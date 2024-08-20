@@ -5,12 +5,13 @@ set -e # Exit on error.
 # List of known bugs.
 # Catch bugs generically.
 KNOWN_BUGS=(
-    "\*.*not implemented"
-    ".*| + |.*not implemented"
-    ".*| - |.*not implemented"
+    "\*.*not implemented" # DPDK failure.
+    ".*| + |.*not implemented" # DPDK failure.
+    ".*| - |.*not implemented" # DPDK failure.
+    ".*true.*not implemented" # DPDK failure.
     "Cannot evaluate initializer for constant"
     "Null expr"
-    "error: retval_1: declaration not found"
+    "error: retval_1: declaration not found"  # V1model failure.
 )
 
 # Function to check if an error is triggered by a known bug.

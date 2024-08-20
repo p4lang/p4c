@@ -17,6 +17,7 @@ set(SMITH_SOURCES
   common/declarations.cpp
   common/expressions.cpp
   common/parser.cpp
+  common/probabilities.cpp
   common/scope.cpp
   common/statements.cpp
   common/table.cpp

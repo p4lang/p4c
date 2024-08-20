@@ -362,20 +362,20 @@ void generateMainMetadata() {
 }
 
 void setPnaDpdkProbabilities() {
-    PCT.PARAMETER_NONEDIR_DERIVED_STRUCT = 0;
-    PCT.PARAMETER_NONEDIR_DERIVED_HEADER = 0;
-    PCT.PARAMETER_NONEDIR_BASETYPE_BOOL = 0;
-    PCT.PARAMETER_NONEDIR_BASETYPE_ERROR = 0;
-    PCT.PARAMETER_NONEDIR_BASETYPE_STRING = 0;
-    PCT.PARAMETER_NONEDIR_BASETYPE_VARBIT = 0;
+    Probabilities::get().PARAMETER_NONEDIR_DERIVED_STRUCT = 0;
+    Probabilities::get().PARAMETER_NONEDIR_DERIVED_HEADER = 0;
+    Probabilities::get().PARAMETER_NONEDIR_BASETYPE_BOOL = 0;
+    Probabilities::get().PARAMETER_NONEDIR_BASETYPE_ERROR = 0;
+    Probabilities::get().PARAMETER_NONEDIR_BASETYPE_STRING = 0;
+    Probabilities::get().PARAMETER_NONEDIR_BASETYPE_VARBIT = 0;
     // Complex types are not supported for function calls.
     // TODO: Distinguish between actions and functions?
-    PCT.PARAMETER_DERIVED_STRUCT = 0;
-    PCT.PARAMETER_DERIVED_HEADER = 0;
-    PCT.PARAMETER_BASETYPE_BOOL = 0;
-    PCT.PARAMETER_BASETYPE_ERROR = 0;
-    PCT.PARAMETER_BASETYPE_STRING = 0;
-    PCT.PARAMETER_BASETYPE_VARBIT = 0;
+    Probabilities::get().PARAMETER_DERIVED_STRUCT = 0;
+    Probabilities::get().PARAMETER_DERIVED_HEADER = 0;
+    Probabilities::get().PARAMETER_BASETYPE_BOOL = 0;
+    Probabilities::get().PARAMETER_BASETYPE_ERROR = 0;
+    Probabilities::get().PARAMETER_BASETYPE_STRING = 0;
+    Probabilities::get().PARAMETER_BASETYPE_VARBIT = 0;
     P4Scope::req.byte_align_headers = true;
     P4Scope::constraints.max_bitwidth = 64;
 }
@@ -458,7 +458,7 @@ const IR::P4Program *DpdkPnaSmithTarget::generateP4Program() const {
     objects->push_back(declarationGenerator().genEthernetHeaderType());
 
     // generate some declarations
-    int typeDecls = Utils::getRandInt(DECL.MIN_TYPE, DECL.MAX_TYPE);
+    int typeDecls = Utils::getRandInt(Declarations::get().MIN_TYPE, Declarations::get().MAX_TYPE);
     for (int i = 0; i < typeDecls; ++i) {
         objects->push_back(declarationGenerator().genTypeDeclaration());
     }
@@ -469,7 +469,8 @@ const IR::P4Program *DpdkPnaSmithTarget::generateP4Program() const {
     objects->push_back(generateUserMetadata());
 
     // generate some callables
-    int callableDecls = Utils::getRandInt(DECL.MIN_CALLABLES, DECL.MAX_CALLABLES);
+    int callableDecls =
+        Utils::getRandInt(Declarations::get().MIN_CALLABLES, Declarations::get().MAX_CALLABLES);
     for (int i = 0; i < callableDecls; ++i) {
         std::vector<int64_t> percent = {80, 15, 0, 5};
         switch (Utils::getRandInt(percent)) {

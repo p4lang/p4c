@@ -8,6 +8,7 @@
 #include "backends/p4tools/common/compiler/compiler_result.h"
 #include "backends/p4tools/common/lib/logging.h"
 #include "backends/p4tools/common/lib/util.h"
+#include "backends/p4tools/modules/smith/common/probabilities.h"
 #include "backends/p4tools/modules/smith/common/scope.h"
 #include "backends/p4tools/modules/smith/core/target.h"
 #include "backends/p4tools/modules/smith/options.h"

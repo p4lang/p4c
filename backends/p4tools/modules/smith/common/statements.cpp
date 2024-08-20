@@ -24,21 +24,21 @@ namespace P4::P4Tools::P4Smith {
 
 IR::Statement *StatementGenerator::genStatement(bool is_in_func) {
     // functions can!have exit statements so set their probability to zero
-    int64_t pctExit = PCT.STATEMENT_EXIT;
+    int64_t pctExit = Probabilities::get().STATEMENT_EXIT;
     if (is_in_func) {
         pctExit = 0;
     }
     std::vector<int64_t> percent = {
-        PCT.STATEMENT_SWITCH,
-        PCT.STATEMENT_ASSIGNMENTORMETHODCALL,
-        PCT.STATEMENT_IF,
-        PCT.STATEMENT_RETURN,
+        Probabilities::get().STATEMENT_SWITCH,
+        Probabilities::get().STATEMENT_ASSIGNMENTORMETHODCALL,
+        Probabilities::get().STATEMENT_IF,
+        Probabilities::get().STATEMENT_RETURN,
         pctExit,
-        PCT.STATEMENT_BLOCK,
+        Probabilities::get().STATEMENT_BLOCK,
         // Add the for-loop statement and
         // the for-in-loop statement generation percentages.
-        PCT.STATEMENT_FOR,
-        PCT.STATEMENT_FOR_IN,
+        Probabilities::get().STATEMENT_FOR,
+        Probabilities::get().STATEMENT_FOR_IN,
     };
     IR::Statement *stmt = nullptr;
     bool useDefaultStmt = false;
@@ -96,8 +96,8 @@ IR::Statement *StatementGenerator::genStatement(bool is_in_func) {
 
 IR::IndexedVector<IR::StatOrDecl> StatementGenerator::genBlockStatementHelper(bool is_in_func) {
     // Randomize the total number of statements.
-    int maxStatements =
-        Utils::getRandInt(DECL.BLOCKSTATEMENT_MIN_STAT, DECL.BLOCKSTATEMENT_MAX_STAT);
+    int maxStatements = Utils::getRandInt(Declarations::get().BLOCKSTATEMENT_MIN_STAT,
+                                          Declarations::get().BLOCKSTATEMENT_MAX_STAT);
     IR::IndexedVector<IR::StatOrDecl> statOrDecls;
 
     // Put tab_name .apply() after some initializations.
@@ -170,8 +170,9 @@ IR::Statement *StatementGenerator::genAssignmentStatement() {
     IR::Expression *left = nullptr;
     IR::Expression *right = nullptr;
 
-    std::vector<int64_t> percent = {PCT.ASSIGNMENTORMETHODCALLSTATEMENT_ASSIGN_BIT,
-                                    PCT.ASSIGNMENTORMETHODCALLSTATEMENT_ASSIGN_STRUCTLIKE};
+    std::vector<int64_t> percent = {
+        Probabilities::get().ASSIGNMENTORMETHODCALLSTATEMENT_ASSIGN_BIT,
+        Probabilities::get().ASSIGNMENTORMETHODCALLSTATEMENT_ASSIGN_STRUCTLIKE};
 
     switch (Utils::getRandInt(percent)) {
         case 0: {
@@ -235,21 +236,22 @@ IR::Statement *StatementGenerator::genMethodCallStatement(bool is_in_func) {
     IR::MethodCallExpression *mce = nullptr;
 
     // functions cannot call actions or tables so set their chance to zero
-    int16_t tmpActionPct = PCT.ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_ACTION;
-    int16_t tmpTblPct = PCT.ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_TABLE;
-    int16_t tmpCtrlPct = PCT.ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_CTRL;
+    int16_t tmpActionPct = Probabilities::get().ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_ACTION;
+    int16_t tmpTblPct = Probabilities::get().ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_TABLE;
+    int16_t tmpCtrlPct = Probabilities::get().ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_CTRL;
     if (is_in_func) {
-        PCT.ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_ACTION = 0;
-        PCT.ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_TABLE = 0;
+        Probabilities::get().ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_ACTION = 0;
+        Probabilities::get().ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_TABLE = 0;
     }
     if (P4Scope::prop.in_action) {
-        PCT.ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_CTRL = 0;
+        Probabilities::get().ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_CTRL = 0;
     }
-    std::vector<int64_t> percent = {PCT.ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_ACTION,
-                                    PCT.ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_FUNCTION,
-                                    PCT.ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_TABLE,
-                                    PCT.ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_CTRL,
-                                    PCT.ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_BUILT_IN};
+    std::vector<int64_t> percent = {
+        Probabilities::get().ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_ACTION,
+        Probabilities::get().ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_FUNCTION,
+        Probabilities::get().ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_TABLE,
+        Probabilities::get().ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_CTRL,
+        Probabilities::get().ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_BUILT_IN};
 
     switch (Utils::getRandInt(percent)) {
         case 0: {
@@ -343,9 +345,9 @@ IR::Statement *StatementGenerator::genMethodCallStatement(bool is_in_func) {
         }
     }
     // restore previous probabilities
-    PCT.ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_ACTION = tmpActionPct;
-    PCT.ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_TABLE = tmpTblPct;
-    PCT.ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_CTRL = tmpCtrlPct;
+    Probabilities::get().ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_ACTION = tmpActionPct;
+    Probabilities::get().ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_TABLE = tmpTblPct;
+    Probabilities::get().ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_CTRL = tmpCtrlPct;
     if (mce != nullptr) {
         return new IR::MethodCallStatement(mce);
     }
@@ -354,8 +356,9 @@ IR::Statement *StatementGenerator::genMethodCallStatement(bool is_in_func) {
 }
 
 IR::Statement *StatementGenerator::genAssignmentOrMethodCallStatement(bool is_in_func) {
-    std::vector<int64_t> percent = {PCT.ASSIGNMENTORMETHODCALLSTATEMENT_ASSIGN,
-                                    PCT.ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_CALL};
+    std::vector<int64_t> percent = {
+        Probabilities::get().ASSIGNMENTORMETHODCALLSTATEMENT_ASSIGN,
+        Probabilities::get().ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_CALL};
     auto val = Utils::getRandInt(percent);
     if (val == 0) {
         return genAssignmentStatement();

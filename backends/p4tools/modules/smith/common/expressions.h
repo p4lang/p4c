@@ -31,6 +31,18 @@ using TyperefProbs = struct TyperefProbs {
     int64_t p4_tuple;
     int64_t p4_void;
     int64_t p4_match_kind;
+
+    [[nodiscard]] std::string toString() const {
+        std::stringstream ss;
+        ss << "p4_bit=" << p4_bit << " p4_signed_bit=" << p4_signed_bit
+           << " p4_varbit=" << p4_varbit << " p4_int=" << p4_int << " p4_error=" << p4_error
+           << " p4_bool=" << p4_bool << " p4_string=" << p4_string << " p4_enum=" << p4_enum
+           << " p4_header=" << p4_header << " p4_header_stack=" << p4_header_stack
+           << " p4_struct=" << p4_struct << " p4_header_union=" << p4_header_union
+           << " p4_tuple=" << p4_tuple << " p4_void=" << p4_void
+           << " p4_match_kind=" << p4_match_kind;
+        return ss.str();
+    }
 };
 
 class ExpressionGenerator : public Generator {

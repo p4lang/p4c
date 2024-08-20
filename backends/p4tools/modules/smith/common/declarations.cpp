@@ -21,9 +21,9 @@
 namespace P4::P4Tools::P4Smith {
 
 IR::StatOrDecl *DeclarationGenerator::generateRandomStatementOrDeclaration(bool is_in_func) {
-    std::vector<int64_t> percent = {PCT.STATEMENTORDECLARATION_VAR,
-                                    PCT.STATEMENTORDECLARATION_CONSTANT,
-                                    PCT.STATEMENTORDECLARATION_STATEMENT};
+    std::vector<int64_t> percent = {Probabilities::get().STATEMENTORDECLARATION_VAR,
+                                    Probabilities::get().STATEMENTORDECLARATION_CONSTANT,
+                                    Probabilities::get().STATEMENTORDECLARATION_STATEMENT};
     auto val = Utils::getRandInt(percent);
     if (val == 0) {
         auto *stmt = target().declarationGenerator().genVariableDeclaration();
@@ -68,14 +68,21 @@ IR::Annotations *DeclarationGenerator::genAnnotation() {
 IR::Declaration_Constant *DeclarationGenerator::genConstantDeclaration() {
     cstring name = getRandomString(6);
     TyperefProbs typePercent = {
-        PCT.CONSTANTDECLARATION_BASETYPE_BIT,    PCT.CONSTANTDECLARATION_BASETYPE_SIGNED_BIT,
-        PCT.CONSTANTDECLARATION_BASETYPE_VARBIT, PCT.CONSTANTDECLARATION_BASETYPE_INT,
-        PCT.CONSTANTDECLARATION_BASETYPE_ERROR,  PCT.CONSTANTDECLARATION_BASETYPE_BOOL,
-        PCT.CONSTANTDECLARATION_BASETYPE_STRING, PCT.CONSTANTDECLARATION_DERIVED_ENUM,
-        PCT.CONSTANTDECLARATION_DERIVED_HEADER,  PCT.CONSTANTDECLARATION_DERIVED_HEADER_STACK,
-        PCT.CONSTANTDECLARATION_DERIVED_STRUCT,  PCT.CONSTANTDECLARATION_DERIVED_HEADER_UNION,
-        PCT.CONSTANTDECLARATION_DERIVED_TUPLE,   PCT.CONSTANTDECLARATION_TYPE_VOID,
-        PCT.CONSTANTDECLARATION_TYPE_MATCH_KIND,
+        Probabilities::get().CONSTANTDECLARATION_BASETYPE_BIT,
+        Probabilities::get().CONSTANTDECLARATION_BASETYPE_SIGNED_BIT,
+        Probabilities::get().CONSTANTDECLARATION_BASETYPE_VARBIT,
+        Probabilities::get().CONSTANTDECLARATION_BASETYPE_INT,
+        Probabilities::get().CONSTANTDECLARATION_BASETYPE_ERROR,
+        Probabilities::get().CONSTANTDECLARATION_BASETYPE_BOOL,
+        Probabilities::get().CONSTANTDECLARATION_BASETYPE_STRING,
+        Probabilities::get().CONSTANTDECLARATION_DERIVED_ENUM,
+        Probabilities::get().CONSTANTDECLARATION_DERIVED_HEADER,
+        Probabilities::get().CONSTANTDECLARATION_DERIVED_HEADER_STACK,
+        Probabilities::get().CONSTANTDECLARATION_DERIVED_STRUCT,
+        Probabilities::get().CONSTANTDECLARATION_DERIVED_HEADER_UNION,
+        Probabilities::get().CONSTANTDECLARATION_DERIVED_TUPLE,
+        Probabilities::get().CONSTANTDECLARATION_TYPE_VOID,
+        Probabilities::get().CONSTANTDECLARATION_TYPE_MATCH_KIND,
     };
 
     const auto *tp = target().expressionGenerator().pickRndType(typePercent);
@@ -121,10 +128,12 @@ IR::P4Action *DeclarationGenerator::genActionDeclaration() {
 IR::IndexedVector<IR::Declaration> DeclarationGenerator::genLocalControlDecls() {
     IR::IndexedVector<IR::Declaration> localDecls;
 
-    auto vars = Utils::getRandInt(DECL.MIN_VAR, DECL.MAX_VAR);
-    auto decls = Utils::getRandInt(DECL.MIN_INSTANCE, DECL.MAX_INSTANCE);
-    auto actions = Utils::getRandInt(DECL.MIN_ACTION, DECL.MAX_ACTION);
-    auto tables = Utils::getRandInt(DECL.MIN_TABLE, DECL.MAX_TABLE);
+    auto vars = Utils::getRandInt(Declarations::get().MIN_VAR, Declarations::get().MAX_VAR);
+    auto decls =
+        Utils::getRandInt(Declarations::get().MIN_INSTANCE, Declarations::get().MAX_INSTANCE);
+    auto actions =
+        Utils::getRandInt(Declarations::get().MIN_ACTION, Declarations::get().MAX_ACTION);
+    auto tables = Utils::getRandInt(Declarations::get().MIN_TABLE, Declarations::get().MAX_TABLE);
 
     // variableDeclarations
     for (int i = 0; i <= vars; i++) {
@@ -290,14 +299,21 @@ IR::Method *DeclarationGenerator::genExternDeclaration() {
 
     // externs have the same type restrictions as functions
     TyperefProbs typePercent = {
-        PCT.FUNCTIONDECLARATION_BASETYPE_BIT,    PCT.FUNCTIONDECLARATION_BASETYPE_SIGNED_BIT,
-        PCT.FUNCTIONDECLARATION_BASETYPE_VARBIT, PCT.FUNCTIONDECLARATION_BASETYPE_INT,
-        PCT.FUNCTIONDECLARATION_BASETYPE_ERROR,  PCT.FUNCTIONDECLARATION_BASETYPE_BOOL,
-        PCT.FUNCTIONDECLARATION_BASETYPE_STRING, PCT.FUNCTIONDECLARATION_DERIVED_ENUM,
-        PCT.FUNCTIONDECLARATION_DERIVED_HEADER,  PCT.FUNCTIONDECLARATION_DERIVED_HEADER_STACK,
-        PCT.FUNCTIONDECLARATION_DERIVED_STRUCT,  PCT.FUNCTIONDECLARATION_DERIVED_HEADER_UNION,
-        PCT.FUNCTIONDECLARATION_DERIVED_TUPLE,   PCT.FUNCTIONDECLARATION_TYPE_VOID,
-        PCT.FUNCTIONDECLARATION_TYPE_MATCH_KIND,
+        Probabilities::get().FUNCTIONDECLARATION_BASETYPE_BIT,
+        Probabilities::get().FUNCTIONDECLARATION_BASETYPE_SIGNED_BIT,
+        Probabilities::get().FUNCTIONDECLARATION_BASETYPE_VARBIT,
+        Probabilities::get().FUNCTIONDECLARATION_BASETYPE_INT,
+        Probabilities::get().FUNCTIONDECLARATION_BASETYPE_ERROR,
+        Probabilities::get().FUNCTIONDECLARATION_BASETYPE_BOOL,
+        Probabilities::get().FUNCTIONDECLARATION_BASETYPE_STRING,
+        Probabilities::get().FUNCTIONDECLARATION_DERIVED_ENUM,
+        Probabilities::get().FUNCTIONDECLARATION_DERIVED_HEADER,
+        Probabilities::get().FUNCTIONDECLARATION_DERIVED_HEADER_STACK,
+        Probabilities::get().FUNCTIONDECLARATION_DERIVED_STRUCT,
+        Probabilities::get().FUNCTIONDECLARATION_DERIVED_HEADER_UNION,
+        Probabilities::get().FUNCTIONDECLARATION_DERIVED_TUPLE,
+        Probabilities::get().FUNCTIONDECLARATION_TYPE_VOID,
+        Probabilities::get().FUNCTIONDECLARATION_TYPE_MATCH_KIND,
     };
     const auto *returnType = target().expressionGenerator().pickRndType(typePercent);
     tm = new IR::Type_Method(returnType, params, name);
@@ -315,14 +331,21 @@ IR::Function *DeclarationGenerator::genFunctionDeclaration() {
     IR::ParameterList *params = genParameterList();
 
     TyperefProbs typePercent = {
-        PCT.FUNCTIONDECLARATION_BASETYPE_BIT,    PCT.FUNCTIONDECLARATION_BASETYPE_SIGNED_BIT,
-        PCT.FUNCTIONDECLARATION_BASETYPE_VARBIT, PCT.FUNCTIONDECLARATION_BASETYPE_INT,
-        PCT.FUNCTIONDECLARATION_BASETYPE_ERROR,  PCT.FUNCTIONDECLARATION_BASETYPE_BOOL,
-        PCT.FUNCTIONDECLARATION_BASETYPE_STRING, PCT.FUNCTIONDECLARATION_DERIVED_ENUM,
-        PCT.FUNCTIONDECLARATION_DERIVED_HEADER,  PCT.FUNCTIONDECLARATION_DERIVED_HEADER_STACK,
-        PCT.FUNCTIONDECLARATION_DERIVED_STRUCT,  PCT.FUNCTIONDECLARATION_DERIVED_HEADER_UNION,
-        PCT.FUNCTIONDECLARATION_DERIVED_TUPLE,   PCT.FUNCTIONDECLARATION_TYPE_VOID,
-        PCT.FUNCTIONDECLARATION_TYPE_MATCH_KIND,
+        Probabilities::get().FUNCTIONDECLARATION_BASETYPE_BIT,
+        Probabilities::get().FUNCTIONDECLARATION_BASETYPE_SIGNED_BIT,
+        Probabilities::get().FUNCTIONDECLARATION_BASETYPE_VARBIT,
+        Probabilities::get().FUNCTIONDECLARATION_BASETYPE_INT,
+        Probabilities::get().FUNCTIONDECLARATION_BASETYPE_ERROR,
+        Probabilities::get().FUNCTIONDECLARATION_BASETYPE_BOOL,
+        Probabilities::get().FUNCTIONDECLARATION_BASETYPE_STRING,
+        Probabilities::get().FUNCTIONDECLARATION_DERIVED_ENUM,
+        Probabilities::get().FUNCTIONDECLARATION_DERIVED_HEADER,
+        Probabilities::get().FUNCTIONDECLARATION_DERIVED_HEADER_STACK,
+        Probabilities::get().FUNCTIONDECLARATION_DERIVED_STRUCT,
+        Probabilities::get().FUNCTIONDECLARATION_DERIVED_HEADER_UNION,
+        Probabilities::get().FUNCTIONDECLARATION_DERIVED_TUPLE,
+        Probabilities::get().FUNCTIONDECLARATION_TYPE_VOID,
+        Probabilities::get().FUNCTIONDECLARATION_TYPE_MATCH_KIND,
     };
     const auto *returnType = target().expressionGenerator().pickRndType(typePercent);
     tm = new IR::Type_Method(returnType, params, name);
@@ -357,14 +380,21 @@ IR::Type_Header *DeclarationGenerator::genHeaderTypeDeclaration() {
     cstring name = getRandomString(6);
     IR::IndexedVector<IR::StructField> fields;
     TyperefProbs typePercent = {
-        PCT.HEADERTYPEDECLARATION_BASETYPE_BIT,    PCT.HEADERTYPEDECLARATION_BASETYPE_SIGNED_BIT,
-        PCT.HEADERTYPEDECLARATION_BASETYPE_VARBIT, PCT.HEADERTYPEDECLARATION_BASETYPE_INT,
-        PCT.HEADERTYPEDECLARATION_BASETYPE_ERROR,  PCT.HEADERTYPEDECLARATION_BASETYPE_BOOL,
-        PCT.HEADERTYPEDECLARATION_BASETYPE_STRING, PCT.HEADERTYPEDECLARATION_DERIVED_ENUM,
-        PCT.HEADERTYPEDECLARATION_DERIVED_HEADER,  PCT.HEADERTYPEDECLARATION_DERIVED_HEADER_STACK,
-        PCT.HEADERTYPEDECLARATION_DERIVED_STRUCT,  PCT.HEADERTYPEDECLARATION_DERIVED_HEADER_UNION,
-        PCT.HEADERTYPEDECLARATION_DERIVED_TUPLE,   PCT.HEADERTYPEDECLARATION_TYPE_VOID,
-        PCT.HEADERTYPEDECLARATION_TYPE_MATCH_KIND,
+        Probabilities::get().HEADERTYPEDECLARATION_BASETYPE_BIT,
+        Probabilities::get().HEADERTYPEDECLARATION_BASETYPE_SIGNED_BIT,
+        Probabilities::get().HEADERTYPEDECLARATION_BASETYPE_VARBIT,
+        Probabilities::get().HEADERTYPEDECLARATION_BASETYPE_INT,
+        Probabilities::get().HEADERTYPEDECLARATION_BASETYPE_ERROR,
+        Probabilities::get().HEADERTYPEDECLARATION_BASETYPE_BOOL,
+        Probabilities::get().HEADERTYPEDECLARATION_BASETYPE_STRING,
+        Probabilities::get().HEADERTYPEDECLARATION_DERIVED_ENUM,
+        Probabilities::get().HEADERTYPEDECLARATION_DERIVED_HEADER,
+        Probabilities::get().HEADERTYPEDECLARATION_DERIVED_HEADER_STACK,
+        Probabilities::get().HEADERTYPEDECLARATION_DERIVED_STRUCT,
+        Probabilities::get().HEADERTYPEDECLARATION_DERIVED_HEADER_UNION,
+        Probabilities::get().HEADERTYPEDECLARATION_DERIVED_TUPLE,
+        Probabilities::get().HEADERTYPEDECLARATION_TYPE_VOID,
+        Probabilities::get().HEADERTYPEDECLARATION_TYPE_MATCH_KIND,
     };
 
     size_t len = Utils::getRandInt(1, 5);
@@ -454,14 +484,21 @@ IR::Type_Struct *DeclarationGenerator::genStructTypeDeclaration() {
 
     IR::IndexedVector<IR::StructField> fields;
     TyperefProbs typePercent = {
-        PCT.STRUCTTYPEDECLARATION_BASETYPE_BIT,    PCT.STRUCTTYPEDECLARATION_BASETYPE_SIGNED_BIT,
-        PCT.STRUCTTYPEDECLARATION_BASETYPE_VARBIT, PCT.STRUCTTYPEDECLARATION_BASETYPE_INT,
-        PCT.STRUCTTYPEDECLARATION_BASETYPE_ERROR,  PCT.STRUCTTYPEDECLARATION_BASETYPE_BOOL,
-        PCT.STRUCTTYPEDECLARATION_BASETYPE_STRING, PCT.STRUCTTYPEDECLARATION_DERIVED_ENUM,
-        PCT.STRUCTTYPEDECLARATION_DERIVED_HEADER,  PCT.STRUCTTYPEDECLARATION_DERIVED_HEADER_STACK,
-        PCT.STRUCTTYPEDECLARATION_DERIVED_STRUCT,  PCT.STRUCTTYPEDECLARATION_DERIVED_HEADER_UNION,
-        PCT.STRUCTTYPEDECLARATION_DERIVED_TUPLE,   PCT.STRUCTTYPEDECLARATION_TYPE_VOID,
-        PCT.STRUCTTYPEDECLARATION_TYPE_MATCH_KIND,
+        Probabilities::get().STRUCTTYPEDECLARATION_BASETYPE_BIT,
+        Probabilities::get().STRUCTTYPEDECLARATION_BASETYPE_SIGNED_BIT,
+        Probabilities::get().STRUCTTYPEDECLARATION_BASETYPE_VARBIT,
+        Probabilities::get().STRUCTTYPEDECLARATION_BASETYPE_INT,
+        Probabilities::get().STRUCTTYPEDECLARATION_BASETYPE_ERROR,
+        Probabilities::get().STRUCTTYPEDECLARATION_BASETYPE_BOOL,
+        Probabilities::get().STRUCTTYPEDECLARATION_BASETYPE_STRING,
+        Probabilities::get().STRUCTTYPEDECLARATION_DERIVED_ENUM,
+        Probabilities::get().STRUCTTYPEDECLARATION_DERIVED_HEADER,
+        Probabilities::get().STRUCTTYPEDECLARATION_DERIVED_HEADER_STACK,
+        Probabilities::get().STRUCTTYPEDECLARATION_DERIVED_STRUCT,
+        Probabilities::get().STRUCTTYPEDECLARATION_DERIVED_HEADER_UNION,
+        Probabilities::get().STRUCTTYPEDECLARATION_DERIVED_TUPLE,
+        Probabilities::get().STRUCTTYPEDECLARATION_TYPE_VOID,
+        Probabilities::get().STRUCTTYPEDECLARATION_TYPE_MATCH_KIND,
     };
     auto lTypes = P4Scope::getDecls<IR::Type_Header>();
     if (lTypes.empty()) {
@@ -498,8 +535,8 @@ IR::Type_Struct *DeclarationGenerator::genHeaderStruct() {
     size_t len = Utils::getRandInt(1, 5);
     // we can only generate very specific types for headers
     // header, header stack, header union
-    std::vector<int64_t> percent = {PCT.STRUCTTYPEDECLARATION_HEADERS_HEADER,
-                                    PCT.STRUCTTYPEDECLARATION_HEADERS_STACK};
+    std::vector<int64_t> percent = {Probabilities::get().STRUCTTYPEDECLARATION_HEADERS_HEADER,
+                                    Probabilities::get().STRUCTTYPEDECLARATION_HEADERS_STACK};
     for (size_t i = 0; i < len; i++) {
         cstring fieldName = getRandomString(4);
         IR::Type *tp = nullptr;
@@ -531,8 +568,9 @@ IR::Type_Struct *DeclarationGenerator::genHeaderStruct() {
 }
 
 IR::Type_Declaration *DeclarationGenerator::genTypeDeclaration() {
-    std::vector<int64_t> percent = {PCT.TYPEDECLARATION_HEADER, PCT.TYPEDECLARATION_STRUCT,
-                                    PCT.TYPEDECLARATION_UNION};
+    std::vector<int64_t> percent = {Probabilities::get().TYPEDECLARATION_HEADER,
+                                    Probabilities::get().TYPEDECLARATION_STRUCT,
+                                    Probabilities::get().TYPEDECLARATION_UNION};
     IR::Type_Declaration *decl = nullptr;
     bool useDefaultDecl = false;
     switch (Utils::getRandInt(percent)) {
@@ -567,14 +605,17 @@ IR::Type_Declaration *DeclarationGenerator::genTypeDeclaration() {
 }
 
 const IR::Type *DeclarationGenerator::genType() {
-    std::vector<int64_t> percent = {PCT.TYPEDEFDECLARATION_BASE, PCT.TYPEDEFDECLARATION_STRUCTLIKE,
-                                    PCT.TYPEDEFDECLARATION_STACK};
+    std::vector<int64_t> percent = {Probabilities::get().TYPEDEFDECLARATION_BASE,
+                                    Probabilities::get().TYPEDEFDECLARATION_STRUCTLIKE,
+                                    Probabilities::get().TYPEDEFDECLARATION_STACK};
 
-    std::vector<int64_t> typeProbs = {
-        PCT.TYPEDEFDECLARATION_BASETYPE_BOOL,  PCT.TYPEDEFDECLARATION_BASETYPE_ERROR,
-        PCT.TYPEDEFDECLARATION_BASETYPE_INT,   PCT.TYPEDEFDECLARATION_BASETYPE_STRING,
-        PCT.TYPEDEFDECLARATION_BASETYPE_BIT,   PCT.TYPEDEFDECLARATION_BASETYPE_SIGNED_BIT,
-        PCT.TYPEDEFDECLARATION_BASETYPE_VARBIT};
+    std::vector<int64_t> typeProbs = {Probabilities::get().TYPEDEFDECLARATION_BASETYPE_BOOL,
+                                      Probabilities::get().TYPEDEFDECLARATION_BASETYPE_ERROR,
+                                      Probabilities::get().TYPEDEFDECLARATION_BASETYPE_INT,
+                                      Probabilities::get().TYPEDEFDECLARATION_BASETYPE_STRING,
+                                      Probabilities::get().TYPEDEFDECLARATION_BASETYPE_BIT,
+                                      Probabilities::get().TYPEDEFDECLARATION_BASETYPE_SIGNED_BIT,
+                                      Probabilities::get().TYPEDEFDECLARATION_BASETYPE_VARBIT};
     const IR::Type *tp = nullptr;
     switch (Utils::getRandInt(percent)) {
         case 0: {
@@ -624,14 +665,21 @@ IR::Declaration_Variable *DeclarationGenerator::genVariableDeclaration() {
     cstring name = getRandomString(6);
 
     TyperefProbs typePercent = {
-        PCT.VARIABLEDECLARATION_BASETYPE_BIT,    PCT.VARIABLEDECLARATION_BASETYPE_SIGNED_BIT,
-        PCT.VARIABLEDECLARATION_BASETYPE_VARBIT, PCT.VARIABLEDECLARATION_BASETYPE_INT,
-        PCT.VARIABLEDECLARATION_BASETYPE_ERROR,  PCT.VARIABLEDECLARATION_BASETYPE_BOOL,
-        PCT.VARIABLEDECLARATION_BASETYPE_STRING, PCT.VARIABLEDECLARATION_DERIVED_ENUM,
-        PCT.VARIABLEDECLARATION_DERIVED_HEADER,  PCT.VARIABLEDECLARATION_DERIVED_HEADER_STACK,
-        PCT.VARIABLEDECLARATION_DERIVED_STRUCT,  PCT.VARIABLEDECLARATION_DERIVED_HEADER_UNION,
-        PCT.VARIABLEDECLARATION_DERIVED_TUPLE,   PCT.VARIABLEDECLARATION_TYPE_VOID,
-        PCT.VARIABLEDECLARATION_TYPE_MATCH_KIND,
+        Probabilities::get().VARIABLEDECLARATION_BASETYPE_BIT,
+        Probabilities::get().VARIABLEDECLARATION_BASETYPE_SIGNED_BIT,
+        Probabilities::get().VARIABLEDECLARATION_BASETYPE_VARBIT,
+        Probabilities::get().VARIABLEDECLARATION_BASETYPE_INT,
+        Probabilities::get().VARIABLEDECLARATION_BASETYPE_ERROR,
+        Probabilities::get().VARIABLEDECLARATION_BASETYPE_BOOL,
+        Probabilities::get().VARIABLEDECLARATION_BASETYPE_STRING,
+        Probabilities::get().VARIABLEDECLARATION_DERIVED_ENUM,
+        Probabilities::get().VARIABLEDECLARATION_DERIVED_HEADER,
+        Probabilities::get().VARIABLEDECLARATION_DERIVED_HEADER_STACK,
+        Probabilities::get().VARIABLEDECLARATION_DERIVED_STRUCT,
+        Probabilities::get().VARIABLEDECLARATION_DERIVED_HEADER_UNION,
+        Probabilities::get().VARIABLEDECLARATION_DERIVED_TUPLE,
+        Probabilities::get().VARIABLEDECLARATION_TYPE_VOID,
+        Probabilities::get().VARIABLEDECLARATION_TYPE_MATCH_KIND,
     };
 
     const IR::Type *tp = target().expressionGenerator().pickRndType(typePercent);
@@ -662,29 +710,44 @@ IR::Parameter *DeclarationGenerator::genTypedParameter(bool if_none_dir) {
 
     if (if_none_dir) {
         typePercent = {
-            PCT.PARAMETER_NONEDIR_BASETYPE_BIT,    PCT.PARAMETER_NONEDIR_BASETYPE_SIGNED_BIT,
-            PCT.PARAMETER_NONEDIR_BASETYPE_VARBIT, PCT.PARAMETER_NONEDIR_BASETYPE_INT,
-            PCT.PARAMETER_NONEDIR_BASETYPE_ERROR,  PCT.PARAMETER_NONEDIR_BASETYPE_BOOL,
-            PCT.PARAMETER_NONEDIR_BASETYPE_STRING, PCT.PARAMETER_NONEDIR_DERIVED_ENUM,
-            PCT.PARAMETER_NONEDIR_DERIVED_HEADER,  PCT.PARAMETER_NONEDIR_DERIVED_HEADER_STACK,
-            PCT.PARAMETER_NONEDIR_DERIVED_STRUCT,  PCT.PARAMETER_NONEDIR_DERIVED_HEADER_UNION,
-            PCT.PARAMETER_NONEDIR_DERIVED_TUPLE,   PCT.PARAMETER_NONEDIR_TYPE_VOID,
-            PCT.PARAMETER_NONEDIR_TYPE_MATCH_KIND,
+            Probabilities::get().PARAMETER_NONEDIR_BASETYPE_BIT,
+            Probabilities::get().PARAMETER_NONEDIR_BASETYPE_SIGNED_BIT,
+            Probabilities::get().PARAMETER_NONEDIR_BASETYPE_VARBIT,
+            Probabilities::get().PARAMETER_NONEDIR_BASETYPE_INT,
+            Probabilities::get().PARAMETER_NONEDIR_BASETYPE_ERROR,
+            Probabilities::get().PARAMETER_NONEDIR_BASETYPE_BOOL,
+            Probabilities::get().PARAMETER_NONEDIR_BASETYPE_STRING,
+            Probabilities::get().PARAMETER_NONEDIR_DERIVED_ENUM,
+            Probabilities::get().PARAMETER_NONEDIR_DERIVED_HEADER,
+            Probabilities::get().PARAMETER_NONEDIR_DERIVED_HEADER_STACK,
+            Probabilities::get().PARAMETER_NONEDIR_DERIVED_STRUCT,
+            Probabilities::get().PARAMETER_NONEDIR_DERIVED_HEADER_UNION,
+            Probabilities::get().PARAMETER_NONEDIR_DERIVED_TUPLE,
+            Probabilities::get().PARAMETER_NONEDIR_TYPE_VOID,
+            Probabilities::get().PARAMETER_NONEDIR_TYPE_MATCH_KIND,
         };
         dir = IR::Direction::None;
     } else {
         typePercent = {
-            PCT.PARAMETER_BASETYPE_BIT,    PCT.PARAMETER_BASETYPE_SIGNED_BIT,
-            PCT.PARAMETER_BASETYPE_VARBIT, PCT.PARAMETER_BASETYPE_INT,
-            PCT.PARAMETER_BASETYPE_ERROR,  PCT.PARAMETER_BASETYPE_BOOL,
-            PCT.PARAMETER_BASETYPE_STRING, PCT.PARAMETER_DERIVED_ENUM,
-            PCT.PARAMETER_DERIVED_HEADER,  PCT.PARAMETER_DERIVED_HEADER_STACK,
-            PCT.PARAMETER_DERIVED_STRUCT,  PCT.PARAMETER_DERIVED_HEADER_UNION,
-            PCT.PARAMETER_DERIVED_TUPLE,   PCT.PARAMETER_TYPE_VOID,
-            PCT.PARAMETER_TYPE_MATCH_KIND,
+            Probabilities::get().PARAMETER_BASETYPE_BIT,
+            Probabilities::get().PARAMETER_BASETYPE_SIGNED_BIT,
+            Probabilities::get().PARAMETER_BASETYPE_VARBIT,
+            Probabilities::get().PARAMETER_BASETYPE_INT,
+            Probabilities::get().PARAMETER_BASETYPE_ERROR,
+            Probabilities::get().PARAMETER_BASETYPE_BOOL,
+            Probabilities::get().PARAMETER_BASETYPE_STRING,
+            Probabilities::get().PARAMETER_DERIVED_ENUM,
+            Probabilities::get().PARAMETER_DERIVED_HEADER,
+            Probabilities::get().PARAMETER_DERIVED_HEADER_STACK,
+            Probabilities::get().PARAMETER_DERIVED_STRUCT,
+            Probabilities::get().PARAMETER_DERIVED_HEADER_UNION,
+            Probabilities::get().PARAMETER_DERIVED_TUPLE,
+            Probabilities::get().PARAMETER_TYPE_VOID,
+            Probabilities::get().PARAMETER_TYPE_MATCH_KIND,
         };
-        std::vector<int64_t> dirPercent = {PCT.PARAMETER_DIR_IN, PCT.PARAMETER_DIR_OUT,
-                                           PCT.PARAMETER_DIR_INOUT};
+        std::vector<int64_t> dirPercent = {Probabilities::get().PARAMETER_DIR_IN,
+                                           Probabilities::get().PARAMETER_DIR_OUT,
+                                           Probabilities::get().PARAMETER_DIR_INOUT};
         switch (Utils::getRandInt(dirPercent)) {
             case 0:
                 dir = IR::Direction::In;
@@ -699,8 +762,8 @@ IR::Parameter *DeclarationGenerator::genTypedParameter(bool if_none_dir) {
                 dir = IR::Direction::None;
         }
     }
-    tp = target().expressionGenerator().pickRndType(typePercent);
 
+    tp = target().expressionGenerator().pickRndType(typePercent);
     return new IR::Parameter(name, dir, tp);
 }
 
