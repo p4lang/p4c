@@ -7,7 +7,6 @@
 #include "lib/sourceCodeBuilder.h"
 
 namespace P4::P4Fmt {
-using std::filesystem::path;
 /**
 This pass converts a P4-16 IR into a P4 source (text) program.
 It can optionally emit as comments a representation of the program IR.
@@ -104,10 +103,10 @@ class P4Formatter : public Inspector, ::P4::ResolutionContext {
  public:
     // Output is constructed here
     Util::SourceCodeBuilder &builder;
-    /* FIXME  -- simplify this by getting rid of the 'builder' object and just emitting
-     * directly to the ostream.  The SourceCodeBuilder object does not appear to add any
-     * useful functionality the ostream does not already provide; it just serves to
-     * obfuscate the code */
+    // FIXME  -- simplify this by getting rid of the 'builder' object and just emitting
+    // directly to the ostream.  The SourceCodeBuilder object does not appear to add any
+    // useful functionality the ostream does not already provide; it just serves to
+    // obfuscate the code
     std::ostream *outStream;
     /** If this is set to non-nullptr, some declarations
         that come from libraries and models are not
@@ -145,8 +144,6 @@ class P4Formatter : public Inspector, ::P4::ResolutionContext {
         visitDagOnce = false;
         setName("P4Formatter");
     }
-
-    using Inspector::preorder;
 
     void setnoIncludesArg(bool condition) { noIncludes = condition; }
 

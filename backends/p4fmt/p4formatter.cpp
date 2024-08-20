@@ -31,14 +31,14 @@ void P4Formatter::end_apply(const IR::Node *) {
 }
 
 // Try to guess whether a file is a "system" file
-bool P4Formatter::isSystemFile(path &file) {
+bool P4Formatter::isSystemFile(std::filesystem::path &file) {
     if (noIncludes) return false;
     return file.parent_path() == p4includePath;
 }
 
-path P4Formatter::ifSystemFile(const IR::Node *node) {
+std::filesystem::path P4Formatter::ifSystemFile(const IR::Node *node) {
     if (!node->srcInfo.isValid()) return {};
-    path sourceFile(node->srcInfo.getSourceFile().c_str());
+    std::filesystem::path sourceFile(node->srcInfo.getSourceFile().c_str());
     if (isSystemFile(sourceFile)) return sourceFile;
     return {};
 }
@@ -54,7 +54,7 @@ bool P4Formatter::preorder(const IR::P4Program *program) {
     bool first = true;
     for (auto a : program->objects) {
         // Check where this declaration originates
-        path sourceFile = ifSystemFile(a);
+        std::filesystem::path sourceFile = ifSystemFile(a);
         if (!a->is<IR::Type_Error>() &&  // errors can come from multiple files
             !sourceFile.empty()) {
             /* FIXME -- when including a user header file (sourceFile !=
@@ -67,7 +67,7 @@ bool P4Formatter::preorder(const IR::P4Program *program) {
 
             if (includesEmitted.count(sourceFile.string()) == 0) {
                 if (sourceFile.parent_path() == p4includePath) {
-                    path p = sourceFile.filename();
+                    std::filesystem::path p = sourceFile.filename();
                     if (P4V1::V1Model::instance.file.name == p) {
                         P4V1::getV1ModelVersion g;
                         program->apply(g);
