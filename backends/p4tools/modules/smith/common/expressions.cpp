@@ -215,15 +215,13 @@ IR::Constant *ExpressionGenerator::genIntLiteral(size_t bit_width) {
     return new IR::Constant(value);
 }
 IR::Constant *ExpressionGenerator::genBitLiteral(const IR::Type *tb) {
-    big_int maxSize = IR::getMaxBvVal(tb);
-
+    big_int maxSize = IR::getMaxBvVal(tb->width_bits());
     big_int value;
-    if (P4Scope::req.not_zero) {
-        value = Utils::getRandBigInt(1, maxSize - 1);
-    } else {
-        value = Utils::getRandBigInt(0, maxSize - 1);
+    if (maxSize == 0) {
+        value = 0;
+        return new IR::Constant(tb, value);
     }
-    return new IR::Constant(tb, value);
+    return new IR::Constant(tb, Utils::getRandBigInt(P4Scope::req.not_zero ? 1 : 0, maxSize));
 }
 
 IR::Expression *ExpressionGenerator::genExpression(const IR::Type *tp) {
@@ -588,7 +586,7 @@ IR::Expression *ExpressionGenerator::constructBinaryBitExpr(const IR::Type_Bits 
             const auto *tl = IR::Type_Bits::get(typeWidth - split, false);
             const auto *tr = IR::Type_Bits::get(split, false);
             // width must be known so we cast
-            // width must be known so we cast
+            printf("Concat: %s, %s\n", tl->toString().c_str(), tr->toString().c_str());
             IR::Expression *left = constructBitExpr(tl);
             if (P4Scope::prop.width_unknown) {
                 left = new IR::Cast(tl, left);

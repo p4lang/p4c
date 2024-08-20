@@ -69,17 +69,18 @@ TEST_DIR=$4
 ARCH=$5
 TARGET=$6
 
+TMP_DIR=$(mktemp -d -p $TEST_DIR -t tmpXXXX)
 for i in $(seq 1 $NUM_ITERATIONS); do
-    echo "Generating program $i"
+    echo "Generating program $i in $TMP_DIR"
     # Generate different programs with different seeds (to inspect the behavior of the generation and compilation process in a finer/smaller granularity).
-    echo "$SMITH_BIN --arch $ARCH --target $TARGET --seed $i $TEST_DIR/out_$i.p4"
-    $SMITH_BIN --arch $ARCH --target $TARGET --seed $i $TEST_DIR/out_$i.p4
+    echo "$SMITH_BIN --arch $ARCH --target $TARGET --seed $i $TMP_DIR/out_$i.p4"
+    $SMITH_BIN --arch $ARCH --target $TARGET --seed $i $TMP_DIR/out_$i.p4
     # TODO: Do not compile until we have stabilized.
 
     # If the compilation fails, check if it is triggered by a known bug.
     # If it is the case, continue with the next iteration.
     # Otherwise, exit with an error.
-    CMD="$COMPILER_BIN $TEST_DIR/out_$i.p4"
+    CMD="$COMPILER_BIN $TMP_DIR/out_$i.p4"
     echo "$CMD"
     if ! output=$($CMD 2>&1); then
         if is_known_bug "$output"; then
