@@ -31,7 +31,7 @@ limitations under the License.
 #endif
 
 #if HAVE_LIBGC
-#include <gc.h>
+#include <gc/gc.h>
 #endif
 
 #include "dbprint.h"
