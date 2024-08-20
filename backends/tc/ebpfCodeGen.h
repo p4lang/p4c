@@ -366,7 +366,6 @@ class ControlBodyTranslatorPNA : public EBPF::ControlBodyTranslator {
                                       const EBPF::EBPFTablePSA *table);
     void processFunction(const P4::ExternFunction *function) override;
     void processApply(const P4::ApplyMethod *method) override;
-    bool checkPnaPortMem(const IR::Member *m);
     virtual cstring getParamName(const IR::PathExpression *);
     bool preorder(const IR::AssignmentStatement *a) override;
     void processMethod(const P4::ExternMethod *method) override;

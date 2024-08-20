@@ -1992,6 +1992,20 @@ void ControlBodyTranslatorPNA::processMethod(const P4::ExternMethod *method) {
 
 bool ControlBodyTranslatorPNA::preorder(const IR::AssignmentStatement *a) {
     if (auto methodCallExpr = a->right->to<IR::MethodCallExpression>()) {
+        if (methodCallExpr->method->toString() == "is_net_port" ||
+            methodCallExpr->method->toString() == "is_host_port") {
+            builder->emitIndent();
+            visit(a->left);
+            builder->append(" = ");
+            if (methodCallExpr->method->toString() == "is_net_port") {
+                builder->append("bpf_p4tc_is_net_port(skb, ");
+            } else {
+                builder->append("bpf_p4tc_is_host_port(skb, ");
+            }
+            assert(methodCallExpr->arguments->size() == 1);
+            visit(methodCallExpr->arguments->at(0));
+            builder->append(");");
+        }
         auto mi = P4::MethodInstance::resolve(methodCallExpr, control->program->refMap,
                                               control->program->typeMap);
         auto ext = mi->to<P4::ExternMethod>();
@@ -1999,7 +2013,6 @@ bool ControlBodyTranslatorPNA::preorder(const IR::AssignmentStatement *a) {
         if (ext == nullptr) {
             return false;
         }
-
         if (ext->originalExternType->name.name == "Register" && ext->method->type->name == "read") {
             cstring name = EBPF::EBPFObject::externalName(ext->object);
             auto reg = pnaControl->getRegister(name);

@@ -1,0 +1,24 @@
+#!/bin/bash -x
+
+set -e
+
+TC="tc"
+$TC p4template create pipeline/is_host_port numtables 1
+
+$TC p4template create action/is_host_port/ingress/send_nh actid 1 \
+	param port_id type dev \
+	param dmac type macaddr \
+	param smac type macaddr
+$TC p4template update action/is_host_port/ingress/send_nh state active
+
+$TC p4template create action/is_host_port/ingress/drop actid 2
+$TC p4template update action/is_host_port/ingress/drop state active
+
+$TC p4template create table/is_host_port/ingress/nh_table \
+	tblid 1 \
+	type exact \
+	keysz 32 nummasks 8 permissions 0x3da4 tentries 262144 \
+	table_acts act name is_host_port/ingress/send_nh \
+	act name is_host_port/ingress/drop
+$TC p4template update table/is_host_port/ingress/nh_table default_miss_action permissions 0x1024 action is_host_port/ingress/drop
+$TC p4template update pipeline/is_host_port state ready

@@ -353,6 +353,27 @@ bpf_p4tc_ext_hash_base_16bit_complement(const void *data, const u32 data__sz,
 	return (base + (hash % max));
 }
 
+/* DPDK doesn't implement this yet */
+/* Equivalent to PNA is_net_port */
+extern bool
+bpf_p4tc_is_net_port(struct __sk_buff *skb_ctx, const u32 ifindex) __ksym;
+
+/* DPDK doesn't implement this yet */
+/* Equivalent to PNA is_host_port */
+extern bool
+bpf_p4tc_is_host_port(struct __sk_buff *skb_ctx, const u32 ifindex) __ksym;
+
+/* DPDK doesn't implement this yet */
+/* Equivalent to PNA is_net_port */
+extern bool
+xdp_p4tc_is_net_port(struct xdp_md *xdp_ctx, const u32 ifindex) __ksym;
+
+/* DPDK doesn't implement this yet */
+/* Equivalent to PNA is_host_port */
+extern bool
+xdp_p4tc_is_host_port(struct xdp_md *xdp_ctx, const u32 ifindex) __ksym;
+
+
 /* per extern specifics start */
 
 /* in this case it is PNA so  we have these helpers like below
