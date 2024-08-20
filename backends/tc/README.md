@@ -1,5 +1,23 @@
-# TC backend
+<!--!
+\page tc_backend TC Backend                                                               
+-->
+<!-- 
+Documentation Inclusion:
+This README is integrated as a standalone page in the P4 compiler documentation.
 
+Refer to the full page here: [TC Backend](https://p4lang.github.io/p4c/pr-preview/4850/tc_backend.html)
+-->
+<!--!
+\internal
+-->
+# TC Backend
+<!--!
+\endinternal
+-->
+
+<!--!
+[TOC]
+-->
 TC backend aims to generate files for the P4TC implementation in Linux kernel (from 6.3.x version). P4TC is an implementation of the Programming Protocol-independent Packet Processors (P4) that is kernel based, building on top of Linux TC.
 
 For more info on P4TC, Please refer:

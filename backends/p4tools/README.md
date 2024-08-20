@@ -1,4 +1,29 @@
-# P4Tools - Testing Tools For P4 Targets
+<!--!
+\page p4tools P4Tools                                                               
+-->
+<!-- 
+Documentation Inclusion:
+This README is integrated as a standalone page in the P4 compiler documentation.
+
+Refer to the full page here: [P4Tools](https://p4lang.github.io/p4c/p4tools.html)
+-->
+<!--!
+\internal
+-->
+# P4Tools 
+<!--!
+\endinternal
+-->
+
+<!--!
+[TOC]
+-->
+P4Tools is a collection of tools that make testing P4 targets and programs a little easier. So far the platform supports the following tools and projects:
+
+- [P4Testgen](https://github.com/p4lang/p4c/tree/main/backends/p4tools/modules/testgen): An input-output test case generator for P4.
+
+- [P4Smith](https://github.com/p4lang/p4c/tree/main/backends/p4tools/modules/smith): A random P4 program generator in the spirit of Csmith.
+
 
 ## Directory Structure
 
@@ -14,13 +39,6 @@ p4tools
     ├─ smith       ── P4Smith: a random P4 program generator.
     └─ testgen       ── P4Testgen: a test-case generator for P4 programs.
 ```
-
-## P4Tools
-P4Tools is a collection of tools that make testing P4 targets and programs a little easier. So far the platform supports the following tools and projects:
-
-- [P4Testgen](https://github.com/p4lang/p4c/tree/main/backends/p4tools/modules/testgen): An input-output test case generator for P4.
-
-- [P4Smith](https://github.com/p4lang/p4c/tree/main/backends/p4tools/modules/smith): A random P4 program generator in the spirit of Csmith.
 
 ## Building
 Please see the general installation instructions [here](https://github.com/p4lang/p4c#installing-p4c-from-source). P4Tools can be built using the following CMAKE configuration in the P4C repository.
@@ -69,3 +87,6 @@ P4Tools in general follows the [P4C coding style](https://github.com/p4lang/p4c/
   library of related classes. Multiple classes may be declared in a `.cpp`
   file.
 
+<!--! 
+\include{doc} "../backends/p4tools/CONTRIBUTORS.md"
+-->

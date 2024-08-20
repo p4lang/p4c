@@ -1,5 +1,24 @@
-# Introduction to uBPF Backend
+<!--!
+\page ubpf_backend uBPF Backend                                                               
+-->
+<!-- 
+Documentation Inclusion:
+This README is integrated as a standalone page in the P4 compiler documentation.
 
+Refer to the full page here: https://p4lang.github.io/p4c/ubpf_backend.html
+-->
+
+<!--!
+\internal
+-->
+# uBPF Backend
+<!--!
+\endinternal
+-->
+
+<!--!
+[TOC]
+-->
 The **p4c-ubpf** compiler allows to translate P4 programs into the uBPF programs. We use the uBPF implementation provided 
 by [the P4rt-OVS switch](https://github.com/Orange-OpenSource/p4rt-ovs). The uBPF VM is based on the
 open-source implementation provided by [IOVisor](https://github.com/iovisor/ubpf).
@@ -70,6 +89,11 @@ Once the C program is generated it can be compiled using:
 
 The output file (`out.o`) can be injected to the uBPF VM. 
 
+<!--! 
+\include{doc} "../backends/ubpf/docs/EXAMPLES.md"
+\include{doc} "../backends/ubpf/tests/README.md"
+-->
+
 #### Custom C extern functions
 
 The P4 to uBPF compiler allows to define custom C extern functions and call them from P4 program as P4 action.
@@ -86,8 +110,3 @@ to learn how to use this feature. Note that the C extern function written for `p
 Tomasz Osiński &lt;tomasz.osinski2@orange.com&gt;
 
 Mateusz Kossakowski &lt;mateusz.kossakowski@orange.com&gt;
-
-
-
-
-

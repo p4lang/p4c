@@ -1,5 +1,22 @@
-# p4fmt (P4 Formatter)
+<!--!
+\page p4fmt p4fmt (P4 Formatter)                                                               
+-->
+<!-- 
+Documentation Inclusion:
+This README is integrated as a standalone page in the P4 compiler documentation.
 
+Refer to the full page here: [p4fmt (P4 Formatter)](https://p4lang.github.io/p4c/p4fmt.html)
+-->
+<!--!
+\internal
+-->
+# p4fmt (P4 Formatter)
+<!--!
+\endinternal
+-->
+<!--!
+[TOC]
+-->
 p4fmt is a WIP formatter for P4. It's in a highly experimental phase
 and, not yet stable/reliable for general use.
 Contributions and feedbacks from the community

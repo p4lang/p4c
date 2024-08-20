@@ -1,3 +1,10 @@
+<!-- 
+Documentation Inclusion:
+This README is integrated as a subsection of the "Getting Started" page in the P4 compiler documentation.
+
+Refer to the specific section here: [Overview - Subsection](https://p4lang.github.io/p4c/getting_started.html#overview)
+-->
+
 # Overview
 
 The P4C compiler is a compiler infrastructure for the P4 compiler designed with the following goals:

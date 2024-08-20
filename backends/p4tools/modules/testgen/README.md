@@ -1,7 +1,28 @@
-# P4Testgen
+<!--!
+\page p4testgen  P4Testgen                                                             
+-->
+<!-- 
+Documentation Inclusion:
+This README is integrated as a standalone page in the P4 compiler documentation.
 
+Refer to the full page here: [P4Testgen](https://p4lang.github.io/p4c/p4testgen.html)
+-->
+<!--!
+\internal
+-->
+# P4Testgen
+<!--!
+\endinternal
+-->
+
+<!--!
+[TOC]
+-->
 [![Status](https://github.com/p4lang/p4c/actions/workflows/ci-p4tools.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-p4tools.yml)
 
+<!--!
+\internal
+-->
 ## Table of Contents
 
 - [Installation](#installation)
@@ -16,6 +37,9 @@
 - [Contributing](#contributing)
 - [License](#license)
 
+<!--!
+\endinternal
+-->
 P4Testgen is an extensible [test oracle](https://en.wikipedia.org/wiki/Test_oracle) that uses symbolic execution to automatically generate input-output tests for P4 programs. P4Testgen is part of the P4Tools and P4C ecosystem.
 
 ## Features
@@ -156,6 +180,12 @@ If you would like to cite this work please use this citation format:
 }
 ```
 
+<!--! 
+\include{doc} "../backends/p4tools/modules/testgen/benchmarks/README.md"
+
+\include{doc} "../backends/p4tools/modules/testgen/targets/bmv2/test/README.md"
+-->
+
 ## Contributing
 
 Contributions to P4Testgen in any form are welcome! Please follow the guidelines listed [here](https://github.com/p4lang/p4c/blob/main/CONTRIBUTING.md) to contribute.
@@ -163,3 +193,4 @@ Contributions to P4Testgen in any form are welcome! Please follow the guidelines
 ## License
 
 This project is licensed under the Apache License 2.0. See the [LICENSE](https://github.com/p4lang/p4c/blob/main/backends/p4tools/LICENSE) file for details.
+

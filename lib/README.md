@@ -1,8 +1,15 @@
+<!-- 
+Documentation Inclusion:
+This README is integrated as a subsection of the "Getting Started" page in the P4 compiler documentation.
+
+Refer to the specific section here: [Getting Started - Subsection](https://p4lang.github.io/p4c/getting_started.html#common-p4c-utility-functions)
+-->
+
 # Common P4C utility functions
 
-This directory contains miscellaneous utilities that are generally useful
+The [`lib` directory](https://github.com/p4lang/p4c/tree/main/lib) contains miscellaneous utilities that are generally useful
 and not specific to any part of the compiler.  Most are not even compiler
-specific.  The files in this folder should only depend on each other; they
+specific.  The files in the `lib` folder should only depend on each other; they
 cannot depend on any other compiler files.
 
 ##### algorithm.h
@@ -87,3 +94,4 @@ Conversion of various types to strings.
 ##### sourceCodeBuilder.h
 
 Support for emitting programs in source (works for P4 and C).
+

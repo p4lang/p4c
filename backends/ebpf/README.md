@@ -1,5 +1,23 @@
-# eBPF Backend
+<!--!
+\page ebpf_backend eBPF Backend                                                                     
+-->
+<!-- 
+Documentation Inclusion:
+This README is integrated as a standalone page in the P4 compiler documentation.
 
+Refer to the full page here: https://p4lang.github.io/p4c/ebpf_backend.html
+-->
+<!--!
+\internal
+-->
+# eBPF Backend
+<!--!
+\endinternal
+-->
+
+<!--!
+[TOC]
+-->
 The back-end accepts only P4_16 code written for the `ebpf_model.p4` or
 `xdp_model.p4` filter models.  It generates C code that can be afterwards
 compiled into [eBPF (extended Berkeley Packet Filters)](https://en.wikipedia.org/wiki/Berkeley_Packet_Filter) using clang/llvm or
@@ -414,3 +432,7 @@ clang -O2 -include C-EXTERN-FILE.c -target bpf -c OUTPUT.c -o OUTPUT.o
   ```
 
   * The C extern function must not access BPF maps that are used to implement P4 tables and defined in the main C program generated from the P4 language.
+
+<!--!
+\include{doc} "../backends/ebpf/psa/README.md"
+-->
