@@ -115,7 +115,7 @@ var searchData=
   ['reporting_20issues_112',['Reporting Issues',['../contribute.html#reporting-issues',1,'']]],
   ['repository_20organization_113',['P4C Repository Organization',['../repository_structure.html',1,'']]],
   ['representation_20ir_114',['P4C Intermediate Representation (IR)',['../intermediate_representation_ir.html',1,'']]],
-  ['representation_20ir_20classes_115',['P4C Intermediate Representation (IR) Classes',['../intermediate_representation_ir.html#p4c-intermediate-representation-ir-classes',1,'']]],
+  ['representation_20p4c_20ir_20classes_115',['P4C Intermediate Representation (P4C-IR) Classes',['../intermediate_representation_ir.html#p4c-intermediate-representation-p4c-ir-classes',1,'']]],
   ['req_116',['req',['../class_p4_1_1_p4_tools_1_1_p4_smith_1_1_p4_scope.html#adfe13546f6abc0bbbeebf22064dfa9e3',1,'P4::P4Tools::P4Smith::P4Scope']]],
   ['requests_117',['Feature Requests',['../contribute.html#feature-requests',1,'']]],
   ['requests_118',['Git commits and pull requests',['../contribute.html#git-commits-and-pull-requests',1,'']]],
