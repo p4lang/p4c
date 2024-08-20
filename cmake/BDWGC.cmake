@@ -39,10 +39,6 @@ macro(p4c_obtain_bdwgc)
       GIT_REPOSITORY https://github.com/ivmai/bdwgc.git
       GIT_TAG 7f1503dbfe254e77678666a0e09b735add064b57 # 8.2.6, 2024-08-03
       GIT_PROGRESS TRUE
-      # PATCH_COMMAND
-      #   git apply ${P4C_SOURCE_DIR}/cmake/bdwgc.patch || git apply
-      #   ${P4C_SOURCE_DIR}/cmake/bdwgc.patch -R --check && echo
-      #   "Patch does not apply because the patch was already applied."
     )
     fetchcontent_makeavailable_but_exclude_install(bdwgc)
 
