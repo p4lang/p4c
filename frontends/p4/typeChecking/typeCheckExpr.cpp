@@ -288,17 +288,6 @@ const IR::Node *TypeInference::postorder(IR::Concat *expression) {
     auto rtype = getType(expression->right);
     if (ltype == nullptr || rtype == nullptr) return expression;
 
-    if (ltype->is<IR::Type_InfInt>()) {
-        typeError("Please specify a width for the operand %1% of a concatenation",
-                  expression->left);
-        return expression;
-    }
-    if (rtype->is<IR::Type_InfInt>()) {
-        typeError("Please specify a width for the operand %1% of a concatenation",
-                  expression->right);
-        return expression;
-    }
-
     const IR::Type *resultType = nullptr;
     if (ltype->is<IR::Type_String>() && rtype->is<IR::Type_String>()) {
         // For strings the output type is just string.
@@ -322,6 +311,22 @@ const IR::Node *TypeInference::postorder(IR::Concat *expression) {
         if (!ltype->is<IR::Type_Bits>() || !rtype->is<IR::Type_Bits>()) {
             typeError("%1%: Concatenation not defined on %2% and %3%", expression,
                       ltype->toString(), rtype->toString());
+
+            // Provide further clarification in the common case of attempting to concat
+            // arbitrary-width int.
+            if (!ltype->is<IR::Type_String>() && !rtype->is<IR::Type_String>()) {
+                if (ltype->is<IR::Type_InfInt>()) {
+                    typeError("Please specify a width for the operand %1% of a concatenation",
+                              expression->left);
+                    return expression;
+                }
+                if (rtype->is<IR::Type_InfInt>()) {
+                    typeError("Please specify a width for the operand %1% of a concatenation",
+                              expression->right);
+                    return expression;
+                }
+            }
+
             return expression;
         }
         auto bl = ltype->to<IR::Type_Bits>();
