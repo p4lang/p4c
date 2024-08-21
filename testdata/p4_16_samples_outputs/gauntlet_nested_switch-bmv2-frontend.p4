@@ -24,7 +24,6 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.simple_val") bit<16> simple_val_0;
-    @name("ingress.hasReturned") bool hasReturned;
     @name("ingress.val") bit<48> val_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
@@ -39,21 +38,16 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         default_action = NoAction_1();
     }
     apply {
-        hasReturned = false;
         simple_val_0 = 16w2;
         call_action();
         if (simple_val_0 <= 16w5) {
-            hasReturned = true;
+            ;
         } else {
             switch (simple_table_0.apply().action_run) {
                 default: {
                     h.eth_hdr.dst_addr = 48w32;
                 }
             }
-        }
-        if (hasReturned) {
-            ;
-        } else {
             h.eth_hdr.eth_type = 16w1;
         }
     }

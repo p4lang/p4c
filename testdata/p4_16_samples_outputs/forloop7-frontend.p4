@@ -27,9 +27,10 @@ control c(inout headers_t hdrs) {
                 tmp = fn(a_0, b_0);
                 if (tmp) {
                     continue;
+                } else {
+                    hasReturned = true;
+                    break;
                 }
-                hasReturned = true;
-                break;
             }
             if (hasReturned) {
                 break;

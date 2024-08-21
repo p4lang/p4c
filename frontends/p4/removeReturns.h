@@ -42,6 +42,58 @@ class HasExits : public Inspector {
 };
 
 /**
+This visitor rewrites code after an 'if' that does a branch by moving the
+code after the if into the else: branch of the if.  A block that looks like
+    ..some code
+    if (pred) branch;
+    ..more code
+becomes:
+    ..some code
+    if (pred) {
+        branch;
+    } else {
+        ..more code
+
+it also deals with cases where the else is not empty (the 'more code' is appended)
+
+The purpose of this is to rewrite code such the DoRemoveReturns (and similar rewrites
+for other branches like exit or loop break/continue) will more likely not need to
+introduce a boolean flag and extra tests to remove those branches.
+
+precondition:
+    switchAddDefault pass has run to ensure switch statements cover all cases
+*/
+class MoveToElseAfterBranch : public Modifier {
+    /* the pass does not use (inherit from) ControlFlowVisitor, even though it is doing
+     * control flow analysis, as it turns out to be more efficient to do it directly here
+     * by overloading the branching constructs (if/switch/loops) and not cloning the visitor,
+     * because we *only* care about statements (not expressions) locally in a block (and
+     * not across calls), and we only have one bit of data (hsBranched flag). */
+    bool hasBranched = false;
+    bool movedToIfBranch = false;
+
+    bool preorder(IR::BlockStatement *) override;
+    bool moveFromParentTo(const IR::Statement *&child);
+    bool preorder(IR::IfStatement *) override;
+    bool preorder(IR::SwitchStatement *) override;
+    void postorder(IR::LoopStatement *) override;
+    bool branch() {
+        hasBranched = true;
+        // no need to visit children
+        return false;
+    }
+    bool preorder(IR::BreakStatement *) override { return branch(); }
+    bool preorder(IR::ContinueStatement *) override { return branch(); }
+    bool preorder(IR::ExitStatement *) override { return branch(); }
+    bool preorder(IR::ReturnStatement *) override { return branch(); }
+    // Only visit statements, skip all expressions
+    bool preorder(IR::Expression *) override { return false; }
+
+ public:
+    MoveToElseAfterBranch() {}
+};
+
+/**
 This visitor replaces 'returns' by ifs:
 e.g.
 control c(inout bit x) { apply {
@@ -105,10 +157,7 @@ class DoRemoveReturns : public Transform {
 
 class RemoveReturns : public PassManager {
  public:
-    RemoveReturns() {
-        passes.push_back(new DoRemoveReturns());
-        setName("RemoveReturns");
-    }
+    RemoveReturns() : PassManager({new MoveToElseAfterBranch(), new DoRemoveReturns()}) {}
 };
 
 }  // namespace P4

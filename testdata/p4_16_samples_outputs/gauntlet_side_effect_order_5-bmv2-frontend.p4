@@ -31,11 +31,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
                 hasReturned = true;
             } else {
                 val_1 = 48w12;
-            }
-            if (hasReturned) {
-                ;
-            } else if (val_0 <= 48w25) {
-                val_1 = 48w1452;
+                if (val_0 <= 48w25) {
+                    val_1 = 48w1452;
+                }
             }
         }
         tmp_0 = val_1;

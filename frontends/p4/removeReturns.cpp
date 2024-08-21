@@ -20,6 +20,78 @@ limitations under the License.
 
 namespace P4 {
 
+bool MoveToElseAfterBranch::preorder(IR::BlockStatement *block) {
+    movedToIfBranch = false;
+    for (auto it = block->components.begin(); it != block->components.end();) {
+        if (movedToIfBranch)
+            it = block->components.erase(it);
+        else
+            visit(*it++);
+    }
+    movedToIfBranch = false;
+    return false;
+}
+
+bool MoveToElseAfterBranch::moveFromParentTo(const IR::Statement *&child) {
+    auto parent = getParent<IR::BlockStatement>();
+    size_t next = getContext()->child_index + 1;
+    if (!parent || next >= parent->components.size()) {
+        // nothing to move from the parent, so nothing to do
+        return false;
+    }
+
+    IR::BlockStatement *modified = nullptr;
+    if (!child)
+        modified = new IR::BlockStatement;
+    else if (auto *t = child->to<IR::BlockStatement>())
+        modified = t->clone();
+    else if (child->is<IR::EmptyStatement>())
+        modified = new IR::BlockStatement;
+    else
+        modified = new IR::BlockStatement({child});
+    for (auto it = parent->components.begin() + next; it != parent->components.end(); ++it)
+        modified->components.push_back(*it);
+    child = modified;
+    return true;
+}
+
+bool MoveToElseAfterBranch::preorder(IR::IfStatement *ifStmt) {
+    hasBranched = false;
+    bool movedCode = false;
+    visit(ifStmt->ifTrue, "ifTrue", 1);
+    bool branchInIfTrue = hasBranched;
+    if (hasBranched) movedCode = moveFromParentTo(ifStmt->ifFalse);
+    hasBranched = false;
+    visit(ifStmt->ifFalse, "ifFalse", 2);
+    if (hasBranched && !branchInIfTrue) {
+        movedCode = moveFromParentTo(ifStmt->ifTrue);
+        // need to revisit to visit the copied code; will autoamtically skip nodes we've
+        // already visited in Modifier::apply_visiter as visitDagOnce == true
+        visit(ifStmt->ifTrue, "ifTrue", 1);
+    }
+    hasBranched &= branchInIfTrue;
+    movedToIfBranch |= movedCode;
+    return false;
+}
+
+bool MoveToElseAfterBranch::preorder(IR::SwitchStatement *swch) {
+    // TBD: if there is exactly one case that falls through (all others end with a branch)
+    // then we could move subsequent code into that case, as it done with 'if'
+    bool canFallThrough = false;
+    for (auto &c : swch->cases) {
+        hasBranched = false;
+        visit(c, "cases");
+        canFallThrough |= !hasBranched;
+    }
+    hasBranched = !canFallThrough;
+    return false;
+}
+
+void MoveToElseAfterBranch::postorder(IR::LoopStatement *) {
+    // after a loop body is never unreachable
+    hasBranched = false;
+}
+
 const IR::Node *DoRemoveReturns::preorder(IR::P4Action *action) {
     HasExits he;
     he.setCalledBy(this);

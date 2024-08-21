@@ -44,7 +44,6 @@ parser prs(packet_in p, out Headers_t headers) {
 control pipe(inout Headers_t headers, out bool pass) {
     @name("pipe.address_0") bit<32> address_0;
     @name("pipe.pass_0") bool pass_0;
-    @name("pipe.hasReturned") bool hasReturned;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("pipe.c1.Reject") action c1_Reject_0() {
@@ -61,17 +60,9 @@ control pipe(inout Headers_t headers, out bool pass) {
         implementation = hash_table(32w1024);
         const default_action = NoAction_1();
     }
-    @hidden action two_ebpf69() {
-        pass = false;
-        hasReturned = true;
-    }
-    @hidden action two_ebpf66() {
-        hasReturned = false;
-        pass = true;
-    }
     @hidden action act() {
         address_0 = headers.ipv4.srcAddr;
-        pass_0 = pass;
+        pass_0 = true;
     }
     @hidden action act_0() {
         pass = pass_0;
@@ -80,17 +71,17 @@ control pipe(inout Headers_t headers, out bool pass) {
     @hidden action act_1() {
         pass = pass_0;
     }
+    @hidden action two_ebpf69() {
+        pass = false;
+    }
+    @hidden action two_ebpf66() {
+        pass = true;
+    }
     @hidden table tbl_two_ebpf66 {
         actions = {
             two_ebpf66();
         }
         const default_action = two_ebpf66();
-    }
-    @hidden table tbl_two_ebpf69 {
-        actions = {
-            two_ebpf69();
-        }
-        const default_action = two_ebpf69();
     }
     @hidden table tbl_act {
         actions = {
@@ -110,21 +101,22 @@ control pipe(inout Headers_t headers, out bool pass) {
         }
         const default_action = act_1();
     }
+    @hidden table tbl_two_ebpf69 {
+        actions = {
+            two_ebpf69();
+        }
+        const default_action = two_ebpf69();
+    }
     apply {
         tbl_two_ebpf66.apply();
         if (headers.ipv4.isValid()) {
-            ;
-        } else {
-            tbl_two_ebpf69.apply();
-        }
-        if (hasReturned) {
-            ;
-        } else {
             tbl_act.apply();
             c1_Check_ip.apply();
             tbl_act_0.apply();
             c1_Check_ip.apply();
             tbl_act_1.apply();
+        } else {
+            tbl_two_ebpf69.apply();
         }
     }
 }

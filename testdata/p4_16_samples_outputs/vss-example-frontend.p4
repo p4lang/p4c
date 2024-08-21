@@ -80,7 +80,6 @@ parser TopParser(packet_in b, out Parsed_packet p) {
 
 control TopPipe(inout Parsed_packet headers, in error parseError, in InControl inCtrl, out OutControl outCtrl) {
     @name("TopPipe.nextHop") IPv4Address nextHop_0;
-    @name("TopPipe.hasReturned") bool hasReturned;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("TopPipe.Drop_action") action Drop_action() {
@@ -153,39 +152,25 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
         default_action = Drop_action_2();
     }
     apply {
-        hasReturned = false;
         if (parseError != error.NoError) {
             Drop_action_3();
-            hasReturned = true;
-        }
-        if (hasReturned) {
-            ;
         } else {
             ipv4_match_0.apply();
             if (outCtrl.outputPort == 4w0xf) {
-                hasReturned = true;
+                ;
+            } else {
+                check_ttl_0.apply();
+                if (outCtrl.outputPort == 4w0xe) {
+                    ;
+                } else {
+                    dmac_1.apply();
+                    if (outCtrl.outputPort == 4w0xf) {
+                        ;
+                    } else {
+                        smac_1.apply();
+                    }
+                }
             }
-        }
-        if (hasReturned) {
-            ;
-        } else {
-            check_ttl_0.apply();
-            if (outCtrl.outputPort == 4w0xe) {
-                hasReturned = true;
-            }
-        }
-        if (hasReturned) {
-            ;
-        } else {
-            dmac_1.apply();
-            if (outCtrl.outputPort == 4w0xf) {
-                hasReturned = true;
-            }
-        }
-        if (hasReturned) {
-            ;
-        } else {
-            smac_1.apply();
         }
     }
 }

@@ -348,7 +348,6 @@ control ComputeChecksumImpl(inout parsed_headers_t hdr, inout local_metadata_t l
 
 control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta, inout standard_metadata_t std_meta) {
     @name("PreQosPipe.hasReturned_0") bool hasReturned_0;
-    @name("PreQosPipe.Routing.hasReturned") bool Routing_hasReturned;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @noWarn("unused") @name(".NoAction") action NoAction_2() {
@@ -718,15 +717,8 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
         _initialize_metadata();
         if (hdr.packet_out.isValid()) {
             hdr.packet_out.setInvalid();
-        } else {
-            if (my_station_0.apply().hit) {
-                ;
-            } else {
-                hasReturned_0 = true;
-            }
-            if (hasReturned_0) {
-                ;
-            } else if (interfaces_0.apply().hit) {
+        } else if (my_station_0.apply().hit) {
+            if (interfaces_0.apply().hit) {
                 if (local_meta.direction == Direction.UPLINK) {
                     local_meta.ue_addr = hdr.inner_ipv4.src_addr;
                     local_meta.inet_addr = hdr.inner_ipv4.dst_addr;
@@ -783,25 +775,21 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
                     do_drop_4();
                 }
             }
+        } else {
+            hasReturned_0 = true;
         }
         if (hasReturned_0) {
             ;
         } else {
-            Routing_hasReturned = false;
             if (hdr.ipv4.isValid()) {
-                ;
-            } else {
-                Routing_hasReturned = true;
-            }
-            if (Routing_hasReturned) {
-                ;
-            } else {
                 hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
                 if (hdr.ipv4.ttl == 8w0) {
                     Routing_drop_0();
                 } else {
                     Routing_routes_v4.apply();
                 }
+            } else {
+                ;
             }
             if (hdr.ethernet.isValid() && hdr.ipv4.isValid()) {
                 Acl_acls.apply();

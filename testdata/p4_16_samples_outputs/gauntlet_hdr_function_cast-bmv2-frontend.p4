@@ -26,23 +26,16 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.val_0") bit<16> val;
-    @name("ingress.hasReturned") bool hasReturned;
     @name("ingress.retval") ethernet_t retval;
     @name("ingress.retval_0") ethernet_t retval_0;
     apply {
         val = h.eth_hdr1.eth_type;
-        hasReturned = false;
         if (val == 16w1) {
-            hasReturned = true;
             retval.setValid();
             retval = (ethernet_t){dst_addr = 48w1,src_addr = 48w1,eth_type = 16w1};
         } else if (val == 16w2) {
-            hasReturned = true;
             retval.setValid();
             retval = (ethernet_t){dst_addr = 48w2,src_addr = 48w2,eth_type = 16w2};
-        }
-        if (hasReturned) {
-            ;
         } else {
             retval.setValid();
             retval = (ethernet_t){dst_addr = 48w3,src_addr = 48w3,eth_type = 16w3};

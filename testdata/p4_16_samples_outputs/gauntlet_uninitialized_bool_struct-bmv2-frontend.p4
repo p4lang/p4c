@@ -51,11 +51,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         switch (simple_table_0.apply().action_run) {
             dummy_action: {
                 if (tmp_0.is_bool) {
-                    ;
+                    h.eth_hdr.dst_addr = 48w1;
                 } else {
                     exit;
                 }
-                h.eth_hdr.dst_addr = 48w1;
             }
             default: {
             }

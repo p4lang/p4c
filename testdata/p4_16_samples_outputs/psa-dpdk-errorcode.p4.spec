@@ -57,7 +57,6 @@ struct metadata {
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
 	bit<16> local_metadata_data
-	bit<8> Ingress_hasReturned
 	bit<16> tmpMask
 	bit<8> tmpMask_0
 }
@@ -103,14 +102,11 @@ apply {
 	jmpeq INGRESSPARSERIMPL_PARSE_TCP m.tmpMask_0 0x4
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp
-	INGRESSPARSERIMPL_ACCEPT :	mov m.Ingress_hasReturned 0
-	jmpeq LABEL_END m.psa_ingress_input_metadata_parser_error 0x0
+	INGRESSPARSERIMPL_ACCEPT :	jmpeq LABEL_FALSE m.psa_ingress_input_metadata_parser_error 0x0
 	mov m.psa_ingress_output_metadata_drop 1
-	mov m.Ingress_hasReturned 1
-	LABEL_END :	jmpneq LABEL_FALSE_0 m.Ingress_hasReturned 0x1
-	jmp LABEL_END_0
-	LABEL_FALSE_0 :	table tbl
-	LABEL_END_0 :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	jmp LABEL_END
+	LABEL_FALSE :	table tbl
+	LABEL_END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	emit h.ipv4
 	emit h.tcp

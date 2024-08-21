@@ -38,20 +38,15 @@ parser prs(packet_in p, out Headers h) {
 }
 
 control c(inout Headers h) {
-    @name("c.hasReturned") bool hasReturned;
     apply {
-        hasReturned = false;
         if (h.eth.isValid()) {
-            ;
+            if (h.eth.type == EthTypes.IPv4) {
+                h.eth.setInvalid();
+            } else {
+                h.eth.type = (EthTypes)16w0;
+            }
         } else {
-            hasReturned = true;
-        }
-        if (hasReturned) {
             ;
-        } else if (h.eth.type == EthTypes.IPv4) {
-            h.eth.setInvalid();
-        } else {
-            h.eth.type = (EthTypes)16w0;
         }
     }
 }

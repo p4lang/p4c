@@ -337,7 +337,6 @@ control FabricDeparser(packet_out packet, in parsed_headers_t hdr) {
 }
 
 control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_metadata, inout standard_metadata_t standard_metadata) {
-    @name("FabricIngress.spgw_normalizer.hasReturned") bool spgw_normalizer_hasReturned;
     @name("FabricIngress.spgw_ingress.hasReturned_0") bool spgw_ingress_hasReturned;
     @name(".nop") action nop_2() {
     }
@@ -672,15 +671,7 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     apply {
         hdr.gtpu_ipv4.setInvalid();
         hdr.gtpu_udp.setInvalid();
-        spgw_normalizer_hasReturned = false;
         if (hdr.gtpu.isValid()) {
-            ;
-        } else {
-            spgw_normalizer_hasReturned = true;
-        }
-        if (spgw_normalizer_hasReturned) {
-            ;
-        } else {
             hdr.gtpu_ipv4 = hdr.ipv4;
             hdr.ipv4 = hdr.inner_ipv4;
             hdr.gtpu_udp = hdr.udp;
@@ -689,6 +680,8 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
             } else {
                 hdr.udp.setInvalid();
             }
+        } else {
+            ;
         }
         if (hdr.packet_out.isValid()) {
             standard_metadata.egress_spec = hdr.packet_out.egress_port;
@@ -832,8 +825,7 @@ control FabricEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_
     apply {
         if (fabric_metadata.is_controller_packet_out) {
             exit;
-        }
-        if (standard_metadata.egress_port == 9w255) {
+        } else if (standard_metadata.egress_port == 9w255) {
             if (fabric_metadata.is_multicast && !fabric_metadata.clone_to_cpu) {
                 mark_to_drop(standard_metadata);
             }

@@ -1,18 +1,3 @@
 vss-example.p4(159): [--Wwarn=uninitialized_use] warning: nextHop may be uninitialized
           key = { nextHop : exact; }
                   ^^^^^^^
-vss-example.p4(198): [--Wwarn=uninitialized_use] warning: outCtrl.outputPort may be uninitialized
-          if (outCtrl.outputPort == CPU_OUT_PORT) return;
-              ^^^^^^^^^^^^^^^^^^
-vss-example.p4(201): [--Wwarn=uninitialized_use] warning: outCtrl.outputPort may be uninitialized
-          if (outCtrl.outputPort == DROP_PORT) return;
-              ^^^^^^^^^^^^^^^^^^
-vss-example.p4(179): [--Wwarn=uninitialized_use] warning: outCtrl.outputPort may be uninitialized
-           key = { outCtrl.outputPort : exact; }
-                   ^^^^^^^^^^^^^^^^^^
-vss-example.p4(95): [--Wwarn=uninitialized_out_param] warning: out parameter 'outCtrl' may be uninitialized when 'TopPipe' terminates
-                out OutControl outCtrl) {
-                               ^^^^^^^
-vss-example.p4(92)
-control TopPipe(inout Parsed_packet headers,
-        ^^^^^^^

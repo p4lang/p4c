@@ -23,11 +23,11 @@ control c(inout headers_t hdrs) {
         for (i_0 = 8w0; i_0 < 8w32; i_0 = i_0 + 8w4, mask_0 = mask_0 >> 1) {
             if (mask_0 == 8w0) {
                 break;
-            }
-            if (mask_0[0:0] == 1w0) {
+            } else if (mask_0[0:0] == 1w0) {
                 continue;
+            } else {
+                result_0 = result_0 + (hdrs.t1.y >> i_0 & 32w0xf);
             }
-            result_0 = result_0 + (hdrs.t1.y >> i_0 & 32w0xf);
         }
         hdrs.t1.y = result_0;
     }

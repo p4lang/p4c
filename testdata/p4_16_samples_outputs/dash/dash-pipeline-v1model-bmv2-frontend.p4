@@ -394,12 +394,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
     @name("dash_ingress.tmp_0") bit<48> tmp_54;
     @name("dash_ingress.eni_lookup_stage.tmp_11") bit<48> eni_lookup_stage_tmp;
     @name("dash_ingress.outbound.acl.hasReturned") bool outbound_acl_hasReturned;
-    @name("dash_ingress.outbound.outbound_routing_stage.hasReturned_3") bool outbound_outbound_routing_stage_hasReturned;
-    @name("dash_ingress.outbound.outbound_mapping_stage.hasReturned_4") bool outbound_outbound_mapping_stage_hasReturned;
     @name("dash_ingress.inbound.acl.hasReturned") bool inbound_acl_hasReturned;
-    @name("dash_ingress.routing_action_apply.do_action_nat46.hasReturned_1") bool routing_action_apply_do_action_nat46_hasReturned;
-    @name("dash_ingress.routing_action_apply.do_action_nat64.hasReturned_2") bool routing_action_apply_do_action_nat64_hasReturned;
-    @name("dash_ingress.routing_action_apply.do_action_static_encap.hasReturned_0") bool routing_action_apply_do_action_static_encap_hasReturned;
     @name("dash_ingress.hdr") headers_t hdr_0;
     @name("dash_ingress.meta") metadata_t meta_33;
     @name("dash_ingress.hdr") headers_t hdr_1;
@@ -1639,20 +1634,12 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
             }
             meta.lkup_dst_ip_addr = meta.dst_ip_addr;
             meta.is_lkup_dst_ip_v6 = meta.is_overlay_ip_v6;
-            outbound_outbound_routing_stage_hasReturned = false;
             if (meta.target_stage != dash_pipeline_stage_t.OUTBOUND_ROUTING) {
-                outbound_outbound_routing_stage_hasReturned = true;
-            }
-            if (outbound_outbound_routing_stage_hasReturned) {
                 ;
             } else {
                 outbound_outbound_routing_stage_routing.apply();
             }
-            outbound_outbound_mapping_stage_hasReturned = false;
             if (meta.target_stage != dash_pipeline_stage_t.OUTBOUND_MAPPING) {
-                outbound_outbound_mapping_stage_hasReturned = true;
-            }
-            if (outbound_outbound_mapping_stage_hasReturned) {
                 ;
             } else {
                 switch (outbound_outbound_mapping_stage_ca_to_pa.apply().action_run) {
@@ -1714,11 +1701,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
             }
             meta.tunnel_pointer = meta.tunnel_pointer + 16w1;
         }
-        routing_action_apply_do_action_nat46_hasReturned = false;
         if (meta.routing_actions & 32w2 == 32w0) {
-            routing_action_apply_do_action_nat46_hasReturned = true;
-        }
-        if (routing_action_apply_do_action_nat46_hasReturned) {
             ;
         } else {
             assert(meta.overlay_data.is_ipv6);
@@ -1734,11 +1717,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
             hdr.u0_ipv4.setInvalid();
             hdr.u0_ethernet.ether_type = 16w0x86dd;
         }
-        routing_action_apply_do_action_nat64_hasReturned = false;
         if (meta.routing_actions & 32w4 == 32w0) {
-            routing_action_apply_do_action_nat64_hasReturned = true;
-        }
-        if (routing_action_apply_do_action_nat64_hasReturned) {
             ;
         } else {
             assert(!meta.overlay_data.is_ipv6);
@@ -1758,11 +1737,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
             hdr.u0_ipv6.setInvalid();
             hdr.u0_ethernet.ether_type = 16w0x800;
         }
-        routing_action_apply_do_action_static_encap_hasReturned = false;
         if (meta.routing_actions & 32w1 == 32w0) {
-            routing_action_apply_do_action_static_encap_hasReturned = true;
-        }
-        if (routing_action_apply_do_action_static_encap_hasReturned) {
             ;
         } else {
             if (meta.encap_data.dash_encapsulation == dash_encapsulation_t.VXLAN) {
