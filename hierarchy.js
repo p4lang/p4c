@@ -1580,6 +1580,7 @@ var hierarchy =
         [ "P4::UBPF::UBPFModel::getUBPFModelVersion", "class_p4_1_1_u_b_p_f_1_1_u_b_p_f_model_1_1get_u_b_p_f_model_version.html", null ],
         [ "P4::ValidateMatchAnnotations", "class_p4_1_1_validate_match_annotations.html", null ],
         [ "P4::ValidateParsedProgram", "class_p4_1_1_validate_parsed_program.html", null ],
+        [ "P4::ValidateStringAnnotations", "class_p4_1_1_validate_string_annotations.html", null ],
         [ "P4::ValidateTableProperties", "class_p4_1_1_validate_table_properties.html", null ],
         [ "P4::ValidateValueSets", "class_p4_1_1_validate_value_sets.html", null ],
         [ "P4::exprUses", "class_p4_1_1expr_uses.html", null ],

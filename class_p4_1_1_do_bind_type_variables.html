@@ -155,6 +155,8 @@ const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</
 <tr class="memitem:addb6ab4a0b06953b3c5ebbce237a2e12" id="r_addb6ab4a0b06953b3c5ebbce237a2e12"><td class="memItemLeft" align="right" valign="top"><a id="addb6ab4a0b06953b3c5ebbce237a2e12" name="addb6ab4a0b06953b3c5ebbce237a2e12"></a>
 const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (IR::P4Parser *parser) override</td></tr>
 <tr class="separator:addb6ab4a0b06953b3c5ebbce237a2e12"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a539a9075efb485bb632acc6dbe01d6f6" id="r_a539a9075efb485bb632acc6dbe01d6f6"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a539a9075efb485bb632acc6dbe01d6f6">preorder</a> (IR::Annotation *annotation) override</td></tr>
+<tr class="separator:a539a9075efb485bb632acc6dbe01d6f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_class_p4_1_1_transform"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_p4_1_1_transform')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_p4_1_1_transform.html">P4::Transform</a></td></tr>
 <tr class="memitem:a853d6a910acd3168aae542c14def7884 inherit pub_methods_class_p4_1_1_transform" id="r_a853d6a910acd3168aae542c14def7884"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_transform.html#a853d6a910acd3168aae542c14def7884">apply_visitor</a> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *, const char *name=0) override</td></tr>
 <tr class="separator:a853d6a910acd3168aae542c14def7884 inherit pub_methods_class_p4_1_1_transform"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -395,6 +397,33 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>joinFlows</b> = false
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = true</td></tr>
 <tr class="separator:a609ed9bc5d421210d591474f234d5e88 inherit pro_attribs_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a539a9075efb485bb632acc6dbe01d6f6" name="a539a9075efb485bb632acc6dbe01d6f6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a539a9075efb485bb632acc6dbe01d6f6">&#9670;&#160;</a></span>preorder()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> * P4::DoBindTypeVariables::preorder </td>
+          <td>(</td>
+          <td class="paramtype">IR::Annotation *</td>          <td class="paramname"><span class="paramname"><em>annotation</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Don't descend to unstructured annotations, they are not type checked, so we can't process them here either. </p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->
