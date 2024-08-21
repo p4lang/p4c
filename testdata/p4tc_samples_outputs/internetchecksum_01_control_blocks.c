@@ -10,7 +10,7 @@ struct __attribute__((__packed__)) ingress_fwd_table_key {
     u32 maskid;
     u32 field0; /* istd.input_port */
 } __attribute__((aligned(8)));
-#define INGRESS_FWD_TABLE_ACT_INGRESS_SET_IPIP_INTERNET_CHECKSUM 1
+#define INGRESS_FWD_TABLE_ACT_INGRESS_SET_IPIP_CSUM 1
 #define INGRESS_FWD_TABLE_ACT_INGRESS_SET_NH 2
 #define INGRESS_FWD_TABLE_ACT_INGRESS_DROP 3
 #define INGRESS_FWD_TABLE_ACT_NOACTION 0
@@ -26,7 +26,7 @@ struct __attribute__((__packed__)) ingress_fwd_table_value {
             u32 src;
             u32 dst;
             u32 port;
-        } ingress_set_ipip_internet_checksum;
+        } ingress_set_ipip_csum;
         struct __attribute__((__packed__)) {
             u64 dmac;
             u32 port;
@@ -89,14 +89,14 @@ if (/* hdr->outer.isValid() */
                     if (value != NULL) {
                         /* run action */
                         switch (value->action) {
-                            case INGRESS_FWD_TABLE_ACT_INGRESS_SET_IPIP_INTERNET_CHECKSUM: 
+                            case INGRESS_FWD_TABLE_ACT_INGRESS_SET_IPIP_CSUM: 
                                 {
-                                    meta->src = bpf_ntohl(value->u.ingress_set_ipip_internet_checksum.src);
-                                                                        meta->dst = bpf_ntohl(value->u.ingress_set_ipip_internet_checksum.dst);
+                                    meta->src = bpf_ntohl(value->u.ingress_set_ipip_csum.src);
+                                                                        meta->dst = bpf_ntohl(value->u.ingress_set_ipip_csum.dst);
                                                                         meta->push = true;
-                                    /* send_to_port(value->u.ingress_set_ipip_internet_checksum.port) */
+                                    /* send_to_port(value->u.ingress_set_ipip_csum.port) */
                                     compiler_meta__->drop = false;
-                                    send_to_port(value->u.ingress_set_ipip_internet_checksum.port);
+                                    send_to_port(value->u.ingress_set_ipip_csum.port);
                                 }
                                 break;
                             case INGRESS_FWD_TABLE_ACT_INGRESS_SET_NH: 

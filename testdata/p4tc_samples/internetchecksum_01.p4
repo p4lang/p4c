@@ -139,7 +139,7 @@ control ingress(
     inout pna_main_output_metadata_t ostd
 )
 {
-    action set_ipip_internet_checksum(@tc_type("ipv4") bit<32> src, @tc_type("ipv4") bit<32> dst, @tc_type("dev") PortId_t port) {
+    action set_ipip_csum(@tc_type("ipv4") bit<32> src, @tc_type("ipv4") bit<32> dst, @tc_type("dev") PortId_t port) {
       meta.src = src;
       meta.dst = dst;
       meta.push = true;
@@ -160,7 +160,7 @@ control ingress(
          istd.input_port : exact @tc_type("dev") @name("port");
       }
       actions = {
-         set_ipip_internet_checksum;
+         set_ipip_csum;
          set_nh;
          drop;
       }

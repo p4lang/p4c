@@ -1,0 +1,14 @@
+[--Werror=type-error] error: 'is_net_port(istd.input_port, hdr.ipv4.srcAddr)'
+        if (hdr.ipv4.isValid() && is_net_port(istd.input_port, hdr.ipv4.srcAddr)) {
+                                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  ---- Actual error:
+  /home/komaljai/is_net/p4c/build/p4include/tc/pna.p4(589): is_net_port: 2 arguments supplied while 1 are expected
+  extern bool is_net_port (in PortId_t p);
+              ^^^^^^^^^^^
+  ---- Originating from:
+  /home/komaljai/is_net/p4c/build/p4include/tc/pna.p4(589): Function type 'is_net_port' does not match invocation type '<Method call>'
+  extern bool is_net_port (in PortId_t p);
+              ^^^^^^^^^^^
+  p4tc_samples/is_net_port_errors.p4(102)
+          if (hdr.ipv4.isValid() && is_net_port(istd.input_port, hdr.ipv4.srcAddr)) {
+                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
