@@ -496,69 +496,90 @@ $(function(){initNavTree('pna_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span>    <span class="keywordflow">return</span> (base + (hash % max));</div>
 <div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span>}</div>
 <div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span> </div>
-<div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span><span class="comment">/* per extern specifics start */</span></div>
-<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span> </div>
-<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span><span class="comment">/* in this case it is PNA so  we have these helpers like below</span></div>
-<div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span><span class="comment">   &quot;is_net_port_skb&quot; but for user specific externs the caller should</span></div>
-<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span><span class="comment">    be doing similar flow:</span></div>
-<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span><span class="comment">    a) populating p4tc_ext_bpf_params struct with their proper</span></div>
-<div class="line"><a id="l00362" name="l00362"></a><span class="lineno">  362</span><span class="comment">    parametrization  of pipeline id, extern id, and extern specific params</span></div>
-<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span><span class="comment">    b) receiving a response and retrieving their extern-specific data/return</span></div>
-<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span><span class="comment">    codes from res-&gt;params</span></div>
-<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span><span class="comment">*/</span></div>
-<div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span> </div>
-<div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span><span class="preprocessor">#define EXTERN_IS_NET_PORT 1234</span></div>
-<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span><span class="preprocessor">#define EXTERN_IS_HOST_PORT 4567</span></div>
-<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span> </div>
-<div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span><span class="comment">/* Extern control path read (for example, used for register read) */</span></div>
-<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span><span class="keyword">extern</span> <span class="keyword">struct </span><a class="code hl_struct" href="structp4tc__ext__bpf__val.html">p4tc_ext_bpf_val</a> *</div>
-<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span>bpf_p4tc_extern_md_read(<span class="keyword">struct</span> __sk_buff *skb_ctx,</div>
-<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span>            <span class="keyword">struct</span> <a class="code hl_struct" href="structp4tc__ext__bpf__params.html">p4tc_ext_bpf_params</a> *params,</div>
-<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span>            <span class="keyword">const</span> u32 params__sz) __ksym;</div>
+<div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span><span class="comment">/* DPDK doesn&#39;t implement this yet */</span></div>
+<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span><span class="comment">/* Equivalent to PNA is_net_port */</span></div>
+<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span><span class="keyword">extern</span> <span class="keywordtype">bool</span></div>
+<div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span>bpf_p4tc_is_net_port(<span class="keyword">struct</span> __sk_buff *skb_ctx, <span class="keyword">const</span> u32 ifindex) __ksym;</div>
+<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span> </div>
+<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span><span class="comment">/* DPDK doesn&#39;t implement this yet */</span></div>
+<div class="line"><a id="l00362" name="l00362"></a><span class="lineno">  362</span><span class="comment">/* Equivalent to PNA is_host_port */</span></div>
+<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span><span class="keyword">extern</span> <span class="keywordtype">bool</span></div>
+<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span>bpf_p4tc_is_host_port(<span class="keyword">struct</span> __sk_buff *skb_ctx, <span class="keyword">const</span> u32 ifindex) __ksym;</div>
+<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span> </div>
+<div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span><span class="comment">/* DPDK doesn&#39;t implement this yet */</span></div>
+<div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span><span class="comment">/* Equivalent to PNA is_net_port */</span></div>
+<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span><span class="keyword">extern</span> <span class="keywordtype">bool</span></div>
+<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span>xdp_p4tc_is_net_port(<span class="keyword">struct</span> xdp_md *xdp_ctx, <span class="keyword">const</span> u32 ifindex) __ksym;</div>
+<div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span> </div>
+<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span><span class="comment">/* DPDK doesn&#39;t implement this yet */</span></div>
+<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span><span class="comment">/* Equivalent to PNA is_host_port */</span></div>
+<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span><span class="keyword">extern</span> <span class="keywordtype">bool</span></div>
+<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span>xdp_p4tc_is_host_port(<span class="keyword">struct</span> xdp_md *xdp_ctx, <span class="keyword">const</span> u32 ifindex) __ksym;</div>
 <div class="line"><a id="l00375" name="l00375"></a><span class="lineno">  375</span> </div>
-<div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span><span class="comment">/* Extern control path write (for example, used for register write) */</span></div>
-<div class="line"><a id="l00377" name="l00377"></a><span class="lineno">  377</span><span class="keyword">extern</span> <span class="keywordtype">int</span> bpf_p4tc_extern_md_write(<span class="keyword">struct</span> __sk_buff *skb_ctx,</div>
-<div class="line"><a id="l00378" name="l00378"></a><span class="lineno">  378</span>                    <span class="keyword">struct</span> <a class="code hl_struct" href="structp4tc__ext__bpf__params.html">p4tc_ext_bpf_params</a> *params,</div>
-<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span>                    <span class="keyword">const</span> u32 params__sz,</div>
-<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span>                    <span class="keyword">struct</span> <a class="code hl_struct" href="structp4tc__ext__bpf__val.html">p4tc_ext_bpf_val</a> *val,</div>
-<div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span>                    <span class="keyword">const</span> u32 val__sz) __ksym;</div>
-<div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span> </div>
-<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span><span class="comment">/* Extern control path read (for example, used for register read) for XDP */</span></div>
-<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span><span class="keyword">extern</span> <span class="keyword">struct </span><a class="code hl_struct" href="structp4tc__ext__bpf__val.html">p4tc_ext_bpf_val</a> *</div>
-<div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span>xdp_p4tc_extern_md_read(<span class="keyword">struct</span> xdp_md *xdp_ctx,</div>
-<div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span>            <span class="keyword">struct</span> <a class="code hl_struct" href="structp4tc__ext__bpf__params.html">p4tc_ext_bpf_params</a> *params,</div>
-<div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span>            <span class="keyword">const</span> u32 params__sz) __ksym;</div>
-<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span> </div>
-<div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span><span class="comment">/* Extern control path read (for example, used for register write for XDP */</span></div>
-<div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span><span class="keyword">extern</span> <span class="keywordtype">int</span> xdp_p4tc_extern_md_write(<span class="keyword">struct</span> xdp_md *xdp_ctx,</div>
-<div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span>                    <span class="keyword">struct</span> <a class="code hl_struct" href="structp4tc__ext__bpf__params.html">p4tc_ext_bpf_params</a> *params,</div>
-<div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span>                    <span class="keyword">const</span> u32 params__sz,</div>
-<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>                    <span class="keyword">struct</span> <a class="code hl_struct" href="structp4tc__ext__bpf__val.html">p4tc_ext_bpf_val</a> *val,</div>
-<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>                    <span class="keyword">const</span> u32 val__sz) __ksym;</div>
-<div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span> </div>
-<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span><span class="keywordtype">int</span> bpf_p4tc_extern_digest_pack(<span class="keyword">struct</span> __sk_buff *skb,</div>
-<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>                <span class="keyword">struct</span> <a class="code hl_struct" href="structp4tc__ext__bpf__params.html">p4tc_ext_bpf_params</a> *params,</div>
-<div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span>                <span class="keyword">const</span> u32 params__sz) __ksym;</div>
-<div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span> </div>
-<div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span><span class="keywordtype">int</span> xdp_p4tc_extern_digest_pack(<span class="keyword">struct</span> xdp_md *xdp_ctx,</div>
-<div class="line"><a id="l00401" name="l00401"></a><span class="lineno">  401</span>                <span class="keyword">struct</span> <a class="code hl_struct" href="structp4tc__ext__bpf__params.html">p4tc_ext_bpf_params</a> *params,</div>
-<div class="line"><a id="l00402" name="l00402"></a><span class="lineno">  402</span>                <span class="keyword">const</span> u32 params__sz) __ksym;</div>
+<div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span> </div>
+<div class="line"><a id="l00377" name="l00377"></a><span class="lineno">  377</span><span class="comment">/* per extern specifics start */</span></div>
+<div class="line"><a id="l00378" name="l00378"></a><span class="lineno">  378</span> </div>
+<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span><span class="comment">/* in this case it is PNA so  we have these helpers like below</span></div>
+<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span><span class="comment">   &quot;is_net_port_skb&quot; but for user specific externs the caller should</span></div>
+<div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span><span class="comment">    be doing similar flow:</span></div>
+<div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span><span class="comment">    a) populating p4tc_ext_bpf_params struct with their proper</span></div>
+<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span><span class="comment">    parametrization  of pipeline id, extern id, and extern specific params</span></div>
+<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span><span class="comment">    b) receiving a response and retrieving their extern-specific data/return</span></div>
+<div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span><span class="comment">    codes from res-&gt;params</span></div>
+<div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span><span class="comment">*/</span></div>
+<div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span> </div>
+<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span><span class="preprocessor">#define EXTERN_IS_NET_PORT 1234</span></div>
+<div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span><span class="preprocessor">#define EXTERN_IS_HOST_PORT 4567</span></div>
+<div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span> </div>
+<div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span><span class="comment">/* Extern control path read (for example, used for register read) */</span></div>
+<div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span><span class="keyword">extern</span> <span class="keyword">struct </span><a class="code hl_struct" href="structp4tc__ext__bpf__val.html">p4tc_ext_bpf_val</a> *</div>
+<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>bpf_p4tc_extern_md_read(<span class="keyword">struct</span> __sk_buff *skb_ctx,</div>
+<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>            <span class="keyword">struct</span> <a class="code hl_struct" href="structp4tc__ext__bpf__params.html">p4tc_ext_bpf_params</a> *params,</div>
+<div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>            <span class="keyword">const</span> u32 params__sz) __ksym;</div>
+<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span> </div>
+<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span><span class="comment">/* Extern control path write (for example, used for register write) */</span></div>
+<div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span><span class="keyword">extern</span> <span class="keywordtype">int</span> bpf_p4tc_extern_md_write(<span class="keyword">struct</span> __sk_buff *skb_ctx,</div>
+<div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span>                    <span class="keyword">struct</span> <a class="code hl_struct" href="structp4tc__ext__bpf__params.html">p4tc_ext_bpf_params</a> *params,</div>
+<div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span>                    <span class="keyword">const</span> u32 params__sz,</div>
+<div class="line"><a id="l00401" name="l00401"></a><span class="lineno">  401</span>                    <span class="keyword">struct</span> <a class="code hl_struct" href="structp4tc__ext__bpf__val.html">p4tc_ext_bpf_val</a> *val,</div>
+<div class="line"><a id="l00402" name="l00402"></a><span class="lineno">  402</span>                    <span class="keyword">const</span> u32 val__sz) __ksym;</div>
 <div class="line"><a id="l00403" name="l00403"></a><span class="lineno">  403</span> </div>
-<div class="line"><a id="l00404" name="l00404"></a><span class="lineno">  404</span><span class="comment">/* Timestamp  PNA extern */</span></div>
-<div class="line"><a id="l00405" name="l00405"></a><span class="lineno">  405</span><span class="keyword">static</span> <span class="keyword">inline</span> u64 bpf_p4tc_extern_timestamp() {</div>
-<div class="line"><a id="l00406" name="l00406"></a><span class="lineno">  406</span>    <span class="keywordflow">return</span> bpf_ktime_get_ns();</div>
-<div class="line"><a id="l00407" name="l00407"></a><span class="lineno">  407</span>}</div>
-<div class="line"><a id="l00408" name="l00408"></a><span class="lineno">  408</span> </div>
-<div class="line"><a id="l00409" name="l00409"></a><span class="lineno">  409</span><span class="preprocessor">#define U32_MAX            ((u32)~0U)</span></div>
-<div class="line"><a id="l00410" name="l00410"></a><span class="lineno">  410</span> </div>
-<div class="line"><a id="l00411" name="l00411"></a><span class="lineno">  411</span><span class="comment">/* Random PNA extern */</span></div>
-<div class="line"><a id="l00412" name="l00412"></a><span class="lineno">  412</span><span class="keyword">static</span> <span class="keyword">inline</span> u32 bpf_p4tc_extern_random(u32 min, u32 max) {</div>
-<div class="line"><a id="l00413" name="l00413"></a><span class="lineno">  413</span>    <span class="keywordflow">if</span> (max == U32_MAX)</div>
-<div class="line"><a id="l00414" name="l00414"></a><span class="lineno">  414</span>        <span class="keywordflow">return</span> (min + bpf_get_prandom_u32());</div>
-<div class="line"><a id="l00415" name="l00415"></a><span class="lineno">  415</span> </div>
-<div class="line"><a id="l00416" name="l00416"></a><span class="lineno">  416</span>    <span class="keywordflow">return</span> (min + bpf_get_prandom_u32()) % (max + 1);</div>
-<div class="line"><a id="l00417" name="l00417"></a><span class="lineno">  417</span>}</div>
-<div class="line"><a id="l00418" name="l00418"></a><span class="lineno">  418</span><span class="preprocessor">#endif </span><span class="comment">/* P4C_PNA_H */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00404" name="l00404"></a><span class="lineno">  404</span><span class="comment">/* Extern control path read (for example, used for register read) for XDP */</span></div>
+<div class="line"><a id="l00405" name="l00405"></a><span class="lineno">  405</span><span class="keyword">extern</span> <span class="keyword">struct </span><a class="code hl_struct" href="structp4tc__ext__bpf__val.html">p4tc_ext_bpf_val</a> *</div>
+<div class="line"><a id="l00406" name="l00406"></a><span class="lineno">  406</span>xdp_p4tc_extern_md_read(<span class="keyword">struct</span> xdp_md *xdp_ctx,</div>
+<div class="line"><a id="l00407" name="l00407"></a><span class="lineno">  407</span>            <span class="keyword">struct</span> <a class="code hl_struct" href="structp4tc__ext__bpf__params.html">p4tc_ext_bpf_params</a> *params,</div>
+<div class="line"><a id="l00408" name="l00408"></a><span class="lineno">  408</span>            <span class="keyword">const</span> u32 params__sz) __ksym;</div>
+<div class="line"><a id="l00409" name="l00409"></a><span class="lineno">  409</span> </div>
+<div class="line"><a id="l00410" name="l00410"></a><span class="lineno">  410</span><span class="comment">/* Extern control path read (for example, used for register write for XDP */</span></div>
+<div class="line"><a id="l00411" name="l00411"></a><span class="lineno">  411</span><span class="keyword">extern</span> <span class="keywordtype">int</span> xdp_p4tc_extern_md_write(<span class="keyword">struct</span> xdp_md *xdp_ctx,</div>
+<div class="line"><a id="l00412" name="l00412"></a><span class="lineno">  412</span>                    <span class="keyword">struct</span> <a class="code hl_struct" href="structp4tc__ext__bpf__params.html">p4tc_ext_bpf_params</a> *params,</div>
+<div class="line"><a id="l00413" name="l00413"></a><span class="lineno">  413</span>                    <span class="keyword">const</span> u32 params__sz,</div>
+<div class="line"><a id="l00414" name="l00414"></a><span class="lineno">  414</span>                    <span class="keyword">struct</span> <a class="code hl_struct" href="structp4tc__ext__bpf__val.html">p4tc_ext_bpf_val</a> *val,</div>
+<div class="line"><a id="l00415" name="l00415"></a><span class="lineno">  415</span>                    <span class="keyword">const</span> u32 val__sz) __ksym;</div>
+<div class="line"><a id="l00416" name="l00416"></a><span class="lineno">  416</span> </div>
+<div class="line"><a id="l00417" name="l00417"></a><span class="lineno">  417</span><span class="keywordtype">int</span> bpf_p4tc_extern_digest_pack(<span class="keyword">struct</span> __sk_buff *skb,</div>
+<div class="line"><a id="l00418" name="l00418"></a><span class="lineno">  418</span>                <span class="keyword">struct</span> <a class="code hl_struct" href="structp4tc__ext__bpf__params.html">p4tc_ext_bpf_params</a> *params,</div>
+<div class="line"><a id="l00419" name="l00419"></a><span class="lineno">  419</span>                <span class="keyword">const</span> u32 params__sz) __ksym;</div>
+<div class="line"><a id="l00420" name="l00420"></a><span class="lineno">  420</span> </div>
+<div class="line"><a id="l00421" name="l00421"></a><span class="lineno">  421</span><span class="keywordtype">int</span> xdp_p4tc_extern_digest_pack(<span class="keyword">struct</span> xdp_md *xdp_ctx,</div>
+<div class="line"><a id="l00422" name="l00422"></a><span class="lineno">  422</span>                <span class="keyword">struct</span> <a class="code hl_struct" href="structp4tc__ext__bpf__params.html">p4tc_ext_bpf_params</a> *params,</div>
+<div class="line"><a id="l00423" name="l00423"></a><span class="lineno">  423</span>                <span class="keyword">const</span> u32 params__sz) __ksym;</div>
+<div class="line"><a id="l00424" name="l00424"></a><span class="lineno">  424</span> </div>
+<div class="line"><a id="l00425" name="l00425"></a><span class="lineno">  425</span><span class="comment">/* Timestamp  PNA extern */</span></div>
+<div class="line"><a id="l00426" name="l00426"></a><span class="lineno">  426</span><span class="keyword">static</span> <span class="keyword">inline</span> u64 bpf_p4tc_extern_timestamp() {</div>
+<div class="line"><a id="l00427" name="l00427"></a><span class="lineno">  427</span>    <span class="keywordflow">return</span> bpf_ktime_get_ns();</div>
+<div class="line"><a id="l00428" name="l00428"></a><span class="lineno">  428</span>}</div>
+<div class="line"><a id="l00429" name="l00429"></a><span class="lineno">  429</span> </div>
+<div class="line"><a id="l00430" name="l00430"></a><span class="lineno">  430</span><span class="preprocessor">#define U32_MAX            ((u32)~0U)</span></div>
+<div class="line"><a id="l00431" name="l00431"></a><span class="lineno">  431</span> </div>
+<div class="line"><a id="l00432" name="l00432"></a><span class="lineno">  432</span><span class="comment">/* Random PNA extern */</span></div>
+<div class="line"><a id="l00433" name="l00433"></a><span class="lineno">  433</span><span class="keyword">static</span> <span class="keyword">inline</span> u32 bpf_p4tc_extern_random(u32 min, u32 max) {</div>
+<div class="line"><a id="l00434" name="l00434"></a><span class="lineno">  434</span>    <span class="keywordflow">if</span> (max == U32_MAX)</div>
+<div class="line"><a id="l00435" name="l00435"></a><span class="lineno">  435</span>        <span class="keywordflow">return</span> (min + bpf_get_prandom_u32());</div>
+<div class="line"><a id="l00436" name="l00436"></a><span class="lineno">  436</span> </div>
+<div class="line"><a id="l00437" name="l00437"></a><span class="lineno">  437</span>    <span class="keywordflow">return</span> (min + bpf_get_prandom_u32()) % (max + 1);</div>
+<div class="line"><a id="l00438" name="l00438"></a><span class="lineno">  438</span>}</div>
+<div class="line"><a id="l00439" name="l00439"></a><span class="lineno">  439</span><span class="preprocessor">#endif </span><span class="comment">/* P4C_PNA_H */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="astructclone__session__entry_html"><div class="ttname"><a href="structclone__session__entry.html">clone_session_entry</a></div><div class="ttdef"><b>Definition</b> ebpf/runtime/psa.h:124</div></div>
 <div class="ttc" id="astructp4tc__ext__bpf__params_html"><div class="ttname"><a href="structp4tc__ext__bpf__params.html">p4tc_ext_bpf_params</a></div><div class="ttdef"><b>Definition</b> pna.h:181</div></div>
 <div class="ttc" id="astructp4tc__ext__bpf__val_html"><div class="ttname"><a href="structp4tc__ext__bpf__val.html">p4tc_ext_bpf_val</a></div><div class="ttdef"><b>Definition</b> pna.h:191</div></div>
