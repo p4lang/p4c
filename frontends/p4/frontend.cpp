@@ -74,6 +74,7 @@ limitations under the License.
 #include "uselessCasts.h"
 #include "validateMatchAnnotations.h"
 #include "validateParsedProgram.h"
+#include "validateStringAnnotations.h"
 #include "validateValueSets.h"
 
 namespace P4 {
@@ -174,6 +175,8 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         // First pass of constant folding, before types are known --
         // may be needed to compute types.
         new ConstantFolding(constantFoldingPolicy),
+        // Validate @name/@deprecated/@noWarn. Should run after constant folding.
+        new ValidateStringAnnotations(),
         // Desugars direct parser and control applications
         // into instantiations followed by application
         new InstantiateDirectCalls(),

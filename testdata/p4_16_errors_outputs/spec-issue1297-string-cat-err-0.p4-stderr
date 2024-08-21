@@ -1,0 +1,3 @@
+spec-issue1297-string-cat-err-0.p4(4): [--Werror=type-error] error: +: cannot be applied to expression '"b"' with type 'string', did you mean to use '++'?
+    log("a" + "b");
+                ^

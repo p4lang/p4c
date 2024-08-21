@@ -730,13 +730,18 @@ const IR::Node *DoConstantFolding::postorder(IR::Concat *e) {
     auto eright = getConstant(e->right);
     if (eleft == nullptr || eright == nullptr) return e;
 
-    auto left = eleft->to<IR::Constant>();
-    if (left == nullptr) {
-        // Could be a SerEnum
-        return e;
+    const auto *lstr = eleft->to<IR::StringLiteral>();
+    const auto *rstr = eright->to<IR::StringLiteral>();
+
+    const auto *left = eleft->to<IR::Constant>();
+    const auto *right = eright->to<IR::Constant>();
+
+    // handle string concatenations
+    if (lstr && rstr) {
+        return new IR::StringLiteral(e->srcInfo, IR::Type_String::get(), lstr->value + rstr->value);
     }
-    auto right = eright->to<IR::Constant>();
-    if (right == nullptr) {
+
+    if (left == nullptr || right == nullptr) {
         // Could be a SerEnum
         return e;
     }

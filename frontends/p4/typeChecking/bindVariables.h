@@ -20,6 +20,11 @@ class DoBindTypeVariables : public Transform {
         setName("DoBindTypeVariables");
         newTypes = new IR::IndexedVector<IR::Node>();
     }
+
+    /// Don't descend to unstructured annotations, they are not type checked, so we can't process
+    /// them here either.
+    const IR::Node *preorder(IR::Annotation *annotation) override;
+
     const IR::Node *postorder(IR::Expression *expression) override;
     const IR::Node *postorder(IR::Declaration_Instance *decl) override;
     const IR::Node *postorder(IR::MethodCallExpression *expression) override;

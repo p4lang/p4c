@@ -1,0 +1,9 @@
+spec-issue1297-string-cat-err-1.p4(5): [--Wwarn=mismatch] warning: 1w2: value does not fit in 1 bits
+    log(1w2
+        ^^^
+spec-issue1297-string-cat-err-1.p4(4): [--Werror=type-error] error: "a" ++ 4: Concatenation not defined on string and int
+    log("a" ++ 4);
+          ^^^^^^
+spec-issue1297-string-cat-err-1.p4(5): [--Werror=type-error] error: 0 ++ "a": Concatenation not defined on bit<1> and string
+    log(1w2 ++ "a");
+        ^^^^^^^^^^
