@@ -66,7 +66,6 @@ var searchData=
   ['ut_5fhash_5fbucket_63',['UT_hash_bucket',['../struct_u_t__hash__bucket.html',1,'']]],
   ['ut_5fhash_5fhandle_64',['UT_hash_handle',['../struct_u_t__hash__handle.html',1,'']]],
   ['ut_5fhash_5ftable_65',['UT_hash_table',['../struct_u_t__hash__table.html',1,'']]],
-  ['util_20h_66',['ir-inline.h ir-tree-macros.h ir-util.h',['../intermediate_representation_ir.html#ir-inlineh-ir-tree-macrosh-ir-utilh',1,'']]],
-  ['utility_20functions_67',['Common P4C utility functions',['../getting_started.html#common-p4c-utility-functions',1,'']]],
-  ['utils_68',['Utils',['../class_p4_1_1_p4_tools_1_1_utils.html',1,'P4::P4Tools']]]
+  ['utility_20functions_66',['Common P4C utility functions',['../getting_started.html#common-p4c-utility-functions',1,'']]],
+  ['utils_67',['Utils',['../class_p4_1_1_p4_tools_1_1_utils.html',1,'P4::P4Tools']]]
 ];

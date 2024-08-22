@@ -1,6 +1,5 @@
 var NAVTREEINDEX0 =
 {
-"@ref midend":[4],
 "annotated.html":[13,0],
 "behavioral_model_backend.html":[5,0],
 "changelog.html":[11],
@@ -249,5 +248,6 @@ var NAVTREEINDEX0 =
 "class_p4_1_1_b_m_v2_1_1_parser_converter.html#ab74ae012876e276af5f4446bf4ca9e28":[12,0,0,0,23,0],
 "class_p4_1_1_b_m_v2_1_1_parser_converter.html#ab74ae012876e276af5f4446bf4ca9e28":[13,0,0,2,25,0],
 "class_p4_1_1_b_m_v2_1_1_pna_code_generator.html":[12,0,0,0,25],
-"class_p4_1_1_b_m_v2_1_1_pna_code_generator.html":[13,0,0,2,27]
+"class_p4_1_1_b_m_v2_1_1_pna_code_generator.html":[13,0,0,2,27],
+"class_p4_1_1_b_m_v2_1_1_pna_enum_on32_bits.html":[12,0,0,0,26]
 };
