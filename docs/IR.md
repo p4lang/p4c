@@ -272,17 +272,11 @@ method is not declared in the .def file, a standard definition (based on the fie
 declared in the class) will be created.  In this way, *most* classes can avoid including
 this boilerplate code in the .def file.
 
-#### `IR::Node`
-
-This is the ultimate abstract base class of all IR nodes and contains only a small amount of
-data for error reporting and debugging.  In general, this info is NEVER compared for
-equality (so subclasses should never call Node::operator==`) as Nodes that differ only
-in this information should be considered equal, and not require cloning or the IR tree.
-
-#### `IR::Vector<T>`
-
-This template class holds a vector of (`const`) pointers to nodes of a particular `IR::Node`
-subclass.
+## Classes
+| **Class**      | **Description**  |
+|----------------|------------------|
+| `IR::Node`     | This is the ultimate abstract base class of all IR nodes and contains only a small amount of data for error reporting and debugging.  In general, this info is NEVER compared for equality (so subclasses should never call `Node::operator==`) as Nodes that differ only in this information should be considered equal, and not require cloning or the IR tree.   |
+| `IR::Vector<T>`| This template class holds a vector of (`const`) pointers to nodes of a particular `IR::Node` subclass. |
 
 <!--!
 \include{doc} "../ir/README.md" 
