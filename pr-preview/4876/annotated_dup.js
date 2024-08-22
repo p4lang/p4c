@@ -445,7 +445,8 @@ var annotated_dup =
         [ "InlineActions", "class_p4_1_1_p4__14_1_1_inline_actions.html", null ]
       ] ],
       [ "P4Fmt", null, [
-        [ "P4fmtOptions", "class_p4_1_1_p4_fmt_1_1_p4fmt_options.html", null ]
+        [ "P4fmtOptions", "class_p4_1_1_p4_fmt_1_1_p4fmt_options.html", null ],
+        [ "P4Formatter", "class_p4_1_1_p4_fmt_1_1_p4_formatter.html", "class_p4_1_1_p4_fmt_1_1_p4_formatter" ]
       ] ],
       [ "P4Test", null, [
         [ "MidEnd", "class_p4_1_1_p4_test_1_1_mid_end.html", null ],
@@ -1017,7 +1018,7 @@ var annotated_dup =
       [ "DiscoverFunctionsInlining", "class_p4_1_1_discover_functions_inlining.html", null ],
       [ "DiscoverInlining", "class_p4_1_1_discover_inlining.html", null ],
       [ "DiscoverStructure", "class_p4_1_1_discover_structure.html", null ],
-      [ "DoBindTypeVariables", "class_p4_1_1_do_bind_type_variables.html", null ],
+      [ "DoBindTypeVariables", "class_p4_1_1_do_bind_type_variables.html", "class_p4_1_1_do_bind_type_variables" ],
       [ "DoCheckConstants", "class_p4_1_1_do_check_constants.html", null ],
       [ "DoCheckCoreMethods", "class_p4_1_1_do_check_core_methods.html", null ],
       [ "DoConstantFolding", "class_p4_1_1_do_constant_folding.html", "class_p4_1_1_do_constant_folding" ],
@@ -1405,6 +1406,7 @@ var annotated_dup =
       [ "UselessCasts", "class_p4_1_1_useless_casts.html", null ],
       [ "ValidateMatchAnnotations", "class_p4_1_1_validate_match_annotations.html", null ],
       [ "ValidateParsedProgram", "class_p4_1_1_validate_parsed_program.html", "class_p4_1_1_validate_parsed_program" ],
+      [ "ValidateStringAnnotations", "class_p4_1_1_validate_string_annotations.html", null ],
       [ "ValidateTableProperties", "class_p4_1_1_validate_table_properties.html", null ],
       [ "ValidateValueSets", "class_p4_1_1_validate_value_sets.html", null ],
       [ "ValueMap", "class_p4_1_1_value_map.html", null ],
