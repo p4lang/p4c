@@ -2,11 +2,11 @@
 
 #include "frontends/common/parseInput.h"
 #include "frontends/common/parser_options.h"
-#include "frontends/p4/toP4/toP4.h"
 #include "ir/ir.h"
 #include "lib/compile_context.h"
 #include "lib/error.h"
 #include "options.h"
+#include "p4formatter.h"
 
 namespace P4::P4Fmt {
 
@@ -24,7 +24,7 @@ std::stringstream getFormattedOutput(std::filesystem::path inputFile) {
         return formattedOutput;
     }
 
-    auto top4 = P4::ToP4(&formattedOutput, false);
+    auto top4 = P4Fmt::P4Formatter(&formattedOutput);
     // Print the program before running front end passes.
     program->apply(top4);
 
