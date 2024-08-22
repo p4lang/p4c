@@ -21,16 +21,13 @@ limitations under the License.
 
 /// @file
 /// @brief Check validity of built-in string annotations.
-
 namespace P4 {
 
 /// Checks that the build-in string annotations (\@name, \@deprecated, \@noWarn) have string
 /// arguments.
 class ValidateStringAnnotations final : public Inspector {
-    TypeMap *typeMap;
-
  public:
-    explicit ValidateStringAnnotations() {}
+    explicit ValidateStringAnnotations() = default;
 
     void postorder(const IR::Annotation *annotation) override {
         const auto name = annotation->name;
@@ -39,13 +36,15 @@ class ValidateStringAnnotations final : public Inspector {
             name != IR::Annotation::noWarnAnnotation) {
             return;
         }
-        if (annotation->expr.size() != 1)
+        if (annotation->expr.size() != 1) {
             error(ErrorType::ERR_INVALID, "%1%: annotation must have exactly 1 argument",
                   annotation);
-        auto e0 = annotation->expr.at(0);
-        if (!e0->is<IR::StringLiteral>())
+        }
+        const auto *e0 = annotation->expr.at(0);
+        if (!e0->is<IR::StringLiteral>()) {
             error(ErrorType::ERR_TYPE_ERROR, "%1%: @%2% annotation's value must be a string", e0,
                   annotation->name.originalName);
+        }
     }
 };
 
