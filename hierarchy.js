@@ -259,6 +259,7 @@ var hierarchy =
         ] ],
         [ "P4::LocalizeActions", "class_p4_1_1_localize_actions.html", null ],
         [ "P4::MoveInitializers", "class_p4_1_1_move_initializers.html", null ],
+        [ "P4::P4Fmt::P4Formatter", "class_p4_1_1_p4_fmt_1_1_p4_formatter.html", null ],
         [ "P4::P4Tools::P4ProgramDCGCreator", "class_p4_1_1_p4_tools_1_1_p4_program_d_c_g_creator.html", null ],
         [ "P4::ReadsWrites", "class_p4_1_1_reads_writes.html", null ],
         [ "P4::RenameSymbols", "class_p4_1_1_rename_symbols.html", null ],
@@ -1523,6 +1524,7 @@ var hierarchy =
         [ "P4::KeyNameGenerator", "class_p4_1_1_key_name_generator.html", null ],
         [ "P4::MidEndLast", "class_p4_1_1_mid_end_last.html", null ],
         [ "P4::MinimalNameGenerator", "class_p4_1_1_minimal_name_generator.html", null ],
+        [ "P4::P4Fmt::P4Formatter", "class_p4_1_1_p4_fmt_1_1_p4_formatter.html", null ],
         [ "P4::P4Tools::P4ProgramDCGCreator", "class_p4_1_1_p4_tools_1_1_p4_program_d_c_g_creator.html", null ],
         [ "P4::P4Tools::P4Testgen::AbstractStepper", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_abstract_stepper.html", [
           [ "P4::P4Tools::P4Testgen::CmdStepper", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_cmd_stepper.html", [

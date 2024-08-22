@@ -445,7 +445,8 @@ var annotated_dup =
         [ "InlineActions", "class_p4_1_1_p4__14_1_1_inline_actions.html", null ]
       ] ],
       [ "P4Fmt", null, [
-        [ "P4fmtOptions", "class_p4_1_1_p4_fmt_1_1_p4fmt_options.html", null ]
+        [ "P4fmtOptions", "class_p4_1_1_p4_fmt_1_1_p4fmt_options.html", null ],
+        [ "P4Formatter", "class_p4_1_1_p4_fmt_1_1_p4_formatter.html", "class_p4_1_1_p4_fmt_1_1_p4_formatter" ]
       ] ],
       [ "P4Test", null, [
         [ "MidEnd", "class_p4_1_1_p4_test_1_1_mid_end.html", null ],

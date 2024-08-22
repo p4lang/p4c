@@ -1,5 +1,7 @@
 var NAVTREEINDEX15 =
 {
+"class_p4_1_1_parsers_unroll.html":[12,0,0,322],
+"class_p4_1_1_parsers_unroll.html":[13,0,0,339],
 "class_p4_1_1_pass_if.html":[12,0,0,323],
 "class_p4_1_1_pass_if.html":[13,0,0,340],
 "class_p4_1_1_pass_manager.html":[12,0,0,324],
@@ -247,7 +249,5 @@ var NAVTREEINDEX15 =
 "class_p4_1_1_simplify_comparisons.html":[12,0,0,396],
 "class_p4_1_1_simplify_comparisons.html":[13,0,0,413],
 "class_p4_1_1_simplify_control_flow.html":[12,0,0,397],
-"class_p4_1_1_simplify_control_flow.html":[13,0,0,414],
-"class_p4_1_1_simplify_def_use.html":[12,0,0,398],
-"class_p4_1_1_simplify_def_use.html":[13,0,0,415]
+"class_p4_1_1_simplify_control_flow.html":[13,0,0,414]
 };

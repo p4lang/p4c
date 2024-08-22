@@ -1,5 +1,7 @@
 var NAVTREEINDEX22 =
 {
+"struct_p4_1_1_r_t_t_i_1_1_detail_1_1_to_type.html":[13,0,0,21,0,1],
+"struct_p4_1_1_r_t_t_i_1_1_type_info.html":[13,0,0,21,5],
 "struct_p4_1_1_r_t_t_i_1_1detail_1_1_type_id_resolver.html":[13,0,0,21,1,0],
 "struct_p4_1_1_r_t_t_i_1_1detail_1_1_type_id_resolver_3_01_t_00_01std_1_1void__t_3_01decltype_07_t_1_1static__type_id_08_4_01_4.html":[13,0,0,21,1,1],
 "struct_p4_1_1_r_t_t_i_1_1detail_1_1_type_name_holder.html":[13,0,0,21,1,2],
