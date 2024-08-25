@@ -299,5 +299,6 @@ var searchData=
   ['guard_296',['Guard',['../struct_p4_1_1_p4_tools_1_1_p4_testgen_1_1_continuation_1_1_guard.html',1,'P4::P4Tools::P4Testgen::Continuation']]],
   ['guardglobal_297',['GuardGlobal',['../class_p4_1_1_control_flow_visitor_1_1_guard_global.html',1,'P4::ControlFlowVisitor']]],
   ['guide_298',['Documentation Comments Style Guide',['../repository_structure.html#documentation-comments-style-guide',1,'']]],
-  ['guidelines_299',['Guidelines',['../contribute.html#guidelines',1,'']]]
+  ['guide_20for_20developing_20the_20doxygen_20documentation_299',['Quick guide for developing the Doxygen documentation',['../repository_structure.html#quick-guide-for-developing-the-doxygen-documentation',1,'']]],
+  ['guidelines_300',['Guidelines',['../contribute.html#guidelines',1,'']]]
 ];
