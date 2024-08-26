@@ -23,9 +23,10 @@ bool Attach::isSystemFile(const std::filesystem::path &file) {
 const Attach::CommentsMap &Attach::getCommentsMap() const { return commentsMap; }
 
 const IR::Node *Attach::attachCommentsToNode(IR::Node *node, TraversalType ttype) {
-    if (node == nullptr || !node->srcInfo.isValid() || clist.empty()) {
+    if (node == nullptr || !node->srcInfo.isValid() || processedComments.empty()) {
         return node;
     }
+
     std::filesystem::path sourceFile(node->srcInfo.getSourceFile().c_str());
     if (isSystemFile(sourceFile)) {
         // Skip attachment for system files
@@ -34,37 +35,33 @@ const IR::Node *Attach::attachCommentsToNode(IR::Node *node, TraversalType ttype
 
     const auto nodeStart = node->srcInfo.getStart();
 
-    auto itr = clist.begin();
-    while (itr != clist.end()) {
-        const Util::Comment *comment = *itr;
+    for (auto &[comment, isVisited] : processedComments) {
+        // Skip if already attached
+        if (isVisited) {
+            continue;
+        }
+
         const auto &commentEnd = comment->getEndPosition();
 
-        bool shouldRemove = false;
-
         switch (ttype) {
-            {
-                case TraversalType::Preorder:
-                    if (commentEnd.getLineNumber() < nodeStart.getLineNumber()) {
-                        addPrefixComments(node->id, comment);
-                        shouldRemove = true;
-                    }
-                    break;
-            }
+            case TraversalType::Preorder:
+                if (commentEnd.getLineNumber() == nodeStart.getLineNumber() - 1) {
+                    addPrefixComments(node->id, comment);
+                    isVisited = true;  // Mark the comment as attached
+                }
+                break;
 
-            {
-                case TraversalType::Postorder:
-                    if (commentEnd.getLineNumber() == nodeStart.getLineNumber()) {
-                        addSuffixComments(node->id, comment);
-                        shouldRemove = true;
-                    }
-                    break;
-            }
+            case TraversalType::Postorder:
+                if (commentEnd.getLineNumber() == nodeStart.getLineNumber()) {
+                    addSuffixComments(node->id, comment);
+                    isVisited = true;
+                }
+                break;
+
             default:
                 ::P4::error(ErrorType::ERR_INVALID, "traversal type unknown/unsupported.");
                 return node;
         }
-
-        itr = shouldRemove ? clist.erase(itr) : std::next(itr);
     }
 
     return node;

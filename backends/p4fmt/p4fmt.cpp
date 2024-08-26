@@ -25,19 +25,23 @@ std::stringstream getFormattedOutput(std::filesystem::path inputFile) {
         return formattedOutput;
     }
 
-    std::unordered_set<const Util::Comment *> globalCommentsList;
-    // get the global list of comments
+    std::unordered_map<const Util::Comment *, bool> globalCommentsMap;
+
+    // Initialize the global comments map from the list of comments in the program.
+    // The map associates each comment with a boolean value that tracks whether the comment
+    // has been processed for attachment to IR nodes. Initially, all comments are set to 'false',
+    // indicating that they have not yet been processed.
     if (!program->objects.empty()) {
         const auto *firstNode = program->objects.front();
         if (firstNode->srcInfo.isValid()) {
             for (const auto *comment : firstNode->srcInfo.getAllFileComments()) {
-                globalCommentsList.insert(comment);
+                globalCommentsMap[comment] = false;  // Initialize all comments as not visited
             }
         }
     }
 
     auto top4 = P4Fmt::P4Formatter(&formattedOutput);
-    auto attach = P4::P4Fmt::Attach(globalCommentsList);
+    auto attach = P4::P4Fmt::Attach(globalCommentsMap);
     program = program->apply(attach);
     // Print the program before running front end passes.
     program->apply(top4);
