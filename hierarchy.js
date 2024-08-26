@@ -696,14 +696,18 @@ var hierarchy =
     [ "P4::P4Tools::NamespaceContext", "class_p4_1_1_p4_tools_1_1_namespace_context.html", null ],
     [ "P4::P4Tools::P4Constants", "class_p4_1_1_p4_tools_1_1_p4_constants.html", null ],
     [ "P4::P4Tools::P4Smith::Constraints", "struct_p4_1_1_p4_tools_1_1_p4_smith_1_1_constraints.html", null ],
+    [ "P4::P4Tools::P4Smith::Declarations", "struct_p4_1_1_p4_tools_1_1_p4_smith_1_1_declarations.html", null ],
     [ "P4::P4Tools::P4Smith::Generator", "class_p4_1_1_p4_tools_1_1_p4_smith_1_1_generator.html", [
       [ "P4::P4Tools::P4Smith::DeclarationGenerator", "class_p4_1_1_p4_tools_1_1_p4_smith_1_1_declaration_generator.html", null ],
-      [ "P4::P4Tools::P4Smith::ExpressionGenerator", "class_p4_1_1_p4_tools_1_1_p4_smith_1_1_expression_generator.html", null ],
+      [ "P4::P4Tools::P4Smith::ExpressionGenerator", "class_p4_1_1_p4_tools_1_1_p4_smith_1_1_expression_generator.html", [
+        [ "P4::P4Tools::P4Smith::NicExpressionGenerator", "class_p4_1_1_p4_tools_1_1_p4_smith_1_1_nic_expression_generator.html", null ]
+      ] ],
       [ "P4::P4Tools::P4Smith::ParserGenerator", "class_p4_1_1_p4_tools_1_1_p4_smith_1_1_parser_generator.html", null ],
       [ "P4::P4Tools::P4Smith::StatementGenerator", "class_p4_1_1_p4_tools_1_1_p4_smith_1_1_statement_generator.html", null ],
       [ "P4::P4Tools::P4Smith::TableGenerator", "class_p4_1_1_p4_tools_1_1_p4_smith_1_1_table_generator.html", null ]
     ] ],
     [ "P4::P4Tools::P4Smith::P4Scope", "class_p4_1_1_p4_tools_1_1_p4_smith_1_1_p4_scope.html", null ],
+    [ "P4::P4Tools::P4Smith::Probabilities", "struct_p4_1_1_p4_tools_1_1_p4_smith_1_1_probabilities.html", null ],
     [ "P4::P4Tools::P4Smith::Properties", "struct_p4_1_1_p4_tools_1_1_p4_smith_1_1_properties.html", null ],
     [ "P4::P4Tools::P4Smith::Requirements", "struct_p4_1_1_p4_tools_1_1_p4_smith_1_1_requirements.html", null ],
     [ "P4::P4Tools::P4Smith::Wordlist", "class_p4_1_1_p4_tools_1_1_p4_smith_1_1_wordlist.html", null ],
