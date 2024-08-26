@@ -13,20 +13,11 @@ macro(p4c_obtain_boost)
       set(Boost_USE_STATIC_LIBS ON)
       set(Boost_USE_STATIC_RUNTIME OFF)
     endif()
-
-    # The boost graph headers are optional and only required by the graphs back end.
-    find_package(Boost QUIET COMPONENTS graph)
-    if(Boost_FOUND)
-      set(HAVE_LIBBOOST_GRAPH 1)
-    else()
-      message(WARNING "Boost graph headers not found, will not build 'graphs' backend")
-    endif()
     find_package(Boost REQUIRED COMPONENTS iostreams)
     set(P4C_BOOST_LIBRARIES Boost::iostreams)
   else()
-    # This option can be used to include custom boost modules.
-    set(P4C_TARGET_BOOST_LIBRARIES "" CACHE STRING "Build and make these boost modules available. Modules are separated with semicolons.")
     set(P4C_BOOST_VERSION "1.86.0")
+    set(P4C_BOOST_HASH "2c5ec5edcdff47ff55e27ed9560b0a0b94b07bd07ed9928b476150e16b0efc57")
     message(STATUS "Fetching Boost version ${P4C_BOOST_VERSION} for P4C...")
     # Print out download state while setting up Boost.
     set(FETCHCONTENT_QUIET_PREV ${FETCHCONTENT_QUIET})
@@ -38,14 +29,9 @@ macro(p4c_obtain_boost)
     # Add boost modules.
     # format, multiprecision, and iostreams are needed by P4C core.
     set(BOOST_INCLUDE_LIBRARIES format multiprecision iostreams)
+    list(APPEND BOOST_INCLUDE_LIBRARIES ${ADDITIONAL_P4C_BOOST_LIBRARIES})
     set(BOOST_ENABLE_CMAKE ON)
 
-    # The boost graph module is optional and only required by the graphs back end.
-    if(ENABLE_P4C_GRAPHS)
-      set(HAVE_LIBBOOST_GRAPH 1)
-      list(APPEND BOOST_INCLUDE_LIBRARIES graph)
-    endif()
-    list(APPEND BOOST_INCLUDE_LIBRARIES ${P4C_TARGET_BOOST_LIBRARIES})
 
     # Always link local Boost statically.
     set(Boost_USE_STATIC_LIBS ON)
@@ -56,7 +42,7 @@ macro(p4c_obtain_boost)
     FetchContent_Declare(
         Boost
         URL https://github.com/boostorg/boost/releases/download/boost-${P4C_BOOST_VERSION}/boost-${P4C_BOOST_VERSION}-cmake.tar.xz
-        URL_HASH SHA256=2c5ec5edcdff47ff55e27ed9560b0a0b94b07bd07ed9928b476150e16b0efc57
+        URL_HASH SHA256=${P4C_BOOST_HASH}
         USES_TERMINAL_DOWNLOAD TRUE
         GIT_PROGRESS TRUE
     )
