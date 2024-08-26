@@ -28,14 +28,12 @@ std::stringstream getFormattedOutput(std::filesystem::path inputFile) {
     std::unordered_map<const Util::Comment *, bool> globalCommentsMap;
 
     // Initialize the global comments map from the list of comments in the program.
-    // The map associates each comment with a boolean value that tracks whether the comment
-    // has been processed for attachment to IR nodes. Initially, all comments are set to 'false',
-    // indicating that they have not yet been processed.
     if (!program->objects.empty()) {
         const auto *firstNode = program->objects.front();
         if (firstNode->srcInfo.isValid()) {
             for (const auto *comment : firstNode->srcInfo.getAllFileComments()) {
-                globalCommentsMap[comment] = false;  // Initialize all comments as not visited
+                globalCommentsMap[comment] =
+                    false;  // Initialize all comments as not yet attached to nodes
             }
         }
     }
