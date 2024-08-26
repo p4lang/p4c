@@ -56,20 +56,20 @@ bool MoveToElseAfterBranch::moveFromParentTo(const IR::Statement *&child) {
 }
 
 bool MoveToElseAfterBranch::preorder(IR::IfStatement *ifStmt) {
-    hasBranched = false;
+    hasJumped = false;
     bool movedCode = false;
     visit(ifStmt->ifTrue, "ifTrue", 1);
-    bool branchInIfTrue = hasBranched;
-    if (hasBranched) movedCode = moveFromParentTo(ifStmt->ifFalse);
-    hasBranched = false;
+    bool jumpInIfTrue = hasJumped;
+    if (hasJumped) movedCode = moveFromParentTo(ifStmt->ifFalse);
+    hasJumped = false;
     visit(ifStmt->ifFalse, "ifFalse", 2);
-    if (hasBranched && !branchInIfTrue) {
+    if (hasJumped && !jumpInIfTrue) {
         movedCode = moveFromParentTo(ifStmt->ifTrue);
         // need to revisit to visit the copied code; will autoamtically skip nodes we've
         // already visited in Modifier::apply_visiter as visitDagOnce == true
         visit(ifStmt->ifTrue, "ifTrue", 1);
     }
-    hasBranched &= branchInIfTrue;
+    hasJumped &= jumpInIfTrue;
     movedToIfBranch |= movedCode;
     return false;
 }
@@ -79,17 +79,17 @@ bool MoveToElseAfterBranch::preorder(IR::SwitchStatement *swch) {
     // then we could move subsequent code into that case, as it done with 'if'
     bool canFallThrough = false;
     for (auto &c : swch->cases) {
-        hasBranched = false;
+        hasJumped = false;
         visit(c, "cases");
-        canFallThrough |= !hasBranched;
+        canFallThrough |= !hasJumped;
     }
-    hasBranched = !canFallThrough;
+    hasJumped = !canFallThrough;
     return false;
 }
 
 void MoveToElseAfterBranch::postorder(IR::LoopStatement *) {
     // after a loop body is never unreachable
-    hasBranched = false;
+    hasJumped = false;
 }
 
 const IR::Node *DoRemoveReturns::preorder(IR::P4Action *action) {
