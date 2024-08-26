@@ -42,22 +42,25 @@ class HasExits : public Inspector {
 };
 
 /**
-This visitor rewrites code after an 'if' that does a branch by moving the
-code after the if into the else: branch of the if.  A block that looks like
+This visitor rewrites code after an 'if' that does a jump to somewhere else (with
+a break/continue/exit/return statement in one branch) by moving the code after the
+if into the branch that does not jump.  A block that looks like
+
     ..some code
-    if (pred) branch;
+    if (pred) jump somewhere;
     ..more code
 becomes:
     ..some code
     if (pred) {
-        branch;
+        jump somewhere;
     } else {
         ..more code
 
-it also deals with cases where the else is not empty (the 'more code' is appended)
+it also deals with cases where the else is not empty (the 'more code' is appended), or
+the jump is in the else branch (adds code to the ifTrue branch).
 
 The purpose of this is to rewrite code such the DoRemoveReturns (and similar rewrites
-for other branches like exit or loop break/continue) will more likely not need to
+for other jump statements like exit or loop break/continue) will more likely not need to
 introduce a boolean flag and extra tests to remove those branches.
 
 precondition:
@@ -68,7 +71,7 @@ class MoveToElseAfterBranch : public Modifier {
      * control flow analysis, as it turns out to be more efficient to do it directly here
      * by overloading the branching constructs (if/switch/loops) and not cloning the visitor,
      * because we *only* care about statements (not expressions) locally in a block (and
-     * not across calls), and we only have one bit of data (hsBranched flag). */
+     * not across calls), and we only have one bit of data (hasBranched flag). */
     bool hasBranched = false;
     bool movedToIfBranch = false;
 
