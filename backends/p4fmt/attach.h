@@ -22,7 +22,8 @@ class Attach : public Transform {
     using CommentsMap = std::unordered_map<NodeId, Comments>;
     enum class TraversalType { Preorder, Postorder };
 
-    explicit Attach(const std::unordered_set<const Util::Comment *> &clist) : clist(clist){};
+    explicit Attach(const std::unordered_map <const Util::Comment *, bool> &processedComments)
+        : processedComments(processedComments){};
     ~Attach() override;
 
     const IR::Node *attachCommentsToNode(IR::Node *, TraversalType);
@@ -40,7 +41,7 @@ class Attach : public Transform {
     const CommentsMap &getCommentsMap() const;
 
  private:
-    std::unordered_set<const Util::Comment *> clist;
+    std::unordered_map<const Util::Comment *, bool> processedComments;
     CommentsMap commentsMap;
 };
 
