@@ -16,10 +16,11 @@
 #include "ir/vector.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
+#include "lib/null.h"
 
 namespace P4::P4Tools::P4Smith {
 
-std::vector<IR::Vector<IR::Node> *> P4Scope::scope;
+std::vector<IR::Vector<IR::Node> *> P4Scope::scope = std::vector<IR::Vector<IR::Node> *>();
 std::set<cstring> P4Scope::usedNames;
 std::map<cstring, std::map<int, std::set<cstring>>> P4Scope::lvalMap;
 std::map<cstring, std::map<int, std::set<cstring>>> P4Scope::lvalMapRw;
@@ -31,6 +32,7 @@ Properties P4Scope::prop;
 Requirements P4Scope::req;
 Constraints P4Scope::constraints;
 void P4Scope::addToScope(const IR::Node *node) {
+    CHECK_NULL(node);
     auto *lScope = P4Scope::scope.back();
     lScope->push_back(node);
 
@@ -41,10 +43,7 @@ void P4Scope::addToScope(const IR::Node *node) {
     }
 }
 
-void P4Scope::startLocalScope() {
-    auto *localScope = new IR::Vector<IR::Node>();
-    scope.push_back(localScope);
-}
+void P4Scope::startLocalScope() { scope.push_back(new IR::Vector<IR::Node>()); }
 
 void P4Scope::endLocalScope() {
     IR::Vector<IR::Node> *localScope = scope.back();
@@ -61,7 +60,6 @@ void P4Scope::endLocalScope() {
         }
     }
 
-    delete localScope;
     scope.pop_back();
 }
 
@@ -98,6 +96,9 @@ void P4Scope::deleteLval(const IR::Type *tp, cstring name) {
     } else if (tp->is<IR::Type_InfInt>()) {
         typeKey = IR::Type_InfInt::static_type_name();
         bitBucket = 1;
+    } else if (const auto *typeEnum = tp->to<IR::Type_Enum>()) {
+        typeKey = typeEnum->name.name;
+        bitBucket = 1;
     } else if (const auto *ts = tp->to<IR::Type_Stack>()) {
         size_t stackSize = ts->getSize();
         typeKey = IR::Type_Stack::static_type_name();
@@ -119,12 +120,14 @@ void P4Scope::deleteLval(const IR::Type *tp, cstring name) {
         if (const auto *td = getTypeByName(tnName)) {
             if (const auto *tnType = td->to<IR::Type_StructLike>()) {
                 typeKey = tnName;
-                // width_bits should work here, do !know why not...
+                // width_bits should work here, do not know why not...
                 // bit_bucket = P4Scope::compound_type[tn_name]->width_bits();
                 bitBucket = 1;
                 deleteCompoundLvals(tnType, name);
+            } else if (const auto *typeDef = td->to<IR::Type_Typedef>()) {
+                deleteLval(typeDef->type, name);
             } else {
-                BUG("Type_Name %s !found!", td->node_type_name());
+                BUG("Type_Name %s not found!", td->node_type_name());
             }
         } else {
             printInfo("Type %s does not exist!\n", tnName.c_str());
@@ -171,6 +174,11 @@ void P4Scope::addLval(const IR::Type *tp, cstring name, bool read_only) {
     } else if (tp->is<IR::Type_InfInt>()) {
         typeKey = IR::Type_InfInt::static_type_name();
         bitBucket = 1;
+    } else if (tp->is<IR::Type_Enum>()) {
+        // TODO: Add enum types.
+        return;
+        // typeKey = enumType->name.name;
+        // bitBucket = 1;
     } else if (const auto *ts = tp->to<IR::Type_Stack>()) {
         size_t stackSize = ts->getSize();
         typeKey = IR::Type_Stack::static_type_name();
@@ -192,12 +200,18 @@ void P4Scope::addLval(const IR::Type *tp, cstring name, bool read_only) {
         }
         if (const auto *td = getTypeByName(tnName)) {
             if (const auto *tnType = td->to<IR::Type_StructLike>()) {
-                // width_bits should work here, do !know why not...
+                // width_bits should work here, do not know why not...
                 typeKey = tnName;
-                // does !work for some reason...
+                // does not work for some reason...
                 // bit_bucket = P4Scope::compound_type[tn_name]->width_bits();
                 bitBucket = 1;
                 addCompoundLvals(tnType, name, read_only);
+            } else if (td->is<IR::Type_Typedef>()) {
+                // TODO: Add typedef types.
+                return;
+                // return addLval(typeDef->type, name, true);
+                // typeKey = typeDef->name.name;
+                // bitBucket = 1;
             } else {
                 BUG("Type_Name %s not yet supported", td->node_type_name());
             }
@@ -337,6 +351,6 @@ const IR::Type_Declaration *P4Scope::getTypeByName(cstring name) {
             }
         }
     }
-    return nullptr;
+    BUG("Type %s not found", name);
 }
 }  // namespace P4::P4Tools::P4Smith

@@ -13,4 +13,3 @@ set(
   ${CMAKE_CURRENT_SOURCE_DIR}/v1model.cpp
   PARENT_SCOPE
 )
-

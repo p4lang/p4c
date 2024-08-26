@@ -185,7 +185,7 @@ const IR::P4Program *GenericCoreSmithTarget::generateP4Program() const {
     objects->push_back(declarationGenerator().genEthernetHeaderType());
 
     // generate some declarations
-    int typeDecls = Utils::getRandInt(DECL.MIN_TYPE, DECL.MAX_TYPE);
+    int typeDecls = Utils::getRandInt(Declarations::get().MIN_TYPE, Declarations::get().MAX_TYPE);
     for (int i = 0; i < typeDecls; ++i) {
         objects->push_back(declarationGenerator().genTypeDeclaration());
     }
@@ -194,7 +194,8 @@ const IR::P4Program *GenericCoreSmithTarget::generateP4Program() const {
     objects->push_back(declarationGenerator().genHeaderStruct());
 
     // generate some callables
-    int callableDecls = Utils::getRandInt(DECL.MIN_CALLABLES, DECL.MAX_CALLABLES);
+    int callableDecls =
+        Utils::getRandInt(Declarations::get().MIN_CALLABLES, Declarations::get().MAX_CALLABLES);
     for (int i = 0; i < callableDecls; ++i) {
         std::vector<int64_t> percent = {70, 15, 10, 5};
         switch (Utils::getRandInt(percent)) {

@@ -14,6 +14,7 @@
 #include "backends/p4tools/modules/smith/common/scope.h"
 #include "backends/p4tools/modules/smith/core/target.h"
 #include "ir/indexed_vector.h"
+#include "ir/irutils.h"
 #include "ir/vector.h"
 #include "lib/exceptions.h"
 
@@ -23,7 +24,7 @@ const IR::Type_Boolean *ExpressionGenerator::genBoolType() { return IR::Type_Boo
 
 const IR::Type_InfInt *ExpressionGenerator::genIntType() { return IR::Type_InfInt::get(); }
 
-const IR::Type *ExpressionGenerator::pickRndBaseType(const std::vector<int64_t> &type_probs) {
+const IR::Type *ExpressionGenerator::pickRndBaseType(const std::vector<int64_t> &type_probs) const {
     if (type_probs.size() != 7) {
         BUG("pickRndBaseType: Type probabilities must be exact");
     }
@@ -85,12 +86,12 @@ const IR::Type *ExpressionGenerator::pickRndType(TyperefProbs type_probs) {
     switch (idx) {
         case 0: {
             // bit<>
-            tp = ExpressionGenerator::genBitType(false);
+            tp = genBitType(false);
             break;
         }
         case 1: {
             // int<>
-            tp = ExpressionGenerator::genBitType(true);
+            tp = genBitType(true);
             break;
         }
         case 2: {
@@ -98,7 +99,7 @@ const IR::Type *ExpressionGenerator::pickRndType(TyperefProbs type_probs) {
             break;
         }
         case 3: {
-            tp = ExpressionGenerator::genIntType();
+            tp = genIntType();
             break;
         }
         case 4: {
@@ -107,7 +108,7 @@ const IR::Type *ExpressionGenerator::pickRndType(TyperefProbs type_probs) {
         }
         case 5: {
             // bool
-            tp = ExpressionGenerator::genBoolType();
+            tp = genBoolType();
             break;
         }
         case 6: {
@@ -188,10 +189,12 @@ IR::BoolLiteral *ExpressionGenerator::genBoolLiteral() {
     return new IR::BoolLiteral(true);
 }
 
-const IR::Type_Bits *ExpressionGenerator::genBitType(bool isSigned) {
-    auto size = Utils::getRandInt(0, sizeof(BIT_WIDTHS) / sizeof(int) - 1);
+const IR::Type_Bits *ExpressionGenerator::genBitType(bool isSigned) const {
+    auto bitWidths = availableBitWidths();
+    BUG_CHECK(!bitWidths.empty(), "No available bit widths");
+    auto size = Utils::getRandInt(0, bitWidths.size() - 1);
 
-    return IR::Type_Bits::get(BIT_WIDTHS[size], isSigned);
+    return IR::Type_Bits::get(bitWidths.at(size), isSigned);
 }
 
 IR::Constant *ExpressionGenerator::genIntLiteral(size_t bit_width) {
@@ -212,15 +215,13 @@ IR::Constant *ExpressionGenerator::genIntLiteral(size_t bit_width) {
     return new IR::Constant(value);
 }
 IR::Constant *ExpressionGenerator::genBitLiteral(const IR::Type *tb) {
-    big_int maxSize = (big_int(1U) << tb->width_bits());
-
+    big_int maxSize = IR::getMaxBvVal(tb->width_bits());
     big_int value;
-    if (P4Scope::req.not_zero) {
-        value = Utils::getRandBigInt(1, maxSize - 1);
-    } else {
-        value = Utils::getRandBigInt(0, maxSize - 1);
+    if (maxSize == 0) {
+        value = 0;
+        return new IR::Constant(tb, value);
     }
-    return new IR::Constant(tb, value);
+    return new IR::Constant(tb, Utils::getRandBigInt(P4Scope::req.not_zero ? 1 : 0, maxSize));
 }
 
 IR::Expression *ExpressionGenerator::genExpression(const IR::Type *tp) {
@@ -235,6 +236,20 @@ IR::Expression *ExpressionGenerator::genExpression(const IR::Type *tp) {
         expr = constructIntExpr();
     } else if (tp->is<IR::Type_Boolean>()) {
         expr = constructBooleanExpr();
+    } else if (tp->is<IR::Type_Typedef>()) {
+        expr = genExpression(tp->to<IR::Type_Typedef>()->type);
+        // Generically perform explicit castings to all cases.
+        const auto *explicitType = new IR::Type_Name(IR::ID(tp->to<IR::Type_Typedef>()->name));
+        expr = new IR::Cast(explicitType, expr);
+    } else if (const auto *enumType = tp->to<IR::Type_Enum>()) {
+        if (enumType->members.empty()) {
+            BUG("Expression: Enum %s has no members", enumType->name.name);
+        }
+        const auto *enumChoice =
+            enumType->members.at(Utils::getRandInt(enumType->members.size() - 1));
+        expr = new IR::Member(enumType,
+                              new IR::PathExpression(enumType, new IR::Path(enumType->getName())),
+                              enumChoice->getName());
     } else if (const auto *tn = tp->to<IR::Type_Name>()) {
         expr = constructStructExpr(tn);
     } else {
@@ -323,14 +338,14 @@ IR::Expression *ExpressionGenerator::constructUnaryExpr(const IR::Type_Bits *tb)
     P4Scope::prop.depth++;
 
     // we want to avoid negation when we require no negative values
-    int64_t negPct = PCT.EXPRESSION_BIT_UNARY_NEG;
+    int64_t negPct = Probabilities::get().EXPRESSION_BIT_UNARY_NEG;
     if (P4Scope::req.not_negative) {
         negPct = 0;
     }
 
-    std::vector<int64_t> percent = {negPct, PCT.EXPRESSION_BIT_UNARY_CMPL,
-                                    PCT.EXPRESSION_BIT_UNARY_CAST,
-                                    PCT.EXPRESSION_BIT_UNARY_FUNCTION};
+    std::vector<int64_t> percent = {negPct, Probabilities::get().EXPRESSION_BIT_UNARY_CMPL,
+                                    Probabilities::get().EXPRESSION_BIT_UNARY_CAST,
+                                    Probabilities::get().EXPRESSION_BIT_UNARY_FUNCTION};
 
     switch (Utils::getRandInt(percent)) {
         case 0: {
@@ -415,27 +430,27 @@ IR::Expression *ExpressionGenerator::constructBinaryBitExpr(const IR::Type_Bits 
     }
     P4Scope::prop.depth++;
 
-    auto pctSub = PCT.EXPRESSION_BIT_BINARY_SUB;
-    auto pctSubsat = PCT.EXPRESSION_BIT_BINARY_SUBSAT;
+    auto pctSub = Probabilities::get().EXPRESSION_BIT_BINARY_SUB;
+    auto pctSubsat = Probabilities::get().EXPRESSION_BIT_BINARY_SUBSAT;
     // we want to avoid subtraction when we require no negative values
     if (P4Scope::req.not_negative) {
         pctSub = 0;
         pctSubsat = 0;
     }
 
-    std::vector<int64_t> percent = {PCT.EXPRESSION_BIT_BINARY_MUL,
-                                    PCT.EXPRESSION_BIT_BINARY_DIV,
-                                    PCT.EXPRESSION_BIT_BINARY_MOD,
-                                    PCT.EXPRESSION_BIT_BINARY_ADD,
+    std::vector<int64_t> percent = {Probabilities::get().EXPRESSION_BIT_BINARY_MUL,
+                                    Probabilities::get().EXPRESSION_BIT_BINARY_DIV,
+                                    Probabilities::get().EXPRESSION_BIT_BINARY_MOD,
+                                    Probabilities::get().EXPRESSION_BIT_BINARY_ADD,
                                     pctSub,
-                                    PCT.EXPRESSION_BIT_BINARY_ADDSAT,
+                                    Probabilities::get().EXPRESSION_BIT_BINARY_ADDSAT,
                                     pctSubsat,
-                                    PCT.EXPRESSION_BIT_BINARY_LSHIFT,
-                                    PCT.EXPRESSION_BIT_BINARY_RSHIFT,
-                                    PCT.EXPRESSION_BIT_BINARY_BAND,
-                                    PCT.EXPRESSION_BIT_BINARY_BOR,
-                                    PCT.EXPRESSION_BIT_BINARY_BXOR,
-                                    PCT.EXPRESSION_BIT_BINARY_CONCAT};
+                                    Probabilities::get().EXPRESSION_BIT_BINARY_LSHIFT,
+                                    Probabilities::get().EXPRESSION_BIT_BINARY_RSHIFT,
+                                    Probabilities::get().EXPRESSION_BIT_BINARY_BAND,
+                                    Probabilities::get().EXPRESSION_BIT_BINARY_BOR,
+                                    Probabilities::get().EXPRESSION_BIT_BINARY_BXOR,
+                                    Probabilities::get().EXPRESSION_BIT_BINARY_CONCAT};
 
     switch (Utils::getRandInt(percent)) {
         case 0: {
@@ -571,7 +586,7 @@ IR::Expression *ExpressionGenerator::constructBinaryBitExpr(const IR::Type_Bits 
             const auto *tl = IR::Type_Bits::get(typeWidth - split, false);
             const auto *tr = IR::Type_Bits::get(split, false);
             // width must be known so we cast
-            // width must be known so we cast
+            printf("Concat: %s, %s\n", tl->toString().c_str(), tr->toString().c_str());
             IR::Expression *left = constructBitExpr(tl);
             if (P4Scope::prop.width_unknown) {
                 left = new IR::Cast(tl, left);
@@ -596,7 +611,8 @@ IR::Expression *ExpressionGenerator::constructTernaryBitExpr(const IR::Type_Bits
     }
     P4Scope::prop.depth++;
 
-    std::vector<int64_t> percent = {PCT.EXPRESSION_BIT_BINARY_SLICE, PCT.EXPRESSION_BIT_BINARY_MUX};
+    std::vector<int64_t> percent = {Probabilities::get().EXPRESSION_BIT_BINARY_SLICE,
+                                    Probabilities::get().EXPRESSION_BIT_BINARY_MUX};
 
     switch (Utils::getRandInt(percent)) {
         case 0: {
@@ -604,7 +620,7 @@ IR::Expression *ExpressionGenerator::constructTernaryBitExpr(const IR::Type_Bits
             // pick a slice that matches the type
             auto typeWidth = tb->width_bits();
             // TODO(fruffy): this is some arbitrary value...
-            auto newTypeSize = Utils::getRandInt(1, 128) + typeWidth;
+            auto newTypeSize = Utils::getRandInt(typeWidth, P4Scope::constraints.max_bitwidth);
             const auto *sliceType = IR::Type_Bits::get(newTypeSize, false);
             auto *sliceExpr = constructBitExpr(sliceType);
             if (P4Scope::prop.width_unknown) {
@@ -612,7 +628,7 @@ IR::Expression *ExpressionGenerator::constructTernaryBitExpr(const IR::Type_Bits
                 P4Scope::prop.width_unknown = false;
             }
             auto margin = newTypeSize - typeWidth;
-            auto high = Utils::getRandInt(0, margin - 1) + typeWidth;
+            auto high = Utils::getRandInt(0, margin) + typeWidth - 1;
             auto low = high - typeWidth + 1;
             expr = new IR::Slice(sliceExpr, high, low);
             break;
@@ -657,9 +673,12 @@ IR::Expression *ExpressionGenerator::pickBitVar(const IR::Type_Bits *tb) {
 IR::Expression *ExpressionGenerator::constructBitExpr(const IR::Type_Bits *tb) {
     IR::Expression *expr = nullptr;
 
-    std::vector<int64_t> percent = {PCT.EXPRESSION_BIT_VAR,         PCT.EXPRESSION_BIT_INT_LITERAL,
-                                    PCT.EXPRESSION_BIT_BIT_LITERAL, PCT.EXPRESSION_BIT_UNARY,
-                                    PCT.EXPRESSION_BIT_BINARY,      PCT.EXPRESSION_BIT_TERNARY};
+    std::vector<int64_t> percent = {Probabilities::get().EXPRESSION_BIT_VAR,
+                                    Probabilities::get().EXPRESSION_BIT_INT_LITERAL,
+                                    Probabilities::get().EXPRESSION_BIT_BIT_LITERAL,
+                                    Probabilities::get().EXPRESSION_BIT_UNARY,
+                                    Probabilities::get().EXPRESSION_BIT_BINARY,
+                                    Probabilities::get().EXPRESSION_BIT_TERNARY};
 
     switch (Utils::getRandInt(percent)) {
         case 0: {
@@ -704,15 +723,15 @@ IR::Expression *ExpressionGenerator::constructBitExpr(const IR::Type_Bits *tb) {
 IR::Expression *ExpressionGenerator::constructCmpExpr() {
     IR::Expression *expr = nullptr;
 
-    // gen some random type
-    // can be either bits, int, bool, or structlike
-    // for now it is just bits
-    auto newTypeSize = Utils::getRandInt(1, 128);
+    // Generate some random type. Can be either bits, int, bool, or structlike
+    // For now it is just bits.
+    auto newTypeSize = Utils::getRandInt(1, P4Scope::constraints.max_bitwidth);
     const auto *newType = IR::Type_Bits::get(newTypeSize, false);
     IR::Expression *left = constructBitExpr(newType);
     IR::Expression *right = constructBitExpr(newType);
 
-    std::vector<int64_t> percent = {PCT.EXPRESSION_BOOLEAN_CMP_EQU, PCT.EXPRESSION_BOOLEAN_CMP_NEQ};
+    std::vector<int64_t> percent = {Probabilities::get().EXPRESSION_BOOLEAN_CMP_EQU,
+                                    Probabilities::get().EXPRESSION_BOOLEAN_CMP_NEQ};
 
     switch (Utils::getRandInt(percent)) {
         case 0: {
@@ -732,10 +751,14 @@ IR::Expression *ExpressionGenerator::constructBooleanExpr() {
     IR::Expression *left = nullptr;
     IR::Expression *right = nullptr;
 
-    std::vector<int64_t> percent = {
-        PCT.EXPRESSION_BOOLEAN_VAR,      PCT.EXPRESSION_BOOLEAN_LITERAL, PCT.EXPRESSION_BOOLEAN_NOT,
-        PCT.EXPRESSION_BOOLEAN_LAND,     PCT.EXPRESSION_BOOLEAN_LOR,     PCT.EXPRESSION_BOOLEAN_CMP,
-        PCT.EXPRESSION_BOOLEAN_FUNCTION, PCT.EXPRESSION_BOOLEAN_BUILT_IN};
+    std::vector<int64_t> percent = {Probabilities::get().EXPRESSION_BOOLEAN_VAR,
+                                    Probabilities::get().EXPRESSION_BOOLEAN_LITERAL,
+                                    Probabilities::get().EXPRESSION_BOOLEAN_NOT,
+                                    Probabilities::get().EXPRESSION_BOOLEAN_LAND,
+                                    Probabilities::get().EXPRESSION_BOOLEAN_LOR,
+                                    Probabilities::get().EXPRESSION_BOOLEAN_CMP,
+                                    Probabilities::get().EXPRESSION_BOOLEAN_FUNCTION,
+                                    Probabilities::get().EXPRESSION_BOOLEAN_BUILT_IN};
 
     switch (Utils::getRandInt(percent)) {
         case 0: {
@@ -831,12 +854,12 @@ IR::Expression *ExpressionGenerator::constructUnaryIntExpr() {
     P4Scope::prop.depth++;
 
     // we want to avoid negation when we require no negative values
-    int64_t negPct = PCT.EXPRESSION_INT_UNARY_NEG;
+    int64_t negPct = Probabilities::get().EXPRESSION_INT_UNARY_NEG;
     if (P4Scope::req.not_negative) {
         negPct = 0;
     }
 
-    std::vector<int64_t> percent = {negPct, PCT.EXPRESSION_INT_UNARY_FUNCTION};
+    std::vector<int64_t> percent = {negPct, Probabilities::get().EXPRESSION_INT_UNARY_FUNCTION};
 
     switch (Utils::getRandInt(percent)) {
         case 0: {
@@ -878,22 +901,22 @@ IR::Expression *ExpressionGenerator::constructBinaryIntExpr() {
     const auto *tp = IR::Type_InfInt::get();
     P4Scope::prop.depth++;
 
-    auto pctSub = PCT.EXPRESSION_INT_BINARY_SUB;
+    auto pctSub = Probabilities::get().EXPRESSION_INT_BINARY_SUB;
     // we want to avoid subtraction when we require no negative values
     if (P4Scope::req.not_negative) {
         pctSub = 0;
     }
 
-    std::vector<int64_t> percent = {PCT.EXPRESSION_INT_BINARY_MUL,
-                                    PCT.EXPRESSION_INT_BINARY_DIV,
-                                    PCT.EXPRESSION_INT_BINARY_MOD,
-                                    PCT.EXPRESSION_INT_BINARY_ADD,
+    std::vector<int64_t> percent = {Probabilities::get().EXPRESSION_INT_BINARY_MUL,
+                                    Probabilities::get().EXPRESSION_INT_BINARY_DIV,
+                                    Probabilities::get().EXPRESSION_INT_BINARY_MOD,
+                                    Probabilities::get().EXPRESSION_INT_BINARY_ADD,
                                     pctSub,
-                                    PCT.EXPRESSION_INT_BINARY_LSHIFT,
-                                    PCT.EXPRESSION_INT_BINARY_RSHIFT,
-                                    PCT.EXPRESSION_INT_BINARY_BAND,
-                                    PCT.EXPRESSION_INT_BINARY_BOR,
-                                    PCT.EXPRESSION_INT_BINARY_BXOR};
+                                    Probabilities::get().EXPRESSION_INT_BINARY_LSHIFT,
+                                    Probabilities::get().EXPRESSION_INT_BINARY_RSHIFT,
+                                    Probabilities::get().EXPRESSION_INT_BINARY_BAND,
+                                    Probabilities::get().EXPRESSION_INT_BINARY_BOR,
+                                    Probabilities::get().EXPRESSION_INT_BINARY_BXOR};
 
     switch (Utils::getRandInt(percent)) {
         case 0: {
@@ -994,8 +1017,9 @@ IR::Expression *ExpressionGenerator::pickIntVar() {
 IR::Expression *ExpressionGenerator::constructIntExpr() {
     IR::Expression *expr = nullptr;
 
-    std::vector<int64_t> percent = {PCT.EXPRESSION_INT_VAR, PCT.EXPRESSION_INT_INT_LITERAL,
-                                    PCT.EXPRESSION_INT_UNARY, PCT.EXPRESSION_INT_BINARY};
+    std::vector<int64_t> percent = {
+        Probabilities::get().EXPRESSION_INT_VAR, Probabilities::get().EXPRESSION_INT_INT_LITERAL,
+        Probabilities::get().EXPRESSION_INT_UNARY, Probabilities::get().EXPRESSION_INT_BINARY};
 
     switch (Utils::getRandInt(percent)) {
         case 0: {
@@ -1026,9 +1050,14 @@ IR::ListExpression *ExpressionGenerator::genStructListExpr(const IR::Type_Name *
             for (const auto *sf : tnType->fields) {
                 IR::Expression *expr = nullptr;
                 if (const auto *fieldTn = sf->type->to<IR::Type_Name>()) {
-                    // can!use another type here yet
-                    expr = genStructListExpr(fieldTn);
-                    components.push_back(expr);
+                    if (const auto *typedefType = P4Scope::getTypeByName(fieldTn->path->name.name)
+                                                      ->to<IR::Type_Typedef>()) {
+                        expr = genExpression(typedefType);
+                        components.push_back(expr);
+                    } else {
+                        expr = genStructListExpr(fieldTn);
+                        components.push_back(expr);
+                    }
                 } else if (const auto *fieldTs = sf->type->to<IR::Type_Stack>()) {
                     auto stackSize = fieldTs->getSize();
                     const auto *stackType = fieldTs->elementType;
@@ -1057,8 +1086,9 @@ IR::ListExpression *ExpressionGenerator::genStructListExpr(const IR::Type_Name *
 
 IR::Expression *ExpressionGenerator::constructStructExpr(const IR::Type_Name *tn) {
     IR::Expression *expr = nullptr;
-    std::vector<int64_t> percent = {PCT.EXPRESSION_STRUCT_VAR, PCT.EXPRESSION_STRUCT_LITERAL,
-                                    PCT.EXPRESSION_STRUCT_FUNCTION};
+    std::vector<int64_t> percent = {Probabilities::get().EXPRESSION_STRUCT_VAR,
+                                    Probabilities::get().EXPRESSION_STRUCT_LITERAL,
+                                    Probabilities::get().EXPRESSION_STRUCT_FUNCTION};
 
     // because fallthrough is !very portable...
     bool useDefaultExpr = false;
@@ -1199,9 +1229,11 @@ IR::Expression *ExpressionGenerator::editHdrStack(cstring lval) {
 IR::Expression *ExpressionGenerator::pickLvalOrSlice(const IR::Type *tp) {
     cstring lvalStr = P4Scope::pickLval(tp, true);
     IR::Expression *expr = editHdrStack(lvalStr);
+    expr->type = tp;
 
     if (const auto *tb = tp->to<IR::Type_Bits>()) {
-        std::vector<int64_t> percent = {PCT.SCOPE_LVAL_PATH, PCT.SCOPE_LVAL_SLICE};
+        std::vector<int64_t> percent = {Probabilities::get().SCOPE_LVAL_PATH,
+                                        Probabilities::get().SCOPE_LVAL_SLICE};
         switch (Utils::getRandInt(percent)) {
             case 0: {
                 break;
@@ -1228,14 +1260,15 @@ IR::Expression *ExpressionGenerator::pickLvalOrSlice(const IR::Type *tp) {
                 if (candidates.empty()) {
                     break;
                 }
-                size_t idx = Utils::getRandInt(0, candidates.size() - 1);
+                auto idx = Utils::getRandInt(0, candidates.size() - 1);
                 auto lval = std::begin(candidates);
                 // "advance" the iterator idx times
                 std::advance(lval, idx);
-                size_t candidateSize = lval->first;
-                auto *sliceExpr = new IR::PathExpression(lval->second);
-                size_t low = Utils::getRandInt(0, candidateSize - targetWidth);
-                size_t high = low + targetWidth - 1;
+                auto candidateSize = lval->first;
+                auto *sliceExpr =
+                    new IR::PathExpression(IR::Type_Bits::get(candidateSize), lval->second);
+                auto low = Utils::getRandInt(0, candidateSize - targetWidth);
+                auto high = low + targetWidth - 1;
                 expr = new IR::Slice(sliceExpr, high, low);
             } break;
         }

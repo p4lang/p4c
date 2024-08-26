@@ -186,8 +186,10 @@ void ParserGenerator::genState(cstring name) {
     // expression
     IR::Expression *transition = nullptr;
 
-    std::vector<int64_t> percent = {PCT.P4STATE_TRANSITION_ACCEPT, PCT.P4STATE_TRANSITION_REJECT,
-                                    PCT.P4STATE_TRANSITION_STATE, PCT.P4STATE_TRANSITION_SELECT};
+    std::vector<int64_t> percent = {Probabilities::get().P4STATE_TRANSITION_ACCEPT,
+                                    Probabilities::get().P4STATE_TRANSITION_REJECT,
+                                    Probabilities::get().P4STATE_TRANSITION_STATE,
+                                    Probabilities::get().P4STATE_TRANSITION_SELECT};
 
     P4Scope::endLocalScope();
     switch (Utils::getRandInt(percent)) {
@@ -213,7 +215,7 @@ void ParserGenerator::genState(cstring name) {
 
             IR::Vector<IR::Type> types;
             for (size_t i = 0; i <= keySetLen; i++) {
-                auto *tb = ExpressionGenerator::genBitType(false);
+                const auto *tb = target().expressionGenerator().genBitType(false);
                 types.push_back(tb);
             }
 

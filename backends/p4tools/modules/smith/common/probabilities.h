@@ -3,7 +3,9 @@
 
 #include <cstdint>
 
-static struct Probabilities {
+namespace P4::P4Tools::P4Smith {
+
+struct Probabilities {
     // assignment or method call
     uint16_t ASSIGNMENTORMETHODCALLSTATEMENT_ASSIGN = 75;
     uint16_t ASSIGNMENTORMETHODCALLSTATEMENT_METHOD_CALL = 25;
@@ -299,9 +301,17 @@ static struct Probabilities {
     uint16_t VARIABLEDECLARATION_DERIVED_TUPLE = DERIVED_TUPLE;
     uint16_t VARIABLEDECLARATION_TYPE_VOID = TYPE_VOID;
     uint16_t VARIABLEDECLARATION_TYPE_MATCH_KIND = TYPE_MATCH_KIND;
-} PCT;
 
-static struct Declarations {
+    static Probabilities &get() {
+        static Probabilities INSTANCE;
+        return INSTANCE;
+    }
+
+ private:
+    Probabilities() = default;
+};
+
+struct Declarations {
     // minimum and maximum number of type declarations
     uint16_t MIN_TYPE = 1;
     uint16_t MAX_TYPE = 8;
@@ -326,6 +336,16 @@ static struct Declarations {
 
     uint16_t MIN_TABLE = 0;
     uint16_t MAX_TABLE = 3;
-} DECL;
+
+    static Declarations &get() {
+        static Declarations INSTANCE;
+        return INSTANCE;
+    }
+
+ private:
+    Declarations() = default;
+};
+
+}  // namespace P4::P4Tools::P4Smith
 
 #endif /* BACKENDS_P4TOOLS_MODULES_SMITH_COMMON_PROBABILITIES_H_ */

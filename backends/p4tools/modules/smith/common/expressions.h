@@ -31,6 +31,18 @@ using TyperefProbs = struct TyperefProbs {
     int64_t p4_tuple;
     int64_t p4_void;
     int64_t p4_match_kind;
+
+    [[nodiscard]] std::string toString() const {
+        std::stringstream ss;
+        ss << "p4_bit=" << p4_bit << " p4_signed_bit=" << p4_signed_bit
+           << " p4_varbit=" << p4_varbit << " p4_int=" << p4_int << " p4_error=" << p4_error
+           << " p4_bool=" << p4_bool << " p4_string=" << p4_string << " p4_enum=" << p4_enum
+           << " p4_header=" << p4_header << " p4_header_stack=" << p4_header_stack
+           << " p4_struct=" << p4_struct << " p4_header_union=" << p4_header_union
+           << " p4_tuple=" << p4_tuple << " p4_void=" << p4_void
+           << " p4_match_kind=" << p4_match_kind;
+        return ss.str();
+    }
 };
 
 class ExpressionGenerator : public Generator {
@@ -40,24 +52,25 @@ class ExpressionGenerator : public Generator {
 
     static constexpr size_t MAX_DEPTH = 3;
 
-    static constexpr int BIT_WIDTHS[6] = {4, 8, 16, 32, 64, 128};
-
     static const IR::Type_Boolean *genBoolType();
 
     static const IR::Type_InfInt *genIntType();
 
     // isSigned, true -> int<>, false -> bit<>
-    static const IR::Type_Bits *genBitType(bool isSigned);
+    [[nodiscard]] const IR::Type_Bits *genBitType(bool isSigned) const;
+    [[nodiscard]] const IR::Type *pickRndBaseType(const std::vector<int64_t> &type_probs) const;
 
-    static const IR::Type *pickRndBaseType(const std::vector<int64_t> &type_probs);
-
-    virtual const IR::Type *pickRndType(TyperefProbs type_probs);
+    [[nodiscard]] virtual const IR::Type *pickRndType(TyperefProbs type_probs);
 
     static IR::BoolLiteral *genBoolLiteral();
 
     static IR::Constant *genIntLiteral(size_t bit_width = INTEGER_WIDTH);
 
     static IR::Constant *genBitLiteral(const IR::Type *tb);
+
+    [[nodiscard]] virtual std::vector<int> availableBitWidths() const {
+        return {4, 8, 16, 32, 64, 128};
+    }
 
  private:
     IR::Expression *constructUnaryExpr(const IR::Type_Bits *tb);

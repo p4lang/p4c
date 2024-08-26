@@ -8,6 +8,7 @@ endif()
 set(
   SMITH_SOURCES
   ${SMITH_SOURCES}
+  ${CMAKE_CURRENT_SOURCE_DIR}/expressions.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/target.cpp
   PARENT_SCOPE
 )
