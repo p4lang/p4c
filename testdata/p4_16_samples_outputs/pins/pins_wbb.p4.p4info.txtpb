@@ -65,6 +65,9 @@ tables {
     scope: DEFAULT_ONLY
   }
   const_default_action_id: 21257015
+  initial_default_action {
+    action_id: 21257015
+  }
   direct_resource_ids: 318767363
   direct_resource_ids: 352321793
   size: 8

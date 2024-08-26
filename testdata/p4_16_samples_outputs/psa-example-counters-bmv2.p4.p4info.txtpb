@@ -22,6 +22,9 @@ tables {
   action_refs {
     id: 25648360
   }
+  initial_default_action {
+    action_id: 25648360
+  }
   direct_resource_ids: 332805598
   size: 1024
 }

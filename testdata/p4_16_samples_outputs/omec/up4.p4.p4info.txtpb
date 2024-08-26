@@ -19,6 +19,9 @@ tables {
   action_refs {
     id: 21257015
   }
+  initial_default_action {
+    action_id: 21257015
+  }
   size: 1024
 }
 tables {
@@ -37,6 +40,21 @@ tables {
     id: 26090030
   }
   const_default_action_id: 26090030
+  initial_default_action {
+    action_id: 26090030
+    arguments {
+      param_id: 1
+      value: "\000"
+    }
+    arguments {
+      param_id: 2
+      value: "\000"
+    }
+    arguments {
+      param_id: 3
+      value: "\000"
+    }
+  }
   size: 1024
 }
 tables {
@@ -69,6 +87,9 @@ tables {
     scope: DEFAULT_ONLY
   }
   const_default_action_id: 28401267
+  initial_default_action {
+    action_id: 28401267
+  }
   size: 1024
 }
 tables {
@@ -98,6 +119,9 @@ tables {
     scope: DEFAULT_ONLY
   }
   const_default_action_id: 28401267
+  initial_default_action {
+    action_id: 28401267
+  }
   size: 1024
 }
 tables {
@@ -130,6 +154,9 @@ tables {
     scope: DEFAULT_ONLY
   }
   const_default_action_id: 28401267
+  initial_default_action {
+    action_id: 28401267
+  }
   size: 1024
 }
 tables {
@@ -162,6 +189,9 @@ tables {
     scope: DEFAULT_ONLY
   }
   const_default_action_id: 28401267
+  initial_default_action {
+    action_id: 28401267
+  }
   size: 1024
 }
 tables {
@@ -198,6 +228,13 @@ tables {
     id: 23010411
   }
   const_default_action_id: 23010411
+  initial_default_action {
+    action_id: 23010411
+    arguments {
+      param_id: 1
+      value: "\000"
+    }
+  }
   size: 1024
 }
 tables {
@@ -220,6 +257,9 @@ tables {
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
+  initial_default_action {
+    action_id: 21257015
+  }
   size: 1024
 }
 tables {
@@ -241,6 +281,9 @@ tables {
     id: 21257015
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
   }
   implementation_id: 297808402
   size: 1024
@@ -327,6 +370,9 @@ tables {
     id: 21257015
   }
   const_default_action_id: 21257015
+  initial_default_action {
+    action_id: 21257015
+  }
   direct_resource_ids: 325583051
   size: 1024
 }

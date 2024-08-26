@@ -16,16 +16,27 @@ limitations under the License.
 
 #include "bytestrings.h"
 
+#include "control-plane/typeSpecConverter.h"
+#include "frontends/p4/enumInstance.h"
 #include "ir/ir.h"
 #include "lib/algorithm.h"
 
-namespace P4 {
+namespace P4::ControlPlaneAPI {
 
-namespace ControlPlaneAPI {
+int getTypeWidth(const IR::Type &type, const TypeMap &typeMap) {
+    TranslationAnnotation annotation;
+    if (hasTranslationAnnotation(&type, &annotation)) {
+        // W if the type is bit<W>, and 0 if the type is string
+        return annotation.controller_type.width;
+    }
+    /* Treat error type as string */
+    if (type.is<IR::Type_Error>()) {
+        return 0;
+    }
 
-/// Convert a bignum to the P4Runtime bytes representation. The value must fit
-/// within the provided @width expressed in bits. Padding will be added as
-/// necessary (as the most significant bits).
+    return typeMap.widthBits(&type, type.getNode(), false);
+}
+
 std::optional<std::string> stringReprConstant(big_int value, int width) {
     // TODO(antonin): support negative values
     if (value < 0) {
@@ -53,19 +64,36 @@ std::optional<std::string> stringReprConstant(big_int value, int width) {
     return std::string(data.begin(), data.end());
 }
 
-/// Convert a Constant to the P4Runtime bytes representation by calling
-/// stringReprConstant.
 std::optional<std::string> stringRepr(const IR::Constant *constant, int width) {
     return stringReprConstant(constant->value, width);
 }
 
-/// Convert a BoolLiteral to the P4Runtime bytes representation by calling
-/// stringReprConstant.
 std::optional<std::string> stringRepr(const IR::BoolLiteral *constant, int width) {
     auto v = static_cast<big_int>(constant->value ? 1 : 0);
     return stringReprConstant(v, width);
 }
 
-}  // namespace ControlPlaneAPI
+std::optional<std::string> stringRepr(const TypeMap &typeMap, const IR::Expression *expression) {
+    int width = getTypeWidth(*expression->type, typeMap);
+    // If the expression is a cast we keep its width, but use the casted expression for string
+    // representation.
+    while (const auto *cast = expression->to<IR::Cast>()) {
+        expression = cast->expr;
+    }
+    auto *ei = EnumInstance::resolve(expression, &typeMap);
+    if (expression->is<IR::Constant>()) {
+        return stringRepr(expression->to<IR::Constant>(), width);
+    }
+    if (expression->is<IR::BoolLiteral>()) {
+        return stringRepr(expression->to<IR::BoolLiteral>(), width);
+    }
+    if (ei != nullptr && ei->is<SerEnumInstance>()) {
+        auto *sei = ei->to<SerEnumInstance>();
+        return stringRepr(sei->value->to<IR::Constant>(), width);
+    }
+    ::P4::error(ErrorType::ERR_UNSUPPORTED, "%1% unsupported argument expression of type %2%",
+                expression, expression->type->node_type_name());
+    return std::nullopt;
+}
 
-}  // namespace P4
+}  // namespace P4::ControlPlaneAPI

@@ -104,7 +104,7 @@ class TypeMap final : public ProgramMap {
     /// The width in bits of this type.  If the width is not
     /// well-defined this will report an error and return -1.
     /// max indicates whether we want the max width or min width.
-    int widthBits(const IR::Type *type, const IR::Node *errorPosition, bool max);
+    int widthBits(const IR::Type *type, const IR::Node *errorPosition, bool max) const;
 
     /// True is type occupies no storage.
     bool typeIsEmpty(const IR::Type *type) const;
