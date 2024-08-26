@@ -35,9 +35,9 @@ const IR::Node *Attach::attachCommentsToNode(IR::Node *node, TraversalType ttype
 
     const auto nodeStart = node->srcInfo.getStart();
 
-    for (auto &[comment, isVisited] : processedComments) {
+    for (auto &[comment, isAttached] : processedComments) {
         // Skip if already attached
-        if (isVisited) {
+        if (isAttached) {
             continue;
         }
 
@@ -47,14 +47,14 @@ const IR::Node *Attach::attachCommentsToNode(IR::Node *node, TraversalType ttype
             case TraversalType::Preorder:
                 if (commentEnd.getLineNumber() == nodeStart.getLineNumber() - 1) {
                     addPrefixComments(node->id, comment);
-                    isVisited = true;  // Mark the comment as attached
+                    isAttached = true;  // Mark the comment as attached
                 }
                 break;
 
             case TraversalType::Postorder:
                 if (commentEnd.getLineNumber() == nodeStart.getLineNumber()) {
                     addSuffixComments(node->id, comment);
-                    isVisited = true;
+                    isAttached = true;
                 }
                 break;
 
