@@ -47,7 +47,6 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_value {
     u32 hit:1,
     is_default_miss_act:1,
     is_default_hit_act:1;
-    __u32 priority;
     union {
         struct {
         } _NoAction;
@@ -76,7 +75,6 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_3_value {
     u32 hit:1,
     is_default_miss_act:1,
     is_default_hit_act:1;
-    __u32 priority;
     union {
         struct {
         } _NoAction;

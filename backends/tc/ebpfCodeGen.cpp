@@ -896,12 +896,6 @@ void EBPFTablePNA::emitValueStructStructure(EBPF::CodeBuilder *builder) {
     builder->append("is_default_hit_act:1;");
     builder->newline();
 
-    if (isTernaryTable()) {
-        builder->emitIndent();
-        builder->append("__u32 priority;");
-        builder->newline();
-    }
-
     builder->emitIndent();
     builder->append("union ");
     builder->blockStart();
