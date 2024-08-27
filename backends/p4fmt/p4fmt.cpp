@@ -38,10 +38,10 @@ std::stringstream getFormattedOutput(std::filesystem::path inputFile) {
         }
     }
 
-    auto top4 = P4Fmt::P4Formatter(&formattedOutput);
     auto attach = P4::P4Fmt::Attach(globalCommentsMap);
     program = program->apply(attach);
     // Print the program before running front end passes.
+    auto top4 = P4Fmt::P4Formatter(&formattedOutput, attach.getCommentsMap());
     program->apply(top4);
 
     if (::P4::errorCount() > 0) {

@@ -1,10 +1,8 @@
 #include "p4formatter.h"
 
-#include <deque>
 #include <sstream>
 #include <string>
 
-#include "frontends/common/options.h"
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/parsers/p4/p4parser.hpp"
 #include "ir/dump.h"
@@ -41,6 +39,18 @@ std::filesystem::path P4Formatter::ifSystemFile(const IR::Node *node) {
     std::filesystem::path sourceFile(node->srcInfo.getSourceFile().c_str());
     if (isSystemFile(sourceFile)) return sourceFile;
     return {};
+}
+
+std::pair<cstring, cstring> P4Formatter::extractNodeComments(int nodeId) {
+    auto commsIt = comMap.find(nodeId);
+    if (commsIt != comMap.end()) {
+        const Attach::Comments &comms = commsIt->second;
+        cstring prefixComm = comms.prefix.empty() ? cstring("") : comms.prefix.front()->toString();
+        cstring suffixComm = comms.suffix.empty() ? cstring("") : comms.suffix.front()->toString();
+        return std::make_pair(prefixComm, suffixComm);
+    }
+    // Return empty strings if node ID not found
+    return {cstring(""), cstring("")};
 }
 
 bool P4Formatter::preorder(const IR::Node *node) {
@@ -174,6 +184,11 @@ bool P4Formatter::preorder(const IR::Argument *arg) {
 }
 
 bool P4Formatter::preorder(const IR::Type_Typedef *t) {
+    auto [prefixc, suffixc] = extractNodeComments(t->id);
+    if (*prefixc != 0) {
+        builder.append(prefixc);
+        builder.append("\n");
+    }
     if (!t->annotations->annotations.empty()) {
         visit(t->annotations);
         builder.spc();
@@ -386,6 +401,10 @@ bool P4Formatter::preorder(const IR::Type_Package *package) {
 }
 
 bool P4Formatter::process(const IR::Type_StructLike *t, const char *name) {
+    auto [prefixc, suffixc] = extractNodeComments(t->id);
+
+    builder.append(prefixc);
+    builder.append("\n");
     if (isDeclaration) {
         builder.emitIndent();
         if (!t->annotations->annotations.empty()) {
@@ -413,6 +432,13 @@ bool P4Formatter::process(const IR::Type_StructLike *t, const char *name) {
     }
 
     for (auto f : t->fields) {
+        auto [fieldPrefixc, fieldSuffixc] = extractNodeComments(f->id);
+        if (*fieldPrefixc != 0) {
+            builder.emitIndent();
+            builder.append(fieldPrefixc);
+            builder.newline();
+        }
+
         if (f->annotations->size() > 0) {
             builder.emitIndent();
             if (!f->annotations->annotations.empty()) {
@@ -1456,7 +1482,8 @@ bool P4Formatter::preorder(const IR::Path *p) {
 
 std::string toP4(const IR::INode *node) {
     std::stringstream stream;
-    P4Fmt::P4Formatter toP4(&stream);
+    Attach::CommentsMap comMap;
+    P4Fmt::P4Formatter toP4(&stream, comMap);
     node->getNode()->apply(toP4);
     return stream.str();
 }
