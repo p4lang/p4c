@@ -1,8 +1,6 @@
 #ifndef BACKENDS_P4FMT_P4FORMATTER_H_
 #define BACKENDS_P4FMT_P4FORMATTER_H_
 
-#include <utility>
-
 #include "backends/p4fmt/attach.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "ir/ir.h"
