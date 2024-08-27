@@ -185,14 +185,14 @@ struct p4tc_ext_bpf_params {
     u32 tbl_id;
     u32 index;
     u32 flags;
-    u8  in_params[128]; /* extern specific params if any */
+    u8  in_params[64]; /* extern specific params if any */
 };
 
 struct p4tc_ext_bpf_val {
     u32 ext_id;
     u32 index_id;
     u32 verdict;
-    u8 out_params[128]; /* specific values if any */
+    u8 out_params[64]; /* specific values if any */
 };
 
 /* Equivalent to PNA indirect counters */
