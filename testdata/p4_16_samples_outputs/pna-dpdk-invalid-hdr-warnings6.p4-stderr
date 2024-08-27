@@ -14,7 +14,7 @@ pna-dpdk-invalid-hdr-warnings6.p4(51): [--Wwarn=invalid_header] warning: accessi
         hdr.u[0].h3.data = 1;
         ^^^^^^^^^^^
 pna-dpdk-invalid-hdr-warnings6.p4(76): [--Wwarn=invalid_header] warning: accessing a field of an invalid header u[0].h1
-        u[0].h1.data = 1; // u[0].h1 is invalid either if the then branch is executed (for any i) or not
+        u[0].h1.data = 1; // u[0].h1 is invalid either if the then branch is executed (for any i)...
         ^^^^^^^
 pna-dpdk-invalid-hdr-warnings6.p4(84): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header u[0].h1
         u[0].h1.data = 1;

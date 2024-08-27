@@ -2,59 +2,59 @@ pins_middleblock.p4(615): [--Wwarn=deprecated] warning: set_nexthop: Using depre
             @proto_id(1) set_nexthop;
                          ^^^^^^^^^^^
 pins_middleblock.p4(603)
-    @id(0x01000003) @deprecated("Use set_ip_nexthop instead.") action set_nexthop(@id(1) @refers_to(router_interface_table , router_interface_id) @refers_to(neighbor_table , router_interface_id) router_interface_id_t router_interface_id, @id(2) @format(IPV6_ADDRESS) @refers_to(neighbor_table , neighbor_id) ipv6_addr_t neighbor_id) {
-                                                                      ^^^^^^^^^^^
+...ted("Use set_ip_nexthop instead.") action set_nexthop(@id(1) @refers_to(router_interface_table...
+                                             ^^^^^^^^^^^
 pins_middleblock.p4(846): [--Wwarn=ignore-prop] warning: KeyElement: constant key element
             1w1: ternary @id(1) @name("dummy_match");
             ^^^
 pins_middleblock.p4(717): [--Wwarn=unused] warning: 'port' is unused
-    @id(0x01000007) action mirror_as_ipv4_erspan(@id(1) port_id_t port, @id(2) @format(IPV4_ADDRESS) ipv4_addr_t src_ip, @id(3) @format(IPV4_ADDRESS) ipv4_addr_t dst_ip, @id(4) @format(MAC_ADDRESS) ethernet_addr_t src_mac, @id(5) @format(MAC_ADDRESS) ethernet_addr_t dst_mac, @id(6) bit<8> ttl, @id(7) bit<8> tos) {
-                                                                  ^^^^
+...ction mirror_as_ipv4_erspan(@id(1) port_id_t port, @id(2) @format(IPV4_ADDRESS) ipv4_addr_t sr...
+                                                ^^^^
 pins_middleblock.p4(717): [--Wwarn=unused] warning: 'src_ip' is unused
-    @id(0x01000007) action mirror_as_ipv4_erspan(@id(1) port_id_t port, @id(2) @format(IPV4_ADDRESS) ipv4_addr_t src_ip, @id(3) @format(IPV4_ADDRESS) ipv4_addr_t dst_ip, @id(4) @format(MAC_ADDRESS) ethernet_addr_t src_mac, @id(5) @format(MAC_ADDRESS) ethernet_addr_t dst_mac, @id(6) bit<8> ttl, @id(7) bit<8> tos) {
-                                                                                                                 ^^^^^^
+...t, @id(2) @format(IPV4_ADDRESS) ipv4_addr_t src_ip, @id(3) @format(IPV4_ADDRESS) ipv4_addr_t d...
+                                               ^^^^^^
 pins_middleblock.p4(717): [--Wwarn=unused] warning: 'dst_ip' is unused
-    @id(0x01000007) action mirror_as_ipv4_erspan(@id(1) port_id_t port, @id(2) @format(IPV4_ADDRESS) ipv4_addr_t src_ip, @id(3) @format(IPV4_ADDRESS) ipv4_addr_t dst_ip, @id(4) @format(MAC_ADDRESS) ethernet_addr_t src_mac, @id(5) @format(MAC_ADDRESS) ethernet_addr_t dst_mac, @id(6) bit<8> ttl, @id(7) bit<8> tos) {
-                                                                                                                                                                  ^^^^^^
+...p, @id(3) @format(IPV4_ADDRESS) ipv4_addr_t dst_ip, @id(4) @format(MAC_ADDRESS) ethernet_addr_...
+                                               ^^^^^^
 pins_middleblock.p4(717): [--Wwarn=unused] warning: 'src_mac' is unused
-    @id(0x01000007) action mirror_as_ipv4_erspan(@id(1) port_id_t port, @id(2) @format(IPV4_ADDRESS) ipv4_addr_t src_ip, @id(3) @format(IPV4_ADDRESS) ipv4_addr_t dst_ip, @id(4) @format(MAC_ADDRESS) ethernet_addr_t src_mac, @id(5) @format(MAC_ADDRESS) ethernet_addr_t dst_mac, @id(6) bit<8> ttl, @id(7) bit<8> tos) {
-                                                                                                                                                                                                                      ^^^^^^^
+...@id(4) @format(MAC_ADDRESS) ethernet_addr_t src_mac, @id(5) @format(MAC_ADDRESS) ethernet_addr...
+                                               ^^^^^^^
 pins_middleblock.p4(717): [--Wwarn=unused] warning: 'dst_mac' is unused
-    @id(0x01000007) action mirror_as_ipv4_erspan(@id(1) port_id_t port, @id(2) @format(IPV4_ADDRESS) ipv4_addr_t src_ip, @id(3) @format(IPV4_ADDRESS) ipv4_addr_t dst_ip, @id(4) @format(MAC_ADDRESS) ethernet_addr_t src_mac, @id(5) @format(MAC_ADDRESS) ethernet_addr_t dst_mac, @id(6) bit<8> ttl, @id(7) bit<8> tos) {
-                                                                                                                                                                                                                                                                           ^^^^^^^
+...mac, @id(5) @format(MAC_ADDRESS) ethernet_addr_t dst_mac, @id(6) bit<8> ttl, @id(7) bit<8> tos) {
+                                                    ^^^^^^^
 pins_middleblock.p4(717): [--Wwarn=unused] warning: 'ttl' is unused
-    @id(0x01000007) action mirror_as_ipv4_erspan(@id(1) port_id_t port, @id(2) @format(IPV4_ADDRESS) ipv4_addr_t src_ip, @id(3) @format(IPV4_ADDRESS) ipv4_addr_t dst_ip, @id(4) @format(MAC_ADDRESS) ethernet_addr_t src_mac, @id(5) @format(MAC_ADDRESS) ethernet_addr_t dst_mac, @id(6) bit<8> ttl, @id(7) bit<8> tos) {
-                                                                                                                                                                                                                                                                                                  ^^^
+...mac, @id(5) @format(MAC_ADDRESS) ethernet_addr_t dst_mac, @id(6) bit<8> ttl, @id(7) bit<8> tos) {
+                                                                           ^^^
 pins_middleblock.p4(717): [--Wwarn=unused] warning: 'tos' is unused
-    @id(0x01000007) action mirror_as_ipv4_erspan(@id(1) port_id_t port, @id(2) @format(IPV4_ADDRESS) ipv4_addr_t src_ip, @id(3) @format(IPV4_ADDRESS) ipv4_addr_t dst_ip, @id(4) @format(MAC_ADDRESS) ethernet_addr_t src_mac, @id(5) @format(MAC_ADDRESS) ethernet_addr_t dst_mac, @id(6) bit<8> ttl, @id(7) bit<8> tos) {
-                                                                                                                                                                                                                                                                                                                     ^^^
+...mac, @id(5) @format(MAC_ADDRESS) ethernet_addr_t dst_mac, @id(6) bit<8> ttl, @id(7) bit<8> tos) {
+                                                                                              ^^^
 pins_middleblock.p4(719): [--Wwarn=unused] warning: 'monitor_failover_port' is unused
-    @id(0x0100001D) @unsupported action mirror_with_vlan_tag_and_ipfix_encapsulation(@id(1) port_id_t monitor_port, @id(2) port_id_t monitor_failover_port, @id(3) @format(MAC_ADDRESS) ethernet_addr_t mirror_encap_src_mac, @id(4) @format(MAC_ADDRESS) ethernet_addr_t mirror_encap_dst_mac, @id(6) vlan_id_t mirror_encap_vlan_id, @id(7) @format(IPV6_ADDRESS) ipv6_addr_t mirror_encap_dst_ip, @id(8) @format(IPV6_ADDRESS) ipv6_addr_t mirror_encap_src_ip, @id(9) bit<16> mirror_encap_udp_src_port, @id(10) bit<16> mirror_encap_udp_dst_port) {
-                                                                                                                                     ^^^^^^^^^^^^^^^^^^^^^
+..._id_t monitor_port, @id(2) port_id_t monitor_failover_port, @id(3) @format(MAC_ADDRESS) ethern...
+                                        ^^^^^^^^^^^^^^^^^^^^^
 pins_middleblock.p4(1080): [--Wwarn=unused] warning: Table acl_egress_dhcp_to_host_table is not used; removing
   ") table acl_egress_dhcp_to_host_table {
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 pins_middleblock.p4(1126): [--Wwarn=unused] warning: 'qos_queue' is unused
-    @id(0x01000101) @sai_action(SAI_PACKET_ACTION_COPY , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_RED) action acl_copy(@sai_action_param(QOS_QUEUE) @id(1) qos_queue_t qos_queue) {
-                                                                                                                                                                                                               ^^^^^^^^^
+...AI_PACKET_COLOR_RED) action acl_copy(@sai_action_param(QOS_QUEUE) @id(1) qos_queue_t qos_queue) {
+                                                                                        ^^^^^^^^^
 pins_middleblock.p4(1146): [--Wwarn=unused] warning: 'qos_queue' is unused
-    @id(0x0100010C) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_COPY_CANCEL , SAI_PACKET_COLOR_RED) action set_qos_queue_and_cancel_copy_above_rate_limit(@id(1) @sai_action_param(QOS_QUEUE) qos_queue_t qos_queue) {
-                                                                                                                                                                                                                                                            ^^^^^^^^^
+...eue_and_cancel_copy_above_rate_limit(@id(1) @sai_action_param(QOS_QUEUE) qos_queue_t qos_queue) {
+                                                                                        ^^^^^^^^^
 pins_middleblock.p4(1149): [--Wwarn=unused] warning: 'cpu_queue' is unused
-    @id(0x01000111) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_DENY , SAI_PACKET_COLOR_RED) @unsupported action set_cpu_and_multicast_queues_and_deny_above_rate_limit(@id(1) @sai_action_param(QOS_QUEUE) qos_queue_t cpu_queue, @id(2) @sai_action_param(MULTICAST_QOS_QUEUE , SAI_PACKET_COLOR_GREEN) qos_queue_t green_multicast_queue, @id(3) @sai_action_param(MULTICAST_QOS_QUEUE , SAI_PACKET_COLOR_RED) qos_queue_t red_multicast_queue) {
-                                                                                                                                                                                                                                                                          ^^^^^^^^^
+...) @sai_action_param(QOS_QUEUE) qos_queue_t cpu_queue, @id(2) @sai_action_param(MULTICAST_QOS_Q...
+                                              ^^^^^^^^^
 pins_middleblock.p4(1149): [--Wwarn=unused] warning: 'green_multicast_queue' is unused
-    @id(0x01000111) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_DENY , SAI_PACKET_COLOR_RED) @unsupported action set_cpu_and_multicast_queues_and_deny_above_rate_limit(@id(1) @sai_action_param(QOS_QUEUE) qos_queue_t cpu_queue, @id(2) @sai_action_param(MULTICAST_QOS_QUEUE , SAI_PACKET_COLOR_GREEN) qos_queue_t green_multicast_queue, @id(3) @sai_action_param(MULTICAST_QOS_QUEUE , SAI_PACKET_COLOR_RED) qos_queue_t red_multicast_queue) {
-                                                                                                                                                                                                                                                                                                                                                                        ^^^^^^^^^^^^^^^^^^^^^
+... SAI_PACKET_COLOR_GREEN) qos_queue_t green_multicast_queue, @id(3) @sai_action_param(MULTICAST...
+                                        ^^^^^^^^^^^^^^^^^^^^^
 pins_middleblock.p4(1149): [--Wwarn=unused] warning: 'red_multicast_queue' is unused
-    @id(0x01000111) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_DENY , SAI_PACKET_COLOR_RED) @unsupported action set_cpu_and_multicast_queues_and_deny_above_rate_limit(@id(1) @sai_action_param(QOS_QUEUE) qos_queue_t cpu_queue, @id(2) @sai_action_param(MULTICAST_QOS_QUEUE , SAI_PACKET_COLOR_GREEN) qos_queue_t green_multicast_queue, @id(3) @sai_action_param(MULTICAST_QOS_QUEUE , SAI_PACKET_COLOR_RED) qos_queue_t red_multicast_queue) {
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                ^^^^^^^^^^^^^^^^^^^
+... @sai_action_param(MULTICAST_QOS_QUEUE , SAI_PACKET_COLOR_RED) qos_queue_t red_multicast_queue) {
+                                                                              ^^^^^^^^^^^^^^^^^^^
 pins_middleblock.p4(1152): [--Wwarn=unused] warning: 'cpu_queue' is unused
-    @id(0x0100010E) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_DENY , SAI_PACKET_COLOR_RED) action set_cpu_queue_and_deny_above_rate_limit(@id(1) @sai_action_param(QOS_QUEUE) qos_queue_t cpu_queue) {
-                                                                                                                                                                                                                                              ^^^^^^^^^
+..._cpu_queue_and_deny_above_rate_limit(@id(1) @sai_action_param(QOS_QUEUE) qos_queue_t cpu_queue) {
+                                                                                        ^^^^^^^^^
 pins_middleblock.p4(1155): [--Wwarn=unused] warning: 'cpu_queue' is unused
-    @id(0x01000110) @sai_action(SAI_PACKET_ACTION_FORWARD) action set_cpu_queue(@id(1) @sai_action_param(QOS_QUEUE) qos_queue_t cpu_queue) {
-                                                                                                                                ^^^^^^^^^
+...ACTION_FORWARD) action set_cpu_queue(@id(1) @sai_action_param(QOS_QUEUE) qos_queue_t cpu_queue) {
+                                                                                        ^^^^^^^^^
 pins_middleblock.p4(1249): [--Wwarn=unused] warning: Table acl_ingress_qos_table is not used; removing
   ") table acl_ingress_qos_table {
            ^^^^^^^^^^^^^^^^^^^^^
@@ -77,8 +77,8 @@ pins_middleblock.p4(1123): [--Wwarn=unused] warning: acl_ingress_qos_counter: un
     @id(0x13000107) direct_counter(CounterType.packets_and_bytes) acl_ingress_qos_counter;
                                                                   ^^^^^^^^^^^^^^^^^^^^^^^
 pins_middleblock.p4(1121): [--Wwarn=unused] warning: acl_ingress_qos_meter: unused instance
-    @id(0x15000102) @mode(single_rate_two_color) direct_meter<MeterColor_t>(MeterType.bytes) acl_ingress_qos_meter;
-                                                                                             ^^^^^^^^^^^^^^^^^^^^^
+...) @mode(single_rate_two_color) direct_meter<MeterColor_t>(MeterType.bytes) acl_ingress_qos_meter;
+                                                                              ^^^^^^^^^^^^^^^^^^^^^
 pins_middleblock.p4(1124): [--Wwarn=unused] warning: acl_ingress_counting_counter: unused instance
     @id(0x13000109) direct_counter(CounterType.packets_and_bytes) acl_ingress_counting_counter;
                                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -95,7 +95,7 @@ pins_middleblock.p4(580): [--Wwarn=uninitialized_use] warning: router_interface_
             router_interface_id_value: exact @id(1) @name("router_interface_id");
             ^^^^^^^^^^^^^^^^^^^^^^^^^
 pins_middleblock.p4(558): [--Wwarn=uninitialized_use] warning: router_interface_id_value may not be completely initialized
-            router_interface_id_value: exact @id(1) @name("router_interface_id") @refers_to(router_interface_table , router_interface_id);
+            router_interface_id_value: exact @id(1) @name("router_interface_id") @refers_to(route...
             ^^^^^^^^^^^^^^^^^^^^^^^^^
 pins_middleblock.p4(559): [--Wwarn=uninitialized_use] warning: neighbor_id_value may be uninitialized
             neighbor_id_value : exact @id(2) @format(IPV6_ADDRESS) @name("neighbor_id");
@@ -104,8 +104,8 @@ pins_middleblock.p4(846): [--Wwarn=mismatch] warning: 1w1: Constant key field
             1w1: ternary @id(1) @name("dummy_match");
             ^^^
 pins_middleblock.p4(1558): [--Wwarn=overflow] warning: local_metadata._wcmp_selector_input13 << 8: shifting value with 8 bits by 8
-        local_metadata.wcmp_selector_input = local_metadata.wcmp_selector_input >> offset | local_metadata.wcmp_selector_input << 8 - offset;
-                                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+... local_metadata.wcmp_selector_input >> offset | local_metadata.wcmp_selector_input << 8 - offset;
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 pins_middleblock.p4(1562): [--Wwarn=overflow] warning: local_metadata._wcmp_selector_input13 << 8: shifting value with 8 bits by 8
-        local_metadata.wcmp_selector_input = local_metadata.wcmp_selector_input >> offset | local_metadata.wcmp_selector_input << 8 - offset;
-                                                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+... local_metadata.wcmp_selector_input >> offset | local_metadata.wcmp_selector_input << 8 - offset;
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

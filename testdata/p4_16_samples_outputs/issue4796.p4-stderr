@@ -11,8 +11,8 @@ issue4796.p4(33): [--Wwarn=unused] warning: 'priv' is unused
     action revie(out priceX year, bit<128> orde, bit<128> priv) {
                                                           ^^^^
 issue4796.p4(22): [--Wwarn=parser-transition] warning: accept state in parser MainParserImpl is unreachable
-parser MainParserImpl(packet_in pkt, out Headers hdr, inout main_metadata_t user_meta, in pna_main_parser_input_metadata_t istd) {
+parser MainParserImpl(packet_in pkt, out Headers hdr, inout main_metadata_t user_meta, in pna_mai...
        ^^^^^^^^^^^^^^
 issue4796.p4(22): [--Wwarn=parser-transition] warning: accept state in parser MainParserImpl is unreachable
-parser MainParserImpl(packet_in pkt, out Headers hdr, inout main_metadata_t user_meta, in pna_main_parser_input_metadata_t istd) {
+parser MainParserImpl(packet_in pkt, out Headers hdr, inout main_metadata_t user_meta, in pna_mai...
        ^^^^^^^^^^^^^^
