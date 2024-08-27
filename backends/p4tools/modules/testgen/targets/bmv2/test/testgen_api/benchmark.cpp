@@ -9,11 +9,14 @@
 
 #include "backends/p4tools/modules/testgen/core/symbolic_executor/path_selection.h"
 #include "backends/p4tools/modules/testgen/options.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/test/gtest_utils.h"
 #include "backends/p4tools/modules/testgen/testgen.h"
 
-namespace P4::Test {
+namespace P4::P4Tools::Test {
 
 using namespace P4::literals;
+
+class P4TestgenBenchmark : public P4TestgenBmv2Test {};
 
 TEST(P4TestgenBenchmark, SuccessfullyGenerate1000Tests) {
     // Set the compiler options.
@@ -47,4 +50,4 @@ TEST(P4TestgenBenchmark, SuccessfullyGenerate1000Tests) {
     // Print the report.
     P4Tools::printPerformanceReport();
 }
-}  // namespace P4::Test
+}  // namespace P4::P4Tools::Test

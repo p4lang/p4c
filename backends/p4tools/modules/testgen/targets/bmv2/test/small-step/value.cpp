@@ -5,20 +5,20 @@
 
 #include "ir/ir.h"
 
+#include "backends/p4tools/modules/testgen/targets/bmv2/test/gtest_utils.h"
 #include "backends/p4tools/modules/testgen/test/gtest_utils.h"
 #include "backends/p4tools/modules/testgen/test/small-step/util.h"
 
-namespace P4::Test {
+namespace P4::P4Tools::Test {
 
-using SmallStepUtil::createSmallStepExprTest;
 using SmallStepUtil::extractExpr;
 using SmallStepUtil::stepAndExamineValue;
 
 namespace {
 
 /// Test the step function for a constant.
-TEST_F(SmallStepTest, Value01) {
-    const auto test = createSmallStepExprTest("bit<8> f;", "8w42");
+TEST_F(Bmv2SmallStepTest, Value01) {
+    const auto test = createBmv2V1modelSmallStepExprTest("bit<8> f;", "8w42");
     ASSERT_TRUE(test);
 
     const auto *opValue = extractExpr<IR::Constant>(test->getProgram());
@@ -29,8 +29,8 @@ TEST_F(SmallStepTest, Value01) {
 }
 
 /// Test the step function for a bool value.
-TEST_F(SmallStepTest, Value02) {
-    const auto test = createSmallStepExprTest("bit<1> f;", "true");
+TEST_F(Bmv2SmallStepTest, Value02) {
+    const auto test = createBmv2V1modelSmallStepExprTest("bit<1> f;", "true");
     ASSERT_TRUE(test);
 
     const auto *opValue = extractExpr<IR::BoolLiteral>(test->getProgram());
@@ -42,4 +42,4 @@ TEST_F(SmallStepTest, Value02) {
 
 }  // anonymous namespace
 
-}  // namespace P4::Test
+}  // namespace P4::P4Tools::Test

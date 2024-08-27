@@ -2,20 +2,14 @@
 
 #include <gtest/gtest.h>
 
-#include <memory>
-
 #include <boost/multiprecision/cpp_int.hpp>
 
-#include "backends/p4tools/common/lib/symbolic_env.h"
 #include "backends/p4tools/common/lib/taint.h"
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 
-#include "backends/p4tools/modules/testgen/lib/execution_state.h"
-#include "backends/p4tools/modules/testgen/test/small-step/util.h"
-
-namespace P4::Test {
+namespace P4::P4Tools::Test {
 
 namespace {
 
@@ -32,7 +26,7 @@ TEST_F(TaintTest, Taint01) {
     const auto *typeBits = IR::Type_Bits::get(8);
     // Create a base state with a parameter continuation to apply the value on.
     {
-        const auto *taintExpression = P4Tools::ToolsVariables::getTaintExpression(typeBits);
+        const auto *taintExpression = ToolsVariables::getTaintExpression(typeBits);
         const auto *constantVar = IR::Constant::get(typeBits, 2);
         const auto *expr = new IR::Add(constantVar, taintExpression);
         const auto *taintedExpr = Taint::propagateTaint(expr);
@@ -48,7 +42,7 @@ TEST_F(TaintTest, Taint01) {
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
     {
-        const auto *taintExpression = P4Tools::ToolsVariables::getTaintExpression(typeBits);
+        const auto *taintExpression = ToolsVariables::getTaintExpression(typeBits);
         const auto *expectedExpr = taintExpression;
         ASSERT_TRUE(taintExpression->equiv(*expectedExpr));
     }
@@ -62,7 +56,7 @@ TEST_F(TaintTest, Taint01) {
 TEST_F(TaintTest, Taint02) {
     // Create a base state with a parameter continuation to apply the value on.
     const auto *typeBits = IR::Type_Bits::get(8);
-    const auto *taintExpression = P4Tools::ToolsVariables::getTaintExpression(typeBits);
+    const auto *taintExpression = ToolsVariables::getTaintExpression(typeBits);
     {
         const auto *expr =
             new IR::Concat(IR::Type_Bits::get(16), IR::Constant::get(typeBits, 2), taintExpression);
@@ -89,7 +83,7 @@ TEST_F(TaintTest, Taint02) {
 TEST_F(TaintTest, Taint03) {
     // Create a base state with a parameter continuation to apply the value on.
     const auto *typeBits = IR::Type_Bits::get(8);
-    const auto *taintExpression = P4Tools::ToolsVariables::getTaintExpression(typeBits);
+    const auto *taintExpression = ToolsVariables::getTaintExpression(typeBits);
     {
         const auto *expr =
             new IR::Concat(IR::Type_Bits::get(16), IR::Constant::get(typeBits, 2), taintExpression);
@@ -116,7 +110,7 @@ TEST_F(TaintTest, Taint03) {
 TEST_F(TaintTest, Taint04) {
     // Create a base state with a parameter continuation to apply the value on.
     const auto *typeBits = IR::Type_Bits::get(8);
-    const auto *taintExpression = P4Tools::ToolsVariables::getTaintExpression(typeBits);
+    const auto *taintExpression = ToolsVariables::getTaintExpression(typeBits);
     {
         const auto *expr =
             new IR::Concat(IR::Type_Bits::get(16), IR::Constant::get(typeBits, 2), taintExpression);
@@ -143,7 +137,7 @@ TEST_F(TaintTest, Taint04) {
 TEST_F(TaintTest, Taint05) {
     // Create a base state with a parameter continuation to apply the value on.
     const auto *typeBits = IR::Type_Bits::get(8);
-    const auto *taintExpression = P4Tools::ToolsVariables::getTaintExpression(typeBits);
+    const auto *taintExpression = ToolsVariables::getTaintExpression(typeBits);
     const auto *constantVar = IR::Constant::get(typeBits, 2);
     {
         const auto *expr = new IR::Concat(IR::Type_Bits::get(16), taintExpression, constantVar);
@@ -171,7 +165,7 @@ TEST_F(TaintTest, Taint05) {
 TEST_F(TaintTest, Taint06) {
     // Create a base state with a parameter continuation to apply the value on.
     const auto *typeBits = IR::Type_Bits::get(8);
-    const auto *taintExpression = P4Tools::ToolsVariables::getTaintExpression(typeBits);
+    const auto *taintExpression = ToolsVariables::getTaintExpression(typeBits);
     const auto *constantVar = IR::Constant::get(typeBits, 2);
     {
         const auto *expr = new IR::Concat(IR::Type_Bits::get(16), constantVar, taintExpression);
@@ -199,7 +193,7 @@ TEST_F(TaintTest, Taint06) {
 TEST_F(TaintTest, Taint07) {
     // Create a base state with a parameter continuation to apply the value on.
     const auto *typeBits = IR::Type_Bits::get(8);
-    const auto *taintExpression = P4Tools::ToolsVariables::getTaintExpression(typeBits);
+    const auto *taintExpression = ToolsVariables::getTaintExpression(typeBits);
     const auto *constantVar = IR::Constant::get(typeBits, 2);
 
     {
@@ -229,7 +223,7 @@ TEST_F(TaintTest, Taint07) {
 TEST_F(TaintTest, Taint08) {
     // Create a base state with a parameter continuation to apply the value on.
     const auto *typeBits = IR::Type_Bits::get(8);
-    const auto *taintExpression = P4Tools::ToolsVariables::getTaintExpression(typeBits);
+    const auto *taintExpression = ToolsVariables::getTaintExpression(typeBits);
     const auto *constantVar = IR::Constant::get(typeBits, 2);
 
     {
@@ -238,8 +232,7 @@ TEST_F(TaintTest, Taint08) {
         const auto *slicedExpr = new IR::Slice(expr, 11, 4);
         slicedExpr = new IR::Slice(slicedExpr, 4, 3);
         const auto *taintedExpr = Taint::propagateTaint(slicedExpr);
-        const auto *expectedExpr =
-            P4Tools::ToolsVariables::getTaintExpression(IR::Type_Bits::get(2));
+        const auto *expectedExpr = ToolsVariables::getTaintExpression(IR::Type_Bits::get(2));
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
     {
@@ -248,8 +241,7 @@ TEST_F(TaintTest, Taint08) {
         const auto *slicedExpr = new IR::Slice(expr, 19, 12);
         slicedExpr = new IR::Slice(slicedExpr, 2, 0);
         const auto *taintedExpr = Taint::propagateTaint(slicedExpr);
-        const auto *expectedExpr =
-            P4Tools::ToolsVariables::getTaintExpression(IR::Type_Bits::get(3));
+        const auto *expectedExpr = ToolsVariables::getTaintExpression(IR::Type_Bits::get(3));
         ASSERT_TRUE(taintedExpr->equiv(*expectedExpr));
     }
 }
@@ -263,7 +255,7 @@ TEST_F(TaintTest, Taint08) {
 /// Expected output: taint in most upper and lower 32 bits, taint in middle 64 bits
 TEST_F(TaintTest, Taint09) {
     // Taint64b
-    const auto *taint64b = P4Tools::ToolsVariables::getTaintExpression(IR::Type_Bits::get(64));
+    const auto *taint64b = ToolsVariables::getTaintExpression(IR::Type_Bits::get(64));
     ASSERT_TRUE(Taint::hasTaint(taint64b));
 
     ASSERT_TRUE(Taint::hasTaint(new IR::Slice(taint64b, 0, 0)));
@@ -310,4 +302,4 @@ TEST_F(TaintTest, Taint10) {
 
 }  // anonymous namespace
 
-}  // namespace P4::Test
+}  // namespace P4::P4Tools::Test

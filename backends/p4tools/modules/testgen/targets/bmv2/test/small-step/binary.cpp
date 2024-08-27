@@ -4,20 +4,20 @@
 
 #include "ir/ir.h"
 
+#include "backends/p4tools/modules/testgen/targets/bmv2/test/gtest_utils.h"
 #include "backends/p4tools/modules/testgen/test/gtest_utils.h"
 #include "backends/p4tools/modules/testgen/test/small-step/util.h"
 
-namespace P4::Test {
+namespace P4::P4Tools::Test {
 
-using SmallStepUtil::createSmallStepExprTest;
 using SmallStepUtil::extractExpr;
 using SmallStepUtil::stepAndExamineOp;
 
 namespace {
 
 /// Test the step function for v + e binary operation.
-TEST_F(SmallStepTest, Binary01) {
-    const auto test = createSmallStepExprTest("bit<8> f;", "8w42 + hdr.h.f");
+TEST_F(Bmv2SmallStepTest, Binary01) {
+    const auto test = createBmv2V1modelSmallStepExprTest("bit<8> f;", "8w42 + hdr.h.f");
     ASSERT_TRUE(test);
 
     const auto *opBin = extractExpr<IR::Operation_Binary>(test->getProgram());
@@ -31,11 +31,11 @@ TEST_F(SmallStepTest, Binary01) {
 }
 
 /// Test the step function for e + e binary operation.
-TEST_F(SmallStepTest, Binary02) {
-    const auto test = createSmallStepExprTest(R"(
+TEST_F(Bmv2SmallStepTest, Binary02) {
+    const auto test = createBmv2V1modelSmallStepExprTest(R"(
                                                bit<8> f1;
                                                bit<8> f2;)",
-                                              "hdr.h.f1 + hdr.h.f2");
+                                                         "hdr.h.f1 + hdr.h.f2");
     ASSERT_TRUE(test);
 
     const auto *opBin = extractExpr<IR::Operation_Binary>(test->getProgram());
@@ -49,8 +49,8 @@ TEST_F(SmallStepTest, Binary02) {
 }
 
 /// Test the step function for e == v binary operation.
-TEST_F(SmallStepTest, Binary03) {
-    const auto test = createSmallStepExprTest("bit<8> f;", "hdr.h.f == 8w42");
+TEST_F(Bmv2SmallStepTest, Binary03) {
+    const auto test = createBmv2V1modelSmallStepExprTest("bit<8> f;", "hdr.h.f == 8w42");
     ASSERT_TRUE(test);
 
     const auto *opBin = extractExpr<IR::Operation_Binary>(test->getProgram());
@@ -64,8 +64,8 @@ TEST_F(SmallStepTest, Binary03) {
 }
 
 /// Test the step function for v ++ e binary operation.
-TEST_F(SmallStepTest, Binary04) {
-    const auto test = createSmallStepExprTest("bit<8> f;", "8w42 ++ hdr.h.f");
+TEST_F(Bmv2SmallStepTest, Binary04) {
+    const auto test = createBmv2V1modelSmallStepExprTest("bit<8> f;", "8w42 ++ hdr.h.f");
     ASSERT_TRUE(test);
 
     const auto *opBin = extractExpr<IR::Operation_Binary>(test->getProgram());
@@ -80,4 +80,4 @@ TEST_F(SmallStepTest, Binary04) {
 
 }  // anonymous namespace
 
-}  // namespace P4::Test
+}  // namespace P4::P4Tools::Test

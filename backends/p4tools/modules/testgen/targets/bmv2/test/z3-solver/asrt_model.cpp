@@ -14,28 +14,27 @@
 #include "ir/declaration.h"
 #include "ir/ir.h"
 #include "lib/big_int_util.h"
+#include "lib/compile_context.h"
 #include "lib/cstring.h"
 #include "lib/enumerator.h"
 #include "lib/exceptions.h"
 #include "test/gtest/helpers.h"
 
 #include "backends/p4tools/modules/testgen/core/target.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/test/gtest_utils.h"
 #include "backends/p4tools/modules/testgen/test/gtest_utils.h"
 #include "backends/p4tools/modules/testgen/test/z3-solver/accessor.h"
 
-namespace P4::Test {
+namespace P4::P4Tools::Test {
 
 using namespace P4::literals;
 
-using P4Tools::Model;
-using P4Tools::Z3Solver;
-using P4Tools::Z3SolverAccessor;
-using P4Tools::P4Testgen::TestgenTarget;
 using Value = IR::Literal;
 
-class Z3SolverTest : public P4ToolsTest {
+class Z3SolverTest : public P4TestgenBmv2Test {
  protected:
     void SetUp() override {
+        P4TestgenBmv2Test::SetUp();
         opLss = nullptr;
         auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
       header H {
@@ -206,4 +205,4 @@ TEST_F(Z3SolverTest, Assertion2Model) {
 
 }  // anonymous namespace
 
-}  // namespace P4::Test
+}  // namespace P4::P4Tools::Test

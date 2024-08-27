@@ -5,10 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "backends/p4tools/common/core/z3_solver.h"
-#include "backends/p4tools/common/lib/model.h"
 #include "ir/declaration.h"
-#include "ir/indexed_vector.h"
 #include "ir/ir.h"
 #include "ir/node.h"
 #include "ir/visitor.h"
@@ -17,23 +14,21 @@
 #include "midend/saturationElim.h"
 #include "test/gtest/helpers.h"
 
-#include "backends/p4tools/modules/testgen/core/target.h"
+#include "backends/p4tools/modules/testgen/targets/bmv2/test/gtest_utils.h"
 #include "backends/p4tools/modules/testgen/test/gtest_utils.h"
 
-namespace P4::Test {
+namespace P4::P4Tools::Test {
 
 using namespace P4::literals;
 
 using P4::SaturationElim;
-using P4Tools::Model;
-using P4Tools::Z3Solver;
-using P4Tools::P4Testgen::TestgenTarget;
 
-class Z3SolverSatTests : public ::testing::Test {
+class Z3SolverSatTests : public P4TestgenBmv2Test {
  protected:
     Z3SolverSatTests(const char *condition, const char *equation)
         : condition(condition), equation(equation) {}
     void SetUp() override {
+        P4TestgenBmv2Test::SetUp();
         expression = nullptr;
         variableValue = nullptr;
         std::stringstream streamTest;
@@ -247,4 +242,4 @@ TEST_F(Z3SolverSubSat05, SubSat05) { test(expression, variableValue); }
 
 }  // namespace ArithmTest
 
-}  // namespace P4::Test
+}  // namespace P4::P4Tools::Test

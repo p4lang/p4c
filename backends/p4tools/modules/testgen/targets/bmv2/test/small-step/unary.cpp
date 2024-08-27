@@ -5,20 +5,20 @@
 
 #include "ir/ir.h"
 
+#include "backends/p4tools/modules/testgen/targets/bmv2/test/gtest_utils.h"
 #include "backends/p4tools/modules/testgen/test/gtest_utils.h"
 #include "backends/p4tools/modules/testgen/test/small-step/util.h"
 
-namespace P4::Test {
+namespace P4::P4Tools::Test {
 
-using SmallStepUtil::createSmallStepExprTest;
 using SmallStepUtil::extractExpr;
 using SmallStepUtil::stepAndExamineOp;
 
 namespace {
 
 /// Test the step function for -(v) unary operation.
-TEST_F(SmallStepTest, Unary01) {
-    const auto test = createSmallStepExprTest("bit<8> f;", "-(hdr.h.f)");
+TEST_F(Bmv2SmallStepTest, Unary01) {
+    const auto test = createBmv2V1modelSmallStepExprTest("bit<8> f;", "-(hdr.h.f)");
     ASSERT_TRUE(test);
 
     const auto *opUn = extractExpr<IR::Operation_Unary>(test->getProgram());
@@ -31,8 +31,8 @@ TEST_F(SmallStepTest, Unary01) {
 }
 
 /// Test the step function for !(v) unary operation.
-TEST_F(SmallStepTest, Unary02) {
-    const auto test = createSmallStepExprTest("bool f;", "!(hdr.h.f)");
+TEST_F(Bmv2SmallStepTest, Unary02) {
+    const auto test = createBmv2V1modelSmallStepExprTest("bool f;", "!(hdr.h.f)");
     ASSERT_TRUE(test);
 
     const auto *opUn = extractExpr<IR::Operation_Unary>(test->getProgram());
@@ -46,8 +46,8 @@ TEST_F(SmallStepTest, Unary02) {
 }
 
 /// Test the step function for ~(v) unary operation.
-TEST_F(SmallStepTest, Unary03) {
-    const auto test = createSmallStepExprTest("bit<8> f;", "~(hdr.h.f)");
+TEST_F(Bmv2SmallStepTest, Unary03) {
+    const auto test = createBmv2V1modelSmallStepExprTest("bit<8> f;", "~(hdr.h.f)");
     ASSERT_TRUE(test);
 
     const auto *opUn = extractExpr<IR::Operation_Unary>(test->getProgram());
@@ -61,4 +61,4 @@ TEST_F(SmallStepTest, Unary03) {
 
 }  // anonymous namespace
 
-}  // namespace P4::Test
+}  // namespace P4::P4Tools::Test

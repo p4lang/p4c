@@ -11,7 +11,7 @@
 #include "gtest/gtest.h"
 #include "ir/ir.h"
 
-namespace P4::Test {
+namespace P4::P4Tools::Test {
 
 class P4SmithForInLoopTest : public ::testing::Test {
  protected:
@@ -70,4 +70,4 @@ TEST_F(P4SmithForInLoopTest, CheckForLoopBody) {
     EXPECT_FALSE(forInStmt->body->is<IR::EmptyStatement>());
 }
 
-}  // namespace P4::Test
+}  // namespace P4::P4Tools::Test
