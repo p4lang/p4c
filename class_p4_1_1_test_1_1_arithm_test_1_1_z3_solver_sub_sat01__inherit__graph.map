@@ -1,7 +1,0 @@
-<map id="P4::Test::ArithmTest::Z3SolverSubSat01" name="P4::Test::ArithmTest::Z3SolverSubSat01">
-<area shape="rect" id="Node000001" title=" " alt="" coords="26,152,177,192"/>
-<area shape="rect" id="Node000002" href="$class_p4_1_1_test_1_1_z3_solver_sat_tests.html" title=" " alt="" coords="5,79,197,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="104,118,104,152,99,152,99,118"/>
-<area shape="rect" id="Node000003" title=" " alt="" coords="51,5,152,31"/>
-<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="104,44,104,79,99,79,99,44"/>
-</map>
