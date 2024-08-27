@@ -1051,10 +1051,21 @@ class FindUninitialized : public Inspector {
             // This could happen if we are writing to an array element
             // with an unknown index.
             auto type = typeMap->getType(expression, true);
-            warn(ErrorType::WARN_UNINITIALIZED_USE,
-                 type->is<IR::Type_Base>() ? "%1% may be uninitialized"
-                                           : "%1% may not be completely initialized",
-                 expression);
+            if (auto structType = type->to<IR::Type_StructLike>()) {
+                for (auto field : structType->fields) {
+                    auto fieldLoc = read->getField(field->name);
+                    auto fieldPoints = currentDefinitions->getPoints(fieldLoc);
+                    if (fieldPoints->containsBeforeStart()) {
+                        warn(ErrorType::WARN_UNINITIALIZED_USE, "%1%.%2% may be uninitialized",
+                             expression, field->name.toString());
+                    }
+                }
+            } else if (type->is<IR::Type_Base>()) {
+                warn(ErrorType::WARN_UNINITIALIZED_USE, "%1% may be uninitialized", expression);
+            } else {
+                warn(ErrorType::WARN_UNINITIALIZED_USE, "%1% may not be completely initialized",
+                     expression);
+            }
         }
 
         hasUses->add(points);
