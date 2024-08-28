@@ -196,6 +196,8 @@ class SourceInfo final {
 
     const SourcePosition &getEnd() const { return this->end; }
 
+    /// Returns all the comments found in the file that is associated with this node.
+    /// Returns nothing if no sources are associated with the node.
     [[nodiscard]] const std::vector<Comment *> getAllFileComments() const;
 
     /**
@@ -272,8 +274,9 @@ class Comment final : IHasDbPrint {
         if (!singleLine) out << "*/";
     }
 
-    // Retrieve the source position associated with this comment.
+    /// Retrieve the beginning of the source position associated with this comment.
     [[nodiscard]] const SourcePosition &getStartPosition() const { return srcInfo.getStart(); }
+    /// Retrieve the end of the source position associated with this comment.
     [[nodiscard]] const SourcePosition &getEndPosition() const { return srcInfo.getEnd(); }
 };
 
@@ -325,7 +328,7 @@ class InputSources final {
     cstring toDebugString() const;
     void addComment(SourceInfo srcInfo, bool singleLine, cstring body);
 
-    // Returns a list of all the comments found in the file, stored as a part of `InputSources`
+    /// Returns a list of all the comments found in the file, stored as a part of `InputSources`
     const std::vector<Comment *> &getAllComments() const;
 
  private:
