@@ -78,7 +78,6 @@ parser TopParser(packet_in b, out Parsed_packet p) {
 
 control TopPipe(inout Parsed_packet headers, in error parseError, in InControl inCtrl, out OutControl outCtrl) {
     @name("TopPipe.nextHop") bit<32> nextHop_0;
-    @name("TopPipe.hasReturned") bool hasReturned;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("TopPipe.Drop_action") action Drop_action() {
@@ -150,91 +149,32 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
         size = 16;
         default_action = Drop_action_2();
     }
-    @hidden action vssexample191() {
-        hasReturned = true;
-    }
-    @hidden action act() {
-        hasReturned = false;
-    }
-    @hidden action vssexample195() {
-        hasReturned = true;
-    }
-    @hidden action vssexample198() {
-        hasReturned = true;
-    }
-    @hidden action vssexample201() {
-        hasReturned = true;
-    }
-    @hidden table tbl_act {
-        actions = {
-            act();
-        }
-        const default_action = act();
-    }
     @hidden table tbl_Drop_action {
         actions = {
             Drop_action_3();
         }
         const default_action = Drop_action_3();
     }
-    @hidden table tbl_vssexample191 {
-        actions = {
-            vssexample191();
-        }
-        const default_action = vssexample191();
-    }
-    @hidden table tbl_vssexample195 {
-        actions = {
-            vssexample195();
-        }
-        const default_action = vssexample195();
-    }
-    @hidden table tbl_vssexample198 {
-        actions = {
-            vssexample198();
-        }
-        const default_action = vssexample198();
-    }
-    @hidden table tbl_vssexample201 {
-        actions = {
-            vssexample201();
-        }
-        const default_action = vssexample201();
-    }
     apply {
-        tbl_act.apply();
         if (parseError != error.NoError) {
             tbl_Drop_action.apply();
-            tbl_vssexample191.apply();
-        }
-        if (hasReturned) {
-            ;
         } else {
             ipv4_match_0.apply();
             if (outCtrl.outputPort == 4w0xf) {
-                tbl_vssexample195.apply();
+                ;
+            } else {
+                check_ttl_0.apply();
+                if (outCtrl.outputPort == 4w0xe) {
+                    ;
+                } else {
+                    dmac_1.apply();
+                    if (outCtrl.outputPort == 4w0xf) {
+                        ;
+                    } else {
+                        smac_1.apply();
+                    }
+                }
             }
-        }
-        if (hasReturned) {
-            ;
-        } else {
-            check_ttl_0.apply();
-            if (outCtrl.outputPort == 4w0xe) {
-                tbl_vssexample198.apply();
-            }
-        }
-        if (hasReturned) {
-            ;
-        } else {
-            dmac_1.apply();
-            if (outCtrl.outputPort == 4w0xf) {
-                tbl_vssexample201.apply();
-            }
-        }
-        if (hasReturned) {
-            ;
-        } else {
-            smac_1.apply();
         }
     }
 }

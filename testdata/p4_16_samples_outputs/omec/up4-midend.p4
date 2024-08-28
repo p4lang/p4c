@@ -309,7 +309,6 @@ control ComputeChecksumImpl(inout parsed_headers_t hdr, inout local_metadata_t l
 control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta, inout standard_metadata_t std_meta) {
     bool hasExited;
     @name("PreQosPipe.hasReturned_0") bool hasReturned_0;
-    @name("PreQosPipe.Routing.hasReturned") bool Routing_hasReturned;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @noWarn("unused") @name(".NoAction") action NoAction_2() {
@@ -665,9 +664,6 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
     @hidden action up4l681() {
         hdr.packet_out.setInvalid();
     }
-    @hidden action up4l684() {
-        hasReturned_0 = true;
-    }
     @hidden action up4l688() {
         local_meta.ue_addr = hdr.inner_ipv4.src_addr;
         local_meta.inet_addr = hdr.inner_ipv4.dst_addr;
@@ -703,11 +699,8 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
     @hidden action up4l712() {
         app_meter_0.execute_meter<bit<2>>(local_meta.app_meter_idx_internal, local_meta.app_color);
     }
-    @hidden action up4l431() {
-        Routing_hasReturned = true;
-    }
-    @hidden action act_0() {
-        Routing_hasReturned = false;
+    @hidden action up4l684() {
+        hasReturned_0 = true;
     }
     @hidden action up4l433() {
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
@@ -729,12 +722,6 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
             up4l681();
         }
         const default_action = up4l681();
-    }
-    @hidden table tbl_up4l684 {
-        actions = {
-            up4l684();
-        }
-        const default_action = up4l684();
     }
     @hidden table tbl_up4l688 {
         actions = {
@@ -820,17 +807,11 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
         }
         const default_action = do_drop_4();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_up4l684 {
         actions = {
-            act_0();
+            up4l684();
         }
-        const default_action = act_0();
-    }
-    @hidden table tbl_up4l431 {
-        actions = {
-            up4l431();
-        }
-        const default_action = up4l431();
+        const default_action = up4l684();
     }
     @hidden table tbl_up4l433 {
         actions = {
@@ -849,15 +830,8 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
         tbl__initialize_metadata.apply();
         if (hdr.packet_out.isValid()) {
             tbl_up4l681.apply();
-        } else {
-            if (my_station_0.apply().hit) {
-                ;
-            } else {
-                tbl_up4l684.apply();
-            }
-            if (hasReturned_0) {
-                ;
-            } else if (interfaces_0.apply().hit) {
+        } else if (my_station_0.apply().hit) {
+            if (interfaces_0.apply().hit) {
                 if (local_meta.direction == 8w0x1) {
                     tbl_up4l688.apply();
                     sessions_uplink_0.apply();
@@ -922,27 +896,23 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
                     }
                 }
             }
+        } else {
+            tbl_up4l684.apply();
         }
         if (hasExited) {
             ;
         } else if (hasReturned_0) {
             ;
         } else {
-            tbl_act_0.apply();
             if (hdr.ipv4.isValid()) {
-                ;
-            } else {
-                tbl_up4l431.apply();
-            }
-            if (Routing_hasReturned) {
-                ;
-            } else {
                 tbl_up4l433.apply();
                 if (hdr.ipv4.ttl == 8w0) {
                     tbl_Routing_drop.apply();
                 } else {
                     Routing_routes_v4.apply();
                 }
+            } else {
+                ;
             }
             if (hdr.ethernet.isValid() && hdr.ipv4.isValid()) {
                 Acl_acls.apply();

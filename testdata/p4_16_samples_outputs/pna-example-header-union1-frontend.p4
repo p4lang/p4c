@@ -48,7 +48,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, in pna
 control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
     @name("ingress.tmp") bool tmp;
     @name("ingress.hdr_0") headers hdr_1;
-    @name("ingress.hasReturned") bool hasReturned;
     @name("ingress.retval") bool retval;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
@@ -66,13 +65,8 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
     apply {
         debug_hdr_0.apply();
         hdr_1 = hdr;
-        hasReturned = false;
         if (hdr_1.base.isValid() && hdr_1.u.short.isValid()) {
-            hasReturned = true;
             retval = true;
-        }
-        if (hasReturned) {
-            ;
         } else {
             retval = false;
         }

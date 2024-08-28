@@ -25,25 +25,19 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.hasReturned") bool hasReturned;
     @name("ingress.retval") ethernet_t retval;
     @name("ingress.retval_0") ethernet_t retval_0;
     @hidden action gauntlet_hdr_function_castbmv2l22() {
-        hasReturned = true;
         retval.setValid();
         retval.dst_addr = 48w1;
         retval.src_addr = 48w1;
         retval.eth_type = 16w1;
     }
     @hidden action gauntlet_hdr_function_castbmv2l24() {
-        hasReturned = true;
         retval.setValid();
         retval.dst_addr = 48w2;
         retval.src_addr = 48w2;
         retval.eth_type = 16w2;
-    }
-    @hidden action act() {
-        hasReturned = false;
     }
     @hidden action gauntlet_hdr_function_castbmv2l26() {
         retval.setValid();
@@ -58,12 +52,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         retval_0.src_addr = 48w1;
         retval_0.eth_type = 16w1;
         h.eth_hdr2 = retval_0;
-    }
-    @hidden table tbl_act {
-        actions = {
-            act();
-        }
-        const default_action = act();
     }
     @hidden table tbl_gauntlet_hdr_function_castbmv2l22 {
         actions = {
@@ -90,14 +78,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = gauntlet_hdr_function_castbmv2l30();
     }
     apply {
-        tbl_act.apply();
         if (h.eth_hdr1.eth_type == 16w1) {
             tbl_gauntlet_hdr_function_castbmv2l22.apply();
         } else if (h.eth_hdr1.eth_type == 16w2) {
             tbl_gauntlet_hdr_function_castbmv2l24.apply();
-        }
-        if (hasReturned) {
-            ;
         } else {
             tbl_gauntlet_hdr_function_castbmv2l26.apply();
         }

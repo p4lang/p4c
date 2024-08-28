@@ -71,7 +71,6 @@ parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata user_
 }
 
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @name("ingress.hasReturned") bool hasReturned;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.execute") action execute_1() {
@@ -89,16 +88,6 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     @hidden action psadpdkerrorcode100() {
         ostd.drop = true;
-        hasReturned = true;
-    }
-    @hidden action act() {
-        hasReturned = false;
-    }
-    @hidden table tbl_act {
-        actions = {
-            act();
-        }
-        const default_action = act();
     }
     @hidden table tbl_psadpdkerrorcode100 {
         actions = {
@@ -107,12 +96,8 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
         const default_action = psadpdkerrorcode100();
     }
     apply {
-        tbl_act.apply();
         if (istd.parser_error != error.NoError) {
             tbl_psadpdkerrorcode100.apply();
-        }
-        if (hasReturned) {
-            ;
         } else {
             tbl_0.apply();
         }

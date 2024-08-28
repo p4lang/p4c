@@ -44,7 +44,6 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    @name("pipe.hasReturned") bool hasReturned;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("pipe.Reject") action Reject(@name("add") IPv4Address add_1) {
@@ -63,18 +62,11 @@ control pipe(inout Headers_t headers, out bool pass) {
         const default_action = NoAction_1();
     }
     apply {
-        hasReturned = false;
         pass = true;
         if (headers.ipv4.isValid()) {
-            ;
+            Check_src_ip_0.apply();
         } else {
             pass = false;
-            hasReturned = true;
-        }
-        if (hasReturned) {
-            ;
-        } else {
-            Check_src_ip_0.apply();
         }
     }
 }

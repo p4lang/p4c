@@ -27,7 +27,6 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    bool hasExited;
     @name("ingress.tmp") bool_struct tmp_0;
     @name("ingress.dummy_bit") bit<16> dummy_bit_0;
     @name("ingress.dummy_struct") bool_struct dummy_struct_0;
@@ -47,14 +46,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         default_action = NoAction_1();
     }
-    @hidden action gauntlet_uninitialized_bool_structbmv2l47() {
-        hasExited = true;
-    }
     @hidden action gauntlet_uninitialized_bool_structbmv2l49() {
         h.eth_hdr.dst_addr = 48w1;
     }
     @hidden action gauntlet_uninitialized_bool_structbmv2l31() {
-        hasExited = false;
         tmp_0.is_bool = false;
     }
     @hidden table tbl_gauntlet_uninitialized_bool_structbmv2l31 {
@@ -62,12 +57,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             gauntlet_uninitialized_bool_structbmv2l31();
         }
         const default_action = gauntlet_uninitialized_bool_structbmv2l31();
-    }
-    @hidden table tbl_gauntlet_uninitialized_bool_structbmv2l47 {
-        actions = {
-            gauntlet_uninitialized_bool_structbmv2l47();
-        }
-        const default_action = gauntlet_uninitialized_bool_structbmv2l47();
     }
     @hidden table tbl_gauntlet_uninitialized_bool_structbmv2l49 {
         actions = {
@@ -80,13 +69,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         switch (simple_table_0.apply().action_run) {
             dummy_action: {
                 if (tmp_0.is_bool) {
-                    ;
-                } else {
-                    tbl_gauntlet_uninitialized_bool_structbmv2l47.apply();
-                }
-                if (hasExited) {
-                    ;
-                } else {
                     tbl_gauntlet_uninitialized_bool_structbmv2l49.apply();
                 }
             }

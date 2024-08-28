@@ -36,8 +36,9 @@ control c(inout headers_t hdrs) {
                 idx_1 = foo<bit<8>>(j_1);
                 if (idx_1 == 8w255) {
                     continue;
+                } else {
+                    foo<bit<8>>(i_0);
                 }
-                foo<bit<8>>(i_0);
             }
         }
     }

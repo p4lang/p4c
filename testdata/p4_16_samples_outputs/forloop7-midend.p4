@@ -17,9 +17,7 @@ control c(inout headers_t hdrs) {
     @name("c.hasReturned") bool hasReturned;
     bool breakFlag;
     bool breakFlag_0;
-    bool continueFlag;
     bool breakFlag_1;
-    bool continueFlag_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("c.a0") action a0(@name("m") bit<8> m_1) {
@@ -27,37 +25,21 @@ control c(inout headers_t hdrs) {
         breakFlag = false;
         fn(16w1, 16w0);
         breakFlag_0 = false;
-        continueFlag = false;
         tmp = fn(16w1, 16w1);
         if (tmp) {
-            continueFlag = true;
-        }
-        if (continueFlag) {
             ;
         } else {
             hasReturned = true;
-        }
-        if (continueFlag) {
-            ;
-        } else {
             breakFlag_0 = true;
         }
         if (breakFlag_0) {
             ;
         } else {
-            continueFlag = false;
             tmp = fn(16w1, 16w2);
             if (tmp) {
-                continueFlag = true;
-            }
-            if (continueFlag) {
                 ;
             } else {
                 hasReturned = true;
-            }
-            if (continueFlag) {
-                ;
-            } else {
                 breakFlag_0 = true;
             }
         }
@@ -77,37 +59,21 @@ control c(inout headers_t hdrs) {
         } else {
             fn(16w2, 16w0);
             breakFlag_1 = false;
-            continueFlag_0 = false;
             tmp = fn(16w2, 16w1);
             if (tmp) {
-                continueFlag_0 = true;
-            }
-            if (continueFlag_0) {
                 ;
             } else {
                 hasReturned = true;
-            }
-            if (continueFlag_0) {
-                ;
-            } else {
                 breakFlag_1 = true;
             }
             if (breakFlag_1) {
                 ;
             } else {
-                continueFlag_0 = false;
                 tmp = fn(16w2, 16w2);
                 if (tmp) {
-                    continueFlag_0 = true;
-                }
-                if (continueFlag_0) {
                     ;
                 } else {
                     hasReturned = true;
-                }
-                if (continueFlag_0) {
-                    ;
-                } else {
                     breakFlag_1 = true;
                 }
             }

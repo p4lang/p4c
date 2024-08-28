@@ -24,30 +24,11 @@ parser prs(packet_in p, out Headers h) {
 }
 
 control c(inout Headers h) {
-    @name("c.hasReturned") bool hasReturned;
-    @hidden action serenum39() {
-        hasReturned = true;
-    }
-    @hidden action act() {
-        hasReturned = false;
-    }
     @hidden action serenum41() {
         h.eth.setInvalid();
     }
     @hidden action serenum43() {
         h.eth.type = 16w0;
-    }
-    @hidden table tbl_act {
-        actions = {
-            act();
-        }
-        const default_action = act();
-    }
-    @hidden table tbl_serenum39 {
-        actions = {
-            serenum39();
-        }
-        const default_action = serenum39();
     }
     @hidden table tbl_serenum41 {
         actions = {
@@ -62,18 +43,14 @@ control c(inout Headers h) {
         const default_action = serenum43();
     }
     apply {
-        tbl_act.apply();
         if (h.eth.isValid()) {
-            ;
+            if (h.eth.type == 16w0x800) {
+                tbl_serenum41.apply();
+            } else {
+                tbl_serenum43.apply();
+            }
         } else {
-            tbl_serenum39.apply();
-        }
-        if (hasReturned) {
             ;
-        } else if (h.eth.type == 16w0x800) {
-            tbl_serenum41.apply();
-        } else {
-            tbl_serenum43.apply();
         }
     }
 }

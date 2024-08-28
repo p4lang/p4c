@@ -23,18 +23,13 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.hasReturned") bool hasReturned;
     @name("ingress.val1") Headers val1;
     @name("ingress.dst") bit<48> dst;
     @name("ingress.type") bit<16> type_1;
     @name("ingress.c") bool c_0;
     @name("ingress.c1") bool c1_0;
     @name("ingress.simple_action") action simple_action() {
-        hasReturned = false;
         if (h.eth_hdr.eth_type == 16w1) {
-            hasReturned = true;
-        }
-        if (hasReturned) {
             ;
         } else {
             h.eth_hdr.src_addr = 48w1;

@@ -42,7 +42,6 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    @name("pipe.hasReturned") bool hasReturned;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("pipe.Reject") action Reject(@name("add") bit<32> add_1) {
@@ -62,10 +61,8 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     @hidden action hit_ebpf63() {
         pass = false;
-        hasReturned = true;
     }
     @hidden action hit_ebpf60() {
-        hasReturned = false;
         pass = true;
     }
     @hidden table tbl_hit_ebpf60 {
@@ -83,14 +80,11 @@ control pipe(inout Headers_t headers, out bool pass) {
     apply {
         tbl_hit_ebpf60.apply();
         if (headers.ipv4.isValid()) {
-            ;
+            if (Check_src_ip_0.apply().hit) {
+                ;
+            }
         } else {
             tbl_hit_ebpf63.apply();
-        }
-        if (hasReturned) {
-            ;
-        } else if (Check_src_ip_0.apply().hit) {
-            ;
         }
     }
 }

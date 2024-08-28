@@ -23,7 +23,6 @@ struct metadata {
 	bit<8> ingress_debug_hdr_base_t
 	bit<8> ingress_debug_hdr_u_short_isValid
 	bit<8> ingress_debug_hdr_u_byte_isValid
-	bit<8> MainControlT_hasReturned
 	bit<8> MainControlT_retval
 }
 metadata instanceof metadata
@@ -69,26 +68,23 @@ apply {
 	invalidate h.MainControlT_hdr_1_u_short
 	LABEL_END_1 :	jmpnv LABEL_END_2 h.u_short
 	validate h.MainControlT_hdr_1_u_short
-	LABEL_END_2 :	mov m.MainControlT_hasReturned 0
-	jmpnv LABEL_END_3 h.base
-	jmpnv LABEL_END_3 h.u_short
-	mov m.MainControlT_hasReturned 1
+	LABEL_END_2 :	jmpnv LABEL_FALSE_1 h.base
+	jmpnv LABEL_FALSE_1 h.u_short
 	mov m.MainControlT_retval 1
-	LABEL_END_3 :	jmpneq LABEL_FALSE_2 m.MainControlT_hasReturned 0x1
-	jmp LABEL_END_4
-	LABEL_FALSE_2 :	mov m.MainControlT_retval 0
-	LABEL_END_4 :	jmpneq LABEL_END_5 m.MainControlT_retval 0x1
+	jmp LABEL_END_3
+	LABEL_FALSE_1 :	mov m.MainControlT_retval 0
+	LABEL_END_3 :	jmpneq LABEL_END_4 m.MainControlT_retval 0x1
 	mov h.base.t 0x3
-	LABEL_END_5 :	jmpnv LABEL_FALSE_4 h.u_short
+	LABEL_END_4 :	jmpnv LABEL_FALSE_3 h.u_short
 	validate h.u_short
 	mov h.u_short.data 0xFFFF
 	invalidate h.u_byte
-	jmp LABEL_END_6
-	LABEL_FALSE_4 :	jmpnv LABEL_END_6 h.u_byte
+	jmp LABEL_END_5
+	LABEL_FALSE_3 :	jmpnv LABEL_END_5 h.u_byte
 	validate h.u_byte
 	mov h.u_byte.data 0xFF
 	invalidate h.u_short
-	LABEL_END_6 :	emit h.base
+	LABEL_END_5 :	emit h.base
 	emit h.u_byte
 	emit h.u_short
 	tx m.pna_main_output_metadata_output_port

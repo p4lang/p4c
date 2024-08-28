@@ -22,16 +22,13 @@ struct Meta {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp_key") bit<128> tmp_key_0;
-    @name("ingress.hasReturned") bool hasReturned;
     @name("ingress.val") bit<8> val_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.do_action") action do_action() {
         val_0 = h.h.a;
-        hasReturned = false;
         if (val_0 > 8w10) {
             val_0 = 8w2;
-            hasReturned = true;
         } else {
             val_0 = 8w3;
         }

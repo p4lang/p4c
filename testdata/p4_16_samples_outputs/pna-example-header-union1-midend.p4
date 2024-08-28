@@ -45,7 +45,6 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
     S hdr_1_base;
     O1 hdr_1_u_byte;
     O2 hdr_1_u_short;
-    @name("ingress.hasReturned") bool hasReturned;
     @name("ingress.retval") bool retval;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
@@ -61,8 +60,10 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
         const default_action = NoAction_1();
     }
     @hidden action pnaexampleheaderunion1l51() {
-        hasReturned = true;
         retval = true;
+    }
+    @hidden action pnaexampleheaderunion1l52() {
+        retval = false;
     }
     @hidden action act() {
         hdr_1_base = hdr.base;
@@ -80,10 +81,6 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
         } else {
             hdr_1_u_short.setInvalid();
         }
-        hasReturned = false;
-    }
-    @hidden action pnaexampleheaderunion1l52() {
-        retval = false;
     }
     @hidden action pnaexampleheaderunion1l73() {
         hdr.base.t = 8w3;
@@ -139,9 +136,6 @@ control ingress(inout headers hdr, inout metadata meta, in pna_main_input_metada
         tbl_act.apply();
         if (hdr_1_base.isValid() && hdr_1_u_short.isValid()) {
             tbl_pnaexampleheaderunion1l51.apply();
-        }
-        if (hasReturned) {
-            ;
         } else {
             tbl_pnaexampleheaderunion1l52.apply();
         }

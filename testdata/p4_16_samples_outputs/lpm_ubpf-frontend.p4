@@ -47,7 +47,6 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
 }
 
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
-    @name("pipe.hasReturned") bool hasReturned;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("pipe.Reject") action Reject(@name("add") IPv4Address add) {
@@ -66,19 +65,12 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
         default_action = Reject(32w0);
     }
     apply {
-        hasReturned = false;
         if (headers.ipv4.isValid()) {
-            ;
+            Check_src_ip_0.apply();
         } else {
             headers.ipv4.setInvalid();
             headers.ipv4.setValid();
             mark_to_drop();
-            hasReturned = true;
-        }
-        if (hasReturned) {
-            ;
-        } else {
-            Check_src_ip_0.apply();
         }
     }
 }
