@@ -150,11 +150,11 @@ unsigned&#160;</td><td class="memItemRight" valign="bottom"><b>getCurrentLineNum
 <tr class="memitem:a7525a025165634f5d587553d574f3515" id="r_a7525a025165634f5d587553d574f3515"><td class="memItemLeft" align="right" valign="top"><a id="a7525a025165634f5d587553d574f3515" name="a7525a025165634f5d587553d574f3515"></a>
 std::string_view&#160;</td><td class="memItemRight" valign="bottom"><b>getLine</b> (unsigned lineNumber) const</td></tr>
 <tr class="separator:a7525a025165634f5d587553d574f3515"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abbcc321027500c69fc74dc05092fbbcc" id="r_abbcc321027500c69fc74dc05092fbbcc"><td class="memItemLeft" align="right" valign="top"><a id="abbcc321027500c69fc74dc05092fbbcc" name="abbcc321027500c69fc74dc05092fbbcc"></a>
-<a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getSourceFragment</b> (const <a class="el" href="class_p4_1_1_util_1_1_source_info.html">SourceInfo</a> &amp;position, bool useMarker) const</td></tr>
-<tr class="separator:abbcc321027500c69fc74dc05092fbbcc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adffdd2e42128d23dc38dc35fe0f0d3d7" id="r_adffdd2e42128d23dc38dc35fe0f0d3d7"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adffdd2e42128d23dc38dc35fe0f0d3d7">getSourceFragment</a> (const <a class="el" href="class_p4_1_1_util_1_1_source_position.html">SourcePosition</a> &amp;position, bool useMarker) const</td></tr>
-<tr class="separator:adffdd2e42128d23dc38dc35fe0f0d3d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad10d1317aa1b2bc0e184a1208d7d6e81" id="r_ad10d1317aa1b2bc0e184a1208d7d6e81"><td class="memItemLeft" align="right" valign="top"><a id="ad10d1317aa1b2bc0e184a1208d7d6e81" name="ad10d1317aa1b2bc0e184a1208d7d6e81"></a>
+<a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getSourceFragment</b> (const <a class="el" href="class_p4_1_1_util_1_1_source_info.html">SourceInfo</a> &amp;position, int trimWidth, bool useMarker) const</td></tr>
+<tr class="separator:ad10d1317aa1b2bc0e184a1208d7d6e81"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3c1e3d256f0e882905a28bf3b22ddac9" id="r_a3c1e3d256f0e882905a28bf3b22ddac9"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3c1e3d256f0e882905a28bf3b22ddac9">getSourceFragment</a> (const <a class="el" href="class_p4_1_1_util_1_1_source_position.html">SourcePosition</a> &amp;position, int trimWidth, bool useMarker) const</td></tr>
+<tr class="separator:a3c1e3d256f0e882905a28bf3b22ddac9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac950c54b6860d8f73b2295300abfedf0" id="r_ac950c54b6860d8f73b2295300abfedf0"><td class="memItemLeft" align="right" valign="top"><a id="ac950c54b6860d8f73b2295300abfedf0" name="ac950c54b6860d8f73b2295300abfedf0"></a>
 <a class="el" href="struct_p4_1_1_util_1_1_source_file_line.html">SourceFileLine</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getSourceLine</b> (unsigned line) const</td></tr>
 <tr class="memdesc:ac950c54b6860d8f73b2295300abfedf0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Original source line that produced the line with the specified number. <br /></td></tr>
@@ -176,8 +176,8 @@ unsigned&#160;</td><td class="memItemRight" valign="bottom"><b>lineCount</b> () 
 <p>The mutable part of the API is tailored for interaction with the lexer. After the lexer is done this object can be "sealed" and never changes again.</p>
 <p>This class implements a singleton pattern: there is a single instance of this class. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="adffdd2e42128d23dc38dc35fe0f0d3d7" name="adffdd2e42128d23dc38dc35fe0f0d3d7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adffdd2e42128d23dc38dc35fe0f0d3d7">&#9670;&#160;</a></span>getSourceFragment()</h2>
+<a id="a3c1e3d256f0e882905a28bf3b22ddac9" name="a3c1e3d256f0e882905a28bf3b22ddac9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3c1e3d256f0e882905a28bf3b22ddac9">&#9670;&#160;</a></span>getSourceFragment()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -186,6 +186,11 @@ unsigned&#160;</td><td class="memItemRight" valign="bottom"><b>lineCount</b> () 
           <td class="memname"><a class="el" href="class_p4_1_1cstring.html">cstring</a> P4::Util::InputSources::getSourceFragment </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="class_p4_1_1_util_1_1_source_position.html">SourcePosition</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>position</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>trimWidth</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
