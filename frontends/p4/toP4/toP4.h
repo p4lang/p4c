@@ -72,8 +72,8 @@ class ToP4 : public Inspector, ResolutionContext {
         BUG_CHECK(!listTerminators.empty(), "Empty listTerminators");
         listTerminators.pop_back();
     }
-    bool isSystemFile(cstring file);
-    cstring ifSystemFile(const IR::Node *node);  // return file containing node if system file
+    // return file containing node if system file
+    cstring ifSystemFile(const IR::Node *node);
     // dump node IR tree up to depth - in the form of a comment
     void dump(unsigned depth, const IR::Node *node = nullptr, unsigned adjDepth = 0);
     unsigned curDepth() const;

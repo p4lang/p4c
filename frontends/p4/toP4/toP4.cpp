@@ -46,17 +46,14 @@ void ToP4::end_apply(const IR::Node *) {
               "inconsistent vectorSeparator");
 }
 
-// Try to guess whether a file is a "system" file
-bool ToP4::isSystemFile(cstring file) {
-    if (noIncludes) return false;
-    if (file.startsWith(p4includePath)) return true;
-    return false;
-}
-
 cstring ToP4::ifSystemFile(const IR::Node *node) {
-    if (!node->srcInfo.isValid()) return nullptr;
+    if (!node->srcInfo.isValid() || noIncludes) {
+        return nullptr;
+    }
     auto sourceFile = node->srcInfo.getSourceFile();
-    if (isSystemFile(sourceFile)) return sourceFile;
+    if (isSystemFile(sourceFile)) {
+        return sourceFile;
+    }
     return nullptr;
 }
 
