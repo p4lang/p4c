@@ -409,7 +409,7 @@ var annotated_dup =
       [ "IR", null, [
         [ "has_static_type_name", "struct_p4_1_1_i_r_1_1has__static__type__name.html", null ],
         [ "has_static_type_name< T, std::void_t< decltype(T::static_type_name())> >", "struct_p4_1_1_i_r_1_1has__static__type__name_3_01_t_00_01std_1_1void__t_3_01decltype_07_t_1_1static__type__name_07_08_08_4_01_4.html", null ],
-        [ "ID", "struct_p4_1_1_i_r_1_1_i_d.html", null ],
+        [ "ID", "struct_p4_1_1_i_r_1_1_i_d.html", "struct_p4_1_1_i_r_1_1_i_d" ],
         [ "IDeclaration", "class_p4_1_1_i_r_1_1_i_declaration.html", "class_p4_1_1_i_r_1_1_i_declaration" ],
         [ "IndexedVector", "class_p4_1_1_i_r_1_1_indexed_vector.html", null ],
         [ "INode", "class_p4_1_1_i_r_1_1_i_node.html", null ],
