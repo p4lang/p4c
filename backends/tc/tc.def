@@ -231,6 +231,7 @@ class TCTable {
     cstring pipelineName;
     cstring permissions;
     cstring directCounterInstance;
+    cstring directMeterInstance;
     unsigned keySize;
     unsigned tableEntriesCount;
     unsigned numMask;
@@ -248,6 +249,7 @@ class TCTable {
     bool isTableAddOnMiss;
     bool isTcMayOverride;
     bool isDirectCounter;
+    bool isDirectMeter;
     ordered_map<TCAction, unsigned> actionList;
     safe_vector<TCEntry> const_entries;
 
@@ -257,6 +259,10 @@ class TCTable {
     void setDirectCounter(cstring counter) {
         isDirectCounter = true;
         directCounterInstance = counter;
+    }
+    void setDirectMeter(cstring meter) {
+        isDirectMeter = true;
+        directMeterInstance = meter;
     }
     void setKeySize(unsigned k) {
         keySize = k;
@@ -337,6 +343,7 @@ class TCTable {
         isTableAddOnMiss = false;
         isTcMayOverride = false;
         isDirectCounter = false;
+        isDirectMeter = false;
     }
     toString {
         std::string tcTable = absl::StrCat("\n$TC p4template create table/",
@@ -352,6 +359,9 @@ class TCTable {
         }
         if (isDirectCounter) {
             absl::StrAppend(&tcTable, " \\\n\tpna_direct_counter DirectCounter/", directCounterInstance.string_view());
+        }
+        if (isDirectMeter) {
+            absl::StrAppend(&tcTable, " \\\n\tpna_direct_meter DirectMeter/", directMeterInstance.string_view());
         }
 
         if (!actionList.empty()) {

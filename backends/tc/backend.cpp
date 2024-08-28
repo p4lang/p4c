@@ -590,6 +590,47 @@ void ConvertToBackendIR::updatePnaDirectCounter(const IR::P4Table *t, IR::TCTabl
     }
 }
 
+void ConvertToBackendIR::updatePnaDirectMeter(const IR::P4Table *t, IR::TCTable *tabledef,
+                                              unsigned tentries) {
+    cstring propertyName = "pna_direct_meter"_cs;
+    auto property = t->properties->getProperty(propertyName);
+    if (property == nullptr) return;
+    auto expr = property->value->to<IR::ExpressionValue>()->expression;
+    auto ctrl = findContext<IR::P4Control>();
+    auto cName = ctrl->name.originalName;
+    auto externInstanceName = cName + "." + expr->toString();
+    tabledef->setDirectMeter(externInstanceName);
+
+    auto externInstance = P4::ExternInstance::resolve(expr, refMap, typeMap);
+    if (!externInstance) {
+        ::P4::error(ErrorType::ERR_INVALID,
+                    "Expected %1% property value for table %2% to resolve to an "
+                    "extern instance: %3%",
+                    propertyName, t->name.originalName, property);
+        return;
+    }
+    bool foundExtern = false;
+    for (auto ext : externsInfo) {
+        if (ext.first == externInstance->type->toString()) {
+            auto externDefinition = tcPipeline->getExternDefinition(ext.first);
+            if (externDefinition) {
+                auto extInstDef = ((IR::TCExternInstance *)externDefinition->getExternInstance(
+                    externInstanceName));
+                extInstDef->setExternTableBindable(true);
+                extInstDef->setNumElements(tentries);
+                foundExtern = true;
+                break;
+            }
+        }
+    }
+    if (foundExtern == false) {
+        ::P4::error(ErrorType::ERR_INVALID,
+                    "Expected %1% property value for table %2% to resolve to an "
+                    "extern instance: %3%",
+                    propertyName, t->name.originalName, property);
+    }
+}
+
 void ConvertToBackendIR::updateAddOnMissTable(const IR::P4Table *t) {
     auto tblname = t->name.originalName;
     for (auto table : tcPipeline->tableDefs) {
@@ -778,6 +819,7 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
             }
         }
         updatePnaDirectCounter(t, tableDefinition, tEntriesCount);
+        updatePnaDirectMeter(t, tableDefinition, tEntriesCount);
         updateDefaultHitAction(t, tableDefinition);
         updateDefaultMissAction(t, tableDefinition);
         updateMatchType(t, tableDefinition);
@@ -1018,72 +1060,80 @@ bool ConvertToBackendIR::hasExecuteMethod(const IR::Type_Extern *extn) {
 /* Process each declaration instance of externs*/
 void ConvertToBackendIR::postorder(const IR::Declaration_Instance *decl) {
     auto decl_type = typeMap->getType(decl, true);
-    if (auto ts = decl_type->to<IR::Type_SpecializedCanonical>()) {
-        if (auto extn = ts->baseType->to<IR::Type_Extern>()) {
-            auto eName = ts->baseType->toString();
-            auto find = ControlStructPerExtern.find(eName);
-            if (find == ControlStructPerExtern.end()) {
-                return;
-            }
-            IR::TCExtern *externDefinition;
-            auto instance = new struct ExternInstance();
-            instance->instance_name = decl->toString();
-
-            auto constructorKeys = processExternConstructor(extn, decl, instance);
-
-            // Get Control Path information if specified for extern.
-            auto controlKeys = processExternControlPath(extn, decl, eName);
-
-            bool has_exec_method = hasExecuteMethod(extn);
-
-            /* If the extern info is already present, add new instance
-               Or else create new extern info.*/
-            auto iterator = externsInfo.find(eName);
-            if (iterator == externsInfo.end()) {
-                struct ExternBlock *eb = new struct ExternBlock();
-                if (eName == "DirectCounter") {
-                    eb->externId = "0x1A000000"_cs;
-                } else if (eName == "Counter") {
-                    eb->externId = "0x19000000"_cs;
-                } else if (eName == "Digest") {
-                    eb->externId = "0x05000000"_cs;
-                    instance->is_num_elements = true;
-                    instance->num_elements = 0;
-                } else {
-                    externCount += 1;
-                    std::stringstream value;
-                    value << "0x" << std::hex << externCount;
-                    eb->externId = value.str();
-                }
-                eb->permissions = processExternPermission(extn);
-                eb->no_of_instances += 1;
-                externsInfo.emplace(eName, eb);
-
-                instance->instance_id = eb->no_of_instances;
-                eb->eInstance.push_back(instance);
-
-                externDefinition =
-                    new IR::TCExtern(eb->externId, eName, pipelineName, eb->no_of_instances,
-                                     eb->permissions, has_exec_method);
-                tcPipeline->addExternDefinition(externDefinition);
-            } else {
-                auto eb = externsInfo[eName];
-                externDefinition = ((IR::TCExtern *)tcPipeline->getExternDefinition(eName));
-                externDefinition->numinstances = ++eb->no_of_instances;
-                instance->instance_id = eb->no_of_instances;
-                eb->eInstance.push_back(instance);
-            }
-            IR::TCExternInstance *tcExternInstance =
-                new IR::TCExternInstance(instance->instance_id, instance->instance_name,
-                                         instance->is_num_elements, instance->num_elements);
-            if (controlKeys.size() != 0) {
-                tcExternInstance->addControlPathKeys(controlKeys);
-            }
-            if (constructorKeys.size() != 0) {
-                tcExternInstance->addConstructorKeys(constructorKeys);
-            }
-            externDefinition->addExternInstance(tcExternInstance);
+    auto ts = decl_type->to<IR::Type_SpecializedCanonical>();
+    if (decl_type->is<IR::Type_Extern>() || (ts && ts->baseType->is<IR::Type_Extern>())) {
+        const IR::Type_Extern *extn;
+        if (decl_type->is<IR::Type_Extern>()) {
+            extn = decl_type->to<IR::Type_Extern>();
+        } else {
+            extn = ts->baseType->to<IR::Type_Extern>();
         }
+        auto eName = extn->name;
+        auto find = ControlStructPerExtern.find(eName);
+        if (find == ControlStructPerExtern.end()) {
+            return;
+        }
+        IR::TCExtern *externDefinition;
+        auto instance = new struct ExternInstance();
+        instance->instance_name = decl->toString();
+
+        auto constructorKeys = processExternConstructor(extn, decl, instance);
+
+        // Get Control Path information if specified for extern.
+        auto controlKeys = processExternControlPath(extn, decl, eName);
+
+        bool has_exec_method = hasExecuteMethod(extn);
+
+        /* If the extern info is already present, add new instance
+           Or else create new extern info.*/
+        auto iterator = externsInfo.find(eName);
+        if (iterator == externsInfo.end()) {
+            struct ExternBlock *eb = new struct ExternBlock();
+            if (eName == "DirectCounter") {
+                eb->externId = "0x1A000000"_cs;
+            } else if (eName == "Counter") {
+                eb->externId = "0x19000000"_cs;
+            } else if (eName == "Digest") {
+                eb->externId = "0x05000000"_cs;
+                instance->is_num_elements = true;
+                instance->num_elements = 0;
+            } else if (eName == "Meter") {
+                eb->externId = "0x1B000000"_cs;
+            } else if (eName == "DirectMeter") {
+                eb->externId = "0x1C000000"_cs;
+            } else {
+                externCount += 1;
+                std::stringstream value;
+                value << "0x" << std::hex << externCount;
+                eb->externId = value.str();
+            }
+            eb->permissions = processExternPermission(extn);
+            eb->no_of_instances += 1;
+            externsInfo.emplace(eName, eb);
+            instance->instance_id = eb->no_of_instances;
+            eb->eInstance.push_back(instance);
+
+            externDefinition =
+                new IR::TCExtern(eb->externId, eName, pipelineName, eb->no_of_instances,
+                                 eb->permissions, has_exec_method);
+            tcPipeline->addExternDefinition(externDefinition);
+        } else {
+            auto eb = externsInfo[eName];
+            externDefinition = ((IR::TCExtern *)tcPipeline->getExternDefinition(eName));
+            externDefinition->numinstances = ++eb->no_of_instances;
+            instance->instance_id = eb->no_of_instances;
+            eb->eInstance.push_back(instance);
+        }
+        IR::TCExternInstance *tcExternInstance =
+            new IR::TCExternInstance(instance->instance_id, instance->instance_name,
+                                     instance->is_num_elements, instance->num_elements);
+        if (controlKeys.size() != 0) {
+            tcExternInstance->addControlPathKeys(controlKeys);
+        }
+        if (constructorKeys.size() != 0) {
+            tcExternInstance->addConstructorKeys(constructorKeys);
+        }
+        externDefinition->addExternInstance(tcExternInstance);
     }
 }
 

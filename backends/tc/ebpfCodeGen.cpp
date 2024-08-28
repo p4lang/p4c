@@ -873,7 +873,6 @@ void EBPFTablePNA::emitValueType(EBPF::CodeBuilder *builder) {
     builder->blockStart();
 
     emitValueStructStructure(builder);
-    emitDirectValueTypes(builder);
 
     builder->blockEnd(false);
     builder->endOfStatement(true);
@@ -1140,6 +1139,11 @@ void EBPFTablePNA::emitValueActionIDNames(EBPF::CodeBuilder *builder) {
 
 void EBPFTablePNA::initDirectCounters() {
     EBPFTablePNADirectCounterPropertyVisitor visitor(this);
+    visitor.visitTableProperty();
+}
+
+void EBPFTablePNA::initDirectMeters() {
+    EBPFTablePNADirectMeterPropertyVisitor visitor(this);
     visitor.visitTableProperty();
 }
 
@@ -1482,6 +1486,12 @@ bool ConvertToEBPFControlPNA::preorder(const IR::ExternBlock *instance) {
         control->addExternDeclaration = true;
         auto ctr = new EBPFCounterPNA(program, di, name, control->codeGen);
         control->counters.emplace(name, ctr);
+    } else if (typeName == "DirectMeter") {
+        control->addExternDeclaration = true;
+    } else if (typeName == "Meter") {
+        control->addExternDeclaration = true;
+        auto met = new EBPFMeterPNA(program, name, di, control->codeGen);
+        control->meters.emplace(name, met);
     } else {
         ::P4::error(ErrorType::ERR_UNEXPECTED, "Unexpected block %s nested within control",
                     instance);
@@ -1974,6 +1984,12 @@ void ControlBodyTranslatorPNA::processMethod(const P4::ExternMethod *method) {
         auto pna_ctr = dynamic_cast<EBPFCounterPNA *>(counterMap);
         pna_ctr->emitMethodInvocation(builder, method, this);
         return;
+    } else if (declType->name.name == "Meter") {
+        auto meter = control->to<EBPF::EBPFControlPSA>()->getMeter(name);
+        auto pna_meter = dynamic_cast<EBPFMeterPNA *>(meter);
+        ::P4::warning(ErrorType::WARN_UNUSED, "This Meter (%1%) return value is not used!", name);
+        pna_meter->emitExecute(builder, method, this, nullptr);
+        return;
     } else if (declType->name.name == "Hash") {
         auto hash = control->to<EBPF::EBPFControlPSA>()->getHash(name);
         hash->processMethod(builder, method->method->name.name, method->expr, this);
@@ -2019,6 +2035,18 @@ bool ControlBodyTranslatorPNA::preorder(const IR::AssignmentStatement *a) {
             // Then the hash value is stored in a registerVar variable.
             hash->calculateHash(builder, ext->expr, this);
             builder->emitIndent();
+        } else if (ext->originalExternType->name.name == "Meter") {
+            cstring name = EBPF::EBPFObject::externalName(ext->object);
+            auto meter = control->to<EBPF::EBPFControlPSA>()->getMeter(name);
+            auto pna_meter = dynamic_cast<EBPFMeterPNA *>(meter);
+            pna_meter->emitExecute(builder, ext, this, a->left);
+            return false;
+        } else if (ext->originalExternType->name.name == "DirectMeter") {
+            cstring name = EBPF::EBPFObject::externalName(ext->object);
+            auto meter = table->getMeter(name);
+            auto pna_meter = dynamic_cast<EBPFMeterPNA *>(meter);
+            pna_meter->emitDirectMeterExecute(builder, ext, this, a->left);
+            return false;
         }
     }
 
@@ -2081,6 +2109,7 @@ void ActionTranslationVisitorPNA::processMethod(const P4::ExternMethod *method) 
     BUG_CHECK(decl->is<IR::Declaration_Instance>(), "Extern has not been declared: %1%", decl);
     auto di = decl->to<IR::Declaration_Instance>();
     auto instanceName = EBPF::EBPFObject::externalName(di);
+    cstring name = EBPF::EBPFObject::externalName(decl);
 
     if (declType->name.name == "DirectCounter") {
         auto ctr = table->getDirectCounter(instanceName);
@@ -2091,6 +2120,18 @@ void ActionTranslationVisitorPNA::processMethod(const P4::ExternMethod *method) 
             ::P4::error(ErrorType::ERR_NOT_FOUND,
                         "%1%: Table %2% does not own DirectCounter named %3%", method->expr,
                         table->table->container, instanceName);
+    } else if (declType->name.name == "DirectMeter") {
+        auto met = table->getMeter(instanceName);
+        auto pna_meter = dynamic_cast<EBPFMeterPNA *>(met);
+        if (pna_meter != nullptr) {
+            ::P4::warning(ErrorType::WARN_UNUSED, "This Meter (%1%) return value is not used!",
+                          name);
+            pna_meter->emitDirectMeterExecute(builder, method, this, nullptr);
+        } else {
+            ::P4::error(ErrorType::ERR_NOT_FOUND,
+                        "%1%: Table %2% does not own DirectMeter named %3%", method->expr,
+                        table->table->container, instanceName);
+        }
     } else {
         ControlBodyTranslatorPNA::processMethod(method);
     }

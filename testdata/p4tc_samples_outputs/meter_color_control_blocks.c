@@ -1,4 +1,4 @@
-#include "direct_counter_example_parser.h"
+#include "meter_color_parser.h"
 struct p4tc_filter_fields p4tc_filter_fields;
 
 struct internal_metadata {
@@ -10,7 +10,7 @@ struct __attribute__((__packed__)) ingress_nh_table_key {
     u32 maskid;
     u32 field0; /* hdr.ipv4.srcAddr */
 } __attribute__((aligned(8)));
-#define INGRESS_NH_TABLE_ACT_INGRESS_SEND_NH 1
+#define INGRESS_NH_TABLE_ACT_INGRESS_METER_EXEC 1
 #define INGRESS_NH_TABLE_ACT_INGRESS_DROP 2
 #define INGRESS_NH_TABLE_ACT_NOACTION 0
 struct __attribute__((__packed__)) ingress_nh_table_value {
@@ -21,11 +21,8 @@ struct __attribute__((__packed__)) ingress_nh_table_value {
     union {
         struct {
         } _NoAction;
-        struct __attribute__((__packed__)) {
-            u32 port_id;
-            u64 dmac;
-            u64 smac;
-        } ingress_send_nh;
+        struct {
+        } ingress_meter_exec;
         struct {
         } ingress_drop;
     } u;
@@ -44,6 +41,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
     u32 ebpf_one = 1;
     unsigned char ebpf_byte;
     u32 pkt_len = skb->len;
+    u64 tstamp = bpf_ktime_get_ns();
 
     struct my_ingress_metadata_t *meta;
     hdrMd = BPF_MAP_LOOKUP_ELEM(hdr_md_cpumap, &ebpf_zero);
@@ -58,6 +56,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
         struct p4tc_ext_bpf_val ext_val = {};
         struct p4tc_ext_bpf_val *ext_val_ptr;
         u8 hit;
+        u32 color_0 = 0;
         {
 /* nh_table_0.apply() */
             {
@@ -85,19 +84,23 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                 if (value != NULL) {
                     /* run action */
                     switch (value->action) {
-                        case INGRESS_NH_TABLE_ACT_INGRESS_SEND_NH: 
+                        case INGRESS_NH_TABLE_ACT_INGRESS_METER_EXEC: 
                             {
-                                hdr->ethernet.srcAddr = value->u.ingress_send_nh.smac;
-                                                                hdr->ethernet.dstAddr = value->u.ingress_send_nh.dmac;
-                                /* send_to_port(value->u.ingress_send_nh.port_id) */
-                                compiler_meta__->drop = false;
-                                send_to_port(value->u.ingress_send_nh.port_id);
-                                /* global_counter_0.count() */
                                 __builtin_memset(&ext_params, 0, sizeof(struct p4tc_ext_bpf_params));
                                 ext_params.pipe_id = p4tc_filter_fields.pipeid;
-                                ext_params.tbl_id = 1;
-                                ext_params.flags = P4TC_EXT_CNT_DIRECT;
-                                bpf_p4tc_extern_count_pkts(skb, &ext_params, sizeof(ext_params), &key, sizeof(key));
+                                ext_params.ext_id = 0x1B000000;
+                                ext_params.flags = P4TC_EXT_METER_INDIRECT;
+                                ext_params.inst_id = 1;
+                                ext_params.index = 3;
+                                
+                                u32* color_meter = (u32 *)ext_params.in_params;
+                                *color_meter = 0;
+                                color_0 = bpf_p4tc_extern_meter_pkts_color(skb, &ext_params, sizeof(ext_params), NULL, 0);
+
+                                if (color_0 == 0) {
+/* drop_packet() */
+                                    drop_packet();                                }
+
                             }
                             break;
                         case INGRESS_NH_TABLE_ACT_INGRESS_DROP: 
