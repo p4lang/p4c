@@ -1602,6 +1602,7 @@ var hierarchy =
         [ "P4::CheckTableSize", "class_p4_1_1_check_table_size.html", null ],
         [ "P4::DoSingleArgumentSelect", "class_p4_1_1_do_single_argument_select.html", null ],
         [ "P4::HeaderTypeMaxLengthCalculator", "class_p4_1_1_header_type_max_length_calculator.html", null ],
+        [ "P4::MoveToElseAfterBranch", "class_p4_1_1_move_to_else_after_branch.html", null ],
         [ "P4::ParseAnnotations", "class_p4_1_1_parse_annotations.html", [
           [ "P4::BMV2::ParseAnnotations", "class_p4_1_1_b_m_v2_1_1_parse_annotations.html", null ],
           [ "P4::ControlPlaneAPI::ParseP4RuntimeAnnotations", "class_p4_1_1_control_plane_a_p_i_1_1_parse_p4_runtime_annotations.html", null ],

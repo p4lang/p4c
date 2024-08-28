@@ -30,5 +30,6 @@ var searchData=
   ['movedeclarations_27',['MoveDeclarations',['../class_p4_1_1_move_declarations.html',1,'P4']]],
   ['moveinitializers_28',['MoveInitializers',['../class_p4_1_1_move_initializers.html',1,'P4']]],
   ['moveintrinsicmetadata_29',['MoveIntrinsicMetadata',['../class_p4_1_1_p4_v1_1_1_move_intrinsic_metadata.html',1,'P4::P4V1']]],
-  ['movenonheaderfieldstopseudoheader_30',['MoveNonHeaderFieldsToPseudoHeader',['../class_p4_1_1_d_p_d_k_1_1_move_non_header_fields_to_pseudo_header.html',1,'P4::DPDK']]]
+  ['movenonheaderfieldstopseudoheader_30',['MoveNonHeaderFieldsToPseudoHeader',['../class_p4_1_1_d_p_d_k_1_1_move_non_header_fields_to_pseudo_header.html',1,'P4::DPDK']]],
+  ['movetoelseafterbranch_31',['MoveToElseAfterBranch',['../class_p4_1_1_move_to_else_after_branch.html',1,'P4']]]
 ];

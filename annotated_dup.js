@@ -1217,6 +1217,7 @@ var annotated_dup =
       [ "MoveConstructors", "class_p4_1_1_move_constructors.html", null ],
       [ "MoveDeclarations", "class_p4_1_1_move_declarations.html", null ],
       [ "MoveInitializers", "class_p4_1_1_move_initializers.html", null ],
+      [ "MoveToElseAfterBranch", "class_p4_1_1_move_to_else_after_branch.html", null ],
       [ "n4", "class_p4_1_1n4.html", null ],
       [ "NameGateways", "class_p4_1_1_name_gateways.html", null ],
       [ "NameGenerator", "class_p4_1_1_name_generator.html", null ],
