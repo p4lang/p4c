@@ -29,6 +29,11 @@ std::ostream &operator<<(std::ostream &out, const UnparsedConstant &constant) {
     return out;
 }
 
+bool operator<(const UnparsedConstant &a, const UnparsedConstant &b) {
+    return std::tie(a.text, a.skip, a.base, a.hasWidth) <
+           std::tie(b.text, b.skip, b.base, b.hasWidth);
+}
+
 /// A helper to parse constants which have an explicit width;
 /// @see UnparsedConstant for an explanation of the parameters.
 static IR::Constant *parseConstantWithWidth(Util::SourceInfo srcInfo, const char *text,

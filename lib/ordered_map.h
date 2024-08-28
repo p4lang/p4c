@@ -126,6 +126,22 @@ class ordered_map {
     size_type max_size() const noexcept { return data_map.max_size(); }
     bool operator==(const ordered_map &a) const { return data == a.data; }
     bool operator!=(const ordered_map &a) const { return data != a.data; }
+    bool operator<(const ordered_map &a) const {
+        // we define this to work INDEPENDENT of the order -- so it is possible to have
+        // two ordered_maps where !(a < b) && !(b < a) && !(a == b) -- such sets have the
+        // same elements but in a different order.  This is generally what you want if you
+        // have a set of ordered_maps (or use ordered_map as a map key).
+        // For individual element comparison, we defer to COMP, which is 'operator<' in the
+        // common case.
+        auto it = a.data_map.begin();
+        for (auto &el : data_map) {
+            if (it == a.data_map.end()) return false;
+            if (mapcmp()(el.first, it->first)) return true;
+            if (mapcmp()(it->first, el.first)) return false;
+            ++it;
+        }
+        return it != a.data_map.end();
+    }
     void clear() {
         data.clear();
         data_map.clear();
