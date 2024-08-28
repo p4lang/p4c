@@ -1,51 +1,51 @@
 dash-pipeline-v1model-bmv2.p4(566): [--Wwarn=unused] warning: 'hdr' is unused
-action push_action_static_encap(in headers_t hdr, inout metadata_t meta, in dash_encapsulation_t encap=dash_encapsulation_t.VXLAN, in bit<24> vni=0, in IPv4Address underlay_sip=0, in IPv4Address underlay_dip=0, in EthernetAddress underlay_smac=0, in EthernetAddress underlay_dmac=0, in EthernetAddress overlay_dmac=0) {
+action push_action_static_encap(in headers_t hdr, inout metadata_t meta, in dash_encapsulation_t ...
                                              ^^^
 dash-pipeline-v1model-bmv2.p4(598): [--Wwarn=unused] warning: 'hdr' is unused
-action push_action_nat46(in headers_t hdr, inout metadata_t meta, in IPv6Address sip, in IPv6Address sip_mask, in IPv6Address dip, in IPv6Address dip_mask) {
+action push_action_nat46(in headers_t hdr, inout metadata_t meta, in IPv6Address sip, in IPv6Addr...
                                       ^^^
 dash-pipeline-v1model-bmv2.p4(668): [--Wwarn=unused] warning: 'hdr' is unused
-action route_vnet(inout headers_t hdr, inout metadata_t meta, @SaiVal[type="sai_object_id_t"] bit<16> dst_vnet_id, bit<1> meter_policy_en, bit<16> meter_class) {
+action route_vnet(inout headers_t hdr, inout metadata_t meta, @SaiVal[type="sai_object_id_t"] bit...
                                   ^^^
 dash-pipeline-v1model-bmv2.p4(673): [--Wwarn=unused] warning: 'hdr' is unused
-action route_vnet_direct(inout headers_t hdr, inout metadata_t meta, bit<16> dst_vnet_id, bit<1> overlay_ip_is_v6, @SaiVal[type="sai_ip_address_t"] IPv4ORv6Address overlay_ip, bit<1> meter_policy_en, bit<16> meter_class) {
+action route_vnet_direct(inout headers_t hdr, inout metadata_t meta, bit<16> dst_vnet_id, bit<1> ...
                                          ^^^
 dash-pipeline-v1model-bmv2.p4(680): [--Wwarn=unused] warning: 'hdr' is unused
-action route_direct(inout headers_t hdr, inout metadata_t meta, bit<1> meter_policy_en, bit<16> meter_class) {
+action route_direct(inout headers_t hdr, inout metadata_t meta, bit<1> meter_policy_en, bit<16> m...
                                     ^^^
 dash-pipeline-v1model-bmv2.p4(684): [--Wwarn=unused] warning: 'overlay_dip_is_v6' is unused
-action route_service_tunnel(inout headers_t hdr, inout metadata_t meta, bit<1> overlay_dip_is_v6, IPv4ORv6Address overlay_dip, bit<1> overlay_dip_mask_is_v6, IPv4ORv6Address overlay_dip_mask, bit<1> overlay_sip_is_v6, IPv4ORv6Address overlay_sip, bit<1> overlay_sip_mask_is_v6, IPv4ORv6Address overlay_sip_mask, bit<1> underlay_dip_is_v6, IPv4ORv6Address underlay_dip, bit<1> underlay_sip_is_v6, IPv4ORv6Address underlay_sip, @SaiVal[type="sai_dash_encapsulation_t", default_value="SAI_DASH_ENCAPSULATION_VXLAN"] dash_encapsulation_t dash_encapsulation, bit<24> tunnel_key, bit<1> meter_policy_en, bit<16> meter_class) {
-                                                                               ^^^^^^^^^^^^^^^^^
+...s_t hdr, inout metadata_t meta, bit<1> overlay_dip_is_v6, IPv4ORv6Address overlay_dip, bit<1> ...
+                                          ^^^^^^^^^^^^^^^^^
 dash-pipeline-v1model-bmv2.p4(684): [--Wwarn=unused] warning: 'overlay_dip_mask_is_v6' is unused
-action route_service_tunnel(inout headers_t hdr, inout metadata_t meta, bit<1> overlay_dip_is_v6, IPv4ORv6Address overlay_dip, bit<1> overlay_dip_mask_is_v6, IPv4ORv6Address overlay_dip_mask, bit<1> overlay_sip_is_v6, IPv4ORv6Address overlay_sip, bit<1> overlay_sip_mask_is_v6, IPv4ORv6Address overlay_sip_mask, bit<1> underlay_dip_is_v6, IPv4ORv6Address underlay_dip, bit<1> underlay_sip_is_v6, IPv4ORv6Address underlay_sip, @SaiVal[type="sai_dash_encapsulation_t", default_value="SAI_DASH_ENCAPSULATION_VXLAN"] dash_encapsulation_t dash_encapsulation, bit<24> tunnel_key, bit<1> meter_policy_en, bit<16> meter_class) {
-                                                                                                                                      ^^^^^^^^^^^^^^^^^^^^^^
+...IPv4ORv6Address overlay_dip, bit<1> overlay_dip_mask_is_v6, IPv4ORv6Address overlay_dip_mask, ...
+                                       ^^^^^^^^^^^^^^^^^^^^^^
 dash-pipeline-v1model-bmv2.p4(684): [--Wwarn=unused] warning: 'overlay_sip_is_v6' is unused
-action route_service_tunnel(inout headers_t hdr, inout metadata_t meta, bit<1> overlay_dip_is_v6, IPv4ORv6Address overlay_dip, bit<1> overlay_dip_mask_is_v6, IPv4ORv6Address overlay_dip_mask, bit<1> overlay_sip_is_v6, IPv4ORv6Address overlay_sip, bit<1> overlay_sip_mask_is_v6, IPv4ORv6Address overlay_sip_mask, bit<1> underlay_dip_is_v6, IPv4ORv6Address underlay_dip, bit<1> underlay_sip_is_v6, IPv4ORv6Address underlay_sip, @SaiVal[type="sai_dash_encapsulation_t", default_value="SAI_DASH_ENCAPSULATION_VXLAN"] dash_encapsulation_t dash_encapsulation, bit<24> tunnel_key, bit<1> meter_policy_en, bit<16> meter_class) {
-                                                                                                                                                                                                       ^^^^^^^^^^^^^^^^^
+...v4ORv6Address overlay_dip_mask, bit<1> overlay_sip_is_v6, IPv4ORv6Address overlay_sip, bit<1> ...
+                                          ^^^^^^^^^^^^^^^^^
 dash-pipeline-v1model-bmv2.p4(684): [--Wwarn=unused] warning: 'overlay_sip_mask_is_v6' is unused
-action route_service_tunnel(inout headers_t hdr, inout metadata_t meta, bit<1> overlay_dip_is_v6, IPv4ORv6Address overlay_dip, bit<1> overlay_dip_mask_is_v6, IPv4ORv6Address overlay_dip_mask, bit<1> overlay_sip_is_v6, IPv4ORv6Address overlay_sip, bit<1> overlay_sip_mask_is_v6, IPv4ORv6Address overlay_sip_mask, bit<1> underlay_dip_is_v6, IPv4ORv6Address underlay_dip, bit<1> underlay_sip_is_v6, IPv4ORv6Address underlay_sip, @SaiVal[type="sai_dash_encapsulation_t", default_value="SAI_DASH_ENCAPSULATION_VXLAN"] dash_encapsulation_t dash_encapsulation, bit<24> tunnel_key, bit<1> meter_policy_en, bit<16> meter_class) {
-                                                                                                                                                                                                                                                              ^^^^^^^^^^^^^^^^^^^^^^
+...IPv4ORv6Address overlay_sip, bit<1> overlay_sip_mask_is_v6, IPv4ORv6Address overlay_sip_mask, ...
+                                       ^^^^^^^^^^^^^^^^^^^^^^
 dash-pipeline-v1model-bmv2.p4(684): [--Wwarn=unused] warning: 'underlay_dip_is_v6' is unused
-action route_service_tunnel(inout headers_t hdr, inout metadata_t meta, bit<1> overlay_dip_is_v6, IPv4ORv6Address overlay_dip, bit<1> overlay_dip_mask_is_v6, IPv4ORv6Address overlay_dip_mask, bit<1> overlay_sip_is_v6, IPv4ORv6Address overlay_sip, bit<1> overlay_sip_mask_is_v6, IPv4ORv6Address overlay_sip_mask, bit<1> underlay_dip_is_v6, IPv4ORv6Address underlay_dip, bit<1> underlay_sip_is_v6, IPv4ORv6Address underlay_sip, @SaiVal[type="sai_dash_encapsulation_t", default_value="SAI_DASH_ENCAPSULATION_VXLAN"] dash_encapsulation_t dash_encapsulation, bit<24> tunnel_key, bit<1> meter_policy_en, bit<16> meter_class) {
-                                                                                                                                                                                                                                                                                                                               ^^^^^^^^^^^^^^^^^^
+...4ORv6Address overlay_sip_mask, bit<1> underlay_dip_is_v6, IPv4ORv6Address underlay_dip, bit<1>...
+                                         ^^^^^^^^^^^^^^^^^^
 dash-pipeline-v1model-bmv2.p4(684): [--Wwarn=unused] warning: 'underlay_sip_is_v6' is unused
-action route_service_tunnel(inout headers_t hdr, inout metadata_t meta, bit<1> overlay_dip_is_v6, IPv4ORv6Address overlay_dip, bit<1> overlay_dip_mask_is_v6, IPv4ORv6Address overlay_dip_mask, bit<1> overlay_sip_is_v6, IPv4ORv6Address overlay_sip, bit<1> overlay_sip_mask_is_v6, IPv4ORv6Address overlay_sip_mask, bit<1> underlay_dip_is_v6, IPv4ORv6Address underlay_dip, bit<1> underlay_sip_is_v6, IPv4ORv6Address underlay_sip, @SaiVal[type="sai_dash_encapsulation_t", default_value="SAI_DASH_ENCAPSULATION_VXLAN"] dash_encapsulation_t dash_encapsulation, bit<24> tunnel_key, bit<1> meter_policy_en, bit<16> meter_class) {
-                                                                                                                                                                                                                                                                                                                                                                                        ^^^^^^^^^^^^^^^^^^
+... IPv4ORv6Address underlay_dip, bit<1> underlay_sip_is_v6, IPv4ORv6Address underlay_sip, @SaiVa...
+                                         ^^^^^^^^^^^^^^^^^^
 dash-pipeline-v1model-bmv2.p4(687): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header hdr.u0_ipv4
-    push_action_static_encap(hdr = hdr, meta = meta, encap = dash_encapsulation, vni = tunnel_key, underlay_sip = (underlay_sip == 0 ? hdr.u0_ipv4.src_addr : (IPv4Address)underlay_sip), underlay_dip = (underlay_dip == 0 ? hdr.u0_ipv4.dst_addr : (IPv4Address)underlay_dip), overlay_dmac = hdr.u0_ethernet.dst_addr);
-                                                                                                                                       ^^^^^^^^^^^
+..._key, underlay_sip = (underlay_sip == 0 ? hdr.u0_ipv4.src_addr : (IPv4Address)underlay_sip), u...
+                                             ^^^^^^^^^^^
 dash-pipeline-v1model-bmv2.p4(687): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header hdr.u0_ipv4
-    push_action_static_encap(hdr = hdr, meta = meta, encap = dash_encapsulation, vni = tunnel_key, underlay_sip = (underlay_sip == 0 ? hdr.u0_ipv4.src_addr : (IPv4Address)underlay_sip), underlay_dip = (underlay_dip == 0 ? hdr.u0_ipv4.dst_addr : (IPv4Address)underlay_dip), overlay_dmac = hdr.u0_ethernet.dst_addr);
-                                                                                                                                                                                                                              ^^^^^^^^^^^
+...sip), underlay_dip = (underlay_dip == 0 ? hdr.u0_ipv4.dst_addr : (IPv4Address)underlay_dip), o...
+                                             ^^^^^^^^^^^
 dash-pipeline-v1model-bmv2.p4(687): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header hdr.u0_ethernet
-    push_action_static_encap(hdr = hdr, meta = meta, encap = dash_encapsulation, vni = tunnel_key, underlay_sip = (underlay_sip == 0 ? hdr.u0_ipv4.src_addr : (IPv4Address)underlay_sip), underlay_dip = (underlay_dip == 0 ? hdr.u0_ipv4.dst_addr : (IPv4Address)underlay_dip), overlay_dmac = hdr.u0_ethernet.dst_addr);
-                                                                                                                                                                                                                                                                                                ^^^^^^^^^^^^^^^
+... 0 ? hdr.u0_ipv4.dst_addr : (IPv4Address)underlay_dip), overlay_dmac = hdr.u0_ethernet.dst_addr);
+                                                                          ^^^^^^^^^^^^^^^
 dash-pipeline-v1model-bmv2.p4(700): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header hdr.u0_ethernet
-    push_action_static_encap(hdr = hdr, meta = meta, encap = dash_encapsulation, vni = tunnel_key, underlay_sip = meta.eni_data.pl_underlay_sip, underlay_dip = underlay_dip, overlay_dmac = hdr.u0_ethernet.dst_addr);
-                                                                                                                                                                                             ^^^^^^^^^^^^^^^
+....eni_data.pl_underlay_sip, underlay_dip = underlay_dip, overlay_dmac = hdr.u0_ethernet.dst_addr);
+                                                                          ^^^^^^^^^^^^^^^
 dash-pipeline-v1model-bmv2.p4(701): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header hdr.u0_ipv4
-    push_action_nat46(hdr = hdr, meta = meta, dip = overlay_dip, dip_mask = 0xffffffffffffffffffffffff, sip = overlay_sip & ~meta.eni_data.pl_sip_mask | meta.eni_data.pl_sip | (IPv6Address)hdr.u0_ipv4.src_addr, sip_mask = 0xffffffffffffffffffffffff);
-                                                                                                                                                                                             ^^^^^^^^^^^
+...ask | meta.eni_data.pl_sip | (IPv6Address)hdr.u0_ipv4.src_addr, sip_mask = 0xfffffffffffffffff...
+                                             ^^^^^^^^^^^
 dash-pipeline-v1model-bmv2.p4(365): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header hdr.u0_ethernet
     hdr.u0_ethernet.dst_addr = (overlay_dmac == 0 ? hdr.u0_ethernet.dst_addr : overlay_dmac);
                                                     ^^^^^^^^^^^^^^^
@@ -53,11 +53,11 @@ dash-pipeline-v1model-bmv2.p4(365): [--Wwarn=invalid_header] warning: accessing 
     hdr.u0_ethernet.dst_addr = (overlay_dmac == 0 ? hdr.u0_ethernet.dst_addr : overlay_dmac);
     ^^^^^^^^^^^^^^^
 dash-pipeline-v1model-bmv2.p4(371): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header hdr.u0_ipv4
-    hdr.u1_ipv4.total_len = hdr.u0_ipv4.total_len * (bit<16>)(bit<1>)hdr.u0_ipv4.isValid() + hdr.u0_ipv6.payload_length * (bit<16>)(bit<1>)hdr.u0_ipv6.isValid() + IPV6_HDR_SIZE * (bit<16>)(bit<1>)hdr.u0_ipv6.isValid() + ETHER_HDR_SIZE + IPV4_HDR_SIZE + UDP_HDR_SIZE + VXLAN_HDR_SIZE;
+    hdr.u1_ipv4.total_len = hdr.u0_ipv4.total_len * (bit<16>)(bit<1>)hdr.u0_ipv4.isValid() + hdr....
                             ^^^^^^^^^^^
 dash-pipeline-v1model-bmv2.p4(371): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header hdr.u0_ipv6
-    hdr.u1_ipv4.total_len = hdr.u0_ipv4.total_len * (bit<16>)(bit<1>)hdr.u0_ipv4.isValid() + hdr.u0_ipv6.payload_length * (bit<16>)(bit<1>)hdr.u0_ipv6.isValid() + IPV6_HDR_SIZE * (bit<16>)(bit<1>)hdr.u0_ipv6.isValid() + ETHER_HDR_SIZE + IPV4_HDR_SIZE + UDP_HDR_SIZE + VXLAN_HDR_SIZE;
-                                                                                             ^^^^^^^^^^^
+... (bit<16>)(bit<1>)hdr.u0_ipv4.isValid() + hdr.u0_ipv6.payload_length * (bit<16>)(bit<1>)hdr.u0...
+                                             ^^^^^^^^^^^
 dash-pipeline-v1model-bmv2.p4(616): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header hdr.u0_ipv4
         hdr.u0_ipv6.payload_length = hdr.u0_ipv4.total_len - IPV4_HDR_SIZE;
                                      ^^^^^^^^^^^
@@ -68,10 +68,10 @@ dash-pipeline-v1model-bmv2.p4(618): [--Wwarn=invalid_header] warning: accessing 
         hdr.u0_ipv6.hop_limit = hdr.u0_ipv4.ttl;
                                 ^^^^^^^^^^^
 dash-pipeline-v1model-bmv2.p4(619): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header hdr.u0_ipv4
-        hdr.u0_ipv6.dst_addr = (IPv6Address)hdr.u0_ipv4.dst_addr & ~meta.overlay_data.dip_mask | meta.overlay_data.dip & meta.overlay_data.dip_mask;
+        hdr.u0_ipv6.dst_addr = (IPv6Address)hdr.u0_ipv4.dst_addr & ~meta.overlay_data.dip_mask | ...
                                             ^^^^^^^^^^^
 dash-pipeline-v1model-bmv2.p4(620): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header hdr.u0_ipv4
-        hdr.u0_ipv6.src_addr = (IPv6Address)hdr.u0_ipv4.src_addr & ~meta.overlay_data.sip_mask | meta.overlay_data.sip & meta.overlay_data.sip_mask;
+        hdr.u0_ipv6.src_addr = (IPv6Address)hdr.u0_ipv4.src_addr & ~meta.overlay_data.sip_mask | ...
                                             ^^^^^^^^^^^
 dash-pipeline-v1model-bmv2.p4(622): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header hdr.u0_ethernet
         hdr.u0_ethernet.ether_type = 0x86dd;

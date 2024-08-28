@@ -195,9 +195,10 @@ SourcePosition InputSources::getCurrentPosition() const {
     return SourcePosition(line, column);
 }
 
-cstring InputSources::getSourceFragment(const SourcePosition &position, bool useMarker) const {
+cstring InputSources::getSourceFragment(const SourcePosition &position, int trimWidth,
+                                        bool useMarker) const {
     SourceInfo info(this, position, position);
-    return getSourceFragment(info, useMarker);
+    return getSourceFragment(info, trimWidth, useMarker);
 }
 
 static std::string carets(std::string_view source, unsigned start, unsigned end) {
@@ -218,16 +219,53 @@ static std::string carets(std::string_view source, unsigned start, unsigned end)
     return builder.str();
 }
 
-cstring InputSources::getSourceFragment(const SourceInfo &position, bool useMarker) const {
+cstring InputSources::getSourceFragment(const SourceInfo &position, int trimWidth,
+                                        bool useMarker) const {
     if (!position.isValid()) return ""_cs;
+    constexpr char ELIPSIS[] = "...";
+    constexpr int ELIPSIS_W = sizeof(ELIPSIS) - 1;
 
     // If the position spans multiple lines, truncate to just the first line
     if (position.getEnd().getLineNumber() > position.getStart().getLineNumber())
-        return getSourceFragment(position.getStart(), useMarker);
+        return getSourceFragment(position.getStart(), trimWidth, useMarker);
 
     std::string_view result = getLine(position.getStart().getLineNumber());
     unsigned int start = position.getStart().getColumnNumber();
     unsigned int end = position.getEnd().getColumnNumber();
+    if (trimWidth == -1) {
+        if (!useMarker)
+            trimWidth = 0;
+        else if (auto *cols = getenv("COLUMNS"))
+            trimWidth = atoi(cols);
+        else
+            trimWidth = 100;
+    }
+    std::string tmp;  // holding place for temp string_view
+    if (trimWidth > 10 && result.size() > (size_t)trimWidth) {
+        if (result.back() == '\n') result.remove_suffix(1);
+        int ltrim = (int)(end + start) / 2 - trimWidth / 2 + ELIPSIS_W;
+        if (ltrim > (int)start) ltrim = start;
+        if (ltrim < 4) ltrim = 0;
+        if (ltrim > (int)result.size() - trimWidth + ELIPSIS_W)
+            ltrim = result.size() - trimWidth + ELIPSIS_W;
+        if (ltrim == 0) {
+            result.remove_suffix(result.size() - trimWidth + ELIPSIS_W);
+            tmp = absl::StrCat(result, ELIPSIS);
+        } else if ((int)result.size() - ltrim + ELIPSIS_W > trimWidth) {
+            result.remove_prefix(ltrim);
+            result.remove_suffix(result.size() - trimWidth + 2 * ELIPSIS_W);
+            tmp = absl::StrCat(ELIPSIS, result, ELIPSIS);
+        } else {
+            result.remove_prefix(ltrim);
+            tmp = absl::StrCat(ELIPSIS, result);
+        }
+        if (ltrim > 0) {
+            start -= ltrim - ELIPSIS_W;
+            end -= ltrim - ELIPSIS_W;
+        }
+        if (end > (unsigned)trimWidth) end = trimWidth;
+        result = tmp;
+    }
 
     // Normally result has a newline, but if not then we have to add a newline
     bool addNewline = !absl::StrContains(result, "\n");
@@ -277,9 +315,9 @@ cstring InputSources::toDebugString() const {
 
 ///////////////////////////////////////////////////
 
-cstring SourceInfo::toSourceFragment(bool useMarker) const {
+cstring SourceInfo::toSourceFragment(int trimWidth, bool useMarker) const {
     if (!isValid()) return ""_cs;
-    return sources->getSourceFragment(*this, useMarker);
+    return sources->getSourceFragment(*this, trimWidth, useMarker);
 }
 
 cstring SourceInfo::toBriefSourceFragment() const {

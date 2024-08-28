@@ -172,7 +172,14 @@ class SourceInfo final {
 
     void dbprint(std::ostream &out) const { out << this->toString(); }
 
-    cstring toSourceFragment(bool useMarker = true) const;
+    /**
+        Create a string with a line of source, optionally with carets on the following line
+        marking the spot of this SourceInfo.  If trimWidth is >= 10, trim the line to be
+        at most trimWidth characters, as too-long lines are unreadable.  trimWidth = -1
+        defaults to 0 (disable) if useMarker is false or the COLUMNS envvar or 100 if
+        useMarker is true */
+    cstring toSourceFragment(int trimWidth = -1, bool useMarker = true) const;
+    cstring toSourceFragment(bool useMarker) const { return toSourceFragment(-1, useMarker); }
     cstring toBriefSourceFragment() const;
     cstring toPositionString() const;
     cstring toSourcePositionData(unsigned *outLineNumber, unsigned *outColumnNumber) const;
@@ -305,8 +312,8 @@ class InputSources final {
        string describing a position in the sources, e.g.:
        int<32> variable;
                ^^^^^^^^ */
-    cstring getSourceFragment(const SourcePosition &position, bool useMarker) const;
-    cstring getSourceFragment(const SourceInfo &position, bool useMarker) const;
+    cstring getSourceFragment(const SourcePosition &position, int trimWidth, bool useMarker) const;
+    cstring getSourceFragment(const SourceInfo &position, int trimWidth, bool useMarker) const;
     cstring getBriefSourceFragment(const SourceInfo &position) const;
 
     cstring toDebugString() const;
