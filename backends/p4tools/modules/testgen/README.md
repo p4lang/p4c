@@ -114,7 +114,7 @@ P4Testgen supports the use of custom externs to restrict the breadth of possible
 
 #### Restricted Tests
 `testgen_assume(expr)` will add `expr` as a necessary path constraints to all subsequent execution. For example, for the following snippet
-```p4
+``` P4
 state parse_ethernet {
     packet.extract(headers.ethernet);
     testgen_assume(headers.ethernet.ether_type == 0x800);
@@ -130,7 +130,7 @@ only inputs which have `0x800` as Ethertype will be generated. This mode is enab
 #### Finding Assertion Violations
 Conversely, `testgen_assert(expr)` can be used to find violations in a particular P4 program. By default, `testgen_assert` behaves like `testgen_assume`. If the flag `--assertion-mode` is enabled, P4Testgen will only generate tests that will cause `expr` to be false and, hence, violate the assertion.
 For example, for
-```p4
+``` P4
 state parse_ethernet {
     packet.extract(headers.ethernet);
     transition select(headers.ethernet.ether_type) {
