@@ -39,8 +39,8 @@ class Attach : public Transform {
     const CommentsMap &getCommentsMap() const;
 
  private:
-    // This Hashmap tracks each comment’s attachment status to IR nodes. Initially, all comments are
-    // set to 'false'.
+    /// This Hashmap tracks each comment’s attachment status to IR nodes. Initially, all comments
+    /// are set to 'false'.
     std::unordered_map<const Util::Comment *, bool> processedComments;
 
     CommentsMap commentsMap;
