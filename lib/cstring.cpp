@@ -21,7 +21,7 @@ limitations under the License.
 #include "absl/strings/str_replace.h"
 
 #if HAVE_LIBGC
-#include <gc_cpp.h>
+#include <gc/gc_cpp.h>
 #define IF_HAVE_LIBGC(X) X
 #else
 #define IF_HAVE_LIBGC(X)

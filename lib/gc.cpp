@@ -29,9 +29,9 @@ limitations under the License.
 #endif
 
 #if HAVE_LIBGC
-#include <gc.h>
-#include <gc_cpp.h>
-#include <gc_mark.h>
+#include <gc/gc.h>
+#include <gc/gc_cpp.h>
+#include <gc/gc_mark.h>
 #endif /* HAVE_LIBGC */
 #include <sys/mman.h>
 #if HAVE_EXECINFO_H
@@ -301,7 +301,12 @@ static void gc_callback() {
     }
 }
 
-void silent(char *, GC_word) {}
+// Starting with minor version 3 'GC_set_warn_proc' requires a const pointer.
+#if (GC_VERSION_MAJOR == 8 && GC_VERSION_MINOR >= 3) || GC_VERSION_MAJOR > 8
+void silent(const char * /*unused*/, GC_word /*unused*/) {}
+#else
+void silent(char * /*unused*/, GC_word /*unused*/) {}
+#endif
 
 void reset_gc_logging() {
     gc_logging_level = Log::Detail::fileLogLevel(__FILE__);
