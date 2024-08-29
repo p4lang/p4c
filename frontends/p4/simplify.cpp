@@ -109,7 +109,9 @@ const IR::Node *DoSimplifyControlFlow::postorder(IR::SwitchStatement *statement)
             else
                 warn(ErrorType::WARN_MISSING, "%1%: fallthrough with no statement", last);
         }
-        statement->cases.erase(it.base(), statement->cases.end());
+        auto mod = last->clone();
+        mod->statement = new IR::BlockStatement;
+        statement->cases.back() = mod;
     }
     return statement;
 }
