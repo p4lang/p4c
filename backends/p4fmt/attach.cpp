@@ -46,14 +46,14 @@ const IR::Node *Attach::attachCommentsToNode(IR::Node *node, TraversalType ttype
         switch (ttype) {
             case TraversalType::Preorder:
                 if (commentEnd.getLineNumber() == nodeStart.getLineNumber() - 1) {
-                    addPrefixComments(node->id, comment);
+                    addPrefixComments(node->clone_id, comment);
                     isAttached = true;  // Mark the comment as attached
                 }
                 break;
 
             case TraversalType::Postorder:
                 if (commentEnd.getLineNumber() == nodeStart.getLineNumber()) {
-                    addSuffixComments(node->id, comment);
+                    addSuffixComments(node->clone_id, comment);
                     isAttached = true;
                 }
                 break;
