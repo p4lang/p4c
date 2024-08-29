@@ -55,3 +55,16 @@ target_include_directories(
 
 # Add control-plane-specific extensions.
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/control_plane)
+
+
+FetchContent_Declare(
+  ctrack
+  GIT_REPOSITORY https://github.com/Compaile/ctrack
+  GIT_TAG v1.0.2
+  GIT_PROGRESS TRUE
+  GIT_SHALLOW TRUE
+)
+FetchContent_MakeAvailable(ctrack)
+get_target_property(target_includes ctrack INTERFACE_INCLUDE_DIRECTORIES)
+set_target_properties(ctrack PROPERTIES INTERFACE_SYSTEM_INCLUDE_DIRECTORIES "${target_includes}")
+target_link_libraries(p4tools-common PUBLIC ctrack)
