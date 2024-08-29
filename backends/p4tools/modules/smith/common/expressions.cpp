@@ -586,7 +586,6 @@ IR::Expression *ExpressionGenerator::constructBinaryBitExpr(const IR::Type_Bits 
             const auto *tl = IR::Type_Bits::get(typeWidth - split, false);
             const auto *tr = IR::Type_Bits::get(split, false);
             // width must be known so we cast
-            printf("Concat: %s, %s\n", tl->toString().c_str(), tr->toString().c_str());
             IR::Expression *left = constructBitExpr(tl);
             if (P4Scope::prop.width_unknown) {
                 left = new IR::Cast(tl, left);
