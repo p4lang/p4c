@@ -2,6 +2,7 @@
 #define LIB_TIMER_H_
 
 #include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <memory>
 #include <string>
@@ -31,6 +32,8 @@ struct TimerEntry {
     size_t milliseconds;
     /// Portion of this timer's name relative to the parent timer.
     float relativeToParent;
+    /// Number of invocations.
+    uint64_t invocations;
 };
 
 /// Returns list of all timers for and their current values.
