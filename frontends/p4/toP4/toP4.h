@@ -17,6 +17,8 @@ limitations under the License.
 #ifndef P4_TOP4_TOP4_H_
 #define P4_TOP4_TOP4_H_
 
+#include <optional>
+
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
@@ -72,9 +74,9 @@ class ToP4 : public Inspector, ResolutionContext {
         BUG_CHECK(!listTerminators.empty(), "Empty listTerminators");
         listTerminators.pop_back();
     }
-    // return file containing node if system file
-    cstring ifSystemFile(const IR::Node *node);
-    // dump node IR tree up to depth - in the form of a comment
+    /// @returns the file that contains the node, if the node is part of a system file.
+    std::optional<cstring> ifSystemFile(const IR::Node *node);
+    /// dump node IR tree up to depth - in the form of a comment
     void dump(unsigned depth, const IR::Node *node = nullptr, unsigned adjDepth = 0);
     unsigned curDepth() const;
 
