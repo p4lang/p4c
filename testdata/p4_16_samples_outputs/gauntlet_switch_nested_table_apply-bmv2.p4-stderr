@@ -10,6 +10,6 @@ gauntlet_switch_nested_table_apply-bmv2.p4(34): [--Wwarn=mismatch] warning: 128w
 gauntlet_switch_nested_table_apply-bmv2.p4(42): [--Wwarn=mismatch] warning: 48w1: Constant key field
             48w1: exact @name("qkgOtm") ;
             ^^^^
-gauntlet_switch_nested_table_apply-bmv2.p4(27): [--Wwarn=uninitialized_use] warning: tmp may not be completely initialized
+gauntlet_switch_nested_table_apply-bmv2.p4(27): [--Wwarn=uninitialized_use] warning: tmp.eth_hdr may be uninitialized
     action set_valid_action(out Headers tmp) {
                                         ^^^

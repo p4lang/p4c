@@ -4,7 +4,7 @@ invalid-hdr-warnings4.p4(20): [--Wwarn=invalid_header] warning: accessing a fiel
 invalid-hdr-warnings4.p4(26): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header hdr.h1[0]
         hdr.h1[0].data = 1;
         ^^^^^^^^^
-invalid-hdr-warnings4.p4(63): [--Wwarn=uninitialized_use] warning: h.h1[0] may not be completely initialized
+invalid-hdr-warnings4.p4(63): [--Wwarn=uninitialized_use] warning: h.h1[0].data may be uninitialized
         validateHeader(h.h1[0]);
                        ^^^^^^^
 invalid-hdr-warnings4.p4(82): [--Wwarn=invalid_header] warning: accessing a field of an invalid header h_copy2.h2[0]

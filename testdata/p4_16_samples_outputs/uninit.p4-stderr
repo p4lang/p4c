@@ -4,7 +4,7 @@ uninit.p4(36): [--Wwarn=ordering] warning: h.data2: 'out' argument has fields in
 uninit.p4(36)
         g(h.data2, g(h.data2, h.data2)); // uninitialized
                      ^^^^^^^
-uninit.p4(35): [--Wwarn=uninitialized_use] warning: h may not be completely initialized
+uninit.p4(35): [--Wwarn=uninitialized_use] warning: h.data2 may be uninitialized
         func(h); // uninitialized
              ^
 uninit.p4(36): [--Wwarn=uninitialized_use] warning: h.data2 may be uninitialized
@@ -19,7 +19,7 @@ uninit.p4(36): [--Wwarn=uninitialized_use] warning: h.data2 may be uninitialized
 uninit.p4(41): [--Wwarn=uninitialized_use] warning: h.data3 may be uninitialized
         h.data2 = h.data3 + 1; // uninitialized
                   ^^^^^^^
-uninit.p4(42): [--Wwarn=uninitialized_use] warning: stack[1] may not be completely initialized
+uninit.p4(42): [--Wwarn=uninitialized_use] warning: stack[1].data1 may be uninitialized
         stack[0] = stack[1]; // uninitialized
                    ^^^^^^^^
 uninit.p4(62): [--Wwarn=uninitialized_use] warning: c may be uninitialized
