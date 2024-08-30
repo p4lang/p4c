@@ -1,5 +1,6 @@
 var NAVTREEINDEX21 =
 {
+"struct_p4_1_1_d_b_print_1_1setprec.html":[13,0,0,5,3],
 "struct_p4_1_1_d_p_d_k_1_1_byte_alignment.html":[12,0,0,3,5],
 "struct_p4_1_1_d_p_d_k_1_1_byte_alignment.html":[13,0,0,7,5],
 "struct_p4_1_1_d_p_d_k_1_1_convert_lookahead.html":[12,0,0,3,27],
@@ -248,6 +249,5 @@ var NAVTREEINDEX21 =
 "struct_p4_1_1_p4_v1_1_1_random___model.html":[13,0,0,19,35],
 "struct_p4_1_1_p4_v1_1_1_register___model.html":[13,0,0,19,36],
 "struct_p4_1_1_p4_v1_1_1_standard_metadata_type___model.html":[13,0,0,19,38],
-"struct_p4_1_1_p4_v1_1_1_switch___model.html":[13,0,0,19,40],
-"struct_p4_1_1_p4_v1_1_1_table_attributes___model.html":[13,0,0,19,41]
+"struct_p4_1_1_p4_v1_1_1_switch___model.html":[13,0,0,19,40]
 };
