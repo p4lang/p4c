@@ -46,18 +46,15 @@ void ToP4::end_apply(const IR::Node *) {
               "inconsistent vectorSeparator");
 }
 
-// Try to guess whether a file is a "system" file
-bool ToP4::isSystemFile(cstring file) {
-    if (noIncludes) return false;
-    if (file.startsWith(p4includePath)) return true;
-    return false;
-}
-
-cstring ToP4::ifSystemFile(const IR::Node *node) {
-    if (!node->srcInfo.isValid()) return nullptr;
+std::optional<cstring> ToP4::ifSystemFile(const IR::Node *node) {
+    if (!node->srcInfo.isValid() || noIncludes) {
+        return std::nullopt;
+    }
     auto sourceFile = node->srcInfo.getSourceFile();
-    if (isSystemFile(sourceFile)) return sourceFile;
-    return nullptr;
+    if (isSystemFile(sourceFile)) {
+        return sourceFile;
+    }
+    return std::nullopt;
 }
 
 namespace {
@@ -153,9 +150,9 @@ bool ToP4::preorder(const IR::P4Program *program) {
     dump(2);
     for (auto a : program->objects) {
         // Check where this declaration originates
-        cstring sourceFile = ifSystemFile(a);
-        if (!a->is<IR::Type_Error>() &&  // errors can come from multiple files
-            sourceFile != nullptr) {
+        auto sourceFileOpt = ifSystemFile(a);
+        // Errors can come from multiple files
+        if (!a->is<IR::Type_Error>() && sourceFileOpt.has_value()) {
             /* FIXME -- when including a user header file (sourceFile !=
              * mainFile), do we want to emit an #include of it or not?  Probably
              * not when translating from P4-14, as that would create a P4-16
@@ -163,7 +160,7 @@ bool ToP4::preorder(const IR::P4Program *program) {
              * allow converting headers independently (is that even possible?).
              * For now we ignore mainFile and don't emit #includes for any
              * non-system header */
-
+            auto sourceFile = sourceFileOpt.value();
             if (includesEmitted.find(sourceFile) == includesEmitted.end()) {
                 if (sourceFile.startsWith(p4includePath)) {
                     const char *p = sourceFile.c_str() + strlen(p4includePath);
@@ -691,7 +688,7 @@ bool ToP4::preorder(const IR::Type_Error *d) {
     dump(1);
     bool first = true;
     for (auto a : *d->getDeclarations()) {
-        if (ifSystemFile(a->getNode()))
+        if (ifSystemFile(a->getNode()).has_value())
             // only print if not from a system file
             continue;
         if (!first) {

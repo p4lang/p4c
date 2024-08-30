@@ -36,6 +36,9 @@ namespace P4 {
 extern const char *p4includePath;
 extern const char *p4_14includePath;
 
+/// Try to guess whether a file is a "system" file
+bool isSystemFile(cstring filename);
+
 /// Base class for compiler options.
 /// This class contains the options for the front-ends.
 /// Each back-end should subclass this file.

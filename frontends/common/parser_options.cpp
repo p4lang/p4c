@@ -48,6 +48,8 @@ const char *p4_14includePath = CONFIG_PKGDATADIR "/p4_14include";
 
 using namespace P4::literals;
 
+bool isSystemFile(cstring file) { return file.startsWith(p4includePath); }
+
 void ParserOptions::closeFile(FILE *file) {
     if (file == nullptr) {
         return;
