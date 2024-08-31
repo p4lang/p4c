@@ -331,13 +331,13 @@ static bool checkEnumValueInitializer(const IR::Type_Bits *type, const IR::Expre
             std::string extraMsg;
             if (!type->isSigned && constant->value < low) {
                 extraMsg =
-                    str(boost::format(
+                    str(BoostFormatCompat(
                             "the value %1% is negative, but the underlying type %2% is unsigned") %
                         constant->value % type->toString());
             } else {
                 extraMsg =
-                    str(boost::format("the value %1% requires %2% bits but the underlying "
-                                      "%3% type %4% only contains %5% bits") %
+                    str(BoostFormatCompat("the value %1% requires %2% bits but the underlying "
+                                          "%3% type %4% only contains %5% bits") %
                         constant->value % required % (type->isSigned ? "signed" : "unsigned") %
                         type->toString() % type->size);
             }

@@ -6,8 +6,6 @@
 #include <sstream>
 #include <string_view>
 
-#include <boost/format.hpp>
-
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/options.h"
 #include "frontends/parsers/p4/p4AnnotationLexer.hpp"
@@ -15,6 +13,7 @@
 #include "frontends/parsers/p4/p4parser.hpp"
 #include "frontends/parsers/v1/v1lexer.hpp"
 #include "frontends/parsers/v1/v1parser.hpp"
+#include "lib/boost_format_compat.h"
 #include "lib/error.h"
 
 #ifdef HAVE_LIBBOOST_IOSTREAMS
@@ -108,7 +107,7 @@ void AbstractParserDriver::onParseError(const Util::SourceInfo &location,
     auto &context = BaseCompileContext::get();
     if (message == unexpectedIdentifierError) {
         context.errorReporter().parser_error(
-            location, boost::format("%s \"%s\"") % unexpectedIdentifierError % lastIdentifier);
+            location, BoostFormatCompat("%s \"%s\"") % unexpectedIdentifierError % lastIdentifier);
     } else {
         context.errorReporter().parser_error(location, message);
     }

@@ -76,7 +76,7 @@ class P4CExceptionBase : public std::exception {
     template <typename... Args>
     explicit P4CExceptionBase(const char *format, Args &&...args) {
         traceCreation();
-        boost::format fmt(format);
+        BoostFormatCompat fmt(format);
         // FIXME: This will implicitly take location of the first argument having
         // SourceInfo. Not sure if this always desireable or not.
         message = ::P4::bug_helper(fmt, "", "", std::forward<Args>(args)...);

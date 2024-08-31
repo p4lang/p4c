@@ -124,7 +124,7 @@ std::string TypeConstraint::localError(Explain *explainer) const {
     if (errFormat.isNullOrEmpty()) return "";
 
     std::string message, explanation;
-    boost::format fmt = boost::format(errFormat);
+    BoostFormatCompat fmt(errFormat);
     switch (errArguments.size()) {
         case 0:
             message = boost::str(fmt);
