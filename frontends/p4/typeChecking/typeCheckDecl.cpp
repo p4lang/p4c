@@ -173,8 +173,8 @@ bool TypeInferenceBase::checkAbstractMethods(const IR::Declaration_Instance *ins
         if (m->isAbstract) {
             auto [it, inserted] = virt.emplace(m->name, m);
             if (!inserted)
-                P4::error(ErrorType::ERR_DUPLICATE, "%1%: duplicated name (%2% is previous instance)",
-                          m->name, it->second);
+                P4::error(ErrorType::ERR_DUPLICATE,
+                          "%1%: duplicated name (%2% is previous instance)", m->name, it->second);
         }
     }
     if (virt.size() == 0 && inst->initializer == nullptr) return true;
