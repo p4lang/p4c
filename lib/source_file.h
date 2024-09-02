@@ -251,7 +251,7 @@ struct SourceFileLine {
     cstring toString() const;
 };
 
-class Comment final : IHasDbPrint {
+class Comment final : IHasDbPrint, IHasSourceInfo {
  private:
     SourceInfo srcInfo;
     bool singleLine;
@@ -274,10 +274,8 @@ class Comment final : IHasDbPrint {
         if (!singleLine) out << "*/";
     }
 
-    /// Retrieve the beginning of the source position associated with this comment.
-    [[nodiscard]] const SourcePosition &getStartPosition() const { return srcInfo.getStart(); }
-    /// Retrieve the end of the source position associated with this comment.
-    [[nodiscard]] const SourcePosition &getEndPosition() const { return srcInfo.getEnd(); }
+    /// Retrieve the Source position associated with this Comment.
+    [[nodiscard]] SourceInfo getSourceInfo() const override { return srcInfo; }
 };
 
 /**

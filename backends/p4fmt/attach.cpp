@@ -39,7 +39,7 @@ const IR::Node *Attach::attachCommentsToNode(IR::Node *node, TraversalType ttype
             continue;
         }
 
-        const auto &commentEnd = comment->getEndPosition();
+        const auto &commentEnd = comment->getSourceInfo().getEnd();
 
         switch (ttype) {
             case TraversalType::Preorder:
