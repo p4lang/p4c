@@ -22,12 +22,8 @@ class Attach : public Transform {
 
     explicit Attach(const std::unordered_map<const Util::Comment *, bool> &processedComments)
         : processedComments(processedComments){};
-    ~Attach() override;
 
     const IR::Node *attachCommentsToNode(IR::Node *, TraversalType);
-
-    using Transform::postorder;
-    using Transform::preorder;
 
     const IR::Node *preorder(IR::Node *node) override;
     const IR::Node *postorder(IR::Node *node) override;

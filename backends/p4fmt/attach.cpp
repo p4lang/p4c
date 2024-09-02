@@ -5,8 +5,6 @@
 
 namespace P4::P4Fmt {
 
-Attach::~Attach() = default;
-
 void Attach::addPrefixComments(NodeId node, const Util::Comment *prefix) {
     commentsMap[node].prefix.push_back(prefix);
 }
@@ -27,7 +25,7 @@ const IR::Node *Attach::attachCommentsToNode(IR::Node *node, TraversalType ttype
         return node;
     }
 
-    std::filesystem::path sourceFile(node->srcInfo.getSourceFile().c_str());
+    std::filesystem::path sourceFile(node->srcInfo.getSourceFile().string_view());
     if (isSystemFile(sourceFile)) {
         // Skip attachment for system files
         return node;
@@ -59,7 +57,7 @@ const IR::Node *Attach::attachCommentsToNode(IR::Node *node, TraversalType ttype
                 break;
 
             default:
-                ::P4::error(ErrorType::ERR_INVALID, "traversal type unknown/unsupported.");
+                P4::error(ErrorType::ERR_INVALID, "traversal type unknown/unsupported.");
                 return node;
         }
     }
