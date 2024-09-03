@@ -128,6 +128,8 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
             16w64: {
                 tmp_0 = 16w2;
             }
+            16w92: {
+            }
         }
         switch (tbl_0.apply().action_run) {
             a1: {

@@ -56,6 +56,8 @@ control c(out bit<32> v) {
             32w1: {
                 v = 32w1;
             }
+            32w2: {
+            }
         }
         switch (E.C) {
             E.A: {

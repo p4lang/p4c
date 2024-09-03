@@ -124,6 +124,8 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
     }
     @hidden action switch_0_case_1() {
     }
+    @hidden action switch_0_case_2() {
+    }
     @hidden table switch_0_table {
         key = {
             switch_0_key: exact;
@@ -132,12 +134,14 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
             switch_0_case();
             switch_0_case_0();
             switch_0_case_1();
+            switch_0_case_2();
         }
-        const default_action = switch_0_case_1();
+        const default_action = switch_0_case_2();
         const entries = {
                         const 16w16 : switch_0_case();
                         const 16w32 : switch_0_case();
                         const 16w64 : switch_0_case_0();
+                        const 16w92 : switch_0_case_1();
         }
     }
     @hidden action psaswitchexpressionwithoutdefault124() {
@@ -187,6 +191,8 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
                 tbl_psaswitchexpressionwithoutdefault125.apply();
             }
             switch_0_case_1: {
+            }
+            switch_0_case_2: {
             }
         }
         switch (tbl_0.apply().action_run) {
