@@ -130,6 +130,8 @@ class ConvertToBackendIR : public Inspector {
     void updateAddOnMissTable(const IR::P4Table *t);
     bool checkParameterDirection(const IR::TCAction *tcAction);
     bool hasExecuteMethod(const IR::Type_Extern *extn);
+    void addExternTypeInstance(const IR::Declaration_Instance *decl,
+                               IR::TCExternInstance *tcExternInstance, cstring eName);
     safe_vector<const IR::TCKey *> HandleTypeNameStructField(const IR::StructField *field,
                                                              const IR::Type_Extern *extn,
                                                              const IR::Declaration_Instance *decl,

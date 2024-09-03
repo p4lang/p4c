@@ -466,7 +466,9 @@ class TCExternInstance {
     unsigned numelemns;
     bool isControlPath;
     bool isTablBindable;
+    bool isInstanceType;
     bool isConstructorKeys;
+    cstring instanceType;
     safe_vector<TCKey> controlKeys;
     safe_vector<TCKey> constructorKeys;
     TCExternInstance(unsigned id, cstring name, bool isNe, unsigned ne) {
@@ -476,6 +478,7 @@ class TCExternInstance {
         numelemns = ne;
         isControlPath = false;
         isTablBindable = false;
+        isInstanceType = false;
         isConstructorKeys = false;
     }
     void addControlPathKeys(safe_vector<TCKey> k) {
@@ -489,6 +492,10 @@ class TCExternInstance {
             isConstructorKeys = true;
             constructorKeys = k;
         }
+    }
+    void setExternTypeInstance(cstring type) {
+        isInstanceType = true;
+        instanceType = type;
     }
     void setExternTableBindable(bool flag) {
         isTablBindable = flag;

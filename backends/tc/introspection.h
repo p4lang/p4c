@@ -123,10 +123,12 @@ struct TableAttributes {
 struct ExternInstancesAttributes {
     unsigned int id;
     cstring name;
+    cstring type;
     safe_vector<struct KeyFieldAttributes *> keyFields;
     ExternInstancesAttributes() {
         id = 0;
         name = nullptr;
+        type = nullptr;
     }
 };
 

@@ -990,6 +990,14 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::processExternControlPath(
                 keys.insert(keys.end(), temp_keys.begin(), temp_keys.end());
             } else {
                 cstring ptype = absl::StrCat("bit", field->type->width_bits());
+                if (eName == "Meter") {
+                    /* If Meter Type is Bytes, then set type of 'cir' and 'pir' as "rate"*/
+                    auto meterTypeArg = decl->arguments->at(1)->expression->to<IR::Constant>();
+                    if (meterTypeArg->value == 1 &&
+                        (field->toString() == "cir" || field->toString() == "pir")) {
+                        ptype = "rate"_cs;
+                    }
+                }
                 IR::TCKey *key = new IR::TCKey(kId++, field->type->width_bits(), ptype,
                                                field->toString(), annoName, true);
                 keys.push_back(key);
@@ -1055,6 +1063,23 @@ bool ConvertToBackendIR::hasExecuteMethod(const IR::Type_Extern *extn) {
         }
     }
     return false;
+}
+
+void ConvertToBackendIR::addExternTypeInstance(const IR::Declaration_Instance *decl,
+                                               IR::TCExternInstance *tcExternInstance,
+                                               cstring eName) {
+    if (eName == "Meter" || eName == "DirectMeter" || eName == "Counter" ||
+        eName == "DirectCounter") {
+        auto typeArg =
+            decl->arguments->at(decl->arguments->size() - 1)->expression->to<IR::Constant>();
+        if (typeArg->value == 0) {
+            tcExternInstance->setExternTypeInstance("PACKETS"_cs);
+        } else if (typeArg->value == 1) {
+            tcExternInstance->setExternTypeInstance("BYTES"_cs);
+        } else {
+            tcExternInstance->setExternTypeInstance("PACKETS_AND_BYTES"_cs);
+        }
+    }
 }
 
 /* Process each declaration instance of externs*/
@@ -1133,6 +1158,7 @@ void ConvertToBackendIR::postorder(const IR::Declaration_Instance *decl) {
         if (constructorKeys.size() != 0) {
             tcExternInstance->addConstructorKeys(constructorKeys);
         }
+        addExternTypeInstance(decl, tcExternInstance, eName);
         externDefinition->addExternInstance(tcExternInstance);
     }
 }
