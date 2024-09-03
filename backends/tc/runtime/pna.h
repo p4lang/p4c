@@ -177,6 +177,8 @@ xdp_p4tc_entry_delete(struct xdp_md *xdp_ctx,
 
 #define P4TC_EXT_CNT_DIRECT 0x1
 #define P4TC_EXT_CNT_INDIRECT 0x2
+#define P4TC_EXT_METER_DIRECT (1 << 2)
+#define P4TC_EXT_METER_INDIRECT (1 << 3)
 
 struct p4tc_ext_bpf_params {
     u32 pipe_id;
@@ -228,34 +230,43 @@ xdp_p4tc_extern_indirect_count_bytesonly(struct xdp_md *xdp_ctx,
 
 extern int bpf_p4tc_extern_meter_bytes_color(struct __sk_buff *skb_ctx,
                                              struct p4tc_ext_bpf_params *params,
-                                             const u32 params__sz) __ksym;
-
-extern int bpf_p4tc_extern_meter_bytes(struct __sk_buff *skb_ctx,
-                                       struct p4tc_ext_bpf_params *params,
-                                       const u32 params__sz) __ksym;
+                                             const u32 params__sz, void *key,
+					     const u32 key__sz) __ksym;
+extern int
+bpf_p4tc_extern_meter_bytes(struct __sk_buff *skb,
+                            struct p4tc_ext_bpf_params *params,
+                            const u32 params__sz, void *key,
+                            const u32 key__sz) __ksym;
 
 extern int bpf_p4tc_extern_meter_pkts_color(struct __sk_buff *skb_ctx,
                                             struct p4tc_ext_bpf_params *params,
-                                            const u32 params__sz) __ksym;
-
-extern int xdp_p4tc_extern_meter_pkts(struct xdp_md *xdp_ctx,
-                                      struct p4tc_ext_bpf_params *params,
-                                      const u32 params__sz) __ksym;
+                                            const u32 params__sz, void *key,
+					    const u32 key__sz) __ksym;
+extern int
+bpf_p4tc_extern_meter_pkts(struct __sk_buff *skb,
+                           struct p4tc_ext_bpf_params *params,
+                           const u32 params__sz, void *key,
+                           const u32 key__sz) __ksym;
 
 extern int xdp_p4tc_extern_meter_bytes_color(struct xdp_md *xdp_ctx,
-                                             const u32 params__sz) __ksym;
+                                             struct p4tc_ext_bpf_params *params,
+                                             const u32 params__sz, void *key,
+                                             const u32 key__sz) __ksym;
 
 extern int xdp_p4tc_extern_meter_bytes(struct xdp_md *xdp_ctx,
                                        struct p4tc_ext_bpf_params *params,
-                                       const u32 params__sz) __ksym;
+                                       const u32 params__sz, void *key,
+                                       const u32 key__sz) __ksym;
 
 extern int xdp_p4tc_extern_meter_pkts_color(struct xdp_md *xdp_ctx,
                                             struct p4tc_ext_bpf_params *params,
-                                            const u32 params__sz) __ksym;
+                                            const u32 params__sz, void *key,
+                                            const u32 key__sz) __ksym;
 
 extern int xdp_p4tc_extern_meter_pkts(struct xdp_md *xdp_ctx,
                                       struct p4tc_ext_bpf_params *params,
-                                      const u32 params__sz) __ksym;
+                                      const u32 params__sz, void *key,
+                                      const u32 key__sz) __ksym;
 
 /* Start checksum related kfuncs */
 struct p4tc_ext_csum_params {

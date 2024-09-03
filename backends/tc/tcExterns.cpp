@@ -480,4 +480,144 @@ void EBPFDigestPNA::emitPushElement(EBPF::CodeBuilder *builder, cstring elem) co
     builder->append("bpf_p4tc_extern_digest_pack(skb, &ext_params, sizeof(ext_params));");
 }
 
+void EBPFMeterPNA::emitInitializer(EBPF::CodeBuilder *builder, const ConvertToBackendIR *tcIR,
+                                   cstring externName) const {
+    builder->emitIndent();
+    builder->appendLine("__builtin_memset(&ext_params, 0, sizeof(struct p4tc_ext_bpf_params));");
+    builder->emitIndent();
+    builder->appendLine("ext_params.pipe_id = p4tc_filter_fields.pipeid;");
+    builder->emitIndent();
+    auto extId = tcIR->getExternId(externName);
+    BUG_CHECK(!extId.isNullOrEmpty(), "Extern ID not found");
+    builder->appendFormat("ext_params.ext_id = %s;", extId);
+    builder->newline();
+    cstring ext_flags = isDirect ? "P4TC_EXT_METER_DIRECT"_cs : "P4TC_EXT_METER_INDIRECT"_cs;
+    builder->emitIndent();
+    builder->appendFormat("ext_params.flags = %s;", ext_flags);
+}
+
+void EBPFMeterPNA::emitExecute(EBPF::CodeBuilder *builder, const P4::ExternMethod *method,
+                               ControlBodyTranslatorPNA *translator,
+                               const IR::Expression *leftExpression) const {
+    auto externName = method->originalExternType->name.name;
+    auto index = method->expr->arguments->at(0)->expression;
+    auto instId = translator->tcIR->getExternInstanceId(externName, this->instanceName);
+    bool isColorAware = false;
+
+    emitInitializer(builder, translator->tcIR, externName);
+
+    builder->newline();
+    builder->emitIndent();
+    BUG_CHECK(instId != 0, "Extern instance ID not found");
+    builder->appendFormat("ext_params.inst_id = %d;", instId);
+    builder->newline();
+    builder->emitIndent();
+    builder->append("ext_params.index = ");
+    translator->visit(index);
+    builder->endOfStatement(true);
+    builder->emitIndent();
+
+    if (method->expr->arguments->size() == 2) {
+        isColorAware = true;
+        auto value = method->expr->arguments->at(1)->expression;
+        cstring color_aware = "color_meter"_cs;
+        auto etype = EBPF::EBPFTypeFactory::instance->create(IR::Type_Bits::get(32));
+        builder->newline();
+        builder->emitIndent();
+        etype->declare(builder, color_aware, true);
+        builder->appendLine(" = (u32 *)ext_params.in_params;");
+        builder->emitIndent();
+        builder->appendFormat("*%s = ", color_aware);
+        translator->visit(value);
+        builder->endOfStatement();
+    }
+
+    if (leftExpression != nullptr) {
+        builder->newline();
+        builder->emitIndent();
+        translator->visit(leftExpression);
+        builder->append(" = ");
+    }
+
+    if (type == BYTES) {
+        if (isColorAware) {
+            builder->appendLine(
+                "bpf_p4tc_extern_meter_bytes_color(skb, &ext_params, sizeof(ext_params), NULL, "
+                "0);");
+        } else {
+            builder->appendLine(
+                "bpf_p4tc_extern_meter_bytes(skb, &ext_params, sizeof(ext_params), NULL, 0);");
+        }
+    } else if (type == PACKETS) {
+        if (isColorAware) {
+            builder->appendLine(
+                "bpf_p4tc_extern_meter_pkts_color(skb, &ext_params, sizeof(ext_params), NULL, 0);");
+        } else {
+            builder->appendLine(
+                "bpf_p4tc_extern_meter_pkts(skb, &ext_params, sizeof(ext_params), NULL, 0);");
+        }
+    }
+}
+
+void EBPFMeterPNA::emitDirectMeterExecute(EBPF::CodeBuilder *builder,
+                                          const P4::ExternMethod *method,
+                                          ControlBodyTranslatorPNA *translator,
+                                          const IR::Expression *leftExpression) const {
+    auto externName = method->originalExternType->name.name;
+    bool isColorAware = false;
+
+    emitInitializer(builder, translator->tcIR, externName);
+
+    builder->newline();
+    auto tblId = translator->tcIR->getTableId(tblname);
+    BUG_CHECK(tblId != 0, "Table ID not found");
+    builder->emitIndent();
+    builder->appendFormat("ext_params.tbl_id = %d;", tblId);
+    builder->newline();
+
+    if (method->expr->arguments->size() == 1) {
+        isColorAware = true;
+        auto value = method->expr->arguments->at(0)->expression;
+        cstring color_aware = "color_meter"_cs;
+        auto etype = EBPF::EBPFTypeFactory::instance->create(IR::Type_Bits::get(32));
+        builder->newline();
+        builder->emitIndent();
+        etype->declare(builder, color_aware, true);
+        builder->appendLine(" = (u32 *)ext_params.in_params;");
+        builder->emitIndent();
+        builder->appendFormat("*%s = ", color_aware);
+        translator->visit(value);
+        builder->endOfStatement();
+    }
+
+    builder->newline();
+    builder->emitIndent();
+    if (leftExpression != nullptr) {
+        translator->visit(leftExpression);
+        builder->append(" = ");
+    }
+
+    if (type == BYTES) {
+        if (isColorAware) {
+            builder->appendLine(
+                "bpf_p4tc_extern_meter_bytes_color(skb, &ext_params, sizeof(ext_params), &key, "
+                "sizeof(key));");
+        } else {
+            builder->appendLine(
+                "bpf_p4tc_extern_meter_bytes(skb, &ext_params, sizeof(ext_params), &key, "
+                "sizeof(key));");
+        }
+    } else if (type == PACKETS) {
+        if (isColorAware) {
+            builder->appendLine(
+                "bpf_p4tc_extern_meter_pkts_color(skb, &ext_params, sizeof(ext_params), &key, "
+                "sizeof(key));");
+        } else {
+            builder->appendLine(
+                "bpf_p4tc_extern_meter_pkts(skb, &ext_params, sizeof(ext_params), &key, "
+                "sizeof(key));");
+        }
+    }
+}
+
 }  // namespace P4::TC

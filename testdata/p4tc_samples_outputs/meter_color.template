@@ -1,0 +1,28 @@
+#!/bin/bash -x
+
+set -e
+
+TC="tc"
+$TC p4template create pipeline/meter_color numtables 1
+
+$TC p4template create action/meter_color/ingress/meter_exec actid 1
+$TC p4template update action/meter_color/ingress/meter_exec state active
+
+$TC p4template create action/meter_color/ingress/drop actid 2
+$TC p4template update action/meter_color/ingress/drop state active
+
+$TC p4template create extern/root/Meter extid 0x1B000000 numinstances 1 tc_acl 0x1936 has_exec_method
+
+$TC p4template create extern_inst/meter_color/Meter/ingress.global_meter instid 1 \
+tc_numel 2048 \
+constructor param type ptype bit32 0 \
+control_path tc_key index ptype bit32 id 1 param cir ptype bit64 id 2 param cbs ptype bit64 id 3 param pir ptype bit64 id 4 param pbs ptype bit64 id 5
+
+$TC p4template create table/meter_color/ingress/nh_table \
+	tblid 1 \
+	type exact \
+	keysz 32 nummasks 8 permissions 0x3da4 tentries 2048 \
+	table_acts act name meter_color/ingress/meter_exec \
+	act name meter_color/ingress/drop
+$TC p4template update table/meter_color/ingress/nh_table default_miss_action permissions 0x1024 action meter_color/ingress/drop
+$TC p4template update pipeline/meter_color state ready

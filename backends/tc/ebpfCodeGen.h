@@ -151,6 +151,7 @@ class EBPFTablePNA : public EBPF::EBPFTablePSA {
                                                                    bool isDefaultAction) const;
     void validateKeys() const override;
     void initDirectCounters();
+    void initDirectMeters();
     const ConvertToBackendIR *tcIR;
 
  public:
@@ -158,6 +159,7 @@ class EBPFTablePNA : public EBPF::EBPFTablePSA {
                  EBPF::CodeGenInspector *codeGen, const ConvertToBackendIR *tcIR)
         : EBPF::EBPFTablePSA(program, table, codeGen), tcIR(tcIR) {
         initDirectCounters();
+        initDirectMeters();
     }
     void emitInitializer(EBPF::CodeBuilder *builder) override;
     void emitDefaultActionStruct(EBPF::CodeBuilder *builder);
@@ -295,6 +297,7 @@ class EBPFControlPNA : public EBPF::EBPFControlPSA {
             builder->appendLine("struct p4tc_ext_bpf_val *ext_val_ptr;");
         }
     }
+    void emitTableTypes(EBPF::CodeBuilder *builder) { EBPF::EBPFControl::emitTableTypes(builder); }
 };
 
 // Similar to class ConvertToEBPFControlPSA in backends/ebpf/psa/ebpfPsaGen.h

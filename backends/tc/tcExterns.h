@@ -196,6 +196,59 @@ class EBPFDigestPNA : public EBPF::EBPFDigestPSA {
     void emitPushElement(EBPF::CodeBuilder *builder, cstring elem) const;
 };
 
+class EBPFMeterPNA : public EBPF::EBPFMeterPSA {
+    cstring tblname;
+    cstring instanceName;
+
+ public:
+    EBPFMeterPNA(const EBPF::EBPFProgram *program, cstring instanceName,
+                 const IR::Declaration_Instance *di, EBPF::CodeGenInspector *codeGen)
+        : EBPF::EBPFMeterPSA(program, instanceName, di, codeGen) {
+        this->instanceName = di->toString();
+    }
+    EBPFMeterPNA(const EBPF::EBPFProgram *program, cstring instanceName, cstring tblname,
+                 const IR::Declaration_Instance *di, EBPF::CodeGenInspector *codeGen)
+        : EBPF::EBPFMeterPSA(program, instanceName, di, codeGen) {
+        this->tblname = tblname;
+        this->instanceName = di->toString();
+    }
+    void emitExecute(EBPF::CodeBuilder *builder, const P4::ExternMethod *method,
+                     ControlBodyTranslatorPNA *translator,
+                     const IR::Expression *leftExpression) const;
+    void emitDirectMeterExecute(EBPF::CodeBuilder *builder, const P4::ExternMethod *method,
+                                ControlBodyTranslatorPNA *translator,
+                                const IR::Expression *leftExpression) const;
+    void emitInitializer(EBPF::CodeBuilder *builder, const ConvertToBackendIR *tcIR,
+                         cstring externName) const;
+};
+
+class EBPFTablePNADirectMeterPropertyVisitor : public EBPF::EBPFTablePsaPropertyVisitor {
+ public:
+    explicit EBPFTablePNADirectMeterPropertyVisitor(EBPF::EBPFTablePSA *table)
+        : EBPF::EBPFTablePsaPropertyVisitor(table) {}
+
+    bool preorder(const IR::PathExpression *pe) override {
+        auto decl = table->program->refMap->getDeclaration(pe->path, true);
+        auto di = decl->to<IR::Declaration_Instance>();
+        CHECK_NULL(di);
+        if (EBPF::EBPFObject::getTypeName(di) != "DirectMeter") {
+            ::P4::error(ErrorType::ERR_UNEXPECTED, "%1%: not a DirectMeter, see declaration of %2%",
+                        pe, decl);
+            return false;
+        }
+
+        auto meterName = EBPF::EBPFObject::externalName(di);
+        auto tblname = table->table->container->name.originalName;
+        auto met = new EBPFMeterPNA(table->program, meterName, tblname, di, table->codeGen);
+        table->meters.emplace_back(std::make_pair(meterName, met));
+        return false;
+    }
+
+    void visitTableProperty() {
+        EBPF::EBPFTablePsaPropertyVisitor::visitTableProperty("pna_direct_meter"_cs);
+    }
+};
+
 }  // namespace P4::TC
 
 #endif /* BACKENDS_TC_TCEXTERNS_H_ */

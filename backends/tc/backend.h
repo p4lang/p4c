@@ -111,6 +111,7 @@ class ConvertToBackendIR : public Inspector {
     void updateMatchType(const IR::P4Table *t, IR::TCTable *tabledef);
     void updateTimerProfiles(IR::TCTable *tabledef);
     void updatePnaDirectCounter(const IR::P4Table *t, IR::TCTable *tabledef, unsigned tentries);
+    void updatePnaDirectMeter(const IR::P4Table *t, IR::TCTable *tabledef, unsigned tentries);
     bool isPnaParserMeta(const IR::Member *mem);
     bool isPnaMainInputMeta(const IR::Member *mem);
     bool isPnaMainOutputMeta(const IR::Member *mem);
