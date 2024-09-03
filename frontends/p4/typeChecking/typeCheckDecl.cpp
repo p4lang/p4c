@@ -12,6 +12,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "absl/strings/substitute.h"
 #include "constantTypeSubstitution.h"
 #include "typeChecker.h"
 
@@ -376,16 +377,17 @@ static bool checkEnumValueInitializer(const IR::Type_Bits *type, const IR::Expre
             int required = getConstantsRepresentationSize(constant->value, type->isSigned);
             std::string extraMsg;
             if (!type->isSigned && constant->value < low) {
-                extraMsg =
-                    str(boost::format(
-                            "the value %1% is negative, but the underlying type %2% is unsigned") %
-                        constant->value % type->toString());
+                extraMsg = absl::Substitute(
+                    "the value $0 is negative, but the underlying type $1 is unsigned",
+                    P4::Util::toString(constant->value, 0, type->isSigned).string_view(),
+                    type->toString().string_view());
             } else {
-                extraMsg =
-                    str(boost::format("the value %1% requires %2% bits but the underlying "
-                                      "%3% type %4% only contains %5% bits") %
-                        constant->value % required % (type->isSigned ? "signed" : "unsigned") %
-                        type->toString() % type->size);
+                extraMsg = absl::Substitute(
+                    "the value $0 requires $1 bits but the underlying "
+                    "$2 type $3 only contains $4 bits",
+                    P4::Util::toString(constant->value, 0, type->isSigned).string_view(), required,
+                    (type->isSigned ? "signed" : "unsigned"), type->toString().string_view(),
+                    type->size);
             }
             P4::error(ErrorType::ERR_TYPE_ERROR,
                       "%1%: Serialized enum constant value %2% is out of bounds of the underlying "
