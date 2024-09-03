@@ -226,8 +226,6 @@ class ErrorReporter {
     /// @return the action to take for the given diagnostic, falling back to the
     /// default action if it wasn't overridden via the command line or a pragma.
     DiagnosticAction getDiagnosticAction(cstring diagnostic, DiagnosticAction defaultAction) {
-        // Actions for errors can never be overridden.
-        if (defaultAction == DiagnosticAction::Error) return defaultAction;
         auto it = diagnosticActions.find(diagnostic);
         if (it != diagnosticActions.end()) return it->second;
         // if we're dealing with warnings and they have been globally modified
