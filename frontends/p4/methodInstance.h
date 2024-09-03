@@ -145,27 +145,40 @@ class ApplyMethod final : public MethodInstance {
     DECLARE_TYPEINFO(ApplyMethod, MethodInstance);
 };
 
-/** Represents a method call on an extern object */
-class ExternMethod final : public MethodInstance {
-    ExternMethod(const IR::MethodCallExpression *expr, const IR::IDeclaration *decl,
-                 const IR::Method *method, const IR::Type_Extern *originalExternType,
-                 const IR::Type_Method *originalMethodType, const IR::Type_Extern *actualExternType,
-                 const IR::Type_Method *actualMethodType, bool incomplete)
-        : MethodInstance(expr, decl, originalMethodType, actualMethodType),
-          method(method),
-          originalExternType(originalExternType),
-          actualExternType(actualExternType) {
+/** represents a call on an extern method or extern function */
+class ExternCall : public MethodInstance {
+ protected:
+    ExternCall(const IR::MethodCallExpression *expr, const IR::IDeclaration *decl,
+               const IR::Method *method, const IR::Type_Method *originalMethodType,
+               const IR::Type_Method *actualMethodType, bool incomplete)
+        : MethodInstance(expr, decl, originalMethodType, actualMethodType), method(method) {
         CHECK_NULL(method);
-        CHECK_NULL(originalExternType);
-        CHECK_NULL(actualExternType);
         bindParameters();
         if (!incomplete)
             typeSubstitution.setBindings(expr, method->type->typeParameters, expr->typeArguments);
     }
-    friend class MethodInstance;
 
  public:
     const IR::Method *method;
+
+    DECLARE_TYPEINFO(ExternCall, MethodInstance);
+};
+
+/** Represents a method call on an extern object */
+class ExternMethod final : public ExternCall {
+    ExternMethod(const IR::MethodCallExpression *expr, const IR::IDeclaration *decl,
+                 const IR::Method *method, const IR::Type_Extern *originalExternType,
+                 const IR::Type_Method *originalMethodType, const IR::Type_Extern *actualExternType,
+                 const IR::Type_Method *actualMethodType, bool incomplete)
+        : ExternCall(expr, decl, method, originalMethodType, actualMethodType, incomplete),
+          originalExternType(originalExternType),
+          actualExternType(actualExternType) {
+        CHECK_NULL(originalExternType);
+        CHECK_NULL(actualExternType);
+    }
+    friend class MethodInstance;
+
+ public:
     const IR::Type_Extern *originalExternType;  // type of object method is applied to
     const IR::Type_Extern *actualExternType;    // with type variables substituted
 
@@ -174,26 +187,19 @@ class ExternMethod final : public MethodInstance {
     // otherwise will consist of those methods that are @synchronous with this
     std::vector<const IR::IDeclaration *> mayCall() const;
 
-    DECLARE_TYPEINFO(ExternMethod, MethodInstance);
+    DECLARE_TYPEINFO(ExternMethod, ExternCall);
 };
 
 /** Represents the call of an extern function */
-class ExternFunction final : public MethodInstance {
+class ExternFunction final : public ExternCall {
     ExternFunction(const IR::MethodCallExpression *expr, const IR::Method *method,
                    const IR::Type_Method *originalMethodType,
                    const IR::Type_Method *actualMethodType, bool incomplete)
-        : MethodInstance(expr, nullptr, originalMethodType, actualMethodType), method(method) {
-        CHECK_NULL(method);
-        bindParameters();
-        if (!incomplete)
-            typeSubstitution.setBindings(expr, method->type->typeParameters, expr->typeArguments);
-    }
+        : ExternCall(expr, nullptr, method, originalMethodType, actualMethodType, incomplete) {}
     friend class MethodInstance;
 
  public:
-    const IR::Method *method;
-
-    DECLARE_TYPEINFO(ExternFunction, MethodInstance);
+    DECLARE_TYPEINFO(ExternFunction, ExternCall);
 };
 
 /** Represents the direct call of an action; This also works for
