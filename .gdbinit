@@ -6,52 +6,52 @@ set unwind-on-terminating-exception on
 set python print-stack full
 
 if $_isvoid($bpnum)
-    break ErrorReporter::emit_message
+    break P4::ErrorReporter::emit_message
     disable
-    break Util::P4CExceptionBase::P4CExceptionBase<>
-    break Util::P4CExceptionBase::traceCreation
-    break BaseCompileContext::getDefaultErrorDiagnosticAction
+    break P4::Util::P4CExceptionBase::P4CExceptionBase<>
+    break P4::Util::P4CExceptionBase::traceCreation
+    break P4::BaseCompileContext::getDefaultErrorDiagnosticAction
 end
 
 define pn
     if $argc == 2
-        call ::dbprint($arg0 $arg1)
+        call P4::dbprint($arg0 $arg1)
     else
-        call ::dbprint($arg0)
+        call P4::dbprint($arg0)
     end
 end
 document pn
-        print a IR::Node pointer
+        print a P4::IR::Node pointer
 end
 define d
     if $argc == 2
-        call ::dump($arg0 $arg1)
+        call P4::dump($arg0 $arg1)
     else
-        call ::dump($arg0)
+        call P4::dump($arg0)
     end
 end
 document d
-        dump IR::Node tree or Visitor::Context
+        dump P4::IR::Node tree or Visitor::Context
 end
 define dnt
     if $argc == 2
-        call ::dump_notype($arg0 $arg1)
+        call P4::dump_notype($arg0 $arg1)
     else
-        call ::dump_notype($arg0)
+        call P4::dump_notype($arg0)
     end
 end
 document dnt
-        dump IR::Node tree, skipping 'type' fields
+        dump P4::IR::Node tree, skipping 'type' fields
 end
 define dsrc
     if $argc == 2
-        call ::dump_src($arg0 $arg1)
+        call P4::dump_src($arg0 $arg1)
     else
-        call ::dump_src($arg0)
+        call P4::dump_src($arg0)
     end
 end
 document dsrc
-        dump IR::Node tree, skipping 'type' fields, and printing source info
+        dump P4::IR::Node tree, skipping 'type' fields, and printing source info
 end
 
 python
@@ -99,7 +99,7 @@ def lookup_type(typename):
     return tp
 
 class ordered_map_Printer:
-    "Print an ordered_map<>"
+    "Print an P4::ordered_map<>"
     def __init__(self, val):
         self.val = val
         self.args = template_split(val.type.tag)
@@ -125,7 +125,7 @@ class ordered_map_Printer:
                           self.val['data']['_M_impl']['_M_node'].address)
 
 class ordered_set_Printer:
-    "Print an ordered_set<>"
+    "Print an P4::ordered_set<>"
     def __init__(self, val):
         self.val = val
         self.args = template_split(val.type.tag)
@@ -161,7 +161,7 @@ class ordered_set_Printer:
                           self.val['data']['_M_impl']['_M_node'].address)
 
 class cstringPrinter(object):
-    "Print a cstring"
+    "Print a P4::cstring"
     def __init__(self, val):
         self.val = val
     def to_string(self):
@@ -171,7 +171,7 @@ class cstringPrinter(object):
             return "nullptr"
 
 class SourceInfoPrinter(object):
-    "Print a Util::SourceInfo"
+    "Print a P4::Util::SourceInfo"
     def __init__(self, val):
         self.val = val
     def to_string(self):
@@ -181,7 +181,7 @@ class SourceInfoPrinter(object):
                 str(self.val['end']['columnNumber']))
 
 class bitvecPrinter(object):
-    "Print a bitvec"
+    "Print a P4::bitvec"
     def __init__(self, val):
         self.val = val
     def to_string(self):
@@ -227,7 +227,7 @@ def vec_at(vec, i):
     return (vec_begin(vec) + i).dereference()
 
 class safe_vector_Printer:
-    "Print a safe_vector<>"
+    "Print a P4::safe_vector<>"
     def __init__(self, val):
         self.val = val
     def to_string(self):
@@ -256,7 +256,7 @@ def bvec_size(vec):
     return sz
 
 class safe_vector_bool_Printer:
-    "Print a safe_vector<bool>"
+    "Print a P4::safe_vector<bool>"
     def __init__(self, val):
         self.val = val
     def to_string(self):
@@ -287,19 +287,19 @@ class safe_vector_bool_Printer:
         return self._iter(self.val)
 
 def find_pp(val):
-    if str(val.type.tag).startswith('ordered_map<'):
+    if str(val.type.tag).startswith('P4::ordered_map<'):
         return ordered_map_Printer(val)
-    if str(val.type.tag).startswith('ordered_set<'):
+    if str(val.type.tag).startswith('P4::ordered_set<'):
         return ordered_set_Printer(val)
-    if str(val.type.tag).startswith('safe_vector<bool'):
+    if str(val.type.tag).startswith('P4::safe_vector<bool'):
         return safe_vector_bool_Printer(val)
-    if str(val.type.tag).startswith('safe_vector<'):
+    if str(val.type.tag).startswith('P4::safe_vector<'):
         return safe_vector_Printer(val)
-    if val.type.tag == 'bitvec':
+    if val.type.tag == 'P4::bitvec':
         return bitvecPrinter(val)
-    if val.type.tag == 'cstring':
+    if val.type.tag == 'P4::cstring':
         return cstringPrinter(val)
-    if val.type.tag == 'Util::SourceInfo':
+    if val.type.tag == 'P4::Util::SourceInfo':
         return SourceInfoPrinter(val)
     return None
 
