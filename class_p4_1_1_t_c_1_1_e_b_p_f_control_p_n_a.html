@@ -141,6 +141,8 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:abfd81c41d94fb11ef6da9ce00c2b8e0f" id="r_abfd81c41d94fb11ef6da9ce00c2b8e0f"><td class="memItemLeft" align="right" valign="top"><a id="abfd81c41d94fb11ef6da9ce00c2b8e0f" name="abfd81c41d94fb11ef6da9ce00c2b8e0f"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>emitExternDefinition</b> (<a class="el" href="class_p4_1_1_e_b_p_f_1_1_code_builder.html">EBPF::CodeBuilder</a> *builder)</td></tr>
 <tr class="separator:abfd81c41d94fb11ef6da9ce00c2b8e0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4d502cd08d993c3afdf02e028c2ac94d" id="r_a4d502cd08d993c3afdf02e028c2ac94d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4d502cd08d993c3afdf02e028c2ac94d">emitTableTypes</a> (<a class="el" href="class_p4_1_1_e_b_p_f_1_1_code_builder.html">EBPF::CodeBuilder</a> *builder)</td></tr>
+<tr class="separator:a4d502cd08d993c3afdf02e028c2ac94d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae309a065e4553a5e15bee4d8318791cc" id="r_ae309a065e4553a5e15bee4d8318791cc"><td class="memItemLeft" align="right" valign="top"><a id="ae309a065e4553a5e15bee4d8318791cc" name="ae309a065e4553a5e15bee4d8318791cc"></a>
 <a class="el" href="class_p4_1_1_t_c_1_1_e_b_p_f_register_p_n_a.html">EBPFRegisterPNA</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>getRegister</b> (<a class="el" href="class_p4_1_1cstring.html">cstring</a> name) const</td></tr>
 <tr class="separator:ae309a065e4553a5e15bee4d8318791cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -157,8 +159,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>emitExternDefinition<
 <tr class="separator:a95e704ab40f74baa58691979855d1f0f inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_e_b_p_f_control_p_s_a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4e0847e8cc0f500aa965c373564fc955 inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_e_b_p_f_control_p_s_a" id="r_a4e0847e8cc0f500aa965c373564fc955"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_e_b_p_f_1_1_e_b_p_f_control_p_s_a.html#a4e0847e8cc0f500aa965c373564fc955">emitTableInstances</a> (<a class="el" href="class_p4_1_1_e_b_p_f_1_1_code_builder.html">CodeBuilder</a> *builder) override</td></tr>
 <tr class="separator:a4e0847e8cc0f500aa965c373564fc955 inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_e_b_p_f_control_p_s_a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aac52dd9dce31205e62e16df7444ed3d4 inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_e_b_p_f_control_p_s_a" id="r_aac52dd9dce31205e62e16df7444ed3d4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_e_b_p_f_1_1_e_b_p_f_control_p_s_a.html#aac52dd9dce31205e62e16df7444ed3d4">emitTableTypes</a> (<a class="el" href="class_p4_1_1_e_b_p_f_1_1_code_builder.html">CodeBuilder</a> *builder) override</td></tr>
-<tr class="separator:aac52dd9dce31205e62e16df7444ed3d4 inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_e_b_p_f_control_p_s_a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a788df04c6184dace13982fd3ff0aa346 inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_e_b_p_f_control_p_s_a" id="r_a788df04c6184dace13982fd3ff0aa346"><td class="memItemLeft" align="right" valign="top">
 <a class="el" href="class_p4_1_1_e_b_p_f_1_1_e_b_p_f_hash_p_s_a.html">EBPFHashPSA</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>getHash</b> (<a class="el" href="class_p4_1_1cstring.html">cstring</a> name) const</td></tr>
 <tr class="separator:a788df04c6184dace13982fd3ff0aa346 inherit pub_methods_class_p4_1_1_e_b_p_f_1_1_e_b_p_f_control_p_s_a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -329,6 +329,34 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>scanConstants</b> ()<
 virtual const void *&#160;</td><td class="memItemRight" valign="bottom"><b>toImpl</b> (TypeId <a class="el" href="struct_p4_1_1_r_t_t_i_1_1_base.html#a4115d7f39d312eac35d583797deabb83">typeId</a>) const noexcept=0</td></tr>
 <tr class="separator:ace64a732901ae7b486559ffffcbbf843 inherit pro_methods_struct_p4_1_1_r_t_t_i_1_1_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="a4d502cd08d993c3afdf02e028c2ac94d" name="a4d502cd08d993c3afdf02e028c2ac94d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4d502cd08d993c3afdf02e028c2ac94d">&#9670;&#160;</a></span>emitTableTypes()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void P4::TC::EBPFControlPNA::emitTableTypes </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_p4_1_1_e_b_p_f_1_1_code_builder.html">EBPF::CodeBuilder</a> *</td>          <td class="paramname"><span class="paramname"><em>builder</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reimplemented from <a class="el" href="class_p4_1_1_e_b_p_f_1_1_e_b_p_f_control_p_s_a.html">P4::EBPF::EBPFControlPSA</a>.</p>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->

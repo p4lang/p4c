@@ -1,5 +1,7 @@
 <map id="P4::EBPF::EBPFMeterPSA" name="P4::EBPF::EBPFMeterPSA">
 <area shape="rect" id="Node000001" title=" " alt="" coords="6,299,189,324"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_t_c_1_1_e_b_p_f_meter_p_n_a.html" title=" " alt="" coords="13,372,181,397"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="100,338,100,372,95,372,95,338"/>
 <area shape="rect" id="Node000002" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_table_base.html" title="Also used to represent counters." alt="" coords="5,225,189,251"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="100,264,100,299,95,299,95,264"/>
 <area shape="rect" id="Node000003" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_object.html" title="Base class for EBPF objects." alt="" coords="17,152,178,177"/>

@@ -927,7 +927,9 @@ var hierarchy =
                 [ "P4::TC::EBPFCounterPNA", "class_p4_1_1_t_c_1_1_e_b_p_f_counter_p_n_a.html", null ]
               ] ]
             ] ],
-            [ "P4::EBPF::EBPFMeterPSA", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_meter_p_s_a.html", null ],
+            [ "P4::EBPF::EBPFMeterPSA", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_meter_p_s_a.html", [
+              [ "P4::TC::EBPFMeterPNA", "class_p4_1_1_t_c_1_1_e_b_p_f_meter_p_n_a.html", null ]
+            ] ],
             [ "P4::EBPF::EBPFRegisterPSA", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_register_p_s_a.html", null ],
             [ "P4::EBPF::EBPFTable", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_table.html", [
               [ "P4::EBPF::EBPFTablePSA", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_table_p_s_a.html", [
@@ -1495,7 +1497,8 @@ var hierarchy =
           [ "P4::EBPF::EBPFTablePSADirectCounterPropertyVisitor", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_table_p_s_a_direct_counter_property_visitor.html", null ],
           [ "P4::EBPF::EBPFTablePSADirectMeterPropertyVisitor", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_table_p_s_a_direct_meter_property_visitor.html", null ],
           [ "P4::EBPF::EBPFTablePSAImplementationPropertyVisitor", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_table_p_s_a_implementation_property_visitor.html", null ],
-          [ "P4::TC::EBPFTablePNADirectCounterPropertyVisitor", "class_p4_1_1_t_c_1_1_e_b_p_f_table_p_n_a_direct_counter_property_visitor.html", null ]
+          [ "P4::TC::EBPFTablePNADirectCounterPropertyVisitor", "class_p4_1_1_t_c_1_1_e_b_p_f_table_p_n_a_direct_counter_property_visitor.html", null ],
+          [ "P4::TC::EBPFTablePNADirectMeterPropertyVisitor", "class_p4_1_1_t_c_1_1_e_b_p_f_table_p_n_a_direct_meter_property_visitor.html", null ]
         ] ],
         [ "P4::EBPF::PSAErrorCodesGen", "class_p4_1_1_e_b_p_f_1_1_p_s_a_error_codes_gen.html", null ],
         [ "P4::Evaluator", "class_p4_1_1_evaluator.html", null ],
