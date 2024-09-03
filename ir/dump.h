@@ -41,6 +41,10 @@ void dump_notype(const IR::INode *n);
 void dump_notype(const IR::INode *n, unsigned maxdepth);
 void dump_notype(uintptr_t p);
 void dump_notype(uintptr_t p, unsigned maxdepth);
+void dump_src(const IR::Node *n);
+void dump_src(const IR::Node *n, unsigned maxdepth);
+void dump_src(const IR::INode *n);
+void dump_src(const IR::INode *n, unsigned maxdepth);
 void dump(std::ostream &, const Visitor::Context *);
 void dump(const Visitor::Context *);
 
