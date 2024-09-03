@@ -84,6 +84,9 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     std::shared_ptr<MinimalNameGenerator> nameGen;
 
  public:
+    // Node itself + flag whether we'd prune()
+    using PreorderResult = std::pair<const IR::Node *, bool>;
+
     // @param readOnly If true it will assert that it behaves like
     //        an Inspector.
     explicit TypeInferenceBase(TypeMap *typeMap, bool readOnly = false, bool checkArrays = true,
@@ -198,6 +201,11 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     const IR::Type_Bits *checkUnderlyingEnumType(const IR::Type *enumType);
 
     //////////////////////////////////////////////////////////////
+    // Template, so we can have common code for both IR::Function* and const IR::Function*
+    template <class Node>
+    PreorderResult preorderFunctionImpl(Node *function);
+    template <class Node>
+    PreorderResult preorderDeclarationInstanceImpl(Node *decl);
 
  public:
     static const IR::Type *specialize(const IR::IMayBeGenericType *type,
@@ -209,16 +217,16 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
         const IR::Expression *right;
     };
 
-    using PreorderResult = std::pair<const IR::Node *, bool>;
-
     // Helper function to handle comparisons
     bool compare(const IR::Node *errorPosition, const IR::Type *ltype, const IR::Type *rtype,
                  Comparison *compare);
 
     // do functions pre-order so we can check the prototype
     // before the returns
+    PreorderResult preorder(IR::Function *function);
     PreorderResult preorder(const IR::Function *function);
     PreorderResult preorder(const IR::P4Program *program);
+    PreorderResult preorder(IR::Declaration_Instance *decl);
     PreorderResult preorder(const IR::Declaration_Instance *decl);
     // check invariants for entire list before checking the entries
     PreorderResult preorder(const IR::EntriesList *el);

@@ -220,33 +220,14 @@ bool TypeInferenceBase::checkAbstractMethods(const IR::Declaration_Instance *ins
     return rv;
 }
 
-TypeInferenceBase::PreorderResult TypeInferenceBase::preorder(
-    const IR::Declaration_Instance *decl) {
+template <class Node>
+TypeInferenceBase::PreorderResult TypeInferenceBase::preorderDeclarationInstanceImpl(Node *decl) {
     // We need to control the order of the type-checking: we want to do first
     // the declaration, and then typecheck the initializer if present.
     if (done()) return {decl, false};
-    // FIXME: this `cloned` dance is very ugly
-    IR::Declaration_Instance *cloned = nullptr;
-    auto *t = apply_visitor(decl->type, "type")->checkedTo<IR::Type>();
-    if (t != decl->type) {
-        cloned = decl->clone();
-        cloned->type = t;
-        decl = cloned;
-    }
-    auto *args = apply_visitor(decl->arguments, "arguments")->checkedTo<IR::Vector<IR::Argument>>();
-    if (args != decl->arguments) {
-        cloned = cloned ? cloned : decl->clone();
-        cloned->arguments = args;
-        decl = cloned;
-    }
-
-    auto *annot = apply_visitor(decl->annotations, "annotations")->checkedTo<IR::Annotations>();
-    if (annot != decl->annotations) {
-        cloned = cloned ? cloned : decl->clone();
-        cloned->annotations = annot;
-        decl = cloned;
-    }
-
+    visit(decl->type, "type");
+    visit(decl->arguments, "arguments");
+    visit(decl->annotations, "annotations");
     visit(decl->properties, "properties");
 
     auto type = getTypeType(decl->type);
@@ -256,9 +237,10 @@ TypeInferenceBase::PreorderResult TypeInferenceBase::preorder(
     auto orig = getOriginal<IR::Declaration_Instance>();
 
     auto simpleType = type;
-    if (auto *sc = type->to<IR::Type_SpecializedCanonical>()) simpleType = sc->substituted;
+    if (auto *sc = type->template to<IR::Type_SpecializedCanonical>()) simpleType = sc->substituted;
 
-    if (auto et = simpleType->to<IR::Type_Extern>()) {
+    IR::Declaration_Instance *cloned = nullptr;
+    if (auto et = simpleType->template to<IR::Type_Extern>()) {
         auto [newType, newArgs] = checkExternConstructor(decl, et, decl->arguments);
         if (newArgs == nullptr) {
             return {decl, true};
@@ -267,20 +249,12 @@ TypeInferenceBase::PreorderResult TypeInferenceBase::preorder(
         // specialized, the type arguments were specified explicitly.
         // Otherwise, we use the type received from checkExternConstructor, which
         // has substituted the type variables with fresh ones.
-        if (type->is<IR::Type_Extern>()) type = newType;
+        if (type->template is<IR::Type_Extern>()) type = newType;
         setType(orig, type);
         setType(decl, type);
 
         // These two checks will need the decl type to be already known
-        if (decl->initializer != nullptr) {
-            auto *init =
-                apply_visitor(decl->initializer, "initializer")->checkedTo<IR::BlockStatement>();
-            if (init != decl->initializer) {
-                cloned = cloned ? cloned : decl->clone();
-                cloned->initializer = init;
-                decl = cloned;
-            }
-        }
+        if (decl->initializer != nullptr) visit(decl->initializer);
 
         if (!checkAbstractMethods(decl, et)) {
             return {decl, true};
@@ -293,62 +267,65 @@ TypeInferenceBase::PreorderResult TypeInferenceBase::preorder(
 
             setType(decl, type);
         }
-    } else if (simpleType->is<IR::IContainer>()) {
+    } else if (simpleType->template is<IR::IContainer>()) {
         if (decl->initializer != nullptr) {
             typeError("%1%: initializers only allowed for extern instances", decl->initializer);
             return {decl, true};
         }
-        if (!simpleType->is<IR::Type_Package>() && (findContext<IR::IContainer>() == nullptr)) {
+        if (!simpleType->template is<IR::Type_Package>() &&
+            (findContext<IR::IContainer>() == nullptr)) {
             P4::error(ErrorType::ERR_INVALID, "%1%: cannot instantiate at top-level", decl);
             return {decl, false};
         }
-        auto typeAndArgs =
-            containerInstantiation(decl, decl->arguments, simpleType->to<IR::IContainer>());
-        auto type = typeAndArgs.first;
-        auto newArgs = typeAndArgs.second;
-        if (type == nullptr || newArgs == nullptr) {
+        auto [newType, newArgs] = containerInstantiation(decl, decl->arguments,
+                                                         simpleType->template to<IR::IContainer>());
+        if (newType == nullptr || newArgs == nullptr) {
             return {decl, true};
         }
-        learn(type, this, getChildContext());
+        learn(newType, this, getChildContext());
         if (newArgs != decl->arguments) {
             cloned = cloned ? cloned : decl->clone();
             cloned->arguments = newArgs;
             decl = cloned;
         }
 
-        setType(decl, type);
-        setType(orig, type);
+        setType(decl, newType);
+        setType(orig, newType);
     } else {
         typeError("%1%: cannot allocate objects of type %2%", decl, type);
     }
     return {decl, true};
 }
 
-TypeInferenceBase::PreorderResult TypeInferenceBase::preorder(const IR::Function *function) {
+TypeInferenceBase::PreorderResult TypeInferenceBase::preorder(IR::Declaration_Instance *decl) {
+    return preorderDeclarationInstanceImpl(decl);
+}
+
+TypeInferenceBase::PreorderResult TypeInferenceBase::preorder(
+    const IR::Declaration_Instance *decl) {
+    return preorderDeclarationInstanceImpl(decl);
+}
+
+template <class Node>
+TypeInferenceBase::PreorderResult TypeInferenceBase::preorderFunctionImpl(Node *function) {
     if (done()) return {function, false};
 
-    IR::Function *cloned = nullptr;
-    const auto *t = apply_visitor(function->type, "type")->checkedTo<IR::Type_Method>();
-    if (t != function->type) {
-        cloned = function->clone();
-        cloned->type = t;
-    }
-
-    auto type = getTypeType(t);
+    visit(function->type);
+    auto type = getTypeType(function->type);
     if (type == nullptr) return {function, false};
     setType(getOriginal(), type);
     setType(function, type);
-    const auto *b = apply_visitor(function->body, "body")->checkedTo<IR::BlockStatement>();
-    if (b != function->body) {
-        cloned = cloned ? cloned : function->clone();
-        cloned->body = b;
-    }
-    if (cloned) {
-        function = cloned;
-        setType(function, type);
-    }
+    visit(function->body);
 
     return {function, true};
+}
+
+TypeInferenceBase::PreorderResult TypeInferenceBase::preorder(IR::Function *function) {
+    return preorderFunctionImpl(function);
+}
+
+TypeInferenceBase::PreorderResult TypeInferenceBase::preorder(const IR::Function *function) {
+    return preorderFunctionImpl(function);
 }
 
 const IR::Node *TypeInferenceBase::postorder(const IR::Method *method) {
