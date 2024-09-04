@@ -12,7 +12,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "constantTypeSubstitution.h"
 #include "typeChecker.h"
 
 namespace P4 {
@@ -46,7 +45,7 @@ bool hasVarbitsOrUnions(const TypeMap *typeMap, const IR::Type *type) {
     return false;
 }
 
-bool TypeInference::onlyBitsOrBitStructs(const IR::Type *type) const {
+bool TypeInferenceBase::onlyBitsOrBitStructs(const IR::Type *type) const {
     // called for a canonical type
     if (type->is<IR::Type_Bits>() || type->is<IR::Type_Boolean>() || type->is<IR::Type_SerEnum>()) {
         return true;
@@ -64,7 +63,7 @@ bool TypeInference::onlyBitsOrBitStructs(const IR::Type *type) const {
     return false;
 }
 
-const IR::Type *TypeInference::setTypeType(const IR::Type *type, bool learn) {
+const IR::Type *TypeInferenceBase::setTypeType(const IR::Type *type, bool learn) {
     if (done()) return type;
     const IR::Type *typeToCanonicalize;
     if (readOnly)
@@ -85,44 +84,44 @@ const IR::Type *TypeInference::setTypeType(const IR::Type *type, bool learn) {
     return canon;
 }
 
-const IR::Node *TypeInference::postorder(IR::Type_Error *decl) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Type_Error *decl) {
     (void)setTypeType(decl);
     for (auto id : *decl->getDeclarations()) setType(id->getNode(), decl);
     return decl;
 }
 
-const IR::Node *TypeInference::postorder(IR::Type_Table *type) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Type_Table *type) {
     (void)setTypeType(type);
     return type;
 }
 
-const IR::Node *TypeInference::postorder(IR::Type_Type *type) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Type_Type *type) {
     BUG("Should never be found in IR: %1%", type);
 }
 
-const IR::Node *TypeInference::postorder(IR::P4Control *cont) {
+const IR::Node *TypeInferenceBase::postorder(const IR::P4Control *cont) {
     (void)setTypeType(cont, false);
     return cont;
 }
 
-const IR::Node *TypeInference::postorder(IR::P4Parser *parser) {
+const IR::Node *TypeInferenceBase::postorder(const IR::P4Parser *parser) {
     (void)setTypeType(parser, false);
     return parser;
 }
 
-const IR::Node *TypeInference::postorder(IR::Type_InfInt *type) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Type_InfInt *type) {
     if (done()) return type;
     auto tt = new IR::Type_Type(getOriginal<IR::Type>());
     setType(getOriginal(), tt);
     return type;
 }
 
-const IR::Node *TypeInference::postorder(IR::Type_ArchBlock *decl) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Type_ArchBlock *decl) {
     (void)setTypeType(decl);
     return decl;
 }
 
-const IR::Node *TypeInference::postorder(IR::Type_Package *decl) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Type_Package *decl) {
     auto canon = setTypeType(decl);
     if (canon != nullptr) {
         for (auto p : decl->getConstructorParameters()->parameters) {
@@ -164,7 +163,7 @@ class ContainsType : public Inspector {
     }
 };
 
-const IR::Node *TypeInference::postorder(IR::Type_Specialized *type) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Type_Specialized *type) {
     // Check for recursive type specializations, e.g.,
     // extern e<T> {};  e<e<bit>> x;
     auto baseType = getTypeType(type->baseType);
@@ -187,12 +186,12 @@ const IR::Node *TypeInference::postorder(IR::Type_Specialized *type) {
     return type;
 }
 
-const IR::Node *TypeInference::postorder(IR::Type_SpecializedCanonical *type) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Type_SpecializedCanonical *type) {
     (void)setTypeType(type);
     return type;
 }
 
-const IR::Node *TypeInference::postorder(IR::Type_Name *typeName) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Type_Name *typeName) {
     if (done()) return typeName;
     const IR::Type *type;
 
@@ -227,24 +226,24 @@ const IR::Node *TypeInference::postorder(IR::Type_Name *typeName) {
     return typeName;
 }
 
-const IR::Node *TypeInference::postorder(IR::Type_ActionEnum *type) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Type_ActionEnum *type) {
     (void)setTypeType(type);
     return type;
 }
 
-const IR::Node *TypeInference::postorder(IR::Type_Enum *type) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Type_Enum *type) {
     auto canon = setTypeType(type);
     for (auto e : *type->getDeclarations()) setType(e->getNode(), canon);
     return type;
 }
 
-const IR::Node *TypeInference::preorder(IR::Type_SerEnum *type) {
+TypeInferenceBase::PreorderResult TypeInferenceBase::preorder(const IR::Type_SerEnum *type) {
     auto canon = setTypeType(type);
     for (auto e : *type->getDeclarations()) setType(e->getNode(), canon);
-    return type;
+    return {type, false};
 }
 
-const IR::Node *TypeInference::postorder(IR::Type_Var *typeVar) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Type_Var *typeVar) {
     if (done()) return typeVar;
     const IR::Type *type;
     if (typeVar->name.isDontCare())
@@ -257,12 +256,12 @@ const IR::Node *TypeInference::postorder(IR::Type_Var *typeVar) {
     return typeVar;
 }
 
-const IR::Node *TypeInference::postorder(IR::Type_List *type) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Type_List *type) {
     (void)setTypeType(type);
     return type;
 }
 
-const IR::Node *TypeInference::postorder(IR::Type_Tuple *type) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Type_Tuple *type) {
     for (auto field : type->components) {
         auto fieldType = getTypeType(field);
         if (auto spec = fieldType->to<IR::Type_SpecializedCanonical>()) fieldType = spec->baseType;
@@ -276,30 +275,17 @@ const IR::Node *TypeInference::postorder(IR::Type_Tuple *type) {
     return type;
 }
 
-const IR::Node *TypeInference::postorder(IR::Type_P4List *type) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Type_P4List *type) {
     (void)setTypeType(type);
     return type;
 }
 
-const IR::Node *TypeInference::postorder(IR::Type_Set *type) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Type_Set *type) {
     (void)setTypeType(type);
     return type;
 }
 
-/// get size int bits required to represent given constant
-static int getConstantsRepresentationSize(big_int val, bool isSigned) {
-    if (val < 0) {
-        val = -val;
-    }
-    int cnt = 0;
-    while (val > 0) {
-        ++cnt;
-        val >>= 1;
-    }
-    return cnt + int(isSigned);
-}
-
-const IR::Type_Bits *TypeInference::checkUnderlyingEnumType(const IR::Type *enumType) {
+const IR::Type_Bits *TypeInferenceBase::checkUnderlyingEnumType(const IR::Type *enumType) {
     const auto *resolvedType = getTypeType(enumType);
     CHECK_NULL(resolvedType);
     if (const auto *type = resolvedType->to<IR::Type_Bits>()) {
@@ -315,99 +301,13 @@ const IR::Type_Bits *TypeInference::checkUnderlyingEnumType(const IR::Type *enum
     return nullptr;
 }
 
-/// Check if the value initializer fits into the underlying enum type. Emits error and returns false
-/// if it does not fit. Returns true if it fits.
-static bool checkEnumValueInitializer(const IR::Type_Bits *type, const IR::Expression *initializer,
-                                      const IR::Type_SerEnum *serEnum,
-                                      const IR::SerEnumMember *member) {
-    // validate the constant fits -- non-fitting enum constants should produce error
-    if (const auto *constant = initializer->to<IR::Constant>()) {
-        // signed values are two's complement, so [-2^(n-1)..2^(n-1)-1]
-        big_int low = type->isSigned ? -(big_int(1) << type->size - 1) : big_int(0);
-        big_int high = (big_int(1) << (type->isSigned ? type->size - 1 : type->size)) - 1;
-
-        if (constant->value < low || constant->value > high) {
-            int required = getConstantsRepresentationSize(constant->value, type->isSigned);
-            std::string extraMsg;
-            if (!type->isSigned && constant->value < low) {
-                extraMsg =
-                    str(boost::format(
-                            "the value %1% is negative, but the underlying type %2% is unsigned") %
-                        constant->value % type->toString());
-            } else {
-                extraMsg =
-                    str(boost::format("the value %1% requires %2% bits but the underlying "
-                                      "%3% type %4% only contains %5% bits") %
-                        constant->value % required % (type->isSigned ? "signed" : "unsigned") %
-                        type->toString() % type->size);
-            }
-            ::P4::error(
-                ErrorType::ERR_TYPE_ERROR,
-                "%1%: Serialized enum constant value %2% is out of bounds of the underlying "
-                "type %3%; %4%",
-                member, constant->value, serEnum->type, extraMsg);
-            return false;
-        }
-    }
-    return true;
-}
-
-const IR::Node *TypeInference::postorder(IR::SerEnumMember *member) {
-    /*
-      The type of the member is initially set in the Type_SerEnum preorder visitor.
-      Here we check additional constraints and we may correct the member.
-      if (done()) return member;
-    */
-    const auto *serEnum = findContext<IR::Type_SerEnum>();
-    CHECK_NULL(serEnum);
-    const auto *type = checkUnderlyingEnumType(serEnum->type);
-    if (!type || !checkEnumValueInitializer(type, member->value, serEnum, member)) {
-        return member;
-    }
-    const auto *exprType = getType(member->value);
-    auto *tvs = unifyCast(member, type, exprType,
-                          "Enum member '%1%' has type '%2%' and not the expected type '%3%'",
-                          {member, exprType, type});
-    if (tvs == nullptr)
-        // error already signalled
-        return member;
-    if (tvs->isIdentity()) return member;
-
-    ConstantTypeSubstitution cts(tvs, typeMap, this);
-    member->value = cts.convert(member->value, getChildContext());  // sets type
-    if (!typeMap->getType(member)) setType(member, getTypeType(serEnum));
-    return member;
-}
-
-const IR::Node *TypeInference::postorder(IR::P4ValueSet *decl) {
-    if (done()) return decl;
-    // This is a specialized version of setTypeType
-    auto canon = canonicalize(decl->elementType);
-    if (canon != nullptr) {
-        if (canon != decl->elementType) {
-            bool errs = learn(canon, this, getChildContext());
-            if (errs) return nullptr;
-        }
-        if (!canon->is<IR::Type_Newtype>() && !canon->is<IR::Type_Bits>() &&
-            !canon->is<IR::Type_SerEnum>() && !canon->is<IR::Type_Boolean>() &&
-            !canon->is<IR::Type_Enum>() && !canon->is<IR::Type_Struct>() &&
-            !canon->is<IR::Type_Tuple>())
-            typeError("%1%: Illegal type for value_set element type", decl->elementType);
-
-        auto tt = new IR::Type_Set(canon);
-        setType(getOriginal(), tt);
-        setType(decl, tt);
-    }
-    return decl;
-}
-
-const IR::Node *TypeInference::postorder(IR::Type_Extern *type) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Type_Extern *type) {
     if (done()) return type;
     setTypeType(type);
     return type;
 }
 
-const IR::Node *TypeInference::postorder(IR::Type_Method *type) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Type_Method *type) {
     auto methodType = type;
     if (auto ext = findContext<IR::Type_Extern>()) {
         auto extName = ext->name.name;
@@ -438,18 +338,18 @@ const IR::Node *TypeInference::postorder(IR::Type_Method *type) {
     return type;
 }
 
-const IR::Node *TypeInference::postorder(IR::Type_Action *type) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Type_Action *type) {
     (void)setTypeType(type);
     BUG_CHECK(type->typeParameters->size() == 0, "%1%: Generic action?", type);
     return type;
 }
 
-const IR::Node *TypeInference::postorder(IR::Type_Base *type) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Type_Base *type) {
     (void)setTypeType(type);
     return type;
 }
 
-const IR::Node *TypeInference::postorder(IR::Type_Newtype *type) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Type_Newtype *type) {
     (void)setTypeType(type);
     auto argType = getTypeType(type->type);
     if (!argType->is<IR::Type_Bits>() && !argType->is<IR::Type_Boolean>() &&
@@ -458,7 +358,7 @@ const IR::Node *TypeInference::postorder(IR::Type_Newtype *type) {
     return type;
 }
 
-const IR::Node *TypeInference::postorder(IR::Type_Typedef *tdecl) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Type_Typedef *tdecl) {
     if (done()) return tdecl;
     auto type = getType(tdecl->type);
     if (type == nullptr) return tdecl;
@@ -475,7 +375,7 @@ const IR::Node *TypeInference::postorder(IR::Type_Typedef *tdecl) {
     return tdecl;
 }
 
-const IR::Node *TypeInference::postorder(IR::Type_Stack *type) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Type_Stack *type) {
     auto canon = setTypeType(type);
     if (canon == nullptr) return type;
 
@@ -491,8 +391,8 @@ const IR::Node *TypeInference::postorder(IR::Type_Stack *type) {
 /// Validate the fields of a struct type using the supplied checker.
 /// The checker returns "false" when a field is invalid.
 /// Return true on success
-bool TypeInference::validateFields(const IR::Type *type,
-                                   std::function<bool(const IR::Type *)> checker) const {
+bool TypeInferenceBase::validateFields(const IR::Type *type,
+                                       std::function<bool(const IR::Type *)> checker) const {
     if (type == nullptr) return false;
     BUG_CHECK(type->is<IR::Type_StructLike>(), "%1%; expected a Struct-like", type);
     auto strct = type->to<IR::Type_StructLike>();
@@ -509,7 +409,7 @@ bool TypeInference::validateFields(const IR::Type *type,
     return !err;
 }
 
-const IR::Node *TypeInference::postorder(IR::StructField *field) {
+const IR::Node *TypeInferenceBase::postorder(const IR::StructField *field) {
     if (done()) return field;
     auto canon = getTypeType(field->type);
     if (canon == nullptr) return field;
@@ -519,7 +419,7 @@ const IR::Node *TypeInference::postorder(IR::StructField *field) {
     return field;
 }
 
-const IR::Node *TypeInference::postorder(IR::Type_Header *type) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Type_Header *type) {
     auto canon = setTypeType(type);
     auto validator = [this](const IR::Type *t) {
         while (t->is<IR::Type_Newtype>()) t = getTypeType(t->to<IR::Type_Newtype>()->type);
@@ -532,7 +432,7 @@ const IR::Node *TypeInference::postorder(IR::Type_Header *type) {
     return type;
 }
 
-const IR::Node *TypeInference::postorder(IR::Type_Struct *type) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Type_Struct *type) {
     auto canon = setTypeType(type);
     auto validator = [this](const IR::Type *t) {
         while (auto *nt = t->to<IR::Type_Newtype>()) t = getTypeType(nt->type);
@@ -547,7 +447,7 @@ const IR::Node *TypeInference::postorder(IR::Type_Struct *type) {
     return type;
 }
 
-const IR::Node *TypeInference::postorder(IR::Type_HeaderUnion *type) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Type_HeaderUnion *type) {
     auto canon = setTypeType(type);
     auto validator = [](const IR::Type *t) {
         return t->is<IR::Type_Header>() || t->is<IR::Type_Var>() ||

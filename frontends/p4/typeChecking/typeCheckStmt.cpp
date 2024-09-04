@@ -18,7 +18,7 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Node *TypeInference::postorder(IR::IfStatement *conditional) {
+const IR::Node *TypeInferenceBase::postorder(const IR::IfStatement *conditional) {
     LOG3("TI Visiting " << dbp(getOriginal()));
     auto type = getType(conditional->condition);
     if (type == nullptr) return conditional;
@@ -28,7 +28,7 @@ const IR::Node *TypeInference::postorder(IR::IfStatement *conditional) {
     return conditional;
 }
 
-const IR::Node *TypeInference::postorder(IR::SwitchStatement *stat) {
+const IR::Node *TypeInferenceBase::postorder(const IR::SwitchStatement *stat) {
     LOG3("TI Visiting " << dbp(getOriginal()));
     auto type = getType(stat->expression);
     if (type == nullptr) return stat;
@@ -61,7 +61,9 @@ const IR::Node *TypeInference::postorder(IR::SwitchStatement *stat) {
         if (isCompileTimeConstant(stat->expression))
             warn(ErrorType::WARN_MISMATCH, "%1%: constant expression in switch", stat->expression);
 
-        for (auto &c : stat->cases) {
+        auto *sclone = stat->clone();
+        bool changed = false;
+        for (auto &c : sclone->cases) {
             if (!isCompileTimeConstant(c->label))
                 typeError("%1%: must be a compile-time constant", c->label);
             auto lt = getType(c->label);
@@ -71,6 +73,7 @@ const IR::Node *TypeInference::postorder(IR::SwitchStatement *stat) {
                                        c->statement);
                 setType(c->label, type);
                 setCompileTimeConstant(c->label);
+                changed = true;
                 continue;
             } else if (c->label->is<IR::DefaultExpression>()) {
                 continue;
@@ -80,13 +83,15 @@ const IR::Node *TypeInference::postorder(IR::SwitchStatement *stat) {
             if (b && comp.right != c->label) {
                 c = new IR::SwitchCase(c->srcInfo, comp.right, c->statement);
                 setCompileTimeConstant(c->label);
+                changed = true;
             }
         }
+        if (changed) stat = sclone;
     }
     return stat;
 }
 
-const IR::Node *TypeInference::postorder(IR::ReturnStatement *statement) {
+const IR::Node *TypeInferenceBase::postorder(const IR::ReturnStatement *statement) {
     LOG3("TI Visiting " << dbp(getOriginal()));
     auto func = findOrigCtxt<IR::Function>();
     if (func == nullptr) {
@@ -115,11 +120,12 @@ const IR::Node *TypeInference::postorder(IR::ReturnStatement *statement) {
     }
 
     auto init = assignment(statement, returnType, statement->expression);
-    if (init != statement->expression) statement->expression = init;
+    if (init != statement->expression)
+        statement = new IR::ReturnStatement(statement->srcInfo, init);
     return statement;
 }
 
-const IR::Node *TypeInference::postorder(IR::AssignmentStatement *assign) {
+const IR::Node *TypeInferenceBase::postorder(const IR::AssignmentStatement *assign) {
     LOG3("TI Visiting " << dbp(getOriginal()));
     auto ltype = getType(assign->left);
     if (ltype == nullptr) return assign;
@@ -136,7 +142,7 @@ const IR::Node *TypeInference::postorder(IR::AssignmentStatement *assign) {
     return assign;
 }
 
-const IR::Node *TypeInference::postorder(IR::ForInStatement *forin) {
+const IR::Node *TypeInferenceBase::postorder(const IR::ForInStatement *forin) {
     LOG3("TI Visiting " << dbp(getOriginal()));
     auto ltype = getType(forin->ref);
     if (ltype == nullptr) return forin;
@@ -153,7 +159,8 @@ const IR::Node *TypeInference::postorder(IR::ForInStatement *forin) {
         rclone->left = assignment(forin, ltype, rclone->left);
         rclone->right = assignment(forin, ltype, rclone->right);
         if (*range != *rclone)
-            forin->collection = rclone;
+            forin = new IR::ForInStatement(forin->srcInfo, forin->annotations, forin->decl, rclone,
+                                           forin->body);
         else
             delete rclone;
     } else if (auto *stack = ctype->to<IR::Type_Stack>()) {
@@ -170,7 +177,7 @@ const IR::Node *TypeInference::postorder(IR::ForInStatement *forin) {
     return forin;
 }
 
-const IR::Node *TypeInference::postorder(IR::ActionListElement *elem) {
+const IR::Node *TypeInferenceBase::postorder(const IR::ActionListElement *elem) {
     if (done()) return elem;
     auto type = getType(elem->expression);
     if (type == nullptr) return elem;
@@ -180,13 +187,13 @@ const IR::Node *TypeInference::postorder(IR::ActionListElement *elem) {
     return elem;
 }
 
-const IR::Node *TypeInference::postorder(IR::SelectCase *sc) {
+const IR::Node *TypeInferenceBase::postorder(const IR::SelectCase *sc) {
     auto type = getType(sc->state);
     if (type != nullptr && type != IR::Type_State::get()) typeError("%1% must be state", sc);
     return sc;
 }
 
-const IR::Node *TypeInference::postorder(IR::KeyElement *elem) {
+const IR::Node *TypeInferenceBase::postorder(const IR::KeyElement *elem) {
     auto ktype = getType(elem->expression);
     if (ktype == nullptr) return elem;
     while (ktype->is<IR::Type_Newtype>()) ktype = getTypeType(ktype->to<IR::Type_Newtype>()->type);
@@ -204,14 +211,14 @@ const IR::Node *TypeInference::postorder(IR::KeyElement *elem) {
     return elem;
 }
 
-const IR::Node *TypeInference::postorder(IR::ActionList *al) {
+const IR::Node *TypeInferenceBase::postorder(const IR::ActionList *al) {
     LOG3("TI Visited " << dbp(al));
     BUG_CHECK(currentActionList == nullptr, "%1%: nested action list?", al);
     currentActionList = al;
     return al;
 }
 
-const IR::ActionListElement *TypeInference::validateActionInitializer(
+const IR::ActionListElement *TypeInferenceBase::validateActionInitializer(
     const IR::Expression *actionCall) {
     // We cannot retrieve the action list from the table, because the
     // table has not been modified yet.  We want the latest version of
@@ -299,40 +306,41 @@ const IR::ActionListElement *TypeInference::validateActionInitializer(
     return elem;
 }
 
-const IR::Node *TypeInference::postorder(IR::Property *prop) {
+const IR::Node *TypeInferenceBase::postorder(const IR::Property *prop) {
     // Handle the default_action
-    if (prop->name == IR::TableProperties::defaultActionPropertyName) {
-        auto pv = prop->value->to<IR::ExpressionValue>();
-        if (pv == nullptr) {
-            typeError("%1% table property should be an action", prop);
-        } else {
-            auto type = getType(pv->expression);
-            if (type == nullptr) return prop;
-            if (!type->is<IR::Type_Action>()) {
-                typeError("%1% table property should be an action", prop);
-                return prop;
-            }
-            auto at = type->to<IR::Type_Action>();
-            if (at->parameters->size() != 0) {
-                typeError("%1%: parameter %2% does not have a corresponding argument", prop->value,
-                          at->parameters->parameters.at(0));
-                return prop;
-            }
+    if (prop->name != IR::TableProperties::defaultActionPropertyName) return prop;
 
-            // Check that the default action appears in the list of actions.
-            BUG_CHECK(prop->value->is<IR::ExpressionValue>(), "%1% not an expression", prop);
-            auto def = prop->value->to<IR::ExpressionValue>()->expression;
-            auto ale = validateActionInitializer(def);
-            if (ale != nullptr) {
-                auto anno = ale->getAnnotation(IR::Annotation::tableOnlyAnnotation);
-                if (anno != nullptr) {
-                    typeError("%1%: Action marked with %2% used as default action", prop,
-                              IR::Annotation::tableOnlyAnnotation);
-                    return prop;
-                }
+    auto pv = prop->value->to<IR::ExpressionValue>();
+    if (pv == nullptr) {
+        typeError("%1% table property should be an action", prop);
+    } else {
+        auto type = getType(pv->expression);
+        if (type == nullptr) return prop;
+        if (!type->is<IR::Type_Action>()) {
+            typeError("%1% table property should be an action", prop);
+            return prop;
+        }
+        auto at = type->to<IR::Type_Action>();
+        if (at->parameters->size() != 0) {
+            typeError("%1%: parameter %2% does not have a corresponding argument", prop->value,
+                      at->parameters->parameters.at(0));
+            return prop;
+        }
+
+        // Check that the default action appears in the list of actions.
+        BUG_CHECK(prop->value->is<IR::ExpressionValue>(), "%1% not an expression", prop);
+        auto def = prop->value->to<IR::ExpressionValue>()->expression;
+        auto ale = validateActionInitializer(def);
+        if (ale != nullptr) {
+            auto anno = ale->getAnnotation(IR::Annotation::tableOnlyAnnotation);
+            if (anno != nullptr) {
+                typeError("%1%: Action marked with %2% used as default action", prop,
+                          IR::Annotation::tableOnlyAnnotation);
+                return prop;
             }
         }
     }
+
     return prop;
 }
 
