@@ -73,7 +73,7 @@ class ErrorReporter {
     /// and source info.
     /// If the error has been reported, return true. Otherwise, insert add the error to the
     /// list of seen errors, and return false.
-    bool error_reported(int err, Util::SourceInfo source) {
+    bool error_reported(int err, const Util::SourceInfo source) {
         if (!source.isValid()) return false;
         auto p = errorTracker.emplace(err, source);
         return !p.second;  // if insertion took place, then we have not seen the error.
