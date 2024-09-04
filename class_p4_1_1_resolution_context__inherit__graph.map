@@ -21,25 +21,25 @@
 <area shape="rect" id="Node000016" href="$class_p4_1_1_deprecated.html" title=" " alt="" coords="499,585,621,611"/>
 <area shape="poly" id="edge15_Node000001_Node000016" title=" " alt="" coords="305,1114,319,1006,345,858,363,782,383,714,406,658,433,620,464,602,498,594,499,599,466,607,436,624,411,660,388,716,368,784,350,859,324,1007,310,1115"/>
 <area shape="rect" id="Node000017" href="$class_p4_1_1_discover_actions_inlining.html" title=" " alt="" coords="461,635,659,660"/>
-<area shape="poly" id="edge16_Node000001_Node000017" title=" " alt="" coords="306,1114,322,1016,349,883,366,815,386,754,408,704,433,671,459,654,462,659,436,675,413,707,391,756,371,817,354,884,327,1017,311,1115"/>
+<area shape="poly" id="edge16_Node000001_Node000017" title=" " alt="" coords="306,1114,321,1016,349,882,366,814,386,753,408,703,433,669,459,653,462,658,436,673,413,706,391,755,371,816,354,883,327,1017,311,1115"/>
 <area shape="rect" id="Node000018" href="$class_p4_1_1_discover_functions_inlining.html" title=" " alt="" coords="453,684,667,709"/>
-<area shape="poly" id="edge17_Node000001_Node000018" title=" " alt="" coords="302,1114,306,1036,312,985,323,929,339,872,362,817,393,765,433,720,452,707,455,712,436,724,397,768,367,819,344,874,328,931,317,986,311,1037,307,1114"/>
+<area shape="poly" id="edge17_Node000001_Node000018" title=" " alt="" coords="302,1114,305,1036,312,985,322,929,339,872,362,815,393,764,433,719,452,706,455,710,436,723,397,767,367,818,344,873,328,930,317,986,311,1037,307,1114"/>
 <area shape="rect" id="Node000019" href="$class_p4_1_1_do_check_constants.html" title=" " alt="" coords="475,733,645,759"/>
-<area shape="poly" id="edge18_Node000001_Node000019" title=" " alt="" coords="303,1114,310,1045,329,951,346,901,368,853,397,808,433,769,452,757,474,748,476,753,455,761,436,773,401,811,373,855,351,903,335,953,315,1045,308,1115"/>
+<area shape="poly" id="edge18_Node000001_Node000019" title=" " alt="" coords="303,1114,310,1044,329,950,346,900,368,852,397,807,433,768,452,755,474,747,476,752,455,760,436,772,401,810,372,854,350,902,334,952,315,1045,308,1114"/>
 <area shape="rect" id="Node000020" href="$class_p4_1_1_do_check_core_methods.html" title="Check types for arguments of core.p4 methods." alt="" coords="465,783,655,808"/>
-<area shape="poly" id="edge19_Node000001_Node000020" title=" " alt="" coords="305,1114,314,1053,336,972,353,930,374,889,401,851,433,819,463,802,465,807,436,823,405,855,379,892,358,932,341,974,320,1054,310,1115"/>
+<area shape="poly" id="edge19_Node000001_Node000020" title=" " alt="" coords="304,1114,314,1053,336,972,352,929,374,888,400,850,433,817,463,801,465,806,436,821,405,853,378,891,357,931,341,974,319,1054,310,1115"/>
 <area shape="rect" id="Node000021" href="$class_p4_1_1_do_constant_folding.html" title="statically evaluates many constant expressions." alt="" coords="475,832,645,857"/>
-<area shape="poly" id="edge20_Node000001_Node000021" title=" " alt="" coords="307,1114,319,1061,343,995,360,960,380,926,404,895,433,868,453,856,474,848,476,853,455,861,436,872,408,898,385,929,365,962,348,997,325,1063,312,1115"/>
+<area shape="poly" id="edge20_Node000001_Node000021" title=" " alt="" coords="306,1114,319,1061,343,994,359,959,380,925,404,893,433,867,453,855,474,847,476,852,455,860,436,871,408,897,384,928,364,961,348,996,324,1063,312,1115"/>
 <area shape="rect" id="Node000022" href="$class_p4_1_1_do_default_arguments.html" title=" " alt="" coords="469,881,651,907"/>
-<area shape="poly" id="edge21_Node000001_Node000022" title=" " alt="" coords="310,1114,325,1070,351,1017,386,963,408,938,433,917,467,901,469,906,436,922,412,942,390,966,355,1019,330,1072,315,1116"/>
+<area shape="poly" id="edge21_Node000001_Node000022" title=" " alt="" coords="310,1114,325,1070,350,1016,386,961,408,937,433,916,467,900,469,904,436,920,412,941,390,965,355,1018,330,1072,315,1116"/>
 <area shape="rect" id="Node000023" href="$class_p4_1_1_do_remove_exits.html" title=" " alt="" coords="485,931,635,956"/>
-<area shape="poly" id="edge22_Node000001_Node000023" title=" " alt="" coords="314,1114,332,1080,359,1040,393,1000,433,966,458,955,484,947,485,952,460,959,436,971,396,1003,363,1043,337,1083,319,1117"/>
+<area shape="poly" id="edge22_Node000001_Node000023" title=" " alt="" coords="314,1114,332,1080,358,1039,392,999,433,965,458,953,484,946,485,951,460,958,436,970,396,1002,363,1042,337,1083,318,1117"/>
 <area shape="rect" id="Node000024" href="$class_p4_1_1_do_simplify_control_flow.html" title="Replace complex control flow nodes with simpler ones where possible." alt="" coords="463,980,657,1005"/>
-<area shape="poly" id="edge23_Node000001_Node000024" title=" " alt="" coords="320,1116,368,1064,399,1038,433,1016,466,1003,468,1008,436,1020,402,1042,371,1068,324,1119"/>
+<area shape="poly" id="edge23_Node000001_Node000024" title=" " alt="" coords="320,1115,367,1063,399,1037,433,1014,462,1003,464,1008,436,1019,402,1041,371,1067,324,1119"/>
 <area shape="rect" id="Node000025" href="$class_p4_1_1_do_simplify_expressions.html" title="Convert expressions so that each expression contains at most one side effect." alt="" coords="463,1029,657,1055"/>
-<area shape="poly" id="edge24_Node000001_Node000025" title=" " alt="" coords="333,1118,379,1090,434,1065,477,1052,478,1057,436,1070,382,1095,336,1122"/>
+<area shape="poly" id="edge24_Node000001_Node000025" title=" " alt="" coords="332,1118,379,1090,434,1064,472,1052,474,1057,436,1068,381,1094,335,1123"/>
 <area shape="rect" id="Node000026" href="$class_p4_1_1_do_static_assert.html" title=" " alt="" coords="489,1079,631,1104"/>
-<area shape="poly" id="edge25_Node000001_Node000026" title=" " alt="" coords="383,1123,493,1101,494,1107,384,1128"/>
+<area shape="poly" id="edge25_Node000001_Node000026" title=" " alt="" coords="383,1123,434,1113,493,1101,494,1107,435,1118,384,1128"/>
 <area shape="rect" id="Node000027" href="$class_p4_1_1_dontcare_args.html" title=" " alt="" coords="493,1128,627,1153"/>
 <area shape="poly" id="edge26_Node000001_Node000027" title=" " alt="" coords="400,1138,492,1138,492,1143,400,1143"/>
 <area shape="rect" id="Node000028" href="$class_p4_1_1_entry_priorities.html" title="Assigns priorities to table entries if they are not &#39;const&#39;." alt="" coords="491,1177,629,1203"/>
@@ -78,10 +78,10 @@
 <area shape="poly" id="edge44_Node000001_Node000045" title=" " alt="" coords="308,1167,313,1327,320,1441,331,1565,347,1688,370,1800,399,1892,417,1927,437,1953,451,1965,467,1972,465,1977,448,1969,433,1957,412,1930,394,1894,365,1802,342,1689,326,1566,315,1442,308,1328,302,1167"/>
 <area shape="rect" id="Node000046" href="$class_p4_1_1_to_p4.html" title=" " alt="" coords="522,2016,598,2041"/>
 <area shape="poly" id="edge45_Node000001_Node000046" title=" " alt="" coords="307,1167,311,1336,317,1458,328,1589,344,1720,367,1840,381,1892,397,1937,416,1975,437,2003,455,2016,477,2025,522,2029,522,2035,476,2030,452,2021,433,2007,411,1978,393,1940,376,1893,362,1841,339,1721,323,1589,312,1458,306,1337,302,1168"/>
-<area shape="rect" id="Node000047" href="$class_p4_1_1_type_inference.html" title=" " alt="" coords="491,2065,629,2091"/>
-<area shape="poly" id="edge46_Node000001_Node000047" title=" " alt="" coords="307,1167,310,1344,315,1472,325,1611,341,1751,364,1878,378,1934,395,1982,415,2022,437,2052,462,2069,492,2077,490,2082,459,2074,433,2056,410,2025,391,1985,373,1935,359,1879,335,1751,320,1612,310,1472,304,1344,302,1167"/>
-<area shape="rect" id="Node000048" href="$class_p4_1_1_unroll_loops.html" title=" " alt="" coords="499,2115,621,2140"/>
-<area shape="poly" id="edge47_Node000001_Node000048" title=" " alt="" coords="307,1167,308,1352,313,1488,322,1635,337,1782,361,1917,376,1976,393,2028,414,2070,437,2102,450,2112,465,2120,499,2127,498,2132,463,2125,447,2117,433,2105,409,2073,389,2030,371,1978,356,1918,332,1783,317,1635,307,1488,303,1353,302,1167"/>
+<area shape="rect" id="Node000047" href="$class_p4_1_1_type_inference_base.html" title=" " alt="" coords="475,2065,645,2091"/>
+<area shape="poly" id="edge46_Node000001_Node000047" title=" " alt="" coords="307,1167,310,1344,315,1472,325,1611,341,1751,364,1878,378,1934,395,1982,415,2022,437,2052,454,2065,476,2074,474,2079,452,2070,433,2056,410,2025,391,1985,373,1935,359,1879,335,1751,320,1612,310,1472,304,1344,302,1167"/>
+<area shape="rect" id="Node000050" href="$class_p4_1_1_unroll_loops.html" title=" " alt="" coords="499,2115,621,2140"/>
+<area shape="poly" id="edge48_Node000001_Node000050" title=" " alt="" coords="307,1167,308,1352,313,1488,322,1635,337,1782,361,1917,376,1976,393,2028,414,2070,437,2102,450,2112,465,2120,499,2127,498,2132,463,2125,447,2117,433,2105,409,2073,389,2030,371,1978,356,1918,332,1783,317,1635,307,1488,303,1353,302,1167"/>
 <area shape="rect" id="Node000002" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="45,1103,133,1128"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="147,1119,220,1128,219,1133,146,1125"/>
 <area shape="rect" id="Node000003" href="$class_p4_1_1_declaration_lookup.html" title=" " alt="" coords="5,1152,172,1177"/>
@@ -94,4 +94,6 @@
 <area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="683,181,769,181,769,186,683,186"/>
 <area shape="rect" id="Node000037" href="$class_p4_1_1_d_p_d_k_1_1_copy_match_keys_to_single_struct.html" title=" " alt="" coords="733,1565,943,1605"/>
 <area shape="poly" id="edge36_Node000036_Node000037" title=" " alt="" coords="641,1582,733,1582,733,1587,641,1587"/>
+<area shape="rect" id="Node000048" href="$class_p4_1_1_read_only_type_inference.html" title=" " alt="" coords="738,2065,938,2091"/>
+<area shape="poly" id="edge47_Node000047_Node000048" title=" " alt="" coords="658,2075,738,2075,738,2081,658,2081"/>
 </map>

@@ -24,6 +24,6 @@ var searchData=
   ['coverstatements_21',['coverStatements',['../namespace_p4_1_1_coverage.html#a2a3d638920ba9282563d3f4c90b8df3a',1,'P4::Coverage::CoverageOptions']]],
   ['covertableentries_22',['coverTableEntries',['../namespace_p4_1_1_coverage.html#af76b789b10235cedf806d8bdd178394f',1,'P4::Coverage::CoverageOptions']]],
   ['ctxtfile_23',['ctxtFile',['../class_p4_1_1_d_p_d_k_1_1_dpdk_options.html#aa67aa215657bf1d2641cb1fdd4b16ec1',1,'P4::DPDK::DpdkOptions']]],
-  ['currentactionlist_24',['currentActionList',['../class_p4_1_1_type_inference.html#a707807765cad4f39588f25ee2e28330c',1,'P4::TypeInference']]],
+  ['currentactionlist_24',['currentActionList',['../class_p4_1_1_type_inference_base.html#aeeb4654c1d4a535e2944285252488f41',1,'P4::TypeInferenceBase']]],
   ['currentdefinitions_25',['currentDefinitions',['../class_p4_1_1_compute_write_set.html#a534487ed7707c490a3fb667e509708dc',1,'P4::ComputeWriteSet']]]
 ];

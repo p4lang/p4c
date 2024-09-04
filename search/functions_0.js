@@ -77,7 +77,7 @@ var searchData=
   ['argumentstotypedeclarations_74',['argumentsToTypeDeclarations',['../namespace_p4_1_1_p4_tools.html#ad00ad123736e81dd85e856644e728a9c',1,'P4::P4Tools']]],
   ['as_75',['as',['../class_p4_1_1_i_castable.html#ab4f93b9a4d1cfab6f27f4a4689ad26a0',1,'P4::ICastable::as() const'],['../class_p4_1_1_i_castable.html#a34de8158d7d9573541c28927ccf8195a',1,'P4::ICastable::as()'],['../class_p4_1_1_util_1_1_enumerator.html#a0020aa90cfef291c9eab644f5ef36d53',1,'P4::Util::Enumerator::as()']]],
   ['asrt_76',['asrt',['../class_p4_1_1_p4_tools_1_1_z3_solver.html#a7a491f1ab3a466cf01c0ddd3c0bf3bcc',1,'P4::P4Tools::Z3Solver::asrt(const z3::expr &amp;assert)'],['../class_p4_1_1_p4_tools_1_1_z3_solver.html#a3fb7ac3df7a914423b9463ef56745084',1,'P4::P4Tools::Z3Solver::asrt(const Constraint *assertion)']]],
-  ['assignment_77',['assignment',['../class_p4_1_1_type_inference.html#afec02e8299991195e70651f4ba25d3c4',1,'P4::TypeInference']]],
+  ['assignment_77',['assignment',['../class_p4_1_1_type_inference_base.html#ab88e2ff5d8f0c770a45f056f3110ea5d',1,'P4::TypeInferenceBase']]],
   ['assignstructlike_78',['assignStructLike',['../class_p4_1_1_p4_tools_1_1_abstract_execution_state.html#a62c647e35c1e932a8625974273ca1a73',1,'P4::P4Tools::AbstractExecutionState']]],
   ['assignvalues_79',['assignValues',['../class_p4_1_1_choose_error_representation.html#aa20a4fa1cbeb9a32f4f956cbf8bbd545',1,'P4::ChooseErrorRepresentation']]]
 ];

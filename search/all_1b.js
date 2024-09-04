@@ -182,7 +182,7 @@ var searchData=
   ['specializationinfo_179',['SpecializationInfo',['../struct_p4_1_1_specialization_info.html',1,'P4']]],
   ['specializationmap_180',['SpecializationMap',['../class_p4_1_1_specialization_map.html',1,'P4']]],
   ['specialize_181',['Specialize',['../class_p4_1_1_specialize.html',1,'P4']]],
-  ['specialize_182',['specialize',['../class_p4_1_1_action_call.html#ac1aed74c206617c07dd75ace3a7f78e4',1,'P4::ActionCall::specialize()'],['../class_p4_1_1_type_inference.html#ac744de523783f56c28313b934a793372',1,'P4::TypeInference::specialize()']]],
+  ['specialize_182',['specialize',['../class_p4_1_1_action_call.html#ac1aed74c206617c07dd75ace3a7f78e4',1,'P4::ActionCall::specialize()'],['../class_p4_1_1_type_inference_base.html#ad4ffa597792cb6dbfd513ff6624a0bcb',1,'P4::TypeInferenceBase::specialize()']]],
   ['specializeall_183',['SpecializeAll',['../class_p4_1_1_specialize_all.html',1,'P4']]],
   ['specialized_184',['specialized',['../struct_p4_1_1_specialization_info.html#a099f057972bd7fefe90f8e4f51cf03e2',1,'P4::SpecializationInfo::specialized'],['../struct_p4_1_1_function_specialization.html#a49538efc286d35a2c0f3fcba2a8fbfc6',1,'P4::FunctionSpecialization::specialized'],['../struct_p4_1_1_type_specialization.html#ab4e081be7c0502e3476dd34252c54ff0',1,'P4::TypeSpecialization::specialized']]],
   ['specializefunctions_185',['SpecializeFunctions',['../class_p4_1_1_specialize_functions.html',1,'P4']]],
