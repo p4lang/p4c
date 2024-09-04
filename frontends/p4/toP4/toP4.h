@@ -98,9 +98,7 @@ class ToP4 : public Inspector, ResolutionContext {
         emitted. */
     std::optional<std::filesystem::path> mainFile;
 
-    ToP4(Util::SourceCodeBuilder &builder, bool showIR)
-        : showIR(showIR),
-          builder(builder) {
+    ToP4(Util::SourceCodeBuilder &builder, bool showIR) : showIR(showIR), builder(builder) {
         visitDagOnce = false;
         setName("ToP4");
     }

@@ -526,10 +526,10 @@ bool ParserOptions::isAnnotationDisabled(const IR::Annotation *a) const {
 }
 
 DebugHook ParserOptions::getDebugHook() const {
-    return getDebugHook([](std::ostream *stream, bool dumpIR, std::filesystem::path file)
-        -> std::unique_ptr<ToP4> {
-        return std::make_unique<ToP4>(stream, dumpIR, file);
-    });
+    return getDebugHook(
+        [](std::ostream *stream, bool dumpIR, std::filesystem::path file) -> std::unique_ptr<ToP4> {
+            return std::make_unique<ToP4>(stream, dumpIR, file);
+        });
 }
 
 DebugHook ParserOptions::getDebugHook(ToP4Factory toP4Fact) const {
