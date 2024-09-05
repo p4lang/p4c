@@ -143,12 +143,12 @@ class HeaderDefinitions : public IHasDbPrint {
     /// (for example, this can happen when the header is valid at the end of the then branch and
     /// invalid at the end of the else branch of an if statement, or if the header is valid entering
     /// a parser state on some input branches and invalid on some other)
-    ordered_map<const StorageLocation *, TernaryBool> defs;
+    absl::flat_hash_map<const StorageLocation *, TernaryBool, Util::Hash> defs;
 
     /// Currently isValid() expressions in if conditions are not processed, so all headers
     /// for which isValid() is called are temporarly stored here until the end of the block
     /// or until the valid bit is changed again in the block.
-    ordered_set<const StorageLocation *> notReport;
+    absl::flat_hash_set<const StorageLocation *, Util::Hash> notReport;
 
  public:
     HeaderDefinitions(ReferenceMap *refMap, TypeMap *typeMap, StorageMap *storageMap)
@@ -291,7 +291,7 @@ class HeaderDefinitions : public IHasDbPrint {
     TernaryBool find(const StorageLocation *storage) const {
         CHECK_NULL(storage);
 
-        if (notReport.find(storage) != notReport.end()) return TernaryBool::Yes;
+        if (notReport.count(storage)) return TernaryBool::Yes;
 
         return ::P4::get(defs, storage, TernaryBool::Maybe);
     }
@@ -331,7 +331,7 @@ class HeaderDefinitions : public IHasDbPrint {
 
     HeaderDefinitions *intersect(const HeaderDefinitions *other) const {
         HeaderDefinitions *result = new HeaderDefinitions(refMap, typeMap, storageMap);
-        for (auto def : defs) {
+        for (const auto &def : defs) {
             auto valid = ::P4::get(other->defs, def.first, TernaryBool::Maybe);
             result->defs.emplace(def.first, valid == def.second ? valid : TernaryBool::Maybe);
         }

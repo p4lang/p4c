@@ -52,10 +52,10 @@ struct loc_t {
 /// Abstraction for something that is has a left value (variable, parameter)
 class StorageLocation : public IHasDbPrint, public ICastable {
     static unsigned crtid;
+    unsigned id;
 
  public:
     virtual ~StorageLocation() {}
-    unsigned id;
     const IR::Type *type;
     const cstring name;
     StorageLocation(const IR::Type *type, cstring name) : id(crtid++), type(type), name(name) {
@@ -105,7 +105,9 @@ class BaseLocation : public StorageLocation {
 /// Base class for location sets that contain fields
 class WithFieldsLocation : public StorageLocation {
  protected:
+    // FIXME: replace with small flat map with inlined storage
     hvec_map<cstring, const StorageLocation *> fieldLocations;
+
     friend class StorageFactory;
     WithFieldsLocation(const IR::Type *type, cstring name) : StorageLocation(type, name) {}
 
@@ -117,9 +119,7 @@ class WithFieldsLocation : public StorageLocation {
     void replaceField(cstring field, StorageLocation *replacement) {
         fieldLocations[field] = replacement;
     }
-    IterValues<hvec_map<cstring, const StorageLocation *>::const_iterator> fields() const {
-        return Values(fieldLocations);
-    }
+    auto fields() const { return Values(fieldLocations); }
     void dbprint(std::ostream &out) const override {
         for (auto f : fieldLocations) out << *f.second << " ";
     }
