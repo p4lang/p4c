@@ -35,6 +35,16 @@ enum flags {
     FRIEND = 1024        // friend function, not a method
 };
 
+namespace {
+void emitSemanticallyLess(std::stringstream &buf, IrField *f, bool revert) {
+    if (revert) {
+        buf << "IR::isSemanticallyLess(a." << f->name << ", " << f->name << ")";
+    } else {
+        buf << "IR::isSemanticallyLess(" << f->name << ", a." << f->name << ")";
+    }
+}
+}  // namespace
+
 const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
     {"operator=="_cs,
      {&NamedType::Bool(),
@@ -122,6 +132,62 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
               }
               if (first) {  // no fields?
                   buf << cl->indent << cl->indent << "return true";
+              }
+              buf << ";" << std::endl;
+          }
+          buf << cl->indent << "}";
+          return buf.str();
+      }}},
+    {"isSemanticallyLess"_cs,
+     {&NamedType::Bool(),
+      {new IrField(new ReferenceType(new NamedType(IrClass::nodeClass()), true), "a_"_cs)},
+      CONST + IN_IMPL + OVERRIDE,
+      [](IrClass *cl, Util::SourceInfo srcInfo, cstring body) -> cstring {
+          std::stringstream buf;
+          buf << "{" << std::endl;
+          buf << cl->indent << cl->indent
+              << "if (static_cast<const Node *>(this) == &a_) return false;\n";
+          if (auto parent = cl->getParent()) {
+              buf << cl->indent << cl->indent
+                  << "if (typeId() != a_.typeId()) "
+                     "return typeId() < a_.typeId();\n";
+              if (parent->name != "Node") {
+                  buf << cl->indent << cl->indent << "if ("
+                      << parent->qualified_name(cl->containedIn)
+                      << "::isSemanticallyLess(a_)) return true;\n";
+              }
+          }
+          if (body) {
+              buf << cl->indent << cl->indent << "auto &a = static_cast<const " << cl->name
+                  << " &>(a_);\n";
+              buf << LineDirective(srcInfo, true) << body;
+          } else {
+              IrField *previousField = nullptr;
+              for (auto *f : *cl->getFields()) {
+                  if (*f->type == NamedType::SourceInfo()) {
+                      continue;  // FIXME -- deal with SourcInfo
+                  }
+                  if (previousField != nullptr) {
+                      buf << std::endl << cl->indent << cl->indent << "|| ";
+                  } else {
+                      buf << cl->indent << cl->indent << "auto &a = static_cast<const " << cl->name
+                          << " &>(a_);\n";
+                      buf << cl->indent << cl->indent << "return ";
+                  }
+                  if (previousField != nullptr) {
+                      buf << "(!";
+                      emitSemanticallyLess(buf, previousField, true);
+                      buf << " && ";
+                  }
+                  emitSemanticallyLess(buf, f, false);
+                  if (previousField != nullptr) {
+                      buf << ")";
+                  }
+                  previousField = f;
+              }
+              // no fields?
+              if (previousField == nullptr) {
+                  buf << cl->indent << cl->indent << "return typeId() < a_.typeId()";
               }
               buf << ";" << std::endl;
           }
