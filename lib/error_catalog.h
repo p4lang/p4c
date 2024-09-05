@@ -147,7 +147,7 @@ class ErrorCatalog {
         bool error = false;
         for (const auto &pair : errorCatalog) {
             if (pair.second == lookup) {
-                if (isError(pair.first)) return false;
+                if (!isError(pair.first)) return false;
                 error = true;
             }
         }
