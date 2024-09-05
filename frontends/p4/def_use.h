@@ -52,17 +52,31 @@ struct loc_t {
 
 /// Abstraction for something that is has a left value (variable, parameter)
 class StorageLocation : public IHasDbPrint, public ICastable {
+#ifdef DEBUG_LOCATION_IDS
     static unsigned crtid;
     unsigned id;
+#endif
 
  public:
     virtual ~StorageLocation() {}
     const IR::Type *type;
     const cstring name;
-    StorageLocation(const IR::Type *type, cstring name) : id(crtid++), type(type), name(name) {
+    StorageLocation(const IR::Type *type, cstring name)
+        :
+#ifdef DEBUG_LOCATION_IDS
+          id(crtid++),
+#endif
+          type(type),
+          name(name) {
         CHECK_NULL(type);
     }
-    void dbprint(std::ostream &out) const override { out << id << " " << name; }
+    void dbprint(std::ostream &out) const override {
+#ifdef DEBUG_LOCATION_IDS
+        out << id << " " << name;
+#else
+        out << dbp(type) << " " << name;
+#endif
+    }
     cstring toString() const { return name; }
 
     /// @returns All locations inside that represent valid bits.

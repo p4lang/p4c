@@ -31,7 +31,9 @@ const cstring StorageFactory::indexFieldName = "$lastIndex"_cs;
 const LocationSet *LocationSet::empty = new LocationSet();
 ProgramPoint ProgramPoint::beforeStart;
 
+#ifdef DEBUG_LOCATION_IDS
 unsigned StorageLocation::crtid = 0;
+#endif
 
 StorageLocation *StorageFactory::create(const IR::Type *type, cstring name) const {
     if (type->is<IR::Type_Bits>() || type->is<IR::Type_Boolean>() || type->is<IR::Type_Varbits>() ||
