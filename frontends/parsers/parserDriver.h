@@ -115,6 +115,12 @@ class P4ParserDriver final : public AbstractParserDriver {
     static const IR::P4Program *parse(FILE *in, std::string_view sourceFile,
                                       unsigned sourceLine = 1);
 
+    static std::pair<const IR::P4Program *, const Util::InputSources *> parseProgramSources(
+        std::istream &in, std::string_view sourceFile, unsigned sourceLine = 1);
+
+    static std::pair<const IR::P4Program *, const Util::InputSources *> parseProgramSources(
+        FILE *in, std::string_view sourceFile, unsigned sourceLine = 1);
+
     /**
      * Parses a P4-16 annotation body.
      *
