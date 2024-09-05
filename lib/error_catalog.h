@@ -133,6 +133,10 @@ class ErrorCatalog {
         return "--unknown--"_cs;
     }
 
+    bool isError(int errorCode) {
+        return errorCode >= ErrorType::LEGACY_ERROR && errorCode <= ErrorType::ERR_MAX;
+    }
+
     /// return true if the given diagnostic can _only_ be an error; false otherwise
     bool isError(std::string_view name) {
         cstring lookup(name);
@@ -141,7 +145,7 @@ class ErrorCatalog {
         bool error = false;
         for (const auto &pair : errorCatalog) {
             if (pair.second == lookup) {
-                if (pair.first < ErrorType::LEGACY_ERROR || pair.first > ErrorType::ERR_MAX)
+                if (isError(pair.first))
                     return false;
                 error = true;
             }

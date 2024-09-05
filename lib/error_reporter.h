@@ -114,7 +114,7 @@ class ErrorReporter {
         if (!node || error_reported(errorCode, node->getSourceInfo())) return;
 
         if (cstring name = get_error_name(errorCode))
-            diagnose(getDiagnosticAction(name, action), name, format, suffix, node,
+            diagnose(getDiagnosticAction(errorCode, name, action), name, format, suffix, node,
                      std::forward<Args>(args)...);
         else
             diagnose(action, nullptr, format, suffix, node, std::forward<Args>(args)...);
@@ -124,7 +124,7 @@ class ErrorReporter {
     void diagnose(DiagnosticAction action, const int errorCode, const char *format,
                   const char *suffix, Args &&...args) {
         if (cstring name = get_error_name(errorCode))
-            diagnose(getDiagnosticAction(name, action), name, format, suffix,
+            diagnose(getDiagnosticAction(errorCode, name, action), name, format, suffix,
                      std::forward<Args>(args)...);
         else
             diagnose(action, nullptr, format, suffix, std::forward<Args>(args)...);
@@ -225,7 +225,10 @@ class ErrorReporter {
 
     /// @return the action to take for the given diagnostic, falling back to the
     /// default action if it wasn't overridden via the command line or a pragma.
-    DiagnosticAction getDiagnosticAction(cstring diagnostic, DiagnosticAction defaultAction) {
+    DiagnosticAction getDiagnosticAction(
+        int errorCode, cstring diagnostic, DiagnosticAction defaultAction) {
+        // Actions for errors can never be overridden.
+        if (ErrorCatalog::getCatalog().isError(errorCode)) return DiagnosticAction::Error;
         auto it = diagnosticActions.find(diagnostic);
         if (it != diagnosticActions.end()) return it->second;
         // if we're dealing with warnings and they have been globally modified

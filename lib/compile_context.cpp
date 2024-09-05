@@ -76,9 +76,4 @@ DiagnosticAction BaseCompileContext::getDefaultErrorDiagnosticAction() {
     return DiagnosticAction::Error;
 }
 
-DiagnosticAction BaseCompileContext::getDiagnosticAction(cstring /* diagnostic */,
-                                                         DiagnosticAction defaultAction) {
-    return defaultAction;
-}
-
 }  // namespace P4

@@ -167,28 +167,6 @@ void info(const int kind, const char *format, Args &&...args) {
     context.errorReporter().diagnose(action, kind, format, "", std::forward<Args>(args)...);
 }
 
-/**
- * Trigger a diagnostic message.
- *
- * @param defaultAction  The action (warn, error, etc.) to take if no action
- *                       was specified for this diagnostic on the command line
- *                       or via a pragma.
- * @param diagnosticName  A human-readable name for the diagnostic. This should
- *                        generally use only lower-case letters and underscores
- *                        so the diagnostic name is a valid P4 identifier.
- * @param format  A format for the diagnostic message, using the same style as
- *                '::P4::warning' or '::P4::error'.
- * @param suffix  A message that is appended at the end.
- */
-template <typename... Args>
-inline void diagnose(DiagnosticAction defaultAction, const char *diagnosticName, const char *format,
-                     const char *suffix, Args &&...args) {
-    auto &context = BaseCompileContext::get();
-    auto action = context.getDiagnosticAction(cstring(diagnosticName), defaultAction);
-    context.errorReporter().diagnose(action, diagnosticName, format, suffix,
-                                     std::forward<Args>(args)...);
-}
-
 }  // namespace P4
 
 #endif /* LIB_ERROR_H_ */
