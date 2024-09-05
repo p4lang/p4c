@@ -22,6 +22,7 @@ limitations under the License.
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "ir/ir.h"
 #include "lib/alloc_trace.h"
+#include "lib/flat_map.h"
 #include "lib/hash.h"
 #include "lib/hvec_map.h"
 #include "lib/ordered_set.h"
@@ -105,8 +106,9 @@ class BaseLocation : public StorageLocation {
 /// Base class for location sets that contain fields
 class WithFieldsLocation : public StorageLocation {
  protected:
-    // FIXME: replace with small flat map with inlined storage
-    hvec_map<cstring, const StorageLocation *> fieldLocations;
+    flat_map<cstring, const StorageLocation *, std::less<>,
+             absl::InlinedVector<std::pair<cstring, const StorageLocation *>, 4>>
+        fieldLocations;
 
     friend class StorageFactory;
     WithFieldsLocation(const IR::Type *type, cstring name) : StorageLocation(type, name) {}

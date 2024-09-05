@@ -31,6 +31,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/equiv_test.cpp
   gtest/exception_test.cpp
   gtest/expr_uses_test.cpp
+  gtest/flat_map.cpp
   gtest/format_test.cpp
   gtest/helpers.cpp
   gtest/hash.cpp
