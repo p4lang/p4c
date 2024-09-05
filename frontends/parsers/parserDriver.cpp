@@ -153,6 +153,28 @@ bool P4ParserDriver::parse(AbstractP4Lexer &lexer, std::string_view sourceFile,
     return parse(inputStream.get(), sourceFile, sourceLine);
 }
 
+/* static */ std::pair<const IR::P4Program *, const Util::InputSources *>
+P4ParserDriver::parseProgramSources(std::istream &in, std::string_view sourceFile,
+                                    unsigned sourceLine /* = 1 */) {
+    P4ParserDriver driver;
+    P4Lexer lexer(in);
+    if (!driver.parse(lexer, sourceFile, sourceLine)) {
+        return {nullptr, nullptr};
+    }
+
+    auto *program = new IR::P4Program(driver.nodes->srcInfo, *driver.nodes);
+    const Util::InputSources *sources = driver.sources;
+
+    return {program, sources};
+}
+
+/*static */ std::pair<const IR::P4Program *, const Util::InputSources *>
+P4ParserDriver::parseProgramSources(FILE *in, std::string_view sourceFile,
+                                    unsigned sourceLine /* = 1 */) {
+    AutoStdioInputStream inputStream(in);
+    return parseProgramSources(inputStream.get(), sourceFile, sourceLine);
+}
+
 template <typename T>
 const T *P4ParserDriver::parse(P4AnnotationLexer::Type type, const Util::SourceInfo &srcInfo,
                                const IR::Vector<IR::AnnotationToken> &body) {

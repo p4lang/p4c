@@ -1,15 +1,52 @@
 #include "backends/p4fmt/p4fmt.h"
 
 #include "backends/p4fmt/attach.h"
+#include "backends/p4fmt/p4formatter.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/common/parser_options.h"
+#include "frontends/parsers/parserDriver.h"
 #include "ir/ir.h"
 #include "lib/compile_context.h"
 #include "lib/error.h"
+#include "lib/source_file.h"
 #include "options.h"
-#include "p4formatter.h"
 
 namespace P4::P4Fmt {
+
+std::pair<const IR::P4Program *, const Util::InputSources *> parseProgram(
+    const ParserOptions &options) {
+    BUG_CHECK(&options == &P4CContext::get().options(),
+              "Parsing using options that don't match the current "
+              "compiler context");
+
+    std::pair<const IR::P4Program *, const Util::InputSources *> result = {nullptr, nullptr};
+
+    if (options.doNotPreprocess) {
+        auto *file = fopen(options.file.c_str(), "r");
+        if (file == nullptr) {
+            ::P4::error(ErrorType::ERR_NOT_FOUND, "%1%: No such file or directory.", options.file);
+            return result;
+        }
+        result = P4ParserDriver::parseProgramSources(file, options.file.string());
+        fclose(file);
+    } else {
+        auto preprocessorResult = options.preprocess();
+        if (::P4::errorCount() > 0 || !preprocessorResult.has_value()) {
+            return result;
+        }
+        result = P4ParserDriver::parseProgramSources(preprocessorResult.value().get(),
+                                                     options.file.string());
+    }
+
+    if (::P4::errorCount() > 0) {
+        ::P4::error(ErrorType::ERR_OVERLIMIT, "%1% errors encountered, aborting compilation",
+                    ::P4::errorCount());
+        return {nullptr, nullptr};
+    }
+    BUG_CHECK(result.first != nullptr, "Parsing failed, but we didn't report an error");
+
+    return result;
+}
 
 std::stringstream getFormattedOutput(std::filesystem::path inputFile) {
     AutoCompileContext autoP4FmtContext(new P4Fmt::P4FmtContext);
@@ -19,7 +56,11 @@ std::stringstream getFormattedOutput(std::filesystem::path inputFile) {
 
     std::stringstream formattedOutput;
 
-    const IR::P4Program *program = P4::parseP4File(options);
+    auto result = parseProgram(options);
+
+    const IR::P4Program *program = result.first;
+    const Util::InputSources *sources = result.second;
+
     if (program == nullptr && ::P4::errorCount() != 0) {
         ::P4::error("Failed to parse P4 file.");
         return formattedOutput;
@@ -28,13 +69,10 @@ std::stringstream getFormattedOutput(std::filesystem::path inputFile) {
     std::unordered_map<const Util::Comment *, bool> globalCommentsMap;
 
     // Initialize the global comments map from the list of comments in the program.
-    if (!program->objects.empty()) {
-        const auto *firstNode = program->objects.front();
-        if (firstNode->srcInfo.isValid()) {
-            for (const auto *comment : firstNode->srcInfo.getAllFileComments()) {
-                globalCommentsMap[comment] =
-                    false;  // Initialize all comments as not yet attached to nodes
-            }
+    if (sources != nullptr) {
+        for (const auto *comment : sources->getAllComments()) {
+            globalCommentsMap[comment] =
+                false;  // Initialize all comments as not yet attached to nodes
         }
     }
 

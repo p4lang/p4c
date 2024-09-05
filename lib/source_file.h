@@ -196,10 +196,6 @@ class SourceInfo final {
 
     const SourcePosition &getEnd() const { return this->end; }
 
-    /// Returns all the comments found in the file that is associated with this node.
-    /// Returns nothing if no sources are associated with the node.
-    [[nodiscard]] const std::vector<Comment *> getAllFileComments() const;
-
     /**
        True if this comes 'before' this source position.
        'invalid' source positions come first.
