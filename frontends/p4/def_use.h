@@ -110,10 +110,8 @@ class WithFieldsLocation : public StorageLocation {
              absl::InlinedVector<std::pair<cstring, const StorageLocation *>, 4>>
         fieldLocations;
 
-    friend class StorageFactory;
     WithFieldsLocation(const IR::Type *type, cstring name) : StorageLocation(type, name) {}
 
- public:
     void createField(cstring name, StorageLocation *field) {
         fieldLocations.emplace(name, field);
         CHECK_NULL(field);
@@ -121,6 +119,10 @@ class WithFieldsLocation : public StorageLocation {
     void replaceField(cstring field, StorageLocation *replacement) {
         fieldLocations[field] = replacement;
     }
+
+    friend class StorageFactory;
+
+ public:
     auto fields() const { return Values(fieldLocations); }
     void dbprint(std::ostream &out) const override {
         for (auto f : fieldLocations) out << *f.second << " ";
@@ -150,12 +152,13 @@ class StructLocation : public WithFieldsLocation {
 class IndexedLocation : public StorageLocation {
  protected:
     absl::InlinedVector<const StorageLocation *, 8> elements;
-    friend class StorageFactory;
 
     void createElement(unsigned index, StorageLocation *element) {
         elements[index] = element;
         CHECK_NULL(element);
     }
+
+    friend class StorageFactory;
 
  public:
     IndexedLocation(const IR::Type *type, cstring name) : StorageLocation(type, name) {
