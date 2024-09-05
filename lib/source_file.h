@@ -256,7 +256,7 @@ class Comment final : IHasDbPrint, IHasSourceInfo {
  public:
     Comment(SourceInfo srcInfo, bool singleLine, cstring body)
         : srcInfo(srcInfo), singleLine(singleLine), body(body) {}
-    cstring toString() const {
+    cstring toString() const override {
         std::stringstream str;
         dbprint(str);
         return str.str();
