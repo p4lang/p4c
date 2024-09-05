@@ -372,7 +372,7 @@ class FindUninitialized : public Inspector {
     /// For some simple expresssions keep here the read location sets.
     /// This does not include location sets read by subexpressions.
     absl::flat_hash_map<const IR::Expression *, const LocationSet *, Util::Hash> readLocations;
-    HasUses *hasUses;  // output
+    HasUses &hasUses;  // output
     /// If true the current statement is unreachable
     bool unreachable = false;
     bool virtualMethod = false;
@@ -416,7 +416,7 @@ class FindUninitialized : public Inspector {
     }
 
  public:
-    FindUninitialized(AllDefinitions *definitions, HasUses *hasUses)
+    FindUninitialized(AllDefinitions *definitions, HasUses &hasUses)
         : refMap(definitions->storageMap->refMap),
           typeMap(definitions->storageMap->typeMap),
           definitions(definitions),
@@ -426,7 +426,6 @@ class FindUninitialized : public Inspector {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
         CHECK_NULL(definitions);
-        CHECK_NULL(hasUses);
         visitDagOnce = false;
     }
 
@@ -473,7 +472,7 @@ class FindUninitialized : public Inspector {
 
                 const LocationSet *loc = new LocationSet(storage);
                 auto points = defs->getPoints(loc);
-                hasUses->add(points);
+                hasUses.add(points);
                 if (typeMap->typeIsEmpty(storage->type)) continue;
                 // Check uninitialized non-headers (headers can be invalid).
                 // inout parameters can never match here, so we could skip them.
@@ -1068,7 +1067,7 @@ class FindUninitialized : public Inspector {
             }
         }
 
-        hasUses->add(points);
+        hasUses.add(points);
     }
 
     // Checks if header unions and header union stacks are initialized.
@@ -1416,7 +1415,7 @@ class FindUninitialized : public Inspector {
         auto *slice_stmt = findContext<IR::AssignmentStatement>();
         if (slice_stmt != nullptr && lhs) {
             // track this slice statement
-            hasUses->watchForOverwrites(expression);
+            hasUses.watchForOverwrites(expression);
             LOG4("Tracking " << dbp(slice_stmt) << " " << slice_stmt
                              << " for potential overwrites");
         }
@@ -1430,7 +1429,7 @@ class FindUninitialized : public Inspector {
         registerUses(expression);
         lhs = save;
 
-        hasUses->doneWatching();
+        hasUses.doneWatching();
         return false;
     }
 
@@ -1489,20 +1488,19 @@ class FindUninitialized : public Inspector {
 };
 
 class RemoveUnused : public Transform {
-    const HasUses *hasUses;
+    const HasUses &hasUses;
     ReferenceMap *refMap;
     TypeMap *typeMap;
 
  public:
-    explicit RemoveUnused(const HasUses *hasUses, ReferenceMap *refMap, TypeMap *typeMap)
+    explicit RemoveUnused(const HasUses &hasUses, ReferenceMap *refMap, TypeMap *typeMap)
         : hasUses(hasUses), refMap(refMap), typeMap(typeMap) {
-        CHECK_NULL(hasUses);
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
         setName("RemoveUnused");
     }
     const IR::Node *postorder(IR::AssignmentStatement *statement) override {
-        if (!hasUses->hasUses(getOriginal())) {
+        if (!hasUses.hasUses(getOriginal())) {
             Log::TempIndent indent;
             LOG3("Removing statement " << getOriginal() << " " << statement << indent);
             SideEffects se(refMap, typeMap);
@@ -1525,7 +1523,7 @@ class RemoveUnused : public Transform {
         return statement;
     }
     const IR::Node *postorder(IR::MethodCallStatement *mcs) override {
-        if (!hasUses->hasUses(getOriginal())) {
+        if (!hasUses.hasUses(getOriginal())) {
             if (SideEffects::hasSideEffect(mcs->methodCall, refMap, typeMap)) {
                 return mcs;
             }
@@ -1545,8 +1543,8 @@ class ProcessDefUse : public PassManager {
  public:
     ProcessDefUse(ReferenceMap *refMap, TypeMap *typeMap) : definitions(refMap, typeMap) {
         passes.push_back(new ComputeWriteSet(&definitions));
-        passes.push_back(new FindUninitialized(&definitions, &hasUses));
-        passes.push_back(new RemoveUnused(&hasUses, refMap, typeMap));
+        passes.push_back(new FindUninitialized(&definitions, hasUses));
+        passes.push_back(new RemoveUnused(hasUses, refMap, typeMap));
         setName("ProcessDefUse");
     }
 };
