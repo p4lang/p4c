@@ -69,13 +69,6 @@ std::ostream &operator<<(std::ostream &os, const SourceInfo &info) {
     return os;
 }
 
-const std::vector<Comment *> SourceInfo::getAllFileComments() const {
-    if (sources == nullptr) {
-        return {};
-    }
-    return this->sources->getAllComments();
-}
-
 //////////////////////////////////////////////////////////////////////////////////////////
 
 InputSources::InputSources() : sealed(false) {
