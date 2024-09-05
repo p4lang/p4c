@@ -1539,14 +1539,13 @@ class RemoveUnused : public Transform {
 
 // Run for each parser and control separately.
 class ProcessDefUse : public PassManager {
-    AllDefinitions *definitions;
+    AllDefinitions definitions;
     HasUses hasUses;
 
  public:
-    ProcessDefUse(ReferenceMap *refMap, TypeMap *typeMap)
-        : definitions(new AllDefinitions(refMap, typeMap)) {
-        passes.push_back(new ComputeWriteSet(definitions));
-        passes.push_back(new FindUninitialized(definitions, &hasUses));
+    ProcessDefUse(ReferenceMap *refMap, TypeMap *typeMap) : definitions(refMap, typeMap) {
+        passes.push_back(new ComputeWriteSet(&definitions));
+        passes.push_back(new FindUninitialized(&definitions, &hasUses));
         passes.push_back(new RemoveUnused(&hasUses, refMap, typeMap));
         setName("ProcessDefUse");
     }
