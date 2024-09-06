@@ -113,35 +113,35 @@ const LocationSet *StorageLocation::removeHeaders() const {
 
 void BaseLocation::removeHeaders(LocationSet *result) const { result->add(this); }
 
+void IndexedLocation::removeHeaders(LocationSet *result) const {
+    for (const auto &f : elements) f->removeHeaders(result);
+}
+
+void WithFieldsLocation::removeHeaders(LocationSet *result) const {
+    if (!type->is<IR::Type_Struct>()) return;
+    for (const auto &f : fieldLocations) f.second->removeHeaders(result);
+}
+
 void StructLocation::addValidBits(LocationSet *result) const {
     if (type->is<IR::Type_Header>()) {
         addField(StorageFactory::validFieldName, result);
     } else {
-        for (auto f : fields()) f->addValidBits(result);
+        for (const auto &f : fields()) f->addValidBits(result);
     }
 }
 
 void StructLocation::addLastIndexField(LocationSet *result) const {
-    for (auto f : fields()) f->addLastIndexField(result);
+    for (const auto &f : fields()) f->addLastIndexField(result);
 }
 
-void StructLocation::addField(cstring field, LocationSet *result) const {
-    auto f = ::P4::get(fieldLocations, field);
+void WithFieldsLocation::addField(cstring field, LocationSet *addTo) const {
+    const auto *f = ::P4::get(fieldLocations, field);
     CHECK_NULL(f);
-    result->add(f);
-}
-
-void TupleLocation::removeHeaders(LocationSet *result) const {
-    for (auto f : elements) f->removeHeaders(result);
-}
-
-void StructLocation::removeHeaders(LocationSet *result) const {
-    if (!type->is<IR::Type_Struct>()) return;
-    for (auto f : fieldLocations) f.second->removeHeaders(result);
+    addTo->add(f);
 }
 
 void ArrayLocation::addValidBits(LocationSet *result) const {
-    for (auto e : *this) e->addValidBits(result);
+    for (const auto *e : *this) e->addValidBits(result);
 }
 
 void ArrayLocation::addLastIndexField(LocationSet *result) const {
