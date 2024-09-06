@@ -392,7 +392,7 @@ void ComputeWriteSet::enterScope(const IR::ParameterList *parameters,
 
     if (parameters != nullptr) {
         for (auto p : parameters->parameters) {
-            StorageLocation *loc = allDefinitions->storageMap->getOrAdd(p);
+            StorageLocation *loc = allDefinitions->getOrAddStorage(p);
             if (loc == nullptr) continue;
             if (p->direction == IR::Direction::In || p->direction == IR::Direction::InOut ||
                 p->direction == IR::Direction::None)
@@ -408,7 +408,7 @@ void ComputeWriteSet::enterScope(const IR::ParameterList *parameters,
     if (locals != nullptr) {
         for (auto d : *locals) {
             if (d->is<IR::Declaration_Variable>()) {
-                StorageLocation *loc = allDefinitions->storageMap->getOrAdd(d);
+                StorageLocation *loc = allDefinitions->getOrAddStorage(d);
                 if (loc != nullptr) {
                     defs->setDefinition(loc, uninit);
                     auto valid = loc->getValidBits();
@@ -432,14 +432,14 @@ void ComputeWriteSet::exitScope(const IR::ParameterList *parameters,
     currentDefinitions = currentDefinitions->cloneDefinitions();
     if (parameters != nullptr) {
         for (auto p : parameters->parameters) {
-            StorageLocation *loc = allDefinitions->storageMap->getStorage(p);
+            StorageLocation *loc = allDefinitions->getStorage(p);
             if (loc != nullptr) currentDefinitions->removeLocation(loc);
         }
     }
     if (locals != nullptr) {
         for (auto d : *locals) {
             if (d->is<IR::Declaration_Variable>()) {
-                StorageLocation *loc = allDefinitions->storageMap->getStorage(d);
+                StorageLocation *loc = allDefinitions->getStorage(d);
                 if (loc != nullptr) currentDefinitions->removeLocation(loc);
             }
         }
@@ -549,8 +549,8 @@ bool ComputeWriteSet::preorder(const IR::PathExpression *expression) {
         expressionWrites(expression, LocationSet::empty);
         return false;
     }
-    auto decl = storageMap->refMap->getDeclaration(expression->path, true);
-    auto storage = storageMap->getStorage(decl);
+    auto decl = refMap->getDeclaration(expression->path, true);
+    auto storage = allDefinitions->getStorage(decl);
     const LocationSet *result;
     if (storage != nullptr)
         result = new LocationSet(storage);
@@ -566,15 +566,15 @@ bool ComputeWriteSet::preorder(const IR::Member *expression) {
         expressionWrites(expression, LocationSet::empty);
         return false;
     }
-    auto type = storageMap->typeMap->getType(expression, true);
+    auto type = typeMap->getType(expression, true);
     if (type->is<IR::Type_Method>()) return false;
-    if (TableApplySolver::isHit(expression, storageMap->refMap, storageMap->typeMap) ||
-        TableApplySolver::isMiss(expression, storageMap->refMap, storageMap->typeMap) ||
-        TableApplySolver::isActionRun(expression, storageMap->refMap, storageMap->typeMap))
+    if (TableApplySolver::isHit(expression, refMap, typeMap) ||
+        TableApplySolver::isMiss(expression, refMap, typeMap) ||
+        TableApplySolver::isActionRun(expression, refMap, typeMap))
         return false;
     auto storage = getWrites(expression->expr);
 
-    auto basetype = storageMap->typeMap->getType(expression->expr, true);
+    auto basetype = typeMap->getType(expression->expr, true);
     if (basetype->is<IR::Type_Stack>()) {
         if (expression->member.name == IR::Type_Stack::next ||
             expression->member.name == IR::Type_Stack::last) {
@@ -675,7 +675,7 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression *expression) {
     // The method call may modify the object, which is part of the method
     visit(expression->method);
     lhs = save;
-    auto mi = MethodInstance::resolve(expression, storageMap->refMap, storageMap->typeMap);
+    auto mi = MethodInstance::resolve(expression, refMap, typeMap);
     if (auto bim = mi->to<BuiltInMethod>()) {
         const loc_t *methodLoc = getLoc(expression->method, getChildContext());
         auto base = getWrites(bim->appliedTo, methodLoc);
@@ -811,7 +811,7 @@ bool ComputeWriteSet::preorder(const IR::P4Parser *parser) {
     visitVirtualMethods(parser->parserLocals);
 
     ParserCallGraph transitions("transitions");
-    ComputeParserCG pcg(storageMap->refMap, &transitions);
+    ComputeParserCG pcg(refMap, &transitions);
     pcg.setCalledBy(this);
 
     (void)parser->apply(pcg);
@@ -1013,8 +1013,7 @@ bool ComputeWriteSet::preorder(const IR::SwitchStatement *statement) {
         visit(s->statement);
         result = result->joinDefinitions(currentDefinitions);
     }
-    auto table = TableApplySolver::isActionRun(statement->expression, storageMap->refMap,
-                                               storageMap->typeMap);
+    auto table = TableApplySolver::isActionRun(statement->expression, refMap, typeMap);
     if (table) {
         auto al = table->getActionList();
         bool allCases = statement->cases.size() == al->size();

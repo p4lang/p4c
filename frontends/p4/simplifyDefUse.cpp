@@ -17,6 +17,7 @@ limitations under the License.
 #include "simplifyDefUse.h"
 
 #include "absl/container/flat_hash_set.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/def_use.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/parserCallGraph.h"
@@ -135,7 +136,7 @@ DeclarationToExpression *DeclarationToExpression::instance = nullptr;
 class HeaderDefinitions : public IHasDbPrint {
     ReferenceMap *refMap;
     TypeMap *typeMap;
-    StorageMap *storageMap;
+    AllDefinitions *definitions;
 
     /// The current values of the header valid bits are stored here. If the value in the map is Yes,
     /// then the header is currently valid. If the value in the map is No, then the header is
@@ -151,11 +152,11 @@ class HeaderDefinitions : public IHasDbPrint {
     absl::flat_hash_set<const StorageLocation *, Util::Hash> notReport;
 
  public:
-    HeaderDefinitions(ReferenceMap *refMap, TypeMap *typeMap, StorageMap *storageMap)
-        : refMap(refMap), typeMap(typeMap), storageMap(storageMap) {
+    HeaderDefinitions(ReferenceMap *refMap, TypeMap *typeMap, AllDefinitions *definitions)
+        : refMap(refMap), typeMap(typeMap), definitions(definitions) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
-        CHECK_NULL(storageMap);
+        CHECK_NULL(definitions);
     }
 
     void dbprint(std::ostream &out) const {
@@ -171,7 +172,7 @@ class HeaderDefinitions : public IHasDbPrint {
         LocationSet *result = new LocationSet;
         if (auto expr = expression->to<IR::PathExpression>()) {
             auto decl = refMap->getDeclaration(expr->path, true);
-            result->add(storageMap->getStorage(decl));
+            result->add(definitions->getStorage(decl));
         } else if (auto expr = expression->to<IR::Member>()) {
             auto base_storage = getStorageLocation(expr->expr);
             for (auto bs : *base_storage) {
@@ -330,7 +331,7 @@ class HeaderDefinitions : public IHasDbPrint {
     bool operator!=(const HeaderDefinitions &other) const { return !(*this == other); }
 
     HeaderDefinitions *intersect(const HeaderDefinitions *other) const {
-        HeaderDefinitions *result = new HeaderDefinitions(refMap, typeMap, storageMap);
+        HeaderDefinitions *result = new HeaderDefinitions(refMap, typeMap, definitions);
         for (const auto &def : defs) {
             auto valid = ::P4::get(other->defs, def.first, TernaryBool::Maybe);
             result->defs.emplace(def.first, valid == def.second ? valid : TernaryBool::Maybe);
@@ -405,8 +406,8 @@ class FindUninitialized : public Inspector {
 
     FindUninitialized(FindUninitialized *parent, ProgramPoint context)
         : context(context),
-          refMap(parent->definitions->storageMap->refMap),
-          typeMap(parent->definitions->storageMap->typeMap),
+          refMap(parent->refMap),
+          typeMap(parent->typeMap),
           definitions(parent->definitions),
           currentPoint(context),
           hasUses(parent->hasUses),
@@ -416,13 +417,14 @@ class FindUninitialized : public Inspector {
     }
 
  public:
-    FindUninitialized(AllDefinitions *definitions, HasUses &hasUses)
-        : refMap(definitions->storageMap->refMap),
-          typeMap(definitions->storageMap->typeMap),
+    FindUninitialized(AllDefinitions *definitions, ReferenceMap *refMap, TypeMap *typeMap,
+                      HasUses &hasUses)
+        : refMap(refMap),
+          typeMap(typeMap),
           definitions(definitions),
           currentPoint(),
           hasUses(hasUses),
-          headerDefs(new HeaderDefinitions(refMap, typeMap, definitions->storageMap)) {
+          headerDefs(new HeaderDefinitions(refMap, typeMap, definitions)) {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
         CHECK_NULL(definitions);
@@ -453,7 +455,7 @@ class FindUninitialized : public Inspector {
     void initHeaderParams(const IR::ParameterList *parameters) {
         if (!parameters) return;
         for (auto p : parameters->parameters)
-            if (auto storage = definitions->storageMap->getStorage(p)) {
+            if (auto storage = definitions->getStorage(p)) {
                 headerDefs->setValueToStorage(storage, p->direction != IR::Direction::Out
                                                            ? TernaryBool::Yes
                                                            : TernaryBool::No);
@@ -466,7 +468,7 @@ class FindUninitialized : public Inspector {
                                               << defs);
         for (auto p : parameters->parameters) {
             if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut) {
-                auto storage = definitions->storageMap->getStorage(p);
+                auto storage = definitions->getStorage(p);
                 LOG3("Checking parameter: " << p);
                 if (storage == nullptr) continue;
 
@@ -614,8 +616,7 @@ class FindUninitialized : public Inspector {
         reportInvalidHeaders = true;
         for (auto state : parser->states) {
             if (inputHeaderDefs.find(state) == inputHeaderDefs.end()) {
-                inputHeaderDefs.emplace(
-                    state, new HeaderDefinitions(refMap, typeMap, definitions->storageMap));
+                inputHeaderDefs.emplace(state, new HeaderDefinitions(refMap, typeMap, definitions));
             }
             headerDefs = inputHeaderDefs[state];
             visit(state);
@@ -662,7 +663,7 @@ class FindUninitialized : public Inspector {
             // else let loc be the whole array
         } else if (auto pe = parent->to<IR::PathExpression>()) {
             auto decl = refMap->getDeclaration(pe->path, true);
-            auto storage = definitions->storageMap->getStorage(decl);
+            auto storage = definitions->getStorage(decl);
             if (storage != nullptr)
                 loc = new LocationSet(storage);
             else
@@ -1141,7 +1142,7 @@ class FindUninitialized : public Inspector {
         LOG4("Declaration for path '" << expression->path << "' is " << Log::indent << Log::endl
                                       << decl << Log::unindent);
 
-        auto storage = definitions->storageMap->getStorage(decl);
+        auto storage = definitions->getStorage(decl);
         const LocationSet *result;
         if (storage != nullptr)
             result = new LocationSet(storage);
@@ -1269,7 +1270,7 @@ class FindUninitialized : public Inspector {
             if (auto actionCall = mi->to<ActionCall>()) {
                 if (auto param = actionCall->action->parameters->getParameter(p->name)) {
                     if (p->direction == IR::Direction::Out) {
-                        headerDefs->setValueToStorage(definitions->storageMap->getStorage(param),
+                        headerDefs->setValueToStorage(definitions->getStorage(param),
                                                       TernaryBool::No);
                     } else {
                         // we can treat the argument passing as an assignment
@@ -1287,8 +1288,7 @@ class FindUninitialized : public Inspector {
         if (auto actionCall = mi->to<ActionCall>()) {
             for (auto p : actionCall->action->parameters->parameters) {
                 if (p->direction == IR::Direction::None && !mi->substitution.contains(p)) {
-                    headerDefs->setValueToStorage(definitions->storageMap->getStorage(p),
-                                                  TernaryBool::Yes);
+                    headerDefs->setValueToStorage(definitions->getStorage(p), TernaryBool::Yes);
                 }
             }
         }
@@ -1542,8 +1542,8 @@ class ProcessDefUse : public PassManager {
 
  public:
     ProcessDefUse(ReferenceMap *refMap, TypeMap *typeMap) : definitions(refMap, typeMap) {
-        passes.push_back(new ComputeWriteSet(&definitions));
-        passes.push_back(new FindUninitialized(&definitions, hasUses));
+        passes.push_back(new ComputeWriteSet(&definitions, refMap, typeMap));
+        passes.push_back(new FindUninitialized(&definitions, refMap, typeMap, hasUses));
         passes.push_back(new RemoveUnused(hasUses, refMap, typeMap));
         setName("ProcessDefUse");
     }

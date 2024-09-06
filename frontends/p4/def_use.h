@@ -483,11 +483,11 @@ class AllDefinitions : public IHasDbPrint {
     /// P4Table, P4Function -- the definitions are BEFORE the
     /// ProgramPoint.
     hvec_map<ProgramPoint, Definitions *> atPoint;
+    StorageMap storageMap;
 
  public:
-    StorageMap *storageMap;
-    AllDefinitions(ReferenceMap *refMap, TypeMap *typeMap)
-        : storageMap(new StorageMap(refMap, typeMap)) {}
+    AllDefinitions(ReferenceMap *refMap, TypeMap *typeMap) : storageMap(refMap, typeMap) {}
+
     Definitions *getDefinitions(ProgramPoint point, bool emptyIfNotFound = false) {
         auto it = atPoint.find(point);
         if (it == atPoint.end()) {
@@ -511,6 +511,15 @@ class AllDefinitions : public IHasDbPrint {
         }
         atPoint[point] = defs;
     }
+
+    StorageLocation *getStorage(const IR::IDeclaration *decl) const {
+        return storageMap.getStorage(decl);
+    }
+
+    StorageLocation *getOrAddStorage(const IR::IDeclaration *decl) {
+        return storageMap.getOrAdd(decl);
+    }
+
     void dbprint(std::ostream &out) const override {
         for (auto e : atPoint) out << e.first << " => " << e.second << Log::endl;
     }
@@ -529,16 +538,19 @@ class AllDefinitions : public IHasDbPrint {
 
 class ComputeWriteSet : public Inspector, public IHasDbPrint {
  public:
-    explicit ComputeWriteSet(AllDefinitions *allDefinitions)
-        : allDefinitions(allDefinitions),
+    explicit ComputeWriteSet(AllDefinitions *allDefinitions, ReferenceMap *refMap, TypeMap *typeMap)
+        : refMap(refMap),
+          typeMap(typeMap),
+          allDefinitions(allDefinitions),
           currentDefinitions(nullptr),
           returnedDefinitions(nullptr),
           exitDefinitions(new Definitions()),
-          storageMap(allDefinitions->storageMap),
           lhs(false),
           virtualMethod(false),
           cached_locs(*new std::unordered_set<loc_t>) {
         CHECK_NULL(allDefinitions);
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
         visitDagOnce = false;
     }
 
@@ -588,6 +600,8 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
     }
 
  protected:
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
     AllDefinitions *allDefinitions;              /// Result computed by this pass.
     Definitions *currentDefinitions;             /// Before statement currently processed.
     Definitions *returnedDefinitions;            /// Definitions after return statements.
@@ -595,7 +609,6 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
     Definitions *breakDefinitions = nullptr;     /// Definitions at break statements.
     Definitions *continueDefinitions = nullptr;  /// Definitions at continue statements.
     ProgramPoint callingContext;
-    const StorageMap *storageMap;
     /// if true we are processing an expression on the lhs of an assignment
     bool lhs;
     /// For each program location the location set it writes
@@ -609,14 +622,16 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
     /// Needed to visit some program fragments repeatedly.
     ComputeWriteSet(const ComputeWriteSet *source, ProgramPoint context, Definitions *definitions,
                     std::unordered_set<loc_t> &cached_locs)
-        : allDefinitions(source->allDefinitions),
+        : refMap(source->refMap),
+          typeMap(source->typeMap),
+
+          allDefinitions(source->allDefinitions),
           currentDefinitions(definitions),
           returnedDefinitions(nullptr),
           exitDefinitions(source->exitDefinitions),
           breakDefinitions(source->breakDefinitions),
           continueDefinitions(source->continueDefinitions),
           callingContext(context),
-          storageMap(source->storageMap),
           lhs(false),
           virtualMethod(false),
           cached_locs(cached_locs) {
