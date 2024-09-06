@@ -29,8 +29,8 @@ var searchData=
   ['ubuntu_26',['Ubuntu',['../getting_started.html#ubuntu',1,'']]],
   ['ubuntu_20dependencies_27',['Ubuntu dependencies',['../getting_started.html#ubuntu-dependencies',1,'']]],
   ['unicast_20nm_20normal_20multicast_20ci2e_20clone_20ingress_20to_20egress_28',['NU (Normal Unicast), NM (Normal Multicast), CI2E (Clone Ingress to Egress)',['../ebpf_backend.html#nu-normal-unicast-nm-normal-multicast-ci2e-clone-ingress-to-egress',1,'']]],
-  ['unify_29',['unify',['../class_p4_1_1_type_inference.html#abc2ef9bb3a691d1e59a721be11cd0499',1,'P4::TypeInference::unify()'],['../class_p4_1_1_type_unification.html#a323df5de0794b2ed417822de869f467b',1,'P4::TypeUnification::unify()']]],
-  ['unifycast_30',['unifyCast',['../class_p4_1_1_type_inference.html#a6e4008746d8fce6012f9f60833ead21e',1,'P4::TypeInference']]],
+  ['unify_29',['unify',['../class_p4_1_1_type_inference_base.html#aaa249fd726092b5fdcd1157dcc1390ab',1,'P4::TypeInferenceBase::unify()'],['../class_p4_1_1_type_unification.html#a323df5de0794b2ed417822de869f467b',1,'P4::TypeUnification::unify()']]],
+  ['unifycast_30',['unifyCast',['../class_p4_1_1_type_inference_base.html#a8b9e1f2d15aba899d9f491e70c2b0fb9',1,'P4::TypeInferenceBase']]],
   ['unionwith_31',['unionWith',['../struct_p4_1_1_half_open_range.html#a9bedcd88bc07ae75600f2358818f4726',1,'P4::HalfOpenRange::unionWith()'],['../struct_p4_1_1_closed_range.html#aeb8b8e1ac10975128be036956bcb3133',1,'P4::ClosedRange::unionWith()']]],
   ['uniquecaller_32',['uniqueCaller',['../struct_p4_1_1_inline_summary_1_1_per_caller.html#a1a447ec67084a4e75395cdbb423dccc7',1,'P4::InlineSummary::PerCaller']]],
   ['uniquenames_33',['UniqueNames',['../class_p4_1_1_unique_names.html',1,'P4']]],
@@ -66,7 +66,6 @@ var searchData=
   ['ut_5fhash_5fbucket_63',['UT_hash_bucket',['../struct_u_t__hash__bucket.html',1,'']]],
   ['ut_5fhash_5fhandle_64',['UT_hash_handle',['../struct_u_t__hash__handle.html',1,'']]],
   ['ut_5fhash_5ftable_65',['UT_hash_table',['../struct_u_t__hash__table.html',1,'']]],
-  ['util_20h_66',['ir-inline.h ir-tree-macros.h ir-util.h',['../intermediate_representation_ir.html#ir-inlineh-ir-tree-macrosh-ir-utilh',1,'']]],
-  ['utility_20functions_67',['Common P4C utility functions',['../getting_started.html#common-p4c-utility-functions',1,'']]],
-  ['utils_68',['Utils',['../class_p4_1_1_p4_tools_1_1_utils.html',1,'P4::P4Tools']]]
+  ['utility_20functions_66',['Common P4C utility functions',['../getting_started.html#common-p4c-utility-functions',1,'']]],
+  ['utils_67',['Utils',['../class_p4_1_1_p4_tools_1_1_utils.html',1,'P4::P4Tools']]]
 ];

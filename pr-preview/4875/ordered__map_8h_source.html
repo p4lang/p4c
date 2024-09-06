@@ -254,140 +254,156 @@ $(function(){initNavTree('ordered__map_8h_source.html',''); initResizable(true);
 <div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>    size_type max_size() const noexcept { <span class="keywordflow">return</span> data_map.max_size(); }</div>
 <div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>    <span class="keywordtype">bool</span> operator==(<span class="keyword">const</span> ordered_map &amp;a)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> data == a.data; }</div>
 <div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>    <span class="keywordtype">bool</span> operator!=(<span class="keyword">const</span> ordered_map &amp;a)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> data != a.data; }</div>
-<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>    <span class="keywordtype">void</span> clear() {</div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>        data.clear();</div>
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>        data_map.clear();</div>
-<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>    }</div>
-<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span> </div>
-<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>    iterator find(<span class="keyword">const</span> key_type &amp;a) { <span class="keywordflow">return</span> tr_iter(data_map.find(&amp;a)); }</div>
-<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>    const_iterator find(<span class="keyword">const</span> key_type &amp;a)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> tr_iter(data_map.find(&amp;a)); }</div>
-<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>    size_type count(<span class="keyword">const</span> key_type &amp;a)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> data_map.count(&amp;a); }</div>
-<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>    iterator lower_bound(<span class="keyword">const</span> key_type &amp;a) { <span class="keywordflow">return</span> tr_iter(data_map.lower_bound(&amp;a)); }</div>
-<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>    const_iterator lower_bound(<span class="keyword">const</span> key_type &amp;a)<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>        <span class="keywordflow">return</span> tr_iter(data_map.lower_bound(&amp;a));</div>
-<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>    }</div>
-<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>    iterator upper_bound(<span class="keyword">const</span> key_type &amp;a) { <span class="keywordflow">return</span> tr_iter(data_map.upper_bound(&amp;a)); }</div>
-<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>    const_iterator upper_bound(<span class="keyword">const</span> key_type &amp;a)<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>        <span class="keywordflow">return</span> tr_iter(data_map.upper_bound(&amp;a));</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>    <span class="keywordtype">bool</span> operator&lt;(<span class="keyword">const</span> ordered_map &amp;a)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>        <span class="comment">// we define this to work INDEPENDENT of the order -- so it is possible to have</span></div>
+<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>        <span class="comment">// two ordered_maps where !(a &lt; b) &amp;&amp; !(b &lt; a) &amp;&amp; !(a == b) -- such sets have the</span></div>
+<div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>        <span class="comment">// same elements but in a different order.  This is generally what you want if you</span></div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>        <span class="comment">// have a set of ordered_maps (or use ordered_map as a map key).</span></div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>        <span class="comment">// For individual element comparison, we defer to COMP, which is &#39;operator&lt;&#39; in the</span></div>
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>        <span class="comment">// common case.</span></div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>        <span class="keyword">auto</span> it = a.data_map.begin();</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span> &amp;el : data_map) {</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>            <span class="keywordflow">if</span> (it == a.data_map.end()) <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>            <span class="keywordflow">if</span> (mapcmp()(el.first, it-&gt;first)) <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>            <span class="keywordflow">if</span> (mapcmp()(it-&gt;first, el.first)) <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>            ++it;</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>        }</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>        <span class="keywordflow">return</span> it != a.data_map.end();</div>
 <div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>    }</div>
-<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>    iterator upper_bound_pred(<span class="keyword">const</span> key_type &amp;a) {</div>
-<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>        <span class="keyword">auto</span> ub = data_map.upper_bound(&amp;a);</div>
-<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>        <span class="keywordflow">if</span> (ub == data_map.begin()) <span class="keywordflow">return</span> end();</div>
-<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>        <span class="keywordflow">return</span> tr_iter(--ub);</div>
-<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span>    }</div>
-<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>    const_iterator upper_bound_pred(<span class="keyword">const</span> key_type &amp;a)<span class="keyword"> const </span>{</div>
-<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>        <span class="keyword">auto</span> ub = data_map.upper_bound(&amp;a);</div>
-<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>        <span class="keywordflow">if</span> (ub == data_map.begin()) <span class="keywordflow">return</span> end();</div>
-<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>        <span class="keywordflow">return</span> tr_iter(--ub);</div>
-<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>    }</div>
-<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span> </div>
-<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>    V &amp;operator[](<span class="keyword">const</span> K &amp;x) {</div>
-<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>        <span class="keyword">auto</span> it = find(x);</div>
-<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>        <span class="keywordflow">if</span> (it == data.end()) {</div>
-<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>            it = data.emplace(data.end(), x, V());</div>
-<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>            data_map.emplace(&amp;it-&gt;first, it);</div>
-<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>        }</div>
-<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>        <span class="keywordflow">return</span> it-&gt;second;</div>
-<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>    }</div>
-<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>    V &amp;operator[](K &amp;&amp;x) {</div>
-<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>        <span class="keyword">auto</span> it = find(x);</div>
-<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>        <span class="keywordflow">if</span> (it == data.end()) {</div>
-<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>            it = data.emplace(data.end(), std::move(x), V());</div>
-<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>            data_map.emplace(&amp;it-&gt;first, it);</div>
-<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>        }</div>
-<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>        <span class="keywordflow">return</span> it-&gt;second;</div>
-<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span>    }</div>
-<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>    V &amp;at(<span class="keyword">const</span> K &amp;x) { <span class="keywordflow">return</span> data_map.at(&amp;x)-&gt;second; }</div>
-<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>    <span class="keyword">const</span> V &amp;at(<span class="keyword">const</span> K &amp;x)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> data_map.at(&amp;x)-&gt;second; }</div>
-<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span> </div>
-<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> KK, <span class="keyword">typename</span>... VV&gt;</div>
-<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>    std::pair&lt;iterator, bool&gt; emplace(KK &amp;&amp;k, VV &amp;&amp;...v) {</div>
-<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>        <span class="keyword">auto</span> it = find(k);</div>
-<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>        <span class="keywordflow">if</span> (it == data.end()) {</div>
-<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>            it = data.emplace(data.end(), std::piecewise_construct_t(), std::forward_as_tuple(k),</div>
-<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>                              std::forward_as_tuple(std::forward&lt;VV&gt;(v)...));</div>
-<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>            data_map.emplace(&amp;it-&gt;first, it);</div>
-<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>            <span class="keywordflow">return</span> std::make_pair(it, <span class="keyword">true</span>);</div>
-<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>        }</div>
-<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>        <span class="keywordflow">return</span> std::make_pair(it, <span class="keyword">false</span>);</div>
-<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>    }</div>
-<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> KK, <span class="keyword">typename</span>... VV&gt;</div>
-<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>    std::pair&lt;iterator, bool&gt; emplace_hint(iterator pos, KK &amp;&amp;k, VV &amp;&amp;...v) {</div>
-<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>        <span class="comment">/* should be const_iterator pos, but glibc++ std::list is broken */</span></div>
-<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>        <span class="keyword">auto</span> it = find(k);</div>
-<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>        <span class="keywordflow">if</span> (it == data.end()) {</div>
-<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>            it = data.emplace(pos, std::piecewise_construct_t(), std::forward_as_tuple(k),</div>
-<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>                              std::forward_as_tuple(std::forward&lt;VV&gt;(v)...));</div>
-<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>            data_map.emplace(&amp;it-&gt;first, it);</div>
-<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>            <span class="keywordflow">return</span> std::make_pair(it, <span class="keyword">true</span>);</div>
-<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>        }</div>
-<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>        <span class="keywordflow">return</span> std::make_pair(it, <span class="keyword">false</span>);</div>
-<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>    }</div>
-<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span> </div>
-<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>    std::pair&lt;iterator, bool&gt; insert(<span class="keyword">const</span> value_type &amp;v) {</div>
-<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>        <span class="keyword">auto</span> it = find(v.first);</div>
-<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>        <span class="keywordflow">if</span> (it == data.end()) {</div>
-<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>            it = data.insert(data.end(), v);</div>
-<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>            data_map.emplace(&amp;it-&gt;first, it);</div>
-<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>            <span class="keywordflow">return</span> std::make_pair(it, <span class="keyword">true</span>);</div>
-<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>        }</div>
-<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>        <span class="keywordflow">return</span> std::make_pair(it, <span class="keyword">false</span>);</div>
-<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>    }</div>
-<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span> </div>
-<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>    <span class="comment">/* TODO: should not exist, does not make sense for map that preserves</span></div>
-<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span><span class="comment">     * insertion order. This function does not preserve it. */</span></div>
-<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>    std::pair&lt;iterator, bool&gt; insert(iterator pos, <span class="keyword">const</span> value_type &amp;v) {</div>
-<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>        <span class="comment">/* should be const_iterator pos, but glibc++ std::list is broken */</span></div>
-<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>        <span class="keyword">auto</span> it = find(v.first);</div>
-<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>        <span class="keywordflow">if</span> (it == data.end()) {</div>
-<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>            it = data.insert(pos, v);</div>
-<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>            data_map.emplace(&amp;it-&gt;first, it);</div>
-<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>            <span class="keywordflow">return</span> std::make_pair(it, <span class="keyword">true</span>);</div>
-<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>        }</div>
-<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>        <span class="keywordflow">return</span> std::make_pair(it, <span class="keyword">false</span>);</div>
-<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>    }</div>
-<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>    <span class="keyword">template</span> &lt;<span class="keyword">class</span> InputIterator&gt;</div>
-<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>    <span class="keywordtype">void</span> insert(InputIterator b, InputIterator e) {</div>
-<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>        <span class="keywordflow">while</span> (b != e) insert(*b++);</div>
-<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>    }</div>
-<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span> </div>
-<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>    <span class="comment">/* TODO: should not exist, does not make sense for map that preserves</span></div>
-<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span><span class="comment">     * insertion order. This function does not preserve it. */</span></div>
-<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>    <span class="keyword">template</span> &lt;<span class="keyword">class</span> InputIterator&gt;</div>
-<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>    <span class="keywordtype">void</span> insert(iterator pos, InputIterator b, InputIterator e) {</div>
-<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>        <span class="comment">/* should be const_iterator pos, but glibc++ std::list is broken */</span></div>
-<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>        <span class="keywordflow">while</span> (b != e) insert(pos, *b++);</div>
-<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>    }</div>
-<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span> </div>
-<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>    iterator erase(const_iterator pos) {</div>
-<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>        <span class="keyword">auto</span> it = data_map.find(&amp;pos-&gt;first);</div>
-<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>        assert(it != data_map.end());</div>
-<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>        <span class="comment">// get the non-const std::list iterator -- libstdc++ is missing</span></div>
-<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>        <span class="comment">// std::list::erase(const_iterator) overload</span></div>
-<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>        <span class="keyword">auto</span> list_it = it-&gt;second;</div>
-<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>        data_map.erase(it);</div>
-<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>        <span class="keywordflow">return</span> data.erase(list_it);</div>
-<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>    }</div>
-<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>    size_type erase(<span class="keyword">const</span> K &amp;k) {</div>
-<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>        <span class="keyword">auto</span> it = find(k);</div>
-<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>        <span class="keywordflow">if</span> (it != data.end()) {</div>
-<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>            data_map.erase(&amp;k);</div>
-<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>            data.erase(it);</div>
-<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>            <span class="keywordflow">return</span> 1;</div>
-<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>        }</div>
-<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>        <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>    }</div>
-<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span> </div>
-<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>    <span class="keyword">template</span> &lt;<span class="keyword">class</span> Compare&gt;</div>
-<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>    <span class="keywordtype">void</span> sort(Compare comp) {</div>
-<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>        data.sort(comp);</div>
-<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>    }</div>
-<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>};</div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>    <span class="keywordtype">void</span> clear() {</div>
+<div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span>        data.clear();</div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>        data_map.clear();</div>
+<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span>    }</div>
+<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span> </div>
+<div class="line"><a id="l00150" name="l00150"></a><span class="lineno">  150</span>    iterator find(<span class="keyword">const</span> key_type &amp;a) { <span class="keywordflow">return</span> tr_iter(data_map.find(&amp;a)); }</div>
+<div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>    const_iterator find(<span class="keyword">const</span> key_type &amp;a)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> tr_iter(data_map.find(&amp;a)); }</div>
+<div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>    size_type count(<span class="keyword">const</span> key_type &amp;a)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> data_map.count(&amp;a); }</div>
+<div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span>    iterator lower_bound(<span class="keyword">const</span> key_type &amp;a) { <span class="keywordflow">return</span> tr_iter(data_map.lower_bound(&amp;a)); }</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>    const_iterator lower_bound(<span class="keyword">const</span> key_type &amp;a)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>        <span class="keywordflow">return</span> tr_iter(data_map.lower_bound(&amp;a));</div>
+<div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>    }</div>
+<div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span>    iterator upper_bound(<span class="keyword">const</span> key_type &amp;a) { <span class="keywordflow">return</span> tr_iter(data_map.upper_bound(&amp;a)); }</div>
+<div class="line"><a id="l00158" name="l00158"></a><span class="lineno">  158</span>    const_iterator upper_bound(<span class="keyword">const</span> key_type &amp;a)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00159" name="l00159"></a><span class="lineno">  159</span>        <span class="keywordflow">return</span> tr_iter(data_map.upper_bound(&amp;a));</div>
+<div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span>    }</div>
+<div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span>    iterator upper_bound_pred(<span class="keyword">const</span> key_type &amp;a) {</div>
+<div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span>        <span class="keyword">auto</span> ub = data_map.upper_bound(&amp;a);</div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span>        <span class="keywordflow">if</span> (ub == data_map.begin()) <span class="keywordflow">return</span> end();</div>
+<div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span>        <span class="keywordflow">return</span> tr_iter(--ub);</div>
+<div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span>    }</div>
+<div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span>    const_iterator upper_bound_pred(<span class="keyword">const</span> key_type &amp;a)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00167" name="l00167"></a><span class="lineno">  167</span>        <span class="keyword">auto</span> ub = data_map.upper_bound(&amp;a);</div>
+<div class="line"><a id="l00168" name="l00168"></a><span class="lineno">  168</span>        <span class="keywordflow">if</span> (ub == data_map.begin()) <span class="keywordflow">return</span> end();</div>
+<div class="line"><a id="l00169" name="l00169"></a><span class="lineno">  169</span>        <span class="keywordflow">return</span> tr_iter(--ub);</div>
+<div class="line"><a id="l00170" name="l00170"></a><span class="lineno">  170</span>    }</div>
+<div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span> </div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>    V &amp;operator[](<span class="keyword">const</span> K &amp;x) {</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>        <span class="keyword">auto</span> it = find(x);</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>        <span class="keywordflow">if</span> (it == data.end()) {</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span>            it = data.emplace(data.end(), x, V());</div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>            data_map.emplace(&amp;it-&gt;first, it);</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>        }</div>
+<div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span>        <span class="keywordflow">return</span> it-&gt;second;</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>    }</div>
+<div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span>    V &amp;operator[](K &amp;&amp;x) {</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>        <span class="keyword">auto</span> it = find(x);</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>        <span class="keywordflow">if</span> (it == data.end()) {</div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>            it = data.emplace(data.end(), std::move(x), V());</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>            data_map.emplace(&amp;it-&gt;first, it);</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>        }</div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>        <span class="keywordflow">return</span> it-&gt;second;</div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>    }</div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>    V &amp;at(<span class="keyword">const</span> K &amp;x) { <span class="keywordflow">return</span> data_map.at(&amp;x)-&gt;second; }</div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>    <span class="keyword">const</span> V &amp;at(<span class="keyword">const</span> K &amp;x)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> data_map.at(&amp;x)-&gt;second; }</div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span> </div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> KK, <span class="keyword">typename</span>... VV&gt;</div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>    std::pair&lt;iterator, bool&gt; emplace(KK &amp;&amp;k, VV &amp;&amp;...v) {</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>        <span class="keyword">auto</span> it = find(k);</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>        <span class="keywordflow">if</span> (it == data.end()) {</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>            it = data.emplace(data.end(), std::piecewise_construct_t(), std::forward_as_tuple(k),</div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>                              std::forward_as_tuple(std::forward&lt;VV&gt;(v)...));</div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>            data_map.emplace(&amp;it-&gt;first, it);</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>            <span class="keywordflow">return</span> std::make_pair(it, <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>        }</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>        <span class="keywordflow">return</span> std::make_pair(it, <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>    }</div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>    <span class="keyword">template</span> &lt;<span class="keyword">typename</span> KK, <span class="keyword">typename</span>... VV&gt;</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>    std::pair&lt;iterator, bool&gt; emplace_hint(iterator pos, KK &amp;&amp;k, VV &amp;&amp;...v) {</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>        <span class="comment">/* should be const_iterator pos, but glibc++ std::list is broken */</span></div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>        <span class="keyword">auto</span> it = find(k);</div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>        <span class="keywordflow">if</span> (it == data.end()) {</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>            it = data.emplace(pos, std::piecewise_construct_t(), std::forward_as_tuple(k),</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>                              std::forward_as_tuple(std::forward&lt;VV&gt;(v)...));</div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>            data_map.emplace(&amp;it-&gt;first, it);</div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>            <span class="keywordflow">return</span> std::make_pair(it, <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>        }</div>
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>        <span class="keywordflow">return</span> std::make_pair(it, <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>    }</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span> </div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>    std::pair&lt;iterator, bool&gt; insert(<span class="keyword">const</span> value_type &amp;v) {</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>        <span class="keyword">auto</span> it = find(v.first);</div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>        <span class="keywordflow">if</span> (it == data.end()) {</div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>            it = data.insert(data.end(), v);</div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>            data_map.emplace(&amp;it-&gt;first, it);</div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>            <span class="keywordflow">return</span> std::make_pair(it, <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>        }</div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>        <span class="keywordflow">return</span> std::make_pair(it, <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>    }</div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span> </div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>    <span class="comment">/* TODO: should not exist, does not make sense for map that preserves</span></div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span><span class="comment">     * insertion order. This function does not preserve it. */</span></div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>    std::pair&lt;iterator, bool&gt; insert(iterator pos, <span class="keyword">const</span> value_type &amp;v) {</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>        <span class="comment">/* should be const_iterator pos, but glibc++ std::list is broken */</span></div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>        <span class="keyword">auto</span> it = find(v.first);</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>        <span class="keywordflow">if</span> (it == data.end()) {</div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>            it = data.insert(pos, v);</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>            data_map.emplace(&amp;it-&gt;first, it);</div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>            <span class="keywordflow">return</span> std::make_pair(it, <span class="keyword">true</span>);</div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>        }</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>        <span class="keywordflow">return</span> std::make_pair(it, <span class="keyword">false</span>);</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>    }</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>    <span class="keyword">template</span> &lt;<span class="keyword">class</span> InputIterator&gt;</div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>    <span class="keywordtype">void</span> insert(InputIterator b, InputIterator e) {</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>        <span class="keywordflow">while</span> (b != e) insert(*b++);</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>    }</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span> </div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>    <span class="comment">/* TODO: should not exist, does not make sense for map that preserves</span></div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span><span class="comment">     * insertion order. This function does not preserve it. */</span></div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>    <span class="keyword">template</span> &lt;<span class="keyword">class</span> InputIterator&gt;</div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>    <span class="keywordtype">void</span> insert(iterator pos, InputIterator b, InputIterator e) {</div>
+<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span>        <span class="comment">/* should be const_iterator pos, but glibc++ std::list is broken */</span></div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>        <span class="keywordflow">while</span> (b != e) insert(pos, *b++);</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>    }</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span> </div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>    iterator erase(const_iterator pos) {</div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>        <span class="keyword">auto</span> it = data_map.find(&amp;pos-&gt;first);</div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>        assert(it != data_map.end());</div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>        <span class="comment">// get the non-const std::list iterator -- libstdc++ is missing</span></div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>        <span class="comment">// std::list::erase(const_iterator) overload</span></div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>        <span class="keyword">auto</span> list_it = it-&gt;second;</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>        data_map.erase(it);</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>        <span class="keywordflow">return</span> data.erase(list_it);</div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>    }</div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>    size_type erase(<span class="keyword">const</span> K &amp;k) {</div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>        <span class="keyword">auto</span> it = find(k);</div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>        <span class="keywordflow">if</span> (it != data.end()) {</div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>            data_map.erase(&amp;k);</div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>            data.erase(it);</div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>            <span class="keywordflow">return</span> 1;</div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>        }</div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>        <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>    }</div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span> </div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>    <span class="keyword">template</span> &lt;<span class="keyword">class</span> Compare&gt;</div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>    <span class="keywordtype">void</span> sort(Compare comp) {</div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>        data.sort(comp);</div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>    }</div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>};</div>
 </div>
-<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span> </div>
-<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>}  <span class="comment">// namespace P4</span></div>
-<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span> </div>
-<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span><span class="preprocessor">#endif </span><span class="comment">/* LIB_ORDERED_MAP_H_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span> </div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>}  <span class="comment">// namespace P4</span></div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span> </div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span><span class="preprocessor">#endif </span><span class="comment">/* LIB_ORDERED_MAP_H_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="aclass_p4_1_1ordered__map_1_1value__compare_html"><div class="ttname"><a href="class_p4_1_1ordered__map_1_1value__compare.html">P4::ordered_map::value_compare</a></div><div class="ttdef"><b>Definition</b> ordered_map.h:53</div></div>
 <div class="ttc" id="aclass_p4_1_1ordered__map_html"><div class="ttname"><a href="class_p4_1_1ordered__map.html">P4::ordered_map</a></div><div class="ttdef"><b>Definition</b> ordered_map.h:32</div></div>
 <div class="ttc" id="anamespace_p4_html"><div class="ttname"><a href="namespace_p4.html">P4</a></div><div class="ttdoc">TODO: this is not really specific to BMV2, it should reside somewhere else.</div><div class="ttdef"><b>Definition</b> applyOptionsPragmas.cpp:24</div></div>

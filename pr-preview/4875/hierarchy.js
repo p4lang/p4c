@@ -259,13 +259,17 @@ var hierarchy =
         ] ],
         [ "P4::LocalizeActions", "class_p4_1_1_localize_actions.html", null ],
         [ "P4::MoveInitializers", "class_p4_1_1_move_initializers.html", null ],
+        [ "P4::P4Fmt::P4Formatter", "class_p4_1_1_p4_fmt_1_1_p4_formatter.html", null ],
         [ "P4::P4Tools::P4ProgramDCGCreator", "class_p4_1_1_p4_tools_1_1_p4_program_d_c_g_creator.html", null ],
         [ "P4::ReadsWrites", "class_p4_1_1_reads_writes.html", null ],
         [ "P4::RenameSymbols", "class_p4_1_1_rename_symbols.html", null ],
         [ "P4::ResolveReferences", "class_p4_1_1_resolve_references.html", null ],
         [ "P4::SubstituteParameters", "class_p4_1_1_substitute_parameters.html", null ],
         [ "P4::ToP4", "class_p4_1_1_to_p4.html", null ],
-        [ "P4::TypeInference", "class_p4_1_1_type_inference.html", null ],
+        [ "P4::TypeInferenceBase", "class_p4_1_1_type_inference_base.html", [
+          [ "P4::ReadOnlyTypeInference", "class_p4_1_1_read_only_type_inference.html", null ],
+          [ "P4::TypeInference", "class_p4_1_1_type_inference.html", null ]
+        ] ],
         [ "P4::UnrollLoops", "class_p4_1_1_unroll_loops.html", null ]
       ] ]
     ] ],
@@ -400,6 +404,7 @@ var hierarchy =
           [ "P4::IR::NodeMap< KEY, VALUE, MAP, COMP, ALLOC >", "class_p4_1_1_i_r_1_1_node_map.html", null ],
           [ "P4::IR::VectorBase", "class_p4_1_1_i_r_1_1_vector_base.html", [
             [ "P4::IR::Vector< IR::Type >", "class_p4_1_1_i_r_1_1_vector.html", null ],
+            [ "P4::IR::Vector< IR::Argument >", "class_p4_1_1_i_r_1_1_vector.html", null ],
             [ "P4::IR::Vector< IR::DpdkAsmStatement >", "class_p4_1_1_i_r_1_1_vector.html", [
               [ "P4::IR::IndexedVector< IR::DpdkAsmStatement >", "class_p4_1_1_i_r_1_1_indexed_vector.html", null ]
             ] ],
@@ -433,7 +438,6 @@ var hierarchy =
             [ "P4::IR::Vector< IR::StructField >", "class_p4_1_1_i_r_1_1_vector.html", [
               [ "P4::IR::IndexedVector< IR::StructField >", "class_p4_1_1_i_r_1_1_indexed_vector.html", null ]
             ] ],
-            [ "P4::IR::Vector< IR::Argument >", "class_p4_1_1_i_r_1_1_vector.html", null ],
             [ "P4::IR::Vector< IR::ParserState >", "class_p4_1_1_i_r_1_1_vector.html", [
               [ "P4::IR::IndexedVector< IR::ParserState >", "class_p4_1_1_i_r_1_1_indexed_vector.html", null ]
             ] ],
@@ -695,14 +699,18 @@ var hierarchy =
     [ "P4::P4Tools::NamespaceContext", "class_p4_1_1_p4_tools_1_1_namespace_context.html", null ],
     [ "P4::P4Tools::P4Constants", "class_p4_1_1_p4_tools_1_1_p4_constants.html", null ],
     [ "P4::P4Tools::P4Smith::Constraints", "struct_p4_1_1_p4_tools_1_1_p4_smith_1_1_constraints.html", null ],
+    [ "P4::P4Tools::P4Smith::Declarations", "struct_p4_1_1_p4_tools_1_1_p4_smith_1_1_declarations.html", null ],
     [ "P4::P4Tools::P4Smith::Generator", "class_p4_1_1_p4_tools_1_1_p4_smith_1_1_generator.html", [
       [ "P4::P4Tools::P4Smith::DeclarationGenerator", "class_p4_1_1_p4_tools_1_1_p4_smith_1_1_declaration_generator.html", null ],
-      [ "P4::P4Tools::P4Smith::ExpressionGenerator", "class_p4_1_1_p4_tools_1_1_p4_smith_1_1_expression_generator.html", null ],
+      [ "P4::P4Tools::P4Smith::ExpressionGenerator", "class_p4_1_1_p4_tools_1_1_p4_smith_1_1_expression_generator.html", [
+        [ "P4::P4Tools::P4Smith::NicExpressionGenerator", "class_p4_1_1_p4_tools_1_1_p4_smith_1_1_nic_expression_generator.html", null ]
+      ] ],
       [ "P4::P4Tools::P4Smith::ParserGenerator", "class_p4_1_1_p4_tools_1_1_p4_smith_1_1_parser_generator.html", null ],
       [ "P4::P4Tools::P4Smith::StatementGenerator", "class_p4_1_1_p4_tools_1_1_p4_smith_1_1_statement_generator.html", null ],
       [ "P4::P4Tools::P4Smith::TableGenerator", "class_p4_1_1_p4_tools_1_1_p4_smith_1_1_table_generator.html", null ]
     ] ],
     [ "P4::P4Tools::P4Smith::P4Scope", "class_p4_1_1_p4_tools_1_1_p4_smith_1_1_p4_scope.html", null ],
+    [ "P4::P4Tools::P4Smith::Probabilities", "struct_p4_1_1_p4_tools_1_1_p4_smith_1_1_probabilities.html", null ],
     [ "P4::P4Tools::P4Smith::Properties", "struct_p4_1_1_p4_tools_1_1_p4_smith_1_1_properties.html", null ],
     [ "P4::P4Tools::P4Smith::Requirements", "struct_p4_1_1_p4_tools_1_1_p4_smith_1_1_requirements.html", null ],
     [ "P4::P4Tools::P4Smith::Wordlist", "class_p4_1_1_p4_tools_1_1_p4_smith_1_1_wordlist.html", null ],
@@ -799,6 +807,7 @@ var hierarchy =
       ] ]
     ] ],
     [ "P4::P4Tools::Target::Spec", "struct_p4_1_1_p4_tools_1_1_target_1_1_spec.html", null ],
+    [ "P4::P4Tools::Test::P4ToolsTestCase", "class_p4_1_1_p4_tools_1_1_test_1_1_p4_tools_test_case.html", null ],
     [ "P4::P4Tools::Utils", "class_p4_1_1_p4_tools_1_1_utils.html", null ],
     [ "P4::P4Tools::Z3SolverAccessor", "class_p4_1_1_p4_tools_1_1_z3_solver_accessor.html", null ],
     [ "P4::P4V1::ConversionContext", "class_p4_1_1_p4_v1_1_1_conversion_context.html", null ],
@@ -921,7 +930,9 @@ var hierarchy =
                 [ "P4::TC::EBPFCounterPNA", "class_p4_1_1_t_c_1_1_e_b_p_f_counter_p_n_a.html", null ]
               ] ]
             ] ],
-            [ "P4::EBPF::EBPFMeterPSA", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_meter_p_s_a.html", null ],
+            [ "P4::EBPF::EBPFMeterPSA", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_meter_p_s_a.html", [
+              [ "P4::TC::EBPFMeterPNA", "class_p4_1_1_t_c_1_1_e_b_p_f_meter_p_n_a.html", null ]
+            ] ],
             [ "P4::EBPF::EBPFRegisterPSA", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_register_p_s_a.html", null ],
             [ "P4::EBPF::EBPFTable", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_table.html", [
               [ "P4::EBPF::EBPFTablePSA", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_table_p_s_a.html", [
@@ -1128,8 +1139,7 @@ var hierarchy =
     [ "P4::TC::KeyFieldAttributes", "struct_p4_1_1_t_c_1_1_key_field_attributes.html", null ],
     [ "P4::TC::MidEnd", "class_p4_1_1_t_c_1_1_mid_end.html", null ],
     [ "P4::TC::TableAttributes", "struct_p4_1_1_t_c_1_1_table_attributes.html", null ],
-    [ "P4::Test::P4ToolsTestCase", "class_p4_1_1_test_1_1_p4_tools_test_case.html", null ],
-    [ "P4::TypeInference::Comparison", "class_p4_1_1_type_inference.html#struct_p4_1_1_type_inference_1_1_comparison", null ],
+    [ "P4::TypeInferenceBase::Comparison", "class_p4_1_1_type_inference_base.html#struct_p4_1_1_type_inference_base_1_1_comparison", null ],
     [ "P4::TypeUnification", "class_p4_1_1_type_unification.html", null ],
     [ "P4::UnparsedConstant", "namespace_p4.html#struct_p4_1_1_unparsed_constant", null ],
     [ "P4::UnrollLoops::loop_bounds_t", "class_p4_1_1_unroll_loops.html#struct_p4_1_1_unroll_loops_1_1loop__bounds__t", null ],
@@ -1233,9 +1243,9 @@ var hierarchy =
           [ "P4::DPDK::DpdkOptions", "class_p4_1_1_d_p_d_k_1_1_dpdk_options.html", null ],
           [ "P4::EbpfOptions", "class_p4_1_1_ebpf_options.html", null ],
           [ "P4::P4Fmt::P4fmtOptions", "class_p4_1_1_p4_fmt_1_1_p4fmt_options.html", null ],
+          [ "P4::P4Tools::Test::P4ReachabilityOptions", "class_p4_1_1_p4_tools_1_1_test_1_1_p4_reachability_options.html", null ],
+          [ "P4::P4Tools::Test::P4TestOptions", "class_p4_1_1_p4_tools_1_1_test_1_1_p4_test_options.html", null ],
           [ "P4::TC::TCOptions", "class_p4_1_1_t_c_1_1_t_c_options.html", null ],
-          [ "P4::Test::P4ReachabilityOptions", "class_p4_1_1_test_1_1_p4_reachability_options.html", null ],
-          [ "P4::Test::P4TestOptions", "class_p4_1_1_test_1_1_p4_test_options.html", null ],
           [ "P4::graphs::Options", "class_p4_1_1graphs_1_1_options.html", null ],
           [ "P4TestOptions", "class_p4_test_options.html", null ]
         ] ]
@@ -1490,7 +1500,8 @@ var hierarchy =
           [ "P4::EBPF::EBPFTablePSADirectCounterPropertyVisitor", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_table_p_s_a_direct_counter_property_visitor.html", null ],
           [ "P4::EBPF::EBPFTablePSADirectMeterPropertyVisitor", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_table_p_s_a_direct_meter_property_visitor.html", null ],
           [ "P4::EBPF::EBPFTablePSAImplementationPropertyVisitor", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_table_p_s_a_implementation_property_visitor.html", null ],
-          [ "P4::TC::EBPFTablePNADirectCounterPropertyVisitor", "class_p4_1_1_t_c_1_1_e_b_p_f_table_p_n_a_direct_counter_property_visitor.html", null ]
+          [ "P4::TC::EBPFTablePNADirectCounterPropertyVisitor", "class_p4_1_1_t_c_1_1_e_b_p_f_table_p_n_a_direct_counter_property_visitor.html", null ],
+          [ "P4::TC::EBPFTablePNADirectMeterPropertyVisitor", "class_p4_1_1_t_c_1_1_e_b_p_f_table_p_n_a_direct_meter_property_visitor.html", null ]
         ] ],
         [ "P4::EBPF::PSAErrorCodesGen", "class_p4_1_1_e_b_p_f_1_1_p_s_a_error_codes_gen.html", null ],
         [ "P4::Evaluator", "class_p4_1_1_evaluator.html", null ],
@@ -1523,6 +1534,7 @@ var hierarchy =
         [ "P4::KeyNameGenerator", "class_p4_1_1_key_name_generator.html", null ],
         [ "P4::MidEndLast", "class_p4_1_1_mid_end_last.html", null ],
         [ "P4::MinimalNameGenerator", "class_p4_1_1_minimal_name_generator.html", null ],
+        [ "P4::P4Fmt::P4Formatter", "class_p4_1_1_p4_fmt_1_1_p4_formatter.html", null ],
         [ "P4::P4Tools::P4ProgramDCGCreator", "class_p4_1_1_p4_tools_1_1_p4_program_d_c_g_creator.html", null ],
         [ "P4::P4Tools::P4Testgen::AbstractStepper", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_abstract_stepper.html", [
           [ "P4::P4Tools::P4Testgen::CmdStepper", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_cmd_stepper.html", [
@@ -1544,6 +1556,7 @@ var hierarchy =
         [ "P4::P4Tools::P4Testgen::Bmv2::RefersToParser", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_refers_to_parser.html", null ],
         [ "P4::P4Tools::P4Testgen::ConcolicResolver", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_concolic_resolver.html", null ],
         [ "P4::P4Tools::P4Testgen::CoverableNodesScanner", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_coverable_nodes_scanner.html", null ],
+        [ "P4::P4Tools::Test::NodeFinder< T >", "class_p4_1_1_p4_tools_1_1_test_1_1_node_finder.html", null ],
         [ "P4::P4Tools::Z3Translator", "class_p4_1_1_p4_tools_1_1_z3_translator.html", null ],
         [ "P4::P4V1::CheckIfMultiEntryPoint", "class_p4_1_1_p4_v1_1_1_check_if_multi_entry_point.html", null ],
         [ "P4::P4V1::ComputeCallGraph", "class_p4_1_1_p4_v1_1_1_compute_call_graph.html", null ],
@@ -1557,6 +1570,7 @@ var hierarchy =
           [ "P4::BMV2::ParsePnaArchitecture", "class_p4_1_1_b_m_v2_1_1_parse_pna_architecture.html", null ],
           [ "P4::ParsePsaArchitecture", "class_p4_1_1_parse_psa_architecture.html", null ]
         ] ],
+        [ "P4::ReadOnlyTypeInference", "class_p4_1_1_read_only_type_inference.html", null ],
         [ "P4::ReadsWrites", "class_p4_1_1_reads_writes.html", null ],
         [ "P4::RemoveModifiedValues", "class_p4_1_1_remove_modified_values.html", null ],
         [ "P4::ResolveReferences", "class_p4_1_1_resolve_references.html", null ],
@@ -1572,7 +1586,6 @@ var hierarchy =
         [ "P4::TC::ParsePnaArchitecture", "class_p4_1_1_t_c_1_1_parse_pna_architecture.html", null ],
         [ "P4::TablesInActions", "class_p4_1_1_tables_in_actions.html", null ],
         [ "P4::TablesInKeys", "class_p4_1_1_tables_in_keys.html", null ],
-        [ "P4::Test::NodeFinder< T >", "class_p4_1_1_test_1_1_node_finder.html", null ],
         [ "P4::ToP4", "class_p4_1_1_to_p4.html", null ],
         [ "P4::TypeCheck::InferActionArgsBottomUp", "class_p4_1_1_type_check_1_1_infer_action_args_bottom_up.html", null ],
         [ "P4::TypeCheck::InferActionArgsTopDown", "class_p4_1_1_type_check_1_1_infer_action_args_top_down.html", null ],
@@ -1580,6 +1593,7 @@ var hierarchy =
         [ "P4::UBPF::UBPFModel::getUBPFModelVersion", "class_p4_1_1_u_b_p_f_1_1_u_b_p_f_model_1_1get_u_b_p_f_model_version.html", null ],
         [ "P4::ValidateMatchAnnotations", "class_p4_1_1_validate_match_annotations.html", null ],
         [ "P4::ValidateParsedProgram", "class_p4_1_1_validate_parsed_program.html", null ],
+        [ "P4::ValidateStringAnnotations", "class_p4_1_1_validate_string_annotations.html", null ],
         [ "P4::ValidateTableProperties", "class_p4_1_1_validate_table_properties.html", null ],
         [ "P4::ValidateValueSets", "class_p4_1_1_validate_value_sets.html", null ],
         [ "P4::exprUses", "class_p4_1_1expr_uses.html", null ],
@@ -1595,6 +1609,7 @@ var hierarchy =
         [ "P4::CheckTableSize", "class_p4_1_1_check_table_size.html", null ],
         [ "P4::DoSingleArgumentSelect", "class_p4_1_1_do_single_argument_select.html", null ],
         [ "P4::HeaderTypeMaxLengthCalculator", "class_p4_1_1_header_type_max_length_calculator.html", null ],
+        [ "P4::MoveToElseAfterBranch", "class_p4_1_1_move_to_else_after_branch.html", null ],
         [ "P4::ParseAnnotations", "class_p4_1_1_parse_annotations.html", [
           [ "P4::BMV2::ParseAnnotations", "class_p4_1_1_b_m_v2_1_1_parse_annotations.html", null ],
           [ "P4::ControlPlaneAPI::ParseP4RuntimeAnnotations", "class_p4_1_1_control_plane_a_p_i_1_1_parse_p4_runtime_annotations.html", null ],
@@ -1752,6 +1767,8 @@ var hierarchy =
         [ "P4::P4Tools::P4Testgen::Bmv2::PropagateP4RuntimeTranslation", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_propagate_p4_runtime_translation.html", null ],
         [ "P4::P4Tools::P4Testgen::VariableSubstitution", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_variable_substitution.html", null ],
         [ "P4::P4Tools::TaintPropagator", "class_p4_1_1_p4_tools_1_1_taint_propagator.html", null ],
+        [ "P4::P4Tools::Test::ArithmTest::SaturationTransform", "class_p4_1_1_p4_tools_1_1_test_1_1_arithm_test_1_1_saturation_transform.html", null ],
+        [ "P4::P4Tools::Test::SymbolicConverter", "class_p4_1_1_p4_tools_1_1_test_1_1_symbolic_converter.html", null ],
         [ "P4::P4V1::AdjustLengths", "class_p4_1_1_p4_v1_1_1_adjust_lengths.html", null ],
         [ "P4::P4V1::ExpressionConverter", "class_p4_1_1_p4_v1_1_1_expression_converter.html", [
           [ "P4::P4V1::StatementConverter", "class_p4_1_1_p4_v1_1_1_statement_converter.html", null ],
@@ -1791,8 +1808,6 @@ var hierarchy =
         [ "P4::SubstituteStructures", "class_p4_1_1_substitute_structures.html", null ],
         [ "P4::TC::ConvertToEbpfPNA", "class_p4_1_1_t_c_1_1_convert_to_ebpf_p_n_a.html", null ],
         [ "P4::TagGlobalActions", "class_p4_1_1_tag_global_actions.html", null ],
-        [ "P4::Test::ArithmTest::SaturationTransform", "class_p4_1_1_test_1_1_arithm_test_1_1_saturation_transform.html", null ],
-        [ "P4::Test::SymbolicConverter", "class_p4_1_1_test_1_1_symbolic_converter.html", null ],
         [ "P4::TypeCheck::AssignInitialTypes", "class_p4_1_1_type_check_1_1_assign_initial_types.html", null ],
         [ "P4::TypeCheck::MakeImplicitCastsExplicit", "class_p4_1_1_type_check_1_1_make_implicit_casts_explicit.html", null ],
         [ "P4::TypeInference", "class_p4_1_1_type_inference.html", null ],
@@ -1803,6 +1818,7 @@ var hierarchy =
         [ "P4::UnnestSelectList", "class_p4_1_1_unnest_select_list.html", null ],
         [ "P4::UnrollLoops", "class_p4_1_1_unroll_loops.html", null ]
       ] ],
+      [ "P4::TypeInferenceBase", "class_p4_1_1_type_inference_base.html", null ],
       [ "P4::VisitFunctor", "class_p4_1_1_visit_functor.html", null ]
     ] ],
     [ "P4::Visitor::ChangeTracker", "class_p4_1_1_visitor_1_1_change_tracker.html", null ],
@@ -1885,6 +1901,7 @@ var hierarchy =
     ] ],
     [ "std::vector< T >", null, [
       [ "P4::safe_vector< const IR::Type * >", "class_p4_1_1safe__vector.html", null ],
+      [ "P4::safe_vector< const IR::Argument * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::DpdkAsmStatement * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const P4::IR::Node * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::Declaration * >", "class_p4_1_1safe__vector.html", null ],
@@ -1896,7 +1913,6 @@ var hierarchy =
       [ "P4::safe_vector< const IR::Parameter * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::DpdkDeclaration * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::StructField * >", "class_p4_1_1safe__vector.html", null ],
-      [ "P4::safe_vector< const IR::Argument * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const T * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::ParserState * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const Constraint * >", "class_p4_1_1safe__vector.html", null ],
@@ -1921,53 +1937,60 @@ var hierarchy =
       [ "P4::safe_vector< T, Alloc >", "class_p4_1_1safe__vector.html", null ]
     ] ],
     [ "testing::Test", null, [
-      [ "P4::Test::P4CReachability", "class_p4_1_1_test_1_1_p4_c_reachability.html", null ],
-      [ "P4::Test::P4SmithForInLoopTest", "class_p4_1_1_test_1_1_p4_smith_for_in_loop_test.html", null ],
-      [ "P4::Test::P4SmithForLoopTest", "class_p4_1_1_test_1_1_p4_smith_for_loop_test.html", null ],
-      [ "P4::Test::P4ToolsTest", "class_p4_1_1_test_1_1_p4_tools_test.html", [
-        [ "P4::Test::FormatTest", "class_p4_1_1_test_1_1_format_test.html", null ],
-        [ "P4::Test::P4AssertsParserTest", "class_p4_1_1_test_1_1_p4_asserts_parser_test.html", null ],
-        [ "P4::Test::P4RuntimeApiTest", "class_p4_1_1_test_1_1_p4_runtime_api_test.html", null ],
-        [ "P4::Test::PTFTest", "class_p4_1_1_test_1_1_p_t_f_test.html", null ],
-        [ "P4::Test::STFTest", "class_p4_1_1_test_1_1_s_t_f_test.html", null ],
-        [ "P4::Test::SmallStepTest", "class_p4_1_1_test_1_1_small_step_test.html", null ],
-        [ "P4::Test::TaintTest", "class_p4_1_1_test_1_1_taint_test.html", null ],
-        [ "P4::Test::Z3SolverTest", "class_p4_1_1_test_1_1_z3_solver_test.html", null ]
+      [ "P4::P4Tools::Test::FormatTest", "class_p4_1_1_p4_tools_1_1_test_1_1_format_test.html", null ],
+      [ "P4::P4Tools::Test::P4AssertsParserTest", "class_p4_1_1_p4_tools_1_1_test_1_1_p4_asserts_parser_test.html", null ],
+      [ "P4::P4Tools::Test::P4CReachability", "class_p4_1_1_p4_tools_1_1_test_1_1_p4_c_reachability.html", null ],
+      [ "P4::P4Tools::Test::P4RuntimeApiTest", "class_p4_1_1_p4_tools_1_1_test_1_1_p4_runtime_api_test.html", null ],
+      [ "P4::P4Tools::Test::P4SmithForInLoopTest", "class_p4_1_1_p4_tools_1_1_test_1_1_p4_smith_for_in_loop_test.html", null ],
+      [ "P4::P4Tools::Test::P4SmithForLoopTest", "class_p4_1_1_p4_tools_1_1_test_1_1_p4_smith_for_loop_test.html", null ],
+      [ "P4::P4Tools::Test::P4TestgenTest", "class_p4_1_1_p4_tools_1_1_test_1_1_p4_testgen_test.html", [
+        [ "P4::P4Tools::Test::P4TestgenBmv2Test", "class_p4_1_1_p4_tools_1_1_test_1_1_p4_testgen_bmv2_test.html", [
+          [ "P4::P4Tools::Test::P4TestgenBenchmark", "class_p4_1_1_p4_tools_1_1_test_1_1_p4_testgen_benchmark.html", null ],
+          [ "P4::P4Tools::Test::P4TestgenLibrary", "class_p4_1_1_p4_tools_1_1_test_1_1_p4_testgen_library.html", null ],
+          [ "P4::P4Tools::Test::P4TestgenOutputOptionTest", "class_p4_1_1_p4_tools_1_1_test_1_1_p4_testgen_output_option_test.html", null ],
+          [ "P4::P4Tools::Test::Z3SolverSatTests", "class_p4_1_1_p4_tools_1_1_test_1_1_z3_solver_sat_tests.html", [
+            [ "P4::P4Tools::Test::ArithmTest::Z3SolverAddSat01", "class_p4_1_1_p4_tools_1_1_test_1_1_arithm_test_1_1_z3_solver_add_sat01.html", null ],
+            [ "P4::P4Tools::Test::ArithmTest::Z3SolverAddSat02", "class_p4_1_1_p4_tools_1_1_test_1_1_arithm_test_1_1_z3_solver_add_sat02.html", null ],
+            [ "P4::P4Tools::Test::ArithmTest::Z3SolverAddSat03", "class_p4_1_1_p4_tools_1_1_test_1_1_arithm_test_1_1_z3_solver_add_sat03.html", null ],
+            [ "P4::P4Tools::Test::ArithmTest::Z3SolverAddSat04", "class_p4_1_1_p4_tools_1_1_test_1_1_arithm_test_1_1_z3_solver_add_sat04.html", null ],
+            [ "P4::P4Tools::Test::ArithmTest::Z3SolverAddSat05", "class_p4_1_1_p4_tools_1_1_test_1_1_arithm_test_1_1_z3_solver_add_sat05.html", null ],
+            [ "P4::P4Tools::Test::ArithmTest::Z3SolverSubSat01", "class_p4_1_1_p4_tools_1_1_test_1_1_arithm_test_1_1_z3_solver_sub_sat01.html", null ],
+            [ "P4::P4Tools::Test::ArithmTest::Z3SolverSubSat02", "class_p4_1_1_p4_tools_1_1_test_1_1_arithm_test_1_1_z3_solver_sub_sat02.html", null ],
+            [ "P4::P4Tools::Test::ArithmTest::Z3SolverSubSat03", "class_p4_1_1_p4_tools_1_1_test_1_1_arithm_test_1_1_z3_solver_sub_sat03.html", null ],
+            [ "P4::P4Tools::Test::ArithmTest::Z3SolverSubSat04", "class_p4_1_1_p4_tools_1_1_test_1_1_arithm_test_1_1_z3_solver_sub_sat04.html", null ],
+            [ "P4::P4Tools::Test::ArithmTest::Z3SolverSubSat05", "class_p4_1_1_p4_tools_1_1_test_1_1_arithm_test_1_1_z3_solver_sub_sat05.html", null ]
+          ] ],
+          [ "P4::P4Tools::Test::Z3SolverTest", "class_p4_1_1_p4_tools_1_1_test_1_1_z3_solver_test.html", null ],
+          [ "P4::P4Tools::Test::Z3SolverTests", "class_p4_1_1_p4_tools_1_1_test_1_1_z3_solver_tests.html", [
+            [ "P4::P4Tools::Test::Z3Test::Z3SolverAdd", "class_p4_1_1_p4_tools_1_1_test_1_1_z3_test_1_1_z3_solver_add.html", null ],
+            [ "P4::P4Tools::Test::Z3Test::Z3SolverBAnd", "class_p4_1_1_p4_tools_1_1_test_1_1_z3_test_1_1_z3_solver_b_and.html", null ],
+            [ "P4::P4Tools::Test::Z3Test::Z3SolverBOR", "class_p4_1_1_p4_tools_1_1_test_1_1_z3_test_1_1_z3_solver_b_o_r.html", null ],
+            [ "P4::P4Tools::Test::Z3Test::Z3SolverBXor", "class_p4_1_1_p4_tools_1_1_test_1_1_z3_test_1_1_z3_solver_b_xor.html", null ],
+            [ "P4::P4Tools::Test::Z3Test::Z3SolverCastBit2Bool", "class_p4_1_1_p4_tools_1_1_test_1_1_z3_test_1_1_z3_solver_cast_bit2_bool.html", null ],
+            [ "P4::P4Tools::Test::Z3Test::Z3SolverCastBit2EqualBit", "class_p4_1_1_p4_tools_1_1_test_1_1_z3_test_1_1_z3_solver_cast_bit2_equal_bit.html", null ],
+            [ "P4::P4Tools::Test::Z3Test::Z3SolverCastBit2LargerBit", "class_p4_1_1_p4_tools_1_1_test_1_1_z3_test_1_1_z3_solver_cast_bit2_larger_bit.html", null ],
+            [ "P4::P4Tools::Test::Z3Test::Z3SolverCastBit2LessBit", "class_p4_1_1_p4_tools_1_1_test_1_1_z3_test_1_1_z3_solver_cast_bit2_less_bit.html", null ],
+            [ "P4::P4Tools::Test::Z3Test::Z3SolverCastBool2Bit", "class_p4_1_1_p4_tools_1_1_test_1_1_z3_test_1_1_z3_solver_cast_bool2_bit.html", null ],
+            [ "P4::P4Tools::Test::Z3Test::Z3SolverCastInAssignment", "class_p4_1_1_p4_tools_1_1_test_1_1_z3_test_1_1_z3_solver_cast_in_assignment.html", null ],
+            [ "P4::P4Tools::Test::Z3Test::Z3SolverComplement", "class_p4_1_1_p4_tools_1_1_test_1_1_z3_test_1_1_z3_solver_complement.html", null ],
+            [ "P4::P4Tools::Test::Z3Test::Z3SolverConc", "class_p4_1_1_p4_tools_1_1_test_1_1_z3_test_1_1_z3_solver_conc.html", null ],
+            [ "P4::P4Tools::Test::Z3Test::Z3SolverITE", "class_p4_1_1_p4_tools_1_1_test_1_1_z3_test_1_1_z3_solver_i_t_e.html", null ],
+            [ "P4::P4Tools::Test::Z3Test::Z3SolverMod", "class_p4_1_1_p4_tools_1_1_test_1_1_z3_test_1_1_z3_solver_mod.html", null ],
+            [ "P4::P4Tools::Test::Z3Test::Z3SolverMult", "class_p4_1_1_p4_tools_1_1_test_1_1_z3_test_1_1_z3_solver_mult.html", null ],
+            [ "P4::P4Tools::Test::Z3Test::Z3SolverShl", "class_p4_1_1_p4_tools_1_1_test_1_1_z3_test_1_1_z3_solver_shl.html", null ],
+            [ "P4::P4Tools::Test::Z3Test::Z3SolverShrS", "class_p4_1_1_p4_tools_1_1_test_1_1_z3_test_1_1_z3_solver_shr_s.html", null ],
+            [ "P4::P4Tools::Test::Z3Test::Z3SolverShrU", "class_p4_1_1_p4_tools_1_1_test_1_1_z3_test_1_1_z3_solver_shr_u.html", null ],
+            [ "P4::P4Tools::Test::Z3Test::Z3SolverSub", "class_p4_1_1_p4_tools_1_1_test_1_1_z3_test_1_1_z3_solver_sub.html", null ]
+          ] ]
+        ] ],
+        [ "P4::P4Tools::Test::SmallStepTest", "class_p4_1_1_p4_tools_1_1_test_1_1_small_step_test.html", [
+          [ "P4::P4Tools::Test::Bmv2SmallStepTest", "class_p4_1_1_p4_tools_1_1_test_1_1_bmv2_small_step_test.html", null ]
+        ] ]
       ] ],
-      [ "P4::Test::Z3SolverSatTests", "class_p4_1_1_test_1_1_z3_solver_sat_tests.html", [
-        [ "P4::Test::ArithmTest::Z3SolverAddSat01", "class_p4_1_1_test_1_1_arithm_test_1_1_z3_solver_add_sat01.html", null ],
-        [ "P4::Test::ArithmTest::Z3SolverAddSat02", "class_p4_1_1_test_1_1_arithm_test_1_1_z3_solver_add_sat02.html", null ],
-        [ "P4::Test::ArithmTest::Z3SolverAddSat03", "class_p4_1_1_test_1_1_arithm_test_1_1_z3_solver_add_sat03.html", null ],
-        [ "P4::Test::ArithmTest::Z3SolverAddSat04", "class_p4_1_1_test_1_1_arithm_test_1_1_z3_solver_add_sat04.html", null ],
-        [ "P4::Test::ArithmTest::Z3SolverAddSat05", "class_p4_1_1_test_1_1_arithm_test_1_1_z3_solver_add_sat05.html", null ],
-        [ "P4::Test::ArithmTest::Z3SolverSubSat01", "class_p4_1_1_test_1_1_arithm_test_1_1_z3_solver_sub_sat01.html", null ],
-        [ "P4::Test::ArithmTest::Z3SolverSubSat02", "class_p4_1_1_test_1_1_arithm_test_1_1_z3_solver_sub_sat02.html", null ],
-        [ "P4::Test::ArithmTest::Z3SolverSubSat03", "class_p4_1_1_test_1_1_arithm_test_1_1_z3_solver_sub_sat03.html", null ],
-        [ "P4::Test::ArithmTest::Z3SolverSubSat04", "class_p4_1_1_test_1_1_arithm_test_1_1_z3_solver_sub_sat04.html", null ],
-        [ "P4::Test::ArithmTest::Z3SolverSubSat05", "class_p4_1_1_test_1_1_arithm_test_1_1_z3_solver_sub_sat05.html", null ]
-      ] ],
-      [ "P4::Test::Z3SolverSatisfiabilityChecks", "class_p4_1_1_test_1_1_z3_solver_satisfiability_checks.html", null ],
-      [ "P4::Test::Z3SolverTests", "class_p4_1_1_test_1_1_z3_solver_tests.html", [
-        [ "P4::Test::Z3Test::Z3SolverAdd", "class_p4_1_1_test_1_1_z3_test_1_1_z3_solver_add.html", null ],
-        [ "P4::Test::Z3Test::Z3SolverBAnd", "class_p4_1_1_test_1_1_z3_test_1_1_z3_solver_b_and.html", null ],
-        [ "P4::Test::Z3Test::Z3SolverBOR", "class_p4_1_1_test_1_1_z3_test_1_1_z3_solver_b_o_r.html", null ],
-        [ "P4::Test::Z3Test::Z3SolverBXor", "class_p4_1_1_test_1_1_z3_test_1_1_z3_solver_b_xor.html", null ],
-        [ "P4::Test::Z3Test::Z3SolverCastBit2Bool", "class_p4_1_1_test_1_1_z3_test_1_1_z3_solver_cast_bit2_bool.html", null ],
-        [ "P4::Test::Z3Test::Z3SolverCastBit2EqualBit", "class_p4_1_1_test_1_1_z3_test_1_1_z3_solver_cast_bit2_equal_bit.html", null ],
-        [ "P4::Test::Z3Test::Z3SolverCastBit2LargerBit", "class_p4_1_1_test_1_1_z3_test_1_1_z3_solver_cast_bit2_larger_bit.html", null ],
-        [ "P4::Test::Z3Test::Z3SolverCastBit2LessBit", "class_p4_1_1_test_1_1_z3_test_1_1_z3_solver_cast_bit2_less_bit.html", null ],
-        [ "P4::Test::Z3Test::Z3SolverCastBool2Bit", "class_p4_1_1_test_1_1_z3_test_1_1_z3_solver_cast_bool2_bit.html", null ],
-        [ "P4::Test::Z3Test::Z3SolverCastInAssignment", "class_p4_1_1_test_1_1_z3_test_1_1_z3_solver_cast_in_assignment.html", null ],
-        [ "P4::Test::Z3Test::Z3SolverComplement", "class_p4_1_1_test_1_1_z3_test_1_1_z3_solver_complement.html", null ],
-        [ "P4::Test::Z3Test::Z3SolverConc", "class_p4_1_1_test_1_1_z3_test_1_1_z3_solver_conc.html", null ],
-        [ "P4::Test::Z3Test::Z3SolverITE", "class_p4_1_1_test_1_1_z3_test_1_1_z3_solver_i_t_e.html", null ],
-        [ "P4::Test::Z3Test::Z3SolverMod", "class_p4_1_1_test_1_1_z3_test_1_1_z3_solver_mod.html", null ],
-        [ "P4::Test::Z3Test::Z3SolverMult", "class_p4_1_1_test_1_1_z3_test_1_1_z3_solver_mult.html", null ],
-        [ "P4::Test::Z3Test::Z3SolverShl", "class_p4_1_1_test_1_1_z3_test_1_1_z3_solver_shl.html", null ],
-        [ "P4::Test::Z3Test::Z3SolverShrS", "class_p4_1_1_test_1_1_z3_test_1_1_z3_solver_shr_s.html", null ],
-        [ "P4::Test::Z3Test::Z3SolverShrU", "class_p4_1_1_test_1_1_z3_test_1_1_z3_solver_shr_u.html", null ],
-        [ "P4::Test::Z3Test::Z3SolverSub", "class_p4_1_1_test_1_1_z3_test_1_1_z3_solver_sub.html", null ]
-      ] ]
+      [ "P4::P4Tools::Test::PTFTest", "class_p4_1_1_p4_tools_1_1_test_1_1_p_t_f_test.html", null ],
+      [ "P4::P4Tools::Test::STFTest", "class_p4_1_1_p4_tools_1_1_test_1_1_s_t_f_test.html", null ],
+      [ "P4::P4Tools::Test::TaintTest", "class_p4_1_1_p4_tools_1_1_test_1_1_taint_test.html", null ],
+      [ "P4::P4Tools::Test::Z3SolverSatisfiabilityChecks", "class_p4_1_1_p4_tools_1_1_test_1_1_z3_solver_satisfiability_checks.html", null ]
     ] ],
     [ "UT_hash_bucket", "struct_u_t__hash__bucket.html", null ],
     [ "UT_hash_handle", "struct_u_t__hash__handle.html", null ],

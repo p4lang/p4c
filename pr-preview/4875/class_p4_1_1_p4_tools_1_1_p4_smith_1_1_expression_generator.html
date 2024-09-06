@@ -131,7 +131,7 @@ $(function(){initNavTree('class_p4_1_1_p4_tools_1_1_p4_smith_1_1_expression_gene
 <div class="dynheader">
 Inheritance diagram for P4::P4Tools::P4Smith::ExpressionGenerator:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="class_p4_1_1_p4_tools_1_1_p4_smith_1_1_expression_generator__inherit__graph.svg" width="178" height="139"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="class_p4_1_1_p4_tools_1_1_p4_smith_1_1_expression_generator__inherit__graph.svg" width="198" height="227"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
@@ -139,6 +139,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a55fa5b6bd5fe4840cc483355346f8446" id="r_a55fa5b6bd5fe4840cc483355346f8446"><td class="memItemLeft" align="right" valign="top"><a id="a55fa5b6bd5fe4840cc483355346f8446" name="a55fa5b6bd5fe4840cc483355346f8446"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>ExpressionGenerator</b> (const <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_smith_1_1_smith_target.html">SmithTarget</a> &amp;target)</td></tr>
 <tr class="separator:a55fa5b6bd5fe4840cc483355346f8446"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae202bab3e21f99dd8e2e2265d36eeaad" id="r_ae202bab3e21f99dd8e2e2265d36eeaad"><td class="memItemLeft" align="right" valign="top"><a id="ae202bab3e21f99dd8e2e2265d36eeaad" name="ae202bab3e21f99dd8e2e2265d36eeaad"></a>
+virtual std::vector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>availableBitWidths</b> () const</td></tr>
+<tr class="separator:ae202bab3e21f99dd8e2e2265d36eeaad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a812b935afd5fd798ff1940a4a0329489" id="r_a812b935afd5fd798ff1940a4a0329489"><td class="memItemLeft" align="right" valign="top"><a id="a812b935afd5fd798ff1940a4a0329489" name="a812b935afd5fd798ff1940a4a0329489"></a>
 virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>checkInputArg</b> (const IR::Parameter *param)</td></tr>
 <tr class="separator:a812b935afd5fd798ff1940a4a0329489"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -154,6 +157,9 @@ IR::Expression *&#160;</td><td class="memItemRight" valign="bottom"><b>construct
 <tr class="memitem:abd9514923a57ee4413b4977cd35e4696" id="r_abd9514923a57ee4413b4977cd35e4696"><td class="memItemLeft" align="right" valign="top"><a id="abd9514923a57ee4413b4977cd35e4696" name="abd9514923a57ee4413b4977cd35e4696"></a>
 virtual IR::Expression *&#160;</td><td class="memItemRight" valign="bottom"><b>constructStructExpr</b> (const IR::Type_Name *tn)</td></tr>
 <tr class="separator:abd9514923a57ee4413b4977cd35e4696"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4077547b29fe1a9d3dcccd029fc7c3ed" id="r_a4077547b29fe1a9d3dcccd029fc7c3ed"><td class="memItemLeft" align="right" valign="top"><a id="a4077547b29fe1a9d3dcccd029fc7c3ed" name="a4077547b29fe1a9d3dcccd029fc7c3ed"></a>
+const IR::Type_Bits *&#160;</td><td class="memItemRight" valign="bottom"><b>genBitType</b> (bool isSigned) const</td></tr>
+<tr class="separator:a4077547b29fe1a9d3dcccd029fc7c3ed"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0c9064236404ec2ffb93287ec067cda7" id="r_a0c9064236404ec2ffb93287ec067cda7"><td class="memItemLeft" align="right" valign="top"><a id="a0c9064236404ec2ffb93287ec067cda7" name="a0c9064236404ec2ffb93287ec067cda7"></a>
 virtual IR::Expression *&#160;</td><td class="memItemRight" valign="bottom"><b>genExpression</b> (const IR::Type *tp)</td></tr>
 <tr class="separator:a0c9064236404ec2ffb93287ec067cda7"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -175,6 +181,9 @@ virtual IR::MethodCallExpression *&#160;</td><td class="memItemRight" valign="bo
 <tr class="memitem:a978589f292f2ae4e6527002046c9ee70" id="r_a978589f292f2ae4e6527002046c9ee70"><td class="memItemLeft" align="right" valign="top"><a id="a978589f292f2ae4e6527002046c9ee70" name="a978589f292f2ae4e6527002046c9ee70"></a>
 virtual IR::Expression *&#160;</td><td class="memItemRight" valign="bottom"><b>pickLvalOrSlice</b> (const IR::Type *tp)</td></tr>
 <tr class="separator:a978589f292f2ae4e6527002046c9ee70"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af4e0646117ef35a517e6f22345702aa5" id="r_af4e0646117ef35a517e6f22345702aa5"><td class="memItemLeft" align="right" valign="top"><a id="af4e0646117ef35a517e6f22345702aa5" name="af4e0646117ef35a517e6f22345702aa5"></a>
+const IR::Type *&#160;</td><td class="memItemRight" valign="bottom"><b>pickRndBaseType</b> (const std::vector&lt; int64_t &gt; &amp;type_probs) const</td></tr>
+<tr class="separator:af4e0646117ef35a517e6f22345702aa5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afb04d9b2bc44065336077f965ea3eb8f" id="r_afb04d9b2bc44065336077f965ea3eb8f"><td class="memItemLeft" align="right" valign="top"><a id="afb04d9b2bc44065336077f965ea3eb8f" name="afb04d9b2bc44065336077f965ea3eb8f"></a>
 virtual const IR::Type *&#160;</td><td class="memItemRight" valign="bottom"><b>pickRndType</b> (TyperefProbs type_probs)</td></tr>
 <tr class="separator:afb04d9b2bc44065336077f965ea3eb8f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -191,9 +200,6 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a371b3af6cc354f4b73f30f3c5d8eb859" id="r_a371b3af6cc354f4b73f30f3c5d8eb859"><td class="memItemLeft" align="right" valign="top"><a id="a371b3af6cc354f4b73f30f3c5d8eb859" name="a371b3af6cc354f4b73f30f3c5d8eb859"></a>
 static IR::Constant *&#160;</td><td class="memItemRight" valign="bottom"><b>genBitLiteral</b> (const IR::Type *tb)</td></tr>
 <tr class="separator:a371b3af6cc354f4b73f30f3c5d8eb859"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a836af6ba58f3411e4a8ba0ce38194ba6" id="r_a836af6ba58f3411e4a8ba0ce38194ba6"><td class="memItemLeft" align="right" valign="top"><a id="a836af6ba58f3411e4a8ba0ce38194ba6" name="a836af6ba58f3411e4a8ba0ce38194ba6"></a>
-static const IR::Type_Bits *&#160;</td><td class="memItemRight" valign="bottom"><b>genBitType</b> (bool isSigned)</td></tr>
-<tr class="separator:a836af6ba58f3411e4a8ba0ce38194ba6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4aff29dc6075be12fb6f6c0bd3642202" id="r_a4aff29dc6075be12fb6f6c0bd3642202"><td class="memItemLeft" align="right" valign="top"><a id="a4aff29dc6075be12fb6f6c0bd3642202" name="a4aff29dc6075be12fb6f6c0bd3642202"></a>
 static IR::BoolLiteral *&#160;</td><td class="memItemRight" valign="bottom"><b>genBoolLiteral</b> ()</td></tr>
 <tr class="separator:a4aff29dc6075be12fb6f6c0bd3642202"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -206,15 +212,9 @@ static IR::Constant *&#160;</td><td class="memItemRight" valign="bottom"><b>genI
 <tr class="memitem:a638cead43b9aa3c677fb9d83155b0ebd" id="r_a638cead43b9aa3c677fb9d83155b0ebd"><td class="memItemLeft" align="right" valign="top"><a id="a638cead43b9aa3c677fb9d83155b0ebd" name="a638cead43b9aa3c677fb9d83155b0ebd"></a>
 static const IR::Type_InfInt *&#160;</td><td class="memItemRight" valign="bottom"><b>genIntType</b> ()</td></tr>
 <tr class="separator:a638cead43b9aa3c677fb9d83155b0ebd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa9c99506c33e506b1c1db280f6d30d85" id="r_aa9c99506c33e506b1c1db280f6d30d85"><td class="memItemLeft" align="right" valign="top"><a id="aa9c99506c33e506b1c1db280f6d30d85" name="aa9c99506c33e506b1c1db280f6d30d85"></a>
-static const IR::Type *&#160;</td><td class="memItemRight" valign="bottom"><b>pickRndBaseType</b> (const std::vector&lt; int64_t &gt; &amp;type_probs)</td></tr>
-<tr class="separator:aa9c99506c33e506b1c1db280f6d30d85"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-attribs" name="pub-static-attribs"></a>
 Static Public Attributes</h2></td></tr>
-<tr class="memitem:a768d6d74b8eee6d183fd2688837199a6" id="r_a768d6d74b8eee6d183fd2688837199a6"><td class="memItemLeft" align="right" valign="top"><a id="a768d6d74b8eee6d183fd2688837199a6" name="a768d6d74b8eee6d183fd2688837199a6"></a>
-static constexpr int&#160;</td><td class="memItemRight" valign="bottom"><b>BIT_WIDTHS</b> [6] = {4, 8, 16, 32, 64, 128}</td></tr>
-<tr class="separator:a768d6d74b8eee6d183fd2688837199a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3bd27c4ffc9ae7cd05d2821e61ac8c90" id="r_a3bd27c4ffc9ae7cd05d2821e61ac8c90"><td class="memItemLeft" align="right" valign="top"><a id="a3bd27c4ffc9ae7cd05d2821e61ac8c90" name="a3bd27c4ffc9ae7cd05d2821e61ac8c90"></a>
 static constexpr size_t&#160;</td><td class="memItemRight" valign="bottom"><b>MAX_DEPTH</b> = 3</td></tr>
 <tr class="separator:a3bd27c4ffc9ae7cd05d2821e61ac8c90"><td class="memSeparator" colspan="2">&#160;</td></tr>

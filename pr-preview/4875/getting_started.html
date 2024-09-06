@@ -222,75 +222,6 @@ $(function(){initNavTree('getting_started.html',''); initResizable(true); });
   <li class="level1">
     <a href="#common-p4c-utility-functions">Common P4C utility functions</a>
     <ul>
-      <li class="level2 empty">
-        <ul>
-          <li class="level3 empty">
-            <ul>
-              <li class="level4 empty">
-                <ul>
-                  <li class="level5">
-                    <a href="#algorithmh">algorithm.h</a>
-                  </li>
-                  <li class="level5">
-                    <a href="#bitopsh">bitops.h</a>
-                  </li>
-                  <li class="level5">
-                    <a href="#bitvech-bitveccpp">bitvec.h, bitvec.cpp</a>
-                  </li>
-                  <li class="level5">
-                    <a href="#cstringh-cstringcpp">cstring.h, cstring.cpp</a>
-                  </li>
-                  <li class="level5">
-                    <a href="#defaulth">default.h</a>
-                  </li>
-                  <li class="level5">
-                    <a href="#enumeratorh-enumeratorcpp">enumerator.h, enumerator.cpp</a>
-                  </li>
-                  <li class="level5">
-                    <a href="#errorh-errorcpp-expresionsh">error.h, error.cpp, expresions.h</a>
-                  </li>
-                  <li class="level5">
-                    <a href="#gccpp">gc.cpp</a>
-                  </li>
-                  <li class="level5">
-                    <a href="#hexh-hexcpp">hex.h, hex.cpp</a>
-                  </li>
-                  <li class="level5">
-                    <a href="#indenth-indentcpp">indent.h, indent.cpp</a>
-                  </li>
-                  <li class="level5">
-                    <a href="#logh-logcpp">log.h, log.cpp</a>
-                  </li>
-                  <li class="level5">
-                    <a href="#ltbitmatrixh">ltbitmatrix.h</a>
-                  </li>
-                  <li class="level5">
-                    <a href="#maph">map.h</a>
-                  </li>
-                  <li class="level5">
-                    <a href="#nullstreamh">nullstream.h</a>
-                  </li>
-                  <li class="level5">
-                    <a href="#optionsh-optionscpp">options.h, options.cpp</a>
-                  </li>
-                  <li class="level5">
-                    <a href="#rangeh">range.h</a>
-                  </li>
-                  <li class="level5">
-                    <a href="#source_fileh-source_filecpp">source_file.h, source_file.cpp</a>
-                  </li>
-                  <li class="level5">
-                    <a href="#stringifyh-stringifycppp">stringify.h, stringify.cppp</a>
-                  </li>
-                  <li class="level5">
-                    <a href="#sourcecodebuilderh">sourceCodeBuilder.h</a>
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </li>
-        </ul>
-      </li>
       <li class="level2">
         <a href="#known-issues">Known issues</a>
         <ul>
@@ -642,63 +573,48 @@ Installation</h4>
 </div><!-- fragment --><h1><a class="anchor" id="common-p4c-utility-functions"></a>
 Common P4C utility functions</h1>
 <p>The <a href="https://github.com/p4lang/p4c/tree/main/lib"><code>lib</code> directory</a> contains miscellaneous utilities that are generally useful and not specific to any part of the compiler. Most are not even compiler specific. The files in the <code>lib</code> folder should only depend on each other; they cannot depend on any other compiler files.</p>
-<h5><a class="anchor" id="algorithmh"></a>
-algorithm.h</h5>
-<p>wrapper around <code>&lt;algorithm&gt;</code> that contains severla useful additional algorithms</p>
-<h5><a class="anchor" id="bitopsh"></a>
-bitops.h</h5>
-<p>bit manipulation operations</p>
-<h5><a class="anchor" id="bitvech-bitveccpp"></a>
-bitvec.h, bitvec.cpp</h5>
-<p>dynamic bitvectors with useful operations. The standard types <code>std::vector&lt;bool&gt;</code> and <code>std::bitsec</code> are missing crucial functionality, making them generally useless.</p>
-<h5><a class="anchor" id="cstringh-cstringcpp"></a>
-cstring.h, cstring.cpp</h5>
-<p>constant strings. The standard library <code>std::string</code> type is mutable, allowing the string to be changed dynamically. Constant strings are what we would prefer to use in the compiler. <code>cstring</code> keeps the memory for all constant strings in a single global pool, allowing constant time comparisons.</p>
-<h5><a class="anchor" id="defaulth"></a>
-default.h</h5>
-<p>Synthesizing default values of various types (e.g., 0 for integers, nullptr for pointers, etc.)</p>
-<h5><a class="anchor" id="enumeratorh-enumeratorcpp"></a>
-enumerator.h, enumerator.cpp</h5>
-<p>C#-like enumerator interface.</p>
-<h5><a class="anchor" id="errorh-errorcpp-expresionsh"></a>
-error.h, error.cpp, expresions.h</h5>
-<p>Error reporting functions.</p>
-<h5><a class="anchor" id="gccpp"></a>
-gc.cpp</h5>
-<p>Overrides global <code>operator new</code> and <code>delete</code> to use the Boehm/Demers/Weiser conservative collector, so all memory allocations are garbage collected</p>
-<h5><a class="anchor" id="hexh-hexcpp"></a>
-hex.h, hex.cpp</h5>
-<p>Adaptor for more conveniently printing hexadecimal string with ostreams.</p>
-<h5><a class="anchor" id="indenth-indentcpp"></a>
-indent.h, indent.cpp</h5>
-<p>Adaptor for managing indentation on ostreams</p>
-<h5><a class="anchor" id="logh-logcpp"></a>
-log.h, log.cpp</h5>
-<p>Macros and support for logging that can be managed on a per-source-file basis</p>
-<h5><a class="anchor" id="ltbitmatrixh"></a>
-ltbitmatrix.h</h5>
-<p>Adaptor using a <code>bitvec</code> as a lower-triangular bit matrix.</p>
-<h5><a class="anchor" id="maph"></a>
-map.h</h5>
-<p>Wrapper around <code>map</code>, adding some useful functions that are missing from <code>std::map</code></p>
-<h5><a class="anchor" id="nullstreamh"></a>
-nullstream.h</h5>
-<p>A simple ostream that does nothing.</p>
-<h5><a class="anchor" id="optionsh-optionscpp"></a>
-options.h, options.cpp</h5>
-<p>Represents compiler command-line options.</p>
-<h5><a class="anchor" id="rangeh"></a>
-range.h</h5>
-<p>Iterators over numeric ranges.</p>
-<h5><a class="anchor" id="source_fileh-source_filecpp"></a>
-source_file.h, source_file.cpp</h5>
-<p>Represents the input source of the compiler and source file position information used for error reporting and generating debugging information.</p>
-<h5><a class="anchor" id="stringifyh-stringifycppp"></a>
-stringify.h, stringify.cppp</h5>
-<p>Conversion of various types to strings.</p>
-<h5><a class="anchor" id="sourcecodebuilderh"></a>
-sourceCodeBuilder.h</h5>
-<p>Support for emitting programs in source (works for P4 and C).</p>
+<table class="markdownTable">
+<tr class="markdownTableHead">
+<th class="markdownTableHeadNone">File(s)   </th><th class="markdownTableHeadNone">Description    </th></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>algorithm.h</code>   </td><td class="markdownTableBodyNone">Wrapper around <code>&lt;algorithm&gt;</code> that contains several useful additional algorithms.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>bitops.h</code>   </td><td class="markdownTableBodyNone">Bit manipulation operations.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>bitvec.h</code>, <code>bitvec.cpp</code>   </td><td class="markdownTableBodyNone">Dynamic bitvectors with useful operations. The standard types <code>std::vector&lt;bool&gt;</code> and <code>std::bitset</code> are missing crucial functionality, making them generally useless.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>cstring.h</code>, <code>cstring.cpp</code>   </td><td class="markdownTableBodyNone">Constant strings. The standard library <code>std::string</code> type is mutable, allowing the string to be changed dynamically. <code>cstring</code> keeps the memory for all constant strings in a single global pool, allowing constant time comparisons.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>default.h</code>   </td><td class="markdownTableBodyNone">Synthesizing default values of various types (e.g., 0 for integers, <code>nullptr</code> for pointers, etc.).    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>enumerator.h</code>, <code>enumerator.cpp</code>   </td><td class="markdownTableBodyNone">C#-like enumerator interface.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>error.h</code>, <code>error.cpp</code>, <code>expressions.h</code>   </td><td class="markdownTableBodyNone">Error reporting functions.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>gc.cpp</code>   </td><td class="markdownTableBodyNone">Overrides global <code>operator new</code> and <code>delete</code> to use the Boehm/Demers/Weiser conservative collector, so all memory allocations are garbage collected.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>hex.h</code>, <code>hex.cpp</code>   </td><td class="markdownTableBodyNone">Adaptor for more conveniently printing hexadecimal strings with ostreams.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>indent.h</code>, <code>indent.cpp</code>   </td><td class="markdownTableBodyNone">Adaptor for managing indentation on ostreams.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>log.h</code>, <code>log.cpp</code>   </td><td class="markdownTableBodyNone">Macros and support for logging that can be managed on a per-source-file basis.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>ltbitmatrix.h</code>   </td><td class="markdownTableBodyNone">Adaptor using a <code>bitvec</code> as a lower-triangular bit matrix.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>map.h</code>   </td><td class="markdownTableBodyNone">Wrapper around <code>map</code>, adding some useful functions that are missing from <code>std::map</code>.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>nullstream.h</code>   </td><td class="markdownTableBodyNone">A simple ostream that does nothing.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>options.h</code>, <code>options.cpp</code>   </td><td class="markdownTableBodyNone">Represents compiler command-line options.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>range.h</code>   </td><td class="markdownTableBodyNone">Iterators over numeric ranges.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>source_file.h</code>, <code>source_file.cpp</code>   </td><td class="markdownTableBodyNone">Represents the input source of the compiler and source file position information used for error reporting and generating debugging information.    </td></tr>
+<tr class="markdownTableRowEven">
+<td class="markdownTableBodyNone"><code>stringify.h</code>, <code>stringify.cpp</code>   </td><td class="markdownTableBodyNone">Conversion of various types to strings.    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>sourceCodeBuilder.h</code>   </td><td class="markdownTableBodyNone">Support for emitting programs in source (works for P4 and C).   </td></tr>
+</table>
 <h2><a class="anchor" id="known-issues"></a>
 Known issues</h2>
 <p>Issues with the compiler are tracked on <a href="https://github.com/p4lang/p4c/issues">GitHub</a>. Before opening a new issue, please check whether a similar issue is already opened. Opening issues and submitting a pull request with fixes for those issues is much appreciated.</p>

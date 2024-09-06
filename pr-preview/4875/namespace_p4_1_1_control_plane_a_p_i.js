@@ -50,11 +50,13 @@ var namespace_p4_1_1_control_plane_a_p_i =
     [ "getIdAnnotation", "namespace_p4_1_1_control_plane_a_p_i.html#a3746f8c2eae065d1931059f3024c24e3", null ],
     [ "getP4RuntimeId", "namespace_p4_1_1_control_plane_a_p_i.html#afff2e33e0af7906dc94c2b037c5d7d55", null ],
     [ "getTypeName", "namespace_p4_1_1_control_plane_a_p_i.html#a0eeb4cc212bdca1fa1c707df8b8775d0", null ],
+    [ "getTypeWidth", "namespace_p4_1_1_control_plane_a_p_i.html#a4eb913db2bfb7833ee16d2f5e76b84ea", null ],
     [ "hasTranslationAnnotation", "namespace_p4_1_1_control_plane_a_p_i.html#a65de58bffa93fc9062e487768ec2820f", null ],
     [ "isControllerHeader", "namespace_p4_1_1_control_plane_a_p_i.html#aa0fa3aff0ebb275f0f39072bd7e67a13", null ],
     [ "isHidden", "namespace_p4_1_1_control_plane_a_p_i.html#a94e16eb37f59dae995b14684e3694707", null ],
     [ "stringRepr", "namespace_p4_1_1_control_plane_a_p_i.html#a56a9e04abacf3ce2ac4dfcba1c4df19d", null ],
     [ "stringRepr", "namespace_p4_1_1_control_plane_a_p_i.html#a1cbf60adfd13d0658ae7f497f889c3a7", null ],
+    [ "stringRepr", "namespace_p4_1_1_control_plane_a_p_i.html#af21cdb3d53e36a146da603ea6611eb2d", null ],
     [ "stringReprConstant", "namespace_p4_1_1_control_plane_a_p_i.html#ab87a21ceb20c681d197b8b1c5ba96d3b", null ],
     [ "szudzikPairing", "namespace_p4_1_1_control_plane_a_p_i.html#a269c8b3a55a7814446cca3544330094f", null ]
 ];

@@ -211,6 +211,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>collectTableSymbols</
 <tr class="separator:a3746f8c2eae065d1931059f3024c24e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0eeb4cc212bdca1fa1c707df8b8775d0" id="r_a0eeb4cc212bdca1fa1c707df8b8775d0"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0eeb4cc212bdca1fa1c707df8b8775d0">getTypeName</a> (const IR::Type *type, <a class="el" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap)</td></tr>
 <tr class="separator:a0eeb4cc212bdca1fa1c707df8b8775d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4eb913db2bfb7833ee16d2f5e76b84ea" id="r_a4eb913db2bfb7833ee16d2f5e76b84ea"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4eb913db2bfb7833ee16d2f5e76b84ea">getTypeWidth</a> (const IR::Type &amp;type, const <a class="el" href="class_p4_1_1_type_map.html">TypeMap</a> &amp;typeMap)</td></tr>
+<tr class="separator:a4eb913db2bfb7833ee16d2f5e76b84ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a65de58bffa93fc9062e487768ec2820f" id="r_a65de58bffa93fc9062e487768ec2820f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a65de58bffa93fc9062e487768ec2820f">hasTranslationAnnotation</a> (const IR::Type *type, <a class="el" href="#struct_p4_1_1_control_plane_a_p_i_1_1_translation_annotation">TranslationAnnotation</a> *payload)</td></tr>
 <tr class="separator:a65de58bffa93fc9062e487768ec2820f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa0fa3aff0ebb275f0f39072bd7e67a13" id="r_aa0fa3aff0ebb275f0f39072bd7e67a13"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa0fa3aff0ebb275f0f39072bd7e67a13">isControllerHeader</a> (const IR::Type_Header *type)</td></tr>
@@ -221,6 +223,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>collectTableSymbols</
 <tr class="separator:a56a9e04abacf3ce2ac4dfcba1c4df19d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1cbf60adfd13d0658ae7f497f889c3a7" id="r_a1cbf60adfd13d0658ae7f497f889c3a7"><td class="memItemLeft" align="right" valign="top">std::optional&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1cbf60adfd13d0658ae7f497f889c3a7">stringRepr</a> (const IR::Constant *constant, int width)</td></tr>
 <tr class="separator:a1cbf60adfd13d0658ae7f497f889c3a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af21cdb3d53e36a146da603ea6611eb2d" id="r_af21cdb3d53e36a146da603ea6611eb2d"><td class="memItemLeft" align="right" valign="top">std::optional&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af21cdb3d53e36a146da603ea6611eb2d">stringRepr</a> (const <a class="el" href="class_p4_1_1_type_map.html">TypeMap</a> &amp;typeMap, const IR::Expression *expression)</td></tr>
+<tr class="separator:af21cdb3d53e36a146da603ea6611eb2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab87a21ceb20c681d197b8b1c5ba96d3b" id="r_ab87a21ceb20c681d197b8b1c5ba96d3b"><td class="memItemLeft" align="right" valign="top">std::optional&lt; std::string &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab87a21ceb20c681d197b8b1c5ba96d3b">stringReprConstant</a> (big_int value, int width)</td></tr>
 <tr class="separator:ab87a21ceb20c681d197b8b1c5ba96d3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a269c8b3a55a7814446cca3544330094f" id="r_a269c8b3a55a7814446cca3544330094f"><td class="memItemLeft" align="right" valign="top">uint64_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a269c8b3a55a7814446cca3544330094f">szudzikPairing</a> (p4rt_id_t x, p4rt_id_t y)</td></tr>
@@ -344,15 +348,21 @@ name</td>
 </div><table class="fieldtable">
 <tr><th colspan="3">Class Members</th></tr>
 <tr><td class="fieldtype">
-<a id="a6009406bbce9e80204e912e70ba89d6f" name="a6009406bbce9e80204e912e70ba89d6f"></a>const bool</td>
+<a id="a0669edd3297daee154b8af717b2985e9" name="a0669edd3297daee154b8af717b2985e9"></a>const P4Action *</td>
 <td class="fieldname">
-isConst</td>
+action</td>
 <td class="fielddoc">
 </td></tr>
 <tr><td class="fieldtype">
-<a id="ad789acddbad9ea8c266b8434c1db2dc5" name="ad789acddbad9ea8c266b8434c1db2dc5"></a>const <a class="el" href="class_p4_1_1cstring.html">cstring</a></td>
+<a id="a98e69156853115d6617ad249c57a8672" name="a98e69156853115d6617ad249c57a8672"></a>const Vector&lt; Argument &gt; *</td>
 <td class="fieldname">
-name</td>
+arguments</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="a6009406bbce9e80204e912e70ba89d6f" name="a6009406bbce9e80204e912e70ba89d6f"></a>const bool</td>
+<td class="fieldname">
+isConst</td>
 <td class="fielddoc">
 </td></tr>
 </table>
@@ -1134,6 +1144,28 @@ template&lt;typename It &gt; </div>
 
 </div>
 </div>
+<a id="a4eb913db2bfb7833ee16d2f5e76b84ea" name="a4eb913db2bfb7833ee16d2f5e76b84ea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4eb913db2bfb7833ee16d2f5e76b84ea">&#9670;&#160;</a></span>getTypeWidth()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int P4::ControlPlaneAPI::getTypeWidth </td>
+          <td>(</td>
+          <td class="paramtype">const IR::Type &amp;</td>          <td class="paramname"><span class="paramname"><em>type</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="class_p4_1_1_type_map.html">TypeMap</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>typeMap</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>getTypeWidth returns the width in bits for the @type, except if it is a user-defined type with a @p4runtime_translation annotation, in which case it returns W if the type is bit&lt;W&gt;, and 0 otherwise (i.e. if the type is string). </p>
+
+</div>
+</div>
 <a id="a65de58bffa93fc9062e487768ec2820f" name="a65de58bffa93fc9062e487768ec2820f"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a65de58bffa93fc9062e487768ec2820f">&#9670;&#160;</a></span>hasTranslationAnnotation()</h2>
 
@@ -1193,7 +1225,7 @@ template&lt;typename It &gt; </div>
 </div>
 </div>
 <a id="a56a9e04abacf3ce2ac4dfcba1c4df19d" name="a56a9e04abacf3ce2ac4dfcba1c4df19d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a56a9e04abacf3ce2ac4dfcba1c4df19d">&#9670;&#160;</a></span>stringRepr() <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a56a9e04abacf3ce2ac4dfcba1c4df19d">&#9670;&#160;</a></span>stringRepr() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1215,7 +1247,7 @@ template&lt;typename It &gt; </div>
 </div>
 </div>
 <a id="a1cbf60adfd13d0658ae7f497f889c3a7" name="a1cbf60adfd13d0658ae7f497f889c3a7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1cbf60adfd13d0658ae7f497f889c3a7">&#9670;&#160;</a></span>stringRepr() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a1cbf60adfd13d0658ae7f497f889c3a7">&#9670;&#160;</a></span>stringRepr() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1233,6 +1265,28 @@ template&lt;typename It &gt; </div>
       </table>
 </div><div class="memdoc">
 <p>Convert a Constant to the P4Runtime bytes representation by calling stringReprConstant. </p>
+
+</div>
+</div>
+<a id="af21cdb3d53e36a146da603ea6611eb2d" name="af21cdb3d53e36a146da603ea6611eb2d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af21cdb3d53e36a146da603ea6611eb2d">&#9670;&#160;</a></span>stringRepr() <span class="overload">[3/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt; std::string &gt; P4::ControlPlaneAPI::stringRepr </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="class_p4_1_1_type_map.html">TypeMap</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>typeMap</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const IR::Expression *</td>          <td class="paramname"><span class="paramname"><em>expression</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Convert an Expression to the P4Runtime bytes representation. The type map is required to resolve complex expressions such as serializable enums. </p>
 
 </div>
 </div>

@@ -1,7 +1,7 @@
 var searchData=
 [
-  ['unify_0',['unify',['../class_p4_1_1_type_inference.html#abc2ef9bb3a691d1e59a721be11cd0499',1,'P4::TypeInference::unify()'],['../class_p4_1_1_type_unification.html#a323df5de0794b2ed417822de869f467b',1,'P4::TypeUnification::unify()']]],
-  ['unifycast_1',['unifyCast',['../class_p4_1_1_type_inference.html#a6e4008746d8fce6012f9f60833ead21e',1,'P4::TypeInference']]],
+  ['unify_0',['unify',['../class_p4_1_1_type_inference_base.html#aaa249fd726092b5fdcd1157dcc1390ab',1,'P4::TypeInferenceBase::unify()'],['../class_p4_1_1_type_unification.html#a323df5de0794b2ed417822de869f467b',1,'P4::TypeUnification::unify()']]],
+  ['unifycast_1',['unifyCast',['../class_p4_1_1_type_inference_base.html#a8b9e1f2d15aba899d9f491e70c2b0fb9',1,'P4::TypeInferenceBase']]],
   ['unionwith_2',['unionWith',['../struct_p4_1_1_half_open_range.html#a9bedcd88bc07ae75600f2358818f4726',1,'P4::HalfOpenRange::unionWith()'],['../struct_p4_1_1_closed_range.html#aeb8b8e1ac10975128be036956bcb3133',1,'P4::ClosedRange::unionWith()']]],
   ['uniquecaller_3',['uniqueCaller',['../struct_p4_1_1_inline_summary_1_1_per_caller.html#a1a447ec67084a4e75395cdbb423dccc7',1,'P4::InlineSummary::PerCaller']]],
   ['uniquenames_4',['uniqueNames',['../class_p4_1_1_d_p_d_k_1_1_direction_to_reg_read.html#ab00a86454e7cc7cc5313ae4ae254a017',1,'P4::DPDK::DirectionToRegRead']]],

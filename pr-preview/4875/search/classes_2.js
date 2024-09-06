@@ -50,7 +50,7 @@ var searchData=
   ['collectusedmetadatafield_47',['CollectUsedMetadataField',['../class_p4_1_1_d_p_d_k_1_1_collect_used_metadata_field.html',1,'P4::DPDK']]],
   ['commandvisitor_48',['CommandVisitor',['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_command_visitor.html',1,'P4::P4Tools::P4Testgen']]],
   ['comment_49',['Comment',['../class_p4_1_1_util_1_1_comment.html',1,'P4::Util']]],
-  ['comparison_50',['Comparison',['../class_p4_1_1_type_inference.html#struct_p4_1_1_type_inference_1_1_comparison',1,'P4::TypeInference']]],
+  ['comparison_50',['Comparison',['../class_p4_1_1_type_inference_base.html#struct_p4_1_1_type_inference_base_1_1_comparison',1,'P4::TypeInferenceBase']]],
   ['compilationerror_51',['CompilationError',['../class_p4_1_1_util_1_1_compilation_error.html',1,'P4::Util']]],
   ['compilecontext_52',['CompileContext',['../class_p4_1_1_p4_tools_1_1_compile_context.html',1,'P4::P4Tools']]],
   ['compilecontextstack_53',['CompileContextStack',['../struct_p4_1_1_compile_context_stack.html',1,'P4']]],
