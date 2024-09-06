@@ -13,11 +13,6 @@ void Attach::addSuffixComments(NodeId node, const Util::Comment *suffix) {
     commentsMap[node].suffix.push_back(suffix);
 }
 
-bool Attach::isSystemFile(const std::filesystem::path &file) {
-    const std::filesystem::path p4include(p4includePath);
-    return file.parent_path() == p4include;
-}
-
 const Attach::CommentsMap &Attach::getCommentsMap() const { return commentsMap; }
 
 const IR::Node *Attach::attachCommentsToNode(IR::Node *node, TraversalType ttype) {
@@ -26,7 +21,7 @@ const IR::Node *Attach::attachCommentsToNode(IR::Node *node, TraversalType ttype
     }
 
     std::filesystem::path sourceFile(node->srcInfo.getSourceFile().string_view());
-    if (isSystemFile(sourceFile)) {
+    if (isSystemFile(sourceFile.string())) {
         // Skip attachment for system files
         return node;
     }

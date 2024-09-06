@@ -56,10 +56,7 @@ std::stringstream getFormattedOutput(std::filesystem::path inputFile) {
 
     std::stringstream formattedOutput;
 
-    auto result = parseProgram(options);
-
-    const IR::P4Program *program = result.first;
-    const Util::InputSources *sources = result.second;
+    const auto &[program, sources] = parseProgram(options);
 
     if (program == nullptr && ::P4::errorCount() != 0) {
         ::P4::error("Failed to parse P4 file.");
@@ -78,7 +75,7 @@ std::stringstream getFormattedOutput(std::filesystem::path inputFile) {
 
     auto top4 = P4Fmt::P4Formatter(&formattedOutput);
     auto attach = P4::P4Fmt::Attach(globalCommentsMap);
-    program = program->apply(attach);
+    program->apply(attach);
     // Print the program before running front end passes.
     program->apply(top4);
 

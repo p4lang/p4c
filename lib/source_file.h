@@ -270,7 +270,7 @@ class Comment final : IHasDbPrint, IHasSourceInfo {
         if (!singleLine) out << "*/";
     }
 
-    /// Retrieve the Source position associated with this Comment.
+    /// Retrieve the source position associated with this comment.
     [[nodiscard]] SourceInfo getSourceInfo() const override { return srcInfo; }
 };
 
