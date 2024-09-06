@@ -115,14 +115,13 @@ const IR::Node *MoveInitializers::preorder(IR::P4Parser *parser) {
         // If this is the case, then the parser's decl initializers cannot be moved
         // to the start state. A new start state that is never looped back to must
         // be inserted at the head of the graph.
-        for (const auto* state : parser->states) {
-            const auto* selectExpr = state->selectExpression;
+        for (const auto *state : parser->states) {
+            const auto *selectExpr = state->selectExpression;
             if (selectExpr == nullptr) {
                 // implicit reject transition
             } else if (selectExpr->is<IR::SelectExpression>()) {
                 // select expression
-                for (const auto* selectCase
-                     : selectExpr->to<IR::SelectExpression>()->selectCases) {
+                for (const auto *selectCase : selectExpr->to<IR::SelectExpression>()->selectCases) {
                     if (selectCase->state->path->name == IR::ParserState::start) {
                         loopsBackToStart = true;
                         break;
@@ -130,12 +129,11 @@ const IR::Node *MoveInitializers::preorder(IR::P4Parser *parser) {
                 }
             } else if (selectExpr->is<IR::PathExpression>()) {
                 // direct transition
-                const auto* pathExpr = selectExpr->to<IR::PathExpression>();
+                const auto *pathExpr = selectExpr->to<IR::PathExpression>();
                 if (pathExpr->path->name == IR::ParserState::start) loopsBackToStart = true;
             }
 
-            if (loopsBackToStart)
-                break;
+            if (loopsBackToStart) break;
         }
 
         newStartName = nameGen.newName(IR::ParserState::start.string_view());
@@ -178,8 +176,7 @@ const IR::Node *MoveInitializers::postorder(IR::ParserState *state) {
 }
 
 const IR::Node *MoveInitializers::postorder(IR::Path *path) {
-    if (!oldStart || !loopsBackToStart || path->name != IR::ParserState::start)
-        return path;
+    if (!oldStart || !loopsBackToStart || path->name != IR::ParserState::start) return path;
 
     // Only rename start state references if the parser contains initializing assignments
     // and loops back to the start state.
