@@ -28,8 +28,6 @@ class Attach : public Transform {
     const IR::Node *preorder(IR::Node *node) override;
     const IR::Node *postorder(IR::Node *node) override;
 
-    static bool isSystemFile(const std::filesystem::path &file);
-
     void addPrefixComments(NodeId, const Util::Comment *);
     void addSuffixComments(NodeId, const Util::Comment *);
     const CommentsMap &getCommentsMap() const;
