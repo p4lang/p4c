@@ -13,37 +13,30 @@
 
 namespace P4::P4Fmt {
 
-std::pair<const IR::P4Program *, const Util::InputSources *> parseProgram(
+std::optional<std::pair<const IR::P4Program *, const Util::InputSources *>> parseProgram(
     const ParserOptions &options) {
-    BUG_CHECK(&options == &P4CContext::get().options(),
-              "Parsing using options that don't match the current "
-              "compiler context");
-
-    std::pair<const IR::P4Program *, const Util::InputSources *> result = {nullptr, nullptr};
-
-    if (options.doNotPreprocess) {
-        auto *file = fopen(options.file.c_str(), "r");
-        if (file == nullptr) {
-            ::P4::error(ErrorType::ERR_NOT_FOUND, "%1%: No such file or directory.", options.file);
-            return result;
-        }
-        result = P4ParserDriver::parseProgramSources(file, options.file.string());
-        fclose(file);
-    } else {
-        auto preprocessorResult = options.preprocess();
-        if (::P4::errorCount() > 0 || !preprocessorResult.has_value()) {
-            return result;
-        }
-        result = P4ParserDriver::parseProgramSources(preprocessorResult.value().get(),
-                                                     options.file.string());
+    auto *file = fopen(options.file.c_str(), "r");
+    if (file == nullptr) {
+        ::P4::error(ErrorType::ERR_NOT_FOUND, "%1%: No such file or directory.", options.file);
+        return std::nullopt;
     }
+    if (options.isv1()) {
+        ::P4::error(ErrorType::ERR_UNKNOWN, "p4fmt cannot deal with p4-14 programs");
+        fclose(file);
+        return std::nullopt;
+    }
+    auto preprocessorResult = options.preprocess();
+    auto result =
+        P4ParserDriver::parseProgramSources(preprocessorResult.value().get(), options.file.c_str());
+    fclose(file);
 
     if (::P4::errorCount() > 0) {
         ::P4::error(ErrorType::ERR_OVERLIMIT, "%1% errors encountered, aborting compilation",
                     ::P4::errorCount());
-        return {nullptr, nullptr};
+        return std::nullopt;
     }
-    BUG_CHECK(result.first != nullptr, "Parsing failed, but we didn't report an error");
+
+    BUG_CHECK(result.first != nullptr, "Parsing failed, but no error was reported");
 
     return result;
 }
@@ -56,12 +49,14 @@ std::stringstream getFormattedOutput(std::filesystem::path inputFile) {
 
     std::stringstream formattedOutput;
 
-    const auto &[program, sources] = parseProgram(options);
-
-    if (program == nullptr && ::P4::errorCount() != 0) {
-        ::P4::error("Failed to parse P4 file.");
+    auto parseResult = parseProgram(options);
+    if (!parseResult) {
+        if (::P4::errorCount() > 0) {
+            ::P4::error("Failed to parse P4 file.");
+        }
         return formattedOutput;
     }
+    const auto &[program, sources] = *parseResult;
 
     std::unordered_map<const Util::Comment *, bool> globalCommentsMap;
 
