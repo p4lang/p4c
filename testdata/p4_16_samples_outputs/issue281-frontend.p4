@@ -42,9 +42,6 @@ struct m {
 parser MyParser(packet_in b, out h hdr, inout m meta, inout standard_metadata_t std) {
     @name("MyParser.l3.etherType") bit<16> l3_etherType;
     state start {
-        transition start_0;
-    }
-    state start_0 {
         hdr.ether.setInvalid();
         hdr.vlan.setInvalid();
         hdr.ipv4.setInvalid();

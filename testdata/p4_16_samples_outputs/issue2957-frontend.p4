@@ -39,9 +39,6 @@ parser p(packet_in pkt, out Headers hdr) {
         tmp_3 = hdr.h[tmp_2];
         tmp_4 = extern_call(tmp_3);
         hdr.h[tmp_2] = tmp_3;
-        transition start_0;
-    }
-    state start_0 {
         pkt.extract<ethernet_t>(hdr.eth_hdr);
         pkt.extract<H>(hdr.h.next);
         transition accept;

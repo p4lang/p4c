@@ -8,9 +8,6 @@ parser p0(packet_in p, out Header h) {
     @name("p0.b") bool b_0;
     state start {
         b_0 = true;
-        transition start_0;
-    }
-    state start_0 {
         p.extract<Header>(h);
         transition select(h.data, b_0) {
             (default, true): next;
