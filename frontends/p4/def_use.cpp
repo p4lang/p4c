@@ -274,16 +274,6 @@ bool LocationSet::operator==(const LocationSet &other) const {
     return it == other.end();
 }
 
-void ProgramPoints::add(const ProgramPoints *from) {
-    points.insert(from->points.begin(), from->points.end());
-}
-
-const ProgramPoints *ProgramPoints::merge(const ProgramPoints *with) const {
-    auto *result = new ProgramPoints(points);
-    result->points.insert(with->points.begin(), with->points.end());
-    return result;
-}
-
 ProgramPoint::ProgramPoint(const ProgramPoint &context, const IR::Node *node) {
     assign(context, node);
 }
@@ -301,6 +291,16 @@ bool ProgramPoint::operator==(const ProgramPoint &other) const {
 }
 
 std::size_t ProgramPoint::hash() const { return Util::hash_range(stack.begin(), stack.end()); }
+
+void ProgramPoints::add(const ProgramPoints *from) {
+    points.insert(from->points.begin(), from->points.end());
+}
+
+const ProgramPoints *ProgramPoints::merge(const ProgramPoints *with) const {
+    auto *result = new ProgramPoints(points);
+    result->points.insert(with->points.begin(), with->points.end());
+    return result;
+}
 
 bool ProgramPoints::operator==(const ProgramPoints &other) const {
     if (points.size() != other.points.size()) return false;
@@ -364,8 +364,7 @@ const ProgramPoints *Definitions::getPoints(const LocationSet *locations) const 
 
 Definitions *Definitions::writes(ProgramPoint point, const LocationSet *locations) const {
     auto result = new Definitions(*this);
-    auto points = new ProgramPoints();
-    points->add(point);
+    auto points = new ProgramPoints(point);
     auto canon = locations->canonicalize();
     for (auto l : *canon) result->setDefinition(l->to<BaseLocation>(), points);
     return result;

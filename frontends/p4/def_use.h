@@ -414,7 +414,6 @@ class ProgramPoints : public IHasDbPrint {
  public:
     ProgramPoints() = default;
     explicit ProgramPoints(ProgramPoint point) { points.emplace(point); }
-    void add(ProgramPoint point) { points.emplace(point); }
     void add(const ProgramPoints *from);
     const ProgramPoints *merge(const ProgramPoints *with) const;
     bool operator==(const ProgramPoints &other) const;
