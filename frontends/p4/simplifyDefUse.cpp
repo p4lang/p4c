@@ -168,31 +168,31 @@ class HeaderDefinitions : public IHasDbPrint {
     /// storage locations of all elements within the stack. In case of accessing
     /// a field of a header union within a stack (indexed with non-constant), it
     /// returns the corresponding field of all unions in the stack.
-    const LocationSet *getStorageLocation(const IR::Expression *expression) const {
-        LocationSet *result = new LocationSet;
+    LocationSet getStorageLocation(const IR::Expression *expression) const {
+        LocationSet result;
         if (auto expr = expression->to<IR::PathExpression>()) {
             auto decl = refMap->getDeclaration(expr->path, true);
-            result->add(definitions->getStorage(decl));
+            result.add(definitions->getStorage(decl));
         } else if (auto expr = expression->to<IR::Member>()) {
             auto base_storage = getStorageLocation(expr->expr);
-            for (auto bs : *base_storage) {
+            for (auto bs : base_storage) {
                 if (auto struct_storage = bs->to<StructLocation>()) {
-                    struct_storage->addField(expr->member, result);
+                    struct_storage->addField(expr->member, &result);
                 } else if (bs->is<ArrayLocation>() && (expr->member == IR::Type_Stack::next ||
                                                        expr->member == IR::Type_Stack::last ||
                                                        expr->member == IR::Type_Stack::lastIndex)) {
                     auto array_storage = bs->to<ArrayLocation>();
-                    for (auto element : *array_storage) result->add(element);
+                    for (auto element : *array_storage) result.add(element);
                 }
             }
         } else if (auto array = expression->to<IR::ArrayIndex>()) {
             auto base_storage = getStorageLocation(array->left);
-            for (auto bs : *base_storage) {
+            for (auto bs : base_storage) {
                 if (auto array_storage = bs->to<ArrayLocation>()) {
                     if (auto index = array->right->to<IR::Constant>()) {
-                        array_storage->addElement(index->asInt(), result);
+                        array_storage->addElement(index->asInt(), &result);
                     } else {
-                        for (auto element : *array_storage) result->add(element);
+                        for (auto element : *array_storage) result.add(element);
                     }
                 }
             }
@@ -248,9 +248,8 @@ class HeaderDefinitions : public IHasDbPrint {
         notReport.erase(storage);
     }
 
-    void update(const LocationSet *locations, TernaryBool valid) {
-        CHECK_NULL(locations);
-        for (auto storage : *locations) {
+    void update(const LocationSet &locations, TernaryBool valid) {
+        for (const auto *storage : locations) {
             update(storage, valid);
         }
     }
@@ -275,13 +274,13 @@ class HeaderDefinitions : public IHasDbPrint {
                 }
             } else {  // constant index or accessing a field of a union which isn't in a stack
                 // invalidate fields of a union
-                auto base_storage = getStorageLocation(member->expr);
-                for (auto bs : *base_storage) {
+                auto baseStorage = getStorageLocation(member->expr);
+                for (const auto *bs : baseStorage) {
                     setValueToStorage(bs, TernaryBool::No);
                 }
                 // update valid bits of a field and a union
                 update(getStorageLocation(expr), valid);
-                update(base_storage, valid);
+                update(baseStorage, valid);
             }
             return;
         }
@@ -298,13 +297,11 @@ class HeaderDefinitions : public IHasDbPrint {
     }
 
     // result is OR operation on valid bits of all locations
-    TernaryBool find(const LocationSet *locations) const {
-        CHECK_NULL(locations);
-
-        if (locations->isEmpty()) return TernaryBool::Yes;
+    TernaryBool find(const LocationSet &locations) const {
+        if (locations.isEmpty()) return TernaryBool::Yes;
 
         TernaryBool valid = TernaryBool::No;
-        for (auto storage : *locations) {
+        for (const auto &storage : locations) {
             TernaryBool val = find(storage);
             if (val == TernaryBool::Maybe)
                 valid = val;
@@ -339,9 +336,8 @@ class HeaderDefinitions : public IHasDbPrint {
         return result;
     }
 
-    void addToNotReport(const LocationSet *locations) {
-        CHECK_NULL(locations);
-        for (auto storage : *locations) {
+    void addToNotReport(const LocationSet &locations) {
+        for (const auto *storage : locations) {
             checkLocation(storage);
             notReport.emplace(storage);
             if (auto header_union = storage->to<StructLocation>())
@@ -716,8 +712,7 @@ class FindUninitialized : public Inspector {
                     processHeadersInAssignment(member, source->expression, ftype, sourceType);
                 }
             } else if (src->is<IR::MethodCallExpression>()) {
-                auto storage = headerDefs->getStorageLocation(dst);
-                for (auto s : *storage) {
+                for (const auto *s : headerDefs->getStorageLocation(dst)) {
                     headerDefs->setValueToStorage(s, TernaryBool::Yes);
                 }
             } else if (src_type->to<IR::Type_Struct>()) {
@@ -739,8 +734,7 @@ class FindUninitialized : public Inspector {
             if (src->is<IR::InvalidHeaderUnion>()) {
                 headerDefs->update(dst, TernaryBool::No);
             } else if (src->is<IR::MethodCallExpression>()) {
-                auto storage = headerDefs->getStorageLocation(dst);
-                for (auto s : *storage) {
+                for (auto s : headerDefs->getStorageLocation(dst)) {
                     headerDefs->setValueToStorage(s, TernaryBool::Yes);
                 }
             } else if (src_type->is<IR::Type_HeaderUnion>()) {
@@ -769,8 +763,7 @@ class FindUninitialized : public Inspector {
 
         if (auto st = dst_type->to<IR::Type_Stack>()) {
             if (src->is<IR::MethodCallExpression>()) {
-                auto locations = headerDefs->getStorageLocation(dst);
-                for (auto storage : *locations) {
+                for (const auto *storage : headerDefs->getStorageLocation(dst)) {
                     headerDefs->setValueToStorage(storage, TernaryBool::Yes);
                 }
             } else if (auto stack_exp = src->to<IR::HeaderStackExpression>()) {
@@ -785,9 +778,9 @@ class FindUninitialized : public Inspector {
                 auto dst_locations = headerDefs->getStorageLocation(dst);
                 auto src_locations = headerDefs->getStorageLocation(src);
 
-                if (!dst_locations->isEmpty() && !src_locations->isEmpty()) {
-                    auto dst_storage = *dst_locations->begin();
-                    auto src_storage = *src_locations->begin();
+                if (!dst_locations.isEmpty() && !src_locations.isEmpty()) {
+                    const auto *dst_storage = *dst_locations.begin();
+                    const auto *src_storage = *src_locations.begin();
 
                     auto dst_array_storage = dst_storage->to<ArrayLocation>();
                     auto src_array_storage = src_storage->to<ArrayLocation>();
@@ -970,7 +963,7 @@ class FindUninitialized : public Inspector {
             lhs = true;
             visit(statement->decl, "decl");
             visit(statement->ref, "ref");
-            for (auto *l : *headerDefs->getStorageLocation(statement->ref))
+            for (const auto *l : headerDefs->getStorageLocation(statement->ref))
                 headerDefs->setValueToStorage(l, TernaryBool::Yes);
             lhs = false;
             currentPoint.assign(context, statement->ref);
@@ -1228,8 +1221,8 @@ class FindUninitialized : public Inspector {
                 // Reads all array fields
                 reads(expression, base);
                 registerUses(expression, false);
-                auto storage = headerDefs->getStorageLocation(bim->appliedTo);
-                for (auto s : *storage) headerDefs->setValueToStorage(s, TernaryBool::Yes);
+                for (const auto *s : headerDefs->getStorageLocation(bim->appliedTo))
+                    headerDefs->setValueToStorage(s, TernaryBool::Yes);
                 return false;
             } else if (name == IR::Type_Header::isValid) {
                 auto storage = base->getField(StorageFactory::validFieldName);
@@ -1331,8 +1324,8 @@ class FindUninitialized : public Inspector {
                     if (typeMap->getType(expr->expression, true)->is<IR::Type_Header>()) {
                         headerDefs->update(expr->expression, TernaryBool::Yes);
                     } else {
-                        auto locations = headerDefs->getStorageLocation(expr->expression);
-                        for (auto storage : *locations) {
+                        for (const auto *storage :
+                             headerDefs->getStorageLocation(expr->expression)) {
                             headerDefs->setValueToStorage(storage, TernaryBool::Yes);
                         }
                     }
