@@ -355,7 +355,7 @@ class LocationSet : public IHasDbPrint {
 /// Maps a declaration to its associated storage.
 class StorageMap : public IHasDbPrint {
     /// Storage location for each declaration.
-    hvec_map<const IR::IDeclaration *, StorageLocation *> storage;
+    hvec_map<const IR::IDeclaration *, const StorageLocation *> storage;
     StorageFactory factory;
 
  public:
@@ -366,19 +366,19 @@ class StorageMap : public IHasDbPrint {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
     }
-    StorageLocation *add(const IR::IDeclaration *decl) {
+    const StorageLocation *add(const IR::IDeclaration *decl) {
         CHECK_NULL(decl);
         auto type = typeMap->getType(decl->getNode(), true);
         auto loc = factory.create(type, decl->getName() + "/" + decl->externalName());
         if (loc != nullptr) storage.emplace(decl, loc);
         return loc;
     }
-    StorageLocation *getOrAdd(const IR::IDeclaration *decl) {
-        auto s = getStorage(decl);
+    const StorageLocation *getOrAdd(const IR::IDeclaration *decl) {
+        const auto *s = getStorage(decl);
         if (s != nullptr) return s;
         return add(decl);
     }
-    StorageLocation *getStorage(const IR::IDeclaration *decl) const {
+    const StorageLocation *getStorage(const IR::IDeclaration *decl) const {
         CHECK_NULL(decl);
         auto result = ::P4::get(storage, decl);
         return result;
@@ -580,11 +580,11 @@ class AllDefinitions : public IHasDbPrint {
         atPoint[point] = defs;
     }
 
-    StorageLocation *getStorage(const IR::IDeclaration *decl) const {
+    const StorageLocation *getStorage(const IR::IDeclaration *decl) const {
         return storageMap.getStorage(decl);
     }
 
-    StorageLocation *getOrAddStorage(const IR::IDeclaration *decl) {
+    const StorageLocation *getOrAddStorage(const IR::IDeclaration *decl) {
         return storageMap.getOrAdd(decl);
     }
 

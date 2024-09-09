@@ -396,7 +396,7 @@ void ComputeWriteSet::enterScope(const IR::ParameterList *parameters,
 
     if (parameters != nullptr) {
         for (auto p : parameters->parameters) {
-            StorageLocation *loc = allDefinitions->getOrAddStorage(p);
+            const StorageLocation *loc = allDefinitions->getOrAddStorage(p);
             if (loc == nullptr) continue;
             if (p->direction == IR::Direction::In || p->direction == IR::Direction::InOut ||
                 p->direction == IR::Direction::None)
@@ -410,8 +410,7 @@ void ComputeWriteSet::enterScope(const IR::ParameterList *parameters,
     if (locals != nullptr) {
         for (auto d : *locals) {
             if (d->is<IR::Declaration_Variable>()) {
-                StorageLocation *loc = allDefinitions->getOrAddStorage(d);
-                if (loc != nullptr) {
+                if (const StorageLocation *loc = allDefinitions->getOrAddStorage(d)) {
                     defs->setDefinition(loc, uninit);
                     defs->setDefinition(loc->getValidBits(), startPoints);
                     defs->setDefinition(loc->getLastIndexField(), startPoints);
@@ -434,7 +433,7 @@ void ComputeWriteSet::exitScope(const IR::ParameterList *parameters,
     currentDefinitions = currentDefinitions->cloneDefinitions();
     if (parameters != nullptr) {
         for (auto p : parameters->parameters) {
-            StorageLocation *loc = allDefinitions->getStorage(p);
+            const StorageLocation *loc = allDefinitions->getStorage(p);
             if (loc != nullptr) {
                 LOG5("Removing location " << loc);
                 currentDefinitions->removeLocation(loc);
@@ -444,7 +443,7 @@ void ComputeWriteSet::exitScope(const IR::ParameterList *parameters,
     if (locals != nullptr) {
         for (auto d : *locals) {
             if (d->is<IR::Declaration_Variable>()) {
-                StorageLocation *loc = allDefinitions->getStorage(d);
+                const StorageLocation *loc = allDefinitions->getStorage(d);
                 if (loc != nullptr) {
                     LOG5("Removing location " << loc);
                     currentDefinitions->removeLocation(loc);
