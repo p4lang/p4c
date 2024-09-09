@@ -50,6 +50,8 @@ struct loc_t {
     std::size_t hash() const;
 };
 
+// #define DEBUG_LOCATION_IDS
+
 /// Abstraction for something that is has a left value (variable, parameter)
 class StorageLocation : public IHasDbPrint, public ICastable {
 #ifdef DEBUG_LOCATION_IDS
@@ -230,11 +232,18 @@ class ArrayLocation : public IndexedLocation {
 };
 
 class StorageFactory {
+    // FIXME: Allocate StorageLocations from an arena, not global allocator
+    mutable std::vector<std::unique_ptr<StorageLocation>> storageLocations;
+
+    template <class T>
+    T *construct(const IR::Type *type, cstring name) const;
+
+    static constexpr std::string_view indexFieldName = "$last_index";
+
  public:
     StorageLocation *create(const IR::Type *type, cstring name) const;
 
     static const cstring validFieldName;
-    static const cstring indexFieldName;
 };
 
 /// A set of locations that may be read or written by a computation.
@@ -645,7 +654,7 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
                     const IR::IndexedVector<IR::Declaration> *locals, ProgramPoint startPoint,
                     bool clear = true);
     void exitScope(const IR::ParameterList *parameters,
-                   const IR::IndexedVector<IR::Declaration> *locals);
+                   const IR::IndexedVector<IR::Declaration> *locals, ProgramPoint endPoint);
     Definitions *getDefinitionsAfter(const IR::ParserState *state);
     bool setDefinitions(Definitions *defs, const IR::Node *who = nullptr, bool overwrite = false);
     ProgramPoint getProgramPoint(const IR::Node *node = nullptr) const;

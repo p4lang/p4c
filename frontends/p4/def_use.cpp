@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "def_use.h"
 
+#include "absl/strings/str_cat.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/tableApply.h"
 #include "lib/ordered_set.h"
@@ -27,13 +28,17 @@ using namespace literals;
 
 // internal name for header valid bit; used only locally
 const cstring StorageFactory::validFieldName = "$valid"_cs;
-const cstring StorageFactory::indexFieldName = "$lastIndex"_cs;
 const LocationSet *LocationSet::empty = new LocationSet();
 ProgramPoint ProgramPoint::beforeStart;
 
 #ifdef DEBUG_LOCATION_IDS
 unsigned StorageLocation::crtid = 0;
 #endif
+
+template <class T>
+T *StorageFactory::construct(const IR::Type *type, cstring name) const {
+    return storageLocations.emplace_back(new T(type, name)).get()->template to<T>();
+}
 
 StorageLocation *StorageFactory::create(const IR::Type *type, cstring name) const {
     if (type->is<IR::Type_Bits>() || type->is<IR::Type_Boolean>() || type->is<IR::Type_Varbits>() ||
@@ -43,7 +48,8 @@ StorageLocation *StorageFactory::create(const IR::Type *type, cstring name) cons
         type->is<IR::Type_Var>() ||
         // Also for newtype
         type->is<IR::Type_Newtype>())
-        return new BaseLocation(type, name);
+        return construct<BaseLocation>(type, name);
+
     if (auto bl = type->to<IR::Type_BaseList>()) {
         // A tuple with no fields is treated like a base location.
         // The other tuples are treated as a collection of their
@@ -53,24 +59,25 @@ StorageLocation *StorageFactory::create(const IR::Type *type, cstring name) cons
         // assignments do something: they intialize the value
         // (although it's not clear what an uninitialized value of
         // type empty tuple could be).
-        if (bl->getSize() == 0) return new BaseLocation(type, name);
+        if (bl->getSize() == 0) return construct<BaseLocation>(type, name);
 
         // Tuple and List
-        auto result = new TupleLocation(type, name);
+        auto *result = construct<TupleLocation>(type, name);
         size_t index = 0;
-        for (auto t : bl->components) {
-            cstring fieldName = name + "[" + Util::toString(index) + "]";
-            auto sl = create(t, fieldName);
+        for (const auto *t : bl->components) {
+            cstring fieldName = absl::StrCat(name.string_view(), "[", index, "]");
+            auto *sl = create(t, fieldName);
             result->createElement(index, sl);
             index++;
         }
         return result;
     }
+
     if (auto st = type->to<IR::Type_StructLike>()) {
         if (st->is<IR::Type_Struct>() && st->fields.size() == 0)
             // See the comment above about empty tuples
-            return new BaseLocation(type, name);
-        auto result = new StructLocation(type, name);
+            return construct<BaseLocation>(type, name);
+        auto *result = construct<StructLocation>(type, name);
 
         // For header unions we will model all of the valid fields
         // for all components as a single shared field.  The
@@ -94,14 +101,16 @@ StorageLocation *StorageFactory::create(const IR::Type *type, cstring name) cons
         }
         return result;
     } else if (auto st = type->to<IR::Type_Stack>()) {
-        auto result = new ArrayLocation(st, name);
+        auto *result = construct<ArrayLocation>(st, name);
         for (unsigned i = 0; i < st->getSize(); i++) {
-            auto sl = create(st->elementType, name + "[" + Util::toString(i) + "]");
+            auto *sl = create(st->elementType, absl::StrCat(name.string_view(), "[", i, "]"));
             result->createElement(i, sl);
         }
-        result->setLastIndexField(create(IR::Type_Bits::get(32), name + "." + indexFieldName));
+        result->setLastIndexField(
+            create(IR::Type_Bits::get(32), absl::StrCat(name.string_view(), ".", indexFieldName)));
         return result;
     }
+
     return nullptr;
 }
 
@@ -175,10 +184,9 @@ const LocationSet *LocationSet::join(const LocationSet *other) const {
 }
 
 const LocationSet *LocationSet::getArrayLastIndex() const {
-    auto result = new LocationSet();
-    for (auto l : locations) {
-        if (l->is<ArrayLocation>()) {
-            auto array = l->to<ArrayLocation>();
+    auto *result = new LocationSet();
+    for (const auto *l : locations) {
+        if (const auto *array = l->to<ArrayLocation>()) {
             result->add(array->getLastIndexField());
         }
     }
@@ -186,19 +194,19 @@ const LocationSet *LocationSet::getArrayLastIndex() const {
 }
 
 const LocationSet *LocationSet::getField(cstring field) const {
-    auto result = new LocationSet();
-    for (auto l : locations) {
-        if (auto strct = l->to<StructLocation>()) {
+    auto *result = new LocationSet();
+    for (const auto *l : locations) {
+        if (const auto *strct = l->to<StructLocation>()) {
             if (field == StorageFactory::validFieldName && strct->isHeaderUnion()) {
                 // special handling for union.isValid()
-                for (auto f : strct->fields()) {
+                for (const auto *f : strct->fields()) {
                     f->to<StructLocation>()->addField(field, result);
                 }
             } else {
                 strct->addField(field, result);
             }
-        } else if (auto array = l->to<ArrayLocation>()) {
-            for (auto f : *array) {
+        } else if (const auto *array = l->to<ArrayLocation>()) {
+            for (const auto *f : *array) {
                 if (field == IR::Type_Stack::next || field == IR::Type_Stack::last) {
                     result->add(f);
                 } else {
@@ -428,19 +436,27 @@ void ComputeWriteSet::enterScope(const IR::ParameterList *parameters,
 }
 
 void ComputeWriteSet::exitScope(const IR::ParameterList *parameters,
-                                const IR::IndexedVector<IR::Declaration> *locals) {
+                                const IR::IndexedVector<IR::Declaration> *locals,
+                                ProgramPoint exitPoint) {
+    LOG5("CWS Exited scope " << exitPoint);
     currentDefinitions = currentDefinitions->cloneDefinitions();
     if (parameters != nullptr) {
         for (auto p : parameters->parameters) {
             StorageLocation *loc = allDefinitions->getStorage(p);
-            if (loc != nullptr) currentDefinitions->removeLocation(loc);
+            if (loc != nullptr) {
+                LOG5("Removing location " << loc);
+                currentDefinitions->removeLocation(loc);
+            }
         }
     }
     if (locals != nullptr) {
         for (auto d : *locals) {
             if (d->is<IR::Declaration_Variable>()) {
                 StorageLocation *loc = allDefinitions->getStorage(d);
-                if (loc != nullptr) currentDefinitions->removeLocation(loc);
+                if (loc != nullptr) {
+                    LOG5("Removing location " << loc);
+                    currentDefinitions->removeLocation(loc);
+                }
             }
         }
     }
@@ -1044,7 +1060,7 @@ bool ComputeWriteSet::preorder(const IR::P4Action *action) {
     visit(action->body);
     currentDefinitions = currentDefinitions->joinDefinitions(returnedDefinitions);
     setDefinitions(currentDefinitions, action->body, true);  // overwrite
-    exitScope(action->parameters, decls);
+    exitScope(action->parameters, decls, pt);
     returnedDefinitions = saveReturned;
     return false;
 }
@@ -1096,7 +1112,7 @@ bool ComputeWriteSet::preorder(const IR::Function *function) {
     else
         LOG3("CWS @" << point.after() << " with " << currentDefinitions->size() << " defs");
     allDefinitions->setDefinitionsAt(point.after(), currentDefinitions, false);
-    exitScope(function->type->parameters, locals);
+    exitScope(function->type->parameters, locals, point);
 
     returnedDefinitions = saveReturned;
     LOG3("Done " << dbp(function));
@@ -1119,7 +1135,7 @@ bool ComputeWriteSet::preorder(const IR::P4Table *table) {
         visit(ale->expression);
         after = after->joinDefinitions(currentDefinitions);
     }
-    exitScope(nullptr, nullptr);
+    exitScope(nullptr, nullptr, pt);
     currentDefinitions = after;
     return false;
 }
