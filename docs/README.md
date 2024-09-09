@@ -152,16 +152,6 @@ XX is a number between 02-99. Currently, 00_revision_history.md
 contains the documentation revision history, and 01_overview.md is the
 overview of the compiler goals and architecture.
 
-## Building the Doxygen documentation
-- Doxygen is configured in `docs/doxygen/doxygen.cfg`.
-- The main HTML page is configured in `docs/doxygen/Doxymain.md`:
-  - CSS for the card effect is in `docs/assets/css/card.css`.
-  - The effect for the Easter egg toggle is defined in `docs/assets/css/flow.css`. 
-  - The homepage P4C architecture is rendered using `docs/assets/architecture_unanimated.html`, with the editable draw file available at `docs/assets/Architecture.drawio`.
-- Add pages and subpages manually to the sidebar (see `docs/doxygen/p4c_layout.xml`).
-- TOCs in markdown files are created with the `[TOC]` command.
-- The base style for Doxygen Awesome is described in the [Doxygen Awesome Documentation](https://jothepro.github.io/doxygen-awesome-css/) and the updated color scheme is defined in [`docs\assets\css\p4c_custom.css`](https://github.com/p4lang/p4c/blob/main/docs/assets/css/p4c_custom.css).
-
 ## C/C++ Documentation Comments Style Guide 
 - Use triple slashes `///` for documenting functions and classes in files.
 - Double slashes `//` should be used for "internal" comments within functions.
@@ -172,7 +162,17 @@ overview of the compiler goals and architecture.
   - First letter of the comment should be a capital letter.
   - Each comment should end with a period.
 
-## Doxygen Comments Style Guide
+## Building the Doxygen documentation
+- Doxygen is configured in `docs/doxygen/doxygen.cfg`.
+- The main HTML page is configured in `docs/doxygen/Doxymain.md`:
+  - CSS for the card effect is in `docs/assets/css/card.css`.
+  - The effect for the Easter egg toggle is defined in `docs/assets/css/flow.css`. 
+  - The homepage P4C architecture is rendered using `docs/assets/architecture_unanimated.html`, with the editable draw file available at `docs/assets/Architecture.drawio`.
+- Add pages and subpages manually to the sidebar (see `docs/doxygen/p4c_layout.xml`).
+- TOCs in markdown files are created with the `[TOC]` command.
+- The base style for Doxygen Awesome is described in the [Doxygen Awesome Documentation](https://jothepro.github.io/doxygen-awesome-css/) and the updated color scheme is defined in [`docs\assets\css\p4c_custom.css`](https://github.com/p4lang/p4c/blob/main/docs/assets/css/p4c_custom.css).
+
+### Doxygen Comments Style Guide
 - Comment Markup and Documentation Commands
   -  `<!-- ... -->` is used for adding documentation inclusion notes. This content is hidden from both the rendered Markdown and Doxygen, but visible in the raw view on GitHub.
   - ```<!--! ... -->``` hides commands from GitHub’s Markdown rendering but provides instructions to Doxygen. For example:
