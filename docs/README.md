@@ -152,7 +152,7 @@ XX is a number between 02-99. Currently, 00_revision_history.md
 contains the documentation revision history, and 01_overview.md is the
 overview of the compiler goals and architecture.
 
-## Quick guide for developing the Doxygen documentation
+## Building the Doxygen documentation
 - Doxygen is configured in `docs/doxygen/doxygen.cfg`.
 - The main HTML page is configured in `docs/doxygen/Doxymain.md`:
   - CSS for the card effect is in `docs/assets/css/card.css`.
