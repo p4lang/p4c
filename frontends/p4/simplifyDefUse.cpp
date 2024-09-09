@@ -468,18 +468,16 @@ class FindUninitialized : public Inspector {
                                               << defs);
         for (auto p : parameters->parameters) {
             if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut) {
-                auto storage = definitions->getStorage(p);
+                const auto *storage = definitions->getStorage(p);
                 LOG3("Checking parameter: " << p);
                 if (storage == nullptr) continue;
 
-                const LocationSet *loc = new LocationSet(storage);
-                auto points = defs->getPoints(loc);
+                const auto *points = defs->getPoints(LocationSet(storage));
                 hasUses.add(points);
                 if (typeMap->typeIsEmpty(storage->type)) continue;
                 // Check uninitialized non-headers (headers can be invalid).
                 // inout parameters can never match here, so we could skip them.
-                loc = storage->removeHeaders();
-                points = defs->getPoints(loc);
+                points = defs->getPoints(storage->removeHeaders());
                 if (points->containsBeforeStart())
                     warn(ErrorType::WARN_UNINITIALIZED_OUT_PARAM,
                          "out parameter '%1%' may be uninitialized when "
@@ -1043,7 +1041,7 @@ class FindUninitialized : public Inspector {
         }
         LOG3("LocationSet for '" << expression << "' is <<" << read << ">>");
 
-        auto points = currentDefinitions->getPoints(read);
+        auto points = currentDefinitions->getPoints(*read);
 
         if (reportUninitialized && !lhs && points->containsBeforeStart() &&
             hasUninitializedHeaderUnion(expression, currentDefinitions, read)) {
@@ -1054,7 +1052,7 @@ class FindUninitialized : public Inspector {
             if (auto structType = type->to<IR::Type_StructLike>()) {
                 for (auto field : structType->fields) {
                     auto fieldLoc = read->getField(field->name);
-                    auto fieldPoints = currentDefinitions->getPoints(fieldLoc);
+                    auto fieldPoints = currentDefinitions->getPoints(*fieldLoc);
                     if (fieldPoints->containsBeforeStart()) {
                         warn(ErrorType::WARN_UNINITIALIZED_USE, "%1%.%2% may be uninitialized",
                              expression, field->name.toString());
@@ -1104,7 +1102,7 @@ class FindUninitialized : public Inspector {
         auto huType = type->to<IR::Type_HeaderUnion>();
         for (auto header : huType->fields) {
             auto headerLoc = read->getField(header->name);
-            auto points = currentDefinitions->getPoints(headerLoc);
+            auto points = currentDefinitions->getPoints(*headerLoc);
             if (!points->containsBeforeStart()) {
                 return false;
             }

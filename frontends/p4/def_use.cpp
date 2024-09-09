@@ -114,9 +114,9 @@ StorageLocation *StorageFactory::create(const IR::Type *type, cstring name) cons
     return nullptr;
 }
 
-const LocationSet *StorageLocation::removeHeaders() const {
-    auto result = new LocationSet();
-    removeHeaders(result);
+LocationSet StorageLocation::removeHeaders() const {
+    LocationSet result;
+    removeHeaders(&result);
     return result;
 }
 
@@ -351,19 +351,19 @@ void Definitions::removeLocation(const StorageLocation *location) {
     }
 }
 
-const ProgramPoints *Definitions::getPoints(const LocationSet *locations) const {
+const ProgramPoints *Definitions::getPoints(const LocationSet &locations) const {
     ProgramPoints *result = new ProgramPoints();
-    for (const auto *sl : locations->canonical()) {
+    for (const auto *sl : locations.canonical()) {
         const auto *points = getPoints(sl->to<BaseLocation>());
         result->add(points);
     }
     return result;
 }
 
-Definitions *Definitions::writes(ProgramPoint point, const LocationSet *locations) const {
+Definitions *Definitions::writes(ProgramPoint point, const LocationSet &locations) const {
     auto result = new Definitions(*this);
     auto points = new ProgramPoints(point);
-    for (auto l : locations->canonical()) result->setDefinition(l->to<BaseLocation>(), points);
+    for (auto l : locations.canonical()) result->setDefinition(l->to<BaseLocation>(), points);
     return result;
 }
 
@@ -539,11 +539,7 @@ bool ComputeWriteSet::preorder(const IR::Literal *expression) {
 
 bool ComputeWriteSet::preorder(const IR::Slice *expression) {
     visit(expression->e0);
-    auto base = getWrites(expression->e0);
-    if (lhs)
-        expressionWrites(expression, base);
-    else
-        expressionWrites(expression, LocationSet::empty);
+    expressionWrites(expression, lhs ? getWrites(expression->e0) : LocationSet::empty);
     return false;
 }
 
@@ -559,11 +555,7 @@ bool ComputeWriteSet::preorder(const IR::PathExpression *expression) {
     }
     auto decl = refMap->getDeclaration(expression->path, true);
     auto storage = allDefinitions->getStorage(decl);
-    const LocationSet *result;
-    if (storage != nullptr)
-        result = new LocationSet(storage);
-    else
-        result = LocationSet::empty;
+    const LocationSet *result = storage ? new LocationSet(storage) : LocationSet::empty;
     expressionWrites(expression, result);
     return false;
 }
@@ -875,7 +867,7 @@ bool ComputeWriteSet::preorder(const IR::IfStatement *statement) {
     visit(statement->condition);
     auto cond = getWrites(statement->condition);
     // defs are the definitions after evaluating the condition
-    auto defs = currentDefinitions->writes(getProgramPoint(), cond);
+    auto defs = currentDefinitions->writes(getProgramPoint(), *cond);
     (void)setDefinitions(defs, statement->condition, false);
     visit(statement->ifTrue);
     auto result = currentDefinitions;
@@ -902,7 +894,7 @@ bool ComputeWriteSet::preorder(const IR::ForStatement *statement) {
         visit(statement->condition, "condition");
         auto cond = getWrites(statement->condition);
         // exitDefs are the definitions after evaluating the condition
-        exitDefs = currentDefinitions->writes(getProgramPoint(), cond);
+        exitDefs = currentDefinitions->writes(getProgramPoint(), *cond);
         (void)setDefinitions(exitDefs, statement->condition, true);
         visit(statement->body, "body");
         currentDefinitions = currentDefinitions->joinDefinitions(continueDefinitions);
@@ -934,7 +926,7 @@ bool ComputeWriteSet::preorder(const IR::ForInStatement *statement) {
         visit(statement->ref, "ref");
         lhs = false;
         auto cond = getWrites(statement->ref);
-        auto defs = currentDefinitions->writes(getProgramPoint(), cond);
+        auto defs = currentDefinitions->writes(getProgramPoint(), *cond);
         (void)setDefinitions(defs, statement->ref, true);
         visit(statement->body, "body");
         currentDefinitions = currentDefinitions->joinDefinitions(continueDefinitions);
@@ -1001,7 +993,7 @@ bool ComputeWriteSet::preorder(const IR::AssignmentStatement *statement) {
     auto l = getWrites(statement->left);
     auto r = getWrites(statement->right);
     locs = l->join(r);
-    auto defs = currentDefinitions->writes(getProgramPoint(), locs);
+    auto defs = currentDefinitions->writes(getProgramPoint(), *locs);
     return setDefinitions(defs);
 }
 
@@ -1010,7 +1002,7 @@ bool ComputeWriteSet::preorder(const IR::SwitchStatement *statement) {
     if (currentDefinitions->isUnreachable()) return setDefinitions(currentDefinitions);
     visit(statement->expression);
     auto locs = getWrites(statement->expression);
-    auto defs = currentDefinitions->writes(getProgramPoint(statement->expression), locs);
+    auto defs = currentDefinitions->writes(getProgramPoint(statement->expression), *locs);
     (void)setDefinitions(defs, statement->expression, false);
     auto save = currentDefinitions;
     auto result = new Definitions();
@@ -1137,7 +1129,7 @@ bool ComputeWriteSet::preorder(const IR::MethodCallStatement *statement) {
     lhs = false;
     visit(statement->methodCall);
     auto locs = getWrites(statement->methodCall);
-    auto defs = currentDefinitions->writes(getProgramPoint(), locs);
+    auto defs = currentDefinitions->writes(getProgramPoint(), *locs);
     return setDefinitions(defs, statement, true);  // overwrite
 }
 

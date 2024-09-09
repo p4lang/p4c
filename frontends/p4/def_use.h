@@ -85,7 +85,7 @@ class StorageLocation : public IHasDbPrint, public ICastable {
     LocationSet getValidBits() const;
     virtual void addValidBits(LocationSet *result) const = 0;
     /// @returns All locations inside if we exclude all headers.
-    const LocationSet *removeHeaders() const;
+    LocationSet removeHeaders() const;
     virtual void removeHeaders(LocationSet *result) const = 0;
     /// @returns All locations inside that represent the 'lastIndex' of an array.
     LocationSet getLastIndexField() const;
@@ -504,7 +504,7 @@ class Definitions : public IHasDbPrint {
         : definitions(other.definitions), unreachable(other.unreachable) {}
     Definitions *joinDefinitions(const Definitions *other) const;
     /// Point writes the specified LocationSet.
-    Definitions *writes(ProgramPoint point, const LocationSet *locations) const;
+    Definitions *writes(ProgramPoint point, const LocationSet &locations) const;
     void setDefintion(const BaseLocation *loc, const ProgramPoints *point) {
         CHECK_NULL(loc);
         CHECK_NULL(point);
@@ -525,7 +525,7 @@ class Definitions : public IHasDbPrint {
         BUG_CHECK(r != nullptr, "no definitions found for %1%", location);
         return r;
     }
-    const ProgramPoints *getPoints(const LocationSet *locations) const;
+    const ProgramPoints *getPoints(const LocationSet &locations) const;
     bool operator==(const Definitions &other) const;
     void dbprint(std::ostream &out) const override {
         if (unreachable) {
