@@ -334,19 +334,17 @@ Definitions *Definitions::joinDefinitions(const Definitions *other) const {
 }
 
 void Definitions::setDefinition(const StorageLocation *location, const ProgramPoints *point) {
-    LocationSet locset;
-    locset.addCanonical(location);
-    for (auto sl : locset) definitions[sl->to<BaseLocation>()] = point;
+    LocationSet locset(location);
+    for (const auto *sl : locset.canonical()) definitions[sl->to<BaseLocation>()] = point;
 }
 
 void Definitions::setDefinition(const LocationSet *locations, const ProgramPoints *point) {
-    for (auto sl : *locations->canonicalize()) definitions[sl->to<BaseLocation>()] = point;
+    for (const auto *sl : locations->canonical()) definitions[sl->to<BaseLocation>()] = point;
 }
 
 void Definitions::removeLocation(const StorageLocation *location) {
-    auto loc = new LocationSet();
-    loc->addCanonical(location);
-    for (auto sl : *loc) {
+    LocationSet locset(location);
+    for (const auto *sl : locset.canonical()) {
         auto bl = sl->to<BaseLocation>();
         auto it = definitions.find(bl);
         if (it != definitions.end()) definitions.erase(it);
@@ -355,7 +353,7 @@ void Definitions::removeLocation(const StorageLocation *location) {
 
 const ProgramPoints *Definitions::getPoints(const LocationSet *locations) const {
     ProgramPoints *result = new ProgramPoints();
-    for (const auto *sl : *locations->canonicalize()) {
+    for (const auto *sl : locations->canonical()) {
         const auto *points = getPoints(sl->to<BaseLocation>());
         result->add(points);
     }
@@ -365,8 +363,7 @@ const ProgramPoints *Definitions::getPoints(const LocationSet *locations) const 
 Definitions *Definitions::writes(ProgramPoint point, const LocationSet *locations) const {
     auto result = new Definitions(*this);
     auto points = new ProgramPoints(point);
-    auto canon = locations->canonicalize();
-    for (auto l : *canon) result->setDefinition(l->to<BaseLocation>(), points);
+    for (auto l : locations->canonical()) result->setDefinition(l->to<BaseLocation>(), points);
     return result;
 }
 

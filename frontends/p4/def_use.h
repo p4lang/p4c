@@ -249,7 +249,65 @@ class StorageFactory {
 /// A set of locations that may be read or written by a computation.
 /// In general this is a conservative approximation of the actual location set.
 class LocationSet : public IHasDbPrint {
-    ordered_set<const StorageLocation *> locations;
+    using LocationsStorage = ordered_set<const StorageLocation *>;
+    LocationsStorage locations;
+
+    class canonical_iterator {
+        absl::InlinedVector<const StorageLocation *, 8> workList;
+
+        void unwrapTop() {
+            if (workList.empty()) return;
+
+            const auto *location = workList.back();
+            if (location->is<BaseLocation>()) return;
+
+            if (const auto *wfl = location->to<WithFieldsLocation>()) {
+                workList.pop_back();
+                for (const auto *f : Util::iterator_range(wfl->fields()).reverse())
+                    workList.push_back(f);
+                unwrapTop();
+                return;
+            }
+
+            if (const auto *a = location->to<IndexedLocation>()) {
+                workList.pop_back();
+                for (const auto *f : Util::iterator_range(*a).reverse()) workList.push_back(f);
+                unwrapTop();
+                return;
+            }
+
+            BUG("unexpected location");
+        }
+
+     public:
+        using iterator_category = std::forward_iterator_tag;
+        using value_type = const StorageLocation *;
+        using difference_type = ptrdiff_t;
+        using pointer = value_type;
+        using reference = value_type;
+
+        canonical_iterator() = default;
+
+        explicit canonical_iterator(const LocationsStorage &locations) {
+            for (const auto *loc : Util::iterator_range(locations).reverse())
+                workList.push_back(loc);
+            unwrapTop();
+        }
+        canonical_iterator &operator++() {
+            workList.pop_back();
+            unwrapTop();
+            return *this;
+        }
+        canonical_iterator operator++(int) {
+            auto copy = *this;
+            ++*this;
+            return copy;
+        }
+        bool operator==(const canonical_iterator &i) const { return workList == i.workList; }
+        bool operator!=(const canonical_iterator &i) const { return workList != i.workList; }
+        reference operator*() const { return workList.back(); }
+        pointer operator->() const { return workList.back(); }
+    };
 
  public:
     LocationSet() = default;
@@ -275,10 +333,12 @@ class LocationSet : public IHasDbPrint {
     /// e.g., a StructLocation is expanded in all its fields.
     const LocationSet *canonicalize() const;
     void addCanonical(const StorageLocation *location);
-    ordered_set<const StorageLocation *>::const_iterator begin() const {
-        return locations.cbegin();
-    }
-    ordered_set<const StorageLocation *>::const_iterator end() const { return locations.cend(); }
+    auto begin() const { return locations.cbegin(); }
+    auto end() const { return locations.cend(); }
+    auto canon_begin() const { return canonical_iterator(locations); }
+    auto canon_end() const { return canonical_iterator(); }
+    auto canonical() const { return Util::iterator_range(canon_begin(), canon_end()); }
+
     void dbprint(std::ostream &out) const override {
         if (locations.empty()) out << "LocationSet::empty";
         for (auto l : locations) {
