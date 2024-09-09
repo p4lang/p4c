@@ -135,13 +135,15 @@ $(function(){initNavTree('repository_structure.html',''); initResizable(true); }
     <a href="#writing-documentation">Writing documentation</a>
     <ul>
       <li class="level2">
-        <a href="#building-the-doxygen-documentation">Building the Doxygen documentation</a>
-      </li>
-      <li class="level2">
         <a href="#cc-documentation-comments-style-guide">C/C++ Documentation Comments Style Guide</a>
       </li>
       <li class="level2">
-        <a href="#doxygen-comments-style-guide">Doxygen Comments Style Guide</a>
+        <a href="#building-the-doxygen-documentation">Building the Doxygen documentation</a>
+        <ul>
+          <li class="level3">
+            <a href="#doxygen-comments-style-guide">Doxygen Comments Style Guide</a>
+          </li>
+        </ul>
       </li>
       <li class="level2">
         <a href="#git-usage">Git usage</a>
@@ -269,20 +271,6 @@ Writing documentation</h1>
 <p>Documentation is generated from two main sources: README files distributed across the repository and comments within the code. The README files are tagged with documentation inclusion notes to indicate their integration into the P4 compiler documentation.</p>
 <p>Code comments should capture the main intent of the implementation and the "why", rather than the "how". The how can be read from the code, however, documenting the reasons why a certain implementation was chosen will help other contributors understand the design choices and enable them to reuse your code. Also important in the context of the compiler is to document the invariants for each pass (or groups of passes), since it is likely that other developers will need to insert additional passes, and they should understand the effects that the pass ordering has on the AST.</p>
 <p>Documentation in the markup documents is intended for higher level design documentation. The files will be automatically captured in the documentation in the order implied by their naming: XX_my_doc.md where XX is a number between 02-99. Currently, 00_revision_history.md contains the documentation revision history, and 01_overview.md is the overview of the compiler goals and architecture.</p>
-<h2><a class="anchor" id="building-the-doxygen-documentation"></a>
-Building the Doxygen documentation</h2>
-<ul>
-<li>Doxygen is configured in <code>docs/doxygen/doxygen.cfg</code>.</li>
-<li>The main HTML page is configured in <code>docs/doxygen/Doxymain.md</code>:<ul>
-<li>CSS for the card effect is in <code>docs/assets/css/card.css</code>.</li>
-<li>The effect for the Easter egg toggle is defined in <code>docs/assets/css/flow.css</code>.</li>
-<li>The homepage P4C architecture is rendered using <code>docs/assets/architecture_unanimated.html</code>, with the editable draw file available at <code>docs/assets/Architecture.drawio</code>.</li>
-</ul>
-</li>
-<li>Add pages and subpages manually to the sidebar (see <code>docs/doxygen/p4c_layout.xml</code>).</li>
-<li>TOCs in markdown files are created with the <code>[TOC]</code> command.</li>
-<li>The base style for Doxygen Awesome is described in the <a href="https://jothepro.github.io/doxygen-awesome-css/">Doxygen Awesome Documentation</a> and the updated color scheme is defined in <a href="https://github.com/p4lang/p4c/blob/main/docs/assets/css/p4c_custom.css"><code>docs\assets\css\p4c_custom.css</code></a>.</li>
-</ul>
 <h2><a class="anchor" id="cc-documentation-comments-style-guide"></a>
 C/C++ Documentation Comments Style Guide</h2>
 <ul>
@@ -297,8 +285,22 @@ C/C++ Documentation Comments Style Guide</h2>
 </ul>
 </li>
 </ul>
-<h2><a class="anchor" id="doxygen-comments-style-guide"></a>
-Doxygen Comments Style Guide</h2>
+<h2><a class="anchor" id="building-the-doxygen-documentation"></a>
+Building the Doxygen documentation</h2>
+<ul>
+<li>Doxygen is configured in <code>docs/doxygen/doxygen.cfg</code>.</li>
+<li>The main HTML page is configured in <code>docs/doxygen/Doxymain.md</code>:<ul>
+<li>CSS for the card effect is in <code>docs/assets/css/card.css</code>.</li>
+<li>The effect for the Easter egg toggle is defined in <code>docs/assets/css/flow.css</code>.</li>
+<li>The homepage P4C architecture is rendered using <code>docs/assets/architecture_unanimated.html</code>, with the editable draw file available at <code>docs/assets/Architecture.drawio</code>.</li>
+</ul>
+</li>
+<li>Add pages and subpages manually to the sidebar (see <code>docs/doxygen/p4c_layout.xml</code>).</li>
+<li>TOCs in markdown files are created with the <code>[TOC]</code> command.</li>
+<li>The base style for Doxygen Awesome is described in the <a href="https://jothepro.github.io/doxygen-awesome-css/">Doxygen Awesome Documentation</a> and the updated color scheme is defined in <a href="https://github.com/p4lang/p4c/blob/main/docs/assets/css/p4c_custom.css"><code>docs\assets\css\p4c_custom.css</code></a>.</li>
+</ul>
+<h3><a class="anchor" id="doxygen-comments-style-guide"></a>
+Doxygen Comments Style Guide</h3>
 <ul>
 <li>Comment Markup and Documentation Commands<ul>
 <li><code>&lt;!-- ... --&gt;</code> is used for adding documentation inclusion notes. This content is hidden from both the rendered Markdown and Doxygen, but visible in the raw view on GitHub.</li>
