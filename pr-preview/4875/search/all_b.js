@@ -80,11 +80,12 @@ var searchData=
   ['build_77',['Build',['../p4fmt.html#build',1,'']]],
   ['build_20system_78',['Build system',['../getting_started.html#build-system',1,'']]],
   ['building_79',['Building',['../p4tools.html#building',1,'']]],
-  ['buildp4infomaps_80',['buildP4InfoMaps',['../class_p4_1_1_control_plane_a_p_i_1_1_p4_info_maps.html#a75be747c5b0f32b7f77ebd127bcc5adb',1,'P4::ControlPlaneAPI::P4InfoMaps']]],
-  ['buildresourcemap_81',['BuildResourceMap',['../class_p4_1_1_build_resource_map.html',1,'P4']]],
-  ['buildtableactionlist_82',['buildTableActionList',['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_table_stepper.html#aa4d706cf9596683abcd64fa32ee65472',1,'P4::P4Tools::P4Testgen::TableStepper']]],
-  ['buildtaintmask_83',['buildTaintMask',['../class_p4_1_1_p4_tools_1_1_taint.html#a8855ea5b12e60e64b143e7d6e5d2b83e',1,'P4::P4Tools::Taint']]],
-  ['builtinmethod_84',['BuiltInMethod',['../class_p4_1_1_built_in_method.html',1,'P4']]],
-  ['busy_85',['busy',['../class_p4_1_1_visitor_1_1_change_tracker.html#afdb84718ba8bb1c25d7bd34981b92597',1,'P4::Visitor::ChangeTracker::busy()'],['../class_p4_1_1_visitor_1_1_tracker.html#ad5149aa401fcc21a11b43ea1a0530413',1,'P4::Visitor::Tracker::busy()']]],
-  ['bytealignment_86',['ByteAlignment',['../struct_p4_1_1_d_p_d_k_1_1_byte_alignment.html',1,'P4::DPDK']]]
+  ['building_20the_20doxygen_20documentation_80',['Building the Doxygen documentation',['../repository_structure.html#building-the-doxygen-documentation',1,'']]],
+  ['buildp4infomaps_81',['buildP4InfoMaps',['../class_p4_1_1_control_plane_a_p_i_1_1_p4_info_maps.html#a75be747c5b0f32b7f77ebd127bcc5adb',1,'P4::ControlPlaneAPI::P4InfoMaps']]],
+  ['buildresourcemap_82',['BuildResourceMap',['../class_p4_1_1_build_resource_map.html',1,'P4']]],
+  ['buildtableactionlist_83',['buildTableActionList',['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_table_stepper.html#aa4d706cf9596683abcd64fa32ee65472',1,'P4::P4Tools::P4Testgen::TableStepper']]],
+  ['buildtaintmask_84',['buildTaintMask',['../class_p4_1_1_p4_tools_1_1_taint.html#a8855ea5b12e60e64b143e7d6e5d2b83e',1,'P4::P4Tools::Taint']]],
+  ['builtinmethod_85',['BuiltInMethod',['../class_p4_1_1_built_in_method.html',1,'P4']]],
+  ['busy_86',['busy',['../class_p4_1_1_visitor_1_1_change_tracker.html#afdb84718ba8bb1c25d7bd34981b92597',1,'P4::Visitor::ChangeTracker::busy()'],['../class_p4_1_1_visitor_1_1_tracker.html#ad5149aa401fcc21a11b43ea1a0530413',1,'P4::Visitor::Tracker::busy()']]],
+  ['bytealignment_87',['ByteAlignment',['../struct_p4_1_1_d_p_d_k_1_1_byte_alignment.html',1,'P4::DPDK']]]
 ];
