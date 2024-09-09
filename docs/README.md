@@ -162,11 +162,17 @@ overview of the compiler goals and architecture.
 - TOCs in markdown files are created with the `[TOC]` command.
 - The base style for Doxygen Awesome is described in the [Doxygen Awesome Documentation](https://jothepro.github.io/doxygen-awesome-css/) and the updated color scheme is defined in [`docs\assets\css\p4c_custom.css`](https://github.com/p4lang/p4c/blob/main/docs/assets/css/p4c_custom.css).
 
-## Documentation Comments Style Guide 
+## C/C++ Documentation Comments Style Guide 
 - Use triple slashes `///` for documenting functions and classes in files.
 - Double slashes `//` should be used for "internal" comments within functions.
 - Double slashes `//` should be used for inline comment.
 - For rare occasions such as adding comments to multi-line macros, you may use `/* ... */` style comments.
+- Formatting:
+  - There should be no space at the end of the comment.
+  - First letter of the comment should be a capital letter.
+  - Each comment should end with a period.
+
+## Doxygen Comments Style Guide
 - Comment Markup and Documentation Commands
   -  `<!-- ... -->` is used for adding documentation inclusion notes. This content is hidden from both the rendered Markdown and Doxygen, but visible in the raw view on GitHub.
   - ```<!--! ... -->``` hides commands from GitHub’s Markdown rendering but provides instructions to Doxygen. For example:
@@ -175,7 +181,7 @@ overview of the compiler goals and architecture.
 \page changelog Releases
 -->
 ```
-  -  `\internal` and `\external` commands within comments can be used to hide information from Doxygen while still displaying it on GitHub.
+  -  `\internal` and `\endinternal` commands within comments can be used to hide information from Doxygen while still displaying it on GitHub.
 ```
 <!--!
 \internal
@@ -185,10 +191,6 @@ This section is hidden from Doxygen but will be visible on GitHub.
 \endinternal
 -->
 ```
-- Formatting:
-  - There should be no space at the end of the comment.
-  - First letter of the comment should be a capital letter.
-  - Each comment should end with a period.
 
 Happy writing! Should you have any questions, please don't hesitate to ask.
 
