@@ -162,15 +162,15 @@ void IndexedLocation::addElement(unsigned index, LocationSet *result) const {
     result->add(elements.at(index));
 }
 
-const LocationSet *StorageLocation::getValidBits() const {
-    auto result = new LocationSet();
-    addValidBits(result);
+LocationSet StorageLocation::getValidBits() const {
+    LocationSet result;
+    addValidBits(&result);
     return result;
 }
 
-const LocationSet *StorageLocation::getLastIndexField() const {
-    auto result = new LocationSet();
-    addLastIndexField(result);
+LocationSet StorageLocation::getLastIndexField() const {
+    LocationSet result;
+    addLastIndexField(&result);
     return result;
 }
 
@@ -335,11 +335,11 @@ Definitions *Definitions::joinDefinitions(const Definitions *other) const {
 
 void Definitions::setDefinition(const StorageLocation *location, const ProgramPoints *point) {
     LocationSet locset(location);
-    for (const auto *sl : locset.canonical()) definitions[sl->to<BaseLocation>()] = point;
+    setDefinition(locset, point);
 }
 
-void Definitions::setDefinition(const LocationSet *locations, const ProgramPoints *point) {
-    for (const auto *sl : locations->canonical()) definitions[sl->to<BaseLocation>()] = point;
+void Definitions::setDefinition(const LocationSet &locations, const ProgramPoints *point) {
+    for (const auto *sl : locations.canonical()) definitions[sl->to<BaseLocation>()] = point;
 }
 
 void Definitions::removeLocation(const StorageLocation *location) {
@@ -403,10 +403,8 @@ void ComputeWriteSet::enterScope(const IR::ParameterList *parameters,
                 defs->setDefinition(loc, startPoints);
             else if (p->direction == IR::Direction::Out)
                 defs->setDefinition(loc, uninit);
-            auto valid = loc->getValidBits();
-            defs->setDefinition(valid, startPoints);
-            auto lastIndex = loc->getLastIndexField();
-            defs->setDefinition(lastIndex, startPoints);
+            defs->setDefinition(loc->getValidBits(), startPoints);
+            defs->setDefinition(loc->getLastIndexField(), startPoints);
         }
     }
     if (locals != nullptr) {
@@ -415,10 +413,8 @@ void ComputeWriteSet::enterScope(const IR::ParameterList *parameters,
                 StorageLocation *loc = allDefinitions->getOrAddStorage(d);
                 if (loc != nullptr) {
                     defs->setDefinition(loc, uninit);
-                    auto valid = loc->getValidBits();
-                    defs->setDefinition(valid, startPoints);
-                    auto lastIndex = loc->getLastIndexField();
-                    defs->setDefinition(lastIndex, startPoints);
+                    defs->setDefinition(loc->getValidBits(), startPoints);
+                    defs->setDefinition(loc->getLastIndexField(), startPoints);
                 }
             }
         }

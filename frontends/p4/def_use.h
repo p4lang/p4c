@@ -82,13 +82,13 @@ class StorageLocation : public IHasDbPrint, public ICastable {
     cstring toString() const { return name; }
 
     /// @returns All locations inside that represent valid bits.
-    const LocationSet *getValidBits() const;
+    LocationSet getValidBits() const;
     virtual void addValidBits(LocationSet *result) const = 0;
     /// @returns All locations inside if we exclude all headers.
     const LocationSet *removeHeaders() const;
     virtual void removeHeaders(LocationSet *result) const = 0;
     /// @returns All locations inside that represent the 'lastIndex' of an array.
-    const LocationSet *getLastIndexField() const;
+    LocationSet getLastIndexField() const;
     virtual void addLastIndexField(LocationSet *result) const = 0;
 
     DECLARE_TYPEINFO(StorageLocation);
@@ -511,7 +511,7 @@ class Definitions : public IHasDbPrint {
         definitions[loc] = point;
     }
     void setDefinition(const StorageLocation *loc, const ProgramPoints *point);
-    void setDefinition(const LocationSet *loc, const ProgramPoints *point);
+    void setDefinition(const LocationSet &loc, const ProgramPoints *point);
     Definitions *setUnreachable() {
         unreachable = true;
         return this;
