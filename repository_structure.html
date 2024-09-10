@@ -135,7 +135,15 @@ $(function(){initNavTree('repository_structure.html',''); initResizable(true); }
     <a href="#writing-documentation">Writing documentation</a>
     <ul>
       <li class="level2">
-        <a href="#documentation-comments-style-guide">Documentation Comments Style Guide</a>
+        <a href="#cc-documentation-comments-style-guide">C/C++ Documentation Comments Style Guide</a>
+      </li>
+      <li class="level2">
+        <a href="#building-the-doxygen-documentation">Building the Doxygen documentation</a>
+        <ul>
+          <li class="level3">
+            <a href="#doxygen-comments-style-guide">Doxygen Comments Style Guide</a>
+          </li>
+        </ul>
       </li>
       <li class="level2">
         <a href="#git-usage">Git usage</a>
@@ -260,19 +268,56 @@ Additional documentation</h1>
 Writing documentation</h1>
 <p>Documenting the workings of the compiler is a never-ending (many times overlooked) job. We can always write better documentation!</p>
 <p>In P4C, documentation is generated using Doxygen. The generated documentation depends on <a href="https://github.com/jothepro/doxygen-awesome-css">Doxygen Awesome CSS</a>. The documentation is dynamically updated and deployed on <a href="https://p4lang.github.io/p4c/">GitHub Pages</a>.</p>
-<p>There are two main sources from which we generate documentation: comments in the code and markup documents in the docs/doxygen directory.</p>
+<p>Documentation is generated from two main sources: README files distributed across the repository and comments within the code. The README files are tagged with documentation inclusion notes to indicate their integration into the P4 compiler documentation.</p>
 <p>Code comments should capture the main intent of the implementation and the "why", rather than the "how". The how can be read from the code, however, documenting the reasons why a certain implementation was chosen will help other contributors understand the design choices and enable them to reuse your code. Also important in the context of the compiler is to document the invariants for each pass (or groups of passes), since it is likely that other developers will need to insert additional passes, and they should understand the effects that the pass ordering has on the AST.</p>
 <p>Documentation in the markup documents is intended for higher level design documentation. The files will be automatically captured in the documentation in the order implied by their naming: XX_my_doc.md where XX is a number between 02-99. Currently, 00_revision_history.md contains the documentation revision history, and 01_overview.md is the overview of the compiler goals and architecture.</p>
-<h2><a class="anchor" id="documentation-comments-style-guide"></a>
-Documentation Comments Style Guide</h2>
+<h2><a class="anchor" id="cc-documentation-comments-style-guide"></a>
+C/C++ Documentation Comments Style Guide</h2>
 <ul>
 <li>Use triple slashes <code>///</code> for documenting functions and classes in files.</li>
 <li>Double slashes <code>//</code> should be used for "internal" comments within functions.</li>
 <li>Double slashes <code>//</code> should be used for inline comment.</li>
 <li>For rare occasions such as adding comments to multi-line macros, you may use <code>/* ... */</code> style comments.</li>
+<li>Formatting:<ul>
 <li>There should be no space at the end of the comment.</li>
 <li>First letter of the comment should be a capital letter.</li>
 <li>Each comment should end with a period.</li>
+</ul>
+</li>
+</ul>
+<h2><a class="anchor" id="building-the-doxygen-documentation"></a>
+Building the Doxygen documentation</h2>
+<ul>
+<li>Doxygen is configured in <code>docs/doxygen/doxygen.cfg</code>.</li>
+<li>The main HTML page is configured in <code>docs/doxygen/Doxymain.md</code>:<ul>
+<li>CSS for the card effect is in <code>docs/assets/css/card.css</code>.</li>
+<li>The effect for the Easter egg toggle is defined in <code>docs/assets/css/flow.css</code>.</li>
+<li>The homepage P4C architecture is rendered using <code>docs/assets/architecture_unanimated.html</code>, with the editable draw file available at <code>docs/assets/Architecture.drawio</code>.</li>
+</ul>
+</li>
+<li>Add pages and subpages manually to the sidebar (see <code>docs/doxygen/p4c_layout.xml</code>).</li>
+<li>TOCs in markdown files are created with the <code>[TOC]</code> command.</li>
+<li>The base style for Doxygen Awesome is described in the <a href="https://jothepro.github.io/doxygen-awesome-css/">Doxygen Awesome Documentation</a> and the updated color scheme is defined in <a href="https://github.com/p4lang/p4c/blob/main/docs/assets/css/p4c_custom.css"><code>docs\assets\css\p4c_custom.css</code></a>.</li>
+</ul>
+<h3><a class="anchor" id="doxygen-comments-style-guide"></a>
+Doxygen Comments Style Guide</h3>
+<ul>
+<li>Comment Markup and Documentation Commands<ul>
+<li><code>&lt;!-- ... --&gt;</code> is used for adding documentation inclusion notes. This content is hidden from both the rendered Markdown and Doxygen, but visible in the raw view on GitHub.</li>
+<li><code>...</code> hides commands from GitHub’s Markdown rendering but provides instructions to Doxygen. For example: <div class="fragment"><div class="line">&lt;!--!</div>
+<div class="line">\page changelog Releases</div>
+<div class="line">--&gt;</div>
+</div><!-- fragment --></li>
+<li><code>\internal</code> and <code>\endinternal</code> commands within comments can be used to hide information from Doxygen while still displaying it on GitHub. <div class="fragment"><div class="line">&lt;!--!</div>
+<div class="line">\internal</div>
+<div class="line">--&gt;</div>
+<div class="line">This section is hidden from Doxygen but will be visible on GitHub.</div>
+<div class="line">&lt;!--!</div>
+<div class="line">\endinternal</div>
+<div class="line">--&gt;</div>
+</div><!-- fragment --></li>
+</ul>
+</li>
 </ul>
 <p>Happy writing! Should you have any questions, please don't hesitate to ask.</p>
 <h2><a class="anchor" id="git-usage"></a>
@@ -347,7 +392,7 @@ Coding conventions</h2>
 <ul>
 <li>Coding style is guided by the following rules.</li>
 <li>We generally follow the <a href="https://google.github.io/styleguide/cppguide.html">Google C++ Style Guide</a>. This is partially enforced by <code>cpplint</code> and <code>clang-format</code> and their respective configuration files. We have customized Google's <code>cpplint.py</code> tool for our purposes. The tool can be invoked with <code>make cpplint</code>. To be able to run <code>clang-format</code> on Ubuntu 20.04, install it with <code>pip3 install --user clang-format</code>. Do not use the Debian package. Both tools run in a git hook and as part of CI.</li>
-<li>Commenting Style is guided by the <a class="el" href="#documentation-comments-style-guide">following rules</a>.</li>
+<li>Commenting Style is guided by the following rules.</li>
 <li>Watch out for <code>const</code>; it is very important.</li>
 <li>Use <code>override</code> whenever possible (new GCC versions enforce this).</li>
 <li>Never use <code>const_cast</code> and <code>reinterpret_cast</code>.</li>
