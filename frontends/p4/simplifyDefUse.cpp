@@ -99,40 +99,6 @@ class HasUses {
     void doneWatching() { tracker = SliceTracker(); }
 };
 
-/// Creates temporary expressions from declarations and updates the refMap and typeMap
-class DeclarationToExpression {
-    static DeclarationToExpression *instance;
-
-    /// Stores the temporary expressions so they can be reused
-    ordered_map<const IR::Declaration *, const IR::PathExpression *> paths;
-
- public:
-    static DeclarationToExpression *getInstance() {
-        if (!instance) instance = new DeclarationToExpression;
-        return instance;
-    }
-
-    const IR::PathExpression *getExpression(const IR::Declaration *decl, ReferenceMap *refMap,
-                                            TypeMap *typeMap) {
-        CHECK_NULL(decl);
-        CHECK_NULL(refMap);
-        CHECK_NULL(typeMap);
-
-        auto expr = ::P4::get(paths, decl);
-        if (!expr) {
-            expr = new IR::PathExpression(decl->name);
-        }
-        if (!refMap->getDeclaration(expr->path, false)) {
-            refMap->setDeclaration(expr->path, decl);
-            typeMap->setType(expr, typeMap->getType(decl, true));
-            paths[decl] = expr;
-        }
-        return expr;
-    }
-};
-
-DeclarationToExpression *DeclarationToExpression::instance = nullptr;
-
 class HeaderDefinitions : public IHasDbPrint {
     ReferenceMap *refMap;
     TypeMap *typeMap;
@@ -369,6 +335,8 @@ class FindUninitialized : public Inspector {
     /// For some simple expresssions keep here the read location sets.
     /// This does not include location sets read by subexpressions.
     absl::flat_hash_map<const IR::Expression *, const LocationSet *, Util::Hash> readLocations;
+    /// Stores the temporary expressions so they can be reused
+    absl::flat_hash_map<const IR::Declaration *, const IR::PathExpression *, Util::Hash> paths;
     HasUses &hasUses;  // output
     /// If true the current statement is unreachable
     bool unreachable = false;
@@ -398,6 +366,20 @@ class FindUninitialized : public Inspector {
     profile_t init_apply(const IR::Node *root) override {
         unreachable = false;  // assume not unreachable at the start of any apply
         return Inspector::init_apply(root);
+    }
+
+    const IR::PathExpression *getExpression(const IR::Declaration *decl) {
+        CHECK_NULL(decl);
+
+        auto expr = ::P4::get(paths, decl);
+        if (!expr) expr = new IR::PathExpression(decl->name);
+
+        if (!refMap->getDeclaration(expr->path, false)) {
+            refMap->setDeclaration(expr->path, decl);
+            typeMap->setType(expr, typeMap->getType(decl, true));
+            paths[decl] = expr;
+        }
+        return expr;
     }
 
     FindUninitialized(FindUninitialized *parent, ProgramPoint context)
@@ -1265,8 +1247,7 @@ class FindUninitialized : public Inspector {
                                                       TernaryBool::No);
                     } else {
                         // we can treat the argument passing as an assignment
-                        auto param_expr = DeclarationToExpression::getInstance()->getExpression(
-                            param, refMap, typeMap);
+                        auto param_expr = getExpression(param);
                         processHeadersInAssignment(param_expr, expr->expression,
                                                    typeMap->getType(param_expr, true),
                                                    typeMap->getType(expr->expression, true));
@@ -1334,8 +1315,7 @@ class FindUninitialized : public Inspector {
 
                 if (auto actionCall = mi->to<ActionCall>()) {
                     if (auto param = actionCall->action->parameters->getParameter(p->name)) {
-                        auto param_expr = DeclarationToExpression::getInstance()->getExpression(
-                            param, refMap, typeMap);
+                        auto param_expr = getExpression(param);
                         processHeadersInAssignment(expr->expression, param_expr,
                                                    typeMap->getType(expr->expression, true),
                                                    typeMap->getType(param_expr, true));
