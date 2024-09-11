@@ -107,9 +107,7 @@ class MoveInitializers : public Transform, public ResolutionContext {
     bool loopsBackToStart;            // true if start is reachable from any other state
 
  public:
-    MoveInitializers() : newStartName("") {
-        setName("MoveInitializers");
-    }
+    MoveInitializers() : newStartName("") { setName("MoveInitializers"); }
     profile_t init_apply(const IR::Node *node) override;
     const IR::Node *preorder(IR::P4Parser *parser) override;
     const IR::Node *preorder(IR::Declaration_Variable *decl) override;
