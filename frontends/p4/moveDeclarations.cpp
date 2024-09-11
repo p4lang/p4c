@@ -97,7 +97,30 @@ const IR::Node *MoveDeclarations::postorder(IR::Declaration_Constant *decl) {
 
 ////////////////////////////////////////////////////////////////////
 
+// Returns true iff the given state is _directly_ reachable from any of the given
+// set of states.
+bool isReachable(cstring stateName, const IR::IndexedVector<IR::ParserState> &states) {
+    for (const auto *state : states) {
+        const auto *selectExpr = state->selectExpression;
+        if (selectExpr == nullptr) continue;  // implicit reject transition
+
+        if (const auto *sel = selectExpr->to<IR::SelectExpression>()) {
+            // select expression
+            for (const auto *selectCase : sel->selectCases)
+                if (selectCase->state->path->name == stateName) return true;
+        } else if (const auto *pathExpr = selectExpr->to<IR::PathExpression>()) {
+            // direct transition
+            if (pathExpr->path->name == stateName) return true;
+        }
+    }
+
+    return false;
+}
+
 const IR::Node *MoveInitializers::preorder(IR::P4Parser *parser) {
+    oldStart = nullptr;
+    loopsBackToStart = false;
+
     // Determine if we have anything to do in this parser.
     // Check if we have top-level declarations with intializers.
     auto someInitializers = false;
@@ -115,26 +138,7 @@ const IR::Node *MoveInitializers::preorder(IR::P4Parser *parser) {
         // If this is the case, then the parser's decl initializers cannot be moved
         // to the start state. A new start state that is never looped back to must
         // be inserted at the head of the graph.
-        for (const auto *state : parser->states) {
-            const auto *selectExpr = state->selectExpression;
-            if (selectExpr == nullptr) {
-                // implicit reject transition
-            } else if (selectExpr->is<IR::SelectExpression>()) {
-                // select expression
-                for (const auto *selectCase : selectExpr->to<IR::SelectExpression>()->selectCases) {
-                    if (selectCase->state->path->name == IR::ParserState::start) {
-                        loopsBackToStart = true;
-                        break;
-                    }
-                }
-            } else if (selectExpr->is<IR::PathExpression>()) {
-                // direct transition
-                const auto *pathExpr = selectExpr->to<IR::PathExpression>();
-                if (pathExpr->path->name == IR::ParserState::start) loopsBackToStart = true;
-            }
-
-            if (loopsBackToStart) break;
-        }
+        loopsBackToStart = isReachable(IR::ParserState::start, parser->states);
 
         newStartName = nameGen.newName(IR::ParserState::start.string_view());
         oldStart = parser->states.getDeclaration(IR::ParserState::start)->to<IR::ParserState>();
@@ -153,18 +157,18 @@ const IR::Node *MoveInitializers::preorder(IR::Declaration_Variable *decl) {
 
     auto varRef = new IR::PathExpression(decl->name);
     auto assign = new IR::AssignmentStatement(decl->srcInfo, varRef, decl->initializer);
-    toMove->push_back(assign);
+    toMove.push_back(assign);
     decl->initializer = nullptr;
     return decl;
 }
 
 const IR::Node *MoveInitializers::postorder(IR::ParserState *state) {
-    if (state->name == IR::ParserState::start && !toMove->empty()) {
+    if (state->name == IR::ParserState::start && !toMove.empty()) {
         if (!loopsBackToStart) {
             // Just prepend all initializing assignments to the original start
             // state if there are no loops back to the start state.
-            state->components.insert(state->components.begin(), (*toMove).begin(), (*toMove).end());
-            toMove = new IR::IndexedVector<IR::StatOrDecl>();
+            state->components.insert(state->components.begin(), toMove.begin(), toMove.end());
+            toMove.clear();
         } else {
             // Otherwise, we need to insert all such assignments into a new start state
             // that can only run once, so that the assignments are only executed one time.
@@ -189,25 +193,22 @@ const IR::Node *MoveInitializers::postorder(IR::P4Parser *parser) {
     if (oldStart && loopsBackToStart) {
         // Only add a new state if the parser has initializers and contains one
         // or more states that loop back to the start state.
-        auto newStart = new IR::ParserState(IR::ID(IR::ParserState::start), *toMove,
+        auto newStart = new IR::ParserState(IR::ID(IR::ParserState::start), toMove,
                                             new IR::PathExpression(newStartName));
-        toMove = new IR::IndexedVector<IR::StatOrDecl>();
+        toMove.clear();
         parser->states.insert(parser->states.begin(), newStart);
     }
-
-    oldStart = nullptr;
-    loopsBackToStart = false;
 
     return parser;
 }
 
 const IR::Node *MoveInitializers::postorder(IR::P4Control *control) {
-    if (toMove->empty()) return control;
-    toMove->append(control->body->components);
+    if (toMove.empty()) return control;
+    toMove.append(control->body->components);
     auto newBody =
-        new IR::BlockStatement(control->body->srcInfo, control->body->annotations, *toMove);
+        new IR::BlockStatement(control->body->srcInfo, control->body->annotations, toMove);
     control->body = newBody;
-    toMove = new IR::IndexedVector<IR::StatOrDecl>();
+    toMove.clear();
     return control;
 }
 
