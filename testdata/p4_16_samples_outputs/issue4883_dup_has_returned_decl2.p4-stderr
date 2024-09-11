@@ -1,0 +1,6 @@
+issue4883_dup_has_returned_decl2.p4(34): [--Wwarn=uninitialized_use] warning: s.f may be uninitialized
+        C.apply(s);
+                ^
+issue4883_dup_has_returned_decl2.p4(11): [--Wwarn=uninitialized_use] warning: s.f may be uninitialized
+        if (foo(s.f == 0, false)) {
+                ^^^
