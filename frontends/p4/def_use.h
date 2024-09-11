@@ -22,6 +22,7 @@ limitations under the License.
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "ir/ir.h"
 #include "lib/alloc_trace.h"
+#include "lib/flat_map.h"
 #include "lib/hash.h"
 #include "lib/hvec_map.h"
 #include "lib/ordered_set.h"
@@ -49,29 +50,45 @@ struct loc_t {
     std::size_t hash() const;
 };
 
+// #define DEBUG_LOCATION_IDS
+
 /// Abstraction for something that is has a left value (variable, parameter)
 class StorageLocation : public IHasDbPrint, public ICastable {
+#ifdef DEBUG_LOCATION_IDS
     static unsigned crtid;
+    unsigned id;
+#endif
 
  public:
     virtual ~StorageLocation() {}
-    unsigned id;
     const IR::Type *type;
     const cstring name;
-    StorageLocation(const IR::Type *type, cstring name) : id(crtid++), type(type), name(name) {
+    StorageLocation(const IR::Type *type, cstring name)
+        :
+#ifdef DEBUG_LOCATION_IDS
+          id(crtid++),
+#endif
+          type(type),
+          name(name) {
         CHECK_NULL(type);
     }
-    void dbprint(std::ostream &out) const override { out << id << " " << name; }
+    void dbprint(std::ostream &out) const override {
+#ifdef DEBUG_LOCATION_IDS
+        out << id << " " << name;
+#else
+        out << dbp(type) << " " << name;
+#endif
+    }
     cstring toString() const { return name; }
 
     /// @returns All locations inside that represent valid bits.
-    const LocationSet *getValidBits() const;
+    LocationSet getValidBits() const;
     virtual void addValidBits(LocationSet *result) const = 0;
     /// @returns All locations inside if we exclude all headers.
-    const LocationSet *removeHeaders() const;
+    LocationSet removeHeaders() const;
     virtual void removeHeaders(LocationSet *result) const = 0;
     /// @returns All locations inside that represent the 'lastIndex' of an array.
-    const LocationSet *getLastIndexField() const;
+    LocationSet getLastIndexField() const;
     virtual void addLastIndexField(LocationSet *result) const = 0;
 
     DECLARE_TYPEINFO(StorageLocation);
@@ -104,12 +121,10 @@ class BaseLocation : public StorageLocation {
 
 /// Base class for location sets that contain fields
 class WithFieldsLocation : public StorageLocation {
- protected:
-    hvec_map<cstring, const StorageLocation *> fieldLocations;
-    friend class StorageFactory;
-    WithFieldsLocation(const IR::Type *type, cstring name) : StorageLocation(type, name) {}
+    flat_map<cstring, const StorageLocation *, std::less<>,
+             absl::InlinedVector<std::pair<cstring, const StorageLocation *>, 4>>
+        fieldLocations;
 
- public:
     void createField(cstring name, StorageLocation *field) {
         fieldLocations.emplace(name, field);
         CHECK_NULL(field);
@@ -117,9 +132,16 @@ class WithFieldsLocation : public StorageLocation {
     void replaceField(cstring field, StorageLocation *replacement) {
         fieldLocations[field] = replacement;
     }
-    IterValues<hvec_map<cstring, const StorageLocation *>::const_iterator> fields() const {
-        return Values(fieldLocations);
-    }
+
+    friend class StorageFactory;
+
+ protected:
+    WithFieldsLocation(const IR::Type *type, cstring name) : StorageLocation(type, name) {}
+
+ public:
+    void addField(cstring field, LocationSet *addTo) const;
+    void removeHeaders(LocationSet *result) const override;
+    auto fields() const { return Values(fieldLocations); }
     void dbprint(std::ostream &out) const override {
         for (auto f : fieldLocations) out << *f.second << " ";
     }
@@ -129,13 +151,14 @@ class WithFieldsLocation : public StorageLocation {
 
 /** Represents the locations for a struct, header or union */
 class StructLocation : public WithFieldsLocation {
- public:
+ protected:
     StructLocation(const IR::Type *type, cstring name) : WithFieldsLocation(type, name) {
         BUG_CHECK(type->is<IR::Type_StructLike>(), "%1%: unexpected type", type);
     }
-    void addField(cstring field, LocationSet *addTo) const;
+    friend class StorageFactory;
+
+ public:
     void addValidBits(LocationSet *result) const override;
-    void removeHeaders(LocationSet *result) const override;
     void addLastIndexField(LocationSet *result) const override;
     bool isHeader() const { return type->is<IR::Type_Header>(); }
     bool isHeaderUnion() const { return type->is<IR::Type_HeaderUnion>(); }
@@ -146,51 +169,61 @@ class StructLocation : public WithFieldsLocation {
 
 /// Interface for locations that support an index operation
 class IndexedLocation : public StorageLocation {
- protected:
     absl::InlinedVector<const StorageLocation *, 8> elements;
-    friend class StorageFactory;
 
+ protected:
     void createElement(unsigned index, StorageLocation *element) {
         elements[index] = element;
         CHECK_NULL(element);
     }
 
- public:
     IndexedLocation(const IR::Type *type, cstring name) : StorageLocation(type, name) {
         CHECK_NULL(type);
-        auto it = type->to<IR::Type_Indexed>();
+        const auto *it = type->to<IR::Type_Indexed>();
         BUG_CHECK(it != nullptr, "%1%: unexpected type", type);
         elements.resize(it->getSize());
     }
+
+    friend class StorageFactory;
+
+ public:
     void addElement(unsigned index, LocationSet *result) const;
     auto begin() const { return elements.cbegin(); }
     auto end() const { return elements.cend(); }
+    void dbprint(std::ostream &out) const override {
+        for (unsigned i = 0; i < elements.size(); i++) out << *elements.at(i) << " ";
+    }
+    size_t getSize() const { return elements.size(); }
+    void removeHeaders(LocationSet *result) const override;
 
     DECLARE_TYPEINFO(IndexedLocation, StorageLocation);
 };
 
 /** Represents the locations for a tuple or list */
 class TupleLocation : public IndexedLocation {
- public:
+ protected:
     TupleLocation(const IR::Type *type, cstring name) : IndexedLocation(type, name) {}
-    size_t getSize() const { return elements.size(); }
+    friend class StorageFactory;
+
+ public:
     void addValidBits(LocationSet *) const override {}
     void addLastIndexField(LocationSet *) const override {}
-    void removeHeaders(LocationSet *result) const override;
 
     DECLARE_TYPEINFO(TupleLocation, IndexedLocation);
 };
 
 class ArrayLocation : public IndexedLocation {
-    const StorageLocation *lastIndexField;  // accessed by lastIndex
- public:
-    ArrayLocation(const IR::Type *type, cstring name)
-        : IndexedLocation(type, name), lastIndexField(nullptr) {}
+    const StorageLocation *lastIndexField = nullptr;  // accessed by lastIndex
+
     void setLastIndexField(const StorageLocation *location) { lastIndexField = location; }
+
+ protected:
+    ArrayLocation(const IR::Type *type, cstring name) : IndexedLocation(type, name) {}
+    friend class StorageFactory;
+
+ public:
     const StorageLocation *getLastIndexField() const { return lastIndexField; }
-    void dbprint(std::ostream &out) const override {
-        for (unsigned i = 0; i < elements.size(); i++) out << *elements.at(i) << " ";
-    }
+
     void addValidBits(LocationSet *result) const override;
     void removeHeaders(LocationSet *) const override {}  // no results added
     void addLastIndexField(LocationSet *result) const override;
@@ -199,17 +232,82 @@ class ArrayLocation : public IndexedLocation {
 };
 
 class StorageFactory {
+    // FIXME: Allocate StorageLocations from an arena, not global allocator
+    mutable std::vector<std::unique_ptr<StorageLocation>> storageLocations;
+
+    template <class T>
+    T *construct(const IR::Type *type, cstring name) const;
+
+    static constexpr std::string_view indexFieldName = "$last_index";
+
  public:
     StorageLocation *create(const IR::Type *type, cstring name) const;
 
     static const cstring validFieldName;
-    static const cstring indexFieldName;
 };
 
 /// A set of locations that may be read or written by a computation.
 /// In general this is a conservative approximation of the actual location set.
 class LocationSet : public IHasDbPrint {
-    ordered_set<const StorageLocation *> locations;
+    using LocationsStorage = ordered_set<const StorageLocation *>;
+    LocationsStorage locations;
+
+    class canonical_iterator {
+        absl::InlinedVector<const StorageLocation *, 8> workList;
+
+        void unwrapTop() {
+            if (workList.empty()) return;
+
+            const auto *location = workList.back();
+            if (location->is<BaseLocation>()) return;
+
+            if (const auto *wfl = location->to<WithFieldsLocation>()) {
+                workList.pop_back();
+                for (const auto *f : Util::iterator_range(wfl->fields()).reverse())
+                    workList.push_back(f);
+                unwrapTop();
+                return;
+            }
+
+            if (const auto *a = location->to<IndexedLocation>()) {
+                workList.pop_back();
+                for (const auto *f : Util::iterator_range(*a).reverse()) workList.push_back(f);
+                unwrapTop();
+                return;
+            }
+
+            BUG("unexpected location");
+        }
+
+     public:
+        using iterator_category = std::forward_iterator_tag;
+        using value_type = const StorageLocation *;
+        using difference_type = ptrdiff_t;
+        using pointer = value_type;
+        using reference = value_type;
+
+        canonical_iterator() = default;
+
+        explicit canonical_iterator(const LocationsStorage &locations) {
+            for (const auto *loc : Util::iterator_range(locations).reverse())
+                workList.push_back(loc);
+            unwrapTop();
+        }
+        canonical_iterator &operator++() {
+            workList.pop_back();
+            unwrapTop();
+            return *this;
+        }
+        canonical_iterator operator++(int) {
+            auto copy = *this;
+            ++*this;
+            return copy;
+        }
+        bool operator==(const canonical_iterator &i) const { return workList == i.workList; }
+        bool operator!=(const canonical_iterator &i) const { return workList != i.workList; }
+        reference operator*() const { return workList.back(); }
+        pointer operator->() const { return workList.back(); }
+    };
 
  public:
     LocationSet() = default;
@@ -235,10 +333,12 @@ class LocationSet : public IHasDbPrint {
     /// e.g., a StructLocation is expanded in all its fields.
     const LocationSet *canonicalize() const;
     void addCanonical(const StorageLocation *location);
-    ordered_set<const StorageLocation *>::const_iterator begin() const {
-        return locations.cbegin();
-    }
-    ordered_set<const StorageLocation *>::const_iterator end() const { return locations.cend(); }
+    auto begin() const { return locations.cbegin(); }
+    auto end() const { return locations.cend(); }
+    auto canon_begin() const { return canonical_iterator(locations); }
+    auto canon_end() const { return canonical_iterator(); }
+    auto canonical() const { return Util::iterator_range(canon_begin(), canon_end()); }
+
     void dbprint(std::ostream &out) const override {
         if (locations.empty()) out << "LocationSet::empty";
         for (auto l : locations) {
@@ -255,7 +355,7 @@ class LocationSet : public IHasDbPrint {
 /// Maps a declaration to its associated storage.
 class StorageMap : public IHasDbPrint {
     /// Storage location for each declaration.
-    hvec_map<const IR::IDeclaration *, StorageLocation *> storage;
+    hvec_map<const IR::IDeclaration *, const StorageLocation *> storage;
     StorageFactory factory;
 
  public:
@@ -266,19 +366,19 @@ class StorageMap : public IHasDbPrint {
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
     }
-    StorageLocation *add(const IR::IDeclaration *decl) {
+    const StorageLocation *add(const IR::IDeclaration *decl) {
         CHECK_NULL(decl);
         auto type = typeMap->getType(decl->getNode(), true);
         auto loc = factory.create(type, decl->getName() + "/" + decl->externalName());
         if (loc != nullptr) storage.emplace(decl, loc);
         return loc;
     }
-    StorageLocation *getOrAdd(const IR::IDeclaration *decl) {
-        auto s = getStorage(decl);
+    const StorageLocation *getOrAdd(const IR::IDeclaration *decl) {
+        const auto *s = getStorage(decl);
         if (s != nullptr) return s;
         return add(decl);
     }
-    StorageLocation *getStorage(const IR::IDeclaration *decl) const {
+    const StorageLocation *getStorage(const IR::IDeclaration *decl) const {
         CHECK_NULL(decl);
         auto result = ::P4::get(storage, decl);
         return result;
@@ -374,7 +474,6 @@ class ProgramPoints : public IHasDbPrint {
  public:
     ProgramPoints() = default;
     explicit ProgramPoints(ProgramPoint point) { points.emplace(point); }
-    void add(ProgramPoint point) { points.emplace(point); }
     void add(const ProgramPoints *from);
     const ProgramPoints *merge(const ProgramPoints *with) const;
     bool operator==(const ProgramPoints &other) const;
@@ -405,14 +504,14 @@ class Definitions : public IHasDbPrint {
         : definitions(other.definitions), unreachable(other.unreachable) {}
     Definitions *joinDefinitions(const Definitions *other) const;
     /// Point writes the specified LocationSet.
-    Definitions *writes(ProgramPoint point, const LocationSet *locations) const;
+    Definitions *writes(ProgramPoint point, const LocationSet &locations) const;
     void setDefintion(const BaseLocation *loc, const ProgramPoints *point) {
         CHECK_NULL(loc);
         CHECK_NULL(point);
         definitions[loc] = point;
     }
     void setDefinition(const StorageLocation *loc, const ProgramPoints *point);
-    void setDefinition(const LocationSet *loc, const ProgramPoints *point);
+    void setDefinition(const LocationSet &loc, const ProgramPoints *point);
     Definitions *setUnreachable() {
         unreachable = true;
         return this;
@@ -426,7 +525,7 @@ class Definitions : public IHasDbPrint {
         BUG_CHECK(r != nullptr, "no definitions found for %1%", location);
         return r;
     }
-    const ProgramPoints *getPoints(const LocationSet *locations) const;
+    const ProgramPoints *getPoints(const LocationSet &locations) const;
     bool operator==(const Definitions &other) const;
     void dbprint(std::ostream &out) const override {
         if (unreachable) {
@@ -452,11 +551,11 @@ class AllDefinitions : public IHasDbPrint {
     /// P4Table, P4Function -- the definitions are BEFORE the
     /// ProgramPoint.
     hvec_map<ProgramPoint, Definitions *> atPoint;
+    StorageMap storageMap;
 
  public:
-    StorageMap *storageMap;
-    AllDefinitions(ReferenceMap *refMap, TypeMap *typeMap)
-        : storageMap(new StorageMap(refMap, typeMap)) {}
+    AllDefinitions(ReferenceMap *refMap, TypeMap *typeMap) : storageMap(refMap, typeMap) {}
+
     Definitions *getDefinitions(ProgramPoint point, bool emptyIfNotFound = false) {
         auto it = atPoint.find(point);
         if (it == atPoint.end()) {
@@ -480,6 +579,15 @@ class AllDefinitions : public IHasDbPrint {
         }
         atPoint[point] = defs;
     }
+
+    const StorageLocation *getStorage(const IR::IDeclaration *decl) const {
+        return storageMap.getStorage(decl);
+    }
+
+    const StorageLocation *getOrAddStorage(const IR::IDeclaration *decl) {
+        return storageMap.getOrAdd(decl);
+    }
+
     void dbprint(std::ostream &out) const override {
         for (auto e : atPoint) out << e.first << " => " << e.second << Log::endl;
     }
@@ -498,16 +606,19 @@ class AllDefinitions : public IHasDbPrint {
 
 class ComputeWriteSet : public Inspector, public IHasDbPrint {
  public:
-    explicit ComputeWriteSet(AllDefinitions *allDefinitions)
-        : allDefinitions(allDefinitions),
+    explicit ComputeWriteSet(AllDefinitions *allDefinitions, ReferenceMap *refMap, TypeMap *typeMap)
+        : refMap(refMap),
+          typeMap(typeMap),
+          allDefinitions(allDefinitions),
           currentDefinitions(nullptr),
           returnedDefinitions(nullptr),
           exitDefinitions(new Definitions()),
-          storageMap(allDefinitions->storageMap),
           lhs(false),
           virtualMethod(false),
           cached_locs(*new std::unordered_set<loc_t>) {
         CHECK_NULL(allDefinitions);
+        CHECK_NULL(refMap);
+        CHECK_NULL(typeMap);
         visitDagOnce = false;
     }
 
@@ -557,6 +668,8 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
     }
 
  protected:
+    ReferenceMap *refMap;
+    TypeMap *typeMap;
     AllDefinitions *allDefinitions;              /// Result computed by this pass.
     Definitions *currentDefinitions;             /// Before statement currently processed.
     Definitions *returnedDefinitions;            /// Definitions after return statements.
@@ -564,7 +677,6 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
     Definitions *breakDefinitions = nullptr;     /// Definitions at break statements.
     Definitions *continueDefinitions = nullptr;  /// Definitions at continue statements.
     ProgramPoint callingContext;
-    const StorageMap *storageMap;
     /// if true we are processing an expression on the lhs of an assignment
     bool lhs;
     /// For each program location the location set it writes
@@ -578,14 +690,16 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
     /// Needed to visit some program fragments repeatedly.
     ComputeWriteSet(const ComputeWriteSet *source, ProgramPoint context, Definitions *definitions,
                     std::unordered_set<loc_t> &cached_locs)
-        : allDefinitions(source->allDefinitions),
+        : refMap(source->refMap),
+          typeMap(source->typeMap),
+
+          allDefinitions(source->allDefinitions),
           currentDefinitions(definitions),
           returnedDefinitions(nullptr),
           exitDefinitions(source->exitDefinitions),
           breakDefinitions(source->breakDefinitions),
           continueDefinitions(source->continueDefinitions),
           callingContext(context),
-          storageMap(source->storageMap),
           lhs(false),
           virtualMethod(false),
           cached_locs(cached_locs) {
@@ -599,7 +713,7 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
                     const IR::IndexedVector<IR::Declaration> *locals, ProgramPoint startPoint,
                     bool clear = true);
     void exitScope(const IR::ParameterList *parameters,
-                   const IR::IndexedVector<IR::Declaration> *locals);
+                   const IR::IndexedVector<IR::Declaration> *locals, ProgramPoint endPoint);
     Definitions *getDefinitionsAfter(const IR::ParserState *state);
     bool setDefinitions(Definitions *defs, const IR::Node *who = nullptr, bool overwrite = false);
     ProgramPoint getProgramPoint(const IR::Node *node = nullptr) const;
