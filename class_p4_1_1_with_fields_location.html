@@ -123,7 +123,6 @@ $(function(){initNavTree('class_p4_1_1_with_fields_location.html',''); initResiz
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pro-methods">Protected Member Functions</a> &#124;
-<a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="#friends">Friends</a> &#124;
 <a href="class_p4_1_1_with_fields_location-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4::WithFieldsLocation Class Reference</div></div>
@@ -142,20 +141,19 @@ Inheritance diagram for P4::WithFieldsLocation:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a5148592b2674bdccd5f067d5257e2a79" id="r_a5148592b2674bdccd5f067d5257e2a79"><td class="memItemLeft" align="right" valign="top"><a id="a5148592b2674bdccd5f067d5257e2a79" name="a5148592b2674bdccd5f067d5257e2a79"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>createField</b> (<a class="el" href="class_p4_1_1cstring.html">cstring</a> name, <a class="el" href="class_p4_1_1_storage_location.html">StorageLocation</a> *field)</td></tr>
-<tr class="separator:a5148592b2674bdccd5f067d5257e2a79"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a92f6808995ec370430eeb723999bde33" id="r_a92f6808995ec370430eeb723999bde33"><td class="memItemLeft" align="right" valign="top"><a id="a92f6808995ec370430eeb723999bde33" name="a92f6808995ec370430eeb723999bde33"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>addField</b> (<a class="el" href="class_p4_1_1cstring.html">cstring</a> field, <a class="el" href="class_p4_1_1_location_set.html">LocationSet</a> *addTo) const</td></tr>
+<tr class="separator:a92f6808995ec370430eeb723999bde33"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3db63836925b8f55562d47a1cd03ae05" id="r_a3db63836925b8f55562d47a1cd03ae05"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3db63836925b8f55562d47a1cd03ae05">dbprint</a> (std::ostream &amp;out) const override</td></tr>
 <tr class="separator:a3db63836925b8f55562d47a1cd03ae05"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a39b61dc9b95e2a49d7f1cf886a089881" id="r_a39b61dc9b95e2a49d7f1cf886a089881"><td class="memItemLeft" align="right" valign="top"><a id="a39b61dc9b95e2a49d7f1cf886a089881" name="a39b61dc9b95e2a49d7f1cf886a089881"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>DECLARE_TYPEINFO</b> (<a class="el" href="class_p4_1_1_with_fields_location.html">WithFieldsLocation</a>, <a class="el" href="class_p4_1_1_storage_location.html">StorageLocation</a>)</td></tr>
 <tr class="separator:a39b61dc9b95e2a49d7f1cf886a089881"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a151d78f013d9bc36474d9c45f043e294" id="r_a151d78f013d9bc36474d9c45f043e294"><td class="memItemLeft" align="right" valign="top"><a id="a151d78f013d9bc36474d9c45f043e294" name="a151d78f013d9bc36474d9c45f043e294"></a>
-<a class="el" href="class_p4_1_1_iter_values.html">IterValues</a>&lt; <a class="el" href="class_p4_1_1hvec__map.html">hvec_map</a>&lt; <a class="el" href="class_p4_1_1cstring.html">cstring</a>, const <a class="el" href="class_p4_1_1_storage_location.html">StorageLocation</a> * &gt;::const_iterator &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>fields</b> () const</td></tr>
-<tr class="separator:a151d78f013d9bc36474d9c45f043e294"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3dfb2ffa6cbfb6bfd8d1a64c04e2349c" id="r_a3dfb2ffa6cbfb6bfd8d1a64c04e2349c"><td class="memItemLeft" align="right" valign="top"><a id="a3dfb2ffa6cbfb6bfd8d1a64c04e2349c" name="a3dfb2ffa6cbfb6bfd8d1a64c04e2349c"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>replaceField</b> (<a class="el" href="class_p4_1_1cstring.html">cstring</a> field, <a class="el" href="class_p4_1_1_storage_location.html">StorageLocation</a> *replacement)</td></tr>
-<tr class="separator:a3dfb2ffa6cbfb6bfd8d1a64c04e2349c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a41f86964666ac5734a4b56b08e82bb02" id="r_a41f86964666ac5734a4b56b08e82bb02"><td class="memItemLeft" align="right" valign="top"><a id="a41f86964666ac5734a4b56b08e82bb02" name="a41f86964666ac5734a4b56b08e82bb02"></a>
+auto&#160;</td><td class="memItemRight" valign="bottom"><b>fields</b> () const</td></tr>
+<tr class="separator:a41f86964666ac5734a4b56b08e82bb02"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a75d9205125e04144f7c43bfd81898896" id="r_a75d9205125e04144f7c43bfd81898896"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a75d9205125e04144f7c43bfd81898896">removeHeaders</a> (<a class="el" href="class_p4_1_1_location_set.html">LocationSet</a> *result) const override</td></tr>
+<tr class="separator:a75d9205125e04144f7c43bfd81898896"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_class_p4_1_1_storage_location"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_p4_1_1_storage_location')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_p4_1_1_storage_location.html">P4::StorageLocation</a></td></tr>
 <tr class="memitem:a9b8108ca1c369a784ce6bc57bedd3836 inherit pub_methods_class_p4_1_1_storage_location" id="r_a9b8108ca1c369a784ce6bc57bedd3836"><td class="memItemLeft" align="right" valign="top">
 &#160;</td><td class="memItemRight" valign="bottom"><b>StorageLocation</b> (const IR::Type *type, <a class="el" href="class_p4_1_1cstring.html">cstring</a> name)</td></tr>
@@ -169,15 +167,12 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>addValidBits<
 <tr class="memitem:ac382e39ea437517fee9c97b6ea34a6ae inherit pub_methods_class_p4_1_1_storage_location" id="r_ac382e39ea437517fee9c97b6ea34a6ae"><td class="memItemLeft" align="right" valign="top">
 &#160;</td><td class="memItemRight" valign="bottom"><b>DECLARE_TYPEINFO</b> (<a class="el" href="class_p4_1_1_storage_location.html">StorageLocation</a>)</td></tr>
 <tr class="separator:ac382e39ea437517fee9c97b6ea34a6ae inherit pub_methods_class_p4_1_1_storage_location"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a60dbd7f1b979623594239c593719635d inherit pub_methods_class_p4_1_1_storage_location" id="r_a60dbd7f1b979623594239c593719635d"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="class_p4_1_1_location_set.html">LocationSet</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_storage_location.html#a60dbd7f1b979623594239c593719635d">getLastIndexField</a> () const</td></tr>
-<tr class="separator:a60dbd7f1b979623594239c593719635d inherit pub_methods_class_p4_1_1_storage_location"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac8c8ca4a93e3c91b4b000a2ba20062ed inherit pub_methods_class_p4_1_1_storage_location" id="r_ac8c8ca4a93e3c91b4b000a2ba20062ed"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="class_p4_1_1_location_set.html">LocationSet</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_storage_location.html#ac8c8ca4a93e3c91b4b000a2ba20062ed">getValidBits</a> () const</td></tr>
-<tr class="separator:ac8c8ca4a93e3c91b4b000a2ba20062ed inherit pub_methods_class_p4_1_1_storage_location"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa58926a1f7dfa776c16b0636ae3693c5 inherit pub_methods_class_p4_1_1_storage_location" id="r_aa58926a1f7dfa776c16b0636ae3693c5"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="class_p4_1_1_location_set.html">LocationSet</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_storage_location.html#aa58926a1f7dfa776c16b0636ae3693c5">removeHeaders</a> () const</td></tr>
-<tr class="separator:aa58926a1f7dfa776c16b0636ae3693c5 inherit pub_methods_class_p4_1_1_storage_location"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae92c5b2e3236f5a0d6ff43a8e01d66ad inherit pub_methods_class_p4_1_1_storage_location" id="r_ae92c5b2e3236f5a0d6ff43a8e01d66ad"><td class="memItemLeft" align="right" valign="top">
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>removeHeaders</b> (<a class="el" href="class_p4_1_1_location_set.html">LocationSet</a> *result) const =0</td></tr>
-<tr class="separator:ae92c5b2e3236f5a0d6ff43a8e01d66ad inherit pub_methods_class_p4_1_1_storage_location"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aefd7260ac4ba1d39c48a663b08943af8 inherit pub_methods_class_p4_1_1_storage_location" id="r_aefd7260ac4ba1d39c48a663b08943af8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_p4_1_1_location_set.html">LocationSet</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_storage_location.html#aefd7260ac4ba1d39c48a663b08943af8">getLastIndexField</a> () const</td></tr>
+<tr class="separator:aefd7260ac4ba1d39c48a663b08943af8 inherit pub_methods_class_p4_1_1_storage_location"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae23674b6eeb9e271d1f41260970fad24 inherit pub_methods_class_p4_1_1_storage_location" id="r_ae23674b6eeb9e271d1f41260970fad24"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_p4_1_1_location_set.html">LocationSet</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_storage_location.html#ae23674b6eeb9e271d1f41260970fad24">getValidBits</a> () const</td></tr>
+<tr class="separator:ae23674b6eeb9e271d1f41260970fad24 inherit pub_methods_class_p4_1_1_storage_location"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae4d3ed68a7a16c4346d4e2849b7c69a8 inherit pub_methods_class_p4_1_1_storage_location" id="r_ae4d3ed68a7a16c4346d4e2849b7c69a8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_p4_1_1_location_set.html">LocationSet</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_storage_location.html#ae4d3ed68a7a16c4346d4e2849b7c69a8">removeHeaders</a> () const</td></tr>
+<tr class="separator:ae4d3ed68a7a16c4346d4e2849b7c69a8 inherit pub_methods_class_p4_1_1_storage_location"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8f990d3ee3d0e114c45803b358609a86 inherit pub_methods_class_p4_1_1_storage_location" id="r_a8f990d3ee3d0e114c45803b358609a86"><td class="memItemLeft" align="right" valign="top">
 <a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>toString</b> () const</td></tr>
 <tr class="separator:a8f990d3ee3d0e114c45803b358609a86 inherit pub_methods_class_p4_1_1_storage_location"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -233,12 +228,6 @@ Protected Member Functions</h2></td></tr>
 virtual const void *&#160;</td><td class="memItemRight" valign="bottom"><b>toImpl</b> (TypeId <a class="el" href="struct_p4_1_1_r_t_t_i_1_1_base.html#a4115d7f39d312eac35d583797deabb83">typeId</a>) const noexcept=0</td></tr>
 <tr class="separator:ace64a732901ae7b486559ffffcbbf843 inherit pro_methods_struct_p4_1_1_r_t_t_i_1_1_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
-Protected Attributes</h2></td></tr>
-<tr class="memitem:a38858e2a89f49e9fc5c54e645d1c3b3f" id="r_a38858e2a89f49e9fc5c54e645d1c3b3f"><td class="memItemLeft" align="right" valign="top"><a id="a38858e2a89f49e9fc5c54e645d1c3b3f" name="a38858e2a89f49e9fc5c54e645d1c3b3f"></a>
-<a class="el" href="class_p4_1_1hvec__map.html">hvec_map</a>&lt; <a class="el" href="class_p4_1_1cstring.html">cstring</a>, const <a class="el" href="class_p4_1_1_storage_location.html">StorageLocation</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>fieldLocations</b></td></tr>
-<tr class="separator:a38858e2a89f49e9fc5c54e645d1c3b3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="friends" name="friends"></a>
 Friends</h2></td></tr>
 <tr class="memitem:a8a546eac26eba06f9a5ec402e68f96bb" id="r_a8a546eac26eba06f9a5ec402e68f96bb"><td class="memItemLeft" align="right" valign="top"><a id="a8a546eac26eba06f9a5ec402e68f96bb" name="a8a546eac26eba06f9a5ec402e68f96bb"></a>
@@ -248,9 +237,6 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>StorageFactory</b></
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
 <tr class="inherit_header pub_attribs_class_p4_1_1_storage_location"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_attribs_class_p4_1_1_storage_location')"><img src="closed.png" alt="-"/>&#160;Public Attributes inherited from <a class="el" href="class_p4_1_1_storage_location.html">P4::StorageLocation</a></td></tr>
-<tr class="memitem:af4aec11dd06baf9bca20aab777811648 inherit pub_attribs_class_p4_1_1_storage_location" id="r_af4aec11dd06baf9bca20aab777811648"><td class="memItemLeft" align="right" valign="top">
-unsigned&#160;</td><td class="memItemRight" valign="bottom"><b>id</b></td></tr>
-<tr class="separator:af4aec11dd06baf9bca20aab777811648 inherit pub_attribs_class_p4_1_1_storage_location"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3f2ca2b1c9e1bec52bd80bd2f08c8441 inherit pub_attribs_class_p4_1_1_storage_location" id="r_a3f2ca2b1c9e1bec52bd80bd2f08c8441"><td class="memItemLeft" align="right" valign="top">
 const <a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>name</b></td></tr>
 <tr class="separator:a3f2ca2b1c9e1bec52bd80bd2f08c8441 inherit pub_attribs_class_p4_1_1_storage_location"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -285,6 +271,33 @@ const IR::Type *&#160;</td><td class="memItemRight" valign="bottom"><b>type</b><
 </div><div class="memdoc">
 
 <p>Reimplemented from <a class="el" href="class_p4_1_1_storage_location.html">P4::StorageLocation</a>.</p>
+
+</div>
+</div>
+<a id="a75d9205125e04144f7c43bfd81898896" name="a75d9205125e04144f7c43bfd81898896"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a75d9205125e04144f7c43bfd81898896">&#9670;&#160;</a></span>removeHeaders()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void P4::WithFieldsLocation::removeHeaders </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="class_p4_1_1_location_set.html">LocationSet</a> *</td>          <td class="paramname"><span class="paramname"><em>result</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Implements <a class="el" href="class_p4_1_1_storage_location.html">P4::StorageLocation</a>.</p>
 
 </div>
 </div>

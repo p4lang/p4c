@@ -192,6 +192,7 @@ var namespace_p4 =
     [ "FindTypeSpecializations", "class_p4_1_1_find_type_specializations.html", null ],
     [ "FindTypesToReplace", "class_p4_1_1_find_types_to_replace.html", null ],
     [ "FindVariableValues", "class_p4_1_1_find_variable_values.html", null ],
+    [ "flat_map", "struct_p4_1_1flat__map.html", "struct_p4_1_1flat__map" ],
     [ "FlattenHeaders", "class_p4_1_1_flatten_headers.html", null ],
     [ "FlattenHeaderUnion", "class_p4_1_1_flatten_header_union.html", null ],
     [ "FlattenInterfaceStructs", "class_p4_1_1_flatten_interface_structs.html", null ],

@@ -139,9 +139,9 @@ Inheritance diagram for P4::ComputeWriteSet:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a31eb3d7ec4d3eb7bbe41f2278787a4fa" id="r_a31eb3d7ec4d3eb7bbe41f2278787a4fa"><td class="memItemLeft" align="right" valign="top"><a id="a31eb3d7ec4d3eb7bbe41f2278787a4fa" name="a31eb3d7ec4d3eb7bbe41f2278787a4fa"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>ComputeWriteSet</b> (<a class="el" href="class_p4_1_1_all_definitions.html">AllDefinitions</a> *allDefinitions)</td></tr>
-<tr class="separator:a31eb3d7ec4d3eb7bbe41f2278787a4fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7095b68fba4ebf68ac171b11977ddbfe" id="r_a7095b68fba4ebf68ac171b11977ddbfe"><td class="memItemLeft" align="right" valign="top"><a id="a7095b68fba4ebf68ac171b11977ddbfe" name="a7095b68fba4ebf68ac171b11977ddbfe"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>ComputeWriteSet</b> (<a class="el" href="class_p4_1_1_all_definitions.html">AllDefinitions</a> *allDefinitions, <a class="el" href="class_p4_1_1_reference_map.html">ReferenceMap</a> *refMap, <a class="el" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap)</td></tr>
+<tr class="separator:a7095b68fba4ebf68ac171b11977ddbfe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1863f160c82bf891b3f8d52c8a6a7bc0" id="r_a1863f160c82bf891b3f8d52c8a6a7bc0"><td class="memItemLeft" align="right" valign="top"><a id="a1863f160c82bf891b3f8d52c8a6a7bc0" name="a1863f160c82bf891b3f8d52c8a6a7bc0"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>handleJump</b> (const char *tok, <a class="el" href="class_p4_1_1_definitions.html">Definitions</a> *&amp;defs)</td></tr>
 <tr class="separator:a1863f160c82bf891b3f8d52c8a6a7bc0"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -451,9 +451,9 @@ Protected Member Functions</h2></td></tr>
 <tr class="memitem:a0773fed7beb3e0ae7633ab1fffadf6fb" id="r_a0773fed7beb3e0ae7633ab1fffadf6fb"><td class="memItemLeft" align="right" valign="top"><a id="a0773fed7beb3e0ae7633ab1fffadf6fb" name="a0773fed7beb3e0ae7633ab1fffadf6fb"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>enterScope</b> (const IR::ParameterList *parameters, const <a class="el" href="class_p4_1_1_i_r_1_1_indexed_vector.html">IR::IndexedVector</a>&lt; IR::Declaration &gt; *locals, <a class="el" href="class_p4_1_1_program_point.html">ProgramPoint</a> startPoint, bool clear=true)</td></tr>
 <tr class="separator:a0773fed7beb3e0ae7633ab1fffadf6fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2d3bdb6f65f3f1579b34e610ee128d66" id="r_a2d3bdb6f65f3f1579b34e610ee128d66"><td class="memItemLeft" align="right" valign="top"><a id="a2d3bdb6f65f3f1579b34e610ee128d66" name="a2d3bdb6f65f3f1579b34e610ee128d66"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>exitScope</b> (const IR::ParameterList *parameters, const <a class="el" href="class_p4_1_1_i_r_1_1_indexed_vector.html">IR::IndexedVector</a>&lt; IR::Declaration &gt; *locals)</td></tr>
-<tr class="separator:a2d3bdb6f65f3f1579b34e610ee128d66"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a742d6c9ff5d062f406bb336b3994443e" id="r_a742d6c9ff5d062f406bb336b3994443e"><td class="memItemLeft" align="right" valign="top"><a id="a742d6c9ff5d062f406bb336b3994443e" name="a742d6c9ff5d062f406bb336b3994443e"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>exitScope</b> (const IR::ParameterList *parameters, const <a class="el" href="class_p4_1_1_i_r_1_1_indexed_vector.html">IR::IndexedVector</a>&lt; IR::Declaration &gt; *locals, <a class="el" href="class_p4_1_1_program_point.html">ProgramPoint</a> endPoint)</td></tr>
+<tr class="separator:a742d6c9ff5d062f406bb336b3994443e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5419384d2857ecdc1ec8105810e64fd6" id="r_a5419384d2857ecdc1ec8105810e64fd6"><td class="memItemLeft" align="right" valign="top"><a id="a5419384d2857ecdc1ec8105810e64fd6" name="a5419384d2857ecdc1ec8105810e64fd6"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>expressionWrites</b> (const IR::Expression *expression, const <a class="el" href="class_p4_1_1_location_set.html">LocationSet</a> *loc)</td></tr>
 <tr class="separator:a5419384d2857ecdc1ec8105810e64fd6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -535,13 +535,16 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>lhs</b></td></tr>
 <tr class="memitem:a74a65fa0c0efc621729504809e8db74a" id="r_a74a65fa0c0efc621729504809e8db74a"><td class="memItemLeft" align="right" valign="top"><a id="a74a65fa0c0efc621729504809e8db74a" name="a74a65fa0c0efc621729504809e8db74a"></a>
 <a class="el" href="structalloc__trace__cb__t.html">alloc_trace_cb_t</a>&#160;</td><td class="memItemRight" valign="bottom"><b>nested_trace</b></td></tr>
 <tr class="separator:a74a65fa0c0efc621729504809e8db74a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a550fe9c748d754a132f563df72317bf2" id="r_a550fe9c748d754a132f563df72317bf2"><td class="memItemLeft" align="right" valign="top"><a id="a550fe9c748d754a132f563df72317bf2" name="a550fe9c748d754a132f563df72317bf2"></a>
+<a class="el" href="class_p4_1_1_reference_map.html">ReferenceMap</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>refMap</b></td></tr>
+<tr class="separator:a550fe9c748d754a132f563df72317bf2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a15be09eb5b630a8435a75cd5e1fc84fa" id="r_a15be09eb5b630a8435a75cd5e1fc84fa"><td class="memItemLeft" align="right" valign="top"><a id="a15be09eb5b630a8435a75cd5e1fc84fa" name="a15be09eb5b630a8435a75cd5e1fc84fa"></a>
 <a class="el" href="class_p4_1_1_definitions.html">Definitions</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>returnedDefinitions</b></td></tr>
 <tr class="memdesc:a15be09eb5b630a8435a75cd5e1fc84fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Before statement currently processed. <br /></td></tr>
 <tr class="separator:a15be09eb5b630a8435a75cd5e1fc84fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a40c57f218ff29d37c642181f58c3c6d8" id="r_a40c57f218ff29d37c642181f58c3c6d8"><td class="memItemLeft" align="right" valign="top"><a id="a40c57f218ff29d37c642181f58c3c6d8" name="a40c57f218ff29d37c642181f58c3c6d8"></a>
-const <a class="el" href="class_p4_1_1_storage_map.html">StorageMap</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>storageMap</b></td></tr>
-<tr class="separator:a40c57f218ff29d37c642181f58c3c6d8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab161ad631928a2eba512ec280f6d7af7" id="r_ab161ad631928a2eba512ec280f6d7af7"><td class="memItemLeft" align="right" valign="top"><a id="ab161ad631928a2eba512ec280f6d7af7" name="ab161ad631928a2eba512ec280f6d7af7"></a>
+<a class="el" href="class_p4_1_1_type_map.html">TypeMap</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>typeMap</b></td></tr>
+<tr class="separator:ab161ad631928a2eba512ec280f6d7af7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa3187a375075cd04fc6d43f75572b312" id="r_aa3187a375075cd04fc6d43f75572b312"><td class="memItemLeft" align="right" valign="top"><a id="aa3187a375075cd04fc6d43f75572b312" name="aa3187a375075cd04fc6d43f75572b312"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>virtualMethod</b></td></tr>
 <tr class="separator:aa3187a375075cd04fc6d43f75572b312"><td class="memSeparator" colspan="2">&#160;</td></tr>

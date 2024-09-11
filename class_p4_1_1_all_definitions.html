@@ -122,7 +122,6 @@ $(function(){initNavTree('class_p4_1_1_all_definitions.html',''); initResizable(
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
-<a href="#pub-attribs">Public Attributes</a> &#124;
 <a href="class_p4_1_1_all_definitions-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4::AllDefinitions Class Reference</div></div>
 </div><!--header-->
@@ -143,6 +142,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a19ac627f67bf1cb108830bc04344a419" id="r_a19ac627f67bf1cb108830bc04344a419"><td class="memItemLeft" align="right" valign="top"><a id="a19ac627f67bf1cb108830bc04344a419" name="a19ac627f67bf1cb108830bc04344a419"></a>
 <a class="el" href="class_p4_1_1_definitions.html">Definitions</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>getDefinitions</b> (<a class="el" href="class_p4_1_1_program_point.html">ProgramPoint</a> point, bool emptyIfNotFound=false)</td></tr>
 <tr class="separator:a19ac627f67bf1cb108830bc04344a419"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a445f5c0d76b82a052c9c975fad9c3012" id="r_a445f5c0d76b82a052c9c975fad9c3012"><td class="memItemLeft" align="right" valign="top"><a id="a445f5c0d76b82a052c9c975fad9c3012" name="a445f5c0d76b82a052c9c975fad9c3012"></a>
+const <a class="el" href="class_p4_1_1_storage_location.html">StorageLocation</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>getOrAddStorage</b> (const <a class="el" href="class_p4_1_1_i_r_1_1_i_declaration.html">IR::IDeclaration</a> *decl)</td></tr>
+<tr class="separator:a445f5c0d76b82a052c9c975fad9c3012"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af78839b45e4a503ca4ccfadfd99add89" id="r_af78839b45e4a503ca4ccfadfd99add89"><td class="memItemLeft" align="right" valign="top"><a id="af78839b45e4a503ca4ccfadfd99add89" name="af78839b45e4a503ca4ccfadfd99add89"></a>
+const <a class="el" href="class_p4_1_1_storage_location.html">StorageLocation</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>getStorage</b> (const <a class="el" href="class_p4_1_1_i_r_1_1_i_declaration.html">IR::IDeclaration</a> *decl) const</td></tr>
+<tr class="separator:af78839b45e4a503ca4ccfadfd99add89"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abe642e48f733b888ff018f228a7a6789" id="r_abe642e48f733b888ff018f228a7a6789"><td class="memItemLeft" align="right" valign="top"><a id="abe642e48f733b888ff018f228a7a6789" name="abe642e48f733b888ff018f228a7a6789"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>setDefinitionsAt</b> (<a class="el" href="class_p4_1_1_program_point.html">ProgramPoint</a> point, <a class="el" href="class_p4_1_1_definitions.html">Definitions</a> *defs, bool overwrite)</td></tr>
 <tr class="separator:abe642e48f733b888ff018f228a7a6789"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -150,12 +155,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>setDefinitionsAt</b> 
 <tr class="memitem:adab61388d3073ee3b9380e95c400f7f0 inherit pub_methods_class_p4_1_1_i_has_db_print" id="r_adab61388d3073ee3b9380e95c400f7f0"><td class="memItemLeft" align="right" valign="top">
 void&#160;</td><td class="memItemRight" valign="bottom"><b>print</b> () const</td></tr>
 <tr class="separator:adab61388d3073ee3b9380e95c400f7f0 inherit pub_methods_class_p4_1_1_i_has_db_print"><td class="memSeparator" colspan="2">&#160;</td></tr>
-</table><table class="memberdecls">
-<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-attribs" name="pub-attribs"></a>
-Public Attributes</h2></td></tr>
-<tr class="memitem:a0f9dbe9a628d6a574798e005809cfc49" id="r_a0f9dbe9a628d6a574798e005809cfc49"><td class="memItemLeft" align="right" valign="top"><a id="a0f9dbe9a628d6a574798e005809cfc49" name="a0f9dbe9a628d6a574798e005809cfc49"></a>
-<a class="el" href="class_p4_1_1_storage_map.html">StorageMap</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>storageMap</b></td></tr>
-<tr class="separator:a0f9dbe9a628d6a574798e005809cfc49"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
 <a id="af7a9ad931d6a231c1156d803628b3e00" name="af7a9ad931d6a231c1156d803628b3e00"></a>

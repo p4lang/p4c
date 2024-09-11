@@ -71,12 +71,11 @@ var searchData=
   ['hsindextransform_68',['HSIndexTransform',['../class_p4_1_1_h_s_index_transform.html',1,'P4']]],
   ['hvec_5fmap_69',['hvec_map',['../class_p4_1_1hvec__map.html',1,'P4']]],
   ['hvec_5fmap_3c_20const_20p4_3a_3abaselocation_20_2a_2c_20const_20p4_3a_3aprogrampoints_20_2a_20_3e_70',['hvec_map&lt; const P4::BaseLocation *, const P4::ProgramPoints * &gt;',['../class_p4_1_1hvec__map.html',1,'P4']]],
-  ['hvec_5fmap_3c_20const_20p4_3a_3air_3a_3aideclaration_20_2a_2c_20def_5finfo_5ft_20_3e_71',['hvec_map&lt; const P4::IR::IDeclaration *, def_info_t &gt;',['../class_p4_1_1hvec__map.html',1,'P4']]],
-  ['hvec_5fmap_3c_20const_20p4_3a_3air_3a_3aideclaration_20_2a_2c_20p4_3a_3astoragelocation_20_2a_20_3e_72',['hvec_map&lt; const P4::IR::IDeclaration *, P4::StorageLocation * &gt;',['../class_p4_1_1hvec__map.html',1,'P4']]],
+  ['hvec_5fmap_3c_20const_20p4_3a_3air_3a_3aideclaration_20_2a_2c_20const_20p4_3a_3astoragelocation_20_2a_20_3e_71',['hvec_map&lt; const P4::IR::IDeclaration *, const P4::StorageLocation * &gt;',['../class_p4_1_1hvec__map.html',1,'P4']]],
+  ['hvec_5fmap_3c_20const_20p4_3a_3air_3a_3aideclaration_20_2a_2c_20def_5finfo_5ft_20_3e_72',['hvec_map&lt; const P4::IR::IDeclaration *, def_info_t &gt;',['../class_p4_1_1hvec__map.html',1,'P4']]],
   ['hvec_5fmap_3c_20const_20p4_3a_3air_3a_3anode_20_2a_2c_20p4_3a_3ahvec_5fset_20_3e_73',['hvec_map&lt; const P4::IR::Node *, P4::hvec_set &gt;',['../class_p4_1_1hvec__map.html',1,'P4']]],
-  ['hvec_5fmap_3c_20p4_3a_3acstring_2c_20const_20p4_3a_3astoragelocation_20_2a_20_3e_74',['hvec_map&lt; P4::cstring, const P4::StorageLocation * &gt;',['../class_p4_1_1hvec__map.html',1,'P4']]],
-  ['hvec_5fmap_3c_20p4_3a_3aloc_5ft_2c_20const_20p4_3a_3alocationset_20_2a_20_3e_75',['hvec_map&lt; P4::loc_t, const P4::LocationSet * &gt;',['../class_p4_1_1hvec__map.html',1,'P4']]],
-  ['hvec_5fmap_3c_20p4_3a_3aprogrampoint_2c_20p4_3a_3adefinitions_20_2a_20_3e_76',['hvec_map&lt; P4::ProgramPoint, P4::Definitions * &gt;',['../class_p4_1_1hvec__map.html',1,'P4']]],
-  ['hvec_5fset_77',['hvec_set',['../class_p4_1_1hvec__set.html',1,'P4']]],
-  ['hvec_5fset_3c_20const_20loc_5ft_20_2a_20_3e_78',['hvec_set&lt; const loc_t * &gt;',['../class_p4_1_1hvec__set.html',1,'P4']]]
+  ['hvec_5fmap_3c_20p4_3a_3aloc_5ft_2c_20const_20p4_3a_3alocationset_20_2a_20_3e_74',['hvec_map&lt; P4::loc_t, const P4::LocationSet * &gt;',['../class_p4_1_1hvec__map.html',1,'P4']]],
+  ['hvec_5fmap_3c_20p4_3a_3aprogrampoint_2c_20p4_3a_3adefinitions_20_2a_20_3e_75',['hvec_map&lt; P4::ProgramPoint, P4::Definitions * &gt;',['../class_p4_1_1hvec__map.html',1,'P4']]],
+  ['hvec_5fset_76',['hvec_set',['../class_p4_1_1hvec__set.html',1,'P4']]],
+  ['hvec_5fset_3c_20const_20loc_5ft_20_2a_20_3e_77',['hvec_set&lt; const loc_t * &gt;',['../class_p4_1_1hvec__set.html',1,'P4']]]
 ];
