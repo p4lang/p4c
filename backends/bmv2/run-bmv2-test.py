@@ -98,6 +98,25 @@ def parse_args():
             " stf file in the same folder."
         ),
     )
+    parser.add_argument(
+        "-cf",
+        "--compiledP4File",
+        dest="compiledP4File",
+        help=(
+            "Provide a path for an already-compiled P4 program for this test. "
+            "If this option is not provided, the script will run the P4"
+            " compiler to create it."
+        ),
+    )
+    parser.add_argument(
+        "-wf",
+        "--writeCompiledP4File",
+        dest="writeCompiledP4File",
+        help=(
+            "Provide a path where a copy of the compiled P4 program should "
+            "be written, after this script compiles it."
+        ),
+    )
     return parser.parse_known_args()
 
 
@@ -109,6 +128,8 @@ class Options:
         self.compilerSrcDir = ""  # path to compiler source tree
         self.compilerBuildDir = ""  # path to compiler build directory
         self.testFile = ""  # path to stf test file that is used
+        self.compiledP4File = None
+        self.writeCompiledP4File = None
         self.testName = None  # Name of the test
         self.verbose = False
         self.replace = False  # replace previous outputs
@@ -298,7 +319,15 @@ def process_file(options, argv):
     if options.runDebugger:
         args[0:0] = options.runDebugger.split()
         os.execvp(args[0], args)
-    result = run_timeout(options, args, timeout, stderr)
+    if options.compiledP4File:
+        shutil.copyfile(options.compiledP4File, jsonfile)
+        print("Copied compiled P4 file from " + options.compiledP4File)
+    if os.path.isfile(jsonfile):
+        print("Compiled P4 file already exists.  Skipping compile: " + jsonfile)
+        result = SUCCESS
+    else:
+        print("Compiled P4 file did not already exist, so compiling it: " + jsonfile)
+        result = run_timeout(options, args, timeout, stderr)
 
     if result != SUCCESS:
         print("Error compiling")
@@ -307,6 +336,10 @@ def process_file(options, argv):
             # If the compiler crashed fail the test
             if "Compiler Bug" in stderr_file.read():
                 return FAILURE
+
+    if options.writeCompiledP4File:
+        shutil.copyfile(jsonfile, options.writeCompiledP4File)
+        print("Copied compiled P4 file to file " + options.writeCompiledP4File)
 
     expected_error = isError(options.p4filename)
     if expected_error:
@@ -346,6 +379,12 @@ if __name__ == "__main__":
     # TODO: Convert these paths to pathlib's Path.
     options.p4filename = check_if_file(args.p4filename).as_posix()
     options.compilerSrcDir = check_if_dir(args.rootdir).as_posix()
+    if args.compiledP4File:
+        options.compiledP4File = check_if_file(args.compiledP4File).as_posix()
+    if args.writeCompiledP4File:
+        print("dbg jafinger '%s'" % (args.writeCompiledP4File))
+        p1 = Path(args.writeCompiledP4File)
+        options.writeCompiledP4File = Path(p1.absolute()).as_posix()
 
     # If no build directory is provided, use current working directory
     if args.builddir:
