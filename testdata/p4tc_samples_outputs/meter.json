@@ -10,6 +10,7 @@
         {
           "inst_name" : "ingress.global_meter",
           "inst_id" : 1,
+          "inst_type" : "BYTES",
           "params" : [
             {
               "id" : 1,
@@ -21,7 +22,7 @@
             {
               "id" : 2,
               "name" : "cir",
-              "type" : "bit64",
+              "type" : "rate",
               "attr" : "param",
               "bitwidth" : 64
             },
@@ -35,7 +36,7 @@
             {
               "id" : 4,
               "name" : "pir",
-              "type" : "bit64",
+              "type" : "rate",
               "attr" : "param",
               "bitwidth" : 64
             },

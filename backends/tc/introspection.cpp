@@ -163,6 +163,9 @@ void IntrospectionGenerator::collectExternInfo() {
             auto externInstanceInfo = new struct ExternInstancesAttributes();
             externInstanceInfo->id = externInstance->instanceID;
             externInstanceInfo->name = externInstance->instanceName;
+            if (externInstance->isInstanceType) {
+                externInstanceInfo->type = externInstance->instanceType;
+            }
             for (auto control_field : externInstance->controlKeys) {
                 auto keyField = new struct KeyFieldAttributes();
                 keyField->id = control_field->keyID;
@@ -188,6 +191,9 @@ Util::JsonObject *IntrospectionGenerator::genExternInfo(struct ExternAttributes 
         auto eInstanceJson = new Util::JsonObject();
         eInstanceJson->emplace("inst_name", eInstance->name);
         eInstanceJson->emplace("inst_id", eInstance->id);
+        if (!eInstance->type.isNullOrEmpty()) {
+            eInstanceJson->emplace("inst_type", eInstance->type);
+        }
         auto paramArray = new Util::JsonArray();
         for (auto param : eInstance->keyFields) {
             auto keyJson = genKeyInfo(param);

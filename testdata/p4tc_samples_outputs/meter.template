@@ -16,7 +16,7 @@ $TC p4template create extern/root/Meter extid 0x1B000000 numinstances 1 tc_acl 0
 $TC p4template create extern_inst/meter/Meter/ingress.global_meter instid 1 \
 tc_numel 2048 \
 constructor param type ptype bit32 1 \
-control_path tc_key index ptype bit32 id 1 param cir ptype bit64 id 2 param cbs ptype bit64 id 3 param pir ptype bit64 id 4 param pbs ptype bit64 id 5
+control_path tc_key index ptype bit32 id 1 param cir ptype rate id 2 param cbs ptype bit64 id 3 param pir ptype rate id 4 param pbs ptype bit64 id 5
 
 $TC p4template create table/meter/ingress/nh_table \
 	tblid 1 \
