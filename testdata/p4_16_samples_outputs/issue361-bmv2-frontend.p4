@@ -17,9 +17,6 @@ parser MyParser(packet_in b, out my_packet p, inout my_metadata m, inout standar
     @name("MyParser.bv") bool bv_0;
     state start {
         bv_0 = true;
-        transition start_0;
-    }
-    state start_0 {
         transition select(bv_0) {
             false: next;
             true: accept;
