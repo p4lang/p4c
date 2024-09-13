@@ -47,7 +47,7 @@ class ComplexExpression : public Inspector {
 const IR::PathExpression *RemoveComplexExpressions::createTemporary(
     const IR::Expression *expression) {
     auto type = typeMap->getType(expression, true);
-    auto name = refMap->newName("tmp");
+    auto name = refMap->newName("tmpAN");
     auto decl = new IR::Declaration_Variable(IR::ID(name), type->getP4Type());
     newDecls.push_back(decl);
     typeMap->setType(decl, type);
@@ -177,7 +177,7 @@ const IR::Node *RemoveComplexExpressions::postorder(IR::MethodCallStatement *sta
             em->method->name != P4::P4CoreLibrary::instance().packetIn.lookahead.name)
             return simpleStatement(statement);
         auto type = em->actualMethodType->returnType;
-        auto name = refMap->newName("tmp");
+        auto name = refMap->newName("tmpAO");
         LOG3("Adding variable for lookahead " << name);
         auto decl = new IR::Declaration_Variable(IR::ID(name), type->getP4Type());
         newDecls.push_back(decl);

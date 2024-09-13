@@ -341,7 +341,7 @@ void UBPFStateTranslationVisitor::compileLookahead(const IR::Expression *destina
 void UBPFStateTranslationVisitor::compileAdvance(const IR::Expression *expr) {
     auto type = state->parser->typeMap->getType(expr);
     auto etype = UBPFTypeFactory::instance->create(type);
-    cstring tmpVarName = refMap->newName("tmp");
+    cstring tmpVarName = refMap->newName("tmpAB");
 
     builder->emitIndent();
     builder->blockStart();

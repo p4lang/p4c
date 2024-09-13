@@ -119,7 +119,7 @@ const IR::Node *MoveConstructors::preorder(IR::P4Table *table) {
 
 const IR::Node *MoveConstructors::postorder(IR::ConstructorCallExpression *expression) {
     if (convert == Region::Outside) return expression;
-    auto tmpvar = nameGen.newName("tmp");
+    auto tmpvar = nameGen.newName("tmpAS");
     auto tmpref = new IR::PathExpression(IR::ID(expression->srcInfo, tmpvar));
     cmap.add(expression, tmpvar);
     return tmpref;

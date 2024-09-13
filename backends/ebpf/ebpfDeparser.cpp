@@ -203,7 +203,7 @@ void DeparserHdrEmitTranslator::emitField(CodeBuilder *builder, cstring field,
             builder->endOfStatement(true);
             msgStr = absl::StrFormat("Deparser: emitting field %s=0x%%llx (%u bits)", field,
                                      widthToEmit);
-            builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, "tmp");
+            builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, "tmpAC");
             builder->blockEnd(true);
         }
     } else {

@@ -53,7 +53,7 @@ const IR::Node *HandleValidityHeaderUnion::expandIsValid(
     if (auto bim = mi->to<P4::BuiltInMethod>()) {
         if (bim->name == "isValid") {  // hdr.u.isValid() or u.isValid
             if (auto huType = bim->appliedTo->type->to<IR::Type_HeaderUnion>()) {  // u or hdr.u
-                cstring tmp = refMap->newName("tmp");
+                cstring tmp = refMap->newName("tmpAQ");
                 IR::PathExpression *tmpVar = new IR::PathExpression(IR::ID(tmp));
                 toInsert.push_back(
                     new IR::Declaration_Variable(IR::ID(tmp), IR::Type_Bits::get(32)));

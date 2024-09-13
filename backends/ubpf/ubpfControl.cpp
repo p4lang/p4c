@@ -346,7 +346,7 @@ bool UBPFControlBodyTranslator::emitRegisterRead(const IR::AssignmentStatement *
     pRegister->emitKeyInstance(builder, method);
 
     auto etype = UBPFTypeFactory::instance->create(pRegister->keyType);
-    auto tmp = control->program->refMap->newName("tmp");
+    auto tmp = control->program->refMap->newName("tmpAA");
     etype->declare(builder, tmp, true);
     builder->endOfStatement(true);
 

@@ -58,7 +58,7 @@ void EBPFRegisterPNA::emitRegisterRead(EBPF::CodeBuilder *builder, const P4::Ext
     builder->appendLine("ext_val = *ext_val_ptr;");
     if (leftExpression != nullptr) {
         builder->emitIndent();
-        builder->append("__builtin_memcpy(&");
+        builder->append("__builtin_memcpy/*C*/(&");
         translator->visit(leftExpression);
         builder->append(", ext_val.out_params, sizeof(");
         this->valueType->declare(builder, cstring::empty, false);
@@ -73,7 +73,7 @@ void EBPFRegisterPNA::emitRegisterWrite(EBPF::CodeBuilder *builder, const P4::Ex
 
     builder->newline();
     builder->emitIndent();
-    builder->append("__builtin_memcpy(ext_val.out_params, &");
+    builder->append("__builtin_memcpy/*D*/(ext_val.out_params, &");
     translator->visit(value);
     builder->append(", sizeof(");
     this->valueType->declare(builder, cstring::empty, false);

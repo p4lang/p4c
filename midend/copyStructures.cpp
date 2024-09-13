@@ -32,7 +32,7 @@ const IR::Node *RemoveAliases::postorder(IR::AssignmentStatement *statement) {
     if (!rw.mayAlias(statement->left, statement->right, getContext())) {
         return statement;
     }
-    auto tmp = refMap->newName("tmp");
+    auto tmp = refMap->newName("tmpAR");
     auto *decl = new IR::Declaration_Variable(IR::ID(tmp), type->getP4Type(), nullptr);
     declarations.push_back(decl);
     auto *result = new IR::IndexedVector<IR::StatOrDecl>();
