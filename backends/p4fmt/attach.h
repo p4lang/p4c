@@ -1,10 +1,6 @@
 #ifndef BACKENDS_P4FMT_ATTACH_H_
 #define BACKENDS_P4FMT_ATTACH_H_
 
-#include <filesystem>
-#include <unordered_map>
-#include <vector>
-
 #include "ir/visitor.h"
 #include "lib/source_file.h"
 
