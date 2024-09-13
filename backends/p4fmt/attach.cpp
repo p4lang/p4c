@@ -20,9 +20,7 @@ const IR::Node *Attach::attachCommentsToNode(IR::Node *node, TraversalType ttype
         return node;
     }
 
-    std::filesystem::path sourceFile(node->srcInfo.getSourceFile().string_view());
-    if (isSystemFile(sourceFile.string())) {
-        // Skip attachment for system files
+    if (isSystemFile(node->srcInfo.getSourceFile())) {
         return node;
     }
 

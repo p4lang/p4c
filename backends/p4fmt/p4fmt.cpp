@@ -15,20 +15,17 @@ namespace P4::P4Fmt {
 
 std::optional<std::pair<const IR::P4Program *, const Util::InputSources *>> parseProgram(
     const ParserOptions &options) {
-    auto *file = fopen(options.file.c_str(), "r");
-    if (file == nullptr) {
-        ::P4::error(ErrorType::ERR_NOT_FOUND, "%1%: No such file or directory.", options.file);
+    if (!std::filesystem::exists(options.file)) {
+        ::P4::error(ErrorType::ERR_NOT_FOUND, "%1%: No such file found.", options.file);
         return std::nullopt;
     }
     if (options.isv1()) {
-        ::P4::error(ErrorType::ERR_UNKNOWN, "p4fmt cannot deal with p4-14 programs");
-        fclose(file);
+        ::P4::error(ErrorType::ERR_UNKNOWN, "p4fmt cannot deal with p4-14 programs.");
         return std::nullopt;
     }
     auto preprocessorResult = options.preprocess();
     auto result =
         P4ParserDriver::parseProgramSources(preprocessorResult.value().get(), options.file.c_str());
-    fclose(file);
 
     if (::P4::errorCount() > 0) {
         ::P4::error(ErrorType::ERR_OVERLIMIT, "%1% errors encountered, aborting compilation",
