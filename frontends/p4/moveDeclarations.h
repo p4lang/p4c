@@ -101,20 +101,22 @@ class MoveDeclarations : public Transform {
  */
 class MoveInitializers : public Transform, public ResolutionContext {
     MinimalNameGenerator nameGen;
-    IR::IndexedVector<IR::StatOrDecl> toMove;  // This contains just IR::AssignmentStatement
+    IR::IndexedVector<IR::StatOrDecl> *toMove;  // This contains just IR::AssignmentStatement
     const IR::ParserState *oldStart;  // nullptr if we do not want to rename the start state
-    cstring newStartName;             // name allocated to the new start state
-    bool loopsBackToStart;            // true if start is reachable from any other state
+    cstring newStartName;             // name allocated to the old start state
 
  public:
-    MoveInitializers() : newStartName("") { setName("MoveInitializers"); }
+    MoveInitializers()
+        : toMove(new IR::IndexedVector<IR::StatOrDecl>()), oldStart(nullptr), newStartName("") {
+        setName("MoveInitializers");
+    }
     profile_t init_apply(const IR::Node *node) override;
     const IR::Node *preorder(IR::P4Parser *parser) override;
-    const IR::Node *preorder(IR::Declaration_Variable *decl) override;
-    const IR::Node *postorder(IR::ParserState *state) override;
-    const IR::Node *postorder(IR::Path *path) override;
     const IR::Node *postorder(IR::P4Parser *parser) override;
+    const IR::Node *postorder(IR::Declaration_Variable *decl) override;
+    const IR::Node *postorder(IR::ParserState *state) override;
     const IR::Node *postorder(IR::P4Control *control) override;
+    const IR::Node *postorder(IR::Path *path) override;
 };
 
 }  // namespace P4

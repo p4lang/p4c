@@ -214,6 +214,9 @@ parser FabricParser(packet_in packet, out parsed_headers_t hdr, inout fabric_met
     @name("FabricParser.tmp") bit<4> tmp;
     @name("FabricParser.tmp_0") bit<4> tmp_0;
     state start {
+        transition start_0;
+    }
+    state start_0 {
         transition select(standard_metadata.ingress_port) {
             9w255: parse_packet_out;
             default: parse_ethernet;

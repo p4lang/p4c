@@ -26,6 +26,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         x = (bit<16>)standard_metadata.ingress_port;
         retval = x + 16w1;
         tmp_port_0 = retval;
+        transition start_0;
+    }
+    state start_0 {
         packet.extract<ethernet_t>(hdr.ethernet);
         x_6 = hdr.ethernet.etherType;
         retval_0 = x_6 + 16w1;

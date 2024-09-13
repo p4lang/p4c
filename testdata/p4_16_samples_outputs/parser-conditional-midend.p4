@@ -7,45 +7,45 @@ parser p(out bit<32> b) {
     @name("p.tmp_1") bit<32> tmp_1;
     state start {
         a_0 = 32w1;
-        transition start_false;
+        transition start_0_false;
     }
-    state start_false {
+    state start_0_false {
         tmp = 32w3;
-        transition start_join;
+        transition start_0_join;
     }
-    state start_join {
+    state start_0_join {
         b = tmp;
         b = tmp + 32w1;
         transition select((bit<1>)(a_0 > 32w0)) {
-            1w1: start_true_0;
-            1w0: start_false_0;
+            1w1: start_0_true_0;
+            1w0: start_0_false_0;
             default: noMatch;
         }
     }
-    state start_true_0 {
+    state start_0_true_0 {
         transition select((bit<1>)(a_0 > 32w1)) {
-            1w1: start_true_0_true;
-            1w0: start_true_0_false;
+            1w1: start_0_true_0_true;
+            1w0: start_0_true_0_false;
             default: noMatch;
         }
     }
-    state start_true_0_true {
+    state start_0_true_0_true {
         tmp_1 = b + 32w1;
-        transition start_true_0_join;
+        transition start_0_true_0_join;
     }
-    state start_true_0_false {
+    state start_0_true_0_false {
         tmp_1 = b + 32w2;
-        transition start_true_0_join;
+        transition start_0_true_0_join;
     }
-    state start_true_0_join {
+    state start_0_true_0_join {
         tmp_0 = tmp_1;
-        transition start_join_0;
+        transition start_0_join_0;
     }
-    state start_false_0 {
+    state start_0_false_0 {
         tmp_0 = b + 32w3;
-        transition start_join_0;
+        transition start_0_join_0;
     }
-    state start_join_0 {
+    state start_0_join_0 {
         b = tmp_0;
         transition accept;
     }
