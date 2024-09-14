@@ -15,13 +15,13 @@ void Attach::addSuffixComments(NodeId node, const Util::Comment *suffix) {
 
 const Attach::CommentsMap &Attach::getCommentsMap() const { return commentsMap; }
 
-const IR::Node *Attach::attachCommentsToNode(IR::Node *node, TraversalType ttype) {
+void Attach::attachCommentsToNode(const IR::Node *node, TraversalType ttype) {
     if (node == nullptr || !node->srcInfo.isValid() || processedComments.empty()) {
-        return node;
+        return;
     }
 
     if (isSystemFile(node->srcInfo.getSourceFile())) {
-        return node;
+        return;
     }
 
     const auto nodeStart = node->srcInfo.getStart();
@@ -51,19 +51,18 @@ const IR::Node *Attach::attachCommentsToNode(IR::Node *node, TraversalType ttype
 
             default:
                 P4::error(ErrorType::ERR_INVALID, "traversal type unknown/unsupported.");
-                return node;
+                return;
         }
     }
-
-    return node;
 }
 
-const IR::Node *Attach::preorder(IR::Node *node) {
-    return attachCommentsToNode(node, TraversalType::Preorder);
+bool Attach::preorder(const IR::Node *node) {
+    attachCommentsToNode(node, TraversalType::Preorder);
+    return true;
 }
 
-const IR::Node *Attach::postorder(IR::Node *node) {
-    return attachCommentsToNode(node, TraversalType::Postorder);
+void Attach::postorder(const IR::Node *node) {
+    attachCommentsToNode(node, TraversalType::Postorder);
 }
 
 }  // namespace P4::P4Fmt

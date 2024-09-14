@@ -6,7 +6,7 @@
 
 namespace P4::P4Fmt {
 
-class Attach : public Transform {
+class Attach : public Inspector {
  public:
     using NodeId = int;
     struct Comments {
@@ -19,10 +19,10 @@ class Attach : public Transform {
     explicit Attach(const std::unordered_map<const Util::Comment *, bool> &processedComments)
         : processedComments(processedComments){};
 
-    const IR::Node *attachCommentsToNode(IR::Node *, TraversalType);
+    void attachCommentsToNode(const IR::Node *, TraversalType);
 
-    const IR::Node *preorder(IR::Node *node) override;
-    const IR::Node *postorder(IR::Node *node) override;
+    bool preorder(const IR::Node *node) override;
+    void postorder(const IR::Node *node) override;
 
     void addPrefixComments(NodeId, const Util::Comment *);
     void addSuffixComments(NodeId, const Util::Comment *);
