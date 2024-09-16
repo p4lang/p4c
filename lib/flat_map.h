@@ -16,6 +16,7 @@ limitations under the License.
 
 #include <algorithm>
 #include <functional>
+#include <stdexcept>
 #include <vector>
 
 namespace P4 {
