@@ -82,6 +82,13 @@ void IR::Slice::dbprint(std::ostream &out) const {
     if (prec == 0) out << ';';
 }
 
+void IR::PlusSlice::dbprint(std::ostream &out) const {
+    int prec = getprec(out);
+    out << setprec(Prec_Postfix) << e0 << "[" << setprec(Prec_Low) << e1
+        << "+:" << setprec(Prec_Low) << e2 << setprec(prec) << ']';
+    if (prec == 0) out << ';';
+}
+
 void IR::Primitive::dbprint(std::ostream &out) const {
     const char *sep = "";
     int prec = getprec(out);

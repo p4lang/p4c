@@ -141,6 +141,7 @@ class DoConstantFolding : public Transform, public ResolutionContext {
     const IR::Node *postorder(IR::LAnd *e) override;
     const IR::Node *postorder(IR::LOr *e) override;
     const IR::Node *postorder(IR::Slice *e) override;
+    const IR::Node *postorder(IR::PlusSlice *e) override;
     const IR::Node *postorder(IR::Add *e) override;
     const IR::Node *postorder(IR::AddSat *e) override;
     const IR::Node *postorder(IR::Sub *e) override;

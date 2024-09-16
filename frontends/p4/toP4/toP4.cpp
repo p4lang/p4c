@@ -772,7 +772,7 @@ VECTOR_VISIT(IndexedVector, StatOrDecl)
 
 ///////////////////////////////////////////
 
-bool ToP4::preorder(const IR::Slice *slice) {
+bool ToP4::preorder(const IR::AbstractSlice *slice) {
     int prec = expressionPrecedence;
     bool useParens = prec > slice->getPrecedence();
     if (useParens) builder.append("(");
@@ -782,6 +782,7 @@ bool ToP4::preorder(const IR::Slice *slice) {
     builder.append("[");
     expressionPrecedence = DBPrint::Prec_Low;
     visit(slice->e1);
+    if (slice->is<IR::PlusSlice>()) builder.append("+");
     builder.append(":");
     expressionPrecedence = DBPrint::Prec_Low;
     visit(slice->e2);

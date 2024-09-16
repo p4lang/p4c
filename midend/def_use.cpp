@@ -454,7 +454,7 @@ void ComputeDefUse::set_live_from_type(def_info_t &di, const IR::Type *type) {
 }
 
 static const IR::Expression *get_primary(const IR::Expression *e, const Visitor::Context *ctxt) {
-    if (ctxt && (ctxt->node->is<IR::Member>() || ctxt->node->is<IR::Slice>() ||
+    if (ctxt && (ctxt->node->is<IR::Member>() || ctxt->node->is<IR::AbstractSlice>() ||
                  ctxt->node->is<IR::ArrayIndex>())) {
         return get_primary(ctxt->node->to<IR::Expression>(), ctxt->parent);
     } else {
@@ -607,6 +607,8 @@ const IR::Expression *ComputeDefUse::do_write(def_info_t &di, const IR::Expressi
         di.erase_slice(range);
         e = do_write(di.slices[range], sl, ctxt->parent);
         return e;
+    } else if (ctxt->node->is<IR::PlusSlice>()) {
+        // writes an unknown part of the expression, rest (still) live
     } else if (auto *ai = ctxt->node->to<IR::ArrayIndex>()) {
         if (auto idx = ai->right->to<IR::Constant>()) {
             int i = idx->asInt();
@@ -619,8 +621,9 @@ const IR::Expression *ComputeDefUse::do_write(def_info_t &di, const IR::Expressi
             e = ai;
         }
         return e;
+    } else {
+        di.defs.clear();
     }
-    di.defs.clear();
     di.defs.insert(getLoc(e));
     di.fields.clear();
     di.slices.clear();

@@ -126,7 +126,7 @@ bool SymbolicEnv::isSymbolicValue(const IR::Node *node) {
                 binary->is<IR::Concat>() || binary->is<IR::Mask>()) &&
                isSymbolicValue(binary->left) && isSymbolicValue(binary->right);
     }
-    if (const auto *slice = expr->to<IR::Slice>()) {
+    if (const auto *slice = expr->to<IR::AbstractSlice>()) {
         return isSymbolicValue(slice->e0) && isSymbolicValue(slice->e1) &&
                isSymbolicValue(slice->e2);
     }

@@ -58,7 +58,7 @@ class FindLocationSets : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::Slice *expression) {
+    bool preorder(const IR::AbstractSlice *expression) {
         visit(expression->e0);
         auto base = get(expression->e0);
         set(expression, base);

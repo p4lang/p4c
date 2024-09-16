@@ -17,7 +17,7 @@ static cstring lValueName(const IR::Expression *exp) {
             if (auto base = lValueName(a->left))
                 return base + "[" + std::to_string(k->asInt()) + "]";
         }
-    } else if (auto sl = exp->to<IR::Slice>()) {
+    } else if (auto sl = exp->to<IR::AbstractSlice>()) {
         if (auto e0 = lValueName(sl->e0)) return e0;
     }
     return cstring();
@@ -157,13 +157,14 @@ bool FindVariableValues::preorder(const IR::AssignmentStatement *stat) {
         removeVarsContaining(&vars, GlobalCopyProp::lValueName(stat->left));
     // Set value
     if (auto lit = stat->right->to<IR::Literal>()) {
-        if (stat->left->is<IR::Slice>()) return false;
+        if (stat->left->is<IR::AbstractSlice>()) return false;
         vars[GlobalCopyProp::lValueName(stat->left)] = lit;
         LOG5("  Setting value: " << lit << ", for: " << stat->left);
     } else if (auto v = vars[GlobalCopyProp::lValueName(stat->right)]) {
         auto lit = v->to<IR::Literal>();
         if (lit == nullptr) return false;
-        if (stat->left->is<IR::Slice>() || stat->right->is<IR::Slice>()) return false;
+        if (stat->left->is<IR::AbstractSlice>() || stat->right->is<IR::AbstractSlice>())
+            return false;
         vars[GlobalCopyProp::lValueName(stat->left)] = lit;
         LOG5("  Setting value: " << lit << ", for: " << stat->left);
     }
@@ -380,7 +381,7 @@ const IR::Node *DoGlobalCopyPropagation::preorder(IR::AssignmentStatement *stat)
     // Store the value for 'stat->left' if it is now a constant. If it is an assignment to an
     // identical literal as already stored in the 'vars' container the statement is removed.
     if (auto lit = stat->right->to<IR::Literal>()) {
-        if (stat->left->is<IR::Slice>()) return stat;
+        if (stat->left->is<IR::AbstractSlice>()) return stat;
         if ((*vars)[GlobalCopyProp::lValueName(stat->left)] &&
             lit->equiv(*((*vars)[GlobalCopyProp::lValueName(stat->left)])))
             return new IR::EmptyStatement(stat->srcInfo);

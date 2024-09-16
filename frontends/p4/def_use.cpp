@@ -536,7 +536,7 @@ bool ComputeWriteSet::preorder(const IR::Literal *expression) {
     return false;
 }
 
-bool ComputeWriteSet::preorder(const IR::Slice *expression) {
+bool ComputeWriteSet::preorder(const IR::AbstractSlice *expression) {
     visit(expression->e0);
     expressionWrites(expression, lhs ? getWrites(expression->e0) : LocationSet::empty);
     return false;
