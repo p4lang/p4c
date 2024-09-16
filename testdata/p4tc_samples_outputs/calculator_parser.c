@@ -2,7 +2,10 @@
 
 struct p4tc_filter_fields p4tc_filter_fields;
 
-static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *hdr, struct pna_global_metadata *compiler_meta__)
+static __always_inline int run_parser(
+	struct __sk_buff *skb,
+	struct headers_t *hdr,
+	struct pna_global_metadata *compiler_meta__ )
 {
     struct hdr_md *hdrMd;
 
@@ -141,7 +144,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
                 ebpf_packetOffsetInBits = ebpf_packetOffsetInBits_save;
             }
             u32 select_0;
-            select_0 = (((((u32)(((u16)tmp_0.p << 8) | ((u16)tmp_2.four & 0xff)) << 8) & ((1 << 24) - 1)) | (((u32)tmp_4.ver & 0xff) & ((1 << 24) - 1))) & ((1 << 24) - 1));
+            select_0 = (((((u32)(((u16)tmp_0.p << 8) | ((u16)tmp_2.four & 0xff)) << 8) & ((1ULL << 24) - 1)) | (((u32)tmp_4.ver & 0xff) & ((1ULL << 24) - 1))) & ((1ULL << 24) - 1));
             if (select_0 == 0x503401)goto parse_p4calc;
             if ((select_0 & 0x0) == (0x0 & 0x0))goto accept;
             else goto reject;

@@ -5,6 +5,11 @@ struct internal_metadata {
     __u16 pkt_ether_type;
 } __attribute__((aligned(4)));
 
+struct skb_aggregate {
+    struct p4tc_skb_meta_get get;
+    struct p4tc_skb_meta_set set;
+};
+
 struct __attribute__((__packed__)) ingress_nh_table_key {
     u32 keysz;
     u32 maskid;
@@ -31,7 +36,11 @@ struct __attribute__((__packed__)) ingress_nh_table_value {
     } u;
 };
 
-static __always_inline int process(struct __sk_buff *skb, struct my_ingress_headers_t *hdr, struct pna_global_metadata *compiler_meta__)
+static __always_inline int process(
+	struct __sk_buff *skb,
+	struct my_ingress_headers_t *hdr,
+	struct pna_global_metadata *compiler_meta__,
+	struct skb_aggregate *sa )
 {
     struct hdr_md *hdrMd;
 
@@ -118,24 +127,6 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
         struct p4tc_ext_bpf_params ext_params = {};
         struct mac_learn_digest_t mac_learn_digest_0;
         __builtin_memset((void *) &mac_learn_digest_0, 0, sizeof(struct mac_learn_digest_t ));
-{
-if (meta->send_digest) {
-                mac_learn_digest_0.srcAddr = hdr->ethernet.srcAddr;
-                                mac_learn_digest_0.ingress_port = meta->ingress_port;
-                /* digest_inst_0.pack(mac_learn_digest_0) */
-
-                __builtin_memset(&ext_params, 0, sizeof(struct p4tc_ext_bpf_params));
-                ext_params.pipe_id = p4tc_filter_fields.pipeid;
-                ext_params.ext_id = 0x05000000;
-                ext_params.inst_id = 1;
-
-                __builtin_memcpy(ext_params.in_params, &mac_learn_digest_0, sizeof(struct mac_learn_digest_t ));
-                bpf_p4tc_extern_digest_pack(skb, &ext_params, sizeof(ext_params));
-            }
-            ;
-            ;
-        }
-
         if (compiler_meta__->drop) {
             return TC_ACT_SHOT;
         }
@@ -155,6 +146,24 @@ if (meta->send_digest) {
                 return TC_ACT_SHOT;
             }
         }
+{
+if (meta->send_digest) {
+                mac_learn_digest_0.srcAddr = hdr->ethernet.srcAddr;
+                                mac_learn_digest_0.ingress_port = meta->ingress_port;
+                /* digest_inst_0.pack(mac_learn_digest_0) */
+
+                __builtin_memset(&ext_params, 0, sizeof(struct p4tc_ext_bpf_params));
+                ext_params.pipe_id = p4tc_filter_fields.pipeid;
+                ext_params.ext_id = 0x05000000;
+                ext_params.inst_id = 1;
+
+                __builtin_memcpy(ext_params.in_params, &mac_learn_digest_0, sizeof(struct mac_learn_digest_t ));
+                bpf_p4tc_extern_digest_pack(skb, &ext_params, sizeof(ext_params));
+            }
+            ;
+            ;
+        }
+
         pkt = ((void*)(long)skb->data);
         ebpf_packetEnd = ((void*)(long)skb->data_end);
         ebpf_packetOffsetInBits = 0;
@@ -284,6 +293,7 @@ if (meta->send_digest) {
 }
 SEC("p4tc/main")
 int tc_ingress_func(struct __sk_buff *skb) {
+    struct skb_aggregate skbstuff;
     struct pna_global_metadata *compiler_meta__ = (struct pna_global_metadata *) skb->cb;
     if (compiler_meta__->pass_to_kernel == true) return TC_ACT_OK;
     compiler_meta__->drop = false;
@@ -300,8 +310,7 @@ int tc_ingress_func(struct __sk_buff *skb) {
     }
     struct hdr_md *hdrMd;
     struct my_ingress_headers_t *hdr;
-    int ret = -1;
-    ret = process(skb, (struct my_ingress_headers_t *) hdr, compiler_meta__);
+    int ret = process(skb, (struct my_ingress_headers_t *) hdr, compiler_meta__, &skbstuff);
     if (ret != -1) {
         return ret;
     }
