@@ -180,6 +180,8 @@ const IR::Node *MoveInitializers::postorder(IR::ParserState *state) {
 }
 
 const IR::Node *MoveInitializers::postorder(IR::Path *path) {
+    if (!findContext<IR::ParserState>()) return path;
+
     if (!oldStart || !loopsBackToStart || path->name != IR::ParserState::start) return path;
 
     // Only rename start state references if the parser contains initializing assignments
