@@ -144,12 +144,6 @@ class P4CContext : public BaseCompileContext {
         errorReporter().setDefaultWarningDiagnosticAction(action);
     }
 
-    /// @return the action to take for the given diagnostic, falling back to the
-    /// default action if it wasn't overridden via the command line or a pragma.
-    DiagnosticAction getDiagnosticAction(cstring diagnostic, DiagnosticAction defaultAction) final {
-        return errorReporter().getDiagnosticAction(diagnostic, defaultAction);
-    }
-
     /// Set the action to take for the given diagnostic.
     void setDiagnosticAction(std::string_view diagnostic, DiagnosticAction action) {
         errorReporter().setDiagnosticAction(diagnostic, action);

@@ -69,6 +69,8 @@ const int ErrorType::WARN_INVALID_HEADER = 1020;
 const int ErrorType::WARN_DUPLICATE_PRIORITIES = 1021;
 const int ErrorType::WARN_ENTRIES_OUT_OF_ORDER = 1022;
 const int ErrorType::WARN_MULTI_HDR_EXTRACT = 1023;
+const int ErrorType::WARN_EXPRESSION = 1024;
+const int ErrorType::WARN_DUPLICATE = 1025;
 
 // ------ Info messages -----------
 const int ErrorType::INFO_INFERRED = WARN_MAX + 1;
@@ -120,6 +122,8 @@ std::map<int, cstring> ErrorCatalog::errorCatalog = {
     {ErrorType::WARN_DUPLICATE_PRIORITIES, "duplicate_priorities"_cs},
     {ErrorType::WARN_ENTRIES_OUT_OF_ORDER, "entries_out_of_priority_order"_cs},
     {ErrorType::WARN_MULTI_HDR_EXTRACT, "multi_header_extract"_cs},
+    {ErrorType::WARN_EXPRESSION, "expr"_cs},
+    {ErrorType::WARN_DUPLICATE, "duplicate"_cs},
 
     // Info messages
     {ErrorType::INFO_INFERRED, "inferred"_cs},

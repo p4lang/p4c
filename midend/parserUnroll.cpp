@@ -174,7 +174,7 @@ class ParserStateRewriter : public Transform {
         auto *value = ev.evaluate(expression->right, false);
         if (!value->is<SymbolicInteger>()) return expression;
         if (!value->to<SymbolicInteger>()->isKnown()) {
-            ::P4::warning(ErrorType::ERR_INVALID,
+            ::P4::warning(ErrorType::WARN_INVALID,
                           "Uninitialized value prevents loop unrolling:\n%1%", expression->right);
             wasError = true;
             return expression;
@@ -183,7 +183,7 @@ class ParserStateRewriter : public Transform {
         newExpression->right = res;
         if (!res->fitsInt64()) {
             // we need to leave expression as is.
-            ::P4::warning(ErrorType::ERR_EXPRESSION, "Index can't be concretized : %1%",
+            ::P4::warning(ErrorType::WARN_EXPRESSION, "Index can't be concretized : %1%",
                           expression);
             return expression;
         }
@@ -393,7 +393,7 @@ class ParserSymbolicInterpreter {
 
             if (value == nullptr) value = factory->create(type, true);
             if (value && value->is<SymbolicError>()) {
-                ::P4::warning(ErrorType::ERR_EXPRESSION, "%1%: %2%", d,
+                ::P4::warning(ErrorType::WARN_EXPRESSION, "%1%: %2%", d,
                               value->to<SymbolicError>()->message());
                 return nullptr;
             }
@@ -447,7 +447,7 @@ class ParserSymbolicInterpreter {
 
             if (!stateClone)
                 // errors in the original state are signalled
-                ::P4::warning(ErrorType::ERR_EXPRESSION, "%1%: error %2% will be triggered\n%3%",
+                ::P4::warning(ErrorType::WARN_EXPRESSION, "%1%: error %2% will be triggered\n%3%",
                               exc->errorPosition, exc->message(), stateChain(state));
             // else this error will occur in a clone of the state produced
             // by unrolling - if the state is reached.  So we don't give an error.
@@ -682,7 +682,7 @@ class ParserSymbolicInterpreter {
                         }
                     }
                     if (equStackVariableMap(crt->statesIndexes, state->statesIndexes)) {
-                        ::P4::warning(ErrorType::ERR_INVALID,
+                        ::P4::warning(ErrorType::WARN_INVALID,
                                       "Parser cycle can't be unrolled, because ParserUnroll can't "
                                       "detect the number of loop iterations:\n%1%",
                                       stateChain(state));
@@ -694,7 +694,7 @@ class ParserSymbolicInterpreter {
                 // If no header validity has changed we can't really unroll
                 if (!headerValidityChange(crt->before, state->before)) {
                     if (equStackVariableMap(crt->statesIndexes, state->statesIndexes)) {
-                        ::P4::warning(ErrorType::ERR_INVALID,
+                        ::P4::warning(ErrorType::WARN_INVALID,
                                       "Parser cycle can't be unrolled, because ParserUnroll can't "
                                       "detect the number of loop iterations:\n%1%",
                                       stateChain(state));

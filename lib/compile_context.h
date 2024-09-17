@@ -105,11 +105,6 @@ class BaseCompileContext : public ICompileContext {
     /// @return the default diagnostic action for calls to `::P4::error()`.
     virtual DiagnosticAction getDefaultErrorDiagnosticAction();
 
-    /// @return the diagnostic action to use for @diagnosticName, or
-    /// @defaultAction if no diagnostic action was found.
-    virtual DiagnosticAction getDiagnosticAction(cstring diagnostic,
-                                                 DiagnosticAction defaultAction);
-
  private:
     /// Error and warning tracking facilities for this compilation context.
     ErrorReporter errorReporterInstance;

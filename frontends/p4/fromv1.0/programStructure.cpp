@@ -314,7 +314,7 @@ void ProgramStructure::createStructures() {
         if (metadataInstances.count(type_name)) continue;
         auto h = headers.get(it.first->name);
         if (h != nullptr)
-            ::P4::warning(ErrorType::ERR_DUPLICATE,
+            ::P4::warning(ErrorType::WARN_DUPLICATE,
                           "%1%: header and metadata instances %2% with the same name", it.first, h);
         auto ht = type->to<IR::Type_StructLike>();
         auto path = new IR::Path(type_name);

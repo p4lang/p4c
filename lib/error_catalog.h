@@ -83,6 +83,8 @@ class ErrorType {
     static const int WARN_DUPLICATE_PRIORITIES;     // two entries with the same priority
     static const int WARN_ENTRIES_OUT_OF_ORDER;     // entries with priorities out of order
     static const int WARN_MULTI_HDR_EXTRACT;        // same header may be extracted more than once
+    static const int WARN_EXPRESSION;               // expression related warnings
+    static const int WARN_DUPLICATE;                // duplicate objects
     // Backends should extend this class with additional warnings in the range 1500-2141.
     static const int WARN_MIN_BACKEND = 1500;  // first allowed backend warning code
     static const int WARN_MAX = 2141;          // last allowed warning code
@@ -133,6 +135,10 @@ class ErrorCatalog {
         return "--unknown--"_cs;
     }
 
+    bool isError(int errorCode) {
+        return errorCode >= ErrorType::LEGACY_ERROR && errorCode <= ErrorType::ERR_MAX;
+    }
+
     /// return true if the given diagnostic can _only_ be an error; false otherwise
     bool isError(std::string_view name) {
         cstring lookup(name);
@@ -141,8 +147,7 @@ class ErrorCatalog {
         bool error = false;
         for (const auto &pair : errorCatalog) {
             if (pair.second == lookup) {
-                if (pair.first < ErrorType::LEGACY_ERROR || pair.first > ErrorType::ERR_MAX)
-                    return false;
+                if (!isError(pair.first)) return false;
                 error = true;
             }
         }
