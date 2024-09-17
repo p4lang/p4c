@@ -55,7 +55,7 @@ var searchData=
   ['developers_52',['Core Developers',['../p4tools.html#core-developers',1,'']]],
   ['development_20style_53',['Development Style',['../p4tools.html#development-style',1,'']]],
   ['development_20tools_54',['Development tools',['../getting_started.html#development-tools',1,'']]],
-  ['diagnose_55',['diagnose',['../class_p4_1_1_error_reporter.html#a4a873bca1529eee3407ac37cf1a0e07f',1,'P4::ErrorReporter::diagnose()'],['../namespace_p4.html#af5c8aefbbccc22f92e579a0d3dd652a2',1,'P4::diagnose(DiagnosticAction defaultAction, const char *diagnosticName, const char *format, const char *suffix, Args &amp;&amp;...args)']]],
+  ['diagnose_55',['diagnose',['../class_p4_1_1_error_reporter.html#a4a873bca1529eee3407ac37cf1a0e07f',1,'P4::ErrorReporter']]],
   ['diagnosticaction_56',['DiagnosticAction',['../namespace_p4.html#a3f204513d8ef11b57cae0f30becb863d',1,'P4']]],
   ['diagnosticcount_57',['diagnosticCount',['../namespace_p4.html#a61e4c327119249aa7fb8cdf771f2dc74',1,'P4']]],
   ['diagnosticcountinfo_58',['DiagnosticCountInfo',['../struct_p4_1_1_diagnostic_count_info.html',1,'P4::DiagnosticCountInfo'],['../struct_p4_1_1_diagnostic_count_info.html#afd8795dc3d740785fdd73c245e5337d1',1,'P4::DiagnosticCountInfo::DiagnosticCountInfo()']]],

@@ -7,7 +7,7 @@ var searchData=
   ['deletetestobject_4',['deleteTestObject',['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_execution_state.html#a2d22d4a2af2b4b707898e49c8d710856',1,'P4::P4Tools::P4Testgen::ExecutionState']]],
   ['deletetestobjectcategory_5',['deleteTestObjectCategory',['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_execution_state.html#a4f2137e4cba97f6f8b82c38eded0d173',1,'P4::P4Tools::P4Testgen::ExecutionState']]],
   ['depthfirstsearch_6',['DepthFirstSearch',['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_depth_first_search.html#a4a961e34c1e84356204e48252b66199e',1,'P4::P4Tools::P4Testgen::DepthFirstSearch']]],
-  ['diagnose_7',['diagnose',['../class_p4_1_1_error_reporter.html#a4a873bca1529eee3407ac37cf1a0e07f',1,'P4::ErrorReporter::diagnose()'],['../namespace_p4.html#af5c8aefbbccc22f92e579a0d3dd652a2',1,'P4::diagnose(DiagnosticAction defaultAction, const char *diagnosticName, const char *format, const char *suffix, Args &amp;&amp;...args)']]],
+  ['diagnose_7',['diagnose',['../class_p4_1_1_error_reporter.html#a4a873bca1529eee3407ac37cf1a0e07f',1,'P4::ErrorReporter']]],
   ['diagnosticcount_8',['diagnosticCount',['../namespace_p4.html#a61e4c327119249aa7fb8cdf771f2dc74',1,'P4']]],
   ['diagnosticcountinfo_9',['DiagnosticCountInfo',['../struct_p4_1_1_diagnostic_count_info.html#afd8795dc3d740785fdd73c245e5337d1',1,'P4::DiagnosticCountInfo']]],
   ['diagnosticcountinfoguard_10',['DiagnosticCountInfoGuard',['../struct_p4_1_1_diagnostic_count_info_guard.html#a9a3a009109abd31efe93c03a2086a00f',1,'P4::DiagnosticCountInfoGuard']]],

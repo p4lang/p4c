@@ -142,8 +142,6 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:af91357fca7af7efe867c4d505cec5bb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aeaf870e96885e1c10bf17819f5c95c2b" id="r_aeaf870e96885e1c10bf17819f5c95c2b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespace_p4.html#a3f204513d8ef11b57cae0f30becb863d">DiagnosticAction</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aeaf870e96885e1c10bf17819f5c95c2b">getDefaultWarningDiagnosticAction</a> () final</td></tr>
 <tr class="separator:aeaf870e96885e1c10bf17819f5c95c2b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa3a516aace5af33d2058875cfd1a1165" id="r_aa3a516aace5af33d2058875cfd1a1165"><td class="memItemLeft" align="right" valign="top"><a class="el" href="namespace_p4.html#a3f204513d8ef11b57cae0f30becb863d">DiagnosticAction</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa3a516aace5af33d2058875cfd1a1165">getDiagnosticAction</a> (<a class="el" href="class_p4_1_1cstring.html">cstring</a> diagnostic, <a class="el" href="namespace_p4.html#a3f204513d8ef11b57cae0f30becb863d">DiagnosticAction</a> defaultAction) final</td></tr>
-<tr class="separator:aa3a516aace5af33d2058875cfd1a1165"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae93b593db57a1208c911bfcf31a88c50" id="r_ae93b593db57a1208c911bfcf31a88c50"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="class_p4_1_1_parser_options.html">ParserOptions</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae93b593db57a1208c911bfcf31a88c50">options</a> ()=0</td></tr>
 <tr class="separator:ae93b593db57a1208c911bfcf31a88c50"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aab19aa91552f0b1dbf95de54727f985b" id="r_aab19aa91552f0b1dbf95de54727f985b"><td class="memItemLeft" align="right" valign="top"><a id="aab19aa91552f0b1dbf95de54727f985b" name="aab19aa91552f0b1dbf95de54727f985b"></a>
@@ -325,38 +323,6 @@ Protected Member Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>the default diagnostic action for calls to <code>P4::warning()</code>. </dd></dl>
 
 <p>Reimplemented from <a class="el" href="class_p4_1_1_base_compile_context.html#aee057f586a149583a4f1553d38586b36">P4::BaseCompileContext</a>.</p>
-
-</div>
-</div>
-<a id="aa3a516aace5af33d2058875cfd1a1165" name="aa3a516aace5af33d2058875cfd1a1165"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa3a516aace5af33d2058875cfd1a1165">&#9670;&#160;</a></span>getDiagnosticAction()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname"><a class="el" href="namespace_p4.html#a3f204513d8ef11b57cae0f30becb863d">DiagnosticAction</a> P4::P4CContext::getDiagnosticAction </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="class_p4_1_1cstring.html">cstring</a></td>          <td class="paramname"><span class="paramname"><em>diagnostic</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="namespace_p4.html#a3f204513d8ef11b57cae0f30becb863d">DiagnosticAction</a></td>          <td class="paramname"><span class="paramname"><em>defaultAction</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">final</span><span class="mlabel">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<dl class="section return"><dt>Returns</dt><dd>the action to take for the given diagnostic, falling back to the default action if it wasn't overridden via the command line or a pragma. </dd></dl>
-
-<p>Reimplemented from <a class="el" href="class_p4_1_1_base_compile_context.html#a947525457936e601ada40f49aa0a3c6b">P4::BaseCompileContext</a>.</p>
 
 </div>
 </div>

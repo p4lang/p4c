@@ -1439,9 +1439,6 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>dbprint</b> (const <a
 <tr class="memitem:af46a2a937724f35e5293ccf7c80444ca" id="r_af46a2a937724f35e5293ccf7c80444ca"><td class="memItemLeft" align="right" valign="top"><a id="af46a2a937724f35e5293ccf7c80444ca" name="af46a2a937724f35e5293ccf7c80444ca"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>dbprint</b> (const std::set&lt; const IR::Expression * &gt; s)</td></tr>
 <tr class="separator:af46a2a937724f35e5293ccf7c80444ca"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af5c8aefbbccc22f92e579a0d3dd652a2" id="r_af5c8aefbbccc22f92e579a0d3dd652a2"><td class="memTemplParams" colspan="2">template&lt;typename... Args&gt; </td></tr>
-<tr class="memitem:af5c8aefbbccc22f92e579a0d3dd652a2"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#af5c8aefbbccc22f92e579a0d3dd652a2">diagnose</a> (<a class="el" href="#a3f204513d8ef11b57cae0f30becb863d">DiagnosticAction</a> defaultAction, const char *diagnosticName, const char *format, const char *suffix, Args &amp;&amp;...args)</td></tr>
-<tr class="separator:af5c8aefbbccc22f92e579a0d3dd652a2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a61e4c327119249aa7fb8cdf771f2dc74" id="r_a61e4c327119249aa7fb8cdf771f2dc74"><td class="memItemLeft" align="right" valign="top">unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a61e4c327119249aa7fb8cdf771f2dc74">diagnosticCount</a> ()</td></tr>
 <tr class="separator:a61e4c327119249aa7fb8cdf771f2dc74"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa11fac8ac605b5cc04108489ddc87536" id="r_aa11fac8ac605b5cc04108489ddc87536"><td class="memItemLeft" align="right" valign="top"><a id="aa11fac8ac605b5cc04108489ddc87536" name="aa11fac8ac605b5cc04108489ddc87536"></a>
@@ -2544,62 +2541,6 @@ text</td>
       </table>
 </div><div class="memdoc">
 <p>Given an expression and a destination type, convert ListExpressions that occur within expression to StructExpression if the destination type matches. </p>
-
-</div>
-</div>
-<a id="af5c8aefbbccc22f92e579a0d3dd652a2" name="af5c8aefbbccc22f92e579a0d3dd652a2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af5c8aefbbccc22f92e579a0d3dd652a2">&#9670;&#160;</a></span>diagnose()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<div class="memtemplate">
-template&lt;typename... Args&gt; </div>
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void P4::diagnose </td>
-          <td>(</td>
-          <td class="paramtype"><a class="el" href="#a3f204513d8ef11b57cae0f30becb863d">DiagnosticAction</a></td>          <td class="paramname"><span class="paramname"><em>defaultAction</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>diagnosticName</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>format</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>suffix</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">Args &amp;&amp;...</td>          <td class="paramname"><span class="paramname"><em>args</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-<p>Trigger a diagnostic message.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">defaultAction</td><td>The action (warn, error, etc.) to take if no action was specified for this diagnostic on the command line or via a pragma. </td></tr>
-    <tr><td class="paramname">diagnosticName</td><td>A human-readable name for the diagnostic. This should generally use only lower-case letters and underscores so the diagnostic name is a valid P4 identifier. </td></tr>
-    <tr><td class="paramname">format</td><td>A format for the diagnostic message, using the same style as 'P4::warning' or 'P4::error'. </td></tr>
-    <tr><td class="paramname">suffix</td><td>A message that is appended at the end. </td></tr>
-  </table>
-  </dd>
-</dl>
 
 </div>
 </div>
