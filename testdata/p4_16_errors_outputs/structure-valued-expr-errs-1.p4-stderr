@@ -1,4 +1,4 @@
-structure-valued-expr-errs-1.p4(100): [--Werror=type-error] error: 'hdr.h1 = { }'
+structure-valued-expr-errs-1.p4(100): [--Werror=type-error] error: 'hdr.h1 = {}'
             hdr.h1 = {};
                    ^
   ---- Actual error:
@@ -9,7 +9,7 @@ structure-valued-expr-errs-1.p4(31)
   header h1_t {
          ^^^^
   ---- Originating from:
-structure-valued-expr-errs-1.p4(100): Source expression '{ }' produces a result of type 'tuple<>' which cannot be assigned to a left-value with type 'header h1_t'
+structure-valued-expr-errs-1.p4(100): Source expression '{}' produces a result of type 'tuple<>' which cannot be assigned to a left-value with type 'header h1_t'
               hdr.h1 = {};
                        ^^
 structure-valued-expr-errs-1.p4(100)
@@ -18,7 +18,7 @@ structure-valued-expr-errs-1.p4(100)
 structure-valued-expr-errs-1.p4(31)
   header h1_t {
          ^^^^
-structure-valued-expr-errs-1.p4(101): [--Werror=type-error] error: 'hdr.h2 = { }'
+structure-valued-expr-errs-1.p4(101): [--Werror=type-error] error: 'hdr.h2 = {}'
             hdr.h2 = {};
                    ^
   ---- Actual error:
@@ -29,7 +29,7 @@ structure-valued-expr-errs-1.p4(35)
   header h2_t {
          ^^^^
   ---- Originating from:
-structure-valued-expr-errs-1.p4(101): Source expression '{ }' produces a result of type 'tuple<>' which cannot be assigned to a left-value with type 'header h2_t'
+structure-valued-expr-errs-1.p4(101): Source expression '{}' produces a result of type 'tuple<>' which cannot be assigned to a left-value with type 'header h2_t'
               hdr.h2 = {};
                        ^^
 structure-valued-expr-errs-1.p4(100)
