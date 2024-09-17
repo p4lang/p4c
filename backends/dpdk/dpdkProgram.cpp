@@ -238,8 +238,15 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
         learners.append(egress_converter->getLearners());
     }
 
-    return new IR::DpdkAsmProgram(headerType, structType, dpdkExternDecls, actions, tables,
-                                  selectors, learners, statements, structure->get_globals());
+    IR::IndexedVector<IR::DpdkHeaderInstance> headerInstances;
+
+    for (auto it : structure->header_instances) {
+        headerInstances.push_back(it.second);
+    }
+
+    return new IR::DpdkAsmProgram(headerType, structType, headerInstances, dpdkExternDecls, actions,
+                                  tables, selectors, learners, statements,
+                                  structure->get_globals());
 }
 
 const IR::Node *ConvertToDpdkProgram::preorder(IR::P4Program *prog) {
