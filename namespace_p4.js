@@ -173,6 +173,7 @@ var namespace_p4 =
     [ "Explain", "class_p4_1_1_explain.html", null ],
     [ "ExpressionEvaluator", "class_p4_1_1_expression_evaluator.html", null ],
     [ "exprUses", "class_p4_1_1expr_uses.html", null ],
+    [ "ExternCall", "class_p4_1_1_extern_call.html", null ],
     [ "ExternConstructorCall", "class_p4_1_1_extern_constructor_call.html", null ],
     [ "ExternFunction", "class_p4_1_1_extern_function.html", null ],
     [ "ExternInstance", "struct_p4_1_1_extern_instance.html", null ],

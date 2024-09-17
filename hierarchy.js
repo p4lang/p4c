@@ -1005,8 +1005,10 @@ var hierarchy =
             [ "P4::ActionCall", "class_p4_1_1_action_call.html", null ],
             [ "P4::ApplyMethod", "class_p4_1_1_apply_method.html", null ],
             [ "P4::BuiltInMethod", "class_p4_1_1_built_in_method.html", null ],
-            [ "P4::ExternFunction", "class_p4_1_1_extern_function.html", null ],
-            [ "P4::ExternMethod", "class_p4_1_1_extern_method.html", null ],
+            [ "P4::ExternCall", "class_p4_1_1_extern_call.html", [
+              [ "P4::ExternFunction", "class_p4_1_1_extern_function.html", null ],
+              [ "P4::ExternMethod", "class_p4_1_1_extern_method.html", null ]
+            ] ],
             [ "P4::FunctionCall", "class_p4_1_1_function_call.html", null ]
           ] ]
         ] ],
