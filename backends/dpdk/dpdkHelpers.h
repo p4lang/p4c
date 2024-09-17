@@ -37,6 +37,8 @@ limitations under the License.
 
 namespace P4::DPDK {
 
+class ConvertStatementToDpdk;
+
 /// @brief Name of the metadata used as output port.
 ///
 /// PNA specification does not contain standard metadata for specifying output port.
@@ -115,6 +117,7 @@ const char DirectResourceTableEntryIndex[] = "table_entry_index";
  * optmized.
  */
 class BranchingInstructionGeneration {
+    ConvertStatementToDpdk *convert;
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
     bool nested(const IR::Node *n) {
@@ -126,9 +129,9 @@ class BranchingInstructionGeneration {
     }
 
  public:
-    IR::IndexedVector<IR::DpdkAsmStatement> instructions;
-    BranchingInstructionGeneration(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
-        : refMap(refMap), typeMap(typeMap) {}
+    BranchingInstructionGeneration(ConvertStatementToDpdk *convert, P4::ReferenceMap *refMap,
+                                   P4::TypeMap *typeMap)
+        : convert(convert), refMap(refMap), typeMap(typeMap) {}
     bool generate(const IR::Expression *, cstring, cstring, bool);
 };
 
@@ -150,6 +153,8 @@ class ConvertStatementToDpdk : public Inspector {
     const IR::P4Parser *parser = nullptr;
     const IR::Node *parent = nullptr;
     IR::Type_Struct *metadataStruct = nullptr;
+    bool createSandboxHeaderType = false;
+    bool createTmpVar = false;
 
  private:
     void processHashParams(const IR::Argument *field, IR::Vector<IR::Expression> &components);
@@ -157,6 +162,9 @@ class ConvertStatementToDpdk : public Inspector {
     void updateMdStrAndGenInstr(const IR::Argument *field, IR::Vector<IR::Expression> &components);
     cstring getHdrMdStrName(const IR::Member *mem);
     bool checkIfConsecutiveHdrMdfields(const IR::Argument *field);
+    void createSandboxHeader();
+    void createTmpVarForSandbox();
+    friend class BranchingInstructionGeneration;
 
  public:
     ConvertStatementToDpdk(P4::ReferenceMap *refmap, P4::TypeMap *typemap,
@@ -185,8 +193,13 @@ class ConvertStatementToDpdk : public Inspector {
     void set_parser(const IR::P4Parser *p) { parser = p; }
     void set_parent(const IR::Node *p) { parent = p; }
     bool handleConstSwitch(const IR::SwitchStatement *a);
+    bool checkIf128bitOp(const IR::Expression *, const IR::Expression *);
+    void add128bitwiseInstr(const IR::Expression *src1Op, const IR::Expression *src2Op,
+                            const char *op);
+    void add128ComparisonInstr(cstring true_label, const IR::Expression *src1Op,
+                               const IR::Expression *src2Op, const char *op);
+    void add128bitComplInstr(const IR::Expression *, const IR::Expression *);
 };
-
 /// Only simplify complex expression in ingress/egress.
 class ProcessControls : public P4::RemoveComplexExpressionsPolicy {
     const std::set<cstring> *process;

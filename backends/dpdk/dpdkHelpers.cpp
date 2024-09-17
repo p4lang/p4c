@@ -37,9 +37,17 @@ void ConvertStatementToDpdk::process_relation_operation(const IR::Expression *ds
     cstring label2 = true_label;
     bool condNegated = false;
     if (op->is<IR::Equ>()) {
-        add_instr(new IR::DpdkJmpEqualStatement(true_label, op->left, op->right));
+        if (checkIf128bitOp(op->left, op->right)) {
+            add128ComparisonInstr(true_label, op->left, op->right, "equ");
+        } else {
+            add_instr(new IR::DpdkJmpEqualStatement(true_label, op->left, op->right));
+        }
     } else if (op->is<IR::Neq>()) {
-        add_instr(new IR::DpdkJmpNotEqualStatement(true_label, op->left, op->right));
+        if (checkIf128bitOp(op->left, op->right)) {
+            add128ComparisonInstr(true_label, op->left, op->right, "neq");
+        } else {
+            add_instr(new IR::DpdkJmpNotEqualStatement(true_label, op->left, op->right));
+        }
     } else if (op->is<IR::Lss>()) {
         add_instr(new IR::DpdkJmpLessStatement(true_label, op->left, op->right));
     } else if (op->is<IR::Grt>()) {
@@ -212,11 +220,20 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
         } else if (right->is<IR::LOr>() || right->is<IR::LAnd>()) {
             process_logical_operation(left, r);
         } else if (right->is<IR::BOr>()) {
-            add_instr(new IR::DpdkOrStatement(left, src1Op, src2Op));
+            if (checkIf128bitOp(src1Op, src2Op))
+                add128bitwiseInstr(src1Op, src2Op, "or");
+            else
+                add_instr(new IR::DpdkOrStatement(left, src1Op, src2Op));
         } else if (right->is<IR::BAnd>()) {
-            add_instr(new IR::DpdkAndStatement(left, src1Op, src2Op));
+            if (checkIf128bitOp(src1Op, src2Op))
+                add128bitwiseInstr(src1Op, src2Op, "and");
+            else
+                add_instr(new IR::DpdkAndStatement(left, src1Op, src2Op));
         } else if (right->is<IR::BXor>()) {
-            add_instr(new IR::DpdkXorStatement(left, src1Op, src2Op));
+            if (checkIf128bitOp(src1Op, src2Op))
+                add128bitwiseInstr(src1Op, src2Op, "xor");
+            else
+                add_instr(new IR::DpdkXorStatement(left, src1Op, src2Op));
         } else if (right->is<IR::ArrayIndex>()) {
             add_instr(new IR::DpdkMovStatement(a->left, a->right));
         } else {
@@ -581,14 +598,18 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                             "Negate operation is only supported on BIT types");
                 return false;
             }
-            BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
-            IR::ID tmpxor(refmap->newName("tmpxor"));
-            auto xor1 = new IR::Member(new IR::PathExpression("m"), tmpxor);
-            metadataStruct->fields.push_back(new IR::StructField(tmpxor, n->expr->type));
-            add_instr(new IR::DpdkMovStatement(
-                xor1, new IR::Constant(Util::mask(n->expr->type->width_bits()))));
-            add_instr(new IR::DpdkXorStatement(xor1, xor1, n->expr));
-            i = new IR::DpdkMovStatement(left, xor1);
+            if (n->expr->type->to<IR::Type_Bits>()->width_bits() == 128) {
+                add128bitComplInstr(left, n->expr);
+            } else {
+                BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
+                IR::ID tmpxor(refmap->newName("tmpxor"));
+                auto xor1 = new IR::Member(new IR::PathExpression("m"), tmpxor);
+                metadataStruct->fields.push_back(new IR::StructField(tmpxor, n->expr->type));
+                add_instr(new IR::DpdkMovStatement(
+                    xor1, new IR::Constant(Util::mask(n->expr->type->width_bits()))));
+                add_instr(new IR::DpdkXorStatement(xor1, xor1, n->expr));
+                i = new IR::DpdkMovStatement(left, xor1);
+            }
         } else if (auto ln = right->to<IR::LNot>()) {
             /* DPDK target does not support storing result of logical NOT operation.
                Hence we convert the expression var = !a into if-else statement.
@@ -800,7 +821,7 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr, cstrin
         // fall through depends on the return value of recursion for right side.
         if (nested(land->left) && nested(land->right)) {
             generate(land->left, true_label + "half", false_label, true);
-            instructions.push_back(new IR::DpdkLabelStatement(true_label + "half"));
+            convert->instructions.push_back(new IR::DpdkLabelStatement(true_label + "half"));
             return generate(land->right, true_label, false_label, true);
         } else if (!nested(land->left) && nested(land->right)) {
             // Second, left is simple and right is nested. Call recursion for the
@@ -824,7 +845,7 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr, cstrin
             // is chance to eliminate the jmp instruction  I just added.
             generate(land->left, true_label, false_label, true);
             generate(land->right, true_label, false_label, true);
-            instructions.push_back(new IR::DpdkJmpLabelStatement(true_label));
+            convert->instructions.push_back(new IR::DpdkJmpLabelStatement(true_label));
             return true;
         } else {
             BUG("Previous simple expression lifting pass failed");
@@ -832,7 +853,7 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr, cstrin
     } else if (auto lor = expr->to<IR::LOr>()) {
         if (nested(lor->left) && nested(lor->right)) {
             generate(lor->left, true_label, false_label + "half", false);
-            instructions.push_back(new IR::DpdkLabelStatement(false_label + "half"));
+            convert->instructions.push_back(new IR::DpdkLabelStatement(false_label + "half"));
             return generate(lor->right, true_label, false_label, false);
         } else if (!nested(lor->left) && nested(lor->right)) {
             generate(lor->left, true_label, false_label, false);
@@ -840,7 +861,7 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr, cstrin
         } else if (!nested(lor->left) && !nested(lor->right)) {
             generate(lor->left, true_label, false_label, false);
             generate(lor->right, true_label, false_label, false);
-            instructions.push_back(new IR::DpdkJmpLabelStatement(false_label));
+            convert->instructions.push_back(new IR::DpdkJmpLabelStatement(false_label));
             return false;
         } else {
             BUG("Previous simple expression lifting pass failed");
@@ -857,51 +878,71 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr, cstrin
         // through. And finally for a base case, it returns what condition it falls
         // through.
         if (is_and) {
-            instructions.push_back(
-                new IR::DpdkJmpNotEqualStatement(false_label, equ->left, equ->right));
+            if (convert->checkIf128bitOp(equ->left, equ->right)) {
+                convert->add128ComparisonInstr(false_label, equ->left, equ->right, "neq");
+            } else {
+                convert->instructions.push_back(
+                    new IR::DpdkJmpNotEqualStatement(false_label, equ->left, equ->right));
+            }
         } else {
-            instructions.push_back(
-                new IR::DpdkJmpEqualStatement(true_label, equ->left, equ->right));
+            if (convert->checkIf128bitOp(equ->left, equ->right)) {
+                convert->add128ComparisonInstr(true_label, equ->left, equ->right, "equ");
+            } else {
+                convert->instructions.push_back(
+                    new IR::DpdkJmpEqualStatement(true_label, equ->left, equ->right));
+            }
         }
         return is_and;
     } else if (auto neq = expr->to<IR::Neq>()) {
         if (is_and) {
-            instructions.push_back(
-                new IR::DpdkJmpEqualStatement(false_label, neq->left, neq->right));
+            if (convert->checkIf128bitOp(neq->left, neq->right)) {
+                convert->add128ComparisonInstr(false_label, neq->left, neq->right, "equ");
+            } else {
+                convert->instructions.push_back(
+                    new IR::DpdkJmpEqualStatement(false_label, neq->left, neq->right));
+            }
         } else {
-            instructions.push_back(
-                new IR::DpdkJmpNotEqualStatement(true_label, neq->left, neq->right));
+            if (convert->checkIf128bitOp(neq->left, neq->right)) {
+                convert->add128ComparisonInstr(true_label, neq->left, neq->right, "neq");
+            } else {
+                convert->instructions.push_back(
+                    new IR::DpdkJmpNotEqualStatement(true_label, neq->left, neq->right));
+            }
         }
         return is_and;
     } else if (auto lss = expr->to<IR::Lss>()) {
         // Dpdk target does not support the negated condition Geq,
         // so always jump on true label.
-        instructions.push_back(new IR::DpdkJmpLessStatement(true_label, lss->left, lss->right));
+        convert->instructions.push_back(
+            new IR::DpdkJmpLessStatement(true_label, lss->left, lss->right));
         return false;
     } else if (auto grt = expr->to<IR::Grt>()) {
         // Dpdk target does not support the negated condition Leq,
         // so always jump on true label.
-        instructions.push_back(new IR::DpdkJmpGreaterStatement(true_label, grt->left, grt->right));
+        convert->instructions.push_back(
+            new IR::DpdkJmpGreaterStatement(true_label, grt->left, grt->right));
         return false;
     } else if (auto geq = expr->to<IR::Geq>()) {
         // Dpdk target does not support the condition Geq,
         // so always negate the condition and jump on false label.
-        instructions.push_back(new IR::DpdkJmpLessStatement(false_label, geq->left, geq->right));
+        convert->instructions.push_back(
+            new IR::DpdkJmpLessStatement(false_label, geq->left, geq->right));
         return true;
     } else if (auto leq = expr->to<IR::Leq>()) {
         // Dpdk target does not support the condition Leq,
         // so always negate the condition and jump on false label
-        instructions.push_back(new IR::DpdkJmpGreaterStatement(false_label, leq->left, leq->right));
+        convert->instructions.push_back(
+            new IR::DpdkJmpGreaterStatement(false_label, leq->left, leq->right));
         return true;
     } else if (auto mce = expr->to<IR::MethodCallExpression>()) {
         auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
         if (auto a = mi->to<P4::BuiltInMethod>()) {
             if (a->name == "isValid") {
                 if (is_and) {
-                    instructions.push_back(
+                    convert->instructions.push_back(
                         new IR::DpdkJmpIfInvalidStatement(false_label, a->appliedTo));
                 } else {
-                    instructions.push_back(
+                    convert->instructions.push_back(
                         new IR::DpdkJmpIfValidStatement(true_label, a->appliedTo));
                 }
                 return is_and;
@@ -913,10 +954,10 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr, cstrin
         }
     } else if (expr->is<IR::PathExpression>()) {
         if (is_and) {
-            instructions.push_back(
+            convert->instructions.push_back(
                 new IR::DpdkJmpNotEqualStatement(false_label, expr, new IR::Constant(1)));
         } else {
-            instructions.push_back(
+            convert->instructions.push_back(
                 new IR::DpdkJmpEqualStatement(true_label, expr, new IR::Constant(1)));
         }
     } else if (auto mem = expr->to<IR::Member>()) {
@@ -926,11 +967,14 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr, cstrin
                 if (a->isTableApply()) {
                     if (mem->member == IR::Type_Table::hit) {
                         auto tbl = a->object->to<IR::P4Table>();
-                        instructions.push_back(new IR::DpdkApplyStatement(tbl->name.toString()));
+                        convert->instructions.push_back(
+                            new IR::DpdkApplyStatement(tbl->name.toString()));
                         if (is_and) {
-                            instructions.push_back(new IR::DpdkJmpMissStatement(false_label));
+                            convert->instructions.push_back(
+                                new IR::DpdkJmpMissStatement(false_label));
                         } else {
-                            instructions.push_back(new IR::DpdkJmpHitStatement(true_label));
+                            convert->instructions.push_back(
+                                new IR::DpdkJmpHitStatement(true_label));
                         }
                     }
                 } else {
@@ -941,10 +985,10 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr, cstrin
             }
         } else {
             if (is_and) {
-                instructions.push_back(
+                convert->instructions.push_back(
                     new IR::DpdkJmpNotEqualStatement(false_label, expr, new IR::Constant(1)));
             } else {
-                instructions.push_back(
+                convert->instructions.push_back(
                     new IR::DpdkJmpEqualStatement(true_label, expr, new IR::Constant(1)));
             }
         }
@@ -966,10 +1010,9 @@ bool ConvertStatementToDpdk::preorder(const IR::IfStatement *s) {
     auto true_label = refmap->newName("label_true");
     auto false_label = refmap->newName("label_false");
     auto end_label = refmap->newName("label_end");
-    auto gen = new BranchingInstructionGeneration(refmap, typemap);
+    auto gen = new BranchingInstructionGeneration(this, refmap, typemap);
     bool res = gen->generate(s->condition, true_label, false_label, true);
 
-    instructions.append(gen->instructions);
     if (res == true) {
         add_instr(new IR::DpdkLabelStatement(true_label));
         visit(s->ifTrue);
@@ -1460,4 +1503,235 @@ bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *s) {
     return false;
 }
 
+bool ConvertStatementToDpdk::checkIf128bitOp(const IR::Expression *src1Op,
+                                             const IR::Expression *src2Op) {
+    if (auto src1Type = src1Op->type->to<IR::Type_Bits>()) {
+        if (src1Type->width_bits() == 128) {
+            if (auto src2Type = src2Op->type->to<IR::Type_Bits>()) {
+                if (src2Type->width_bits() == 128) return true;
+            }
+        }
+    }
+    return false;
+}
+
+void ConvertStatementToDpdk::add128bitwiseInstr(const IR::Expression *src1Op,
+                                                const IR::Expression *src2Op, const char *op) {
+    // check bool variable to check and create sandbox struct
+    // sandbox tmp variable creation
+    if (!createTmpVar) {
+        createTmpVar = true;
+        createTmpVarForSandbox();
+    }
+    if (!createSandboxHeaderType) {
+        createSandboxHeaderType = true;
+        createSandboxHeader();
+    }
+    const IR::Type_Header *Type_Header = nullptr;
+    const IR::Type_Header *Type_Tmp = nullptr;
+    for (auto header : structure->header_types) {
+        if (strcmp(header.first, "_p4c_sandbox_header_t") == 0) {
+            Type_Header = header.second;
+        } else if (strcmp(header.first, "_p4c_tmp128_t") == 0) {
+            Type_Tmp = header.second;
+        }
+    }
+    if (Type_Header == nullptr || Type_Tmp == nullptr) {
+        BUG("Header type not found");
+    }
+    auto src1OpHeaderName = src1Op->toString();
+    if (src1Op->is<IR::Member>()) {
+        src1OpHeaderName = src1Op->to<IR::Member>()->member.name;
+    }
+    auto tmpVarOpName = src1OpHeaderName + "_tmp";
+    src1OpHeaderName = src1OpHeaderName + "_128";
+    auto src1OpHeader = new IR::Declaration_Variable(src1OpHeaderName, Type_Header);
+    auto tmpVarOp = new IR::Declaration_Variable(tmpVarOpName, Type_Tmp);
+    auto src1OpHeaderInstance = new IR::DpdkHeaderInstance(src1OpHeader, Type_Header);
+    auto tmpVarOpInstance = new IR::DpdkHeaderInstance(tmpVarOp, Type_Tmp);
+    structure->addHeaderInstances(src1OpHeaderInstance);
+    structure->addHeaderInstances(tmpVarOpInstance);
+    auto src1OpUpper =
+        new IR::Member(new IR::PathExpression("h." + src1OpHeader->name), IR::ID("upper_half"));
+    auto src1OpLower =
+        new IR::Member(new IR::PathExpression("h." + src1OpHeader->name), IR::ID("lower_half"));
+    auto tmp = new IR::Member(new IR::PathExpression("h." + tmpVarOp->name), IR::ID("inter"));
+    add_instr(new IR::DpdkMovhStatement(src1OpUpper, src1Op));
+    add_instr(new IR::DpdkMovStatement(src1OpLower, src1Op));
+    if (src2Op->is<IR::Constant>()) {
+        add_instr(new IR::DpdkMovStatement(tmp, src1OpLower));
+        if (strcmp(op, "xor") == 0) {
+            add_instr(new IR::DpdkXorStatement(tmp, tmp, src2Op));
+        } else if (strcmp(op, "or") == 0) {
+            add_instr(new IR::DpdkOrStatement(tmp, tmp, src2Op));
+        } else if (strcmp(op, "and") == 0) {
+            add_instr(new IR::DpdkAndStatement(tmp, tmp, src2Op));
+        }
+        add_instr(new IR::DpdkMovStatement(src1Op, tmp));
+        add_instr(new IR::DpdkMovStatement(tmp, src1OpUpper));
+        if (strcmp(op, "xor") == 0) {
+            add_instr(new IR::DpdkXorStatement(tmp, tmp, src2Op));
+        } else if (strcmp(op, "or") == 0) {
+            add_instr(new IR::DpdkOrStatement(tmp, tmp, src2Op));
+        } else if (strcmp(op, "and") == 0) {
+            add_instr(new IR::DpdkAndStatement(tmp, tmp, src2Op));
+        }
+        add_instr(new IR::DpdkMovhStatement(src1Op, tmp));
+    } else {
+        auto src2OpHeaderName = src2Op->toString();
+        if (src2Op->is<IR::Member>()) {
+            src2OpHeaderName = src2Op->to<IR::Member>()->member.name;
+        }
+        src2OpHeaderName = src2OpHeaderName + "_128";
+        auto src2OpHeader = new IR::Declaration_Variable(src2OpHeaderName, Type_Header);
+        auto src2OpHeaderInstance = new IR::DpdkHeaderInstance(src2OpHeader, Type_Header);
+        structure->addHeaderInstances(src2OpHeaderInstance);
+        auto src2OpUpper =
+            new IR::Member(new IR::PathExpression("h." + src2OpHeader->name), IR::ID("upper_half"));
+        auto src2OpLower =
+            new IR::Member(new IR::PathExpression("h." + src2OpHeader->name), IR::ID("lower_half"));
+        add_instr(new IR::DpdkMovhStatement(src2OpUpper, src2Op));
+        add_instr(new IR::DpdkMovStatement(src2OpLower, src2Op));
+        add_instr(new IR::DpdkMovStatement(tmp, src1OpLower));
+        if (strcmp(op, "xor") == 0) {
+            add_instr(new IR::DpdkXorStatement(tmp, tmp, src2OpLower));
+        } else if (strcmp(op, "or") == 0) {
+            add_instr(new IR::DpdkOrStatement(tmp, tmp, src2OpLower));
+        } else if (strcmp(op, "and") == 0) {
+            add_instr(new IR::DpdkAndStatement(tmp, tmp, src2OpLower));
+        }
+        add_instr(new IR::DpdkMovStatement(src1Op, tmp));
+        add_instr(new IR::DpdkMovStatement(tmp, src1OpUpper));
+        if (strcmp(op, "xor") == 0) {
+            add_instr(new IR::DpdkXorStatement(tmp, tmp, src2OpUpper));
+        } else if (strcmp(op, "or") == 0) {
+            add_instr(new IR::DpdkOrStatement(tmp, tmp, src2OpUpper));
+        } else if (strcmp(op, "and") == 0) {
+            add_instr(new IR::DpdkAndStatement(tmp, tmp, src2OpUpper));
+        }
+        add_instr(new IR::DpdkMovhStatement(src1Op, tmp));
+    }
+}
+
+void ConvertStatementToDpdk::createSandboxHeader() {
+    auto fields = new IR::IndexedVector<IR::StructField>;
+    fields->push_back(new IR::StructField("upper_half", IR::Type_Bits::get(64)));
+    fields->push_back(new IR::StructField("lower_half", IR::Type_Bits::get(64)));
+    const IR::Type_Header *headerStruct =
+        new IR::Type_Header(IR::ID("_p4c_sandbox_header_t"), *fields);
+    structure->header_types.emplace(cstring("_p4c_sandbox_header_t"), headerStruct);
+}
+
+void ConvertStatementToDpdk::createTmpVarForSandbox() {
+    auto fields = new IR::IndexedVector<IR::StructField>;
+    fields->push_back(new IR::StructField("tmp", IR::Type_Bits::get(64)));
+    const IR::Type_Header *headerStruct = new IR::Type_Header(IR::ID("_p4c_tmp128_t"), *fields);
+    structure->header_types.emplace(cstring("_p4c_tmp128_t"), headerStruct);
+}
+
+void ConvertStatementToDpdk::add128ComparisonInstr(cstring true_label, const IR::Expression *src1Op,
+                                                   const IR::Expression *src2Op, const char *op) {
+    if (!createSandboxHeaderType) {
+        createSandboxHeaderType = true;
+        createSandboxHeader();
+    }
+    const IR::Type_Header *Type_Header = nullptr;
+    for (auto header : structure->header_types) {
+        if (strcmp(header.first, "_p4c_sandbox_header_t") == 0) {
+            Type_Header = header.second;
+        }
+    }
+    if (Type_Header == nullptr) {
+        BUG("Header type not found");
+    }
+    auto src1OpHeaderName = src1Op->toString();
+    if (src1Op->is<IR::Member>()) {
+        src1OpHeaderName = src1Op->to<IR::Member>()->member.name;
+    }
+    src1OpHeaderName = src1OpHeaderName + "_128";
+    auto src1OpHeader = new IR::Declaration_Variable(src1OpHeaderName, Type_Header);
+    auto src1OpHeaderInstance = new IR::DpdkHeaderInstance(src1OpHeader, Type_Header);
+    structure->addHeaderInstances(src1OpHeaderInstance);
+    auto src1OpUpper =
+        new IR::Member(new IR::PathExpression("h." + src1OpHeader->name), IR::ID("upper_half"));
+    auto src1OpLower =
+        new IR::Member(new IR::PathExpression("h." + src1OpHeader->name), IR::ID("lower_half"));
+    add_instr(new IR::DpdkMovhStatement(src1OpUpper, src1Op));
+    add_instr(new IR::DpdkMovStatement(src1OpLower, src1Op));
+    if (src2Op->is<IR::Constant>()) {
+        add_instr(new IR::DpdkXorStatement(src1OpUpper, src1OpUpper, src2Op));
+        add_instr(new IR::DpdkXorStatement(src1OpLower, src1OpLower, src2Op));
+    } else {
+        auto src2OpHeaderName = src2Op->toString();
+        if (src2Op->is<IR::Member>()) {
+            src2OpHeaderName = src2Op->to<IR::Member>()->member.name;
+        }
+        src2OpHeaderName = src2OpHeaderName + "_128";
+        auto src2OpHeader = new IR::Declaration_Variable(src2OpHeaderName, Type_Header);
+        auto src2OpHeaderInstance = new IR::DpdkHeaderInstance(src2OpHeader, Type_Header);
+        structure->addHeaderInstances(src2OpHeaderInstance);
+        auto src2OpUpper =
+            new IR::Member(new IR::PathExpression("h." + src2OpHeader->name), IR::ID("upper_half"));
+        auto src2OpLower =
+            new IR::Member(new IR::PathExpression("h." + src2OpHeader->name), IR::ID("lower_half"));
+        add_instr(new IR::DpdkMovhStatement(src2OpUpper, src2Op));
+        add_instr(new IR::DpdkMovStatement(src2OpLower, src2Op));
+        add_instr(new IR::DpdkXorStatement(src1OpUpper, src1OpUpper, src2OpUpper));
+        add_instr(new IR::DpdkXorStatement(src1OpLower, src1OpLower, src2OpLower));
+    }
+    add_instr(new IR::DpdkXorStatement(src1OpUpper, src1OpUpper, src1OpLower));
+    if (strcmp(op, "equ") == 0) {
+        add_instr(new IR::DpdkJmpEqualStatement(true_label, src1OpUpper, new IR::Constant(0)));
+    } else {
+        add_instr(new IR::DpdkJmpNotEqualStatement(true_label, src1OpUpper, new IR::Constant(0)));
+    }
+}
+
+void ConvertStatementToDpdk::add128bitComplInstr(const IR::Expression *dst,
+                                                 const IR::Expression *src1Op) {
+    if (!createTmpVar) {
+        createTmpVar = true;
+        createTmpVarForSandbox();
+    }
+    if (!createSandboxHeaderType) {
+        createSandboxHeaderType = true;
+        createSandboxHeader();
+    }
+    const IR::Type_Header *Type_Header = nullptr;
+    const IR::Type_Header *Type_Tmp = nullptr;
+    for (auto header : structure->header_types) {
+        if (strcmp(header.first, "_p4c_sandbox_header_t") == 0) {
+            Type_Header = header.second;
+        } else if (strcmp(header.first, "_p4c_tmp128_t") == 0) {
+            Type_Tmp = header.second;
+        }
+    }
+    if (Type_Header == nullptr || Type_Tmp == nullptr) {
+        BUG("Header type not found");
+    }
+    auto src1OpHeaderName = src1Op->toString();
+    if (src1Op->is<IR::Member>()) {
+        src1OpHeaderName = src1Op->to<IR::Member>()->member.name;
+    }
+    auto tmpVarOpName = src1OpHeaderName + "_tmp";
+    src1OpHeaderName = src1OpHeaderName + "_128";
+    auto src1OpHeader = new IR::Declaration_Variable(src1OpHeaderName, Type_Header);
+    auto tmpVarOp = new IR::Declaration_Variable(tmpVarOpName, Type_Tmp);
+    auto src1OpHeaderInstance = new IR::DpdkHeaderInstance(src1OpHeader, Type_Header);
+    auto tmpVarOpInstance = new IR::DpdkHeaderInstance(tmpVarOp, Type_Tmp);
+    structure->addHeaderInstances(src1OpHeaderInstance);
+    structure->addHeaderInstances(tmpVarOpInstance);
+    auto src1OpUpper =
+        new IR::Member(new IR::PathExpression("h." + src1OpHeader->name), IR::ID("upper_half"));
+    auto src1OpLower =
+        new IR::Member(new IR::PathExpression("h." + src1OpHeader->name), IR::ID("lower_half"));
+    auto tmp = new IR::Member(new IR::PathExpression("h." + tmpVarOp->name), IR::ID("inter"));
+    add_instr(new IR::DpdkMovhStatement(src1OpUpper, src1Op));
+    add_instr(new IR::DpdkMovStatement(src1OpLower, src1Op));
+    add_instr(new IR::DpdkMovStatement(tmp, new IR::Constant(Util::mask(64))));
+    add_instr(new IR::DpdkXorStatement(src1OpLower, src1OpLower, tmp));
+    add_instr(new IR::DpdkXorStatement(src1OpUpper, src1OpUpper, tmp));
+    add_instr(new IR::DpdkMovStatement(dst, src1OpLower));
+    add_instr(new IR::DpdkMovhStatement(dst, src1OpUpper));
+}
 }  // namespace P4::DPDK
