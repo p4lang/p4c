@@ -1101,6 +1101,11 @@ class ValidateOperandSize : public Inspector {
     }
 
     void postorder(const IR::Operation_Binary *binop) override {
+        if (binop->is<IR::BOr>() || binop->is<IR::BAnd>() || binop->is<IR::BXor>()) {
+            if (auto src1Type = binop->left->type->to<IR::Type_Bits>()) {
+                if (src1Type->width_bits() == 128) return;
+            }
+        }
         isValidOperandSize(binop->left);
         isValidOperandSize(binop->right);
     }
