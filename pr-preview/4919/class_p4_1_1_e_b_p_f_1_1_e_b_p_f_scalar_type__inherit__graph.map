@@ -1,0 +1,18 @@
+<map id="P4::EBPF::EBPFScalarType" name="P4::EBPF::EBPFScalarType">
+<area shape="rect" id="Node000001" title=" " alt="" coords="117,299,305,324"/>
+<area shape="rect" id="Node000007" href="$class_p4_1_1_u_b_p_f_1_1_u_b_p_f_extern_type.html" title=" " alt="" coords="5,372,200,397"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="183,334,122,374,119,370,181,329"/>
+<area shape="rect" id="Node000008" href="$class_p4_1_1_u_b_p_f_1_1_u_b_p_f_scalar_type.html" title=" " alt="" coords="224,372,416,397"/>
+<area shape="poly" id="edge8_Node000001_Node000008" title=" " alt="" coords="241,329,304,370,301,374,238,334"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_type.html" title="Base class for EBPF types." alt="" coords="50,225,198,251"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="150,257,198,296,195,301,147,261"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_object.html" title="Base class for EBPF objects." alt="" coords="71,152,233,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="145,191,131,226,126,224,140,189"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_i_castable.html" title=" " alt="" coords="157,79,264,104"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="194,116,164,154,159,150,190,113"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_e_b_p_f_1_1_i_has_width.html" title=" " alt="" coords="222,225,375,251"/>
+<area shape="poly" id="edge6_Node000006_Node000004" title=" " alt="" coords="227,115,294,224,289,227,223,117"/>
+<area shape="rect" id="Node000005" href="$struct_p4_1_1_r_t_t_i_1_1_base.html" title=" " alt="" coords="153,5,268,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="213,44,213,79,208,79,208,44"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="276,261,227,301,223,296,272,257"/>
+</map>

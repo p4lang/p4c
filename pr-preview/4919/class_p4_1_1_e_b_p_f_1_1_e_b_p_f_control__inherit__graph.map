@@ -1,0 +1,35 @@
+<map id="P4::EBPF::EBPFControl" name="P4::EBPF::EBPFControl">
+<area shape="rect" id="Node000001" title=" " alt="" coords="532,104,699,129"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_control_p_s_a.html" title=" " alt="" coords="747,55,939,80"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="687,98,783,77,784,83,688,104"/>
+<area shape="rect" id="Node000007" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_deparser.html" title=" " alt="" coords="753,104,932,129"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="712,114,753,114,753,119,712,119"/>
+<area shape="rect" id="Node000017" href="$class_p4_1_1_u_b_p_f_1_1_u_b_p_f_control.html" title=" " alt="" coords="757,153,928,179"/>
+<area shape="poly" id="edge16_Node000001_Node000017" title=" " alt="" coords="688,130,784,151,783,156,687,135"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_object.html" title="Base class for EBPF objects." alt="" coords="323,104,484,129"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="498,114,532,114,532,119,498,119"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_i_castable.html" title=" " alt="" coords="168,104,275,129"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="289,114,323,114,323,119,289,119"/>
+<area shape="rect" id="Node000004" href="$struct_p4_1_1_r_t_t_i_1_1_base.html" title=" " alt="" coords="5,104,120,129"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="134,114,168,114,168,119,134,119"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_t_c_1_1_e_b_p_f_control_p_n_a.html" title=" " alt="" coords="1000,55,1177,80"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="952,65,1000,65,1000,70,952,70"/>
+<area shape="rect" id="Node000008" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_deparser_p_s_a.html" title=" " alt="" coords="987,104,1191,129"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="946,114,987,114,987,119,946,119"/>
+<area shape="rect" id="Node000009" href="$class_p4_1_1_e_b_p_f_1_1_egress_deparser_p_s_a.html" title=" " alt="" coords="1241,55,1455,80"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="1169,99,1280,77,1281,83,1170,104"/>
+<area shape="rect" id="Node000012" href="$class_p4_1_1_e_b_p_f_1_1_ingress_deparser_p_s_a.html" title=" " alt="" coords="1239,104,1457,129"/>
+<area shape="poly" id="edge11_Node000008_Node000012" title=" " alt="" coords="1204,114,1239,114,1239,119,1204,119"/>
+<area shape="rect" id="Node000016" href="$class_p4_1_1_t_c_1_1_ingress_deparser_p_n_a.html" title=" " alt="" coords="1247,153,1449,179"/>
+<area shape="poly" id="edge15_Node000008_Node000016" title=" " alt="" coords="1170,129,1281,151,1280,156,1169,135"/>
+<area shape="rect" id="Node000010" href="$class_p4_1_1_e_b_p_f_1_1_t_c_egress_deparser_p_s_a.html" title=" " alt="" coords="1513,5,1743,31"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="1434,50,1555,28,1555,33,1435,55"/>
+<area shape="rect" id="Node000011" href="$class_p4_1_1_e_b_p_f_1_1_x_d_p_egress_deparser_p_s_a.html" title=" " alt="" coords="1507,55,1749,80"/>
+<area shape="poly" id="edge10_Node000009_Node000011" title=" " alt="" coords="1469,65,1507,65,1507,70,1469,70"/>
+<area shape="rect" id="Node000013" href="$class_p4_1_1_e_b_p_f_1_1_t_c_ingress_deparser_p_s_a.html" title=" " alt="" coords="1511,104,1745,129"/>
+<area shape="poly" id="edge12_Node000012_Node000013" title=" " alt="" coords="1471,114,1510,114,1510,119,1471,119"/>
+<area shape="rect" id="Node000015" href="$class_p4_1_1_e_b_p_f_1_1_x_d_p_ingress_deparser_p_s_a.html" title=" " alt="" coords="1505,153,1751,179"/>
+<area shape="poly" id="edge14_Node000012_Node000015" title=" " alt="" coords="1435,129,1555,151,1555,156,1434,134"/>
+<area shape="rect" id="Node000014" href="$class_p4_1_1_e_b_p_f_1_1_t_c_ingress_deparser_for_traffic_manager_p_s_a.html" title=" " alt="" coords="1799,97,2007,137"/>
+<area shape="poly" id="edge13_Node000013_Node000014" title=" " alt="" coords="1759,114,1798,114,1798,119,1759,119"/>
+</map>

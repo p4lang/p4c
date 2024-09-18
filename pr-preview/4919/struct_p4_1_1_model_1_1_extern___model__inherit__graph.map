@@ -1,0 +1,37 @@
+<map id="P4::Model::Extern_Model" name="P4::Model::Extern_Model">
+<area shape="rect" id="Node000001" title="Extern_Model : Type_Model." alt="" coords="399,319,581,345"/>
+<area shape="rect" id="Node000004" href="$struct_p4_1_1_e_b_p_f_1_1_counter_array___model.html" title=" " alt="" coords="639,5,811,45"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="495,305,510,253,536,186,575,116,599,84,628,55,645,43,648,48,631,59,603,87,579,119,541,188,515,255,500,307"/>
+<area shape="rect" id="Node000005" href="$struct_p4_1_1_e_b_p_f_1_1_table_impl___model.html" title=" " alt="" coords="650,69,799,109"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="499,305,518,265,546,215,582,164,628,119,649,107,651,111,631,123,587,167,550,218,523,267,504,308"/>
+<area shape="rect" id="Node000006" href="$struct_p4_1_1_p4_v1_1_1_action_profile___model.html" title=" " alt="" coords="640,133,809,173"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="506,306,556,245,590,212,628,183,651,171,653,176,631,188,594,216,560,249,510,310"/>
+<area shape="rect" id="Node000007" href="$struct_p4_1_1_p4_v1_1_1_action_selector___model.html" title=" " alt="" coords="634,197,815,237"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="520,309,570,279,628,248,660,235,662,240,630,253,573,284,523,314"/>
+<area shape="rect" id="Node000008" href="$struct_p4_1_1_p4_v1_1_1_cloner___model.html" title=" " alt="" coords="637,262,813,287"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="555,313,671,285,673,290,557,319"/>
+<area shape="rect" id="Node000009" href="$struct_p4_1_1_p4_v1_1_1_counter_or_meter___model.html" title=" " alt="" coords="629,312,820,352"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="595,329,629,329,629,335,595,335"/>
+<area shape="rect" id="Node000014" href="$struct_p4_1_1_p4_v1_1_1_register___model.html" title=" " alt="" coords="654,376,795,416"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="551,346,654,374,653,379,550,351"/>
+<area shape="rect" id="Node000015" href="$class_p4_1_1_p4_v1_1_1_truncate.html" title=" " alt="" coords="653,441,796,466"/>
+<area shape="poly" id="edge14_Node000001_Node000015" title=" " alt="" coords="518,351,568,389,630,426,664,438,663,443,628,430,565,394,515,356"/>
+<area shape="rect" id="Node000016" href="$class_p4_1_1_packet_in.html" title=" " alt="" coords="675,490,775,515"/>
+<area shape="poly" id="edge15_Node000001_Node000016" title=" " alt="" coords="509,354,559,416,593,449,631,476,652,486,675,493,674,498,650,491,628,481,589,453,555,420,505,358"/>
+<area shape="rect" id="Node000017" href="$class_p4_1_1_packet_out.html" title=" " alt="" coords="669,539,780,565"/>
+<area shape="poly" id="edge16_Node000001_Node000017" title=" " alt="" coords="504,356,523,394,551,441,587,487,631,526,650,536,670,543,668,548,647,541,628,530,583,490,547,444,519,397,500,359"/>
+<area shape="rect" id="Node000018" href="$struct_p4_1_1_u_b_p_f_1_1_register___model.html" title=" " alt="" coords="653,589,796,629"/>
+<area shape="poly" id="edge17_Node000001_Node000018" title=" " alt="" coords="501,357,518,403,545,462,583,523,605,551,631,575,654,590,652,594,628,579,602,554,578,526,540,465,513,405,496,359"/>
+<area shape="rect" id="Node000002" href="$struct_p4_1_1_model_1_1_type___model.html" title=" " alt="" coords="180,319,351,345"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="365,329,398,329,398,335,365,335"/>
+<area shape="rect" id="Node000003" href="$struct_p4_1_1_model_1_1_elem.html" title=" " alt="" coords="5,319,132,345"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="146,329,180,329,180,335,146,335"/>
+<area shape="rect" id="Node000010" href="$struct_p4_1_1_p4_v1_1_1_counter___model.html" title=" " alt="" coords="868,230,1053,255"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="803,305,819,298,842,282,867,266,901,253,903,258,869,270,845,286,821,302,806,309"/>
+<area shape="rect" id="Node000011" href="$struct_p4_1_1_p4_v1_1_1_direct_counter___model.html" title=" " alt="" coords="872,280,1049,320"/>
+<area shape="poly" id="edge10_Node000009_Node000011" title=" " alt="" coords="833,315,872,309,872,315,834,320"/>
+<area shape="rect" id="Node000012" href="$struct_p4_1_1_p4_v1_1_1_direct_meter___model.html" title=" " alt="" coords="879,344,1043,384"/>
+<area shape="poly" id="edge11_Node000009_Node000012" title=" " alt="" coords="834,344,879,350,878,356,833,349"/>
+<area shape="rect" id="Node000013" href="$struct_p4_1_1_p4_v1_1_1_meter___model.html" title=" " alt="" coords="875,409,1047,434"/>
+<area shape="poly" id="edge12_Node000009_Node000013" title=" " alt="" coords="806,355,821,362,845,378,869,394,903,406,901,411,867,398,842,382,819,366,803,359"/>
+</map>
