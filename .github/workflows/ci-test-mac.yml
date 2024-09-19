@@ -93,12 +93,6 @@ jobs:
 
       - name: Install dependencies (MacOS)
         run: |
-          # FIXME: We should not need to do this, but there are currently some complications with Github CI.
-          # See https://github.com/actions/runner-images/issues/4020.
-          # See https://github.com/actions/runner-images/issues/8838.
-          brew install python@3.12 || true
-          brew link --overwrite python@3.12
-          brew pin python@3.12
           tools/install_mac_deps.sh
 
       - name: Build (MacOS)
