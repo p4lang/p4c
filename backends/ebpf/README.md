@@ -280,7 +280,7 @@ state transition | `goto` statement
 `extract` | load/shift/mask data from packet buffer
 
 #### Translating match-action pipelines
-##
+
 P4 Construct | C Translation
 ----------|------------
 table     | 2 eBPF tables: second one used just for the default action
@@ -385,7 +385,7 @@ The C extern could be also allowed to access packet’s payload, but this featur
 
 The custom C extern function should be explicitly declared in the P4 program making use of that extern. For example:
 
-```C
+```c
 /** Declaration of the C extern function. */
 extern bool verify_ipv4_checksum(in IPv4_h iphdr);
 ```
