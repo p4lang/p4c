@@ -73,6 +73,7 @@ class FunctionsInliner : public AbstractInliner<FunctionsInlineList, FunctionsIn
     const IR::Node *postCaller(const IR::Node *caller);
     const ReplacementMap *getReplacementMap() const;
     void dumpReplacementMap() const;
+    class isLocalExpression;  // functor to test actual arguments scope use
 
  public:
     FunctionsInliner() = default;
