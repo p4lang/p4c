@@ -81,12 +81,13 @@ var searchData=
   ['ioptionpragmaparser_78',['IOptionPragmaParser',['../class_p4_1_1_i_option_pragma_parser.html',1,'P4']]],
   ['isdirectionmetadataused_79',['IsDirectionMetadataUsed',['../class_p4_1_1_d_p_d_k_1_1_is_direction_metadata_used.html',1,'P4::DPDK']]],
   ['islikeleftvalue_80',['IsLikeLeftValue',['../class_p4_1_1_is_like_left_value.html',1,'P4']]],
-  ['ismask_81',['IsMask',['../class_p4_1_1_is_mask.html',1,'P4']]],
-  ['isnonconstantarrayindex_82',['IsNonConstantArrayIndex',['../class_p4_1_1_is_non_constant_array_index.html',1,'P4']]],
-  ['istype_83',['IsType',['../struct_p4_1_1_r_t_t_i_1_1_detail_1_1_is_type.html',1,'P4::RTTI::Detail']]],
-  ['isvalid_84',['IsValid',['../class_p4_1_1_is_valid.html',1,'P4']]],
-  ['iterator_5frange_85',['iterator_range',['../class_p4_1_1_util_1_1iterator__range.html',1,'P4::Util']]],
-  ['iteratorenumerator_86',['IteratorEnumerator',['../class_p4_1_1_util_1_1_iterator_enumerator.html',1,'P4::Util']]],
-  ['iterkeys_87',['IterKeys',['../class_p4_1_1_iter_keys.html',1,'P4']]],
-  ['itervalues_88',['IterValues',['../class_p4_1_1_iter_values.html',1,'P4']]]
+  ['islocalexpression_81',['isLocalExpression',['../class_p4_1_1_functions_inliner_1_1is_local_expression.html',1,'P4::FunctionsInliner']]],
+  ['ismask_82',['IsMask',['../class_p4_1_1_is_mask.html',1,'P4']]],
+  ['isnonconstantarrayindex_83',['IsNonConstantArrayIndex',['../class_p4_1_1_is_non_constant_array_index.html',1,'P4']]],
+  ['istype_84',['IsType',['../struct_p4_1_1_r_t_t_i_1_1_detail_1_1_is_type.html',1,'P4::RTTI::Detail']]],
+  ['isvalid_85',['IsValid',['../class_p4_1_1_is_valid.html',1,'P4']]],
+  ['iterator_5frange_86',['iterator_range',['../class_p4_1_1_util_1_1iterator__range.html',1,'P4::Util']]],
+  ['iteratorenumerator_87',['IteratorEnumerator',['../class_p4_1_1_util_1_1_iterator_enumerator.html',1,'P4::Util']]],
+  ['iterkeys_88',['IterKeys',['../class_p4_1_1_iter_keys.html',1,'P4']]],
+  ['itervalues_89',['IterValues',['../class_p4_1_1_iter_values.html',1,'P4']]]
 ];

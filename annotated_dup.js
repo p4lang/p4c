@@ -1133,7 +1133,7 @@ var annotated_dup =
       [ "FrontEnd", "class_p4_1_1_front_end.html", null ],
       [ "FrontEndPolicy", "class_p4_1_1_front_end_policy.html", "class_p4_1_1_front_end_policy" ],
       [ "FunctionCall", "class_p4_1_1_function_call.html", null ],
-      [ "FunctionsInliner", "class_p4_1_1_functions_inliner.html", null ],
+      [ "FunctionsInliner", "class_p4_1_1_functions_inliner.html", "class_p4_1_1_functions_inliner" ],
       [ "FunctionSpecialization", "struct_p4_1_1_function_specialization.html", "struct_p4_1_1_function_specialization" ],
       [ "FunctionSpecializationMap", "struct_p4_1_1_function_specialization_map.html", null ],
       [ "GeneralInliner", "class_p4_1_1_general_inliner.html", "class_p4_1_1_general_inliner" ],

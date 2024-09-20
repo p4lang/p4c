@@ -252,6 +252,7 @@ var hierarchy =
         [ "P4::FindGlobalActionUses", "class_p4_1_1_find_global_action_uses.html", null ],
         [ "P4::FindRepeatedActionUses", "class_p4_1_1_find_repeated_action_uses.html", null ],
         [ "P4::FindSpecializations", "class_p4_1_1_find_specializations.html", null ],
+        [ "P4::FunctionsInliner::isLocalExpression", "class_p4_1_1_functions_inliner_1_1is_local_expression.html", null ],
         [ "P4::HasTableApply", "class_p4_1_1_has_table_apply.html", null ],
         [ "P4::InstantiateDirectCalls", "class_p4_1_1_instantiate_direct_calls.html", null ],
         [ "P4::KeySideEffect", "class_p4_1_1_key_side_effect.html", [
@@ -1524,6 +1525,7 @@ var hierarchy =
         [ "P4::FindTypesInLogMsgInvocationToReplace", "class_p4_1_1_find_types_in_log_msg_invocation_to_replace.html", null ],
         [ "P4::FindTypesToReplace", "class_p4_1_1_find_types_to_replace.html", null ],
         [ "P4::FindVariableValues", "class_p4_1_1_find_variable_values.html", null ],
+        [ "P4::FunctionsInliner::isLocalExpression", "class_p4_1_1_functions_inliner_1_1is_local_expression.html", null ],
         [ "P4::HSIndexFinder", "class_p4_1_1_h_s_index_finder.html", null ],
         [ "P4::HasExits", "class_p4_1_1_has_exits.html", null ],
         [ "P4::HasTableApply", "class_p4_1_1_has_table_apply.html", null ],

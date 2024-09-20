@@ -194,6 +194,8 @@ var NAVTREEINDEX6 =
 "class_p4_1_1_function_call.html":[13,0,0,214],
 "class_p4_1_1_functions_inliner.html":[12,0,0,199],
 "class_p4_1_1_functions_inliner.html":[13,0,0,215],
+"class_p4_1_1_functions_inliner_1_1is_local_expression.html":[12,0,0,199,0],
+"class_p4_1_1_functions_inliner_1_1is_local_expression.html":[13,0,0,215,0],
 "class_p4_1_1_general_inliner.html":[12,0,0,202],
 "class_p4_1_1_general_inliner.html":[13,0,0,218],
 "class_p4_1_1_general_inliner.html#a5bc6a54a3d9b4fd516735a3a0122f220":[12,0,0,202,0],
@@ -247,7 +249,5 @@ var NAVTREEINDEX6 =
 "class_p4_1_1_i_r_1_1_i_node.html":[13,0,0,11,5],
 "class_p4_1_1_i_r_1_1_indexed_vector.html":[13,0,0,11,4],
 "class_p4_1_1_i_r_1_1_name_map.html":[13,0,0,11,6],
-"class_p4_1_1_i_r_1_1_node.html":[13,0,0,11,7],
-"class_p4_1_1_i_r_1_1_node_map.html":[13,0,0,11,8],
-"class_p4_1_1_i_r_1_1_vector.html":[13,0,0,11,13]
+"class_p4_1_1_i_r_1_1_node.html":[13,0,0,11,7]
 };
