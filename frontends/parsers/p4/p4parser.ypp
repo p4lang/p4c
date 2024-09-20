@@ -250,7 +250,7 @@ using namespace P4;
 // End of token definitions ///////////////////////////////////////////////////
 
 
-%type<IR::ID*>              name dot_name nonTypeName nonTableKwName
+%type<IR::ID*>              name dot_name nonTypeName nonTableKwName annotationName
 %type<IR::Direction>        direction
 %type<IR::Path*>            prefixedNonTypeName prefixedType
 %type<IR::IndexedVector<IR::Type_Var>*>  typeParameterList
@@ -533,20 +533,20 @@ annotations
     ;
 
 annotation
-    : "@" name
+    : "@" annotationName
         { // Initialize with an empty sequence of annotation tokens so that the
           // annotation node is marked as unparsed.
           IR::Vector<IR::AnnotationToken> body;
           $$ = new IR::Annotation(@1, *$2, body); }
-    | "@" name "(" annotationBody ")"
+    | "@" annotationName "(" annotationBody ")"
         { $$ = new IR::Annotation(@1, *$2, *$4); }
-    | "@" name "[" expressionList optTrailingComma "]"
+    | "@" annotationName "[" expressionList optTrailingComma "]"
         { $$ = new IR::Annotation(@1, *$2, *$4, true); }
-    | "@" name "[" kvList optTrailingComma "]"
+    | "@" annotationName "[" kvList optTrailingComma "]"
         { $$ = new IR::Annotation(@1, *$2, *$4, true); }
     // Experimental: backwards compatibility with P4-14 pragmas (which
     // themselves are experimental!)
-    | PRAGMA name annotationBody END_PRAGMA
+    | PRAGMA annotationName annotationBody END_PRAGMA
         { $$ = new IR::Annotation(@1, *$2, *$3, false); }
     ;
 
@@ -564,6 +564,60 @@ annotationBody
           $$->push_back(new IR::AnnotationToken(@2, $2.type, $2.text, $2.unparsedConstant));
           $$->srcInfo = @1 + @2;
         }
+    ;
+
+annotationName
+    : ABSTRACT         { $$ = new IR::ID(@1, "abstract"_cs); }
+    | ACTION           { $$ = new IR::ID(@1, "action"_cs); }
+    | ACTIONS          { $$ = new IR::ID(@1, "actions"_cs); }
+    | APPLY            { $$ = new IR::ID(@1, "apply"_cs); }
+    | BOOL             { $$ = new IR::ID(@1, "bool"_cs); }
+    | BIT              { $$ = new IR::ID(@1, "bit"_cs); }
+    | BREAK            { $$ = new IR::ID(@1, "break"_cs); }
+    | CONST            { $$ = new IR::ID(@1, "const"_cs); }
+    | CONTINUE         { $$ = new IR::ID(@1, "continue"_cs); }
+    | CONTROL          { $$ = new IR::ID(@1, "control"_cs); }
+    | DEFAULT          { $$ = new IR::ID(@1, "default"_cs); }
+    | ELSE             { $$ = new IR::ID(@1, "else"_cs); }
+    | ENTRIES          { $$ = new IR::ID(@1, "entries"_cs); }
+    | ENUM             { $$ = new IR::ID(@1, "enum"_cs); }
+    | ERROR            { $$ = new IR::ID(@1, "error"_cs); }
+    | EXIT             { $$ = new IR::ID(@1, "exit"_cs); }
+    | EXTERN           { $$ = new IR::ID(@1, "extern"_cs); }
+    | FALSE            { $$ = new IR::ID(@1, "false"_cs); }
+    | FOR              { $$ = new IR::ID(@1, "for"_cs); }
+    | HEADER           { $$ = new IR::ID(@1, "header"_cs); }
+    | HEADER_UNION     { $$ = new IR::ID(@1, "header_union"_cs); }
+    | IF               { $$ = new IR::ID(@1, "if"_cs); }
+    | IN               { $$ = new IR::ID(@1, "in"_cs); }
+    | INOUT            { $$ = new IR::ID(@1, "inout"_cs); }
+    | INT              { $$ = new IR::ID(@1, "int"_cs); }
+    | KEY              { $$ = new IR::ID(@1, "key"_cs); }
+    | MATCH_KIND       { $$ = new IR::ID(@1, "match_kind"_cs); }
+    | TYPE             { $$ = new IR::ID(@1, "type"_cs); }
+    | OUT              { $$ = new IR::ID(@1, "out"_cs); }
+    | PARSER           { $$ = new IR::ID(@1, "parser"_cs); }
+    | PACKAGE          { $$ = new IR::ID(@1, "package"_cs); }
+    | PRIORITY         { $$ = new IR::ID(@1, "priority"_cs); }
+    | RETURN           { $$ = new IR::ID(@1, "return"_cs); }
+    | SELECT           { $$ = new IR::ID(@1, "select"_cs); }
+    | STATE            { $$ = new IR::ID(@1, "state"_cs); }
+    | STRING           { $$ = new IR::ID(@1, "string"_cs); }
+    | STRUCT           { $$ = new IR::ID(@1, "struct"_cs); }
+    | SWITCH           { $$ = new IR::ID(@1, "switch"_cs); }
+    | TABLE            { $$ = new IR::ID(@1, "table"_cs); }
+    | THIS             { $$ = new IR::ID(@1, "this"_cs); }
+    | TRANSITION       { $$ = new IR::ID(@1, "transition"_cs); }
+    | TRUE             { $$ = new IR::ID(@1, "true"_cs); }
+    | TUPLE            { $$ = new IR::ID(@1, "tuple"_cs); }
+    | TYPEDEF          { $$ = new IR::ID(@1, "typedef"_cs); }
+    | VARBIT           { $$ = new IR::ID(@1, "varbit"_cs); }
+    | VALUESET         { $$ = new IR::ID(@1, "valueset"_cs); }
+    | LIST             { $$ = new IR::ID(@1, "list"_cs); }
+    | VOID             { $$ = new IR::ID(@1, "void"_cs); }
+    | "_"              { $$ = new IR::ID(@1, "_"_cs); }
+    | IDENTIFIER       { $$ = new IR::ID(@1, $1); }
+    | TYPE_IDENTIFIER  { $$ = new IR::ID(@1, $1); }
     ;
 
 annotationToken
