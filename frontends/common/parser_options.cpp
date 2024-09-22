@@ -472,8 +472,8 @@ static std::filesystem::path makeFileName(const std::filesystem::path &folder,
 
 bool ParserOptions::isv1() const { return langVersion == ParserOptions::FrontendVersion::P4_14; }
 
-void ParserOptions::dumpPass(ToP4Factory toP4Fact, const char *manager, unsigned seq,
-                             const char *pass, const IR::Node *node) const {
+void ParserOptions::dumpPass(const char *manager, unsigned seq, const char *pass,
+                             const IR::Node *node) const {
     if (strncmp(pass, "P4::", 4) == 0) pass += 4;
     std::string name = absl::StrCat(manager, "_", seq, "_", pass);
     if (Log::verbose()) std::cerr << name << std::endl;
@@ -501,7 +501,7 @@ void ParserOptions::dumpPass(ToP4Factory toP4Fact, const char *manager, unsigned
             std::unique_ptr<std::ostream> stream{openFile(fileName, true)};
             if (stream != nullptr) {
                 if (Log::verbose()) std::cerr << "Writing program to " << fileName << std::endl;
-                std::unique_ptr<P4::ToP4> toP4 = toP4Fact(stream.get(), Log::verbose(), file);
+                std::unique_ptr<P4::ToP4> toP4 = getToP4(stream.get(), Log::verbose(), file);
                 if (noIncludes) {
                     toP4->setnoIncludesArg(true);
                 }
@@ -516,6 +516,11 @@ void ParserOptions::dumpPass(ToP4Factory toP4Fact, const char *manager, unsigned
     }
 }
 
+std::unique_ptr<ToP4> ParserOptions::getToP4(std::ostream *outStream, bool showIR,
+                                             std::filesystem::path mainFile) const {
+    return std::make_unique<ToP4>(outStream, showIR, mainFile);
+}
+
 bool ParserOptions::isAnnotationDisabled(const IR::Annotation *a) const {
     if (disabledAnnotations.count(a->name.name) > 0) {
         ::P4::warning(ErrorType::WARN_IGNORE, "%1% is ignored because it was explicitly disabled",
@@ -526,14 +531,7 @@ bool ParserOptions::isAnnotationDisabled(const IR::Annotation *a) const {
 }
 
 DebugHook ParserOptions::getDebugHook() const {
-    return getDebugHook(
-        [](std::ostream *stream, bool dumpIR, std::filesystem::path file) -> std::unique_ptr<ToP4> {
-            return std::make_unique<ToP4>(stream, dumpIR, file);
-        });
-}
-
-DebugHook ParserOptions::getDebugHook(ToP4Factory toP4Fact) const {
-    auto dp = std::bind(&ParserOptions::dumpPass, this, toP4Fact, std::placeholders::_1,
+    auto dp = std::bind(&ParserOptions::dumpPass, this, std::placeholders::_1,
                         std::placeholders::_2, std::placeholders::_3, std::placeholders::_4);
     return dp;
 }

@@ -45,11 +45,6 @@ bool isSystemFile(cstring filename);
 /// This class contains the options for the front-ends.
 /// Each back-end should subclass this file.
 class ParserOptions : public Util::Options {
- public:
-    using ToP4Factory =
-        std::function<std::unique_ptr<ToP4>(std::ostream *, bool, std::filesystem::path)>;
-
- private:
     /// Annotation names that are to be ignored by the compiler.
     std::set<cstring> disabledAnnotations;
 
@@ -57,11 +52,13 @@ class ParserOptions : public Util::Options {
     mutable size_t dump_uid = 0;
 
  protected:
-    /// Implements function that is returned by getDebugHook. The hook will take the same arguments
-    /// except for the first one, which is filled in by getDebugHook and allow the ToP4 pass to be
-    /// overriden by its descendat.
-    void dumpPass(ToP4Factory toP4Fact, const char *manager, unsigned seq, const char *pass,
-                  const IR::Node *node) const;
+    /// Implements function that is returned by getDebugHook. The hook will take the same arguments.
+    /// The hook uses \ref getToP4 to obtain the P4 printer.
+    void dumpPass(const char *manager, unsigned seq, const char *pass, const IR::Node *node) const;
+
+    /// Obtain an instance of ToP4 or its descendant. The arguments correspond to constructor
+    /// arguments of ToP4.
+    virtual std::unique_ptr<ToP4> getToP4(std::ostream *, bool, std::filesystem::path) const;
 
  public:
     explicit ParserOptions(std::string_view defaultMessage = "Parse a P4 program");
@@ -105,8 +102,6 @@ class ParserOptions : public Util::Options {
     /// Get a debug hook function suitable for insertion in the pass managers. The hook is
     /// responsible for dumping P4 according to th --top4 and related options.
     DebugHook getDebugHook() const;
-    /// Get a debug hook function suitable for insertion in the pass managers.
-    DebugHook getDebugHook(ToP4Factory toP4Fact) const;
     /// Check whether this particular annotation was disabled
     bool isAnnotationDisabled(const IR::Annotation *a) const;
     /// Search and set 'includePathOut' to be the first valid path from the
