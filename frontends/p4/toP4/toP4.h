@@ -34,6 +34,7 @@ This pass converts a P4-16 IR into a P4 source (text) program.
 It can optionally emit as comments a representation of the program IR.
 */
 class ToP4 : public Inspector, ResolutionContext {
+ protected:
     /// precedence of current IR::Operation
     int expressionPrecedence = DBPrint::Prec_Low;
     bool isDeclaration = true;    /// current type is a declaration
