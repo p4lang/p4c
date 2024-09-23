@@ -487,10 +487,10 @@ void ParserOptions::dumpPass(const char *manager, unsigned seq, const char *pass
             // regex_search checks if the regex is contained as substring
             match = std::regex_search(name.begin(), name.end(), s_regex);
         } catch (const std::regex_error &e) {
-            P4::error(ErrorType::ERR_INVALID,
-                      "Malformed toP4 regex string \"%s\".\n"
-                      "The regex matcher follows ECMAScript syntax.",
-                      s);
+            error(ErrorType::ERR_INVALID,
+                  "Malformed toP4 regex string \"%s\".\n"
+                  "The regex matcher follows ECMAScript syntax.",
+                  s);
             exit(1);
         }
         if (match) {
