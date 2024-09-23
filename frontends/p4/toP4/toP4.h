@@ -17,7 +17,10 @@ limitations under the License.
 #ifndef P4_TOP4_TOP4_H_
 #define P4_TOP4_TOP4_H_
 
+#include <filesystem>
+#include <iostream>
 #include <optional>
+#include <vector>
 
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "ir/ir.h"
@@ -31,12 +34,14 @@ This pass converts a P4-16 IR into a P4 source (text) program.
 It can optionally emit as comments a representation of the program IR.
 */
 class ToP4 : public Inspector, ResolutionContext {
-    int expressionPrecedence;  /// precedence of current IR::Operation
-    bool isDeclaration;        /// current type is a declaration
-    bool showIR;               /// if true dump IR as comments
-    bool withinArgument;       /// if true we are within a method call argument
-    bool noIncludes = false;   /// If true do not generate #include statements.
-                               /// Used for debugging.
+ protected:
+    /// precedence of current IR::Operation
+    int expressionPrecedence = DBPrint::Prec_Low;
+    bool isDeclaration = true;    /// current type is a declaration
+    bool showIR;                  /// if true dump IR as comments
+    bool withinArgument = false;  /// if true we are within a method call argument
+    bool noIncludes = false;      /// If true do not generate #include statements.
+                                  /// Used for debugging.
 
     struct VecPrint {
         cstring separator;
@@ -87,46 +92,31 @@ class ToP4 : public Inspector, ResolutionContext {
      * directly to the ostream.  The SourceCodeBuilder object does not appear to add any
      * useful functionality the ostream does not already provide; it just serves to
      * obfuscate the code */
-    std::ostream *outStream;
-    /** If this is set to non-nullptr, some declarations
+    std::ostream *outStream = nullptr;
+    /** If this is set to non-empty, some declarations
         that come from libraries and models are not
         emitted. */
-    cstring mainFile;
+    std::optional<std::filesystem::path> mainFile;
 
-    ToP4(Util::SourceCodeBuilder &builder, bool showIR, cstring mainFile = nullptr)
-        : expressionPrecedence(DBPrint::Prec_Low),
-          isDeclaration(true),
-          showIR(showIR),
-          withinArgument(false),
-          builder(builder),
-          outStream(nullptr),
-          mainFile(mainFile) {
+    ToP4(Util::SourceCodeBuilder &builder, bool showIR) : showIR(showIR), builder(builder) {
         visitDagOnce = false;
         setName("ToP4");
     }
-    ToP4(std::ostream *outStream, bool showIR, cstring mainFile = nullptr)
-        : expressionPrecedence(DBPrint::Prec_Low),
-          isDeclaration(true),
-          showIR(showIR),
-          withinArgument(false),
-          builder(*new Util::SourceCodeBuilder()),
-          outStream(outStream),
-          mainFile(mainFile) {
-        visitDagOnce = false;
-        setName("ToP4");
+
+    ToP4(std::ostream *outStream, bool showIR) : ToP4(*new Util::SourceCodeBuilder(), showIR) {
+        this->outStream = outStream;
     }
-    ToP4()
-        :  // this is useful for debugging
-          expressionPrecedence(DBPrint::Prec_Low),
-          isDeclaration(true),
-          showIR(false),
-          withinArgument(false),
-          builder(*new Util::SourceCodeBuilder()),
-          outStream(&std::cout),
-          mainFile(nullptr) {
-        visitDagOnce = false;
-        setName("ToP4");
+
+    ToP4(Util::SourceCodeBuilder &builder, bool showIR, std::filesystem::path mainFile)
+        : ToP4(builder, showIR) {
+        this->mainFile = mainFile;
     }
+    ToP4(std::ostream *outStream, bool showIR, std::filesystem::path mainFile)
+        : ToP4(outStream, showIR) {
+        this->mainFile = mainFile;
+    }
+
+    ToP4() : ToP4(*new Util::SourceCodeBuilder(), false) {}
 
     using Inspector::preorder;
 

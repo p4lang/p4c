@@ -487,10 +487,10 @@ void ParserOptions::dumpPass(const char *manager, unsigned seq, const char *pass
             // regex_search checks if the regex is contained as substring
             match = std::regex_search(name.begin(), name.end(), s_regex);
         } catch (const std::regex_error &e) {
-            ::P4::error(ErrorType::ERR_INVALID,
-                        "Malformed toP4 regex string \"%s\".\n"
-                        "The regex matcher follows ECMAScript syntax.",
-                        s);
+            error(ErrorType::ERR_INVALID,
+                  "Malformed toP4 regex string \"%s\".\n"
+                  "The regex matcher follows ECMAScript syntax.",
+                  s);
             exit(1);
         }
         if (match) {
@@ -501,13 +501,12 @@ void ParserOptions::dumpPass(const char *manager, unsigned seq, const char *pass
             std::unique_ptr<std::ostream> stream{openFile(fileName, true)};
             if (stream != nullptr) {
                 if (Log::verbose()) std::cerr << "Writing program to " << fileName << std::endl;
-                // FIXME: Accept path here
-                P4::ToP4 toP4(stream.get(), Log::verbose(), cstring(file));
+                std::unique_ptr<P4::ToP4> toP4 = getToP4(stream.get(), Log::verbose(), file);
                 if (noIncludes) {
-                    toP4.setnoIncludesArg(true);
+                    toP4->setnoIncludesArg(true);
                 }
                 if (node) {
-                    node->apply(toP4);
+                    node->apply(*toP4);
                 } else {
                     *stream << "No P4 program returned by the pass" << std::endl;
                 }
@@ -515,6 +514,11 @@ void ParserOptions::dumpPass(const char *manager, unsigned seq, const char *pass
             break;
         }
     }
+}
+
+std::unique_ptr<ToP4> ParserOptions::getToP4(std::ostream *outStream, bool showIR,
+                                             std::filesystem::path mainFile) const {
+    return std::make_unique<ToP4>(outStream, showIR, mainFile);
 }
 
 bool ParserOptions::isAnnotationDisabled(const IR::Annotation *a) const {

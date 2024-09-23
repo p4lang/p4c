@@ -31,6 +31,8 @@ limitations under the License.
 
 namespace P4 {
 
+class ToP4;
+
 /// Standard include paths for .p4 header files. The values are determined by
 /// `configure`.
 extern const char *p4includePath;
@@ -50,8 +52,13 @@ class ParserOptions : public Util::Options {
     mutable size_t dump_uid = 0;
 
  protected:
-    /// Function that is returned by getDebugHook.
+    /// Implements function that is returned by getDebugHook. The hook will take the same arguments.
+    /// The hook uses \ref getToP4 to obtain the P4 printer.
     void dumpPass(const char *manager, unsigned seq, const char *pass, const IR::Node *node) const;
+
+    /// Obtain an instance of ToP4 or its descendant. The arguments correspond to constructor
+    /// arguments of ToP4.
+    virtual std::unique_ptr<ToP4> getToP4(std::ostream *, bool, std::filesystem::path) const;
 
  public:
     explicit ParserOptions(std::string_view defaultMessage = "Parse a P4 program");
@@ -92,8 +99,8 @@ class ParserOptions : public Util::Options {
     std::optional<ParserOptions::PreprocessorResult> preprocess() const;
     /// True if we are compiling a P4 v1.0 or v1.1 program
     bool isv1() const;
-    /// Get a debug hook function suitable for insertion
-    /// in the pass managers that are executed.
+    /// Get a debug hook function suitable for insertion in the pass managers. The hook is
+    /// responsible for dumping P4 according to th --top4 and related options.
     DebugHook getDebugHook() const;
     /// Check whether this particular annotation was disabled
     bool isAnnotationDisabled(const IR::Annotation *a) const;

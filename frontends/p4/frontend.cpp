@@ -105,8 +105,7 @@ class PrettyPrint : public Inspector {
     bool preorder(const IR::P4Program *program) override {
         if (!ppfile.empty()) {
             std::ostream *ppStream = openFile(ppfile, true);
-            // FIXME: ToP4 should accept PathName
-            P4::ToP4 top4(ppStream, false, cstring(inputfile));
+            P4::ToP4 top4(ppStream, false, inputfile);
             (void)program->apply(top4);
         }
         return false;  // prune
