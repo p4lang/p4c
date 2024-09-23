@@ -1144,6 +1144,8 @@ var hierarchy =
     [ "P4::TC::KeyFieldAttributes", "struct_p4_1_1_t_c_1_1_key_field_attributes.html", null ],
     [ "P4::TC::MidEnd", "class_p4_1_1_t_c_1_1_mid_end.html", null ],
     [ "P4::TC::TableAttributes", "struct_p4_1_1_t_c_1_1_table_attributes.html", null ],
+    [ "P4::ToP4::ListPrint", "struct_p4_1_1_to_p4_1_1_list_print.html", null ],
+    [ "P4::ToP4::VecPrint", "struct_p4_1_1_to_p4_1_1_vec_print.html", null ],
     [ "P4::TypeInferenceBase::Comparison", "class_p4_1_1_type_inference_base.html#struct_p4_1_1_type_inference_base_1_1_comparison", null ],
     [ "P4::TypeUnification", "class_p4_1_1_type_unification.html", null ],
     [ "P4::UnparsedConstant", "namespace_p4.html#struct_p4_1_1_unparsed_constant", null ],

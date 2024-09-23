@@ -4,6 +4,7 @@ var class_p4_1_1_parser_options =
     [ "dumpPass", "class_p4_1_1_parser_options.html#a665e3adf6f5e083e426e261f9be97e66", null ],
     [ "getDebugHook", "class_p4_1_1_parser_options.html#add7559b7905b446a59c64dda15aa41cb", null ],
     [ "getIncludePath", "class_p4_1_1_parser_options.html#aabe36c719a7359b05312fa2ef7f7fe63", null ],
+    [ "getToP4", "class_p4_1_1_parser_options.html#adf80951ba1d8583f7fd61ea4e7b17e6c", null ],
     [ "isAnnotationDisabled", "class_p4_1_1_parser_options.html#a8ec79239f1fb480afe41b59486086c58", null ],
     [ "isv1", "class_p4_1_1_parser_options.html#a199177c4bd3d579a7842a1a13e1c8d80", null ],
     [ "preprocess", "class_p4_1_1_parser_options.html#a8ee3d96c97ed1739333585eda4114fd1", null ],

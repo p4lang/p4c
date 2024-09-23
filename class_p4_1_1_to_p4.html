@@ -121,8 +121,11 @@ $(function(){initNavTree('class_p4_1_1_to_p4.html',''); initResizable(true); });
 
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-attribs">Public Attributes</a> &#124;
+<a href="#pro-methods">Protected Member Functions</a> &#124;
+<a href="#pro-attribs">Protected Attributes</a> &#124;
 <a href="class_p4_1_1_to_p4-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4::ToP4 Class Reference</div></div>
 </div><!--header-->
@@ -135,14 +138,27 @@ Inheritance diagram for P4::ToP4:</div>
 <div class="center"><iframe scrolling="no" frameborder="0" src="class_p4_1_1_to_p4__inherit__graph.svg" width="310" height="183"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_p4_1_1_to_p4_1_1_list_print.html">ListPrint</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_p4_1_1_to_p4_1_1_vec_print.html">VecPrint</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:abaccdd35b17274d05a75b61f2c5dd4fd" id="r_abaccdd35b17274d05a75b61f2c5dd4fd"><td class="memItemLeft" align="right" valign="top"><a id="abaccdd35b17274d05a75b61f2c5dd4fd" name="abaccdd35b17274d05a75b61f2c5dd4fd"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>ToP4</b> (std::ostream *outStream, bool showIR, <a class="el" href="class_p4_1_1cstring.html">cstring</a> <a class="el" href="#ad6899bc288b6cf7486d0db40283f83a3">mainFile</a>=nullptr)</td></tr>
-<tr class="separator:abaccdd35b17274d05a75b61f2c5dd4fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:add3595b3c14e5b6ad4c13ab5a4633c66" id="r_add3595b3c14e5b6ad4c13ab5a4633c66"><td class="memItemLeft" align="right" valign="top"><a id="add3595b3c14e5b6ad4c13ab5a4633c66" name="add3595b3c14e5b6ad4c13ab5a4633c66"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>ToP4</b> (<a class="el" href="class_p4_1_1_util_1_1_source_code_builder.html">Util::SourceCodeBuilder</a> &amp;builder, bool showIR, <a class="el" href="class_p4_1_1cstring.html">cstring</a> <a class="el" href="#ad6899bc288b6cf7486d0db40283f83a3">mainFile</a>=nullptr)</td></tr>
-<tr class="separator:add3595b3c14e5b6ad4c13ab5a4633c66"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abff80181163a03380c7a0912cc9403e3" id="r_abff80181163a03380c7a0912cc9403e3"><td class="memItemLeft" align="right" valign="top"><a id="abff80181163a03380c7a0912cc9403e3" name="abff80181163a03380c7a0912cc9403e3"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>ToP4</b> (std::ostream *outStream, bool <a class="el" href="#ab21659a68ae8fa22e33b88df1f4b5a16">showIR</a>)</td></tr>
+<tr class="separator:abff80181163a03380c7a0912cc9403e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa430d58c2645e0d19c2650337e5afa5e" id="r_aa430d58c2645e0d19c2650337e5afa5e"><td class="memItemLeft" align="right" valign="top"><a id="aa430d58c2645e0d19c2650337e5afa5e" name="aa430d58c2645e0d19c2650337e5afa5e"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>ToP4</b> (std::ostream *outStream, bool <a class="el" href="#ab21659a68ae8fa22e33b88df1f4b5a16">showIR</a>, std::filesystem::path <a class="el" href="#afd0ba943da3c4191cbc2f41de6e05482">mainFile</a>)</td></tr>
+<tr class="separator:aa430d58c2645e0d19c2650337e5afa5e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a360f1cea8e7528bb07a6a8872916903a" id="r_a360f1cea8e7528bb07a6a8872916903a"><td class="memItemLeft" align="right" valign="top"><a id="a360f1cea8e7528bb07a6a8872916903a" name="a360f1cea8e7528bb07a6a8872916903a"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>ToP4</b> (<a class="el" href="class_p4_1_1_util_1_1_source_code_builder.html">Util::SourceCodeBuilder</a> &amp;builder, bool <a class="el" href="#ab21659a68ae8fa22e33b88df1f4b5a16">showIR</a>)</td></tr>
+<tr class="separator:a360f1cea8e7528bb07a6a8872916903a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa7ce48859ccd7e635b1aafd00c1e3444" id="r_aa7ce48859ccd7e635b1aafd00c1e3444"><td class="memItemLeft" align="right" valign="top"><a id="aa7ce48859ccd7e635b1aafd00c1e3444" name="aa7ce48859ccd7e635b1aafd00c1e3444"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>ToP4</b> (<a class="el" href="class_p4_1_1_util_1_1_source_code_builder.html">Util::SourceCodeBuilder</a> &amp;builder, bool <a class="el" href="#ab21659a68ae8fa22e33b88df1f4b5a16">showIR</a>, std::filesystem::path <a class="el" href="#afd0ba943da3c4191cbc2f41de6e05482">mainFile</a>)</td></tr>
+<tr class="separator:aa7ce48859ccd7e635b1aafd00c1e3444"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa1f5e03f93848793e3141a08ec6fe664" id="r_aa1f5e03f93848793e3141a08ec6fe664"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa1f5e03f93848793e3141a08ec6fe664">end_apply</a> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *node) override</td></tr>
 <tr class="separator:aa1f5e03f93848793e3141a08ec6fe664"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a37971827787099cbbcb31e1b31201b94" id="r_a37971827787099cbbcb31e1b31201b94"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_p4_1_1_visitor_1_1profile__t.html">Visitor::profile_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a37971827787099cbbcb31e1b31201b94">init_apply</a> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *node) override</td></tr>
@@ -677,10 +693,10 @@ Public Attributes</h2></td></tr>
 <tr class="memitem:a89fc790146328faed828d0d583e26fa4" id="r_a89fc790146328faed828d0d583e26fa4"><td class="memItemLeft" align="right" valign="top"><a id="a89fc790146328faed828d0d583e26fa4" name="a89fc790146328faed828d0d583e26fa4"></a>
 <a class="el" href="class_p4_1_1_util_1_1_source_code_builder.html">Util::SourceCodeBuilder</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>builder</b></td></tr>
 <tr class="separator:a89fc790146328faed828d0d583e26fa4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad6899bc288b6cf7486d0db40283f83a3" id="r_ad6899bc288b6cf7486d0db40283f83a3"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad6899bc288b6cf7486d0db40283f83a3">mainFile</a></td></tr>
-<tr class="separator:ad6899bc288b6cf7486d0db40283f83a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afd0ba943da3c4191cbc2f41de6e05482" id="r_afd0ba943da3c4191cbc2f41de6e05482"><td class="memItemLeft" align="right" valign="top">std::optional&lt; std::filesystem::path &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afd0ba943da3c4191cbc2f41de6e05482">mainFile</a></td></tr>
+<tr class="separator:afd0ba943da3c4191cbc2f41de6e05482"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0f1687b14d0829dc2572e11406f4464d" id="r_a0f1687b14d0829dc2572e11406f4464d"><td class="memItemLeft" align="right" valign="top"><a id="a0f1687b14d0829dc2572e11406f4464d" name="a0f1687b14d0829dc2572e11406f4464d"></a>
-std::ostream *&#160;</td><td class="memItemRight" valign="bottom"><b>outStream</b></td></tr>
+std::ostream *&#160;</td><td class="memItemRight" valign="bottom"><b>outStream</b> = nullptr</td></tr>
 <tr class="separator:a0f1687b14d0829dc2572e11406f4464d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_attribs_class_p4_1_1_visitor"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_attribs_class_p4_1_1_visitor')"><img src="closed.png" alt="-"/>&#160;Public Attributes inherited from <a class="el" href="class_p4_1_1_visitor.html">P4::Visitor</a></td></tr>
 <tr class="memitem:a77790b8548086cf62140b5b5579ac455 inherit pub_attribs_class_p4_1_1_visitor" id="r_a77790b8548086cf62140b5b5579ac455"><td class="memItemLeft" align="right" valign="top">
@@ -696,6 +712,85 @@ const <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *&#160;</td><td
 <a class="el" href="class_p4_1_1_split_flow_visit__base.html">SplitFlowVisit_base</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>split_link_mem</b> = nullptr</td></tr>
 <tr class="separator:ad5fbe40632b94fd5f81268281e92c262 inherit pub_attribs_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
+Protected Member Functions</h2></td></tr>
+<tr class="memitem:a6691da09fa8cc17b50e4cffd8b1e5908" id="r_a6691da09fa8cc17b50e4cffd8b1e5908"><td class="memItemLeft" align="right" valign="top"><a id="a6691da09fa8cc17b50e4cffd8b1e5908" name="a6691da09fa8cc17b50e4cffd8b1e5908"></a>
+unsigned&#160;</td><td class="memItemRight" valign="bottom"><b>curDepth</b> () const</td></tr>
+<tr class="separator:a6691da09fa8cc17b50e4cffd8b1e5908"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a91b2d1adb981b0d95bca5cbaab47a740" id="r_a91b2d1adb981b0d95bca5cbaab47a740"><td class="memItemLeft" align="right" valign="top"><a id="a91b2d1adb981b0d95bca5cbaab47a740" name="a91b2d1adb981b0d95bca5cbaab47a740"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>doneList</b> ()</td></tr>
+<tr class="separator:a91b2d1adb981b0d95bca5cbaab47a740"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:affbe9ab69efeda09a7b6ddb411f8e71c" id="r_affbe9ab69efeda09a7b6ddb411f8e71c"><td class="memItemLeft" align="right" valign="top"><a id="affbe9ab69efeda09a7b6ddb411f8e71c" name="affbe9ab69efeda09a7b6ddb411f8e71c"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>doneVec</b> ()</td></tr>
+<tr class="separator:affbe9ab69efeda09a7b6ddb411f8e71c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0f24f5f607b85aef874c876844bea8a3" id="r_a0f24f5f607b85aef874c876844bea8a3"><td class="memItemLeft" align="right" valign="top"><a id="a0f24f5f607b85aef874c876844bea8a3" name="a0f24f5f607b85aef874c876844bea8a3"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>dump</b> (unsigned depth, const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *node=nullptr, unsigned adjDepth=0)</td></tr>
+<tr class="memdesc:a0f24f5f607b85aef874c876844bea8a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">dump node IR tree up to depth - in the form of a comment <br /></td></tr>
+<tr class="separator:a0f24f5f607b85aef874c876844bea8a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d2d6eea6722da4d8680630208d4d52a" id="r_a1d2d6eea6722da4d8680630208d4d52a"><td class="memItemLeft" align="right" valign="top"><a id="a1d2d6eea6722da4d8680630208d4d52a" name="a1d2d6eea6722da4d8680630208d4d52a"></a>
+<a class="el" href="struct_p4_1_1_to_p4_1_1_vec_print.html">VecPrint</a>&#160;</td><td class="memItemRight" valign="bottom"><b>getSep</b> ()</td></tr>
+<tr class="separator:a1d2d6eea6722da4d8680630208d4d52a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae24e928794569a576a4fc6920825daf0" id="r_ae24e928794569a576a4fc6920825daf0"><td class="memItemLeft" align="right" valign="top">std::optional&lt; <a class="el" href="class_p4_1_1cstring.html">cstring</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae24e928794569a576a4fc6920825daf0">ifSystemFile</a> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *node)</td></tr>
+<tr class="separator:ae24e928794569a576a4fc6920825daf0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f777b8b3bd985837397490e531ae2df" id="r_a1f777b8b3bd985837397490e531ae2df"><td class="memItemLeft" align="right" valign="top"><a id="a1f777b8b3bd985837397490e531ae2df" name="a1f777b8b3bd985837397490e531ae2df"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>setVecSep</b> (const char *sep, const char *term=nullptr)</td></tr>
+<tr class="separator:a1f777b8b3bd985837397490e531ae2df"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pro_methods_class_p4_1_1_visitor"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_methods_class_p4_1_1_visitor')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="class_p4_1_1_visitor.html">P4::Visitor</a></td></tr>
+<tr class="memitem:a16268c6a9909821e47b5c6313c75d35e inherit pro_methods_class_p4_1_1_visitor" id="r_a16268c6a9909821e47b5c6313c75d35e"><td class="memItemLeft" align="right" valign="top">
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>init_join_flows</b> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *)</td></tr>
+<tr class="separator:a16268c6a9909821e47b5c6313c75d35e inherit pro_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae7dead1386c1bd5727307f5ae131aad7 inherit pro_methods_class_p4_1_1_visitor" id="r_ae7dead1386c1bd5727307f5ae131aad7"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_visitor.html#ae7dead1386c1bd5727307f5ae131aad7">join_flows</a> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *)</td></tr>
+<tr class="separator:ae7dead1386c1bd5727307f5ae131aad7 inherit pro_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5dbe3feb775de2157cab17104691d606 inherit pro_methods_class_p4_1_1_visitor" id="r_a5dbe3feb775de2157cab17104691d606"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_visitor.html#a5dbe3feb775de2157cab17104691d606">post_join_flows</a> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *, const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *)</td></tr>
+<tr class="separator:a5dbe3feb775de2157cab17104691d606 inherit pro_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a56c27a883ef67322ea4d8a01ace0de inherit pro_methods_class_p4_1_1_visitor" id="r_a6a56c27a883ef67322ea4d8a01ace0de"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>visit_children</b> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *, std::function&lt; void()&gt; fn)</td></tr>
+<tr class="separator:a6a56c27a883ef67322ea4d8a01ace0de inherit pro_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
+Protected Attributes</h2></td></tr>
+<tr class="memitem:aead7d86565a4922908390db8da3e81f9" id="r_aead7d86565a4922908390db8da3e81f9"><td class="memItemLeft" align="right" valign="top"><a id="aead7d86565a4922908390db8da3e81f9" name="aead7d86565a4922908390db8da3e81f9"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>expressionPrecedence</b> = DBPrint::Prec_Low</td></tr>
+<tr class="memdesc:aead7d86565a4922908390db8da3e81f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">precedence of current IR::Operation <br /></td></tr>
+<tr class="separator:aead7d86565a4922908390db8da3e81f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8e2bfaf83d55da6097228a9cd28cfb37" id="r_a8e2bfaf83d55da6097228a9cd28cfb37"><td class="memItemLeft" align="right" valign="top"><a id="a8e2bfaf83d55da6097228a9cd28cfb37" name="a8e2bfaf83d55da6097228a9cd28cfb37"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>isDeclaration</b> = true</td></tr>
+<tr class="separator:a8e2bfaf83d55da6097228a9cd28cfb37"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac4f9c06722297b6c895bcf5fb505c388" id="r_ac4f9c06722297b6c895bcf5fb505c388"><td class="memItemLeft" align="right" valign="top"><a id="ac4f9c06722297b6c895bcf5fb505c388" name="ac4f9c06722297b6c895bcf5fb505c388"></a>
+std::vector&lt; <a class="el" href="struct_p4_1_1_to_p4_1_1_list_print.html">ListPrint</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>listTerminators</b></td></tr>
+<tr class="separator:ac4f9c06722297b6c895bcf5fb505c388"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af7a5710cc87f840974c575e2927dcf18" id="r_af7a5710cc87f840974c575e2927dcf18"><td class="memItemLeft" align="right" valign="top"><a id="af7a5710cc87f840974c575e2927dcf18" name="af7a5710cc87f840974c575e2927dcf18"></a>
+size_t&#160;</td><td class="memItemRight" valign="bottom"><b>listTerminators_init_apply_size</b> = 0</td></tr>
+<tr class="separator:af7a5710cc87f840974c575e2927dcf18"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a69caf0efbd27657b819d305f2cfe43be" id="r_a69caf0efbd27657b819d305f2cfe43be"><td class="memItemLeft" align="right" valign="top"><a id="a69caf0efbd27657b819d305f2cfe43be" name="a69caf0efbd27657b819d305f2cfe43be"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>noIncludes</b> = false</td></tr>
+<tr class="memdesc:a69caf0efbd27657b819d305f2cfe43be"><td class="mdescLeft">&#160;</td><td class="mdescRight">if true we are within a method call argument <br /></td></tr>
+<tr class="separator:a69caf0efbd27657b819d305f2cfe43be"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab21659a68ae8fa22e33b88df1f4b5a16" id="r_ab21659a68ae8fa22e33b88df1f4b5a16"><td class="memItemLeft" align="right" valign="top"><a id="ab21659a68ae8fa22e33b88df1f4b5a16" name="ab21659a68ae8fa22e33b88df1f4b5a16"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>showIR</b></td></tr>
+<tr class="memdesc:ab21659a68ae8fa22e33b88df1f4b5a16"><td class="mdescLeft">&#160;</td><td class="mdescRight">current type is a declaration <br /></td></tr>
+<tr class="separator:ab21659a68ae8fa22e33b88df1f4b5a16"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a87bc7562d36097f43cbe2a3aa6b95b4b" id="r_a87bc7562d36097f43cbe2a3aa6b95b4b"><td class="memItemLeft" align="right" valign="top"><a id="a87bc7562d36097f43cbe2a3aa6b95b4b" name="a87bc7562d36097f43cbe2a3aa6b95b4b"></a>
+std::vector&lt; <a class="el" href="struct_p4_1_1_to_p4_1_1_vec_print.html">VecPrint</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>vectorSeparator</b></td></tr>
+<tr class="separator:a87bc7562d36097f43cbe2a3aa6b95b4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af4a457e1d8ac96e3f7023b09ff488a32" id="r_af4a457e1d8ac96e3f7023b09ff488a32"><td class="memItemLeft" align="right" valign="top"><a id="af4a457e1d8ac96e3f7023b09ff488a32" name="af4a457e1d8ac96e3f7023b09ff488a32"></a>
+size_t&#160;</td><td class="memItemRight" valign="bottom"><b>vectorSeparator_init_apply_size</b> = 0</td></tr>
+<tr class="separator:af4a457e1d8ac96e3f7023b09ff488a32"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad6720f0e6a07c690eeb4f3cf08eb01d6" id="r_ad6720f0e6a07c690eeb4f3cf08eb01d6"><td class="memItemLeft" align="right" valign="top"><a id="ad6720f0e6a07c690eeb4f3cf08eb01d6" name="ad6720f0e6a07c690eeb4f3cf08eb01d6"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>withinArgument</b> = false</td></tr>
+<tr class="memdesc:ad6720f0e6a07c690eeb4f3cf08eb01d6"><td class="mdescLeft">&#160;</td><td class="mdescRight">if true dump IR as comments <br /></td></tr>
+<tr class="separator:ad6720f0e6a07c690eeb4f3cf08eb01d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pro_attribs_class_p4_1_1_visitor"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_class_p4_1_1_visitor')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="class_p4_1_1_visitor.html">P4::Visitor</a></td></tr>
+<tr class="memitem:acfef9a2a08634af0bbad5d5134d84c56 inherit pro_attribs_class_p4_1_1_visitor" id="r_acfef9a2a08634af0bbad5d5134d84c56"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>dontForwardChildrenBeforePreorder</b> = false</td></tr>
+<tr class="separator:acfef9a2a08634af0bbad5d5134d84c56 inherit pro_attribs_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0faafbf35168a5a7f22ab34b02fb4170 inherit pro_attribs_class_p4_1_1_visitor" id="r_a0faafbf35168a5a7f22ab34b02fb4170"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>joinFlows</b> = false</td></tr>
+<tr class="separator:a0faafbf35168a5a7f22ab34b02fb4170 inherit pro_attribs_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a609ed9bc5d421210d591474f234d5e88 inherit pro_attribs_class_p4_1_1_visitor" id="r_a609ed9bc5d421210d591474f234d5e88"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = true</td></tr>
+<tr class="separator:a609ed9bc5d421210d591474f234d5e88 inherit pro_attribs_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
 <tr class="inherit_header pub_types_class_p4_1_1_visitor"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_types_class_p4_1_1_visitor')"><img src="closed.png" alt="-"/>&#160;Public Types inherited from <a class="el" href="class_p4_1_1_visitor.html">P4::Visitor</a></td></tr>
@@ -708,27 +803,6 @@ static <a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td c
 <tr class="separator:a660765ff55d502b9d9c0c6b5c522dca0 inherit pub_static_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a883ecb795f506e021328e285c7c23264 inherit pub_static_methods_class_p4_1_1_visitor" id="r_a883ecb795f506e021328e285c7c23264"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_visitor.html#a883ecb795f506e021328e285c7c23264">warning_enabled</a> (const <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *visitor, int warning_kind)</td></tr>
 <tr class="separator:a883ecb795f506e021328e285c7c23264 inherit pub_static_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="inherit_header pro_methods_class_p4_1_1_visitor"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_methods_class_p4_1_1_visitor')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="class_p4_1_1_visitor.html">P4::Visitor</a></td></tr>
-<tr class="memitem:a16268c6a9909821e47b5c6313c75d35e inherit pro_methods_class_p4_1_1_visitor" id="r_a16268c6a9909821e47b5c6313c75d35e"><td class="memItemLeft" align="right" valign="top">
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>init_join_flows</b> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *)</td></tr>
-<tr class="separator:a16268c6a9909821e47b5c6313c75d35e inherit pro_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ae7dead1386c1bd5727307f5ae131aad7 inherit pro_methods_class_p4_1_1_visitor" id="r_ae7dead1386c1bd5727307f5ae131aad7"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_visitor.html#ae7dead1386c1bd5727307f5ae131aad7">join_flows</a> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *)</td></tr>
-<tr class="separator:ae7dead1386c1bd5727307f5ae131aad7 inherit pro_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5dbe3feb775de2157cab17104691d606 inherit pro_methods_class_p4_1_1_visitor" id="r_a5dbe3feb775de2157cab17104691d606"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_visitor.html#a5dbe3feb775de2157cab17104691d606">post_join_flows</a> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *, const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *)</td></tr>
-<tr class="separator:a5dbe3feb775de2157cab17104691d606 inherit pro_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6a56c27a883ef67322ea4d8a01ace0de inherit pro_methods_class_p4_1_1_visitor" id="r_a6a56c27a883ef67322ea4d8a01ace0de"><td class="memItemLeft" align="right" valign="top">
-void&#160;</td><td class="memItemRight" valign="bottom"><b>visit_children</b> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *, std::function&lt; void()&gt; fn)</td></tr>
-<tr class="separator:a6a56c27a883ef67322ea4d8a01ace0de inherit pro_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="inherit_header pro_attribs_class_p4_1_1_visitor"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_class_p4_1_1_visitor')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="class_p4_1_1_visitor.html">P4::Visitor</a></td></tr>
-<tr class="memitem:acfef9a2a08634af0bbad5d5134d84c56 inherit pro_attribs_class_p4_1_1_visitor" id="r_acfef9a2a08634af0bbad5d5134d84c56"><td class="memItemLeft" align="right" valign="top">
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>dontForwardChildrenBeforePreorder</b> = false</td></tr>
-<tr class="separator:acfef9a2a08634af0bbad5d5134d84c56 inherit pro_attribs_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0faafbf35168a5a7f22ab34b02fb4170 inherit pro_attribs_class_p4_1_1_visitor" id="r_a0faafbf35168a5a7f22ab34b02fb4170"><td class="memItemLeft" align="right" valign="top">
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>joinFlows</b> = false</td></tr>
-<tr class="separator:a0faafbf35168a5a7f22ab34b02fb4170 inherit pro_attribs_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a609ed9bc5d421210d591474f234d5e88 inherit pro_attribs_class_p4_1_1_visitor" id="r_a609ed9bc5d421210d591474f234d5e88"><td class="memItemLeft" align="right" valign="top">
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = true</td></tr>
-<tr class="separator:a609ed9bc5d421210d591474f234d5e88 inherit pro_attribs_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>This pass converts a P4-16 IR into a P4 source (text) program. It can optionally emit as comments a representation of the program IR. </p>
@@ -757,6 +831,32 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 </div><div class="memdoc">
 
 <p>Reimplemented from <a class="el" href="class_p4_1_1_visitor.html">P4::Visitor</a>.</p>
+
+</div>
+</div>
+<a id="ae24e928794569a576a4fc6920825daf0" name="ae24e928794569a576a4fc6920825daf0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae24e928794569a576a4fc6920825daf0">&#9670;&#160;</a></span>ifSystemFile()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::optional&lt; <a class="el" href="class_p4_1_1cstring.html">cstring</a> &gt; P4::ToP4::ifSystemFile </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *</td>          <td class="paramname"><span class="paramname"><em>node</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the file that contains the node, if the node is part of a system file. </dd></dl>
 
 </div>
 </div>
@@ -815,18 +915,18 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
-<a id="ad6899bc288b6cf7486d0db40283f83a3" name="ad6899bc288b6cf7486d0db40283f83a3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad6899bc288b6cf7486d0db40283f83a3">&#9670;&#160;</a></span>mainFile</h2>
+<a id="afd0ba943da3c4191cbc2f41de6e05482" name="afd0ba943da3c4191cbc2f41de6e05482"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afd0ba943da3c4191cbc2f41de6e05482">&#9670;&#160;</a></span>mainFile</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname"><a class="el" href="class_p4_1_1cstring.html">cstring</a> P4::ToP4::mainFile</td>
+          <td class="memname">std::optional&lt;std::filesystem::path&gt; P4::ToP4::mainFile</td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>If this is set to non-nullptr, some declarations that come from libraries and models are not emitted. </p>
+<p>If this is set to non-empty, some declarations that come from libraries and models are not emitted. </p>
 
 </div>
 </div>
