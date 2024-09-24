@@ -69,6 +69,13 @@ std::ostream &operator<<(std::ostream &os, const SourceInfo &info) {
     return os;
 }
 
+const std::vector<Comment *> SourceInfo::getAllFileComments() const {
+    if (sources == nullptr) {
+        return {};
+    }
+    return this->sources->getAllComments();
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////
 
 InputSources::InputSources() : sealed(false) {
@@ -82,6 +89,8 @@ void InputSources::addComment(SourceInfo srcInfo, bool singleLine, cstring body)
         body = body.exceptLast(2);
     comments.push_back(new Comment(srcInfo, singleLine, body));
 }
+
+const std::vector<Comment *> &InputSources::getAllComments() const { return comments; }
 
 /// prevent further changes
 void InputSources::seal() {

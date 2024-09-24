@@ -3,6 +3,7 @@ set(FMT_SRCS
     options.cpp
     main.cpp
     p4formatter.cpp
+    attach.cpp
 )
 
 set(REFCHECK_SRCS
@@ -10,6 +11,7 @@ set(REFCHECK_SRCS
     options.cpp
     p4fmt.cpp
     p4formatter.cpp
+    attach.cpp
 )
 
 # p4fmt

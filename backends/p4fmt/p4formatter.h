@@ -1,6 +1,7 @@
 #ifndef BACKENDS_P4FMT_P4FORMATTER_H_
 #define BACKENDS_P4FMT_P4FORMATTER_H_
 
+#include "backends/p4fmt/attach.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
@@ -123,13 +124,15 @@ class P4Formatter : public Inspector, ::P4::ResolutionContext {
         visitDagOnce = false;
         setName("P4Formatter");
     }
-    explicit P4Formatter(std::ostream *outStream, cstring mainFile = nullptr)
+    explicit P4Formatter(std::ostream *outStream, Attach::Attach::CommentsMap comMap,
+                         cstring mainFile = nullptr)
         : expressionPrecedence(DBPrint::Prec_Low),
           isDeclaration(true),
           withinArgument(false),
           builder(*new Util::SourceCodeBuilder()),
           outStream(outStream),
-          mainFile(mainFile) {
+          mainFile(mainFile),
+          comMap(std::move(comMap)) {
         visitDagOnce = false;
         setName("P4Formatter");
     }
@@ -145,10 +148,11 @@ class P4Formatter : public Inspector, ::P4::ResolutionContext {
         setName("P4Formatter");
     }
 
+    std::pair<cstring, cstring> extractNodeComments(int nodeId);
     void setnoIncludesArg(bool condition) { noIncludes = condition; }
 
     void setListTerm(const char *start, const char *end) {
-        listTerminators.push_back(ListPrint(start, end));
+        listTerminators.emplace_back(start, end);
     }
     Visitor::profile_t init_apply(const IR::Node *node) override;
     void end_apply(const IR::Node *node) override;
@@ -290,6 +294,9 @@ class P4Formatter : public Inspector, ::P4::ResolutionContext {
 
     // in case it is accidentally called on a V1Program
     bool preorder(const IR::V1Program *) override { return false; }
+
+ private:
+    Attach::Attach::CommentsMap comMap;
 };
 
 std::string toP4(const IR::INode *node);

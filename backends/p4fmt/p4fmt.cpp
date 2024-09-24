@@ -1,5 +1,6 @@
 #include "backends/p4fmt/p4fmt.h"
 
+#include "backends/p4fmt/attach.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/common/parser_options.h"
 #include "ir/ir.h"
@@ -24,8 +25,23 @@ std::stringstream getFormattedOutput(std::filesystem::path inputFile) {
         return formattedOutput;
     }
 
-    auto top4 = P4Fmt::P4Formatter(&formattedOutput);
+    std::unordered_map<const Util::Comment *, bool> globalCommentsMap;
+
+    // Initialize the global comments map from the list of comments in the program.
+    if (!program->objects.empty()) {
+        const auto *firstNode = program->objects.front();
+        if (firstNode->srcInfo.isValid()) {
+            for (const auto *comment : firstNode->srcInfo.getAllFileComments()) {
+                globalCommentsMap[comment] =
+                    false;  // Initialize all comments as not yet attached to nodes
+            }
+        }
+    }
+
+    auto attach = P4::P4Fmt::Attach(globalCommentsMap);
+    program = program->apply(attach);
     // Print the program before running front end passes.
+    auto top4 = P4Fmt::P4Formatter(&formattedOutput, attach.getCommentsMap());
     program->apply(top4);
 
     if (::P4::errorCount() > 0) {
