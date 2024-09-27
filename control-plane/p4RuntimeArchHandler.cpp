@@ -20,8 +20,8 @@ limitations under the License.
 #include "frontends/common/resolveReferences/referenceMap.h"
 // TODO(antonin): this include should go away when we cleanup getTableSize
 // implementation.
+#include "frontends/p4-14/fromv1.0/v1model.h"
 #include "frontends/p4/externInstance.h"
-#include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/p4/toP4/toP4.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"

@@ -16,12 +16,10 @@ limitations under the License.
 
 #include "frontend.h"
 
-#include <fstream>
 #include <iostream>
 
 #include "../common/options.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
-#include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/p4/typeChecking/bindVariables.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
@@ -41,6 +39,7 @@ limitations under the License.
 #include "evaluator/evaluator.h"
 #include "frontends/common/constantFolding.h"
 #include "functionsInlining.h"
+#include "getV1ModelVersion.h"
 #include "hierarchicalNames.h"
 #include "inlining.h"
 #include "localizeActions.h"
@@ -162,7 +161,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
 
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     PassManager passes({
-        new P4V1::getV1ModelVersion,
+        new P4V1::GetV1ModelVersion,
         // Parse annotations
         new ParseAnnotationBodies(parseAnnotations, &typeMap),
         new PrettyPrint(options),
@@ -236,7 +235,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new ClearTypeMap(&typeMap),
         evaluator,
     });
-    if (policy->optimize(options))
+    if (policy->optimize(options)) {
         passes.addPasses({
             new Inline(&refMap, &typeMap, evaluator, *policy, options.optimizeParserInlining),
             new InlineActions(&refMap, &typeMap, *policy),
@@ -261,6 +260,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             new RemoveAllUnusedDeclarations(&refMap, *policy),
             new SimplifyControlFlow(&typeMap),
         });
+    }
     passes.addPasses({
         // Check for shadowing after all inlining passes. We disable this
         // check during inlining since it significantly slows compilation.

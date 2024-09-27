@@ -19,7 +19,7 @@ limitations under the License.
 #include <cstdio>
 #include <sstream>
 
-#include "frontends/p4/fromv1.0/converters.h"
+#include "frontends/p4-14/fromv1.0/converters.h"
 #include "frontends/parsers/parserDriver.h"
 #include "lib/error.h"
 

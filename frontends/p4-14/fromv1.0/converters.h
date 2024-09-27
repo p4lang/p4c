@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef FRONTENDS_P4_FROMV1_0_CONVERTERS_H_
-#define FRONTENDS_P4_FROMV1_0_CONVERTERS_H_
+#ifndef FRONTENDS_P4_14_FROMV1_0_CONVERTERS_H_
+#define FRONTENDS_P4_14_FROMV1_0_CONVERTERS_H_
 
 #include <typeindex>
 #include <typeinfo>
@@ -1059,4 +1059,4 @@ class Converter : public PassManager {
 
 }  // namespace P4::P4V1
 
-#endif /* FRONTENDS_P4_FROMV1_0_CONVERTERS_H_ */
+#endif /* FRONTENDS_P4_14_FROMV1_0_CONVERTERS_H_ */

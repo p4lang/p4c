@@ -30,7 +30,6 @@ set (IR_SRCS
   pass_manager.cpp
   pass_utils.cpp
   type.cpp
-  v1.cpp
   visitor.cpp
   write_context.cpp
 )
@@ -62,7 +61,6 @@ set (BASE_IR_DEF_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/type.def
   ${CMAKE_CURRENT_SOURCE_DIR}/expression.def
   ${CMAKE_CURRENT_SOURCE_DIR}/ir.def
-  ${CMAKE_CURRENT_SOURCE_DIR}/v1.def
 )
 
 set (IR_DEF_FILES ${IR_DEF_FILES} ${BASE_IR_DEF_FILES} PARENT_SCOPE)
