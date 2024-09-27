@@ -26,7 +26,6 @@ limitations under the License.
 #include <boost/format.hpp>
 
 #include "absl/strings/str_cat.h"
-#include "cstring.h"
 #include "source_file.h"
 #include "stringify.h"
 

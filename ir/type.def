@@ -32,7 +32,6 @@ inline cstring directionToString(IR::Direction direction) {
             BUG("Unhandled case");
     }
 }
-}  // namespace IR
 
 inline std::ostream& operator<<(std::ostream &out, IR::Direction d) {
     switch (d) {
@@ -52,6 +51,8 @@ inline std::ostream& operator<<(std::ostream &out, IR::Direction d) {
     }
     return out;
 }
+
+}  // namespace IR
 
 // FIXME: should accept string_view
 inline bool operator>>(cstring s, IR::Direction &d) {

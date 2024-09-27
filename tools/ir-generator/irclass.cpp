@@ -141,7 +141,6 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
         << std::endl
         << "namespace IR {\n"
         << "extern std::map<cstring, NodeFactoryFn> unpacker_table;\n"
-        << "using namespace P4::literals;\n"
         << "}\n";
 
     impl << "std::map<cstring, NodeFactoryFn> IR::unpacker_table = {\n";
