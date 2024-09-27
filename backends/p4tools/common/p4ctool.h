@@ -45,8 +45,8 @@ class AbstractP4cTool {
         Options &toolOptions = dynamic_cast<CompileContext<Options> *>(context.value())->options();
 
         // Process command-line options.
-        auto compileContext = toolOptions.process(args);
-        if (compileContext != EXIT_SUCCESS) {
+        auto result = toolOptions.process(args);
+        if (result != EXIT_SUCCESS) {
             return EXIT_FAILURE;
         }
 

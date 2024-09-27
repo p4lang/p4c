@@ -123,6 +123,18 @@ cstring toString(const void *value);
 
 char DigitToChar(int digit);
 
+/// Convert a string to lower case. This is not safe for non-ASCII strings.
+/// Performs the lowering operation in place.
+void lowerString(std::string &s);
+
+/// Convert a string to lower case. This is not safe for non-ASCII strings.
+/// Returns a copy of the string.
+std::string createLowerString(std::string s);
+
+/// Convert a string view to lower case. This is not safe for non-ASCII strings.
+/// Returns a copy of the string view.
+std::string lowerString(std::string_view s);
+
 }  // namespace Util
 }  // namespace P4
 

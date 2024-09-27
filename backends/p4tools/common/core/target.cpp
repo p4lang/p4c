@@ -9,16 +9,12 @@
 
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/irutils.h"
+#include "lib/stringify.h"
 
 namespace P4::P4Tools {
 
 Target::Spec::Spec(std::string_view deviceName, std::string_view archName)
-    : deviceName(deviceName), archName(archName) {
-    // Convert names to lower case.
-    std::transform(this->archName.begin(), this->archName.end(), this->archName.begin(), ::tolower);
-    std::transform(this->deviceName.begin(), this->deviceName.end(), this->deviceName.begin(),
-                   ::tolower);
-}
+    : deviceName(Util::lowerString(deviceName)), archName(Util::lowerString(archName)) {}
 
 bool Target::Spec::operator<(const Spec &other) const {
     if (deviceName != other.deviceName) {
@@ -116,27 +112,24 @@ std::optional<ICompileContext *> Target::initializeTarget(std::string_view toolN
 }
 
 bool Target::setDevice(std::string_view deviceName) {
-    std::string lowerCaseDeviceName(deviceName);
-    std::transform(lowerCaseDeviceName.begin(), lowerCaseDeviceName.end(),
-                   lowerCaseDeviceName.begin(), ::tolower);
-    if (defaultArchByDevice.count(lowerCaseDeviceName) == 0U) {
+    std::string lowerCaseDeviceName(Util::lowerString(deviceName));
+    auto archList = defaultArchByDevice.find(lowerCaseDeviceName);
+    if (archList == defaultArchByDevice.end()) {
         return false;
     }
 
-    auto archName = curTarget ? curTarget->archName : defaultArchByDevice.at(deviceName.data());
-    return init(deviceName, archName);
+    return init(lowerCaseDeviceName, curTarget ? curTarget->archName : archList->second);
 }
 
 bool Target::setArch(std::string_view archName) {
-    std::string lowerCaseArchName(archName);
+    std::string lowerCaseArchName(Util::lowerString(archName));
     std::transform(lowerCaseArchName.begin(), lowerCaseArchName.end(), lowerCaseArchName.begin(),
                    ::tolower);
-    if (defaultDeviceByArch.count(lowerCaseArchName) == 0U) {
+    auto deviceList = defaultDeviceByArch.find(lowerCaseArchName);
+    if (deviceList == defaultDeviceByArch.end()) {
         return false;
     }
-
-    auto deviceName = curTarget ? curTarget->deviceName : defaultDeviceByArch.at(archName.data());
-    return init(deviceName, archName);
+    return init(curTarget ? curTarget->deviceName : deviceList->second, lowerCaseArchName);
 }
 
 const IR::Expression *Target::createTargetUninitialized(const IR::Type *type,
@@ -153,7 +146,7 @@ Target::Target(std::string_view toolName, const std::string &deviceName,
     // Register this instance.
     BUG_CHECK(!registry[spec].count(toolName), "Already registered %1%/%2% instance for %3%",
               deviceName, archName, toolName);
-    registry[spec][toolName.data()] = this;
+    registry[spec][this->toolName] = this;
 
     // Register default device and architecture, if needed.
     if (defaultDeviceByArch.count(spec.archName) == 0U) {

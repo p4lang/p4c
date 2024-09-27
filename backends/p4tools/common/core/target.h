@@ -20,6 +20,7 @@ class Target {
  public:
     /// Specifies a target device and architecture by their names in lower case.
     struct Spec {
+        // TODO: Prefix the variables here and in target with "_" to avoid ambiguities.
         std::string deviceName;
         std::string archName;
 

@@ -54,8 +54,8 @@ class P4ToolsTestCase {
 
 class P4TestgenTest : public testing::Test {
  public:
-    [[nodiscard]] static std::optional<std::unique_ptr<AutoCompileContext>> SetUp(
-        std::string_view target, std::string_view archName) {
+    [[nodiscard]] static std::unique_ptr<AutoCompileContext> SetUp(std::string_view target,
+                                                                   std::string_view archName) {
         P4Tools::P4Testgen::registerTestgenTargets();
         /// Set up the appropriate compile context for P4Testgen tests.
         /// TODO: Remove this once options are not initialized statically anymore.
@@ -63,7 +63,7 @@ class P4TestgenTest : public testing::Test {
                                                                  target, archName);
 
         if (!ctxOpt.has_value()) {
-            return std::nullopt;
+            return nullptr;
         }
         return std::make_unique<AutoCompileContext>(ctxOpt.value());
     }

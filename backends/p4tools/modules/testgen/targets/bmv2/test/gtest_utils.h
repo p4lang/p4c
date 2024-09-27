@@ -12,12 +12,11 @@ class P4TestgenBmv2Test : public P4TestgenTest {
 
  public:
     void SetUp() override {
-        auto result = P4TestgenTest::SetUp("bmv2", "v1model");
-        if (!result.has_value()) {
+        compileContext = P4TestgenTest::SetUp("bmv2", "v1model");
+        if (compileContext == nullptr) {
             FAIL() << "Failed to set up P4Testgen BMv2 test";
             return;
         }
-        compileContext = std::move(result.value());
     }
 };
 
@@ -30,12 +29,11 @@ class Bmv2SmallStepTest : public SmallStepTest {
 
  public:
     void SetUp() override {
-        auto result = P4TestgenTest::SetUp("bmv2", "v1model");
-        if (!result.has_value()) {
+        compileContext = P4TestgenTest::SetUp("bmv2", "v1model");
+        if (compileContext == nullptr) {
             FAIL() << "Failed to set up P4Testgen BMv2 test";
             return;
         }
-        compileContext = std::move(result.value());
     }
 };
 
