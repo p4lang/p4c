@@ -79,6 +79,8 @@ inline std::ostream& operator<<(std::ostream& out, const OptionalConst& oc) {
     return out;
 }
 
+}  // namespace P4
+
 // Bison uses the types you provide to %type to make constructors for the
 // variant type it uses under the hood, but its code generation is a little
 // naive and it always prepends 'const' to the type. This is problematic when
@@ -109,7 +111,7 @@ class Token {
     Token(int type, UnparsedConstant unparsedConstant)
             : Token(type, unparsedConstant.text,
                     new UnparsedConstant(unparsedConstant)) { }
-
+    
  private:
     Token(int type, cstring text, UnparsedConstant* unparsedConstant)
             : type(type), text(text), unparsedConstant(unparsedConstant) { }

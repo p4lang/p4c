@@ -30,7 +30,6 @@ enum class StandardExceptions {
     HeaderTooShort,
     ParserTimeout,
 };
-}  // namespace P4
 
 namespace P4 {
 

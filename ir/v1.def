@@ -42,8 +42,12 @@ inline bool operator>>(cstring s, IR::CounterType &ctr) {
     return true;
 }
 
+<<<<<<< HEAD
 }  // namespace P4
 
+=======
+}
+>>>>>>> c37038959... snapshot
 #end
 
 class Type_Block : Type_Base {

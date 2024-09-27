@@ -27,6 +27,8 @@ limitations under the License.
 #include "lib/source_file.h"
 
 namespace P4 {
+using namespace P4::literals;
+
 class Visitor;
 struct Visitor_Context;
 class Inspector;
@@ -41,8 +43,6 @@ class JsonObject;
 }  // namespace P4::Util
 
 namespace P4::IR {
-
-using namespace P4::literals;
 
 class Node;
 class Annotation;  // IWYU pragma: keep
