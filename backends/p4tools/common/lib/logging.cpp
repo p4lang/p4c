@@ -51,7 +51,7 @@ void printPerformanceReport(const std::optional<std::filesystem::path> &basePath
         perfFilePath.replace_extension(".csv");
         auto perfFile = std::ofstream(perfFilePath, std::ios::out | std::ios::app);
         if (!perfFile.is_open()) {
-            ::P4::error("Failed to open the performance report file %1%", perfFilePath.c_str());
+            error("Failed to open the performance report file %1%", perfFilePath.c_str());
             return;
         }
 

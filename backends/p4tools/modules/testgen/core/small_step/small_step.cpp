@@ -218,7 +218,7 @@ class CommandVisitor {
         if (solverResult == std::nullopt || !solverResult.value()) {
             std::stringstream condStream;
             guard.cond->dbprint(condStream);
-            ::P4::warning(
+            warning(
                 "Guard %1% was not satisfiable."
                 " Incrementing number of guard violations.",
                 condStream.str().c_str());

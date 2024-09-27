@@ -50,7 +50,7 @@ CompilerResultOrError Bmv2V1ModelTestgenTarget::runCompilerImpl(
     /// After the front end, get the P4Runtime API for the V1model architecture.
     auto p4runtimeApi = P4::P4RuntimeSerializer::get()->generateP4Runtime(program, "v1model"_cs);
 
-    if (::P4::errorCount() > 0) {
+    if (errorCount() > 0) {
         return std::nullopt;
     }
 
@@ -66,20 +66,20 @@ CompilerResultOrError Bmv2V1ModelTestgenTarget::runCompilerImpl(
         P4ProgramDCGCreator dcgCreator(dcg);
         program->apply(dcgCreator);
     }
-    if (::P4::errorCount() > 0) {
+    if (errorCount() > 0) {
         return std::nullopt;
     }
     /// Collect coverage information about the program.
     auto coverage = P4::Coverage::CollectNodes(TestgenOptions::get().coverageOptions);
     program->apply(coverage);
-    if (::P4::errorCount() > 0) {
+    if (errorCount() > 0) {
         return std::nullopt;
     }
 
     // Parses any @refers_to annotations and converts them into a vector of restrictions.
     auto refersToParser = RefersToParser();
     program->apply(refersToParser);
-    if (::P4::errorCount() > 0) {
+    if (errorCount() > 0) {
         return std::nullopt;
     }
     ConstraintsVector p4ConstraintsRestrictions = refersToParser.getRestrictionsVector();
@@ -88,14 +88,14 @@ CompilerResultOrError Bmv2V1ModelTestgenTarget::runCompilerImpl(
     // expressions, and stores them in p4ConstraintsRestrictions to move targetConstraints
     // further.
     program->apply(AssertsParser(p4ConstraintsRestrictions));
-    if (::P4::errorCount() > 0) {
+    if (errorCount() > 0) {
         return std::nullopt;
     }
     // Try to map all instances of direct externs to the table they are attached to.
     // Save the map in @var directExternMap.
     auto directExternMapper = MapDirectExterns();
     program->apply(directExternMapper);
-    if (::P4::errorCount() > 0) {
+    if (errorCount() > 0) {
         return std::nullopt;
     }
 

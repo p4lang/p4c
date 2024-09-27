@@ -67,7 +67,7 @@ void DepthFirstSearch::runImpl(const Callback &callBack, ExecutionStateReference
                 throw;
             }
             // Otherwise we try to roll back as we typically do.
-            ::P4::warning("Path encountered unimplemented feature. Message: %1%\n", e.what());
+            warning("Path encountered unimplemented feature. Message: %1%\n", e.what());
         }
 
         // Roll back to a previous branch and continue execution from there, but if there are no

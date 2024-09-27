@@ -58,7 +58,7 @@ CompilerResultOrError CompilerTarget::runCompilerImpl(const CompilerOptions &opt
 
 const IR::P4Program *CompilerTarget::runParser(const ParserOptions &options) {
     const auto *program = P4::parseP4File(options);
-    if (::P4::errorCount() > 0) {
+    if (errorCount() > 0) {
         return nullptr;
     }
     return program;
@@ -72,7 +72,7 @@ const IR::P4Program *CompilerTarget::runFrontend(const CompilerOptions &options,
     auto frontEnd = mkFrontEnd();
     frontEnd.addDebugHook(options.getDebugHook());
     program = frontEnd.run(options, program);
-    if ((program == nullptr) || ::P4::errorCount() > 0) {
+    if ((program == nullptr) || errorCount() > 0) {
         return nullptr;
     }
     return program;
