@@ -158,6 +158,9 @@ void MidEnd::addDefaultPasses() {
         new P4::EliminateTuples(&refMap, &typeMap),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::SimplifyControlFlow(&typeMap),
+        // Perform a last round of type-checking before passes which do not type-check begin.
+        // TODO: We should split mid end passes into safe and unsafe passes.
+        new P4::TypeChecking(&refMap, &typeMap, true),
         // Simplify header stack assignments with runtime indices into conditional statements.
         new P4::HSIndexSimplifier(&refMap, &typeMap),
         // Convert Type_Varbits into a type that contains information about the assigned width.

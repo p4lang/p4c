@@ -92,6 +92,10 @@ const IR::P4Program *CompilerTarget::runFrontend(const CompilerOptions &options,
     auto frontEnd = mkFrontEnd();
     frontEnd.addDebugHook(options.getDebugHook());
     program = frontEnd.run(options, program);
+    P4::ReferenceMap refMap;
+    P4::TypeMap typeMap;
+    // Perform a last round of type checking.
+    program = program->apply(P4::TypeChecking(&refMap, &typeMap, true));
     if ((program == nullptr) || ::P4::errorCount() > 0) {
         return nullptr;
     }
