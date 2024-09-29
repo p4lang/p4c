@@ -103,8 +103,8 @@ struct Tcp_option_sack_top {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("ParserImpl.Tcp_option_parser.tcp_hdr_bytes_left") bit<7> Tcp_option_parser_tcp_hdr_bytes_left;
-    @name("ParserImpl.Tcp_option_parser.tmp_0") bit<8> Tcp_option_parser_tmp_0;
-    bit<16> tmp;
+    bit<8> tmp;
+    bit<16> tmp_0;
     state start {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -183,8 +183,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     state Tcp_option_parser_next_option_part2 {
-        Tcp_option_parser_tmp_0 = packet.lookahead<bit<8>>();
-        transition select(Tcp_option_parser_tmp_0) {
+        tmp = packet.lookahead<bit<8>>();
+        transition select(tmp) {
             8w0: Tcp_option_parser_parse_tcp_option_end;
             8w1: Tcp_option_parser_parse_tcp_option_nop;
             8w2: Tcp_option_parser_parse_tcp_option_ss;
@@ -217,11 +217,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition Tcp_option_parser_next_option;
     }
     state Tcp_option_parser_parse_tcp_option_sack {
-        tmp = packet.lookahead<bit<16>>();
-        verify(tmp[7:0] == 8w10 || tmp[7:0] == 8w18 || tmp[7:0] == 8w26 || tmp[7:0] == 8w34, error.TcpBadSackOptionLength);
-        verify(Tcp_option_parser_tcp_hdr_bytes_left >= (bit<7>)tmp[7:0], error.TcpOptionTooLongForHeader);
-        Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left - (bit<7>)tmp[7:0];
-        packet.extract<Tcp_option_sack_h>(hdr.tcp_options_vec.next.sack, (bit<32>)((tmp[7:0] << 3) + 8w240));
+        tmp_0 = packet.lookahead<bit<16>>();
+        verify(tmp_0[7:0] == 8w10 || tmp_0[7:0] == 8w18 || tmp_0[7:0] == 8w26 || tmp_0[7:0] == 8w34, error.TcpBadSackOptionLength);
+        verify(Tcp_option_parser_tcp_hdr_bytes_left >= (bit<7>)tmp_0[7:0], error.TcpOptionTooLongForHeader);
+        Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left - (bit<7>)tmp_0[7:0];
+        packet.extract<Tcp_option_sack_h>(hdr.tcp_options_vec.next.sack, (bit<32>)((tmp_0[7:0] << 3) + 8w240));
         transition Tcp_option_parser_next_option;
     }
     state parse_tcp_0 {
