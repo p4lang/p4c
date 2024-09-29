@@ -1,10 +1,12 @@
 #ifndef IR_SOLVER_H_
 #define IR_SOLVER_H_
 
+#include <functional>
 #include <optional>
 #include <vector>
 
-#include "absl/container/btree_map.h"
+#include "absl/container/flat_hash_map.h"
+#include "absl/container/flat_hash_set.h"
 #include "ir/compare.h"
 #include "ir/ir.h"
 #include "lib/castable.h"
@@ -17,8 +19,10 @@ namespace P4 {
 using Constraint = IR::Expression;
 
 /// This type maps symbolic variables to their value assigned by the solver.
-using SymbolicMapping =
-    absl::btree_map<const IR::SymbolicVariable *, const IR::Expression *, IR::SymbolicVariableLess>;
+using SymbolicMapping = absl::flat_hash_map<const IR::SymbolicVariable *, const IR::Expression *,
+                                            IR::SymbolicVariableHash, IR::SymbolicVariableEqual>;
+using SymbolicSet = absl::flat_hash_set<const IR::SymbolicVariable *, IR::SymbolicVariableHash,
+                                        IR::SymbolicVariableEqual>;
 
 /// Provides a higher-level interface for an SMT solver.
 class AbstractSolver : public ICastable {
