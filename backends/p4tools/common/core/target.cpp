@@ -7,14 +7,14 @@
 #include <optional>
 #include <string>
 
+#include "absl/strings/ascii.h"
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/irutils.h"
-#include "lib/stringify.h"
 
 namespace P4::P4Tools {
 
 Target::Spec::Spec(std::string_view deviceName, std::string_view archName)
-    : deviceName(Util::lowerString(deviceName)), archName(Util::lowerString(archName)) {}
+    : deviceName(absl::AsciiStrToLower(deviceName)), archName(absl::AsciiStrToLower(archName)) {}
 
 bool Target::Spec::operator<(const Spec &other) const {
     if (deviceName != other.deviceName) {
@@ -112,7 +112,7 @@ std::optional<ICompileContext *> Target::initializeTarget(std::string_view toolN
 }
 
 bool Target::setDevice(std::string_view deviceName) {
-    std::string lowerCaseDeviceName(Util::lowerString(deviceName));
+    std::string lowerCaseDeviceName(absl::AsciiStrToLower(deviceName));
     auto archList = defaultArchByDevice.find(lowerCaseDeviceName);
     if (archList == defaultArchByDevice.end()) {
         return false;
@@ -122,7 +122,7 @@ bool Target::setDevice(std::string_view deviceName) {
 }
 
 bool Target::setArch(std::string_view archName) {
-    std::string lowerCaseArchName(Util::lowerString(archName));
+    std::string lowerCaseArchName(absl::AsciiStrToLower(archName));
     std::transform(lowerCaseArchName.begin(), lowerCaseArchName.end(), lowerCaseArchName.begin(),
                    ::tolower);
     auto deviceList = defaultDeviceByArch.find(lowerCaseArchName);

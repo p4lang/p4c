@@ -128,20 +128,4 @@ cstring toString(cstring value) {
 
 cstring toString(std::string_view value) { return cstring(value); }
 
-void lowerString(std::string &s) {
-    std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return std::tolower(c); });
-}
-
-std::string createLowerString(std::string s) {
-    std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return std::tolower(c); });
-    return s;
-}
-
-std::string lowerString(std::string_view s) {
-    std::string loweredString(s);
-    std::transform(loweredString.begin(), loweredString.end(), loweredString.begin(),
-                   [](unsigned char c) { return std::tolower(c); });
-    return loweredString;
-}
-
 }  // namespace P4::Util
