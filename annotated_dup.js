@@ -743,7 +743,7 @@ var annotated_dup =
         [ "FindRecirculated", "class_p4_1_1_p4_v1_1_1_find_recirculated.html", null ],
         [ "FixExtracts", "class_p4_1_1_p4_v1_1_1_fix_extracts.html", null ],
         [ "FixMultiEntryPoint", "class_p4_1_1_p4_v1_1_1_fix_multi_entry_point.html", null ],
-        [ "getV1ModelVersion", "class_p4_1_1_p4_v1_1_1get_v1_model_version.html", null ],
+        [ "GetV1ModelVersion", "class_p4_1_1_p4_v1_1_1_get_v1_model_version.html", null ],
         [ "Hash_Model", "struct_p4_1_1_p4_v1_1_1_hash___model.html", null ],
         [ "InsertCompilerGeneratedStartState", "class_p4_1_1_p4_v1_1_1_insert_compiler_generated_start_state.html", null ],
         [ "Meter_Model", "struct_p4_1_1_p4_v1_1_1_meter___model.html", null ],

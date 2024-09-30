@@ -1572,7 +1572,7 @@ var hierarchy =
         [ "P4::P4V1::DetectDuplicates", "class_p4_1_1_p4_v1_1_1_detect_duplicates.html", null ],
         [ "P4::P4V1::DiscoverStructure", "class_p4_1_1_p4_v1_1_1_discover_structure.html", null ],
         [ "P4::P4V1::FindRecirculated", "class_p4_1_1_p4_v1_1_1_find_recirculated.html", null ],
-        [ "P4::P4V1::getV1ModelVersion", "class_p4_1_1_p4_v1_1_1get_v1_model_version.html", null ],
+        [ "P4::P4V1::GetV1ModelVersion", "class_p4_1_1_p4_v1_1_1_get_v1_model_version.html", null ],
         [ "P4::ParseDpdkArchitecture", "class_p4_1_1_parse_dpdk_architecture.html", null ],
         [ "P4::ParsePortableArchitecture", "class_p4_1_1_parse_portable_architecture.html", [
           [ "P4::BMV2::ParsePnaArchitecture", "class_p4_1_1_b_m_v2_1_1_parse_pna_architecture.html", null ],

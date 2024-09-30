@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=11"/>
 <meta name="generator" content="Doxygen 1.12.0"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>P4 Compiler Documentation (P4C): register.h Source File</title>
+<title>P4 Compiler Documentation (P4C): getV1ModelVersion.h Source File</title>
 <link rel="icon" href="p4-fav.svg" type="image/x-icon" />
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <script type="text/javascript" src="jquery.js"></script>
@@ -94,7 +94,7 @@ $(function() {
 </div>
 <script type="text/javascript">
 /* @license magnet:?xt=urn:btih:d3d9a9a6595521f9666a5e94cc830dab83b65699&amp;dn=expat.txt MIT */
-$(function(){initNavTree('smith_2targets_2bmv2_2register_8h_source.html',''); initResizable(true); });
+$(function(){initNavTree('get_v1_model_version_8h_source.html',''); initResizable(true); });
 /* @license-end */
 </script>
 <div id="doc-content">
@@ -120,34 +120,45 @@ $(function(){initNavTree('smith_2targets_2bmv2_2register_8h_source.html',''); in
 </div>
 
 <div class="header">
-  <div class="headertitle"><div class="title">smith/targets/bmv2/register.h</div></div>
+  <div class="headertitle"><div class="title">getV1ModelVersion.h</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef BACKENDS_P4TOOLS_MODULES_SMITH_TARGETS_BMV2_REGISTER_H_</span></div>
-<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define BACKENDS_P4TOOLS_MODULES_SMITH_TARGETS_BMV2_REGISTER_H_</span></div>
+<div class="fragment"><div class="line"><a id="l00001" name="l00001"></a><span class="lineno">    1</span><span class="preprocessor">#ifndef _FRONTENDS_P4_GETV1MODELVERSION_H_</span></div>
+<div class="line"><a id="l00002" name="l00002"></a><span class="lineno">    2</span><span class="preprocessor">#define _FRONTENDS_P4_GETV1MODELVERSION_H_</span></div>
 <div class="line"><a id="l00003" name="l00003"></a><span class="lineno">    3</span> </div>
-<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &quot;backends/p4tools/modules/smith/targets/bmv2/psa.h&quot;</span></div>
-<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &quot;backends/p4tools/modules/smith/targets/bmv2/v1model.h&quot;</span></div>
+<div class="line"><a id="l00004" name="l00004"></a><span class="lineno">    4</span><span class="preprocessor">#include &quot;ir/ir.h&quot;</span></div>
+<div class="line"><a id="l00005" name="l00005"></a><span class="lineno">    5</span><span class="preprocessor">#include &quot;ir/visitor.h&quot;</span></div>
 <div class="line"><a id="l00006" name="l00006"></a><span class="lineno">    6</span> </div>
-<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="keyword">namespace </span>P4::P4Tools::P4Smith {</div>
+<div class="line"><a id="l00007" name="l00007"></a><span class="lineno">    7</span><span class="keyword">namespace </span>P4::P4V1 {</div>
 <div class="line"><a id="l00008" name="l00008"></a><span class="lineno">    8</span> </div>
-<div class="line"><a id="l00009" name="l00009"></a><span class="lineno">    9</span><span class="keyword">inline</span> <span class="keywordtype">void</span> bmv2RegisterSmithTarget() {</div>
-<div class="line"><a id="l00010" name="l00010"></a><span class="lineno">   10</span>    <a class="code hl_function" href="class_p4_1_1_p4_tools_1_1_p4_smith_1_1_b_mv2_1_1_bmv2_v1model_smith_target.html#a45f823f65d88242f439ee4763f650907">BMv2::Bmv2V1modelSmithTarget::make</a>();</div>
-<div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span>    <a class="code hl_function" href="class_p4_1_1_p4_tools_1_1_p4_smith_1_1_b_mv2_1_1_bmv2_psa_smith_target.html#ab9497bf5605fbff817228761cbcafbea">BMv2::Bmv2PsaSmithTarget::make</a>();</div>
-<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>}</div>
-<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span> </div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>}  <span class="comment">// namespace P4::P4Tools::P4Smith</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span> </div>
-<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_P4TOOLS_MODULES_SMITH_TARGETS_BMV2_REGISTER_H_ */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="aclass_p4_1_1_p4_tools_1_1_p4_smith_1_1_b_mv2_1_1_bmv2_psa_smith_target_html_ab9497bf5605fbff817228761cbcafbea"><div class="ttname"><a href="class_p4_1_1_p4_tools_1_1_p4_smith_1_1_b_mv2_1_1_bmv2_psa_smith_target.html#ab9497bf5605fbff817228761cbcafbea">P4::P4Tools::P4Smith::BMv2::Bmv2PsaSmithTarget::make</a></div><div class="ttdeci">static void make()</div><div class="ttdoc">Registers this target.</div><div class="ttdef"><b>Definition</b> psa.cpp:32</div></div>
-<div class="ttc" id="aclass_p4_1_1_p4_tools_1_1_p4_smith_1_1_b_mv2_1_1_bmv2_v1model_smith_target_html_a45f823f65d88242f439ee4763f650907"><div class="ttname"><a href="class_p4_1_1_p4_tools_1_1_p4_smith_1_1_b_mv2_1_1_bmv2_v1model_smith_target.html#a45f823f65d88242f439ee4763f650907">P4::P4Tools::P4Smith::BMv2::Bmv2V1modelSmithTarget::make</a></div><div class="ttdeci">static void make()</div><div class="ttdoc">Registers this target.</div><div class="ttdef"><b>Definition</b> backends/p4tools/modules/smith/targets/bmv2/v1model.cpp:32</div></div>
+<div class="foldopen" id="foldopen00011" data-start="{" data-end="};">
+<div class="line"><a id="l00011" name="l00011"></a><span class="lineno"><a class="line" href="class_p4_1_1_p4_v1_1_1_get_v1_model_version.html">   11</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1_p4_v1_1_1_get_v1_model_version.html">GetV1ModelVersion</a> : <span class="keyword">public</span> <a class="code hl_class" href="class_p4_1_1_inspector.html">Inspector</a> {</div>
+<div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span>    <span class="keywordtype">bool</span> preorder(<span class="keyword">const</span> IR::Declaration_Constant *dc)<span class="keyword"> override </span>{</div>
+<div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span>        <span class="keywordflow">if</span> (dc-&gt;name == <span class="stringliteral">&quot;__v1model_version&quot;</span>) {</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span>            <span class="keyword">const</span> <span class="keyword">auto</span> *val = dc-&gt;initializer-&gt;to&lt;IR::Constant&gt;();</div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>            version = <span class="keyword">static_cast&lt;</span><span class="keywordtype">unsigned</span><span class="keyword">&gt;</span>(val-&gt;value);</div>
+<div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>        }</div>
+<div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span>    }</div>
+<div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span>    <span class="keywordtype">bool</span> preorder(<span class="keyword">const</span> IR::Declaration *)<span class="keyword"> override </span>{ <span class="keywordflow">return</span> <span class="keyword">false</span>; }</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span> </div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span> <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span>    <span class="keywordtype">unsigned</span> version = 0;</div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span>};</div>
+</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
+<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span>}  <span class="comment">// namespace P4::P4V1</span></div>
+<div class="line"><a id="l00026" name="l00026"></a><span class="lineno">   26</span> </div>
+<div class="line"><a id="l00027" name="l00027"></a><span class="lineno">   27</span><span class="preprocessor">#endif </span><span class="comment">/* _FRONTENDS_P4_GETV1MODELVERSION_H_ */</span><span class="preprocessor"></span></div>
+<div class="ttc" id="aclass_p4_1_1_inspector_html"><div class="ttname"><a href="class_p4_1_1_inspector.html">P4::Inspector</a></div><div class="ttdef"><b>Definition</b> visitor.h:400</div></div>
+<div class="ttc" id="aclass_p4_1_1_p4_v1_1_1_get_v1_model_version_html"><div class="ttname"><a href="class_p4_1_1_p4_v1_1_1_get_v1_model_version.html">P4::P4V1::GetV1ModelVersion</a></div><div class="ttdef"><b>Definition</b> getV1ModelVersion.h:11</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="navelem"><a class="el" href="dir_dec21994cd756836ecefab773235960a.html">backends</a></li><li class="navelem"><a class="el" href="dir_1841efd42c9265a4a72e4d07d8561569.html">p4tools</a></li><li class="navelem"><a class="el" href="dir_741b27cf8f7bebc8151bbfef823d7c1d.html">modules</a></li><li class="navelem"><a class="el" href="dir_033d3cf0fd29ec45f80efda16482c607.html">smith</a></li><li class="navelem"><a class="el" href="dir_5d8d7df2a653a970da5690787ad190da.html">targets</a></li><li class="navelem"><a class="el" href="dir_1fb74835140f8f1957192c1e7e1e368c.html">bmv2</a></li><li class="navelem"><b>register.h</b></li>
+    <li class="navelem"><a class="el" href="dir_f80ff6a6bf04c03cda5161d6e46eabc4.html">frontends</a></li><li class="navelem"><a class="el" href="dir_909899068012a3277a995fb4a888ea2e.html">p4</a></li><li class="navelem"><b>getV1ModelVersion.h</b></li>
     <li class="footer">Generated by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.12.0 </li>
   </ul>
 </div>
