@@ -30,7 +30,6 @@ limitations under the License.
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_format.h"
 #include "frontends/p4/toP4/toP4.h"
-#include "ir/json_generator.h"
 #include "lib/exceptions.h"
 #include "lib/exename.h"
 #include "lib/log.h"
@@ -303,7 +302,8 @@ ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(de
             return true;
         },
         "[Compiler debugging] Dump the P4 representation after\n"
-        "passes whose name contains one of `passX' substrings.\n"
+        "passes whose name contains one of `passX' regex substrings. Matching is "
+        "case-insensitive.\n"
         "When '-v' is used this will include the compiler IR.\n");
     registerOption(
         "--dump", "folder",
@@ -481,11 +481,11 @@ void ParserOptions::dumpPass(const char *manager, unsigned seq, const char *pass
     for (auto s : top4) {
         bool match = false;
         try {
-            auto s_regex = std::regex(s, std::regex_constants::ECMAScript);
-            // we use regex_search instead of regex_match
-            // regex_match compares the regex against the entire string
-            // regex_search checks if the regex is contained as substring
-            match = std::regex_search(name.begin(), name.end(), s_regex);
+            auto sRegex = std::regex(s, std::regex::ECMAScript | std::regex::icase);
+            // We use std::regex_search instead of std::regex_match.
+            // std::regex_match compares the regex against the entire string.
+            // std::regex_search checks if the regex is contained as substring.
+            match = std::regex_search(name.begin(), name.end(), sRegex);
         } catch (const std::regex_error &e) {
             error(ErrorType::ERR_INVALID,
                   "Malformed toP4 regex string \"%s\".\n"
