@@ -65,6 +65,8 @@ class TestgenTarget : public CompilerTarget {
 
     CompilerResultOrError runCompilerImpl(const CompilerOptions &options,
                                           const IR::P4Program *program) const override;
+
+    [[nodiscard]] ICompileContext *makeContext() const override;
 };
 
 }  // namespace P4::P4Tools::P4Testgen

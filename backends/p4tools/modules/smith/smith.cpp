@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "backends/p4tools/common/compiler/compiler_result.h"
+#include "backends/p4tools/common/compiler/context.h"
 #include "backends/p4tools/common/lib/logging.h"
 #include "backends/p4tools/common/lib/util.h"
 #include "backends/p4tools/modules/smith/common/probabilities.h"
@@ -13,11 +14,11 @@
 #include "backends/p4tools/modules/smith/core/target.h"
 #include "backends/p4tools/modules/smith/options.h"
 #include "backends/p4tools/modules/smith/register.h"
+#include "backends/p4tools/modules/smith/toolname.h"
 #include "frontends/common/parser_options.h"
 #include "frontends/p4/toP4/toP4.h"
 #include "ir/ir.h"
 #include "lib/compile_context.h"
-#include "lib/cstring.h"
 #include "lib/error.h"
 #include "lib/nullstream.h"
 
@@ -29,10 +30,17 @@ int Smith::main(const std::vector<const char *> &args) {
     // Register supported compiler targets.
     registerTarget();
 
+    // Initialize the target and the context.
+    auto context = Target::initializeTarget(P4Tools::P4Smith::TOOL_NAME, args);
+    if (!context.has_value()) {
+        return EXIT_FAILURE;
+    }
+    // Set up the compilation context.
+    AutoCompileContext autoContext(context.value());
+
     // Process command-line options.
     auto &toolOptions = SmithOptions::get();
-    auto compileContext = toolOptions.process(args);
-    if (!compileContext) {
+    if (toolOptions.process(args) != EXIT_SUCCESS) {
         return EXIT_FAILURE;
     }
 
@@ -41,8 +49,6 @@ int Smith::main(const std::vector<const char *> &args) {
         enableInformationLogging();
     }
 
-    // Set up the compilation context.
-    AutoCompileContext autoContext(*compileContext);
     // Instantiate a dummy program for now. In the future this can be a skeleton.
     const IR::P4Program program;
     return mainImpl(CompilerResult(program));
@@ -51,7 +57,7 @@ int Smith::main(const std::vector<const char *> &args) {
 int Smith::mainImpl(const CompilerResult & /*result*/) {
     registerSmithTargets();
 
-    auto outputFile = P4CContext::get().options().file;
+    auto outputFile = SmithOptions::get().file;
 
     auto &smithOptions = P4Tools::SmithOptions::get();
 

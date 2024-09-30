@@ -18,6 +18,7 @@ namespace P4::P4Tools::P4Testgen {
 /// Encapsulates and processes command-line options for P4Testgen.
 class TestgenOptions : public AbstractP4cToolOptions {
  public:
+    TestgenOptions();
     virtual ~TestgenOptions() = default;
 
     /// Maximum number of tests to be generated. Defaults to 1.
@@ -102,13 +103,8 @@ class TestgenOptions : public AbstractP4cToolOptions {
     /// Defaults to the name of the input program, if provided.
     std::optional<cstring> testBaseName;
 
-    const char *getIncludePath() const override;
-
  protected:
     bool validateOptions() const override;
-
- private:
-    TestgenOptions();
 };
 
 }  // namespace P4::P4Tools::P4Testgen
