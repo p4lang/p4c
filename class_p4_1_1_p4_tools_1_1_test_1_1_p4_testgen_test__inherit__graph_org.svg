@@ -742,8 +742,8 @@
 <!-- Node40 -->
 <g id="Node000040" class="node">
 <title>Node40</title>
-<g id="a_Node000040"><a xlink:href="class_p4_1_1_p4_tools_1_1_test_1_1_bmv2_small_step_test.html" target="_top" xlink:title="BMv2&#45;specific version of a small step test.">
-<polygon fill="white" stroke="#666666" points="533.5,-462 419.5,-462 419.5,-432 533.5,-432 533.5,-462"/>
+<g id="a_Node000040"><a xlink:href="class_p4_1_1_p4_tools_1_1_test_1_1_bmv2_small_step_test.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#bfbfbf" points="533.5,-462 419.5,-462 419.5,-432 533.5,-432 533.5,-462"/>
 <text text-anchor="start" x="427.5" y="-450" font-family="Helvetica,sans-Serif" font-size="10.00">P4::P4Tools::Test::</text>
 <text text-anchor="middle" x="476.5" y="-439" font-family="Helvetica,sans-Serif" font-size="10.00">Bmv2SmallStepTest</text>
 </a>

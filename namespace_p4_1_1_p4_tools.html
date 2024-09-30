@@ -173,8 +173,6 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_p4_tools_1_1_h_s_index_to_member.html">HSIndexToMember</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">The main class for finding non-concrete header stack indices.  <a href="class_p4_1_1_p4_tools_1_1_h_s_index_to_member.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:struct_p4_1_1_p4_tools_1_1_inherited_compiler_option_spec" id="r_struct_p4_1_1_p4_tools_1_1_inherited_compiler_option_spec"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#struct_p4_1_1_p4_tools_1_1_inherited_compiler_option_spec">InheritedCompilerOptionSpec</a></td></tr>
-<tr class="separator:struct_p4_1_1_p4_tools_1_1_inherited_compiler_option_spec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_p4_tools_1_1_mask_builder.html">MaskBuilder</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_p4_tools_1_1_mid_end.html">MidEnd</a></td></tr>
@@ -391,50 +389,6 @@ useSeparator = false</td>
 useUpperCaseHex = true</td>
 <td class="fielddoc">
 In case of hex strings, use uppercase instead of lowercase letters. </td></tr>
-</table>
-
-</div>
-</div>
-<a name="struct_p4_1_1_p4_tools_1_1_inherited_compiler_option_spec" id="struct_p4_1_1_p4_tools_1_1_inherited_compiler_option_spec"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#struct_p4_1_1_p4_tools_1_1_inherited_compiler_option_spec">&#9670;&#160;</a></span>P4::P4Tools::InheritedCompilerOptionSpec</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">struct P4::P4Tools::InheritedCompilerOptionSpec</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<div class="textblock"><p>Specifies a command-line option to inherit from the compiler, and any special handling for the option. </p>
-</div><table class="fieldtable">
-<tr><th colspan="3">Class Members</th></tr>
-<tr><td class="fieldtype">
-<a id="a2e1640697281fbd4b6ab5266507d711b" name="a2e1640697281fbd4b6ab5266507d711b"></a>const char *</td>
-<td class="fieldname">
-argName</td>
-<td class="fielddoc">
-<p>A descriptive name for the parameter to the option, or nullptr if the option has no parameters. </p>
-</td></tr>
-<tr><td class="fieldtype">
-<a id="ae8f1357538c7a49dd9863e53d51c6bab" name="ae8f1357538c7a49dd9863e53d51c6bab"></a>const char *</td>
-<td class="fieldname">
-description</td>
-<td class="fielddoc">
-A description of the option. </td></tr>
-<tr><td class="fieldtype">
-<a id="aec8d9c455cacfde99fe396b8100968d9" name="aec8d9c455cacfde99fe396b8100968d9"></a>optional&lt; function&lt; bool(const char *)&gt; &gt;</td>
-<td class="fieldname">
-handler</td>
-<td class="fielddoc">
-<p>An optional handler for the option. If provided, this is executed before the option is forwarded to the compiler. Any argument to the option is provided to the handler. The handler should return true on successful processing, and false otherwise. </p>
-</td></tr>
-<tr><td class="fieldtype">
-<a id="a2947ae8690e9477eeab3451cde1ff423" name="a2947ae8690e9477eeab3451cde1ff423"></a>const char *</td>
-<td class="fieldname">
-option</td>
-<td class="fielddoc">
-The name of the command-line option. For example, "--target". </td></tr>
 </table>
 
 </div>
