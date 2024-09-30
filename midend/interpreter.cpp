@@ -166,6 +166,33 @@ bool SymbolicInteger::equals(const SymbolicValue *other) const {
     return true;
 }
 
+bool SymbolicString::merge(const SymbolicValue *other) {
+    BUG_CHECK(other->is<SymbolicString>(), "%1%: expected a string", other);
+    auto so = other->to<SymbolicString>();
+    auto saveState = state;
+    state = mergeState(so->state);
+    if (state == ValueState::Constant && string->value != so->string->value) {
+        state = ValueState::NotConstant;
+        string = nullptr;
+    }
+    return (state != saveState);
+}
+
+void SymbolicString::assign(const SymbolicValue *other) {
+    BUG_CHECK(other->is<SymbolicString>(), "%1%: expected a string", other);
+    auto so = other->to<SymbolicString>();
+    state = so->state;
+    string = so->string;
+}
+
+bool SymbolicString::equals(const SymbolicValue *other) const {
+    if (!other->is<SymbolicString>()) return false;
+    auto ab = other->to<SymbolicString>();
+    if (state != ab->state) return false;
+    if (isKnown()) return string->value == ab->string->value;
+    return true;
+}
+
 bool SymbolicVarbit::merge(const SymbolicValue *other) {
     BUG_CHECK(other->is<SymbolicVarbit>(), "%1%: expected a varbit", other);
     auto vo = other->to<SymbolicVarbit>();
@@ -657,6 +684,8 @@ const IR::Expression *getConstant(const ScalarValue *constant) {
         return new IR::BoolLiteral(IR::Type::Boolean::get(), constant->to<SymbolicBool>()->value);
     } else if (constant->is<SymbolicInteger>()) {
         return constant->to<SymbolicInteger>()->constant;
+    } else if (constant->is<SymbolicString>()) {
+        return constant->to<SymbolicString>()->string;
     }
     BUG("Unimplemented structure for expression evaluation %1%", constant);
 }
@@ -669,8 +698,11 @@ void ExpressionEvaluator::checkResult(const IR::Expression *expression,
     } else if (result->is<IR::BoolLiteral>()) {
         set(expression, new SymbolicBool(result->to<IR::BoolLiteral>()->value));
         return;
+    } else if (result->is<IR::StringLiteral>()) {
+        set(expression, new SymbolicString(result->to<IR::StringLiteral>()));
+        return;
     }
-    BUG("%1% : expected a constant/bool literal", result);
+    BUG("%1% : expected a constant/bool/string literal", result);
 }
 
 void ExpressionEvaluator::setNonConstant(const IR::Expression *expression) {
@@ -827,6 +859,10 @@ void ExpressionEvaluator::postorder(const IR::Operation_Unary *expression) {
 
 void ExpressionEvaluator::postorder(const IR::Constant *expression) {
     set(expression, new SymbolicInteger(expression));
+}
+
+void ExpressionEvaluator::postorder(const IR::StringLiteral *expression) {
+    set(expression, new SymbolicString(expression));
 }
 
 void ExpressionEvaluator::postorder(const IR::ListExpression *expression) {
