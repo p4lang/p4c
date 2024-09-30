@@ -31,8 +31,6 @@ enum class StandardExceptions {
     ParserTimeout,
 };
 
-namespace P4 {
-
 inline std::ostream &operator<<(std::ostream &out, P4::StandardExceptions e) {
     switch (e) {
         case P4::StandardExceptions::NoError:

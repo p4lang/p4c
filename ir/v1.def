@@ -11,20 +11,19 @@
 namespace P4 {
 namespace IR {
 enum class CounterType { NONE, PACKETS, BYTES, BOTH };
-}  // namespace IR
 
-inline std::ostream& operator<<(std::ostream &out, IR::CounterType d) {
+inline std::ostream& operator<<(std::ostream &out, const P4::IR::CounterType d) {
     switch (d) {
-        case IR::CounterType::NONE:
+        case P4::IR::CounterType::NONE:
             out << "NONE";
             break;
-        case IR::CounterType::PACKETS:
+        case P4::IR::CounterType::PACKETS:
             out << "PACKETS";
             break;
-        case IR::CounterType::BYTES:
+        case P4::IR::CounterType::BYTES:
             out << "BYTES";
             break;
-        case IR::CounterType::BOTH:
+        case P4::IR::CounterType::BOTH:
             out << "BOTH";
             break;
         default:
@@ -33,21 +32,17 @@ inline std::ostream& operator<<(std::ostream &out, IR::CounterType d) {
     return out;
 }
 
-inline bool operator>>(cstring s, IR::CounterType &ctr) {
-    if (!s || s == "" || s == "NONE") ctr = IR::CounterType::NONE;
-    else if (s == "PACKETS") ctr = IR::CounterType::PACKETS;
-    else if (s == "BYTES") ctr = IR::CounterType::BYTES;
-    else if (s == "BOTH") ctr = IR::CounterType::BOTH;
+inline bool operator>>(P4::cstring s, P4::IR::CounterType &ctr) {
+    if (!s || s == "" || s == "NONE") ctr = P4::IR::CounterType::NONE;
+    else if (s == "PACKETS") ctr = P4::IR::CounterType::PACKETS;
+    else if (s == "BYTES") ctr = P4::IR::CounterType::BYTES;
+    else if (s == "BOTH") ctr = P4::IR::CounterType::BOTH;
     else return false;
     return true;
 }
 
-<<<<<<< HEAD
+}  // namespace IR
 }  // namespace P4
-
-=======
-}
->>>>>>> c37038959... snapshot
 #end
 
 class Type_Block : Type_Base {
