@@ -53,6 +53,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/source_file_test.cpp
   gtest/strength_reduction.cpp
   gtest/string_map.cpp
+  gtest/string_test.cpp
   gtest/transforms.cpp
   gtest/rtti_test.cpp
   gtest/nethash.cpp
