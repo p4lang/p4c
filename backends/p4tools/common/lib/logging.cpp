@@ -28,14 +28,19 @@ void printPerformanceReport(const std::optional<std::filesystem::path> &basePath
             printFeature("tools_performance", 4, "Total: %i ms", c.milliseconds);
             timerData["pct"] = "100";
             timerData["name"] = "total";
+            timerData["invocations"] = std::to_string(c.invocations);
         } else {
             timerData["pct"] = std::to_string(c.relativeToParent * 100);
-            printFeature("tools_performance", 4, "%s: %i ms (%0.2f %% of parent)", c.timerName,
-                         c.milliseconds, c.relativeToParent * 100);
+            auto timePerInvocation =
+                static_cast<float>(c.milliseconds) / static_cast<float>(c.invocations);
+            printFeature("tools_performance", 4,
+                         "%s: %i ms (%i ms per invocation, %0.2f %% of parent)", c.timerName,
+                         c.milliseconds, timePerInvocation, c.relativeToParent * 100);
             auto prunedName = c.timerName;
             prunedName.erase(remove_if(prunedName.begin(), prunedName.end(), isspace),
                              prunedName.end());
             timerData["name"] = prunedName;
+            timerData["invocations"] = std::to_string(c.invocations);
         }
         timerList.emplace_back(timerData);
     }
@@ -53,7 +58,7 @@ void printPerformanceReport(const std::optional<std::filesystem::path> &basePath
         perfFile << "Timer,Total Time,Percentage\n";
         for (const auto &timerData : timerList) {
             perfFile << timerData.at("name") << "," << timerData.at("time") << ","
-                     << timerData.at("pct") << "\n";
+                     << timerData.at("pct") << "," << timerData.at("invocations") << "\n";
         }
         perfFile.close();
     }
