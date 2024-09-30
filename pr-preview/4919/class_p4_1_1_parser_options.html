@@ -256,10 +256,10 @@ std::vector&lt; <a class="el" href="class_p4_1_1cstring.html">cstring</a> &gt;&#
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:a665e3adf6f5e083e426e261f9be97e66" id="r_a665e3adf6f5e083e426e261f9be97e66"><td class="memItemLeft" align="right" valign="top"><a id="a665e3adf6f5e083e426e261f9be97e66" name="a665e3adf6f5e083e426e261f9be97e66"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>dumpPass</b> (const char *manager, unsigned seq, const char *pass, const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *node) const</td></tr>
-<tr class="memdesc:a665e3adf6f5e083e426e261f9be97e66"><td class="mdescLeft">&#160;</td><td class="mdescRight">Function that is returned by getDebugHook. <br /></td></tr>
+<tr class="memitem:a665e3adf6f5e083e426e261f9be97e66" id="r_a665e3adf6f5e083e426e261f9be97e66"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a665e3adf6f5e083e426e261f9be97e66">dumpPass</a> (const char *manager, unsigned seq, const char *pass, const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *node) const</td></tr>
 <tr class="separator:a665e3adf6f5e083e426e261f9be97e66"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adf80951ba1d8583f7fd61ea4e7b17e6c" id="r_adf80951ba1d8583f7fd61ea4e7b17e6c"><td class="memItemLeft" align="right" valign="top">virtual std::unique_ptr&lt; <a class="el" href="class_p4_1_1_to_p4.html">ToP4</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adf80951ba1d8583f7fd61ea4e7b17e6c">getToP4</a> (std::ostream *, bool, std::filesystem::path) const</td></tr>
+<tr class="separator:adf80951ba1d8583f7fd61ea4e7b17e6c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_methods_class_p4_1_1_util_1_1_options"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_methods_class_p4_1_1_util_1_1_options')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="class_p4_1_1_util_1_1_options.html">P4::Util::Options</a></td></tr>
 <tr class="memitem:ac7eebffa204031f65cf1647da49dfb76 inherit pro_methods_class_p4_1_1_util_1_1_options" id="r_ac7eebffa204031f65cf1647da49dfb76"><td class="memItemLeft" align="right" valign="top">
 &#160;</td><td class="memItemRight" valign="bottom"><b>Options</b> (std::string_view message)</td></tr>
@@ -313,6 +313,46 @@ std::vector&lt; const char * &gt;&#160;</td><td class="memItemRight" valign="bot
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Base class for compiler options. This class contains the options for the front-ends. Each back-end should subclass this file. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a665e3adf6f5e083e426e261f9be97e66" name="a665e3adf6f5e083e426e261f9be97e66"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a665e3adf6f5e083e426e261f9be97e66">&#9670;&#160;</a></span>dumpPass()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void P4::ParserOptions::dumpPass </td>
+          <td>(</td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>manager</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned</td>          <td class="paramname"><span class="paramname"><em>seq</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const char *</td>          <td class="paramname"><span class="paramname"><em>pass</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *</td>          <td class="paramname"><span class="paramname"><em>node</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Implements function that is returned by getDebugHook. The hook will take the same arguments. The hook uses <a class="el" href="#adf80951ba1d8583f7fd61ea4e7b17e6c">getToP4</a> to obtain the P4 printer. </p>
+
+</div>
+</div>
 <a id="add7559b7905b446a59c64dda15aa41cb" name="add7559b7905b446a59c64dda15aa41cb"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#add7559b7905b446a59c64dda15aa41cb">&#9670;&#160;</a></span>getDebugHook()</h2>
 
@@ -327,7 +367,7 @@ std::vector&lt; const char * &gt;&#160;</td><td class="memItemRight" valign="bot
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Get a debug hook function suitable for insertion in the pass managers that are executed. </p>
+<p>Get a debug hook function suitable for insertion in the pass managers. The hook is responsible for dumping P4 according to th &ndash;top4 and related options. </p>
 
 </div>
 </div>
@@ -357,6 +397,41 @@ std::vector&lt; const char * &gt;&#160;</td><td class="memItemRight" valign="bot
 <p>Return target specific include path. </p>
 
 <p>Implements <a class="el" href="class_p4_1_1_util_1_1_options.html">P4::Util::Options</a>.</p>
+
+</div>
+</div>
+<a id="adf80951ba1d8583f7fd61ea4e7b17e6c" name="adf80951ba1d8583f7fd61ea4e7b17e6c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adf80951ba1d8583f7fd61ea4e7b17e6c">&#9670;&#160;</a></span>getToP4()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::unique_ptr&lt; <a class="el" href="class_p4_1_1_to_p4.html">ToP4</a> &gt; P4::ParserOptions::getToP4 </td>
+          <td>(</td>
+          <td class="paramtype">std::ostream *</td>          <td class="paramname"><span class="paramname"><em>outStream</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>showIR</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::filesystem::path</td>          <td class="paramname"><span class="paramname"><em>mainFile</em></span>&#160;) const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">protected</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Obtain an instance of ToP4 or its descendant. The arguments correspond to constructor arguments of ToP4. </p>
 
 </div>
 </div>
