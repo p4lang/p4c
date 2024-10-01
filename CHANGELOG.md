@@ -23,6 +23,62 @@ We follow a monthly release cadence. Our versioning scheme is as follows:
 > @note
 > The commit history prior to the release [1.2.2.1](https://github.com/p4lang/p4c/pull/3085) is not included here but is available in the [commit history](https://github.com/p4lang/p4c/commits/main/).
 
+## Release v1.2.4.15 [[view](https://github.com/p4lang/p4c/pull/4899)]
+
+### Breaking Changes 🛠
+- Fixup/cleanup `IR::Type::width_bits()` [[view](https://github.com/p4lang/p4c/pull/4858)] (Chris Dodd)
+- Promote `P4` to be the project-wise top-level namespace [[view](https://github.com/p4lang/p4c/pull/4825)] (qobilidop)
+
+### P4 Specification Implementation
+- Allow concatenation of string literals at compile time [[view](https://github.com/p4lang/p4c/pull/4856)] (Vladimír Štill)
+
+### Changes to the Compiler Core
+- Ensure correct overload for `diagnose()` is called even in `Transform` context [[view](https://github.com/p4lang/p4c/pull/4830)] (asl)
+- Fix ASAN issue in `lib/cstring` [[view](https://github.com/p4lang/p4c/pull/4865)] (Matthew Lam)
+- Ensure proper `operator<<` is used during debug printing [[view](https://github.com/p4lang/p4c/pull/4860)] (asl)
+- Fix linter complaints and enable `-werror` for MacOS [[view](https://github.com/p4lang/p4c/pull/4881)] (fruffy)
+- Trim overlong source fragments in error messages [[view](https://github.com/p4lang/p4c/pull/4885)] (Chris Dodd)
+- Pass to reduce added flags from `RemoveReturn` [[view](https://github.com/p4lang/p4c/pull/4878)] (Chris Dodd)
+- Add `operator<` to some compiler classes [[view](https://github.com/p4lang/p4c/pull/4851)] (fruffy)
+- Make `isSystemFile()` part of parser options file [[view](https://github.com/p4lang/p4c/pull/4888)] (fruffy)
+- Add empty block for trailing case(s) with no code [[view](https://github.com/p4lang/p4c/pull/4889)] (Chris Dodd)
+- Silence `-Wswitch-enum` from bison generated file [[view](https://github.com/p4lang/p4c/pull/4886)] (Chris Dodd)
+- Sync `dump.h` with `dump.cpp` [[view](https://github.com/p4lang/p4c/pull/4896)] (qobilidop)
+- Make type checking a true read-only visitor [[view](https://github.com/p4lang/p4c/pull/4829)] (asl)
+
+### Changes to the Control Plane
+- Set the initial default action for tables when generating a `P4Info` [[view](https://github.com/p4lang/p4c/pull/4773)] (fruffy)
+
+### Changes to the BMv2 Back Ends
+- Fix incorrect BMv2 include [[view](https://github.com/p4lang/p4c/pull/4843)] (fruffy)
+
+### Changes to the TC Back End
+- Support of `Digest` extern in P4TC [[view](https://github.com/p4lang/p4c/pull/4842)] (Komal Jain)
+- Support for `is_net_port` and `is_host_port` externs [[view](https://github.com/p4lang/p4c/pull/4873)] (Komal Jain)
+- Reduce extern parameters size to 64 bytes [[view](https://github.com/p4lang/p4c/pull/4880)] (vbnogueira)
+- Remove priority field from ternary table's action [[view](https://github.com/p4lang/p4c/pull/4879)] (vbnogueira)
+- Support for `Meter` and `DirectMeter` extern in P4TC [[view](https://github.com/p4lang/p4c/pull/4884)] (Komal Jain)
+
+### Changes to the P4Tools Back End
+- [P4Testgen] Represent bits of width zero as an empty string [[view](https://github.com/p4lang/p4c/pull/4852)] (fruffy)
+- Reenable compilation tests for P4Smith [[view](https://github.com/p4lang/p4c/pull/4791)] (zzmic)
+- [P4Tools] Clean up the P4Tools GTest infrastructure [[view](https://github.com/p4lang/p4c/pull/4841)] (fruffy)
+- [P4Smith] Remove stray print in the smith code [[view](https://github.com/p4lang/p4c/pull/4891)] (fruffy)
+
+### Other Changes
+- Docs: Changelog release update for v1.2.4.14 [[view](https://github.com/p4lang/p4c/pull/4849)] (Adarsh Rawat)
+- Feat: PR Preview Workflow via GitHub Pages [[view](https://github.com/p4lang/p4c/pull/4848)] (Adarsh Rawat)
+- Fix: PR Preview URL to Use Base Repository [[view](https://github.com/p4lang/p4c/pull/4855)] (Adarsh Rawat)
+- Bump Documentation build workflow action from Doxygen v1.11.0 to v1.12.0 [[view](https://github.com/p4lang/p4c/pull/4861)] (Adarsh Rawat)
+- Bump actions/github-script from 6 to 7 [[view](https://github.com/p4lang/p4c/pull/4864)] (dependabot)
+- Docs: Content Organization and Documentation Updates [[view](https://github.com/p4lang/p4c/pull/4850)] (Adarsh Rawat)
+- [p4fmt]: Add a pretty printer for p4fmt [[view](https://github.com/p4lang/p4c/pull/4862)] (snapdgn)
+- Docs:Content Organization & Add 'Frontend' and 'Midend' Sections [[view](https://github.com/p4lang/p4c/pull/4876)] (Adarsh Rawat)
+- Update BDWGC [[view](https://github.com/p4lang/p4c/pull/4868)] (fruffy)
+- Remove redundant tests [[view](https://github.com/p4lang/p4c/pull/4890)] (Andy Fingerhut)
+-  Report specific uninitialized struct field in `simplifyDefUse` [[view](https://github.com/p4lang/p4c/pull/4892)] (Chris Dodd)
+- Update namespace usage in `.gdbinit` [[view](https://github.com/p4lang/p4c/pull/4895)] (qobilidop)
+
 ## Release v1.2.4.14 [[view](https://github.com/p4lang/p4c/pull/4844)] 
 
 ### Breaking Changes 🛠
