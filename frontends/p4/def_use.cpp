@@ -810,7 +810,7 @@ bool ComputeWriteSet::preorder(const IR::P4Parser *parser) {
     visitVirtualMethods(parser->parserLocals);
 
     ParserCallGraph transitions("transitions");
-    ComputeParserCG pcg(refMap, &transitions);
+    ComputeParserCG pcg(&transitions);
     pcg.setCalledBy(this);
 
     (void)parser->apply(pcg, getChildContext());

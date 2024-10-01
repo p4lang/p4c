@@ -40,7 +40,7 @@ const IR::ToplevelBlock *MidEnd::run(TCOptions &options, const IR::P4Program *pr
          new P4::SimplifySelectCases(&refMap, &typeMap, false),  // accept non-constant keysets
          new P4::ExpandEmit(&refMap, &typeMap),
          new P4::HandleNoMatch(&refMap),
-         new P4::SimplifyParsers(&refMap),
+         new P4::SimplifyParsers(),
          new PassRepeated({
              new P4::ConstantFolding(&refMap, &typeMap),
              new P4::StrengthReduction(&typeMap),

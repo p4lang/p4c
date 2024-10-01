@@ -549,7 +549,7 @@ class FindUninitialized : public Inspector {
         auto acceptState = parser->getDeclByName(IR::ParserState::accept)->to<IR::ParserState>();
 
         ParserCallGraph transitions("transitions");
-        ComputeParserCG pcg(refMap, &transitions);
+        ComputeParserCG pcg(&transitions);
         pcg.setCalledBy(this);
 
         (void)parser->apply(pcg, getChildContext());

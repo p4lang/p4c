@@ -21,7 +21,7 @@ namespace P4 {
 bool ComputeParserCG::preorder(const IR::PathExpression *expression) {
     auto state = findContext<IR::ParserState>();
     if (state != nullptr) {
-        auto decl = refMap->getDeclaration(expression->path);
+        auto decl = getDeclaration(expression->path);
         if (decl != nullptr && decl->is<IR::ParserState>())
             transitions->calls(state, decl->to<IR::ParserState>());
     }

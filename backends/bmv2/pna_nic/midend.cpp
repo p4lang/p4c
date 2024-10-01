@@ -127,7 +127,7 @@ PnaNicMidEnd::PnaNicMidEnd(CompilerOptions &options, std::ostream *outStream)
             new P4::SimplifySelectCases(&refMap, &typeMap, true),  // require constant keysets
             new P4::ExpandLookahead(&refMap, &typeMap),
             new P4::ExpandEmit(&refMap, &typeMap),
-            new P4::SimplifyParsers(&refMap),
+            new P4::SimplifyParsers(),
             new P4::StrengthReduction(&typeMap),
             new P4::EliminateTuples(&refMap, &typeMap),
             new P4::SimplifyComparisons(&refMap, &typeMap),
