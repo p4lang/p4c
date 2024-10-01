@@ -18,6 +18,7 @@ var searchData=
   ['instance_15',['instance',['../structpsa__global__metadata.html#a64efa6fe96226d3752d6db40753fe0fb',1,'psa_global_metadata']]],
   ['internal_5fextern_5fmethod_5fimpls_16',['INTERNAL_EXTERN_METHOD_IMPLS',['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_expr_stepper.html#af5250c4720adbeb57f640d1724fe9614',1,'P4::P4Tools::P4Testgen::ExprStepper']]],
   ['invocation_17',['invocation',['../struct_p4_1_1_specialization_info.html#a6b31fa3c61b974d54e51cba63e5d8554',1,'P4::SpecializationInfo::invocation'],['../struct_p4_1_1_function_specialization.html#a7f82621d5914996fd7353bb943a70da3',1,'P4::FunctionSpecialization::invocation']]],
-  ['invocationtostate_18',['invocationToState',['../struct_p4_1_1_inline_summary_1_1_per_caller.html#a3e83f1eb7e5c34ebb51693cb1c88e52e',1,'P4::InlineSummary::PerCaller']]],
-  ['istainted_19',['isTainted',['../struct_p4_1_1_p4_tools_1_1_table_utils_1_1_key_properties.html#a5bae092a74d8d58e68e4fb149a0472b4',1,'P4::P4Tools::TableUtils::KeyProperties']]]
+  ['invocations_18',['invocations',['../struct_p4_1_1_util_1_1_timer_entry.html#af71e1d5b6a1055e0bf5a0628d7837933',1,'P4::Util::TimerEntry']]],
+  ['invocationtostate_19',['invocationToState',['../struct_p4_1_1_inline_summary_1_1_per_caller.html#a3e83f1eb7e5c34ebb51693cb1c88e52e',1,'P4::InlineSummary::PerCaller']]],
+  ['istainted_20',['isTainted',['../struct_p4_1_1_p4_tools_1_1_table_utils_1_1_key_properties.html#a5bae092a74d8d58e68e4fb149a0472b4',1,'P4::P4Tools::TableUtils::KeyProperties']]]
 ];

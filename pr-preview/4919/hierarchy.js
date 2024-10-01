@@ -697,7 +697,6 @@ var hierarchy =
     [ "P4::P4Tools::ArchSpec", "class_p4_1_1_p4_tools_1_1_arch_spec.html", null ],
     [ "P4::P4Tools::ArchSpec::ArchMember", "class_p4_1_1_p4_tools_1_1_arch_spec.html#struct_p4_1_1_p4_tools_1_1_arch_spec_1_1_arch_member", null ],
     [ "P4::P4Tools::FormatOptions", "namespace_p4_1_1_p4_tools.html#struct_p4_1_1_p4_tools_1_1_format_options", null ],
-    [ "P4::P4Tools::InheritedCompilerOptionSpec", "namespace_p4_1_1_p4_tools.html#struct_p4_1_1_p4_tools_1_1_inherited_compiler_option_spec", null ],
     [ "P4::P4Tools::Model", "class_p4_1_1_p4_tools_1_1_model.html", null ],
     [ "P4::P4Tools::NamespaceContext", "class_p4_1_1_p4_tools_1_1_namespace_context.html", null ],
     [ "P4::P4Tools::P4Constants", "class_p4_1_1_p4_tools_1_1_p4_constants.html", null ],
@@ -1234,10 +1233,6 @@ var hierarchy =
     [ "P4::Util::InputSources", "class_p4_1_1_util_1_1_input_sources.html", null ],
     [ "P4::Util::iterator_range< Iter, Sentinel >", "class_p4_1_1_util_1_1iterator__range.html", null ],
     [ "P4::Util::Options", "class_p4_1_1_util_1_1_options.html", [
-      [ "P4::P4Tools::AbstractP4cToolOptions", "class_p4_1_1_p4_tools_1_1_abstract_p4c_tool_options.html", [
-        [ "P4::P4Tools::P4Testgen::TestgenOptions", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_testgen_options.html", null ],
-        [ "P4::P4Tools::SmithOptions", "class_p4_1_1_p4_tools_1_1_smith_options.html", null ]
-      ] ],
       [ "P4::ParserOptions", "class_p4_1_1_parser_options.html", [
         [ "P4::CompilerOptions", "class_p4_1_1_compiler_options.html", [
           [ "P4::BMV2::BMV2Options", "class_p4_1_1_b_m_v2_1_1_b_m_v2_options.html", [
@@ -1250,6 +1245,10 @@ var hierarchy =
           [ "P4::DPDK::DpdkOptions", "class_p4_1_1_d_p_d_k_1_1_dpdk_options.html", null ],
           [ "P4::EbpfOptions", "class_p4_1_1_ebpf_options.html", null ],
           [ "P4::P4Fmt::P4fmtOptions", "class_p4_1_1_p4_fmt_1_1_p4fmt_options.html", null ],
+          [ "P4::P4Tools::AbstractP4cToolOptions", "class_p4_1_1_p4_tools_1_1_abstract_p4c_tool_options.html", [
+            [ "P4::P4Tools::P4Testgen::TestgenOptions", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_testgen_options.html", null ],
+            [ "P4::P4Tools::SmithOptions", "class_p4_1_1_p4_tools_1_1_smith_options.html", null ]
+          ] ],
           [ "P4::P4Tools::Test::P4ReachabilityOptions", "class_p4_1_1_p4_tools_1_1_test_1_1_p4_reachability_options.html", null ],
           [ "P4::P4Tools::Test::P4TestOptions", "class_p4_1_1_p4_tools_1_1_test_1_1_p4_test_options.html", null ],
           [ "P4::TC::TCOptions", "class_p4_1_1_t_c_1_1_t_c_options.html", null ],

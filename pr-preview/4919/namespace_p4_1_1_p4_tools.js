@@ -69,7 +69,6 @@ var namespace_p4_1_1_p4_tools =
     [ "ExtendedCallGraph", "class_p4_1_1_p4_tools_1_1_extended_call_graph.html", "class_p4_1_1_p4_tools_1_1_extended_call_graph" ],
     [ "FormatOptions", "namespace_p4_1_1_p4_tools.html#struct_p4_1_1_p4_tools_1_1_format_options", "namespace_p4_1_1_p4_tools_struct_p4_1_1_p4_tools_1_1_format_options_dup" ],
     [ "HSIndexToMember", "class_p4_1_1_p4_tools_1_1_h_s_index_to_member.html", null ],
-    [ "InheritedCompilerOptionSpec", "namespace_p4_1_1_p4_tools.html#struct_p4_1_1_p4_tools_1_1_inherited_compiler_option_spec", "namespace_p4_1_1_p4_tools_struct_p4_1_1_p4_tools_1_1_inherited_compiler_option_spec_dup" ],
     [ "MaskBuilder", "class_p4_1_1_p4_tools_1_1_mask_builder.html", null ],
     [ "MidEnd", "class_p4_1_1_p4_tools_1_1_mid_end.html", "class_p4_1_1_p4_tools_1_1_mid_end" ],
     [ "Model", "class_p4_1_1_p4_tools_1_1_model.html", "class_p4_1_1_p4_tools_1_1_model" ],

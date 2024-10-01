@@ -11,10 +11,10 @@
 <!-- Node0 -->
 <g id="Node000000" class="node">
 <title>Node0</title>
-<g id="a_Node000000"><a xlink:href="class_p4_1_1_p4_tools_1_1_reachability_engine.html" target="_top" xlink:title=" ">
+<g id="a_Node000000"><a xlink:href="class_p4_1_1_p4_tools_1_1_reachability_engine_state.html" target="_top" xlink:title="The main data for reachability engine.">
 <polygon fill="white" stroke="#666666" points="138,-30 0,-30 0,0 138,0 138,-30"/>
 <text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">P4::P4Tools::Reachability</text>
-<text text-anchor="middle" x="69" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">Engine</text>
+<text text-anchor="middle" x="69" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">EngineState</text>
 </a>
 </g>
 </g>
