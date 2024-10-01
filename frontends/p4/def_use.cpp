@@ -813,7 +813,7 @@ bool ComputeWriteSet::preorder(const IR::P4Parser *parser) {
     ComputeParserCG pcg(refMap, &transitions);
     pcg.setCalledBy(this);
 
-    (void)parser->apply(pcg);
+    (void)parser->apply(pcg, getChildContext());
     ordered_set<const IR::ParserState *> toRun;  // worklist
     toRun.emplace(startState);
 
