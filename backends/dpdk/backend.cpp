@@ -54,8 +54,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new DpdkArchFirst(),
         new ValidateOperandSize(),
         new CollectLocalStructAndFlatten(refMap, typeMap),
-        new P4::EliminateTypedef(refMap, typeMap),
-        new P4::ClearTypeMap(typeMap),
+        new P4::EliminateTypedef(typeMap),
         new P4::TypeChecking(refMap, typeMap),
         new ByteAlignment(typeMap, refMap, &structure),
         new P4::SimplifyKey(

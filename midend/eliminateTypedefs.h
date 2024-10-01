@@ -1,6 +1,7 @@
 #ifndef MIDEND_ELIMINATETYPEDEFS_H_
 #define MIDEND_ELIMINATETYPEDEFS_H_
 
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 
 namespace P4 {
@@ -10,22 +11,20 @@ namespace P4 {
  * This can be done when all the information required by the
  * control-plane has been generated.
  */
-class DoReplaceTypedef final : public Transform {
-    const ReferenceMap *refMap;
-
+class DoReplaceTypedef final : public Transform, public ResolutionContext {
  public:
-    explicit DoReplaceTypedef(const ReferenceMap *refMap) : refMap(refMap) {}
+    DoReplaceTypedef() = default;
     const IR::Type *preorder(IR::Type_Name *type) override;
 };
 
 class EliminateTypedef final : public PassManager {
  public:
-    EliminateTypedef(ReferenceMap *refMap, TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
-        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
+    EliminateTypedef(TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
+        if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap);
         passes.push_back(typeChecking);
-        passes.push_back(new DoReplaceTypedef(refMap));
-        passes.push_back(new TypeChecking(refMap, typeMap, true));
-        setName("EliminateTypedefs");
+        passes.push_back(new DoReplaceTypedef);
+        passes.push_back(new TypeChecking(nullptr, typeMap, true));
+        passes.push_back(new ClearTypeMap(typeMap)), setName("EliminateTypedefs");
     }
 };
 
