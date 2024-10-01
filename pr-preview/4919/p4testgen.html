@@ -287,6 +287,7 @@ Generating Specific Tests</h3>
 <h4><a class="anchor" id="restricted-tests"></a>
 Restricted Tests</h4>
 <p><code>testgen_assume(expr)</code> will add <code>expr</code> as a necessary path constraints to all subsequent execution. For example, for the following snippet </p><div class="fragment"><div class="line"> P4</div>
+<div class="line"> </div>
 <div class="line">state parse_ethernet {</div>
 <div class="line">    packet.extract(headers.ethernet);</div>
 <div class="line">    testgen_assume(headers.ethernet.ether_type == 0x800);</div>
@@ -300,6 +301,7 @@ Restricted Tests</h4>
 <h4><a class="anchor" id="finding-assertion-violations"></a>
 Finding Assertion Violations</h4>
 <p>Conversely, <code>testgen_assert(expr)</code> can be used to find violations in a particular P4 program. By default, <code>testgen_assert</code> behaves like <code>testgen_assume</code>. If the flag <code>--assertion-mode</code> is enabled, P4Testgen will only generate tests that will cause <code>expr</code> to be false and, hence, violate the assertion. For example, for </p><div class="fragment"><div class="line"> P4</div>
+<div class="line"> </div>
 <div class="line">state parse_ethernet {</div>
 <div class="line">    packet.extract(headers.ethernet);</div>
 <div class="line">    transition select(headers.ethernet.ether_type) {</div>
