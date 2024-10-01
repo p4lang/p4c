@@ -36,7 +36,7 @@ int AbstractP4cToolOptions::process(const std::vector<const char *> &args) {
 
     // Delegate to the hook.
     auto *remainingArgs = process(argc, argv);
-    if ((remainingArgs == nullptr) || ::P4::errorCount() > 0) {
+    if ((remainingArgs == nullptr) || errorCount() > 0) {
         return EXIT_FAILURE;
     }
     setInputFile();

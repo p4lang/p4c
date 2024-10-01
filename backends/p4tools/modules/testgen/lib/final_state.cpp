@@ -90,12 +90,12 @@ std::optional<std::reference_wrapper<const FinalState>> FinalState::computeConco
     }
     auto solverResult = solver.get().checkSat(asserts);
     if (!solverResult) {
-        ::P4::warning("Timed out trying to solve this concolic execution path.");
+        warning("Timed out trying to solve this concolic execution path.");
         return std::nullopt;
     }
 
     if (!*solverResult) {
-        ::P4::warning("Concolic constraints for this path are unsatisfiable.");
+        warning("Concolic constraints for this path are unsatisfiable.");
         return std::nullopt;
     }
     auto &model = processModel(state, *new Model(solver.get().getSymbolicMapping()), false);

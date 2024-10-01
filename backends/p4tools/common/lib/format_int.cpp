@@ -292,7 +292,7 @@ std::optional<std::string> convertToIpv4String(const std::vector<uint8_t> &byteA
     constexpr uint8_t ipv4ByteSize = 4U;
 
     if (byteArray.size() != ipv4ByteSize) {
-        ::P4::error("Invalid IPv4 address byte array of size %1%", byteArray.size());
+        error("Invalid IPv4 address byte array of size %1%", byteArray.size());
         return std::nullopt;
     }
 
@@ -311,7 +311,7 @@ std::optional<std::string> convertToIpv6String(const std::vector<uint8_t> &byteA
     constexpr uint8_t chunkSize = 8U;
     constexpr uint8_t ipv6ByteSize = 16U;
     if (byteArray.size() != ipv6ByteSize) {
-        ::P4::error("Invalid IPv6 address byte array of size %1%", byteArray.size());
+        error("Invalid IPv6 address byte array of size %1%", byteArray.size());
         return std::nullopt;
     }
 
@@ -330,7 +330,7 @@ std::optional<std::string> convertToIpv6String(const std::vector<uint8_t> &byteA
 std::optional<std::string> convertToMacString(const std::vector<uint8_t> &byteArray) {
     constexpr uint8_t macByteSize = 6U;
     if (byteArray.size() != macByteSize) {
-        ::P4::error("Invalid MAC address byte array of size %1%", byteArray.size());
+        error("Invalid MAC address byte array of size %1%", byteArray.size());
         return std::nullopt;
     }
 

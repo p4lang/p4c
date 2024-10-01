@@ -22,7 +22,7 @@ void SmithOptions::processArgs(const std::vector<const char *> &args) {
     char **argv = nullptr;
     std::tie(argc, argv) = convertArgs(args);
 
-    // Establish a dummy compilation context so that we can use ::P4::error to report errors while
+    // Establish a dummy compilation context so that we can use error to report errors while
     // processing command-line options.
     class DummyCompileContext : public BaseCompileContext {
     } dummyContext;
@@ -30,7 +30,7 @@ void SmithOptions::processArgs(const std::vector<const char *> &args) {
 
     // Delegate to the hook.
     auto *remainingArgs = P4Tools::AbstractP4cToolOptions::process(argc, argv);
-    if ((remainingArgs == nullptr) || ::P4::errorCount() > 0) {
+    if ((remainingArgs == nullptr) || errorCount() > 0) {
         return;
     }
 }
