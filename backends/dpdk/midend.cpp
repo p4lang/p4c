@@ -183,7 +183,7 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
             new P4::RemoveExits(&typeMap),
             new P4::ConstantFolding(&refMap, &typeMap),
             new P4::StrengthReduction(&typeMap),
-            new P4::SimplifySelectCases(&refMap, &typeMap, true),
+            new P4::SimplifySelectCases(&typeMap, true),
             // The lookahead implementation in DPDK target supports only a header instance as
             // an operand, we do not expand headers.
             // Structures expanded here are then processed as base bit type in ConvertLookahead
