@@ -45,16 +45,14 @@ MidEnd::MidEnd(const CompilerOptions &options) {
     refMap.setIsV1(options.langVersion == CompilerOptions::FrontendVersion::P4_16);
 }
 
-Visitor *MidEnd::mkConvertEnums() {
-    return new P4::ConvertEnums(&refMap, &typeMap, mkConvertEnumsPolicy());
-}
+Visitor *MidEnd::mkConvertEnums() { return new P4::ConvertEnums(&typeMap, mkConvertEnumsPolicy()); }
 
 Visitor *MidEnd::mkConvertErrors() {
-    return new P4::ConvertErrors(&refMap, &typeMap, mkConvertErrorPolicy());
+    return new P4::ConvertErrors(&typeMap, mkConvertErrorPolicy());
 }
 
 Visitor *MidEnd::mkConvertKeys() {
-    return new P4::SimplifyKey(&refMap, &typeMap, new P4::IsLikeLeftValue());
+    return new P4::SimplifyKey(&typeMap, new P4::IsLikeLeftValue());
 }
 
 P4::ChooseEnumRepresentation *MidEnd::mkConvertEnumsPolicy() {
@@ -95,44 +93,44 @@ void MidEnd::addDefaultPasses() {
         // operate on actions by introducing a new table.
         new P4::EliminateSwitch(&refMap, &typeMap),
         // Replace types introduced by 'type' with 'typedef'.
-        new P4::EliminateNewtype(&refMap, &typeMap),
+        new P4::EliminateNewtype(&typeMap),
         // Remove the invalid header / header-union literal, except for constant expressions
-        new P4::EliminateInvalidHeaders(&refMap, &typeMap),
+        new P4::EliminateInvalidHeaders(&typeMap),
         // Replace serializable enum constants with their values.
-        new P4::EliminateSerEnums(&refMap, &typeMap),
+        new P4::EliminateSerEnums(&typeMap),
         // Make sure that we have no TypeDef left in the program.
-        new P4::EliminateTypedef(&refMap, &typeMap),
+        new P4::EliminateTypedef(&typeMap),
         // Remove in/inout/out action parameters.
         new P4::RemoveActionParameters(&typeMap),
         // Sort call arguments according to the order of the function's parameters.
-        new P4::OrderArguments(&refMap, &typeMap),
+        new P4::OrderArguments(&typeMap),
         new P4::TypeChecking(&refMap, &typeMap),
         mkConvertKeys(),
         mkConvertEnums(),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::SimplifyControlFlow(&typeMap),
         // Eliminate extraneous cases in select statements.
-        new P4::SimplifySelectCases(&refMap, &typeMap, false),
+        new P4::SimplifySelectCases(&typeMap, false),
         // Expand lookahead assignments into sequences of field assignments.
-        new P4::ExpandLookahead(&refMap, &typeMap),
+        new P4::ExpandLookahead(&typeMap),
         // Expand emits into emits of individual fields.
-        new P4::ExpandEmit(&refMap, &typeMap),
+        new P4::ExpandEmit(&typeMap),
         // Replaces bit ranges in select expressions with bitmasks.
-        new P4::ReplaceSelectRange(&refMap, &typeMap),
+        new P4::ReplaceSelectRange,
         // Expand comparisons on structs and headers into comparisons on fields.
-        new P4::SimplifyComparisons(&refMap, &typeMap),
+        new P4::SimplifyComparisons(&typeMap),
         // Expand header and struct assignments into sequences of field assignments.
         new PassRepeated({
             new P4::CopyStructures(&refMap, &typeMap, false, true, nullptr),
         }),
         new P4::RemoveParserControlFlow(&typeMap),
         // Flatten nested list expressions.
-        new P4::SimplifySelectList(&refMap, &typeMap),
+        new P4::SimplifySelectList(&typeMap),
         // Convert booleans in selects into bit<1>.
-        new P4::RemoveSelectBooleans(&refMap, &typeMap),
+        new P4::RemoveSelectBooleans(&typeMap),
         // Flatten nested headers and structs.
         new P4::NestedStructs(&refMap, &typeMap),
-        new P4::FlattenHeaders(&refMap, &typeMap),
+        new P4::FlattenHeaders(&typeMap),
         new P4::TypeChecking(&refMap, &typeMap, true),
         // Move local declarations to the top of each control/parser.
         new P4::MoveDeclarations(),
@@ -149,13 +147,13 @@ void MidEnd::addDefaultPasses() {
         new P4::MoveDeclarations(),
         new P4::SimplifyControlFlow(&typeMap),
         // Replace any slices in the left side of assignments and convert them to casts.
-        new P4::RemoveLeftSlices(&refMap, &typeMap),
+        new P4::RemoveLeftSlices(&typeMap),
         // Remove loops from parsers by unrolling them as far as the stack indices allow.
         new P4::ParsersUnroll(true, &refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap, true),
         mkConvertErrors(),
         // Convert tuples into structs.
-        new P4::EliminateTuples(&refMap, &typeMap),
+        new P4::EliminateTuples(&typeMap),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::SimplifyControlFlow(&typeMap),
         // Simplify header stack assignments with runtime indices into conditional statements.
