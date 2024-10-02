@@ -82,10 +82,10 @@ class ReplaceLogMsg : public Transform, P4WriteContext {
 
 class FlattenLogMsg final : public PassManager {
  public:
-    FlattenLogMsg(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
+    explicit FlattenLogMsg(P4::TypeMap *typeMap) {
         auto findTypesInLogMsgInvocationToReplace =
             new FindTypesInLogMsgInvocationToReplace(typeMap);
-        passes.push_back(new TypeChecking(refMap, typeMap));
+        passes.push_back(new TypeChecking(nullptr, typeMap));
         passes.push_back(findTypesInLogMsgInvocationToReplace);
         passes.push_back(new ReplaceLogMsg(typeMap, findTypesInLogMsgInvocationToReplace));
         passes.push_back(new ClearTypeMap(typeMap));
