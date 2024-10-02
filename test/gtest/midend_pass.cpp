@@ -79,7 +79,7 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          new P4::SimplifySelectCases(&typeMap, false),  // non-constant keysets
          new P4::ExpandLookahead(&refMap, &typeMap),
          new P4::ExpandEmit(&refMap, &typeMap),
-         new P4::HandleNoMatch(&refMap),
+         new P4::HandleNoMatch(),
          new P4::SimplifyParsers(),
          new P4::StrengthReduction(&typeMap),
          new P4::EliminateTuples(&typeMap),

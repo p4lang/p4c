@@ -28,27 +28,21 @@ namespace P4 {
 /// into
 /// state s { transition select (e) { ... default: noMatch; }}
 /// state noMatch { verify(false, error.NoMatch); transition reject; }
-class DoHandleNoMatch : public Transform {
-    NameGenerator *nameGen;
+class HandleNoMatch : public Transform {
+    MinimalNameGenerator nameGen;
 
  public:
     const IR::ParserState *noMatch = nullptr;
-    explicit DoHandleNoMatch(NameGenerator *ng) : nameGen(ng) {
-        CHECK_NULL(ng);
-        setName("DoHandleNoMatch");
+    HandleNoMatch() { setName("HandleNoMatch"); }
+    Visitor::profile_t init_apply(const IR::Node *node) override {
+        auto rv = Transform::init_apply(node);
+        node->apply(nameGen);
+
+        return rv;
     }
     const IR::Node *postorder(IR::SelectExpression *expression) override;
     const IR::Node *postorder(IR::P4Parser *parser) override;
     const IR::Node *postorder(IR::P4Program *program) override;
-};
-
-class HandleNoMatch : public PassManager {
- public:
-    explicit HandleNoMatch(ReferenceMap *refMap) {
-        passes.push_back(new ResolveReferences(refMap));
-        passes.push_back(new DoHandleNoMatch(refMap));
-        setName("HandleNoMatch");
-    }
 };
 
 }  // namespace P4

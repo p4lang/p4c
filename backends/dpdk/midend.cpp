@@ -190,7 +190,7 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
             // pass in backend.
             new P4::ExpandLookahead(&refMap, &typeMap, nullptr, false),
             new P4::ExpandEmit(&refMap, &typeMap),
-            new P4::HandleNoMatch(&refMap),
+            new P4::HandleNoMatch(),
             new P4::SimplifyParsers(),
             new P4::StrengthReduction(&typeMap),
             new P4::EliminateTuples(&typeMap),
