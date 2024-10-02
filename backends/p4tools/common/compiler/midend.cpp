@@ -129,7 +129,7 @@ void MidEnd::addDefaultPasses() {
         // Convert booleans in selects into bit<1>.
         new P4::RemoveSelectBooleans(&typeMap),
         // Flatten nested headers and structs.
-        new P4::NestedStructs(&refMap, &typeMap),
+        new P4::NestedStructs(&typeMap),
         new P4::FlattenHeaders(&typeMap),
         new P4::TypeChecking(&refMap, &typeMap, true),
         // Move local declarations to the top of each control/parser.

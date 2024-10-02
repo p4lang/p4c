@@ -17,6 +17,8 @@ limitations under the License.
 #ifndef MIDEND_NESTEDSTRUCTS_H_
 #define MIDEND_NESTEDSTRUCTS_H_
 
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
@@ -70,25 +72,24 @@ class ComplexValues final {
     std::map<const IR::Declaration_Variable *, Component *> values;
     std::map<const IR::Expression *, Component *> translation;
 
-    ReferenceMap *refMap;
     TypeMap *typeMap;
+    NameGenerator &nameGen;
 
-    ComplexValues(ReferenceMap *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
-        CHECK_NULL(refMap);
+    ComplexValues(TypeMap *typeMap, NameGenerator &nameGen) : typeMap(typeMap), nameGen(nameGen) {
         CHECK_NULL(typeMap);
     }
     /// Helper function that test if a struct is nested
-    bool isNestedStruct(const IR::Type *type);
+    bool isNestedStruct(const IR::Type *type) const;
     /// Flatten a nested struct to only contain field declaration or non-nested struct
     template <class T>
-    void explode(cstring prefix, const IR::Type_Struct *type, FieldsMap *map,
+    void explode(std::string_view prefix, const IR::Type_Struct *type, FieldsMap *map,
                  IR::Vector<T> *result);
-    Component *getTranslation(const IR::IDeclaration *decl) {
+    Component *getTranslation(const IR::IDeclaration *decl) const {
         auto dv = decl->to<IR::Declaration_Variable>();
         if (dv == nullptr) return nullptr;
         return ::P4::get(values, dv);
     }
-    Component *getTranslation(const IR::Expression *expression) {
+    Component *getTranslation(const IR::Expression *expression) const {
         LOG2("Check translation " << dbp(expression));
         return ::P4::get(translation, expression);
     }
@@ -127,13 +128,19 @@ class ComplexValues final {
  *  @post: Ensure that
  *    - all variables whose types are nested structs are flattened.
  */
-class RemoveNestedStructs final : public Transform {
-    ComplexValues *values;
+class RemoveNestedStructs final : public Transform, public ResolutionContext {
+    ComplexValues values;
+    MinimalNameGenerator nameGen;
 
  public:
-    explicit RemoveNestedStructs(ComplexValues *values) : values(values) {
-        CHECK_NULL(values);
+    explicit RemoveNestedStructs(TypeMap *typeMap) : values(typeMap, nameGen) {
         setName("RemoveNestedStructs");
+    }
+    Visitor::profile_t init_apply(const IR::Node *node) override {
+        auto rv = Transform::init_apply(node);
+        node->apply(nameGen);
+
+        return rv;
     }
 
     /// rewrite nested structs to non-nested structs
@@ -147,11 +154,10 @@ class RemoveNestedStructs final : public Transform {
 
 class NestedStructs final : public PassManager {
  public:
-    NestedStructs(ReferenceMap *refMap, TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
-        auto values = new ComplexValues(refMap, typeMap);
-        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
+    explicit NestedStructs(TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
+        if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap);
         passes.push_back(typeChecking);
-        passes.push_back(new RemoveNestedStructs(values));
+        passes.push_back(new RemoveNestedStructs(typeMap));
         passes.push_back(new ClearTypeMap(typeMap));
         setName("NestedStructs");
     }

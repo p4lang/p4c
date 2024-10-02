@@ -131,7 +131,7 @@ PnaNicMidEnd::PnaNicMidEnd(CompilerOptions &options, std::ostream *outStream)
             new P4::EliminateTuples(&typeMap),
             new P4::SimplifyComparisons(&typeMap),
             new P4::CopyStructures(&refMap, &typeMap),
-            new P4::NestedStructs(&refMap, &typeMap),
+            new P4::NestedStructs(&typeMap),
             new P4::SimplifySelectList(&typeMap),
             new P4::RemoveSelectBooleans(&typeMap),
             new P4::FlattenHeaders(&typeMap),
