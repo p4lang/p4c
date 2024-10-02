@@ -112,7 +112,7 @@ PnaNicMidEnd::PnaNicMidEnd(CompilerOptions &options, std::ostream *outStream)
             options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
             new CheckUnsupported(),
             new P4::RemoveMiss(&refMap, &typeMap),
-            new P4::EliminateNewtype(&refMap, &typeMap),
+            new P4::EliminateNewtype(&typeMap),
             new P4::EliminateInvalidHeaders(&refMap, &typeMap),
             new P4::EliminateSerEnums(&typeMap),
             convertEnums,

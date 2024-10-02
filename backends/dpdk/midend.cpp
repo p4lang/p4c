@@ -170,7 +170,7 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
         addPasses({
             options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
             new P4::RemoveMiss(&refMap, &typeMap),
-            new P4::EliminateNewtype(&refMap, &typeMap),
+            new P4::EliminateNewtype(&typeMap),
             new P4::EliminateSerEnums(&typeMap),
             new P4::EliminateInvalidHeaders(&refMap, &typeMap),
             convertEnums,

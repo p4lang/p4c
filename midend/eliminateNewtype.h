@@ -43,8 +43,8 @@ class DoReplaceNewtype final : public Transform {
 
 class EliminateNewtype final : public PassManager {
  public:
-    EliminateNewtype(ReferenceMap *refMap, TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
-        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
+    explicit EliminateNewtype(TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
+        if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoReplaceNewtype(typeMap));
         passes.push_back(new ClearTypeMap(typeMap));
