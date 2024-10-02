@@ -46,7 +46,7 @@ class ComplexExpression : public Inspector {
 const IR::PathExpression *RemoveComplexExpressions::createTemporary(
     const IR::Expression *expression) {
     auto type = typeMap->getType(expression, true);
-    auto name = refMap->newName("tmp");
+    auto name = nameGen.newName("tmp");
     auto decl = new IR::Declaration_Variable(IR::ID(name), type->getP4Type());
     newDecls.push_back(decl);
     typeMap->setType(decl, type);
@@ -149,7 +149,7 @@ const IR::Node *RemoveComplexExpressions::preorder(IR::P4Control *control) {
 
 const IR::Node *RemoveComplexExpressions::postorder(IR::MethodCallExpression *expression) {
     if (expression->arguments->size() == 0) return expression;
-    auto mi = P4::MethodInstance::resolve(expression, refMap, typeMap);
+    auto mi = P4::MethodInstance::resolve(expression, this, typeMap);
     if (mi->isApply() || mi->is<P4::BuiltInMethod>()) return expression;
 
     auto vec = simplifyExpressions(expression->arguments);
@@ -170,13 +170,13 @@ const IR::Node *RemoveComplexExpressions::postorder(IR::Statement *statement) {
 }
 
 const IR::Node *RemoveComplexExpressions::postorder(IR::MethodCallStatement *statement) {
-    auto mi = P4::MethodInstance::resolve(statement, refMap, typeMap);
+    auto mi = P4::MethodInstance::resolve(statement, this, typeMap);
     if (auto em = mi->to<P4::ExternMethod>()) {
         if (em->originalExternType->name != P4::P4CoreLibrary::instance().packetIn.name ||
             em->method->name != P4::P4CoreLibrary::instance().packetIn.lookahead.name)
             return simpleStatement(statement);
         auto type = em->actualMethodType->returnType;
-        auto name = refMap->newName("tmp");
+        auto name = nameGen.newName("tmp");
         LOG3("Adding variable for lookahead " << name);
         auto decl = new IR::Declaration_Variable(IR::ID(name), type->getP4Type());
         newDecls.push_back(decl);

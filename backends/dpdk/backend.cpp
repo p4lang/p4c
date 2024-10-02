@@ -62,7 +62,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::TypeChecking(refMap, typeMap),
         /// TBD: implement dpdk lowering passes instead of reusing bmv2's lowering pass.
         new PassRepeated({new BMV2::LowerExpressions(typeMap, DPDK_MAX_SHIFT_AMOUNT)}, 2),
-        new P4::RemoveComplexExpressions(refMap, typeMap,
+        new P4::RemoveComplexExpressions(typeMap,
                                          new DPDK::ProcessControls(&structure.pipeline_controls)),
         new DismantleMuxExpressions(typeMap, refMap),
         new P4::ConstantFolding(refMap, typeMap, false),

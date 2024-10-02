@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef MIDEND_REMOVECOMPLEXEXPRESSIONS_H_
 #define MIDEND_REMOVECOMPLEXEXPRESSIONS_H_
 
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
@@ -42,20 +43,25 @@ Lift complex expressions from a select or as arguments to external functions
 into temporaries.
 Convert a statement like lookahead<T>() into tmp = lookahead<T>();
 */
-class RemoveComplexExpressions : public Transform {
+class RemoveComplexExpressions : public Transform, public ResolutionContext {
  public:
-    P4::ReferenceMap *refMap;
+    MinimalNameGenerator nameGen;
     P4::TypeMap *typeMap;
     RemoveComplexExpressionsPolicy *policy;
     IR::IndexedVector<IR::Declaration> newDecls;
     IR::IndexedVector<IR::StatOrDecl> assignments;
 
-    RemoveComplexExpressions(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
-                             RemoveComplexExpressionsPolicy *policy = nullptr)
-        : refMap(refMap), typeMap(typeMap), policy(policy) {
-        CHECK_NULL(refMap);
+    explicit RemoveComplexExpressions(P4::TypeMap *typeMap,
+                                      RemoveComplexExpressionsPolicy *policy = nullptr)
+        : typeMap(typeMap), policy(policy) {
         CHECK_NULL(typeMap);
         setName("RemoveComplexExpressions");
+    }
+    Visitor::profile_t init_apply(const IR::Node *node) override {
+        auto rv = Transform::init_apply(node);
+        node->apply(nameGen);
+
+        return rv;
     }
 
     const IR::PathExpression *createTemporary(const IR::Expression *expression);
