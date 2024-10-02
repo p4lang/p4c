@@ -102,7 +102,7 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *o
              new P4::SimplifyComparisons(&refMap, &typeMap),
              new P4::CopyStructures(&refMap, &typeMap),
              new P4::NestedStructs(&refMap, &typeMap),
-             new P4::SimplifySelectList(&refMap, &typeMap),
+             new P4::SimplifySelectList(&typeMap),
              new P4::RemoveSelectBooleans(&refMap, &typeMap),
              new P4::FlattenHeaders(&refMap, &typeMap),
              new P4::FlattenInterfaceStructs(&refMap, &typeMap),
