@@ -39,6 +39,7 @@ class EBPFType : public EBPFObject {
     virtual void declareArray(CodeBuilder * /*builder*/, cstring /*id*/, unsigned /*size*/) {
         BUG("%1%: unsupported array", type);
     }
+    virtual bool is_array() { return (false); }
 
     DECLARE_TYPEINFO(EBPFType, EBPFObject);
 };
@@ -121,6 +122,8 @@ class EBPFScalarType : public EBPFType, public IHasWidth {
     unsigned implementationWidthInBits() const override { return bytesRequired() * 8; }
     // True if this width is small enough to store in a machine scalar
     static bool generatesScalar(unsigned width) { return width <= 64; }
+    // XXX Should we be using generatesScalar instead of defining another method?
+    virtual bool is_array() override { return (width > 64); }
 
     DECLARE_TYPEINFO(EBPFScalarType, EBPFType, IHasWidth);
 };

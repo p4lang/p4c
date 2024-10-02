@@ -40,6 +40,106 @@ const cstring pnaParserMeta = "pna_main_parser_input_metadata_t"_cs;
 const cstring pnaInputMeta = "pna_main_input_metadata_t"_cs;
 const cstring pnaOutputMeta = "pna_main_output_metadata_t"_cs;
 
+const IR::Node *FIXUP_CASTS::preorder(IR::Statement *s) {
+    CONTAINER *c;
+
+    std::cout << "cast fixup: preorder: " << (void *)s << '\n' << s->toString() << std::endl;
+    c = new CONTAINER;
+    c->temps = 0;
+    c->s = s;
+    c->link = contain;
+    contain = c;
+    return (s);
+}
+
+const IR::Node *FIXUP_CASTS::postorder(IR::Statement *s) {
+    CONTAINER *c;
+    DECLLIST *temps;
+    DECLLIST *t;
+    IR::BlockStatement *b;
+
+    std::cout << "cast fixup: postorder: " << (void *)s << '\n' << s->toString() << std::endl;
+    c = contain;
+    if (c->s != s) abort();
+    contain = c->link;
+    temps = c->temps;
+    c->temps = 0;
+    delete c;
+    if (!temps) return (s);
+    std::cout << "Declarations:";
+    for (t = temps; t; t = t->link) std::cout << " " << t->decl->toString();
+    std::cout << std::endl;
+    b = new IR::BlockStatement();
+    for (t = temps; t; t = t->link) b->append(t->decl);
+    b->append(s);
+    return (b);
+}
+
+static void save_temp(TC::CONTAINER *c, IR::Declaration *d) {
+    DECLLIST *dl;
+
+    dl = new DECLLIST;
+    dl->decl = d;
+    dl->link = c->temps;
+    c->temps = dl;
+}
+
+/*
+ * The dance for IR::Type_Type is because I see such coming back from
+ *  typemap->getType().  I don't know why and I don't know what it
+ *  means; I hope someone who does know can fix up anything necessary.
+ */
+const IR::Node *FIXUP_CASTS::postorder(IR::Cast *e) {
+    CONTAINER *c;
+
+    if (!EBPF::EBPFTypeFactory::instance) abort();
+    std::cout << "cast fixup: cast expression: " << e->toString() << std::endl;
+    std::cout << "Contained in:";
+    for (c = contain; c; c = c->link) std::cout << ' ' << (void *)c->s;
+    std::cout << std::endl;
+    const IR::Type *argtype;
+    argtype = typemap->getType(e->expr, true);
+    if (argtype->is<IR::Type_Type>()) argtype = argtype->to<const IR::Type_Type>()->type;
+    std::cout << "Arg type: " << argtype->toString() << std::endl;
+    const IR::Type *casttype;
+    casttype = typemap->getType(e->destType, true);
+    if (casttype->is<IR::Type_Type>()) casttype = casttype->to<const IR::Type_Type>()->type;
+    std::cout << "Cast-to type: " << casttype->toString() << std::endl;
+    auto aet = EBPF::EBPFTypeFactory::instance->create(argtype);
+    std::cout << "Arg EBPF type: " << (void *)aet << std::endl;
+    std::cout << "    (" << aet->type->toString() << ")" << std::endl;
+    auto cet = EBPF::EBPFTypeFactory::instance->create(casttype);
+    std::cout << "Cast-to EBPF type: " << (void *)cet << std::endl;
+    std::cout << "    (" << cet->type->toString() << ")" << std::endl;
+    std::cout << "Arg is scalar: " << (aet->is<EBPF::EBPFScalarType>() ? "YES" : "NO")
+              << "; result is scalar: " << (cet->is<EBPF::EBPFScalarType>() ? "YES" : "NO")
+              << std::endl;
+    if (!aet->is<EBPF::EBPFScalarType>() || !cet->is<EBPF::EBPFScalarType>()) return (e);
+    auto aw = aet->to<EBPF::EBPFScalarType>()->implementationWidthInBits();
+    auto cw = cet->to<EBPF::EBPFScalarType>()->implementationWidthInBits();
+    std::cout << "Arg width: " << aw
+              << ", scalar: " << (EBPF::EBPFScalarType::generatesScalar(aw) ? "YES" : "NO") << '\n';
+    std::cout << "Result width: " << cw
+              << ", scalar: " << (EBPF::EBPFScalarType::generatesScalar(cw) ? "YES" : "NO")
+              << std::endl;
+    if (EBPF::EBPFScalarType::generatesScalar(aw) && EBPF::EBPFScalarType::generatesScalar(cw))
+        return (e);
+    auto sn = refmap->newName("cast_src");
+    auto dn = refmap->newName("cast_dst");
+    std::cout << "sn=" << sn << ", dn=" << dn << std::endl;
+    auto sd = new IR::Declaration_Variable(IR::ID(sn, nullptr), argtype);
+    auto dd = new IR::Declaration_Variable(IR::ID(dn, nullptr), casttype);
+    std::cout << "Src declaration: " << sd->toString() << std::endl;
+    std::cout << "Dst declaration: " << dd->toString() << std::endl;
+    save_temp(contain, sd);
+    save_temp(contain, dd);
+    auto px = new IR::PathExpression(dd->getName());
+    std::cout << "Cast expression: " << (void *)e << ", " << e->toString() << std::endl;
+    std::cout << "Replacement expression: " << (void *)px << ", " << px->toString() << std::endl;
+    return (px);
+    // return(e);
+}
+
 bool Backend::process() {
     CHECK_NULL(toplevel);
     if (toplevel->getMain() == nullptr) {
@@ -52,9 +152,11 @@ bool Backend::process() {
     parseTCAnno = new ParseTCAnnotations();
     tcIR = new ConvertToBackendIR(toplevel, pipeline, refMap, typeMap, options);
     genIJ = new IntrospectionGenerator(pipeline, refMap, typeMap);
+    EBPF::EBPFTypeFactory::createFactory(typeMapEBPF);
     PassManager backEnd = {};
     backEnd.addPasses({parseTCAnno, new P4::ClearTypeMap(typeMap),
-                       new P4::TypeChecking(refMap, typeMap, true), tcIR, genIJ});
+                       new P4::TypeChecking(refMap, typeMap, true), tcIR, genIJ,
+                       new FIXUP_CASTS(refMap, typeMap)});
     backEnd.addDebugHook(hook, true);
     toplevel->getProgram()->apply(backEnd);
     if (::P4::errorCount() > 0) return false;
@@ -101,7 +203,7 @@ bool Backend::ebpfCodeGen(P4::ReferenceMap *refMapEBPF, P4::TypeMap *typeMapEBPF
     main->apply(*parsePnaArch);
     program = top->getProgram();
 
-    EBPF::EBPFTypeFactory::createFactory(typeMapEBPF);
+    //    EBPF::EBPFTypeFactory::createFactory(typeMapEBPF);
     auto convertToEbpf = new ConvertToEbpfPNA(ebpfOption, refMapEBPF, typeMapEBPF, tcIR);
     PassManager toEBPF = {
         new P4::DiscoverStructure(&structure),

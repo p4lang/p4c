@@ -665,7 +665,7 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
         unsigned shift = loadSize - alignment - widthToExtract;
         builder->emitIndent();
         if (noEndiannessConversion) {
-            builder->appendFormat("__builtin_memcpy(&");
+            builder->appendFormat("__builtin_memcpy/*A*/(&");
             visit(expr);
             builder->appendFormat(".%s, %s + BYTES(%s), %d)", fieldName,
                                   program->packetStartVar.c_str(), program->offsetVar.c_str(),
@@ -1881,7 +1881,7 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
 
             builder->emitIndent();
             if (memcpy) {
-                builder->appendFormat("__builtin_memcpy(&(%s.%s[0]), &(", keyname.c_str(),
+                builder->appendFormat("__builtin_memcpy/*B*/(&(%s.%s[0]), &(", keyname.c_str(),
                                       fieldName.c_str());
                 table->codeGen->visit(c->expression);
                 builder->appendFormat("[0]), %d)", scalar->bytesRequired());
@@ -2269,7 +2269,7 @@ void DeparserHdrEmitTranslatorPNA::emitField(EBPF::CodeBuilder *builder, cstring
             builder->endOfStatement(true);
             msgStr = absl::StrFormat("Deparser: emitting field %s=0x%%llx (%u bits)", field,
                                      widthToEmit);
-            builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, "tmp");
+            builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, "tmpAD");
             builder->blockEnd(true);
         }
     } else {

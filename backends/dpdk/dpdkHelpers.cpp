@@ -184,7 +184,7 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                         auto maskMsb = tmp->value << (consOrgBitwidth - 1);
                         // Move param to metadata as DPDK expects it to be in metadata
                         BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
-                        IR::ID src1(refmap->newName("tmp"));
+                        IR::ID src1(refmap->newName("tmpAM"));
                         metadataStruct->fields.push_back(new IR::StructField(src1, src2Op->type));
                         auto src1Member = new IR::Member(new IR::PathExpression("m"), src1);
                         add_instr(

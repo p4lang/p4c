@@ -188,6 +188,8 @@ bool CodeGenInspector::preorder(const IR::Cast *c) {
     widthCheck(c);
     int prec = expressionPrecedence;
     bool useParens = prec > c->getPrecedence();
+    std::cout << "CGI::preorder(IR::Cast), " << (void *)c << ", destType "
+              << c->destType->toString() << std::endl;
     if (useParens) builder->append("(");
     builder->append("(");
     auto et = EBPFTypeFactory::instance->create(c->destType);
@@ -353,14 +355,28 @@ void CodeGenInspector::emitAssignStatement(const IR::Type *ltype, const IR::Expr
     }
 
     builder->emitIndent();
+    if (lexpr == nullptr)
+        builder->appendFormat("/* lexpr = nil, lpath %s */", lpath);
+    else
+        builder->appendFormat("/* lexpr = %s */", lexpr->toString());
+    builder->newline();
+    builder->emitIndent();
+    builder->appendFormat("/* rexpr = %s */", rexpr->toString());
+    builder->newline();
+    builder->emitIndent();
     if (memcpy) {
-        builder->append("__builtin_memcpy(&");
+        builder->append("__builtin_memcpy/*G*/(&");
         if (lexpr != nullptr) {
             visit(lexpr);
         } else {
             builder->append(lpath);
         }
-        builder->append(", &");
+        builder->append(", ");
+        auto rtype = EBPFTypeFactory::instance->create(typeMap->getType(rexpr));
+        if (rtype->is<EBPFScalarType>() && rtype->is_array())
+            builder->append("& /* no */");
+        else
+            builder->append("/* yes */");
         if (rexpr->is<IR::Constant>()) {
             builder->appendFormat("(u8[%u])", scalar->bytesRequired());
         }
@@ -455,6 +471,7 @@ bool CodeGenInspector::preorder(const IR::MethodCallStatement *s) {
 }
 
 void CodeGenInspector::widthCheck(const IR::Node *node) const {
+#if 0
     // This is a temporary solution.
     // Rather than generate incorrect results, we reject programs that
     // do not perform arithmetic on machine-supported widths.
@@ -472,6 +489,9 @@ void CodeGenInspector::widthCheck(const IR::Node *node) const {
     }
     ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: Computations on %2% bits not supported",
                 node, tb->size);
+#else
+    (void)node;
+#endif
 }
 
 void CodeGenInspector::emitAndConvertByteOrder(const IR::Expression *expr, cstring byte_order) {

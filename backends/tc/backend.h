@@ -43,6 +43,33 @@ extern cstring PnaMainOutputMetaFields[TC::MAX_PNA_OUTPUT_META];
 
 class PNAEbpfGenerator;
 
+typedef struct decllist DECLLIST;
+struct decllist {
+    DECLLIST *link;
+    IR::Declaration *decl;
+};
+
+typedef struct container CONTAINER;
+struct container {
+    CONTAINER *link;
+    DECLLIST *temps;
+    IR::Statement *s;
+};
+
+class FIXUP_CASTS : public Transform {
+ private:
+    CONTAINER *contain;
+    P4::ReferenceMap *refmap;
+    P4::TypeMap *typemap;
+    const IR::Node *preorder(IR::Statement *) override;
+    const IR::Node *postorder(IR::Statement *) override;
+    const IR::Node *postorder(IR::Cast *) override;
+
+ public:
+    explicit FIXUP_CASTS(P4::ReferenceMap *rm, P4::TypeMap *tm)
+        : contain(0), refmap(rm), typemap(tm){};
+};
+
 /**
  * Backend code generation from midend IR
  */

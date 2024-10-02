@@ -29,7 +29,7 @@ namespace P4 {
 cstring DoSimplifyExpressions::createTemporary(const IR::Type *type) {
     type = type->getP4Type();
     BUG_CHECK(type && !type->is<IR::Type_Dontcare>(), "Can't create don't-care temps");
-    auto tmp = nameGen.newName("tmp");
+    auto tmp = nameGen.newName("tmpAT");
     auto decl = new IR::Declaration_Variable(IR::ID(tmp, nullptr), type);
     toInsert.push_back(decl);
     return tmp;
