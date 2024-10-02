@@ -24,7 +24,8 @@ class EliminateTypedef final : public PassManager {
         passes.push_back(typeChecking);
         passes.push_back(new DoReplaceTypedef);
         passes.push_back(new TypeChecking(nullptr, typeMap, true));
-        passes.push_back(new ClearTypeMap(typeMap)), setName("EliminateTypedefs");
+        passes.push_back(new ClearTypeMap(typeMap));
+        setName("EliminateTypedefs");
     }
 };
 
