@@ -199,7 +199,7 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
             new P4::SimplifySelectList(&typeMap),
             new P4::RemoveSelectBooleans(&typeMap),
             new P4::FlattenHeaders(&typeMap),
-            new P4::FlattenInterfaceStructs(&refMap, &typeMap),
+            new P4::FlattenInterfaceStructs(&typeMap),
             new P4::EliminateTypedef(&typeMap),
             new P4::HSIndexSimplifier(&refMap, &typeMap),
             new P4::ParsersUnroll(true, &refMap, &typeMap),

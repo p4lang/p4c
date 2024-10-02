@@ -135,7 +135,7 @@ PnaNicMidEnd::PnaNicMidEnd(CompilerOptions &options, std::ostream *outStream)
             new P4::SimplifySelectList(&typeMap),
             new P4::RemoveSelectBooleans(&typeMap),
             new P4::FlattenHeaders(&typeMap),
-            new P4::FlattenInterfaceStructs(&refMap, &typeMap),
+            new P4::FlattenInterfaceStructs(&typeMap),
             new P4::ReplaceSelectRange(),
             new P4::Predication(),
             new P4::MoveDeclarations(),  // more may have been introduced
