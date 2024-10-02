@@ -58,7 +58,7 @@ const IR::ToplevelBlock *MidEnd::run(TCOptions &options, const IR::P4Program *pr
         new P4::SingleArgumentSelect(&typeMap),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::SimplifyControlFlow(&typeMap),
-        new P4::TableHit(&refMap, &typeMap),
+        new P4::TableHit(&typeMap),
         new P4::RemoveLeftSlices(&typeMap),
         new EBPF::Lower(&refMap, &typeMap),
         new P4::ParsersUnroll(true, &refMap, &typeMap),

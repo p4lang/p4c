@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef MIDEND_ELIMINATEINVALIDHEADERS_H_
 #define MIDEND_ELIMINATEINVALIDHEADERS_H_
 
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
@@ -29,12 +30,12 @@ namespace P4 {
  * This cannot be done for constant declarations, though.
  */
 class DoEliminateInvalidHeaders final : public Transform {
-    ReferenceMap *refMap;
+    NameGenerator *nameGen;
     IR::IndexedVector<IR::StatOrDecl> statements;
     std::vector<const IR::Declaration_Variable *> variables;
 
  public:
-    DoEliminateInvalidHeaders(ReferenceMap *refMap) : refMap(refMap) {
+    DoEliminateInvalidHeaders(ReferenceMap *refMap) : nameGen(refMap) {
         setName("DoEliminateInvalidHeaders");
         CHECK_NULL(refMap);
     }

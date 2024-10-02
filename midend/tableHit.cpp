@@ -30,7 +30,7 @@ const IR::Node *DoTableHit::postorder(IR::AssignmentStatement *statement) {
         right = neg->expr;
     }
 
-    if (!TableApplySolver::isHit(right, refMap, typeMap)) return statement;
+    if (!TableApplySolver::isHit(right, this, typeMap)) return statement;
 
     auto tstat = new IR::AssignmentStatement(statement->left->clone(), new IR::BoolLiteral(true));
     auto fstat = new IR::AssignmentStatement(statement->left->clone(), new IR::BoolLiteral(false));

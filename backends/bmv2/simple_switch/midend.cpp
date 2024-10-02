@@ -128,7 +128,7 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *o
              new P4::SimplifyControlFlow(&typeMap),
              new P4::EliminateTypedef(&typeMap),
              new P4::CompileTimeOperations(),
-             new P4::TableHit(&refMap, &typeMap),
+             new P4::TableHit(&typeMap),
              new P4::EliminateSwitch(&refMap, &typeMap),
              new P4::RemoveLeftSlices(&typeMap),
              // p4c-bm removed unused action parameters. To produce a compatible

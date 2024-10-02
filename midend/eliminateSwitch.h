@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef MIDEND_ELIMINATESWITCH_H_
 #define MIDEND_ELIMINATESWITCH_H_
 
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
@@ -75,7 +76,7 @@ switch1_case_default: { ... }
 
  */
 class DoEliminateSwitch final : public Transform {
-    ReferenceMap *refMap;
+    NameGenerator *nameGen;
     const TypeMap *typeMap;
     std::vector<const IR::Declaration *> toInsert;
 
@@ -83,7 +84,7 @@ class DoEliminateSwitch final : public Transform {
     bool exactNeeded = false;
 
     DoEliminateSwitch(ReferenceMap *refMap, const TypeMap *typeMap)
-        : refMap(refMap), typeMap(typeMap) {
+        : nameGen(refMap), typeMap(typeMap) {
         setName("DoEliminateSwitch");
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);

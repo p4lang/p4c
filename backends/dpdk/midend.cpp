@@ -109,7 +109,7 @@ class ErrorWidth : public P4::ChooseErrorRepresentation {
 
 DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
     auto convertEnums = new P4::ConvertEnums(&typeMap, new EnumOn32Bits());
-    auto convertErrors = new P4::ConvertErrors(&refMap, &typeMap, new ErrorWidth(16));
+    auto convertErrors = new P4::ConvertErrors(&typeMap, new ErrorWidth(16));
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     std::function<bool(const Context *, const IR::Expression *)> policy =
         [=](const Context *ctx, const IR::Expression *) -> bool {
@@ -219,7 +219,7 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
             new P4::SimplifyControlFlow(&typeMap),
             new P4::SimplifySwitch(&typeMap),
             new P4::CompileTimeOperations(),
-            new P4::TableHit(&refMap, &typeMap),
+            new P4::TableHit(&typeMap),
             new P4::RemoveLeftSlices(&typeMap),
             new P4::TypeChecking(&refMap, &typeMap),
             convertErrors,

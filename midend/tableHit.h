@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef MIDEND_TABLEHIT_H_
 #define MIDEND_TABLEHIT_H_
 
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
@@ -32,13 +33,11 @@ else
    tmp = false;
 This may be needed by some back-ends which only support hit test in conditionals
 */
-class DoTableHit : public Transform {
-    ReferenceMap *refMap;
+class DoTableHit : public Transform, public ResolutionContext {
     TypeMap *typeMap;
 
  public:
-    DoTableHit(ReferenceMap *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
-        CHECK_NULL(refMap);
+    explicit DoTableHit(TypeMap *typeMap) : typeMap(typeMap) {
         CHECK_NULL(typeMap);
         setName("DoTableHit");
     }
@@ -47,10 +46,10 @@ class DoTableHit : public Transform {
 
 class TableHit : public PassManager {
  public:
-    TableHit(ReferenceMap *refMap, TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
-        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
+    explicit TableHit(TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
+        if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap);
         passes.push_back(typeChecking);
-        passes.push_back(new DoTableHit(refMap, typeMap));
+        passes.push_back(new DoTableHit(typeMap));
         setName("TableHit");
     }
 };
