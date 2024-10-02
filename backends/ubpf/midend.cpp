@@ -93,7 +93,7 @@ const IR::ToplevelBlock *MidEnd::run(EbpfOptions &options, const IR::P4Program *
                 new P4::StrengthReduction(&typeMap),
             }),
             new P4::SimplifyComparisons(&typeMap),
-            new P4::CopyStructures(&refMap, &typeMap),
+            new P4::CopyStructures(&typeMap),
             new P4::LocalCopyPropagation(&refMap, &typeMap),
             new P4::SimplifySelectList(&typeMap),
             new P4::MoveDeclarations(),  // more may have been introduced
