@@ -172,7 +172,7 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
             new P4::RemoveMiss(&typeMap),
             new P4::EliminateNewtype(&typeMap),
             new P4::EliminateSerEnums(&typeMap),
-            new P4::EliminateInvalidHeaders(&refMap, &typeMap),
+            new P4::EliminateInvalidHeaders(&typeMap),
             convertEnums,
             new VisitFunctor([this, convertEnums]() { enumMap = convertEnums->getEnumMapping(); }),
             new P4::OrderArguments(&refMap, &typeMap),

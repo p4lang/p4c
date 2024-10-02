@@ -69,7 +69,7 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
         {options.ndebug ? new P4::RemoveAssertAssume(&typeMap) : nullptr,
          new P4::RemoveMiss(&typeMap),
          new P4::EliminateNewtype(&typeMap),
-         new P4::EliminateInvalidHeaders(&refMap, &typeMap),
+         new P4::EliminateInvalidHeaders(&typeMap),
          new P4::EliminateSerEnums(&typeMap),
          new P4::SimplifyKey(
              &typeMap, new P4::OrPolicy(new P4::IsValid(&typeMap), new P4::IsLikeLeftValue())),

@@ -113,7 +113,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
             new CheckUnsupported(),
             new P4::RemoveMiss(&typeMap),
             new P4::EliminateNewtype(&typeMap),
-            new P4::EliminateInvalidHeaders(&refMap, &typeMap),
+            new P4::EliminateInvalidHeaders(&typeMap),
             new P4::EliminateSerEnums(&typeMap),
             convertEnums,
             [this, convertEnums]() { enumMap = convertEnums->getEnumMapping(); },
