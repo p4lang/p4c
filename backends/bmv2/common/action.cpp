@@ -36,6 +36,29 @@ cstring ActionConverter::jsonAssignment(const IR::Type *type) {
     return "assign"_cs;
 }
 
+namespace {
+/// Invalidates all other headers in a header union except the provided source header.
+/// Has no effect if the parent structure is not a header union.
+void invalidateOtherHeaderUnionHeaders(const IR::Member *sourceHeader,
+                                       const ConversionContext &ctxt, Util::JsonArray *result,
+                                       const IR::StatOrDecl *sourceStatement) {
+    const auto *type = ctxt.typeMap->getType(sourceHeader->expr, true);
+    if (const auto *headerUnionType = type->to<IR::Type_HeaderUnion>()) {
+        for (const auto *field : headerUnionType->fields) {
+            // Do not set the source member invalid.
+            if (sourceHeader->member == field->name) {
+                continue;
+            }
+            auto *member = new IR::Member(field->type, sourceHeader->expr, field->name);
+            ctxt.typeMap->setType(member, field->type);
+            auto *primitive = mkPrimitive("remove_header"_cs, result);
+            primitive->emplace_non_null("source_info"_cs, sourceStatement->sourceInfoJsonObj());
+            primitive->emplace("parameters", new Util::JsonArray({ctxt.conv->convert(member)}));
+        }
+    }
+}
+}  // namespace
+
 void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
                                         Util::JsonArray *result) {
     for (auto s : *body) {
@@ -146,6 +169,11 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
                     prim = "add_header"_cs;
                 } else if (builtin->name == IR::Type_Header::setInvalid) {
                     prim = "remove_header"_cs;
+                    // If setInvalid is called on any header in a header union, we need to
+                    // invalidate all other headers in the union.
+                    if (const auto *parentStructure = builtin->appliedTo->to<IR::Member>()) {
+                        invalidateOtherHeaderUnionHeaders(parentStructure, *ctxt, result, s);
+                    }
                 } else if (builtin->name == IR::Type_Stack::push_front) {
                     BUG_CHECK(mc->arguments->size() == 1, "Expected 1 argument for %1%", mc);
                     auto arg = ctxt->conv->convert(mc->arguments->at(0)->expression);

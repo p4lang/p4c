@@ -123,7 +123,13 @@ void MidEnd::addDefaultPasses() {
         new P4::SimplifyComparisons(&refMap, &typeMap),
         // Expand header and struct assignments into sequences of field assignments.
         new PassRepeated({
-            new P4::CopyStructures(&refMap, &typeMap, false, true, nullptr),
+            new P4::CopyStructures(&refMap, &typeMap,
+                                   {
+                                       /*errorOnMethodCall*/ false,
+                                       /*copyHeaders*/ true,
+                                       /*expandUnions*/ false,
+                                   },
+                                   nullptr),
         }),
         new P4::RemoveParserControlFlow(&typeMap),
         // Flatten nested list expressions.
