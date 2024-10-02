@@ -85,7 +85,7 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *o
              new P4::EliminateSerEnums(&typeMap),
              convertEnums,
              [this, convertEnums]() { enumMap = convertEnums->getEnumMapping(); },
-             new P4::OrderArguments(&refMap, &typeMap),
+             new P4::OrderArguments(&typeMap),
              new P4::TypeChecking(&refMap, &typeMap),
              new P4::SimplifyKey(&typeMap,
                                  new P4::OrPolicy(new P4::IsValid(&typeMap), new P4::IsMask())),
