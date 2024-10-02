@@ -21,9 +21,10 @@ limitations under the License.
 
 namespace P4 {
 
-bool IsValid::isSimple(const IR::Expression *expression, const Visitor::Context *) {
+bool IsValid::isSimple(const IR::Expression *expression, const Visitor::Context *ctxt) {
     if (!expression->is<IR::MethodCallExpression>()) return false;
-    auto mi = MethodInstance::resolve(expression->to<IR::MethodCallExpression>(), refMap, typeMap);
+    auto mi = MethodInstance::resolve(expression->to<IR::MethodCallExpression>(), this, typeMap,
+                                      false, ctxt);
     if (!mi->is<BuiltInMethod>()) return false;
     auto bi = mi->to<BuiltInMethod>();
     if (bi->name.name == IR::Type_Header::isValid) {
@@ -51,7 +52,7 @@ const IR::Node *DoSimplifyKey::postorder(IR::KeyElement *element) {
         insertions = it->second;
     }
 
-    auto tmp = refMap->newName("key");
+    auto tmp = nameGen.newName("key");
     auto type = typeMap->getType(element->expression, true);
     auto decl = new IR::Declaration_Variable(tmp, type, nullptr);
     insertions->declarations.push_back(decl);

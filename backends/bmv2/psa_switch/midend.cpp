@@ -92,7 +92,7 @@ class PsaEnumOn32Bits : public P4::ChooseEnumRepresentation {
 
 PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStream)
     : PortableMidEnd(options) {
-    auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new PsaEnumOn32Bits("psa.p4"_cs));
+    auto convertEnums = new P4::ConvertEnums(&typeMap, new PsaEnumOn32Bits("psa.p4"_cs));
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     std::function<bool(const Context *, const IR::Expression *)> policy =
         [=](const Context *, const IR::Expression *e) -> bool {
@@ -109,36 +109,35 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
     };
     if (BMV2::PsaSwitchContext::get().options().loadIRFromJson == false) {
         addPasses({
-            options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
+            options.ndebug ? new P4::RemoveAssertAssume(&typeMap) : nullptr,
             new CheckUnsupported(),
-            new P4::RemoveMiss(&refMap, &typeMap),
-            new P4::EliminateNewtype(&refMap, &typeMap),
-            new P4::EliminateInvalidHeaders(&refMap, &typeMap),
-            new P4::EliminateSerEnums(&refMap, &typeMap),
+            new P4::RemoveMiss(&typeMap),
+            new P4::EliminateNewtype(&typeMap),
+            new P4::EliminateInvalidHeaders(&typeMap),
+            new P4::EliminateSerEnums(&typeMap),
             convertEnums,
             [this, convertEnums]() { enumMap = convertEnums->getEnumMapping(); },
-            new P4::OrderArguments(&refMap, &typeMap),
+            new P4::OrderArguments(&typeMap),
             new P4::TypeChecking(&refMap, &typeMap),
-            new P4::SimplifyKey(
-                &refMap, &typeMap,
-                new P4::OrPolicy(new P4::IsValid(&refMap, &typeMap), new P4::IsMask())),
+            new P4::SimplifyKey(&typeMap,
+                                new P4::OrPolicy(new P4::IsValid(&typeMap), new P4::IsMask())),
             new P4::ConstantFolding(&refMap, &typeMap),
             new P4::StrengthReduction(&typeMap),
-            new P4::SimplifySelectCases(&refMap, &typeMap, true),  // require constant keysets
-            new P4::ExpandLookahead(&refMap, &typeMap),
-            new P4::ExpandEmit(&refMap, &typeMap),
-            new P4::SimplifyParsers(&refMap),
+            new P4::SimplifySelectCases(&typeMap, true),  // require constant keysets
+            new P4::ExpandLookahead(&typeMap),
+            new P4::ExpandEmit(&typeMap),
+            new P4::SimplifyParsers(),
             new P4::StrengthReduction(&typeMap),
-            new P4::EliminateTuples(&refMap, &typeMap),
-            new P4::SimplifyComparisons(&refMap, &typeMap),
+            new P4::EliminateTuples(&typeMap),
+            new P4::SimplifyComparisons(&typeMap),
             new P4::CopyStructures(&refMap, &typeMap),
             new P4::NestedStructs(&refMap, &typeMap),
-            new P4::SimplifySelectList(&refMap, &typeMap),
-            new P4::RemoveSelectBooleans(&refMap, &typeMap),
-            new P4::FlattenHeaders(&refMap, &typeMap),
+            new P4::SimplifySelectList(&typeMap),
+            new P4::RemoveSelectBooleans(&typeMap),
+            new P4::FlattenHeaders(&typeMap),
             new P4::FlattenInterfaceStructs(&refMap, &typeMap),
-            new P4::ReplaceSelectRange(&refMap, &typeMap),
-            new P4::Predication(&refMap),
+            new P4::ReplaceSelectRange(),
+            new P4::Predication(),
             new P4::MoveDeclarations(),  // more may have been introduced
             new P4::ConstantFolding(&refMap, &typeMap),
             new P4::LocalCopyPropagation(&refMap, &typeMap, nullptr, policy),
@@ -156,10 +155,10 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
             }),
             new P4::SimplifyControlFlow(&typeMap),
             new P4::CompileTimeOperations(),
-            new P4::TableHit(&refMap, &typeMap),
+            new P4::TableHit(&typeMap),
             new P4::EliminateSwitch(&refMap, &typeMap),
             new P4::MoveActionsToTables(&refMap, &typeMap),
-            new P4::RemoveLeftSlices(&refMap, &typeMap),
+            new P4::RemoveLeftSlices(&typeMap),
             new P4::TypeChecking(&refMap, &typeMap),
             new P4::MidEndLast(),
             evaluator,

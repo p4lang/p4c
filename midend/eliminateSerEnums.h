@@ -40,9 +40,8 @@ class DoEliminateSerEnums final : public Transform {
 
 class EliminateSerEnums final : public PassManager {
  public:
-    EliminateSerEnums(ReferenceMap *refMap, TypeMap *typeMap,
-                      TypeChecking *typeChecking = nullptr) {
-        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
+    explicit EliminateSerEnums(TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
+        if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoEliminateSerEnums(typeMap));
         passes.push_back(new ClearTypeMap(typeMap));

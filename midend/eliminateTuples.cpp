@@ -28,7 +28,7 @@ const IR::Type *ReplacementMap::convertType(const IR::Type *type) {
             return type;
         }
     } else if (auto bl = type->to<IR::Type_BaseList>()) {
-        cstring name = ng->newName("tuple");
+        cstring name = ng.newName("tuple");
         IR::IndexedVector<IR::StructField> fields;
         size_t index = 0;
         for (auto t : bl->components) {
@@ -69,11 +69,11 @@ const IR::Node *DoReplaceTuples::postorder(IR::Type_BaseList *bl) {
     auto type = getOriginal<IR::Type_BaseList>();
     // If any of the arguments is a type variable leave the type unchanged
     for (auto arg : type->components) {
-        auto targ = repl->typeMap->getTypeType(arg, true);
+        auto targ = repl.typeMap->getTypeType(arg, true);
         if (targ->is<IR::Type_Var>()) return bl;
     }
-    auto canon = repl->typeMap->getTypeType(type, true)->to<IR::Type_BaseList>();
-    auto st = repl->getReplacement(canon)->getP4Type();
+    auto canon = repl.typeMap->getTypeType(type, true)->to<IR::Type_BaseList>();
+    auto st = repl.getReplacement(canon)->getP4Type();
     return st;
 }
 
@@ -81,7 +81,7 @@ const IR::Node *DoReplaceTuples::insertReplacements(const IR::Node *before) {
     // Check that we are in the top-level P4Program list of declarations.
     if (!getParent<IR::P4Program>()) return before;
 
-    auto result = repl->getNewReplacements();
+    auto result = repl.getNewReplacements();
     if (result == nullptr) return before;
     LOG3("Inserting replacements before " << dbp(before));
     result->push_back(before);
@@ -90,11 +90,11 @@ const IR::Node *DoReplaceTuples::insertReplacements(const IR::Node *before) {
 
 const IR::Node *DoReplaceTuples::postorder(IR::ArrayIndex *expression) {
     auto original = getOriginal<IR::ArrayIndex>();
-    auto type = repl->typeMap->getType(original->left);
+    auto type = repl.typeMap->getType(original->left);
     if (type->is<IR::Type_Tuple>()) {
         auto cst = expression->right->to<IR::Constant>();
         BUG_CHECK(cst, "%1%: Expected a constant", expression->right);
-        cstring field = "f"_cs + Util::toString(cst->asInt());
+        cstring field = absl::StrCat("f", cst->asInt());
         auto src = expression->right->srcInfo;
         return new IR::Member(src, expression->left, IR::ID(src, field));
     }

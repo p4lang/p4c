@@ -18,6 +18,7 @@ limitations under the License.
 #define MIDEND_SIMPLIFYKEY_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/sideEffects.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
@@ -66,16 +67,12 @@ class IsLikeLeftValue : public KeyIsSimple, public Inspector {
 /**
  * Policy that treats a key as simple if it a call to isValid().
  */
-class IsValid : public KeyIsSimple {
-    ReferenceMap *refMap;
+class IsValid : public KeyIsSimple, public Inspector, public ResolutionContext {
     TypeMap *typeMap;
 
  public:
-    IsValid(ReferenceMap *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
-        CHECK_NULL(refMap);
-        CHECK_NULL(typeMap);
-    }
-    bool isSimple(const IR::Expression *expression, const Visitor::Context *);
+    explicit IsValid(TypeMap *typeMap) : typeMap(typeMap) { CHECK_NULL(typeMap); }
+    bool isSimple(const IR::Expression *expression, const Visitor::Context *ctxt);
 };
 
 /**
@@ -144,19 +141,26 @@ class OrPolicy : public KeyIsSimple {
  * @post all complex table key expressions are replaced with a simpler expression.
  */
 class DoSimplifyKey : public Transform {
-    ReferenceMap *refMap;
+    MinimalNameGenerator nameGen;
     TypeMap *typeMap;
     KeyIsSimple *key_policy;
     std::map<const IR::P4Table *, TableInsertions *> toInsert;
 
  public:
-    DoSimplifyKey(ReferenceMap *refMap, TypeMap *typeMap, KeyIsSimple *key_policy)
-        : refMap(refMap), typeMap(typeMap), key_policy(key_policy) {
-        CHECK_NULL(refMap);
+    DoSimplifyKey(TypeMap *typeMap, KeyIsSimple *key_policy)
+        : typeMap(typeMap), key_policy(key_policy) {
         CHECK_NULL(typeMap);
         CHECK_NULL(key_policy);
         setName("DoSimplifyKey");
     }
+
+    Visitor::profile_t init_apply(const IR::Node *node) override {
+        auto rv = Transform::init_apply(node);
+        node->apply(nameGen);
+
+        return rv;
+    }
+
     const IR::Node *doStatement(const IR::Statement *statement, const IR::Expression *expression);
 
     // These should be all kinds of statements that may contain a table apply
@@ -183,11 +187,10 @@ class DoSimplifyKey : public Transform {
  */
 class SimplifyKey : public PassManager {
  public:
-    SimplifyKey(ReferenceMap *refMap, TypeMap *typeMap, KeyIsSimple *key_policy,
-                TypeChecking *typeChecking = nullptr) {
-        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
+    SimplifyKey(TypeMap *typeMap, KeyIsSimple *key_policy, TypeChecking *typeChecking = nullptr) {
+        if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap);
         passes.push_back(typeChecking);
-        passes.push_back(new DoSimplifyKey(refMap, typeMap, key_policy));
+        passes.push_back(new DoSimplifyKey(typeMap, key_policy));
         setName("SimplifyKey");
     }
 };

@@ -40,19 +40,19 @@ static IR::Vector<IR::Argument> *reorder(const ParameterSubstitution &substituti
 }
 
 const IR::Node *DoOrderArguments::postorder(IR::MethodCallExpression *expression) {
-    auto mi = MethodInstance::resolve(expression, refMap, typeMap);
+    auto mi = MethodInstance::resolve(expression, this, typeMap);
     expression->arguments = reorder(mi->substitution);
     return expression;
 }
 
 const IR::Node *DoOrderArguments::postorder(IR::ConstructorCallExpression *expression) {
-    ConstructorCall *ccd = ConstructorCall::resolve(expression, refMap, typeMap);
+    ConstructorCall *ccd = ConstructorCall::resolve(expression, this, typeMap);
     expression->arguments = reorder(ccd->substitution);
     return expression;
 }
 
 const IR::Node *DoOrderArguments::postorder(IR::Declaration_Instance *instance) {
-    auto inst = Instantiation::resolve(instance, refMap, typeMap);
+    auto inst = Instantiation::resolve(instance, this, typeMap);
     instance->arguments = reorder(inst->substitution);
     return instance;
 }

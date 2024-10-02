@@ -251,12 +251,13 @@ class ReplaceStructs : public Transform, P4WriteContext {
 };
 
 class FlattenInterfaceStructs final : public PassManager {
+    NestedStructMap sm;
+
  public:
-    FlattenInterfaceStructs(ReferenceMap *refMap, TypeMap *typeMap) {
-        auto sm = new NestedStructMap(refMap, typeMap);
+    FlattenInterfaceStructs(ReferenceMap *refMap, TypeMap *typeMap) : sm(refMap, typeMap) {
         passes.push_back(new TypeChecking(refMap, typeMap));
-        passes.push_back(new FindTypesToReplace(sm));
-        passes.push_back(new ReplaceStructs(sm));
+        passes.push_back(new FindTypesToReplace(&sm));
+        passes.push_back(new ReplaceStructs(&sm));
         passes.push_back(new ClearTypeMap(typeMap));
         setName("FlattenInterfaceStructs");
     }

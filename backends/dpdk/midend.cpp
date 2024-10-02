@@ -108,8 +108,8 @@ class ErrorWidth : public P4::ChooseErrorRepresentation {
 };
 
 DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
-    auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits());
-    auto convertErrors = new P4::ConvertErrors(&refMap, &typeMap, new ErrorWidth(16));
+    auto convertEnums = new P4::ConvertEnums(&typeMap, new EnumOn32Bits());
+    auto convertErrors = new P4::ConvertErrors(&typeMap, new ErrorWidth(16));
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     std::function<bool(const Context *, const IR::Expression *)> policy =
         [=](const Context *ctx, const IR::Expression *) -> bool {
@@ -168,45 +168,44 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
 
     if (!DPDK::DpdkContext::get().options().loadIRFromJson) {
         addPasses({
-            options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
-            new P4::RemoveMiss(&refMap, &typeMap),
-            new P4::EliminateNewtype(&refMap, &typeMap),
-            new P4::EliminateSerEnums(&refMap, &typeMap),
-            new P4::EliminateInvalidHeaders(&refMap, &typeMap),
+            options.ndebug ? new P4::RemoveAssertAssume(&typeMap) : nullptr,
+            new P4::RemoveMiss(&typeMap),
+            new P4::EliminateNewtype(&typeMap),
+            new P4::EliminateSerEnums(&typeMap),
+            new P4::EliminateInvalidHeaders(&typeMap),
             convertEnums,
             new VisitFunctor([this, convertEnums]() { enumMap = convertEnums->getEnumMapping(); }),
-            new P4::OrderArguments(&refMap, &typeMap),
+            new P4::OrderArguments(&typeMap),
             new P4::TypeChecking(&refMap, &typeMap),
             new P4::SimplifyKey(
-                &refMap, &typeMap,
-                new P4::OrPolicy(new P4::IsValid(&refMap, &typeMap), new P4::IsLikeLeftValue())),
+                &typeMap, new P4::OrPolicy(new P4::IsValid(&typeMap), new P4::IsLikeLeftValue())),
             new P4::RemoveExits(&typeMap),
             new P4::ConstantFolding(&refMap, &typeMap),
             new P4::StrengthReduction(&typeMap),
-            new P4::SimplifySelectCases(&refMap, &typeMap, true),
+            new P4::SimplifySelectCases(&typeMap, true),
             // The lookahead implementation in DPDK target supports only a header instance as
             // an operand, we do not expand headers.
             // Structures expanded here are then processed as base bit type in ConvertLookahead
             // pass in backend.
-            new P4::ExpandLookahead(&refMap, &typeMap, nullptr, false),
-            new P4::ExpandEmit(&refMap, &typeMap),
-            new P4::HandleNoMatch(&refMap),
-            new P4::SimplifyParsers(&refMap),
+            new P4::ExpandLookahead(&typeMap, nullptr, false),
+            new P4::ExpandEmit(&typeMap),
+            new P4::HandleNoMatch(),
+            new P4::SimplifyParsers(),
             new P4::StrengthReduction(&typeMap),
-            new P4::EliminateTuples(&refMap, &typeMap),
-            new P4::SimplifyComparisons(&refMap, &typeMap),
+            new P4::EliminateTuples(&typeMap),
+            new P4::SimplifyComparisons(&typeMap),
             new P4::CopyStructures(&refMap, &typeMap, false /* errorOnMethodCall */),
             new P4::NestedStructs(&refMap, &typeMap),
-            new P4::SimplifySelectList(&refMap, &typeMap),
-            new P4::RemoveSelectBooleans(&refMap, &typeMap),
-            new P4::FlattenHeaders(&refMap, &typeMap),
+            new P4::SimplifySelectList(&typeMap),
+            new P4::RemoveSelectBooleans(&typeMap),
+            new P4::FlattenHeaders(&typeMap),
             new P4::FlattenInterfaceStructs(&refMap, &typeMap),
-            new P4::EliminateTypedef(&refMap, &typeMap),
+            new P4::EliminateTypedef(&typeMap),
             new P4::HSIndexSimplifier(&refMap, &typeMap),
             new P4::ParsersUnroll(true, &refMap, &typeMap),
             new P4::FlattenHeaderUnion(&refMap, &typeMap),
             new P4::SimplifyControlFlow(&typeMap),
-            new P4::ReplaceSelectRange(&refMap, &typeMap),
+            new P4::ReplaceSelectRange(),
             new P4::MoveDeclarations(),  // more may have been introduced
             new P4::ConstantFolding(&refMap, &typeMap),
             new P4::LocalCopyPropagation(&refMap, &typeMap, nullptr, policy),
@@ -219,11 +218,11 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
             new P4::SimplifyControlFlow(&typeMap),
             new P4::SimplifySwitch(&typeMap),
             new P4::CompileTimeOperations(),
-            new P4::TableHit(&refMap, &typeMap),
-            new P4::RemoveLeftSlices(&refMap, &typeMap),
+            new P4::TableHit(&typeMap),
+            new P4::RemoveLeftSlices(&typeMap),
             new P4::TypeChecking(&refMap, &typeMap),
             convertErrors,
-            new P4::EliminateSerEnums(&refMap, &typeMap),
+            new P4::EliminateSerEnums(&typeMap),
             new P4::MidEndLast(),
             evaluator,
             new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),

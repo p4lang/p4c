@@ -24,46 +24,46 @@ const IR::ToplevelBlock *MidEnd::run(TCOptions &options, const IR::P4Program *pr
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
 
     PassManager midEnd = {};
-    midEnd.addPasses(
-        {new P4::ConvertEnums(&refMap, &typeMap, new P4::EnumOn32Bits()),
-         new P4::ClearTypeMap(&typeMap),
-         new P4::RemoveMiss(&refMap, &typeMap),
-         new P4::EliminateInvalidHeaders(&refMap, &typeMap),
-         new P4::EliminateNewtype(&refMap, &typeMap),
-         new P4::EliminateSerEnums(&refMap, &typeMap),
-         new P4::SimplifyControlFlow(&typeMap),
-         new P4::SimplifyKey(
-             &refMap, &typeMap,
-             new P4::OrPolicy(new P4::IsValid(&refMap, &typeMap), new P4::IsLikeLeftValue())),
-         new P4::RemoveExits(&typeMap),
-         new P4::ConstantFolding(&refMap, &typeMap),
-         new P4::SimplifySelectCases(&refMap, &typeMap, false),  // accept non-constant keysets
-         new P4::ExpandEmit(&refMap, &typeMap),
-         new P4::HandleNoMatch(&refMap),
-         new P4::SimplifyParsers(&refMap),
-         new PassRepeated({
-             new P4::ConstantFolding(&refMap, &typeMap),
-             new P4::StrengthReduction(&typeMap),
-         }),
-         new P4::SimplifyComparisons(&refMap, &typeMap),
-         new P4::EliminateTuples(&refMap, &typeMap),
-         new P4::SimplifySelectList(&refMap, &typeMap),
-         new P4::MoveDeclarations(),  // more may have been introduced
-         new P4::LocalCopyPropagation(&refMap, &typeMap),
-         new PassRepeated({
-             new P4::ConstantFolding(&refMap, &typeMap),
-             new P4::StrengthReduction(&typeMap),
-         }),
-         new P4::RemoveSelectBooleans(&refMap, &typeMap),
-         new P4::SingleArgumentSelect(&refMap, &typeMap),
-         new P4::ConstantFolding(&refMap, &typeMap),
-         new P4::SimplifyControlFlow(&typeMap),
-         new P4::TableHit(&refMap, &typeMap),
-         new P4::RemoveLeftSlices(&refMap, &typeMap),
-         new EBPF::Lower(&refMap, &typeMap),
-         new P4::ParsersUnroll(true, &refMap, &typeMap),
-         evaluator,
-         new P4::MidEndLast()});
+    midEnd.addPasses({
+        new P4::ConvertEnums(&typeMap, new P4::EnumOn32Bits()),
+        new P4::ClearTypeMap(&typeMap),
+        new P4::RemoveMiss(&typeMap),
+        new P4::EliminateInvalidHeaders(&typeMap),
+        new P4::EliminateNewtype(&typeMap),
+        new P4::EliminateSerEnums(&typeMap),
+        new P4::SimplifyControlFlow(&typeMap),
+        new P4::SimplifyKey(&typeMap,
+                            new P4::OrPolicy(new P4::IsValid(&typeMap), new P4::IsLikeLeftValue())),
+        new P4::RemoveExits(&typeMap),
+        new P4::ConstantFolding(&refMap, &typeMap),
+        new P4::SimplifySelectCases(&typeMap, false),  // accept non-constant keysets
+        new P4::ExpandEmit(&typeMap),
+        new P4::HandleNoMatch(),
+        new P4::SimplifyParsers(),
+        new PassRepeated({
+            new P4::ConstantFolding(&refMap, &typeMap),
+            new P4::StrengthReduction(&typeMap),
+        }),
+        new P4::SimplifyComparisons(&typeMap),
+        new P4::EliminateTuples(&typeMap),
+        new P4::SimplifySelectList(&typeMap),
+        new P4::MoveDeclarations(),  // more may have been introduced
+        new P4::LocalCopyPropagation(&refMap, &typeMap),
+        new PassRepeated({
+            new P4::ConstantFolding(&refMap, &typeMap),
+            new P4::StrengthReduction(&typeMap),
+        }),
+        new P4::RemoveSelectBooleans(&typeMap),
+        new P4::SingleArgumentSelect(&typeMap),
+        new P4::ConstantFolding(&refMap, &typeMap),
+        new P4::SimplifyControlFlow(&typeMap),
+        new P4::TableHit(&typeMap),
+        new P4::RemoveLeftSlices(&typeMap),
+        new EBPF::Lower(&refMap, &typeMap),
+        new P4::ParsersUnroll(true, &refMap, &typeMap),
+        evaluator,
+        new P4::MidEndLast(),
+    });
     if (options.listMidendPasses) {
         midEnd.listPasses(*outStream, cstring::newline);
         *outStream << std::endl;

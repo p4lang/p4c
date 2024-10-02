@@ -57,7 +57,7 @@ const IR::Node *DoEliminateInvalidHeaders::postorder(IR::InvalidHeader *expressi
         ::P4::error("%1%: Cannot eliminate invalid header", expression);
         return expression;
     }
-    cstring name = refMap->newName("ih");
+    cstring name = nameGen.newName("ih");
     auto src = expression->srcInfo;
     auto decl = new IR::Declaration_Variable(name, expression->headerType->getP4Type());
     variables.push_back(decl);
@@ -77,7 +77,7 @@ const IR::Node *DoEliminateInvalidHeaders::postorder(IR::InvalidHeaderUnion *exp
         ::P4::error("%1%: Cannot eliminate invalid header union", expression);
         return expression;
     }
-    cstring name = refMap->newName("ih");
+    cstring name = nameGen.newName("ih");
     auto src = expression->srcInfo;
     auto decl = new IR::Declaration_Variable(name, expression->headerUnionType->getP4Type());
     variables.push_back(decl);  // Uninitialized header unions are invalid

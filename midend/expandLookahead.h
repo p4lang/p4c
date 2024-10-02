@@ -18,6 +18,7 @@ limitations under the License.
 #define MIDEND_EXPANDLOOKAHEAD_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
@@ -37,8 +38,8 @@ namespace P4 {
 /// determines whether headers (IR::Type_Header) are expanded or not.
 /// Default value for the flag (when optional constructor argument is not used) is
 /// true, which means that by default headers are expanded.
-class DoExpandLookahead : public Transform {
-    P4::ReferenceMap *refMap;
+class DoExpandLookahead : public Transform, public ResolutionContext {
+    MinimalNameGenerator nameGen;
     P4::TypeMap *typeMap;
     IR::IndexedVector<IR::Declaration> newDecls;
     /**
@@ -60,12 +61,18 @@ class DoExpandLookahead : public Transform {
     ExpansionInfo *convertLookahead(const IR::MethodCallExpression *expression);
 
  public:
-    DoExpandLookahead(ReferenceMap *refMap, TypeMap *typeMap, bool expandHeader = true)
-        : refMap(refMap), typeMap(typeMap), expandHeader(expandHeader) {
-        CHECK_NULL(refMap);
+    explicit DoExpandLookahead(TypeMap *typeMap, bool expandHeader = true)
+        : typeMap(typeMap), expandHeader(expandHeader) {
         CHECK_NULL(typeMap);
         setName("DoExpandLookahead");
     }
+    Visitor::profile_t init_apply(const IR::Node *node) override {
+        auto rv = Transform::init_apply(node);
+        node->apply(nameGen);
+
+        return rv;
+    }
+
     const IR::Node *postorder(IR::AssignmentStatement *statement) override;
     const IR::Node *postorder(IR::MethodCallStatement *statement) override;
     const IR::Node *preorder(IR::P4Control *control) override {
@@ -87,11 +94,11 @@ class DoExpandLookahead : public Transform {
 /// See also description in class DoExpandLookahead.
 class ExpandLookahead : public PassManager {
  public:
-    ExpandLookahead(ReferenceMap *refMap, TypeMap *typeMap, TypeChecking *typeChecking = nullptr,
-                    bool expandHeader = true) {
-        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
+    explicit ExpandLookahead(TypeMap *typeMap, TypeChecking *typeChecking = nullptr,
+                             bool expandHeader = true) {
+        if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap);
         passes.push_back(typeChecking);
-        passes.push_back(new DoExpandLookahead(refMap, typeMap, expandHeader));
+        passes.push_back(new DoExpandLookahead(typeMap, expandHeader));
         setName("ExpandLookahead");
     }
 };

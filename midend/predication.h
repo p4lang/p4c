@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef MIDEND_PREDICATION_H_
 #define MIDEND_PREDICATION_H_
 
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
@@ -81,7 +82,7 @@ class Predication final : public Transform {
     };
 
     // Used to dynamically generate names for variables in parts of code
-    NameGenerator *generator;
+    MinimalNameGenerator generator;
     // Used to remove empty statements and empty block statements that appear in the code
     EmptyStatementRemover remover;
     bool inside_action;
@@ -122,10 +123,16 @@ class Predication final : public Transform {
     }
 
  public:
-    explicit Predication(NameGenerator *gen)
-        : generator(gen), inside_action(false), ifNestingLevel(0), depNestingLevel(0) {
+    explicit Predication() : inside_action(false), ifNestingLevel(0), depNestingLevel(0) {
         setName("Predication");
     }
+    Visitor::profile_t init_apply(const IR::Node *node) override {
+        auto rv = Transform::init_apply(node);
+        node->apply(generator);
+
+        return rv;
+    }
+
     const IR::Expression *clone(const IR::Expression *expression);
     const IR::Node *clone(const IR::AssignmentStatement *statement);
     const IR::Node *preorder(IR::IfStatement *statement) override;

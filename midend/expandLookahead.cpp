@@ -66,7 +66,7 @@ void DoExpandLookahead::expand(
 DoExpandLookahead::ExpansionInfo *DoExpandLookahead::convertLookahead(
     const IR::MethodCallExpression *expression) {
     if (expression == nullptr) return nullptr;
-    auto mi = MethodInstance::resolve(expression, refMap, typeMap);
+    auto mi = MethodInstance::resolve(expression, this, typeMap);
     if (!mi->is<P4::ExternMethod>()) return nullptr;
     auto em = mi->to<P4::ExternMethod>();
     if (em->originalExternType->name != P4CoreLibrary::instance().packetIn.name ||
@@ -86,7 +86,7 @@ DoExpandLookahead::ExpansionInfo *DoExpandLookahead::convertLookahead(
     if (width < 0) return nullptr;
 
     auto bittype = IR::Type_Bits::get(width);
-    auto name = refMap->newName("tmp");
+    auto name = nameGen.newName("tmp");
     auto decl = new IR::Declaration_Variable(IR::ID(name), bittype, nullptr);
     newDecls.push_back(decl);
 

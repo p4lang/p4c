@@ -549,10 +549,10 @@ class FindUninitialized : public Inspector {
         auto acceptState = parser->getDeclByName(IR::ParserState::accept)->to<IR::ParserState>();
 
         ParserCallGraph transitions("transitions");
-        ComputeParserCG pcg(refMap, &transitions);
+        ComputeParserCG pcg(&transitions);
         pcg.setCalledBy(this);
 
-        (void)parser->apply(pcg);
+        (void)parser->apply(pcg, getChildContext());
         ordered_set<const IR::ParserState *> toRun;  // worklist
         ordered_map<const IR::ParserState *, HeaderDefinitions *> inputHeaderDefs;
 
@@ -1525,7 +1525,7 @@ const IR::Node *DoSimplifyDefUse::process(const IR::Node *node) {
     ProcessDefUse process(refMap, typeMap);
     process.setCalledBy(this);
     LOG5("ProcessDefUse of:" << Log::endl << node);
-    return node->apply(process);
+    return node->apply(process, getChildContext());
 }
 
 }  // namespace P4

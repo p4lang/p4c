@@ -213,7 +213,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new SwitchAddDefault,
         new FrontEndDump(),  // used for testing the program at this point
         new RemoveAllUnusedDeclarations(&refMap, *policy, true),
-        new SimplifyParsers(&refMap),
+        new SimplifyParsers(),
         new ResetHeaders(&typeMap),
         new UniqueNames(),       // Give each local declaration a unique internal name
         new MoveDeclarations(),  // Move all local declarations to the beginning

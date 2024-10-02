@@ -159,7 +159,7 @@ class IsNonConstantArrayIndex : public KeyIsSimple, public Inspector {
 };
 
 IR::Node *HSIndexContretizer::preorder(IR::P4Control *control) {
-    DoSimplifyKey keySimplifier(refMap, typeMap, new IsNonConstantArrayIndex());
+    DoSimplifyKey keySimplifier(typeMap, new IsNonConstantArrayIndex());
     const auto *controlKeySimplified =
         control->apply(keySimplifier, getContext())->to<IR::P4Control>();
     auto *newControl = controlKeySimplified->clone();

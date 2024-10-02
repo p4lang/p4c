@@ -61,7 +61,7 @@ bool DoExpandEmit::expandArg(const IR::Type *type, const IR::Argument *arg,
 }
 
 const IR::Node *DoExpandEmit::postorder(IR::MethodCallStatement *statement) {
-    auto mi = MethodInstance::resolve(statement->methodCall, refMap, typeMap);
+    auto mi = MethodInstance::resolve(statement->methodCall, this, typeMap);
     if (auto em = mi->to<P4::ExternMethod>()) {
         if (em->originalExternType->name.name == P4::P4CoreLibrary::instance().packetOut.name &&
             em->method->name.name == P4::P4CoreLibrary::instance().packetOut.emit.name) {
