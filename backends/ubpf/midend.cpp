@@ -75,7 +75,7 @@ const IR::ToplevelBlock *MidEnd::run(EbpfOptions &options, const IR::P4Program *
     PassManager midEnd;
     if (options.loadIRFromJson == false) {
         midEnd.addPasses({
-            new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits()),
+            new P4::ConvertEnums(&typeMap, new EnumOn32Bits()),
             new P4::RemoveMiss(&refMap, &typeMap),
             new P4::ClearTypeMap(&typeMap),
             new P4::EliminateNewtype(&typeMap),

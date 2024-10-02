@@ -92,7 +92,7 @@ class PsaEnumOn32Bits : public P4::ChooseEnumRepresentation {
 
 PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStream)
     : PortableMidEnd(options) {
-    auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new PsaEnumOn32Bits("psa.p4"_cs));
+    auto convertEnums = new P4::ConvertEnums(&typeMap, new PsaEnumOn32Bits("psa.p4"_cs));
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     std::function<bool(const Context *, const IR::Expression *)> policy =
         [=](const Context *, const IR::Expression *e) -> bool {

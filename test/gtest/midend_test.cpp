@@ -57,7 +57,7 @@ TEST_F(P4CMidend, convertEnums_pass) {
     // Log::addDebugSpec("convertEnums:0");
     ReferenceMap refMap;
     TypeMap typeMap;
-    auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits());
+    auto convertEnums = new P4::ConvertEnums(&typeMap, new EnumOn32Bits());
     PassManager passes = {convertEnums};
     pgm = pgm->apply(passes);
     ASSERT_TRUE(pgm != nullptr && errorCount() == 0);
@@ -74,7 +74,7 @@ TEST_F(P4CMidend, convertEnums_used_before_declare) {
 
     ReferenceMap refMap;
     TypeMap typeMap;
-    auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits());
+    auto convertEnums = new P4::ConvertEnums(&typeMap, new EnumOn32Bits());
     PassManager passes = {convertEnums};
     pgm = pgm->apply(passes);
     // use enum before declaration should fail
@@ -93,7 +93,7 @@ TEST_F(P4CMidend, getEnumMapping) {
     ReferenceMap refMap;
     TypeMap typeMap;
     P4::ConvertEnums::EnumMapping enumMap;
-    auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits());
+    auto convertEnums = new P4::ConvertEnums(&typeMap, new EnumOn32Bits());
     PassManager passes_ = {convertEnums};
     auto result = pgm->apply(passes_);
     ASSERT_TRUE(result != nullptr && ::P4::errorCount() == 0);

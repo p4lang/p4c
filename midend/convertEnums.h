@@ -42,7 +42,7 @@ class ChooseEnumRepresentation {
 };
 
 class EnumRepresentation {
-    std::map<cstring, unsigned> repr;
+    string_map<unsigned> repr;
 
  public:
     const IR::Type_Bits *type;
@@ -53,12 +53,10 @@ class EnumRepresentation {
     void add(cstring decl) { repr.emplace(decl, repr.size()); }
     unsigned get(cstring decl) const { return ::P4::get(repr, decl); }
 
-    using iterator = decltype(repr)::iterator;
-    using const_iterator = decltype(repr)::const_iterator;
-    iterator begin() { return repr.begin(); }
-    const_iterator begin() const { return repr.begin(); }
-    iterator end() { return repr.end(); }
-    const_iterator end() const { return repr.end(); }
+    auto begin() { return repr.begin(); }
+    auto begin() const { return repr.begin(); }
+    auto end() { return repr.end(); }
+    auto end() const { return repr.end(); }
 };
 
 /** implement a pass to convert Type_Enum to Type_Bits
@@ -116,10 +114,10 @@ class ConvertEnums : public PassManager {
 
  public:
     using EnumMapping = decltype(DoConvertEnums::repr);
-    ConvertEnums(ReferenceMap *refMap, TypeMap *typeMap, ChooseEnumRepresentation *policy,
+    ConvertEnums(TypeMap *typeMap, ChooseEnumRepresentation *policy,
                  TypeChecking *typeChecking = nullptr)
         : convertEnums(new DoConvertEnums(policy, typeMap)) {
-        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
+        if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(convertEnums);
         passes.push_back(new ClearTypeMap(typeMap));

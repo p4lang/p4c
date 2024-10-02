@@ -74,8 +74,7 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *o
     : MidEnd(options) {
     auto *evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     if (!BMV2::SimpleSwitchContext::get().options().loadIRFromJson) {
-        auto *convertEnums =
-            new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits("v1model.p4"_cs));
+        auto *convertEnums = new P4::ConvertEnums(&typeMap, new EnumOn32Bits("v1model.p4"_cs));
         addPasses(
             {options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
              new P4::CheckTableSize(),

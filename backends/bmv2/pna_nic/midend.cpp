@@ -92,7 +92,7 @@ class PnaEnumOn32Bits : public P4::ChooseEnumRepresentation {
 
 PnaNicMidEnd::PnaNicMidEnd(CompilerOptions &options, std::ostream *outStream)
     : PortableMidEnd(options) {
-    auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new PnaEnumOn32Bits("pna.p4"_cs));
+    auto convertEnums = new P4::ConvertEnums(&typeMap, new PnaEnumOn32Bits("pna.p4"_cs));
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     std::function<bool(const Context *, const IR::Expression *)> policy =
         [=](const Context *, const IR::Expression *e) -> bool {
