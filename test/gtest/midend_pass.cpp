@@ -66,7 +66,7 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
     defuse = new P4::ComputeDefUse;
 
     addPasses(
-        {options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
+        {options.ndebug ? new P4::RemoveAssertAssume(&typeMap) : nullptr,
          new P4::RemoveMiss(&typeMap),
          new P4::EliminateNewtype(&typeMap),
          new P4::EliminateInvalidHeaders(&refMap, &typeMap),
@@ -83,13 +83,13 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          new P4::SimplifyParsers(),
          new P4::StrengthReduction(&typeMap),
          new P4::EliminateTuples(&typeMap),
-         new P4::SimplifyComparisons(&refMap, &typeMap),
+         new P4::SimplifyComparisons(&typeMap),
          new P4::CopyStructures(&refMap, &typeMap),
          new P4::NestedStructs(&refMap, &typeMap),
          new P4::StrengthReduction(&typeMap),
          new P4::SimplifySelectList(&typeMap),
-         new P4::RemoveSelectBooleans(&refMap, &typeMap),
-         new P4::FlattenHeaders(&refMap, &typeMap),
+         new P4::RemoveSelectBooleans(&typeMap),
+         new P4::FlattenHeaders(&typeMap),
          new P4::FlattenInterfaceStructs(&refMap, &typeMap),
          new P4::EliminateTypedef(&typeMap),
          new P4::ReplaceSelectRange(),

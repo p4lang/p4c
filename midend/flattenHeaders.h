@@ -138,10 +138,9 @@ class ReplaceHeaders : public Transform, P4WriteContext {
 
 class FlattenHeaders final : public PassManager {
  public:
-    FlattenHeaders(ReferenceMap *refMap, TypeMap *typeMap,
-                   AnnotationSelectionPolicy *policy = nullptr) {
+    FlattenHeaders(TypeMap *typeMap, AnnotationSelectionPolicy *policy = nullptr) {
         auto findHeadersToReplace = new FindHeaderTypesToReplace(typeMap, policy);
-        passes.push_back(new TypeChecking(refMap, typeMap));
+        passes.push_back(new TypeChecking(nullptr, typeMap));
         passes.push_back(findHeadersToReplace);
         passes.push_back(new ReplaceHeaders(typeMap, findHeadersToReplace));
         passes.push_back(new ClearTypeMap(typeMap));

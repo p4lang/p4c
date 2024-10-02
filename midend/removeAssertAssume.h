@@ -8,14 +8,11 @@
 
 namespace P4 {
 // Removes assert and assume statements if it is not in debug mode
-class DoRemoveAssertAssume : public Transform {
-    P4::ReferenceMap *refMap;
+class DoRemoveAssertAssume : public Transform, public ResolutionContext {
     P4::TypeMap *typeMap;
 
  public:
-    explicit DoRemoveAssertAssume(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
-        : refMap(refMap), typeMap(typeMap) {
-        CHECK_NULL(refMap);
+    explicit DoRemoveAssertAssume(P4::TypeMap *typeMap) : typeMap(typeMap) {
         CHECK_NULL(typeMap);
         setName("DoRemoveAssertAssume");
     }
@@ -25,11 +22,10 @@ class DoRemoveAssertAssume : public Transform {
 
 class RemoveAssertAssume final : public PassManager {
  public:
-    RemoveAssertAssume(ReferenceMap *refMap, TypeMap *typeMap,
-                       TypeChecking *typeChecking = nullptr) {
-        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
+    explicit RemoveAssertAssume(TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
+        if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap);
         passes.push_back(typeChecking);
-        passes.push_back(new DoRemoveAssertAssume(refMap, typeMap));
+        passes.push_back(new DoRemoveAssertAssume(typeMap));
         setName("RemoveAssertAssume");
     }
 };

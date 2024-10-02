@@ -76,7 +76,7 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *o
     if (!BMV2::SimpleSwitchContext::get().options().loadIRFromJson) {
         auto *convertEnums = new P4::ConvertEnums(&typeMap, new EnumOn32Bits("v1model.p4"_cs));
         addPasses(
-            {options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
+            {options.ndebug ? new P4::RemoveAssertAssume(&typeMap) : nullptr,
              new P4::CheckTableSize(),
              new CheckUnsupported(),
              new P4::RemoveMiss(&typeMap),
@@ -98,12 +98,12 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *o
              new P4::SimplifyParsers(),
              new P4::StrengthReduction(&typeMap),
              new P4::EliminateTuples(&typeMap),
-             new P4::SimplifyComparisons(&refMap, &typeMap),
+             new P4::SimplifyComparisons(&typeMap),
              new P4::CopyStructures(&refMap, &typeMap),
              new P4::NestedStructs(&refMap, &typeMap),
              new P4::SimplifySelectList(&typeMap),
-             new P4::RemoveSelectBooleans(&refMap, &typeMap),
-             new P4::FlattenHeaders(&refMap, &typeMap),
+             new P4::RemoveSelectBooleans(&typeMap),
+             new P4::FlattenHeaders(&typeMap),
              new P4::FlattenInterfaceStructs(&refMap, &typeMap),
              new P4::ReplaceSelectRange(),
              new P4::Predication(&refMap),
@@ -130,7 +130,7 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *o
              new P4::CompileTimeOperations(),
              new P4::TableHit(&refMap, &typeMap),
              new P4::EliminateSwitch(&refMap, &typeMap),
-             new P4::RemoveLeftSlices(&refMap, &typeMap),
+             new P4::RemoveLeftSlices(&typeMap),
              // p4c-bm removed unused action parameters. To produce a compatible
              // control plane API, we remove them as well for P4-14 programs.
              {isv1 ? new P4::RemoveUnusedActionParameters(&refMap) : nullptr},

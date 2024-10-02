@@ -45,8 +45,8 @@ class DoRemoveLeftSlices : public Transform {
 
 class RemoveLeftSlices : public PassManager {
  public:
-    RemoveLeftSlices(ReferenceMap *refMap, TypeMap *typeMap) {
-        passes.push_back(new P4::TypeChecking(refMap, typeMap));
+    explicit RemoveLeftSlices(TypeMap *typeMap) {
+        passes.push_back(new TypeChecking(nullptr, typeMap));
         passes.push_back(new DoRemoveLeftSlices(typeMap));
         setName("RemoveLeftSlices");
     }

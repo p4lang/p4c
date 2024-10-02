@@ -109,7 +109,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
     };
     if (BMV2::PsaSwitchContext::get().options().loadIRFromJson == false) {
         addPasses({
-            options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
+            options.ndebug ? new P4::RemoveAssertAssume(&typeMap) : nullptr,
             new CheckUnsupported(),
             new P4::RemoveMiss(&typeMap),
             new P4::EliminateNewtype(&typeMap),
@@ -130,12 +130,12 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
             new P4::SimplifyParsers(),
             new P4::StrengthReduction(&typeMap),
             new P4::EliminateTuples(&typeMap),
-            new P4::SimplifyComparisons(&refMap, &typeMap),
+            new P4::SimplifyComparisons(&typeMap),
             new P4::CopyStructures(&refMap, &typeMap),
             new P4::NestedStructs(&refMap, &typeMap),
             new P4::SimplifySelectList(&typeMap),
-            new P4::RemoveSelectBooleans(&refMap, &typeMap),
-            new P4::FlattenHeaders(&refMap, &typeMap),
+            new P4::RemoveSelectBooleans(&typeMap),
+            new P4::FlattenHeaders(&typeMap),
             new P4::FlattenInterfaceStructs(&refMap, &typeMap),
             new P4::ReplaceSelectRange(),
             new P4::Predication(&refMap),
@@ -159,7 +159,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
             new P4::TableHit(&refMap, &typeMap),
             new P4::EliminateSwitch(&refMap, &typeMap),
             new P4::MoveActionsToTables(&refMap, &typeMap),
-            new P4::RemoveLeftSlices(&refMap, &typeMap),
+            new P4::RemoveLeftSlices(&typeMap),
             new P4::TypeChecking(&refMap, &typeMap),
             new P4::MidEndLast(),
             evaluator,
