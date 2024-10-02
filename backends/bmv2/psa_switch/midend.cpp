@@ -119,9 +119,8 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
             [this, convertEnums]() { enumMap = convertEnums->getEnumMapping(); },
             new P4::OrderArguments(&refMap, &typeMap),
             new P4::TypeChecking(&refMap, &typeMap),
-            new P4::SimplifyKey(
-                &refMap, &typeMap,
-                new P4::OrPolicy(new P4::IsValid(&refMap, &typeMap), new P4::IsMask())),
+            new P4::SimplifyKey(&typeMap,
+                                new P4::OrPolicy(new P4::IsValid(&typeMap), new P4::IsMask())),
             new P4::ConstantFolding(&refMap, &typeMap),
             new P4::StrengthReduction(&typeMap),
             new P4::SimplifySelectCases(&typeMap, true),  // require constant keysets

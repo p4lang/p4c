@@ -178,8 +178,7 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
             new P4::OrderArguments(&refMap, &typeMap),
             new P4::TypeChecking(&refMap, &typeMap),
             new P4::SimplifyKey(
-                &refMap, &typeMap,
-                new P4::OrPolicy(new P4::IsValid(&refMap, &typeMap), new P4::IsLikeLeftValue())),
+                &typeMap, new P4::OrPolicy(new P4::IsValid(&typeMap), new P4::IsLikeLeftValue())),
             new P4::RemoveExits(&typeMap),
             new P4::ConstantFolding(&refMap, &typeMap),
             new P4::StrengthReduction(&typeMap),

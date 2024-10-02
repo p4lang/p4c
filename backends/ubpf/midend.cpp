@@ -82,8 +82,7 @@ const IR::ToplevelBlock *MidEnd::run(EbpfOptions &options, const IR::P4Program *
             new P4::EliminateInvalidHeaders(&refMap, &typeMap),
             new P4::SimplifyControlFlow(&typeMap),
             new P4::SimplifyKey(
-                &refMap, &typeMap,
-                new P4::OrPolicy(new P4::IsValid(&refMap, &typeMap), new P4::IsLikeLeftValue())),
+                &typeMap, new P4::OrPolicy(new P4::IsValid(&typeMap), new P4::IsLikeLeftValue())),
             new P4::ConstantFolding(&refMap, &typeMap),
             // accept non-constant keysets
             new P4::SimplifySelectCases(&typeMap, false),

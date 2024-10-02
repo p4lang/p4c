@@ -32,9 +32,8 @@ const IR::ToplevelBlock *MidEnd::run(TCOptions &options, const IR::P4Program *pr
         new P4::EliminateNewtype(&typeMap),
         new P4::EliminateSerEnums(&typeMap),
         new P4::SimplifyControlFlow(&typeMap),
-        new P4::SimplifyKey(
-            &refMap, &typeMap,
-            new P4::OrPolicy(new P4::IsValid(&refMap, &typeMap), new P4::IsLikeLeftValue())),
+        new P4::SimplifyKey(&typeMap,
+                            new P4::OrPolicy(new P4::IsValid(&typeMap), new P4::IsLikeLeftValue())),
         new P4::RemoveExits(&typeMap),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::SimplifySelectCases(&typeMap, false),  // accept non-constant keysets
