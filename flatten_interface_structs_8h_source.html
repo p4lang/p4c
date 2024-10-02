@@ -303,21 +303,22 @@ $(function(){initNavTree('flatten_interface_structs_8h_source.html',''); initRes
 <div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span> </div>
 <div class="foldopen" id="foldopen00253" data-start="{" data-end="};">
 <div class="line"><a id="l00253" name="l00253"></a><span class="lineno"><a class="line" href="class_p4_1_1_flatten_interface_structs.html">  253</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1_flatten_interface_structs.html">FlattenInterfaceStructs</a> final : <span class="keyword">public</span> <a class="code hl_class" href="class_p4_1_1_pass_manager.html">PassManager</a> {</div>
-<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>    <a class="code hl_class" href="class_p4_1_1_flatten_interface_structs.html">FlattenInterfaceStructs</a>(<a class="code hl_class" href="class_p4_1_1_reference_map.html">ReferenceMap</a> *refMap, <a class="code hl_class" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap) {</div>
-<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>        <span class="keyword">auto</span> sm = <span class="keyword">new</span> <a class="code hl_struct" href="struct_p4_1_1_nested_struct_map.html">NestedStructMap</a>(refMap, typeMap);</div>
-<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_type_checking.html">TypeChecking</a>(refMap, typeMap));</div>
-<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_find_types_to_replace.html">FindTypesToReplace</a>(sm));</div>
-<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_replace_structs.html">ReplaceStructs</a>(sm));</div>
-<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_clear_type_map.html">ClearTypeMap</a>(typeMap));</div>
-<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>        setName(<span class="stringliteral">&quot;FlattenInterfaceStructs&quot;</span>);</div>
-<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>    }</div>
-<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>};</div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>    <a class="code hl_struct" href="struct_p4_1_1_nested_struct_map.html">NestedStructMap</a> sm;</div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span> </div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span> <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>    <a class="code hl_class" href="class_p4_1_1_flatten_interface_structs.html">FlattenInterfaceStructs</a>(<a class="code hl_class" href="class_p4_1_1_reference_map.html">ReferenceMap</a> *refMap, <a class="code hl_class" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap) : sm(refMap, typeMap) {</div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_type_checking.html">TypeChecking</a>(refMap, typeMap));</div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_find_types_to_replace.html">FindTypesToReplace</a>(&amp;sm));</div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_replace_structs.html">ReplaceStructs</a>(&amp;sm));</div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_clear_type_map.html">ClearTypeMap</a>(typeMap));</div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>        setName(<span class="stringliteral">&quot;FlattenInterfaceStructs&quot;</span>);</div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>    }</div>
+<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span>};</div>
 </div>
-<div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span> </div>
-<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>}  <span class="comment">// namespace P4</span></div>
-<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span> </div>
-<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span><span class="preprocessor">#endif </span><span class="comment">/* MIDEND_FLATTENINTERFACESTRUCTS_H_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span> </div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>}  <span class="comment">// namespace P4</span></div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span> </div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span><span class="preprocessor">#endif </span><span class="comment">/* MIDEND_FLATTENINTERFACESTRUCTS_H_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="aclass_p4_1_1_annotation_selection_policy_html"><div class="ttname"><a href="class_p4_1_1_annotation_selection_policy.html">P4::AnnotationSelectionPolicy</a></div><div class="ttdef"><b>Definition</b> flattenInterfaceStructs.h:30</div></div>
 <div class="ttc" id="aclass_p4_1_1_annotation_selection_policy_html_adbb93f90ad02b2c8f3e5887ce7bb99c2"><div class="ttname"><a href="class_p4_1_1_annotation_selection_policy.html#adbb93f90ad02b2c8f3e5887ce7bb99c2">P4::AnnotationSelectionPolicy::keep</a></div><div class="ttdeci">virtual bool keep(const IR::Annotation *)</div><div class="ttdef"><b>Definition</b> flattenInterfaceStructs.h:42</div></div>
 <div class="ttc" id="aclass_p4_1_1_clear_type_map_html"><div class="ttname"><a href="class_p4_1_1_clear_type_map.html">P4::ClearTypeMap</a></div><div class="ttdef"><b>Definition</b> typeChecker.h:32</div></div>

@@ -847,9 +847,9 @@ var sectionId = 'dynsection-0';
 <!-- Node49 -->
 <g id="Node000049" class="node">
 <title>Node49</title>
-<g id="a_Node000049"><a xlink:href="class_p4_1_1_handle_no_match.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#bfbfbf" points="530,-167 417,-167 417,-148 530,-148 530,-167"/>
-<text text-anchor="middle" x="473.5" y="-155" font-family="Helvetica,sans-Serif" font-size="10.00">P4::HandleNoMatch</text>
+<g id="a_Node000049"><a xlink:href="class_p4_1_1_inline_actions.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#bfbfbf" points="522.5,-167 424.5,-167 424.5,-148 522.5,-148 522.5,-167"/>
+<text text-anchor="middle" x="473.5" y="-155" font-family="Helvetica,sans-Serif" font-size="10.00">P4::InlineActions</text>
 </a>
 </g>
 </g>
@@ -857,7 +857,7 @@ var sectionId = 'dynsection-0';
 <g id="edge44_Node000004_Node000049" class="edge">
 <title>Node4&#45;&gt;Node49</title>
 <g id="a_edge44_Node000004_Node000049"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M284.54,-803.42C285.18,-704.36 293.05,-268.73 382,-175.5 391.18,-165.88 403.92,-160.61 416.95,-157.87"/>
+<path fill="none" stroke="#63b8ff" d="M284.54,-803.42C285.18,-704.36 293.05,-268.73 382,-175.5 392.95,-164.03 408.96,-158.73 424.49,-156.56"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="281.04,-803.55 284.5,-813.56 288.04,-803.58 281.04,-803.55"/>
 </a>
 </g>
@@ -865,9 +865,9 @@ var sectionId = 'dynsection-0';
 <!-- Node50 -->
 <g id="Node000050" class="node">
 <title>Node50</title>
-<g id="a_Node000050"><a xlink:href="class_p4_1_1_inline_actions.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#bfbfbf" points="522.5,-130 424.5,-130 424.5,-111 522.5,-111 522.5,-130"/>
-<text text-anchor="middle" x="473.5" y="-118" font-family="Helvetica,sans-Serif" font-size="10.00">P4::InlineActions</text>
+<g id="a_Node000050"><a xlink:href="class_p4_1_1_inline_functions.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#bfbfbf" points="527.5,-130 419.5,-130 419.5,-111 527.5,-111 527.5,-130"/>
+<text text-anchor="middle" x="473.5" y="-118" font-family="Helvetica,sans-Serif" font-size="10.00">P4::InlineFunctions</text>
 </a>
 </g>
 </g>
@@ -875,7 +875,7 @@ var sectionId = 'dynsection-0';
 <g id="edge45_Node000004_Node000050" class="edge">
 <title>Node4&#45;&gt;Node50</title>
 <g id="a_edge45_Node000004_Node000050"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M284.36,-803.91C284.08,-702.48 287.98,-237.83 382,-138.5 392.9,-126.98 408.91,-121.68 424.44,-119.51"/>
+<path fill="none" stroke="#63b8ff" d="M284.36,-803.91C284.08,-702.48 287.98,-237.83 382,-138.5 391.69,-128.26 405.41,-122.94 419.25,-120.35"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="280.86,-803.99 284.41,-813.98 287.86,-803.96 280.86,-803.99"/>
 </a>
 </g>
@@ -883,9 +883,9 @@ var sectionId = 'dynsection-0';
 <!-- Node51 -->
 <g id="Node000051" class="node">
 <title>Node51</title>
-<g id="a_Node000051"><a xlink:href="class_p4_1_1_inline_functions.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#bfbfbf" points="527.5,-93 419.5,-93 419.5,-74 527.5,-74 527.5,-93"/>
-<text text-anchor="middle" x="473.5" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">P4::InlineFunctions</text>
+<g id="a_Node000051"><a xlink:href="class_p4_1_1_inline_pass.html" target="_top" xlink:title="Performs one round of inlining bottoms&#45;up.">
+<polygon fill="white" stroke="#666666" points="515,-93 432,-93 432,-74 515,-74 515,-93"/>
+<text text-anchor="middle" x="473.5" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">P4::InlinePass</text>
 </a>
 </g>
 </g>
@@ -893,7 +893,7 @@ var sectionId = 'dynsection-0';
 <g id="edge46_Node000004_Node000051" class="edge">
 <title>Node4&#45;&gt;Node51</title>
 <g id="a_edge46_Node000004_Node000051"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M284.21,-803.85C283.06,-699.07 283.07,-206.78 382,-101.5 391.65,-91.23 405.36,-85.89 419.2,-83.31"/>
+<path fill="none" stroke="#63b8ff" d="M284.21,-803.85C283.06,-699.07 283.07,-206.78 382,-101.5 394.62,-88.08 414.16,-83.08 431.86,-81.65"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="280.71,-804.01 284.34,-813.96 287.71,-803.92 280.71,-804.01"/>
 </a>
 </g>
@@ -901,9 +901,9 @@ var sectionId = 'dynsection-0';
 <!-- Node52 -->
 <g id="Node000052" class="node">
 <title>Node52</title>
-<g id="a_Node000052"><a xlink:href="class_p4_1_1_inline_pass.html" target="_top" xlink:title="Performs one round of inlining bottoms&#45;up.">
-<polygon fill="white" stroke="#666666" points="515,-56 432,-56 432,-37 515,-37 515,-56"/>
-<text text-anchor="middle" x="473.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">P4::InlinePass</text>
+<g id="a_Node000052"><a xlink:href="class_p4_1_1_local_copy_propagation.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#bfbfbf" points="545,-56 402,-56 402,-37 545,-37 545,-56"/>
+<text text-anchor="middle" x="473.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">P4::LocalCopyPropagation</text>
 </a>
 </g>
 </g>
@@ -911,7 +911,7 @@ var sectionId = 'dynsection-0';
 <g id="edge47_Node000004_Node000052" class="edge">
 <title>Node4&#45;&gt;Node52</title>
 <g id="a_edge47_Node000004_Node000052"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M285.67,-803.84C292.6,-690.18 329.79,-120.42 382,-64.5 394.57,-51.03 414.11,-46.03 431.82,-44.61"/>
+<path fill="none" stroke="#63b8ff" d="M285.67,-803.84C292.6,-690.18 329.79,-120.42 382,-64.5 387.47,-58.65 394.25,-54.39 401.63,-51.34"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="282.17,-803.7 285.06,-813.89 289.16,-804.12 282.17,-803.7"/>
 </a>
 </g>
@@ -919,9 +919,9 @@ var sectionId = 'dynsection-0';
 <!-- Node53 -->
 <g id="Node000053" class="node">
 <title>Node53</title>
-<g id="a_Node000053"><a xlink:href="class_p4_1_1_local_copy_propagation.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#bfbfbf" points="545,-19 402,-19 402,0 545,0 545,-19"/>
-<text text-anchor="middle" x="473.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">P4::LocalCopyPropagation</text>
+<g id="a_Node000053"><a xlink:href="class_p4_1_1_localize_all_actions.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="535,-19 412,-19 412,0 535,0 535,-19"/>
+<text text-anchor="middle" x="473.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">P4::LocalizeAllActions</text>
 </a>
 </g>
 </g>
@@ -929,7 +929,7 @@ var sectionId = 'dynsection-0';
 <g id="edge48_Node000004_Node000053" class="edge">
 <title>Node4&#45;&gt;Node53</title>
 <g id="a_edge48_Node000004_Node000053"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M285.54,-803.98C291.91,-687.42 327.29,-86.44 382,-27.5 387.45,-21.63 394.22,-17.37 401.59,-14.3"/>
+<path fill="none" stroke="#63b8ff" d="M285.54,-803.98C291.91,-687.42 327.29,-86.44 382,-27.5 389.85,-19.05 400.44,-13.92 411.61,-10.93"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="282.04,-803.8 285,-813.97 289.03,-804.18 282.04,-803.8"/>
 </a>
 </g>

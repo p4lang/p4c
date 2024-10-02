@@ -136,15 +136,14 @@ Inheritance diagram for P4::Predication:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ace8cf58466796005d641caf750e9e77c" id="r_ace8cf58466796005d641caf750e9e77c"><td class="memItemLeft" align="right" valign="top"><a id="ace8cf58466796005d641caf750e9e77c" name="ace8cf58466796005d641caf750e9e77c"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>Predication</b> (<a class="el" href="class_p4_1_1_name_generator.html">NameGenerator</a> *gen)</td></tr>
-<tr class="separator:ace8cf58466796005d641caf750e9e77c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8aee33b4ad4f1b4fac05c106e0bfb49e" id="r_a8aee33b4ad4f1b4fac05c106e0bfb49e"><td class="memItemLeft" align="right" valign="top"><a id="a8aee33b4ad4f1b4fac05c106e0bfb49e" name="a8aee33b4ad4f1b4fac05c106e0bfb49e"></a>
 const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>clone</b> (const IR::AssignmentStatement *statement)</td></tr>
 <tr class="separator:a8aee33b4ad4f1b4fac05c106e0bfb49e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a661ec3f1f8609f52530753ad3aabcb0f" id="r_a661ec3f1f8609f52530753ad3aabcb0f"><td class="memItemLeft" align="right" valign="top"><a id="a661ec3f1f8609f52530753ad3aabcb0f" name="a661ec3f1f8609f52530753ad3aabcb0f"></a>
 const IR::Expression *&#160;</td><td class="memItemRight" valign="bottom"><b>clone</b> (const IR::Expression *expression)</td></tr>
 <tr class="separator:a661ec3f1f8609f52530753ad3aabcb0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad1369bb036472a56ca76a1e70c055b3a" id="r_ad1369bb036472a56ca76a1e70c055b3a"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_p4_1_1_visitor_1_1profile__t.html">Visitor::profile_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad1369bb036472a56ca76a1e70c055b3a">init_apply</a> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *node) override</td></tr>
+<tr class="separator:ad1369bb036472a56ca76a1e70c055b3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abd13a7cf230440ad72f6ca09af20b468" id="r_abd13a7cf230440ad72f6ca09af20b468"><td class="memItemLeft" align="right" valign="top"><a id="abd13a7cf230440ad72f6ca09af20b468" name="abd13a7cf230440ad72f6ca09af20b468"></a>
 const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (IR::ExitStatement *statement) override</td></tr>
 <tr class="separator:abd13a7cf230440ad72f6ca09af20b468"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -418,7 +417,35 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>This pass operates on action bodies. It converts 'if' statements to '?:' expressions, if possible. Otherwise this pass will signal an error. This pass should be used only on architectures that do not support conditionals in actions. For this to work all statements must be assignments or other ifs. if (e) a = f(b); else c = f(d); becomes (actual implementatation is slightly optimized): { a = e ? f(b) : a; c = e ? c : f(d); } </p>
-</div></div><!-- contents -->
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="ad1369bb036472a56ca76a1e70c055b3a" name="ad1369bb036472a56ca76a1e70c055b3a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad1369bb036472a56ca76a1e70c055b3a">&#9670;&#160;</a></span>init_apply()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="class_p4_1_1_visitor_1_1profile__t.html">Visitor::profile_t</a> P4::Predication::init_apply </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *</td>          <td class="paramname"><span class="paramname"><em>node</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reimplemented from <a class="el" href="class_p4_1_1_visitor.html">P4::Visitor</a>.</p>
+
+</div>
+</div>
+</div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->
 <!-- start footer part -->

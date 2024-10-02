@@ -126,66 +126,64 @@ $(function(){initNavTree('class_p4_1_1_simplify_parsers.html',''); initResizable
   <div class="headertitle"><div class="title">P4::SimplifyParsers Class Reference</div></div>
 </div><!--header-->
 <div class="contents">
+
+<p>Remove unreachable parser states, and collapse simple chains of states.  
+ <a href="#details">More...</a></p>
+
+<p><code>#include &lt;<a class="el" href="simplify_parsers_8h_source.html">simplifyParsers.h</a>&gt;</code></p>
 <div class="dynheader">
 Inheritance diagram for P4::SimplifyParsers:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="class_p4_1_1_simplify_parsers__inherit__graph.svg" width="187" height="256"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="class_p4_1_1_simplify_parsers__inherit__graph.svg" width="158" height="183"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a6c2c5cf223ef63df8ef8255bd1fcc6c8" id="r_a6c2c5cf223ef63df8ef8255bd1fcc6c8"><td class="memItemLeft" align="right" valign="top"><a id="a6c2c5cf223ef63df8ef8255bd1fcc6c8" name="a6c2c5cf223ef63df8ef8255bd1fcc6c8"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>SimplifyParsers</b> (<a class="el" href="class_p4_1_1_reference_map.html">ReferenceMap</a> *refMap)</td></tr>
-<tr class="separator:a6c2c5cf223ef63df8ef8255bd1fcc6c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="inherit_header pub_methods_class_p4_1_1_pass_manager"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_p4_1_1_pass_manager')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_p4_1_1_pass_manager.html">P4::PassManager</a></td></tr>
-<tr class="memitem:a3726155f087818e0b6d725d244355faa inherit pub_methods_class_p4_1_1_pass_manager" id="r_a3726155f087818e0b6d725d244355faa"><td class="memItemLeft" align="right" valign="top">
-&#160;</td><td class="memItemRight" valign="bottom"><b>PassManager</b> (const <a class="el" href="class_p4_1_1_pass_manager.html">PassManager</a> &amp;)=default</td></tr>
-<tr class="separator:a3726155f087818e0b6d725d244355faa inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:acd212052699bb1d820570a1ecfd48b35 inherit pub_methods_class_p4_1_1_pass_manager" id="r_acd212052699bb1d820570a1ecfd48b35"><td class="memItemLeft" align="right" valign="top">
-&#160;</td><td class="memItemRight" valign="bottom"><b>PassManager</b> (const std::initializer_list&lt; <a class="el" href="class_p4_1_1_pass_manager_1_1_visitor_ref.html">VisitorRef</a> &gt; &amp;init)</td></tr>
-<tr class="separator:acd212052699bb1d820570a1ecfd48b35 inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4152397b385eeaa2a10a9a39849f74c4 inherit pub_methods_class_p4_1_1_pass_manager" id="r_a4152397b385eeaa2a10a9a39849f74c4"><td class="memItemLeft" align="right" valign="top">
-&#160;</td><td class="memItemRight" valign="bottom"><b>PassManager</b> (<a class="el" href="class_p4_1_1_pass_manager.html">PassManager</a> &amp;&amp;)=default</td></tr>
-<tr class="separator:a4152397b385eeaa2a10a9a39849f74c4 inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8e90e493a640b8d259806857acf68e2a inherit pub_methods_class_p4_1_1_pass_manager" id="r_a8e90e493a640b8d259806857acf68e2a"><td class="memItemLeft" align="right" valign="top">
-void&#160;</td><td class="memItemRight" valign="bottom"><b>addDebugHook</b> (<a class="el" href="namespace_p4.html#aa0162e94389d5f8eeab54661b5c892db">DebugHook</a> h, bool recursive=false)</td></tr>
-<tr class="separator:a8e90e493a640b8d259806857acf68e2a inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a06ed7a6dcdc61735eb79f636c8123f6c inherit pub_methods_class_p4_1_1_pass_manager" id="r_a06ed7a6dcdc61735eb79f636c8123f6c"><td class="memItemLeft" align="right" valign="top">
-void&#160;</td><td class="memItemRight" valign="bottom"><b>addDebugHooks</b> (std::vector&lt; <a class="el" href="namespace_p4.html#aa0162e94389d5f8eeab54661b5c892db">DebugHook</a> &gt; hooks, bool recursive=false)</td></tr>
-<tr class="separator:a06ed7a6dcdc61735eb79f636c8123f6c inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab9753d4b6527eb1325bbf1019a2d5577 inherit pub_methods_class_p4_1_1_pass_manager" id="r_ab9753d4b6527eb1325bbf1019a2d5577"><td class="memItemLeft" align="right" valign="top">
-void&#160;</td><td class="memItemRight" valign="bottom"><b>addPasses</b> (const std::initializer_list&lt; <a class="el" href="class_p4_1_1_pass_manager_1_1_visitor_ref.html">VisitorRef</a> &gt; &amp;init)</td></tr>
-<tr class="separator:ab9753d4b6527eb1325bbf1019a2d5577 inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6549267be6ea55f07130e4900a4adcc5 inherit pub_methods_class_p4_1_1_pass_manager" id="r_a6549267be6ea55f07130e4900a4adcc5"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_pass_manager.html#a6549267be6ea55f07130e4900a4adcc5">apply_visitor</a> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *, const char *=0) override</td></tr>
-<tr class="separator:a6549267be6ea55f07130e4900a4adcc5 inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8db7f10ce7cee089b1e23b7910aa0e44 inherit pub_methods_class_p4_1_1_pass_manager" id="r_a8db7f10ce7cee089b1e23b7910aa0e44"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_pass_manager.html#a8db7f10ce7cee089b1e23b7910aa0e44">backtrack</a> (<a class="el" href="struct_p4_1_1_backtrack_1_1trigger.html">trigger</a> &amp;trig) override</td></tr>
-<tr class="separator:a8db7f10ce7cee089b1e23b7910aa0e44 inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a87910ce780a13dbf0f18b61c92570b29 inherit pub_methods_class_p4_1_1_pass_manager" id="r_a87910ce780a13dbf0f18b61c92570b29"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_p4_1_1_pass_manager.html">PassManager</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_pass_manager.html#a87910ce780a13dbf0f18b61c92570b29">clone</a> () const override</td></tr>
-<tr class="separator:a87910ce780a13dbf0f18b61c92570b29 inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0785ef49ac996a6e72c6ffb28e071469 inherit pub_methods_class_p4_1_1_pass_manager" id="r_a0785ef49ac996a6e72c6ffb28e071469"><td class="memItemLeft" align="right" valign="top">
-void&#160;</td><td class="memItemRight" valign="bottom"><b>early_exit</b> ()</td></tr>
-<tr class="separator:a0785ef49ac996a6e72c6ffb28e071469 inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aacb1fb462b2a2fc579ccb2d742caf4c8 inherit pub_methods_class_p4_1_1_pass_manager" id="r_aacb1fb462b2a2fc579ccb2d742caf4c8"><td class="memItemLeft" align="right" valign="top">
-void&#160;</td><td class="memItemRight" valign="bottom"><b>listPasses</b> (std::ostream &amp;, <a class="el" href="class_p4_1_1cstring.html">cstring</a> sep) const</td></tr>
-<tr class="separator:aacb1fb462b2a2fc579ccb2d742caf4c8 inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abfbb0f692643fe24d5ddad2c64ce5260 inherit pub_methods_class_p4_1_1_pass_manager" id="r_abfbb0f692643fe24d5ddad2c64ce5260"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_pass_manager.html#abfbb0f692643fe24d5ddad2c64ce5260">never_backtracks</a> () override</td></tr>
-<tr class="separator:abfbb0f692643fe24d5ddad2c64ce5260 inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8c55af43064c335bcd3b3f16987c0b86 inherit pub_methods_class_p4_1_1_pass_manager" id="r_a8c55af43064c335bcd3b3f16987c0b86"><td class="memItemLeft" align="right" valign="top">
-void&#160;</td><td class="memItemRight" valign="bottom"><b>removePasses</b> (const std::vector&lt; <a class="el" href="class_p4_1_1cstring.html">cstring</a> &gt; &amp;exclude)</td></tr>
-<tr class="separator:a8c55af43064c335bcd3b3f16987c0b86 inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6646fe0ce3b2e429528426989f39396f inherit pub_methods_class_p4_1_1_pass_manager" id="r_a6646fe0ce3b2e429528426989f39396f"><td class="memItemLeft" align="right" valign="top">
-void&#160;</td><td class="memItemRight" valign="bottom"><b>setStopOnError</b> (bool stop)</td></tr>
-<tr class="separator:a6646fe0ce3b2e429528426989f39396f inherit pub_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f6686780516f234246d2b39288a983c" id="r_a1f6686780516f234246d2b39288a983c"><td class="memItemLeft" align="right" valign="top"><a id="a1f6686780516f234246d2b39288a983c" name="a1f6686780516f234246d2b39288a983c"></a>
+const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (IR::P4Control *control) override</td></tr>
+<tr class="separator:a1f6686780516f234246d2b39288a983c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae72457a7f7afde3743fd7ba3a12d46e7" id="r_ae72457a7f7afde3743fd7ba3a12d46e7"><td class="memItemLeft" align="right" valign="top"><a id="ae72457a7f7afde3743fd7ba3a12d46e7" name="ae72457a7f7afde3743fd7ba3a12d46e7"></a>
+const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (IR::P4Parser *parser) override</td></tr>
+<tr class="separator:ae72457a7f7afde3743fd7ba3a12d46e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_methods_class_p4_1_1_transform"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_p4_1_1_transform')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_p4_1_1_transform.html">P4::Transform</a></td></tr>
+<tr class="memitem:a853d6a910acd3168aae542c14def7884 inherit pub_methods_class_p4_1_1_transform" id="r_a853d6a910acd3168aae542c14def7884"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_transform.html#a853d6a910acd3168aae542c14def7884">apply_visitor</a> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *, const char *name=0) override</td></tr>
+<tr class="separator:a853d6a910acd3168aae542c14def7884 inherit pub_methods_class_p4_1_1_transform"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a61b9c9ec44b319feba8a8e8342739603 inherit pub_methods_class_p4_1_1_transform" id="r_a61b9c9ec44b319feba8a8e8342739603"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_p4_1_1_visitor_1_1profile__t.html">profile_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_transform.html#a61b9c9ec44b319feba8a8e8342739603">init_apply</a> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *root) override</td></tr>
+<tr class="separator:a61b9c9ec44b319feba8a8e8342739603 inherit pub_methods_class_p4_1_1_transform"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab14e50cf69900aa899d775e5579bb314 inherit pub_methods_class_p4_1_1_transform" id="r_ab14e50cf69900aa899d775e5579bb314"><td class="memItemLeft" align="right" valign="top">
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>loop_revisit</b> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *)</td></tr>
+<tr class="separator:ab14e50cf69900aa899d775e5579bb314 inherit pub_methods_class_p4_1_1_transform"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9163170fd46f8c757f07d44da90b7d8b inherit pub_methods_class_p4_1_1_transform" id="r_a9163170fd46f8c757f07d44da90b7d8b"><td class="memItemLeft" align="right" valign="top">
+virtual const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (<a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *n)</td></tr>
+<tr class="separator:a9163170fd46f8c757f07d44da90b7d8b inherit pub_methods_class_p4_1_1_transform"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3527749168b1cabb52d2522d5b1a48dc inherit pub_methods_class_p4_1_1_transform" id="r_a3527749168b1cabb52d2522d5b1a48dc"><td class="memItemLeft" align="right" valign="top">virtual const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_transform.html#a3527749168b1cabb52d2522d5b1a48dc">preorder</a> (<a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *n)</td></tr>
+<tr class="separator:a3527749168b1cabb52d2522d5b1a48dc inherit pub_methods_class_p4_1_1_transform"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7d20c5249be7400372e02a2c54fef825 inherit pub_methods_class_p4_1_1_transform" id="r_a7d20c5249be7400372e02a2c54fef825"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>prune</b> ()</td></tr>
+<tr class="separator:a7d20c5249be7400372e02a2c54fef825 inherit pub_methods_class_p4_1_1_transform"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2542bd7501357a4a8f4bca43d9505e24 inherit pub_methods_class_p4_1_1_transform" id="r_a2542bd7501357a4a8f4bca43d9505e24"><td class="memItemLeft" align="right" valign="top">
+virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>revisit</b> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *, const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *)</td></tr>
+<tr class="separator:a2542bd7501357a4a8f4bca43d9505e24 inherit pub_methods_class_p4_1_1_transform"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab51b9319ef5bd75cc3d2f942eeedddcd inherit pub_methods_class_p4_1_1_transform" id="r_ab51b9319ef5bd75cc3d2f942eeedddcd"><td class="memItemLeft" align="right" valign="top">
+void&#160;</td><td class="memItemRight" valign="bottom"><b>revisit_visited</b> ()</td></tr>
+<tr class="separator:ab51b9319ef5bd75cc3d2f942eeedddcd inherit pub_methods_class_p4_1_1_transform"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acd67fa2a0dff8d7c23e68e425fadab25 inherit pub_methods_class_p4_1_1_transform" id="r_acd67fa2a0dff8d7c23e68e425fadab25"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>visit_in_progress</b> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *) const</td></tr>
+<tr class="separator:acd67fa2a0dff8d7c23e68e425fadab25 inherit pub_methods_class_p4_1_1_transform"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9e13c329a7586b5eab24035fede096d inherit pub_methods_class_p4_1_1_transform" id="r_ae9e13c329a7586b5eab24035fede096d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_transform.html#ae9e13c329a7586b5eab24035fede096d">visitAgain</a> () const override</td></tr>
+<tr class="separator:ae9e13c329a7586b5eab24035fede096d inherit pub_methods_class_p4_1_1_transform"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa2b22461a414aa4e4623f3d02d3293f0 inherit pub_methods_class_p4_1_1_transform" id="r_aa2b22461a414aa4e4623f3d02d3293f0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_transform.html#aa2b22461a414aa4e4623f3d02d3293f0">visitOnce</a> () const override</td></tr>
+<tr class="separator:aa2b22461a414aa4e4623f3d02d3293f0 inherit pub_methods_class_p4_1_1_transform"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_class_p4_1_1_visitor"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_p4_1_1_visitor')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_p4_1_1_visitor.html">P4::Visitor</a></td></tr>
-<tr class="memitem:a90bf74266b772af6303b9edeaac8a4a4 inherit pub_methods_class_p4_1_1_visitor" id="r_a90bf74266b772af6303b9edeaac8a4a4"><td class="memItemLeft" align="right" valign="top">
-virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>check_clone</b> (const <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *a)</td></tr>
-<tr class="separator:a90bf74266b772af6303b9edeaac8a4a4 inherit pub_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2b92d3827b07662df506d1ed792c167a inherit pub_methods_class_p4_1_1_visitor" id="r_a2b92d3827b07662df506d1ed792c167a"><td class="memItemLeft" align="right" valign="top">
 virtual bool&#160;</td><td class="memItemRight" valign="bottom"><b>check_global</b> (<a class="el" href="class_p4_1_1cstring.html">cstring</a>)</td></tr>
 <tr class="separator:a2b92d3827b07662df506d1ed792c167a inherit pub_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af0087b0a0a46d8df6fd5df184a3acedb inherit pub_methods_class_p4_1_1_visitor" id="r_af0087b0a0a46d8df6fd5df184a3acedb"><td class="memItemLeft" align="right" valign="top">
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>clear_globals</b> ()</td></tr>
 <tr class="separator:af0087b0a0a46d8df6fd5df184a3acedb inherit pub_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2f4a4cbeccb494423a6ffbb80ade109d inherit pub_methods_class_p4_1_1_visitor" id="r_a2f4a4cbeccb494423a6ffbb80ade109d"><td class="memItemLeft" align="right" valign="top">
+virtual <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>clone</b> () const</td></tr>
+<tr class="separator:a2f4a4cbeccb494423a6ffbb80ade109d inherit pub_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac6a5e2e28ca2bb741588ec144bd152c2 inherit pub_methods_class_p4_1_1_visitor" id="r_ac6a5e2e28ca2bb741588ec144bd152c2"><td class="memItemLeft" align="right" valign="top">
 virtual <a class="el" href="class_p4_1_1_control_flow_visitor.html">ControlFlowVisitor</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>controlFlowVisitor</b> ()</td></tr>
 <tr class="separator:ac6a5e2e28ca2bb741588ec144bd152c2 inherit pub_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -331,7 +329,6 @@ template&lt;class T , typename  = std::enable_if_t&lt;Util::has_SourceInfo_v&lt;
 <tr class="separator:a647556f1c95e9850dc8ac09637145089 inherit pub_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a855598301a9252de50b2a46715286605 inherit pub_methods_class_p4_1_1_visitor" id="r_a855598301a9252de50b2a46715286605"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_visitor.html#a855598301a9252de50b2a46715286605">warning_enabled</a> (int warning_kind) const</td></tr>
 <tr class="separator:a855598301a9252de50b2a46715286605 inherit pub_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="inherit_header pub_methods_class_p4_1_1_backtrack"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_p4_1_1_backtrack')"><img src="closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="class_p4_1_1_backtrack.html">P4::Backtrack</a></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
@@ -358,12 +355,10 @@ const <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *&#160;</td><td
 <tr class="memitem:ad5fbe40632b94fd5f81268281e92c262 inherit pub_attribs_class_p4_1_1_visitor" id="r_ad5fbe40632b94fd5f81268281e92c262"><td class="memItemLeft" align="right" valign="top">
 <a class="el" href="class_p4_1_1_split_flow_visit__base.html">SplitFlowVisit_base</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>split_link_mem</b> = nullptr</td></tr>
 <tr class="separator:ad5fbe40632b94fd5f81268281e92c262 inherit pub_attribs_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="inherit_header pro_methods_class_p4_1_1_pass_manager"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_methods_class_p4_1_1_pass_manager')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="class_p4_1_1_pass_manager.html">P4::PassManager</a></td></tr>
-<tr class="memitem:ae3ee813889f11534f7212bad5abf53ed inherit pro_methods_class_p4_1_1_pass_manager" id="r_ae3ee813889f11534f7212bad5abf53ed"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_p4_1_1_visitor_1_1profile__t.html">profile_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_pass_manager.html#ae3ee813889f11534f7212bad5abf53ed">init_apply</a> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *root) override</td></tr>
-<tr class="separator:ae3ee813889f11534f7212bad5abf53ed inherit pro_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac2033dab6ff82ec51c187911137a4843 inherit pro_methods_class_p4_1_1_pass_manager" id="r_ac2033dab6ff82ec51c187911137a4843"><td class="memItemLeft" align="right" valign="top">
-void&#160;</td><td class="memItemRight" valign="bottom"><b>runDebugHooks</b> (const char *visitorName, const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *node)</td></tr>
-<tr class="separator:ac2033dab6ff82ec51c187911137a4843 inherit pro_methods_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pro_methods_class_p4_1_1_transform"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_methods_class_p4_1_1_transform')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="class_p4_1_1_transform.html">P4::Transform</a></td></tr>
+<tr class="memitem:af78d57e6cd24506ee25dca7c63e8615c inherit pro_methods_class_p4_1_1_transform" id="r_af78d57e6cd24506ee25dca7c63e8615c"><td class="memItemLeft" align="right" valign="top">
+const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>transform_child</b> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *child)</td></tr>
+<tr class="separator:af78d57e6cd24506ee25dca7c63e8615c inherit pro_methods_class_p4_1_1_transform"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_methods_class_p4_1_1_visitor"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_methods_class_p4_1_1_visitor')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="class_p4_1_1_visitor.html">P4::Visitor</a></td></tr>
 <tr class="memitem:a16268c6a9909821e47b5c6313c75d35e inherit pro_methods_class_p4_1_1_visitor" id="r_a16268c6a9909821e47b5c6313c75d35e"><td class="memItemLeft" align="right" valign="top">
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>init_join_flows</b> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *)</td></tr>
@@ -375,28 +370,10 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>init_join_flo
 <tr class="memitem:a6a56c27a883ef67322ea4d8a01ace0de inherit pro_methods_class_p4_1_1_visitor" id="r_a6a56c27a883ef67322ea4d8a01ace0de"><td class="memItemLeft" align="right" valign="top">
 void&#160;</td><td class="memItemRight" valign="bottom"><b>visit_children</b> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *, std::function&lt; void()&gt; fn)</td></tr>
 <tr class="separator:a6a56c27a883ef67322ea4d8a01ace0de inherit pro_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ab7ae3062d302163bb2f845ee672821bd inherit pro_methods_class_p4_1_1_visitor" id="r_ab7ae3062d302163bb2f845ee672821bd"><td class="memItemLeft" align="right" valign="top">
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>visitAgain</b> () const</td></tr>
-<tr class="separator:ab7ae3062d302163bb2f845ee672821bd inherit pro_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a03cef005cecb08d981b8d625d6630d92 inherit pro_methods_class_p4_1_1_visitor" id="r_a03cef005cecb08d981b8d625d6630d92"><td class="memItemLeft" align="right" valign="top">
-virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>visitOnce</b> () const</td></tr>
-<tr class="separator:a03cef005cecb08d981b8d625d6630d92 inherit pro_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="inherit_header pro_attribs_class_p4_1_1_pass_manager"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_class_p4_1_1_pass_manager')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="class_p4_1_1_pass_manager.html">P4::PassManager</a></td></tr>
-<tr class="memitem:a123d41f5eec934b55ca13afa738b1e37 inherit pro_attribs_class_p4_1_1_pass_manager" id="r_a123d41f5eec934b55ca13afa738b1e37"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="class_p4_1_1safe__vector.html">safe_vector</a>&lt; <a class="el" href="namespace_p4.html#aa0162e94389d5f8eeab54661b5c892db">DebugHook</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>debugHooks</b></td></tr>
-<tr class="separator:a123d41f5eec934b55ca13afa738b1e37 inherit pro_attribs_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a9c6c2ed1191ac688a0a57b5a3096c0e5 inherit pro_attribs_class_p4_1_1_pass_manager" id="r_a9c6c2ed1191ac688a0a57b5a3096c0e5"><td class="memItemLeft" align="right" valign="top">
-<a class="el" href="class_p4_1_1safe__vector.html">safe_vector</a>&lt; <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>passes</b></td></tr>
-<tr class="separator:a9c6c2ed1191ac688a0a57b5a3096c0e5 inherit pro_attribs_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:abc9bba9f872a6739417ca99a466d9949 inherit pro_attribs_class_p4_1_1_pass_manager" id="r_abc9bba9f872a6739417ca99a466d9949"><td class="memItemLeft" align="right" valign="top">
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>running</b> = false</td></tr>
-<tr class="separator:abc9bba9f872a6739417ca99a466d9949 inherit pro_attribs_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ada4d1d5c6977228e3aa134e11100c68c inherit pro_attribs_class_p4_1_1_pass_manager" id="r_ada4d1d5c6977228e3aa134e11100c68c"><td class="memItemLeft" align="right" valign="top">
-unsigned&#160;</td><td class="memItemRight" valign="bottom"><b>seqNo</b> = 0</td></tr>
-<tr class="separator:ada4d1d5c6977228e3aa134e11100c68c inherit pro_attribs_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3284f7615c08708e20195a33a440328e inherit pro_attribs_class_p4_1_1_pass_manager" id="r_a3284f7615c08708e20195a33a440328e"><td class="memItemLeft" align="right" valign="top">
-bool&#160;</td><td class="memItemRight" valign="bottom"><b>stop_on_error</b> = true</td></tr>
-<tr class="separator:a3284f7615c08708e20195a33a440328e inherit pro_attribs_class_p4_1_1_pass_manager"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pro_attribs_class_p4_1_1_transform"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_class_p4_1_1_transform')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="class_p4_1_1_transform.html">P4::Transform</a></td></tr>
+<tr class="memitem:a866c6912a6acf02fcade6f759bdb291a inherit pro_attribs_class_p4_1_1_transform" id="r_a866c6912a6acf02fcade6f759bdb291a"><td class="memItemLeft" align="right" valign="top">
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>forceClone</b> = false</td></tr>
+<tr class="separator:a866c6912a6acf02fcade6f759bdb291a inherit pro_attribs_class_p4_1_1_transform"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_class_p4_1_1_visitor"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_class_p4_1_1_visitor')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="class_p4_1_1_visitor.html">P4::Visitor</a></td></tr>
 <tr class="memitem:acfef9a2a08634af0bbad5d5134d84c56 inherit pro_attribs_class_p4_1_1_visitor" id="r_acfef9a2a08634af0bbad5d5134d84c56"><td class="memItemLeft" align="right" valign="top">
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>dontForwardChildrenBeforePreorder</b> = false</td></tr>
@@ -408,7 +385,14 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>joinFlows</b> = false
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = true</td></tr>
 <tr class="separator:a609ed9bc5d421210d591474f234d5e88 inherit pro_attribs_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
-</div><!-- contents -->
+<a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
+<div class="textblock"><p>Remove unreachable parser states, and collapse simple chains of states. </p>
+<p>Does not remove the "accept" state, even if it is not reachable. A transition between states <code>s1</code> and <code>s2</code> is part of a "simple" chain if:</p><ul>
+<li>there are no other outgoing edges from <code>s1</code>,</li>
+<li>there are no other incoming edges to <code>s2</code>,</li>
+<li>and <code>s2</code> does not have annotations. </li>
+</ul>
+</div></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->
 <!-- start footer part -->

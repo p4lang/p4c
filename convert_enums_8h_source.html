@@ -166,7 +166,7 @@ $(function(){initNavTree('convert_enums_8h_source.html',''); initResizable(true)
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span> </div>
 <div class="foldopen" id="foldopen00044" data-start="{" data-end="};">
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno"><a class="line" href="class_p4_1_1_enum_representation.html">   44</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1_enum_representation.html">EnumRepresentation</a> {</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    std::map&lt;cstring, unsigned&gt; repr;</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>    <a class="code hl_class" href="class_p4_1_1string__map.html">string_map&lt;unsigned&gt;</a> repr;</div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span> </div>
 <div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span> <span class="keyword">public</span>:</div>
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    <span class="keyword">const</span> IR::Type_Bits *type;</div>
@@ -177,86 +177,84 @@ $(function(){initNavTree('convert_enums_8h_source.html',''); initResizable(true)
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keywordtype">void</span> add(<a class="code hl_class" href="class_p4_1_1cstring.html">cstring</a> decl) { repr.emplace(decl, repr.size()); }</div>
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>    <span class="keywordtype">unsigned</span> get(<a class="code hl_class" href="class_p4_1_1cstring.html">cstring</a> decl)<span class="keyword"> const </span>{ return ::P4::get(repr, decl); }</div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keyword">using </span>iterator = <span class="keyword">decltype</span>(repr)::iterator;</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="keyword">using </span>const_iterator = <span class="keyword">decltype</span>(repr)::const_iterator;</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    iterator begin() { <span class="keywordflow">return</span> repr.begin(); }</div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    const_iterator begin()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> repr.begin(); }</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    iterator end() { <span class="keywordflow">return</span> repr.end(); }</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    const_iterator end()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> repr.end(); }</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>};</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keyword">auto</span> begin() { <span class="keywordflow">return</span> repr.begin(); }</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="keyword">auto</span> begin()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> repr.begin(); }</div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span>    <span class="keyword">auto</span> end() { <span class="keywordflow">return</span> repr.end(); }</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    <span class="keyword">auto</span> end()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> repr.end(); }</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>};</div>
 </div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span> </div>
-<div class="foldopen" id="foldopen00095" data-start="{" data-end="};">
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno"><a class="line" href="class_p4_1_1_do_convert_enums.html">   95</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1_do_convert_enums.html">DoConvertEnums</a> : <span class="keyword">public</span> <a class="code hl_class" href="class_p4_1_1_transform.html">Transform</a> {</div>
-<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    <span class="keyword">friend</span> <span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1_convert_enums.html">ConvertEnums</a>;</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span> </div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    <a class="code hl_class" href="class_p4_1_1ordered__map.html">ordered_map&lt;const IR::Type_Enum *, EnumRepresentation *&gt;</a> repr;</div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    <a class="code hl_class" href="class_p4_1_1_choose_enum_representation.html">ChooseEnumRepresentation</a> *policy;</div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    <a class="code hl_class" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap;</div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>    <a class="code hl_class" href="class_p4_1_1_do_convert_enums.html">DoConvertEnums</a>(<a class="code hl_class" href="class_p4_1_1_choose_enum_representation.html">ChooseEnumRepresentation</a> *policy, <a class="code hl_class" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap)</div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>        : policy(policy), typeMap(typeMap) {</div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>        CHECK_NULL(policy);</div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>        CHECK_NULL(typeMap);</div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>        setName(<span class="stringliteral">&quot;DoConvertEnums&quot;</span>);</div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    }</div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *preorder(IR::Type_Enum *type) <span class="keyword">override</span>;</div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *postorder(IR::Type_Name *type) <span class="keyword">override</span>;</div>
-<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>    <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *postorder(IR::Member *expression) <span class="keyword">override</span>;</div>
-<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span>};</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span> </div>
+<div class="foldopen" id="foldopen00093" data-start="{" data-end="};">
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno"><a class="line" href="class_p4_1_1_do_convert_enums.html">   93</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1_do_convert_enums.html">DoConvertEnums</a> : <span class="keyword">public</span> <a class="code hl_class" href="class_p4_1_1_transform.html">Transform</a> {</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    <span class="keyword">friend</span> <span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1_convert_enums.html">ConvertEnums</a>;</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>    <a class="code hl_class" href="class_p4_1_1ordered__map.html">ordered_map&lt;const IR::Type_Enum *, EnumRepresentation *&gt;</a> repr;</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    <a class="code hl_class" href="class_p4_1_1_choose_enum_representation.html">ChooseEnumRepresentation</a> *policy;</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    <a class="code hl_class" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap;</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span> </div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>    <a class="code hl_class" href="class_p4_1_1_do_convert_enums.html">DoConvertEnums</a>(<a class="code hl_class" href="class_p4_1_1_choose_enum_representation.html">ChooseEnumRepresentation</a> *policy, <a class="code hl_class" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap)</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>        : policy(policy), typeMap(typeMap) {</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>        CHECK_NULL(policy);</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>        CHECK_NULL(typeMap);</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>        setName(<span class="stringliteral">&quot;DoConvertEnums&quot;</span>);</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    }</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *preorder(IR::Type_Enum *type) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>    <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *postorder(IR::Type_Name *type) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *postorder(IR::Member *expression) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>};</div>
 </div>
-<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span> </div>
-<div class="foldopen" id="foldopen00114" data-start="{" data-end="};">
-<div class="line"><a id="l00114" name="l00114"></a><span class="lineno"><a class="line" href="class_p4_1_1_convert_enums.html">  114</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1_convert_enums.html">ConvertEnums</a> : <span class="keyword">public</span> <a class="code hl_class" href="class_p4_1_1_pass_manager.html">PassManager</a> {</div>
-<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span>    <a class="code hl_class" href="class_p4_1_1_do_convert_enums.html">DoConvertEnums</a> *convertEnums{<span class="keyword">nullptr</span>};</div>
-<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span> </div>
-<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>    <span class="keyword">using </span>EnumMapping = <span class="keyword">decltype</span>(DoConvertEnums::repr);</div>
-<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>    <a class="code hl_class" href="class_p4_1_1_convert_enums.html">ConvertEnums</a>(<a class="code hl_class" href="class_p4_1_1_reference_map.html">ReferenceMap</a> *refMap, <a class="code hl_class" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap, <a class="code hl_class" href="class_p4_1_1_choose_enum_representation.html">ChooseEnumRepresentation</a> *policy,</div>
-<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>                 <a class="code hl_class" href="class_p4_1_1_type_checking.html">TypeChecking</a> *typeChecking = <span class="keyword">nullptr</span>)</div>
-<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>        : convertEnums(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_do_convert_enums.html">DoConvertEnums</a>(policy, typeMap)) {</div>
-<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>        <span class="keywordflow">if</span> (!typeChecking) typeChecking = <span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_type_checking.html">TypeChecking</a>(refMap, typeMap);</div>
-<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>        passes.push_back(typeChecking);</div>
-<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>        passes.push_back(convertEnums);</div>
-<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_clear_type_map.html">ClearTypeMap</a>(typeMap));</div>
-<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span>        setName(<span class="stringliteral">&quot;ConvertEnums&quot;</span>);</div>
-<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>    }</div>
-<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span> </div>
-<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>    EnumMapping getEnumMapping()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> convertEnums-&gt;repr; }</div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>};</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span> </div>
+<div class="foldopen" id="foldopen00112" data-start="{" data-end="};">
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno"><a class="line" href="class_p4_1_1_convert_enums.html">  112</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1_convert_enums.html">ConvertEnums</a> : <span class="keyword">public</span> <a class="code hl_class" href="class_p4_1_1_pass_manager.html">PassManager</a> {</div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>    <a class="code hl_class" href="class_p4_1_1_do_convert_enums.html">DoConvertEnums</a> *convertEnums{<span class="keyword">nullptr</span>};</div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span> </div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span> <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00116" name="l00116"></a><span class="lineno">  116</span>    <span class="keyword">using </span>EnumMapping = <span class="keyword">decltype</span>(DoConvertEnums::repr);</div>
+<div class="line"><a id="l00117" name="l00117"></a><span class="lineno">  117</span>    <a class="code hl_class" href="class_p4_1_1_convert_enums.html">ConvertEnums</a>(<a class="code hl_class" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap, <a class="code hl_class" href="class_p4_1_1_choose_enum_representation.html">ChooseEnumRepresentation</a> *policy,</div>
+<div class="line"><a id="l00118" name="l00118"></a><span class="lineno">  118</span>                 <a class="code hl_class" href="class_p4_1_1_type_checking.html">TypeChecking</a> *typeChecking = <span class="keyword">nullptr</span>)</div>
+<div class="line"><a id="l00119" name="l00119"></a><span class="lineno">  119</span>        : convertEnums(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_do_convert_enums.html">DoConvertEnums</a>(policy, typeMap)) {</div>
+<div class="line"><a id="l00120" name="l00120"></a><span class="lineno">  120</span>        <span class="keywordflow">if</span> (!typeChecking) typeChecking = <span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_type_checking.html">TypeChecking</a>(<span class="keyword">nullptr</span>, typeMap);</div>
+<div class="line"><a id="l00121" name="l00121"></a><span class="lineno">  121</span>        passes.push_back(typeChecking);</div>
+<div class="line"><a id="l00122" name="l00122"></a><span class="lineno">  122</span>        passes.push_back(convertEnums);</div>
+<div class="line"><a id="l00123" name="l00123"></a><span class="lineno">  123</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_clear_type_map.html">ClearTypeMap</a>(typeMap));</div>
+<div class="line"><a id="l00124" name="l00124"></a><span class="lineno">  124</span>        setName(<span class="stringliteral">&quot;ConvertEnums&quot;</span>);</div>
+<div class="line"><a id="l00125" name="l00125"></a><span class="lineno">  125</span>    }</div>
+<div class="line"><a id="l00126" name="l00126"></a><span class="lineno">  126</span> </div>
+<div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>    EnumMapping getEnumMapping()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> convertEnums-&gt;repr; }</div>
+<div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span>};</div>
 </div>
-<div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span> </div>
-<div class="foldopen" id="foldopen00137" data-start="{" data-end="};">
-<div class="line"><a id="l00137" name="l00137"></a><span class="lineno"><a class="line" href="class_p4_1_1_enum_on32_bits.html">  137</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1_enum_on32_bits.html">EnumOn32Bits</a> : <span class="keyword">public</span> <a class="code hl_class" href="class_p4_1_1_choose_enum_representation.html">P4::ChooseEnumRepresentation</a> {</div>
-<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>    <span class="keywordtype">bool</span> convert(<span class="keyword">const</span> IR::Type_Enum *type)<span class="keyword"> const override </span>{</div>
-<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>        <span class="keywordflow">if</span> (type-&gt;srcInfo.isValid()) {</div>
-<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>        }</div>
-<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>    }</div>
-<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span>    <span class="keywordtype">unsigned</span> enumSize(<span class="keywordtype">unsigned</span>)<span class="keyword"> const override </span>{ <span class="keywordflow">return</span> 32; }</div>
-<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>};</div>
+<div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span> </div>
+<div class="foldopen" id="foldopen00135" data-start="{" data-end="};">
+<div class="line"><a id="l00135" name="l00135"></a><span class="lineno"><a class="line" href="class_p4_1_1_enum_on32_bits.html">  135</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1_enum_on32_bits.html">EnumOn32Bits</a> : <span class="keyword">public</span> <a class="code hl_class" href="class_p4_1_1_choose_enum_representation.html">P4::ChooseEnumRepresentation</a> {</div>
+<div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>    <span class="keywordtype">bool</span> convert(<span class="keyword">const</span> IR::Type_Enum *type)<span class="keyword"> const override </span>{</div>
+<div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>        <span class="keywordflow">if</span> (type-&gt;srcInfo.isValid()) {</div>
+<div class="line"><a id="l00138" name="l00138"></a><span class="lineno">  138</span>            <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00139" name="l00139"></a><span class="lineno">  139</span>        }</div>
+<div class="line"><a id="l00140" name="l00140"></a><span class="lineno">  140</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00141" name="l00141"></a><span class="lineno">  141</span>    }</div>
+<div class="line"><a id="l00142" name="l00142"></a><span class="lineno">  142</span>    <span class="keywordtype">unsigned</span> enumSize(<span class="keywordtype">unsigned</span>)<span class="keyword"> const override </span>{ <span class="keywordflow">return</span> 32; }</div>
+<div class="line"><a id="l00143" name="l00143"></a><span class="lineno">  143</span>};</div>
 </div>
+<div class="line"><a id="l00144" name="l00144"></a><span class="lineno">  144</span> </div>
+<div class="line"><a id="l00145" name="l00145"></a><span class="lineno">  145</span>}  <span class="comment">// namespace P4</span></div>
 <div class="line"><a id="l00146" name="l00146"></a><span class="lineno">  146</span> </div>
-<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span>}  <span class="comment">// namespace P4</span></div>
-<div class="line"><a id="l00148" name="l00148"></a><span class="lineno">  148</span> </div>
-<div class="line"><a id="l00149" name="l00149"></a><span class="lineno">  149</span><span class="preprocessor">#endif </span><span class="comment">/* MIDEND_CONVERTENUMS_H_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00147" name="l00147"></a><span class="lineno">  147</span><span class="preprocessor">#endif </span><span class="comment">/* MIDEND_CONVERTENUMS_H_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="aclass_p4_1_1_choose_enum_representation_html"><div class="ttname"><a href="class_p4_1_1_choose_enum_representation.html">P4::ChooseEnumRepresentation</a></div><div class="ttdef"><b>Definition</b> convertEnums.h:29</div></div>
 <div class="ttc" id="aclass_p4_1_1_clear_type_map_html"><div class="ttname"><a href="class_p4_1_1_clear_type_map.html">P4::ClearTypeMap</a></div><div class="ttdef"><b>Definition</b> typeChecker.h:32</div></div>
-<div class="ttc" id="aclass_p4_1_1_convert_enums_html"><div class="ttname"><a href="class_p4_1_1_convert_enums.html">P4::ConvertEnums</a></div><div class="ttdef"><b>Definition</b> convertEnums.h:114</div></div>
-<div class="ttc" id="aclass_p4_1_1_do_convert_enums_html"><div class="ttname"><a href="class_p4_1_1_do_convert_enums.html">P4::DoConvertEnums</a></div><div class="ttdef"><b>Definition</b> convertEnums.h:95</div></div>
-<div class="ttc" id="aclass_p4_1_1_enum_on32_bits_html"><div class="ttname"><a href="class_p4_1_1_enum_on32_bits.html">P4::EnumOn32Bits</a></div><div class="ttdef"><b>Definition</b> convertEnums.h:137</div></div>
+<div class="ttc" id="aclass_p4_1_1_convert_enums_html"><div class="ttname"><a href="class_p4_1_1_convert_enums.html">P4::ConvertEnums</a></div><div class="ttdef"><b>Definition</b> convertEnums.h:112</div></div>
+<div class="ttc" id="aclass_p4_1_1_do_convert_enums_html"><div class="ttname"><a href="class_p4_1_1_do_convert_enums.html">P4::DoConvertEnums</a></div><div class="ttdef"><b>Definition</b> convertEnums.h:93</div></div>
+<div class="ttc" id="aclass_p4_1_1_enum_on32_bits_html"><div class="ttname"><a href="class_p4_1_1_enum_on32_bits.html">P4::EnumOn32Bits</a></div><div class="ttdef"><b>Definition</b> convertEnums.h:135</div></div>
 <div class="ttc" id="aclass_p4_1_1_enum_representation_html"><div class="ttname"><a href="class_p4_1_1_enum_representation.html">P4::EnumRepresentation</a></div><div class="ttdef"><b>Definition</b> convertEnums.h:44</div></div>
 <div class="ttc" id="aclass_p4_1_1_i_r_1_1_node_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_node.html">P4::IR::Node</a></div><div class="ttdef"><b>Definition</b> node.h:95</div></div>
 <div class="ttc" id="aclass_p4_1_1_pass_manager_html"><div class="ttname"><a href="class_p4_1_1_pass_manager.html">P4::PassManager</a></div><div class="ttdef"><b>Definition</b> pass_manager.h:40</div></div>
-<div class="ttc" id="aclass_p4_1_1_reference_map_html"><div class="ttname"><a href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a></div><div class="ttdoc">Class used to encode maps from paths to declarations.</div><div class="ttdef"><b>Definition</b> referenceMap.h:66</div></div>
 <div class="ttc" id="aclass_p4_1_1_transform_html"><div class="ttname"><a href="class_p4_1_1_transform.html">P4::Transform</a></div><div class="ttdef"><b>Definition</b> visitor.h:424</div></div>
 <div class="ttc" id="aclass_p4_1_1_type_checking_html"><div class="ttname"><a href="class_p4_1_1_type_checking.html">P4::TypeChecking</a></div><div class="ttdef"><b>Definition</b> typeChecker.h:55</div></div>
 <div class="ttc" id="aclass_p4_1_1_type_map_html"><div class="ttname"><a href="class_p4_1_1_type_map.html">P4::TypeMap</a></div><div class="ttdef"><b>Definition</b> typeMap.h:41</div></div>
 <div class="ttc" id="aclass_p4_1_1_util_1_1_source_info_html"><div class="ttname"><a href="class_p4_1_1_util_1_1_source_info.html">P4::Util::SourceInfo</a></div><div class="ttdef"><b>Definition</b> source_file.h:124</div></div>
 <div class="ttc" id="aclass_p4_1_1cstring_html"><div class="ttname"><a href="class_p4_1_1cstring.html">P4::cstring</a></div><div class="ttdef"><b>Definition</b> cstring.h:85</div></div>
 <div class="ttc" id="aclass_p4_1_1ordered__map_html"><div class="ttname"><a href="class_p4_1_1ordered__map.html">P4::ordered_map</a></div><div class="ttdef"><b>Definition</b> ordered_map.h:32</div></div>
+<div class="ttc" id="aclass_p4_1_1string__map_html"><div class="ttname"><a href="class_p4_1_1string__map.html">P4::string_map</a></div><div class="ttdef"><b>Definition</b> string_map.h:41</div></div>
 <div class="ttc" id="anamespace_p4_html"><div class="ttname"><a href="namespace_p4.html">P4</a></div><div class="ttdoc">TODO: this is not really specific to BMV2, it should reside somewhere else.</div><div class="ttdef"><b>Definition</b> applyOptionsPragmas.cpp:24</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->

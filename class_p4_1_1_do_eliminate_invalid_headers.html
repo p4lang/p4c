@@ -136,9 +136,8 @@ Inheritance diagram for P4::DoEliminateInvalidHeaders:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a6caac6c24cd64a98207f0a32a21fe0d3" id="r_a6caac6c24cd64a98207f0a32a21fe0d3"><td class="memItemLeft" align="right" valign="top"><a id="a6caac6c24cd64a98207f0a32a21fe0d3" name="a6caac6c24cd64a98207f0a32a21fe0d3"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>DoEliminateInvalidHeaders</b> (<a class="el" href="class_p4_1_1_reference_map.html">ReferenceMap</a> *refMap)</td></tr>
-<tr class="separator:a6caac6c24cd64a98207f0a32a21fe0d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a582f9f45f44e3967c33a972153ce5c62" id="r_a582f9f45f44e3967c33a972153ce5c62"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_p4_1_1_visitor_1_1profile__t.html">Visitor::profile_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a582f9f45f44e3967c33a972153ce5c62">init_apply</a> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *node) override</td></tr>
+<tr class="separator:a582f9f45f44e3967c33a972153ce5c62"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa5a2f3e16ec5ea4d3170dbc74db16ca6" id="r_aa5a2f3e16ec5ea4d3170dbc74db16ca6"><td class="memItemLeft" align="right" valign="top"><a id="aa5a2f3e16ec5ea4d3170dbc74db16ca6" name="aa5a2f3e16ec5ea4d3170dbc74db16ca6"></a>
 const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (IR::InvalidHeader *expression) override</td></tr>
 <tr class="separator:aa5a2f3e16ec5ea4d3170dbc74db16ca6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -396,7 +395,35 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Replaces invalid header expressions by variables which are explicitly initialized to be invalid. A similar operation is performed for invalid header unions. This cannot be done for constant declarations, though. </p>
-</div></div><!-- contents -->
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a582f9f45f44e3967c33a972153ce5c62" name="a582f9f45f44e3967c33a972153ce5c62"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a582f9f45f44e3967c33a972153ce5c62">&#9670;&#160;</a></span>init_apply()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="class_p4_1_1_visitor_1_1profile__t.html">Visitor::profile_t</a> P4::DoEliminateInvalidHeaders::init_apply </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *</td>          <td class="paramname"><span class="paramname"><em>node</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reimplemented from <a class="el" href="class_p4_1_1_visitor.html">P4::Visitor</a>.</p>
+
+</div>
+</div>
+</div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->
 <!-- start footer part -->

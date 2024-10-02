@@ -136,12 +136,14 @@ Inheritance diagram for P4::DoSimplifyKey:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a290d33f5fb82bf0c6442f786d3d85959" id="r_a290d33f5fb82bf0c6442f786d3d85959"><td class="memItemLeft" align="right" valign="top"><a id="a290d33f5fb82bf0c6442f786d3d85959" name="a290d33f5fb82bf0c6442f786d3d85959"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>DoSimplifyKey</b> (<a class="el" href="class_p4_1_1_reference_map.html">ReferenceMap</a> *refMap, <a class="el" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap, <a class="el" href="class_p4_1_1_key_is_simple.html">KeyIsSimple</a> *key_policy)</td></tr>
-<tr class="separator:a290d33f5fb82bf0c6442f786d3d85959"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3c004d61c803876a4f623f5bf86db1b6" id="r_a3c004d61c803876a4f623f5bf86db1b6"><td class="memItemLeft" align="right" valign="top"><a id="a3c004d61c803876a4f623f5bf86db1b6" name="a3c004d61c803876a4f623f5bf86db1b6"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>DoSimplifyKey</b> (<a class="el" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap, <a class="el" href="class_p4_1_1_key_is_simple.html">KeyIsSimple</a> *key_policy)</td></tr>
+<tr class="separator:a3c004d61c803876a4f623f5bf86db1b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abab5d5d87b24d3f47dff67534de949d7" id="r_abab5d5d87b24d3f47dff67534de949d7"><td class="memItemLeft" align="right" valign="top"><a id="abab5d5d87b24d3f47dff67534de949d7" name="abab5d5d87b24d3f47dff67534de949d7"></a>
 const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>doStatement</b> (const IR::Statement *statement, const IR::Expression *expression)</td></tr>
 <tr class="separator:abab5d5d87b24d3f47dff67534de949d7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3fcfb798c65ed480966765cf8bed3c93" id="r_a3fcfb798c65ed480966765cf8bed3c93"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_p4_1_1_visitor_1_1profile__t.html">Visitor::profile_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3fcfb798c65ed480966765cf8bed3c93">init_apply</a> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *node) override</td></tr>
+<tr class="separator:a3fcfb798c65ed480966765cf8bed3c93"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad6c944b34e57ff1da2b56d1b96a5a8ab" id="r_ad6c944b34e57ff1da2b56d1b96a5a8ab"><td class="memItemLeft" align="right" valign="top"><a id="ad6c944b34e57ff1da2b56d1b96a5a8ab" name="ad6c944b34e57ff1da2b56d1b96a5a8ab"></a>
 const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (IR::AssignmentStatement *statement) override</td></tr>
 <tr class="separator:ad6c944b34e57ff1da2b56d1b96a5a8ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -421,7 +423,35 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 <div class="line">}</div>
 </div><!-- fragment --><dl class="section pre"><dt>Precondition</dt><dd>none </dd></dl>
 <dl class="section post"><dt>Postcondition</dt><dd>all complex table key expressions are replaced with a simpler expression. </dd></dl>
-</div></div><!-- contents -->
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a3fcfb798c65ed480966765cf8bed3c93" name="a3fcfb798c65ed480966765cf8bed3c93"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3fcfb798c65ed480966765cf8bed3c93">&#9670;&#160;</a></span>init_apply()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="class_p4_1_1_visitor_1_1profile__t.html">Visitor::profile_t</a> P4::DoSimplifyKey::init_apply </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *</td>          <td class="paramname"><span class="paramname"><em>node</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reimplemented from <a class="el" href="class_p4_1_1_visitor.html">P4::Visitor</a>.</p>
+
+</div>
+</div>
+</div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->
 <!-- start footer part -->
