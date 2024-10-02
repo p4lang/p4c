@@ -27,7 +27,7 @@ const IR::ToplevelBlock *MidEnd::run(TCOptions &options, const IR::P4Program *pr
     midEnd.addPasses({
         new P4::ConvertEnums(&typeMap, new P4::EnumOn32Bits()),
         new P4::ClearTypeMap(&typeMap),
-        new P4::RemoveMiss(&refMap, &typeMap),
+        new P4::RemoveMiss(&typeMap),
         new P4::EliminateInvalidHeaders(&refMap, &typeMap),
         new P4::EliminateNewtype(&typeMap),
         new P4::EliminateSerEnums(&typeMap),
