@@ -205,7 +205,7 @@ const IR::Node *Predication::preorder(IR::AssignmentStatement *statement) {
         statement->right = new IR::Mux(conditions.back(), statement->right, statement->left);
         if (!traversalPath[ifNestingLevel - 1]) {
             // change statement name, if the current branch is the 'else' branch
-            statementName = generator->newName("elseStatement");
+            statementName = generator.newName("elseStatement");
         }
     } else {
         // Search for a statement with the same name in liveAssignments, if it is there
@@ -258,7 +258,7 @@ const IR::Node *Predication::preorder(IR::ArrayIndex *arrInd) {
     if (!(arrInd->right->is<IR::Constant>()) && modifyIndex) {
         // Creates a new variable that has the value of the original index when the
         // condition is fulfilled, and in any other case it has a default value of '1w0'
-        cstring indexName = generator->newName("index");
+        cstring indexName = generator.newName("index");
         auto indexDecl = new IR::Declaration_Variable(indexName, arrInd->right->type->getP4Type());
         auto index = new IR::PathExpression(IR::ID(indexName));
         auto indexAssignment = new IR::AssignmentStatement(index, clone(arrInd->right));
@@ -295,7 +295,7 @@ const IR::Node *Predication::preorder(IR::IfStatement *statement) {
     // can be pushed onto 'rv' immediately, while it's assignment of value needs to be pushed
     // onto 'liveAssigns', delaying it's placement on the 'rv' block and avoiding ordering issues.
     if (!statement->condition->is<IR::PathExpression>()) {
-        cstring conditionName = generator->newName("cond");
+        cstring conditionName = generator.newName("cond");
         rv->push_back(new IR::Declaration_Variable(conditionName, IR::Type::Boolean::get()));
         auto condition = new IR::PathExpression(IR::ID(conditionName));
         liveAssigns.push_back(new IR::AssignmentStatement(clone(condition), statement->condition));
