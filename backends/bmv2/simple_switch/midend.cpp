@@ -92,8 +92,8 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *o
              new P4::ConstantFolding(&refMap, &typeMap),
              new P4::StrengthReduction(&typeMap),
              new P4::SimplifySelectCases(&typeMap, true),  // require constant keysets
-             new P4::ExpandLookahead(&refMap, &typeMap),
-             new P4::ExpandEmit(&refMap, &typeMap),
+             new P4::ExpandLookahead(&typeMap),
+             new P4::ExpandEmit(&typeMap),
              new P4::SimplifyParsers(),
              new P4::StrengthReduction(&typeMap),
              new P4::EliminateTuples(&typeMap),

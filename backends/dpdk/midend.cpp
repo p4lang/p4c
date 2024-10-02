@@ -187,8 +187,8 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
             // an operand, we do not expand headers.
             // Structures expanded here are then processed as base bit type in ConvertLookahead
             // pass in backend.
-            new P4::ExpandLookahead(&refMap, &typeMap, nullptr, false),
-            new P4::ExpandEmit(&refMap, &typeMap),
+            new P4::ExpandLookahead(&typeMap, nullptr, false),
+            new P4::ExpandEmit(&typeMap),
             new P4::HandleNoMatch(),
             new P4::SimplifyParsers(),
             new P4::StrengthReduction(&typeMap),

@@ -90,7 +90,7 @@ const IR::ToplevelBlock *MidEnd::run(EbpfOptions &options, const IR::P4Program *
              new P4::RemoveExits(&typeMap),
              new P4::ConstantFolding(&refMap, &typeMap),
              new P4::SimplifySelectCases(&typeMap, false),  // accept non-constant keysets
-             new P4::ExpandEmit(&refMap, &typeMap),
+             new P4::ExpandEmit(&typeMap),
              new P4::HandleNoMatch(),
              new P4::SimplifyParsers(),
              new PassRepeated({
