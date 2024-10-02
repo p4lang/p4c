@@ -114,7 +114,7 @@ PnaNicMidEnd::PnaNicMidEnd(CompilerOptions &options, std::ostream *outStream)
             new P4::RemoveMiss(&refMap, &typeMap),
             new P4::EliminateNewtype(&refMap, &typeMap),
             new P4::EliminateInvalidHeaders(&refMap, &typeMap),
-            new P4::EliminateSerEnums(&refMap, &typeMap),
+            new P4::EliminateSerEnums(&typeMap),
             convertEnums,
             [this, convertEnums]() { enumMap = convertEnums->getEnumMapping(); },
             new P4::OrderArguments(&refMap, &typeMap),
