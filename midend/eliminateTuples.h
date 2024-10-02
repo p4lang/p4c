@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef MIDEND_ELIMINATETUPLES_H_
 #define MIDEND_ELIMINATETUPLES_H_
 
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
@@ -33,11 +34,10 @@ class ReplacementMap {
     const IR::Type *convertType(const IR::Type *type);
 
  public:
-    P4::NameGenerator *ng;
+    NameGenerator &ng;
     P4::TypeMap *typeMap;
 
-    ReplacementMap(NameGenerator *ng, TypeMap *typeMap) : ng(ng), typeMap(typeMap) {
-        CHECK_NULL(ng);
+    ReplacementMap(NameGenerator &ng, TypeMap *typeMap) : ng(ng), typeMap(typeMap) {
         CHECK_NULL(typeMap);
     }
     const IR::Type_Struct *getReplacement(const IR::Type_BaseList *tt);
@@ -76,12 +76,16 @@ class ReplacementMap {
  *         is needed for that.
  */
 class DoReplaceTuples final : public Transform {
-    ReplacementMap *repl;
+    ReplacementMap repl;
+    MinimalNameGenerator ng;
 
  public:
-    DoReplaceTuples(ReferenceMap *refMap, TypeMap *typeMap)
-        : repl(new ReplacementMap(refMap, typeMap)) {
-        setName("DoReplaceTuples");
+    explicit DoReplaceTuples(TypeMap *typeMap) : repl(ng, typeMap) { setName("DoReplaceTuples"); }
+    Visitor::profile_t init_apply(const IR::Node *node) override {
+        auto rv = Transform::init_apply(node);
+        node->apply(ng);
+
+        return rv;
     }
     const IR::Node *skip(const IR::Node *node) {
         prune();
@@ -113,19 +117,16 @@ class DoReplaceTuples final : public Transform {
 
 class EliminateTuples final : public PassManager {
  public:
-    EliminateTuples(ReferenceMap *refMap, TypeMap *typeMap, TypeChecking *typeChecking = nullptr,
-                    TypeInference *typeInference = nullptr) {
-        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
-        passes.push_back(typeChecking);
-        passes.push_back(new DoReplaceTuples(refMap, typeMap));
+    explicit EliminateTuples(TypeMap *typeMap, TypeChecking *typeChecking = nullptr,
+                             TypeInference *typeInference = nullptr) {
+        passes.push_back(typeChecking ? typeChecking : new TypeChecking(nullptr, typeMap));
+        passes.push_back(new DoReplaceTuples(typeMap));
         passes.push_back(new ClearTypeMap(typeMap));
         // We do a round of type-checking which may mutate the program.
         // This will convert some ListExpressions
         // into StructExpression where tuples were converted
         // to structs.
-        passes.push_back(new ResolveReferences(refMap));
-        if (!typeInference) typeInference = new TypeInference(typeMap, false);
-        passes.push_back(typeInference);
+        passes.push_back(typeInference ? typeInference : new TypeInference(typeMap, false));
         setName("EliminateTuples");
     }
 };

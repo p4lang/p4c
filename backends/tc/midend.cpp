@@ -46,7 +46,7 @@ const IR::ToplevelBlock *MidEnd::run(TCOptions &options, const IR::P4Program *pr
              new P4::StrengthReduction(&typeMap),
          }),
          new P4::SimplifyComparisons(&refMap, &typeMap),
-         new P4::EliminateTuples(&refMap, &typeMap),
+         new P4::EliminateTuples(&typeMap),
          new P4::SimplifySelectList(&refMap, &typeMap),
          new P4::MoveDeclarations(),  // more may have been introduced
          new P4::LocalCopyPropagation(&refMap, &typeMap),
