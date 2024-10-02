@@ -156,7 +156,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
             new P4::SimplifyControlFlow(&typeMap),
             new P4::CompileTimeOperations(),
             new P4::TableHit(&typeMap),
-            new P4::EliminateSwitch(&refMap, &typeMap),
+            new P4::EliminateSwitch(&typeMap),
             new P4::MoveActionsToTables(&refMap, &typeMap),
             new P4::RemoveLeftSlices(&typeMap),
             new P4::TypeChecking(&refMap, &typeMap),

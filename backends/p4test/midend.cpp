@@ -123,7 +123,7 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          new P4::SimplifyControlFlow(&typeMap),
          new P4::CompileTimeOperations(),
          new P4::TableHit(&typeMap),
-         new P4::EliminateSwitch(&refMap, &typeMap),
+         new P4::EliminateSwitch(&typeMap),
          new P4::ResolveReferences(&refMap),
          new P4::TypeChecking(&refMap, &typeMap, true),  // update types before ComputeDefUse
          new PassRepeated({

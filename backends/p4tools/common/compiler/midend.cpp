@@ -91,7 +91,7 @@ void MidEnd::addDefaultPasses() {
         // Replaces switch statements that operate on arbitrary scalars with switch statements
         // that
         // operate on actions by introducing a new table.
-        new P4::EliminateSwitch(&refMap, &typeMap),
+        new P4::EliminateSwitch(&typeMap),
         // Replace types introduced by 'type' with 'typedef'.
         new P4::EliminateNewtype(&typeMap),
         // Remove the invalid header / header-union literal, except for constant expressions
