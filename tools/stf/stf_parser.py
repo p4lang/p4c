@@ -19,6 +19,7 @@
 # -----------------------------------------------------------------------------
 
 import re
+from typing import Dict, Tuple
 
 import ply.yacc as yacc
 
@@ -99,7 +100,7 @@ class STFParser:
         self.parser = yacc.yacc(module=self)
         self.errors_cnt = 0
 
-    def parse(self, data=None, filename=""):
+    def parse(self, data=None, filename="") -> Tuple[Dict[str, str], int]:
         if data is None and filename == "":
             raise ValueError("Please specify either a filename or data")
 

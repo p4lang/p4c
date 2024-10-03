@@ -25,7 +25,7 @@ import socket
 import subprocess
 import threading
 from pathlib import Path
-from typing import Any, List, NamedTuple, Optional, Union
+from typing import Any, Dict, List, NamedTuple, Optional, Union
 
 import scapy.packet
 
