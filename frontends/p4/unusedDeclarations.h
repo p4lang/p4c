@@ -27,7 +27,7 @@ namespace P4 {
 
 class RemoveUnusedDeclarations;
 
-class UsedSet : public IHasDbPrint {
+class UsedDeclSet : public IHasDbPrint {
     /// Set containing all declarations in the program.
     absl::flat_hash_set<const IR::IDeclaration *, Util::Hash> usedDecls;
 
@@ -52,15 +52,15 @@ class RemoveUnusedPolicy {
  public:
     /// The policy for removing unused declarations is baked into the pass -- targets can specify
     /// their own subclass of the pass with a changed policy and return that here
-    virtual RemoveUnusedDeclarations *getRemoveUnusedDeclarationsPass(const UsedSet &used,
+    virtual RemoveUnusedDeclarations *getRemoveUnusedDeclarationsPass(const UsedDeclSet &used,
                                                                       bool warn = false) const;
 };
 
 class CollectUsedDeclarations : public Inspector, ResolutionContext {
-    UsedSet &used;
+    UsedDeclSet &used;
 
  public:
-    explicit CollectUsedDeclarations(UsedSet &used) : used(used) {}
+    explicit CollectUsedDeclarations(UsedDeclSet &used) : used(used) {}
 
     // We might be invoked in PassRepeated scenario, so the used set should be
     // force cleared.
@@ -100,7 +100,7 @@ class CollectUsedDeclarations : public Inspector, ResolutionContext {
  */
 class RemoveUnusedDeclarations : public Transform, ResolutionContext {
  protected:
-    const UsedSet &used;
+    const UsedDeclSet &used;
 
     /** If not null, logs the following unused elements in @warn:
      *  - unused IR::P4Table nodes
@@ -121,7 +121,7 @@ class RemoveUnusedDeclarations : public Transform, ResolutionContext {
 
     // Prevent direct instantiations of this class.
     friend class RemoveUnusedPolicy;
-    RemoveUnusedDeclarations(const UsedSet &used, bool warn)
+    RemoveUnusedDeclarations(const UsedDeclSet &used, bool warn)
         : used(used), warned(warn ? new std::set<const IR::Node *> : nullptr) {
         setName("RemoveUnusedDeclarations");
     }
@@ -185,7 +185,7 @@ class RemoveUnusedDeclarations : public Transform, ResolutionContext {
  * IR::P4Table or IR::Declaration_Instance is removed.
  */
 class RemoveAllUnusedDeclarations : public PassRepeated {
-    UsedSet used;
+    UsedDeclSet used;
 
  public:
     explicit RemoveAllUnusedDeclarations(const RemoveUnusedPolicy &policy, bool warn = false)

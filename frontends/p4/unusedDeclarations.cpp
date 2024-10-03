@@ -20,8 +20,8 @@ limitations under the License.
 
 namespace P4 {
 
-RemoveUnusedDeclarations *RemoveUnusedPolicy::getRemoveUnusedDeclarationsPass(const UsedSet &used,
-                                                                              bool warn) const {
+RemoveUnusedDeclarations *RemoveUnusedPolicy::getRemoveUnusedDeclarationsPass(
+    const UsedDeclSet &used, bool warn) const {
     return new RemoveUnusedDeclarations(used, warn);
 }
 
@@ -55,7 +55,7 @@ bool CollectUsedDeclarations::preorder(const IR::Type_Name *type) {
     return true;
 }
 
-void UsedSet::dbprint(std::ostream &out) const {
+void UsedDeclSet::dbprint(std::ostream &out) const {
     if (usedDecls.empty()) out << "Empty" << '\n';
     for (const auto *decl : usedDecls) out << dbp(decl) << '\n';
 }

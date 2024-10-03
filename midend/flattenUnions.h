@@ -165,7 +165,7 @@ class HandleValidityHeaderUnion : public Transform {
 };
 
 class RemoveUnusedHUDeclarations : public Transform {
-    UsedSet used;
+    UsedDeclSet used;
 
  public:
     Visitor::profile_t init_apply(const IR::Node *node) override {
