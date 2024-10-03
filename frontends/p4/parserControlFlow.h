@@ -17,7 +17,6 @@ limitations under the License.
 #ifndef FRONTENDS_P4_PARSERCONTROLFLOW_H_
 #define FRONTENDS_P4_PARSERCONTROLFLOW_H_
 
-#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/uniqueNames.h"

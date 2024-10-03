@@ -89,7 +89,7 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *o
              new P4::TypeChecking(&refMap, &typeMap),
              new P4::SimplifyKey(&typeMap,
                                  new P4::OrPolicy(new P4::IsValid(&typeMap), new P4::IsMask())),
-             new P4::ConstantFolding(&refMap, &typeMap),
+             new P4::ConstantFolding(&typeMap),
              new P4::StrengthReduction(&typeMap),
              new P4::SimplifySelectCases(&typeMap, true),  // require constant keysets
              new P4::ExpandLookahead(&typeMap),
@@ -98,19 +98,19 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *o
              new P4::StrengthReduction(&typeMap),
              new P4::EliminateTuples(&typeMap),
              new P4::SimplifyComparisons(&typeMap),
-             new P4::CopyStructures(&refMap, &typeMap),
-             new P4::NestedStructs(&refMap, &typeMap),
+             new P4::CopyStructures(&typeMap),
+             new P4::NestedStructs(&typeMap),
              new P4::SimplifySelectList(&typeMap),
              new P4::RemoveSelectBooleans(&typeMap),
              new P4::FlattenHeaders(&typeMap),
-             new P4::FlattenInterfaceStructs(&refMap, &typeMap),
+             new P4::FlattenInterfaceStructs(&typeMap),
              new P4::ReplaceSelectRange(),
              new P4::Predication(),
              new P4::MoveDeclarations(),  // more may have been introduced
-             new P4::ConstantFolding(&refMap, &typeMap),
-             new P4::LocalCopyPropagation(&refMap, &typeMap),
+             new P4::ConstantFolding(&typeMap),
+             new P4::LocalCopyPropagation(&typeMap),
              new PassRepeated({
-                 new P4::ConstantFolding(&refMap, &typeMap),
+                 new P4::ConstantFolding(&typeMap),
                  new P4::StrengthReduction(&typeMap),
              }),
              new P4::SimplifyKey(&typeMap,
@@ -127,7 +127,7 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *o
              new P4::EliminateTypedef(&typeMap),
              new P4::CompileTimeOperations(),
              new P4::TableHit(&typeMap),
-             new P4::EliminateSwitch(&refMap, &typeMap),
+             new P4::EliminateSwitch(&typeMap),
              new P4::RemoveLeftSlices(&typeMap),
              // p4c-bm removed unused action parameters. To produce a compatible
              // control plane API, we remove them as well for P4-14 programs.

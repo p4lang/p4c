@@ -1443,7 +1443,7 @@ class CollectLocalStructAndFlatten : public PassManager {
         passes.push_back(new P4::ResolveReferences(refMap));
         passes.push_back(new P4::TypeInference(typeMap, false));
         passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
-        passes.push_back(new P4::FlattenInterfaceStructs(refMap, typeMap));
+        passes.push_back(new P4::FlattenInterfaceStructs(typeMap));
     }
 };
 

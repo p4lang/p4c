@@ -98,6 +98,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
         [=](const Context *, const IR::Expression *e) -> bool {
         auto mce = e->to<IR::MethodCallExpression>();
         if (mce == nullptr) return true;
+        // FIXME: Add utility method to resolve declaration given a context
         auto mi = P4::MethodInstance::resolve(mce, &refMap, &typeMap);
         auto em = mi->to<P4::ExternMethod>();
         if (em == nullptr) return true;
@@ -121,7 +122,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
             new P4::TypeChecking(&refMap, &typeMap),
             new P4::SimplifyKey(&typeMap,
                                 new P4::OrPolicy(new P4::IsValid(&typeMap), new P4::IsMask())),
-            new P4::ConstantFolding(&refMap, &typeMap),
+            new P4::ConstantFolding(&typeMap),
             new P4::StrengthReduction(&typeMap),
             new P4::SimplifySelectCases(&typeMap, true),  // require constant keysets
             new P4::ExpandLookahead(&typeMap),
@@ -130,19 +131,20 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
             new P4::StrengthReduction(&typeMap),
             new P4::EliminateTuples(&typeMap),
             new P4::SimplifyComparisons(&typeMap),
-            new P4::CopyStructures(&refMap, &typeMap),
-            new P4::NestedStructs(&refMap, &typeMap),
+            new P4::CopyStructures(&typeMap),
+            new P4::NestedStructs(&typeMap),
             new P4::SimplifySelectList(&typeMap),
             new P4::RemoveSelectBooleans(&typeMap),
             new P4::FlattenHeaders(&typeMap),
-            new P4::FlattenInterfaceStructs(&refMap, &typeMap),
+            new P4::FlattenInterfaceStructs(&typeMap),
             new P4::ReplaceSelectRange(),
             new P4::Predication(),
             new P4::MoveDeclarations(),  // more may have been introduced
-            new P4::ConstantFolding(&refMap, &typeMap),
-            new P4::LocalCopyPropagation(&refMap, &typeMap, nullptr, policy),
+            new P4::ConstantFolding(&typeMap),
+            new P4::TypeChecking(&refMap, &typeMap),  // policy below relies on fresh refmap
+            new P4::LocalCopyPropagation(&typeMap, nullptr, policy),
             new PassRepeated({
-                new P4::ConstantFolding(&refMap, &typeMap),
+                new P4::ConstantFolding(&typeMap),
                 new P4::StrengthReduction(&typeMap),
             }),
             new P4::MoveDeclarations(),
@@ -156,7 +158,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
             new P4::SimplifyControlFlow(&typeMap),
             new P4::CompileTimeOperations(),
             new P4::TableHit(&typeMap),
-            new P4::EliminateSwitch(&refMap, &typeMap),
+            new P4::EliminateSwitch(&typeMap),
             new P4::MoveActionsToTables(&refMap, &typeMap),
             new P4::RemoveLeftSlices(&typeMap),
             new P4::TypeChecking(&refMap, &typeMap),

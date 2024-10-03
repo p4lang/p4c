@@ -93,7 +93,7 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          new P4::SimplifyKey(
              &typeMap, new P4::OrPolicy(new P4::IsValid(&typeMap), new P4::IsLikeLeftValue())),
          new P4::RemoveExits(&typeMap),
-         new P4::ConstantFolding(&refMap, &typeMap),
+         new P4::ConstantFolding(&typeMap),
          new P4::SimplifySelectCases(&typeMap, false),  // non-constant keysets
          new P4::ExpandLookahead(&typeMap),
          new P4::ExpandEmit(&typeMap),
@@ -102,35 +102,35 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          new P4::StrengthReduction(&typeMap),
          new P4::EliminateTuples(&typeMap),
          new P4::SimplifyComparisons(&typeMap),
-         new P4::CopyStructures(&refMap, &typeMap, false),
-         new P4::NestedStructs(&refMap, &typeMap),
+         new P4::CopyStructures(&typeMap, false),
+         new P4::NestedStructs(&typeMap),
          new P4::StrengthReduction(&typeMap),
          new P4::SimplifySelectList(&typeMap),
          new P4::RemoveSelectBooleans(&typeMap),
          new P4::FlattenHeaders(&typeMap),
-         new P4::FlattenInterfaceStructs(&refMap, &typeMap),
+         new P4::FlattenInterfaceStructs(&typeMap),
          new P4::EliminateTypedef(&typeMap),
          new P4::ReplaceSelectRange(),
          new P4::MoveDeclarations(),  // more may have been introduced
-         new P4::ConstantFolding(&refMap, &typeMap),
+         new P4::ConstantFolding(&typeMap),
          new P4::GlobalCopyPropagation(&refMap, &typeMap),
          new PassRepeated({
-             new P4::LocalCopyPropagation(&refMap, &typeMap),
-             new P4::ConstantFolding(&refMap, &typeMap),
+             new P4::LocalCopyPropagation(&typeMap),
+             new P4::ConstantFolding(&typeMap),
          }),
          new P4::StrengthReduction(&typeMap),
          new P4::MoveDeclarations(),  // more may have been introduced
          new P4::SimplifyControlFlow(&typeMap),
          new P4::CompileTimeOperations(),
          new P4::TableHit(&typeMap),
-         new P4::EliminateSwitch(&refMap, &typeMap),
+         new P4::EliminateSwitch(&typeMap),
          new P4::ResolveReferences(&refMap),
          new P4::TypeChecking(&refMap, &typeMap, true),  // update types before ComputeDefUse
          new PassRepeated({
              defUse,
              new P4::UnrollLoops(refMap, defUse),
-             new P4::LocalCopyPropagation(&refMap, &typeMap),
-             new P4::ConstantFolding(&refMap, &typeMap),
+             new P4::LocalCopyPropagation(&typeMap),
+             new P4::ConstantFolding(&typeMap),
              new P4::StrengthReduction(&typeMap),
          }),
          new P4::MoveDeclarations(),  // more may have been introduced
@@ -158,7 +158,7 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
              }
              return root;
          },
-         new P4::HSIndexSimplifier(&refMap, &typeMap),
+         new P4::HSIndexSimplifier(&typeMap),
          new P4::SynthesizeActions(&refMap, &typeMap, new SkipControls(v1controls)),
          new P4::MoveActionsToTables(&refMap, &typeMap),
          options.loopsUnrolling ? new P4::ParsersUnroll(true, &refMap, &typeMap) : nullptr,

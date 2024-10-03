@@ -27,7 +27,6 @@ limitations under the License.
 #include "midend/checkExternInvocationCommon.h"
 
 namespace P4 {
-class ReferenceMap;
 class TypeMap;
 }  // namespace P4
 
@@ -137,9 +136,8 @@ class CheckPNAExternInvocation : public P4::CheckExternInvocationCommon {
     }
 
  public:
-    CheckPNAExternInvocation(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
-                             DpdkProgramStructure *structure)
-        : P4::CheckExternInvocationCommon(refMap, typeMap), structure(structure) {
+    CheckPNAExternInvocation(P4::TypeMap *typeMap, DpdkProgramStructure *structure)
+        : P4::CheckExternInvocationCommon(typeMap), structure(structure) {
         initPipeConstraints();
     }
 };
@@ -147,20 +145,18 @@ class CheckPNAExternInvocation : public P4::CheckExternInvocationCommon {
 /// @brief Class which chooses the correct class for checking the constraints for invocations.
 ///        of extern methods and functions depending on the architecture.
 class CheckExternInvocation : public Inspector {
-    P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
     DpdkProgramStructure *structure;
 
  public:
-    CheckExternInvocation(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
-                          DpdkProgramStructure *structure)
-        : refMap(refMap), typeMap(typeMap), structure(structure) {}
+    CheckExternInvocation(P4::TypeMap *typeMap, DpdkProgramStructure *structure)
+        : typeMap(typeMap), structure(structure) {}
 
     bool preorder(const IR::P4Program *program) {
         if (structure->isPNA()) {
             LOG1("Checking extern invocations for PNA architecture.");
-            auto checker = new CheckPNAExternInvocation(refMap, typeMap, structure);
-            program->apply(*checker);
+            CheckPNAExternInvocation checker(typeMap, structure);
+            program->apply(checker, getChildContext());
         } else if (structure->isPSA()) {
             LOG1("Checking extern invocations for PSA architecture.");
             // Add class checking PSA constraints here.

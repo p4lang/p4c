@@ -91,7 +91,7 @@ void MidEnd::addDefaultPasses() {
         // Replaces switch statements that operate on arbitrary scalars with switch statements
         // that
         // operate on actions by introducing a new table.
-        new P4::EliminateSwitch(&refMap, &typeMap),
+        new P4::EliminateSwitch(&typeMap),
         // Replace types introduced by 'type' with 'typedef'.
         new P4::EliminateNewtype(&typeMap),
         // Remove the invalid header / header-union literal, except for constant expressions
@@ -107,7 +107,7 @@ void MidEnd::addDefaultPasses() {
         new P4::TypeChecking(&refMap, &typeMap),
         mkConvertKeys(),
         mkConvertEnums(),
-        new P4::ConstantFolding(&refMap, &typeMap),
+        new P4::ConstantFolding(&typeMap),
         new P4::SimplifyControlFlow(&typeMap),
         // Eliminate extraneous cases in select statements.
         new P4::SimplifySelectCases(&typeMap, false),
@@ -121,7 +121,7 @@ void MidEnd::addDefaultPasses() {
         new P4::SimplifyComparisons(&typeMap),
         // Expand header and struct assignments into sequences of field assignments.
         new PassRepeated({
-            new P4::CopyStructures(&refMap, &typeMap, false, true, nullptr),
+            new P4::CopyStructures(&typeMap, false, true, nullptr),
         }),
         new P4::RemoveParserControlFlow(&typeMap),
         // Flatten nested list expressions.
@@ -129,21 +129,21 @@ void MidEnd::addDefaultPasses() {
         // Convert booleans in selects into bit<1>.
         new P4::RemoveSelectBooleans(&typeMap),
         // Flatten nested headers and structs.
-        new P4::NestedStructs(&refMap, &typeMap),
+        new P4::NestedStructs(&typeMap),
         new P4::FlattenHeaders(&typeMap),
         new P4::TypeChecking(&refMap, &typeMap, true),
         // Move local declarations to the top of each control/parser.
         new P4::MoveDeclarations(),
-        new P4::ConstantFolding(&refMap, &typeMap),
+        new P4::ConstantFolding(&typeMap),
         // Rewrite P4_14 masked assignments.
         new P4::SimplifyBitwise(),
         // Local copy propagation and dead-code elimination.
         new P4::LocalCopyPropagation(
-            &refMap, &typeMap, nullptr,
+            &typeMap, nullptr,
             [this](const Visitor::Context *context, const IR::Expression *expr) {
                 return localCopyPropPolicy(context, expr);
             }),
-        new P4::ConstantFolding(&refMap, &typeMap),
+        new P4::ConstantFolding(&typeMap),
         new P4::MoveDeclarations(),
         new P4::SimplifyControlFlow(&typeMap),
         // Replace any slices in the left side of assignments and convert them to casts.
@@ -154,10 +154,10 @@ void MidEnd::addDefaultPasses() {
         mkConvertErrors(),
         // Convert tuples into structs.
         new P4::EliminateTuples(&typeMap),
-        new P4::ConstantFolding(&refMap, &typeMap),
+        new P4::ConstantFolding(&typeMap),
         new P4::SimplifyControlFlow(&typeMap),
         // Simplify header stack assignments with runtime indices into conditional statements.
-        new P4::HSIndexSimplifier(&refMap, &typeMap),
+        new P4::HSIndexSimplifier(&typeMap),
         // Convert Type_Varbits into a type that contains information about the assigned width.
         new ConvertVarbits(),
         // Convert any StructExpressions with Type_Header into a HeaderExpression.

@@ -1178,13 +1178,12 @@ void SimpleSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::TypeChecking(refMap, typeMap),
         new P4::SimplifyControlFlow(typeMap),
         new LowerExpressions(typeMap),
-        new P4::ConstantFolding(refMap, typeMap, false),
+        new P4::ConstantFolding(typeMap, false),
         new P4::TypeChecking(refMap, typeMap),
-        new RemoveComplexExpressions(refMap, typeMap,
-                                     new ProcessControls(&structure->pipeline_controls)),
+        new RemoveComplexExpressions(typeMap, new ProcessControls(&structure->pipeline_controls)),
         new P4::SimplifyControlFlow(typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap, P4::RemoveUnusedPolicy()),
-        new P4::FlattenLogMsg(refMap, typeMap),
+        new P4::FlattenLogMsg(typeMap),
         // Converts the DAG into a TREE (at least for expressions)
         // This is important later for conversion to JSON.
         new P4::CloneExpressions(),

@@ -74,13 +74,13 @@ const IR::Node *ReplaceStructs::postorder(IR::Member *expression) {
     std::string prefix;
     while (auto mem = e->to<IR::Member>()) {
         e = mem->expr;
-        prefix = "." + mem->member + prefix;
+        prefix = absl::StrCat(".", mem->member.string_view(), prefix);
     }
     auto pe = e->to<IR::PathExpression>();
     if (pe == nullptr) return expression;
     // At this point we know that pe is an expression of the form
     // param.field1.etc.fieldN, where param has a type that needs to be replaced.
-    auto decl = replacementMap->refMap->getDeclaration(pe->path, true);
+    auto decl = getDeclaration(pe->path, true);
     auto param = decl->to<IR::Parameter>();
     if (param == nullptr) return expression;
     auto repl = ::P4::get(toReplace, param);

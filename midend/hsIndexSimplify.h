@@ -1,7 +1,8 @@
 #ifndef MIDEND_HSINDEXSIMPLIFY_H_
 #define MIDEND_HSINDEXSIMPLIFY_H_
 
-#include "frontends/common/resolveReferences/referenceMap.h"
+#include <memory>
+
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
@@ -17,7 +18,7 @@ class HSIndexFinder : public Inspector {
     friend class HSIndexTransform;
     friend class HSIndexContretizer;
     IR::IndexedVector<IR::Declaration> *locals;
-    ReferenceMap *refMap;
+    std::shared_ptr<NameGenerator> nameGen;
     TypeMap *typeMap;
     const IR::ArrayIndex *arrayIndex = nullptr;
     const IR::PathExpression *newVariable = nullptr;
@@ -26,10 +27,11 @@ class HSIndexFinder : public Inspector {
     std::list<IR::Member *> dependedMembers;
 
  public:
-    HSIndexFinder(IR::IndexedVector<IR::Declaration> *locals, ReferenceMap *refMap,
-                  TypeMap *typeMap, GeneratedVariablesMap *generatedVariables)
+    HSIndexFinder(IR::IndexedVector<IR::Declaration> *locals,
+                  std::shared_ptr<NameGenerator> nameGen, TypeMap *typeMap,
+                  GeneratedVariablesMap *generatedVariables)
         : locals(locals),
-          refMap(refMap),
+          nameGen(nameGen),
           typeMap(typeMap),
           generatedVariables(generatedVariables) {}
     void postorder(const IR::ArrayIndex *curArrayIndex) override;
@@ -65,20 +67,33 @@ class HSIndexTransform : public Transform {
 /// if (hdivr0 == 0) { hdr.h[0] = 1;}
 /// else if (hdivr0 == 1){hdr.h[1] = 1;}
 class HSIndexContretizer : public Transform {
-    ReferenceMap *refMap;
     TypeMap *typeMap;
+    std::shared_ptr<MinimalNameGenerator> nameGen;
     IR::IndexedVector<IR::Declaration> *locals;
     GeneratedVariablesMap *generatedVariables;
 
  public:
-    HSIndexContretizer(ReferenceMap *refMap, TypeMap *typeMap,
-                       IR::IndexedVector<IR::Declaration> *locals = nullptr,
-                       GeneratedVariablesMap *generatedVariables = nullptr)
-        : refMap(refMap), typeMap(typeMap), locals(locals), generatedVariables(generatedVariables) {
-        if (generatedVariables == nullptr) {
-            generatedVariables = new GeneratedVariablesMap();
-        }
+    explicit HSIndexContretizer(TypeMap *typeMap,
+                                std::shared_ptr<MinimalNameGenerator> nameGen = nullptr,
+                                IR::IndexedVector<IR::Declaration> *locals = nullptr,
+                                GeneratedVariablesMap *generatedVariables = nullptr)
+        : typeMap(typeMap),
+          nameGen(nameGen),
+          locals(locals),
+          generatedVariables(generatedVariables) {
+        if (generatedVariables == nullptr) generatedVariables = new GeneratedVariablesMap();
     }
+    Visitor::profile_t init_apply(const IR::Node *node) override {
+        auto rv = Transform::init_apply(node);
+
+        if (!nameGen) {
+            nameGen = std::make_shared<MinimalNameGenerator>();
+            node->apply(*nameGen);
+        }
+
+        return rv;
+    }
+
     IR::Node *preorder(IR::IfStatement *ifStatement) override;
     IR::Node *preorder(IR::AssignmentStatement *assignmentStatement) override;
     IR::Node *preorder(IR::BlockStatement *blockStatement) override;
@@ -94,10 +109,10 @@ class HSIndexContretizer : public Transform {
 
 class HSIndexSimplifier : public PassManager {
  public:
-    HSIndexSimplifier(ReferenceMap *refMap, TypeMap *typeMap) {
+    explicit HSIndexSimplifier(TypeMap *typeMap) {
         // remove block statements
-        passes.push_back(new TypeChecking(refMap, typeMap, true));
-        passes.push_back(new HSIndexContretizer(refMap, typeMap));
+        passes.push_back(new TypeChecking(nullptr, typeMap, true));
+        passes.push_back(new HSIndexContretizer(typeMap));
         setName("HSIndexSimplifier");
     }
 };
