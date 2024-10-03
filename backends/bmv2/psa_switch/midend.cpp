@@ -98,6 +98,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
         [=](const Context *, const IR::Expression *e) -> bool {
         auto mce = e->to<IR::MethodCallExpression>();
         if (mce == nullptr) return true;
+        // FIXME: Add utility method to resolve declaration given a context
         auto mi = P4::MethodInstance::resolve(mce, &refMap, &typeMap);
         auto em = mi->to<P4::ExternMethod>();
         if (em == nullptr) return true;
@@ -140,6 +141,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
             new P4::Predication(),
             new P4::MoveDeclarations(),  // more may have been introduced
             new P4::ConstantFolding(&typeMap),
+            new P4::TypeChecking(&refMap, &typeMap),  // policy below relies on fresh refmap
             new P4::LocalCopyPropagation(&typeMap, nullptr, policy),
             new PassRepeated({
                 new P4::ConstantFolding(&typeMap),
