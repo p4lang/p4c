@@ -93,7 +93,7 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          new P4::SimplifyKey(
              &typeMap, new P4::OrPolicy(new P4::IsValid(&typeMap), new P4::IsLikeLeftValue())),
          new P4::RemoveExits(&typeMap),
-         new P4::ConstantFolding(&refMap, &typeMap),
+         new P4::ConstantFolding(&typeMap),
          new P4::SimplifySelectCases(&typeMap, false),  // non-constant keysets
          new P4::ExpandLookahead(&typeMap),
          new P4::ExpandEmit(&typeMap),
@@ -112,11 +112,11 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          new P4::EliminateTypedef(&typeMap),
          new P4::ReplaceSelectRange(),
          new P4::MoveDeclarations(),  // more may have been introduced
-         new P4::ConstantFolding(&refMap, &typeMap),
+         new P4::ConstantFolding(&typeMap),
          new P4::GlobalCopyPropagation(&refMap, &typeMap),
          new PassRepeated({
              new P4::LocalCopyPropagation(&typeMap),
-             new P4::ConstantFolding(&refMap, &typeMap),
+             new P4::ConstantFolding(&typeMap),
          }),
          new P4::StrengthReduction(&typeMap),
          new P4::MoveDeclarations(),  // more may have been introduced
@@ -130,7 +130,7 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
              defUse,
              new P4::UnrollLoops(refMap, defUse),
              new P4::LocalCopyPropagation(&typeMap),
-             new P4::ConstantFolding(&refMap, &typeMap),
+             new P4::ConstantFolding(&typeMap),
              new P4::StrengthReduction(&typeMap),
          }),
          new P4::MoveDeclarations(),  // more may have been introduced

@@ -88,13 +88,13 @@ const IR::ToplevelBlock *MidEnd::run(EbpfOptions &options, const IR::P4Program *
              new P4::SimplifyKey(
                  &typeMap, new P4::OrPolicy(new P4::IsValid(&typeMap), new P4::IsLikeLeftValue())),
              new P4::RemoveExits(&typeMap),
-             new P4::ConstantFolding(&refMap, &typeMap),
+             new P4::ConstantFolding(&typeMap),
              new P4::SimplifySelectCases(&typeMap, false),  // accept non-constant keysets
              new P4::ExpandEmit(&typeMap),
              new P4::HandleNoMatch(),
              new P4::SimplifyParsers(),
              new PassRepeated({
-                 new P4::ConstantFolding(&refMap, &typeMap),
+                 new P4::ConstantFolding(&typeMap),
                  new P4::StrengthReduction(&typeMap),
              }),
              new P4::SimplifyComparisons(&typeMap),
@@ -103,7 +103,7 @@ const IR::ToplevelBlock *MidEnd::run(EbpfOptions &options, const IR::P4Program *
              new P4::MoveDeclarations(),  // more may have been introduced
              new P4::RemoveSelectBooleans(&typeMap),
              new P4::SingleArgumentSelect(&typeMap),
-             new P4::ConstantFolding(&refMap, &typeMap),
+             new P4::ConstantFolding(&typeMap),
              new P4::SimplifyControlFlow(&typeMap),
              new P4::TableHit(&typeMap),
              new P4::RemoveLeftSlices(&typeMap),

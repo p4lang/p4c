@@ -65,7 +65,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::RemoveComplexExpressions(typeMap,
                                          new DPDK::ProcessControls(&structure.pipeline_controls)),
         new DismantleMuxExpressions(typeMap, refMap),
-        new P4::ConstantFolding(refMap, typeMap, false),
+        new P4::ConstantFolding(typeMap, false),
         new EliminateHeaderCopy(refMap, typeMap),
         new P4::TypeChecking(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap, P4::RemoveUnusedPolicy()),

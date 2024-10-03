@@ -180,7 +180,7 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
             new P4::SimplifyKey(
                 &typeMap, new P4::OrPolicy(new P4::IsValid(&typeMap), new P4::IsLikeLeftValue())),
             new P4::RemoveExits(&typeMap),
-            new P4::ConstantFolding(&refMap, &typeMap),
+            new P4::ConstantFolding(&typeMap),
             new P4::StrengthReduction(&typeMap),
             new P4::SimplifySelectCases(&typeMap, true),
             // The lookahead implementation in DPDK target supports only a header instance as
@@ -207,10 +207,10 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options, std::ostream *outStream) {
             new P4::SimplifyControlFlow(&typeMap),
             new P4::ReplaceSelectRange(),
             new P4::MoveDeclarations(),  // more may have been introduced
-            new P4::ConstantFolding(&refMap, &typeMap),
+            new P4::ConstantFolding(&typeMap),
             new P4::LocalCopyPropagation(&typeMap, nullptr, policy),
             new PassRepeated({
-                new P4::ConstantFolding(&refMap, &typeMap),
+                new P4::ConstantFolding(&typeMap),
                 new P4::StrengthReduction(&typeMap),
             }),
             new P4::MoveDeclarations(),

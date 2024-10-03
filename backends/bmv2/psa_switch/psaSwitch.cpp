@@ -103,7 +103,7 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::SimplifyControlFlow(typeMap),
         new LowerExpressions(typeMap),
         new PassRepeated({
-            new P4::ConstantFolding(refMap, typeMap),
+            new P4::ConstantFolding(typeMap),
             new P4::StrengthReduction(typeMap),
         }),
         new P4::TypeChecking(refMap, typeMap),

@@ -116,21 +116,23 @@ class DoConstantFolding : public Transform, public ResolutionContext {
  public:
     DoConstantFolding(const DeclarationLookup *refMap, const TypeMap *typeMap, bool warnings = true,
                       ConstantFoldingPolicy *policy = nullptr)
-        : refMap(refMap), typeMap(typeMap), typesKnown(typeMap != nullptr), warnings(warnings) {
-        if (policy) {
-            this->policy = policy;
-        } else {
-            this->policy = new ConstantFoldingPolicy();
-        }
+        : policy(policy ? policy : new ConstantFoldingPolicy()),
+          refMap(refMap),
+          typeMap(typeMap),
+          typesKnown(typeMap != nullptr),
+          warnings(warnings) {
         visitDagOnce = true;
         setName("DoConstantFolding");
         assignmentTarget = false;
     }
 
-    // If DeclarationLookup is not passed, then resolve by our own.
+    // If DeclarationLookup is not passed, then resolve by our own. We might
+    // need proper context for this
     explicit DoConstantFolding(const TypeMap *typeMap, bool warnings = true,
                                ConstantFoldingPolicy *policy = nullptr)
         : DoConstantFolding(this, typeMap, warnings, policy) {}
+
+    DoConstantFolding() : DoConstantFolding(nullptr, nullptr) {}
 
     const IR::Node *postorder(IR::Declaration_Constant *d) override;
     const IR::Node *postorder(IR::PathExpression *e) override;
@@ -182,20 +184,6 @@ class DoConstantFolding : public Transform, public ResolutionContext {
  */
 class ConstantFolding : public PassManager {
  public:
-    ConstantFolding(ReferenceMap *refMap, TypeMap *typeMap, ConstantFoldingPolicy *policy)
-        : ConstantFolding(refMap, typeMap, true, nullptr, policy) {}
-
-    ConstantFolding(ReferenceMap *refMap, TypeMap *typeMap, bool warnings = true,
-                    TypeChecking *typeChecking = nullptr, ConstantFoldingPolicy *policy = nullptr) {
-        if (typeMap != nullptr) {
-            if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
-            passes.push_back(typeChecking);
-        }
-        passes.push_back(new DoConstantFolding(refMap, typeMap, warnings, policy));
-        if (typeMap != nullptr) passes.push_back(new ClearTypeMap(typeMap));
-        setName("ConstantFolding");
-    }
-
     ConstantFolding(TypeMap *typeMap, ConstantFoldingPolicy *policy)
         : ConstantFolding(typeMap, true, nullptr, policy) {}
 

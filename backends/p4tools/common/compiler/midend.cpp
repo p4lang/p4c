@@ -107,7 +107,7 @@ void MidEnd::addDefaultPasses() {
         new P4::TypeChecking(&refMap, &typeMap),
         mkConvertKeys(),
         mkConvertEnums(),
-        new P4::ConstantFolding(&refMap, &typeMap),
+        new P4::ConstantFolding(&typeMap),
         new P4::SimplifyControlFlow(&typeMap),
         // Eliminate extraneous cases in select statements.
         new P4::SimplifySelectCases(&typeMap, false),
@@ -134,7 +134,7 @@ void MidEnd::addDefaultPasses() {
         new P4::TypeChecking(&refMap, &typeMap, true),
         // Move local declarations to the top of each control/parser.
         new P4::MoveDeclarations(),
-        new P4::ConstantFolding(&refMap, &typeMap),
+        new P4::ConstantFolding(&typeMap),
         // Rewrite P4_14 masked assignments.
         new P4::SimplifyBitwise(),
         // Local copy propagation and dead-code elimination.
@@ -143,7 +143,7 @@ void MidEnd::addDefaultPasses() {
             [this](const Visitor::Context *context, const IR::Expression *expr) {
                 return localCopyPropPolicy(context, expr);
             }),
-        new P4::ConstantFolding(&refMap, &typeMap),
+        new P4::ConstantFolding(&typeMap),
         new P4::MoveDeclarations(),
         new P4::SimplifyControlFlow(&typeMap),
         // Replace any slices in the left side of assignments and convert them to casts.
@@ -154,7 +154,7 @@ void MidEnd::addDefaultPasses() {
         mkConvertErrors(),
         // Convert tuples into structs.
         new P4::EliminateTuples(&typeMap),
-        new P4::ConstantFolding(&refMap, &typeMap),
+        new P4::ConstantFolding(&typeMap),
         new P4::SimplifyControlFlow(&typeMap),
         // Simplify header stack assignments with runtime indices into conditional statements.
         new P4::HSIndexSimplifier(&typeMap),

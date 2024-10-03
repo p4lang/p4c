@@ -32,12 +32,9 @@ struct P4CFrontend : P4CTest {
 struct P4CConstantFoldingValidation : P4CFrontend {
     void createPasses(P4::ConstantFoldingPolicy *policy) {
         addPasses({
-            new P4::ResolveReferences(&refMap),
-            new P4::ConstantFolding(&refMap, nullptr, policy),
+            new P4::ConstantFolding(nullptr, policy),
         });
     }
-
-    P4::ReferenceMap refMap;
 };
 
 /**

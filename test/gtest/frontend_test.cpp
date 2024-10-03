@@ -31,8 +31,7 @@ struct P4CFrontend : P4CTest {
 
 struct P4CFrontendEnumValidation : P4CFrontend {
     P4CFrontendEnumValidation() {
-        addPasses({new P4::ResolveReferences(&refMap), new P4::ConstantFolding(&refMap, nullptr),
-                   new P4::ResolveReferences(&refMap),
+        addPasses({new P4::ConstantFolding(nullptr, true), new P4::ResolveReferences(&refMap),
                    new P4::TypeInference(&typeMap, false, false)});
     }
 

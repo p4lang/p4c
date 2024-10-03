@@ -1178,7 +1178,7 @@ void SimpleSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::TypeChecking(refMap, typeMap),
         new P4::SimplifyControlFlow(typeMap),
         new LowerExpressions(typeMap),
-        new P4::ConstantFolding(refMap, typeMap, false),
+        new P4::ConstantFolding(typeMap, false),
         new P4::TypeChecking(refMap, typeMap),
         new RemoveComplexExpressions(typeMap, new ProcessControls(&structure->pipeline_controls)),
         new P4::SimplifyControlFlow(typeMap),

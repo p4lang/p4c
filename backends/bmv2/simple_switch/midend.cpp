@@ -89,7 +89,7 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *o
              new P4::TypeChecking(&refMap, &typeMap),
              new P4::SimplifyKey(&typeMap,
                                  new P4::OrPolicy(new P4::IsValid(&typeMap), new P4::IsMask())),
-             new P4::ConstantFolding(&refMap, &typeMap),
+             new P4::ConstantFolding(&typeMap),
              new P4::StrengthReduction(&typeMap),
              new P4::SimplifySelectCases(&typeMap, true),  // require constant keysets
              new P4::ExpandLookahead(&typeMap),
@@ -107,10 +107,10 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *o
              new P4::ReplaceSelectRange(),
              new P4::Predication(),
              new P4::MoveDeclarations(),  // more may have been introduced
-             new P4::ConstantFolding(&refMap, &typeMap),
+             new P4::ConstantFolding(&typeMap),
              new P4::LocalCopyPropagation(&typeMap),
              new PassRepeated({
-                 new P4::ConstantFolding(&refMap, &typeMap),
+                 new P4::ConstantFolding(&typeMap),
                  new P4::StrengthReduction(&typeMap),
              }),
              new P4::SimplifyKey(&typeMap,

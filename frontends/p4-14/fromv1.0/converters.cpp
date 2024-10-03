@@ -655,7 +655,7 @@ Converter::Converter() {
 
     // Discover types using P4-14 type-checker
     passes.emplace_back(new DetectDuplicates());
-    passes.emplace_back(new P4::DoConstantFolding(nullptr, nullptr));
+    passes.emplace_back(new P4::DoConstantFolding());
     passes.emplace_back(new CheckHeaderTypes());
     passes.emplace_back(new AdjustLengths());
     passes.emplace_back(new TypeCheck());
