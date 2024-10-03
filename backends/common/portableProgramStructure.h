@@ -17,7 +17,8 @@ limitations under the License.
 #ifndef BACKENDS_COMMON_PORTABLEPROGRAMSTRUCTURE_H_
 #define BACKENDS_COMMON_PORTABLEPROGRAMSTRUCTURE_H_
 
-#include "backends/bmv2/common/backend.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeMap.h"
 #include "backends/common/programStructure.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
