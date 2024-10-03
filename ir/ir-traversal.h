@@ -90,15 +90,7 @@ struct Traverse {
     static Obj *modify(Obj *obj, Index idx, Selectors &&... selectors)
     {
         BUG_CHECK(obj->size() > idx.value, "Index %1% out of bounds of %2%", idx.value, obj);
-        auto &val = (*obj)[idx.value];
-        if constexpr (std::is_pointer_v<std::remove_reference_t<decltype(val)>>) {
-            val = modify(val->clone(), std::forward<Selectors>(selectors)...);
-        } else {
-            const auto *res = modify(&val, std::forward<Selectors>(selectors)...);
-            if (&val != res) {
-                val = *res;
-            }
-        }
+        modifyRef((*obj)[idx.value], std::forward<Selectors>(selectors)...);
         return obj;
     }
 
@@ -114,15 +106,20 @@ struct Traverse {
     static Obj *modify(Obj *obj, Sub T::* member, Selectors &&... selectors)
     {
         static_assert(!std::is_const_v<Obj>, "Cannot modify constant object");
-        if constexpr (std::is_pointer_v<Sub>) {
-            obj->*member = modify((obj->*member)->clone(), std::forward<Selectors>(selectors)...);
+        modifyRef(obj->*member, std::forward<Selectors>(selectors)...);
+        return obj;
+    }
+
+    template<typename T, typename... Selectors>
+    static void modifyRef(T &ref, Selectors &&... selectors) {
+        if constexpr (std::is_pointer_v<T>) {
+            ref = modify(ref->clone(), std::forward<Selectors>(selectors)...);
         } else {
-            const auto *res = modify(&(obj->*member), std::forward<Selectors>(selectors)...);
-            if (&(obj->*member) != res) {
-                obj->*member = *res;
+            auto *res = modify(&ref, std::forward<Selectors>(selectors)...);
+            if (&ref != res) {
+                ref = *res;
             }
         }
-        return obj;
     }
 };
 
@@ -157,9 +154,9 @@ struct Traverse {
 /// @section sec_modifiers Modifiers
 ///
 /// Modifier is a last component of the chain, it modifies the selected object.
-/// - @ref Assign -- a simple modifier that assigns/replaces the currently selected value. If the
-///   argument is a pointer, the value is replaced, if the argument is non-pointer, the selected value
-///   is assigned.
+/// - @ref `Traversal::Assign` -- a simple modifier that assigns/replaces the currently selected
+///   value. If the argument is a pointer, the value is replaced, if the argument is non-pointer,
+///   the selected value is assigned.
 /// - freeform modifier object -- usually a lambda. This object will receive pointer to non-const
 ///   value of the currently selected object and can modify it in any way (e.g. increment value).
 ///
@@ -180,14 +177,14 @@ struct Traverse {
 ///        &IR::ParameterList::parameters, Index(0), &IR::Parameter::type, Assign(idxType));
 /// @endcode
 ///
-/// Any time a cast fails or an index is out of range the modification triggers a BUG.
+/// Any time a cast fails or an index is out of range the modification triggers a `BUG`.
 template<typename Obj, typename... Selectors>
 Obj *modify(Obj *obj, Selectors &&... selectors) {
     return Detail::Traverse::modify(obj, std::forward<Selectors>(selectors)...);
 }
 
 /// @brief Similar to modify, but accepts constant argument which is cloned. Therefore, the result
-/// is a different object then @p obj. @sa modify.
+/// is a different object then @p obj. @sa `Traversal::modify`.
 template<typename Obj, typename... Selectors>
 Obj *apply(const Obj *obj, Selectors &&... selectors) {
     return Detail::Traverse::modify(obj->clone(), std::forward<Selectors>(selectors)...);
