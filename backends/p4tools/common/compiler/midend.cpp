@@ -139,7 +139,7 @@ void MidEnd::addDefaultPasses() {
         new P4::SimplifyBitwise(),
         // Local copy propagation and dead-code elimination.
         new P4::LocalCopyPropagation(
-            &refMap, &typeMap, nullptr,
+            &typeMap, nullptr,
             [this](const Visitor::Context *context, const IR::Expression *expr) {
                 return localCopyPropPolicy(context, expr);
             }),

@@ -48,7 +48,7 @@ const IR::ToplevelBlock *MidEnd::run(TCOptions &options, const IR::P4Program *pr
         new P4::EliminateTuples(&typeMap),
         new P4::SimplifySelectList(&typeMap),
         new P4::MoveDeclarations(),  // more may have been introduced
-        new P4::LocalCopyPropagation(&refMap, &typeMap),
+        new P4::LocalCopyPropagation(&typeMap),
         new PassRepeated({
             new P4::ConstantFolding(&refMap, &typeMap),
             new P4::StrengthReduction(&typeMap),

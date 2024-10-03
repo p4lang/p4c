@@ -17,9 +17,11 @@ limitations under the License.
 #define MIDEND_LOCAL_COPYPROP_H_
 
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "has_side_effects.h"
 #include "ir/ir.h"
+#include "ir/visitor.h"
 
 namespace P4 {
 
@@ -49,8 +51,10 @@ may be evaluated mulitple times.  The default policy just returns true -- always
 if legal to do so.
 
  */
-class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteContext {
-    ReferenceMap *refMap;
+class DoLocalCopyPropagation : public ControlFlowVisitor,
+                               Transform,
+                               P4WriteContext,
+                               ResolutionContext {
     TypeMap *typeMap;
     bool working = false;
     struct VarInfo {
@@ -98,8 +102,8 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
     bool name_overlap(cstring, cstring);
     void forOverlapAvail(cstring, std::function<void(cstring, VarInfo *)>);
     void dropValuesUsing(cstring);
-    bool hasSideEffects(const IR::Expression *e) {
-        return bool(::P4::hasSideEffects(refMap, typeMap, e));
+    bool hasSideEffects(const IR::Expression *e, const Visitor::Context *ctxt) {
+        return bool(::P4::hasSideEffects(typeMap, e, ctxt));
     }
     bool isHeaderUnionIsValid(const IR::Expression *e);
 
@@ -147,11 +151,10 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
     DoLocalCopyPropagation(const DoLocalCopyPropagation &) = default;
 
  public:
-    DoLocalCopyPropagation(ReferenceMap *refMap, TypeMap *typeMap,
+    DoLocalCopyPropagation(TypeMap *typeMap,
                            std::function<bool(const Context *, const IR::Expression *)> policy,
                            bool eut)
-        : refMap(refMap),
-          typeMap(typeMap),
+        : typeMap(typeMap),
           tables(*new std::map<cstring, TableInfo>),
           actions(*new std::map<cstring, FuncInfo>),
           methods(*new std::map<cstring, FuncInfo>),
@@ -163,17 +166,17 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
 class LocalCopyPropagation : public PassManager {
  public:
     LocalCopyPropagation(
-        ReferenceMap *refMap, TypeMap *typeMap, TypeChecking *typeChecking = nullptr,
+        TypeMap *typeMap, TypeChecking *typeChecking = nullptr,
         std::function<bool(const Context *, const IR::Expression *)> policy =
             [](const Context *, const IR::Expression *) -> bool { return true; },
         bool elimUnusedTables = false) {
-        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap, true);
+        if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap, true);
         passes.push_back(typeChecking);
-        passes.push_back(new DoLocalCopyPropagation(refMap, typeMap, policy, elimUnusedTables));
+        passes.push_back(new DoLocalCopyPropagation(typeMap, policy, elimUnusedTables));
     }
-    LocalCopyPropagation(ReferenceMap *refMap, TypeMap *typeMap,
+    LocalCopyPropagation(TypeMap *typeMap,
                          std::function<bool(const Context *, const IR::Expression *)> policy)
-        : LocalCopyPropagation(refMap, typeMap, nullptr, policy) {}
+        : LocalCopyPropagation(typeMap, nullptr, policy) {}
 };
 
 }  // namespace P4

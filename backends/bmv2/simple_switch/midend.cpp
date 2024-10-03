@@ -108,7 +108,7 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *o
              new P4::Predication(),
              new P4::MoveDeclarations(),  // more may have been introduced
              new P4::ConstantFolding(&refMap, &typeMap),
-             new P4::LocalCopyPropagation(&refMap, &typeMap),
+             new P4::LocalCopyPropagation(&typeMap),
              new PassRepeated({
                  new P4::ConstantFolding(&refMap, &typeMap),
                  new P4::StrengthReduction(&typeMap),

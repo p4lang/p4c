@@ -17,7 +17,7 @@ limitations under the License.
 #ifndef MIDEND_HAS_SIDE_EFFECTS_H_
 #define MIDEND_HAS_SIDE_EFFECTS_H_
 
-#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/methodInstance.h"
 #include "ir/ir.h"
 
@@ -25,8 +25,7 @@ namespace P4 {
 
 /* Should this be a method on IR::Expression?  Maybe after the refMap/typeMap go away */
 
-class hasSideEffects : public Inspector {
-    P4::ReferenceMap *refMap = nullptr;
+class hasSideEffects : public Inspector, public ResolutionContext {
     P4::TypeMap *typeMap = nullptr;
 
     bool result = false;
@@ -35,16 +34,13 @@ class hasSideEffects : public Inspector {
         return false;
     }
     bool preorder(const IR::MethodCallExpression *mc) override {
-        if (result) {
-            return false;
-        }
+        if (result) return false;
+
         /* assume has side effects if we can't look it up */
-        if (refMap && typeMap) {
-            auto *mi = P4::MethodInstance::resolve(mc, refMap, typeMap, true);
+        if (typeMap) {
+            auto *mi = P4::MethodInstance::resolve(mc, this, typeMap, true);
             if (auto *bm = mi->to<P4::BuiltInMethod>()) {
-                if (bm->name == "isValid") {
-                    return true;
-                }
+                if (bm->name == "isValid") return true;
             }
             if (auto *em = mi->to<P4::ExternMethod>()) {
                 if (em->method->getAnnotation(IR::Annotation::noSideEffectsAnnotation)) return true;
@@ -62,10 +58,9 @@ class hasSideEffects : public Inspector {
 
  public:
     explicit hasSideEffects(const IR::Expression *e) { e->apply(*this); }
-    hasSideEffects(P4::ReferenceMap *rm, P4::TypeMap *tm) : refMap(rm), typeMap(tm) {}
-    hasSideEffects(P4::ReferenceMap *rm, P4::TypeMap *tm, const IR::Expression *e)
-        : refMap(rm), typeMap(tm) {
-        e->apply(*this);
+    hasSideEffects(P4::TypeMap *tm, const IR::Expression *e, const Visitor::Context *ctxt)
+        : typeMap(tm) {
+        e->apply(*this, ctxt);
     }
     bool operator()(const IR::Expression *e) {
         result = false;

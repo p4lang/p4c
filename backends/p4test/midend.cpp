@@ -115,7 +115,7 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          new P4::ConstantFolding(&refMap, &typeMap),
          new P4::GlobalCopyPropagation(&refMap, &typeMap),
          new PassRepeated({
-             new P4::LocalCopyPropagation(&refMap, &typeMap),
+             new P4::LocalCopyPropagation(&typeMap),
              new P4::ConstantFolding(&refMap, &typeMap),
          }),
          new P4::StrengthReduction(&typeMap),
@@ -129,7 +129,7 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          new PassRepeated({
              defUse,
              new P4::UnrollLoops(refMap, defUse),
-             new P4::LocalCopyPropagation(&refMap, &typeMap),
+             new P4::LocalCopyPropagation(&typeMap),
              new P4::ConstantFolding(&refMap, &typeMap),
              new P4::StrengthReduction(&typeMap),
          }),

@@ -140,7 +140,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
             new P4::Predication(),
             new P4::MoveDeclarations(),  // more may have been introduced
             new P4::ConstantFolding(&refMap, &typeMap),
-            new P4::LocalCopyPropagation(&refMap, &typeMap, nullptr, policy),
+            new P4::LocalCopyPropagation(&typeMap, nullptr, policy),
             new PassRepeated({
                 new P4::ConstantFolding(&refMap, &typeMap),
                 new P4::StrengthReduction(&typeMap),
