@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef FRONTENDS_P4_REDUNDANTPARSERS_H_
 #define FRONTENDS_P4_REDUNDANTPARSERS_H_
 
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/unusedDeclarations.h"
 #include "ir/ir.h"
@@ -38,26 +39,25 @@ class FindRedundantParsers : public Inspector {
 /** Find .apply() calls on parsers that are on redundantParsers, and
  *  eliminate them.
  */
-class EliminateSubparserCalls : public Transform {
+class EliminateSubparserCalls : public Transform, public ResolutionContext {
     const std::set<const IR::P4Parser *> &redundantParsers;
-    ReferenceMap *refMap;
     TypeMap *typeMap;
     const IR::Node *postorder(IR::MethodCallStatement *methodCallStmt) override;
 
  public:
     EliminateSubparserCalls(const std::set<const IR::P4Parser *> &redundantParsers,
-                            ReferenceMap *refMap, TypeMap *typeMap)
-        : redundantParsers(redundantParsers), refMap(refMap), typeMap(typeMap) {}
+                            TypeMap *typeMap)
+        : redundantParsers(redundantParsers), typeMap(typeMap) {}
 };
 
 class RemoveRedundantParsers : public PassManager {
     std::set<const IR::P4Parser *> redundantParsers;
 
  public:
-    RemoveRedundantParsers(ReferenceMap *refMap, TypeMap *typeMap, const RemoveUnusedPolicy &policy)
-        : PassManager{new TypeChecking(refMap, typeMap, true),
+    RemoveRedundantParsers(TypeMap *typeMap, const RemoveUnusedPolicy &policy)
+        : PassManager{new TypeChecking(nullptr, typeMap, true),
                       new FindRedundantParsers(redundantParsers),
-                      new EliminateSubparserCalls(redundantParsers, refMap, typeMap),
+                      new EliminateSubparserCalls(redundantParsers, typeMap),
                       new RemoveAllUnusedDeclarations(policy)} {
         setName("RemoveRedundantParsers");
     }

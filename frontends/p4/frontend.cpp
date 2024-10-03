@@ -231,7 +231,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new RemoveDontcareArgs(&typeMap),
         new MoveConstructors(),
         new RemoveAllUnusedDeclarations(*policy),
-        new RemoveRedundantParsers(&refMap, &typeMap, *policy),
+        new RemoveRedundantParsers(&typeMap, *policy),
         new ClearTypeMap(&typeMap),
         evaluator,
     });
