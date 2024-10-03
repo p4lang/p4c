@@ -13,7 +13,7 @@ function(check_with_bmv2 testfile testfolder p4test)
   file(APPEND ${testfile} "for item in \${stffiles[@]}\n")
   file(APPEND ${testfile} "do\n")
   file(APPEND ${testfile} "\techo \"Found \${item}\"\n")
-  file(APPEND ${testfile} "\tpython3 ${__bmv2runner} . -v -b -tf \${item} -bd ${__p4cbmv2path} ${p4test}\n")
+  file(APPEND ${testfile} "\tpython3 ${__bmv2runner} ${P4C_SOURCE_DIR} -v -b -tf \${item} -bd ${__p4cbmv2path} ${p4test}\n")
   file(APPEND ${testfile} "done\n")
 endfunction(check_with_bmv2)
 
