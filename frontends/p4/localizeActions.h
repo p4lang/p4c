@@ -168,7 +168,7 @@ class LocalizeAllActions : public PassManager {
     ActionReplacement localReplacements;
 
  public:
-    explicit LocalizeAllActions(ReferenceMap *refMap, const RemoveUnusedPolicy &policy) {
+    explicit LocalizeAllActions(const RemoveUnusedPolicy &policy) {
         passes.emplace_back(new TagGlobalActions());
         passes.emplace_back(new PassRepeated{
             new FindGlobalActionUses(&globalReplacements),
@@ -176,8 +176,7 @@ class LocalizeAllActions : public PassManager {
         });
         passes.emplace_back(new FindRepeatedActionUses(&localReplacements));
         passes.emplace_back(new DuplicateActions(&localReplacements));
-        passes.emplace_back(new ResolveReferences(refMap));
-        passes.emplace_back(new RemoveAllUnusedDeclarations(refMap, policy));
+        passes.emplace_back(new RemoveAllUnusedDeclarations(policy));
         setName("LocalizeAllActions");
     }
 };

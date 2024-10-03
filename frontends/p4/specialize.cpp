@@ -287,15 +287,13 @@ const IR::Node *Specialize::postorder(IR::Declaration_Instance *decl) {
     return instantiate(replacement, getContext());
 }
 
-SpecializeAll::SpecializeAll(ReferenceMap *refMap, TypeMap *typeMap, FrontEndPolicy *policy)
-    : PassRepeated({}) {
+SpecializeAll::SpecializeAll(TypeMap *typeMap, FrontEndPolicy *policy) : PassRepeated({}) {
     passes.emplace_back(new ConstantFolding(typeMap, policy->getConstantFoldingPolicy()));
     passes.emplace_back(new TypeChecking(nullptr, typeMap));
     passes.emplace_back(new FindSpecializations(&specMap));
     passes.emplace_back(new Specialize(&specMap));
     passes.emplace_back(new TypeInference(typeMap, false));  // more casts may be needed
-    passes.emplace_back(new ResolveReferences(refMap));
-    passes.emplace_back(new RemoveAllUnusedDeclarations(refMap, *policy));
+    passes.emplace_back(new RemoveAllUnusedDeclarations(*policy));
     specMap.typeMap = typeMap;
     setName("SpecializeAll");
 }

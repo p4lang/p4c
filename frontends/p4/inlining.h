@@ -436,7 +436,7 @@ class InlinePass : public PassManager {
                        new DiscoverInlining(&toInline, refMap, typeMap, evaluator),
                        new InlineDriver<InlineList, InlineSummary>(
                            &toInline, new GeneralInliner(refMap, optimizeParserInlining)),
-                       new RemoveAllUnusedDeclarations(refMap, policy)}) {
+                       new RemoveAllUnusedDeclarations(policy)}) {
         setName("InlinePass");
     }
 };

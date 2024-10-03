@@ -197,12 +197,13 @@ class FlattenHeaderUnion : public PassManager {
             passes.push_back(new P4::ResolveReferences(refMap));
             passes.push_back(new P4::TypeInference(typeMap, false));
             passes.push_back(new P4::TypeChecking(refMap, typeMap));
-            passes.push_back(new P4::RemoveAllUnusedDeclarations(refMap, RemoveUnusedPolicy()));
+            passes.push_back(new P4::RemoveAllUnusedDeclarations(RemoveUnusedPolicy()));
         }
         passes.push_back(new DoFlattenHeaderUnion(refMap, typeMap));
+        // FIXME: Make RemoveUnusedHUDDeclarations use UsedSet
+        passes.push_back(new P4::RemoveAllUnusedDeclarations(RemoveUnusedPolicy()));
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.push_back(new P4::TypeChecking(refMap, typeMap));
-        passes.push_back(new P4::RemoveAllUnusedDeclarations(refMap, RemoveUnusedPolicy()));
         passes.push_back(new P4::RemoveUnusedHUDeclarations(refMap));
         passes.push_back(new P4::RemoveParserIfs(typeMap));
     }

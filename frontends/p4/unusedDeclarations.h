@@ -20,17 +20,60 @@ limitations under the License.
 #include "../common/resolveReferences/resolveReferences.h"
 #include "ir/ir.h"
 #include "ir/pass_manager.h"
+#include "lib/iterator_range.h"
+#include "lib/stringify.h"
 
 namespace P4 {
 
 class RemoveUnusedDeclarations;
 
+class UsedSet : public IHasDbPrint {
+    /// Set containing all declarations in the program.
+    absl::flat_hash_set<const IR::IDeclaration *, Util::Hash> usedDecls;
+
+ public:
+    bool setUsed(const IR::IDeclaration *decl) { return usedDecls.emplace(decl).second; }
+
+    [[nodiscard]] auto begin() const { return usedDecls.begin(); }
+
+    [[nodiscard]] auto end() const { return usedDecls.end(); }
+
+    [[nodiscard]] auto used() const { return Util::iterator_range(usedDecls); }
+
+    void clear() { usedDecls.clear(); }
+
+    void dbprint(std::ostream &cout) const override;
+
+    /// @returns @true if @p decl is used in the program.
+    bool isUsed(const IR::IDeclaration *decl) const { return usedDecls.count(decl) > 0; }
+};
+
 class RemoveUnusedPolicy {
  public:
     /// The policy for removing unused declarations is baked into the pass -- targets can specify
     /// their own subclass of the pass with a changed policy and return that here
-    virtual RemoveUnusedDeclarations *getRemoveUnusedDeclarationsPass(const ReferenceMap *refMap,
+    virtual RemoveUnusedDeclarations *getRemoveUnusedDeclarationsPass(const UsedSet &used,
                                                                       bool warn = false) const;
+};
+
+class CollectUsedDeclarations : public Inspector, ResolutionContext {
+    UsedSet &used;
+
+ public:
+    explicit CollectUsedDeclarations(UsedSet &used) : used(used) {}
+
+    // We might be invoked in PassRepeated scenario, so the used set should be
+    // force cleared.
+    Visitor::profile_t init_apply(const IR::Node *node) override {
+        auto rv = Inspector::init_apply(node);
+        used.clear();
+
+        return rv;
+    }
+
+    bool preorder(const IR::KeyElement *ke) override;
+    bool preorder(const IR::PathExpression *path) override;
+    bool preorder(const IR::Type_Name *type) override;
 };
 
 /** @brief Removes unused declarations.
@@ -55,9 +98,9 @@ class RemoveUnusedPolicy {
  *
  * @pre Requires an up-to-date ReferenceMap.
  */
-class RemoveUnusedDeclarations : public Transform {
+class RemoveUnusedDeclarations : public Transform, ResolutionContext {
  protected:
-    const ReferenceMap *refMap;
+    const UsedSet &used;
 
     /** If not null, logs the following unused elements in @warn:
      *  - unused IR::P4Table nodes
@@ -78,9 +121,8 @@ class RemoveUnusedDeclarations : public Transform {
 
     // Prevent direct instantiations of this class.
     friend class RemoveUnusedPolicy;
-    RemoveUnusedDeclarations(const ReferenceMap *refMap, bool warn)
-        : refMap(refMap), warned(warn ? new std::set<const IR::Node *> : nullptr) {
-        CHECK_NULL(refMap);
+    RemoveUnusedDeclarations(const UsedSet &used, bool warn)
+        : used(used), warned(warn ? new std::set<const IR::Node *> : nullptr) {
         setName("RemoveUnusedDeclarations");
     }
 
@@ -135,7 +177,6 @@ class RemoveUnusedDeclarations : public Transform {
     const IR::Node *preorder(IR::Declaration_Variable *decl) override;
     const IR::Node *preorder(IR::Declaration *decl) override { return process(decl); }
     const IR::Node *preorder(IR::Type_Declaration *decl) override { return process(decl); }
-    cstring ifSystemFile(const IR::Node *node);  // return file containing node if system file
 };
 
 /** @brief Iterates RemoveUnusedDeclarations until convergence.
@@ -144,15 +185,15 @@ class RemoveUnusedDeclarations : public Transform {
  * IR::P4Table or IR::Declaration_Instance is removed.
  */
 class RemoveAllUnusedDeclarations : public PassRepeated {
+    UsedSet used;
+
  public:
-    RemoveAllUnusedDeclarations(ReferenceMap *refMap, const RemoveUnusedPolicy &policy,
-                                bool warn = false)
-        : PassManager({new ResolveReferences(refMap),
-                       policy.getRemoveUnusedDeclarationsPass(refMap, warn)}) {
+    explicit RemoveAllUnusedDeclarations(const RemoveUnusedPolicy &policy, bool warn = false)
+        : PassManager({new CollectUsedDeclarations(used),
+                       policy.getRemoveUnusedDeclarationsPass(used, warn)}) {
         // Unused extern instances are not removed but may still trigger
         // warnings.  The @warned set keeps track of warnings emitted in
         // previous iterations to avoid emitting duplicate warnings.
-        CHECK_NULL(refMap);
         setName("RemoveAllUnusedDeclarations");
         setStopOnError(true);
     }

@@ -212,7 +212,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new SimplifyControlFlow(&typeMap),
         new SwitchAddDefault,
         new FrontEndDump(),  // used for testing the program at this point
-        new RemoveAllUnusedDeclarations(&refMap, *policy, true),
+        new RemoveAllUnusedDeclarations(*policy, true),
         new SimplifyParsers(),
         new ResetHeaders(&typeMap),
         new UniqueNames(),       // Give each local declaration a unique internal name
@@ -225,12 +225,12 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new SimplifyDefUse(&refMap, &typeMap),
         new UniqueParameters(&typeMap),
         new SimplifyControlFlow(&typeMap),
-        new SpecializeAll(&refMap, &typeMap, policy),
+        new SpecializeAll(&typeMap, policy),
         new RemoveParserControlFlow(&typeMap),
         new RemoveReturns(),
         new RemoveDontcareArgs(&typeMap),
         new MoveConstructors(),
-        new RemoveAllUnusedDeclarations(&refMap, *policy),
+        new RemoveAllUnusedDeclarations(*policy),
         new RemoveRedundantParsers(&refMap, &typeMap, *policy),
         new ClearTypeMap(&typeMap),
         evaluator,
@@ -238,15 +238,15 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     if (policy->optimize(options)) {
         passes.addPasses({
             new Inline(&refMap, &typeMap, evaluator, *policy, options.optimizeParserInlining),
-            new InlineActions(&refMap, &typeMap, *policy),
-            new LocalizeAllActions(&refMap, *policy),
+            new InlineActions(&typeMap, *policy),
+            new LocalizeAllActions(*policy),
             new UniqueNames(),
             new UniqueParameters(&typeMap),
             // Must be done before inlining functions, to allow
             // function calls used as action arguments to be inlined
             // in the proper place.
             new RemoveActionParameters(&typeMap),
-            new InlineFunctions(&refMap, &typeMap, *policy),
+            new InlineFunctions(&typeMap, *policy),
             new SetHeaders(&typeMap),
             // Check for constants only after inlining
             new CheckConstants(&typeMap),
@@ -257,7 +257,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             new UniqueNames(),       // needed again after inlining
             new MoveDeclarations(),  // needed again after inlining
             new SimplifyDefUse(&refMap, &typeMap),
-            new RemoveAllUnusedDeclarations(&refMap, *policy),
+            new RemoveAllUnusedDeclarations(*policy),
             new SimplifyControlFlow(&typeMap),
         });
     }

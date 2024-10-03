@@ -58,7 +58,7 @@ class RemoveRedundantParsers : public PassManager {
         : PassManager{new TypeChecking(refMap, typeMap, true),
                       new FindRedundantParsers(redundantParsers),
                       new EliminateSubparserCalls(redundantParsers, refMap, typeMap),
-                      new RemoveAllUnusedDeclarations(refMap, policy)} {
+                      new RemoveAllUnusedDeclarations(policy)} {
         setName("RemoveRedundantParsers");
     }
 };
