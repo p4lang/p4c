@@ -21,7 +21,11 @@ limitations under the License.
  * \author Vladimír Štill
  */
 
+#ifndef IR_IR_TRAVERSAL_H_
+#define IR_IR_TRAVERSAL_H_
+
 #include <lib/rtti_utils.h>
+#include <lib/exceptions.h>
 
 namespace P4::IR::Traversal {
 
@@ -55,33 +59,39 @@ namespace Detail {
 struct Traverse {
     template <typename Obj, typename T>
     static const Obj *modify(const Obj *, Assign<const T *> asgn) {
+        static_assert(!std::is_const_v<Obj>, "Cannot modify constant object");
         return asgn.value;
     }
 
     template <typename Obj, typename T>
     static const Obj *modify(Obj *, Assign<const T *> asgn) {
+        static_assert(!std::is_const_v<Obj>, "Cannot modify constant object");
         return asgn.value;
     }
 
-    template <typename Obj>
-    static Obj *modify(Obj *obj, Assign<Obj> &&asgn) {
+    template <typename Obj, typename T>
+    static Obj *modify(Obj *obj, Assign<T> &&asgn) {
+        static_assert(!std::is_const_v<Obj>, "Cannot modify constant object");
         *obj = std::move(asgn.value);
         return obj;
     }
 
-    template <typename Obj>
-    static Obj *modify(Obj *obj, const Assign<Obj> &asgn) {
+    template <typename Obj, typename T>
+    static Obj *modify(Obj *obj, const Assign<T> &asgn) {
+        static_assert(!std::is_const_v<Obj>, "Cannot modify constant object");
         *obj = asgn.value;
         return obj;
     }
 
     template <typename Obj, typename Fn>
     static decltype(auto) modify(Obj *obj, Fn fn) {
+        static_assert(!std::is_const_v<Obj>, "Cannot modify constant object");
         return fn(obj);
     }
 
     template <typename Obj, typename... Selectors>
     static Obj *modify(Obj *obj, Index idx, Selectors &&...selectors) {
+        static_assert(!std::is_const_v<Obj>, "Cannot modify constant object");
         BUG_CHECK(obj->size() > idx.value, "Index %1% out of bounds of %2%", idx.value, obj);
         modifyRef((*obj)[idx.value], std::forward<Selectors>(selectors)...);
         return obj;
@@ -89,6 +99,7 @@ struct Traverse {
 
     template <typename Obj, typename To, typename... Selectors>
     static To *modify(Obj *obj, RTTI::Detail::ToType<To> cast, Selectors &&...selectors) {
+        static_assert(!std::is_const_v<Obj>, "Cannot modify constant object");
         auto *casted = cast(obj);
         BUG_CHECK(casted, "Cast of %1% failed", obj);
         return modify(casted, std::forward<Selectors>(selectors)...);
@@ -140,7 +151,8 @@ struct Traverse {
 ///   `IR::IndexedVector`.
 /// - @ref `RTTI::to<T>` -- used to cast to a more specific type. This is necessary to access
 ///   members of the more specific type (e.g. if you know that a RHS of `IR::AssignmentStatement` is
-///   `IR::Lss`, you can use `RTTI::to<IR::Lss>` and then access members of `IR::Lss`.
+///   `IR::Lss`, you can use `RTTI::to<IR::Lss>` and then access members of `IR::Lss`. Note that the
+///   cast is not applied to anything -- we are passing a cast object.
 ///
 /// @section sec_modifiers Modifiers
 ///
@@ -169,6 +181,10 @@ struct Traverse {
 /// @endcode
 ///
 /// Any time a cast fails or an index is out of range the modification triggers a `BUG`.
+///
+/// Please note that any modification is applied only to the selected path, that is, if the same
+/// node occurs multiple times in the IR DAG, and one of them is "focused" by the selector and
+/// modified, the other instance is unchanged (because the "focused" instance is cloned).
 template <typename Obj, typename... Selectors>
 Obj *modify(Obj *obj, Selectors &&...selectors) {
     return Detail::Traverse::modify(obj, std::forward<Selectors>(selectors)...);
@@ -182,3 +198,5 @@ Obj *apply(const Obj *obj, Selectors &&...selectors) {
 }
 
 }  // namespace P4::IR::Traversal
+
+#endif // IR_IR_TRAVERSAL_H_
