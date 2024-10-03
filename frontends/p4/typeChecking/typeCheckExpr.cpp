@@ -2053,9 +2053,9 @@ const IR::Node *TypeInference::postorder(IR::MethodCallExpression *expression) {
             const IR::Type *baseReturnType = returnType;
             if (const auto *sc = returnType->to<IR::Type_SpecializedCanonical>())
                 baseReturnType = sc->baseType;
-            const bool factoryOrStaticAssert =
-                baseReturnType->is<IR::Type_Extern>() || ef->method->name == "static_assert" ||
-                baseReturnType->is<IR::Type_Enum>();
+            const bool factoryOrStaticAssert = baseReturnType->is<IR::Type_Extern>() ||
+                                               ef->method->name == "static_assert" ||
+                                               baseReturnType->is<IR::Type_Enum>();
             if (constArgs && factoryOrStaticAssert) {
                 // This condition checks for three specific cases:
                 // 1. Factory extern function calls (those that return extern objects)
