@@ -1376,6 +1376,7 @@ var annotated_dup =
       [ "SymbolicInteger", "class_p4_1_1_symbolic_integer.html", null ],
       [ "SymbolicPacketIn", "class_p4_1_1_symbolic_packet_in.html", null ],
       [ "SymbolicStaticError", "class_p4_1_1_symbolic_static_error.html", null ],
+      [ "SymbolicString", "class_p4_1_1_symbolic_string.html", null ],
       [ "SymbolicStruct", "class_p4_1_1_symbolic_struct.html", null ],
       [ "SymbolicTuple", "class_p4_1_1_symbolic_tuple.html", null ],
       [ "SymbolicValue", "class_p4_1_1_symbolic_value.html", null ],

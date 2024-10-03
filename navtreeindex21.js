@@ -1,5 +1,7 @@
 var NAVTREEINDEX21 =
 {
+"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_register_traits_3_01_arch_1_1_p_s_a_01_4.html":[12,0,0,1,1,31],
+"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_register_traits_3_01_arch_1_1_p_s_a_01_4.html":[13,0,0,3,1,31],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_register_traits_3_01_arch_1_1_v1_m_o_d_e_l2020_01_4.html":[12,0,0,1,1,33],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_register_traits_3_01_arch_1_1_v1_m_o_d_e_l2020_01_4.html":[13,0,0,3,1,33],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_register_traits_3_01_arch_1_1_v1_m_o_d_e_l_01_4.html":[12,0,0,1,1,32],
@@ -247,7 +249,5 @@ var NAVTREEINDEX21 =
 "struct_p4_1_1_p4_tools_1_1_target_1_1_spec.html#aae05c72881e62d163228b2d9e875dc51":[13,0,0,18,31,0,1],
 "struct_p4_1_1_p4_v1_1_1_action_profile___model.html":[13,0,0,19,0],
 "struct_p4_1_1_p4_v1_1_1_action_selector___model.html":[13,0,0,19,1],
-"struct_p4_1_1_p4_v1_1_1_algorithm___model.html":[13,0,0,19,3],
-"struct_p4_1_1_p4_v1_1_1_clone_type___model.html":[13,0,0,19,6],
-"struct_p4_1_1_p4_v1_1_1_cloner___model.html":[13,0,0,19,5]
+"struct_p4_1_1_p4_v1_1_1_algorithm___model.html":[13,0,0,19,3]
 };

@@ -493,6 +493,7 @@ var hierarchy =
           [ "P4::SymbolicBool", "class_p4_1_1_symbolic_bool.html", null ],
           [ "P4::SymbolicEnum", "class_p4_1_1_symbolic_enum.html", null ],
           [ "P4::SymbolicInteger", "class_p4_1_1_symbolic_integer.html", null ],
+          [ "P4::SymbolicString", "class_p4_1_1_symbolic_string.html", null ],
           [ "P4::SymbolicVarbit", "class_p4_1_1_symbolic_varbit.html", null ]
         ] ],
         [ "P4::SymbolicArray", "class_p4_1_1_symbolic_array.html", null ],

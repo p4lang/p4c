@@ -91,12 +91,12 @@ var NAVTREEINDEX =
 "class_p4_1_1_p4_tools_1_1_trace_events_1_1_assignment_statement.html#ae4d3c949decaedfaa59c33bb0b45264e",
 "class_p4_1_1_parser_options.html#a665e3adf6f5e083e426e261f9be97e66",
 "class_p4_1_1_resolution_context.html",
-"class_p4_1_1_t_c_1_1_p_n_a_arch_t_c.html#ae3d5d3a109604d580c1e29d42eac869c",
-"class_p4_1_1_util_1_1_options.html#ad4c4600e98d9769b486b8237751e5f7aa7388d5b41fc0f44179570ca24a9ff47a",
-"functions_f.html",
-"namespace_p4_1_1_p4_tools.html#a544a93ae2fc3303aeb9b62add7b407de",
-"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_register_traits_3_01_arch_1_1_v1_m_o_d_e_l2020_01_4.html",
-"struct_p4_1_1_p4_v1_1_1_control___model.html"
+"class_p4_1_1_t_c_1_1_p_n_a_arch_t_c.html#addcbd85a64fca2e278f02d37d746bdce",
+"class_p4_1_1_util_1_1_options.html#ad4c4600e98d9769b486b8237751e5f7a",
+"functions_enum.html",
+"namespace_p4_1_1_p4_tools.html#a4ff625cd65290ae0fe0bb406da593ea0",
+"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_register_traits_3_01_arch_1_1_p_s_a_01_4.html",
+"struct_p4_1_1_p4_v1_1_1_clone_type___model.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
