@@ -19,7 +19,6 @@ limitations under the License.
 #ifndef EVALUATOR_SUBSTITUTEPARAMETERS_H_
 #define EVALUATOR_SUBSTITUTEPARAMETERS_H_
 
-#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/parameterSubstitution.h"
 #include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"

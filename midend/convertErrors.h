@@ -18,7 +18,6 @@ limitations under the License.
 
 #include <map>
 
-#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"

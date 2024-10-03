@@ -16,7 +16,6 @@ limitations under the License.
 
 #include "removeExits.h"
 
-#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/methodInstance.h"
 
 namespace P4 {

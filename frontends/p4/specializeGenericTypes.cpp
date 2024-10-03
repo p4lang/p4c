@@ -16,7 +16,6 @@ limitations under the License.
 
 #include "specializeGenericTypes.h"
 
-#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
 
 namespace P4 {

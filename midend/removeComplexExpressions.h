@@ -17,7 +17,6 @@ limitations under the License.
 #ifndef MIDEND_REMOVECOMPLEXEXPRESSIONS_H_
 #define MIDEND_REMOVECOMPLEXEXPRESSIONS_H_
 
-#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"

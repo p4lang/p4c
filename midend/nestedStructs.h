@@ -17,7 +17,6 @@ limitations under the License.
 #ifndef MIDEND_NESTEDSTRUCTS_H_
 #define MIDEND_NESTEDSTRUCTS_H_
 
-#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"

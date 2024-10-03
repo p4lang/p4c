@@ -17,7 +17,6 @@ limitations under the License.
 #ifndef FRONTENDS_P4_SPECIALIZEGENERICTYPES_H_
 #define FRONTENDS_P4_SPECIALIZEGENERICTYPES_H_
 
-#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 

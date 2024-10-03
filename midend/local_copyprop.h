@@ -16,7 +16,6 @@ limitations under the License.
 #ifndef MIDEND_LOCAL_COPYPROP_H_
 #define MIDEND_LOCAL_COPYPROP_H_
 
-#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "has_side_effects.h"
