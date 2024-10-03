@@ -2158,20 +2158,14 @@ const IR::Node *TypeInferenceBase::postorder(const IR::MethodCallExpression *exp
             if (const auto *sc = returnType->to<IR::Type_SpecializedCanonical>())
                 baseReturnType = sc->baseType;
             const bool factoryOrStaticAssert =
-                baseReturnType->is<IR::Type_Extern>() || ef->method->name == "static_assert" ||
-                baseReturnType->is<IR::Type_Enum>();
-            if (constArgs && factoryOrStaticAssert) {
-                // This condition checks for three specific cases:
-                // 1. Factory extern function calls (those that return extern objects)
-                // 2. Calls to static_assert
-                // 3. Functions that return enum types
-                // If all arguments are constant and one of these conditions is met,
-                // the result is considered a compile-time constant.
-                //
-                // For factory functions, this allows compile-time instantiation of extern objects.
-                // For static_assert, the result is always a compile-time constant.
-                // For enum types, this ensures that enum operations with constant inputs
-                // are evaluated at compile-time.
+                baseReturnType->is<IR::Type_Extern>() || ef->method->name == "static_assert";
+            const bool hasPureAnnotation =
+                ef->method->getAnnotation(IR::Annotation::pureAnnotation);
+            if (constArgs && (factoryOrStaticAssert || hasPureAnnotation)) {
+                // factory extern function calls (those that return extern objects) with constant
+                // args are compile-time constants.
+                // The result of a static_assert call is also a compile-time constant
+                // Pure functions marked with @pure annotation is a compiled-time constant
                 setCompileTimeConstant(expression);
                 setCompileTimeConstant(getOriginal<IR::Expression>());
             }
