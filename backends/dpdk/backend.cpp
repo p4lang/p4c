@@ -109,7 +109,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new DpdkAddPseudoHeader(refMap, typeMap, is_all_args_header_fields),
         new CollectProgramStructure(refMap, typeMap, &structure),
         new InspectDpdkProgram(refMap, typeMap, &structure),
-        new CheckExternInvocation(refMap, typeMap, &structure),
+        new CheckExternInvocation(typeMap, &structure),
         new TypeWidthValidator(),
         new DpdkArchLast(),
         new VisitFunctor([this, genContextJson] {
