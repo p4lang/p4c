@@ -34,10 +34,15 @@ struct Assign {
     T value;
 };
 
-/// @brief Select an index of a integer-indexed sub-object. This is useful e.g. to select first
-/// parameter of a method call and in similar cases involving @ref Vector or @ref IR::IndexedVector.
-/// E.g. `modify(mce, &IR::MethodCallExpression::arguments, Index(0), &IR::Argument::expression,
-/// Assign(val))`.
+/// @brief Select an index of a integer-indexed sub-object. %This is useful e.g. to select first
+/// parameter of a method call and in similar cases involving @ref IR::Vector or @ref
+/// IR::IndexedVector.
+///
+/// @code
+/// modify(mce, &IR::MethodCallExpression::arguments, Index(0), &IR::Argument::expression,
+/// Assign(val))
+/// @endcode
+/// This snippet assigns `val` into the first argument of a method call.
 struct Index {
     explicit Index(size_t value) : value(value) {}
     size_t value;
@@ -45,7 +50,8 @@ struct Index {
 
 namespace Detail {
 
-// The class exists so that the functions can be mutually recursive.
+/// @brief Internal, don't use directly.
+/// The class exists so that the functions can be mutually recursive.
 struct Traverse {
 
     template<typename Obj, typename T>
@@ -123,7 +129,7 @@ struct Traverse {
 } // namespace Details
 
 /// @brief Given an object @p obj and a series of selector (ending with a modifier), modify the @p
-/// obj's sub object at the selecte path. This is useful for deeper modification of objects that
+/// obj's sub object at the selecte path. %This is useful for deeper modification of objects that
 /// is not based on object types (in that case please use visitors) but on object structure (e.g.
 /// member paths of C++ objects).
 /// @param obj           An object to modify.
@@ -142,10 +148,11 @@ struct Traverse {
 ///   members and sometimes uses pointer members these are transparently handled the same -- this
 ///   behaves as-if at any point the current object was a pointer to value that is to be processed
 ///   by the following selectors.
-/// - @ref Index -- used for indexing e.g. @ref IR::Vector or @ref IR::IndexedVector.
-/// - @ref RTTI::to<T> -- used to cast to a more specific type. This is necessary to access members
-///   of the more specific type (e.g. if you know that a RHS of IR::AssignmentStatement is IR::Lss,
-///   you can use `RTTI::to<IR::Lss>` and then access members of IR::Lss.
+/// - @ref `IR::Traversal::Index` -- used for indexing e.g. @ref `IR::Vector` or @ref
+///   `IR::IndexedVector`.
+/// - @ref `RTTI::to<T>` -- used to cast to a more specific type. This is necessary to access
+///   members of the more specific type (e.g. if you know that a RHS of `IR::AssignmentStatement` is
+///   `IR::Lss`, you can use `RTTI::to<IR::Lss>` and then access members of `IR::Lss`.
 ///
 /// @section sec_modifiers Modifiers
 ///
