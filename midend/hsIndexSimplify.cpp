@@ -31,7 +31,7 @@ void HSIndexFinder::addNewVariable() {
         } else if (generatedVariables->count(indexString) == 0) {
             // Generate new temporary variable.
             const auto *type = typeMap->getTypeType(arrayIndex->right->type, true);
-            auto name = refMap->newName("hsiVar");
+            auto name = nameGen->newName("hsiVar");
             auto *decl = new IR::Declaration_Variable(name, type);
             locals->push_back(decl);
             typeMap->setType(decl, type);
@@ -100,7 +100,7 @@ IR::Node *HSIndexContretizer::eliminateArrayIndexes(HSIndexFinder &aiFinder,
         const IR::PathExpression *pathExpr = nullptr;
         if (generatedVariables->count(typeString) == 0) {
             // Add assignment of undefined header.
-            auto name = refMap->newName("hsVar");
+            auto name = nameGen->newName("hsVar");
             auto *decl = new IR::Declaration_Variable(name, expr->type);
             locals->push_back(decl);
             typeMap->setType(decl, expr->type);
@@ -123,7 +123,7 @@ IR::Node *HSIndexContretizer::eliminateArrayIndexes(HSIndexFinder &aiFinder,
 }
 
 IR::Node *HSIndexContretizer::preorder(IR::AssignmentStatement *assignmentStatement) {
-    HSIndexFinder aiFinder(locals, refMap, typeMap, generatedVariables);
+    HSIndexFinder aiFinder(locals, nameGen, typeMap, generatedVariables);
     assignmentStatement->left->apply(aiFinder);
     if (aiFinder.arrayIndex == nullptr) {
         assignmentStatement->right->apply(aiFinder);
@@ -165,7 +165,7 @@ IR::Node *HSIndexContretizer::preorder(IR::P4Control *control) {
     auto *newControl = controlKeySimplified->clone();
     IR::IndexedVector<IR::Declaration> newControlLocals;
     GeneratedVariablesMap blockGeneratedVariables;
-    HSIndexContretizer hsSimplifier(refMap, typeMap, &newControlLocals, &blockGeneratedVariables);
+    HSIndexContretizer hsSimplifier(typeMap, nameGen, &newControlLocals, &blockGeneratedVariables);
     newControl->body = newControl->body->apply(hsSimplifier)->to<IR::BlockStatement>();
     for (const auto *declaration : controlKeySimplified->controlLocals) {
         if (declaration->is<IR::P4Action>()) {
@@ -184,12 +184,12 @@ IR::Node *HSIndexContretizer::preorder(IR::P4Parser *parser) {
 }
 
 IR::Node *HSIndexContretizer::preorder(IR::BlockStatement *blockStatement) {
-    HSIndexFinder aiFinder(locals, refMap, typeMap, generatedVariables);
+    HSIndexFinder aiFinder(locals, nameGen, typeMap, generatedVariables);
     blockStatement->apply(aiFinder);
     if (aiFinder.arrayIndex == nullptr) {
         return blockStatement;
     }
-    HSIndexContretizer hsSimplifier(refMap, typeMap, locals, generatedVariables);
+    HSIndexContretizer hsSimplifier(typeMap, nameGen, locals, generatedVariables);
     auto *newBlock = blockStatement->clone();
     IR::IndexedVector<IR::StatOrDecl> newComponents;
     for (auto &component : blockStatement->components) {
@@ -207,13 +207,13 @@ IR::Node *HSIndexContretizer::preorder(IR::BlockStatement *blockStatement) {
 }
 
 IR::Node *HSIndexContretizer::preorder(IR::IfStatement *ifStatement) {
-    HSIndexFinder aiFinder(locals, refMap, typeMap, generatedVariables);
+    HSIndexFinder aiFinder(locals, nameGen, typeMap, generatedVariables);
     ifStatement->condition->apply(aiFinder);
     return eliminateArrayIndexes(aiFinder, ifStatement, nullptr);
 }
 
 IR::Node *HSIndexContretizer::preorder(IR::MethodCallStatement *methodCallStatement) {
-    HSIndexFinder aiFinder(locals, refMap, typeMap, generatedVariables);
+    HSIndexFinder aiFinder(locals, nameGen, typeMap, generatedVariables);
     methodCallStatement->apply(aiFinder);
     // Here we mean that in/out parameter will be replaced by correspondent assignments.
     // In this case no need to consider assignment to undefined value.
@@ -221,7 +221,7 @@ IR::Node *HSIndexContretizer::preorder(IR::MethodCallStatement *methodCallStatem
 }
 
 IR::Node *HSIndexContretizer::preorder(IR::SwitchStatement *switchStatement) {
-    HSIndexFinder aiFinder(locals, refMap, typeMap, generatedVariables);
+    HSIndexFinder aiFinder(locals, nameGen, typeMap, generatedVariables);
     switchStatement->expression->apply(aiFinder);
     return eliminateArrayIndexes(aiFinder, switchStatement, nullptr);
 }

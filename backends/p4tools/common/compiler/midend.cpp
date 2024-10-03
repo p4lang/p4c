@@ -157,7 +157,7 @@ void MidEnd::addDefaultPasses() {
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::SimplifyControlFlow(&typeMap),
         // Simplify header stack assignments with runtime indices into conditional statements.
-        new P4::HSIndexSimplifier(&refMap, &typeMap),
+        new P4::HSIndexSimplifier(&typeMap),
         // Convert Type_Varbits into a type that contains information about the assigned width.
         new ConvertVarbits(),
         // Convert any StructExpressions with Type_Header into a HeaderExpression.

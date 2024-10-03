@@ -158,7 +158,7 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
              }
              return root;
          },
-         new P4::HSIndexSimplifier(&refMap, &typeMap),
+         new P4::HSIndexSimplifier(&typeMap),
          new P4::SynthesizeActions(&refMap, &typeMap, new SkipControls(v1controls)),
          new P4::MoveActionsToTables(&refMap, &typeMap),
          options.loopsUnrolling ? new P4::ParsersUnroll(true, &refMap, &typeMap) : nullptr,
