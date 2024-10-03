@@ -3,8 +3,8 @@ enum HashAlgorithm_t {
     RANDOM
 }
 
-extern HashAlgorithm_t identity_hash(bool msb, bool extend);
-extern HashAlgorithm_t random_hash(bool msb, bool extend);
+@pure extern HashAlgorithm_t identity_hash(bool msb, bool extend);
+@pure extern HashAlgorithm_t random_hash(bool msb, bool extend);
 extern Hash<W> {
     Hash(HashAlgorithm_t algo);
     W get<D>(in D data);
