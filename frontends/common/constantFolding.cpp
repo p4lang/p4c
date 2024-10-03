@@ -678,6 +678,51 @@ const IR::Node *DoConstantFolding::postorder(IR::Slice *e) {
     return new IR::Constant(e->srcInfo, resultType, value, cbase->base, true);
 }
 
+const IR::Node *DoConstantFolding::postorder(IR::PlusSlice *e) {
+    auto *e0 = getConstant(e->e0);
+    auto *lsb = getConstant(e->e1);
+    auto *width = getConstant(e->e2);
+    if (!width) {
+        if (typesKnown)
+            error(ErrorType::ERR_EXPECTED, "%1%: slice indexes must be compile-time constants",
+                  e->e2);
+        return e;
+    }
+
+    if (!e0 || !lsb) return e;
+
+    auto clsb = lsb->to<IR::Constant>();
+    if (clsb == nullptr) {
+        error(ErrorType::ERR_EXPECTED, "%1%: expected an integer value", lsb);
+        return e;
+    }
+    auto cwidth = width->to<IR::Constant>();
+    if (cwidth == nullptr) {
+        error(ErrorType::ERR_EXPECTED, "%1%: expected an integer value", width);
+        return e;
+    }
+    auto cbase = e0->to<IR::Constant>();
+    if (cbase == nullptr) {
+        error(ErrorType::ERR_EXPECTED, "%1%: expected an integer value", e->e0);
+        return e;
+    }
+
+    int w = cwidth->asInt();
+    int l = clsb->asInt();
+    if (l < 0) {
+        ::P4::error(ErrorType::ERR_EXPECTED, "%1%: expected slice indexes to be non-negative",
+                    e->e2);
+        return e;
+    }
+    if (overflowWidth(e, l) || overflowWidth(e, l + w)) return e;
+    big_int value = cbase->value >> l;
+    big_int mask = 1;
+    mask = (mask << w) - 1;
+    value = value & mask;
+    auto resultType = IR::Type_Bits::get(w);
+    return new IR::Constant(e->srcInfo, resultType, value, cbase->base, true);
+}
+
 const IR::Node *DoConstantFolding::postorder(IR::Member *e) {
     if (!typesKnown) return e;
     auto orig = getOriginal<IR::Member>();

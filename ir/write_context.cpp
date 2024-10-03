@@ -32,7 +32,7 @@ bool P4WriteContext::isWrite(bool root_value) {
     if (!ctxt || !ctxt->node) return root_value;
     while (ctxt->child_index == 0 &&
            (ctxt->node->is<IR::ArrayIndex>() || ctxt->node->is<IR::HeaderStackItemRef>() ||
-            ctxt->node->is<IR::Slice>() || ctxt->node->is<IR::Member>())) {
+            ctxt->node->is<IR::AbstractSlice>() || ctxt->node->is<IR::Member>())) {
         ctxt = ctxt->parent;
         if (!ctxt || !ctxt->node) return root_value;
     }
@@ -77,7 +77,7 @@ bool P4WriteContext::isRead(bool root_value) {
     if (!ctxt || !ctxt->node) return root_value;
     while (ctxt->child_index == 0 &&
            (ctxt->node->is<IR::ArrayIndex>() || ctxt->node->is<IR::HeaderStackItemRef>() ||
-            ctxt->node->is<IR::Slice>() || ctxt->node->is<IR::Member>())) {
+            ctxt->node->is<IR::AbstractSlice>() || ctxt->node->is<IR::Member>())) {
         ctxt = ctxt->parent;
         if (!ctxt || !ctxt->node) return root_value;
     }

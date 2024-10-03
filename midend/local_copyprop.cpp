@@ -32,7 +32,7 @@ using namespace literals;
 static const IR::Expression *lvalue_out(const IR::Expression *exp) {
     if (auto ai = exp->to<IR::ArrayIndex>()) return lvalue_out(ai->left);
     if (auto hsr = exp->to<IR::HeaderStackItemRef>()) return lvalue_out(hsr->base());
-    if (auto sl = exp->to<IR::Slice>()) return lvalue_out(sl->e0);
+    if (auto sl = exp->to<IR::AbstractSlice>()) return lvalue_out(sl->e0);
     if (auto mem = exp->to<IR::Member>()) return lvalue_out(mem->expr);
     return exp;
 }

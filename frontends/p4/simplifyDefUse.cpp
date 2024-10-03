@@ -644,7 +644,7 @@ class FindUninitialized : public Inspector {
                 loc = new LocationSet(storage);
             else
                 loc = LocationSet::empty;
-        } else if (auto slice = parent->to<IR::Slice>()) {
+        } else if (auto slice = parent->to<IR::AbstractSlice>()) {
             loc = checkHeaderFieldWrite(expr, slice->e0);
         } else {
             BUG("%1%: unexpected expression on LHS", parent);
@@ -1380,13 +1380,14 @@ class FindUninitialized : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::Slice *expression) override {
+    bool preorder(const IR::AbstractSlice *expression) override {
         LOG3("FU Visiting [" << expression->id << "]: " << expression);
 
         auto *slice_stmt = findContext<IR::AssignmentStatement>();
-        if (slice_stmt != nullptr && lhs) {
+        auto *slice = expression->to<IR::Slice>();
+        if (slice_stmt != nullptr && lhs && slice) {
             // track this slice statement
-            hasUses.watchForOverwrites(expression);
+            hasUses.watchForOverwrites(slice);
             LOG4("Tracking " << dbp(slice_stmt) << " " << slice_stmt
                              << " for potential overwrites");
         }
@@ -1394,6 +1395,7 @@ class FindUninitialized : public Inspector {
         bool save = lhs;
         lhs = false;  // slices on the LHS also read the data
         visit(expression->e0);
+        visit(expression->e1);  // this might not be a constant (for a PlusSlice)
         LOG3("FU Returned from " << expression);
         auto storage = getReads(expression->e0, true);
         reads(expression, storage);  // true even in LHS
