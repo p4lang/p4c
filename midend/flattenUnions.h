@@ -165,14 +165,20 @@ class HandleValidityHeaderUnion : public Transform {
 };
 
 class RemoveUnusedHUDeclarations : public Transform {
-    P4::ReferenceMap *refMap;
+    UsedSet used;
 
  public:
-    explicit RemoveUnusedHUDeclarations(P4::ReferenceMap *refMap) : refMap(refMap) {}
-    const IR::Node *preorder(IR::Type_HeaderUnion *type) {
-        if (!refMap->isUsed(getOriginal<IR::IDeclaration>())) {
-            return nullptr;
-        }
+    Visitor::profile_t init_apply(const IR::Node *node) override {
+        auto rv = Transform::init_apply(node);
+
+        CollectUsedDeclarations collector(used);
+        node->apply(collector);
+
+        return rv;
+    }
+
+    const IR::Node *preorder(IR::Type_HeaderUnion *type) override {
+        if (!used.isUsed(getOriginal<IR::IDeclaration>())) return nullptr;
         return type;
     }
 };
@@ -193,18 +199,16 @@ class FlattenHeaderUnion : public PassManager {
         // .next .last etc accessors for stack elements.
         if (loopsUnroll) {
             passes.push_back(new DoFlattenHeaderUnionStack(refMap, typeMap));
-            passes.push_back(new P4::ClearTypeMap(typeMap));
-            passes.push_back(new P4::ResolveReferences(refMap));
-            passes.push_back(new P4::TypeInference(typeMap, false));
-            passes.push_back(new P4::TypeChecking(refMap, typeMap));
             passes.push_back(new P4::RemoveAllUnusedDeclarations(RemoveUnusedPolicy()));
         }
-        passes.push_back(new DoFlattenHeaderUnion(refMap, typeMap));
-        // FIXME: Make RemoveUnusedHUDDeclarations use UsedSet
-        passes.push_back(new P4::RemoveAllUnusedDeclarations(RemoveUnusedPolicy()));
         passes.push_back(new P4::ClearTypeMap(typeMap));
+        passes.push_back(new P4::TypeInference(typeMap, false));
         passes.push_back(new P4::TypeChecking(refMap, typeMap));
-        passes.push_back(new P4::RemoveUnusedHUDeclarations(refMap));
+        passes.push_back(new DoFlattenHeaderUnion(refMap, typeMap));
+        passes.push_back(new P4::RemoveAllUnusedDeclarations(RemoveUnusedPolicy()));
+        passes.push_back(new P4::RemoveUnusedHUDeclarations());
+        passes.push_back(new P4::ClearTypeMap(typeMap));
+        passes.push_back(new P4::TypeChecking(nullptr, typeMap));
         passes.push_back(new P4::RemoveParserIfs(typeMap));
     }
 };
