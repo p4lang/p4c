@@ -26,6 +26,7 @@ limitations under the License.
 #include "dpdkMetadata.h"
 #include "dpdkProgram.h"
 #include "frontends/p4/moveDeclarations.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/dbprint.h"
 #include "ir/ir.h"
 #include "lib/stringify.h"
@@ -64,6 +65,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new PassRepeated({new BMV2::LowerExpressions(typeMap, DPDK_MAX_SHIFT_AMOUNT)}, 2),
         new P4::RemoveComplexExpressions(typeMap,
                                          new DPDK::ProcessControls(&structure.pipeline_controls)),
+        new TypeChecking(refMap, typeMap),  // DismantleMuxExpressions wants fresh refmap
         new DismantleMuxExpressions(typeMap, refMap),
         new P4::ConstantFolding(typeMap, false),
         new EliminateHeaderCopy(refMap, typeMap),
