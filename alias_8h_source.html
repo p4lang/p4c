@@ -316,7 +316,7 @@ $(function(){initNavTree('alias_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>        rw.emplace(expression, e0-&gt;join(e1)-&gt;join(e2));</div>
 <div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>    }</div>
 <div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span> </div>
-<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>    <span class="keywordtype">void</span> postorder(<span class="keyword">const</span> IR::Slice *expression)<span class="keyword"> override </span>{</div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>    <span class="keywordtype">void</span> postorder(<span class="keyword">const</span> IR::AbstractSlice *expression)<span class="keyword"> override </span>{</div>
 <div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>        <span class="keyword">auto</span> e = ::P4::get(rw, expression-&gt;e0);</div>
 <div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>        CHECK_NULL(e);</div>
 <div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>        rw.emplace(expression, e);</div>
