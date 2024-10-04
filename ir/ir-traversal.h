@@ -24,8 +24,8 @@ limitations under the License.
 #ifndef IR_IR_TRAVERSAL_H_
 #define IR_IR_TRAVERSAL_H_
 
-#include <lib/rtti_utils.h>
 #include <lib/exceptions.h>
+#include <lib/rtti_utils.h>
 
 namespace P4::IR::Traversal {
 
