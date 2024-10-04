@@ -128,7 +128,7 @@ struct Traverse {
 }  // namespace Detail
 
 /// @brief Given an object @p obj and a series of selector (ending with a modifier), modify the @p
-/// obj's sub object at the selecte path. %This is useful for deeper modification of objects that
+/// obj's sub object at the selected path. %This is useful for deeper modification of objects that
 /// is not based on object types (in that case please use visitors) but on object structure (e.g.
 /// member paths of C++ objects).
 /// @param obj           An object to modify.
@@ -199,4 +199,4 @@ Obj *apply(const Obj *obj, Selectors &&...selectors) {
 
 }  // namespace P4::IR::Traversal
 
-#endif // IR_IR_TRAVERSAL_H_
+#endif  // IR_IR_TRAVERSAL_H_
