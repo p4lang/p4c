@@ -21,6 +21,7 @@ limitations under the License.
 #include "ir/vector.h"
 #include "lib/enumerator.h"
 #include "lib/error.h"
+#include "lib/indent.h"
 #include "lib/map.h"
 #include "lib/null.h"
 #include "lib/safe_vector.h"
@@ -219,6 +220,14 @@ class IndexedVector : public Vector<T> {
             BUG_CHECK(it != declarations.end() && it->second->getNode() == el->getNode(),
                       "invalid element %1%", el);
         }
+    }
+
+    void dbprint(std::ostream &out) const override {
+        out << "{" << IndentCtl::indent;
+        for (auto p : *this) {
+            out << " " << p;
+        }
+        out << IndentCtl::unindent << " }";
     }
 
     DECLARE_TYPEINFO_WITH_DISCRIMINATOR(IndexedVector<T>, NodeDiscriminator::IndexedVectorT, T,
