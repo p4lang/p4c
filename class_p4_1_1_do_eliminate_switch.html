@@ -137,9 +137,11 @@ Inheritance diagram for P4::DoEliminateSwitch:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:abe47cff1f56f5436a59cdeb9f4afd5fe" id="r_abe47cff1f56f5436a59cdeb9f4afd5fe"><td class="memItemLeft" align="right" valign="top"><a id="abe47cff1f56f5436a59cdeb9f4afd5fe" name="abe47cff1f56f5436a59cdeb9f4afd5fe"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>DoEliminateSwitch</b> (<a class="el" href="class_p4_1_1_reference_map.html">ReferenceMap</a> *refMap, const <a class="el" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap)</td></tr>
-<tr class="separator:abe47cff1f56f5436a59cdeb9f4afd5fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab1e7c8469b29ca420ab64ad36a7f0e63" id="r_ab1e7c8469b29ca420ab64ad36a7f0e63"><td class="memItemLeft" align="right" valign="top"><a id="ab1e7c8469b29ca420ab64ad36a7f0e63" name="ab1e7c8469b29ca420ab64ad36a7f0e63"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>DoEliminateSwitch</b> (const <a class="el" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap)</td></tr>
+<tr class="separator:ab1e7c8469b29ca420ab64ad36a7f0e63"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a054ab133e883ff8bb9b96b0b06472df2" id="r_a054ab133e883ff8bb9b96b0b06472df2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_p4_1_1_visitor_1_1profile__t.html">Visitor::profile_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a054ab133e883ff8bb9b96b0b06472df2">init_apply</a> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *node) override</td></tr>
+<tr class="separator:a054ab133e883ff8bb9b96b0b06472df2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a58edf7d09532d297c5f375b37b462c49" id="r_a58edf7d09532d297c5f375b37b462c49"><td class="memItemLeft" align="right" valign="top"><a id="a58edf7d09532d297c5f375b37b462c49" name="a58edf7d09532d297c5f375b37b462c49"></a>
 const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (IR::P4Control *control) override</td></tr>
 <tr class="separator:a58edf7d09532d297c5f375b37b462c49"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -402,7 +404,35 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 <p>ExpressionType switch1_key;</p>
 <p>@hidden action switch1_case_1 () { no statements here, by design } @hidden action switch1_case_23 () {} @hidden action switch1_case_4 () {} @hidden action switch1_case_default () {} @hidden table switch1_table { key = { switch1_key : exact; } actions = { switch1_case_1; switch1_case_23; switch1_case_4; switch1_case_default; } const entries = { 1 : switch1_case_1; 2 : switch1_case_23; 3 : switch1_case_23; 4 : switch1_case_4; } const default_action = switch1_case_default; }</p>
 <p>later in the control's apply block, where the original switch statement appeared: switch1_key = expression; switch (switch1_table.apply().action_run) { switch1_case_1: { ... } switch1_case_23: { ... } switch1_case_4: { ... } switch1_case_default: { ... } } </p>
-</div></div><!-- contents -->
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="a054ab133e883ff8bb9b96b0b06472df2" name="a054ab133e883ff8bb9b96b0b06472df2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a054ab133e883ff8bb9b96b0b06472df2">&#9670;&#160;</a></span>init_apply()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="class_p4_1_1_visitor_1_1profile__t.html">Visitor::profile_t</a> P4::DoEliminateSwitch::init_apply </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *</td>          <td class="paramname"><span class="paramname"><em>node</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reimplemented from <a class="el" href="class_p4_1_1_visitor.html">P4::Visitor</a>.</p>
+
+</div>
+</div>
+</div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->
 <!-- start footer part -->

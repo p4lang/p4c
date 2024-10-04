@@ -230,6 +230,9 @@ var hierarchy =
         ] ],
         [ "P4::AbstractInliner< P4::InlineList, InlineWorkList >", "class_p4_1_1_abstract_inliner.html", null ],
         [ "P4::AbstractInliner< InlineList, InlineWorkList >", "class_p4_1_1_abstract_inliner.html", null ],
+        [ "P4::CheckExternInvocationCommon", "class_p4_1_1_check_extern_invocation_common.html", [
+          [ "P4::DPDK::CheckPNAExternInvocation", "class_p4_1_1_d_p_d_k_1_1_check_p_n_a_extern_invocation.html", null ]
+        ] ],
         [ "P4::ComputeDefUse", "class_p4_1_1_compute_def_use.html", null ],
         [ "P4::ComputeDefUse::SetupJoinPoints", "class_p4_1_1_compute_def_use_1_1_setup_join_points.html", null ],
         [ "P4::ComputeParserCG", "class_p4_1_1_compute_parser_c_g.html", null ],
@@ -244,6 +247,7 @@ var hierarchy =
         [ "P4::DoDefaultArguments", "class_p4_1_1_do_default_arguments.html", null ],
         [ "P4::DoExpandEmit", "class_p4_1_1_do_expand_emit.html", null ],
         [ "P4::DoExpandLookahead", "class_p4_1_1_do_expand_lookahead.html", null ],
+        [ "P4::DoLocalCopyPropagation", "class_p4_1_1_do_local_copy_propagation.html", null ],
         [ "P4::DoOrderArguments", "class_p4_1_1_do_order_arguments.html", null ],
         [ "P4::DoRemoveAssertAssume", "class_p4_1_1_do_remove_assert_assume.html", null ],
         [ "P4::DoRemoveExits", "class_p4_1_1_do_remove_exits.html", null ],
@@ -272,7 +276,12 @@ var hierarchy =
         [ "P4::P4Fmt::P4Formatter", "class_p4_1_1_p4_fmt_1_1_p4_formatter.html", null ],
         [ "P4::P4Tools::P4ProgramDCGCreator", "class_p4_1_1_p4_tools_1_1_p4_program_d_c_g_creator.html", null ],
         [ "P4::ReadsWrites", "class_p4_1_1_reads_writes.html", null ],
+        [ "P4::RemoveComplexExpressions", "class_p4_1_1_remove_complex_expressions.html", [
+          [ "P4::BMV2::RemoveComplexExpressions", "class_p4_1_1_b_m_v2_1_1_remove_complex_expressions.html", null ]
+        ] ],
+        [ "P4::RemoveNestedStructs", "class_p4_1_1_remove_nested_structs.html", null ],
         [ "P4::RenameSymbols", "class_p4_1_1_rename_symbols.html", null ],
+        [ "P4::ReplaceStructs", "class_p4_1_1_replace_structs.html", null ],
         [ "P4::ResolveReferences", "class_p4_1_1_resolve_references.html", null ],
         [ "P4::SubstituteParameters", "class_p4_1_1_substitute_parameters.html", null ],
         [ "P4::ToP4", "class_p4_1_1_to_p4.html", null ],
@@ -280,7 +289,8 @@ var hierarchy =
           [ "P4::ReadOnlyTypeInference", "class_p4_1_1_read_only_type_inference.html", null ],
           [ "P4::TypeInference", "class_p4_1_1_type_inference.html", null ]
         ] ],
-        [ "P4::UnrollLoops", "class_p4_1_1_unroll_loops.html", null ]
+        [ "P4::UnrollLoops", "class_p4_1_1_unroll_loops.html", null ],
+        [ "P4::hasSideEffects", "class_p4_1_1has_side_effects.html", null ]
       ] ]
     ] ],
     [ "P4::detail::DbprintDispatchPtr< T >", "struct_p4_1_1detail_1_1_dbprint_dispatch_ptr.html", null ],
@@ -1421,9 +1431,7 @@ var hierarchy =
         [ "P4::BMV2::ParserConverter", "class_p4_1_1_b_m_v2_1_1_parser_converter.html", null ],
         [ "P4::BMV2::SharedActionSelectorCheck< arch >", "class_p4_1_1_b_m_v2_1_1_shared_action_selector_check.html", null ],
         [ "P4::BuildResourceMap", "class_p4_1_1_build_resource_map.html", null ],
-        [ "P4::CheckExternInvocationCommon", "class_p4_1_1_check_extern_invocation_common.html", [
-          [ "P4::DPDK::CheckPNAExternInvocation", "class_p4_1_1_d_p_d_k_1_1_check_p_n_a_extern_invocation.html", null ]
-        ] ],
+        [ "P4::CheckExternInvocationCommon", "class_p4_1_1_check_extern_invocation_common.html", null ],
         [ "P4::CheckNamedArgs", "class_p4_1_1_check_named_args.html", null ],
         [ "P4::ClearTypeMap", "class_p4_1_1_clear_type_map.html", null ],
         [ "P4::CompileTimeOperations", "class_p4_1_1_compile_time_operations.html", null ],
@@ -1799,9 +1807,7 @@ var hierarchy =
         [ "P4::RemoveAliases", "class_p4_1_1_remove_aliases.html", null ],
         [ "P4::RemoveBreakContinue", "class_p4_1_1_remove_break_continue.html", null ],
         [ "P4::RemoveComplexComparisons", "class_p4_1_1_remove_complex_comparisons.html", null ],
-        [ "P4::RemoveComplexExpressions", "class_p4_1_1_remove_complex_expressions.html", [
-          [ "P4::BMV2::RemoveComplexExpressions", "class_p4_1_1_b_m_v2_1_1_remove_complex_expressions.html", null ]
-        ] ],
+        [ "P4::RemoveComplexExpressions", "class_p4_1_1_remove_complex_expressions.html", null ],
         [ "P4::RemoveGenericTypes", "class_p4_1_1_remove_generic_types.html", null ],
         [ "P4::RemoveHidden", "class_p4_1_1_remove_hidden.html", null ],
         [ "P4::RemoveNestedStructs", "class_p4_1_1_remove_nested_structs.html", null ],

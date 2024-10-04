@@ -142,59 +142,64 @@ $(function(){initNavTree('eliminate_switch_8h_source.html',''); initResizable(tr
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="preprocessor">#ifndef MIDEND_ELIMINATESWITCH_H_</span></div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="preprocessor">#define MIDEND_ELIMINATESWITCH_H_</span></div>
 <div class="line"><a id="l00019" name="l00019"></a><span class="lineno">   19</span> </div>
-<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &quot;frontends/common/resolveReferences/referenceMap.h&quot;</span></div>
-<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &quot;frontends/p4/typeChecking/typeChecker.h&quot;</span></div>
-<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span><span class="preprocessor">#include &quot;ir/ir.h&quot;</span></div>
-<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span> </div>
-<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_p4.html">P4</a> {</div>
-<div class="line"><a id="l00025" name="l00025"></a><span class="lineno">   25</span> </div>
-<div class="foldopen" id="foldopen00078" data-start="{" data-end="};">
-<div class="line"><a id="l00078" name="l00078"></a><span class="lineno"><a class="line" href="class_p4_1_1_do_eliminate_switch.html">   78</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1_do_eliminate_switch.html">DoEliminateSwitch</a> final : <span class="keyword">public</span> <a class="code hl_class" href="class_p4_1_1_transform.html">Transform</a> {</div>
-<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    <a class="code hl_class" href="class_p4_1_1_name_generator.html">NameGenerator</a> *nameGen;</div>
-<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap;</div>
-<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    std::vector&lt;const IR::Declaration *&gt; toInsert;</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> </div>
-<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>    <span class="keywordtype">bool</span> exactNeeded = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span> </div>
-<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>    <a class="code hl_class" href="class_p4_1_1_do_eliminate_switch.html">DoEliminateSwitch</a>(<a class="code hl_class" href="class_p4_1_1_reference_map.html">ReferenceMap</a> *refMap, <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap)</div>
-<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>        : nameGen(refMap), typeMap(typeMap) {</div>
-<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>        setName(<span class="stringliteral">&quot;DoEliminateSwitch&quot;</span>);</div>
-<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>        CHECK_NULL(refMap);</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>        CHECK_NULL(typeMap);</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    }</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *postorder(IR::SwitchStatement *statement) <span class="keyword">override</span>;</div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *postorder(IR::P4Control *control) <span class="keyword">override</span>;</div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *postorder(IR::P4Program *program) <span class="keyword">override</span>;</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>};</div>
-</div>
+<div class="line"><a id="l00020" name="l00020"></a><span class="lineno">   20</span><span class="preprocessor">#include &quot;frontends/p4/typeChecking/typeChecker.h&quot;</span></div>
+<div class="line"><a id="l00021" name="l00021"></a><span class="lineno">   21</span><span class="preprocessor">#include &quot;ir/ir.h&quot;</span></div>
+<div class="line"><a id="l00022" name="l00022"></a><span class="lineno">   22</span> </div>
+<div class="line"><a id="l00023" name="l00023"></a><span class="lineno">   23</span><span class="keyword">namespace </span><a class="code hl_namespace" href="namespace_p4.html">P4</a> {</div>
+<div class="line"><a id="l00024" name="l00024"></a><span class="lineno">   24</span> </div>
+<div class="foldopen" id="foldopen00077" data-start="{" data-end="};">
+<div class="line"><a id="l00077" name="l00077"></a><span class="lineno"><a class="line" href="class_p4_1_1_do_eliminate_switch.html">   77</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1_do_eliminate_switch.html">DoEliminateSwitch</a> final : <span class="keyword">public</span> <a class="code hl_class" href="class_p4_1_1_transform.html">Transform</a> {</div>
+<div class="line"><a id="l00078" name="l00078"></a><span class="lineno">   78</span>    <a class="code hl_class" href="class_p4_1_1_minimal_name_generator.html">MinimalNameGenerator</a> nameGen;</div>
+<div class="line"><a id="l00079" name="l00079"></a><span class="lineno">   79</span>    <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap;</div>
+<div class="line"><a id="l00080" name="l00080"></a><span class="lineno">   80</span>    std::vector&lt;const IR::Declaration *&gt; toInsert;</div>
+<div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span> </div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span> <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>    <span class="keywordtype">bool</span> exactNeeded = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span> </div>
+<div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>    <span class="keyword">explicit</span> <a class="code hl_class" href="class_p4_1_1_do_eliminate_switch.html">DoEliminateSwitch</a>(<span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap) : typeMap(typeMap) {</div>
+<div class="line"><a id="l00086" name="l00086"></a><span class="lineno">   86</span>        setName(<span class="stringliteral">&quot;DoEliminateSwitch&quot;</span>);</div>
+<div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>        CHECK_NULL(typeMap);</div>
+<div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    }</div>
+<div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    <a class="code hl_class" href="class_p4_1_1_visitor_1_1profile__t.html">Visitor::profile_t</a> init_apply(<span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *node)<span class="keyword"> override </span>{</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>        <span class="keyword">auto</span> rv = Transform::init_apply(node);</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>        node-&gt;apply(nameGen);</div>
+<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        <span class="keywordflow">return</span> rv;</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    }</div>
 <div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
-<div class="foldopen" id="foldopen00097" data-start="{" data-end="};">
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno"><a class="line" href="class_p4_1_1_eliminate_switch.html">   97</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1_eliminate_switch.html">EliminateSwitch</a> final : <span class="keyword">public</span> <a class="code hl_class" href="class_p4_1_1_pass_manager.html">PassManager</a> {</div>
-<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    <a class="code hl_class" href="class_p4_1_1_eliminate_switch.html">EliminateSwitch</a>(<a class="code hl_class" href="class_p4_1_1_reference_map.html">ReferenceMap</a> *refMap, <a class="code hl_class" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap, <a class="code hl_class" href="class_p4_1_1_type_checking.html">TypeChecking</a> *typeChecking = <span class="keyword">nullptr</span>) {</div>
-<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>        <span class="keywordflow">if</span> (!typeChecking) typeChecking = <span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_type_checking.html">TypeChecking</a>(refMap, typeMap);</div>
-<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>        passes.push_back(typeChecking);</div>
-<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_do_eliminate_switch.html">DoEliminateSwitch</a>(refMap, typeMap));</div>
-<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_clear_type_map.html">ClearTypeMap</a>(typeMap));</div>
-<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>        setName(<span class="stringliteral">&quot;EliminateSwitch&quot;</span>);</div>
-<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>    }</div>
-<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>};</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *postorder(IR::SwitchStatement *statement) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *postorder(IR::P4Control *control) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *postorder(IR::P4Program *program) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>};</div>
 </div>
-<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span> </div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>}  <span class="comment">// namespace P4</span></div>
-<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span> </div>
-<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span><span class="preprocessor">#endif </span><span class="comment">/* MIDEND_ELIMINATESWITCH_H_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span> </div>
+<div class="foldopen" id="foldopen00102" data-start="{" data-end="};">
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno"><a class="line" href="class_p4_1_1_eliminate_switch.html">  102</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1_eliminate_switch.html">EliminateSwitch</a> final : <span class="keyword">public</span> <a class="code hl_class" href="class_p4_1_1_pass_manager.html">PassManager</a> {</div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span>    <a class="code hl_class" href="class_p4_1_1_eliminate_switch.html">EliminateSwitch</a>(<a class="code hl_class" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap, <a class="code hl_class" href="class_p4_1_1_type_checking.html">TypeChecking</a> *typeChecking = <span class="keyword">nullptr</span>) {</div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>        <span class="keywordflow">if</span> (!typeChecking) typeChecking = <span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_type_checking.html">TypeChecking</a>(<span class="keyword">nullptr</span>, typeMap);</div>
+<div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>        passes.push_back(typeChecking);</div>
+<div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_do_eliminate_switch.html">DoEliminateSwitch</a>(typeMap));</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>        passes.push_back(<span class="keyword">new</span> <a class="code hl_class" href="class_p4_1_1_clear_type_map.html">ClearTypeMap</a>(typeMap));</div>
+<div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>        setName(<span class="stringliteral">&quot;EliminateSwitch&quot;</span>);</div>
+<div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>    }</div>
+<div class="line"><a id="l00111" name="l00111"></a><span class="lineno">  111</span>};</div>
+</div>
+<div class="line"><a id="l00112" name="l00112"></a><span class="lineno">  112</span> </div>
+<div class="line"><a id="l00113" name="l00113"></a><span class="lineno">  113</span>}  <span class="comment">// namespace P4</span></div>
+<div class="line"><a id="l00114" name="l00114"></a><span class="lineno">  114</span> </div>
+<div class="line"><a id="l00115" name="l00115"></a><span class="lineno">  115</span><span class="preprocessor">#endif </span><span class="comment">/* MIDEND_ELIMINATESWITCH_H_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="aclass_p4_1_1_clear_type_map_html"><div class="ttname"><a href="class_p4_1_1_clear_type_map.html">P4::ClearTypeMap</a></div><div class="ttdef"><b>Definition</b> typeChecker.h:32</div></div>
-<div class="ttc" id="aclass_p4_1_1_do_eliminate_switch_html"><div class="ttname"><a href="class_p4_1_1_do_eliminate_switch.html">P4::DoEliminateSwitch</a></div><div class="ttdef"><b>Definition</b> eliminateSwitch.h:78</div></div>
-<div class="ttc" id="aclass_p4_1_1_eliminate_switch_html"><div class="ttname"><a href="class_p4_1_1_eliminate_switch.html">P4::EliminateSwitch</a></div><div class="ttdef"><b>Definition</b> eliminateSwitch.h:97</div></div>
+<div class="ttc" id="aclass_p4_1_1_do_eliminate_switch_html"><div class="ttname"><a href="class_p4_1_1_do_eliminate_switch.html">P4::DoEliminateSwitch</a></div><div class="ttdef"><b>Definition</b> eliminateSwitch.h:77</div></div>
+<div class="ttc" id="aclass_p4_1_1_eliminate_switch_html"><div class="ttname"><a href="class_p4_1_1_eliminate_switch.html">P4::EliminateSwitch</a></div><div class="ttdef"><b>Definition</b> eliminateSwitch.h:102</div></div>
 <div class="ttc" id="aclass_p4_1_1_i_r_1_1_node_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_node.html">P4::IR::Node</a></div><div class="ttdef"><b>Definition</b> node.h:95</div></div>
-<div class="ttc" id="aclass_p4_1_1_name_generator_html"><div class="ttname"><a href="class_p4_1_1_name_generator.html">P4::NameGenerator</a></div><div class="ttdef"><b>Definition</b> referenceMap.h:29</div></div>
+<div class="ttc" id="aclass_p4_1_1_minimal_name_generator_html"><div class="ttname"><a href="class_p4_1_1_minimal_name_generator.html">P4::MinimalNameGenerator</a></div><div class="ttdef"><b>Definition</b> referenceMap.h:36</div></div>
 <div class="ttc" id="aclass_p4_1_1_pass_manager_html"><div class="ttname"><a href="class_p4_1_1_pass_manager.html">P4::PassManager</a></div><div class="ttdef"><b>Definition</b> pass_manager.h:40</div></div>
-<div class="ttc" id="aclass_p4_1_1_reference_map_html"><div class="ttname"><a href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a></div><div class="ttdoc">Class used to encode maps from paths to declarations.</div><div class="ttdef"><b>Definition</b> referenceMap.h:66</div></div>
 <div class="ttc" id="aclass_p4_1_1_transform_html"><div class="ttname"><a href="class_p4_1_1_transform.html">P4::Transform</a></div><div class="ttdef"><b>Definition</b> visitor.h:424</div></div>
 <div class="ttc" id="aclass_p4_1_1_type_checking_html"><div class="ttname"><a href="class_p4_1_1_type_checking.html">P4::TypeChecking</a></div><div class="ttdef"><b>Definition</b> typeChecker.h:55</div></div>
 <div class="ttc" id="aclass_p4_1_1_type_map_html"><div class="ttname"><a href="class_p4_1_1_type_map.html">P4::TypeMap</a></div><div class="ttdef"><b>Definition</b> typeMap.h:41</div></div>
+<div class="ttc" id="aclass_p4_1_1_visitor_1_1profile__t_html"><div class="ttname"><a href="class_p4_1_1_visitor_1_1profile__t.html">P4::Visitor::profile_t</a></div><div class="ttdef"><b>Definition</b> visitor.h:78</div></div>
 <div class="ttc" id="anamespace_p4_html"><div class="ttname"><a href="namespace_p4.html">P4</a></div><div class="ttdoc">TODO: this is not really specific to BMV2, it should reside somewhere else.</div><div class="ttdef"><b>Definition</b> applyOptionsPragmas.cpp:24</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->

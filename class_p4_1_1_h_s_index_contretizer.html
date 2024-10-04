@@ -137,9 +137,11 @@ Inheritance diagram for P4::HSIndexContretizer:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ad0b26dfe32db171418b4978edf0f9e4a" id="r_ad0b26dfe32db171418b4978edf0f9e4a"><td class="memItemLeft" align="right" valign="top"><a id="ad0b26dfe32db171418b4978edf0f9e4a" name="ad0b26dfe32db171418b4978edf0f9e4a"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>HSIndexContretizer</b> (<a class="el" href="class_p4_1_1_reference_map.html">ReferenceMap</a> *refMap, <a class="el" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap, <a class="el" href="class_p4_1_1_i_r_1_1_indexed_vector.html">IR::IndexedVector</a>&lt; IR::Declaration &gt; *locals=nullptr, GeneratedVariablesMap *generatedVariables=nullptr)</td></tr>
-<tr class="separator:ad0b26dfe32db171418b4978edf0f9e4a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a78d09fba8397e3f462cc9b75b27963f3" id="r_a78d09fba8397e3f462cc9b75b27963f3"><td class="memItemLeft" align="right" valign="top"><a id="a78d09fba8397e3f462cc9b75b27963f3" name="a78d09fba8397e3f462cc9b75b27963f3"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>HSIndexContretizer</b> (<a class="el" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap, std::shared_ptr&lt; <a class="el" href="class_p4_1_1_minimal_name_generator.html">MinimalNameGenerator</a> &gt; nameGen=nullptr, <a class="el" href="class_p4_1_1_i_r_1_1_indexed_vector.html">IR::IndexedVector</a>&lt; IR::Declaration &gt; *locals=nullptr, GeneratedVariablesMap *generatedVariables=nullptr)</td></tr>
+<tr class="separator:a78d09fba8397e3f462cc9b75b27963f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb06e7bb6bbf2703e6463f5d32693b72" id="r_acb06e7bb6bbf2703e6463f5d32693b72"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_p4_1_1_visitor_1_1profile__t.html">Visitor::profile_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acb06e7bb6bbf2703e6463f5d32693b72">init_apply</a> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *node) override</td></tr>
+<tr class="separator:acb06e7bb6bbf2703e6463f5d32693b72"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af9c88c14975107e14b9e92fea01c49b7" id="r_af9c88c14975107e14b9e92fea01c49b7"><td class="memItemLeft" align="right" valign="top"><a id="af9c88c14975107e14b9e92fea01c49b7" name="af9c88c14975107e14b9e92fea01c49b7"></a>
 <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b> (IR::AssignmentStatement *assignmentStatement) override</td></tr>
 <tr class="separator:af9c88c14975107e14b9e92fea01c49b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -409,7 +411,35 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>This class eliminates all non-concrete indexes of the header stacks in the controls. It generates new variables for all expressions in the header stacks indexes and checks their values for substitution of concrete values. Each new variable is unique in a scope. Restriction : in/out parameters should be replaced by correspondent assignments. Let header h_index { bit&lt;32&gt; index;} header h_stack { bit&lt;32&gt; a;} struct headers { h_stack[2] h; h_index i;} headers hdr; Then the assignment hdr.h[hdr.i] = 1 will be translated into bit&lt;32&gt; hdivr0; hdivr0 = hdr.i; if (hdivr0 == 0) { hdr.h[0] = 1;} else if (hdivr0 == 1){hdr.h[1] = 1;} </p>
-</div></div><!-- contents -->
+</div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="acb06e7bb6bbf2703e6463f5d32693b72" name="acb06e7bb6bbf2703e6463f5d32693b72"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acb06e7bb6bbf2703e6463f5d32693b72">&#9670;&#160;</a></span>init_apply()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="class_p4_1_1_visitor_1_1profile__t.html">Visitor::profile_t</a> P4::HSIndexContretizer::init_apply </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *</td>          <td class="paramname"><span class="paramname"><em>node</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reimplemented from <a class="el" href="class_p4_1_1_visitor.html">P4::Visitor</a>.</p>
+
+</div>
+</div>
+</div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->
 <!-- start footer part -->
