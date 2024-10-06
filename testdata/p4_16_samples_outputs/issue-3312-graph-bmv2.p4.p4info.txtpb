@@ -17,9 +17,6 @@ tables {
     id: 26265154
   }
   const_default_action_id: 20728178
-  initial_default_action {
-    action_id: 20728178
-  }
   size: 1024
 }
 tables {
@@ -32,9 +29,6 @@ tables {
     id: 26265154
   }
   const_default_action_id: 26265154
-  initial_default_action {
-    action_id: 26265154
-  }
   size: 1024
 }
 tables {
@@ -47,9 +41,6 @@ tables {
     id: 20728178
   }
   const_default_action_id: 20728178
-  initial_default_action {
-    action_id: 20728178
-  }
   size: 1024
 }
 actions {

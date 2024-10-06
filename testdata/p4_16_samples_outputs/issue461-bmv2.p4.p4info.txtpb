@@ -22,9 +22,6 @@ tables {
   action_refs {
     id: 20279829
   }
-  initial_default_action {
-    action_id: 20279829
-  }
   direct_resource_ids: 323801931
   size: 1024
 }
@@ -46,9 +43,6 @@ tables {
   action_refs {
     id: 32609675
   }
-  initial_default_action {
-    action_id: 32609675
-  }
   size: 1024
 }
 tables {
@@ -68,9 +62,6 @@ tables {
   }
   action_refs {
     id: 32609675
-  }
-  initial_default_action {
-    action_id: 32609675
   }
   size: 1024
 }
