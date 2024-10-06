@@ -22,9 +22,6 @@ tables {
   action_refs {
     id: 27489497
   }
-  initial_default_action {
-    action_id: 27489497
-  }
   size: 1024
 }
 tables {
@@ -54,9 +51,6 @@ tables {
   action_refs {
     id: 27489497
   }
-  initial_default_action {
-    action_id: 27489497
-  }
   size: 1024
 }
 tables {
@@ -76,9 +70,6 @@ tables {
   }
   action_refs {
     id: 27489497
-  }
-  initial_default_action {
-    action_id: 27489497
   }
   size: 1024
 }
@@ -100,9 +91,6 @@ tables {
   action_refs {
     id: 27489497
   }
-  initial_default_action {
-    action_id: 27489497
-  }
   size: 1024
 }
 tables {
@@ -122,9 +110,6 @@ tables {
   }
   action_refs {
     id: 27489497
-  }
-  initial_default_action {
-    action_id: 27489497
   }
   size: 1024
 }
