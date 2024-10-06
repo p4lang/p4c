@@ -450,13 +450,7 @@ class ControlConverter : public Inspector {
             for (auto k : keyset->components) {
                 auto key = new Util::JsonObject();
                 auto tableKey = table->getKey()->keyElements.at(keyIndex);
-                int keyWidth = 0;
-                if (tableKey->expression->type->is<IR::Type_Error>()) {
-                    // error type doesn't have a width, and will fail below, checking the key
-                    // expression k, so it doesn't matter what keyWidth is.
-                } else {
-                    keyWidth = tableKey->expression->type->width_bits();
-                }
+                auto keyWidth = tableKey->expression->type->width_bits();
                 auto k8 = ROUNDUP(keyWidth, 8);
                 auto matchType = getKeyMatchType(tableKey);
                 // Table key fields with match_kind optional will be
