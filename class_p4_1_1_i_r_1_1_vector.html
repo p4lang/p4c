@@ -198,6 +198,8 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>check_null</b> () con
 <tr class="memitem:ac0861d134f2795677b06a4f55ba7d808" id="r_ac0861d134f2795677b06a4f55ba7d808"><td class="memItemLeft" align="right" valign="top"><a id="ac0861d134f2795677b06a4f55ba7d808" name="ac0861d134f2795677b06a4f55ba7d808"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>clear</b> ()</td></tr>
 <tr class="separator:ac0861d134f2795677b06a4f55ba7d808"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af7d64e0095cece7381af2afc55bb2bd1" id="r_af7d64e0095cece7381af2afc55bb2bd1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af7d64e0095cece7381af2afc55bb2bd1">dbprint</a> (std::ostream &amp;out) const override</td></tr>
+<tr class="separator:af7d64e0095cece7381af2afc55bb2bd1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abe7557203812ea0cb4d09ec4f13a9eed" id="r_abe7557203812ea0cb4d09ec4f13a9eed"><td class="memItemLeft" align="right" valign="top"><a id="abe7557203812ea0cb4d09ec4f13a9eed" name="abe7557203812ea0cb4d09ec4f13a9eed"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>DECLARE_TYPEINFO_WITH_DISCRIMINATOR</b> (<a class="el" href="class_p4_1_1_i_r_1_1_vector.html">Vector</a>&lt; T &gt;, NodeDiscriminator::VectorT, T, <a class="el" href="class_p4_1_1_i_r_1_1_vector_base.html">VectorBase</a>)</td></tr>
 <tr class="separator:abe7557203812ea0cb4d09ec4f13a9eed"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -389,8 +391,6 @@ virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>apply_visitor
 <tr class="memitem:a5461ef07e806b513fffb814c189991d5 inherit pub_methods_class_p4_1_1_i_r_1_1_node" id="r_a5461ef07e806b513fffb814c189991d5"><td class="memItemLeft" align="right" valign="top">
 virtual <a class="el" href="class_p4_1_1_i_r_1_1_node.html">Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>clone</b> () const =0</td></tr>
 <tr class="separator:a5461ef07e806b513fffb814c189991d5 inherit pub_methods_class_p4_1_1_i_r_1_1_node"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6cdc5d8b1fadeb60cc068365f90d77a4 inherit pub_methods_class_p4_1_1_i_r_1_1_node" id="r_a6cdc5d8b1fadeb60cc068365f90d77a4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_i_r_1_1_node.html#a6cdc5d8b1fadeb60cc068365f90d77a4">dbprint</a> (std::ostream &amp;out) const override</td></tr>
-<tr class="separator:a6cdc5d8b1fadeb60cc068365f90d77a4 inherit pub_methods_class_p4_1_1_i_r_1_1_node"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa8141337e5d7b1496117a646985b5e56 inherit pub_methods_class_p4_1_1_i_r_1_1_node" id="r_aa8141337e5d7b1496117a646985b5e56"><td class="memItemLeft" align="right" valign="top">
 &#160;</td><td class="memItemRight" valign="bottom"><b>DECLARE_TYPEINFO_WITH_TYPEID</b> (<a class="el" href="class_p4_1_1_i_r_1_1_node.html">Node</a>, NodeKind::Node, <a class="el" href="class_p4_1_1_i_r_1_1_i_node.html">INode</a>)</td></tr>
 <tr class="separator:aa8141337e5d7b1496117a646985b5e56 inherit pub_methods_class_p4_1_1_i_r_1_1_node"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -536,6 +536,35 @@ static int&#160;</td><td class="memItemRight" valign="bottom"><b>currentId</b> =
 <tr class="separator:a894afe99320b011457ae8902d62d3897 inherit pro_static_attribs_class_p4_1_1_i_r_1_1_node"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="af7d64e0095cece7381af2afc55bb2bd1" name="af7d64e0095cece7381af2afc55bb2bd1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af7d64e0095cece7381af2afc55bb2bd1">&#9670;&#160;</a></span>dbprint()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;class T &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="class_p4_1_1_i_r_1_1_vector.html">P4::IR::Vector</a>&lt; T &gt;::dbprint </td>
+          <td>(</td>
+          <td class="paramtype">std::ostream &amp;</td>          <td class="paramname"><span class="paramname"><em>out</em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reimplemented from <a class="el" href="class_p4_1_1_i_r_1_1_node.html">P4::IR::Node</a>.</p>
+
+</div>
+</div>
 <a id="a0599f49d3f617d7b6c36022ac97c9472" name="a0599f49d3f617d7b6c36022ac97c9472"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a0599f49d3f617d7b6c36022ac97c9472">&#9670;&#160;</a></span>empty()</h2>
 
