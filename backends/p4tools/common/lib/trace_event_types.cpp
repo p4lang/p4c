@@ -76,15 +76,10 @@ MethodCall::MethodCall(const IR::MethodCallExpression *call) : call(call) {}
 
 void MethodCall::print(std::ostream &os) const {
     const auto &srcInfo = call->getSourceInfo();
-    // Convert the method call to a string and strip any new lines.
-    std::stringstream callStream;
-    call->dbprint(callStream);
-    auto callString = callStream.str();
-    callString.erase(std::remove(callString.begin(), callString.end(), '\n'), callString.cend());
     if (srcInfo.isValid()) {
-        os << "[MethodCall]: " << callString;
+        os << "[MethodCall]: " << call;
     } else {
-        os << "[P4Testgen MethodCall]: " << callString;
+        os << "[P4Testgen MethodCall]: " << call;
     }
 }
 
@@ -283,14 +278,7 @@ const Emit *Emit::evaluate(const Model &model, bool doComplete) const {
 }
 
 void Emit::print(std::ostream &os) const {
-    // Convert the header expression to a string and strip any new lines.
-    // TODO: Maybe there is a better way to format newlines?
-    std::stringstream assignStream;
-    emitHeader->dbprint(assignStream);
-    auto headerString = assignStream.str();
-    headerString.erase(std::remove(headerString.begin(), headerString.end(), '\n'),
-                       headerString.cend());
-    os << "[Emit]: " << headerString;
+    os << "[Emit]: " << emitHeader;
 }
 
 /* =============================================================================================
