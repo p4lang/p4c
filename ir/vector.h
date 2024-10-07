@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "ir/node.h"
 #include "lib/enumerator.h"
+#include "lib/indent.h"
 #include "lib/null.h"
 #include "lib/safe_vector.h"
 
@@ -206,6 +207,14 @@ class Vector : public VectorBase {
     Util::Enumerator<const S *> *only() const {
         return getEnumerator()->template as<const S *>()->where(
             [](const T *d) { return d != nullptr; });
+    }
+
+    void dbprint(std::ostream &out) const override {
+        out << "{" << IndentCtl::indent;
+        for (auto p : *this) {
+            out << " " << p;
+        }
+        out << IndentCtl::unindent << " }";
     }
 
     DECLARE_TYPEINFO_WITH_DISCRIMINATOR(Vector<T>, NodeDiscriminator::VectorT, T, VectorBase);
