@@ -221,7 +221,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new SimplifyControlFlow(&typeMap),
         new SimplifySwitch(&typeMap),
         new MoveDeclarations(),  // Move all local declarations to the beginning
-        new SimplifyDefUse(&refMap, &typeMap),
+        new SimplifyDefUse(&typeMap),
         new UniqueParameters(&typeMap),
         new SimplifyControlFlow(&typeMap),
         new SpecializeAll(&typeMap, policy),
@@ -232,7 +232,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new RemoveAllUnusedDeclarations(*policy),
         new RemoveRedundantParsers(&typeMap, *policy),
         new ClearTypeMap(&typeMap),
-        new EvaluatorPass(&refMap, &typeMap),
+        new EvaluatorPass(&typeMap),
     });
     if (policy->optimize(options)) {
         passes.addPasses({
@@ -255,7 +255,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             new RemoveParserControlFlow(&typeMap),
             new UniqueNames(),       // needed again after inlining
             new MoveDeclarations(),  // needed again after inlining
-            new SimplifyDefUse(&refMap, &typeMap),
+            new SimplifyDefUse(&typeMap),
             new RemoveAllUnusedDeclarations(*policy),
             new SimplifyControlFlow(&typeMap),
         });
