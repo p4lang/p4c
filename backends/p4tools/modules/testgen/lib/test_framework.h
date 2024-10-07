@@ -72,7 +72,8 @@ class TestFramework {
                 ss << trace;
                 std::string traceStr = ss.str();
                 if (stripNewline) {
-                    traceStr.erase(std::remove(traceStr.begin(), traceStr.end(), '\n'), traceStr.cend());
+                    traceStr.erase(std::remove(traceStr.begin(), traceStr.end(), '\n'),
+                                   traceStr.cend());
                 }
                 traceList.push_back(traceStr);
             }
