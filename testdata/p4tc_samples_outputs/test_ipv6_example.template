@@ -2,7 +2,7 @@
 
 set -e
 
-TC="tc"
+: "${TC:="tc"}"
 $TC p4template create pipeline/test_ipv6_example numtables 1
 
 $TC p4template create action/test_ipv6_example/MainControlImpl/set_dst actid 1 \

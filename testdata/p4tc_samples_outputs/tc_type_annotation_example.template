@@ -2,7 +2,7 @@
 
 set -e
 
-TC="tc"
+: "${TC:="tc"}"
 $TC p4template create pipeline/tc_type_annotation_example numtables 2
 
 $TC p4template create action/tc_type_annotation_example/MainControlImpl/next_hop actid 1 \

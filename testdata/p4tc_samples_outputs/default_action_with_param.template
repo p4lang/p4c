@@ -2,7 +2,7 @@
 
 set -e
 
-TC="tc"
+: "${TC:="tc"}"
 $TC p4template create pipeline/default_action_with_param numtables 2
 
 $TC p4template create action/default_action_with_param/MainControlImpl/next_hop actid 1 \
