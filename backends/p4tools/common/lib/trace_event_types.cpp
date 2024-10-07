@@ -277,9 +277,7 @@ const Emit *Emit::evaluate(const Model &model, bool doComplete) const {
         model.evaluateStructExpr(emitHeader, doComplete)->checkedTo<IR::HeaderExpression>());
 }
 
-void Emit::print(std::ostream &os) const {
-    os << "[Emit]: " << emitHeader;
-}
+void Emit::print(std::ostream &os) const { os << "[Emit]: " << emitHeader; }
 
 /* =============================================================================================
  *   Packet
