@@ -741,9 +741,13 @@ void ExpressionEvaluator::postorder(const IR::Operation_Ternary *expression) {
     auto e1i = e1->to<ScalarValue>();
     auto e2i = e2->to<ScalarValue>();
     if (e0i->isUninitialized()) {
-        auto result = new SymbolicStaticError(expression->e0, "Uninitialized");
-        set(expression, result);
-        return;
+        // This cannot be an uninitialized read if 'expression' is the LHS of
+        // an assignment to a sliced l-value.
+        if (!evaluatingLeftValue) {
+            auto result = new SymbolicStaticError(expression->e0, "Uninitialized");
+            set(expression, result);
+            return;
+        }
     } else if (e1i->isUninitialized()) {
         auto result = new SymbolicStaticError(expression->e1, "Uninitialized");
         set(expression, result);

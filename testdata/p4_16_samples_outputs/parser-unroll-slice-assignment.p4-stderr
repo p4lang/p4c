@@ -1,0 +1,3 @@
+parser-unroll-slice-assignment.p4(9): [--Wwarn=uninitialized_use] warning: s.f may be uninitialized
+        s.f[3:0] = 2;
+        ^^^
