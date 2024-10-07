@@ -26,7 +26,7 @@ RemoveUnusedDeclarations *RemoveUnusedPolicy::getRemoveUnusedDeclarationsPass(
 }
 
 Visitor::profile_t RemoveUnusedDeclarations::init_apply(const IR::Node *node) {
-    LOG4("Used sed " << used);
+    LOG4("Used set " << used);
     return Transform::init_apply(node);
 }
 
