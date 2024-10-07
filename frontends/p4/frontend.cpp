@@ -159,7 +159,6 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
 
     ConstantFoldingPolicy *constantFoldingPolicy = policy->getConstantFoldingPolicy();
 
-    auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     PassManager passes({
         new P4V1::GetV1ModelVersion,
         // Parse annotations
@@ -233,11 +232,11 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new RemoveAllUnusedDeclarations(*policy),
         new RemoveRedundantParsers(&typeMap, *policy),
         new ClearTypeMap(&typeMap),
-        evaluator,
+        new EvaluatorPass(&refMap, &typeMap),
     });
     if (policy->optimize(options)) {
         passes.addPasses({
-            new Inline(&refMap, &typeMap, evaluator, *policy, options.optimizeParserInlining),
+            new Inline(&typeMap, *policy, options.optimizeParserInlining),
             new InlineActions(&typeMap, *policy),
             new LocalizeAllActions(*policy),
             new UniqueNames(),

@@ -350,9 +350,9 @@ bool Evaluator::preorder(const IR::StructExpression *se) {
 
 //////////////////////////////////////
 
-EvaluatorPass::EvaluatorPass(ReferenceMap *refMap, TypeMap *typeMap) {
+EvaluatorPass::EvaluatorPass(ReferenceMap *refMap, TypeMap *typeMap)
+    : evaluator(new P4::Evaluator(refMap, typeMap)) {
     setName("EvaluatorPass");
-    evaluator = new P4::Evaluator(refMap, typeMap);
     passes.emplace_back(new P4::TypeChecking(refMap, typeMap));
     passes.emplace_back(evaluator);
 }
