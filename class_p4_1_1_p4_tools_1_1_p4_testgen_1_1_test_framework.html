@@ -170,13 +170,11 @@ template&lt;class ProfileType &gt; </td></tr>
 <tr class="memitem:a899477a00b329187fd769116b9a565b2"><td class="memTemplItemLeft" align="right" valign="top">static void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>collectActionProfileDeclarations</b> (const <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_test_spec.html">TestSpec</a> *testSpec, inja::json &amp;controlPlaneJson, const std::map&lt; <a class="el" href="class_p4_1_1cstring.html">cstring</a>, <a class="el" href="class_p4_1_1cstring.html">cstring</a> &gt; &amp;apAsMap)</td></tr>
 <tr class="memdesc:a899477a00b329187fd769116b9a565b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Collect all the action profile objects. These will have to be declared in the test. <br /></td></tr>
 <tr class="separator:a899477a00b329187fd769116b9a565b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac1c326b9fdb4c6372c687ec5e8fc3372" id="r_ac1c326b9fdb4c6372c687ec5e8fc3372"><td class="memItemLeft" align="right" valign="top"><a id="ac1c326b9fdb4c6372c687ec5e8fc3372" name="ac1c326b9fdb4c6372c687ec5e8fc3372"></a>
-static inja::json&#160;</td><td class="memItemRight" valign="bottom"><b>getTrace</b> (const <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_test_spec.html">TestSpec</a> *testSpec)</td></tr>
-<tr class="memdesc:ac1c326b9fdb4c6372c687ec5e8fc3372"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts the traces of this test into a string representation and Inja object. <br /></td></tr>
-<tr class="separator:ac1c326b9fdb4c6372c687ec5e8fc3372"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afe6fa1527f4c2b41eb6040c6d4ba8b3e" id="r_afe6fa1527f4c2b41eb6040c6d4ba8b3e"><td class="memItemLeft" align="right" valign="top">static inja::json&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#afe6fa1527f4c2b41eb6040c6d4ba8b3e">getTrace</a> (const <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_test_spec.html">TestSpec</a> *testSpec, bool stripNewline=true)</td></tr>
+<tr class="separator:afe6fa1527f4c2b41eb6040c6d4ba8b3e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>THe default base class for the various test frameworks. Every test framework has a test name and a seed associated with it. Also contains a variety of common utility functions. </p>
+<div class="textblock"><p>The default base class for the various test frameworks. Every test framework has a test name and a seed associated with it. Also contains a variety of common utility functions. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
 <a id="ac7123118958bec1c6100e93287c9a31c" name="ac7123118958bec1c6100e93287c9a31c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ac7123118958bec1c6100e93287c9a31c">&#9670;&#160;</a></span>checkForDefaultActionOverride()</h2>
@@ -242,6 +240,41 @@ template&lt;class ProfileType , class SelectorType &gt; </div>
 </table>
 </div><div class="memdoc">
 <p>Checks whether a table object has an action profile or selector associated with it. If that is the case, we set a boolean flag for this particular inja object. </p>
+
+</div>
+</div>
+<a id="afe6fa1527f4c2b41eb6040c6d4ba8b3e" name="afe6fa1527f4c2b41eb6040c6d4ba8b3e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afe6fa1527f4c2b41eb6040c6d4ba8b3e">&#9670;&#160;</a></span>getTrace()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">static inja::json P4::P4Tools::P4Testgen::TestFramework::getTrace </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_test_spec.html">TestSpec</a> *</td>          <td class="paramname"><span class="paramname"><em>testSpec</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>stripNewline</em></span><span class="paramdefsep"> = </span><span class="paramdefval">true</span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">static</span><span class="mlabel">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Converts the traces of this test into a string representation and Inja object. </p><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">stripNewline</td><td>Currently most test frameworks don't handle newlines in the trace well, therefore we strip them by default. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>
