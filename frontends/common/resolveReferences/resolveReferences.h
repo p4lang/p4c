@@ -19,7 +19,9 @@ limitations under the License.
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/inlined_vector.h"
+#include "frontends/common/parser_options.h"
 #include "ir/ir.h"
+#include "ir/pass_manager.h"
 #include "lib/cstring.h"
 #include "lib/iterator_range.h"
 #include "referenceMap.h"
@@ -168,6 +170,18 @@ class ResolveReferences : public Inspector, private ResolutionContext {
     }
 
     void checkShadowing(const IR::INamespace *ns) const;
+};
+
+class CheckShadow : public PassManager {
+    ReferenceMap refMap;
+
+ public:
+    CheckShadow() {
+        refMap.setIsV1(P4CContext::get().options().isv1());
+
+        addPasses({new ResolveReferences(&refMap, /* checkShadow */ true)});
+        setName("CheckShadow");
+    }
 };
 
 }  // namespace P4

@@ -149,10 +149,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
                                    std::ostream *outStream) {
     if (program == nullptr && options.listFrontendPasses == 0) return nullptr;
 
-    bool isv1 = options.isv1();
-    ReferenceMap refMap;
     TypeMap typeMap;
-    refMap.setIsV1(isv1);
 
     ParseAnnotations *parseAnnotations = policy->getParseAnnotations();
     if (!parseAnnotations) parseAnnotations = new ParseAnnotations();
@@ -168,7 +165,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new ValidateParsedProgram(),
         // Synthesize some built-in constructs
         new CreateBuiltins(),
-        new ResolveReferences(&refMap, /* checkShadow */ true),
+        new CheckShadow(),
         // First pass of constant folding, before types are known --
         // may be needed to compute types.
         new ConstantFolding(constantFoldingPolicy),
@@ -263,7 +260,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     passes.addPasses({
         // Check for shadowing after all inlining passes. We disable this
         // check during inlining since it significantly slows compilation.
-        new ResolveReferences(&refMap, /* checkShadow */ true),
+        new CheckShadow(),
         new HierarchicalNames(),
         new FrontEndLast(),
     });
