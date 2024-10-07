@@ -40,6 +40,7 @@ limitations under the License.
 #include "frontends/common/constantFolding.h"
 #include "functionsInlining.h"
 #include "getV1ModelVersion.h"
+#include "duplicateHierarchicalNameCheck.h"
 #include "hierarchicalNames.h"
 #include "inlining.h"
 #include "localizeActions.h"
@@ -238,6 +239,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     if (policy->optimize(options)) {
         passes.addPasses({
             new Inline(&refMap, &typeMap, evaluator, *policy, options.optimizeParserInlining),
+            new DuplicateHierarchicalNameCheck(),
             new InlineActions(&refMap, &typeMap, *policy),
             new LocalizeAllActions(&refMap, *policy),
             new UniqueNames(),
