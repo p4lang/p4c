@@ -63,15 +63,20 @@ const Expression *Expression::evaluate(const Model &model, bool doComplete) cons
     return new Expression(evaluatedValue, label);
 }
 
+static std::string dbFormatWithoutNewline(const P4::IHasDbPrint *value)
+{
+    std::stringstream str;
+    value->dbprint(str);
+    auto expString = str.str();
+    expString.erase(std::remove(expString.begin(), expString.end(), '\n'), expString.cend());
+    return expString;
+}
+
 void Expression::print(std::ostream &os) const {
     // Convert the assignment to a string and strip any new lines.
     // TODO: Maybe there is a better way to format newlines?
-    std::stringstream exprStream;
-    value->dbprint(exprStream);
-    auto expString = exprStream.str();
-    expString.erase(std::remove(expString.begin(), expString.end(), '\n'), expString.cend());
     Generic::print(os);
-    os << ": " << expString;
+    os << ": " << dbFormatWithoutNewline(value);
 }
 
 /* =============================================================================================
@@ -137,9 +142,9 @@ void IfStatementCondition::print(std::ostream &os) const {
     if (srcInfo.isValid()) {
         os << "[If Statement]: " << srcInfo.toBriefSourceFragment();
     } else {
-        os << "[P4Testgen If Statement]: " << preEvalCond;
+        os << "[P4Testgen If Statement]:";
     }
-    os << " Condition: " << preEvalCond;
+    os << " Condition: " << dbFormatWithoutNewline(preEvalCond);
     const auto *boolResult = postEvalCond->checkedTo<IR::BoolLiteral>()->value ? "true" : "false";
     os << " Result: " << boolResult;
 }
