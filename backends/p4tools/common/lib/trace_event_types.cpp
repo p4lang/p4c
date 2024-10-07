@@ -63,20 +63,9 @@ const Expression *Expression::evaluate(const Model &model, bool doComplete) cons
     return new Expression(evaluatedValue, label);
 }
 
-static std::string dbFormatWithoutNewline(const P4::IHasDbPrint *value)
-{
-    std::stringstream str;
-    value->dbprint(str);
-    auto expString = str.str();
-    expString.erase(std::remove(expString.begin(), expString.end(), '\n'), expString.cend());
-    return expString;
-}
-
 void Expression::print(std::ostream &os) const {
-    // Convert the assignment to a string and strip any new lines.
-    // TODO: Maybe there is a better way to format newlines?
     Generic::print(os);
-    os << ": " << dbFormatWithoutNewline(value);
+    os << ": " << value;
 }
 
 /* =============================================================================================
@@ -144,7 +133,7 @@ void IfStatementCondition::print(std::ostream &os) const {
     } else {
         os << "[P4Testgen If Statement]:";
     }
-    os << " Condition: " << dbFormatWithoutNewline(preEvalCond);
+    os << " Condition: " << preEvalCond;
     const auto *boolResult = postEvalCond->checkedTo<IR::BoolLiteral>()->value ? "true" : "false";
     os << " Result: " << boolResult;
 }
@@ -189,19 +178,12 @@ const AssignmentStatement *AssignmentStatement::evaluate(const Model &model,
 
 void AssignmentStatement::print(std::ostream &os) const {
     const auto &srcInfo = stmt.getSourceInfo();
-    // Convert the assignment to a string and strip any new lines.
-    // TODO: Maybe there is a better way to format newlines?
-    std::stringstream assignStream;
-    stmt.dbprint(assignStream);
-    auto assignString = assignStream.str();
-    assignString.erase(std::remove(assignString.begin(), assignString.end(), '\n'),
-                       assignString.cend());
     if (srcInfo.isValid()) {
         auto fragment = srcInfo.toSourceFragment(false);
         fragment = fragment.trim();
-        os << "[AssignmentStatement]: " << fragment << "| Computed: " << assignString;
+        os << "[AssignmentStatement]: " << fragment << "| Computed: " << stmt;
     } else {
-        os << "[P4Testgen AssignmentStatement]: " << assignString;
+        os << "[P4Testgen AssignmentStatement]: " << stmt;
     }
 }
 

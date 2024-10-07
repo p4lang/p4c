@@ -49,7 +49,7 @@ std::vector<const ConcreteTest *> convertAbstractTestsToConcreteTests(
 /// framework.
 using OptionalFilePath = std::optional<std::filesystem::path>;
 
-/// THe default base class for the various test frameworks. Every test framework has a test
+/// The default base class for the various test frameworks. Every test framework has a test
 /// name and a seed associated with it. Also contains a variety of common utility functions.
 class TestFramework {
  private:
@@ -61,14 +61,20 @@ class TestFramework {
     explicit TestFramework(const TestBackendConfiguration &testBackendConfiguration);
 
     /// Converts the traces of this test into a string representation and Inja object.
-    static inja::json getTrace(const TestSpec *testSpec) {
+    /// @param stripNewline  Currently most test frameworks don't handle newlines in the trace well,
+    ///                      therefore we strip them by default.
+    static inja::json getTrace(const TestSpec *testSpec, bool stripNewline = true) {
         inja::json traceList = inja::json::array();
         const auto *traces = testSpec->getTraces();
         if (traces != nullptr) {
             for (const auto &trace : *traces) {
                 std::stringstream ss;
                 ss << trace;
-                traceList.push_back(ss.str());
+                std::string traceStr = ss.str();
+                if (stripNewline) {
+                    traceStr.erase(std::remove(traceStr.begin(), traceStr.end(), '\n'), traceStr.cend());
+                }
+                traceList.push_back(traceStr);
             }
         }
         return traceList;
