@@ -459,12 +459,9 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
 
              // Strip any newlines in the value we want to record.
              value->dbprint(assignStream);
-             auto assignString = assignStream.str();
-             assignString.erase(std::remove(assignString.begin(), assignString.end(), '\n'),
-                                assignString.cend());
 
              auto &nextState = stepper.state.clone();
-             nextState.add(*new TraceEvents::Generic(assignString));
+             nextState.add(*new TraceEvents::Generic(assignStream.str()));
              nextState.popBody();
              stepper.result->emplace_back(nextState);
          }},
