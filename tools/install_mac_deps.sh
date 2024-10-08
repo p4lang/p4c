@@ -11,7 +11,7 @@ brew_install() {
     if brew list $1 &>/dev/null; then
         echo "${1} is already installed"
     else
-        brew install $1 && echo "$1 is installed"
+        brew install --overwrite $1 && echo "$1 is installed"
     fi
 }
 
@@ -42,13 +42,11 @@ BOOST_LIB="boost@1.85"
 REQUIRED_PACKAGES=(
     autoconf automake ccache cmake libtool
     openssl pkg-config coreutils bison grep ninja
+    ${BOOST_LIB}
 )
 for package in "${REQUIRED_PACKAGES[@]}"; do
   brew_install ${package}
 done
-
-# The boost installation is flaky, do not fail if it fails.
-brew_install ${BOOST_LIB} || echo "Failed to install ${BOOST_LIB}"
 
 # Check if linking is needed.
 if ! brew ls --linked --formula ${BOOST_LIB} > /dev/null 2>&1; then
