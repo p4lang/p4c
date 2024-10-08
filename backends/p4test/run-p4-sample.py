@@ -164,7 +164,7 @@ def compare_files(options, produced, expected, ignore_case):
         return FAILURE
 
 
-def recompile_file(options, produced, mustBeIdentical):
+def recompile_file(options, produced, mustBeIdentical, origFileP414=False):
     # Compile the generated file a second time
     secondFile = produced + "-x"
     args = [
@@ -174,8 +174,10 @@ def recompile_file(options, produced, mustBeIdentical):
         secondFile,
         "--std",
         "p4-16",
-        produced,
-    ] + options.compilerOptions
+    ]
+    if origFileP414 or ('-midend' in produced):
+        args += ["--excludeFrontendPasses", "DuplicateHierarchicalNameCheck"]
+    args += [produced] + options.compilerOptions
     if options.runDebugger:
         if options.runDebugger_skip > 0:
             options.runDebugger_skip = options.runDebugger_skip - 1
@@ -314,7 +316,10 @@ def process_file(options, argv):
             args.extend(["--p4runtime-files", p4runtimeFile])
             args.extend(["--p4runtime-entries-files", p4runtimeEntriesFile])
 
+    origFileP414 = False
     if "p4_14" in options.p4filename or "v1_samples" in options.p4filename:
+        origFileP414 = True
+        args.extend(["--excludeFrontendPasses", "DuplicateHierarchicalNameCheck"])
         args.extend(["--std", "p4-14"])
     args.extend(argv)
     if options.runDebugger:
@@ -357,7 +362,9 @@ def process_file(options, argv):
     if result == SUCCESS:
         result = check_generated_files(options, tmpdir, expected_dirname)
     if (result == SUCCESS) and (not expected_error):
-        result = recompile_file(options, ppfile, False)
+        print("jaf dbg just before recompile_file")
+        result = recompile_file(options, ppfile, False, origFileP414)
+        print("jaf dbg just after recompile_file")
     if (
         (result == SUCCESS)
         and (not expected_error)
