@@ -1,5 +1,5 @@
 /*
-Copyright 2017 VMware, Inc.
+Copyright 2024 Cisco Systems, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,7 +20,9 @@ limitations under the License.
 
 namespace P4 {
 
-cstring DuplicateHierarchicalNameCheck::getName(const IR::IDeclaration *decl) { return decl->getName(); }
+cstring DuplicateHierarchicalNameCheck::getName(const IR::IDeclaration *decl) {
+    return decl->getName();
+}
 
 const IR::Node *DuplicateHierarchicalNameCheck::postorder(IR::Annotation *annotation) {
     if (annotation->name != IR::Annotation::nameAnnotation) return annotation;
