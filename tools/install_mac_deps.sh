@@ -3,6 +3,7 @@
 # Script to install P4C dependencies on MacOS.
 
 set -e  # Exit on error.
+set -x  # Make command execution verbose
 
 # Installation helper.
 brew_install() {
@@ -10,7 +11,7 @@ brew_install() {
     if brew list $1 &>/dev/null; then
         echo "${1} is already installed"
     else
-        brew install $1 && echo "$1 is installed"
+        brew install --ignore-dependencies $1 && echo "$1 is installed"
     fi
 }
 
