@@ -41,11 +41,33 @@ const IR::Node *DuplicateHierarchicalNameCheck::postorder(IR::Annotation *annota
     if (annotatedNode->is<IR::Declaration_Variable>()) {
         return annotation;
     }
-    if (annotatedNodes.count(name)) {
-        error(ErrorType::ERR_DUPLICATE, "%1%: " ERR_STR_DUPLICATED_NAME ": %2%", annotatedNode,
-              annotatedNodes[name]);
+    bool foundDuplicate = false;
+    auto *otherNode = annotatedNode;
+    if (annotatedNode->is<IR::P4Table>()) {
+        if (annotatedTables.count(name)) {
+            foundDuplicate = true;
+            otherNode = annotatedTables[name];
+        } else {
+            annotatedTables[name] = annotatedNode;
+        }
+    } else if (annotatedNode->is<IR::P4Action>()) {
+        if (annotatedActions.count(name)) {
+            foundDuplicate = true;
+            otherNode = annotatedActions[name];
+        } else {
+            annotatedActions[name] = annotatedNode;
+        }
     } else {
-        annotatedNodes[name] = annotatedNode;
+        if (annotatedOthers.count(name)) {
+            foundDuplicate = true;
+            otherNode = annotatedOthers[name];
+        } else {
+            annotatedOthers[name] = annotatedNode;
+        }
+    }
+    if (foundDuplicate) {
+        error(ErrorType::ERR_DUPLICATE, "%1%: " ERR_STR_DUPLICATED_NAME ": %2%", annotatedNode,
+              otherNode);
     }
     return annotation;
 }

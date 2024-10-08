@@ -43,8 +43,13 @@ namespace P4 {
  */
 class DuplicateHierarchicalNameCheck : public Transform {
     std::vector<cstring> stack;
-    /// Used for detection of conflicting control plane names
-    std::map<cstring, const IR::Node *> annotatedNodes;
+    /// Used for detection of conflicting control plane names among actions.
+    std::map<cstring, const IR::Node *> annotatedActions;
+    /// Used for detection of conflicting control plane names among tables.
+    std::map<cstring, const IR::Node *> annotatedTables;
+    /// Used for detection of conflicting control plane names among
+    /// objects other than actions and tables.
+    std::map<cstring, const IR::Node *> annotatedOthers;
 
  public:
     cstring getName(const IR::IDeclaration *decl);
