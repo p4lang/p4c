@@ -39,8 +39,8 @@ const IR::Node *DuplicateHierarchicalNameCheck::postorder(IR::Annotation *annota
     auto *annotatedNode = getContext()->parent->node;
     CHECK_NULL(annotatedNode);
     if (annotatedNodes.count(name)) {
-        error(ErrorType::ERR_DUPLICATE, "%1%: " ERR_STR_DUPLICATED_NAME ": %2%",
-            annotatedNode, annotatedNodes[name]);
+        error(ErrorType::ERR_DUPLICATE, "%1%: " ERR_STR_DUPLICATED_NAME ": %2%", annotatedNode,
+              annotatedNodes[name]);
     } else {
         annotatedNodes[name] = annotatedNode;
     }
