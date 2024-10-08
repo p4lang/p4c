@@ -2157,12 +2157,14 @@ const IR::Node *TypeInferenceBase::postorder(const IR::MethodCallExpression *exp
             const IR::Type *baseReturnType = returnType;
             if (const auto *sc = returnType->to<IR::Type_SpecializedCanonical>())
                 baseReturnType = sc->baseType;
-            const bool factoryOrStaticAssert =
-                baseReturnType->is<IR::Type_Extern>() || ef->method->name == "static_assert";
-            if (constArgs && factoryOrStaticAssert) {
+            const bool factoryOrStaticAssertOrPureAnnot =
+                baseReturnType->is<IR::Type_Extern>() || ef->method->name == "static_assert" ||
+                ef->method->getAnnotation(IR::Annotation::pureAnnotation);
+            if (constArgs && factoryOrStaticAssertOrPureAnnot) {
                 // factory extern function calls (those that return extern objects) with constant
                 // args are compile-time constants.
-                // The result of a static_assert call is also a compile-time constant.
+                // The result of a static_assert call is also a compile-time constant
+                // Pure functions marked with @pure annotation is a compiled-time constant
                 setCompileTimeConstant(expression);
                 setCompileTimeConstant(getOriginal<IR::Expression>());
             }
