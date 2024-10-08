@@ -19,7 +19,7 @@ $TC p4template update action/add_entry_1_example/MainControlImpl/dflt_route_drop
 $TC p4template create table/add_entry_1_example/MainControlImpl/ipv4_tbl_1 \
 	tblid 1 \
 	type exact \
-	keysz 64 nummasks 8 permissions 0x38e6 tentries 1024 \
+	keysz 64 permissions 0x38e6 tentries 1024 nummasks 1 \
 	table_acts act name add_entry_1_example/MainControlImpl/next_hop \
 	act name add_entry_1_example/MainControlImpl/send_nh \
 	act name add_entry_1_example/MainControlImpl/dflt_route_drop

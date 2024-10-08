@@ -23,7 +23,7 @@ control_path tc_key index ptype bit32 id 1 param srcAddr ptype macaddr id 2 para
 $TC p4template create table/digest/ingress/nh_table \
 	tblid 1 \
 	type exact \
-	keysz 32 nummasks 8 permissions 0x3da4 tentries 2048 \
+	keysz 32 permissions 0x3da4 tentries 2048 nummasks 1 \
 	table_acts act name digest/ingress/send_nh \
 	act name digest/ingress/drop
 $TC p4template update table/digest/ingress/nh_table default_miss_action permissions 0x1024 action digest/ingress/drop
