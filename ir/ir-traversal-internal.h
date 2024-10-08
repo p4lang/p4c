@@ -23,8 +23,8 @@ limitations under the License.
 #ifndef IR_IR_TRAVERSAL_INTERNAL_H_
 #define IR_IR_TRAVERSAL_INTERNAL_H_
 
-#include <lib/exceptions.h>
-#include <lib/rtti_utils.h>
+#include "lib/exceptions.h"
+#include "lib/rtti_utils.h"
 
 #ifndef IR_IR_TRAVERSAL_INTERNAL_ENABLE
 #error "This file must not be used directly"
