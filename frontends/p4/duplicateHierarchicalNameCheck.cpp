@@ -38,7 +38,11 @@ const IR::Node *DuplicateHierarchicalNameCheck::postorder(IR::Annotation *annota
     CHECK_NULL(getContext()->parent);
     auto *annotatedNode = getContext()->parent->node;
     CHECK_NULL(annotatedNode);
-    if (annotatedNode->is<IR::Declaration_Variable>()) {
+    // variable and struct declarations are fine if they have identical
+    // name annotations, and such name annotations can be synthesized by
+    // p4c before this pass.  Ignore them.
+    if (annotatedNode->is<IR::Declaration_Variable>() ||
+	annotatedNode->is<IR::Type_Struct>()) {
         return annotation;
     }
     bool foundDuplicate = false;

@@ -83,6 +83,8 @@ std::pair<const IR::P4Parser *, const IR::P4Parser *> loadExample(
     const char *argv = "./gtestp4c";
     options.process(1, (char *const *)&argv);
     options.langVersion = langVersion;
+    options.excludeFrontendPasses = true;
+    options.passesToExcludeFrontend.push_back(cstring("DuplicateHierarchicalNameCheck"));
     const IR::P4Program *program = load_model(file, options);
     if (!program) return std::make_pair(nullptr, nullptr);
     return rewriteParser(program, options);
