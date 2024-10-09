@@ -42,7 +42,7 @@ const IR::Node *DuplicateHierarchicalNameCheck::postorder(IR::Annotation *annota
     // name annotations, and such name annotations can be synthesized by
     // p4c before this pass.  Ignore them.
     if (annotatedNode->is<IR::Declaration_Variable>() ||
-	annotatedNode->is<IR::Type_Struct>()) {
+        annotatedNode->is<IR::Type_Struct>()) {
         return annotation;
     }
     bool foundDuplicate = false;
