@@ -31,13 +31,12 @@ namespace P4 {
  * in this duplicate check.
  *
  * See also the pass HierarchicalNames, on which the implementation of
- * this pass is based.
+ * this pass was based.
  *
- * This pass should be run before LocalizeAllActions, because that
- * pass can create actions with duplicate names, by design, that were
- * not created by the P4 developer, but generated internally by the
- * compiler.  We should not issue an error if that pass creates
- * duplicate hierarchical names.
+ * This pass should be run before pass LocalizeAllActions, because
+ * LocalizeAllActions can create actions with duplicate names, by
+ * design, that were not created by the P4 developer.  We should not
+ * issue an error if that pass creates duplicate hierarchical names.
  */
 class DuplicateHierarchicalNameCheck : public Transform {
     std::vector<cstring> stack;
