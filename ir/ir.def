@@ -176,6 +176,7 @@ class Type_Error : ISimpleNamespace, Type_Declaration {
         return members.getDeclaration(name); }
     IDeclaration getDeclByName(std::string_view name) const override {
         return members.getDeclaration(name); }
+    int width_bits() const override { return 0; }
     validate{ members.check_null(); }
 }
 
