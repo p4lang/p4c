@@ -378,7 +378,7 @@ or member.
 
 Before action execution, following source code will be generated (and some additional comments to it) for table lookup,
 which has implementation `ActionSelector`:
-```c
+``` c
 struct ingress_as_value * as_value = NULL;  // pointer to an action data
 u32 as_action_ref = value->ingress_as_ref;  // value->ingress_as_ref is entry from table (reference)
 u8 as_group_state = 0;                      // which map contains action data
