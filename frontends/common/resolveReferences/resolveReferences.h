@@ -172,15 +172,15 @@ class ResolveReferences : public Inspector, private ResolutionContext {
     void checkShadowing(const IR::INamespace *ns) const;
 };
 
-class CheckShadow : public PassManager {
+class CheckShadowing : public PassManager {
     ReferenceMap refMap;
 
  public:
-    CheckShadow() {
+    CheckShadowing() {
         refMap.setIsV1(P4CContext::get().options().isv1());
 
         addPasses({new ResolveReferences(&refMap, /* checkShadow */ true)});
-        setName("CheckShadow");
+        setName("CheckShadowing");
     }
 };
 

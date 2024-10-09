@@ -165,21 +165,28 @@ class HandleValidityHeaderUnion : public Transform {
 };
 
 class RemoveUnusedHUDeclarations : public Transform {
-    UsedDeclSet used;
+    const UsedDeclSet &used;
 
  public:
-    Visitor::profile_t init_apply(const IR::Node *node) override {
-        auto rv = Transform::init_apply(node);
-
-        CollectUsedDeclarations collector(used);
-        node->apply(collector);
-
-        return rv;
-    }
+    explicit RemoveUnusedHUDeclarations(const UsedDeclSet &used) : used(used) {}
 
     const IR::Node *preorder(IR::Type_HeaderUnion *type) override {
         if (!used.isUsed(getOriginal<IR::IDeclaration>())) return nullptr;
         return type;
+    }
+};
+
+class RemoveAllUnusedHUDDeclarations : public PassManager {
+    UsedDeclSet used;
+
+ public:
+    RemoveAllUnusedHUDDeclarations()
+        : PassManager({
+              new CollectUsedDeclarations(used),
+              new RemoveUnusedHUDeclarations(used),
+          }) {
+        setName("RemoveAllUnusedHUDDeclarations");
+        setStopOnError(true);
     }
 };
 
@@ -206,7 +213,7 @@ class FlattenHeaderUnion : public PassManager {
         passes.push_back(new P4::TypeChecking(refMap, typeMap));
         passes.push_back(new DoFlattenHeaderUnion(refMap, typeMap));
         passes.push_back(new P4::RemoveAllUnusedDeclarations(RemoveUnusedPolicy()));
-        passes.push_back(new P4::RemoveUnusedHUDeclarations());
+        passes.push_back(new P4::RemoveAllUnusedHUDDeclarations());
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.push_back(new P4::TypeChecking(nullptr, typeMap));
         passes.push_back(new P4::RemoveParserIfs(typeMap));

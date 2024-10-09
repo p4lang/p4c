@@ -20,7 +20,6 @@ limitations under the License.
 #include "../common/resolveReferences/resolveReferences.h"
 #include "ir/ir.h"
 #include "ir/pass_manager.h"
-#include "lib/iterator_range.h"
 #include "lib/stringify.h"
 
 namespace P4 {
@@ -38,14 +37,12 @@ class UsedDeclSet : public IHasDbPrint {
 
     [[nodiscard]] auto end() const { return usedDecls.end(); }
 
-    [[nodiscard]] auto used() const { return Util::iterator_range(usedDecls); }
-
     void clear() { usedDecls.clear(); }
 
     void dbprint(std::ostream &cout) const override;
 
     /// @returns @true if @p decl is used in the program.
-    bool isUsed(const IR::IDeclaration *decl) const { return usedDecls.count(decl) > 0; }
+    bool isUsed(const IR::IDeclaration *decl) const { return usedDecls.contains(decl); }
 };
 
 class RemoveUnusedPolicy {
@@ -56,6 +53,7 @@ class RemoveUnusedPolicy {
                                                                       bool warn = false) const;
 };
 
+/// @brief Collects all used declarations into @used set
 class CollectUsedDeclarations : public Inspector, ResolutionContext {
     UsedDeclSet &used;
 
@@ -102,9 +100,13 @@ class RemoveUnusedDeclarations : public Transform, ResolutionContext {
  protected:
     const UsedDeclSet &used;
 
-    /** If not null, logs the following unused elements in @warn:
+    /** If not null, logs the following unused elements in @warned:
      *  - unused IR::P4Table nodes
      *  - unused IR::Declaration_Instance nodes
+     *
+     *  Unused extern instances are not removed but may still trigger
+     *  warnings.  The @warned set keeps track of warnings emitted in
+     *  previous iterations to avoid emitting duplicate warnings.
      */
     std::set<const IR::Node *> *warned;
 
@@ -191,9 +193,6 @@ class RemoveAllUnusedDeclarations : public PassRepeated {
     explicit RemoveAllUnusedDeclarations(const RemoveUnusedPolicy &policy, bool warn = false)
         : PassManager({new CollectUsedDeclarations(used),
                        policy.getRemoveUnusedDeclarationsPass(used, warn)}) {
-        // Unused extern instances are not removed but may still trigger
-        // warnings.  The @warned set keeps track of warnings emitted in
-        // previous iterations to avoid emitting duplicate warnings.
         setName("RemoveAllUnusedDeclarations");
         setStopOnError(true);
     }

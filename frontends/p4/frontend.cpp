@@ -165,7 +165,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new ValidateParsedProgram(),
         // Synthesize some built-in constructs
         new CreateBuiltins(),
-        new CheckShadow(),
+        new CheckShadowing(),
         // First pass of constant folding, before types are known --
         // may be needed to compute types.
         new ConstantFolding(constantFoldingPolicy),
@@ -260,7 +260,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     passes.addPasses({
         // Check for shadowing after all inlining passes. We disable this
         // check during inlining since it significantly slows compilation.
-        new CheckShadow(),
+        new CheckShadowing(),
         new HierarchicalNames(),
         new FrontEndLast(),
     });

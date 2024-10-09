@@ -114,7 +114,7 @@ class Evaluator final : public Inspector, public IHasBlock {
 /// high-level constructs.
 class EvaluatorPass final : public PassManager, public IHasBlock {
     P4::Evaluator *evaluator;
-    ReferenceMap selfRefMap;
+    std::unique_ptr<ReferenceMap> selfRefMap;
 
  public:
     IR::ToplevelBlock *getToplevelBlock() const override { return evaluator->getToplevelBlock(); }
