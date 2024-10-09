@@ -21,7 +21,6 @@ limitations under the License.
 #include <unordered_map>
 
 #include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 #include "lib/log.h"

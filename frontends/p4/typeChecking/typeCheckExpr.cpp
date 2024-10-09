@@ -1452,6 +1452,78 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Slice *expression) {
     return expression;
 }
 
+const IR::Node *TypeInferenceBase::postorder(const IR::PlusSlice *expression) {
+    if (done()) return expression;
+    const IR::Type *type = getType(expression->e0);
+    if (type == nullptr) return expression;
+
+    if (auto se = type->to<IR::Type_SerEnum>()) type = getTypeType(se->type);
+
+    if (!type->is<IR::Type_Bits>()) {
+        typeError("%1%: bit extraction only defined for bit<> types", expression);
+        return expression;
+    }
+
+    IR::PlusSlice *cloned = nullptr;
+    auto e1type = getType(expression->e1);
+    if (e1type && e1type->is<IR::Type_SerEnum>()) {
+        auto ei = EnumInstance::resolve(expression->e1, typeMap);
+        CHECK_NULL(ei);
+        if (auto sei = ei->to<SerEnumInstance>(); sei && expression->e1 != sei->value) {
+            cloned = expression->clone();
+            cloned->e1 = sei->value;
+        }
+    }
+    auto e2type = getType(expression->e2);
+    if (e2type && e2type->is<IR::Type_SerEnum>()) {
+        auto ei = EnumInstance::resolve(expression->e2, typeMap);
+        CHECK_NULL(ei);
+        auto sei = ei->to<SerEnumInstance>();
+        if (sei == nullptr) {
+            typeError("%1%: slice bit index values must be constants", expression->e2);
+            return expression;
+        }
+
+        if (expression->e1 != sei->value) {
+            cloned = (cloned ? cloned : expression->clone());
+            cloned->e2 = sei->value;
+        }
+    }
+    if (cloned) expression = cloned;
+
+    if (!expression->e2->is<IR::Constant>()) {
+        typeError("%1%: slice bit index values must be constants", expression->e2);
+        return expression;
+    }
+    auto width = expression->e2->checkedTo<IR::Constant>();
+    if (!width->fitsInt()) {
+        typeError("%1%: width too large", width);
+        return expression;
+    }
+    int w = width->asInt();
+    if (w < 0) {
+        typeError("%1%: negative width %2%", expression, width);
+        return expression;
+    }
+
+    const IR::Type *resultType = IR::Type_Bits::get(type->srcInfo, w, false);
+    resultType = canonicalize(resultType);
+    if (resultType == nullptr) return expression;
+    setType(getOriginal(), resultType);
+    setType(expression, resultType);
+    if (isLeftValue(expression->e0)) {
+        setLeftValue(expression);
+        setLeftValue(getOriginal<IR::Expression>());
+    }
+    if (isCompileTimeConstant(expression->e0) && isCompileTimeConstant(expression->e1)) {
+        auto result = constantFold(expression);
+        setCompileTimeConstant(result);
+        setCompileTimeConstant(getOriginal<IR::Expression>());
+        return result;
+    }
+    return expression;
+}
+
 const IR::Node *TypeInferenceBase::postorder(const IR::Dots *expression) {
     if (done()) return expression;
     setType(expression, IR::Type_Any::get());
@@ -2085,12 +2157,14 @@ const IR::Node *TypeInferenceBase::postorder(const IR::MethodCallExpression *exp
             const IR::Type *baseReturnType = returnType;
             if (const auto *sc = returnType->to<IR::Type_SpecializedCanonical>())
                 baseReturnType = sc->baseType;
-            const bool factoryOrStaticAssert =
-                baseReturnType->is<IR::Type_Extern>() || ef->method->name == "static_assert";
-            if (constArgs && factoryOrStaticAssert) {
+            const bool factoryOrStaticAssertOrPureAnnot =
+                baseReturnType->is<IR::Type_Extern>() || ef->method->name == "static_assert" ||
+                ef->method->getAnnotation(IR::Annotation::pureAnnotation);
+            if (constArgs && factoryOrStaticAssertOrPureAnnot) {
                 // factory extern function calls (those that return extern objects) with constant
                 // args are compile-time constants.
-                // The result of a static_assert call is also a compile-time constant.
+                // The result of a static_assert call is also a compile-time constant
+                // Pure functions marked with @pure annotation is a compiled-time constant
                 setCompileTimeConstant(expression);
                 setCompileTimeConstant(getOriginal<IR::Expression>());
             }

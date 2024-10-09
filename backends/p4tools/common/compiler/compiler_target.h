@@ -2,7 +2,6 @@
 #define BACKENDS_P4TOOLS_COMMON_COMPILER_COMPILER_TARGET_H_
 
 #include <string>
-#include <vector>
 
 #include "backends/p4tools/common/compiler/compiler_result.h"
 #include "backends/p4tools/common/compiler/context.h"
@@ -19,15 +18,6 @@ namespace P4::P4Tools {
 /// Encapsulates the details of invoking the P4 compiler for a target device and architecture.
 class CompilerTarget : public Target {
  public:
-    /// @returns a new compilation context for the compiler.
-    static ICompileContext *makeContext(std::string_view toolName);
-
-    /// Initializes the P4 compiler with the given compiler-specific command-line arguments.
-    ///
-    /// @returns any unprocessed arguments, or nullptr if there was an error.
-    static std::vector<const char *> *initCompiler(std::string_view toolName, int argc,
-                                                   char **argv);
-
     /// Runs the P4 compiler to produce an IR and various other kinds of information on the input
     /// program.
     ///
@@ -49,17 +39,9 @@ class CompilerTarget : public Target {
                                              std::string_view toolName, const IR::P4Program *);
 
  protected:
-    /// @see @makeContext.
-    [[nodiscard]] virtual ICompileContext *makeContextImpl() const;
-
     /// @see runCompiler.
     virtual CompilerResultOrError runCompilerImpl(const CompilerOptions &options,
                                                   const IR::P4Program *) const;
-
-    /// This implementation just forwards the given arguments to the compiler.
-    ///
-    /// @see @initCompiler.
-    virtual std::vector<const char *> *initCompilerImpl(int argc, char **argv) const;
 
     /// Parses the P4 program specified on the command line.
     ///

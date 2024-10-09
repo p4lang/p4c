@@ -26,6 +26,7 @@ limitations under the License.
 #include "dpdkMetadata.h"
 #include "dpdkProgram.h"
 #include "frontends/p4/moveDeclarations.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/dbprint.h"
 #include "ir/ir.h"
 #include "lib/stringify.h"
@@ -54,20 +55,19 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new DpdkArchFirst(),
         new ValidateOperandSize(),
         new CollectLocalStructAndFlatten(refMap, typeMap),
-        new P4::EliminateTypedef(refMap, typeMap),
-        new P4::ClearTypeMap(typeMap),
+        new P4::EliminateTypedef(typeMap),
         new P4::TypeChecking(refMap, typeMap),
         new ByteAlignment(typeMap, refMap, &structure),
-        new P4::SimplifyKey(
-            refMap, typeMap,
-            new P4::OrPolicy(new P4::IsValid(refMap, typeMap), new P4::IsLikeLeftValue())),
+        new P4::SimplifyKey(typeMap,
+                            new P4::OrPolicy(new P4::IsValid(typeMap), new P4::IsLikeLeftValue())),
         new P4::TypeChecking(refMap, typeMap),
         /// TBD: implement dpdk lowering passes instead of reusing bmv2's lowering pass.
         new PassRepeated({new BMV2::LowerExpressions(typeMap, DPDK_MAX_SHIFT_AMOUNT)}, 2),
-        new P4::RemoveComplexExpressions(refMap, typeMap,
+        new P4::RemoveComplexExpressions(typeMap,
                                          new DPDK::ProcessControls(&structure.pipeline_controls)),
+        new TypeChecking(refMap, typeMap),  // DismantleMuxExpressions wants fresh refmap
         new DismantleMuxExpressions(typeMap, refMap),
-        new P4::ConstantFolding(refMap, typeMap, false),
+        new P4::ConstantFolding(typeMap, false),
         new EliminateHeaderCopy(refMap, typeMap),
         new P4::TypeChecking(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap, P4::RemoveUnusedPolicy()),
@@ -111,7 +111,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new DpdkAddPseudoHeader(refMap, typeMap, is_all_args_header_fields),
         new CollectProgramStructure(refMap, typeMap, &structure),
         new InspectDpdkProgram(refMap, typeMap, &structure),
-        new CheckExternInvocation(refMap, typeMap, &structure),
+        new CheckExternInvocation(typeMap, &structure),
         new TypeWidthValidator(),
         new DpdkArchLast(),
         new VisitFunctor([this, genContextJson] {

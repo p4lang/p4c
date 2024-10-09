@@ -435,7 +435,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
 
         // If the parameter is out and the argument is a slice then
         // also use a temporary; makes the job of def-use analysis easier
-        if (arg->expression->is<IR::Slice>() && p->hasOut()) {
+        if (arg->expression->is<IR::AbstractSlice>() && p->hasOut()) {
             LOG3("Using temporary for " << dbp(mce) << " param " << dbp(p)
                                         << " since it is an out slice");
             useTemporary.emplace(p);

@@ -16,6 +16,9 @@ limitations under the License.
 
 #include "simplifyParsers.h"
 
+#include "ir/pass_manager.h"
+#include "parserCallGraph.h"
+
 namespace P4 {
 
 namespace {
@@ -185,8 +188,8 @@ class SimplifyParser : public PassManager {
     ParserCallGraph transitions;
 
  public:
-    explicit SimplifyParser(ReferenceMap *refMap) : transitions("transitions") {
-        passes.push_back(new ComputeParserCG(refMap, &transitions));
+    SimplifyParser() : transitions("transitions") {
+        passes.push_back(new ComputeParserCG(&transitions));
         passes.push_back(new RemoveUnreachableStates(&transitions));
         passes.push_back(new CollapseChains(&transitions));
         setName("SimplifyParser");
@@ -195,10 +198,10 @@ class SimplifyParser : public PassManager {
 
 }  // namespace
 
-const IR::Node *DoSimplifyParsers::preorder(IR::P4Parser *parser) {
-    SimplifyParser simpl(refMap);
+const IR::Node *SimplifyParsers::preorder(IR::P4Parser *parser) {
+    SimplifyParser simpl;
     simpl.setCalledBy(this);
-    return parser->apply(simpl);
+    return parser->apply(simpl, getContext());
 }
 
 }  // namespace P4

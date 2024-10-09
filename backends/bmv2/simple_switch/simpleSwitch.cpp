@@ -23,8 +23,8 @@ limitations under the License.
 
 #include "backends/bmv2/common/annotations.h"
 #include "backends/bmv2/simple_switch/options.h"
+#include "frontends/p4-14/fromv1.0/v1model.h"
 #include "frontends/p4/cloner.h"
-#include "frontends/p4/fromv1.0/v1model.h"
 #include "lib/json.h"
 #include "midend/flattenLogMsg.h"
 
@@ -1178,13 +1178,12 @@ void SimpleSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::TypeChecking(refMap, typeMap),
         new P4::SimplifyControlFlow(typeMap),
         new LowerExpressions(typeMap),
-        new P4::ConstantFolding(refMap, typeMap, false),
+        new P4::ConstantFolding(typeMap, false),
         new P4::TypeChecking(refMap, typeMap),
-        new RemoveComplexExpressions(refMap, typeMap,
-                                     new ProcessControls(&structure->pipeline_controls)),
+        new RemoveComplexExpressions(typeMap, new ProcessControls(&structure->pipeline_controls)),
         new P4::SimplifyControlFlow(typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap, P4::RemoveUnusedPolicy()),
-        new P4::FlattenLogMsg(refMap, typeMap),
+        new P4::FlattenLogMsg(typeMap),
         // Converts the DAG into a TREE (at least for expressions)
         // This is important later for conversion to JSON.
         new P4::CloneExpressions(),

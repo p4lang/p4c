@@ -17,7 +17,6 @@ limitations under the License.
 #ifndef FRONTENDS_P4_REMOVERETURNS_H_
 #define FRONTENDS_P4_REMOVERETURNS_H_
 
-#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/ternaryBool.h"
 #include "frontends/p4/typeChecking/typeChecker.h"

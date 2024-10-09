@@ -64,14 +64,8 @@ const Expression *Expression::evaluate(const Model &model, bool doComplete) cons
 }
 
 void Expression::print(std::ostream &os) const {
-    // Convert the assignment to a string and strip any new lines.
-    // TODO: Maybe there is a better way to format newlines?
-    std::stringstream exprStream;
-    value->dbprint(exprStream);
-    auto expString = exprStream.str();
-    expString.erase(std::remove(expString.begin(), expString.end(), '\n'), expString.cend());
     Generic::print(os);
-    os << ": " << expString;
+    os << ": " << value;
 }
 
 /* =============================================================================================
@@ -82,15 +76,10 @@ MethodCall::MethodCall(const IR::MethodCallExpression *call) : call(call) {}
 
 void MethodCall::print(std::ostream &os) const {
     const auto &srcInfo = call->getSourceInfo();
-    // Convert the method call to a string and strip any new lines.
-    std::stringstream callStream;
-    call->dbprint(callStream);
-    auto callString = callStream.str();
-    callString.erase(std::remove(callString.begin(), callString.end(), '\n'), callString.cend());
     if (srcInfo.isValid()) {
-        os << "[MethodCall]: " << callString;
+        os << "[MethodCall]: " << call;
     } else {
-        os << "[P4Testgen MethodCall]: " << callString;
+        os << "[P4Testgen MethodCall]: " << call;
     }
 }
 
@@ -137,7 +126,7 @@ void IfStatementCondition::print(std::ostream &os) const {
     if (srcInfo.isValid()) {
         os << "[If Statement]: " << srcInfo.toBriefSourceFragment();
     } else {
-        os << "[P4Testgen If Statement]: " << preEvalCond;
+        os << "[P4Testgen If Statement]:";
     }
     os << " Condition: " << preEvalCond;
     const auto *boolResult = postEvalCond->checkedTo<IR::BoolLiteral>()->value ? "true" : "false";
@@ -184,19 +173,12 @@ const AssignmentStatement *AssignmentStatement::evaluate(const Model &model,
 
 void AssignmentStatement::print(std::ostream &os) const {
     const auto &srcInfo = stmt.getSourceInfo();
-    // Convert the assignment to a string and strip any new lines.
-    // TODO: Maybe there is a better way to format newlines?
-    std::stringstream assignStream;
-    stmt.dbprint(assignStream);
-    auto assignString = assignStream.str();
-    assignString.erase(std::remove(assignString.begin(), assignString.end(), '\n'),
-                       assignString.cend());
     if (srcInfo.isValid()) {
         auto fragment = srcInfo.toSourceFragment(false);
         fragment = fragment.trim();
-        os << "[AssignmentStatement]: " << fragment << "| Computed: " << assignString;
+        os << "[AssignmentStatement]: " << fragment << "| Computed: " << stmt;
     } else {
-        os << "[P4Testgen AssignmentStatement]: " << assignString;
+        os << "[P4Testgen AssignmentStatement]: " << stmt;
     }
 }
 
@@ -295,16 +277,7 @@ const Emit *Emit::evaluate(const Model &model, bool doComplete) const {
         model.evaluateStructExpr(emitHeader, doComplete)->checkedTo<IR::HeaderExpression>());
 }
 
-void Emit::print(std::ostream &os) const {
-    // Convert the header expression to a string and strip any new lines.
-    // TODO: Maybe there is a better way to format newlines?
-    std::stringstream assignStream;
-    emitHeader->dbprint(assignStream);
-    auto headerString = assignStream.str();
-    headerString.erase(std::remove(headerString.begin(), headerString.end(), '\n'),
-                       headerString.cend());
-    os << "[Emit]: " << headerString;
-}
+void Emit::print(std::ostream &os) const { os << "[Emit]: " << emitHeader; }
 
 /* =============================================================================================
  *   Packet

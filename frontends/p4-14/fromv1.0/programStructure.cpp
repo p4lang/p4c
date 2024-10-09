@@ -21,7 +21,6 @@ limitations under the License.
 
 #include "converters.h"
 #include "frontends/common/options.h"
-#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/reservedWords.h"
 #include "frontends/p4/tableKeyNames.h"

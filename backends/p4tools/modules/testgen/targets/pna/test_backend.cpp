@@ -38,7 +38,7 @@ PnaTestBackend::PnaTestBackend(const ProgramInfo &programInfo,
     : TestBackEnd(programInfo, testBackendConfiguration, symbex) {
     cstring testBackendString = TestgenOptions::get().testBackend;
     if (testBackendString.isNullOrEmpty()) {
-        ::P4::error(
+        error(
             "No test back end provided. Please provide a test back end using the --test-backend "
             "parameter. Supported back ends are %1%.",
             Utils::containerToString(SUPPORTED_BACKENDS));

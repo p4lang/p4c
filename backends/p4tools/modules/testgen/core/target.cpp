@@ -3,6 +3,7 @@
 #include <string>
 
 #include "backends/p4tools/common/compiler/compiler_target.h"
+#include "backends/p4tools/common/compiler/context.h"
 #include "backends/p4tools/common/core/target.h"
 #include "ir/declaration.h"
 #include "ir/ir.h"
@@ -86,6 +87,10 @@ CompilerResultOrError TestgenTarget::runCompilerImpl(const CompilerOptions &opti
 
     return {
         *new TestgenCompilerResult(CompilerResult(*program), coverage.getCoverableNodes(), dcg)};
+}
+
+ICompileContext *TestgenTarget::makeContext() const {
+    return new P4Tools::CompileContext<TestgenOptions>();
 }
 
 }  // namespace P4::P4Tools::P4Testgen

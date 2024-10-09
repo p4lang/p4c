@@ -325,24 +325,48 @@ class TypeNameExpression : Expression {
                          "%1% unexpected type in TypeNameExpression", typeName); }
 }
 
-class Slice : Operation_Ternary {
+abstract AbstractSlice : Operation_Ternary {
+    virtual unsigned getH() const = 0;
+    virtual unsigned getL() const = 0;
+}
+
+class Slice : AbstractSlice {
     precedence = DBPrint::Prec_Postfix;
     stringOp = "[:]";
     toString{ return absl::StrCat(e0->toString().string_view(),
                                   "[", e1->toString().string_view(), ":",
                                        e2->toString().string_view(), "]"); }
     // After type checking e1 and e2 will be constants
-    unsigned getH() const { return e1->to<IR::Constant>()->asUnsigned(); }
-    unsigned getL() const { return e2->to<IR::Constant>()->asUnsigned(); }
+    unsigned getH() const override { return e1->checkedTo<IR::Constant>()->asUnsigned(); }
+    unsigned getL() const override { return e2->checkedTo<IR::Constant>()->asUnsigned(); }
     Slice(Expression a, int hi, int lo)
-    : Operation_Ternary(IR::Type::Bits::get(hi-lo+1), a, new Constant(hi), new Constant(lo)) {}
+    : AbstractSlice(IR::Type::Bits::get(hi-lo+1), a, new Constant(hi), new Constant(lo)) {}
     Slice(Util::SourceInfo si, Expression a, int hi, int lo)
-    : Operation_Ternary(si, IR::Type::Bits::get(hi-lo+1), a, new Constant(hi), new Constant(lo)) {}
+    : AbstractSlice(si, IR::Type::Bits::get(hi-lo+1), a, new Constant(hi), new Constant(lo)) {}
     Slice {
         if (type->is<Type::Unknown>() && e1 && e1->is<Constant>() && e2 && e2->is<Constant>())
             type = IR::Type::Bits::get(getH() - getL() + 1); }
     // make a slice, folding slices on slices and slices on constants automatically
     static Expression make(Expression a, unsigned hi, unsigned lo);
+}
+
+class PlusSlice : AbstractSlice {
+    precedence = DBPrint::Prec_Postfix;
+    stringOp = "[+:]";
+    toString{ return absl::StrCat(e0->toString().string_view(),
+                                  "[", e1->toString().string_view(), "+:",
+                                       e2->toString().string_view(), "]"); }
+    unsigned getH() const override {
+        BUG_CHECK(e1->is<IR::Constant>(), "non-const PlusSlice not handled");
+        return e1->to<IR::Constant>()->asUnsigned() + e2->checkedTo<IR::Constant>()->asUnsigned() - 1; }
+    unsigned getL() const override {
+        BUG_CHECK(e1->is<IR::Constant>(), "non-const PlusSlice not handled");
+        return e1->to<IR::Constant>()->asUnsigned(); }
+    PlusSlice(Expression a, Expression lo, int width)
+    : AbstractSlice(IR::Type::Bits::get(width), a, lo, new Constant(width)) {}
+    PlusSlice {
+        if (type->is<Type::Unknown>() && e2 && e2->is<Constant>())
+            type = IR::Type::Bits::get(e2->to<IR::Constant>()->asUnsigned()); }
 }
 
 class Member : Operation_Unary {

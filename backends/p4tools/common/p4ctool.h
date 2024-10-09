@@ -36,15 +36,21 @@ class AbstractP4cTool {
         // Register supported compiler targets.
         registerTarget();
 
+        // Initialize the target and the context.
+        auto context = Target::initializeTarget(toolName, args);
+        if (!context.has_value()) {
+            return EXIT_FAILURE;
+        }
+        AutoCompileContext autoContext(context.value());
+        Options &toolOptions = dynamic_cast<CompileContext<Options> *>(context.value())->options();
+
         // Process command-line options.
-        auto &toolOptions = Options::get();
-        auto compileContext = toolOptions.process(args);
-        if (!compileContext) {
+        auto result = toolOptions.process(args);
+        if (result != EXIT_SUCCESS) {
             return EXIT_FAILURE;
         }
 
         // Set up the compilation context.
-        AutoCompileContext autoContext(*compileContext);
         // If not explicitly disabled, print basic information to standard output.
         if (!toolOptions.disableInformationLogging) {
             enableInformationLogging();
@@ -56,8 +62,7 @@ class AbstractP4cTool {
         }
 
         // Run the compiler to get an IR and invoke the tool.
-        const auto compilerResult = P4Tools::CompilerTarget::runCompiler(
-            CompileContext<CompilerOptions>::get().options(), toolName);
+        const auto compilerResult = P4Tools::CompilerTarget::runCompiler(toolOptions, toolName);
         if (!compilerResult.has_value()) {
             return EXIT_FAILURE;
         }

@@ -28,13 +28,11 @@ namespace P4 {
  * Order the arguments of a call in the order that the parameters appear.
  * This only works if all optional parameters are at the end.
  */
-class DoOrderArguments : public Transform {
-    ReferenceMap *refMap;
+class DoOrderArguments : public Transform, public ResolutionContext {
     TypeMap *typeMap;
 
  public:
-    DoOrderArguments(ReferenceMap *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
-        CHECK_NULL(refMap);
+    explicit DoOrderArguments(TypeMap *typeMap) : typeMap(typeMap) {
         CHECK_NULL(typeMap);
         setName("DoOrderArguments");
     }
@@ -46,10 +44,10 @@ class DoOrderArguments : public Transform {
 
 class OrderArguments : public PassManager {
  public:
-    OrderArguments(ReferenceMap *refMap, TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
-        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
+    explicit OrderArguments(TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
+        if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap);
         passes.push_back(typeChecking);
-        passes.push_back(new DoOrderArguments(refMap, typeMap));
+        passes.push_back(new DoOrderArguments(typeMap));
         setName("OrderArguments");
     }
 };

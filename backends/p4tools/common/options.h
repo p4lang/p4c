@@ -6,16 +6,15 @@
 #include <tuple>
 #include <vector>
 
+#include "frontends/common/options.h"
 #include "lib/compile_context.h"
-#include "lib/cstring.h"
-#include "lib/options.h"
 
 namespace P4::P4Tools {
 
 /// Encapsulates and processes command-line options for a compiler-based tool. Implementations
 /// should use the singleton pattern and define a static get() for obtaining the singleton
 /// instance.
-class AbstractP4cToolOptions : protected Util::Options {
+class AbstractP4cToolOptions : public CompilerOptions {
  private:
     /// The name of the tool associated with these options.
     std::string _toolName;
@@ -30,8 +29,8 @@ class AbstractP4cToolOptions : protected Util::Options {
 
     /// Processes options.
     ///
-    /// @returns a compilation context on success, std::nullopt on error.
-    std::optional<ICompileContext *> process(const std::vector<const char *> &args);
+    /// @returns an EXIT_SUCCESS context on success, EXIT_FAILURE on error.
+    int process(const std::vector<const char *> &args);
 
     /// Command-line arguments to be sent to the compiler. Populated by @process.
     std::vector<const char *> compilerArgs;

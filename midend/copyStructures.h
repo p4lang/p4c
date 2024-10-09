@@ -92,16 +92,21 @@ class DoCopyStructures : public Transform {
  * @post no structure assignment refers on the RHS to fields that appear in the LHS.
  */
 class RemoveAliases : public Transform {
-    ReferenceMap *refMap;
+    MinimalNameGenerator nameGen;
     TypeMap *typeMap;
 
     IR::IndexedVector<IR::Declaration> declarations;
 
  public:
-    RemoveAliases(ReferenceMap *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
-        CHECK_NULL(refMap);
+    explicit RemoveAliases(TypeMap *typeMap) : typeMap(typeMap) {
         CHECK_NULL(typeMap);
         setName("RemoveAliases");
+    }
+    Visitor::profile_t init_apply(const IR::Node *node) override {
+        auto rv = Transform::init_apply(node);
+        node->apply(nameGen);
+
+        return rv;
     }
 
     const IR::Node *postorder(IR::AssignmentStatement *statement) override;
@@ -111,17 +116,13 @@ class RemoveAliases : public Transform {
 
 class CopyStructures : public PassRepeated {
  public:
-    explicit CopyStructures(ReferenceMap *refMap, TypeMap *typeMap, bool errorOnMethodCall = true,
-                            bool copyHeaders = false, TypeChecking *typeChecking = nullptr)
-        : PassManager({}) {
-        CHECK_NULL(refMap);
+    explicit CopyStructures(TypeMap *typeMap, bool errorOnMethodCall = true,
+                            bool copyHeaders = false, TypeChecking *typeChecking = nullptr) {
         CHECK_NULL(typeMap);
         setName("CopyStructures");
-        if (typeChecking == nullptr) {
-            typeChecking = new TypeChecking(refMap, typeMap);
-        }
+        if (typeChecking == nullptr) typeChecking = new TypeChecking(nullptr, typeMap);
         passes.emplace_back(typeChecking);
-        passes.emplace_back(new RemoveAliases(refMap, typeMap));
+        passes.emplace_back(new RemoveAliases(typeMap));
         passes.emplace_back(typeChecking);
         passes.emplace_back(new DoCopyStructures(typeMap, errorOnMethodCall, copyHeaders));
     }

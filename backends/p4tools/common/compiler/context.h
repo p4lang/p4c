@@ -2,7 +2,7 @@
 #define BACKENDS_P4TOOLS_COMMON_COMPILER_CONTEXT_H_
 
 #include "backends/p4tools/common/compiler/configuration.h"
-#include "frontends/common/options.h"
+#include "frontends/common/parser_options.h"
 
 namespace P4::P4Tools {
 
@@ -18,17 +18,17 @@ class CompileContext : public virtual P4CContext {
 
     template <typename OptionsDerivedType>
     explicit CompileContext(CompileContext<OptionsDerivedType> &context)
-        : optionsInstance(context.options()) {}
+        : _optionsInstance(context.options()) {}
 
     /// @return the compiler options for this compilation context.
-    OptionsType &options() override { return optionsInstance; }
+    OptionsType &options() override { return _optionsInstance; }
 
  protected:
     const CompilerConfiguration &getConfigImpl() override { return CompilerConfiguration::get(); }
 
  private:
     /// The compiler options for this compilation context.
-    OptionsType optionsInstance;
+    OptionsType _optionsInstance;
 };
 
 }  // namespace P4::P4Tools

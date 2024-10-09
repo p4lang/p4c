@@ -491,7 +491,7 @@ bool ExprStepper::preorder(const IR::StructExpression *structExpression) {
     return stepSymbolicValue(structExpression);
 }
 
-bool ExprStepper::preorder(const IR::Slice *slice) {
+bool ExprStepper::preorder(const IR::AbstractSlice *slice) {
     logStep(slice);
 
     if (!SymbolicEnv::isSymbolicValue(slice->e0)) {

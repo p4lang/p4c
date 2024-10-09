@@ -28,7 +28,6 @@ namespace P4 {
  */
 class RemoveComplexComparisons : public Transform {
  protected:
-    ReferenceMap *refMap;
     TypeMap *typeMap;
 
     /// Expands left == right into sub-field comparisons
@@ -37,9 +36,7 @@ class RemoveComplexComparisons : public Transform {
                                   const IR::Expression *right);
 
  public:
-    RemoveComplexComparisons(ReferenceMap *refMap, TypeMap *typeMap)
-        : refMap(refMap), typeMap(typeMap) {
-        CHECK_NULL(refMap);
+    explicit RemoveComplexComparisons(TypeMap *typeMap) : typeMap(typeMap) {
         CHECK_NULL(typeMap);
         setName("RemoveComplexComparisons");
     }
@@ -48,11 +45,10 @@ class RemoveComplexComparisons : public Transform {
 
 class SimplifyComparisons final : public PassManager {
  public:
-    SimplifyComparisons(ReferenceMap *refMap, TypeMap *typeMap,
-                        TypeChecking *typeChecking = nullptr) {
-        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
+    explicit SimplifyComparisons(TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
+        if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap);
         passes.push_back(typeChecking);
-        passes.push_back(new RemoveComplexComparisons(refMap, typeMap));
+        passes.push_back(new RemoveComplexComparisons(typeMap));
         setName("SimplifyComparisons");
     }
 };

@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef MIDEND_CHECKEXTERNINVOCATIONCOMMON_H_
 #define MIDEND_CHECKEXTERNINVOCATIONCOMMON_H_
 
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/methodInstance.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
@@ -24,7 +25,6 @@ limitations under the License.
 
 namespace P4 {
 
-class ReferenceMap;
 class TypeMap;
 
 /**
@@ -38,9 +38,8 @@ class TypeMap;
  * Example class which inherits from this base class can be seen
  * in backends/dpdk/dpdkCheckExternInvocation.h.
  */
-class CheckExternInvocationCommon : public Inspector {
+class CheckExternInvocationCommon : public Inspector, public ResolutionContext {
  protected:
-    ReferenceMap *refMap;
     TypeMap *typeMap;
     std::map<cstring /* extType */, bitvec> pipeConstraints;
 
@@ -149,12 +148,11 @@ class CheckExternInvocationCommon : public Inspector {
         }
     }
 
-    CheckExternInvocationCommon(ReferenceMap *refMap, TypeMap *typeMap)
-        : refMap(refMap), typeMap(typeMap) {}
+    explicit CheckExternInvocationCommon(TypeMap *typeMap) : typeMap(typeMap) {}
 
  public:
     bool preorder(const IR::MethodCallExpression *expr) override {
-        auto mi = MethodInstance::resolve(expr, refMap, typeMap);
+        auto mi = MethodInstance::resolve(expr, this, typeMap);
         if (auto extMethod = mi->to<ExternMethod>()) {
             checkExtern(extMethod, expr);
         } else if (auto extFunction = mi->to<ExternFunction>()) {

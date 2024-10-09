@@ -75,19 +75,25 @@ switch1_case_default: { ... }
 
  */
 class DoEliminateSwitch final : public Transform {
-    ReferenceMap *refMap;
+    MinimalNameGenerator nameGen;
     const TypeMap *typeMap;
     std::vector<const IR::Declaration *> toInsert;
 
  public:
     bool exactNeeded = false;
 
-    DoEliminateSwitch(ReferenceMap *refMap, const TypeMap *typeMap)
-        : refMap(refMap), typeMap(typeMap) {
+    explicit DoEliminateSwitch(const TypeMap *typeMap) : typeMap(typeMap) {
         setName("DoEliminateSwitch");
-        CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
     }
+
+    Visitor::profile_t init_apply(const IR::Node *node) override {
+        auto rv = Transform::init_apply(node);
+        node->apply(nameGen);
+
+        return rv;
+    }
+
     const IR::Node *postorder(IR::SwitchStatement *statement) override;
     const IR::Node *postorder(IR::P4Control *control) override;
     const IR::Node *postorder(IR::P4Program *program) override;
@@ -95,10 +101,10 @@ class DoEliminateSwitch final : public Transform {
 
 class EliminateSwitch final : public PassManager {
  public:
-    EliminateSwitch(ReferenceMap *refMap, TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
-        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
+    EliminateSwitch(TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
+        if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap);
         passes.push_back(typeChecking);
-        passes.push_back(new DoEliminateSwitch(refMap, typeMap));
+        passes.push_back(new DoEliminateSwitch(typeMap));
         passes.push_back(new ClearTypeMap(typeMap));
         setName("EliminateSwitch");
     }

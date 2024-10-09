@@ -32,7 +32,7 @@ using namespace literals;
 static const IR::Expression *lvalue_out(const IR::Expression *exp) {
     if (auto ai = exp->to<IR::ArrayIndex>()) return lvalue_out(ai->left);
     if (auto hsr = exp->to<IR::HeaderStackItemRef>()) return lvalue_out(hsr->base());
-    if (auto sl = exp->to<IR::Slice>()) return lvalue_out(sl->e0);
+    if (auto sl = exp->to<IR::AbstractSlice>()) return lvalue_out(sl->e0);
     if (auto mem = exp->to<IR::Member>()) return lvalue_out(mem->expr);
     return exp;
 }
@@ -85,7 +85,8 @@ class DoLocalCopyPropagation::ElimDead : public Transform {
             if (auto var = ::P4::getref(self.available, dest->path->name)) {
                 if (var->local && !var->live) {
                     LOG3("  removing dead assignment to " << dest->path->name);
-                    if (self.hasSideEffects(as->right)) return makeSideEffectStatement(as->right);
+                    if (self.hasSideEffects(as->right, getChildContext()))
+                        return makeSideEffectStatement(as->right);
                     return nullptr;
                 } else if (var->local) {
                     LOG6("  not removing live assignment to " << dest->path->name);
@@ -101,7 +102,7 @@ class DoLocalCopyPropagation::ElimDead : public Transform {
             /* can't leave ifTrue == nullptr, as that will fail validation -- fold away
              * the if statement as needed */
             if (s->ifFalse == nullptr) {
-                if (!self.hasSideEffects(s->condition)) {
+                if (!self.hasSideEffects(s->condition, getChildContext())) {
                     return nullptr;
                 } else {
                     s->ifTrue = new IR::EmptyStatement(s->srcInfo);
@@ -241,7 +242,7 @@ bool DoLocalCopyPropagation::name_overlap(cstring name1, cstring name2) {
 bool DoLocalCopyPropagation::isHeaderUnionIsValid(const IR::Expression *e) {
     auto mce = e->to<IR::MethodCallExpression>();
     if (!mce) return false;
-    auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
+    auto mi = P4::MethodInstance::resolve(mce, this, typeMap);
     if (auto bm = mi->to<P4::BuiltInMethod>()) {
         if (bm->name == "isValid" && bm->expr->arguments->size() == 0) {
             if (bm->appliedTo->type->is<IR::Type_HeaderUnion>()) return true;
@@ -286,7 +287,7 @@ void DoLocalCopyPropagation::visit_local_decl(const IR::Declaration_Variable *va
     auto &local = available[var->name];
     local.local = true;
     if (var->initializer) {
-        if (!hasSideEffects(var->initializer)) {
+        if (!hasSideEffects(var->initializer, getChildContext())) {
             LOG3("  saving init value for " << var->name << ": " << var->initializer);
             local.val = var->initializer;
         } else {
@@ -416,7 +417,7 @@ IR::AssignmentStatement *DoLocalCopyPropagation::postorder(IR::AssignmentStateme
     // compute) the necessary info for local vars.
     if (!working) return as;
     if (auto dest = expr_name(as->left)) {
-        if (!hasSideEffects(as->right)) {
+        if (!hasSideEffects(as->right, getChildContext())) {
             if (as->right->is<IR::ListExpression>()) {
                 /* FIXME -- List Expressions need to be turned into constructor calls before
                  * we can copyprop them */
@@ -449,7 +450,7 @@ IR::IfStatement *DoLocalCopyPropagation::postorder(IR::IfStatement *s) {
          * the if statement as needed. We do not apply ElimDead as we don't want to
          * modify other statements in the midst of analysis. */
         if (s->ifFalse == nullptr) {
-            if (!hasSideEffects(s->condition)) {
+            if (!hasSideEffects(s->condition, getChildContext())) {
                 return nullptr;
             } else {
                 s->ifTrue = new IR::EmptyStatement();
@@ -506,7 +507,7 @@ bool isAsync(const IR::Vector<IR::Method> methods, cstring callee, cstring calle
 
 IR::MethodCallExpression *DoLocalCopyPropagation::postorder(IR::MethodCallExpression *mc) {
     if (!working) return mc;
-    auto *mi = MethodInstance::resolve(mc, refMap, typeMap, true);
+    auto *mi = MethodInstance::resolve(mc, this, typeMap, true);
     if (auto mem = mc->method->to<IR::Member>()) {
         if (auto obj = expr_name(mem->expr)) {
             if (tables.count(obj)) {
@@ -599,7 +600,7 @@ IR::MethodCallExpression *DoLocalCopyPropagation::postorder(IR::MethodCallExpres
 
 // FIXME -- this duplicates much of what is in the above method -- factor things better
 void DoLocalCopyPropagation::LoopPrepass::postorder(const IR::MethodCallExpression *mc) {
-    auto *mi = MethodInstance::resolve(mc, self.refMap, self.typeMap, true);
+    auto *mi = MethodInstance::resolve(mc, &self, self.typeMap, true);
     if (auto mem = mc->method->to<IR::Member>()) {
         if (auto obj = expr_name(mem->expr)) {
             if (self.tables.count(obj)) {
@@ -682,7 +683,7 @@ IR::P4Action *DoLocalCopyPropagation::postorder(IR::P4Action *act) {
     LOG5("DoLocalCopyPropagation before ElimDead " << act->name);
     LOG5(act);
     BUG_CHECK(inferForFunc == &actions[act->name], "corrupt internal data struct");
-    act->body = act->body->apply(ElimDead(*this))->to<IR::BlockStatement>();
+    act->body = act->body->apply(ElimDead(*this), getChildContext())->to<IR::BlockStatement>();
     working = false;
     available.clear();
     LOG3("DoLocalCopyPropagation finished action " << act->name);
@@ -718,7 +719,7 @@ IR::Function *DoLocalCopyPropagation::postorder(IR::Function *fn) {
     LOG5("DoLocalCopyPropagation before ElimDead " << name);
     LOG5(fn);
     BUG_CHECK(inferForFunc == &methods[name], "corrupt internal data struct");
-    fn->body = fn->body->apply(ElimDead(*this))->to<IR::BlockStatement>();
+    fn->body = fn->body->apply(ElimDead(*this), getChildContext())->to<IR::BlockStatement>();
     working = false;
     available.clear();
     LOG3("DoLocalCopyPropagation finished function " << name);
@@ -762,8 +763,8 @@ IR::P4Control *DoLocalCopyPropagation::preorder(IR::P4Control *ctrl) {
     }
     LOG5("DoLocalCopyPropagation before ElimDead " << ctrl->name);
     LOG5(ctrl);
-    ctrl->controlLocals = *ctrl->controlLocals.apply(ElimDead(*this));
-    ctrl->body = ctrl->body->apply(ElimDead(*this))->to<IR::BlockStatement>();
+    ctrl->controlLocals = *ctrl->controlLocals.apply(ElimDead(*this), getChildContext());
+    ctrl->body = ctrl->body->apply(ElimDead(*this), getChildContext())->to<IR::BlockStatement>();
     working = false;
     available.clear();
     LOG3("DoLocalCopyPropagation finished control " << ctrl->name);
@@ -811,7 +812,7 @@ void DoLocalCopyPropagation::apply_table(DoLocalCopyPropagation::TableInfo *tbl)
                     var->live = true;
                 }
             } else if (var->val && lvalue_out(var->val)->is<IR::MethodCallExpression>()) {
-                if (hasSideEffects(lvalue_out(var->val))) {
+                if (hasSideEffects(lvalue_out(var->val), getChildContext())) {
                     LOG3("  cannot propagate expression with side effect into table key "
                          << vname << ": " << var->val);
                     var->live = true;
@@ -884,7 +885,7 @@ const IR::P4Parser *DoLocalCopyPropagation::postorder(IR::P4Parser *parser) {
     LOG2("DoLocalCopyPropagation working on parser " << parser->name);
     visit(parser->parserLocals, "parserLocals");  // visit these again with working==true
     for (auto *state : parser->states) apply_function(&states[state->name]);
-    auto *rv = parser->apply(ElimDead(*this));
+    auto *rv = parser->apply(ElimDead(*this), getChildContext());
     working = false;
     available.clear();
     return rv;
@@ -904,7 +905,7 @@ IR::ParserState *DoLocalCopyPropagation::postorder(IR::ParserState *state) {
     BUG_CHECK(working && inferForFunc == &states[state->name], "corrupt internal data struct");
     LOG5("DoLocalCopyPropagation before ElimDead " << state->name);
     LOG5(state);
-    state->components = *state->components.apply(ElimDead(*this));
+    state->components = *state->components.apply(ElimDead(*this), getChildContext());
     working = false;
     inferForFunc = nullptr;
     available.clear();

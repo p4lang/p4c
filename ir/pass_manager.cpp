@@ -81,7 +81,7 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
         try {
             try {
                 LOG1(log_indent << name() << " invoking " << v->name());
-                program = program->apply(**it);
+                program = program->apply(**it, getChildContext());
                 if (LOGGING(3)) {
                     size_t maxmem, mem = gc_mem_inuse(&maxmem);  // triggers gc
                     LOG3(log_indent << "heap after " << v->name() << ": in use " << n4(mem)

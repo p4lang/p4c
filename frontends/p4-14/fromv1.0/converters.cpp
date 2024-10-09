@@ -110,8 +110,7 @@ const IR::Node *ExpressionConverter::postorder(IR::Primitive *primitive) {
         auto typeargs = new IR::Vector<IR::Type>();
         typeargs->push_back(IR::Type_Bits::get(aval + bval));
         auto lookahead = new IR::MethodCallExpression(method, typeargs);
-        auto result = new IR::Slice(primitive->srcInfo, lookahead, new IR::Constant(bval - 1),
-                                    new IR::Constant(0));
+        auto result = new IR::Slice(primitive->srcInfo, lookahead, bval - 1, 0);
         result->type = IR::Type_Bits::get(bval);
         return result;
     } else if (primitive->name == "valid") {
@@ -655,7 +654,7 @@ Converter::Converter() {
 
     // Discover types using P4-14 type-checker
     passes.emplace_back(new DetectDuplicates());
-    passes.emplace_back(new P4::DoConstantFolding(nullptr, nullptr));
+    passes.emplace_back(new P4::DoConstantFolding());
     passes.emplace_back(new CheckHeaderTypes());
     passes.emplace_back(new AdjustLengths());
     passes.emplace_back(new TypeCheck());

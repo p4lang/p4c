@@ -29,15 +29,20 @@ namespace P4 {
  * This cannot be done for constant declarations, though.
  */
 class DoEliminateInvalidHeaders final : public Transform {
-    ReferenceMap *refMap;
+    MinimalNameGenerator nameGen;
     IR::IndexedVector<IR::StatOrDecl> statements;
     std::vector<const IR::Declaration_Variable *> variables;
 
  public:
-    DoEliminateInvalidHeaders(ReferenceMap *refMap) : refMap(refMap) {
-        setName("DoEliminateInvalidHeaders");
-        CHECK_NULL(refMap);
+    DoEliminateInvalidHeaders() { setName("DoEliminateInvalidHeaders"); }
+
+    Visitor::profile_t init_apply(const IR::Node *node) override {
+        auto rv = Transform::init_apply(node);
+        node->apply(nameGen);
+
+        return rv;
     }
+
     const IR::Node *postorder(IR::InvalidHeader *expression) override;
     const IR::Node *postorder(IR::InvalidHeaderUnion *expression) override;
     const IR::Node *postorder(IR::P4Control *control) override;
@@ -47,11 +52,10 @@ class DoEliminateInvalidHeaders final : public Transform {
 
 class EliminateInvalidHeaders final : public PassManager {
  public:
-    EliminateInvalidHeaders(ReferenceMap *refMap, TypeMap *typeMap,
-                            TypeChecking *typeChecking = nullptr) {
-        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
+    EliminateInvalidHeaders(TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
+        if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap);
         passes.push_back(typeChecking);
-        passes.push_back(new DoEliminateInvalidHeaders(refMap));
+        passes.push_back(new DoEliminateInvalidHeaders());
         setName("EliminateInvalidHeaders");
     }
 };

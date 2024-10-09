@@ -30,15 +30,12 @@ set (P4_FRONTEND_SRCS
   p4/evaluator/evaluator.cpp
   p4/evaluator/substituteParameters.cpp
   p4/externInstance.cpp
-  p4/fromv1.0/converters.cpp
-  p4/fromv1.0/programStructure.cpp
   p4/frontend.cpp
   p4/functionsInlining.cpp
   p4/hierarchicalNames.cpp
   p4/inlining.cpp
   p4/localizeActions.cpp
   p4/methodInstance.cpp
-  p4/modelInstances.cpp
   p4/moveConstructors.cpp
   p4/moveDeclarations.cpp
   p4/parameterSubstitution.cpp
@@ -110,9 +107,6 @@ set (P4_FRONTEND_HDRS
   p4/evaluator/evaluator.h
   p4/evaluator/substituteParameters.h
   p4/externInstance.h
-  p4/fromv1.0/converters.h
-  p4/fromv1.0/programStructure.h
-  p4/fromv1.0/v1model.h
   p4/frontend.h
   p4/functionsInlining.h
   p4/hierarchicalNames.h
@@ -196,6 +190,11 @@ set (COMMON_FRONTEND_HDRS
 set (V1_FRONTEND_SRCS
   p4-14/typecheck.cpp
   p4-14/header_type.cpp
+  p4-14/v1.cpp
+
+  p4-14/fromv1.0/converters.cpp
+  p4-14/fromv1.0/programStructure.cpp
+  p4-14/fromv1.0/v1model.cpp
   )
 
 set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/p4-14/ir-v1.def PARENT_SCOPE)
@@ -204,6 +203,10 @@ set (V1_FRONTEND_HDRS
   p4-14/header_type.h
   p4-14/inline_control_flow.h
   p4-14/typecheck.h
+
+  p4-14/fromv1.0/converters.h
+  p4-14/fromv1.0/programStructure.h
+  p4-14/fromv1.0/v1model.h
   )
 
 set (PARSERS_SRCS

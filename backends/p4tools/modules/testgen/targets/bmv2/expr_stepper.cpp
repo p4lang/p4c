@@ -459,12 +459,9 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
 
              // Strip any newlines in the value we want to record.
              value->dbprint(assignStream);
-             auto assignString = assignStream.str();
-             assignString.erase(std::remove(assignString.begin(), assignString.end(), '\n'),
-                                assignString.cend());
 
              auto &nextState = stepper.state.clone();
-             nextState.add(*new TraceEvents::Generic(assignString));
+             nextState.add(*new TraceEvents::Generic(assignStream.str()));
              nextState.popBody();
              stepper.result->emplace_back(nextState);
          }},
@@ -777,7 +774,7 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              const IR::StateVariable &meterResult =
                  ToolsVariables::convertReference(externInfo.externArguments.at(1)->expression);
              if (testBackend != "PTF") {
-                 ::P4::warning(
+                 warning(
                      "meter.execute_meter not implemented for %1%. Choosing default value (GREEN).",
                      testBackend);
                  auto &nextState = stepper.state.clone();
@@ -886,7 +883,7 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              // configuring the extern. We just set the default value (green).
              auto testBackend = TestgenOptions::get().testBackend;
              if (testBackend != "PTF" || tableEntry == nullptr) {
-                 ::P4::warning(
+                 warning(
                      "direct_meter.read configuration not possible for %1%. Choosing default value "
                      "(GREEN).",
                      testBackend);
@@ -966,7 +963,7 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
         {"*method.digest"_cs,
          {"receiver"_cs, "data"_cs},
          [](const ExternInfo & /*externInfo*/, Bmv2V1ModelExprStepper &stepper) {
-             ::P4::warning("digest not fully implemented.");
+             warning("digest not fully implemented.");
              auto &nextState = stepper.state.clone();
              nextState.popBody();
              stepper.result->emplace_back(nextState);
@@ -1016,7 +1013,7 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              if (stepper.state.hasProperty("recirculate_count"_cs)) {
                  if (stepper.state.getProperty<uint64_t>("recirculate_count"_cs) > 0) {
                      auto &nextState = stepper.state.clone();
-                     ::P4::warning("Only single recirculation supported for now. Dropping packet.");
+                     warning("Only single recirculation supported for now. Dropping packet.");
                      auto *dropStmt = new IR::MethodCallStatement(
                          Utils::generateInternalMethodCall("drop_and_exit", {}));
                      nextState.replaceTopBody(dropStmt);
@@ -1031,8 +1028,7 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              }
              // If any of the input arguments is tainted, the entire extern is unreliable.
              if (argsAreTainted) {
-                 ::P4::warning(
-                     "clone args are tainted and not predictable. Skipping clone execution.");
+                 warning("clone args are tainted and not predictable. Skipping clone execution.");
                  auto &nextState = stepper.state.clone();
                  nextState.popBody();
                  stepper.result->emplace_back(nextState);
@@ -1104,7 +1100,7 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              if (stepper.state.hasProperty("recirculate_count"_cs)) {
                  recirculateCount = stepper.state.getProperty<uint64_t>("recirculate_count"_cs);
                  if (recirculateCount > 0) {
-                     ::P4::warning("Only single resubmit supported for now. Dropping packet.");
+                     warning("Only single resubmit supported for now. Dropping packet.");
                      auto *dropStmt = new IR::MethodCallStatement(
                          Utils::generateInternalMethodCall("drop_and_exit", {}));
                      nextState.replaceTopBody(dropStmt);
@@ -1165,7 +1161,7 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              if (stepper.state.hasProperty("recirculate_count"_cs)) {
                  recirculateCount = stepper.state.getProperty<uint64_t>("recirculate_count"_cs);
                  if (recirculateCount > 0) {
-                     ::P4::warning("Only single recirculation supported for now. Dropping packet.");
+                     warning("Only single recirculation supported for now. Dropping packet.");
                      auto *dropStmt = new IR::MethodCallStatement(
                          Utils::generateInternalMethodCall("drop_and_exit", {}));
                      nextState.replaceTopBody(dropStmt);
@@ -1208,7 +1204,7 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              if (stepper.state.hasProperty("recirculate_count"_cs)) {
                  if (stepper.state.getProperty<uint64_t>("recirculate_count"_cs) > 0) {
                      auto &nextState = stepper.state.clone();
-                     ::P4::warning("Only single recirculation supported for now. Dropping packet.");
+                     warning("Only single recirculation supported for now. Dropping packet.");
                      auto *dropStmt = new IR::MethodCallStatement(
                          Utils::generateInternalMethodCall("drop_and_exit", {}));
                      nextState.replaceTopBody(dropStmt);
@@ -1223,8 +1219,7 @@ const Bmv2V1ModelExprStepper::ExternMethodImpls<Bmv2V1ModelExprStepper>
              }
              // If any of the input arguments is tainted, the entire extern is unreliable.
              if (argsAreTainted) {
-                 ::P4::warning(
-                     "clone args are tainted and not predictable. Skipping clone execution.");
+                 warning("clone args are tainted and not predictable. Skipping clone execution.");
                  auto &nextState = stepper.state.clone();
                  nextState.popBody();
                  stepper.result->emplace_back(nextState);

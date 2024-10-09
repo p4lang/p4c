@@ -442,7 +442,7 @@ interface Type_Indexed {
     // Probably this sohuld be called 'size()', but some subclasses already
     // have a 'size' field.
     virtual size_t getSize() const = 0;
-    Type at(size_t index) const;
+    virtual Type at(size_t index) const = 0;
 }
 
 /// Base class for Type_List, and Type_Tuple
@@ -450,7 +450,7 @@ abstract Type_BaseList : Type, Type_Indexed {
     optional inline Vector<Type> components;
     validate{ components.check_null(); }
     size_t getSize() const override { return components.size(); }
-    Type at(size_t index) const { return components.at(index); }
+    Type at(size_t index) const override { return components.at(index); }
     int width_bits() const override {
         /// returning sum of the width of the elements
         int rv = 0;
@@ -571,7 +571,7 @@ class Type_Stack : Type_Indexed, Type {
     dbprint{ out << elementType << "[" << size << "]"; }
     bool sizeKnown() const;
     size_t getSize() const override;
-    Type at(size_t index) const;
+    Type at(size_t index) const override;
     static const cstring next;
     static const cstring last;
     static const cstring arraySize;

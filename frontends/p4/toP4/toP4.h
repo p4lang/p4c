@@ -174,7 +174,7 @@ class ToP4 : public Inspector, ResolutionContext {
     bool preorder(const IR::Dots *e) override;
     bool preorder(const IR::NamedDots *e) override;
     bool preorder(const IR::Constant *c) override;
-    bool preorder(const IR::Slice *slice) override;
+    bool preorder(const IR::AbstractSlice *slice) override;
     bool preorder(const IR::BoolLiteral *b) override;
     bool preorder(const IR::StringLiteral *s) override;
     bool preorder(const IR::PathExpression *p) override;

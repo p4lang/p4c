@@ -45,6 +45,11 @@ const IR::Expression *IR::Slice::make(const IR::Expression *e, unsigned lo, unsi
         BUG_CHECK(lo >= sl->getL() && hi <= sl->getH(), "MakeSlice slice on slice type mismatch");
         e = sl->e0;
     }
+    if (auto sl = e->to<IR::PlusSlice>()) {
+        auto *e2 = sl->e2;
+        if (lo > 0) e2 = new IR::Add(e2, new IR::Constant(lo));
+        return new IR::PlusSlice(sl->e1, e2, hi - lo + 1);
+    }
     return new IR::Slice(e, hi, lo);
 }
 

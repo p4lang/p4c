@@ -17,7 +17,7 @@ limitations under the License.
 #ifndef MIDEND_REMOVEMISS_H_
 #define MIDEND_REMOVEMISS_H_
 
-#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
@@ -28,12 +28,11 @@ namespace P4 {
  *  This visitor converts table.apply().miss into !table.apply().hit.
  *  In an if statement it actually inverts the branches.
  */
-class DoRemoveMiss : public Transform {
-    ReferenceMap *refMap;
+class DoRemoveMiss : public Transform, public ResolutionContext {
     TypeMap *typeMap;
 
  public:
-    DoRemoveMiss(ReferenceMap *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
+    explicit DoRemoveMiss(TypeMap *typeMap) : typeMap(typeMap) {
         visitDagOnce = false;
         CHECK_NULL(typeMap);
         setName("DoRemoveMiss");
@@ -44,10 +43,10 @@ class DoRemoveMiss : public Transform {
 
 class RemoveMiss : public PassManager {
  public:
-    RemoveMiss(ReferenceMap *refMap, TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
-        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
+    explicit RemoveMiss(TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
+        if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap);
         passes.push_back(typeChecking);
-        passes.push_back(new DoRemoveMiss(refMap, typeMap));
+        passes.push_back(new DoRemoveMiss(typeMap));
         setName("RemoveMiss");
     }
 };

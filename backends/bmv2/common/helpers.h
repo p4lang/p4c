@@ -22,7 +22,7 @@ limitations under the License.
 #include "controlFlowGraph.h"
 #include "expression.h"
 #include "frontends/common/model.h"
-#include "frontends/p4/fromv1.0/v1model.h"
+#include "frontends/p4-14/fromv1.0/v1model.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/json.h"

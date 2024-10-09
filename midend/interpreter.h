@@ -138,6 +138,7 @@ class ExpressionEvaluator : public Inspector {
 
     void postorder(const IR::Constant *expression) override;
     void postorder(const IR::BoolLiteral *expression) override;
+    void postorder(const IR::StringLiteral *expression) override;
     void postorder(const IR::Operation_Ternary *expression) override;
     void postorder(const IR::Operation_Binary *expression) override;
     void postorder(const IR::Operation_Relation *expression) override;
@@ -344,6 +345,35 @@ class SymbolicInteger final : public ScalarValue {
     bool equals(const SymbolicValue *other) const override;
 
     DECLARE_TYPEINFO(SymbolicInteger, ScalarValue);
+};
+
+class SymbolicString final : public ScalarValue {
+ public:
+    const IR::StringLiteral *string;
+    explicit SymbolicString(const IR::Type_String *type)
+        : ScalarValue(ScalarValue::ValueState::Uninitialized, type), string(nullptr) {}
+    SymbolicString(ScalarValue::ValueState state, const IR::Type_String *type)
+        : ScalarValue(state, type), string(nullptr) {}
+    explicit SymbolicString(const IR::StringLiteral *string)
+        : ScalarValue(ScalarValue::ValueState::Constant, string->type), string(string) {
+        CHECK_NULL(string);
+    }
+    SymbolicString(const SymbolicString &other) = default;
+    void dbprint(std::ostream &out) const override {
+        ScalarValue::dbprint(out);
+        if (isKnown()) out << string->value;
+    }
+    SymbolicValue *clone() const override {
+        auto result = new SymbolicString(type->to<IR::Type_String>());
+        result->state = state;
+        result->string = string;
+        return result;
+    }
+    void assign(const SymbolicValue *other) override;
+    bool merge(const SymbolicValue *other) override;
+    bool equals(const SymbolicValue *other) const override;
+
+    DECLARE_TYPEINFO(SymbolicString, ScalarValue);
 };
 
 class SymbolicVarbit final : public ScalarValue {

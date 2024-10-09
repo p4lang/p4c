@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef MIDEND_FLATTENINTERFACESTRUCTS_H_
 #define MIDEND_FLATTENINTERFACESTRUCTS_H_
 
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
@@ -159,16 +160,11 @@ struct StructTypeReplacement : public IHasDbPrint {
  * replacement.
  */
 struct NestedStructMap {
-    P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
 
     ordered_map<const IR::Type *, StructTypeReplacement<IR::Type_Struct> *> replacement;
 
-    NestedStructMap(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
-        : refMap(refMap), typeMap(typeMap) {
-        CHECK_NULL(refMap);
-        CHECK_NULL(typeMap);
-    }
+    explicit NestedStructMap(P4::TypeMap *typeMap) : typeMap(typeMap) { CHECK_NULL(typeMap); }
     void createReplacement(const IR::Type_Struct *type);
     StructTypeReplacement<IR::Type_Struct> *getReplacement(const IR::Type *type) const {
         return ::P4::get(replacement, type);
@@ -233,7 +229,7 @@ control c(inout T arg) {
 top<TFlat>(c()) main;
 
  */
-class ReplaceStructs : public Transform, P4WriteContext {
+class ReplaceStructs : public Transform, P4WriteContext, ResolutionContext {
     NestedStructMap *replacementMap;
     std::map<const IR::Parameter *, StructTypeReplacement<IR::Type_Struct> *> toReplace;
 
@@ -251,12 +247,13 @@ class ReplaceStructs : public Transform, P4WriteContext {
 };
 
 class FlattenInterfaceStructs final : public PassManager {
+    NestedStructMap sm;
+
  public:
-    FlattenInterfaceStructs(ReferenceMap *refMap, TypeMap *typeMap) {
-        auto sm = new NestedStructMap(refMap, typeMap);
-        passes.push_back(new TypeChecking(refMap, typeMap));
-        passes.push_back(new FindTypesToReplace(sm));
-        passes.push_back(new ReplaceStructs(sm));
+    explicit FlattenInterfaceStructs(TypeMap *typeMap) : sm(typeMap) {
+        passes.push_back(new TypeChecking(nullptr, typeMap));
+        passes.push_back(new FindTypesToReplace(&sm));
+        passes.push_back(new ReplaceStructs(&sm));
         passes.push_back(new ClearTypeMap(typeMap));
         setName("FlattenInterfaceStructs");
     }

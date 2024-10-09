@@ -156,7 +156,7 @@ void StatementGenerator::removeLval(const IR::Expression *left, const IR::Type *
         lvalStr = path->path->name.name;
     } else if (const auto *mem = left->to<IR::Member>()) {
         lvalStr = mem->member.name;
-    } else if (const auto *slice = left->to<IR::Slice>()) {
+    } else if (const auto *slice = left->to<IR::AbstractSlice>()) {
         lvalStr = slice->e0->to<IR::PathExpression>()->path->name.name;
     } else if (const auto *arrIdx = left->to<IR::ArrayIndex>()) {
         lvalStr = arrIdx->left->to<IR::PathExpression>()->path->name.name;

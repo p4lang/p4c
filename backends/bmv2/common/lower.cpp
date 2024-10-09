@@ -16,8 +16,8 @@ limitations under the License.
 
 #include "lower.h"
 
+#include "frontends/p4-14/fromv1.0/v1model.h"
 #include "frontends/p4/coreLibrary.h"
-#include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/p4/methodInstance.h"
 #include "lib/big_int_util.h"
 
@@ -171,7 +171,7 @@ const IR::Node *LowerExpressions::postorder(IR::Concat *expression) {
 
 const IR::Node *RemoveComplexExpressions::postorder(IR::MethodCallExpression *expression) {
     if (expression->arguments->size() == 0) return expression;
-    auto mi = P4::MethodInstance::resolve(expression, refMap, typeMap);
+    auto mi = P4::MethodInstance::resolve(expression, this, typeMap);
     if (mi->isApply() || mi->is<P4::BuiltInMethod>()) return expression;
 
     if (auto ef = mi->to<P4::ExternFunction>()) {

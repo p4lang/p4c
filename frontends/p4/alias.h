@@ -191,7 +191,7 @@ class ReadsWrites : public Inspector, public ResolutionContext {
         rw.emplace(expression, e0->join(e1)->join(e2));
     }
 
-    void postorder(const IR::Slice *expression) override {
+    void postorder(const IR::AbstractSlice *expression) override {
         auto e = ::P4::get(rw, expression->e0);
         CHECK_NULL(e);
         rw.emplace(expression, e);

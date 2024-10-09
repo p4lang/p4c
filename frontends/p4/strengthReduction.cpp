@@ -448,4 +448,23 @@ const IR::Node *DoStrengthReduction::postorder(IR::Slice *expr) {
     return expr;
 }
 
+const IR::Node *DoStrengthReduction::postorder(IR::PlusSlice *expr) {
+    if (expr->e1->is<IR::Constant>() && expr->e2->is<IR::Constant>()) {
+        auto *rv = new IR::Slice(expr->srcInfo, expr->e0, expr->getH(), expr->getL());
+        return postorder(rv);
+    }
+    if (auto sh = expr->e0->to<IR::Shr>()) {
+        if (!sh->left->type->is<IR::Type_Bits>()) return expr;
+        if (sh->left->type->to<IR::Type_Bits>()->isSigned) return expr;
+        expr->e0 = sh->left;
+        expr->e1 = new IR::Add(sh->srcInfo, expr->e1, sh->right);
+    }
+    if (auto sh = expr->e0->to<IR::Shl>()) {
+        if (!sh->left->type->is<IR::Type_Bits>()) return expr;
+        expr->e0 = sh->left;
+        expr->e1 = new IR::Sub(sh->srcInfo, expr->e1, sh->right);
+    }
+    return expr;
+}
+
 }  // namespace P4

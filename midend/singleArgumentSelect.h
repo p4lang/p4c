@@ -57,9 +57,8 @@ class DoSingleArgumentSelect : public Modifier {
 
 class SingleArgumentSelect : public PassManager {
  public:
-    SingleArgumentSelect(ReferenceMap *refMap, TypeMap *typeMap,
-                         TypeChecking *typeChecking = nullptr) {
-        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
+    explicit SingleArgumentSelect(TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
+        if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoSingleArgumentSelect(typeMap));
         setName("SingleArgumentSelect");

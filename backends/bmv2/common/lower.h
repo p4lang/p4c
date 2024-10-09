@@ -54,9 +54,9 @@ class LowerExpressions : public Transform {
 
 class RemoveComplexExpressions : public P4::RemoveComplexExpressions {
  public:
-    RemoveComplexExpressions(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
-                             P4::RemoveComplexExpressionsPolicy *policy = nullptr)
-        : P4::RemoveComplexExpressions(refMap, typeMap, policy) {}
+    explicit RemoveComplexExpressions(P4::TypeMap *typeMap,
+                                      P4::RemoveComplexExpressionsPolicy *policy = nullptr)
+        : P4::RemoveComplexExpressions(typeMap, policy) {}
 
     const IR::Node *postorder(IR::MethodCallExpression *expression) override;
 };

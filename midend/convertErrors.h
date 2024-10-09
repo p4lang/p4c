@@ -18,7 +18,6 @@ limitations under the License.
 
 #include <map>
 
-#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
@@ -80,11 +79,11 @@ class ConvertErrors : public PassManager {
 
  public:
     using ErrorMapping = decltype(DoConvertErrors::repr);
-    ConvertErrors(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, ChooseErrorRepresentation *policy,
+    ConvertErrors(P4::TypeMap *typeMap, ChooseErrorRepresentation *policy,
                   P4::TypeChecking *typeChecking = nullptr)
         : convertErrors(new DoConvertErrors(policy, typeMap)) {
         if (typeChecking == nullptr) {
-            typeChecking = new P4::TypeChecking(refMap, typeMap);
+            typeChecking = new P4::TypeChecking(nullptr, typeMap);
         }
         passes.push_back(typeChecking);
         passes.push_back(convertErrors);

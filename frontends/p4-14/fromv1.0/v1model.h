@@ -14,15 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef FRONTENDS_P4_FROMV1_0_V1MODEL_H_
-#define FRONTENDS_P4_FROMV1_0_V1MODEL_H_
+#ifndef FRONTENDS_P4_14_FROMV1_0_V1MODEL_H_
+#define FRONTENDS_P4_14_FROMV1_0_V1MODEL_H_
 
 #include "frontends/common/model.h"
 #include "frontends/p4/coreLibrary.h"
-#include "frontends/p4/methodInstance.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
-#include "lib/json.h"
 
 namespace P4::P4V1 {
 
@@ -353,22 +351,6 @@ class V1Model : public Model::Model {
     static const char *versionCurrent;  // 20200408
 };
 
-/// Stores the version of the global constant __v1model_version used
-/// in the 'version' public instance variable.
-class getV1ModelVersion : public Inspector {
-    bool preorder(const IR::Declaration_Constant *dc) override {
-        if (dc->name == "__v1model_version") {
-            auto val = dc->initializer->to<IR::Constant>();
-            version = static_cast<unsigned>(val->value);
-        }
-        return false;
-    }
-    bool preorder(const IR::Declaration *) override { return false; }
-
- public:
-    unsigned version = 0;
-};
-
 }  // namespace P4::P4V1
 
-#endif /* FRONTENDS_P4_FROMV1_0_V1MODEL_H_ */
+#endif /* FRONTENDS_P4_14_FROMV1_0_V1MODEL_H_ */

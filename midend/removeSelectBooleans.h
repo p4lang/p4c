@@ -17,7 +17,6 @@ limitations under the License.
 #ifndef MIDEND_REMOVESELECTBOOLEANS_H_
 #define MIDEND_REMOVESELECTBOOLEANS_H_
 
-#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
@@ -48,9 +47,8 @@ class DoRemoveSelectBooleans : public Transform {
 
 class RemoveSelectBooleans : public PassManager {
  public:
-    RemoveSelectBooleans(ReferenceMap *refMap, TypeMap *typeMap,
-                         TypeChecking *typeChecking = nullptr) {
-        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
+    explicit RemoveSelectBooleans(TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
+        if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoRemoveSelectBooleans(typeMap));
         passes.push_back(new ClearTypeMap(typeMap));  // some types have changed

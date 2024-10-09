@@ -8,7 +8,6 @@
 #include "backends/p4tools/modules/smith/toolname.h"
 #include "lib/compile_context.h"
 #include "lib/error.h"
-#include "lib/exceptions.h"
 
 namespace P4::P4Tools {
 
@@ -17,17 +16,13 @@ SmithOptions &SmithOptions::get() {
     return INSTANCE;
 }
 
-const char *SmithOptions::getIncludePath() const {
-    P4C_UNIMPLEMENTED("getIncludePath is not implemented for P4Smith.");
-}
-
 void SmithOptions::processArgs(const std::vector<const char *> &args) {
     // Convert to the standard (argc, argv) pair.
     int argc = 0;
     char **argv = nullptr;
     std::tie(argc, argv) = convertArgs(args);
 
-    // Establish a dummy compilation context so that we can use ::P4::error to report errors while
+    // Establish a dummy compilation context so that we can use error to report errors while
     // processing command-line options.
     class DummyCompileContext : public BaseCompileContext {
     } dummyContext;
@@ -35,7 +30,7 @@ void SmithOptions::processArgs(const std::vector<const char *> &args) {
 
     // Delegate to the hook.
     auto *remainingArgs = P4Tools::AbstractP4cToolOptions::process(argc, argv);
-    if ((remainingArgs == nullptr) || ::P4::errorCount() > 0) {
+    if ((remainingArgs == nullptr) || errorCount() > 0) {
         return;
     }
 }

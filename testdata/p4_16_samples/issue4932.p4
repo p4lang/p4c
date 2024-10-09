@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+Copyright 2024 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,15 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "coreLibrary.h"
-#include "fromv1.0/v1model.h"
+extern void log(string msg);
 
-/* These must be in the same compiliation unit to ensure that P4CoreLibrary::instance
- * is initialized before V1Model::instance */
-namespace P4::P4V1 {
+parser SimpleParser();
+package SimpleArch(SimpleParser p);
 
-V1Model V1Model::instance;
-const char *V1Model::versionInitial = "20180101";
-const char *V1Model::versionCurrent = "20200408";
+parser ParserImpl()
+{
+    state start {
+        log("Log message" ++ " text");
+        transition accept;
+    }
+}
 
-}  // namespace P4::P4V1
+SimpleArch(ParserImpl()) main;

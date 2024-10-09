@@ -24,7 +24,7 @@ void EBPFTableStepper::checkTargetProperties(
         properties.tableIsTainted = properties.tableIsTainted || keyIsTainted;
         // If the key expression is tainted, do not bother resolving the remaining keys.
         if (properties.tableIsTainted) {
-            ::P4::warning("Key %1% of table %2% is tainted.", keyElement->expression, table);
+            warning("Key %1% of table %2% is tainted.", keyElement->expression, table);
             return;
         }
     }

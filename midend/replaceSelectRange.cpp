@@ -61,8 +61,8 @@ static void expandRange(const IR::Range *r, std::vector<const IR::Mask *> *masks
     }
 }
 
-std::vector<const IR::Mask *> *DoReplaceSelectRange::rangeToMasks(const IR::Range *r,
-                                                                  size_t keyIndex) {
+std::vector<const IR::Mask *> *ReplaceSelectRange::rangeToMasks(const IR::Range *r,
+                                                                size_t keyIndex) {
     auto l = r->left->to<IR::Constant>();
     if (!l) {
         ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
@@ -107,7 +107,7 @@ std::vector<const IR::Mask *> *DoReplaceSelectRange::rangeToMasks(const IR::Rang
     return masks;
 }
 
-std::vector<IR::Vector<IR::Expression>> DoReplaceSelectRange::cartesianAppend(
+std::vector<IR::Vector<IR::Expression>> ReplaceSelectRange::cartesianAppend(
     const std::vector<IR::Vector<IR::Expression>> &vecs,
     const std::vector<const IR::Mask *> &masks) {
     std::vector<IR::Vector<IR::Expression>> newVecs;
@@ -124,7 +124,7 @@ std::vector<IR::Vector<IR::Expression>> DoReplaceSelectRange::cartesianAppend(
     return newVecs;
 }
 
-std::vector<IR::Vector<IR::Expression>> DoReplaceSelectRange::cartesianAppend(
+std::vector<IR::Vector<IR::Expression>> ReplaceSelectRange::cartesianAppend(
     const std::vector<IR::Vector<IR::Expression>> &vecs, const IR::Expression *e) {
     std::vector<IR::Vector<IR::Expression>> newVecs;
 
@@ -138,7 +138,7 @@ std::vector<IR::Vector<IR::Expression>> DoReplaceSelectRange::cartesianAppend(
     return newVecs;
 }
 
-const IR::Node *DoReplaceSelectRange::postorder(IR::SelectExpression *e) {
+const IR::Node *ReplaceSelectRange::postorder(IR::SelectExpression *e) {
     BUG_CHECK(findContext<IR::SelectExpression>() == nullptr, "A select nested in select: %1%", e);
     if (!signedIndicesToReplace.empty()) {
         IR::Vector<IR::Expression> newSelectList;
@@ -166,7 +166,7 @@ const IR::Node *DoReplaceSelectRange::postorder(IR::SelectExpression *e) {
     return e;
 }
 
-const IR::Node *DoReplaceSelectRange::postorder(IR::SelectCase *sc) {
+const IR::Node *ReplaceSelectRange::postorder(IR::SelectCase *sc) {
     BUG_CHECK(findContext<IR::SelectExpression>() != nullptr,
               "A lone select case not inside select: %1%", sc);
 

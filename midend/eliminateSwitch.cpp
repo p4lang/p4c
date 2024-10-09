@@ -52,9 +52,9 @@ const IR::Node *DoEliminateSwitch::postorder(IR::SwitchStatement *statement) {
 
     auto src = statement->srcInfo;
     IR::IndexedVector<IR::StatOrDecl> contents;
-    cstring prefix = refMap->newName("switch");
+    cstring prefix = nameGen.newName("switch");
     // Compute key for new switch statement
-    cstring key = refMap->newName(prefix + "_key");
+    cstring key = nameGen.newName(prefix + "_key");
     auto decl = new IR::Declaration_Variable(key, type->getP4Type());
     toInsert.push_back(decl);
     auto assign =
@@ -93,7 +93,7 @@ const IR::Node *DoEliminateSwitch::postorder(IR::SwitchStatement *statement) {
         auto scSrc = sc->srcInfo;
         pendingLabels.push_back(sc->label);
         if (sc->statement != nullptr) {
-            cstring actionName = refMap->newName(prefix + "_case");
+            cstring actionName = nameGen.newName(prefix + "_case");
             auto action = new IR::P4Action(src, actionName, hidden, new IR::ParameterList(),
                                            new IR::BlockStatement());
             auto actionCall =
@@ -126,7 +126,7 @@ const IR::Node *DoEliminateSwitch::postorder(IR::SwitchStatement *statement) {
             src, new IR::MethodCallExpression(new IR::PathExpression(defaultAction))),
         true));
     properties.push_back(new IR::Property(src, "entries", new IR::EntriesList(entries), true));
-    cstring tableName = refMap->newName(prefix + "_table");
+    cstring tableName = nameGen.newName(prefix + "_table");
     auto table = new IR::P4Table(src, tableName, hidden, new IR::TableProperties(properties));
     toInsert.push_back(table);
 

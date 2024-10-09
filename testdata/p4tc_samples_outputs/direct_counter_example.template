@@ -2,7 +2,7 @@
 
 set -e
 
-TC="tc"
+: "${TC:="tc"}"
 $TC p4template create pipeline/direct_counter_example numtables 1
 
 $TC p4template create action/direct_counter_example/ingress/send_nh actid 1 \

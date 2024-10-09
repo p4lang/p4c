@@ -11,7 +11,7 @@ namespace P4 {
 inline const IR::Expression *optimizeExpression(const IR::Expression *node) {
     auto pass = PassRepeated({
         new P4::StrengthReduction(nullptr, nullptr),
-        new P4::ConstantFolding(nullptr, nullptr, false),
+        new P4::ConstantFolding(nullptr, false),
     });
     node = node->apply(pass);
     BUG_CHECK(::P4::errorCount() == 0, "Encountered errors while trying to optimize expressions.");

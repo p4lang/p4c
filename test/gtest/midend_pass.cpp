@@ -18,8 +18,8 @@ limitations under the License.
 
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/options.h"
+#include "frontends/p4-14/fromv1.0/v1model.h"
 #include "frontends/p4/evaluator/evaluator.h"
-#include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/simplifyParsers.h"
@@ -66,44 +66,43 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
     defuse = new P4::ComputeDefUse;
 
     addPasses(
-        {options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
-         new P4::RemoveMiss(&refMap, &typeMap),
-         new P4::EliminateNewtype(&refMap, &typeMap),
-         new P4::EliminateInvalidHeaders(&refMap, &typeMap),
-         new P4::EliminateSerEnums(&refMap, &typeMap),
+        {options.ndebug ? new P4::RemoveAssertAssume(&typeMap) : nullptr,
+         new P4::RemoveMiss(&typeMap),
+         new P4::EliminateNewtype(&typeMap),
+         new P4::EliminateInvalidHeaders(&typeMap),
+         new P4::EliminateSerEnums(&typeMap),
          new P4::SimplifyKey(
-             &refMap, &typeMap,
-             new P4::OrPolicy(new P4::IsValid(&refMap, &typeMap), new P4::IsLikeLeftValue())),
+             &typeMap, new P4::OrPolicy(new P4::IsValid(&typeMap), new P4::IsLikeLeftValue())),
          new P4::RemoveExits(&typeMap),
-         new P4::ConstantFolding(&refMap, &typeMap),
-         new P4::SimplifySelectCases(&refMap, &typeMap, false),  // non-constant keysets
-         new P4::ExpandLookahead(&refMap, &typeMap),
-         new P4::ExpandEmit(&refMap, &typeMap),
-         new P4::HandleNoMatch(&refMap),
-         new P4::SimplifyParsers(&refMap),
+         new P4::ConstantFolding(&typeMap),
+         new P4::SimplifySelectCases(&typeMap, false),  // non-constant keysets
+         new P4::ExpandLookahead(&typeMap),
+         new P4::ExpandEmit(&typeMap),
+         new P4::HandleNoMatch(),
+         new P4::SimplifyParsers(),
          new P4::StrengthReduction(&typeMap),
-         new P4::EliminateTuples(&refMap, &typeMap),
-         new P4::SimplifyComparisons(&refMap, &typeMap),
-         new P4::CopyStructures(&refMap, &typeMap),
-         new P4::NestedStructs(&refMap, &typeMap),
+         new P4::EliminateTuples(&typeMap),
+         new P4::SimplifyComparisons(&typeMap),
+         new P4::CopyStructures(&typeMap),
+         new P4::NestedStructs(&typeMap),
          new P4::StrengthReduction(&typeMap),
-         new P4::SimplifySelectList(&refMap, &typeMap),
-         new P4::RemoveSelectBooleans(&refMap, &typeMap),
-         new P4::FlattenHeaders(&refMap, &typeMap),
-         new P4::FlattenInterfaceStructs(&refMap, &typeMap),
-         new P4::EliminateTypedef(&refMap, &typeMap),
-         new P4::ReplaceSelectRange(&refMap, &typeMap),
-         new P4::Predication(&refMap),
+         new P4::SimplifySelectList(&typeMap),
+         new P4::RemoveSelectBooleans(&typeMap),
+         new P4::FlattenHeaders(&typeMap),
+         new P4::FlattenInterfaceStructs(&typeMap),
+         new P4::EliminateTypedef(&typeMap),
+         new P4::ReplaceSelectRange(),
+         new P4::Predication(),
          new P4::MoveDeclarations(),  // more may have been introduced
-         new P4::ConstantFolding(&refMap, &typeMap),
-         new P4::LocalCopyPropagation(&refMap, &typeMap),
-         new P4::ConstantFolding(&refMap, &typeMap),
+         new P4::ConstantFolding(&typeMap),
+         new P4::LocalCopyPropagation(&typeMap),
+         new P4::ConstantFolding(&typeMap),
          new P4::StrengthReduction(&typeMap),
          new P4::MoveDeclarations(),  // more may have been introduced
          new P4::SimplifyControlFlow(&typeMap),
          new P4::CompileTimeOperations(),
-         new P4::TableHit(&refMap, &typeMap),
-         new P4::EliminateSwitch(&refMap, &typeMap),
+         new P4::TableHit(&typeMap),
+         new P4::EliminateSwitch(&typeMap),
          defuse,
          evaluator,
          [v1controls, evaluator](const IR::Node *root) -> const IR::Node * {

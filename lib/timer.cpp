@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <chrono>  // NOLINT linter forbids using chrono, but we don't have alternatives
+#include <cstdint>
 #include <memory>
 #include <unordered_map>
 #include <utility>
@@ -20,6 +21,7 @@ struct CounterEntry {
     const char *name;
     std::unordered_map<std::string, std::unique_ptr<CounterEntry>> counters;
     Clock::duration duration{};
+    std::uint64_t invocations = 0;
 
     /// Lookup existing or create new child counter.
     CounterEntry *openSubcounter(const char *name) {
@@ -31,7 +33,10 @@ struct CounterEntry {
     }
 
     /// Adds specified duration to the current counter.
-    void add(Clock::duration d) { duration += d; }
+    void add(Clock::duration d) {
+        duration += d;
+        invocations++;
+    }
 
     explicit CounterEntry(const char *n) : name(n) {}
 };
@@ -121,6 +126,7 @@ static void formatCounters(std::vector<TimerEntry> &out, CounterEntry &current,
     TimerEntry entry;
     entry.timerName = namePrefix;
     entry.milliseconds = currentTotalDuration.count();
+    entry.invocations = current.invocations;
     if (parentDurationMs == 0) {
         entry.relativeToParent = 1;
     } else {

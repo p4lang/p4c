@@ -19,7 +19,7 @@ limitations under the License.
 
 #include "frontends/common/options.h"
 #include "frontends/common/parser_options.h"
-#include "frontends/p4/fromv1.0/converters.h"
+#include "frontends/p4-14/fromv1.0/converters.h"
 #include "frontends/parsers/parserDriver.h"
 #include "lib/error.h"
 

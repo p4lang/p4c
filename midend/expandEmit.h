@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef MIDEND_EXPANDEMIT_H_
 #define MIDEND_EXPANDEMIT_H_
 
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
 
@@ -41,13 +42,11 @@ namespace P4 {
  * emit(s.h2[0]);
  * emit(s.h2[1]);
  */
-class DoExpandEmit : public Transform {
-    ReferenceMap *refMap;
+class DoExpandEmit : public Transform, public ResolutionContext {
     TypeMap *typeMap;
 
  public:
-    DoExpandEmit(ReferenceMap *refMap, TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
-        CHECK_NULL(refMap);
+    explicit DoExpandEmit(TypeMap *typeMap) : typeMap(typeMap) {
         CHECK_NULL(typeMap);
         setName("DoExpandEmit");
     }
@@ -60,11 +59,11 @@ class DoExpandEmit : public Transform {
 
 class ExpandEmit : public PassManager {
  public:
-    ExpandEmit(ReferenceMap *refMap, TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
+    explicit ExpandEmit(TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
         setName("ExpandEmit");
-        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
+        if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap);
         passes.push_back(typeChecking);
-        passes.push_back(new DoExpandEmit(refMap, typeMap));
+        passes.push_back(new DoExpandEmit(typeMap));
     }
 };
 
