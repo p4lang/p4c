@@ -2,7 +2,7 @@
 
 set -e
 
-TC="tc"
+: "${TC:="tc"}"
 $TC p4template create pipeline/size_param_example numtables 2
 
 $TC p4template create action/size_param_example/MainControlImpl/next_hop actid 1 \

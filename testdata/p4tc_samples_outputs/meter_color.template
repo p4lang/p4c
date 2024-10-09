@@ -2,7 +2,7 @@
 
 set -e
 
-TC="tc"
+: "${TC:="tc"}"
 $TC p4template create pipeline/meter_color numtables 1
 
 $TC p4template create action/meter_color/ingress/meter_exec actid 1

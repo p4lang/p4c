@@ -2,7 +2,7 @@
 
 set -e
 
-TC="tc"
+: "${TC:="tc"}"
 $TC p4template create pipeline/tc_may_override_example_03 numtables 2
 
 $TC p4template create action/tc_may_override_example_03/MainControlImpl/next_hop actid 1
