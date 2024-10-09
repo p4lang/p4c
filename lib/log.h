@@ -109,9 +109,11 @@ void increaseVerbosity();
 #endif
 
 // NOLINTBEGIN(bugprone-macro-parentheses)
-#define LOGGING(N)                                                              \
-    ((N) <= MAX_LOGGING_LEVEL && P4::Log::fileLogLevelIsAtLeast(__FILE__, N) && \
+#define LOGGING_FEATURE(TAG, N)                                            \
+    ((N) <= MAX_LOGGING_LEVEL && P4::Log::fileLogLevelIsAtLeast(TAG, N) && \
      P4::Log::enableLogging())
+#define LOGGING(N) LOGGING_FEATURE(__FILE__, N)
+
 #define LOGN(N, X)                                                          \
     (LOGGING(N) ? P4::Log::Detail::fileLogOutput(__FILE__)                  \
                       << P4::Log::Detail::OutputLogPrefix(__FILE__, N) << X \
@@ -140,7 +142,7 @@ void increaseVerbosity();
 #define LOG9_UNINDENT LOGN_UNINDENT(9)
 
 #define LOG_FEATURE(TAG, N, X)                                               \
-    ((N) <= MAX_LOGGING_LEVEL && P4::Log::fileLogLevelIsAtLeast(TAG, N)      \
+    (LOGGING_FEATURE(TAG, N)                                                 \
          ? P4::Log::Detail::fileLogOutput(TAG)                               \
                << P4::Log::Detail::OutputLogPrefix(TAG, N) << X << std::endl \
          : std::clog)
