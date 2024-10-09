@@ -362,9 +362,7 @@ def process_file(options, argv):
     if result == SUCCESS:
         result = check_generated_files(options, tmpdir, expected_dirname)
     if (result == SUCCESS) and (not expected_error):
-        print("jaf dbg just before recompile_file")
         result = recompile_file(options, ppfile, False, origFileP414)
-        print("jaf dbg just after recompile_file")
     if (
         (result == SUCCESS)
         and (not expected_error)
