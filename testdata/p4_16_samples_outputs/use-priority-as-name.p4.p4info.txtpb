@@ -22,6 +22,9 @@ tables {
   action_refs {
     id: 32254556
   }
+  initial_default_action {
+    action_id: 32254556
+  }
   size: 1024
 }
 tables {
@@ -42,6 +45,9 @@ tables {
   action_refs {
     id: 32254556
   }
+  initial_default_action {
+    action_id: 32254556
+  }
   size: 1024
 }
 tables {
@@ -61,6 +67,9 @@ tables {
   }
   action_refs {
     id: 27859478
+  }
+  initial_default_action {
+    action_id: 27859478
   }
   size: 1024
 }

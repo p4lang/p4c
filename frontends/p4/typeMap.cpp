@@ -353,7 +353,7 @@ const IR::Type *TypeMap::getCanonical(const IR::Type *type) {
     return type;
 }
 
-int TypeMap::widthBits(const IR::Type *type, const IR::Node *errorPosition, bool max) {
+int TypeMap::widthBits(const IR::Type *type, const IR::Node *errorPosition, bool max) const {
     CHECK_NULL(type);
     const IR::Type *t;
     if (auto tt = type->to<IR::Type_Type>())

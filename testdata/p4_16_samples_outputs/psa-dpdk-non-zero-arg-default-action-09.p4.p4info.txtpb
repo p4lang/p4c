@@ -17,6 +17,17 @@ tables {
     id: 29027610
   }
   const_default_action_id: 20013177
+  initial_default_action {
+    action_id: 20013177
+    arguments {
+      param_id: 1
+      value: "\000\000\000\001"
+    }
+    arguments {
+      param_id: 2
+      value: "\000"
+    }
+  }
   size: 1000000
 }
 actions {

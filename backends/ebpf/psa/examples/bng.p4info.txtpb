@@ -47,6 +47,9 @@ tables {
     id: 17049673
   }
   const_default_action_id: 28724955
+  initial_default_action {
+    action_id: 28724955
+  }
   size: 8192
 }
 tables {
@@ -86,6 +89,13 @@ tables {
     id: 17126659
   }
   const_default_action_id: 17126659
+  initial_default_action {
+    action_id: 17126659
+    arguments {
+      param_id: 1
+      value: "\000"
+    }
+  }
   size: 1024
 }
 tables {
@@ -107,6 +117,9 @@ tables {
     id: 21257015
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
   }
   size: 1024
 }
@@ -137,6 +150,9 @@ tables {
     scope: DEFAULT_ONLY
   }
   const_default_action_id: 21257015
+  initial_default_action {
+    action_id: 21257015
+  }
   size: 1024
 }
 tables {
@@ -161,6 +177,13 @@ tables {
     id: 27019812
   }
   const_default_action_id: 27019812
+  initial_default_action {
+    action_id: 27019812
+    arguments {
+      param_id: 1
+      value: "\000\000\000\000"
+    }
+  }
   size: 8192
 }
 tables {
@@ -184,6 +207,9 @@ tables {
     scope: DEFAULT_ONLY
   }
   const_default_action_id: 21257015
+  initial_default_action {
+    action_id: 21257015
+  }
   size: 16
 }
 tables {
@@ -219,6 +245,9 @@ tables {
     scope: DEFAULT_ONLY
   }
   const_default_action_id: 21552277
+  initial_default_action {
+    action_id: 21552277
+  }
   size: 32768
 }
 tables {
@@ -245,6 +274,9 @@ tables {
     id: 33281717
   }
   const_default_action_id: 21257015
+  initial_default_action {
+    action_id: 21257015
+  }
   size: 8192
 }
 tables {
@@ -284,6 +316,9 @@ tables {
     id: 23799701
   }
   const_default_action_id: 23799701
+  initial_default_action {
+    action_id: 23799701
+  }
   size: 256
 }
 tables {
@@ -319,6 +354,9 @@ tables {
     scope: DEFAULT_ONLY
   }
   const_default_action_id: 20119496
+  initial_default_action {
+    action_id: 20119496
+  }
   size: 1024
 }
 actions {
