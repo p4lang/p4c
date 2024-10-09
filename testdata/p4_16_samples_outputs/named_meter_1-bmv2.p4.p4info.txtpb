@@ -43,10 +43,10 @@ tables {
     match_type: EXACT
   }
   action_refs {
-    id: 24512981
+    id: 18971545
   }
   action_refs {
-    id: 26939440
+    id: 27693640
   }
   action_refs {
     id: 21257015
@@ -81,14 +81,21 @@ actions {
 }
 actions {
   preamble {
-    id: 24512981
-    name: "ingress.m_action"
-    alias: "m_action"
+    id: 18971545
+    name: "ingress.m_action_2"
+    alias: "m_action_2"
   }
   params {
     id: 1
     name: "meter_idx"
     bitwidth: 9
+  }
+}
+actions {
+  preamble {
+    id: 27693640
+    name: "ingress._nop_2"
+    alias: "_nop_2"
   }
 }
 direct_meters {
