@@ -2,7 +2,7 @@
 
 set -e
 
-TC="tc"
+: "${TC:="tc"}"
 $TC p4template create pipeline/internetchecksum_01 numtables 1
 
 $TC p4template create action/internetchecksum_01/ingress/set_ipip_csum actid 1 \

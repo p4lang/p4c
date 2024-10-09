@@ -622,7 +622,7 @@ class TCPipeline {
     }
     toString {
         std::string tcCode = absl::StrCat("#!/bin/bash -x\n",
-                                        "\nset -e\n", "\nTC=\"tc\"",
+                                        "\nset -e\n", "\n: \"${TC:=\"tc\"}\"",
                                         "\n$TC p4template create pipeline/", pipelineName.string_view(),
                                         " numtables ", numTables);
         if (!actionDefs.empty()) {
