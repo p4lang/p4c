@@ -69,7 +69,7 @@ const IR::Node *DuplicateHierarchicalNameCheck::postorder(IR::Annotation *annota
         }
     }
     if (foundDuplicate) {
-        error(ErrorType::ERR_DUPLICATE, "%1%: " ERR_STR_DUPLICATED_NAME ": %2%", annotatedNode,
+        error(ErrorType::ERR_DUPLICATE, "%1%: conflicting control plane name: %2%", annotatedNode,
               otherNode);
     }
     return annotation;

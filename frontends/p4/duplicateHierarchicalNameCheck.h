@@ -22,8 +22,6 @@ limitations under the License.
 
 namespace P4 {
 
-#define ERR_STR_DUPLICATED_NAME "conflicting control plane name"
-
 /**
  * This pass does not change anything in the IR.  It only gives an
  * error if it finds two objects with the same hierarchical name.  I
@@ -44,12 +42,12 @@ namespace P4 {
 class DuplicateHierarchicalNameCheck : public Transform {
     std::vector<cstring> stack;
     /// Used for detection of conflicting control plane names among actions.
-    std::map<cstring, const IR::Node *> annotatedActions;
+    string_map<const IR::Node *> annotatedActions;
     /// Used for detection of conflicting control plane names among tables.
-    std::map<cstring, const IR::Node *> annotatedTables;
+    string_map<const IR::Node *> annotatedTables;
     /// Used for detection of conflicting control plane names among
     /// objects other than actions and tables.
-    std::map<cstring, const IR::Node *> annotatedOthers;
+    string_map<const IR::Node *> annotatedOthers;
 
  public:
     cstring getName(const IR::IDeclaration *decl);
