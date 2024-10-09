@@ -109,9 +109,8 @@ void increaseVerbosity();
 #endif
 
 // NOLINTBEGIN(bugprone-macro-parentheses)
-#define LOGGING_FEATURE(TAG, N)                                            \
-    ((N) <= MAX_LOGGING_LEVEL && P4::Log::fileLogLevelIsAtLeast(TAG, N) && \
-     P4::Log::enableLogging())
+#define LOGGING_FEATURE(TAG, N) \
+    ((N) <= MAX_LOGGING_LEVEL && P4::Log::fileLogLevelIsAtLeast(TAG, N) && P4::Log::enableLogging())
 #define LOGGING(N) LOGGING_FEATURE(__FILE__, N)
 
 #define LOGN(N, X)                                                          \
@@ -141,11 +140,10 @@ void increaseVerbosity();
 #define LOG8_UNINDENT LOGN_UNINDENT(8)
 #define LOG9_UNINDENT LOGN_UNINDENT(9)
 
-#define LOG_FEATURE(TAG, N, X)                                               \
-    (LOGGING_FEATURE(TAG, N)                                                 \
-         ? P4::Log::Detail::fileLogOutput(TAG)                               \
-               << P4::Log::Detail::OutputLogPrefix(TAG, N) << X << std::endl \
-         : std::clog)
+#define LOG_FEATURE(TAG, N, X)                                                                   \
+    (LOGGING_FEATURE(TAG, N) ? P4::Log::Detail::fileLogOutput(TAG)                               \
+                                   << P4::Log::Detail::OutputLogPrefix(TAG, N) << X << std::endl \
+                             : std::clog)
 
 #define P4C_ERROR(X) (std::clog << "ERROR: " << X << std::endl)
 #define P4C_WARNING(X) (P4::Log::verbose() ? std::clog << "WARNING: " << X << std::endl : std::clog)
