@@ -1,0 +1,5 @@
+<map id="P4::has_dbprint&lt; T, std::void_t&lt; decltype(std::declval&lt; T &gt;().dbprint(std::declval&lt; std::ostream &amp; &gt;()))&gt; &gt;" name="P4::has_dbprint&lt; T, std::void_t&lt; decltype(std::declval&lt; T &gt;().dbprint(std::declval&lt; std::ostream &amp; &gt;()))&gt; &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,79,205,163"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="49,5,161,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="108,44,108,79,103,79,103,44"/>
+</map>
