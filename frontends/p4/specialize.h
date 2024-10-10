@@ -222,7 +222,7 @@ class SpecializeAll : public PassRepeated {
     SpecializationMap specMap;
 
  public:
-    SpecializeAll(ReferenceMap *refMap, TypeMap *typeMap, FrontEndPolicy *policy);
+    SpecializeAll(TypeMap *typeMap, FrontEndPolicy *policy);
 };
 
 }  // namespace P4

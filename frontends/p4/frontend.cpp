@@ -149,17 +149,13 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
                                    std::ostream *outStream) {
     if (program == nullptr && options.listFrontendPasses == 0) return nullptr;
 
-    bool isv1 = options.isv1();
-    ReferenceMap refMap;
     TypeMap typeMap;
-    refMap.setIsV1(isv1);
 
     ParseAnnotations *parseAnnotations = policy->getParseAnnotations();
     if (!parseAnnotations) parseAnnotations = new ParseAnnotations();
 
     ConstantFoldingPolicy *constantFoldingPolicy = policy->getConstantFoldingPolicy();
 
-    auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     PassManager passes({
         new P4V1::GetV1ModelVersion,
         // Parse annotations
@@ -169,7 +165,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new ValidateParsedProgram(),
         // Synthesize some built-in constructs
         new CreateBuiltins(),
-        new ResolveReferences(&refMap, /* checkShadow */ true),
+        new CheckShadowing(),
         // First pass of constant folding, before types are known --
         // may be needed to compute types.
         new ConstantFolding(constantFoldingPolicy),
@@ -212,7 +208,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new SimplifyControlFlow(&typeMap),
         new SwitchAddDefault,
         new FrontEndDump(),  // used for testing the program at this point
-        new RemoveAllUnusedDeclarations(&refMap, *policy, true),
+        new RemoveAllUnusedDeclarations(*policy, true),
         new SimplifyParsers(),
         new ResetHeaders(&typeMap),
         new UniqueNames(),       // Give each local declaration a unique internal name
@@ -222,31 +218,31 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new SimplifyControlFlow(&typeMap),
         new SimplifySwitch(&typeMap),
         new MoveDeclarations(),  // Move all local declarations to the beginning
-        new SimplifyDefUse(&refMap, &typeMap),
+        new SimplifyDefUse(&typeMap),
         new UniqueParameters(&typeMap),
         new SimplifyControlFlow(&typeMap),
-        new SpecializeAll(&refMap, &typeMap, policy),
+        new SpecializeAll(&typeMap, policy),
         new RemoveParserControlFlow(&typeMap),
         new RemoveReturns(),
         new RemoveDontcareArgs(&typeMap),
         new MoveConstructors(),
-        new RemoveAllUnusedDeclarations(&refMap, *policy),
-        new RemoveRedundantParsers(&refMap, &typeMap, *policy),
+        new RemoveAllUnusedDeclarations(*policy),
+        new RemoveRedundantParsers(&typeMap, *policy),
         new ClearTypeMap(&typeMap),
-        evaluator,
+        new EvaluatorPass(&typeMap),
     });
     if (policy->optimize(options)) {
         passes.addPasses({
-            new Inline(&refMap, &typeMap, evaluator, *policy, options.optimizeParserInlining),
-            new InlineActions(&refMap, &typeMap, *policy),
-            new LocalizeAllActions(&refMap, *policy),
+            new Inline(&typeMap, *policy, options.optimizeParserInlining),
+            new InlineActions(&typeMap, *policy),
+            new LocalizeAllActions(*policy),
             new UniqueNames(),
             new UniqueParameters(&typeMap),
             // Must be done before inlining functions, to allow
             // function calls used as action arguments to be inlined
             // in the proper place.
             new RemoveActionParameters(&typeMap),
-            new InlineFunctions(&refMap, &typeMap, *policy),
+            new InlineFunctions(&typeMap, *policy),
             new SetHeaders(&typeMap),
             // Check for constants only after inlining
             new CheckConstants(&typeMap),
@@ -256,15 +252,15 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             new RemoveParserControlFlow(&typeMap),
             new UniqueNames(),       // needed again after inlining
             new MoveDeclarations(),  // needed again after inlining
-            new SimplifyDefUse(&refMap, &typeMap),
-            new RemoveAllUnusedDeclarations(&refMap, *policy),
+            new SimplifyDefUse(&typeMap),
+            new RemoveAllUnusedDeclarations(*policy),
             new SimplifyControlFlow(&typeMap),
         });
     }
     passes.addPasses({
         // Check for shadowing after all inlining passes. We disable this
         // check during inlining since it significantly slows compilation.
-        new ResolveReferences(&refMap, /* checkShadow */ true),
+        new CheckShadowing(),
         new HierarchicalNames(),
         new FrontEndLast(),
     });
