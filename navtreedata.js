@@ -96,7 +96,7 @@ var NAVTREEINDEX =
 "functions_enum.html",
 "namespace_p4_1_1_p4_tools.html#a4ff625cd65290ae0fe0bb406da593ea0",
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_register_traits_3_01_arch_1_1_p_s_a_01_4.html",
-"struct_p4_1_1_p4_v1_1_1_clone_type___model.html"
+"struct_p4_1_1_p4_v1_1_1_action_profile___model.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

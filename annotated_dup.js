@@ -407,6 +407,13 @@ var annotated_dup =
         [ "TempIndent", "class_p4_1_1_indent_ctl_1_1_temp_indent.html", null ]
       ] ],
       [ "IR", null, [
+        [ "Traversal", null, [
+          [ "Detail", null, [
+            [ "Traverse", "struct_p4_1_1_i_r_1_1_traversal_1_1_detail_1_1_traverse.html", null ]
+          ] ],
+          [ "Assign", "struct_p4_1_1_i_r_1_1_traversal_1_1_assign.html", null ],
+          [ "Index", "struct_p4_1_1_i_r_1_1_traversal_1_1_index.html", null ]
+        ] ],
         [ "has_static_type_name", "struct_p4_1_1_i_r_1_1has__static__type__name.html", null ],
         [ "has_static_type_name< T, std::void_t< decltype(T::static_type_name())> >", "struct_p4_1_1_i_r_1_1has__static__type__name_3_01_t_00_01std_1_1void__t_3_01decltype_07_t_1_1static__type__name_07_08_08_4_01_4.html", null ],
         [ "ID", "struct_p4_1_1_i_r_1_1_i_d.html", "struct_p4_1_1_i_r_1_1_i_d" ],
