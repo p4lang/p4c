@@ -1,6 +1,15 @@
 #!/bin/bash
 
-set -e
+# Script for building P4C on Fedora for continuous integration builds.
+
+set -e  # Exit on error.
+set -x  # Make command execution verbose
+
+# In Docker builds, sudo is not available. So make it a noop.
+if [ "$IN_DOCKER" == "TRUE" ]; then
+  echo "Executing within docker container."
+  function sudo() { command "$@"; }
+fi
 
 sudo dnf install -y -q \
     automake \
@@ -47,12 +56,12 @@ sudo dnf install -y -q \
     zlib-devel \
     ninja-build
 
-sudo pip3 install ply ptf scapy==2.5.0 wheel
+pip3 install --user ply ptf scapy==2.5.0 wheel
 
 # Install dependencies for the BMv2 PTF runner and P4Runtime.
-sudo pip3 install --upgrade protobuf==3.20.3
-sudo pip3 install --upgrade googleapis-common-protos==1.61.0
-sudo pip3 install --upgrade grpcio==1.59.2
+pip3 install --user --upgrade protobuf==3.20.3
+pip3 install --user --upgrade googleapis-common-protos==1.61.0
+pip3 install --user --upgrade grpcio==1.59.2
 
 MAKEFLAGS="-j$(nproc)"
 export MAKEFLAGS
