@@ -14,6 +14,7 @@
 #include "ir/dump.h"
 #include "ir/id.h"
 #include "ir/indexed_vector.h"
+#include "ir/ir-traversal.h"
 #include "ir/irutils.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
@@ -171,10 +172,10 @@ bool AbstractStepper::stepToStructSubexpr(
     return stepToSubexpr(
         nonValueComponent, result, state,
         [nonValueComponentIdx, rebuildCmd, subexpr](const Continuation::Parameter *v) {
-            auto *result = subexpr->clone();
-            auto *namedClone = result->components[nonValueComponentIdx]->clone();
-            namedClone->expression = v->param;
-            result->components[nonValueComponentIdx] = namedClone;
+            auto *result = IR::Traversal::apply(subexpr, &IR::StructExpression::components,
+                                                IR::Traversal::Index(nonValueComponentIdx),
+                                                &IR::NamedExpression::expression,
+                                                IR::Traversal::Assign(v->param));
             return rebuildCmd(result);
         });
 }
