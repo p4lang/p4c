@@ -137,14 +137,11 @@ $(function(){initNavTree('class_p4_1_1_remove_unused_declarations.html',''); ini
 <div class="dynheader">
 Inheritance diagram for P4::RemoveUnusedDeclarations:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="class_p4_1_1_remove_unused_declarations__inherit__graph.svg" width="242" height="183"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="class_p4_1_1_remove_unused_declarations__inherit__graph.svg" width="312" height="183"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a12dd7facfa2b2af0c64aec2f1e75920f" id="r_a12dd7facfa2b2af0c64aec2f1e75920f"><td class="memItemLeft" align="right" valign="top"><a id="a12dd7facfa2b2af0c64aec2f1e75920f" name="a12dd7facfa2b2af0c64aec2f1e75920f"></a>
-<a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>ifSystemFile</b> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *node)</td></tr>
-<tr class="separator:a12dd7facfa2b2af0c64aec2f1e75920f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a42329a2035e9fd627ab6609d66b6c52e" id="r_a42329a2035e9fd627ab6609d66b6c52e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_p4_1_1_visitor_1_1profile__t.html">Visitor::profile_t</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a42329a2035e9fd627ab6609d66b6c52e">init_apply</a> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *root) override</td></tr>
 <tr class="separator:a42329a2035e9fd627ab6609d66b6c52e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9163170fd46f8c757f07d44da90b7d8b" id="r_a9163170fd46f8c757f07d44da90b7d8b"><td class="memItemLeft" align="right" valign="top">virtual const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9163170fd46f8c757f07d44da90b7d8b">postorder</a> (<a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *n)</td></tr>
@@ -390,9 +387,9 @@ template&lt;class T , typename  = std::enable_if_t&lt;Util::has_SourceInfo_v&lt;
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-methods" name="pro-methods"></a>
 Protected Member Functions</h2></td></tr>
-<tr class="memitem:a26b71d8da70649d51d5129d8995d24c6" id="r_a26b71d8da70649d51d5129d8995d24c6"><td class="memItemLeft" align="right" valign="top"><a id="a26b71d8da70649d51d5129d8995d24c6" name="a26b71d8da70649d51d5129d8995d24c6"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>RemoveUnusedDeclarations</b> (const <a class="el" href="class_p4_1_1_reference_map.html">ReferenceMap</a> *refMap, bool warn)</td></tr>
-<tr class="separator:a26b71d8da70649d51d5129d8995d24c6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8e58ce44ba50cb2778cc1fc0e5052fe5" id="r_a8e58ce44ba50cb2778cc1fc0e5052fe5"><td class="memItemLeft" align="right" valign="top"><a id="a8e58ce44ba50cb2778cc1fc0e5052fe5" name="a8e58ce44ba50cb2778cc1fc0e5052fe5"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>RemoveUnusedDeclarations</b> (const <a class="el" href="class_p4_1_1_used_decl_set.html">UsedDeclSet</a> &amp;used, bool warn)</td></tr>
+<tr class="separator:a8e58ce44ba50cb2778cc1fc0e5052fe5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaf098956487c2e1631b573f5a68d2ba3" id="r_aaf098956487c2e1631b573f5a68d2ba3"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aaf098956487c2e1631b573f5a68d2ba3">giveWarning</a> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *node)</td></tr>
 <tr class="separator:aaf098956487c2e1631b573f5a68d2ba3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a41b32104c8d7527625d11f158b3bdb40" id="r_a41b32104c8d7527625d11f158b3bdb40"><td class="memItemLeft" align="right" valign="top"><a id="a41b32104c8d7527625d11f158b3bdb40" name="a41b32104c8d7527625d11f158b3bdb40"></a>
@@ -419,9 +416,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>visit_children</b> (c
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-attribs" name="pro-attribs"></a>
 Protected Attributes</h2></td></tr>
-<tr class="memitem:a220529dc192987a5c468d663edc4b371" id="r_a220529dc192987a5c468d663edc4b371"><td class="memItemLeft" align="right" valign="top"><a id="a220529dc192987a5c468d663edc4b371" name="a220529dc192987a5c468d663edc4b371"></a>
-const <a class="el" href="class_p4_1_1_reference_map.html">ReferenceMap</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>refMap</b></td></tr>
-<tr class="separator:a220529dc192987a5c468d663edc4b371"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a925bde597bbbad9d011be8ec949a4f82" id="r_a925bde597bbbad9d011be8ec949a4f82"><td class="memItemLeft" align="right" valign="top"><a id="a925bde597bbbad9d011be8ec949a4f82" name="a925bde597bbbad9d011be8ec949a4f82"></a>
+const <a class="el" href="class_p4_1_1_used_decl_set.html">UsedDeclSet</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>used</b></td></tr>
+<tr class="separator:a925bde597bbbad9d011be8ec949a4f82"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9f3cdb33606e9c641b1817f0512c521d" id="r_a9f3cdb33606e9c641b1817f0512c521d"><td class="memItemLeft" align="right" valign="top">std::set&lt; const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> * &gt; *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9f3cdb33606e9c641b1817f0512c521d">warned</a></td></tr>
 <tr class="separator:a9f3cdb33606e9c641b1817f0512c521d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pro_attribs_class_p4_1_1_transform"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_class_p4_1_1_transform')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="class_p4_1_1_transform.html">P4::Transform</a></td></tr>
@@ -619,10 +616,11 @@ const <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *&#160;</td><td
   </tr>
 </table>
 </div><div class="memdoc">
-<p>If not null, logs the following unused elements in @warn:</p><ul>
+<p>If not null, logs the following unused elements in @warned:</p><ul>
 <li>unused IR::P4Table nodes</li>
-<li>unused IR::Declaration_Instance nodes </li>
+<li>unused IR::Declaration_Instance nodes</li>
 </ul>
+<p>Unused extern instances are not removed but may still trigger warnings. The @warned set keeps track of warnings emitted in previous iterations to avoid emitting duplicate warnings. </p>
 
 </div>
 </div>

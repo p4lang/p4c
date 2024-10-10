@@ -233,6 +233,7 @@ var hierarchy =
         [ "P4::CheckExternInvocationCommon", "class_p4_1_1_check_extern_invocation_common.html", [
           [ "P4::DPDK::CheckPNAExternInvocation", "class_p4_1_1_d_p_d_k_1_1_check_p_n_a_extern_invocation.html", null ]
         ] ],
+        [ "P4::CollectUsedDeclarations", "class_p4_1_1_collect_used_declarations.html", null ],
         [ "P4::ComputeDefUse", "class_p4_1_1_compute_def_use.html", null ],
         [ "P4::ComputeDefUse::SetupJoinPoints", "class_p4_1_1_compute_def_use_1_1_setup_join_points.html", null ],
         [ "P4::ComputeParserCG", "class_p4_1_1_compute_parser_c_g.html", null ],
@@ -258,6 +259,7 @@ var hierarchy =
         [ "P4::DoStaticAssert", "class_p4_1_1_do_static_assert.html", null ],
         [ "P4::DoTableHit", "class_p4_1_1_do_table_hit.html", null ],
         [ "P4::DontcareArgs", "class_p4_1_1_dontcare_args.html", null ],
+        [ "P4::EliminateSubparserCalls", "class_p4_1_1_eliminate_subparser_calls.html", null ],
         [ "P4::EntryPriorities", "class_p4_1_1_entry_priorities.html", null ],
         [ "P4::FindActionParameters", "class_p4_1_1_find_action_parameters.html", null ],
         [ "P4::FindFunctionSpecializations", "class_p4_1_1_find_function_specializations.html", null ],
@@ -280,6 +282,7 @@ var hierarchy =
           [ "P4::BMV2::RemoveComplexExpressions", "class_p4_1_1_b_m_v2_1_1_remove_complex_expressions.html", null ]
         ] ],
         [ "P4::RemoveNestedStructs", "class_p4_1_1_remove_nested_structs.html", null ],
+        [ "P4::RemoveUnusedDeclarations", "class_p4_1_1_remove_unused_declarations.html", null ],
         [ "P4::RenameSymbols", "class_p4_1_1_rename_symbols.html", null ],
         [ "P4::ReplaceStructs", "class_p4_1_1_replace_structs.html", null ],
         [ "P4::ResolveReferences", "class_p4_1_1_resolve_references.html", null ],
@@ -533,6 +536,7 @@ var hierarchy =
       [ "P4::TypeSpecialization", "struct_p4_1_1_type_specialization.html", null ],
       [ "P4::TypeSpecializationMap", "struct_p4_1_1_type_specialization_map.html", null ],
       [ "P4::TypeSubstitution< T >", "class_p4_1_1_type_substitution.html", null ],
+      [ "P4::UsedDeclSet", "class_p4_1_1_used_decl_set.html", null ],
       [ "P4::Util::Comment", "class_p4_1_1_util_1_1_comment.html", null ],
       [ "P4::ValueMap", "class_p4_1_1_value_map.html", null ]
     ] ],
@@ -1310,6 +1314,7 @@ var hierarchy =
           [ "P4::BindTypeVariables", "class_p4_1_1_bind_type_variables.html", null ],
           [ "P4::CheckConstants", "class_p4_1_1_check_constants.html", null ],
           [ "P4::CheckCoreMethods", "class_p4_1_1_check_core_methods.html", null ],
+          [ "P4::CheckShadowing", "class_p4_1_1_check_shadowing.html", null ],
           [ "P4::ConstantFolding", "class_p4_1_1_constant_folding.html", null ],
           [ "P4::ConvertEnums", "class_p4_1_1_convert_enums.html", null ],
           [ "P4::ConvertErrors", "class_p4_1_1_convert_errors.html", null ],
@@ -1345,6 +1350,7 @@ var hierarchy =
           [ "P4::FlattenLogMsg", "class_p4_1_1_flatten_log_msg.html", null ],
           [ "P4::GlobalCopyPropagation", "class_p4_1_1_global_copy_propagation.html", null ],
           [ "P4::HSIndexSimplifier", "class_p4_1_1_h_s_index_simplifier.html", null ],
+          [ "P4::Inline", "class_p4_1_1_inline.html", null ],
           [ "P4::InlineActions", "class_p4_1_1_inline_actions.html", null ],
           [ "P4::InlineFunctions", "class_p4_1_1_inline_functions.html", null ],
           [ "P4::InlinePass", "class_p4_1_1_inline_pass.html", null ],
@@ -1365,7 +1371,6 @@ var hierarchy =
           [ "P4::PassRepeated", "class_p4_1_1_pass_repeated.html", [
             [ "P4::CopyStructures", "class_p4_1_1_copy_structures.html", null ],
             [ "P4::DPDK::DpdkAsmOptimization", "class_p4_1_1_d_p_d_k_1_1_dpdk_asm_optimization.html", null ],
-            [ "P4::Inline", "class_p4_1_1_inline.html", null ],
             [ "P4::RemoveAllUnusedDeclarations", "class_p4_1_1_remove_all_unused_declarations.html", null ],
             [ "P4::RemoveParserControlFlow", "class_p4_1_1_remove_parser_control_flow.html", null ],
             [ "P4::SideEffectOrdering", "class_p4_1_1_side_effect_ordering.html", null ],
@@ -1374,6 +1379,7 @@ var hierarchy =
             [ "P4::SpecializeGenericTypes", "class_p4_1_1_specialize_generic_types.html", null ]
           ] ],
           [ "P4::RemoveActionParameters", "class_p4_1_1_remove_action_parameters.html", null ],
+          [ "P4::RemoveAllUnusedHUDDeclarations", "class_p4_1_1_remove_all_unused_h_u_d_declarations.html", null ],
           [ "P4::RemoveAssertAssume", "class_p4_1_1_remove_assert_assume.html", null ],
           [ "P4::RemoveDontcareArgs", "class_p4_1_1_remove_dontcare_args.html", null ],
           [ "P4::RemoveExits", "class_p4_1_1_remove_exits.html", null ],
@@ -1437,6 +1443,7 @@ var hierarchy =
         [ "P4::CheckExternInvocationCommon", "class_p4_1_1_check_extern_invocation_common.html", null ],
         [ "P4::CheckNamedArgs", "class_p4_1_1_check_named_args.html", null ],
         [ "P4::ClearTypeMap", "class_p4_1_1_clear_type_map.html", null ],
+        [ "P4::CollectUsedDeclarations", "class_p4_1_1_collect_used_declarations.html", null ],
         [ "P4::CompileTimeOperations", "class_p4_1_1_compile_time_operations.html", null ],
         [ "P4::ComputeDefUse", "class_p4_1_1_compute_def_use.html", null ],
         [ "P4::ComputeParserCG", "class_p4_1_1_compute_parser_c_g.html", null ],

@@ -28,9 +28,10 @@ var searchData=
   ['unparsedconstant_25',['UnparsedConstant',['../namespace_p4.html#struct_p4_1_1_unparsed_constant',1,'P4']]],
   ['unrollloops_26',['UnrollLoops',['../class_p4_1_1_unroll_loops.html',1,'P4']]],
   ['updateactionforswitch_27',['UpdateActionForSwitch',['../class_p4_1_1_d_p_d_k_1_1_update_action_for_switch.html',1,'P4::DPDK']]],
-  ['uselesscasts_28',['UselessCasts',['../class_p4_1_1_useless_casts.html',1,'P4']]],
-  ['ut_5fhash_5fbucket_29',['UT_hash_bucket',['../struct_u_t__hash__bucket.html',1,'']]],
-  ['ut_5fhash_5fhandle_30',['UT_hash_handle',['../struct_u_t__hash__handle.html',1,'']]],
-  ['ut_5fhash_5ftable_31',['UT_hash_table',['../struct_u_t__hash__table.html',1,'']]],
-  ['utils_32',['Utils',['../class_p4_1_1_p4_tools_1_1_utils.html',1,'P4::P4Tools']]]
+  ['useddeclset_28',['UsedDeclSet',['../class_p4_1_1_used_decl_set.html',1,'P4']]],
+  ['uselesscasts_29',['UselessCasts',['../class_p4_1_1_useless_casts.html',1,'P4']]],
+  ['ut_5fhash_5fbucket_30',['UT_hash_bucket',['../struct_u_t__hash__bucket.html',1,'']]],
+  ['ut_5fhash_5fhandle_31',['UT_hash_handle',['../struct_u_t__hash__handle.html',1,'']]],
+  ['ut_5fhash_5ftable_32',['UT_hash_table',['../struct_u_t__hash__table.html',1,'']]],
+  ['utils_33',['Utils',['../class_p4_1_1_p4_tools_1_1_utils.html',1,'P4::P4Tools']]]
 ];

@@ -197,7 +197,7 @@ var searchData=
   ['istrue_194',['isTrue',['../class_p4_1_1_do_strength_reduction.html#a430e39c46cd804978545e8b7ca3aa76c',1,'P4::DoStrengthReduction']]],
   ['istype_195',['IsType',['../struct_p4_1_1_r_t_t_i_1_1_detail_1_1_is_type.html',1,'P4::RTTI::Detail']]],
   ['isunifiabletypevariable_196',['isUnifiableTypeVariable',['../class_p4_1_1_type_constraints.html#adf275ac5ed02bf832ba4f11860a9baab',1,'P4::TypeConstraints']]],
-  ['isused_197',['isUsed',['../class_p4_1_1_reference_map.html#af2f1886078ad29023c8df71d9dd8aaf7',1,'P4::ReferenceMap']]],
+  ['isused_197',['isUsed',['../class_p4_1_1_reference_map.html#af2f1886078ad29023c8df71d9dd8aaf7',1,'P4::ReferenceMap::isUsed()'],['../class_p4_1_1_used_decl_set.html#a3d53da6b2854776165f14dcac48d1901',1,'P4::UsedDeclSet::isUsed()']]],
   ['isv1_198',['isV1',['../class_p4_1_1_reference_map.html#afe67a5819292e5200fa0dc98c38cf410',1,'P4::ReferenceMap']]],
   ['isv1_199',['isv1',['../class_p4_1_1_parser_options.html#a199177c4bd3d579a7842a1a13e1c8d80',1,'P4::ParserOptions']]],
   ['isvalid_200',['IsValid',['../class_p4_1_1_is_valid.html',1,'P4']]],
