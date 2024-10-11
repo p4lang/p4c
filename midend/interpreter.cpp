@@ -747,6 +747,9 @@ void ExpressionEvaluator::postorder(const IR::Operation_Ternary *expression) {
             auto result = new SymbolicStaticError(expression->e0, "Uninitialized");
             set(expression, result);
             return;
+        } else {
+            BUG_CHECK(expression->is<IR::AbstractSlice>(), "%1%: Expected AbstractSlice.",
+                      expression);
         }
     } else if (e1i->isUninitialized()) {
         auto result = new SymbolicStaticError(expression->e1, "Uninitialized");
