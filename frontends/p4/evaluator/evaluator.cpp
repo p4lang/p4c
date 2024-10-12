@@ -17,6 +17,8 @@ limitations under the License.
 #include "evaluator.h"
 
 #include "frontends/common/constantFolding.h"
+#include "frontends/common/parser_options.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/parameterSubstitution.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 
@@ -352,6 +354,11 @@ bool Evaluator::preorder(const IR::StructExpression *se) {
 
 EvaluatorPass::EvaluatorPass(ReferenceMap *refMap, TypeMap *typeMap) {
     setName("EvaluatorPass");
+    if (!refMap) {
+        selfRefMap.reset(new ReferenceMap);
+        selfRefMap->setIsV1(P4CContext::get().options().isv1());
+        refMap = selfRefMap.get();
+    }
     evaluator = new P4::Evaluator(refMap, typeMap);
     passes.emplace_back(new P4::TypeChecking(refMap, typeMap));
     passes.emplace_back(evaluator);

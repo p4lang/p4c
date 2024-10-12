@@ -16,19 +16,48 @@ limitations under the License.
 
 #include "unusedDeclarations.h"
 
-#include "frontends/common/parser_options.h"
 #include "sideEffects.h"
 
 namespace P4 {
 
 RemoveUnusedDeclarations *RemoveUnusedPolicy::getRemoveUnusedDeclarationsPass(
-    const ReferenceMap *refMap, bool warn) const {
-    return new RemoveUnusedDeclarations(refMap, warn);
+    const UsedDeclSet &used, bool warn) const {
+    return new RemoveUnusedDeclarations(used, warn);
 }
 
 Visitor::profile_t RemoveUnusedDeclarations::init_apply(const IR::Node *node) {
-    LOG4("Reference map " << refMap);
+    LOG4("Used set " << used);
     return Transform::init_apply(node);
+}
+
+bool CollectUsedDeclarations::preorder(const IR::KeyElement *ke) {
+    visit(ke->annotations, "annotations");
+    visit(ke->expression, "expression");
+
+    auto decls = lookupMatchKind(ke->matchType->path->name);
+    BUG_CHECK(decls.size() == 1, "");
+    used.setUsed(decls.front());
+
+    return false;
+}
+
+bool CollectUsedDeclarations::preorder(const IR::PathExpression *path) {
+    auto decl = resolvePath(path->path, false);
+    if (decl) used.setUsed(decl);
+
+    return true;
+}
+
+bool CollectUsedDeclarations::preorder(const IR::Type_Name *type) {
+    auto decl = resolvePath(type->path, true);
+    if (decl) used.setUsed(decl);
+
+    return true;
+}
+
+void UsedDeclSet::dbprint(std::ostream &out) const {
+    if (usedDecls.empty()) out << "Empty" << '\n';
+    for (const auto *decl : usedDecls) out << dbp(decl) << '\n';
 }
 
 bool RemoveUnusedDeclarations::giveWarning(const IR::Node *node) {
@@ -40,7 +69,7 @@ bool RemoveUnusedDeclarations::giveWarning(const IR::Node *node) {
 
 const IR::Node *RemoveUnusedDeclarations::preorder(IR::Type_Enum *type) {
     prune();  // never remove individual enum members
-    if (!refMap->isUsed(getOriginal<IR::Type_Enum>())) {
+    if (!used.isUsed(getOriginal<IR::Type_Enum>())) {
         LOG3("Removing " << type);
         return nullptr;
     }
@@ -49,7 +78,7 @@ const IR::Node *RemoveUnusedDeclarations::preorder(IR::Type_Enum *type) {
 
 const IR::Node *RemoveUnusedDeclarations::preorder(IR::Type_SerEnum *type) {
     prune();  // never remove individual enum members
-    if (!refMap->isUsed(getOriginal<IR::Type_SerEnum>())) {
+    if (!used.isUsed(getOriginal<IR::Type_SerEnum>())) {
         LOG3("Removing " << type);
         return nullptr;
     }
@@ -58,7 +87,7 @@ const IR::Node *RemoveUnusedDeclarations::preorder(IR::Type_SerEnum *type) {
 
 const IR::Node *RemoveUnusedDeclarations::preorder(IR::P4Control *cont) {
     auto orig = getOriginal<IR::P4Control>();
-    if (!refMap->isUsed(orig)) {
+    if (!used.isUsed(orig)) {
         if (giveWarning(orig))
             warn(ErrorType::WARN_UNUSED, "Control %2% is not used; removing", cont,
                  cont->externalName());
@@ -75,7 +104,7 @@ const IR::Node *RemoveUnusedDeclarations::preorder(IR::P4Control *cont) {
 
 const IR::Node *RemoveUnusedDeclarations::preorder(IR::P4Parser *parser) {
     auto orig = getOriginal<IR::P4Parser>();
-    if (!refMap->isUsed(orig)) {
+    if (!used.isUsed(orig)) {
         if (giveWarning(orig))
             warn(ErrorType::WARN_UNUSED, "Parser %2% is not used; removing", parser,
                  parser->externalName());
@@ -91,7 +120,7 @@ const IR::Node *RemoveUnusedDeclarations::preorder(IR::P4Parser *parser) {
 }
 
 const IR::Node *RemoveUnusedDeclarations::preorder(IR::P4Table *table) {
-    if (!refMap->isUsed(getOriginal<IR::IDeclaration>())) {
+    if (!used.isUsed(getOriginal<IR::IDeclaration>())) {
         if (giveWarning(getOriginal()))
             warn(ErrorType::WARN_UNUSED, "Table %1% is not used; removing", table);
         LOG3("Removing " << table);
@@ -115,7 +144,7 @@ const IR::Node *RemoveUnusedDeclarations::process(const IR::IDeclaration *decl) 
     if (decl->externalName(decl->getName().name).startsWith("__"))
         // Internal identifiers, e.g., __v1model_version
         return decl->getNode();
-    if (refMap->isUsed(getOriginal<IR::IDeclaration>())) return decl->getNode();
+    if (used.isUsed(getOriginal<IR::IDeclaration>())) return decl->getNode();
     LOG3("Removing " << getOriginal());
     prune();  // no need to go deeper
     return nullptr;
@@ -131,7 +160,7 @@ const IR::Node *RemoveUnusedDeclarations::preorder(IR::Parameter *param) {
 }
 
 const IR::Node *RemoveUnusedDeclarations::warnIfUnused(const IR::Node *node) {
-    if (!refMap->isUsed(getOriginal<IR::IDeclaration>()))
+    if (!used.isUsed(getOriginal<IR::IDeclaration>()))
         if (giveWarning(getOriginal())) warn(ErrorType::WARN_UNUSED, "'%1%' is unused", node);
     return node;
 }
@@ -139,13 +168,13 @@ const IR::Node *RemoveUnusedDeclarations::warnIfUnused(const IR::Node *node) {
 const IR::Node *RemoveUnusedDeclarations::preorder(IR::Declaration_Instance *decl) {
     // Don't delete instances; they may have consequences on the control-plane API
     if (decl->getName().name == IR::P4Program::main && getParent<IR::P4Program>()) return decl;
-    if (!refMap->isUsed(getOriginal<IR::Declaration_Instance>())) {
+    if (!used.isUsed(getOriginal<IR::Declaration_Instance>())) {
         if (giveWarning(getOriginal())) warn(ErrorType::WARN_UNUSED, "%1%: unused instance", decl);
         // We won't delete extern instances; these may be useful even if not references.
         auto type = decl->type;
         if (type->is<IR::Type_Specialized>()) type = type->to<IR::Type_Specialized>()->baseType;
         if (type->is<IR::Type_Name>())
-            type = refMap->getDeclaration(type->to<IR::Type_Name>()->path, true)->to<IR::Type>();
+            type = getDeclaration(type->to<IR::Type_Name>()->path, true)->to<IR::Type>();
         if (!type->is<IR::Type_Extern>()) return process(decl);
         prune();
         return decl;
@@ -160,7 +189,7 @@ const IR::Node *RemoveUnusedDeclarations::preorder(IR::ParserState *state) {
         state->name == IR::ParserState::start)
         return state;
 
-    if (refMap->isUsed(getOriginal<IR::ParserState>())) return state;
+    if (used.isUsed(getOriginal<IR::ParserState>())) return state;
     LOG3("Removing " << state);
     prune();
     return nullptr;

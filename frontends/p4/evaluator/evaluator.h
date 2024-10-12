@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef EVALUATOR_EVALUATOR_H_
 #define EVALUATOR_EVALUATOR_H_
 
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
@@ -113,10 +114,12 @@ class Evaluator final : public Inspector, public IHasBlock {
 /// high-level constructs.
 class EvaluatorPass final : public PassManager, public IHasBlock {
     P4::Evaluator *evaluator;
+    std::unique_ptr<ReferenceMap> selfRefMap;
 
  public:
     IR::ToplevelBlock *getToplevelBlock() const override { return evaluator->getToplevelBlock(); }
     EvaluatorPass(ReferenceMap *refMap, TypeMap *typeMap);
+    explicit EvaluatorPass(TypeMap *typeMap) : EvaluatorPass(nullptr, typeMap) {}
 };
 
 }  // namespace P4

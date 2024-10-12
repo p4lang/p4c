@@ -12,6 +12,7 @@
 #include "backends/p4tools/common/lib/trace_event_types.h"
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/declaration.h"
+#include "ir/ir-traversal.h"
 #include "ir/irutils.h"
 #include "ir/node.h"
 #include "ir/solver.h"
@@ -137,23 +138,22 @@ bool ExprStepper::resolveMethodCallArguments(const IR::MethodCallExpression *cal
         // the argument is not yet symbolic, try to resolve it.
         return stepToSubexpr(
             argExpr, result, state, [call, idx, param](const Continuation::Parameter *v) {
-                // TODO: It seems expensive to copy the function every time we resolve an argument.
+                // TODO: It seems expensive to copy the function call every time we resolve an
+                // argument.
                 // We should do this all at once. But how?
                 // This is the same problem as in stepToListSubexpr
                 // Thankfully, most method calls have less than 10 arguments.
-                auto *clonedCall = call->clone();
-                auto *arguments = clonedCall->arguments->clone();
-                auto *arg = arguments->at(idx)->clone();
-                const IR::Expression *computedExpr = v->param;
-                // A parameter with direction InOut might be read and also written to.
-                // We capture this ambiguity with an InOutReference.
-                if (param->direction == IR::Direction::InOut) {
-                    auto stateVar = ToolsVariables::convertReference(arg->expression);
-                    computedExpr = new IR::InOutReference(stateVar, computedExpr);
-                }
-                arg->expression = computedExpr;
-                (*arguments)[idx] = arg;
-                clonedCall->arguments = arguments;
+                auto *clonedCall = IR::Traversal::apply(
+                    call, &IR::MethodCallExpression::arguments, IR::Traversal::Index(idx),
+                    &IR::Argument::expression, [&](IR::Expression *expr) -> const IR::Expression * {
+                        // A parameter with direction InOut might be read and also written to.
+                        // We capture this ambiguity with an InOutReference.
+                        if (param->direction == IR::Direction::InOut) {
+                            auto stateVar = ToolsVariables::convertReference(expr);
+                            return new IR::InOutReference(stateVar, v->param);
+                        }
+                        return v->param;
+                    });
                 return Continuation::Return(clonedCall);
             });
     }

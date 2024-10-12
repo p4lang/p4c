@@ -94,7 +94,7 @@ DoExpandLookahead::ExpansionInfo *DoExpandLookahead::convertLookahead(
     ta->push_back(bittype);
     auto mc = new IR::MethodCallExpression(expression->srcInfo, expression->method->clone(), ta,
                                            expression->arguments);
-    auto pathe = new IR::PathExpression(name);
+    auto pathe = new IR::PathExpression(bittype, name);
     auto lookupCall = new IR::AssignmentStatement(expression->srcInfo, pathe, mc);
     auto result = new ExpansionInfo;
     result->statement = lookupCall;

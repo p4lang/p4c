@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef FRONTENDS_P4_SIMPLIFYDEFUSE_H_
 #define FRONTENDS_P4_SIMPLIFYDEFUSE_H_
 
+#include "frontends/common/parser_options.h"
 #include "frontends/p4/cloner.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
@@ -61,6 +62,8 @@ class RemoveHidden : public Transform {
 };
 
 class SimplifyDefUse : public PassManager {
+    ReferenceMap refMap;
+
     class Cloner : public CloneExpressions {
      public:
         Cloner() { setName("Cloner"); }
@@ -90,18 +93,18 @@ class SimplifyDefUse : public PassManager {
     };
 
  public:
-    SimplifyDefUse(ReferenceMap *refMap, TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
-        CHECK_NULL(refMap);
+    explicit SimplifyDefUse(TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
         CHECK_NULL(typeMap);
+
+        refMap.setIsV1(P4CContext::get().options().isv1());
 
         // SimplifyDefUse needs the expression tree *not* to be a DAG,
         // because it keeps state in hash-maps indexed with PathExpressions.
         // This is achieved by Cloner.
         passes.push_back(new Cloner());
-        if (!typeChecking) typeChecking = new TypeChecking(refMap, typeMap);
+        if (!typeChecking) typeChecking = new TypeChecking(&refMap, typeMap);
 
-        auto repeated = new PassRepeated({typeChecking, new DoSimplifyDefUse(refMap, typeMap)});
-        passes.push_back(repeated);
+        passes.push_back(new PassRepeated({typeChecking, new DoSimplifyDefUse(&refMap, typeMap)}));
         passes.push_back(new RemoveHidden());
         setName("SimplifyDefUse");
     }

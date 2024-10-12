@@ -38,6 +38,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/hvec_map.cpp
   gtest/hvec_set.cpp
   gtest/indexed_vector.cpp
+  gtest/ir-traversal-test.cpp
   gtest/json_test.cpp
   gtest/map.cpp
   gtest/midend_def_use.cpp

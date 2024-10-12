@@ -42,7 +42,7 @@ const IR::Node *EliminateSubparserCalls::postorder(IR::MethodCallStatement *mcs)
     // will be reported in later passes (i.e. DiscoverInlining).
     if (!findContext<IR::ParserState>()) return mcs;
 
-    auto mi = MethodInstance::resolve(mcs->methodCall, refMap, typeMap, true);
+    auto mi = MethodInstance::resolve(mcs->methodCall, this, typeMap, true);
     if (!mi->isApply()) return mcs;
 
     auto apply = mi->to<ApplyMethod>()->applyObject;
@@ -52,7 +52,7 @@ const IR::Node *EliminateSubparserCalls::postorder(IR::MethodCallStatement *mcs)
     auto declInstance = mi->object->to<IR::Declaration_Instance>();
     if (!declInstance) return mcs;
 
-    auto decl = refMap->getDeclaration(declInstance->type->to<IR::Type_Name>()->path);
+    auto decl = getDeclaration(declInstance->type->to<IR::Type_Name>()->path);
     auto p4parser = decl->to<IR::P4Parser>();
     if (!p4parser || !redundantParsers.count(p4parser)) return mcs;
 
