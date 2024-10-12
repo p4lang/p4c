@@ -1,0 +1,7 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" href="$class_p4_1_1_util_1_1_enumerator.html" title=" " alt="" coords="5,45,196,70"/>
+<area shape="rect" id="Node000001" href="$class_p4_1_1_util_1_1_as_enumerator.html" title="Casts each element." alt="" coords="250,5,419,45"/>
+<area shape="poly" id="edge1144_Node000000_Node000001" title=" " alt="" coords="207,40,249,34,250,40,208,45"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_util_1_1_map_enumerator.html" title="Transforms all elements from type T to type S." alt="" coords="244,69,425,109"/>
+<area shape="poly" id="edge1145_Node000000_Node000002" title=" " alt="" coords="208,69,244,74,243,80,207,75"/>
+</map>

@@ -1,0 +1,11 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" href="$class_p4_1_1_util_1_1_enumerator.html" title="Type&#45;erased Enumerator interface." alt="" coords="5,84,196,109"/>
+<area shape="rect" id="Node000001" href="$class_p4_1_1_util_1_1_concat_enumerator.html" title="Concatenation." alt="" coords="244,5,480,31"/>
+<area shape="poly" id="edge1147_Node000000_Node000001" title=" " alt="" coords="142,76,243,39,289,28,290,33,245,45,144,81"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_util_1_1_empty_enumerator.html" title="Always empty iterator (equivalent to end())" alt="" coords="245,55,479,80"/>
+<area shape="poly" id="edge1148_Node000000_Node000002" title=" " alt="" coords="209,82,248,77,249,83,210,87"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_util_1_1_filter_enumerator.html" title=" " alt="" coords="269,105,455,145"/>
+<area shape="poly" id="edge1149_Node000000_Node000003" title=" " alt="" coords="210,106,269,112,268,117,209,111"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_util_1_1_single_enumerator.html" title=" " alt="" coords="247,169,477,195"/>
+<area shape="poly" id="edge1150_Node000000_Node000004" title=" " alt="" coords="141,113,190,134,245,154,292,167,291,172,243,159,188,139,139,118"/>
+</map>

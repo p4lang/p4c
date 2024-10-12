@@ -1,0 +1,13 @@
+<map id="P4::KeyIsSimple" name="P4::KeyIsSimple">
+<area shape="rect" id="Node000001" title=" " alt="" coords="301,5,428,31"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_is_like_left_value.html" title=" " alt="" coords="5,79,148,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="306,37,124,81,123,76,305,31"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_is_non_constant_array_index.html" title=" " alt="" coords="172,79,384,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="342,41,294,81,290,76,339,37"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_is_valid.html" title=" " alt="" coords="408,79,497,104"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="391,37,440,76,437,81,388,41"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_or_policy.html" title=" " alt="" coords="521,79,621,104"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="412,33,539,76,537,81,410,38"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_is_mask.html" title=" " alt="" coords="31,152,123,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="79,118,79,152,74,152,74,118"/>
+</map>

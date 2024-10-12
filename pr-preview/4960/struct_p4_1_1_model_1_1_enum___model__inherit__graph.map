@@ -1,0 +1,17 @@
+<map id="P4::Model::Enum_Model" name="P4::Model::Enum_Model">
+<area shape="rect" id="Node000001" title="Enum_Model : Type_Model." alt="" coords="399,141,577,166"/>
+<area shape="rect" id="Node000004" href="$struct_p4_1_1_p4_v1_1_1_algorithm___model.html" title=" " alt="" coords="634,5,785,45"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="514,130,564,93,624,55,650,43,652,48,627,60,567,97,517,134"/>
+<area shape="rect" id="Node000005" href="$struct_p4_1_1_p4_v1_1_1_clone_type___model.html" title=" " alt="" coords="632,69,787,109"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="545,134,639,107,640,112,547,139"/>
+<area shape="rect" id="Node000006" href="$struct_p4_1_1_p4_v1_1_1_counter_type___model.html" title=" " alt="" coords="625,133,793,173"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="591,151,625,151,625,156,591,156"/>
+<area shape="rect" id="Node000007" href="$struct_p4_1_1_p4_v1_1_1_meter_type___model.html" title=" " alt="" coords="632,197,787,237"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="547,167,640,195,639,200,545,173"/>
+<area shape="rect" id="Node000008" href="$struct_p4_1_1_u_b_p_f_1_1_algorithm___model.html" title=" " alt="" coords="633,261,785,301"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="517,173,567,210,627,247,652,259,650,264,624,252,564,214,514,177"/>
+<area shape="rect" id="Node000002" href="$struct_p4_1_1_model_1_1_type___model.html" title=" " alt="" coords="180,141,351,166"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="365,151,398,151,398,156,365,156"/>
+<area shape="rect" id="Node000003" href="$struct_p4_1_1_model_1_1_elem.html" title=" " alt="" coords="5,141,132,166"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="146,151,180,151,180,156,146,156"/>
+</map>

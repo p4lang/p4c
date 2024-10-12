@@ -1,0 +1,25 @@
+var searchData=
+[
+  ['dcg_0',['dcg',['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#aee1eb0f0bad99011c09427a7f13d01d4',1,'P4::P4Tools::P4Testgen::TestgenOptions']]],
+  ['declaration_1',['declaration',['../struct_p4_1_1_type_specialization.html#a9048f2a01577432158410009998aab6d',1,'P4::TypeSpecialization']]],
+  ['declarations_2',['declarations',['../struct_p4_1_1_specialization_info.html#a42eb56dce3bd0c0f9630c3e003526b89',1,'P4::SpecializationInfo']]],
+  ['decltocallee_3',['declToCallee',['../struct_p4_1_1_inline_summary_1_1_per_caller.html#a389ebb63e1408de17c1a32de48a6cc00',1,'P4::InlineSummary::PerCaller']]],
+  ['default_5flearner_5ftable_5ftimeout_4',['default_learner_table_timeout',['../namespace_p4.html#a8dc4e88c9f1cd7362f0d6a96a1c45324',1,'P4']]],
+  ['defaultisimmutable_5',['defaultIsImmutable',['../struct_p4_1_1_p4_tools_1_1_table_utils_1_1_table_properties.html#a36afd54ee72025275e1bf33e9d8b7f20',1,'P4::P4Tools::TableUtils::TableProperties']]],
+  ['deparser_6',['deparser',['../class_p4_1_1_e_b_p_f_1_1_e_b_p_f_program.html#ab65b2fb3b843696094812b6bbf483be5',1,'P4::EBPF::EBPFProgram']]],
+  ['derivedfrom_7',['derivedFrom',['../class_p4_1_1_type_constraint.html#ad8c58d1c90ae8899160e039aa4eae327',1,'P4::TypeConstraint']]],
+  ['directcountermap_8',['directCounterMap',['../class_p4_1_1_program_structure.html#a263ea065d4deaaaff97260b120d18754',1,'P4::ProgramStructure']]],
+  ['direction_9',['DIRECTION',['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_symbolic_vars.html#adec64387bf3c779dd01186cf9f7516a1',1,'P4::P4Tools::P4Testgen::Pna::PnaSymbolicVars']]],
+  ['direction_10',['direction',['../namespace_p4_1_1_d_p_d_k.html#aff1e4d101e697a6bd3a2b47a52e11df1',1,'P4::DPDK::TableAttributes']]],
+  ['directmetermap_11',['directMeterMap',['../class_p4_1_1_program_structure.html#a6949dff18c1cf68422ead4da855a3b38',1,'P4::ProgramStructure']]],
+  ['directmeters_12',['directMeters',['../class_p4_1_1_p4_v1_1_1_program_structure.html#a412f100718d1230c7ea73e3e876ba69b',1,'P4::P4V1::ProgramStructure']]],
+  ['disableinformationlogging_13',['disableInformationLogging',['../class_p4_1_1_p4_tools_1_1_abstract_p4c_tool_options.html#ade4cc5a6dc3fa99c403f3baf73f004c7',1,'P4::P4Tools::AbstractP4cToolOptions']]],
+  ['donotcompile_14',['doNotCompile',['../class_p4_1_1_parser_options.html#a5c1ea3b2c15f95195a45d75756727133',1,'P4::ParserOptions']]],
+  ['donotpreprocess_15',['doNotPreprocess',['../class_p4_1_1_parser_options.html#ac286dc354d8063099fc9a683b07f55f2',1,'P4::ParserOptions']]],
+  ['dpdk_5fdefault_5ftable_5fsize_16',['dpdk_default_table_size',['../namespace_p4.html#a4a8660f94a6724c3220d35ca163d7085',1,'P4']]],
+  ['dpdk_5flearner_5fmax_5fconfigurable_5ftimeout_5fvalues_17',['dpdk_learner_max_configurable_timeout_values',['../namespace_p4.html#a89dcb743b9b946f0b26429bff33671bc',1,'P4']]],
+  ['dpdk_5fmax_5foperand_5fsize_18',['dpdk_max_operand_size',['../namespace_p4.html#a0e819dcdecc9b11a4df0244d8657256b',1,'P4']]],
+  ['drop_5fvar_19',['DROP_VAR',['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_constants.html#a6f4ae5d9e582aa44fd2b984cb0de64ea',1,'P4::P4Tools::P4Testgen::Pna::PnaConstants']]],
+  ['droppedpacketonly_20',['droppedPacketOnly',['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#a0495aa45fafbc14c0b183a0fe0cee05e',1,'P4::P4Tools::P4Testgen::TestgenOptions']]],
+  ['dumpfolder_21',['dumpFolder',['../class_p4_1_1_parser_options.html#ac8beada7861751ebe6700edc717e7c8b',1,'P4::ParserOptions']]]
+];
