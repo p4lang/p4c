@@ -224,7 +224,7 @@ git push -f
   wish to run one or more of these, look through the list of Github
   labels for the p4c project
   [here](https://github.com/p4lang/p4c/labels) for labels whose name
-  begins with "runs-".  Add one or more of those labels to your PR.
+  begins with "run-".  Add one or more of those labels to your PR.
   On all future pushes to the branch of that PR, those additional CI
   runs should run.
 
