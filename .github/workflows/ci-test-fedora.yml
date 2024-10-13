@@ -21,6 +21,8 @@ jobs:
     container:
       image: registry.fedoraproject.org/fedora:latest
       options: --privileged
+      env:
+        IN_DOCKER: "TRUE"
     env:
       CTEST_PARALLEL_LEVEL: 4
     steps:
@@ -47,6 +49,6 @@ jobs:
           cmake --build build -- -j $(nproc)
 
       - name: Run p4c tests (Fedora Linux)
-        # Need to use sudo for the eBPF kernel tests.
-        run: sudo -E ctest --output-on-failure --schedule-random
+        run: |
+          export PATH="$HOME/.local/bin:$PATH"; ctest --output-on-failure --schedule-random
         working-directory: ./build
