@@ -969,8 +969,8 @@ class FindUninitialized : public Inspector {
         return false;
     }
 
-    // Check whether the expression the child of a Member or
-    // ArrayIndex.  I.e., for and expression such as a.x within a
+    // Check whether the expression is the child of a Member or
+    // ArrayIndex.  I.e., for an expression such as a.x within a
     // larger expression a.x.b it returns "false".  This is because
     // the expression is not reading a.x, it is reading just a.x.b.
     // ctx must be the context of the current expression in the
@@ -978,17 +978,16 @@ class FindUninitialized : public Inspector {
     bool isFinalRead(const Visitor::Context *ctx, const IR::Expression *expression) {
         if (ctx == nullptr) return true;
 
-        // If this expression is a child of a Member of a left
+        // If this expression is a child of a Member or a left
         // child of an ArrayIndex then we don't report it here, only
         // in the parent.
         auto parentexp = ctx->node->to<IR::Expression>();
         if (parentexp != nullptr) {
             if (parentexp->is<IR::Member>()) return false;
-            if (parentexp->is<IR::ArrayIndex>()) {
+            if (const auto *ai = parentexp->to<IR::ArrayIndex>()) {
                 // Since we are doing the visit using a custom order,
                 // ctx->child_index is not accurate, so we check
                 // manually whether this is the left child.
-                auto ai = parentexp->to<IR::ArrayIndex>();
                 if (ai->left == expression) return false;
             }
         }
