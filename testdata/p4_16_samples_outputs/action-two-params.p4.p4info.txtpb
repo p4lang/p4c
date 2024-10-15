@@ -23,6 +23,9 @@ tables {
     id: 25652968
   }
   const_default_action_id: 25652968
+  initial_default_action {
+    action_id: 25652968
+  }
   size: 1024
   is_const_table: true
   has_initial_entries: true

@@ -17,6 +17,9 @@ tables {
     id: 29027610
   }
   const_default_action_id: 20013177
+  initial_default_action {
+    action_id: 20013177
+  }
   size: 1000000
 }
 actions {

@@ -13,6 +13,13 @@ tables {
   action_refs {
     id: 23144899
   }
+  initial_default_action {
+    action_id: 23144899
+    arguments {
+      param_id: 1
+      value: "\000\000\000\n"
+    }
+  }
   size: 1024
 }
 actions {
