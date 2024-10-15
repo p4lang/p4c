@@ -28,9 +28,6 @@ tables {
   action_refs {
     id: 26776898
   }
-  initial_default_action {
-    action_id: 25218163
-  }
   size: 1024
   has_initial_entries: true
 }
@@ -57,9 +54,6 @@ tables {
   }
   action_refs {
     id: 26776898
-  }
-  initial_default_action {
-    action_id: 25218163
   }
   size: 1024
   has_initial_entries: true
@@ -88,9 +82,6 @@ tables {
   action_refs {
     id: 26776898
   }
-  initial_default_action {
-    action_id: 25218163
-  }
   size: 1024
   has_initial_entries: true
 }
@@ -117,9 +108,6 @@ tables {
   }
   action_refs {
     id: 26776898
-  }
-  initial_default_action {
-    action_id: 25218163
   }
   size: 1024
   has_initial_entries: true
@@ -148,9 +136,6 @@ tables {
   action_refs {
     id: 26776898
   }
-  initial_default_action {
-    action_id: 25218163
-  }
   size: 1024
   has_initial_entries: true
 }
@@ -177,9 +162,6 @@ tables {
   }
   action_refs {
     id: 26776898
-  }
-  initial_default_action {
-    action_id: 25218163
   }
   size: 1024
   has_initial_entries: true
@@ -208,9 +190,6 @@ tables {
   action_refs {
     id: 26776898
   }
-  initial_default_action {
-    action_id: 25218163
-  }
   size: 1024
   has_initial_entries: true
 }
@@ -238,9 +217,6 @@ tables {
   action_refs {
     id: 26776898
   }
-  initial_default_action {
-    action_id: 25218163
-  }
   size: 1024
   has_initial_entries: true
 }
@@ -267,9 +243,6 @@ tables {
   }
   action_refs {
     id: 26776898
-  }
-  initial_default_action {
-    action_id: 25218163
   }
   size: 1024
   has_initial_entries: true
