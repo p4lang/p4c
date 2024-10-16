@@ -1,0 +1,25 @@
+Distribution README
+* The compiler source is being distributed under an Intel license. Please adhere to the licensing requirements.
+
+Prerequisites
+* The compiler can be built from the sources in an environment setup to build and run p4studio.
+* Ensure that the build environment has p4studio dependencies installed.
+* Ensure that the SDE and SDE_INSTALL env variables are setup. These are at the same root level.
+* The source should be untarred to the $SDE path.
+
+Instructions for how to run the compiler
+* Untar the bf-p4c_source.tar.gz package to $SDE path
+* cd $SDE/bf-p4c_source
+
+Additional setup required
+* ./ubuntu20.04.setup
+* sudo apt-get install -y rapidjson-dev libfl-dev
+* Install z3 from https://github.com/Z3Prover/z3 (version z3-4.8.8)
+
+* ./bootstrap_bfn_compilers.sh --minimal-config --no-ptf -DCMAKE_BUILD_TYPE=RELEASE [--prefix <path>] [--enable-doxygen-docs]
+* cd build
+* make -j N [check] [install]
+
+Known issues and limitations
+
+Resources
