@@ -35,7 +35,7 @@ header crc_t {
     bit<32> f3;
     bit<32> f4;
 
-    bit<16> crc;
+    bit<32> crc;
 }
 
 struct my_ingress_headers_t {
@@ -87,11 +87,9 @@ control ingress(
     inout pna_main_output_metadata_t ostd
 )
 {
-    Hash<bit<16>>(PNA_HashAlgorithm_t.CRC16) h;
-    const bit<16> base = 15;
-    const bit<16> max = 32;
+    Hash<bit<32>>(PNA_HashAlgorithm_t.CRC32) h;
     apply {
-        hdr.crc.crc = h.get_hash(base, {hdr.crc.f1, hdr.crc.f2, hdr.crc.f3, hdr.crc.f4}, max);
+        hdr.crc.crc = h.get_hash({hdr.crc.f1, hdr.crc.f2, hdr.crc.f3, hdr.crc.f4});
     }
 }
 

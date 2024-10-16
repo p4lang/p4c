@@ -453,6 +453,72 @@ void EBPFDigestPNA::emitInitializer(EBPF::CodeBuilder *builder) const {
     builder->newline();
 }
 
+void EBPFHashPNA::emitVariables(EBPF::CodeBuilder *builder) {
+    if (engine) {
+        engine->emitVariables(builder, declaration);
+    }
+}
+
+void EBPFHashPNA::processMethod(EBPF::CodeBuilder *builder, cstring method,
+                                const IR::MethodCallExpression *expr, Visitor *visitor) {
+    engine->setVisitor(visitor);
+
+    if (method == "get_hash") {
+        BUG_CHECK(expr->arguments->size() == 1 || expr->arguments->size() == 3,
+                  "Expected 1 or 3 arguments: %1%", expr);
+        engine->emitGet(builder);
+    } else {
+        ::P4::error(ErrorType::ERR_UNEXPECTED, "Unexpected method call %1%", expr);
+    }
+}
+
+void EBPFHashPNA::calculateHash(EBPF::CodeBuilder *builder, const IR::MethodCallExpression *expr,
+                                Visitor *visitor) {
+    engine->setVisitor(visitor);
+    engine->emitClear(builder);
+    engine->emitAddData(builder, expr->arguments->size() == 3 ? 1 : 0, expr);
+    builder->newline();
+}
+
+void CRCChecksumAlgorithmPNA::emitGet(EBPF::CodeBuilder *builder) {
+    builder->appendFormat("%s", registerVar.c_str());
+}
+
+void CRCChecksumAlgorithmPNA::emitAddData(EBPF::CodeBuilder *builder, int dataPos,
+                                          const IR::MethodCallExpression *expr) {
+    emitAddData(builder, unpackArguments(expr, dataPos), expr);
+}
+
+void CRCChecksumAlgorithmPNA::emitAddData(EBPF::CodeBuilder *builder,
+                                          const ArgumentsList &arguments,
+                                          const IR::MethodCallExpression *expr) {
+    cstring kfunc;
+    if (crcWidth == 16) {
+        kfunc = expr->arguments->size() == 3 ? "bpf_p4tc_ext_hash_base_crc16"_cs
+                                             : "bpf_p4tc_ext_hash_crc16"_cs;
+    } else {
+        kfunc = expr->arguments->size() == 3 ? "bpf_p4tc_ext_hash_base_crc32"_cs
+                                             : "bpf_p4tc_ext_hash_crc32"_cs;
+    }
+    for (auto field : arguments) {
+        builder->newline();
+        builder->emitIndent();
+        builder->appendFormat("%s(&", kfunc);
+        visitor->visit(field);
+        builder->append(", sizeof(");
+        visitor->visit(field);
+        if (expr->arguments->size() == 3) {
+            builder->append("), ");
+            visitor->visit(expr->arguments->at(0));
+            builder->append(", ");
+            visitor->visit(expr->arguments->at(2));
+            builder->appendFormat(", %s);", registerVar);
+        } else {
+            builder->appendFormat("), %s);", registerVar);
+        }
+    }
+}
+
 void EBPFDigestPNA::emitPushElement(EBPF::CodeBuilder *builder, const IR::Expression *elem,
                                     Inspector *codegen) const {
     emitInitializer(builder);
