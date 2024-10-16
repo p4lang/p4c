@@ -1,0 +1,15 @@
+# Build output
+build/
+dist/
+
+# Generated file (in the bf-p4c build process)
+schemas/targets.py
+
+# Python compiled files
+*.pyc
+
+# macOS files
+.DS_Store
+
+# generated files
+generated/
