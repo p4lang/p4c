@@ -22,7 +22,6 @@ limitations under the License.
 
 namespace P4 {
 
-enum gress_t { INGRESS, EGRESS };
 enum block_t {
     PARSER,
     PIPELINE,
