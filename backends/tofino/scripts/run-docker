@@ -1,0 +1,19 @@
+#!/bin/sh
+
+tag=latest
+
+while [ $# -gt 0 ]; do
+    case $1 in
+    tofino_debug)
+        tag=$1
+        ;;
+    *)
+        echo 2>&2 "Unrecognized argument $1"
+        exit 1 ;;
+    esac
+done
+
+docker pull amr-registry.caas.intel.com/bxd-sw/jarvis:$tag
+docker system prune -f
+docker images -f "dangling=true" -q | xargs -r docker rmi
+exec docker run --privileged -w /mnt -v $(pwd):/mnt -v $HOME:/root -p 8080:80 -it amr-registry.caas.intel.com/bxd-sw/jarvis:$tag /bin/bash
