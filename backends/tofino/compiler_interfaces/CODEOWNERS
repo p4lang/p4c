@@ -1,0 +1,3 @@
+# Schema review board members must approve pull requests
+# before they can be merged.
+schemas/* @simuthus @saynb @slicking @amreshk @MichalKekely @awjreynolds
