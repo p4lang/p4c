@@ -92,6 +92,15 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
     @name("MainControlImpl.ipv6_modify_dstAddr") action ipv6_modify_dstAddr(@name("dstAddr") bit<32> dstAddr_1) {
         headers.ipv6.dstAddr = (bit<128>)dstAddr_1;
     }
+    @name("MainControlImpl.ipv6_addr_or") action ipv6_addr_or() {
+        headers.ipv6.dstAddr = headers.ipv6.dstAddr | headers.ipv6.srcAddr;
+    }
+    @name("MainControlImpl.ipv6_addr_and") action ipv6_addr_and() {
+        headers.ipv6.dstAddr = tmp_0 & headers.ipv6.srcAddr;
+    }
+    @name("MainControlImpl.ipv6_addr_xor") action ipv6_addr_xor() {
+        headers.ipv6.dstAddr = headers.ipv6.dstAddr ^ tmp_0;
+    }
     @name("MainControlImpl.ipv6_swap_addr") action ipv6_swap_addr() {
         headers.ipv6.dstAddr = headers.ipv6.srcAddr;
         headers.ipv6.srcAddr = tmp_0;
@@ -121,6 +130,9 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
             ipv6_modify_dstAddr();
             ipv6_swap_addr();
             set_flowlabel();
+            ipv6_addr_or();
+            ipv6_addr_xor();
+            ipv6_addr_and();
             set_traffic_class_flow_label();
             set_ipv6_version();
             set_next_hdr();

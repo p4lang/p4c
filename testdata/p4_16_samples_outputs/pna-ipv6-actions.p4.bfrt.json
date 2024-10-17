@@ -72,6 +72,27 @@
           ]
         },
         {
+          "id" : 23072859,
+          "name" : "MainControlImpl.ipv6_addr_or",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        },
+        {
+          "id" : 26319412,
+          "name" : "MainControlImpl.ipv6_addr_xor",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        },
+        {
+          "id" : 22390528,
+          "name" : "MainControlImpl.ipv6_addr_and",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        },
+        {
           "id" : 31572308,
           "name" : "MainControlImpl.set_traffic_class_flow_label",
           "action_scope" : "TableAndDefault",

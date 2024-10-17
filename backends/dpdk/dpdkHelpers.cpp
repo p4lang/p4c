@@ -212,11 +212,20 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
         } else if (right->is<IR::LOr>() || right->is<IR::LAnd>()) {
             process_logical_operation(left, r);
         } else if (right->is<IR::BOr>()) {
-            add_instr(new IR::DpdkOrStatement(left, src1Op, src2Op));
+            if (checkIf128bitOp(left, src1Op, src2Op))
+                add128bitInstr(src1Op, src2Op, "or");
+            else
+                add_instr(new IR::DpdkOrStatement(left, src1Op, src2Op));
         } else if (right->is<IR::BAnd>()) {
-            add_instr(new IR::DpdkAndStatement(left, src1Op, src2Op));
+            if (checkIf128bitOp(left, src1Op, src2Op))
+                add128bitInstr(src1Op, src2Op, "and");
+            else
+                add_instr(new IR::DpdkAndStatement(left, src1Op, src2Op));
         } else if (right->is<IR::BXor>()) {
-            add_instr(new IR::DpdkXorStatement(left, src1Op, src2Op));
+            if (checkIf128bitOp(left, src1Op, src2Op))
+                add128bitInstr(src1Op, src2Op, "xor");
+            else
+                add_instr(new IR::DpdkXorStatement(left, src1Op, src2Op));
         } else if (right->is<IR::ArrayIndex>()) {
             add_instr(new IR::DpdkMovStatement(a->left, a->right));
         } else {
@@ -1458,6 +1467,140 @@ bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *s) {
     }
     add_instr(new IR::DpdkLabelStatement(end_label));
     return false;
+}
+
+bool ConvertStatementToDpdk::checkIf128bitOp(const IR::Expression *left,
+                                             const IR::Expression *src1Op,
+                                             const IR::Expression *src2Op) {
+    if (auto t = left->type->to<IR::Type_Bits>()) {
+        auto leftWidth = t->width_bits();
+        if (leftWidth == 128) {
+            if (auto src1Type = src1Op->type->to<IR::Type_Bits>()) {
+                if (src1Type->width_bits() == 128) {
+                    if (auto src2Type = src2Op->type->to<IR::Type_Bits>()) {
+                        if (src2Type->width_bits() == 128) return true;
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
+
+void ConvertStatementToDpdk::add128bitInstr(const IR::Expression *src1Op,
+                                            const IR::Expression *src2Op, const char *op) {
+    // check bool variable to check and create sandbox struct
+    // sandbox tmp variable creation
+    if (!createTmpVar) {
+        createTmpVar = true;
+        createTmpVarForSandbox();
+    }
+    if (!createSandboxHeaderType) {
+        createSandboxHeaderType = true;
+        createSandboxHeader();
+    }
+    const IR::Type_Header *Type_Header = nullptr;
+    const IR::Type_Header *Type_Tmp = nullptr;
+    for (auto header : structure->header_types) {
+        if (strcmp(header.first, "_p4c_sandbox_header_t") == 0) {
+            Type_Header = header.second;
+        } else if (strcmp(header.first, "_p4c_tmp128_t") == 0) {
+            Type_Tmp = header.second;
+        }
+    }
+    if (Type_Header == nullptr || Type_Tmp == nullptr) {
+        BUG("Header type not found");
+    }
+    auto src1OpHeaderName = src1Op->toString();
+    if (src1Op->is<IR::Member>()) {
+        src1OpHeaderName = src1Op->to<IR::Member>()->member.name;
+    }
+    auto tmpVarOpName = src1OpHeaderName + "_tmp";
+    src1OpHeaderName = src1OpHeaderName + "_128";
+    auto src1OpHeader = new IR::Declaration_Variable(src1OpHeaderName, Type_Header);
+    auto tmpVarOp = new IR::Declaration_Variable(tmpVarOpName, Type_Tmp);
+    auto src1OpHeaderInstance = new IR::DpdkHeaderInstance(src1OpHeader, Type_Header);
+    auto tmpVarOpInstance = new IR::DpdkHeaderInstance(tmpVarOp, Type_Tmp);
+    structure->addHeaderInstances(src1OpHeaderInstance);
+    structure->addHeaderInstances(tmpVarOpInstance);
+    auto src1OpUpper =
+        new IR::Member(new IR::PathExpression("h." + src1OpHeader->name), IR::ID("upper_half"));
+    auto src1OpLower =
+        new IR::Member(new IR::PathExpression("h." + src1OpHeader->name), IR::ID("lower_half"));
+    auto tmp = new IR::Member(new IR::PathExpression("h." + tmpVarOp->name), IR::ID("inter"));
+    if (src2Op->is<IR::Constant>()) {
+        add_instr(new IR::DpdkMovhStatement(src1OpUpper, src1Op));
+        add_instr(new IR::DpdkMovStatement(src1OpLower, src1Op));
+        add_instr(new IR::DpdkMovStatement(tmp, src1OpLower));
+        if (strcmp(op, "xor") == 0) {
+            add_instr(new IR::DpdkXorStatement(tmp, tmp, src2Op));
+        } else if (strcmp(op, "or") == 0) {
+            add_instr(new IR::DpdkOrStatement(tmp, tmp, src2Op));
+        } else if (strcmp(op, "and") == 0) {
+            add_instr(new IR::DpdkAndStatement(tmp, tmp, src2Op));
+        }
+        add_instr(new IR::DpdkMovStatement(src1Op, tmp));
+        add_instr(new IR::DpdkMovStatement(tmp, src1OpUpper));
+        if (strcmp(op, "xor") == 0) {
+            add_instr(new IR::DpdkXorStatement(tmp, tmp, src2Op));
+        } else if (strcmp(op, "or") == 0) {
+            add_instr(new IR::DpdkOrStatement(tmp, tmp, src2Op));
+        } else if (strcmp(op, "and") == 0) {
+            add_instr(new IR::DpdkAndStatement(tmp, tmp, src2Op));
+        }
+        add_instr(new IR::DpdkMovhStatement(src1Op, tmp));
+    } else {
+        auto src2OpHeaderName = src2Op->toString();
+        if (src2Op->is<IR::Member>()) {
+            src2OpHeaderName = src2Op->to<IR::Member>()->member.name;
+        }
+        src2OpHeaderName = src2OpHeaderName + "_128";
+        auto src2OpHeader = new IR::Declaration_Variable(src2OpHeaderName, Type_Header);
+        auto src2OpHeaderInstance = new IR::DpdkHeaderInstance(src2OpHeader, Type_Header);
+        structure->addHeaderInstances(src2OpHeaderInstance);
+        auto src2OpUpper =
+            new IR::Member(new IR::PathExpression("h." + src2OpHeader->name), IR::ID("upper_half"));
+        auto src2OpLower =
+            new IR::Member(new IR::PathExpression("h." + src2OpHeader->name), IR::ID("lower_half"));
+        add_instr(new IR::DpdkMovhStatement(src1OpUpper, src1Op));
+        add_instr(new IR::DpdkMovStatement(src1OpLower, src1Op));
+        add_instr(new IR::DpdkMovhStatement(src2OpUpper, src2Op));
+        add_instr(new IR::DpdkMovStatement(src2OpLower, src2Op));
+        add_instr(new IR::DpdkMovStatement(tmp, src1OpLower));
+        if (strcmp(op, "xor") == 0) {
+            add_instr(new IR::DpdkXorStatement(tmp, tmp, src2OpLower));
+        } else if (strcmp(op, "or") == 0) {
+            add_instr(new IR::DpdkOrStatement(tmp, tmp, src2OpLower));
+        } else if (strcmp(op, "and") == 0) {
+            add_instr(new IR::DpdkAndStatement(tmp, tmp, src2OpLower));
+        }
+        add_instr(new IR::DpdkMovStatement(src1Op, tmp));
+        add_instr(new IR::DpdkMovStatement(tmp, src1OpUpper));
+        if (strcmp(op, "xor") == 0) {
+            add_instr(new IR::DpdkXorStatement(tmp, tmp, src2OpUpper));
+        } else if (strcmp(op, "or") == 0) {
+            add_instr(new IR::DpdkOrStatement(tmp, tmp, src2OpUpper));
+        } else if (strcmp(op, "and") == 0) {
+            add_instr(new IR::DpdkAndStatement(tmp, tmp, src2OpUpper));
+        }
+        add_instr(new IR::DpdkMovhStatement(src1Op, tmp));
+    }
+}
+
+void ConvertStatementToDpdk::createSandboxHeader() {
+    auto fields = new IR::IndexedVector<IR::StructField>;
+    fields->push_back(new IR::StructField("upper_half", IR::Type_Bits::get(64)));
+    fields->push_back(new IR::StructField("lower_half", IR::Type_Bits::get(64)));
+    const IR::Type_Header *headerStruct =
+        new IR::Type_Header(IR::ID("_p4c_sandbox_header_t"), *fields);
+    structure->header_types.emplace(cstring("_p4c_sandbox_header_t"), headerStruct);
+}
+
+void ConvertStatementToDpdk::createTmpVarForSandbox() {
+    auto fields = new IR::IndexedVector<IR::StructField>;
+    fields->push_back(new IR::StructField("tmp", IR::Type_Bits::get(64)));
+    const IR::Type_Header *headerStruct = new IR::Type_Header(IR::ID("_p4c_tmp128_t"), *fields);
+    structure->header_types.emplace(cstring("_p4c_tmp128_t"), headerStruct);
 }
 
 }  // namespace P4::DPDK

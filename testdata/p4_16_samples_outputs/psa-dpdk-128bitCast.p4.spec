@@ -9,6 +9,15 @@ struct dpdk_pseudo_header_t {
 	bit<64> pseudo
 }
 
+struct _p4c_tmp128_t {
+	bit<64> tmp
+}
+
+struct _p4c_sandbox_header_t {
+	bit<64> upper_half
+	bit<64> lower_half
+}
+
 struct psa_ingress_output_metadata_t {
 	bit<8> class_of_service
 	bit<8> clone
@@ -44,17 +53,44 @@ struct user_meta_data_t {
 }
 metadata instanceof user_meta_data_t
 
+header Ingress_tmp_128 instanceof header _p4c_sandbox_header_t
+header Ingress_tmp_tmp instanceof header _p4c_tmp128_t
+header Ingress_tmp_0_128 instanceof header _p4c_sandbox_header_t
+header Ingress_tmp_0_tmp instanceof header _p4c_tmp128_t
+header Ingress_tmp_1_128 instanceof header _p4c_sandbox_header_t
+header Ingress_tmp_1_tmp instanceof header _p4c_tmp128_t
 action NoAction args none {
 	return
 }
 
 action macswp args none {
 	mov m.Ingress_tmp m.Ingress_flg
-	and m.Ingress_tmp 0xFFFFFFFFFFFFFFFF
+	movh h.Ingress_tmp_128.upper_half m.Ingress_tmp
+	mov h.Ingress_tmp_128.lower_half m.Ingress_tmp
+	mov h.Ingress_tmp_tmp.inter h.Ingress_tmp_128.lower_half
+	and h.Ingress_tmp_tmp.inter 0xFFFFFFFFFFFFFFFF
+	mov m.Ingress_tmp h.Ingress_tmp_tmp.inter
+	mov h.Ingress_tmp_tmp.inter h.Ingress_tmp_128.upper_half
+	and h.Ingress_tmp_tmp.inter 0xFFFFFFFFFFFFFFFF
+	movh m.Ingress_tmp h.Ingress_tmp_tmp.inter
 	mov m.Ingress_tmp_0 m.Ingress_tmp
-	and m.Ingress_tmp_0 0xFFFFFFFFFFFFFFFF
+	movh h.Ingress_tmp_0_128.upper_half m.Ingress_tmp_0
+	mov h.Ingress_tmp_0_128.lower_half m.Ingress_tmp_0
+	mov h.Ingress_tmp_0_tmp.inter h.Ingress_tmp_0_128.lower_half
+	and h.Ingress_tmp_0_tmp.inter 0xFFFFFFFFFFFFFFFF
+	mov m.Ingress_tmp_0 h.Ingress_tmp_0_tmp.inter
+	mov h.Ingress_tmp_0_tmp.inter h.Ingress_tmp_0_128.upper_half
+	and h.Ingress_tmp_0_tmp.inter 0xFFFFFFFFFFFFFFFF
+	movh m.Ingress_tmp_0 h.Ingress_tmp_0_tmp.inter
 	mov m.Ingress_tmp_1 m.Ingress_tmp_0
-	and m.Ingress_tmp_1 0xFFFFFFFFFFFFFFFF
+	movh h.Ingress_tmp_1_128.upper_half m.Ingress_tmp_1
+	mov h.Ingress_tmp_1_128.lower_half m.Ingress_tmp_1
+	mov h.Ingress_tmp_1_tmp.inter h.Ingress_tmp_1_128.lower_half
+	and h.Ingress_tmp_1_tmp.inter 0xFFFFFFFFFFFFFFFF
+	mov m.Ingress_tmp_1 h.Ingress_tmp_1_tmp.inter
+	mov h.Ingress_tmp_1_tmp.inter h.Ingress_tmp_1_128.upper_half
+	and h.Ingress_tmp_1_tmp.inter 0xFFFFFFFFFFFFFFFF
+	movh m.Ingress_tmp_1 h.Ingress_tmp_1_tmp.inter
 	mov h.dpdk_pseudo_header.pseudo m.Ingress_tmp_1
 	jmpneq LABEL_END h.dpdk_pseudo_header.pseudo 0x2
 	mov m.local_metadata_addr h.ethernet.dst_addr

@@ -18,6 +18,13 @@ class DpdkHeaderType : Type_Header, IDPDKNode {
 #nodbprint
 }
 
+class DpdkHeaderInstance : IDPDKNode {
+    Declaration_Variable name;
+    Type_Header headerType;
+    std::ostream& toSpec(std::ostream& out) const override;
+#nodbprint
+}
+
 class DpdkStructType : Type_Struct, IDPDKNode {
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
@@ -99,6 +106,7 @@ class DpdkLearner {
 class DpdkAsmProgram {
     inline IndexedVector<DpdkHeaderType> headerType;
     inline IndexedVector<DpdkStructType> structType;
+    inline IndexedVector<DpdkHeaderInstance> headerInstance;
     inline IndexedVector<DpdkExternDeclaration> externDeclarations;
     inline IndexedVector<DpdkAction> actions;
     inline IndexedVector<DpdkTable> tables;
@@ -301,6 +309,12 @@ abstract DpdkUnaryStatement : DpdkAssignmentStatement {
 class DpdkMovStatement : DpdkUnaryStatement {
     DpdkMovStatement(Expression dst, Expression src) :
         DpdkUnaryStatement("mov"_cs, dst, src) { }
+#noconstructor
+}
+
+class DpdkMovhStatement : DpdkUnaryStatement {
+    DpdkMovhStatement(Expression dst, Expression src) :
+        DpdkUnaryStatement("movh"_cs, dst, src) { }
 #noconstructor
 }
 

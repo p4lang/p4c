@@ -38,6 +38,15 @@ struct dpdk_pseudo_header_t {
 	bit<64> pseudo_1
 }
 
+struct _p4c_tmp128_t {
+	bit<64> tmp
+}
+
+struct _p4c_sandbox_header_t {
+	bit<64> upper_half
+	bit<64> lower_half
+}
+
 struct ipv6_modify_dstAddr_arg_t {
 	bit<32> dstAddr
 }
@@ -87,6 +96,10 @@ struct main_metadata_t {
 }
 metadata instanceof main_metadata_t
 
+header dstAddr_128 instanceof header _p4c_sandbox_header_t
+header dstAddr_tmp instanceof header _p4c_tmp128_t
+header srcAddr_128 instanceof header _p4c_sandbox_header_t
+header MainControlT_tmp_13_128 instanceof header _p4c_sandbox_header_t
 regarray direction size 0x100 initval 0
 action NoAction args none {
 	return
@@ -100,6 +113,49 @@ action Reject args none {
 action ipv6_modify_dstAddr args instanceof ipv6_modify_dstAddr_arg_t {
 	mov h.dpdk_pseudo_header.pseudo t.dstAddr
 	mov h.ipv6.dstAddr h.dpdk_pseudo_header.pseudo
+	return
+}
+
+action ipv6_addr_or args none {
+	movh h.dstAddr_128.upper_half h.ipv6.dstAddr
+	mov h.dstAddr_128.lower_half h.ipv6.dstAddr
+	movh h.srcAddr_128.upper_half h.ipv6.srcAddr
+	mov h.srcAddr_128.lower_half h.ipv6.srcAddr
+	mov h.dstAddr_tmp.inter h.dstAddr_128.lower_half
+	or h.dstAddr_tmp.inter h.srcAddr_128.lower_half
+	mov h.ipv6.dstAddr h.dstAddr_tmp.inter
+	mov h.dstAddr_tmp.inter h.dstAddr_128.upper_half
+	or h.dstAddr_tmp.inter h.srcAddr_128.upper_half
+	movh h.ipv6.dstAddr h.dstAddr_tmp.inter
+	return
+}
+
+action ipv6_addr_and args none {
+	mov h.ipv6.dstAddr m.MainControlT_tmp_13
+	movh h.dstAddr_128.upper_half h.ipv6.dstAddr
+	mov h.dstAddr_128.lower_half h.ipv6.dstAddr
+	movh h.srcAddr_128.upper_half h.ipv6.srcAddr
+	mov h.srcAddr_128.lower_half h.ipv6.srcAddr
+	mov h.dstAddr_tmp.inter h.dstAddr_128.lower_half
+	and h.dstAddr_tmp.inter h.srcAddr_128.lower_half
+	mov h.ipv6.dstAddr h.dstAddr_tmp.inter
+	mov h.dstAddr_tmp.inter h.dstAddr_128.upper_half
+	and h.dstAddr_tmp.inter h.srcAddr_128.upper_half
+	movh h.ipv6.dstAddr h.dstAddr_tmp.inter
+	return
+}
+
+action ipv6_addr_xor args none {
+	movh h.dstAddr_128.upper_half h.ipv6.dstAddr
+	mov h.dstAddr_128.lower_half h.ipv6.dstAddr
+	movh h.MainControlT_tmp_13_128.upper_half m.MainControlT_tmp_13
+	mov h.MainControlT_tmp_13_128.lower_half m.MainControlT_tmp_13
+	mov h.dstAddr_tmp.inter h.dstAddr_128.lower_half
+	xor h.dstAddr_tmp.inter h.MainControlT_tmp_13_128.lower_half
+	mov h.ipv6.dstAddr h.dstAddr_tmp.inter
+	mov h.dstAddr_tmp.inter h.dstAddr_128.upper_half
+	xor h.dstAddr_tmp.inter h.MainControlT_tmp_13_128.upper_half
+	movh h.ipv6.dstAddr h.dstAddr_tmp.inter
 	return
 }
 
@@ -169,6 +225,9 @@ table filter_tbl {
 		ipv6_modify_dstAddr
 		ipv6_swap_addr
 		set_flowlabel
+		ipv6_addr_or
+		ipv6_addr_xor
+		ipv6_addr_and
 		set_traffic_class_flow_label
 		set_ipv6_version
 		set_next_hdr

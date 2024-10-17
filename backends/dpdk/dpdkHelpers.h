@@ -150,6 +150,8 @@ class ConvertStatementToDpdk : public Inspector {
     const IR::P4Parser *parser = nullptr;
     const IR::Node *parent = nullptr;
     IR::Type_Struct *metadataStruct = nullptr;
+    bool createSandboxHeaderType = false;
+    bool createTmpVar = false;
 
  private:
     void processHashParams(const IR::Argument *field, IR::Vector<IR::Expression> &components);
@@ -157,6 +159,8 @@ class ConvertStatementToDpdk : public Inspector {
     void updateMdStrAndGenInstr(const IR::Argument *field, IR::Vector<IR::Expression> &components);
     cstring getHdrMdStrName(const IR::Member *mem);
     bool checkIfConsecutiveHdrMdfields(const IR::Argument *field);
+    void createSandboxHeader();
+    void createTmpVarForSandbox();
 
  public:
     ConvertStatementToDpdk(P4::ReferenceMap *refmap, P4::TypeMap *typemap,
@@ -185,8 +189,9 @@ class ConvertStatementToDpdk : public Inspector {
     void set_parser(const IR::P4Parser *p) { parser = p; }
     void set_parent(const IR::Node *p) { parent = p; }
     bool handleConstSwitch(const IR::SwitchStatement *a);
+    bool checkIf128bitOp(const IR::Expression *, const IR::Expression *, const IR::Expression *);
+    void add128bitInstr(const IR::Expression *src1Op, const IR::Expression *src2Op, const char *op);
 };
-
 /// Only simplify complex expression in ingress/egress.
 class ProcessControls : public P4::RemoveComplexExpressionsPolicy {
     const std::set<cstring> *process;

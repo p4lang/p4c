@@ -36,6 +36,10 @@ std::ostream &IR::DpdkAsmProgram::toSpec(std::ostream &out) const {
         add_comment(out, s->name.toString());
         s->toSpec(out) << std::endl;
     }
+    for (auto hi : headerInstance) {
+        add_comment(out, hi->name->toString());
+        hi->toSpec(out) << std::endl;
+    }
     for (auto s : externDeclarations) {
         add_comment(out, s->name.toString());
         s->toSpec(out);
@@ -210,6 +214,11 @@ std::ostream &IR::DpdkHeaderType::toSpec(std::ostream &out) const {
         out << std::endl;
     }
     out << "}" << std::endl;
+    return out;
+}
+
+std::ostream &IR::DpdkHeaderInstance::toSpec(std::ostream &out) const {
+    out << "header " << name->toString() << " instanceof " << headerType->toString();
     return out;
 }
 

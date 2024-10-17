@@ -90,6 +90,15 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
     @name("MainControlImpl.ipv6_modify_dstAddr") action ipv6_modify_dstAddr(@name("dstAddr") bit<32> dstAddr_1) {
         headers.ipv6.dstAddr = (bit<128>)dstAddr_1;
     }
+    @name("MainControlImpl.ipv6_addr_or") action ipv6_addr_or() {
+        headers.ipv6.dstAddr = headers.ipv6.dstAddr | headers.ipv6.srcAddr;
+    }
+    @name("MainControlImpl.ipv6_addr_and") action ipv6_addr_and() {
+        headers.ipv6.dstAddr = tmp_0 & headers.ipv6.srcAddr;
+    }
+    @name("MainControlImpl.ipv6_addr_xor") action ipv6_addr_xor() {
+        headers.ipv6.dstAddr = headers.ipv6.dstAddr ^ tmp_0;
+    }
     @name("MainControlImpl.ipv6_swap_addr") action ipv6_swap_addr() {
         headers.ipv6.dstAddr = headers.ipv6.srcAddr;
         headers.ipv6.srcAddr = tmp_0;
@@ -119,6 +128,9 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
             ipv6_modify_dstAddr();
             ipv6_swap_addr();
             set_flowlabel();
+            ipv6_addr_or();
+            ipv6_addr_xor();
+            ipv6_addr_and();
             set_traffic_class_flow_label();
             set_ipv6_version();
             set_next_hdr();
@@ -144,20 +156,20 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
 }
 
 control MainDeparserImpl(packet_out packet, in headers_t headers, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaipv6actions180() {
+    @hidden action pnaipv6actions195() {
         packet.emit<Ethernet_h>(headers.ethernet);
         packet.emit<mpls_h>(headers.mpls);
         packet.emit<IPv6_h>(headers.ipv6);
         packet.emit<IPv4_h>(headers.ipv4);
     }
-    @hidden table tbl_pnaipv6actions180 {
+    @hidden table tbl_pnaipv6actions195 {
         actions = {
-            pnaipv6actions180();
+            pnaipv6actions195();
         }
-        const default_action = pnaipv6actions180();
+        const default_action = pnaipv6actions195();
     }
     apply {
-        tbl_pnaipv6actions180.apply();
+        tbl_pnaipv6actions195.apply();
     }
 }
 
