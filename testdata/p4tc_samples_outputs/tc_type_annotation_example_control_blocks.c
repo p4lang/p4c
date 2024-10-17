@@ -5,6 +5,11 @@ struct internal_metadata {
     __u16 pkt_ether_type;
 } __attribute__((aligned(4)));
 
+struct skb_aggregate {
+    struct p4tc_skb_meta_get get;
+    struct p4tc_skb_meta_set set;
+};
+
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_key {
     u32 keysz;
     u32 maskid;
@@ -46,7 +51,11 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_2_value {
     } u;
 };
 
-static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr, struct pna_global_metadata *compiler_meta__)
+static __always_inline int process(
+	struct __sk_buff *skb,
+	struct headers_t *hdr,
+	struct pna_global_metadata *compiler_meta__,
+	struct skb_aggregate *sa )
 {
     struct hdr_md *hdrMd;
 
@@ -161,11 +170,6 @@ if (/* hdr->ipv4.isValid() */
         }
     }
     {
-{
-;
-            ;
-        }
-
         if (compiler_meta__->drop) {
             return TC_ACT_SHOT;
         }
@@ -185,6 +189,11 @@ if (/* hdr->ipv4.isValid() */
                 return TC_ACT_SHOT;
             }
         }
+{
+;
+            ;
+        }
+
         pkt = ((void*)(long)skb->data);
         ebpf_packetEnd = ((void*)(long)skb->data_end);
         ebpf_packetOffsetInBits = 0;
@@ -314,6 +323,7 @@ if (/* hdr->ipv4.isValid() */
 }
 SEC("p4tc/main")
 int tc_ingress_func(struct __sk_buff *skb) {
+    struct skb_aggregate skbstuff;
     struct pna_global_metadata *compiler_meta__ = (struct pna_global_metadata *) skb->cb;
     if (compiler_meta__->pass_to_kernel == true) return TC_ACT_OK;
     compiler_meta__->drop = false;
@@ -330,8 +340,7 @@ int tc_ingress_func(struct __sk_buff *skb) {
     }
     struct hdr_md *hdrMd;
     struct headers_t *hdr;
-    int ret = -1;
-    ret = process(skb, (struct headers_t *) hdr, compiler_meta__);
+    int ret = process(skb, (struct headers_t *) hdr, compiler_meta__, &skbstuff);
     if (ret != -1) {
         return ret;
     }

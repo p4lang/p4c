@@ -78,8 +78,8 @@ control ingress(
     inout my_ingress_headers_t  hdr,
     inout my_ingress_metadata_t meta,
     in    pna_main_input_metadata_t  istd,
-    inout pna_main_output_metadata_t ostd
-)
+    inout pna_main_output_metadata_t ostd,
+    tc_skb_metadata sm)
 {
     action send_nh(@tc_type("dev") PortId_t port_id, @tc_type("macaddr") bit<48> dmac, @tc_type("macaddr") bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
@@ -127,7 +127,8 @@ control Ingress_Deparser(
     packet_out pkt,
     inout    my_ingress_headers_t hdr,
     in    my_ingress_metadata_t meta,
-    in    pna_main_output_metadata_t ostd)
+    in    pna_main_output_metadata_t ostd,
+    tc_skb_metadata sm)
 {
     apply {
         pkt.emit(hdr.ethernet);
