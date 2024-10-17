@@ -49,3 +49,6 @@ docs/doxygen/p4c-doxygen-warn.log
 
 # Local Documentation build theme files
 docs/doxygen/awesome_css/
+
+# thirdparty
+backends/tofino/third_party/
