@@ -1,0 +1,30 @@
+#!/bin/bash -x
+
+set -e
+
+: "${TC:="tc"}"
+$TC p4template create pipeline/digest_parser_meta numtables 1
+
+$TC p4template create action/digest_parser_meta/ingress/send_nh actid 1 \
+	param port type dev \
+	param srcMac type macaddr \
+	param dstMac type macaddr
+$TC p4template update action/digest_parser_meta/ingress/send_nh state active
+
+$TC p4template create action/digest_parser_meta/ingress/drop actid 2
+$TC p4template update action/digest_parser_meta/ingress/drop state active
+
+$TC p4template create extern/root/Digest extid 0x05000000 numinstances 1 tc_acl 0x19b6 has_exec_method
+
+$TC p4template create extern_inst/digest_parser_meta/Digest/Ingress_Deparser.digest_inst instid 1 \
+tc_numel 0 \
+control_path tc_key index ptype bit32 id 1 param srcAddr ptype ipv4 id 2 param ingress_port ptype dev id 3
+
+$TC p4template create table/digest_parser_meta/ingress/nh_table \
+	tblid 1 \
+	type exact \
+	keysz 32 permissions 0x3da4 tentries 2048 nummasks 1 \
+	table_acts act name digest_parser_meta/ingress/send_nh \
+	act name digest_parser_meta/ingress/drop
+$TC p4template update table/digest_parser_meta/ingress/nh_table default_miss_action permissions 0x1024 action digest_parser_meta/ingress/drop
+$TC p4template update pipeline/digest_parser_meta state ready

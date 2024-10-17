@@ -590,6 +590,7 @@ enum PNA_Source_t {
 struct pna_main_parser_input_metadata_t {
     // common fields initialized for all packets that are input to main
     // parser, regardless of direction.
+    // Unsupported as of now.
     bool                     recirculated;
     // If this packet has FROM_NET source, input_port contains
     // the id of the network port on which the packet arrived.

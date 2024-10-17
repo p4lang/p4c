@@ -126,6 +126,8 @@ class PnaStateTranslationVisitor : public EBPF::PsaStateTranslationVisitor {
                                         EBPF::EBPFPsaParser *prsr)
         : EBPF::PsaStateTranslationVisitor(refMap, typeMap, prsr) {}
 
+    bool preorder(const IR::Member *expression) override;
+
  protected:
     void compileExtractField(const IR::Expression *expr, const IR::StructField *field,
                              unsigned hdrOffsetBits, EBPF::EBPFType *type) override;

@@ -1,0 +1,98 @@
+{
+  "schema_version" : "1.0.0",
+  "pipeline_name" : "digest_parser_meta",
+  "externs" : [
+    {
+      "name" : "Digest",
+      "id" : "0x05000000",
+      "permissions" : "0x19b6",
+      "instances" : [
+        {
+          "inst_name" : "Ingress_Deparser.digest_inst",
+          "inst_id" : 1,
+          "params" : [
+            {
+              "id" : 1,
+              "name" : "index",
+              "type" : "bit32",
+              "attr" : "tc_key",
+              "bitwidth" : 32
+            },
+            {
+              "id" : 2,
+              "name" : "srcAddr",
+              "type" : "ipv4",
+              "attr" : "param",
+              "bitwidth" : 32
+            },
+            {
+              "id" : 3,
+              "name" : "ingress_port",
+              "type" : "dev",
+              "attr" : "param",
+              "bitwidth" : 32
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "tables" : [
+    {
+      "name" : "ingress/nh_table",
+      "id" : 1,
+      "tentries" : 2048,
+      "permissions" : "0x3da4",
+      "nummask" : 8,
+      "keysize" : 32,
+      "keyfields" : [
+        {
+          "id" : 1,
+          "name" : "dstAddr",
+          "type" : "ipv4",
+          "match_type" : "exact",
+          "bitwidth" : 32
+        }
+      ],
+      "actions" : [
+        {
+          "id" : 1,
+          "name" : "ingress/send_nh",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "params" : [
+            {
+              "id" : 1,
+              "name" : "port",
+              "type" : "dev",
+              "bitwidth" : 32
+            },
+            {
+              "id" : 2,
+              "name" : "srcMac",
+              "type" : "macaddr",
+              "bitwidth" : 48
+            },
+            {
+              "id" : 3,
+              "name" : "dstMac",
+              "type" : "macaddr",
+              "bitwidth" : 48
+            }
+          ],
+          "default_hit_action" : false,
+          "default_miss_action" : false
+        },
+        {
+          "id" : 2,
+          "name" : "ingress/drop",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "params" : [],
+          "default_hit_action" : false,
+          "default_miss_action" : true
+        }
+      ]
+    }
+  ]
+}

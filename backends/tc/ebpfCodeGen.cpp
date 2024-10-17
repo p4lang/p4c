@@ -767,6 +767,24 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
     builder->newline();
 }
 
+bool PnaStateTranslationVisitor::preorder(const IR::Member *m) {
+    if ((m->expr != nullptr) && (m->expr->type != nullptr)) {
+        if (auto st = m->expr->type->to<IR::Type_Struct>()) {
+            if (st->name == "pna_main_parser_input_metadata_t") {
+                if (m->member.name == "input_port") {
+                    builder->append("skb->ifindex");
+                    return false;
+                } else {
+                    ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                                "%1%: this metadata field is not supported", m);
+                }
+            }
+        }
+    }
+
+    return EBPF::PsaStateTranslationVisitor::preorder(m);
+}
+
 void PnaStateTranslationVisitor::compileLookahead(const IR::Expression *destination) {
     cstring msgStr = absl::StrFormat("Parser: lookahead for %s %s",
                                      state->parser->typeMap->getType(destination)->toString(),
