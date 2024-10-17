@@ -1,0 +1,96 @@
+#!/bin/bash
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+help() {
+   cat <<EOF
+Usage: $0 [-h] [-i <bzImage>] [-f config] [-s script] [-n vm_ip]
+
+Recompile the current kernel, turning on all tc related options in the current .config,
+and run the provided command. The original .config file is always preserved.
+If no command is provided, "$DEFAULT_CMD" is run inside the VM.
+Options:
+        -h            Display this message.
+        -i            Precompiled bzImage to use.
+        -f            Kernel configuration file to use.
+                      Defaults to "$KCONFIG".
+        -s            Script to execute after booting
+        -n            VM ip
+EOF
+}
+
+VMCPUS=$(nproc)
+
+while getopts 'hi:f:s:n:m:u:' OPT; do
+   case "$OPT" in
+      h)
+         help
+         exit 0
+         ;;
+      m)
+         MNTDIR="$OPTARG"
+         if ! [ -d "$MNTDIR" ]; then
+            echo "$MNTDIR doesn't exist"
+            exit 1
+         fi
+         ;;
+      i)
+         KIMG="$OPTARG"
+         if ! [ -f "$KIMG" ]; then
+            echo "$KIMG doesn't exist"
+            exit 1
+         fi
+         ;;
+      s)
+         SCRIPT="$OPTARG"
+         if ! [ -f "$MNTDIR/$SCRIPT" ]; then
+            echo "$SCRIPT doesn't exist"
+            exit 1
+         fi
+         ;;
+      f)
+         KCONFIG=$(realpath "$OPTARG")
+         if ! [ -f "$KCONFIG" ]; then
+            echo "Configuration file $KCONFIG doesn't exist"
+            exit 1
+         fi
+         ;;
+      u)
+         USER="$OPTARG"
+         ;;
+      n)
+         VM_IP="$OPTARG"
+         ;;
+      \? )
+         help
+         exit 1
+         ;;
+   esac
+done
+shift $((OPTIND -1))
+
+source ${MNTDIR}/virtme-ng/bin/activate
+
+virtme-run \
+   --arch "x86_64" \
+   --root / \
+   --user $USER \
+   --kimg "$KIMG" \
+   --cpus "$VMCPUS" \
+   --memory "512M" \
+   --rwdir="/mnt=$MNTDIR" \
+   --rwdir="/home/$USER" \
+   --show-boot-console \
+   --script-sh "/mnt/$SCRIPT $VM_IP" \
+   --qemu-opts -nic tap,ifname=taptc,script=no,downscript=no
+
+deactivate

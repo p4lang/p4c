@@ -1,0 +1,44 @@
+#!/bin/bash
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+NS_NAME=$1
+PORT0=$2
+PORT0_PAIR=$3
+PORT1=$4
+PORT1_PAIR=$5
+BLOCK_NUM=$6
+
+sudo ip netns add $NS_NAME
+sudo ip link add $PORT0 address 10:00:00:01:AA:BB type veth peer $PORT0_PAIR address 10:00:00:02:AA:BB
+sudo ip link add $PORT1 address 10:00:01:01:AA:BB type veth peer $PORT1_PAIR address 10:00:01:02:AA:BB
+sudo ip link set dev $PORT0_PAIR netns $NS_NAME
+sudo ip link set dev $PORT1_PAIR netns $NS_NAME
+sudo ip a add 10.0.0.1/24 dev $PORT0
+sudo ip a add 2001:db8::1/64 dev $PORT0
+sudo ip neigh add 10.0.0.2 dev $PORT0 lladdr 10:00:00:02:aa:bb
+sudo ip netns exec $NS_NAME ip a add 2001:db8::2/64 dev $PORT0_PAIR
+sudo ip neigh add 2001:db8::2 dev $PORT0 lladdr 10:00:00:02:aa:bb
+sudo ip netns exec $NS_NAME ip a add 10.0.0.2/24 dev $PORT0_PAIR
+sudo ip netns exec $NS_NAME ip neigh add 10.0.0.1 dev $PORT0_PAIR lladdr 10:00:00:01:aa:bb
+sudo ip netns exec $NS_NAME ip neigh add 2001:db8::1 dev $PORT0_PAIR lladdr 10:00:00:01:aa:bb
+sudo ip a add 10.0.1.1/24 dev $PORT1
+sudo ip netns exec $NS_NAME ip a add 10.0.1.2/24 dev $PORT1_PAIR
+sudo ip netns exec $NS_NAME ip l set dev $PORT0_PAIR up
+sudo ip l set dev $PORT0 up
+sudo ip l set dev $PORT1 up
+sudo ip netns exec $NS_NAME ip l set dev $PORT1_PAIR up
+sudo ip netns exec $NS_NAME tc qdisc add dev $PORT0_PAIR ingress_block $BLOCK_NUM clsact
+sudo sysctl -w net.ipv6.conf.$PORT0.router_solicitations=0
+sudo sysctl -w net.ipv6.conf.$PORT1.router_solicitations=0
+sudo ip netns exec $NS_NAME sysctl -w net.ipv6.conf.$PORT0_PAIR.router_solicitations=0
+sudo ip netns exec $NS_NAME sysctl -w net.ipv6.conf.$PORT1_PAIR.router_solicitations=0
