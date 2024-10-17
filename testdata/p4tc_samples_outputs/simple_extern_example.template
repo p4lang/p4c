@@ -31,7 +31,7 @@ control_path tc_key index ptype bit32 id 1 param protocol ptype bit8 id 2 param 
 $TC p4template create table/simple_extern_example/ingress/nh_table \
 	tblid 1 \
 	type lpm \
-	keysz 32 nummasks 8 permissions 0x3da4 tentries 262144 \
+	keysz 32 permissions 0x3da4 tentries 262144 nummasks 8 \
 	table_acts act name simple_extern_example/ingress/ext_reg \
 	act name simple_extern_example/ingress/send_nh \
 	act name simple_extern_example/ingress/drop

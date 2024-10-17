@@ -25,7 +25,7 @@ control_path tc_key index ptype bit32 id 1 param pkts ptype bit64 id 2
 $TC p4template create table/direct_counter_example/ingress/nh_table \
 	tblid 1 \
 	type exact \
-	keysz 32 nummasks 8 permissions 0x3da4 tentries 2048 \
+	keysz 32 permissions 0x3da4 tentries 2048 nummasks 1 \
 	pna_direct_counter DirectCounter/ingress.global_counter \
 	table_acts act name direct_counter_example/ingress/send_nh \
 	act name direct_counter_example/ingress/drop

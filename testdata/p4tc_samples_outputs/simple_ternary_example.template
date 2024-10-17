@@ -17,7 +17,7 @@ $TC p4template update action/simple_ternary_example/ingress/drop state active
 $TC p4template create table/simple_ternary_example/ingress/nh_table \
 	tblid 1 \
 	type ternary \
-	keysz 64 nummasks 8 permissions 0x3da4 tentries 262144 \
+	keysz 64 permissions 0x3da4 tentries 262144 nummasks 8 \
 	table_acts act name simple_ternary_example/ingress/send_nh \
 	act name simple_ternary_example/ingress/drop
 $TC p4template update table/simple_ternary_example/ingress/nh_table default_miss_action permissions 0x1024 action simple_ternary_example/ingress/drop

@@ -17,7 +17,7 @@ $TC p4template update action/set_entry_timer_example/MainControlImpl/drop state 
 $TC p4template create table/set_entry_timer_example/MainControlImpl/ipv4_tbl_1 \
 	tblid 1 \
 	type exact \
-	keysz 64 nummasks 8 permissions 0x3da4 tentries 1024 \
+	keysz 64 permissions 0x3da4 tentries 1024 nummasks 1 \
 	table_acts act name set_entry_timer_example/MainControlImpl/next_hop \
 	act name set_entry_timer_example/MainControlImpl/default_route_drop
 $TC p4template update table/set_entry_timer_example/MainControlImpl/ipv4_tbl_1 default_miss_action action set_entry_timer_example/MainControlImpl/default_route_drop
@@ -25,7 +25,7 @@ $TC p4template update table/set_entry_timer_example/MainControlImpl/ipv4_tbl_1 d
 $TC p4template create table/set_entry_timer_example/MainControlImpl/ipv4_tbl_2 \
 	tblid 2 \
 	type exact \
-	keysz 72 nummasks 8 permissions 0x3da4 tentries 1024 \
+	keysz 72 permissions 0x3da4 tentries 1024 nummasks 1 \
 	table_acts act name set_entry_timer_example/MainControlImpl/next_hop \
 	act name set_entry_timer_example/MainControlImpl/drop
 $TC p4template update table/set_entry_timer_example/MainControlImpl/ipv4_tbl_2 default_miss_action action set_entry_timer_example/MainControlImpl/drop

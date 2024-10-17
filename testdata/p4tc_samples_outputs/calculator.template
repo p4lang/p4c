@@ -26,7 +26,7 @@ $TC p4template update action/calculator/MainControlImpl/operation_drop state act
 $TC p4template create table/calculator/MainControlImpl/calculate \
 	tblid 1 \
 	type exact \
-	keysz 8 nummasks 8 permissions 0x3da4 tentries 1024 \
+	keysz 8 permissions 0x3da4 tentries 1024 nummasks 1 \
 	table_acts act name calculator/MainControlImpl/operation_add \
 	act name calculator/MainControlImpl/operation_sub \
 	act name calculator/MainControlImpl/operation_and \

@@ -351,9 +351,14 @@ class TCTable {
                         "\n\ttblid ", tableID, " \\",
                         "\n\ttype ", printMatchType(matchType).string_view(), " \\",
                         "\n\tkeysz ", keySize,
-                        " nummasks ", numMask,
                         " permissions ", permissions.string_view(),
                         " tentries ", tableEntriesCount);
+        if (matchType == TC::EXACT_TYPE) {
+            absl::StrAppend(&tcTable, " nummasks ", TC::DEFAULT_KEY_MASK_EXACT);
+        } else {
+            absl::StrAppend(&tcTable, " nummasks ", TC::DEFAULT_KEY_MASK);
+        }
+
         if (isTableAddOnMiss && timerProfiles > defaultTimerProfiles) {
             absl::StrAppend(&tcTable, " num_timer_profiles ", timerProfiles);
         }

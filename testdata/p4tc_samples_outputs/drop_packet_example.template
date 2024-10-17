@@ -15,7 +15,7 @@ $TC p4template update action/drop_packet_example/MainControlImpl/default_route_d
 $TC p4template create table/drop_packet_example/MainControlImpl/ipv4_tbl \
 	tblid 1 \
 	type exact \
-	keysz 32 nummasks 8 permissions 0x3da4 tentries 1024 \
+	keysz 32 permissions 0x3da4 tentries 1024 nummasks 1 \
 	table_acts act name drop_packet_example/MainControlImpl/next_hop \
 	act name drop_packet_example/MainControlImpl/default_route_drop
 $TC p4template update table/drop_packet_example/MainControlImpl/ipv4_tbl default_miss_action action drop_packet_example/MainControlImpl/default_route_drop

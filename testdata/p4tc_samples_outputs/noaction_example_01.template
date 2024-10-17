@@ -22,7 +22,7 @@ $TC p4template update action/noaction_example_01/MainControlImpl/drop state acti
 $TC p4template create table/noaction_example_01/MainControlImpl/ipv4_tbl_1 \
 	tblid 1 \
 	type exact \
-	keysz 32 nummasks 8 permissions 0x3da4 tentries 1024 \
+	keysz 32 permissions 0x3da4 tentries 1024 nummasks 1 \
 	table_acts act name noaction_example_01/MainControlImpl/next_hop \
 	act name noaction_example_01/MainControlImpl/default_route_drop
 $TC p4template update table/noaction_example_01/MainControlImpl/ipv4_tbl_1 default_miss_action action noaction_example_01/MainControlImpl/default_route_drop
@@ -30,7 +30,7 @@ $TC p4template update table/noaction_example_01/MainControlImpl/ipv4_tbl_1 defau
 $TC p4template create table/noaction_example_01/MainControlImpl/ipv4_tbl_2 \
 	tblid 2 \
 	type exact \
-	keysz 67 nummasks 8 permissions 0x3da4 tentries 1024 \
+	keysz 67 permissions 0x3da4 tentries 1024 nummasks 1 \
 	table_acts act name noaction_example_01/MainControlImpl/sendtoport \
 	act name noaction_example_01/MainControlImpl/drop \
 	act name NoAction
