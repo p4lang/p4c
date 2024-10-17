@@ -50,6 +50,8 @@ P4C_DIR=$(readlink -f ${THIS_DIR}/..)
 : "${ENABLE_BMV2:=ON}"
 # eBPF is enabled by default.
 : "${ENABLE_EBPF:=ON}"
+# P4TC is enabled by default.
+: "${ENABLE_P4TC:=ON}"
 # This is the list of back ends that can be enabled.
 # Back ends can be enabled from the command line with "ENABLE_[backend]=TRUE/FALSE"
 ENABLE_BACKENDS=("TOFINO" "BMV2" "EBPF" "UBPF" "DPDK"
@@ -212,6 +214,48 @@ if [[ "${ENABLE_EBPF}" == "ON" ]] ; then
   fi
 fi
 # ! ------  END EBPF -----------------------------------------------
+
+# ! ------  BEGIN P4TC -----------------------------------------------
+function build_p4tc() {
+  P4TC_DEPS="libpcap-dev \
+             libelf-dev \
+             zlib1g-dev \
+             gcc-multilib \
+             net-tools \
+             flex \
+             libelf-dev \
+             libmnl-dev \
+             pkg-config \
+             xtables-addons-source \
+             bridge-utils \
+             python3 \
+             python3-pip \
+             python3-venv \
+             python3-argcomplete \
+             wget \
+             qemu qemu-system-x86"
+
+  sudo apt-get install -y --no-install-recommends ${P4TC_DEPS}
+
+  wget https://apt.llvm.org/llvm.sh
+  sudo chmod +x llvm.sh
+  sudo ./llvm.sh 15
+  rm llvm.sh
+
+  git clone --recurse-submodules https://github.com/arighi/virtme-ng.git ${P4C_DIR}/backends/tc/runtime/virtme-ng
+  pushd ${P4C_DIR}/backends/tc/runtime/virtme-ng
+  git checkout v1.19
+  python3 -m venv ${P4C_DIR}/backends/tc/runtime/virtme-ng
+  source ${P4C_DIR}/backends/tc/runtime/virtme-ng/bin/activate
+  pip install --upgrade pip
+  pip install .
+  deactivate
+  popd
+}
+if [[ "${ENABLE_P4TC}" == "ON" ]] ; then
+  build_p4tc
+fi
+# ! ------  END P4TC -----------------------------------------------
 
 # ! ------  BEGIN DPDK -----------------------------------------------
 function build_dpdk() {
