@@ -33,6 +33,7 @@ set (P4_FRONTEND_SRCS
   p4/frontend.cpp
   p4/functionsInlining.cpp
   p4/hierarchicalNames.cpp
+  p4/duplicateHierarchicalNameCheck.cpp
   p4/inlining.cpp
   p4/localizeActions.cpp
   p4/methodInstance.cpp
@@ -110,6 +111,7 @@ set (P4_FRONTEND_HDRS
   p4/frontend.h
   p4/functionsInlining.h
   p4/hierarchicalNames.h
+  p4/duplicateHierarchicalNameCheck.h
   p4/inlining.h
   p4/localizeActions.h
   p4/methodInstance.h

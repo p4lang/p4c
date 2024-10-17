@@ -35,6 +35,7 @@ limitations under the License.
 #include "deprecated.h"
 #include "directCalls.h"
 #include "dontcareArgs.h"
+#include "duplicateHierarchicalNameCheck.h"
 #include "entryPriorities.h"
 #include "evaluator/evaluator.h"
 #include "frontends/common/constantFolding.h"
@@ -234,6 +235,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     if (policy->optimize(options)) {
         passes.addPasses({
             new Inline(&typeMap, *policy, options.optimizeParserInlining),
+            new DuplicateHierarchicalNameCheck(),
             new InlineActions(&typeMap, *policy),
             new LocalizeAllActions(*policy),
             new UniqueNames(),
