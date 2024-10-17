@@ -133,44 +133,51 @@ long UnrollLoops::evalLoop(const IR::Expression *exp, long val,
     if (fail) return 1;
     if (auto *pe = exp->to<IR::PathExpression>()) {
         if (defUse->getDefs(pe) != idefs) fail = true;
-        return val;
     } else if (auto *k = exp->to<IR::Constant>()) {
-        return k->asLong();
+        val = k->asLong();
     } else if (auto *e = exp->to<IR::Leq>()) {
-        return evalLoop(e->left, val, idefs, fail) <= evalLoop(e->right, val, idefs, fail);
+        val = evalLoop(e->left, val, idefs, fail) <= evalLoop(e->right, val, idefs, fail);
     } else if (auto *e = exp->to<IR::Lss>()) {
-        return evalLoop(e->left, val, idefs, fail) < evalLoop(e->right, val, idefs, fail);
+        val = evalLoop(e->left, val, idefs, fail) < evalLoop(e->right, val, idefs, fail);
     } else if (auto *e = exp->to<IR::Geq>()) {
-        return evalLoop(e->left, val, idefs, fail) >= evalLoop(e->right, val, idefs, fail);
+        val = evalLoop(e->left, val, idefs, fail) >= evalLoop(e->right, val, idefs, fail);
     } else if (auto *e = exp->to<IR::Grt>()) {
-        return evalLoop(e->left, val, idefs, fail) > evalLoop(e->right, val, idefs, fail);
+        val = evalLoop(e->left, val, idefs, fail) > evalLoop(e->right, val, idefs, fail);
     } else if (auto *e = exp->to<IR::Equ>()) {
-        return evalLoop(e->left, val, idefs, fail) == evalLoop(e->right, val, idefs, fail);
+        val = evalLoop(e->left, val, idefs, fail) == evalLoop(e->right, val, idefs, fail);
     } else if (auto *e = exp->to<IR::Neq>()) {
-        return evalLoop(e->left, val, idefs, fail) != evalLoop(e->right, val, idefs, fail);
+        val = evalLoop(e->left, val, idefs, fail) != evalLoop(e->right, val, idefs, fail);
     } else if (auto *e = exp->to<IR::Add>()) {
-        return evalLoop(e->left, val, idefs, fail) + evalLoop(e->right, val, idefs, fail);
+        val = evalLoop(e->left, val, idefs, fail) + evalLoop(e->right, val, idefs, fail);
     } else if (auto *e = exp->to<IR::Sub>()) {
-        return evalLoop(e->left, val, idefs, fail) - evalLoop(e->right, val, idefs, fail);
+        val = evalLoop(e->left, val, idefs, fail) - evalLoop(e->right, val, idefs, fail);
     } else if (auto *e = exp->to<IR::Mul>()) {
-        return evalLoop(e->left, val, idefs, fail) * evalLoop(e->right, val, idefs, fail);
+        val = evalLoop(e->left, val, idefs, fail) * evalLoop(e->right, val, idefs, fail);
     } else if (auto *e = exp->to<IR::Div>()) {
-        return evalLoop(e->left, val, idefs, fail) / evalLoop(e->right, val, idefs, fail);
+        val = evalLoop(e->left, val, idefs, fail) / evalLoop(e->right, val, idefs, fail);
     } else if (auto *e = exp->to<IR::Mod>()) {
-        return evalLoop(e->left, val, idefs, fail) % evalLoop(e->right, val, idefs, fail);
+        val = evalLoop(e->left, val, idefs, fail) % evalLoop(e->right, val, idefs, fail);
     } else if (auto *e = exp->to<IR::Shl>()) {
-        return evalLoop(e->left, val, idefs, fail) << evalLoop(e->right, val, idefs, fail);
+        val = evalLoop(e->left, val, idefs, fail) << evalLoop(e->right, val, idefs, fail);
     } else if (auto *e = exp->to<IR::Shr>()) {
-        return evalLoop(e->left, val, idefs, fail) >> evalLoop(e->right, val, idefs, fail);
+        val = evalLoop(e->left, val, idefs, fail) >> evalLoop(e->right, val, idefs, fail);
     } else if (auto *e = exp->to<IR::Neg>()) {
-        return -evalLoop(e->expr, val, idefs, fail);
+        val = -evalLoop(e->expr, val, idefs, fail);
     } else if (auto *e = exp->to<IR::Cmpl>()) {
-        return ~evalLoop(e->expr, val, idefs, fail);
+        val = ~evalLoop(e->expr, val, idefs, fail);
     } else if (auto *e = exp->to<IR::LNot>()) {
-        return !evalLoop(e->expr, val, idefs, fail);
+        val = !evalLoop(e->expr, val, idefs, fail);
+    } else {
+        fail = true;
+        return 1;
     }
-    fail = true;
-    return 1;
+    if (auto *bt = exp->type->to<IR::Type::Bits>()) {
+        if (bt->size > 0 && bt->size < int(CHAR_BIT * sizeof(long))) {
+            val = val & ((1ULL << bt->size) - 1);
+            if (bt->isSigned && (val >> (bt->size - 1)) != 0) val -= (1LL << bt->size);
+        }
+    }
+    return val;
 }
 
 bool UnrollLoops::findLoopBounds(IR::ForStatement *fstmt, loop_bounds_t &bounds) {
