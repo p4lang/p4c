@@ -83,6 +83,8 @@ void InputSources::addComment(SourceInfo srcInfo, bool singleLine, cstring body)
     comments.push_back(new Comment(srcInfo, singleLine, body));
 }
 
+const std::vector<Comment *> &InputSources::getAllComments() const { return comments; }
+
 /// prevent further changes
 void InputSources::seal() {
     LOG4(toDebugString());
