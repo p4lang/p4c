@@ -78,6 +78,7 @@ p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-protobuf-ir"
   "Unhandled node type in Bmv2V1ModelCmdStepper: ForStatement"
   issue4739.p4
+  loop-3-clause-tricky2.p4
 )
 
 ####################################################################################################
