@@ -54,6 +54,8 @@ P4C_DIR=$(readlink -f ${THIS_DIR}/..)
 : "${INSTALL_EBPF:=ON}"
 # Install DPDK and its dependencies.
 : "${INSTALL_DPDK:=OFF}"
+# Install Tofino and its dependencies.
+: "${INSTALL_TOFINO:=ON}"
 
 . /etc/lsb-release
 
@@ -207,11 +209,85 @@ function build_dpdk() {
   sudo pip3 install protobuf==3.20.3 netaddr==0.9.0
 }
 
-if [ "$INSTALL_DPDK" == "ON" ]; then
+if [[ "${INSTALL_DPDK}" == "ON" ]]; then
   build_dpdk
 fi
 # ! ------  END DPDK -----------------------------------------------
 
+# ! ------  BEGIN TOFINO --------------------------------------------
+
+die () {
+    if [ $# -gt 0 ]; then
+        echo >&2 "$@"
+    fi
+    exit 1
+}
+
+function install_rapidjson() {
+  # ARG: rapidjson version
+  local rj_ver=$1
+  install_it=1
+
+  if ! `pkg-config RapidJSON` || version_LT `pkg-config --modversion RapidJSON` "1.1.0"; then
+    build_rapidjson_from_source ${rj_ver} $install_it
+  fi
+}
+
+function build_rapidjson_from_source() {
+    # ARG: rapidjson version
+    local rj_ver=$1
+    local install_it=$2
+    local builddir=$(mktemp --directory -t rjson_XXXXXX)
+    cd $builddir
+    # add packaging info
+    cat > rj.patch <<EOF
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ceda71b1..21acee18 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -171,3 +171,18 @@ INSTALL(FILES
+     \${CMAKE_CURRENT_BINARY_DIR}/\${PROJECT_NAME}ConfigVersion.cmake
+     DESTINATION "\${CMAKE_INSTALL_DIR}"
+     COMPONENT dev)
++
++# create a debian package
++set (CPACK_GENERATOR "DEB")
++set (CPACK_PACKAGE_NAME "\${PROJECT_NAME}-dev")
++set (CPACK_PACKAGE_VERSION_MAJOR \${LIB_MAJOR_VERSION})
++set (CPACK_PACKAGE_VERSION_MINOR \${LIB_MINOR_VERSION})
++set (CPACK_PACKAGE_VERSION_PATCH \${LIB_PATHC_VERSION})
++set (CPACK_PACKAGE_VERSION "\${LIB_VERSION_STRING}")
++set (CPACK_PACKAGE_CONTACT "THL A29 Limited")
++set (CPACK_PACKAGE_VENDOR "THL A29 Limited")
++set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "RapidJSON")
++set (CPACK_PACKAGE_DESCRIPTION "RapidJSON")
++set (CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
++include (CPack)
++
+EOF
+    git clone https://github.com/miloyip/rapidjson.git \
+        --branch "v${rj_ver}" && \
+    cd rapidjson && \
+    git apply ../rj.patch && \
+    mkdir build && cd build && \
+    cmake .. -DRAPIDJSON_BUILD_DOC=OFF \
+              -DRAPIDJSON_BUILD_EXAMPLES=OFF \
+              -DRAPIDJSON_BUILD_TESTS=OFF && \
+    make -j $nprocs  || die "Failed to build rapidjson"
+    if [[ $install_it == 1 ]] ; then
+	    sudo make install  || die "Failed to install rapidjson"
+	  else
+      cpack -G DEB && cp RapidJSON-dev-${rj_ver}-Linux.deb /tmp
+	  fi
+  cd /tmp && \
+  rm -rf $builddir
+}
+
+if [[ "${INSTALL_TOFINO}" == "ON" ]]; then
+  echo "Installing Tofino dependencies"
+  install_rapidjson "1.1.0"
+fi
+# ! ------  END TOFINO ----------------------------------------------
 
 # ! ------  BEGIN VALIDATION -----------------------------------------------
 function build_gauntlet() {
@@ -254,6 +330,8 @@ CMAKE_FLAGS+="-DENABLE_WERROR=${ENABLE_WERROR} "
 CMAKE_FLAGS+="-DENABLE_SANITIZERS=${ENABLE_SANITIZERS} "
 # Enable auto var initialization with pattern.
 CMAKE_FLAGS+="-DBUILD_AUTO_VAR_INIT_PATTERN=${BUILD_AUTO_VAR_INIT_PATTERN} "
+# Enable Tofino.
+CMAKE_FLAGS+="-DENABLE_TOFINO=${ENABLE_TOFINO} "
 
 if [ "$ENABLE_SANITIZERS" == "ON" ]; then
   CMAKE_FLAGS+="-DENABLE_GC=OFF"
