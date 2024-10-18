@@ -17,6 +17,7 @@ struct main_metadata_t {
 	bit<32> pna_main_input_metadata_input_port
 	bit<8> local_metadata_f1
 	bit<32> pna_main_output_metadata_output_port
+	bit<8> MainParserT_parser_tmp
 }
 metadata instanceof main_metadata_t
 
@@ -29,9 +30,10 @@ regarray direction size 0x100 initval 0
 apply {
 	rx m.pna_main_input_metadata_input_port
 	lookahead h.MainParserT_parser_lookahead_0
-	mov m.local_metadata_f1 h.MainParserT_parser_lookahead_0.f
-	jmpeq MAINPARSERIMPL_PARSE_H1 m.local_metadata_f1 0x1
-	jmpeq MAINPARSERIMPL_PARSE_H2 m.local_metadata_f1 0x2
+	mov m.MainParserT_parser_tmp h.MainParserT_parser_lookahead_0.f
+	mov m.local_metadata_f1 m.MainParserT_parser_tmp
+	jmpeq MAINPARSERIMPL_PARSE_H1 m.MainParserT_parser_tmp 0x1
+	jmpeq MAINPARSERIMPL_PARSE_H2 m.MainParserT_parser_tmp 0x2
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_PARSE_H2 :	extract h.h2
 	jmp MAINPARSERIMPL_ACCEPT
