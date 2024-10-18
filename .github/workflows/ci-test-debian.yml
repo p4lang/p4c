@@ -21,6 +21,7 @@ jobs:
       CTEST_PARALLEL_LEVEL: 4
       IMAGE_TYPE: test
       BUILD_GENERATOR: Ninja
+      ENABLE_TOFINO: ON
     steps:
       - uses: actions/checkout@v4
         with:
