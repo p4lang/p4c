@@ -14,6 +14,7 @@
 #define BF_P4C_MAU_ATTACHED_ENTRIES_H_
 
 #include "lib/ordered_map.h"
+#include <ostream>
 
 namespace P4 {
 namespace IR {

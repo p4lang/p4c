@@ -15,7 +15,6 @@
 
 #include <optional>
 #include "bf-p4c/ir/bitrange.h"
-#include "bf-p4c/lib/small_set.h"
 #include "bf-p4c/phv/phv.h"
 #include "lib/bitvec.h"
 #include "lib/symbitmatrix.h"
@@ -25,8 +24,8 @@ namespace PHV {
 
 using namespace P4;
 
-using ActionSet = SmallSet<const IR::MAU::Action*>;
-using UnitSet = SmallSet<const IR::BFN::Unit*>;
+using ActionSet = ordered_set<const IR::MAU::Action*>;
+using UnitSet = ordered_set<const IR::BFN::Unit*>;
 using RefsMap = ordered_map<cstring, FieldUse>;
 
 class DarkInitPrimitive;

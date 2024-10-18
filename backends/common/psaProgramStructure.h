@@ -22,6 +22,11 @@ limitations under the License.
 
 namespace P4 {
 
+enum psa_gress_t {
+    INGRESS,
+    EGRESS,
+};
+
 enum block_t {
     PARSER,
     PIPELINE,
@@ -31,7 +36,7 @@ enum block_t {
 class PsaProgramStructure : public PortableProgramStructure {
  public:
     /// Architecture related information.
-    ordered_map<const IR::Node *, std::pair<gress_t, block_t>> block_type;
+    ordered_map<const IR::Node *, std::pair<psa_gress_t, block_t>> block_type;
 
  public:
     PsaProgramStructure(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)

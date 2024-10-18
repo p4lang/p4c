@@ -1,11 +1,12 @@
-#include "bfutils/dynamic_hash/dynamic_hash.h"
+#include "bf-utils/include/dynamic_hash/dynamic_hash.h"
+
+#include <assert.h>
 #include <inttypes.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include <assert.h>
 #define assert_macro assert
 #define calloc_macro calloc
 #define free_macro free
