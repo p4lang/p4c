@@ -16,3 +16,5 @@ googleapis-common-protos==1.53.0; python_version <= '3.6'
 grpcio==1.48.2; python_version <= '3.6'
 isort==5.10.1; python_version <= '3.6'
 black==22.8.0; python_version <= '3.6'
+jsl==0.2.4
+pyinstaller==6.11.0

@@ -14,14 +14,6 @@
 
 MESSAGE("-- Adding p4c-barefoot")
 
-# Try to find Z3 in the system, only use the static Z3 library.
-set(Z3_MIN_VERSION "4.8.8")
-# TODO: Move this option into the Z3 CMake module.
-set(_z3_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
-set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
-find_package(Z3 ${Z3_MIN_VERSION} REQUIRED)
-set(CMAKE_FIND_LIBRARY_SUFFIXES ${_z3_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES})
-
 # Set dynamic hash include directory
 set(LIBDYNHASH_INCLUDE_DIR "${BFN_P4C_SOURCE_DIR}/bf-utils/include")
 include_directories(${LIBDYNHASH_INCLUDE_DIR})
@@ -984,7 +976,7 @@ if(BUILD_STATIC_BFP4C_LIBS)
 else()
     add_library(tofinobackend OBJECT ${BF_P4C_SOURCES})
 endif()
-target_link_libraries(tofinobackend PRIVATE absl::prefetch)
+target_link_libraries(tofinobackend PRIVATE absl::prefetch ${P4C_LIB_DEPS})
 add_dependencies(tofinobackend ir-generated frontend genLogging bfn_p4runtime)
 target_include_directories(tofinobackend PRIVATE "${BFN_P4C_SOURCE_DIR}/third_party/spdlog/include")
 foreach(dir ${Protobuf_INCLUDE_DIRS})
@@ -1384,7 +1376,7 @@ if (ENABLE_GTESTS)
                                 "${CMAKE_CURRENT_SOURCE_DIR}/test/gtest/tofino_gtest_utils.cpp")
                                 # test_bf_gtest_helpers should be in its own testlib - & requies 'whole_archive' hack!
                                 # Leave it in GTEST_BF_P4C_SOURCES for now.
-  target_link_libraries (bf_gtest_support PRIVATE absl::flat_hash_map PRIVATE absl::flat_hash_set)
+  target_link_libraries (bf_gtest_support PRIVATE absl::flat_hash_map PRIVATE absl::flat_hash_set ${P4C_LIB_DEPS})
   target_include_directories (bf_gtest_support PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/test/gtest}" PRIVATE "${P4C_BINARY_DIR}")
   add_dependencies (bf_gtest_support p4headers_h p4headers_cpp ir-generated gtest frontend-parser-gen)  # Indirectly we #include "ir/gen-tree-macro.h" and "p4parser.hpp"
 

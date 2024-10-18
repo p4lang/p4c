@@ -11,10 +11,12 @@
  */
 
 #include "event_logger.h"
+
 #include <rapidjson/prettywriter.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/null_sink.h>
 #include <spdlog/spdlog.h>
+
 #include <ctime>
 
 #include "event_log_schema.h"
@@ -161,7 +163,7 @@ void EventLogger::init(const std::string &OUTDIR, const std::string &FILENAME) {
 
         stream_for_writing_header.flush();  // belt and suspenders
         stream_for_writing_header.close();  // belt and suspenders
-    }                                       // end of unpredicated inner scope
+    }  // end of unpredicated inner scope
 
     auto logger = spdlog::basic_logger_mt("logger", pathname, TRUNCATE_FILE_IF_IT_ALREADY_EXISTS);
 
