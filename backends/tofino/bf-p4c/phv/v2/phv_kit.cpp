@@ -72,8 +72,10 @@ PHV::Slicing::IteratorInterface* PhvKit::make_slicing_ctx(const PHV::SuperCluste
                                         sc, pragmas.pa_container_sizes().field_to_layout(),
                                         *packing_validator,
                                         *parser_packing_validator,
-                                        boost::bind(&PhvKit::has_pack_conflict, this, _1, _2),
-                                        boost::bind(&PhvKit::is_referenced, this, _1));
+                                        boost::bind(&PhvKit::has_pack_conflict, this,
+                                            boost::placeholders::_1, boost::placeholders::_2),
+                                        boost::bind(&PhvKit::is_referenced, this,
+                                            boost::placeholders::_1));
 }
 
 bool PhvKit::can_logical_liverange_be_overlaid(const PHV::AllocSlice& a,

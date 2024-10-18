@@ -488,8 +488,8 @@ struct Memories : public ::Memories {
         void clear() { group = nullptr; mask = 0; mapram_mask = 0; }
         void clear_masks() {mask = 0; mapram_mask = 0; }
         void dbprint(std::ostream &out) const {
-            out << *group << " RAM mask: 0x" << hex(mask) << " map RAM mask: 0x"
-                << hex(mapram_mask);
+            out << *group << " RAM mask: 0x" << P4::hex(mask) << " map RAM mask: 0x"
+                << P4::hex(mapram_mask);
         }
     };
 

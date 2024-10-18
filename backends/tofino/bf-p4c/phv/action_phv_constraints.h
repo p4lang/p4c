@@ -83,7 +83,7 @@ struct CanPackErrorV2 {
     cstring msg;
     bool remove_align_req = false;
     const std::vector<PHV::AllocSlice>* invalid_dest_packing = nullptr;
-    explicit CanPackErrorV2(CanPackErrorCode code) : code(code) {}
+    CanPackErrorV2(CanPackErrorCode code) : code(code) {}
     CanPackErrorV2(CanPackErrorCode code, bool clear_align) : code(code),
                                                                 remove_align_req(clear_align) {}
     CanPackErrorV2(CanPackErrorCode code, cstring msg) : code(code), msg(msg) {}

@@ -20,7 +20,7 @@ std::map<int, PHV::FieldUse> LiveRangeReport::processUseDefSet(
     const int DEPARSER = maxStages;
     const int PARSER = -1;
     std::map<int, PHV::FieldUse> fieldMap;
-    for (const FieldDefUse::locpair use : defuseSet) {
+    for (const FieldDefUse::locpair &use : defuseSet) {
         const IR::BFN::Unit* use_unit = use.first;
         if (use_unit->is<IR::BFN::ParserState>() || use_unit->is<IR::BFN::Parser>() ||
             use_unit->is<IR::BFN::GhostParser>()) {

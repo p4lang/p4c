@@ -1476,7 +1476,6 @@ if (ENABLE_GTESTS)
     ${CMAKE_CURRENT_SOURCE_DIR}/test/gtest/simplify_key_elim_casts.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/test/gtest/slice_comparison.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/test/gtest/slice.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/test/gtest/small_set.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/test/gtest/static_entries_const_prop.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/test/gtest/table_dependency_graph.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/test/gtest/table_flow_graph.cpp

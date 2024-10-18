@@ -1842,7 +1842,7 @@ void GetBackendParser::rewriteChecksums(IR::BFN::Parser* parser, IR::BFN::Parser
         applyRewrite(const_cast<IR::BFN::ParserState*>(state), rpc);
     }
 
-    for (const auto loop : backendLoops) {
+    for (const auto& loop : backendLoops) {
         ordered_map<cstring, int> offsetInsideLoop;
 
         for (const auto* state : loop) {

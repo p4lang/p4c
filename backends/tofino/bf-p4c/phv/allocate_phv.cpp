@@ -15,6 +15,7 @@
 #include <numeric>
 #include <sstream>
 #include <boost/format.hpp>
+#include <boost/bind/bind.hpp>
 #include <boost/optional/optional_io.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 
@@ -628,8 +629,10 @@ PHV::Slicing::IteratorInterface* PHV::AllocUtils::make_slicing_ctx(
                                         sc, pragmas.pa_container_sizes().field_to_layout(),
                                         *packing_validator,
                                         *parser_packing_validator,
-                                        boost::bind(&AllocUtils::has_pack_conflict, this, _1, _2),
-                                        boost::bind(&AllocUtils::is_referenced, this, _1));
+                                        boost::bind(&AllocUtils::has_pack_conflict, this,
+                                            boost::placeholders::_1, boost::placeholders::_2),
+                                        boost::bind(&AllocUtils::is_referenced,
+                                            this, boost::placeholders::_1));
 }
 
 bool PHV::AllocUtils::can_physical_liverange_be_overlaid(

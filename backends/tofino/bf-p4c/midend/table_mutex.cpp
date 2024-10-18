@@ -13,13 +13,12 @@
 #include "table_mutex.h"
 
 #include "frontends/p4/methodInstance.h"
-#include "lib/small_set.h"
 #include "lib/symbitmatrix.h"
 
 struct TableMutex::Shared {
     std::map<cstring, int> tableByName;
     std::vector<cstring> tableById;
-    std::map<cstring, SmallSet<int>> tablesForAction;
+    std::map<cstring, ordered_set<int>> tablesForAction;
     SymBitMatrix mutex;
     SymBitMatrix not_mutex;  // temp within one control
     bitvec seen_in_control;

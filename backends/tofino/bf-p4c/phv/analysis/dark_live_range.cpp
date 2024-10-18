@@ -145,7 +145,7 @@ void DarkLiveRange::setFieldLiveMap(const PHV::Field* f) {
     // minDef = earliest stage for defs of the field.
     // maxDef = latest stage for defs of the field.
     // Set the min values initially to the deparser, and the max values to the parser initially.
-    for (const FieldDefUse::locpair use : defuse.getAllUses(f->id)) {
+    for (const FieldDefUse::locpair &use : defuse.getAllUses(f->id)) {
         const IR::BFN::Unit* use_unit = use.first;
         if (use_unit->is<IR::BFN::ParserState>() || use_unit->is<IR::BFN::Parser>() ||
             use_unit->to<IR::BFN::GhostParser>()) {

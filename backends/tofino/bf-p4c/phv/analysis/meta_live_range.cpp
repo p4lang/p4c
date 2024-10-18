@@ -83,7 +83,7 @@ void MetadataLiveRange::setFieldLiveMap(const PHV::Field* f) {
         const auto kind = accessMode == READ ? "Used" : "Defined";
         if (accessSet.empty())
             LOG5(kind << " accessSet empty");
-        for (const auto [unit, expr] : accessSet) {
+        for (const auto &[unit, expr] : accessSet) {
             if (unit->is<IR::BFN::ParserState>() || unit->is<IR::BFN::Parser>() ||
                 unit->to<IR::BFN::GhostParser>()) {
                 // If the def is an implicit read inserted only for metadata fields to account for

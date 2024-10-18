@@ -518,7 +518,7 @@ inline std::ostream &operator<<(std::ostream &out, const IXBar::Use::Byte &b) {
     out << b.container << '[' << b.lo << ".." << (b.lo + 7) << ']';
     if (b.loc) out << b.loc;
     out << " 0x" << b.bit_use;
-    if (b.flags) out << " flags=" << hex(b.flags);
+    if (b.flags) out << " flags=" << P4::hex(b.flags);
     out << " " << b.visualization_detail();
     return out;
 }
