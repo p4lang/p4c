@@ -10,8 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef _EXTENSIONS_BF_P4C_MAU_REMOVE_ACT_TABLES_H_
-#define _EXTENSIONS_BF_P4C_MAU_REMOVE_ACT_TABLES_H_
+#ifndef _BACKENDS_TOFINO_BF_P4C_MAU_REMOVE_ACT_TABLES_H_
+#define _BACKENDS_TOFINO_BF_P4C_MAU_REMOVE_ACT_TABLES_H_
 
 #include "ir/ir.h"
 
@@ -28,14 +28,12 @@ using namespace P4;
 class AnalyzeActionTables : public MAU::Inspector {
  public:
     AnalyzeActionTables() {}
-    bool isCandidate(const IR::MAU::Table *t) const {
-        return _candidates.
-    }
+    bool isCandidate(const IR::MAU::Table *t) const { return _candidates. }
 
  private:
-    bool preorder(IR::P4Control* control) override;
-    bool preorder(const IR::MAU::Table* t) override;
-    bool preorder(IR::P4Action* action) override;
+    bool preorder(IR::P4Control *control) override;
+    bool preorder(const IR::MAU::Table *t) override;
+    bool preorder(IR::P4Action *action) override;
 
     std::set<cstring> _candidates;
 };
@@ -45,10 +43,10 @@ class DoRemoveActionTables : public Transform {
     const AnalyzeActionTables *analysis;
 
  public:
-    DoRemoveActionTables(const AnalyzeActionTables *a) : analysis(a) {}
+    explicit DoRemoveActionTables(const AnalyzeActionTables *a) : analysis(a) {}
 
  private:
-    const IR::Node *postorder(const IR::MAU::Table* t) override;
+    const IR::Node *postorder(const IR::MAU::Table *t) override;
 };
 
 class RemoveActionTables : public PassManager {
@@ -62,5 +60,4 @@ class RemoveActionTables : public PassManager {
     }
 };
 
-
-#endif  /* _EXTENSIONS_BF_P4C_MAU_REMOVE_ACT_TABLES_H_ */
+#endif /* _BACKENDS_TOFINO_BF_P4C_MAU_REMOVE_ACT_TABLES_H_ */

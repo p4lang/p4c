@@ -10,11 +10,11 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_COMMON_SIZE_OF_H_
-#define EXTENSIONS_BF_P4C_COMMON_SIZE_OF_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_COMMON_SIZE_OF_H_
+#define BACKENDS_TOFINO_BF_P4C_COMMON_SIZE_OF_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/strengthReduction.h"
+#include "ir/ir.h"
 
 namespace BFN {
 
@@ -23,12 +23,12 @@ using namespace P4;
 class CloneConstants : public Transform {
  public:
     CloneConstants() = default;
-    const IR::Node* postorder(IR::Constant* constant) override {
+    const IR::Node *postorder(IR::Constant *constant) override {
         // We clone the constant.  This is necessary because the same
         // the type associated with the constant may participate in
         // type unification, and thus we want to have different type
         // objects for different constant instances.
-        const IR::Type* type = constant->type;
+        const IR::Type *type = constant->type;
         if (type->is<IR::Type_Bits>()) {
             type = constant->type->clone();
         } else if (auto ii = type->to<IR::Type_InfInt>()) {
@@ -40,7 +40,7 @@ class CloneConstants : public Transform {
         }
         return new IR::Constant(constant->srcInfo, type, constant->value, constant->base);
     }
-    static const IR::Expression* clone(const IR::Expression* expression) {
+    static const IR::Expression *clone(const IR::Expression *expression) {
         return expression->apply(CloneConstants())->to<IR::Expression>();
     }
 };
@@ -51,9 +51,9 @@ class CloneConstants : public Transform {
  */
 class ConvertSizeOfToConstant : public Transform {
  public:
-    ConvertSizeOfToConstant() { }
-    const IR::Node *preorder(IR::MAU::TypedPrimitive* p) override;
-    const IR::Node *preorder(IR::MethodCallExpression* mce) override;
+    ConvertSizeOfToConstant() {}
+    const IR::Node *preorder(IR::MAU::TypedPrimitive *p) override;
+    const IR::Node *preorder(IR::MethodCallExpression *mce) override;
 };
 
 /**
@@ -62,27 +62,24 @@ class ConvertSizeOfToConstant : public Transform {
  */
 class BackendConstantFolding : public Transform {
  public:
-    const IR::Expression* getConstant(const IR::Expression* expr) const;
-    const IR::Node* postorder(IR::Slice* e) override;
+    const IR::Expression *getConstant(const IR::Expression *expr) const;
+    const IR::Node *postorder(IR::Slice *e) override;
 };
 
 class BackendStrengthReduction : public Transform {
-    const IR::Node* sub(IR::MAU::Instruction* inst);
-    const IR::Node* preorder(IR::MAU::SaluInstruction* inst) override;
-    const IR::Node* preorder(IR::MAU::Instruction* inst) override;
+    const IR::Node *sub(IR::MAU::Instruction *inst);
+    const IR::Node *preorder(IR::MAU::SaluInstruction *inst) override;
+    const IR::Node *preorder(IR::MAU::Instruction *inst) override;
 };
 
 class ResolveSizeOfOperator : public PassManager {
  public:
     ResolveSizeOfOperator() {
-        addPasses({
-            new ConvertSizeOfToConstant(),
-            new BackendConstantFolding(),
-            new BackendStrengthReduction()
-        });
+        addPasses({new ConvertSizeOfToConstant(), new BackendConstantFolding(),
+                   new BackendStrengthReduction()});
     }
 };
 
 }  // namespace BFN
 
-#endif  /* EXTENSIONS_BF_P4C_COMMON_SIZE_OF_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_COMMON_SIZE_OF_H_ */

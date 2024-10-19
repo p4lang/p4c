@@ -10,10 +10,11 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_COMMON_DEBUG_INFO_H_
-#define EXTENSIONS_BF_P4C_COMMON_DEBUG_INFO_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_COMMON_DEBUG_INFO_H_
+#define BACKENDS_TOFINO_BF_P4C_COMMON_DEBUG_INFO_H_
 
 #include <vector>
+
 #include "lib/cstring.h"
 
 using namespace P4;
@@ -25,7 +26,7 @@ namespace BFN {
 /// but it has no effect on correctness.
 struct DebugInfo {
     /// Merge the contents of another DebugInfo object into this one.
-    void mergeWith(const DebugInfo& other) {
+    void mergeWith(const DebugInfo &other) {
         info.insert(info.end(), other.info.begin(), other.info.end());
     }
 
@@ -34,4 +35,4 @@ struct DebugInfo {
 
 }  // namespace BFN
 
-#endif /* EXTENSIONS_BF_P4C_COMMON_DEBUG_INFO_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_COMMON_DEBUG_INFO_H_ */

@@ -10,12 +10,12 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PARDE_COMMON_ALLOCATORS_H_
-#define EXTENSIONS_BF_P4C_PARDE_COMMON_ALLOCATORS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_COMMON_ALLOCATORS_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_COMMON_ALLOCATORS_H_
 
 #include "bf-p4c/common/ir_utils.h"
-#include "bf-p4c/parde/parde_visitor.h"
 #include "bf-p4c/parde/clot/clot_info.h"
+#include "bf-p4c/parde/parde_visitor.h"
 #include "ir/ir.h"
 
 /**
@@ -44,7 +44,7 @@ class LoweredParserMatchAllocator {
 
     struct OutOfBuffer : Inspector {
         bool lo = false, hi = false;
-        bool preorder(const IR::BFN::LoweredPacketRVal* rval) override {
+        bool preorder(const IR::BFN::LoweredPacketRVal *rval) override {
             auto max = Device::pardeSpec().byteInputBufferSize() * 8;
             hi |= rval->range.hi >= max;
             lo |= rval->range.lo >= max;
@@ -53,18 +53,18 @@ class LoweredParserMatchAllocator {
     };
 
     template <typename T>
-    static bool within_buffer(const T* p) {
+    static bool within_buffer(const T *p) {
         OutOfBuffer oob;
         p->apply(oob);
         return !oob.hi;
     }
 
     struct Allocator {
-        LoweredParserMatchAllocator& lpm_allocator;
+        LoweredParserMatchAllocator &lpm_allocator;
 
         IR::Vector<IR::BFN::LoweredParserPrimitive> current, spilled;
 
-        explicit Allocator(LoweredParserMatchAllocator& lpm_allocator)
+        explicit Allocator(LoweredParserMatchAllocator &lpm_allocator)
             : lpm_allocator(lpm_allocator) {}
 
         virtual void allocate() = 0;
@@ -77,7 +77,7 @@ class LoweredParserMatchAllocator {
     };
 
     struct ExtractAllocator : Allocator {
-        ordered_map<PHV::Container, ordered_set<const IR::BFN::LoweredExtractPhv*>>
+        ordered_map<PHV::Container, ordered_set<const IR::BFN::LoweredExtractPhv *>>
             container_to_extracts;
 
         virtual std::pair<size_t, unsigned> inbuf_extractor_use(size_t container_size) = 0;
@@ -87,7 +87,7 @@ class LoweredParserMatchAllocator {
 
         std::map<size_t, unsigned> constant_extractor_use_choices(
             PHV::Container container,
-            const ordered_set<const IR::BFN::LoweredExtractPhv*>& extracts) {
+            const ordered_set<const IR::BFN::LoweredExtractPhv *> &extracts) {
             std::map<size_t, unsigned> rv;
             bool has_clr_on_write = false;
 
@@ -98,7 +98,7 @@ class LoweredParserMatchAllocator {
 
                 LOG4("constant: " << c);
 
-                for (auto& [size, count] : rv)
+                for (auto &[size, count] : rv)
                     LOG4("extractors needed: " << size << " : " << count);
             }
 
@@ -107,7 +107,7 @@ class LoweredParserMatchAllocator {
 
         std::map<size_t, unsigned> inbuf_extractor_needed(
             PHV::Container container,
-            const ordered_set<const IR::BFN::LoweredExtractPhv*>& extracts) {
+            const ordered_set<const IR::BFN::LoweredExtractPhv *> &extracts) {
             std::map<size_t, unsigned> rv;
 
             if (has_inbuf_extract(extracts)) {
@@ -118,15 +118,15 @@ class LoweredParserMatchAllocator {
             return rv;
         }
 
-        bool has_inbuf_extract(const ordered_set<const IR::BFN::LoweredExtractPhv*>& extracts) {
+        bool has_inbuf_extract(const ordered_set<const IR::BFN::LoweredExtractPhv *> &extracts) {
             for (auto e : extracts) {
                 if (e->source->is<IR::BFN::LoweredInputBufferRVal>()) return true;
             }
             return false;
         }
 
-        unsigned merge_const_source(const ordered_set<const IR::BFN::LoweredExtractPhv*>& extracts,
-                                    bool& has_clr_on_write) {
+        unsigned merge_const_source(const ordered_set<const IR::BFN::LoweredExtractPhv *> &extracts,
+                                    bool &has_clr_on_write) {
             unsigned merged = 0;
 
             for (auto e : extracts) {
@@ -141,7 +141,7 @@ class LoweredParserMatchAllocator {
             return merged;
         }
 
-        bool extract_out_of_buffer(const IR::BFN::LoweredExtractPhv* e) {
+        bool extract_out_of_buffer(const IR::BFN::LoweredExtractPhv *e) {
             GetExtractBufferPos get_buf_pos;
             e->apply(get_buf_pos);
 
@@ -158,7 +158,7 @@ class LoweredParserMatchAllocator {
             // reserve extractor for checksum verification
             for (auto c : lpm_allocator.current_statements) {
                 if (auto lpc = c->to<IR::BFN::LoweredParserChecksum>()) {
-                    const IR::BFN::ContainerRef* dest = lpc->phv_dest;
+                    const IR::BFN::ContainerRef *dest = lpc->phv_dest;
                     if (lpc->type == IR::BFN::ChecksumMode::VERIFY && lpc->csum_err)
                         dest = lpc->csum_err->container;
                     if (!dest) continue;
@@ -181,9 +181,9 @@ class LoweredParserMatchAllocator {
                 }
             }
 
-            for (auto& kv : container_to_extracts) {
+            for (auto &kv : container_to_extracts) {
                 auto container = kv.first;
-                auto& extracts = kv.second;
+                auto &extracts = kv.second;
 
                 auto ibuf_needed = inbuf_extractor_needed(container, extracts);
 
@@ -195,7 +195,7 @@ class LoweredParserMatchAllocator {
                     if (Device::currentDevice() == Device::TOFINO) {
                         std::map<size_t, unsigned> valid_choices;
 
-                        for (auto& choice : constant_choices) {
+                        for (auto &choice : constant_choices) {
                             if (choice.first == 16 || choice.first == 32) {
                                 if (choice.second + constants_by_size[choice.first] > 2) continue;
                             }
@@ -235,8 +235,7 @@ class LoweredParserMatchAllocator {
                 if (!constant_choices.empty()) {
                     extractor_avail = false;
 
-                    for (auto it = constant_choices.rbegin();
-                         it != constant_choices.rend(); ++it) {
+                    for (auto it = constant_choices.rbegin(); it != constant_choices.rend(); ++it) {
                         auto choice = *it;
 
                         total_needed = ibuf_needed;
@@ -248,7 +247,7 @@ class LoweredParserMatchAllocator {
 
                         bool choice_ok = true;
 
-                        for (auto& kv : total_needed) {
+                        for (auto &kv : total_needed) {
                             auto avail = Device::pardeSpec().extractorSpec().at(kv.first);
                             if (extractors_by_size[kv.first] + kv.second > avail) {
                                 choice_ok = false;
@@ -265,7 +264,7 @@ class LoweredParserMatchAllocator {
                 } else {
                     total_needed = ibuf_needed;
 
-                    for (auto& kv : total_needed) {
+                    for (auto &kv : total_needed) {
                         auto avail = Device::pardeSpec().extractorSpec().at(kv.first);
                         if (extractors_by_size[kv.first] + kv.second > avail) {
                             extractor_avail = false;
@@ -289,7 +288,7 @@ class LoweredParserMatchAllocator {
                     // allocate
                     for (auto e : extracts) current.push_back(e);
 
-                    for (auto& kv : total_needed) extractors_by_size[kv.first] += kv.second;
+                    for (auto &kv : total_needed) extractors_by_size[kv.first] += kv.second;
 
                     constants_by_size[constant_needed.first] += constant_needed.second;
                 } else {
@@ -307,7 +306,7 @@ class LoweredParserMatchAllocator {
             }
         }
 
-        explicit ExtractAllocator(LoweredParserMatchAllocator& lpm_allocator)
+        explicit ExtractAllocator(LoweredParserMatchAllocator &lpm_allocator)
             : Allocator(lpm_allocator) {
             PHV::FieldUse use(PHV::FieldUse::WRITE);
             for (auto e : lpm_allocator.phv_extracts) {
@@ -324,20 +323,17 @@ class LoweredParserMatchAllocator {
             switch (extractor_size) {
                 case 32:
                     for (int i = 0; i < 32; i++) {
-                        if ((val & 1) && (0x7 & val) == val)
-                            return true;
+                        if ((val & 1) && (0x7 & val) == val) return true;
                         val = ((val >> 1) | (val << 31)) & 0xffffffffU;
                     }
                     return false;
                 case 16:
-                    if ((val >> 16) && !can_extract(val >> 16, extractor_size))
-                        return false;
+                    if ((val >> 16) && !can_extract(val >> 16, extractor_size)) return false;
                     val &= 0xffff;
                     for (int i = 0; i < 16; i++) {
-                        if ((val & 1) && (0xf & val) == val)
-                            return true;
+                        if ((val & 1) && (0xf & val) == val) return true;
                         val = ((val >> 1) | (val << 15)) & 0xffffU;
-                        }
+                    }
                     return false;
                 case 8:
                     return true;
@@ -346,14 +342,13 @@ class LoweredParserMatchAllocator {
             return false;
         }
 
-        std::map<size_t, unsigned>
-        constant_extractor_use_choices(unsigned value, size_t container_size) override {
+        std::map<size_t, unsigned> constant_extractor_use_choices(unsigned value,
+                                                                  size_t container_size) override {
             std::map<size_t, unsigned> rv;
 
-            for (const auto extractor_size : { PHV::Size::b32, PHV::Size::b16, PHV::Size::b8}) {
+            for (const auto extractor_size : {PHV::Size::b32, PHV::Size::b16, PHV::Size::b8}) {
                 // can not use larger extractor on smaller container
-                if (container_size < size_t(extractor_size))
-                    continue;
+                if (container_size < size_t(extractor_size)) continue;
 
                 if (can_extract(value, unsigned(extractor_size)))
                     rv[size_t(extractor_size)] = container_size / unsigned(extractor_size);
@@ -364,13 +359,12 @@ class LoweredParserMatchAllocator {
             return rv;
         }
 
-        std::pair<size_t, unsigned>
-        inbuf_extractor_use(size_t container_size) override {
+        std::pair<size_t, unsigned> inbuf_extractor_use(size_t container_size) override {
             return {container_size, 1};
         }
 
      public:
-        explicit TofinoExtractAllocator(LoweredParserMatchAllocator& lpm_allocator)
+        explicit TofinoExtractAllocator(LoweredParserMatchAllocator &lpm_allocator)
             : ExtractAllocator(lpm_allocator) {
             allocate();
             add_to_result();
@@ -378,8 +372,8 @@ class LoweredParserMatchAllocator {
     };
 
     class JBayExtractAllocator : public ExtractAllocator {
-        std::map<size_t, unsigned>
-        constant_extractor_use_choices(uint32_t value, size_t container_size) override {
+        std::map<size_t, unsigned> constant_extractor_use_choices(uint32_t value,
+                                                                  size_t container_size) override {
             std::map<size_t, unsigned> rv;
 
             unsigned num = 0;
@@ -394,13 +388,12 @@ class LoweredParserMatchAllocator {
             return rv;
         }
 
-        std::pair<size_t, unsigned>
-        inbuf_extractor_use(size_t container_size) override {
+        std::pair<size_t, unsigned> inbuf_extractor_use(size_t container_size) override {
             return {16, container_size == 32 ? 2 : 1};
         }
 
      public:
-        explicit JBayExtractAllocator(LoweredParserMatchAllocator& lpm_allocator)
+        explicit JBayExtractAllocator(LoweredParserMatchAllocator &lpm_allocator)
             : ExtractAllocator(lpm_allocator) {
             allocate();
             add_to_result();
@@ -409,8 +402,7 @@ class LoweredParserMatchAllocator {
 
     void allocate() {
         sort_state_primitives();
-        for (const auto& checksum : checksums)
-            current_statements.push_back(checksum);
+        for (const auto &checksum : checksums) current_statements.push_back(checksum);
 
         if (Device::currentDevice() == Device::TOFINO) {
             TofinoExtractAllocator tea(*this);
@@ -434,7 +426,7 @@ class LoweredParserMatchAllocator {
         int min = Device::pardeSpec().byteInputBufferSize() * 8;
         int max = -1;
 
-        bool preorder(const IR::BFN::LoweredExtractPhv* extract) override {
+        bool preorder(const IR::BFN::LoweredExtractPhv *extract) override {
             if (auto rval = extract->source->to<IR::BFN::LoweredPacketRVal>()) {
                 min = std::min(min, rval->range.lo);
                 max = std::max(max, rval->range.hi);
@@ -444,23 +436,23 @@ class LoweredParserMatchAllocator {
     };
 
  public:
-    LoweredParserMatchAllocator(const IR::BFN::LoweredParserMatch* s, ClotInfo& clot)
+    LoweredParserMatchAllocator(const IR::BFN::LoweredParserMatch *s, ClotInfo &clot)
         : state(s), clot(clot) {
         allocate();
     }
 
-    const IR::BFN::LoweredParserMatch* state;
+    const IR::BFN::LoweredParserMatch *state;
 
-    ClotInfo& clot;
+    ClotInfo &clot;
 
-    std::vector<const IR::BFN::LoweredExtractPhv*> phv_extracts;
-    std::vector<const IR::BFN::LoweredExtractClot*> clot_extracts;
-    std::vector<const IR::BFN::LoweredParserChecksum*> checksums;
-    std::vector<const IR::BFN::ParserCounterPrimitive*> counters;
-    std::vector<const IR::BFN::LoweredParserPrimitive*> others;
+    std::vector<const IR::BFN::LoweredExtractPhv *> phv_extracts;
+    std::vector<const IR::BFN::LoweredExtractClot *> clot_extracts;
+    std::vector<const IR::BFN::LoweredParserChecksum *> checksums;
+    std::vector<const IR::BFN::ParserCounterPrimitive *> counters;
+    std::vector<const IR::BFN::LoweredParserPrimitive *> others;
 
     IR::Vector<IR::BFN::LoweredParserPrimitive> current_statements, spilled_statements;
     bool spill_selects = false;
 };
 
-#endif /* EXTENSIONS_BF_P4C_PARDE_COMMON_ALLOCATORS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_COMMON_ALLOCATORS_H_ */

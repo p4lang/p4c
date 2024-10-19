@@ -10,12 +10,12 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PARDE_ADJUST_EXTRACT_H_
-#define EXTENSIONS_BF_P4C_PARDE_ADJUST_EXTRACT_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_ADJUST_EXTRACT_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_ADJUST_EXTRACT_H_
 
-#include "ir/ir.h"
-#include "bf-p4c/phv/phv_fields.h"
 #include "bf-p4c/parde/parde_visitor.h"
+#include "bf-p4c/phv/phv_fields.h"
+#include "ir/ir.h"
 
 /**
  * @ingroup parde
@@ -26,24 +26,23 @@
  * and then send to ingress/egress parser.
  */
 class AdjustExtract : public PardeModifier {
-    const PhvInfo& phv;
+    const PhvInfo &phv;
 
     /// Adjust extract and shift.
-    void postorder(IR::BFN::ParserState* state) override;
+    void postorder(IR::BFN::ParserState *state) override;
 
     /// For a marshaled field, calculate the junk bits that is also serialized.
     /// This requires that the field can be serialized consecutively, so that
     /// junk bits can only show up before and after the field.
     /// @returns a pair of size_t where the first is the size of pre_padding
     /// and the second is post_padding, in nw_order.
-    std::pair<size_t, size_t> calcPrePadding(const PHV::Field* field);
+    std::pair<size_t, size_t> calcPrePadding(const PHV::Field *field);
 
     /// Whether a state has any extraction that extracts from malshaled fields.
-    bool hasMarshaled(const IR::BFN::ParserState* state);
+    bool hasMarshaled(const IR::BFN::ParserState *state);
 
  public:
-    explicit AdjustExtract(const PhvInfo& phv)
-        : phv(phv) {}
+    explicit AdjustExtract(const PhvInfo &phv) : phv(phv) {}
 };
 
-#endif /* EXTENSIONS_BF_P4C_PARDE_ADJUST_EXTRACT_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_ADJUST_EXTRACT_H_ */

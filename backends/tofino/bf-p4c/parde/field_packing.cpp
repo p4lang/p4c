@@ -12,20 +12,20 @@
 
 #include "bf-p4c/parde/field_packing.h"
 
+#include "bf-p4c/parde/marshal.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
-#include "bf-p4c/parde/marshal.h"
 
 namespace BFN {
 
 using namespace P4;
 
-void FieldPacking::appendField(const IR::Expression* field, unsigned width, gress_t gress) {
+void FieldPacking::appendField(const IR::Expression *field, unsigned width, gress_t gress) {
     appendField(field, cstring(), width, gress);
 }
 
-void FieldPacking::appendField(const IR::Expression* field, cstring source,
-                               unsigned width, gress_t gress) {
+void FieldPacking::appendField(const IR::Expression *field, cstring source, unsigned width,
+                               gress_t gress) {
     BUG_CHECK(field != nullptr, "Packing null field?");
     fields.push_back(PackedItem(field, gress, source, width));
     totalWidth += width;
@@ -41,7 +41,7 @@ void FieldPacking::appendPadding(unsigned width) {
     totalWidth += width;
 }
 
-void FieldPacking::append(const FieldPacking& packing) {
+void FieldPacking::append(const FieldPacking &packing) {
     for (auto item : packing.fields) {
         if (item.isPadding())
             appendPadding(item.width);
@@ -75,19 +75,18 @@ bool FieldPacking::isAlignedTo(unsigned alignment, unsigned phase /* = 0 */) con
     return totalWidth % alignment == phase % alignment;
 }
 
-IR::BFN::ParserState*
-FieldPacking::createExtractionState(gress_t gress, cstring stateName,
-                                    const IR::BFN::ParserState* finalState) const {
+IR::BFN::ParserState *FieldPacking::createExtractionState(
+    gress_t gress, cstring stateName, const IR::BFN::ParserState *finalState) const {
     BUG_CHECK(totalWidth % 8 == 0,
               "Creating extraction states for non-byte-aligned field packing?");
 
     IR::Vector<IR::BFN::ParserPrimitive> extracts;
     unsigned currentBit = 0;
     size_t pre_padding = 0;
-    for (auto& item : fields) {
+    for (auto &item : fields) {
         if (!item.isPadding()) {
-            auto* extract = new IR::BFN::Extract(item.field,
-              new IR::BFN::PacketRVal(StartLen(currentBit, item.width), false));
+            auto *extract = new IR::BFN::Extract(
+                item.field, new IR::BFN::PacketRVal(StartLen(currentBit, item.width), false));
             extract->marshaled_from =
                 MarshaledFrom(item.gress, item.field->toString(), pre_padding);
             extracts.push_back(extract);
@@ -98,14 +97,14 @@ FieldPacking::createExtractionState(gress_t gress, cstring stateName,
         currentBit += item.width;
     }
 
-    return new IR::BFN::ParserState(stateName, gress, extracts, { }, {
-        new IR::BFN::Transition(match_t(), totalWidth / 8, finalState)
-    });
+    return new IR::BFN::ParserState(
+        stateName, gress, extracts, {},
+        {new IR::BFN::Transition(match_t(), totalWidth / 8, finalState)});
 }
 
 }  // namespace BFN
 
-std::ostream& operator<<(std::ostream& out, const BFN::FieldPacking* packing) {
+std::ostream &operator<<(std::ostream &out, const BFN::FieldPacking *packing) {
     if (packing == nullptr) {
         out << "(null field packing)" << std::endl;
         return out;

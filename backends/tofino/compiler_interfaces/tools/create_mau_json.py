@@ -4,18 +4,25 @@
 This script produces a mau.json from an input context.json file.
 """
 
-import json, jsonschema, logging, math, os, sys
+import json
+import logging
+import math
+import os
+import sys
 from collections import OrderedDict
+
+import jsonschema
+
 from .utils import *
 
-if not getattr(sys,'frozen', False):
+if not getattr(sys, 'frozen', False):
     # standalone script
     MYPATH = os.path.dirname(__file__)
     SCHEMA_PATH = os.path.join(MYPATH, "../")
     sys.path.append(SCHEMA_PATH)
 from schemas.mau_schema import MauJSONSchema
-from schemas.schema_keys import *
 from schemas.schema_enum_values import *
+from schemas.schema_keys import *
 
 # The minimum context.json schema version required.
 MINIMUM_CONTEXT_JSON_VERSION = "1.7.0"
@@ -27,11 +34,13 @@ MAU_JSON_FILE = "mau.json"
 # ----------------------------------------
 #  Helpers
 # ----------------------------------------
-REF_TYPE_TO_TABLE_TYPE = {ACTION_DATA_TABLE_REFS: ACTION,
-                          METER_TABLE_REFS: METER,
-                          SELECTION_TABLE_REFS: SELECTION,
-                          STATEFUL_TABLE_REFS: STATEFUL,
-                          STATISTICS_TABLE_REFS: STATISTICS}
+REF_TYPE_TO_TABLE_TYPE = {
+    ACTION_DATA_TABLE_REFS: ACTION,
+    METER_TABLE_REFS: METER,
+    SELECTION_TABLE_REFS: SELECTION,
+    STATEFUL_TABLE_REFS: STATEFUL,
+    STATISTICS_TABLE_REFS: STATISTICS,
+}
 
 
 def find_table_node(table_name, table_handle, table_type, context):
@@ -44,13 +53,16 @@ def find_table_node(table_name, table_handle, table_type, context):
             return t
         if handle is not None and handle == table_handle and ttype == table_type:
             return t
-    print_error_and_exit("Unable to find table '%s' (%s) with handle '%s' in '%s' node." % (table_name, table_type, str(table_handle), TABLES))
-
+    print_error_and_exit(
+        "Unable to find table '%s' (%s) with handle '%s' in '%s' node."
+        % (table_name, table_type, str(table_handle), TABLES)
+    )
 
 
 # ----------------------------------------
 #  Produce MAU JSON
 # ----------------------------------------
+
 
 def get_match_stage_tables(match_table):
     match_attr = get_attr(MATCH_ATTRIBUTES, match_table)
@@ -155,7 +167,9 @@ def get_stage_action_formats(match_stage_table, match_table, context):
     for ref in adt_refs:
         name = get_attr(NAME, ref)
         handle = get_attr(HANDLE, ref)
-        action_table = find_table_node(name, handle, REF_TYPE_TO_TABLE_TYPE[ACTION_DATA_TABLE_REFS], context)
+        action_table = find_table_node(
+            name, handle, REF_TYPE_TO_TABLE_TYPE[ACTION_DATA_TABLE_REFS], context
+        )
         action_stage_tables = get_attr(STAGE_TABLES, action_table)
         actions_list = get_attr(ACTIONS, action_table)
 
@@ -185,7 +199,9 @@ def get_stage_action_formats(match_stage_table, match_table, context):
                     aformat = OrderedDict()
                     aformat["name"] = action_name
                     aformat["action_format"] = {"entries": entries}
-                    aformat["parameter_map"] = get_parameter_map(a, s)  # FIXME: Information does not exist in context.json
+                    aformat["parameter_map"] = get_parameter_map(
+                        a, s
+                    )  # FIXME: Information does not exist in context.json
 
                     stage_action_formats.append(aformat)
 
@@ -235,7 +251,9 @@ def convert_ternary_pack_format(pack_format):
         new_p["table_word_width"] = -1  # Will update below
         new_p["memory_word_width"] = 44
         new_p["entries_per_table_word"] = get_attr(ENTRIES_PER_TABLE_WORD, p)
-        new_p["number_memory_units_per_table_word"] = get_attr(NUMBER_MEMORY_UNITS_PER_TABLE_WORD, p)
+        new_p["number_memory_units_per_table_word"] = get_attr(
+            NUMBER_MEMORY_UNITS_PER_TABLE_WORD, p
+        )
         new_p["table_word_width"] = 44 * new_p["number_memory_units_per_table_word"]
 
         entries = get_attr(ENTRIES, p)
@@ -323,8 +341,13 @@ def get_entry_bit_width(pack_format, stage_table_type):
         for f in fields:
             source = get_attr(SOURCE, f)
             # skip padding for ram-based match tables
-            if source == ZERO and stage_table_type in [ALGORITHMIC_TCAM_MATCH, DIRECT_MATCH,
-                                                       HASH_WAY, HASH_MATCH, PROXY_HASH_MATCH]:
+            if source == ZERO and stage_table_type in [
+                ALGORITHMIC_TCAM_MATCH,
+                DIRECT_MATCH,
+                HASH_WAY,
+                HASH_MATCH,
+                PROXY_HASH_MATCH,
+            ]:
                 continue
             match_bits += get_attr(FIELD_WIDTH, f)
         break  # Only care about the first entry
@@ -404,7 +427,9 @@ def get_ideal_match_entries(match_stage_table, match_table, ideal_overhead_imm_b
         mem_width = get_attr(MEMORY_WORD_WIDTH, p)
         break  # Only care about first instance of packet format
 
-    p4_lookup_types, p4_match_fields = get_match_key_fields_json(get_attr(MATCH_KEY_FIELDS, match_table))
+    p4_lookup_types, p4_match_fields = get_match_key_fields_json(
+        get_attr(MATCH_KEY_FIELDS, match_table)
+    )
     match_bits = 0
     for mdict in p4_match_fields:
         match_bits += mdict["bit_width"]
@@ -465,14 +490,18 @@ def get_match_memory(match_stage_table, match_table, context, entries_so_far):
             mem_allocs.append(get_attr(MEMORY_RESOURCE_ALLOCATION, w))
     else:
         mem_alloc = get_attr(MEMORY_RESOURCE_ALLOCATION, match_stage_table)
-        if mem_alloc is not None:  # Can be None for keyless ternary tables (always miss), so no memory allocated
+        if (
+            mem_alloc is not None
+        ):  # Can be None for keyless ternary tables (always miss), so no memory allocated
             mem_allocs.append(mem_alloc)
             try:
                 mem_type = get_attr(MEMORY_TYPE, mem_alloc)
             except:
                 print("no mem alloc for table type %s" % table_type)
 
-    p4_lookup_types, p4_match_fields = get_match_key_fields_json(get_attr(MATCH_KEY_FIELDS, match_table))
+    p4_lookup_types, p4_match_fields = get_match_key_fields_json(
+        get_attr(MATCH_KEY_FIELDS, match_table)
+    )
     ideal_entry_bits = 0
     for mdict in p4_match_fields:
         ideal_entry_bits += mdict["bit_width"]
@@ -509,7 +538,10 @@ def get_match_memory(match_stage_table, match_table, context, entries_so_far):
 
     for mem_alloc in mem_allocs:  # Multiple items if iterating through ways
         if mem_alloc is None:
-            print_error_and_exit("Unexpected null memory resource allocation for table %s." % get_attr(NAME, match_table))
+            print_error_and_exit(
+                "Unexpected null memory resource allocation for table %s."
+                % get_attr(NAME, match_table)
+            )
         mem_units_and_vpns = get_attr(MEMORY_UNITS_AND_VPNS, mem_alloc)
         for memdict in mem_units_and_vpns:
             memory_units = get_attr(MEMORY_UNITS, memdict)
@@ -527,22 +559,31 @@ def get_match_memory(match_stage_table, match_table, context, entries_so_far):
     mem_elem["entries_requested"] = min(entries_allocated, max(0, table_entries - entries_so_far))
     mem_elem["entries_allocated"] = entries_allocated
 
-    mem_elem["imm_bit_width_in_overhead_requested"] = get_max_parameter_size_in_overhead(match_stage_table, match_table, context)
+    mem_elem["imm_bit_width_in_overhead_requested"] = get_max_parameter_size_in_overhead(
+        match_stage_table, match_table, context
+    )
 
     if table_type == TERNARY_MATCH:
         tind_stage_table = get_attr(TERNARY_INDIRECTION_STAGE_TABLE, match_stage_table)
         tind_pack_format = get_pack_format(tind_stage_table, match_table)
-        mem_elem["imm_bit_width_in_overhead_allocated"] = get_overhead_field_size(OH_IMMEDIATE, tind_pack_format)
+        mem_elem["imm_bit_width_in_overhead_allocated"] = get_overhead_field_size(
+            OH_IMMEDIATE, tind_pack_format
+        )
     elif table_type == PHASE_0_MATCH:
         mem_elem["imm_bit_width_in_overhead_allocated"] = 0
     else:
-        mem_elem["imm_bit_width_in_overhead_allocated"] = get_overhead_field_size(OH_IMMEDIATE, pack_format)
+        mem_elem["imm_bit_width_in_overhead_allocated"] = get_overhead_field_size(
+            OH_IMMEDIATE, pack_format
+        )
 
     mem_elem["entry_bit_width_requested"] = ideal_entry_bits
     mem_elem["entry_bit_width_allocated"] = allocated_match_bits
 
-    mem_elem["ideal_entries_per_table_word"], mem_elem["ideal_table_word_bit_width"] = \
-        get_ideal_match_entries(match_stage_table, match_table, mem_elem["imm_bit_width_in_overhead_requested"])
+    mem_elem["ideal_entries_per_table_word"], mem_elem["ideal_table_word_bit_width"] = (
+        get_ideal_match_entries(
+            match_stage_table, match_table, mem_elem["imm_bit_width_in_overhead_requested"]
+        )
+    )
 
     memories.append(mem_elem)
 
@@ -669,14 +710,16 @@ def get_side_effect_memory(match_stage_table, match_table, context, stage_table_
                     mem_elem["entry_bit_width_requested"] = max(0, max_param_bw - imm_bw)
                     mem_elem["entry_bit_width_allocated"] = entry_bit_width
 
-                    if max_param_bw >=128:
+                    if max_param_bw >= 128:
                         mem_elem["ideal_entries_per_table_word"] = 1
                         mem_elem["ideal_table_word_bit_width"] = next_power_2(max_param_bw)
                     else:
                         if max_param_bw == 0:
                             mem_elem["ideal_entries_per_table_word"] = 1
                         else:
-                            mem_elem["ideal_entries_per_table_word"] = 128 // next_power_2(max_param_bw)
+                            mem_elem["ideal_entries_per_table_word"] = 128 // next_power_2(
+                                max_param_bw
+                            )
                         mem_elem["ideal_table_word_bit_width"] = 128
 
                 memories.append(mem_elem)
@@ -684,18 +727,24 @@ def get_side_effect_memory(match_stage_table, match_table, context, stage_table_
     return memories
 
 
-def get_stage_memories(match_stage_table, match_table, context, entries_so_far, stage_table_idx=None):
+def get_stage_memories(
+    match_stage_table, match_table, context, entries_so_far, stage_table_idx=None
+):
     memories = []
     memories.extend(get_match_memory(match_stage_table, match_table, context, entries_so_far))
     memories.extend(get_tind_memory(match_stage_table, match_table, context))
-    memories.extend(get_side_effect_memory(match_stage_table, match_table, context, stage_table_idx))
+    memories.extend(
+        get_side_effect_memory(match_stage_table, match_table, context, stage_table_idx)
+    )
     return memories
 
 
 def get_overhead_fields(match_stage_table, match_table):
     overhead = []
     all_oh_copy = [x for x in ALL_OH]
-    all_oh_copy.remove(OH_VERSION)  # Remove this so diff is easier, and only should be added for non tcam tables
+    all_oh_copy.remove(
+        OH_VERSION
+    )  # Remove this so diff is easier, and only should be added for non tcam tables
 
     table_type = get_attr(STAGE_TABLE_TYPE, match_stage_table)
     pack_format = get_pack_format(match_stage_table, match_table)
@@ -735,6 +784,7 @@ def get_stage_allocation(table, context):
         entries_so_far += get_attr(SIZE, s)
         stage_list.append(sdict)
     return stage_list
+
 
 def get_unit_stage_allocation(table, context):
     """
@@ -791,7 +841,9 @@ def produce_match_table_json(table, context):
     tdict["lookup_types"] = []  # Added this just so diff could be easier
     tdict["entries_requested"] = get_attr(SIZE, table)
     tdict["entries_allocated"] = get_entries_allocated(table)
-    tdict["lookup_types"], tdict["match_fields"] = get_match_key_fields_json(get_attr(MATCH_KEY_FIELDS, table))
+    tdict["lookup_types"], tdict["match_fields"] = get_match_key_fields_json(
+        get_attr(MATCH_KEY_FIELDS, table)
+    )
     tdict["action_parameters"] = get_action_parameters_json(table)
     if match_type in [ALGORITHMIC_TCAM, ALGORITHMIC_LPM, CHAINED_LPM]:
         tdict["stage_allocation"] = get_unit_stage_allocation(table, context)
@@ -854,10 +906,17 @@ if __name__ == "__main__":
     import sys
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('source', metavar='source', type=str,
-                        help='The input context.json source file to use.')
-    parser.add_argument('--output', '-o', type=str, action="store", default=".",
-                        help="The output directory to output mau.json.")
+    parser.add_argument(
+        'source', metavar='source', type=str, help='The input context.json source file to use.'
+    )
+    parser.add_argument(
+        '--output',
+        '-o',
+        type=str,
+        action="store",
+        default=".",
+        help="The output directory to output mau.json.",
+    )
     args = parser.parse_args()
 
     try:

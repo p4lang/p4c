@@ -13,9 +13,9 @@
 #ifndef BF_P4C_MIDEND_ACTION_SYNTHESIS_POLICY_H_
 #define BF_P4C_MIDEND_ACTION_SYNTHESIS_POLICY_H_
 
-#include "midend/actionSynthesis.h"
 #include "bf-p4c/ir/tofino_write_context.h"
 #include "bf-p4c/midend/register_read_write.h"
+#include "midend/actionSynthesis.h"
 
 namespace BFN {
 
@@ -36,56 +36,64 @@ This class implements a policy suitable for the SynthesizeActions pass:
   splitting/rewriting pass, however, and this is simpler for now.
 */
 class ActionSynthesisPolicy : public P4::ActionSynthesisPolicy {
-    P4::ReferenceMap    *refMap;
-    P4::TypeMap         *typeMap;
+    P4::ReferenceMap *refMap;
+    P4::TypeMap *typeMap;
     // set of controls where actions are not synthesized
     const std::set<cstring> *skip;
 
-    bool convert(const Visitor::Context *, const IR::P4Control* control) override {
+    bool convert(const Visitor::Context *, const IR::P4Control *control) override {
         if (control->is<IR::BFN::TnaDeparser>()) {
             return false;
         }
         for (auto c : *skip)
-            if (control->name == c)
-                return false;
+            if (control->name == c) return false;
         return true;
     }
 
     static const IR::Type_Extern *externType(const IR::Type *type) {
-        if (auto *spec = type->to<IR::Type_SpecializedCanonical>())
-            type = spec->baseType;
-        return type->to<IR::Type_Extern>(); }
+        if (auto *spec = type->to<IR::Type_SpecializedCanonical>()) type = spec->baseType;
+        return type->to<IR::Type_Extern>();
+    }
 
     class FindPathsWritten : public Inspector, TofinoWriteContext {
-        std::set<cstring>       &writes;
+        std::set<cstring> &writes;
         bool preorder(const IR::PathExpression *pe) {
             if (isWrite()) writes.insert(pe->toString());
-            return false; }
+            return false;
+        }
         bool preorder(const IR::Member *m) {
             if (isWrite()) writes.insert(m->toString());
-            return false; }
+            return false;
+        }
         bool preorder(const IR::AssignmentStatement *assign) {
             // special case -- ignore writing the result of a 'hash.get' call to a var,
             // as we can use that directly in the same action (hash is computed in ixbar hash)
             if (auto *mc = assign->right->to<IR::MethodCallExpression>()) {
                 if (auto *m = mc->method->to<IR::Member>()) {
                     if (auto *et = externType(m->expr->type)) {
-                        if (et->name == "Hash" && m->member == "get") return false; } } }
-            return true; }
+                        if (et->name == "Hash" && m->member == "get") return false;
+                    }
+                }
+            }
+            return true;
+        }
 
      public:
-        explicit FindPathsWritten(std::set<cstring> &w) : writes(w) {} };
+        explicit FindPathsWritten(std::set<cstring> &w) : writes(w) {}
+    };
 
     class DependsOnPaths : public Inspector {
-        ActionSynthesisPolicy   &self;
-        std::set<cstring>       &paths;
-        bool                    rv = false;
+        ActionSynthesisPolicy &self;
+        std::set<cstring> &paths;
+        bool rv = false;
         bool preorder(const IR::PathExpression *pe) {
             if (paths.count(pe->toString())) rv = true;
-            return !rv; }
+            return !rv;
+        }
         bool preorder(const IR::Member *m) {
             if (paths.count(m->toString())) rv = true;
-            return !rv; }
+            return !rv;
+        }
         bool preorder(const IR::Node *) { return !rv; }
         void postorder(const IR::MethodCallExpression *mc) {
             auto *mi = P4::MethodInstance::resolve(mc, self.refMap, self.typeMap, true);
@@ -101,30 +109,34 @@ class ActionSynthesisPolicy : public P4::ActionSynthesisPolicy {
      public:
         explicit operator bool() { return rv; }
         DependsOnPaths(ActionSynthesisPolicy &self, const IR::Node *n, std::set<cstring> &p)
-        : self(self), paths(p), rv(false) {
-            n->apply(*this); } };
+            : self(self), paths(p), rv(false) {
+            n->apply(*this);
+        }
+    };
 
     class ReferencesExtern : public Inspector {
-        bool                    rv = false;
+        bool rv = false;
         bool preorder(const IR::PathExpression *pe) {
             if (rv) return false;
             auto *et = externType(pe->type);
             if (et && et->name != "Hash") {
-                rv = true; }
-            return !rv; }
+                rv = true;
+            }
+            return !rv;
+        }
         bool preorder(const IR::Node *) { return !rv; }
 
      public:
         explicit operator bool() { return rv; }
-        explicit ReferencesExtern(const IR::Node *n) { n->apply(*this); } };
+        explicit ReferencesExtern(const IR::Node *n) { n->apply(*this); }
+    };
 
     /**
      * Detects write-after-read on the same register in two consecutive statements.
      * It will allow to create a RegisterAction with both read and write statement
      * in the RegisterReadWrite pass.
      */
-    bool isRegisterWriteAfterRead(const IR::BlockStatement *blk,
-                    const IR::StatOrDecl *stmt_decl) {
+    bool isRegisterWriteAfterRead(const IR::BlockStatement *blk, const IR::StatOrDecl *stmt_decl) {
         auto *blk_stmt = blk->components.back()->to<IR::Statement>();
         if (!blk_stmt) return false;
         auto read_rv = BFN::RegisterReadWrite::extractRegisterReadWrite(blk_stmt);
@@ -147,8 +159,7 @@ class ActionSynthesisPolicy : public P4::ActionSynthesisPolicy {
         if (!read_member) return false;
         auto *read_extern_type = externType(read_member->expr->type);
         if (!read_extern_type) return false;
-        if (read_extern_type->name != "Register" || read_member->member != "read")
-            return false;
+        if (read_extern_type->name != "Register" || read_member->member != "read") return false;
 
         auto *write_inst = P4::MethodInstance::resolve(write_mce, refMap, typeMap);
         // Check also object becuase of plain functions
@@ -160,30 +171,30 @@ class ActionSynthesisPolicy : public P4::ActionSynthesisPolicy {
         if (!write_member) return false;
         auto *write_extern_type = externType(write_member->expr->type);
         if (!write_extern_type) return false;
-        if (write_extern_type->name != "Register" || write_member->member != "write")
-            return false;
+        if (write_extern_type->name != "Register" || write_member->member != "write") return false;
 
-        if (read_decl->declid != write_decl->declid)
-            return false;
+        if (read_decl->declid != write_decl->declid) return false;
 
         return true;
     }
 
     bool can_combine(const Visitor::Context *, const IR::BlockStatement *blk,
                      const IR::StatOrDecl *stmt) override {
-        if (isRegisterWriteAfterRead(blk, stmt))
-            return true;
-        std::set<cstring>       writes;
+        if (isRegisterWriteAfterRead(blk, stmt)) return true;
+        std::set<cstring> writes;
         if (ReferencesExtern(blk) && ReferencesExtern(stmt)) return false;
         blk->apply(FindPathsWritten(writes));
-        return !DependsOnPaths(*this, stmt, writes); }
+        return !DependsOnPaths(*this, stmt, writes);
+    }
 
  public:
     ActionSynthesisPolicy(const std::set<cstring> *skip, P4::ReferenceMap *refMap,
                           P4::TypeMap *typeMap)
-    : refMap(refMap), typeMap(typeMap), skip(skip) { CHECK_NULL(skip); }
+        : refMap(refMap), typeMap(typeMap), skip(skip) {
+        CHECK_NULL(skip);
+    }
 };
 
 }  // namespace BFN
 
-#endif  /* BF_P4C_MIDEND_ACTION_SYNTHESIS_POLICY_H_ */
+#endif /* BF_P4C_MIDEND_ACTION_SYNTHESIS_POLICY_H_ */

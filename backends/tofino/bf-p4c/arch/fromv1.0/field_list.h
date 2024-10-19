@@ -10,12 +10,12 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_ARCH_FROMV1_0_FIELD_LIST_H_
-#define EXTENSIONS_BF_P4C_ARCH_FROMV1_0_FIELD_LIST_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_ARCH_FROMV1_0_FIELD_LIST_H_
+#define BACKENDS_TOFINO_BF_P4C_ARCH_FROMV1_0_FIELD_LIST_H_
 
-#include "ir/ir.h"
-#include "frontends/p4-14/fromv1.0/converters.h"
 #include "bf-p4c/midend/path_linearizer.h"
+#include "frontends/p4-14/fromv1.0/converters.h"
+#include "ir/ir.h"
 
 namespace P4 {
 namespace P4V1 {
@@ -23,6 +23,7 @@ namespace P4V1 {
 class FieldListConverter {
     FieldListConverter();
     static FieldListConverter singleton;
+
  public:
     static const IR::Node *convertFieldList(const IR::Node *);
 };
@@ -30,4 +31,4 @@ class FieldListConverter {
 }  // namespace P4V1
 }  // namespace P4
 
-#endif /* EXTENSIONS_BF_P4C_ARCH_FROMV1_0_FIELD_LIST_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_ARCH_FROMV1_0_FIELD_LIST_H_ */

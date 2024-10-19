@@ -10,18 +10,19 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+#include "bf-p4c/mau/add_always_run.h"
+
 #include <initializer_list>
 #include <optional>
+
 #include <boost/algorithm/string/replace.hpp>
 
-#include "gtest/gtest.h"
-
-#include "ir/ir.h"
-#include "test/gtest/helpers.h"
 #include "bf-p4c/common/multiple_apply.h"
-#include "bf-p4c/mau/add_always_run.h"
 #include "bf-p4c/mau/table_flow_graph.h"
 #include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "gtest/gtest.h"
+#include "ir/ir.h"
+#include "test/gtest/helpers.h"
 
 namespace P4::Test {
 
@@ -29,8 +30,7 @@ class AddAlwaysRunTest : public JBayBackendTest {};
 
 namespace {
 
-std::optional<TofinoPipeTestCase>
-createAddAlwaysRunTestCase(const std::string& parserSource) {
+std::optional<TofinoPipeTestCase> createAddAlwaysRunTestCase(const std::string &parserSource) {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
 header H1
 {
@@ -90,7 +90,7 @@ V1Switch(parse(), verifyChecksum(), mau(), mau(),
 
     boost::replace_first(source, "%MAU%", parserSource);
 
-    auto& options = BackendOptions();
+    auto &options = BackendOptions();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.target = "tofino"_cs;
     options.arch = "v1model"_cs;
@@ -108,8 +108,7 @@ V1Switch(parse(), verifyChecksum(), mau(), mau(),
 }  // namespace
 
 /// @returns a map for each gress from external table names to their unique IDs.
-std::map<gress_t, std::map<cstring, UniqueId>>
-getTables(std::optional<TofinoPipeTestCase> test) {
+std::map<gress_t, std::map<cstring, UniqueId>> getTables(std::optional<TofinoPipeTestCase> test) {
     std::map<gress_t, std::map<cstring, UniqueId>> result;
 
     // Kludge: to avoid writing our own visitor, build a flow graph and get the tables from there.
@@ -117,9 +116,9 @@ getTables(std::optional<TofinoPipeTestCase> test) {
     FindFlowGraphs ffg(graphs);
     test->pipe->apply(ffg);
 
-    for (auto& gress_graph : graphs) {
-        auto& graph = gress_graph.second;
-        for (auto* table : graph.get_tables()) {
+    for (auto &gress_graph : graphs) {
+        auto &graph = gress_graph.second;
+        for (auto *table : graph.get_tables()) {
             result[table->gress][table->externalName()] = table->pp_unique_id();
         }
     }
@@ -128,13 +127,11 @@ getTables(std::optional<TofinoPipeTestCase> test) {
 }
 
 /// Common test functionality.
-void runTest(
-    std::optional<TofinoPipeTestCase> test,
-    ordered_map<gress_t, ConstraintMap> tablesToAdd
-) {
+void runTest(std::optional<TofinoPipeTestCase> test,
+             ordered_map<gress_t, ConstraintMap> tablesToAdd) {
     // Insert tables.
     AddAlwaysRun addAlwaysRun(tablesToAdd);
-    auto* result = test->pipe->apply(addAlwaysRun);
+    auto *result = test->pipe->apply(addAlwaysRun);
 
     // Check that the result conforms to IR invariants.
     MultipleApply ma(BackendOptions());
@@ -148,43 +145,43 @@ void runTest(
     result->apply(ffg);
 
     // Build a map for each gress from unique IDs to tables.
-    std::map<gress_t, std::map<UniqueId, const IR::MAU::Table*>> tables;
-    for (auto& gress_graph : graphs) {
-        auto& graph = gress_graph.second;
+    std::map<gress_t, std::map<UniqueId, const IR::MAU::Table *>> tables;
+    for (auto &gress_graph : graphs) {
+        auto &graph = gress_graph.second;
 
-        for (auto* table : graph.get_tables()) {
+        for (auto *table : graph.get_tables()) {
             tables[table->gress][table->pp_unique_id()] = table;
         }
     }
 
     // Use the flow graphs to check that the result conforms to the insertion constraints and that
     // the tables we inserted are executed on all paths.
-    for (auto& gress_constraintMap : tablesToAdd) {
-        auto& gress = gress_constraintMap.first;
-        auto& constraintMap = gress_constraintMap.second;
+    for (auto &gress_constraintMap : tablesToAdd) {
+        auto &gress = gress_constraintMap.first;
+        auto &constraintMap = gress_constraintMap.second;
 
-        auto& graph = graphs.at(gress);
+        auto &graph = graphs.at(gress);
 
-        for (auto& table_constraints : constraintMap) {
-            auto* table = table_constraints.first;
-            auto& constraints = table_constraints.second;
+        for (auto &table_constraints : constraintMap) {
+            auto *table = table_constraints.first;
+            auto &constraints = table_constraints.second;
 
-            auto& tableIdsBefore = constraints.first;
-            auto& tableIdsAfter = constraints.second;
+            auto &tableIdsBefore = constraints.first;
+            auto &tableIdsAfter = constraints.second;
 
             // Convert the inserted table into the corresponding Table object inhabiting the
             // result.
             table = tables[table->gress][table->pp_unique_id()];
 
             // Check tables that should come before the inserted table.
-            for (auto& beforeId : tableIdsBefore) {
-                auto* beforeTable = tables[table->gress][beforeId];
+            for (auto &beforeId : tableIdsBefore) {
+                auto *beforeTable = tables[table->gress][beforeId];
                 ASSERT_TRUE(graph.can_reach(beforeTable, table));
             }
 
             // Check tables that should come after the inserted table.
-            for (auto& afterId : tableIdsAfter) {
-                auto* afterTable = tables[table->gress][afterId];
+            for (auto &afterId : tableIdsAfter) {
+                auto *afterTable = tables[table->gress][afterId];
                 ASSERT_TRUE(graph.can_reach(table, afterTable));
             }
 
@@ -197,8 +194,7 @@ void runTest(
 
 /// Basic test case.
 TEST_F(AddAlwaysRunTest, BasicControlFlow) {
-    auto test = createAddAlwaysRunTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createAddAlwaysRunTestCase(P4_SOURCE(P4Headers::NONE, R"(
 
     action act1_1() {}
     action act1_2() {}
@@ -283,7 +279,7 @@ apply {
     auto tables = getTables(test);
 
     // Create the table to be inserted and its constraints.
-    auto* to_insert = new IR::MAU::Table("always_run"_cs, INGRESS);
+    auto *to_insert = new IR::MAU::Table("always_run"_cs, INGRESS);
     to_insert->created_during_tp = true;  // suppress BUGs about invalid do-nothing tables
     ordered_map<gress_t, ConstraintMap> tablesToAdd;
     tablesToAdd[INGRESS][to_insert].first.insert(tables.at(INGRESS).at("mau.t2"_cs));
@@ -293,8 +289,7 @@ apply {
 }
 
 TEST_F(AddAlwaysRunTest, TableSeqAlias1) {
-    auto test = createAddAlwaysRunTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createAddAlwaysRunTestCase(P4_SOURCE(P4Headers::NONE, R"(
 
     action act1_1() {}
     action act1_2() {}
@@ -396,7 +391,7 @@ apply {
     auto tables = getTables(test);
 
     // Create the table to be inserted and its constraints.
-    auto* to_insert = new IR::MAU::Table("always_run"_cs, INGRESS);
+    auto *to_insert = new IR::MAU::Table("always_run"_cs, INGRESS);
     to_insert->created_during_tp = true;  // suppress BUGs about invalid do-nothing tables
     ordered_map<gress_t, ConstraintMap> tablesToAdd;
     tablesToAdd[INGRESS][to_insert].first.insert(tables.at(INGRESS).at("mau.t5"_cs));
@@ -406,8 +401,7 @@ apply {
 }
 
 TEST_F(AddAlwaysRunTest, TableSeqAlias2) {
-    auto test = createAddAlwaysRunTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createAddAlwaysRunTestCase(P4_SOURCE(P4Headers::NONE, R"(
 
     action act1_1() {}
     action act1_2() {}
@@ -466,7 +460,7 @@ apply {
     auto tables = getTables(test);
 
     // Create the table to be inserted and its constraints.
-    auto* to_insert = new IR::MAU::Table("always_run"_cs, INGRESS);
+    auto *to_insert = new IR::MAU::Table("always_run"_cs, INGRESS);
     to_insert->created_during_tp = true;  // suppress BUGs about invalid do-nothing tables
     ordered_map<gress_t, ConstraintMap> tablesToAdd;
     tablesToAdd[INGRESS][to_insert].first.insert(tables.at(INGRESS).at("mau.t2"_cs));
@@ -476,8 +470,7 @@ apply {
 }
 
 TEST_F(AddAlwaysRunTest, TableSeqAlias3) {
-    auto test = createAddAlwaysRunTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createAddAlwaysRunTestCase(P4_SOURCE(P4Headers::NONE, R"(
     action act1_1() {}
     action act1_2() {}
     action act1_3() {}
@@ -533,7 +526,7 @@ apply {
     ASSERT_TRUE(test);
 
     auto tables = getTables(test);
-    auto* to_insert = new IR::MAU::Table("always_run"_cs, INGRESS);
+    auto *to_insert = new IR::MAU::Table("always_run"_cs, INGRESS);
     to_insert->created_during_tp = true;  // suppress BUGs about invalid do-nothing tables
     ordered_map<gress_t, ConstraintMap> tablesToAdd;
     tablesToAdd[INGRESS][to_insert].first.insert(tables.at(INGRESS).at("mau.t2"_cs));
@@ -543,8 +536,7 @@ apply {
 }
 
 TEST_F(AddAlwaysRunTest, MultipleApply1) {
-    auto test = createAddAlwaysRunTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createAddAlwaysRunTestCase(P4_SOURCE(P4Headers::NONE, R"(
     action act1_1() {}
     action act1_2() {}
     action act1_3() {}
@@ -634,7 +626,7 @@ apply {
     ASSERT_TRUE(test);
 
     auto tables = getTables(test);
-    auto* to_insert = new IR::MAU::Table("always_run"_cs, INGRESS);
+    auto *to_insert = new IR::MAU::Table("always_run"_cs, INGRESS);
     to_insert->created_during_tp = true;  // suppress BUGs about invalid do-nothing tables
     ordered_map<gress_t, ConstraintMap> tablesToAdd;
     tablesToAdd[INGRESS][to_insert].first.insert(tables.at(INGRESS).at("mau.t4"_cs));
@@ -644,8 +636,7 @@ apply {
 }
 
 TEST_F(AddAlwaysRunTest, ConditionalTest) {
-    auto test = createAddAlwaysRunTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createAddAlwaysRunTestCase(P4_SOURCE(P4Headers::NONE, R"(
     action act1_1() {}
     action act1_2() {}
     action act1_3() {}
@@ -705,7 +696,7 @@ apply {
     ASSERT_TRUE(test);
 
     auto tables = getTables(test);
-    auto* to_insert = new IR::MAU::Table("always_run"_cs, INGRESS);
+    auto *to_insert = new IR::MAU::Table("always_run"_cs, INGRESS);
     to_insert->created_during_tp = true;  // suppress BUGs about invalid do-nothing tables
     ordered_map<gress_t, ConstraintMap> tablesToAdd;
     tablesToAdd[INGRESS][to_insert].first.insert(tables.at(INGRESS).at("mau.t1"_cs));

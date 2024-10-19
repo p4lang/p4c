@@ -10,12 +10,12 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_COMMON_PRAGMA_PRAGMA_H_
-#define EXTENSIONS_BF_P4C_COMMON_PRAGMA_PRAGMA_H_
-#include <cstring>
+#ifndef BACKENDS_TOFINO_BF_P4C_COMMON_PRAGMA_PRAGMA_H_
+#define BACKENDS_TOFINO_BF_P4C_COMMON_PRAGMA_PRAGMA_H_
 #include <algorithm>
-#include <iostream>
+#include <cstring>
 #include <iomanip>
+#include <iostream>
 #include <set>
 #include <string>
 
@@ -32,8 +32,8 @@ namespace BFN {
  */
 class Pragma {
  public:
-    Pragma(const char *name, const char *description, const char *help) :
-        _name(name), _description(description), _help(help) {}
+    Pragma(const char *name, const char *description, const char *help)
+        : _name(name), _description(description), _help(help) {}
 
     static void registerPragma(const Pragma *p, bool internal = false) {
         if (!internal)
@@ -51,8 +51,8 @@ class Pragma {
                 std::string chunk = std::string(str).substr(0, width);
                 auto newline = chunk.find('\n');
                 if (newline != std::string::npos) {
-                    *res += chunk.substr(0, newline+1);
-                    str += newline+1;
+                    *res += chunk.substr(0, newline + 1);
+                    str += newline + 1;
                 } else if (strlen(str) < width) {
                     *res += str;
                     break;  // no need to go further
@@ -61,7 +61,7 @@ class Pragma {
                     auto lastspace = chunk.rfind(' ');
                     if (lastspace != std::string::npos) {
                         *res += chunk.substr(0, lastspace) + "\n";
-                        str += lastspace+1;
+                        str += lastspace + 1;
                     } else {
                         // no space? unlikely, so then we just print the string
                         *res += chunk + "\n";
@@ -76,7 +76,8 @@ class Pragma {
             o << std::endl << std::string(80, '-') << std::endl;
             auto d = format(p->_description, 80 - (strlen(p->_name) + 3));
             auto h = format(p->_help, 80);
-            o << p->_name << ": " << d->c_str() << std::endl << std::endl
+            o << p->_name << ": " << d->c_str() << std::endl
+              << std::endl
               << h->c_str() << std::endl;
             delete d;
             delete h;
@@ -85,7 +86,8 @@ class Pragma {
         o << "Supported pragmas:" << std::endl;
         for (auto &p : _supported_pragmas) formatPragma(p, o);
 #if BAREFOOT_INTERNAL
-        o << std::endl << std::string(80, '*') << std::endl
+        o << std::endl
+          << std::string(80, '*') << std::endl
           << "Barefoot internal pragmas" << std::endl;
         for (auto &p : _internal_pragmas) formatPragma(p, o);
 #endif
@@ -99,7 +101,9 @@ class Pragma {
 
     struct PragmaCmp {
         bool operator()(const Pragma *a, const Pragma *b) const {
-            return std::string(a->_name) < std::string(b->_name); }};
+            return std::string(a->_name) < std::string(b->_name);
+        }
+    };
 
     /// set of externally supported pragmas
     static std::set<const Pragma *, PragmaCmp> _supported_pragmas;
@@ -109,4 +113,4 @@ class Pragma {
 
 }  // end namespace BFN
 
-#endif  // EXTENSIONS_BF_P4C_COMMON_PRAGMA_PRAGMA_H_
+#endif  // BACKENDS_TOFINO_BF_P4C_COMMON_PRAGMA_PRAGMA_H_

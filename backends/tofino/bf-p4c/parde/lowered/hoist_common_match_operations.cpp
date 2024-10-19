@@ -18,14 +18,14 @@
 
 namespace Parde::Lowered {
 
-Visitor::profile_t HoistCommonMatchOperations::init_apply(const IR::Node* root) {
+Visitor::profile_t HoistCommonMatchOperations::init_apply(const IR::Node *root) {
     auto rv = Transform::init_apply(root);
     original_to_modified.clear();
     return rv;
 }
 
-bool HoistCommonMatchOperations::compare_match_operations(const IR::BFN::LoweredParserMatch* a,
-                                                          const IR::BFN::LoweredParserMatch* b) {
+bool HoistCommonMatchOperations::compare_match_operations(const IR::BFN::LoweredParserMatch *a,
+                                                          const IR::BFN::LoweredParserMatch *b) {
     return a->shift == b->shift && a->hdrLenIncFinalAmt == b->hdrLenIncFinalAmt &&
            a->extracts == b->extracts && a->saves == b->saves && a->scratches == b->scratches &&
            a->checksums == b->checksums && a->counters == b->counters &&
@@ -34,8 +34,8 @@ bool HoistCommonMatchOperations::compare_match_operations(const IR::BFN::Lowered
            a->loop == b->loop;
 }
 
-const IR::BFN::LoweredParserMatch* HoistCommonMatchOperations::get_unconditional_match(
-    const IR::BFN::LoweredParserState* state) {
+const IR::BFN::LoweredParserMatch *HoistCommonMatchOperations::get_unconditional_match(
+    const IR::BFN::LoweredParserState *state) {
     if (state->transitions.size() == 0) return nullptr;
 
     if (state->select->regs.empty() && state->select->counters.empty())
@@ -44,7 +44,7 @@ const IR::BFN::LoweredParserMatch* HoistCommonMatchOperations::get_unconditional
     // Detect if all transitions actually do the same thing and branch/loop to
     // the same state.  That represents another type of unconditional match.
     std::vector<match_t> matches;
-    for (const auto& transition : state->transitions) {
+    for (const auto &transition : state->transitions) {
         if (auto match = transition->value->to<IR::BFN::ParserConstMatchValue>()) {
             matches.push_back(match->value);
         } else {
@@ -55,7 +55,7 @@ const IR::BFN::LoweredParserMatch* HoistCommonMatchOperations::get_unconditional
     if (!hfmc.rv) return nullptr;
 
     auto first_transition = state->transitions[0];
-    for (auto& transition : state->transitions) {
+    for (auto &transition : state->transitions) {
         if (!compare_match_operations(first_transition, transition)) return nullptr;
     }
 
@@ -66,7 +66,7 @@ struct RightShiftPacketRVal : public Modifier {
     int byteDelta = 0;
     bool oob = false;
     explicit RightShiftPacketRVal(int byteDelta) : byteDelta(byteDelta) {}
-    bool preorder(IR::BFN::LoweredPacketRVal* rval) override {
+    bool preorder(IR::BFN::LoweredPacketRVal *rval) override {
         rval->range = rval->range.shiftedByBytes(byteDelta);
         BUG_CHECK(rval->range.lo >= 0, "Shifting extract to negative position.");
         if (rval->range.hi >= Device::pardeSpec().byteInputBufferSize()) oob = true;
@@ -82,7 +82,7 @@ struct RightShiftCsumMask : public Modifier {
 
     explicit RightShiftCsumMask(int byteDelta) : byteDelta(byteDelta) {}
 
-    bool preorder(IR::BFN::LoweredParserChecksum* csum) override {
+    bool preorder(IR::BFN::LoweredParserChecksum *csum) override {
         if (byteDelta == 0 || oob || swapMalform) return false;
         std::set<nw_byterange> new_masked_ranges;
         for (const auto &m : csum->masked_ranges) {
@@ -132,10 +132,10 @@ struct RightShiftCsumMask : public Modifier {
 };
 
 std::set<PHV::Container> HoistCommonMatchOperations::get_extract_constant_dests(
-        const IR::BFN::LoweredParserMatch* match) {
+    const IR::BFN::LoweredParserMatch *match) {
     std::set<PHV::Container> dests;
-    for (const auto* extract : match->extracts) {
-        const auto* extract_phv = extract->to<IR::BFN::LoweredExtractPhv>();
+    for (const auto *extract : match->extracts) {
+        const auto *extract_phv = extract->to<IR::BFN::LoweredExtractPhv>();
         if (!extract_phv) continue;
         if (!extract_phv->source->is<IR::BFN::LoweredConstantRVal>()) continue;
 
@@ -145,10 +145,10 @@ std::set<PHV::Container> HoistCommonMatchOperations::get_extract_constant_dests(
 }
 
 std::set<PHV::Container> HoistCommonMatchOperations::get_extract_inbuf_dests(
-        const IR::BFN::LoweredParserMatch* match) {
+    const IR::BFN::LoweredParserMatch *match) {
     std::set<PHV::Container> dests;
-    for (const auto* extract : match->extracts) {
-        const auto* extract_phv = extract->to<IR::BFN::LoweredExtractPhv>();
+    for (const auto *extract : match->extracts) {
+        const auto *extract_phv = extract->to<IR::BFN::LoweredExtractPhv>();
         if (!extract_phv) continue;
         if (!extract_phv->source->is<IR::BFN::LoweredInputBufferRVal>()) continue;
 
@@ -158,28 +158,27 @@ std::set<PHV::Container> HoistCommonMatchOperations::get_extract_inbuf_dests(
 }
 
 std::map<unsigned, unsigned> HoistCommonMatchOperations::extractors_used(
-    const IR::BFN::LoweredParserMatch* match) {
+    const IR::BFN::LoweredParserMatch *match) {
     std::map<unsigned, unsigned> extractors_used = {{8, 0}, {16, 0}, {32, 0}};
-    for (const auto* extract : match->extracts) {
-        if (const auto* extract_phv = extract->to<IR::BFN::LoweredExtractPhv>()) {
-            const auto* dest = extract_phv->dest;
+    for (const auto *extract : match->extracts) {
+        if (const auto *extract_phv = extract->to<IR::BFN::LoweredExtractPhv>()) {
+            const auto *dest = extract_phv->dest;
             extractors_used[dest->container.size()]++;
         }
     }
-    for (const auto* checksum : match->checksums) {
-        if (auto* phv_dest = checksum->phv_dest) {
+    for (const auto *checksum : match->checksums) {
+        if (auto *phv_dest = checksum->phv_dest) {
             extractors_used[phv_dest->container.size()]++;
         }
-        if (auto* csum_err = checksum->csum_err) {
+        if (auto *csum_err = checksum->csum_err) {
             if (!csum_err->container) continue;
             extractors_used[csum_err->container->container.size()]++;
         }
     }
 
-    if (Device::currentDevice() == Device::JBAY
-    ) {
-        unsigned& b8s_used = extractors_used[8];
-        unsigned& b32s_used = extractors_used[32];
+    if (Device::currentDevice() == Device::JBAY) {
+        unsigned &b8s_used = extractors_used[8];
+        unsigned &b32s_used = extractors_used[32];
 
         extractors_used[16] += (b8s_used + (2 - 1)) / 2 + b32s_used * 2;
         extractors_used.erase(8);
@@ -188,8 +187,8 @@ std::map<unsigned, unsigned> HoistCommonMatchOperations::extractors_used(
     return extractors_used;
 }
 
-bool HoistCommonMatchOperations::can_hoist(const IR::BFN::LoweredParserMatch* a,
-                                           const IR::BFN::LoweredParserMatch* b) {
+bool HoistCommonMatchOperations::can_hoist(const IR::BFN::LoweredParserMatch *a,
+                                           const IR::BFN::LoweredParserMatch *b) {
     if (a->hdrLenIncFinalAmt || b->hdrLenIncFinalAmt) return false;
 
     if (computed.dontMergeStates.count(a->next) || computed.dontMergeStates.count(b->next))
@@ -213,7 +212,7 @@ bool HoistCommonMatchOperations::can_hoist(const IR::BFN::LoweredParserMatch* a,
     RightShiftPacketRVal shifter(a->shift);
     RightShiftCsumMask csum_shifter(a->shift);
 
-    IR::BFN::LoweredParserMatch* a_clone = a->clone();
+    IR::BFN::LoweredParserMatch *a_clone = a->clone();
 
     for (auto extract : b->extracts) {
         extract->apply(shifter);
@@ -221,14 +220,14 @@ bool HoistCommonMatchOperations::can_hoist(const IR::BFN::LoweredParserMatch* a,
     }
 
     // Merge ExtractConstants that have the same dest container
-    ordered_map<PHV::Container, ordered_set<const IR::BFN::LoweredParserPrimitive*>>
+    ordered_map<PHV::Container, ordered_set<const IR::BFN::LoweredParserPrimitive *>>
         container_to_parser_primitive;
     ordered_map<PHV::Container, uint32_t> container_to_constant;
     for (auto extract : a_clone->extracts) {
-        const auto* extract_phv = extract->to<IR::BFN::LoweredExtractPhv>();
+        const auto *extract_phv = extract->to<IR::BFN::LoweredExtractPhv>();
         if (!extract_phv) continue;
 
-        const auto* constant_rval = extract_phv->source->to<IR::BFN::LoweredConstantRVal>();
+        const auto *constant_rval = extract_phv->source->to<IR::BFN::LoweredConstantRVal>();
         if (!constant_rval) continue;
 
         PHV::Container container = extract_phv->dest->container;
@@ -236,18 +235,18 @@ bool HoistCommonMatchOperations::can_hoist(const IR::BFN::LoweredParserMatch* a,
         container_to_constant[container] |= constant_rval->constant;
     }
 
-    for (const auto& [container, parser_primitives] : container_to_parser_primitive) {
+    for (const auto &[container, parser_primitives] : container_to_parser_primitive) {
         if (parser_primitives.size() < 2) continue;
         if (std::any_of(parser_primitives.cbegin(), parser_primitives.cend(),
-                        [](const IR::BFN::LoweredParserPrimitive* parser_primitive) {
-                            const auto* extract_phv =
+                        [](const IR::BFN::LoweredParserPrimitive *parser_primitive) {
+                            const auto *extract_phv =
                                 parser_primitive->to<IR::BFN::LoweredExtractPhv>();
                             return extract_phv->write_mode != IR::BFN::ParserWriteMode::BITWISE_OR;
                         }))
             return false;
 
         bool is_merged = false;
-        for (const auto* parser_primitive : parser_primitives) {
+        for (const auto *parser_primitive : parser_primitives) {
             auto it =
                 std::find(a_clone->extracts.begin(), a_clone->extracts.end(), parser_primitive);
             it = a_clone->extracts.erase(it);
@@ -271,7 +270,7 @@ bool HoistCommonMatchOperations::can_hoist(const IR::BFN::LoweredParserMatch* a,
 
     a_clone->scratches.insert(b->scratches.begin(), b->scratches.end());
 
-    std::vector<const IR::BFN::LoweredParserChecksum*> checksums;
+    std::vector<const IR::BFN::LoweredParserChecksum *> checksums;
     for (auto checksum : a->checksums) {
         checksums.push_back(checksum);
     }
@@ -291,9 +290,9 @@ bool HoistCommonMatchOperations::can_hoist(const IR::BFN::LoweredParserMatch* a,
         a_clone->counters.push_back(counter->to<IR::BFN::ParserCounterPrimitive>());
     }
     if (a_clone->counters.size() > 1) return false;
-    for (const auto* counter : a_clone->counters) {
-        if (const auto* load_pkt = counter->to<IR::BFN::ParserCounterLoadPkt>()) {
-            for (const auto& pair : load_pkt->source->reg_slices) {
+    for (const auto *counter : a_clone->counters) {
+        if (const auto *load_pkt = counter->to<IR::BFN::ParserCounterLoadPkt>()) {
+            for (const auto &pair : load_pkt->source->reg_slices) {
                 if (std::any_of(save_dests.begin(), save_dests.end(),
                                 [&pair](auto save_dest) { return save_dest == pair.first; }))
                     return false;
@@ -325,17 +324,17 @@ bool HoistCommonMatchOperations::can_hoist(const IR::BFN::LoweredParserMatch* a,
     auto extactors_required = extractors_used(a);
     auto b_extractors = extractors_used(b);
     extactors_required = std::accumulate(b_extractors.begin(), b_extractors.end(),
-                                         extactors_required, [](auto& map, const auto& pair) {
+                                         extactors_required, [](auto &map, const auto &pair) {
                                              map[pair.first] += pair.second;
                                              return map;
                                          });
-    for (const auto& [size, max] : Device::pardeSpec().extractorSpec())
+    for (const auto &[size, max] : Device::pardeSpec().extractorSpec())
         if (extactors_required[size] > max) return false;
 
     // Do not hoist a into b if result would contain more than 2 CLOTs or if b contains a spilled
     // CLOT extract from a
     if (Device::numClots() > 0 && BackendOptions().use_clot) {
-        assoc::hash_set<const Clot*> clots;
+        assoc::hash_set<const Clot *> clots;
         for (auto e : a->extracts) {
             if (auto extract_clot = e->to<IR::BFN::LoweredExtractClot>()) {
                 clots.insert(extract_clot->dest);
@@ -353,8 +352,8 @@ bool HoistCommonMatchOperations::can_hoist(const IR::BFN::LoweredParserMatch* a,
     return true;
 }
 
-void HoistCommonMatchOperations::do_hoist(IR::BFN::LoweredParserMatch* match,
-                                          const IR::BFN::LoweredParserMatch* next) {
+void HoistCommonMatchOperations::do_hoist(IR::BFN::LoweredParserMatch *match,
+                                          const IR::BFN::LoweredParserMatch *next) {
     RightShiftPacketRVal shifter(match->shift);
     RightShiftCsumMask csum_shifter(match->shift);
 
@@ -364,12 +363,12 @@ void HoistCommonMatchOperations::do_hoist(IR::BFN::LoweredParserMatch* match,
     }
 
     // Merge ExtractConstants that have the same dest container
-    ordered_map<PHV::Container, ordered_set<const IR::BFN::LoweredParserPrimitive*>>
+    ordered_map<PHV::Container, ordered_set<const IR::BFN::LoweredParserPrimitive *>>
         container_to_parser_primitive;
     ordered_map<PHV::Container, uint32_t> container_to_constant;
     for (auto e : match->extracts) {
-        if (const auto* extract_phv = e->to<IR::BFN::LoweredExtractPhv>()) {
-            if (const auto* constant_rval =
+        if (const auto *extract_phv = e->to<IR::BFN::LoweredExtractPhv>()) {
+            if (const auto *constant_rval =
                     extract_phv->source->to<IR::BFN::LoweredConstantRVal>()) {
                 PHV::Container container = extract_phv->dest->container;
                 container_to_parser_primitive[container].push_back(e);
@@ -378,11 +377,11 @@ void HoistCommonMatchOperations::do_hoist(IR::BFN::LoweredParserMatch* match,
         }
     }
 
-    for (const auto& [container, parser_primitives] : container_to_parser_primitive) {
+    for (const auto &[container, parser_primitives] : container_to_parser_primitive) {
         if (parser_primitives.size() < 2) continue;
 
         bool is_merged = false;
-        for (const auto* parser_primitive : parser_primitives) {
+        for (const auto *parser_primitive : parser_primitives) {
             auto it = std::find(match->extracts.begin(), match->extracts.end(), parser_primitive);
             it = match->extracts.erase(it);
             if (!is_merged)
@@ -430,10 +429,10 @@ bool HoistCommonMatchOperations::is_loopback_state(cstring state) {
 }
 
 struct ClearLoweredParserMatch : public Modifier {
-    const IR::BFN::LoweredParserMatch* match_to_clear = nullptr;
-    explicit ClearLoweredParserMatch(const IR::BFN::LoweredParserMatch* match)
+    const IR::BFN::LoweredParserMatch *match_to_clear = nullptr;
+    explicit ClearLoweredParserMatch(const IR::BFN::LoweredParserMatch *match)
         : match_to_clear(match) {}
-    bool preorder(IR::BFN::LoweredParserMatch* match) override {
+    bool preorder(IR::BFN::LoweredParserMatch *match) override {
         auto original = getOriginal<IR::BFN::LoweredParserMatch>();
         if (original != match_to_clear) return true;
 
@@ -446,10 +445,10 @@ struct ClearLoweredParserMatch : public Modifier {
     }
 };
 
-IR::Node* HoistCommonMatchOperations::preorder(IR::BFN::LoweredParserMatch* match) {
-    const auto* original_match = getOriginal<IR::BFN::LoweredParserMatch>();
-    const auto* parser = findOrigCtxt<IR::BFN::LoweredParser>();
-    const auto* state = findOrigCtxt<IR::BFN::LoweredParserState>();
+IR::Node *HoistCommonMatchOperations::preorder(IR::BFN::LoweredParserMatch *match) {
+    const auto *original_match = getOriginal<IR::BFN::LoweredParserMatch>();
+    const auto *parser = findOrigCtxt<IR::BFN::LoweredParser>();
+    const auto *state = findOrigCtxt<IR::BFN::LoweredParserState>();
 
     if (computed.dontMergeStates.count(state)) return match;
     if (!match->next) return match;
@@ -460,14 +459,14 @@ IR::Node* HoistCommonMatchOperations::preorder(IR::BFN::LoweredParserMatch* matc
                                                  (next_name.find("$") < next_name.rfind("stall"))))
         return match;
 
-    const IR::BFN::LoweredParserState* original_next_state = original_match->next;
-    const IR::BFN::LoweredParserState* next_state = match->next;
-    const IR::BFN::LoweredParserMatch* child_match = get_unconditional_match(next_state);
+    const IR::BFN::LoweredParserState *original_next_state = original_match->next;
+    const IR::BFN::LoweredParserState *next_state = match->next;
+    const IR::BFN::LoweredParserMatch *child_match = get_unconditional_match(next_state);
     if (!child_match) return match;
 
     auto parent_matches = parser_info.graph(parser).transitions_to(original_next_state);
     parent_matches.insert(match);
-    for (const auto* parent_match : parent_matches) {
+    for (const auto *parent_match : parent_matches) {
         if (!can_hoist(parent_match, child_match)) return match;
     }
 
@@ -480,10 +479,10 @@ IR::Node* HoistCommonMatchOperations::preorder(IR::BFN::LoweredParserMatch* matc
     if (original_to_modified.count(next_state)) {
         match->next = original_to_modified.at(next_state);
     } else {
-        const IR::BFN::LoweredParserState* modified_next_state = next_state;
-        for (const auto* child_match : next_state->transitions) {
+        const IR::BFN::LoweredParserState *modified_next_state = next_state;
+        for (const auto *child_match : next_state->transitions) {
             ClearLoweredParserMatch clearer(child_match);
-            const IR::Node* modified = modified_next_state->apply(clearer);
+            const IR::Node *modified = modified_next_state->apply(clearer);
             modified_next_state = modified->to<IR::BFN::LoweredParserState>();
         }
         match->next = modified_next_state;

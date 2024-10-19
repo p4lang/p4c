@@ -17,11 +17,11 @@
  *    be included just in one translation unit. Otherwise, linking conflicts will
  *    happen. */
 
+#include <algorithm>
 #include <iostream>
-#include <vector>
 #include <map>
 #include <set>
-#include <algorithm>
+#include <vector>
 
 #include "bf-p4c/common/table_printer.h"
 #include "bf-p4c/phv/phv.h"
@@ -32,15 +32,13 @@ struct StateExtractUsage {
     // TODO would be nice to get this from PardeSpec. JBay has one size,
     // 16-bit extractors, so the extractor balance may not even be relevant.
 
-    std::map<PHV::Size, unsigned> use = { {PHV::Size::b8,  0},
-                                          {PHV::Size::b16, 0},
-                                          {PHV::Size::b32, 0} };
+    std::map<PHV::Size, unsigned> use = {
+        {PHV::Size::b8, 0}, {PHV::Size::b16, 0}, {PHV::Size::b32, 0}};
 
-    StateExtractUsage() { }
+    StateExtractUsage() {}
 
-    explicit StateExtractUsage(const std::set<PHV::Container>& containers) {
-        for (auto c : containers)
-            use[c.type().size()]++;
+    explicit StateExtractUsage(const std::set<PHV::Container> &containers) {
+        for (auto c : containers) use[c.type().size()]++;
     }
 
     // Given two state extract usages of same number of extracted bytes, which is
@@ -123,13 +121,11 @@ struct StateExtractUsage {
         unsigned b_over_four = 0;
 
         for (auto u : use) {
-            if (u.second > 4)
-                a_over_four++;
+            if (u.second > 4) a_over_four++;
         }
 
         for (auto u : b.use) {
-            if (u.second > 4)
-                b_over_four++;
+            if (u.second > 4) b_over_four++;
         }
 
         if (a_over_four < b_over_four) return true;
@@ -146,29 +142,24 @@ struct StateExtractUsage {
         return false;
     }
 
-    bool operator==(const StateExtractUsage& c) const {
-        return use == c.use;
-    }
+    bool operator==(const StateExtractUsage &c) const { return use == c.use; }
 
     unsigned total_extracts() const {
         unsigned total = 0;
-        for (auto sz : extractor_sizes)
-            total += use.at(sz);
+        for (auto sz : extractor_sizes) total += use.at(sz);
 
         return total;
     }
 
     unsigned total_bytes() const {
         unsigned total = 0;
-        for (auto sz : extractor_sizes)
-            total += (unsigned)sz/8 * use.at(sz);
+        for (auto sz : extractor_sizes) total += (unsigned)sz / 8 * use.at(sz);
 
         return total;
     }
 
     void print() const {
-        for (auto sz : extractor_sizes)
-            std::cout << use.at(sz) << " ";
+        for (auto sz : extractor_sizes) std::cout << use.at(sz) << " ";
 
         std::cout << std::endl;
     }
@@ -176,8 +167,7 @@ struct StateExtractUsage {
     std::vector<unsigned> sorted() const {
         std::vector<unsigned> rv;
 
-        for (auto sz : extractor_sizes)
-            rv.push_back(use.at(sz));
+        for (auto sz : extractor_sizes) rv.push_back(use.at(sz));
 
         std::sort(rv.begin(), rv.end());
         return rv;
@@ -186,24 +176,21 @@ struct StateExtractUsage {
 
 namespace ParserExtractScore {
 
-void verify(const StateExtractUsage& use, unsigned num_bytes) {
+void verify(const StateExtractUsage &use, unsigned num_bytes) {
     BUG_CHECK(use.total_bytes() == num_bytes, "number of bytes don't add up");
 }
 
-std::string
-print_scoreboard(unsigned num_bytes, const std::set<StateExtractUsage>& combos) {
+std::string print_scoreboard(unsigned num_bytes, const std::set<StateExtractUsage> &combos) {
     std::stringstream ss;
     ss << "Scoreboard for " << num_bytes << " bytes:" << std::endl;
 
     TablePrinter tp(ss, {"B", "H", "W", "Score"});
 
     int score = 0;
-    for (auto& use : combos) {
-        tp.addRow({ std::to_string(use.use.at(PHV::Size::b8)),
-                    std::to_string(use.use.at(PHV::Size::b16)),
-                    std::to_string(use.use.at(PHV::Size::b32)),
-                    std::to_string(score--)
-                  });
+    for (auto &use : combos) {
+        tp.addRow({std::to_string(use.use.at(PHV::Size::b8)),
+                   std::to_string(use.use.at(PHV::Size::b16)),
+                   std::to_string(use.use.at(PHV::Size::b32)), std::to_string(score--)});
     }
 
     tp.print();
@@ -212,9 +199,8 @@ print_scoreboard(unsigned num_bytes, const std::set<StateExtractUsage>& combos) 
 
 // What are all possible combinations of extracts (B, H, W) that add up to N bytes?
 // This is a textbook dynamic programming problem (memoization + optimal substructure).
-std::set<StateExtractUsage>
-enumerate_extract_combinations(unsigned num_bytes,
-        std::map<unsigned, std::set<StateExtractUsage>>& all_usages) {
+std::set<StateExtractUsage> enumerate_extract_combinations(
+    unsigned num_bytes, std::map<unsigned, std::set<StateExtractUsage>> &all_usages) {
     std::set<StateExtractUsage> usages;
 
     if (num_bytes == 0) {
@@ -223,16 +209,15 @@ enumerate_extract_combinations(unsigned num_bytes,
         return usages;
     }
 
-    if (all_usages.count(num_bytes))
-        return all_usages.at(num_bytes);
+    if (all_usages.count(num_bytes)) return all_usages.at(num_bytes);
 
-    for (auto sz : { PHV::Size::b8, PHV::Size::b16, PHV::Size::b32 }) {
-        unsigned bytes = (unsigned)sz/8;
+    for (auto sz : {PHV::Size::b8, PHV::Size::b16, PHV::Size::b32}) {
+        unsigned bytes = (unsigned)sz / 8;
 
         if (num_bytes >= bytes) {
             auto opt_sub = enumerate_extract_combinations(num_bytes - bytes, all_usages);
 
-            for (auto& u : opt_sub) {
+            for (auto &u : opt_sub) {
                 auto use = u;
                 use.use[sz]++;
                 usages.insert(use);
@@ -240,8 +225,7 @@ enumerate_extract_combinations(unsigned num_bytes,
         }
     }
 
-    for (auto use : usages)
-        verify(use, num_bytes);
+    for (auto use : usages) verify(use, num_bytes);
 
     all_usages[num_bytes] = usages;  // memoize
 
@@ -250,18 +234,16 @@ enumerate_extract_combinations(unsigned num_bytes,
     return usages;
 }
 
-std::set<StateExtractUsage>
-enumerate_extract_combinations(unsigned num_bytes) {
+std::set<StateExtractUsage> enumerate_extract_combinations(unsigned num_bytes) {
     static std::map<unsigned, std::set<StateExtractUsage>> all_usages;
 
-    if (all_usages.count(num_bytes))
-        return all_usages.at(num_bytes);
+    if (all_usages.count(num_bytes)) return all_usages.at(num_bytes);
 
     auto res = enumerate_extract_combinations(num_bytes, all_usages);
     return res;
 }
 
-int get_score(const StateExtractUsage& use) {
+int get_score(const StateExtractUsage &use) {
     unsigned num_bytes = use.total_bytes();
     auto combos = enumerate_extract_combinations(num_bytes);
 

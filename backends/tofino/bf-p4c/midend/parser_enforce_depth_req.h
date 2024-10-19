@@ -60,7 +60,7 @@ class ParserEnforceDepthReq : public PassManager {
  private:
     P4::ReferenceMap *refMap;
 
-    BFN::EvaluatorPass  *evaluator;
+    BFN::EvaluatorPass *evaluator;
 
     std::set<cstring> structs;
     std::map<const IR::P4Parser *, ParserPadReq> padReq;
@@ -70,7 +70,7 @@ class ParserEnforceDepthReq : public PassManager {
     std::map<const IR::P4Control *, gress_t> all_mau_pipe;
     std::map<const IR::P4Control *, std::set<const IR::P4Parser *>> deparser_parser;
     std::map<const IR::P4Control *, std::set<const IR::P4Parser *>> mau_pipe_parser;
-    std::map<const IR::P4Parser*, std::map<cstring, int>> stateSize;
+    std::map<const IR::P4Parser *, std::map<cstring, int>> stateSize;
 
     int ctrShiftAmt;
 

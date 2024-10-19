@@ -10,8 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_LIB_UNION_FIND_HPP_
-#define EXTENSIONS_BF_P4C_LIB_UNION_FIND_HPP_
+#ifndef BACKENDS_TOFINO_BF_P4C_LIB_UNION_FIND_HPP_
+#define BACKENDS_TOFINO_BF_P4C_LIB_UNION_FIND_HPP_
 
 #include <initializer_list>
 #include <boost/iterator/indirect_iterator.hpp>
@@ -227,4 +227,4 @@ std::ostream &operator<<(std::ostream &out, const UnionFind<T>* uf) {
 }
 
 
-#endif  /* EXTENSIONS_BF_P4C_LIB_UNION_FIND_HPP_ */
+#endif  /* BACKENDS_TOFINO_BF_P4C_LIB_UNION_FIND_HPP_ */

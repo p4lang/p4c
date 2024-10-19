@@ -84,33 +84,33 @@
  *         4. BFN::AttachTables::DefineGlobalRefs
  */
 
-#ifndef EXTENSIONS_BF_P4C_MAU_STATEFUL_ALU_H_
-#define EXTENSIONS_BF_P4C_MAU_STATEFUL_ALU_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_STATEFUL_ALU_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_STATEFUL_ALU_H_
 
 #include <map>
 #include <vector>
 
-#include "ir/ir.h"
-#include "frontends/common/resolveReferences/referenceMap.h"
-#include "mau_visitor.h"
 #include "bf-p4c/device.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "ir/ir.h"
+#include "mau_visitor.h"
 
 using namespace P4;
 
 struct Device::StatefulAluSpec {
-    bool                        CmpMask;  // are cmp oprerands maskable?
-    std::vector<cstring>        CmpUnits;
-    int                         MaxSize;
-    int                         MaxDualSize;
-    int                         MaxPhvInputWidth;
-    int                         MaxInstructions;
-    int                         MaxInstructionConstWidth;
-    int                         MinInstructionConstValue;
-    int                         MaxInstructionConstValue;
-    int                         OutputWords;
-    bool                        DivModUnit;
-    bool                        FastClear;
-    int                         MaxRegfileRows;
+    bool CmpMask;  // are cmp oprerands maskable?
+    std::vector<cstring> CmpUnits;
+    int MaxSize;
+    int MaxDualSize;
+    int MaxPhvInputWidth;
+    int MaxInstructions;
+    int MaxInstructionConstWidth;
+    int MinInstructionConstValue;
+    int MaxInstructionConstValue;
+    int OutputWords;
+    bool DivModUnit;
+    bool FastClear;
+    int MaxRegfileRows;
 
     cstring cmpUnit(unsigned idx) const;
 };
@@ -153,85 +153,83 @@ struct Device::StatefulAluSpec {
  * via | operation.
  */
 class CreateSaluInstruction : public Inspector {
-    IR::MAU::StatefulAlu                *salu;
-    const IR::Type                      *regtype;
-    const IR::Declaration_Instance      *reg_action = nullptr;
-    cstring                             action_type_name;
+    IR::MAU::StatefulAlu *salu;
+    const IR::Type *regtype;
+    const IR::Declaration_Instance *reg_action = nullptr;
+    cstring action_type_name;
     enum class param_t { VALUE, OUTPUT, HASH, LEARN, MATCH };
-    const std::vector<param_t>          *param_types = nullptr;
-    IR::MAU::SaluAction                 *action = nullptr;
-    const IR::ParameterList             *params = nullptr;
+    const std::vector<param_t> *param_types = nullptr;
+    IR::MAU::SaluAction *action = nullptr;
+    const IR::ParameterList *params = nullptr;
 
     struct LocalVar {
-        cstring                 name;
-        bool                    pair;
-        const IR::MAU::SaluRegfileRow   *regfile = nullptr;
-        enum use_t { NONE, ALUHI, MEMLO, MEMHI, MEMALL, REGFILE }
-                                use = NONE;
+        cstring name;
+        bool pair;
+        const IR::MAU::SaluRegfileRow *regfile = nullptr;
+        enum use_t { NONE, ALUHI, MEMLO, MEMHI, MEMALL, REGFILE } use = NONE;
         LocalVar(cstring name, bool pair, use_t use = NONE,
-            const IR::MAU::SaluRegfileRow *regfile = nullptr)
+                 const IR::MAU::SaluRegfileRow *regfile = nullptr)
             : name(name), pair(pair), regfile(regfile), use(use) {}
-    }                           *dest = nullptr;  // destination of current assignment
+    } *dest = nullptr;  // destination of current assignment
     std::map<cstring, LocalVar> locals;
     enum etype_t {
         // tracks the use (context) of the expression we're currently visiting
         // lvalue contexts
-        NONE,    // unknown
+        NONE,        // unknown
         MINMAX_IDX,  // output index of min/max
         // rvalue contexts
-        IF,      // condition -- operand of an if
-        MINMAX_SRC,  // 128-bit input to min/max instruction
-        VALUE,   // value to be written to memory -- alu output
-        OUTPUT_ALUHI,   // value to be written to adb via alu_hi alu (non-dual)
-        OUTPUT,  // value to be written to action data bus output
-        MATCH,   // value to be written to match output
-        }                       etype = NONE;
+        IF,            // condition -- operand of an if
+        MINMAX_SRC,    // 128-bit input to min/max instruction
+        VALUE,         // value to be written to memory -- alu output
+        OUTPUT_ALUHI,  // value to be written to adb via alu_hi alu (non-dual)
+        OUTPUT,        // value to be written to action data bus output
+        MATCH,         // value to be written to match output
+    } etype = NONE;
     static bool islvalue(etype_t t) { return t < IF; }
-    bool                        negate = false;
-    bool                        negate_regfile = false;
-    bool                        alu_write[2] = { false, false };
-    cstring                     opcode;
-    IR::Vector<IR::Expression>                  operands, pred_operands;
-    int                                         output_index = -1;
+    bool negate = false;
+    bool negate_regfile = false;
+    bool alu_write[2] = {false, false};
+    cstring opcode;
+    IR::Vector<IR::Expression> operands, pred_operands;
+    int output_index = -1;
     std::vector<const IR::MAU::SaluInstruction *> cmp_instr;
-    const IR::MAU::SaluInstruction              *divmod_instr = nullptr, *minmax_instr = nullptr;
-    int                                         minmax_width = -1;  // 0 = min/max8, 1 = min/max16
-    const IR::Expression                        *predicate = nullptr;
-    const IR::MAU::SaluInstruction              *onebit = nullptr;  // the single 1-bit alu op
-    bool                                        onebit_cmpl = false;  // 1-bit op needs cmpl
-    int                                         address_subword = 0;
-    std::vector<IR::MAU::SaluInstruction  *>    outputs;  // add to end of action body
-    std::map<int, const IR::Expression  *>      output_address_subword_predicate;
-    IR::MAU::StatefulAlu::MathUnit              math;
-    IR::MAU::SaluFunction                       *math_function = nullptr;
-    bool                                        assignDone = false;
-    int                                         comb_pred_width = 0;
-    IR::MAU::SaluAction::ReturnEnumEncoding     *return_encoding = nullptr;
-    int                                         return_enum_word = -1;
-    bool                                        split_ifs = false;
-    std::map<int, const IR::Expression*>        output_param_operands;
-    std::map<int, const IR::Expression*>        output_predicates;
-    std::set<const IR::Expression*>             or_targets;
+    const IR::MAU::SaluInstruction *divmod_instr = nullptr, *minmax_instr = nullptr;
+    int minmax_width = -1;  // 0 = min/max8, 1 = min/max16
+    const IR::Expression *predicate = nullptr;
+    const IR::MAU::SaluInstruction *onebit = nullptr;  // the single 1-bit alu op
+    bool onebit_cmpl = false;                          // 1-bit op needs cmpl
+    int address_subword = 0;
+    std::vector<IR::MAU::SaluInstruction *> outputs;  // add to end of action body
+    std::map<int, const IR::Expression *> output_address_subword_predicate;
+    IR::MAU::StatefulAlu::MathUnit math;
+    IR::MAU::SaluFunction *math_function = nullptr;
+    bool assignDone = false;
+    int comb_pred_width = 0;
+    IR::MAU::SaluAction::ReturnEnumEncoding *return_encoding = nullptr;
+    int return_enum_word = -1;
+    bool split_ifs = false;
+    std::map<int, const IR::Expression *> output_param_operands;
+    std::map<int, const IR::Expression *> output_predicates;
+    std::set<const IR::Expression *> or_targets;
 
     // Map for detection of WAW data hazards
     // * Key is the lvalue
     // * Value is the set of predicates for a given expression and source code position
     // of given assignment
     struct AssignmentProperties {
-        const IR::Expression   *predicate;
+        const IR::Expression *predicate;
         const Util::SourceInfo &srcInfo;
-        explicit AssignmentProperties(const IR::Expression *pred, const Util::SourceInfo &src) :
-            predicate(pred), srcInfo(src) {}
+        explicit AssignmentProperties(const IR::Expression *pred, const Util::SourceInfo &src)
+            : predicate(pred), srcInfo(src) {}
     };
-    std::map<cstring,
-        std::vector<AssignmentProperties>>   written_dest;
-    const IR::AssignmentStatement           *assig_st = nullptr;
-    const IR::Expression                    *assig_pred = nullptr;
+    std::map<cstring, std::vector<AssignmentProperties>> written_dest;
+    const IR::AssignmentStatement *assig_st = nullptr;
+    const IR::Expression *assig_pred = nullptr;
     void captureAssigstateProps();
     void checkWriteAfterWrite();
 
     bool isComplexInstruction(const IR::Operation_Binary *op) const;
-    void checkAndReportComplexInstruction(const IR::Operation_Binary* op) const;
+    void checkAndReportComplexInstruction(const IR::Operation_Binary *op) const;
 
     /**
      * @brief Insert the instruction into the SALU body.
@@ -269,7 +267,8 @@ class CreateSaluInstruction : public Inspector {
     bool preorder(const IR::EmptyStatement *) override { return true; }
     bool preorder(const IR::Statement *s) override {
         error("%s: statement too complex for register action %s", s->srcInfo, s);
-        return false; }
+        return false;
+    }
 
     void doPrimary(const IR::Expression *, const IR::PathExpression *, cstring);
     bool preorder(const IR::PathExpression *pe) override;
@@ -322,11 +321,12 @@ class CreateSaluInstruction : public Inspector {
     bool preorder(const IR::Mod *e) override { return divmod(e, "mod"_cs); }
     bool preorder(const IR::Expression *e) override {
         error("%s: expression too complex for register action", e->srcInfo);
-        return false; }
+        return false;
+    }
 
     friend std::ostream &operator<<(std::ostream &, CreateSaluInstruction::LocalVar::use_t);
     friend std::ostream &operator<<(std::ostream &, CreateSaluInstruction::etype_t);
-    static std::map<std::pair<cstring, cstring>, std::vector<param_t>>  function_param_types;
+    static std::map<std::pair<cstring, cstring>, std::vector<param_t>> function_param_types;
 
  public:
     explicit CreateSaluInstruction(IR::MAU::StatefulAlu *salu) : salu(salu) {
@@ -334,7 +334,8 @@ class CreateSaluInstruction : public Inspector {
             regtype = spec->arguments->at(0);  // RegisterAction
         else
             regtype = IR::Type::Bits::get(1);  // SelectorAction
-        visitDagOnce = false; }
+        visitDagOnce = false;
+    }
 };
 
 /** Check all IR::MAU::StatefulAlu objects to make sure they're implementable
@@ -352,10 +353,10 @@ class CheckStatefulAlu : public MauModifier {
         bool preorder(const IR::MAU::SaluFunction *) override;
         bool preorder(const IR::MAU::SaluCmpReg *) override;
         bool safe_merge(const IR::Expression *a, const IR::Expression *b, unsigned inuse);
-        const IR::MAU::StatefulAlu      *salu;
-        unsigned                inuse_mask;      // cmp registers used in this action
-        const IR::Expression    *lmatch_operand;
-        unsigned                lmatch_inuse_mask;
+        const IR::MAU::StatefulAlu *salu;
+        unsigned inuse_mask;  // cmp registers used in this action
+        const IR::Expression *lmatch_operand;
+        unsigned lmatch_inuse_mask;
     } lmatch_usage;
 
     bool preorder(IR::MAU::StatefulAlu *) override;
@@ -374,7 +375,8 @@ class CheckStatefulAlu : public MauModifier {
     // midend?  But we're running into it here, so a helper to skip over typedefs.
     static const IR::Type *getType(const IR::Type *t) {
         while (auto td = t->to<IR::Type_Typedef>()) t = td->type;
-        return t; }
+        return t;
+    }
 
     std::set<big_int> large_constants;
 };
@@ -400,25 +402,26 @@ class FixupStatefulAlu : public PassManager {
      */
 
     struct return_enum_info_t {
-        cstring                                         enum_name;
-        ordered_set<const IR::MAU::SaluAction *>        actions;
-        const IR::MAU::SaluAction::ReturnEnumEncoding   *encoding;
+        cstring enum_name;
+        ordered_set<const IR::MAU::SaluAction *> actions;
+        const IR::MAU::SaluAction::ReturnEnumEncoding *encoding;
     };
-    ordered_map<const IR::Type_Enum *, return_enum_info_t>      encodings;
-    int                                 pred_type_size;
-    const IR::Type::Bits                *pred_type;
+    ordered_map<const IR::Type_Enum *, return_enum_info_t> encodings;
+    int pred_type_size;
+    const IR::Type::Bits *pred_type;
 
     struct FindEncodings : public MauInspector {
-        FixupStatefulAlu        &self;
+        FixupStatefulAlu &self;
         bool preorder(const IR::MAU::SaluAction *) override;
         bool preorder(const IR::MAU::Action *) override { return false; }
         explicit FindEncodings(FixupStatefulAlu &self) : self(self) {}
     };
     struct UpdateEncodings : public Transform {
-        FixupStatefulAlu        &self;
+        FixupStatefulAlu &self;
         const IR::BFN::Pipe *preorder(IR::BFN::Pipe *p) override {
             if (self.encodings.empty()) prune();
-            return p; }
+            return p;
+        }
         const IR::MAU::SaluAction *preorder(IR::MAU::SaluAction *) override;
         const IR::Operation::Relation *preorder(IR::Operation::Relation *) override;
         const IR::Expression *preorder(IR::Member *) override;
@@ -428,27 +431,29 @@ class FixupStatefulAlu : public PassManager {
         explicit UpdateEncodings(FixupStatefulAlu &self) : self(self) {}
     };
     struct ReplaceUpdatedEnumTypes : public Transform {
-        FixupStatefulAlu        &self;
+        FixupStatefulAlu &self;
         const IR::Expression *postorder(IR::Expression *exp) {
             visit(exp->type, "type");
-            return exp; }
+            return exp;
+        }
         const IR::Type *preorder(IR::Type_Enum *enum_t) {
-            if (self.encodings.count(getOriginal<IR::Type_Enum>()))
-                return self.pred_type;
-            return enum_t; }
+            if (self.encodings.count(getOriginal<IR::Type_Enum>())) return self.pred_type;
+            return enum_t;
+        }
         explicit ReplaceUpdatedEnumTypes(FixupStatefulAlu &self) : self(self) {}
     };
 
  public:
-    FixupStatefulAlu() : PassManager({
-        new CheckStatefulAlu,
-        new FindEncodings(*this),
-        new UpdateEncodings(*this),
-        new ReplaceUpdatedEnumTypes(*this),
-    }) {
+    FixupStatefulAlu()
+        : PassManager({
+              new CheckStatefulAlu,
+              new FindEncodings(*this),
+              new UpdateEncodings(*this),
+              new ReplaceUpdatedEnumTypes(*this),
+          }) {
         pred_type_size = 1 << Device::statefulAluSpec().CmpUnits.size();
         pred_type = IR::Type::Bits::get(pred_type_size);
     }
 };
 
-#endif /* EXTENSIONS_BF_P4C_MAU_STATEFUL_ALU_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_STATEFUL_ALU_H_ */

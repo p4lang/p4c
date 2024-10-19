@@ -13,9 +13,9 @@
 #ifndef BF_P4C_MIDEND_TYPE_CHECKER_H_
 #define BF_P4C_MIDEND_TYPE_CHECKER_H_
 
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
-#include "frontends/common/resolveReferences/resolveReferences.h"
 
 namespace BFN {
 
@@ -28,18 +28,16 @@ class TypeInference : public P4::TypeInference {
     P4::TypeMap *typeMap;
 
  public:
-    TypeInference(P4::TypeMap* typeMap,
-                  bool readOnly = false) :
-            P4::TypeInference(typeMap, readOnly),
-            typeMap(typeMap) { }
+    explicit TypeInference(P4::TypeMap *typeMap, bool readOnly = false)
+        : P4::TypeInference(typeMap, readOnly), typeMap(typeMap) {}
 
-    const IR::Node* postorder(IR::BFN::ReinterpretCast*) override;
-    const IR::Node* postorder(IR::BFN::SignExtend*) override;
-    const IR::Node* postorder(IR::Member*) override;
-    TypeInference* clone() const override;
+    const IR::Node *postorder(IR::BFN::ReinterpretCast *) override;
+    const IR::Node *postorder(IR::BFN::SignExtend *) override;
+    const IR::Node *postorder(IR::Member *) override;
+    TypeInference *clone() const override;
 
  protected:
-    const IR::Type* setTypeType(const IR::Type* type, bool learn = true) override;
+    const IR::Type *setTypeType(const IR::Type *type, bool learn = true) override;
 };
 
 /**
@@ -50,8 +48,7 @@ class TypeInference : public P4::TypeInference {
  */
 class TypeChecking : public P4::TypeChecking {
  public:
-    TypeChecking(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                 bool updateExpressions = false);
+    TypeChecking(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, bool updateExpressions = false);
 };
 
 /**
@@ -61,13 +58,13 @@ class TypeChecking : public P4::TypeChecking {
  * @sa P4::Evaluator
  */
 class EvaluatorPass final : public PassManager, public P4::IHasBlock {
-    P4::Evaluator* evaluator;
+    P4::Evaluator *evaluator;
 
  public:
-    IR::ToplevelBlock* getToplevelBlock() const override { return evaluator->getToplevelBlock(); }
-    EvaluatorPass(P4::ReferenceMap* refMap, P4::TypeMap* typeMap);
+    IR::ToplevelBlock *getToplevelBlock() const override { return evaluator->getToplevelBlock(); }
+    EvaluatorPass(P4::ReferenceMap *refMap, P4::TypeMap *typeMap);
 };
 
 }  // namespace BFN
 
-#endif  /* BF_P4C_MIDEND_TYPE_CHECKER_H_ */
+#endif /* BF_P4C_MIDEND_TYPE_CHECKER_H_ */

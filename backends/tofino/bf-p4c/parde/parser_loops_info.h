@@ -10,29 +10,28 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PARDE_PARSER_LOOPS_INFO_H_
-#define EXTENSIONS_BF_P4C_PARDE_PARSER_LOOPS_INFO_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_PARSER_LOOPS_INFO_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_PARSER_LOOPS_INFO_H_
 
+#include "bf-p4c/ir/gress.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "logging/pass_manager.h"
-#include "bf-p4c/ir/gress.h"
-
 
 namespace BFN {
 
 struct ParserPragmas : public Inspector {
-    static bool checkNumArgs(cstring pragma, const IR::Vector<IR::Expression>& exprs,
+    static bool checkNumArgs(cstring pragma, const IR::Vector<IR::Expression> &exprs,
                              unsigned expected);
 
-    static bool checkGress(cstring pragma, const IR::StringLiteral* gress);
+    static bool checkGress(cstring pragma, const IR::StringLiteral *gress);
 
     bool preorder(const IR::Annotation *annot) override;
 
-    std::set<const IR::ParserState*> terminate_parsing;
-    std::map<const IR::ParserState*, unsigned> force_shift;
-    std::map<const IR::ParserState*, unsigned> max_loop_depth;
+    std::set<const IR::ParserState *> terminate_parsing;
+    std::map<const IR::ParserState *, unsigned> force_shift;
+    std::map<const IR::ParserState *, unsigned> max_loop_depth;
 
     std::set<cstring> dont_unroll;
 };
@@ -45,16 +44,16 @@ struct ParserLoopsInfo {
     /// state.
     struct GetMaxLoopDepth;
 
-    ParserLoopsInfo(P4::ReferenceMap* refMap, const IR::BFN::TnaParser* parser,
-            const ParserPragmas& pm);
+    ParserLoopsInfo(P4::ReferenceMap *refMap, const IR::BFN::TnaParser *parser,
+                    const ParserPragmas &pm);
 
-    const ParserPragmas& parserPragmas;
+    const ParserPragmas &parserPragmas;
 
     std::set<std::set<cstring>> loops;
     std::map<cstring, int> max_loop_depth;
-    std::set<cstring> has_next;   // states that have stack "next" references
+    std::set<cstring> has_next;  // states that have stack "next" references
 
-    const std::set<cstring>* find_loop(cstring state) const;
+    const std::set<cstring> *find_loop(cstring state) const;
 
     /// Returns true if the state is on loop that has "next" reference.
     bool has_next_on_loop(cstring state) const;
@@ -67,4 +66,4 @@ struct ParserLoopsInfo {
 
 }  // namespace BFN
 
-#endif  /* EXTENSIONS_BF_P4C_PARDE_PARSER_LOOPS_INFO_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_PARSER_LOOPS_INFO_H_ */

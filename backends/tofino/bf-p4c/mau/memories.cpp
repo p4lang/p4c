@@ -10,15 +10,16 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include "bf-p4c/device.h"
 #include "bf-p4c/mau/memories.h"
+
+#include "bf-p4c/device.h"
 #include "bf-p4c/mau/mau_visitor.h"
 #include "bf-p4c/mau/payload_gateway.h"
 #include "bf-p4c/mau/resource.h"
 #include "bf-p4c/mau/resource_estimate.h"
+#include "bf-p4c/mau/tofino/memories.h"
 #include "lib/bitops.h"
 #include "lib/range.h"
-#include "bf-p4c/mau/tofino/memories.h"
 
 constexpr int Memories::SRAM_DEPTH;
 
@@ -36,11 +37,9 @@ int Memories::Use::rams_required() const {
  * a search bus have different values.
  */
 bool Memories::Use::separate_search_and_result_bus() const {
-    if (type != EXACT && type != ATCAM)
-        return false;
+    if (type != EXACT && type != ATCAM) return false;
     for (auto r : row) {
-        if (!(r.result_bus == -1 || r.result_bus == r.bus))
-            return true;
+        if (!(r.result_bus == -1 || r.result_bus == r.bus)) return true;
     }
     return false;
 }
@@ -54,6 +53,4 @@ std::ostream &operator<<(std::ostream &out, const Memories::Use::Way &w) {
     return out << std::endl;
 }
 
-Memories *Memories::create() {
-    return new Tofino::Memories;
-}
+Memories *Memories::create() { return new Tofino::Memories; }

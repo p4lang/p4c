@@ -10,8 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef _EXTENSIONS_BF_P4C_LOGGING_RAPIDJSON_ADAPTER_H_
-#define _EXTENSIONS_BF_P4C_LOGGING_RAPIDJSON_ADAPTER_H_
+#ifndef _BACKENDS_TOFINO_BF_P4C_LOGGING_RAPIDJSON_ADAPTER_H_
+#define _BACKENDS_TOFINO_BF_P4C_LOGGING_RAPIDJSON_ADAPTER_H_
 
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
@@ -78,4 +78,4 @@ class PlainWriterAdapter : public Writer {
 
 }  // namespace Logging
 
-#endif  /* _EXTENSIONS_BF_P4C_LOGGING_RAPIDJSON_ADAPTER_H_ */
+#endif /* _BACKENDS_TOFINO_BF_P4C_LOGGING_RAPIDJSON_ADAPTER_H_ */

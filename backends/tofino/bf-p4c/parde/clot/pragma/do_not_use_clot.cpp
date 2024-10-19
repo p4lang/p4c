@@ -12,12 +12,12 @@
 
 #include "bf-p4c/parde/clot/pragma/do_not_use_clot.h"
 
-#include <string>
 #include <numeric>
+#include <string>
 
-#include "lib/log.h"
 #include "bf-p4c/common/utils.h"
 #include "bf-p4c/phv/pragma/phv_pragmas.h"
+#include "lib/log.h"
 
 // BFN::Pragma interface
 const char *PragmaDoNotUseClot::name = "do_not_use_clot";
@@ -40,13 +40,12 @@ const char *PragmaDoNotUseClot::help =
     "to the corresponding pipeline. If not provided, it is applied to "
     "all pipelines.";
 
-bool PragmaDoNotUseClot::preorder(const IR::BFN::Pipe* pipe) {
+bool PragmaDoNotUseClot::preorder(const IR::BFN::Pipe *pipe) {
     auto global_pragmas = pipe->global_pragmas;
-    for (const auto& annotation : global_pragmas) {
-        if (annotation->name.name != PragmaDoNotUseClot::name)
-            continue;
+    for (const auto &annotation : global_pragmas) {
+        if (annotation->name.name != PragmaDoNotUseClot::name) continue;
 
-        const IR::Vector<IR::Expression>& exprs = annotation->expr;
+        const IR::Vector<IR::Expression> &exprs = annotation->expr;
 
         if (!PHV::Pragmas::checkStringLiteralArgs(exprs)) {
             continue;
@@ -55,17 +54,17 @@ bool PragmaDoNotUseClot::preorder(const IR::BFN::Pipe* pipe) {
         const unsigned min_required_arguments = 2;  // gress, node
         unsigned required_arguments = min_required_arguments;
         unsigned expr_index = 0;
-        const IR::StringLiteral* pipe_arg = nullptr;
-        const IR::StringLiteral* gress_arg = nullptr;
+        const IR::StringLiteral *pipe_arg = nullptr;
+        const IR::StringLiteral *gress_arg = nullptr;
 
-        if (!PHV::Pragmas::determinePipeGressArgs(exprs, expr_index,
-                required_arguments, pipe_arg, gress_arg)) {
+        if (!PHV::Pragmas::determinePipeGressArgs(exprs, expr_index, required_arguments, pipe_arg,
+                                                  gress_arg)) {
             continue;
         }
 
-        if (!PHV::Pragmas::checkNumberArgs(annotation, required_arguments,
-                min_required_arguments, true, cstring(PragmaDoNotUseClot::name),
-                "`gress', `node'"_cs)) {
+        if (!PHV::Pragmas::checkNumberArgs(annotation, required_arguments, min_required_arguments,
+                                           true, cstring(PragmaDoNotUseClot::name),
+                                           "`gress', `node'"_cs)) {
             continue;
         }
 
@@ -73,17 +72,15 @@ bool PragmaDoNotUseClot::preorder(const IR::BFN::Pipe* pipe) {
             continue;
         }
 
-        const IR::StringLiteral* node_ir = exprs[expr_index++]->to<IR::StringLiteral>();
+        const IR::StringLiteral *node_ir = exprs[expr_index++]->to<IR::StringLiteral>();
 
-        LOG4("@pragma do_not_use_clot's arguments: "
-             << (pipe_arg ? pipe_arg->value + ", " : "")
-             << gress_arg->value << ", "
-             << node_ir->value);
+        LOG4("@pragma do_not_use_clot's arguments: " << (pipe_arg ? pipe_arg->value + ", " : "")
+                                                     << gress_arg->value << ", " << node_ir->value);
 
         cstring node_name = gress_arg->value + "::"_cs + node_ir->value;
-        const PHV::Field* field = phv_info.field(node_name);
-        const PhvInfo::StructInfo* header = field ? nullptr : phv_info.hdr(node_name);
-        ordered_set<const PHV::Field*> node_fields;
+        const PHV::Field *field = phv_info.field(node_name);
+        const PhvInfo::StructInfo *header = field ? nullptr : phv_info.hdr(node_name);
+        ordered_set<const PHV::Field *> node_fields;
 
         if (field) {
             node_fields.insert(field);
@@ -94,7 +91,7 @@ bool PragmaDoNotUseClot::preorder(const IR::BFN::Pipe* pipe) {
             continue;
         }
 
-        for (const auto& field : node_fields) {
+        for (const auto &field : node_fields) {
             LOG4("Adding into fields that will not be allocated to CLOTs: " << field->name);
             do_not_use_clot.insert(field);
         }
@@ -102,11 +99,11 @@ bool PragmaDoNotUseClot::preorder(const IR::BFN::Pipe* pipe) {
     return false;
 }
 
-std::ostream& operator<<(std::ostream& out, const PragmaDoNotUseClot& do_not_use_clot) {
+std::ostream &operator<<(std::ostream &out, const PragmaDoNotUseClot &do_not_use_clot) {
     std::stringstream logs;
     logs << "Printing all fields made ineligible for CLOT allocation by @pragma do_not_use_clot:"
          << std::endl;
-    for (const auto& field : do_not_use_clot.do_not_use_clot_fields())
+    for (const auto &field : do_not_use_clot.do_not_use_clot_fields())
         logs << "  " << field->name << std::endl;
     out << logs.str();
     return out;

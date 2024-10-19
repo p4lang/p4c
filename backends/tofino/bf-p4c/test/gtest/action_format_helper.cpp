@@ -12,8 +12,8 @@
 
 #include "bf-p4c/mau/action_format.h"
 #include "bf-p4c/phv/phv.h"
-#include "lib/log.h"
 #include "gtest/gtest.h"
+#include "lib/log.h"
 
 namespace P4::Test {
 
@@ -77,7 +77,7 @@ TEST(ActionFormatHelper, BasicRotation) {
 }
 
 void LayeredRotation_test1(ActionData::RamSection *ad, ActionData::Argument *arg1,
-        ActionData::Argument *arg2, ActionData::Argument *arg3) {
+                           ActionData::Argument *arg2, ActionData::Argument *arg3) {
     auto byte_rotate = ad->can_rotate(8, 0);
     BUG_CHECK(byte_rotate != nullptr, "Rotation should be possible");
     ActionData::ParameterPositions param_positions = byte_rotate->parameter_positions();
@@ -103,7 +103,7 @@ void LayeredRotation_test1(ActionData::RamSection *ad, ActionData::Argument *arg
 }
 
 void LayeredRotation_test2(ActionData::RamSection *ad, ActionData::Argument *arg1,
-        ActionData::Argument *arg2, ActionData::Argument *arg3) {
+                           ActionData::Argument *arg2, ActionData::Argument *arg3) {
     auto bit_rotate1 = ad->can_rotate(0, 12);
     BUG_CHECK(bit_rotate1 != nullptr, "Rotation should be possible");
     ActionData::ParameterPositions param_positions = bit_rotate1->parameter_positions();
@@ -200,7 +200,6 @@ void OverlapMerge_test1(ActionData::RamSection *ad1, ActionData::RamSection *ad2
     EXPECT_EQ(rec_const.size(), 8U);
     EXPECT_EQ(pack_info.get_granularity(), 1);
 }
-
 
 TEST(ActionFormatHelper, OverlapMerge) {
     int basic_size = 8;
@@ -414,14 +413,13 @@ TEST(ActionFormatHelper, DataSubset) {
     ActionData::RamSection *ad2 = new ActionData::RamSection(8, pc);
 
     ActionData::Argument *arg1 = new ActionData::Argument("arg1", {0, 7});
-    ActionData::Argument *arg1_mini = new ActionData::Argument ("arg1", {2, 5});
+    ActionData::Argument *arg1_mini = new ActionData::Argument("arg1", {2, 5});
     ad1->add_param(0, arg1);
     ad2->add_param(2, arg1_mini);
 
     EXPECT_TRUE(ad2->is_data_subset_of(ad1));
     EXPECT_FALSE(ad1->is_data_subset_of(ad2));
 }
-
 
 void Contains_test1(ActionData::RamSection *ad_outside, ActionData::RamSection *ad_inside) {
     ActionData::Argument *arg1 = new ActionData::Argument("arg1", {0, 7});
@@ -529,9 +527,9 @@ TEST(ActionFormatHelper, Contains) {
     Contains_test6(new ActionData::RamSection(ad_outside), new ActionData::RamSection(ad_inside));
 }
 
-
 void ConditionalArgs_Test(ActionData::Parameter *arg1, ActionData::Parameter *arg1_cond1,
-        ActionData::Parameter *arg1_cond2, ActionData::Parameter *arg1_extend_cond1) {
+                          ActionData::Parameter *arg1_cond2,
+                          ActionData::Parameter *arg1_extend_cond1) {
     EXPECT_FALSE(arg1->equiv_value(arg1_cond1));
     EXPECT_FALSE(arg1->equiv_value(arg1_cond2));
     EXPECT_FALSE(arg1_cond1->equiv_value(arg1_cond2));
@@ -672,7 +670,6 @@ void RandomNumberOverlaps() {
     le_bitrange my_overlap = {0, 0};
     le_bitrange ad_overlap = {0, 0};
 
-
     auto overlap1 = rn1_a1->overlap(rn1_a2, false, &my_overlap, &ad_overlap);
     EXPECT_TRUE(overlap1 != nullptr);
     if (overlap1) {
@@ -775,7 +772,6 @@ TEST(ActionFormatHelper, RandomNumberTests) {
     RandomNumberOverlaps();
     RandomNumberRamSection();
 }
-
 
 void StaticEntryStandardOperation() {
     ActionData::ALUOperation alu_op(PHV::Container(PHV::Type::H, 0), ActionData::DEPOSIT_FIELD);

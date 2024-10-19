@@ -16,12 +16,11 @@
 
 #include "bf-p4c/midend/fold_constant_hashes.h"
 
-#include "bf_gtest_helpers.h"
-#include "gtest/gtest.h"
-
 #include "bf-p4c/midend/type_checker.h"
+#include "bf_gtest_helpers.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
+#include "gtest/gtest.h"
 
 namespace P4::Test {
 

@@ -10,21 +10,22 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+#include "bf-p4c/mau/table_flow_graph.h"
+
 #include <initializer_list>
 #include <optional>
+
 #include <boost/algorithm/string/replace.hpp>
 
+#include "bf-p4c/common/header_stack.h"
+#include "bf-p4c/common/multiple_apply.h"
+#include "bf-p4c/mau/table_dependency_graph.h"
+#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
 #include "gtest/gtest.h"
-
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
 #include "test/gtest/helpers.h"
-#include "bf-p4c/common/header_stack.h"
-#include "bf-p4c/common/multiple_apply.h"
-#include "bf-p4c/mau/table_dependency_graph.h"
-#include "bf-p4c/mau/table_flow_graph.h"
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
 
 namespace P4::Test {
 
@@ -32,8 +33,7 @@ class TableFlowGraphTest : public TofinoBackendTest {};
 
 namespace {
 
-std::optional<TofinoPipeTestCase>
-createTableFlowGraphTestCase(const std::string& parserSource) {
+std::optional<TofinoPipeTestCase> createTableFlowGraphTestCase(const std::string &parserSource) {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
 header H1
 {
@@ -93,7 +93,7 @@ V1Switch(parse(), verifyChecksum(), mau(), mau(),
 
     boost::replace_first(source, "%MAU%", parserSource);
 
-    auto& options = BackendOptions();
+    auto &options = BackendOptions();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.target = "tofino"_cs;
     options.arch = "v1model"_cs;
@@ -106,8 +106,7 @@ V1Switch(parse(), verifyChecksum(), mau(), mau(),
 
 /// Basic test case.
 TEST_F(TableFlowGraphTest, BasicControlFlow) {
-    auto test = createTableFlowGraphTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableFlowGraphTestCase(P4_SOURCE(P4Headers::NONE, R"(
 
     action setb1(bit<32> val) {
         headers.h2.b1 = val;
@@ -319,8 +318,7 @@ apply {
     t1 = t2 = t3 = t4 = t5 = t6 = t7 = t8 = t9 = t10 = t11 = t12 = nullptr;
     typename FlowGraph::Graph::vertex_iterator v, v_end;
     for (boost::tie(v, v_end) = boost::vertices(fg.g); v != v_end; ++v) {
-        if (*v == fg.v_sink)
-            continue;
+        if (*v == fg.v_sink) continue;
         const IR::MAU::Table *found_table = fg.get_vertex(*v);
         if (found_table->externalName() == "mau.t1") {
             t1 = found_table;
@@ -388,7 +386,7 @@ apply {
      *        |
      *     deparser
      */
-    std::map<const IR::MAU::Table*, ordered_set<const IR::MAU::Table*>> expected_edges;
+    std::map<const IR::MAU::Table *, ordered_set<const IR::MAU::Table *>> expected_edges;
     expected_edges[t11].insert(t12);
     expected_edges[t12].insert(t1);
     expected_edges[t1].insert(t2);
@@ -406,7 +404,7 @@ apply {
     expected_edges[t10].insert(nullptr);
 
     FlowGraph::Graph::edge_iterator edges, edges_end;
-    std::map<const IR::MAU::Table*, ordered_set<const IR::MAU::Table*>> stored_edges;
+    std::map<const IR::MAU::Table *, ordered_set<const IR::MAU::Table *>> stored_edges;
     for (boost::tie(edges, edges_end) = boost::edges(fg.g); edges != edges_end; ++edges) {
         const IR::MAU::Table *src = fg.get_vertex(boost::source(*edges, fg.g));
         const IR::MAU::Table *dst = fg.get_vertex(boost::target(*edges, fg.g));
@@ -416,14 +414,14 @@ apply {
     // Check that expected_edges and stored_edges is the same. Do this by making sure all
     // stored_edges are expected, removing those edges from expected_edges, and making sure that
     // expected_edges is empty at the end.
-    for (auto& kv : stored_edges) {
-        auto& src = kv.first;
-        auto& stored_dsts = kv.second;
+    for (auto &kv : stored_edges) {
+        auto &src = kv.first;
+        auto &stored_dsts = kv.second;
 
         EXPECT_NE(expected_edges.count(src), UINT32_C(0));
-        auto& expected_dsts = expected_edges.at(src);
+        auto &expected_dsts = expected_edges.at(src);
 
-        for (auto& dst : stored_dsts) {
+        for (auto &dst : stored_dsts) {
             EXPECT_NE(expected_dsts.count(dst), UINT32_C(0));
             expected_dsts.erase(dst);
         }
@@ -443,7 +441,7 @@ apply {
     EXPECT_EQ(fg.can_reach(t3, t7), true);
 
     // Test dominators.
-    std::map<const IR::MAU::Table*, std::set<const IR::MAU::Table*>> expectedDominators;
+    std::map<const IR::MAU::Table *, std::set<const IR::MAU::Table *>> expectedDominators;
     expectedDominators[t11] = {t11};
     expectedDominators[t12] = {t11, t12};
     expectedDominators[t1] = {t11, t12, t1};
@@ -458,16 +456,15 @@ apply {
     expectedDominators[t10] = {t11, t8, t9, t10};
     expectedDominators[nullptr] = {t11, t8, t9, t10};
     for (auto table_dominators : expectedDominators) {
-        auto& table = table_dominators.first;
-        auto& dominators = table_dominators.second;
+        auto &table = table_dominators.first;
+        auto &dominators = table_dominators.second;
         EXPECT_EQ(dominators, fg.get_dominators(table));
     }
 }
 
 /// Tests case where there cannot be a default-next table.
 TEST_F(TableFlowGraphTest, NoDefaultNext) {
-    auto test = createTableFlowGraphTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableFlowGraphTestCase(P4_SOURCE(P4Headers::NONE, R"(
 
     action setb1(bit<32> val) {
         headers.h2.b1 = val;
@@ -543,17 +540,14 @@ apply {
 
     // Apply MultipleApply to de-duplicate table nodes.
     auto mau =
-        test->pipe->thread[INGRESS].mau->apply(*new MultipleApply(BackendOptions(),
-                                                                  INGRESS,
-                                                                  true));
+        test->pipe->thread[INGRESS].mau->apply(*new MultipleApply(BackendOptions(), INGRESS, true));
     mau->apply(*find_fg_ingress);
 
     const IR::MAU::Table *t1, *t2, *t3, *t4;
     t1 = t2 = t3 = t4 = nullptr;
     typename FlowGraph::Graph::vertex_iterator v, v_end;
     for (boost::tie(v, v_end) = boost::vertices(fg.g); v != v_end; ++v) {
-        if (*v == fg.v_sink)
-            continue;
+        if (*v == fg.v_sink) continue;
         const IR::MAU::Table *found_table = fg.get_vertex(*v);
         if (found_table->externalName() == "mau.t1") {
             t1 = found_table;
@@ -576,7 +570,7 @@ apply {
      *       t1 -- t2 -- t3 -- t4 -- deparser
      *               \________/
      */
-    std::map<const IR::MAU::Table*, ordered_set<const IR::MAU::Table*>> expected_edges;
+    std::map<const IR::MAU::Table *, ordered_set<const IR::MAU::Table *>> expected_edges;
     expected_edges[t1].insert(t2);
     expected_edges[t2].insert(t3);
     expected_edges[t2].insert(t4);
@@ -584,7 +578,7 @@ apply {
     expected_edges[t4].insert(nullptr);
 
     FlowGraph::Graph::edge_iterator edges, edges_end;
-    std::map<const IR::MAU::Table*, ordered_set<const IR::MAU::Table*>> stored_edges;
+    std::map<const IR::MAU::Table *, ordered_set<const IR::MAU::Table *>> stored_edges;
     for (boost::tie(edges, edges_end) = boost::edges(fg.g); edges != edges_end; ++edges) {
         const IR::MAU::Table *src = fg.get_vertex(boost::source(*edges, fg.g));
         const IR::MAU::Table *dst = fg.get_vertex(boost::target(*edges, fg.g));
@@ -594,14 +588,14 @@ apply {
     // Check that expected_edges and stored_edges is the same. Do this by making sure all
     // stored_edges are expected, removing those edges from expected_edges, and making sure that
     // expected_edges is empty at the end.
-    for (auto& kv : stored_edges) {
-        auto& src = kv.first;
-        auto& stored_dsts = kv.second;
+    for (auto &kv : stored_edges) {
+        auto &src = kv.first;
+        auto &stored_dsts = kv.second;
 
         EXPECT_NE(expected_edges.count(src), UINT32_C(0));
-        auto& expected_dsts = expected_edges.at(src);
+        auto &expected_dsts = expected_edges.at(src);
 
-        for (auto& dst : stored_dsts) {
+        for (auto &dst : stored_dsts) {
             EXPECT_NE(expected_dsts.count(dst), UINT32_C(0));
             expected_dsts.erase(dst);
         }
@@ -612,23 +606,22 @@ apply {
     EXPECT_EQ(expected_edges.size(), UINT32_C(0));
 
     // Test dominators.
-    std::map<const IR::MAU::Table*, std::set<const IR::MAU::Table*>> expectedDominators;
+    std::map<const IR::MAU::Table *, std::set<const IR::MAU::Table *>> expectedDominators;
     expectedDominators[t1] = {t1};
     expectedDominators[t2] = {t1, t2};
     expectedDominators[t3] = {t1, t2, t3};
     expectedDominators[t4] = {t1, t2, t4};
     expectedDominators[nullptr] = {t1, t2, t4};
     for (auto table_dominators : expectedDominators) {
-        auto& table = table_dominators.first;
-        auto& dominators = table_dominators.second;
+        auto &table = table_dominators.first;
+        auto &dominators = table_dominators.second;
         EXPECT_EQ(dominators, fg.get_dominators(table));
     }
 }
 
 /// Tests case where tables are not applied in consistent order on all branches.
 TEST_F(TableFlowGraphTest, InconsistentApplyOrder) {
-    auto test = createTableFlowGraphTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableFlowGraphTestCase(P4_SOURCE(P4Headers::NONE, R"(
 
     action setb1(bit<32> val) {
         headers.h2.b1 = val;
@@ -690,17 +683,14 @@ apply {
 
     // Apply MultipleApply to de-duplicate table nodes.
     auto mau =
-        test->pipe->thread[INGRESS].mau->apply(*new MultipleApply(BackendOptions(),
-                                                                  INGRESS,
-                                                                  true));
+        test->pipe->thread[INGRESS].mau->apply(*new MultipleApply(BackendOptions(), INGRESS, true));
     mau->apply(*find_fg_ingress);
 
     const IR::MAU::Table *t1, *t2, *t3;
     t1 = t2 = t3 = nullptr;
     typename FlowGraph::Graph::vertex_iterator v, v_end;
     for (boost::tie(v, v_end) = boost::vertices(fg.g); v != v_end; ++v) {
-        if (*v == fg.v_sink)
-            continue;
+        if (*v == fg.v_sink) continue;
         const IR::MAU::Table *found_table = fg.get_vertex(*v);
         if (found_table->externalName() == "mau.t1") {
             t1 = found_table;
@@ -725,7 +715,7 @@ apply {
      *               |               |
      *               +---------------+
      */
-    std::map<const IR::MAU::Table*, ordered_set<const IR::MAU::Table*>> expected_edges;
+    std::map<const IR::MAU::Table *, ordered_set<const IR::MAU::Table *>> expected_edges;
     expected_edges[t1].insert(t2);
     expected_edges[t2].insert(t3);
     expected_edges[t3].insert(nullptr);
@@ -734,7 +724,7 @@ apply {
     expected_edges[t2].insert(nullptr);
 
     FlowGraph::Graph::edge_iterator edges, edges_end;
-    std::map<const IR::MAU::Table*, ordered_set<const IR::MAU::Table*>> stored_edges;
+    std::map<const IR::MAU::Table *, ordered_set<const IR::MAU::Table *>> stored_edges;
     for (boost::tie(edges, edges_end) = boost::edges(fg.g); edges != edges_end; ++edges) {
         const IR::MAU::Table *src = fg.get_vertex(boost::source(*edges, fg.g));
         const IR::MAU::Table *dst = fg.get_vertex(boost::target(*edges, fg.g));
@@ -744,14 +734,14 @@ apply {
     // Check that expected_edges and stored_edges is the same. Do this by making sure all
     // stored_edges are expected, removing those edges from expected_edges, and making sure that
     // expected_edges is empty at the end.
-    for (auto& kv : stored_edges) {
-        auto& src = kv.first;
-        auto& stored_dsts = kv.second;
+    for (auto &kv : stored_edges) {
+        auto &src = kv.first;
+        auto &stored_dsts = kv.second;
 
         EXPECT_NE(expected_edges.count(src), UINT32_C(0));
-        auto& expected_dsts = expected_edges.at(src);
+        auto &expected_dsts = expected_edges.at(src);
 
-        for (auto& dst : stored_dsts) {
+        for (auto &dst : stored_dsts) {
             EXPECT_NE(expected_dsts.count(dst), UINT32_C(0));
             expected_dsts.erase(dst);
         }
@@ -768,22 +758,21 @@ apply {
     EXPECT_EQ(fg.can_reach(t3, t3), true);
 
     // Test dominators.
-    std::map<const IR::MAU::Table*, std::set<const IR::MAU::Table*>> expectedDominators;
+    std::map<const IR::MAU::Table *, std::set<const IR::MAU::Table *>> expectedDominators;
     expectedDominators[t1] = {t1};
     expectedDominators[t2] = {t1, t2};
     expectedDominators[t3] = {t1, t3};
     expectedDominators[nullptr] = {t1};
     for (auto table_dominators : expectedDominators) {
-        auto& table = table_dominators.first;
-        auto& dominators = table_dominators.second;
+        auto &table = table_dominators.first;
+        auto &dominators = table_dominators.second;
         EXPECT_EQ(dominators, fg.get_dominators(table));
     }
 }
 
 /// Tests case where tables are applied multiple times.
 TEST_F(TableFlowGraphTest, MultipleApplies) {
-    auto test = createTableFlowGraphTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableFlowGraphTestCase(P4_SOURCE(P4Headers::NONE, R"(
 
     action setb1(bit<32> val) {
         headers.h2.b1 = val;
@@ -993,17 +982,14 @@ apply {
 
     // Apply MultipleApply to de-duplicate table nodes.
     auto mau =
-        test->pipe->thread[INGRESS].mau->apply(*new MultipleApply(BackendOptions(),
-                                                                  INGRESS,
-                                                                  true));
+        test->pipe->thread[INGRESS].mau->apply(*new MultipleApply(BackendOptions(), INGRESS, true));
     mau->apply(*find_fg_ingress);
 
     const IR::MAU::Table *t1, *t2, *t3, *t4, *t5, *t6, *t7, *t8, *t9, *t10, *t11, *t12;
     t1 = t2 = t3 = t4 = t5 = t6 = t7 = t8 = t9 = t10 = t11 = t12 = nullptr;
     typename FlowGraph::Graph::vertex_iterator v, v_end;
     for (boost::tie(v, v_end) = boost::vertices(fg.g); v != v_end; ++v) {
-        if (*v == fg.v_sink)
-            continue;
+        if (*v == fg.v_sink) continue;
         const IR::MAU::Table *found_table = fg.get_vertex(*v);
         if (found_table->externalName() == "mau.t1") {
             t1 = found_table;
@@ -1071,7 +1057,7 @@ apply {
      *                 |              |
      *                t10 ------------+
      */
-    std::map<const IR::MAU::Table*, ordered_set<const IR::MAU::Table*>> expected_edges;
+    std::map<const IR::MAU::Table *, ordered_set<const IR::MAU::Table *>> expected_edges;
     expected_edges[t11].insert(t12);
     expected_edges[t12].insert(t1);
     expected_edges[t1].insert(t2);
@@ -1091,7 +1077,7 @@ apply {
     expected_edges[t10].insert(t6);
 
     FlowGraph::Graph::edge_iterator edges, edges_end;
-    std::map<const IR::MAU::Table*, ordered_set<const IR::MAU::Table*>> stored_edges;
+    std::map<const IR::MAU::Table *, ordered_set<const IR::MAU::Table *>> stored_edges;
     for (boost::tie(edges, edges_end) = boost::edges(fg.g); edges != edges_end; ++edges) {
         const IR::MAU::Table *src = fg.get_vertex(boost::source(*edges, fg.g));
         const IR::MAU::Table *dst = fg.get_vertex(boost::target(*edges, fg.g));
@@ -1101,14 +1087,14 @@ apply {
     // Check that expected_edges and stored_edges is the same. Do this by making sure all
     // stored_edges are expected, removing those edges from expected_edges, and making sure that
     // expected_edges is empty at the end.
-    for (auto& kv : stored_edges) {
-        auto& src = kv.first;
-        auto& stored_dsts = kv.second;
+    for (auto &kv : stored_edges) {
+        auto &src = kv.first;
+        auto &stored_dsts = kv.second;
 
         EXPECT_NE(expected_edges.count(src), UINT32_C(0));
-        auto& expected_dsts = expected_edges.at(src);
+        auto &expected_dsts = expected_edges.at(src);
 
-        for (auto& dst : stored_dsts) {
+        for (auto &dst : stored_dsts) {
             EXPECT_NE(expected_dsts.count(dst), UINT32_C(0));
             expected_dsts.erase(dst);
         }
@@ -1133,7 +1119,7 @@ apply {
     EXPECT_EQ(fg.can_reach(t9, t8), true);
 
     // Test dominators.
-    std::map<const IR::MAU::Table*, std::set<const IR::MAU::Table*>> expectedDominators;
+    std::map<const IR::MAU::Table *, std::set<const IR::MAU::Table *>> expectedDominators;
     expectedDominators[t11] = {t11};
     expectedDominators[t12] = {t11, t12};
     expectedDominators[t1] = {t11, t12, t1};
@@ -1148,8 +1134,8 @@ apply {
     expectedDominators[t10] = {t11, t8, t9, t10};
     expectedDominators[nullptr] = {t11, t6};
     for (auto table_dominators : expectedDominators) {
-        auto& table = table_dominators.first;
-        auto& dominators = table_dominators.second;
+        auto &table = table_dominators.first;
+        auto &dominators = table_dominators.second;
         EXPECT_EQ(dominators, fg.get_dominators(table));
     }
 }

@@ -15,20 +15,19 @@
 
 #include <utility>
 
-#include "lib/ordered_set.h"
-
 #include "bf-p4c/lib/assoc.h"
 #include "bf-p4c/parde/check_parser_multi_write.h"
 #include "bf-p4c/phv/slicing/phv_slicing_iterator.h"
 #include "bf-p4c/phv/slicing/phv_slicing_split.h"
 #include "bf-p4c/phv/slicing/types.h"
 #include "bf-p4c/phv/utils/utils.h"
+#include "lib/ordered_set.h"
 
 namespace PHV {
 namespace Slicing {
 
 /// locate a slice list.
-using SliceListLoc = std::pair<SuperCluster*, SuperCluster::SliceList*>;
+using SliceListLoc = std::pair<SuperCluster *, SuperCluster::SliceList *>;
 
 /// constraints introduced on fieldslices of container sizes after splitting a slice list.
 struct AfterSplitConstraint {
@@ -43,9 +42,9 @@ struct AfterSplitConstraint {
     };
 
     // default constructor
-    AfterSplitConstraint(): sizes(all_container_sizes) {}
+    AfterSplitConstraint() : sizes(all_container_sizes) {}
     // construct from set.
-    explicit AfterSplitConstraint(const bitvec& sizes);
+    explicit AfterSplitConstraint(const bitvec &sizes);
     // construct based on type.
     explicit AfterSplitConstraint(ConstraintType t, int v = 0);
 
@@ -62,14 +61,14 @@ struct AfterSplitConstraint {
     // e.g. MIN(8)   ^ EXACT(32) = EXACT(32)
     //      MIN(8)   ^ MIN(16)   = MIN(16)
     //      EXACT(8) ^ EXACT(16) = std::nullopt
-    std::optional<AfterSplitConstraint> intersect(const AfterSplitConstraint& other) const;
+    std::optional<AfterSplitConstraint> intersect(const AfterSplitConstraint &other) const;
 
     // return true if field with this AfterSplitConstraint can
     // be placed in a container of size @p n bits.
     bool ok(const int n) const;
 };
 
-std::ostream& operator<<(std::ostream& out, const AfterSplitConstraint& c);
+std::ostream &operator<<(std::ostream &out, const AfterSplitConstraint &c);
 
 /// map FieldSlices to AfterSplit constraints introduced by the slicing decisions.
 using SplitDecision = ordered_map<FieldSlice, AfterSplitConstraint>;
@@ -87,11 +86,11 @@ enum class SplitChoice {
 class DfsItrContext : public IteratorInterface {
  public:
     // input
-    const PhvInfo& phv_i;
-    const SuperCluster* sc_i;
+    const PhvInfo &phv_i;
+    const SuperCluster *sc_i;
     const PHVContainerSizeLayout pa_i;
-    const ActionPackingValidatorInterface& action_packing_validator_i;
-    const ParserPackingValidatorInterface& parser_packing_validator_i;
+    const ActionPackingValidatorInterface &action_packing_validator_i;
+    const ParserPackingValidatorInterface &parser_packing_validator_i;
     const PackConflictChecker has_pack_conflict_i;
     const IsReferencedChecker is_used_i;
     IteratorConfig config_i;
@@ -100,7 +99,7 @@ class DfsItrContext : public IteratorInterface {
     // if a pa_container_size asks a field to be allocated to containers larger than it's
     // size, it's recorded here and will be used during pruning. Note that for one field,
     // there can only one upcasting piece, which is the tailing part.
-    ordered_map<const PHV::Field*, std::pair<le_bitrange, int>> pa_container_size_upcastings_i;
+    ordered_map<const PHV::Field *, std::pair<le_bitrange, int>> pa_container_size_upcastings_i;
 
     //// DFS states
     // split_decisions collects slicing decisions already made and
@@ -112,15 +111,15 @@ class DfsItrContext : public IteratorInterface {
 
     // slicelist_on_stack stores all slice list that were split during DFS in a stack-style.
     // and the number of choices left for the slice list to try different slicing.
-    std::vector<const SuperCluster::SliceList*> slicelist_on_stack_i;
+    std::vector<const SuperCluster::SliceList *> slicelist_on_stack_i;
 
     // done_i is a set of super clusters that
     // (1) all slice slices are already split, or cannot be split further.
     // (2) the super cluster is well-formed, i.e. SuperCluster::is_well_formed() = true.
-    ordered_set<SuperCluster*> done_i;
+    ordered_set<SuperCluster *> done_i;
 
     // super clusters left to be sliced.
-    ordered_set<SuperCluster*> to_be_split_i;
+    ordered_set<SuperCluster *> to_be_split_i;
 
     // true if has itr generated before. one context can only generate one iterator.
     bool has_itr_i = false;
@@ -134,12 +133,12 @@ class DfsItrContext : public IteratorInterface {
     // last solution was found at n_steps_since_last_solution before.
     int n_steps_since_last_solution = 0;
 
-       // Set of rejected SplitChoice options from previous slice-lists
+    // Set of rejected SplitChoice options from previous slice-lists
     std::set<SplitChoice> reject_sizes;
 
     // if not nullptr, backtrack to the stack that to_invalidate is not on stack,
     // i.e. not a part of the DFS path.
-    const SuperCluster::SliceList* to_invalidate = nullptr;
+    const SuperCluster::SliceList *to_invalidate = nullptr;
 
     // When an action cannot be synthesized, either we can try to split the destination more,
     // or we try to split sources differently so that maybe then src and dest slices happen to
@@ -155,17 +154,15 @@ class DfsItrContext : public IteratorInterface {
     // to be invalidated, but ignored, exceeds the max allowance, we will try to backtrack to that
     // slice list. Counter is cleared when we backtracked to the list.
     static constexpr int to_invalidate_max_ignore = 8;
-    ordered_map<const SuperCluster::SliceList*, int> to_invalidate_sl_counter;
+    ordered_map<const SuperCluster::SliceList *, int> to_invalidate_sl_counter;
 
  public:
-    DfsItrContext(const PhvInfo& phv,
-                  const MapFieldToParserStates& field_to_states,
-                  const CollectParserInfo& parser_info,
-                  const SuperCluster* sc, const PHVContainerSizeLayout& pa,
-                  const ActionPackingValidatorInterface& action_packing_validator,
-                  const ParserPackingValidatorInterface& parser_packing_validator,
-                  const PackConflictChecker& pack_conflict,
-                  const IsReferencedChecker is_used)
+    DfsItrContext(const PhvInfo &phv, const MapFieldToParserStates &field_to_states,
+                  const CollectParserInfo &parser_info, const SuperCluster *sc,
+                  const PHVContainerSizeLayout &pa,
+                  const ActionPackingValidatorInterface &action_packing_validator,
+                  const ParserPackingValidatorInterface &parser_packing_validator,
+                  const PackConflictChecker &pack_conflict, const IsReferencedChecker is_used)
         : phv_i(phv),
           sc_i(sc),
           pa_i(pa),
@@ -177,52 +174,48 @@ class DfsItrContext : public IteratorInterface {
           check_write_mode_consistency_i(phv, field_to_states, parser_info) {}
 
     /// iterate will pass valid slicing results to cb. Stop when cb returns false.
-    void iterate(const IterateCb& cb) override;
+    void iterate(const IterateCb &cb) override;
 
     /// invalidate is the feedback mechanism for allocation algorithm to
     /// ask iterator not to produce slicing result contains @p sl. Caller can
     /// This DFS iterator will respect the list of top-most stack frame,
     /// i.e., the most recent decision made by DFS.
-    void invalidate(const SuperCluster::SliceList* sl) override;
+    void invalidate(const SuperCluster::SliceList *sl) override;
 
     /// set configs.
-    void set_config(const IteratorConfig& cfg) override {
-        config_i = cfg;
-    }
+    void set_config(const IteratorConfig &cfg) override { config_i = cfg; }
 
     /// dfs search valid slicing. @p unchecked are superclusters that needs to be checked
     /// for pruning.
-    bool dfs(const IterateCb& yield, const ordered_set<SuperCluster*>& unchecked);
+    bool dfs(const IterateCb &yield, const ordered_set<SuperCluster *> &unchecked);
 
     /// split_by_pa_container_size will split @p sc by @p pa container size.
-    std::optional<std::list<SuperCluster*>> split_by_pa_container_size(
-        const SuperCluster* sc, const PHVContainerSizeLayout& pa);
+    std::optional<std::list<SuperCluster *>> split_by_pa_container_size(
+        const SuperCluster *sc, const PHVContainerSizeLayout &pa);
 
     /// split_by_adjacent_no_pack will split @p sc at byte boundary if two adjacent fields
     /// cannot be packed into one container.
-    std::optional<std::list<SuperCluster*>> split_by_adjacent_no_pack(SuperCluster* sc) const;
+    std::optional<std::list<SuperCluster *>> split_by_adjacent_no_pack(SuperCluster *sc) const;
 
     /// split_by_deparsed_bottom_bits will split at the beginning of deparsed_bottom_bits field.
-    std::optional<std::list<SuperCluster*>> split_by_deparsed_bottom_bits(
-        SuperCluster* sc) const;
+    std::optional<std::list<SuperCluster *>> split_by_deparsed_bottom_bits(SuperCluster *sc) const;
 
     /// split_by_adjacent_deparsed_and_non_deparsed will split @p sc between deparsed and
     /// non-deparsed field.
-    std::optional<std::list<SuperCluster*>> split_by_adjacent_deparsed_and_non_deparsed(
-        SuperCluster* sc) const;
+    std::optional<std::list<SuperCluster *>> split_by_adjacent_deparsed_and_non_deparsed(
+        SuperCluster *sc) const;
 
     /// split_by_valid_container_range will split based on valid container range constraint
     /// that a field cannot be packed fields after it, when its valid container range
     /// is equal to the size of the field.
-    std::optional<std::list<SuperCluster*>> split_by_valid_container_range(
-        SuperCluster* sc) const;
+    std::optional<std::list<SuperCluster *>> split_by_valid_container_range(SuperCluster *sc) const;
 
     /// split_by_long_fieldslices will split fieldslices that its length is greater or equal to
     /// 64 bits, using 32-bit container if possible.
-    std::optional<std::list<SuperCluster*>> split_by_long_fieldslices(SuperCluster* sc) const;
+    std::optional<std::list<SuperCluster *>> split_by_long_fieldslices(SuperCluster *sc) const;
 
     /// split_by_parser_write_mode will split based on incompatible parser write modes
-    std::optional<std::list<SuperCluster*>> split_by_parser_write_mode(SuperCluster* sc);
+    std::optional<std::list<SuperCluster *>> split_by_parser_write_mode(SuperCluster *sc);
 
     /// return possible SplitChoice on @p target.
     /// When minimal_packing_mode is false, results are sorted with a set of heuristics
@@ -231,25 +224,24 @@ class DfsItrContext : public IteratorInterface {
     /// are placed at lower indexes. See implementation for more details on heuristics.
     /// If minimal_packing_mode is true, then we will prefer to split with less packing
     /// of fieldslices.
-    std::vector<SplitChoice> make_choices(const SliceListLoc& target) const;
+    std::vector<SplitChoice> make_choices(const SliceListLoc &target) const;
 
     /// pruning strategies
     /// return true if found any unsatisfactory case. This function will return true
     /// if any of the following pruning strategies returns true.
     /// TODO: non-const because it may call invalidate();
-    bool dfs_prune(const ordered_set<SuperCluster*>& unchecked);
+    bool dfs_prune(const ordered_set<SuperCluster *> &unchecked);
 
     /// dfs_prune_unwell_formed: return true if
     /// (1) @p sc cannot be split further and is not well_formed.
     /// (2) a slicelist in @p sc that cannot be split further has pack conflicts.
-    bool dfs_prune_unwell_formed(const SuperCluster* sc) const;
+    bool dfs_prune_unwell_formed(const SuperCluster *sc) const;
 
-    bool dfs_prune_invalid_parser_packing(const SuperCluster* sc) const;
+    bool dfs_prune_invalid_parser_packing(const SuperCluster *sc) const;
 
     /// return true if exists constraint unsat due to the limit of slice list size.
-    bool dfs_prune_unsat_slicelist_max_size(
-        const SplitDecision& constraints,
-        const SuperCluster* sc) const;
+    bool dfs_prune_unsat_slicelist_max_size(const SplitDecision &constraints,
+                                            const SuperCluster *sc) const;
 
     /// return true if constraints for a slice list cannot be *all* satisfied.
     /// Check for cases like:
@@ -259,9 +251,8 @@ class DfsItrContext : public IteratorInterface {
     /// while for fs3 it's 16-bit container. However, in the above layout
     /// it's impossible. We run a greedy algorithm looking for cases but may have
     /// false negatives.
-    bool dfs_prune_unsat_slicelist_constraints(
-        const SplitDecision& constraints,
-        const SuperCluster* sc) const;
+    bool dfs_prune_unsat_slicelist_constraints(const SplitDecision &constraints,
+                                               const SuperCluster *sc) const;
 
     /// return true if exists a metadata list that will join two
     /// exact_containers lists of different sizes. For example:;
@@ -272,20 +263,17 @@ class DfsItrContext : public IteratorInterface {
     /// {f3[0:1], md1}, {f4<8>[0:3], md2}
     /// sl_3 will join sl_1 and sl_2 into one super cluster, and we can infer that
     /// this cluster is invalid because exact slice list sizes are not the same.
-    bool dfs_prune_unsat_exact_list_size_mismatch(
-        const SplitDecision& decided_sz,
-        const SuperCluster* sc) const;
+    bool dfs_prune_unsat_exact_list_size_mismatch(const SplitDecision &decided_sz,
+                                                  const SuperCluster *sc) const;
 
     /// return true if there exists packing that make it impossible to
     /// to synthesize actions.
     /// TODO: non-const because it may call invalidate();
-    bool dfs_prune_invalid_packing(const SuperCluster* sc);
+    bool dfs_prune_invalid_packing(const SuperCluster *sc);
 
     /// collect_aftersplit_constraints returns AfterSplitConstraints on the fieldslice
     /// of @p sc based on split_decisions_i and pa_container_size_upcastings_i.
-    std::optional<SplitDecision>
-    collect_aftersplit_constraints(
-        const SuperCluster* sc) const;
+    std::optional<SplitDecision> collect_aftersplit_constraints(const SuperCluster *sc) const;
 
     /// collect additional implicit container size constraint and save them to @p decided_sz,
     /// if it can be expressed. Otherwise, if will only check whether the implicit container
@@ -295,9 +283,8 @@ class DfsItrContext : public IteratorInterface {
     /// (1) ^bit[0..15]; (2) no_split; (3) deparsed_bottom_bits
     /// because of these three constraints, this field can only be allocated to 16-bit container.
     /// There can be more special cases for these implicit (hard to be generalized).
-    bool collect_implicit_container_sz_constraint(
-        SplitDecision* decided_sz,
-        const SuperCluster* sc) const;
+    bool collect_implicit_container_sz_constraint(SplitDecision *decided_sz,
+                                                  const SuperCluster *sc) const;
 
     /// dfs_pick_next return the next slice list to be split.
     /// There are some heuristics for returning the slicelist that has most constraints.
@@ -310,32 +297,30 @@ class DfsItrContext : public IteratorInterface {
     /// exact_containers constraint, then we can infer that all other slices in the
     /// the same rotational cluster with slices that were just split out, need to
     /// be split by the bytes (counting from the beginning of lists) that contains them.
-    void propagate_8bit_exact_container_split(SuperCluster* sc, SuperCluster::SliceList* target,
-                                              SplitSchema* schema, SplitDecision* decisions) const;
+    void propagate_8bit_exact_container_split(SuperCluster *sc, SuperCluster::SliceList *target,
+                                              SplitSchema *schema, SplitDecision *decisions) const;
 
     /// If we found that any field slice in the last byte of a slice list has a decided size,
     /// then we can split the *tail* out so that the packing is materialized as early as possible.
-    bool propagate_tail_split(SuperCluster* sc,
-                              const SplitDecision& constraints,
-                              const SplitDecision* decisions,
-                              const SuperCluster::SliceList* just_split_target,
-                              const int n_just_split_bits,
-                              SplitSchema* schema) const;
+    bool propagate_tail_split(SuperCluster *sc, const SplitDecision &constraints,
+                              const SplitDecision *decisions,
+                              const SuperCluster::SliceList *just_split_target,
+                              const int n_just_split_bits, SplitSchema *schema) const;
 
     /// make_split_meta will generate schema and decision to split out first @p first_n_bits
     /// of @p sl under @p sc.When a conflicting split decision is found, @returns std::nullopt.
     std::optional<std::pair<SplitSchema, SplitDecision>> make_split_meta(
-        SuperCluster* sc, SuperCluster::SliceList* sl, int first_n_bits) const;
+        SuperCluster *sc, SuperCluster::SliceList *sl, int first_n_bits) const;
 
     /// return true if the slicelist needs to be further split.
-    bool need_further_split(const SuperCluster::SliceList* sl) const;
+    bool need_further_split(const SuperCluster::SliceList *sl) const;
 
     /// return true if there are pack_conflicts in @p sl.
-    bool check_pack_conflict(const SuperCluster::SliceList* sl) const;
+    bool check_pack_conflict(const SuperCluster::SliceList *sl) const;
 
     /// get_well_formed_no_more_split returns super clusters that all the slice lists
     /// does not need_further_split, and the cluster is well_formed.
-    std::vector<SuperCluster*> get_well_formed_no_more_split() const;
+    std::vector<SuperCluster *> get_well_formed_no_more_split() const;
 
     // For some superclusters, slicing iterator is prone to generating duplicate slicing plans.
     // Duplicate slicing plans mean that although the slice lists have been sliced into a different

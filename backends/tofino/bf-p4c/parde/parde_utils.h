@@ -10,13 +10,12 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PARDE_PARDE_UTILS_H_
-#define EXTENSIONS_BF_P4C_PARDE_PARDE_UTILS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_PARDE_UTILS_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_PARDE_UTILS_H_
 
 #include "bf-p4c/device.h"
 
-
-static const IR::BFN::PacketRVal* get_packet_range(const IR::BFN::ParserPrimitive* p) {
+static const IR::BFN::PacketRVal *get_packet_range(const IR::BFN::ParserPrimitive *p) {
     if (auto e = p->to<IR::BFN::Extract>()) {
         if (auto range = e->source->to<IR::BFN::PacketRVal>()) {
             return range;
@@ -34,19 +33,17 @@ static const IR::BFN::PacketRVal* get_packet_range(const IR::BFN::ParserPrimitiv
 }
 
 struct SortExtracts {
-    explicit SortExtracts(IR::BFN::ParserState* state) {
+    explicit SortExtracts(IR::BFN::ParserState *state) {
         std::stable_sort(state->statements.begin(), state->statements.end(),
-            [&] (const IR::BFN::ParserPrimitive* a,
-                 const IR::BFN::ParserPrimitive* b) {
-                auto va = get_packet_range(a);
-                auto vb = get_packet_range(b);
-                return (va && vb) ? (va->range < vb->range) : !!va;
-            });
+                         [&](const IR::BFN::ParserPrimitive *a, const IR::BFN::ParserPrimitive *b) {
+                             auto va = get_packet_range(a);
+                             auto vb = get_packet_range(b);
+                             return (va && vb) ? (va->range < vb->range) : !!va;
+                         });
 
         if (LOGGING(5)) {
             std::clog << "sorted primitives in " << state->name << std::endl;
-            for (auto p : state->statements)
-                std::clog << p << std::endl;
+            for (auto p : state->statements) std::clog << p << std::endl;
         }
     }
 };
@@ -54,7 +51,7 @@ struct SortExtracts {
 struct GetMaxBufferPos : Inspector {
     int rv = -1;
 
-    bool preorder(const IR::BFN::InputBufferRVal* rval) override {
+    bool preorder(const IR::BFN::InputBufferRVal *rval) override {
         rv = std::max(rval->range.hi, rv);
         return false;
     }
@@ -63,7 +60,7 @@ struct GetMaxBufferPos : Inspector {
 struct GetMinBufferPos : Inspector {
     int rv = Device::pardeSpec().byteInputBufferSize() * 8;
 
-    bool preorder(const IR::BFN::InputBufferRVal* rval) override {
+    bool preorder(const IR::BFN::InputBufferRVal *rval) override {
         if (rval->range.hi < 0) return false;
         if (rval->range.lo < 0) BUG("rval straddles input buffer?");
         rv = std::min(rval->range.lo, rv);
@@ -80,37 +77,35 @@ struct Shift : Transform {
 
 struct ShiftPacketRVal : Shift {
     bool negative_ok = false;
-    explicit ShiftPacketRVal(int shft, bool neg_ok = false) :
-        Shift(shft), negative_ok(neg_ok) { }
+    explicit ShiftPacketRVal(int shft, bool neg_ok = false) : Shift(shft), negative_ok(neg_ok) {}
 
-    IR::Node* preorder(IR::BFN::PacketRVal* rval) override {
+    IR::Node *preorder(IR::BFN::PacketRVal *rval) override {
         auto new_range = rval->range.shiftedByBits(-shift_amt);
-        if (!negative_ok)
-            BUG_CHECK(new_range.lo >= 0, "packet rval shifted to be negative?");
+        if (!negative_ok) BUG_CHECK(new_range.lo >= 0, "packet rval shifted to be negative?");
         rval->range = new_range;
         return rval;
     }
 
-    IR::Node* postorder(IR::BFN::ChecksumSubtract* csum) {
-        auto* orig = getOriginal<IR::BFN::ChecksumSubtract>();
+    IR::Node *postorder(IR::BFN::ChecksumSubtract *csum) {
+        auto *orig = getOriginal<IR::BFN::ChecksumSubtract>();
         if (csum->source->range.loByte() % 2 != orig->source->range.loByte() % 2) {
-            return new IR::BFN::ChecksumSubtract(csum->declName,
-                    csum->source, !csum->swap, csum->isPayloadChecksum);
+            return new IR::BFN::ChecksumSubtract(csum->declName, csum->source, !csum->swap,
+                                                 csum->isPayloadChecksum);
         }
         return csum;
     }
 
-    IR::Node* postorder(IR::BFN::ChecksumAdd* csum) {
-        auto* orig = getOriginal<IR::BFN::ChecksumAdd>();
+    IR::Node *postorder(IR::BFN::ChecksumAdd *csum) {
+        auto *orig = getOriginal<IR::BFN::ChecksumAdd>();
         if (csum->source->range.loByte() % 2 != orig->source->range.loByte() % 2) {
-            return new IR::BFN::ChecksumAdd(csum->declName,
-                    csum->source, !csum->swap, csum->isHeaderChecksum);
+            return new IR::BFN::ChecksumAdd(csum->declName, csum->source, !csum->swap,
+                                            csum->isHeaderChecksum);
         }
         return csum;
     }
 };
 
-inline unsigned get_state_shift(const IR::BFN::ParserState* state) {
+inline unsigned get_state_shift(const IR::BFN::ParserState *state) {
     unsigned state_shift = 0;
 
     for (unsigned i = 0; i < state->transitions.size(); i++) {
@@ -125,4 +120,4 @@ inline unsigned get_state_shift(const IR::BFN::ParserState* state) {
     return state_shift;
 }
 
-#endif /* EXTENSIONS_BF_P4C_PARDE_PARDE_UTILS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_PARDE_UTILS_H_ */

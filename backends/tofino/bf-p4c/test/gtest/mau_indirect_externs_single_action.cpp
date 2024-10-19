@@ -12,10 +12,9 @@
 
 #include <optional>
 
-#include "gtest/gtest.h"
-
-#include "bf_gtest_helpers.h"
 #include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "bf_gtest_helpers.h"
+#include "gtest/gtest.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/error.h"

@@ -10,41 +10,33 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_CONTROL_PLANE_BFRUNTIME_ARCH_HANDLER_H_
-#define EXTENSIONS_BF_P4C_CONTROL_PLANE_BFRUNTIME_ARCH_HANDLER_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_CONTROL_PLANE_BFRUNTIME_ARCH_HANDLER_H_
+#define BACKENDS_TOFINO_BF_P4C_CONTROL_PLANE_BFRUNTIME_ARCH_HANDLER_H_
 
 #include <iostream>
+#include <optional>
 #include <set>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-#include <optional>
-
 #include "barefoot/p4info.pb.h"
-
-#include "bf-p4c/control-plane/bfruntime.h"
-#include "bf-p4c/control-plane/p4runtime_force_std.h"
-#include "bf-p4c/control-plane/runtime.h"
-
 #include "bf-p4c/arch/fromv1.0/phase0.h"
 #include "bf-p4c/arch/helpers.h"
 #include "bf-p4c/arch/tna.h"
-
 #include "bf-p4c/common/utils.h"
-
+#include "bf-p4c/control-plane/bfruntime.h"
+#include "bf-p4c/control-plane/p4runtime_force_std.h"
+#include "bf-p4c/control-plane/runtime.h"
 #include "bf-p4c/device.h"
-
 #include "control-plane/flattenHeader.h"
 #include "control-plane/p4RuntimeArchHandler.h"
 #include "control-plane/p4RuntimeSerializer.h"
 #include "control-plane/typeSpecConverter.h"
-
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/externInstance.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeMap.h"
-
 #include "ir/ir-generated.h"
 #include "lib/log.h"
 #include "midend/eliminateTypedefs.h"
@@ -243,7 +235,7 @@ static cstring prefix(cstring p, cstring str) { return p.isNullOrEmpty() ? str :
 /// The information about an action profile which is necessary to generate its
 /// serialized representation.
 struct ActionProfile {
-    const cstring name;                 // The fully qualified external name of this action profile.
+    const cstring name;  // The fully qualified external name of this action profile.
     const int64_t size;
     const IR::IAnnotated *annotations;  // If non-null, any annotations applied to this action
                                         // profile declaration.
@@ -260,7 +252,7 @@ struct ActionProfile {
 struct ActionSelector {
     const cstring name;  // The fully qualified external name of this action selector.
     const std::optional<cstring> actionProfileName;  // If not known, we will generate
-                                                       // an action profile instance.
+                                                     // an action profile instance.
     const int64_t size;  // TODO: size does not make sense with new ActionSelector P4 extern
     const int64_t maxGroupSize;
     const int64_t numGroups;
@@ -295,8 +287,8 @@ struct DynHash {
     const IR::IAnnotated *annotations;  // If non-null, any annotations applied to this dynhash
                                         // declaration.
     struct hashField {
-        cstring hashFieldName;          // Field Name
-        bool isConstant;                // true if field is a constant
+        cstring hashFieldName;  // Field Name
+        bool isConstant;        // true if field is a constant
     };
     std::vector<hashField> hashFieldInfo;
     const int hashWidth;
@@ -311,8 +303,8 @@ struct ValueSet {
                                         // declaration.
 
     static std::optional<ValueSet> from(const cstring name, const IR::P4ValueSet *instance,
-                                          const ReferenceMap *refMap, TypeMap *typeMap,
-                                          p4configv1::P4TypeInfo *p4RtTypeInfo) {
+                                        const ReferenceMap *refMap, TypeMap *typeMap,
+                                        p4configv1::P4TypeInfo *p4RtTypeInfo) {
         CHECK_NULL(instance);
         int64_t size = 0;
         auto sizeConstant = instance->size->to<IR::Constant>();
@@ -342,9 +334,8 @@ struct Register {
 
     /// @return the information required to serialize an @p instance of register
     /// or std::nullopt in case of error.
-    static std::optional<Register> from(const IR::ExternBlock *instance,
-                                          const ReferenceMap *refMap, TypeMap *typeMap,
-                                          p4configv1::P4TypeInfo *p4RtTypeInfo) {
+    static std::optional<Register> from(const IR::ExternBlock *instance, const ReferenceMap *refMap,
+                                        TypeMap *typeMap, p4configv1::P4TypeInfo *p4RtTypeInfo) {
         CHECK_NULL(instance);
         auto declaration = instance->node->to<IR::Declaration_Instance>();
 
@@ -368,9 +359,9 @@ struct Register {
     /// @return the information required to serialize an @p instance of a direct
     /// register or std::nullopt in case of error.
     static std::optional<Register> fromDirect(const P4::ExternInstance &instance,
-                                                const IR::P4Table *table,
-                                                const ReferenceMap *refMap, TypeMap *typeMap,
-                                                p4configv1::P4TypeInfo *p4RtTypeInfo) {
+                                              const IR::P4Table *table, const ReferenceMap *refMap,
+                                              TypeMap *typeMap,
+                                              p4configv1::P4TypeInfo *p4RtTypeInfo) {
         CHECK_NULL(table);
         BUG_CHECK(instance.name != std::nullopt, "Caller should've ensured we have a name");
 
@@ -406,8 +397,8 @@ struct RegisterParam {
     /// @return the information required to serialize an @p instance of register parameter
     /// or std::nullopt in case of error.
     static std::optional<RegisterParam> from(const IR::ExternBlock *instance,
-                                               const ReferenceMap *refMap, TypeMap *typeMap,
-                                               p4configv1::P4TypeInfo *p4RtTypeInfo) {
+                                             const ReferenceMap *refMap, TypeMap *typeMap,
+                                             p4configv1::P4TypeInfo *p4RtTypeInfo) {
         CHECK_NULL(instance);
         auto declaration = instance->node->to<IR::Declaration_Instance>();
 
@@ -453,7 +444,7 @@ struct Lpf {
     /// @return the information required to serialize an @p instance of a direct
     /// Lpf or std::nullopt in case of error.
     static std::optional<Lpf> fromDirect(const P4::ExternInstance &instance,
-                                           const IR::P4Table *table) {
+                                         const IR::P4Table *table) {
         CHECK_NULL(table);
         BUG_CHECK(instance.name != std::nullopt, "Caller should've ensured we have a name");
         return Lpf{*instance.name, 0, table->controlPlaneName(), instance.annotations};
@@ -492,7 +483,7 @@ struct Wred {
     /// @return the information required to serialize an @p instance of a direct
     /// Wred or std::nullopt in case of error.
     static std::optional<Wred> fromDirect(const P4::ExternInstance &instance,
-                                            const IR::P4Table *table) {
+                                          const IR::P4Table *table) {
         CHECK_NULL(table);
         BUG_CHECK(instance.name != std::nullopt, "Caller should've ensured we have a name");
 
@@ -941,9 +932,9 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
 
     /// @return the direct register associated with @p table, if it has one, or
     /// std::nullopt otherwise.
-    static std::optional<Register> getDirectRegister(const IR::P4Table *table,
-                                                       ReferenceMap *refMap, TypeMap *typeMap,
-                                                       p4configv1::P4TypeInfo *p4RtTypeInfo) {
+    static std::optional<Register> getDirectRegister(const IR::P4Table *table, ReferenceMap *refMap,
+                                                     TypeMap *typeMap,
+                                                     p4configv1::P4TypeInfo *p4RtTypeInfo) {
         auto directRegisterInstance =
             Helpers::getExternInstanceFromProperty(table, "registers"_cs, refMap, typeMap);
         if (!directRegisterInstance) return std::nullopt;
@@ -1040,7 +1031,7 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
     bool filterAnnotations(cstring) override { return false; }
 
     std::optional<Digest> getDigest(const IR::Declaration_Instance *decl,
-                                      p4configv1::P4TypeInfo *p4RtTypeInfo) {
+                                    p4configv1::P4TypeInfo *p4RtTypeInfo) {
         std::vector<const P4::ExternMethod *> packCalls;
         // Check that the pack method is called exactly once on the digest
         // instance. The type of the data being packed used to be a type
@@ -1070,7 +1061,7 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
     }
 
     std::optional<DynHash> getDynHash(const IR::Declaration_Instance *decl,
-                                        p4configv1::P4TypeInfo *p4RtTypeInfo) {
+                                      p4configv1::P4TypeInfo *p4RtTypeInfo) {
         std::vector<const P4::ExternMethod *> hashCalls;
         // Get Hash Calls in the program for the declaration.
         forAllExternMethodCalls(
@@ -1127,7 +1118,7 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
     /// @return the action profile referenced in the implementation property of @p table,
     /// if it has one, or @c std::nullopt otherwise.
     std::optional<ActionProfile> getActionProfile(const IR::P4Table *table, ReferenceMap *refMap,
-                                                    TypeMap *typeMap) {
+                                                  TypeMap *typeMap) {
         using Helpers::getExternInstanceFromProperty;
         auto instance = getExternInstanceFromProperty(table, implementationString, refMap, typeMap);
         if (!instance) return std::nullopt;
@@ -1150,8 +1141,8 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
 
     /// @return the action profile referenced in @p table's implementation
     /// property, if it has one, or std::nullopt otherwise.
-    std::optional<ActionSelector> getActionSelector(const IR::P4Table *table,
-                                                      ReferenceMap *refMap, TypeMap *typeMap) {
+    std::optional<ActionSelector> getActionSelector(const IR::P4Table *table, ReferenceMap *refMap,
+                                                    TypeMap *typeMap) {
         using BFN::getExternInstanceFromPropertyByTypeName;
         auto action_selector = getExternInstanceFromPropertyByTypeName(
             table, implementationString, "ActionSelector"_cs, refMap, typeMap);
@@ -1475,12 +1466,12 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
     }
 
     std::optional<cstring> getTableImplementationName(const IR::P4Table *table,
-                                                        ReferenceMap *refMap) {
+                                                      ReferenceMap *refMap) {
         auto impl = getTableImplementationProperty(table);
         if (impl == nullptr) return std::nullopt;
         if (!impl->value->template is<IR::ExpressionValue>()) {
             error("Expected %1% property value for table %2% to be an expression: %2%",
-                    implementationString, table->controlPlaneName(), impl);
+                  implementationString, table->controlPlaneName(), impl);
             return std::nullopt;
         }
         auto expr = impl->value->template to<IR::ExpressionValue>()->expression;
@@ -1532,10 +1523,10 @@ class BFRuntimeArchHandlerTofino final : public BFN::BFRuntimeArchHandlerCommon<
             auto pipe = param.second;
             if (!pipe->is<IR::PackageBlock>()) {
                 error(ErrorType::ERR_INVALID,
-                        "%1% package block. You are compiling for the %2% "
-                        "P4 architecture.\n"
-                        "Please verify that you included the correct architecture file.",
-                        pipe, BackendOptions().arch);
+                      "%1% package block. You are compiling for the %2% "
+                      "P4 architecture.\n"
+                      "Please verify that you included the correct architecture file.",
+                      pipe, BackendOptions().arch);
                 return;
             }
             auto idxParam = cparams->getParameter(index);
@@ -1556,10 +1547,10 @@ class BFRuntimeArchHandlerTofino final : public BFN::BFRuntimeArchHandlerCommon<
                 BUG_CHECK(parsers, "Expected Block");
                 if (!parsers->is<IR::PackageBlock>()) {
                     error(ErrorType::ERR_INVALID,
-                            "%1% package block. "
-                            "You are compiling for the %2% P4 architecture.\n"
-                            "Please verify that you included the correct architecture file.",
-                            parsers, BackendOptions().arch);
+                          "%1% package block. "
+                          "You are compiling for the %2% P4 architecture.\n"
+                          "Please verify that you included the correct architecture file.",
+                          parsers, BackendOptions().arch);
                     return;
                 }
                 auto parsersBlock = parsers->to<IR::PackageBlock>();
@@ -1611,9 +1602,8 @@ class BFRuntimeArchHandlerTofino final : public BFN::BFRuntimeArchHandlerCommon<
                 cstring blockNamePrefix = pipeName;
                 if (decl) blockNamePrefix = decl->controlPlaneName();
                 blockNamePrefixMap[block] = blockNamePrefix;
-                LOG4("Updating blockNamePrefixMap with " << &*block
-                     << block->toString() << " : "
-                     << blockNamePrefixMap[block]);
+                LOG4("Updating blockNamePrefixMap with " << &*block << block->toString() << " : "
+                                                         << blockNamePrefixMap[block]);
                 pipes.insert(pipeName);
             });
         });
@@ -1696,7 +1686,7 @@ class BFRuntimeArchHandlerTofino final : public BFN::BFRuntimeArchHandlerCommon<
         if (portMetadata) {
             if (hasUserPortMetadata.count(parserBlock)) {
                 error("Cannot have multiple extern calls for %1%",
-                        BFN::ExternPortMetadataUnpackString);
+                      BFN::ExternPortMetadataUnpackString);
                 return;
             }
             hasUserPortMetadata.insert(parserBlock);
@@ -1958,7 +1948,7 @@ class BFRuntimeArchHandlerTofino final : public BFN::BFRuntimeArchHandlerCommon<
                     actionProfilesRefs[selectorDeclName].begin(),
                     actionProfilesRefs[selectorDeclName].end());
                 LOG5("Adding action profile : " << profileDeclName << " for tables "
-                        << actionProfilesRefs[profileDeclName]);
+                                                << actionProfilesRefs[profileDeclName]);
             }
         });
 
@@ -2076,7 +2066,7 @@ class BFRuntimeArchHandlerTofino final : public BFN::BFRuntimeArchHandlerCommon<
     /// getDirectWred.
     template <typename T>
     static std::optional<T> getDirectFilter(const IR::P4Table *table, ReferenceMap *refMap,
-                                              TypeMap *typeMap, cstring filterType) {
+                                            TypeMap *typeMap, cstring filterType) {
         auto directFilterInstance =
             Helpers::getExternInstanceFromProperty(table, "filters"_cs, refMap, typeMap);
         if (!directFilterInstance) return std::nullopt;
@@ -2088,14 +2078,14 @@ class BFRuntimeArchHandlerTofino final : public BFN::BFRuntimeArchHandlerCommon<
     /// @return the direct Lpf instance associated with @p table, if it has one,
     /// or std::nullopt otherwise.
     static std::optional<Lpf> getDirectLpf(const IR::P4Table *table, ReferenceMap *refMap,
-                                             TypeMap *typeMap) {
+                                           TypeMap *typeMap) {
         return getDirectFilter<Lpf>(table, refMap, typeMap, "DirectLpf"_cs);
     }
 
     /// @return the direct Wred instance associated with @p table, if it has one,
     /// or std::nullopt otherwise.
     static std::optional<Wred> getDirectWred(const IR::P4Table *table, ReferenceMap *refMap,
-                                               TypeMap *typeMap) {
+                                             TypeMap *typeMap) {
         return getDirectFilter<Wred>(table, refMap, typeMap, "DirectWred"_cs);
     }
 
@@ -2472,4 +2462,4 @@ struct PSAArchHandlerBuilder : public P4::ControlPlaneAPI::P4RuntimeArchHandlerB
 };
 
 }  // namespace BFN
-#endif /* EXTENSIONS_BF_P4C_CONTROL_PLANE_BFRUNTIME_ARCH_HANDLER_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_CONTROL_PLANE_BFRUNTIME_ARCH_HANDLER_H_ */

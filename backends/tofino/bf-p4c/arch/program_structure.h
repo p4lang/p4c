@@ -10,15 +10,15 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_ARCH_PROGRAM_STRUCTURE_H_
-#define EXTENSIONS_BF_P4C_ARCH_PROGRAM_STRUCTURE_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_ARCH_PROGRAM_STRUCTURE_H_
+#define BACKENDS_TOFINO_BF_P4C_ARCH_PROGRAM_STRUCTURE_H_
 
-#include "ir/ir.h"
-#include "ir/namemap.h"
-#include "lib/ordered_set.h"
 #include "bf-p4c/ir/gress.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/evaluator/evaluator.h"
+#include "ir/ir.h"
+#include "ir/namemap.h"
+#include "lib/ordered_set.h"
 
 namespace BFN {
 
@@ -28,8 +28,7 @@ using TranslationMap = ordered_map<const IR::Node *, const IR::Node *>;
 using NodeNameMap = ordered_map<const IR::Node *, cstring>;
 
 // used by checksum translation
-using ChecksumSourceMap = ordered_map<const IR::Member *,
-    const IR::MethodCallExpression *>;
+using ChecksumSourceMap = ordered_map<const IR::Member *, const IR::MethodCallExpression *>;
 
 /// A helper struct used to construct the metadata remapping tables.
 struct MetadataField {
@@ -42,34 +41,30 @@ struct MetadataField {
     // the compiler_generated_meta.
     bool isCG;
 
-    MetadataField(cstring sn, cstring fn, int w) :
-        structName(sn), fieldName(fn), width(w), offset(0), isCG(false) {}
+    MetadataField(cstring sn, cstring fn, int w)
+        : structName(sn), fieldName(fn), width(w), offset(0), isCG(false) {}
 
-    MetadataField(cstring sn, cstring fn, int w, int o) :
-        structName(sn), fieldName(fn), width(w), offset(o), isCG(false) {}
+    MetadataField(cstring sn, cstring fn, int w, int o)
+        : structName(sn), fieldName(fn), width(w), offset(o), isCG(false) {}
 
-    MetadataField(cstring sn, cstring fn, int w, bool isCG) :
-        structName(sn), fieldName(fn), width(w), offset(0), isCG(isCG) {}
+    MetadataField(cstring sn, cstring fn, int w, bool isCG)
+        : structName(sn), fieldName(fn), width(w), offset(0), isCG(isCG) {}
 
-    MetadataField(cstring sn, cstring fn, int w, int o, bool isCG) :
-        structName(sn), fieldName(fn), width(w), offset(o), isCG(isCG) {}
+    MetadataField(cstring sn, cstring fn, int w, int o, bool isCG)
+        : structName(sn), fieldName(fn), width(w), offset(o), isCG(isCG) {}
 
-    cstring name() {
-        return structName + "." + fieldName;
-    }
+    cstring name() { return structName + "." + fieldName; }
 
     bool operator<(const MetadataField &other) const {
-        if (structName != other.structName)
-            return structName < other.structName;
+        if (structName != other.structName) return structName < other.structName;
         return fieldName < other.fieldName;
     }
 
     bool operator==(const MetadataField &other) const {
-        return structName == other.structName &&
-               fieldName == other.fieldName;
+        return structName == other.structName && fieldName == other.fieldName;
     }
 
-    bool operator !=(const MetadataField &a) const { return !(*this == a); }
+    bool operator!=(const MetadataField &a) const { return !(*this == a); }
     friend std::ostream &operator<<(std::ostream &out, const BFN::MetadataField &m);
 };
 
@@ -116,12 +111,12 @@ struct ProgramStructure {
     ordered_map<cstring, cstring> blockNames;
 
     cstring getBlockName(cstring name);
-    bool isIngressParser(const IR::P4Parser* parser);
-    bool isIngress(const IR::P4Control* control);
-    bool isIngressDeparser(const IR::P4Control* control);
-    bool isEgressParser(const IR::P4Parser* parser);
-    bool isEgress(const IR::P4Control* control);
-    bool isEgressDeparser(const IR::P4Control* control);
+    bool isIngressParser(const IR::P4Parser *parser);
+    bool isIngress(const IR::P4Control *control);
+    bool isIngressDeparser(const IR::P4Control *control);
+    bool isEgressParser(const IR::P4Parser *parser);
+    bool isEgress(const IR::P4Control *control);
+    bool isEgressDeparser(const IR::P4Control *control);
 
     // additional declarations created by the translation pass and to be
     // prepended to each block.
@@ -143,7 +138,6 @@ struct ProgramStructure {
     ordered_map<cstring, std::vector<const IR::StatOrDecl *>> ingressParserStatements;
     ordered_map<cstring, std::vector<const IR::StatOrDecl *>> egressParserStatements;
 
-
     ordered_map<const IR::Member *, const IR::Member *> membersToDo;
     /// maintain the paths to translate and their thread info
     ordered_map<const IR::Member *, const IR::Member *> pathsToDo;
@@ -157,11 +151,12 @@ struct ProgramStructure {
     std::set<MetadataField> targetMetadataSet;
 
     void addMetadata(gress_t gress, MetadataField src, MetadataField dst) {
-        auto &nameMap = (gress == gress_t::INGRESS) ?
-                        ingressMetadataNameMap : egressMetadataNameMap;
+        auto &nameMap =
+            (gress == gress_t::INGRESS) ? ingressMetadataNameMap : egressMetadataNameMap;
         auto itr = nameMap.emplace(src, dst);
         if (!itr.second) {
-            BUG_CHECK(itr.first->second == dst,
+            BUG_CHECK(
+                itr.first->second == dst,
                 "Cannot add metadata mapping %1% - %2% as mapping already exists to %1% - %3%",
                 src.name(), dst.name(), itr.first->second.name());
         }
@@ -188,4 +183,4 @@ struct ProgramStructure {
 
 }  // namespace BFN
 
-#endif  /* EXTENSIONS_BF_P4C_ARCH_PROGRAM_STRUCTURE_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_ARCH_PROGRAM_STRUCTURE_H_ */

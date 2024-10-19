@@ -10,16 +10,18 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include <optional>
-#include <boost/algorithm/string/replace.hpp>
-#include "gtest/gtest.h"
+#include "bf-p4c/phv/analysis/parser_critical_path.h"
 
+#include <optional>
+
+#include <boost/algorithm/string/replace.hpp>
+
+#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "gtest/gtest.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
 #include "test/gtest/helpers.h"
-#include "bf-p4c/phv/analysis/parser_critical_path.h"
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
 
 // Changes related to inserting parser states might break
 // these tests.
@@ -30,8 +32,8 @@ class ParserCriticalPathTest : public TofinoBackendTest {};
 
 namespace {
 
-std::optional<TofinoPipeTestCase>
-createParserCriticalPathTestCase(const std::string& parserSource) {
+std::optional<TofinoPipeTestCase> createParserCriticalPathTestCase(
+    const std::string &parserSource) {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
         header H1
         {
@@ -70,7 +72,7 @@ createParserCriticalPathTestCase(const std::string& parserSource) {
 
     boost::replace_first(source, "%PARSER_SOURCE%", parserSource);
 
-    auto& options = BackendOptions();
+    auto &options = BackendOptions();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.target = "tofino"_cs;
     options.arch = "v1model"_cs;
@@ -82,24 +84,24 @@ createParserCriticalPathTestCase(const std::string& parserSource) {
 // In this unit-test, we do not check those inserted states before start (states has $ in name)
 // Checking them make this unit-test flaky in that anyone who changes the inserted
 // states would have to change this unit-test accrodingly.
-std::vector<std::pair<cstring, int>>
-transformToComparable(const std::vector<std::pair<const IR::BFN::ParserState*, int>>& path) {
+std::vector<std::pair<cstring, int>> transformToComparable(
+    const std::vector<std::pair<const IR::BFN::ParserState *, int>> &path) {
     std::vector<std::pair<cstring, int>> dest(path.size());
     transform(path.begin(), path.end(), dest.begin(),
-              [] (const std::pair<const IR::BFN::ParserState*, int>& x) {
-                  return std::make_pair(x.first->name, x.second);} );
-    dest.erase(std::remove_if(dest.begin(), dest.end(),
-                              [] (std::pair<cstring, int> v) {
-                                  return v.first.find('$') != nullptr; }),
-               dest.end());
+              [](const std::pair<const IR::BFN::ParserState *, int> &x) {
+                  return std::make_pair(x.first->name, x.second);
+              });
+    dest.erase(
+        std::remove_if(dest.begin(), dest.end(),
+                       [](std::pair<cstring, int> v) { return v.first.find('$') != nullptr; }),
+        dest.end());
     return dest;
 }
 
 }  // namespace
 
 TEST_F(ParserCriticalPathTest, SinglePath) {
-    auto test = createParserCriticalPathTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createParserCriticalPathTestCase(P4_SOURCE(P4Headers::NONE, R"(
 state start {
     packet.extract(headers.h1);
     transition accept;
@@ -111,20 +113,15 @@ state start {
     CalcParserCriticalPath *run = new CalcParserCriticalPath(phv);
     test->pipe->apply(*run);
 
-    std::vector<std::pair<cstring, int>> expectedIngressPath({
-            {"ingress::start"_cs, 41}
-        });
-    std::vector<std::pair<cstring, int>> expectedEgressPath({
-            {"egress::start"_cs, 41}
-        });
+    std::vector<std::pair<cstring, int>> expectedIngressPath({{"ingress::start"_cs, 41}});
+    std::vector<std::pair<cstring, int>> expectedEgressPath({{"egress::start"_cs, 41}});
 
     EXPECT_EQ(transformToComparable(run->get_ingress_result().path), expectedIngressPath);
     EXPECT_EQ(transformToComparable(run->get_egress_result().path), expectedEgressPath);
 }
 
 TEST_F(ParserCriticalPathTest, TwoPath) {
-    auto test = createParserCriticalPathTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createParserCriticalPathTestCase(P4_SOURCE(P4Headers::NONE, R"(
 state start {
     packet.extract(headers.h1);
     transition select(headers.h1.f1) {
@@ -151,14 +148,11 @@ state parseH2AndMeta {
     CalcParserCriticalPath *run = new CalcParserCriticalPath(phv);
     test->pipe->apply(*run);
 
-    std::vector<std::pair<cstring, int>> expectedIngressPath({
-            {"ingress::start"_cs, 41},
-            {"ingress::parseH2AndMeta"_cs, 65 + 8}
-        });
+    std::vector<std::pair<cstring, int>> expectedIngressPath(
+        {{"ingress::start"_cs, 41}, {"ingress::parseH2AndMeta"_cs, 65 + 8}});
     std::vector<std::pair<cstring, int>> expectedEgressPath({
-            {"egress::start"_cs, 41},
-            {"egress::parseH2"_cs, 65}  // Egress does not extract metadata
-        });
+        {"egress::start"_cs, 41}, {"egress::parseH2"_cs, 65}  // Egress does not extract metadata
+    });
 
     EXPECT_EQ(transformToComparable(run->get_ingress_result().path), expectedIngressPath);
     EXPECT_EQ(transformToComparable(run->get_egress_result().path), expectedEgressPath);

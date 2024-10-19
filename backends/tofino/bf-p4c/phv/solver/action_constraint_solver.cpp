@@ -15,7 +15,9 @@
 #include <chrono>
 #include <sstream>
 #include <unordered_set>
+
 #include <boost/format/format_fwd.hpp>
+
 #include "bf-p4c/ir/bitrange.h"
 #include "lib/bitvec.h"
 #include "lib/exceptions.h"
@@ -37,7 +39,7 @@ struct SourceClassifiedAssigns {
 
     // n can be 1 or 2, represent the src1 and src2 for the instruction.
     // prefer to use ad_or_const as src.
-    const std::vector<Assign>& get_src(int n) const {
+    const std::vector<Assign> &get_src(int n) const {
         BUG_CHECK(n_sources() >= n, "get src out of index %1%", n);
         BUG_CHECK(n <= 2 && n > 0, "SourceClassifiedAssigns can only return src1 or src2");
         if (!ad_or_const.empty()) {
@@ -56,9 +58,9 @@ struct SourceClassifiedAssigns {
     }
 };
 
-SourceClassifiedAssigns classify_by_sources(const std::vector<Assign>& assigns) {
+SourceClassifiedAssigns classify_by_sources(const std::vector<Assign> &assigns) {
     SourceClassifiedAssigns rst;
-    for (const auto& assign : assigns) {
+    for (const auto &assign : assigns) {
         if (assign.src.is_ad_or_const) {
             rst.ad_or_const.push_back(assign);
         } else {
@@ -68,7 +70,7 @@ SourceClassifiedAssigns classify_by_sources(const std::vector<Assign>& assigns) 
     return rst;
 }
 
-int left_rotate_offset(const Assign& assign, int container_sz) {
+int left_rotate_offset(const Assign &assign, int container_sz) {
     if (assign.src.is_ad_or_const) {
         return 0;
     }
@@ -87,9 +89,9 @@ int right_rotate(int dest_idx, int n_bits, int container_sz) {
     return src_idx;
 }
 
-bitvec byte_rotate_merge_src1_mask(const std::vector<Assign>& assigns) {
+bitvec byte_rotate_merge_src1_mask(const std::vector<Assign> &assigns) {
     bitvec mask;
-    for (const auto& v : assigns) {
+    for (const auto &v : assigns) {
         const int lo = (v.dst.range.lo / 8) * 8;
         const int width = (v.dst.range.hi / 8) * 8 - lo + 8;
         mask.setrange(lo, width);
@@ -97,8 +99,8 @@ bitvec byte_rotate_merge_src1_mask(const std::vector<Assign>& assigns) {
     return mask;
 }
 
-void assign_input_bug_check(const ordered_map<ContainerID, ContainerSpec>& specs,
-                            const Assign& assign) {
+void assign_input_bug_check(const ordered_map<ContainerID, ContainerSpec> &specs,
+                            const Assign &assign) {
     for (const auto op : {assign.src, assign.dst}) {
         if (op.is_ad_or_const) {
             BUG_CHECK(op.container == "", "action data or const must have nil container", op);
@@ -131,11 +133,11 @@ void assign_input_bug_check(const ordered_map<ContainerID, ContainerSpec>& specs
 
 /// return the first container bit that are live but not set for by assigns. A non-none return
 /// value means that the bit@i is corrupted because of the whole container set instruction.
-std::optional<int> invalid_whole_container_set(const std::vector<Assign>& assigns,
-                                                 const ContainerSpec& c,
-                                                 const bitvec& src_unallocated_bits) {
+std::optional<int> invalid_whole_container_set(const std::vector<Assign> &assigns,
+                                               const ContainerSpec &c,
+                                               const bitvec &src_unallocated_bits) {
     bitvec set_bits;
-    for (const auto& assign : assigns) {
+    for (const auto &assign : assigns) {
         set_bits.setrange(assign.dst.range.lo, assign.dst.range.size());
     }
     for (int i = 0; i < c.size; i++) {
@@ -147,26 +149,25 @@ std::optional<int> invalid_whole_container_set(const std::vector<Assign>& assign
 }
 
 // convert empty container id to readable format.
-ContainerID pretty_print(ContainerID c) {
-    return c == ""_cs ? "ad_or_const"_cs : c;
-}
+ContainerID pretty_print(ContainerID c) { return c == ""_cs ? "ad_or_const"_cs : c; }
 
 }  // namespace
 
 cstring DepositField::to_cstring() const {
-    return (boost::format("%1% %2%, %3%, %4%, %5%, %6%")
-            % name() % dest % pretty_print(src1) % left_rotate % mask % src2).str();
+    return (boost::format("%1% %2%, %3%, %4%, %5%, %6%") % name() % dest % pretty_print(src1) %
+            left_rotate % mask % src2)
+        .str();
 }
 
 cstring BitmaskedSet::to_cstring() const {
-     return (boost::format("%1% %2%, %3%, %4%, %5%")
-            % name() % dest % pretty_print(src1) % src2 % mask).str();
+    return (boost::format("%1% %2%, %3%, %4%, %5%") % name() % dest % pretty_print(src1) % src2 %
+            mask)
+        .str();
 }
 cstring ByteRotateMerge::to_cstring() const {
-    return (boost::format("%1% %2%, (%3%, %4%), (%5%, %6%), %7%")
-            % name() % dest
-            % pretty_print(src1) % shift1
-            % src2 % shift2 %mask).str();
+    return (boost::format("%1% %2%, (%3%, %4%), (%5%, %6%), %7%") % name() % dest %
+            pretty_print(src1) % shift1 % src2 % shift2 % mask)
+        .str();
 }
 cstring ContainerSet::to_cstring() const {
     return (boost::format("%1% %2%, %3%") % name() % dest % pretty_print(src)).str();
@@ -174,12 +175,10 @@ cstring ContainerSet::to_cstring() const {
 
 Operand make_ad_or_const_operand() { return Operand{true, ""_cs, le_bitrange()}; }
 
-Operand make_container_operand(ContainerID c, le_bitrange r) {
-    return Operand{false, c, r};
-}
+Operand make_container_operand(ContainerID c, le_bitrange r) { return Operand{false, c, r}; }
 
 Result ActionSolverBase::try_container_set(const ContainerID dest,
-                                           const RotateClassifiedAssigns& offset_assigns) const {
+                                           const RotateClassifiedAssigns &offset_assigns) const {
     // source must be aligned.
     if (offset_assigns.size() != 1 || !offset_assigns.count(0)) {
         std::stringstream ss;
@@ -188,14 +187,14 @@ Result ActionSolverBase::try_container_set(const ContainerID dest,
         return Result(Error(ErrorCode::too_many_unaligned_sources, ss.str()));
     }
     // only one source.
-    const auto& source_classified = classify_by_sources(offset_assigns.at(0));
+    const auto &source_classified = classify_by_sources(offset_assigns.at(0));
     if (source_classified.n_sources() > 1) {
         std::stringstream ss;
         ss << "destination " << dest << " has too many sources: " << source_classified.n_sources();
         return Result(Error(ErrorCode::too_many_container_sources, ss.str()));
     }
     // does not write other live bits.
-    const auto& assigns = source_classified.get_src(1);
+    const auto &assigns = source_classified.get_src(1);
     auto invalid_write_bit =
         invalid_whole_container_set(assigns, specs_i.at(dest), src_unallocated_bits.at(dest));
     if (invalid_write_bit) {
@@ -210,9 +209,9 @@ Result ActionSolverBase::try_container_set(const ContainerID dest,
 std::optional<Error> ActionSolverBase::check_whole_container_set_with_none_source_allocated()
     const {
     // check partial write for destinations when none of their sources has been allocated.
-    for (const auto& dest_unallocated_bv : src_unallocated_bits) {
-        const auto& dest = dest_unallocated_bv.first;
-        const auto& unallocated_bv = dest_unallocated_bv.second;
+    for (const auto &dest_unallocated_bv : src_unallocated_bits) {
+        const auto &dest = dest_unallocated_bv.first;
+        const auto &unallocated_bv = dest_unallocated_bv.second;
         if (dest_assigns_i.count(dest)) continue;
         // do not check if there is no source unallocated.
         if (unallocated_bv.empty()) continue;
@@ -227,7 +226,7 @@ std::optional<Error> ActionSolverBase::check_whole_container_set_with_none_sourc
     return std::nullopt;
 }
 
-void ActionSolverBase::add_assign(const Operand& dst, Operand src) {
+void ActionSolverBase::add_assign(const Operand &dst, Operand src) {
     // Assume that ad_or_const sources are always aligned with dst.
     if (src.is_ad_or_const) {
         src.range = dst.range;
@@ -243,7 +242,7 @@ void ActionSolverBase::add_assign(const Operand& dst, Operand src) {
     dest_assigns_i[dst.container][offset].push_back(assign);
 }
 
-void ActionSolverBase::add_src_unallocated_assign(const ContainerID& c, const le_bitrange& range) {
+void ActionSolverBase::add_src_unallocated_assign(const ContainerID &c, const le_bitrange &range) {
     BUG_CHECK(specs_i.count(c), "unknown container %1%", c);
     for (int i = range.lo; i <= range.hi; i++) {
         BUG_CHECK(
@@ -267,11 +266,11 @@ void ActionSolverBase::set_container_spec(ContainerID id, int size, bitvec live)
 
 std::optional<Error> ActionSolverBase::validate_input() const {
     std::stringstream err_msg;
-    for (const auto& dest_assigns : dest_assigns_i) {
+    for (const auto &dest_assigns : dest_assigns_i) {
         bitvec assigned;
-        for (const auto& offset_assigns : dest_assigns.second) {
-            for (const auto& assign : offset_assigns.second) {
-                const auto& dst = assign.dst;
+        for (const auto &offset_assigns : dest_assigns.second) {
+            for (const auto &assign : offset_assigns.second) {
+                const auto &dst = assign.dst;
                 // no bit is assigned more than once.
                 for (int i = dst.range.lo; i <= dst.range.hi; i++) {
                     if (assigned[i]) {
@@ -288,9 +287,9 @@ std::optional<Error> ActionSolverBase::validate_input() const {
 }
 
 std::optional<Error> ActionMoveSolver::dest_meet_expectation(
-    const ContainerID dest, const std::vector<Assign>& src1, const std::vector<Assign>& src2,
-    const symbolic_bitvec::BitVec& bv_dest, const symbolic_bitvec::BitVec& bv_src1,
-    const symbolic_bitvec::BitVec& bv_src2) const {
+    const ContainerID dest, const std::vector<Assign> &src1, const std::vector<Assign> &src2,
+    const symbolic_bitvec::BitVec &bv_dest, const symbolic_bitvec::BitVec &bv_src1,
+    const symbolic_bitvec::BitVec &bv_src2) const {
     std::stringstream ss;
     // For live bits, they must be either
     // (1) unchanged.
@@ -298,9 +297,9 @@ std::optional<Error> ActionMoveSolver::dest_meet_expectation(
     // (3) have unallocated source.
     // checking (2) here:
     bitvec set_bits;
-    for (const auto& assigns : {std::make_pair(src1, bv_src1), std::make_pair(src2, bv_src2)}) {
-        const auto& source_bv = assigns.second;
-        for (const auto& assign : assigns.first) {
+    for (const auto &assigns : {std::make_pair(src1, bv_src1), std::make_pair(src2, bv_src2)}) {
+        const auto &source_bv = assigns.second;
+        for (const auto &assign : assigns.first) {
             const int dst_lo = assign.dst.range.lo;
             const int src_lo = assign.src.range.lo;
             const int sz = assign.dst.range.size();
@@ -320,7 +319,7 @@ std::optional<Error> ActionMoveSolver::dest_meet_expectation(
     // when src2 and dest are the same container, for both deposit-field or byte-rotate-merge.
     // Because in this solver, we always use src2 as background if needed.
     bool require_src2_be_dest = false;
-    const auto& live_bits = specs_i.at(dest).live;
+    const auto &live_bits = specs_i.at(dest).live;
     for (int i = 0; i < specs_i.at(dest).size; i++) {
         // bits occupied by other field not involved in this action.
         // It's safe to assume that those bits are from s2, as long as
@@ -343,8 +342,8 @@ std::optional<Error> ActionMoveSolver::dest_meet_expectation(
 }
 
 Result ActionMoveSolver::run_deposit_field_symbolic_bitvec_solver(
-    const ContainerID dest, const std::vector<Assign>& src1,
-    const std::vector<Assign>& src2) const {
+    const ContainerID dest, const std::vector<Assign> &src1,
+    const std::vector<Assign> &src2) const {
     LOG5("deposit-field.src1 assigns: " << src1);
     LOG5("deposit-field.src2 assigns: " << src2);
     const int width = specs_i.at(dest).size;
@@ -353,7 +352,7 @@ Result ActionMoveSolver::run_deposit_field_symbolic_bitvec_solver(
     // pre-compute mask
     int mask_l = width;
     int mask_h = -1;
-    for (const auto& assign : src1) {
+    for (const auto &assign : src1) {
         mask_l = std::min(mask_l, assign.dst.range.lo);
         mask_h = std::max(mask_h, assign.dst.range.hi);
     }
@@ -375,20 +374,20 @@ Result ActionMoveSolver::run_deposit_field_symbolic_bitvec_solver(
         LOG3("failed to use deposit-field because " << err->msg);
         return Result(*err);
     }
-    const auto& src2_container = src2.empty() ? dest : src2.front().src.container;
+    const auto &src2_container = src2.empty() ? dest : src2.front().src.container;
     return Result(
         new DepositField(dest, src1.front().src.container, n_left_rotate, mask, src2_container));
 }
 
 // run deposit-field instruction symbolic bitvec solver.
-Result ActionMoveSolver::run_deposit_field_solver(
-    const ContainerID dest, const std::vector<Assign>& src1,
-    const std::vector<Assign>& src2) const {
+Result ActionMoveSolver::run_deposit_field_solver(const ContainerID dest,
+                                                  const std::vector<Assign> &src1,
+                                                  const std::vector<Assign> &src2) const {
     return run_deposit_field_symbolic_bitvec_solver(dest, src1, src2);
 }
 
-Result ActionMoveSolver::try_deposit_field(
-    const ContainerID dest, const RotateClassifiedAssigns& assigns) const {
+Result ActionMoveSolver::try_deposit_field(const ContainerID dest,
+                                           const RotateClassifiedAssigns &assigns) const {
     std::stringstream err_msg;
     if (assigns.size() > 2 || (assigns.size() == 2 && !assigns.count(0))) {
         err_msg << "container " << dest
@@ -450,7 +449,7 @@ Result ActionMoveSolver::try_deposit_field(
             // The rotationally aligned source must be src1.
             const auto src2 = classify_by_sources(assigns.begin()->second);
             const auto src1 = classify_by_sources(std::next(assigns.begin())->second);
-            for (const auto& src : {src1, src2}) {
+            for (const auto &src : {src1, src2}) {
                 if (src.n_sources() > 1) {
                     err_msg << "container " << dest
                             << " has too many different container sources for one same offset: "
@@ -469,8 +468,8 @@ Result ActionMoveSolver::try_deposit_field(
 }
 
 Result ActionMoveSolver::run_byte_rotate_merge_symbolic_bitvec_solver(
-    const ContainerID dest, const std::vector<Assign>& src1,
-    const std::vector<Assign>& src2) const {
+    const ContainerID dest, const std::vector<Assign> &src1,
+    const std::vector<Assign> &src2) const {
     LOG5("byte-rotate-merge.src1 assigns: " << src1);
     LOG5("byte-rotate-merge.src2 assigns: " << src2);
 
@@ -495,14 +494,14 @@ Result ActionMoveSolver::run_byte_rotate_merge_symbolic_bitvec_solver(
     if (err) {
         return Result(*err);
     }
-    const auto& src2_container = src2.empty() ? dest : src2.front().src.container;
+    const auto &src2_container = src2.empty() ? dest : src2.front().src.container;
     return Result(new ByteRotateMerge(dest, src1.front().src.container, src1_shift, src2_container,
                                       src2_shift, mask1));
 }
 
-Result ActionMoveSolver::run_byte_rotate_merge_solver(
-    const ContainerID dest, const std::vector<Assign>& src1,
-    const std::vector<Assign>& src2) const {
+Result ActionMoveSolver::run_byte_rotate_merge_solver(const ContainerID dest,
+                                                      const std::vector<Assign> &src1,
+                                                      const std::vector<Assign> &src2) const {
     return run_byte_rotate_merge_symbolic_bitvec_solver(dest, src1, src2);
 }
 
@@ -513,8 +512,8 @@ Result ActionMoveSolver::run_byte_rotate_merge_solver(
 // There can only be up to 2 shifts, and per each shift, only one source, and ad_or_const
 // data must all have the same shifts in src1. (no need to check this, because we
 // assume it's always possible).
-Result ActionMoveSolver::try_byte_rotate_merge(
-    const ContainerID dest, const RotateClassifiedAssigns& assigns) const {
+Result ActionMoveSolver::try_byte_rotate_merge(const ContainerID dest,
+                                               const RotateClassifiedAssigns &assigns) const {
     std::stringstream ss;
     // more than two different shift offsets.
     if (assigns.size() > 2) {
@@ -523,8 +522,8 @@ Result ActionMoveSolver::try_byte_rotate_merge(
     }
 
     // non-byte-aligned shifts not possible for byte_rotate_merge.
-    for (const auto& offset_assigns : assigns) {
-        const int& offset = offset_assigns.first;
+    for (const auto &offset_assigns : assigns) {
+        const int &offset = offset_assigns.first;
         if (offset % 8 != 0) {
             ss << "dest " << dest << " has non-byte-shiftable source offset: " << offset;
             return Result(Error(ErrorCode::non_rot_aligned_and_non_byte_shiftable, ss.str()));
@@ -549,7 +548,7 @@ Result ActionMoveSolver::try_byte_rotate_merge(
     } else {
         // when there's two sets of different-offset assignments,
         // each can only have one container source.
-        for (const auto& offset_assign : assigns) {
+        for (const auto &offset_assign : assigns) {
             SourceClassifiedAssigns sources = classify_by_sources(offset_assign.second);
             if (sources.n_sources() > 1) {
                 ss << "too many container sources for dest " << dest;
@@ -564,8 +563,8 @@ Result ActionMoveSolver::try_byte_rotate_merge(
 }
 
 /// try to solve this assignment using bitmasked-set
-Result ActionMoveSolver::try_bitmasked_set(
-    const ContainerID dest, const RotateClassifiedAssigns& assigns) const {
+Result ActionMoveSolver::try_bitmasked_set(const ContainerID dest,
+                                           const RotateClassifiedAssigns &assigns) const {
     std::stringstream err_msg;
     if (assigns.size() > 1 || !assigns.count(0)) {
         err_msg << "container " << dest << " has unaligned aligned sources";
@@ -574,24 +573,24 @@ Result ActionMoveSolver::try_bitmasked_set(
     const auto source_classified = classify_by_sources(assigns.begin()->second);
     if (source_classified.n_sources() == 1) {
         bitvec mask;
-        for (const auto& assign : source_classified.get_src(1)) {
+        for (const auto &assign : source_classified.get_src(1)) {
             mask.setrange(assign.dst.range.lo, assign.dst.range.size());
         }
-        const auto& src1 = source_classified.get_src(1).begin()->src.container;
+        const auto &src1 = source_classified.get_src(1).begin()->src.container;
         return Result(new BitmaskedSet(dest, src1, dest, mask));
     } else if (source_classified.n_sources() == 2) {
-        const auto* src1 = &source_classified.get_src(1);
-        const auto* src2 = &source_classified.get_src(2);
+        const auto *src1 = &source_classified.get_src(1);
+        const auto *src2 = &source_classified.get_src(2);
         // always use src2 as background, i.e., prefer src2 to be the same container as dest.
         if (!src1->front().src.is_ad_or_const && src1->front().src.container == dest) {
             std::swap(src1, src2);
         }
         // all bits in destination that will be set.
         bitvec set_bits;
-        for (const auto& assign : assigns.at(0)) {
+        for (const auto &assign : assigns.at(0)) {
             set_bits.setrange(assign.dst.range.lo, assign.dst.range.size());
         }
-        const auto& live_bits = specs_i.at(dest).live;
+        const auto &live_bits = specs_i.at(dest).live;
         for (int i = 0; i < specs_i.at(dest).size; i++) {
             if (live_bits[i] && !set_bits[i]) {
                 // if there are live bits that are not set by assignments in this action,
@@ -605,12 +604,11 @@ Result ActionMoveSolver::try_bitmasked_set(
         }
         // mask computed from src1
         bitvec mask;
-        for (const auto& assign : *src1) {
+        for (const auto &assign : *src1) {
             mask.setrange(assign.dst.range.lo, assign.dst.range.size());
         }
         return Result(
-            new BitmaskedSet(
-                    dest, src1->front().src.container, src2->front().src.container, mask));
+            new BitmaskedSet(dest, src1->front().src.container, src2->front().src.container, mask));
     } else {
         err_msg << "destination " << dest
                 << " has too many sources: " << source_classified.n_sources();
@@ -618,9 +616,8 @@ Result ActionMoveSolver::try_bitmasked_set(
     }
 }
 
-const RotateClassifiedAssigns* ActionMoveSolver::apply_unallocated_src_optimization(
-        const ContainerID dest,
-        const RotateClassifiedAssigns& offset_assigns) {
+const RotateClassifiedAssigns *ActionMoveSolver::apply_unallocated_src_optimization(
+    const ContainerID dest, const RotateClassifiedAssigns &offset_assigns) {
     // optimization requirement: must have unallocated phv source and ad_or_const source.
     if (src_unallocated_bits.at(dest).empty() || !offset_assigns.count(0)) {
         return &offset_assigns;
@@ -645,7 +642,7 @@ const RotateClassifiedAssigns* ActionMoveSolver::apply_unallocated_src_optimizat
         c = ContainerID("$unallocated");
         specs_i[*c] = ContainerSpec{dest_sz, bitvec()};
     }
-    auto* rst = new RotateClassifiedAssigns(offset_assigns);
+    auto *rst = new RotateClassifiedAssigns(offset_assigns);
     for (const int idx : src_unallocated_bits.at(dest)) {
         const auto dst_bit = make_container_operand(dest, StartLen(idx, 1));
         const auto src_bit =
@@ -661,12 +658,12 @@ Result ActionMoveSolver::solve() {
     if (auto err = validate_input()) {
         return Result(*err);
     }
-    std::vector<const Instruction*> instructions;
-    for (const auto& kv : dest_assigns_i) {
+    std::vector<const Instruction *> instructions;
+    for (const auto &kv : dest_assigns_i) {
         ErrorCode code = ErrorCode::unsat;
         std::stringstream ss;
         ContainerID dest = kv.first;
-        const auto& offset_assigns = *apply_unallocated_src_optimization(dest, kv.second);
+        const auto &offset_assigns = *apply_unallocated_src_optimization(dest, kv.second);
         if (offset_assigns.empty()) {
             continue;
         }
@@ -713,8 +710,8 @@ Result ActionMochaSolver::solve() {
     if (auto err = check_whole_container_set_with_none_source_allocated()) {
         return Result(*err);
     }
-    std::vector<const Instruction*> instructions;
-    for (const auto& dest_assigns : dest_assigns_i) {
+    std::vector<const Instruction *> instructions;
+    for (const auto &dest_assigns : dest_assigns_i) {
         auto rst = try_container_set(dest_assigns.first, dest_assigns.second);
         if (rst.ok()) {
             LOG5("synthesized with container-set: " << rst.instructions.front()->to_cstring());
@@ -735,13 +732,13 @@ Result ActionDarkSolver::solve() {
         return Result(*err);
     }
     std::stringstream ss;
-    std::vector<const Instruction*> instructions;
-    for (const auto& dest_assigns : dest_assigns_i) {
-        const auto& dest = dest_assigns.first;
-        const auto& offset_assigns = dest_assigns.second;
+    std::vector<const Instruction *> instructions;
+    for (const auto &dest_assigns : dest_assigns_i) {
+        const auto &dest = dest_assigns.first;
+        const auto &offset_assigns = dest_assigns.second;
         auto rst = try_container_set(dest, offset_assigns);
         if (rst.ok()) {
-            const auto& source_classified = classify_by_sources(offset_assigns.at(0));
+            const auto &source_classified = classify_by_sources(offset_assigns.at(0));
             if (!source_classified.ad_or_const.empty()) {
                 ss << "dark container destination " << dest
                    << " has ad/const source: " << offset_assigns.at(0);
@@ -756,7 +753,7 @@ Result ActionDarkSolver::solve() {
     return Result(instructions);
 }
 
-std::ostream& operator<<(std::ostream& s, const Operand& c) {
+std::ostream &operator<<(std::ostream &s, const Operand &c) {
     if (c.is_ad_or_const) {
         s << "ad_or_const";
     } else {
@@ -765,14 +762,14 @@ std::ostream& operator<<(std::ostream& s, const Operand& c) {
     return s;
 }
 
-std::ostream& operator<<(std::ostream& s, const Assign& c) {
+std::ostream &operator<<(std::ostream &s, const Assign &c) {
     s << c.dst << " = " << c.src;
     return s;
 }
 
-std::ostream& operator<<(std::ostream& s, const std::vector<Assign>& c) {
+std::ostream &operator<<(std::ostream &s, const std::vector<Assign> &c) {
     s << "{\n";
-    for (const auto& v : c) {
+    for (const auto &v : c) {
         s << "\t" << v << "\n";
     }
     s << "}";

@@ -10,25 +10,27 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include <sstream>
-#include "bf-p4c/arch/bridge_metadata.h"
 #include "bf-p4c/common/alias.h"
+
+#include <sstream>
+
+#include "bf-p4c/arch/bridge_metadata.h"
 #include "bf-p4c/common/ir_utils.h"
 
-Visitor::profile_t FindExpressionsForFields::init_apply(const IR::Node* root) {
+Visitor::profile_t FindExpressionsForFields::init_apply(const IR::Node *root) {
     profile_t rv = Inspector::init_apply(root);
     fieldNameToExpressionsMap.clear();
     return rv;
 }
 
-bool FindExpressionsForFields::preorder(const IR::HeaderOrMetadata* h) {
+bool FindExpressionsForFields::preorder(const IR::HeaderOrMetadata *h) {
     LOG5("Header: " << h->name);
     LOG5("Header type: " << h->type);
     for (auto f : h->type->fields) {
         if (auto hs = h->to<IR::HeaderStack>()) {
             for (int i = 0; i < hs->size; i++) {
                 // add every header in header stack
-                cstring name = h->name + "[" + cstring::to_cstring(i)  + "]." + f->name;
+                cstring name = h->name + "[" + cstring::to_cstring(i) + "]." + f->name;
                 if (name.endsWith("$always_deparse") ||
                     name.endsWith(BFN::BRIDGED_MD_INDICATOR.string_view()))
                     continue;
@@ -38,12 +40,10 @@ bool FindExpressionsForFields::preorder(const IR::HeaderOrMetadata* h) {
                     ftype = field->type;
                 else
                     BUG("Couldn't find header stack field %s in %s", f->name, hs->name);
-                IR::Member* mem =
-                    new IR::Member(
-                        ftype,
-                        new IR::HeaderStackItemRef(
-                            new IR::ConcreteHeaderRef(h), new IR::Constant(i)),
-                        f->name);
+                IR::Member *mem = new IR::Member(
+                    ftype,
+                    new IR::HeaderStackItemRef(new IR::ConcreteHeaderRef(h), new IR::Constant(i)),
+                    f->name);
                 fieldNameToExpressionsMap[name] = mem;
                 LOG5("  Added field: " << name << ", " << mem);
             }
@@ -53,7 +53,7 @@ bool FindExpressionsForFields::preorder(const IR::HeaderOrMetadata* h) {
             if (name.endsWith("$always_deparse") ||
                 name.endsWith(BFN::BRIDGED_MD_INDICATOR.string_view()))
                 continue;
-            IR::Member* mem = gen_fieldref(h, f->name);
+            IR::Member *mem = gen_fieldref(h, f->name);
             if (!mem) continue;
             fieldNameToExpressionsMap[name] = mem;
             LOG5("  Added field: " << name << ", " << mem);
@@ -61,8 +61,8 @@ bool FindExpressionsForFields::preorder(const IR::HeaderOrMetadata* h) {
     }
     if (auto hs = h->type->to<IR::HeaderStack>()) {
         for (int i = 0; i < hs->size; i++) {
-            cstring name = h->name + "[" + cstring::to_cstring(i)  + "].$valid";
-            IR::Member* mem = new IR::Member(
+            cstring name = h->name + "[" + cstring::to_cstring(i) + "].$valid";
+            IR::Member *mem = new IR::Member(
                 IR::Type_Bits::get(1),
                 new IR::HeaderStackItemRef(new IR::ConcreteHeaderRef(h), new IR::Constant(i)),
                 "$valid");
@@ -73,8 +73,8 @@ bool FindExpressionsForFields::preorder(const IR::HeaderOrMetadata* h) {
         }
     } else if (h->type->is<IR::Type_Header>()) {
         cstring name = h->name + ".$valid"_cs;
-        IR::Member* mem = new IR::Member(IR::Type_Bits::get(1),
-                new IR::ConcreteHeaderRef(h), "$valid");
+        IR::Member *mem =
+            new IR::Member(IR::Type_Bits::get(1), new IR::ConcreteHeaderRef(h), "$valid");
         if (mem) {
             fieldNameToExpressionsMap[name] = mem;
             LOG5("  Added field: " << name << ", " << mem);
@@ -83,43 +83,48 @@ bool FindExpressionsForFields::preorder(const IR::HeaderOrMetadata* h) {
     return true;
 }
 
-Visitor::profile_t ReplaceAllAliases::init_apply(const IR::Node* root) {
+Visitor::profile_t ReplaceAllAliases::init_apply(const IR::Node *root) {
     if (LOGGING(3)) {
         LOG1("    All aliasing fields: ");
         for (auto &kv : pragmaAlias.getAliasMap()) {
             std::stringstream ss;
             if (kv.second.range)
                 ss << "[" << kv.second.range->hi << ":" << kv.second.range->lo << "]";
-            LOG1("      " << kv.first << " -> " << kv.second.field << ss.str()); } }
+            LOG1("      " << kv.first << " -> " << kv.second.field << ss.str());
+        }
+    }
     return Transform::init_apply(root);
 }
 
 // make hw_constrained_fields visible to this Transform
-IR::Node* ReplaceAllAliases::preorder(IR::BFN::Pipe* pipe) {
+IR::Node *ReplaceAllAliases::preorder(IR::BFN::Pipe *pipe) {
     visit(pipe->thread[INGRESS].hw_constrained_fields);
     visit(pipe->thread[EGRESS].hw_constrained_fields);
     return pipe;
 }
 
-IR::Node* ReplaceAllAliases::preorder(IR::Expression* expr) {
-    auto* f = phv.field(expr);
+IR::Node *ReplaceAllAliases::preorder(IR::Expression *expr) {
+    auto *f = phv.field(expr);
     if (!f) {
         LOG4("    Field not found for expression: " << expr);
-        return expr; }
+        return expr;
+    }
 
     // Determine alias source fields
-    auto& aliasMap = pragmaAlias.getAliasMap();
+    auto &aliasMap = pragmaAlias.getAliasMap();
     if (!aliasMap.count(f->name)) {
         LOG4("    Field " << f->name << " not part of any aliasing.");
-        return expr; }
-    auto* ixbarread = expr->to<IR::MAU::TableKey>();
+        return expr;
+    }
+    auto *ixbarread = expr->to<IR::MAU::TableKey>();
     if (ixbarread) {
         LOG4("    Expression " << expr << " is an input xbar read.");
-        return expr; }
+        return expr;
+    }
 
     // replacementField is the alias destination field
     auto destInfo = aliasMap.at(f->name);
-    const PHV::Field* replacementField = phv.field(destInfo.field);
+    const PHV::Field *replacementField = phv.field(destInfo.field);
     CHECK_NULL(replacementField);
     // If this is a HardwareConstraintField and the target doesn't exist; don't make any change.
     if (getParent<IR::BFN::HardwareConstrainedField>() &&
@@ -133,29 +138,29 @@ IR::Node* ReplaceAllAliases::preorder(IR::Expression* expr) {
     //         "Expression not found %1%", replacementField->name);
 
     // replacementExpression is the expression corresponding to the alias destination field
-    const IR::Member* replacementMember = fieldExpressions.at(replacementField->name);
+    const IR::Member *replacementMember = fieldExpressions.at(replacementField->name);
 
-    auto* sl = expr->to<IR::Slice>();
+    auto *sl = expr->to<IR::Slice>();
     if (sl) {
         if (f->size == replacementField->size) {
-            auto* newMember = new IR::BFN::AliasMember(replacementMember, sl->e0);
-            IR::Slice* newSlice = new IR::Slice(newMember, sl->getH(), sl->getL());
+            auto *newMember = new IR::BFN::AliasMember(replacementMember, sl->e0);
+            IR::Slice *newSlice = new IR::Slice(newMember, sl->getH(), sl->getL());
             LOG2("    Replaced A: " << expr << " -> " << newSlice);
             return newSlice;
         } else {
-            IR::Slice* destSlice = new IR::Slice(replacementMember, sl->getH(), sl->getL());
-            auto* newAliasSlice = new IR::BFN::AliasSlice(destSlice, sl);
+            IR::Slice *destSlice = new IR::Slice(replacementMember, sl->getH(), sl->getL());
+            auto *newAliasSlice = new IR::BFN::AliasSlice(destSlice, sl);
             LOG2("    Replaced B: " << expr << " -> " << newAliasSlice);
             return newAliasSlice;
         }
     } else {
         if (f->size == replacementField->size) {
-            auto* newMember = new IR::BFN::AliasMember(replacementMember, expr);
+            auto *newMember = new IR::BFN::AliasMember(replacementMember, expr);
             LOG2("    Replaced C: " << expr << " -> " << newMember);
             return newMember;
         } else {
-            IR::Slice* destSlice = new IR::Slice(replacementMember, f->size - 1, 0);
-            auto* newAliasSlice = new IR::BFN::AliasSlice(destSlice, expr);
+            IR::Slice *destSlice = new IR::Slice(replacementMember, f->size - 1, 0);
+            auto *newAliasSlice = new IR::BFN::AliasSlice(destSlice, expr);
             LOG2("    Replaced D: " << expr << " -> " << newAliasSlice);
             return newAliasSlice;
         }
@@ -166,41 +171,40 @@ inline cstring AddValidityBitSets::getFieldValidityName(cstring origName) {
     return origName + ".$valid";
 }
 
-Visitor::profile_t AddValidityBitSets::init_apply(const IR::Node* root) {
+Visitor::profile_t AddValidityBitSets::init_apply(const IR::Node *root) {
     aliasedFields.clear();
     actionToPOVMap.clear();
-    for (auto& kv : pragmaAlias.getAliasMap()) {
+    for (auto &kv : pragmaAlias.getAliasMap()) {
         const cstring validFieldName = getFieldValidityName(kv.first);
-        const PHV::Field* field = phv.field(validFieldName);
+        const PHV::Field *field = phv.field(validFieldName);
         if (!field) continue;
         aliasedFields[phv.field(kv.second.field)].insert(field);
-        LOG1("\tAliased field " << kv.second.field << " has a validity bit from "
-             << kv.first << " (" << field->name << ")");
+        LOG1("\tAliased field " << kv.second.field << " has a validity bit from " << kv.first
+                                << " (" << field->name << ")");
     }
     return Transform::init_apply(root);
 }
 
-IR::Node* AddValidityBitSets::preorder(IR::MAU::Instruction* inst) {
+IR::Node *AddValidityBitSets::preorder(IR::MAU::Instruction *inst) {
     if (inst->operands.size() == 0) return inst;
-    const PHV::Field* f = phv.field(inst->operands.at(0));
+    const PHV::Field *f = phv.field(inst->operands.at(0));
     if (!aliasedFields.count(f)) return inst;
-    auto* action = findContext<IR::MAU::Action>();
+    auto *action = findContext<IR::MAU::Action>();
     if (!action) return inst;
-    for (const auto* pov : aliasedFields.at(f))
-        actionToPOVMap[action->name].insert(pov);
+    for (const auto *pov : aliasedFields.at(f)) actionToPOVMap[action->name].insert(pov);
     return inst;
 }
 
-IR::Node* AddValidityBitSets::postorder(IR::MAU::Action* action) {
+IR::Node *AddValidityBitSets::postorder(IR::MAU::Action *action) {
     if (!actionToPOVMap.count(action->name)) return action;
-    for (const auto* f : actionToPOVMap.at(action->name)) {
-        auto* pov = phv.getTempVar(f);
+    for (const auto *f : actionToPOVMap.at(action->name)) {
+        auto *pov = phv.getTempVar(f);
         if (!pov) {
             LOG3("\t  Could not find POV corresponding to " << f->name);
             continue;
         }
-        auto* oneExpr = new IR::Constant(IR::Type_Bits::get(pov->type->width_bits()), 1);
-        auto* prim = new IR::MAU::Instruction("set"_cs, { pov, oneExpr });
+        auto *oneExpr = new IR::Constant(IR::Type_Bits::get(pov->type->width_bits()), 1);
+        auto *prim = new IR::MAU::Instruction("set"_cs, {pov, oneExpr});
         LOG1("\t  Add to action " << action->name << " : " << prim);
         action->action.push_back(prim);
     }

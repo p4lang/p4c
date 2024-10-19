@@ -12,29 +12,29 @@
 
 #include "bf-p4c/common/map_tables_to_actions.h"
 
-Visitor::profile_t MapTablesToActions::init_apply(const IR::Node* root) {
+Visitor::profile_t MapTablesToActions::init_apply(const IR::Node *root) {
     tableToActionsMap.clear();
     defaultActions.clear();
     actionMap.clear();
     return Inspector::init_apply(root);
 }
 
-const PHV::ActionSet& MapTablesToActions::getActionsForTable(const IR::MAU::Table* t) const {
+const PHV::ActionSet &MapTablesToActions::getActionsForTable(const IR::MAU::Table *t) const {
     BUG_CHECK(t, "Null table encountered");
     static const PHV::ActionSet emptySet;
     if (!tableToActionsMap.count(t)) return emptySet;
     return tableToActionsMap.at(t);
 }
 
-const PHV::ActionSet& MapTablesToActions::getDefaultActionsForTable(const IR::MAU::Table* t) const {
+const PHV::ActionSet &MapTablesToActions::getDefaultActionsForTable(const IR::MAU::Table *t) const {
     BUG_CHECK(t, "Null table encountered");
     static const PHV::ActionSet emptySet;
     if (!defaultActions.count(t)) return emptySet;
     return defaultActions.at(t);
 }
 
-std::optional<const IR::MAU::Table*>
-MapTablesToActions::getTableForAction(const IR::MAU::Action* act) const {
+std::optional<const IR::MAU::Table *> MapTablesToActions::getTableForAction(
+    const IR::MAU::Action *act) const {
     BUG_CHECK(act, "Null action encountered.");
     if (actionMap.count(act)) {
         return actionMap.at(act);
@@ -43,34 +43,30 @@ MapTablesToActions::getTableForAction(const IR::MAU::Action* act) const {
         // old IR::MAU::Action pointer. Using the clone_id instead is less efficient but resilient
         // over IR transformation.
         for (auto kv : actionMap) {
-            if (kv.first->clone_id == act->clone_id)
-                return kv.second;
+            if (kv.first->clone_id == act->clone_id) return kv.second;
         }
     }
     return std::nullopt;
 }
 
-bool MapTablesToActions::preorder(const IR::MAU::Table* t) {
+bool MapTablesToActions::preorder(const IR::MAU::Table *t) {
     for (auto kv : t->actions) {
-        const auto* action = kv.second;
+        const auto *action = kv.second;
         tableToActionsMap[t].insert(action);
         actionMap[action] = t;
         LOG6("\tAdd action " << action->name << " in table " << t->name);
-        if (action->miss_only() || action->init_default)
-            defaultActions[t].insert(kv.second);
+        if (action->miss_only() || action->init_default) defaultActions[t].insert(kv.second);
     }
     return true;
 }
 
-void MapTablesToActions::printTableActionsMap(
-        const MapTablesToActions::TableActionsMap& tblActMap,
-        cstring logMessage) const {
+void MapTablesToActions::printTableActionsMap(const MapTablesToActions::TableActionsMap &tblActMap,
+                                              cstring logMessage) const {
     LOG5("\t  " << logMessage);
     for (auto kv : tblActMap) {
         std::stringstream ss;
         ss << "\t\t" << kv.first->name << "\t:\t";
-        for (const auto* act : kv.second)
-            ss << act->name << " ";
+        for (const auto *act : kv.second) ss << act->name << " ";
         LOG5(ss.str());
     }
 }
@@ -80,7 +76,6 @@ void MapTablesToActions::end_apply() {
         printTableActionsMap(tableToActionsMap, "Printing tables to actions map"_cs);
         printTableActionsMap(defaultActions, "Printing tables to default actions map"_cs);
         LOG5("Printing action to tables map");
-        for (auto kv : actionMap)
-            LOG5("\t" << kv.first->name << "\t:\t" << kv.second->name);
+        for (auto kv : actionMap) LOG5("\t" << kv.first->name << "\t:\t" << kv.second->name);
     }
 }

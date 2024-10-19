@@ -10,22 +10,22 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+#include "bf-p4c/mau/dynamic_dep_metrics.h"
+
 #include <array>
 #include <initializer_list>
 #include <optional>
 
 #include <boost/algorithm/string/replace.hpp>
 
-#include "gtest/gtest.h"
-
-#include "bf-p4c/common/header_stack.h"
-#include "bf-p4c/phv/phv_fields.h"
 #include "bf-p4c/common/field_defuse.h"
-#include "bf-p4c/mau/dynamic_dep_metrics.h"
+#include "bf-p4c/common/header_stack.h"
+#include "bf-p4c/common/multiple_apply.h"
 #include "bf-p4c/mau/instruction_selection.h"
 #include "bf-p4c/mau/table_dependency_graph.h"
-#include "bf-p4c/common/multiple_apply.h"
+#include "bf-p4c/phv/phv_fields.h"
 #include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "gtest/gtest.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
@@ -37,8 +37,8 @@ class DynamicDepTest : public TofinoBackendTest {};
 
 namespace {
 
-std::optional<TofinoPipeTestCase> createDynamicDepMetricsCase(const std::string& ingressSource,
-        const std::string& egressSource) {
+std::optional<TofinoPipeTestCase> createDynamicDepMetricsCase(const std::string &ingressSource,
+                                                              const std::string &egressSource) {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
 header H1
 {
@@ -104,7 +104,7 @@ V1Switch(parse(), verifyChecksum(), mau(), my_egress(),
     boost::replace_first(source, "%INGRESS_MAU%", ingressSource);
     boost::replace_first(source, "%EGRESS_MAU%", egressSource);
 
-    auto& options = BackendOptions();
+    auto &options = BackendOptions();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.target = "tofino"_cs;
     options.arch = "v1model"_cs;
@@ -113,29 +113,26 @@ V1Switch(parse(), verifyChecksum(), mau(), my_egress(),
     return TofinoPipeTestCase::createWithThreadLocalInstances(source);
 }
 
-const IR::BFN::Pipe *runMockPasses(const IR::BFN::Pipe* pipe,
-        PhvInfo& phv, CalculateNextTableProp &ntp, ControlPathwaysToTable &paths,
-        DependencyGraph &dg) {
+const IR::BFN::Pipe *runMockPasses(const IR::BFN::Pipe *pipe, PhvInfo &phv,
+                                   CalculateNextTableProp &ntp, ControlPathwaysToTable &paths,
+                                   DependencyGraph &dg) {
     auto options = new BFN_Options();  // dummy options used in Pass
     ReductionOrInfo red_info;
-    PassManager quick_backend = {
-        new MultipleApply(BackendOptions()),
-        new CollectHeaderStackInfo,
-        new CollectPhvInfo(phv),
-        new InstructionSelection(*options, phv, red_info),
-        new CollectPhvInfo(phv),
-        &ntp,
-        &paths,
-        new FindDependencyGraph(phv, dg)
-    };
+    PassManager quick_backend = {new MultipleApply(BackendOptions()),
+                                 new CollectHeaderStackInfo,
+                                 new CollectPhvInfo(phv),
+                                 new InstructionSelection(*options, phv, red_info),
+                                 new CollectPhvInfo(phv),
+                                 &ntp,
+                                 &paths,
+                                 new FindDependencyGraph(phv, dg)};
     return pipe->apply(quick_backend);
 }
 
 }  // namespace
 
 TEST_F(DynamicDepTest, DownwardProp1) {
-    auto test = createDynamicDepMetricsCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createDynamicDepMetricsCase(P4_SOURCE(P4Headers::NONE, R"(
     action a1() {
         headers.h1.f1 = 0;
     }
@@ -200,7 +197,7 @@ TEST_F(DynamicDepTest, DownwardProp1) {
     }
 
         )"),
-        P4_SOURCE(P4Headers::NONE, R"(
+                                            P4_SOURCE(P4Headers::NONE, R"(
 
     action noop() {} 
 
@@ -230,7 +227,7 @@ TEST_F(DynamicDepTest, DownwardProp1) {
 
     const IR::MAU::Table *t1, *t2, *t3, *t4, *t5, *t6, *e1;
     t1 = t2 = t3 = t4 = t5 = t6 = e1 = nullptr;
-    for (const auto& kv : dg.stage_info) {
+    for (const auto &kv : dg.stage_info) {
         cstring table_name = kv.first->externalName() + ""_cs;
         if (table_name == ".t1") {
             t1 = kv.first;
@@ -244,7 +241,7 @@ TEST_F(DynamicDepTest, DownwardProp1) {
             t5 = kv.first;
         } else if (table_name == ".t6") {
             t6 = kv.first;
-        } else if (table_name  == ".e1") {
+        } else if (table_name == ".e1") {
             e1 = kv.first;
         }
     }
@@ -265,8 +262,8 @@ TEST_F(DynamicDepTest, DownwardProp1) {
     EXPECT_EQ(scores.second, 2);
 
     placed_tables.emplace(t1);
-    ddm.update_placed_tables([&placed_tables](const IR::MAU::Table *tbl)->bool {
-        return placed_tables.count(tbl); });
+    ddm.update_placed_tables(
+        [&placed_tables](const IR::MAU::Table *tbl) -> bool { return placed_tables.count(tbl); });
 
     scores = ddm.get_downward_prop_score(t2, e1);
     EXPECT_EQ(scores.first, 2);
@@ -278,8 +275,7 @@ TEST_F(DynamicDepTest, DownwardProp1) {
 }
 
 TEST_F(DynamicDepTest, CanPlaceCDS) {
-    auto test = createDynamicDepMetricsCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createDynamicDepMetricsCase(P4_SOURCE(P4Headers::NONE, R"(
     action a1(bit<8> p) {
         headers.h1.f1 = p;
     }
@@ -353,7 +349,7 @@ TEST_F(DynamicDepTest, CanPlaceCDS) {
         }
     }
         )"),
-        P4_SOURCE(P4Headers::NONE, R"(apply { })"));
+                                            P4_SOURCE(P4Headers::NONE, R"(apply { })"));
 
     ASSERT_TRUE(test);
 
@@ -369,7 +365,7 @@ TEST_F(DynamicDepTest, CanPlaceCDS) {
 
     const IR::MAU::Table *t1, *t2, *t3, *t3_sub1, *t3_sub2, *t4, *t4_sub1;
     t1 = t2 = t3_sub1 = t3_sub2 = t4 = t4_sub1 = nullptr;
-    for (const auto& kv : dg.stage_info) {
+    for (const auto &kv : dg.stage_info) {
         cstring table_name = kv.first->externalName() + ""_cs;
         if (table_name == ".t1") {
             t1 = kv.first;
@@ -395,7 +391,6 @@ TEST_F(DynamicDepTest, CanPlaceCDS) {
     EXPECT_NE(t3_sub2, nullptr);
     EXPECT_NE(t4, nullptr);
     EXPECT_NE(t4_sub1, nullptr);
-
 
     EXPECT_TRUE(ddm.can_place_cds_in_stage(t3, placed_tables));
     EXPECT_TRUE(ddm.can_place_cds_in_stage(t4, placed_tables));

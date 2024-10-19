@@ -13,10 +13,8 @@
 #ifndef BF_P4C_PARDE_ADD_METADATA_POV_H_
 #define BF_P4C_PARDE_ADD_METADATA_POV_H_
 
-#include "ir/ir.h"
 #include "bf-p4c/phv/phv_fields.h"
-
-
+#include "ir/ir.h"
 
 /**
  * \ingroup parde
@@ -31,7 +29,6 @@
 class AddMetadataPOV : public Transform {
     const PhvInfo &phv;
     const IR::BFN::Deparser *dp = nullptr;
-
 
     bool equiv(const IR::Expression *a, const IR::Expression *b);
     static IR::MAU::Primitive *create_pov_write(const IR::Expression *povBit, bool validate);

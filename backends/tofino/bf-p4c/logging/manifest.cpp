@@ -10,10 +10,13 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+#include "manifest.h"
+
 #include <libgen.h>
+
 #include <cstdlib>
-#include <string>
 #include <filesystem>
+#include <string>
 
 #include "../git_sha_version.h"  // for BF_P4C_GIT_SHA
 #include "backends/graphs/controls.h"
@@ -22,11 +25,10 @@
 #include "bf-p4c/common/run_id.h"
 #include "bf-p4c/version.h"  // for BF_P4C_VERSION
 #include "ir/ir.h"
-#include "manifest.h"
 
 using Manifest = Logging::Manifest;
 
-void Manifest::postorder(const IR::BFN::TnaParser* const parser) {
+void Manifest::postorder(const IR::BFN::TnaParser *const parser) {
     const auto pipeName = m_pipes.at(m_pipeId);
     if (parser && (m_pipes.size() == 1 || parser->pipeName == pipeName) && parser->name) {
         CHECK_NULL(m_refMap);
@@ -47,7 +49,7 @@ void Manifest::postorder(const IR::BFN::TnaParser* const parser) {
     }
 }
 
-void Manifest::postorder(const IR::BFN::TnaControl* const control) {
+void Manifest::postorder(const IR::BFN::TnaControl *const control) {
     const auto controlName = (control ? control->name.name : ""_cs);
     const auto pipeName = m_pipes.at(m_pipeId);
     if (control && control->pipeName == pipeName && controlName) {
@@ -69,7 +71,7 @@ void Manifest::postorder(const IR::BFN::TnaControl* const control) {
     }
 }
 
-Manifest::InputFiles::InputFiles(const BFN_Options& options) {
+Manifest::InputFiles::InputFiles(const BFN_Options &options) {
     std::filesystem::path filePath(options.file);
     std::filesystem::path rootPath = filePath.parent_path();
 
@@ -77,23 +79,25 @@ Manifest::InputFiles::InputFiles(const BFN_Options& options) {
     m_rootPath = rootPath.string();
 
     // walk the command line arguments and collect includes
-    char* const ppFlags = strndup(options.preprocessor_options.c_str(),
-                                        options.preprocessor_options.size());
-    char* brkt;
-    const char* const sep = " ";
-    for (const auto* word = strtok_r(ppFlags, sep, &brkt);
-         word;
+    char *const ppFlags =
+        strndup(options.preprocessor_options.c_str(), options.preprocessor_options.size());
+    char *brkt;
+    const char *const sep = " ";
+    for (const auto *word = strtok_r(ppFlags, sep, &brkt); word;
          word = strtok_r(nullptr, sep, &brkt)) {
         if ('0' == word[0]) {
-            if      ('I' == word[1]) m_includePaths.insert(cstring(word+2));
-            else if ('D' == word[1])      m_defines.insert(cstring(word+2));
-            else if ('U' == word[1])      m_defines.erase( cstring(word+2));
+            if ('I' == word[1])
+                m_includePaths.insert(cstring(word + 2));
+            else if ('D' == word[1])
+                m_defines.insert(cstring(word + 2));
+            else if ('U' == word[1])
+                m_defines.erase(cstring(word + 2));
         }
     }
     free(ppFlags);
 }
 
-void Manifest::InputFiles::serialize(Writer& writer) const {
+void Manifest::InputFiles::serialize(Writer &writer) const {
     writer.Key("source_files");
     writer.StartObject();
     writer.Key("src_root");
@@ -122,8 +126,10 @@ void Manifest::serialize() {
     writer.Key("schema_version");
     writer.String(MANIFEST_SCHEMA_VERSION);
     writer.Key("target");
-    if (m_options.target) writer.String(m_options.target.c_str());
-    else                  writer.String("tofino");
+    if (m_options.target)
+        writer.String(m_options.target.c_str());
+    else
+        writer.String("tofino");
     writer.Key("build_date");
     const time_t now = time(NULL);
     char build_date[1024];
@@ -147,8 +153,8 @@ void Manifest::serialize() {
     cstring program_name = m_options.programName + ".p4"_cs;
     writer.String(program_name.c_str());
     writer.Key("p4_version");
-    writer.String((m_options.langVersion == BFN_Options::FrontendVersion::P4_14) ?
-                  "p4-14" : "p4-16");
+    writer.String((m_options.langVersion == BFN_Options::FrontendVersion::P4_14) ? "p4-14"
+                                                                                 : "p4-16");
 
     if (m_eventLogPath.size() > 0) {
         writer.Key("event_log_file");
@@ -172,7 +178,7 @@ void Manifest::serialize() {
     m_manifestStream.close();
 }
 
-void Manifest::serialize_target_data(Writer& writer) {
+void Manifest::serialize_target_data(Writer &writer) {
     writer.Key("target_data");
     writer.StartObject();
 
@@ -186,8 +192,7 @@ void Manifest::serialize_target_data(Writer& writer) {
             writer.String("PISA");
     }
 
-    if (m_pipelines.size() == 0)
-        return;
+    if (m_pipelines.size() == 0) return;
 
     writer.Key("architectureConfig");
     writer.StartObject();
@@ -197,7 +202,7 @@ void Manifest::serialize_target_data(Writer& writer) {
         threads += m_pipelines.getPipeline(pipe_idx).threads.size();
     }
     BUG_CHECK(threads > 0, "No pipes found!");
-    const auto numPorts = std::to_string(64/threads*2) + "q";
+    const auto numPorts = std::to_string(64 / threads * 2) + "q";
     writer.String(numPorts.c_str());
     writer.Key("pipes");
     writer.StartArray();
@@ -205,7 +210,7 @@ void Manifest::serialize_target_data(Writer& writer) {
         writer.StartObject();
         writer.Key("pipe");
         writer.Int(pipe.first);
-        for (auto gress : { INGRESS, EGRESS }) {
+        for (auto gress : {INGRESS, EGRESS}) {
             const auto thread = m_pipelines.getPipeline(pipe.first).threads.find(gress);
             if (thread != m_pipelines.getPipeline(pipe.first).threads.end()) {
                 writer.Key(gress == INGRESS ? "ingress" : "egress");
@@ -215,19 +220,19 @@ void Manifest::serialize_target_data(Writer& writer) {
                 writer.Key("nextControl");
                 writer.StartArray();
                 switch (gress) {
-                  case INGRESS:
-                    // ingress can go to any other pipe's egress
-                    for (auto &other_pipe : m_pipes)
-                        sendTo(writer, other_pipe.first, EGRESS);
-                    break;
-                  case EGRESS:
-                    if (pipe.first != 0) {
-                        // pipe 0 egress always goes out
-                        // any other pipe goes to its ingress
-                        sendTo(writer, pipe.first, INGRESS);
-                    }
-                    break;
-                  default: break;
+                    case INGRESS:
+                        // ingress can go to any other pipe's egress
+                        for (auto &other_pipe : m_pipes) sendTo(writer, other_pipe.first, EGRESS);
+                        break;
+                    case EGRESS:
+                        if (pipe.first != 0) {
+                            // pipe 0 egress always goes out
+                            // any other pipe goes to its ingress
+                            sendTo(writer, pipe.first, INGRESS);
+                        }
+                        break;
+                    default:
+                        break;
                 }
                 writer.EndArray();
                 writer.EndObject();
@@ -242,7 +247,7 @@ void Manifest::serialize_target_data(Writer& writer) {
 }
 
 /// serialize all the output in an array of pipes ("pipes" : [ OutputFiles ])
-void Manifest::serializePipes(Writer& writer) {
+void Manifest::serializePipes(Writer &writer) {
     writer.Key("pipes");
     writer.StartArray();  // for each pipe
     for (auto &pipeOutput : m_pipeOutputs) {
@@ -266,7 +271,7 @@ void Manifest::serializePipes(Writer& writer) {
     writer.EndArray();
 }
 
-void Manifest::sendTo(Writer& writer, const int pipe, const gress_t gress) {
+void Manifest::sendTo(Writer &writer, const int pipe, const gress_t gress) {
     const auto thread = m_pipelines.getPipeline(pipe).threads.find(gress);
     if (thread != m_pipelines.getPipeline(pipe).threads.end()) {
         writer.StartObject();
@@ -278,7 +283,7 @@ void Manifest::sendTo(Writer& writer, const int pipe, const gress_t gress) {
     }
 }
 
-void Manifest::GraphOutput::serialize(Writer& writer) const {
+void Manifest::GraphOutput::serialize(Writer &writer) const {
     writer.StartObject();
     writer.Key("path");
     writer.String(m_path.c_str());
@@ -291,15 +296,17 @@ void Manifest::GraphOutput::serialize(Writer& writer) const {
     writer.EndObject();
 }
 
-void Manifest::OutputFiles::serialize(Writer& writer) const {
+void Manifest::OutputFiles::serialize(Writer &writer) const {
     writer.Key("files");
     writer.StartObject();
     // Should be overwritten by assembler or driver on successful compile
     writer.Key("context");
     writer.StartObject();  // Abe`s note: is this a bug?  I copied it verbatim from the legacy code.
     writer.Key("path");
-    if (m_context) writer.String(m_context);
-    else           writer.String("");
+    if (m_context)
+        writer.String(m_context);
+    else
+        writer.String("");
     writer.EndObject();
 
     // Should be written by assembler or driver on successful compile
@@ -342,8 +349,8 @@ void Manifest::OutputFiles::serialize(Writer& writer) const {
     writer.EndObject();  // files
 }
 
-bool Manifest::PathCmp::operator()(const PathAndType& LHS, const PathAndType& RHS) const {
-    const auto  left = std::string(LHS.first) + std::string(LHS.second);
+bool Manifest::PathCmp::operator()(const PathAndType &LHS, const PathAndType &RHS) const {
+    const auto left = std::string(LHS.first) + std::string(LHS.second);
     const auto right = std::string(RHS.first) + std::string(RHS.second);
     return std::less<std::string>()(left, right);
 }
@@ -352,7 +359,7 @@ Manifest::Manifest() : m_options(BackendOptions()), m_programInputs(BackendOptio
     std::filesystem::path path = m_options.outputDir.string_view();
     path /= "manifest.json";
     m_manifestStream.open(path, std::ofstream::out);
-    if (! m_manifestStream)
+    if (!m_manifestStream)
         std::cerr << "Failed to open manifest file ''" << path.string() << "'' for writing."
                   << std::endl;
 }
@@ -363,7 +370,7 @@ Manifest::~Manifest() {  //  dtor
     m_manifestStream.close();
 }
 
-Manifest::OutputFiles* Manifest::getPipeOutputs(const unsigned int pipe) {
+Manifest::OutputFiles *Manifest::getPipeOutputs(const unsigned int pipe) {
     const auto iterator = m_pipeOutputs.find(pipe);
     if (iterator != m_pipeOutputs.end()) return iterator->second;
     return m_pipeOutputs.emplace(pipe, new OutputFiles()).first->second;
@@ -382,19 +389,23 @@ void Manifest::setPipe(const int pipeID_in, const cstring pipe_name) {
 
 void Manifest::addGraph(const int pipe, const cstring graphType, const cstring graphName,
                         const gress_t gress, const cstring ext) {
-    const auto path = BFNContext::get().getOutputDirectory("graphs"_cs, pipe)
-        .substr(m_options.outputDir.size()+1) + "/" + graphName + ext;
-    getPipeOutputs(pipe) -> m_graphs.insert(GraphOutput(path, gress, graphType, ext));
+    const auto path = BFNContext::get()
+                          .getOutputDirectory("graphs"_cs, pipe)
+                          .substr(m_options.outputDir.size() + 1) +
+                      "/" + graphName + ext;
+    getPipeOutputs(pipe)->m_graphs.insert(GraphOutput(path, gress, graphType, ext));
 }
 
 void Manifest::addLog(const int pipe, const cstring logType, const cstring logName) {
-    const auto path = BFNContext::get().getOutputDirectory("logs"_cs, pipe)
-        .substr(m_options.outputDir.size()+1) + "/" + logName;
-    getPipeOutputs(pipe) -> m_logs.insert(PathAndType(path, logType));
+    const auto path = BFNContext::get()
+                          .getOutputDirectory("logs"_cs, pipe)
+                          .substr(m_options.outputDir.size() + 1) +
+                      "/" + logName;
+    getPipeOutputs(pipe)->m_logs.insert(PathAndType(path, logType));
 }
 
 /// Return the singleton object
-Manifest& Manifest::getManifest() {
+Manifest &Manifest::getManifest() {
     static Manifest instance;
     return instance;
 }

@@ -10,20 +10,23 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include <lib/bitvec.h>
 #include "desugar_varbit_extract.h"
-#include "frontends/common/constantFolding.h"
+
+#include <lib/bitvec.h>
+
 #include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/device.h"
 #include "bf-p4c/common/utils.h"
+#include "bf-p4c/device.h"
+#include "frontends/common/constantFolding.h"
 
 namespace BFN {
 
 /// Does the header type contain any varbit field?
-static bool has_varbit(const IR::Type_Header* hdr) {
+static bool has_varbit(const IR::Type_Header *hdr) {
     CHECK_NULL(hdr);
-    return std::any_of(hdr->fields.begin(), hdr->fields.end(),
-                [](const IR::StructField *fld) { return fld->type->is<IR::Type_Varbits>(); });
+    return std::any_of(hdr->fields.begin(), hdr->fields.end(), [](const IR::StructField *fld) {
+        return fld->type->is<IR::Type_Varbits>();
+    });
 }
 
 /**
@@ -35,13 +38,14 @@ struct ErrorOnUnsupportedVarbitUse : public Inspector {
     // To support the use of varbit field in the MAU add a few twists to
     // the problem (TODO).
 
-    bool preorder(const IR::Expression* expr) override {
+    bool preorder(const IR::Expression *expr) override {
         if (expr->type->is<IR::Type_Varbits>()) {
             auto control = findContext<IR::BFN::TnaControl>();
             if (control) {
                 fatal_error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                             "%1%: use of varbit field is only supported in parser and deparser "
-                            "currently", expr);
+                            "currently",
+                            expr);
             }
         }
 
@@ -50,9 +54,9 @@ struct ErrorOnUnsupportedVarbitUse : public Inspector {
 
     // TODO: When we enable assignment of varbits, we need to make sure the dead emit elimination
     // works correctly even with assignment.
-    bool preorder(const IR::MethodCallExpression* mc) override {
+    bool preorder(const IR::MethodCallExpression *mc) override {
         if (auto mem = mc->method->to<IR::Member>();
-                mem && mem->member == IR::Type_Header::setValid) {
+            mem && mem->member == IR::Type_Header::setValid) {
             auto hdr = mem->expr->type->to<IR::Type_Header>();
             BUG_CHECK(hdr, "setValid is called on non-header type %1%", mem->expr);
 
@@ -64,7 +68,8 @@ struct ErrorOnUnsupportedVarbitUse : public Inspector {
                             "valid rather than parsed, the value of the varbit field will always "
                             "be undefined.\n"
                             "Suggestion: if you need to set only non-varbit parts of the header, "
-                            "please split the header.", mc);
+                            "please split the header.",
+                            mc);
             }
         }
         return true;
@@ -72,11 +77,12 @@ struct ErrorOnUnsupportedVarbitUse : public Inspector {
 
     // TODO: When we enable assignment of varbits, we need to make sure the dead emit elimination
     // works correctly even with assignment.
-    bool preorder(const IR::AssignmentStatement* asgn) override {
+    bool preorder(const IR::AssignmentStatement *asgn) override {
         if (asgn->right->type->is<IR::Type_Varbits>()) {
             fatal_error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                         "%1%: cannot assign varbit field. The compiler currently does not "
-                        "support assigning values to varbit fields.", asgn->right);
+                        "support assigning values to varbit fields.",
+                        asgn->right);
         }
         if (auto hdr = asgn->right->type->to<IR::Type_Header>(); hdr && has_varbit(hdr)) {
             fatal_error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
@@ -84,33 +90,34 @@ struct ErrorOnUnsupportedVarbitUse : public Inspector {
                         "compiler currently does not support assigning values to varbit "
                         "fields. Therefore, a header that contains varbit cannot be assigned.\n"
                         "Suggestion: if you need to set only non-varbit parts of the header, "
-                        "please split the header.", asgn->right);
+                        "please split the header.",
+                        asgn->right);
         }
         return true;
     }
 };
 
 struct CollectVariables : public Inspector {
-    bool preorder(const IR::Expression* expr) override {
-        if (expr->is<IR::Member>() || expr->is<IR::Slice>() ||
-            expr->is<IR::TempVar>() || expr->is<IR::PathExpression>()) {
+    bool preorder(const IR::Expression *expr) override {
+        if (expr->is<IR::Member>() || expr->is<IR::Slice>() || expr->is<IR::TempVar>() ||
+            expr->is<IR::PathExpression>()) {
             rv.push_back(expr);
             return false;
         }
         return true;
     }
 
-    std::vector<const IR::Expression*> rv;
+    std::vector<const IR::Expression *> rv;
 
-    CollectVariables() { }
+    CollectVariables() {}
 };
 
 struct EvaluateForVar : public PassManager {
     struct SubstituteVar : public Transform {
-        const IR::Expression* var;
+        const IR::Expression *var;
         unsigned val;
 
-        IR::Node* preorder(IR::Expression* expr) override {
+        IR::Node *preorder(IR::Expression *expr) override {
             if (expr->equiv(*var)) {
                 auto width = var->type->width_bits();
                 auto constant = new IR::Constant(IR::Type::Bits::get(width), val);
@@ -120,17 +127,12 @@ struct EvaluateForVar : public PassManager {
             }
         }
 
-        SubstituteVar(const IR::Expression* var, unsigned val) :
-            var(var), val(val) { }
+        SubstituteVar(const IR::Expression *var, unsigned val) : var(var), val(val) {}
     };
 
-    EvaluateForVar(P4::ReferenceMap* rm, P4::TypeMap* tm,
-                   const IR::Expression* var, unsigned val) :
-            refMap(*rm), typeMap(*tm) {
-        addPasses({
-            new SubstituteVar(var, val),
-            new P4::ConstantFolding(&typeMap, false)
-        });
+    EvaluateForVar(P4::ReferenceMap *rm, P4::TypeMap *tm, const IR::Expression *var, unsigned val)
+        : refMap(*rm), typeMap(*tm) {
+        addPasses({new SubstituteVar(var, val), new P4::ConstantFolding(&typeMap, false)});
     }
 
     // ConstantFolding has side effects on typeMap, make these local copies
@@ -147,79 +149,71 @@ class CollectVarbitExtract : public Inspector {
     P4::TypeMap *typeMap;
 
  public:
-    std::map<const IR::ParserState*, const IR::BFN::TnaParser*> state_to_parser;
+    std::map<const IR::ParserState *, const IR::BFN::TnaParser *> state_to_parser;
 
-    std::map<const IR::ParserState*, const IR::Type_Header*> state_to_varbit_header;
+    std::map<const IR::ParserState *, const IR::Type_Header *> state_to_varbit_header;
     // Map to store if the varbit extract length is dynamic
-    std::map<cstring, ordered_set<const IR::ParserState*>> varbit_hdr_instance_to_variable_state;
+    std::map<cstring, ordered_set<const IR::ParserState *>> varbit_hdr_instance_to_variable_state;
 
-    std::map<const IR::ParserState*, const IR::Expression*> state_to_encode_var;
+    std::map<const IR::ParserState *, const IR::Expression *> state_to_encode_var;
 
-    std::map<const IR::ParserState*, const IR::AssignmentStatement*> state_to_csum_verify;
+    std::map<const IR::ParserState *, const IR::AssignmentStatement *> state_to_csum_verify;
     // Map to store if the varbit extract length is constant
-    std::map<cstring, std::map<unsigned,
-             ordered_set<const IR::ParserState*>>> varbit_hdr_instance_to_constant_state;
-    std::map<cstring, const IR::StructField*> varbit_hdr_instance_to_varbit_field;
+    std::map<cstring, std::map<unsigned, ordered_set<const IR::ParserState *>>>
+        varbit_hdr_instance_to_constant_state;
+    std::map<cstring, const IR::StructField *> varbit_hdr_instance_to_varbit_field;
 
-    std::map<const IR::ParserState*,
-             std::set<const IR::Expression*>> state_to_verify_exprs;
+    std::map<const IR::ParserState *, std::set<const IR::Expression *>> state_to_verify_exprs;
 
-    std::map<const IR::ParserState*, cstring> state_to_header_instance;
+    std::map<const IR::ParserState *, cstring> state_to_header_instance;
 
-    std::map<const IR::ParserState*,
-             std::set<const IR::MethodCallExpression*>> state_to_csum_add;
+    std::map<const IR::ParserState *, std::set<const IR::MethodCallExpression *>> state_to_csum_add;
 
-    std::map<const IR::ParserState*,
-             std::map<unsigned, unsigned>> state_to_match_to_length;
+    std::map<const IR::ParserState *, std::map<unsigned, unsigned>> state_to_match_to_length;
 
     // reverse map of above
-    std::map<const IR::ParserState*,
-             std::map<unsigned, std::set<unsigned>>> state_to_length_to_match;
+    std::map<const IR::ParserState *, std::map<unsigned, std::set<unsigned>>>
+        state_to_length_to_match;
 
-    std::map<const IR::ParserState*, std::set<unsigned>> state_to_reject_matches;
+    std::map<const IR::ParserState *, std::set<unsigned>> state_to_reject_matches;
 
-    std::map<const IR::Type_Header*, const IR::StructField*> header_type_to_varbit_field;
-    std::map<const IR::StructField*,
-             const IR::Expression*> varbit_field_to_extract_call_path;
+    std::map<const IR::Type_Header *, const IR::StructField *> header_type_to_varbit_field;
+    std::map<const IR::StructField *, const IR::Expression *> varbit_field_to_extract_call_path;
 
  private:
-    bool is_legal_runtime_value(const IR::Expression* verify,
-                                const IR::Expression* encode_var, unsigned val);
+    bool is_legal_runtime_value(const IR::Expression *verify, const IR::Expression *encode_var,
+                                unsigned val);
 
-    bool is_legal_runtime_value(const IR::ParserState* state,
-                                const IR::Expression* encode_var, unsigned val);
+    bool is_legal_runtime_value(const IR::ParserState *state, const IR::Expression *encode_var,
+                                unsigned val);
 
-    const IR::Constant* evaluate(const IR::Expression* varsize_expr,
-                                 const IR::Expression* encode_var, unsigned val);
+    const IR::Constant *evaluate(const IR::Expression *varsize_expr,
+                                 const IR::Expression *encode_var, unsigned val);
 
-    bool enumerate_varbit_field_values(
-        const IR::MethodCallExpression* call,
-        const IR::ParserState* state,
-        const IR::StructField* varbit_field,
-        const IR::Expression* varsize_expr,
-        const IR::Expression*& encode_var,
-        std::map<unsigned, unsigned>& match_to_length,
-        std::map<unsigned, std::set<unsigned>>& length_to_match,
-        std::set<unsigned>& reject_matches,
-        cstring header_name);
+    bool enumerate_varbit_field_values(const IR::MethodCallExpression *call,
+                                       const IR::ParserState *state,
+                                       const IR::StructField *varbit_field,
+                                       const IR::Expression *varsize_expr,
+                                       const IR::Expression *&encode_var,
+                                       std::map<unsigned, unsigned> &match_to_length,
+                                       std::map<unsigned, std::set<unsigned>> &length_to_match,
+                                       std::set<unsigned> &reject_matches, cstring header_name);
 
-    void enumerate_varbit_field_values(
-        const IR::MethodCallExpression* call,
-        const IR::ParserState* state,
-        const IR::Expression* varsize_expr,
-        const IR::Type_Header* hdr_type,
-        cstring headerName);
+    void enumerate_varbit_field_values(const IR::MethodCallExpression *call,
+                                       const IR::ParserState *state,
+                                       const IR::Expression *varsize_expr,
+                                       const IR::Type_Header *hdr_type, cstring headerName);
 
-    bool preorder(const IR::MethodCallExpression*) override;
-    bool preorder(const IR::AssignmentStatement*) override;
+    bool preorder(const IR::MethodCallExpression *) override;
+    bool preorder(const IR::AssignmentStatement *) override;
 
  public:
-    CollectVarbitExtract(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) :
-        refMap(refMap), typeMap(typeMap) { }
+    CollectVarbitExtract(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
+        : refMap(refMap), typeMap(typeMap) {}
 };
 
-const IR::Constant* CollectVarbitExtract::evaluate(const IR::Expression* varsize_expr,
-                                        const IR::Expression* encode_var, unsigned val) {
+const IR::Constant *CollectVarbitExtract::evaluate(const IR::Expression *varsize_expr,
+                                                   const IR::Expression *encode_var, unsigned val) {
     auto clone = varsize_expr->clone();
 
     EvaluateForVar evaluator(refMap, typeMap, encode_var, val);
@@ -231,37 +225,33 @@ const IR::Constant* CollectVarbitExtract::evaluate(const IR::Expression* varsize
     return constant;
 }
 
-bool CollectVarbitExtract::is_legal_runtime_value(const IR::Expression* verify,
-        const IR::Expression* encode_var, unsigned val) {
+bool CollectVarbitExtract::is_legal_runtime_value(const IR::Expression *verify,
+                                                  const IR::Expression *encode_var, unsigned val) {
     auto clone = verify->clone();
 
     EvaluateForVar evaluator(refMap, typeMap, encode_var, val);
     auto rv = clone->apply(evaluator);
 
     if (auto bl = rv->to<IR::BoolLiteral>()) {
-        if (bl->value == 0)
-            return false;
+        if (bl->value == 0) return false;
     }
 
     return true;
 }
 
-bool CollectVarbitExtract::is_legal_runtime_value(const IR::ParserState* state,
-        const IR::Expression* encode_var, unsigned val) {
+bool CollectVarbitExtract::is_legal_runtime_value(const IR::ParserState *state,
+                                                  const IR::Expression *encode_var, unsigned val) {
     if (state_to_verify_exprs.count(state)) {
         for (auto verify : state_to_verify_exprs.at(state)) {
-            if (!is_legal_runtime_value(verify, encode_var, val))
-                return false;
+            if (!is_legal_runtime_value(verify, encode_var, val)) return false;
         }
     }
 
     return true;
 }
 
-void check_compile_time_constant(const IR::Constant* c,
-                                 const IR::MethodCallExpression* call,
-                                 int varbit_field_size,
-                                 bool zero_ok = false) {
+void check_compile_time_constant(const IR::Constant *c, const IR::MethodCallExpression *call,
+                                 int varbit_field_size, bool zero_ok = false) {
     if (c->asInt() < 0 || (!zero_ok && c->asInt() == 0)) {
         cstring hint;
 
@@ -278,21 +268,17 @@ void check_compile_time_constant(const IR::Constant* c,
     }
 
     if (c->asInt() > varbit_field_size) {
-        ::fatal_error("%1% exceeds varbit field size %2%: %3%",
-                      c->asInt(), varbit_field_size, call);
+        ::fatal_error("%1% exceeds varbit field size %2%: %3%", c->asInt(), varbit_field_size,
+                      call);
     }
 }
 
 bool CollectVarbitExtract::enumerate_varbit_field_values(
-        const IR::MethodCallExpression* call,
-        const IR::ParserState* state,
-        const IR::StructField* varbit_field,
-        const IR::Expression* varsize_expr,
-        const IR::Expression*& encode_var,
-        std::map<unsigned, unsigned>& match_to_length,
-        std::map<unsigned, std::set<unsigned>>& length_to_match,
-        std::set<unsigned>& reject_matches,
-        cstring header_name) {
+    const IR::MethodCallExpression *call, const IR::ParserState *state,
+    const IR::StructField *varbit_field, const IR::Expression *varsize_expr,
+    const IR::Expression *&encode_var, std::map<unsigned, unsigned> &match_to_length,
+    std::map<unsigned, std::set<unsigned>> &length_to_match, std::set<unsigned> &reject_matches,
+    cstring header_name) {
     CollectVariables find_encode_var;
     varsize_expr->apply(find_encode_var);
 
@@ -339,38 +325,36 @@ bool CollectVarbitExtract::enumerate_varbit_field_values(
     }
 
     if (too_many_branches) {
-        ::fatal_error("Varbit extract requires too many parser branches to implement. "
-                  "Consider rewriting the variable length expression or shrink the varbit size "
-                  "to reduce the number of possible runtime values: %1%", call);
+        ::fatal_error(
+            "Varbit extract requires too many parser branches to implement. "
+            "Consider rewriting the variable length expression or shrink the varbit size "
+            "to reduce the number of possible runtime values: %1%",
+            call);
         return false;
     }
 
     LOG2(varsize_expr << " needs " << branches_needed << " branches to implement");
     LOG2(varsize_expr << " evaluate to compile time constants:");
 
-    for (auto& kv : match_to_length)
-        LOG2(encode_var << " = " << kv.first << " : " << kv.second);
+    for (auto &kv : match_to_length) LOG2(encode_var << " = " << kv.first << " : " << kv.second);
 
-    for (auto& v : reject_matches)
-        LOG2(encode_var << " = " << v << " : reject");
+    for (auto &v : reject_matches) LOG2(encode_var << " = " << v << " : reject");
     varbit_hdr_instance_to_variable_state[header_name].insert(state);
     return true;
 }
 
-void CollectVarbitExtract::enumerate_varbit_field_values(
-        const IR::MethodCallExpression* call,
-        const IR::ParserState* state,
-        const IR::Expression* varsize_expr,
-        const IR::Type_Header* hdr_type,
-        cstring headerName) {
+void CollectVarbitExtract::enumerate_varbit_field_values(const IR::MethodCallExpression *call,
+                                                         const IR::ParserState *state,
+                                                         const IR::Expression *varsize_expr,
+                                                         const IR::Type_Header *hdr_type,
+                                                         cstring headerName) {
     if (state_to_varbit_header.count(state)) {
         fatal_error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                     "%1%: multiple varbit fields in a parser state are currently unsupported",
                     call);
     }
 
-
-    const IR::StructField* varbit_field = nullptr;
+    const IR::StructField *varbit_field = nullptr;
 
     for (auto field : hdr_type->fields) {
         if (field->type->is<IR::Type::Varbits>()) {
@@ -381,7 +365,7 @@ void CollectVarbitExtract::enumerate_varbit_field_values(
 
     if (!varbit_field) return;
     varbit_hdr_instance_to_varbit_field[headerName] = varbit_field;
-    const IR::Expression* encode_var = nullptr;
+    const IR::Expression *encode_var = nullptr;
     std::map<unsigned, unsigned> match_to_length;
     std::map<unsigned, std::set<unsigned>> length_to_match;
     std::set<unsigned> reject_matches;
@@ -394,9 +378,9 @@ void CollectVarbitExtract::enumerate_varbit_field_values(
         length_to_match[c->asUnsigned()].insert(0);
         varbit_hdr_instance_to_constant_state[headerName][c->asUnsigned()].insert(state);
     } else {
-        bool ok = enumerate_varbit_field_values(call, state, varbit_field, varsize_expr,
-                            encode_var, match_to_length, length_to_match, reject_matches,
-                            headerName);
+        bool ok = enumerate_varbit_field_values(call, state, varbit_field, varsize_expr, encode_var,
+                                                match_to_length, length_to_match, reject_matches,
+                                                headerName);
         if (!ok) return;
     }
 
@@ -407,7 +391,7 @@ void CollectVarbitExtract::enumerate_varbit_field_values(
     state_to_reject_matches[state] = reject_matches;
 
     auto expr = (*call->arguments)[0]->expression;
-    const IR::Expression* path = nullptr;
+    const IR::Expression *path = nullptr;
     if (auto member = expr->to<IR::Member>()) {
         path = member->expr;
     } else if (expr->is<IR::PathExpression>()) {
@@ -422,7 +406,7 @@ void CollectVarbitExtract::enumerate_varbit_field_values(
     header_type_to_varbit_field[hdr_type] = varbit_field;
 }
 
-const IR::StructField* get_varbit_structfield(const IR::Member* member) {
+const IR::StructField *get_varbit_structfield(const IR::Member *member) {
     auto header = member->expr->to<IR::Member>();
     auto headerType = header->type->to<IR::Type_Header>();
     for (auto field : headerType->fields) {
@@ -434,7 +418,7 @@ const IR::StructField* get_varbit_structfield(const IR::Member* member) {
     return nullptr;
 }
 
-bool CollectVarbitExtract::preorder(const IR::AssignmentStatement* astmt) {
+bool CollectVarbitExtract::preorder(const IR::AssignmentStatement *astmt) {
     if (auto state = findContext<IR::ParserState>()) {
         bool seen_varbit = state_to_varbit_header.count(state);
         if (!seen_varbit) return false;
@@ -448,8 +432,7 @@ bool CollectVarbitExtract::preorder(const IR::AssignmentStatement* astmt) {
                     auto type = path->type->to<IR::Type_Extern>();
                     if (!type) return false;
                     if (type->name != "Checksum") return false;
-                    if (method->member == "verify")
-                        state_to_csum_verify[state] = astmt;
+                    if (method->member == "verify") state_to_csum_verify[state] = astmt;
                 }
             }
         }
@@ -457,7 +440,7 @@ bool CollectVarbitExtract::preorder(const IR::AssignmentStatement* astmt) {
     return false;
 }
 
-bool CollectVarbitExtract::preorder(const IR::MethodCallExpression* call) {
+bool CollectVarbitExtract::preorder(const IR::MethodCallExpression *call) {
     if (auto state = findContext<IR::ParserState>()) {
         bool seen_varbit = state_to_varbit_header.count(state);
 
@@ -474,9 +457,10 @@ bool CollectVarbitExtract::preorder(const IR::MethodCallExpression* call) {
                     if (seen_varbit) {
                         fatal_error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                                     "%1%: multiple varbit fields in a parser state are currently "
-                                    "unsupported", call);
+                                    "unsupported",
+                                    call);
                     }
-                    const IR::Type_Header* hdr_type = nullptr;
+                    const IR::Type_Header *hdr_type = nullptr;
                     cstring headerName;
 
                     if (auto header = expr->to<IR::Member>()) {
@@ -489,8 +473,7 @@ bool CollectVarbitExtract::preorder(const IR::MethodCallExpression* call) {
                     } else {
                         error("Unsupported header type %1%", expr);
                     }
-                    enumerate_varbit_field_values(call, state,
-                                                  varsize_expr, hdr_type, headerName);
+                    enumerate_varbit_field_values(call, state, varsize_expr, hdr_type, headerName);
 
                     auto parser = findContext<IR::BFN::TnaParser>();
                     state_to_parser[state] = parser;
@@ -498,7 +481,8 @@ bool CollectVarbitExtract::preorder(const IR::MethodCallExpression* call) {
                 } else if (seen_varbit) {
                     fatal_error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                                 "%1%: current compiler implementation requires the "
-                                "varbit header to be extracted last in the parser state", call);
+                                "varbit header to be extracted last in the parser state",
+                                call);
                 }
             } else if (method->member == "add" || method->member == "subtract") {
                 auto path = method->expr->to<IR::PathExpression>();
@@ -514,7 +498,8 @@ bool CollectVarbitExtract::preorder(const IR::MethodCallExpression* call) {
                                 if (method->member == "subtract") {
                                     fatal_error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                                                 "Checksum subtract is currently not supported to "
-                                                "have varbit fields %1%", call);
+                                                "have varbit fields %1%",
+                                                call);
                                 }
                                 state_to_csum_add[state].insert(call);
                             }
@@ -526,7 +511,7 @@ bool CollectVarbitExtract::preorder(const IR::MethodCallExpression* call) {
             if (path->path->name == "verify") {
                 warning("Parser \"verify\" is currently unsupported %s", call->srcInfo);
             }
-       }
+        }
     }
     return false;
 }
@@ -541,13 +526,13 @@ static cstring create_instance_name(cstring name) {
  * \ingroup DesugarVarbitExtract
  */
 class RewriteVarbitUses : public Modifier {
-    const CollectVarbitExtract& cve;
+    const CollectVarbitExtract &cve;
     int tcam_row_usage_estimation = 0;
 
-    std::map<const IR::ParserState*,
-             ordered_map<unsigned, const IR::ParserState*>> state_to_branch_states;
+    std::map<const IR::ParserState *, ordered_map<unsigned, const IR::ParserState *>>
+        state_to_branch_states;
 
-    std::map<const IR::ParserState*, const IR::ParserState*> state_to_end_state;
+    std::map<const IR::ParserState *, const IR::ParserState *> state_to_end_state;
 
  public:
     // To get all the headers associated with length L, find all the header types with
@@ -555,58 +540,56 @@ class RewriteVarbitUses : public Modifier {
     ordered_map<cstring, ordered_map<unsigned, IR::Type_Header *>>
         varbit_hdr_instance_to_header_types;
 
-    ordered_map<std::pair<cstring, unsigned>, ordered_map<unsigned, IR::Type_Header*>>
+    ordered_map<std::pair<cstring, unsigned>, ordered_map<unsigned, IR::Type_Header *>>
         varbit_hdr_instance_to_header_types_by_base;
 
-    std::map<const IR::StructField*, IR::Type_Header*> varbit_field_to_post_header_type;
+    std::map<const IR::StructField *, IR::Type_Header *> varbit_field_to_post_header_type;
 
     std::map<cstring, IR::Vector<IR::StructField>> tuple_types_to_rewrite;
 
  private:
-    profile_t init_apply(const IR::Node* root) override;
+    profile_t init_apply(const IR::Node *root) override;
 
-    const IR::ParserState*
-    create_branch_state(const IR::BFN::TnaParser* parser,
-                        const IR::ParserState* state,
-                        const IR::Expression* select,
-                        const IR::StructField* varbit_field, unsigned length, unsigned base_length,
-                        cstring name);
+    const IR::ParserState *create_branch_state(const IR::BFN::TnaParser *parser,
+                                               const IR::ParserState *state,
+                                               const IR::Expression *select,
+                                               const IR::StructField *varbit_field, unsigned length,
+                                               unsigned base_length, cstring name);
 
-    void create_varbit_header_type(const IR::Type_Header* orig_hdr, cstring orig_hdr_inst,
-                                   const IR::StructField* varbit_field, unsigned current_hdr_size,
+    void create_varbit_header_type(const IR::Type_Header *orig_hdr, cstring orig_hdr_inst,
+                                   const IR::StructField *varbit_field, unsigned current_hdr_size,
                                    unsigned varbit_field_size, unsigned base_size);
 
-    void create_branches(const IR::ParserState* state, const IR::StructField* varbit_field,
+    void create_branches(const IR::ParserState *state, const IR::StructField *varbit_field,
                          unsigned prev_length);
 
-    void find_and_replace_setinvalid(const IR::AssignmentStatement* assign,
-                                    IR::IndexedVector<IR::StatOrDecl>& comp);
-    const IR::ParserState*
-    create_end_state(const IR::BFN::TnaParser* parser,
-                     const IR::ParserState* state, cstring name,
-                     const IR::StructField* varbit_field,
-                     const IR::Type_Header* orig_header,
-                     cstring orig_hdr_name);
+    void find_and_replace_setinvalid(const IR::AssignmentStatement *assign,
+                                     IR::IndexedVector<IR::StatOrDecl> &comp);
+    const IR::ParserState *create_end_state(const IR::BFN::TnaParser *parser,
+                                            const IR::ParserState *state, cstring name,
+                                            const IR::StructField *varbit_field,
+                                            const IR::Type_Header *orig_header,
+                                            cstring orig_hdr_name);
 
-    bool preorder(IR::BFN::TnaParser*) override;
-    void postorder(IR::BFN::TnaParser*) override;
-    bool preorder(IR::ParserState*) override;
+    bool preorder(IR::BFN::TnaParser *) override;
+    void postorder(IR::BFN::TnaParser *) override;
+    bool preorder(IR::ParserState *) override;
 
-    bool preorder(IR::MethodCallExpression*) override;
-    bool preorder(IR::BlockStatement*) override;
+    bool preorder(IR::MethodCallExpression *) override;
+    bool preorder(IR::BlockStatement *) override;
 
-    IR::IndexedVector<IR::NamedExpression>
-    filter_post_header_fields(const IR::IndexedVector<IR::NamedExpression>& components);
+    IR::IndexedVector<IR::NamedExpression> filter_post_header_fields(
+        const IR::IndexedVector<IR::NamedExpression> &components);
 
-    bool preorder(IR::StructExpression* list) override;
-    bool preorder(IR::Member* member) override;
+    bool preorder(IR::StructExpression *list) override;
+    bool preorder(IR::Member *member) override;
 
  public:
-    explicit RewriteVarbitUses(const CollectVarbitExtract& cve) : cve(cve) {}
+    explicit RewriteVarbitUses(const CollectVarbitExtract &cve) : cve(cve) {}
 };
 
-Modifier::profile_t RewriteVarbitUses::init_apply(const IR::Node* root) {
-    for (const auto &[ name, states ] : cve.varbit_hdr_instance_to_constant_state) {
+Modifier::profile_t RewriteVarbitUses::init_apply(const IR::Node *root) {
+    for (const auto &[name, states] : cve.varbit_hdr_instance_to_constant_state) {
         // If the length is declared as a constant, the creation of branches
         // for each state should happen in the ascending order of the lengths
         unsigned prev_length = 0;
@@ -618,7 +601,7 @@ Modifier::profile_t RewriteVarbitUses::init_apply(const IR::Node* root) {
             }
         }
     }
-    for (const auto &[ name, states ] : cve.varbit_hdr_instance_to_variable_state) {
+    for (const auto &[name, states] : cve.varbit_hdr_instance_to_variable_state) {
         for (const auto &state : states) {
             auto varbit_field = cve.varbit_hdr_instance_to_varbit_field.at(name);
             create_branches(state, varbit_field, 0);
@@ -627,46 +610,39 @@ Modifier::profile_t RewriteVarbitUses::init_apply(const IR::Node* root) {
     return Modifier::init_apply(root);
 }
 
-static IR::MethodCallStatement*
-create_extract_statement(const IR::BFN::TnaParser* parser,
-                         const IR::Expression* path,
-                         const IR::Type *type,
-                         cstring header) {
+static IR::MethodCallStatement *create_extract_statement(const IR::BFN::TnaParser *parser,
+                                                         const IR::Expression *path,
+                                                         const IR::Type *type, cstring header) {
     auto packetInParam = parser->tnaParams.at("pkt"_cs);
     auto method = new IR::Member(new IR::PathExpression(packetInParam), IR::ID("extract"));
-    auto typeArgs = new IR::Vector<IR::Type>({ type });
-    auto args = new IR::Vector<IR::Argument>(
-         { new IR::Argument(new IR::Member(type, path, header)) });
+    auto typeArgs = new IR::Vector<IR::Type>({type});
+    auto args =
+        new IR::Vector<IR::Argument>({new IR::Argument(new IR::Member(type, path, header))});
     auto *callExpr = new IR::MethodCallExpression(method, typeArgs, args);
     return new IR::MethodCallStatement(callExpr);
 }
 
-static IR::MethodCallStatement*
-create_add_statement(const IR::Member* method,
-                     const IR::Expression* path,
-                     const IR::Type_Header* header) {
+static IR::MethodCallStatement *create_add_statement(const IR::Member *method,
+                                                     const IR::Expression *path,
+                                                     const IR::Type_Header *header) {
     auto listVec = IR::Vector<IR::Expression>();
     auto headerName = create_instance_name(header->name);
     for (const auto *f : header->fields) {
         listVec.push_back(new IR::Member(f->type, new IR::Member(path, headerName), f->name));
     }
-    auto args = new IR::Vector<IR::Argument>({ new IR::Argument(
-                new IR::ListExpression(listVec))});
-    auto typeArgs = new IR::Vector<IR::Type>({ args->at(0)->expression->type });
+    auto args = new IR::Vector<IR::Argument>({new IR::Argument(new IR::ListExpression(listVec))});
+    auto typeArgs = new IR::Vector<IR::Type>({args->at(0)->expression->type});
     auto addCall = new IR::MethodCallExpression(method, typeArgs, args);
     return new IR::MethodCallStatement(addCall);
 }
-const IR::ParserState*
-RewriteVarbitUses::create_branch_state(const IR::BFN::TnaParser* parser,
-        const IR::ParserState* state, const IR::Expression* select,
-        const IR::StructField* varbit_field, unsigned length, unsigned base_length,
-        cstring name) {
+const IR::ParserState *RewriteVarbitUses::create_branch_state(
+    const IR::BFN::TnaParser *parser, const IR::ParserState *state, const IR::Expression *select,
+    const IR::StructField *varbit_field, unsigned length, unsigned base_length, cstring name) {
     for (const auto &kv : state_to_branch_states) {
         auto p = cve.state_to_parser.at(kv.first);
         if (p == parser) {
             for (const auto &s : kv.second) {
-                if (name == s.second->name)
-                    return s.second;
+                if (name == s.second->name) return s.second;
             }
         }
     }
@@ -679,15 +655,13 @@ RewriteVarbitUses::create_branch_state(const IR::BFN::TnaParser* parser,
     for (auto &header_to_length :
          varbit_hdr_instance_to_header_types_by_base[std::make_pair(hdr_instance, base_length)]) {
         auto header_length = header_to_length.first;
-        if (header_length > length)
-            break;
+        if (header_length > length) break;
 
         auto header = header_to_length.second;
         auto varbit_hdr_inst = create_instance_name(header->name);
         auto extract = create_extract_statement(parser, path, header, varbit_hdr_inst);
         statements.push_back(extract);
-        LOG3("Added extract statement for header " << header->name << " in state "
-              << name);
+        LOG3("Added extract statement for header " << header->name << " in state " << name);
         if (cve.state_to_csum_add.count(state)) {
             for (auto call : cve.state_to_csum_add.at(state)) {
                 auto method = call->method->to<IR::Member>();
@@ -702,27 +676,25 @@ RewriteVarbitUses::create_branch_state(const IR::BFN::TnaParser* parser,
     return branch_state;
 }
 
-const IR::ParserState*
-RewriteVarbitUses::create_end_state(const IR::BFN::TnaParser* parser,
-                                    const IR::ParserState* state, cstring name,
-                                    const IR::StructField* varbit_field,
-                                    const IR::Type_Header* orig_header,
-                                    cstring orig_hdr_name) {
+const IR::ParserState *RewriteVarbitUses::create_end_state(const IR::BFN::TnaParser *parser,
+                                                           const IR::ParserState *state,
+                                                           cstring name,
+                                                           const IR::StructField *varbit_field,
+                                                           const IR::Type_Header *orig_header,
+                                                           cstring orig_hdr_name) {
     for (const auto &kv : state_to_branch_states) {
         const auto p = cve.state_to_parser.at(kv.first);
         if (p == parser) {
             for (const auto &s : kv.second) {
-                if (name == s.second->name)
-                    return s.second;
+                if (name == s.second->name) return s.second;
             }
         }
     }
 
-    for (const auto& kv : state_to_end_state) {
+    for (const auto &kv : state_to_end_state) {
         const auto p = cve.state_to_parser.at(kv.first);
         if (p == parser) {
-            if (name == kv.second->name)
-                return kv.second;
+            if (name == kv.second->name) return kv.second;
         }
     }
 
@@ -742,11 +714,9 @@ RewriteVarbitUses::create_end_state(const IR::BFN::TnaParser* parser,
 
     bool seen_varbit = false;
     for (auto field : orig_header->fields) {
-        if (seen_varbit)
-            post_hdr->fields.push_back(field);
+        if (seen_varbit) post_hdr->fields.push_back(field);
 
-        if (field->type->is<IR::Type_Varbits>())
-            seen_varbit = true;
+        if (field->type->is<IR::Type_Varbits>()) seen_varbit = true;
     }
 
     IR::IndexedVector<IR::StatOrDecl> statements;
@@ -775,9 +745,9 @@ RewriteVarbitUses::create_end_state(const IR::BFN::TnaParser* parser,
     return new IR::ParserState(name, statements, state->selectExpression);
 }
 
-void RewriteVarbitUses::create_varbit_header_type(const IR::Type_Header* orig_hdr,
+void RewriteVarbitUses::create_varbit_header_type(const IR::Type_Header *orig_hdr,
                                                   cstring orig_hdr_inst,
-                                                  const IR::StructField* varbit_field,
+                                                  const IR::StructField *varbit_field,
                                                   unsigned current_hdr_size,
                                                   unsigned varbit_field_size, unsigned base_size) {
     auto hdr_base = std::make_pair(orig_hdr_inst, base_size);
@@ -792,8 +762,7 @@ void RewriteVarbitUses::create_varbit_header_type(const IR::Type_Header* orig_hd
     }
 
     if (!varbit_hdr_instance_to_header_types_by_base.count(hdr_base) ||
-        !varbit_hdr_instance_to_header_types_by_base.at(hdr_base)
-             .count(varbit_field_size)) {
+        !varbit_hdr_instance_to_header_types_by_base.at(hdr_base).count(varbit_field_size)) {
         cstring name = orig_hdr->name + "_"_cs + orig_hdr_inst + "_"_cs + varbit_field->name +
                        "_"_cs + cstring::to_cstring(varbit_field_size) + "b_t";
         auto hdr = new IR::Type_Header(name);
@@ -801,39 +770,36 @@ void RewriteVarbitUses::create_varbit_header_type(const IR::Type_Header* orig_hd
         auto field = new IR::StructField("field", field_type);
         hdr->fields.push_back(field);
         varbit_hdr_instance_to_header_types[orig_hdr_inst][varbit_field_size] = hdr;
-        varbit_hdr_instance_to_header_types_by_base[hdr_base][varbit_field_size] =
-            hdr;
+        varbit_hdr_instance_to_header_types_by_base[hdr_base][varbit_field_size] = hdr;
     }
 }
 
-void RewriteVarbitUses::create_branches(const IR::ParserState* state,
-                                        const IR::StructField* varbit_field,
-                                        unsigned prev_length) {
-    ordered_map<unsigned, const IR::ParserState*> length_to_branch_state;
+void RewriteVarbitUses::create_branches(const IR::ParserState *state,
+                                        const IR::StructField *varbit_field, unsigned prev_length) {
+    ordered_map<unsigned, const IR::ParserState *> length_to_branch_state;
 
     auto parser = cve.state_to_parser.at(state);
     auto orig_hdr = cve.state_to_varbit_header.at(state);
     auto orig_hdr_inst = cve.state_to_header_instance.at(state);
     auto encode_var = cve.state_to_encode_var.at(state);
 
-    auto& value_map = cve.state_to_length_to_match.at(state);
+    auto &value_map = cve.state_to_length_to_match.at(state);
 
     cstring no_option_state_name =
         "parse_"_cs + orig_hdr_inst + "_"_cs + varbit_field->name + "_end"_cs;
     const IR::ParserState *no_option_state = nullptr;
     unsigned base_length = value_map.begin()->first;
-    for (auto& kv : value_map) {
+    for (auto &kv : value_map) {
         auto length = kv.first;
 
         if (length) {
-            if (length-prev_length != 0) {
-                create_varbit_header_type(orig_hdr, orig_hdr_inst,
-                                      varbit_field, length-prev_length,
-                                      length, base_length);
+            if (length - prev_length != 0) {
+                create_varbit_header_type(orig_hdr, orig_hdr_inst, varbit_field,
+                                          length - prev_length, length, base_length);
                 prev_length = length;
             }
 
-            const IR::Expression* select = nullptr;
+            const IR::Expression *select = nullptr;
 
             if (encode_var)
                 select = new IR::PathExpression(no_option_state_name);
@@ -841,68 +807,64 @@ void RewriteVarbitUses::create_branches(const IR::ParserState* state,
                 select = state->selectExpression;
 
             cstring name = "parse_"_cs + orig_hdr_inst + "_"_cs + varbit_field->name + "_"_cs +
-                    cstring::to_cstring(length) + "b";
+                           cstring::to_cstring(length) + "b";
 
-            auto branch_state = create_branch_state(parser, state, select,
-                                                    varbit_field, length, base_length, name);
+            auto branch_state =
+                create_branch_state(parser, state, select, varbit_field, length, base_length, name);
 
             length_to_branch_state[length] = branch_state;
         } else {
-            no_option_state = create_end_state(parser, state, no_option_state_name,
-                                               varbit_field, orig_hdr, orig_hdr_inst);
+            no_option_state = create_end_state(parser, state, no_option_state_name, varbit_field,
+                                               orig_hdr, orig_hdr_inst);
 
             length_to_branch_state[length] = no_option_state;
         }
     }
 
     if (!no_option_state) {
-        no_option_state = create_end_state(parser, state, no_option_state_name,
-                                           varbit_field, orig_hdr, orig_hdr_inst);
+        no_option_state = create_end_state(parser, state, no_option_state_name, varbit_field,
+                                           orig_hdr, orig_hdr_inst);
     }
 
     state_to_branch_states[state] = length_to_branch_state;
     state_to_end_state[state] = no_option_state;
 }
 
-
-bool RewriteVarbitUses::preorder(IR::BFN::TnaParser* parser) {
+bool RewriteVarbitUses::preorder(IR::BFN::TnaParser *parser) {
     tcam_row_usage_estimation = 0;
     auto orig = getOriginal<IR::P4Parser>();
 
     bool has_varbit = false;
 
-    for (auto& kv : cve.state_to_parser) {
+    for (auto &kv : cve.state_to_parser) {
         if (kv.second == orig) {
             has_varbit = true;
             break;
         }
     }
 
-    if (!has_varbit)
-        return true;
+    if (!has_varbit) return true;
 
-    std::set<const IR::ParserState*> states;
+    std::set<const IR::ParserState *> states;
 
-    for (auto& kv : state_to_branch_states) {
+    for (auto &kv : state_to_branch_states) {
         if (cve.state_to_parser.at(kv.first) == orig) {
-            for (auto& ms : kv.second)
-                states.insert(ms.second);
+            for (auto &ms : kv.second) states.insert(ms.second);
         }
     }
 
-    for (auto& kv : state_to_end_state) {
+    for (auto &kv : state_to_end_state) {
         if (cve.state_to_parser.at(kv.first) == orig) {
             states.insert(kv.second);
         }
     }
 
-    for (auto s : states)
-        parser->states.push_back(s);
+    for (auto s : states) parser->states.push_back(s);
 
     return true;
 }
 
-void RewriteVarbitUses::postorder(IR::BFN::TnaParser* p) {
+void RewriteVarbitUses::postorder(IR::BFN::TnaParser *p) {
     LOG5("Total expected tcam usage by varbit extracts: " << tcam_row_usage_estimation);
     // Desugaring varbit extracts has potential to inflate the IR significantly, making
     // the rest of the compilation very slow. For user's convenience, we try to estimate
@@ -910,17 +872,18 @@ void RewriteVarbitUses::postorder(IR::BFN::TnaParser* p) {
     // extracts. If this estimation is already much larger than TCAM rows count available
     // on the device we bail out early.
     if (tcam_row_usage_estimation > Device::pardeSpec().numTcamRows() * 2) {
-        ::fatal_error("Varbit extracts require too many parser branches to implement. "
-                      "Parser %1% needs %2% transitions for varbit extracts, which is more than "
-                      "%3% TCAM rows available. "
-                      "Consider rewriting the variable length expression or shrink the varbit "
-                      "sizes to reduce the total number of possible runtime values.",
-                      p->name, tcam_row_usage_estimation, Device::pardeSpec().numTcamRows());
+        ::fatal_error(
+            "Varbit extracts require too many parser branches to implement. "
+            "Parser %1% needs %2% transitions for varbit extracts, which is more than "
+            "%3% TCAM rows available. "
+            "Consider rewriting the variable length expression or shrink the varbit "
+            "sizes to reduce the total number of possible runtime values.",
+            p->name, tcam_row_usage_estimation, Device::pardeSpec().numTcamRows());
     }
 }
 
-static IR::SelectCase *
-create_select_case(unsigned bitwidth, unsigned value, unsigned mask, cstring next_state) {
+static IR::SelectCase *create_select_case(unsigned bitwidth, unsigned value, unsigned mask,
+                                          cstring next_state) {
     auto type = IR::Type::Bits::get(bitwidth);
     auto value_expr = new IR::Constant(type, value);
     auto mask_expr = new IR::Constant(type, mask);
@@ -933,19 +896,17 @@ struct Match {
     unsigned mask = 0;
 };
 
-
 /// Try to be smart about multiple matches - if we can collapse consecutive values from one value
 /// set into a ternary match that matches them exactly, we do so and proceed to match the remaining
 /// values. This is not optimal, sometimes grouping non-consective values would provide lower
 /// number of matches, but this is a sufficiently simple heuristic.
 static std::vector<Match> merge_matches(const std::set<unsigned> &values0, unsigned mask) {
-    if (values0.empty())
-        return {};
+    if (values0.empty()) return {};
     // avoid having to keep counts for each range, use random access iterator difference instead
     std::vector<unsigned> values(values0.begin(), values0.end());
     std::vector<Match> out;
-    LOG9("Trying to cover " << values.size() << " values between " << values.front()
-         << " and " << values.back());
+    LOG9("Trying to cover " << values.size() << " values between " << values.front() << " and "
+                            << values.back());
 
     unsigned irrelevant_bits_candidate = 0;
     Match match_candidate;
@@ -966,9 +927,9 @@ static std::vector<Match> merge_matches(const std::set<unsigned> &values0, unsig
         // if we oversoot or if we got to the end of values, we save the last working match and
         // continue after its end
         if (match_size > (values.end() - low + 1) || high == std::prev(values.end())) {
-            LOG9("  covered " << (last_high - low + 1) << " values between "
-                 << *low << " and " << *last_high << " with "
-                 << match_candidate.value << " &&& " << match_candidate.mask);
+            LOG9("  covered " << (last_high - low + 1) << " values between " << *low << " and "
+                              << *last_high << " with " << match_candidate.value << " &&& "
+                              << match_candidate.mask);
             out.push_back(match_candidate);
             low = high = std::next(last_high);
             match_candidate = Match();
@@ -981,15 +942,14 @@ static std::vector<Match> merge_matches(const std::set<unsigned> &values0, unsig
     return out;
 }
 
-bool RewriteVarbitUses::preorder(IR::ParserState* state) {
+bool RewriteVarbitUses::preorder(IR::ParserState *state) {
     auto orig = getOriginal<IR::ParserState>();
     IR::IndexedVector<IR::StatOrDecl> components;
     for (auto a : orig->components) {
         // Remove verify call from original state
-        if (cve.state_to_csum_verify.count(orig) &&
-            cve.state_to_csum_verify.at(orig)->equiv(*a)) {
+        if (cve.state_to_csum_verify.count(orig) && cve.state_to_csum_verify.at(orig)->equiv(*a)) {
             continue;
-        // Replace varbit header setInvalid
+            // Replace varbit header setInvalid
         } else if (auto assign = a->to<IR::AssignmentStatement>()) {
             find_and_replace_setinvalid(assign, components);
         }
@@ -997,11 +957,10 @@ bool RewriteVarbitUses::preorder(IR::ParserState* state) {
     }
     state->components = components;
 
-    if (!state_to_branch_states.count(orig))
-        return true;
+    if (!state_to_branch_states.count(orig)) return true;
 
-    auto& length_to_branch_state = state_to_branch_states.at(orig);
-    auto& length_to_match = cve.state_to_length_to_match.at(orig);
+    auto &length_to_branch_state = state_to_branch_states.at(orig);
+    auto &length_to_match = cve.state_to_length_to_match.at(orig);
 
     IR::Vector<IR::SelectCase> select_cases;
 
@@ -1011,14 +970,14 @@ bool RewriteVarbitUses::preorder(IR::ParserState* state) {
         unsigned var_bitwidth = encode_var->type->width_bits();
         unsigned var_mask = (1 << var_bitwidth) - 1;
 
-        for (auto& ms : length_to_branch_state) {
+        for (auto &ms : length_to_branch_state) {
             auto length = ms.first;
             auto matches = length_to_match.at(length);
             auto next_state = ms.second;
 
             for (const auto &match : merge_matches(matches, var_mask)) {
-                auto select_case = create_select_case(var_bitwidth, match.value, match.mask,
-                                                      next_state->name);
+                auto select_case =
+                    create_select_case(var_bitwidth, match.value, match.mask, next_state->name);
                 select_cases.push_back(select_case);
             }
         }
@@ -1035,7 +994,7 @@ bool RewriteVarbitUses::preorder(IR::ParserState* state) {
 
         auto select = new IR::SelectExpression(new IR::ListExpression(select_on), select_cases);
         state->selectExpression = select;
-    }  else {  // unconditional transition (varsize expr is constant)
+    } else {  // unconditional transition (varsize expr is constant)
         BUG_CHECK(length_to_branch_state.size() == 1, "more than one unconditional branch?");
 
         auto next_state = length_to_branch_state.begin()->second;
@@ -1046,7 +1005,7 @@ bool RewriteVarbitUses::preorder(IR::ParserState* state) {
     return true;
 }
 
-bool RewriteVarbitUses::preorder(IR::MethodCallExpression* call) {
+bool RewriteVarbitUses::preorder(IR::MethodCallExpression *call) {
     auto state = findContext<IR::ParserState>();
     if (state) {
         if (auto method = call->method->to<IR::Member>()) {
@@ -1064,34 +1023,31 @@ bool RewriteVarbitUses::preorder(IR::MethodCallExpression* call) {
     return true;
 }
 
-static IR::MethodCallStatement*
-create_emit_statement(const IR::Member* method, const IR::Type *type,
-                      const IR::Expression* path, cstring header) {
-    auto typeArgs = new IR::Vector<IR::Type>({ type });
-    auto args = new IR::Vector<IR::Argument>(
-        { new IR::Argument(new IR::Member(type, path, header)) } );
+static IR::MethodCallStatement *create_emit_statement(const IR::Member *method,
+                                                      const IR::Type *type,
+                                                      const IR::Expression *path, cstring header) {
+    auto typeArgs = new IR::Vector<IR::Type>({type});
+    auto args =
+        new IR::Vector<IR::Argument>({new IR::Argument(new IR::Member(type, path, header))});
     auto call = new IR::MethodCallExpression(method, typeArgs, args);
     auto emit = new IR::MethodCallStatement(call);
     return emit;
 }
 
-IR::AssignmentStatement* create_valid_statement(const IR::Type_Header* hdr,
-                                                 const IR::Expression* path,
-                                                 bool value) {
+IR::AssignmentStatement *create_valid_statement(const IR::Type_Header *hdr,
+                                                const IR::Expression *path, bool value) {
     auto hdr_expr = new IR::Member(hdr, path, create_instance_name(hdr->name));
     auto left = new IR::Member(IR::Type::Bits::get(1), hdr_expr, "$valid");
     auto right = new IR::Constant(IR::Type::Bits::get(1), value);
     return new IR::AssignmentStatement(left, right);
 }
 
-void RewriteVarbitUses::find_and_replace_setinvalid(const IR::AssignmentStatement* assign,
-                                                    IR::IndexedVector<IR::StatOrDecl>& component) {
+void RewriteVarbitUses::find_and_replace_setinvalid(const IR::AssignmentStatement *assign,
+                                                    IR::IndexedVector<IR::StatOrDecl> &component) {
     auto left = assign->left->to<IR::Member>();
-    if (!left || left->member != "$valid")
-        return;
+    if (!left || left->member != "$valid") return;
     auto right = assign->right->to<IR::Constant>();
-    if (!right)
-        return;
+    if (!right) return;
     if (auto expr = left->expr->to<IR::Member>()) {
         if (varbit_hdr_instance_to_header_types.count(expr->member)) {
             if (right->asInt() == 1) {
@@ -1100,17 +1056,17 @@ void RewriteVarbitUses::find_and_replace_setinvalid(const IR::AssignmentStatemen
             for (auto &hdr : varbit_hdr_instance_to_header_types.at(expr->member)) {
                 component.push_back(create_valid_statement(hdr.second, expr->expr, false));
             }
-            auto varbit_field = cve.header_type_to_varbit_field.at(
-                                              expr->type->to<IR::Type_Header>());
+            auto varbit_field =
+                cve.header_type_to_varbit_field.at(expr->type->to<IR::Type_Header>());
             if (varbit_field_to_post_header_type.count(varbit_field)) {
                 component.push_back(create_valid_statement(
-                       varbit_field_to_post_header_type.at(varbit_field), expr->expr, false));
+                    varbit_field_to_post_header_type.at(varbit_field), expr->expr, false));
             }
         }
     }
 }
 
-bool RewriteVarbitUses::preorder(IR::BlockStatement* block) {
+bool RewriteVarbitUses::preorder(IR::BlockStatement *block) {
     auto deparser = findContext<IR::BFN::TnaDeparser>();
     IR::IndexedVector<IR::StatOrDecl> components;
     bool dirty = false;
@@ -1127,30 +1083,31 @@ bool RewriteVarbitUses::preorder(IR::BlockStatement* block) {
 
                         if (auto *varbit_field = get(cve.header_type_to_varbit_field, type)) {
                             auto path = arg->expression->to<IR::Member>()->expr;
-                            auto instance =  arg->expression->to<IR::Member>()->member;
+                            auto instance = arg->expression->to<IR::Member>()->member;
                             for (auto [_, header_type] :
-                                    get(varbit_hdr_instance_to_header_types, instance)) {
-                                auto emit = create_emit_statement(method, header_type, path,
-                                                   create_instance_name(header_type->name));
+                                 get(varbit_hdr_instance_to_header_types, instance)) {
+                                auto emit =
+                                    create_emit_statement(method, header_type, path,
+                                                          create_instance_name(header_type->name));
                                 components.push_back(emit);
                             }
 
                             if (auto *type = get(varbit_field_to_post_header_type, varbit_field)) {
                                 auto emit = create_emit_statement(method, type, path,
-                                                   create_instance_name(type->name));
+                                                                  create_instance_name(type->name));
                                 components.push_back(emit);
                             }
-                        // has varbit, but we did not find any rewritten field
+                            // has varbit, but we did not find any rewritten field
                         } else if (type && has_varbit(type)) {
                             warning(ErrorType::WARN_UNUSED,
-                                        "%1%: emitting a header %2% (type %3%) with varbit field "
-                                        "that is never parsed in %4%. The header will never be "
-                                        "emitted. Consider not emitting this header, or parse it "
-                                        "in the corresponding parser. You can also silence the"
-                                        "warning by @noWarn(\"unused\") pragma in the header "
-                                        "instance declaration.",
-                                        arg->expression, arg->expression->toString(), type,
-                                        deparser->toString());
+                                    "%1%: emitting a header %2% (type %3%) with varbit field "
+                                    "that is never parsed in %4%. The header will never be "
+                                    "emitted. Consider not emitting this header, or parse it "
+                                    "in the corresponding parser. You can also silence the"
+                                    "warning by @noWarn(\"unused\") pragma in the header "
+                                    "instance declaration.",
+                                    arg->expression, arg->expression->toString(), type,
+                                    deparser->toString());
                             components.pop_back();
                             dirty = true;
                         }
@@ -1164,15 +1121,13 @@ bool RewriteVarbitUses::preorder(IR::BlockStatement* block) {
             }
         }
     }
-    if (components.size() || dirty)
-        block->components = components;
+    if (components.size() || dirty) block->components = components;
 
     return true;
 }
 
-IR::IndexedVector<IR::NamedExpression>
-RewriteVarbitUses::filter_post_header_fields(
-        const IR::IndexedVector<IR::NamedExpression>& components) {
+IR::IndexedVector<IR::NamedExpression> RewriteVarbitUses::filter_post_header_fields(
+    const IR::IndexedVector<IR::NamedExpression> &components) {
     IR::IndexedVector<IR::NamedExpression> filtered;
 
     for (auto comp : components) {
@@ -1194,8 +1149,7 @@ RewriteVarbitUses::filter_post_header_fields(
                             }
                         }
 
-                        if (is_in_post_header)
-                            continue;
+                        if (is_in_post_header) continue;
                     }
                 }
             }
@@ -1207,7 +1161,7 @@ RewriteVarbitUses::filter_post_header_fields(
     return filtered;
 }
 
-bool RewriteVarbitUses::preorder(IR::StructExpression* list) {
+bool RewriteVarbitUses::preorder(IR::StructExpression *list) {
     auto deparser = findContext<IR::BFN::TnaDeparser>();
     auto mc = findContext<IR::MethodCallExpression>();
     IR::IndexedVector<IR::NamedExpression> components;
@@ -1222,14 +1176,13 @@ bool RewriteVarbitUses::preorder(IR::StructExpression* list) {
         auto c = comp->expression;
         if (auto member = c->to<IR::Member>()) {
             if (member->type->is<IR::Type_Varbits>()) {
-                if (has_varbit)
-                    error("More than one varbit expression in %1%", list);
+                if (has_varbit) error("More than one varbit expression in %1%", list);
                 if (deparser) {
                     has_varbit = true;
                     auto path = member->expr->to<IR::Member>();
 
                     unsigned ind = 0;
-                    for (auto& kv : varbit_hdr_instance_to_header_types.at(path->member)) {
+                    for (auto &kv : varbit_hdr_instance_to_header_types.at(path->member)) {
                         auto hdr = kv.second;
                         auto field = hdr->fields[0];
 
@@ -1269,8 +1222,7 @@ bool RewriteVarbitUses::preorder(IR::StructExpression* list) {
 
             for (auto field : tuple->fields) {
                 if (field->type->is<IR::Type_Varbits>()) {
-                    for (auto vt : varbit_types)
-                        types.push_back(vt);
+                    for (auto vt : varbit_types) types.push_back(vt);
                 } else {
                     types.push_back(field);
                 }
@@ -1288,7 +1240,7 @@ bool RewriteVarbitUses::preorder(IR::StructExpression* list) {
 
                         bool filter = false;
 
-                        for (auto& kv : cve.header_type_to_varbit_field) {
+                        for (auto &kv : cve.header_type_to_varbit_field) {
                             if (kv.first->name == tuple_name) {
                                 filter = true;
                                 break;
@@ -1300,8 +1252,7 @@ bool RewriteVarbitUses::preorder(IR::StructExpression* list) {
                         // tuple as they have been moved into its own header type and
                         // instance
 
-                        if (filter)
-                            list->components = filter_post_header_fields(components);
+                        if (filter) list->components = filter_post_header_fields(components);
                     }
                 } else if (type_args.size() > 1) {
                     error("More than one type in %1%", list);
@@ -1313,7 +1264,7 @@ bool RewriteVarbitUses::preorder(IR::StructExpression* list) {
     return true;
 }
 
-bool RewriteVarbitUses::preorder(IR::Member* member) {
+bool RewriteVarbitUses::preorder(IR::Member *member) {
     if (auto type = member->expr->type->to<IR::Type_Header>()) {
         if (cve.header_type_to_varbit_field.count(type)) {
             auto varbit_field = cve.header_type_to_varbit_field.at(type);
@@ -1350,15 +1301,15 @@ bool RewriteVarbitUses::preorder(IR::Member* member) {
  * \ingroup DesugarVarbitExtract
  */
 class RewriteParserVerify : public Transform {
-    const CollectVarbitExtract& cve;
+    const CollectVarbitExtract &cve;
 
-    IR::Node* preorder(IR::MethodCallStatement*) override;
+    IR::Node *preorder(IR::MethodCallStatement *) override;
 
  public:
-    explicit RewriteParserVerify(const CollectVarbitExtract& cve) : cve(cve) {}
+    explicit RewriteParserVerify(const CollectVarbitExtract &cve) : cve(cve) {}
 };
 
-IR::Node* RewriteParserVerify::preorder(IR::MethodCallStatement* stmt) {
+IR::Node *RewriteParserVerify::preorder(IR::MethodCallStatement *stmt) {
     auto state = findContext<IR::ParserState>();
     if (state) {
         auto call = stmt->methodCall;
@@ -1371,7 +1322,7 @@ IR::Node* RewriteParserVerify::preorder(IR::MethodCallStatement* stmt) {
                 verify_expr->apply(find_var);
 
                 if (find_var.rv.size() == 1) {
-                    for (auto& sv : cve.state_to_encode_var) {
+                    for (auto &sv : cve.state_to_encode_var) {
                         if (sv.second->equiv(*(find_var.rv[0]))) {
                             LOG4("remove " << stmt << " absorbed in varbit rewrite");
                             return nullptr;
@@ -1385,12 +1336,11 @@ IR::Node* RewriteParserVerify::preorder(IR::MethodCallStatement* stmt) {
     return stmt;
 }
 
-
 /**
  * \ingroup DesugarVarbitExtract
  */
 struct RemoveZeroVarbitExtract : public Modifier {
-    bool preorder(IR::ParserState* state) override {
+    bool preorder(IR::ParserState *state) override {
         IR::IndexedVector<IR::StatOrDecl> rv;
 
         for (auto stmt : state->components) {
@@ -1401,8 +1351,7 @@ struct RemoveZeroVarbitExtract : public Modifier {
                         if (call->arguments->size() == 2) {
                             auto varsize_expr = (*call->arguments)[1]->expression;
                             if (auto c = varsize_expr->to<IR::Constant>()) {
-                                if (c->asInt() == 0)
-                                    continue;
+                                if (c->asInt() == 0) continue;
                             }
                         }
                     }
@@ -1421,39 +1370,36 @@ struct RemoveZeroVarbitExtract : public Modifier {
  * \ingroup DesugarVarbitExtract
  */
 class RewriteVarbitTypes : public Modifier {
-    const CollectVarbitExtract& cve;
-    const RewriteVarbitUses& rvu;
+    const CollectVarbitExtract &cve;
+    const RewriteVarbitUses &rvu;
 
-    bool contains_varbit_header(IR::Type_StructLike*);
+    bool contains_varbit_header(IR::Type_StructLike *);
 
-    bool preorder(IR::P4Program*) override;
-    bool preorder(IR::Type_StructLike*) override;
-    bool preorder(IR::Type_Header*) override;
+    bool preorder(IR::P4Program *) override;
+    bool preorder(IR::Type_StructLike *) override;
+    bool preorder(IR::Type_Header *) override;
 
  public:
-    RewriteVarbitTypes(const CollectVarbitExtract& c,
-                       const RewriteVarbitUses& r) : cve(c), rvu(r) { }
+    RewriteVarbitTypes(const CollectVarbitExtract &c, const RewriteVarbitUses &r)
+        : cve(c), rvu(r) {}
 };
 
-bool RewriteVarbitTypes::preorder(IR::P4Program* program) {
-    for (auto& kv : rvu.varbit_hdr_instance_to_header_types) {
-        for (auto& lt : kv.second)
-            program->objects.insert(program->objects.begin(), lt.second);
+bool RewriteVarbitTypes::preorder(IR::P4Program *program) {
+    for (auto &kv : rvu.varbit_hdr_instance_to_header_types) {
+        for (auto &lt : kv.second) program->objects.insert(program->objects.begin(), lt.second);
     }
 
-    for (auto& kv : rvu.varbit_field_to_post_header_type)
+    for (auto &kv : rvu.varbit_field_to_post_header_type)
         program->objects.insert(program->objects.begin(), kv.second);
 
     return true;
 }
 
-
-bool RewriteVarbitTypes::contains_varbit_header(IR::Type_StructLike* type_struct) {
+bool RewriteVarbitTypes::contains_varbit_header(IR::Type_StructLike *type_struct) {
     for (auto field : type_struct->fields) {
         if (auto path = field->type->to<IR::Type_Name>()) {
-            for (auto& kv : cve.header_type_to_varbit_field) {
-                if (kv.first->name == path->path->name)
-                    return true;
+            for (auto &kv : cve.header_type_to_varbit_field) {
+                if (kv.first->name == path->path->name) return true;
             }
         }
     }
@@ -1461,32 +1407,31 @@ bool RewriteVarbitTypes::contains_varbit_header(IR::Type_StructLike* type_struct
     return false;
 }
 
-bool RewriteVarbitTypes::preorder(IR::Type_StructLike* type_struct) {
+bool RewriteVarbitTypes::preorder(IR::Type_StructLike *type_struct) {
     if (type_struct->is<IR::Type_HeaderUnion>()) {
         fatal_error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "Unsupported type %s", type_struct);
     }
 
-    if (contains_varbit_header(type_struct) &&
-        type_struct->name.name.find("tuple_") == nullptr) {
-        for (auto& kv : rvu.varbit_hdr_instance_to_header_types) {
-            for (auto& lt : kv.second) {
+    if (contains_varbit_header(type_struct) && type_struct->name.name.find("tuple_") == nullptr) {
+        for (auto &kv : rvu.varbit_hdr_instance_to_header_types) {
+            for (auto &lt : kv.second) {
                 auto type = lt.second;
                 auto field = new IR::StructField(create_instance_name(type->name),
-                                     new IR::Type_Name(type->name));
+                                                 new IR::Type_Name(type->name));
                 type_struct->fields.push_back(field);
                 LOG3("Adding " << field << " in " << type_struct);
             }
         }
 
-        for (auto& kv : rvu.varbit_field_to_post_header_type) {
+        for (auto &kv : rvu.varbit_field_to_post_header_type) {
             auto type = kv.second;
             auto field = new IR::StructField(create_instance_name(type->name),
-                                     new IR::Type_Name(type->name));
+                                             new IR::Type_Name(type->name));
             type_struct->fields.push_back(field);
             LOG3("Adding " << field << "in " << type_struct);
         }
     } else {
-        for (auto& kv : rvu.tuple_types_to_rewrite) {
+        for (auto &kv : rvu.tuple_types_to_rewrite) {
             if (type_struct->name == kv.first) {
                 type_struct->fields = {};
 
@@ -1501,15 +1446,14 @@ bool RewriteVarbitTypes::preorder(IR::Type_StructLike* type_struct) {
     return true;
 }
 
-bool RewriteVarbitTypes::preorder(IR::Type_Header* header) {
+bool RewriteVarbitTypes::preorder(IR::Type_Header *header) {
     auto orig = getOriginal<IR::Type_Header>();
 
     if (cve.header_type_to_varbit_field.count(orig)) {
         IR::IndexedVector<IR::StructField> fields;
 
         for (auto field : header->fields) {
-            if (field->type->is<IR::Type::Varbits>())
-                break;
+            if (field->type->is<IR::Type::Varbits>()) break;
 
             fields.push_back(field);
         }
@@ -1520,31 +1464,19 @@ bool RewriteVarbitTypes::preorder(IR::Type_Header* header) {
     return true;
 }
 
+CheckVarbitAccess::CheckVarbitAccess() { addPasses({new ErrorOnUnsupportedVarbitUse}); }
 
-CheckVarbitAccess::CheckVarbitAccess() {
-    addPasses({
-        new ErrorOnUnsupportedVarbitUse
-    });
-}
-
-DesugarVarbitExtract::DesugarVarbitExtract(P4::ReferenceMap* refMap, P4::TypeMap* typeMap) {
+DesugarVarbitExtract::DesugarVarbitExtract(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
     auto remove_zero_varbit = new RemoveZeroVarbitExtract;
     auto collect_varbit_extract = new CollectVarbitExtract(refMap, typeMap);
     auto rewrite_varbit_uses = new RewriteVarbitUses(*collect_varbit_extract);
     auto rewrite_parser_verify = new RewriteParserVerify(*collect_varbit_extract);
-    auto rewrite_varbit_types = new RewriteVarbitTypes(*collect_varbit_extract,
-                                                       *rewrite_varbit_uses);
+    auto rewrite_varbit_types =
+        new RewriteVarbitTypes(*collect_varbit_extract, *rewrite_varbit_uses);
 
-    addPasses({
-        remove_zero_varbit,
-        collect_varbit_extract,
-        rewrite_varbit_uses,
-        rewrite_parser_verify,
-        rewrite_varbit_types,
-        new P4::CloneExpressions,
-        new P4::ClearTypeMap(typeMap),
-        new BFN::TypeChecking(refMap, typeMap, true)
-    });
+    addPasses({remove_zero_varbit, collect_varbit_extract, rewrite_varbit_uses,
+               rewrite_parser_verify, rewrite_varbit_types, new P4::CloneExpressions,
+               new P4::ClearTypeMap(typeMap), new BFN::TypeChecking(refMap, typeMap, true)});
 }
 
 }  // namespace BFN

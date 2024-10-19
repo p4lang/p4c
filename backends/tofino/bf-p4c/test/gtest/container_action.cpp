@@ -10,17 +10,16 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include <sstream>
-
-#include <gtest/gtest.h>
 #include <gmock/gmock-matchers.h>
 #include <gtest/gtest-message.h>
 #include <gtest/gtest-test-part.h>
+#include <gtest/gtest.h>
+
+#include <sstream>
 
 #include "bf-p4c/ir/gress.h"
-#include "bf-p4c/phv/utils/utils.h"
 #include "bf-p4c/mau/action_analysis.h"
-
+#include "bf-p4c/phv/utils/utils.h"
 #include "bf-p4c/test/gtest/tofino_gtest_utils.h"
 
 namespace P4::Test {
@@ -31,7 +30,7 @@ namespace P4::Test {
 // synthesize ALU instructions for it? Or in other words, is the PHV allocation
 // correct to be implemented as ALU instructions?
 
-class ContainerAction: public BackendTest {
+class ContainerAction : public BackendTest {
  protected:
     ContainerAction() {
         tbl = new IR::MAU::Table("test"_cs, INGRESS);
@@ -40,80 +39,62 @@ class ContainerAction: public BackendTest {
     }
 
     PhvInfo phv;
-    IR::MAU::Table* tbl;
-    IR::MAU::Action* act;
+    IR::MAU::Table *tbl;
+    IR::MAU::Action *act;
 
-    void add_set(const PHV::Field* dst, const PHV::Field* src) {
+    void add_set(const PHV::Field *dst, const PHV::Field *src) {
         auto set = new IR::MAU::Instruction("set"_cs);
 
-        set->operands.push_back(
-            new IR::TempVar(IR::Type::Bits::get(dst->size), false, dst->name));
-        set->operands.push_back(
-            new IR::TempVar(IR::Type::Bits::get(src->size), false, src->name));
+        set->operands.push_back(new IR::TempVar(IR::Type::Bits::get(dst->size), false, dst->name));
+        set->operands.push_back(new IR::TempVar(IR::Type::Bits::get(src->size), false, src->name));
 
         act->action.push_back(set);
     }
 
-    void add_set(const PHV::Field* dst, unsigned src) {
+    void add_set(const PHV::Field *dst, unsigned src) {
         auto set = new IR::MAU::Instruction("set"_cs);
 
-        set->operands.push_back(
-            new IR::TempVar(IR::Type::Bits::get(dst->size), false, dst->name));
-        set->operands.push_back(
-            new IR::Constant(IR::Type::Bits::get(dst->size), src));
+        set->operands.push_back(new IR::TempVar(IR::Type::Bits::get(dst->size), false, dst->name));
+        set->operands.push_back(new IR::Constant(IR::Type::Bits::get(dst->size), src));
 
         act->action.push_back(set);
     }
 
-    void add_set(const PHV::Field* dst, cstring param) {
+    void add_set(const PHV::Field *dst, cstring param) {
         auto set = new IR::MAU::Instruction("set"_cs);
 
-        set->operands.push_back(
-            new IR::TempVar(IR::Type::Bits::get(dst->size), false, dst->name));
+        set->operands.push_back(new IR::TempVar(IR::Type::Bits::get(dst->size), false, dst->name));
         set->operands.push_back(
             new IR::MAU::ActionArg(IR::Type::Bits::get(dst->size), "act"_cs, param));
 
         act->action.push_back(set);
     }
 
-    void add_set_from_meter(const PHV::Field* dst,
-                            cstring meter) {
+    void add_set_from_meter(const PHV::Field *dst, cstring meter) {
         auto set = new IR::MAU::Instruction("set"_cs);
 
-        set->operands.push_back(
-            new IR::TempVar(IR::Type::Bits::get(dst->size), false, dst->name));
-        set->operands.push_back(
-            new IR::Slice(
-                new IR::MAU::AttachedOutput(IR::Type::Bits::get(dst->size),
-                                            new IR::MAU::Meter(meter)),
+        set->operands.push_back(new IR::TempVar(IR::Type::Bits::get(dst->size), false, dst->name));
+        set->operands.push_back(new IR::Slice(
+            new IR::MAU::AttachedOutput(IR::Type::Bits::get(dst->size), new IR::MAU::Meter(meter)),
             dst->size - 1, 0));
 
         act->action.push_back(set);
     }
 
-    void add_set_from_meter(const PHV::Field* dst,
-                            int slice_hi,
-                            int slice_lo,
-                            cstring meter) {
+    void add_set_from_meter(const PHV::Field *dst, int slice_hi, int slice_lo, cstring meter) {
         auto set = new IR::MAU::Instruction("set"_cs);
 
+        set->operands.push_back(new IR::Slice(
+            new IR::TempVar(IR::Type::Bits::get(dst->size), false, dst->name), slice_hi, slice_lo));
         set->operands.push_back(
-            new IR::Slice(
-                new IR::TempVar(IR::Type::Bits::get(dst->size), false, dst->name),
-                slice_hi, slice_lo));
-        set->operands.push_back(
-            new IR::Slice(
-                new IR::MAU::AttachedOutput(IR::Type::Bits::get(slice_hi - slice_lo + 1),
-                                            new IR::MAU::Meter(meter)),
-                slice_hi - slice_lo, 0));
+            new IR::Slice(new IR::MAU::AttachedOutput(IR::Type::Bits::get(slice_hi - slice_lo + 1),
+                                                      new IR::MAU::Meter(meter)),
+                          slice_hi - slice_lo, 0));
 
         act->action.push_back(set);
     }
 
-    void add_op(const PHV::Field* dst,
-                cstring op,
-                const PHV::Field* src1,
-                const PHV::Field* src2) {
+    void add_op(const PHV::Field *dst, cstring op, const PHV::Field *src1, const PHV::Field *src2) {
         auto instr = new IR::MAU::Instruction(op);
 
         instr->operands.push_back(
@@ -126,10 +107,7 @@ class ContainerAction: public BackendTest {
         act->action.push_back(instr);
     }
 
-    void add_op(const PHV::Field* dst,
-                cstring op,
-                const PHV::Field* src1,
-                cstring src2) {
+    void add_op(const PHV::Field *dst, cstring op, const PHV::Field *src1, cstring src2) {
         auto instr = new IR::MAU::Instruction(op);
 
         instr->operands.push_back(
@@ -161,11 +139,9 @@ class ContainerAction: public BackendTest {
         return Result(aa.warning_found(), aa.error_found());
     }
 
-    void alloc(PHV::Field* field,
-               const char* container, unsigned field_lo,
-               unsigned container_lo, unsigned width,
-               int first_stage = 0, unsigned first_use = 0,
-               int last_stage = 0, unsigned last_use = 0) {
+    void alloc(PHV::Field *field, const char *container, unsigned field_lo, unsigned container_lo,
+               unsigned width, int first_stage = 0, unsigned first_use = 0, int last_stage = 0,
+               unsigned last_use = 0) {
         PHV::AllocSlice slice(field, container, field_lo, container_lo, width);
 
         if (Device::currentDevice() != Device::TOFINO) {
@@ -192,19 +168,16 @@ class ContainerAction: public BackendTest {
     try {                                                   \
         auto rv = analyze_container_actions();              \
         ASSERT_FALSE(rv.error);                             \
-    } catch (const Util::CompilerUnimplemented &e) {         \
+    } catch (const Util::CompilerUnimplemented &e) {        \
         ASSERT_THAT(e.what(), testing::HasSubstr(err_msg)); \
     }
 
 class TofinoContainerAction : public ContainerAction {
  public:
-    TofinoContainerAction() {
-        Device::init("Tofino"_cs);
-    }
+    TofinoContainerAction() { Device::init("Tofino"_cs); }
 };
 
-#define FIELD(field, size)                                \
-    field = phv.add(cstring(#field), INGRESS, size, 0, true, false);
+#define FIELD(field, size) field = phv.add(cstring(#field), INGRESS, size, 0, true, false);
 
 TEST_F(TofinoContainerAction, sanity) {
     PHV::Field *f1, *f2;
@@ -579,7 +552,7 @@ class MultipleActionFromMeter : public TofinoContainerAction {
         alloc(f1, "B0"_cs, 4, 4, 4);
     }
 
-    PHV::Field* f1;
+    PHV::Field *f1;
 };
 
 // Test 1: Regular set from a parameter
@@ -614,15 +587,15 @@ class JBayContainerAction : public ContainerAction {
 
     JBayContainerAction() {
         Device::init("Tofino2"_cs);
-        PhvInfo::table_to_min_stages["test"_cs] = { 0 };
+        PhvInfo::table_to_min_stages["test"_cs] = {0};
     }
 
  protected:
-    void alloc_src(PHV::Field* field, const char* container, unsigned container_lo) {
+    void alloc_src(PHV::Field *field, const char *container, unsigned container_lo) {
         alloc(field, container, 0, container_lo, field->size, 0, R, 1, W);
     }
 
-    void alloc_dst(PHV::Field* field, const char* container, unsigned container_lo) {
+    void alloc_dst(PHV::Field *field, const char *container, unsigned container_lo) {
         alloc(field, container, 0, container_lo, field->size, 0, W, 1, R);
     }
 };
@@ -643,7 +616,6 @@ class Dark : public JBayContainerAction {
 };
 
 TEST_F(Dark, test1) {
-
     alloc_dst(f1, "DB8"_cs, 0);
     alloc_src(f2, "DB8"_cs, 1);
     alloc_src(f3, "B28"_cs, 0);
@@ -762,9 +734,7 @@ TEST_F(DarkSource, test2) {
 
 class DarkCannotSourceActionRAM : public JBayContainerAction {
  protected:
-    void SetUp() override {
-        FIELD(f1, 8);
-    }
+    void SetUp() override { FIELD(f1, 8); }
 
     PHV::Field *f1;
 };

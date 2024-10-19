@@ -34,17 +34,17 @@ class ContainerSizeExtractor {
 
     static unsigned getFieldSize(const ConstrainedField &field);
 
-    static std::vector<le_bitrange> computeSlicing(
-                                unsigned fieldSize, const std::vector<int> &layout);
+    static std::vector<le_bitrange> computeSlicing(unsigned fieldSize,
+                                                   const std::vector<int> &layout);
 
-    static void updateFieldSlicesWithSlicing(
-                                const std::vector<le_bitrange> &slicing, ConstrainedField &field);
+    static void updateFieldSlicesWithSlicing(const std::vector<le_bitrange> &slicing,
+                                             ConstrainedField &field);
 
-    static std::vector<ConstrainedSlice*> getSortedSlicePointers(
-                                const std::vector<le_bitrange> &slicing, ConstrainedField &field);
+    static std::vector<ConstrainedSlice *> getSortedSlicePointers(
+        const std::vector<le_bitrange> &slicing, ConstrainedField &field);
 
-    static void applyConstraintToSlices(
-                    std::vector<ConstrainedSlice*> &slices, const std::vector<int> &layout);
+    static void applyConstraintToSlices(std::vector<ConstrainedSlice *> &slices,
+                                        const std::vector<int> &layout);
 };
 
 #endif  // BF_P4C_LOGGING_CONTAINER_SIZE_EXTRACTOR_H_

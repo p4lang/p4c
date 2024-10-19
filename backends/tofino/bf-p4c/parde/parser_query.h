@@ -14,10 +14,10 @@
 #define BF_P4C_PARDE_PARSER_QUERY_H_
 
 #include <ir/ir.h>
-#include "ir/pass_manager.h"
 
 #include "bf-p4c/parde/parde_visitor.h"
 #include "bf-p4c/parde/parser_info.h"
+#include "ir/pass_manager.h"
 
 class PhvInfo;
 class MapFieldToParserStates;
@@ -27,8 +27,8 @@ class MapFieldToParserStates;
 /// These functions rely on data provided by other classes, hence the reason for encapsulating
 /// inside a struct
 struct ParserQuery {
-    const CollectParserInfo& parser_info;
-    const MapFieldToParserStates& field_to_states;
+    const CollectParserInfo &parser_info;
+    const MapFieldToParserStates &field_to_states;
 
     /// Do two extracts use the same constant value?
     bool same_const_source(const IR::BFN::ParserPrimitive *pp,
@@ -39,10 +39,8 @@ struct ParserQuery {
     /// be in this set.
     /// @p ps must be state of @p p or nullptr. @p qs must be state of @p q or nullptr.
     bool is_before(const ordered_set<const IR::BFN::ParserPrimitive *> &writes,
-                   const IR::BFN::Parser *parser,
-                   const IR::BFN::ParserPrimitive *p,
-                   const IR::BFN::ParserState *ps,
-                   const IR::BFN::ParserPrimitive *q,
+                   const IR::BFN::Parser *parser, const IR::BFN::ParserPrimitive *p,
+                   const IR::BFN::ParserState *ps, const IR::BFN::ParserPrimitive *q,
                    const IR::BFN::ParserState *qs = nullptr) const;
 
     /// Find all prior writes for a given write
@@ -51,9 +49,9 @@ struct ParserQuery {
     /// @param writes The set of writes from which to identify prior writes
     ///
     /// @returns An ordered_set of all writes that occur prior to @p
-    ordered_set<const IR::BFN::ParserPrimitive*>
-    get_previous_writes(const IR::BFN::ParserPrimitive* p,
-                        const ordered_set<const IR::BFN::ParserPrimitive*>& writes) const;
+    ordered_set<const IR::BFN::ParserPrimitive *> get_previous_writes(
+        const IR::BFN::ParserPrimitive *p,
+        const ordered_set<const IR::BFN::ParserPrimitive *> &writes) const;
 
     /// Are all writes in @p writes single-write (i.e., no path through the
     /// parse graph executes more than one write).
@@ -61,16 +59,15 @@ struct ParserQuery {
 
     /// Find the first writes, i.e. inits, given the set of @p writes. The set of writes
     /// belong to the same field. An init is a write that has no prior write in the parser IR.
-    ordered_set<const IR::BFN::ParserPrimitive*>
-    find_inits(const ordered_set<const IR::BFN::ParserPrimitive*>& writes) const;
+    ordered_set<const IR::BFN::ParserPrimitive *> find_inits(
+        const ordered_set<const IR::BFN::ParserPrimitive *> &writes) const;
 
     /// Find the first writes, i.e. inits, corresponding to the container @p c.  An init is a write
     /// that has no prior write in the parser IR.
-    ordered_set<const IR::BFN::ParserPrimitive*> find_inits(PHV::Container c) const;
+    ordered_set<const IR::BFN::ParserPrimitive *> find_inits(PHV::Container c) const;
 
     ParserQuery(const CollectParserInfo &pi, const MapFieldToParserStates &fs)
         : parser_info(pi), field_to_states(fs) {}
 };
 
 #endif /*BF_P4C_PARDE_PARSER_QUERY_H_*/
-

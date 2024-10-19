@@ -11,6 +11,7 @@
  */
 
 #include "drop_packet_with_mirror_engine.h"
+
 #include "bf-p4c/device.h"
 
 namespace BFN {
@@ -67,15 +68,16 @@ const IR::Node* DropPacketWithMirrorEngine_::preorder(IR::BFN::TnaControl *contr
 }
 #endif
 
-const IR::Node* DropPacketWithMirrorEngine_::preorder(IR::Declaration_Instance* inst) {
+const IR::Node *DropPacketWithMirrorEngine_::preorder(IR::Declaration_Instance *inst) {
     unique_names.insert(inst->name);
     return inst;
 }
 
-const IR::Node* DropPacketWithMirrorEngine_::postorder(IR::BFN::TnaDeparser *dp) {
+const IR::Node *DropPacketWithMirrorEngine_::postorder(IR::BFN::TnaDeparser *dp) {
     if (dp->thread != INGRESS) {
         prune();
-        return dp; }
+        return dp;
+    }
     // If available, use existing eg_intr_md_for_dprsr metadata parameter
     if (dp->tnaParams.find("ig_intr_md_for_dprsr"_cs) != dp->tnaParams.end()) {
         // Save existing eg_intr_md_for_dprsr parameter name for later use
@@ -103,14 +105,12 @@ const IR::Node* DropPacketWithMirrorEngine_::postorder(IR::BFN::TnaDeparser *dp)
     emit_invalid_mirror_session_args->push_back(
         new IR::Argument(new IR::Constant(IR::Type::Bits::get(Device::cloneSessionIdWidth()), 0)));
     auto emit_invalid_mirror_session = new IR::IfStatement(
-        new IR::Equ(
-            IR::Type::Bits::get(Device::mirrorTypeWidth()),
-            new IR::Member(new IR::PathExpression(igIntrMdForDprsrName), "mirror_type"),
-            new IR::Constant(IR::Type::Bits::get(Device::mirrorTypeWidth()), 0)),
-        new IR::MethodCallStatement({
-            new IR::MethodCallExpression(
-                new IR::Member(new IR::PathExpression(name), "emit"),
-                emit_invalid_mirror_session_args)}),
+        new IR::Equ(IR::Type::Bits::get(Device::mirrorTypeWidth()),
+                    new IR::Member(new IR::PathExpression(igIntrMdForDprsrName), "mirror_type"),
+                    new IR::Constant(IR::Type::Bits::get(Device::mirrorTypeWidth()), 0)),
+        new IR::MethodCallStatement(
+            {new IR::MethodCallExpression(new IR::Member(new IR::PathExpression(name), "emit"),
+                                          emit_invalid_mirror_session_args)}),
         nullptr);
 
     // prepend Mirror() mirror to deparser statements;
@@ -125,10 +125,9 @@ const IR::Node* DropPacketWithMirrorEngine_::postorder(IR::BFN::TnaDeparser *dp)
     auto body = new IR::BlockStatement(dp->body->srcInfo, dp->body->getAnnotations(), comp);
 
     // create new Deparser
-    auto rv = new IR::BFN::TnaDeparser(
-            dp->srcInfo, dp->name, dp->type,
-            dp->constructorParams, local_vars,
-            body, dp->tnaParams, dp->thread, dp->pipeName);
-    return rv; }
+    auto rv = new IR::BFN::TnaDeparser(dp->srcInfo, dp->name, dp->type, dp->constructorParams,
+                                       local_vars, body, dp->tnaParams, dp->thread, dp->pipeName);
+    return rv;
+}
 
 }  // namespace BFN

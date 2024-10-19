@@ -16,11 +16,10 @@
 
 #include <boost/algorithm/string/replace.hpp>
 
-#include "gtest/gtest.h"
-#include "bf_gtest_helpers.h"
-
-#include "ir/ir.h"
 #include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "bf_gtest_helpers.h"
+#include "gtest/gtest.h"
+#include "ir/ir.h"
 #include "test/gtest/helpers.h"
 
 namespace P4::Test {
@@ -174,8 +173,8 @@ Switch(pipe) main;
 }  // namespace NormalizeHashList
 
 /** Verify that initialization is correctly inserted when we have a nested statement,
-  * such as a hash.get inside of an if statement.
-  */
+ * such as a hash.get inside of an if statement.
+ */
 TEST(NormalizeHashList, NestedStatements) {
     auto blk = TestCode(TestCode::Hdr::Tofino1arch, NormalizeHashList::prog(), {});
     blk.flags(TrimWhiteSpace | TrimAnnotations);
@@ -191,8 +190,8 @@ TEST(NormalizeHashList, NestedStatements) {
     auto phv_asm = blk.extract_code(TestCode::CodeBlock::PhvAsm);
     auto hash_field_arg = blk.get_field_container("$hash_field_argument0", phv_asm);
 
-    auto res = blk.match(TestCode::CodeBlock::MauAsm,
-                         CheckList{"`.*`", "and " + hash_field_arg + ","});
+    auto res =
+        blk.match(TestCode::CodeBlock::MauAsm, CheckList{"`.*`", "and " + hash_field_arg + ","});
     EXPECT_TRUE(res.success) << " pos=" << res.pos << " count=" << res.count << "\n'"
                              << blk.extract_code(TestCode::CodeBlock::MauAsm) << "'\n";
 }

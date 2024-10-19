@@ -16,7 +16,7 @@
 
 namespace Parde::Lowered {
 
-bool EliminateEmptyStates::is_empty(const IR::BFN::ParserState* state) {
+bool EliminateEmptyStates::is_empty(const IR::BFN::ParserState *state) {
     if (!state->selects.empty()) return false;
 
     if (!state->statements.empty()) return false;
@@ -41,8 +41,8 @@ bool EliminateEmptyStates::is_empty(const IR::BFN::ParserState* state) {
     return true;
 }
 
-const IR::BFN::Transition* EliminateEmptyStates::get_unconditional_transition(
-    const IR::BFN::ParserState* state) {
+const IR::BFN::Transition *EliminateEmptyStates::get_unconditional_transition(
+    const IR::BFN::ParserState *state) {
     if (state->transitions.size() == 1) {
         auto t = state->transitions[0];
         if (auto match = t->value->to<IR::BFN::ParserConstMatchValue>()) {
@@ -55,7 +55,7 @@ const IR::BFN::Transition* EliminateEmptyStates::get_unconditional_transition(
     return nullptr;
 }
 
-IR::Node* EliminateEmptyStates::preorder(IR::BFN::Transition* transition) {
+IR::Node *EliminateEmptyStates::preorder(IR::BFN::Transition *transition) {
     if (transition->next && is_empty(transition->next)) {
         if (auto next = get_unconditional_transition(transition->next)) {
             if (int(transition->shift + next->shift) <= Device::pardeSpec().byteInputBufferSize()) {

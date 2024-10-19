@@ -10,7 +10,6 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-
 #include "bf_gtest_helpers.h"
 #include "gtest/gtest.h"
 
@@ -92,13 +91,11 @@ TEST(PayloadGateway, KeyValueMaskSingleBit) {
         )";
 
     Match::CheckList expected{
-        "`.*`",        "exact_match", "`.*`",
-        "gateway:",    "`.*`",        "match: { 0: hdr.h.f1(0..7), 8: hdr.h.f1(8..15) }",
-        "0o1*****:",
-        "action: hit",
+        "`.*`",      "exact_match",    "`.*`",
+        "gateway:",  "`.*`",           "match: { 0: hdr.h.f1(0..7), 8: hdr.h.f1(8..15) }",
+        "0o1*****:", "action: hit",
         "next: END",  // 0x8000
-        "miss:",
-        "run_table: true"};
+        "miss:",     "run_table: true"};
     RUN_CHECK(input, expected);
 }
 
@@ -128,7 +125,7 @@ TEST(PayloadGateway, DoubleKeyValueMask) {
                               "24: hdr.h.f1(8..15) }",        // 0b********
                               "0b*************001*************010:",
                               "action: hit",
-                              "next: END",                    // (1 &&& 7, 2 &&& 7)
+                              "next: END",  // (1 &&& 7, 2 &&& 7)
                               "miss:",
                               "run_table: true"};
     RUN_CHECK(input, expected);

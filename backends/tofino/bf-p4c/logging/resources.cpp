@@ -10,6 +10,7 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+/* clang-format off */
 
 #include <ctime>
 #include <algorithm>
@@ -30,19 +31,26 @@
 #include "resources_parser.h"
 #include "resources_clot.h"
 
+
 namespace std {
     std::string to_string(BFN::Resources::HashBitResource::UsageType type) {
         using UsageType = BFN::Resources::HashBitResource::UsageType;
         switch (type) {
-        case UsageType::WaySelect:     return "way_select";
-        case UsageType::WayLineSelect: return "way_line_select";
-        case UsageType::SelectionBit:  return "selection_bit";
-        case UsageType::DistBit:       return "dist_bit";
-        case UsageType::Gateway:       return "gateway";
-        default: BUG("Unkwnown HashBitResource::UsageType");
+        case UsageType::WaySelect:
+            return "way_select";
+        case UsageType::WayLineSelect:
+            return "way_line_select";
+        case UsageType::SelectionBit:
+            return "selection_bit";
+        case UsageType::DistBit:
+            return "dist_bit";
+        case UsageType::Gateway:
+            return "gateway";
+        default:
+            BUG("Unkwnown HashBitResource::UsageType");
         }
     }
-}
+}  // namespace std
 
 namespace BFN {
 
@@ -76,21 +84,32 @@ static std::string getMeterTypeName(const IR::MAU::Table *table) {
     }
 }
 
-static std::string typeName(Memories::Use::type_t type,
-                            const IR::MAU::Table *table) {
+static std::string typeName(Memories::Use::type_t type, const IR::MAU::Table *table) {
     switch (type) {
-        case Memories::Use::EXACT:      return "match_entry_ram";
-        case Memories::Use::ATCAM:      return "algorithmic_tcam";
-        case Memories::Use::TERNARY:    return "ternary_match";
-        case Memories::Use::GATEWAY:    return "gateway";
-        case Memories::Use::TIND:       return "ternary_indirection_ram";
-        case Memories::Use::COUNTER:    return "statistics_ram";
-        case Memories::Use::METER:      return getMeterTypeName(table);
-        case Memories::Use::STATEFUL:   return "stateful_ram";
-        case Memories::Use::SELECTOR:   return "select_ram";
-        case Memories::Use::ACTIONDATA: return "action_ram";
-        case Memories::Use::IDLETIME:   return "idletime";
-        default: BUG("Unknown memory type");
+        case Memories::Use::EXACT:
+            return "match_entry_ram";
+        case Memories::Use::ATCAM:
+            return "algorithmic_tcam";
+        case Memories::Use::TERNARY:
+            return "ternary_match";
+        case Memories::Use::GATEWAY:
+            return "gateway";
+        case Memories::Use::TIND:
+            return "ternary_indirection_ram";
+        case Memories::Use::COUNTER:
+            return "statistics_ram";
+        case Memories::Use::METER:
+            return getMeterTypeName(table);
+        case Memories::Use::STATEFUL:
+            return "stateful_ram";
+        case Memories::Use::SELECTOR:
+            return "select_ram";
+        case Memories::Use::ACTIONDATA:
+            return "action_ram";
+        case Memories::Use::IDLETIME:
+            return "idletime";
+        default:
+            BUG("Unknown memory type");
     }
 }
 
@@ -120,19 +139,22 @@ static ResourcesLogging::PhvResourceUsage *logPhvContainers(const PhvSpec &spec)
             const auto units = addresses.size();
             const auto width = int(size);
             auto pct = new PhvContainerType(units, width);
-            pct->get_addresses().insert(pct->get_addresses().end(),
-                                        addresses.begin(),
+            pct->get_addresses().insert(pct->get_addresses().end(), addresses.begin(),
                                         addresses.end());
 
             switch (kind) {
             case PHV::Kind::normal:
-                result->append_normal(pct); break;
+                    result->append_normal(pct);
+                    break;
             case PHV::Kind::tagalong:
-                result->append_tagalong(pct); break;
+                    result->append_tagalong(pct);
+                    break;
             case PHV::Kind::mocha:
-                result->append_mocha(pct); break;
+                    result->append_mocha(pct);
+                    break;
             case PHV::Kind::dark:
-                result->append_dark(pct); break;
+                    result->append_dark(pct);
+                    break;
             default:
                 BUG("Unknown PHV container kind");
             }
@@ -142,27 +164,30 @@ static ResourcesLogging::PhvResourceUsage *logPhvContainers(const PhvSpec &spec)
     return result;
 }
 
-Resources::XbarByteResource::XbarByteResource(const std::string &ub,
-                                              const std::string &uf,
-                                              const IXBar::Use::Byte &b) : byte(b) {
+Resources::XbarByteResource::XbarByteResource(const std::string &ub, const std::string &uf,
+                                              const IXBar::Use::Byte &b)
+    : byte(b) {
     usedBy = stripLeadingDot(ub);
     usedFor = stripLeadingDot(uf);
 }
 
-void Resources::HashBitResource::append(std::string ub,
-                                        std::string uf,
-                                        Resources::HashBitResource::UsageType type,
-                                        int value, const std::string &fieldName) {
+void Resources::HashBitResource::append(std::string ub, std::string uf,
+                                        Resources::HashBitResource::UsageType type, int value,
+                                        const std::string &fieldName) {
     ub = stripLeadingDot(ub);
     uf = stripLeadingDot(uf);
 
     if (!usedBy.empty()) {
-        BUG_CHECK(usedBy == ub, "Hash bit resource allows only one used_by "
-                  "(current: %s, incoming: %s)", usedBy, ub.c_str());
+        BUG_CHECK(usedBy == ub,
+                  "Hash bit resource allows only one used_by "
+                  "(current: %s, incoming: %s)",
+                  usedBy, ub.c_str());
     }
     if (!usedFor.empty()) {
-        BUG_CHECK(usedFor == uf, "Hash bit resource allows only one used_for "
-                  "(current: %s, incoming: %s)", usedFor, uf.c_str());
+        BUG_CHECK(usedFor == uf,
+                  "Hash bit resource allows only one used_for "
+                  "(current: %s, incoming: %s)",
+                  usedFor, uf.c_str());
     }
     BUG_CHECK(ub != "<hash parity bit>",
               "Hash bit resource used by hash parity bit which shouldn't be logged.");
@@ -223,22 +248,14 @@ void ResourcesLogging::end_apply(const IR::Node *root) {
 
     auto phvContainers = logPhvContainers(Device::phvSpec());
 
-    auto resources = new ResourceUsage(
-        mauResources,
-        parserResources,
-        phvContainers);
+    auto resources = new ResourceUsage(mauResources, parserResources, phvContainers);
 
     // Output clot info for JBAY
     for (auto &cp : clotResources) resources->append_clots(cp);
 
-    auto logger = new Resources_Schema_Logger(
-        filePath.c_str(),
-        Logging::Logger::buildDate(),
-        BF_P4C_VERSION,
-        BackendOptions().programName + ".p4",
-        RunId::getId(),
-        RESOURCES_SCHEMA_VERSION,
-        resources);
+    auto logger = new Resources_Schema_Logger(filePath.c_str(), Logging::Logger::buildDate(),
+                                              BF_P4C_VERSION, BackendOptions().programName + ".p4",
+                                              RunId::getId(), RESOURCES_SCHEMA_VERSION, resources);
 
     logger->log();
     for (int pipe_id : root->to<IR::BFN::Pipe>()->ids) {
@@ -270,8 +287,8 @@ void ResourcesLogging::collectTableUsage(cstring name, const IR::MAU::Table *tab
 
     LOG3("\tadding resource table: " << name);
 
-    stageResources[stage].memories.emplace_back(
-        table, name.c_str(), table->build_gateway_name().c_str(), alloc);
+    stageResources[stage].memories.emplace_back(table, name.c_str(),
+                                                table->build_gateway_name().c_str(), alloc);
 
     collectXbarBytesUsage(stage, alloc->match_ixbar.get());
     collectXbarBytesUsage(stage, alloc->salu_ixbar.get());
@@ -293,8 +310,7 @@ void ResourcesLogging::collectTableUsage(cstring name, const IR::MAU::Table *tab
 }
 
 void ResourcesLogging::collectXbarBytesUsage(unsigned int stage, const IXBar::Use *alloc) {
-    if (!alloc || alloc->use.empty())
-        return;
+    if (!alloc || alloc->use.empty()) return;
 
     auto &stageResource = stageResources[stage];
     alloc->update_resources(stage, stageResource);
@@ -313,13 +329,11 @@ void ResourcesLogging::collectHashDistUsage(unsigned int stage,
     int unitInHashId = hdUse.unit % ixbSpec.hashDistSlices();
     auto key = std::make_pair(hashId, unitInHashId);
 
-    LOG2("add_hash_dist_usage (stage=" << stage << "), table: " << hdUse.used_by
-         << " done!");
+    LOG2("add_hash_dist_usage (stage=" << stage << "), table: " << hdUse.used_by << " done!");
     stageResources[stage].hashDist[key].append(hdUse.used_by.c_str(), hdUse.used_for());
 }
 
-void ResourcesLogging::collectActionBusBytesUsage(unsigned int stage,
-                                                  const TableResourceAlloc *res,
+void ResourcesLogging::collectActionBusBytesUsage(unsigned int stage, const TableResourceAlloc *res,
                                                   cstring tableName) {
     const std::string tableNameStr = stripLeadingDot(tableName.c_str());
 
@@ -327,7 +341,7 @@ void ResourcesLogging::collectActionBusBytesUsage(unsigned int stage,
         for (auto &rs : action_data_xbar->action_data_locs) {
             int byte_sz = ActionData::slot_type_to_bits(rs.location.type) / 8;
             for (auto i = 0; i < byte_sz; i++) {
-                stageResources[stage].actionBusBytes[rs.location.byte+i].append(tableNameStr);
+                stageResources[stage].actionBusBytes[rs.location.byte + i].append(tableNameStr);
             }
         }
     }
@@ -336,7 +350,7 @@ void ResourcesLogging::collectActionBusBytesUsage(unsigned int stage,
         for (auto &rs : meter_xbar->action_data_locs) {
             int byte_sz = ActionData::slot_type_to_bits(rs.location.type) / 8;
             for (auto i = 0; i < byte_sz; i++) {
-                stageResources[stage].actionBusBytes[rs.location.byte+i].append(tableNameStr);
+                stageResources[stage].actionBusBytes[rs.location.byte + i].append(tableNameStr);
             }
         }
     }
@@ -359,16 +373,15 @@ void ResourcesLogging::collectVliwUsage(unsigned int stage, const InstructionMem
         imr.usages[usedBy].insert(actionName);
 
         bool shared_slot = false;
-        for (auto& r : stageResources[stage].imemColor[row]) {
-            if (r.color == imr.color && r.gress == imr.gress)  {
+        for (auto &r : stageResources[stage].imemColor[row]) {
+            if (r.color == imr.color && r.gress == imr.gress) {
                 r.usages[usedBy].insert(actionName);
                 shared_slot = true;
                 break;
             }
         }
 
-        if (shared_slot)
-            continue;
+        if (shared_slot) continue;
 
         stageResources[stage].imemColor[row].push_back(imr);
     }
@@ -472,9 +485,11 @@ ResourcesLogging::HashDistResourceUsage *ResourcesLogging::logHashDist(unsigned 
 }
 
 void ResourcesLogging::logMemories(unsigned int stageNo, RamResourceUsage *ramsRes,
-                    MapRamResourceUsage *mapRamsRes, GatewayResourceUsage *gatewaysRes,
+                                   MapRamResourceUsage *mapRamsRes,
+                                   GatewayResourceUsage *gatewaysRes,
                     StashResourceUsage *stashesRes, MeterAluResourceUsage *meterRes,
-                    StatisticAluResourceUsage *statisticsRes, TcamResourceUsage *tcamsRes) const {
+                                   StatisticAluResourceUsage *statisticsRes,
+                                   TcamResourceUsage *tcamsRes) const {
     using GatewayUsage = Resources_Schema_Logger::GatewayUsage;
     using MapRamUsage = Resources_Schema_Logger::MapRamUsage;
     using MeterAluUsage = Resources_Schema_Logger::MeterAluUsage;
@@ -489,8 +504,8 @@ void ResourcesLogging::logMemories(unsigned int stageNo, RamResourceUsage *ramsR
             std::string usedBy = stripLeadingDot(memuse.used_by);
             std::string usedFor = typeName(memuse.type, res.table);
 
-            LOG3("MemUse: (" << res.tableName << ", p4name: " << usedBy
-                 << " " << memuse.type << ")");
+            LOG3("MemUse: (" << res.tableName << ", p4name: " << usedBy << " " << memuse.type
+                             << ")");
             switch (memuse.type) {
             case Memories::Use::EXACT:
             case Memories::Use::ATCAM:
@@ -499,7 +514,8 @@ void ResourcesLogging::logMemories(unsigned int stageNo, RamResourceUsage *ramsR
                 for (auto &r : memuse.row) {
                     for (auto &col : r.col) {
                         int way = memuse.get_way(r.row, col);
-                        auto ru = new RamUsage(col, r.row, (way != -1 ? new int(way): nullptr));
+                            auto ru =
+                                new RamUsage(col, r.row, (way != -1 ? new int(way) : nullptr));
                         auto eu = new ElementUsage(usedBy, usedFor);
                         ru->append(eu);
                         ramsRes->append(ru);
@@ -532,7 +548,8 @@ void ResourcesLogging::logMemories(unsigned int stageNo, RamResourceUsage *ramsR
                 auto eu = new ElementUsage(usedBy, usedFor);
                 gu->append(eu);
                 gatewaysRes->append(gu);
-                break; }
+                    break;
+                }
             case Memories::Use::COUNTER:
             case Memories::Use::METER:
             case Memories::Use::STATEFUL:
@@ -589,13 +606,14 @@ void ResourcesLogging::logMemories(unsigned int stageNo, RamResourceUsage *ramsR
                     }
                 break;
             default:
-                BUG("Unhandled memory use type %d in ResourcesLogging::gen_memories", memuse.type);
+                    BUG("Unhandled memory use type %d in ResourcesLogging::gen_memories",
+                        memuse.type);
             }
         }
     }
 }
 
-ResourcesLogging::LogicalTableResourceUsage* ResourcesLogging::logLogicalTables(int stage) const {
+ResourcesLogging::LogicalTableResourceUsage *ResourcesLogging::logLogicalTables(int stage) const {
     using LogicalTableUsage = Resources_Schema_Logger::LogicalTableUsage;
 
     auto logicalRes = new LogicalTableResourceUsage(StageUse::MAX_LOGICAL_IDS);  // size
@@ -609,8 +627,8 @@ ResourcesLogging::LogicalTableResourceUsage* ResourcesLogging::logLogicalTables(
     return logicalRes;
 }
 
-ResourcesLogging::ActionDataResourceUsage*
-ResourcesLogging::logActionBusBytes(unsigned int stageNo) const {
+ResourcesLogging::ActionDataResourceUsage *ResourcesLogging::logActionBusBytes(
+    unsigned int stageNo) const {
     using ActionDataByteUsage = Resources_Schema_Logger::ActionDataByteUsage;
 
     const int size = ActionDataBus::getAdbSize();
@@ -637,7 +655,7 @@ void ResourcesLogging::logActionSlots(MauStageResourceUsage *msru) const {
     using ActionSlotUsage = Resources_Schema_Logger::ActionSlotUsage;
 
     // \TODO: where do we get these ones from?
-    for ( auto slot : { 8, 16, 32} ) {
+    for (auto slot : {8, 16, 32}) {
         const int maximum_slots = 32;
         const int number_used = 0;
         auto asu = new ActionSlotUsage(maximum_slots, number_used, slot);
@@ -645,7 +663,7 @@ void ResourcesLogging::logActionSlots(MauStageResourceUsage *msru) const {
     }
 }
 
-ResourcesLogging::VliwResourceUsage* ResourcesLogging::logVliw(unsigned int stageNo) const {
+ResourcesLogging::VliwResourceUsage *ResourcesLogging::logVliw(unsigned int stageNo) const {
     using VliwColorUsage = Resources_Schema_Logger::VliwColorUsage;
     using VliwElementUsage = Resources_Schema_Logger::VliwColorUsage::Usages;
     using VliwUsage = Resources_Schema_Logger::VliwUsage;
@@ -681,15 +699,15 @@ ResourcesLogging::VliwResourceUsage* ResourcesLogging::logVliw(unsigned int stag
     return vru;
 }
 
-ResourcesLogging::ExactMatchSearchBusResourceUsage*
-ResourcesLogging::logExactMemSearchBuses(unsigned int stageNo) const {
+ResourcesLogging::ExactMatchSearchBusResourceUsage *ResourcesLogging::logExactMemSearchBuses(
+    unsigned int stageNo) const {
     using ExactMatchSearchBusUsage = Resources_Schema_Logger::ExactMatchSearchBusUsage;
 
     const int size = 2 * Memories::SRAM_ROWS;
 
     auto emsbru = new ExactMatchSearchBusResourceUsage(size);
 
-    std::map<int, ExactMatchSearchBusUsage*> idToUsages;  // for sharing buses
+    std::map<int, ExactMatchSearchBusUsage *> idToUsages;  // for sharing buses
     for (auto &res : stageResources[stageNo].memories) {
         for (auto &use : res.use->memuse) {
             auto memuse = use.second;
@@ -712,14 +730,15 @@ ResourcesLogging::logExactMemSearchBuses(unsigned int stageNo) const {
                     idToUsages[id] = new ExactMatchSearchBusUsage(id);
                 }
 
-                const auto tableName = (memuse.type == Memories::Use::GATEWAY)
-                                        ? res.gatewayName : res.tableName;
+                    const auto tableName =
+                        (memuse.type == Memories::Use::GATEWAY) ? res.gatewayName : res.tableName;
                 auto usedBy = tableName.substr(tableName[0] == '.' ? 1 : 0);
                 auto eu = new ElementUsage(usedBy, usedFor);
                 idToUsages[id]->append(eu);
                 break;
             }
-            default: break;
+                default:
+                    break;
             }
         }
     }
@@ -731,15 +750,15 @@ ResourcesLogging::logExactMemSearchBuses(unsigned int stageNo) const {
     return emsbru;
 }
 
-ResourcesLogging::ExactMatchResultBusResourceUsage*
-ResourcesLogging::logExactMemResultBuses(unsigned int stageNo) const {
+ResourcesLogging::ExactMatchResultBusResourceUsage *ResourcesLogging::logExactMemResultBuses(
+    unsigned int stageNo) const {
     using ExactMatchResultBusUsage = Resources_Schema_Logger::ExactMatchResultBusUsage;
 
     const int size = 2 * Memories::SRAM_ROWS;
 
     auto emrbru = new ExactMatchResultBusResourceUsage(size);
 
-    std::map<int, ExactMatchResultBusUsage*> idToUsages;  // Support for sharing buses
+    std::map<int, ExactMatchResultBusUsage *> idToUsages;  // Support for sharing buses
     for (auto &res : stageResources[stageNo].memories) {
         for (auto &use : res.use->memuse) {
             Memories::Use memuse = use.second;
@@ -785,7 +804,8 @@ ResourcesLogging::logExactMemResultBuses(unsigned int stageNo) const {
                 break;
             }*/
 
-            default: break;
+                default:
+                    break;
             }
         }
     }
@@ -798,15 +818,15 @@ ResourcesLogging::logExactMemResultBuses(unsigned int stageNo) const {
     return emrbru;
 }
 
-ResourcesLogging::TindResultBusResourceUsage*
-ResourcesLogging::logTindResultBuses(unsigned int stageNo) const {
+ResourcesLogging::TindResultBusResourceUsage *ResourcesLogging::logTindResultBuses(
+    unsigned int stageNo) const {
     using TindResultBusUsage = Resources_Schema_Logger::TindResultBusUsage;
 
     const int size = 2 * Memories::SRAM_ROWS;
 
     auto trbru = new TindResultBusResourceUsage(size);
 
-    std::map<int, TindResultBusUsage*> idToUsages;  // Support for sharing buses
+    std::map<int, TindResultBusUsage *> idToUsages;  // Support for sharing buses
     for (auto &res : stageResources[stageNo].memories) {
         for (auto &use : res.use->memuse) {
             Memories::Use memuse = use.second;
@@ -836,8 +856,7 @@ ResourcesLogging::logTindResultBuses(unsigned int stageNo) const {
                 // auto unit = memuse.gateway.unit;
                 // FIXME: How do we know if this is a tind bus or exm bus?
                 if (memuse.gateway.payload_unit == 0 || memuse.gateway.payload_unit == 1) {
-                    auto id = 2 * memuse.gateway.payload_row +
-                        memuse.gateway.payload_unit;
+                        auto id = 2 * memuse.gateway.payload_row + memuse.gateway.payload_unit;
                     if (idToUsages.count(id) == 0) {
                         idToUsages[id] = new TindResultBusUsage(id);
                     }
@@ -873,29 +892,25 @@ ResourcesLogging::MauStageResourceUsage *ResourcesLogging::logStage(int stageNo)
     int tcam_rows = ixbSpec.tcam_rows();
     int tcam_cols = ixbSpec.tcam_columns();
 
-    auto ramsRes = new RamResourceUsage(
-        Memories::SRAM_COLUMNS,  // nColums
-        Memories::SRAM_ROWS);  // nRows
+    auto ramsRes = new RamResourceUsage(Memories::SRAM_COLUMNS,  // nColums
+                                        Memories::SRAM_ROWS);    // nRows
 
-    auto mapRamsRes = new MapRamResourceUsage(
-        Memories::SRAM_ROWS,  // nRows
+    auto mapRamsRes = new MapRamResourceUsage(Memories::SRAM_ROWS,        // nRows
         Memories::MAPRAM_COLUMNS);  // nUnits
 
-    auto gatewaysRes = new GatewayResourceUsage(
-        Memories::SRAM_ROWS,  // nRows
+    auto gatewaysRes = new GatewayResourceUsage(Memories::SRAM_ROWS,          // nRows
         Memories::GATEWAYS_PER_ROW);  // nUnits
 
-    auto stashesRes = new StashResourceUsage(
-        Memories::SRAM_ROWS,  // nRows
+    auto stashesRes = new StashResourceUsage(Memories::SRAM_ROWS,          // nRows
         Memories::GATEWAYS_PER_ROW);  // nUnits
 
-    auto meterRes = new MeterAluResourceUsage(4);  // nAlus
+    auto meterRes = new MeterAluResourceUsage(4);           // nAlus
     auto statisticsRes = new StatisticAluResourceUsage(4);  // nAlus
 
     auto tcamsRes = new TcamResourceUsage(tcam_cols, tcam_rows);
 
-    logMemories(stageNo, ramsRes, mapRamsRes, gatewaysRes,
-                stashesRes, meterRes, statisticsRes, tcamsRes);
+    logMemories(stageNo, ramsRes, mapRamsRes, gatewaysRes, stashesRes, meterRes, statisticsRes,
+                tcamsRes);
 
     auto logicalTables = logLogicalTables(stageNo);
 
@@ -905,24 +920,10 @@ ResourcesLogging::MauStageResourceUsage *ResourcesLogging::logStage(int stageNo)
     auto exactResult = logExactMemResultBuses(stageNo);
     auto tindResult = logTindResultBuses(stageNo);
 
-    auto msru = new MauStageResourceUsage(
-        actionData,
-        exactResult,
-        exactSearch,
-        gatewaysRes,
-        hashBits,
-        hashDist,
-        logicalTables,
-        mapRamsRes,
-        meterRes,
-        ramsRes,
-        stageNo,
-        stashesRes,
-        statisticsRes,
-        tcamsRes,
-        tindResult,
-        vliw,
-        xbarBytes);
+    auto msru =
+        new MauStageResourceUsage(actionData, exactResult, exactSearch, gatewaysRes, hashBits,
+                                  hashDist, logicalTables, mapRamsRes, meterRes, ramsRes, stageNo,
+                                  stashesRes, statisticsRes, tcamsRes, tindResult, vliw, xbarBytes);
 
     logActionSlots(msru);
 
@@ -930,3 +931,5 @@ ResourcesLogging::MauStageResourceUsage *ResourcesLogging::logStage(int stageNo)
 }
 
 }  // namespace BFN
+
+/* clang-format on */

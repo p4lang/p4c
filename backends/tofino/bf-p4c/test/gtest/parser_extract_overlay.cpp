@@ -19,11 +19,10 @@
 
 #include <boost/algorithm/string/replace.hpp>
 
-#include "gtest/gtest.h"
-#include "bf_gtest_helpers.h"
-
-#include "ir/ir.h"
 #include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "bf_gtest_helpers.h"
+#include "gtest/gtest.h"
+#include "ir/ir.h"
 #include "test/gtest/helpers.h"
 
 namespace P4::Test {
@@ -220,10 +219,10 @@ Switch(pipe) main;
 }  // namespace ParserExtractOverlay
 
 /** Verify that fields are not packed in with the ingress port.
-  * Until a recent fix, checksum validation results were being packed with the
-  * ingress port, and these potentially overlap with the version and/or recirc
-  * bits.
-  */
+ * Until a recent fix, checksum validation results were being packed with the
+ * ingress port, and these potentially overlap with the version and/or recirc
+ * bits.
+ */
 TEST(ParserExtractOverlay, DontPackWithIngressPort_Traditional) {
     auto blk = TestCode(TestCode::Hdr::Tofino1arch, ParserExtractOverlay::prog(), {});
     blk.flags(TrimWhiteSpace | TrimAnnotations);
@@ -245,10 +244,10 @@ TEST(ParserExtractOverlay, DontPackWithIngressPort_Traditional) {
 }
 
 /** Verify that fields are not packed in with the ingress port.
-  * Until a recent fix, checksum validation results were being packed with the
-  * ingress port, and these potentially overlap with the version and/or recirc
-  * bits.
-  */
+ * Until a recent fix, checksum validation results were being packed with the
+ * ingress port, and these potentially overlap with the version and/or recirc
+ * bits.
+ */
 TEST(ParserExtractOverlay, DontPackWithIngressPort_AltPhv) {
     auto blk = TestCode(TestCode::Hdr::Tofino1arch, ParserExtractOverlay::prog(), {});
     blk.flags(TrimWhiteSpace | TrimAnnotations);

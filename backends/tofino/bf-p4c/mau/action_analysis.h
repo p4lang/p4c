@@ -10,8 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_MAU_ACTION_ANALYSIS_H_
-#define EXTENSIONS_BF_P4C_MAU_ACTION_ANALYSIS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_ACTION_ANALYSIS_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_ACTION_ANALYSIS_H_
 
 #include "bf-p4c/ir/bitrange.h"
 #include "bf-p4c/ir/tofino_write_context.h"
@@ -47,7 +47,7 @@ struct TableResourceAlloc;
  */
 class ActionAnalysis : public MauInspector, TofinoWriteContext {
  public:
-    enum op_type_t { NONE=0, DST, SRC1, SRC2, SRC3 };
+    enum op_type_t { NONE = 0, DST, SRC1, SRC2, SRC3 };
     static constexpr int LOADCONST_MAX = 21;
     static constexpr int CONST_SRC_MAX = 3;
     static constexpr int JBAY_CONST_SRC_MIN = 2;
@@ -59,13 +59,18 @@ class ActionAnalysis : public MauInspector, TofinoWriteContext {
     struct ActionParam {
         enum type_t { PHV, ACTIONDATA, CONSTANT, TOTAL_TYPES } type;
         const IR::Expression *expr;
-        enum speciality_t { NO_SPECIAL, HASH_DIST, METER_COLOR, RANDOM, METER_ALU, STFUL_COUNTER }
-             speciality = NO_SPECIAL;
+        enum speciality_t {
+            NO_SPECIAL,
+            HASH_DIST,
+            METER_COLOR,
+            RANDOM,
+            METER_ALU,
+            STFUL_COUNTER
+        } speciality = NO_SPECIAL;
         bool is_conditional = false;
 
         ActionParam() : type(PHV), expr(nullptr) {}
-        ActionParam(type_t t, const IR::Expression *e)
-            : type(t), expr(e) {}
+        ActionParam(type_t t, const IR::Expression *e) : type(t), expr(e) {}
 
         ActionParam(type_t t, const IR::Expression *e, speciality_t s)
             : type(t), expr(e), speciality(s) {}
@@ -77,7 +82,7 @@ class ActionAnalysis : public MauInspector, TofinoWriteContext {
 
         le_bitrange range() const {
             if (auto sl = expr->to<IR::Slice>())
-                return { static_cast<int>(sl->getL()), static_cast<int>(sl->getH()) };
+                return {static_cast<int>(sl->getL()), static_cast<int>(sl->getH())};
             return {0, size() - 1};
         }
 
@@ -88,19 +93,28 @@ class ActionAnalysis : public MauInspector, TofinoWriteContext {
         const IR::Expression *unsliced_expr() const;
 
         cstring get_type_string() const {
-            if (type == PHV)             return "PHV"_cs;
-            else if (type == ACTIONDATA) return "ACTIONDATA"_cs;
-            else if (type == CONSTANT)   return "CONSTANT"_cs;
+            if (type == PHV)
+                return "PHV"_cs;
+            else if (type == ACTIONDATA)
+                return "ACTIONDATA"_cs;
+            else if (type == CONSTANT)
+                return "CONSTANT"_cs;
             return "INVALID_TYPE"_cs;
         }
 
         cstring get_speciality_string() const {
-            if (speciality == NO_SPECIAL)         return "NO_SPECIAL"_cs;
-            else if (speciality == HASH_DIST)     return "HASH_DIST"_cs;
-            else if (speciality == METER_COLOR)   return "METER_COLOR"_cs;
-            else if (speciality == RANDOM)        return "RANDOM"_cs;
-            else if (speciality == METER_ALU)     return "METER_ALU"_cs;
-            else if (speciality == STFUL_COUNTER) return "STFUL_COUNTER"_cs;
+            if (speciality == NO_SPECIAL)
+                return "NO_SPECIAL"_cs;
+            else if (speciality == HASH_DIST)
+                return "HASH_DIST"_cs;
+            else if (speciality == METER_COLOR)
+                return "METER_COLOR"_cs;
+            else if (speciality == RANDOM)
+                return "RANDOM"_cs;
+            else if (speciality == METER_ALU)
+                return "METER_ALU"_cs;
+            else if (speciality == STFUL_COUNTER)
+                return "STFUL_COUNTER"_cs;
             return "INVALID_SPECIALITY"_cs;
         }
     };
@@ -135,17 +149,11 @@ class ActionAnalysis : public MauInspector, TofinoWriteContext {
             return name == "and" || name == "or" || name == "xor" || name == "xnor";
         }
 
-        bool is_single_shift() const {
-            return name == "shru" || name == "shrs" || name == "shl";
-        }
+        bool is_single_shift() const { return name == "shru" || name == "shrs" || name == "shl"; }
 
-        bool is_funnel_shift() const {
-            return name == "funnel-shift";
-        }
+        bool is_funnel_shift() const { return name == "funnel-shift"; }
 
-        bool is_shift() const {
-            return is_single_shift() || is_funnel_shift();
-        }
+        bool is_shift() const { return is_single_shift() || is_funnel_shift(); }
 
         enum container_overwrite_t {
             // only bits in dst field slice are overwritten
@@ -188,7 +196,7 @@ class ActionAnalysis : public MauInspector, TofinoWriteContext {
             : write_bits(wb), read_bits(rb), read_src(rs) {}
 
         int right_shift(PHV::Container container) const;
-        friend std::ostream &operator<<(std::ostream &out, const Alignment&);
+        friend std::ostream &operator<<(std::ostream &out, const Alignment &);
     };
 
     /** Information on all PHV reads affecting a single container.  Again used for verification
@@ -207,7 +215,6 @@ class ActionAnalysis : public MauInspector, TofinoWriteContext {
         // Determined during verify_alignment.  Only used for deposit-field instructions
         bitvec implicit_write_bits;
         bitvec implicit_read_bits;
-
 
         bitvec write_bits() const { return direct_write_bits | implicit_write_bits; }
         bitvec read_bits() const { return direct_read_bits | implicit_read_bits; }
@@ -228,9 +235,7 @@ class ActionAnalysis : public MauInspector, TofinoWriteContext {
             return direct_write_bits.popcount() == direct_read_bits.popcount();
         }
 
-        bool aligned() const {
-            return right_shift == 0;
-        }
+        bool aligned() const { return right_shift == 0; }
 
         bitvec df_src1_mask() const;
         bitvec df_src2_mask(PHV::Container container) const;
@@ -263,7 +268,7 @@ class ActionAnalysis : public MauInspector, TofinoWriteContext {
             return bitrange_contiguous() ? bitrange_cover_size() : -1;
         }
 
-        TotalAlignment operator |(const TotalAlignment &ta) {
+        TotalAlignment operator|(const TotalAlignment &ta) {
             TotalAlignment rv;
             rv.indiv_alignments.insert(rv.indiv_alignments.end(), indiv_alignments.begin(),
                                        indiv_alignments.end());
@@ -276,7 +281,7 @@ class ActionAnalysis : public MauInspector, TofinoWriteContext {
             rv.verbose = verbose | ta.verbose;
             return rv;
         }
-        friend std::ostream &operator<<(std::ostream &out, const TotalAlignment&);
+        friend std::ostream &operator<<(std::ostream &out, const TotalAlignment &);
     };
 
     /** Information on the action data field contained within the instruction.  The action data
@@ -292,7 +297,7 @@ class ActionAnalysis : public MauInspector, TofinoWriteContext {
         int start = -1;
         int total_field_affects = 0;
         int field_affects = 0;
-        int size  = -1;
+        int size = -1;
         bitvec specialities;
 
         void initialize(cstring adn, bool imm, int s, int tfa) {
@@ -310,7 +315,7 @@ class ActionAnalysis : public MauInspector, TofinoWriteContext {
     struct ConstantPosition {
         unsigned value;
         le_bitrange range;
-        ConstantPosition(unsigned v, le_bitrange r) : value(v), range(r) { }
+        ConstantPosition(unsigned v, le_bitrange r) : value(v), range(r) {}
     };
 
     /** Information on all constants within a single container instruction
@@ -327,7 +332,6 @@ class ActionAnalysis : public MauInspector, TofinoWriteContext {
         bool signExtend = false;  // Only true if requires rotation in a deposit-field instruction
         unsigned valid_instruction_constant(int container_size) const;
     };
-
 
     /** Information on all of the individual reads and writes within a single PHV container
      *  in an action function. Essentially coordinate to all the action that can happen
@@ -355,32 +359,32 @@ class ActionAnalysis : public MauInspector, TofinoWriteContext {
         ///> of these error messages.  In the meantime, used for tracking action
         ///> data issues
         enum error_code_t {
-            NO_PROBLEM                          = 0,
-            MULTIPLE_CONTAINER_ACTIONS          = (1 << 0),
-            READ_PHV_MISMATCH                   = (1 << 1),
-            ACTION_DATA_MISMATCH                = (1 << 2),
-            CONSTANT_MISMATCH                   = (1 << 3),
-            TOO_MANY_PHV_SOURCES                = (1 << 4),
-            IMPOSSIBLE_ALIGNMENT                = (1 << 5),
-            CONSTANT_TO_ACTION_DATA             = (1 << 6),
-            MULTIPLE_ACTION_DATA                = (1 << 7),
-            ILLEGAL_OVERWRITE                   = (1 << 8),
-            BIT_COLLISION                       = (1 << 9),
-            OPERAND_MISMATCH                    = (1 << 10),
-            UNHANDLED_ACTION_DATA               = (1 << 11),
-            DIFFERENT_READ_SIZE                 = (1 << 12),
-            MAU_GROUP_MISMATCH                  = (1 << 13),
-            PHV_AND_ACTION_DATA                 = (1 << 14),
-            PARTIAL_OVERWRITE                   = (1 << 15),
-            MULTIPLE_SHIFTS                     = (1 << 16),
-            ILLEGAL_ACTION_DATA                 = (1 << 17),
-            REFORMAT_CONSTANT                   = (1 << 18),
-            UNRESOLVED_REPEATED_ACTION_DATA     = (1 << 19),
-            ATTACHED_OUTPUT_ILLEGAL_ALIGNMENT   = (1 << 20),
-            CONSTANT_TO_HASH                    = (1 << 21),
-            ILLEGAL_MOCHA_OR_DARK_WRITE         = (1 << 22),
-            BIT_COLLISION_SET                   = (1 << 23),
-            MULTIPLE_SPECIALITIES               = (1 << 24)
+            NO_PROBLEM = 0,
+            MULTIPLE_CONTAINER_ACTIONS = (1 << 0),
+            READ_PHV_MISMATCH = (1 << 1),
+            ACTION_DATA_MISMATCH = (1 << 2),
+            CONSTANT_MISMATCH = (1 << 3),
+            TOO_MANY_PHV_SOURCES = (1 << 4),
+            IMPOSSIBLE_ALIGNMENT = (1 << 5),
+            CONSTANT_TO_ACTION_DATA = (1 << 6),
+            MULTIPLE_ACTION_DATA = (1 << 7),
+            ILLEGAL_OVERWRITE = (1 << 8),
+            BIT_COLLISION = (1 << 9),
+            OPERAND_MISMATCH = (1 << 10),
+            UNHANDLED_ACTION_DATA = (1 << 11),
+            DIFFERENT_READ_SIZE = (1 << 12),
+            MAU_GROUP_MISMATCH = (1 << 13),
+            PHV_AND_ACTION_DATA = (1 << 14),
+            PARTIAL_OVERWRITE = (1 << 15),
+            MULTIPLE_SHIFTS = (1 << 16),
+            ILLEGAL_ACTION_DATA = (1 << 17),
+            REFORMAT_CONSTANT = (1 << 18),
+            UNRESOLVED_REPEATED_ACTION_DATA = (1 << 19),
+            ATTACHED_OUTPUT_ILLEGAL_ALIGNMENT = (1 << 20),
+            CONSTANT_TO_HASH = (1 << 21),
+            ILLEGAL_MOCHA_OR_DARK_WRITE = (1 << 22),
+            BIT_COLLISION_SET = (1 << 23),
+            MULTIPLE_SPECIALITIES = (1 << 24)
         };
         unsigned error_code = NO_PROBLEM;
         static const std::vector<cstring> error_code_string_t;
@@ -393,7 +397,6 @@ class ActionAnalysis : public MauInspector, TofinoWriteContext {
         // This is for keeping information about extra 0 bits when one of the reads
         // is resized by "0 ++ <PHV>"
         TotalAlignment extra_resize_reads;
-
 
         ordered_map<PHV::Container, safe_vector<Alignment>> initialization_phv_alignment;
         // A container can be sourced multiple times, and thus this has become a multimap
@@ -410,22 +413,15 @@ class ActionAnalysis : public MauInspector, TofinoWriteContext {
         ContainerAction(cstring n, const IR::MAU::Table *tbl) : name(n), table_context(tbl) {}
 
         int total_types() {
-            return counts[ActionParam::PHV]
-                 + counts[ActionParam::ACTIONDATA]
-                 + counts[ActionParam::CONSTANT];
+            return counts[ActionParam::PHV] + counts[ActionParam::ACTIONDATA] +
+                   counts[ActionParam::CONSTANT];
         }
 
-        bool is_single_shift() const {
-            return name == "shru" || name == "shrs" || name == "shl";
-        }
+        bool is_single_shift() const { return name == "shru" || name == "shrs" || name == "shl"; }
 
-        bool is_funnel_shift() const {
-            return name == "funnel-shift";
-        }
+        bool is_funnel_shift() const { return name == "funnel-shift"; }
 
-        bool is_shift() const {
-            return is_single_shift() || is_funnel_shift();
-        }
+        bool is_shift() const { return is_single_shift() || is_funnel_shift(); }
 
         /**
          * Each alignment comes from an individual manipulation of alloc_slice or single
@@ -433,8 +429,7 @@ class ActionAnalysis : public MauInspector, TofinoWriteContext {
          */
         int alignment_counts() const {
             int rv = adi.alignment.indiv_alignments.size() + ci.alignment.indiv_alignments.size();
-            for (auto pa : phv_alignment)
-                rv += pa.second.indiv_alignments.size();
+            for (auto pa : phv_alignment) rv += pa.second.indiv_alignments.size();
             return rv;
         }
 
@@ -453,41 +448,26 @@ class ActionAnalysis : public MauInspector, TofinoWriteContext {
             return std::min(1, counts[ActionParam::ACTIONDATA] + counts[ActionParam::CONSTANT]);
         }
 
-        int read_sources() const {
-            return ad_sources() + counts[ActionParam::PHV];
-        }
+        int read_sources() const { return ad_sources() + counts[ActionParam::PHV]; }
 
+        bool is_from_set() const { return name == "set" || name == "to-bitmasked-set"; }
 
-        bool is_from_set() const {
-            return name == "set" || name == "to-bitmasked-set";
-        }
-
-        bool has_ad_or_constant() const {
-            return ad_sources() > 0;
-        }
+        bool has_ad_or_constant() const { return ad_sources() > 0; }
 
         bool partial_overwrite() const {
-            return ((error_code & PARTIAL_OVERWRITE) != 0 && !convert_instr_to_deposit_field)
-                    || convert_instr_to_bitmasked_set;
+            return ((error_code & PARTIAL_OVERWRITE) != 0 && !convert_instr_to_deposit_field) ||
+                   convert_instr_to_bitmasked_set;
         }
 
-        bool unresolved_ad() const {
-            return (error_code & UNRESOLVED_REPEATED_ACTION_DATA) != 0;
-        }
+        bool unresolved_ad() const { return (error_code & UNRESOLVED_REPEATED_ACTION_DATA) != 0; }
 
-        bool ad_renamed() const {
-            return adi.field_affects > 1 || unresolved_ad();
-        }
+        bool ad_renamed() const { return adi.field_affects > 1 || unresolved_ad(); }
 
-        bool no_sources() const {
-            return name == "invalidate";
-        }
+        bool no_sources() const { return name == "invalidate"; }
 
         void set_mismatch(ActionParam::type_t type);
 
-        bool action_data_isolated() const {
-            return !is_from_set();
-        }
+        bool action_data_isolated() const { return !is_from_set(); }
 
         bool set_invalidate_write_bits(le_bitrange write) {
             if (name != "invalidate") return false;
@@ -495,9 +475,7 @@ class ActionAnalysis : public MauInspector, TofinoWriteContext {
             return true;
         }
 
-        bool is_total_overwrite_possible() {
-            return total_overwrite_possible && !is_shift();
-        }
+        bool is_total_overwrite_possible() { return total_overwrite_possible && !is_shift(); }
 
         // FIXME: Can potentially use rotational shifts at some point
         // bool is_contig_rotate(bitvec check, int &shift, int size);
@@ -505,18 +483,18 @@ class ActionAnalysis : public MauInspector, TofinoWriteContext {
 
         bool verify_mocha_and_dark(cstring &error_message, PHV::Container container);
         bool verify_speciality(cstring &error_message, PHV::Container container,
-            cstring action_name);
+                               cstring action_name);
         bool verify_shift(cstring &error_message, PHV::Container container, const PhvInfo &phv);
         bool verify_phv_mau_group(PHV::Container container);
         bool verify_one_alignment(TotalAlignment &tot_alignment, int size, int &unaligned_count,
-            int &non_contiguous_count);
+                                  int &non_contiguous_count);
         void move_source_to_bit(safe_vector<int> &bit_uses, TotalAlignment &ta);
         bool verify_source_to_bit(int operands, PHV::Container container);
 
         bool verify_overwritten(PHV::Container container, const PhvInfo &phv);
         bool verify_only_read(const PhvInfo &phv, int num_source);
-        bool verify_possible(cstring &error_message, PHV::Container container,
-                             cstring action_name, const PhvInfo &phv);
+        bool verify_possible(cstring &error_message, PHV::Container container, cstring action_name,
+                             const PhvInfo &phv);
         bool is_byte_rotate_merge(PHV::Container container, TotalAlignment &ad_alignment);
         bool verify_deposit_field_variant(PHV::Container container, TotalAlignment &ad_alignment);
         bool verify_set_alignment(PHV::Container, TotalAlignment &ad_alignment);
@@ -531,32 +509,18 @@ class ActionAnalysis : public MauInspector, TofinoWriteContext {
             return (error_code & CONSTANT_TO_ACTION_DATA) != 0;
         }
 
-        bool convert_constant_to_hash() const {
-            return (error_code & CONSTANT_TO_HASH) != 0;
-        }
+        bool convert_constant_to_hash() const { return (error_code & CONSTANT_TO_HASH) != 0; }
 
         bool is_commutative() const {
-            return (name == "add")
-               ||  (name == "addc")
-               ||  (name == "saddu")
-               ||  (name == "sadds")
-               ||  (name == "minu")
-               ||  (name == "mins")
-               ||  (name == "maxu")
-               ||  (name == "maxs")
-               ||  (name == "setz")
-               ||  (name == "nor")
-               ||  (name == "xor")
-               ||  (name == "nand")
-               ||  (name == "and")
-               ||  (name == "xnor")
-               ||  (name == "or")
-               ||  (name == "sethi");
+            return (name == "add") || (name == "addc") || (name == "saddu") || (name == "sadds") ||
+                   (name == "minu") || (name == "mins") || (name == "maxu") || (name == "maxs") ||
+                   (name == "setz") || (name == "nor") || (name == "xor") || (name == "nand") ||
+                   (name == "and") || (name == "xnor") || (name == "or") || (name == "sethi");
         }
 
         bool verify_multiple_action_data() const;
 
-        friend std::ostream &operator<<(std::ostream &out, const ContainerAction&);
+        friend std::ostream &operator<<(std::ostream &out, const ContainerAction &);
         std::string to_string() const;
     };
 
@@ -587,9 +551,18 @@ class ActionAnalysis : public MauInspector, TofinoWriteContext {
     void initialize_phv_field(const IR::Expression *expr);
     void initialize_action_data(const IR::Expression *expr);
     ActionParam::speciality_t classify_attached_output(const IR::MAU::AttachedOutput *);
-    bool preorder(const IR::MAU::Action *) override { visitOnce(); return true; }
-    bool preorder(const IR::MAU::Table *) override { visitOnce(); return true; }
-    bool preorder(const IR::MAU::TableSeq *) override { visitOnce(); return true; }
+    bool preorder(const IR::MAU::Action *) override {
+        visitOnce();
+        return true;
+    }
+    bool preorder(const IR::MAU::Table *) override {
+        visitOnce();
+        return true;
+    }
+    bool preorder(const IR::MAU::TableSeq *) override {
+        visitOnce();
+        return true;
+    }
     bool preorder(const IR::Annotation *) override { return false; }
 
     bool preorder(const IR::Slice *) override;
@@ -612,27 +585,32 @@ class ActionAnalysis : public MauInspector, TofinoWriteContext {
     bool preorder(const IR::MAU::Primitive *) override;
     void postorder(const IR::MAU::Instruction *) override;
     void postorder(const IR::MAU::Action *) override;
-    bool preorder(const IR::BFN::ReinterpretCast* cast) override;
+    bool preorder(const IR::BFN::ReinterpretCast *cast) override;
 
     bool initialize_invalidate_alignment(const ActionParam &write, ContainerAction &cont_action);
     bool initialize_alignment(const ActionParam &write, const ActionParam &read,
-        const op_type_t read_src, ContainerAction &cont_action, cstring &error_message,
-        PHV::Container container, cstring action_name);
+                              const op_type_t read_src, ContainerAction &cont_action,
+                              cstring &error_message, PHV::Container container,
+                              cstring action_name);
     bool init_phv_alignment(const ActionParam &read, const op_type_t read_src,
                             ContainerAction &cont_action, le_bitrange write_bits,
                             PHV::Container container, cstring &error_message);
     bool init_special_alignment(const ActionParam &read, ContainerAction &cont_action,
-        le_bitrange write_bits, cstring action_name, PHV::Container container);
+                                le_bitrange write_bits, cstring action_name,
+                                PHV::Container container);
     bool init_ad_alloc_alignment(const ActionParam &read, ContainerAction &cont_action,
-        le_bitrange write_bits, cstring action_name, PHV::Container container);
+                                 le_bitrange write_bits, cstring action_name,
+                                 PHV::Container container);
     bool init_hash_constant_alignment(const ActionParam &read, ContainerAction &cont_action,
-        le_bitrange write_bits, cstring action_name, PHV::Container container);
+                                      le_bitrange write_bits, cstring action_name,
+                                      PHV::Container container);
     bool init_constant_alignment(const ActionParam &read, ContainerAction &cont_action,
-        le_bitrange write_bits, cstring action_name, PHV::Container container);
+                                 le_bitrange write_bits, cstring action_name,
+                                 PHV::Container container);
     bool init_simple_alignment(const ActionParam &read, ContainerAction &cont_action,
-        le_bitrange write_bits);
+                               le_bitrange write_bits);
     void initialize_constant(const ActionParam &read, ContainerAction &cont_action,
-        le_bitrange write_bits, safe_vector<le_bitrange> &read_bits_brs);
+                             le_bitrange write_bits, safe_vector<le_bitrange> &read_bits_brs);
     void build_phv_alignment(PHV::Container container, ContainerAction &cont_action);
     void determine_unused_bits(PHV::Container container, ContainerAction &cont_action);
 
@@ -649,29 +627,26 @@ class ActionAnalysis : public MauInspector, TofinoWriteContext {
     bool is_allowed_unalloc(const IR::Expression *e) {
         if (!allow_unalloc) return false;
         while (auto *sl = e->to<IR::Slice>()) e = sl->e0;
-        return e->is<IR::TempVar>(); }
-
- public:
-    const IR::Expression *isActionParam(const IR::Expression *expr,
-        le_bitrange *bits_out = nullptr, ActionParam::type_t *type = nullptr);
-    const IR::Expression *isStrengthReducible(const IR::Expression *expr);
-    const IR::MAU::ActionArg *isActionArg(const IR::Expression *expr,
-        le_bitrange *bits_out = nullptr);
-    bool isReductionOr(ContainerAction &cont_action) const;
-
-    bool misaligned_actiondata() {
-        return action_data_misaligned;
+        return e->is<IR::TempVar>();
     }
 
+ public:
+    const IR::Expression *isActionParam(const IR::Expression *expr, le_bitrange *bits_out = nullptr,
+                                        ActionParam::type_t *type = nullptr);
+    const IR::Expression *isStrengthReducible(const IR::Expression *expr);
+    const IR::MAU::ActionArg *isActionArg(const IR::Expression *expr,
+                                          le_bitrange *bits_out = nullptr);
+    bool isReductionOr(ContainerAction &cont_action) const;
+
+    bool misaligned_actiondata() { return action_data_misaligned; }
+
     void set_field_actions_map(FieldActionsMap *fam) {
-        if (ad_alloc == true)
-            return;
+        if (ad_alloc == true) return;
         field_actions_map = fam;
     }
 
     void set_container_actions_map(ContainerActionsMap *cam) {
-        if (phv_alloc == false)
-            return;
+        if (phv_alloc == false) return;
         container_actions_map = cam;
     }
 
@@ -686,15 +661,22 @@ class ActionAnalysis : public MauInspector, TofinoWriteContext {
     bool get_action_data_misaligned() const { return action_data_misaligned; }
     bool get_verbose() const { return verbose; }
     bool get_error_verbose() const { return error_verbose; }
-    const IR::MAU::Table* get_table() const { return tbl; }
-    const ContainerActionsMap* get_container_actions_map() const { return container_actions_map; }
+    const IR::MAU::Table *get_table() const { return tbl; }
+    const ContainerActionsMap *get_container_actions_map() const { return container_actions_map; }
 
     ActionAnalysis(const PhvInfo &p, bool pa, bool aa, const IR::MAU::Table *t,
-            const ReductionOrInfo &ri, bool au = false, bool seq = true)
-        : phv(p), phv_alloc(pa), ad_alloc(aa), allow_unalloc(au), sequential(seq), tbl(t),
-          red_info(ri) {visitDagOnce = false;}
+                   const ReductionOrInfo &ri, bool au = false, bool seq = true)
+        : phv(p),
+          phv_alloc(pa),
+          ad_alloc(aa),
+          allow_unalloc(au),
+          sequential(seq),
+          tbl(t),
+          red_info(ri) {
+        visitDagOnce = false;
+    }
 };
 
-std::ostream &operator<<(std::ostream &out, const ActionAnalysis&);
+std::ostream &operator<<(std::ostream &out, const ActionAnalysis &);
 
-#endif /* EXTENSIONS_BF_P4C_MAU_ACTION_ANALYSIS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_ACTION_ANALYSIS_H_ */

@@ -13,8 +13,8 @@
 #ifndef BF_P4C_MAU_ATTACHED_INFO_H_
 #define BF_P4C_MAU_ATTACHED_INFO_H_
 
-#include "bf-p4c/mau/mau_visitor.h"
 #include "attached_entries.h"
+#include "bf-p4c/mau/mau_visitor.h"
 #include "ir/pass_manager.h"
 #include "lib/ordered_map.h"
 #include "lib/ordered_set.h"
@@ -52,8 +52,13 @@ class FormatType_t {
     // that differ only in this bit will end up with the exact same possible table and
     // action formats.
 
-    enum stage_t { EARLIER_STAGE = 1, THIS_STAGE = 2, LATER_STAGE = 4, MASK = 7,
-                   ALL_ATTACHED = 01111111110, };
+    enum stage_t {
+        EARLIER_STAGE = 1,
+        THIS_STAGE = 2,
+        LATER_STAGE = 4,
+        MASK = 7,
+        ALL_ATTACHED = 01111111110,
+    };
     uint32_t value;
 
  public:
@@ -66,19 +71,20 @@ class FormatType_t {
                                                                   // insane combinations
     bool normal() const {  // valid format that does not require any action changes
         // either everything is in this stage OR there are no attached tabled
-        return (value & ~(ALL_ATTACHED*THIS_STAGE)) == THIS_STAGE || (value > 0 && value <= MASK); }
+        return (value & ~(ALL_ATTACHED * THIS_STAGE)) == THIS_STAGE || (value > 0 && value <= MASK);
+    }
 
     bool matchEarlierStage() const { return value & EARLIER_STAGE; }
     bool matchThisStage() const { return value & THIS_STAGE; }
     bool matchLaterStage() const { return value & LATER_STAGE; }
 
-    int num_attached() const { return floor_log2(value)/3; }
-    bool attachedEarlierStage(int idx) const { return (value >> 3*(idx+1)) & EARLIER_STAGE; }
-    bool attachedThisStage(int idx) const { return (value >> 3*(idx+1)) & THIS_STAGE; }
-    bool attachedLaterStage(int idx) const { return (value >> 3*(idx+1)) & LATER_STAGE; }
-    bool anyAttachedEarlierStage() const { return (value & (ALL_ATTACHED*EARLIER_STAGE)) != 0; }
-    bool anyAttachedThisStage() const { return (value & (ALL_ATTACHED*THIS_STAGE)) != 0; }
-    bool anyAttachedLaterStage() const { return (value & (ALL_ATTACHED*LATER_STAGE)) != 0; }
+    int num_attached() const { return floor_log2(value) / 3; }
+    bool attachedEarlierStage(int idx) const { return (value >> 3 * (idx + 1)) & EARLIER_STAGE; }
+    bool attachedThisStage(int idx) const { return (value >> 3 * (idx + 1)) & THIS_STAGE; }
+    bool attachedLaterStage(int idx) const { return (value >> 3 * (idx + 1)) & LATER_STAGE; }
+    bool anyAttachedEarlierStage() const { return (value & (ALL_ATTACHED * EARLIER_STAGE)) != 0; }
+    bool anyAttachedThisStage() const { return (value & (ALL_ATTACHED * THIS_STAGE)) != 0; }
+    bool anyAttachedLaterStage() const { return (value & (ALL_ATTACHED * LATER_STAGE)) != 0; }
 
     FormatType_t() : value(0) {}
     void initialize(const IR::MAU::Table *tbl, int entries, bool prev_stages,
@@ -105,10 +111,14 @@ class ValidateAttachedOfSingleTable : public MauInspector {
 
     cstring addr_type_name(addr_type_t type) {
         switch (type) {
-            case STATS: return "stats"_cs;
-            case METER: return "meter"_cs;
-            case ACTIONDATA: return "action"_cs;
-            default: return ""_cs;
+            case STATS:
+                return "stats"_cs;
+            case METER:
+                return "meter"_cs;
+            case ACTIONDATA:
+                return "action"_cs;
+            default:
+                return ""_cs;
         }
     }
 
@@ -121,15 +131,13 @@ class ValidateAttachedOfSingleTable : public MauInspector {
     bool preorder(const IR::MAU::Selector *as) override;
     bool preorder(const IR::MAU::TernaryIndirect *) override {
         BUG("No ternary indirect should exist before table placement");
-        return false; }
-    bool preorder(const IR::MAU::ActionData *ad) override;
-    bool preorder(const IR::MAU::IdleTime *) override {
         return false;
     }
+    bool preorder(const IR::MAU::ActionData *ad) override;
+    bool preorder(const IR::MAU::IdleTime *) override { return false; }
     bool preorder(const IR::Attached *att) override {
         BUG("Unknown attached table type %s", typeid(*att).name());
     }
-
 
  public:
     ValidateAttachedOfSingleTable(TypeToAddressMap &ia, const IR::MAU::Table *t)
@@ -150,7 +158,7 @@ class ValidateAttachedOfSingleTable : public MauInspector {
  * If the stateful ALU is in a different stage than the match table, the enable bit needs to
  * move through PHV if:
  *     - Only the first bullet point, as the by running the noop instruction from the gateway
- *       the enable bit will never run 
+ *       the enable bit will never run
  *     - On at least one miss action, the stateful ALU does not run.
  *
  * Meter type is necessary on a table when:
@@ -188,10 +196,12 @@ class HasAttachedMemory : public MauInspector {
         const Visitor::Context *ctxt = nullptr;
         if (findContext<IR::MAU::Primitive>(ctxt)) {
             BUG_CHECK(ctxt->child_index >= 0 && ctxt->child_index < 32, "mask overflow");
-            mask <<= ctxt->child_index; }
+            mask <<= ctxt->child_index;
+        }
         if (am_match.count(am)) {
             _found[am_match.at(am)] |= mask;
-            _found_all |= mask; }
+            _found_all |= mask;
+        }
         return false;
     }
 
@@ -200,9 +210,12 @@ class HasAttachedMemory : public MauInspector {
     void add(const IR::MAU::AttachedMemory *am) {
         if (!am_match.count(am)) {
             unsigned idx = am_match.size();
-            am_match[am] = idx; } }
+            am_match[am] = idx;
+        }
+    }
     HasAttachedMemory(std::initializer_list<const IR::MAU::AttachedMemory *> am) {
-        for (auto *a : am) add(a); }
+        for (auto *a : am) add(a);
+    }
     unsigned found() const { return _found_all; }
     unsigned found(const IR::MAU::AttachedMemory *am) const { return _found[am_match.at(am)]; }
     auto begin() const -> decltype(Keys(am_match).begin()) { return Keys(am_match).begin(); }
@@ -214,8 +227,8 @@ class HasAttachedMemory : public MauInspector {
  * PHV if this stateful ALU portion is split from the match portion
  */
 class SplitAttachedInfo : public PassManager {
-    typedef ActionData::FormatType_t  FormatType_t;
-    PhvInfo     &phv;
+    typedef ActionData::FormatType_t FormatType_t;
+    PhvInfo &phv;
 
     // Can't use IR::Node * as keys in a map, as they change in transforms.  Names
     // are unique and stable, so use them instead.  However, the pointers in the
@@ -229,7 +242,7 @@ class SplitAttachedInfo : public PassManager {
         const IR::TempVar *enable = nullptr;
         const IR::TempVar *type = nullptr;
     };
-    std::map<cstring, IndexTemp>  index_tempvars;
+    std::map<cstring, IndexTemp> index_tempvars;
 
     // Not linked via gateway with information
     struct AddressInfo {
@@ -255,7 +268,7 @@ class SplitAttachedInfo : public PassManager {
         auto rv = PassManager::init_apply(node);
         attached_to_table_map.clear();
         address_info_per_table.clear();
-        cache.clear();          // actions might have changed without renaming
+        cache.clear();  // actions might have changed without renaming
         return rv;
     }
 
@@ -269,7 +282,6 @@ class SplitAttachedInfo : public PassManager {
      public:
         explicit BuildSplitMaps(SplitAttachedInfo &s) : self(s) {}
     };
-
 
     /**
      * For each action in a table, determine if the attached memory is enabled within
@@ -294,47 +306,46 @@ class SplitAttachedInfo : public PassManager {
 
  public:
     explicit SplitAttachedInfo(PhvInfo &phv) : phv(phv) {
-        addPasses({
-            new BuildSplitMaps(*this),
-            new ValidateAttachedOfAllTables(*this),
-            new EnableAndTypesOnActions(*this)
-        });
+        addPasses({new BuildSplitMaps(*this), new ValidateAttachedOfAllTables(*this),
+                   new EnableAndTypesOnActions(*this)});
     }
 
-    const ordered_set<const IR::MAU::Table *> &
-    tables_from_attached(const IR::Attached *att) const {
-        return attached_to_table_map.at(att->name); }
+    const ordered_set<const IR::MAU::Table *> &tables_from_attached(const IR::Attached *att) const {
+        return attached_to_table_map.at(att->name);
+    }
 
  private:
     int addr_bits_to_phv_on_split(const IR::MAU::Table *tbl,
                                   const IR::MAU::AttachedMemory *at) const;
-    bool enable_to_phv_on_split(const IR::MAU::Table *tbl,
-                                const IR::MAU::AttachedMemory *at) const;
+    bool enable_to_phv_on_split(const IR::MAU::Table *tbl, const IR::MAU::AttachedMemory *at) const;
     int type_bits_to_phv_on_split(const IR::MAU::Table *tbl,
                                   const IR::MAU::AttachedMemory *at) const;
 
     const IR::MAU::Instruction *pre_split_addr_instr(const IR::MAU::Action *act,
-        const IR::MAU::Table *tbl, const IR::MAU::AttachedMemory *at);
+                                                     const IR::MAU::Table *tbl,
+                                                     const IR::MAU::AttachedMemory *at);
     const IR::MAU::Instruction *pre_split_enable_instr(const IR::MAU::Action *act,
-        const IR::MAU::Table *tbl, const IR::MAU::AttachedMemory *at);
+                                                       const IR::MAU::Table *tbl,
+                                                       const IR::MAU::AttachedMemory *at);
     const IR::MAU::Instruction *pre_split_type_instr(const IR::MAU::Action *act,
-        const IR::MAU::Table *tbl, const IR::MAU::AttachedMemory *at);
+                                                     const IR::MAU::Table *tbl,
+                                                     const IR::MAU::AttachedMemory *at);
 
     // memoization cache for get/create_split_action
     typedef std::tuple<cstring /* table name */, cstring /* action name */, FormatType_t> memo_key;
-    std::map<memo_key, const IR::MAU::Action *>  cache;
+    std::map<memo_key, const IR::MAU::Action *> cache;
 
  public:
     const IR::Expression *split_enable(const IR::MAU::AttachedMemory *, const IR::MAU::Table *);
     const IR::Expression *split_index(const IR::MAU::AttachedMemory *, const IR::MAU::Table *);
     const IR::Expression *split_type(const IR::MAU::AttachedMemory *, const IR::MAU::Table *);
 
-    const IR::MAU::Action *get_split_action(const IR::MAU::Action *act,
-        const IR::MAU::Table *tbl, FormatType_t format_type);
+    const IR::MAU::Action *get_split_action(const IR::MAU::Action *act, const IR::MAU::Table *tbl,
+                                            FormatType_t format_type);
 
  private:
     const IR::MAU::Action *create_split_action(const IR::MAU::Action *act,
-        const IR::MAU::Table *tbl, FormatType_t format_type);
+                                               const IR::MAU::Table *tbl, FormatType_t format_type);
 };
 
-#endif  /* BF_P4C_MAU_ATTACHED_INFO_H_ */
+#endif /* BF_P4C_MAU_ATTACHED_INFO_H_ */

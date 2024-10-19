@@ -13,8 +13,8 @@
 #ifndef BF_P4C_PARDE_STACK_PUSH_SHIMS_H_
 #define BF_P4C_PARDE_STACK_PUSH_SHIMS_H_
 
-#include "parde_visitor.h"
 #include "bf-p4c/common/header_stack.h"
+#include "parde_visitor.h"
 
 /**
  * @ingroup parde
@@ -24,9 +24,9 @@
  * @see HeaderPushPop for more discussion.
  */
 class StackPushShims : public PardeModifier {
-    const BFN::HeaderStackInfo* stacks = nullptr;
+    const BFN::HeaderStackInfo *stacks = nullptr;
 
-    bool preorder(IR::BFN::Pipe* pipe) override {
+    bool preorder(IR::BFN::Pipe *pipe) override {
         BUG_CHECK(pipe->headerStackInfo != nullptr,
                   "Running StackPushShims without running "
                   "CollectHeaderStackInfo first?");
@@ -35,8 +35,9 @@ class StackPushShims : public PardeModifier {
     }
 
     bool preorder(IR::BFN::Parser *p) override {
-        BUG_CHECK(stacks != nullptr, "No HeaderStackInfo; was StackPushShims "
-                                     "applied to a non-Pipe node?");
+        BUG_CHECK(stacks != nullptr,
+                  "No HeaderStackInfo; was StackPushShims "
+                  "applied to a non-Pipe node?");
         for (auto &stack : *stacks) {
             if (stack.maxpush == 0 || !stack.inThread[p->gress]) continue;
 
@@ -54,18 +55,15 @@ class StackPushShims : public PardeModifier {
             const unsigned stkValidSize = stack.size + stack.maxpush + stack.maxpop;
             const unsigned stkValidValue = pushValue << (stack.size + stack.maxpop);
 
-            IR::Vector<IR::BFN::ParserPrimitive> initStkValid = {
-                new IR::BFN::Extract(
-                    new IR::Member(IR::Type::Bits::get(stkValidSize),
-                                   new IR::PathExpression(stack.name), "$stkvalid"),
-                    new IR::BFN::ConstantRVal(stkValidValue))
-            };
-            p->start = new IR::BFN::ParserState(stack.name + "$shim", p->gress,
-                                                initStkValid, { }, {
-                new IR::BFN::Transition(match_t(), 0, p->start)
-            });
+            IR::Vector<IR::BFN::ParserPrimitive> initStkValid = {new IR::BFN::Extract(
+                new IR::Member(IR::Type::Bits::get(stkValidSize),
+                               new IR::PathExpression(stack.name), "$stkvalid"),
+                new IR::BFN::ConstantRVal(stkValidValue))};
+            p->start = new IR::BFN::ParserState(stack.name + "$shim", p->gress, initStkValid, {},
+                                                {new IR::BFN::Transition(match_t(), 0, p->start)});
         }
-        return false; }
+        return false;
+    }
 };
 
 #endif /* BF_P4C_PARDE_STACK_PUSH_SHIMS_H_ */

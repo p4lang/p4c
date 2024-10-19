@@ -14,13 +14,14 @@
 #define _FIELD_DEFUSE_H_
 
 #include <iostream>
-#include "ir/ir.h"
-#include "lib/symbitmatrix.h"
-#include "lib/ltbitmatrix.h"
-#include "lib/ordered_set.h"
-#include "bf-p4c/phv/phv_fields.h"
+
 #include "bf-p4c/ir/control_flow_visitor.h"
 #include "bf-p4c/ir/tofino_write_context.h"
+#include "bf-p4c/phv/phv_fields.h"
+#include "ir/ir.h"
+#include "lib/ltbitmatrix.h"
+#include "lib/ordered_set.h"
+#include "lib/symbitmatrix.h"
 
 using namespace P4;
 
@@ -35,16 +36,17 @@ using namespace P4;
  */
 class ImplicitParserInit : public IR::Expression {
  private:
-    IR::Expression* clone() const override {
-        auto* new_expr = new ImplicitParserInit(*this);
-        return new_expr; }
+    IR::Expression *clone() const override {
+        auto *new_expr = new ImplicitParserInit(*this);
+        return new_expr;
+    }
 
  public:
-    explicit ImplicitParserInit(const PHV::Field* f)
-        : field(f) { }
-    const PHV::Field* field;
-    void dbprint(std::ostream & out) const override {
-        out << "ImplicitParserInit of " << field->id << ":" << field->name; }
+    explicit ImplicitParserInit(const PHV::Field *f) : field(f) {}
+    const PHV::Field *field;
+    void dbprint(std::ostream &out) const override {
+        out << "ImplicitParserInit of " << field->id << ":" << field->name;
+    }
 
     DECLARE_TYPEINFO(ImplicitParserInit);
 };
@@ -71,14 +73,10 @@ class FieldDefUse : public BFN::ControlFlowVisitor, public Inspector, TofinoWrit
     /** A given expression for a field might appear multiple places in the IR dag (eg, an
      * action used by mulitple tables), so we use a pair<Unit,Expr> to denote a particular
      * use or definition in the code */
-    typedef std::pair<const IR::BFN::Unit *, const IR::Expression*>  locpair;
+    typedef std::pair<const IR::BFN::Unit *, const IR::Expression *> locpair;
     typedef ordered_set<locpair> LocPairSet;
 
-    enum VisitMode {
-      VisitJustReads,
-      VisitJustWrites,
-      VisitAll
-    };
+    enum VisitMode { VisitJustReads, VisitJustWrites, VisitAll };
 
     VisitMode mode = VisitAll;
 
@@ -89,33 +87,33 @@ class FieldDefUse : public BFN::ControlFlowVisitor, public Inspector, TofinoWrit
     static const std::unordered_set<cstring> write_by_parser;
 
  private:
-    const PhvInfo               &phv;
-    SymBitMatrix                &conflict;
+    const PhvInfo &phv;
+    SymBitMatrix &conflict;
 
     /// Maps uses to defs and vice versa.
-    ordered_map<locpair, LocPairSet>  &uses, &defs;
+    ordered_map<locpair, LocPairSet> &uses, &defs;
     ordered_map<locpair, bool> &ixbar_refs;
 
     /// All uses and all defs for each field.
-    ordered_map<int, LocPairSet>      &located_uses, &located_defs;
+    ordered_map<int, LocPairSet> &located_uses, &located_defs;
 
     /// Maps each def to the set of defs that it may overwrite.
-    ordered_map<locpair, LocPairSet>  &output_deps;
+    ordered_map<locpair, LocPairSet> &output_deps;
 
     /// All implicit parser zero initialization for each field.
-    LocPairSet                        &parser_zero_inits;
+    LocPairSet &parser_zero_inits;
 
     // All fields that rely on parser zero initialization.
-    ordered_set<const PHV::Field*>    &uninitialized_fields;
+    ordered_set<const PHV::Field *> &uninitialized_fields;
 
     // All fields used as alias destinations.
-    ordered_set<const PHV::Field*>    alias_destinations;
+    ordered_set<const PHV::Field *> alias_destinations;
     static const LocPairSet emptyset;
 
     /// Intermediate data structure for computing def/use sets.
     struct info {
-        const PHV::Field    *field = nullptr;
-        LocPairSet           def, use;
+        const PHV::Field *field = nullptr;
+        LocPairSet def, use;
         ordered_map<locpair, ordered_set<le_bitrange>> def_covered_ranges_map;
         // The reason to have a set of bit range is that there is a case that new def's range only
         // shadows a segment of a previous range, e.g., [3,5] shadows [0,7]. In this case, the
@@ -151,9 +149,9 @@ class FieldDefUse : public BFN::ControlFlowVisitor, public Inspector, TofinoWrit
     bool preorder(const IR::BFN::LoweredParser *p) override;
     bool preorder(const IR::MAU::Table *t) override;
     void postorder(const IR::MAU::Table *t) override;
-    bool preorder(const IR::MAU::Primitive* prim) override;
+    bool preorder(const IR::MAU::Primitive *prim) override;
     bool preorder(const IR::MAU::Action *p) override;
-    bool preorder(const IR::MAU::StatefulAlu* prim) override;
+    bool preorder(const IR::MAU::StatefulAlu *prim) override;
     bool preorder(const IR::Expression *e) override;
     bool preorder(const IR::BFN::AbstractDeparser *d) override;
     void postorder(const IR::BFN::AbstractDeparser *d) override;
@@ -170,26 +168,33 @@ class FieldDefUse : public BFN::ControlFlowVisitor, public Inspector, TofinoWrit
 
  public:
     explicit FieldDefUse(const PhvInfo &p)
-    : phv(p), conflict(*new SymBitMatrix),
-      uses(*new std::remove_reference<decltype(uses)>::type),
-      defs(*new std::remove_reference<decltype(defs)>::type),
-      ixbar_refs(*new std::remove_reference<decltype(ixbar_refs)>::type),
-      located_uses(*new std::remove_reference<decltype(located_uses)>::type),
-      located_defs(*new std::remove_reference<decltype(located_defs)>::type),
-      output_deps(*new std::remove_reference<decltype(output_deps)>::type),
-      parser_zero_inits(*new std::remove_reference<decltype(parser_zero_inits)>::type),
-      uninitialized_fields(*new std::remove_reference<decltype(uninitialized_fields)>::type)
-      { joinFlows = true; visitDagOnce = false; BackwardsCompatibleBroken = true; }
+        : phv(p),
+          conflict(*new SymBitMatrix),
+          uses(*new std::remove_reference<decltype(uses)>::type),
+          defs(*new std::remove_reference<decltype(defs)>::type),
+          ixbar_refs(*new std::remove_reference<decltype(ixbar_refs)>::type),
+          located_uses(*new std::remove_reference<decltype(located_uses)>::type),
+          located_defs(*new std::remove_reference<decltype(located_defs)>::type),
+          output_deps(*new std::remove_reference<decltype(output_deps)>::type),
+          parser_zero_inits(*new std::remove_reference<decltype(parser_zero_inits)>::type),
+          uninitialized_fields(*new std::remove_reference<decltype(uninitialized_fields)>::type) {
+        joinFlows = true;
+        visitDagOnce = false;
+        BackwardsCompatibleBroken = true;
+    }
 
     // TODO: unused?
     // const SymBitMatrix &conflicts() { return conflict; }
 
     const LocPairSet &getDefs(locpair use) const {
-        return defs.count(use) ? defs.at(use) : emptyset; }
+        return defs.count(use) ? defs.at(use) : emptyset;
+    }
     const LocPairSet &getDefs(const IR::BFN::Unit *u, const IR::Expression *e) const {
-        return getDefs(locpair(u, e)); }
+        return getDefs(locpair(u, e));
+    }
     const LocPairSet &getDefs(const Visitor *v, const IR::Expression *e) const {
-        return getDefs(locpair(v->findOrigCtxt<IR::BFN::Unit>(), e)); }
+        return getDefs(locpair(v->findOrigCtxt<IR::BFN::Unit>(), e));
+    }
 
     /** Get all defs and uses of the PHV::Field with ID @p fid. */
     const LocPairSet getAllDefsAndUses(int fid) const {
@@ -207,24 +212,29 @@ class FieldDefUse : public BFN::ControlFlowVisitor, public Inspector, TofinoWrit
 
     /** Get all defs of the PHV::Field with ID @p fid. */
     const LocPairSet &getAllDefs(int fid) const {
-        return located_defs.count(fid) ? located_defs.at(fid) : emptyset; }
+        return located_defs.count(fid) ? located_defs.at(fid) : emptyset;
+    }
 
     const ordered_map<int, LocPairSet> &getAllDefs() const { return located_defs; }
 
-    LocPairSet getParserDefs(const PHV::Field* f, std::optional<le_bitrange> bits) const;
-    LocPairSet getParserDefs(const PHV::FieldSlice& fs) const {
+    LocPairSet getParserDefs(const PHV::Field *f, std::optional<le_bitrange> bits) const;
+    LocPairSet getParserDefs(const PHV::FieldSlice &fs) const {
         return getParserDefs(fs.field(), fs.range());
     }
 
     const LocPairSet &getUses(locpair def) const {
-        return uses.count(def) ? uses.at(def) : emptyset; }
+        return uses.count(def) ? uses.at(def) : emptyset;
+    }
     const LocPairSet &getUses(const IR::BFN::Unit *u, const IR::Expression *e) const {
-        return getUses(locpair(u, e)); }
+        return getUses(locpair(u, e));
+    }
     const LocPairSet &getUses(const Visitor *v, const IR::Expression *e) const {
-        return getUses(locpair(v->findOrigCtxt<IR::BFN::Unit>(), e)); }
+        return getUses(locpair(v->findOrigCtxt<IR::BFN::Unit>(), e));
+    }
     /** Get all uses of the PHV::Field with ID @p fid. */
     const LocPairSet &getAllUses(int fid) const {
-        return located_uses.count(fid) ? located_uses.at(fid) : emptyset; }
+        return located_uses.count(fid) ? located_uses.at(fid) : emptyset;
+    }
     const ordered_map<int, LocPairSet> &getAllUses() const { return located_uses; }
 
     /// @return all defs that the given def may overwrite.
@@ -238,8 +248,9 @@ class FieldDefUse : public BFN::ControlFlowVisitor, public Inspector, TofinoWrit
         return getOutputDeps(locpair(v->findOrigCtxt<IR::BFN::Unit>(), e));
     }
 
-    const ordered_set<const PHV::Field*> &getUninitializedFields() const {
-        return uninitialized_fields; }
+    const ordered_set<const PHV::Field *> &getUninitializedFields() const {
+        return uninitialized_fields;
+    }
 
     bool hasNonDarkContext(locpair info) const {
         if (ixbar_refs.count(info)) {
@@ -247,8 +258,9 @@ class FieldDefUse : public BFN::ControlFlowVisitor, public Inspector, TofinoWrit
         }
 
         if (!ixbar_refs.count(info)) {
-            LOG5("\t\t ixbar_refs for expression " << info.second << " not found for unit " <<
-                 info.first << ", but assuming it is non-dark");
+            LOG5("\t\t ixbar_refs for expression " << info.second << " not found for unit "
+                                                   << info.first
+                                                   << ", but assuming it is non-dark");
             return true;
         }
 
@@ -256,20 +268,20 @@ class FieldDefUse : public BFN::ControlFlowVisitor, public Inspector, TofinoWrit
     }
 
     bool hasUninitializedRead(int fid) const {
-        for (const auto& def : getAllDefs(fid)) {
-            auto* expr = def.second;
-            if (dynamic_cast<const ImplicitParserInit*>(expr) != nullptr)
-                if (getUses(def).size() > 0)
-                    return true; }
+        for (const auto &def : getAllDefs(fid)) {
+            auto *expr = def.second;
+            if (dynamic_cast<const ImplicitParserInit *>(expr) != nullptr)
+                if (getUses(def).size() > 0) return true;
+        }
         return false;
     }
 
     /// @returns true if the field @p f is used in the parser.
-    bool isUsedInParser(const PHV::Field* f) const;
-    bool hasUseAt(const PHV::Field* f, const IR::BFN::Unit* u) const;
-    bool hasDefAt(const PHV::Field* f, const IR::BFN::Unit* u) const;
-    bool hasDefInParser(const PHV::Field* f, std::optional<le_bitrange> bits) const;
-    bool hasDefInParser(const PHV::FieldSlice& fs) const {
+    bool isUsedInParser(const PHV::Field *f) const;
+    bool hasUseAt(const PHV::Field *f, const IR::BFN::Unit *u) const;
+    bool hasDefAt(const PHV::Field *f, const IR::BFN::Unit *u) const;
+    bool hasDefInParser(const PHV::Field *f, std::optional<le_bitrange> bits) const;
+    bool hasDefInParser(const PHV::FieldSlice &fs) const {
         return hasDefInParser(fs.field(), fs.range());
     }
 };

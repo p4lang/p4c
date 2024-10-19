@@ -11,22 +11,20 @@
  */
 
 #include "lpf.h"
+
 #include "programStructure.h"
 
-P4V1::LpfConverter::LpfConverter() {
-    addConverter("lpf"_cs, this);
-}
+P4V1::LpfConverter::LpfConverter() { addConverter("lpf"_cs, this); }
 
 const IR::Type_Extern *P4V1::LpfConverter::convertExternType(P4V1::ProgramStructure *structure,
                                                              const IR::Type_Extern *, cstring) {
-    if (use_v1model())
-        structure->include("tofino/lpf.p4"_cs);
+    if (use_v1model()) structure->include("tofino/lpf.p4"_cs);
     return nullptr;
 }
 
 const IR::Declaration_Instance *P4V1::LpfConverter::convertExternInstance(
-        P4V1::ProgramStructure *structure, const IR::Declaration_Instance *ext, cstring name,
-        IR::IndexedVector<IR::Declaration> *) {
+    P4V1::ProgramStructure *structure, const IR::Declaration_Instance *ext, cstring name,
+    IR::IndexedVector<IR::Declaration> *) {
     auto *et = ext->type->to<IR::Type_Extern>();
     BUG_CHECK(et && et->name == "lpf", "Extern %s is not lpf type, but %s", ext, ext->type);
     ExpressionConverter conv(structure);
@@ -36,8 +34,7 @@ const IR::Declaration_Instance *P4V1::LpfConverter::convertExternInstance(
     bool direct = false;
     for (auto prop : Values(ext->properties)) {
         const IR::Expression *val = nullptr;
-        if (auto ev = prop->value->to<IR::ExpressionValue>())
-            val = conv.convert(ev->expression);
+        if (auto ev = prop->value->to<IR::ExpressionValue>()) val = conv.convert(ev->expression);
         if (prop->name == "filter_input") {
             filt_type = val ? val->type : nullptr;
         } else if (prop->name == "direct" || prop->name == "static") {
@@ -48,32 +45,31 @@ const IR::Declaration_Instance *P4V1::LpfConverter::convertExternInstance(
             instance_count = val;
         } else {
             error("Unknown property %s on lpf", prop);
-            continue; }
-        if (!val)
-            error("%s: %s property is not an expression", prop->name, prop->value->srcInfo); }
-    if (direct && instance_count)
-        error("lpf %s specifies both 'direct' and 'instance_count'", ext);
+            continue;
+        }
+        if (!val) error("%s: %s property is not an expression", prop->name, prop->value->srcInfo);
+    }
+    if (direct && instance_count) error("lpf %s specifies both 'direct' and 'instance_count'", ext);
 
-    auto* externalName = new IR::StringLiteral(IR::ID("." + name));
-    auto* annotations = new IR::Annotations({
-        new IR::Annotation(IR::ID("name"), { externalName })});
+    auto *externalName = new IR::StringLiteral(IR::ID("." + name));
+    auto *annotations = new IR::Annotations({new IR::Annotation(IR::ID("name"), {externalName})});
     auto args = new IR::Vector<IR::Argument>();
     if (instance_count) {
         args->push_back(new IR::Argument(instance_count));
         auto type = new IR::Type_Specialized(
             new IR::Type_Name("Lpf"),
-            new IR::Vector<IR::Type>({ filt_type, IR::Type::Bits::get(32) }));
+            new IR::Vector<IR::Type>({filt_type, IR::Type::Bits::get(32)}));
         return new IR::Declaration_Instance(ext->srcInfo, name, annotations, type, args);
     } else {
-        auto type = new IR::Type_Specialized(
-            new IR::Type_Name("DirectLpf"),
-            new IR::Vector<IR::Type>({ filt_type }));
+        auto type = new IR::Type_Specialized(new IR::Type_Name("DirectLpf"),
+                                             new IR::Vector<IR::Type>({filt_type}));
         return new IR::Declaration_Instance(ext->srcInfo, name, annotations, type, args);
     }
 }
 
 const IR::Statement *P4V1::LpfConverter::convertExternCall(P4V1::ProgramStructure *structure,
-        const IR::Declaration_Instance *ext, const IR::Primitive *prim) {
+                                                           const IR::Declaration_Instance *ext,
+                                                           const IR::Primitive *prim) {
     auto *et = ext->type->to<IR::Type_Extern>();
     BUG_CHECK(et && et->name == "lpf", "Extern %s is not lpf type, but %s", ext, ext->type);
     ExpressionConverter conv(structure);
@@ -88,15 +84,17 @@ const IR::Statement *P4V1::LpfConverter::convertExternCall(P4V1::ProgramStructur
             args->push_back(new IR::Argument(conv.convert(ev->expression)));
         } else {
             error("%s: filter_input property is not an expression", prop->value->srcInfo);
-            return nullptr; }
+            return nullptr;
+        }
     } else {
-        error("No filter_input in %s", ext); }
+        error("No filter_input in %s", ext);
+    }
     IR::BlockStatement *block = nullptr;
     if (prim->name == "execute_from_hash") {
         cstring temp = structure->makeUniqueName("temp"_cs);
         block = P4V1::generate_hash_block_statement(structure, prim, temp, conv, 3);
-        args->push_back(new IR::Argument(new IR::Cast(IR::Type_Bits::get(32),
-                        new IR::PathExpression(new IR::Path(temp)))));
+        args->push_back(new IR::Argument(
+            new IR::Cast(IR::Type_Bits::get(32), new IR::PathExpression(new IR::Path(temp)))));
     } else if (prim->name == "execute") {
         if (prim->operands.size() == 3)
             args->push_back(new IR::Argument(conv.convert(prim->operands.at(2))));
@@ -110,7 +108,8 @@ const IR::Statement *P4V1::LpfConverter::convertExternCall(P4V1::ProgramStructur
     rv = structure->assign(prim->srcInfo, dest, mc, dest->type);
     if (block) {
         block->push_back(rv);
-        rv = block; }
+        rv = block;
+    }
     return rv;
 }
 

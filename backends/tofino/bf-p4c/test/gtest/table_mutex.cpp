@@ -10,29 +10,29 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+#include "bf-p4c/mau/table_mutex.h"
+
 #include <optional>
+
 #include <boost/algorithm/string/replace.hpp>
 
+#include "bf-p4c/common/header_stack.h"
+#include "bf-p4c/common/multiple_apply.h"
+#include "bf-p4c/mau/instruction_selection.h"
+#include "bf-p4c/phv/action_phv_constraints.h"
+#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
 #include "gtest/gtest.h"
-
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
 #include "test/gtest/helpers.h"
-#include "bf-p4c/mau/table_mutex.h"
-#include "bf-p4c/common/multiple_apply.h"
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
-#include "bf-p4c/phv/action_phv_constraints.h"
-#include "bf-p4c/mau/instruction_selection.h"
-#include "bf-p4c/common/header_stack.h"
 namespace P4::Test {
 
 class TableMutexTest : public TofinoBackendTest {};
 
 namespace {
 
-std::optional<TofinoPipeTestCase>
-createTableMutexTestCase(const std::string &ingress_source) {
+std::optional<TofinoPipeTestCase> createTableMutexTestCase(const std::string &ingress_source) {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
 
 header H1
@@ -81,7 +81,7 @@ V1Switch(parse(), verifyChecksum(), igrs(), egrs(),
 
     boost::replace_first(source, "%INGRESS%", ingress_source);
 
-    auto& options = BackendOptions();
+    auto &options = BackendOptions();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.target = "tofino"_cs;
     options.arch = "v1model"_cs;
@@ -92,8 +92,7 @@ V1Switch(parse(), verifyChecksum(), igrs(), egrs(),
 }  // namespace
 
 TEST_F(TableMutexTest, BasicMutex) {
-    auto test = createTableMutexTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableMutexTestCase(P4_SOURCE(P4Headers::NONE, R"(
 
     action nop () {}
     action setf1(bit<8> p1) { headers.h1.f1 = p1; }
@@ -136,8 +135,7 @@ TEST_F(TableMutexTest, BasicMutex) {
 }
 
 TEST_F(TableMutexTest, TwoActionsSameNextTable) {
-    auto test = createTableMutexTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableMutexTestCase(P4_SOURCE(P4Headers::NONE, R"(
 
     action nop () {}
     action setf1(bit<8> p1) { headers.h1.f1 = p1; }
@@ -191,8 +189,7 @@ TEST_F(TableMutexTest, TwoActionsSameNextTable) {
 }
 
 TEST_F(TableMutexTest, SharedNextTable) {
-    auto test = createTableMutexTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableMutexTestCase(P4_SOURCE(P4Headers::NONE, R"(
     action nop () {}
     action setf1(bit<8> p1) { headers.h1.f1 = p1; }
     action setf2() { headers.h1.f2 = headers.h1.f1; }
@@ -255,8 +252,7 @@ TEST_F(TableMutexTest, SharedNextTable) {
 }
 
 TEST_F(TableMutexTest, DifferingNextTableChains) {
-    auto test = createTableMutexTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableMutexTestCase(P4_SOURCE(P4Headers::NONE, R"(
     action nop () {}
     action setf1(bit<8> p1) { headers.h1.f1 = p1; }
     action setf2() { headers.h1.f2 = headers.h1.f1; }
@@ -332,11 +328,8 @@ TEST_F(TableMutexTest, DifferingNextTableChains) {
     EXPECT_FALSE(mutex(names.at("igrs.t4"_cs), names.at("igrs.t5"_cs)));
 }
 
-
-
 TEST_F(TableMutexTest, OneChainFromTwoActions) {
-    auto test = createTableMutexTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableMutexTestCase(P4_SOURCE(P4Headers::NONE, R"(
     action nop () {}
     action setf1(bit<8> p1) { headers.h1.f1 = p1; }
     action setf2() { headers.h1.f2 = headers.h1.f1; }
@@ -398,10 +391,8 @@ TEST_F(TableMutexTest, OneChainFromTwoActions) {
     EXPECT_TRUE(mutex(names.at("igrs.t3"_cs), names.at("igrs.t4"_cs)));
 }
 
-
 TEST_F(TableMutexTest, MultiLevelNextTableChain) {
-    auto test = createTableMutexTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableMutexTestCase(P4_SOURCE(P4Headers::NONE, R"(
     action nop () {}
     action setf1(bit<8> p1) { headers.h1.f1 = p1; }
     action setf2() { headers.h1.f2 = headers.h1.f1; }
@@ -455,8 +446,7 @@ TEST_F(TableMutexTest, MultiLevelNextTableChain) {
 }
 
 TEST_F(TableMutexTest, Tofino2MultiApplyChain) {
-    auto test = createTableMutexTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableMutexTestCase(P4_SOURCE(P4Headers::NONE, R"(
     action nop() {}
     action a1() { headers.h1.f1 = headers.h1.f2; }
     action a2() { headers.h1.f2 = headers.h1.f1; }
@@ -544,22 +534,17 @@ TEST_F(TableMutexTest, Tofino2MultiApplyChain) {
     EXPECT_FALSE(mutex(names.at("igrs.t5"_cs), names.at("igrs.t6"_cs)));
 }
 
-const IR::BFN::Pipe *runInitialPassManager(const IR::BFN::Pipe* pipe,
-                                           const BFN_Options& option,
+const IR::BFN::Pipe *runInitialPassManager(const IR::BFN::Pipe *pipe, const BFN_Options &option,
                                            PhvInfo *phv) {
     ReductionOrInfo red_info;
-    PassManager quick_backend = {
-        new CollectHeaderStackInfo,
-        new CollectPhvInfo(*phv),
-        new InstructionSelection(option, *phv, red_info)
-    };
+    PassManager quick_backend = {new CollectHeaderStackInfo, new CollectPhvInfo(*phv),
+                                 new InstructionSelection(option, *phv, red_info)};
 
     return pipe->apply(quick_backend);
 }
 
 TEST_F(TableMutexTest, IndirectAttachedActionAnalysis) {
-    auto test = createTableMutexTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableMutexTestCase(P4_SOURCE(P4Headers::NONE, R"(
     counter<bit<5>>(32, CounterType.packets_and_bytes) tcount;
     counter<bit<5>>(32, CounterType.packets_and_bytes) scount;
     action nop() {}
@@ -657,8 +642,7 @@ TEST_F(TableMutexTest, IndirectAttachedActionAnalysis) {
 }
 
 TEST_F(TableMutexTest, ExitTableMutex1) {
-    auto test = createTableMutexTestCase(
-     P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableMutexTestCase(P4_SOURCE(P4Headers::NONE, R"(
      action nop() {}
      action a1() { headers.h1.f1 = headers.h1.f2; }
      action a2() { exit;}

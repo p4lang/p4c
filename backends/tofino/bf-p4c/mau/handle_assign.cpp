@@ -11,11 +11,11 @@
  */
 
 #include "bf-p4c/mau/handle_assign.h"
-#include "bf-p4c/mau/input_xbar.h"
-#include "bf-p4c/mau/tofino/input_xbar.h"
-#include "bf-p4c/mau/resource_estimate.h"
-#include "lib/safe_vector.h"
 
+#include "bf-p4c/mau/input_xbar.h"
+#include "bf-p4c/mau/resource_estimate.h"
+#include "bf-p4c/mau/tofino/input_xbar.h"
+#include "lib/safe_vector.h"
 
 bool AssignActionHandle::ActionProfileImposedConstraints::preorder(const IR::MAU::ActionData *ad) {
     auto tbl = findContext<IR::MAU::Table>();
@@ -50,9 +50,11 @@ bool AssignActionHandle::ActionProfileImposedConstraints::preorder(const IR::MAU
             non_shared_actions += sep + entry;
             sep = ", ";
         }
-        error("%s: Currently in p4c, any table using an action profile is required to use "
-              "the same actions, and the following actions don't appear in all table using "
-              "the action profile %s : %s", ad->srcInfo, ad->name, non_shared_actions);
+        error(
+            "%s: Currently in p4c, any table using an action profile is required to use "
+            "the same actions, and the following actions don't appear in all table using "
+            "the action profile %s : %s",
+            ad->srcInfo, ad->name, non_shared_actions);
     }
     return false;
 }
@@ -73,8 +75,7 @@ bool AssignActionHandle::DetermineHandle::preorder(const IR::MAU::Action *act) {
     const IR::MAU::ActionData *ad = nullptr;
     for (auto ba : tbl->attached) {
         ad = ba->attached->to<IR::MAU::ActionData>();
-        if (ad != nullptr)
-            break;
+        if (ad != nullptr) break;
     }
 
     if (ad == nullptr) {
@@ -111,22 +112,20 @@ Visitor::profile_t AssignActionHandle::ValidateSelectors::init_apply(const IR::N
 }
 
 bool AssignActionHandle::ValidateSelectors::ValidateKey::preorder(const IR::MAU::Selector *sel) {
-    if (findContext<IR::MAU::StatefulAlu>())
-        return false;
+    if (findContext<IR::MAU::StatefulAlu>()) return false;
     auto tbl = findContext<IR::MAU::Table>();
     if (!tbl) return false;
     BUG_CHECK(tbl != nullptr, "No associated table found for Selector - %1%", sel);
 
     safe_vector<const IR::Expression *> sel_key_vec;
     for (auto ixbar_read : tbl->match_key) {
-        if (!ixbar_read->for_selection())
-            continue;
+        if (!ixbar_read->for_selection()) continue;
         sel_key_vec.push_back(ixbar_read->expr);
     }
 
     if (sel_key_vec.empty()) {
         error("%s: On Table %s, the Selector %s is provided no keys", sel->srcInfo, tbl->name,
-                sel->name);
+              sel->name);
         return false;
     }
 
@@ -138,16 +137,18 @@ bool AssignActionHandle::ValidateSelectors::ValidateKey::preorder(const IR::MAU:
          * one can only assign a single logical table to a wide hash mod.  Thus, a selector
          * that requires a hash mod cannot be shared
          */
-        error("%s: The selector %s cannot be shared between tables %s and %s, because "
-                "it requires a max pool size of %d.  In order to share a selector on Barefoot "
-                "HW, the max pool size must be %d", sel->srcInfo, sel->name, tbl->name,
-                self.initial_table.at(sel), sel->max_pool_size,
-                StageUseEstimate::SINGLE_RAMLINE_POOL_SIZE);
+        error(
+            "%s: The selector %s cannot be shared between tables %s and %s, because "
+            "it requires a max pool size of %d.  In order to share a selector on Barefoot "
+            "HW, the max pool size must be %d",
+            sel->srcInfo, sel->name, tbl->name, self.initial_table.at(sel), sel->max_pool_size,
+            StageUseEstimate::SINGLE_RAMLINE_POOL_SIZE);
     }
     auto &ixbSpec = Device::ixbarSpec();
-    le_bitrange hash_bits = { 0, (sel->mode == IR::MAU::SelectorMode::RESILIENT
-                                  ? ixbSpec.resilientModeHashBits()
-                                  : ixbSpec.fairModeHashBits()) - 1 };
+    le_bitrange hash_bits = {
+        0, (sel->mode == IR::MAU::SelectorMode::RESILIENT ? ixbSpec.resilientModeHashBits()
+                                                          : ixbSpec.fairModeHashBits()) -
+               1};
 
     P4HashFunction *sel_func = new P4HashFunction();
     sel_func->inputs = sel_key_vec;
@@ -164,21 +165,21 @@ bool AssignActionHandle::ValidateSelectors::ValidateKey::preorder(const IR::MAU:
     } else {
         auto sel_func_comp = self.selector_keys.at(sel);
         if (!sel_func->equiv(sel_func_comp)) {
-            error("%s: The key for selector %s on table %s does not match the key for the "
-                    "selector on table %s.  Barefoot requires the selector key to be identical "
-                    "per selector", sel->srcInfo, sel->name, tbl->name, self.initial_table.at(sel));
+            error(
+                "%s: The key for selector %s on table %s does not match the key for the "
+                "selector on table %s.  Barefoot requires the selector key to be identical "
+                "per selector",
+                sel->srcInfo, sel->name, tbl->name, self.initial_table.at(sel));
         }
     }
     return false;
 }
 
-
-bool AssignActionHandle::ValidateSelectors::
-        SetSymmetricSelectorKeys::preorder(IR::MAU::Table *tbl) {
+bool AssignActionHandle::ValidateSelectors::SetSymmetricSelectorKeys::preorder(
+    IR::MAU::Table *tbl) {
     auto orig_tbl = getOriginal()->to<IR::MAU::Table>();
     auto sel_itr = self.table_to_selector.find(orig_tbl);
-    if (sel_itr == self.table_to_selector.end())
-        return true;
+    if (sel_itr == self.table_to_selector.end()) return true;
     auto hf = self.selector_keys.at(sel_itr->second);
     tbl->sel_symmetric_keys = hf->symmetrically_hashed_inputs;
     return true;
@@ -193,7 +194,7 @@ Visitor::profile_t AssignActionHandle::GuaranteeUniqueHandle::init_apply(const I
 
 /**
  * Ensures that an action handle is unique within a P4 program
- * 
+ *
  */
 bool AssignActionHandle::GuaranteeUniqueHandle::preorder(const IR::MAU::Action *act) {
     visitOnce();
@@ -201,8 +202,7 @@ bool AssignActionHandle::GuaranteeUniqueHandle::preorder(const IR::MAU::Action *
     const IR::MAU::ActionData *ad = nullptr;
     for (auto ba : tbl->attached) {
         ad = ba->attached->to<IR::MAU::ActionData>();
-        if (ad != nullptr)
-            break;
+        if (ad != nullptr) break;
     }
 
     if (ad != nullptr) {
@@ -217,7 +217,6 @@ bool AssignActionHandle::GuaranteeUniqueHandle::preorder(const IR::MAU::Action *
             action_profiles.insert(ad);
         }
     }
-
 
     auto pos = unique_handle.find(act->handle);
     if (pos != unique_handle.end()) {

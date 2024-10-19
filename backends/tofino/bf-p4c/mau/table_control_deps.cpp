@@ -11,13 +11,13 @@
  */
 
 #include "table_control_deps.h"
+
 #include "lib/algorithm.h"
 
 ordered_set<const IR::MAU::Table *> TableControlDeps::parents() {
     ordered_set<const IR::MAU::Table *> rv;
     const Visitor::Context *ctxt = nullptr;
-    while (auto *t = findContext<IR::MAU::Table>(ctxt))
-        rv.insert(t);
+    while (auto *t = findContext<IR::MAU::Table>(ctxt)) rv.insert(t);
     return rv;
 }
 
@@ -26,8 +26,7 @@ void TableControlDeps::postorder(const IR::MAU::Table *tbl) {
     info_t &info = this->info[tbl];
     info.parents = parents();
     ordered_set<const IR::MAU::TableSeq *> next;
-    for (auto *seq : Values(tbl->next))
-        next.insert(seq);
+    for (auto *seq : Values(tbl->next)) next.insert(seq);
     info.dependent_paths = next.size();
 }
 

@@ -10,8 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_COMMON_AUTOINDENT_H_
-#define EXTENSIONS_BF_P4C_COMMON_AUTOINDENT_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_COMMON_AUTOINDENT_H_
+#define BACKENDS_TOFINO_BF_P4C_COMMON_AUTOINDENT_H_
 
 #include "lib/log.h"
 
@@ -19,13 +19,14 @@
 /// amount when it's destroyed.
 /// TODO: This should live in indent.h.
 struct AutoIndent {
-    explicit AutoIndent(indent_t& indent, int indentBy = 1)
-      : indent(indent), indentBy(indentBy) { indent += indentBy; }
+    explicit AutoIndent(indent_t &indent, int indentBy = 1) : indent(indent), indentBy(indentBy) {
+        indent += indentBy;
+    }
     ~AutoIndent() { indent -= indentBy; }
 
  private:
-    indent_t& indent;
+    indent_t &indent;
     int indentBy;
 };
 
-#endif /* EXTENSIONS_BF_P4C_COMMON_AUTOINDENT_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_COMMON_AUTOINDENT_H_ */

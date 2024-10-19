@@ -10,14 +10,14 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include <typeinfo>
-#include <typeindex>
 #include "field_list.h"
 
+#include <typeindex>
+#include <typeinfo>
+
 P4V1::FieldListConverter::FieldListConverter() {
-    ExpressionConverter::addConverter(
-            cstring(std::type_index(typeid(IR::FieldList)).name()),
-            convertFieldList);
+    ExpressionConverter::addConverter(cstring(std::type_index(typeid(IR::FieldList)).name()),
+                                      convertFieldList);
 }
 
 const IR::Node *P4V1::FieldListConverter::convertFieldList(const IR::Node *node) {
@@ -30,8 +30,7 @@ const IR::Node *P4V1::FieldListConverter::convertFieldList(const IR::Node *node)
     std::map<cstring, std::pair<int, int>> field_slices;
     for (auto anno : fl->annotations->annotations) {
         if (anno->name == pragma_string) {
-            if (anno->expr.size() != 3)
-                error("Invalid pragma specification -- ", pragma_string);
+            if (anno->expr.size() != 3) error("Invalid pragma specification -- ", pragma_string);
 
             if (!anno->expr[0]->is<IR::StringLiteral>())
                 error("Invalid field in pragma specification -- ", anno->expr[0]);
@@ -40,8 +39,7 @@ const IR::Node *P4V1::FieldListConverter::convertFieldList(const IR::Node *node)
             if (!anno->expr[1]->is<IR::Constant>() || !anno->expr[2]->is<IR::Constant>())
                 error("Invalid slice bit position(s) in pragma specification -- ", pragma_string);
 
-            if (sliced_fields.count(field))
-                error("Duplicate slice definition for field ", field);
+            if (sliced_fields.count(field)) error("Duplicate slice definition for field ", field);
             sliced_fields.insert(field);
 
             auto msb = anno->expr[1]->to<IR::Constant>()->asInt();
@@ -56,13 +54,14 @@ const IR::Node *P4V1::FieldListConverter::convertFieldList(const IR::Node *node)
     for (auto f : fl->fields) {
         if (!f->is<IR::Member>()) {
             components->push_back(f);  // slice can only be applied to IR::Member.
-            continue; }
+            continue;
+        }
 
         BFN::PathLinearizer path;
         f->apply(path);
         cstring field_string = path.linearPath->to_cstring();
 
-        IR::Slice* f_slice = nullptr;
+        IR::Slice *f_slice = nullptr;
         for (auto slice : field_slices) {
             if (field_string.endsWith(slice.first.string())) {
                 auto hi = slice.second.first;
@@ -72,7 +71,9 @@ const IR::Node *P4V1::FieldListConverter::convertFieldList(const IR::Node *node)
                     error("Invalid field slice %1%[%2%:%3%]", f, hi, lo);
 
                 f_slice = new IR::Slice(f, hi, lo);
-                break; } }
+                break;
+            }
+        }
         if (f_slice)
             components->push_back(f_slice);
         else

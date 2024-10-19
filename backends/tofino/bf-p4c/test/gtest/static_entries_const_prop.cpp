@@ -11,34 +11,33 @@
  */
 
 #include <optional>
+
 #include <boost/algorithm/string/replace.hpp>
 
+#include "bf-p4c/common/header_stack.h"
+#include "bf-p4c/common/multiple_apply.h"
+#include "bf-p4c/mau/instruction_selection.h"
+#include "bf-p4c/mau/table_mutex.h"
+#include "bf-p4c/phv/action_phv_constraints.h"
+#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
 #include "gtest/gtest.h"
-
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
 #include "test/gtest/helpers.h"
-#include "bf-p4c/mau/table_mutex.h"
-#include "bf-p4c/common/multiple_apply.h"
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
-#include "bf-p4c/phv/action_phv_constraints.h"
-#include "bf-p4c/mau/instruction_selection.h"
-#include "bf-p4c/common/header_stack.h"
 namespace P4::Test {
 
 class StaticEntriesConstPropTest : public TofinoBackendTest {};
 
 namespace {
 
-#define  FABRIC_PKT_TYPE_ETH  (0x00) /* L2VPN */
-#define  FABRIC_PKT_TYPE_IPV4 (0x01) /* IPV4, L3VPN IPV4*/
-#define  FABRIC_PKT_TYPE_IPV6 (0x03) /* IPV6, L3VPN IPV6*/
-#define  FABRIC_PKT_TYPE_IP   (0x05)
+#define FABRIC_PKT_TYPE_ETH (0x00)  /* L2VPN */
+#define FABRIC_PKT_TYPE_IPV4 (0x01) /* IPV4, L3VPN IPV4*/
+#define FABRIC_PKT_TYPE_IPV6 (0x03) /* IPV6, L3VPN IPV6*/
+#define FABRIC_PKT_TYPE_IP (0x05)
 
-
-std::optional<TofinoPipeTestCase>
-createStaticEntriesConstPropTestCase(const std::string &ingress_source) {
+std::optional<TofinoPipeTestCase> createStaticEntriesConstPropTestCase(
+    const std::string &ingress_source) {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
         header ipv4_t {
             bit<4>  version;
@@ -143,7 +142,7 @@ const switch_pkt_type_t FABRIC_PKT_TYPE_IP = 0x05;
 
     boost::replace_first(source, "%INGRESS%", ingress_source);
 
-    auto& options = BackendOptions();
+    auto &options = BackendOptions();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.target = "tofino"_cs;
     options.arch = "v1model"_cs;
@@ -153,23 +152,17 @@ const switch_pkt_type_t FABRIC_PKT_TYPE_IP = 0x05;
 
 }  // namespace
 
-
-const IR::BFN::Pipe *runCustomPassManager(const IR::BFN::Pipe* pipe,
-                                           const BFN_Options& option,
-                                           PhvInfo *phv) {
+const IR::BFN::Pipe *runCustomPassManager(const IR::BFN::Pipe *pipe, const BFN_Options &option,
+                                          PhvInfo *phv) {
     ReductionOrInfo red_info;
-    PassManager quick_backend = {
-        new CollectHeaderStackInfo,
-        new CollectPhvInfo(*phv),
-        new InstructionSelection(option, *phv, red_info)
-    };
+    PassManager quick_backend = {new CollectHeaderStackInfo, new CollectPhvInfo(*phv),
+                                 new InstructionSelection(option, *phv, red_info)};
 
     return pipe->apply(quick_backend);
 }
 
 TEST_F(StaticEntriesConstPropTest, TestUniqueConstEntry) {
-    auto test = createStaticEntriesConstPropTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createStaticEntriesConstPropTestCase(P4_SOURCE(P4Headers::NONE, R"(
             const default_action = NoAction;
 
             const entries = {
@@ -182,12 +175,11 @@ TEST_F(StaticEntriesConstPropTest, TestUniqueConstEntry) {
     PhvInfo phv;
     auto options = new BFN_Options();
     auto *post_pm = runCustomPassManager(test->pipe, *options, &phv);
-    auto ingress_tables =  post_pm->thread[0].mau->tables;
+    auto ingress_tables = post_pm->thread[0].mau->tables;
 
     const IR::MAU::Table *table_to_check = nullptr;
     for (auto table : ingress_tables) {
-        if (table->name == "fabric_rewrite_0")
-            table_to_check = table;
+        if (table->name == "fabric_rewrite_0") table_to_check = table;
     }
 
     auto actions = table_to_check->actions;
@@ -212,8 +204,7 @@ TEST_F(StaticEntriesConstPropTest, TestUniqueConstEntry) {
 }
 
 TEST_F(StaticEntriesConstPropTest, TestMultipleConstEntry) {
-    auto test = createStaticEntriesConstPropTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createStaticEntriesConstPropTestCase(P4_SOURCE(P4Headers::NONE, R"(
             const default_action = NoAction;
 
             const entries = {
@@ -228,12 +219,11 @@ TEST_F(StaticEntriesConstPropTest, TestMultipleConstEntry) {
     PhvInfo phv;
     auto options = new BFN_Options();
     auto *post_pm = runCustomPassManager(test->pipe, *options, &phv);
-    auto ingress_tables =  post_pm->thread[0].mau->tables;
+    auto ingress_tables = post_pm->thread[0].mau->tables;
 
     const IR::MAU::Table *table_to_check = nullptr;
     for (auto table : ingress_tables) {
-        if (table->name == "fabric_rewrite_0")
-            table_to_check = table;
+        if (table->name == "fabric_rewrite_0") table_to_check = table;
     }
 
     auto actions = table_to_check->actions;
@@ -258,8 +248,7 @@ TEST_F(StaticEntriesConstPropTest, TestMultipleConstEntry) {
 }
 
 TEST_F(StaticEntriesConstPropTest, TestUniqueConstEntryIsDefaultAction) {
-    auto test = createStaticEntriesConstPropTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createStaticEntriesConstPropTestCase(P4_SOURCE(P4Headers::NONE, R"(
             const default_action = fabric_unicast_eth;
 
             const entries = {
@@ -272,12 +261,11 @@ TEST_F(StaticEntriesConstPropTest, TestUniqueConstEntryIsDefaultAction) {
     PhvInfo phv;
     auto options = new BFN_Options();
     auto *post_pm = runCustomPassManager(test->pipe, *options, &phv);
-    auto ingress_tables =  post_pm->thread[0].mau->tables;
+    auto ingress_tables = post_pm->thread[0].mau->tables;
 
     const IR::MAU::Table *table_to_check = nullptr;
     for (auto table : ingress_tables) {
-        if (table->name == "fabric_rewrite_0")
-            table_to_check = table;
+        if (table->name == "fabric_rewrite_0") table_to_check = table;
     }
 
     auto actions = table_to_check->actions;

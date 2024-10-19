@@ -23,17 +23,19 @@ TableResourceAlloc *TableResourceAlloc::rename(const IR::MAU::Table *tbl, int st
         if (u_id.equal_table(it->first))
             ++it;
         else
-            it = memuse.erase(it); }
+            it = memuse.erase(it);
+    }
 
     // Gateway ixbar has to be cleared from ATCAM in the non-first logical table
     bool has_gateway = false;
     for (auto &kv : memuse) {
         if (kv.second.type == Memories::Use::GATEWAY) {
             has_gateway = true;
-            break; } }
+            break;
+        }
+    }
 
-    if (!has_gateway)
-        gateway_ixbar.reset();
+    if (!has_gateway) gateway_ixbar.reset();
 
     return this;
 }
@@ -55,8 +57,9 @@ bool TableResourceAlloc::has_tind() const {
     }
 
     if (rv)
-        BUG_CHECK(table_format.has_overhead(), "A ternary indirect table is currently "
-            "required with no overhead");
+        BUG_CHECK(table_format.has_overhead(),
+                  "A ternary indirect table is currently "
+                  "required with no overhead");
     return rv;
 }
 
@@ -70,8 +73,9 @@ safe_vector<int> TableResourceAlloc::hash_dist_immed_units() const {
         int unit = -1;
         for (auto &hd : hash_dists) {
             if (hd.destinations().getbit(i)) {
-                BUG_CHECK(unit == -1, "Multiple HashDistUse objects cannot head to the same "
-                    "output destination");
+                BUG_CHECK(unit == -1,
+                          "Multiple HashDistUse objects cannot head to the same "
+                          "output destination");
                 unit = hd.unit;
             }
         }
@@ -88,29 +92,23 @@ int TableResourceAlloc::rng_unit() const {
     return -1;
 }
 
-int TableResourceAlloc::findBytesOnIxbar(const PHV::FieldSlice& slice) const {
+int TableResourceAlloc::findBytesOnIxbar(const PHV::FieldSlice &slice) const {
     int bytesOnIxbar = 0;
-    if (match_ixbar)
-        bytesOnIxbar = match_ixbar->findBytesOnIxbar(slice);
+    if (match_ixbar) bytesOnIxbar = match_ixbar->findBytesOnIxbar(slice);
     if (bytesOnIxbar > 0) return bytesOnIxbar;
-    if (gateway_ixbar)
-        bytesOnIxbar = gateway_ixbar->findBytesOnIxbar(slice);
+    if (gateway_ixbar) bytesOnIxbar = gateway_ixbar->findBytesOnIxbar(slice);
     if (bytesOnIxbar > 0) return bytesOnIxbar;
-    if (proxy_hash_ixbar)
-        bytesOnIxbar = proxy_hash_ixbar->findBytesOnIxbar(slice);
+    if (proxy_hash_ixbar) bytesOnIxbar = proxy_hash_ixbar->findBytesOnIxbar(slice);
     if (bytesOnIxbar > 0) return bytesOnIxbar;
-    if (selector_ixbar)
-        bytesOnIxbar = selector_ixbar->findBytesOnIxbar(slice);
+    if (selector_ixbar) bytesOnIxbar = selector_ixbar->findBytesOnIxbar(slice);
     if (bytesOnIxbar > 0) return bytesOnIxbar;
-    if (salu_ixbar)
-        bytesOnIxbar = salu_ixbar->findBytesOnIxbar(slice);
+    if (salu_ixbar) bytesOnIxbar = salu_ixbar->findBytesOnIxbar(slice);
     if (bytesOnIxbar > 0) return bytesOnIxbar;
-    if (meter_ixbar)
-        bytesOnIxbar = meter_ixbar->findBytesOnIxbar(slice);
+    if (meter_ixbar) bytesOnIxbar = meter_ixbar->findBytesOnIxbar(slice);
     return bytesOnIxbar;
 }
 
-::IXBar::Use* TableResourceAlloc::find_ixbar(IXBar::Use::type_t type) const {
+::IXBar::Use *TableResourceAlloc::find_ixbar(IXBar::Use::type_t type) const {
     switch (type) {
         case IXBar::Use::EXACT_MATCH:
             return match_ixbar.get();
@@ -146,8 +144,7 @@ std::ostream &operator<<(std::ostream &out, const TableResourceAlloc &alloc) {
     if (alloc.salu_ixbar) out << "salu_ixbar: " << *alloc.salu_ixbar << Log::endl;
     if (alloc.meter_ixbar) out << "meter_ixbar: " << *alloc.meter_ixbar << Log::endl;
     std::unique_ptr<Memories> mem(Memories::create());
-    for (auto &mu : alloc.memuse)
-        mem->update(mu.first.build_name(), mu.second);
+    for (auto &mu : alloc.memuse) mem->update(mu.first.build_name(), mu.second);
     out << *mem;
     return out;
 }

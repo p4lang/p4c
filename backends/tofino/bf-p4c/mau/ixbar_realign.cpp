@@ -11,21 +11,23 @@
  */
 
 #include "bf-p4c/mau/ixbar_realign.h"
+
 #include "bf-p4c/mau/table_summary.h"
 #include "bf-p4c/phv/phv_fields.h"
 #include "lib/hex.h"
 
 class IXBarVerify::GetCurrentUse : public MauInspector {
-    IXBarVerify        &self;
+    IXBarVerify &self;
     bool preorder(const IR::Expression *) override { return false; }
     bool preorder(const IR::MAU::Table *t) override {
         BUG_CHECK(t->is_always_run_action() || t->global_id(), "Table not placed");
         int gress = INGRESS;
         unsigned stage = t->stage();
-        if (!self.ixbar[gress][stage])
-            self.ixbar[gress][stage].reset(IXBar::create());
+        if (!self.ixbar[gress][stage]) self.ixbar[gress][stage].reset(IXBar::create());
         self.ixbar[gress][stage]->update(t);
-        return true; }
+        return true;
+    }
+
  public:
     explicit GetCurrentUse(IXBarVerify &s) : self(s) {}
 };
@@ -49,12 +51,10 @@ void IXBarVerify::verify_format(const IXBar::Use *use) {
             bool byte_found = false;
             bool single_byte = true;
             PHV::FieldUse use(PHV::FieldUse::READ);
-            auto slicesToProcess =
-                field->get_combined_alloc_bytes(PHV::AllocContext::of_unit(currentTable), &use,
-                                                PHV::SliceMatch::REF_PHYS_LR);
+            auto slicesToProcess = field->get_combined_alloc_bytes(
+                PHV::AllocContext::of_unit(currentTable), &use, PHV::SliceMatch::REF_PHYS_LR);
             //  early check to make debugging incorrect PHV live range easier.
-            BUG_CHECK(!slicesToProcess.empty(),
-                      "cannot find allocation of %1%, read in %2% (%3%)",
+            BUG_CHECK(!slicesToProcess.empty(), "cannot find allocation of %1%, read in %2% (%3%)",
                       field, currentTable->name, currentTable->externalName());
             for (const auto &alloc : slicesToProcess) {
                 if (fi.lo < alloc.field_slice().lo || fi.hi > alloc.field_slice().hi) continue;
@@ -63,19 +63,20 @@ void IXBarVerify::verify_format(const IXBar::Use *use) {
                     container = alloc.container();
                     mod_4_offset = potential_mod4_offset;
                     container_set = true;
-                } else if (container != alloc.container()
-                           || mod_4_offset != potential_mod4_offset) {
+                } else if (container != alloc.container() ||
+                           mod_4_offset != potential_mod4_offset) {
                     single_byte = false;
                     continue;
                 }
 
-                int container_start = (alloc.container_slice().lo % 8) + fi.lo -
-                                      alloc.field_slice().lo;
-                if (container_start != fi.cont_lo)
-                    continue;
+                int container_start =
+                    (alloc.container_slice().lo % 8) + fi.lo - alloc.field_slice().lo;
+                if (container_start != fi.cont_lo) continue;
                 byte_found = true;
-                BUG_CHECK((byte_use & fi.cont_loc()).empty(), "Overlapping field bit "
-                          "information on an input xbar byte: %s", byte);
+                BUG_CHECK((byte_use & fi.cont_loc()).empty(),
+                          "Overlapping field bit "
+                          "information on an input xbar byte: %s",
+                          byte);
                 byte_use |= fi.cont_loc();
             }
             if (!byte_found || !single_byte) {
@@ -97,8 +98,7 @@ void IXBarVerify::verify_format(const IXBar::Use *use) {
 
 Visitor::profile_t IXBarVerify::init_apply(const IR::Node *root) {
     auto rv = MauModifier::init_apply(root);
-    for (auto gress : { INGRESS, EGRESS })
-        ixbar[gress].clear();
+    for (auto gress : {INGRESS, EGRESS}) ixbar[gress].clear();
     currentTable = nullptr;
     root->apply(GetCurrentUse(*this));
     return rv;

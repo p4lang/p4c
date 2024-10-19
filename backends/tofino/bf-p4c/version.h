@@ -10,9 +10,9 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_VERSION_H_
-#define EXTENSIONS_BF_P4C_VERSION_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_VERSION_H_
+#define BACKENDS_TOFINO_BF_P4C_VERSION_H_
 
 #define BF_P4C_VERSION "9.13.4"
 
-#endif  // EXTENSIONS_BF_P4C_VERSION_H_
+#endif  // BACKENDS_TOFINO_BF_P4C_VERSION_H_

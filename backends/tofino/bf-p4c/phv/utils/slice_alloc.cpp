@@ -10,27 +10,27 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+#include "bf-p4c/phv/utils/slice_alloc.h"
+
 #include <iostream>
 #include <sstream>
+
 #include <boost/optional/optional_io.hpp>
+
+#include "bf-p4c/mau/table_summary.h"
 #include "bf-p4c/phv/phv.h"
 #include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/utils/slice_alloc.h"
-#include "bf-p4c/mau/table_summary.h"
 
 namespace PHV {
 
-AllocSlice::AllocSlice(
-        const Field* f,
-        Container c,
-        int field_bit_lo,
-        int container_bit_lo,
-        int width)
-: field_i(f), container_i(c), field_bit_lo_i(field_bit_lo),
-  container_bit_lo_i(container_bit_lo), width_i(width) {
-    BUG_CHECK(width_i <= 32,
-        "Slice larger than largest container: %1%",
-        cstring::to_cstring(this));
+AllocSlice::AllocSlice(const Field *f, Container c, int field_bit_lo, int container_bit_lo,
+                       int width)
+    : field_i(f),
+      container_i(c),
+      field_bit_lo_i(field_bit_lo),
+      container_bit_lo_i(container_bit_lo),
+      width_i(width) {
+    BUG_CHECK(width_i <= 32, "Slice larger than largest container: %1%", cstring::to_cstring(this));
 
     le_bitrange field_range = StartLen(0, f->size);
     le_bitrange slice_range = StartLen(field_bit_lo, width);
@@ -41,35 +41,24 @@ AllocSlice::AllocSlice(
     max_stage_i = std::make_pair(PhvInfo::getDeparserStage(), FieldUse(FieldUse::WRITE));
 }
 
-AllocSlice::AllocSlice(
-        const Field* f,
-        Container c,
-        int field_bit_lo,
-        int container_bit_lo,
-        int width,
-        const ActionSet& action)
-: AllocSlice(f, c, field_bit_lo, container_bit_lo, width) {
+AllocSlice::AllocSlice(const Field *f, Container c, int field_bit_lo, int container_bit_lo,
+                       int width, const ActionSet &action)
+    : AllocSlice(f, c, field_bit_lo, container_bit_lo, width) {
     init_points_i = action;
 }
 
-AllocSlice::AllocSlice(
-        const Field* f,
-        Container c,
-        le_bitrange field_slice,
-        le_bitrange container_slice)
-: AllocSlice(f, c, field_slice.lo, container_slice.lo, field_slice.size()) {
+AllocSlice::AllocSlice(const Field *f, Container c, le_bitrange field_slice,
+                       le_bitrange container_slice)
+    : AllocSlice(f, c, field_slice.lo, container_slice.lo, field_slice.size()) {
     BUG_CHECK(field_slice.size() == container_slice.size(),
               "Trying to allocate field slice %1% to a container slice %2% of different "
               "size.",
-              cstring::to_cstring(field_slice),
-              cstring::to_cstring(container_slice));
+              cstring::to_cstring(field_slice), cstring::to_cstring(container_slice));
 }
 
-AllocSlice::AllocSlice(const AllocSlice& other) {
-    *this = other;
-}
+AllocSlice::AllocSlice(const AllocSlice &other) { *this = other; }
 
-AllocSlice& AllocSlice::operator=(const AllocSlice& other) {
+AllocSlice &AllocSlice::operator=(const AllocSlice &other) {
     field_i = other.field();
     container_i = other.container();
     field_bit_lo_i = other.field_slice().lo;
@@ -87,45 +76,32 @@ AllocSlice& AllocSlice::operator=(const AllocSlice& other) {
     return *this;
 }
 
-void AllocSlice::setInitPrimitive(const DarkInitPrimitive* prim) {
-    init_i = *prim;
+void AllocSlice::setInitPrimitive(const DarkInitPrimitive *prim) { init_i = *prim; }
+
+bool AllocSlice::operator==(const AllocSlice &other) const {
+    return field_i == other.field_i && container_i == other.container_i &&
+           field_bit_lo_i == other.field_bit_lo_i &&
+           container_bit_lo_i == other.container_bit_lo_i && width_i == other.width_i &&
+           min_stage_i == other.min_stage_i && max_stage_i == other.max_stage_i &&
+           is_physical_stage_based_i == other.is_physical_stage_based_i &&
+           physical_deparser_stage_i == other.physical_deparser_stage_i;
 }
 
-bool AllocSlice::operator==(const AllocSlice& other) const {
-    return field_i                   == other.field_i
-        && container_i               == other.container_i
-        && field_bit_lo_i            == other.field_bit_lo_i
-        && container_bit_lo_i        == other.container_bit_lo_i
-        && width_i                   == other.width_i
-        && min_stage_i               == other.min_stage_i
-        && max_stage_i               == other.max_stage_i
-        && is_physical_stage_based_i == other.is_physical_stage_based_i
-        && physical_deparser_stage_i == other.physical_deparser_stage_i;
+bool AllocSlice::same_alloc_fieldslice(const AllocSlice &other) const {
+    return field_i == other.field_i && container_i == other.container_i &&
+           field_bit_lo_i == other.field_bit_lo_i &&
+           container_bit_lo_i == other.container_bit_lo_i && width_i == other.width_i;
 }
 
-bool AllocSlice::same_alloc_fieldslice(const AllocSlice& other) const {
-    return field_i             == other.field_i
-        && container_i         == other.container_i
-        && field_bit_lo_i      == other.field_bit_lo_i
-        && container_bit_lo_i  == other.container_bit_lo_i
-        && width_i             == other.width_i;
-}
+bool AllocSlice::operator!=(const AllocSlice &other) const { return !this->operator==(other); }
 
-bool AllocSlice::operator!=(const AllocSlice& other) const {
-    return !this->operator==(other);
-}
-
-bool AllocSlice::operator<(const AllocSlice& other) const {
-    if (field_i->id != other.field_i->id)
-        return field_i->id < other.field_i->id;
-    if (container_i != other.container_i)
-        return container_i < other.container_i;
-    if (field_bit_lo_i != other.field_bit_lo_i)
-        return field_bit_lo_i < other.field_bit_lo_i;
+bool AllocSlice::operator<(const AllocSlice &other) const {
+    if (field_i->id != other.field_i->id) return field_i->id < other.field_i->id;
+    if (container_i != other.container_i) return container_i < other.container_i;
+    if (field_bit_lo_i != other.field_bit_lo_i) return field_bit_lo_i < other.field_bit_lo_i;
     if (container_bit_lo_i != other.container_bit_lo_i)
         return container_bit_lo_i < other.container_bit_lo_i;
-    if (width_i != other.width_i)
-        return width_i < other.width_i;
+    if (width_i != other.width_i) return width_i < other.width_i;
     if (min_stage_i.first != other.min_stage_i.first)
         return min_stage_i.first < other.min_stage_i.first;
     if (min_stage_i.second != other.min_stage_i.second)
@@ -142,9 +118,8 @@ bool AllocSlice::operator<(const AllocSlice& other) const {
 }
 
 /// Check if the references of the slice are earlier than the @other refs
-bool AllocSlice::isEarlierFieldslice(const AllocSlice& other) const {
-    if ((field_i->id == other.field_i->id) &&
-        field_slice().overlaps(other.field_slice())) {
+bool AllocSlice::isEarlierFieldslice(const AllocSlice &other) const {
+    if ((field_i->id == other.field_i->id) && field_slice().overlaps(other.field_slice())) {
         for (auto sl_ref : getRefs()) {
             for (const auto *ref_tbl : TableSummary::getTablePtr(sl_ref.first)) {
                 for (auto other_ref : other.getRefs()) {
@@ -166,8 +141,7 @@ std::optional<AllocSlice> AllocSlice::sub_alloc_by_field(int start, int len) con
     le_bitrange sub_slice(start, start + len - 1);
     auto overlap = sub_slice.intersectWith(this->field_slice());
 
-    if (overlap.empty() || overlap.size() != len)
-        return std::nullopt;
+    if (overlap.empty() || overlap.size() != len) return std::nullopt;
 
     AllocSlice clone = *this;
     clone.container_bit_lo_i += (start - field_bit_lo_i);
@@ -186,14 +160,12 @@ void AllocSlice::get_ref_lr(StageAndAccess &lr_min, StageAndAccess &lr_max) cons
     bool earliest_slice = true;
     bool latest_slice = true;
 
-    for (const auto& slc : field_i->get_alloc()) {
-        if ((*this != slc) && !isEarlierFieldslice(slc))
-            earliest_slice = false;
+    for (const auto &slc : field_i->get_alloc()) {
+        if ((*this != slc) && !isEarlierFieldslice(slc)) earliest_slice = false;
     }
 
-    for (const auto& slc : field_i->get_alloc()) {
-        if ((*this != slc) && isEarlierFieldslice(slc))
-            latest_slice = false;
+    for (const auto &slc : field_i->get_alloc()) {
+        if ((*this != slc) && isEarlierFieldslice(slc)) latest_slice = false;
     }
 
     if (field_i->parsed() && earliest_slice) {
@@ -215,10 +187,11 @@ void AllocSlice::get_ref_lr(StageAndAccess &lr_min, StageAndAccess &lr_max) cons
     if (!field_i->parsed() && !field_i->deparsed()) {
         for (auto ref : refs) {
             // If there are no stages for the ref table go to the next
-            std::set<const IR::MAU::Table*> tblPtrs = TableSummary::getTablePtr(ref.first);
+            std::set<const IR::MAU::Table *> tblPtrs = TableSummary::getTablePtr(ref.first);
             BUG_CHECK(tblPtrs.size(), "Could not find IR Tables for ref %1%", ref.first);
-            LOG5("   get_ref_lr - ref : " << ref.first << " (" << ref.second << ") min_stg : " <<
-                 min_stg << " max_stg : " << max_stg << " #tables:" << tblPtrs.size());
+            LOG5("   get_ref_lr - ref : " << ref.first << " (" << ref.second
+                                          << ") min_stg : " << min_stg << " max_stg : " << max_stg
+                                          << " #tables:" << tblPtrs.size());
 
             for (auto *tbl : tblPtrs) {
                 if (first_ref) {
@@ -247,7 +220,7 @@ void AllocSlice::get_ref_lr(StageAndAccess &lr_min, StageAndAccess &lr_max) cons
     lr_max.second = max_fu;
 }
 
-bool AllocSlice::isLiveAt(int stage, const FieldUse& use) const {
+bool AllocSlice::isLiveAt(int stage, const FieldUse &use) const {
     int after_start = false, before_end = false;
     if (is_physical_stage_based_i) {
         // physical live range, all AllocSlice live range starts with read or write
@@ -260,25 +233,25 @@ bool AllocSlice::isLiveAt(int stage, const FieldUse& use) const {
         // but only the first half-word is ever read in `ig_md.hash[15:0] : selector;`.
         // Then, live range of ig_md.hash[15:0] will be [6w, 6w].
         const int end = max_stage_i.second.isWrite() ? max_stage_i.first + 1 : max_stage_i.first;
-        after_start  = start <= actual_stage;
-        before_end   = (actual_stage <= end) || isPhysicalDeparserStageExceeded();
+        after_start = start <= actual_stage;
+        before_end = (actual_stage <= end) || isPhysicalDeparserStageExceeded();
     } else {
         // after starting write
         after_start = (min_stage_i.first < stage) ||
-                                 (min_stage_i.first == stage && use >= min_stage_i.second);
+                      (min_stage_i.first == stage && use >= min_stage_i.second);
         // before ending read
         before_end = (stage < max_stage_i.first) ||
-                                (stage == max_stage_i.first && use <= max_stage_i.second);
+                     (stage == max_stage_i.first && use <= max_stage_i.second);
     }
     return after_start && before_end;
 }
 
-bool AllocSlice::isLiveRangeDisjoint(const AllocSlice& other, int gap) const {
+bool AllocSlice::isLiveRangeDisjoint(const AllocSlice &other, int gap) const {
     if (gap) {
-        PHV::StageAndAccess max_stage_gap = std::make_pair(max_stage_i.first + gap,
-                                                           max_stage_i.second);
-        PHV::StageAndAccess max_other_stage_gap = std::make_pair(other.max_stage_i.first + gap,
-                                                                 other.max_stage_i.second);
+        PHV::StageAndAccess max_stage_gap =
+            std::make_pair(max_stage_i.first + gap, max_stage_i.second);
+        PHV::StageAndAccess max_other_stage_gap =
+            std::make_pair(other.max_stage_i.first + gap, other.max_stage_i.second);
         return LiveRange(min_stage_i, max_stage_gap)
             .is_disjoint(LiveRange(other.min_stage_i, max_other_stage_gap));
     }
@@ -291,15 +264,11 @@ bool AllocSlice::hasInitPrimitive() const {
     return true;
 }
 
-bool AllocSlice::isUsedParser() const {
-    return min_stage_i.first == parser_stage_idx();
-}
+bool AllocSlice::isUsedParser() const { return min_stage_i.first == parser_stage_idx(); }
 
-bool AllocSlice::isUsedDeparser() const {
-    return max_stage_i.first == deparser_stage_idx();
-}
+bool AllocSlice::isUsedDeparser() const { return max_stage_i.first == deparser_stage_idx(); }
 
-bool AllocSlice::isReferenced(const AllocContext* ctxt, const FieldUse* use,
+bool AllocSlice::isReferenced(const AllocContext *ctxt, const FieldUse *use,
                               SliceMatch useTblRefs) const {
     LOG5("    Checking isReference for unit: ");
 
@@ -336,22 +305,19 @@ bool AllocSlice::isReferenced(const AllocContext* ctxt, const FieldUse* use,
             LOG5("\t\t useTblRefs: " << (int)useTblRefs);
             if (is_physical_stage_based_i) {
                 stages = PhvInfo::physicalStages(ctxt->table);
-                for (auto s : stages)
-                    LOG5("\t\t\t stages: " << s);
+                for (auto s : stages) LOG5("\t\t\t stages: " << s);
             } else if ((int)useTblRefs) {
                 cstring tblName(ctxt->table->name);
                 const char *tblSplit = tblName.find("$split");
-                if (tblSplit != nullptr)
-                    tblName = tblName.before(tblSplit);
+                if (tblSplit != nullptr) tblName = tblName.before(tblSplit);
 
                 cstring gwName(ctxt->table->gateway_name);
                 const char *gwSplit = gwName.find("$split");
-                if (gwSplit != nullptr)
-                    gwName = gwName.before(gwSplit);
+                if (gwSplit != nullptr) gwName = gwName.before(gwSplit);
 
                 LOG5("\ttblName: " << tblName << "  gwName: " << gwName);
-                for (auto refEntry : refs) LOG5("\t  " << refEntry.first << " (" <<
-                                                refEntry.second << ")");
+                for (auto refEntry : refs)
+                    LOG5("\t  " << refEntry.first << " (" << refEntry.second << ")");
                 bool ref_match = false;
                 const auto tblNameRef = refs.find(tblName);
                 if (tblNameRef != refs.end()) {
@@ -371,7 +337,7 @@ bool AllocSlice::isReferenced(const AllocContext* ctxt, const FieldUse* use,
                 if (!ref_match && (useTblRefs == SliceMatch::REF_PHYS_LR)) {
                     int ctx_stage = ctxt->table->stage();
                     for (auto ref : refs) {
-                        std::set<const IR::MAU::Table*> tblPtrs =
+                        std::set<const IR::MAU::Table *> tblPtrs =
                             TableSummary::getTablePtr(ref.first);
                         for (auto *tbl : tblPtrs) {
                             if (tbl->stage() != ctx_stage) continue;
@@ -379,16 +345,15 @@ bool AllocSlice::isReferenced(const AllocContext* ctxt, const FieldUse* use,
                                 ref_match |= !bool(ref.second & *use);
                             else
                                 ref_match |= true;
-                            LOG5("\t REF_PHYS_LR: Found other table ref at stage " << ctx_stage <<
-                                 " : " << tbl);
+                            LOG5("\t REF_PHYS_LR: Found other table ref at stage " << ctx_stage
+                                                                                   << " : " << tbl);
                         }
                     }
                 }
                 return ref_match;
             } else {
                 stages = PhvInfo::minStages(ctxt->table);
-                for (auto s : stages)
-                    LOG5("\t\t\t min stages: " << s);
+                for (auto s : stages) LOG5("\t\t\t min stages: " << s);
             }
 
             for (auto stage : stages) {
@@ -411,13 +376,11 @@ bool AllocSlice::isReferenced(const AllocContext* ctxt, const FieldUse* use,
 
     return false;
 }
-int AllocSlice::parser_stage_idx() const {
-    return -1;
-}
+int AllocSlice::parser_stage_idx() const { return -1; }
 
 int AllocSlice::deparser_stage_idx() const {
-    return (is_physical_stage_based_i || physical_deparser_stage_i)
-            ? Device::numStages() : PhvInfo::getDeparserStage();
+    return (is_physical_stage_based_i || physical_deparser_stage_i) ? Device::numStages()
+                                                                    : PhvInfo::getDeparserStage();
 }
 
 // Add table access if it hasn't been already added
@@ -436,14 +399,12 @@ bool AllocSlice::addRef(cstring u_name, FieldUse f_use) const {
 
 le_bitrange AllocSlice::container_bytes() const {
     int byte_lo = container_bit_lo_i / 8;
-    int byte_hi = (container_bit_lo_i + width_i -1) / 8;
+    int byte_hi = (container_bit_lo_i + width_i - 1) / 8;
     return StartLen(byte_lo, (byte_hi - byte_lo + 1));
 }
 
 bool AllocSlice::is_initialized() const {
-    if (init_points_i.size() ||
-        init_i.destAssignedToZero() ||
-        init_i.getInitPoints().size() ||
+    if (init_points_i.size() || init_i.destAssignedToZero() || init_i.getInitPoints().size() ||
         shadow_init_i)
         return true;
 
@@ -468,59 +429,66 @@ bool DarkInitPrimitive::setSourceLatestLiveness(StageAndAccess max) {
     }
 }
 
-DarkInitPrimitive::DarkInitPrimitive(const ActionSet& initPoints)
-    : assignZeroToDestination(true), nop(false),
-    alwaysInitInLastMAUStage(false), alwaysRunActionPrim(false), actions(initPoints) {}
+DarkInitPrimitive::DarkInitPrimitive(const ActionSet &initPoints)
+    : assignZeroToDestination(true),
+      nop(false),
+      alwaysInitInLastMAUStage(false),
+      alwaysRunActionPrim(false),
+      actions(initPoints) {}
 
-DarkInitPrimitive::DarkInitPrimitive(AllocSlice& src)
-     : assignZeroToDestination(false), nop(false), sourceSlice(new AllocSlice(src)),
-     alwaysInitInLastMAUStage(false), alwaysRunActionPrim(false) { }
+DarkInitPrimitive::DarkInitPrimitive(AllocSlice &src)
+    : assignZeroToDestination(false),
+      nop(false),
+      sourceSlice(new AllocSlice(src)),
+      alwaysInitInLastMAUStage(false),
+      alwaysRunActionPrim(false) {}
 
-DarkInitPrimitive::DarkInitPrimitive(AllocSlice& src, const ActionSet& initPoints)
-     : assignZeroToDestination(false), nop(false), sourceSlice(new AllocSlice(src)),
-     alwaysInitInLastMAUStage(false), alwaysRunActionPrim(false), actions(initPoints) { }
+DarkInitPrimitive::DarkInitPrimitive(AllocSlice &src, const ActionSet &initPoints)
+    : assignZeroToDestination(false),
+      nop(false),
+      sourceSlice(new AllocSlice(src)),
+      alwaysInitInLastMAUStage(false),
+      alwaysRunActionPrim(false),
+      actions(initPoints) {}
 
-DarkInitPrimitive::DarkInitPrimitive(const DarkInitPrimitive& other)
-     : assignZeroToDestination(other.assignZeroToDestination),
-     nop(other.nop),
-     alwaysInitInLastMAUStage(other.alwaysInitInLastMAUStage),
-     alwaysRunActionPrim(other.alwaysRunActionPrim),
-     actions(other.actions),
-     priorUnits(other.priorUnits),
-     postUnits(other.postUnits),
-     priorPrims(other.priorPrims),
-     postPrims(other.postPrims)
-{
-     if (other.getSourceSlice()) {
+DarkInitPrimitive::DarkInitPrimitive(const DarkInitPrimitive &other)
+    : assignZeroToDestination(other.assignZeroToDestination),
+      nop(other.nop),
+      alwaysInitInLastMAUStage(other.alwaysInitInLastMAUStage),
+      alwaysRunActionPrim(other.alwaysRunActionPrim),
+      actions(other.actions),
+      priorUnits(other.priorUnits),
+      postUnits(other.postUnits),
+      priorPrims(other.priorPrims),
+      postPrims(other.postPrims) {
+    if (other.getSourceSlice()) {
         sourceSlice.reset(new AllocSlice(*other.getSourceSlice()));
-     }
+    }
 }
 
-void DarkInitPrimitive::addSource(const AllocSlice& sl) {
+void DarkInitPrimitive::addSource(const AllocSlice &sl) {
     assignZeroToDestination = false;
     sourceSlice.reset(new AllocSlice(sl));
 }
 
-bool DarkInitPrimitive::operator==(const DarkInitPrimitive& other) const {
+bool DarkInitPrimitive::operator==(const DarkInitPrimitive &other) const {
     bool zero2dest = (assignZeroToDestination == other.assignZeroToDestination);
     bool isNop = (nop == other.nop);
     bool srcSlc = false;
-    if (!sourceSlice && !other.sourceSlice)
-        srcSlc = true;
-    if (sourceSlice && other.sourceSlice)
-        srcSlc = (*sourceSlice == *other.sourceSlice);
-    bool initLstStg  = (alwaysInitInLastMAUStage == other.alwaysInitInLastMAUStage);
+    if (!sourceSlice && !other.sourceSlice) srcSlc = true;
+    if (sourceSlice && other.sourceSlice) srcSlc = (*sourceSlice == *other.sourceSlice);
+    bool initLstStg = (alwaysInitInLastMAUStage == other.alwaysInitInLastMAUStage);
     bool araPrim = (alwaysRunActionPrim == other.alwaysRunActionPrim);
     bool acts = (actions == other.actions);
     bool rslt = zero2dest && isNop && srcSlc && initLstStg && araPrim && acts;
 
-    LOG7("\t op==" << rslt << " <-- " << zero2dest << " " << isNop << " " << srcSlc <<
-         " " << initLstStg << " " << araPrim << " " << acts);
+    LOG7("\t op==" << rslt << " <-- " << zero2dest << " " << isNop << " " << srcSlc << " "
+                   << initLstStg << " " << araPrim << " " << acts);
 
     return rslt;
 }
 
-DarkInitPrimitive& DarkInitPrimitive::operator=(const DarkInitPrimitive& other) {
+DarkInitPrimitive &DarkInitPrimitive::operator=(const DarkInitPrimitive &other) {
     if (this != &other) {
         assignZeroToDestination = other.assignZeroToDestination;
         nop = other.nop;
@@ -546,7 +514,7 @@ std::string AllocSlice::toString() const {
     return ss.str();
 }
 
-std::ostream& operator<<(std::ostream& out, const AllocSlice& slice) {
+std::ostream &operator<<(std::ostream &out, const AllocSlice &slice) {
     out << slice.container() << " " << slice.container_slice() << " <-- "
         << FieldSlice(slice.field(), slice.field_slice());
     out << " live at " << (slice.isPhysicalStageBased() ? "P" : "") << "[";
@@ -567,14 +535,13 @@ std::ostream& operator<<(std::ostream& out, const AllocSlice& slice) {
 
     auto units = slice.getRefs();
     out << ' ' << units.size() << " units {";
-    for (auto u_entry : units)
-        out << u_entry.first << " (" << u_entry.second << "); ";
+    for (auto u_entry : units) out << u_entry.first << " (" << u_entry.second << "); ";
     out << "}";
 
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const AllocSlice* slice) {
+std::ostream &operator<<(std::ostream &out, const AllocSlice *slice) {
     if (slice)
         out << *slice;
     else
@@ -582,20 +549,19 @@ std::ostream& operator<<(std::ostream& out, const AllocSlice* slice) {
     return out;
 }
 
-std::ostream &operator<<(std::ostream &out,
-                         const std::vector<AllocSlice> &sl_vec) {
+std::ostream &operator<<(std::ostream &out, const std::vector<AllocSlice> &sl_vec) {
     for (auto &sl : sl_vec) out << sl << "\n";
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const DarkInitEntry& entry) {
+std::ostream &operator<<(std::ostream &out, const DarkInitEntry &entry) {
     out << "\t\t" << entry.getDestinationSlice();
-    const DarkInitPrimitive& prim = entry.getInitPrimitive();
+    const DarkInitPrimitive &prim = entry.getInitPrimitive();
     out << prim;
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const DarkInitPrimitive& prim) {
+std::ostream &operator<<(std::ostream &out, const DarkInitPrimitive &prim) {
     if (prim.isNOP()) {
         out << " NOP";
         return out;
@@ -603,30 +569,30 @@ std::ostream& operator<<(std::ostream& out, const DarkInitPrimitive& prim) {
         out << " = 0";
     } else {
         auto source = prim.getSourceSlice();
-        if (!source)
-            out << " NO SOURCE SLICE";
+        if (!source) out << " NO SOURCE SLICE";
         // BUG_CHECK(source, "No source slice specified, even though compiler expects one.");
         else
             out << " = " << *source;
     }
-    if (prim.mustInitInLastMAUStage())
-        out << "  : always_run last Stage ";
-    if (prim.isAlwaysRunActionPrim())
-        out << "  : always_run_action prim";
+    if (prim.mustInitInLastMAUStage()) out << "  : always_run last Stage ";
+    if (prim.isAlwaysRunActionPrim()) out << "  : always_run_action prim";
 
-    const auto& actions = prim.getInitPoints();
+    const auto &actions = prim.getInitPoints();
     out << "  :  " << actions.size() << " actions";
 
     auto priorUnts = prim.getARApriorUnits();
-    auto postUnts  = prim.getARApostUnits();
+    auto postUnts = prim.getARApostUnits();
 
     if (!priorUnts.size()) {
         out << "  : No prior units";
     } else {
         out << "  : Prior units:";
         for (auto node : priorUnts) {
-            const auto* tbl = node->to<IR::MAU::Table>();
-            if (!tbl) {out << "\t non-table unit"; continue; }
+            const auto *tbl = node->to<IR::MAU::Table>();
+            if (!tbl) {
+                out << "\t non-table unit";
+                continue;
+            }
             out << "\t " << tbl->name;
         }
     }
@@ -636,21 +602,27 @@ std::ostream& operator<<(std::ostream& out, const DarkInitPrimitive& prim) {
     } else {
         out << "  : Post units:";
         for (auto node : postUnts) {
-            const auto* tbl = node->to<IR::MAU::Table>();
-            if (!tbl) {out << "\t non-table unit"; continue; }
+            const auto *tbl = node->to<IR::MAU::Table>();
+            if (!tbl) {
+                out << "\t non-table unit";
+                continue;
+            }
             out << "\t " << tbl->name;
         }
     }
 
     auto priorPrms = prim.getARApriorPrims();
-    auto postPrms  = prim.getARApostPrims();
+    auto postPrms = prim.getARApostPrims();
 
     if (priorPrms.empty()) {
         out << "  : No prior prims";
     } else {
         out << "  : Prior prims:";
         for (auto *drkEntry : priorPrms) {
-            if (!drkEntry) {out << "\t null"; continue; }
+            if (!drkEntry) {
+                out << "\t null";
+                continue;
+            }
             out << "\t " << drkEntry->getDestinationSlice();
         }
     }
@@ -660,7 +632,10 @@ std::ostream& operator<<(std::ostream& out, const DarkInitPrimitive& prim) {
     } else {
         out << "  : Post prims:";
         for (auto *drkEntry : postPrms) {
-            if (!drkEntry) {out << "\t null"; continue; }
+            if (!drkEntry) {
+                out << "\t null";
+                continue;
+            }
             out << "\t " << drkEntry->getDestinationSlice();
         }
     }
@@ -670,8 +645,7 @@ std::ostream& operator<<(std::ostream& out, const DarkInitPrimitive& prim) {
 
 }  // namespace PHV
 
-std::ostream &operator<<(std::ostream &out,
-                         const safe_vector<PHV::AllocSlice> &sl_vec) {
+std::ostream &operator<<(std::ostream &out, const safe_vector<PHV::AllocSlice> &sl_vec) {
     for (auto &sl : sl_vec) out << sl << "\n";
     return out;
 }

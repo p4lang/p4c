@@ -30,45 +30,54 @@ class Field;
 }  // namespace PHV
 
 /** The purpose of this pass is to adjust shift instruction that only write to a single slice but
-  * sourced from multiple containers. This is only seen with signed shifted right operation
-  * currently since all of the unsigned shift operation are either sliced or splitted. This pass
-  * have to adjust the operation, shift value and slice boundary to match the expected result. For
-  * example these P4_14 lines:
-  *     header_type my_header_t {
-  *         fields {
-  *             a: 32;
-  *         }
-  *     }
-  *     header my_header_t my_header;
-  *     header_type my_md_t {
-  *         fields {
-  *             a: 32 (signed);
-  *         }
-  *    }
-  *    ...
-  *    modify_field_with_shift(my_header.a, my_md.a, 9, 0xff);
-  *
-  * Will be translated by the compiler to this operation:
-  *    instruction:shrs(ingress::my_header.a[7:0], ingress::my_md.a[7:0], 9);
-  *
-  * As we can see, this operation does not make any sense but the compiler does not decode the
-  * shift value to adjust the slice so the source and destination slice will always be at the same
-  * position regardless of the shift value. This pass will translate such instructions using
-  * shrs, set or funnel-shift depending on the situation. The example above will get translated to:
-  *     instruction:funnel-shift(ingress::my_header.a[7:0], ingress::my_md.a[23:16],
-  *                              ingress::my_md.a[15:8], 1)
-  */
+ * sourced from multiple containers. This is only seen with signed shifted right operation
+ * currently since all of the unsigned shift operation are either sliced or splitted. This pass
+ * have to adjust the operation, shift value and slice boundary to match the expected result. For
+ * example these P4_14 lines:
+ *     header_type my_header_t {
+ *         fields {
+ *             a: 32;
+ *         }
+ *     }
+ *     header my_header_t my_header;
+ *     header_type my_md_t {
+ *         fields {
+ *             a: 32 (signed);
+ *         }
+ *    }
+ *    ...
+ *    modify_field_with_shift(my_header.a, my_md.a, 9, 0xff);
+ *
+ * Will be translated by the compiler to this operation:
+ *    instruction:shrs(ingress::my_header.a[7:0], ingress::my_md.a[7:0], 9);
+ *
+ * As we can see, this operation does not make any sense but the compiler does not decode the
+ * shift value to adjust the slice so the source and destination slice will always be at the same
+ * position regardless of the shift value. This pass will translate such instructions using
+ * shrs, set or funnel-shift depending on the situation. The example above will get translated to:
+ *     instruction:funnel-shift(ingress::my_header.a[7:0], ingress::my_md.a[23:16],
+ *                              ingress::my_md.a[15:8], 1)
+ */
 class AdjustShiftInstructions : public MauTransform, TofinoWriteContext {
     const PhvInfo &phv;
 
     const IR::Node *preorder(IR::MAU::Instruction *) override;
     // ignore stuff related to stateful alus
-    const IR::Node *preorder(IR::MAU::AttachedOutput *ao) override { prune(); return ao; }
-    const IR::Node *preorder(IR::MAU::StatefulAlu *salu) override { prune(); return salu; }
-    const IR::Node *preorder(IR::MAU::HashDist *hd) override { prune(); return hd; }
+    const IR::Node *preorder(IR::MAU::AttachedOutput *ao) override {
+        prune();
+        return ao;
+    }
+    const IR::Node *preorder(IR::MAU::StatefulAlu *salu) override {
+        prune();
+        return salu;
+    }
+    const IR::Node *preorder(IR::MAU::HashDist *hd) override {
+        prune();
+        return hd;
+    }
 
  public:
-    explicit AdjustShiftInstructions(const PhvInfo &p) : phv(p) { }
+    explicit AdjustShiftInstructions(const PhvInfo &p) : phv(p) {}
 };
 
 /** The purpose of these classes is to adjust the instructions in a single action that perform on
@@ -106,7 +115,6 @@ class AdjustShiftInstructions : public MauTransform, TofinoWriteContext {
  *  of the sources of an action
  */
 
-
 /** Responsible for splitting all field instructions over multiple containers into multiple
  *  field instructions over a single container, for example, let's say the program has
  *  the following field instruction:
@@ -124,12 +132,21 @@ class SplitInstructions : public MauTransform, TofinoWriteContext {
 
     const IR::Node *preorder(IR::MAU::Instruction *) override;
     // ignore stuff related to stateful alus
-    const IR::Node *preorder(IR::MAU::AttachedOutput *ao) override { prune(); return ao; }
-    const IR::Node *preorder(IR::MAU::StatefulAlu *salu) override { prune(); return salu; }
-    const IR::Node *preorder(IR::MAU::HashDist *hd) override { prune(); return hd; }
+    const IR::Node *preorder(IR::MAU::AttachedOutput *ao) override {
+        prune();
+        return ao;
+    }
+    const IR::Node *preorder(IR::MAU::StatefulAlu *salu) override {
+        prune();
+        return salu;
+    }
+    const IR::Node *preorder(IR::MAU::HashDist *hd) override {
+        prune();
+        return hd;
+    }
 
  public:
-    explicit SplitInstructions(const PhvInfo &p) : phv(p) { }
+    explicit SplitInstructions(const PhvInfo &p) : phv(p) {}
 };
 
 /** Responsible for converting IR::Constant to IR::MAU::ActionDataConstants when necessary.
@@ -165,7 +182,8 @@ class ConstantsToActionData : public MauTransform, TofinoWriteContext {
 
  public:
     ConstantsToActionData(const PhvInfo &p, const ReductionOrInfo &ri) : phv(p), red_info(ri) {
-        visitDagOnce = false; }
+        visitDagOnce = false;
+    }
 };
 
 class ExpressionsToHash : public MauTransform {
@@ -176,12 +194,19 @@ class ExpressionsToHash : public MauTransform {
 
     const IR::MAU::Action *preorder(IR::MAU::Action *) override;
     const IR::MAU::Instruction *preorder(IR::MAU::Instruction *) override;
-    const IR::Node *preorder(IR::Node *n) override { visitOnce(); return n; }
-    const IR::MAU::StatefulAlu *preorder(IR::MAU::StatefulAlu *s) override { prune(); return s; }
+    const IR::Node *preorder(IR::Node *n) override {
+        visitOnce();
+        return n;
+    }
+    const IR::MAU::StatefulAlu *preorder(IR::MAU::StatefulAlu *s) override {
+        prune();
+        return s;
+    }
 
  public:
     ExpressionsToHash(const PhvInfo &p, const ReductionOrInfo &ri) : phv(p), red_info(ri) {
-        visitDagOnce = false; }
+        visitDagOnce = false;
+    }
 };
 
 /** Responsible for converting all FieldInstructions within a single Container operation into
@@ -225,7 +250,6 @@ class MergeInstructions : public MauTransform, TofinoWriteContext {
     const IR::MAU::StatefulAlu *preorder(IR::MAU::StatefulAlu *salu) override;
     const IR::MAU::HashDist *preorder(IR::MAU::HashDist *hd) override;
 
-
     const IR::Node *preorder(IR::Node *) override;
     const IR::MAU::Instruction *postorder(IR::MAU::Instruction *) override;
     const IR::MAU::Action *postorder(IR::MAU::Action *) override;
@@ -236,32 +260,33 @@ class MergeInstructions : public MauTransform, TofinoWriteContext {
     ordered_set<PHV::Container>::iterator merged_location;
 
     IR::MAU::Instruction *dest_slice_to_container(PHV::Container container,
-        ActionAnalysis::ContainerAction &cont_action);
-
+                                                  ActionAnalysis::ContainerAction &cont_action);
 
     void build_actiondata_source(ActionAnalysis::ContainerAction &cont_action,
-        const IR::Expression **src1_p, bitvec &src1_writebits, ByteRotateMergeInfo &brm_info,
-        PHV::Container container);
+                                 const IR::Expression **src1_p, bitvec &src1_writebits,
+                                 ByteRotateMergeInfo &brm_info, PHV::Container container);
     void build_phv_source(ActionAnalysis::ContainerAction &cont_action,
-        const IR::Expression **src1_p, const IR::Expression **src2_p, bitvec &src1_writebits,
-        bitvec &src2_writebits, ByteRotateMergeInfo &brm_info, PHV::Container container);
+                          const IR::Expression **src1_p, const IR::Expression **src2_p,
+                          bitvec &src1_writebits, bitvec &src2_writebits,
+                          ByteRotateMergeInfo &brm_info, PHV::Container container);
 
     IR::MAU::Instruction *build_merge_instruction(PHV::Container container,
-        ActionAnalysis::ContainerAction &cont_action);
+                                                  ActionAnalysis::ContainerAction &cont_action);
     void fill_out_write_multi_operand(ActionAnalysis::ContainerAction &cont_action,
-        IR::MAU::MultiOperand *mo);
+                                      IR::MAU::MultiOperand *mo);
     void fill_out_read_multi_operand(ActionAnalysis::ContainerAction &cont_action,
-        ActionAnalysis::ActionParam::type_t type, cstring match_name,
-        IR::MAU::MultiOperand *mo);
+                                     ActionAnalysis::ActionParam::type_t type, cstring match_name,
+                                     IR::MAU::MultiOperand *mo);
     const IR::Expression *fill_out_hash_operand(PHV::Container container,
-        ActionAnalysis::ContainerAction &cont_action);
+                                                ActionAnalysis::ContainerAction &cont_action);
     const IR::Expression *fill_out_rand_operand(PHV::Container container,
-        ActionAnalysis::ContainerAction &cont_action);
+                                                ActionAnalysis::ContainerAction &cont_action);
     const IR::Constant *find_field_action_constant(ActionAnalysis::ContainerAction &cont_action);
 
  public:
     MergeInstructions(const PhvInfo &p, const ReductionOrInfo &ri) : phv(p), red_info(ri) {
-        visitDagOnce = false; }
+        visitDagOnce = false;
+    }
 };
 
 class AdjustStatefulInstructions : public MauTransform {
@@ -272,12 +297,12 @@ class AdjustStatefulInstructions : public MauTransform {
     const IR::MAU::IXBarExpression *preorder(IR::MAU::IXBarExpression *) override;
 
     bool check_bit_positions(std::map<int, le_bitrange> &salu_inputs, le_bitrange field_bits,
-        int starting_bit);
+                             int starting_bit);
     bool verify_on_search_bus(const IR::MAU::StatefulAlu *, const Tofino::IXBar::Use &salu_ixbar,
-        const PHV::Field *field, le_bitrange &bits, bool &is_hi);
+                              const PHV::Field *field, le_bitrange &bits, bool &is_hi);
     bool verify_on_hash_bus(const IR::MAU::StatefulAlu *salu,
-         const Tofino::IXBar::Use::MeterAluHash &mah, const IR::Expression *expr,
-         le_bitrange &bits, bool &is_hi);
+                            const Tofino::IXBar::Use::MeterAluHash &mah, const IR::Expression *expr,
+                            le_bitrange &bits, bool &is_hi);
 
  public:
     explicit AdjustStatefulInstructions(const PhvInfo &p) : phv(p) {}
@@ -286,19 +311,22 @@ class AdjustStatefulInstructions : public MauTransform {
 // Remove instructions which are effectively Noops in the code
 // This class is when run post phv allocation can determine if an instruction is not performing an
 // actual operation e.g. OR A, A, A / AND A, A, A
-class EliminateNoopInstructions: public MauTransform {
+class EliminateNoopInstructions : public MauTransform {
  private:
     enum OP_TYPE { DST = 0, SRC1 = 1, SRC2 = 2 };
     const PhvInfo &phv;
     typedef std::set<std::pair<PHV::Container, le_bitrange>> AllocContainerSlice;
     bool get_alloc_slice(IR::MAU::Instruction *ins, OP_TYPE type,
-                                AllocContainerSlice &op_alloc) const;
+                         AllocContainerSlice &op_alloc) const;
     const IR::MAU::Instruction *preorder(IR::MAU::Instruction *) override;
     const IR::MAU::Synth2Port *preorder(IR::MAU::Synth2Port *s) override;
     cstring toString(OP_TYPE ot) const {
-        if (ot == DST) return "DST"_cs;
-        else if (ot == SRC1) return "SRC1"_cs;
-        else if (ot == SRC2) return "SRC2"_cs;
+        if (ot == DST)
+            return "DST"_cs;
+        else if (ot == SRC1)
+            return "SRC1"_cs;
+        else if (ot == SRC2)
+            return "SRC2"_cs;
         return "-"_cs;
     }
 

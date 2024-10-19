@@ -16,9 +16,7 @@ namespace P4 {
 namespace IR {
 namespace MAU {
 
-static const char *data_aggr_to_str[] = {
-    "NONE", "PACKETS", "BYTES", "BOTH"
-};
+static const char *data_aggr_to_str[] = {"NONE", "PACKETS", "BYTES", "BOTH"};
 
 std::ostream &operator<<(std::ostream &out, const IR::MAU::DataAggregation &d) {
     out << data_aggr_to_str[static_cast<int>(d)];
@@ -39,11 +37,8 @@ bool operator>>(cstring s, IR::MAU::DataAggregation &d) {
     return false;
 }
 
-
-static const char *meter_type_to_str[] = {
-    "UNUSED", "STFUL_INST0", "COLOR_BLIND", "STFUL_INST1", "SELECTOR", "STFUL_INST2",
-    "COLOR_AWARE", "STFUL_INSTR3"
-};
+static const char *meter_type_to_str[] = {"UNUSED",   "STFUL_INST0", "COLOR_BLIND", "STFUL_INST1",
+                                          "SELECTOR", "STFUL_INST2", "COLOR_AWARE", "STFUL_INSTR3"};
 
 std::ostream &operator<<(std::ostream &out, const IR::MAU::MeterType &m) {
     // FIXME -- COLOR_AWARE and STFUL_CLEAR are overloaded into the same code; which it
@@ -65,15 +60,14 @@ bool operator>>(cstring s, IR::MAU::MeterType &m) {
     }
     if (s == "STFUL_CLEAR") {
         m = IR::MAU::MeterType::STFUL_CLEAR;
-        return true; }
+        return true;
+    }
     return false;
 }
 
-static const char *stateful_use_to_str[] = {
-    "NO_USE", "DIRECT", "INDIRECT", "LOG", "STACK_PUSH", "STACK_POP", "FIFO_PUSH", "FIFO_POP",
-    "FAST_CLEAR", "STFUL_TYPES"
-};
-
+static const char *stateful_use_to_str[] = {"NO_USE",     "DIRECT",     "INDIRECT",  "LOG",
+                                            "STACK_PUSH", "STACK_POP",  "FIFO_PUSH", "FIFO_POP",
+                                            "FAST_CLEAR", "STFUL_TYPES"};
 
 std::ostream &operator<<(std::ostream &out, const IR::MAU::StatefulUse &s) {
     out << stateful_use_to_str[static_cast<int>(s)];
@@ -94,10 +88,8 @@ bool operator>>(cstring s, IR::MAU::StatefulUse &u) {
     return false;
 }
 
-
-static const char *addr_location_to_str[] = {
-    "DIRECT", "OVERHEAD", "HASH", "STFUL_COUNTER", "GATEWAY_PAYLOAD", "NOT_SET"
-};
+static const char *addr_location_to_str[] = {"DIRECT",        "OVERHEAD",        "HASH",
+                                             "STFUL_COUNTER", "GATEWAY_PAYLOAD", "NOT_SET"};
 
 std::ostream &operator<<(std::ostream &out, const IR::MAU::AddrLocation &a) {
     out << addr_location_to_str[static_cast<int>(a)];
@@ -118,9 +110,7 @@ bool operator>>(cstring s, IR::MAU::AddrLocation &a) {
     return false;
 }
 
-static const char *pfe_location_to_str[] = {
-    "DEFAULT", "OVERHEAD", "GATEWAY_PAYLOAD", "NOT_SET"
-};
+static const char *pfe_location_to_str[] = {"DEFAULT", "OVERHEAD", "GATEWAY_PAYLOAD", "NOT_SET"};
 
 std::ostream &operator<<(std::ostream &out, const IR::MAU::PfeLocation &p) {
     out << pfe_location_to_str[static_cast<int>(p)];
@@ -141,9 +131,7 @@ bool operator>>(cstring s, IR::MAU::PfeLocation &p) {
     return false;
 }
 
-static const char *type_location_to_str[] = {
-    "DEFAULT", "OVERHEAD", "GATEWAY_PAYLOAD", "NOT_SET"
-};
+static const char *type_location_to_str[] = {"DEFAULT", "OVERHEAD", "GATEWAY_PAYLOAD", "NOT_SET"};
 
 std::ostream &operator<<(std::ostream &out, const IR::MAU::TypeLocation &t) {
     out << type_location_to_str[static_cast<int>(t)];
@@ -157,15 +145,15 @@ bool operator>>(cstring s, IR::MAU::TypeLocation &t) {
     }
     for (int i = 0; i <= static_cast<int>(IR::MAU::TypeLocation::NOT_SET); i++) {
         if (type_location_to_str[i] == s) {
-            t = static_cast<IR::MAU::TypeLocation>(i); return true;
+            t = static_cast<IR::MAU::TypeLocation>(i);
+            return true;
         }
     }
     return false;
 }
 
-static const char *color_mapram_address_to_str[] = {
-    "IDLETIME", "STATS", "MAPRAM_ADDR_TYPES", "NOT_SET"
-};
+static const char *color_mapram_address_to_str[] = {"IDLETIME", "STATS", "MAPRAM_ADDR_TYPES",
+                                                    "NOT_SET"};
 
 std::ostream &operator<<(std::ostream &out, const IR::MAU::ColorMapramAddress &cma) {
     out << color_mapram_address_to_str[static_cast<int>(cma)];
@@ -178,15 +166,14 @@ bool operator>>(cstring s, IR::MAU::ColorMapramAddress &cma) {
     }
     for (int i = 0; i <= static_cast<int>(IR::MAU::ColorMapramAddress::NOT_SET); i++) {
         if (color_mapram_address_to_str[i] == s) {
-            cma = static_cast<IR::MAU::ColorMapramAddress>(i); return true;
+            cma = static_cast<IR::MAU::ColorMapramAddress>(i);
+            return true;
         }
     }
     return false;
 }
 
-static const char *selector_mode_to_str[] = {
-    "FAIR", "RESILIENT", "SELECTOR_MODES"
-};
+static const char *selector_mode_to_str[] = {"FAIR", "RESILIENT", "SELECTOR_MODES"};
 
 std::ostream &operator<<(std::ostream &out, const IR::MAU::SelectorMode &t) {
     out << selector_mode_to_str[static_cast<int>(t)];
@@ -196,17 +183,16 @@ std::ostream &operator<<(std::ostream &out, const IR::MAU::SelectorMode &t) {
 bool operator>>(cstring s, IR::MAU::SelectorMode &t) {
     for (int i = 0; i <= static_cast<int>(IR::MAU::SelectorMode::SELECTOR_MODES); i++) {
         if (selector_mode_to_str[i] == s) {
-            t = static_cast<IR::MAU::SelectorMode>(i); return true;
+            t = static_cast<IR::MAU::SelectorMode>(i);
+            return true;
         }
     }
     return false;
 }
 
-static const char *always_run_to_str[] = {
-    "NONE", "TABLE", "ACTION"
-};
+static const char *always_run_to_str[] = {"NONE", "TABLE", "ACTION"};
 
-std::ostream& operator<<(std::ostream &out, const IR::MAU::AlwaysRun &ar) {
+std::ostream &operator<<(std::ostream &out, const IR::MAU::AlwaysRun &ar) {
     out << always_run_to_str[static_cast<int>(ar)];
     return out;
 }
@@ -227,9 +213,7 @@ bool operator>>(cstring s, IR::MAU::AlwaysRun &ar) {
 namespace IR {
 namespace BFN {
 
-static const char *checksum_mode_to_str[] = {
-    "VERIFY", "RESIDUAL", "CLOT"
-};
+static const char *checksum_mode_to_str[] = {"VERIFY", "RESIDUAL", "CLOT"};
 
 std::ostream &operator<<(std::ostream &out, const IR::BFN::ChecksumMode &t) {
     out << checksum_mode_to_str[static_cast<int>(t)];
@@ -239,16 +223,14 @@ std::ostream &operator<<(std::ostream &out, const IR::BFN::ChecksumMode &t) {
 bool operator>>(cstring s, IR::BFN::ChecksumMode &t) {
     for (int i = 0; i < 3; i++) {
         if (checksum_mode_to_str[i] == s) {
-            t = static_cast<IR::BFN::ChecksumMode>(i); return true;
+            t = static_cast<IR::BFN::ChecksumMode>(i);
+            return true;
         }
     }
     return false;
 }
 
-
-static const char *parser_write_mode_to_str[] = {
-    "SINGLE_WRITE", "BITWISE_OR", "CLEAR_ON_WRITE"
-};
+static const char *parser_write_mode_to_str[] = {"SINGLE_WRITE", "BITWISE_OR", "CLEAR_ON_WRITE"};
 
 std::ostream &operator<<(std::ostream &out, const IR::BFN::ParserWriteMode &t) {
     out << parser_write_mode_to_str[static_cast<int>(t)];
@@ -258,7 +240,8 @@ std::ostream &operator<<(std::ostream &out, const IR::BFN::ParserWriteMode &t) {
 bool operator>>(cstring s, IR::BFN::ParserWriteMode &t) {
     for (int i = 0; i < 3; i++) {
         if (parser_write_mode_to_str[i] == s) {
-            t = static_cast<IR::BFN::ParserWriteMode>(i); return true;
+            t = static_cast<IR::BFN::ParserWriteMode>(i);
+            return true;
         }
     }
     return false;

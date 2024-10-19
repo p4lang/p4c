@@ -11,6 +11,7 @@
  */
 
 #include "bf-p4c/midend/annotate_with_in_hash.h"
+
 #include "bf-p4c/midend/path_linearizer.h"
 #include "bf-p4c/midend/type_categories.h"
 
@@ -35,7 +36,7 @@ namespace BFN {
  *         default action is suitable; false otherwise.
  */
 bool DoAnnotateWithInHash::checkKeyDefaultAction(const IR::P4Control &control,
-        const IR::P4Action &action) const {
+                                                 const IR::P4Action &action) const {
     for (const auto *decl : control.getDeclarations()->toVector()) {
         if (const auto *table = decl->to<IR::P4Table>()) {
             const auto *actionList = table->getActionList();
@@ -83,10 +84,11 @@ bool DoAnnotateWithInHash::checkKeyDefaultAction(const IR::P4Control &control,
  *         for using the \@in_hash annotation.
  */
 bool DoAnnotateWithInHash::checkAssignmentStructure(const IR::AssignmentStatement &assignment,
-        const IR::Expression **op, const IR::Expression **opConcat) {
+                                                    const IR::Expression **op,
+                                                    const IR::Expression **opConcat) {
     auto *binary = assignment.right->to<IR::Operation_Binary>();
-    if (!binary || (!binary->is<IR::Add>() && !binary->is<IR::Sub>()
-            && !binary->is<IR::AddSat>() && !binary->is<IR::SubSat>())) {
+    if (!binary || (!binary->is<IR::Add>() && !binary->is<IR::Sub>() && !binary->is<IR::AddSat>() &&
+                    !binary->is<IR::SubSat>())) {
         return false;
     }
 
@@ -101,14 +103,10 @@ bool DoAnnotateWithInHash::checkAssignmentStructure(const IR::AssignmentStatemen
         return expr->is<IR::PathExpression>() || expr->is<IR::Member>() || expr->is<IR::Slice>();
     };
 
-    if (isPathExpression(binary->left))
-        opLeft = binary->left;
-    if (isPathExpression(binary->right))
-        opRight = binary->right;
-    if (binary->left->is<IR::Concat>())
-        concatLeft = binary->left->to<IR::Concat>();
-    if (binary->right->is<IR::Concat>())
-        concatRight = binary->right->to<IR::Concat>();
+    if (isPathExpression(binary->left)) opLeft = binary->left;
+    if (isPathExpression(binary->right)) opRight = binary->right;
+    if (binary->left->is<IR::Concat>()) concatLeft = binary->left->to<IR::Concat>();
+    if (binary->right->is<IR::Concat>()) concatRight = binary->right->to<IR::Concat>();
 
     const IR::Concat *concat = nullptr;
 
@@ -128,9 +126,8 @@ bool DoAnnotateWithInHash::checkAssignmentStructure(const IR::AssignmentStatemen
         }
     }
 
-    if (concat && concat->left->is<IR::Constant>()
-            && concat->left->to<IR::Constant>()->asInt() == 0
-            && isPathExpression(concat->right)) {
+    if (concat && concat->left->is<IR::Constant>() &&
+        concat->left->to<IR::Constant>()->asInt() == 0 && isPathExpression(concat->right)) {
         *opConcat = concat->right;
     }
 
@@ -163,8 +160,8 @@ bool DoAnnotateWithInHash::checkHeaderMetadataReference(const IR::Expression &op
     BFN::PathLinearizer path;
     op.apply(path);
     BUG_CHECK(path.linearPath != std::nullopt, "Missing linear path expression");
-    return isHeaderReference(*path.linearPath, typeMap)
-        || isMetadataReference(*path.linearPath, typeMap);
+    return isHeaderReference(*path.linearPath, typeMap) ||
+           isMetadataReference(*path.linearPath, typeMap);
 }
 
 /**
@@ -202,8 +199,9 @@ const IR::Node *DoAnnotateWithInHash::preorder(IR::AssignmentStatement *assignme
      * Do not annotate in a non-default action if the table does not have a key.
      */
     if (!checkKeyDefaultAction(*control, *action)) {
-        LOG2("Not annotating assignment statement in action " << action->getName()
-            << " in a table with inappropriate combination of default "
+        LOG2("Not annotating assignment statement in action "
+             << action->getName()
+             << " in a table with inappropriate combination of default "
                 "action and table key presence.");
         prune();
         return assignment;
@@ -216,8 +214,8 @@ const IR::Node *DoAnnotateWithInHash::preorder(IR::AssignmentStatement *assignme
      * Checks the structure of the assignment statement.
      */
     if (!checkAssignmentStructure(*assignment, &op, &opConcat)) {
-        LOG2("Not annotating assignment statement in action " << action->getName()
-            << " which does not have appropriate form.");
+        LOG2("Not annotating assignment statement in action "
+             << action->getName() << " which does not have appropriate form.");
         prune();
         return assignment;
     }
@@ -228,8 +226,8 @@ const IR::Node *DoAnnotateWithInHash::preorder(IR::AssignmentStatement *assignme
      * do not know whether the hash unit has to be used.
      */
     if (checkAluSuitability(*op) && checkAluSuitability(*opConcat)) {
-        LOG2("Not annotating assignment statement in action " << action->getName()
-            << " which has operands of appropriate width.");
+        LOG2("Not annotating assignment statement in action "
+             << action->getName() << " which has operands of appropriate width.");
         prune();
         return assignment;
     }
@@ -239,14 +237,15 @@ const IR::Node *DoAnnotateWithInHash::preorder(IR::AssignmentStatement *assignme
      * via action bus, which is to be used for carrying data from the hash unit.
      */
     if (!checkHeaderMetadataReference(*opConcat)) {
-        LOG2("Not annotating assignment statement in action " << action->getName()
-            << " whose concatenated operand is not a header or metadata type.");
+        LOG2("Not annotating assignment statement in action "
+             << action->getName()
+             << " whose concatenated operand is not a header or metadata type.");
         prune();
         return assignment;
     }
     if (!checkHeaderMetadataReference(*op)) {
-        LOG2("Not annotating assignment statement in action " << action->getName()
-            << " whose operand is not a header or metadata type.");
+        LOG2("Not annotating assignment statement in action "
+             << action->getName() << " whose operand is not a header or metadata type.");
         prune();
         return assignment;
     }
@@ -254,13 +253,12 @@ const IR::Node *DoAnnotateWithInHash::preorder(IR::AssignmentStatement *assignme
     /*
      * If all previous checks passed, let's annotate the assignment statement.
      */
-    LOG1("Annotating assignment statement in action " << action->getName() << ":"
-        << std::endl << "\t" << assignment);
+    LOG1("Annotating assignment statement in action " << action->getName() << ":" << std::endl
+                                                      << "\t" << assignment);
     prune();  // The annotated assignment statement would be visited recursively.
-    return new IR::BlockStatement(
-        assignment->srcInfo,
-        new IR::Annotations({new IR::Annotation(IR::ID("in_hash"), {})}),
-        {assignment});
+    return new IR::BlockStatement(assignment->srcInfo,
+                                  new IR::Annotations({new IR::Annotation(IR::ID("in_hash"), {})}),
+                                  {assignment});
 }
 
 }  // namespace BFN

@@ -13,13 +13,13 @@
 #ifndef BF_P4C_PHV_MAU_BACKTRACKER_H_
 #define BF_P4C_PHV_MAU_BACKTRACKER_H_
 
+#include "bf-p4c/mau/table_summary.h"
 #include "ir/ir.h"
 #include "lib/ordered_map.h"
-#include "bf-p4c/mau/table_summary.h"
 
 /** When backtracking, this class contains members that save the generated table placement (without
-  * container conflicts) for use by the second round of PHV allocation
-  */
+ * container conflicts) for use by the second round of PHV allocation
+ */
 class MauBacktracker : public Backtrack {
  private:
     State::state_t &state;
@@ -34,7 +34,7 @@ class MauBacktracker : public Backtrack {
     ordered_map<cstring, ordered_set<int>> prevRoundTables;
 
     /// Table Order for 2nd TP round in alt phv alloc
-    ordered_map<int, ordered_set<ordered_set<cstring> > > table_order;
+    ordered_map<int, ordered_set<ordered_set<cstring>>> table_order;
 
     /// Store a map of internal table names to stage, used as reference by the second round of
     /// PHV allocation (after a backtrack exception has been thrown by TableSummary). Only used
@@ -76,15 +76,13 @@ class MauBacktracker : public Backtrack {
     /// return true.
     bool backtrack(trigger &) override;
 
-    ordered_set<int> inSameStage(
-            const IR::MAU::Table* t1,
-            const IR::MAU::Table* t2,
-            const ordered_map<cstring, ordered_set<int>>& tableMap) const;
+    ordered_set<int> inSameStage(const IR::MAU::Table *t1, const IR::MAU::Table *t2,
+                                 const ordered_map<cstring, ordered_set<int>> &tableMap) const;
 
  public:
     /// @returns the stage number(s) if tables @p t1 and @p t2 are placed in the same stage
     /// @returns an empty set if tables are not in the same stage
-    ordered_set<int> inSameStage(const IR::MAU::Table* t1, const IR::MAU::Table* t2) const;
+    ordered_set<int> inSameStage(const IR::MAU::Table *t1, const IR::MAU::Table *t2) const;
 
     /// Prints the table allocation received by MauBacktracker by means of the backtrack trigger
     std::string printTableAlloc() const;
@@ -95,7 +93,7 @@ class MauBacktracker : public Backtrack {
 
     /// @returns the stages in which table @p t was placed. Use internalTables mapping when internal
     /// flag is set.
-    ordered_set<int> stage(const IR::MAU::Table* t, bool internal = false) const;
+    ordered_set<int> stage(const IR::MAU::Table *t, bool internal = false) const;
 
     /// @returns metaInitDisable.
     bool disableMetadataInitialization() const { return metaInitDisable; }
@@ -103,21 +101,23 @@ class MauBacktracker : public Backtrack {
     /// @returns firstRoundFit.
     bool didFirstRoundFit() const { return firstRoundFit; }
 
-    bool happensBefore(const IR::MAU::Table* t1, const IR::MAU::Table* t2) const;
+    bool happensBefore(const IR::MAU::Table *t1, const IR::MAU::Table *t2) const;
 
     /// @returns the number of stages in the table allocation
     int numStages() const;
 
     /// @returns the Table Summary pointer
-    const TableSummary* get_table_summary() const { return table_summary; };
+    const TableSummary *get_table_summary() const { return table_summary; };
 
     /// @returns tables structure
-    const ordered_map<cstring, ordered_set<int>>&
-        getInternalTablesInfo() const { return internalTables; }
+    const ordered_map<cstring, ordered_set<int>> &getInternalTablesInfo() const {
+        return internalTables;
+    }
 
     /// @returns merged gateways structure
-    const ordered_map<cstring, std::pair<cstring, cstring>>&
-        getMergedGatewaysInfo() const { return mergedGateways; }
+    const ordered_map<cstring, std::pair<cstring, cstring>> &getMergedGatewaysInfo() const {
+        return mergedGateways;
+    }
 
     /// Clear the MauBacktracker state.
     /// Only use when backtracking to a point where everything should be reset.
@@ -127,7 +127,7 @@ class MauBacktracker : public Backtrack {
     /// Constructor takes mutually exclusive to be able to clear it before every
     /// PHV allocation pass
     explicit MauBacktracker(State::state_t &state = *(new State::state_t),
-        TableSummary *table_summary = nullptr)
+                            TableSummary *table_summary = nullptr)
         : state(state), table_summary(table_summary) {}
 };
 

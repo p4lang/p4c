@@ -10,10 +10,11 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+#include "jbay_phv_analysis.h"
+
 #include "bf-p4c/device.h"
 #include "bf-p4c/phv/phv_fields.h"
 #include "bf-p4c/phv/phv_parde_mau_use.h"
-#include "jbay_phv_analysis.h"
 
 Visitor::profile_t JbayPhvAnalysis::init_apply(const IR::Node *root) {
     profile_t rv = Inspector::init_apply(root);
@@ -58,38 +59,35 @@ Visitor::profile_t JbayPhvAnalysis::init_apply(const IR::Node *root) {
     return rv;
 }
 
-bool JbayPhvAnalysis::preorder(const IR::MAU::Table* tbl) {
+bool JbayPhvAnalysis::preorder(const IR::MAU::Table *tbl) {
     listOfTables.insert(tbl);
     tableStack.push_back(tbl);
     return true;
 }
 
-bool JbayPhvAnalysis::preorder(const IR::MAU::TableKey* read) {
+bool JbayPhvAnalysis::preorder(const IR::MAU::TableKey *read) {
     auto tbl = findContext<IR::MAU::Table>();
-    const PHV::Field* f = phv.field(read->expr);
+    const PHV::Field *f = phv.field(read->expr);
     BUG_CHECK(tbl != nullptr, "No associated table found for PHV analysis - %1%", read->expr);
-    if (!f)
-        warning("\t\tField read not found: %1% in table: %2%", read->expr, tbl->name);
+    if (!f) warning("\t\tField read not found: %1% in table: %2%", read->expr, tbl->name);
     fieldUsesMap[f] |= IPXBAR;
     tableMatches[tableStack.back()].insert(f);
     fieldUses[f][dg.min_stage(tbl)] |= MATCH;
     return false;
 }
 
-bool JbayPhvAnalysis::preorder(const IR::MAU::Action* act) {
+bool JbayPhvAnalysis::preorder(const IR::MAU::Action *act) {
     auto tbl = tableStack.back();
-    ordered_set<const PHV::Field*> actionWrites = actions.actionWrites(act);
-    ordered_set<const PHV::Field*> actionReads = actions.actionReads(act);
+    ordered_set<const PHV::Field *> actionWrites = actions.actionWrites(act);
+    ordered_set<const PHV::Field *> actionReads = actions.actionReads(act);
     tablePHVReads[tbl].insert(actionReads.begin(), actionReads.end());
     tablePHVWrites[tbl].insert(actionWrites.begin(), actionWrites.end());
-    for (auto* f : actionWrites)
-        fieldUses[f][dg.min_stage(tbl)] |= WRITE;
-    for (auto* f : actionReads)
-        fieldUses[f][dg.min_stage(tbl)] |= READ;
+    for (auto *f : actionWrites) fieldUses[f][dg.min_stage(tbl)] |= WRITE;
+    for (auto *f : actionReads) fieldUses[f][dg.min_stage(tbl)] |= READ;
     return false;
 }
 
-void JbayPhvAnalysis::postorder(const IR::MAU::Table* tbl) {
+void JbayPhvAnalysis::postorder(const IR::MAU::Table *tbl) {
     if (tbl != tableStack.back())
         warning("Popping a different table to the one encountered in postorder");
     tableStack.pop_back();
@@ -105,16 +103,17 @@ void JbayPhvAnalysis::end_apply() {
     auto dep = longestDependenceChain();
     LOG4("\n");
     printFieldLiveness(dep);
-    for (auto& f : phv) {
+    for (auto &f : phv) {
         if (!uses.is_referenced(&f)) continue;
-        assessCandidacy(&f, dep); }
+        assessCandidacy(&f, dep);
+    }
 
     LOG4("\nPrinting Initial Candidacy\n");
     printCandidacy(dep);
     printStagewiseStats(dep);
 
     LOG4("\nPrinting Fixed Allocation\n");
-    for (auto& f : phv) {
+    for (auto &f : phv) {
         if (!uses.is_referenced(&f)) continue;
         if (phvMap[&f] == TPHV) continue;
         fixPHVAllocation(&f, dep);
@@ -124,7 +123,7 @@ void JbayPhvAnalysis::end_apply() {
     printStagewiseStats(dep);
 
     LOG4("\nPrinting Fixed Mocha Allocation\n");
-    for (auto& f : phv) {
+    for (auto &f : phv) {
         if (!uses.is_referenced(&f)) continue;
         if (phvMap[&f] == TPHV) continue;
         fixMochaAllocation(&f, dep);
@@ -140,216 +139,229 @@ void JbayPhvAnalysis::end_apply() {
 
 size_t JbayPhvAnalysis::totalBits() const {
     size_t rv = 0;
-    for (auto& f : phv)
-        rv += f.size;
+    for (auto &f : phv) rv += f.size;
     return rv;
 }
 
 size_t JbayPhvAnalysis::totalAllocatedBits() const {
     size_t rv = 0;
-    for (auto& f : phv) {
-        if (uses.is_referenced(&f))
-            rv += f.size; }
+    for (auto &f : phv) {
+        if (uses.is_referenced(&f)) rv += f.size;
+    }
     return rv;
 }
 
 size_t JbayPhvAnalysis::totalPhvBits() const {
     size_t rv = 0;
-    for (auto& f : phv) {
+    for (auto &f : phv) {
         if (!uses.is_referenced(&f)) continue;
-        if (isPHV(&f))
-            rv += f.size; }
+        if (isPHV(&f)) rv += f.size;
+    }
     return rv;
 }
 
 size_t JbayPhvAnalysis::totalTPhvBits() {
     size_t rv = 0;
-    for (auto& f : phv) {
+    for (auto &f : phv) {
         if (!uses.is_referenced(&f)) continue;
         if (!isPHV(&f)) {
             phvMap[&f] = TPHV;
-            rv += f.size; } }
+            rv += f.size;
+        }
+    }
     return rv;
 }
 
 size_t JbayPhvAnalysis::totalHeaderBits() const {
     size_t rv = 0;
-    for (auto& f : phv) {
+    for (auto &f : phv) {
         if (!uses.is_referenced(&f)) continue;
-        if (isHeader(&f))
-            rv += f.size; }
+        if (isHeader(&f)) rv += f.size;
+    }
     return rv;
 }
 
 size_t JbayPhvAnalysis::totalMetadataBits() const {
     size_t rv = 0;
-    for (auto& f : phv) {
+    for (auto &f : phv) {
         if (!uses.is_referenced(&f)) continue;
-        if (f.metadata) rv += f.size; }
+        if (f.metadata) rv += f.size;
+    }
     return rv;
 }
 
 size_t JbayPhvAnalysis::totalPOVBits() const {
     size_t rv = 0;
-    for (auto& f : phv) {
+    for (auto &f : phv) {
         if (!uses.is_referenced(&f)) continue;
-        if (f.pov) rv += f.size; }
+        if (f.pov) rv += f.size;
+    }
     return rv;
 }
 
 size_t JbayPhvAnalysis::usedInPardeMetadata() const {
     size_t rv = 0;
-    for (auto& f : phv) {
+    for (auto &f : phv) {
         if (!uses.is_referenced(&f)) continue;
-        if (f.metadata && uses.is_used_parde(&f))
-            rv += f.size; }
+        if (f.metadata && uses.is_used_parde(&f)) rv += f.size;
+    }
     return rv;
 }
 
 size_t JbayPhvAnalysis::usedInParde() {
     size_t rv = 0;
-    for (auto& f : phv) {
+    for (auto &f : phv) {
         if (!uses.is_referenced(&f)) continue;
         if (uses.is_used_parde(&f)) {
             fieldUsesMap[&f] |= PARDE;
-            rv += f.size; } }
+            rv += f.size;
+        }
+    }
     return rv;
 }
 
 size_t JbayPhvAnalysis::usedInMau() const {
     size_t rv = 0;
-    for (auto& f : phv) {
+    for (auto &f : phv) {
         if (!uses.is_referenced(&f)) continue;
-        if (uses.is_used_mau(&f))
-            rv += f.size; }
+        if (uses.is_used_mau(&f)) rv += f.size;
+    }
     return rv;
 }
 
 size_t JbayPhvAnalysis::usedInPardeHeader() const {
     size_t rv = 0;
-    for (auto& f : phv) {
+    for (auto &f : phv) {
         if (!uses.is_referenced(&f)) continue;
-        if (uses.is_used_parde(&f) && isHeader(&f))
-            rv += f.size; }
+        if (uses.is_used_parde(&f) && isHeader(&f)) rv += f.size;
+    }
     return rv;
 }
 
 size_t JbayPhvAnalysis::usedInPardePOV() const {
     size_t rv = 0;
-    for (auto& f : phv) {
+    for (auto &f : phv) {
         if (!uses.is_referenced(&f)) continue;
-        if (f.pov && uses.is_used_parde(&f))
-            rv += f.size; }
+        if (f.pov && uses.is_used_parde(&f)) rv += f.size;
+    }
     return rv;
 }
 
 size_t JbayPhvAnalysis::ingressPhvBits() const {
     size_t rv = 0;
-    for (auto& f : phv) {
+    for (auto &f : phv) {
         if (!uses.is_referenced(&f)) continue;
-        if (isPHV(&f) && isGress(&f, INGRESS))
-            rv += f.size; }
+        if (isPHV(&f) && isGress(&f, INGRESS)) rv += f.size;
+    }
     return rv;
 }
 
 size_t JbayPhvAnalysis::egressPhvBits() const {
     size_t rv = 0;
-    for (auto& f : phv) {
+    for (auto &f : phv) {
         if (!uses.is_referenced(&f)) continue;
-        if (isPHV(&f) && isGress(&f, EGRESS))
-            rv += f.size; }
+        if (isPHV(&f) && isGress(&f, EGRESS)) rv += f.size;
+    }
     return rv;
 }
 
 size_t JbayPhvAnalysis::ingressTPhvBits() const {
     size_t rv = 0;
-    for (auto& f : phv) {
+    for (auto &f : phv) {
         if (!uses.is_referenced(&f)) continue;
-        if (!isPHV(&f) && isGress(&f, INGRESS))
-            rv += f.size; }
+        if (!isPHV(&f) && isGress(&f, INGRESS)) rv += f.size;
+    }
     return rv;
 }
 
 size_t JbayPhvAnalysis::egressTPhvBits() const {
     size_t rv = 0;
-    for (auto& f : phv) {
+    for (auto &f : phv) {
         if (!uses.is_referenced(&f)) continue;
-        if (!isPHV(&f) && isGress(&f, EGRESS))
-            rv += f.size; }
+        if (!isPHV(&f) && isGress(&f, EGRESS)) rv += f.size;
+    }
     return rv;
 }
 
 size_t JbayPhvAnalysis::aluUseBits() {
     size_t rv = 0;
-    for (auto& f : phv) {
+    for (auto &f : phv) {
         bool isUsedInALU = uses.is_used_alu(&f);
         if (!isUsedInALU) continue;
         if (uses.is_referenced(&f)) {
             rv += f.size;
             fieldUsesMap[&f] |= ALU;
         } else {
-            warning("\tUnreferenced field used in ALU: %1%", f.name); } }
+            warning("\tUnreferenced field used in ALU: %1%", f.name);
+        }
+    }
     return rv;
 }
 
 size_t JbayPhvAnalysis::aluUseBitsHeader() const {
     size_t rv = 0;
-    for (auto& f : phv) {
+    for (auto &f : phv) {
         if (!isHeader(&f)) continue;
         bool isUsedInALU = uses.is_used_alu(&f);
         if (!isUsedInALU) continue;
         if (uses.is_referenced(&f))
             rv += f.size;
         else
-            warning("\tUnreferenced field used in ALU: %1%", f.name); }
+            warning("\tUnreferenced field used in ALU: %1%", f.name);
+    }
     return rv;
 }
 
 size_t JbayPhvAnalysis::aluUseBitsMetadata() const {
     size_t rv = 0;
-    for (auto& f : phv) {
+    for (auto &f : phv) {
         if (!f.metadata) continue;
         bool isUsedInALU = uses.is_used_alu(&f);
         if (!isUsedInALU) continue;
         if (uses.is_referenced(&f))
             rv += f.size;
         else
-            warning("\tUnreferenced field used in ALU: %1%", f.name); }
+            warning("\tUnreferenced field used in ALU: %1%", f.name);
+    }
     return rv;
 }
 
 size_t JbayPhvAnalysis::matchingBitsTotal() {
     size_t rv = 0;
-    for (auto& f : phv) {
+    for (auto &f : phv) {
         if (!uses.is_referenced(&f)) continue;
-        if (fieldUsesMap[&f] & IPXBAR)
-            rv += f.size; }
+        if (fieldUsesMap[&f] & IPXBAR) rv += f.size;
+    }
     return rv;
 }
 
 size_t JbayPhvAnalysis::aluUseBitsPOV() const {
     size_t rv = 0;
-    for (auto& f : phv) {
+    for (auto &f : phv) {
         if (!f.pov) continue;
         bool isUsedInALU = uses.is_used_alu(&f);
         if (!isUsedInALU) continue;
         if (uses.is_referenced(&f))
             rv += f.size;
         else
-            warning("\tUnreferenced field used in ALU: %1%", f.name); }
+            warning("\tUnreferenced field used in ALU: %1%", f.name);
+    }
     return rv;
 }
 
 size_t JbayPhvAnalysis::determineDarkCandidates() {
     size_t numBits = 0;
     size_t numFields = 0;
-    for (auto& f : phv) {
+    for (auto &f : phv) {
         if (!uses.is_referenced(&f)) continue;
         if (!(fieldUsesMap[&f] & PARDE)) {
             if (!(fieldUsesMap[&f] & ALU)) {
                 phvMap[&f] = DARK;
                 ++numFields;
-                numBits += f.size; } } }
+                numBits += f.size;
+            }
+        }
+    }
     LOG4("\t" << numFields << "\tNumber of fields for DARK");
     return numBits;
 }
@@ -357,12 +369,14 @@ size_t JbayPhvAnalysis::determineDarkCandidates() {
 size_t JbayPhvAnalysis::determineMochaCandidates() {
     size_t numBits = 0;
     size_t numFields = 0;
-    for (auto& f : phv) {
+    for (auto &f : phv) {
         if (!uses.is_referenced(&f)) continue;
         if (phvMap[&f] & DARK) continue;
         if ((!(fieldUsesMap[&f] & ALU)) && (fieldUsesMap[&f] & IPXBAR)) {
             ++numFields;
-            numBits += f.size; } }
+            numBits += f.size;
+        }
+    }
     LOG4("\t" << numFields << "\tNumber of fields for MOCHA");
     return numBits;
 }
@@ -376,7 +390,8 @@ void JbayPhvAnalysis::printFieldLiveness(int maxStages) {
         if (i > 9)
             ss << " " << i << "|";
         else
-            ss << " " << i << " |"; }
+            ss << " " << i << " |";
+    }
     ss << " Field";
     LOG4(ss.str());
     for (auto f : fieldUses) {
@@ -400,12 +415,13 @@ void JbayPhvAnalysis::printFieldLiveness(int maxStages) {
                 ssRow << " |";
         }
         ssRow << " " << f.first->name;
-        LOG4(ssRow.str()); }
+        LOG4(ssRow.str());
+    }
     LOG4("Number of Fields: " << numFields);
     LOG4("Number of field bits: " << fieldsSize);
 }
 
-void JbayPhvAnalysis::assessCandidacy(const PHV::Field* f, int maxStages) {
+void JbayPhvAnalysis::assessCandidacy(const PHV::Field *f, int maxStages) {
     ordered_set<int> unusedStages;
     ordered_set<int> matchStages;
     ordered_set<int> aluStages;
@@ -413,28 +429,36 @@ void JbayPhvAnalysis::assessCandidacy(const PHV::Field* f, int maxStages) {
         // use represents the field's use in the ith stage
         if (phvMap[f] == TPHV) {
             candidateTypes[f][i] = TPHV;
-            continue; }
+            continue;
+        }
         unsigned use = fieldUses[f][i];
         LOG5("Use of field " << f->name << " in stage " << i << ": " << use);
         if (use == 0) {
             LOG5("Inserting in unused stages");
-            unusedStages.insert(i); }
+            unusedStages.insert(i);
+        }
         if (use & MATCH) {
             LOG5("Inserting in match stages");
-            matchStages.insert(i); }
+            matchStages.insert(i);
+        }
         if ((use & READ) || (use & WRITE)) {
             LOG5("Inserting in read and write stages");
-            aluStages.insert(i); } }
+            aluStages.insert(i);
+        }
+    }
     LOG5("Num in unused: " << unusedStages.size());
     LOG5("Num in match : " << matchStages.size());
     LOG5("Num in alu   : " << aluStages.size());
     for (int stage : aluStages) {
         LOG5("\tSetting to NORMAL PHV");
-        candidateTypes[f][stage] = NORMAL; }
+        candidateTypes[f][stage] = NORMAL;
+    }
     for (int stage : matchStages) {
         if (candidateTypes[f][stage] == 0) {
             LOG5("\tSetting to MOCHA");
-            candidateTypes[f][stage] = MOCHA; } }
+            candidateTypes[f][stage] = MOCHA;
+        }
+    }
     for (int stage : unusedStages) {
         LOG5("stage: " << stage);
         bool isParsedDeparsed = uses.is_used_parde(f);
@@ -445,14 +469,17 @@ void JbayPhvAnalysis::assessCandidacy(const PHV::Field* f, int maxStages) {
                 candidateTypes[f][stage] = MOCHA;
             } else {
                 LOG5("\tSetting to DARK | MOCHA");
-                candidateTypes[f][stage] = DARK | MOCHA; }
+                candidateTypes[f][stage] = DARK | MOCHA;
+            }
         } else {
             // For unused fields, it is safe to move them either to dark or mocha
             LOG5("\tSetting to DARK OR MOCHA");
-            candidateTypes[f][stage] = DARK | MOCHA; } }
+            candidateTypes[f][stage] = DARK | MOCHA;
+        }
+    }
 }
 
-void JbayPhvAnalysis::fixPHVAllocation(const PHV::Field* f, int maxStages) {
+void JbayPhvAnalysis::fixPHVAllocation(const PHV::Field *f, int maxStages) {
     int lastFound = -1;
     int found = -1;
     if (candidateTypes[f][0] & TPHV) return;
@@ -461,19 +488,22 @@ void JbayPhvAnalysis::fixPHVAllocation(const PHV::Field* f, int maxStages) {
             lastFound = found;
             found = i;
         } else {
-            continue; }
+            continue;
+        }
         if (lastFound == -1) {
-            if ((found > 0) && (fieldUses[f][found] & READ))
-                candidateTypes[f][found-1] = NORMAL;
-            continue; }
+            if ((found > 0) && (fieldUses[f][found] & READ)) candidateTypes[f][found - 1] = NORMAL;
+            continue;
+        }
         // Only change allocation if the distance (in stages) between two requirements of normal
         // PHVs is greater than 2 (allows for copying into dark/mocha)
         if (found - lastFound <= 3) {
-            if (lastFound + 1 < found) candidateTypes[f][lastFound+1] = NORMAL;
-            if (found - 1 > lastFound) candidateTypes[f][found - 1] = NORMAL; } }
+            if (lastFound + 1 < found) candidateTypes[f][lastFound + 1] = NORMAL;
+            if (found - 1 > lastFound) candidateTypes[f][found - 1] = NORMAL;
+        }
+    }
 }
 
-void JbayPhvAnalysis::fixMochaAllocation(const PHV::Field* f, int maxStages) {
+void JbayPhvAnalysis::fixMochaAllocation(const PHV::Field *f, int maxStages) {
     int lastFound = -1;
     int found = -1;
     if (candidateTypes[f][0] & TPHV) return;
@@ -482,21 +512,26 @@ void JbayPhvAnalysis::fixMochaAllocation(const PHV::Field* f, int maxStages) {
             lastFound = found;
             found = i;
         } else {
-            continue; }
+            continue;
+        }
         if (lastFound == -1) {
             if ((found > 0) && (fieldUses[f][found] & READ)) {
-                if (candidateTypes[f][found-1] != NORMAL) {
-                    candidateTypes[f][found-1] = MOCHA; } }
-            continue; }
+                if (candidateTypes[f][found - 1] != NORMAL) {
+                    candidateTypes[f][found - 1] = MOCHA;
+                }
+            }
+            continue;
+        }
         // Only change allocation if the distance (in stages) between two requirements of normal
         // PHVs is greater than 2 (allows for copying into dark/mocha)
         if (found - lastFound <= 3) {
-            if ((lastFound + 1 < found) && (candidateTypes[f][lastFound+1] != NORMAL))
-                candidateTypes[f][lastFound+1] = NORMAL;
-            if ((found - 1 > lastFound) && (candidateTypes[f][found-1] != NORMAL))
-                    candidateTypes[f][found - 1] = NORMAL; } }
+            if ((lastFound + 1 < found) && (candidateTypes[f][lastFound + 1] != NORMAL))
+                candidateTypes[f][lastFound + 1] = NORMAL;
+            if ((found - 1 > lastFound) && (candidateTypes[f][found - 1] != NORMAL))
+                candidateTypes[f][found - 1] = NORMAL;
+        }
+    }
 }
-
 
 void JbayPhvAnalysis::printCandidacy(int maxStages) {
     size_t numFields = 0;
@@ -513,7 +548,8 @@ void JbayPhvAnalysis::printCandidacy(int maxStages) {
         if (i > 9)
             ss << " " << i << "|";
         else
-            ss << " " << i << " |"; }
+            ss << " " << i << " |";
+    }
     ss << " Size | Field";
     LOG4(ss.str());
     for (auto f : candidateTypes) {
@@ -540,9 +576,12 @@ void JbayPhvAnalysis::printCandidacy(int maxStages) {
             } else if (alloc & TPHV) {
                 ssRow << " T |";
             } else {
-                warning("Don't see an allocation for this field"); } }
+                warning("Don't see an allocation for this field");
+            }
+        }
         ssRow << " " << (boost::format("%3d") % f.first->size) << "b |\t" << f.first->name;
-        LOG4(ssRow.str()); }
+        LOG4(ssRow.str());
+    }
     LOG4("Number of Fields: " << numFields);
     LOG4("Number of field bits: " << fieldsSize);
 }
@@ -556,10 +595,11 @@ void JbayPhvAnalysis::printStagewiseStats(int maxStages) {
         size_t mocha = stageMocha[i];
         size_t either = stageEither[i];
         size_t total = normal + dark + mocha + either;
-        ss << (boost::format("%6d") % i) << "|" << (boost::format("%5d") % normal) << "|" <<
-            (boost::format("%5d") % mocha) << "|" << (boost::format("%5d") % dark) << "|" <<
-            (boost::format("%5d") % either) << "|" << (boost::format("%5d") % total);
-        LOG4(ss.str()); }
+        ss << (boost::format("%6d") % i) << "|" << (boost::format("%5d") % normal) << "|"
+           << (boost::format("%5d") % mocha) << "|" << (boost::format("%5d") % dark) << "|"
+           << (boost::format("%5d") % either) << "|" << (boost::format("%5d") % total);
+        LOG4(ss.str());
+    }
 }
 
 int JbayPhvAnalysis::longestDependenceChain() const {
@@ -568,27 +608,24 @@ int JbayPhvAnalysis::longestDependenceChain() const {
     LOG4("Start of Table Analysis");
     LOG4("-----------------------");
     int maxStage = -1;
-    for (auto* tbl : listOfTables) {
-        auto minStage =  dg.min_stage(tbl);
-        if (minStage > maxStage)
-            maxStage = minStage; }
+    for (auto *tbl : listOfTables) {
+        auto minStage = dg.min_stage(tbl);
+        if (minStage > maxStage) maxStage = minStage;
+    }
     return maxStage;
 }
 
-bool JbayPhvAnalysis::isPHV(const PHV::Field* f) const {
-    if (uses.is_used_mau(f) || f->pov || f->deparsed_to_tm())
-        return true;
+bool JbayPhvAnalysis::isPHV(const PHV::Field *f) const {
+    if (uses.is_used_mau(f) || f->pov || f->deparsed_to_tm()) return true;
     return false;
 }
 
-bool JbayPhvAnalysis::isHeader(const PHV::Field* f) const {
-    if (!f->pov && !f->metadata)
-        return true;
+bool JbayPhvAnalysis::isHeader(const PHV::Field *f) const {
+    if (!f->pov && !f->metadata) return true;
     return false;
 }
 
-bool JbayPhvAnalysis::isGress(const PHV::Field* f, gress_t gress) const {
-    if (f->gress == gress)
-        return true;
+bool JbayPhvAnalysis::isGress(const PHV::Field *f, gress_t gress) const {
+    if (f->gress == gress) return true;
     return false;
 }

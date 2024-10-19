@@ -10,17 +10,17 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PARDE_CLOT_FIELD_SLICE_SET_H_
-#define EXTENSIONS_BF_P4C_PARDE_CLOT_FIELD_SLICE_SET_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_CLOT_FIELD_SLICE_SET_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_CLOT_FIELD_SLICE_SET_H_
 
 #include "bf-p4c/phv/phv_fields.h"
 
 /// Implements comparisons correctly.
-class FieldSliceSet : public std::set<const PHV::FieldSlice*, PHV::FieldSlice::Less> {
+class FieldSliceSet : public std::set<const PHV::FieldSlice *, PHV::FieldSlice::Less> {
  public:
-    using std::set<const PHV::FieldSlice*, PHV::FieldSlice::Less>::set;
+    using std::set<const PHV::FieldSlice *, PHV::FieldSlice::Less>::set;
 
-    bool operator==(const FieldSliceSet& other) const {
+    bool operator==(const FieldSliceSet &other) const {
         if (size() != other.size()) return false;
 
         auto it1 = begin();
@@ -34,7 +34,7 @@ class FieldSliceSet : public std::set<const PHV::FieldSlice*, PHV::FieldSlice::L
         return true;
     }
 
-    bool operator<(const FieldSliceSet& other) const {
+    bool operator<(const FieldSliceSet &other) const {
         if (size() != other.size()) return size() < other.size();
 
         auto it1 = begin();
@@ -48,7 +48,7 @@ class FieldSliceSet : public std::set<const PHV::FieldSlice*, PHV::FieldSlice::L
         return false;
     }
 
-    bool operator>(const FieldSliceSet& other) const {
+    bool operator>(const FieldSliceSet &other) const {
         if (size() != other.size()) return size() > other.size();
 
         auto it1 = begin();
@@ -62,19 +62,13 @@ class FieldSliceSet : public std::set<const PHV::FieldSlice*, PHV::FieldSlice::L
         return false;
     }
 
-    bool operator!=(const FieldSliceSet& other) const {
-        return !operator==(other);
-    }
+    bool operator!=(const FieldSliceSet &other) const { return !operator==(other); }
 
-    bool operator<=(const FieldSliceSet& other) const {
-      return !operator>(other);
-    }
+    bool operator<=(const FieldSliceSet &other) const { return !operator>(other); }
 
-    bool operator>=(const FieldSliceSet& other) const {
-      return !operator<(other);
-    }
+    bool operator>=(const FieldSliceSet &other) const { return !operator<(other); }
 };
 
 using PovBitSet = FieldSliceSet;
 
-#endif /* EXTENSIONS_BF_P4C_PARDE_CLOT_FIELD_SLICE_SET_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_CLOT_FIELD_SLICE_SET_H_ */

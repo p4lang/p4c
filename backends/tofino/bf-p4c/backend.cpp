@@ -54,22 +54,19 @@
  */
 
 #include "backend.h"
+
 #include <fstream>
 #include <set>
-#include "bf-p4c/phv/utils/slice_alloc.h"
-#include "ir/ir-generated.h"
-#include "ir/pass_manager.h"
-#include "lib/indent.h"
 
 #include "bf-p4c/arch/collect_hardware_constrained_fields.h"
 #include "bf-p4c/common/alias.h"
+#include "bf-p4c/common/bridged_packing.h"
 #include "bf-p4c/common/check_field_corruption.h"
 #include "bf-p4c/common/check_for_unimplemented_features.h"
 #include "bf-p4c/common/check_header_refs.h"
 #include "bf-p4c/common/check_uninitialized_read.h"
 #include "bf-p4c/common/elim_unused.h"
 #include "bf-p4c/common/extract_maupipe.h"
-#include "bf-p4c/common/bridged_packing.h"
 #include "bf-p4c/common/header_stack.h"
 #include "bf-p4c/common/ir_utils.h"
 #include "bf-p4c/common/merge_pov_bits.h"
@@ -111,19 +108,23 @@
 #include "bf-p4c/parde/rewrite_parser_locals.h"
 #include "bf-p4c/parde/stack_push_shims.h"
 #include "bf-p4c/parde/update_parser_write_mode.h"
-#include "bf-p4c/phv/analysis/dark.h"
-#include "bf-p4c/phv/pragma/pa_no_overlay.h"
 #include "bf-p4c/phv/add_alias_allocation.h"
 #include "bf-p4c/phv/allocate_temps_and_finalize_liverange.h"
+#include "bf-p4c/phv/analysis/dark.h"
 #include "bf-p4c/phv/auto_init_metadata.h"
 #include "bf-p4c/phv/check_unallocated.h"
 #include "bf-p4c/phv/create_thread_local_instances.h"
 #include "bf-p4c/phv/dump_table_flow_graph.h"
 #include "bf-p4c/phv/finalize_stage_allocation.h"
-#include "bf-p4c/phv/phv_analysis.h"
-#include "bf-p4c/phv/split_padding.h"
-#include "bf-p4c/phv/v2/metadata_initialization.h"
 #include "bf-p4c/phv/init_in_mau.h"
+#include "bf-p4c/phv/phv_analysis.h"
+#include "bf-p4c/phv/pragma/pa_no_overlay.h"
+#include "bf-p4c/phv/split_padding.h"
+#include "bf-p4c/phv/utils/slice_alloc.h"
+#include "bf-p4c/phv/v2/metadata_initialization.h"
+#include "ir/ir-generated.h"
+#include "ir/pass_manager.h"
+#include "lib/indent.h"
 
 namespace BFN {
 
@@ -132,20 +133,22 @@ namespace BFN {
  * and control whether we print an error (for debugging) or exit
  */
 class CheckUnimplementedFeatures : public Inspector {
-  bool _printAndNotExit;
- public:
-  explicit CheckUnimplementedFeatures(bool print = false) : _printAndNotExit(print) {}
+    bool _printAndNotExit;
 
-  bool preorder(const IR::EntriesList *entries) {
-    auto source = entries->getSourceInfo().toPosition();
-    if (_printAndNotExit)
-      ::warning("Table entries (%s) are not yet implemented in this backend",
-                source.toString());
-    else
-      throw Util::CompilerUnimplemented(source.sourceLine, source.fileName,
+ public:
+    explicit CheckUnimplementedFeatures(bool print = false) : _printAndNotExit(print) {}
+
+    bool preorder(const IR::EntriesList *entries) {
+        auto source = entries->getSourceInfo().toPosition();
+        if (_printAndNotExit)
+            ::warning("Table entries (%s) are not yet implemented in this backend",
+                      source.toString());
+        else
+            throw Util::CompilerUnimplemented(
+                source.sourceLine, source.fileName,
                 "Table entries are not yet implemented in this backend");
-    return false;
-  }
+        return false;
+    }
 };
 
 void force_link_dump(const IR::Node *n) { dump(n); }
@@ -159,29 +162,29 @@ static void debug_hook(const char *parent, unsigned idx, const char *pass, const
         LOG5("PASS: " << pass << " [" << parent << " (" << idx << ")]:");
         dump(std::clog, n);
     } else {
-        LOG4(pass << " [" << parent << " (" << idx << ")]:" << indent << endl <<
-             *n << unindent << endl); }
+        LOG4(pass << " [" << parent << " (" << idx << ")]:" << indent << endl
+                  << *n << unindent << endl);
+    }
 }
 
-Backend::Backend(const BFN_Options& o, int pipe_id) :
-    options(o),
-    uses(phv),
-    clot(uses),
-    defuse(phv),
-    decaf(phv, uses, defuse, deps),
-    table_summary(pipe_id, deps, phv, compilation_state),
-    mau_backtracker(compilation_state, &table_summary),
-    table_alloc(options, phv, deps, table_summary, &jsonGraph, mau_backtracker),
-    parserHeaderSeqs(phv),
-    longBranchDisabled() {
+Backend::Backend(const BFN_Options &o, int pipe_id)
+    : options(o),
+      uses(phv),
+      clot(uses),
+      defuse(phv),
+      decaf(phv, uses, defuse, deps),
+      table_summary(pipe_id, deps, phv, compilation_state),
+      mau_backtracker(compilation_state, &table_summary),
+      table_alloc(options, phv, deps, table_summary, &jsonGraph, mau_backtracker),
+      parserHeaderSeqs(phv),
+      longBranchDisabled() {
     BUG_CHECK(pipe_id >= 0, "Invalid pipe id in backend : %d", pipe_id);
     flexibleLogging = new LogFlexiblePacking(phv);
     phvLoggingInfo = new CollectPhvLoggingInfo(phv, uses, deps.red_info);
     phvLoggingDefUseInfo = options.debugInfo ? new PhvLogging::CollectDefUseInfo(defuse) : nullptr;
-    auto *PHV_Analysis = new PHV_AnalysisPass(options, phv, uses, clot,
-                                              defuse, deps, decaf, mau_backtracker,
-                                              phvLoggingInfo /*, &jsonGraph */,
-                                              mauInitFields, table_summary);
+    auto *PHV_Analysis =
+        new PHV_AnalysisPass(options, phv, uses, clot, defuse, deps, decaf, mau_backtracker,
+                             phvLoggingInfo /*, &jsonGraph */, mauInitFields, table_summary);
 
     // Collect next table info if we're using LBs
     if (Device::numLongBranchTags() > 0 && !options.disable_long_branch) {
@@ -198,9 +201,10 @@ Backend::Backend(const BFN_Options& o, int pipe_id) :
     auto *noOverlay = new PragmaNoOverlay(phv);
     auto *pragmaAlias = new PragmaAlias(phv, *noOverlay);
 
-    auto* pragmaDoNotUseClot = new PragmaDoNotUseClot(phv);
-    auto* allocateClot = Device::numClots() > 0 && options.use_clot ?
-        new AllocateClot(clot, phv, uses, *pragmaDoNotUseClot, *pragmaAlias) : nullptr;
+    auto *pragmaDoNotUseClot = new PragmaDoNotUseClot(phv);
+    auto *allocateClot = Device::numClots() > 0 && options.use_clot
+                             ? new AllocateClot(clot, phv, uses, *pragmaDoNotUseClot, *pragmaAlias)
+                             : nullptr;
 
     addPasses({
         new DumpPipe("Initial table graph"),
@@ -217,7 +221,8 @@ Backend::Backend(const BFN_Options& o, int pipe_id) :
             } else {
                 options.disable_long_branch = true;
                 longBranchDisabled = true;
-                nextTblProp.setVisitor(new DefaultNext(longBranchDisabled)); }
+                nextTblProp.setVisitor(new DefaultNext(longBranchDisabled));
+            }
             mau_backtracker.clear();
             table_summary.resetPlacement();
         }),
@@ -230,20 +235,20 @@ Backend::Backend(const BFN_Options& o, int pipe_id) :
         // generate invalid metadata dependencies. Placing it early in backend,
         // as it will also error out on invalid gateway expressions and we fail
         // early in those cases.
-        new CanonGatewayExpr,  // Must be before PHV_Analysis
+        new CanonGatewayExpr,        // Must be before PHV_Analysis
         new CollectHeaderStackInfo,  // Needed by CollectPhvInfo.
         new CollectPhvInfo(phv),
         &defuse,
         Device::hasMetadataPOV() ? new AddMetadataPOV(phv) : nullptr,
-        Device::currentDevice() == Device::TOFINO ?
-            new ResetInvalidatedChecksumHeaders(phv) : nullptr,
+        Device::currentDevice() == Device::TOFINO ? new ResetInvalidatedChecksumHeaders(phv)
+                                                  : nullptr,
         new CollectPhvInfo(phv),
         &defuse,
         new CollectHeaderStackInfo,  // Needs to be rerun after CreateThreadLocalInstances, but
                                      // cannot be run after InstructionSelection.
         new RemovePushInitialization,
         new StackPushShims,
-        new CollectPhvInfo(phv),    // Needs to be rerun after CreateThreadLocalInstances.
+        new CollectPhvInfo(phv),  // Needs to be rerun after CreateThreadLocalInstances.
         new HeaderPushPop,
         new CollectPhvInfo(phv),
         new GatherReductionOrReqs(deps.red_info),
@@ -281,19 +286,20 @@ Backend::Backend(const BFN_Options& o, int pipe_id) :
         new ResolveNegativeExtract,
         new CollectPhvInfo(phv),
         &defuse,
-        ((Device::currentDevice() != Device::TOFINO) && options.infer_payload_offset) ?
-            new InferPayloadOffset(phv, defuse) : nullptr,
+        ((Device::currentDevice() != Device::TOFINO) && options.infer_payload_offset)
+            ? new InferPayloadOffset(phv, defuse)
+            : nullptr,
         new CollectPhvInfo(phv),
         &defuse,
         new CollectHeaderStackInfo,
         new CollectPhvInfo(phv),
-        new ValidToStkvalid(phv),   // Alias header stack $valid fields with $stkvalid slices.
-                                    // Must happen before ElimUnused.
+        new ValidToStkvalid(phv),  // Alias header stack $valid fields with $stkvalid slices.
+                                   // Must happen before ElimUnused.
         new ConstMirrorSessionOpt(phv),
         new CollectPhvInfo(phv),
         &defuse,
-        (options.no_deadcode_elimination == false) ?
-            new ElimUnused(phv, defuse, zeroInitFields) : nullptr,
+        (options.no_deadcode_elimination == false) ? new ElimUnused(phv, defuse, zeroInitFields)
+                                                   : nullptr,
         (options.no_deadcode_elimination == false) ? new ElimUnusedHeaderStackInfo : nullptr,
         (options.disable_parser_state_merging == false) ? new MergeParserStates : nullptr,
         options.auto_init_metadata ? nullptr : new DisableAutoInitMetadata(defuse, phv),
@@ -315,8 +321,9 @@ Backend::Backend(const BFN_Options& o, int pipe_id) :
         new RemoveMetadataInits(phv, defuse, zeroInitFields),
         new CollectPhvInfo(phv),
         &defuse,
-        options.alt_phv_alloc_meta_init ?
-            new PHV::v2::MetadataInitialization(mau_backtracker, phv, defuse) : nullptr,
+        options.alt_phv_alloc_meta_init
+            ? new PHV::v2::MetadataInitialization(mau_backtracker, phv, defuse)
+            : nullptr,
         new CheckParserMultiWrite(phv),
         new CollectPhvInfo(phv),
         new CheckForHeaders(),
@@ -328,8 +335,8 @@ Backend::Backend(const BFN_Options& o, int pipe_id) :
         // eliminating POV bit assignments associated with the fields within zeroInitFields.
         // Metadata POV bits are only added on Tofino2 hence this will not affect any Tofino1
         // programs
-        (options.no_deadcode_elimination == false) ?
-            new ElimUnused(phv, defuse, zeroInitFields) : nullptr,
+        (options.no_deadcode_elimination == false) ? new ElimUnused(phv, defuse, zeroInitFields)
+                                                   : nullptr,
         new MergePovBits(phv),  // Ideally run earlier, see comment in class for explanation.
 
         // Two different allocation flow:
@@ -342,61 +349,63 @@ Backend::Backend(const BFN_Options& o, int pipe_id) :
         new AddInitsInMAU(phv, mauInitFields, false),
         new DumpPipe("Before phv_analysis"_cs),
         new DumpTableFlowGraph(phv),
-        options.alt_phv_alloc ? new PassManager({
-            // run trivial alloc for the first time
-            new PassIf(
-                [this]() {
-                    auto actualState = table_summary.getActualState();
-                    return actualState == State::ALT_INITIAL &&
-                           table_summary.getNumInvoked() == 0;
-                },
-                {
-                    [=]() {
-                        PHV_Analysis->set_trivial_alloc(true);
-                        PHV_Analysis->set_no_code_change(true);
-                        PHV_Analysis->set_physical_liverange_overlay(false);
-                        PHV_Analysis->set_physical_stage_trivial(false);
-                    },
-                }),
-            // run trivial alloc for the second time
-            new PassIf(
-                [this]() {
-                    auto actualState = table_summary.getActualState();
-                    return actualState == State::ALT_INITIAL &&
-                           table_summary.getNumInvoked() != 0;
-                },
-                {
-                    [=]() {
-                        PHV_Analysis->set_trivial_alloc(true);
-                        PHV_Analysis->set_no_code_change(true);
-                        PHV_Analysis->set_physical_liverange_overlay(false);
-                        PHV_Analysis->set_physical_stage_trivial(true);
-                    },
-                }),
-            // run actual PHV allocation
-            new PassIf(
-                [this]() {
-                    auto actualState = table_summary.getActualState();
-                    return actualState == State::ALT_FINALIZE_TABLE_SAME_ORDER ||
-                        actualState == State::ALT_FINALIZE_TABLE_SAME_ORDER_TABLE_FIXED;
-                },
-                {
-                    [=]() {
-                        PHV_Analysis->set_trivial_alloc(false);
-                        PHV_Analysis->set_no_code_change(true);
-                        PHV_Analysis->set_physical_liverange_overlay(true);
-                    },
-                }),
-            // ^^ three PassIf are mutex.
-        }) : new PassManager({
-            // Do PHV allocation.  Cannot run CollectPhvInfo afterwards, as that
-            // will clear the allocation.
-            [=](){
-                PHV_Analysis->set_trivial_alloc(false);
-                PHV_Analysis->set_no_code_change(false);
-                PHV_Analysis->set_physical_liverange_overlay(false);
-            },
-        }),
+        options.alt_phv_alloc
+            ? new PassManager({
+                  // run trivial alloc for the first time
+                  new PassIf(
+                      [this]() {
+                          auto actualState = table_summary.getActualState();
+                          return actualState == State::ALT_INITIAL &&
+                                 table_summary.getNumInvoked() == 0;
+                      },
+                      {
+                          [=]() {
+                              PHV_Analysis->set_trivial_alloc(true);
+                              PHV_Analysis->set_no_code_change(true);
+                              PHV_Analysis->set_physical_liverange_overlay(false);
+                              PHV_Analysis->set_physical_stage_trivial(false);
+                          },
+                      }),
+                  // run trivial alloc for the second time
+                  new PassIf(
+                      [this]() {
+                          auto actualState = table_summary.getActualState();
+                          return actualState == State::ALT_INITIAL &&
+                                 table_summary.getNumInvoked() != 0;
+                      },
+                      {
+                          [=]() {
+                              PHV_Analysis->set_trivial_alloc(true);
+                              PHV_Analysis->set_no_code_change(true);
+                              PHV_Analysis->set_physical_liverange_overlay(false);
+                              PHV_Analysis->set_physical_stage_trivial(true);
+                          },
+                      }),
+                  // run actual PHV allocation
+                  new PassIf(
+                      [this]() {
+                          auto actualState = table_summary.getActualState();
+                          return actualState == State::ALT_FINALIZE_TABLE_SAME_ORDER ||
+                                 actualState == State::ALT_FINALIZE_TABLE_SAME_ORDER_TABLE_FIXED;
+                      },
+                      {
+                          [=]() {
+                              PHV_Analysis->set_trivial_alloc(false);
+                              PHV_Analysis->set_no_code_change(true);
+                              PHV_Analysis->set_physical_liverange_overlay(true);
+                          },
+                      }),
+                  // ^^ three PassIf are mutex.
+              })
+            : new PassManager({
+                  // Do PHV allocation.  Cannot run CollectPhvInfo afterwards, as that
+                  // will clear the allocation.
+                  [=]() {
+                      PHV_Analysis->set_trivial_alloc(false);
+                      PHV_Analysis->set_no_code_change(false);
+                      PHV_Analysis->set_physical_liverange_overlay(false);
+                  },
+              }),
         PHV_Analysis,
 
         // CheckUninitializedReadAndOverlayedReads Pass checks all allocation slices for overlays
@@ -424,7 +433,7 @@ Backend::Backend(const BFN_Options& o, int pipe_id) :
         allocateClot == nullptr ? nullptr : new ClotAdjuster(clot, phv),
         new ValidateActions(phv, deps.red_info, false, true, false),
         new PHV::AddAliasAllocation(phv),
-        new ReinstateAliasSources(phv),    // revert AliasMembers/Slices to their original sources
+        new ReinstateAliasSources(phv),  // revert AliasMembers/Slices to their original sources
         // This pass must be called before instruction adjustment since the primitive info
         // is per P4 actions. This should also happen before table placement which may cause
         // tables to be split across stages.
@@ -435,15 +444,16 @@ Backend::Backend(const BFN_Options& o, int pipe_id) :
         // Rerun defuse analysis here so that table placements are used to correctly calculate live
         // ranges output in the assembly.
         &defuse,
-        options.alt_phv_alloc ?
-            new PHV::AllocateTempsAndFinalizeLiverange(phv, clot, defuse, table_summary) : nullptr,
+        options.alt_phv_alloc
+            ? new PHV::AllocateTempsAndFinalizeLiverange(phv, clot, defuse, table_summary)
+            : nullptr,
         liveRangeReport,
         new IXBarVerify(phv),
         new CollectIXBarInfo(phv),
         // DO NOT run CheckForUnallocatedTemps in table-first pass because temp vars has been
         // allocated in above AllocateTempsAndFinalizeLiverange.
-        !options.alt_phv_alloc
-            ? new CheckForUnallocatedTemps(phv, uses, clot, PHV_Analysis) : nullptr,
+        !options.alt_phv_alloc ? new CheckForUnallocatedTemps(phv, uses, clot, PHV_Analysis)
+                               : nullptr,
         new InstructionAdjustment(phv, deps.red_info),
         &nextTblProp,  // Must be run after all modifications to the table graph have finished!
         new DumpPipe("Final table graph"_cs),
@@ -459,7 +469,7 @@ Backend::Backend(const BFN_Options& o, int pipe_id) :
         new CheckUnimplementedFeatures(options.allowUnimplemented),
         // must be called right before characterize power
         new FindDependencyGraph(phv, deps, &options, "placement_graph"_cs,
-                "After Table Placement"_cs),
+                                "After Table Placement"_cs),
         new DumpJsonGraph(deps, &jsonGraph, "After Table Placement"_cs, true),
 
         // Call this at the end of the backend. This changes the logical stages used for PHV
@@ -467,7 +477,8 @@ Backend::Backend(const BFN_Options& o, int pipe_id) :
         // DO NOT NEED to do it in alternative phv allocation because AllocSlices are already
         // physical stage based.
         Device::currentDevice() != Device::TOFINO && !options.alt_phv_alloc
-            ? new FinalizeStageAllocation(phv, defuse, deps) : nullptr,
+            ? new FinalizeStageAllocation(phv, defuse, deps)
+            : nullptr,
 
         // Must be called as last pass.  If the power budget is exceeded,
         // we cannot produce a binary file.
@@ -475,8 +486,7 @@ Backend::Backend(const BFN_Options& o, int pipe_id) :
     });
     setName("Barefoot backend");
 
-    if (options.excludeBackendPasses)
-        removePasses(options.passesToExcludeBackend);
+    if (options.excludeBackendPasses) removePasses(options.passesToExcludeBackend);
 
 #if 0
     // check for passes that incorrectly duplicate shared attached tables
@@ -488,8 +498,7 @@ Backend::Backend(const BFN_Options& o, int pipe_id) :
         root->apply(*check); }, true);
 #endif
 
-    if (LOGGING(4))
-        addDebugHook(debug_hook, true);
+    if (LOGGING(4)) addDebugHook(debug_hook, true);
 }
 
 }  // namespace BFN

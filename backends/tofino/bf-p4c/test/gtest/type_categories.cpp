@@ -10,35 +10,31 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include "gtest/gtest.h"
-
 #include "bf-p4c/midend/type_categories.h"
+
+#include "gtest/gtest.h"
 #include "ir/ir.h"
 
 namespace BFN {
 
 TEST(BFNTypeCategories, Types) {
-    auto* imAnnotation = new IR::Annotations({
-            new IR::Annotation(IR::ID("__intrinsic_metadata"), { })
-        });
-    auto* cgAnnotation = new IR::Annotations({
-            new IR::Annotation(IR::ID("__compiler_generated"), { })
-        });
+    auto *imAnnotation =
+        new IR::Annotations({new IR::Annotation(IR::ID("__intrinsic_metadata"), {})});
+    auto *cgAnnotation =
+        new IR::Annotations({new IR::Annotation(IR::ID("__compiler_generated"), {})});
 
-    auto* headerType = new IR::Type_Header("hdr", IR::Annotations::empty,
-                                           new IR::TypeParameters(), { });
-    auto* headerImType = new IR::Type_Header("hdr", imAnnotation, new IR::TypeParameters(), { });
-    auto* headerCgType = new IR::Type_Header("hdr", cgAnnotation, new IR::TypeParameters(), { });
-    auto* structType = new IR::Type_Struct("meta", IR::Annotations::empty,
-                                           new IR::TypeParameters(), { });
-    auto* structImType = new IR::Type_Struct("meta", imAnnotation,
-                                           new IR::TypeParameters(), { });
-    auto* structCgType = new IR::Type_Struct("meta", cgAnnotation,
-                                           new IR::TypeParameters(), { });
-    auto* bitType = IR::Type::Bits::get(1);
-    auto* boolType = IR::Type_Boolean::get();
-    auto* infIntType = IR::Type_InfInt::get();
-    auto* stringType = IR::Type_String::get();
+    auto *headerType =
+        new IR::Type_Header("hdr", IR::Annotations::empty, new IR::TypeParameters(), {});
+    auto *headerImType = new IR::Type_Header("hdr", imAnnotation, new IR::TypeParameters(), {});
+    auto *headerCgType = new IR::Type_Header("hdr", cgAnnotation, new IR::TypeParameters(), {});
+    auto *structType =
+        new IR::Type_Struct("meta", IR::Annotations::empty, new IR::TypeParameters(), {});
+    auto *structImType = new IR::Type_Struct("meta", imAnnotation, new IR::TypeParameters(), {});
+    auto *structCgType = new IR::Type_Struct("meta", cgAnnotation, new IR::TypeParameters(), {});
+    auto *bitType = IR::Type::Bits::get(1);
+    auto *boolType = IR::Type_Boolean::get();
+    auto *infIntType = IR::Type_InfInt::get();
+    auto *stringType = IR::Type_String::get();
 
     EXPECT_FALSE(isIntrinsicMetadataType(headerType));
     EXPECT_TRUE(isIntrinsicMetadataType(headerImType));

@@ -10,8 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PARDE_LOWERED_REWRITE_EMIT_CLOT_H_
-#define EXTENSIONS_BF_P4C_PARDE_LOWERED_REWRITE_EMIT_CLOT_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_LOWERED_REWRITE_EMIT_CLOT_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_LOWERED_REWRITE_EMIT_CLOT_H_
 
 #include "bf-p4c/parde/clot/clot_info.h"
 #include "bf-p4c/parde/parde_visitor.h"
@@ -28,15 +28,15 @@ namespace Parde::Lowered {
  * removed from the emit list and are replace by EmitClot objects.
  */
 struct RewriteEmitClot : public DeparserModifier {
-    RewriteEmitClot(const PhvInfo& phv, ClotInfo& clotInfo) : phv(phv), clotInfo(clotInfo) {}
+    RewriteEmitClot(const PhvInfo &phv, ClotInfo &clotInfo) : phv(phv), clotInfo(clotInfo) {}
 
  private:
-    bool preorder(IR::BFN::Deparser* deparser) override;
+    bool preorder(IR::BFN::Deparser *deparser) override;
 
-    const PhvInfo& phv;
-    ClotInfo& clotInfo;
+    const PhvInfo &phv;
+    ClotInfo &clotInfo;
 };
 
 }  // namespace Parde::Lowered
 
-#endif /* EXTENSIONS_BF_P4C_PARDE_LOWERED_REWRITE_EMIT_CLOT_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_LOWERED_REWRITE_EMIT_CLOT_H_ */

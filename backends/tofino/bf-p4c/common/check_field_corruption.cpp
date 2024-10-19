@@ -12,22 +12,22 @@
 
 #include "check_field_corruption.h"
 
-bool CheckFieldCorruption::preorder(const IR::BFN::Pipe* pipe) {
+bool CheckFieldCorruption::preorder(const IR::BFN::Pipe *pipe) {
     pipe->apply(uses);
     return true;
 }
 
-bool CheckFieldCorruption::preorder(const IR::BFN::DeparserParameter* param) {
+bool CheckFieldCorruption::preorder(const IR::BFN::DeparserParameter *param) {
     if (param->source) pov_protected_fields.insert(phv.field(param->source->field));
     return false;
 }
 
-bool CheckFieldCorruption::preorder(const IR::BFN::Digest* digest) {
+bool CheckFieldCorruption::preorder(const IR::BFN::Digest *digest) {
     pov_protected_fields.insert(phv.field(digest->selector->field));
     return false;
 }
 
-bool CheckFieldCorruption::preorder(const IR::Expression* e) {
+bool CheckFieldCorruption::preorder(const IR::Expression *e) {
     if (isWrite()) {
         if (auto state = findContext<IR::BFN::ParserState>()) {
             state_extracts[state].insert(e);
@@ -37,12 +37,12 @@ bool CheckFieldCorruption::preorder(const IR::Expression* e) {
     return false;
 }
 
-bool CheckFieldCorruption::preorder(const IR::BFN::ParserZeroInit* pzi) {
+bool CheckFieldCorruption::preorder(const IR::BFN::ParserZeroInit *pzi) {
     parser_inits[phv.field(pzi->field->field)].insert(pzi->field->field);
     return true;
 }
 
-bool CheckFieldCorruption::copackedFieldExtractedSeparately(const FieldDefUse::locpair& use) {
+bool CheckFieldCorruption::copackedFieldExtractedSeparately(const FieldDefUse::locpair &use) {
     // Walk through the slices corresponding to the use
     auto read = PHV::FieldUse(PHV::FieldUse::READ);
     const auto &allocs = phv.get_alloc(use.second, PHV::AllocContext::of_unit(use.first), &read);
@@ -70,8 +70,7 @@ bool CheckFieldCorruption::copackedFieldExtractedSeparately(const FieldDefUse::l
             if (sl.isLiveRangeDisjoint(other)) continue;
             if (phv.isFieldMutex(other.field(), sl.field())) continue;
 
-            if (Device::currentDevice() == Device::JBAY
-            ) {
+            if (Device::currentDevice() == Device::JBAY) {
                 if (sl.container_slice().lo / 8 > other.container_slice().hi / 8 ||
                     sl.container_slice().hi / 8 < other.container_slice().lo / 8)
                     continue;
@@ -117,7 +116,7 @@ bool CheckFieldCorruption::copackedFieldExtractedSeparately(const FieldDefUse::l
 }
 
 void CheckFieldCorruption::end_apply() {
-    auto is_ignored_field = [&](const PHV::Field &field){
+    auto is_ignored_field = [&](const PHV::Field &field) {
         if (field.pov) {
             // pov is always initialized.
             LOG3("Ignore pov bits: " << field);
@@ -186,15 +185,15 @@ void CheckFieldCorruption::end_apply() {
             } else {
                 // metadata in INGRESS and non bridged metadata in EGRESS will have at least a
                 // ImplicitParserInit def.
-                BUG_CHECK(!field.metadata ||
-                          (field.metadata && field.bridged && field.gress == EGRESS),
-                          "metadata cannot reach here");
+                BUG_CHECK(
+                    !field.metadata || (field.metadata && field.bridged && field.gress == EGRESS),
+                    "metadata cannot reach here");
             }
             if (uninit && pkt_extract) {
-                    warning(
-                        "%s is read in %s, but it is totally or partially uninitialized after "
-                        "being corrupted by a parser extraction to the same container(s)",
-                        field.name, use.first);
+                warning(
+                    "%s is read in %s, but it is totally or partially uninitialized after "
+                    "being corrupted by a parser extraction to the same container(s)",
+                    field.name, use.first);
             }
         }
     }

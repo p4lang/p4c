@@ -12,18 +12,18 @@
 
 #include "bf-p4c/phv/pragma/pa_no_init.h"
 
-#include <string>
 #include <numeric>
+#include <string>
 
-#include "lib/log.h"
 #include "bf-p4c/common/utils.h"
 #include "bf-p4c/phv/pragma/phv_pragmas.h"
+#include "lib/log.h"
 
 /// BFN::Pragma interface
 const char *PragmaNoInit::name = "pa_no_init";
-const char *PragmaNoInit::description =
-    "Specifies that the field does not require initialization.";
-const char *PragmaNoInit::help = "@pragma pa_no_init [pipe] gress inst_name.field_name\n"
+const char *PragmaNoInit::description = "Specifies that the field does not require initialization.";
+const char *PragmaNoInit::help =
+    "@pragma pa_no_init [pipe] gress inst_name.field_name\n"
     "+ attached to P4 header instances\n"
     "\n"
     "Specifies that the indicated metadata field does not require "
@@ -54,13 +54,12 @@ const char *PragmaNoInit::help = "@pragma pa_no_init [pipe] gress inst_name.fiel
     "Use this pragma with care.  If that unexpected "
     "control flow path is exercised, the field will have an unknown value.";
 
-bool PragmaNoInit::preorder(const IR::BFN::Pipe* pipe) {
+bool PragmaNoInit::preorder(const IR::BFN::Pipe *pipe) {
     auto global_pragmas = pipe->global_pragmas;
-    for (const auto* annotation : global_pragmas) {
-        if (annotation->name.name != PragmaNoInit::name)
-            continue;
+    for (const auto *annotation : global_pragmas) {
+        if (annotation->name.name != PragmaNoInit::name) continue;
 
-        auto& exprs = annotation->expr;
+        auto &exprs = annotation->expr;
 
         if (!PHV::Pragmas::checkStringLiteralArgs(exprs)) {
             continue;
@@ -72,14 +71,14 @@ bool PragmaNoInit::preorder(const IR::BFN::Pipe* pipe) {
         const IR::StringLiteral *pipe_arg = nullptr;
         const IR::StringLiteral *gress_arg = nullptr;
 
-        if (!PHV::Pragmas::determinePipeGressArgs(exprs, expr_index,
-                required_arguments, pipe_arg, gress_arg)) {
+        if (!PHV::Pragmas::determinePipeGressArgs(exprs, expr_index, required_arguments, pipe_arg,
+                                                  gress_arg)) {
             continue;
         }
 
-        if (!PHV::Pragmas::checkNumberArgs(annotation, required_arguments,
-                min_required_arguments, true, cstring(PragmaNoInit::name),
-                "`gress', `field'"_cs)) {
+        if (!PHV::Pragmas::checkNumberArgs(annotation, required_arguments, min_required_arguments,
+                                           true, cstring(PragmaNoInit::name),
+                                           "`gress', `field'"_cs)) {
             continue;
         }
 
@@ -90,7 +89,7 @@ bool PragmaNoInit::preorder(const IR::BFN::Pipe* pipe) {
         auto field_ir = exprs[expr_index++]->to<IR::StringLiteral>();
 
         auto field_name = gress_arg->value + "::" + field_ir->value;
-        const PHV::Field* field = phv_i.field(field_name);
+        const PHV::Field *field = phv_i.field(field_name);
         if (!field) {
             PHV::Pragmas::reportNoMatchingPHV(pipe, field_ir, field_name);
             continue;
@@ -107,11 +106,11 @@ bool PragmaNoInit::preorder(const IR::BFN::Pipe* pipe) {
     return true;
 }
 
-std::ostream& operator<<(std::ostream& out, const PragmaNoInit& pa_no) {
+std::ostream &operator<<(std::ostream &out, const PragmaNoInit &pa_no) {
     std::stringstream logs;
-    for (auto* f : pa_no.getFields())
-        logs << "@pa_no_init specifies that " << f->name << " should be marked no_init" <<
-            std::endl;
+    for (auto *f : pa_no.getFields())
+        logs << "@pa_no_init specifies that " << f->name << " should be marked no_init"
+             << std::endl;
     out << logs.str();
     return out;
 }

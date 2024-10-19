@@ -10,7 +10,6 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-
 #ifndef BF_P4C_ARCH_ADD_T2NA_META_H_
 #define BF_P4C_ARCH_ADD_T2NA_META_H_
 
@@ -24,9 +23,9 @@ class AddT2naMeta final : public Modifier {
     AddT2naMeta() { setName("AddT2naMeta"); }
 
     // Check T2NA metadata structures and headers and add missing fields
-    void postorder(IR::Type_StructLike* typeStructLike) override;
+    void postorder(IR::Type_StructLike *typeStructLike) override;
 };
 
 }  // namespace BFN
 
-#endif  /* BF_P4C_ARCH_ADD_T2NA_META_H_ */
+#endif /* BF_P4C_ARCH_ADD_T2NA_META_H_ */

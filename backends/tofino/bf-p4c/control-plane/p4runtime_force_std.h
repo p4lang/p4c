@@ -10,8 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_CONTROL_PLANE_P4RUNTIME_FORCE_STD_H_
-#define EXTENSIONS_BF_P4C_CONTROL_PLANE_P4RUNTIME_FORCE_STD_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_CONTROL_PLANE_P4RUNTIME_FORCE_STD_H_
+#define BACKENDS_TOFINO_BF_P4C_CONTROL_PLANE_P4RUNTIME_FORCE_STD_H_
 
 #include "control-plane/p4RuntimeSerializer.h"
 
@@ -24,8 +24,8 @@ using namespace P4;
 /// standard P4Runtime implementation (with no support for TNA-specific
 /// extensions). Displays a warning to the user for each extern instance that
 /// cannot be converted.
-P4::P4RuntimeAPI convertToStdP4Runtime(const P4::P4RuntimeAPI& p4RuntimeInput);
+P4::P4RuntimeAPI convertToStdP4Runtime(const P4::P4RuntimeAPI &p4RuntimeInput);
 
 }  // namespace BFN
 
-#endif /* EXTENSIONS_BF_P4C_CONTROL_PLANE_P4RUNTIME_FORCE_STD_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_CONTROL_PLANE_P4RUNTIME_FORCE_STD_H_ */

@@ -10,22 +10,24 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+#include "bf-p4c/phv/action_phv_constraints.h"
+
 #include <algorithm>
 #include <sstream>
 #include <tuple>
+
 #include <boost/optional/optional_io.hpp>
 
-#include "bf-p4c/phv/phv_fields.h"
-#include "lib/algorithm.h"
 #include "bf-p4c/common/asm_output.h"
 #include "bf-p4c/common/scc_toposort.h"
-#include "bf-p4c/phv/solver/action_constraint_solver.h"
-#include "bf-p4c/phv/action_phv_constraints.h"
-#include "bf-p4c/phv/cluster_phv_operations.h"
-#include "bf-p4c/phv/utils/utils.h"
-#include "bf-p4c/phv/phv.h"
 #include "bf-p4c/ir/bitrange.h"
+#include "bf-p4c/phv/cluster_phv_operations.h"
+#include "bf-p4c/phv/phv.h"
+#include "bf-p4c/phv/phv_fields.h"
+#include "bf-p4c/phv/solver/action_constraint_solver.h"
 #include "bf-p4c/phv/utils/slice_alloc.h"
+#include "bf-p4c/phv/utils/utils.h"
+#include "lib/algorithm.h"
 #include "lib/exceptions.h"
 
 namespace {
@@ -33,7 +35,7 @@ namespace {
 using namespace P4;
 
 // return a solver based on contaienr type.
-solver::ActionSolverBase* make_solver(const PHV::Container& c) {
+solver::ActionSolverBase *make_solver(const PHV::Container &c) {
     switch (c.type().kind()) {
         case PHV::Kind::normal: {
             LOG3("initializing normal container move solver");
@@ -60,13 +62,13 @@ solver::ActionSolverBase* make_solver(const PHV::Container& c) {
 /// @p action can be nullptr when it's an always_run_table action.
 /// @param container_state is a set of field slices that are non-mutex with some fieldslice
 /// in the candidate allocslice list.
-bitvec compute_dest_live_bv(const PhvUse& uses, const PHV::Allocation& alloc,
-                            const PHV::Allocation::LiveRangeShrinkingMap& initActions,
-                            const PHV::Allocation::MutuallyLiveSlices& container_state,
-                            const int stage, const IR::MAU::Action* action) {
+bitvec compute_dest_live_bv(const PhvUse &uses, const PHV::Allocation &alloc,
+                            const PHV::Allocation::LiveRangeShrinkingMap &initActions,
+                            const PHV::Allocation::MutuallyLiveSlices &container_state,
+                            const int stage, const IR::MAU::Action *action) {
     bitvec dest_live;
-    for (const auto& slice : container_state) {
-        const auto* field = slice.field();
+    for (const auto &slice : container_state) {
+        const auto *field = slice.field();
         if (!uses.is_referenced(field) || field->padding) continue;
         // TODO: for physical-stage-based liverange, we can actually only do precise
         // live range checks for non-mutex slices of (@p stage, write), instead of slices that
@@ -86,7 +88,7 @@ bitvec compute_dest_live_bv(const PhvUse& uses, const PHV::Allocation& alloc,
                 alloc.getMetadataInits(action).count(field)) {
                 dest_live.setrange(slice.container_slice().lo, slice.container_slice().size());
             } else {
-                const auto& dark_prim = slice.getInitPrimitive();
+                const auto &dark_prim = slice.getInitPrimitive();
                 if (!dark_prim.isAlwaysRunActionPrim()) {
                     if (dark_prim.getInitPoints().count(action)) {
                         dest_live.setrange(slice.container_slice().lo,
@@ -146,16 +148,14 @@ void ActionPhvConstraints::ConstraintTracker::clear() {
 }
 
 void ActionPhvConstraints::ConstraintTracker::add_action(
-        const IR::MAU::Action *act,
-        const ActionAnalysis::FieldActionsMap field_actions_map,
-        const IR::MAU::Table *tbl) {
+    const IR::MAU::Action *act, const ActionAnalysis::FieldActionsMap field_actions_map,
+    const IR::MAU::Table *tbl) {
     LOG5("Action PHV Constraints: Analyzing " << act << " in table " << tbl->name);
     action_to_table[act] = tbl;
     for (auto &field_action : Values(field_actions_map)) {
         le_bitrange write_range;
         auto *write_field = phv.field(field_action.write.expr, &write_range);
-        if (write_field == nullptr)
-            BUG("Action does not have a write?");
+        if (write_field == nullptr) BUG("Action does not have a write?");
         PHV::FieldSlice write(write_field, write_range);
         field_writes_to_actions[write_field][write_range].insert(act);
         OperandInfo fw(write, current_action);
@@ -179,7 +179,7 @@ void ActionPhvConstraints::ConstraintTracker::add_action(
             fr.unique_action_id = current_action;
             if (read.type == ActionAnalysis::ActionParam::PHV) {
                 le_bitrange read_range;
-                auto* f_used = phv.field(read.expr, &read_range);
+                auto *f_used = phv.field(read.expr, &read_range);
                 fr.phv_used = PHV::FieldSlice(f_used, read_range);
                 read_to_writes_per_action[f_used][act][read_range].insert(write);
                 action_to_reads[act].insert(*fr.phv_used);
@@ -198,7 +198,7 @@ void ActionPhvConstraints::ConstraintTracker::add_action(
                 }
                 fr.constant = true;
                 if (read.expr->is<IR::Constant>()) {
-                    const auto* constExpr = read.expr->to<IR::Constant>();
+                    const auto *constExpr = read.expr->to<IR::Constant>();
                     if (constExpr->fitsLong())
                         fr.const_value = constExpr->asLong();
                     else
@@ -207,7 +207,8 @@ void ActionPhvConstraints::ConstraintTracker::add_action(
                     fr.const_value = -1;
                 }
             } else {
-                BUG("Read must either be of a PHV, action data, or constant."); }
+                BUG("Read must either be of a PHV, action data, or constant.");
+            }
 
             // Originally this condition was to satisfy the current table placement requirement that
             // any destination written by meter colors must be allocated to an 8-bit PHV. This
@@ -242,9 +243,14 @@ void ActionPhvConstraints::ConstraintTracker::add_action(
                     }
                     std::pair<int, int> read_range_pair = std::make_pair(lo, hi);
                     statefulWrites[write_field][write_range][act].insert(read_range_pair);
-                    LOG5("\t  ...adding stateful read range [" << lo << ", " << hi << "] and "
-                         "write range [" << write_range.lo << ", " << write_range.hi << "] "
-                         "for action " << act->name << " in table " << tbl->name);
+                    LOG5("\t  ...adding stateful read range ["
+                         << lo << ", " << hi
+                         << "] and "
+                            "write range ["
+                         << write_range.lo << ", " << write_range.hi
+                         << "] "
+                            "for action "
+                         << act->name << " in table " << tbl->name);
                 }
             }
 
@@ -257,179 +263,179 @@ void ActionPhvConstraints::ConstraintTracker::add_action(
             } else if (PHV_Field_Operations::BITWISE_OPS.count(field_action.name)) {
                 fr.flags |= OperandInfo::BITWISE;
             } else {
-                fr.flags |= OperandInfo::WHOLE_CONTAINER; }
+                fr.flags |= OperandInfo::WHOLE_CONTAINER;
+            }
             fr.action_name = field_action.name;
             LOG5("    ...read: " << fr);
-            write_to_reads_per_action[write_field][act][write_range].push_back(fr); } }
+            write_to_reads_per_action[write_field][act][write_range].push_back(fr);
+        }
+    }
 
     current_action++;
 }
 
 bool ActionPhvConstraints::check_speciality_packing(
-    const PHV::Allocation::MutuallyLiveSlices& container_state) const {
-    ordered_set<const PHV::Field*> fields;
-    for (auto& s : container_state) fields.insert(s.field());
+    const PHV::Allocation::MutuallyLiveSlices &container_state) const {
+    ordered_set<const PHV::Field *> fields;
+    for (auto &s : container_state) fields.insert(s.field());
 
-    ordered_set<const PHV::Field*> special_writes;
+    ordered_set<const PHV::Field *> special_writes;
     // Detect all the speciality writes in the container
-    for (const PHV::Field* f : fields) {
-        if (special_no_pack.count(f))
-            special_writes.insert(f); }
+    for (const PHV::Field *f : fields) {
+        if (special_no_pack.count(f)) special_writes.insert(f);
+    }
 
     // If no special writes, detected return true
     if (special_writes.size() == 0) return true;
 
     // If special writes present, check against all other actions
-    for (const PHV::Field* f : special_writes) {
-        for (const IR::MAU::Action* act : special_no_pack.at(f)) {
-            for (auto& fo_wr : constraint_tracker.writes(act)) {
+    for (const PHV::Field *f : special_writes) {
+        for (const IR::MAU::Action *act : special_no_pack.at(f)) {
+            for (auto &fo_wr : constraint_tracker.writes(act)) {
                 if (!fo_wr.phv_used) continue;
-                const PHV::Field* f_wr = fo_wr.phv_used->field();
+                const PHV::Field *f_wr = fo_wr.phv_used->field();
                 if (f_wr == f) continue;
-                if (fields.count(f_wr))
-                    return false; } } }
+                if (fields.count(f_wr)) return false;
+            }
+        }
+    }
 
     return true;
 }
 
 std::vector<ActionPhvConstraints::OperandInfo> ActionPhvConstraints::ConstraintTracker::sources(
-        const PHV::FieldSlice& dst,
-        const IR::MAU::Action* act) const {
+    const PHV::FieldSlice &dst, const IR::MAU::Action *act) const {
     std::vector<OperandInfo> rv;
 
     // Check whether this field is ever a dst.
-    if (write_to_reads_per_action.find(dst.field()) == write_to_reads_per_action.end())
-        return rv;
+    if (write_to_reads_per_action.find(dst.field()) == write_to_reads_per_action.end()) return rv;
 
-    auto& by_action = write_to_reads_per_action.at(dst.field());
-    if (by_action.find(act) == by_action.end())
-        return rv;
+    auto &by_action = write_to_reads_per_action.at(dst.field());
+    if (by_action.find(act) == by_action.end()) return rv;
 
     // Find the range containing @dst, if any.
-    auto& by_range = by_action.at(act);
+    auto &by_range = by_action.at(act);
     const le_bitrange *containing = nullptr;
-    for (auto& kv : by_range) {
+    for (auto &kv : by_range) {
         if (kv.first.contains(dst.range())) {
-            BUG_CHECK(containing == nullptr,
-                      "Field %1% written to more than once in action %2%",
+            BUG_CHECK(containing == nullptr, "Field %1% written to more than once in action %2%",
                       dst.field()->name, act);
-            containing = &(kv.first); } }
-    if (containing == nullptr)
-        return rv;
+            containing = &(kv.first);
+        }
+    }
+    if (containing == nullptr) return rv;
 
     // Shrink each source field operand to correspond to the slice of the
     // destination, if any.  The offset of `dst` in `containing` must
     // correspond to the shrunken range to the source operand range.
-    unsigned offset = dst.range().lo - containing->lo;    // Positive because containing.
+    unsigned offset = dst.range().lo - containing->lo;  // Positive because containing.
 
-    for (const auto& field_op : by_range.at(*containing)) {
+    for (const auto &field_op : by_range.at(*containing)) {
         // Skip non-PHV operands.
         if (!field_op.phv_used) {
             rv.push_back(field_op);
-            continue; }
-        auto& used = field_op.phv_used;
+            continue;
+        }
+        auto &used = field_op.phv_used;
         le_bitrange shifted = StartLen(used->range().lo + offset, dst.range().size());
         le_bitinterval src_int = used->range().intersectWith(shifted);
         if (auto src_range = toClosedRange(src_int)) {
             // Copy field_op, then update `phv_used` in the copy.
             rv.push_back(field_op);
-            rv.back().phv_used = PHV::FieldSlice(used->field(), *src_range); } }
+            rv.back().phv_used = PHV::FieldSlice(used->field(), *src_range);
+        }
+    }
 
     return rv;
 }
 
 ordered_set<PHV::FieldSlice> ActionPhvConstraints::ConstraintTracker::destinations(
-        PHV::FieldSlice src,
-        const IR::MAU::Action* act) const {
+    PHV::FieldSlice src, const IR::MAU::Action *act) const {
     ordered_set<PHV::FieldSlice> rv;
 
     // Check whether this field is ever a source.
-    if (read_to_writes_per_action.find(src.field()) == read_to_writes_per_action.end())
-        return rv;
+    if (read_to_writes_per_action.find(src.field()) == read_to_writes_per_action.end()) return rv;
 
-    auto& by_action = read_to_writes_per_action.at(src.field());
-    if (by_action.find(act) == by_action.end())
-        return rv;
+    auto &by_action = read_to_writes_per_action.at(src.field());
+    if (by_action.find(act) == by_action.end()) return rv;
 
     // Find the range containing @src, if any.
-    for (auto& kv : by_action.at(act)) {
-        if (!kv.first.contains(src.range()))
-            continue;
+    for (auto &kv : by_action.at(act)) {
+        if (!kv.first.contains(src.range())) continue;
 
         // Shrink each destination field operand to correspond to the slice of the
         // source, if any.  The offset of `src` in `kv.first` must
         // correspond to the shrunken range to the destination operand range.
-        unsigned offset = src.range().lo - kv.first.lo;    // Positive because containing.
-        for (const auto& slice : kv.second) {
+        unsigned offset = src.range().lo - kv.first.lo;  // Positive because containing.
+        for (const auto &slice : kv.second) {
             le_bitrange shifted = StartLen(slice.range().lo + offset, src.range().size());
             le_bitinterval src_int = slice.range().intersectWith(shifted);
             if (auto src_range = toClosedRange(src_int))
-                rv.insert(PHV::FieldSlice(slice.field(), *src_range)); } }
+                rv.insert(PHV::FieldSlice(slice.field(), *src_range));
+        }
+    }
 
     return rv;
 }
 
-const ordered_set<ActionPhvConstraints::OperandInfo>&
-ActionPhvConstraints::ConstraintTracker::writes(const IR::MAU::Action* act) const {
+const ordered_set<ActionPhvConstraints::OperandInfo> &
+ActionPhvConstraints::ConstraintTracker::writes(const IR::MAU::Action *act) const {
     static ordered_set<OperandInfo> empty;
     auto it = action_to_writes.find(act);
-    if (it == action_to_writes.end())
-        return empty;
+    if (it == action_to_writes.end()) return empty;
     return it->second;
 }
 
-const ordered_set<PHV::FieldSlice>&
-ActionPhvConstraints::ConstraintTracker::reads(const IR::MAU::Action* act) const {
+const ordered_set<PHV::FieldSlice> &ActionPhvConstraints::ConstraintTracker::reads(
+    const IR::MAU::Action *act) const {
     static ordered_set<PHV::FieldSlice> empty;
     auto it = action_to_reads.find(act);
-    if (it == action_to_reads.end())
-        return empty;
+    if (it == action_to_reads.end()) return empty;
     return it->second;
 }
 
-ordered_set<const IR::MAU::Action*>
-ActionPhvConstraints::ConstraintTracker::read_in(PHV::FieldSlice src) const {
-    ordered_set<const IR::MAU::Action*> rv;
-    if (read_to_writes_per_action.find(src.field()) == read_to_writes_per_action.end())
-        return rv;
-    for (const auto& by_action : read_to_writes_per_action.at(src.field())) {
-        for (const auto& by_range : by_action.second)
-            if (by_range.first.contains(src.range()))
-                rv.insert(by_action.first); }
+ordered_set<const IR::MAU::Action *> ActionPhvConstraints::ConstraintTracker::read_in(
+    PHV::FieldSlice src) const {
+    ordered_set<const IR::MAU::Action *> rv;
+    if (read_to_writes_per_action.find(src.field()) == read_to_writes_per_action.end()) return rv;
+    for (const auto &by_action : read_to_writes_per_action.at(src.field())) {
+        for (const auto &by_range : by_action.second)
+            if (by_range.first.contains(src.range())) rv.insert(by_action.first);
+    }
     return rv;
 }
 
-ordered_set<const IR::MAU::Action*>
-ActionPhvConstraints::ConstraintTracker::written_in(PHV::FieldSlice dst) const {
-    ordered_set<const IR::MAU::Action*> rv;
+ordered_set<const IR::MAU::Action *> ActionPhvConstraints::ConstraintTracker::written_in(
+    PHV::FieldSlice dst) const {
+    ordered_set<const IR::MAU::Action *> rv;
     if (!field_writes_to_actions.count(dst.field())) return rv;
-    for (auto& kv : field_writes_to_actions.at(dst.field())) {
-        if (kv.first.overlaps(dst.range()))
-            rv.insert(kv.second.begin(), kv.second.end()); }
+    for (auto &kv : field_writes_to_actions.at(dst.field())) {
+        if (kv.first.overlaps(dst.range())) rv.insert(kv.second.begin(), kv.second.end());
+    }
     return rv;
 }
 
 ordered_set<int> ActionPhvConstraints::ConstraintTracker::source_alignment(
-        PHV::AllocSlice dst,
-        PHV::FieldSlice src) const {
+    PHV::AllocSlice dst, PHV::FieldSlice src) const {
     ordered_set<int> rv;
-    for (auto* act : written_in(dst)) {
-        for (auto& opInfo : sources(dst, act)) {
-            if (!opInfo.phv_used || *opInfo.phv_used != src)
-                continue;
+    for (auto *act : written_in(dst)) {
+        for (auto &opInfo : sources(dst, act)) {
+            if (!opInfo.phv_used || *opInfo.phv_used != src) continue;
             LOG6("\t\t\t\tSource alignment " << dst << " / ");
             LOG6("\t\t\t\t\t\t" << src);
-            LOG6("\t\t\t\t\t\t" << "(opInfo: "
-                 << *opInfo.phv_used << ") @ " << dst.container_slice().lo);
+            LOG6("\t\t\t\t\t\t" << "(opInfo: " << *opInfo.phv_used << ") @ "
+                                << dst.container_slice().lo);
             LOG6("\t\t\t\t...induced by action " << act->name);
-            rv.insert(dst.container_slice().lo); } }
+            rv.insert(dst.container_slice().lo);
+        }
+    }
 
     return rv;
 }
 
 std::optional<int> ActionPhvConstraints::ConstraintTracker::can_be_both_sources(
-        const std::vector<PHV::AllocSlice> &slices, ordered_set<PHV::FieldSlice> &packing_slices,
-        PHV::FieldSlice src) const {
+    const std::vector<PHV::AllocSlice> &slices, ordered_set<PHV::FieldSlice> &packing_slices,
+    PHV::FieldSlice src) const {
     ordered_set<const IR::MAU::Action *> two_aligned_actions;
     bitvec alignment;
 
@@ -439,13 +445,12 @@ std::optional<int> ActionPhvConstraints::ConstraintTracker::can_be_both_sources(
         bool has_ad = false;
     };
 
-
     ordered_map<const IR::MAU::Action *, LocalAlignmentInfo> act_to_alignment;
 
     for (auto dst : slices) {
-        for (auto* act : written_in(dst)) {
+        for (auto *act : written_in(dst)) {
             auto local_alignment = act_to_alignment[act];
-            for (auto& opInfo : sources(dst, act)) {
+            for (auto &opInfo : sources(dst, act)) {
                 if (!opInfo.phv_used)
                     local_alignment.has_ad = true;
                 else if (*opInfo.phv_used == src)
@@ -458,8 +463,7 @@ std::optional<int> ActionPhvConstraints::ConstraintTracker::can_be_both_sources(
     for (auto entry : act_to_alignment) {
         auto loc_align = entry.second;
         if (loc_align.alignment.popcount() == 2) {
-            if (loc_align.has_ad)
-                return std::nullopt;
+            if (loc_align.has_ad) return std::nullopt;
             two_aligned_actions.insert(entry.first);
         } else if (loc_align.alignment.popcount() == 1) {
             if (single_alignment_point >= 0 &&
@@ -487,8 +491,7 @@ std::optional<int> ActionPhvConstraints::ConstraintTracker::can_be_both_sources(
                 written_bits.setrange(dst.container_slice().lo, dst.width());
         }
 
-        if (written_bits.popcount() != int(container.size()))
-            return std::nullopt;
+        if (written_bits.popcount() != int(container.size())) return std::nullopt;
 
         for (auto entry : src_to_dst_bits) {
             if (entry.second.size() == 1) {
@@ -496,8 +499,7 @@ std::optional<int> ActionPhvConstraints::ConstraintTracker::can_be_both_sources(
             } else if (entry.second.size() > 2) {
                 return std::nullopt;
             } else {
-                if (entry.first != src)
-                    return std::nullopt;
+                if (entry.first != src) return std::nullopt;
             }
         }
     }
@@ -505,27 +507,30 @@ std::optional<int> ActionPhvConstraints::ConstraintTracker::can_be_both_sources(
 }
 
 void ActionPhvConstraints::ConstraintTracker::print_field_ordering(
-        const std::vector<PHV::AllocSlice>& slices) const {
+    const std::vector<PHV::AllocSlice> &slices) const {
     ordered_map<PHV::AllocSlice, size_t> field_slices_to_writes;
     ordered_map<PHV::AllocSlice, size_t> field_slices_to_reads;
     for (auto sl : slices) {
         PHV::FieldSlice slice(sl.field(), sl.field_slice());
         field_slices_to_writes[sl] = written_in(slice).size();
-        field_slices_to_reads[sl] = read_in(slice).size(); }
+        field_slices_to_reads[sl] = read_in(slice).size();
+    }
 
     LOG6("\t\t\t\t\t\t\tField Ordering Map");
     for (auto sl : slices) {
-        LOG6("\t\t\t\t\t\t\t" << sl << "\t" << field_slices_to_writes[sl] << "\t" <<
-                field_slices_to_reads[sl]); }
+        LOG6("\t\t\t\t\t\t\t" << sl << "\t" << field_slices_to_writes[sl] << "\t"
+                              << field_slices_to_reads[sl]);
+    }
 }
 
 const IR::MAU::Table *ActionPhvConstraints::ConstraintTracker::action_table(
-        const IR::MAU::Action *act) const {
+    const IR::MAU::Action *act) const {
     if (action_to_table.count(act)) return action_to_table.at(act);
     return nullptr;
 }
 
-void ActionPhvConstraints::sort(std::list<const PHV::SuperCluster::SliceList*>& slice_lists) const {
+void ActionPhvConstraints::sort(
+    std::list<const PHV::SuperCluster::SliceList *> &slice_lists) const {
     if (LOGGING(6)) {
         LOG6("Slice list on input");
         for (auto sl : slice_lists) {
@@ -533,16 +538,16 @@ void ActionPhvConstraints::sort(std::list<const PHV::SuperCluster::SliceList*>& 
         }
     }
 
-    ordered_map<const PHV::Field*, std::vector<PHV::FieldSlice>> fields;
-    for (const auto* sl : slice_lists) {
-        for (const auto& fs : *sl) {
+    ordered_map<const PHV::Field *, std::vector<PHV::FieldSlice>> fields;
+    for (const auto *sl : slice_lists) {
+        for (const auto &fs : *sl) {
             fields[fs.field()].push_back(fs);
         }
     }
     auto priorities = compute_sources_first_order(fields);
-    ordered_map<const PHV::SuperCluster::SliceList*, int> list_priority;
-    for (const auto* sl : slice_lists) {
-        for (const auto& fs : *sl) {
+    ordered_map<const PHV::SuperCluster::SliceList *, int> list_priority;
+    for (const auto *sl : slice_lists) {
+        for (const auto &fs : *sl) {
             if (list_priority.count(sl)) {
                 list_priority[sl] = std::min(list_priority[sl], priorities.at(fs.field()));
             } else {
@@ -558,8 +563,8 @@ void ActionPhvConstraints::sort(std::list<const PHV::SuperCluster::SliceList*>& 
         }
     }
 
-    auto SliceListComparator = [&](const PHV::SuperCluster::SliceList* l,
-                                   const PHV::SuperCluster::SliceList* r) {
+    auto SliceListComparator = [&](const PHV::SuperCluster::SliceList *l,
+                                   const PHV::SuperCluster::SliceList *r) {
         // LO slice needs to be before HI - make that check before going to read/write status
         // analysis. The check can be performed on first element in the slice list only
         // because the wide arith slices are arranged like this
@@ -582,7 +587,7 @@ void ActionPhvConstraints::sort(std::list<const PHV::SuperCluster::SliceList*>& 
         auto r_reads = 0;
         auto r_writes = 0;
 
-        for (auto& sl : *l) {
+        for (auto &sl : *l) {
             l_reads += this->constraint_tracker.read_in(sl).size();
             l_writes += this->constraint_tracker.written_in(sl).size();
         }
@@ -613,39 +618,38 @@ void ActionPhvConstraints::sort(std::list<const PHV::SuperCluster::SliceList*>& 
     }
 }
 
-void ActionPhvConstraints::sort(std::vector<PHV::FieldSlice>& slices) const {
-    ordered_map<const PHV::Field*, std::vector<PHV::FieldSlice>> fields;
-    for (const auto& fs : slices) {
+void ActionPhvConstraints::sort(std::vector<PHV::FieldSlice> &slices) const {
+    ordered_map<const PHV::Field *, std::vector<PHV::FieldSlice>> fields;
+    for (const auto &fs : slices) {
         fields[fs.field()].push_back(fs);
     }
     auto priorities = compute_sources_first_order(fields);
 
-    std::sort(slices.begin(), slices.end(),
-        [&](PHV::FieldSlice l, PHV::FieldSlice r) {
-            if (priorities.at(l.field()) != priorities.at(r.field())) {
-                return priorities.at(l.field()) < priorities.at(r.field());
-            }
-            auto l_reads = this->constraint_tracker.read_in(l).size();
-            auto l_writes = this->constraint_tracker.written_in(l).size();
-            auto r_reads = this->constraint_tracker.read_in(r).size();
-            auto r_writes = this->constraint_tracker.written_in(r).size();
-            if (l_writes != r_writes)
-                return l_writes < r_writes;
-            return l_reads > r_reads; });
+    std::sort(slices.begin(), slices.end(), [&](PHV::FieldSlice l, PHV::FieldSlice r) {
+        if (priorities.at(l.field()) != priorities.at(r.field())) {
+            return priorities.at(l.field()) < priorities.at(r.field());
+        }
+        auto l_reads = this->constraint_tracker.read_in(l).size();
+        auto l_writes = this->constraint_tracker.written_in(l).size();
+        auto r_reads = this->constraint_tracker.read_in(r).size();
+        auto r_writes = this->constraint_tracker.written_in(r).size();
+        if (l_writes != r_writes) return l_writes < r_writes;
+        return l_reads > r_reads;
+    });
 }
 
 void ActionPhvConstraints::dest_first_sort(
-    std::vector<const PHV::SuperCluster::SliceList*>& slice_lists) const {
-    ordered_map<const PHV::Field*, std::vector<PHV::FieldSlice>> fields;
-    for (const auto* sl : slice_lists) {
-        for (const auto& fs : *sl) {
+    std::vector<const PHV::SuperCluster::SliceList *> &slice_lists) const {
+    ordered_map<const PHV::Field *, std::vector<PHV::FieldSlice>> fields;
+    for (const auto *sl : slice_lists) {
+        for (const auto &fs : *sl) {
             fields[fs.field()].push_back(fs);
         }
     }
     auto priorities = compute_sources_first_order(fields);
-    ordered_map<const PHV::SuperCluster::SliceList*, int> priority;
-    for (const auto* sl : slice_lists) {
-        for (const auto& fs : *sl) {
+    ordered_map<const PHV::SuperCluster::SliceList *, int> priority;
+    for (const auto *sl : slice_lists) {
+        for (const auto &fs : *sl) {
             if (priority.count(sl)) {
                 priority[sl] = std::max(priority[sl], priorities.at(fs.field()));
             } else {
@@ -654,15 +658,15 @@ void ActionPhvConstraints::dest_first_sort(
         }
     }
 
-    ordered_map<const PHV::SuperCluster::SliceList*, int> num_action_write;
-    for (const auto* sl : slice_lists) {
-        for (const auto& fs : *sl) {
+    ordered_map<const PHV::SuperCluster::SliceList *, int> num_action_write;
+    for (const auto *sl : slice_lists) {
+        for (const auto &fs : *sl) {
             num_action_write[sl] += this->constraint_tracker.written_in(fs).size();
         }
     }
 
-    const auto SliceListComparator = [&](const PHV::SuperCluster::SliceList* l,
-                                         const PHV::SuperCluster::SliceList* r) {
+    const auto SliceListComparator = [&](const PHV::SuperCluster::SliceList *l,
+                                         const PHV::SuperCluster::SliceList *r) {
         // NOTE: wide_arithmetic slice lists are handled differently in the new allocator
         // so that we do not need to care about their ordering here like before.
 
@@ -675,8 +679,8 @@ void ActionPhvConstraints::dest_first_sort(
             return num_action_write.at(l) > num_action_write.at(r);
         }
         //  by lo if same field.
-        const auto& l_front = l->front();
-        const auto& r_front = r->front();
+        const auto &l_front = l->front();
+        const auto &r_front = r->front();
         if (l_front.field() == r_front.field()) {
             BUG_CHECK(l_front.range().lo != r_front.range().lo,
                       "same field slice in different slice lists: %1% and %2%", l, r);
@@ -688,8 +692,8 @@ void ActionPhvConstraints::dest_first_sort(
 }
 
 void ActionPhvConstraints::determine_same_byte_fields() {
-    ordered_map<const PHV::Field*, le_bitrange> header_bytes;
-    for (const auto& f : phv) {
+    ordered_map<const PHV::Field *, le_bitrange> header_bytes;
+    for (const auto &f : phv) {
         if (f.metadata || f.pov) continue;
         le_bitrange hdr_byte_range = f.byteAlignedRangeInBits();
         LOG7("\t  Range for " << f.name << " : " << hdr_byte_range);
@@ -705,14 +709,14 @@ void ActionPhvConstraints::determine_same_byte_fields() {
     }
 }
 
-const ordered_set<PHV::FieldSlice>
-ActionPhvConstraints::get_slices_in_same_byte(const PHV::FieldSlice& slice) const {
+const ordered_set<PHV::FieldSlice> ActionPhvConstraints::get_slices_in_same_byte(
+    const PHV::FieldSlice &slice) const {
     ordered_set<PHV::FieldSlice> rv;
     rv.insert(PHV::FieldSlice(slice.field(), slice.range()));
     if (!same_byte_fields.count(slice.field())) return rv;
     le_bitrange limit = slice.byteAlignedRangeInBits();
     LOG7("    Range for slice " << limit);
-    for (const auto* f : same_byte_fields.at(slice.field())) {
+    for (const auto *f : same_byte_fields.at(slice.field())) {
         LOG7("    Checking same byte field: " << f->name);
         le_bitrange f_limit = f->byteAlignedRangeInBits();
         if (limit.contains(f_limit)) {
@@ -725,10 +729,10 @@ ActionPhvConstraints::get_slices_in_same_byte(const PHV::FieldSlice& slice) cons
     return rv;
 }
 
-bool ActionPhvConstraints::early_check_ok(const IR::MAU::Action* act) {
-    const auto& writes_in_act = constraint_tracker.writes(act);
+bool ActionPhvConstraints::early_check_ok(const IR::MAU::Action *act) {
+    const auto &writes_in_act = constraint_tracker.writes(act);
     ordered_map<PHV::FieldSlice, OperandInfo> slice_to_info;
-    for (auto& info : writes_in_act) {
+    for (auto &info : writes_in_act) {
         BUG_CHECK(info.phv_used != std::nullopt, "Write slice cannot be NULL.");
         slice_to_info[*(info.phv_used)] = info;
     }
@@ -736,7 +740,7 @@ bool ActionPhvConstraints::early_check_ok(const IR::MAU::Action* act) {
     std::stringstream error_msg;
     bool rv = true;
     ordered_set<PHV::FieldSlice> slicesConsidered;
-    for (auto& slice : Keys(slice_to_info)) {
+    for (auto &slice : Keys(slice_to_info)) {
         // We have already checked constraints related to @slice if the slice is in slicesConsidered
         // set. Therefore, go to the next slice.
         if (slicesConsidered.count(PHV::FieldSlice(slice.field(), slice.range()))) continue;
@@ -752,7 +756,7 @@ bool ActionPhvConstraints::early_check_ok(const IR::MAU::Action* act) {
     return rv;
 }
 
-std::set<int> ActionPhvConstraints::stages(const IR::MAU::Action* action,
+std::set<int> ActionPhvConstraints::stages(const IR::MAU::Action *action,
                                            bool physical_stage) const {
     const auto tbl = tableActionsMap.getTableForAction(action);
     if (!tbl) BUG("Action %1% not defined as part of a table.", action->name);
@@ -764,15 +768,14 @@ std::set<int> ActionPhvConstraints::stages(const IR::MAU::Action* action,
 }
 
 ActionPhvConstraints::NumContainers ActionPhvConstraints::num_container_sources(
-        const PHV::Allocation &alloc,
-        const PHV::Allocation::MutuallyLiveSlices& container_state,
-        const IR::MAU::Action* action) const {
+    const PHV::Allocation &alloc, const PHV::Allocation::MutuallyLiveSlices &container_state,
+    const IR::MAU::Action *action) const {
     // source containers used in @p action
     ordered_set<PHV::Container> source_containers;
     // source -> destinations mapping.
     ordered_map<PHV::FieldSlice, ordered_set<PHV::AllocSlice>> source_to_dest;
     // unallocated slices, grouped by field
-    ordered_map<const PHV::Field*, ordered_set<PHV::FieldSlice>> unalloc_slices;
+    ordered_map<const PHV::Field *, ordered_set<PHV::FieldSlice>> unalloc_slices;
     int num_unallocated = 0;
     // TODO: these num_double_* were introduced in
     // https://github.com/barefootnetworks/bf-p4c-compilers/pull/3559/files
@@ -781,7 +784,7 @@ ActionPhvConstraints::NumContainers ActionPhvConstraints::num_container_sources(
     // NOTE: although named as double_*, can be multiple.
     int num_double_allocated = 0;
     int num_double_unallocated = 0;
-    for (const auto& slice : container_state) {
+    for (const auto &slice : container_state) {
         // when computing num container sources, we only need to verify this action in one
         // stage, because actions are the same across all stages.
         const int stage = *stages(action, slice.isPhysicalStageBased()).begin();
@@ -795,13 +798,12 @@ ActionPhvConstraints::NumContainers ActionPhvConstraints::num_container_sources(
                 LOG6("\t\t\t\t" << operand << " doesn't count as a container source");
                 continue;
             }
-            const PHV::FieldSlice& source = *(operand.phv_used);
+            const PHV::FieldSlice &source = *(operand.phv_used);
             // compute allocated slices for this source, which is
             // current allocation object + in this container.
-            ordered_set<PHV::AllocSlice> source_allocated_slices =
-                alloc.slices(source.field(), source.range(), stage,
-                             PHV::FieldUse(PHV::FieldUse::READ));
-            for (const auto& container_source : container_state) {
+            ordered_set<PHV::AllocSlice> source_allocated_slices = alloc.slices(
+                source.field(), source.range(), stage, PHV::FieldUse(PHV::FieldUse::READ));
+            for (const auto &container_source : container_state) {
                 if (container_source.field() == source.field() &&
                     container_source.field_slice().overlaps(source.range())) {
                     source_allocated_slices.insert(container_source);
@@ -819,7 +821,7 @@ ActionPhvConstraints::NumContainers ActionPhvConstraints::num_container_sources(
             // not be considered as double_read.
             bool source_was_read_before = false;
             if (source_to_dest.count(source)) {
-                for (const auto& prev_dest : source_to_dest.at(source)) {
+                for (const auto &prev_dest : source_to_dest.at(source)) {
                     if (!prev_dest.isLiveRangeDisjoint(slice)) {
                         LOG5("\t\t\t\t" << source.field()->name << source.range()
                                         << " has already been read by "
@@ -853,7 +855,7 @@ ActionPhvConstraints::NumContainers ActionPhvConstraints::num_container_sources(
             //     from one container. TODO: need to verify this.
             ++num_unallocated;
         } else {
-            for (const auto& slice : kv.second) {
+            for (const auto &slice : kv.second) {
                 LOG5("\t\t\t\t  Unallocated slice: " << slice);
                 ++num_unallocated;
             }
@@ -865,8 +867,8 @@ ActionPhvConstraints::NumContainers ActionPhvConstraints::num_container_sources(
     const int total_unallocated = num_unallocated + num_double_unallocated;
 
     if (LOGGING(5)) {
-        LOG5("\t\t\t\tDouble allocation, allocated: " << num_double_allocated <<
-             ", unallocated: " << num_double_unallocated);
+        LOG5("\t\t\t\tDouble allocation, allocated: " << num_double_allocated << ", unallocated: "
+                                                      << num_double_unallocated);
         LOG5("\t\t\t\tNumber of allocated sources  : " << total_allocated);
         LOG5("\t\t\t\tNumber of unallocated sources: " << total_unallocated);
         LOG5("\t\t\t\tTotal number of sources      : " << total_allocated + total_unallocated);
@@ -878,8 +880,8 @@ ActionPhvConstraints::NumContainers ActionPhvConstraints::num_container_sources(
 }
 
 std::optional<PHV::AllocSlice> ActionPhvConstraints::getSourcePHVSlice(
-    const PHV::Allocation& alloc, const std::vector<PHV::AllocSlice>& slices,
-    const PHV::AllocSlice& dst, const IR::MAU::Action* action, const int stage) const {
+    const PHV::Allocation &alloc, const std::vector<PHV::AllocSlice> &slices,
+    const PHV::AllocSlice &dst, const IR::MAU::Action *action, const int stage) const {
     LOG5("\t\t\t\tgetSourcePHVSlices for action: " << action->name << " and slice " << dst);
     auto *field = dst.field();
     auto reads = constraint_tracker.sources(dst, action);
@@ -887,27 +889,27 @@ std::optional<PHV::AllocSlice> ActionPhvConstraints::getSourcePHVSlice(
     if (reads.size() == 0)
         LOG5("\t\t\t\tField " << field->name << " is not written in action " << action->name);
     else
-        LOG5("\t\t\t\tField " << field->name << " is written in action "  << action->name <<
-             " using " << reads.size() << " operands");
+        LOG5("\t\t\t\tField " << field->name << " is written in action " << action->name
+                              << " using " << reads.size() << " operands");
 
     // There should be only one source per dest slice.
     std::optional<PHV::AllocSlice> source_slice = std::nullopt;
     for (auto operand : reads) {
         if (operand.ad || operand.constant) continue;
-        const PHV::Field* fieldRead = operand.phv_used->field();
+        const PHV::Field *fieldRead = operand.phv_used->field();
         const le_bitrange rangeRead = operand.phv_used->range();
         LOG5("\t\t\t\t\tSlice read: " << PHV::FieldSlice(fieldRead, rangeRead));
         ordered_set<PHV::FieldSlice> seen;  // to filter out duplicated slices.
         ordered_set<PHV::AllocSlice> source_slices =
             alloc.slices(fieldRead, rangeRead, stage, PHV::FieldUse(PHV::FieldUse::READ));
-        for (auto& allocated_slice : source_slices) {
+        for (auto &allocated_slice : source_slices) {
             LOG5("\t\t\t\t\tAllocated Slice: " << allocated_slice);
             seen.insert(PHV::FieldSlice(allocated_slice.field(), allocated_slice.field_slice()));
         }
 
         // Add any source slices found in @slices, which are the proposed packing.
         // any overlapping slice will be added.
-        for (auto& candidate_slice : slices) {
+        for (auto &candidate_slice : slices) {
             if (candidate_slice.field() == fieldRead &&
                 candidate_slice.field_slice().overlaps(rangeRead)) {
                 if (seen.count(
@@ -933,7 +935,7 @@ std::optional<PHV::AllocSlice> ActionPhvConstraints::getSourcePHVSlice(
         if (source_slices.size() > 1) {
             const auto sources_str = [&]() {
                 std::stringstream ss;
-                for (const auto& slice : source_slices) {
+                for (const auto &slice : source_slices) {
                     ss << slice << ";";
                 }
                 return ss.str();
@@ -943,7 +945,7 @@ std::optional<PHV::AllocSlice> ActionPhvConstraints::getSourcePHVSlice(
                       fieldRead->name, sources_str());
             const bool all_adjacent_container_slices =
                 std::adjacent_find(source_slices.begin(), source_slices.end(),
-                                   [&](const PHV::AllocSlice& a, const PHV::AllocSlice& b) {
+                                   [&](const PHV::AllocSlice &a, const PHV::AllocSlice &b) {
                                        return a.container() != b.container() ||
                                               a.container_slice().hi + 1 != b.container_slice().lo;
                                    }) == source_slices.end();
@@ -953,7 +955,7 @@ std::optional<PHV::AllocSlice> ActionPhvConstraints::getSourcePHVSlice(
         }
         // Alloc object might return merged slices that its range is wider than readRange.
         // We need to cut the range to match the destination slice.
-        const auto& first = source_slices.front();
+        const auto &first = source_slices.front();
         const int container_range_start =
             rangeRead.lo - first.field_slice().lo + first.container_slice().lo;
         PHV::AllocSlice rst =
@@ -978,35 +980,39 @@ std::optional<PHV::AllocSlice> ActionPhvConstraints::getSourcePHVSlice(
 //  legal Tofino action. Same is true when multiple action data and/or multiple constants are used
 //  as operands on the same container in the same action.
 bool ActionPhvConstraints::has_ad_or_constant_sources(
-        const PHV::Allocation::MutuallyLiveSlices& slices,
-        const IR::MAU::Action* action,
-        const PHV::Allocation::LiveRangeShrinkingMap& initActions) const {
-    for (const auto& slice : slices) {
+    const PHV::Allocation::MutuallyLiveSlices &slices, const IR::MAU::Action *action,
+    const PHV::Allocation::LiveRangeShrinkingMap &initActions) const {
+    for (const auto &slice : slices) {
         for (auto operand : constraint_tracker.sources(slice, action)) {
             if (operand.ad || operand.constant) {
-                LOG5("\t\t\t\t  Field " << slice.field()->name <<
-                     " written using action data/constant in action " << action->name);
-                return true; } }
+                LOG5("\t\t\t\t  Field " << slice.field()->name
+                                        << " written using action data/constant in action "
+                                        << action->name);
+                return true;
+            }
+        }
         // If the field is initialized due to metadata initialization in @action, then add
         // constant/action data source for the field.
         if (initActions.count(slice.field()) && initActions.at(slice.field()).count(action)) {
-            LOG5("\t\t\t\t  Field " << slice.field()->name << " initialized for live range "
-                 "shrinking in action " << action->name);
-            return true; }
+            LOG5("\t\t\t\t  Field " << slice.field()->name
+                                    << " initialized for live range "
+                                       "shrinking in action "
+                                    << action->name);
+            return true;
+        }
     }
     return false;
 }
 
 ActionPhvConstraints::ActionDataUses ActionPhvConstraints::all_or_none_constant_sources(
-        const PHV::Allocation::MutuallyLiveSlices& slices,
-        const IR::MAU::Action* action,
-        const PHV::Allocation::LiveRangeShrinkingMap& initActions) const {
+    const PHV::Allocation::MutuallyLiveSlices &slices, const IR::MAU::Action *action,
+    const PHV::Allocation::LiveRangeShrinkingMap &initActions) const {
     ordered_set<PHV::AllocSlice> slices_written_by_ad;
     ordered_set<PHV::AllocSlice> slices_written_by_special_ad;
     ordered_set<PHV::AllocSlice> padding_slices;
     bool has_non_special_slices_written_by_constant_only = true;
     unsigned speciality_type = ActionAnalysis::ActionParam::NO_SPECIAL;
-    for (const auto& slice : slices) {
+    for (const auto &slice : slices) {
         for (auto operand : constraint_tracker.sources(slice, action)) {
             if (operand.ad || operand.constant) {
                 slices_written_by_ad.insert(slice);
@@ -1021,34 +1027,35 @@ ActionPhvConstraints::ActionDataUses ActionPhvConstraints::all_or_none_constant_
         if (initActions.count(slice.field()) && initActions.at(slice.field()).count(action))
             slices_written_by_ad.insert(slice);
         bool is_padding = !uses.is_referenced(slice.field()) || slice.field()->padding;
-        if (is_padding)
-            padding_slices.insert(slice);
+        if (is_padding) padding_slices.insert(slice);
     }
     if (LOGGING(5))
-        for (const auto& slice : slices_written_by_special_ad)
+        for (const auto &slice : slices_written_by_special_ad)
             LOG5("\t\t\t\t\t  Special AD slice: " << slice);
     unsigned num_slices_written_by_special_ad = slices_written_by_special_ad.size();
     unsigned num_slices_written_by_ad = slices_written_by_ad.size();
     unsigned num_slices_padding = padding_slices.size();
-    LOG5("\t\t\t\t\tSpecial AD slices: " << num_slices_written_by_special_ad <<
-         ", AD slices: " << num_slices_written_by_ad << ", Padding slices: " << num_slices_padding);
+    LOG5("\t\t\t\t\tSpecial AD slices: " << num_slices_written_by_special_ad
+                                         << ", AD slices: " << num_slices_written_by_ad
+                                         << ", Padding slices: " << num_slices_padding);
     BUG_CHECK(num_slices_written_by_special_ad <= num_slices_written_by_ad,
               "Slices written by speciality action data cannot be greater than slices written by "
               "action data");
     if (num_slices_written_by_ad == 0) {
         LOG5("\t\t\t\t  No slice in proposed packing written by action data/constant in action "
              << action->name);
-        return ALL_AD_CONSTANT; }
+        return ALL_AD_CONSTANT;
+    }
 
     // If there is a slice written by speciality action data and another slice written by other
     // action data that must always be packed in the same container, then do not return
     // COMPLEX_AD_PACKING_REQ. Instead, allow the failure to happen in table placement later.
     bool check_speciality_packing = true;
-    for (auto& sl_ad : slices_written_by_ad) {
+    for (auto &sl_ad : slices_written_by_ad) {
         int offset_ad = sl_ad.field()->offset;
         int left_sl_ad = (offset_ad + sl_ad.field_slice().lo) / 8;
         int right_sl_ad = ROUNDUP(offset_ad + sl_ad.field_slice().hi, 8);
-        for (auto& sl_special : slices_written_by_special_ad) {
+        for (auto &sl_special : slices_written_by_special_ad) {
             // Only applicable for header fields as the strict parser alignment requirements are
             // only for headers.
             if (sl_ad.field()->metadata || sl_special.field()->metadata) continue;
@@ -1058,61 +1065,68 @@ ActionPhvConstraints::ActionDataUses ActionPhvConstraints::all_or_none_constant_
             int offset_special = sl_special.field()->offset;
             int left_sl_special = (offset_special + sl_special.field_slice().lo) / 8;
             int right_sl_special = ROUNDUP(offset_special + sl_special.field_slice().hi, 8);
-            LOG6("\t\t\t\t  Slice ad: " << sl_ad << ", offset: " << offset_ad << ", lo: " <<
-                    left_sl_ad << ", hi: " << right_sl_ad);
-            LOG6("\t\t\t\t  Slice special: " << sl_special << ", offset: " << offset_special <<
-                    ", lo: " << left_sl_special << ", hi: " << right_sl_special);
+            LOG6("\t\t\t\t  Slice ad: " << sl_ad << ", offset: " << offset_ad
+                                        << ", lo: " << left_sl_ad << ", hi: " << right_sl_ad);
+            LOG6("\t\t\t\t  Slice special: " << sl_special << ", offset: " << offset_special
+                                             << ", lo: " << left_sl_special
+                                             << ", hi: " << right_sl_special);
             // If there is an overlap between two different slices (they share the same byte), then
             // the left limit of the later slice is going to be 1 less than the right limit of the
             // earlier slice.
             if (sl_ad != sl_special &&
-               (left_sl_special + 1 == right_sl_ad || left_sl_ad + 1 == right_sl_special)) {
-                LOG5("\t\t\t\t  Slices " << sl_ad << " and " << sl_special << " must be packed in "
-                     "the same container and share a byte.");
+                (left_sl_special + 1 == right_sl_ad || left_sl_ad + 1 == right_sl_special)) {
+                LOG5("\t\t\t\t  Slices " << sl_ad << " and " << sl_special
+                                         << " must be packed in "
+                                            "the same container and share a byte.");
                 check_speciality_packing = false;
             }
         }
     }
 
     if (check_speciality_packing && num_slices_written_by_special_ad != 0 &&
-            num_slices_written_by_ad != num_slices_written_by_special_ad) {
+        num_slices_written_by_ad != num_slices_written_by_special_ad) {
         // For an action where some slices are written by a HASH_DIST operation and the other slices
         // are all written by constants (not action data), packing is possible.
         if (speciality_type == ActionAnalysis::ActionParam::HASH_DIST &&
-                has_non_special_slices_written_by_constant_only) {
+            has_non_special_slices_written_by_constant_only) {
             LOG5("\t\t\t\t  Can combine HASH_DIST sources with constant data.");
         } else {
             // We currently disable packing of field slices if there is a mixture of speciality
             // action data and normal action data reads in the same action. This may be relaxed in
             // the future when action data packing becomes more efficient.
-            LOG5("\t\t\t\t  This packing will require combining a speciality action data with "
-                 "other action data for action " << action->name << ". The compiler currently does "
-                 "not support this feature.");
-            return COMPLEX_AD_PACKING_REQ; }
+            LOG5(
+                "\t\t\t\t  This packing will require combining a speciality action data with "
+                "other action data for action "
+                << action->name
+                << ". The compiler currently does "
+                   "not support this feature.");
+            return COMPLEX_AD_PACKING_REQ;
+        }
     }
     if (num_slices_written_by_ad + num_slices_padding == slices.size()) {
         LOG5("\t\t\t\t  All slices in proposed packing written by action data/constant in action "
              << action->name);
-        return ALL_AD_CONSTANT; }
-    LOG5("\t\t\t\t  Only " << num_slices_written_by_ad << " out of " << slices.size() << " slices "
-         " in proposed packing are written by action data/constant in action " << action->name);
+        return ALL_AD_CONSTANT;
+    }
+    LOG5("\t\t\t\t  Only " << num_slices_written_by_ad << " out of " << slices.size()
+                           << " slices "
+                              " in proposed packing are written by action data/constant in action "
+                           << action->name);
     return SOME_AD_CONSTANT;
 }
 
 int ActionPhvConstraints::unallocated_bits(PHV::Allocation::MutuallyLiveSlices slices,
-        const PHV::Container c) const {
+                                           const PHV::Container c) const {
     int size_used = 0;
-    for (const auto& slice : slices)
-        size_used += slice.width();
+    for (const auto &slice : slices) size_used += slice.width();
     if (int(c.size()) < size_used)
         LOG4("Total size of mutually live slices is greater than the size of the container");
     return (c.size() - size_used);
 }
 
 bool ActionPhvConstraints::valid_container_operation_type(
-        const IR::MAU::Action* action,
-        const ordered_set<PHV::FieldSlice>& slices,
-        std::stringstream& ss) const {
+    const IR::MAU::Action *action, const ordered_set<PHV::FieldSlice> &slices,
+    std::stringstream &ss) const {
     unsigned type_of_operation = 0;
     ordered_set<PHV::FieldSlice> fields_not_written;
     ordered_map<cstring, ordered_set<PHV::FieldSlice>> operations_to_fields;
@@ -1121,18 +1135,19 @@ bool ActionPhvConstraints::valid_container_operation_type(
 
     cstring hdr = (*(slices.begin())).field()->header();
 
-    ss << "This program violates action constraints imposed by " << Device::name() <<
-        "." << std::endl << std::endl;
+    ss << "This program violates action constraints imposed by " << Device::name() << "."
+       << std::endl
+       << std::endl;
     ss << "  The following field slices must be allocated in the same container as they are "
-          "present within the same byte of header " << hdr << ":" << std::endl;
-    for (auto& slice : slices) {
+          "present within the same byte of header "
+       << hdr << ":" << std::endl;
+    for (auto &slice : slices) {
         ss << "\t" << slice.shortString() << std::endl;
         std::optional<OperandInfo> fw = constraint_tracker.is_written(slice, action);
         bool is_padding = !uses.is_referenced(slice.field()) || slice.field()->padding;
         // Unreferenced fields may be overwritten no issues.
         if (!fw) {
-            if (!is_padding)
-                fields_not_written.insert(slice);
+            if (!is_padding) fields_not_written.insert(slice);
         } else if (fw->flags & OperandInfo::MOVE) {
             type_of_operation |= OperandInfo::MOVE;
             operations_to_fields["assignment"_cs].insert(slice);
@@ -1153,17 +1168,18 @@ bool ActionPhvConstraints::valid_container_operation_type(
     if (operations_to_fields.size() > 1) {
         ss << std::endl;
         ss << "  However, the program requires multiple instruction types for the same container "
-              "in the same action (" << action_name << "):" << std::endl;
+              "in the same action ("
+           << action_name << "):" << std::endl;
         for (auto kv : operations_to_fields) {
-            ss << "\tThe following slice(s) are written using " << kv.first << " instruction." <<
-                std::endl;
-            for (auto& slice : kv.second)
-                ss << "\t  " << slice.shortString() << std::endl;
+            ss << "\tThe following slice(s) are written using " << kv.first << " instruction."
+               << std::endl;
+            for (auto &slice : kv.second) ss << "\t  " << slice.shortString() << std::endl;
         }
-        ss << std::endl << "Therefore, the program requires an action impossible to synthesize for "
-           << Device::name() << " ALU. Rewrite action " << action_name << " to use the same " <<
-           "instruction for all the above field slices that must be in the same container."<<
-           std::endl;
+        ss << std::endl
+           << "Therefore, the program requires an action impossible to synthesize for "
+           << Device::name() << " ALU. Rewrite action " << action_name << " to use the same "
+           << "instruction for all the above field slices that must be in the same container."
+           << std::endl;
         return false;
     }
 
@@ -1171,18 +1187,20 @@ bool ActionPhvConstraints::valid_container_operation_type(
     // slice in the container is not written, then the unwritten slice would be overwritten
     // illegally. Therefore, flag an error message for this, and return false.
     if (((type_of_operation & OperandInfo::WHOLE_CONTAINER) ||
-                (type_of_operation & OperandInfo::BITWISE)) && fields_not_written.size() > 0) {
+         (type_of_operation & OperandInfo::BITWISE)) &&
+        fields_not_written.size() > 0) {
         ss << std::endl;
-        ss << "  However, the following fields slice(s) are written in action " << action_name <<
-              " by the " << operation << " instruction, which operates on the entire container:" <<
-              std::endl;
-        for (auto& slice : operations_to_fields.at(operation))
+        ss << "  However, the following fields slice(s) are written in action " << action_name
+           << " by the " << operation
+           << " instruction, which operates on the entire container:" << std::endl;
+        for (auto &slice : operations_to_fields.at(operation))
             ss << "\t" << slice.shortString() << std::endl;
-        ss << std::endl << "  As a result, the following field slice(s) not written in action " <<
-            action_name << " will be overwritten illegally:" << std::endl;
-        for (auto& slice : fields_not_written)
-            ss << "\t" << slice.shortString() << std::endl;
-        ss << std::endl << "Therefore, the program requires an action impossible to synthesize for "
+        ss << std::endl
+           << "  As a result, the following field slice(s) not written in action " << action_name
+           << " will be overwritten illegally:" << std::endl;
+        for (auto &slice : fields_not_written) ss << "\t" << slice.shortString() << std::endl;
+        ss << std::endl
+           << "Therefore, the program requires an action impossible to synthesize for "
            << Device::name() << " ALU." << std::endl;
         return false;
     }
@@ -1190,17 +1208,16 @@ bool ActionPhvConstraints::valid_container_operation_type(
     return true;
 }
 
-unsigned
-ActionPhvConstraints::container_operation_type(
-    const IR::MAU::Action* action, const PHV::Allocation::MutuallyLiveSlices& slices,
-    const PHV::Allocation::LiveRangeShrinkingMap& initActions) const {
+unsigned ActionPhvConstraints::container_operation_type(
+    const IR::MAU::Action *action, const PHV::Allocation::MutuallyLiveSlices &slices,
+    const PHV::Allocation::LiveRangeShrinkingMap &initActions) const {
     LOG5("\t\t\tChecking container operation type for action: " << action->name);
     unsigned type_of_operation = 0;
     size_t num_fields_not_written = 0;
-    ordered_set<const PHV::Field*> observed_fields;
+    ordered_set<const PHV::Field *> observed_fields;
     cstring operation;
 
-    for (const auto& slice : slices) {
+    for (const auto &slice : slices) {
         auto field_slice = PHV::FieldSlice(slice.field(), slice.field_slice());
         std::optional<OperandInfo> fw = constraint_tracker.is_written(field_slice, action);
         bool is_padding = !uses.is_referenced(slice.field()) || slice.field()->padding;
@@ -1221,8 +1238,9 @@ ActionPhvConstraints::container_operation_type(
             } else if (operation == fw->operation) {
                 LOG5("\t\t\t\t  Subsequent bitwise operation found: " << fw->operation);
             } else {
-                LOG5("\t\t\t\t  Action " << action->name << " uses multiple different bitwise "
-                        "operations for slices in the proposed packing.");
+                LOG5("\t\t\t\t  Action " << action->name
+                                         << " uses multiple different bitwise "
+                                            "operations for slices in the proposed packing.");
                 return OperandInfo::MIXED;
             }
         } else if (fw->flags & OperandInfo::WHOLE_CONTAINER) {
@@ -1233,8 +1251,9 @@ ActionPhvConstraints::container_operation_type(
             type_of_operation |= OperandInfo::PART_OF_CONTAINER;
             observed_fields.insert(slice.field());
         } else {
-            warning("Detected a write that is neither move nor whole container "
-                    "operation.");
+            warning(
+                "Detected a write that is neither move nor whole container "
+                "operation.");
         }
     }
 
@@ -1257,27 +1276,32 @@ ActionPhvConstraints::container_operation_type(
         if (type_of_operation & OperandInfo::WHOLE_CONTAINER) {
             if (num_fields_not_written) {
                 LOG5("\t\t\t\tAction " << action->name << " uses a whole container operation but "
-                        << num_fields_not_written << " slices are not written in this action.");
-                return OperandInfo::MIXED; }
+                                       << num_fields_not_written
+                                       << " slices are not written in this action.");
+                return OperandInfo::MIXED;
+            }
         }
 
         if (type_of_operation & OperandInfo::MOVE) {
-            LOG5("\t\t\t\tAction " << action->name << " uses both whole container and move "
-                    "operations for slices in the proposed packing.");
-            return OperandInfo::MIXED; }
-
-        if (type_of_operation == (OperandInfo::WHOLE_CONTAINER | OperandInfo::PART_OF_CONTAINER)) {
-            LOG5("\t\t\t\tAction " << action->name << " uses multiple whole container "
-                   "operations for slices in the proposed packing.");
+            LOG5("\t\t\t\tAction " << action->name
+                                   << " uses both whole container and move "
+                                      "operations for slices in the proposed packing.");
             return OperandInfo::MIXED;
         }
 
-        LOG5("\t\t\t\tNumber of fields written to by this whole container operation: " <<
-                observed_fields.size());
+        if (type_of_operation == (OperandInfo::WHOLE_CONTAINER | OperandInfo::PART_OF_CONTAINER)) {
+            LOG5("\t\t\t\tAction " << action->name
+                                   << " uses multiple whole container "
+                                      "operations for slices in the proposed packing.");
+            return OperandInfo::MIXED;
+        }
+
+        LOG5("\t\t\t\tNumber of fields written to by this whole container operation: "
+             << observed_fields.size());
         if (observed_fields.size() == 1) {
-            return (type_of_operation & OperandInfo::WHOLE_CONTAINER) ?
-                          OperandInfo::WHOLE_CONTAINER_SAME_FIELD
-                        : OperandInfo::PART_OF_CONTAINER;
+            return (type_of_operation & OperandInfo::WHOLE_CONTAINER)
+                       ? OperandInfo::WHOLE_CONTAINER_SAME_FIELD
+                       : OperandInfo::PART_OF_CONTAINER;
         }
 
         if (type_of_operation == OperandInfo::PART_OF_CONTAINER)
@@ -1293,20 +1317,25 @@ ActionPhvConstraints::container_operation_type(
     // and BITWISE operations.
     if (type_of_operation & OperandInfo::BITWISE) {
         if (num_fields_not_written) {
-            LOG5("\t\t\t\tAction " << action->name << " uses a bitwise operation but " <<
-                    num_fields_not_written << " slices are not written in this action.");
-            return OperandInfo::MIXED; }
+            LOG5("\t\t\t\tAction " << action->name << " uses a bitwise operation but "
+                                   << num_fields_not_written
+                                   << " slices are not written in this action.");
+            return OperandInfo::MIXED;
+        }
         if (type_of_operation & OperandInfo::MOVE) {
-            LOG5("\t\t\t\tAction " << action->name << " uses both bitwise and move operations "
-                    "for slices in the proposed packing.");
-            return OperandInfo::MIXED; }
-        return OperandInfo::BITWISE; }
+            LOG5("\t\t\t\tAction " << action->name
+                                   << " uses both bitwise and move operations "
+                                      "for slices in the proposed packing.");
+            return OperandInfo::MIXED;
+        }
+        return OperandInfo::BITWISE;
+    }
 
     return OperandInfo::MOVE;
 }
 
 bool ActionPhvConstraints::are_adjacent_field_slices(
-        const PHV::Allocation::MutuallyLiveSlices& container_state) const {
+    const PHV::Allocation::MutuallyLiveSlices &container_state) const {
     // ignore prepending padding or unused fieldslices.
     auto itr = container_state.begin();
     while (itr != container_state.end() &&
@@ -1314,7 +1343,7 @@ bool ActionPhvConstraints::are_adjacent_field_slices(
         itr++;
     }
     itr = std::adjacent_find(
-        itr, container_state.end(), [](const PHV::AllocSlice& a, const PHV::AllocSlice& b) {
+        itr, container_state.end(), [](const PHV::AllocSlice &a, const PHV::AllocSlice &b) {
             return a.field() != b.field() || a.field_slice().hi + 1 != b.field_slice().lo;
         });
     // ignore postpending padding or unused fieldslices.
@@ -1329,52 +1358,52 @@ bool ActionPhvConstraints::are_adjacent_field_slices(
 }
 
 unsigned ActionPhvConstraints::count_container_holes(
-    const PHV::Allocation::MutuallyLiveSlices& container_state) const {
+    const PHV::Allocation::MutuallyLiveSlices &container_state) const {
     le_bitrange last;
     bool firstSlice = true;
     cstring lastField;
     unsigned numBreaks = 0;
-    for (const auto& slice : container_state) {
+    for (const auto &slice : container_state) {
         le_bitrange range = slice.container_slice();
         // No checks for the first slice
         if (firstSlice) {
             lastField = slice.field()->name;
             last = range;
             firstSlice = false;
-            continue; }
+            continue;
+        }
         if (last.hi + 1 != range.lo) {
-            LOG7("\t\t\t\t\tSlices [" << last.lo << ", " << last.hi << "] of field " <<
-                    lastField << " and [" << range.lo << ", " << range.hi << "] of field " <<
-                    slice.field() << " are not adjacent.");
-            numBreaks += 1; }
+            LOG7("\t\t\t\t\tSlices [" << last.lo << ", " << last.hi << "] of field " << lastField
+                                      << " and [" << range.lo << ", " << range.hi << "] of field "
+                                      << slice.field() << " are not adjacent.");
+            numBreaks += 1;
+        }
         last = range;
-        lastField = slice.field()->name; }
+        lastField = slice.field()->name;
+    }
     return numBreaks;
 }
 
 bool ActionPhvConstraints::pack_slices_together(
-        const PHV::Allocation &alloc,
-        const PHV::Allocation::MutuallyLiveSlices& container_state,
-        PackingConstraints* packing_constraints,
-        const IR::MAU::Action* action,
-        bool pack_unallocated_only,  /*If true, only unallocated slices will be packed together*/
-        bool ad_source_present /* action data/constant source present */) const {
-    const PHV::Field* no_pack_source_field = nullptr;
+    const PHV::Allocation &alloc, const PHV::Allocation::MutuallyLiveSlices &container_state,
+    PackingConstraints *packing_constraints, const IR::MAU::Action *action,
+    bool pack_unallocated_only, /*If true, only unallocated slices will be packed together*/
+    bool ad_source_present /* action data/constant source present */) const {
+    const PHV::Field *no_pack_source_field = nullptr;
     if (pack_unallocated_only)
         LOG5("\t\t\t\t\tPack all unallocated slices together. All bits in container are occupied.");
     else
         LOG5("\t\t\t\t\tPack all slices together.");
     ordered_set<PHV::FieldSlice> pack_together;
     ordered_set<PHV::FieldSlice> pack_together_no_pack;
-    ordered_set<const PHV::Field*> pack_together_fields;
+    ordered_set<const PHV::Field *> pack_together_fields;
     bool pack_together_has_no_pack = false;
-    for (const auto& slice : container_state) {
+    for (const auto &slice : container_state) {
         // copack constraints are not dependent on stages, so just use the first one.
         const int stage = *stages(action, slice.isPhysicalStageBased()).begin();
         for (auto operand : constraint_tracker.sources(slice, action)) {
-            if (operand.ad || operand.constant)
-                continue;
-            const PHV::Field* fieldRead = operand.phv_used->field();
+            if (operand.ad || operand.constant) continue;
+            const PHV::Field *fieldRead = operand.phv_used->field();
             le_bitrange rangeRead = operand.phv_used->range();
             if (pack_unallocated_only) {
                 ordered_set<PHV::Container> containers;
@@ -1385,19 +1414,19 @@ bool ActionPhvConstraints::pack_slices_together(
                 for (auto &packed_slice : container_state)
                     // TODO: Should this be overlaps() or contains()?
                     if (packed_slice.field() == fieldRead &&
-                            packed_slice.field_slice().overlaps(rangeRead))
+                        packed_slice.field_slice().overlaps(rangeRead))
                         per_source_slices.insert(packed_slice);
 
-                for (const auto& slice : per_source_slices)
-                    containers.insert(slice.container());
-                if (containers.size() != 0)
-                    continue; }
+                for (const auto &slice : per_source_slices) containers.insert(slice.container());
+                if (containers.size() != 0) continue;
+            }
 
             // Insert the slices to be packed together into the UnionFind structure
-            LOG3("\t\t\t\t\tInserting " << fieldRead->name << " [" << rangeRead.lo << ", " <<
-                    rangeRead.hi << "] into copacking_constraints for action " << action->name);
+            LOG3("\t\t\t\t\tInserting "
+                 << fieldRead->name << " [" << rangeRead.lo << ", " << rangeRead.hi
+                 << "] into copacking_constraints for action " << action->name);
             if (fieldRead->is_solitary() &&
-               (no_pack_source_field == nullptr || fieldRead == no_pack_source_field)) {
+                (no_pack_source_field == nullptr || fieldRead == no_pack_source_field)) {
                 // If the source is no-pack and there is no other no-pack field encountered, then
                 // add this to the no-pack slice list. Also do the same if this slice belongs to the
                 // already noted no-pack field.
@@ -1431,34 +1460,39 @@ bool ActionPhvConstraints::pack_slices_together(
     // pack_together and pack_together_no_pack sets having members present, and the allocation also
     // has an action data/constant source, then this allocation is invalid.
     if (ad_source_present && pack_together.size() > 0 && pack_together_no_pack.size() > 0) {
-        LOG5("\t\t\t\t  Conditional constraints require use of two PHV containers as sources. "
-             "However, this is impossible because one of the two allowed sources is action "
-             "data/constant.");
+        LOG5(
+            "\t\t\t\t  Conditional constraints require use of two PHV containers as sources. "
+            "However, this is impossible because one of the two allowed sources is action "
+            "data/constant.");
         return false;
     }
 
     if (LOGGING(5)) {
         std::stringstream ss;
-        for (const auto& slice : pack_together)
-            ss << slice;
-        LOG5("\t\t\t\t\tPack together: " << ss.str()); }
+        for (const auto &slice : pack_together) ss << slice;
+        LOG5("\t\t\t\t\tPack together: " << ss.str());
+    }
 
     PHV::FieldSlice *firstSlice = nullptr;
     // Pack all the non no-pack slices together.
-    for (const auto& slice : pack_together) {
+    for (const auto &slice : pack_together) {
         if (firstSlice == nullptr) {
             LOG5("\t\t\t\t\t\tSetting first slice to  " << slice);
-            firstSlice = new PHV::FieldSlice(slice.field(), slice.range()); }
+            firstSlice = new PHV::FieldSlice(slice.field(), slice.range());
+        }
         LOG5("\t\t\t\t\tUnion " << *firstSlice << " with " << slice);
-        packing_constraints->at(action).makeUnion(*firstSlice, slice); }
+        packing_constraints->at(action).makeUnion(*firstSlice, slice);
+    }
     // Pack the no-pack slices together in the second source.
     firstSlice = nullptr;
-    for (const auto& slice : pack_together_no_pack) {
+    for (const auto &slice : pack_together_no_pack) {
         if (firstSlice == nullptr) {
             LOG5("\t\t\t\t\t\tSetting first slice to " << slice);
-            firstSlice = new PHV::FieldSlice(slice.field(), slice.range()); }
+            firstSlice = new PHV::FieldSlice(slice.field(), slice.range());
+        }
         LOG5("\t\t\t\t\tUnion " << *firstSlice << " with " << slice);
-        packing_constraints->at(action).makeUnion(*firstSlice, slice); }
+        packing_constraints->at(action).makeUnion(*firstSlice, slice);
+    }
     return true;
 }
 
@@ -1467,20 +1501,19 @@ bool ActionPhvConstraints::pack_slices_together(
 // to those mutually exclusive fields should not have an effect on the number of bitmasked-set
 // instructions detected.
 int ActionPhvConstraints::count_bitmasked_set_instructions(
-        const std::vector<PHV::AllocSlice>& slices,
-        const PHV::Allocation::LiveRangeShrinkingMap& initActions) const {
+    const std::vector<PHV::AllocSlice> &slices,
+    const PHV::Allocation::LiveRangeShrinkingMap &initActions) const {
     int numBitmaskedSet = 0;
     if (slices.size() == 0) return 0;
     // Create a set out of the vector of slices, because has_ad_or_constant_sources() only takes the
     // set.
     ordered_set<PHV::AllocSlice> setOfSlices;
-    for (auto& slice : slices)
-        setOfSlices.insert(slice);
+    for (auto &slice : slices) setOfSlices.insert(slice);
 
     // Merge actions for all candidate fields into a set.
     PHV::ActionSet allActionsForSlices;
-    for (auto& slice : slices) {
-        const auto& writingActions = constraint_tracker.written_in(slice);
+    for (auto &slice : slices) {
+        const auto &writingActions = constraint_tracker.written_in(slice);
         allActionsForSlices.insert(writingActions.begin(), writingActions.end());
         const auto it = initActions.find(slice.field());
         if (it != initActions.end()) {
@@ -1488,31 +1521,28 @@ int ActionPhvConstraints::count_bitmasked_set_instructions(
         }
     }
     // For every action, check if bitmasked-set would be synthesized for the writes to slices.
-    for (auto& action : allActionsForSlices) {
+    for (auto &action : allActionsForSlices) {
         bool has_ad_constant_sources = has_ad_or_constant_sources(setOfSlices, action, initActions);
         // Bitmasked-set instructions require an action data source.
-        if (!has_ad_constant_sources)
-            continue;
+        if (!has_ad_constant_sources) continue;
         // Determine the set of fields in the packing (slices) that are not written by action.
         ordered_set<PHV::AllocSlice> fieldsNotWrittenTo;
-        for (const auto& slice : slices) {
+        for (const auto &slice : slices) {
             if (!constraint_tracker.is_written(slice, action) &&
                 !(initActions.count(slice.field()) && initActions.at(slice.field()).count(action)))
                 fieldsNotWrittenTo.insert(slice);
         }
-        if (is_bitmasked_set(slices, fieldsNotWrittenTo))
-            numBitmaskedSet++;
+        if (is_bitmasked_set(slices, fieldsNotWrittenTo)) numBitmaskedSet++;
     }
     return numBitmaskedSet;
 }
 
 bool ActionPhvConstraints::is_bitmasked_set(
-        const std::vector<PHV::AllocSlice>& container_state,
-        const ordered_set<PHV::AllocSlice>& fields_not_written_to) const {
+    const std::vector<PHV::AllocSlice> &container_state,
+    const ordered_set<PHV::AllocSlice> &fields_not_written_to) const {
     bitvec written;
-    for (auto& slice : container_state) {
-        if (fields_not_written_to.count(slice))
-            continue;
+    for (auto &slice : container_state) {
+        if (fields_not_written_to.count(slice)) continue;
         auto container_range = slice.container_slice();
         bitvec writtenThisSlice(container_range.lo, container_range.size());
         written |= writtenThisSlice;
@@ -1520,14 +1550,13 @@ bool ActionPhvConstraints::is_bitmasked_set(
     // Contiguity is enough because we don't currently support making action data rotationally
     // equivalent. If the bits written are contiguous, then this instruction is going to be realized
     // using deposit-field rather than bitmasked-set.
-    if (written.is_contiguous())
-        return false;
+    if (written.is_contiguous()) return false;
     return true;
 }
 
 bool ActionPhvConstraints::pack_conflicts_present(
-        const PHV::Allocation::MutuallyLiveSlices& container_state,
-        const std::vector<PHV::AllocSlice>& slices) const {
+    const PHV::Allocation::MutuallyLiveSlices &container_state,
+    const std::vector<PHV::AllocSlice> &slices) const {
     // Check that none of the new slices have pack conflicts with the already allocated slices
     // (container_state).
     for (auto sl1 : container_state) {
@@ -1562,18 +1591,17 @@ bool ActionPhvConstraints::pack_conflicts_present(
     // However, both of them will create the same pack conflict on f1 and f2.
     // This is one of the previous bug that make allocation be short of 8-bit containers.
     // we check the pack conflicts between slices within the candidate set.
-    for (const auto& sl1 : slices) {
-        for (const auto& sl2 : slices) {
-            if (phv.must_alloc_same_container(
-                    PHV::FieldSlice(sl1.field(), sl1.field_slice()),
-                    PHV::FieldSlice(sl2.field(), sl2.field_slice()))) {
+    for (const auto &sl1 : slices) {
+        for (const auto &sl2 : slices) {
+            if (phv.must_alloc_same_container(PHV::FieldSlice(sl1.field(), sl1.field_slice()),
+                                              PHV::FieldSlice(sl2.field(), sl2.field_slice()))) {
                 continue;
             }
-            auto* f1 = sl1.field();
-            auto* f2 = sl2.field();
+            auto *f1 = sl1.field();
+            auto *f2 = sl2.field();
             if (f1 == f2) continue;
             if (hasPackConflict(PHV::FieldSlice(sl1.field(), sl1.field_slice()),
-                PHV::FieldSlice(sl2.field(), sl2.field_slice()))) {
+                                PHV::FieldSlice(sl2.field(), sl2.field_slice()))) {
                 LOG5("\t\t\tAllocation candidate " << sl1.field()->name
                                                    << " cannot be packed in "
                                                       "the same stage with "
@@ -1586,14 +1614,15 @@ bool ActionPhvConstraints::pack_conflicts_present(
 }
 
 bool ActionPhvConstraints::stateful_destinations_constraints_violated(
-        const PHV::Allocation::MutuallyLiveSlices& container_state) const {
+    const PHV::Allocation::MutuallyLiveSlices &container_state) const {
     BUG_CHECK(container_state.size() > 0, "No slices in candidate container allocation?");
     size_t size = static_cast<size_t>(container_state.begin()->container().size());
     LOG6("\t\t\tContainer size: " << size);
-    const auto& statefulWrites = constraint_tracker.getStatefulWrites();
-    ordered_map<const PHV::Field*,
-                ordered_map<le_bitrange, ordered_map<const IR::MAU::Action*, int>>> fslice_to_rot;
-    for (const auto& slice : container_state) {
+    const auto &statefulWrites = constraint_tracker.getStatefulWrites();
+    ordered_map<const PHV::Field *,
+                ordered_map<le_bitrange, ordered_map<const IR::MAU::Action *, int>>>
+        fslice_to_rot;
+    for (const auto &slice : container_state) {
         if (!statefulWrites.count(slice.field())) continue;
         for (auto kv : statefulWrites.at(slice.field())) {
             auto write_range = kv.first;
@@ -1603,11 +1632,12 @@ bool ActionPhvConstraints::stateful_destinations_constraints_violated(
             for (auto limit : kv.second) {
                 auto *act = limit.first;
                 for (auto read_range : limit.second) {
-                    if (write_range.lo != written_field_slice.lo || write_range.hi !=
-                        written_field_slice.hi)
-                        LOG6("\t\t\t  Range " << written_field_slice << " contained in [" <<
-                             write_range.lo << ", " << write_range.hi << "] but not the same as "
-                             "it.");
+                    if (write_range.lo != written_field_slice.lo ||
+                        write_range.hi != written_field_slice.hi)
+                        LOG6("\t\t\t  Range " << written_field_slice << " contained in ["
+                                              << write_range.lo << ", " << write_range.hi
+                                              << "] but not the same as "
+                                                 "it.");
                     // Because of the way slicing is done, write_range will always be a superset of
                     // written_field_slice. Therefore, written_field_slice's lo will always be
                     // greater than or equal to write_range's left coordinate (lo) and
@@ -1632,10 +1662,12 @@ bool ActionPhvConstraints::stateful_destinations_constraints_violated(
                             fslice_to_rot[slice.field()][write_range].count(act)) {
                             int prev_rot = fslice_to_rot[slice.field()][write_range][act];
                             if (prev_rot != cur_rot) {
-                                LOG5("\t\t\tThe rotation (" << cur_rot << ") of " << slice <<
-                                     " is not equal to other rotation (" << prev_rot << ") carried"
-                                     " in the same container. Thereforce, this packing is not"
-                                     " possible.");
+                                LOG5("\t\t\tThe rotation ("
+                                     << cur_rot << ") of " << slice
+                                     << " is not equal to other rotation (" << prev_rot
+                                     << ") carried"
+                                        " in the same container. Thereforce, this packing is not"
+                                        " possible.");
                                 return true;
                             }
                         } else {
@@ -1643,9 +1675,11 @@ bool ActionPhvConstraints::stateful_destinations_constraints_violated(
                         }
                         continue;
                     }
-                    LOG5("\t\t\tThe alignment of " << slice << " would force the data for ALU "
-                         "operation to go to multiple action data bus slots. Therefore, this "
-                         "packing is not possible.");
+                    LOG5("\t\t\tThe alignment of "
+                         << slice
+                         << " would force the data for ALU "
+                            "operation to go to multiple action data bus slots. Therefore, this "
+                            "packing is not possible.");
                     return true;
                 }
             }
@@ -1655,16 +1689,15 @@ bool ActionPhvConstraints::stateful_destinations_constraints_violated(
 }
 
 bool ActionPhvConstraints::parser_constant_extract_satisfied(
-        const PHV::Container& c,
-        const PHV::Allocation::MutuallyLiveSlices& container_state) const {
+    const PHV::Container &c, const PHV::Allocation::MutuallyLiveSlices &container_state) const {
     if (c.is(PHV::Size::b8)) return true;
-    const auto& unionFind = phv.getSameSetConstantExtraction();
-    for (auto& slice : container_state) {
+    const auto &unionFind = phv.getSameSetConstantExtraction();
+    for (auto &slice : container_state) {
         // For each slice, if it is not marked as parser constant extract, do nothing.
         if (!phv.hasParserConstantExtract(slice.field())) continue;
         bitvec range(slice.container_slice().lo, slice.width());
-        const auto& sliceSet = unionFind.setOf(const_cast<PHV::Field*>(slice.field()));
-        for (auto& slice1 : container_state) {
+        const auto &sliceSet = unionFind.setOf(const_cast<PHV::Field *>(slice.field()));
+        for (auto &slice1 : container_state) {
             if (slice == slice1) continue;
             // If these are different slices of the same field, then don't do anything.
             if (slice.field() == slice1.field()) continue;
@@ -1673,8 +1706,7 @@ bool ActionPhvConstraints::parser_constant_extract_satisfied(
             if (!phv.hasParserConstantExtract(slice1.field())) continue;
             // If the field is not in the same set as the parser constant extract field, then we are
             // good.
-            if (sliceSet.find(const_cast<PHV::Field*>(slice1.field())) == sliceSet.end())
-                continue;
+            if (sliceSet.find(const_cast<PHV::Field *>(slice1.field())) == sliceSet.end()) continue;
             // Both slice and slice1's fields are in the same set. Now we need to make sure they can
             // be allocated into the same container.
             range |= bitvec(slice1.container_slice().lo, slice1.width());
@@ -1698,9 +1730,10 @@ bool ActionPhvConstraints::parser_constant_extract_satisfied(
             // for 32b fields.
             size_t maxAllowed = c.is(PHV::Size::b16) ? 4 : 3;
             if (count <= maxAllowed) continue;
-            LOG5("\t\t\tIn container " << c << ", POV slices " << slice << " and " << slice1 <<
-                 " are packed " << count << " (maxAllowed: " << maxAllowed << "b) bits apart." <<
-                 " Disallowing this packing to save parser extractors.");
+            LOG5("\t\t\tIn container " << c << ", POV slices " << slice << " and " << slice1
+                                       << " are packed " << count << " (maxAllowed: " << maxAllowed
+                                       << "b) bits apart."
+                                       << " Disallowing this packing to save parser extractors.");
             return false;
         }
     }
@@ -1708,20 +1741,20 @@ bool ActionPhvConstraints::parser_constant_extract_satisfied(
 }
 
 bool ActionPhvConstraints::check_and_generate_constraints_for_move_with_unallocated_sources(
-    const PHV::Allocation& alloc, const IR::MAU::Action* action, const PHV::Container& c,
-    const PHV::Allocation::MutuallyLiveSlices& container_state,
-    const PHV::Allocation::LiveRangeShrinkingMap& initActions, ActionContainerProperty* action_prop,
-    PackingConstraints* copacking_constraints) const {
+    const PHV::Allocation &alloc, const IR::MAU::Action *action, const PHV::Container &c,
+    const PHV::Allocation::MutuallyLiveSlices &container_state,
+    const PHV::Allocation::LiveRangeShrinkingMap &initActions, ActionContainerProperty *action_prop,
+    PackingConstraints *copacking_constraints) const {
     // Special packing constraints are introduced when number of source containers > 2 and
     // number of allocated containers is less than or equal to 2.
     // At this point of the loop, sources.num_allocated <= 2, sources.num_unallocated may be any
     // value.
     const bool mocha_or_dark = c.is(PHV::Kind::dark) || c.is(PHV::Kind::mocha);
-    const auto& sources = action_prop->sources;
+    const auto &sources = action_prop->sources;
 
     PHV::Allocation::MutuallyLiveSlices state_written_to;
     PHV::Allocation::MutuallyLiveSlices state_not_written_to;
-    for (const auto& slice : container_state) {
+    for (const auto &slice : container_state) {
         bool is_padding = slice.field()->padding || !uses.is_referenced(slice.field());
         if (constraint_tracker.is_written(slice, action))
             // If written by normal instruction.
@@ -1740,20 +1773,24 @@ bool ActionPhvConstraints::check_and_generate_constraints_for_move_with_unalloca
         // data/constant source as well as a PHV source.
         // Therefore, no fields can be unwritten in any given action.
         if (num_fields_not_written_to) {
-            LOG5("\t\t\t\tSome bits not written in action " << action->name << " will get "
+            LOG5("\t\t\t\tSome bits not written in action "
+                 << action->name
+                 << " will get "
                     "clobbered because there is at least one PHV source and another action"
                     " data/ constant source");
-            return false; }
+            return false;
+        }
         // Any unallocated PHV slices must all be packed within the same container, as there can
         // only be a maximum of one PHV source when an action data/constant source is present.
         // Generate these conditional constraints for this particular case.
         if (sources.num_unallocated > 0) {
             if (!masks_valid(container_state, action, true /*action data only*/, initActions)) {
                 LOG5("\t\t\t\tThe action data used for this packing is not contiguous");
-                return false; }
+                return false;
+            }
             if (!pack_slices_together(alloc, container_state, copacking_constraints, action,
-                        false /* pack both allocated and unallocated together */,
-                        true /* action data source present */))
+                                      false /* pack both allocated and unallocated together */,
+                                      true /* action data source present */))
                 return false;
         }
         // At this point, analysis determines there is at least 1 PHV source. So
@@ -1777,25 +1814,28 @@ bool ActionPhvConstraints::check_and_generate_constraints_for_move_with_unalloca
                 // the mask validity for the container state written to.
                 bool sourceContainerAlignedWithDest = is_aligned(state_written_to, action, alloc);
                 bool writtenMaskValid = masks_valid(state_written_to, action,
-                        false /* non action data only */, emptyInit);
+                                                    false /* non action data only */, emptyInit);
                 if (sourceContainerAlignedWithDest) {
-                    if (!writtenMaskValid && !masks_valid(state_not_written_to, action,
-                                false /*non action data only*/, emptyInit)) {
+                    if (!writtenMaskValid &&
+                        !masks_valid(state_not_written_to, action, false /*non action data only*/,
+                                     emptyInit)) {
                         LOG5("\t\t\t\tMasks found to not be valid for packing");
                         return false;
                     }
                 } else if (!writtenMaskValid) {
-                    LOG5("\t\t\t\tSource container and destination container are not aligned. "
-                         "Therefore, we require a contiguous mask for the container state written. "
-                         "However, mask found to not be contiguous.");
+                    LOG5(
+                        "\t\t\t\tSource container and destination container are not aligned. "
+                        "Therefore, we require a contiguous mask for the container state written. "
+                        "However, mask found to not be contiguous.");
                     return false;
                 }
             }
             // If the allocation is to a mocha or dark container, and there is an unallocated
             // source, we need to make sure the source and the destination are aligned.
             if (mocha_or_dark && sources.num_unallocated > 0) {
-                LOG5("\t\t\t\tSetting phv must be aligned for mocha/dark destination and "
-                     "unallocated source");
+                LOG5(
+                    "\t\t\t\tSetting phv must be aligned for mocha/dark destination and "
+                    "unallocated source");
                 action_prop->must_be_aligned = true;
             }
             // No Action data or constant sources and only 1 PHV container as source plus masks for
@@ -1812,16 +1852,20 @@ bool ActionPhvConstraints::check_and_generate_constraints_for_move_with_unalloca
     // If this requires two containers, this packing is not possible (TOO_MANY_SOURCES)
     if (num_fields_not_written_to && requires_two_containers) {
         LOG5("\t\t\t\t" << num_fields_not_written_to << " fields not written in action "
-                << action->name << " will get clobbered.");
-        return false; }
+                        << action->name << " will get clobbered.");
+        return false;
+    }
 
     // If some bits in the container are not written to, then one of the sources of the move has
     // to be the container itself.
     // If requires two containers, this packing is not possible (TOO_MANY_SOURCES)
     if (has_bits_not_written_to && requires_two_containers) {
-        LOG5("\t\t\t\tSome unallocated bits in the container will get clobbered by writes in "
-                "action" << action->name);
-        return false; }
+        LOG5(
+            "\t\t\t\tSome unallocated bits in the container will get clobbered by writes in "
+            "action"
+            << action->name);
+        return false;
+    }
 
     // One of the PHV must be aligned for the case with 2 sources
     LOG6("\t\t\t\t\tSetting phvMustBeAligned for action " << action->name << " to TRUE");
@@ -1829,8 +1873,7 @@ bool ActionPhvConstraints::check_and_generate_constraints_for_move_with_unalloca
 
     // If sources.num_allocated == 2 and sources.num_unallocated == 0, then packing is valid and
     // no other packing constraints are induced
-    if (sources.num_allocated == 2 && sources.num_unallocated == 0)
-        return true;
+    if (sources.num_allocated == 2 && sources.num_unallocated == 0) return true;
 
     // If sources.num_allocated == 2 and sources.num_unallocated > 0, then all unallocated
     // fields have to be packed together with one of the allocated fields
@@ -1841,8 +1884,7 @@ bool ActionPhvConstraints::check_and_generate_constraints_for_move_with_unalloca
 
     // For mocha and dark containers, partial container sets are impossible.
     if (mocha_or_dark && sources.num_unallocated > 0) {
-        BUG_CHECK(sources.num_allocated <= 1, "Cannot have 2 or more sources for container %1%",
-                c);
+        BUG_CHECK(sources.num_allocated <= 1, "Cannot have 2 or more sources for container %1%", c);
         // Pack all slices together.
         if (!pack_slices_together(alloc, container_state, copacking_constraints, action, false))
             return false;
@@ -1855,8 +1897,9 @@ bool ActionPhvConstraints::check_and_generate_constraints_for_move_with_unalloca
             // Can only have src2 as src1 is always the destination container itself
             if (!pack_slices_together(alloc, container_state, copacking_constraints, action, false))
                 return false;
-            LOG6("\t\t\t\t\tMust pack unallocated fields with allocated fields."
-                    " Setting source containers to 1.");
+            LOG6(
+                "\t\t\t\t\tMust pack unallocated fields with allocated fields."
+                " Setting source containers to 1.");
             if (!masks_valid(container_state, action)) {
                 LOG5("\t\t\t\tCannot synthesize deposit-field instruction.");
                 return false;
@@ -1875,13 +1918,12 @@ bool ActionPhvConstraints::check_and_generate_constraints_for_move_with_unalloca
 }
 
 bool ActionPhvConstraints::generate_conditional_constraints_for_bitwise_op(
-    const PHV::Allocation::MutuallyLiveSlices& container_state, const IR::MAU::Action* action,
-    const ordered_set<PHV::FieldSlice>& sources,
-    PackingConstraints* copacking_constraints) const {
+    const PHV::Allocation::MutuallyLiveSlices &container_state, const IR::MAU::Action *action,
+    const ordered_set<PHV::FieldSlice> &sources, PackingConstraints *copacking_constraints) const {
     if (sources.size() == 0) return true;
     bool firstSliceProcessed = false;
     bool destSameAsSource = false;
-    for (auto& slice : container_state) {
+    for (auto &slice : container_state) {
         PHV::FieldSlice sl(slice.field(), slice.field_slice());
         bool sameAsSource = sources.count(sl);
         if (!firstSliceProcessed) {
@@ -1902,9 +1944,9 @@ bool ActionPhvConstraints::generate_conditional_constraints_for_bitwise_op(
     }
     if (copacking_constraints == nullptr) return true;
     LOG6("\t\t\t\t\tPrinting source set for bitwise operation");
-    for (auto& slice : sources) {
+    for (auto &slice : sources) {
         LOG6("\t\t\t\t\t  " << slice);
-        for (auto& slice1 : sources) {
+        for (auto &slice1 : sources) {
             if (slice == slice1) continue;
             LOG6("\t\t\t\t\t\tInserting " << slice1 << " into copacking_constraints for " << slice);
             copacking_constraints->at(action).makeUnion(slice, slice1);
@@ -1914,45 +1956,44 @@ bool ActionPhvConstraints::generate_conditional_constraints_for_bitwise_op(
 }
 
 bool ActionPhvConstraints::check_and_generate_constraints_for_bitwise_op_with_unallocated_sources(
-    const IR::MAU::Action* action, const PHV::Allocation::MutuallyLiveSlices& container_state,
-    const NumContainers& sources, PackingConstraints* copacking_constraints) const {
+    const IR::MAU::Action *action, const PHV::Allocation::MutuallyLiveSlices &container_state,
+    const NumContainers &sources, PackingConstraints *copacking_constraints) const {
     // No unallocated sources, so no need to generate any conditional constraints.
     bool rv = true;
     if (sources.num_unallocated == 0) return rv;
     ordered_set<PHV::FieldSlice> source1;
     ordered_set<PHV::FieldSlice> source2;
-    for (auto& slice : container_state) {
+    for (auto &slice : container_state) {
         // Get all the sources for a given slice in this action.
         auto sourceSlices = constraint_tracker.sources(slice, action);
         unsigned operandNumber = 0;
         for (auto operand : sourceSlices) {
             // Depending on whether this is the first set or the second set, choose the appropriate
             // set.
-            ordered_set<PHV::FieldSlice>* copacking_set = (operandNumber == 0) ? &source1 :
-                &source2;
+            ordered_set<PHV::FieldSlice> *copacking_set =
+                (operandNumber == 0) ? &source1 : &source2;
             ++operandNumber;
             if (operand.ad || operand.constant) continue;
-            const PHV::Field* fieldRead = operand.phv_used->field();
+            const PHV::Field *fieldRead = operand.phv_used->field();
             le_bitrange rangeRead = operand.phv_used->range();
             copacking_set->insert(PHV::FieldSlice(fieldRead, rangeRead));
         }
     }
     rv &= generate_conditional_constraints_for_bitwise_op(container_state, action, source1,
-            copacking_constraints);
+                                                          copacking_constraints);
     rv &= generate_conditional_constraints_for_bitwise_op(container_state, action, source2,
-            copacking_constraints);
+                                                          copacking_constraints);
     return rv;
 }
 
 PHV::Allocation::MutuallyLiveSlices make_mutually_live_slices(
-    const std::vector<PHV::AllocSlice>& slices,
-    const PHV::Allocation::MutuallyLiveSlices& original_container_state) {
-
+    const std::vector<PHV::AllocSlice> &slices,
+    const PHV::Allocation::MutuallyLiveSlices &original_container_state) {
     PHV::Allocation::MutuallyLiveSlices container_state;
-    LOG4("\t\tOriginal existing container state: " <<
-         (original_container_state.size() ? "" : "{}"));
-    for (const auto& slice : original_container_state) {
-        const auto IsDisjoint = [&](const PHV::AllocSlice& alloc_slice) {
+    LOG4(
+        "\t\tOriginal existing container state: " << (original_container_state.size() ? "" : "{}"));
+    for (const auto &slice : original_container_state) {
+        const auto IsDisjoint = [&](const PHV::AllocSlice &alloc_slice) {
             return slice.isLiveRangeDisjoint(alloc_slice);
         };
         LOG4("\t\t\t" << slice);
@@ -1968,14 +2009,14 @@ PHV::Allocation::MutuallyLiveSlices make_mutually_live_slices(
 }
 
 bool ActionPhvConstraints::check_speciality_read_and_bitmask(
-        const PHV::Allocation::MutuallyLiveSlices& container_state,
-        const PHV::Allocation::LiveRangeShrinkingMap& initActions) const {
-    const auto WriteFromSpeciality = [&](const PHV::AllocSlice& slice) {
+    const PHV::Allocation::MutuallyLiveSlices &container_state,
+    const PHV::Allocation::LiveRangeShrinkingMap &initActions) const {
+    const auto WriteFromSpeciality = [&](const PHV::AllocSlice &slice) {
         return special_no_pack.count(slice.field());
     };
     if (std::any_of(container_state.begin(), container_state.end(), WriteFromSpeciality)) {
         std::vector<PHV::AllocSlice> existingVector;
-        for (auto& sl : container_state) existingVector.push_back(sl);
+        for (auto &sl : container_state) existingVector.push_back(sl);
         if (count_bitmasked_set_instructions(existingVector, initActions) != 0) {
             return true;
         }
@@ -1984,29 +2025,29 @@ bool ActionPhvConstraints::check_speciality_read_and_bitmask(
 }
 
 PHV::ActionSet ActionPhvConstraints::make_writing_action_set(
-    const PHV::Allocation& alloc, const PHV::Allocation::MutuallyLiveSlices& container_state,
-    const PHV::Allocation::LiveRangeShrinkingMap& initActions) const {
+    const PHV::Allocation &alloc, const PHV::Allocation::MutuallyLiveSlices &container_state,
+    const PHV::Allocation::LiveRangeShrinkingMap &initActions) const {
     PHV::ActionSet set_of_actions;
-    for (const auto& slice : container_state) {
-        const auto& writing_actions = constraint_tracker.written_in(slice);
+    for (const auto &slice : container_state) {
+        const auto &writing_actions = constraint_tracker.written_in(slice);
         set_of_actions.insert(writing_actions.begin(), writing_actions.end());
         // Add metaInit actions of this candidate set.
         if (initActions.count(slice.field())) {
-            for (const auto* a : initActions.at(slice.field())) {
+            for (const auto *a : initActions.at(slice.field())) {
                 set_of_actions.insert(a);
             }
         }
         // add darkInit actions of this candidate set and previously allocated slices.
-        const auto& dark_prim = slice.getInitPrimitive();
+        const auto &dark_prim = slice.getInitPrimitive();
         if (!dark_prim.isAlwaysRunActionPrim()) {
-            for (const auto* action : dark_prim.getInitPoints()) {
+            for (const auto *action : dark_prim.getInitPoints()) {
                 set_of_actions.insert(action);
             }
         }
         //// TODO: not sure whether the two below were duplicated, keep them
         //// both here to be defensive.
         // add metaInit actions of this candidate set and previously allocated slices.
-        for (const auto* dark_init : slice.getInitPoints()) {
+        for (const auto *dark_init : slice.getInitPoints()) {
             set_of_actions.insert(dark_init);
         }
         // add metaInit actions added before this allocation.
@@ -2019,14 +2060,12 @@ PHV::ActionSet ActionPhvConstraints::make_writing_action_set(
 
 /// generate action container properties for @p actions.
 ActionPhvConstraints::ActionPropertyMap ActionPhvConstraints::make_action_container_properties(
-    const PHV::Allocation& alloc, const PHV::ActionSet& actions,
-    const PHV::Allocation::MutuallyLiveSlices& container_state,
-    const PHV::Allocation::LiveRangeShrinkingMap& initActions,
-    bool is_mocha_or_dark) const {
-    ordered_map<const IR::MAU::Action*, ActionPhvConstraints::ActionContainerProperty> rst;
-    for (const auto* action : actions) {
-        NumContainers sources =
-            num_container_sources(alloc, container_state, action);
+    const PHV::Allocation &alloc, const PHV::ActionSet &actions,
+    const PHV::Allocation::MutuallyLiveSlices &container_state,
+    const PHV::Allocation::LiveRangeShrinkingMap &initActions, bool is_mocha_or_dark) const {
+    ordered_map<const IR::MAU::Action *, ActionPhvConstraints::ActionContainerProperty> rst;
+    for (const auto *action : actions) {
+        NumContainers sources = num_container_sources(alloc, container_state, action);
 
         ActionContainerProperty prop;
         prop.op_type = container_operation_type(action, container_state, initActions);
@@ -2042,11 +2081,11 @@ ActionPhvConstraints::ActionPropertyMap ActionPhvConstraints::make_action_contai
 }
 
 ActionPhvConstraints::PackingConstraints ActionPhvConstraints::make_initial_copack_constraints(
-    const PHV::ActionSet& actions,
-    const PHV::Allocation::MutuallyLiveSlices& container_state) const {
+    const PHV::ActionSet &actions,
+    const PHV::Allocation::MutuallyLiveSlices &container_state) const {
     ActionPhvConstraints::PackingConstraints packing_constraints;
-    for (const auto* action : actions) {
-        for (const auto& slice : container_state) {
+    for (const auto *action : actions) {
+        for (const auto &slice : container_state) {
             auto reads = constraint_tracker.sources(slice, action);
             for (auto operand : reads) {
                 if (operand.ad || operand.constant || !operand.phv_used) {
@@ -2055,7 +2094,7 @@ ActionPhvConstraints::PackingConstraints ActionPhvConstraints::make_initial_copa
                 }
 
                 // update copacking constraint
-                const PHV::FieldSlice& source = *(operand.phv_used);
+                const PHV::FieldSlice &source = *(operand.phv_used);
                 if (!packing_constraints[action].contains(source)) {
                     LOG5("\t\t\t\t\tInserting "
                          << source << " into copacking_constraints for action " << action->name);
@@ -2068,20 +2107,19 @@ ActionPhvConstraints::PackingConstraints ActionPhvConstraints::make_initial_copa
 }
 
 CanPackErrorV2 ActionPhvConstraints::check_bitwise_and_basic_move_constraints(
-    const PHV::ActionSet& actions,
-    const PHV::Allocation::MutuallyLiveSlices& container_state,
-    const ActionPropertyMap* action_props) const {
-    for (const auto* action : actions) {
+    const PHV::ActionSet &actions, const PHV::Allocation::MutuallyLiveSlices &container_state,
+    const ActionPropertyMap *action_props) const {
+    for (const auto *action : actions) {
         LOG5("\t\t\tNeed to check container sources now for action " << action->name);
         const int stage = *stages(action, container_state.front().isPhysicalStageBased()).begin();
         PHV::Allocation::MutuallyLiveSlices container_state_of_action;
-        for (const auto& slice : container_state) {
+        for (const auto &slice : container_state) {
             if (slice.isLiveAt(stage, PHV::FieldUse(PHV::FieldUse::WRITE))) {
                 container_state_of_action.insert(slice);
             }
         }
-        auto& prop = action_props->at(action);
-        const auto& op_type = prop.op_type;
+        auto &prop = action_props->at(action);
+        const auto &op_type = prop.op_type;
         if (op_type == OperandInfo::WHOLE_CONTAINER || op_type == OperandInfo::MIXED)
             return {CanPackErrorCode::MIXED_OPERAND,
                     "mixed operation type in action " + action->externalName()};
@@ -2145,7 +2183,7 @@ CanPackErrorV2 ActionPhvConstraints::check_bitwise_and_basic_move_constraints(
             // single slice in the proposed packing has already been written by the same bitwise
             // operation (for this action).
             if (!check_and_generate_constraints_for_bitwise_op_with_unallocated_sources(
-                        action, container_state, prop.sources, nullptr))
+                    action, container_state, prop.sources, nullptr))
                 return CanPackErrorV2{CanPackErrorCode::BITWISE_AND_UNALLOCATED_SOURCE};
         } else if (op_type != OperandInfo::WHOLE_CONTAINER_SAME_FIELD &&
                    op_type != OperandInfo::PART_OF_CONTAINER) {
@@ -2156,29 +2194,29 @@ CanPackErrorV2 ActionPhvConstraints::check_bitwise_and_basic_move_constraints(
 }
 
 CanPackErrorCode ActionPhvConstraints::check_and_generate_constraints_for_bitwise_or_move(
-    const PHV::Allocation& alloc, const PHV::ActionSet& actions,
-    const PHV::Allocation::MutuallyLiveSlices& container_state, const PHV::Container& c,
-    const PHV::Allocation::LiveRangeShrinkingMap& initActions, ActionPropertyMap* action_props,
-    PackingConstraints* copack_constraints) const {
+    const PHV::Allocation &alloc, const PHV::ActionSet &actions,
+    const PHV::Allocation::MutuallyLiveSlices &container_state, const PHV::Container &c,
+    const PHV::Allocation::LiveRangeShrinkingMap &initActions, ActionPropertyMap *action_props,
+    PackingConstraints *copack_constraints) const {
     if (LOGGING(5)) {
         std::stringstream ss;
         ss << "\t\t\tMust check " << actions.size() << " actions: ";
-        for (auto* act : actions) ss << act->name << " ";
+        for (auto *act : actions) ss << act->name << " ";
         LOG5(ss.str());
     }
 
     const bool mocha_or_dark = c.is(PHV::Kind::dark) || c.is(PHV::Kind::mocha);
-    for (const auto* action : actions) {
+    for (const auto *action : actions) {
         LOG5("\t\t\tNeed to check container sources now for action " << action->name);
         const int stage = *stages(action, container_state.front().isPhysicalStageBased()).begin();
         PHV::Allocation::MutuallyLiveSlices container_state_of_action;
-        for (const auto& slice : container_state) {
+        for (const auto &slice : container_state) {
             if (slice.isLiveAt(stage, PHV::FieldUse(PHV::FieldUse::WRITE))) {
                 container_state_of_action.insert(slice);
             }
         }
-        auto& prop = action_props->at(action);
-        const auto& op_type = prop.op_type;
+        auto &prop = action_props->at(action);
+        const auto &op_type = prop.op_type;
         if (op_type == OperandInfo::WHOLE_CONTAINER || op_type == OperandInfo::MIXED)
             return CanPackErrorCode::MIXED_OPERAND;
 
@@ -2218,8 +2256,7 @@ CanPackErrorCode ActionPhvConstraints::check_and_generate_constraints_for_bitwis
         // in every action that writes one of those fields.
         if (mocha_or_dark) {
             // Only one container source for dark/mocha.
-            if (prop.sources.num_allocated > 1)
-                return CanPackErrorCode::TF2_MORE_THAN_ONE_SOURCE;
+            if (prop.sources.num_allocated > 1) return CanPackErrorCode::TF2_MORE_THAN_ONE_SOURCE;
             if (!all_field_slices_written_together(container_state, actions, initActions))
                 return CanPackErrorCode::TF2_ALL_WRITTEN_TOGETHER;
         }
@@ -2256,8 +2293,8 @@ CanPackErrorCode ActionPhvConstraints::check_and_generate_constraints_for_bitwis
             if (!check_and_generate_constraints_for_bitwise_op_with_unallocated_sources(
                     action, container_state, prop.sources, copack_constraints))
                 return CanPackErrorCode::BITWISE_AND_UNALLOCATED_SOURCE;
-        } else if (op_type != OperandInfo::WHOLE_CONTAINER_SAME_FIELD
-                   && op_type != OperandInfo::PART_OF_CONTAINER) {
+        } else if (op_type != OperandInfo::WHOLE_CONTAINER_SAME_FIELD &&
+                   op_type != OperandInfo::PART_OF_CONTAINER) {
             BUG("Operation type other than BITWISE and MOVE encountered.");
         }
     }
@@ -2265,16 +2302,13 @@ CanPackErrorCode ActionPhvConstraints::check_and_generate_constraints_for_bitwis
 }
 
 CanPackErrorCode ActionPhvConstraints::check_and_generate_rotational_alignment_constraints(
-    const PHV::Allocation& alloc,
-    const std::vector<PHV::AllocSlice>& slices,
-    const PHV::ActionSet& actions,
-    const PHV::Allocation::MutuallyLiveSlices& container_state,
-    const PHV::Container& c,
-    ActionPropertyMap* action_props) const {
+    const PHV::Allocation &alloc, const std::vector<PHV::AllocSlice> &slices,
+    const PHV::ActionSet &actions, const PHV::Allocation::MutuallyLiveSlices &container_state,
+    const PHV::Container &c, ActionPropertyMap *action_props) const {
     const bool mocha_or_dark = c.is(PHV::Kind::dark) || c.is(PHV::Kind::mocha);
-    for (const auto& action : actions) {
+    for (const auto &action : actions) {
         const int stage = *stages(action, container_state.front().isPhysicalStageBased()).begin();
-        auto& prop = action_props->at(action);
+        auto &prop = action_props->at(action);
         LOG5("\t\t\tphvMustBeAligned: " << prop.must_be_aligned << " numSourceContainers: "
                                         << prop.num_sources << " action: " << action->name);
 
@@ -2287,7 +2321,7 @@ CanPackErrorCode ActionPhvConstraints::check_and_generate_rotational_alignment_c
                     // If all fields are adjacent slices of the same field, check if all the
                     // sources are adjacent slices of the same field as well
                     ordered_set<PHV::AllocSlice> sources;
-                    for (const auto& slice : container_state) {
+                    for (const auto &slice : container_state) {
                         std::optional<PHV::AllocSlice> source =
                             getSourcePHVSlice(alloc, slices, slice, action, stage);
                         if (!source) continue;
@@ -2300,7 +2334,7 @@ CanPackErrorCode ActionPhvConstraints::check_and_generate_rotational_alignment_c
                 }
                 bool firstSlice = true;
                 int firstOffset = 0;
-                for (const auto& slice : container_state) {
+                for (const auto &slice : container_state) {
                     std::optional<PHV::AllocSlice> source =
                         getSourcePHVSlice(alloc, slices, slice, action, stage);
                     if (!source) continue;
@@ -2328,7 +2362,7 @@ CanPackErrorCode ActionPhvConstraints::check_and_generate_rotational_alignment_c
         prop.aligned_unallocated_requires_aligment = false;
         if (prop.num_sources == 1) {
             // The single phv source must be aligned
-            for (const auto& slice : container_state) {
+            for (const auto &slice : container_state) {
                 LOG5("\t\t\t\tslice: " << slice);
                 std::optional<PHV::AllocSlice> source =
                     getSourcePHVSlice(alloc, slices, slice, action, stage);
@@ -2358,14 +2392,12 @@ CanPackErrorCode ActionPhvConstraints::check_and_generate_rotational_alignment_c
             // the same container as its destination (unless it's the same field).
             std::optional<ClassifiedSources> classifiedSources =
                 verify_two_container_alignment(alloc, container_state, action, c, &prop);
-            if (!classifiedSources)
-                return CanPackErrorCode::PACK_AND_ALIGNED;
+            if (!classifiedSources) return CanPackErrorCode::PACK_AND_ALIGNED;
             if (LOGGING(5)) {
                 LOG5("\t\t\t\tFirst container source: " << classifiedSources.value()[0]);
                 LOG5("\t\t\t\tSecond container source: " << classifiedSources.value()[1]);
             }
-            if (!masks_valid(classifiedSources.value()))
-                return CanPackErrorCode::INVALID_MASK;
+            if (!masks_valid(classifiedSources.value())) return CanPackErrorCode::INVALID_MASK;
             if (prop.num_unallocated == 2) {
                 prop.aligned_two_unallocated = true;
             } else if (prop.num_unallocated == 1) {
@@ -2378,17 +2410,15 @@ CanPackErrorCode ActionPhvConstraints::check_and_generate_rotational_alignment_c
 }
 
 CanPackErrorCode ActionPhvConstraints::check_and_generate_copack_set(
-    const PHV::Allocation& alloc,
-    const PHV::Allocation::MutuallyLiveSlices& container_state,
-    const PackingConstraints& copack_constraints,
-    const ActionPropertyMap& action_props,
-    ordered_map<int, ordered_set<PHV::FieldSlice>>* copacking_set,
-    ordered_map<PHV::FieldSlice, PHV::Container>* req_container) const {
+    const PHV::Allocation &alloc, const PHV::Allocation::MutuallyLiveSlices &container_state,
+    const PackingConstraints &copack_constraints, const ActionPropertyMap &action_props,
+    ordered_map<int, ordered_set<PHV::FieldSlice>> *copacking_set,
+    ordered_map<PHV::FieldSlice, PHV::Container> *req_container) const {
     int setIndex = 0;
-    for (const auto& kv : copack_constraints) {
+    for (const auto &kv : copack_constraints) {
         LOG5("\t\t\t  Enforcing copacking constraint for action " << kv.first->name);
-        const auto& prop = action_props.at(kv.first);
-        for (auto& set : kv.second) {
+        const auto &prop = action_props.at(kv.first);
+        for (auto &set : kv.second) {
             // Need to enforce alignment constraints when we have one unallocated PHV source and
             // action data writing to the container in the same action.
             if (set.size() < 2 && (prop.num_sources == 2 || !prop.aligned_one_unallocated))
@@ -2409,12 +2439,12 @@ CanPackErrorCode ActionPhvConstraints::check_and_generate_copack_set(
 
     // If copacking_constraints has exactly two unallocated PHV source slices, force the smaller
     // slice to be aligned with its destination.
-    for (const auto& kv : copack_constraints) {
-        const auto& prop = action_props.at(kv.first);
+    for (const auto &kv : copack_constraints) {
+        const auto &prop = action_props.at(kv.first);
         if (prop.aligned_two_unallocated) {
             LOG5("Detected two unallocated PHV sources for action " << kv.first->name);
             ordered_set<PHV::FieldSlice> field_slices_in_current_container;
-            for (auto& sl : container_state) {
+            for (auto &sl : container_state) {
                 field_slices_in_current_container.insert(
                     PHV::FieldSlice(sl.field(), sl.field_slice()));
                 LOG5("\t\t\t\tAdding " << sl << " to field slices in current container");
@@ -2423,7 +2453,7 @@ CanPackErrorCode ActionPhvConstraints::check_and_generate_copack_set(
                 get_smaller_source_slice(alloc, kv.second, field_slices_in_current_container);
             if (alignedSlice) {
                 bool foundAlignmentConstraint = false;
-                for (auto& set : kv.second) {
+                for (auto &set : kv.second) {
                     if (set.size() > 1 && set.count(*alignedSlice)) {
                         foundAlignmentConstraint = true;
                         LOG5("\t\t\t\t  Alignment constraint already found on smaller slice: "
@@ -2441,7 +2471,7 @@ CanPackErrorCode ActionPhvConstraints::check_and_generate_copack_set(
         } else if (prop.num_sources == 2 && prop.aligned_one_unallocated) {
             LOG5("\t\t\t\tNeed to handle the case here.");
             ordered_set<PHV::FieldSlice> field_slices_in_current_container;
-            for (auto& sl : container_state) {
+            for (auto &sl : container_state) {
                 field_slices_in_current_container.insert(
                     PHV::FieldSlice(sl.field(), sl.field_slice()));
                 LOG5("\t\t\t\tAdding " << sl << " to field slices in current container");
@@ -2465,11 +2495,11 @@ CanPackErrorCode ActionPhvConstraints::check_and_generate_copack_set(
 }
 
 CanPackReturnType ActionPhvConstraints::check_and_generate_conditional_constraints(
-    const PHV::Allocation& alloc, const std::vector<PHV::AllocSlice>& slices,
+    const PHV::Allocation &alloc, const std::vector<PHV::AllocSlice> &slices,
     // const ordered_set<const IR::MAU::Action*>& actions,
-    const PHV::Allocation::MutuallyLiveSlices& container_state,
-    const ordered_map<int, ordered_set<PHV::FieldSlice>>& copacking_set,
-    const ordered_map<PHV::FieldSlice, PHV::Container>& req_container) const {
+    const PHV::Allocation::MutuallyLiveSlices &container_state,
+    const ordered_map<int, ordered_set<PHV::FieldSlice>> &copacking_set,
+    const ordered_map<PHV::FieldSlice, PHV::Container> &req_container) const {
     PHV::Allocation::ConditionalConstraints rv;
     // Find the right alignment for each slice in the copacking constraints.
     for (auto kv_unallocated : copacking_set) {
@@ -2478,9 +2508,9 @@ CanPackReturnType ActionPhvConstraints::check_and_generate_conditional_constrain
         // overlaps based on required alignment, return std::nullopt.
         ordered_map<const PHV::FieldSlice, le_bitrange> placements;
 
-        for (auto& packing_slice : kv_unallocated.second) {
+        for (auto &packing_slice : kv_unallocated.second) {
             ordered_set<int> req_alignment;
-            for (auto& slice : container_state) {
+            for (auto &slice : container_state) {
                 auto sources = constraint_tracker.source_alignment(slice, packing_slice);
                 req_alignment |= sources;
             }
@@ -2514,7 +2544,7 @@ CanPackReturnType ActionPhvConstraints::check_and_generate_conditional_constrain
 
             // Check that no other slices are also required to be at this bit
             // position, unless they're mutually exclusive and can be overlaid.
-            for (auto& kv : placements) {
+            for (auto &kv : placements) {
                 bool isMutex = phv.field_mutex()(kv.first.field()->id, packing_slice.field()->id);
                 if (kv.second.overlaps(StartLen(bitPosition, packing_slice.size())) && !isMutex) {
                     LOG5("\t\t\tPacking failed because " << packing_slice << " and " << kv.first
@@ -2540,7 +2570,7 @@ CanPackReturnType ActionPhvConstraints::check_and_generate_conditional_constrain
             // Set the required bit position.
             if (req_container.count(packing_slice))
                 per_unallocated_source[packing_slice] = PHV::Allocation::ConditionalConstraintData(
-                        bitPosition, req_container.at(packing_slice));
+                    bitPosition, req_container.at(packing_slice));
             else
                 per_unallocated_source[packing_slice] =
                     PHV::Allocation::ConditionalConstraintData(bitPosition);
@@ -2552,7 +2582,7 @@ CanPackReturnType ActionPhvConstraints::check_and_generate_conditional_constrain
         for (auto kv1 : rv) {
             if (kv1.second.size() != per_unallocated_source.size()) continue;
             bool individualConditionMatch = true;
-            for (auto& kv2 : per_unallocated_source) {
+            for (auto &kv2 : per_unallocated_source) {
                 // If slice not found, then this conditional source does not match.
                 individualConditionMatch =
                     kv1.second.count(kv2.first) && (kv1.second.at(kv2.first) == kv2.second);
@@ -2567,10 +2597,9 @@ CanPackReturnType ActionPhvConstraints::check_and_generate_conditional_constrain
 }
 
 CanPackReturnType ActionPhvConstraints::can_pack(
-        const PHV::Allocation& alloc,
-        const std::vector<PHV::AllocSlice>& slices,
-        const PHV::Allocation::MutuallyLiveSlices& original_container_state,
-        const PHV::Allocation::LiveRangeShrinkingMap& initActions) const {
+    const PHV::Allocation &alloc, const std::vector<PHV::AllocSlice> &slices,
+    const PHV::Allocation::MutuallyLiveSlices &original_container_state,
+    const PHV::Allocation::LiveRangeShrinkingMap &initActions) const {
     // Allocating zero slices always succeeds...
     if (slices.size() == 0)
         return std::make_tuple(CanPackErrorCode::NO_ERROR,
@@ -2591,7 +2620,7 @@ CanPackReturnType ActionPhvConstraints::can_pack(
     auto container_state = make_mutually_live_slices(slices, original_container_state);
     if (LOGGING(4)) {
         LOG4("\t\tChecking whether field slice(s) ");
-        for (const auto& slice : slices)
+        for (const auto &slice : slices)
             LOG4("\t\t\t" << slice.field()->name << " (" << slice.width() << "b)");
         LOG4("\t\tcan be packed into container " << container_state << " already containing "
                                                  << container_state.size() << " slices");
@@ -2603,7 +2632,7 @@ CanPackReturnType ActionPhvConstraints::can_pack(
         return std::make_tuple(CanPackErrorCode::PACK_CONSTRAINT_PRESENT, std::nullopt);
 
     // Create candidate packing
-    for (const auto& slice : slices) {
+    for (const auto &slice : slices) {
         container_state.insert(slice);
     }
 
@@ -2647,30 +2676,29 @@ CanPackReturnType ActionPhvConstraints::can_pack(
 
     // TODO: we use solver to check move-based actions as a safe net to ensure
     // we don't create invalid packing.
-    auto ara_move_err = check_ara_move_constraints(
-            alloc, container_state, c, initActions);
+    auto ara_move_err = check_ara_move_constraints(alloc, container_state, c, initActions);
     if (ara_move_err != CanPackErrorCode::NO_ERROR) {
         return std::make_tuple(ara_move_err, std::nullopt);
     }
-    for (const auto* action : actions) {
+    for (const auto *action : actions) {
         if (action_props.at(action).op_type != OperandInfo::MOVE) {
             LOG3("skip non-move action on container " << c << ": " << action->name);
             continue;
         }
-        auto move_err = check_move_constraints(
-                alloc, action, slices, container_state, c, initActions);
+        auto move_err =
+            check_move_constraints(alloc, action, slices, container_state, c, initActions);
         if (!move_err.ok()) {
             return std::make_tuple(move_err.code, std::nullopt);
         }
         if (!mocha_or_dark && move_err.remove_align_req) {
-            auto& prop = action_props.at(action);
+            auto &prop = action_props.at(action);
             if ((prop.sources.num_allocated == 2) ||
                 (prop.sources.double_unallocated && prop.sources.num_unallocated == 2)) {
                 prop.must_be_aligned = false;
                 LOG5("REMOVING must_be_aligned for action " << action->name);
-                LOG5("\tnum_alloc: " << prop.sources.num_allocated << " double_unalloc: " <<
-                     prop.sources.double_unallocated << " num_unalloc: " <<
-                     prop.sources.num_unallocated);
+                LOG5("\tnum_alloc: " << prop.sources.num_allocated
+                                     << " double_unalloc: " << prop.sources.double_unallocated
+                                     << " num_unalloc: " << prop.sources.num_unallocated);
             }
         }
     }
@@ -2682,8 +2710,8 @@ CanPackReturnType ActionPhvConstraints::can_pack(
 
     // depending on ^check_and_generate_constraints_for_bitwise_or_move.
     LOG5("\t\t\tChecking rotational alignment");
-    err = check_and_generate_rotational_alignment_constraints(
-            alloc, slices, actions, container_state, c, &action_props);
+    err = check_and_generate_rotational_alignment_constraints(alloc, slices, actions,
+                                                              container_state, c, &action_props);
     if (err != CanPackErrorCode::NO_ERROR) {
         return std::make_tuple(err, std::nullopt);
     }
@@ -2718,20 +2746,18 @@ CanPackReturnType ActionPhvConstraints::can_pack(
         for (auto kv : copacking_set) {
             std::stringstream ss;
             ss << "\t\t\t  " << kv.first << " : ";
-            for (auto field_slice : kv.second)
-                ss << kv.second << " ";
+            for (auto field_slice : kv.second) ss << kv.second << " ";
             LOG5(ss.str());
         }
     }
 
     // final check and generate conditional constraints;
-    return check_and_generate_conditional_constraints(
-            alloc, slices, container_state, copacking_set, req_container);
+    return check_and_generate_conditional_constraints(alloc, slices, container_state, copacking_set,
+                                                      req_container);
 }
 
 CanPackErrorV2 ActionPhvConstraints::can_pack_v2(
-        const PHV::Allocation& alloc,
-        const std::vector<PHV::AllocSlice>& candidates) const {
+    const PHV::Allocation &alloc, const std::vector<PHV::AllocSlice> &candidates) const {
     Log::TempIndent indent;
     LOG5("Can pack v2 with " << candidates.size() << " candidates " << indent);
 
@@ -2749,8 +2775,7 @@ CanPackErrorV2 ActionPhvConstraints::can_pack_v2(
 
     if (LOGGING(6)) constraint_tracker.print_field_ordering(candidates);
 
-    ordered_set<PHV::AllocSlice> container_state =
-        alloc.liverange_overlapped_slices(c, candidates);
+    ordered_set<PHV::AllocSlice> container_state = alloc.liverange_overlapped_slices(c, candidates);
 
     // Check if table placement induced any no pack constraints on fields that are candidates for
     // packing. If yes, packing not possible.
@@ -2759,7 +2784,7 @@ CanPackErrorV2 ActionPhvConstraints::can_pack_v2(
     LOG6("No pack conflicts present");
 
     // Create after-allocation container state.
-    for (const auto& sl : candidates) {
+    for (const auto &sl : candidates) {
         container_state.insert(sl);
     }
 
@@ -2782,19 +2807,17 @@ CanPackErrorV2 ActionPhvConstraints::can_pack_v2(
 
     // xxx(Deep): This function checks if any field that gets its value from METER_ALU, HASH_DIST,
     // RANDOM, or METER_COLOR is being packed with other fields written in the same action.
-    if (!check_speciality_packing(container_state))
-        return {CanPackErrorCode::SPECIALTY_DATA};
+    if (!check_speciality_packing(container_state)) return {CanPackErrorCode::SPECIALTY_DATA};
     LOG6("No packing violated for speciality data");
 
     const bool mocha_or_dark = c.is(PHV::Kind::dark) || c.is(PHV::Kind::mocha);
     const auto actions = make_writing_action_set(alloc, container_state, {});
-    auto action_props = make_action_container_properties(
-            alloc, actions, container_state, {}, mocha_or_dark);
+    auto action_props =
+        make_action_container_properties(alloc, actions, container_state, {}, mocha_or_dark);
 
     // check basic constraints of bitwise and move.
     CanPackErrorV2 err =
-        check_bitwise_and_basic_move_constraints(
-                actions, container_state, &action_props);
+        check_bitwise_and_basic_move_constraints(actions, container_state, &action_props);
     if (!err.ok()) {
         return err;
     }
@@ -2802,13 +2825,12 @@ CanPackErrorV2 ActionPhvConstraints::can_pack_v2(
 
     // we use solver to check move-based actions as a safe net to ensure
     // we don't create invalid packing.
-    for (const auto* action : actions) {
+    for (const auto *action : actions) {
         if (action_props.at(action).op_type != OperandInfo::MOVE) {
             LOG3("skip non-move action on container " << c << ": " << action->name);
             continue;
         }
-        auto move_err = check_move_constraints(
-                alloc, action, candidates, container_state, c, {});
+        auto move_err = check_move_constraints(alloc, action, candidates, container_state, c, {});
         if (!move_err.ok()) {
             std::stringstream ss;
             ss << "In action " << action->externalName()
@@ -2830,26 +2852,24 @@ CanPackErrorV2 ActionPhvConstraints::can_pack_v2(
     return CanPackErrorV2{CanPackErrorCode::NO_ERROR};
 }
 
-
 bool ActionPhvConstraints::creates_container_conflicts(
-        const PHV::Allocation::MutuallyLiveSlices& container_state,
-        const PHV::Allocation::LiveRangeShrinkingMap& initActions,
-        const MapTablesToActions& tableActionsMap) const {
+    const PHV::Allocation::MutuallyLiveSlices &container_state,
+    const PHV::Allocation::LiveRangeShrinkingMap &initActions,
+    const MapTablesToActions &tableActionsMap) const {
     if (container_state.size() == 0) return false;
     LOG5("\tPrinting container conflicts candidates");
-    for (auto& slice : container_state)
-        LOG5("\t  " << slice);
-    ordered_map<const PHV::Field*, ordered_set<const IR::MAU::Table*>> field_to_table_writes;
+    for (auto &slice : container_state) LOG5("\t  " << slice);
+    ordered_map<const PHV::Field *, ordered_set<const IR::MAU::Table *>> field_to_table_writes;
     for (auto kv : initActions) {
-        for (auto* action : kv.second) {
+        for (auto *action : kv.second) {
             auto t = tableActionsMap.getTableForAction(action);
             BUG_CHECK(t, "Action %1% does not have a table associated with it.", action->name);
             field_to_table_writes[kv.first].insert(*t);
         }
     }
-    for (auto& slice : container_state) {
+    for (auto &slice : container_state) {
         auto actions = actions_writing_fields(slice);
-        for (const auto* action : actions) {
+        for (const auto *action : actions) {
             auto t = tableActionsMap.getTableForAction(action);
             BUG_CHECK(t, "Action %1% does not have a table associated with it.", action->name);
             field_to_table_writes[slice.field()].insert(*t);
@@ -2860,8 +2880,7 @@ bool ActionPhvConstraints::creates_container_conflicts(
         for (auto kv : field_to_table_writes) {
             std::stringstream ss;
             ss << "\t" << kv.first->name << " : ";
-            for (const auto* t : kv.second)
-                ss << t->name << " ";
+            for (const auto *t : kv.second) ss << t->name << " ";
             LOG6(ss.str());
         }
     }
@@ -2871,29 +2890,34 @@ bool ActionPhvConstraints::creates_container_conflicts(
             // If the same field, ignore.
             if (kv.first == kv1.first) continue;
             // If different fields, check their tables.
-            for (const auto* t1 : kv.second) {
-                for (const auto* t2 : kv1.second) {
+            for (const auto *t1 : kv.second) {
+                for (const auto *t2 : kv1.second) {
                     if (conflicts.writtenInSameStageDifferentTable(t1, t2)) {
-                        LOG5("\t\t  Fields " << kv.first->name << " and " << kv1.first->name <<
-                             " are written in different tables in the same stage: "
-                             << t1->name << " and " << t2->name << std::endl << "\t\t  " <<
-                             "This would produce container conflicts.");
-                        return true; } } } } }
+                        LOG5("\t\t  Fields "
+                             << kv.first->name << " and " << kv1.first->name
+                             << " are written in different tables in the same stage: " << t1->name
+                             << " and " << t2->name << std::endl
+                             << "\t\t  " << "This would produce container conflicts.");
+                        return true;
+                    }
+                }
+            }
+        }
+    }
 
     return false;
 }
 
 std::optional<PHV::FieldSlice> ActionPhvConstraints::get_unallocated_slice(
-        const PHV::Allocation& alloc,
-        const UnionFind<PHV::FieldSlice>& copacking_constraints,
-        const ordered_set<PHV::FieldSlice>& container_state) const {
+    const PHV::Allocation &alloc, const UnionFind<PHV::FieldSlice> &copacking_constraints,
+    const ordered_set<PHV::FieldSlice> &container_state) const {
     // Get unallocated sources, excluding both allocated sources as well as slices that are being
     // packed in the container_State. Since those slices are in the contianer_state, they must be
     // assumed to be allocated already.
     ordered_set<PHV::FieldSlice> unallocatedSlices;
     LOG5("\t\t\t\tGathering unallocated source for this container:");
-    for (auto& set : copacking_constraints) {
-        for (auto& sl : set) {
+    for (auto &set : copacking_constraints) {
+        for (auto &sl : set) {
             if (!container_state.count(sl) && alloc.slices(sl.field(), sl.range()).size() == 0) {
                 LOG5("\t\t\t\t\tAdding " << sl);
                 unallocatedSlices.insert(sl);
@@ -2901,66 +2925,69 @@ std::optional<PHV::FieldSlice> ActionPhvConstraints::get_unallocated_slice(
         }
     }
     if (unallocatedSlices.size() != 1) {
-        LOG5("\t\t\t\tFound more than one unallocated slice despite expecting only one such "
-             "slice.");
+        LOG5(
+            "\t\t\t\tFound more than one unallocated slice despite expecting only one such "
+            "slice.");
         return std::nullopt;
     }
     return (*(unallocatedSlices.begin()));
 }
 
 std::optional<PHV::FieldSlice> ActionPhvConstraints::get_smaller_source_slice(
-        const PHV::Allocation& alloc,
-        const UnionFind<PHV::FieldSlice>& copacking_constraints,
-        const ordered_set<PHV::FieldSlice>& container_state) const {
+    const PHV::Allocation &alloc, const UnionFind<PHV::FieldSlice> &copacking_constraints,
+    const ordered_set<PHV::FieldSlice> &container_state) const {
     // Get unallocated sources, excluding both allocated sources as well as slices that
     // are being packed in the container_state. Since those slices are in the container_state, they
     // are assumed to be allocated already.
     ordered_set<PHV::FieldSlice> twoUnallocatedSlices;
     LOG5("\t\t\t\tGathering unallocated sources for this container:");
-    for (auto& set : copacking_constraints) {
-        for (auto& sl : set) {
+    for (auto &set : copacking_constraints) {
+        for (auto &sl : set) {
             if (!container_state.count(sl) && alloc.slices(sl.field(), sl.range()).size() == 0) {
                 LOG5("\t\t\t\t\tAdding " << sl);
                 twoUnallocatedSlices.insert(sl);
             } else {
-                LOG5("\t\t\t\t\tIgnoring allocated slice " << sl); } } }
+                LOG5("\t\t\t\t\tIgnoring allocated slice " << sl);
+            }
+        }
+    }
 
     if (twoUnallocatedSlices.size() > 2) {
         // If we find more than two unallocated slices, return std::nullopt.
         LOG5("\t\t\t\tFound more than two unallocated slices.");
-        return std::nullopt; }
+        return std::nullopt;
+    }
 
     auto min = std::min_element(twoUnallocatedSlices.begin(), twoUnallocatedSlices.end(),
-            [&](const PHV::FieldSlice& sl1, const PHV::FieldSlice& sl2) {
-        return sl1.size() < sl2.size(); });
+                                [&](const PHV::FieldSlice &sl1, const PHV::FieldSlice &sl2) {
+                                    return sl1.size() < sl2.size();
+                                });
     if (min == twoUnallocatedSlices.end())
         return std::nullopt;
     else
         return *min;
 }
 
-bool ActionPhvConstraints::masks_valid(const ClassifiedSources& sources) const {
+bool ActionPhvConstraints::masks_valid(const ClassifiedSources &sources) const {
     const int source0_holes = count_container_holes(sources[0].slices);
     const int source1_holes = count_container_holes(sources[1].slices);
-    const int total_holes =  source1_holes + source0_holes;
+    const int total_holes = source1_holes + source0_holes;
     if (total_holes > 1) {
         LOG5("\t\t\t\tInvalid mask found: more than 1 holes");
         return false;
     }
-    if ((!sources[0].aligned && source0_holes > 0) ||
-        (!sources[1].aligned && source1_holes > 0)) {
+    if ((!sources[0].aligned && source0_holes > 0) || (!sources[1].aligned && source1_holes > 0)) {
         LOG5("\t\t\t\tInvalid mask found: non-aligned source with holes");
         return false;
     }
     return true;
 }
 
-bool ActionPhvConstraints::masks_valid(
-        const PHV::Allocation::MutuallyLiveSlices& container_state,
-        const IR::MAU::Action* action) const {
+bool ActionPhvConstraints::masks_valid(const PHV::Allocation::MutuallyLiveSlices &container_state,
+                                       const IR::MAU::Action *action) const {
     bitvec mask;
     int c_size = -1;
-    for (auto& slice : container_state) {
+    for (auto &slice : container_state) {
         if (c_size == -1) c_size = slice.container().size();
         if (constraint_tracker.is_written(slice, action))
             mask |= bitvec(slice.container_slice().lo, slice.width());
@@ -2976,34 +3003,30 @@ bool ActionPhvConstraints::masks_valid(
 }
 
 bool ActionPhvConstraints::masks_valid(
-        const PHV::Allocation::MutuallyLiveSlices& container_state,
-        const IR::MAU::Action* action,
-        bool actionDataOnly,
-        const PHV::Allocation::LiveRangeShrinkingMap& initActions) const {
+    const PHV::Allocation::MutuallyLiveSlices &container_state, const IR::MAU::Action *action,
+    bool actionDataOnly, const PHV::Allocation::LiveRangeShrinkingMap &initActions) const {
     bitvec actionDataConstantMask;
-    for (const auto& slice : container_state) {
-        if (actionDataOnly && has_ad_or_constant_sources({ slice }, action, initActions)) {
-            LOG5("\t\t\t\t  Action data constant mask for " << slice << " : " <<
-                    slice.container_slice().lo << ", " << slice.width());
+    for (const auto &slice : container_state) {
+        if (actionDataOnly && has_ad_or_constant_sources({slice}, action, initActions)) {
+            LOG5("\t\t\t\t  Action data constant mask for "
+                 << slice << " : " << slice.container_slice().lo << ", " << slice.width());
             actionDataConstantMask |= bitvec(slice.container_slice().lo, slice.width());
         }
         if (!actionDataOnly) {
-            LOG5("\t\t\t\t  Mask for " << slice << " : " << slice.container_slice().lo
-                    << ", " << slice.width());
+            LOG5("\t\t\t\t  Mask for " << slice << " : " << slice.container_slice().lo << ", "
+                                       << slice.width());
             actionDataConstantMask |= bitvec(slice.container_slice().lo, slice.width());
         }
     }
     LOG5("\t\t\t\tRequired mask : " << actionDataConstantMask);
-    if (actionDataConstantMask.is_contiguous())
-        return true;
+    if (actionDataConstantMask.is_contiguous()) return true;
     return false;
 }
 
-bool ActionPhvConstraints::is_aligned(
-        const PHV::Allocation::MutuallyLiveSlices& container_state,
-        const IR::MAU::Action* action,
-        const PHV::Allocation& alloc) const {
-    for (auto& slice : container_state) {
+bool ActionPhvConstraints::is_aligned(const PHV::Allocation::MutuallyLiveSlices &container_state,
+                                      const IR::MAU::Action *action,
+                                      const PHV::Allocation &alloc) const {
+    for (auto &slice : container_state) {
         auto reads = constraint_tracker.sources(slice, action);
         BUG_CHECK(reads.size() > 0, "Slice %1% must be written in action %2%", slice, action->name);
         for (auto operand : reads) {
@@ -3049,17 +3072,15 @@ inline int ActionPhvConstraints::getOffset(le_bitrange a, le_bitrange b, PHV::Co
  */
 std::optional<ActionPhvConstraints::ClassifiedSources>
 ActionPhvConstraints::verify_two_container_alignment(
-        const PHV::Allocation& alloc,
-        const PHV::Allocation::MutuallyLiveSlices& container_state,
-        const IR::MAU::Action* action,
-        const PHV::Container destination,
-        ActionContainerProperty* action_prop) const {
+    const PHV::Allocation &alloc, const PHV::Allocation::MutuallyLiveSlices &container_state,
+    const IR::MAU::Action *action, const PHV::Container destination,
+    ActionContainerProperty *action_prop) const {
     ClassifiedSources sources;
     for (auto dest : container_state) {
         LOG7("\t\t\t\tClassifying source slice for: " << dest);
         for (auto operand : constraint_tracker.sources(dest, action)) {
             if (operand.ad || operand.constant || !operand.phv_used) continue;
-            const PHV::Field* fieldRead = operand.phv_used->field();
+            const PHV::Field *fieldRead = operand.phv_used->field();
             // only need to check one stage because action alignments requirement
             // are the same regardless of stage and slices in the container.
             const int stage = *stages(action, dest.isPhysicalStageBased()).begin();
@@ -3073,8 +3094,8 @@ ActionPhvConstraints::verify_two_container_alignment(
             }
 
             // Combine multiple adjacent source slices.
-            const PHV::AllocSlice* src_slice = nullptr;
-            for (auto& slice : source_slices) {
+            const PHV::AllocSlice *src_slice = nullptr;
+            for (auto &slice : source_slices) {
                 if (src_slice == nullptr) {
                     src_slice = &slice;
                     continue;
@@ -3102,7 +3123,7 @@ ActionPhvConstraints::verify_two_container_alignment(
             }
 
             // add this source list to sources.
-            const auto& sl = *src_slice;
+            const auto &sl = *src_slice;
             if (!sources[0].exist) {
                 // first container encountered
                 sources[0].exist = true;
@@ -3117,8 +3138,7 @@ ActionPhvConstraints::verify_two_container_alignment(
             } else if (!sources[1].exist) {
                 // first container has already been encountered at this point
                 if (sources[0].container == sl.container()) {
-                    LOG7("\t\t\t\t\tFound first container : " << sl.container() << " in : " <<
-                            sl);
+                    LOG7("\t\t\t\t\tFound first container : " << sl.container() << " in : " << sl);
                     sources[0].slices.insert(sl);
                     // check if the slice is aligned and whether this is the same as the
                     // previous source slices from this source container
@@ -3131,8 +3151,8 @@ ActionPhvConstraints::verify_two_container_alignment(
                     // destination slices are uniform across all slices. If not, packing is
                     // invalid (enforced by setting firstContainerAligned to false).
                     if (!sources[0].aligned) {
-                        const int offset = getOffset(
-                                sl.container_slice(), dest.container_slice(), dest.container());
+                        const int offset = getOffset(sl.container_slice(), dest.container_slice(),
+                                                     dest.container());
                         if (sources[0].offset != offset) {
                             LOG5("\t\t\t\t\tSource slices are aligned at different offsets.");
                             return std::nullopt;
@@ -3156,14 +3176,12 @@ ActionPhvConstraints::verify_two_container_alignment(
                 int refOffset = 0;
                 bool containerAligned;
                 if (sources[0].container == sl.container()) {
-                    LOG7("\t\t\t\t\tFound first container : " << sl.container() << " in : " <<
-                            sl);
+                    LOG7("\t\t\t\t\tFound first container : " << sl.container() << " in : " << sl);
                     containerAligned = sources[0].aligned;
                     refOffset = sources[0].offset;
                     sources[0].slices.insert(sl);
                 } else if (sources[1].container == sl.container()) {
-                    LOG7("\t\t\t\t\tFound second container: " << sl.container() << " in : " <<
-                            sl);
+                    LOG7("\t\t\t\t\tFound second container: " << sl.container() << " in : " << sl);
                     containerAligned = sources[1].aligned;
                     refOffset = sources[1].offset;
                     sources[1].slices.insert(sl);
@@ -3221,54 +3239,61 @@ ActionPhvConstraints::verify_two_container_alignment(
 }
 
 bool ActionPhvConstraints::assign_containers_to_unallocated_sources(
-        const PHV::Allocation& alloc,
-        const UnionFind<PHV::FieldSlice>& copacking_constraints,
-        ordered_map<PHV::FieldSlice, PHV::Container>& req_container) const {
+    const PHV::Allocation &alloc, const UnionFind<PHV::FieldSlice> &copacking_constraints,
+    ordered_map<PHV::FieldSlice, PHV::Container> &req_container) const {
     // For each set in copacking_constraints, check if any sources are allocated and if yes, all
     // unallocated sources in that set have to have the same container number
-    for (auto& set : copacking_constraints) {
+    for (auto &set : copacking_constraints) {
         PHV::Container c;
         ordered_set<PHV::FieldSlice> unallocated_slices;
         // Find all allocated slices in each set
-        for (auto& slice : set) {
-            ordered_set<PHV::AllocSlice> per_source_slices = alloc.slices(slice.field(),
-                    slice.range());
+        for (auto &slice : set) {
+            ordered_set<PHV::AllocSlice> per_source_slices =
+                alloc.slices(slice.field(), slice.range());
             // If this is an unallocated source slice, then examine the next slice after adding it
             // to the unallocated slices set
             if (per_source_slices.size() == 0) {
                 unallocated_slices.insert(slice);
-                continue; }
+                continue;
+            }
             // For each alloc slice, note the container used. If we encounter two different
             // containers, then packing in a single container is not possible. Return false.
             for (auto sl : per_source_slices) {
                 // No container allocated so far
                 if (c == PHV::Container()) {
-                    LOG6("\t\t\t\t\tSlice " << sl << " already allocated to container " <<
-                            sl.container());
+                    LOG6("\t\t\t\t\tSlice " << sl << " already allocated to container "
+                                            << sl.container());
                     c = sl.container();
-                    continue; }
+                    continue;
+                }
                 if (sl.container() != c) {
-                    LOG5("\t\t\t\t\tSlice " << sl << " allocated to container " << sl.container() <<
-                         " even though other slice(s) in the copacking set are allocated to " <<
-                         "container "  << c);
-                    return false; } } }
+                    LOG5("\t\t\t\t\tSlice "
+                         << sl << " allocated to container " << sl.container()
+                         << " even though other slice(s) in the copacking set are allocated to "
+                         << "container " << c);
+                    return false;
+                }
+            }
+        }
         // If all slices are unallocated, go to the next set in copacking_constraints
         if (c == PHV::Container()) continue;
-        for (auto& slice : unallocated_slices) {
+        for (auto &slice : unallocated_slices) {
             LOG5("\t\t\t\t\tSlice " << slice << " must be allocated to container " << c);
-            req_container[slice] = c; } }
+            req_container[slice] = c;
+        }
+    }
 
     return true;
 }
 
 bool ActionPhvConstraints::all_field_slices_written_together(
-        const PHV::Allocation::MutuallyLiveSlices& container_state,
-        const PHV::ActionSet& set_of_actions,
-        const PHV::Allocation::LiveRangeShrinkingMap& initActions) const {
+    const PHV::Allocation::MutuallyLiveSlices &container_state,
+    const PHV::ActionSet &set_of_actions,
+    const PHV::Allocation::LiveRangeShrinkingMap &initActions) const {
     for (auto action : set_of_actions) {
         enum WriteType { NO_INIT, NOT_WRITTEN, WRITTEN } thisActionWrites = NO_INIT;
         // for each AllocSlice in the container, check if it is written by the action.
-        for (auto& slice : container_state) {
+        for (auto &slice : container_state) {
             std::optional<OperandInfo> writeStatus = constraint_tracker.is_written(slice, action);
             bool metaInit = false;
             // Metadata initialization done in this action for the field of slice.
@@ -3287,37 +3312,39 @@ bool ActionPhvConstraints::all_field_slices_written_together(
                     thisActionWrites = WRITTEN;
                 else if (thisActionWrites == NOT_WRITTEN)
                     // If a field was not written previously, this returns false.
-                    return false; } } }
+                    return false;
+            }
+        }
+    }
     return true;
 }
 
 bool ActionPhvConstraints::checkBridgedPackingConstraints(
-        const ordered_set<const PHV::Field*>& packing) const {
+    const ordered_set<const PHV::Field *> &packing) const {
     // Mapping from a field to the actions in which the field is written.
-    ordered_map<const PHV::Field*, ordered_set<const IR::MAU::Action*>> actionToWrittenFieldsMap;
+    ordered_map<const PHV::Field *, ordered_set<const IR::MAU::Action *>> actionToWrittenFieldsMap;
     // Represents the list of all actions where the fields in the candidate packing @packing are
     // written.
-    ordered_set<const IR::MAU::Action*> allActions;
+    ordered_set<const IR::MAU::Action *> allActions;
     for (auto f : packing) {
         auto actions = actions_writing_fields(f);
-        const IR::MAU::Action* act = nullptr;
+        const IR::MAU::Action *act = nullptr;
         // The action with the name `act` is used to initialize the bridged metadata header version
         // of the field to the original program version. We do not need to consider the set
         // operations introduced in this compiler-generated action when checking valid packing for
         // the bridged metadata fields. Therefore, we remove this action from the list of actions
         // writing fields.
-        for (auto* a : actions)
-            if (a->name == "act")
-                act = a;
-        if (act != nullptr)
-            actions.erase(act);
+        for (auto *a : actions)
+            if (a->name == "act") act = a;
+        if (act != nullptr) actions.erase(act);
         actionToWrittenFieldsMap[f] = actions;
-        allActions.insert(actionToWrittenFieldsMap[f].begin(), actionToWrittenFieldsMap[f].end()); }
+        allActions.insert(actionToWrittenFieldsMap[f].begin(), actionToWrittenFieldsMap[f].end());
+    }
 
     // If there are bits present in a container that won't be written for a given action, we need to
     // make sure that the fields that are written all have either a PHV write or an action data
     // write.
-    for (auto* act : allActions) {
+    for (auto *act : allActions) {
         // true if we have encountered a PHV source for one of the fields in the packing.
         std::optional<bool> foundPHVSource = std::nullopt;
         // true if we have encountered an action data/constant source for one of the fields in the
@@ -3326,7 +3353,7 @@ bool ActionPhvConstraints::checkBridgedPackingConstraints(
         LOG6("\t\t    Action: " << act->name);
         BUG_CHECK(act->name != "act", "Action %1% should have been removed earlier", act->name);
         // For each field in packing:
-        for (auto* f : packing) {
+        for (auto *f : packing) {
             auto hasPHVSource = constraint_tracker.hasPHVSource(f, act);
             auto hasADSource = constraint_tracker.hasActionDataOrConstantSource(f, act);
             LOG6("\t\t\t  Field: " << f->name);
@@ -3343,12 +3370,14 @@ bool ActionPhvConstraints::checkBridgedPackingConstraints(
             // Mark foundPHVSource as having found the first PHV source.
             if (!foundPHVSource && hasPHVSource) {
                 foundPHVSource = *hasPHVSource;
-                LOG6("\t\t\t  Setting foundPHVSource to " << *foundPHVSource); }
+                LOG6("\t\t\t  Setting foundPHVSource to " << *foundPHVSource);
+            }
 
             // Mark foundADConstantSource as having found the first action data/constant source.
             if (!foundADConstantSource && hasADSource) {
                 foundADConstantSource = *hasADSource;
-                LOG6("\t\t\t  Setting foundADConstantSource to " << *foundADConstantSource); }
+                LOG6("\t\t\t  Setting foundADConstantSource to " << *foundADConstantSource);
+            }
 
             // If there was a PHV source, and a field does not have a PHV source, then this packing
             // is not possible. (Underlying principle: Do not mix action data/PHV sources in bridged
@@ -3356,49 +3385,46 @@ bool ActionPhvConstraints::checkBridgedPackingConstraints(
             // complicated, and such a valid packing is not always possible).
             if (hasPHVSource && foundPHVSource && *hasPHVSource != *foundPHVSource) {
                 LOG6("\t\t\t  Returning false");
-                return false; }
+                return false;
+            }
 
             // Similarly, if there was an action data/constant source and a field does not have an
             // action data/constant source, then this packing is not possible.
             if (hasADSource && foundADConstantSource && *hasADSource != *foundADConstantSource) {
                 LOG6("\t\t\t  Returning false");
-                return false; } } }
+                return false;
+            }
+        }
+    }
     return true;
 }
 
-bool ActionPhvConstraints::written_in(const PHV::Field* f, const IR::MAU::Action* act) const {
+bool ActionPhvConstraints::written_in(const PHV::Field *f, const IR::MAU::Action *act) const {
     if (LOGGING(6)) {
         LOG6("\t\t\t\tField " << f->name << " is written by:");
-        for (const auto* act : actions_writing_fields(f))
-            LOG6("\t\t\t\t  " << act->name);
+        for (const auto *act : actions_writing_fields(f)) LOG6("\t\t\t\t  " << act->name);
     }
     return actions_writing_fields(f).count(act);
 }
 
-bool ActionPhvConstraints::written_by_ad_constant(
-        const PHV::Field* f,
-        const IR::MAU::Action* act) const {
+bool ActionPhvConstraints::written_by_ad_constant(const PHV::Field *f,
+                                                  const IR::MAU::Action *act) const {
     // If field is not written in this action, return false.
     if (!written_in(f, act)) return false;
     PHV::FieldSlice slice(f, StartLen(0, f->size));
     for (auto operand : constraint_tracker.sources(slice, act))
-        if (operand.ad || operand.constant)
-            return true;
+        if (operand.ad || operand.constant) return true;
     return false;
 }
 
 std::optional<ActionPhvConstraints::OperandInfo>
-ActionPhvConstraints::ConstraintTracker::is_written(
-        PHV::FieldSlice slice,
-        const IR::MAU::Action *act) const {
-    const auto& all_writes = this->writes(act);
-    for (const auto& op : all_writes) {
-        if (!op.phv_used)
-            continue;
-        if (op.phv_used->field() != slice.field())
-            continue;
-        if (!op.phv_used->range().contains(slice.range()))
-            continue;
+ActionPhvConstraints::ConstraintTracker::is_written(PHV::FieldSlice slice,
+                                                    const IR::MAU::Action *act) const {
+    const auto &all_writes = this->writes(act);
+    for (const auto &op : all_writes) {
+        if (!op.phv_used) continue;
+        if (op.phv_used->field() != slice.field()) continue;
+        if (!op.phv_used->range().contains(slice.range())) continue;
 
         ActionPhvConstraints::OperandInfo rv = op;
         rv.phv_used = slice;
@@ -3408,69 +3434,75 @@ ActionPhvConstraints::ConstraintTracker::is_written(
                                                                         : "MOVE"_cs;
         LOG5("\t\t\t\tSlice " << slice << " is written in action " << act->name << " by a "
                               << operation << " operation.");
-        return rv; }
+        return rv;
+    }
 
     LOG5("\t\t\t\tSlice " << slice << " is not written in action " << act->name);
     return std::nullopt;
 }
 
-bool ActionPhvConstraints::cannot_initialize(
-        const PHV::Container& c,
-        const IR::MAU::Action* action,
-        const PHV::Allocation& alloc) const {
+bool ActionPhvConstraints::cannot_initialize(const PHV::Container &c, const IR::MAU::Action *action,
+                                             const PHV::Allocation &alloc) const {
     ordered_map<PHV::FieldSlice, ordered_set<PHV::AllocSlice>> destinationsToBeChecked;
     const int stage = *stages(action, false).begin();
     for (auto write : constraint_tracker.writes(action)) {
         // For each write in the action, check if the written slice has been allocated yet, and if
         // yes, whether it has been  allocated in container c.
         if (!write.phv_used) BUG("No PHV FieldSlice corresponding to the write");
-        const PHV::Field* fieldWritten = write.phv_used->field();
+        const PHV::Field *fieldWritten = write.phv_used->field();
         le_bitrange rangeWritten = write.phv_used->range();
-        ordered_set<PHV::AllocSlice> per_destination_slices = alloc.slices(fieldWritten,
-                rangeWritten, stage, PHV::FieldUse(PHV::FieldUse::WRITE));
+        ordered_set<PHV::AllocSlice> per_destination_slices =
+            alloc.slices(fieldWritten, rangeWritten, stage, PHV::FieldUse(PHV::FieldUse::WRITE));
         for (auto dest : per_destination_slices) {
             if (dest.container() != c) continue;
             // This written slice is allocated to the current container.
             PHV::FieldSlice write(dest.field(), dest.field_slice());
-            LOG5("\t\t\t  Field slice " << write << " must be checked for PHV/action data/non-zero "
-                 "constant sources.");
-            for (auto& read : constraint_tracker.sources(write, action)) {
-                if (read.ad) { LOG5("\t\t\t... action data"); return true; }
-                if (read.phv_used != std::nullopt) { LOG5("\t\t\t... PHV"); return true; }
+            LOG5("\t\t\t  Field slice " << write
+                                        << " must be checked for PHV/action data/non-zero "
+                                           "constant sources.");
+            for (auto &read : constraint_tracker.sources(write, action)) {
+                if (read.ad) {
+                    LOG5("\t\t\t... action data");
+                    return true;
+                }
+                if (read.phv_used != std::nullopt) {
+                    LOG5("\t\t\t... PHV");
+                    return true;
+                }
                 if (read.constant && read.const_value != 0) {
                     LOG5("\t\t\t... action data");
-                    return true; }
+                    return true;
+                }
             }
         }
     }
     return false;
 }
 
-ordered_set<const PHV::Field*>
-ActionPhvConstraints::actionReads(const IR::MAU::Action* act) const {
-    ordered_set<const PHV::Field*> rv;
-    for (auto& slice : constraint_tracker.reads(act))
-        rv.insert(slice.field());
+ordered_set<const PHV::Field *> ActionPhvConstraints::actionReads(
+    const IR::MAU::Action *act) const {
+    ordered_set<const PHV::Field *> rv;
+    for (auto &slice : constraint_tracker.reads(act)) rv.insert(slice.field());
     return rv;
 }
 
-ordered_set<const PHV::Field*>
-ActionPhvConstraints::actionWrites(const IR::MAU::Action* act) const {
-    ordered_set<const PHV::Field*> rv;
+ordered_set<const PHV::Field *> ActionPhvConstraints::actionWrites(
+    const IR::MAU::Action *act) const {
+    ordered_set<const PHV::Field *> rv;
     for (auto fw : constraint_tracker.writes(act)) {
-        if (fw.phv_used)
-            rv.insert(fw.phv_used->field()); }
+        if (fw.phv_used) rv.insert(fw.phv_used->field());
+    }
     return rv;
 }
 
-ordered_set<const PHV::Field*> ActionPhvConstraints::slices_sources(
-    const PHV::Field* dest, const std::vector<PHV::FieldSlice>& slices) const {
-    ordered_set<const PHV::Field*> rv;
-    for (const IR::MAU::Action* act : constraint_tracker.written_in(PHV::FieldSlice(dest))) {
-        for (const auto& fs : slices) {
+ordered_set<const PHV::Field *> ActionPhvConstraints::slices_sources(
+    const PHV::Field *dest, const std::vector<PHV::FieldSlice> &slices) const {
+    ordered_set<const PHV::Field *> rv;
+    for (const IR::MAU::Action *act : constraint_tracker.written_in(PHV::FieldSlice(dest))) {
+        for (const auto &fs : slices) {
             BUG_CHECK(fs.field() == dest, "field slice %1% is not part of %2%", fs, dest->name);
             auto operands = constraint_tracker.sources(fs, act);
-            for (const auto& operand : operands) {
+            for (const auto &operand : operands) {
                 if (operand.phv_used) {
                     rv.insert(operand.phv_used->field());
                 }
@@ -3480,71 +3512,66 @@ ordered_set<const PHV::Field*> ActionPhvConstraints::slices_sources(
     return rv;
 }
 
-ordered_set<const PHV::Field*> ActionPhvConstraints::slices_destinations(
-    const PHV::Field* src, const std::vector<PHV::FieldSlice>& slices) const {
-    ordered_set<const PHV::Field*> rv;
-    for (const IR::MAU::Action* act : constraint_tracker.read_in(PHV::FieldSlice(src))) {
-        for (const auto& fs : slices) {
+ordered_set<const PHV::Field *> ActionPhvConstraints::slices_destinations(
+    const PHV::Field *src, const std::vector<PHV::FieldSlice> &slices) const {
+    ordered_set<const PHV::Field *> rv;
+    for (const IR::MAU::Action *act : constraint_tracker.read_in(PHV::FieldSlice(src))) {
+        for (const auto &fs : slices) {
             auto destinations = constraint_tracker.destinations(fs, act);
-            for (const auto& slice : destinations) rv.insert(slice.field());
+            for (const auto &slice : destinations) rv.insert(slice.field());
         }
     }
     return rv;
 }
 
-std::optional<const PHV::Field*> ActionPhvConstraints::field_destination(
-        const PHV::Field* f,
-        const IR::MAU::Action* action) const {
-    ordered_set<const PHV::Field*> rs;
+std::optional<const PHV::Field *> ActionPhvConstraints::field_destination(
+    const PHV::Field *f, const IR::MAU::Action *action) const {
+    ordered_set<const PHV::Field *> rs;
     PHV::FieldSlice source(f, StartLen(0, f->size));
-    for (const IR::MAU::Action* act : constraint_tracker.read_in(source)) {
+    for (const IR::MAU::Action *act : constraint_tracker.read_in(source)) {
         if (act != action) continue;
         auto destinations = constraint_tracker.destinations(source, act);
-        for (const auto& slice : destinations)
-            rs.insert(slice.field());
+        for (const auto &slice : destinations) rs.insert(slice.field());
     }
     if (rs.size() == 0) return std::nullopt;
     return (*(rs.begin()));
 }
 
-bool ActionPhvConstraints::move_only_operations(const PHV::Field* f) const {
+bool ActionPhvConstraints::move_only_operations(const PHV::Field *f) const {
     PHV::FieldSlice dest(f, StartLen(0, f->size));
     // Whenever f is written in an action, if the write is not a MOVE operation, return true
-    for (const IR::MAU::Action* act : constraint_tracker.written_in(dest)) {
+    for (const IR::MAU::Action *act : constraint_tracker.written_in(dest)) {
         auto operands = constraint_tracker.sources(dest, act);
         for (auto it = operands.begin(); it != operands.end(); ++it)
-            if (it->flags != OperandInfo::MOVE)
-                return false; }
+            if (it->flags != OperandInfo::MOVE) return false;
+    }
     return true;
 }
 
-bool ActionPhvConstraints::can_pack_pov(
-        const PHV::SuperCluster::SliceList* slice_list,
-        const PHV::Field* f) const {
+bool ActionPhvConstraints::can_pack_pov(const PHV::SuperCluster::SliceList *slice_list,
+                                        const PHV::Field *f) const {
     LOG3("Considering slice list " << *slice_list);
-    ordered_map<const PHV::Field*, size_t> fieldsWithPositions;
+    ordered_map<const PHV::Field *, size_t> fieldsWithPositions;
     size_t index = 0;
-    for (auto& slice : *slice_list)
-        fieldsWithPositions[slice.field()] = index++;
+    for (auto &slice : *slice_list) fieldsWithPositions[slice.field()] = index++;
     fieldsWithPositions[f] = index++;
-    for (auto kv : fieldsWithPositions)
-        LOG3(kv.first->name << " : " << kv.second);
+    for (auto kv : fieldsWithPositions) LOG3(kv.first->name << " : " << kv.second);
 
     // Conditions:
     // 1. If these fields are all written in the same container with different kind of
     //    operands, then reject this packing.
-    ordered_set<const IR::MAU::Action*> set_of_actions;
+    ordered_set<const IR::MAU::Action *> set_of_actions;
     for (auto kv : fieldsWithPositions) {
-        const auto& writing_actions = constraint_tracker.written_in(PHV::FieldSlice(kv.first));
+        const auto &writing_actions = constraint_tracker.written_in(PHV::FieldSlice(kv.first));
         set_of_actions.insert(writing_actions.begin(), writing_actions.end());
     }
 
     unsigned num_fields = fieldsWithPositions.size();
-    for (const auto* act : set_of_actions) {
+    for (const auto *act : set_of_actions) {
         LOG3("\tChecking action " << act->name);
-        ordered_set<const PHV::Field*> written_by_phv;
-        ordered_set<const PHV::Field*> written_by_ad;
-        ordered_set<const PHV::Field*> not_written;
+        ordered_set<const PHV::Field *> written_by_phv;
+        ordered_set<const PHV::Field *> written_by_ad;
+        ordered_set<const PHV::Field *> not_written;
         for (auto kv : fieldsWithPositions) {
             auto source = constraint_tracker.hasPHVSource(kv.first, act);
             if (!source) {
@@ -3557,11 +3584,11 @@ bool ActionPhvConstraints::can_pack_pov(
                 written_by_ad.insert(kv.first);
         }
 
-        LOG3("phv: " << written_by_phv.size() << ", ad: " << written_by_ad.size() <<
-             ", not written: " << not_written.size());
+        LOG3("phv: " << written_by_phv.size() << ", ad: " << written_by_ad.size()
+                     << ", not written: " << not_written.size());
         if (num_fields % 8 == 0 && not_written.size() == 0) continue;
         if (written_by_phv.size() > 0 && written_by_ad.size() > 0 &&
-                (not_written.size() > 0 || num_fields % 8 != 0)) {
+            (not_written.size() > 0 || num_fields % 8 != 0)) {
             LOG3("Some part of the container will be overwritten.");
             return false;
         }
@@ -3570,45 +3597,39 @@ bool ActionPhvConstraints::can_pack_pov(
 }
 
 std::optional<bool> ActionPhvConstraints::ConstraintTracker::hasPHVSource(
-        const PHV::Field* field,
-        const IR::MAU::Action* act) const {
+    const PHV::Field *field, const IR::MAU::Action *act) const {
     PHV::FieldSlice destination(field, StartLen(0, field->size));
     // Destination field not written in @act, return std::nullopt.
-    if (!written_in(destination).count(act))
-        return std::nullopt;
+    if (!written_in(destination).count(act)) return std::nullopt;
     // Check each source for the destination field.
     auto operands = sources(destination, act);
-    for (auto& op : operands) {
+    for (auto &op : operands) {
         // If any source has a non-PHV source, then return false.
-        if (op.phv_used == std::nullopt)
-            return false;
+        if (op.phv_used == std::nullopt) return false;
     }
     return true;
 }
 
 std::optional<bool> ActionPhvConstraints::ConstraintTracker::hasActionDataOrConstantSource(
-        const PHV::Field* field,
-        const IR::MAU::Action* act) const {
+    const PHV::Field *field, const IR::MAU::Action *act) const {
     PHV::FieldSlice destination(field, StartLen(0, field->size));
     // Destination field not written in @act, return std::nullopt.
-    if (!written_in(destination).count(act))
-        return std::nullopt;
+    if (!written_in(destination).count(act)) return std::nullopt;
     // Check each source for the destination field.
     auto operands = sources(destination, act);
-    for (auto& op : operands) {
+    for (auto &op : operands) {
         // If any source has a non action data or constant source, return false.
-        if (op.ad == false && op.constant == false)
-            return false;
+        if (op.ad == false && op.constant == false) return false;
     }
     return true;
 }
 
 UnionFind<PHV::FieldSlice> ActionPhvConstraints::classify_PHV_sources(
-        const ordered_set<PHV::FieldSlice>& phvSlices,
-        const ordered_map<PHV::FieldSlice, const PHV::SuperCluster::SliceList*>& lists_map) const {
+    const ordered_set<PHV::FieldSlice> &phvSlices,
+    const ordered_map<PHV::FieldSlice, const PHV::SuperCluster::SliceList *> &lists_map) const {
     UnionFind<PHV::FieldSlice> classified_sources;
-    ordered_map<const PHV::SuperCluster::SliceList*, PHV::FieldSlice> slice_list_to_slice;
-    for (auto& slice : phvSlices) {
+    ordered_map<const PHV::SuperCluster::SliceList *, PHV::FieldSlice> slice_list_to_slice;
+    for (auto &slice : phvSlices) {
         classified_sources.insert(slice);
         // If the slice does not belong to a slice list, then it is to be placed in its own
         // container.
@@ -3626,23 +3647,24 @@ UnionFind<PHV::FieldSlice> ActionPhvConstraints::classify_PHV_sources(
 }
 
 void ActionPhvConstraints::throw_too_many_sources_error(
-        const ordered_set<PHV::FieldSlice>& actionDataWrittenSlices,
-        const ordered_set<PHV::FieldSlice>& notWrittenSlices,
-        const UnionFind<PHV::FieldSlice>& phvSources,
-        const ordered_map<PHV::FieldSlice, std::pair<int, int>>& phvAlignedSlices,
-        const IR::MAU::Action* action,
-        std::stringstream& ss) const {
+    const ordered_set<PHV::FieldSlice> &actionDataWrittenSlices,
+    const ordered_set<PHV::FieldSlice> &notWrittenSlices,
+    const UnionFind<PHV::FieldSlice> &phvSources,
+    const ordered_map<PHV::FieldSlice, std::pair<int, int>> &phvAlignedSlices,
+    const IR::MAU::Action *action, std::stringstream &ss) const {
     cstring action_name = canon_name(action->externalName());
     bool adSource = (actionDataWrittenSlices.size() > 0);
     ss << "it requires too many sources.";
     unsigned source_num = 1;
     if (adSource) {
-        ss << std::endl << "\tSource " << (source_num++) << " is action data/constant, which "
-            "write(s) the following field slices:";
-        for (auto& slice : actionDataWrittenSlices) {
+        ss << std::endl
+           << "\tSource " << (source_num++)
+           << " is action data/constant, which "
+              "write(s) the following field slices:";
+        for (auto &slice : actionDataWrittenSlices) {
             auto sources = constraint_tracker.sources(slice, action);
             std::stringstream ss_source;
-            for (auto& source : sources) {
+            for (auto &source : sources) {
                 if (source.ad) {
                     ss_source << ", written by action data";
                     break;
@@ -3655,32 +3677,32 @@ void ActionPhvConstraints::throw_too_many_sources_error(
         }
     }
     if (notWrittenSlices.size() > 0) {
-        ss << std::endl << "\tSource " << (source_num++) << " is the container itself, imposed "
-            "by the following fields that are unwritten in action " << action_name << ":";
-        for (auto& slice : notWrittenSlices)
-            ss << std::endl << "\t  " << slice.shortString();
+        ss << std::endl
+           << "\tSource " << (source_num++)
+           << " is the container itself, imposed "
+              "by the following fields that are unwritten in action "
+           << action_name << ":";
+        for (auto &slice : notWrittenSlices) ss << std::endl << "\t  " << slice.shortString();
     }
-    for (const auto& set : phvSources) {
+    for (const auto &set : phvSources) {
         bool allSlicesUnwritten = true;
         // Ignore the slices in the UnionFind struct that are sources because they are not written
         // in this action. The not-written case has already been handled by the above if-condition.
-        for (auto& slice : set)
-            if (!notWrittenSlices.count(slice))
-                allSlicesUnwritten = false;
+        for (auto &slice : set)
+            if (!notWrittenSlices.count(slice)) allSlicesUnwritten = false;
         if (allSlicesUnwritten) continue;
         ss << std::endl << "\tSource " << (source_num++) << " contains the following fields:";
         std::optional<int> offset = std::nullopt;
         bool unaligned = false;
         ordered_set<PHV::FieldSlice> printedFields;
-        for (auto& slice : set) {
+        for (auto &slice : set) {
             if (printedFields.count(slice)) continue;
             ss << std::endl << "\t  " << slice.shortString();
             printedFields.insert(slice);
             if (phvAlignedSlices.count(slice)) {
                 int start = phvAlignedSlices.at(slice).second;
                 int thisOffset = phvAlignedSlices.at(slice).first - start;
-                if ((offset != std::nullopt) && (*offset != thisOffset))
-                    unaligned = true;
+                if ((offset != std::nullopt) && (*offset != thisOffset)) unaligned = true;
                 // Start = -1 indicates that the source does not belong to a slice list and
                 // therefore, could potentially have multiple possible alignments within its
                 // container.
@@ -3696,72 +3718,81 @@ void ActionPhvConstraints::throw_too_many_sources_error(
         // Also, indicate to the user that PHV sources are not aligned (if possible), which violates
         // alignment constraints when action data/constant is present.
         if (adSource && (offset != std::nullopt) && (*offset != 0)) {
-            ss << std::endl << "  Slices of source " << source_num-1 << " are not allocated "
-                << "at the same offsets within the container as the destination slices." <<
-                std::endl;
+            ss << std::endl
+               << "  Slices of source " << source_num - 1 << " are not allocated "
+               << "at the same offsets within the container as the destination slices."
+               << std::endl;
             ss << "  " << Device::name() << " does not support action data/constant with "
-                << "rotated PHV source at the same time." << std::endl;
+               << "rotated PHV source at the same time." << std::endl;
             continue;
         }
         // If each destination in the container has a different offset relative to its source slice
         // (and all those source slices are part of the same source container), that also violates
         // an action constraint.
         if (unaligned) {
-            ss << std::endl << "  Slices of source " << source_num-1 << " do not have the "
-                "same rotational alignment with respect to their destination slices." <<
-                std::endl;
+            ss << std::endl
+               << "  Slices of source " << source_num - 1
+               << " do not have the "
+                  "same rotational alignment with respect to their destination slices."
+               << std::endl;
             continue;
         }
     }
 
     if (adSource) {
-        ss << std::endl << "  However, " << Device::name() << " supports only one PHV source, "
-            "when action data/constant is present.";
+        ss << std::endl
+           << "  However, " << Device::name()
+           << " supports only one PHV source, "
+              "when action data/constant is present.";
     } else {
         ss << std::endl << "  However, " << Device::name() << " supports only two PHV sources.";
     }
-    ss << std::endl << "  Rewrite action " << action_name << " to use at most 2 PHV sources "
-        "(and no action data/constant source) or 1 PHV source (if action data/constant is "
-        << "necessary)." << std::endl << std::endl;
+    ss << std::endl
+       << "  Rewrite action " << action_name
+       << " to use at most 2 PHV sources "
+          "(and no action data/constant source) or 1 PHV source (if action data/constant is "
+       << "necessary)." << std::endl
+       << std::endl;
 }
 
 void ActionPhvConstraints::throw_non_contiguous_mask_error(
-        const ordered_set<PHV::FieldSlice>& notWrittenSlices,
-        const ordered_map<PHV::FieldSlice, ordered_set<PHV::FieldSlice>>& destToSource,
-        const ordered_map<PHV::FieldSlice, unsigned>& fieldAlignments,
-        cstring action_name,
-        std::stringstream& ss) const {
+    const ordered_set<PHV::FieldSlice> &notWrittenSlices,
+    const ordered_map<PHV::FieldSlice, ordered_set<PHV::FieldSlice>> &destToSource,
+    const ordered_map<PHV::FieldSlice, unsigned> &fieldAlignments, cstring action_name,
+    std::stringstream &ss) const {
     ss << " of non-contiguous partial container write(s)." << std::endl;
-    ss << "\tAction " << action_name << " writes the following fields in the container:" <<
-        std::endl;
-    for (const auto& kv : destToSource) {
+    ss << "\tAction " << action_name
+       << " writes the following fields in the container:" << std::endl;
+    for (const auto &kv : destToSource) {
         ss << "\t  " << kv.first.shortString();
         if (kv.first.size() == 1)
             ss << " @ bit " << fieldAlignments.at(kv.first) << std::endl;
         else
-            ss << " @ bits " << fieldAlignments.at(kv.first) << "-" <<
-                (fieldAlignments.at(kv.first) + kv.first.size() - 1) << std::endl;
+            ss << " @ bits " << fieldAlignments.at(kv.first) << "-"
+               << (fieldAlignments.at(kv.first) + kv.first.size() - 1) << std::endl;
     }
-    ss << "\tAction " << action_name << " does not write the following container fields:" <<
-        std::endl;
-    for (auto& slice : notWrittenSlices) {
+    ss << "\tAction " << action_name
+       << " does not write the following container fields:" << std::endl;
+    for (auto &slice : notWrittenSlices) {
         ss << "\t  " << slice.shortString();
         if (slice.size() == 1)
             ss << " @ bit " << fieldAlignments.at(slice) << std::endl;
         else
-            ss << " @ bits " << fieldAlignments.at(slice) << "-" << (fieldAlignments.at(slice) +
-                    slice.size() - 1) << std::endl;
+            ss << " @ bits " << fieldAlignments.at(slice) << "-"
+               << (fieldAlignments.at(slice) + slice.size() - 1) << std::endl;
     }
-    ss << "  " << Device::name() << " requires at least one of the set of slices written or "
-       "slices not written to be contiguous." << std::endl << std::endl;
+    ss << "  " << Device::name()
+       << " requires at least one of the set of slices written or "
+          "slices not written to be contiguous."
+       << std::endl
+       << std::endl;
 }
 
 bool ActionPhvConstraints::diagnoseInvalidPacking(
-        const IR::MAU::Action* action,
-        const PHV::SuperCluster::SliceList* list,
-        const ordered_map<PHV::FieldSlice, unsigned>& fieldAlignments,
-        const ordered_map<PHV::FieldSlice, const PHV::SuperCluster::SliceList*>& lists_map,
-        std::stringstream& ss) const {
+    const IR::MAU::Action *action, const PHV::SuperCluster::SliceList *list,
+    const ordered_map<PHV::FieldSlice, unsigned> &fieldAlignments,
+    const ordered_map<PHV::FieldSlice, const PHV::SuperCluster::SliceList *> &lists_map,
+    std::stringstream &ss) const {
     ordered_map<PHV::FieldSlice, ordered_set<PHV::FieldSlice>> destToSource;
     ordered_map<PHV::FieldSlice, ordered_set<PHV::FieldSlice>> sourceToDest;
     ordered_set<PHV::FieldSlice> notWrittenSlices;
@@ -3771,7 +3802,7 @@ bool ActionPhvConstraints::diagnoseInvalidPacking(
     cstring action_name = canon_name(action->externalName());
     bitvec writtenBitvec;
     bitvec notWrittenBitvec;
-    for (auto& slice : *list) {
+    for (auto &slice : *list) {
         auto sources = constraint_tracker.sources(slice, action);
         if (sources.size() == 0) {
             notWrittenSlices.insert(slice);
@@ -3780,7 +3811,7 @@ bool ActionPhvConstraints::diagnoseInvalidPacking(
             continue;
         }
         writtenBitvec |= bitvec(fieldAlignments.at(slice), slice.size());
-        for (auto& info : sources) {
+        for (auto &info : sources) {
             if (info.ad || info.constant) {
                 actionDataWrittenSlices.insert(slice);
             } else {
@@ -3790,8 +3821,8 @@ bool ActionPhvConstraints::diagnoseInvalidPacking(
                 sourceToDest[source_slice].insert(slice);
                 allPHVSlices.insert(*(info.phv_used));
                 if (fieldAlignments.count(source_slice))
-                    phvAlignedSlices[source_slice] = std::make_pair(fieldAlignments.at(slice),
-                            fieldAlignments.at(source_slice));
+                    phvAlignedSlices[source_slice] =
+                        std::make_pair(fieldAlignments.at(slice), fieldAlignments.at(source_slice));
                 else
                     phvAlignedSlices[source_slice] = std::make_pair(fieldAlignments.at(slice), -1);
             }
@@ -3809,7 +3840,7 @@ bool ActionPhvConstraints::diagnoseInvalidPacking(
     // Detect the case where multiple PHV sources are required, in addition to action data/constant.
     if (tooManySources) {
         throw_too_many_sources_error(actionDataWrittenSlices, notWrittenSlices, phvSources,
-                phvAlignedSlices, action, ss);
+                                     phvAlignedSlices, action, ss);
         return false;
     }
 
@@ -3817,7 +3848,7 @@ bool ActionPhvConstraints::diagnoseInvalidPacking(
     // contiguous.
     if (numPHVSources > 0 && !writtenBitvec.is_contiguous() && !notWrittenBitvec.is_contiguous()) {
         throw_non_contiguous_mask_error(notWrittenSlices, destToSource, fieldAlignments,
-                action_name, ss);
+                                        action_name, ss);
         return false;
     }
 
@@ -3830,7 +3861,7 @@ bool ActionPhvConstraints::diagnoseInvalidPacking(
     if (adSource && numPHVSources > 0 &&
         std::any_of(phvAlignedSlices.begin(), phvAlignedSlices.end(), IsRotation)) {
         throw_too_many_sources_error(actionDataWrittenSlices, notWrittenSlices, phvSources,
-                phvAlignedSlices, action, ss);
+                                     phvAlignedSlices, action, ss);
         return false;
     }
 
@@ -3838,40 +3869,41 @@ bool ActionPhvConstraints::diagnoseInvalidPacking(
 }
 
 bool ActionPhvConstraints::diagnoseSuperCluster(
-        const ordered_set<const PHV::SuperCluster::SliceList*>& sc,
-        const ordered_map<PHV::FieldSlice, unsigned>& fieldAlignments,
-        std::stringstream& error_msg) const {
+    const ordered_set<const PHV::SuperCluster::SliceList *> &sc,
+    const ordered_map<PHV::FieldSlice, unsigned> &fieldAlignments,
+    std::stringstream &error_msg) const {
     // For each slice list, gather all the field slices in it, and the actions that write to that
     // slice list.
-    error_msg << "This program violates action constraints imposed by " << Device::name() << "." <<
-        std::endl << std::endl;
-    ordered_map<PHV::FieldSlice, const PHV::SuperCluster::SliceList*> slice_to_slice_list;
+    error_msg << "This program violates action constraints imposed by " << Device::name() << "."
+              << std::endl
+              << std::endl;
+    ordered_map<PHV::FieldSlice, const PHV::SuperCluster::SliceList *> slice_to_slice_list;
     bool error_found = false;
-    for (const auto* list : sc)
-        for (auto& slice : *list)
-            slice_to_slice_list[slice] = list;
-    for (const auto* list : sc) {
-        ordered_set<const IR::MAU::Action*> actions;
+    for (const auto *list : sc)
+        for (auto &slice : *list) slice_to_slice_list[slice] = list;
+    for (const auto *list : sc) {
+        ordered_set<const IR::MAU::Action *> actions;
         ordered_set<PHV::FieldSlice> set_of_slices;
         cstring hdr = (*(list->begin())).field()->header();
         std::stringstream slices;
         slices << "  PHV allocation requires the following field slices to be packed together, "
-            "because of the structure of header " << hdr << std::endl;
-        for (auto& slice : *list) {
+                  "because of the structure of header "
+               << hdr << std::endl;
+        for (auto &slice : *list) {
             slices << "\t" << slice.shortString() << std::endl;
             auto actionsWritingSlice = constraint_tracker.written_in(slice);
             actions.insert(actionsWritingSlice.begin(), actionsWritingSlice.end());
             set_of_slices.insert(slice);
         }
-        for (const auto* action : actions) {
+        for (const auto *action : actions) {
             cstring action_name = canon_name(action->externalName());
             std::stringstream ss;
             ss << "  Action " << action_name << " must be rewritten.";
             // Check whether the operations in this slice list are of the correct kind.
             if (!valid_container_operation_type(action, set_of_slices, ss)) {
                 if (action->srcInfo.isValid())
-                    error_msg << action->srcInfo.toPositionString() << ":" << std::endl <<
-                            action->srcInfo.toSourceFragment() << std::endl;
+                    error_msg << action->srcInfo.toPositionString() << ":" << std::endl
+                              << action->srcInfo.toSourceFragment() << std::endl;
                 error_msg << ss.str();
                 error_found = true;
                 continue;
@@ -3881,8 +3913,8 @@ bool ActionPhvConstraints::diagnoseSuperCluster(
             // Then check if the packing for this supercluster is valid.
             if (!diagnoseInvalidPacking(action, list, fieldAlignments, slice_to_slice_list, ss)) {
                 if (action->srcInfo.isValid())
-                    error_msg << action->srcInfo.toPositionString() << ":" << std::endl <<
-                            action->srcInfo.toSourceFragment() << std::endl;
+                    error_msg << action->srcInfo.toPositionString() << ":" << std::endl
+                              << action->srcInfo.toSourceFragment() << std::endl;
                 error_msg << slices.str() << std::endl;
                 error_msg << ss.str();
                 error_found = true;
@@ -3898,84 +3930,88 @@ void ActionPhvConstraints::ConstraintTracker::printMapStates() const {
         LOG7("Action: " << act.first->name << " writes fields: ");
         for (auto &fi : act.second) {
             LOG7("\t\t" << *fi.phv_used << ", written by a MOVE? "
-                 << (fi.flags == OperandInfo::MOVE)); } }
+                        << (fi.flags == OperandInfo::MOVE));
+        }
+    }
 
-        for (auto &f : write_to_reads_per_action) {
-            LOG7("Key field: " << f.first << " uses operands: ");
-            for (auto &fi : f.second) {
-                LOG7("\tAction: " << fi.first->name);
-                for (auto &r : fi.second) {
-                    LOG7("\t\tRange: " << r.first);
-                    for (auto &fii : r.second) {
-                        if (!fii.ad && !fii.constant)
-                            LOG7("\t\t\tSlice: " << *fii.phv_used);
-                        else
-                            LOG7("\t\t\tAction data."); } } } }
+    for (auto &f : write_to_reads_per_action) {
+        LOG7("Key field: " << f.first << " uses operands: ");
+        for (auto &fi : f.second) {
+            LOG7("\tAction: " << fi.first->name);
+            for (auto &r : fi.second) {
+                LOG7("\t\tRange: " << r.first);
+                for (auto &fii : r.second) {
+                    if (!fii.ad && !fii.constant)
+                        LOG7("\t\t\tSlice: " << *fii.phv_used);
+                    else
+                        LOG7("\t\t\tAction data.");
+                }
+            }
+        }
+    }
 
-        for (auto &f : read_to_writes_per_action) {
-            LOG7("Key field: " << f.first << " is read by the field(s): ");
-            for (auto &fi : f.second) {
-                LOG7("\tAction: " << fi.first->name);
-                for (auto& r : fi.second) {
-                    LOG7("\t\tRange: " << r.first);
-                    for (auto &fii : r.second)
-                        LOG7("\t\t\tSlice: " << fii); } } }
+    for (auto &f : read_to_writes_per_action) {
+        LOG7("Key field: " << f.first << " is read by the field(s): ");
+        for (auto &fi : f.second) {
+            LOG7("\tAction: " << fi.first->name);
+            for (auto &r : fi.second) {
+                LOG7("\t\tRange: " << r.first);
+                for (auto &fii : r.second) LOG7("\t\t\tSlice: " << fii);
+            }
+        }
+    }
 
-    for (auto& by_field : field_writes_to_actions) {
-        for (auto& by_range : by_field.second) {
+    for (auto &by_field : field_writes_to_actions) {
+        for (auto &by_range : by_field.second) {
             LOG7(PHV::FieldSlice(by_field.first, by_range.first) << " written in:");
-            for (auto* act : by_range.second)
-                LOG7("    " << act->name); } }
+            for (auto *act : by_range.second) LOG7("    " << act->name);
+        }
+    }
 }
 
-bool ActionPhvConstraints::is_in_field_writes_to_actions(
-        cstring write,
-        const IR::MAU::Action* action) const {
-    const PHV::Field* write_field = phv.field(write);
-    if (write_field == nullptr)
-        return false;
+bool ActionPhvConstraints::is_in_field_writes_to_actions(cstring write,
+                                                         const IR::MAU::Action *action) const {
+    const PHV::Field *write_field = phv.field(write);
+    if (write_field == nullptr) return false;
     auto slice = PHV::FieldSlice(write_field, StartLen(0, write_field->size));
     auto acts = constraint_tracker.written_in(slice);
     return (acts.find(action) != acts.end());
 }
 
-bool ActionPhvConstraints::is_in_action_to_writes(
-        const IR::MAU::Action* action,
-        cstring write) const {
-    const PHV::Field* write_field = phv.field(write);
-    if (write_field == nullptr)
-        return false;
+bool ActionPhvConstraints::is_in_action_to_writes(const IR::MAU::Action *action,
+                                                  cstring write) const {
+    const PHV::Field *write_field = phv.field(write);
+    if (write_field == nullptr) return false;
     auto ops = constraint_tracker.writes(action);
-    return std::any_of(ops.begin(), ops.end(), [&](const OperandInfo& info) {
-                            return info.phv_used && info.phv_used->field() == write_field; });
+    return std::any_of(ops.begin(), ops.end(), [&](const OperandInfo &info) {
+        return info.phv_used && info.phv_used->field() == write_field;
+    });
 }
 
-bool ActionPhvConstraints::is_in_write_to_reads(
-        cstring write,
-        const IR::MAU::Action *act,
-        cstring read) const {
-    const PHV::Field* write_field = phv.field(write);
-    const PHV::Field* read_field = phv.field(read);
-    if (write_field == nullptr || read_field == nullptr)
-        return false;
+bool ActionPhvConstraints::is_in_write_to_reads(cstring write, const IR::MAU::Action *act,
+                                                cstring read) const {
+    const PHV::Field *write_field = phv.field(write);
+    const PHV::Field *read_field = phv.field(read);
+    if (write_field == nullptr || read_field == nullptr) return false;
     auto write_slice = PHV::FieldSlice(write_field, StartLen(0, write_field->size));
     auto reads = constraint_tracker.sources(write_slice, act);
-    return std::any_of(reads.begin(), reads.end(), [&](const OperandInfo& info) {
-                            return info.phv_used && info.phv_used->field() == read_field; });
+    return std::any_of(reads.begin(), reads.end(), [&](const OperandInfo &info) {
+        return info.phv_used && info.phv_used->field() == read_field;
+    });
 }
 
-ordered_map<const PHV::Field*, int> ActionPhvConstraints::compute_sources_first_order(
-    const ordered_map<const PHV::Field*, std::vector<PHV::FieldSlice>>& fields) const {
+ordered_map<const PHV::Field *, int> ActionPhvConstraints::compute_sources_first_order(
+    const ordered_map<const PHV::Field *, std::vector<PHV::FieldSlice>> &fields) const {
     // forall writes, add them to dep graph.
-    ordered_map<const PHV::Field*, int> field_to_nodes;
+    ordered_map<const PHV::Field *, int> field_to_nodes;
     SccTopoSorter topo_sorter;
-    for (const auto& kv : fields) {
-        const auto* f = kv.first;
-        const auto& slices = kv.second;
+    for (const auto &kv : fields) {
+        const auto *f = kv.first;
+        const auto &slices = kv.second;
         if (!field_to_nodes.count(f)) {
             field_to_nodes[f] = topo_sorter.new_node();
         }
-        for (const auto* src : slices_sources(f, slices)) {
+        for (const auto *src : slices_sources(f, slices)) {
             if (!field_to_nodes.count(src)) {
                 field_to_nodes[src] = topo_sorter.new_node();
             }
@@ -3984,25 +4020,24 @@ ordered_map<const PHV::Field*, int> ActionPhvConstraints::compute_sources_first_
         }
     }
     auto topo_orders = topo_sorter.scc_topo_sort();
-    ordered_map<const PHV::Field*, int> rst;
-    for (const auto& kv : field_to_nodes) {
+    ordered_map<const PHV::Field *, int> rst;
+    for (const auto &kv : field_to_nodes) {
         rst[kv.first] = topo_orders[kv.second];
     }
     return rst;
 }
 
 ActionPhvConstraints::ActionSources ActionPhvConstraints::getActionSources(
-        const IR::MAU::Action* act, const PHV::Container& c,
-        ordered_set<PHV::AllocSlice>& new_slices,
-        const PHV::Allocation& alloc) const {
+    const IR::MAU::Action *act, const PHV::Container &c, ordered_set<PHV::AllocSlice> &new_slices,
+    const PHV::Allocation &alloc) const {
     ActionSources rv;
 
     LOG5("Finding action sources for " << act->name << " writing to " << c);
-    for (const auto& fs : actionWritesSlices(act)) {
+    for (const auto &fs : actionWritesSlices(act)) {
         std::set<PHV::AllocSlice> dstSlices;
-        for (const auto& sl : new_slices) {
+        for (const auto &sl : new_slices) {
             if (sl.field() == fs.field() && sl.field_slice().overlaps(fs.range()) &&
-                    sl.container() == c) {
+                sl.container() == c) {
                 dstSlices.emplace(sl);
                 rv.dest_bits.setrange(sl.container_slice().lo, sl.container_slice().size());
             }
@@ -4017,14 +4052,14 @@ ActionPhvConstraints::ActionSources ActionPhvConstraints::getActionSources(
 
         if (dstSlices.size() == 0) continue;
 
-        for (const auto& op : constraint_tracker.sources(fs, act)) {
+        for (const auto &op : constraint_tracker.sources(fs, act)) {
             rv.has_ad |= op.ad;
             rv.has_const |= op.constant;
             if (op.phv_used) {
                 const auto slices =
                     alloc.slices(op.phv_used->field(), op.phv_used->range(),
                                  *stages(act, false).begin(), PHV::FieldUse(PHV::FieldUse::READ));
-                for (const auto& sl : slices) {
+                for (const auto &sl : slices) {
                     if (sl.container()) {
                         rv.phv.emplace(sl.container());
                     } else {
@@ -4039,30 +4074,29 @@ ActionPhvConstraints::ActionSources ActionPhvConstraints::getActionSources(
 }
 
 CanPackErrorV2 ActionPhvConstraints::check_read_action_move_constraints(
-    const PHV::Allocation& alloc,
-    const std::vector<PHV::AllocSlice>& candidates,
-    const IR::MAU::Action* action,
-    const PHV::Allocation::LiveRangeShrinkingMap& initActions) const {
+    const PHV::Allocation &alloc, const std::vector<PHV::AllocSlice> &candidates,
+    const IR::MAU::Action *action,
+    const PHV::Allocation::LiveRangeShrinkingMap &initActions) const {
     const auto action_stages = stages(action, candidates.front().isPhysicalStageBased());
     const auto use = PHV::FieldUse(PHV::FieldUse::WRITE);
-    for (const auto& stage : action_stages) {
+    for (const auto &stage : action_stages) {
         // Gather all containers read from any newly allocated slice.
         ordered_map<PHV::Container, ordered_set<PHV::AllocSlice>> container_write_slices;
-        for (const auto& slice : candidates) {
-            for (const auto& write : constraint_tracker.destinations(slice, action)) {
+        for (const auto &slice : candidates) {
+            for (const auto &write : constraint_tracker.destinations(slice, action)) {
                 // if destination has been allocated, save their containers.
-                alloc.foreach_slice(write.field(), write.range(), stage, use,
-                    [&] (const auto& write_sl) {
+                alloc.foreach_slice(
+                    write.field(), write.range(), stage, use, [&](const auto &write_sl) {
                         container_write_slices[write_sl.container()].insert(write_sl);
                     });
             }
         }
         // Walk through the destination containers one-by-one and check their validity
-        for (const auto& kv : container_write_slices) {
-            const auto& c = kv.first;
-            const auto& write_slices = kv.second;
-            const auto is_all_mutex = [&](const PHV::AllocSlice& sl) {
-                for (const auto& write_sl : write_slices) {
+        for (const auto &kv : container_write_slices) {
+            const auto &c = kv.first;
+            const auto &write_slices = kv.second;
+            const auto is_all_mutex = [&](const PHV::AllocSlice &sl) {
+                for (const auto &write_sl : write_slices) {
                     if (!phv.field_mutex()(write_sl.field()->id, sl.field()->id) &&
                         !write_sl.isLiveRangeDisjoint(sl)) {
                         return false;
@@ -4072,15 +4106,14 @@ CanPackErrorV2 ActionPhvConstraints::check_read_action_move_constraints(
             };
 
             ordered_set<PHV::AllocSlice> live_slices;
-            for (const auto& sl : alloc.slices(c, stage, use)) {
+            for (const auto &sl : alloc.slices(c, stage, use)) {
                 if (is_all_mutex(sl)) continue;
                 live_slices.insert(sl);
             }
             auto op_type = container_operation_type(action, live_slices, {});
             if (op_type == OperandInfo::MOVE) {
                 auto err =
-                    check_move_constraints(
-                            alloc, action, candidates, live_slices, c, initActions);
+                    check_move_constraints(alloc, action, candidates, live_slices, c, initActions);
                 if (!err.ok()) {
                     return err;
                 }
@@ -4091,9 +4124,8 @@ CanPackErrorV2 ActionPhvConstraints::check_read_action_move_constraints(
 }
 
 CanPackErrorV2 ActionPhvConstraints::check_read_action_num_source_constraints(
-    const PHV::Allocation& alloc,
-    const std::vector<PHV::AllocSlice>& candidates,
-    const IR::MAU::Action* action) const {
+    const PHV::Allocation &alloc, const std::vector<PHV::AllocSlice> &candidates,
+    const IR::MAU::Action *action) const {
     for (const int stage : stages(action, candidates.front().isPhysicalStageBased())) {
         // Gather all containers written by any of the slices in candidates
         //
@@ -4108,7 +4140,7 @@ CanPackErrorV2 ActionPhvConstraints::check_read_action_num_source_constraints(
                     if (writeSlice.container()) dests.emplace(writeSlice.container());
 
         // Walk through the destination containers one-by-one and check their validity
-        for (const auto& dest : dests) {
+        for (const auto &dest : dests) {
             const bool mocha_or_dark = dest.is(PHV::Kind::mocha) || dest.is(PHV::Kind::dark);
             size_t num_adc = 0;
             ordered_set<PHV::Container> all_source_containers;
@@ -4121,7 +4153,7 @@ CanPackErrorV2 ActionPhvConstraints::check_read_action_num_source_constraints(
                         num_adc = 1;
                         continue;
                     }
-                    const PHV::Field* src_field = operand.phv_used->field();
+                    const PHV::Field *src_field = operand.phv_used->field();
                     le_bitrange src_field_range = operand.phv_used->range();
                     ordered_set<PHV::Container> src_containers;
                     ordered_set<PHV::AllocSlice> src_alloc = alloc.slices(
@@ -4169,11 +4201,11 @@ CanPackErrorV2 ActionPhvConstraints::check_read_action_num_source_constraints(
 }
 
 CanPackErrorV2 ActionPhvConstraints::check_move_constraints_from_read(
-    const PHV::Allocation& alloc, const std::vector<PHV::AllocSlice>& candidates,
-    const PHV::Allocation::LiveRangeShrinkingMap& initActions) const {
-    ordered_set<const IR::MAU::Action*> verified;
-    for (const auto& slice : candidates) {
-        for (const auto& action : constraint_tracker.read_in(slice)) {
+    const PHV::Allocation &alloc, const std::vector<PHV::AllocSlice> &candidates,
+    const PHV::Allocation::LiveRangeShrinkingMap &initActions) const {
+    ordered_set<const IR::MAU::Action *> verified;
+    for (const auto &slice : candidates) {
+        for (const auto &action : constraint_tracker.read_in(slice)) {
             if (verified.count(action)) {
                 continue;
             }
@@ -4181,8 +4213,7 @@ CanPackErrorV2 ActionPhvConstraints::check_move_constraints_from_read(
             LOG5("\t\t\tCheck action " << action->name << " because its source "
                                        << slice.field()->name << " is being allocated.");
             // check move-based instruction constraints
-            auto err = check_read_action_move_constraints(
-                    alloc, candidates, action, initActions);
+            auto err = check_read_action_move_constraints(alloc, candidates, action, initActions);
             if (!err.ok()) {
                 std::stringstream ss;
                 ss << "In action " << action->externalName()
@@ -4203,11 +4234,10 @@ CanPackErrorV2 ActionPhvConstraints::check_move_constraints_from_read(
 }
 
 CanPackErrorCode ActionPhvConstraints::check_ara_move_constraints(
-    const PHV::Allocation& alloc,
-    const PHV::Allocation::MutuallyLiveSlices& container_state, const PHV::Container& c,
-    const PHV::Allocation::LiveRangeShrinkingMap& initActions) const {
+    const PHV::Allocation &alloc, const PHV::Allocation::MutuallyLiveSlices &container_state,
+    const PHV::Container &c, const PHV::Allocation::LiveRangeShrinkingMap &initActions) const {
     using namespace solver;
-    auto* solver = make_solver(c);
+    auto *solver = make_solver(c);
     // Unfornately, due to the current implementation, there can be non-mutex alloc slices
     // in container_state, when dark overlay is involved. For example, you might see
     // MH10 bit[15..0] <--f1<16> mocha [0:15] live at [9w, 11r] { always_run; 0 actions }
@@ -4215,16 +4245,16 @@ CanPackErrorCode ActionPhvConstraints::check_ara_move_constraints(
     // DH9 bit[15..0]  <--f1<16> mocha [0:15] live at [5w, 9r]
     // in container_state when we dark swap out f1 to DH9.
     // So, we need to filter out all ara actions and check fields that lives.
-    ordered_set<const PHV::AllocSlice*> ara_slices;
-    for (const auto& slice : container_state) {
-        const auto& prim = slice.getInitPrimitive();
+    ordered_set<const PHV::AllocSlice *> ara_slices;
+    for (const auto &slice : container_state) {
+        const auto &prim = slice.getInitPrimitive();
         // alloc slice without source slices are slices that was swapped out, e.g.,
         // DH9 bit[15..0] <-- f1 live at [5w, 9r] = MH10 f2 live at [-1w, 5r].
         if (prim.isAlwaysRunActionPrim() && prim.getSourceSlice()) {
             ara_slices.insert(&slice);
         }
     }
-    for (const auto* ara_slice : ara_slices) {
+    for (const auto *ara_slice : ara_slices) {
         LOG3("check ARA on slice: " << ara_slice);
         solver->clear();
         solver->enable_bitmasked_set(false);  // ara cannot do bitmasked set.
@@ -4233,7 +4263,7 @@ CanPackErrorCode ActionPhvConstraints::check_ara_move_constraints(
                                  ara_slice->getEarliestLiveness().first, nullptr);
         LOG5("dest live bits bitvec after ARA: " << dest_live);
         solver->set_container_spec(c.toString(), c.size(), dest_live);
-        for (const auto& slice : container_state) {
+        for (const auto &slice : container_state) {
             // TODO: It seems that we are adding dark init for pure padding fields.
             // We should fix it in darkInit and change this to a bug check?.
             if (!uses.is_referenced(slice.field()) || slice.field()->padding) {
@@ -4244,7 +4274,7 @@ CanPackErrorCode ActionPhvConstraints::check_ara_move_constraints(
             if (slice.getEarliestLiveness() != ara_slice->getEarliestLiveness()) {
                 continue;
             }
-            const auto& prim = slice.getInitPrimitive();
+            const auto &prim = slice.getInitPrimitive();
             const auto dest = make_container_operand(c.toString(), slice.container_slice());
             if (prim.isAlwaysRunActionPrim()) {
                 if (auto src_slice = prim.getSourceSlice()) {
@@ -4270,7 +4300,7 @@ CanPackErrorCode ActionPhvConstraints::check_ara_move_constraints(
         }
         if (LOGGING(4)) {
             LOG4("ARA instructions: ");
-            for (const auto* inst : rst.instructions) {
+            for (const auto *inst : rst.instructions) {
                 LOG4(inst->to_cstring());
             }
         }
@@ -4279,24 +4309,23 @@ CanPackErrorCode ActionPhvConstraints::check_ara_move_constraints(
 }
 
 CanPackErrorV2 ActionPhvConstraints::check_move_constraints(
-    const PHV::Allocation& alloc, const IR::MAU::Action* action,
-    const std::vector<PHV::AllocSlice>& slices,
-    const PHV::Allocation::MutuallyLiveSlices& container_state, const PHV::Container& c,
-    const PHV::Allocation::LiveRangeShrinkingMap& initActions) const {
+    const PHV::Allocation &alloc, const IR::MAU::Action *action,
+    const std::vector<PHV::AllocSlice> &slices,
+    const PHV::Allocation::MutuallyLiveSlices &container_state, const PHV::Container &c,
+    const PHV::Allocation::LiveRangeShrinkingMap &initActions) const {
     if (LOGGING(5)) {
         LOG5("check_move_constraints:");
         LOG5("action: " << action->name);
-        for (const auto& slice : container_state) {
+        for (const auto &slice : container_state) {
             LOG5("slice: " << slice);
         }
     }
     using namespace solver;
-    auto* solver = make_solver(c);
+    auto *solver = make_solver(c);
 
     // check metaInit for dest slice, if found, add assignment to solver.
-    const auto add_meta_init_assign = [&](const IR::MAU::Action* action,
-                                          const PHV::AllocSlice& slice,
-                                          const Operand& dest) {
+    const auto add_meta_init_assign = [&](const IR::MAU::Action *action,
+                                          const PHV::AllocSlice &slice, const Operand &dest) {
         if (initActions.count(slice.field()) && initActions.at(slice.field()).count(action)) {
             LOG5("add metadata init to " << dest);
             solver->add_assign(dest, make_ad_or_const_operand());
@@ -4308,20 +4337,19 @@ CanPackErrorV2 ActionPhvConstraints::check_move_constraints(
 
     // check dark swap slices. AlwaysRun inits in getInitPrimitive are ignored here
     // because those slices were not initialized through actions.
-    const auto add_dark_init_assign = [&](const IR::MAU::Action* action,
-                                          const PHV::AllocSlice& slice,
-                                          const Operand& dest) {
-        const auto& dark_prim = slice.getInitPrimitive();
+    const auto add_dark_init_assign = [&](const IR::MAU::Action *action,
+                                          const PHV::AllocSlice &slice, const Operand &dest) {
+        const auto &dark_prim = slice.getInitPrimitive();
         if (!dark_prim.isAlwaysRunActionPrim()) {
             if (dark_prim.getInitPoints().count(action)) {
                 auto src_slice = dark_prim.getSourceSlice();
                 if (src_slice) {
                     const auto src_container = src_slice->container();
-                    const auto src = make_container_operand(
-                            src_container.toString(), src_slice->container_slice());
+                    const auto src = make_container_operand(src_container.toString(),
+                                                            src_slice->container_slice());
                     if (src_container != c) {
-                        solver->set_container_spec(
-                                src_container.toString(), src_container.size(), bitvec());
+                        solver->set_container_spec(src_container.toString(), src_container.size(),
+                                                   bitvec());
                     }
                     LOG5("add dark container move to " << dest << " from " << src);
                     solver->add_assign(dest, src);
@@ -4334,9 +4362,8 @@ CanPackErrorV2 ActionPhvConstraints::check_move_constraints(
     };
 
     // add assignment to dest in the action.
-    const auto add_action_assign = [&](const IR::MAU::Action* action,
-                                       const PHV::AllocSlice& dest_slice,
-                                       const Operand& dest,
+    const auto add_action_assign = [&](const IR::MAU::Action *action,
+                                       const PHV::AllocSlice &dest_slice, const Operand &dest,
                                        const int stage) {
         // ignore slices that are not live for this action.
         // earliest is always a write, if write after this stage, ignore
@@ -4349,9 +4376,9 @@ CanPackErrorV2 ActionPhvConstraints::check_move_constraints(
             return;
         }
         BUG_CHECK(sources.size() == 1,
-            "dest_slice %1% is not fine-sliced. Multiple sources found: %2%\n%3%",
-             dest_slice.toString(), sources.size(), sources);
-        const auto& operand = sources.front();
+                  "dest_slice %1% is not fine-sliced. Multiple sources found: %2%\n%3%",
+                  dest_slice.toString(), sources.size(), sources);
+        const auto &operand = sources.front();
         LOG5("has op: " << operand);
         if (operand.ad || operand.constant) {
             LOG5("add ad_or_const move to " << dest);
@@ -4381,7 +4408,7 @@ CanPackErrorV2 ActionPhvConstraints::check_move_constraints(
 
     bool clear_align = false;
     bool enable_bitmasked_set = true;
-    const auto* tbl = constraint_tracker.action_table(action);
+    const auto *tbl = constraint_tracker.action_table(action);
     if (tbl->match_key.empty()) {
         GetActionRequirements ghdr;
         action->apply(ghdr);
@@ -4389,7 +4416,7 @@ CanPackErrorV2 ActionPhvConstraints::check_move_constraints(
             enable_bitmasked_set = false;  // Keyless table with hash cannot have action data
     }
     const auto action_stages = stages(action, slices.front().isPhysicalStageBased());
-    for (const auto& stage : action_stages) {
+    for (const auto &stage : action_stages) {
         solver->clear();
         LOG5("check action " << action->name << " for " << c << " @ stage " << stage);
         solver->enable_bitmasked_set(enable_bitmasked_set);
@@ -4397,7 +4424,7 @@ CanPackErrorV2 ActionPhvConstraints::check_move_constraints(
             compute_dest_live_bv(uses, alloc, initActions, container_state, stage, action);
         LOG5("dest after action live bitvec: " << dest_live);
         solver->set_container_spec(c.toString(), c.size(), dest_live);
-        for (const auto& slice : container_state) {
+        for (const auto &slice : container_state) {
             // There can be dark slices in container state even if c is a normal container,
             // because of the current implementation of container_states. Those slice
             // should be just ignored. TODO: split them out to dark solver?
@@ -4412,11 +4439,11 @@ CanPackErrorV2 ActionPhvConstraints::check_move_constraints(
             // the instruction, that read this container for the upcasted field, will read
             // corrupted bits. We check it by setting all bits of destination
             // to be *live*, (meaning cannot be clobbered), to solver.
-            if (c.type().kind() == PHV::Kind::mocha || c.type().kind() == PHV::Kind::dark){
+            if (c.type().kind() == PHV::Kind::mocha || c.type().kind() == PHV::Kind::dark) {
                 if (slice.field()->is_upcasted()) {
                     const auto sources = constraint_tracker.sources(slice, action);
                     if (!sources.empty()) {
-                        const auto& operand = sources.front();
+                        const auto &operand = sources.front();
                         // Action Data or Constant set the entire container with padding
                         if (!operand.ad && !operand.constant)
                             solver->set_container_spec(c.toString(), c.size(), bitvec(0, c.size()));
@@ -4434,8 +4461,8 @@ CanPackErrorV2 ActionPhvConstraints::check_move_constraints(
             LOG2("Solver Error Reason: " << rst.err->msg);
             // construct invalid-packing slices, which are slices live in the container
             // for this action.
-            auto* invalid_packing = new std::vector<PHV::AllocSlice>();
-            for (const auto& sl : container_state) {
+            auto *invalid_packing = new std::vector<PHV::AllocSlice>();
+            for (const auto &sl : container_state) {
                 if (sl.container() != c) {
                     continue;
                 }
@@ -4448,7 +4475,7 @@ CanPackErrorV2 ActionPhvConstraints::check_move_constraints(
         }
         int num_instrs = rst.instructions.size();
         LOG4("instructions: ");
-        for (const auto* inst : rst.instructions) {
+        for (const auto *inst : rst.instructions) {
             clear_align = (num_instrs == 1) && (inst->name() == "byte-rotate-merge");
             LOG4(inst->to_cstring());
         }
@@ -4457,47 +4484,36 @@ CanPackErrorV2 ActionPhvConstraints::check_move_constraints(
     return CanPackErrorV2{CanPackErrorCode::NO_ERROR, clear_align};
 }
 
-std::ostream &operator<<(std::ostream &out, const ActionPhvConstraints::ClassifiedSource& src) {
-    out << (boost::format("{ exist: %1%, container: %2%, aligned: %3%, offset: %4%, ") %
-            src.exist % src.container % src.aligned % src.offset);
+std::ostream &operator<<(std::ostream &out, const ActionPhvConstraints::ClassifiedSource &src) {
+    out << (boost::format("{ exist: %1%, container: %2%, aligned: %3%, offset: %4%, ") % src.exist %
+            src.container % src.aligned % src.offset);
     out << "slices: [";
     for (auto sl : src.slices) out << sl << ", ";
     out << "]}";
     return out;
 }
 
-std::ostream &operator<<(std::ostream &out, const ActionPhvConstraints::OperandInfo& info) {
+std::ostream &operator<<(std::ostream &out, const ActionPhvConstraints::OperandInfo &info) {
     out << "[ ";
-    if (info.ad)
-        out << "ACTION DATA ";
-    if (info.constant)
-        out << "CONST " << info.const_value << " ";
-    if (info.phv_used)
-        out << *info.phv_used << " ";
-    if (!info.ad && !info.constant && !info.phv_used)
-        out << "INVALID OPERAND INFO ";
+    if (info.ad) out << "ACTION DATA ";
+    if (info.constant) out << "CONST " << info.const_value << " ";
+    if (info.phv_used) out << *info.phv_used << " ";
+    if (!info.ad && !info.constant && !info.phv_used) out << "INVALID OPERAND INFO ";
     out << "]";
     out << "[ ";
-    if (info.flags & ActionPhvConstraints::OperandInfo::MOVE)
-        out << " MOVE ";
-    if (info.flags & ActionPhvConstraints::OperandInfo::BITWISE)
-        out << " BITWISE ";
-    if (info.flags & ActionPhvConstraints::OperandInfo::WHOLE_CONTAINER)
-        out << " WHOLE ";
-    if (info.flags & ActionPhvConstraints::OperandInfo::PART_OF_CONTAINER)
-        out << " PART ";
-    if (info.flags & ActionPhvConstraints::OperandInfo::ANOTHER_OPERAND)
-        out << " ANOTHER ";
-    if (info.flags & ActionPhvConstraints::OperandInfo::MIXED)
-        out << " MIXED ";
-    if (info.flags & ActionPhvConstraints::OperandInfo::WHOLE_CONTAINER_SAME_FIELD)
-        out << " SAME ";
+    if (info.flags & ActionPhvConstraints::OperandInfo::MOVE) out << " MOVE ";
+    if (info.flags & ActionPhvConstraints::OperandInfo::BITWISE) out << " BITWISE ";
+    if (info.flags & ActionPhvConstraints::OperandInfo::WHOLE_CONTAINER) out << " WHOLE ";
+    if (info.flags & ActionPhvConstraints::OperandInfo::PART_OF_CONTAINER) out << " PART ";
+    if (info.flags & ActionPhvConstraints::OperandInfo::ANOTHER_OPERAND) out << " ANOTHER ";
+    if (info.flags & ActionPhvConstraints::OperandInfo::MIXED) out << " MIXED ";
+    if (info.flags & ActionPhvConstraints::OperandInfo::WHOLE_CONTAINER_SAME_FIELD) out << " SAME ";
     out << "]";
     return out;
 }
 
-std::ostream &
-operator<<(std::ostream &out, const safe_vector<ActionPhvConstraints::OperandInfo>& info) {
+std::ostream &operator<<(std::ostream &out,
+                         const safe_vector<ActionPhvConstraints::OperandInfo> &info) {
     for (auto i : info) {
         out << i << "\n";
     }

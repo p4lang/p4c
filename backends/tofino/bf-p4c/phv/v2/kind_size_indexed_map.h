@@ -23,13 +23,13 @@ namespace v2 {
 
 struct KindSizeIndexedMap {
     std::map<std::pair<PHV::Kind, PHV::Size>, int> m;
-    int& operator[](const std::pair<PHV::Kind, PHV::Size>& ks) { return m[ks]; }
-    int sum(const PHV::Kind& k) const;
-    int sum(const PHV::Size& k) const;
-    std::optional<int> get(const PHV::Kind& k, const PHV::Size& s) const;
-    int get_or(const PHV::Kind& k, const PHV::Size& s, int default_val) const;
+    int &operator[](const std::pair<PHV::Kind, PHV::Size> &ks) { return m[ks]; }
+    int sum(const PHV::Kind &k) const;
+    int sum(const PHV::Size &k) const;
+    std::optional<int> get(const PHV::Kind &k, const PHV::Size &s) const;
+    int get_or(const PHV::Kind &k, const PHV::Size &s, int default_val) const;
 };
-std::ostream& operator<<(std::ostream&, const KindSizeIndexedMap&);
+std::ostream &operator<<(std::ostream &, const KindSizeIndexedMap &);
 
 }  // namespace v2
 }  // namespace PHV

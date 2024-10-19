@@ -13,13 +13,14 @@
 #ifndef BF_P4C_PHV_SOLVER_ACTION_CONSTRAINT_SOLVER_H_
 #define BF_P4C_PHV_SOLVER_ACTION_CONSTRAINT_SOLVER_H_
 
-#include <vector>
 #include <optional>
+#include <vector>
+
 #include "bf-p4c/ir/bitrange.h"
+#include "bf-p4c/phv/solver/symbolic_bitvec.h"
 #include "lib/bitvec.h"
 #include "lib/cstring.h"
 #include "lib/ordered_map.h"
-#include "bf-p4c/phv/solver/symbolic_bitvec.h"
 
 namespace solver {
 
@@ -53,8 +54,7 @@ class DepositField : public Instruction {
     int left_rotate;
     bitvec mask;
     ContainerID src2;
-    DepositField(ContainerID dest, ContainerID src1, int left_rotate, bitvec mask,
-                 ContainerID src2)
+    DepositField(ContainerID dest, ContainerID src1, int left_rotate, bitvec mask, ContainerID src2)
         : dest(dest), src1(src1), left_rotate(left_rotate), mask(mask), src2(src2) {}
     cstring name() const override { return "deposit-field"_cs; };
     cstring to_cstring() const override;
@@ -98,8 +98,7 @@ class ContainerSet : public Instruction {
  public:
     ContainerID dest;
     ContainerID src;
-    ContainerSet(ContainerID dest, ContainerID src)
-        : dest(dest), src(src) {}
+    ContainerSet(ContainerID dest, ContainerID src) : dest(dest), src(src) {}
     cstring name() const override { return "set"_cs; };
     cstring to_cstring() const override;
 };
@@ -134,11 +133,11 @@ struct ContainerSpec {
 /// Result contains either an error or all instructions for an action.
 struct Result {
     std::optional<Error> err;
-    std::vector<const Instruction*> instructions;
-    Result(){}
-    explicit Result(const Error& err): err(err) {}
-    explicit Result(const Instruction* inst): instructions({inst}) {}
-    explicit Result(const std::vector<const Instruction*>& instructions)
+    std::vector<const Instruction *> instructions;
+    Result() {}
+    explicit Result(const Error &err) : err(err) {}
+    explicit Result(const Instruction *inst) : instructions({inst}) {}
+    explicit Result(const std::vector<const Instruction *> &instructions)
         : instructions(instructions) {}
     bool ok() { return !err; }
 };
@@ -148,12 +147,12 @@ struct Operand {
     bool is_ad_or_const;
     ContainerID container;
     le_bitrange range;
-    bool operator==(const Operand& b) const {
+    bool operator==(const Operand &b) const {
         return is_ad_or_const == b.is_ad_or_const && container == b.container && range == b.range;
     }
-    bool operator!=(const Operand& b) const { return !(*this == b); }
+    bool operator!=(const Operand &b) const { return !(*this == b); }
 };
-std::ostream& operator<<(std::ostream& s, const Operand&);
+std::ostream &operator<<(std::ostream &s, const Operand &);
 
 /// Constructor helper functions for operand.
 Operand make_ad_or_const_operand();
@@ -164,8 +163,8 @@ struct Assign {
     Operand dst;
     Operand src;
 };
-std::ostream& operator<<(std::ostream& s, const Assign&);
-std::ostream& operator<<(std::ostream& s, const std::vector<Assign>&);
+std::ostream &operator<<(std::ostream &s, const Assign &);
+std::ostream &operator<<(std::ostream &s, const std::vector<Assign> &);
 
 /// right-rotate-offset-indexed assignments.
 using RotateClassifiedAssigns = std::map<int, std::vector<Assign>>;
@@ -192,7 +191,7 @@ class ActionSolverBase {
     /// Also, We need to ensure that other allocated bits in the container will not be corrupted,
     /// i.e., all other bits of dest that are not set in this action need to be not live.
     Result try_container_set(const ContainerID dest,
-                             const RotateClassifiedAssigns& offset_assigns) const;
+                             const RotateClassifiedAssigns &offset_assigns) const;
 
     /// For all destination container c in @a src_unallocated_bits, that if dest_assigns_i
     /// do not have records of c, i.e., none of the sources have been allocated, check
@@ -201,12 +200,10 @@ class ActionSolverBase {
 
  public:
     /// set true to enable bitmasked_set set, otherwise disable. default: enable.
-    void enable_bitmasked_set(bool enable) {
-        enable_bitmasked_set_i = enable;
-    }
+    void enable_bitmasked_set(bool enable) { enable_bitmasked_set_i = enable; }
 
     /// add an assignment from the action.
-    virtual void add_assign(const Operand& dst, Operand src);
+    virtual void add_assign(const Operand &dst, Operand src);
 
     /// setrange on @p c of src_unallocated_bits by @p range.
     /// contract:
@@ -217,7 +214,7 @@ class ActionSolverBase {
     /// f1: [0w, 3r],
     /// f2: [3w, 4r].
     /// if we allocate (overlay) f2 to W[0:2], this assignment can be eliminated.
-    virtual void add_src_unallocated_assign(const ContainerID& c, const le_bitrange& range);
+    virtual void add_src_unallocated_assign(const ContainerID &c, const le_bitrange &range);
 
     /// set_container_spec will update the container spec.
     virtual void set_container_spec(ContainerID id, int size, bitvec live);
@@ -257,51 +254,47 @@ class ActionMoveSolver : public ActionSolverBase {
  private:
     // check whether @p bv_dest satifies all assignments.
     std::optional<Error> dest_meet_expectation(const ContainerID dest,
-                                                 const std::vector<Assign>& src1,
-                                                 const std::vector<Assign>& src2,
-                                                 const symbolic_bitvec::BitVec& bv_dest,
-                                                 const symbolic_bitvec::BitVec& bv_src1,
-                                                 const symbolic_bitvec::BitVec& bv_src2) const;
+                                               const std::vector<Assign> &src1,
+                                               const std::vector<Assign> &src2,
+                                               const symbolic_bitvec::BitVec &bv_dest,
+                                               const symbolic_bitvec::BitVec &bv_src1,
+                                               const symbolic_bitvec::BitVec &bv_src2) const;
 
     /// run deposit-field instruction symbolic bitvec solver with specific src1 and src2.
     /// When src2 is empty, src2 is assumed to be dest.
-    Result run_deposit_field_symbolic_bitvec_solver(
-        const ContainerID dest,
-        const std::vector<Assign>& src1, const std::vector<Assign>& src2) const;
+    Result run_deposit_field_symbolic_bitvec_solver(const ContainerID dest,
+                                                    const std::vector<Assign> &src1,
+                                                    const std::vector<Assign> &src2) const;
 
     /// an indirection to symbolic bitvec solver, potentially can be other solvers.
-    Result run_deposit_field_solver(
-        const ContainerID dest,
-        const std::vector<Assign>& src1, const std::vector<Assign>& src2) const;
+    Result run_deposit_field_solver(const ContainerID dest, const std::vector<Assign> &src1,
+                                    const std::vector<Assign> &src2) const;
 
     /// try solve this assignment using deposit-field.
-    Result try_deposit_field(
-        const ContainerID dest, const RotateClassifiedAssigns& assigns) const;
+    Result try_deposit_field(const ContainerID dest, const RotateClassifiedAssigns &assigns) const;
 
     /// Build and run a symbolic solver to check possibility of assignments on dest from
     /// src1 and src2. When src2 is empty, src2 is assumed to be dest.
-    Result run_byte_rotate_merge_symbolic_bitvec_solver(
-        const ContainerID dest, const std::vector<Assign>& src1,
-        const std::vector<Assign>& src2) const;
+    Result run_byte_rotate_merge_symbolic_bitvec_solver(const ContainerID dest,
+                                                        const std::vector<Assign> &src1,
+                                                        const std::vector<Assign> &src2) const;
 
     /// an indirection to symbolic solver. For byte-rotate-merge,
     /// only symbolic solver is implemented.
-    Result run_byte_rotate_merge_solver(
-        const ContainerID dest, const std::vector<Assign>& src1,
-        const std::vector<Assign>& src2) const;
+    Result run_byte_rotate_merge_solver(const ContainerID dest, const std::vector<Assign> &src1,
+                                        const std::vector<Assign> &src2) const;
 
     /// try to solve this assignment using byte_rotate_merge.
     /// dest = ((src1 << src1_shift) & mask) | ((src2 << src2_shift) & ~mask)
-    Result try_byte_rotate_merge(
-        const ContainerID dest, const RotateClassifiedAssigns& assigns) const;
+    Result try_byte_rotate_merge(const ContainerID dest,
+                                 const RotateClassifiedAssigns &assigns) const;
 
     /// try to solve this assignment using bitmasked-set.
     /// Note that, even if it's possible to just use a simple ContainerSet, this function
     /// will return a BitmaskedSet. Since a simple containerSet can be considered as a
     /// special form of deposit-field with 0 shift and full mask, make sure to try use
     /// deposit-field first.
-    Result try_bitmasked_set(
-        const ContainerID dest, const RotateClassifiedAssigns& assigns) const;
+    Result try_bitmasked_set(const ContainerID dest, const RotateClassifiedAssigns &assigns) const;
 
     /// This optimization allows solver to detect impossible action
     /// synthesis even before all source fields have been allocated. It targets the case that
@@ -326,8 +319,8 @@ class ActionMoveSolver : public ActionSolverBase {
     /// To overcome the above false positive caller must strictly follow the contract in
     /// add_src_unallocated_assign: DO NOT add overlayable source as unallocated.
     /// unit-tests: unallocated_src_optimization_*
-    const RotateClassifiedAssigns* apply_unallocated_src_optimization(
-        const ContainerID dest, const RotateClassifiedAssigns& offset_assigns);
+    const RotateClassifiedAssigns *apply_unallocated_src_optimization(
+        const ContainerID dest, const RotateClassifiedAssigns &offset_assigns);
 
  public:
     Result solve() override;
@@ -341,7 +334,7 @@ class ActionMoveSolver : public ActionSolverBase {
 /// are not set in this action need to be not live.
 class ActionMochaSolver : public ActionSolverBase {
  public:
-    ActionMochaSolver() {};
+    ActionMochaSolver(){};
     Result solve() override;
 };
 
@@ -352,7 +345,7 @@ class ActionMochaSolver : public ActionSolverBase {
 /// are not set in this action need not to be not live.
 class ActionDarkSolver : public ActionSolverBase {
  public:
-    ActionDarkSolver() {};
+    ActionDarkSolver(){};
     Result solve() override;
 };
 

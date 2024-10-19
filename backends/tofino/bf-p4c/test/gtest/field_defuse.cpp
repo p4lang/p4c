@@ -10,18 +10,19 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include <optional>
-#include <boost/algorithm/string/replace.hpp>
-#include "gtest/gtest.h"
-
-#include "ir/ir.h"
-#include "lib/error.h"
-#include "test/gtest/helpers.h"
 #include "bf-p4c/common/field_defuse.h"
+
+#include <optional>
+
+#include <boost/algorithm/string/replace.hpp>
+
 #include "bf-p4c/common/header_stack.h"
 #include "bf-p4c/phv/phv_fields.h"
 #include "bf-p4c/test/gtest/tofino_gtest_utils.h"
-
+#include "gtest/gtest.h"
+#include "ir/ir.h"
+#include "lib/error.h"
+#include "test/gtest/helpers.h"
 
 namespace P4::Test {
 
@@ -29,8 +30,7 @@ class FieldDefUseTest : public TofinoBackendTest {};
 
 namespace {
 
-std::optional<TofinoPipeTestCase>
-createFieldDefUseTestCase(const std::string& ingress) {
+std::optional<TofinoPipeTestCase> createFieldDefUseTestCase(const std::string &ingress) {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
         header H1
         {
@@ -69,7 +69,7 @@ createFieldDefUseTestCase(const std::string& ingress) {
 
     boost::replace_first(source, "%INGRESS%", ingress);
 
-    auto& options = BackendOptions();
+    auto &options = BackendOptions();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.target = "tofino"_cs;
     options.arch = "v1model"_cs;
@@ -78,21 +78,16 @@ createFieldDefUseTestCase(const std::string& ingress) {
     return TofinoPipeTestCase::createWithThreadLocalInstances(source);
 }
 
-const IR::BFN::Pipe *runMockPasses(const IR::BFN::Pipe* pipe, PhvInfo& phv, FieldDefUse& defuse) {
-    PassManager quick_backend = {
-        new CollectHeaderStackInfo,
-        new CollectPhvInfo(phv),
-        &defuse
-    };
+const IR::BFN::Pipe *runMockPasses(const IR::BFN::Pipe *pipe, PhvInfo &phv, FieldDefUse &defuse) {
+    PassManager quick_backend = {new CollectHeaderStackInfo, new CollectPhvInfo(phv), &defuse};
     return pipe->apply(quick_backend);
 }
 
 }  // namespace
 
 TEST_F(FieldDefUseTest, SimpleTest) {
-    auto test = createFieldDefUseTestCase(
-            P4_SOURCE(P4Headers::NONE,
-                      R"(
+    auto test = createFieldDefUseTestCase(P4_SOURCE(P4Headers::NONE,
+                                                    R"(
                          bit<9> foo;
                          if(sm.ingress_port == 1) {
                              foo = 1;
@@ -120,9 +115,8 @@ TEST_F(FieldDefUseTest, SimpleTest) {
 }
 
 TEST_F(FieldDefUseTest, SimpleSliceTest) {
-    auto test = createFieldDefUseTestCase(
-            P4_SOURCE(P4Headers::NONE,
-                      R"(
+    auto test = createFieldDefUseTestCase(P4_SOURCE(P4Headers::NONE,
+                                                    R"(
                          bit<16> foo = 1;
                          foo[15:9] = 0;
                          foo[8:0] = sm.ingress_port;
@@ -151,9 +145,8 @@ TEST_F(FieldDefUseTest, SimpleSliceTest) {
 }
 
 TEST_F(FieldDefUseTest, ComplexSliceTest1) {
-    auto test = createFieldDefUseTestCase(
-            P4_SOURCE(P4Headers::NONE,
-                      R"(
+    auto test = createFieldDefUseTestCase(P4_SOURCE(P4Headers::NONE,
+                                                    R"(
                          bit<16> foo = 1;
                          if (sm.ingress_port == 1) {
                              foo = 2;
@@ -185,9 +178,8 @@ TEST_F(FieldDefUseTest, ComplexSliceTest1) {
 }
 
 TEST_F(FieldDefUseTest, ComplexSliceTest2) {
-    auto test = createFieldDefUseTestCase(
-            P4_SOURCE(P4Headers::NONE,
-                      R"(
+    auto test = createFieldDefUseTestCase(P4_SOURCE(P4Headers::NONE,
+                                                    R"(
                          bit<16> foo = 1;
                          if (sm.ingress_port == 1) {
                              foo[15:8] = 2;
@@ -219,9 +211,8 @@ TEST_F(FieldDefUseTest, ComplexSliceTest2) {
 }
 
 TEST_F(FieldDefUseTest, ComplexSliceTest3) {
-    auto test = createFieldDefUseTestCase(
-            P4_SOURCE(P4Headers::NONE,
-                      R"(
+    auto test = createFieldDefUseTestCase(P4_SOURCE(P4Headers::NONE,
+                                                    R"(
                          bit<16> foo = 1;
                          if (sm.ingress_port == 1) {
                              foo[15:8] = 2;
@@ -252,9 +243,8 @@ TEST_F(FieldDefUseTest, ComplexSliceTest3) {
 }
 
 TEST_F(FieldDefUseTest, ComplexSliceTest4) {
-    auto test = createFieldDefUseTestCase(
-            P4_SOURCE(P4Headers::NONE,
-                      R"(
+    auto test = createFieldDefUseTestCase(P4_SOURCE(P4Headers::NONE,
+                                                    R"(
                          bit<16> foo = 1;
                          if (sm.ingress_port == 1) {
                              foo[15:8] = 2;
@@ -287,9 +277,8 @@ TEST_F(FieldDefUseTest, ComplexSliceTest4) {
 }
 
 TEST_F(FieldDefUseTest, ComplexSliceTest5) {
-    auto test = createFieldDefUseTestCase(
-            P4_SOURCE(P4Headers::NONE,
-                      R"(
+    auto test = createFieldDefUseTestCase(P4_SOURCE(P4Headers::NONE,
+                                                    R"(
                          bit<16> foo = 1;
                          if (sm.ingress_port == 1) {
                              foo[15:10] = 2;
@@ -326,9 +315,8 @@ TEST_F(FieldDefUseTest, ComplexSliceTest5) {
 }
 
 TEST_F(FieldDefUseTest, ComplexSliceTest6) {
-    auto test = createFieldDefUseTestCase(
-            P4_SOURCE(P4Headers::NONE,
-                      R"(
+    auto test = createFieldDefUseTestCase(P4_SOURCE(P4Headers::NONE,
+                                                    R"(
                          bit<16> foo = 1;
                          if (sm.ingress_port == 1) {
                              foo[15:10] = 2;
@@ -365,9 +353,8 @@ TEST_F(FieldDefUseTest, ComplexSliceTest6) {
 }
 
 TEST_F(FieldDefUseTest, ComplexUseSlice1) {
-    auto test = createFieldDefUseTestCase(
-            P4_SOURCE(P4Headers::NONE,
-                      R"(
+    auto test = createFieldDefUseTestCase(P4_SOURCE(P4Headers::NONE,
+                                                    R"(
                          bit<16> foo = 1;
                          if (sm.ingress_port == 1) {
                              foo[15:10] = 2;
@@ -399,9 +386,8 @@ TEST_F(FieldDefUseTest, ComplexUseSlice1) {
 }
 
 TEST_F(FieldDefUseTest, ComplexUseSlice2) {
-    auto test = createFieldDefUseTestCase(
-            P4_SOURCE(P4Headers::NONE,
-                      R"(
+    auto test = createFieldDefUseTestCase(P4_SOURCE(P4Headers::NONE,
+                                                    R"(
                          bit<16> foo = 1;
                          if (sm.ingress_port == 1) {
                              foo[15:8] = 2;
@@ -432,9 +418,8 @@ TEST_F(FieldDefUseTest, ComplexUseSlice2) {
     }
 }
 TEST_F(FieldDefUseTest, ComplexUseSlice3) {
-    auto test = createFieldDefUseTestCase(
-            P4_SOURCE(P4Headers::NONE,
-                      R"(
+    auto test = createFieldDefUseTestCase(P4_SOURCE(P4Headers::NONE,
+                                                    R"(
                          bit<16> foo = 1;
                          if (sm.ingress_port == 1) {
                              foo[15:8] = 2;
@@ -466,9 +451,8 @@ TEST_F(FieldDefUseTest, ComplexUseSlice3) {
 }
 
 TEST_F(FieldDefUseTest, ComplexUseSlice4) {
-    auto test = createFieldDefUseTestCase(
-            P4_SOURCE(P4Headers::NONE,
-                      R"(
+    auto test = createFieldDefUseTestCase(P4_SOURCE(P4Headers::NONE,
+                                                    R"(
                          bit<16> foo = 1;
                          if (sm.ingress_port == 1) {
                              foo[15:10] = 2;
@@ -505,9 +489,8 @@ TEST_F(FieldDefUseTest, ComplexUseSlice4) {
 }
 
 TEST_F(FieldDefUseTest, ComplexUseSlice5) {
-    auto test = createFieldDefUseTestCase(
-            P4_SOURCE(P4Headers::NONE,
-                      R"(
+    auto test = createFieldDefUseTestCase(P4_SOURCE(P4Headers::NONE,
+                                                    R"(
                          bit<16> foo = 1;
                          if (sm.ingress_port == 1) {
                              foo[15:10] = 2;

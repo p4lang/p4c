@@ -10,14 +10,15 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PHV_PRAGMA_PA_MUTUALLY_EXCLUSIVE_H_
-#define EXTENSIONS_BF_P4C_PHV_PRAGMA_PA_MUTUALLY_EXCLUSIVE_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_PRAGMA_PA_MUTUALLY_EXCLUSIVE_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_PRAGMA_PA_MUTUALLY_EXCLUSIVE_H_
 
 #include <map>
 #include <optional>
-#include "ir/ir.h"
+
 #include "bf-p4c/phv/phv_fields.h"
 #include "bf-p4c/phv/utils/utils.h"
+#include "ir/ir.h"
 
 using namespace P4;
 
@@ -28,11 +29,11 @@ using namespace P4;
  *
  */
 class PragmaMutuallyExclusive : public Inspector {
-    const PhvInfo& phv_i;
-    ordered_map<const PHV::Field*, ordered_set<const PHV::Field*>> pa_mutually_exclusive_i;
+    const PhvInfo &phv_i;
+    ordered_map<const PHV::Field *, ordered_set<const PHV::Field *>> pa_mutually_exclusive_i;
     ordered_map<cstring, ordered_set<cstring>> mutually_exclusive_headers;
 
-    profile_t init_apply(const IR::Node* root) override {
+    profile_t init_apply(const IR::Node *root) override {
         profile_t rv = Inspector::init_apply(root);
         pa_mutually_exclusive_i.clear();
         mutually_exclusive_headers.clear();
@@ -41,24 +42,24 @@ class PragmaMutuallyExclusive : public Inspector {
 
     /** Get global pragma pa_mutually_exclusive.
      */
-    bool preorder(const IR::BFN::Pipe* pipe) override;
+    bool preorder(const IR::BFN::Pipe *pipe) override;
 
  public:
-    explicit PragmaMutuallyExclusive(const PhvInfo& phv) : phv_i(phv) { }
+    explicit PragmaMutuallyExclusive(const PhvInfo &phv) : phv_i(phv) {}
 
     /// BFN::Pragma interface
     static const char *name;
     static const char *description;
     static const char *help;
 
-    const ordered_map<const PHV::Field*, ordered_set<const PHV::Field*>>& mutex_fields() const {
+    const ordered_map<const PHV::Field *, ordered_set<const PHV::Field *>> &mutex_fields() const {
         return pa_mutually_exclusive_i;
     }
-    const ordered_map<cstring, ordered_set<cstring>>& mutex_headers() const {
+    const ordered_map<cstring, ordered_set<cstring>> &mutex_headers() const {
         return mutually_exclusive_headers;
     }
 };
 
-std::ostream& operator<<(std::ostream& out, const PragmaMutuallyExclusive& pa_me);
+std::ostream &operator<<(std::ostream &out, const PragmaMutuallyExclusive &pa_me);
 
-#endif /* EXTENSIONS_BF_P4C_PHV_PRAGMA_PA_MUTUALLY_EXCLUSIVE_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_PRAGMA_PA_MUTUALLY_EXCLUSIVE_H_ */

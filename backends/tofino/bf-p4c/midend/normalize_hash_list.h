@@ -22,7 +22,7 @@ class TypeChecking;
 class TypeMap;
 class ReferenceMap;
 
-} /* -- namespace P4 */
+}  // namespace P4
 
 /**
  * @brief Normalize field lists in hashing expression (Hash.get primitive)
@@ -84,18 +84,16 @@ class ReferenceMap;
  */
 class NormalizeHashList : public PassManager {
  public:
-    explicit NormalizeHashList(
-        ::P4::ReferenceMap* ref_map_,
-        ::P4::TypeMap* type_map_,
-        ::P4::TypeChecking* type_checking_);
+    explicit NormalizeHashList(::P4::ReferenceMap *ref_map_, ::P4::TypeMap *type_map_,
+                               ::P4::TypeChecking *type_checking_);
 
     /* -- avoid copying */
-    NormalizeHashList& operator=(NormalizeHashList&&) = delete;
+    NormalizeHashList &operator=(NormalizeHashList &&) = delete;
 
     /**
      * @brief Check whether a method call is the hasher call
      */
-    static bool isHasher(const IR::MethodCallExpression* mc);
+    static bool isHasher(const IR::MethodCallExpression *mc);
 };
 
 #endif  // BF_P4C_MIDEND_NORMALIZE_HASH_LIST_H_

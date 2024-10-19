@@ -10,19 +10,19 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PARDE_RESOLVE_NEGATIVE_EXTRACT_H_
-#define EXTENSIONS_BF_P4C_PARDE_RESOLVE_NEGATIVE_EXTRACT_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_RESOLVE_NEGATIVE_EXTRACT_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_RESOLVE_NEGATIVE_EXTRACT_H_
 
 #include <map>
 #include <sstream>
 #include <utility>
 
 #include "bf-p4c/common/utils.h"
+#include "bf-p4c/device.h"
 #include "bf-p4c/parde/dump_parser.h"
 #include "bf-p4c/parde/parde_visitor.h"
 #include "bf-p4c/parde/parser_dominator_builder.h"
 #include "bf-p4c/parde/parser_info.h"
-#include "bf-p4c/device.h"
 #include "ir/ir-generated.h"
 #include "lib/indent.h"
 #include "lib/ordered_map.h"
@@ -42,19 +42,19 @@ struct ResolveNegativeExtract : public PassManager {
     /// The shift delay/extract restribution occurs between directly-connected nodes (parent +
     /// child). Shifts/extracts will not be distributed across more than one level of hierarchy.
     struct CollectNegativeExtractOutOfBufferStates : public ParserInspector {
-        const CollectParserInfo& parserInfo;
+        const CollectParserInfo &parserInfo;
 
         /**
          * @brief In-buffer offsets of states
          */
         std::map<cstring, unsigned> state_to_shift;
 
-        explicit CollectNegativeExtractOutOfBufferStates(const CollectParserInfo& pi)
+        explicit CollectNegativeExtractOutOfBufferStates(const CollectParserInfo &pi)
             : parserInfo(pi) {}
 
         unsigned max_buff_size = 0;
 
-        bool preorder(const IR::BFN::PacketRVal* rval) override {
+        bool preorder(const IR::BFN::PacketRVal *rval) override {
             auto extract = findContext<IR::BFN::Extract>();
             if (extract && rval->range.lo < 0) {
                 auto state = findContext<IR::BFN::ParserState>();
@@ -110,13 +110,13 @@ struct ResolveNegativeExtract : public PassManager {
          * is the maximal historic data index
          *
          */
-        std::map<const IR::BFN::ParserState*, unsigned> historic_states;
+        std::map<const IR::BFN::ParserState *, unsigned> historic_states;
 
         /**
          * @brief Mapping of Parser state to given Parser instance
          *
          */
-        std::map<const IR::BFN::ParserState*, const IR::BFN::Parser*> parsers;
+        std::map<const IR::BFN::ParserState *, const IR::BFN::Parser *> parsers;
 
         /**
          * @brief Delay the shift from the predecessor to provide additional backwards history
@@ -127,17 +127,18 @@ struct ResolveNegativeExtract : public PassManager {
          * @param required_history Required backward history in bytes
          */
         unsigned delay_shift_from_predecessor(const IR::BFN::ParserState *state,
-            const IR::BFN::Parser *parser,
-            int required_history) {
+                                              const IR::BFN::Parser *parser, int required_history) {
             BUG_CHECK(state, "Parser state cannot be null!");
 
             auto graph = parserInfo.graph(parser);
             auto preds = graph.predecessors().at(state);
             if (preds.size() > 1) {
-                error("Cannot resolve negative extract because of multiple paths to "
-                    "the node %1%", state->name);
+                error(
+                    "Cannot resolve negative extract because of multiple paths to "
+                    "the node %1%",
+                    state->name);
             }
-            const auto* pred = *preds.begin();
+            const auto *pred = *preds.begin();
 
             unsigned curr_shift = 0;
             std::for_each(pred->transitions.begin(), pred->transitions.end(),
@@ -149,9 +150,9 @@ struct ResolveNegativeExtract : public PassManager {
 
             // For extracts, identify the earliest start byte for each end byte
             std::map<int, int> end_to_earliest_start;
-            for (const auto* stmt : pred->statements) {
-                if (const auto* extract = stmt->to<IR::BFN::Extract>()) {
-                    if (const auto* rval = extract->source->to<IR::BFN::InputBufferRVal>()) {
+            for (const auto *stmt : pred->statements) {
+                if (const auto *extract = stmt->to<IR::BFN::Extract>()) {
+                    if (const auto *rval = extract->source->to<IR::BFN::InputBufferRVal>()) {
                         auto range = rval->range;
                         auto hi_byte = range.hiByte();
                         auto lo_byte = range.loByte();
@@ -186,8 +187,8 @@ struct ResolveNegativeExtract : public PassManager {
                 end_to_earliest_start_merged[i] = i;
                 int min_idx = i;
                 if (end_to_earliest_start.count(i))
-                    min_idx = std::min(end_to_earliest_start[i],
-                                       end_to_earliest_start_merged[min_idx]);
+                    min_idx =
+                        std::min(end_to_earliest_start[i], end_to_earliest_start_merged[min_idx]);
                 for (int j = std::max(0, min_idx); j <= i; j++)
                     end_to_earliest_start_merged[j] = min_idx;
             }
@@ -198,8 +199,7 @@ struct ResolveNegativeExtract : public PassManager {
                 unsigned keep = static_cast<unsigned>(end_to_earliest_start_merged[max_keep]);
                 unsigned delay_shift = curr_shift - keep;
                 if (state_to_shift.count(pred->name))
-                    state_to_shift[pred->name] =
-                        std::min(delay_shift, state_to_shift[pred->name]);
+                    state_to_shift[pred->name] = std::min(delay_shift, state_to_shift[pred->name]);
                 else
                     state_to_shift[pred->name] = delay_shift;
                 return delay_shift;
@@ -212,12 +212,12 @@ struct ResolveNegativeExtract : public PassManager {
     /// Adjustments for out of buffer negative extracts only.
     /// Shift amounts are adjusted and extrct statements are delayed until the child states.
     struct AdjustShiftOutOfBuffer : public ParserModifier {
-        const CollectNegativeExtractOutOfBufferStates& collectNegative;
+        const CollectNegativeExtractOutOfBufferStates &collectNegative;
 
         explicit AdjustShiftOutOfBuffer(const CollectNegativeExtractOutOfBufferStates &cg)
             : collectNegative(cg) {}
 
-        std::map<cstring, std::vector<const IR::BFN::Extract*>> delayed_statements;
+        std::map<cstring, std::vector<const IR::BFN::Extract *>> delayed_statements;
         std::map<cstring, unsigned> state_delay;
         std::map<cstring, cstring> state_pred;
 
@@ -232,7 +232,7 @@ struct ResolveNegativeExtract : public PassManager {
             return rv;
         }
 
-        bool preorder(IR::BFN::ParserState* state) override {
+        bool preorder(IR::BFN::ParserState *state) override {
             // Handle shift to be delayed from current state
             if (collectNegative.state_to_shift.count(state->name)) {
                 // Shift from the current state to delay until child states
@@ -256,15 +256,15 @@ struct ResolveNegativeExtract : public PassManager {
                 // Split the statements into statements to delay to child states and statements to
                 // keep in current state
                 IR::Vector<IR::BFN::ParserPrimitive> new_statements;
-                for (const auto* stmt : state->statements) {
+                for (const auto *stmt : state->statements) {
                     bool keep = true;
-                    if (const auto* extract = stmt->to<IR::BFN::Extract>()) {
-                        if (const auto* rval = extract->source->to<IR::BFN::InputBufferRVal>()) {
+                    if (const auto *extract = stmt->to<IR::BFN::Extract>()) {
+                        if (const auto *rval = extract->source->to<IR::BFN::InputBufferRVal>()) {
                             if (rval->range.hiByte() >= static_cast<int>(max_buff_size)) {
-                                auto* rval_clone = rval->clone();
+                                auto *rval_clone = rval->clone();
                                 rval_clone->range.hi -= (curr_shift - pending_shift) * 8;
                                 rval_clone->range.lo -= (curr_shift - pending_shift) * 8;
-                                auto* extract_clone = extract->clone();
+                                auto *extract_clone = extract->clone();
                                 extract_clone->source = rval_clone;
                                 delayed_statements[state->name].push_back(extract_clone);
                                 keep = false;
@@ -282,10 +282,9 @@ struct ResolveNegativeExtract : public PassManager {
                 IR::Vector<IR::BFN::ParserPrimitive> new_statements;
                 // Clone the delayed statements -- need a unique copy for each state
                 // in case the statements are adjusted (e.g., made into CLOTs).
-                for (const auto* stmt : delayed_statements[pred])
+                for (const auto *stmt : delayed_statements[pred])
                     new_statements.push_back(stmt->clone());
-                new_statements.insert(new_statements.end(),
-                                      state->statements.begin(),
+                new_statements.insert(new_statements.end(), state->statements.begin(),
                                       state->statements.end());
                 state->statements = new_statements;
             }
@@ -293,27 +292,28 @@ struct ResolveNegativeExtract : public PassManager {
             return true;
         }
 
-        bool preorder(IR::BFN::Transition* transition) override {
+        bool preorder(IR::BFN::Transition *transition) override {
             auto state = findContext<IR::BFN::ParserState>();
             BUG_CHECK(state, "State cannot be null!");
 
-
             if (collectNegative.state_to_shift.count(state->name)) {
                 transition->shift -= collectNegative.state_to_shift.at(state->name);
-                LOG3("Adjusting transition from " << state->name << ", match { " <<
-                    transition->value << " } to shift value = " << transition->shift);
+                LOG3("Adjusting transition from " << state->name << ", match { "
+                                                  << transition->value
+                                                  << " } to shift value = " << transition->shift);
             }
             if (state_delay.count(state->name)) {
                 transition->shift += state_delay.at(state->name);
-                LOG3("Adjusting transition from " << state->name << ", match { " <<
-                    transition->value << " } to shift value = " << transition->shift);
+                LOG3("Adjusting transition from " << state->name << ", match { "
+                                                  << transition->value
+                                                  << " } to shift value = " << transition->shift);
             }
 
             return true;
         }
 
-        bool preorder(IR::BFN::PacketRVal* rval) override {
-            auto state   = findContext<IR::BFN::ParserState>();
+        bool preorder(IR::BFN::PacketRVal *rval) override {
+            auto state = findContext<IR::BFN::ParserState>();
             auto extract = findContext<IR::BFN::Extract>();
 
             if (state_delay.count(state->name)) {
@@ -321,9 +321,9 @@ struct ResolveNegativeExtract : public PassManager {
                 rval->range.lo += shift;
                 rval->range.hi += shift;
                 if (extract) {
-                    LOG3("Adjusting field " << extract->dest->field->toString() << " to " <<
-                        shift/8 << " byte offset (lo = " << rval->range.lo << ", hi  = " <<
-                        rval->range.hi << ")");
+                    LOG3("Adjusting field " << extract->dest->field->toString() << " to "
+                                            << shift / 8 << " byte offset (lo = " << rval->range.lo
+                                            << ", hi  = " << rval->range.hi << ")");
                 }
             }
 
@@ -334,7 +334,7 @@ struct ResolveNegativeExtract : public PassManager {
     /// Colect all negative extract states and compute corresponding shift values
     /// for transitions and states
     struct CollectNegativeExtractStates : public ParserInspector {
-        const CollectParserInfo& parserInfo;
+        const CollectParserInfo &parserInfo;
 
         /**
          * @brief In-buffer offsets of states
@@ -345,14 +345,12 @@ struct ResolveNegativeExtract : public PassManager {
          * @brief Output shift values for given transitions - key is the
          * source node and value is a map transition -> value
          */
-        std::map<cstring,
-            std::map<const IR::BFN::ParserMatchValue*,
-                     unsigned>> transition_shift;
+        std::map<cstring, std::map<const IR::BFN::ParserMatchValue *, unsigned>> transition_shift;
 
         /**
          * @brief Transitions exiting parser with unconsumed bytes in the packet buffer.
          */
-        std::map<const IR::BFN::Transition*, unsigned> remainder_before_exit;
+        std::map<const IR::BFN::Transition *, unsigned> remainder_before_exit;
 
         /**
          * @brief Duplicate the given node and set the shift value
@@ -391,9 +389,9 @@ struct ResolveNegativeExtract : public PassManager {
         std::map<const IR::BFN::Transition *, std::pair<const IR::BFN::ParserState *, int>>
             state_to_duplicate;
 
-        explicit CollectNegativeExtractStates(const CollectParserInfo& pi) : parserInfo(pi) { }
+        explicit CollectNegativeExtractStates(const CollectParserInfo &pi) : parserInfo(pi) {}
 
-        bool preorder(const IR::BFN::PacketRVal* rval) override {
+        bool preorder(const IR::BFN::PacketRVal *rval) override {
             auto extract = findContext<IR::BFN::Extract>();
             if (extract && rval->range.lo < 0) {
                 auto state = findContext<IR::BFN::ParserState>();
@@ -426,12 +424,12 @@ struct ResolveNegativeExtract : public PassManager {
                 auto state = kv.first;
                 auto max_idx_value = kv.second;
                 BUG_CHECK(max_idx_value <= max_buff_size,
-                    "In parse state %s: a value that is %d B backwards from the current "
-                    "parsing position is being accessed/used. It is only possible to "
-                    "access %d B backwards from the current parsing position. As a "
-                    "possible workaround try moving around the extracts (possibly "
-                    "by using methods advance and lookahead or splitting some headers).",
-                    state->name, max_idx_value, max_buff_size);
+                          "In parse state %s: a value that is %d B backwards from the current "
+                          "parsing position is being accessed/used. It is only possible to "
+                          "access %d B backwards from the current parsing position. As a "
+                          "possible workaround try moving around the extracts (possibly "
+                          "by using methods advance and lookahead or splitting some headers).",
+                          state->name, max_idx_value, max_buff_size);
 
                 distribute_shift_to_node(state, nullptr, parsers[state], max_idx_value);
 
@@ -452,8 +450,9 @@ struct ResolveNegativeExtract : public PassManager {
             for (auto kv : transition_shift) {
                 for (auto tr_config : kv.second) {
                     std::stringstream ss;
-                    ss << "Transition with match { " << tr_config.first << " } from state " <<
-                    kv.first << " needs will be set with the shift value " << tr_config.second;
+                    ss << "Transition with match { " << tr_config.first << " } from state "
+                       << kv.first << " needs will be set with the shift value "
+                       << tr_config.second;
                     LOG3(ss.str());
                 }
             }
@@ -468,13 +467,13 @@ struct ResolveNegativeExtract : public PassManager {
          * is the maximal historic data index
          *
          */
-        std::map<const IR::BFN::ParserState*, unsigned> historic_states;
+        std::map<const IR::BFN::ParserState *, unsigned> historic_states;
 
         /**
          * @brief Mapping of Parser state to given Parser instance
          *
          */
-        std::map<const IR::BFN::ParserState*, const IR::BFN::Parser*> parsers;
+        std::map<const IR::BFN::ParserState *, const IR::BFN::Parser *> parsers;
 
         /**
          * @brief Get the current value of the transition (assigned by the algorithm)
@@ -484,7 +483,7 @@ struct ResolveNegativeExtract : public PassManager {
          * @return Transition shift value
          */
         unsigned get_transition_shift(const IR::BFN::ParserState *src,
-                                      const IR::BFN::Transition* tr) {
+                                      const IR::BFN::Transition *tr) {
             BUG_CHECK(tr != nullptr, "Transition node cannot be null!");
             if (transition_shift.count(src->name) &&
                 transition_shift.at(src->name).count(tr->value)) {
@@ -510,16 +509,16 @@ struct ResolveNegativeExtract : public PassManager {
          * @param state_shift State shift to set
          */
         void adjust_shift_buffer(const IR::BFN::ParserState *state,
-            const IR::BFN::ParserState *state_child,
-            const IR::BFN::Parser* parser,
-            unsigned tr_shift, unsigned state_shift) {
+                                 const IR::BFN::ParserState *state_child,
+                                 const IR::BFN::Parser *parser, unsigned tr_shift,
+                                 unsigned state_shift) {
             auto graph = parserInfo.graph(parser);
             for (auto state_trans : state->transitions) {
                 auto state_succ = state_trans->next;
                 transition_shift[state->name][state_trans->value] = tr_shift;
-                LOG4("Adding transition { " << state_trans->value << " } shift value "
-                            << tr_shift << " B from state " << state->name << " to state "
-                            << state_succ->name);
+                LOG4("Adding transition { " << state_trans->value << " } shift value " << tr_shift
+                                            << " B from state " << state->name << " to state "
+                                            << state_succ->name);
 
                 if (!state_succ) {
                     // This transition exits parser, but we need to shift `state_shift` bytes
@@ -532,14 +531,14 @@ struct ResolveNegativeExtract : public PassManager {
                 if (graph.predecessors().at(state_succ).size() <= 1) {
                     state_to_shift[state_succ->name] = state_shift;
                     LOG4("Setting shift value " << state_shift << " B for state "
-                                << state_succ->name);
+                                                << state_succ->name);
                 }
 
                 // Don't process the subtree if we reached from that part of the tree
                 // because it will be analyzed later
                 if (state_succ == state_child) {
-                    LOG4("Skipping transition adjustment for " << state_succ->name <<
-                        " (will be set later).");
+                    LOG4("Skipping transition adjustment for " << state_succ->name
+                                                               << " (will be set later).");
                     continue;
                 }
 
@@ -575,14 +574,16 @@ struct ResolveNegativeExtract : public PassManager {
          * @param required_history Required backward history in bytes
          */
         void distribute_shift_to_node(const IR::BFN::ParserState *state,
-            const IR::BFN::ParserState *succ, const IR::BFN::Parser *parser,
-            int required_history) {
+                                      const IR::BFN::ParserState *succ,
+                                      const IR::BFN::Parser *parser, int required_history) {
             // 1] Identify the deficit absorbed by the recursion or if we already analyzed
             // a path through the graph
             BUG_CHECK(state, "Parser state cannot be null!");
             if (state_to_shift.count(state->name) > 0) {
-                error("Current path with historic data usage has an intersection with"
-                    " a previously analyzed historic data path at node %1%!", state->name);
+                error(
+                    "Current path with historic data usage has an intersection with"
+                    " a previously analyzed historic data path at node %1%!",
+                    state->name);
             }
 
             int deficit = required_history;
@@ -611,8 +612,10 @@ struct ResolveNegativeExtract : public PassManager {
             if (deficit > 0) {
                 auto preds = graph.predecessors().at(state);
                 if (preds.size() > 1) {
-                    error("Cannot resolve negative extract because of multiple paths to "
-                        "the node %1%", state->name);
+                    error(
+                        "Cannot resolve negative extract because of multiple paths to "
+                        "the node %1%",
+                        state->name);
                 }
                 distribute_shift_to_node(*preds.begin(), state, parser, deficit);
             }
@@ -647,9 +650,9 @@ struct ResolveNegativeExtract : public PassManager {
     };
 
     struct AdjustShift : public ParserModifier {
-        const CollectNegativeExtractStates& collectNegative;
+        const CollectNegativeExtractStates &collectNegative;
 
-        explicit AdjustShift(const CollectNegativeExtractStates& cg) : collectNegative(cg) { }
+        explicit AdjustShift(const CollectNegativeExtractStates &cg) : collectNegative(cg) {}
 
         std::map<const IR::BFN::ParserState *, std::pair<IR::BFN::ParserState *, int>>
             duplicated_states;
@@ -660,7 +663,7 @@ struct ResolveNegativeExtract : public PassManager {
             return rv;
         }
 
-        bool preorder(IR::BFN::Transition* transition) override {
+        bool preorder(IR::BFN::Transition *transition) override {
             auto state = findContext<IR::BFN::ParserState>();
             auto orig_transition = getOriginal()->to<IR::BFN::Transition>();
             BUG_CHECK(state, "State cannot be null!");
@@ -668,10 +671,11 @@ struct ResolveNegativeExtract : public PassManager {
 
             if (collectNegative.transition_shift.count(state->name) &&
                 collectNegative.transition_shift.at(state->name).count(orig_transition->value)) {
-                const auto& tr_map = collectNegative.transition_shift.at(state->name);
+                const auto &tr_map = collectNegative.transition_shift.at(state->name);
                 transition->shift = tr_map.at(orig_transition->value);
-                LOG3("Adjusting transition from " << state->name << ", match { " <<
-                    orig_transition->value << " } to shift value = " << transition->shift);
+                LOG3("Adjusting transition from " << state->name << ", match { "
+                                                  << orig_transition->value
+                                                  << " } to shift value = " << transition->shift);
             }
 
             if (collectNegative.remainder_before_exit.count(orig_transition)) {
@@ -680,9 +684,8 @@ struct ResolveNegativeExtract : public PassManager {
                 // for this purpose.
                 unsigned state_shift = collectNegative.remainder_before_exit.at(orig_transition);
 
-                auto remainder_state = new IR::BFN::ParserState(state->p4States,
-                                                          state->name + "$final_shift",
-                                                          state->gress);
+                auto remainder_state = new IR::BFN::ParserState(
+                    state->p4States, state->name + "$final_shift", state->gress);
                 transition->next = remainder_state;
                 auto end_transition = new IR::BFN::Transition(match_t(), state_shift);
                 remainder_state->transitions.push_back(end_transition);
@@ -699,7 +702,7 @@ struct ResolveNegativeExtract : public PassManager {
                                                           << orig_transition->value << " to state "
                                                           << orig_state->name);
 
-                IR::BFN::ParserState* duplicated_state = nullptr;
+                IR::BFN::ParserState *duplicated_state = nullptr;
                 if (duplicated_states.count(orig_state)) {
                     int prev_state_shift;
                     std::tie(duplicated_state, prev_state_shift) = duplicated_states[orig_state];
@@ -708,20 +711,18 @@ struct ResolveNegativeExtract : public PassManager {
                               "value %2% for duplicated state %3%",
                               state_shift, prev_state_shift, state->name);
                 } else {
-                  duplicated_state = new IR::BFN::ParserState(
-                      orig_state->p4States, orig_state->name + "$dup",
-                      orig_state->gress);
-                  for (auto tr : orig_state->transitions) {
-                    auto new_trans = new IR::BFN::Transition(
-                        tr->srcInfo, tr->value, tr->shift + state_shift,
-                        tr->next);
-                    duplicated_state->transitions.push_back(new_trans);
-                  }
-                  for (const auto stmt : orig_state->statements) {
-                      duplicated_state->statements.push_back(stmt->clone());
-                  }
-                  duplicated_states.emplace(orig_state,
-                                            std::make_pair(duplicated_state, state_shift));
+                    duplicated_state = new IR::BFN::ParserState(
+                        orig_state->p4States, orig_state->name + "$dup", orig_state->gress);
+                    for (auto tr : orig_state->transitions) {
+                        auto new_trans = new IR::BFN::Transition(tr->srcInfo, tr->value,
+                                                                 tr->shift + state_shift, tr->next);
+                        duplicated_state->transitions.push_back(new_trans);
+                    }
+                    for (const auto stmt : orig_state->statements) {
+                        duplicated_state->statements.push_back(stmt->clone());
+                    }
+                    duplicated_states.emplace(orig_state,
+                                              std::make_pair(duplicated_state, state_shift));
                 }
 
                 transition->next = duplicated_state;
@@ -730,8 +731,8 @@ struct ResolveNegativeExtract : public PassManager {
             return true;
         }
 
-        bool preorder(IR::BFN::PacketRVal* rval) override {
-            auto state   = findContext<IR::BFN::ParserState>();
+        bool preorder(IR::BFN::PacketRVal *rval) override {
+            auto state = findContext<IR::BFN::ParserState>();
             auto extract = findContext<IR::BFN::Extract>();
 
             if (collectNegative.state_to_shift.count(state->name)) {
@@ -739,9 +740,9 @@ struct ResolveNegativeExtract : public PassManager {
                 rval->range.lo += shift;
                 rval->range.hi += shift;
                 if (extract) {
-                    LOG3("Adjusting field " << extract->dest->field->toString() << " to " <<
-                        shift/8 << " byte offset (lo = " << rval->range.lo << ", hi  = " <<
-                        rval->range.hi << ")");
+                    LOG3("Adjusting field " << extract->dest->field->toString() << " to "
+                                            << shift / 8 << " byte offset (lo = " << rval->range.lo
+                                            << ", hi  = " << rval->range.hi << ")");
                 }
             }
 
@@ -750,25 +751,20 @@ struct ResolveNegativeExtract : public PassManager {
     };
 
     ResolveNegativeExtract() {
-        auto* parserInfo = new CollectParserInfo;
-        auto* collectNegative = new CollectNegativeExtractStates(*parserInfo);
-        auto* collectNegativeOutOfBuffer = new CollectNegativeExtractOutOfBufferStates(*parserInfo);
+        auto *parserInfo = new CollectParserInfo;
+        auto *collectNegative = new CollectNegativeExtractStates(*parserInfo);
+        auto *collectNegativeOutOfBuffer = new CollectNegativeExtractOutOfBufferStates(*parserInfo);
 
-        addPasses({
-            LOGGING(4) ? new DumpParser("before_resolve_negative_extract") : nullptr,
-            // Step 1: Handle negative extracts that exceed the parser buffer size.
-            // Need to adjust shift and delay extracts until subsequent states.
-            parserInfo,
-            collectNegativeOutOfBuffer,
-            new AdjustShiftOutOfBuffer(*collectNegativeOutOfBuffer),
-            // Step 2: Handle all other negative extracts
-            // Adjusting shift amounts but not delaying extracts.
-            parserInfo,
-            collectNegative,
-            new AdjustShift(*collectNegative),
-            LOGGING(4) ? new DumpParser("after_resolve_negative_extract") : nullptr
-        });
+        addPasses({LOGGING(4) ? new DumpParser("before_resolve_negative_extract") : nullptr,
+                   // Step 1: Handle negative extracts that exceed the parser buffer size.
+                   // Need to adjust shift and delay extracts until subsequent states.
+                   parserInfo, collectNegativeOutOfBuffer,
+                   new AdjustShiftOutOfBuffer(*collectNegativeOutOfBuffer),
+                   // Step 2: Handle all other negative extracts
+                   // Adjusting shift amounts but not delaying extracts.
+                   parserInfo, collectNegative, new AdjustShift(*collectNegative),
+                   LOGGING(4) ? new DumpParser("after_resolve_negative_extract") : nullptr});
     }
 };
 
-#endif /* EXTENSIONS_BF_P4C_PARDE_RESOLVE_NEGATIVE_EXTRACT_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_RESOLVE_NEGATIVE_EXTRACT_H_ */

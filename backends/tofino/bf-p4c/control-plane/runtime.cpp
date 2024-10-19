@@ -10,32 +10,30 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include <fstream>       // Ensure this header is included
-#include <filesystem>    // If not already included
+#include "bf-p4c/control-plane/runtime.h"
+
+#include <filesystem>  // If not already included
+#include <fstream>     // Ensure this header is included
 
 #include "bf-p4c/arch/arch.h"
-#include "bf-p4c/control-plane/bfruntime_ext.h"
-#include "bf-p4c/control-plane/runtime.h"
-#include "bf-p4c/control-plane/bfruntime_arch_handler.h"
-#include "bf-p4c/control-plane/p4runtime_force_std.h"
-
-#include "bf-p4c/bf-p4c-options.h"
 #include "bf-p4c/arch/rewrite_action_selector.h"
-
+#include "bf-p4c/bf-p4c-options.h"
+#include "bf-p4c/control-plane/bfruntime_arch_handler.h"
+#include "bf-p4c/control-plane/bfruntime_ext.h"
+#include "bf-p4c/control-plane/p4runtime_force_std.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
 #include "lib/log.h"
-#include "midend/eliminateNewtype.h"
 #include "lib/nullstream.h"
+#include "midend/eliminateNewtype.h"
 
 namespace BFN {
 
-bool CheckReservedNames::preorder(const IR::Type_ArchBlock* b) {
+bool CheckReservedNames::preorder(const IR::Type_ArchBlock *b) {
     LOG3(" Checking block " << b);
     auto name = b->name.toString();
     if (reservedNames.count(name) > 0)
-        error("Block name in p4 cannot contain BF-RT reserved name (%s) : %s",
-                name, b->toString());
+        error("Block name in p4 cannot contain BF-RT reserved name (%s) : %s", name, b->toString());
     return false;
 }
 
@@ -44,31 +42,28 @@ bool SetDefaultSize::preorder(IR::P4Table *table) {
     auto sizeProperty = table->getSizeProperty();
     if (sizeProperty == nullptr) {
         int defaultSize = 512;
-        if (auto k = table->getConstantProperty("min_size"_cs))
-            defaultSize = k->asInt();
+        if (auto k = table->getConstantProperty("min_size"_cs)) defaultSize = k->asInt();
         auto properties = new IR::TableProperties(table->properties->properties);
-        auto sizeProp = new IR::Property(IR::ID("size"),
-                new IR::ExpressionValue(new IR::Constant(defaultSize)), true);
+        auto sizeProp = new IR::Property(
+            IR::ID("size"), new IR::ExpressionValue(new IR::Constant(defaultSize)), true);
         properties->properties.push_back(sizeProp);
         if (warn) {
             auto hidden = table->getAnnotation("hidden"_cs);
             if (!hidden)
-                warning("No size defined for table '%s', setting default size to %d",
-                        table->name, defaultSize);
+                warning("No size defined for table '%s', setting default size to %d", table->name,
+                        defaultSize);
         }
         table->properties = properties;
     }
     return false;
 }
 
-void generateRuntime(const IR::P4Program* program,
-                       const BFN_Options& options) {
+void generateRuntime(const IR::P4Program *program, const BFN_Options &options) {
     // If the user didn't ask for us to generate P4Runtime, skip the analysis.
-    bool doNotGenerateP4Info = options.p4RuntimeFile.isNullOrEmpty() &&
-            options.p4RuntimeFiles.isNullOrEmpty() &&
-            options.p4RuntimeEntriesFile.isNullOrEmpty() &&
-            options.p4RuntimeEntriesFiles.isNullOrEmpty() &&
-            options.bfRtSchema.isNullOrEmpty();
+    bool doNotGenerateP4Info =
+        options.p4RuntimeFile.isNullOrEmpty() && options.p4RuntimeFiles.isNullOrEmpty() &&
+        options.p4RuntimeEntriesFile.isNullOrEmpty() &&
+        options.p4RuntimeEntriesFiles.isNullOrEmpty() && options.bfRtSchema.isNullOrEmpty();
     bool generateP4Info = !doNotGenerateP4Info;
 
     bool doNotGenerateBFRT = options.bfRtSchema.isNullOrEmpty();
@@ -90,8 +85,8 @@ void generateRuntime(const IR::P4Program* program,
     // runtime runs before midend, we run the pass to eliminate typedefs here to
     // facilitate bf-rt json generation.
     // Note: This can be removed if typedef elimination pass moves to frontend.
-    P4::ReferenceMap    refMap;
-    P4::TypeMap         typeMap;
+    P4::ReferenceMap refMap;
+    P4::TypeMap typeMap;
     refMap.setIsV1(true);
     program = program->apply(P4::EliminateTypedef(&typeMap));
     program = program->apply(P4::TypeChecking(&refMap, &typeMap));
@@ -136,7 +131,7 @@ void generateRuntime(const IR::P4Program* program,
             error("Couldn't open BF-RT schema file: %1%", schemaFilePath.string());
             return;
         }
-        std::ostream& out = outFile;
+        std::ostream &out = outFile;
 
         // New types must be eliminated to resolve their bitwidths to be
         // generated in BF-RT json.

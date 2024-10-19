@@ -10,8 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PARDE_LOWERED_HELPERS_H_
-#define EXTENSIONS_BF_P4C_PARDE_LOWERED_HELPERS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_LOWERED_HELPERS_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_LOWERED_HELPERS_H_
 
 #include "bf-p4c/ir/bitrange.h"
 #include "bf-p4c/parde/clot/clot_info.h"
@@ -38,7 +38,7 @@ cstring sanitizeName(StringRef name);
  * @return a string describing which bits in the field are included in the
  * slice, and describing the corresponding bits in the container.
  */
-cstring debugInfoFor(const cstring fieldName, const PHV::AllocSlice& slice,
+cstring debugInfoFor(const cstring fieldName, const PHV::AllocSlice &slice,
                      bool includeContainerInfo = true);
 
 /**
@@ -53,7 +53,7 @@ cstring debugInfoFor(const cstring fieldName, const PHV::AllocSlice& slice,
  * @return a string describing which bits in the field are included in the
  * slice, and describing the corresponding bits in the container.
  */
-cstring debugInfoFor(const IR::BFN::ParserLVal* lval, const PHV::AllocSlice& slice,
+cstring debugInfoFor(const IR::BFN::ParserLVal *lval, const PHV::AllocSlice &slice,
                      bool includeContainerInfo = true);
 
 /**
@@ -74,8 +74,8 @@ cstring debugInfoFor(const IR::BFN::ParserLVal* lval, const PHV::AllocSlice& sli
  * field, the container, and the constant or input buffer region read by the
  * `Extract`.
  */
-cstring debugInfoFor(const IR::BFN::Extract* extract, const PHV::AllocSlice& slice,
-                     const nw_bitrange& bufferRange = nw_bitrange(), bool includeRangeInfo = false);
+cstring debugInfoFor(const IR::BFN::Extract *extract, const PHV::AllocSlice &slice,
+                     const nw_bitrange &bufferRange = nw_bitrange(), bool includeRangeInfo = false);
 
 /**
  * Construct a string describing how an `Extract` primitive was mapped to a
@@ -90,42 +90,42 @@ cstring debugInfoFor(const IR::BFN::Extract* extract, const PHV::AllocSlice& sli
  * @return a string containing debugging info describing the mapping between the
  * field, the container, and POV state/flags bits read by the `Extract`.
  */
-cstring debugInfoFor(const IR::BFN::Extract* extract, const PHV::AllocSlice& slice,
-        const le_bitrange& pov_range, const cstring pov_type_string = ""_cs);
+cstring debugInfoFor(const IR::BFN::Extract *extract, const PHV::AllocSlice &slice,
+                     const le_bitrange &pov_range, const cstring pov_type_string = ""_cs);
 
 /// Maps a POV bit field to a single bit within a container, represented as a
 /// ContainerBitRef. Checks that the allocation for the POV bit field is sane.
-const IR::BFN::ContainerBitRef* lowerSingleBit(const PhvInfo& phv,
-                                               const IR::BFN::FieldLVal* fieldRef,
-                                               const PHV::AllocContext* ctxt);
+const IR::BFN::ContainerBitRef *lowerSingleBit(const PhvInfo &phv,
+                                               const IR::BFN::FieldLVal *fieldRef,
+                                               const PHV::AllocContext *ctxt);
 
 /// Maps a sequence of fields to a sequence of PHV containers. The sequence of
 /// fields is treated as ordered and non-overlapping; the resulting container
 /// sequence is the shortest one which maintains these properties.
-std::pair<IR::Vector<IR::BFN::ContainerRef>, std::vector<Clot*>> lowerFields(
-    const PhvInfo& phv, const ClotInfo& clotInfo, const IR::Vector<IR::BFN::FieldLVal>& fields,
+std::pair<IR::Vector<IR::BFN::ContainerRef>, std::vector<Clot *>> lowerFields(
+    const PhvInfo &phv, const ClotInfo &clotInfo, const IR::Vector<IR::BFN::FieldLVal> &fields,
     bool is_checksum = false);
 
 /// Maps a field which cannot be split between multiple containers to a single
 /// container, represented as a ContainerRef. Checks that the allocation for the
 /// field is sane.
-const IR::BFN::ContainerRef* lowerUnsplittableField(const PhvInfo& phv, const ClotInfo& clotInfo,
-                                                    const IR::BFN::FieldLVal* fieldRef,
-                                                    const char* unsplittableReason);
+const IR::BFN::ContainerRef *lowerUnsplittableField(const PhvInfo &phv, const ClotInfo &clotInfo,
+                                                    const IR::BFN::FieldLVal *fieldRef,
+                                                    const char *unsplittableReason);
 
 // Deparser checksum engine exposes input entries as 16-bit.
 // PHV container entry needs a swap if the field's 2-byte alignment
 // in the container is not same as the alignment in the packet layout
 // i.e. off by 1 byte. For example, this could happen if "ipv4.ttl" is
 // allocated to a 8-bit container.
-std::map<PHV::Container, unsigned> getChecksumPhvSwap(const PhvInfo& phv,
-                                                      const IR::BFN::EmitChecksum* emitChecksum);
+std::map<PHV::Container, unsigned> getChecksumPhvSwap(const PhvInfo &phv,
+                                                      const IR::BFN::EmitChecksum *emitChecksum);
 
 /// Given a sequence of fields, construct a packing format describing how the
 /// fields will be laid out once they're lowered to containers.
-const safe_vector<IR::BFN::DigestField>* computeControlPlaneFormat(
-    const PhvInfo& phv, const IR::Vector<IR::BFN::FieldLVal>& fields);
+const safe_vector<IR::BFN::DigestField> *computeControlPlaneFormat(
+    const PhvInfo &phv, const IR::Vector<IR::BFN::FieldLVal> &fields);
 
 }  // namespace Parde::Lowered
 
-#endif /* EXTENSIONS_BF_P4C_PARDE_LOWERED_HELPERS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_LOWERED_HELPERS_H_ */

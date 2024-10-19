@@ -12,12 +12,12 @@
 
 #include "bf-p4c/phv/pragma/pa_atomic.h"
 
-#include <string>
 #include <numeric>
+#include <string>
 
-#include "lib/log.h"
 #include "bf-p4c/common/utils.h"
 #include "bf-p4c/phv/pragma/phv_pragmas.h"
+#include "lib/log.h"
 
 /// BFN::Pragma interface
 const char *PragmaAtomic::name = "pa_atomic";
@@ -41,12 +41,10 @@ const char *PragmaAtomic::help =
 // but because intrinsic metadata name may be changed during translation
 // stashing these here for now
 static const std::unordered_set<cstring> pa_atomic_from_arch = {
-    "ingress::ig_intr_md_from_prsr.parser_err"_cs,
-    "egress::eg_intr_md_from_prsr.parser_err"_cs
-};
+    "ingress::ig_intr_md_from_prsr.parser_err"_cs, "egress::eg_intr_md_from_prsr.parser_err"_cs};
 
-bool PragmaAtomic::add_constraint(const IR::BFN::Pipe* pipe,
-        const IR::Expression* expr, cstring field_name) {
+bool PragmaAtomic::add_constraint(const IR::BFN::Pipe *pipe, const IR::Expression *expr,
+                                  cstring field_name) {
     // check field name
     auto field = phv_i.field(field_name);
     if (!field) {
@@ -56,9 +54,11 @@ bool PragmaAtomic::add_constraint(const IR::BFN::Pipe* pipe,
 
     // Make sure the field can fit into an available container fully
     if (field->size > int(PHV::Size::b32)) {
-        warning("@pragma pa_atomic's argument %1% can not be atomic, "
-                  "because the size of field is greater than the size of "
-                  "the largest container", field_name);
+        warning(
+            "@pragma pa_atomic's argument %1% can not be atomic, "
+            "because the size of field is greater than the size of "
+            "the largest container",
+            field_name);
         return false;
     }
 
@@ -69,13 +69,12 @@ bool PragmaAtomic::add_constraint(const IR::BFN::Pipe* pipe,
     return true;
 }
 
-bool PragmaAtomic::preorder(const IR::BFN::Pipe* pipe) {
+bool PragmaAtomic::preorder(const IR::BFN::Pipe *pipe) {
     auto global_pragmas = pipe->global_pragmas;
-    for (const auto* annotation : global_pragmas) {
-        if (annotation->name.name != PragmaAtomic::name)
-            continue;
+    for (const auto *annotation : global_pragmas) {
+        if (annotation->name.name != PragmaAtomic::name) continue;
 
-        auto& exprs = annotation->expr;
+        auto &exprs = annotation->expr;
 
         if (!PHV::Pragmas::checkStringLiteralArgs(exprs)) {
             continue;
@@ -87,14 +86,14 @@ bool PragmaAtomic::preorder(const IR::BFN::Pipe* pipe) {
         const IR::StringLiteral *pipe_arg = nullptr;
         const IR::StringLiteral *gress_arg = nullptr;
 
-        if (!PHV::Pragmas::determinePipeGressArgs(exprs, expr_index,
-                required_arguments, pipe_arg, gress_arg)) {
+        if (!PHV::Pragmas::determinePipeGressArgs(exprs, expr_index, required_arguments, pipe_arg,
+                                                  gress_arg)) {
             continue;
         }
 
-        if (!PHV::Pragmas::checkNumberArgs(annotation, required_arguments,
-                min_required_arguments, true, cstring(PragmaAtomic::name),
-                "`gress', `field'"_cs)) {
+        if (!PHV::Pragmas::checkNumberArgs(annotation, required_arguments, min_required_arguments,
+                                           true, cstring(PragmaAtomic::name),
+                                           "`gress', `field'"_cs)) {
             continue;
         }
 
@@ -109,18 +108,17 @@ bool PragmaAtomic::preorder(const IR::BFN::Pipe* pipe) {
     }
 
     for (auto field : pa_atomic_from_arch) {
-        if (phv_i.field(field))
-            add_constraint(pipe, nullptr, field);
+        if (phv_i.field(field)) add_constraint(pipe, nullptr, field);
     }
 
     return true;
 }
 
-std::ostream& operator<<(std::ostream& out, const PragmaAtomic& pa_a) {
+std::ostream &operator<<(std::ostream &out, const PragmaAtomic &pa_a) {
     std::stringstream logs;
-    for (auto* f : pa_a.getFields())
-        logs << "@pa_atomic specifies that " << f->name << " should be marked no_split" <<
-            std::endl;
+    for (auto *f : pa_a.getFields())
+        logs << "@pa_atomic specifies that " << f->name << " should be marked no_split"
+             << std::endl;
     out << logs.str();
     return out;
 }

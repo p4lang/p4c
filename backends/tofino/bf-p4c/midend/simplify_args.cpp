@@ -35,7 +35,7 @@ bool InjectTmpVar::DoInject::isNestedStruct(const IR::Expression *expr) {
     }
 
     if (foundStruct && (expr->is<IR::PathExpression>() || expr->is<IR::Member>()) &&
-            expr->type->is<IR::Type_Header>()) {
+        expr->type->is<IR::Type_Header>()) {
         LOG3("Found nested struct in header: " << expr << ", type: " << expr->type);
         return true;
     }
@@ -44,32 +44,27 @@ bool InjectTmpVar::DoInject::isNestedStruct(const IR::Expression *expr) {
 
 const IR::Node *InjectTmpVar::DoInject::postorder(IR::AssignmentStatement *as) {
     auto mce = as->right->to<IR::MethodCallExpression>();
-    if (!mce)
-        return as;
+    if (!mce) return as;
 
     auto retTypeStruct = mce->type->to<IR::Type_Struct>();
-    if (!retTypeStruct)
-        return as;
+    if (!retTypeStruct) return as;
 
     auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
-    if (!mi->is<P4::ExternMethod>())
-        return as;
+    if (!mi->is<P4::ExternMethod>()) return as;
 
-    if (!isNestedStruct(as->left))
-        return as;
+    if (!isNestedStruct(as->left)) return as;
 
     IR::IndexedVector<IR::StatOrDecl> statements;
     IR::ID tmpVarName(refMap->newName("tmp"));
     auto tmpVarType = new IR::Type_Name(retTypeStruct->name);
 
     statements.push_back(new IR::Declaration_Variable(tmpVarName, tmpVarType, mce));
-    statements.push_back(
-            new IR::AssignmentStatement(as->getSourceInfo(), as->left,
-                                        new IR::PathExpression(tmpVarName)));
+    statements.push_back(new IR::AssignmentStatement(as->getSourceInfo(), as->left,
+                                                     new IR::PathExpression(tmpVarName)));
 
-    LOG3("Replacing AssignmentStatement:" << std::endl <<
-         "  " << as << std::endl <<
-         "by statements:");
+    LOG3("Replacing AssignmentStatement:" << std::endl
+                                          << "  " << as << std::endl
+                                          << "by statements:");
     for (auto st : statements) {
         LOG3("  " << st);
     }
@@ -78,12 +73,10 @@ const IR::Node *InjectTmpVar::DoInject::postorder(IR::AssignmentStatement *as) {
 
 const IR::Node *InjectTmpVar::DoInject::postorder(IR::MethodCallStatement *mcs) {
     auto mce = mcs->methodCall;
-    if (!mce)
-        return mcs;
+    if (!mce) return mcs;
 
     auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
-    if (!mi->is<P4::ExternMethod>())
-        return mcs;
+    if (!mi->is<P4::ExternMethod>()) return mcs;
     auto em = mi->to<P4::ExternMethod>();
 
     P4::ParameterSubstitution paramSub;
@@ -98,26 +91,24 @@ const IR::Node *InjectTmpVar::DoInject::postorder(IR::MethodCallStatement *mcs) 
         if (param->type->is<IR::Type_Struct>() && isNestedStruct(arg->expression)) {
             LOG3("Processing argument: " << arg << " for parameter: " << param);
             cstring newName = refMap->newName(param->name.string_view());
-            newArgs->push_back(new IR::Argument(
-                    arg->srcInfo, arg->name, new IR::PathExpression(newName)));
+            newArgs->push_back(
+                new IR::Argument(arg->srcInfo, arg->name, new IR::PathExpression(newName)));
             // Save arguments of in and inout parameters into local variables
-            if (param->direction == IR::Direction::In ||
-                    param->direction == IR::Direction::InOut) {
-                auto vardecl = new IR::Declaration_Variable(newName,
-                        param->annotations, param->type,
-                        arg->expression);
+            if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) {
+                auto vardecl = new IR::Declaration_Variable(newName, param->annotations,
+                                                            param->type, arg->expression);
                 before.push_back(vardecl);
             } else if (param->direction == IR::Direction::Out) {
-                auto vardecl = new IR::Declaration_Variable(newName,
-                        param->annotations, param->type);
+                auto vardecl =
+                    new IR::Declaration_Variable(newName, param->annotations, param->type);
                 before.push_back(vardecl);
             }
             // Copy out and inout parameters
             if (param->direction == IR::Direction::InOut ||
-                    param->direction == IR::Direction::Out) {
+                param->direction == IR::Direction::Out) {
                 auto right = new IR::PathExpression(newName);
-                auto copyout = new IR::AssignmentStatement(mcs->getSourceInfo(),
-                                                           arg->expression, right);
+                auto copyout =
+                    new IR::AssignmentStatement(mcs->getSourceInfo(), arg->expression, right);
                 after.push_back(copyout);
             }
         } else {
@@ -129,8 +120,7 @@ const IR::Node *InjectTmpVar::DoInject::postorder(IR::MethodCallStatement *mcs) 
      * If this is empty it means that we don't need any new temporary variables so
      * we don't modify the original statement.
      */
-    if (before.empty())
-        return mcs;
+    if (before.empty()) return mcs;
 
     auto mceClone = mce->clone();
     mceClone->arguments = newArgs;
@@ -141,16 +131,16 @@ const IR::Node *InjectTmpVar::DoInject::postorder(IR::MethodCallStatement *mcs) 
     statements.push_back(mcs);
     statements.append(after);
 
-    LOG3("Replacing MethodCallStatement:" << std::endl <<
-         "  " << mcs << std::endl <<
-         "by statements:");
+    LOG3("Replacing MethodCallStatement:" << std::endl
+                                          << "  " << mcs << std::endl
+                                          << "by statements:");
     for (auto st : statements) {
         LOG3("  " << st);
     }
     return new IR::BlockStatement(statements);
 }
 
-void FlattenHeader::flattenType(const IR::Type* type) {
+void FlattenHeader::flattenType(const IR::Type *type) {
     if (auto st = type->to<IR::Type_StructLike>()) {
         allAnnotations.push_back(st->annotations);
         for (auto f : st->fields) {
@@ -164,7 +154,7 @@ void FlattenHeader::flattenType(const IR::Type* type) {
         }
         allAnnotations.pop_back();
     } else {  // primitive field types
-        auto& newFields = flattenedHeader->fields;
+        auto &newFields = flattenedHeader->fields;
         auto newName = makeName("_");
         auto origName = makeName(".");
         if (origName != newName) {
@@ -173,8 +163,8 @@ void FlattenHeader::flattenType(const IR::Type* type) {
         }
         // preserve the original name using an annotation
         auto annotations = mergeAnnotations();
-        newFields.push_back(new IR::StructField(srcInfos.back(),
-                            IR::ID(newName), annotations, type));
+        newFields.push_back(
+            new IR::StructField(srcInfos.back(), IR::ID(newName), annotations, type));
     }
 }
 
@@ -189,12 +179,12 @@ cstring FlattenHeader::makeName(std::string_view sep) const {
     return name;
 }
 
-/** 
+/**
  * Merge all the annotation vectors in allAnnotations into a single
  * one. Duplicates are resolved, with preference given to the ones towards the
  * end of allAnnotations, which correspond to the most "nested" ones.
  */
-const IR::Annotations* FlattenHeader::mergeAnnotations() const {
+const IR::Annotations *FlattenHeader::mergeAnnotations() const {
     auto mergedAnnotations = new IR::Annotations();
     for (auto annosIt = allAnnotations.rbegin(); annosIt != allAnnotations.rend(); annosIt++) {
         for (auto anno : (*annosIt)->annotations) {
@@ -206,10 +196,11 @@ const IR::Annotations* FlattenHeader::mergeAnnotations() const {
     return mergedAnnotations;
 }
 
-bool FlattenHeader::preorder(IR::Type_Header* headerType) {
+bool FlattenHeader::preorder(IR::Type_Header *headerType) {
     if (policy(getChildContext(), headerType)) {
         LOG3("\t skip flattening " << headerType->name << " due to policy");
-        return false; }
+        return false;
+    }
     LOG3("visiting header " << headerType);
     flattenedHeader = headerType->clone();
     flattenedHeader->fields.clear();
@@ -231,21 +222,21 @@ cstring FlattenHeader::makeMember(std::string_view sep) const {
 
 /**
  * The IR for member is structured as:
- * 
+ *
  *     IR::Member
  *         IR::Member
  *             IR::Member
  *                 IR::PathExpression
- * 
+ *
  * Suppose we would like to transform a path from hdr.meta.nested.field to
  * hdr.meta.nested_field.
  * The IR tree should be transformed to:
- * 
+ *
  *      IR::Member
  *          IR::Member
  *              IR::PathExpression
  */
-void FlattenHeader::flattenMember(const IR::Member* member) {
+void FlattenHeader::flattenMember(const IR::Member *member) {
     if (memberSegments.size() == 0) {
         flattenedMember = member;
     }
@@ -258,9 +249,10 @@ void FlattenHeader::flattenMember(const IR::Member* member) {
     LOG3("   check " << (isHeader ? "header " : "struct ") << member->expr << " " << origName);
     if (!isHeader) {
         memberSegments.pop_back();
-        return; }
+        return;
+    }
     if (fieldNameMap.count(origName)) {
-        const IR::Expression* header;
+        const IR::Expression *header;
         if (member->expr->is<IR::PathExpression>())
             header = member->expr->to<IR::PathExpression>();
         else if (member->expr->is<IR::Member>())
@@ -268,22 +260,21 @@ void FlattenHeader::flattenMember(const IR::Member* member) {
         else
             BUG("Unexpected member expression %1%", member->expr);
         auto field = fieldNameMap.at(origName);
-        LOG3("     map " << flattenedMember->toString() <<
-             " to " << "(" << header << ", " << field << ")");
-        replacementMap.emplace(flattenedMember->toString(),
-                std::make_tuple(header, field));
+        LOG3("     map " << flattenedMember->toString() << " to " << "(" << header << ", " << field
+                         << ")");
+        replacementMap.emplace(flattenedMember->toString(), std::make_tuple(header, field));
     }
     memberSegments.pop_back();
 }
 
-bool FlattenHeader::preorder(IR::Member* member) {
-    LOG2("preorder "  << member);
+bool FlattenHeader::preorder(IR::Member *member) {
+    LOG2("preorder " << member);
     flattenMember(member);
     memberSegments.clear();
     return true;
 }
 
-int FlattenHeader::memberDepth(const IR::Member* m) {
+int FlattenHeader::memberDepth(const IR::Member *m) {
     int depth = 1;
     while (const auto *child = m->expr->to<IR::Member>()) {
         m = child;
@@ -354,21 +345,20 @@ const IR::Expression *FlattenHeader::balancedReplaceSrcInfo(const IR::Expression
         while (const auto *child = src->expr->to<IR::Member>()) {
             src = child;
         }
-        const auto* src_pe = src->expr->to<IR::PathExpression>();
+        const auto *src_pe = src->expr->to<IR::PathExpression>();
         CHECK_NULL(src_pe);
 
         return replaceSrcInfo(tgt_pe, src_pe);
     }
 }
 
-void FlattenHeader::postorder(IR::Member* member) {
+void FlattenHeader::postorder(IR::Member *member) {
     auto mem = member->toString();
     LOG2("postorder " << mem);
     if (replacementMap.count(mem)) {
-        LOG2("    replace " << member->expr <<
-                "." << member->member <<
-                " with " << std::get<0>(replacementMap.at(mem)) <<
-                "." << std::get<1>(replacementMap.at(mem)));
+        LOG2("    replace " << member->expr << "." << member->member << " with "
+                            << std::get<0>(replacementMap.at(mem)) << "."
+                            << std::get<1>(replacementMap.at(mem)));
         // Ideally, we would just do:
         //
         //   member->expr = std::get<0>(replacementMap.at(mem))->apply(cloner);
@@ -389,7 +379,7 @@ void FlattenHeader::postorder(IR::Member* member) {
     }
 }
 
-bool FlattenHeader::preorder(IR::MethodCallExpression* mc) {
+bool FlattenHeader::preorder(IR::MethodCallExpression *mc) {
     auto method = mc->method->to<IR::Member>();
     if (!method || method->member != "emit") return true;
 
@@ -399,8 +389,7 @@ bool FlattenHeader::preorder(IR::MethodCallExpression* mc) {
     auto type = dname->type->to<IR::Type_Extern>();
     if (!type) return false;
 
-    if (type->name != "Mirror" && type->name != "Resubmit"
-        && type->name != "Digest") return false;
+    if (type->name != "Mirror" && type->name != "Resubmit" && type->name != "Digest") return false;
 
     // HACK(Han): after the P4-14 to TNA refactor, we should
     // derive these indices from the TNA model.
@@ -412,28 +401,25 @@ bool FlattenHeader::preorder(IR::MethodCallExpression* mc) {
     //   digest.emit(field_list);
     //   digest.emit(); - digest without parameters
     int field_list_index = (type->name == "Mirror") ? 1 : 0;
-    if (mc->arguments->size() == 0)
-        return false;
+    if (mc->arguments->size() == 0) return false;
 
     if (type->name == "Mirror" && mc->arguments->size() != 2) {
         return false;
     }
 
-    auto* arg = mc->arguments->at(field_list_index);
-    auto* aexpr = arg->expression;
-    if (auto* liste = aexpr->to<IR::ListExpression>()) {
+    auto *arg = mc->arguments->at(field_list_index);
+    auto *aexpr = arg->expression;
+    if (auto *liste = aexpr->to<IR::ListExpression>()) {
         LOG4("Flattening arguments: " << liste);
-        auto* flattened_args = new IR::Vector<IR::Argument>();
-        if (type->name == "Mirror")
-            flattened_args->push_back(mc->arguments->at(0));
+        auto *flattened_args = new IR::Vector<IR::Argument>();
+        if (type->name == "Mirror") flattened_args->push_back(mc->arguments->at(0));
         flattened_args->push_back(new IR::Argument(flatten_list(liste)));
         mc->arguments = flattened_args;
         LOG4("Flattened arguments: " << mc);
-    } else if (auto* liste = aexpr->to<IR::StructExpression>()) {
+    } else if (auto *liste = aexpr->to<IR::StructExpression>()) {
         LOG4("Flattening arguments: " << liste);
-        auto* flattened_args = new IR::Vector<IR::Argument>();
-        if (type->name == "Mirror")
-            flattened_args->push_back(mc->arguments->at(0));
+        auto *flattened_args = new IR::Vector<IR::Argument>();
+        if (type->name == "Mirror") flattened_args->push_back(mc->arguments->at(0));
         auto flattenedList = doFlattenStructInitializer(liste);
         flattened_args->push_back(new IR::Argument(flattenedList));
         mc->arguments = flattened_args;
@@ -444,8 +430,7 @@ bool FlattenHeader::preorder(IR::MethodCallExpression* mc) {
     return true;
 }
 
-void FlattenHeader::explode(const IR::Expression* expression,
-    IR::Vector<IR::Expression>* output) {
+void FlattenHeader::explode(const IR::Expression *expression, IR::Vector<IR::Expression> *output) {
     if (auto st = expression->type->to<IR::Type_Header>()) {
         for (auto f : st->fields) {
             auto e = new IR::Member(expression, f->name);
@@ -453,9 +438,9 @@ void FlattenHeader::explode(const IR::Expression* expression,
             explode(e, output);
         }
     } else {
-        BUG_CHECK(!expression->type->is<IR::Type_StructLike>() &&
-            !expression->type->is<IR::Type_Stack>(),
-                  "%1%: unexpected type", expression->type);
+        BUG_CHECK(
+            !expression->type->is<IR::Type_StructLike>() && !expression->type->is<IR::Type_Stack>(),
+            "%1%: unexpected type", expression->type);
         output->push_back(expression);
     }
 }
@@ -477,14 +462,13 @@ cstring FlattenHeader::makePath(std::string_view sep) const {
     return name;
 }
 
-void FlattenHeader::flattenStructInitializer(
-        const IR::StructExpression *expr,
-        IR::IndexedVector<IR::NamedExpression> *components) {
+void FlattenHeader::flattenStructInitializer(const IR::StructExpression *expr,
+                                             IR::IndexedVector<IR::NamedExpression> *components) {
     for (auto e : expr->components) {
         pathSegments.push_back(e->name);
-        if (const auto* c = e->expression->to<IR::StructExpression>()) {
+        if (const auto *c = e->expression->to<IR::StructExpression>()) {
             flattenStructInitializer(c, components);
-        } else if (auto* member = e->expression->to<IR::Member>()) {
+        } else if (auto *member = e->expression->to<IR::Member>()) {
             if (auto type = member->type->to<IR::Type_Struct>()) {
                 for (auto f : type->fields) {
                     pathSegments.push_back(f->name);
@@ -508,21 +492,19 @@ void FlattenHeader::flattenStructInitializer(
     }
 }
 
-IR::StructExpression*
-FlattenHeader::doFlattenStructInitializer(const IR::StructExpression* e) {
+IR::StructExpression *FlattenHeader::doFlattenStructInitializer(const IR::StructExpression *e) {
     // removing nested StructInitailzierExpression
     auto no_nested_struct = new IR::IndexedVector<IR::NamedExpression>();
     flattenStructInitializer(e, no_nested_struct);
     return new IR::StructExpression(e->srcInfo, e->structType, *no_nested_struct);
 }
 
-IR::ListExpression* FlattenHeader::flatten_list(const IR::ListExpression* args) {
+IR::ListExpression *FlattenHeader::flatten_list(const IR::ListExpression *args) {
     IR::Vector<IR::Expression> components;
-    for (const auto* expr : args->components) {
-        if (const auto* list_arg = expr->to<IR::ListExpression>()) {
-            auto* flattened = flatten_list(list_arg);
-            for (const auto* comp : flattened->components)
-                components.push_back(comp);
+    for (const auto *expr : args->components) {
+        if (const auto *list_arg = expr->to<IR::ListExpression>()) {
+            auto *flattened = flatten_list(list_arg);
+            for (const auto *comp : flattened->components) components.push_back(comp);
         } else {
             components.push_back(expr);
         }
@@ -530,25 +512,24 @@ IR::ListExpression* FlattenHeader::flatten_list(const IR::ListExpression* args) 
     return new IR::ListExpression(components);
 }
 
-const IR::Node* RewriteTypeArguments::preorder(IR::Type_Struct* typeStruct) {
-    for (auto& t : eeh->rewriteTupleType) {
+const IR::Node *RewriteTypeArguments::preorder(IR::Type_Struct *typeStruct) {
+    for (auto &t : eeh->rewriteTupleType) {
         if (typeStruct->name == t.first) {
-             typeStruct->fields = {};
-             for (auto comp : t.second) {
-                 auto field = new IR::StructField(comp->name, comp->expression->type);
-                 typeStruct->fields.push_back(field);
-             }
+            typeStruct->fields = {};
+            for (auto comp : t.second) {
+                auto field = new IR::StructField(comp->name, comp->expression->type);
+                typeStruct->fields.push_back(field);
+            }
         }
     }
     return typeStruct;
 }
 
-const IR::Node* RewriteTypeArguments::preorder(IR::MethodCallExpression* mc) {
-    if (eeh->rewriteOtherType.empty())
-        return mc;
-    for (auto& type : eeh->rewriteOtherType) {
+const IR::Node *RewriteTypeArguments::preorder(IR::MethodCallExpression *mc) {
+    if (eeh->rewriteOtherType.empty()) return mc;
+    for (auto &type : eeh->rewriteOtherType) {
         if (type.first->equiv(*mc)) {
-            auto* typeArguments = new IR::Vector<IR::Type>();
+            auto *typeArguments = new IR::Vector<IR::Type>();
             typeArguments->push_back(type.second);
             mc->typeArguments = typeArguments;
         }
@@ -556,7 +537,7 @@ const IR::Node* RewriteTypeArguments::preorder(IR::MethodCallExpression* mc) {
     return mc;
 }
 
-const IR::Node* EliminateHeaders::preorder(IR::Argument *arg) {
+const IR::Node *EliminateHeaders::preorder(IR::Argument *arg) {
     auto mc = findContext<IR::MethodCallExpression>();
     if (!mc) return arg;
     auto method = mc->method->to<IR::Member>();
@@ -569,7 +550,7 @@ const IR::Node* EliminateHeaders::preorder(IR::Argument *arg) {
         auto fieldVectorList = IR::IndexedVector<IR::NamedExpression>();
         std::map<cstring, int> namesUsed;
         auto origlist = IR::IndexedVector<IR::NamedExpression>();
-        const IR::Type* structType = nullptr;
+        const IR::Type *structType = nullptr;
         if (arg->expression->is<IR::StructExpression>()) {
             origlist = arg->expression->to<IR::StructExpression>()->components;
             structType = arg->expression->to<IR::StructExpression>()->structType;
@@ -585,28 +566,24 @@ const IR::Node* EliminateHeaders::preorder(IR::Argument *arg) {
                     IR::ID name = f->name;
                     if (namesUsed.count(name.name)) {
                         name = IR::ID(name + "_renamed_" +
-                               cstring::to_cstring(namesUsed[name.name]++));
+                                      cstring::to_cstring(namesUsed[name.name]++));
                     } else {
                         namesUsed[name.name] = 1;
                     }
-                    fieldVectorList.push_back(
-                        new IR::NamedExpression(
-                            name,
-                            new IR::Member(f->type, expr->expression, f->name)));
+                    fieldVectorList.push_back(new IR::NamedExpression(
+                        name, new IR::Member(f->type, expr->expression, f->name)));
                 }
             } else if (auto st = expr->expression->type->to<IR::Type_Struct>()) {
                 for (auto f : st->fields) {
                     IR::ID name = f->name;
                     if (namesUsed.count(name.name)) {
                         name = IR::ID(name + "_renamed_" +
-                               cstring::to_cstring(namesUsed[name.name]++));
+                                      cstring::to_cstring(namesUsed[name.name]++));
                     } else {
                         namesUsed[name.name] = 1;
                     }
-                    fieldVectorList.push_back(
-                        new IR::NamedExpression(
-                            name,
-                            new IR::Member(f->type, expr->expression, f->name)));
+                    fieldVectorList.push_back(new IR::NamedExpression(
+                        name, new IR::Member(f->type, expr->expression, f->name)));
                 }
             } else if (auto concat = expr->expression->to<IR::Concat>()) {
                 IR::IndexedVector<IR::NamedExpression> concatList;
@@ -618,11 +595,11 @@ const IR::Node* EliminateHeaders::preorder(IR::Argument *arg) {
                 fieldVectorList.push_back(expr);
             } else {
                 error(ErrorType::ERR_UNEXPECTED, " unexpected type of parameter %2% in %1%",
-                        extName, expr->expression);
+                      extName, expr->expression);
             }
         }
         if (fieldVectorList.size()) {
-            IR::StructExpression* list;
+            IR::StructExpression *list;
             list = new IR::StructExpression(structType, fieldVectorList);
             if (mc->typeArguments->size()) {
                 if (auto type = mc->typeArguments->at(0)->to<IR::Type_Name>()) {
@@ -633,66 +610,67 @@ const IR::Node* EliminateHeaders::preorder(IR::Argument *arg) {
             }
             return (new IR::Argument(arg->srcInfo, list));
         }
-    } else if (extName == "Digest" || extName == "Mirror"
-            || extName == "Resubmit" || extName == "Hash") {
+    } else if (extName == "Digest" || extName == "Mirror" || extName == "Resubmit" ||
+               extName == "Hash") {
         const IR::Type_StructLike *type = nullptr;
         if (auto path = arg->expression->to<IR::PathExpression>()) {
             if (path->type->is<IR::Type_StructLike>()) {
                 type = path->type->to<IR::Type_StructLike>();
             } else {
-                return arg; }
+                return arg;
+            }
         } else if (auto mem = arg->expression->to<IR::Member>()) {
             if (mem->type->is<IR::Type_StructLike>()) {
                 type = mem->type->to<IR::Type_StructLike>();
             } else {
-                return arg; } }
+                return arg;
+            }
+        }
 
         if (!type) return arg;
 
-        if (policy(getChildContext(), type))
-            return arg;
+        if (policy(getChildContext(), type)) return arg;
 
         cstring type_name;
         auto fieldList = IR::IndexedVector<IR::NamedExpression>();
         if (auto header = type->to<IR::Type_Header>()) {
             for (auto f : header->fields) {
                 auto mem = new IR::Member(arg->expression, f->name);
-                fieldList.push_back(new IR::NamedExpression(f->name, mem)); }
+                fieldList.push_back(new IR::NamedExpression(f->name, mem));
+            }
             type_name = header->name;
         } else if (auto st = type->to<IR::Type_Struct>()) {
             for (auto f : st->fields) {
                 auto mem = new IR::Member(arg->expression, f->name);
-                fieldList.push_back(new IR::NamedExpression(f->name, mem)); }
+                fieldList.push_back(new IR::NamedExpression(f->name, mem));
+            }
             type_name = st->name;
         } else {
-            error(ErrorType::ERR_UNEXPECTED, " unexpected type of parameter %2% in %1%",
-                        extName, arg);
+            error(ErrorType::ERR_UNEXPECTED, " unexpected type of parameter %2% in %1%", extName,
+                  arg);
         }
 
         if (fieldList.size() > 0)
-            return new IR::Argument(arg->srcInfo,
-                    new IR::StructExpression(new IR::Type_Name(type_name), fieldList));
+            return new IR::Argument(
+                arg->srcInfo, new IR::StructExpression(new IR::Type_Name(type_name), fieldList));
     }
     return arg;
 }
 
-void EliminateHeaders::elimConcat(IR::IndexedVector<IR::NamedExpression>& output,
-                                  const IR::Concat* expr) {
-     static int i = 0;
-     if (!expr)
-         return;
-     if (expr->left->is<IR::Concat>())
-         elimConcat(output, expr->left->to<IR::Concat>());
-     else
-         output.push_back(new IR::NamedExpression(
-                                IR::ID("concat_" + cstring::to_cstring(i++)),
-                                expr->left));
+void EliminateHeaders::elimConcat(IR::IndexedVector<IR::NamedExpression> &output,
+                                  const IR::Concat *expr) {
+    static int i = 0;
+    if (!expr) return;
+    if (expr->left->is<IR::Concat>())
+        elimConcat(output, expr->left->to<IR::Concat>());
+    else
+        output.push_back(
+            new IR::NamedExpression(IR::ID("concat_" + cstring::to_cstring(i++)), expr->left));
 
-     if (expr->right->is<IR::Concat>())
-         elimConcat(output, expr->right->to<IR::Concat>());
-     else
-         output.push_back(new IR::NamedExpression(
-                                IR::ID("concat_" + cstring::to_cstring(i++)),
-                                expr->right));
+    if (expr->right->is<IR::Concat>())
+        elimConcat(output, expr->right->to<IR::Concat>());
+    else
+        output.push_back(
+            new IR::NamedExpression(IR::ID("concat_" + cstring::to_cstring(i++)), expr->right));
 }
 }  // namespace BFN

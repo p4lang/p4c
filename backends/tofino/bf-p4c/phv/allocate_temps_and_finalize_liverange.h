@@ -37,14 +37,14 @@ namespace PHV {
 //
 
 class AllocateTempsAndFinalizeLiverange : public PassManager {
-    PhvInfo& phv_i;
-    const ClotInfo& clot_i;
+    PhvInfo &phv_i;
+    const ClotInfo &clot_i;
     const FieldDefUse &defuse_i;
     const TableSummary &ts_i;
 
  public:
-    AllocateTempsAndFinalizeLiverange(PhvInfo& phv, const ClotInfo& clot, const FieldDefUse& defuse,
-            const ::TableSummary &ts);
+    AllocateTempsAndFinalizeLiverange(PhvInfo &phv, const ClotInfo &clot, const FieldDefUse &defuse,
+                                      const ::TableSummary &ts);
 };
 
 // For programs exceeding available stages for Tofino HW i.e. (12 for Tofino1 & 20 for Tofino2), it
@@ -83,10 +83,11 @@ class AllocateTempsAndFinalizeLiverange : public PassManager {
 // FinalizePhysicalLiverange
 // (check isPhysicalDeparserStageExceeded and allow larger deparser stage)
 //
-class UpdateDeparserStage: public Inspector {
-    PhvInfo& phv_i;
+class UpdateDeparserStage : public Inspector {
+    PhvInfo &phv_i;
 
     void end_apply() override;
+
  public:
     explicit UpdateDeparserStage(PhvInfo &phv) : phv_i(phv) {}
 };

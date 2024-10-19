@@ -48,32 +48,32 @@
 #ifndef BF_P4C_MIDEND_REMOVE_SELECT_BOOLEANS_H_
 #define BF_P4C_MIDEND_REMOVE_SELECT_BOOLEANS_H_
 
-#include "ir/ir.h"
-#include "frontends/p4/typeMap.h"
-#include "midend/removeSelectBooleans.h"
 #include "bf-p4c/midend/elim_cast.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
+#include "midend/removeSelectBooleans.h"
 
 namespace BFN {
 
 class RemoveSelectBooleans : public PassManager {
  public:
-    RemoveSelectBooleans(P4::ReferenceMap* refMap, P4::TypeMap* typeMap) {
+    RemoveSelectBooleans(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
         addPasses({
-           new P4::ClearTypeMap(typeMap),
-           new BFN::TypeChecking(refMap, typeMap, true),
-           new P4::RemoveSelectBooleans(typeMap),
-           new BFN::TypeChecking(refMap, typeMap, true),
-           new BFN::RewriteCastToReinterpretCast(typeMap),
-           // RewriteCastToReinterpretCast might change some of the Type_Bits
-           // to different objects representing the same type =>
-           // rerun typechecking with empty typemap to properly
-           // unify those new types
-           new P4::ClearTypeMap(typeMap),
-           new BFN::TypeChecking(refMap, typeMap, true),
+            new P4::ClearTypeMap(typeMap),
+            new BFN::TypeChecking(refMap, typeMap, true),
+            new P4::RemoveSelectBooleans(typeMap),
+            new BFN::TypeChecking(refMap, typeMap, true),
+            new BFN::RewriteCastToReinterpretCast(typeMap),
+            // RewriteCastToReinterpretCast might change some of the Type_Bits
+            // to different objects representing the same type =>
+            // rerun typechecking with empty typemap to properly
+            // unify those new types
+            new P4::ClearTypeMap(typeMap),
+            new BFN::TypeChecking(refMap, typeMap, true),
         });
     }
 };
 
-}
+}  // namespace BFN
 
 #endif /* BF_P4C_MIDEND_REMOVE_SELECT_BOOLEANS_H_ */

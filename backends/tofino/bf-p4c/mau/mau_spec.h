@@ -10,8 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_MAU_MAU_SPEC_H_
-#define EXTENSIONS_BF_P4C_MAU_MAU_SPEC_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_MAU_SPEC_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_MAU_SPEC_H_
 
 #include "ir/ir.h"
 
@@ -34,7 +34,6 @@ class TofinoIMemSpec : public IMemSpec {
     int address_bits() const override;
     int map_table_entries() const override;
 };
-
 
 class IXBarSpec {
  public:
@@ -74,7 +73,6 @@ class IXBarSpec {
     virtual int resilientModeHashBits() const;
     virtual int ternaryBytesPerBigGroup() const;
     virtual int tofinoMeterAluByteOffset() const;
-
 
     virtual int getExactOrdBase(int group) const = 0;
     virtual int getTernaryOrdBase(int group) const = 0;
@@ -161,7 +159,6 @@ class TofinoIXBarSpec : public IXBarSpec {
     int xcmpMatchTotalBytes() const override;
 };
 
-
 class TofinoMauSpec : public MauSpec {
     const TofinoIXBarSpec ixbar_;
     const TofinoIMemSpec imem_;
@@ -182,6 +179,4 @@ class JBayMauSpec : public MauSpec {
     const IMemSpec &getIMemSpec() const override;
 };
 
-
-
-#endif /* EXTENSIONS_BF_P4C_MAU_MAU_SPEC_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_MAU_SPEC_H_ */

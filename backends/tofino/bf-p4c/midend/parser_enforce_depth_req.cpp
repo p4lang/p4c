@@ -64,7 +64,7 @@ class IdentifyPadRequirements : public Inspector {
     std::map<cstring, int> typeWidth;
 
     /// Size of each state in each parser
-    std::map<const IR::P4Parser*, std::map<cstring, int>> &stateSize;
+    std::map<const IR::P4Parser *, std::map<cstring, int>> &stateSize;
 
     /// Counters declared in the current parser. These are not necessarily used.
     std::set<cstring> counters;
@@ -157,7 +157,7 @@ class IdentifyPadRequirements : public Inspector {
         // Apply ParserLoopsInfo to get info about loops
         ParserPragmas parserPragmas;
         ParserLoopsInfo *parserLoopsInfo = nullptr;
-        if (const auto* tnaParser = prsr->to<IR::BFN::TnaParser>()) {
+        if (const auto *tnaParser = prsr->to<IR::BFN::TnaParser>()) {
             tnaParser->apply(parserPragmas);
             parserLoopsInfo = new ParserLoopsInfo(refMap, tnaParser, parserPragmas);
         }
@@ -273,8 +273,7 @@ class IdentifyPadRequirements : public Inspector {
 
             headerPadAmt[header] = std::max(padStates, headerPadAmt[header]);
             if (hdrTypeIsStruct)
-                LOG2("  Header " << header << " needs " << headerPadAmt[header]
-                                 << " parse states");
+                LOG2("  Header " << header << " needs " << headerPadAmt[header] << " parse states");
             else
                 LOG2("  Header " << header << " needs " << headerPadAmt[header] << " bytes pad");
         }
@@ -422,7 +421,7 @@ class AddParserPad : public Modifier {
     const std::set<cstring> &structs;
 
     /// Size of all states
-    const std::map<const IR::P4Parser*, std::map<cstring, int>> &stateSize;
+    const std::map<const IR::P4Parser *, std::map<cstring, int>> &stateSize;
 
     /// Map of parsers and the pad requirements for each parser
     const std::map<const IR::P4Parser *, ParserEnforceDepthReq::ParserPadReq> &padReq;
@@ -630,7 +629,7 @@ class AddParserPad : public Modifier {
             auto *new_th = th->clone();
             new_th->name = IR::ID(th->name + ParserEnforceDepthReq::non_struct_pad_suf);
             auto *padField = new IR::StructField(ParserEnforceDepthReq::pad_hdr_field,
-                                        IR::Type_Bits::get(padAmt * 8));
+                                                 IR::Type_Bits::get(padAmt * 8));
             new_th->fields.push_back(padField);
 
             hdrNameToNewTypeHdr[th->name] = new_th;
@@ -726,12 +725,12 @@ class AddParserPad : public Modifier {
                 di = new IR::Declaration_Instance(
                     prsrCtrName,
                     new IR::Type_Specialized(new IR::Type_Name("ParserCounter"),
-                                            new IR::Vector<IR::Type>({IR::Type_Bits::get(8)})),
+                                             new IR::Vector<IR::Type>({IR::Type_Bits::get(8)})),
                     new IR::Vector<IR::Argument>());
 
             } else {
                 di = new IR::Declaration_Instance(prsrCtrName, new IR::Type_Name("ParserCounter"),
-                                                new IR::Vector<IR::Argument>());
+                                                  new IR::Vector<IR::Argument>());
             }
             prsr->parserLocals.push_back(di);
             LOG5("Added counter to parser " << prsr->externalName() << ": " << di);
@@ -802,7 +801,7 @@ class AddParserPad : public Modifier {
             auto *th = pe->type->to<IR::Type_Header>();
             if (th && hdrNameToNewTypeHdr.count(th->name)) {
                 pe->type = hdrNameToNewTypeHdr.at(th->name);
-            return false;
+                return false;
             }
         }
         return true;
@@ -840,7 +839,7 @@ class AddParserPad : public Modifier {
             argsToCheck = {std::make_pair(0, 0), std::make_pair(3, 2)};
         else
             error("Unsupported architecture \"%1%\" for parser minimum depth enforcement",
-                    BackendOptions().arch);
+                  BackendOptions().arch);
 
         if (auto *di = getParent<IR::Declaration_Instance>()) {
             if (ts->baseType->path->name == "Pipeline") {
@@ -1257,8 +1256,8 @@ ParserEnforceDepthReq::ParserEnforceDepthReq(P4::ReferenceMap *rm, BFN::Evaluato
                 }
             }
         },
-        new IdentifyPadRequirements(refMap, structs, stateSize, padReq, headerPadAmt,
-                                    all_parser, ctrShiftAmt),
+        new IdentifyPadRequirements(refMap, structs, stateSize, padReq, headerPadAmt, all_parser,
+                                    ctrShiftAmt),
         new AddParserPad(structs, stateSize, padReq, headerPadAmt, all_parser, all_mau_pipe,
                          all_deparser, deparser_parser, mau_pipe_parser, ctrShiftAmt),
     });

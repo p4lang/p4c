@@ -10,14 +10,15 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_COMMON_UTILS_H_
-#define EXTENSIONS_BF_P4C_COMMON_UTILS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_COMMON_UTILS_H_
+#define BACKENDS_TOFINO_BF_P4C_COMMON_UTILS_H_
 
 #include <iostream>
+
+#include "ir/ir.h"
 #include "lib/error_catalog.h"
 #include "lib/exceptions.h"
 #include "lib/gc.h"
-#include "ir/ir.h"
 
 #if defined(__GNUC__) && __GNUC__ < 7
 #define BFN_FALLTHROUGH /* fall through */
@@ -47,24 +48,23 @@ void end_fatal_error();
 
 /// Report an error with the given message and exit.
 template <typename... T>
-inline void fatal_error(const char* format, T... args) {
+inline void fatal_error(const char *format, T... args) {
     error(format, args...);
     end_fatal_error();
 }
 
 /// Report an error with the error type and given message and exit.
 template <typename... T>
-inline void fatal_error(int kind, const char* format, T... args) {
+inline void fatal_error(int kind, const char *format, T... args) {
     error(kind, format, args...);
     end_fatal_error();
 }
 
 #ifdef BAREFOOT_INTERNAL
-#define INTERNAL_WARNING(...)   warning(ErrorType::WARN_UNSUPPORTED, __VA_ARGS__)
+#define INTERNAL_WARNING(...) warning(ErrorType::WARN_UNSUPPORTED, __VA_ARGS__)
 #else
-#define INTERNAL_WARNING(...)   BUG(__VA_ARGS__)
+#define INTERNAL_WARNING(...) BUG(__VA_ARGS__)
 #endif
-
 
 /// Check if ghost control is present on any pipes other than current pipe given
 /// by pipe_id argument
@@ -78,7 +78,7 @@ std::pair<cstring, cstring> get_key_and_mask(const cstring &input);
 /// Input: "vrf[15:0]", Output: std::pair<true, "vrf", 15, 0>
 std::tuple<bool, cstring, int, int> get_key_slice_info(const cstring &input);
 
-const IR::Vector<IR::Expression>* getListExprComponents(const IR::Node& node);
+const IR::Vector<IR::Expression> *getListExprComponents(const IR::Node &node);
 
 bool is_starter_pistol_table(const cstring &tableName);
-#endif /* EXTENSIONS_BF_P4C_COMMON_UTILS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_COMMON_UTILS_H_ */

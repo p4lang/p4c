@@ -13,9 +13,9 @@
 #ifndef BF_P4C_MIDEND_CHECK_UNSUPPORTED_H_
 #define BF_P4C_MIDEND_CHECK_UNSUPPORTED_H_
 
-#include "ir/ir.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
 
 namespace P4 {
 class TypeMap;
@@ -28,14 +28,14 @@ namespace BFN {
  * \brief Check for unsupported features in the backend compiler.
  */
 class CheckUnsupported final : public Inspector {
-    bool preorder(const IR::PathExpression* path_expression) override;
+    bool preorder(const IR::PathExpression *path_expression) override;
     void postorder(const IR::P4Table *) override;
     bool preorder(const IR::Declaration_Instance *instance) override;
 
  public:
-    explicit CheckUnsupported(P4::ReferenceMap *, P4::TypeMap*) {}
+    explicit CheckUnsupported(P4::ReferenceMap *, P4::TypeMap *) {}
 };
 
 }  // namespace BFN
 
-#endif  /* BF_P4C_MIDEND_CHECK_UNSUPPORTED_H_ */
+#endif /* BF_P4C_MIDEND_CHECK_UNSUPPORTED_H_ */

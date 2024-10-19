@@ -25,6 +25,6 @@ class PrettyPrint {
     virtual std::string pretty_print() const = 0;
 };
 
-}
+}  // namespace Pragma
 
 #endif /* BF_P4C_PHV_PRAGMA_PRETTY_PRINT_H_ */

@@ -47,17 +47,17 @@
  *
  */
 class ConstMirrorSessionOpt final : public DeparserTransform {
-    const PhvInfo& phv;
+    const PhvInfo &phv;
 
  public:
-    ConstMirrorSessionOpt(PhvInfo& phv) : phv(phv) {}
+    ConstMirrorSessionOpt(PhvInfo &phv) : phv(phv) {}
 
-    IR::Node* preorder(IR::BFN::Deparser* dp) override {
-        if (dp->gress != INGRESS)
-            prune();
-        return dp; }
-    IR::Node* preorder(IR::BFN::Digest*dfl) override;
-    IR::Node* preorder(IR::TempVar* tv) override;
+    IR::Node *preorder(IR::BFN::Deparser *dp) override {
+        if (dp->gress != INGRESS) prune();
+        return dp;
+    }
+    IR::Node *preorder(IR::BFN::Digest *dfl) override;
+    IR::Node *preorder(IR::TempVar *tv) override;
 };
 
-#endif  /* BF_P4C_PARDE_MIRROR_CONST_MIRROR_SESSION_OPT_H_ */
+#endif /* BF_P4C_PARDE_MIRROR_CONST_MIRROR_SESSION_OPT_H_ */

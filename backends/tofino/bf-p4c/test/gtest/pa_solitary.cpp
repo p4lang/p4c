@@ -10,17 +10,19 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include <optional>
-#include <boost/algorithm/string/replace.hpp>
-#include "gtest/gtest.h"
+#include "bf-p4c/phv/pragma/pa_solitary.h"
 
+#include <optional>
+
+#include <boost/algorithm/string/replace.hpp>
+
+#include "bf-p4c/common/header_stack.h"
+#include "bf-p4c/phv/phv_fields.h"
+#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "gtest/gtest.h"
 #include "ir/ir.h"
 #include "lib/error.h"
 #include "test/gtest/helpers.h"
-#include "bf-p4c/common/header_stack.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/pragma/pa_solitary.h"
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
 
 namespace P4::Test {
 
@@ -28,8 +30,7 @@ class PaSolitaryPragmaTest : public TofinoBackendTest {};
 
 namespace {
 
-std::optional<TofinoPipeTestCase>
-createPaSolitaryPragmaTestCase(const std::string& pragmas) {
+std::optional<TofinoPipeTestCase> createPaSolitaryPragmaTestCase(const std::string &pragmas) {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
         %PRAGMAS%
         header H1
@@ -77,7 +78,7 @@ createPaSolitaryPragmaTestCase(const std::string& pragmas) {
 
     boost::replace_first(source, "%PRAGMAS%", pragmas);
 
-    auto& options = BackendOptions();
+    auto &options = BackendOptions();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.target = "tofino"_cs;
     options.arch = "v1model"_cs;
@@ -86,23 +87,17 @@ createPaSolitaryPragmaTestCase(const std::string& pragmas) {
     return TofinoPipeTestCase::createWithThreadLocalInstances(source);
 }
 
-const IR::BFN::Pipe *runMockPasses(const IR::BFN::Pipe* pipe,
-                                   PhvInfo& phv,
-                                   PragmaSolitary& pa_solitary) {
-    PassManager quick_backend = {
-        new CollectHeaderStackInfo,
-        new CollectPhvInfo(phv),
-        &pa_solitary
-    };
+const IR::BFN::Pipe *runMockPasses(const IR::BFN::Pipe *pipe, PhvInfo &phv,
+                                   PragmaSolitary &pa_solitary) {
+    PassManager quick_backend = {new CollectHeaderStackInfo, new CollectPhvInfo(phv), &pa_solitary};
     return pipe->apply(quick_backend);
 }
 
 }  // namespace
 
 TEST_F(PaSolitaryPragmaTest, Basic) {
-    auto test = createPaSolitaryPragmaTestCase(
-            P4_SOURCE(P4Headers::NONE,
-                      R"(
+    auto test = createPaSolitaryPragmaTestCase(P4_SOURCE(P4Headers::NONE,
+                                                         R"(
                          @pa_solitary("ingress", "h1.f1")
                          @pa_solitary("ingress", "h1.f2")
                          @pa_solitary("ingress", "h2.f1")
@@ -113,9 +108,9 @@ TEST_F(PaSolitaryPragmaTest, Basic) {
     PragmaSolitary pa_solitary(phv);
     runMockPasses(test->pipe, phv, pa_solitary);
 
-    auto* h1_f1 = phv.field("ingress::h1.f1"_cs);
-    auto* h1_f2 = phv.field("ingress::h1.f2"_cs);
-    auto* h2_f1 = phv.field("ingress::h2.f1"_cs);
+    auto *h1_f1 = phv.field("ingress::h1.f1"_cs);
+    auto *h1_f2 = phv.field("ingress::h1.f2"_cs);
+    auto *h2_f1 = phv.field("ingress::h2.f1"_cs);
 
     EXPECT_EQ(h1_f1->is_solitary(), true);
     EXPECT_EQ(h1_f2->is_solitary(), false);  // skip if not container-sized header field

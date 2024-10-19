@@ -17,12 +17,12 @@
 
 namespace Parde::Lowered {
 
-Visitor::profile_t ComputeLoweredParserIR::init_apply(const IR::Node* node) {
+Visitor::profile_t ComputeLoweredParserIR::init_apply(const IR::Node *node) {
     dontMergeStates.clear();
     return Inspector::init_apply(node);
 }
 
-bool ComputeLoweredParserIR::preorder(const IR::Type_Header* type) {
+bool ComputeLoweredParserIR::preorder(const IR::Type_Header *type) {
     LOG1("ComputeLoweredParserIR preorder on Header : " << type);
     if (type->name == "egress_intrinsic_metadata_t") {
         static std::vector<std::pair<std::string, unsigned>> eg_intr_md = {
@@ -60,13 +60,13 @@ bool ComputeLoweredParserIR::preorder(const IR::Type_Header* type) {
 }
 
 IR::Vector<IR::BFN::LoweredParserChecksum> ComputeLoweredParserIR::lowerParserChecksums(
-    const IR::BFN::Parser* parser, const IR::BFN::ParserState* state,
-    const std::vector<const IR::BFN::ParserChecksumPrimitive*>& checksums) {
+    const IR::BFN::Parser *parser, const IR::BFN::ParserState *state,
+    const std::vector<const IR::BFN::ParserChecksumPrimitive *> &checksums) {
     IR::Vector<IR::BFN::LoweredParserChecksum> loweredChecksums;
-    ordered_map<cstring, std::vector<const IR::BFN::ParserChecksumPrimitive*>> csum_to_prims;
+    ordered_map<cstring, std::vector<const IR::BFN::ParserChecksumPrimitive *>> csum_to_prims;
     for (auto prim : checksums) csum_to_prims[prim->declName].push_back(prim);
 
-    for (auto& kv : csum_to_prims) {
+    for (auto &kv : csum_to_prims) {
         auto csum = lowerParserChecksum(parser, state, kv.first, kv.second);
 
         bool hasEquiv = false;
@@ -82,7 +82,7 @@ IR::Vector<IR::BFN::LoweredParserChecksum> ComputeLoweredParserIR::lowerParserCh
     return loweredChecksums;
 }
 
-unsigned int ComputeLoweredParserIR::rangeToInt(const IR::BFN::PacketRVal* range) {
+unsigned int ComputeLoweredParserIR::rangeToInt(const IR::BFN::PacketRVal *range) {
     auto lo = range->range.loByte();
     auto hi = range->range.hiByte();
     unsigned num = 0;
@@ -92,15 +92,15 @@ unsigned int ComputeLoweredParserIR::rangeToInt(const IR::BFN::PacketRVal* range
     return num;
 }
 
-IR::BFN::LoweredParserChecksum* ComputeLoweredParserIR::lowerParserChecksum(
-    const IR::BFN::Parser* parser, const IR::BFN::ParserState* state, cstring name,
-    std::vector<const IR::BFN::ParserChecksumPrimitive*>& checksums) {
+IR::BFN::LoweredParserChecksum *ComputeLoweredParserIR::lowerParserChecksum(
+    const IR::BFN::Parser *parser, const IR::BFN::ParserState *state, cstring name,
+    std::vector<const IR::BFN::ParserChecksumPrimitive *> &checksums) {
     unsigned id = checksumAlloc.get_id(parser, name);
     bool start = checksumAlloc.is_start_state(parser, name, state);
     bool end = checksumAlloc.is_end_state(parser, name, state);
     auto type = checksumAlloc.get_type(parser, name);
 
-    const IR::BFN::FieldLVal* dest = nullptr;
+    const IR::BFN::FieldLVal *dest = nullptr;
     unsigned swap = 0;
     unsigned mul2 = 0;
     // Will be used to compare bitranges for multiply by 2 in jbay
@@ -178,19 +178,19 @@ IR::BFN::LoweredParserChecksum* ComputeLoweredParserIR::lowerParserChecksum(
     return csum;
 }
 
-unsigned ComputeLoweredParserIR::getOffsetIncAmt(const IR::BFN::ParserState* state) {
+unsigned ComputeLoweredParserIR::getOffsetIncAmt(const IR::BFN::ParserState *state) {
     CountStridedHeaderRefs count;
     state->statements.apply(count);
 
     // TODO move this check to midend
     if (count.header_stack_to_indices.size() > 1) {
         std::stringstream ss;
-        for (auto& kv : count.header_stack_to_indices) ss << kv.first << " ";
+        for (auto &kv : count.header_stack_to_indices) ss << kv.first << " ";
 
         error("More than one header stack in parser state %1%: %2%", state->name, ss.str());
     }
 
-    auto& indices = count.header_stack_to_indices.begin()->second;
+    auto &indices = count.header_stack_to_indices.begin()->second;
 
     unsigned i = 0;
 
@@ -208,28 +208,28 @@ unsigned ComputeLoweredParserIR::getOffsetIncAmt(const IR::BFN::ParserState* sta
     return indices.size();
 }
 
-void ComputeLoweredParserIR::postorder(const IR::BFN::ParserState* state) {
+void ComputeLoweredParserIR::postorder(const IR::BFN::ParserState *state) {
     LOG4("[ComputeLoweredParserIR] lowering state " << state->name);
 
     BUG_CHECK(!loweredStates.count(state), "Parser state %1% already lowered?", state->name);
 
-    auto* loweredState = new IR::BFN::LoweredParserState(sanitizeName(state->name), state->gress);
+    auto *loweredState = new IR::BFN::LoweredParserState(sanitizeName(state->name), state->gress);
 
-    std::vector<const IR::BFN::ParserChecksumPrimitive*> checksums;
+    std::vector<const IR::BFN::ParserChecksumPrimitive *> checksums;
 
     IR::Vector<IR::BFN::ParserCounterPrimitive> counters;
 
-    const IR::BFN::ParserPrioritySet* priority = nullptr;
-    const IR::BFN::HdrLenIncStop* stopper = nullptr;
+    const IR::BFN::ParserPrioritySet *priority = nullptr;
+    const IR::BFN::HdrLenIncStop *stopper = nullptr;
     std::optional<bool> partial_hdr_err_proc_extract = std::nullopt;
 
     // Collect all the extract operations; we'll lower them as a group so we
     // can merge extracts that write to the same PHV containers.
     ExtractSimplifier simplifier(phv, clotInfo);
     for (auto prim : state->statements) {
-        if (auto* extract = prim->to<IR::BFN::Extract>()) {
+        if (auto *extract = prim->to<IR::BFN::Extract>()) {
             simplifier.add(extract);
-            if (auto* pkt_rval = extract->source->to<IR::BFN::PacketRVal>()) {
+            if (auto *pkt_rval = extract->source->to<IR::BFN::PacketRVal>()) {
                 // At this point, all possible conflicts with partial_hdr_err_proc
                 // must have been resolved by pass SplitGreedyParserStates that ran previously.
                 BUG_CHECK(!partial_hdr_err_proc_extract ||
@@ -237,20 +237,20 @@ void ComputeLoweredParserIR::postorder(const IR::BFN::ParserState* state) {
                           "Parser state %1% has conflicting partial_hdr_err_proc", state->name);
                 partial_hdr_err_proc_extract = pkt_rval->partial_hdr_err_proc;
             }
-        } else if (auto* csum = prim->to<IR::BFN::ParserChecksumPrimitive>()) {
+        } else if (auto *csum = prim->to<IR::BFN::ParserChecksumPrimitive>()) {
             checksums.push_back(csum);
-        } else if (auto* cntr = prim->to<IR::BFN::ParserCounterPrimitive>()) {
+        } else if (auto *cntr = prim->to<IR::BFN::ParserCounterPrimitive>()) {
             counters.push_back(cntr);
-        } else if (auto* prio = prim->to<IR::BFN::ParserPrioritySet>()) {
+        } else if (auto *prio = prim->to<IR::BFN::ParserPrioritySet>()) {
             BUG_CHECK(!priority, "more than one parser priority set in %1%?", state->name);
             priority = prio;
-        } else if (auto* stop = prim->to<IR::BFN::HdrLenIncStop>()) {
+        } else if (auto *stop = prim->to<IR::BFN::HdrLenIncStop>()) {
             BUG_CHECK(!stopper, "more than one hdr_len_inc_stop in %1%?", state->name);
             stopper = stop;
-        } else if (auto* zeroInit = prim->to<IR::BFN::ParserZeroInit>()) {
+        } else if (auto *zeroInit = prim->to<IR::BFN::ParserZeroInit>()) {
             if (Device::currentDevice() == Device::TOFINO) {
                 auto ctxt = PHV::AllocContext::PARSER;
-                for (auto& alloc : phv.get_alloc(zeroInit->field->field, ctxt))
+                for (auto &alloc : phv.get_alloc(zeroInit->field->field, ctxt))
                     origParserZeroInitContainers[state->thread()].emplace(alloc.container());
             }
         } else if (!prim->is<IR::BFN::ParserZeroInit>()) {
@@ -264,7 +264,7 @@ void ComputeLoweredParserIR::postorder(const IR::BFN::ParserState* state) {
     auto loweredExtracts = simplifier.lowerExtracts(clotTagToCsumUnit);
 
     /// Convert multiple select into one.
-    auto* loweredSelect = new IR::BFN::LoweredSelect();
+    auto *loweredSelect = new IR::BFN::LoweredSelect();
 
     for (const auto *select : state->selects) {
         if (const auto *ctr = select->source->to<IR::BFN::ParserCounterRVal>())
@@ -277,7 +277,7 @@ void ComputeLoweredParserIR::postorder(const IR::BFN::ParserState* state) {
 
     loweredState->select = loweredSelect;
 
-    for (auto* transition : state->transitions) {
+    for (auto *transition : state->transitions) {
         BUG_CHECK(int(transition->shift) <= Device::pardeSpec().byteInputBufferSize(),
                   "State %1% has shift %2% more than buffer size?", state->name, transition->shift);
         BUG_CHECK(loweredStates.find(transition->next) != loweredStates.end(),
@@ -287,14 +287,14 @@ void ComputeLoweredParserIR::postorder(const IR::BFN::ParserState* state) {
         std::optional<bool> partial_hdr_err_proc_saves = std::nullopt;
         IR::Vector<IR::BFN::LoweredSave> saves;
 
-        for (const auto* save : transition->saves) {
+        for (const auto *save : transition->saves) {
             auto range = save->source->range.toUnit<RangeUnit::Byte>();
 
-            IR::BFN::LoweredInputBufferRVal* source = nullptr;
+            IR::BFN::LoweredInputBufferRVal *source = nullptr;
 
             if (save->source->is<IR::BFN::MetadataRVal>())
                 source = new IR::BFN::LoweredMetadataRVal(range);
-            else if (auto* sv = save->source->to<IR::BFN::PacketRVal>()) {
+            else if (auto *sv = save->source->to<IR::BFN::PacketRVal>()) {
                 source = new IR::BFN::LoweredPacketRVal(range);
                 // At this point, all possible conflicts with partial_hdr_err_proc
                 // must have been resolved by pass SplitGreedyParserStates that ran previously.
@@ -327,7 +327,7 @@ void ComputeLoweredParserIR::postorder(const IR::BFN::ParserState* state) {
             partialHdrErrProc = *partial_hdr_err_proc_saves;
         }
 
-        auto* loweredMatch = new IR::BFN::LoweredParserMatch(
+        auto *loweredMatch = new IR::BFN::LoweredParserMatch(
             transition->value, transition->shift, loweredExtracts, saves, transition->scratches,
             loweredChecksums, counters, priority, partialHdrErrProc,
             loweredStates[transition->next]);
@@ -354,15 +354,15 @@ void ComputeLoweredParserIR::postorder(const IR::BFN::ParserState* state) {
 }
 
 void ComputeLoweredParserIR::end_apply() {
-    for (const auto& f : phv) {
+    for (const auto &f : phv) {
         auto ctxt = PHV::AllocContext::PARSER;
         if (f.name == "ingress::ig_intr_md_from_prsr.parser_err") {
-            f.foreach_alloc(ctxt, nullptr, [&](const PHV::AllocSlice& alloc) {
+            f.foreach_alloc(ctxt, nullptr, [&](const PHV::AllocSlice &alloc) {
                 BUG_CHECK(!igParserError, "parser error allocated to multiple containers?");
                 igParserError = new IR::BFN::ContainerRef(alloc.container());
             });
         } else if (f.name == "egress::eg_intr_md_from_prsr.parser_err") {
-            f.foreach_alloc(ctxt, nullptr, [&](const PHV::AllocSlice& alloc) {
+            f.foreach_alloc(ctxt, nullptr, [&](const PHV::AllocSlice &alloc) {
                 BUG_CHECK(!egParserError, "parser error allocated to multiple containers?");
                 egParserError = new IR::BFN::ContainerRef(alloc.container());
             });

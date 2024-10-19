@@ -33,13 +33,13 @@ using namespace P4;
  *   - overlayable fields
  *   - pov bit protected fields (which are not overlayable)
  */
-class FindUninitializedAndOverlayedReads: public Inspector {
+class FindUninitializedAndOverlayedReads : public Inspector {
     const FieldDefUse &defuse;
     const PhvInfo &phv;
     const PHV::Pragmas &pragmas;
     const DependencyGraph &deps;
 
-    ordered_set<const PHV::Field*> pov_protected_fields;
+    ordered_set<const PHV::Field *> pov_protected_fields;
 
     struct uninit_read {
         cstring field_slice;
@@ -50,31 +50,33 @@ class FindUninitializedAndOverlayedReads: public Inspector {
 
         // Less than function for std::set comparison to skip adding duplicates
         bool operator<(const uninit_read &other) const {
-            return std::tie(field_slice, overlay_slice, field_cont_slice, overlay_cont_slice, loc)
-                 < std::tie(other.field_slice, other.overlay_slice, other.field_cont_slice,
+            return std::tie(field_slice, overlay_slice, field_cont_slice, overlay_cont_slice, loc) <
+                   std::tie(other.field_slice, other.overlay_slice, other.field_cont_slice,
                             other.overlay_cont_slice, loc);
         }
 
         uninit_read(cstring fs, cstring os, cstring fcs, cstring ocs, cstring loc)
-            : field_slice(fs), overlay_slice(os),
-              field_cont_slice(fcs), overlay_cont_slice(ocs),
+            : field_slice(fs),
+              overlay_slice(os),
+              field_cont_slice(fcs),
+              overlay_cont_slice(ocs),
               loc(loc) {}
     };
 
  public:
-    FindUninitializedAndOverlayedReads(const FieldDefUse &defuse, const PhvInfo& phv,
-                              const PHV::Pragmas &pragmas, const DependencyGraph &deps)
-    : defuse(defuse), phv(phv), pragmas(pragmas), deps(deps) {}
+    FindUninitializedAndOverlayedReads(const FieldDefUse &defuse, const PhvInfo &phv,
+                                       const PHV::Pragmas &pragmas, const DependencyGraph &deps)
+        : defuse(defuse), phv(phv), pragmas(pragmas), deps(deps) {}
 
-    bool preorder(const IR::BFN::DeparserParameter* param) override;
-    bool preorder(const IR::BFN::Digest* digest) override;
+    bool preorder(const IR::BFN::DeparserParameter *param) override;
+    bool preorder(const IR::BFN::Digest *digest) override;
 
     void end_apply() override;
 };
 
-class CheckUninitializedAndOverlayedReads: public PassManager {
+class CheckUninitializedAndOverlayedReads : public PassManager {
  public:
-     CheckUninitializedAndOverlayedReads(const FieldDefUse &defuse, const PhvInfo& phv,
-                             const PHV::Pragmas &pragmas, const BFN_Options &options);
+    CheckUninitializedAndOverlayedReads(const FieldDefUse &defuse, const PhvInfo &phv,
+                                        const PHV::Pragmas &pragmas, const BFN_Options &options);
 };
 #endif /* BF_P4C_COMMON_CHECK_UNINITIALIZED_READ_H_ */

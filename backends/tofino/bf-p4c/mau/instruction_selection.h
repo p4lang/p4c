@@ -40,7 +40,7 @@ class UnimplementedRegisterMethodCalls : public MauInspector {
  * pass work in tendem with the Midend EliminateWidthCasts one.
  */
 class ToFunnelShiftInstruction : public MauTransform {
-    const IR::Expression *preorder(IR::Cast*) override;
+    const IR::Expression *preorder(IR::Cast *) override;
 
  public:
     ToFunnelShiftInstruction() {}
@@ -50,7 +50,7 @@ class ToFunnelShiftInstruction : public MauTransform {
  * This class convert extern funnel_shift_right method call to funnel-shift instruction.
  */
 class ConvertFunnelShiftExtern : public MauTransform {
-    const IR::Expression *preorder(IR::Primitive*) override;
+    const IR::Expression *preorder(IR::Primitive *) override;
 
  public:
     ConvertFunnelShiftExtern() {}
@@ -67,7 +67,6 @@ class HashGenSetup : public PassManager {
     const PhvInfo &phv;
     const BFN_Options &options;
 
-
     Visitor::profile_t init_apply(const IR::Node *node) override {
         auto rv = PassManager::init_apply(node);
         hash_gen_injections.clear();
@@ -80,7 +79,7 @@ class HashGenSetup : public PassManager {
      */
     class CreateHashGenExprs : public MauInspector, TofinoWriteContext {
         HashGenSetup &self;
-        std::vector<const IR::Expression *>     per_prim_hge;
+        std::vector<const IR::Expression *> per_prim_hge;
         bool preorder(const IR::MAU::StatefulAlu *) override { return false; }
         bool preorder(const IR::BFN::SignExtend *) override;
         bool preorder(const IR::Concat *) override;
@@ -89,8 +88,8 @@ class HashGenSetup : public PassManager {
         bool preorder(const IR::MAU::Primitive *) override;
         void postorder(const IR::MAU::Primitive *) override;
 
-        void check_for_symmetric(const IR::Declaration_Instance *decl,
-            const IR::ListExpression *le, IR::MAU::HashFunction hf, LTBitMatrix *sym_keys);
+        void check_for_symmetric(const IR::Declaration_Instance *decl, const IR::ListExpression *le,
+                                 IR::MAU::HashFunction hf, LTBitMatrix *sym_keys);
         bool isBetter(const IR::Expression *dest, const IR::Expression *a, const IR::Expression *b);
 
      public:
@@ -122,14 +121,10 @@ class HashGenSetup : public PassManager {
 
  public:
     explicit HashGenSetup(const PhvInfo &p, const BFN_Options &o) : phv(p), options(o) {
-        addPasses({
-            new CreateHashGenExprs(*this),
-            new ScanHashDists(*this),
-            new UpdateHashDists(*this)
-        });
+        addPasses(
+            {new CreateHashGenExprs(*this), new ScanHashDists(*this), new UpdateHashDists(*this)});
     }
 };
-
 
 /** The purpose of this pass is to determine the types, and per flow enables of actions.
  *  Eventually a second inspector will be required, after StatefulAttachmentSetup, in order
@@ -157,7 +152,7 @@ class Synth2PortSetup : public MauTransform {
     }
 
  public:
-    explicit Synth2PortSetup(const PhvInfo &) { }
+    explicit Synth2PortSetup(const PhvInfo &) {}
 };
 
 /** The general purpose of instruction selection is to completely transform all P4 frontend code
@@ -177,19 +172,25 @@ class Synth2PortSetup : public MauTransform {
  */
 class DoInstructionSelection : public MauTransform, TofinoWriteContext {
     const PhvInfo &phv;
-    IR::MAU::Action                     *af = nullptr;
+    IR::MAU::Action *af = nullptr;
     class SplitInstructions;
-    int                                 synth_arg_num = 0;
-    const IR::MAU::TableSeq                   *ts = nullptr;
+    int synth_arg_num = 0;
+    const IR::MAU::TableSeq *ts = nullptr;
     ordered_map<cstring, const IR::MAU::Instruction *> const_to_phv;
 
     profile_t init_apply(const IR::Node *root) override;
-    const IR::MAU::HashDist *preorder(IR::MAU::HashDist *hd) override { prune(); return hd; }
+    const IR::MAU::HashDist *preorder(IR::MAU::HashDist *hd) override {
+        prune();
+        return hd;
+    }
     const IR::GlobalRef *preorder(IR::GlobalRef *) override;
     const IR::MAU::TableSeq *postorder(IR::MAU::TableSeq *) override;
     const IR::MAU::Action *postorder(IR::MAU::Action *) override;
     const IR::MAU::Action *preorder(IR::MAU::Action *) override;
-    const IR::MAU::SaluAction *preorder(IR::MAU::SaluAction *a) override { prune(); return a; }
+    const IR::MAU::SaluAction *preorder(IR::MAU::SaluAction *a) override {
+        prune();
+        return a;
+    }
     const IR::Expression *postorder(IR::Add *) override;
     const IR::Expression *postorder(IR::AddSat *) override;
     const IR::Expression *postorder(IR::Sub *) override;
@@ -235,7 +236,7 @@ class StatefulAttachmentSetup : public PassManager {
     const IR::TempVar *saved_tempvar = nullptr;
     const IR::MAU::HashDist *saved_hashdist = nullptr;
     typedef std::pair<const IR::MAU::AttachedMemory *, const IR::MAU::Table *> HashDistKey;
-    typedef std::pair<const IR::MAU::StatefulCall *, const IR::MAU::Table*> StatefulCallKey;
+    typedef std::pair<const IR::MAU::StatefulCall *, const IR::MAU::Table *> StatefulCallKey;
     ordered_set<cstring> remove_tempvars;
     ordered_set<cstring> copy_propagated_tempvars;
     ordered_set<const IR::Node *> remove_instr;
@@ -247,12 +248,12 @@ class StatefulAttachmentSetup : public PassManager {
         action_use;
     typedef std::pair<const IR::MAU::Synth2Port *, const IR::MAU::Table *> IndexCheck;
     struct clear_info_t {
-        const IR::MAU::AttachedMemory   *attached = 0;
-        bitvec                          clear_value;
-        uint32_t                        busy_value = 0;
+        const IR::MAU::AttachedMemory *attached = 0;
+        bitvec clear_value;
+        uint32_t busy_value = 0;
     };
-    ordered_map<const IR::MAU::AttachedMemory *, clear_info_t>  salu_clears;
-    ordered_map<const IR::MAU::Table *, clear_info_t *>         table_clears;
+    ordered_map<const IR::MAU::AttachedMemory *, clear_info_t> salu_clears;
+    ordered_map<const IR::MAU::Table *, clear_info_t *> table_clears;
 
     ordered_set<IndexCheck> addressed_by_hash;
     ordered_set<IndexCheck> addressed_by_index;
@@ -263,7 +264,8 @@ class StatefulAttachmentSetup : public PassManager {
         remove_instr.clear();
         stateful_alu_from_hash_dists.clear();
         update_hd.clear();
-        return PassManager::init_apply(root); }
+        return PassManager::init_apply(root);
+    }
     class Scan : public MauInspector, TofinoWriteContext {
         StatefulAttachmentSetup &self;
         bool preorder(const IR::MAU::Action *) override;
@@ -274,10 +276,9 @@ class StatefulAttachmentSetup : public PassManager {
         void postorder(const IR::MAU::Primitive *) override;
         void postorder(const IR::MAU::Table *) override;
         void setup_index_operand(const IR::Expression *index_expr,
-            const IR::MAU::Synth2Port *synth2port, const IR::MAU::Table *tbl,
-            const IR::MAU::StatefulCall *call);
-        void simpl_concat(std::vector<const IR::Expression*>& slices,
-                          const IR::Concat* concat);
+                                 const IR::MAU::Synth2Port *synth2port, const IR::MAU::Table *tbl,
+                                 const IR::MAU::StatefulCall *call);
+        void simpl_concat(std::vector<const IR::Expression *> &slices, const IR::Concat *concat);
 
      public:
         explicit Scan(StatefulAttachmentSetup &self) : self(self) {}
@@ -288,9 +289,11 @@ class StatefulAttachmentSetup : public PassManager {
         const IR::MAU::BackendAttached *preorder(IR::MAU::BackendAttached *ba) override;
         const IR::MAU::StatefulAlu *preorder(IR::MAU::StatefulAlu *salu) override;
         const IR::MAU::Instruction *preorder(IR::MAU::Instruction *sp) override;
+
      public:
         explicit Update(StatefulAttachmentSetup &self) : self(self) {
-            dontForwardChildrenBeforePreorder = true; }
+            dontForwardChildrenBeforePreorder = true;
+        }
     };
 
     const IR::MAU::HashDist *find_hash_dist(const IR::Expression *expr,
@@ -299,14 +302,15 @@ class StatefulAttachmentSetup : public PassManager {
 
  public:
     explicit StatefulAttachmentSetup(const PhvInfo &p) : phv(p) {
-        addPasses({ new Scan(*this), new Update(*this) }); }
+        addPasses({new Scan(*this), new Update(*this)});
+    }
 };
 
 class NullifyAllStatefulCallPrim : public MauModifier {
     bool preorder(IR::MAU::StatefulCall *sc) override;
 
  public:
-    NullifyAllStatefulCallPrim() { }
+    NullifyAllStatefulCallPrim() {}
 };
 
 /** Local copy propagates any writes in set operations to later reads in other operations.
@@ -317,18 +321,23 @@ class BackendCopyPropagation : public MauTransform, TofinoWriteContext {
     struct FieldImpact {
         le_bitrange dest_bits;
         const IR::Expression *read;
+
      public:
-        FieldImpact(le_bitrange db, const IR::Expression *r) : dest_bits(db), read(r) { }
+        FieldImpact(le_bitrange db, const IR::Expression *r) : dest_bits(db), read(r) {}
         const IR::Expression *getSlice(bool isSalu, le_bitrange bits);
     };
     ordered_map<const PHV::Field *, safe_vector<FieldImpact>> copy_propagation_replacements;
     bool elem_copy_propagated = false;
     IR::Vector<IR::MAU::Primitive> *split_set = nullptr;
 
-    const IR::Node *preorder(IR::Node *n) override { visitOnce(); return n; }
+    const IR::Node *preorder(IR::Node *n) override {
+        visitOnce();
+        return n;
+    }
     const IR::Node *preorder(IR::MAU::Instruction *i) override;
     const IR::MAU::StatefulCall *preorder(IR::MAU::StatefulCall *sc) override {
-        prune(); return sc;
+        prune();
+        return sc;
     }
     const IR::MAU::Action *preorder(IR::MAU::Action *a) override;
     const IR::Expression *preorder(IR::Expression *a) override;
@@ -346,7 +355,7 @@ class BackendCopyPropagation : public MauTransform, TofinoWriteContext {
  */
 class VerifyParallelWritesAndReads : public MauInspector, TofinoWriteContext {
  public:
-    typedef ordered_map<const PHV::Field*, safe_vector<le_bitrange>> FieldWrites;
+    typedef ordered_map<const PHV::Field *, safe_vector<le_bitrange>> FieldWrites;
 
  private:
     const PhvInfo &phv;
@@ -396,19 +405,22 @@ class EliminateAllButLastWrite : public PassManager {
         const IR::MAU::Action *preorder(IR::MAU::Action *) override;
         const IR::Node *preorder(IR::MAU::Instruction *) override;
         const IR::MAU::StatefulCall *preorder(IR::MAU::StatefulCall *sc) override {
-            prune(); return sc;
+            prune();
+            return sc;
         }
         const IR::MAU::BackendAttached *preorder(IR::MAU::BackendAttached *ba) override {
-            prune(); return ba;
+            prune();
+            return ba;
         }
 
      public:
-        explicit Update(EliminateAllButLastWrite &self) : self(self) { }
+        explicit Update(EliminateAllButLastWrite &self) : self(self) {}
     };
 
  public:
     explicit EliminateAllButLastWrite(const PhvInfo &p) : phv(p) {
-        addPasses({ new Scan(*this), new Update(*this) }); }
+        addPasses({new Scan(*this), new Update(*this)});
+    }
 };
 
 /** Applies two transformations to arithmetic compare operations:
@@ -517,29 +529,29 @@ class ArithCompareAdjustment : public PassManager {
         const IR::Node *preorder(IR::Member *) override;
         const IR::Type_StructLike *adjust_type_struct(const IR::Type_StructLike *, cstring name);
         const IR::MAU::StatefulCall *preorder(IR::MAU::StatefulCall *sc) override {
-            prune(); return sc;
+            prune();
+            return sc;
         }
         const IR::MAU::BackendAttached *preorder(IR::MAU::BackendAttached *ba) override {
-            prune(); return ba;
+            prune();
+            return ba;
         }
         const IR::MAU::Action *postorder(IR::MAU::Action *) override;
 
      public:
-        explicit Update(ArithCompareAdjustment &self) : self(self) { }
+        explicit Update(ArithCompareAdjustment &self) : self(self) {}
     };
 
     bool is_compare(cstring name) {
-        return name == "gtequ" || name == "gteqs" ||
-            name == "ltu" || name == "lts" ||
-            name == "lequ" || name == "leqs" ||
-            name == "gtu" || name == "gts" ||
-            name == "eq" || name == "neq" ||
-            name == "eq64" || name == "neq64";
+        return name == "gtequ" || name == "gteqs" || name == "ltu" || name == "lts" ||
+               name == "lequ" || name == "leqs" || name == "gtu" || name == "gts" || name == "eq" ||
+               name == "neq" || name == "eq64" || name == "neq64";
     }
 
  public:
     explicit ArithCompareAdjustment(const PhvInfo &p) : phv(p) {
-        addPasses({ new Scan(*this), new Update(*this) }); }
+        addPasses({new Scan(*this), new Update(*this)});
+    }
 };
 
 /** This pass will set up the IR to include any inputs to an LPF/WRED meter, as well
@@ -565,6 +577,7 @@ class MeterSetup : public PassManager {
         profile_t init_apply(const IR::Node *root) override;
         bool preorder(const IR::MAU::Instruction *) override;
         bool preorder(const IR::MAU::Primitive *) override;
+
      public:
         explicit Scan(MeterSetup &self) : self(self) {}
     };
@@ -575,13 +588,15 @@ class MeterSetup : public PassManager {
         void update_pre_color(IR::MAU::Meter *);
         bool preorder(IR::MAU::Meter *) override;
         bool preorder(IR::MAU::Action *) override;
+
      public:
         explicit Update(MeterSetup &self) : self(self) {}
     };
 
  public:
     explicit MeterSetup(const PhvInfo &p) : phv(p) {
-        addPasses({ new Scan(*this), new Update(*this) }); }
+        addPasses({new Scan(*this), new Update(*this)});
+    }
 };
 
 class SetupAttachedAddressing : public PassManager {
@@ -602,45 +617,46 @@ class SetupAttachedAddressing : public PassManager {
     class InitializeAttachedInfo : public MauInspector {
         SetupAttachedAddressing &self;
         bool preorder(const IR::MAU::BackendAttached *) override;
+
      public:
-        explicit InitializeAttachedInfo(SetupAttachedAddressing &self) : self(self) { }
+        explicit InitializeAttachedInfo(SetupAttachedAddressing &self) : self(self) {}
     };
 
     class ScanTables : public MauInspector {
         SetupAttachedAddressing &self;
         bool preorder(const IR::MAU::Table *) override;
+
      public:
-        explicit ScanTables(SetupAttachedAddressing &self) : self(self) { }
+        explicit ScanTables(SetupAttachedAddressing &self) : self(self) {}
     };
 
     class VerifyAttached : public MauInspector {
         SetupAttachedAddressing &self;
         bool preorder(const IR::MAU::BackendAttached *) override;
+
      public:
-        explicit VerifyAttached(SetupAttachedAddressing &self) : self(self) { }
+        explicit VerifyAttached(SetupAttachedAddressing &self) : self(self) {}
     };
 
     class UpdateAttached : public MauModifier {
         SetupAttachedAddressing &self;
         void simple_attached(IR::MAU::BackendAttached *);
         bool preorder(IR::MAU::BackendAttached *) override;
+
      public:
-        explicit UpdateAttached(SetupAttachedAddressing &self) : self(self) { }
+        explicit UpdateAttached(SetupAttachedAddressing &self) : self(self) {}
     };
 
  public:
     SetupAttachedAddressing() {
-        addPasses({
-            new InitializeAttachedInfo(*this),
-            new ScanTables(*this),
-            new VerifyAttached(*this),
-            new UpdateAttached(*this)
-        });
+        addPasses({new InitializeAttachedInfo(*this), new ScanTables(*this),
+                   new VerifyAttached(*this), new UpdateAttached(*this)});
     }
 };
 
 class RemoveUnnecessaryActionArgSlice : public MauTransform {
     const IR::Node *preorder(IR::Slice *) override;
+
  public:
     RemoveUnnecessaryActionArgSlice() {}
 };
@@ -678,23 +694,18 @@ class GuaranteeHashDistSize : public PassManager {
     };
 
  public:
-    GuaranteeHashDistSize() {
-        addPasses({
-            new Scan(*this),
-            new Update(*this)
-        });
-    }
+    GuaranteeHashDistSize() { addPasses({new Scan(*this), new Update(*this)}); }
 };
 
 class SimplifyConditionalActionArg : public MauTransform {
  public:
-     SimplifyConditionalActionArg() {}
-     const IR::Node* postorder(IR::Mux* prim) override;
+    SimplifyConditionalActionArg() {}
+    const IR::Node *postorder(IR::Mux *prim) override;
 };
 
 class InstructionSelection : public PassManager {
  public:
-    InstructionSelection(const BFN_Options&, PhvInfo &, const ReductionOrInfo &);
+    InstructionSelection(const BFN_Options &, PhvInfo &, const ReductionOrInfo &);
 };
 
 #endif /* BF_P4C_MAU_INSTRUCTION_SELECTION_H_ */

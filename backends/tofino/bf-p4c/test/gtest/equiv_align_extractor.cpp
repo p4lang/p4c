@@ -11,14 +11,14 @@
  */
 
 #include <iostream>
-#include <sstream>
 #include <list>
+#include <sstream>
 
-#include "gtest/gtest.h"
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
-#include "bf-p4c/test/utils/super_cluster_builder.h"
 #include "bf-p4c/logging/constrained_fields.h"
 #include "bf-p4c/logging/group_constraint_extractor.h"
+#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "bf-p4c/test/utils/super_cluster_builder.h"
+#include "gtest/gtest.h"
 
 namespace P4::Test {
 
@@ -39,7 +39,7 @@ class EquivalentAlignExtractorTest : public TofinoBackendTest {
     )");
 
     SuperClusterBuilder scb;
-    std::list<PHV::SuperCluster*> groups;
+    std::list<PHV::SuperCluster *> groups;
     PhvInfo info;
 
     ConstrainedFieldMap fieldMap;
@@ -47,7 +47,7 @@ class EquivalentAlignExtractorTest : public TofinoBackendTest {
 
 TEST_F(EquivalentAlignExtractorTest, IgnoresAlignedClusterWithSingleItem) {
     // Build supercluster
-    std::optional<PHV::SuperCluster*> sc1 = scb.build_super_cluster(CLUSTER_WITHOUT_EQUIV_ALIGN);
+    std::optional<PHV::SuperCluster *> sc1 = scb.build_super_cluster(CLUSTER_WITHOUT_EQUIV_ALIGN);
     if (!sc1) FAIL() << "Failed to build the cluster!";
     groups.push_back(*sc1);
 
@@ -64,7 +64,7 @@ TEST_F(EquivalentAlignExtractorTest, IgnoresAlignedClusterWithSingleItem) {
 
 TEST_F(EquivalentAlignExtractorTest, ExtractsAlignedClusterWithMoreItems) {
     // Build supercluster
-    std::optional<PHV::SuperCluster*> sc1 = scb.build_super_cluster(CLUSTER_WITH_EQUIV_ALIGN);
+    std::optional<PHV::SuperCluster *> sc1 = scb.build_super_cluster(CLUSTER_WITH_EQUIV_ALIGN);
     if (!sc1) FAIL() << "Failed to build the cluster!";
     groups.push_back(*sc1);
 

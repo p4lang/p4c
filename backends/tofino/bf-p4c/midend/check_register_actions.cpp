@@ -11,13 +11,14 @@
  */
 
 #include "bf-p4c/midend/check_register_actions.h"
+
+#include "bf-p4c/lib/safe_width.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
-#include "bf-p4c/lib/safe_width.h"
 
 namespace BFN {
 
-bool CheckRegisterActions::preorder(const IR::Declaration_Instance* di) {
+bool CheckRegisterActions::preorder(const IR::Declaration_Instance *di) {
     if (di->arguments->empty()) return false;
 
     const auto specType = di->type->to<IR::Type_Specialized>();
@@ -26,13 +27,13 @@ bool CheckRegisterActions::preorder(const IR::Declaration_Instance* di) {
     const auto baseNameType = specType->baseType->to<IR::Type_Name>();
     if (!baseNameType) return false;
 
-    const cstring& name = baseNameType->path->name.name;
+    const cstring &name = baseNameType->path->name.name;
     if (!name.startsWith("RegisterAction")) return false;
 
     if (specType->arguments->size() < 2) return false;
 
-    const IR::Type* regActionEntryType = specType->arguments->at(0);
-    const IR::Type* regActionIndexType = specType->arguments->at(1);
+    const IR::Type *regActionEntryType = specType->arguments->at(0);
+    const IR::Type *regActionIndexType = specType->arguments->at(1);
 
     if (!regActionEntryType || !regActionIndexType) return false;
     if (regActionEntryType->is<IR::Type_Dontcare>()) return false;
@@ -44,7 +45,7 @@ bool CheckRegisterActions::preorder(const IR::Declaration_Instance* di) {
         safe_width_bits(typeMap->getTypeType(regActionIndexType->getNode(), /*notNull=*/true));
 
     auto regArgExpr = di->arguments->at(0)->expression->to<IR::PathExpression>();
-    const IR::Vector<IR::Type>* regTypeArgs = nullptr;
+    const IR::Vector<IR::Type> *regTypeArgs = nullptr;
     if (auto regSpecType = regArgExpr->type->to<IR::Type_Specialized>()) {
         regTypeArgs = regSpecType->arguments;
     } else if (auto regSpecCanType = regArgExpr->type->to<IR::Type_SpecializedCanonical>()) {
@@ -52,8 +53,8 @@ bool CheckRegisterActions::preorder(const IR::Declaration_Instance* di) {
     }
 
     if (!regTypeArgs || regTypeArgs->size() < 2) return false;
-    const IR::Type* regEntryType = regTypeArgs->at(0);
-    const IR::Type* regIndexType = regTypeArgs->at(1);
+    const IR::Type *regEntryType = regTypeArgs->at(0);
+    const IR::Type *regIndexType = regTypeArgs->at(1);
     if (!regEntryType || !regIndexType) return false;
 
     int regEntryWidth =

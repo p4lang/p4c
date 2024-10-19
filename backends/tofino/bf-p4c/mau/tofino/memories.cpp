@@ -10,10 +10,12 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+#include "bf-p4c/mau/tofino/memories.h"
+
 #include <functional>
+
 #include "bf-p4c/common/utils.h"
 #include "bf-p4c/device.h"
-#include "bf-p4c/mau/tofino/memories.h"
 #include "bf-p4c/mau/mau_visitor.h"
 #include "bf-p4c/mau/payload_gateway.h"
 #include "bf-p4c/mau/resource.h"
@@ -25,28 +27,25 @@
 namespace Tofino {
 // Despite the namespace name, this code is shared for Tofino and JBay (Tofino 1/2)
 
-static const char *use_type_to_str[] = {
-    "EXACT", "ATCAM", "TERNARY", "GATEWAY", "TIND", "IDLETIME",
-    "COUNTER", "METER", "SELECTOR", "STATEFUL", "ACTIONDATA"
-};
+static const char *use_type_to_str[] = {"EXACT",    "ATCAM",    "TERNARY",   "GATEWAY",
+                                        "TIND",     "IDLETIME", "COUNTER",   "METER",
+                                        "SELECTOR", "STATEFUL", "ACTIONDATA"};
 
 static const char *sram_group_type_to_str[] = {
-    "Exact", "Action", "Stats", "Meter", "Register", "Selector", "Tind", "Idletime", "Atcam"
-};
+    "Exact", "Action", "Stats", "Meter", "Register", "Selector", "Tind", "Idletime", "Atcam"};
 
 /** When anlyzing tables, the order is occasionally important, so we sort in order of
  * this priority.  For now the only important one is anaylyzing dleft tables before any
  * non-dleft table that may share the stateful ALU
  */
-int Memories::table_alloc::analysis_priority() const {
-    return table->for_dleft() ? 0 : 1;
-}
+int Memories::table_alloc::analysis_priority() const { return table->for_dleft() ? 0 : 1; }
 
 /** Building a UniqueId per table alloc.  The stage table comes from initialization, all other
  *  data must be provided
  */
-UniqueId Memories::table_alloc::build_unique_id(const IR::MAU::AttachedMemory *at,
-        bool is_gw, int logical_table, UniqueAttachedId::pre_placed_type_t ppt) const {
+UniqueId Memories::table_alloc::build_unique_id(const IR::MAU::AttachedMemory *at, bool is_gw,
+                                                int logical_table,
+                                                UniqueAttachedId::pre_placed_type_t ppt) const {
     return table->pp_unique_id(at, is_gw, stage_table, logical_table, ppt);
 }
 
@@ -88,8 +87,8 @@ UniqueId Memories::table_alloc::build_unique_id(const IR::MAU::AttachedMemory *a
  *
  * This leaves room for any other odd corner casing we need to support
  */
-safe_vector<UniqueId> Memories::table_alloc::allocation_units(const IR::MAU::AttachedMemory *at,
-        bool is_gw, UniqueAttachedId::pre_placed_type_t ppt) const {
+safe_vector<UniqueId> Memories::table_alloc::allocation_units(
+    const IR::MAU::AttachedMemory *at, bool is_gw, UniqueAttachedId::pre_placed_type_t ppt) const {
     safe_vector<UniqueId> rv;
     Log::TempIndent indent;
     LOG5("Allocation unit for memory : gateway: " << is_gw << ", uid: " << ppt);
@@ -126,8 +125,8 @@ safe_vector<UniqueId> Memories::table_alloc::allocation_units(const IR::MAU::Att
  * DLEFT some point in the future, maybe if other tables are attached, not just the stateful
  * ALU table.
  */
-safe_vector<UniqueId> Memories::table_alloc::unattached_units(const IR::MAU::AttachedMemory *at,
-    UniqueAttachedId::pre_placed_type_t ppt) const {
+safe_vector<UniqueId> Memories::table_alloc::unattached_units(
+    const IR::MAU::AttachedMemory *at, UniqueAttachedId::pre_placed_type_t ppt) const {
     safe_vector<UniqueId> rv;
     if (table->layout.atcam) {
         if (at && at->direct == false) {
@@ -142,15 +141,17 @@ safe_vector<UniqueId> Memories::table_alloc::unattached_units(const IR::MAU::Att
 /**
  * The union of the allocation_units and the unattached_units
  */
-safe_vector<UniqueId> Memories::table_alloc::accounted_units(const IR::MAU::AttachedMemory *at,
-    UniqueAttachedId::pre_placed_type_t ppt) const {
+safe_vector<UniqueId> Memories::table_alloc::accounted_units(
+    const IR::MAU::AttachedMemory *at, UniqueAttachedId::pre_placed_type_t ppt) const {
     safe_vector<UniqueId> rv = allocation_units(at, false, ppt);
     safe_vector<UniqueId> vec2 = unattached_units(at, ppt);
     safe_vector<UniqueId> intersect;
     std::set_intersection(rv.begin(), rv.end(), vec2.begin(), vec2.end(),
                           std::back_inserter(intersect));
-    BUG_CHECK(intersect.empty(), "%s: Error when accounting for uniqueness in logical units "
-              "to address in memory allocation", table->name);
+    BUG_CHECK(intersect.empty(),
+              "%s: Error when accounting for uniqueness in logical units "
+              "to address in memory allocation",
+              table->name);
     rv.insert(rv.end(), vec2.begin(), vec2.end());
     return rv;
 }
@@ -168,14 +169,13 @@ Memories::result_bus_info Memories::SRAM_group::build_result_bus(int width_sect)
 void Memories::SRAM_group::dbprint(std::ostream &out) const {
     out << "SRAM group: " << ta->table->name << ", type: " << sram_group_type_to_str[type]
         << ", width: " << width << ", number: " << number;
-    out << " { is placed: " << placed << ", depth " << depth
-        << ", left to place " << left_to_place() << " }";
+    out << " { is placed: " << placed << ", depth " << depth << ", left to place "
+        << left_to_place() << " }";
 }
 
 bool Memories::SRAM_group::same_wide_action(const SRAM_group &a) {
     return ta == a.ta && type == ACTION && a.type == ACTION && logical_table == a.logical_table;
 }
-
 
 unsigned Memories::side_mask(RAM_side_t side) const {
     switch (side) {
@@ -184,17 +184,16 @@ unsigned Memories::side_mask(RAM_side_t side) const {
         case RIGHT:
             return ((1 << SRAM_COLUMNS) - 1) & ~((1 << LEFT_SIDE_COLUMNS) - 1);
         case RAM_SIDES:
-             return ((1 << SRAM_COLUMNS) - 1);
+            return ((1 << SRAM_COLUMNS) - 1);
         default:
-             BUG("Unrecognizable RAM side to allocate");
+            BUG("Unrecognizable RAM side to allocate");
     }
     return 0;
 }
 
 unsigned Memories::partition_mask(RAM_side_t side) {
     unsigned mask = (1 << MAX_PARTITION_RAMS_PER_ROW) - 1;
-    if (side == RIGHT)
-        mask <<= MAX_PARTITION_RAMS_PER_ROW;
+    if (side == RIGHT) mask <<= MAX_PARTITION_RAMS_PER_ROW;
     return mask;
 }
 
@@ -269,17 +268,16 @@ void Memories::clear_allocation() {
 
 /* Creates a new table_alloc object for each of the tables within the memory allocation */
 void Memories::add_table(const IR::MAU::Table *t, const IR::MAU::Table *gw,
-        TableResourceAlloc *resources, const LayoutOption *lo, const ActionData::Format::Use *af,
-        ActionData::FormatType_t ft, int entries, int stage_table,
-        attached_entries_t attached_entries) {
+                         TableResourceAlloc *resources, const LayoutOption *lo,
+                         const ActionData::Format::Use *af, ActionData::FormatType_t ft,
+                         int entries, int stage_table, attached_entries_t attached_entries) {
     table_alloc *ta;
     auto gw_ixbar = resources->gateway_ixbar.get();
     // auto gw_ixbar = dynamic_cast<const IXBar::Use *>(resources->gateway_ixbar.get());
     if (!t->conditional_gateway_only()) {
         auto match_ixbar = resources->match_ixbar.get();
         // auto match_ixbar = dynamic_cast<const IXBar::Use *>(resources->match_ixbar.get());
-        if (lo->layout.gateway_match || !ft.matchThisStage())
-            match_ixbar = gw_ixbar;
+        if (lo->layout.gateway_match || !ft.matchThisStage()) match_ixbar = gw_ixbar;
         ta = new table_alloc(t, match_ixbar, &resources->table_format, &resources->instr_mem, af,
                              &resources->memuse, lo, ft, entries, stage_table,
                              std::move(attached_entries));
@@ -289,11 +287,10 @@ void Memories::add_table(const IR::MAU::Table *t, const IR::MAU::Table *gw,
     }
     LOG2("Adding table " << ta->table->name << " with " << entries << " entries");
     tables.push_back(ta);
-    if (gw != nullptr)  {
+    if (gw != nullptr) {
         auto *ta_gw = new table_alloc(gw, gw_ixbar, nullptr, nullptr, nullptr, &resources->memuse,
                                       lo, ft, -1, stage_table, {});
-        LOG2("Adding gateway table " << ta_gw->table->name << " to table "
-             << ta_gw->table->name);
+        LOG2("Adding gateway table " << ta_gw->table->name << " to table " << ta_gw->table->name);
         ta_gw->link_table(ta);
         ta->link_table(ta_gw);
         tables.push_back(ta_gw);
@@ -347,9 +344,7 @@ bool Memories::allocate_all() {
             finished = true;
         }
 
-
-        if (!finished)
-            LOG2(" Increasing balance");
+        if (!finished) LOG2(" Increasing balance");
     } while (bitcount(row) < SRAM_COLUMNS && !finished);
 
     LOG3_UNINDENT;
@@ -383,10 +378,9 @@ class SetupAttachedTables : public MauInspector {
     profile_t init_apply(const IR::Node *root) {
         profile_t rv = MauInspector::init_apply(root);
         if (ta->layout_option == nullptr) return rv;
-        bool tind_check = ta->layout_option->layout.ternary &&
-                          !ta->layout_option->layout.no_match_miss_path() &&
-                          !ta->layout_option->layout.gateway_match &&
-                          ta->format_type.matchThisStage();
+        bool tind_check =
+            ta->layout_option->layout.ternary && !ta->layout_option->layout.no_match_miss_path() &&
+            !ta->layout_option->layout.gateway_match && ta->format_type.matchThisStage();
         if (tind_check) {
             if (ta->table_format->has_overhead()) {
                 for (auto u_id : ta->allocation_units(nullptr, false, UniqueAttachedId::TIND_PP)) {
@@ -409,8 +403,7 @@ class SetupAttachedTables : public MauInspector {
                 auto &alloc = (*ta->memuse)[u_id];
                 alloc.type = Memories::Use::ACTIONDATA;
                 alloc.used_by = ta->table->externalName();
-                if (ta->layout_option->layout.pre_classifier)
-                    alloc.used_by += "_preclassifier";
+                if (ta->layout_option->layout.pre_classifier) alloc.used_by += "_preclassifier";
                 alloc.used_by += "$action";
 
                 mi.action_tables++;
@@ -420,7 +413,8 @@ class SetupAttachedTables : public MauInspector {
             int width = 1;
             int per_row = ActionDataPerWord(&ta->layout_option->layout, &width);
             int depth = mem.mems_needed(entries, Memories::SRAM_DEPTH, per_row, false);
-            mi.action_bus_min += width; mi.action_RAMs += depth * width;
+            mi.action_bus_min += width;
+            mi.action_RAMs += depth * width;
         }
         return rv;
     }
@@ -447,8 +441,10 @@ class SetupAttachedTables : public MauInspector {
         std::set_intersection(attached_object_id.begin(), attached_object_id.end(),
                               unattached_object_ids.begin(), unattached_object_ids.end(),
                               std::back_inserter(intersect));
-        BUG_CHECK(intersect.empty(), "%s: Error when accounting for uniqueness in logical units "
-                  "to address in memory allocation", ta->table->name);
+        BUG_CHECK(intersect.empty(),
+                  "%s: Error when accounting for uniqueness in logical units "
+                  "to address in memory allocation",
+                  ta->table->name);
 
         for (auto unattached_id : unattached_object_ids) {
             // auto tbl_id = ta->build_unique_id(nullptr, false, unattached_id.logical_table);
@@ -459,15 +455,13 @@ class SetupAttachedTables : public MauInspector {
         return !attached;
     }
 
-
     /* In order to only visit the attached tables of the current table */
     bool preorder(const IR::MAU::TableSeq *) { return false; }
     bool preorder(const IR::MAU::Action *) { return false; }
 
     bool preorder(const IR::MAU::ActionData *ad) {
         BUG_CHECK(!ad->direct, "No direct action data tables before table placement");
-        if (determine_unattached(ad))
-            return false;
+        if (determine_unattached(ad)) return false;
 
         for (auto u_id : ta->allocation_units(ad)) {
             auto &alloc = (*ta->memuse)[u_id];
@@ -480,15 +474,15 @@ class SetupAttachedTables : public MauInspector {
         mem.shared_attached[ad] = ta;
         int width = 1;
         int per_row = ActionDataPerWord(&ta->table->layout, &width);
-        int depth = mem.mems_needed(attached_entries.at(ad).entries,
-                                    Memories::SRAM_DEPTH, per_row, false);
-        mi.action_bus_min += width; mi.action_RAMs += depth * width;
+        int depth =
+            mem.mems_needed(attached_entries.at(ad).entries, Memories::SRAM_DEPTH, per_row, false);
+        mi.action_bus_min += width;
+        mi.action_RAMs += depth * width;
         return false;
     }
 
     bool preorder(const IR::MAU::Meter *mtr) {
-        if (determine_unattached(mtr))
-            return false;
+        if (determine_unattached(mtr)) return false;
 
         for (auto u_id : ta->allocation_units(mtr)) {
             auto &alloc = (*ta->memuse)[u_id];
@@ -501,8 +495,8 @@ class SetupAttachedTables : public MauInspector {
         if (mtr->direct)
             mi.meter_RAMs += mem.mems_needed(entries, Memories::SRAM_DEPTH, 1, true);
         else
-            mi.meter_RAMs += mem.mems_needed(attached_entries.at(mtr).entries,
-                                             Memories::SRAM_DEPTH, 1, true);
+            mi.meter_RAMs +=
+                mem.mems_needed(attached_entries.at(mtr).entries, Memories::SRAM_DEPTH, 1, true);
 
         if (!meter_pushed) {
             mem.meter_tables.push_back(ta);
@@ -512,8 +506,7 @@ class SetupAttachedTables : public MauInspector {
     }
 
     bool preorder(const IR::MAU::Counter *cnt) {
-        if (determine_unattached(cnt))
-            return false;
+        if (determine_unattached(cnt)) return false;
         for (auto u_id : ta->allocation_units(cnt)) {
             auto &alloc = (*ta->memuse)[u_id];
             alloc.type = Memories::Use::COUNTER;
@@ -525,8 +518,8 @@ class SetupAttachedTables : public MauInspector {
         if (cnt->direct)
             mi.stats_RAMs += mem.mems_needed(entries, Memories::SRAM_DEPTH, per_row, true);
         else
-            mi.stats_RAMs += mem.mems_needed(attached_entries.at(cnt).entries,
-                                             Memories::SRAM_DEPTH, per_row, true);
+            mi.stats_RAMs += mem.mems_needed(attached_entries.at(cnt).entries, Memories::SRAM_DEPTH,
+                                             per_row, true);
 
         if (!stats_pushed) {
             mem.stats_tables.push_back(ta);
@@ -554,8 +547,7 @@ class SetupAttachedTables : public MauInspector {
     }
 
     bool preorder(const IR::MAU::StatefulAlu *salu) {
-        if (determine_unattached(salu))
-            return false;
+        if (determine_unattached(salu)) return false;
 
         for (auto u_id : ta->allocation_units(salu)) {
             auto &alloc = (*ta->memuse)[u_id];
@@ -564,8 +556,7 @@ class SetupAttachedTables : public MauInspector {
             mi.stateful_tables++;
         }
 
-        if (ta->table->for_dleft())
-            init_dleft_learn_and_match(salu);
+        if (ta->table->for_dleft()) init_dleft_learn_and_match(salu);
 
         mem.shared_attached[salu] = ta;
         int per_row = RegisterPerWord(salu);
@@ -587,8 +578,7 @@ class SetupAttachedTables : public MauInspector {
     }
 
     bool preorder(const IR::MAU::Selector *as) {
-        if (determine_unattached(as))
-            return false;
+        if (determine_unattached(as)) return false;
 
         for (auto u_id : ta->allocation_units(as)) {
             auto &alloc = (*ta->memuse)[u_id];
@@ -602,7 +592,7 @@ class SetupAttachedTables : public MauInspector {
         return false;
     }
 
-    bool preorder(const IR::MAU::Table* tbl) {
+    bool preorder(const IR::MAU::Table *tbl) {
         visit(tbl->attached);
         return false;
     }
@@ -620,9 +610,9 @@ class SetupAttachedTables : public MauInspector {
     }
 
  public:
-     explicit SetupAttachedTables(Memories &m, Memories::table_alloc *t, int e,
-                                  const attached_entries_t &ae, Memories::mem_info &i)
-    : mem(m), ta(t), entries(e), attached_entries(ae), mi(i) {}
+    explicit SetupAttachedTables(Memories &m, Memories::table_alloc *t, int e,
+                                 const attached_entries_t &ae, Memories::mem_info &i)
+        : mem(m), ta(t), entries(e), attached_entries(ae), mi(i) {}
 };
 
 void Memories::set_logical_memuse_type(table_alloc *ta, Use::type_t type) {
@@ -638,7 +628,8 @@ bool Memories::analyze_tables(mem_info &mi) {
     mi.clear();
     clear_table_vectors();
     std::stable_sort(tables.begin(), tables.end(), [](table_alloc *a, table_alloc *b) {
-        return a->analysis_priority() < b->analysis_priority(); });
+        return a->analysis_priority() < b->analysis_priority();
+    });
     for (auto *ta : tables) {
         auto table = ta->table;
         int entries = ta->provided_entries;
@@ -656,7 +647,7 @@ bool Memories::analyze_tables(mem_info &mi) {
             gw_tables.push_back(ta);
             LOG4("Gateway table for " << ta->table->name);
             if (any_of(Values(ta->attached_entries),
-                       [](attached_entries_element_t ent){ return ent.entries > 0; })) {
+                       [](attached_entries_element_t ent) { return ent.entries > 0; })) {
                 // at least one attached table so need a no match table
                 no_match_hit_tables.push_back(ta);
                 ta->link_table(ta);  // link to itself to produce payload
@@ -675,7 +666,8 @@ bool Memories::analyze_tables(mem_info &mi) {
                 no_match_hit_tables.push_back(ta);
                 set_logical_memuse_type(ta, Use::EXACT);
             } else {
-                BUG_CHECK(!ta->table->for_dleft(), "DLeft tables can only be "
+                BUG_CHECK(!ta->table->for_dleft(),
+                          "DLeft tables can only be "
                           "part of the hit path");
                 set_logical_memuse_type(ta, Use::TERNARY);
                 // In order to potentially provide potential sizes for attached tables,
@@ -704,24 +696,24 @@ bool Memories::analyze_tables(mem_info &mi) {
             mi.result_bus_min += width;
             mi.match_RAMs += depth;
         } else {
-           set_logical_memuse_type(ta, Use::TERNARY);
-           ternary_tables.push_back(ta);
-           mi.ternary_tables += ta->layout_option->logical_tables();
-           mi.logical_tables += ta->layout_option->logical_tables();
-           int bytes = table->layout.match_bytes;
-           int TCAMs_needed = 0;
-           while (bytes > 11) {
-               bytes -= 11;
-               TCAMs_needed += 2;
-           }
+            set_logical_memuse_type(ta, Use::TERNARY);
+            ternary_tables.push_back(ta);
+            mi.ternary_tables += ta->layout_option->logical_tables();
+            mi.logical_tables += ta->layout_option->logical_tables();
+            int bytes = table->layout.match_bytes;
+            int TCAMs_needed = 0;
+            while (bytes > 11) {
+                bytes -= 11;
+                TCAMs_needed += 2;
+            }
 
-           if (bytes > 6)
-               TCAMs_needed += 2;
-           else
-               TCAMs_needed += 1;
+            if (bytes > 6)
+                TCAMs_needed += 2;
+            else
+                TCAMs_needed += 1;
 
-           int depth = mems_needed(entries, TCAM_DEPTH, 1, false);
-           mi.ternary_TCAMs += TCAMs_needed * depth;
+            int depth = mems_needed(entries, TCAM_DEPTH, 1, false);
+            mi.ternary_TCAMs += TCAMs_needed * depth;
         }
         SetupAttachedTables setup(*this, ta, entries, ta->attached_entries, mi);
         ta->table->apply(setup);
@@ -732,74 +724,82 @@ bool Memories::analyze_tables(mem_info &mi) {
 bool Memories::mem_info::constraint_check(int lt_allowed, cstring &failure_reason) const {
     if (match_tables + no_match_tables + ternary_tables + independent_gw_tables >
         Memories::TABLES_MAX) {
-        LOG6(" match_tables(" << match_tables << ") + no_match_tables(" <<
-            no_match_tables << ") + ternary_tables(" << ternary_tables <<
-            ") + independent_gw_tables(" << independent_gw_tables <<
-            ") > Memories::TABLES_MAX(" << Memories::TABLES_MAX << ")");
+        LOG6(" match_tables(" << match_tables << ") + no_match_tables(" << no_match_tables
+                              << ") + ternary_tables(" << ternary_tables
+                              << ") + independent_gw_tables(" << independent_gw_tables
+                              << ") > Memories::TABLES_MAX(" << Memories::TABLES_MAX << ")");
         failure_reason = "too many tables total"_cs;
-        return false; }
+        return false;
+    }
 
     if (tind_tables > Memories::TERNARY_TABLES_MAX) {
         LOG6(" tind_tables(" << tind_tables << ") > Memories::TERNARY_TABLES_MAX("
-            << Memories::TERNARY_TABLES_MAX << ")");
+                             << Memories::TERNARY_TABLES_MAX << ")");
         failure_reason = "too many tind tables"_cs;
-        return false; }
+        return false;
+    }
 
     if (action_tables > Memories::ACTION_TABLES_MAX) {
         LOG6(" action_tables(" << action_tables << ") > Memories::ACTION_TABLES_MAX("
-            << Memories::ACTION_TABLES_MAX << ")");
+                               << Memories::ACTION_TABLES_MAX << ")");
         failure_reason = "too many action tables"_cs;
-        return false; }
+        return false;
+    }
 
     if (action_bus_min > Memories::SRAM_ROWS * Memories::BUS_COUNT) {
         LOG6(" action_bus_min(" << action_bus_min << ") > Memories::SRAM_ROWS("
-            << Memories::SRAM_ROWS << ") * Memories::BUS_COUNT(" <<
-            Memories::BUS_COUNT << ")");
+                                << Memories::SRAM_ROWS << ") * Memories::BUS_COUNT("
+                                << Memories::BUS_COUNT << ")");
         failure_reason = "too many action busses"_cs;
-        return false; }
+        return false;
+    }
 
     if (match_RAMs + action_RAMs + tind_RAMs > Memories::SRAM_ROWS * Memories::SRAM_COLUMNS) {
-        LOG6(" match_RAMs(" << match_RAMs << ") + action_RAMs(" << action_RAMs
-            << ") + tind_RAMs(" << tind_RAMs << ") > Memories::SRAM_ROWS(" <<
-            Memories::SRAM_ROWS << ") * Memories::SRAM_COLUMNS(" << Memories::SRAM_COLUMNS
-            << ")");
+        LOG6(" match_RAMs(" << match_RAMs << ") + action_RAMs(" << action_RAMs << ") + tind_RAMs("
+                            << tind_RAMs << ") > Memories::SRAM_ROWS(" << Memories::SRAM_ROWS
+                            << ") * Memories::SRAM_COLUMNS(" << Memories::SRAM_COLUMNS << ")");
         failure_reason = "too many srams"_cs;
-        return false; }
+        return false;
+    }
 
     if (ternary_tables > Memories::TERNARY_TABLES_MAX) {
         LOG6(" ternary_tables(" << ternary_tables << ") > Memories::TERNARY_TABLES_MAX("
-            << Memories::TERNARY_TABLES_MAX << ")");
+                                << Memories::TERNARY_TABLES_MAX << ")");
         failure_reason = "too many ternary tables"_cs;
-        return false; }
+        return false;
+    }
 
     if (stats_tables > Memories::STATS_ALUS) {
-        LOG6(" stats_tables(" << stats_tables << ") > Memories::STATS_ALUS("
-            << Memories::STATS_ALUS << ")");
+        LOG6(" stats_tables(" << stats_tables << ") > Memories::STATS_ALUS(" << Memories::STATS_ALUS
+                              << ")");
         failure_reason = "too many stats tables"_cs;
-        return false; }
+        return false;
+    }
 
     if (meter_tables + stateful_tables + selector_tables > Memories::METER_ALUS) {
-        LOG6(" meter_tables(" << meter_tables << ") + stateful_tables(" <<
-            stateful_tables << ") + selector_tables(" << selector_tables <<
-            ") > Memories::METER_ALUS(" << Memories::METER_ALUS << ")");
+        LOG6(" meter_tables(" << meter_tables << ") + stateful_tables(" << stateful_tables
+                              << ") + selector_tables(" << selector_tables
+                              << ") > Memories::METER_ALUS(" << Memories::METER_ALUS << ")");
         failure_reason = "too many meter alu users"_cs;
-        return false; }
+        return false;
+    }
 
     if (meter_RAMs + stats_RAMs + stateful_RAMs + selector_RAMs + idletime_RAMs >
         Memories::MAPRAM_COLUMNS * Memories::SRAM_ROWS) {
-        LOG6(" meter_RAMs(" << meter_RAMs << ") + stats_RAMs(" << stats_RAMs <<
-            ") + stateful_RAMs(" << stateful_RAMs << ") + selector_RAMs(" << selector_RAMs
-            << ") + idletime_RAMs(" << idletime_RAMs << ") > Memories::MAPRAM_COLUMNS("
-            << Memories::MAPRAM_COLUMNS << ") * Memories::SRAM_ROWS(" <<
-            Memories::SRAM_ROWS << ")");
+        LOG6(" meter_RAMs(" << meter_RAMs << ") + stats_RAMs(" << stats_RAMs << ") + stateful_RAMs("
+                            << stateful_RAMs << ") + selector_RAMs(" << selector_RAMs
+                            << ") + idletime_RAMs(" << idletime_RAMs
+                            << ") > Memories::MAPRAM_COLUMNS(" << Memories::MAPRAM_COLUMNS
+                            << ") * Memories::SRAM_ROWS(" << Memories::SRAM_ROWS << ")");
         failure_reason = "too many map rams"_cs;
-        return false; }
+        return false;
+    }
 
     if (logical_tables > lt_allowed) {
-        LOG6(" logical_tables(" << logical_tables << ") > lt_allowed(" <<
-           lt_allowed << ")");
+        LOG6(" logical_tables(" << logical_tables << ") > lt_allowed(" << lt_allowed << ")");
         failure_reason = "too many logical tables"_cs;
-        return false; }
+        return false;
+    }
 
     return true;
 }
@@ -816,12 +816,12 @@ void Memories::calculate_entries() {
         BUG_CHECK(ta->allocation_units().size() == size_t(ta->layout_option->logical_tables()),
                   "Logical table mismatch on %s", ta->table->name);
         for (int lt = 0; lt < ta->layout_option->logical_tables(); lt++) {
-            int search_bus_per_lt = (ta->table->layout.partition_count + SRAM_DEPTH - 1) /
-                                     SRAM_DEPTH;
-        /* we cannot use total_depth since the real number of allocations is max_partition_rams
-         * times the number of ways the match happens */
+            int search_bus_per_lt =
+                (ta->table->layout.partition_count + SRAM_DEPTH - 1) / SRAM_DEPTH;
+            /* we cannot use total_depth since the real number of allocations is max_partition_rams
+             * times the number of ways the match happens */
             int lt_entries = search_bus_per_lt * ta->layout_option->partition_sizes[lt] *
-                                 ta->layout_option->way.match_groups * SRAM_DEPTH;
+                             ta->layout_option->way.match_groups * SRAM_DEPTH;
             ta->calc_entries_per_uid.push_back(lt_entries);
         }
     }
@@ -849,17 +849,16 @@ void Memories::calculate_entries() {
 safe_vector<int> Memories::way_size_calculator(int ways, int RAMs_needed) {
     safe_vector<int> vec;
     if (ways == -1) {
-    // FIXME: If the number of ways are not provided, not yet considered
+        // FIXME: If the number of ways are not provided, not yet considered
     } else {
         for (int i = 0; i < ways; i++) {
             if (RAMs_needed < ways - i) {
                 RAMs_needed = ways - i;
             }
 
-            int depth = (RAMs_needed + ways - i - 1)/(ways - i);
+            int depth = (RAMs_needed + ways - i - 1) / (ways - i);
             int log2sz = floor_log2(depth);
-            if (depth != (1 << log2sz))
-                depth = 1 << (log2sz + 1);
+            if (depth != (1 << log2sz)) depth = 1 << (log2sz + 1);
 
             RAMs_needed -= depth;
             vec.push_back(depth);
@@ -871,70 +870,66 @@ safe_vector<int> Memories::way_size_calculator(int ways, int RAMs_needed) {
 /**
  * Find the rows of SRAMs that can hold the table, verified as well by the busses set in SRAM
  */
-safe_vector<std::pair<int, int>>
-Memories::available_SRAMs_per_row(unsigned mask, SRAM_group *group, int width_sect) {
+safe_vector<std::pair<int, int>> Memories::available_SRAMs_per_row(unsigned mask, SRAM_group *group,
+                                                                   int width_sect) {
     safe_vector<std::pair<int, int>> available_rams;
     auto group_search_bus = group->build_search_bus(width_sect);
     auto group_result_bus = group->build_result_bus(width_sect);
     for (int i = 0; i < SRAM_ROWS; i++) {
-        if (!search_bus_available(i, group_search_bus))
-            continue;
-        if (group_result_bus.init && !result_bus_available(i, group_result_bus))
-            continue;
+        if (!search_bus_available(i, group_search_bus)) continue;
+        if (group_result_bus.init && !result_bus_available(i, group_result_bus)) continue;
         available_rams.push_back(std::make_pair(i, bitcount(mask & ~sram_inuse[i])));
     }
 
     std::sort(available_rams.begin(), available_rams.end(),
-             [&](const std::pair<int, int> a, const std::pair<int, int> b) {
-        int t;
-        if (a.second != 0 && b.second == 0) return true;
-        if (a.second == 0 && b.second != 0) return false;
+              [&](const std::pair<int, int> a, const std::pair<int, int> b) {
+                  int t;
+                  if (a.second != 0 && b.second == 0) return true;
+                  if (a.second == 0 && b.second != 0) return false;
 
-        // Must fully place a partition
-        if (group->type == SRAM_group::ATCAM) {
-            if (group->left_to_place() <= a.second && group->left_to_place() > b.second)
-                return true;
-            if (group->left_to_place() > a.second && group->left_to_place() <= b.second)
-                return false;
-        }
+                  // Must fully place a partition
+                  if (group->type == SRAM_group::ATCAM) {
+                      if (group->left_to_place() <= a.second && group->left_to_place() > b.second)
+                          return true;
+                      if (group->left_to_place() > a.second && group->left_to_place() <= b.second)
+                          return false;
+                  }
 
-        // Prefer sharing a search bus/result bus if there is one to share
-        auto bus = sram_search_bus[a.first];
-        bool a_matching_bus = bus[0] == group_search_bus || bus[1] == group_search_bus;
-        bus = sram_search_bus[b.first];
-        bool b_matching_bus = bus[0] == group_search_bus || bus[1] == group_search_bus;
-        if (a_matching_bus != b_matching_bus)
-            return a_matching_bus;
+                  // Prefer sharing a search bus/result bus if there is one to share
+                  auto bus = sram_search_bus[a.first];
+                  bool a_matching_bus = bus[0] == group_search_bus || bus[1] == group_search_bus;
+                  bus = sram_search_bus[b.first];
+                  bool b_matching_bus = bus[0] == group_search_bus || bus[1] == group_search_bus;
+                  if (a_matching_bus != b_matching_bus) return a_matching_bus;
 
-        if ((t = a.second - b.second) != 0) return t > 0;
-        return a > b;
-    });
+                  if ((t = a.second - b.second) != 0) return t > 0;
+                  return a > b;
+              });
     return available_rams;
 }
 
 /* Simple now.  Just find rows with the available RAMs that it is asking for */
 safe_vector<int> Memories::available_match_SRAMs_per_row(unsigned selected_columns_mask,
-        unsigned total_mask, std::set<int> used_rows, SRAM_group *group, int width_sect) {
+                                                         unsigned total_mask,
+                                                         std::set<int> used_rows, SRAM_group *group,
+                                                         int width_sect) {
     safe_vector<int> matching_rows;
     auto group_search_bus = group->build_search_bus(width_sect);
     auto group_result_bus = group->build_result_bus(width_sect);
 
     for (int i = 0; i < SRAM_ROWS; i++) {
         if (used_rows.find(i) != used_rows.end()) continue;
-        if (!search_bus_available(i, group_search_bus))
-            continue;
-        if (group_result_bus.init && !result_bus_available(i, group_result_bus))
-            continue;
+        if (!search_bus_available(i, group_search_bus)) continue;
+        if (group_result_bus.init && !result_bus_available(i, group_result_bus)) continue;
 
         if (bitcount(selected_columns_mask & ~sram_inuse[i]) == bitcount(selected_columns_mask))
             matching_rows.push_back(i);
     }
 
-    std::sort(matching_rows.begin(), matching_rows.end(),
-              [=] (const int a, const int b) {
+    std::sort(matching_rows.begin(), matching_rows.end(), [=](const int a, const int b) {
         int t;
-        if ((t = bitcount(~sram_inuse[a] & total_mask) -
-                 bitcount(~sram_inuse[b] & total_mask)) != 0)
+        if ((t = bitcount(~sram_inuse[a] & total_mask) - bitcount(~sram_inuse[b] & total_mask)) !=
+            0)
             return t < 0;
 
         auto bus = sram_search_bus[a];
@@ -942,8 +937,7 @@ safe_vector<int> Memories::available_match_SRAMs_per_row(unsigned selected_colum
         bus = sram_search_bus[b];
         bool b_matching_bus = bus[0] == group_search_bus || bus[1] == group_search_bus;
 
-        if (a_matching_bus != b_matching_bus)
-            return a_matching_bus;
+        if (a_matching_bus != b_matching_bus) return a_matching_bus;
 
         return a > b;
     });
@@ -962,10 +956,9 @@ void Memories::break_exact_tables_into_ways() {
             (*ta->memuse)[u_id].row.clear();
             int index = 0;
             for (auto &way : match_ixbar->way_use) {
-                SRAM_group *wa
-                      = new SRAM_group(ta, ta->layout_option->way_sizes[index],
-                                       ta->layout_option->way.width, index, way.source,
-                                       SRAM_group::EXACT);
+                SRAM_group *wa = new SRAM_group(ta, ta->layout_option->way_sizes[index],
+                                                ta->layout_option->way.width, index, way.source,
+                                                SRAM_group::EXACT);
                 wa->logical_table = u_id.logical_table;
 
                 exact_match_ways.push_back(wa);
@@ -980,11 +973,11 @@ void Memories::break_exact_tables_into_ways() {
 
     std::sort(exact_match_ways.begin(), exact_match_ways.end(),
               [=](const SRAM_group *a, const SRAM_group *b) {
-         int t;
-         if ((t = a->width - b->width) != 0) return t > 0;
-         if ((t = (a->left_to_place()) - (b->left_to_place())) != 0) return t > 0;
-         return a->logical_table < b->logical_table;
-    });
+                  int t;
+                  if ((t = a->width - b->width) != 0) return t > 0;
+                  if ((t = (a->left_to_place()) - (b->left_to_place())) != 0) return t > 0;
+                  return a->logical_table < b->logical_table;
+              });
 }
 
 /* Selects the best way to begin placing on the row, based on what was previously placed
@@ -1017,95 +1010,86 @@ bool Memories::fill_out_row(SRAM_group *placed_way, int row, unsigned column_mas
     // FIXME: Need to adjust to the proper mask provided by earlier function
     while (bitcount(column_mask & ~sram_inuse[row]) > 0) {
         SRAM_group *way = find_best_candidate(placed_way, row, loc);
-        if (way == nullptr)
-            return true;
+        if (way == nullptr) return true;
 
         match_selection match_select;
         if (!determine_match_rows_and_cols(way, row, column_mask, match_select, false))
             return false;
         fill_out_match_alloc(way, match_select, false);
 
-        if (way->all_placed())
-            exact_match_ways.erase(exact_match_ways.begin() + loc);
+        if (way->all_placed()) exact_match_ways.erase(exact_match_ways.begin() + loc);
     }
     return true;
 }
 
 bool Memories::search_bus_available(int search_row, search_bus_info &sbi) {
     for (auto bus : sram_search_bus[search_row]) {
-        if (bus.free() || bus == sbi)
-            return true;
+        if (bus.free() || bus == sbi) return true;
     }
     return false;
 }
 
 bool Memories::result_bus_available(int search_row, result_bus_info &mbi) {
     for (auto bus : sram_result_bus[search_row]) {
-        if (bus.free() || bus == mbi)
-            return true;
+        if (bus.free() || bus == mbi) return true;
     }
     return false;
 }
 
 /* Returns the search bus that we are selecting on this row */
 int Memories::select_search_bus(SRAM_group *group, int width_sect, int row) {
-     auto group_search_bus = group->build_search_bus(width_sect);
-     int index = 0;
-     for (auto bus : sram_search_bus[row]) {
-         if (bus == group_search_bus)
-             return index;
-         index++;
-     }
+    auto group_search_bus = group->build_search_bus(width_sect);
+    int index = 0;
+    for (auto bus : sram_search_bus[row]) {
+        if (bus == group_search_bus) return index;
+        index++;
+    }
 
-     index = 0;
-     for (auto bus : sram_search_bus[row]) {
-         if (bus.free())
-             return index;
-         index++;
-     }
-     return -1;
+    index = 0;
+    for (auto bus : sram_search_bus[row]) {
+        if (bus.free()) return index;
+        index++;
+    }
+    return -1;
 }
 
 int Memories::select_result_bus(SRAM_group *group, int width_sect, int row) {
-     auto group_result_bus = group->build_result_bus(width_sect);
-     if (!group_result_bus.init)
-         return -1;
-     int index = 0;
-     for (auto bus : sram_result_bus[row]) {
-          if (bus == group_result_bus)
-              return index;
-          index++;
-     }
-     index = 0;
-     for (auto bus : sram_result_bus[row]) {
-         if (bus.free())
-             return index;
-         index++;
-     }
-     return -2;
+    auto group_result_bus = group->build_result_bus(width_sect);
+    if (!group_result_bus.init) return -1;
+    int index = 0;
+    for (auto bus : sram_result_bus[row]) {
+        if (bus == group_result_bus) return index;
+        index++;
+    }
+    index = 0;
+    for (auto bus : sram_result_bus[row]) {
+        if (bus.free()) return index;
+        index++;
+    }
+    return -2;
 }
 
 /* Picks an empty/most open row, and begins to fill it in within a way */
 bool Memories::find_best_row_and_fill_out(unsigned column_mask) {
     SRAM_group *way = exact_match_ways[0];
-    safe_vector<std::pair<int, int>> available_rams
-        = available_SRAMs_per_row(column_mask, way, way->width - 1);
+    safe_vector<std::pair<int, int>> available_rams =
+        available_SRAMs_per_row(column_mask, way, way->width - 1);
     // No memories left to place anything
     if (available_rams.size() == 0) {
         failure_reason = "no rams left in exact_match.find_best_row"_cs;
-        return false; }
+        return false;
+    }
 
     int row = available_rams[0].first;
     match_selection match_select;
     if (available_rams[0].second == 0) {
         failure_reason = "empty row in exact_match.find_best_row"_cs;
-        return false; }
-    if (!determine_match_rows_and_cols(way, row, column_mask, match_select, false))
         return false;
+    }
+    if (!determine_match_rows_and_cols(way, row, column_mask, match_select, false)) return false;
     fill_out_match_alloc(way, match_select, false);
 
-    if (way->all_placed())
-        exact_match_ways.erase(exact_match_ways.begin());
+    if (way->all_placed()) exact_match_ways.erase(exact_match_ways.begin());
 
     if (bitcount(~sram_inuse[row] & column_mask) == 0)
         return true;
@@ -1116,12 +1100,12 @@ bool Memories::find_best_row_and_fill_out(unsigned column_mask) {
 /* Determining if the side from which we want to give extra columns to the exact match
    allocation, potentially cutting room from either tind tables or twoport tables */
 bool Memories::cut_from_left_side(const mem_info &mi, int left_given_columns,
-                                          int right_given_columns) {
-    if (right_given_columns > mi.columns(mi.right_side_RAMs())
-        && left_given_columns <= mi.columns(mi.left_side_RAMs())) {
+                                  int right_given_columns) {
+    if (right_given_columns > mi.columns(mi.right_side_RAMs()) &&
+        left_given_columns <= mi.columns(mi.left_side_RAMs())) {
         return false;
-    } else if (right_given_columns <= mi.columns(mi.right_side_RAMs())
-               && left_given_columns > mi.columns(mi.left_side_RAMs())) {
+    } else if (right_given_columns <= mi.columns(mi.right_side_RAMs()) &&
+               left_given_columns > mi.columns(mi.left_side_RAMs())) {
         return true;
     } else if (mi.columns(mi.left_side_RAMs()) < left_given_columns) {
         return true;
@@ -1139,7 +1123,7 @@ bool Memories::cut_from_left_side(const mem_info &mi, int left_given_columns,
 /* Calculates the number of columns and the distribution of columns on the left and
    right side of the SRAM array in order to place all exact match tables */
 void Memories::calculate_column_balance(const mem_info &mi, unsigned &row,
-        bool &column_balance_init) {
+                                        bool &column_balance_init) {
     int min_columns_required = (mi.match_RAMs + SRAM_COLUMNS - 1) / SRAM_COLUMNS;
     int left_given_columns = 0;
     int right_given_columns = 0;
@@ -1209,21 +1193,21 @@ bool Memories::allocate_all_exact(unsigned column_mask) {
         // Currently stashes are only used for atomic modify (of entries) within
         // the RAM. Since JBAY HW has a way to deal with this (by introducing a
         // bubble) stashes are not required. We disable it for now.
-        ordered_map<table_alloc*, int> table_alloc_ram_widths;
+        ordered_map<table_alloc *, int> table_alloc_ram_widths;
         for (auto *ta : exact_tables) {
             for (auto u_id : ta->allocation_units()) {
                 auto &alloc = (*ta->memuse)[u_id];
                 for (auto mem_way : alloc.ways) {
-                    int ram_width = mem_way.rams.size()/mem_way.size;
+                    int ram_width = mem_way.rams.size() / mem_way.size;
                     if (ram_width > table_alloc_ram_widths[ta])
-                            table_alloc_ram_widths[ta] = ram_width;
+                        table_alloc_ram_widths[ta] = ram_width;
                 }
             }
         }
         // Flip map to create a sorted multimap of ram widths (greater first) to table allocs
-        std::multimap<int, table_alloc*, std::greater<int>> ram_width_table_allocs;
+        std::multimap<int, table_alloc *, std::greater<int>> ram_width_table_allocs;
         for (auto &tr : table_alloc_ram_widths) {
-            ram_width_table_allocs.insert(std::pair<int, table_alloc*>(tr.second, tr.first));
+            ram_width_table_allocs.insert(std::pair<int, table_alloc *>(tr.second, tr.first));
         }
         LOG7("Sorted table alloc for stash allocation");
         for (auto &ta : ram_width_table_allocs) {
@@ -1246,13 +1230,14 @@ bool Memories::allocate_all_exact(unsigned column_mask) {
                 std::map<int, std::vector<int>> stash_map;
                 for (auto mem_way : alloc.ways) {
                     BUG_CHECK(ixbar_way != match_ixbar->way_use.end(), "No ixbar_way found!");
-                    LOG5("\tway group : " << ixbar_way->source
-                            << " - way: " << wayno << " - size : " << mem_way.size
-                            << " - mem way: " << mem_way);
+                    LOG5("\tway group : " << ixbar_way->source << " - way: " << wayno
+                                          << " - size : " << mem_way.size
+                                          << " - mem way: " << mem_way);
                     if (stash_map.count(ixbar_way->source) == 0) {
-                        auto ram_width = mem_way.rams.size()/mem_way.size;
-                        LOG6("\tRam Width: " << ram_width << ", mem way rams size : "
-                                << mem_way.rams.size() << " mem way size : " << mem_way.size);
+                        auto ram_width = mem_way.rams.size() / mem_way.size;
+                        LOG6("\tRam Width: " << ram_width
+                                             << ", mem way rams size : " << mem_way.rams.size()
+                                             << " mem way size : " << mem_way.size);
                         // Determine stash unit, all units should be aligned in
                         // the same stash column for wide matches
                         auto stash_unit = -1;
@@ -1266,8 +1251,9 @@ bool Memories::allocate_all_exact(unsigned column_mask) {
                                 if (ram_width > 1) {
                                     for (auto ram : mem_way.rams) {
                                         LOG7("\t\t\tRam : " << ram.first << " stash unit: "
-                                                << stash_use[ram.first][i] << " width: "
-                                                << width << ", ram_width: " << ram_width);
+                                                            << stash_use[ram.first][i]
+                                                            << " width: " << width
+                                                            << ", ram_width: " << ram_width);
                                         if (width >= ram_width) break;
                                         if (!stash_use[ram.first][i].isNullOrEmpty()) {
                                             stash_unit = -1;
@@ -1277,13 +1263,13 @@ bool Memories::allocate_all_exact(unsigned column_mask) {
                                         LOG7("\t\t\tAssigned stash unit " << stash_unit);
                                         width++;
                                     }
-                                // For single RAM width allocate any slot
-                                // available on any row the RAMs are present
+                                    // For single RAM width allocate any slot
+                                    // available on any row the RAMs are present
                                 } else {
                                     for (auto ram : mem_way.rams) {
                                         LOG7("\t\t\tRam : " << ram.first << " stash unit: "
-                                                << stash_use[ram.first][i]
-                                                << ", ram_width: " << ram_width);
+                                                            << stash_use[ram.first][i]
+                                                            << ", ram_width: " << ram_width);
                                         if (!stash_use[ram.first][i].isNullOrEmpty()) {
                                             continue;
                                         }
@@ -1301,8 +1287,8 @@ bool Memories::allocate_all_exact(unsigned column_mask) {
                                     stash_map[ixbar_way->source].push_back(ram.first);
                                     stash_use[ram.first][stash_unit] = u_id.build_name();
                                     LOG4("\t\tRams : " << "[" << ram.first << ", "
-                                        << (ram.second + 2) << "]"
-                                        << " - stash unit : " << stash_unit);
+                                                       << (ram.second + 2) << "]"
+                                                       << " - stash unit : " << stash_unit);
                                     for (auto &r : alloc.row) {
                                         if (r.row == ram.first) {
                                             r.stash_unit = stash_unit;
@@ -1316,8 +1302,8 @@ bool Memories::allocate_all_exact(unsigned column_mask) {
                             }
                         }
                         LOG7("\tStash Usage: \n" << stash_use);
-                        BUG_CHECK(stash_unit >= 0,
-                            "No stash unit found for table %1%", u_id.build_name());
+                        BUG_CHECK(stash_unit >= 0, "No stash unit found for table %1%",
+                                  u_id.build_name());
                     }
                     wayno++;
                     ixbar_way++;
@@ -1347,34 +1333,33 @@ bool Memories::allocate_all_exact(unsigned column_mask) {
     return true;
 }
 
-
 void Memories::compress_row(Use &alloc) {
     std::stable_sort(alloc.row.begin(), alloc.row.end(),
-        [=](const Memories::Use::Row a, const Memories::Use::Row b) {
-            int t;
-            if ((t = a.row - b.row) != 0) return t < 0;
-            if ((t = a.bus - b.bus) != 0) return t < 0;
-            return a.alloc < b.alloc;
-        });
+                     [=](const Memories::Use::Row a, const Memories::Use::Row b) {
+                         int t;
+                         if ((t = a.row - b.row) != 0) return t < 0;
+                         if ((t = a.bus - b.bus) != 0) return t < 0;
+                         return a.alloc < b.alloc;
+                     });
     for (size_t i = 0; i + 1 < alloc.row.size(); i++) {
-        if (alloc.row[i].row == alloc.row[i+1].row &&
-            alloc.row[i].bus == alloc.row[i+1].bus) {
-            BUG_CHECK(alloc.row[i].word == alloc.row[i+1].word, "SRAMs that share a row "
+        if (alloc.row[i].row == alloc.row[i + 1].row && alloc.row[i].bus == alloc.row[i + 1].bus) {
+            BUG_CHECK(alloc.row[i].word == alloc.row[i + 1].word,
+                      "SRAMs that share a row "
                       "and bus must share the same word");
-            alloc.row[i].col.insert(alloc.row[i].col.end(), alloc.row[i+1].col.begin(),
-                                    alloc.row[i+1].col.end());
+            alloc.row[i].col.insert(alloc.row[i].col.end(), alloc.row[i + 1].col.begin(),
+                                    alloc.row[i + 1].col.end());
             alloc.row.erase(alloc.row.begin() + i + 1);
             i--;
         }
     }
 
     std::stable_sort(alloc.row.begin(), alloc.row.end(),
-        [=](const Memories::Use::Row &a, const Memories::Use::Row &b) {
-        int t;
-        if ((t = a.alloc - b.alloc) != 0) return t < 0;
-        if ((t = a.word - b.word) != 0) return t < 0;
-        return a.row < b.row;
-    });
+                     [=](const Memories::Use::Row &a, const Memories::Use::Row &b) {
+                         int t;
+                         if ((t = a.alloc - b.alloc) != 0) return t < 0;
+                         if ((t = a.word - b.word) != 0) return t < 0;
+                         return a.row < b.row;
+                     });
 }
 
 /** Adjust the Use structures so that there is is only one Use::Row object per row and bus.
@@ -1460,7 +1445,8 @@ void Memories::break_atcams_into_partitions() {
             }
             auto match_ixbar = dynamic_cast<const IXBar::Use *>(ta->match_ixbar);
             BUG_CHECK(match_ixbar, "No match ixbar allocated?");
-            BUG_CHECK(match_ixbar->way_use.size() == 1, "Somehow multiple ixbar ways "
+            BUG_CHECK(match_ixbar->way_use.size() == 1,
+                      "Somehow multiple ixbar ways "
                       "calculated for an ATCAM table");
             auto way = match_ixbar->way_use[0];
             for (int j = 0; j < ta->layout_option->partition_sizes[lt]; j++) {
@@ -1470,11 +1456,11 @@ void Memories::break_atcams_into_partitions() {
     }
     std::sort(atcam_partitions.begin(), atcam_partitions.end(),
               [=](const SRAM_group *a, const SRAM_group *b) {
-        int t;
-        if ((t = a->width - b->width) != 0) return t > 0;
-        if ((t = (a->left_to_place()) - (b->left_to_place())) != 0) return t > 0;
-        return a->logical_table < b->logical_table;
-    });
+                  int t;
+                  if ((t = a->width - b->width) != 0) return t > 0;
+                  if ((t = (a->left_to_place()) - (b->left_to_place())) != 0) return t > 0;
+                  return a->logical_table < b->logical_table;
+              });
 }
 
 /** Given an initial row to place a way or partition on, determine which search/match bus,
@@ -1484,7 +1470,7 @@ void Memories::break_atcams_into_partitions() {
  *  row must be the same.
  */
 bool Memories::determine_match_rows_and_cols(SRAM_group *group, int row, unsigned column_mask,
-        match_selection &match_select, bool atcam) {
+                                             match_selection &match_select, bool atcam) {
     // Pick a bus
     int search_bus = select_search_bus(group, group->width - 1, row);
     BUG_CHECK(search_bus >= 0, "Search somehow found an impossible bus");
@@ -1509,12 +1495,12 @@ bool Memories::determine_match_rows_and_cols(SRAM_group *group, int row, unsigne
 
     // If the match is wide, pick rows that have these columns available
     for (int i = group->width - 2; i >= 0; i--) {
-        safe_vector<int> matching_rows =
-            available_match_SRAMs_per_row(match_select.column_mask, column_mask,
-                                          determined_rows, group, i);
+        safe_vector<int> matching_rows = available_match_SRAMs_per_row(
+            match_select.column_mask, column_mask, determined_rows, group, i);
         if (matching_rows.size() == 0) {
             failure_reason = "empty row for wide match in determine_match_rows_and_cols"_cs;
-            return false; }
+            return false;
+        }
         int wide_row = matching_rows[0];
         match_select.rows.push_back(wide_row);
         search_bus = select_search_bus(group, i, wide_row);
@@ -1531,7 +1517,8 @@ bool Memories::determine_match_rows_and_cols(SRAM_group *group, int row, unsigne
     if (atcam &&
         bitcount(match_select.column_mask) != static_cast<size_t>(group->left_to_place())) {
         failure_reason = "atcam fail in determine_match_rows_and_cols"_cs;
-        return false; }
+        return false;
+    }
 
     std::sort(match_select.rows.begin(), match_select.rows.end());
     std::reverse(match_select.rows.begin(), match_select.rows.end());
@@ -1573,8 +1560,8 @@ void Memories::fill_out_match_alloc(SRAM_group *group, match_selection &match_se
         } else {
             sram_search_bus[row][bus] = group_search_bus;
             sram_print_search_bus[row][bus] = group_search_bus.name;
-            LOG7("Setting sram search bus on row " << row << " and bus "
-                    << bus << " for " << sram_print_search_bus[row][bus]);
+            LOG7("Setting sram search bus on row " << row << " and bus " << bus << " for "
+                                                   << sram_print_search_bus[row][bus]);
         }
 
         if (result_bus >= 0) {
@@ -1584,8 +1571,9 @@ void Memories::fill_out_match_alloc(SRAM_group *group, match_selection &match_se
             } else {
                 sram_result_bus[row][result_bus] = group_result_bus;
                 sram_print_result_bus[row][result_bus] = group_result_bus.name;
-                LOG7("Setting sram result bus on row " << row << " and result bus "
-                        << result_bus << " for " << sram_print_result_bus[row][result_bus]);
+                LOG7("Setting sram result bus on row " << row << " and result bus " << result_bus
+                                                       << " for "
+                                                       << sram_print_result_bus[row][result_bus]);
             }
         }
     }
@@ -1603,8 +1591,8 @@ void Memories::fill_out_match_alloc(SRAM_group *group, match_selection &match_se
                 ram_pairs[match_select.widths.at(row)] = std::make_pair(row, col);
             }
             std::reverse(ram_pairs.begin(), ram_pairs.end());
-            alloc.ways[number].rams.insert(alloc.ways[number].rams.end(),
-                                           ram_pairs.begin(), ram_pairs.end());
+            alloc.ways[number].rams.insert(alloc.ways[number].rams.end(), ram_pairs.begin(),
+                                           ram_pairs.end());
             number++;
         }
     } else {
@@ -1627,8 +1615,8 @@ void Memories::fill_out_match_alloc(SRAM_group *group, match_selection &match_se
 bool Memories::find_best_partition_for_atcam(unsigned partition_mask) {
     auto part = atcam_partitions[0];
 
-    safe_vector<std::pair<int, int>> available_rams
-        = available_SRAMs_per_row(partition_mask, part, part->width - 1);
+    safe_vector<std::pair<int, int>> available_rams =
+        available_SRAMs_per_row(partition_mask, part, part->width - 1);
     if (available_rams.size() == 0) {
         return false;
     }
@@ -1651,8 +1639,7 @@ bool Memories::find_best_partition_for_atcam(unsigned partition_mask) {
 /** Given that a partition has already been placed within the row and partition side, find
  *  another partition that can be placed within that same space
  */
-Memories::SRAM_group *Memories::best_partition_candidate(int row, unsigned column_mask,
-        int &loc) {
+Memories::SRAM_group *Memories::best_partition_candidate(int row, unsigned column_mask, int &loc) {
     loc = -1;
     auto search_bus = sram_search_bus[row];
     auto result_bus = sram_result_bus[row];
@@ -1661,12 +1648,9 @@ Memories::SRAM_group *Memories::best_partition_candidate(int row, unsigned colum
         loc++;
         auto group_search_bus = part->build_search_bus(part->width - 1);
         auto group_result_bus = part->build_result_bus(part->width - 1);
-        if (group_search_bus != search_bus[0] && group_search_bus != search_bus[1])
-            continue;
-        if (group_result_bus != result_bus[0] && group_result_bus != result_bus[1])
-            continue;
-        if (part->left_to_place() > available_rams)
-            continue;
+        if (group_search_bus != search_bus[0] && group_search_bus != search_bus[1]) continue;
+        if (group_result_bus != result_bus[0] && group_result_bus != result_bus[1]) continue;
+        if (part->left_to_place() > available_rams) continue;
         return part;
     }
     return nullptr;
@@ -1681,8 +1665,7 @@ bool Memories::fill_out_partition(int row, unsigned partition_mask) {
     int loc = 0;
     while ((partition_mask & ~sram_inuse[row]) > 0) {
         auto part = best_partition_candidate(row, partition_mask, loc);
-        if (part == nullptr)
-            return true;
+        if (part == nullptr) return true;
 
         match_selection match_select;
         if (!determine_match_rows_and_cols(part, row, partition_mask, match_select, true))
@@ -1708,8 +1691,7 @@ unsigned Memories::best_partition_side(mem_info &mi) {
         for (int side = 0; side < RAM_SIDES; side++) {
             int RAMs = bitcount(side_mask(static_cast<RAM_side_t>(side)) & sram_inuse[i]);
             RAMs_placed[side] += RAMs;
-            if (RAMs > 0)
-                partitions_allocated[side]++;
+            if (RAMs > 0) partitions_allocated[side]++;
         }
     }
 
@@ -1745,8 +1727,7 @@ bool Memories::allocate_all_atcam(mem_info &mi) {
             for (int iteration = 0; iteration < RAM_SIDES; iteration++) {
                 // If the partition does not fit on what is classified as the better side, due
                 // to wide width requirements, to allocate on the worse side
-                if (iteration == 1)
-                    partition_mask = side_mask(RAM_SIDES) & ~partition_mask;
+                if (iteration == 1) partition_mask = side_mask(RAM_SIDES) & ~partition_mask;
                 if (find_best_partition_for_atcam(partition_mask)) {
                     found = true;
                     break;
@@ -1755,14 +1736,14 @@ bool Memories::allocate_all_atcam(mem_info &mi) {
             if (!found) {
                 failure_reason = "atcam partition failure"_cs;
                 LOG3(failure_reason);
-                return false; }
+                return false;
+            }
         }
     }
 
     compress_ways(true);
     return true;
 }
-
 
 /* Number of continuous TCAMs needed for table width */
 int Memories::ternary_TCAMs_necessary(table_alloc *ta, int &midbyte) {
@@ -1771,8 +1752,8 @@ int Memories::ternary_TCAMs_necessary(table_alloc *ta, int &midbyte) {
 }
 
 /* Finds the stretch on the ternary array that can hold entries */
-bool Memories::find_ternary_stretch(int TCAMs_necessary, int &row, int &col,
-                                    int midbyte, bool &split_first) {
+bool Memories::find_ternary_stretch(int TCAMs_necessary, int &row, int &col, int midbyte,
+                                    bool &split_first) {
     for (int j = 0; j < TCAM_COLUMNS; j++) {
         int clear_cols = 0;
         split_first = false;
@@ -1787,12 +1768,11 @@ bool Memories::find_ternary_stretch(int TCAMs_necessary, int &row, int &col,
             // These checks are enforcing that the midbyte is shared correctly between two
             // contiguous blocks.
             if ((TCAMs_necessary % 2) == 0) {
-                if ((i % 2) == 1 && clear_cols == 0)
-                    continue;
+                if ((i % 2) == 1 && clear_cols == 0) continue;
             } else {
                 if ((i % 2) == 1 && clear_cols == 0) {
-                    if (midbyte >= 0 && tcam_midbyte_use[i / 2][j] >= 0
-                        && midbyte != tcam_midbyte_use[i / 2][j]) {
+                    if (midbyte >= 0 && tcam_midbyte_use[i / 2][j] >= 0 &&
+                        midbyte != tcam_midbyte_use[i / 2][j]) {
                         continue;
                     }
                     split_first = true;
@@ -1815,14 +1795,14 @@ bool Memories::find_ternary_stretch(int TCAMs_necessary, int &row, int &col,
 bool Memories::allocate_all_ternary() {
     allocation_count = 0;
     std::sort(ternary_tables.begin(), ternary_tables.end(),
-        [=](const table_alloc *a, table_alloc *b) {
-        int t;
-        if ((t = a->table->layout.match_bytes - b->table->layout.match_bytes) != 0) return t > 0;
-        return a->total_entries() > b->total_entries();
-    });
+              [=](const table_alloc *a, table_alloc *b) {
+                  int t;
+                  if ((t = a->table->layout.match_bytes - b->table->layout.match_bytes) != 0)
+                      return t > 0;
+                  return a->total_entries() > b->total_entries();
+              });
     Log::TempIndent indent;
-    if (!ternary_tables.empty())
-        LOG3("Allocating all ternary tables" << indent);
+    if (!ternary_tables.empty()) LOG3("Allocating all ternary tables" << indent);
 
     // FIXME: All of this needs to be changed on this to match up with xbar
     for (auto *ta : ternary_tables) {
@@ -1832,15 +1812,16 @@ bool Memories::allocate_all_ternary() {
             int TCAMs_necessary = ternary_TCAMs_necessary(ta, midbyte);
 
             // FIXME: If the table is just a default action table, essentially a hack
-            if (TCAMs_necessary == 0)
-                continue;
-            int row = 0; int col = 0;
+            if (TCAMs_necessary == 0) continue;
+            int row = 0;
+            int col = 0;
             Memories::Use &alloc = (*ta->memuse)[u_id];
             for (int i = 0; i < ta->calc_entries_per_uid[lt_entry] / 512; i++) {
                 bool split_midbyte = false;
                 if (!find_ternary_stretch(TCAMs_necessary, row, col, midbyte, split_midbyte)) {
                     LOG4("failed find_ternary_stretch for " << ta->table->name);
-                    return false; }
+                    return false;
+                }
                 int word = 0;
                 bool increment = true;
                 if (split_midbyte) {
@@ -1848,16 +1829,17 @@ bool Memories::allocate_all_ternary() {
                     increment = false;
                 }
                 for (int i = row; i < row + TCAMs_necessary; i++) {
-                     tcam_use[i][col] = u_id.build_name();
-                     auto tcam = ta->table_format->tcam_use[word];
-                     if (tcam_midbyte_use[i/2][col] >= 0 && tcam.byte_group >= 0)
-                         BUG_CHECK(tcam_midbyte_use[i/2][col] == tcam.byte_group, "Two contiguous "
-                             "TCAMs cannot correct share midbyte");
-                     else if (tcam_midbyte_use[i/2][col] < 0)
-                         tcam_midbyte_use[i/2][col] = tcam.byte_group;
-                     alloc.row.emplace_back(i, col, word, allocation_count);
-                     alloc.row.back().col.push_back(col);
-                     word = increment ? word + 1 : word - 1;
+                    tcam_use[i][col] = u_id.build_name();
+                    auto tcam = ta->table_format->tcam_use[word];
+                    if (tcam_midbyte_use[i / 2][col] >= 0 && tcam.byte_group >= 0)
+                        BUG_CHECK(tcam_midbyte_use[i / 2][col] == tcam.byte_group,
+                                  "Two contiguous "
+                                  "TCAMs cannot correct share midbyte");
+                    else if (tcam_midbyte_use[i / 2][col] < 0)
+                        tcam_midbyte_use[i / 2][col] = tcam.byte_group;
+                    alloc.row.emplace_back(i, col, word, allocation_count);
+                    alloc.row.back().col.push_back(col);
+                    word = increment ? word + 1 : word - 1;
                 }
                 allocation_count++;
             }
@@ -1869,12 +1851,12 @@ bool Memories::allocate_all_ternary() {
         for (auto u_id : ta->allocation_units()) {
             auto &alloc = (*ta->memuse)[u_id];
             std::stable_sort(alloc.row.begin(), alloc.row.end(),
-                [=](const Memories::Use::Row &a, const Memories::Use::Row &b) {
-                int t;
-                if ((t = a.alloc - b.alloc) != 0) return t < 0;
-                if ((t = a.word - b.word) != 0) return t < 0;
-                return a.row < b.row;
-            });
+                             [=](const Memories::Use::Row &a, const Memories::Use::Row &b) {
+                                 int t;
+                                 if ((t = a.alloc - b.alloc) != 0) return t < 0;
+                                 if ((t = a.word - b.word) != 0) return t < 0;
+                                 return a.row < b.row;
+                             });
         }
     }
 
@@ -1901,14 +1883,16 @@ void Memories::find_tind_groups() {
         for (auto u_id : ta->allocation_units(nullptr, false, UniqueAttachedId::TIND_PP)) {
             // Cannot use the TernaryIndirectPerWord function call, as the overhead allocated
             // may differ than the estimated overhead in the layout_option
-            BUG_CHECK(ta->table_format->has_overhead(), "Allocating a ternary indirect table "
-                 "%s with no overhead", u_id.build_name());
+            BUG_CHECK(ta->table_format->has_overhead(),
+                      "Allocating a ternary indirect table "
+                      "%s with no overhead",
+                      u_id.build_name());
             bitvec overhead = ta->table_format->overhead();
             int tind_size = 1 << ceil_log2(overhead.max().index() + 1);
             tind_size = std::max(tind_size, 8);
             int per_word = TableFormat::SINGLE_RAM_BITS / tind_size;
-            int depth = mems_needed(ta->calc_entries_per_uid[lt_entry], SRAM_DEPTH, per_word,
-                                    false);
+            int depth =
+                mems_needed(ta->calc_entries_per_uid[lt_entry], SRAM_DEPTH, per_word, false);
             tind_groups.push_back(new SRAM_group(ta, depth, 0, SRAM_group::TIND));
             tind_groups.back()->logical_table = u_id.logical_table;
             tind_groups.back()->ppt = UniqueAttachedId::TIND_PP;
@@ -1916,11 +1900,11 @@ void Memories::find_tind_groups() {
     }
     std::sort(tind_groups.begin(), tind_groups.end(),
               [=](const SRAM_group *a, const SRAM_group *b) {
-        int t;
-        if ((t = (a->left_to_place()) - (b->left_to_place())) != 0) return t > 0;
-        if ((t = a->logical_table - b->logical_table) != 0) return t < 0;
-        return a->logical_table < b->logical_table;
-    });
+                  int t;
+                  if ((t = (a->left_to_place()) - (b->left_to_place())) != 0) return t > 0;
+                  if ((t = a->logical_table - b->logical_table) != 0) return t < 0;
+                  return a->logical_table < b->logical_table;
+              });
 }
 
 /* Finds the best row in which to put the tind table */
@@ -1937,26 +1921,21 @@ int Memories::find_best_tind_row(SRAM_group *tg, int &bus) {
         }
     }
 
-    if (open_space == 0)
-        return -1;
+    if (open_space == 0) return -1;
 
-    std::sort(available_rows.begin(), available_rows.end(),
-        [=] (const int a, const int b) {
+    std::sort(available_rows.begin(), available_rows.end(), [=](const int a, const int b) {
         int t;
-        if ((t = bitcount(~sram_inuse[a] & left_mask)
-               - bitcount(~sram_inuse[b] & left_mask)) != 0) return t > 0;
+        if ((t = bitcount(~sram_inuse[a] & left_mask) - bitcount(~sram_inuse[b] & left_mask)) != 0)
+            return t > 0;
 
         auto tbus0 = tind_bus[a];
         auto tbus1 = tind_bus[b];
-        if ((tbus0[0] == name || tbus0[1] == name)
-            && !(tbus1[0] == name || tbus1[1] == name))
+        if ((tbus0[0] == name || tbus0[1] == name) && !(tbus1[0] == name || tbus1[1] == name))
             return true;
-        if ((tbus1[0] == name || tbus1[1] == name)
-            && !(tbus0[0] == name || tbus0[1] == name))
+        if ((tbus1[0] == name || tbus1[1] == name) && !(tbus0[0] == name || tbus0[1] == name))
             return false;
         return a < b;
     });
-
 
     int best_row = available_rows[0];
     if (!tind_bus[best_row][0] || tind_bus[best_row][0] == name)
@@ -1973,17 +1952,17 @@ void Memories::compress_tind_groups() {
         for (auto u_id : ta->allocation_units(nullptr, false, UniqueAttachedId::TIND_PP)) {
             auto &alloc = (*ta->memuse)[u_id];
             std::sort(alloc.row.begin(), alloc.row.end(),
-                [=](const Memories::Use::Row a, const Memories::Use::Row b) {
-                    int t;
-                    if ((t = a.row - b.row) != 0) return t < 0;
-                    if ((t = a.bus - b.bus) != 0) return t < 0;
-                    return false;
-                });
+                      [=](const Memories::Use::Row a, const Memories::Use::Row b) {
+                          int t;
+                          if ((t = a.row - b.row) != 0) return t < 0;
+                          if ((t = a.bus - b.bus) != 0) return t < 0;
+                          return false;
+                      });
             for (size_t i = 0; i < alloc.row.size() - 1; i++) {
-                if (alloc.row[i].row == alloc.row[i+1].row &&
-                    alloc.row[i].bus == alloc.row[i+1].bus) {
-                    alloc.row[i].col.insert(alloc.row[i].col.end(), alloc.row[i+1].col.begin(),
-                                            alloc.row[i+1].col.end());
+                if (alloc.row[i].row == alloc.row[i + 1].row &&
+                    alloc.row[i].bus == alloc.row[i + 1].bus) {
+                    alloc.row[i].col.insert(alloc.row[i].col.end(), alloc.row[i + 1].col.begin(),
+                                            alloc.row[i + 1].col.end());
                     alloc.row.erase(alloc.row.begin() + i + 1);
                     i--;
                 }
@@ -1997,8 +1976,7 @@ void Memories::compress_tind_groups() {
 bool Memories::allocate_all_tind() {
     find_tind_groups();
     Log::TempIndent indent;
-    if (!tind_groups.empty())
-        LOG3("Allocating all ternary indirect tables" << indent);
+    if (!tind_groups.empty()) LOG3("Allocating all ternary indirect tables" << indent);
     while (!tind_groups.empty()) {
         auto *tg = tind_groups[0];
         int best_bus = 0;
@@ -2006,7 +1984,8 @@ bool Memories::allocate_all_tind() {
         if (best_row == -1) {
             failure_reason = "no tind row available"_cs;
             LOG4("no tind row available for " << tg->ta->table->name);
-            return false; }
+            return false;
+        }
         for (int i = 0; i < LEFT_SIDE_COLUMNS; i++) {
             if (~sram_inuse[best_row] & (1 << i)) {
                 auto unique_id = tg->build_unique_id();
@@ -2041,10 +2020,10 @@ void Memories::swbox_bus_selectors_indirects() {
             // FIXME: need to adjust if the action selector is larger than 2 RAMs, based
             // on the pragmas provided to the compiler
             const IR::MAU::Selector *as = nullptr;
-            if ((as = at->to<IR::MAU::Selector>()) == nullptr)
-                continue;
+            if ((as = at->to<IR::MAU::Selector>()) == nullptr) continue;
 
-            BUG_CHECK(ta->allocation_units(as).size() == 1, "Cannot have multiple selector "
+            BUG_CHECK(ta->allocation_units(as).size() == 1,
+                      "Cannot have multiple selector "
                       "objects");
             for (auto u_id : ta->allocation_units(as)) {
                 int RAM_lines = SelectorRAMLinesPerEntry(as) * as->num_pools;
@@ -2063,9 +2042,9 @@ void Memories::swbox_bus_selectors_indirects() {
             LOG5("For backend attached table : " << back_at);
             auto at = back_at->attached;
             const IR::MAU::ActionData *ad = nullptr;
-            if ((ad = at->to<IR::MAU::ActionData>()) == nullptr)
-                continue;
-            BUG_CHECK(ta->allocation_units(ad).size() == 1, "Cannot have multiple action profile "
+            if ((ad = at->to<IR::MAU::ActionData>()) == nullptr) continue;
+            BUG_CHECK(ta->allocation_units(ad).size() == 1,
+                      "Cannot have multiple action profile "
                       "objects");
             for (auto u_id : ta->allocation_units(ad)) {
                 LOG5("For allocation unit: " << u_id);
@@ -2109,8 +2088,7 @@ void Memories::swbox_bus_stateful_alus() {
         const IR::MAU::StatefulAlu *salu = nullptr;
         for (auto back_at : ta->table->attached) {
             auto at = back_at->attached;
-            if ((salu = at->to<IR::MAU::StatefulAlu>()) == nullptr)
-                continue;
+            if ((salu = at->to<IR::MAU::StatefulAlu>()) == nullptr) continue;
             if (salu->selector)
                 // use the selector's memory
                 continue;
@@ -2141,8 +2119,7 @@ void Memories::swbox_bus_meters_counters() {
         for (auto back_at : ta->table->attached) {
             auto at = back_at->attached;
             const IR::MAU::Counter *stats = nullptr;
-            if ((stats = at->to<IR::MAU::Counter>()) == nullptr)
-                continue;
+            if ((stats = at->to<IR::MAU::Counter>()) == nullptr) continue;
             int lt_entry = 0;
             for (auto u_id : ta->allocation_units(stats)) {
                 int vpn_spare = 0;
@@ -2157,8 +2134,8 @@ void Memories::swbox_bus_meters_counters() {
                 // of indirect counter to match Tofino capability.
                 if ((Device::isMemoryCoreSplit()) && (depth > MAX_STATS_RAM_PER_ALU) &&
                     !stats->direct) {
-                    auto *stats_group = new SRAM_group(ta, MAX_STATS_RAM_PER_ALU, 0,
-                                                       SRAM_group::STATS);
+                    auto *stats_group =
+                        new SRAM_group(ta, MAX_STATS_RAM_PER_ALU, 0, SRAM_group::STATS);
                     stats_group->attached = stats;
                     stats_group->logical_table = u_id.logical_table;
                     stats_group->vpn_offset = depth - MAX_STATS_RAM_PER_ALU;
@@ -2166,13 +2143,12 @@ void Memories::swbox_bus_meters_counters() {
                     // The same spare VPN value would be used for both spare bank.
                     vpn_spare = stats_group->vpn_spare = depth - 1;
                     synth_bus_users.insert(stats_group);
-                    depth -= ((MAX_STATS_RAM_PER_ALU) - 1);
+                    depth -= ((MAX_STATS_RAM_PER_ALU)-1);
                 }
                 auto *stats_group = new SRAM_group(ta, depth, 0, SRAM_group::STATS);
                 stats_group->attached = stats;
                 stats_group->logical_table = u_id.logical_table;
-                if (vpn_spare)
-                    stats_group->vpn_spare = vpn_spare;
+                if (vpn_spare) stats_group->vpn_spare = vpn_spare;
 
                 synth_bus_users.insert(stats_group);
                 lt_entry++;
@@ -2184,8 +2160,7 @@ void Memories::swbox_bus_meters_counters() {
         const IR::MAU::Meter *meter = nullptr;
         for (auto back_at : ta->table->attached) {
             auto at = back_at->attached;
-            if ((meter = at->to<IR::MAU::Meter>()) == nullptr)
-                continue;
+            if ((meter = at->to<IR::MAU::Meter>()) == nullptr) continue;
             int lt_entry = 0;
             for (auto u_id : ta->allocation_units(meter)) {
                 int vpn_spare = 0;
@@ -2206,19 +2181,18 @@ void Memories::swbox_bus_meters_counters() {
                     // break the table at a multiple of 4. This make sure the same color mapram is
                     // not part of both half.
                     int top_half_ram_depth = depth;
-                    while (top_half_ram_depth > max_half_ram_depth)
-                        top_half_ram_depth -= 4;
+                    while (top_half_ram_depth > max_half_ram_depth) top_half_ram_depth -= 4;
 
-                    auto *meter_group = new SRAM_group(ta, top_half_ram_depth, 0,
-                                                       SRAM_group::METER);
+                    auto *meter_group =
+                        new SRAM_group(ta, top_half_ram_depth, 0, SRAM_group::METER);
                     meter_group->attached = meter;
                     meter_group->logical_table = u_id.logical_table;
                     meter_group->vpn_offset = depth - top_half_ram_depth;
 
                     if (meter->color_output()) {
-                        meter_group->cm.needed = mems_needed((top_half_ram_depth - 1) * SRAM_DEPTH,
-                                                             SRAM_DEPTH, COLOR_MAPRAM_PER_ROW,
-                                                             false);
+                        meter_group->cm.needed =
+                            mems_needed((top_half_ram_depth - 1) * SRAM_DEPTH, SRAM_DEPTH,
+                                        COLOR_MAPRAM_PER_ROW, false);
                         if (meter->mapram_possible(IR::MAU::ColorMapramAddress::IDLETIME))
                             meter_group->cm.cma = IR::MAU::ColorMapramAddress::IDLETIME;
                         else if (meter->mapram_possible(IR::MAU::ColorMapramAddress::STATS))
@@ -2240,8 +2214,8 @@ void Memories::swbox_bus_meters_counters() {
                 meter_group->attached = meter;
                 meter_group->logical_table = u_id.logical_table;
                 if (meter->color_output()) {
-                    meter_group->cm.needed = mems_needed(entries, SRAM_DEPTH,
-                                                         COLOR_MAPRAM_PER_ROW, false);
+                    meter_group->cm.needed =
+                        mems_needed(entries, SRAM_DEPTH, COLOR_MAPRAM_PER_ROW, false);
                     if (meter->mapram_possible(IR::MAU::ColorMapramAddress::IDLETIME))
                         meter_group->cm.cma = IR::MAU::ColorMapramAddress::IDLETIME;
                     else if (meter->mapram_possible(IR::MAU::ColorMapramAddress::STATS))
@@ -2251,8 +2225,7 @@ void Memories::swbox_bus_meters_counters() {
                 } else {
                     meter_group->requires_ab = true;
                 }
-                if (vpn_spare)
-                    meter_group->vpn_spare = vpn_spare;
+                if (vpn_spare) meter_group->vpn_spare = vpn_spare;
 
                 synth_bus_users.insert(meter_group);
             }
@@ -2316,11 +2289,10 @@ void Memories::find_swbox_bus_users() {
  * dedicated to synth2port
  */
 void Memories::determine_synth_RAMs(int &RAMs_available, int row,
-        const SRAM_group *curr_oflow) const {
+                                    const SRAM_group *curr_oflow) const {
     int unallocated_RAMs = bitcount(~sram_inuse[row] & side_mask(RIGHT));
 
-    if (!(curr_oflow &&
-          curr_oflow->type == SRAM_group::METER &&
+    if (!(curr_oflow && curr_oflow->type == SRAM_group::METER &&
           curr_oflow->cm.left_to_place() > 0)) {
         RAMs_available = unallocated_RAMs;
         return;
@@ -2368,7 +2340,7 @@ void Memories::determine_synth_RAMs(int &RAMs_available, int row,
  * Any leftover RAMs not used by synth2port tables are now available for action data.
  */
 void Memories::determine_action_RAMs(int &RAMs_available, int row, RAM_side_t side,
-        const safe_vector<LogicalRowUser> &lrus) const {
+                                     const safe_vector<LogicalRowUser> &lrus) const {
     int synth_RAMs_used = 0;
     for (auto &lru : lrus) {
         synth_RAMs_used += lru.RAM_mask.popcount();
@@ -2378,7 +2350,6 @@ void Memories::determine_action_RAMs(int &RAMs_available, int row, RAM_side_t si
     LOG5("\tRAMs available for action data " << RAMs_available);
 }
 
-
 /**
  * In order to begin placing a synth2port table, there has to be a data pathway to the ALU
  * for that table.  The current check only allows meters/selectors/stateful ALUs to begin
@@ -2386,18 +2357,16 @@ void Memories::determine_action_RAMs(int &RAMs_available, int row, RAM_side_t si
  * can verify that the overflow bus has not yet been used, this can be loosened
  */
 bool Memories::alu_pathway_available(SRAM_group *synth_table, int row,
-        const SRAM_group *curr_oflow) const {
+                                     const SRAM_group *curr_oflow) const {
     BUG_CHECK(synth_table->is_synth_type(), "Alu pathway only required for a synth2port table");
     if ((row % 2) == 0) {
-        if (synth_table->type != SRAM_group::STATS)
-            return false;
+        if (synth_table->type != SRAM_group::STATS) return false;
         // If the meter is to use statistics bus for the color map RAMs
         if (curr_oflow && curr_oflow->type == SRAM_group::METER &&
             curr_oflow->cm.left_to_place() > 0 && curr_oflow->cm.require_stats())
             return false;
     } else {
-        if (synth_table->type == SRAM_group::STATS)
-            return false;
+        if (synth_table->type == SRAM_group::STATS) return false;
     }
     return true;
 }
@@ -2407,8 +2376,7 @@ int Memories::phys_to_log_row(int physical_row, RAM_side_t side) const {
 }
 
 int Memories::log_to_phys_row(int logical_row, RAM_side_t *side) const {
-    if (side)
-        *side = static_cast<RAM_side_t>(logical_row % 2);
+    if (side) *side = static_cast<RAM_side_t>(logical_row % 2);
     return logical_row / 2;
 }
 
@@ -2425,8 +2393,7 @@ int Memories::lowest_row_to_overflow(const SRAM_group *candidate, int logical_ro
     int lowest_phys_row = 0;
     if (!Device::isMemoryCoreSplit()) {
         int phys_row = log_to_phys_row(logical_row);
-        if (candidate->recent_home_row >= 0)
-            phys_row = log_to_phys_row(candidate->recent_home_row);
+        if (candidate->recent_home_row >= 0) phys_row = log_to_phys_row(candidate->recent_home_row);
         lowest_phys_row = std::max(phys_row - MAX_DATA_SWBOX_ROWS, 0);
     } else {
         int phys_row = log_to_phys_row(logical_row);
@@ -2437,13 +2404,12 @@ int Memories::lowest_row_to_overflow(const SRAM_group *candidate, int logical_ro
 }
 
 int Memories::open_rams_between_rows(int highest_logical_row, int lowest_logical_row,
-       bitvec sides) const {
+                                     bitvec sides) const {
     int rv = 0;
     for (int r = highest_logical_row; r >= lowest_logical_row; r--) {
         RAM_side_t side = RAM_SIDES;
         int phys_row = log_to_phys_row(r, &side);
-        if (!sides.getbit(static_cast<int>(side)))
-            continue;
+        if (!sides.getbit(static_cast<int>(side))) continue;
         rv += bitcount(side_mask(side) & ~sram_inuse[phys_row]);
     }
     return rv;
@@ -2462,14 +2428,12 @@ int Memories::open_maprams_between_rows(int highest_phys_row, int lowest_phys_ro
  * physical row due to the maximum number of rows possible for overflow to begin placing this
  * table.
  */
-bool Memories::overflow_possible(const SRAM_group *candidate, const SRAM_group *curr_oflow,
-        int row, RAM_side_t side) const {
-    if (!candidate->is_synth_type())
-        return true;
+bool Memories::overflow_possible(const SRAM_group *candidate, const SRAM_group *curr_oflow, int row,
+                                 RAM_side_t side) const {
+    if (!candidate->is_synth_type()) return true;
     int logical_row = phys_to_log_row(row, side);
     int lowest_logical_row = lowest_row_to_overflow(candidate, logical_row);
-    if (candidate->type == SRAM_group::ACTION)
-        lowest_logical_row = 0;
+    if (candidate->type == SRAM_group::ACTION) lowest_logical_row = 0;
     bitvec sides;
     sides.setbit(RIGHT);
     int available_rams = open_rams_between_rows(logical_row, lowest_logical_row, sides);
@@ -2481,8 +2445,7 @@ bool Memories::overflow_possible(const SRAM_group *candidate, const SRAM_group *
             available_rams -= curr_oflow->cm.left_to_place();
         }
     }
-    if (available_rams < candidate->left_to_place())
-        return false;
+    if (available_rams < candidate->left_to_place()) return false;
     return true;
 }
 
@@ -2492,19 +2455,16 @@ bool Memories::overflow_possible(const SRAM_group *candidate, const SRAM_group *
  * overflow constraint of the maximum number of possible rows.
  */
 bool Memories::break_other_overflow(const SRAM_group *candidate, const SRAM_group *curr_oflow,
-        int row, RAM_side_t side) const {
-    if (!(curr_oflow && curr_oflow->is_synth_type()))
-        return true;
-    if (!candidate->is_synth_type())
-        return true;
+                                    int row, RAM_side_t side) const {
+    if (!(curr_oflow && curr_oflow->is_synth_type())) return true;
+    if (!candidate->is_synth_type()) return true;
     int logical_row = phys_to_log_row(row, side);
     int lowest_logical_row = lowest_row_to_overflow(curr_oflow, logical_row);
     bitvec sides;
     sides.setbit(RIGHT);
     int available_rams = open_rams_between_rows(logical_row, lowest_logical_row, sides);
     int total_RAMs_required = candidate->left_to_place() + curr_oflow->left_to_place();
-    if (available_rams < total_RAMs_required)
-        return false;
+    if (available_rams < total_RAMs_required) return false;
     return true;
 }
 
@@ -2531,12 +2491,10 @@ bool Memories::break_other_overflow(const SRAM_group *candidate, const SRAM_grou
  * currently interpret only one selector per stage.
  */
 bool Memories::can_be_placed_in_half(const SRAM_group *candidate, int row, RAM_side_t side,
-        const SRAM_group *synth, int avail_RAMs_on_row) const {
-    if (!Device::isMemoryCoreSplit())
-        return true;
+                                     const SRAM_group *synth, int avail_RAMs_on_row) const {
+    if (!Device::isMemoryCoreSplit()) return true;
 
-    if (must_place_in_half.find(candidate) != must_place_in_half.end())
-        return true;
+    if (must_place_in_half.find(candidate) != must_place_in_half.end()) return true;
     int synth_RAMs = 0;
     int map_RAMs = 0;
     int action_RAMs = 0;
@@ -2545,7 +2503,8 @@ bool Memories::can_be_placed_in_half(const SRAM_group *candidate, int row, RAM_s
     ///> been placed.  Thus it will not yet be part of the must_place_in_half set at this point.
     if (synth && synth->type == SRAM_group::SELECTOR) {
         if (candidate->sel.sel_group == synth) {
-            BUG_CHECK(candidate->type == SRAM_group::ACTION, "Error coordinating selector "
+            BUG_CHECK(candidate->type == SRAM_group::ACTION,
+                      "Error coordinating selector "
                       "and action profile in memories");
             return true;
         }
@@ -2572,11 +2531,9 @@ bool Memories::can_be_placed_in_half(const SRAM_group *candidate, int row, RAM_s
     ///> The RAMs available on the current RAM line are known, so we add this sum to
     ///> all available RAMs on the line below
     avail_synth_RAMs += open_rams_between_rows(phys_to_log_row(row, side) - 1,
-                                               phys_to_log_row(lowest_phys_row, RIGHT),
-                                               right_side);
+                                               phys_to_log_row(lowest_phys_row, RIGHT), right_side);
     avail_RAMs += open_rams_between_rows(phys_to_log_row(row, side) - 1,
-                                         phys_to_log_row(lowest_phys_row, LEFT),
-                                         all_sides);
+                                         phys_to_log_row(lowest_phys_row, LEFT), all_sides);
 
     ///> The map RAMs are completely free
     int avail_map_RAMs = open_maprams_between_rows(row, lowest_phys_row);
@@ -2598,16 +2555,13 @@ bool Memories::can_be_placed_in_half(const SRAM_group *candidate, int row, RAM_s
     }
 
     ///> For standard overflow constraints
-    if (candidate_synth_RAMs + synth_RAMs > avail_synth_RAMs)
-        return false;
+    if (candidate_synth_RAMs + synth_RAMs > avail_synth_RAMs) return false;
     ///> For color overflow constraints
-    if (candidate_map_RAMs + map_RAMs > avail_map_RAMs)
-        return false;
+    if (candidate_map_RAMs + map_RAMs > avail_map_RAMs) return false;
 
     ///> For selector overflow constraints
     if (candidate_synth_RAMs + synth_RAMs + candidate_action_RAMs + action_RAMs > avail_RAMs) {
-        if (candidate->is_synth_type())
-            return false;
+        if (candidate->is_synth_type()) return false;
         ///> Action data RAMs don't have overflow issues, but in order to make sure
         ///> that all selection based action RAMs are prioritized, this check will not start
         ///> too large action data tables.
@@ -2639,22 +2593,21 @@ bool Memories::can_be_placed_in_half(const SRAM_group *candidate, int row, RAM_s
  * action data strategy early, and then indicate that when selecting the action data candidates.
  */
 bool Memories::satisfy_sel_swbox_constraints(const SRAM_group *candidate,
-        const SRAM_group *sel_oflow, SRAM_group *synth) const {
+                                             const SRAM_group *sel_oflow, SRAM_group *synth) const {
     if (candidate->type != SRAM_group::SELECTOR && candidate->type != SRAM_group::ACTION)
         return true;
 
     ///> Prevent any selector from being placed until the previous selector is fully placed
     if (candidate->type == SRAM_group::SELECTOR) {
-        if (sel_oflow != nullptr)
-            return false;
-        BUG_CHECK(!candidate->sel.action_any_placed(), "A selector already has action data "
+        if (sel_oflow != nullptr) return false;
+        BUG_CHECK(!candidate->sel.action_any_placed(),
+                  "A selector already has action data "
                   "tables placed, breaking selector switchbox constraints");
         return true;
     }
 
     if (candidate->type == SRAM_group::ACTION) {
-        if (!(candidate->sel.sel_group == nullptr ||
-              candidate->sel.sel_group == sel_oflow ||
+        if (!(candidate->sel.sel_group == nullptr || candidate->sel.sel_group == sel_oflow ||
               candidate->sel.sel_group == synth))
             return false;
         return true;
@@ -2667,8 +2620,8 @@ bool Memories::satisfy_sel_swbox_constraints(const SRAM_group *candidate,
  * Determine best fits, i.e. candidate that requires the most number of RAMs that can
  * still fit on the row
  */
-void Memories::determine_fit_on_logical_row(SRAM_group **fit_on_logical_row,
-        SRAM_group *candidate, int RAMs_avail) const {
+void Memories::determine_fit_on_logical_row(SRAM_group **fit_on_logical_row, SRAM_group *candidate,
+                                            int RAMs_avail) const {
     if (RAMs_avail - candidate->left_to_place() > 0) {
         if (*fit_on_logical_row) {
             if (candidate->left_to_place() > (**fit_on_logical_row).left_to_place())
@@ -2697,7 +2650,6 @@ void Memories::determine_max_req(SRAM_group **max_req, SRAM_group *candidate) co
         }
     }
 
-
     if (*max_req) {
         ///> Selectors also include their action data
         if ((**max_req).total_left_to_place() < candidate->total_left_to_place())
@@ -2710,26 +2662,22 @@ void Memories::determine_max_req(SRAM_group **max_req, SRAM_group *candidate) co
 /**
  * Determine the best-fit and the maximum requirement candidate for the SYNTH bus.
  */
-void Memories::candidates_for_synth_row(SRAM_group **fit_on_logical_row,
-        SRAM_group **max_req, int row, const SRAM_group *curr_oflow, const SRAM_group *sel_oflow,
-        int RAMs_avail) const {
+void Memories::candidates_for_synth_row(SRAM_group **fit_on_logical_row, SRAM_group **max_req,
+                                        int row, const SRAM_group *curr_oflow,
+                                        const SRAM_group *sel_oflow, int RAMs_avail) const {
     for (auto synth_table : synth_bus_users) {
-        if (curr_oflow == synth_table)
-            continue;
+        if (curr_oflow == synth_table) continue;
         LOG5("\tSynth candidate " << synth_table);
-        BUG_CHECK(!synth_table->any_placed(), "Cannot start a synth2port table and not have "
+        BUG_CHECK(!synth_table->any_placed(),
+                  "Cannot start a synth2port table and not have "
                   "it as non-overflowing");
-        if (!alu_pathway_available(synth_table, row, curr_oflow))
-            continue;
+        if (!alu_pathway_available(synth_table, row, curr_oflow)) continue;
         LOG6("\t    Alu pathway available");
-        if (!overflow_possible(synth_table, curr_oflow, row, RIGHT))
-            continue;
+        if (!overflow_possible(synth_table, curr_oflow, row, RIGHT)) continue;
         LOG6("\t    Overflow is possible");
-        if (!satisfy_sel_swbox_constraints(synth_table, sel_oflow, nullptr))
-            continue;
+        if (!satisfy_sel_swbox_constraints(synth_table, sel_oflow, nullptr)) continue;
         LOG6("\t    Satisfies swbox constraints");
-        if (!can_be_placed_in_half(synth_table, row, RIGHT, nullptr, RAMs_avail))
-            continue;
+        if (!can_be_placed_in_half(synth_table, row, RIGHT, nullptr, RAMs_avail)) continue;
 
         LOG5("\tCan be max requirement");
         determine_max_req(max_req, synth_table);
@@ -2737,41 +2685,34 @@ void Memories::candidates_for_synth_row(SRAM_group **fit_on_logical_row,
         ///> FIXME: Because these calculations are based on RAMs only, the meter color
         ///> maprams cannot yet be determined if they will also not require overflow
         ///> needs.  Therefore, meters cannot yet be best fit
-        if (synth_table->type == SRAM_group::METER && synth_table->cm.left_to_place() > 0)
-            continue;
-        if (!break_other_overflow(synth_table, curr_oflow, row, RIGHT))
-            continue;
+        if (synth_table->type == SRAM_group::METER && synth_table->cm.left_to_place() > 0) continue;
+        if (!break_other_overflow(synth_table, curr_oflow, row, RIGHT)) continue;
         LOG5("\tCan be the best fit");
         determine_fit_on_logical_row(fit_on_logical_row, synth_table, RAMs_avail);
     }
 }
 
-void Memories::candidates_for_action_row(SRAM_group **fit_on_logical_row,
-        SRAM_group **max_req, int row, RAM_side_t side, const SRAM_group *curr_oflow,
-        const SRAM_group *sel_oflow, int RAMs_avail, SRAM_group *synth) const {
+void Memories::candidates_for_action_row(SRAM_group **fit_on_logical_row, SRAM_group **max_req,
+                                         int row, RAM_side_t side, const SRAM_group *curr_oflow,
+                                         const SRAM_group *sel_oflow, int RAMs_avail,
+                                         SRAM_group *synth) const {
     for (auto action_table : action_bus_users) {
-        if (curr_oflow == action_table)
-            continue;
+        if (curr_oflow == action_table) continue;
         LOG5("\t  Action candidate " << action_table);
-        BUG_CHECK(!action_table->all_placed(), "Cannot be a candidate for action table if fully "
+        BUG_CHECK(!action_table->all_placed(),
+                  "Cannot be a candidate for action table if fully "
                   "placed");
-        if (synth && synth->needs_ab())
-            continue;
-        if (!overflow_possible(action_table, curr_oflow, row, side))
-            continue;
+        if (synth && synth->needs_ab()) continue;
+        if (!overflow_possible(action_table, curr_oflow, row, side)) continue;
         LOG6("\t\tOverflow possible");
-        if (!satisfy_sel_swbox_constraints(action_table, sel_oflow, synth))
-            continue;
+        if (!satisfy_sel_swbox_constraints(action_table, sel_oflow, synth)) continue;
         LOG6("\t\tSwitchbox selector satisfied");
-        if (!can_be_placed_in_half(action_table, row, side, synth, RAMs_avail))
-            continue;
+        if (!can_be_placed_in_half(action_table, row, side, synth, RAMs_avail)) continue;
         LOG6("\t\tCan be placed in half");
         LOG5("\t  Can be max requirement");
         determine_max_req(max_req, action_table);
 
-
-        if (!break_other_overflow(action_table, curr_oflow, row, side))
-            continue;
+        if (!break_other_overflow(action_table, curr_oflow, row, side)) continue;
         LOG5("\t  Can fit on logical row");
         determine_fit_on_logical_row(fit_on_logical_row, action_table, RAMs_avail);
     }
@@ -2782,8 +2723,9 @@ void Memories::candidates_for_action_row(SRAM_group **fit_on_logical_row,
  * properties.
  */
 void Memories::determine_synth_logical_row_users(SRAM_group *fit_on_logical_row,
-        SRAM_group *max_req, SRAM_group *curr_oflow, safe_vector<LogicalRowUser> &lrus,
-        int RAMs_avail) const {
+                                                 SRAM_group *max_req, SRAM_group *curr_oflow,
+                                                 safe_vector<LogicalRowUser> &lrus,
+                                                 int RAMs_avail) const {
     bool synth_bus_used = false;
     // If a synth2port is overflowing, and we can finish the table on a single row while using
     // all possible RAMs, then we place the single row table
@@ -2796,8 +2738,7 @@ void Memories::determine_synth_logical_row_users(SRAM_group *fit_on_logical_row,
     }
 
     // Next we will try to finish the overflow table
-    if (curr_oflow && curr_oflow->is_synth_type())
-        lrus.emplace_back(curr_oflow, OFLOW);
+    if (curr_oflow && curr_oflow->is_synth_type()) lrus.emplace_back(curr_oflow, OFLOW);
 
     // Last choice will be for the largest requirements on synth2port
     if (max_req && !synth_bus_used) {
@@ -2817,16 +2758,17 @@ void Memories::determine_synth_logical_row_users(SRAM_group *fit_on_logical_row,
  * row.
  */
 bool Memories::action_candidate_prefer_sel(SRAM_group *max_req, SRAM_group *synth,
-        SRAM_group *curr_oflow, SRAM_group *sel_oflow, safe_vector<LogicalRowUser> &lrus) const {
-    if (!Device::isMemoryCoreSplit())
-        return false;
+                                           SRAM_group *curr_oflow, SRAM_group *sel_oflow,
+                                           safe_vector<LogicalRowUser> &lrus) const {
+    if (!Device::isMemoryCoreSplit()) return false;
     // If a selector is placed, and there is more room on the RAM line, prefer the action data
     // RAM
-    if (synth && synth->type == SRAM_group::SELECTOR &&
-        curr_oflow && curr_oflow->type == SRAM_group::ACTION) {
+    if (synth && synth->type == SRAM_group::SELECTOR && curr_oflow &&
+        curr_oflow->type == SRAM_group::ACTION) {
         if (max_req) {
-            BUG_CHECK(max_req->sel.is_sel_corr_group(synth), "Action RAMs in Tofino2 must be "
-                "preferred with its selector RAMs");
+            BUG_CHECK(max_req->sel.is_sel_corr_group(synth),
+                      "Action RAMs in Tofino2 must be "
+                      "preferred with its selector RAMs");
             lrus.emplace_back(max_req, ACTION);
             return true;
         }
@@ -2835,11 +2777,12 @@ bool Memories::action_candidate_prefer_sel(SRAM_group *max_req, SRAM_group *synt
     // If a selector is already placed and an action RAM not connected to the selector
     // is overflowing (i.e. a selector wasthe only thing that could be placed, so overflow was
     // never cleared)
-    if (sel_oflow && curr_oflow && curr_oflow->type == SRAM_group::ACTION
-        && !curr_oflow->sel.is_sel_corr_group(sel_oflow)) {
+    if (sel_oflow && curr_oflow && curr_oflow->type == SRAM_group::ACTION &&
+        !curr_oflow->sel.is_sel_corr_group(sel_oflow)) {
         if (max_req) {
-            BUG_CHECK(max_req->sel.is_sel_corr_group(sel_oflow), "Action RAMs in Tofino2 must be "
-                "preferred with its selector RAMs");
+            BUG_CHECK(max_req->sel.is_sel_corr_group(sel_oflow),
+                      "Action RAMs in Tofino2 must be "
+                      "preferred with its selector RAMs");
             lrus.emplace_back(max_req, ACTION);
             return true;
         }
@@ -2848,8 +2791,10 @@ bool Memories::action_candidate_prefer_sel(SRAM_group *max_req, SRAM_group *synt
 }
 
 void Memories::determine_action_logical_row_users(SRAM_group *fit_on_logical_row,
-        SRAM_group *max_req, SRAM_group *synth, SRAM_group *curr_oflow, SRAM_group *sel_oflow,
-        safe_vector<LogicalRowUser> &lrus, int RAMs_avail) const {
+                                                  SRAM_group *max_req, SRAM_group *synth,
+                                                  SRAM_group *curr_oflow, SRAM_group *sel_oflow,
+                                                  safe_vector<LogicalRowUser> &lrus,
+                                                  int RAMs_avail) const {
     bool action_bus_used = action_candidate_prefer_sel(max_req, synth, curr_oflow, sel_oflow, lrus);
     // If a action table is overflowing and we can finish a table on a single row while using
     // all possible RAMs, then we place the single row table
@@ -2862,8 +2807,7 @@ void Memories::determine_action_logical_row_users(SRAM_group *fit_on_logical_row
     }
 
     // Next we try to finish the overflow table
-    if (curr_oflow && !curr_oflow->is_synth_type())
-        lrus.emplace_back(curr_oflow, OFLOW);
+    if (curr_oflow && !curr_oflow->is_synth_type()) lrus.emplace_back(curr_oflow, OFLOW);
 
     // Last choice will be for the largest requirements on synth2port
     if (max_req && !action_bus_used) {
@@ -2877,7 +2821,7 @@ void Memories::determine_action_logical_row_users(SRAM_group *fit_on_logical_row
  * each candidate will be using
  */
 void Memories::determine_RAM_masks(safe_vector<LogicalRowUser> &lrus, int row, RAM_side_t side,
-        int RAMs_available, bool is_synth_type) const {
+                                   int RAMs_available, bool is_synth_type) const {
     bitvec RAM_in_use;
     bitvec map_RAM_in_use;
     int allocated_RAMs = 0;
@@ -2903,11 +2847,9 @@ void Memories::determine_RAM_masks(safe_vector<LogicalRowUser> &lrus, int row, R
         int allocated_RAMs_per_lru = 0;
         for (int ram = start_ram; ram < end_ram; ram++) {
             ///> Don't place more RAMs than are available
-            if (allocated_RAMs == RAMs_available)
-                break;
+            if (allocated_RAMs == RAMs_available) break;
             ///> Don't place more RAMs than required per candidate
-            if (allocated_RAMs_per_lru == candidate->left_to_place())
-                break;
+            if (allocated_RAMs_per_lru == candidate->left_to_place()) break;
             if (!RAM_in_use.getbit(ram)) {
                 RAM_in_use.setbit(ram);
                 lru.RAM_mask.setbit(ram);
@@ -2956,30 +2898,24 @@ void Memories::determine_RAM_masks(safe_vector<LogicalRowUser> &lrus, int row, R
  * function adjust_RAMs_available is specified.
  */
 void Memories::one_color_map_RAM_mask(LogicalRowUser &lru, bitvec &map_RAM_in_use,
-        bool &stats_bus_used, int row) const {
+                                      bool &stats_bus_used, int row) const {
     auto candidate = lru.group;
-    if (!(candidate->type == SRAM_group::METER && candidate->cm.left_to_place() > 0))
-        return;
+    if (!(candidate->type == SRAM_group::METER && candidate->cm.left_to_place() > 0)) return;
 
     int available_map_RAMs = (bitvec(MAPRAM_MASK) - map_RAM_in_use).popcount();
-    if (available_map_RAMs == 0)
-        return;
+    if (available_map_RAMs == 0) return;
 
     // Only can use one stats bus for the color map RAMs
     if (candidate->cm.cma == IR::MAU::ColorMapramAddress::STATS) {
-        if (candidate->cm.left_to_place() > available_map_RAMs)
-            return;
-        if ((row % 2) == 1)
-            return;
-        if (stats_bus_used)
-            return;
+        if (candidate->cm.left_to_place() > available_map_RAMs) return;
+        if ((row % 2) == 1) return;
+        if (stats_bus_used) return;
         stats_bus_used = true;
     }
     int allocated_map_RAMs = 0;
 
     for (int mr = 0; mr < MAPRAM_COLUMNS; mr++) {
-        if (allocated_map_RAMs == candidate->cm.left_to_place())
-            break;
+        if (allocated_map_RAMs == candidate->cm.left_to_place()) break;
         if (!map_RAM_in_use.getbit(mr)) {
             map_RAM_in_use.setbit(mr);
             lru.map_RAM_mask.setbit(mr);
@@ -2996,19 +2932,16 @@ void Memories::one_color_map_RAM_mask(LogicalRowUser &lru, bitvec &map_RAM_in_us
  */
 void Memories::determine_color_map_RAM_masks(safe_vector<LogicalRowUser> &lrus, int row) const {
     bitvec map_RAM_in_use;
-    for (auto &lru : lrus)
-        map_RAM_in_use |= lru.map_RAM_mask;
+    for (auto &lru : lrus) map_RAM_in_use |= lru.map_RAM_mask;
 
     map_RAM_in_use |= bitvec(mapram_inuse[row] & MAPRAM_MASK);
     bool stats_bus_used = false;
 
     bool overflow_finished = true;
     for (auto &lru : lrus) {
-        if (lru.bus != OFLOW)
-            continue;
+        if (lru.bus != OFLOW) continue;
         bool is_meter = lru.group->type == SRAM_group::METER;
-        if (is_meter)
-            one_color_map_RAM_mask(lru, map_RAM_in_use, stats_bus_used, row);
+        if (is_meter) one_color_map_RAM_mask(lru, map_RAM_in_use, stats_bus_used, row);
         // Cannot start placing unless both the table and curr oflow are both finished, i.e.
         // color maprams could be placed before any RAMs
         overflow_finished = false;
@@ -3019,22 +2952,17 @@ void Memories::determine_color_map_RAM_masks(safe_vector<LogicalRowUser> &lrus, 
     }
 
     for (auto &lru : lrus) {
-        if (lru.bus != SYNTH)
-            continue;
-        if (lru.group->type != SRAM_group::METER)
-            continue;
+        if (lru.bus != SYNTH) continue;
+        if (lru.group->type != SRAM_group::METER) continue;
         ///> If the overflow candidates is not finished yet, then no color mapram of the SYNTH
         ///> table can be placed, as that this will require the synth_oflow for both
-        if (!overflow_finished)
-            continue;
+        if (!overflow_finished) continue;
         ///> Don't place a color map RAM until a RAM has been placed.  FIXME Not actually
         ///> a constraint, but a corner case not yet handled correctly by the compiler or assembler
-        if (lru.RAM_mask.empty())
-            continue;
+        if (lru.RAM_mask.empty()) continue;
         one_color_map_RAM_mask(lru, map_RAM_in_use, stats_bus_used, row);
     }
 }
-
 
 /**
  * Given the candidates selected, these function determine which RAMs and which map RAMs go
@@ -3045,7 +2973,8 @@ void Memories::determine_color_map_RAM_masks(safe_vector<LogicalRowUser> &lrus, 
  * allocations, i.e. RAMs or color map RAMs.
  */
 void Memories::determine_logical_row_masks(safe_vector<LogicalRowUser> &lrus, int row,
-        RAM_side_t side, int RAMs_available, bool is_synth_type) const {
+                                           RAM_side_t side, int RAMs_available,
+                                           bool is_synth_type) const {
     std::set<switchbox_t> bus_users;
     ///> Only one user per switchbox_t
     for (auto &lru : lrus) {
@@ -3096,16 +3025,15 @@ void Memories::determine_logical_row_masks(safe_vector<LogicalRowUser> &lrus, in
  *        selector table is placed, given the constraints behind the selector adr switchbox.
  */
 void Memories::find_swbox_candidates(safe_vector<LogicalRowUser> &lrus, int row, RAM_side_t side,
-        SRAM_group *curr_oflow, SRAM_group *sel_oflow) {
-    if (action_bus_users.empty() && synth_bus_users.empty())
-        return;
+                                     SRAM_group *curr_oflow, SRAM_group *sel_oflow) {
+    if (action_bus_users.empty() && synth_bus_users.empty()) return;
 
-    std::array<int, OFLOW> RAMs_avail_on_row = { { 0, 0 } };
+    std::array<int, OFLOW> RAMs_avail_on_row = {{0, 0}};
     ///> These SRAM_groups can fit entirely on this row without overflowing, and can be placed
     ///> without breaking overflow constraints
-    std::array<SRAM_group *, OFLOW> fit_on_logical_row = { { nullptr, nullptr } };
+    std::array<SRAM_group *, OFLOW> fit_on_logical_row = {{nullptr, nullptr}};
     ///> These SRAM_groups require the maximum number of resources and should be prioritized
-    std::array<SRAM_group *, OFLOW> max_req = { { nullptr, nullptr } };
+    std::array<SRAM_group *, OFLOW> max_req = {{nullptr, nullptr}};
 
     ///> Determine the synth2port tables and requirements
     if (side == RIGHT) {
@@ -3133,9 +3061,8 @@ void Memories::find_swbox_candidates(safe_vector<LogicalRowUser> &lrus, int row,
     determine_logical_row_masks(lrus, row, side, RAMs_avail_on_row[ACTION], false);
 
     for (auto &lru : lrus) {
-        LOG4("    Candidate " << lru.group << " on bus " << lru.bus
-             << " RAM mask : 0x" << lru.RAM_mask
-             << " map RAM mask 0x" << lru.map_RAM_mask);
+        LOG4("    Candidate " << lru.group << " on bus " << lru.bus << " RAM mask : 0x"
+                              << lru.RAM_mask << " map RAM mask 0x" << lru.map_RAM_mask);
     }
 }
 
@@ -3145,8 +3072,7 @@ void Memories::find_swbox_candidates(safe_vector<LogicalRowUser> &lrus, int row,
  * particular row
  */
 void Memories::fill_RAM_use(LogicalRowUser &lru, int row, RAM_side_t side) {
-    if (lru.RAM_mask.empty())
-        return;
+    if (lru.RAM_mask.empty()) return;
     auto candidate = lru.group;
 
     auto unique_id = candidate->build_unique_id();
@@ -3155,8 +3081,7 @@ void Memories::fill_RAM_use(LogicalRowUser &lru, int row, RAM_side_t side) {
     if (lru.bus == OFLOW) {
         overflow_bus[row][side] = name;
         alloc.row.emplace_back(row);
-        if (candidate->type == SRAM_group::ACTION)
-            alloc.row.back().word = candidate->number;
+        if (candidate->type == SRAM_group::ACTION) alloc.row.back().word = candidate->number;
     } else if (lru.bus == SYNTH) {
         BUG_CHECK(side == RIGHT, "Allocating Synth2Port table on left side of RAM array");
         twoport_bus[row] = name;
@@ -3173,8 +3098,7 @@ void Memories::fill_RAM_use(LogicalRowUser &lru, int row, RAM_side_t side) {
 
     ///> Fills out the RAM objects
     for (int k = 0; k < SRAM_COLUMNS; k++) {
-        if (((1 << k) & side_mask(side)) == 0)
-            continue;
+        if (((1 << k) & side_mask(side)) == 0) continue;
 
         if (lru.RAM_mask.getbit(k)) {
             sram_use[row][k] = name;
@@ -3210,19 +3134,17 @@ void Memories::fill_RAM_use(LogicalRowUser &lru, int row, RAM_side_t side) {
     sram_inuse[row] |= lru.RAM_mask.getrange(0, SRAM_COLUMNS);
     if (lru.bus == SYNTH) {
         if (candidate->type == SRAM_group::STATS)
-            stats_alus[row/2] = name;
+            stats_alus[row / 2] = name;
         else
-            meter_alus[row/2] = name;
+            meter_alus[row / 2] = name;
     }
 }
 
 /** Fills the Use object for meters specifically for color maprams. */
 void Memories::fill_color_map_RAM_use(LogicalRowUser &lru, int row) {
     auto candidate = lru.group;
-    if (candidate->type != SRAM_group::METER)
-        return;
-    if (lru.color_map_RAM_mask().empty())
-        return;
+    if (candidate->type != SRAM_group::METER) return;
+    if (lru.color_map_RAM_mask().empty()) return;
     BUG_CHECK(candidate->type == SRAM_group::METER && candidate->cm.left_to_place() > 0,
               "Color maprams assigned to a non-meter");
 
@@ -3244,11 +3166,11 @@ void Memories::fill_color_map_RAM_use(LogicalRowUser &lru, int row) {
         }
 
         for (int i = 0; i < NUM_IDLETIME_BUS && bus < 0; i++) {
-            if (!idletime_bus[half][i])
-                bus = i;
+            if (!idletime_bus[half][i]) bus = i;
         }
-        BUG_CHECK(bus >= 0, "Cannot have a negative color mapram bus.  Should always have a free "
-                        "choice at this point");
+        BUG_CHECK(bus >= 0,
+                  "Cannot have a negative color mapram bus.  Should always have a free "
+                  "choice at this point");
         idletime_bus[half][bus] = name;
     } else if (candidate->cm.cma == IR::MAU::ColorMapramAddress::STATS) {
         // On stats, bus 0 will for the stats homerow, which is the only possible bus
@@ -3302,22 +3224,20 @@ void Memories::remove_placed_group(SRAM_group *candidate, RAM_side_t side) {
  * Updates the must place in half object if the strategy has locked particular RAMs in.
  */
 void Memories::update_must_place_in_half(const SRAM_group *candidate, switchbox_t bus) {
-    if (bus != SYNTH)
-        return;
-    BUG_CHECK(must_place_in_half.find(candidate) == must_place_in_half.end(), "Trying to "
+    if (bus != SYNTH) return;
+    BUG_CHECK(must_place_in_half.find(candidate) == must_place_in_half.end(),
+              "Trying to "
               "allocate a synth2port table to multiple home rows");
     BUG_CHECK(candidate->is_synth_type(), "Trying to place non-synth2port group as synth2port");
     must_place_in_half.insert(candidate);
-    for (auto ag : candidate->sel.action_groups)
-        must_place_in_half.insert(ag);
+    for (auto ag : candidate->sel.action_groups) must_place_in_half.insert(ag);
 }
 
 void Memories::fill_swbox_side(safe_vector<LogicalRowUser> &lrus, int row, RAM_side_t side) {
     for (auto &lru : lrus) {
         BUG_CHECK(lru.set(), "Trying to fill in a use object with nothing to allocate");
         fill_RAM_use(lru, row, side);
-        if (side == RIGHT)
-            fill_color_map_RAM_use(lru, row);
+        if (side == RIGHT) fill_color_map_RAM_use(lru, row);
         remove_placed_group(lru.group, side);
         update_must_place_in_half(lru.group, lru.bus);
     }
@@ -3339,15 +3259,13 @@ void Memories::fill_swbox_side(safe_vector<LogicalRowUser> &lrus, int row, RAM_s
  * in those rows, and then to allocate those RAMs to that positijon
  */
 void Memories::swbox_logical_row(safe_vector<LogicalRowUser> &lrus, int row, RAM_side_t side,
-        SRAM_group *curr_oflow, SRAM_group *sel_oflow) {
+                                 SRAM_group *curr_oflow, SRAM_group *sel_oflow) {
     lrus.clear();
     LOG4("    RAMs available on row " << bitcount(side_mask(side) & ~sram_inuse[row]));
-    if (bitcount(side_mask(side) & ~sram_inuse[row]) == 0)
-        return;
+    if (bitcount(side_mask(side) & ~sram_inuse[row]) == 0) return;
     find_swbox_candidates(lrus, row, side, curr_oflow, sel_oflow);
 
-    if (lrus.empty())
-        return;
+    if (lrus.empty()) return;
     fill_swbox_side(lrus, row, side);
 }
 
@@ -3362,8 +3280,8 @@ void Memories::swbox_logical_row(safe_vector<LogicalRowUser> &lrus, int row, RAM
  * All double pointers are set in this function
  */
 void Memories::calculate_curr_oflow(safe_vector<LogicalRowUser> &lrus, SRAM_group **curr_oflow,
-        SRAM_group **synth_oflow, RAM_side_t side) const {
-    std::array<SRAM_group *, SWBOX_TYPES> candidates = { { nullptr, nullptr, nullptr } };
+                                    SRAM_group **synth_oflow, RAM_side_t side) const {
+    std::array<SRAM_group *, SWBOX_TYPES> candidates = {{nullptr, nullptr, nullptr}};
 
     for (auto &lru : lrus) {
         candidates[static_cast<int>(lru.bus)] = lru.group;
@@ -3371,7 +3289,8 @@ void Memories::calculate_curr_oflow(safe_vector<LogicalRowUser> &lrus, SRAM_grou
 
     ///> The overflow candidate by definition must be the curr_oflow object
     if (candidates[OFLOW])
-        BUG_CHECK(*curr_oflow != nullptr && *curr_oflow == candidates[OFLOW], "Error in "
+        BUG_CHECK(*curr_oflow != nullptr && *curr_oflow == candidates[OFLOW],
+                  "Error in "
                   "calculating overflow");
 
     bool synth_oflow_needed = false;
@@ -3381,15 +3300,14 @@ void Memories::calculate_curr_oflow(safe_vector<LogicalRowUser> &lrus, SRAM_grou
             *synth_oflow = candidates[SYNTH];
             synth_oflow_needed = true;
         }
-        if (*curr_oflow && (*curr_oflow)->is_synth_type()
-            && !((*curr_oflow)->all_placed() && (*curr_oflow)->cm.all_placed())) {
+        if (*curr_oflow && (*curr_oflow)->is_synth_type() &&
+            !((*curr_oflow)->all_placed() && (*curr_oflow)->cm.all_placed())) {
             BUG_CHECK(!synth_oflow_needed, "Multiple synth2port require overflow");
             *synth_oflow = *curr_oflow;
             synth_oflow_needed = true;
         }
 
-        if (!synth_oflow_needed)
-            *synth_oflow = nullptr;
+        if (!synth_oflow_needed) *synth_oflow = nullptr;
     }
 
     bool curr_oflow_needed = false;
@@ -3403,8 +3321,7 @@ void Memories::calculate_curr_oflow(safe_vector<LogicalRowUser> &lrus, SRAM_grou
         curr_oflow_needed = true;
     }
 
-    if (!curr_oflow_needed)
-        *curr_oflow = nullptr;
+    if (!curr_oflow_needed) *curr_oflow = nullptr;
 }
 
 /**
@@ -3412,7 +3329,7 @@ void Memories::calculate_curr_oflow(safe_vector<LogicalRowUser> &lrus, SRAM_grou
  * data headed through the selector_adr_switchbox
  */
 void Memories::calculate_sel_oflow(safe_vector<LogicalRowUser> &lrus,
-        SRAM_group **sel_oflow) const {
+                                   SRAM_group **sel_oflow) const {
     bool sel_oflow_needed = false;
     SRAM_group *synth = nullptr;
     for (auto &lru : lrus) {
@@ -3421,8 +3338,7 @@ void Memories::calculate_sel_oflow(safe_vector<LogicalRowUser> &lrus,
         break;
     }
 
-    if (*sel_oflow && !(*sel_oflow)->sel.action_all_placed())
-        sel_oflow_needed = true;
+    if (*sel_oflow && !(*sel_oflow)->sel.action_all_placed()) sel_oflow_needed = true;
 
     if (synth && synth->type == SRAM_group::SELECTOR && !synth->sel.action_all_placed()) {
         BUG_CHECK(!sel_oflow_needed, "Collision on selector switch box");
@@ -3430,20 +3346,18 @@ void Memories::calculate_sel_oflow(safe_vector<LogicalRowUser> &lrus,
         *sel_oflow = synth;
     }
 
-    if (!sel_oflow_needed)
-        *sel_oflow = nullptr;
+    if (!sel_oflow_needed) *sel_oflow = nullptr;
 }
 
-
 void Memories::log_allocation(safe_vector<table_alloc *> *tas,
-        UniqueAttachedId::pre_placed_type_t ppt) {
+                              UniqueAttachedId::pre_placed_type_t ppt) {
     for (auto *ta : *tas) {
         for (auto u_id : ta->allocation_units(nullptr, false, ppt)) {
             auto alloc = (*ta->memuse)[u_id];
             LOG4("Allocation for " << u_id.build_name());
             for (auto row : alloc.row) {
-                LOG4("(Row, Bus, [Columns]) : (" << row.row << ", " << row.bus << ", ["
-                     << row.col << "])");
+                LOG4("(Row, Bus, [Columns]) : (" << row.row << ", " << row.bus << ", [" << row.col
+                                                 << "])");
             }
         }
     }
@@ -3452,14 +3366,13 @@ void Memories::log_allocation(safe_vector<table_alloc *> *tas,
 void Memories::log_allocation(safe_vector<table_alloc *> *tas, UniqueAttachedId::type_t type) {
     for (auto *ta : *tas) {
         for (auto ba : ta->table->attached) {
-            if (ba->attached->unique_id().type != type)
-                continue;
+            if (ba->attached->unique_id().type != type) continue;
             for (auto u_id : ta->allocation_units(ba->attached)) {
                 auto alloc = (*ta->memuse)[u_id];
                 LOG4("Allocation for " << u_id.build_name());
                 for (auto row : alloc.row) {
                     LOG4("(Row, Bus, [Columns]) : (" << row.row << ", " << row.bus << ", ["
-                         << row.col << "])");
+                                                     << row.col << "])");
                 }
             }
         }
@@ -3475,7 +3388,6 @@ void Memories::action_bus_users_log() {
     log_allocation(&selector_tables, UniqueAttachedId::SELECTOR);
     log_allocation(&indirect_action_tables, UniqueAttachedId::ACTION_DATA);
 }
-
 
 /** The purpose of this section of code is to allocate all data HV (Horizontal/Vertical) switchbox
  *  users.  This particular switchbox is shown in section 6.2.4.4 (RAM Data Bus Horizontal/Vertical
@@ -3550,20 +3462,22 @@ bool Memories::allocate_all_swbox_users() {
             calculate_curr_oflow(lrus, &curr_oflow, &synth_oflow, side);
             calculate_sel_oflow(lrus, &sel_oflow);
             if (curr_oflow)
-                BUG_CHECK(!(curr_oflow->all_placed() && curr_oflow->cm.all_placed()), "The "
+                BUG_CHECK(!(curr_oflow->all_placed() && curr_oflow->cm.all_placed()),
+                          "The "
                           "overflow candidate has already been placed");
         }
 
         // Always overflow the synth2port table between rows
         if (synth_oflow) {
-            BUG_CHECK(!(synth_oflow->all_placed() && synth_oflow->cm.all_placed()), "The "
+            BUG_CHECK(!(synth_oflow->all_placed() && synth_oflow->cm.all_placed()),
+                      "The "
                       "synth2port overflow is not correct");
             curr_oflow = synth_oflow;
         }
 
         if (i != SRAM_ROWS - 1 && curr_oflow)
-            vert_overflow_bus[i] = std::make_pair(curr_oflow->build_unique_id().build_name(),
-                                                  curr_oflow->number);
+            vert_overflow_bus[i] =
+                std::make_pair(curr_oflow->build_unique_id().build_name(), curr_oflow->number);
 
         // Due to a timing constraint not yet even described in the uArch, the maximum number
         // of rows a particular table can overflow is 6.
@@ -3611,12 +3525,10 @@ bool Memories::allocate_all_swbox_users() {
 
     if (!action_bus_users.empty() || !synth_bus_users.empty()) {
         int act_unused = 0;
-        for (auto abu : action_bus_users)
-            act_unused += abu->left_to_place();
+        for (auto abu : action_bus_users) act_unused += abu->left_to_place();
 
         int sup_unused = 0;
-        for (auto sbu : synth_bus_users)
-            sup_unused += sbu->left_to_place();
+        for (auto sbu : synth_bus_users) sup_unused += sbu->left_to_place();
 
         failure_reason = "allocate_all_swbox_users failed"_cs;
         LOG4(failure_reason);
@@ -3629,8 +3541,7 @@ bool Memories::allocate_all_swbox_users() {
 Memories::table_alloc *Memories::find_corresponding_exact_match(cstring name) {
     for (auto *ta : exact_tables) {
         auto check_name = ta->build_unique_id().build_name();
-        if (check_name == name)
-            return ta;
+        if (check_name == name) return ta;
     }
     return nullptr;
 }
@@ -3639,8 +3550,7 @@ bool Memories::gw_search_bus_fit(table_alloc *ta, table_alloc *exact_ta, int row
     // Proxy Hash Tables cannot share a search bus with a gateway, as the input
     // from the xbar cannot be merged onto the same bus.  See uArch 6.2.3. Exact Match Row
     // Vertical/Horizontal (VH) XBars
-    if (exact_ta->layout_option->layout.proxy_hash)
-        return false;
+    if (exact_ta->layout_option->layout.proxy_hash) return false;
     auto search_bus = sram_search_bus[row][col];
     BUG_CHECK(exact_ta->table_format->ixbar_group_per_width.count(search_bus.hash_group) > 0,
               "Miscoordination of what hash groups are on the search bus vs. what hash "
@@ -3654,16 +3564,15 @@ bool Memories::gw_search_bus_fit(table_alloc *ta, table_alloc *exact_ta, int row
     const auto &ixbar_groups = exact_ta->table_format->ixbar_group_per_width.begin()->second;
     int ixbar_group = ixbar_groups[search_bus.width_section];
 
-    if (ixbar_group != ta->match_ixbar->gateway_group())
-        return false;
+    if (ixbar_group != ta->match_ixbar->gateway_group()) return false;
 
     int lo = TableFormat::SINGLE_RAM_BYTES * search_bus.width_section;
 
     auto avail_bytes = exact_ta->table_format->avail_sb_bytes;
     auto match_ixbar = dynamic_cast<const IXBar::Use *>(ta->match_ixbar);
     BUG_CHECK(match_ixbar, "No match ixbar allocated?");
-    if (avail_bytes.getslice(lo, match_ixbar->gw_search_bus_bytes).popcount()
-        != match_ixbar->gw_search_bus_bytes)
+    if (avail_bytes.getslice(lo, match_ixbar->gw_search_bus_bytes).popcount() !=
+        match_ixbar->gw_search_bus_bytes)
         return false;
     return true;
 }
@@ -3710,21 +3619,18 @@ bool Memories::find_search_bus_gw(table_alloc *ta, Memories::Use &alloc, cstring
                 // FIXME: currently we have to fold in the table format to this equation
                 // in order to share a format
                 if (match_ixbar->gw_search_bus) {
-                    if (gw_bytes_reserved[i][k])
-                        continue;
-                    if (!gw_search_bus_fit(ta, exact_ta, i, k))
-                        continue;
+                    if (gw_bytes_reserved[i][k]) continue;
+                    if (!gw_search_bus_fit(ta, exact_ta, i, k)) continue;
                 }
                 // Because multiple ways could have different hash groups, this check is no
                 // longer valid
                 if (match_ixbar->gw_hash_group) {
                     auto sbi = sram_search_bus[i][k];
-                    if (sbi.hash_group != match_ixbar->bit_use[0].group)
-                        continue;
+                    if (sbi.hash_group != match_ixbar->bit_use[0].group) continue;
                     // FIXME: Currently all ways do not share the same hash_group
                     // if (match_ixbar->bit_use[0].group
-                       //  != exact_match_ixbar->way_use[0].group)
-                         // continue;
+                    //  != exact_match_ixbar->way_use[0].group)
+                    // continue;
                 }
                 exact_ta->attached_gw_bytes += match_ixbar->gw_search_bus_bytes;
                 gw_bytes_reserved[i][k] = true;
@@ -3745,9 +3651,9 @@ bool Memories::find_search_bus_gw(table_alloc *ta, Memories::Use &alloc, cstring
  *  row, bus, and value, as well as link no match tables if necessary
  */
 bool Memories::find_result_bus_gw(Memories::Use &alloc, uint64_t payload, cstring gw_name,
-                                 table_alloc *table, int logical_table) {
-    LOG5("Finding result bus for gateway " << gw_name << " on table "
-                                        << table->table->name << IndentCtl::indent);
+                                  table_alloc *table, int logical_table) {
+    LOG5("Finding result bus for gateway " << gw_name << " on table " << table->table->name
+                                           << IndentCtl::indent);
     Memories::Use *sram_use = nullptr;
     auto *result_bus = &sram_result_bus;
     auto *print_result_bus = &sram_print_result_bus;
@@ -3756,35 +3662,41 @@ bool Memories::find_result_bus_gw(Memories::Use &alloc, uint64_t payload, cstrin
     if (table->memuse->count(match_id) != 0) {
         sram_use = &table->memuse->at(match_id);
         switch (sram_use->type) {
-        case Use::TIND:
-            print_result_bus = &tind_bus;
-            result_bus = nullptr;
-            ternary = true;
-            break;
-        case Use::EXACT:
-        case Use::ATCAM:
-            break;
-        default:
-            // no result bus in this memory type
-            sram_use = nullptr;
-            break; } }
+            case Use::TIND:
+                print_result_bus = &tind_bus;
+                result_bus = nullptr;
+                ternary = true;
+                break;
+            case Use::EXACT:
+            case Use::ATCAM:
+                break;
+            default:
+                // no result bus in this memory type
+                sram_use = nullptr;
+                break;
+        }
+    }
     // FIXME: Check if below code is valid and gets executed in any regression
     // tests. Add a BUG_CHECK? Possible legacy code which can be removed
     if (!sram_use) {
         for (auto &mem : *table->memuse) {
             switch (mem.second.type) {
-            case Use::TIND:
-                print_result_bus = &tind_bus;
-                result_bus = nullptr;
-                ternary = true;
-                BFN_FALLTHROUGH;
-            case Use::EXACT:
-            case Use::ATCAM:
-                match_id = mem.first;
-                sram_use = &mem.second;
-                break;
-            default: continue; }
-            break; } }
+                case Use::TIND:
+                    print_result_bus = &tind_bus;
+                    result_bus = nullptr;
+                    ternary = true;
+                    BFN_FALLTHROUGH;
+                case Use::EXACT:
+                case Use::ATCAM:
+                    match_id = mem.first;
+                    sram_use = &mem.second;
+                    break;
+                default:
+                    continue;
+            }
+            break;
+        }
+    }
     if (!sram_use) {
         if (table->memuse->count(match_id) == 0) {
             sram_use = &(*table->memuse)[match_id];
@@ -3801,36 +3713,40 @@ bool Memories::find_result_bus_gw(Memories::Use &alloc, uint64_t payload, cstrin
     // match address to be invalid in case the PFE is defaulted.
     // FIXME -- this probably belongs somewhere else?
     for (auto at : table->table->attached) {
-        if (at->attached->direct && (at->attached->is<IR::MAU::Synth2Port>()
-                                    || at->attached->is<IR::MAU::IdleTime>())) {
+        if (at->attached->direct &&
+            (at->attached->is<IR::MAU::Synth2Port>() || at->attached->is<IR::MAU::IdleTime>())) {
             LOG6("Forcing payload match address to 0x7ffff on attached table " << at);
             alloc.gateway.payload_match_address = 0x7ffff;
-            break; } }
+            break;
+        }
+    }
     ordered_set<int> rows;
     // search on rows already in use first -- FIXME for wide exact match should only be
     // searching on rows that already use a result bus first.
     if (sram_use)
-        for (auto &r : sram_use->row)
-            rows.insert(r.row);
-    for (int i = 0; i < SRAM_ROWS; i++)
-        rows.insert(i);
+        for (auto &r : sram_use->row) rows.insert(r.row);
+    for (int i = 0; i < SRAM_ROWS; i++) rows.insert(i);
     for (int row : rows) {
         int bus = 0;
         if (sram_use) {
             for (auto &r : sram_use->row) {
                 if (r.row == row && r.result_bus >= 0) {
                     bus = r.result_bus;
-                    break; } } }
+                    break;
+                }
+            }
+        }
         for (; bus < BUS_COUNT; bus++) {
             if ((*print_result_bus)[row][bus] &&
                 (*print_result_bus)[row][bus] != match_id.build_name()) {
                 LOG7("Cannot assign on row " << row << " and bus " << bus
-                        << " as it is occupied by " << (*print_result_bus)[row][bus]);
+                                             << " as it is occupied by "
+                                             << (*print_result_bus)[row][bus]);
                 continue;
             }
             alloc.gateway.bus_type = ternary ? Use::TIND : Use::EXACT;
-            LOG7("Payload use on row " << row << " and bus " << bus
-                                            << " is " << payload_use[row][bus]);
+            LOG7("Payload use on row " << row << " and bus " << bus << " is "
+                                       << payload_use[row][bus]);
             if (payload != 0ULL || alloc.gateway.payload_match_address >= 0) {
                 if (auto pUse = payload_use[row][bus]) {
                     if (pUse != gw_name) continue;
@@ -3838,18 +3754,21 @@ bool Memories::find_result_bus_gw(Memories::Use &alloc, uint64_t payload, cstrin
                 alloc.gateway.payload_row = row;
                 alloc.gateway.payload_unit = bus;
                 alloc.gateway.payload_value = payload;
-                payload_use[row][bus] = gw_name; }
-            if (sram_use && !std::any_of(sram_use->row.begin(), sram_use->row.end(),
-                [row, bus](Use::Row &r) { return r.row == row && r.result_bus == bus; })) {
+                payload_use[row][bus] = gw_name;
+            }
+            if (sram_use &&
+                !std::any_of(sram_use->row.begin(), sram_use->row.end(), [row, bus](Use::Row &r) {
+                    return r.row == row && r.result_bus == bus;
+                })) {
                 sram_use->row.emplace_back(row);
                 sram_use->row.back().result_bus = bus;
-                if (ternary)
-                    sram_use->row.back().bus = bus; }
+                if (ternary) sram_use->row.back().bus = bus;
+            }
             if (result_bus)
                 (*result_bus)[row][bus] = result_bus_info(match_id.build_name(), 0, logical_table);
             (*print_result_bus)[row][bus] = match_id.build_name();
-            LOG6("Result bus assigned on row " << row << " and bus " << bus
-                                        << " for " << (*print_result_bus)[row][bus]);
+            LOG6("Result bus assigned on row " << row << " and bus " << bus << " for "
+                                               << (*print_result_bus)[row][bus]);
             LOG5_UNINDENT;
             return true;
         }
@@ -3884,7 +3803,8 @@ uint64_t Memories::determine_payload(table_alloc *ta) {
         // come from payload -- not yet implemented
     } else {
         payload_bv = FindPayloadCandidates::determine_payload(ta->table, &temp_alloc,
-                                                              &ta->layout_option->layout); }
+                                                              &ta->layout_option->layout);
+    }
     return payload_bv.getrange(0, 64);
 }
 
@@ -3893,7 +3813,7 @@ uint64_t Memories::determine_payload(table_alloc *ta) {
  */
 bool Memories::allocate_all_payload_gw(bool alloc_search_bus) {
     LOG3("Allocate all payload gateways with alloc search bus set to "
-                                        << (alloc_search_bus ? "true" : "false"));
+         << (alloc_search_bus ? "true" : "false"));
     for (auto *ta : payload_gws) {
         auto match_ixbar = dynamic_cast<const IXBar::Use *>(ta->match_ixbar);
         BUG_CHECK(match_ixbar, "No match ixbar allocated?");
@@ -3902,8 +3822,9 @@ bool Memories::allocate_all_payload_gw(bool alloc_search_bus) {
         if (ta->table_link) {
             u_ids = ta->table_link->allocation_units(nullptr, true);
         } else {
-            BUG_CHECK(ta->layout_option->layout.gateway_match, "Payload requiring gateway must "
-                "have been originally a match table");
+            BUG_CHECK(ta->layout_option->layout.gateway_match,
+                      "Payload requiring gateway must "
+                      "have been originally a match table");
             u_ids = ta->allocation_units(nullptr, true);
         }
 
@@ -3911,15 +3832,13 @@ bool Memories::allocate_all_payload_gw(bool alloc_search_bus) {
             auto &alloc = (*ta->memuse)[u_id];
             alloc.type = Use::GATEWAY;
             alloc.used_by = ta->table->build_gateway_name();
-            if (alloc_search_bus != match_ixbar->search_data())
-                continue;
+            if (alloc_search_bus != match_ixbar->search_data()) continue;
 
             bool gw_found = false;
             if (alloc_search_bus)
                 gw_found = find_search_bus_gw(ta, alloc, u_id.build_name());
             else
                 gw_found = find_unit_gw(alloc, u_id.build_name(), false);
-
 
             table_alloc *payload_ta = ta->table_link ? ta->table_link : ta;
             uint64_t payload_value = determine_payload(payload_ta);
@@ -3929,9 +3848,10 @@ bool Memories::allocate_all_payload_gw(bool alloc_search_bus) {
             if (!(gw_found && result_bus_found)) {
                 if (!gw_found) LOG3("  failed to find gw for " << u_id);
                 if (!result_bus_found) LOG3("  failed to find result_bus for " << u_id);
-                failure_reason = "failed to place payload gw "_cs + u_id.build_name()
-                               + (alloc_search_bus ? " with search bus"_cs : " no search bus"_cs);
-                return false; }
+                failure_reason = "failed to place payload gw "_cs + u_id.build_name() +
+                                 (alloc_search_bus ? " with search bus"_cs : " no search bus"_cs);
+                return false;
+            }
             BUG_CHECK(alloc.row.size() == 1, "Help me payload");
         }
     }
@@ -3946,7 +3866,8 @@ bool Memories::allocate_all_normal_gw(bool alloc_search_bus) {
     for (auto *ta : normal_gws) {
         bool need_search_bus = false;
         if (auto match_ixbar = dynamic_cast<const IXBar::Use *>(ta->match_ixbar)) {
-            need_search_bus = match_ixbar->search_data(); }
+            need_search_bus = match_ixbar->search_data();
+        }
         safe_vector<UniqueId> u_ids = ta->table_link
                                           ? ta->table_link->allocation_units(nullptr, true)
                                           : ta->allocation_units(nullptr, true);
@@ -3955,8 +3876,7 @@ bool Memories::allocate_all_normal_gw(bool alloc_search_bus) {
             auto &alloc = (*ta->memuse)[u_id];
             alloc.type = Use::GATEWAY;
             alloc.used_by = used_by;
-            if (alloc_search_bus != need_search_bus)
-                continue;
+            if (alloc_search_bus != need_search_bus) continue;
             bool gw_found = false;
             if (alloc_search_bus)
                 gw_found = find_search_bus_gw(ta, alloc, u_id.build_name());
@@ -3967,9 +3887,10 @@ bool Memories::allocate_all_normal_gw(bool alloc_search_bus) {
             alloc.gateway.payload_row = -1;
             if (!gw_found) {
                 LOG3("  failed to find gw for " << u_id);
-                failure_reason = "failed to place normal gw "_cs + u_id.build_name()
-                               + (alloc_search_bus ? " with search bus"_cs : " no search bus"_cs);
-                return false; }
+                failure_reason = "failed to place normal gw "_cs + u_id.build_name() +
+                                 (alloc_search_bus ? " with search bus"_cs : " no search bus"_cs);
+                return false;
+            }
             BUG_CHECK(alloc.row.size() == 1, "Help me normal");
         }
     }
@@ -3987,13 +3908,14 @@ bool Memories::allocate_all_no_match_gw() {
             alloc.type = Use::GATEWAY;
             alloc.used_by = ta->table->build_gateway_name();
             bool unit_found = find_unit_gw(alloc, u_id.build_name(), false);
-            bool result_bus_found = find_result_bus_gw(alloc, 0ULL, u_id.build_name(), ta,
-                                                       u_id.logical_table);
+            bool result_bus_found =
+                find_result_bus_gw(alloc, 0ULL, u_id.build_name(), ta, u_id.logical_table);
             if (!(unit_found && result_bus_found)) {
                 if (!unit_found) LOG3("  failed to find gw for " << u_id);
                 if (!result_bus_found) LOG3("  failed to find result_bus for " << u_id);
                 failure_reason = "failed to place no_match gw "_cs + u_id.build_name();
-                return false; }
+                return false;
+            }
             BUG_CHECK(alloc.row.size() == 1, "Help me no match");
         }
     }
@@ -4063,8 +3985,8 @@ bool Memories::allocate_all_gw() {
 
         if (auto *mt = ta_gw->table_link ? ta_gw->table_link->table : nullptr) {
             for (auto at : mt->attached) {
-                if (at->attached->direct && (at->attached->is<IR::MAU::Synth2Port>()
-                                            || at->attached->is<IR::MAU::IdleTime>())) {
+                if (at->attached->direct && (at->attached->is<IR::MAU::Synth2Port>() ||
+                                             at->attached->is<IR::MAU::IdleTime>())) {
                     LOG5("Adding payload gw for attached table : " << at);
                     /* direct attached synth2port / idletime tables will use the
                      * match address, so we need to make sure the gateway has an
@@ -4078,7 +4000,10 @@ bool Memories::allocate_all_gw() {
                     ta_gw->payload_match_addr_only = true;
                     ta_gw->table_link->payload_match_addr_only = true;
                     pushed_back = true;
-                    break; } } }
+                    break;
+                }
+            }
+        }
         if (pushed_back) continue;
 
         normal_gws.push_back(ta_gw);
@@ -4106,8 +4031,7 @@ bool Memories::allocate_all_gw() {
     int search_bus_free = 0;
     for (int i = 0; i < SRAM_ROWS; i++) {
         for (int j = 0; j < 2; j++) {
-            if (sram_search_bus[i][j].free())
-                search_bus_free++;
+            if (sram_search_bus[i][j].free()) search_bus_free++;
         }
     }
 
@@ -4126,8 +4050,7 @@ bool Memories::allocate_all_gw() {
  */
 bool Memories::allocate_all_no_match_miss() {
     Log::TempIndent indent;
-    if (!no_match_miss_tables.empty())
-        LOG3("Allocate all no match miss" << indent);
+    if (!no_match_miss_tables.empty()) LOG3("Allocate all no match miss" << indent);
     // FIXME: Currently the assembler supports exact match to make calls to immediate here,
     // so this is essentially what I'm doing.  More discussion is needed with the driver
     // team in order to determine if this is correct, or if this has to go through ternary and
@@ -4158,7 +4081,8 @@ bool Memories::allocate_all_no_match_miss() {
                 LOG4(failure_reason);
                 return false;
             } else {
-                no_match_tables_allocated++; }
+                no_match_tables_allocated++;
+            }
         }
     }
     return true;
@@ -4177,8 +4101,7 @@ bool Memories::allocate_all_no_match_miss() {
  */
 bool Memories::allocate_all_tind_result_bus_tables() {
     Log::TempIndent indent;
-    if (!tind_result_bus_tables.empty())
-        LOG3("Allocate all tind result bus tables" << indent);
+    if (!tind_result_bus_tables.empty()) LOG3("Allocate all tind result bus tables" << indent);
     for (auto *ta : tind_result_bus_tables) {
         for (auto u_id : ta->allocation_units()) {
             auto &alloc = (*ta->memuse).at(u_id);
@@ -4201,26 +4124,26 @@ bool Memories::allocate_all_tind_result_bus_tables() {
             if (!found) {
                 failure_reason = "failed to place tind result bus "_cs + u_id.build_name();
                 LOG4(failure_reason);
-                return false; }
+                return false;
+            }
         }
     }
     return true;
 }
 
 bool Memories::find_mem_and_bus_for_idletime(
-        std::vector<std::pair<int, std::vector<int>>>& mem_locs,
-        int& bus, int total_mem_required, bool top_half) {
+    std::vector<std::pair<int, std::vector<int>>> &mem_locs, int &bus, int total_mem_required,
+    bool top_half) {
     // find mapram locs
     int total_requested = 0;
 
-    int mem_start_row = (top_half) ? SRAM_ROWS/2 : 0;
-    int mem_end_row = (top_half) ? SRAM_ROWS : SRAM_ROWS/2;
+    int mem_start_row = (top_half) ? SRAM_ROWS / 2 : 0;
+    int mem_end_row = (top_half) ? SRAM_ROWS : SRAM_ROWS / 2;
 
     mem_locs.clear();
 
     for (int i = mem_start_row; i < mem_end_row; i++) {
-        if (total_requested == total_mem_required)
-            break;
+        if (total_requested == total_mem_required) break;
 
         std::vector<int> cols;
         for (int j = 0; j < MAPRAM_COLUMNS; j++) {
@@ -4228,14 +4151,13 @@ bool Memories::find_mem_and_bus_for_idletime(
                 cols.push_back(j);
 
                 total_requested++;
-                if (total_requested == total_mem_required)
-                    break;
+                if (total_requested == total_mem_required) break;
             }
         }
         mem_locs.emplace_back(i, cols);
     }
 
-    const char* which_half = top_half ? "top" : "bottom";
+    const char *which_half = top_half ? "top" : "bottom";
 
     // find a bus
     bool found_bus = false;
@@ -4255,7 +4177,7 @@ bool Memories::find_mem_and_bus_for_idletime(
     return true;
 }
 
-bool Memories::allocate_idletime_in_top_or_bottom_half(SRAM_group* idletime_group,
+bool Memories::allocate_idletime_in_top_or_bottom_half(SRAM_group *idletime_group,
                                                        bool in_top_half) {
     auto unique_id = idletime_group->build_unique_id();
 
@@ -4265,16 +4187,15 @@ bool Memories::allocate_idletime_in_top_or_bottom_half(SRAM_group* idletime_grou
     int bus = -1;
 
     // find mem and bus in top and bottom half of mapram
-    bool resource_available = find_mem_and_bus_for_idletime(mem_locs, bus, total_required,
-                                                            in_top_half);
+    bool resource_available =
+        find_mem_and_bus_for_idletime(mem_locs, bus, total_required, in_top_half);
 
-    if (!resource_available)
-        return false;
+    if (!resource_available) return false;
 
     // update memuse and bus use
     auto &alloc = (*idletime_group->ta->memuse)[unique_id];
 
-    for (auto& loc : mem_locs) {
+    for (auto &loc : mem_locs) {
         Memories::Use::Row row(loc.first, bus);
         for (auto col : loc.second) {
             mapram_use[loc.first][col] = unique_id.build_name();
@@ -4289,17 +4210,15 @@ bool Memories::allocate_idletime_in_top_or_bottom_half(SRAM_group* idletime_grou
     return idletime_group->all_placed();
 }
 
-bool Memories::allocate_idletime(SRAM_group* idletime_group) {
+bool Memories::allocate_idletime(SRAM_group *idletime_group) {
     // Pick the most available section of the map RAM array to try to fit in an idletime
     // resource allocation
     int top_half_maprams = open_maprams_between_rows(SRAM_ROWS - 1, MATCH_CENTRAL_ROW);
     int bottom_half_maprams = open_maprams_between_rows(MATCH_CENTRAL_ROW - 1, 0);
 
     bool in_top_half = top_half_maprams >= bottom_half_maprams;
-    if (allocate_idletime_in_top_or_bottom_half(idletime_group, in_top_half))
-        return true;
-    if (allocate_idletime_in_top_or_bottom_half(idletime_group, !in_top_half))
-        return true;
+    if (allocate_idletime_in_top_or_bottom_half(idletime_group, in_top_half)) return true;
+    if (allocate_idletime_in_top_or_bottom_half(idletime_group, !in_top_half)) return true;
     failure_reason = "allocate_idletime failed"_cs;
     return false;
 }
@@ -4307,19 +4226,17 @@ bool Memories::allocate_idletime(SRAM_group* idletime_group) {
 bool Memories::allocate_all_idletime() {
     idletime_groups.clear();
     Log::TempIndent indent;
-    if (!idletime_tables.empty())
-        LOG3("Allocating all idletime tables" << indent);
+    if (!idletime_tables.empty()) LOG3("Allocating all idletime tables" << indent);
     for (auto *ta : idletime_tables) {
         for (auto back_at : ta->table->attached) {
             auto at = back_at->attached;
             const IR::MAU::IdleTime *id = nullptr;
-            if ((id = at->to<IR::MAU::IdleTime>()) == nullptr)
-                continue;
+            if ((id = at->to<IR::MAU::IdleTime>()) == nullptr) continue;
             int lt_entry = 0;
             for (auto u_id : ta->allocation_units(id)) {
                 int per_row = IdleTimePerWord(id);
-                int depth = mems_needed(ta->calc_entries_per_uid[lt_entry], SRAM_DEPTH, per_row,
-                                        false);
+                int depth =
+                    mems_needed(ta->calc_entries_per_uid[lt_entry], SRAM_DEPTH, per_row, false);
                 auto idletime_group = new SRAM_group(ta, depth, 1, SRAM_group::IDLETIME);
                 idletime_group->attached = id;
                 idletime_group->logical_table = u_id.logical_table;
@@ -4330,11 +4247,11 @@ bool Memories::allocate_all_idletime() {
     }
 
     std::stable_sort(idletime_groups.begin(), idletime_groups.end(),
-        [](const SRAM_group *a, const SRAM_group *b){
-        return a->left_to_place() > b->left_to_place();
-    });
+                     [](const SRAM_group *a, const SRAM_group *b) {
+                         return a->left_to_place() > b->left_to_place();
+                     });
 
-    for (auto* idletime_group : idletime_groups) {
+    for (auto *idletime_group : idletime_groups) {
         if (!allocate_idletime(idletime_group)) {
             LOG4("failed to allocation idletime group " << idletime_group->ta->table->name);
             return false;
@@ -4349,55 +4266,57 @@ void Memories::visitUse(const Use &alloc, std::function<void(cstring &, update_t
     unsigned *inuse = 0, *map_inuse = 0;
     update_type_t bus_type = NONE;
     switch (alloc.type) {
-    case Use::EXACT:
-    case Use::ATCAM:
-        use = &sram_use;
-        inuse = sram_inuse;
-        bus = &sram_print_search_bus;
-        bus_type = UPDATE_SEARCH_BUS;
-        result_bus = &sram_print_result_bus;
-        break;
-    case Use::TERNARY:
-        use = &tcam_use;
-        break;
-    case Use::GATEWAY:
-        gw_use = &gateway_use;
-        bus = &sram_print_search_bus;
-        bus_type = UPDATE_SEARCH_BUS;
-        BUG_CHECK(alloc.row.size() == 1, "multiple rows for gateway");
-        break;
-    case Use::TIND:
-        use = &sram_use;
-        inuse = sram_inuse;
-        bus = &tind_bus;
-        bus_type = UPDATE_TIND_BUS;
-        break;
-    case Use::COUNTER:
-    case Use::METER:
-    case Use::STATEFUL:
-    case Use::SELECTOR:
-        use = &sram_use;
-        inuse = sram_inuse;
-        mapuse = &mapram_use;
-        map_inuse = mapram_inuse;
-        break;
-    case Use::ACTIONDATA:
-        use = &sram_use;
-        inuse = sram_inuse;
-        break;
-    case Use::IDLETIME:
-        use = &mapram_use;
-        inuse = mapram_inuse;
-        break;
-    default:
-        BUG("Unhandled memory use type %d in visit", alloc.type); }
+        case Use::EXACT:
+        case Use::ATCAM:
+            use = &sram_use;
+            inuse = sram_inuse;
+            bus = &sram_print_search_bus;
+            bus_type = UPDATE_SEARCH_BUS;
+            result_bus = &sram_print_result_bus;
+            break;
+        case Use::TERNARY:
+            use = &tcam_use;
+            break;
+        case Use::GATEWAY:
+            gw_use = &gateway_use;
+            bus = &sram_print_search_bus;
+            bus_type = UPDATE_SEARCH_BUS;
+            BUG_CHECK(alloc.row.size() == 1, "multiple rows for gateway");
+            break;
+        case Use::TIND:
+            use = &sram_use;
+            inuse = sram_inuse;
+            bus = &tind_bus;
+            bus_type = UPDATE_TIND_BUS;
+            break;
+        case Use::COUNTER:
+        case Use::METER:
+        case Use::STATEFUL:
+        case Use::SELECTOR:
+            use = &sram_use;
+            inuse = sram_inuse;
+            mapuse = &mapram_use;
+            map_inuse = mapram_inuse;
+            break;
+        case Use::ACTIONDATA:
+            use = &sram_use;
+            inuse = sram_inuse;
+            break;
+        case Use::IDLETIME:
+            use = &mapram_use;
+            inuse = mapram_inuse;
+            break;
+        default:
+            BUG("Unhandled memory use type %d in visit", alloc.type);
+    }
     for (auto &r : alloc.row) {
         if (bus && r.bus != -1) {
-            fn((*bus)[r.row][r.bus], bus_type); }
+            fn((*bus)[r.row][r.bus], bus_type);
+        }
         if (result_bus && r.result_bus != -1) {
-            fn((*result_bus)[r.row][r.result_bus], UPDATE_RESULT_BUS); }
-        if (alloc.is_twoport())
-            fn(twoport_bus[r.row], UPDATE_STATEFUL_BUS);
+            fn((*result_bus)[r.row][r.result_bus], UPDATE_RESULT_BUS);
+        }
+        if (alloc.is_twoport()) fn(twoport_bus[r.row], UPDATE_STATEFUL_BUS);
         if (alloc.type == Use::ACTIONDATA) {
             BUG_CHECK(r.bus == ACTION || r.bus == OFLOW, "invalid bus %d for actiondata", r.bus);
             int side = r.col.front() >= 6;
@@ -4413,14 +4332,19 @@ void Memories::visitUse(const Use &alloc, std::function<void(cstring &, update_t
                     if ((*use)[r.row][col])
                         inuse[r.row] |= 1 << col;
                     else
-                        inuse[r.row] &= ~(1 << col); } } }
+                        inuse[r.row] &= ~(1 << col);
+                }
+            }
+        }
         if (mapuse) {
             for (auto col : r.mapcol) {
                 fn((*mapuse)[r.row][col], UPDATE_MAPRAM);
                 if ((*mapuse)[r.row][col])
                     map_inuse[r.row] |= 1 << col;
                 else
-                    map_inuse[r.row] &= ~(1 << col); } }
+                    map_inuse[r.row] &= ~(1 << col);
+            }
+        }
         if (gw_use) {
             fn((*gw_use)[r.row][alloc.gateway.unit], UPDATE_GATEWAY);
             if (alloc.gateway.payload_row >= 0)
@@ -4429,7 +4353,7 @@ void Memories::visitUse(const Use &alloc, std::function<void(cstring &, update_t
             if (r.result_bus >= 0) {
                 if (alloc.gateway.bus_type == Use::EXACT)
                     fn(sram_print_result_bus[alloc.gateway.payload_row][r.result_bus],
-                            UPDATE_RESULT_BUS);
+                       UPDATE_RESULT_BUS);
                 else if (alloc.gateway.bus_type == Use::TERNARY)
                     fn(tind_bus[alloc.gateway.payload_row][r.result_bus], UPDATE_RESULT_BUS);
                 else
@@ -4444,7 +4368,10 @@ void Memories::visitUse(const Use &alloc, std::function<void(cstring &, update_t
                 if ((*mapuse)[r.row][col])
                     map_inuse[r.row] |= 1 << col;
                 else
-                    map_inuse[r.row] &= ~(1 << col); } } }
+                    map_inuse[r.row] &= ~(1 << col);
+            }
+        }
+    }
 }
 
 void Memories::update(cstring name, const Use &alloc) {
@@ -4455,11 +4382,9 @@ void Memories::update(cstring name, const Use &alloc) {
             // required two hash functions (i.e. 5 way table).  The table would require two
             // search / address buses, but only one result bus.  Thus the name repeat is fine
             // for result_buses
-            if (u_type == UPDATE_RESULT_BUS && name == use)
-                collision = false;
+            if (u_type == UPDATE_RESULT_BUS && name == use) collision = false;
 
-            if (collision)
-                BUG_CHECK("conflicting memory use between %s and %s", use, name);
+            if (collision) BUG_CHECK("conflicting memory use between %s and %s", use, name);
         }
         use = name;
     });
@@ -4471,43 +4396,52 @@ void Memories::update(const std::map<UniqueId, Use> &alloc) {
 
 void Memories::remove(cstring name, const Use &alloc) {
     visitUse(alloc, [name](cstring &use, update_type_t) {
-        if (use != name)
-            BUG("Undo failure for %s", name);
-        use = nullptr; });
+        if (use != name) BUG("Undo failure for %s", name);
+        use = nullptr;
+    });
 }
 void Memories::remove(const std::map<UniqueId, Use> &alloc) {
     for (auto &a : alloc) remove(a.first.build_name(), a.second);
 }
 
 std::ostream &operator<<(std::ostream &out, const Memories::search_bus_info &sbi) {
-    out << "search bus " << sbi.name << " width: " << sbi.width_section << " hash_group: "
-        << sbi.hash_group;
+    out << "search bus " << sbi.name << " width: " << sbi.width_section
+        << " hash_group: " << sbi.hash_group;
     return out;
 }
 
 std::ostream &operator<<(std::ostream &out, const Memories::result_bus_info &rbi) {
-    out << "result bus " << rbi.name << " width: " << rbi.width_section << " hash_group: "
-        << rbi.logical_table;
+    out << "result bus " << rbi.name << " width: " << rbi.width_section
+        << " hash_group: " << rbi.logical_table;
     return out;
 }
 
 /* MemoriesPrinter in .gdbinit should match this */
 void Memories::printOn(std::ostream &out) const {
-    const BFN::Alloc2Dbase<cstring> *arrays[] = { &tcam_use, &sram_print_search_bus,
-                &sram_print_result_bus, &tind_bus, &action_data_bus,
-                &stash_use, &sram_use, &mapram_use, &overflow_bus,
-                &gateway_use, &payload_use };
-    std::map<cstring, char>     tables;
+    const BFN::Alloc2Dbase<cstring> *arrays[] = {&tcam_use,
+                                                 &sram_print_search_bus,
+                                                 &sram_print_result_bus,
+                                                 &tind_bus,
+                                                 &action_data_bus,
+                                                 &stash_use,
+                                                 &sram_use,
+                                                 &mapram_use,
+                                                 &overflow_bus,
+                                                 &gateway_use,
+                                                 &payload_use};
+    std::map<cstring, char> tables;
     for (auto arr : arrays)
         for (int r = 0; r < arr->rows(); r++)
             for (int c = 0; c < arr->cols(); c++)
-                if (arr->at(r, c))
-                    tables[arr->at(r, c)] = '?';
+                if (arr->at(r, c)) tables[arr->at(r, c)] = '?';
     char ch = 'A' - 1;
     for (auto &t : tables) {
         t.second = ++ch;
-        if (ch == 'Z') ch = 'a'-1;
-        else if (ch == 'z') ch = '0'-1; }
+        if (ch == 'Z')
+            ch = 'a' - 1;
+        else if (ch == 'z')
+            ch = '0' - 1;
+    }
     out << "tc  sb  rb  tib ab  st  srams       mapram  ov  gw pay 2p" << Log::endl;
     for (int r = 0; r < TCAM_ROWS; r++) {
         for (auto arr : arrays) {
@@ -4518,23 +4452,27 @@ void Memories::printOn(std::ostream &out) const {
                     if (auto tbl = arr->at(r, c)) {
                         out << tables.at(tbl);
                     } else {
-                        out << '.'; } } }
-            out << "  "; }
+                        out << '.';
+                    }
+                }
+            }
+            out << "  ";
+        }
         if (r < Memories::SRAM_ROWS) {
             if (auto tbl = twoport_bus[r]) {
                 out << tables.at(tbl);
             } else {
-                out << '.'; } }
-        out << Log::endl; }
-    for (auto &tbl : tables)
-        out << "   " << tbl.second << " " << tbl.first << Log::endl;
+                out << '.';
+            }
+        }
+        out << Log::endl;
+    }
+    for (auto &tbl : tables) out << "   " << tbl.second << " " << tbl.first << Log::endl;
 }
 
-void dump(const Memories *mem) {
-    mem->printOn(std::cout);
-}
+void dump(const Memories *mem) { mem->printOn(std::cout); }
 
-std::ostream & operator<<(std::ostream &out, const Memories::table_alloc &ta) {
+std::ostream &operator<<(std::ostream &out, const Memories::table_alloc &ta) {
     out << "table_alloc[" << ta.table->match_table->externalName() << ": ";
     for (auto &u : *ta.memuse)
         out << "(" << u.first.build_name() << ", " << use_type_to_str[u.second.type] << ") ";
@@ -4546,9 +4484,9 @@ std::ostream &operator<<(std::ostream &out, const safe_vector<Memories::table_al
     const char *sep = "";
     for (auto *ta : v) {
         out << sep << ta->table->name;
-        sep = ", "; }
+        sep = ", ";
+    }
     return out;
 }
 
 }  // end namespace Tofino
-

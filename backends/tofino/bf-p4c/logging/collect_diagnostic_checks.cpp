@@ -11,8 +11,9 @@
  */
 
 #include "collect_diagnostic_checks.h"
-#include <regex>
+
 #include <optional>
+#include <regex>
 
 namespace BFN {
 
@@ -94,8 +95,7 @@ inline std::string to_lower(std::smatch::const_reference it) {
 
 void collect_diagnostic_checks(BfErrorReporter &reporter, BFN_Options &options) {
     const auto contents = get_file_contents(options);
-    if (!contents.has_value())
-        return;
+    if (!contents.has_value()) return;
     const auto comments = get_comments(std::move(contents.value()));
     std::smatch match;
 

@@ -10,8 +10,9 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include "bf-p4c/phv/allocate_phv.h"
 #include "bf-p4c/phv/mau_backtracker.h"
+
+#include "bf-p4c/phv/allocate_phv.h"
 #include "lib/log.h"
 
 bool MauBacktracker::backtrack(trigger &trig) {
@@ -31,19 +32,18 @@ bool MauBacktracker::backtrack(trigger &trig) {
             if (tables.size() > 0) {
                 // There exists already a table placement from a previous round without container
                 // conflicts.
-                for (auto entry : tables)
-                    prevRoundTables[entry.first] = entry.second;
+                for (auto entry : tables) prevRoundTables[entry.first] = entry.second;
             }
             tables.clear();
             for (auto entry : t->tableAlloc) {
                 tables[entry.first] = entry.second;
                 for (int logical_id : entry.second) {
                     int st = logical_id / NUM_LOGICAL_TABLES_PER_STAGE;
-                    maxStage = (maxStage < st) ? st : maxStage; }
+                    maxStage = (maxStage < st) ? st : maxStage;
+                }
             }
             internalTables.clear();
-            for (auto entry : t->internalTableAlloc)
-                internalTables[entry.first] = entry.second;
+            for (auto entry : t->internalTableAlloc) internalTables[entry.first] = entry.second;
             mergedGateways = t->mergedGateways;
             LOG4("Inserted tables size: " << tables.size());
         } else {
@@ -53,7 +53,7 @@ bool MauBacktracker::backtrack(trigger &trig) {
             // stopTableReplayFitting has thrown, jump to ALT_FINALIZE_TABLE and prepare for
             // normal phv allocation and table allocation.
             BUG_CHECK(state == State::ALT_FINALIZE_TABLE_SAME_ORDER_TABLE_FIXED,
-                "wrong compilation state");
+                      "wrong compilation state");
             state = State::ALT_FINALIZE_TABLE;
             table_summary->clear_table_alloc_info();
         }
@@ -62,7 +62,7 @@ bool MauBacktracker::backtrack(trigger &trig) {
     return false;
 }
 
-const IR::Node *MauBacktracker::apply_visitor(const IR::Node* root, const char *) {
+const IR::Node *MauBacktracker::apply_visitor(const IR::Node *root, const char *) {
     LOG1("MauBacktracker called " << numInvoked << " time(s)");
     LOG1("  Is metadata initialization disabled? " << (metaInitDisable ? "YES" : "NO"));
     LOG1("  Should pack conflicts be ignored? " << (ignorePackConflicts ? "YES" : "NO"));
@@ -72,14 +72,14 @@ const IR::Node *MauBacktracker::apply_visitor(const IR::Node* root, const char *
     if (firstRoundFit) {
         LOG4("  Clearing all logging");
         tables.clear();
-        prevRoundTables.clear(); }
-    if (numInvoked != 1)
-        LOG4(printTableAlloc());
+        prevRoundTables.clear();
+    }
+    if (numInvoked != 1) LOG4(printTableAlloc());
     return root;
 }
 
-ordered_set<int>
-MauBacktracker::inSameStage(const IR::MAU::Table* t1, const IR::MAU::Table* t2) const {
+ordered_set<int> MauBacktracker::inSameStage(const IR::MAU::Table *t1,
+                                             const IR::MAU::Table *t2) const {
     BUG_CHECK(t1, "Null table!");
     BUG_CHECK(t2, "Null table!");
     ordered_set<int> rs;
@@ -90,27 +90,27 @@ MauBacktracker::inSameStage(const IR::MAU::Table* t1, const IR::MAU::Table* t2) 
     return rs;
 }
 
-ordered_set<int>
-MauBacktracker::inSameStage(
-        const IR::MAU::Table* t1,
-        const IR::MAU::Table* t2,
-        const ordered_map<cstring, ordered_set<int>>& tableMap) const {
+ordered_set<int> MauBacktracker::inSameStage(
+    const IR::MAU::Table *t1, const IR::MAU::Table *t2,
+    const ordered_map<cstring, ordered_set<int>> &tableMap) const {
     ordered_set<int> rs;
     if (tableMap.size() == 0) return rs;
     // Some tables in the list of tableActions maintained by PackConflicts may not have an
     // allocation (dead code eliminated away). The following if condition handles that case.
     if (!tableMap.count(TableSummary::getTableName(t1)) ||
-            !tableMap.count(TableSummary::getTableName(t2)))
+        !tableMap.count(TableSummary::getTableName(t2)))
         return rs;
-    const ordered_set<int>& t1Stages = tableMap.at(TableSummary::getTableName(t1));
-    const ordered_set<int>& t2Stages = tableMap.at(TableSummary::getTableName(t2));
+    const ordered_set<int> &t1Stages = tableMap.at(TableSummary::getTableName(t1));
+    const ordered_set<int> &t2Stages = tableMap.at(TableSummary::getTableName(t2));
     BUG_CHECK(t1Stages.size() > 0, "No allocation for table %1%", t1->name);
     BUG_CHECK(t2Stages.size() > 0, "No allocation for table %2%", t2->name);
     for (int a : t1Stages) {
         for (int b : t2Stages) {
             int stage_a = a / NUM_LOGICAL_TABLES_PER_STAGE;
             int stage_b = b / NUM_LOGICAL_TABLES_PER_STAGE;
-            if (stage_a == stage_b) rs.insert(stage_a); } }
+            if (stage_a == stage_b) rs.insert(stage_a);
+        }
+    }
     return rs;
 }
 
@@ -123,19 +123,16 @@ std::string MauBacktracker::printTableAlloc() const {
         for (int logical_id : tbl.second) {
             int st = logical_id / NUM_LOGICAL_TABLES_PER_STAGE;
             int id = logical_id % NUM_LOGICAL_TABLES_PER_STAGE;
-            talloc << boost::format("%5d")  % st << " | "
-                   << boost::format("%10d") % id << " | "
+            talloc << boost::format("%5d") % st << " | " << boost::format("%10d") % id << " | "
                    << tbl.first << std::endl;
         }
     }
     return talloc.str();
 }
 
-bool MauBacktracker::hasTablePlacement() const {
-    return has_table_placement;
-}
+bool MauBacktracker::hasTablePlacement() const { return has_table_placement; }
 
-ordered_set<int> MauBacktracker::stage(const IR::MAU::Table* t, bool internal) const {
+ordered_set<int> MauBacktracker::stage(const IR::MAU::Table *t, bool internal) const {
     ordered_set<int> rs;
     if (internal) {
         if (internalTables.size() == 0) return rs;
@@ -153,9 +150,7 @@ ordered_set<int> MauBacktracker::stage(const IR::MAU::Table* t, bool internal) c
     return rs;
 }
 
-bool MauBacktracker::happensBefore(
-        const IR::MAU::Table* t1,
-        const IR::MAU::Table* t2) const {
+bool MauBacktracker::happensBefore(const IR::MAU::Table *t1, const IR::MAU::Table *t2) const {
     if (tables.size() == 0) return true;
     if (maxStage == -1 || maxStage >= Device::numStages()) return true;
     cstring tableName1 = TableSummary::getTableName(t1);
@@ -172,9 +167,7 @@ bool MauBacktracker::happensBefore(
     return true;
 }
 
-int MauBacktracker::numStages() const {
-    return maxStage;
-}
+int MauBacktracker::numStages() const { return maxStage; }
 
 void MauBacktracker::clear() {
     tables.clear();

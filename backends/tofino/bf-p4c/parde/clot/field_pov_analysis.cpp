@@ -12,14 +12,14 @@
 
 #include "field_pov_analysis.h"
 
-bool FieldPovAnalysis::preorder(const IR::BFN::EmitField* emit) {
+bool FieldPovAnalysis::preorder(const IR::BFN::EmitField *emit) {
     auto field = phv.field(emit->source->field);
     auto pov = phv.field(emit->povBit->field);
     pov_to_fields[pov].insert(field);
     return true;
 }
 
-bool FieldPovAnalysis::preorder(const IR::BFN::Parser* parser) {
+bool FieldPovAnalysis::preorder(const IR::BFN::Parser *parser) {
     parsers.insert(parser);
     return true;
 }
@@ -66,7 +66,7 @@ void FieldPovAnalysis::end_apply() {
                     if (firstIter) {
                         temp_field_vec = state_to_field_pov[pred->name].first;
                     } else {
-                         temp_field_vec &= state_to_field_pov[pred->name].first;
+                        temp_field_vec &= state_to_field_pov[pred->name].first;
                     }
                     firstIter = false;
                     temp_pov_vec |= state_to_field_pov[pred->name].second;
@@ -82,9 +82,9 @@ void FieldPovAnalysis::end_apply() {
             bitvec curr_pov_vec;
             for (auto pov_id : temp_pov_vec) {
                 auto pov = phv.field(pov_id);
-                bool is_field_extracted = std::any_of(pov_to_fields.at(pov).begin(),
-                                  pov_to_fields.at(pov).end(), [&] (const PHV::Field* field) {
-                                   return curr_field_vec.getbit(field->id); });
+                bool is_field_extracted = std::any_of(
+                    pov_to_fields.at(pov).begin(), pov_to_fields.at(pov).end(),
+                    [&](const PHV::Field *field) { return curr_field_vec.getbit(field->id); });
                 if (!is_field_extracted) {
                     curr_pov_vec.setbit(pov_id);
                 }

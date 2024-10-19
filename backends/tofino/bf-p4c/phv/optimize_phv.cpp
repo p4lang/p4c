@@ -20,10 +20,9 @@
  * @param[in] tr_id Optional Transaction ID. When unset, the Transaction ID will be the next
  *                  integer value. Removed Transaction ID are not re-used.
  */
-void BruteForceOptimizationStrategy::addTransaction(PHV::Transaction& transaction,
-                                                    PHV::SuperCluster& sc, int tr_id) {
-    if (tr_id != -1)
-        data->next_tr_id = tr_id;
+void BruteForceOptimizationStrategy::addTransaction(PHV::Transaction &transaction,
+                                                    PHV::SuperCluster &sc, int tr_id) {
+    if (tr_id != -1) data->next_tr_id = tr_id;
 
     data->tr_to_sc_i.insert(std::make_pair(&transaction, &sc));
     data->tr_to_tr_id_i.insert(std::make_pair(&transaction, data->next_tr_id));
@@ -32,12 +31,12 @@ void BruteForceOptimizationStrategy::addTransaction(PHV::Transaction& transactio
 
     LOG4("Adding Transaction " << data->next_tr_id << ":" << sc);
     LOG4(data->tr_id_to_diff.at(data->next_tr_id));
-    const PHV::Transaction* parent =
-                                dynamic_cast<const PHV::Transaction *>(transaction.getParent());
+    const PHV::Transaction *parent =
+        dynamic_cast<const PHV::Transaction *>(transaction.getParent());
     BUG_CHECK(parent, "Unable to find the parent of this Transaction");
     for (auto kv : transaction.getTransactionStatus()) {
         bool new_slice = false;
-        const auto* parent_status = parent->getStatus(kv.first);
+        const auto *parent_status = parent->getStatus(kv.first);
         BUG_CHECK(parent_status,
                   "Trying to get allocation status for container %1% not in Allocation",
                   cstring::to_cstring(kv.first));
@@ -81,8 +80,8 @@ void BruteForceOptimizationStrategy::addTransaction(PHV::Transaction& transactio
  *
  * @return true if the returned sequence is valid. false otherwise.
  */
-bool BruteForceOptimizationStrategy::buildSeqWithout(int tr_id, std::list<int>& tr_in,
-                                                     std::list<int>& tr_out) {
+bool BruteForceOptimizationStrategy::buildSeqWithout(int tr_id, std::list<int> &tr_in,
+                                                     std::list<int> &tr_out) {
     std::set<int> pruned_tr_ids;
     std::list<int> to_prune_tr_ids;
     std::stringstream tr_in_ss;
@@ -93,7 +92,7 @@ bool BruteForceOptimizationStrategy::buildSeqWithout(int tr_id, std::list<int>& 
 
     LOG4("Building sequence without Transaction " << tr_id);
     while (!to_prune_tr_ids.empty()) {
-        int& tr_to_prune = to_prune_tr_ids.front();
+        int &tr_to_prune = to_prune_tr_ids.front();
         for (auto kv : data->container_to_tr_ids_i) {
             auto it = kv.second.find(tr_to_prune);
             while (it != kv.second.end()) {
@@ -140,19 +139,19 @@ bool BruteForceOptimizationStrategy::buildSeqWithout(int tr_id, std::list<int>& 
  * @return BruteForceOptimizationStrategy object containing the re-played sequence.
  */
 BruteForceOptimizationStrategy BruteForceOptimizationStrategy::playSeq(
-                                        std::list<int>& tr_in, PHV::Transaction& partial_alloc) {
-    BruteForceOptimizationStrategy rv = BruteForceOptimizationStrategy(this->alloc_strategy_i,
-                                            this->container_groups_i, this->score_ctx_i);
+    std::list<int> &tr_in, PHV::Transaction &partial_alloc) {
+    BruteForceOptimizationStrategy rv = BruteForceOptimizationStrategy(
+        this->alloc_strategy_i, this->container_groups_i, this->score_ctx_i);
 
     LOG4("Re-Playing the given Transaction ID list");
-    for (int& tr_id : tr_in) {
+    for (int &tr_id : tr_in) {
         // Find the Transaction and the SuperCluster from the ID
-        PHV::Transaction* tr = data->tr_id_to_tr_i.at(tr_id);
-        PHV::SuperCluster* sc = data->tr_to_sc_i.at(tr);
+        PHV::Transaction *tr = data->tr_id_to_tr_i.at(tr_id);
+        PHV::SuperCluster *sc = data->tr_to_sc_i.at(tr);
         // Cloning is needed to update the parent and also to make sure the added transaction is
         // not cleaned by the commit.
-        PHV::Transaction* clone = tr->clone(partial_alloc);
-        PHV::Transaction* upd_parent = tr->clone(partial_alloc);
+        PHV::Transaction *clone = tr->clone(partial_alloc);
+        PHV::Transaction *upd_parent = tr->clone(partial_alloc);
         rv.addTransaction(*upd_parent, *sc, tr_id);
         partial_alloc.commit(*clone);
     }
@@ -169,19 +168,19 @@ BruteForceOptimizationStrategy BruteForceOptimizationStrategy::playSeq(
  *
  * @return Assigned SuperClusters list from the @p unallocated_sc list.
  */
-std::list<PHV::SuperCluster*> BruteForceOptimizationStrategy::optimize(
-                            std::list<PHV::SuperCluster*>& unallocated_sc, PHV::Transaction& rst) {
+std::list<PHV::SuperCluster *> BruteForceOptimizationStrategy::optimize(
+    std::list<PHV::SuperCluster *> &unallocated_sc, PHV::Transaction &rst) {
     std::optional<PHV::Transaction> best_alloc = std::nullopt;
     std::optional<PHV::Transaction> best_partial = std::nullopt;
-    std::list<PHV::SuperCluster*> allocated_sc;
+    std::list<PHV::SuperCluster *> allocated_sc;
     std::stringstream opt_history;
     int max_opt_pass;
     int pass = 0;
 
-    opt_history << "Beginning of the PHV Optimization process with " << unallocated_sc.size() <<
-                   " unallocated super clusters\n";
-    LOG4("Beginning of the PHV Optimization process with " << unallocated_sc.size() <<
-         " unallocated super clusters");
+    opt_history << "Beginning of the PHV Optimization process with " << unallocated_sc.size()
+                << " unallocated super clusters\n";
+    LOG4("Beginning of the PHV Optimization process with " << unallocated_sc.size()
+                                                           << " unallocated super clusters");
     int num_sc = 1;
     for (auto *usc : unallocated_sc) {
         LOG2("  " << num_sc << ".  " << *usc);
@@ -191,26 +190,25 @@ std::list<PHV::SuperCluster*> BruteForceOptimizationStrategy::optimize(
 
     // Do not optimize relatively small Transaction pool (typically pounder round)
     if (data->tr_id_to_tr_i.size() < BruteForceOptimizationStrategy::MIN_TR_SIZE) {
-        LOG4("Cancelling the PHV Optimization process since transaction size = " <<
-             data->tr_id_to_tr_i.size());
+        LOG4("Cancelling the PHV Optimization process since transaction size = "
+             << data->tr_id_to_tr_i.size());
         return allocated_sc;
     }
 
     // Validate some minimum criteria to try the optimization process.
     size_t largest_sc_bits = 0;
     size_t total_sc_bits = 0;
-    for (PHV::SuperCluster* sc : unallocated_sc) {
+    for (PHV::SuperCluster *sc : unallocated_sc) {
         total_sc_bits += sc->aggregate_size();
-        if (sc->aggregate_size() > largest_sc_bits)
-            largest_sc_bits = sc->aggregate_size();
+        if (sc->aggregate_size() > largest_sc_bits) largest_sc_bits = sc->aggregate_size();
     }
     LOG4("Total unallocated super clusters bits=" << total_sc_bits);
     LOG4("Largest unallocated super clusters bits=" << largest_sc_bits);
 
     if (largest_sc_bits > BruteForceOptimizationStrategy::MAX_SC_BIT ||
         total_sc_bits > BruteForceOptimizationStrategy::MAX_TOTAL_SC_BIT) {
-        LOG4("Cancelling the PHV Optimization process since the unallocated superclusters " <<
-             "represent too many bits");
+        LOG4("Cancelling the PHV Optimization process since the unallocated superclusters "
+             << "represent too many bits");
         return allocated_sc;
     }
 
@@ -230,8 +228,8 @@ std::list<PHV::SuperCluster*> BruteForceOptimizationStrategy::optimize(
         int stop_id = data->tr_id_to_tr_i.rbegin()->first;
         int next_id = data->tr_id_to_tr_i.begin()->first;
         LOG4("Pass " << pass << ", First Id: " << next_id << ", Stop Id: " << stop_id);
-        opt_history << "Pass " << pass << ", First Id: " << next_id << ", Stop Id: " << stop_id <<
-                       "\n";
+        opt_history << "Pass " << pass << ", First Id: " << next_id << ", Stop Id: " << stop_id
+                    << "\n";
 
         // This always disable dark spilling for n passes and re-enable it after. This overwrite
         // the actual PhvInfo::darkSpillARA and can introduce dark spilling even on cases where it
@@ -254,18 +252,15 @@ std::list<PHV::SuperCluster*> BruteForceOptimizationStrategy::optimize(
                 BruteForceOptimizationStrategy partial_opt = playSeq(tr_in, partial_alloc);
 
                 for (int tr_id : tr_out) {
-                    PHV::Transaction* tr = data->tr_id_to_tr_i.at(tr_id);
-                    PHV::SuperCluster* sc = data->tr_to_sc_i.at(tr);
+                    PHV::Transaction *tr = data->tr_id_to_tr_i.at(tr_id);
+                    PHV::SuperCluster *sc = data->tr_to_sc_i.at(tr);
                     LOG4("Try replacing Transaction id: " << tr_id);
                     opt_history << "Try replacing Transaction id: " << tr_id << "\n";
-                    best_alloc = alloc_strategy_i.tryVariousSlicing(partial_alloc,
-                                                                    sc,
-                                                                    container_groups_i,
-                                                                    score_ctx_i,
-                                                                    opt_history);
+                    best_alloc = alloc_strategy_i.tryVariousSlicing(
+                        partial_alloc, sc, container_groups_i, score_ctx_i, opt_history);
                     if (best_alloc) {
                         LOG4("    Success!");
-                        PHV::Transaction* clone = (*best_alloc).clone(partial_alloc);
+                        PHV::Transaction *clone = (*best_alloc).clone(partial_alloc);
                         partial_opt.addTransaction(*clone, *sc);
                         partial_alloc.commit(*best_alloc);
 
@@ -274,15 +269,15 @@ std::list<PHV::SuperCluster*> BruteForceOptimizationStrategy::optimize(
                         const cstring &best = partial_opt.data->tr_id_to_diff.at(best_tr_id);
                         if (original != best) {
                             any_tr_updated = true;
-                            opt_history << "Found difference between the original and " <<
-                                            "the replacement diff:\n";
+                            opt_history << "Found difference between the original and "
+                                        << "the replacement diff:\n";
                             opt_history << "Original:\n";
                             opt_history << original << "\n";
                             opt_history << "Replacement:\n";
                             opt_history << best << "\n";
                         } else {
-                            opt_history << "Found NO difference between the original and " <<
-                                            "the replacement diff\n";
+                            opt_history << "Found NO difference between the original and "
+                                        << "the replacement diff\n";
                         }
                     } else {
                         // Only accept a solution that minimally replace all of the removed
@@ -300,19 +295,16 @@ std::list<PHV::SuperCluster*> BruteForceOptimizationStrategy::optimize(
                         LOG4("Try placing unallocated super clusters");
                         opt_history << "Try placing unallocated super clusters\n";
                         bool unallocated_update = false;
-                        for (PHV::SuperCluster* sc : unallocated_sc) {
+                        for (PHV::SuperCluster *sc : unallocated_sc) {
                             LOG4("Try allocating super cluster " << *sc);
                             opt_history << "Try allocating super cluster " << *sc;
-                            best_alloc = alloc_strategy_i.tryVariousSlicing(partial_alloc,
-                                                                            sc,
-                                                                            container_groups_i,
-                                                                            score_ctx_i,
-                                                                            opt_history);
+                            best_alloc = alloc_strategy_i.tryVariousSlicing(
+                                partial_alloc, sc, container_groups_i, score_ctx_i, opt_history);
                             if (best_alloc) {
                                 // Great! We were able to successfully insert one of the
                                 // unallocated SuperCluster.
                                 LOG4("    Success!");
-                                PHV::Transaction* clone = (*best_alloc).clone(partial_alloc);
+                                PHV::Transaction *clone = (*best_alloc).clone(partial_alloc);
                                 partial_opt.addTransaction(*clone, *sc);
                                 partial_alloc.commit(*best_alloc);
                                 allocated_sc.push_back(sc);
@@ -321,7 +313,7 @@ std::list<PHV::SuperCluster*> BruteForceOptimizationStrategy::optimize(
                         }
                         if (unallocated_update) {
                             LOG4("Update unallocated super cluster list");
-                            for (PHV::SuperCluster* sc : allocated_sc) {
+                            for (PHV::SuperCluster *sc : allocated_sc) {
                                 unallocated_sc.remove(sc);
                             }
                         }
@@ -333,8 +325,7 @@ std::list<PHV::SuperCluster*> BruteForceOptimizationStrategy::optimize(
                 }
             }
             // Stop criteria
-            if (unallocated_sc.empty())
-                break;
+            if (unallocated_sc.empty()) break;
 
             // Move to the next Transaction ID. Take note that replaced Transaction ID are replaced
             // with higher value to replay the sequence in the proper order. This can lead to
@@ -343,24 +334,22 @@ std::list<PHV::SuperCluster*> BruteForceOptimizationStrategy::optimize(
             next_id = data->tr_id_to_tr_i.upper_bound(next_id)->first;
         }
         // Stop criteria
-        if (unallocated_sc.empty())
-            break;
+        if (unallocated_sc.empty()) break;
 
         int unallocated_slices = 0;
         int unallocated_bits = 0;
-        LOG1("Pass " << pass << " finished with " << unallocated_sc.size() <<
-             " superclusters:");
-        opt_history << "Pass " << pass << " finished with " << unallocated_sc.size() <<
-                " superclusters:\n";
+        LOG1("Pass " << pass << " finished with " << unallocated_sc.size() << " superclusters:");
+        opt_history << "Pass " << pass << " finished with " << unallocated_sc.size()
+                    << " superclusters:\n";
         int num = 1;
         for (auto *usc : unallocated_sc) {
             LOG1("  " << num << ".  " << *usc);
             opt_history << "  " << num << ".  " << *usc;
             ++num;
-            usc->forall_fieldslices([&](const PHV::FieldSlice& fs) {
-                                        unallocated_slices++;
-                                        unallocated_bits += fs.size();
-                                    });
+            usc->forall_fieldslices([&](const PHV::FieldSlice &fs) {
+                unallocated_slices++;
+                unallocated_bits += fs.size();
+            });
         }
         LOG1(" Unallocated slices: " << unallocated_slices);
         LOG1(" Unallocated bits:   " << unallocated_bits);
@@ -370,10 +359,10 @@ std::list<PHV::SuperCluster*> BruteForceOptimizationStrategy::optimize(
         pass++;
     }
 
-    LOG4("Exit Optimization phase with " << unallocated_sc.size() <<
-         " unallocated super clusters remaining");
-    opt_history << "Exit Optimization phase with " << unallocated_sc.size() <<
-                   " unallocated super clusters remaining\n";
+    LOG4("Exit Optimization phase with " << unallocated_sc.size()
+                                         << " unallocated super clusters remaining");
+    opt_history << "Exit Optimization phase with " << unallocated_sc.size()
+                << " unallocated super clusters remaining\n";
     if (LOGGING(1)) {
         // Use a separate file for the optimization_history.
         auto filename = Logging::PassManager::getNewLogFileName("phv_optimization_history_"_cs);
@@ -383,8 +372,7 @@ std::list<PHV::SuperCluster*> BruteForceOptimizationStrategy::optimize(
         Logging::FileLog::close(logfile);
     }
 
-    if (best_partial && !allocated_sc.empty())
-        rst.commit(*best_partial);
+    if (best_partial && !allocated_sc.empty()) rst.commit(*best_partial);
 
     PhvInfo::darkSpillARA = initial_ara;
 

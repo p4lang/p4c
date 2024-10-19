@@ -16,10 +16,9 @@
 
 IR::InstanceRef::InstanceRef(cstring prefix, IR::ID n, const IR::Type *t,
                              const IR::Annotations *ann)
-: HeaderRef(t), name(n), nested() {
+    : HeaderRef(t), name(n), nested() {
     if (n.srcInfo.isValid()) srcInfo = n.srcInfo;
-    if (prefix)
-        name.name = prefix + "." + n.name;
+    if (prefix) name.name = prefix + "." + n.name;
     IR::HeaderOrMetadata *obj = nullptr;
     if (auto *hdr = t->to<IR::Type_Header>()) {
         obj = new IR::Header(name, hdr);
@@ -27,8 +26,7 @@ IR::InstanceRef::InstanceRef(cstring prefix, IR::ID n, const IR::Type *t,
         obj = new IR::Metadata(name, meta);
         for (auto f : meta->fields)
             if (f->type->is<IR::Type_StructLike>() || f->type->is<IR::Type_Stack>())
-                nested.add(name + "." + f->name,
-                           new InstanceRef(name, f->name, f->type));
+                nested.add(name + "." + f->name, new InstanceRef(name, f->name, f->type));
     } else if (auto *stk = t->to<IR::Type_Stack>()) {
         if (stk->elementType->is<IR::Type_HeaderUnion>()) {
             P4C_UNIMPLEMENTED("Unsupported type %s %s", stk, n);
@@ -40,9 +38,9 @@ IR::InstanceRef::InstanceRef(cstring prefix, IR::ID n, const IR::Type *t,
         // non-converted enum type -- probably StatefulAlu predicate output.
         obj = nullptr;
     } else {
-        P4C_UNIMPLEMENTED("Unsupported type %s %s", t, n); }
-    if (obj && ann)
-        obj->annotations = ann;
+        P4C_UNIMPLEMENTED("Unsupported type %s %s", t, n);
+    }
+    if (obj && ann) obj->annotations = ann;
     this->obj = obj;
 }
 
@@ -50,7 +48,7 @@ IR::InstanceRef::InstanceRef(cstring prefix, IR::ID n, const IR::Type *t,
  * we also don't handle StructFlexible as that never occurs in V1 */
 IR::V1InstanceRef::V1InstanceRef(cstring /* prefix */, IR::ID n, const IR::Type *t,
                                  const IR::Annotations *ann)
-: InstanceRef(t) {
+    : InstanceRef(t) {
     name = n;
     if (n.srcInfo.isValid()) srcInfo = n.srcInfo;
     IR::HeaderOrMetadata *obj = nullptr;
@@ -66,9 +64,9 @@ IR::V1InstanceRef::V1InstanceRef(cstring /* prefix */, IR::ID n, const IR::Type 
     } else if (t->is<IR::Type::Bits>() || t->is<IR::Type::Boolean>() || t->is<IR::Type_Set>()) {
         obj = nullptr;
     } else {
-        P4C_UNIMPLEMENTED("Unsupported P4_14 type %s %s", t, n); }
-    if (obj && ann)
-        obj->annotations = ann;
+        P4C_UNIMPLEMENTED("Unsupported P4_14 type %s %s", t, n);
+    }
+    if (obj && ann) obj->annotations = ann;
     this->obj = obj;
 }
 
@@ -77,9 +75,8 @@ int IR::TempVar::uid = 0;
 int IR::Padding::uid = 0;
 
 bool IR::BFN::Pipe::has_pragma(const char *name) const {
-    for (const auto* annotation : global_pragmas) {
-        if (annotation->name.name == name)
-            return true;
+    for (const auto *annotation : global_pragmas) {
+        if (annotation->name.name == name) return true;
     }
     return false;
 }

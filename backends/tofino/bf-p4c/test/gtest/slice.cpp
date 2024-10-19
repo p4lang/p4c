@@ -11,6 +11,7 @@
  */
 
 #include "bf-p4c/common/slice.h"
+
 #include "gtest/gtest.h"
 
 namespace P4::Test {
@@ -21,16 +22,14 @@ TEST(slice, MakeSlice) {
     // and then bits[0..63] are sliced.
     auto field = new IR::Constant(IR::Type::Bits::get(64), 0xdeadbeefdeadbeef);
     auto before = new IR::BOr(
-            new IR::Concat(IR::Type::Bits::get(128),
-                    new IR::Constant(IR::Type::Bits::get(64), 0),
-                    new IR::Member(IR::Type::Bits::get(64), field, "field")),
-            new IR::Constant(IR::Type::Bits::get(128), 1551532840));
+        new IR::Concat(IR::Type::Bits::get(128), new IR::Constant(IR::Type::Bits::get(64), 0),
+                       new IR::Member(IR::Type::Bits::get(64), field, "field")),
+        new IR::Constant(IR::Type::Bits::get(128), 1551532840));
 
     auto after = MakeSlice(before, 0, 63);
 
-    auto expected  = new IR::BOr(
-            new IR::Member(IR::Type::Bits::get(64), field, "field"),
-            new IR::Constant(IR::Type::Bits::get(64), 1551532840));
+    auto expected = new IR::BOr(new IR::Member(IR::Type::Bits::get(64), field, "field"),
+                                new IR::Constant(IR::Type::Bits::get(64), 1551532840));
 
     ASSERT_FALSE(before->equiv(*expected));
     ASSERT_TRUE(after->equiv(*expected));

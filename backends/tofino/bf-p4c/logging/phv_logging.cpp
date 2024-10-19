@@ -10,10 +10,11 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/logging/manifest.h"
 #include "bf-p4c/logging/phv_logging.h"
+
+#include "bf-p4c/bf-p4c-options.h"
 #include "bf-p4c/logging/container_size_extractor.h"
+#include "bf-p4c/logging/manifest.h"
 #include "bf-p4c/version.h"  // for BF_P4C_VERSION
 
 void CollectPhvLoggingInfo::collectConstraints() {
@@ -36,13 +37,13 @@ void CollectPhvLoggingInfo::collectConstraints() {
     // Extract no overlay
     for (auto field : pragmas->pa_no_overlay().get_no_overlay_fields()) {
         BUG_CHECK(fieldConstraints.find(field->name) != fieldConstraints.end(),
-            "No overlay constraint for field %s which is not in fieldConstraints map.",
-            field->name);
+                  "No overlay constraint for field %s which is not in fieldConstraints map.",
+                  field->name);
         fieldConstraints[field->name].setNoOverlay(true);
     }
 }
 
-Visitor::profile_t CollectPhvLoggingInfo::init_apply(const IR::Node* root) {
+Visitor::profile_t CollectPhvLoggingInfo::init_apply(const IR::Node *root) {
     profile_t rv = Inspector::init_apply(root);
     sliceWriteToActions.clear();
     sliceReadToActions.clear();
@@ -58,7 +59,7 @@ Visitor::profile_t CollectPhvLoggingInfo::init_apply(const IR::Node* root) {
     return rv;
 }
 
-bool CollectPhvLoggingInfo::preorder(const IR::MAU::Table* tbl) {
+bool CollectPhvLoggingInfo::preorder(const IR::MAU::Table *tbl) {
     if (tbl->match_table && tbl->match_table->externalName())
         tableNames[tbl->name] = tbl->match_table->externalName();
     else
@@ -66,33 +67,31 @@ bool CollectPhvLoggingInfo::preorder(const IR::MAU::Table* tbl) {
     return true;
 }
 
-ordered_set<PHV::FieldSlice> CollectPhvLoggingInfo::getSlices(
-                            const IR::Expression* fieldExpr,
-                            const IR::MAU::Table* tbl) {
+ordered_set<PHV::FieldSlice> CollectPhvLoggingInfo::getSlices(const IR::Expression *fieldExpr,
+                                                              const IR::MAU::Table *tbl) {
     // Set of FieldSlices matching the field uses specified by
     // the fieldExpr (action writes/action reads/input xbar uses)
     ordered_set<PHV::FieldSlice> slices;
     le_bitrange rng;
-    auto* f = phv.field(fieldExpr, &rng);
+    auto *f = phv.field(fieldExpr, &rng);
     if (f == nullptr) return slices;
     PHV::FieldSlice fs(f, rng);
     slices.insert(fs);
     // See if there are field slice allocations for this field
     // and add those which intersect the field range
-    f->foreach_alloc(rng, tbl, nullptr,
-        [&](const PHV::AllocSlice as) {
+    f->foreach_alloc(rng, tbl, nullptr, [&](const PHV::AllocSlice as) {
         PHV::FieldSlice fs(as.field(), as.field_slice());
         slices.insert(fs);
     });
     return slices;
 }
 
-bool CollectPhvLoggingInfo::preorder(const IR::MAU::Action* act) {
-    const IR::MAU::Table* tbl = findContext<IR::MAU::Table>();
+bool CollectPhvLoggingInfo::preorder(const IR::MAU::Action *act) {
+    const IR::MAU::Table *tbl = findContext<IR::MAU::Table>();
     if (actionsToTables.count(act) != 0)
-        return true;   // action is in multiple tables. Even if that's
-                       // the case, by the time we reach here it is
-                       // irrelevant.
+        return true;  // action is in multiple tables. Even if that's
+                      // the case, by the time we reach here it is
+                      // irrelevant.
     actionsToTables[act] = tbl;
     // Call action analysis pass to gather information about field usage.
     ActionAnalysis aa(phv, false, false, tbl, red_info);
@@ -100,12 +99,11 @@ bool CollectPhvLoggingInfo::preorder(const IR::MAU::Action* act) {
     aa.set_field_actions_map(&fieldActionsMap);
     act->apply(aa);
 
-    for (auto& fieldAction : Values(fieldActionsMap)) {
+    for (auto &fieldAction : Values(fieldActionsMap)) {
         auto writeSlices = getSlices(fieldAction.write.expr, tbl);
         for (auto sl : writeSlices) sliceWriteToActions[sl].insert(act);
-        for (auto& readAction : fieldAction.reads) {
-            if (readAction.type != ActionAnalysis::ActionParam::PHV)
-                continue;
+        for (auto &readAction : fieldAction.reads) {
+            if (readAction.type != ActionAnalysis::ActionParam::PHV) continue;
             auto readSlices = getSlices(readAction.expr, tbl);
             for (auto sl : readSlices) sliceReadToActions[sl].insert(act);
         }
@@ -113,12 +111,11 @@ bool CollectPhvLoggingInfo::preorder(const IR::MAU::Action* act) {
     return true;
 }
 
-bool CollectPhvLoggingInfo::preorder(const IR::MAU::TableKey* read) {
-    const IR::MAU::Table* tbl = findContext<IR::MAU::Table>();
+bool CollectPhvLoggingInfo::preorder(const IR::MAU::TableKey *read) {
+    const IR::MAU::Table *tbl = findContext<IR::MAU::Table>();
     if (tableNames.count(tbl->name) == 0) return true;
     auto xbarSlices = getSlices(read->expr, tbl);
-    for (auto sl : xbarSlices)
-        sliceXbarToTables[sl].insert(tableNames.at(tbl->name));
+    for (auto sl : xbarSlices) sliceXbarToTables[sl].insert(tableNames.at(tbl->name));
     return true;
 }
 
@@ -131,15 +128,13 @@ const IR::Node *PhvLogging::CollectDefUseInfo::apply_visitor(const IR::Node *n, 
         for (auto &[unit, expr] : defs) {
             // If this is an implicit parser initialization added because
             // of uninitialized reads, ignore it.
-            if (expr->is<ImplicitParserInit>())
-                continue;
+            if (expr->is<ImplicitParserInit>()) continue;
             if (auto ps = unit->to<IR::BFN::ParserState>()) {
                 state_names.emplace(ps->name);
                 LOG4("    state: " << ps->name);
             }
         }
-        if (!state_names.empty())
-            parser_defs.emplace(field_id, state_names);
+        if (!state_names.empty()) parser_defs.emplace(field_id, state_names);
     }
     for (auto &[field_id, uses] : defuse.getAllUses()) {
         LOG4("Located use[" << field_id << "]:");
@@ -150,8 +145,7 @@ const IR::Node *PhvLogging::CollectDefUseInfo::apply_visitor(const IR::Node *n, 
                 LOG4("    deparser: " << d->toString());
             }
         }
-        if (!deparser_names.empty())
-            deparser_uses.emplace(field_id, deparser_names);
+        if (!deparser_names.empty()) deparser_uses.emplace(field_id, deparser_names);
     }
     return n;
 }
@@ -179,17 +173,16 @@ void PhvLogging::end_apply(const IR::Node *root) {
 
     logConstraintReasons();
     logger.log();
-    Logging::Manifest::getManifest().addLog(root->to<IR::BFN::Pipe>()->canon_id(),
-                                            "phv"_cs, "phv.json"_cs);
+    Logging::Manifest::getManifest().addLog(root->to<IR::BFN::Pipe>()->canon_id(), "phv"_cs,
+                                            "phv.json"_cs);
 }
 
-PHV::Field::AllocState PhvLogging::getAllocatedState(
-    const PHV::Field* f) {
+PHV::Field::AllocState PhvLogging::getAllocatedState(const PHV::Field *f) {
     bitvec allocatedBits;
     bitvec phvAllocatedBits;
     bitvec clotAllocatedBits;
 
-    f->foreach_alloc([&](const PHV::AllocSlice& alloc) {
+    f->foreach_alloc([&](const PHV::AllocSlice &alloc) {
         bitvec sliceBits(alloc.field_slice().lo, alloc.width());
         phvAllocatedBits |= sliceBits;
     });
@@ -224,31 +217,31 @@ PHV::Field::AllocState PhvLogging::getAllocatedState(
     return (rv | PHV::Field::REFERENCED);
 }
 
-ordered_map<cstring, ordered_set<const PHV::Field*>> PhvLogging::getFields() {
-    ordered_map<cstring, ordered_set<const PHV::Field*>> fields;
+ordered_map<cstring, ordered_set<const PHV::Field *>> PhvLogging::getFields() {
+    ordered_map<cstring, ordered_set<const PHV::Field *>> fields;
 
     /* Map fields to headers to which they belong */
-    for (const auto& f : phv) {
+    for (const auto &f : phv) {
         fields[f.header()].insert(&f);
     }
 
     return fields;
 }
 
-ordered_map<const PHV::Field*, const PHV::Field*> PhvLogging::getFieldAliases() {
-    ordered_map<const PHV::Field*, const PHV::Field*> aliasMap;
+ordered_map<const PHV::Field *, const PHV::Field *> PhvLogging::getFieldAliases() {
+    ordered_map<const PHV::Field *, const PHV::Field *> aliasMap;
 
     /* Check all allocated fields for their aliases to build a reverse alias map*/
-    for (const auto& f : phv) {
+    for (const auto &f : phv) {
         if (!f.aliasSource) continue;
         if (aliasMap.count(f.aliasSource) > 0) {
             // Should this be a BUG_CHECK? Ideally this behavior should be
             // caught during PHV analysis / allocation phase and we should not
             // fail during logging.
-            LOG3(" Field : " << f << " has an alias : " << f.aliasSource <<
-                    " which already exists in the alias map. This could be an"
-                    " issue with aliasing as an alias source cannot have multiple"
-                    " alias destinations");
+            LOG3(" Field : " << f << " has an alias : " << f.aliasSource
+                             << " which already exists in the alias map. This could be an"
+                                " issue with aliasing as an alias source cannot have multiple"
+                                " alias destinations");
             continue;
         }
         aliasMap[f.aliasSource] = &f;
@@ -256,22 +249,21 @@ ordered_map<const PHV::Field*, const PHV::Field*> PhvLogging::getFieldAliases() 
     return aliasMap;
 }
 
-Phv_Schema_Logger::FieldInfo* PhvLogging::getFieldInfo(const PHV::Field *f) const {
+Phv_Schema_Logger::FieldInfo *PhvLogging::getFieldInfo(const PHV::Field *f) const {
     BUG_CHECK(f, "field cannot be null");
     return new FieldInfo(f->size, getFieldType(f), std::string(stripThreadPrefix(f->name)),
-            getGress(f), "");
+                         getGress(f), "");
 }
 
-Phv_Schema_Logger::SourceLocation* PhvLogging::getSourceLoc(const PHV::Field *f) const {
+Phv_Schema_Logger::SourceLocation *PhvLogging::getSourceLoc(const PHV::Field *f) const {
     BUG_CHECK(f, "field cannot be null");
-    if (f->srcInfo == std::nullopt)
-        return new SourceLocation("DummyFile", -1);
+    if (f->srcInfo == std::nullopt) return new SourceLocation("DummyFile", -1);
     return new SourceLocation(std::string(f->srcInfo->toPosition().fileName),
-                                f->srcInfo->toPosition().sourceLine);
+                              f->srcInfo->toPosition().sourceLine);
 }
 
-Phv_Schema_Logger::FieldSlice*
-PhvLogging::logFieldSlice(const PHV::Field* f, bool use_alias = false) {
+Phv_Schema_Logger::FieldSlice *PhvLogging::logFieldSlice(const PHV::Field *f,
+                                                         bool use_alias = false) {
     std::string fieldName = std::string(stripThreadPrefix(f->name));
     if (use_alias && f->aliasSource)
         fieldName = std::string(stripThreadPrefix(f->aliasSource->name));
@@ -280,9 +272,8 @@ PhvLogging::logFieldSlice(const PHV::Field* f, bool use_alias = false) {
     return fs;
 }
 
-Phv_Schema_Logger::FieldSlice*
-PhvLogging::logFieldSlice(const PHV::AllocSlice& sl,
-                            bool use_alias = false) {
+Phv_Schema_Logger::FieldSlice *PhvLogging::logFieldSlice(const PHV::AllocSlice &sl,
+                                                         bool use_alias = false) {
     auto f = sl.field();
     std::string fieldName = std::string(stripThreadPrefix(f->name));
     if (use_alias && f->aliasSource)
@@ -292,14 +283,12 @@ PhvLogging::logFieldSlice(const PHV::AllocSlice& sl,
     return fs;
 }
 
-Phv_Schema_Logger::ContainerSlice*
-PhvLogging::logContainerSlice(const PHV::AllocSlice& sl,
-                                bool use_alias = false) {
-    const auto& phvSpec = Device::phvSpec();
+Phv_Schema_Logger::ContainerSlice *PhvLogging::logContainerSlice(const PHV::AllocSlice &sl,
+                                                                 bool use_alias = false) {
+    const auto &phvSpec = Device::phvSpec();
     auto fs = logFieldSlice(sl, use_alias);
     auto ps = new Slice(sl.container_slice().lo, sl.container_slice().hi);
-    auto cid = phvSpec.physicalAddress(phvSpec.containerToId(sl.container()),
-                                                   PhvSpec::MAU);
+    auto cid = phvSpec.physicalAddress(phvSpec.containerToId(sl.container()), PhvSpec::MAU);
     auto cs = new ContainerSlice(fs, cid, ps);
 
     ordered_set<PardeInfo> parde;
@@ -324,43 +313,37 @@ PhvLogging::logContainerSlice(const PHV::AllocSlice& sl,
 }
 
 namespace SchemaComparators {
-    using FieldInfo = ::Logging::Phv_Schema_Logger::FieldInfo;
-    using SourceLoc = ::Logging::Phv_Schema_Logger::SourceLocation;
-    using Slice = ::Logging::Phv_Schema_Logger::Slice;
-    using FieldGroupItem = ::Logging::Phv_Schema_Logger::FieldGroupItem;
+using FieldInfo = ::Logging::Phv_Schema_Logger::FieldInfo;
+using SourceLoc = ::Logging::Phv_Schema_Logger::SourceLocation;
+using Slice = ::Logging::Phv_Schema_Logger::Slice;
+using FieldGroupItem = ::Logging::Phv_Schema_Logger::FieldGroupItem;
 
-    bool equal(const FieldInfo *f1, const FieldInfo *f2) {
-        return f1->get_bit_width() == f2->get_bit_width()
-            && f1->get_field_class() == f2->get_field_class()
-            && f1->get_field_name() == f2->get_field_name()
-            && f1->get_gress() == f2->get_gress()
-            && f1->get_format_type() == f2->get_format_type();
-    }
+bool equal(const FieldInfo *f1, const FieldInfo *f2) {
+    return f1->get_bit_width() == f2->get_bit_width() &&
+           f1->get_field_class() == f2->get_field_class() &&
+           f1->get_field_name() == f2->get_field_name() && f1->get_gress() == f2->get_gress() &&
+           f1->get_format_type() == f2->get_format_type();
+}
 
-    bool equal(const SourceLoc *s1, const SourceLoc *s2) {
-        return s1->get_line() == s2->get_line()
-            && s1->get_file() == s2->get_file();
-    }
+bool equal(const SourceLoc *s1, const SourceLoc *s2) {
+    return s1->get_line() == s2->get_line() && s1->get_file() == s2->get_file();
+}
 
-    bool equal(const Slice *s1, const Slice *s2) {
-        if (s1 == nullptr && s2 == nullptr) return true;  // both are nullptr
-        if (s1 == nullptr || s2 == nullptr) return false;  // only one of them is
-        return s1->get_msb() == s2->get_msb()
-            && s1->get_lsb() == s2->get_lsb();
-    }
+bool equal(const Slice *s1, const Slice *s2) {
+    if (s1 == nullptr && s2 == nullptr) return true;   // both are nullptr
+    if (s1 == nullptr || s2 == nullptr) return false;  // only one of them is
+    return s1->get_msb() == s2->get_msb() && s1->get_lsb() == s2->get_lsb();
+}
 
-    bool equal(const FieldGroupItem *i1, const FieldGroupItem *i2) {
-        return equal(i1->get_field_info(), i2->get_field_info())
-            && equal(i1->get_source(), i2->get_source())
-            && equal(i1->get_slice(), i2->get_slice());
-    }
+bool equal(const FieldGroupItem *i1, const FieldGroupItem *i2) {
+    return equal(i1->get_field_info(), i2->get_field_info()) &&
+           equal(i1->get_source(), i2->get_source()) && equal(i1->get_slice(), i2->get_slice());
+}
 
-    bool equal(const std::vector<int> &a, const std::vector<int> &b) {
-        return a == b;
-    }
+bool equal(const std::vector<int> &a, const std::vector<int> &b) { return a == b; }
 }  // namespace SchemaComparators
 
-template<typename T>
+template <typename T>
 int PhvLogging::getDatabaseIndex(std::vector<T> &db, T item) {
     using namespace SchemaComparators;
 
@@ -416,54 +399,49 @@ void PhvLogging::logSolitaryConstraints(ConstrainedField &field, const SourceLoc
 
     BoolConstraint *sc = nullptr;
     if (c.isALU()) {
-        sc = new BoolConstraint(
-            false, int(ConstraintReason::SolitaryAlu), "Solitary", srcLoc);
+        sc = new BoolConstraint(false, int(ConstraintReason::SolitaryAlu), "Solitary", srcLoc);
     }
     if (c.isArch()) {
-        sc = new BoolConstraint(
-            false, int(ConstraintReason::SolitaryIntrinsic), "Solitary", srcLoc);
+        sc =
+            new BoolConstraint(false, int(ConstraintReason::SolitaryIntrinsic), "Solitary", srcLoc);
     }
     if (c.isChecksum()) {
-        sc = new BoolConstraint(
-            false, int(ConstraintReason::SolitaryChecksum), "Solitary", srcLoc);
+        sc = new BoolConstraint(false, int(ConstraintReason::SolitaryChecksum), "Solitary", srcLoc);
     }
     if (c.isDigest()) {
         auto digest = field.getDigest();
         if (digest.isMirror()) {
-            sc = new BoolConstraint(
-                false, int(ConstraintReason::SolitaryMirror), "Solitary", srcLoc);
+            sc = new BoolConstraint(false, int(ConstraintReason::SolitaryMirror), "Solitary",
+                                    srcLoc);
         } else {
-            sc = new BoolConstraint(
-                false, int(ConstraintReason::SolitaryExceptSameDigest), "Solitary", srcLoc);
+            sc = new BoolConstraint(false, int(ConstraintReason::SolitaryExceptSameDigest),
+                                    "Solitary", srcLoc);
         }
     }
     if (c.isPragmaSolitary()) {
-        sc = new BoolConstraint(
-            false, int(ConstraintReason::SolitaryPragma), "Solitary", srcLoc);
+        sc = new BoolConstraint(false, int(ConstraintReason::SolitaryPragma), "Solitary", srcLoc);
     }
     if (c.isPragmaContainerSize()) {
-        sc = new BoolConstraint(
-            false, int(ConstraintReason::SolitaryContainerSize), "Solitary", srcLoc);
+        sc = new BoolConstraint(false, int(ConstraintReason::SolitaryContainerSize), "Solitary",
+                                srcLoc);
     }
     if (field.hasBottomBits()) {
         // Logged as Solitary Last Byte for better verbosity at user level
-        sc = new BoolConstraint(
-            false, int(ConstraintReason::SolitaryLastByte), "Solitary", srcLoc);
+        sc = new BoolConstraint(false, int(ConstraintReason::SolitaryLastByte), "Solitary", srcLoc);
     }
 
     if (sc) field.getLogger()->append(sc);
 }
 
-void PhvLogging::logNoPackConstraint(ConstrainedField &field,
-                                     const FieldInfo *fieldInfo,
+void PhvLogging::logNoPackConstraint(ConstrainedField &field, const FieldInfo *fieldInfo,
                                      const SourceLocation *srcLoc) {
     auto &fieldGroupItems = logger.get_field_group_items();
     auto &fieldGroups = logger.get_field_groups();
 
     // No Pack constraint is logged as DifferentContainer for better verbosity
     // at user level
-    auto diffContainerConstraint = new ListConstraint(
-        {}, int(ConstraintReason::DifferentContainer), "DifferentContainer", srcLoc);
+    auto diffContainerConstraint = new ListConstraint({}, int(ConstraintReason::DifferentContainer),
+                                                      "DifferentContainer", srcLoc);
 
     for (auto kv : info.fieldConstraints) {
         auto &f = kv.second;
@@ -495,12 +473,12 @@ void PhvLogging::logNoPackConstraint(ConstrainedField &field,
 }
 
 void PhvLogging::logGroupConstraint(ConstrainedField &field, ListConstraint *c,
-                                                        std::vector<ConstrainedSlice> &group) {
-    auto getSlice = [] (const PHV::FieldSlice *slice) {
+                                    std::vector<ConstrainedSlice> &group) {
+    auto getSlice = [](const PHV::FieldSlice *slice) {
         return new Slice(slice->range().lo, slice->range().hi);
     };
 
-    std::vector<std::pair<ConstrainedSlice*, bool>> relatedSlices;
+    std::vector<std::pair<ConstrainedSlice *, bool>> relatedSlices;
 
     // Create group of indices to field_group_items
     std::vector<int> indexGroup;
@@ -536,7 +514,7 @@ void PhvLogging::logGroupConstraint(ConstrainedField &field, ListConstraint *c,
             // If the slice is whole field, then append constraint to field itself
             field.getLogger()->append(c);
             BUG_CHECK(relatedSlices.size() == 1,
-                "Related slices contain whole-field slice plus something extra.");
+                      "Related slices contain whole-field slice plus something extra.");
         } else {
             pair.first->getLogger()->append(c);
         }
@@ -562,12 +540,11 @@ void PhvLogging::logNoSplitConstraint(ConstrainedField &field, const SourceLocat
     field.getLogger()->append(nsc);
 }
 
-void PhvLogging::logContainerSizeConstraint(ConstrainedField &field,
-                                                const SourceLocation *srcLoc) {
+void PhvLogging::logContainerSizeConstraint(ConstrainedField &field, const SourceLocation *srcLoc) {
     auto &c = field.getContainerSize();
     if (c.hasConstraint()) {
-        auto csc = new IntConstraint(c.getContainerSize(),
-            int(ConstraintReason::ContainerSize), "ContainerSize", srcLoc);
+        auto csc = new IntConstraint(c.getContainerSize(), int(ConstraintReason::ContainerSize),
+                                     "ContainerSize", srcLoc);
         field.getLogger()->append(csc);
     }
 
@@ -575,8 +552,8 @@ void PhvLogging::logContainerSizeConstraint(ConstrainedField &field,
         auto &c = slice.getContainerSize();
         if (!c.hasConstraint()) continue;
 
-        auto csc = new IntConstraint(c.getContainerSize(),
-            int(ConstraintReason::ContainerSize), "ContainerSize", srcLoc);
+        auto csc = new IntConstraint(c.getContainerSize(), int(ConstraintReason::ContainerSize),
+                                     "ContainerSize", srcLoc);
         slice.getLogger()->append(csc);
     }
 }
@@ -584,14 +561,14 @@ void PhvLogging::logContainerSizeConstraint(ConstrainedField &field,
 void PhvLogging::logAlignmentConstraint(ConstrainedField &field, const SourceLocation *srcLoc) {
     if (field.getAlignment().hasConstraint()) {
         auto ac = new IntConstraint(field.getAlignment().getAlignment(),
-            int(ConstraintReason::Alignment), "Alignment", srcLoc);
+                                    int(ConstraintReason::Alignment), "Alignment", srcLoc);
         field.getLogger()->append(ac);
     }
 
     for (auto slice : field.getSlices()) {
         if (slice.getAlignment().hasConstraint()) {
             auto ac = new IntConstraint(slice.getAlignment().getAlignment(),
-                int(ConstraintReason::Alignment), "Alignment", srcLoc);
+                                        int(ConstraintReason::Alignment), "Alignment", srcLoc);
             slice.getLogger()->append(ac);
         }
     }
@@ -605,16 +582,16 @@ void PhvLogging::logNoOverlayConstraint(ConstrainedField &field, const SourceLoc
 }
 
 void PhvLogging::logExactContainerConstraint(ConstrainedField &field,
-                                                const SourceLocation *srcLoc) {
+                                             const SourceLocation *srcLoc) {
     if (!field.hasExactContainer()) return;
 
-    auto ecc = new BoolConstraint(false, int(ConstraintReason::ExactContainer),
-        "ExactContainer", srcLoc);
+    auto ecc =
+        new BoolConstraint(false, int(ConstraintReason::ExactContainer), "ExactContainer", srcLoc);
     field.getLogger()->append(ecc);
 }
 
 void PhvLogging::logEquivalentAlignConstraint(ConstrainedField &field,
-                                                                const SourceLocation *srcLoc) {
+                                              const SourceLocation *srcLoc) {
     if (!info.equivAlignConstraints->isFieldInAnyGroup(field.getName())) return;
 
     auto groups = info.equivAlignConstraints->getGroups(field.getName());
@@ -622,38 +599,35 @@ void PhvLogging::logEquivalentAlignConstraint(ConstrainedField &field,
     for (auto mg : groups) {
         auto mauGroup = *mg;
         auto eac = new ListConstraint({}, int(ConstraintReason::EquivalentAlignment),
-            "EquivalentAlignment", srcLoc);
+                                      "EquivalentAlignment", srcLoc);
         logGroupConstraint(field, eac, mauGroup);
     }
 }
 
-void PhvLogging::logNoHolesConstraint(ConstrainedField &field,
-                                                        const SourceLocation *srcLoc) {
+void PhvLogging::logNoHolesConstraint(ConstrainedField &field, const SourceLocation *srcLoc) {
     if (!field.hasNoHoles()) return;
 
-    auto nhc = new BoolConstraint(false, int(ConstraintReason::NoHoles),
-        "NoHoles", srcLoc);
+    auto nhc = new BoolConstraint(false, int(ConstraintReason::NoHoles), "NoHoles", srcLoc);
     field.getLogger()->append(nhc);
 }
 
-void PhvLogging::logSameContainerGroup(ConstrainedField &field,
-                                                        const SourceLocation *srcLoc) {
+void PhvLogging::logSameContainerGroup(ConstrainedField &field, const SourceLocation *srcLoc) {
     if (!field.hasSameContainerGroup()) return;
 
     auto scgc = new BoolConstraint(false, int(ConstraintReason::SameContainerGroup),
-        "SameContainerGroup", srcLoc);
+                                   "SameContainerGroup", srcLoc);
     field.getLogger()->append(scgc);
 }
 
 void PhvLogging::logFields() {
     /// Map of all headers and their fields.
-    ordered_map<cstring, ordered_set<const PHV::Field*>> fields = getFields();
+    ordered_map<cstring, ordered_set<const PHV::Field *>> fields = getFields();
 
     auto aliases = getFieldAliases();
     /* Add fields to the log file */
     for (auto kv : fields) {
         std::string headerName(stripThreadPrefix(kv.first));
-        for (const auto* f : kv.second) {
+        for (const auto *f : kv.second) {
             std::string fieldName(stripThreadPrefix(f->name));
 
             bool use_alias = (aliases.count(f) > 0);
@@ -664,8 +638,10 @@ void PhvLogging::logFields() {
 
             std::string state = "";
             PHV::Field::AllocState allocState = getAllocatedState(f);
-            if (!f->isReferenced(allocState)) state = "unreferenced";
-            else if (!f->hasAllocation(allocState)) state = "unallocated";
+            if (!f->isReferenced(allocState))
+                state = "unreferenced";
+            else if (!f->hasAllocation(allocState))
+                state = "unallocated";
             else if (f->partiallyPhvAllocated(allocState))
                 state = "partially allocated";
             else if (f->fullyPhvAllocated(allocState))
@@ -673,13 +649,12 @@ void PhvLogging::logFields() {
             else
                 BUG("Unhandled field allocation state: %d", allocState);
 
-            LOG3("Field: " << fieldName << ", allocState: " <<
-                allocState << ", state: " << state);
+            LOG3("Field: " << fieldName << ", allocState: " << allocState << ", state: " << state);
 
             auto fi = new FieldInfo(f->size, getFieldType(f), fieldName, getGress(f), "");
             auto field = new Field(fi, state, headerName);
 
-            for (auto& sl : f->get_alloc()) {
+            for (auto &sl : f->get_alloc()) {
                 field->append_field_slices(logFieldSlice(sl, use_alias));
                 field->append_phv_slices(logContainerSlice(sl, use_alias));
             }
@@ -693,80 +668,60 @@ void PhvLogging::logFields() {
 
 void PhvLogging::logConstraintReasons() {
     const std::map<ConstraintReason, std::string> reasons = {
-        {
-            ConstraintReason::SolitaryAlu,
-            "Solitary (ALU): This field cannot be packed with anything else due to ALU operation."
-        }, {
-            ConstraintReason::SolitaryIntrinsic,
-            "Solitary (Intrinsic): This field cannot be packed with anything else due to"
-            " hardware requirement."
-        }, {
-            ConstraintReason::SolitaryChecksum,
-            "Solitary (Checksum): This field cannot be packed with anything else because it is"
-            " used as a checksum calculation result."
-        }, {
-            ConstraintReason::SolitaryLastByte,
-            "Solitary (Last byte): This field cannot be packed with anything else in its non-full"
-            " last byte."
-        }, {
-            ConstraintReason::SolitaryMirror,
-            "Solitary (Mirror): This field cannot be packed with any field that is mirrored."
-        }, {
-            ConstraintReason::SolitaryContainerSize,
-            "Solitary (Container size): This field was constrained with pa_container_size pragma"
-            " in a way that requires it to be solitary."
-        }, {
-            ConstraintReason::SolitaryPragma,
-            "Solitary (Pragma): This field was constrained by pa_solitary pragma."
-        }, {
-            ConstraintReason::SolitaryExceptSameDigest,
-            "Solitary (Except same digest): This field cannot be packed with anything else that"
-            " does not belong to the same digest field list."
-        }, {
-            ConstraintReason::DifferentContainer,
-            "Different Container: This field cannot be packed into same container with listed"
-            " fields or their slices."
-        }, {
-            ConstraintReason::MAUGroup,
-            "MAU Group: This field (or its particular slices) must be in the same MAU group"
-            " as other fields or slices."
-        }, {
-            ConstraintReason::NoSplit,
-            "No Split: This field must be entirely allocated to a single PHV container. "
-            "Fields that are shifted or are the destination of arithmetic operation have "
-            "this constraint."
-        }, {
-            ConstraintReason::ContainerSize,
-            "Container Size: Slices of this field can only be placed into containers of"
-            " specific sizes. Container size is in bits."
-        }, {
-            ConstraintReason::Alignment,
-            "Alignment: Field has to be placed at a given offset within a container."
-        }, {
-            ConstraintReason::NoOverlay,
-            "No Overlay: Field cannot be overlayed with any other field."
-        }, {
-            ConstraintReason::ExactContainer,
-            "Exact Container: If any field slice in a PHV container has this constraint, then the "
-            "container must be completely filled, and if it contains more than one slice, all "
-            "slices must be layed contiguously (in order). All header fields have this constraint."
-        }, {
-            ConstraintReason::EquivalentAlignment,
-            "Equivalent Alignment: Each field in this group must be placed starting at the same "
-            "least-significant bit in their respective PHV containers. This constraint implies "
-            "MAU Group."
-        }, {
-            ConstraintReason::NoHoles,
-            "No Holes: Field can either be located entirely on a single container or be splitted "
-            "across multiple containers as long as all of the slices fit with no holes "
-            "(concatenating the containers would reconstruct the field). This constraint relaxes "
-            "Exact Containers by allowing to split the field."
-        }, {
-            ConstraintReason::SameContainerGroup,
-            "Same Container Group: All slices of this field must be present in the same MAU group. "
-            "This constraint does not imply MAU group, but it makes it stricter if it is present."
-        }
-    };
+        {ConstraintReason::SolitaryAlu,
+         "Solitary (ALU): This field cannot be packed with anything else due to ALU operation."},
+        {ConstraintReason::SolitaryIntrinsic,
+         "Solitary (Intrinsic): This field cannot be packed with anything else due to"
+         " hardware requirement."},
+        {ConstraintReason::SolitaryChecksum,
+         "Solitary (Checksum): This field cannot be packed with anything else because it is"
+         " used as a checksum calculation result."},
+        {ConstraintReason::SolitaryLastByte,
+         "Solitary (Last byte): This field cannot be packed with anything else in its non-full"
+         " last byte."},
+        {ConstraintReason::SolitaryMirror,
+         "Solitary (Mirror): This field cannot be packed with any field that is mirrored."},
+        {ConstraintReason::SolitaryContainerSize,
+         "Solitary (Container size): This field was constrained with pa_container_size pragma"
+         " in a way that requires it to be solitary."},
+        {ConstraintReason::SolitaryPragma,
+         "Solitary (Pragma): This field was constrained by pa_solitary pragma."},
+        {ConstraintReason::SolitaryExceptSameDigest,
+         "Solitary (Except same digest): This field cannot be packed with anything else that"
+         " does not belong to the same digest field list."},
+        {ConstraintReason::DifferentContainer,
+         "Different Container: This field cannot be packed into same container with listed"
+         " fields or their slices."},
+        {ConstraintReason::MAUGroup,
+         "MAU Group: This field (or its particular slices) must be in the same MAU group"
+         " as other fields or slices."},
+        {ConstraintReason::NoSplit,
+         "No Split: This field must be entirely allocated to a single PHV container. "
+         "Fields that are shifted or are the destination of arithmetic operation have "
+         "this constraint."},
+        {ConstraintReason::ContainerSize,
+         "Container Size: Slices of this field can only be placed into containers of"
+         " specific sizes. Container size is in bits."},
+        {ConstraintReason::Alignment,
+         "Alignment: Field has to be placed at a given offset within a container."},
+        {ConstraintReason::NoOverlay,
+         "No Overlay: Field cannot be overlayed with any other field."},
+        {ConstraintReason::ExactContainer,
+         "Exact Container: If any field slice in a PHV container has this constraint, then the "
+         "container must be completely filled, and if it contains more than one slice, all "
+         "slices must be layed contiguously (in order). All header fields have this constraint."},
+        {ConstraintReason::EquivalentAlignment,
+         "Equivalent Alignment: Each field in this group must be placed starting at the same "
+         "least-significant bit in their respective PHV containers. This constraint implies "
+         "MAU Group."},
+        {ConstraintReason::NoHoles,
+         "No Holes: Field can either be located entirely on a single container or be splitted "
+         "across multiple containers as long as all of the slices fit with no holes "
+         "(concatenating the containers would reconstruct the field). This constraint relaxes "
+         "Exact Containers by allowing to split the field."},
+        {ConstraintReason::SameContainerGroup,
+         "Same Container Group: All slices of this field must be present in the same MAU group. "
+         "This constraint does not imply MAU group, but it makes it stricter if it is present."}};
 
     for (auto &pair : reasons) {
         logger.append_constraint_reasons(pair.second);
@@ -775,21 +730,23 @@ void PhvLogging::logConstraintReasons() {
 
 void PhvLogging::logHeaders() {
     /// Map of all headers and their fields.
-    ordered_map<cstring, ordered_set<const PHV::Field*>> headerFields = getFields();
+    ordered_map<cstring, ordered_set<const PHV::Field *>> headerFields = getFields();
     /* Add header structures to the log file */
     for (auto kv : headerFields) {
         std::string headerName(stripThreadPrefix(kv.first));
         auto firstSlice = *kv.second.begin();
-        auto* s = new Structure(getGress(firstSlice), headerName, "header");
-        for (const auto* f : kv.second) {
+        auto *s = new Structure(getGress(firstSlice), headerName, "header");
+        for (const auto *f : kv.second) {
             auto fs = logFieldSlice(f);
-            s->append(fs); }
-        logger.append_structures(s); }
+            s->append(fs);
+        }
+        logger.append_structures(s);
+    }
 }
 
 void PhvLogging::populateContainerGroups(cstring groupType) {
     // Extract MAU group specific information from phvSpec
-    const auto& phvSpec = Device::phvSpec();
+    const auto &phvSpec = Device::phvSpec();
     // TODO: Need to model and add "tagalong" resource type
     auto phvGroup = groupType == "mau" ? PhvSpec::MAU : PhvSpec::DEPARSER;
     for (auto r : phvSpec.physicalAddressSpec(phvGroup)) {
@@ -804,7 +761,7 @@ void PhvLogging::populateContainerGroups(cstring groupType) {
 }
 
 /// @returns a string indicating the type of the container.
-const char * PhvLogging::containerType(const PHV::Container c) const {
+const char *PhvLogging::containerType(const PHV::Container c) const {
     if (c.is(PHV::Kind::normal)) return "normal";
     if (c.is(PHV::Kind::tagalong)) return "tagalong";
     if (c.is(PHV::Kind::mocha)) return "mocha";
@@ -813,7 +770,7 @@ const char * PhvLogging::containerType(const PHV::Container c) const {
     return "normal";
 }
 
-const char * PhvLogging::getFieldType(const PHV::Field* f) const {
+const char *PhvLogging::getFieldType(const PHV::Field *f) const {
     // How to identify compiler added fields ($?)
     if (f->padding) return "padding";
     if (f->bridged) return "bridged";
@@ -824,13 +781,13 @@ const char * PhvLogging::getFieldType(const PHV::Field* f) const {
     return "pkt";
 }
 
-const char * PhvLogging::getGress(const PHV::Field* f) const {
+const char *PhvLogging::getGress(const PHV::Field *f) const {
     if (f->gress == INGRESS) return "ingress";
     if (f->gress == EGRESS) return "egress";
     return "ghost";
 }
 
-const char * PhvLogging::getDeparserAccessType(const PHV::Field* f) const {
+const char *PhvLogging::getDeparserAccessType(const PHV::Field *f) const {
     if (f->is_intrinsic()) return "imeta";
     if (f->bridged) return "bridge";
     if (f->pov) return "pov";
@@ -852,8 +809,8 @@ std::string PhvLogging::stripDotPrefix(const cstring name) const {
     return name.substr(1).c_str();
 }
 
-void
-PhvLogging::getAllDeparserUses(const PHV::Field* f, ordered_set<PhvLogging::PardeInfo>& rv) const {
+void PhvLogging::getAllDeparserUses(const PHV::Field *f,
+                                    ordered_set<PhvLogging::PardeInfo> &rv) const {
     if (f->padding) return;
     LOG4("Deparser uses of Field: " << f);
     if (auto uses = defuseInfo.deparser_uses.find(f->id); uses != defuseInfo.deparser_uses.end()) {
@@ -865,8 +822,8 @@ PhvLogging::getAllDeparserUses(const PHV::Field* f, ordered_set<PhvLogging::Pard
     }
 }
 
-void
-PhvLogging::getAllParserDefs(const PHV::Field* f, ordered_set<PhvLogging::PardeInfo>& rv) const {
+void PhvLogging::getAllParserDefs(const PHV::Field *f,
+                                  ordered_set<PhvLogging::PardeInfo> &rv) const {
     if (f->padding) return;
     // Check for any aliases - this sweeps and collects all of the
     // aliesed fields' defs (for example when all of the extracts
@@ -882,95 +839,77 @@ PhvLogging::getAllParserDefs(const PHV::Field* f, ordered_set<PhvLogging::PardeI
     }
 }
 
-void
-PhvLogging::addPardeReadsAndWrites(const PHV::Field* f, ordered_set<PhvLogging::PardeInfo>& rv,
-                                   Phv_Schema_Logger::ContainerSlice *cs) const {
+void PhvLogging::addPardeReadsAndWrites(const PHV::Field *f, ordered_set<PhvLogging::PardeInfo> &rv,
+                                        Phv_Schema_Logger::ContainerSlice *cs) const {
     LOG4("Adding parde reads and writes for Field: " << f);
     auto dType = getDeparserAccessType(f);
-    std::for_each(rv.begin(), rv.end(),
-                  [&](const PardeInfo& entry) {
-                      if (entry.unit == "parser") {
-                          std::string parserStateName(stripThreadPrefix(entry.parserState));
-                          cs->append_writes(new Access(ParserLocation("ibuf",
-                                                                      parserStateName,
-                                                                      entry.unit))); }
-                      else if (entry.unit == "deparser" && strcmp(dType, "none") != 0)
-                          cs->append_reads(new Access(DeparserLocation(dType,
-                                                                       entry.unit)));
-                  });
+    std::for_each(rv.begin(), rv.end(), [&](const PardeInfo &entry) {
+        if (entry.unit == "parser") {
+            std::string parserStateName(stripThreadPrefix(entry.parserState));
+            cs->append_writes(new Access(ParserLocation("ibuf", parserStateName, entry.unit)));
+        } else if (entry.unit == "deparser" && strcmp(dType, "none") != 0)
+            cs->append_reads(new Access(DeparserLocation(dType, entry.unit)));
+    });
 }
 
-void
-PhvLogging::addTableKeys(const PHV::FieldSlice &sl, Phv_Schema_Logger::ContainerSlice *cs) const {
+void PhvLogging::addTableKeys(const PHV::FieldSlice &sl,
+                              Phv_Schema_Logger::ContainerSlice *cs) const {
     LOG4("Adding input xbar read for slice: " << sl);
     if (info.sliceXbarToTables.count(sl)) {
-        for (auto& tableName : info.sliceXbarToTables.at(sl)) {
-            if (tableAlloc.count(tableName) == 0)
-                continue;
+        for (auto &tableName : info.sliceXbarToTables.at(sl)) {
+            if (tableAlloc.count(tableName) == 0) continue;
             for (int logicalID : tableAlloc.at(tableName))
-                cs->append_reads(new Access(MAULocation("xbar",
-                                                        logicalID/16,
-                                                        "mau",
-                                                        "" /* action_name */,
-                                                        stripDotPrefix(tableName))));
+                cs->append_reads(
+                    new Access(MAULocation("xbar", logicalID / 16, "mau", "" /* action_name */,
+                                           stripDotPrefix(tableName))));
         }
     }
 }
 
-void
-PhvLogging::addVLIWReads(const PHV::FieldSlice& sl, Phv_Schema_Logger::ContainerSlice *cs) const {
+void PhvLogging::addVLIWReads(const PHV::FieldSlice &sl,
+                              Phv_Schema_Logger::ContainerSlice *cs) const {
     LOG4("Adding VLIW Read for slice: " << sl);
     if (info.sliceReadToActions.count(sl)) {
         LOG4("  Found VLIW read for this slice");
-        for (const IR::MAU::Action* act : info.sliceReadToActions.at(sl)) {
-            if (info.actionsToTables.count(act) == 0)
-                continue;
-            const IR::MAU::Table* t = info.actionsToTables.at(act);
-            if (info.tableNames.count(t->name) == 0)
-                continue;
+        for (const IR::MAU::Action *act : info.sliceReadToActions.at(sl)) {
+            if (info.actionsToTables.count(act) == 0) continue;
+            const IR::MAU::Table *t = info.actionsToTables.at(act);
+            if (info.tableNames.count(t->name) == 0) continue;
             std::string tableName(info.tableNames.at(t->name));
             std::string actionName(cstring(act->name));
-            if (tableAlloc.count(tableName) == 0)
-                continue;
+            if (tableAlloc.count(tableName) == 0) continue;
             for (int logicalID : tableAlloc.at(tableName))
-                cs->append_reads(new Access(MAULocation("vliw",
-                                                        logicalID/16,
-                                                        "mau",
-                                                        stripDotPrefix(actionName),
-                                                        stripDotPrefix(tableName))));
+                cs->append_reads(
+                    new Access(MAULocation("vliw", logicalID / 16, "mau",
+                                           stripDotPrefix(actionName), stripDotPrefix(tableName))));
         }
     }
 }
 
-void
-PhvLogging::addVLIWWrites(const PHV::FieldSlice& sl, Phv_Schema_Logger::ContainerSlice *cs) const {
+void PhvLogging::addVLIWWrites(const PHV::FieldSlice &sl,
+                               Phv_Schema_Logger::ContainerSlice *cs) const {
     LOG4("Adding VLIW Write for slice: " << sl);
     if (info.sliceWriteToActions.count(sl)) {
-        for (const IR::MAU::Action* act : info.sliceWriteToActions.at(sl)) {
-            if (info.actionsToTables.count(act) == 0)
-                continue;
-            const IR::MAU::Table* t = info.actionsToTables.at(act);
-            if (info.tableNames.count(t->name) == 0)
-                continue;
+        for (const IR::MAU::Action *act : info.sliceWriteToActions.at(sl)) {
+            if (info.actionsToTables.count(act) == 0) continue;
+            const IR::MAU::Table *t = info.actionsToTables.at(act);
+            if (info.tableNames.count(t->name) == 0) continue;
             std::string tableName(info.tableNames.at(t->name));
             std::string actionName(cstring(act->name));
             LOG4("Table name in VLIW write: " << tableName);
-            if (tableAlloc.count(tableName) == 0)
-                continue;
+            if (tableAlloc.count(tableName) == 0) continue;
             for (int logicalID : tableAlloc.at(tableName))
-                cs->append_writes(new Access(MAULocation("vliw",
-                                                         logicalID/16,
-                                                         "mau",
-                                                         stripDotPrefix(actionName),
-                                                         stripDotPrefix(tableName))));
+                cs->append_writes(
+                    new Access(MAULocation("vliw", logicalID / 16, "mau",
+                                           stripDotPrefix(actionName), stripDotPrefix(tableName))));
         }
     }
 }
 
-void PhvLogging::addMutexFields(const PHV::AllocSlice& sl,
-                           Phv_Schema_Logger::ContainerSlice *cs) const {
+void PhvLogging::addMutexFields(const PHV::AllocSlice &sl,
+                                Phv_Schema_Logger::ContainerSlice *cs) const {
     LOG4("Adding mutually exclusive fields for slice: " << sl);
-    for (const auto* f2 : phv.fields_in_container(sl.container())) {
+    for (const auto *f2 : phv.fields_in_container(sl.container())) {
         if (phv.isFieldMutex(sl.field(), f2)) {
             std::string fieldName(stripThreadPrefix(f2->name));
             cs->append_mutually_exclusive_with(fieldName);
@@ -979,13 +918,13 @@ void PhvLogging::addMutexFields(const PHV::AllocSlice& sl,
 }
 
 void PhvLogging::logContainers() {
-    const auto& phvSpec = Device::phvSpec();
+    const auto &phvSpec = Device::phvSpec();
     // Populate container structures.
     ordered_map<const PHV::Container, ordered_set<PHV::AllocSlice>> allocation;
     auto aliases = getFieldAliases();
-    for (auto& field : phv) {
-        for (auto& slice : field.get_alloc())
-            allocation[slice.container()].insert(slice); }
+    for (auto &field : phv) {
+        for (auto &slice : field.get_alloc()) allocation[slice.container()].insert(slice);
+    }
 
     for (auto kv : allocation) {
         auto c = kv.first;
@@ -1002,18 +941,17 @@ void PhvLogging::logContainers() {
         }
         // Get gress associated with the field slices in this container
         auto firstSlice = *kv.second.begin();
-        auto containerEntry = new Container(c.size(), containerType(c),
-                                            getGress(firstSlice.field()),
-                                            deparserGroupId, mauGroupId,
-                                            cid);
+        auto containerEntry =
+            new Container(c.size(), containerType(c), getGress(firstSlice.field()), deparserGroupId,
+                          mauGroupId, cid);
         for (auto sl : kv.second) {
             bool use_alias = (aliases.count(sl.field()) > 0);
             auto f = use_alias ? aliases[sl.field()] : sl.field();
-            f->foreach_alloc([&](const PHV::AllocSlice& alloc) {
-               if (alloc.container() == sl.container()
-                    && alloc.field_slice().lo == sl.field_slice().lo
-                    && alloc.container_slice().lo == sl.container_slice().lo
-                    && alloc.width() == sl.width())
+            f->foreach_alloc([&](const PHV::AllocSlice &alloc) {
+                if (alloc.container() == sl.container() &&
+                    alloc.field_slice().lo == sl.field_slice().lo &&
+                    alloc.container_slice().lo == sl.container_slice().lo &&
+                    alloc.width() == sl.width())
                     sl = alloc;
             });
             auto cs = logContainerSlice(sl, use_alias);

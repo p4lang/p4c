@@ -10,8 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_IR_TOFINO_WRITE_CONTEXT_H_
-#define EXTENSIONS_BF_P4C_IR_TOFINO_WRITE_CONTEXT_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_IR_TOFINO_WRITE_CONTEXT_H_
+#define BACKENDS_TOFINO_BF_P4C_IR_TOFINO_WRITE_CONTEXT_H_
 
 #include "ir/ir.h"
 
@@ -38,4 +38,4 @@ class TofinoWriteContext : public P4WriteContext {
     bool isIxbarRead(bool root_value = false);
 };
 
-#endif /* EXTENSIONS_BF_P4C_IR_TOFINO_WRITE_CONTEXT_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_IR_TOFINO_WRITE_CONTEXT_H_ */

@@ -10,17 +10,19 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include <optional>
-#include <boost/algorithm/string/replace.hpp>
-#include "gtest/gtest.h"
+#include "bf-p4c/phv/pragma/pa_atomic.h"
 
+#include <optional>
+
+#include <boost/algorithm/string/replace.hpp>
+
+#include "bf-p4c/common/header_stack.h"
+#include "bf-p4c/phv/phv_fields.h"
+#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "gtest/gtest.h"
 #include "ir/ir.h"
 #include "lib/error.h"
 #include "test/gtest/helpers.h"
-#include "bf-p4c/common/header_stack.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/pragma/pa_atomic.h"
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
 
 namespace P4::Test {
 
@@ -28,8 +30,7 @@ class PaAtomicPragmaTest : public TofinoBackendTest {};
 
 namespace {
 
-std::optional<TofinoPipeTestCase>
-createPaAtomicPragmaTestCase(const std::string& pragmas) {
+std::optional<TofinoPipeTestCase> createPaAtomicPragmaTestCase(const std::string &pragmas) {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
         %PRAGMAS%
         header H1
@@ -72,7 +73,7 @@ createPaAtomicPragmaTestCase(const std::string& pragmas) {
 
     boost::replace_first(source, "%PRAGMAS%", pragmas);
 
-    auto& options = BackendOptions();
+    auto &options = BackendOptions();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.target = "tofino"_cs;
     options.arch = "v1model"_cs;
@@ -81,23 +82,17 @@ createPaAtomicPragmaTestCase(const std::string& pragmas) {
     return TofinoPipeTestCase::createWithThreadLocalInstances(source);
 }
 
-const IR::BFN::Pipe *runMockPasses(const IR::BFN::Pipe* pipe,
-                                   PhvInfo& phv,
-                                   PragmaAtomic& pa_atomic) {
-    PassManager quick_backend = {
-        new CollectHeaderStackInfo,
-        new CollectPhvInfo(phv),
-        &pa_atomic
-    };
+const IR::BFN::Pipe *runMockPasses(const IR::BFN::Pipe *pipe, PhvInfo &phv,
+                                   PragmaAtomic &pa_atomic) {
+    PassManager quick_backend = {new CollectHeaderStackInfo, new CollectPhvInfo(phv), &pa_atomic};
     return pipe->apply(quick_backend);
 }
 
 }  // namespace
 
 TEST_F(PaAtomicPragmaTest, Basic) {
-    auto test = createPaAtomicPragmaTestCase(
-            P4_SOURCE(P4Headers::NONE,
-                      R"(
+    auto test = createPaAtomicPragmaTestCase(P4_SOURCE(P4Headers::NONE,
+                                                       R"(
                          @pa_atomic("ingress", "h1.f3")
                          @pa_atomic("ingress", "h1.f4")
                          )"));
@@ -107,8 +102,8 @@ TEST_F(PaAtomicPragmaTest, Basic) {
     PragmaAtomic pa_atomic(phv);
     runMockPasses(test->pipe, phv, pa_atomic);
 
-    auto* h1_f4 = phv.field("ingress::h1.f4"_cs);
-    auto* h1_f3 = phv.field("ingress::h1.f3"_cs);
+    auto *h1_f4 = phv.field("ingress::h1.f4"_cs);
+    auto *h1_f3 = phv.field("ingress::h1.f3"_cs);
 
     EXPECT_EQ(h1_f3->no_split(), true);
     EXPECT_EQ(h1_f4->no_split(), false);  // skip if field greater than 32b

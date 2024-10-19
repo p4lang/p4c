@@ -4,19 +4,26 @@
 This script produces a metrics file from an input resources.json file.
 """
 
-import json, jsonschema, logging, math, os, sys
+import json
+import logging
+import math
+import os
+import sys
 from collections import OrderedDict
+
+import jsonschema
+
 from .utils import *
 
-if not getattr(sys,'frozen', False):
+if not getattr(sys, 'frozen', False):
     # standalone script
     MYPATH = os.path.dirname(__file__)
     SCHEMA_PATH = os.path.join(MYPATH, "../")
     sys.path.append(SCHEMA_PATH)
-from schemas.phv_schema import PhvJSONSchema
 from schemas.metrics_schema import MetricsJSONSchema
-from schemas.schema_keys import *
+from schemas.phv_schema import PhvJSONSchema
 from schemas.schema_enum_values import *
+from schemas.schema_keys import *
 
 # The minimum resources.json schema version required.
 MINIMUM_RESOURCES_JSON_REQUIRED = "1.0.5"
@@ -30,7 +37,7 @@ MINIMUM_POWER_JSON_REQUIRED = "1.0.0"
 MINIMUM_MANIFEST_JSON_REQUIRED = "2.0.0"
 RESULTS_JSON = "metrics.json"
 METRICS_SCHEMA_VERSION = "1.1.0"  # the schema version produced
-DIV = "-"*40
+DIV = "-" * 40
 
 
 class ContainerUsage(object):
@@ -219,12 +226,21 @@ class ParserUsage(object):
         for g in self.tcam_rows:
             self.tcam_rows[g] += other.tcam_rows[g]
 
+
 class MauUsage(object):
     def __init__(self, resource_cnt=None):
         # dictionary that maps resource name to total usage
         self.resource_count = {}
         # required resources that are part of metrics schema
-        req = [SRAMS, TCAMS, MAP_RAMS, LOGICAL_TABLES, ACTION_BUS_BYTES, EXACT_CROSSBAR_BYTES, TERNARY_CROSSBAR_BYTES]
+        req = [
+            SRAMS,
+            TCAMS,
+            MAP_RAMS,
+            LOGICAL_TABLES,
+            ACTION_BUS_BYTES,
+            EXACT_CROSSBAR_BYTES,
+            TERNARY_CROSSBAR_BYTES,
+        ]
         for resource in req:
             self.resource_count[resource] = 0
         if resource_cnt is not None:
@@ -235,13 +251,15 @@ class MauUsage(object):
 
     def __str__(self):
         to_ret = "%s\nMAU Usage\n%s" % (DIV, DIV)
-        props = [("SRAM", self.resource_count[SRAMS]),
-                 ("TCAM", self.resource_count[TCAMS]),
-                 ("MapRAM", self.resource_count[MAP_RAMS]),
-                 ("Logical Tables", self.resource_count[LOGICAL_TABLES]),
-                 ("Action Data Bus Bytes", self.resource_count[ACTION_BUS_BYTES]),
-                 ("Exact Match Crossbar", self.resource_count[EXACT_CROSSBAR_BYTES]),
-                 ("Ternary Match Crossbar", self.resource_count[TERNARY_CROSSBAR_BYTES])]
+        props = [
+            ("SRAM", self.resource_count[SRAMS]),
+            ("TCAM", self.resource_count[TCAMS]),
+            ("MapRAM", self.resource_count[MAP_RAMS]),
+            ("Logical Tables", self.resource_count[LOGICAL_TABLES]),
+            ("Action Data Bus Bytes", self.resource_count[ACTION_BUS_BYTES]),
+            ("Exact Match Crossbar", self.resource_count[EXACT_CROSSBAR_BYTES]),
+            ("Ternary Match Crossbar", self.resource_count[TERNARY_CROSSBAR_BYTES]),
+        ]
         # TODO: Add others as see fit
         for name, value in props:
             to_ret += "\n  %s: %d" % (name, value)
@@ -292,6 +310,7 @@ class MauUsage(object):
     def update_power(self, gress, value):
         self.power[gress] = value
 
+
 class DeparserUsage(object):
     def __init__(self, pov_bits=None, fde_entries=None):
         if pov_bits is None:
@@ -333,6 +352,7 @@ class DeparserUsage(object):
             self.pov_bits[g] += other.pov_bits[g]
         for g in self.fde_entries:
             self.fde_entries[g] += other.fde_entries[g]
+
 
 class ClotUsage(object):
     def __init__(self):
@@ -376,18 +396,22 @@ class ClotUsage(object):
         self.all_allocated_bits[gress] += num_bits_in_clots
 
         # Only count the field if it is unused.
-        if get_attr(IS_READONLY, field) \
-                or get_attr(IS_MODIFIED, field) \
-                or get_attr(IS_CHECKSUM, field):
+        if (
+            get_attr(IS_READONLY, field)
+            or get_attr(IS_MODIFIED, field)
+            or get_attr(IS_CHECKSUM, field)
+        ):
             return
 
         self.allocated_bits[gress] += num_bits_in_clots
         self.unallocated_bits[gress] += bit_width - num_bits_in_clots
         self.redundant_phv_bits[gress] += num_bits_in_clots + num_bits_in_phvs - bit_width
 
+
 # ----------------------------------------
 #  Produce log file
 # ----------------------------------------
+
 
 def _parse_manifest_json(context):
 
@@ -400,6 +424,7 @@ def _parse_manifest_json(context):
     compilation_time = get_attr(COMPILATION_TIME, context)
 
     return compilation_time
+
 
 def _parse_power_json(context):
 
@@ -428,6 +453,7 @@ def _parse_power_json(context):
 
     return mau_latency, mau_power
 
+
 def _parse_context_json(context):
 
     schema_version = get_attr(SCHEMA_VERSION, context)
@@ -439,6 +465,7 @@ def _parse_context_json(context):
     target = get_attr(TARGET_KEY, context)
 
     return target
+
 
 def _parse_phv_json(context):
 
@@ -454,7 +481,9 @@ def _parse_phv_json(context):
     else:
         phv_usage = Tofino2PhvUsage()
 
-    summary = {}  # dictionary from container type to dictionary from sizes to dictionary of address to ContainerUsage
+    summary = (
+        {}
+    )  # dictionary from container type to dictionary from sizes to dictionary of address to ContainerUsage
 
     containers = get_attr(CONTAINERS, context)
     for c in containers:
@@ -468,7 +497,9 @@ def _parse_phv_json(context):
         if bit_width not in summary[container_type]:
             summary[container_type][bit_width] = {}
         if phv_number not in summary[container_type][bit_width]:
-            summary[container_type][bit_width][phv_number] = ContainerUsage(phv_number, container_type)
+            summary[container_type][bit_width][phv_number] = ContainerUsage(
+                phv_number, container_type
+            )
 
         cusage = summary[container_type][bit_width][phv_number]
         for r in slices:
@@ -499,6 +530,7 @@ def _parse_phv_json(context):
 
     return phv_usage
 
+
 def _parse_resources_json(context):
 
     parser_usage = ParserUsage()
@@ -526,21 +558,23 @@ def _parse_resources_json(context):
         s[gress] = len(states)
         parser_usage.add(ParserUsage(tcam_rows=s))
 
-
     mau = get_attr(MAU, resources)
     mau_stages = get_attr(MAU_STAGES, mau)
 
     for mau_stage in mau_stages:
         stage_number = get_attr(STAGE_NUMBER, mau_stage)
 
-        #------------------------------------------------------------------------------
+        # ------------------------------------------------------------------------------
         xbar_bytes = get_attr(XBAR_BYTES, mau_stage)
         bytes = get_attr(BYTES, xbar_bytes)
         type_to_cnt = {EXACT: 0, TERNARY: 0}
         for b in bytes:
             byte_type = get_attr(BYTE_TYPE, b)
             type_to_cnt[byte_type] += 1
-        rcnt = {EXACT_CROSSBAR_BYTES: type_to_cnt[EXACT], TERNARY_CROSSBAR_BYTES: type_to_cnt[TERNARY]}
+        rcnt = {
+            EXACT_CROSSBAR_BYTES: type_to_cnt[EXACT],
+            TERNARY_CROSSBAR_BYTES: type_to_cnt[TERNARY],
+        }
         mau_usage.add(MauUsage(rcnt))
 
         # ------------------------------------------------------------------------------
@@ -655,7 +689,8 @@ def _parse_resources_json(context):
         clots = get_attr(CLOTS, resources)
         for gress in [INGRESS, EGRESS]:
             for clot in clots:
-                if gress != get_attr(GRESS, clot): continue
+                if gress != get_attr(GRESS, clot):
+                    continue
                 fields = get_attr(CLOT_ELIGIBLE_FIELDS, clot)
                 for field in fields:
                     clot_usage.add(gress, field)
@@ -665,11 +700,21 @@ def _parse_resources_json(context):
     run_id = get_attr(RUN_ID, context)
     program_name = get_attr(PROGRAM_NAME, context)
 
-    return compiler_version, build_date, run_id, program_name, \
-           parser_usage, mau_usage, deparser_usage, clot_usage
+    return (
+        compiler_version,
+        build_date,
+        run_id,
+        program_name,
+        parser_usage,
+        mau_usage,
+        deparser_usage,
+        clot_usage,
+    )
 
 
-def produce_metrics(context_source, resources_source, phv_source, power_source, manifest_source, output):
+def produce_metrics(
+    context_source, resources_source, phv_source, power_source, manifest_source, output
+):
     # Note: power_source and manifest_source are allowed to be None.
 
     # Load and parse context JSON
@@ -688,8 +733,16 @@ def produce_metrics(context_source, resources_source, phv_source, power_source, 
         resources_json_file.close()
     except:
         print_error_and_exit("Unable to open JSON file '%s'" % str(resources_source))
-    compiler_version, build_date, run_id, program_name, \
-        parser_usage, mau_usage, deparser_usage, clot_usage = _parse_resources_json(resources_context)
+    (
+        compiler_version,
+        build_date,
+        run_id,
+        program_name,
+        parser_usage,
+        mau_usage,
+        deparser_usage,
+        clot_usage,
+    ) = _parse_resources_json(resources_context)
 
     # Load and parse phv JSON
     try:
@@ -729,7 +782,6 @@ def produce_metrics(context_source, resources_source, phv_source, power_source, 
             print_error_and_exit("Unable to open JSON file '%s'" % str(manifest_source))
         compilation_time = _parse_manifest_json(manifest_context)
 
-
     # Dump JSON
     metric_json = OrderedDict()
     metric_json[PROGRAM_NAME] = program_name
@@ -760,18 +812,32 @@ if __name__ == "__main__":
     import sys
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('context', metavar='context', type=str,
-                        help='The input context.json source file to use.')
-    parser.add_argument('resources', metavar='resources', type=str,
-                        help='The input resources.json source file to use.')
-    parser.add_argument('phv', metavar='phv', type=str,
-                        help='The input phv.json source file to use.')
-    parser.add_argument('power', metavar='power', type=str,
-                        help='The input power.json source file to use.')
-    parser.add_argument('manifest', metavar='manifest', type=str,
-                        help='The input manifest.json source file to use.')
-    parser.add_argument('--output', '-o', type=str, action="store", default=".",
-                        help="The output directory to output %s." % RESULTS_JSON)
+    parser.add_argument(
+        'context', metavar='context', type=str, help='The input context.json source file to use.'
+    )
+    parser.add_argument(
+        'resources',
+        metavar='resources',
+        type=str,
+        help='The input resources.json source file to use.',
+    )
+    parser.add_argument(
+        'phv', metavar='phv', type=str, help='The input phv.json source file to use.'
+    )
+    parser.add_argument(
+        'power', metavar='power', type=str, help='The input power.json source file to use.'
+    )
+    parser.add_argument(
+        'manifest', metavar='manifest', type=str, help='The input manifest.json source file to use.'
+    )
+    parser.add_argument(
+        '--output',
+        '-o',
+        type=str,
+        action="store",
+        default=".",
+        help="The output directory to output %s." % RESULTS_JSON,
+    )
     args = parser.parse_args()
 
     try:
@@ -783,8 +849,9 @@ if __name__ == "__main__":
     return_code = SUCCESS
     err_msg = ""
     try:
-        return_code, err_msg = produce_metrics(args.context, args.resources, args.phv, args.power,
-                                               args.manifest, args.output)
+        return_code, err_msg = produce_metrics(
+            args.context, args.resources, args.phv, args.power, args.manifest, args.output
+        )
     except:
         # import traceback
         # print(traceback.format_exc())

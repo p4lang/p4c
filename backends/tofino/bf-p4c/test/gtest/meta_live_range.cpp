@@ -10,27 +10,28 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+#include "bf-p4c/phv/analysis/meta_live_range.h"
+
 #include <initializer_list>
 #include <optional>
 #include <vector>
+
 #include <boost/algorithm/string/replace.hpp>
 
+#include "bf-p4c/common/elim_unused.h"
+#include "bf-p4c/common/field_defuse.h"
+#include "bf-p4c/common/header_stack.h"
+#include "bf-p4c/ir/gress.h"
+#include "bf-p4c/mau/instruction_selection.h"
+#include "bf-p4c/mau/table_dependency_graph.h"
+#include "bf-p4c/phv/mau_backtracker.h"
+#include "bf-p4c/phv/phv_fields.h"
+#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
 #include "gtest/gtest.h"
-
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
 #include "test/gtest/helpers.h"
-#include "bf-p4c/ir/gress.h"
-#include "bf-p4c/common/elim_unused.h"
-#include "bf-p4c/common/field_defuse.h"
-#include "bf-p4c/common/header_stack.h"
-#include "bf-p4c/phv/mau_backtracker.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/mau/table_dependency_graph.h"
-#include "bf-p4c/mau/instruction_selection.h"
-#include "bf-p4c/phv/analysis/meta_live_range.h"
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
 
 namespace P4::Test {
 
@@ -38,8 +39,7 @@ class MetadataLiveRangeTest : public TofinoBackendTest {};
 
 namespace {
 
-std::optional<TofinoPipeTestCase>
-createMetadataLiveRangeTestCase(const std::string& mauSource) {
+std::optional<TofinoPipeTestCase> createMetadataLiveRangeTestCase(const std::string &mauSource) {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
 header H1
 {
@@ -88,7 +88,7 @@ V1Switch(parse(), verifyChecksum(), ingress(), egress(), computeChecksum(), depa
 
     boost::replace_first(source, "%MAU%", mauSource);
 
-    auto& options = BackendOptions();
+    auto &options = BackendOptions();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.target = "tofino"_cs;
     options.arch = "v1model"_cs;
@@ -97,41 +97,32 @@ V1Switch(parse(), verifyChecksum(), ingress(), egress(), computeChecksum(), depa
     return TofinoPipeTestCase::createWithThreadLocalInstances(source);
 }
 
-const IR::BFN::Pipe* runMockPasses(
-        const IR::BFN::Pipe* pipe,
-        PhvInfo& phv,
-        FieldDefUse& defuse,
-        DependencyGraph& deps,
-        PhvUse& uses,
-        PHV::Pragmas& pragmas,
-        MauBacktracker& entry,
-        MetadataLiveRange& metaLiveRange) {
+const IR::BFN::Pipe *runMockPasses(const IR::BFN::Pipe *pipe, PhvInfo &phv, FieldDefUse &defuse,
+                                   DependencyGraph &deps, PhvUse &uses, PHV::Pragmas &pragmas,
+                                   MauBacktracker &entry, MetadataLiveRange &metaLiveRange) {
     auto options = new BFN_Options();  // dummy options used in Pass
     std::set<cstring> zeroInitFields;
-    PassManager quick_backend = {
-        new CollectHeaderStackInfo,
-        new CollectPhvInfo(phv),
-        new GatherReductionOrReqs(deps.red_info),
-        new InstructionSelection(*options, phv, deps.red_info),
-        &defuse,
-        new ElimUnused(phv, defuse, zeroInitFields),
-        new ElimUnusedHeaderStackInfo,
-        new CollectPhvInfo(phv),
-        &entry,
-        &uses,
-        &pragmas,
-        new FindDependencyGraph(phv, deps),
-        &defuse,
-        &metaLiveRange
-    };
+    PassManager quick_backend = {new CollectHeaderStackInfo,
+                                 new CollectPhvInfo(phv),
+                                 new GatherReductionOrReqs(deps.red_info),
+                                 new InstructionSelection(*options, phv, deps.red_info),
+                                 &defuse,
+                                 new ElimUnused(phv, defuse, zeroInitFields),
+                                 new ElimUnusedHeaderStackInfo,
+                                 new CollectPhvInfo(phv),
+                                 &entry,
+                                 &uses,
+                                 &pragmas,
+                                 new FindDependencyGraph(phv, deps),
+                                 &defuse,
+                                 &metaLiveRange};
     return pipe->apply(quick_backend);
 }
 
 }  // namespace
 
 TEST_F(MetadataLiveRangeTest, BasicControlFlow) {
-    auto test = createMetadataLiveRangeTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createMetadataLiveRangeTestCase(P4_SOURCE(P4Headers::NONE, R"(
 
     action do1() {
         headers.h1.f1 = 6;
@@ -218,7 +209,7 @@ TEST_F(MetadataLiveRangeTest, BasicControlFlow) {
     EXPECT_EQ(defuse.hasUninitializedRead(phv.field("ingress::meta.f1"_cs)->id), true);
     EXPECT_EQ(defuse.hasUninitializedRead(phv.field("ingress::meta.f2"_cs)->id), true);
 
-    const auto& livemap = metaLive.getMetadataLiveMap();
+    const auto &livemap = metaLive.getMetadataLiveMap();
     auto meta_f1_map = livemap.at(phv.field("ingress::meta.f1"_cs)->id);
     EXPECT_EQ(meta_f1_map.first, 2);
     EXPECT_EQ(meta_f1_map.second, 4);

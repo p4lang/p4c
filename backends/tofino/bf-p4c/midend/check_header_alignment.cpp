@@ -11,29 +11,29 @@
  */
 
 #include "bf-p4c/midend/check_header_alignment.h"
+
 #include "bf-p4c/common/bridged_packing.h"
 #include "bf-p4c/device.h"
 #include "frontends/p4/typeMap.h"
-#include "lib/pad_alignment.h"
-#include "lib/cstring.h"
-
 #include "ir/ir.h"
+#include "lib/cstring.h"
+#include "lib/pad_alignment.h"
 
 namespace BFN {
 
-bool CheckPadAssignment::preorder(const IR::AssignmentStatement* statement) {
+bool CheckPadAssignment::preorder(const IR::AssignmentStatement *statement) {
     auto member = statement->left->to<IR::Member>();
-    if (!member)
-        return false;
+    if (!member) return false;
     auto header_type = dynamic_cast<const IR::Type_StructLike *>(member->expr->type);
-    if (!header_type)
-        return false;
+    if (!header_type) return false;
     auto field = header_type->getField(member->member.name);
     if (field && field->getAnnotation("padding"_cs)) {
         if (statement->srcInfo.isValid())
-            warning(ErrorType::WARN_UNUSED, "%1%: Padding fields do not need to be explicitly "
-                      "set. Also, setting these fields can introduce PHV constraints the compiler "
-                      "may not be able to resolve.", statement);
+            warning(ErrorType::WARN_UNUSED,
+                    "%1%: Padding fields do not need to be explicitly "
+                    "set. Also, setting these fields can introduce PHV constraints the compiler "
+                    "may not be able to resolve.",
+                    statement);
     }
 
     return false;
@@ -42,35 +42,34 @@ bool CheckPadAssignment::preorder(const IR::AssignmentStatement* statement) {
 /**
  * We do not need user to byte-align headers used in Mirror/Resubmit/Digest
  */
-bool CheckHeaderAlignment::preorder(const IR::Type_Header* header) {
+bool CheckHeaderAlignment::preorder(const IR::Type_Header *header) {
     auto canonicalType = typeMap->getTypeType(header, true);
     auto found = findFlexibleAnnotation(header);
     ERROR_CHECK(canonicalType->width_bits() % 8 == 0 || found,
                 "%1% requires byte-aligned headers, but header %2% is not "
-                "byte-aligned (has %3% bits)", Device::name(), header->name,
-                canonicalType->width_bits());
+                "byte-aligned (has %3% bits)",
+                Device::name(), header->name, canonicalType->width_bits());
     return false;
 }
 
 /**
  * Pad headers used in Mirror/Resubmit/Digest emit() method to byte boundaries.
  */
-std::vector<cstring> FindPaddingCandidate::find_headers_to_pad(P4::MethodInstance* mi) {
+std::vector<cstring> FindPaddingCandidate::find_headers_to_pad(P4::MethodInstance *mi) {
     const auto all_hdrs = find_all_headers(mi);
     std::vector<cstring> retval;
-    for (const auto & structlike : all_hdrs) {
+    for (const auto &structlike : all_hdrs) {
         if (findFlexibleAnnotation(structlike)) retval.push_back(structlike->name);
     }
     return retval;
 }
 
 // This function find all headers in MethodInstance Parameters
-std::vector<const IR::Type_StructLike*>
-FindPaddingCandidate::find_all_headers(P4::MethodInstance* mi) {
-    std::vector<const IR::Type_StructLike*> retval;
+std::vector<const IR::Type_StructLike *> FindPaddingCandidate::find_all_headers(
+    P4::MethodInstance *mi) {
+    std::vector<const IR::Type_StructLike *> retval;
     for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
-        if (p->direction != IR::Direction::In)
-            continue;
+        if (p->direction != IR::Direction::In) continue;
         auto paramType = typeMap->getType(p, true);
         if (auto hdr = paramType->to<IR::Type_Header>()) {
             retval.push_back(hdr);
@@ -81,17 +80,15 @@ FindPaddingCandidate::find_all_headers(P4::MethodInstance* mi) {
     return retval;
 }
 
-void FindPaddingCandidate::check_mirror(P4::MethodInstance* mi) {
+void FindPaddingCandidate::check_mirror(P4::MethodInstance *mi) {
     auto hdrs = find_headers_to_pad(mi);
-    for (auto v : hdrs)
-        headers_to_pad->insert(v);
+    for (auto v : hdrs) headers_to_pad->insert(v);
 }
 
-void FindPaddingCandidate::check_resubmit(P4::MethodInstance* mi) {
+void FindPaddingCandidate::check_resubmit(P4::MethodInstance *mi) {
     // This hdr means headers that have flexible fields, but it does not decide if it is resubmit
     const auto hdrs_to_pad = find_headers_to_pad(mi);
-    for (const auto v : hdrs_to_pad)
-        headers_to_pad->insert(v);
+    for (const auto v : hdrs_to_pad) headers_to_pad->insert(v);
     // If it is in Resubmit()'s arguments, then it is a resubmit header regardless whether it has
     // flexible fields or not.
     const auto all_resubmit_hdrs = find_all_headers(mi);
@@ -101,21 +98,22 @@ void FindPaddingCandidate::check_resubmit(P4::MethodInstance* mi) {
     }
 }
 
-void FindPaddingCandidate::check_digest(P4::MethodInstance* mi) {
+void FindPaddingCandidate::check_digest(P4::MethodInstance *mi) {
     auto em = mi->to<P4::ExternMethod>();
     if (!em) return;
     for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
         if (auto hdr = p->type->to<IR::Type_Header>()) {
             auto decl = all_header_types->at(hdr->name);
             if (findFlexibleAnnotation(decl)) {
-                LOG3("  found flexible annotation in " << decl->name <<
-                        ", add as padding candidate");
-                headers_to_pad->insert(decl->name); }
+                LOG3("  found flexible annotation in " << decl->name
+                                                       << ", add as padding candidate");
+                headers_to_pad->insert(decl->name);
+            }
         }
     }
 }
 
-bool FindPaddingCandidate::preorder(const IR::MethodCallExpression* method) {
+bool FindPaddingCandidate::preorder(const IR::MethodCallExpression *method) {
     auto mi = P4::MethodInstance::resolve(method, refMap, typeMap);
     if (auto *em = mi->to<P4::ExternMethod>()) {
         cstring externName = em->actualExternType->name;
@@ -131,20 +129,18 @@ bool FindPaddingCandidate::preorder(const IR::MethodCallExpression* method) {
     return false;
 }
 
-bool FindPaddingCandidate::preorder(const IR::Type_Header* type) {
+bool FindPaddingCandidate::preorder(const IR::Type_Header *type) {
     all_header_types->emplace(type->name, type);
     return false;
 }
 
-const IR::Node* AddPaddingFields::preorder(IR::Type_Header* header) {
-    if (!headers_to_pad->count(header->name) &&
-            !findFlexibleAnnotation(header))
-        return header;
+const IR::Node *AddPaddingFields::preorder(IR::Type_Header *header) {
+    if (!headers_to_pad->count(header->name) && !findFlexibleAnnotation(header)) return header;
     IR::IndexedVector<IR::StructField> structFields;
     unsigned padFieldId = 0;
     int programmer_inserted_padding = 0;
-    for (auto& field : header->fields) {
-        const IR::Type* canonicalType;
+    for (auto &field : header->fields) {
+        const IR::Type *canonicalType;
         if (field->type->is<IR::Type_Name>())
             canonicalType = typeMap->getTypeType(field->type, true);
         else
@@ -156,17 +152,19 @@ const IR::Node* AddPaddingFields::preorder(IR::Type_Header* header) {
         auto packed = field->getAnnotation("packed"_cs);
         if (packed != nullptr) {
             structFields.push_back(field);
-            continue; }
+            continue;
+        }
         // If field has @padding annotation, it is treated as a padding field.
         // remove all other annotations on the field, especially the @flexible
         // annotation which could be introduced by header flattening.
         auto hidden = field->getAnnotation("padding"_cs);
         if (hidden != nullptr) {
-            auto *fieldAnnotations = new IR::Annotations({
-                new IR::Annotation(IR::ID("padding"), {})});
+            auto *fieldAnnotations =
+                new IR::Annotations({new IR::Annotation(IR::ID("padding"), {})});
             structFields.push_back(new IR::StructField(field->name, fieldAnnotations, field->type));
             programmer_inserted_padding += canonicalType->width_bits();
-            continue; }
+            continue;
+        }
         // Add padding field for every bridged metadata field to ensure that the resulting
         // header is byte aligned.
         auto total_bit_size = canonicalType->width_bits() + programmer_inserted_padding;
@@ -174,8 +172,8 @@ const IR::Node* AddPaddingFields::preorder(IR::Type_Header* header) {
         if (alignment != 0) {
             cstring padFieldName = "__pad_"_cs;
             padFieldName += cstring::to_cstring(padFieldId++);
-            auto *fieldAnnotations = new IR::Annotations({
-                    new IR::Annotation(IR::ID("padding"), {})});
+            auto *fieldAnnotations =
+                new IR::Annotations({new IR::Annotation(IR::ID("padding"), {})});
             structFields.push_back(new IR::StructField(padFieldName, fieldAnnotations,
                                                        IR::Type::Bits::get(alignment)));
             programmer_inserted_padding = 0;
@@ -183,24 +181,22 @@ const IR::Node* AddPaddingFields::preorder(IR::Type_Header* header) {
         structFields.push_back(field);
     }
 
-    auto retval = new IR::Type_Header(header->srcInfo, header->name,
-            header->annotations, structFields);
+    auto retval =
+        new IR::Type_Header(header->srcInfo, header->name, header->annotations, structFields);
     LOG6("rewrite flexible struct " << retval);
     return retval;
 }
 
-const IR::Node* AddPaddingFields::preorder(IR::StructExpression *st) {
+const IR::Node *AddPaddingFields::preorder(IR::StructExpression *st) {
     auto origType = typeMap->getType(st->structType)->to<IR::Type_Type>();
     BUG_CHECK(origType, "Expected %1% to be a type", st->structType);
-    if (!origType->type->is<IR::Type_Header>())
-        return st;
+    if (!origType->type->is<IR::Type_Header>()) return st;
 
     auto type = st->type->to<IR::Type_Header>();
     BUG_CHECK(type, "Expected %1% to have a header type", st);
 
     auto type_name = type->name;
-    if (!headers_to_pad->count(type_name))
-        return st;
+    if (!headers_to_pad->count(type_name)) return st;
 
     LOG3(" start modifying ");
     IR::IndexedVector<IR::NamedExpression> components;
@@ -215,8 +211,8 @@ const IR::Node* AddPaddingFields::preorder(IR::StructExpression *st) {
     int index = 0;
     int padFieldId = 0;
     int programmer_inserted_padding = 0;
-    for (auto& field : header->fields) {
-        const IR::Type* canonicalType;
+    for (auto &field : header->fields) {
+        const IR::Type *canonicalType;
         if (field->type->is<IR::Type_Name>())
             canonicalType = typeMap->getTypeType(field->type, true);
         else
@@ -234,8 +230,8 @@ const IR::Node* AddPaddingFields::preorder(IR::StructExpression *st) {
             if (alignment != 0) {
                 cstring padFieldName = "__pad_"_cs;
                 padFieldName += cstring::to_cstring(padFieldId++);
-                components.push_back(new IR::NamedExpression(padFieldName,
-                            new IR::Constant(IR::Type::Bits::get(alignment), 0)));
+                components.push_back(new IR::NamedExpression(
+                    padFieldName, new IR::Constant(IR::Type::Bits::get(alignment), 0)));
                 programmer_inserted_padding = 0;
             }
         }
@@ -248,7 +244,7 @@ const IR::Node* AddPaddingFields::preorder(IR::StructExpression *st) {
     return retval;
 }
 
-const IR::Node* TransformResubmitHeaders::preorder(IR::Type_Header* header) {
+const IR::Node *TransformResubmitHeaders::preorder(IR::Type_Header *header) {
     /**
      * header used in resubmit is special, it must always be 64bit in size.
      * We use a special IR node so that flexible_packing knows how to deal with
@@ -256,8 +252,10 @@ const IR::Node* TransformResubmitHeaders::preorder(IR::Type_Header* header) {
      */
     if (resubmit_headers->count(header->name)) {
         LOG3("rewrite resubmit header as fixed size");
-        return new IR::BFN::Type_FixedSizeHeader(header->srcInfo, header->name,
-            header->annotations, header->fields, Device::pardeSpec().bitResubmitSize()); }
+        return new IR::BFN::Type_FixedSizeHeader(header->srcInfo, header->name, header->annotations,
+                                                 header->fields,
+                                                 Device::pardeSpec().bitResubmitSize());
+    }
 
     return header;
 }

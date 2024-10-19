@@ -15,8 +15,9 @@
 
 #include <cstdint>
 #include <ostream>
-#include "lib/ordered_set.h"
+
 #include "lib/cstring.h"
+#include "lib/ordered_set.h"
 
 /// This is the file in which we will document all PHV constraints.
 /// TODO: Integrate all constraints into this class format.
@@ -48,19 +49,19 @@ class BooleanConstraint {
 /// fields sharing the same container through overlay.
 class SolitaryConstraint : BooleanConstraint {
  public:
-     // Define reasons for constraints here as enum classes.
+    // Define reasons for constraints here as enum classes.
     enum SolitaryReason {
-        NONE = 0,                           // represents absence of solitary constraint
-        ALU = (1 << 0),                     // solitary constraint due to ALU operation
-        CHECKSUM = (1 << 1),                // solitary constraint due to use in checksum
-        ARCH = (1 << 2),                    // solitary constraint required by the hardware
-        DIGEST = (1 << 3),                  // solitary constraint due to use in digest
-        PRAGMA_SOLITARY = (1 << 4),         // solitary constraint due to pa_solitary pragma
-        PRAGMA_CONTAINER_SIZE = (1 << 5),   // solitary constraint due to pa_container_size
-        CONFLICT_ALIGNMENT = (1 << 6),      // solitary constraint due to conflicting alignment
-                                            // in bridge packing
-        CLEAR_ON_WRITE = (1 << 7)           // solitary constraint due to the field being
-                                            // cleared-on-write
+        NONE = 0,                          // represents absence of solitary constraint
+        ALU = (1 << 0),                    // solitary constraint due to ALU operation
+        CHECKSUM = (1 << 1),               // solitary constraint due to use in checksum
+        ARCH = (1 << 2),                   // solitary constraint required by the hardware
+        DIGEST = (1 << 3),                 // solitary constraint due to use in digest
+        PRAGMA_SOLITARY = (1 << 4),        // solitary constraint due to pa_solitary pragma
+        PRAGMA_CONTAINER_SIZE = (1 << 5),  // solitary constraint due to pa_container_size
+        CONFLICT_ALIGNMENT = (1 << 6),     // solitary constraint due to conflicting alignment
+                                           // in bridge packing
+        CLEAR_ON_WRITE = (1 << 7)          // solitary constraint due to the field being
+                                           // cleared-on-write
     };
 
     bool hasConstraint() const { return (reason != 0); }
@@ -76,7 +77,7 @@ class SolitaryConstraint : BooleanConstraint {
     bool isOnlyClearOnWrite() const { return reason == CLEAR_ON_WRITE; }
 };
 
-std::ostream &operator<<(std::ostream &out, const SolitaryConstraint& cons);
+std::ostream &operator<<(std::ostream &out, const SolitaryConstraint &cons);
 
 /// This class represents the digest constraint, which implies that the field is used in a digest.
 /// Additionally, it also stores the type of digest in which the field is used.
@@ -84,11 +85,11 @@ class DigestConstraint : BooleanConstraint {
  public:
     // Define type of digest in which the field is used.
     enum DigestType {
-        NONE = 0,               // Field is not used in a digest
-        MIRROR = (1 << 0),      // used in mirror digest
-        LEARNING = (1 << 1),    // used in learning digest
-        RESUBMIT = (1 << 2),    // used in resubmit
-        PKTGEN = (1 << 3)       // used in pktgen
+        NONE = 0,             // Field is not used in a digest
+        MIRROR = (1 << 0),    // used in mirror digest
+        LEARNING = (1 << 1),  // used in learning digest
+        RESUBMIT = (1 << 2),  // used in resubmit
+        PKTGEN = (1 << 3)     // used in pktgen
     };
 
     bool hasConstraint() const { return (reason != 0); }
@@ -103,8 +104,8 @@ class DigestConstraint : BooleanConstraint {
 class DeparsedToTMConstraint : BooleanConstraint {
  public:
     enum DeparsedToTMReason {
-        NONE = 0,               // Field is not deparsed to TM
-        DEPARSE = 1 << 0,       // Field is deparsed to TM
+        NONE = 0,          // Field is not deparsed to TM
+        DEPARSE = 1 << 0,  // Field is deparsed to TM
     };
 
     bool hasConstraint() const { return (reason != 0); }
@@ -116,8 +117,8 @@ class DeparsedToTMConstraint : BooleanConstraint {
 class NoSplitConstraint : BooleanConstraint {
  public:
     enum NoSplitReason {
-        NONE = 0,               // Field is not deparsed to TM
-        NO_SPLIT = 1 << 0,      // Field is deparsed to TM
+        NONE = 0,           // Field is not deparsed to TM
+        NO_SPLIT = 1 << 0,  // Field is deparsed to TM
     };
 
     bool hasConstraint() const { return (reason != 0); }
@@ -161,7 +162,10 @@ class AlignmentConstraint : IntegerConstraint {
 
     ~AlignmentConstraint() {}
     bool hasConstraint() const { return (reason != 0); }
-    void addConstraint(unsigned source, unsigned v) { reason |= source; value = v; }
+    void addConstraint(unsigned source, unsigned v) {
+        reason |= source;
+        value = v;
+    }
 
     void updateConstraint(unsigned source) { reason |= source; }
     void eraseConstraint() { reason = 0; }
@@ -178,25 +182,28 @@ class AlignmentConstraint : IntegerConstraint {
     bool isDigest() const { return reason & DIGEST; }
     bool isIntrinsic() const { return reason & INTRINSIC; }
 
-    bool operator==(const AlignmentConstraint & a) const {
-        return reason == a.reason && value == a.value; }
-    bool operator<(AlignmentConstraint const & a) const {
-        if (value < a.value) return true;
-        else if (reason < a.reason) return true;
+    bool operator==(const AlignmentConstraint &a) const {
+        return reason == a.reason && value == a.value;
+    }
+    bool operator<(AlignmentConstraint const &a) const {
+        if (value < a.value)
+            return true;
+        else if (reason < a.reason)
+            return true;
         return false;
     }
 };
 
 class ContainerSizeConstraint : IntegerConstraint {
  public:
-    enum ContainerSizeReason {
-        NONE = 0,
-        PRAGMA = 1
-    };
+    enum ContainerSizeReason { NONE = 0, PRAGMA = 1 };
 
     ~ContainerSizeConstraint() {}
     bool hasConstraint() const { return (reason != 0); }
-    void addConstraint(unsigned source, unsigned v) { reason = source; value = v; }
+    void addConstraint(unsigned source, unsigned v) {
+        reason = source;
+        value = v;
+    }
     unsigned getContainerSize() const { return value; }
 };
 
@@ -204,7 +211,7 @@ class GroupConstraint {
  protected:
     unsigned reason = 0;
     /* fields that share the same group constraint */
-    ordered_set<const PHV::Field*> fields;
+    ordered_set<const PHV::Field *> fields;
 
  public:
     virtual ~GroupConstraint() {}
@@ -230,18 +237,21 @@ class PairConstraint {
             fields.second = f1;
         }
     }
-    PairConstraint(PairConstraint& p) {
+    PairConstraint(PairConstraint &p) {
         fields.first = p.fields.first;
         fields.second = p.fields.second;
     }
     ~PairConstraint() {}
     virtual bool hasConstraint() const = 0;
     virtual void addConstraint(uint32_t reason) = 0;
-    bool operator==(const PairConstraint & a) const {
-        return reason == a.reason && fields == a.fields; }
-    bool operator<(PairConstraint const & a) const {
-        if (reason < a.reason) return true;
-        else if (fields < a.fields) return true;
+    bool operator==(const PairConstraint &a) const {
+        return reason == a.reason && fields == a.fields;
+    }
+    bool operator<(PairConstraint const &a) const {
+        if (reason < a.reason)
+            return true;
+        else if (fields < a.fields)
+            return true;
         return false;
     }
 };
@@ -274,7 +284,6 @@ class MutuallyAlignedConstraint : PairConstraint {
     void addConstraint(unsigned r) { reason |= r; }
 };
 
-
 }  // namespace Constraints
 
-#endif  /* BF_P4C_PHV_CONSTRAINTS_CONSTRAINTS_H_ */
+#endif /* BF_P4C_PHV_CONSTRAINTS_CONSTRAINTS_H_ */

@@ -42,7 +42,7 @@ class CollectTableKeys : public MauInspector {
 
  public:
     explicit CollectTableKeys(const PhvInfo &p) : phv(p) {}
-    const TableProp& prop(const IR::MAU::Table *tbl) const { return table_props.at(tbl); }
+    const TableProp &prop(const IR::MAU::Table *tbl) const { return table_props.at(tbl); }
     const ordered_map<const IR::MAU::Table *, TableProp> &props() const { return table_props; }
 };
 

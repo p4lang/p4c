@@ -10,14 +10,14 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include "gtest/gtest.h"
+#include "bf-p4c/common/scc_toposort.h"
 
 #include "bf-p4c/test/gtest/tofino_gtest_utils.h"
-#include "bf-p4c/common/scc_toposort.h"
+#include "gtest/gtest.h"
 
 namespace P4::Test {
 
-class TofinoSccToposort : public TofinoBackendTest { };
+class TofinoSccToposort : public TofinoBackendTest {};
 
 TEST_F(TofinoSccToposort, empty) {
     SccTopoSorter sorter;

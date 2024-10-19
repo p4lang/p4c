@@ -10,30 +10,31 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PARDE_PARSER_INFO_H_
-#define EXTENSIONS_BF_P4C_PARDE_PARSER_INFO_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_PARSER_INFO_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_PARSER_INFO_H_
 
 #include <numeric>
 #include <optional>
+
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/copy.hpp>
-#include <boost/graph/topological_sort.hpp>
 #include <boost/graph/graphviz.hpp>
+#include <boost/graph/topological_sort.hpp>
 
+#include "bf-p4c/ir/control_flow_visitor.h"
+#include "bf-p4c/ir/gress.h"
+#include "bf-p4c/lib/assoc.h"
+#include "bf-p4c/parde/parde_visitor.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
-#include "bf-p4c/ir/gress.h"
-#include "bf-p4c/ir/control_flow_visitor.h"
-#include "bf-p4c/parde/parde_visitor.h"
-#include "bf-p4c/lib/assoc.h"
 
 namespace boost {
-    enum vertex_state_t { vertex_state };
-    BOOST_INSTALL_PROPERTY(vertex, state);
+enum vertex_state_t { vertex_state };
+BOOST_INSTALL_PROPERTY(vertex, state);
 
-    enum edge_transition_t { edge_transition };
-    BOOST_INSTALL_PROPERTY(edge, transition);
-}
+enum edge_transition_t { edge_transition };
+BOOST_INSTALL_PROPERTY(edge, transition);
+}  // namespace boost
 
 /** @addtogroup parde
  *  @{
@@ -49,15 +50,13 @@ namespace boost {
 class ReversibleParserGraph {
  public:
     typedef boost::adjacency_list<
-        boost::vecS,
-        boost::vecS,
-        boost::bidirectionalS,
-        boost::property<boost::vertex_state_t, const IR::BFN::ParserState*>,
-        boost::property<boost::edge_transition_t, const IR::BFN::Transition*>
-    > Graph;
+        boost::vecS, boost::vecS, boost::bidirectionalS,
+        boost::property<boost::vertex_state_t, const IR::BFN::ParserState *>,
+        boost::property<boost::edge_transition_t, const IR::BFN::Transition *>>
+        Graph;
 
     Graph graph;
-    const IR::BFN::Parser* parser = nullptr;
+    const IR::BFN::Parser *parser = nullptr;
     std::optional<gress_t> gress;
 
     typename Graph::vertex_descriptor get_entry_point() {
@@ -75,8 +74,8 @@ class ReversibleParserGraph {
  public:
     std::optional<typename Graph::vertex_descriptor> end;
 
-    ordered_map<const IR::BFN::ParserState*, typename Graph::vertex_descriptor> state_to_vertex;
-    ordered_map<typename Graph::vertex_descriptor, const IR::BFN::ParserState*> vertex_to_state;
+    ordered_map<const IR::BFN::ParserState *, typename Graph::vertex_descriptor> state_to_vertex;
+    ordered_map<typename Graph::vertex_descriptor, const IR::BFN::ParserState *> vertex_to_state;
 
     bool empty() const {
         auto all_vertices = boost::vertices(graph);
@@ -86,13 +85,10 @@ class ReversibleParserGraph {
         return false;
     }
 
-    bool contains(const IR::BFN::ParserState* state) {
-        return state_to_vertex.count(state);
-    }
+    bool contains(const IR::BFN::ParserState *state) { return state_to_vertex.count(state); }
 
-    typename Graph::vertex_descriptor add_vertex(const IR::BFN::ParserState* state) {
-        if (state != nullptr && !gress)
-            gress = state->gress;
+    typename Graph::vertex_descriptor add_vertex(const IR::BFN::ParserState *state) {
+        if (state != nullptr && !gress) gress = state->gress;
 
         if (contains(state)) {
             LOG1("State " << ((state) ? state->name : "END") << " already exists");
@@ -105,10 +101,8 @@ class ReversibleParserGraph {
         else
             LOG1("Added vertex " << vertex << " for state END");
 
-        if (state && state->name.find("$entry_point"))
-            entry_point = vertex;
-        if (state == nullptr)
-            end = vertex;
+        if (state && state->name.find("$entry_point")) entry_point = vertex;
+        if (state == nullptr) end = vertex;
 
         state_to_vertex[state] = vertex;
         vertex_to_state[vertex] = state;
@@ -117,9 +111,8 @@ class ReversibleParserGraph {
     }
 
     std::pair<typename Graph::edge_descriptor, bool> add_edge(
-            const IR::BFN::ParserState* source,
-            const IR::BFN::ParserState* destination,
-            const IR::BFN::Transition* transition) {
+        const IR::BFN::ParserState *source, const IR::BFN::ParserState *destination,
+        const IR::BFN::Transition *transition) {
         typename Graph::vertex_descriptor source_vertex, destination_vertex;
         source_vertex = add_vertex(source);
         destination_vertex = add_vertex(destination);
@@ -127,8 +120,7 @@ class ReversibleParserGraph {
         // Look for a pre-existing edge.
         typename Graph::out_edge_iterator out, end;
         for (boost::tie(out, end) = boost::out_edges(source_vertex, graph); out != end; ++out) {
-            if (boost::target(*out, graph) == destination_vertex)
-                return {*out, false};
+            if (boost::target(*out, graph) == destination_vertex) return {*out, false};
         }
         // No pre-existing edge, so make one.
         auto edge = boost::add_edge(source_vertex, destination_vertex, graph);
@@ -142,22 +134,18 @@ class ReversibleParserGraph {
 
     ReversibleParserGraph() {}
 
-    ReversibleParserGraph(const ReversibleParserGraph& other) {
+    ReversibleParserGraph(const ReversibleParserGraph &other) {
         boost::copy_graph(other.graph, graph);
     }
 };
 
 class DirectedGraph {
-    typedef boost::adjacency_list<boost::listS,
-                                  boost::vecS,
-                                  boost::directedS> Graph;
+    typedef boost::adjacency_list<boost::listS, boost::vecS, boost::directedS> Graph;
 
  public:
     DirectedGraph() {}
 
-    DirectedGraph(const DirectedGraph& other) {
-        boost::copy_graph(other._graph, _graph);
-    }
+    DirectedGraph(const DirectedGraph &other) { boost::copy_graph(other._graph, _graph); }
 
     ~DirectedGraph() {}
 
@@ -166,9 +154,7 @@ class DirectedGraph {
         return id;
     }
 
-    void add_edge(int src, int dst) {
-        boost::add_edge(src, dst, _graph);
-    }
+    void add_edge(int src, int dst) { boost::add_edge(src, dst, _graph); }
 
     std::vector<int> topological_sort() const {
         std::vector<int> result;
@@ -188,7 +174,7 @@ class DirectedGraph {
 };
 
 template <class State>
-struct ParserStateMap : public ordered_map<const State*, ordered_set<const State*>> { };
+struct ParserStateMap : public ordered_map<const State *, ordered_set<const State *>> {};
 
 template <class Parser, class State, class Transition>
 class ParserGraphImpl : public DirectedGraph {
@@ -196,65 +182,61 @@ class ParserGraphImpl : public DirectedGraph {
     template <class P, class S, class T>
     friend class CollectParserInfoImpl;
 
-    explicit ParserGraphImpl(const Parser* parser) : root(parser->start) {}
+    explicit ParserGraphImpl(const Parser *parser) : root(parser->start) {}
 
-    const State* const root;
+    const State *const root;
 
-    const ordered_set<const State*>& states() const { return _states; }
+    const ordered_set<const State *> &states() const { return _states; }
 
-    const ParserStateMap<State>& successors() const { return _succs; }
+    const ParserStateMap<State> &successors() const { return _succs; }
 
-    const ParserStateMap<State>& predecessors() const { return _preds; }
+    const ParserStateMap<State> &predecessors() const { return _preds; }
 
-    const ordered_map<const State*,
-                      ordered_set<const Transition*>>& to_pipe() const { return _to_pipe; }
+    const ordered_map<const State *, ordered_set<const Transition *>> &to_pipe() const {
+        return _to_pipe;
+    }
 
-    ordered_set<const Transition*>
-    transitions(const State* src, const State* dst) const {
+    ordered_set<const Transition *> transitions(const State *src, const State *dst) const {
         auto it = _transitions.find({src, dst});
-        if (it != _transitions.end())
-            return it->second;
+        if (it != _transitions.end()) return it->second;
 
         return {};
     }
 
-    ordered_set<const Transition*> transitions_to(const State* dst) const {
-        ordered_set<const Transition*> transitions;
-        auto has_dst = [dst](const auto& kv) { return kv.first.second == dst; };
+    ordered_set<const Transition *> transitions_to(const State *dst) const {
+        ordered_set<const Transition *> transitions;
+        auto has_dst = [dst](const auto &kv) { return kv.first.second == dst; };
         auto it = std::find_if(_transitions.begin(), _transitions.end(), has_dst);
         while (it != _transitions.end()) {
-            ordered_set<const Transition*> value = it->second;
+            ordered_set<const Transition *> value = it->second;
             transitions.insert(value.begin(), value.end());
             it = std::find_if(++it, _transitions.end(), has_dst);
         }
         return transitions;
     }
 
-    ordered_set<const Transition*> to_pipe(const State* src) const {
-        if (_to_pipe.count(src))
-            return _to_pipe.at(src);
+    ordered_set<const Transition *> to_pipe(const State *src) const {
+        if (_to_pipe.count(src)) return _to_pipe.at(src);
 
         return {};
     }
 
-    ordered_map<std::pair<const State*, cstring>, ordered_set<const Transition*>>
-    loopbacks() const {
+    ordered_map<std::pair<const State *, cstring>, ordered_set<const Transition *>> loopbacks()
+        const {
         return _loopbacks;
     }
 
     bool is_loopback_state(cstring state) const {
-        for (auto& kv : _loopbacks) {
-            if (stripThreadPrefix(state) == stripThreadPrefix(kv.first.second))
-                return true;
+        for (auto &kv : _loopbacks) {
+            if (stripThreadPrefix(state) == stripThreadPrefix(kv.first.second)) return true;
         }
 
         return false;
     }
 
-    const State* get_state(cstring name) const {
+    const State *get_state(cstring name) const {
         for (auto s : states()) {
-            if (name == s->name)
-                return s;
+            if (name == s->name) return s;
         }
 
         return nullptr;
@@ -262,19 +244,16 @@ class ParserGraphImpl : public DirectedGraph {
 
  private:
     /// Memoization table.
-    mutable assoc::map<const State*, assoc::map<const State*, bool>> is_ancestor_;
+    mutable assoc::map<const State *, assoc::map<const State *, bool>> is_ancestor_;
 
  public:
     /// Is "src" an ancestor of "dst"?
-    bool is_ancestor(const State* src, const State* dst) const {
-        if (src == dst)
-            return false;
+    bool is_ancestor(const State *src, const State *dst) const {
+        if (src == dst) return false;
 
-        if (!predecessors().count(dst))
-            return false;
+        if (!predecessors().count(dst)) return false;
 
-        if (predecessors().at(dst).count(src))
-            return true;
+        if (predecessors().at(dst).count(src)) return true;
 
         if (is_ancestor_.count(src) && is_ancestor_.at(src).count(dst))
             return is_ancestor_.at(src).at(dst);
@@ -289,22 +268,18 @@ class ParserGraphImpl : public DirectedGraph {
         return is_ancestor_[src][dst] = false;
     }
 
-    bool is_descendant(const State* src, const State* dst) const {
-        return is_ancestor(dst, src);
-    }
+    bool is_descendant(const State *src, const State *dst) const { return is_ancestor(dst, src); }
 
-    bool is_loop_reachable(const State* src, const State* dst) const {
+    bool is_loop_reachable(const State *src, const State *dst) const {
         for (auto &kv : _loopbacks) {
             if (kv.first.first == src) {
                 auto loop_state = get_state(kv.first.second);
-                if (loop_state == dst || is_ancestor(loop_state, dst))
-                    return true;
+                if (loop_state == dst || is_ancestor(loop_state, dst)) return true;
             }
         }
 
         return false;
     }
-
 
     /// Determines whether @p dst can be reached from @p src.
     /// It can be reached directly (without taking any loops,
@@ -351,10 +326,9 @@ class ParserGraphImpl : public DirectedGraph {
     /// Now we would get stuck between A->D->B->C->A. This is one of the reasons
     /// why we never take a loop that does not take us somewhere new. Since
     /// we DO check if loop takes us somewhere new we would nrecursionloop does not happen).
-    bool is_reachable(const State* src, const State* dst) const {
+    bool is_reachable(const State *src, const State *dst) const {
         // One way is that src is an ancestor of dst
-        if (is_ancestor(src, dst))
-            return true;
+        if (is_ancestor(src, dst)) return true;
         // Otherwise we must check all possible loopbacks
         for (auto &kv : _loopbacks) {
             auto loop_from = kv.first.first;
@@ -362,14 +336,12 @@ class ParserGraphImpl : public DirectedGraph {
             // Can we get to this loopback from source (without any other loopbacks)?
             if (src == loop_from || is_ancestor(src, loop_from)) {
                 // If the loopback goes to dst we are done
-                if (loop_to == dst)
-                    return true;
+                if (loop_to == dst) return true;
                 // Loopback needs to get us somewhere new
                 // (where we couldn't directly reach from src)
                 // And we need to be able to reach the dst from this new state
                 // (possibly via more loops)
-                if (src != loop_to && !is_ancestor(src, loop_to) &&
-                    is_reachable(loop_to, dst))
+                if (src != loop_to && !is_ancestor(src, loop_to) && is_reachable(loop_to, dst))
                     return true;
             }
         }
@@ -380,11 +352,9 @@ class ParserGraphImpl : public DirectedGraph {
     /// Determines whether @p s is dominated by the set of states @p set.
     /// This means that every path from start to @p s leads through (at least) one of
     /// the states from @p set.
-    bool is_dominated_by_set(const State* s,
-                             const ordered_set<const State*>& set) {
+    bool is_dominated_by_set(const State *s, const ordered_set<const State *> &set) {
         // If there are no predecessors domination is false
-        if (!predecessors().count(s) || predecessors().at(s).empty())
-            return false;
+        if (!predecessors().count(s) || predecessors().at(s).empty()) return false;
         // Otherwise we need every predecessor to be from the set or recursively
         // dominated by the set
         for (auto ns : predecessors().at(s)) {
@@ -398,11 +368,9 @@ class ParserGraphImpl : public DirectedGraph {
     /// Determines whether @p s is postdominated by the set of states @p set.
     /// This means that every path from @p s to exit leads through (at least) one of
     /// the states from @p set.
-    bool is_postdominated_by_set(const State* s,
-                                 const ordered_set<const State*>& set) {
+    bool is_postdominated_by_set(const State *s, const ordered_set<const State *> &set) {
         // If there are no successors postdomination is false
-        if (!successors().count(s) || successors().at(s).empty())
-            return false;
+        if (!successors().count(s) || successors().at(s).empty()) return false;
         // Otherwise we need every successor to be from the set or recursively
         // postdominated by the set
         for (auto ns : successors().at(s)) {
@@ -432,15 +400,13 @@ class ParserGraphImpl : public DirectedGraph {
     /// Loop start in this case is the first state within the loopback (the state the loopback
     /// transition goes to) and loop exit is the last state in the loopback (state that the
     /// loopback transition goes from).
-    std::pair<const State*, const State*> is_loopback_reassignment(
-            const State* s,
-            const ordered_set<const State*>& set) {
+    std::pair<const State *, const State *> is_loopback_reassignment(
+        const State *s, const ordered_set<const State *> &set) {
         for (auto &kv : _loopbacks) {
             auto le = kv.first.first;
             auto ls = get_state(kv.first.second);
             // Is this state even within this loopback?
-            if (s == le || s == ls ||
-                (is_ancestor(ls, s) && is_ancestor(s, le))) {
+            if (s == le || s == ls || (is_ancestor(ls, s) && is_ancestor(s, le))) {
                 // If it is check this particular loopback
                 // Check if the loopback has postdomination happening inside
                 // And also that loop exit is dominated (or the loopback is reflexive)
@@ -456,17 +422,14 @@ class ParserGraphImpl : public DirectedGraph {
 
     /// Determines whether @p src and @p dst are mutually exclusive states on all paths through
     /// the parser graph.
-    bool is_mutex(const State* a, const State* b) const {
-        return a != b &&
-               !is_ancestor(a, b) &&
-               !is_ancestor(b, a) &&
-               !is_loop_reachable(a, b) &&
+    bool is_mutex(const State *a, const State *b) const {
+        return a != b && !is_ancestor(a, b) && !is_ancestor(b, a) && !is_loop_reachable(a, b) &&
                !is_loop_reachable(b, a);
     }
 
     /// Determines whether the states in the given set are all mutually exclusive on all paths
     /// through the parser graph.
-    bool is_mutex(const ordered_set<const State*>& states) const {
+    bool is_mutex(const ordered_set<const State *> &states) const {
         for (auto it1 = states.begin(); it1 != states.end(); ++it1) {
             for (auto it2 = it1; it2 != states.end(); ++it2) {
                 if (it1 == it2) continue;
@@ -477,9 +440,8 @@ class ParserGraphImpl : public DirectedGraph {
         return true;
     }
 
-    bool is_mutex(const Transition* a, const Transition* b) const {
-        if (a == b)
-            return false;
+    bool is_mutex(const Transition *a, const Transition *b) const {
+        if (a == b) return false;
 
         auto a_dst = get_dst(a);
         auto a_src = get_src(a);
@@ -499,90 +461,83 @@ class ParserGraphImpl : public DirectedGraph {
         return true;
     }
 
-    ordered_set<const State*>
-    get_all_descendants(const State* src) const {
-        ordered_set<const State*> rv;
+    ordered_set<const State *> get_all_descendants(const State *src) const {
+        ordered_set<const State *> rv;
         get_all_descendants_impl(src, rv);
         return rv;
     }
 
-    std::vector<const State*> topological_sort() const {
+    std::vector<const State *> topological_sort() const {
         std::vector<int> result = DirectedGraph::topological_sort();
-        std::vector<const State*> mapped_result;
-        for (auto id : result)
-            mapped_result.push_back(get_state(id));
+        std::vector<const State *> mapped_result;
+        for (auto id : result) mapped_result.push_back(get_state(id));
         return mapped_result;
     }
 
     // longest path (in states) from src to end of parser
-    std::vector<const State*> longest_path_states(const State* src) const {
-        assoc::map<const State*, std::pair<unsigned, std::vector<const State*>>> path_map;
+    std::vector<const State *> longest_path_states(const State *src) const {
+        assoc::map<const State *, std::pair<unsigned, std::vector<const State *>>> path_map;
         return min_max_path_impl(src, path_map, true, true, true).second;
     }
 
     // longest path (in states) from start of parser to dest
-    std::vector<const State*>
-    longest_path_states_to(const State* dest) const {
-        assoc::map<const State*, std::pair<unsigned, std::vector<const State*>>> path_map;
+    std::vector<const State *> longest_path_states_to(const State *dest) const {
+        assoc::map<const State *, std::pair<unsigned, std::vector<const State *>>> path_map;
         return min_max_path_impl(dest, path_map, true, false, true).second;
     }
 
     // shortest path from src to end of parser
-    std::vector<const State*> shortest_path_states(const State* src) const {
-        assoc::map<const State*, std::pair<unsigned, std::vector<const State*>>> path_map;
+    std::vector<const State *> shortest_path_states(const State *src) const {
+        assoc::map<const State *, std::pair<unsigned, std::vector<const State *>>> path_map;
         return min_max_path_impl(src, path_map, false, true, true).second;
     }
 
     // longest path (in bytes) from src to end of parser
-    std::pair<unsigned, std::vector<const State*>> longest_path_bytes(const State* src) const {
-        assoc::map<const State*, std::pair<unsigned, std::vector<const State*>>> path_map;
+    std::pair<unsigned, std::vector<const State *>> longest_path_bytes(const State *src) const {
+        assoc::map<const State *, std::pair<unsigned, std::vector<const State *>>> path_map;
         return min_max_path_impl(src, path_map, true, true, false);
     }
 
     // shortest path (in bytes) from src to end of parser
-    std::pair<unsigned, std::vector<const State*>> shortest_path_bytes(const State* src) const {
-        assoc::map<const State*, std::pair<unsigned, std::vector<const State*>>> path_map;
+    std::pair<unsigned, std::vector<const State *>> shortest_path_bytes(const State *src) const {
+        assoc::map<const State *, std::pair<unsigned, std::vector<const State *>>> path_map;
         return min_max_path_impl(src, path_map, false, true, false);
     }
 
     // shortest path (in bytes) from src to end of parser
-    std::pair<unsigned, std::vector<const State*>> shortest_path_thru_bytes(
-            const State* src) const {
-        assoc::map<const State*, std::pair<unsigned, std::vector<const State*>>> path_map_from;
-        assoc::map<const State*, std::pair<unsigned, std::vector<const State*>>> path_map_to;
+    std::pair<unsigned, std::vector<const State *>> shortest_path_thru_bytes(
+        const State *src) const {
+        assoc::map<const State *, std::pair<unsigned, std::vector<const State *>>> path_map_from;
+        assoc::map<const State *, std::pair<unsigned, std::vector<const State *>>> path_map_to;
 
         auto from = min_max_path_impl(src, path_map_from, false, true, false);
         auto to = min_max_path_impl(src, path_map_to, false, false, false);
 
-        std::vector<const State*> ret = to.second;
+        std::vector<const State *> ret = to.second;
         ret.insert(ret.end(), ++from.second.begin(), from.second.end());
 
         return std::make_pair(from.first + to.first, ret);
     }
 
-    const State* get_src(const Transition* t) const {
-        for (auto& kv : _transitions) {
-            if (kv.second.count(t))
-                return kv.first.first;
+    const State *get_src(const Transition *t) const {
+        for (auto &kv : _transitions) {
+            if (kv.second.count(t)) return kv.first.first;
         }
 
-        for (auto& kv : _to_pipe) {
-            if (kv.second.count(t))
-                return kv.first;
+        for (auto &kv : _to_pipe) {
+            if (kv.second.count(t)) return kv.first;
         }
 
-        for (auto& kv : _loopbacks) {
-            if (kv.second.count(t))
-                return kv.first.first;
+        for (auto &kv : _loopbacks) {
+            if (kv.second.count(t)) return kv.first.first;
         }
 
         return nullptr;
     }
 
-    const State* get_dst(const Transition* t) const {
-        for (auto& kv : _transitions) {
-            if (kv.second.count(t))
-                return kv.first.second;
+    const State *get_dst(const Transition *t) const {
+        for (auto &kv : _transitions) {
+            if (kv.second.count(t)) return kv.first.second;
         }
         return nullptr;
     }
@@ -592,9 +547,8 @@ class ParserGraphImpl : public DirectedGraph {
     /// and @p loop_exit is postdominated by the set of states @p set within itself.
     /// This means that every path from @p s to @p loop_exit
     /// (or any parser exit state) leads through (at least) one of the states from @p set.
-    bool _is_loopback_postdominated_by_set_impl(const State* s,
-                                                const State* loop_exit,
-                                                const ordered_set<const State*>& set) {
+    bool _is_loopback_postdominated_by_set_impl(const State *s, const State *loop_exit,
+                                                const ordered_set<const State *> &set) {
         // Check if we are at the loop_exit
         if (s == loop_exit) {
             if (set.count(loop_exit)) {
@@ -604,8 +558,7 @@ class ParserGraphImpl : public DirectedGraph {
             }
         }
         // If there are no successors postdomination is false
-        if (!successors().count(s) || successors().at(s).empty())
-            return false;
+        if (!successors().count(s) || successors().at(s).empty()) return false;
         // Otherwise we need every successor to be from the set or recursively
         // postdominated by the set
         for (auto ns : successors().at(s)) {
@@ -616,13 +569,13 @@ class ParserGraphImpl : public DirectedGraph {
         return true;
     }
 
-    std::vector<const State*> longest_or_shortest_path_states_impl(const State* src,
-            assoc::map<const State*, std::vector<const State*>>& path_map, bool longest) const {
-        if (path_map.count(src))
-            return path_map.at(src);
+    std::vector<const State *> longest_or_shortest_path_states_impl(
+        const State *src, assoc::map<const State *, std::vector<const State *>> &path_map,
+        bool longest) const {
+        if (path_map.count(src)) return path_map.at(src);
 
-        const State* best_succ = nullptr;
-        std::vector<const State*> best_succ_path;
+        const State *best_succ = nullptr;
+        std::vector<const State *> best_succ_path;
 
         if ((longest || to_pipe(src).size() == 0) && successors().count(src)) {
             for (auto succ : successors().at(src)) {
@@ -653,22 +606,21 @@ class ParserGraphImpl : public DirectedGraph {
      * @param origin Is state the start (true) or end (false) of the path
      * @param states Count path length by states (true) or bytes (false)
      */
-    std::pair<unsigned, std::vector<const State*>> min_max_path_impl(
-            const State* state,
-            assoc::map<const State*, std::pair<unsigned, std::vector<const State*>>>& path_map,
-            bool longest, bool origin, bool states) const {
-        if (path_map.count(state))
-            return path_map.at(state);
+    std::pair<unsigned, std::vector<const State *>> min_max_path_impl(
+        const State *state,
+        assoc::map<const State *, std::pair<unsigned, std::vector<const State *>>> &path_map,
+        bool longest, bool origin, bool states) const {
+        if (path_map.count(state)) return path_map.at(state);
 
-        const State* best = nullptr;
-        std::vector<const State*> best_path;
+        const State *best = nullptr;
+        std::vector<const State *> best_path;
         unsigned best_len = 0;
 
-        auto max = [](unsigned v, const Transition* t) { return v > t->shift ? v : t->shift; };
-        auto min = [](unsigned v, const Transition* t) { return v < t->shift ? v : t->shift; };
+        auto max = [](unsigned v, const Transition *t) { return v > t->shift ? v : t->shift; };
+        auto min = [](unsigned v, const Transition *t) { return v < t->shift ? v : t->shift; };
 
         auto next_map = origin ? successors() : predecessors();
-        auto exit_trans = origin ? to_pipe(state) : ordered_set<const Transition*>();
+        auto exit_trans = origin ? to_pipe(state) : ordered_set<const Transition *>();
 
         if ((longest || exit_trans.size() == 0) && next_map.count(state)) {
             for (auto next : next_map.at(state)) {
@@ -700,10 +652,8 @@ class ParserGraphImpl : public DirectedGraph {
         return path_map[state];
     }
 
-    void get_all_descendants_impl(const State* src,
-                                  ordered_set<const State*>& rv) const {
-        if (!successors().count(src))
-            return;
+    void get_all_descendants_impl(const State *src, ordered_set<const State *> &rv) const {
+        if (!successors().count(src)) return;
 
         for (auto succ : successors().at(src)) {
             if (!rv.count(succ)) {
@@ -713,11 +663,9 @@ class ParserGraphImpl : public DirectedGraph {
         }
     }
 
-    void add_state(const State* s) {
-        _states.insert(s);
-    }
+    void add_state(const State *s) { _states.insert(s); }
 
-    void add_transition(const State* state, const Transition* t) {
+    void add_transition(const State *state, const Transition *t) {
         add_state(state);
 
         if (t->next) {
@@ -740,51 +688,42 @@ class ParserGraphImpl : public DirectedGraph {
         }
 
         for (auto t : _succs)
-            for (auto dst : t.second)
-                DirectedGraph::add_edge(get_id(t.first), get_id(dst));
+            for (auto dst : t.second) DirectedGraph::add_edge(get_id(t.first), get_id(dst));
     }
 
-    int get_id(const State* s) {
-        if (_state_to_id.count(s) == 0)
-            add_state(s);
+    int get_id(const State *s) {
+        if (_state_to_id.count(s) == 0) add_state(s);
         return _state_to_id.at(s);
     }
 
-    const State* get_state(int id) const {
-        return _id_to_state.at(id);
-    }
+    const State *get_state(int id) const { return _id_to_state.at(id); }
 
-    ordered_set<const State*> _states;
+    ordered_set<const State *> _states;
 
     ParserStateMap<State> _succs, _preds;
 
-    ordered_map<std::pair<const State*, const State*>,
-                ordered_set<const Transition*>> _transitions;
+    ordered_map<std::pair<const State *, const State *>, ordered_set<const Transition *>>
+        _transitions;
 
     // the iteration order is not actually needed to be fixed except for
     // dump_parser
-    ordered_map<std::pair<const State*, cstring>,
-                ordered_set<const Transition*>> _loopbacks;
+    ordered_map<std::pair<const State *, cstring>, ordered_set<const Transition *>> _loopbacks;
 
     // the iteration order is not actually needed to be fixed except for
     // dump_parser
-    ordered_map<const State*,
-                ordered_set<const Transition*>> _to_pipe;
+    ordered_map<const State *, ordered_set<const Transition *>> _to_pipe;
 
-    assoc::map<const State*, int> _state_to_id;
-    assoc::map<int, const State*> _id_to_state;
+    assoc::map<const State *, int> _state_to_id;
+    assoc::map<int, const State *> _id_to_state;
 };
 
 namespace P4 {
 namespace IR {
 namespace BFN {
 
-using ParserGraph = ParserGraphImpl<IR::BFN::Parser,
-                                    IR::BFN::ParserState,
-                                    IR::BFN::Transition>;
+using ParserGraph = ParserGraphImpl<IR::BFN::Parser, IR::BFN::ParserState, IR::BFN::Transition>;
 
-using LoweredParserGraph = ParserGraphImpl<IR::BFN::LoweredParser,
-                                           IR::BFN::LoweredParserState,
+using LoweredParserGraph = ParserGraphImpl<IR::BFN::LoweredParser, IR::BFN::LoweredParserState,
                                            IR::BFN::LoweredParserMatch>;
 }  // namespace BFN
 }  // namespace IR
@@ -795,16 +734,14 @@ class CollectParserInfoImpl : public PardeInspector {
     using GraphType = ParserGraphImpl<Parser, State, Transition>;
 
  public:
-    const ordered_map<const Parser*, GraphType*>& graphs() const { return _graphs; }
-    const GraphType& graph(const Parser* p) const { return *(_graphs.at(p)); }
-    const GraphType& graph(const State* s) const { return graph(parser(s)); }
+    const ordered_map<const Parser *, GraphType *> &graphs() const { return _graphs; }
+    const GraphType &graph(const Parser *p) const { return *(_graphs.at(p)); }
+    const GraphType &graph(const State *s) const { return graph(parser(s)); }
 
-    const Parser* parser(const State* state) const {
-        return _state_to_parser.at(state);
-    }
+    const Parser *parser(const State *state) const { return _state_to_parser.at(state); }
 
  private:
-    Visitor::profile_t init_apply(const IR::Node* root) override {
+    Visitor::profile_t init_apply(const IR::Node *root) override {
         auto rv = Inspector::init_apply(root);
 
         clear_cache();
@@ -814,13 +751,13 @@ class CollectParserInfoImpl : public PardeInspector {
         return rv;
     }
 
-    bool preorder(const Parser* parser) override {
+    bool preorder(const Parser *parser) override {
         _graphs[parser] = new GraphType(parser);
         revisit_visited();
         return true;
     }
 
-    bool preorder(const State* state) override {
+    bool preorder(const State *state) override {
         auto parser = findContext<Parser>();
         _state_to_parser[state] = parser;
 
@@ -828,27 +765,24 @@ class CollectParserInfoImpl : public PardeInspector {
 
         g->add_state(state);
 
-        for (auto t : state->transitions)
-            g->add_transition(state, t);
+        for (auto t : state->transitions) g->add_transition(state, t);
 
         return true;
     }
 
     /// Clears internal memoization state.
-    void clear_cache() {
-        all_shift_amounts_.clear();
-    }
+    void clear_cache() { all_shift_amounts_.clear(); }
 
     // Memoization table. Only contains results for forward paths in the graph.
-    mutable assoc::map<const State*,
-                     assoc::map<const State*, const std::set<int>*>> all_shift_amounts_;
+    mutable assoc::map<const State *, assoc::map<const State *, const std::set<int> *>>
+        all_shift_amounts_;
 
  public:
     /// @return all possible shift amounts, in bits, for all paths from the start state to @p dst .
     /// If @p dst is the start state, then a singleton 0 is returned.
     ///
     /// DANGER: This method assumes the parser graph is a DAG.
-    const std::set<int>* get_all_shift_amounts(const State* dst) const {
+    const std::set<int> *get_all_shift_amounts(const State *dst) const {
         return get_all_shift_amounts(graph(dst).root, dst);
     }
 
@@ -856,7 +790,7 @@ class CollectParserInfoImpl : public PardeInspector {
     ///    @p dst.
     ///
     /// @pre DANGER: This method assumes the parser graph is a DAG.
-    int get_min_shift_amount(const State* dst) const {
+    int get_min_shift_amount(const State *dst) const {
         return *get_all_shift_amounts(dst)->begin();
     }
 
@@ -864,7 +798,7 @@ class CollectParserInfoImpl : public PardeInspector {
     ///    @p dst.
     ///
     /// @pre DANGER: This method assumes the parser graph is a DAG.
-    int get_max_shift_amount(const State* dst) const {
+    int get_max_shift_amount(const State *dst) const {
         return *get_all_shift_amounts(dst)->rbegin();
     }
 
@@ -875,8 +809,7 @@ class CollectParserInfoImpl : public PardeInspector {
     ///   the shift amounts will be negative.
     ///
     /// @pre DANGER: This method assumes the parser graph is a DAG.
-    const std::set<int>* get_all_shift_amounts(const State* src,
-                                               const State* dst) const {
+    const std::set<int> *get_all_shift_amounts(const State *src, const State *dst) const {
         bool reverse_path = graphs().at(parser(src))->is_ancestor(dst, src);
         if (reverse_path) std::swap(src, dst);
 
@@ -893,8 +826,8 @@ class CollectParserInfoImpl : public PardeInspector {
     }
 
  private:
-    const std::set<int>* get_all_forward_path_shift_amounts(const State* src,
-                                                            const State* dst) const {
+    const std::set<int> *get_all_forward_path_shift_amounts(const State *src,
+                                                            const State *dst) const {
         if (src == dst) return new std::set<int>({0});
 
         if (all_shift_amounts_.count(src) && all_shift_amounts_.at(src).count(dst))
@@ -912,20 +845,19 @@ class CollectParserInfoImpl : public PardeInspector {
         }
 
         // Recurse with the successors of the source.
-        BUG_CHECK(graph->successors().count(src),
-                  "State %s has a descendant %s, but no successors", src->name, dst->name);
+        BUG_CHECK(graph->successors().count(src), "State %s has a descendant %s, but no successors",
+                  src->name, dst->name);
         for (auto succ : graph->successors().at(src)) {
             auto amounts = get_all_forward_path_shift_amounts(succ, dst);
             if (!amounts->size()) continue;
 
             auto transitions = graph->transitions(src, succ);
-            BUG_CHECK(!transitions.empty(),
-                      "Missing parser transition from %s to %s", src->name, succ->name);
+            BUG_CHECK(!transitions.empty(), "Missing parser transition from %s to %s", src->name,
+                      succ->name);
 
             auto t = *(transitions.begin());
 
-            for (auto amount : *amounts)
-                result->insert(amount + t->shift * 8);
+            for (auto amount : *amounts) result->insert(amount + t->shift * 8);
         }
 
         return all_shift_amounts_[src][dst] = result;
@@ -933,22 +865,20 @@ class CollectParserInfoImpl : public PardeInspector {
 
     void end_apply() override {
         clear_cache();
-        for (auto g : _graphs)
-            g.second->map_to_boost_graph();
+        for (auto g : _graphs) g.second->map_to_boost_graph();
     }
 
-    ordered_map<const Parser*, GraphType*> _graphs;
-    assoc::map<const State*, const Parser*> _state_to_parser;
+    ordered_map<const Parser *, GraphType *> _graphs;
+    assoc::map<const State *, const Parser *> _state_to_parser;
 };
 
-using CollectParserInfo = CollectParserInfoImpl<IR::BFN::Parser,
-                                                IR::BFN::ParserState,
-                                                IR::BFN::Transition>;
+using CollectParserInfo =
+    CollectParserInfoImpl<IR::BFN::Parser, IR::BFN::ParserState, IR::BFN::Transition>;
 
-using CollectLoweredParserInfo = CollectParserInfoImpl<IR::BFN::LoweredParser,
-                                                       IR::BFN::LoweredParserState,
-                                                       IR::BFN::LoweredParserMatch>;
+using CollectLoweredParserInfo =
+    CollectParserInfoImpl<IR::BFN::LoweredParser, IR::BFN::LoweredParserState,
+                          IR::BFN::LoweredParserMatch>;
 
 /** @} */  // end of group parde
 
-#endif  /* EXTENSIONS_BF_P4C_PARDE_PARSER_INFO_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_PARSER_INFO_H_ */

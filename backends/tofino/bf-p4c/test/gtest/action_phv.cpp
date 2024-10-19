@@ -12,26 +12,26 @@
 
 #include <optional>
 #include <type_traits>
-#include <boost/algorithm/string/replace.hpp>
-#include "gtest/gtest.h"
 
+#include <boost/algorithm/string/replace.hpp>
+
+#include "bf-p4c/common/header_stack.h"
+#include "bf-p4c/mau/instruction_selection.h"
+#include "bf-p4c/phv/action_phv_constraints.h"
+#include "bf-p4c/phv/phv_fields.h"
+#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "gtest/gtest.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
 #include "test/gtest/helpers.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/common/header_stack.h"
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
-#include "bf-p4c/phv/action_phv_constraints.h"
-#include "bf-p4c/mau/instruction_selection.h"
 
 namespace P4::Test {
 
 namespace {
 
-std::optional<TofinoPipeTestCase>
-createActionTest(const std::string& ingressPipeline,
-                 const std::string& egressPipeline) {
+std::optional<TofinoPipeTestCase> createActionTest(const std::string &ingressPipeline,
+                                                   const std::string &egressPipeline) {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
         header H { bit<8> field1; bit<8> field2; bit<8> field3; bit<8> field4; }
         struct Headers { H h1; H h2; }
@@ -74,7 +74,7 @@ createActionTest(const std::string& ingressPipeline,
     boost::replace_first(source, "%INGRESS_PIPELINE%", ingressPipeline);
     boost::replace_first(source, "%EGRESS_PIPELINE%", egressPipeline);
 
-    auto& options = BackendOptions();
+    auto &options = BackendOptions();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.target = "tofino"_cs;
     options.arch = "v1model"_cs;
@@ -83,19 +83,16 @@ createActionTest(const std::string& ingressPipeline,
     return TofinoPipeTestCase::createWithThreadLocalInstances(source);
 }
 
-const IR::BFN::Pipe *runInitialPassManager(const IR::BFN::Pipe* pipe, PhvInfo *phv) {
-    PassManager quick_backend = {
-        new CollectHeaderStackInfo,
-        new CollectPhvInfo(*phv),
-        new DoInstructionSelection(*phv)
-    };
+const IR::BFN::Pipe *runInitialPassManager(const IR::BFN::Pipe *pipe, PhvInfo *phv) {
+    PassManager quick_backend = {new CollectHeaderStackInfo, new CollectPhvInfo(*phv),
+                                 new DoInstructionSelection(*phv)};
 
     return pipe->apply(quick_backend);
 }
 
 }  // namespace
 
-class ActionPhv : public TofinoBackendTest { };
+class ActionPhv : public TofinoBackendTest {};
 
 TEST_F(ActionPhv, IngressSingleTableSharedWrites) {
     auto test = createActionTest(P4_SOURCE(P4Headers::NONE, R"(
@@ -122,7 +119,8 @@ TEST_F(ActionPhv, IngressSingleTableSharedWrites) {
             test1.apply();
         }
 
-    )"), P4_SOURCE(P4Headers::NONE, R"(
+    )"),
+                                 P4_SOURCE(P4Headers::NONE, R"(
         apply { }
     )"));
 
@@ -133,9 +131,8 @@ TEST_F(ActionPhv, IngressSingleTableSharedWrites) {
     post_pm_pipe = post_pm_pipe->apply(apc);
 
     std::vector<const IR::MAU::Action *> actionList;
-    forAllMatching<IR::MAU::Action>(post_pm_pipe, [&](const IR::MAU::Action* act) {
-            actionList.push_back(act);
-            });
+    forAllMatching<IR::MAU::Action>(post_pm_pipe,
+                                    [&](const IR::MAU::Action *act) { actionList.push_back(act); });
 
     EXPECT_TRUE(apc.is_in_field_writes_to_actions("ingress::h1.field1", actionList[0]));
     EXPECT_TRUE(apc.is_in_field_writes_to_actions("ingress::h1.field1", actionList[1]));
@@ -204,7 +201,8 @@ TEST_F(ActionPhv, IngressMultipleTablesSharedWrites) {
             test2.apply();
         }
 
-    )"), P4_SOURCE(P4Headers::NONE, R"(
+    )"),
+                                 P4_SOURCE(P4Headers::NONE, R"(
         apply { }
     )"));
 
@@ -215,9 +213,8 @@ TEST_F(ActionPhv, IngressMultipleTablesSharedWrites) {
     post_pm_pipe = post_pm_pipe->apply(apc);
 
     std::vector<const IR::MAU::Action *> actionList;
-    forAllMatching<IR::MAU::Action>(post_pm_pipe, [&](const IR::MAU::Action* act) {
-            actionList.push_back(act);
-            });
+    forAllMatching<IR::MAU::Action>(post_pm_pipe,
+                                    [&](const IR::MAU::Action *act) { actionList.push_back(act); });
 
     EXPECT_TRUE(apc.is_in_field_writes_to_actions("ingress::h1.field1", actionList[0]));
     EXPECT_TRUE(apc.is_in_field_writes_to_actions("ingress::h1.field1", actionList[2]));
@@ -285,7 +282,8 @@ TEST_F(ActionPhv, IngressMultipleTablesReads) {
             test2.apply();
         }
 
-    )"), P4_SOURCE(P4Headers::NONE, R"(
+    )"),
+                                 P4_SOURCE(P4Headers::NONE, R"(
         apply { }
     )"));
 
@@ -296,16 +294,15 @@ TEST_F(ActionPhv, IngressMultipleTablesReads) {
     post_pm_pipe = post_pm_pipe->apply(apc);
 
     std::vector<const IR::MAU::Action *> actionList;
-    forAllMatching<IR::MAU::Action>(post_pm_pipe, [&](const IR::MAU::Action* act) {
-            actionList.push_back(act);
-            });
+    forAllMatching<IR::MAU::Action>(post_pm_pipe,
+                                    [&](const IR::MAU::Action *act) { actionList.push_back(act); });
 
-    EXPECT_TRUE(apc.is_in_write_to_reads(
-                    "ingress::h1.field1", actionList[2], "ingress::h2.field1"));
-    EXPECT_FALSE(apc.is_in_write_to_reads(
-                    "ingress::h1.field1", actionList[0], "ingress::h2.field2"));
-    EXPECT_TRUE(apc.is_in_write_to_reads(
-                    "ingress::h2.field2", actionList[3], "ingress::h1.field2"));
+    EXPECT_TRUE(
+        apc.is_in_write_to_reads("ingress::h1.field1", actionList[2], "ingress::h2.field1"));
+    EXPECT_FALSE(
+        apc.is_in_write_to_reads("ingress::h1.field1", actionList[0], "ingress::h2.field2"));
+    EXPECT_TRUE(
+        apc.is_in_write_to_reads("ingress::h2.field2", actionList[3], "ingress::h1.field2"));
     // EXPECT_FALSE(apc.is_in_write_to_reads(
     //               "ingress::h1.field1", actionList[3], "ingress::h2.field1"));
 }

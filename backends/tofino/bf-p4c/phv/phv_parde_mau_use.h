@@ -13,13 +13,13 @@
 #ifndef BF_P4C_PHV_PHV_PARDE_MAU_USE_H_
 #define BF_P4C_PHV_PHV_PARDE_MAU_USE_H_
 
-#include "bf-p4c/ir/bitrange.h"
-#include "ir/ir.h"
 #include "bf-p4c/common/header_stack.h"
+#include "bf-p4c/ir/bitrange.h"
 #include "bf-p4c/ir/gress.h"
 #include "bf-p4c/ir/thread_visitor.h"
 #include "bf-p4c/ir/tofino_write_context.h"
 #include "bf-p4c/phv/phv.h"
+#include "ir/ir.h"
 
 using namespace P4;
 
@@ -30,7 +30,7 @@ class Field;
 class PhvInfo;
 
 class Phv_Parde_Mau_Use : public Inspector, public TofinoWriteContext {
-    using FieldToRangeMap = ordered_map<const PHV::Field*, ordered_set<le_bitrange>>;
+    using FieldToRangeMap = ordered_map<const PHV::Field *, ordered_set<le_bitrange>>;
     using FieldIdToRangeMap = ordered_map<int, ordered_set<le_bitrange>>;
 
     /// Fields written in the MAU pipeline. Keys are fields written in the MAU pipeline. Values are
@@ -49,16 +49,16 @@ class Phv_Parde_Mau_Use : public Inspector, public TofinoWriteContext {
         ixbar_read_i;
 
     /// fields that are read by deparser learning engine, including selector.
-    ordered_set<const PHV::Field*> learning_reads_i;
+    ordered_set<const PHV::Field *> learning_reads_i;
 
     /// Fields extracted in the parser.
-    bitvec      extracted_i[GRESS_T_COUNT];
+    bitvec extracted_i[GRESS_T_COUNT];
 
     /// Fields extracted in the parser from the packet stream
-    bitvec      extracted_from_pkt_i[GRESS_T_COUNT];
+    bitvec extracted_from_pkt_i[GRESS_T_COUNT];
 
     /// Fields extracted in the parser from a constant.
-    bitvec      extracted_from_const_i[GRESS_T_COUNT];
+    bitvec extracted_from_const_i[GRESS_T_COUNT];
 
     /// Handy enum for indexing use_i below.
     enum { PARDE = 0, MAU = 1 };
@@ -71,11 +71,11 @@ class Phv_Parde_Mau_Use : public Inspector, public TofinoWriteContext {
     ordered_map<int, ordered_map<unsigned, ordered_set<le_bitrange>>> use_i;
 
     /// Fields used in the deparser.
-    bitvec      deparser_i[GRESS_T_COUNT];
+    bitvec deparser_i[GRESS_T_COUNT];
     /*                |    ^- gress               */
     /*                 == use in deparser         */
 
-    explicit Phv_Parde_Mau_Use(const PhvInfo &p) : phv(p) { }
+    explicit Phv_Parde_Mau_Use(const PhvInfo &p) : phv(p) {}
 
     /// @returns true if @p f is read or written anywhere in the pipeline
     /// or if @p f is marked bridged.
@@ -86,7 +86,7 @@ class Phv_Parde_Mau_Use : public Inspector, public TofinoWriteContext {
 
     /// @returns true if @p f is used (read or written) in the MAU pipeline.
     bool is_used_mau(const PHV::Field *f) const;
-    bool is_used_mau(const PHV::Field* f, le_bitrange range) const;
+    bool is_used_mau(const PHV::Field *f, le_bitrange range) const;
 
     /// @returns true if @p f is written in the MAU pipeline.
     bool is_written_mau(const PHV::Field *f) const;
@@ -102,11 +102,11 @@ class Phv_Parde_Mau_Use : public Inspector, public TofinoWriteContext {
 
     /// @returns true if @p f is extracted in the (ingress or egress) parser from packet data.
     bool is_extracted_from_pkt(const PHV::Field *f,
-            std::optional<gress_t> gress = std::nullopt) const;
+                               std::optional<gress_t> gress = std::nullopt) const;
 
     /// @returns true if @p f is extracted in the (ingress or egress) parser from a constant.
     bool is_extracted_from_constant(const PHV::Field *f,
-            std::optional<gress_t> gress = std::nullopt) const;
+                                    std::optional<gress_t> gress = std::nullopt) const;
 
     /// @returns true if @p f needs to be allocated for PHV.
     /// A field must be allocated to a PHV if is_ignore_alloc() is false and
@@ -127,9 +127,9 @@ class Phv_Parde_Mau_Use : public Inspector, public TofinoWriteContext {
 
  protected:
     const PhvInfo &phv;
-    gress_t       thread = INGRESS;
-    bool          in_mau = false;
-    bool          in_dep = false;
+    gress_t thread = INGRESS;
+    bool in_mau = false;
+    bool in_dep = false;
 
  protected:
     profile_t init_apply(const IR::Node *) override;
@@ -147,7 +147,7 @@ class Phv_Parde_Mau_Use : public Inspector, public TofinoWriteContext {
 /// egress_port and digests as used in MAU as they can't go in TPHV.
 class PhvUse : public Phv_Parde_Mau_Use {
  public:
-    explicit PhvUse(const PhvInfo &p) : Phv_Parde_Mau_Use(p) { }
+    explicit PhvUse(const PhvInfo &p) : Phv_Parde_Mau_Use(p) {}
 
  private:
     bool preorder(const IR::BFN::Deparser *d) override;

@@ -15,16 +15,17 @@
 
 #include <map>
 #include <stack>
-#include "mau_visitor.h"
-#include "table_dependency_graph.h"
+
 #include "bf-p4c/common/field_defuse.h"
 #include "bf-p4c/ir/control_flow_visitor.h"
-#include "bf-p4c/phv/phv_fields.h"
 #include "bf-p4c/mau/table_flow_graph.h"
 #include "bf-p4c/mau/table_mutex.h"
 #include "bf-p4c/mau/table_summary.h"
-#include "lib/ordered_set.h"
+#include "bf-p4c/phv/phv_fields.h"
 #include "lib/ordered_map.h"
+#include "lib/ordered_set.h"
+#include "mau_visitor.h"
+#include "table_dependency_graph.h"
 
 using namespace P4;
 
@@ -32,14 +33,11 @@ class InjectControlDependencies : public MauInspector {
     bool preorder(const IR::MAU::TableSeq *seq) override;
 
  private:
-    DependencyGraph& dg;
+    DependencyGraph &dg;
 
  public:
-    explicit InjectControlDependencies(DependencyGraph& out) : dg(out) {
-        visitDagOnce = false;
-    }
+    explicit InjectControlDependencies(DependencyGraph &out) : dg(out) { visitDagOnce = false; }
 };
-
 
 class PredicationBasedControlEdges : public MauInspector {
     DependencyGraph *dg;
@@ -67,7 +65,6 @@ class PredicationBasedControlEdges : public MauInspector {
     void postorder(const IR::MAU::Table *tbl) override;
     void end_apply() override;
 };
-
 
 /// Common functionality for injecting dependencies into a DependencyGraph.
 class AbstractDependencyInjector : public MauInspector {
@@ -118,19 +115,19 @@ class InjectMetadataControlDependencies : public AbstractDependencyInjector {
 
  public:
     InjectMetadataControlDependencies(const PhvInfo &p, DependencyGraph &g, const FlowGraph &f,
-            const ControlPathwaysToTable &cp)
-        : AbstractDependencyInjector(g, cp), phv(p), fg(f) { }
+                                      const ControlPathwaysToTable &cp)
+        : AbstractDependencyInjector(g, cp), phv(p), fg(f) {}
 };
 
 class InjectActionExitAntiDependencies : public AbstractDependencyInjector {
-    const CalculateNextTableProp& cntp;
+    const CalculateNextTableProp &cntp;
 
-    void postorder(const IR::MAU::Table* table) override;
+    void postorder(const IR::MAU::Table *table) override;
 
  public:
     InjectActionExitAntiDependencies(DependencyGraph &g, const CalculateNextTableProp &cntp,
-            const ControlPathwaysToTable &cp)
-        : AbstractDependencyInjector(g, cp), cntp(cntp) { }
+                                     const ControlPathwaysToTable &cp)
+        : AbstractDependencyInjector(g, cp), cntp(cntp) {}
 };
 
 class InjectControlExitDependencies : public AbstractDependencyInjector {
@@ -143,23 +140,23 @@ class InjectControlExitDependencies : public AbstractDependencyInjector {
         return rv;
     }
 
-    void end_apply(const IR::Node* node) override {
+    void end_apply(const IR::Node *node) override {
         Visitor::end_apply(node);
         link_run_before_exit_tables();
         LOG3("InjectControlExitDependencies ends");
     }
 
-    bool preorder(const IR::MAU::Table* table) override;
-    void postorder(const IR::MAU::Table* table) override;
+    bool preorder(const IR::MAU::Table *table) override;
+    void postorder(const IR::MAU::Table *table) override;
 
-    void collect_run_before_exit_table(const IR::MAU::Table* table);
+    void collect_run_before_exit_table(const IR::MAU::Table *table);
     void inject_dependencies_from_gress_root_tables_to_first_rbe_table(
-        const IR::MAU::Table* first_rbe_table);
-    bool is_first_run_before_exit_table_in_gress(const IR::MAU::Table* rbe_table);
-    const IR::MAU::TableSeq* get_gress_root_table_seq(const IR::MAU::Table* table);
+        const IR::MAU::Table *first_rbe_table);
+    bool is_first_run_before_exit_table_in_gress(const IR::MAU::Table *rbe_table);
+    const IR::MAU::TableSeq *get_gress_root_table_seq(const IR::MAU::Table *table);
     void link_run_before_exit_tables();
-    void inject_control_exit_dependency(const IR::MAU::Table* source,
-                                        const IR::MAU::Table* destination);
+    void inject_control_exit_dependency(const IR::MAU::Table *source,
+                                        const IR::MAU::Table *destination);
 
  public:
     InjectControlExitDependencies(DependencyGraph &dg, const ControlPathwaysToTable &cp)
@@ -182,12 +179,12 @@ class InjectDarkAntiDependencies : public AbstractDependencyInjector {
     void end_apply() override;
     // Get table corresponding to uid from id_to_table map
     // - handle case where @uid may not exists in id_to_table
-    const IR::MAU::Table* getTable(UniqueId uid);
+    const IR::MAU::Table *getTable(UniqueId uid);
 
  public:
     InjectDarkAntiDependencies(const PhvInfo &p, DependencyGraph &g,
-            const ControlPathwaysToTable &cp)
-        : AbstractDependencyInjector(g, cp), phv(p) { }
+                               const ControlPathwaysToTable &cp)
+        : AbstractDependencyInjector(g, cp), phv(p) {}
 };
 
 class TableFindInjectedDependencies : public PassManager {
@@ -206,12 +203,13 @@ class TableFindInjectedDependencies : public PassManager {
     }
 
  public:
-    explicit TableFindInjectedDependencies(const PhvInfo &p, DependencyGraph& dg,
-        FlowGraph& fg, const BFN_Options *options = nullptr,
-        const TableSummary *summary = nullptr);
+    explicit TableFindInjectedDependencies(const PhvInfo &p, DependencyGraph &dg, FlowGraph &fg,
+                                           const BFN_Options *options = nullptr,
+                                           const TableSummary *summary = nullptr);
+
  private:
     // Duplicates to dominators
-    ordered_map<const IR::MAU::TableSeq*, const IR::MAU::Table*> dominators;
+    ordered_map<const IR::MAU::TableSeq *, const IR::MAU::Table *> dominators;
 };
 
 // During alt-phv-alloc, the ALT_FINALIZE_TABLE round during table placement
@@ -227,9 +225,9 @@ class InjectDepForAltPhvAlloc : public MauInspector {
     void end_apply() override;
 
  public:
-    InjectDepForAltPhvAlloc(const PhvInfo &p, DependencyGraph &g,
-            const FieldDefUse &du, const TablesMutuallyExclusive &mu)
-        : phv(p), dg(g), defuse(du), mutex(mu) { }
+    InjectDepForAltPhvAlloc(const PhvInfo &p, DependencyGraph &g, const FieldDefUse &du,
+                            const TablesMutuallyExclusive &mu)
+        : phv(p), dg(g), defuse(du), mutex(mu) {}
 };
 
 #endif /* BF_P4C_MAU_TABLE_INJECTED_DEPS_H_ */

@@ -15,19 +15,15 @@
 
 #include <optional>
 
-#include "ir/ir.h"
-#include "bf-p4c/phv/phv_fields.h"
 #include "bf-p4c/mau/action_analysis.h"
+#include "bf-p4c/phv/phv_fields.h"
+#include "ir/ir.h"
 
 namespace PHV {
 
 /// SourceOp represents a source operand.
 struct SourceOp {
-    enum class OpType {
-        move,
-        bitwise,
-        whole_container
-    };
+    enum class OpType { move, bitwise, whole_container };
     OpType t = OpType::move;
     bool ad_or_const = false;
     std::optional<PHV::FieldSlice> phv_src = std::nullopt;
@@ -38,14 +34,14 @@ struct SourceOp {
     SourceOp slice(int start, int len) const;
 };
 
-std::ostream &operator<<(std::ostream &out, const SourceOp& src);
+std::ostream &operator<<(std::ostream &out, const SourceOp &src);
 
 /// A collection of source operands of a field slice, classified by actions.
-using ActionClassifiedSources = ordered_map<const IR::MAU::Action*, safe_vector<SourceOp>>;
+using ActionClassifiedSources = ordered_map<const IR::MAU::Action *, safe_vector<SourceOp>>;
 
 /// ActionSourceTracker collects all source-to-destination for all field slices.
 class ActionSourceTracker : public Inspector {
-    const PhvInfo& phv;
+    const PhvInfo &phv;
     const ReductionOrInfo &red_info;
 
     /// sources[f][range1][act] = {src_op1, src_op2...} means that
@@ -57,7 +53,7 @@ class ActionSourceTracker : public Inspector {
     ///  3..4: zzz
     /// }, because query will have to iterate, slice and merge all sources.
     /// We will split them into disjoint ranges in the end_apply().
-    ordered_map<const PHV::Field*, ordered_map<le_bitrange, ActionClassifiedSources>> sources;
+    ordered_map<const PHV::Field *, ordered_map<le_bitrange, ActionClassifiedSources>> sources;
 
  private:
     void clear() { sources.clear(); };
@@ -79,18 +75,18 @@ class ActionSourceTracker : public Inspector {
     void end_apply() override;
 
  public:
-    explicit ActionSourceTracker(const PhvInfo& phv, const ReductionOrInfo &ri)
+    explicit ActionSourceTracker(const PhvInfo &phv, const ReductionOrInfo &ri)
         : phv(phv), red_info(ri) {}
 
     /// @returns action classified sources of @p fs for all actions.
     /// @p fs must be fine-sliced: every bit of @p fs must write by the same set of instructions.
-    ActionClassifiedSources get_sources(const PHV::FieldSlice& fs) const;
+    ActionClassifiedSources get_sources(const PHV::FieldSlice &fs) const;
 
-    friend std::ostream &operator<<(std::ostream &out, const ActionSourceTracker& tracker);
+    friend std::ostream &operator<<(std::ostream &out, const ActionSourceTracker &tracker);
 };
 
-std::ostream &operator<<(std::ostream &out, const ActionClassifiedSources& sources);
-std::ostream &operator<<(std::ostream &out, const ActionSourceTracker& tracker);
+std::ostream &operator<<(std::ostream &out, const ActionClassifiedSources &sources);
+std::ostream &operator<<(std::ostream &out, const ActionSourceTracker &tracker);
 
 }  // namespace PHV
 

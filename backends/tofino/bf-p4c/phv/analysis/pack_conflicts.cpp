@@ -11,6 +11,7 @@
  */
 
 #include "pack_conflicts.h"
+
 #include "lib/log.h"
 
 Visitor::profile_t PackConflicts::init_apply(const IR::Node *root) {
@@ -23,8 +24,8 @@ Visitor::profile_t PackConflicts::init_apply(const IR::Node *root) {
     fieldslice_no_pack_i.clear();
     field_fine_slices.clear();
     // Initialize the fieldNoPack matrix to allow all fields to be packed together
-    for (auto& f1 : phv) {
-        for (auto& f2 : phv) {
+    for (auto &f1 : phv) {
+        for (auto &f2 : phv) {
             // If the fields are no pack according to deparser constraints, then set that here.
             if (phv.isDeparserNoPack(&f1, &f2)) {
                 addPackConflict(PHV::FieldSlice(&f1), PHV::FieldSlice(&f2));
@@ -38,7 +39,7 @@ Visitor::profile_t PackConflicts::init_apply(const IR::Node *root) {
     }
 
     // add pa_no_pack
-    for (const auto& f : pa_no_pack.no_packs()) {
+    for (const auto &f : pa_no_pack.no_packs()) {
         LOG3("add pa_no_pack: " << f.first->name << " and " << f.second->name);
         addPackConflict(PHV::FieldSlice(f.first), PHV::FieldSlice(f.second));
     }
@@ -46,7 +47,7 @@ Visitor::profile_t PackConflicts::init_apply(const IR::Node *root) {
 }
 
 bool PackConflicts::GatherWrites::preorder(const IR::MAU::Action *act) {
-    auto* tbl = findContext<IR::MAU::Table>();
+    auto *tbl = findContext<IR::MAU::Table>();
     // Create a mapping of tables to all the actions it may invoke
     self.tableActions[tbl].insert(act);
 
@@ -56,76 +57,91 @@ bool PackConflicts::GatherWrites::preorder(const IR::MAU::Action *act) {
     act->apply(aa);
 
     // Collect all the PHV fields written to by this action into the actionWrites map
-    for (auto& field_action : Values(field_actions_map)) {
+    for (auto &field_action : Values(field_actions_map)) {
         le_bitrange range;
-        auto* write = self.phv.field(field_action.write.expr, &range);
-        if (write == nullptr)
-            BUG("Action does not have a write?");
-        self.actionWrites[act].insert(PHV::FieldSlice(write, range)); }
+        auto *write = self.phv.field(field_action.write.expr, &range);
+        if (write == nullptr) BUG("Action does not have a write?");
+        self.actionWrites[act].insert(PHV::FieldSlice(write, range));
+    }
     return true;
 }
 
-bool PackConflicts::GatherWrites::preorder(const IR::BFN::Digest* digest) {
+bool PackConflicts::GatherWrites::preorder(const IR::BFN::Digest *digest) {
     // The no-pack constraint on metadata fields used in learning digests is not applicable to JBay.
     if (Device::currentDevice() != Device::TOFINO) return true;
     // Currently we support only three digests: learning, mirror, and resubmit.
     if (digest->name != "learning" && digest->name != "mirror" && digest->name != "resubmit")
         return true;
     LOG3("    Determining constraints for " << digest->name << " digest.");
-    ordered_set<const PHV::Field*> allDigestFields;
+    ordered_set<const PHV::Field *> allDigestFields;
     // For fields that are not part of the same digest field lists, set the no-pack constraint.
     for (auto fieldList : digest->fieldLists) {
         for (auto flval1 : fieldList->sources) {
-            const auto* f1 = self.phv.field(flval1->field);
+            const auto *f1 = self.phv.field(flval1->field);
             // Apply the constraint only to metadata fields.
             if (f1 == nullptr) continue;
             if (!f1->metadata && !f1->bridged) continue;
-            allDigestFields.insert(f1); }
-        for (const auto* f1 : allDigestFields) {
-            for (const auto* f2 : allDigestFields) {
+            allDigestFields.insert(f1);
+        }
+        for (const auto *f1 : allDigestFields) {
+            for (const auto *f2 : allDigestFields) {
                 if (f1 == f2) continue;
                 // Fields within the same digest field list. So, packing them together is okay.
-                self.phv.removeDigestNoPack(f1, f2); } } }
+                self.phv.removeDigestNoPack(f1, f2);
+            }
+        }
+    }
 
     // Set no pack for fields not marked digest pack okay.
-    for (const auto* digestField : allDigestFields) {
-        for (const auto& f : self.phv) {
+    for (const auto *digestField : allDigestFields) {
+        for (const auto &f : self.phv) {
             if (digestField == &f) continue;
             if (f.padding || f.isCompilerGeneratedPaddingField()) continue;
             if (!allDigestFields.count(&f)) {
-                LOG3("\t  Setting no-pack for digest field " << digestField->name << " and "
-                    "non-digest field " << f.name);
+                LOG3("\t  Setting no-pack for digest field " << digestField->name
+                                                             << " and "
+                                                                "non-digest field "
+                                                             << f.name);
                 self.addPackConflict(PHV::FieldSlice(digestField), PHV::FieldSlice(&f));
-                self.phv.addDigestNoPack(digestField, &f); } } }
+                self.phv.addDigestNoPack(digestField, &f);
+            }
+        }
+    }
 
     return true;
 }
 
-void PackConflicts::generateNoPackConstraintsForBridgedFields(
-        const IR::MAU::Table* t1, const IR::MAU::Table* t2) {
+void PackConflicts::generateNoPackConstraintsForBridgedFields(const IR::MAU::Table *t1,
+                                                              const IR::MAU::Table *t2) {
     ordered_set<PHV::FieldSlice> fieldslices1;
     ordered_set<PHV::FieldSlice> fieldslices2;
 
     if (!tableActions.count(t1)) {
         LOG6("\t\tNo actions in table " << t1);
-        return; }
+        return;
+    }
     if (!tableActions.count(t2)) {
         LOG6("\t\tNo actions in table " << t2);
-        return; }
+        return;
+    }
     for (auto act1 : tableActions.at(t1)) {
         for (auto act2 : tableActions.at(t2)) {
             if (amutex(act1, act2)) {
-                LOG6("Actions " << act1->name << " and " << act2->name << " are mutually "
-                        "exclusive.");
+                LOG6("Actions " << act1->name << " and " << act2->name
+                                << " are mutually "
+                                   "exclusive.");
             } else {
                 LOG6("\t  Non mutually exclusive actions " << act1->name << " and " << act2->name);
                 fieldslices1.insert(actionWrites[act1].begin(), actionWrites[act1].end());
-                fieldslices2.insert(actionWrites[act2].begin(), actionWrites[act2].end()); } } }
+                fieldslices2.insert(actionWrites[act2].begin(), actionWrites[act2].end());
+            }
+        }
+    }
 
-    LOG5("\tFor table: " << t1->name << ", number of fieldslices written across actions: " <<
-            fieldslices1.size());
-    LOG5("\tFor table: " << t2->name << ", number of fieldslices written across actions: " <<
-            fieldslices2.size());
+    LOG5("\tFor table: " << t1->name << ", number of fieldslices written across actions: "
+                         << fieldslices1.size());
+    LOG5("\tFor table: " << t2->name << ", number of fieldslices written across actions: "
+                         << fieldslices2.size());
 
     for (auto fs1 : fieldslices1) {
         for (auto fs2 : fieldslices2) {
@@ -142,8 +158,8 @@ void PackConflicts::generateNoPackConstraintsForBridgedFields(
 void PackConflicts::end_apply() {
     for (auto row1 : tableActions) {
         for (auto row2 : tableActions) {
-            auto* t1 = row1.first;
-            auto* t2 = row2.first;
+            auto *t1 = row1.first;
+            auto *t2 = row2.first;
             if (t1 == t2) continue;
             ordered_set<int> stage = bt.inSameStage(t1, t2);
             bool on_same_stage = false;
@@ -165,16 +181,16 @@ void PackConflicts::end_apply() {
                 }
             }
             if (!stage.empty() || on_same_stage) {
-                LOG4("\tGenerate no pack conditions for table " << t1->name << " and table " <<
-                        t2->name);
+                LOG4("\tGenerate no pack conditions for table " << t1->name << " and table "
+                                                                << t2->name);
                 generateNoPackConstraints(t1, t2);
-            } else if (t1->get_provided_stage() == t2->get_provided_stage()
-                       && t1->get_provided_stage() >= 0) {
+            } else if (t1->get_provided_stage() == t2->get_provided_stage() &&
+                       t1->get_provided_stage() >= 0) {
                 // Potentially should not be an issue, as this can get caught by backtracking
                 // but if the program does not backtrack, then expected behavior might not
                 // be the same
-                LOG4("\tGenerate no pack conditions for table " << t1->name << " and table "
-                      << t2->name << " due to stage pragmas");
+                LOG4("\tGenerate no pack conditions for table "
+                     << t1->name << " and table " << t2->name << " due to stage pragmas");
                 generateNoPackConstraints(t1, t2);
             }
 
@@ -185,29 +201,30 @@ void PackConflicts::end_apply() {
             if (!t1->name.startsWith("__mau_inits_table") &&
                 !t2->name.startsWith("__mau_inits_table") &&
                 (dg.min_stage(t1) == dg.min_stage(t2))) {
-                LOG4("\tGenerate no pack conditions for table " << t1->name << " and table "
-                      << t2->name << " for bridge fields");
+                LOG4("\tGenerate no pack conditions for table "
+                     << t1->name << " and table " << t2->name << " for bridge fields");
                 generateNoPackConstraintsForBridgedFields(t1, t2);
             }
         }
     }
 
     for (auto tbl_pair : ignore.pairwise_deps_to_ignore()) {
-        LOG1("\tGenerate no pack conditions for table " << tbl_pair.first->name << " and table " <<
-              tbl_pair.second->name << " due to ignore_table_dependency constraints");
+        LOG1("\tGenerate no pack conditions for table "
+             << tbl_pair.first->name << " and table " << tbl_pair.second->name
+             << " due to ignore_table_dependency constraints");
         generateNoPackConstraints(tbl_pair.first, tbl_pair.second);
     }
 
     LOG3("Total packing conditions: " << totalNumSet);
     updateNumPackConstraints();
-    if (LOGGING(5))
-        printNoPackConflicts();
+    if (LOGGING(5)) printNoPackConflicts();
 }
 
-void PackConflicts::generateNoPackConstraints(const IR::MAU::Table* t1, const IR::MAU::Table* t2) {
+void PackConflicts::generateNoPackConstraints(const IR::MAU::Table *t1, const IR::MAU::Table *t2) {
     if (mutex(t1, t2)) {
         LOG6("\tTables " << t1->name << " and " << t2->name << " are mutually exclusive");
-        return; }
+        return;
+    }
 
     ordered_set<PHV::FieldSlice> fieldslices1;
     ordered_set<PHV::FieldSlice> fieldslices2;
@@ -215,53 +232,62 @@ void PackConflicts::generateNoPackConstraints(const IR::MAU::Table* t1, const IR
 
     if (!tableActions.count(t1)) {
         LOG6("\t\tNo actions in table " << t1);
-        return; }
+        return;
+    }
     if (!tableActions.count(t2)) {
         LOG6("\t\tNo actions in table " << t2);
-        return; }
+        return;
+    }
     for (auto act1 : tableActions.at(t1)) {
         for (auto act2 : tableActions.at(t2)) {
             if (amutex(act1, act2)) {
-                LOG6("Actions " << act1->name << " and " << act2->name << " are mutually "
-                        "exclusive.");
+                LOG6("Actions " << act1->name << " and " << act2->name
+                                << " are mutually "
+                                   "exclusive.");
             } else {
                 LOG6("\t  Non mutually exclusive actions " << act1->name << " and " << act2->name);
                 fieldslices1.insert(actionWrites[act1].begin(), actionWrites[act1].end());
-                fieldslices2.insert(actionWrites[act2].begin(), actionWrites[act2].end()); } } }
+                fieldslices2.insert(actionWrites[act2].begin(), actionWrites[act2].end());
+            }
+        }
+    }
 
-    LOG5("\tFor table: " << t1->name << ", number of fields written across actions: " <<
-            fieldslices1.size());
-    LOG5("\tFor table: " << t2->name << ", number of fields written across actions: " <<
-            fieldslices2.size());
+    LOG5("\tFor table: " << t1->name
+                         << ", number of fields written across actions: " << fieldslices1.size());
+    LOG5("\tFor table: " << t2->name
+                         << ", number of fields written across actions: " << fieldslices2.size());
 
     for (auto fs1 : fieldslices1) {
         for (auto fs2 : fieldslices2) {
             if (fs1.field() == fs2.field() && fs1.range().overlaps(fs2.range())) {
                 // xxx(Deep): This should be taken care of by mutually_exclusive_actions
-                LOG1("Dependency analysis may be wrong if " << fs1 << " is written by both "
-                     "tables " << t1->name << " and " << t2->name);
+                LOG1("Dependency analysis may be wrong if " << fs1
+                                                            << " is written by both "
+                                                               "tables "
+                                                            << t1->name << " and " << t2->name);
             } else {
                 ++numSet;
                 addPackConflict(fs1, fs2);
-                LOG6("\t" << " Setting no pack for " << fs1 << " and " << fs2); } } }
+                LOG6("\t" << " Setting no pack for " << fs1 << " and " << fs2);
+            }
+        }
+    }
 
-    LOG4("\tNumber of no pack conditions added for " << t1->name << " and " << t2->name << " : " <<
-         (numSet / 2));
+    LOG4("\tNumber of no pack conditions added for " << t1->name << " and " << t2->name << " : "
+                                                     << (numSet / 2));
     totalNumSet += numSet;
 }
 
-unsigned PackConflicts::size() const {
-    return phv.sizeFieldNoPack();
-}
+unsigned PackConflicts::size() const { return phv.sizeFieldNoPack(); }
 
-void PackConflicts::removePackConflict(const PHV::FieldSlice& fs1, const PHV::FieldSlice& fs2) {
+void PackConflicts::removePackConflict(const PHV::FieldSlice &fs1, const PHV::FieldSlice &fs2) {
     phv.removeFieldNoPack(fs1.field(), fs2.field());
     if (!fieldslice_to_id.count(fs1)) return;
     if (!fieldslice_to_id.count(fs2)) return;
     fieldslice_no_pack_i(fieldslice_to_id[fs1], fieldslice_to_id[fs2]) = false;
 }
 
-void PackConflicts::addPackConflict(const PHV::FieldSlice& fs1, const PHV::FieldSlice& fs2) {
+void PackConflicts::addPackConflict(const PHV::FieldSlice &fs1, const PHV::FieldSlice &fs2) {
     LOG6("add Pack Conflict " << fs1 << " and " << fs2);
     phv.addFieldNoPack(fs1.field(), fs2.field());
 
@@ -273,7 +299,7 @@ void PackConflicts::addPackConflict(const PHV::FieldSlice& fs1, const PHV::Field
     fieldslice_no_pack_i(fieldslice_to_id[fs1], fieldslice_to_id[fs2]) = true;
 }
 
-bool PackConflicts::hasPackConflict(const PHV::FieldSlice& fs1, const PHV::FieldSlice& fs2) const {
+bool PackConflicts::hasPackConflict(const PHV::FieldSlice &fs1, const PHV::FieldSlice &fs2) const {
     LOG6(this << " PackConflict:" << " - Checking for " << fs1 << " and " << fs2 << " )");
     if (!field_fine_slices.count(fs1.field())) return false;
     if (!field_fine_slices.count(fs2.field())) return false;
@@ -298,26 +324,26 @@ bool PackConflicts::hasPackConflict(const PHV::FieldSlice& fs1, const PHV::Field
 
 void PackConflicts::printNoPackConflicts() const {
     LOG5("List of no pack constraints for fields ");
-    for (auto& f1 : phv) {
-        for (auto& f2 : phv) {
+    for (auto &f1 : phv) {
+        for (auto &f2 : phv) {
             if (f1.id >= f2.id) continue;
             if (phv.isFieldNoPack(&f1, &f2)) {
-                LOG5("\tno pack fields: " << f1.name << " (" << f1.id << "), " << f2.name <<
-                     " (" << f2.id << ")");
+                LOG5("\tno pack fields: " << f1.name << " (" << f1.id << "), " << f2.name << " ("
+                                          << f2.id << ")");
             }
         }
     }
     LOG5("List of no pack constraints for fieldslices ");
-    for (auto& entry1 : fieldslice_to_id) {
+    for (auto &entry1 : fieldslice_to_id) {
         auto fs1 = entry1.first;
         auto id1 = entry1.second;
-        for (auto& entry2 : fieldslice_to_id) {
+        for (auto &entry2 : fieldslice_to_id) {
             auto fs2 = entry2.first;
             auto id2 = entry2.second;
             if (id1 >= id2) continue;
             if (hasPackConflict(fs1, fs2)) {
-                LOG5("\tno pack fieldslices: " << fs1 << " (" << id1 << "), " <<
-                                                  fs2 << " (" << id2 << ")");
+                LOG5("\tno pack fieldslices: " << fs1 << " (" << id1 << "), " << fs2 << " (" << id2
+                                               << ")");
             }
         }
     }
@@ -325,18 +351,18 @@ void PackConflicts::printNoPackConflicts() const {
 }
 
 void PackConflicts::updateNumPackConstraints() {
-    for (auto& f1 : phv) {
+    for (auto &f1 : phv) {
         size_t numPack = 0;
-        for (auto& f2 : phv) {
+        for (auto &f2 : phv) {
             if (f1.id == f2.id) continue;
-            if (phv.isFieldNoPack(&f1, &f2))
-                numPack++; }
-        f1.set_num_pack_conflicts(numPack); }
+            if (phv.isFieldNoPack(&f1, &f2)) numPack++;
+        }
+        f1.set_num_pack_conflicts(numPack);
+    }
 }
 
-bool PackConflicts::writtenInSameStageDifferentTable(
-        const IR::MAU::Table* t1,
-        const IR::MAU::Table* t2) const {
+bool PackConflicts::writtenInSameStageDifferentTable(const IR::MAU::Table *t1,
+                                                     const IR::MAU::Table *t2) const {
     // Written in same stage and same table.
     if (t1 == t2) return false;
     // If no table placement from previous round, then ignore this.
@@ -345,7 +371,6 @@ bool PackConflicts::writtenInSameStageDifferentTable(
     std::stringstream ss;
     for (auto st : stage) ss << st << " ";
     if (!stage.empty())
-        LOG3("\tTables " << t1->name << " and " << t2->name << " share common stages " <<
-            ss.str());
+        LOG3("\tTables " << t1->name << " and " << t2->name << " share common stages " << ss.str());
     return !stage.empty();
 }

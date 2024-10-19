@@ -63,7 +63,8 @@ class Edge {
     void dbprint(std::ostream &out, NodeAndEdgeSet *seen) const;
     void dbprint(std::ostream &out) const {
         NodeAndEdgeSet seen;
-        dbprint(out, &seen); }
+        dbprint(out, &seen);
+    }
 };
 
 /**
@@ -100,7 +101,8 @@ class Node {
     void dbprint(std::ostream &out, NodeAndEdgeSet *seen) const;
     void dbprint(std::ostream &out) const {
         NodeAndEdgeSet seen;
-        dbprint(out, &seen); }
+        dbprint(out, &seen);
+    }
 
  private:
     void add_edge(Edge *e);
@@ -190,7 +192,8 @@ class SimplePowerGraph : public IHasDbPrint {
     void dbprint(std::ostream &out, NodeAndEdgeSet *seen) const;
     void dbprint(std::ostream &out) const {
         NodeAndEdgeSet seen;
-        dbprint(out, &seen); }
+        dbprint(out, &seen);
+    }
 
  private:
     int running_id_;  // For producing unique integer values of graph Nodes.

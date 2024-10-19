@@ -10,8 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_COMMON_IR_UTILS_H_
-#define EXTENSIONS_BF_P4C_COMMON_IR_UTILS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_COMMON_IR_UTILS_H_
+#define BACKENDS_TOFINO_BF_P4C_COMMON_IR_UTILS_H_
 
 #include "ir/ir.h"
 
@@ -19,22 +19,23 @@ using namespace P4;
 
 IR::Member *gen_fieldref(const IR::HeaderOrMetadata *hdr, cstring field);
 
-const IR::HeaderOrMetadata*
-getMetadataType(const IR::BFN::Pipe* pipe, cstring typeName);
+const IR::HeaderOrMetadata *getMetadataType(const IR::BFN::Pipe *pipe, cstring typeName);
 
 bool isSigned(const IR::Type *);
 
 // probably belongs in ir/ir.h or ir/node.h...
-template <class T> inline T *clone_update(const T* &ptr) {
+template <class T>
+inline T *clone_update(const T *&ptr) {
     T *rv = ptr->clone();
     ptr = rv;
-    return rv; }
+    return rv;
+}
 
 uint64_t bitMask(unsigned size);
 big_int bigBitMask(int size);
 
 // FIXME -- move to open source code (ir/pass_manager.h probably)
-template<class BT>
+template <class BT>
 class CatchBacktrack : public Backtrack {
     std::function<void(BT *)> fn;
     bool backtrack(trigger &trig) override {
@@ -50,7 +51,7 @@ class CatchBacktrack : public Backtrack {
 
  public:
     explicit CatchBacktrack(std::function<void(BT *)> f) : fn(f) {}
-    explicit CatchBacktrack(std::function<void()> f) : fn([f](BT *){ f(); }) {}
+    explicit CatchBacktrack(std::function<void()> f) : fn([f](BT *) { f(); }) {}
 };
 
-#endif /* EXTENSIONS_BF_P4C_COMMON_IR_UTILS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_COMMON_IR_UTILS_H_ */

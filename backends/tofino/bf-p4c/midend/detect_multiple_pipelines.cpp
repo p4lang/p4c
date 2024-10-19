@@ -18,10 +18,9 @@
 namespace BFN {
 
 // Checks the "main"
-bool DetectMultiplePipelines::preorder(const IR::Declaration_Instance* di) {
+bool DetectMultiplePipelines::preorder(const IR::Declaration_Instance *di) {
     // Check if this is specialized type with baseType reffering to "Switch"
-    if (!di->type->is<IR::Type_Specialized>())
-        return false;
+    if (!di->type->is<IR::Type_Specialized>()) return false;
     auto type = di->type->to<IR::Type_Specialized>();
     if (!type->baseType->is<IR::Type_Name>() ||
         type->baseType->to<IR::Type_Name>()->path->name != "Switch")
@@ -36,4 +35,4 @@ bool DetectMultiplePipelines::preorder(const IR::Declaration_Instance* di) {
     return false;
 }
 
-}   // namespace BFN
+}  // namespace BFN

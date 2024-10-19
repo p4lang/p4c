@@ -10,10 +10,10 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include "gtest/gtest.h"
-
-#include "ir/ir.h"
 #include "bf-p4c/parde/field_packing.h"
+
+#include "gtest/gtest.h"
+#include "ir/ir.h"
 
 namespace BFN {
 
@@ -24,7 +24,7 @@ TEST(TofinoFieldPacking, Fields) {
     EXPECT_EQ(0u, packing.totalWidth);
 
     // Any expression can serve as a field.
-    auto* field1 = new IR::Constant(0);
+    auto *field1 = new IR::Constant(0);
 
     // Test adding one field.
     packing.appendField(field1, 10);
@@ -37,7 +37,7 @@ TEST(TofinoFieldPacking, Fields) {
     EXPECT_FALSE(packing.fields.back().isPadding());
 
     // Test adding a second field.
-    auto* field2 = new IR::Constant(0);
+    auto *field2 = new IR::Constant(0);
     packing.appendField(field2, "field2"_cs, 1);
     EXPECT_TRUE(packing.containsFields());
     EXPECT_EQ(2u, packing.fields.size());
@@ -81,7 +81,7 @@ TEST(TofinoFieldPacking, Padding) {
     EXPECT_TRUE(packing.fields.back().isPadding());
 
     // A field should not be merged with padding.
-    auto* field = new IR::Constant(0);
+    auto *field = new IR::Constant(0);
     packing.appendField(field, 5);
     EXPECT_TRUE(packing.containsFields());
     EXPECT_EQ(2u, packing.fields.size());
@@ -120,7 +120,7 @@ TEST(TofinoFieldPacking, ZeroPadding) {
 TEST(TofinoFieldPacking, EmptyPackingAlignment) {
     // An empty FieldPacking should be aligned to any number of bits. (Ignoring
     // phase, at least.) padToAlignment() should have no effect.
-    for (unsigned alignment : { 1, 8, 16, 32 }) {
+    for (unsigned alignment : {1, 8, 16, 32}) {
         SCOPED_TRACE(alignment);
         FieldPacking packing;
         EXPECT_TRUE(packing.isAlignedTo(alignment));
@@ -130,7 +130,7 @@ TEST(TofinoFieldPacking, EmptyPackingAlignment) {
 
     // An empty FieldPacking *isn't* aligned if the phase is non-zero, so
     // padToAlignment() should introduce padding bits.
-    for (unsigned phase : { 0, 1, 2, 3, 4, 5, 6, 7 }) {
+    for (unsigned phase : {0, 1, 2, 3, 4, 5, 6, 7}) {
         SCOPED_TRACE(phase);
         FieldPacking packing;
 
@@ -144,7 +144,7 @@ TEST(TofinoFieldPacking, EmptyPackingAlignment) {
     }
 }
 
-static void checkAlignment(const FieldPacking& packing, unsigned preAlignmentWidth,
+static void checkAlignment(const FieldPacking &packing, unsigned preAlignmentWidth,
                            unsigned alignment, unsigned phase) {
     // Check that the alignment is correct.
     EXPECT_EQ(phase, packing.totalWidth % alignment);
@@ -164,10 +164,10 @@ static void checkAlignment(const FieldPacking& packing, unsigned preAlignmentWid
 
 TEST(TofinoFieldPacking, FieldAlignment) {
     // Check that we can correctly align a FieldPacking with a field in it.
-    auto* field = new IR::Constant(0);
-    for (unsigned alignment : { 8, 16, 32 }) {
+    auto *field = new IR::Constant(0);
+    for (unsigned alignment : {8, 16, 32}) {
         SCOPED_TRACE(alignment);
-        for (unsigned phase : { 0, 1, 2, 3, 4, 5, 6, 7 }) {
+        for (unsigned phase : {0, 1, 2, 3, 4, 5, 6, 7}) {
             SCOPED_TRACE(phase);
             FieldPacking packing;
             const unsigned fieldWidth = 3;
@@ -190,9 +190,9 @@ TEST(TofinoFieldPacking, FieldAlignment) {
 
 TEST(TofinoFieldPacking, PaddingAlignment) {
     // Check that we can correctly align a FieldPacking with padding in it.
-    for (unsigned alignment : { 8, 16, 32 }) {
+    for (unsigned alignment : {8, 16, 32}) {
         SCOPED_TRACE(alignment);
-        for (unsigned phase : { 0, 1, 2, 3, 4, 5, 6, 7 }) {
+        for (unsigned phase : {0, 1, 2, 3, 4, 5, 6, 7}) {
             SCOPED_TRACE(phase);
             FieldPacking packing;
             const unsigned paddingWidth = 3;
@@ -237,63 +237,61 @@ TEST(TofinoFieldPacking, ForEachField) {
     // Define a packing.
     FieldPacking packing;
     packing.appendPadding(3);
-    auto* field1 = new IR::Member(new IR::Constant(0), "field1"_cs);
+    auto *field1 = new IR::Member(new IR::Constant(0), "field1"_cs);
     packing.appendField(field1, "field1"_cs, 6);
-    auto* field2 = new IR::Member(new IR::Constant(0), "field2"_cs);
+    auto *field2 = new IR::Member(new IR::Constant(0), "field2"_cs);
     packing.appendField(field2, "field2"_cs, 15);
     packing.appendPadding(9);
-    auto* field3 = new IR::Member(new IR::Constant(0), "field3"_cs);
+    auto *field3 = new IR::Member(new IR::Constant(0), "field3"_cs);
     packing.appendField(field3, "field3"_cs, 8);
     packing.padToAlignment(8);
 
     // Check that we can iterate over it correctly with network order ranges.
     {
         const std::vector<std::pair<cstring, nw_bitrange>> expected = {
-            { "field1"_cs, nw_bitrange(StartLen(3, 6)) },
-            { "field2"_cs, nw_bitrange(StartLen(9, 15)) },
-            { "field3"_cs, nw_bitrange(StartLen(33, 8)) },
+            {"field1"_cs, nw_bitrange(StartLen(3, 6))},
+            {"field2"_cs, nw_bitrange(StartLen(9, 15))},
+            {"field3"_cs, nw_bitrange(StartLen(33, 8))},
         };
 
         unsigned currentField = 0;
-        packing.forEachField<Endian::Network>([&](nw_bitrange range,
-                                                  const IR::Expression* field,
-                                                  cstring source) {
-            SCOPED_TRACE(currentField);
-            ASSERT_LE(currentField, 2U);
-            EXPECT_EQ(expected[currentField].first, source);
-            EXPECT_EQ(expected[currentField].second, range);
+        packing.forEachField<Endian::Network>(
+            [&](nw_bitrange range, const IR::Expression *field, cstring source) {
+                SCOPED_TRACE(currentField);
+                ASSERT_LE(currentField, 2U);
+                EXPECT_EQ(expected[currentField].first, source);
+                EXPECT_EQ(expected[currentField].second, range);
 
-            auto* member = field->to<IR::Member>();
-            ASSERT_NE(member, nullptr);
-            EXPECT_EQ(expected[currentField].first, member->member.name);
+                auto *member = field->to<IR::Member>();
+                ASSERT_NE(member, nullptr);
+                EXPECT_EQ(expected[currentField].first, member->member.name);
 
-            currentField++;
-        });
+                currentField++;
+            });
     }
 
     // Check that we can iterate over it correctly with little endian ranges.
     {
         const std::vector<std::pair<cstring, le_bitrange>> expected = {
-            { "field1"_cs, le_bitrange(StartLen(39, 6)) },
-            { "field2"_cs, le_bitrange(StartLen(24, 15)) },
-            { "field3"_cs, le_bitrange(StartLen(7, 8)) },
+            {"field1"_cs, le_bitrange(StartLen(39, 6))},
+            {"field2"_cs, le_bitrange(StartLen(24, 15))},
+            {"field3"_cs, le_bitrange(StartLen(7, 8))},
         };
 
         unsigned currentField = 0;
-        packing.forEachField<Endian::Little>([&](le_bitrange range,
-                                                 const IR::Expression* field,
-                                                 cstring source) {
-            SCOPED_TRACE(currentField);
-            ASSERT_LE(currentField, 2U);
-            EXPECT_EQ(expected[currentField].first, source);
-            EXPECT_EQ(expected[currentField].second, range);
+        packing.forEachField<Endian::Little>(
+            [&](le_bitrange range, const IR::Expression *field, cstring source) {
+                SCOPED_TRACE(currentField);
+                ASSERT_LE(currentField, 2U);
+                EXPECT_EQ(expected[currentField].first, source);
+                EXPECT_EQ(expected[currentField].second, range);
 
-            auto* member = field->to<IR::Member>();
-            ASSERT_TRUE(member != nullptr);
-            EXPECT_EQ(expected[currentField].first, member->member.name);
+                auto *member = field->to<IR::Member>();
+                ASSERT_TRUE(member != nullptr);
+                EXPECT_EQ(expected[currentField].first, member->member.name);
 
-            currentField++;
-        });
+                currentField++;
+            });
     }
 }
 
@@ -301,21 +299,20 @@ TEST(TofinoFieldPacking, CreateExtractionState) {
     // Define a packing.
     FieldPacking packing;
     packing.appendPadding(3);
-    auto* field1 = new IR::Member(new IR::Constant(0), "field1"_cs);
+    auto *field1 = new IR::Member(new IR::Constant(0), "field1"_cs);
     packing.appendField(field1, 6);
-    auto* field2 = new IR::Member(new IR::Constant(0), "field2"_cs);
+    auto *field2 = new IR::Member(new IR::Constant(0), "field2"_cs);
     packing.appendField(field2, 15);
     packing.appendPadding(9);
-    auto* field3 = new IR::Member(new IR::Constant(0), "field3"_cs);
+    auto *field3 = new IR::Member(new IR::Constant(0), "field3"_cs);
     packing.appendField(field3, 8);
     packing.padToAlignment(8);
 
     // Create a parser state to extract fields according to that packing.
     auto gress = INGRESS;
-    auto* finalState = new IR::BFN::ParserState("final"_cs, gress, { }, { }, { });
+    auto *finalState = new IR::BFN::ParserState("final"_cs, gress, {}, {}, {});
     cstring extractionStateName = "extract"_cs;
-    auto* extractionState =
-      packing.createExtractionState(gress, extractionStateName, finalState);
+    auto *extractionState = packing.createExtractionState(gress, extractionStateName, finalState);
 
     // Verify that all of the state metadata (its name, the next state, the
     // amount it shifts, etc.) is correct.
@@ -332,24 +329,24 @@ TEST(TofinoFieldPacking, CreateExtractionState) {
     // Verify that the state reproduces the packing and has the structure we
     // expect. Note that padding isn't represented as a separate IR object; it's
     // implicit in the range of bits read by an Extract.
-    auto& extracts = extractionState->statements;
+    auto &extracts = extractionState->statements;
     ASSERT_EQ(3u, extracts.size());
 
-    auto* field1Extract = extracts[0]->to<IR::BFN::Extract>();
+    auto *field1Extract = extracts[0]->to<IR::BFN::Extract>();
     ASSERT_TRUE(field1Extract != nullptr);
-    auto* field1Source = field1Extract->source->to<IR::BFN::PacketRVal>();
+    auto *field1Source = field1Extract->source->to<IR::BFN::PacketRVal>();
     ASSERT_TRUE(field1Source != nullptr);
     ASSERT_TRUE(field1Source->range == nw_bitrange(3, 8));
 
-    auto* field2Extract = extracts[1]->to<IR::BFN::Extract>();
+    auto *field2Extract = extracts[1]->to<IR::BFN::Extract>();
     ASSERT_TRUE(field2Extract != nullptr);
-    auto* field2Source = field2Extract->source->to<IR::BFN::PacketRVal>();
+    auto *field2Source = field2Extract->source->to<IR::BFN::PacketRVal>();
     ASSERT_TRUE(field2Source != nullptr);
     ASSERT_TRUE(field2Source->range == nw_bitrange(9, 23));
 
-    auto* field3Extract = extracts[2]->to<IR::BFN::Extract>();
+    auto *field3Extract = extracts[2]->to<IR::BFN::Extract>();
     ASSERT_TRUE(field3Extract != nullptr);
-    auto* field3Source = field3Extract->source->to<IR::BFN::PacketRVal>();
+    auto *field3Source = field3Extract->source->to<IR::BFN::PacketRVal>();
     ASSERT_TRUE(field3Source != nullptr);
     ASSERT_TRUE(field3Source->range == nw_bitrange(33, 40));
 }

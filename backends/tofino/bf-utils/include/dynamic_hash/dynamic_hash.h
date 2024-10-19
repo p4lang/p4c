@@ -1,8 +1,9 @@
-#ifndef _BF_DYNAMIC_HASH_H_
-#define _BF_DYNAMIC_HASH_H_
+#ifndef BACKENDS_TOFINO_BF_UTILS_INCLUDE_DYNAMIC_HASH_DYNAMIC_HASH_H_
+#define BACKENDS_TOFINO_BF_UTILS_INCLUDE_DYNAMIC_HASH_DYNAMIC_HASH_H_
 
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
+
 #include "bfn_hash_algorithm.h"
 
 #ifdef __cplusplus
@@ -21,13 +22,13 @@ enum ixbar_input_type { tCONST, tPHV };
  * @brief Contains Symmetric hashing info for a hash input.
  */
 typedef struct hash_symmetric_info_ {
-  /* Whether this bit-range is symmetric */
-  bool is_symmetric;
-  /* The symmetric group for this hash input */
-  uint32_t sym_group;
-  /* The symmetric group which this hash input
-   * needs to be symmetrically hashed with */
-  uint32_t sib_sym_group;
+    /* Whether this bit-range is symmetric */
+    bool is_symmetric;
+    /* The symmetric group for this hash input */
+    uint32_t sym_group;
+    /* The symmetric group which this hash input
+     * needs to be symmetrically hashed with */
+    uint32_t sib_sym_group;
 } hash_symmetric_info_t;
 
 /**
@@ -47,14 +48,14 @@ typedef struct hash_symmetric_info_ {
  *             constant values in a field list if a larger constant is needed.
  */
 typedef struct ixbar_input_ {
-  enum ixbar_input_type type;
-  uint32_t ixbar_bit_position;
-  uint32_t bit_size;
-  hash_symmetric_info_t symmetric_info;
-  union {
-    bool valid;
-    uint64_t constant;
-  } u;
+    enum ixbar_input_type type;
+    uint32_t ixbar_bit_position;
+    uint32_t bit_size;
+    hash_symmetric_info_t symmetric_info;
+    union {
+        bool valid;
+        uint64_t constant;
+    } u;
 } ixbar_input_t;
 
 /**
@@ -66,9 +67,9 @@ typedef struct ixbar_input_ {
  *     bit_size - the number of bits in the range
  */
 typedef struct hash_calc_output_ {
-  uint32_t p4_hash_output_bit;
-  uint32_t gfm_start_bit;
-  uint32_t bit_size;
+    uint32_t p4_hash_output_bit;
+    uint32_t gfm_start_bit;
+    uint32_t bit_size;
 } hash_matrix_output_t;
 
 /**
@@ -83,10 +84,10 @@ typedef struct hash_calc_output_ {
  *        of the p4 hash ouput bits indexed by the num_hash_bits.
  */
 typedef struct hash_calc_rotate_info {
-  uint64_t rotate;
-  uint32_t num_hash_bits;
-  uint32_t *gfm_bit_posn;
-  uint32_t *p4_hash_output_bit_posn;
+    uint64_t rotate;
+    uint32_t num_hash_bits;
+    uint32_t *gfm_bit_posn;
+    uint32_t *p4_hash_output_bit_posn;
 } hash_calc_rotate_info_t;
 
 /**
@@ -94,13 +95,13 @@ typedef struct hash_calc_rotate_info {
  * corresponds to which of the 8 hash outputs this hash function is output to.
  */
 typedef struct ixbar_init_ {
-  ixbar_input_t *ixbar_inputs;
-  uint32_t inputs_sz;
+    ixbar_input_t *ixbar_inputs;
+    uint32_t inputs_sz;
 
-  hash_matrix_output_t *hash_matrix_outputs;
-  uint32_t outputs_sz;
+    hash_matrix_output_t *hash_matrix_outputs;
+    uint32_t outputs_sz;
 
-  uint32_t parity_group;
+    uint32_t parity_group;
 } ixbar_init_t;
 
 /**
@@ -109,8 +110,8 @@ typedef struct ixbar_init_ {
  *     byte_used - bit mask of the bytes used per column
  */
 typedef struct hash_column_ {
-  uint64_t column_value;
-  uint8_t byte_used;
+    uint64_t column_value;
+    uint8_t byte_used;
 } hash_column_t;
 
 /**
@@ -119,37 +120,37 @@ typedef struct hash_column_ {
  *     hash_seed_used - bit mask of the seed bits used by this calculation
  */
 typedef struct hash_seed_ {
-  uint64_t hash_seed_value;
-  uint64_t hash_seed_used;
+    uint64_t hash_seed_value;
+    uint64_t hash_seed_used;
 } hash_seed_t;
 
 /** The changes to make to an individual galois matrix register. */
 typedef struct galois_field_matrix_delta_ {
-  uint32_t byte_pair_index;
-  uint32_t hash_bit;
+    uint32_t byte_pair_index;
+    uint32_t hash_bit;
 
-  unsigned byte0;
-  unsigned valid0;
-  unsigned byte1;
-  unsigned valid1;
+    unsigned byte0;
+    unsigned valid0;
+    unsigned byte1;
+    unsigned valid1;
 } galois_field_matrix_delta_t;
 
 /** The changes to make to an individual hash seed register */
 typedef struct hash_seed_delta_ {
-  uint32_t hash_bit;
-  unsigned hash_seed_and_value;
-  unsigned hash_seed_or_value;
+    uint32_t hash_bit;
+    unsigned hash_seed_and_value;
+    unsigned hash_seed_or_value;
 } hash_seed_delta_t;
 
 /** The changes required to make to the hash matrix registers */
 typedef struct hash_regs_ {
-  // This field must be freed after use
-  galois_field_matrix_delta_t *galois_field_matrix_regs;
-  uint32_t gfm_sz;
+    // This field must be freed after use
+    galois_field_matrix_delta_t *galois_field_matrix_regs;
+    uint32_t gfm_sz;
 
-  // This field must be freed after use
-  hash_seed_delta_t *hash_seed_regs;
-  uint32_t hs_sz;
+    // This field must be freed after use
+    hash_seed_delta_t *hash_seed_regs;
+    uint32_t hs_sz;
 } hash_regs_t;
 
 /**
@@ -167,12 +168,9 @@ typedef struct hash_regs_ {
  *    hash_matrix - The 1024 x 52 b array representing the hash matrix in
  *        Barefoot hardware
  */
-void determine_hash_matrix(
-    const ixbar_init_t *ixbar_init,
-    const ixbar_input_t *inputs,
-    uint32_t inputs_sz,
-    const bfn_hash_algorithm_t *alg,
-    hash_column_t hash_matrix[PARITY_GROUPS_DYN][HASH_MATRIX_WIDTH_DYN]);
+void determine_hash_matrix(const ixbar_init_t *ixbar_init, const ixbar_input_t *inputs,
+                           uint32_t inputs_sz, const bfn_hash_algorithm_t *alg,
+                           hash_column_t hash_matrix[PARITY_GROUPS_DYN][HASH_MATRIX_WIDTH_DYN]);
 /**
  * This function calculates the seed algorithm for a hash matrix.  The
  * parameters are the following:
@@ -188,13 +186,9 @@ void determine_hash_matrix(
  *     alg - the algorithm used to calculate the final_xor
  *     hash_seed - The calculated seed for this algorithm
  */
-void determine_seed(const hash_matrix_output_t *hash_matrix_outputs,
-                    uint32_t outputs_sz,
-                    const ixbar_input_t *inputs,
-                    uint32_t inputs_sz,
-                    uint32_t total_input_bits,
-                    const bfn_hash_algorithm_t *alg,
-                    hash_seed_t *hash_seed);
+void determine_seed(const hash_matrix_output_t *hash_matrix_outputs, uint32_t outputs_sz,
+                    const ixbar_input_t *inputs, uint32_t inputs_sz, uint32_t total_input_bits,
+                    const bfn_hash_algorithm_t *alg, hash_seed_t *hash_seed);
 
 /**
  * This function calculates the registers to be updated in order to implement
@@ -211,15 +205,12 @@ void determine_seed(const hash_matrix_output_t *hash_matrix_outputs,
  *     hash_regs - The register deltas needed to update in order to set the
  *         hash_matrix.  This has multiple pointers that have to be freed.
  */
-void determine_tofino_regs(const ixbar_init_t *ixbar_init,
-                           const ixbar_input_t *inputs,
-                           uint32_t input_sz,
-                           const bfn_hash_algorithm_t *alg,
-                           hash_calc_rotate_info_t *rot_info,
-                           hash_regs_t *hash_regs);
+void determine_tofino_regs(const ixbar_init_t *ixbar_init, const ixbar_input_t *inputs,
+                           uint32_t input_sz, const bfn_hash_algorithm_t *alg,
+                           hash_calc_rotate_info_t *rot_info, hash_regs_t *hash_regs);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _BF_DYNAMIC_HASH_H_ */
+#endif /* BACKENDS_TOFINO_BF_UTILS_INCLUDE_DYNAMIC_HASH_DYNAMIC_HASH_H_ */

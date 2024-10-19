@@ -10,6 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+#include "bf-p4c/mau/walk_power_graph.h"
+
 #include <ctime>
 #include <map>
 #include <queue>
@@ -27,7 +29,6 @@
 #include "bf-p4c/mau/mau_visitor.h"
 #include "bf-p4c/mau/memories.h"
 #include "bf-p4c/mau/simple_power_graph.h"
-#include "bf-p4c/mau/walk_power_graph.h"
 #include "ir/gress.h"
 #include "ir/unique_id.h"
 #include "lib/json.h"
@@ -73,8 +74,7 @@ void WalkPowerGraph::end_apply(const IR::Node *root) {
     // chains to resolve, which may allow fewer tables to be turned on per stage.
     while (updated_deps) {
         updated_deps = false;
-        if (Device::currentDevice() == Device::JBAY
-        ) {
+        if (Device::currentDevice() == Device::JBAY) {
             clear_mpr_settings();
             compute_mpr();
             if (check_mpr_conflict()) {
@@ -913,22 +913,18 @@ void WalkPowerGraph::print_worst_power(std::ofstream &out) const {
 
         // Table columns
         heading << sep.str();
-        heading << "|" << boost::format("%=3s") % "Stg"
-                << "|" << boost::format(sl.str()) % "Table Name"
-                << "|" << boost::format("%=6s") % "Run"
+        heading << "|" << boost::format("%=3s") % "Stg" << "|"
+                << boost::format(sl.str()) % "Table Name" << "|" << boost::format("%=6s") % "Run"
 #ifdef BAREFOOT_INTERNAL
-                << "|" << boost::format("%=2s") % "CP"
-                << "|" << boost::format("%=6s") % "Power"
+                << "|" << boost::format("%=2s") % "CP" << "|" << boost::format("%=6s") % "Power"
 #else
                 << "|" << boost::format("%=6s") % "Weight"
 #endif
 #ifdef BAREFOOT_INTERNAL
-                << "|" << boost::format("%=4s") % "SR"
-                << "|" << boost::format("%=4s") % "SW"
-                << "|" << boost::format("%=4s") % "Tcam"
+                << "|" << boost::format("%=4s") % "SR" << "|" << boost::format("%=4s") % "SW" << "|"
+                << boost::format("%=4s") % "Tcam"
 #endif
-                << "|" << boost::format("%=6s") % "Prcnt"
-                << "|" << std::endl;
+                << "|" << boost::format("%=6s") % "Prcnt" << "|" << std::endl;
         heading << sep.str();
         out << heading.str();
 
@@ -1008,8 +1004,7 @@ void WalkPowerGraph::print_worst_power(std::ofstream &out) const {
 #else
         itot_wt << float2str(total_weight);
 #endif
-        itotal << "|" << boost::format("%=3s") % "Tot"
-               << "|" << boost::format(sl.str()) % " "
+        itotal << "|" << boost::format("%=3s") % "Tot" << "|" << boost::format(sl.str()) % " "
                << "|" << boost::format("%=6s") % " "
 #ifdef BAREFOOT_INTERNAL
                << "|" << boost::format("%=2s") % " "
@@ -1020,23 +1015,19 @@ void WalkPowerGraph::print_worst_power(std::ofstream &out) const {
                << boost::format("%=4s") % std::to_string(itot_sramw).c_str() << "|"
                << boost::format("%=4s") % std::to_string(itot_tcams).c_str()
 #endif
-               << "|" << boost::format("%=6s") % "100%"
-               << "|" << std::endl;
+               << "|" << boost::format("%=6s") % "100%" << "|" << std::endl;
 
-        blank << "|" << boost::format("%=3s") % " "
-              << "|" << boost::format(sl.str()) % " "
-              << "|" << boost::format("%=6s") % " "
+        blank << "|" << boost::format("%=3s") % " " << "|" << boost::format(sl.str()) % " " << "|"
+              << boost::format("%=6s") % " "
 #ifdef BAREFOOT_INTERNAL
               << "|" << boost::format("%=2s") % " "
 #endif
               << "|" << boost::format("%=6s") % " "
 #ifdef BAREFOOT_INTERNAL
-              << "|" << boost::format("%=4s") % " "
-              << "|" << boost::format("%=4s") % " "
-              << "|" << boost::format("%=4s") % " "
+              << "|" << boost::format("%=4s") % " " << "|" << boost::format("%=4s") % " " << "|"
+              << boost::format("%=4s") % " "
 #endif
-              << "|" << boost::format("%=6s") % " "
-              << "|" << std::endl;
+              << "|" << boost::format("%=6s") % " " << "|" << std::endl;
 
         out << blank.str();
         out << itotal.str();

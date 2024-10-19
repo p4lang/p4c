@@ -10,8 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_BF_P4C_OPTIONS_H_
-#define EXTENSIONS_BF_P4C_BF_P4C_OPTIONS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_BF_P4C_OPTIONS_H_
+#define BACKENDS_TOFINO_BF_P4C_BF_P4C_OPTIONS_H_
 
 #include "frontends/common/applyOptionsPragmas.h"
 #include "frontends/common/options.h"
@@ -75,7 +75,7 @@ class BFN_Options : public CompilerOptions {
     bool no_power_check = false;
     bool stage_allocation = false;
     bool tof2lab44_workaround = false;
-    bool skip_seo = true;   // still skipping by default currently
+    bool skip_seo = true;  // still skipping by default currently
 #endif
     bool verbose = false;
 
@@ -87,7 +87,7 @@ class BFN_Options : public CompilerOptions {
     cstring bfRtSchema = ""_cs;
     bool p4RuntimeForceStdExterns = false;
     cstring programName;
-    cstring outputDir = nullptr;    // output directory, default "programName.device"
+    cstring outputDir = nullptr;  // output directory, default "programName.device"
 
     // Default value on v1ModelVersion must be set based on changes to p4c
     // frontend. Check PR 2706 in p4lang/p4c. This value will need an update
@@ -97,9 +97,9 @@ class BFN_Options : public CompilerOptions {
     BFN_Options();
 
     /// Process the command line arguments and set options accordingly.
-    std::vector<const char*>* process(int argc, char* const argv[]) override;
+    std::vector<const char *> *process(int argc, char *const argv[]) override;
 
-// private:
+    // private:
     // BFN_Options::process is called twice: once from the main, and once
     // from applyPragmaOptions to handle pragma command_line.
     // This variable prevents doing the actions below twice, since the
@@ -123,21 +123,21 @@ namespace P4 {
 namespace IR {
 class P4Program;      // NOLINT(build/forward_decl)
 class ToplevelBlock;  // NOLINT(build/forward_decl)
-}
-}
+}  // namespace IR
+}  // namespace P4
 
 /// A CompileContext for bf-p4c.
 class BFNContext : public virtual P4CContext {
  public:
     /// @return the current compilation context, which must be of type
     /// BFNContext.
-    static BFNContext& get();
+    static BFNContext &get();
 
     /// @return the compiler options for this compilation context.
-    BFN_Options& options() override;
+    BFN_Options &options() override;
 
     /// Record options created in the Backend
-    void setBackendOptions(BFN_Options* options);
+    void setBackendOptions(BFN_Options *options);
 
     /// Clear the backend options
     void clearBackendOptions();
@@ -164,26 +164,24 @@ class BFNContext : public virtual P4CContext {
     cstring getOutputDirectory(const cstring &suffix = cstring(), int pipe_id = -1);
 
     /// identify the pipelines in the program and setup the _pipes map
-    void discoverPipes(const IR::P4Program *, const IR::ToplevelBlock*);
+    void discoverPipes(const IR::P4Program *, const IR::ToplevelBlock *);
 
     /// Return the pipeline name or empty if the program has not been parsed
     cstring &getPipeName(int pipe_id) {
         static cstring empty("");
-        if (_pipes.count(pipe_id))
-            return _pipes.at(pipe_id);
+        if (_pipes.count(pipe_id)) return _pipes.at(pipe_id);
         return empty;
     }
 
     /// Checks whether the given @name names a pipe in the program.
     bool isPipeName(const cstring &name) {
         for (auto pipe : _pipes) {
-            if (pipe.second == name)
-                return true;
+            if (pipe.second == name) return true;
         }
         return false;
     }
 
-    BfErrorReporter& errorReporter() override;
+    BfErrorReporter &errorReporter() override;
 
  private:
     bool isRecognizedDiagnostic(cstring diagnostic) final;
@@ -193,7 +191,7 @@ class BFNContext : public virtual P4CContext {
     BFN_Options primaryOptions;
 
     /// Current options instance
-    thread_local static BFN_Options* optionsInstance;
+    thread_local static BFN_Options *optionsInstance;
 
     /// The pipelines for this compilation: pairs of <pipe_id, pipename>
     /// These are needed for ensuring a consistent output directory
@@ -202,7 +200,7 @@ class BFNContext : public virtual P4CContext {
     BfErrorReporter bfErrorReporter;
 };
 
-inline BFN_Options& BackendOptions() { return BFNContext::get().options(); }
+inline BFN_Options &BackendOptions() { return BFNContext::get().options(); }
 
 /**
  * An IOptionPragmaParser implementation that supports Barefoot-specific
@@ -215,12 +213,10 @@ inline BFN_Options& BackendOptions() { return BFNContext::get().options(); }
  */
 class BFNOptionPragmaParser : public P4::P4COptionPragmaParser {
  public:
-    std::optional<CommandLineOptions>
-    tryToParse(const IR::Annotation* annotation) override;
+    std::optional<CommandLineOptions> tryToParse(const IR::Annotation *annotation) override;
 
  private:
-    std::optional<CommandLineOptions>
-    parseCompilerOption(const IR::Annotation* annotation);
+    std::optional<CommandLineOptions> parseCompilerOption(const IR::Annotation *annotation);
 };
 
-#endif /* EXTENSIONS_BF_P4C_BF_P4C_OPTIONS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_BF_P4C_OPTIONS_H_ */

@@ -18,7 +18,7 @@
 namespace P4 {
 class TypeMap;
 class ReferenceMap;
-}
+}  // namespace P4
 
 namespace BFN {
 
@@ -29,16 +29,16 @@ namespace BFN {
 class RewriteEgressIntrinsicMetadataHeader : public PassManager {
     struct CollectUsedFields : public Inspector {
         std::set<cstring> used_fields;
-        const IR::Type_Header* eg_intr_md = nullptr;
+        const IR::Type_Header *eg_intr_md = nullptr;
 
-        bool preorder(const IR::Type_Header* type) override {
+        bool preorder(const IR::Type_Header *type) override {
             if (type->name == "egress_intrinsic_metadata_t") {
                 if (!eg_intr_md) eg_intr_md = type;
             }
             return false;
         }
 
-        bool preorder(const IR::Member* member) override {
+        bool preorder(const IR::Member *member) override {
             if (auto hdr = member->expr->to<IR::PathExpression>()) {
                 if (auto type = hdr->type->to<IR::Type_Header>()) {
                     if (type->name == "egress_intrinsic_metadata_t") {
@@ -52,31 +52,31 @@ class RewriteEgressIntrinsicMetadataHeader : public PassManager {
     };
 
     struct RewriteHeader : public Transform {
-        const CollectUsedFields& used_fields;
-        P4::TypeMap* typeMap;
+        const CollectUsedFields &used_fields;
+        P4::TypeMap *typeMap;
 
         IR::IndexedVector<IR::StructField> new_fields;
 
-        profile_t init_apply(const IR::Node* root) override {
+        profile_t init_apply(const IR::Node *root) override {
             BUG_CHECK(used_fields.eg_intr_md, "egress_intrinsic_metadata_t not found?");
 
-            const IR::StructField* prev = nullptr;
-            const IR::Type* prev_type = nullptr;
+            const IR::StructField *prev = nullptr;
+            const IR::Type *prev_type = nullptr;
             for (auto field : used_fields.eg_intr_md->fields) {
-                if (used_fields.used_fields.count(field->name) ||
-                    field->name == "egress_port") {
+                if (used_fields.used_fields.count(field->name) || field->name == "egress_port") {
                     // "egress_port" is always there (not optional)
                     // we need to preserve each field's byte alignment as in original header
-                    const IR::Type* canonicalType = nullptr;
+                    const IR::Type *canonicalType = nullptr;
                     if (field->type->is<IR::Type_Name>())
                         canonicalType = typeMap->getTypeType(field->type, true);
                     else
                         canonicalType = field->type;
                     if (canonicalType->width_bits() % 8) {
-                        BUG_CHECK(prev &&
-                        (canonicalType->width_bits() + prev_type->width_bits()) % 8 == 0,
-                                  "%1% not padded to be byte-aligned in %2%",
-                                  field->name, "egress_intrinsic_metadata_t");
+                        BUG_CHECK(
+                            prev &&
+                                (canonicalType->width_bits() + prev_type->width_bits()) % 8 == 0,
+                            "%1% not padded to be byte-aligned in %2%", field->name,
+                            "egress_intrinsic_metadata_t");
                         new_fields.push_back(prev);
                     }
                     new_fields.push_back(field);
@@ -90,7 +90,7 @@ class RewriteEgressIntrinsicMetadataHeader : public PassManager {
 
             unsigned total_size_in_bits = 0;
             for (auto field : new_fields) {
-                const IR::Type* canonicalType;
+                const IR::Type *canonicalType;
                 if (field->type->is<IR::Type_Name>())
                     canonicalType = typeMap->getTypeType(field->type, true);
                 else
@@ -114,11 +114,10 @@ class RewriteEgressIntrinsicMetadataHeader : public PassManager {
                 if (tofino2_pad) {
                     LOG4("tofino2 needs " << tofino2_pad << " bytes of padding");
 
-                    auto* annots = new IR::Annotations(
-                        {new IR::Annotation(IR::ID("padding"), { })});
+                    auto *annots = new IR::Annotations({new IR::Annotation(IR::ID("padding"), {})});
 
-                    const IR::StructField* tofino2_pad_field = new IR::StructField("__tofino2_pad_",
-                        annots, IR::Type::Bits::get(tofino2_pad * 8));
+                    const IR::StructField *tofino2_pad_field = new IR::StructField(
+                        "__tofino2_pad_", annots, IR::Type::Bits::get(tofino2_pad * 8));
 
                     new_fields.push_back(tofino2_pad_field);
                 }
@@ -127,7 +126,7 @@ class RewriteEgressIntrinsicMetadataHeader : public PassManager {
             return Transform::init_apply(root);
         }
 
-        IR::Node* preorder(IR::Type_Header* type) override {
+        IR::Node *preorder(IR::Type_Header *type) override {
             if (type->name == "egress_intrinsic_metadata_t") {
                 auto clone = type->clone();
                 clone->fields = new_fields;
@@ -139,12 +138,12 @@ class RewriteEgressIntrinsicMetadataHeader : public PassManager {
             return type;
         }
 
-        explicit RewriteHeader(const CollectUsedFields& used, P4::TypeMap* typeMap) :
-            used_fields(used), typeMap(typeMap) {}
+        explicit RewriteHeader(const CollectUsedFields &used, P4::TypeMap *typeMap)
+            : used_fields(used), typeMap(typeMap) {}
     };
 
  public:
-    explicit RewriteEgressIntrinsicMetadataHeader(P4::ReferenceMap* refMap, P4::TypeMap* typeMap) {
+    explicit RewriteEgressIntrinsicMetadataHeader(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
         auto collectUsedFields = new CollectUsedFields;
 
         addPasses({

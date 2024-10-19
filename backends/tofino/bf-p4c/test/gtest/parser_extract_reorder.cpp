@@ -19,11 +19,10 @@
 
 #include <boost/algorithm/string/replace.hpp>
 
-#include "gtest/gtest.h"
-#include "bf_gtest_helpers.h"
-
-#include "ir/ir.h"
 #include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "bf_gtest_helpers.h"
+#include "gtest/gtest.h"
+#include "ir/ir.h"
 #include "test/gtest/helpers.h"
 
 namespace P4::Test {
@@ -31,10 +30,10 @@ namespace P4::Test {
 using namespace Match;  // To remove noise & reduce line lengths.
 
 /** Verify that fields are not packed in with the ingress port.
-  * Until a recent fix, checksum validation results were being packed with the
-  * ingress port, and these potentially overlap with the version and/or recirc
-  * bits.
-  */
+ * Until a recent fix, checksum validation results were being packed with the
+ * ingress port, and these potentially overlap with the version and/or recirc
+ * bits.
+ */
 TEST(ParserExtractReorder, VerifySplitStates) {
     std::string prog = R"(
 // ----------------------------------------------------------------------------
@@ -307,9 +306,9 @@ Switch(pipe) main;
     EXPECT_TRUE(blk.apply_pass(TestCode::Pass::FullBackend));
 
     // Expect to have a split_0 state
-    auto res = blk.match(TestCode::CodeBlock::ParserIAsm,
-                    CheckList{"parser ingress: start",
-                              "`.*`", "$entry_point.start.$split_0:"});
+    auto res =
+        blk.match(TestCode::CodeBlock::ParserIAsm,
+                  CheckList{"parser ingress: start", "`.*`", "$entry_point.start.$split_0:"});
     EXPECT_TRUE(res.success) << " pos=" << res.pos << " count=" << res.count << "\n'"
                              << blk.extract_code(TestCode::CodeBlock::ParserIAsm) << "'\n";
 
@@ -327,27 +326,24 @@ Switch(pipe) main;
 
     // FIXME: Temporary test: MW0/1 should be in the $split_0 state and W0 should be in the split_1
     // state.
-    res = blk.match(TestCode::CodeBlock::ParserIAsm,
-                    CheckList{"parser ingress: start",
-                              "`.*`", "$entry_point.start.$split_0:",
-                              "`.*`", "$entry_point.start.$split_1:",
-                              "`.*`", ": W0"});
+    res =
+        blk.match(TestCode::CodeBlock::ParserIAsm,
+                  CheckList{"parser ingress: start", "`.*`", "$entry_point.start.$split_0:", "`.*`",
+                            "$entry_point.start.$split_1:", "`.*`", ": W0"});
     EXPECT_TRUE(res.success) << " pos=" << res.pos << " count=" << res.count << "\n'"
                              << blk.extract_code(TestCode::CodeBlock::ParserIAsm) << "'\n";
 
-    res = blk.match(TestCode::CodeBlock::ParserIAsm,
-                    CheckList{"parser ingress: start",
-                              "`.*`", "$entry_point.start.$split_0:",
-                              "`.*`", ": MW0",
-                              "`.*`", "$entry_point.start.$split_1:"});
+    res =
+        blk.match(TestCode::CodeBlock::ParserIAsm,
+                  CheckList{"parser ingress: start", "`.*`", "$entry_point.start.$split_0:", "`.*`",
+                            ": MW0", "`.*`", "$entry_point.start.$split_1:"});
     EXPECT_TRUE(res.success) << " pos=" << res.pos << " count=" << res.count << "\n'"
                              << blk.extract_code(TestCode::CodeBlock::ParserIAsm) << "'\n";
 
-    res = blk.match(TestCode::CodeBlock::ParserIAsm,
-                    CheckList{"parser ingress: start",
-                              "`.*`", "$entry_point.start.$split_0:",
-                              "`.*`", ": MW1",
-                              "`.*`", "$entry_point.start.$split_1:"});
+    res =
+        blk.match(TestCode::CodeBlock::ParserIAsm,
+                  CheckList{"parser ingress: start", "`.*`", "$entry_point.start.$split_0:", "`.*`",
+                            ": MW1", "`.*`", "$entry_point.start.$split_1:"});
     EXPECT_TRUE(res.success) << " pos=" << res.pos << " count=" << res.count << "\n'"
                              << blk.extract_code(TestCode::CodeBlock::ParserIAsm) << "'\n";
 }

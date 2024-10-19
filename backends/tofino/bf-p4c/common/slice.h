@@ -19,8 +19,8 @@
 using namespace P4;
 
 /** @returns the lo and hi bits for a give expression
-  */
-std::pair<int, int> getSliceLoHi(const IR::Expression* e);
+ */
+std::pair<int, int> getSliceLoHi(const IR::Expression *e);
 
 /**
  *  MakeSlice -- slice an expression.
@@ -32,25 +32,26 @@ std::pair<int, int> getSliceLoHi(const IR::Expression* e);
  */
 const IR::Expression *MakeSlice(const IR::Expression *e, int lo, int hi);
 inline const IR::Expression *MakeSlice(const IR::Expression *e, le_bitrange slice) {
-    return MakeSlice(e, slice.lo, slice.hi); }
+    return MakeSlice(e, slice.lo, slice.hi);
+}
 
 /**
-  * MakeSliceDestination -- slice an expression used as the destination in an instruction.  Creates
-  * a slice extracting the bits lo..hi from an expression. This may be an IR:Slice or not.  Any
-  * slices on slices or slices on constants are folded to the simplest form. Slices that extract
-  * off the top of an expression (past the msb) are implicitly zero-extended. 
+ * MakeSliceDestination -- slice an expression used as the destination in an instruction.  Creates
+ * a slice extracting the bits lo..hi from an expression. This may be an IR:Slice or not.  Any
+ * slices on slices or slices on constants are folded to the simplest form. Slices that extract
+ * off the top of an expression (past the msb) are implicitly zero-extended.
  */
 const IR::Expression *MakeSliceDestination(const IR::Expression *e, int lo, int hi);
 
 /**
-  * MakeSliceSource -- slice an expression used as the destination in an instruction.  Creates a
-  * slice extracting the bits lo..hi from an expression. This may be an IR:Slice or not.  Any slices
-  * on slices or slices on constants are folded to the simplest form. Slices that extract off the
-  * top of an expression (past the msb) are implicitly zero-extended. It also accounts for the case
-  * where the destination used with this read is not aligned with the read.
+ * MakeSliceSource -- slice an expression used as the destination in an instruction.  Creates a
+ * slice extracting the bits lo..hi from an expression. This may be an IR:Slice or not.  Any slices
+ * on slices or slices on constants are folded to the simplest form. Slices that extract off the
+ * top of an expression (past the msb) are implicitly zero-extended. It also accounts for the case
+ * where the destination used with this read is not aligned with the read.
  */
-const IR::Expression *MakeSliceSource(const IR::Expression *read, int lo, int hi, const
-        IR::Expression* write);
+const IR::Expression *MakeSliceSource(const IR::Expression *read, int lo, int hi,
+                                      const IR::Expression *write);
 
 /**
  *  Changes an IR::Mask to a list of IR::Slices.  The phv.field function cannot interpret

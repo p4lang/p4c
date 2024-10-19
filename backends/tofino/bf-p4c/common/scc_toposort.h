@@ -10,8 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_COMMON_SCC_TOPOSORT_H_
-#define EXTENSIONS_BF_P4C_COMMON_SCC_TOPOSORT_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_COMMON_SCC_TOPOSORT_H_
+#define BACKENDS_TOFINO_BF_P4C_COMMON_SCC_TOPOSORT_H_
 
 #include <ostream>
 #include <unordered_map>
@@ -61,4 +61,4 @@ class SccTopoSorter {
     void validate_node_id(int i) const;
 };
 
-#endif  /* EXTENSIONS_BF_P4C_COMMON_SCC_TOPOSORT_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_COMMON_SCC_TOPOSORT_H_ */

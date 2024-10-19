@@ -11,6 +11,7 @@
  */
 
 #include "control_flow_visitor.h"
+
 #include "frontends/p4/methodInstance.h"
 
 namespace BFN {
@@ -39,4 +40,4 @@ void ControlFlowVisitor::visit_def(const IR::MethodCallExpression *mc) {
     }
 }
 
-}
+}  // namespace BFN

@@ -14,6 +14,7 @@
 #define BF_P4C_MAU_REDUCTION_OR_H_
 
 #include <map>
+
 #include "bf-p4c/mau/mau_visitor.h"
 #include "lib/ordered_set.h"
 
@@ -42,9 +43,9 @@ struct ReductionOrInfo {
     using TblReductionOrGroup = std::map<cstring, ordered_set<const IR::MAU::Table *>>;
 
     SaluReductionOrGroup salu_reduction_or_group;
-    TblReductionOrGroup  tbl_reduction_or_group;
+    TblReductionOrGroup tbl_reduction_or_group;
     bool is_reduction_or(const IR::MAU::Instruction *, const IR::MAU::Table *,
-            cstring &red_or_key) const;
+                         cstring &red_or_key) const;
 
     void clear() {
         salu_reduction_or_group.clear();
@@ -60,7 +61,7 @@ class GatherReductionOrReqs : public MauInspector {
     ReductionOrInfo &red_or_info;
 
  public:
-    explicit GatherReductionOrReqs(ReductionOrInfo &red_or_info) : red_or_info(red_or_info) { }
+    explicit GatherReductionOrReqs(ReductionOrInfo &red_or_info) : red_or_info(red_or_info) {}
 };
 
-#endif  /* BF_P4C_MAU_REDUCTION_OR_H_ */
+#endif /* BF_P4C_MAU_REDUCTION_OR_H_ */

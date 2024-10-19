@@ -27,18 +27,24 @@
 #     - an archive (if --archive)
 #
 
-from __future__ import print_function, absolute_import
+from __future__ import absolute_import, print_function
 
-import os, os.path, re, sys
 import argparse
+import difflib
 import importlib
 import json
-from multiprocessing import Pool, Queue
-from packaging import version
-import shlex, shutil
+import os
+import os.path
+import re
+import shlex
+import shutil
 import subprocess
+import sys
 import traceback
-import difflib
+from multiprocessing import Pool, Queue
+
+from packaging import version
+
 
 class TestError(Exception):
     def __init__(self, info=""):
@@ -46,6 +52,7 @@ class TestError(Exception):
 
     def __str__(self):
         return self.info
+
 
 class Test:
     """A stateless class to run and check the output of a compiler run.
@@ -57,6 +64,7 @@ class Test:
     take as an argument the name of the archive).
 
     """
+
     def __init__(self, args):
         self._compiler = args.compiler
         self._dry_run = args.dry_run
@@ -80,15 +88,17 @@ class Test:
 
         args = [self._compiler] + options
         try:
-            p = subprocess.Popen(shlex.split(' '.join(args)),
-                                 stdout = subprocess.PIPE, stderr = subprocess.PIPE)
+            p = subprocess.Popen(
+                shlex.split(' '.join(args)), stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            )
         except:
-            print("error invoking {} {}".format(self._compiler, ' '.join(options)),file=sys.stderr)
+            print("error invoking {} {}".format(self._compiler, ' '.join(options)), file=sys.stderr)
             print(traceback.format_exc(), file=sys.stderr)
             return 1
 
-        if self._verbose: print('running {}'.format(' '.join(args)))
-        (outlog, errlog) = p.communicate() # now wait
+        if self._verbose:
+            print('running {}'.format(' '.join(args)))
+        (outlog, errlog) = p.communicate()  # now wait
         if self._verbose:
             print("Output log:", outlog.decode())
             print("Error log:", errlog.decode())
@@ -99,7 +109,7 @@ class Test:
                 return 0
         if ref_out is not None:
             if outlog.find(bytearray(ref_out, 'utf-8')) == -1:
-                return 1 # could be any non zero value
+                return 1  # could be any non zero value
             else:
                 return 0
         if p.returncode != 0 and self._print_on_failure:
@@ -108,76 +118,117 @@ class Test:
         return p.returncode
 
     def defineCompilerArgs(self):
-        """Selected set of compiler arguments that we want to test
-
-        """
+        """Selected set of compiler arguments that we want to test"""
         parser = argparse.ArgumentParser(prog="p4c")
         # from p4c
-        parser.add_argument("--target", dest="target",
-                            help="specify target device",
-                            action="store", default="tofino")
-        parser.add_argument("--arch", dest="arch",
-                            help="specify target architecture",
-                            action="store", default="tna")
-        parser.add_argument("-E", dest="preprocessor_only",
-                            help="run preprocessor only",
-                            action="store_true", default=False)
-        parser.add_argument("-I", dest="arch",
-                            help="include path",
-                            action="store", default=None)
-        parser.add_argument("-g", dest="debug_info",
-                            help="Generate debug information",
-                            action="store_true", default=False)
-        parser.add_argument("-o", dest="output_directory",
-                            help="Write output to the provided path",
-                            action="store", metavar="PATH", default=None)
-        parser.add_argument("--std", dest="language",
-                            choices = ["p4-14", "p4-16"],
-                            help="Treat subsequent input files as having type language.",
-                            action="store", default="p4-16")
+        parser.add_argument(
+            "--target",
+            dest="target",
+            help="specify target device",
+            action="store",
+            default="tofino",
+        )
+        parser.add_argument(
+            "--arch", dest="arch", help="specify target architecture", action="store", default="tna"
+        )
+        parser.add_argument(
+            "-E",
+            dest="preprocessor_only",
+            help="run preprocessor only",
+            action="store_true",
+            default=False,
+        )
+        parser.add_argument("-I", dest="arch", help="include path", action="store", default=None)
+        parser.add_argument(
+            "-g",
+            dest="debug_info",
+            help="Generate debug information",
+            action="store_true",
+            default=False,
+        )
+        parser.add_argument(
+            "-o",
+            dest="output_directory",
+            help="Write output to the provided path",
+            action="store",
+            metavar="PATH",
+            default=None,
+        )
+        parser.add_argument(
+            "--std",
+            dest="language",
+            choices=["p4-14", "p4-16"],
+            help="Treat subsequent input files as having type language.",
+            action="store",
+            default="p4-16",
+        )
         # from the barefoot driver
-        parser.add_argument("--archive", nargs='?',
-                            help="Archive all outputs into a single tar.bz2 file.\n" + \
-                            "Note: it can not be the argument before source file" + \
-                            " without specifying the archive name!",
-                            const="__default__", default=None)
-        parser.add_argument("--create-graphs",
-                            help="Create graphs",
-                            action="store_true", default=False)
+        parser.add_argument(
+            "--archive",
+            nargs='?',
+            help="Archive all outputs into a single tar.bz2 file.\n"
+            + "Note: it can not be the argument before source file"
+            + " without specifying the archive name!",
+            const="__default__",
+            default=None,
+        )
+        parser.add_argument(
+            "--create-graphs", help="Create graphs", action="store_true", default=False
+        )
         # parser.add_argument("--bf-rt-schema", action="store",
         #                   help="Generate and write BF-RT JSON schema  to the specified file")
-        parser.add_argument("--program-name",
-                            help="Program name overriding the default name derived from source file name.",
-                            action="store", default=None, type=str)
-        parser.add_argument("--validate-output", action="store_true", default=False,
-                            help="run context.json validation")
-        parser.add_argument("--validate-manifest", action="store_true", default=False,
-                            help="run manifest validation")
-        parser.add_argument("--verbose",
-                            action="store", default=0, type=int, choices=[0, 1, 2, 3],
-                            help="Set compiler logging verbosity level: 0=OFF, 1=SUMMARY, 2=INFO, 3=DEBUG")
-        parser.add_argument ("source_file", help="P4 source file")
+        parser.add_argument(
+            "--program-name",
+            help="Program name overriding the default name derived from source file name.",
+            action="store",
+            default=None,
+            type=str,
+        )
+        parser.add_argument(
+            "--validate-output",
+            action="store_true",
+            default=False,
+            help="run context.json validation",
+        )
+        parser.add_argument(
+            "--validate-manifest",
+            action="store_true",
+            default=False,
+            help="run manifest validation",
+        )
+        parser.add_argument(
+            "--verbose",
+            action="store",
+            default=0,
+            type=int,
+            choices=[0, 1, 2, 3],
+            help="Set compiler logging verbosity level: 0=OFF, 1=SUMMARY, 2=INFO, 3=DEBUG",
+        )
+        parser.add_argument("source_file", help="P4 source file")
         self._parser = parser
         # now we can call
         # self._parser.parse_args(['--std=p4-14']) and parse the args
-
 
     def checkOutputDir(self, args):
         """Check that the right output directory has been produced and that
         the manifest exists
 
         """
-        if self._verbose: print("Source file:", args.source_file)
+        if self._verbose:
+            print("Source file:", args.source_file)
 
-        if args.preprocessor_only and args.output_directory and os.path.isdir(args.output_directory):
+        if (
+            args.preprocessor_only
+            and args.output_directory
+            and os.path.isdir(args.output_directory)
+        ):
             raise TestError("ERROR: Output folder exists (and should not)")
 
         if args.output_directory is None:
             file_name, ext = os.path.splitext(os.path.basename(args.source_file))
             outdir = file_name + "." + args.target
             if not os.path.isdir(outdir):
-                raise TestError(
-                    "Can not find the output directory: '{}'".format(outdir))
+                raise TestError("Can not find the output directory: '{}'".format(outdir))
             args.output_directory = outdir
 
         if args.output_directory and os.path.isdir(args.output_directory):
@@ -186,7 +237,9 @@ class Test:
                 for dirname, dirnames, filenames in os.walk(args.output_directory):
                     for f in filenames:
                         print(dirname + "/" + f)
-            if not args.preprocessor_only and not os.path.isfile(os.path.join(args.output_directory, "manifest.json")):
+            if not args.preprocessor_only and not os.path.isfile(
+                os.path.join(args.output_directory, "manifest.json")
+            ):
                 raise TestError("Can not find the manifest file")
 
     def checkManifest(self, args):
@@ -205,8 +258,8 @@ class Test:
             manifest = json.load(json_file)
             if type(manifest) is not dict or "programs" not in manifest:
                 raise TestError(
-                    "ERROR: Input file '{}' does not have a 'programs' key",
-                    manifest_file)
+                    "ERROR: Input file '{}' does not have a 'programs' key", manifest_file
+                )
 
             schema_version = version.parse(manifest['schema_version'])
             program = manifest['programs'][0]
@@ -214,8 +267,8 @@ class Test:
 
             if not (p4_version == "p4-14" or p4_version == "p4-16"):
                 raise TestError(
-                    "ERROR: Invalid program version {} in '{}'",
-                    p4_version, manifest_file)
+                    "ERROR: Invalid program version {} in '{}'", p4_version, manifest_file
+                )
 
             # check that there is at least one context.json defined, and that file exists
             def check_file_in_manifest(key, name):
@@ -225,8 +278,10 @@ class Test:
                     prg = program['pipes'][0]['files']
 
                 if key not in prg:
-                    raise TestError("ERROR: Input file '{}' does not have "
-                                    "a key '{}'".format(manifest_file, key))
+                    raise TestError(
+                        "ERROR: Input file '{}' does not have "
+                        "a key '{}'".format(manifest_file, key)
+                    )
 
                 m_dict = prg[key]
                 for item in m_dict:
@@ -235,60 +290,59 @@ class Test:
                     else:
                         m_file = os.path.join(args.output_directory, m_dict['path'])
                     if not os.path.isfile(m_file):
-                        raise TestError("ERROR: Input file '{}' contains an invalid "
-                                        "{} path: {}".format(manifest_file, name, m_file))
+                        raise TestError(
+                            "ERROR: Input file '{}' contains an invalid "
+                            "{} path: {}".format(manifest_file, name, m_file)
+                        )
 
             # check that there is at least one context.json defined
             if schema_version < version.parse("2.0.0"):
                 if len(program['contexts']) == 0:
                     raise TestError(
-                        "ERROR: Input file '{}' contains an empty 'contexts' "
-                        "dictionary", manifest_file)
+                        "ERROR: Input file '{}' contains an empty 'contexts' " "dictionary",
+                        manifest_file,
+                    )
             else:
                 context = program['pipes'][0]['files'].get('context', False)
                 if context:
                     check_file_in_manifest('context', 'context file')
                 else:
                     raise TestError(
-                        "ERROR: Input file '{}' contains an empty 'contexts' "
-                        "dictionary", manifest_file)
+                        "ERROR: Input file '{}' contains an empty 'contexts' " "dictionary",
+                        manifest_file,
+                    )
 
             # check_file_in_manifest('binaries', 'binary file')
             check_file_in_manifest('graphs', 'graph file')
             check_file_in_manifest('logs', 'log file')
-            if schema_version >= version.parse("1.3.0") and \
-               schema_version < version.parse("2.0.0"):
+            if schema_version >= version.parse("1.3.0") and schema_version < version.parse("2.0.0"):
                 check_file_in_manifest('p4i', 'resources file')
             elif schema_version >= version.parse("2.0.0"):
                 check_file_in_manifest('resources', 'resources_file')
 
     def checkGraphs(self, args):
-        """Check that the produced graphs are valid
-
-        """
+        """Check that the produced graphs are valid"""
         if not args.create_graphs:
             return
         # \TODO: write the checks
 
     def checkArchive(self, args):
-        """Check that the produced archive is valid
-
-        """
+        """Check that the produced archive is valid"""
         if args.archive is None:
             return
         # \TODO: write the checks
 
     def checkMAUStagesForTarget(self, args):
         """Check that the number of stages generated in the resources file
-           is valid for the target:
+        is valid for the target:
         """
         stages = {
-            "tofino"   : 12,
-            "tofino2"  : 20,
-            "tofino2h" :  6,
-            "tofino2m" : 12,
-            "tofino2u" : 20,
-            "tofino3"  : 20
+            "tofino": 12,
+            "tofino2": 20,
+            "tofino2h": 6,
+            "tofino2m": 12,
+            "tofino2u": 20,
+            "tofino3": 20,
         }
 
         if args.preprocessor_only:
@@ -314,7 +368,8 @@ class Test:
                 if not os.path.isfile(m_file):
                     raise TestError(
                         "ERROR: Input file '{}' contains an invalid "
-                        "{} path: {}".format(manifest_file, 'resources file', m_file))
+                        "{} path: {}".format(manifest_file, 'resources file', m_file)
+                    )
                 # Get the resources.json/res.json path if it exists
                 if r['type'] == "resources":
                     resources_file = os.path.join(args.output_directory, r['path'])
@@ -326,7 +381,8 @@ class Test:
                     if nStages > stages[target]:
                         raise TestError(
                             "ERROR: Number of stages in resource file {} "
-                            "is more than maximum expected ({})".format(nStages, stages[target]))
+                            "is more than maximum expected ({})".format(nStages, stages[target])
+                        )
         # success
         # if we either did not have a resource file, or all the stages check out.
 
@@ -336,7 +392,8 @@ class Test:
         check (non)existence of files Listed. File path prefixed
         with ! symbol means check non-existence.
         """
-        if file_list is None: return
+        if file_list is None:
+            return
 
         for file in file_list:
             fileShouldNotExist = False
@@ -346,17 +403,19 @@ class Test:
             path = os.path.join(args.output_directory, file)
 
             if fileShouldNotExist and os.path.isfile(path):
-                raise TestError(
-                    "ERROR: File {} exists (and should not)".format(path))
+                raise TestError("ERROR: File {} exists (and should not)".format(path))
             elif not fileShouldNotExist and not os.path.isfile(path):
-                raise TestError(
-                    "ERROR: File {} does not exist".format(path))
+                raise TestError("ERROR: File {} does not exist".format(path))
 
     def printDiff(self, reference, actual):
         with open(reference, 'r') as ref_file:
             with open(actual, 'r') as act_file:
-                diff = difflib.unified_diff(ref_file.readlines(), act_file.readlines(),
-                        fromfile='reference ' + reference, tofile='actual ' + actual)
+                diff = difflib.unified_diff(
+                    ref_file.readlines(),
+                    act_file.readlines(),
+                    fromfile='reference ' + reference,
+                    tofile='actual ' + actual,
+                )
                 for line in diff:
                     print(line, end='')
 
@@ -373,26 +432,28 @@ class Test:
         with open(ref_src_json, 'r') as ref_file:
             ref_src = json.load(ref_file)
         # Remove absolute paths that may differ
-        act_src['source_root']=""
+        act_src['source_root'] = ""
         for symbol in act_src['symbols']:
             if os.path.isabs(symbol['declaration']['file']):
-                symbol['declaration']['file']=""
+                symbol['declaration']['file'] = ""
             for reference in symbol['references']:
                 if os.path.isabs(reference['file']):
-                    reference['file']=""
-        ref_src['source_root']=""
+                    reference['file'] = ""
+        ref_src['source_root'] = ""
         for symbol in ref_src['symbols']:
             if os.path.isabs(symbol['declaration']['file']):
-                symbol['declaration']['file']=""
+                symbol['declaration']['file'] = ""
             for reference in symbol['references']:
                 if os.path.isabs(reference['file']):
-                    reference['file']=""
+                    reference['file'] = ""
         # Compare the rest
         if act_src != ref_src:
             self.printDiff(ref_src_json, act_src_json)
-            raise TestError("ERROR: Output source.json file differs from the reference one."
+            raise TestError(
+                "ERROR: Output source.json file differs from the reference one."
                 "\n       Different absolute paths may be ignored, they don't cause this error."
-                "\n       If the differences are expected, refer to the --gen-src-json knob.")
+                "\n       If the differences are expected, refer to the --gen-src-json knob."
+            )
 
     def checkProgramConf(self, args, ref_prg_conf):
         """
@@ -409,25 +470,27 @@ class Test:
             ref_src = json.load(ref_file)
         # Ignore PCIe-related nodes
         for chip in act_src['chip_list']:
-            chip['pcie_sysfs_prefix']=""
-            chip['pcie_domain']=0
-            chip['pcie_bus']=0
-            chip['pcie_dev']=0
-            chip['pcie_fn']=0
-            chip['id']=0
+            chip['pcie_sysfs_prefix'] = ""
+            chip['pcie_domain'] = 0
+            chip['pcie_bus'] = 0
+            chip['pcie_dev'] = 0
+            chip['pcie_fn'] = 0
+            chip['id'] = 0
         for chip in ref_src['chip_list']:
-            chip['pcie_sysfs_prefix']=""
-            chip['pcie_domain']=0
-            chip['pcie_bus']=0
-            chip['pcie_dev']=0
-            chip['pcie_fn']=0
-            chip['id']=0
+            chip['pcie_sysfs_prefix'] = ""
+            chip['pcie_domain'] = 0
+            chip['pcie_bus'] = 0
+            chip['pcie_dev'] = 0
+            chip['pcie_fn'] = 0
+            chip['id'] = 0
         # Compare the rest
         if act_src != ref_src:
             self.printDiff(ref_prg_conf, act_prg_conf)
-            raise TestError("ERROR: Output conf file differs from the reference one."
+            raise TestError(
+                "ERROR: Output conf file differs from the reference one."
                 "\n       Different absolute paths may be ignored, they don't cause this error."
-                "\n       If the differences are expected, refer to the --gen-prg-conf knob.")
+                "\n       If the differences are expected, refer to the --gen-prg-conf knob."
+            )
 
     def checkRemovedFiles(self, args):
         """Check that files are cleaned when the debug mode has been enabled.
@@ -435,6 +498,7 @@ class Test:
         Parameters:
             - args -  passed arguments to parser
         """
+
         def __check_with_rfiles(rfiles, fins):
             """
             Check if fins ends with a given suffixes passed in the
@@ -447,8 +511,9 @@ class Test:
                 if fins.endswith(rf):
                     return True
             return False
+
         # Check if we need to remove debug files. The rule here needs to be aligned with
-        # conditions inside the barefoot.py driver! Files are NOT removed when: 
+        # conditions inside the barefoot.py driver! Files are NOT removed when:
         # * debug mode is NOT enabled
         # * archive mode is not enabled
         if args.archive is not None or args.debug_info:
@@ -458,11 +523,7 @@ class Test:
         # whole files, etc.
         #
         # Don't forget to edit the reference list in bf-p4c/driver/barefoot.py file!
-        filesToRemove = [
-            ".dynhash.json",
-            ".prim.json",
-            "resources_deparser.json"
-        ]
+        filesToRemove = [".dynhash.json", ".prim.json", "resources_deparser.json"]
         # Walk through the generated folder and check that these
         # files are already removed
         for _, _, files in os.walk(args.output_directory):
@@ -477,7 +538,8 @@ class Test:
         Check that the generated output is correct.
         file_list contains list of files to check for (non)existence
         """
-        if self._dry_run: return 0 # nothing to check if we didn't run
+        if self._dry_run:
+            return 0  # nothing to check if we didn't run
 
         args = self._parser.parse_known_args(options)[0]
         try:
@@ -517,8 +579,15 @@ class Test:
 
         return 0
 
-
-    def runTest(self, options, xfail_msg = None, file_list = None, ref_src_json = None, ref_prg_conf = None, ref_out = None):
+    def runTest(
+        self,
+        options,
+        xfail_msg=None,
+        file_list=None,
+        ref_src_json=None,
+        ref_prg_conf=None,
+        ref_out=None,
+    ):
         """Run an individual test using the options and if the run is
         successful check the outputs. If `ref_out` is not None, the possible
         output files are not checked and the standard output of the test is
@@ -530,18 +599,24 @@ class Test:
         rcCode = self.runCompiler(options, xfail_msg, ref_out)
 
         if xfail_msg is not None:
-            if rcCode == 0: return "XFAIL"
-            else: return "XPASS"
+            if rcCode == 0:
+                return "XFAIL"
+            else:
+                return "XPASS"
 
         if ref_out is not None:
-            if rcCode == 0: return "PASS"
-            else: return "FAIL"
+            if rcCode == 0:
+                return "PASS"
+            else:
+                return "FAIL"
 
         ctCode = self.checkTest(options, file_list, ref_src_json, ref_prg_conf)
         if rcCode == 0 and ctCode == 0 and xfail_msg is None:
             return "PASS"
-        elif ctCode != 0: return "VALIDATION_FAIL"
-        else: return "FAIL"
+        elif ctCode != 0:
+            return "VALIDATION_FAIL"
+        else:
+            return "FAIL"
 
 
 def load_test_file(testfile):
@@ -578,32 +653,35 @@ def load_test_file(testfile):
         print(traceback.format_exc())
         return None
 
+
 # -----------------------------------------------------------------------------------
 p = argparse.ArgumentParser()
-p.add_argument("--compiler", "-c", help="compiler path to test",
-               action="store", default="./p4c")
-p.add_argument("--filter", "-f", help="test filter regex",
-               action="store", default=None)
-p.add_argument("--list", "-l", help="list available tests",
-               action="store_true", default=False)
-p.add_argument("--jobs", "-j", help="number of jobs",
-               action="store", type=int, default=1)
-p.add_argument("--keep-output", "-k", help="keep output files",
-               action="store_true", default=False)
-p.add_argument("--test_matrix", "-m", help="test specification",
-               action="store", default=None)
-p.add_argument("--dry-run", "-n", help="print commands only",
-               action="store_true", default=False)
-p.add_argument("--print-on-failure", "-p", help="print compiler output when failed",
-               action="store_true", default=False)
-p.add_argument("--testfile", "-t", help="test specification file",
-               action="store", default=None)
-p.add_argument("--verbose", "-v", help="increase verbosity",
-               action="store_true", default=False)
-p.add_argument("--gen-src-json", "-s", help="generate reference source jsons",
-               action="store_true", default=False)
-p.add_argument("--gen-prg-conf", help="generate reference program conf",
-               action="store_true", default=False)
+p.add_argument("--compiler", "-c", help="compiler path to test", action="store", default="./p4c")
+p.add_argument("--filter", "-f", help="test filter regex", action="store", default=None)
+p.add_argument("--list", "-l", help="list available tests", action="store_true", default=False)
+p.add_argument("--jobs", "-j", help="number of jobs", action="store", type=int, default=1)
+p.add_argument("--keep-output", "-k", help="keep output files", action="store_true", default=False)
+p.add_argument("--test_matrix", "-m", help="test specification", action="store", default=None)
+p.add_argument("--dry-run", "-n", help="print commands only", action="store_true", default=False)
+p.add_argument(
+    "--print-on-failure",
+    "-p",
+    help="print compiler output when failed",
+    action="store_true",
+    default=False,
+)
+p.add_argument("--testfile", "-t", help="test specification file", action="store", default=None)
+p.add_argument("--verbose", "-v", help="increase verbosity", action="store_true", default=False)
+p.add_argument(
+    "--gen-src-json",
+    "-s",
+    help="generate reference source jsons",
+    action="store_true",
+    default=False,
+)
+p.add_argument(
+    "--gen-prg-conf", help="generate reference program conf", action="store_true", default=False
+)
 args = p.parse_args()
 
 # ------------ load the tests that need to run
@@ -611,10 +689,9 @@ test_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), '../p4-tests
 tests_file = args.testfile or os.path.join(test_dir, "p4c_driver_tests.py")
 test_matrix = load_test_file(tests_file)
 
-def generateReferenceSourceJson(test_runner, test_name, options, ref_src_json):
-    """Generate reference source json for source.json regression
 
-    """
+def generateReferenceSourceJson(test_runner, test_name, options, ref_src_json):
+    """Generate reference source json for source.json regression"""
     if ref_src_json != None:
         print('Generating reference source json for', test_name, '......')
         rc = test_runner.runCompiler(options, None, None)
@@ -630,10 +707,9 @@ def generateReferenceSourceJson(test_runner, test_name, options, ref_src_json):
         print('SUCC:', test_name)
     return 0
 
-def generateReferenceProgramConf(test_runner, test_name, options, ref_prg_conf):
-    """Generate reference source json for source.json regression
 
-    """
+def generateReferenceProgramConf(test_runner, test_name, options, ref_prg_conf):
+    """Generate reference source json for source.json regression"""
     if ref_prg_conf != None:
         print('Generating reference program conf for', test_name, '......')
         rc = test_runner.runCompiler(options, None, None)
@@ -650,15 +726,19 @@ def generateReferenceProgramConf(test_runner, test_name, options, ref_prg_conf):
         print('SUCC:', test_name)
     return 0
 
-def runOneTest(test_runner, test_name, args, xfail_msg, file_list, ref_src_json, ref_prg_conf, ref_out):
-    """Run a test and print the status
 
-    """
+def runOneTest(
+    test_runner, test_name, args, xfail_msg, file_list, ref_src_json, ref_prg_conf, ref_out
+):
+    """Run a test and print the status"""
     print('Starting', test_name, '......')
     rc = test_runner.runTest(args, xfail_msg, file_list, ref_src_json, ref_prg_conf, ref_out)
     print(rc, ':', test_name)
-    if rc == "PASS" or rc == "XFAIL": return 0
-    else: return 1
+    if rc == "PASS" or rc == "XFAIL":
+        return 0
+    else:
+        return 1
+
 
 def createDummyTarget(directory):
     """
@@ -669,23 +749,32 @@ def createDummyTarget(directory):
     # P4_16 files
     os.mkdir(os.path.join(directory, "pipe"))
     os.mkdir(os.path.join(directory, "pipe", "logs"))
-    with open(os.path.join(directory, "pipe", "test.bfa"), "w") as _: pass
-    with open(os.path.join(directory, "test.conf"), "w") as _: pass
-    with open(os.path.join(directory, "test.p4pp"), "w") as _: pass
+    with open(os.path.join(directory, "pipe", "test.bfa"), "w") as _:
+        pass
+    with open(os.path.join(directory, "test.conf"), "w") as _:
+        pass
+    with open(os.path.join(directory, "test.p4pp"), "w") as _:
+        pass
     # Create also possible P4_14 files and folders
     os.mkdir(os.path.join(directory, "logs"))
-    with open(os.path.join(directory, "logs/test.log"), "w") as _: pass
+    with open(os.path.join(directory, "logs/test.log"), "w") as _:
+        pass
     os.mkdir(os.path.join(directory, "graphs"))
-    with open(os.path.join(directory, "graphs/test.dot"), "w") as _: pass
-    with open(os.path.join(directory, "test.bin"), "w") as _: pass
-    with open(os.path.join(directory, "frontend-ir.json"), "w") as _: pass
-    with open(os.path.join(directory, "source.json"), "w") as _: pass
+    with open(os.path.join(directory, "graphs/test.dot"), "w") as _:
+        pass
+    with open(os.path.join(directory, "test.bin"), "w") as _:
+        pass
+    with open(os.path.join(directory, "frontend-ir.json"), "w") as _:
+        pass
+    with open(os.path.join(directory, "source.json"), "w") as _:
+        pass
+
 
 def setupTestStructure(parent_dir):
     """
     Creates a dummy output folders to test out structure changing functions
     such as the precleaner.
-    These folders are needed to test out precleaner in 
+    These folders are needed to test out precleaner in
     precleaner_test and skip_precleaner_test in p4c_driver_tests.py
     :param parent_dir Directory into which will be structure placed
     :return None
@@ -718,12 +807,13 @@ def setupTestStructure(parent_dir):
 setupTestStructure(os.path.abspath(os.path.dirname("./")))
 # ---------- Filter which tests need to run
 filter = None
-if args.filter: filter = re.compile(args.filter)
+if args.filter:
+    filter = re.compile(args.filter)
 
 if filter:
-    tests_to_run = [ t for t in test_matrix if filter.match(t) ]
+    tests_to_run = [t for t in test_matrix if filter.match(t)]
 else:
-    tests_to_run = [ t for t in test_matrix ]
+    tests_to_run = [t for t in test_matrix]
 skipped = len(test_matrix) - len(tests_to_run)
 
 if args.list:
@@ -734,20 +824,34 @@ if args.list:
 failed = Queue()
 test_runner = Test(args)
 
+
 def worker(test_name):
     rc = 0
     if args.gen_src_json:
-        rc = generateReferenceSourceJson(test_runner, test_name, test_matrix[test_name][0],
-                test_matrix[test_name][3] if len(test_matrix[test_name]) > 3 else None)
+        rc = generateReferenceSourceJson(
+            test_runner,
+            test_name,
+            test_matrix[test_name][0],
+            test_matrix[test_name][3] if len(test_matrix[test_name]) > 3 else None,
+        )
     elif args.gen_prg_conf:
-        rc = generateReferenceProgramConf(test_runner, test_name, test_matrix[test_name][0],
-                test_matrix[test_name][4] if len(test_matrix[test_name]) > 4 else None)
+        rc = generateReferenceProgramConf(
+            test_runner,
+            test_name,
+            test_matrix[test_name][0],
+            test_matrix[test_name][4] if len(test_matrix[test_name]) > 4 else None,
+        )
     else:
-        rc = runOneTest(test_runner, test_name,
-                test_matrix[test_name][0], test_matrix[test_name][1], test_matrix[test_name][2],
-                test_matrix[test_name][3] if len(test_matrix[test_name]) > 3 else None,
-                test_matrix[test_name][4] if len(test_matrix[test_name]) > 4 else None,
-                test_matrix[test_name][5] if len(test_matrix[test_name]) > 5 else None)
+        rc = runOneTest(
+            test_runner,
+            test_name,
+            test_matrix[test_name][0],
+            test_matrix[test_name][1],
+            test_matrix[test_name][2],
+            test_matrix[test_name][3] if len(test_matrix[test_name]) > 3 else None,
+            test_matrix[test_name][4] if len(test_matrix[test_name]) > 4 else None,
+            test_matrix[test_name][5] if len(test_matrix[test_name]) > 5 else None,
+        )
     if rc != 0:
         failed.put(test_name)
     else:
@@ -759,11 +863,13 @@ def worker(test_name):
         # print q.empty()
         failed.put(None)
 
+
 if args.jobs > 1:
     with Pool(processes=args.jobs) as pool:
         pool.map(worker, tests_to_run)
 else:
-    for t in tests_to_run: worker(t)
+    for t in tests_to_run:
+        worker(t)
 
 failedTests = []
 cnt = 0
@@ -776,7 +882,7 @@ while cnt != len(tests_to_run):
 # -------- Report the overall status
 if failedTests:
     print('Failed tests {} out of {}:'.format(len(failedTests), len(test_matrix)))
-    print('  ','\n   '.join(failedTests))
+    print('  ', '\n   '.join(failedTests))
     sys.exit(1)
 else:
     print('Success:', len(tests_to_run), 'tests passed')

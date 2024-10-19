@@ -23,7 +23,7 @@ namespace v2 {
 /// a pair of container and the index of the byte, counting from 0.
 using ContainerByte = std::pair<Container, int>;
 /// map tables to ixbar bytes of container.
-using TableIxbarContBytesMap = ordered_map<const IR::MAU::Table*, ordered_set<ContainerByte>>;
+using TableIxbarContBytesMap = ordered_map<const IR::MAU::Table *, ordered_set<ContainerByte>>;
 /// map tables to ixbar bytes of container.
 using StageIxbarContBytesMap = ordered_map<int, ordered_set<ContainerByte>>;
 
@@ -40,7 +40,7 @@ struct Vision {
 
     /// Map super clusters to required number of containers grouped by kind and size, based
     /// on their baseline allocations.
-    ordered_map<const SuperCluster*, KindSizeIndexedMap> sc_cont_required;
+    ordered_map<const SuperCluster *, KindSizeIndexedMap> sc_cont_required;
     /// The estimated number of containers that will be required for unallocated
     /// super clusters, by gress and size.
     ordered_map<gress_t, KindSizeIndexedMap> cont_required;
@@ -74,43 +74,42 @@ struct Vision {
     StageIxbarContBytesMap stage_tcam_ixbar_cont_bytes;
 
     /// supply vs demand in terms of bits.
-    int bits_demand(const PHV::Kind& k) const;
-    int bits_supply(const PHV::Kind& k) const;
-    bool has_more_than_enough(const PHV::Kind& k) const {
+    int bits_demand(const PHV::Kind &k) const;
+    int bits_supply(const PHV::Kind &k) const;
+    bool has_more_than_enough(const PHV::Kind &k) const {
         return bits_supply(k) >= bits_demand(k);
     };
 };
 
-std::ostream& operator<<(std::ostream&, const ContainerByte&);
-std::ostream& operator<<(std::ostream&, const Vision&);
+std::ostream &operator<<(std::ostream &, const ContainerByte &);
+std::ostream &operator<<(std::ostream &, const Vision &);
 
 class GreedyTxScoreMaker : public TxScoreMaker {
  private:
-    const PhvKit& kit_i;
+    const PhvKit &kit_i;
 
     Vision vision_i;
     std::set<const Field *> table_key_with_ranges;
 
     friend class GreedyTxScore;
-    friend std::ostream& operator<<(std::ostream&, const Vision&);
+    friend std::ostream &operator<<(std::ostream &, const Vision &);
 
  public:
-    GreedyTxScoreMaker(const PhvKit& utils,
-                       const std::list<ContainerGroup*>& container_groups,
-                       const std::list<SuperCluster*>& sorted_clusters,
-                       const ordered_map<const SuperCluster*, KindSizeIndexedMap>& baseline);
+    GreedyTxScoreMaker(const PhvKit &utils, const std::list<ContainerGroup *> &container_groups,
+                       const std::list<SuperCluster *> &sorted_clusters,
+                       const ordered_map<const SuperCluster *, KindSizeIndexedMap> &baseline);
 
-    TxScore* make(const Transaction& tx) const override;
+    TxScore *make(const Transaction &tx) const override;
 
     /// update @a vision_i.
-    void record_commit(const Transaction& tx, const SuperCluster* presliced_sc);
+    void record_commit(const Transaction &tx, const SuperCluster *presliced_sc);
 
     /// When deallocating @p sc from @p curr_alloc, by removing @p slices, some containers
     /// will become free again. We will update vision_i based on them and return them as
     /// a new baseline for this super cluster.
-    KindSizeIndexedMap record_deallocation(const SuperCluster* sc,
-                                           const ConcreteAllocation& curr_alloc,
-                                           const ordered_set<AllocSlice>& slices);
+    KindSizeIndexedMap record_deallocation(const SuperCluster *sc,
+                                           const ConcreteAllocation &curr_alloc,
+                                           const ordered_set<AllocSlice> &slices);
 
     cstring status() const;
 
@@ -124,14 +123,14 @@ class GreedyTxScoreMaker : public TxScoreMaker {
     ///  H9@0          MH5@1
     /// The score is 2 because there are 2 ixbar bytes that has more than minimal bytes (1
     /// in this case). See gtests.
-    static int ixbar_imbalanced_alignment(const ordered_set<ContainerByte>& cont_bytes);
+    static int ixbar_imbalanced_alignment(const ordered_set<ContainerByte> &cont_bytes);
 };
 
 /// GreedyTxScore is the default allocation heuristics.
 class GreedyTxScore : public TxScore {
  private:
-    const GreedyTxScoreMaker* maker_i = nullptr;
-    const Vision* vision_i;
+    const GreedyTxScoreMaker *maker_i = nullptr;
+    const Vision *vision_i;
 
     /// the most precious container bits: normal container and potentially mocha bits
     /// depending on current context.
@@ -219,10 +218,10 @@ class GreedyTxScore : public TxScore {
     int n_range_match_nibbles_occupied = 0;
 
  public:
-    explicit GreedyTxScore(const Vision* vision) : vision_i(vision) {}
+    explicit GreedyTxScore(const Vision *vision) : vision_i(vision) {}
 
     /// @returns true if better
-    bool better_than(const TxScore* other) const override;
+    bool better_than(const TxScore *other) const override;
 
     /// @returns string representation.
     std::string str() const override;

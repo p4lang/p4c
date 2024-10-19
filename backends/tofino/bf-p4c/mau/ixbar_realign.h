@@ -14,15 +14,16 @@
 #define BF_P4C_MAU_IXBAR_REALIGN_H_
 
 #include <array>
+
 #include "bf-p4c/mau/mau_visitor.h"
 #include "bf-p4c/mau/resource.h"
 #include "lib/safe_vector.h"
 
 using namespace P4;
 
-class IXBarVerify: public MauModifier {
-    const PhvInfo       &phv;
-    const IR::MAU::Table* currentTable = nullptr;
+class IXBarVerify : public MauModifier {
+    const PhvInfo &phv;
+    const IR::MAU::Table *currentTable = nullptr;
     profile_t init_apply(const IR::Node *) override;
     bool preorder(IR::Expression *) override { return false; }
     void postorder(IR::MAU::Table *) override;

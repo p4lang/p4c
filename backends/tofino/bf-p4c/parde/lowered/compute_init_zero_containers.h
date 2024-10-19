@@ -10,11 +10,11 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PARDE_LOWERED_COMPUTE_INIT_ZERO_CONTAINERS_H_
-#define EXTENSIONS_BF_P4C_PARDE_LOWERED_COMPUTE_INIT_ZERO_CONTAINERS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_LOWERED_COMPUTE_INIT_ZERO_CONTAINERS_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_LOWERED_COMPUTE_INIT_ZERO_CONTAINERS_H_
 
-#include "bf-p4c/parde/parde_visitor.h"
 #include "bf-p4c/common/field_defuse.h"
+#include "bf-p4c/parde/parde_visitor.h"
 
 namespace Parde::Lowered {
 
@@ -26,23 +26,24 @@ namespace Parde::Lowered {
  * In Tofino2, all containers are valid coming out of the parser.
  */
 class ComputeInitZeroContainers : public ParserModifier {
-    void postorder(IR::BFN::LoweredParser* parser) override;
+    void postorder(IR::BFN::LoweredParser *parser) override;
 
  public:
     ComputeInitZeroContainers(
-            const PhvInfo& phv,
-            const FieldDefUse& defuse,
-            const ordered_set<const PHV::Field*>& no_init,
-            const std::map<gress_t, std::set<PHV::Container>>& origParserZeroInitContainers)
-        : phv(phv), defuse(defuse), no_init_fields(no_init),
+        const PhvInfo &phv, const FieldDefUse &defuse,
+        const ordered_set<const PHV::Field *> &no_init,
+        const std::map<gress_t, std::set<PHV::Container>> &origParserZeroInitContainers)
+        : phv(phv),
+          defuse(defuse),
+          no_init_fields(no_init),
           origParserZeroInitContainers(origParserZeroInitContainers) {}
 
-    const PhvInfo& phv;
-    const FieldDefUse& defuse;
-    const ordered_set<const PHV::Field*>& no_init_fields;
-    const std::map<gress_t, std::set<PHV::Container>>& origParserZeroInitContainers;
+    const PhvInfo &phv;
+    const FieldDefUse &defuse;
+    const ordered_set<const PHV::Field *> &no_init_fields;
+    const std::map<gress_t, std::set<PHV::Container>> &origParserZeroInitContainers;
 };
 
 }  // namespace Parde::Lowered
 
-#endif /* EXTENSIONS_BF_P4C_PARDE_LOWERED_COMPUTE_INIT_ZERO_CONTAINERS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_LOWERED_COMPUTE_INIT_ZERO_CONTAINERS_H_ */

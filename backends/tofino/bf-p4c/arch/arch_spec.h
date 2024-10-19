@@ -10,25 +10,25 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_ARCH_ARCH_SPEC_H_
-#define EXTENSIONS_BF_P4C_ARCH_ARCH_SPEC_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_ARCH_ARCH_SPEC_H_
+#define BACKENDS_TOFINO_BF_P4C_ARCH_ARCH_SPEC_H_
 
-#include "ir/ir.h"
 #include "bf-p4c/ir/gress.h"
+#include "ir/ir.h"
 
 struct IntrinsicField {
  public:
     std::string name;
     std::string asm_name;
-    explicit IntrinsicField(std::string n) : name(n), asm_name(n) { }
-    IntrinsicField(std::string n, std::string an) : name(n), asm_name(an) { }
+    explicit IntrinsicField(std::string n) : name(n), asm_name(n) {}
+    IntrinsicField(std::string n, std::string an) : name(n), asm_name(an) {}
 };
 
 struct IntrinsicParam {
  public:
     std::string type;
     std::string name;
-    IntrinsicParam(std::string t, std::string n) : type(t), name(n) { }
+    IntrinsicParam(std::string t, std::string n) : type(t), name(n) {}
 };
 
 /**
@@ -53,8 +53,7 @@ class ArchSpec {
     int deparser_intrinsic_metadata_for_deparser_param_index = -1;
 
  public:
-    enum ArchType_t { TNA, T2NA
-    };
+    enum ArchType_t { TNA, T2NA };
 
     ArchSpec();
 
@@ -94,9 +93,7 @@ class ArchSpec {
         return intrinsic_metadata_for_output_port[EGRESS];
     }
 
-    void add_md(gress_t gress, IntrinsicField f) {
-        intrinsic_metadata[gress].push_back(f);
-    }
+    void add_md(gress_t gress, IntrinsicField f) { intrinsic_metadata[gress].push_back(f); }
 
     void add_tm_md(gress_t gress, IntrinsicField f) {
         intrinsic_metadata_for_tm[gress].push_back(f);
@@ -144,7 +141,6 @@ class ArchSpec {
     void setTofinoIntrinsicTypes();
 };
 
-
 class TofinoArchSpec : public ArchSpec {
  public:
     TofinoArchSpec();
@@ -155,6 +151,4 @@ class JBayArchSpec : public ArchSpec {
     JBayArchSpec();
 };
 
-
-
-#endif  /* EXTENSIONS_BF_P4C_ARCH_ARCH_SPEC_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_ARCH_ARCH_SPEC_H_ */

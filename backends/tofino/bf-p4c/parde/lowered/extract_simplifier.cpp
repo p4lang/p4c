@@ -16,7 +16,7 @@
 
 namespace Parde::Lowered {
 
-void ExtractSimplifier::add(const IR::BFN::Extract* extract) {
+void ExtractSimplifier::add(const IR::BFN::Extract *extract) {
     if (auto ec = extract->to<IR::BFN::ExtractClot>())
         add(ec);
     else if (auto ep = extract->to<IR::BFN::ExtractPhv>())
@@ -25,7 +25,7 @@ void ExtractSimplifier::add(const IR::BFN::Extract* extract) {
         BUG("Unexpected unclassified extract encountered while lowering parser IR: %1%", extract);
 }
 
-void ExtractSimplifier::add(const IR::BFN::ExtractClot* extract) {
+void ExtractSimplifier::add(const IR::BFN::ExtractClot *extract) {
     le_bitrange extracted_range;
     auto field = phv.field(extract->dest->field, &extracted_range);
     auto extracted_slice = new PHV::FieldSlice(field, extracted_range);
@@ -47,7 +47,7 @@ void ExtractSimplifier::add(const IR::BFN::ExtractClot* extract) {
     clotExtracts[clot].push_back(extract);
 }
 
-void ExtractSimplifier::add(const IR::BFN::ExtractPhv* extract) {
+void ExtractSimplifier::add(const IR::BFN::ExtractPhv *extract) {
     PHV::FieldUse use(PHV::FieldUse::WRITE);
     std::vector<PHV::AllocSlice> slices =
         phv.get_alloc(extract->dest->field, PHV::AllocContext::PARSER, &use);
@@ -58,12 +58,12 @@ void ExtractSimplifier::add(const IR::BFN::ExtractPhv* extract) {
 
     // TODO we should have single slice at this point
 
-    for (const auto& slice : slices)
+    for (const auto &slice : slices)
         BUG_CHECK(bool(slice.container()), "Parser extracts into invalid PHV container: %1%",
                   extract);
 
-    if (auto* bufferSource = extract->source->to<IR::BFN::InputBufferRVal>()) {
-        for (const auto& slice : slices) {
+    if (auto *bufferSource = extract->source->to<IR::BFN::InputBufferRVal>()) {
+        for (const auto &slice : slices) {
             if (!slice.isUsedParser()) continue;
             // Shift the slice to its proper place in the input buffer.
             auto bufferRange = bufferSource->range;
@@ -97,7 +97,7 @@ void ExtractSimplifier::add(const IR::BFN::ExtractPhv* extract) {
             const auto byteFinalBufferRange = finalBufferRange.toUnit<RangeUnit::Byte>();
 
             // Generate the lowered extract.
-            const IR::BFN::LoweredParserRVal* newSource;
+            const IR::BFN::LoweredParserRVal *newSource;
             if (bufferSource->is<IR::BFN::PacketRVal>())
                 newSource = new IR::BFN::LoweredPacketRVal(byteFinalBufferRange);
             else
@@ -110,7 +110,7 @@ void ExtractSimplifier::add(const IR::BFN::ExtractPhv* extract) {
                 newRange.hi = (containerRange.hi & byteMask) + 7;
                 containerRef->range = newRange;
             }
-            auto* newExtract = new IR::BFN::LoweredExtractPhv(newSource, containerRef);
+            auto *newExtract = new IR::BFN::LoweredExtractPhv(newSource, containerRef);
 
             newExtract->write_mode = extract->write_mode;
             newExtract->debug.info.push_back(debugInfoFor(extract, slice, bufferRange));
@@ -120,8 +120,8 @@ void ExtractSimplifier::add(const IR::BFN::ExtractPhv* extract) {
             else
                 extractFromBufferByContainer[slice.container()].push_back(newExtract);
         }
-    } else if (auto* constantSource = extract->source->to<IR::BFN::ConstantRVal>()) {
-        for (auto& slice : boost::adaptors::reverse(slices)) {
+    } else if (auto *constantSource = extract->source->to<IR::BFN::ConstantRVal>()) {
+        for (auto &slice : boost::adaptors::reverse(slices)) {
             // Large constant may be extracted across multiple containers, therefore we
             // need to slice the containt into multiple slices and align each slice
             // within each container.
@@ -137,8 +137,8 @@ void ExtractSimplifier::add(const IR::BFN::ExtractPhv* extract) {
             // Create an extract that writes just those bits.
             LOG4("extract " << constSlice << " into " << slice.container());
 
-            auto* newSource = new IR::BFN::LoweredConstantRVal(constSlice.asUnsigned());
-            auto* newExtract = new IR::BFN::LoweredExtractPhv(slice.container(), newSource);
+            auto *newSource = new IR::BFN::LoweredConstantRVal(constSlice.asUnsigned());
+            auto *newExtract = new IR::BFN::LoweredExtractPhv(slice.container(), newSource);
 
             newExtract->write_mode = extract->write_mode;
             newExtract->debug.info.push_back(debugInfoFor(extract, slice));
@@ -152,12 +152,12 @@ void ExtractSimplifier::add(const IR::BFN::ExtractPhv* extract) {
 }
 
 template <typename InputBufferRValType>
-const IR::BFN::LoweredExtractPhv* ExtractSimplifier::createMergedExtract(
-    PHV::Container container, const ExtractSimplifier::ExtractSequence& extracts,
+const IR::BFN::LoweredExtractPhv *ExtractSimplifier::createMergedExtract(
+    PHV::Container container, const ExtractSimplifier::ExtractSequence &extracts,
     nw_byteinterval bufferRange) {
     // Create a single combined extract that implements all of the
     // component extracts. Each merged extract writes to an entire container.
-    const auto* finalBufferValue = new InputBufferRValType(*toClosedRange(bufferRange));
+    const auto *finalBufferValue = new InputBufferRValType(*toClosedRange(bufferRange));
 
     auto containerRef = new IR::BFN::ContainerRef(container);
 
@@ -169,18 +169,18 @@ const IR::BFN::LoweredExtractPhv* ExtractSimplifier::createMergedExtract(
         containerRef->range = newRange;
     }
 
-    auto* mergedExtract = new IR::BFN::LoweredExtractPhv(finalBufferValue, containerRef);
+    auto *mergedExtract = new IR::BFN::LoweredExtractPhv(finalBufferValue, containerRef);
 
     mergedExtract->write_mode = extracts[0]->write_mode;
 
-    for (auto* extract : extracts) mergedExtract->debug.mergeWith(extract->debug);
+    for (auto *extract : extracts) mergedExtract->debug.mergeWith(extract->debug);
 
     return mergedExtract;
 }
 
 template <typename InputBufferRValType>
 const ExtractSimplifier::ExtractSequence ExtractSimplifier::mergeExtractsFor(
-    PHV::Container container, const ExtractSequence& extracts) {
+    PHV::Container container, const ExtractSequence &extracts) {
     BUG_CHECK(!extracts.empty(), "Trying merge an empty sequence of extracts?");
 
     ExtractSequence rv;
@@ -194,12 +194,12 @@ const ExtractSimplifier::ExtractSequence ExtractSimplifier::mergeExtractsFor(
     // this container. They should all be the same, but if they aren't
     // we want to know about it.
     nw_byteinterval bufferRange;
-    std::map<int, std::map<int, ordered_set<const IR::BFN::LoweredExtractPhv*>>> extractDstSrcs;
+    std::map<int, std::map<int, ordered_set<const IR::BFN::LoweredExtractPhv *>>> extractDstSrcs;
 
-    const IR::BFN::LoweredExtractPhv* prev = nullptr;
+    const IR::BFN::LoweredExtractPhv *prev = nullptr;
 
-    for (auto* extract : extracts) {
-        auto* bufferSource = extract->source->to<InputBufferRValType>();
+    for (auto *extract : extracts) {
+        auto *bufferSource = extract->source->to<InputBufferRValType>();
 
         BUG_CHECK(bufferSource, "Unexpected non-buffer source");
 
@@ -231,13 +231,13 @@ const ExtractSimplifier::ExtractSequence ExtractSimplifier::mergeExtractsFor(
         // where possible.
         while (extractDstSrcs.size()) {
             ExtractSequence currExtracts;
-            std::set<const IR::BFN::LoweredExtractPhv*> currExtractsSet;
+            std::set<const IR::BFN::LoweredExtractPhv *> currExtractsSet;
             int dest = extractDstSrcs.begin()->first;
             int src = extractDstSrcs.at(dest).begin()->first;
 
             nw_byteinterval newBufferRange(src, src);
             while (extractDstSrcs.count(dest) && extractDstSrcs.at(dest).count(src)) {
-                for (const auto* extract : extractDstSrcs.at(dest).at(src)) {
+                for (const auto *extract : extractDstSrcs.at(dest).at(src)) {
                     if (!currExtractsSet.count(extract)) {
                         currExtracts.push_back(extract);
                         currExtractsSet.emplace(extract);
@@ -274,10 +274,10 @@ const ExtractSimplifier::ExtractSequence ExtractSimplifier::mergeExtractsFor(
 }
 
 void ExtractSimplifier::sortExtractPhvs(
-    IR::Vector<IR::BFN::LoweredParserPrimitive>& loweredExtracts) {
+    IR::Vector<IR::BFN::LoweredParserPrimitive> &loweredExtracts) {
     std::stable_sort(
         loweredExtracts.begin(), loweredExtracts.end(),
-        [&](const IR::BFN::LoweredParserPrimitive* a, const IR::BFN::LoweredParserPrimitive* b) {
+        [&](const IR::BFN::LoweredParserPrimitive *a, const IR::BFN::LoweredParserPrimitive *b) {
             auto ea = a->to<IR::BFN::LoweredExtractPhv>();
             auto eb = b->to<IR::BFN::LoweredExtractPhv>();
 
@@ -292,19 +292,19 @@ void ExtractSimplifier::sortExtractPhvs(
         });
 }
 
-const IR::BFN::LoweredExtractPhv* ExtractSimplifier::mergeExtractsForConstants(
-    PHV::Container container, const ExtractSequence& extracts) {
+const IR::BFN::LoweredExtractPhv *ExtractSimplifier::mergeExtractsForConstants(
+    PHV::Container container, const ExtractSequence &extracts) {
     BUG_CHECK(!extracts.empty(), "Trying merge an empty sequence of extracts?");
 
     if (extracts.size() == 1) return extracts[0];
 
     // Merge all of the constant extracts for this container into a
     // single operation by ORing the constant sources together.
-    auto* mergedValue = new IR::BFN::LoweredConstantRVal(0);
-    auto* mergedExtract = new IR::BFN::LoweredExtractPhv(container, mergedValue);
+    auto *mergedValue = new IR::BFN::LoweredConstantRVal(0);
+    auto *mergedExtract = new IR::BFN::LoweredExtractPhv(container, mergedValue);
 
-    for (auto* extract : extracts) {
-        auto* constantSource = extract->source->to<IR::BFN::LoweredConstantRVal>();
+    for (auto *extract : extracts) {
+        auto *constantSource = extract->source->to<IR::BFN::LoweredConstantRVal>();
 
         BUG_CHECK(constantSource, "Unexpected non-constant source");
 
@@ -325,8 +325,8 @@ IR::Vector<IR::BFN::LoweredParserPrimitive> ExtractSimplifier::lowerExtracts(
 
     for (const auto &item : extractFromPacketByContainer) {
         auto container = item.first;
-        auto& extracts = item.second;
-        auto& merged = mergeExtractsFor<IR::BFN::LoweredPacketRVal>(container, extracts);
+        auto &extracts = item.second;
+        auto &merged = mergeExtractsFor<IR::BFN::LoweredPacketRVal>(container, extracts);
         loweredExtracts.insert(loweredExtracts.end(), merged.begin(), merged.end());
     }
 
@@ -334,22 +334,22 @@ IR::Vector<IR::BFN::LoweredParserPrimitive> ExtractSimplifier::lowerExtracts(
 
     for (const auto &item : extractFromBufferByContainer) {
         auto container = item.first;
-        auto& extracts = item.second;
-        auto& merged = mergeExtractsFor<IR::BFN::LoweredMetadataRVal>(container, extracts);
+        auto &extracts = item.second;
+        auto &merged = mergeExtractsFor<IR::BFN::LoweredMetadataRVal>(container, extracts);
         loweredExtracts.insert(loweredExtracts.end(), merged.begin(), merged.end());
     }
 
     for (const auto &item : extractConstantByContainer) {
         auto container = item.first;
-        auto& extracts = item.second;
-        auto* merged = mergeExtractsForConstants(container, extracts);
+        auto &extracts = item.second;
+        auto *merged = mergeExtractsForConstants(container, extracts);
         loweredExtracts.push_back(merged);
     }
 
     for (const auto &cx : clotExtracts) {
-        auto* clot = cx.first;
-        const auto* first_slice = clot->parser_state_to_slices().begin()->second.front();
-        const auto* first_field = first_slice->field();
+        auto *clot = cx.first;
+        const auto *first_slice = clot->parser_state_to_slices().begin()->second.front();
+        const auto *first_field = first_slice->field();
 
         bool is_start = false;
         nw_bitinterval bitInterval;
@@ -383,8 +383,8 @@ IR::Vector<IR::BFN::LoweredParserPrimitive> ExtractSimplifier::lowerExtracts(
         nw_bitrange bitrange = *toClosedRange(bitInterval);
         nw_byterange byterange = bitrange.toUnit<RangeUnit::Byte>();
 
-        auto* rval = new IR::BFN::LoweredPacketRVal(byterange);
-        auto* extractClot = new IR::BFN::LoweredExtractClot(is_start, rval, clot);
+        auto *rval = new IR::BFN::LoweredPacketRVal(byterange);
+        auto *extractClot = new IR::BFN::LoweredExtractClot(is_start, rval, clot);
         extractClot->higher_parser_state = cx.second.front()->original_state;
         if (clotTagToCsumUnit[clot->gress].count(clot->tag)) {
             clot->csum_unit = clotTagToCsumUnit[clot->gress][clot->tag];

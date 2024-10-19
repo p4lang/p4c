@@ -12,12 +12,12 @@
 
 #include <fstream>
 
+#include "bf-p4c/arch/arch.h"
+#include "bf-p4c/logging/collect_diagnostic_checks.h"
 #include "bf_gtest_helpers.h"
+#include "frontends/parsers/parserDriver.h"
 #include "gtest/gtest.h"
 #include "lib/error.h"
-#include "frontends/parsers/parserDriver.h"
-#include "bf-p4c/logging/collect_diagnostic_checks.h"
-#include "bf-p4c/arch/arch.h"
 
 namespace P4::Test {
 class ErrorReporterTest : public ::testing::Test {
@@ -33,7 +33,7 @@ class ErrorReporterTest : public ::testing::Test {
 
     void TearDown() {}
 
-    std::ostream* DiagnosticTestSetup(BfErrorReporter& reporter, std::string code) {
+    std::ostream *DiagnosticTestSetup(BfErrorReporter &reporter, std::string code) {
         auto testCode = TestCode(TestCode::Hdr::CoreP4, code);
 
         auto *backup_stream = reporter.getOutputStream();
@@ -52,19 +52,19 @@ class ErrorReporterTest : public ::testing::Test {
         return backup_stream;
     }
 
-    IR::Node* GetMockNode(const std::string &code, int line, int column = 1) {
+    IR::Node *GetMockNode(const std::string &code, int line, int column = 1) {
         Util::SourcePosition pos(line, column);
-        auto* sources = new Util::InputSources();
+        auto *sources = new Util::InputSources();
         sources->appendText(code.c_str());
 
         return new IR::StringLiteral(Util::SourceInfo(sources, pos), ""_cs);
     }
 
-    void ReportError(const std::string& code, std::string msg, int line, int column = 1) {
+    void ReportError(const std::string &code, std::string msg, int line, int column = 1) {
         ::error(ErrorType::ERR_EXPECTED, (msg + "%1%").c_str(), GetMockNode(code, line, column));
     }
 
-    void ReportWarning(const std::string& code, std::string msg, int line, int column = 1) {
+    void ReportWarning(const std::string &code, std::string msg, int line, int column = 1) {
         ::warning(ErrorType::WARN_FAILED, (msg + "%1%").c_str(), GetMockNode(code, line, column));
     }
 };
@@ -72,25 +72,26 @@ class ErrorReporterTest : public ::testing::Test {
 TEST_F(ErrorReporterTest, ErrorHelperPlainFormatsCorrectly) {
     boost::format fmt("Str: %1%, Dec: %2%");
 
-    EXPECT_EQ(
-        ::error_helper(fmt, "hello", 10).toString(),
-        "Str: hello, Dec: 10\n");
+    EXPECT_EQ(::error_helper(fmt, "hello", 10).toString(), "Str: hello, Dec: 10\n");
 }
 
 TEST_F(ErrorReporterTest, WarningsConformToExpectedFormat) {
     // NOTE: Warnings are formatted exactly the same as errors
 
-    const std::string EXPECTED_WARN_0 = R"(TestCode(44): [--Wwarn=unused] warning: 'val_undefined' is unused
+    const std::string EXPECTED_WARN_0 =
+        R"(TestCode(44): [--Wwarn=unused] warning: 'val_undefined' is unused
     action do_global_action(in bool make_zero, out bool val_undefined) {
                                                         ^^^^^^^^^^^^^
 )";
 
-    const std::string EXPECTED_WARN_1 = R"(TestCode(46): [--Wwarn=uninitialized_use] warning: tmp may be uninitialized
+    const std::string EXPECTED_WARN_1 =
+        R"(TestCode(46): [--Wwarn=uninitialized_use] warning: tmp may be uninitialized
         tmp = tmp * (make_zero ? 16w0 : 16w1);
               ^^^
 )";
 
-    const std::string EXPECTED_WARN_2 = R"(TestCode(44): [--Wwarn=uninitialized_out_param] warning: out parameter 'val_undefined' may be uninitialized when 'do_global_action' terminates
+    const std::string EXPECTED_WARN_2 =
+        R"(TestCode(44): [--Wwarn=uninitialized_out_param] warning: out parameter 'val_undefined' may be uninitialized when 'do_global_action' terminates
     action do_global_action(in bool make_zero, out bool val_undefined) {
                                                         ^^^^^^^^^^^^^
 TestCode(44)
@@ -98,17 +99,19 @@ TestCode(44)
            ^^^^^^^^^^^^^^^^
 )";
 
-    const std::string EXPECTED_WARN_3 = R"([--Wwarn=uninitialized_use] warning: val_undefined may be uninitialized
+    const std::string EXPECTED_WARN_3 =
+        R"([--Wwarn=uninitialized_use] warning: val_undefined may be uninitialized
 TestCode(44): [--Wwarn=uninitialized_use] warning: val_undefined may be uninitialized
     action do_global_action(in bool make_zero, out bool val_undefined) {
                                                         ^^^^^^^^^^^^^
 )";
 
-    const std::string EXPECTED_WARN_4 = R"(warning: No size defined for table 'TABLE_NAME', setting default size to 512
+    const std::string EXPECTED_WARN_4 =
+        R"(warning: No size defined for table 'TABLE_NAME', setting default size to 512
 )";
 
-    const std::string EXPECTED_WARNINGS = EXPECTED_WARN_0 + EXPECTED_WARN_1 + EXPECTED_WARN_2 +
-                                          EXPECTED_WARN_3 + EXPECTED_WARN_4;
+    const std::string EXPECTED_WARNINGS =
+        EXPECTED_WARN_0 + EXPECTED_WARN_1 + EXPECTED_WARN_2 + EXPECTED_WARN_3 + EXPECTED_WARN_4;
 
     // Running frontend on this code should emit EXPECTED_WARN_0, 1, 2, 3 and 4
     auto CODE = R"(
@@ -149,7 +152,6 @@ TestCode(44): [--Wwarn=uninitialized_use] warning: val_undefined may be uninitia
     top(ingress()) main;
     )";
 
-
     // Compile program so our custom stream is populated with warnings
     // Instantiation of testCode reinstantiates errorReporter instance
     auto testCode = TestCode(TestCode::Hdr::CoreP4, CODE);
@@ -163,8 +165,7 @@ TestCode(44): [--Wwarn=uninitialized_use] warning: val_undefined may be uninitia
     EXPECT_TRUE(testCode.apply_pass(TestCode::Pass::FullFrontend));
 
     // Should emit EXPECTED_WARN_3
-    ::warning("No size defined for table '%s', setting default size to %d",
-                        "TABLE_NAME", 512);
+    ::warning("No size defined for table '%s', setting default size to %d", "TABLE_NAME", 512);
 
     EXPECT_EQ(EXPECTED_WARNINGS, customStream.str());
 
@@ -173,7 +174,8 @@ TestCode(44): [--Wwarn=uninitialized_use] warning: val_undefined may be uninitia
 }
 
 TEST_F(ErrorReporterTest, WarningWithSuffixConformToExpectedFormat) {
-    const std::string EXPECTED_WARN_1 = R"(TestCode(44): [--Werror=type-error] error: 'return ix + 1'
+    const std::string EXPECTED_WARN_1 =
+        R"(TestCode(44): [--Werror=type-error] error: 'return ix + 1'
                 return (ix + 1);
                 ^^^^^^
   ---- Actual error:
@@ -243,7 +245,8 @@ TestCode(42): [--Werror=type-error] error: 'cntr'
 }
 
 TEST_F(ErrorReporterTest, ParserErrorConformsToExpectedFormat) {
-    const std::string EXPECTED_WARN = R"(file.cpp(0):syntax error, unexpected IDENTIFIER, expecting {
+    const std::string EXPECTED_WARN =
+        R"(file.cpp(0):syntax error, unexpected IDENTIFIER, expecting {
 header hdr bug
            ^^^
 )";
@@ -263,7 +266,7 @@ header hdr bug
 
 TEST_F(ErrorReporterTest, NoAssertions) {
     AutoCompileContext ctx(new BFNContext());
-    auto& reporter = BFNContext::get().errorReporter();
+    auto &reporter = BFNContext::get().errorReporter();
     const std::string CODE = R"(
         control c(inout bit<16> p) {
             action noop() {}
@@ -279,7 +282,7 @@ TEST_F(ErrorReporterTest, NoAssertions) {
         }
     )";
 
-    auto* backup = DiagnosticTestSetup(reporter, CODE);
+    auto *backup = DiagnosticTestSetup(reporter, CODE);
 
     EXPECT_EQ(reporter.verify_checks(), BfErrorReporter::CheckResult::NO_TESTS);
 
@@ -288,7 +291,7 @@ TEST_F(ErrorReporterTest, NoAssertions) {
 
 TEST_F(ErrorReporterTest, ErrorAssertionSuccess) {
     AutoCompileContext ctx(new BFNContext());
-    auto& reporter = BFNContext::get().errorReporter();
+    auto &reporter = BFNContext::get().errorReporter();
     const std::string CODE = R"(
         control c(inout bit<16> p) { // expect error: "Example error message"
             action noop() {}
@@ -304,7 +307,7 @@ TEST_F(ErrorReporterTest, ErrorAssertionSuccess) {
         }
     )";
 
-    auto* backup = DiagnosticTestSetup(reporter, CODE);
+    auto *backup = DiagnosticTestSetup(reporter, CODE);
 
     ReportError(CODE, "Example error message", 2);
 
@@ -315,7 +318,7 @@ TEST_F(ErrorReporterTest, ErrorAssertionSuccess) {
 
 TEST_F(ErrorReporterTest, ErrorCheckNotMatched) {
     AutoCompileContext ctx(new BFNContext());
-    auto& reporter = BFNContext::get().errorReporter();
+    auto &reporter = BFNContext::get().errorReporter();
     const std::string CODE = R"(
         control c(inout bit<16> p) { /* expect error: "Example multi
 line \"error\" message" */
@@ -335,7 +338,7 @@ line \"error\" message" */
         "[--Werror=not-found] error: Unmatched check: Expected error message \"Example multi\n"
         "line \\\"error\\\" message\" at line 2 not reported.\n";
 
-    auto* backup = DiagnosticTestSetup(reporter, CODE);
+    auto *backup = DiagnosticTestSetup(reporter, CODE);
 
     // No errors.
 
@@ -347,7 +350,7 @@ line \"error\" message" */
 
 TEST_F(ErrorReporterTest, UnexpectedError) {
     AutoCompileContext ctx(new BFNContext());
-    auto& reporter = BFNContext::get().errorReporter();
+    auto &reporter = BFNContext::get().errorReporter();
     const std::string CODE = R"(
         control c(inout bit<16> p) { /* expect error@+5: "Example multi
 line error message" */
@@ -367,7 +370,7 @@ line error message" */
         "[--Werror=unexpected] error: The following errors were not expected:\n"
         "(5): [--Werror=expected] error: Unexpected error!";
 
-    auto* backup = DiagnosticTestSetup(reporter, CODE);
+    auto *backup = DiagnosticTestSetup(reporter, CODE);
 
     ReportError(CODE, "Example multi\nline error message", 7);
     ReportError(CODE, "Unexpected error!", 5);
@@ -380,7 +383,7 @@ line error message" */
 
 TEST_F(ErrorReporterTest, ErrorAndWarningSameLine) {
     AutoCompileContext ctx(new BFNContext());
-    auto& reporter = BFNContext::get().errorReporter();
+    auto &reporter = BFNContext::get().errorReporter();
     const std::string CODE = R"(
         control c(inout bit<16> p) { // expect error: "Error message"
         // expect warning@-1: "Warning message"
@@ -396,7 +399,7 @@ TEST_F(ErrorReporterTest, ErrorAndWarningSameLine) {
             }
         }
     )";
-    auto* backup = DiagnosticTestSetup(reporter, CODE);
+    auto *backup = DiagnosticTestSetup(reporter, CODE);
 
     // Once an error has been reported, warnings are silenced, so the warning has to be reported
     // first.

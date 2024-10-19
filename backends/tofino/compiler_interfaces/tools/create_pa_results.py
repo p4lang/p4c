@@ -4,18 +4,22 @@
 This script produces a pa.results.log from an input context.json file.
 """
 
-import json, logging, os, sys
+import json
+import logging
+import os
+import sys
 from collections import OrderedDict
+
 from .utils import *
 
-if not getattr(sys,'frozen', False):
+if not getattr(sys, 'frozen', False):
     # standalone script
     MYPATH = os.path.dirname(__file__)
     SCHEMA_PATH = os.path.join(MYPATH, "../")
     sys.path.append(SCHEMA_PATH)
 
-from schemas.schema_keys import *
 from schemas.schema_enum_values import *
+from schemas.schema_keys import *
 
 # The minimum context.json schema version required.
 MINIMUM_CONTEXT_JSON_REQUIRED = "1.7.0"
@@ -27,8 +31,19 @@ CONTAINER_TYPE_MAP = {NORMAL: "n", MOCHA: "m", DARK: "d", TAGALONG: "t", "": ""}
 
 
 class Record(object):
-    def __init__(self, container_size, address, gress, container_msb, container_lsb,
-                 field_name, field_msb, field_lsb, is_deparsed, container_type=""):
+    def __init__(
+        self,
+        container_size,
+        address,
+        gress,
+        container_msb,
+        container_lsb,
+        field_name,
+        field_msb,
+        field_lsb,
+        is_deparsed,
+        container_type="",
+    ):
         self.container_size = container_size
         self.address = address
         self.gress = gress
@@ -51,10 +66,21 @@ class Record(object):
             t = " (tagalong capable)"
         ct = CONTAINER_TYPE_MAP[self.container_type]
 
-        return "%d-bit PHV %d%s (%s): phv%d[%d:%d] = %s[%d:%d]%s%s" % \
-               (self.container_size, self.address, ct, self.gress,
-                self.address, self.container_msb, self.container_lsb,
-                self.field_name, self.field_msb, self.field_lsb, t, d)
+        return "%d-bit PHV %d%s (%s): phv%d[%d:%d] = %s[%d:%d]%s%s" % (
+            self.container_size,
+            self.address,
+            ct,
+            self.gress,
+            self.address,
+            self.container_msb,
+            self.container_lsb,
+            self.field_name,
+            self.field_msb,
+            self.field_lsb,
+            t,
+            d,
+        )
+
 
 # FIXME: This doesn't account for --extra-phv
 def addr_to_bw(addr, target=TARGET.TOFINO):
@@ -93,10 +119,12 @@ def _get_data(text, containers_used, containers_available, bits_used, bits_avail
     butil = 0
     if bits_available != 0:
         butil = 100.0 * float(bits_used) / float(bits_available)
-    return [str(text),
-            "%d (%.2f%%)" % (containers_used, cutil),
-            "%d (%.2f%%)" % (bits_used, butil),
-            "%d" % bits_available]
+    return [
+        str(text),
+        "%d (%.2f%%)" % (containers_used, cutil),
+        "%d (%.2f%%)" % (bits_used, butil),
+        "%d" % bits_available,
+    ]
 
 
 # ----------------------------------------
@@ -167,12 +195,24 @@ def _parse_context_json(context):
                             container_to_records[phv_num].append(rec)
                             pov_gress[g].add((bit_index, phv_num, csize, n))
                     else:
-                        rec = Record(csize, phv_num, g, phv_msb, phv_lsb, fname, fmsb, flsb, live_end == LIVE_DEPARSER, ct)
+                        rec = Record(
+                            csize,
+                            phv_num,
+                            g,
+                            phv_msb,
+                            phv_lsb,
+                            fname,
+                            fmsb,
+                            flsb,
+                            live_end == LIVE_DEPARSER,
+                            ct,
+                        )
                         container_to_records[phv_num].append(rec)
 
         break  # Only care about stage 0 for logging purposes (currently)
 
     return container_to_records, pov_gress, field_widths
+
 
 # TODO: Move this to a common file to avoid duplication
 def _get_field_info(field_name, fields):
@@ -180,6 +220,7 @@ def _get_field_info(field_name, fields):
         field_info = get_attr(FIELD_INFO, field)
         if get_attr(FIELD_NAME, field_info) == field_name:
             return field_info
+
 
 def _parse_phv_json(context):
     # Container number to list of PHV allocation records
@@ -239,7 +280,9 @@ def _parse_phv_json(context):
                     is_deparsed = True
                     break
 
-            rec = Record(bit_width, phv_num, g, phv_msb, phv_lsb, fname, fmsb, flsb, is_deparsed, ct)
+            rec = Record(
+                bit_width, phv_num, g, phv_msb, phv_lsb, fname, fmsb, flsb, is_deparsed, ct
+            )
             field_gress_to_container_size[(fname, g)] = (phv_num, bit_width)
             container_to_records[phv_num].append(rec)
 
@@ -252,6 +295,7 @@ def _parse_phv_json(context):
         pov_gress[g].add((pov_bit_index, phv_num, phv_bw, pov_bit_name))
 
     return container_to_records, pov_gress, field_widths
+
 
 def produce_pa_results(source, output):
     # Setup logging
@@ -279,10 +323,12 @@ def produce_pa_results(source, output):
 
     box = "+---------------------------------------------------------------------+"
     log.info(box)
-    for s in ["Log file: %s" % RESULTS_FILE,
-              "Compiler version: %s" % str(compiler_version),
-              "Created on: %s" % str(build_date),
-              "Run ID: %s" % str(run_id)]:
+    for s in [
+        "Log file: %s" % RESULTS_FILE,
+        "Compiler version: %s" % str(compiler_version),
+        "Created on: %s" % str(build_date),
+        "Run ID: %s" % str(run_id),
+    ]:
         line = "|  %s" % s
         while len(line) < (len(box) - 1):
             line += " "
@@ -309,8 +355,10 @@ def produce_pa_results(source, output):
         print_error_and_exit(error_msg)
 
     # Output summary table in log file
-    hdrs = [["PHV Group",              "Containers Used", "Bits Used", "Bits Available"],
-            ["(container bit widths)", "(% used)",       "(% used)",  ""]]
+    hdrs = [
+        ["PHV Group", "Containers Used", "Bits Used", "Bits Available"],
+        ["(container bit widths)", "(% used)", "(% used)", ""],
+    ]
     data = []
 
     mau_grp_containers = 16
@@ -365,7 +413,9 @@ def produce_pa_results(source, output):
             if next_grp_bw != grp_bw:
                 bavail = total_grp_avail * grp_bw
                 text = "Total for %d bit" % grp_bw
-                data.append(_get_data(text, total_grp_containers, total_grp_avail, total_grp_bits, bavail))
+                data.append(
+                    _get_data(text, total_grp_containers, total_grp_avail, total_grp_bits, bavail)
+                )
                 data.append(["", "", "", ""])
 
                 if is_tag:
@@ -397,17 +447,28 @@ def produce_pa_results(source, output):
 
     if target == TARGET.TOFINO:
         text = "MAU total"
-        data.append(_get_data(text, mau_total_grp_containers, mau_total_grp_avail, mau_total_grp_bits, 4096))
+        data.append(
+            _get_data(text, mau_total_grp_containers, mau_total_grp_avail, mau_total_grp_bits, 4096)
+        )
         text = "Tagalong total"
-        data.append(_get_data(text, tag_total_grp_containers, tag_total_grp_avail, tag_total_grp_bits, 2048))
+        data.append(
+            _get_data(text, tag_total_grp_containers, tag_total_grp_avail, tag_total_grp_bits, 2048)
+        )
         text = "Overall total"
-        data.append(_get_data(text, mau_total_grp_containers + tag_total_grp_containers,
-                              mau_total_grp_avail + tag_total_grp_avail,
-                              mau_total_grp_bits + tag_total_grp_bits,
-                              4096 + 2048))
+        data.append(
+            _get_data(
+                text,
+                mau_total_grp_containers + tag_total_grp_containers,
+                mau_total_grp_avail + tag_total_grp_avail,
+                mau_total_grp_bits + tag_total_grp_bits,
+                4096 + 2048,
+            )
+        )
     elif target is not None and target != TARGET.TOFINO:
         text = "Overall total"
-        data.append(_get_data(text, mau_total_grp_containers, mau_total_grp_avail, mau_total_grp_bits, 5120))
+        data.append(
+            _get_data(text, mau_total_grp_containers, mau_total_grp_avail, mau_total_grp_bits, 5120)
+        )
     elif target is not None:
         print_error_and_exit("Unknown target '%s'" % str(target))
 
@@ -439,7 +500,9 @@ def produce_pa_results(source, output):
                 t = ""
                 if addr >= 256 and target == TARGET.TOFINO:
                     t = " (tagalong)"
-                log.info("Allocations in Group %d %d bits%s" % (grp_num, addr_to_bw(addr, target), t))
+                log.info(
+                    "Allocations in Group %d %d bits%s" % (grp_num, addr_to_bw(addr, target), t)
+                )
             grp_cnt += 1
 
             ing = True
@@ -523,10 +586,20 @@ if __name__ == "__main__":
     import sys
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('source', metavar='source', type=str,
-                        help='The input context.json or phv.json source file to use.')
-    parser.add_argument('--output', '-o', type=str, action="store", default=".",
-                        help="The output directory to output %s." % RESULTS_FILE)
+    parser.add_argument(
+        'source',
+        metavar='source',
+        type=str,
+        help='The input context.json or phv.json source file to use.',
+    )
+    parser.add_argument(
+        '--output',
+        '-o',
+        type=str,
+        action="store",
+        default=".",
+        help="The output directory to output %s." % RESULTS_FILE,
+    )
     args = parser.parse_args()
 
     try:

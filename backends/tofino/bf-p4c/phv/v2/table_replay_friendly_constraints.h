@@ -14,9 +14,10 @@
 #define BF_P4C_PHV_V2_TABLE_REPLAY_FRIENDLY_CONSTRAINTS_H_
 
 #include <algorithm>
-#include "bf-p4c/phv/mau_backtracker.h"
+
 #include "bf-p4c/common/field_defuse.h"
 #include "bf-p4c/common/utils.h"
+#include "bf-p4c/phv/mau_backtracker.h"
 #include "bf-p4c/phv/pragma/pa_no_init.h"
 
 struct AllocInfo {
@@ -26,7 +27,7 @@ struct AllocInfo {
     bool perfectly_aligned;
 };
 
-std::ostream& operator<<(std::ostream &out, const AllocInfo &ai);
+std::ostream &operator<<(std::ostream &out, const AllocInfo &ai);
 
 namespace PHV {
 namespace v2 {
@@ -45,7 +46,7 @@ class TableReplayFriendlyPhvConstraints : public Transform {
     // extra pa_no_pack pragmas to fix table replay
     ordered_map<cstring, ordered_set<cstring>> add_pa_no_pack;
     // problematic_table during table replay found by table_summary
-    const IR::MAU::Table* problematic_table = nullptr;
+    const IR::MAU::Table *problematic_table = nullptr;
     // field candidates to fix in the problematic table
     ordered_set<const PHV::Field *> field_candidates;
     // a map from action to a set of fields in this action
@@ -63,12 +64,13 @@ class TableReplayFriendlyPhvConstraints : public Transform {
     TableReplayFriendlyPhvConstraints(
         MauBacktracker &mau_backtracker, PhvInfo &phv,
         const ordered_map<cstring, ordered_map<int, AllocInfo>> &trivial_allocation_info,
-        const ordered_map<cstring, ordered_map<int, AllocInfo>> &real_allocation_info):
-        mau_backtracker(mau_backtracker), phv(phv),
-        trivial_allocation_info(trivial_allocation_info),
-        real_allocation_info(real_allocation_info) {}
+        const ordered_map<cstring, ordered_map<int, AllocInfo>> &real_allocation_info)
+        : mau_backtracker(mau_backtracker),
+          phv(phv),
+          trivial_allocation_info(trivial_allocation_info),
+          real_allocation_info(real_allocation_info) {}
 
-    const IR::Node *preorder(IR::BFN::Pipe * pipe) override;
+    const IR::Node *preorder(IR::BFN::Pipe *pipe) override;
     const IR::Node *preorder(IR::Expression *expr) override;
 
     const IR::Node *postorder(IR::BFN::Pipe *pipe) override {
@@ -98,14 +100,17 @@ class CollectPHVAllocationResult : public Inspector {
     ordered_map<cstring, ordered_map<int, AllocInfo>> real_allocation_info;
     PhvInfo &phv;
     MauBacktracker &mau_backtracker;
+
  public:
-    CollectPHVAllocationResult(PhvInfo &phv, MauBacktracker &mau_backtracker) :
-        phv(phv), mau_backtracker(mau_backtracker) {}
+    CollectPHVAllocationResult(PhvInfo &phv, MauBacktracker &mau_backtracker)
+        : phv(phv), mau_backtracker(mau_backtracker) {}
     void end_apply(const IR::Node *) override;
-    const ordered_map<cstring, ordered_map<int, AllocInfo>> &get_trivial_allocation_info()
-        { return trivial_allocation_info; }
-    const ordered_map<cstring, ordered_map<int, AllocInfo>> &get_real_allocation_info()
-        { return real_allocation_info; }
+    const ordered_map<cstring, ordered_map<int, AllocInfo>> &get_trivial_allocation_info() {
+        return trivial_allocation_info;
+    }
+    const ordered_map<cstring, ordered_map<int, AllocInfo>> &get_real_allocation_info() {
+        return real_allocation_info;
+    }
 };
 
 }  // namespace v2

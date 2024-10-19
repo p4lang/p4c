@@ -10,15 +10,15 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_COMMON_MERGE_POV_BITS_H_
-#define EXTENSIONS_BF_P4C_COMMON_MERGE_POV_BITS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_COMMON_MERGE_POV_BITS_H_
+#define BACKENDS_TOFINO_BF_P4C_COMMON_MERGE_POV_BITS_H_
 
-#include "ir/ir.h"
-#include "ir/pass_manager.h"
-#include "ir/visitor.h"
 #include "bf-p4c/parde/parde_visitor.h"
 #include "bf-p4c/parde/parser_info.h"
 #include "bf-p4c/phv/phv_fields.h"
+#include "ir/ir.h"
+#include "ir/pass_manager.h"
+#include "ir/visitor.h"
 
 namespace BFN {
 
@@ -55,7 +55,7 @@ using namespace P4;
  */
 class MergePovBits : public PassManager {
  protected:
-    ordered_map<const PHV::Field*, const PHV::Field*> merge_pov;
+    ordered_map<const PHV::Field *, const PHV::Field *> merge_pov;
 
  public:
     explicit MergePovBits(const PhvInfo &phv);
@@ -63,5 +63,4 @@ class MergePovBits : public PassManager {
 
 }  // namespace BFN
 
-#endif /* EXTENSIONS_BF_P4C_COMMON_MERGE_POV_BITS_H_ */
-
+#endif /* BACKENDS_TOFINO_BF_P4C_COMMON_MERGE_POV_BITS_H_ */

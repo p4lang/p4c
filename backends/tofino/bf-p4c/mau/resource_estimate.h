@@ -56,11 +56,11 @@ struct StageUseEstimate {
     // use this object really as just the estimate and ignore the table layout related
     // fields.  Other places depend greatly on the table layout.
 
-    ActionData::FormatType_t             format_type;
-    safe_vector<LayoutOption>            layout_options;
+    ActionData::FormatType_t format_type;
+    safe_vector<LayoutOption> layout_options;
     safe_vector<ActionData::Format::Use> action_formats;
-    MeterALU::Format::Use                meter_format;
-    size_t                               preferred_index = 0;  // into layout_options
+    MeterALU::Format::Use meter_format;
+    size_t preferred_index = 0;  // into layout_options
     StageUseEstimate() {}
     StageUseEstimate &operator+=(const StageUseEstimate &a) {
         logical_ids += a.logical_ids;
@@ -72,12 +72,16 @@ struct StageUseEstimate {
         ternary_ixbar_groups += a.ternary_ixbar_groups;
         meter_alus += a.meter_alus;
         stats_alus += a.stats_alus;
-        return *this; }
+        return *this;
+    }
     StageUseEstimate(const IR::MAU::Table *, int &, attached_entries_t &, LayoutChoices *lc,
                      bool prev_placed, bool gateway_attached, bool disable_split, PhvInfo &phv);
 
     StageUseEstimate operator+(const StageUseEstimate &a) const {
-        StageUseEstimate rv = *this; rv += a; return rv; }
+        StageUseEstimate rv = *this;
+        rv += a;
+        return rv;
+    }
     static StageUseEstimate max() {
         StageUseEstimate rv;
         rv.logical_ids = StageUse::MAX_LOGICAL_IDS;
@@ -89,16 +93,25 @@ struct StageUseEstimate {
         rv.ternary_ixbar_groups = StageUse::MAX_TERNARY_GROUPS;
         rv.meter_alus = MAX_METER_ALUS;
         rv.stats_alus = MAX_STATS_ALUS;
-        return rv; }
+        return rv;
+    }
     bool operator<=(const StageUseEstimate &a) {
         return logical_ids <= a.logical_ids && srams <= a.srams && tcams <= a.tcams &&
                maprams <= a.maprams && exact_ixbar_bytes <= a.exact_ixbar_bytes &&
                ternary_ixbar_groups <= a.ternary_ixbar_groups && meter_alus < a.meter_alus &&
-               stats_alus <= a.stats_alus && local_tinds <= a.local_tinds; }
+               stats_alus <= a.stats_alus && local_tinds <= a.local_tinds;
+    }
     void clear() {
-        logical_ids = 0; srams = 0; tcams = 0; maprams = 0;
-        exact_ixbar_bytes = 0; ternary_ixbar_groups = 0;
-        meter_alus = 0; stats_alus = 0; local_tinds = 0; }
+        logical_ids = 0;
+        srams = 0;
+        tcams = 0;
+        maprams = 0;
+        exact_ixbar_bytes = 0;
+        ternary_ixbar_groups = 0;
+        meter_alus = 0;
+        stats_alus = 0;
+        local_tinds = 0;
+    }
     cstring ran_out() const;
 
     void options_to_ways(const IR::MAU::Table *tbl, int entries);
@@ -112,35 +125,33 @@ struct StageUseEstimate {
                                  LayoutOption *lo);
     void fill_estimate_from_option(int &entries);
     void remove_invalid_option() {
-        erase_if(layout_options, [](const LayoutOption &lo){ return lo.entries == 0; });
+        erase_if(layout_options, [](const LayoutOption &lo) { return lo.entries == 0; });
     }
     const LayoutOption *preferred() const {
-    if (layout_options.empty())
-        return nullptr;
-    else
-        return &layout_options[preferred_index]; }
+        if (layout_options.empty())
+            return nullptr;
+        else
+            return &layout_options[preferred_index];
+    }
 
     const ActionData::Format::Use *preferred_action_format() const {
         auto option = preferred();
-        if (option == nullptr)
-            return nullptr;
+        if (option == nullptr) return nullptr;
         return &action_formats[option->action_format_index];
     }
 
-    const MeterALU::Format::Use *preferred_meter_format() const {
-        return &meter_format;
-    }
+    const MeterALU::Format::Use *preferred_meter_format() const { return &meter_format; }
 
     void determine_initial_layout_option(const IR::MAU::Table *tbl, int &entries,
                                          attached_entries_t &);
     bool adjust_choices(const IR::MAU::Table *tbl, int &entries, attached_entries_t &);
 
-    bool calculate_for_leftover_srams(const IR::MAU::Table *tbl, int &srams_left,
-                                      int &entries, attached_entries_t &);
+    bool calculate_for_leftover_srams(const IR::MAU::Table *tbl, int &srams_left, int &entries,
+                                      attached_entries_t &);
     void calculate_for_leftover_tcams(const IR::MAU::Table *tbl, int srams_left, int tcams_left,
                                       int &entries, attached_entries_t &);
-    void calculate_for_leftover_atcams(const IR::MAU::Table *tbl, int srams_left,
-                                       int &entries, attached_entries_t &);
+    void calculate_for_leftover_atcams(const IR::MAU::Table *tbl, int srams_left, int &entries,
+                                       attached_entries_t &);
     void shrink_preferred_srams_lo(const IR::MAU::Table *tbl, int &entries,
                                    attached_entries_t &attached_entries);
     void shrink_preferred_tcams_lo(const IR::MAU::Table *tbl, int &entries,
@@ -166,15 +177,14 @@ struct StageUseEstimate {
         bool need_srams;
         bool need_maprams;
         RAM_counter() : per_word(0), width(0), need_srams(false), need_maprams(false) {}
-        RAM_counter(int p, int w, bool ns, bool nm) : per_word(p), width(w), need_srams(ns),
-                                                      need_maprams(nm) {}
+        RAM_counter(int p, int w, bool ns, bool nm)
+            : per_word(p), width(w), need_srams(ns), need_maprams(nm) {}
     };
     void calculate_per_row_vector(safe_vector<RAM_counter> &per_word_and_width,
                                   const IR::MAU::Table *tbl, LayoutOption *lo);
 
     int stages_required() const;
 };
-
 
 int CounterPerWord(const IR::MAU::Counter *ctr);
 int CounterWidth(const IR::MAU::Counter *ctr);

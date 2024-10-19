@@ -14,6 +14,7 @@
 #define BF_P4C_COMMON_TABLE_PRINTER_H_
 
 #include <iomanip>
+
 #include "lib/exceptions.h"
 #include "lib/log.h"
 
@@ -35,14 +36,11 @@ class TablePrinter {
     enum Align { LEFT, CENTER, RIGHT };
 
     TablePrinter(std::ostream &s, std::vector<std::string> headers, Align align = RIGHT)
-      : _s(s), _headers(headers), _align(align) {
-        for (auto& h : headers)
-            _colWidth.push_back(h.length());
+        : _s(s), _headers(headers), _align(align) {
+        for (auto &h : headers) _colWidth.push_back(h.length());
     }
 
-    bool empty() {
-        return _data.empty();
-    }
+    bool empty() { return _data.empty(); }
 
     void addRow(std::vector<std::string> row) {
         BUG_CHECK(row.size() == _headers.size(), "row size does not match header");
@@ -50,14 +48,11 @@ class TablePrinter {
         _data.push_back(row);
 
         for (unsigned i = 0; i < row.size(); i++) {
-            if (row[i].length() > _colWidth[i])
-                _colWidth[i] = row[i].length();
+            if (row[i].length() > _colWidth[i]) _colWidth[i] = row[i].length();
         }
     }
 
-    void addSep(unsigned start_col = 0) {
-        _seps[_data.size()] = start_col;
-    }
+    void addSep(unsigned start_col = 0) { _seps[_data.size()] = start_col; }
 
     void addBlank() {
         unsigned cols = _colWidth.size();
@@ -74,7 +69,7 @@ class TablePrinter {
 
         for (unsigned i = 0; i < _data.size(); i++) {
             printRow(_data.at(i));
-            if (_seps.count(i+1) && i+1 != _data.size()) printSep(_seps.at(i+1));
+            if (_seps.count(i + 1) && i + 1 != _data.size()) printSep(_seps.at(i + 1));
         }
 
         printSep();
@@ -83,8 +78,7 @@ class TablePrinter {
  private:
     unsigned getTableWidth() const {
         unsigned rv = 0;
-        for (auto cw : _colWidth)
-            rv += cw + cellPad;
+        for (auto cw : _colWidth) rv += cw + cellPad;
         return rv + _headers.size() + 1;
     }
 
@@ -101,12 +95,11 @@ class TablePrinter {
         unsigned width = _colWidth.at(col);
         if (_align == LEFT) _s << std::left;
         _s << std::setw(width + cellPad);
-        if (_align == CENTER)
-            data += std::string((width + cellPad - data.length() + 1) / 2, ' ');
+        if (_align == CENTER) data += std::string((width + cellPad - data.length() + 1) / 2, ' ');
         _s << data;
     }
 
-    void printRow(const std::vector<std::string>& row) const {
+    void printRow(const std::vector<std::string> &row) const {
         for (unsigned i = 0; i < row.size(); i++) {
             _s << "|";
 
@@ -129,4 +122,4 @@ class TablePrinter {
     const unsigned cellPad = 2;
 };
 
-#endif  /* BF_P4C_COMMON_TABLE_PRINTER_H_ */
+#endif /* BF_P4C_COMMON_TABLE_PRINTER_H_ */

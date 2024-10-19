@@ -94,11 +94,11 @@
 #ifndef BF_P4C_MIDEND_DESUGAR_VARBIT_EXTRACT_H_
 #define BF_P4C_MIDEND_DESUGAR_VARBIT_EXTRACT_H_
 
-#include "ir/ir.h"
-#include "frontends/p4/cloner.h"
-#include "bf-p4c/midend/type_checker.h"
 #include "bf-p4c/common/utils.h"
+#include "bf-p4c/midend/type_checker.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/cloner.h"
+#include "ir/ir.h"
 
 namespace BFN {
 
@@ -106,17 +106,17 @@ namespace BFN {
  * \ingroup DesugarVarbitExtract
  */
 class AnnotateVarbitExtractStates : public Transform {
-    IR::Node* preorder(IR::ParserState* state) override {
-        for (const auto* component : state->components) {
-            const auto* statement = component->to<IR::MethodCallStatement>();
+    IR::Node *preorder(IR::ParserState *state) override {
+        for (const auto *component : state->components) {
+            const auto *statement = component->to<IR::MethodCallStatement>();
             if (!statement) continue;
-            const IR::MethodCallExpression* call = statement->methodCall;
+            const IR::MethodCallExpression *call = statement->methodCall;
             if (!call) continue;
-            const auto* method = call->method->to<IR::Member>();
+            const auto *method = call->method->to<IR::Member>();
             if (!method) continue;
 
             if (method->member == "extract" && call->arguments->size() == 2) {
-                IR::Annotations* annotations = state->annotations->clone();
+                IR::Annotations *annotations = state->annotations->clone();
                 annotations->add(new IR::Annotation(IR::ID("dontmerge"), {}));
                 state->annotations = annotations;
                 break;
@@ -145,7 +145,7 @@ class CheckVarbitAccess : public PassManager {
  */
 class DesugarVarbitExtract : public PassManager {
  public:
-    explicit DesugarVarbitExtract(P4::ReferenceMap* refMap, P4::TypeMap* typeMap);
+    explicit DesugarVarbitExtract(P4::ReferenceMap *refMap, P4::TypeMap *typeMap);
 };
 
 }  // namespace BFN

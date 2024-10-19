@@ -11,10 +11,12 @@
  */
 
 #include "device.h"
+
 #include <algorithm>
+
 #include "lib/error.h"
 
-Device* Device::instance_ = nullptr;
+Device *Device::instance_ = nullptr;
 int Device::numStagesRuntimeOverride_ = 0;
 
 void Device::init(cstring name) {
@@ -30,7 +32,7 @@ void Device::init(cstring name) {
 #if BAREFOOT_INTERNAL
     else if (lower_name == "tofino2h")
         instance_ = new JBayHDevice();
-#endif  /* BAREFOOT_INTERNAL */
+#endif /* BAREFOOT_INTERNAL */
     else if (lower_name == "tofino2m")
         instance_ = new JBayMDevice();
     else if (lower_name == "tofino2u")
@@ -44,8 +46,8 @@ void Device::init(cstring name) {
 void Device::overrideNumStages(int num) {
     int realNumStages = Device::get().getNumStages();
     if (num < 0 || num > realNumStages) {
-        ::error("Trying to override mau stages count to %d but device is capped to %d.",
-            num, realNumStages);
+        ::error("Trying to override mau stages count to %d but device is capped to %d.", num,
+                realNumStages);
         return;
     }
 

@@ -13,10 +13,10 @@
 #ifndef _MIDEND_NORMALIZE_PARAMS_H_
 #define _MIDEND_NORMALIZE_PARAMS_H_
 
-#include "ir/ir.h"
+#include "bf-p4c/midend/type_checker.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
-#include "bf-p4c/midend/type_checker.h"
+#include "ir/ir.h"
 
 /** At the P4 level, the TNA architecture provides an interface for users to
  * define custom parsers/controls/deparsers that are parameterized on
@@ -61,15 +61,15 @@
 class NormalizeParams : public Modifier {
     /// Maps (original) parameter node pointers for each block to the names
     /// that should replace them.
-    using Renaming = ordered_map<const IR::Parameter*, cstring>;
-    ordered_map<const IR::Node*, Renaming> renaming;
+    using Renaming = ordered_map<const IR::Parameter *, cstring>;
+    ordered_map<const IR::Node *, Renaming> renaming;
 
-    Modifier::profile_t init_apply(const IR::Node* root) override;
-    bool preorder(IR::P4Parser* parser) override;
-    bool preorder(IR::P4Control* control) override;
+    Modifier::profile_t init_apply(const IR::Node *root) override;
+    bool preorder(IR::P4Parser *parser) override;
+    bool preorder(IR::P4Control *control) override;
 
  public:
-    explicit NormalizeParams(const IR::ToplevelBlock*) {}
+    explicit NormalizeParams(const IR::ToplevelBlock *) {}
 };
 
 /**
@@ -79,15 +79,16 @@ class NormalizeParams : public Modifier {
  *        with the corresponding parameter names defined in the architecture.
  */
 class RenameArchParams : public PassManager {
-    const IR::ToplevelBlock*   toplevel;
+    const IR::ToplevelBlock *toplevel;
+
  public:
-    RenameArchParams(P4::ReferenceMap* refMap, P4::TypeMap* typeMap) {
+    RenameArchParams(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
         auto evaluator = new BFN::EvaluatorPass(refMap, typeMap);
-        auto eval = new VisitFunctor([this, evaluator]() {
-            toplevel = evaluator->getToplevelBlock(); });
+        auto eval =
+            new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); });
         passes.push_back(eval);
         passes.push_back(new NormalizeParams(toplevel));
     }
 };
 
-#endif  /* _MIDEND_NORMALIZE_PARAMS_H_ */
+#endif /* _MIDEND_NORMALIZE_PARAMS_H_ */

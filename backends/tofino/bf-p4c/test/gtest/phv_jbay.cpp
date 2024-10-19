@@ -15,7 +15,6 @@
 
 #include "bf-p4c/phv/phv.h"
 #include "gtest/gtest.h"
-
 #include "ir/ir.h"
 #include "ir/json_loader.h"
 #include "lib/bitvec.h"

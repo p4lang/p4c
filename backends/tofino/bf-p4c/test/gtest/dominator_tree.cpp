@@ -10,21 +10,22 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+#include "bf-p4c/phv/analysis/dominator_tree.h"
+
 #include <initializer_list>
 #include <optional>
 #include <vector>
+
 #include <boost/algorithm/string/replace.hpp>
 
+#include "bf-p4c/common/header_stack.h"
+#include "bf-p4c/ir/gress.h"
+#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
 #include "gtest/gtest.h"
-
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
 #include "test/gtest/helpers.h"
-#include "bf-p4c/ir/gress.h"
-#include "bf-p4c/common/header_stack.h"
-#include "bf-p4c/phv/analysis/dominator_tree.h"
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
 
 namespace P4::Test {
 
@@ -32,8 +33,7 @@ class DominatorTreeTest : public TofinoBackendTest {};
 
 namespace {
 
-std::optional<TofinoPipeTestCase>
-createDominatorTreeTestCase(const std::string& parserSource) {
+std::optional<TofinoPipeTestCase> createDominatorTreeTestCase(const std::string &parserSource) {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
 header H1
 {
@@ -93,7 +93,7 @@ V1Switch(parse(), verifyChecksum(), mau(), mau(),
 
     boost::replace_first(source, "%MAU%", parserSource);
 
-    auto& options = BackendOptions();
+    auto &options = BackendOptions();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.target = "tofino"_cs;
     options.arch = "v1model"_cs;
@@ -105,8 +105,7 @@ V1Switch(parse(), verifyChecksum(), mau(), mau(),
 }  // namespace
 
 TEST_F(DominatorTreeTest, BasicControlFlow) {
-    auto test = createDominatorTreeTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createDominatorTreeTestCase(P4_SOURCE(P4Headers::NONE, R"(
 
 action setb1(bit<32> val) {
     headers.h2.b1 = val;
@@ -309,7 +308,7 @@ apply {
     ASSERT_TRUE(test);
 
     ordered_map<gress_t, FlowGraph> fg;
-    auto* dom_tree = new BuildDominatorTree(fg);
+    auto *dom_tree = new BuildDominatorTree(fg);
     test->pipe->apply(*dom_tree);
 
     EXPECT_EQ(dom_tree->hasImmediateDominator(INGRESS, "SINK"_cs), "t10_0"_cs);

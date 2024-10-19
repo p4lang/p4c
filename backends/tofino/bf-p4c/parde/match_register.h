@@ -10,10 +10,11 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PARDE_MATCH_REGISTER_H_
-#define EXTENSIONS_BF_P4C_PARDE_MATCH_REGISTER_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_MATCH_REGISTER_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_MATCH_REGISTER_H_
 
 #include <iostream>
+
 #include "lib/cstring.h"
 
 namespace P4 {
@@ -28,21 +29,19 @@ class MatchRegister {
 
     cstring toString() const;
 
-    bool operator==(const MatchRegister& other) const {
-        return name == other.name;
-    }
+    bool operator==(const MatchRegister &other) const { return name == other.name; }
 
     /// JSON serialization/deserialization.
-    void toJSON(JSONGenerator& json) const;
-    static MatchRegister fromJSON(JSONLoader& json);
+    void toJSON(JSONGenerator &json) const;
+    static MatchRegister fromJSON(JSONLoader &json);
 
     cstring name;
-    size_t  size;
-    int     id;
+    size_t size;
+    int id;
 
     static int s_id;
 
-    bool operator<(const MatchRegister& other) const {
+    bool operator<(const MatchRegister &other) const {
         if (size < other.size) return true;
         if (other.size < size) return false;
         if (id < other.id) return true;
@@ -50,13 +49,11 @@ class MatchRegister {
         return false;
     }
 
-    friend std::ostream& operator<<(std::ostream& out, const MatchRegister& c);
+    friend std::ostream &operator<<(std::ostream &out, const MatchRegister &c);
 };
 
-inline std::ostream& operator<<(std::ostream& out, const MatchRegister& c) {
-    return out << c.name;
-}
+inline std::ostream &operator<<(std::ostream &out, const MatchRegister &c) { return out << c.name; }
 
 }  // namespace P4
 
-#endif /* EXTENSIONS_BF_P4C_PARDE_MATCH_REGISTER_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_MATCH_REGISTER_H_ */

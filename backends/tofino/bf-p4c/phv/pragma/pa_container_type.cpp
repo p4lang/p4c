@@ -12,13 +12,13 @@
 
 #include "bf-p4c/phv/pragma/pa_container_type.h"
 
-#include <string>
 #include <numeric>
+#include <string>
 
-#include "bf-p4c/phv/phv.h"
-#include "lib/log.h"
 #include "bf-p4c/common/utils.h"
+#include "bf-p4c/phv/phv.h"
 #include "bf-p4c/phv/pragma/phv_pragmas.h"
+#include "lib/log.h"
 
 namespace {
 
@@ -26,9 +26,9 @@ std::optional<PHV::Kind> str_to_kind(cstring str) {
     if (str == "tagalong") {
         return PHV::Kind::tagalong;
     } else if (str == "normal") {
-       return PHV::Kind::normal;
+        return PHV::Kind::normal;
     } else if (str == "mocha") {
-       return PHV::Kind::mocha;
+        return PHV::Kind::mocha;
     } else if (str == "dark") {
         return PHV::Kind::dark;
     }
@@ -41,7 +41,7 @@ std::optional<PHV::Kind> str_to_kind(cstring str) {
 const char *PragmaContainerType::name = "pa_container_type";
 const char *PragmaContainerType::description =
     "Forces the allocation of a field in the specified container type.";
-const char* PragmaContainerType::help =
+const char *PragmaContainerType::help =
     "@pragma pa_container_type gress field field_type\n"
     "+ attached to P4 header instances\n"
     "\n"
@@ -58,10 +58,10 @@ const char* PragmaContainerType::help =
     "This specifies that the field hdr.data.f1 in the ingress pipe should be placed "
     "in a normal container.";
 
-bool PragmaContainerType::add_constraint(const IR::BFN::Pipe* pipe, const IR::Expression* expr,
+bool PragmaContainerType::add_constraint(const IR::BFN::Pipe *pipe, const IR::Expression *expr,
                                          cstring field_name, PHV::Kind kind) {
     // check field name
-    PHV::Field* field = phv_i.field(field_name);
+    PHV::Field *field = phv_i.field(field_name);
     if (!field) {
         PHV::Pragmas::reportNoMatchingPHV(pipe, expr, field_name);
         return false;
@@ -76,21 +76,22 @@ bool PragmaContainerType::add_constraint(const IR::BFN::Pipe* pipe, const IR::Ex
         field->set_mocha_candidate(false);
         field->set_dark_candidate(false);
     } else if (kind == PHV::Kind::tagalong) {
-        warning("@prama pa_container_type currently does not support tagalong containers, "
-                  "skipped", field_name);
+        warning(
+            "@prama pa_container_type currently does not support tagalong containers, "
+            "skipped",
+            field_name);
         return false;
     }
     fields[field] = kind;
     return true;
 }
 
-bool PragmaContainerType::preorder(const IR::BFN::Pipe* pipe) {
+bool PragmaContainerType::preorder(const IR::BFN::Pipe *pipe) {
     auto global_pragmas = pipe->global_pragmas;
-    for (const auto* annotation : global_pragmas) {
-        if (annotation->name.name != PragmaContainerType::name)
-            continue;
+    for (const auto *annotation : global_pragmas) {
+        if (annotation->name.name != PragmaContainerType::name) continue;
 
-        auto& exprs = annotation->expr;
+        auto &exprs = annotation->expr;
 
         if (!PHV::Pragmas::checkStringLiteralArgs(exprs)) {
             continue;
@@ -102,14 +103,14 @@ bool PragmaContainerType::preorder(const IR::BFN::Pipe* pipe) {
         const IR::StringLiteral *pipe_arg = nullptr;
         const IR::StringLiteral *gress_arg = nullptr;
 
-        if (!PHV::Pragmas::determinePipeGressArgs(exprs, expr_index,
-                required_arguments, pipe_arg, gress_arg)) {
+        if (!PHV::Pragmas::determinePipeGressArgs(exprs, expr_index, required_arguments, pipe_arg,
+                                                  gress_arg)) {
             continue;
         }
 
-        if (!PHV::Pragmas::checkNumberArgs(annotation, required_arguments,
-                min_required_arguments, true, cstring(PragmaContainerType::name),
-                "`gress', `field', `type'"_cs)) {
+        if (!PHV::Pragmas::checkNumberArgs(annotation, required_arguments, min_required_arguments,
+                                           true, cstring(PragmaContainerType::name),
+                                           "`gress', `field', `type'"_cs)) {
             continue;
         }
 
@@ -135,18 +136,20 @@ bool PragmaContainerType::preorder(const IR::BFN::Pipe* pipe) {
     return true;
 }
 
-std::optional<PHV::Kind> PragmaContainerType::required_kind(const PHV::Field* f) const {
+std::optional<PHV::Kind> PragmaContainerType::required_kind(const PHV::Field *f) const {
     if (fields.count(f)) {
         return fields.at(f);
     }
     return std::nullopt;
 }
 
-std::ostream& operator<<(std::ostream& out, const PragmaContainerType& pa_ct) {
+std::ostream &operator<<(std::ostream &out, const PragmaContainerType &pa_ct) {
     std::stringstream logs;
     for (auto kv : pa_ct.getFields())
-        logs << "@pa_container_type specifies that " << kv.first->name << " should be allocated to "
-            "a " << kv.second << " container." << std::endl;
+        logs << "@pa_container_type specifies that " << kv.first->name
+             << " should be allocated to "
+                "a "
+             << kv.second << " container." << std::endl;
     out << logs.str();
     return out;
 }

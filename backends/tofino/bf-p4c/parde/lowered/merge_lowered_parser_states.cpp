@@ -14,8 +14,8 @@
 
 namespace Parde::Lowered {
 
-bool MergeLoweredParserStates::compare_match_operations(const IR::BFN::LoweredParserMatch* a,
-                                                        const IR::BFN::LoweredParserMatch* b) {
+bool MergeLoweredParserStates::compare_match_operations(const IR::BFN::LoweredParserMatch *a,
+                                                        const IR::BFN::LoweredParserMatch *b) {
     return a->shift == b->shift && a->hdrLenIncFinalAmt == b->hdrLenIncFinalAmt &&
            a->extracts == b->extracts && a->saves == b->saves && a->scratches == b->scratches &&
            a->checksums == b->checksums && a->counters == b->counters &&
@@ -24,8 +24,8 @@ bool MergeLoweredParserStates::compare_match_operations(const IR::BFN::LoweredPa
            a->offsetInc == b->offsetInc && a->loop == b->loop;
 }
 
-const IR::BFN::LoweredParserMatch* MergeLoweredParserStates::get_unconditional_match(
-    const IR::BFN::LoweredParserState* state) {
+const IR::BFN::LoweredParserMatch *MergeLoweredParserStates::get_unconditional_match(
+    const IR::BFN::LoweredParserState *state) {
     if (state->transitions.size() == 0) return nullptr;
 
     if (state->select->regs.empty() && state->select->counters.empty())
@@ -34,21 +34,21 @@ const IR::BFN::LoweredParserMatch* MergeLoweredParserStates::get_unconditional_m
     // Detect if all transitions actually do the same thing and branch/loop to
     // the same state.  That represents another type of unconditional match.
     auto first_transition = state->transitions[0];
-    for (auto& transition : state->transitions) {
+    for (auto &transition : state->transitions) {
         if (!compare_match_operations(first_transition, transition)) return nullptr;
     }
 
     return state->transitions[0];
 }
 
-bool MergeLoweredParserStates::RightShiftPacketRVal::preorder(IR::BFN::LoweredPacketRVal* rval) {
+bool MergeLoweredParserStates::RightShiftPacketRVal::preorder(IR::BFN::LoweredPacketRVal *rval) {
     rval->range = rval->range.shiftedByBytes(byteDelta);
     BUG_CHECK(rval->range.lo >= 0, "Shifting extract to negative position.");
     if (rval->range.hi >= Device::pardeSpec().byteInputBufferSize()) oob = true;
     return true;
 }
 
-bool MergeLoweredParserStates::RightShiftCsumMask::preorder(IR::BFN::LoweredParserChecksum* csum) {
+bool MergeLoweredParserStates::RightShiftCsumMask::preorder(IR::BFN::LoweredParserChecksum *csum) {
     if (byteDelta == 0 || oob || swapMalform) return false;
     std::set<nw_byterange> new_masked_ranges;
     for (auto m : csum->masked_ranges) {
@@ -96,8 +96,8 @@ bool MergeLoweredParserStates::RightShiftCsumMask::preorder(IR::BFN::LoweredPars
     return true;
 }
 
-bool MergeLoweredParserStates::can_merge(const IR::BFN::LoweredParserMatch* a,
-                                         const IR::BFN::LoweredParserMatch* b) {
+bool MergeLoweredParserStates::can_merge(const IR::BFN::LoweredParserMatch *a,
+                                         const IR::BFN::LoweredParserMatch *b) {
     if (a->hdrLenIncFinalAmt || b->hdrLenIncFinalAmt) return false;
 
     if (computed.dontMergeStates.count(a->next) || computed.dontMergeStates.count(b->next))
@@ -141,8 +141,8 @@ bool MergeLoweredParserStates::can_merge(const IR::BFN::LoweredParserMatch* a,
     return true;
 }
 
-void MergeLoweredParserStates::do_merge(IR::BFN::LoweredParserMatch* match,
-                                        const IR::BFN::LoweredParserMatch* next) {
+void MergeLoweredParserStates::do_merge(IR::BFN::LoweredParserMatch *match,
+                                        const IR::BFN::LoweredParserMatch *next) {
     RightShiftPacketRVal shifter(match->shift);
     RightShiftCsumMask csum_shifter(match->shift);
 
@@ -187,7 +187,7 @@ bool MergeLoweredParserStates::is_loopback_state(cstring state) {
     return false;
 }
 
-IR::Node* MergeLoweredParserStates::preorder(IR::BFN::LoweredParserMatch* match) {
+IR::Node *MergeLoweredParserStates::preorder(IR::BFN::LoweredParserMatch *match) {
     auto state = findOrigCtxt<IR::BFN::LoweredParserState>();
     if (computed.dontMergeStates.count(state)) {
         return match;

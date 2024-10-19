@@ -12,9 +12,9 @@
 
 #include <iostream>
 
-#include "utils.h"
 #include "ir/dump.h"
 #include "lib/gc.h"
+#include "utils.h"
 
 using namespace P4;
 
@@ -26,8 +26,8 @@ bool DumpPipe::preorder(const IR::Node *pipe) {
             LOG1(heading);
             LOG1("-------------------------------------------------");
             size_t maxMem = 0;
-            size_t memUsed = gc_mem_inuse(&maxMem)/(1024*1024);
-            maxMem = maxMem/(1024*1024);
+            size_t memUsed = gc_mem_inuse(&maxMem) / (1024 * 1024);
+            maxMem = maxMem / (1024 * 1024);
             LOG1("*** mem in use = " << memUsed << "MB, heap size = " << maxMem << "MB");
         }
         if (LOGGING(2))

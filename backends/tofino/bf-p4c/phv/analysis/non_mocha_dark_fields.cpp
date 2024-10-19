@@ -11,10 +11,11 @@
  */
 
 #include "bf-p4c/phv/analysis/non_mocha_dark_fields.h"
+
 #include "bf-p4c/logging/event_logger.h"
 #include "bf-p4c/mau/action_analysis.h"
 
-Visitor::profile_t NonMochaDarkFields::init_apply(const IR::Node* root) {
+Visitor::profile_t NonMochaDarkFields::init_apply(const IR::Node *root) {
     profile_t rv = Inspector::init_apply(root);
 
     nonDark.clear();
@@ -23,8 +24,8 @@ Visitor::profile_t NonMochaDarkFields::init_apply(const IR::Node* root) {
     return rv;
 }
 
-bool NonMochaDarkFields::preorder(const IR::MAU::Action* act) {
-    auto* tbl = findContext<IR::MAU::Table>();
+bool NonMochaDarkFields::preorder(const IR::MAU::Action *act) {
+    auto *tbl = findContext<IR::MAU::Table>();
     BUG_CHECK(tbl, "Could not find table");
     ActionAnalysis aa(phv, false, false, tbl, red_info);
     ActionAnalysis::FieldActionsMap fieldActionsMap;
@@ -32,11 +33,11 @@ bool NonMochaDarkFields::preorder(const IR::MAU::Action* act) {
     act->apply(aa);
 
     LOG5("\tAnalyzing action " << act->name << " in table " << tbl->name);
-    for (auto& faEntry : fieldActionsMap) {
+    for (auto &faEntry : fieldActionsMap) {
         LOG5("\tInstruction: " << faEntry.first);
         auto fieldAction = faEntry.second;
 
-        const PHV::Field* write = phv.field(fieldAction.write.expr);
+        const PHV::Field *write = phv.field(fieldAction.write.expr);
         BUG_CHECK(write, "Action %1% does not have a write?", fieldAction.write.expr);
         FieldDefUse::locpair wr_pair(tbl, fieldAction.write.expr);
         if (defuse.hasNonDarkContext(wr_pair)) nonDark[write->id][tbl] = WRITE;
@@ -47,7 +48,7 @@ bool NonMochaDarkFields::preorder(const IR::MAU::Action* act) {
             nonMocha[write->id][tbl] = WRITE;
         }
 
-        for (auto& readSrc : fieldAction.reads) {
+        for (auto &readSrc : fieldAction.reads) {
             if (readSrc.type == ActionAnalysis::ActionParam::ACTIONDATA ||
                 readSrc.type == ActionAnalysis::ActionParam::CONSTANT) {
                 LOG5("\t  Field written by action data/constant: " << write);
@@ -77,9 +78,9 @@ bool NonMochaDarkFields::preorder(const IR::MAU::Action* act) {
 }
 
 void NonMochaDarkFields::end_apply() {
-    for (const PHV::Field& f : phv) {
+    for (const PHV::Field &f : phv) {
         for (const FieldDefUse::locpair &use : defuse.getAllUses(f.id)) {
-            const IR::BFN::Unit* use_unit = use.first;
+            const IR::BFN::Unit *use_unit = use.first;
             if (use_unit->is<IR::BFN::ParserState>() || use_unit->is<IR::BFN::Parser>() ||
                 use_unit->to<IR::BFN::GhostParser>()) {
                 // Nothing to mark for nonDark
@@ -90,7 +91,7 @@ void NonMochaDarkFields::end_apply() {
                 LOG_DEBUG4(TAB1 "  Ignoring Use in deparser.");
                 continue;
             } else if (use_unit->is<IR::MAU::Table>()) {
-                const auto* tbl = use_unit->to<IR::MAU::Table>();
+                const auto *tbl = use_unit->to<IR::MAU::Table>();
                 LOG_DEBUG4(TAB1 "  Used in table " << tbl->name);
                 if (!defuse.hasNonDarkContext(use)) {
                     LOG_DEBUG4("\t\tCan use in a dark container.");
@@ -104,8 +105,8 @@ void NonMochaDarkFields::end_apply() {
     }
 }
 
-PHV::FieldUse NonMochaDarkFields::isNotMocha(const PHV::Field* field,
-                                             const IR::MAU::Table* tbl) const {
+PHV::FieldUse NonMochaDarkFields::isNotMocha(const PHV::Field *field,
+                                             const IR::MAU::Table *tbl) const {
     if (!tbl) {
         LOG5(" tbl = null,  field = " << field->name
                                       << "   in nonMocha: " << nonMocha.count(field->id));
@@ -121,8 +122,8 @@ PHV::FieldUse NonMochaDarkFields::isNotMocha(const PHV::Field* field,
     }
 }
 
-PHV::FieldUse NonMochaDarkFields::isNotDark(const PHV::Field* field,
-                                            const IR::MAU::Table* tbl) const {
+PHV::FieldUse NonMochaDarkFields::isNotDark(const PHV::Field *field,
+                                            const IR::MAU::Table *tbl) const {
     if (tbl && nonDark.count(field->id) && nonDark.at(field->id).count(tbl)) {
         return nonDark.at(field->id).at(tbl);
     }

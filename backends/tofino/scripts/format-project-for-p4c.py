@@ -2,6 +2,7 @@ import os
 import shutil
 import sys
 
+
 def copy_directories_and_files(source, dest):
     # Check if the source directory exists
     if not os.path.exists(source):
@@ -25,11 +26,20 @@ def copy_directories_and_files(source, dest):
 
     # Files to copy
     files_to_copy = [
-        'CMakeLists.txt', 'LICENSE', 'README', 'bootstrap_bfn_env.sh',
+        'CMakeLists.txt',
+        'LICENSE',
+        'README',
+        'bootstrap_bfn_env.sh',
         'CPackOptions.cmake',
-        'LICENSE.in', 'README.md', 'bootstrap_bfn_compilers.sh',
-        'bootstrap_ptf.sh', 'doc.Jenkinsfile', 'ubuntu20.04.setup', 'Doxyfile.in',
-        'LICENSES.txt', 'git_sha_version.h.in'
+        'LICENSE.in',
+        'README.md',
+        'bootstrap_bfn_compilers.sh',
+        'bootstrap_ptf.sh',
+        'doc.Jenkinsfile',
+        'ubuntu20.04.setup',
+        'Doxyfile.in',
+        'LICENSES.txt',
+        'git_sha_version.h.in',
     ]
 
     # Iterate over the specified directories in the source
@@ -54,6 +64,7 @@ def copy_directories_and_files(source, dest):
         else:
             print(f"File '{item}' does not exist in the source.")
 
+
 if __name__ == "__main__":
     if len(sys.argv) != 3:
         print("Usage: python script.py <source_directory> <destination_directory>")
@@ -61,6 +72,6 @@ if __name__ == "__main__":
 
     source = sys.argv[1]
     dest = os.path.join(sys.argv[2], 'backends/tofino2')
-    
+
     copy_directories_and_files(source, dest)
     print("Copying completed.")

@@ -11,13 +11,13 @@
  */
 
 #include <iostream>
-#include <sstream>
 #include <list>
+#include <sstream>
 
-#include "gtest/gtest.h"
+#include "bf-p4c/logging/constrained_fields.h"
 #include "bf-p4c/test/gtest/tofino_gtest_utils.h"
 #include "bf-p4c/test/utils/super_cluster_builder.h"
-#include "bf-p4c/logging/constrained_fields.h"
+#include "gtest/gtest.h"
 
 namespace P4::Test {
 
@@ -35,7 +35,7 @@ class ConstrainedFieldMapBuilderTest : public TofinoBackendTest {
 )");
 
     PhvInfo phv;
-    std::list<PHV::SuperCluster*> superclusters;
+    std::list<PHV::SuperCluster *> superclusters;
     ConstrainedFieldMap fields;
     SuperClusterBuilder scb;
 
@@ -57,7 +57,7 @@ TEST_F(ConstrainedFieldMapBuilderTest, ShouldInitializeFields) {
 
 TEST_F(ConstrainedFieldMapBuilderTest, ShouldInitializeSlices) {
     // Setup superclusters
-    std::optional<PHV::SuperCluster*> sc1 = scb.build_super_cluster(SUPERCLUSTER);
+    std::optional<PHV::SuperCluster *> sc1 = scb.build_super_cluster(SUPERCLUSTER);
     if (!sc1) FAIL() << "Failed to build the supercluster!";
     superclusters.push_back(*sc1);
 
@@ -104,7 +104,7 @@ TEST_F(ConstrainedFieldMapBuilderTest, ShouldInitializeFieldConstraints) {
 
 TEST_F(ConstrainedFieldMapBuilderTest, ShouldInitializeSliceConstraints) {
     // Setup superclusters
-    std::optional<PHV::SuperCluster*> sc1 = scb.build_super_cluster(SUPERCLUSTER);
+    std::optional<PHV::SuperCluster *> sc1 = scb.build_super_cluster(SUPERCLUSTER);
     if (!sc1) FAIL() << "Failed to build the supercluster!";
     superclusters.push_back(*sc1);
 

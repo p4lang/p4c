@@ -11,22 +11,22 @@
  */
 
 #include <optional>
+
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/make_unique.hpp>
 
-#include "gtest/gtest.h"
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
 #include "bf-p4c/test/gtest/bf_gtest_helpers.h"
-
+#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "gtest/gtest.h"
 
 namespace P4::Test {
 
 namespace {
 
 struct FindEgIntrMd : public Inspector {
-    const IR::Type_Header* eg_intr_md = nullptr;
+    const IR::Type_Header *eg_intr_md = nullptr;
 
-    bool preorder(const IR::Type_Header* type) override {
+    bool preorder(const IR::Type_Header *type) override {
         if (type->name == "egress_intrinsic_metadata_t") {
             if (!eg_intr_md) eg_intr_md = type;
         }
@@ -34,7 +34,7 @@ struct FindEgIntrMd : public Inspector {
     }
 };
 
-std::unique_ptr<TestCode> createCode(const std::string& pragma, const std::string& option) {
+std::unique_ptr<TestCode> createCode(const std::string &pragma, const std::string &option) {
     std::stringstream ss;
     ss << pragma << '\n';
     ss << R"(
@@ -46,12 +46,11 @@ std::unique_ptr<TestCode> createCode(const std::string& pragma, const std::strin
         struct local_metadata_t { bit<8> f1; }
     )";
 
-    auto insertions = {ss.str(), TestCode::empty_state(),
-                     TestCode::empty_appy(), TestCode::empty_appy()};
+    auto insertions = {ss.str(), TestCode::empty_state(), TestCode::empty_appy(),
+                       TestCode::empty_appy()};
     auto options = {option};
-    auto test_code = boost::make_unique<TestCode>(TestCode::Hdr::TofinoMin,
-                                                TestCode::tofino_shell(),
-                                                insertions, "", options);
+    auto test_code = boost::make_unique<TestCode>(
+        TestCode::Hdr::TofinoMin, TestCode::tofino_shell(), insertions, "", options);
 
     BFNOptionPragmaParser parser;
     P4::ApplyOptionsPragmas global_pragmas_pass(parser);
@@ -72,14 +71,13 @@ std::unique_ptr<TestCode> createCode(const std::string& pragma, const std::strin
     return test_code;
 }
 
-const IR::Type_Header* extractEgIntrMdType(TestCode* code) {
+const IR::Type_Header *extractEgIntrMdType(TestCode *code) {
     FindEgIntrMd finder;
     code->apply_pass(finder);
     return finder.eg_intr_md;
 }
 
 }  // namespace
-
 
 TEST(EgIntrMdOpt, CompareCmdOptionWithPragma) {
     auto code = createCode("", "");

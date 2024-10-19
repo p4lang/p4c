@@ -10,21 +10,21 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include "lib/stringify.h"
+#include "bf-p4c/mau/dynhash.h"
+
 #include "bf-p4c/common/asm_output.h"
 #include "bf-p4c/common/utils.h"
-#include "bf-p4c/mau/dynhash.h"
 #include "bf-p4c/mau/ixbar_expr.h"
 #include "bf-p4c/mau/resource.h"
 #include "bf-p4c/mau/tofino/input_xbar.h"
+#include "lib/stringify.h"
 
 /**
  * Guarantees that each dynamic hash function is the same across all calls of this dynamic
  * hash function.  This way the JSON node will be consistent
  */
 bool VerifyUniqueDynamicHash::preorder(const IR::MAU::HashGenExpression *hge) {
-    if (!hge->dynamic)
-        return false;
+    if (!hge->dynamic) return false;
     auto key = hge->id.name;
     if (verify_hash_gen.count(key) == 0) {
         verify_hash_gen[key] = hge;
@@ -33,9 +33,11 @@ bool VerifyUniqueDynamicHash::preorder(const IR::MAU::HashGenExpression *hge) {
 
     auto hge_comp = verify_hash_gen.at(key);
     if (!hge->equiv(*hge_comp)) {
-        ::fatal_error("%1% : Hash.get over dynamic hash %2% differ: %3%.  Dynamic hashes must "
+        ::fatal_error(
+            "%1% : Hash.get over dynamic hash %2% differ: %3%.  Dynamic hashes must "
             "have the same field list and sets of algorithm for each get call, as these must "
-            "change simultaneously at runtime", hge, key, hge_comp);
+            "change simultaneously at runtime",
+            hge, key, hge_comp);
     }
     return false;
 }
@@ -44,14 +46,15 @@ bool VerifyUniqueDynamicHash::preorder(const IR::MAU::HashGenExpression *hge) {
  * Gather all tables that have allocated this particular dynamic hash object
  */
 bool GatherDynamicHashAlloc::preorder(const IR::MAU::Table *tbl) {
-    if (!tbl->is_placed())
-        return true;
+    if (!tbl->is_placed()) return true;
     for (auto &hd_use : tbl->resources->hash_dists) {
         for (auto &ir_alloc : hd_use.ir_allocations) {
             if (!ir_alloc.is_dynamic()) continue;
             auto key = ir_alloc.dyn_hash_name;
-            BUG_CHECK(verify_hash_gen.count(key), "Cannot associate the hash allocation for "
-                "dyn hash key %s", key);
+            BUG_CHECK(verify_hash_gen.count(key),
+                      "Cannot associate the hash allocation for "
+                      "dyn hash key %s",
+                      key);
             HashFuncLoc hfl(tbl->stage(), hd_use.hash_group());
             auto value = std::make_pair(hfl, &ir_alloc);
             hash_gen_alloc[key].emplace_back(value);
@@ -89,17 +92,17 @@ bool GenerateDynamicHashJson::preorder(const IR::MAU::Table *tbl) {
                     algorithms.names.push_back(annot->expr[0]->to<IR::StringLiteral>()->value);
             }
             // If none of the above values are populated dont proceed.
-            LOG5("fieldListCalcName: " << fieldListCalcName << " fieldListName: "
-                    << fieldListName << " hash_bit_width: "
-                    << hash_bit_width << "Algo size: " << algorithms.names.size());
-            if (!fieldListCalcName.isNullOrEmpty() && !fieldListName.isNullOrEmpty()
-                    && (hash_bit_width > 0) && (algorithms.names.size() > 0)) {
+            LOG5("fieldListCalcName: " << fieldListCalcName << " fieldListName: " << fieldListName
+                                       << " hash_bit_width: " << hash_bit_width
+                                       << "Algo size: " << algorithms.names.size());
+            if (!fieldListCalcName.isNullOrEmpty() && !fieldListName.isNullOrEmpty() &&
+                (hash_bit_width > 0) && (algorithms.names.size() > 0)) {
                 _dynHashCalc->emplace("name"_cs, fieldListCalcName);
                 _dynHashCalc->emplace("handle"_cs, dynHashHandleBase + dynHashHandle++);
-                LOG4("Generating dynamic hash schema for "
-                        << fieldListCalcName << " and field list " << fieldListName);
-                gen_ixbar_json(res->selector_ixbar.get(), _dynHashCalc, tbl->stage(),
-                               fieldListName, &algorithms, hash_bit_width);
+                LOG4("Generating dynamic hash schema for " << fieldListCalcName
+                                                           << " and field list " << fieldListName);
+                gen_ixbar_json(res->selector_ixbar.get(), _dynHashCalc, tbl->stage(), fieldListName,
+                               &algorithms, hash_bit_width);
                 _dynHashNode->append(_dynHashCalc);
             }
         }
@@ -121,7 +124,6 @@ void GenerateDynamicHashJson::gen_hash_dist_json(cstring dyn_hash_name) {
 #endif
         return;
     }
-
 
     auto &hga_value = hash_gen_alloc.at(dyn_hash_name);
     AllocToHashUse alloc_to_use;
@@ -153,21 +155,18 @@ void GenerateDynamicHashJson::gen_hash_dist_json(cstring dyn_hash_name) {
                 for (auto &c_b : combined_use.use) {
                     if (b.loc == c_b.loc) {
                         repeat_byte = true;
-                        for (auto fi : b.field_bytes)
-                            c_b.add_info(fi);
+                        for (auto fi : b.field_bytes) c_b.add_info(fi);
                         break;
                     }
                 }
-                if (!repeat_byte)
-                    combined_use.use.push_back(b);
+                if (!repeat_byte) combined_use.use.push_back(b);
             }
             auto &hdh = combined_use.hash_dist_hash;
             auto &local_hdh = dynamic_cast<Tofino::IXBar::Use &>(*alloc->use).hash_dist_hash;
             hdh.allocated = true;
             hdh.group = hfl.hash_group;
-            hdh.galois_start_bit_to_p4_hash.insert(
-                local_hdh.galois_start_bit_to_p4_hash.begin(),
-                local_hdh.galois_start_bit_to_p4_hash.end());
+            hdh.galois_start_bit_to_p4_hash.insert(local_hdh.galois_start_bit_to_p4_hash.begin(),
+                                                   local_hdh.galois_start_bit_to_p4_hash.end());
         }
         gen_ixbar_bytes_json(_xbar_cfgs, hfl.stage, fieldNames, combined_use);
         gen_hash_json(_hash_cfgs, hfl.stage, combined_use, hash_bit_width);
@@ -301,7 +300,8 @@ void GenerateDynamicHashJson::gen_hash_dist_json(const IR::MAU::Table *tbl) {
 */
 
 void GenerateDynamicHashJson::gen_single_algo_json(Util::JsonArray *_algos,
-        const IR::MAU::HashFunction *algorithm, cstring alg_name, bool &is_default) {
+                                                   const IR::MAU::HashFunction *algorithm,
+                                                   cstring alg_name, bool &is_default) {
     Util::JsonObject *_algo = new Util::JsonObject();
     _algo->emplace("name"_cs, alg_name);  // p4 algo name
     _algo->emplace("type"_cs, algorithm->algo_type());
@@ -331,7 +331,7 @@ void GenerateDynamicHashJson::gen_single_algo_json(Util::JsonArray *_algos,
 }
 
 void GenerateDynamicHashJson::gen_algo_json(Util::JsonObject *_dhc,
-        const IR::MAU::HashGenExpression *hge) {
+                                            const IR::MAU::HashGenExpression *hge) {
     _dhc->emplace("any_hash_algorithm_allowed"_cs, hge->any_alg_allowed);
     Util::JsonArray *_algos = new Util::JsonArray();
     bool is_default = true;
@@ -351,9 +351,9 @@ void GenerateDynamicHashJson::gen_algo_json(Util::JsonObject *_dhc,
     _dhc->emplace("algorithms"_cs, _algos);
 }
 
-
 void GenerateDynamicHashJson::gen_field_list_json(Util::JsonObject *_field_list,
-        const IR::MAU::HashGenExpression *hge, std::map<cstring, cstring> &fieldNames) {
+                                                  const IR::MAU::HashGenExpression *hge,
+                                                  std::map<cstring, cstring> &fieldNames) {
     Util::JsonArray *_fields = new Util::JsonArray();
     auto fle = hge->expr->to<IR::MAU::FieldListExpression>();
 
@@ -403,7 +403,8 @@ void GenerateDynamicHashJson::gen_field_list_json(Util::JsonObject *_field_list,
 }
 
 void GenerateDynamicHashJson::gen_ixbar_bytes_json(Util::JsonArray *_xbar_cfgs, int stage,
-        const std::map<cstring, cstring> &fieldNames, const IXBar::Use &ixbar_use) {
+                                                   const std::map<cstring, cstring> &fieldNames,
+                                                   const IXBar::Use &ixbar_use) {
     Util::JsonObject *_xbar_cfg = new Util::JsonObject();
     _xbar_cfg->emplace("stage_number"_cs, stage);
     Util::JsonArray *_xbar = new Util::JsonArray();
@@ -426,7 +427,7 @@ void GenerateDynamicHashJson::gen_ixbar_bytes_json(Util::JsonArray *_xbar_cfgs, 
 }
 
 void GenerateDynamicHashJson::gen_hash_json(Util::JsonArray *_hash_cfgs, int stage,
-        Tofino::IXBar::Use &ixbar_use, int &hash_bit_width) {
+                                            Tofino::IXBar::Use &ixbar_use, int &hash_bit_width) {
     int hashGroup = -1;
     Util::JsonArray *_hash_bits = new Util::JsonArray();
     int num_hash_bits = 0;
@@ -448,8 +449,9 @@ void GenerateDynamicHashJson::gen_hash_json(Util::JsonArray *_hash_cfgs, int sta
     } else if (ixbar_use.meter_alu_hash.allocated) {
         auto mah = ixbar_use.meter_alu_hash;
         hashGroup = mah.group;
-        num_hash_bits = mah.bit_mask.is_contiguous() && (mah.bit_mask.min().index() == 0) ?
-                            mah.bit_mask.max().index() + 1 : 0;
+        num_hash_bits = mah.bit_mask.is_contiguous() && (mah.bit_mask.min().index() == 0)
+                            ? mah.bit_mask.max().index() + 1
+                            : 0;
         if (!num_hash_bits) return;  // invalid bit mask
         for (auto hash_bit = 0; hash_bit < num_hash_bits; hash_bit++) {
             Util::JsonObject *_hash_bit = new Util::JsonObject();
@@ -476,9 +478,9 @@ void GenerateDynamicHashJson::gen_hash_json(Util::JsonArray *_hash_cfgs, int sta
     _hash_cfgs->append(_hash_cfg);
 }
 
-void GenerateDynamicHashJson::gen_ixbar_json(const IXBar::Use *ixbar_use_,
-        Util::JsonObject *_dhc, int stage, const cstring field_list_name,
-        const IR::NameList *algorithms, int hash_width) {
+void GenerateDynamicHashJson::gen_ixbar_json(const IXBar::Use *ixbar_use_, Util::JsonObject *_dhc,
+                                             int stage, const cstring field_list_name,
+                                             const IR::NameList *algorithms, int hash_width) {
     auto *ixbar_use = dynamic_cast<const Tofino::IXBar::Use *>(ixbar_use_);
     Util::JsonArray *_field_lists = new Util::JsonArray();
     Util::JsonObject *_field_list = new Util::JsonObject();
@@ -553,8 +555,9 @@ void GenerateDynamicHashJson::gen_ixbar_json(const IXBar::Use *ixbar_use_,
         const IR::MAU::HashFunction *hashAlgo = &mah.algorithm;
         hashGroup = mah.group;
         hash_bit_width = hash_width <= 0 ? hashAlgo->size : hash_width;
-        num_hash_bits = mah.bit_mask.is_contiguous() && (mah.bit_mask.min().index() == 0) ?
-                            mah.bit_mask.max().index() + 1 : 0;
+        num_hash_bits = mah.bit_mask.is_contiguous() && (mah.bit_mask.min().index() == 0)
+                            ? mah.bit_mask.max().index() + 1
+                            : 0;
         if (!num_hash_bits) return;  // invalid bit mask
         for (auto hash_bit = 0; hash_bit < num_hash_bits; hash_bit++) {
             Util::JsonObject *_hash_bit = new Util::JsonObject();
@@ -635,6 +638,5 @@ std::ostream &operator<<(std::ostream &out, const DynamicHashJson &dyn) {
     dyn_json->serialize(out);
     return out;
 }
-
 
 }  // namespace BFN

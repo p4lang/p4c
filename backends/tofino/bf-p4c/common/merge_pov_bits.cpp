@@ -34,13 +34,13 @@ class IdentifyPovMergeTargets : public ParserInspector {
     const PhvInfo &phv;
     const CollectParserInfo &parser_info;
     const HeaderValidityAnalysis &hva;
-    ordered_map<const PHV::Field*, const PHV::Field*>& merge_pov;
+    ordered_map<const PHV::Field *, const PHV::Field *> &merge_pov;
 
     ordered_map<const PHV::Field *, std::set<const IR::BFN::ParserState *>> pov_states;
     ordered_map<const IR::BFN::ParserState *, ordered_set<const PHV::Field *>> state_povs;
     std::set<const PHV::Field *> pov_zero_writes;
 
-    Visitor::profile_t init_apply(const IR::Node* root) override {
+    Visitor::profile_t init_apply(const IR::Node *root) override {
         auto rv = Inspector::init_apply(root);
         merge_pov.clear();
         pov_states.clear();
@@ -122,7 +122,7 @@ class IdentifyPovMergeTargets : public ParserInspector {
 
         if (LOGGING(3)) {
             LOG3("POVs in the same state that can be merged:");
-            for (const auto& [f1, f2] : merge_pov) {
+            for (const auto &[f1, f2] : merge_pov) {
                 LOG3("  " << f1->name << " -> " << f2->name);
             }
         }
@@ -137,9 +137,9 @@ class IdentifyPovMergeTargets : public ParserInspector {
                 const auto &f1_states = i1->second;
                 const auto &f2_states = i2->second;
 
-                auto& graph = parser_info.graph(*f1_states.begin());
-                auto& preds = graph.predecessors();
-                auto& succs = graph.successors();
+                auto &graph = parser_info.graph(*f1_states.begin());
+                auto &preds = graph.predecessors();
+                auto &succs = graph.successors();
 
                 std::set<const IR::BFN::ParserState *> f1_state_preds;
                 std::set<const IR::BFN::ParserState *> f1_state_succs;
@@ -151,7 +151,7 @@ class IdentifyPovMergeTargets : public ParserInspector {
                 // both orderings of f1 states and f2 states.
                 bool preds_ok = true;
                 bool succs_ok = true;
-                for (const auto* state : f1_states) {
+                for (const auto *state : f1_states) {
                     // If there's a branch to the pipe or a loopback transition
                     // then we can't merge the POV bits from different states.
                     succs_ok &= graph.to_pipe(state).size() == 0;
@@ -163,7 +163,7 @@ class IdentifyPovMergeTargets : public ParserInspector {
                         f1_state_succs.insert(succs.at(state).begin(), succs.at(state).end());
                 }
 
-                for (const auto* state : f2_states) {
+                for (const auto *state : f2_states) {
                     // If there's a branch to the pipe or a loopback transition
                     // then we can't merge the POV bits from different states.
                     preds_ok &= graph.to_pipe(state).size() == 0;
@@ -186,7 +186,7 @@ class IdentifyPovMergeTargets : public ParserInspector {
 
         if (LOGGING(3)) {
             LOG3("POVs that can be merged (targets may still point to other sources):");
-            for (const auto& [f1, f2] : merge_pov) {
+            for (const auto &[f1, f2] : merge_pov) {
                 LOG3("  " << f1->name << " -> " << f2->name);
             }
         }
@@ -197,8 +197,8 @@ class IdentifyPovMergeTargets : public ParserInspector {
         bool changed = false;
         do {
             changed = false;
-            ordered_map<const PHV::Field*, const PHV::Field*> merge_pov_new;
-            for (const auto& [f1, f2] : merge_pov) {
+            ordered_map<const PHV::Field *, const PHV::Field *> merge_pov_new;
+            for (const auto &[f1, f2] : merge_pov) {
                 if (merge_pov.count(f2)) {
                     merge_pov_new.emplace(f1, merge_pov.at(f2));
                     changed = true;
@@ -210,7 +210,7 @@ class IdentifyPovMergeTargets : public ParserInspector {
         } while (changed);
 
         LOG1("POVs to be merged:");
-        for (const auto& [f1, f2] : merge_pov) {
+        for (const auto &[f1, f2] : merge_pov) {
             LOG1("  " << f1->name << " -> " << f2->name);
         }
     }
@@ -257,19 +257,19 @@ class UpdatePovBits : public Transform {
     const ordered_map<const PHV::Field *, const PHV::Field *> &merge_pov;
 
     /// Map of IR::Expression objects corresponding to the field names.
-    ordered_map<cstring, const IR::Member*> fieldNameToExpressionsMap;
+    ordered_map<cstring, const IR::Member *> fieldNameToExpressionsMap;
 
     /// Names of stack POV bits
     std::set<cstring> stack_pov_bits;
     std::set<cstring> skip_stack_pov_bits;
 
-    Visitor::profile_t init_apply(const IR::Node* root) override {
+    Visitor::profile_t init_apply(const IR::Node *root) override {
         profile_t rv = Transform::init_apply(root);
         fieldNameToExpressionsMap.clear();
         return rv;
     }
 
-    const IR::Node *preorder(IR::HeaderOrMetadata* h) override {
+    const IR::Node *preorder(IR::HeaderOrMetadata *h) override {
         LOG5("Header: " << h->name);
         LOG5("Header type: " << h->type);
         const IR::HeaderStack *hs = h->to<IR::HeaderStack>();
@@ -279,10 +279,10 @@ class UpdatePovBits : public Transform {
             const auto *stkvalid = phv.field(stkvalid_name);
             bool skip = hva.povBitsUpdateActions.count(stkvalid);
             for (int i = 0; i < hs->size; i++) {
-                cstring name = h->name + "[" + cstring::to_cstring(i)  + "].$valid";
+                cstring name = h->name + "[" + cstring::to_cstring(i) + "].$valid";
                 stack_pov_bits.emplace(name);
                 if (skip) skip_stack_pov_bits.emplace(name);
-                IR::Member* mem = new IR::Member(
+                IR::Member *mem = new IR::Member(
                     IR::Type_Bits::get(1),
                     new IR::HeaderStackItemRef(new IR::ConcreteHeaderRef(h), new IR::Constant(i)),
                     "$valid");
@@ -293,8 +293,8 @@ class UpdatePovBits : public Transform {
             }
         } else if (h->type->is<IR::Type_Header>()) {
             cstring name = h->name + ".$valid"_cs;
-            IR::Member* mem = new IR::Member(IR::Type_Bits::get(1),
-                    new IR::ConcreteHeaderRef(h), "$valid");
+            IR::Member *mem =
+                new IR::Member(IR::Type_Bits::get(1), new IR::ConcreteHeaderRef(h), "$valid");
             if (mem) {
                 fieldNameToExpressionsMap[name] = mem;
                 LOG5("  Added field: " << name << ", " << mem);
@@ -317,7 +317,7 @@ class UpdatePovBits : public Transform {
             LOG1("Replacing POV reference in deparser emit: " << emit->povBit->field << " -> "
                                                               << newMember);
 
-            auto* newPovBit = emit->povBit->clone();
+            auto *newPovBit = emit->povBit->clone();
             newPovBit->field = newMember;
             emit->povBit = newPovBit;
         }
@@ -339,7 +339,7 @@ class UpdatePovBits : public Transform {
             LOG1("Replacing POV reference in deparser checksum entry: " << csum->povBit->field
                                                                         << " -> " << newMember);
 
-            auto* newPovBit = csum->povBit->clone();
+            auto *newPovBit = csum->povBit->clone();
             newPovBit->field = newMember;
             csum->povBit = newPovBit;
         }
@@ -347,8 +347,7 @@ class UpdatePovBits : public Transform {
     }
 
  public:
-    explicit UpdatePovBits(const PhvInfo &phv,
-                           const HeaderValidityAnalysis &hva,
+    explicit UpdatePovBits(const PhvInfo &phv, const HeaderValidityAnalysis &hva,
                            const ordered_map<const PHV::Field *, const PHV::Field *> &merge_pov)
         : phv(phv), hva(hva), merge_pov(merge_pov){};
 };
@@ -372,7 +371,7 @@ class ElimParserValidZeroWrites : public ParserTransform {
             if (src->constant->value == 0) {
                 const auto &states = fs.field_to_parser_states.at(f);
                 const auto *state = findOrigCtxt<IR::BFN::ParserState>();
-                const auto& graph = parser_info.graph(state);
+                const auto &graph = parser_info.graph(state);
                 bool first_write = true;
                 for (const auto *otherState : states) {
                     if (state == otherState) continue;
@@ -401,10 +400,9 @@ MergePovBits::MergePovBits(const PhvInfo &phv) {
     auto *field_to_parser_states = new MapFieldToParserStates(phv);
 
     addPasses({
-        new PassRepeated({
-            parser_info,
-            field_to_parser_states,
-            new ElimParserValidZeroWrites(phv, *parser_info, *field_to_parser_states)}),
+        new PassRepeated(
+            {parser_info, field_to_parser_states,
+             new ElimParserValidZeroWrites(phv, *parser_info, *field_to_parser_states)}),
         parser_info,
         header_validity_analysis,
         new IdentifyPovMergeTargets(phv, *parser_info, *header_validity_analysis, merge_pov),

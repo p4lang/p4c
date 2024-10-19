@@ -10,6 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+/* clang-format off */
+
 #include "bf-p4c/midend/fold_constant_hashes.h"
 #include <boost/optional/optional_io.hpp>
 #include <boost/range/adaptor/reversed.hpp>
@@ -25,8 +27,7 @@ namespace BFN {
  * @return Returns the parametrized type if the declaration declares a Hash extern,
  *         nullptr otherwise.
  */
-const IR::Type* FoldConstantHashes::checkHashExtern(
-        const IR::Declaration_Instance *decl) {
+const IR::Type *FoldConstantHashes::checkHashExtern(const IR::Declaration_Instance *decl) {
     if (auto *specialized = decl->type->to<IR::Type_Specialized>()) {
         if (auto *name_type = specialized->baseType->to<IR::Type_Name>()) {
             if (name_type->path->name == "Hash") {
@@ -49,15 +50,13 @@ bool FoldConstantHashes::DoFoldConstantHashes::checkConstantInput(const IR::Expr
     } else if (auto *list = expr->to<IR::ListExpression>()) {
         for (auto *comp : list->components) {
             auto *comp_expr = comp->to<IR::Expression>();
-            if (!comp_expr || !checkConstantInput(comp_expr))
-                return false;
+            if (!comp_expr || !checkConstantInput(comp_expr)) return false;
         }
         return true;
     } else if (auto *list = expr->to<IR::StructExpression>()) {
         for (auto *comp : list->components) {
             auto *comp_expr = comp->expression->to<IR::Expression>();
-            if (!comp_expr || !checkConstantInput(comp_expr))
-                return false;
+            if (!comp_expr || !checkConstantInput(comp_expr)) return false;
         }
         return true;
     }
@@ -72,8 +71,7 @@ bool FoldConstantHashes::DoFoldConstantHashes::checkConstantInput(const IR::Expr
  * @param[in,out] shift The bit position to put the value at
  * @param[in] list The list of expressions used as an input for the hash function
  */
-void FoldConstantHashes::DoFoldConstantHashes::foldListToConstant(
-        uint64_t &value, size_t &shift,
+void FoldConstantHashes::DoFoldConstantHashes::foldListToConstant(uint64_t &value, size_t &shift,
         const IR::ListExpression *list) {
     for (auto *comp : boost::adaptors::reverse(list->components)) {
         if (auto *constant = comp->to<IR::Constant>()) {
@@ -97,8 +95,7 @@ void FoldConstantHashes::DoFoldConstantHashes::foldListToConstant(
  * @param[in] list The list of struct expressions used as an input for the hash function
  */
 void FoldConstantHashes::DoFoldConstantHashes::foldListToConstant(
-        uint64_t &value, size_t &shift,
-        const IR::StructExpression *list) {
+    uint64_t &value, size_t &shift, const IR::StructExpression *list) {
     for (auto *comp : boost::adaptors::reverse(list->components)) {
         if (auto *constant = comp->expression->to<IR::Constant>()) {
             value |= constant->asUint64() << shift;
@@ -121,16 +118,14 @@ void FoldConstantHashes::DoFoldConstantHashes::foldListToConstant(
  * @return Returns newly created constant expression.
  */
 const IR::Expression *FoldConstantHashes::DoFoldConstantHashes::substituteIdentityHash(
-        const IR::ListExpression *hash_list,
-        const IR::Type *hash_type) {
+    const IR::ListExpression *hash_list, const IR::Type *hash_type) {
     uint64_t value = 0;
     size_t shift = 0;
     foldListToConstant(value, shift, hash_list);
     return new IR::Constant(hash_type->clone(), value);
 }
 const IR::Expression *FoldConstantHashes::DoFoldConstantHashes::substituteIdentityHash(
-        const IR::StructExpression *hash_list,
-        const IR::Type *hash_type) {
+    const IR::StructExpression *hash_list, const IR::Type *hash_type) {
     uint64_t value = 0;
     size_t shift = 0;
     foldListToConstant(value, shift, hash_list);
@@ -145,8 +140,7 @@ const IR::Expression *FoldConstantHashes::DoFoldConstantHashes::substituteIdenti
  * @return Returns calculated hash value.
  */
 hash_seed_t FoldConstantHashes::DoFoldConstantHashes::computeHash(
-        IR::MAU::HashFunction &hash_function,
-        const IR::ListExpression *hash_list,
+    IR::MAU::HashFunction &hash_function, const IR::ListExpression *hash_list,
         const IR::Type *hash_type) {
     bfn_hash_algorithm_t hash_alg;
     hash_function.build_algorithm_t(&hash_alg);
@@ -176,9 +170,8 @@ hash_seed_t FoldConstantHashes::DoFoldConstantHashes::computeHash(
 
     hash_seed_t hash_seed{/* hash_seed_value */ 0ULL, /* hash_seed_used */ 0ULL};
 
-    determine_seed(hash_outputs.data(), hash_outputs.size(),
-        hash_inputs.data(), hash_inputs.size(), total_input_bits,
-        &hash_alg, &hash_seed);
+    determine_seed(hash_outputs.data(), hash_outputs.size(), hash_inputs.data(), hash_inputs.size(),
+                   total_input_bits, &hash_alg, &hash_seed);
 
     LOG1("  seed = " << std::hex << hash_seed.hash_seed_value << std::dec);
     LOG1("  used = " << std::hex << hash_seed.hash_seed_used << std::dec);
@@ -193,8 +186,7 @@ hash_seed_t FoldConstantHashes::DoFoldConstantHashes::computeHash(
  * @return Returns calculated hash value.
  */
 hash_seed_t FoldConstantHashes::DoFoldConstantHashes::computeHash(
-        IR::MAU::HashFunction &hash_function,
-        const IR::StructExpression *hash_list,
+    IR::MAU::HashFunction &hash_function, const IR::StructExpression *hash_list,
         const IR::Type *hash_type) {
     bfn_hash_algorithm_t hash_alg;
     hash_function.build_algorithm_t(&hash_alg);
@@ -224,9 +216,8 @@ hash_seed_t FoldConstantHashes::DoFoldConstantHashes::computeHash(
 
     hash_seed_t hash_seed{/* hash_seed_value */ 0ULL, /* hash_seed_used */ 0ULL};
 
-    determine_seed(hash_outputs.data(), hash_outputs.size(),
-        hash_inputs.data(), hash_inputs.size(), total_input_bits,
-        &hash_alg, &hash_seed);
+    determine_seed(hash_outputs.data(), hash_outputs.size(), hash_inputs.data(), hash_inputs.size(),
+                   total_input_bits, &hash_alg, &hash_seed);
 
     LOG1("  seed = " << std::hex << hash_seed.hash_seed_value << std::dec);
     LOG1("  used = " << std::hex << hash_seed.hash_seed_used << std::dec);
@@ -243,13 +234,12 @@ hash_seed_t FoldConstantHashes::DoFoldConstantHashes::computeHash(
  * @return Returns newly created constant expression.
  */
 const IR::Expression *FoldConstantHashes::DoFoldConstantHashes::substituteCustomHash(
-        const IR::PathExpression *crc_poly_path,
-        const IR::ListExpression *hash_list,
+    const IR::PathExpression *crc_poly_path, const IR::ListExpression *hash_list,
         const IR::Type *hash_type) {
     auto *crc_poly_decl_inst = getDeclInst(self.refMap, crc_poly_path);
     if (!crc_poly_decl_inst) return nullptr;
-    auto *crc_poly_ref = new IR::GlobalRef(crc_poly_decl_inst->srcInfo,
-        crc_poly_decl_inst->type, crc_poly_decl_inst);
+    auto *crc_poly_ref = new IR::GlobalRef(crc_poly_decl_inst->srcInfo, crc_poly_decl_inst->type,
+                                           crc_poly_decl_inst);
     if (!crc_poly_ref) return nullptr;
 
     IR::MAU::HashFunction hash_function;
@@ -270,13 +260,12 @@ const IR::Expression *FoldConstantHashes::DoFoldConstantHashes::substituteCustom
  * @return Returns newly created constant expression.
  */
 const IR::Expression *FoldConstantHashes::DoFoldConstantHashes::substituteCustomHash(
-        const IR::PathExpression *crc_poly_path,
-        const IR::StructExpression *hash_list,
+    const IR::PathExpression *crc_poly_path, const IR::StructExpression *hash_list,
         const IR::Type *hash_type) {
     auto *crc_poly_decl_inst = getDeclInst(self.refMap, crc_poly_path);
     if (!crc_poly_decl_inst) return nullptr;
-    auto *crc_poly_ref = new IR::GlobalRef(crc_poly_decl_inst->srcInfo,
-        crc_poly_decl_inst->type, crc_poly_decl_inst);
+    auto *crc_poly_ref = new IR::GlobalRef(crc_poly_decl_inst->srcInfo, crc_poly_decl_inst->type,
+                                           crc_poly_decl_inst);
     if (!crc_poly_ref) return nullptr;
 
     IR::MAU::HashFunction hash_function;
@@ -298,12 +287,10 @@ const IR::Expression *FoldConstantHashes::DoFoldConstantHashes::substituteCustom
  * @return Returns newly created constant expression.
  */
 const IR::Expression *FoldConstantHashes::DoFoldConstantHashes::substituteOtherHash(
-        const IR::Expression *hash_algo_expr,
-        const IR::ListExpression *hash_list,
+    const IR::Expression *hash_algo_expr, const IR::ListExpression *hash_list,
         const IR::Type *hash_type) {
     IR::MAU::HashFunction hash_function;
-    if (!hash_function.setup(hash_algo_expr))
-        return nullptr;
+    if (!hash_function.setup(hash_algo_expr)) return nullptr;
 
     LOG2("  " << hash_function);
 
@@ -320,12 +307,10 @@ const IR::Expression *FoldConstantHashes::DoFoldConstantHashes::substituteOtherH
  * @return Returns newly created constant expression.
  */
 const IR::Expression *FoldConstantHashes::DoFoldConstantHashes::substituteOtherHash(
-        const IR::Expression *hash_algo_expr,
-        const IR::StructExpression *hash_list,
+    const IR::Expression *hash_algo_expr, const IR::StructExpression *hash_list,
         const IR::Type *hash_type) {
     IR::MAU::HashFunction hash_function;
-    if (!hash_function.setup(hash_algo_expr))
-        return nullptr;
+    if (!hash_function.setup(hash_algo_expr)) return nullptr;
 
     LOG2("  " << hash_function);
 
@@ -368,10 +353,9 @@ const IR::Node *FoldConstantHashes::DoFoldConstantHashes::preorder(IR::MethodCal
     if (hash_expr->is<IR::ListExpression>()) {
         IR::IndexedVector<IR::NamedExpression> components;
         int i = 0;
-        for (const auto& comp : hash_expr->to<IR::ListExpression>()->components) {
-            components.push_back(new IR::NamedExpression(
-                                    IR::ID("temp_name" + cstring::to_cstring(i++)),
-                                 comp));
+        for (const auto &comp : hash_expr->to<IR::ListExpression>()->components) {
+            components.push_back(
+                new IR::NamedExpression(IR::ID("temp_name" + cstring::to_cstring(i++)), comp));
         }
         hash_list = new IR::StructExpression(hash_expr->srcInfo, nullptr, components);
     }
@@ -388,8 +372,7 @@ const IR::Node *FoldConstantHashes::DoFoldConstantHashes::preorder(IR::MethodCal
         rv = substituteIdentityHash(hash_list, hash_type);
     } else if (hash_algo_name == "HashAlgorithm_t.CUSTOM") {
         LOG1("Substituting custom hash " << method_instance->expr);
-        auto *crc_poly_path
-            = extern_decl->arguments->at(1)->expression->to<IR::PathExpression>();
+        auto *crc_poly_path = extern_decl->arguments->at(1)->expression->to<IR::PathExpression>();
         if (!crc_poly_path) return mce;
         rv = substituteCustomHash(crc_poly_path, hash_list, hash_type);
         auto *crc_poly_decl_inst = getDeclInst(self.refMap, crc_poly_path);
@@ -418,7 +401,7 @@ const IR::Node *FoldConstantHashes::DoFoldConstantHashes::preorder(IR::MethodCal
 /**
  * Do not remove declarations of candidates that are used in path expressions.
  */
-const IR::Node* FoldConstantHashes::CheckCandidesToRemove::preorder(IR::PathExpression *path) {
+const IR::Node *FoldConstantHashes::CheckCandidesToRemove::preorder(IR::PathExpression *path) {
     auto *decl_inst = getDeclInst(self.refMap, path);
     if (!decl_inst) return path;
     auto *mcs = findContext<IR::MethodCallStatement>();
@@ -433,10 +416,9 @@ const IR::Node* FoldConstantHashes::CheckCandidesToRemove::preorder(IR::PathExpr
 /**
  * Remove declarations of candidates that have not been removed in the CheckCandidesToRemove pass.
  */
-const IR::Node* FoldConstantHashes::RemoveHangingCandidates::preorder(
+const IR::Node *FoldConstantHashes::RemoveHangingCandidates::preorder(
         IR::Declaration_Instance *decl) {
-    if (self.candidatesToRemove.count(decl->declid) == 0)
-        return decl;
+    if (self.candidatesToRemove.count(decl->declid) == 0) return decl;
     LOG2("Removing " << decl);
     return nullptr;
 }
@@ -445,10 +427,9 @@ const IR::Node* FoldConstantHashes::RemoveHangingCandidates::preorder(
  * Remove the invocations whose result is not used.
  * It would cause a compiler bug when replaced with a constant.
  */
-const IR::Node* FoldConstantHashes::RemoveHangingCandidates::preorder(
+const IR::Node *FoldConstantHashes::RemoveHangingCandidates::preorder(
         IR::MethodCallStatement *mcs) {
-    if (self.methodCallStatementsToRemove.count(mcs->clone_id) == 0)
-        return mcs;
+    if (self.methodCallStatementsToRemove.count(mcs->clone_id) == 0) return mcs;
     LOG2("Removing " << mcs);
     return nullptr;
 }

@@ -10,11 +10,11 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PHV_PRAGMA_PA_NO_INIT_H_
-#define EXTENSIONS_BF_P4C_PHV_PRAGMA_PA_NO_INIT_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_PRAGMA_PA_NO_INIT_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_PRAGMA_PA_NO_INIT_H_
 
-#include "ir/ir.h"
 #include "bf-p4c/phv/phv_fields.h"
+#include "ir/ir.h"
 
 using namespace P4;
 
@@ -27,13 +27,13 @@ using namespace P4;
  * needed, it will always be written before it is read.
  */
 class PragmaNoInit : public Inspector {
-    const PhvInfo& phv_i;
+    const PhvInfo &phv_i;
 
     /// List of fields for which the pragma pa_no_init has been specified
     /// Used to print logging messages
-    ordered_set<const PHV::Field*> fields;
+    ordered_set<const PHV::Field *> fields;
 
-    profile_t init_apply(const IR::Node* root) override {
+    profile_t init_apply(const IR::Node *root) override {
         profile_t rv = Inspector::init_apply(root);
         fields.clear();
         return rv;
@@ -41,10 +41,10 @@ class PragmaNoInit : public Inspector {
 
     bool add_constraint(cstring field_name);
 
-    bool preorder(const IR::BFN::Pipe* pipe) override;
+    bool preorder(const IR::BFN::Pipe *pipe) override;
 
  public:
-    explicit PragmaNoInit(const PhvInfo& phv) : phv_i(phv) { }
+    explicit PragmaNoInit(const PhvInfo &phv) : phv_i(phv) {}
 
     /// BFN::Pragma interface
     static const char *name;
@@ -52,11 +52,9 @@ class PragmaNoInit : public Inspector {
     static const char *help;
 
     /// @returns the set of fields fo which the pragma pa_no_init has been specified in the program
-    const ordered_set<const PHV::Field*>& getFields() const {
-        return fields;
-    }
+    const ordered_set<const PHV::Field *> &getFields() const { return fields; }
 };
 
-std::ostream& operator<<(std::ostream& out, const PragmaNoInit& pa_a);
+std::ostream &operator<<(std::ostream &out, const PragmaNoInit &pa_a);
 
-#endif /* EXTENSIONS_BF_P4C_PHV_PRAGMA_PA_NO_INIT_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_PRAGMA_PA_NO_INIT_H_ */

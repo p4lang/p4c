@@ -11,9 +11,10 @@
  */
 
 #include "split_parser_state.h"
+
 #include "bf-p4c/common/utils.h"
-#include "bf-p4c/parde/parser_query.h"
 #include "bf-p4c/parde/parde_utils.h"
+#include "bf-p4c/parde/parser_query.h"
 
 class DumpSplitStates : public DotDumper {
  public:
@@ -29,18 +30,17 @@ class DumpSplitStates : public DotDumper {
         out << "}" << std::endl;
 
         if (cid > 1 && LOGGING(4)) {  // only dump if state gets split
-            if (auto fs = open_file(INGRESS, 0, "debug/split_parser_state"_cs))
-                write_to_file(fs);
+            if (auto fs = open_file(INGRESS, 0, "debug/split_parser_state"_cs)) write_to_file(fs);
         }
     }
 
     unsigned cid = 0;
     std::string prev_tail;
 
-    void add_cluster(std::vector<const IR::BFN::ParserState*> states) {
+    void add_cluster(std::vector<const IR::BFN::ParserState *> states) {
         cluster_name = "cluster_" + std::to_string(cid) + "_";
 
-        out << "subgraph cluster_"  << cid << " {" << std::endl;
+        out << "subgraph cluster_" << cid << " {" << std::endl;
         out << "label=\"iteration " << cid << "\"";
         out << "size=\"8,5\"" << std::endl;
 
@@ -73,7 +73,7 @@ class DumpSplitStates : public DotDumper {
             out << std::endl;
         }
 
-        prev_tail =  to_label("State", states.back());
+        prev_tail = to_label("State", states.back());
 
         cluster_name = "";
         cid++;
@@ -85,11 +85,11 @@ class DumpSplitStates : public DotDumper {
 /// extracts into different states (this is the case when field straddles the input-buffer
 /// boundary).
 struct SliceExtracts : public ParserModifier {
-    const PhvInfo& phv;
-    const ClotInfo& clot;
+    const PhvInfo &phv;
+    const ClotInfo &clot;
     const ParserQuery pq;
 
-    const IR::BFN::ParserState* state = nullptr;
+    const IR::BFN::ParserState *state = nullptr;
 
     SliceExtracts(const PhvInfo &phv, const ClotInfo &clot, const CollectParserInfo &parser_info,
                   const MapFieldToParserStates &field_to_states)
@@ -107,25 +107,24 @@ struct SliceExtracts : public ParserModifier {
     /// the first make_slice, le_low_idx is 32, width is 32 and extract_base is 32. For the second
     /// make_slice, le_low_idx is 64, width is 32 and extract_base is 32.
     template <class Extract>
-    const Extract* make_slice(const IR::BFN::Extract* extract, int le_low_idx, int width,
+    const Extract *make_slice(const IR::BFN::Extract *extract, int le_low_idx, int width,
                               int extract_base, std::optional<PHV::Container> cont = std::nullopt) {
         auto slice_lo = le_low_idx;
         auto slice_hi = slice_lo + width - 1;
 
         auto dest = extract->dest->field;
         while (auto s = dest->to<IR::Slice>()) dest = s->e0;
-        if (width != phv.field(dest)->size)
-            dest = IR::Slice::make(dest, slice_lo, slice_hi);
+        if (width != phv.field(dest)->size) dest = IR::Slice::make(dest, slice_lo, slice_hi);
 
         auto dest_lval = new IR::BFN::FieldLVal(dest);
 
-        IR::BFN::ParserRVal* src_slice = nullptr;
+        IR::BFN::ParserRVal *src_slice = nullptr;
 
         if (auto src = extract->source->to<IR::BFN::InputBufferRVal>()) {
             auto src_hi = src->range.hi - slice_lo + extract_base;
             auto src_lo = src_hi - width + 1;
 
-            if (auto* pkt_rval = src->to<IR::BFN::PacketRVal>())
+            if (auto *pkt_rval = src->to<IR::BFN::PacketRVal>())
                 src_slice = new IR::BFN::PacketRVal(nw_bitrange(src_lo, src_hi),
                                                     pkt_rval->partial_hdr_err_proc);
             else if (src->is<IR::BFN::MetadataRVal>())
@@ -142,8 +141,8 @@ struct SliceExtracts : public ParserModifier {
                 (extract->write_mode == IR::BFN::ParserWriteMode::CLEAR_ON_WRITE &&
                  !(cont && pq.find_inits(*cont).count(extract) &&
                    width == static_cast<int>(cont->size())))) {
-                src_slice = new IR::BFN::ConstantRVal(IR::Type::Bits::get(width),
-                                                  const_slice.asUnsigned());
+                src_slice =
+                    new IR::BFN::ConstantRVal(IR::Type::Bits::get(width), const_slice.asUnsigned());
             } else {
                 LOG4("Skipping extract of " << extract << " to " << const_slice);
                 return nullptr;
@@ -160,9 +159,9 @@ struct SliceExtracts : public ParserModifier {
 
     /// Breaks up an Extract into a series of Extracts according to the extracted field's PHV and
     /// CLOT allocation.
-    std::vector<const IR::BFN::Extract*> slice_extract(const IR::BFN::Extract* extract) {
+    std::vector<const IR::BFN::Extract *> slice_extract(const IR::BFN::Extract *extract) {
         LOG4("rewrite " << extract << " as:");
-        std::vector<const IR::BFN::Extract*> rv;
+        std::vector<const IR::BFN::Extract *> rv;
 
         // Keeps track of which bits have been allocated, for sanity checking.
         bitvec bits_allocated;
@@ -213,13 +212,13 @@ struct SliceExtracts : public ParserModifier {
             bits_allocated.setrange(lo, size);
         }
         BUG_CHECK(bits_allocated == bitvec(range.lo, range.hi - range.lo + 1),
-                  "Extracted field %s (%s) received an incomplete allocation %s",
-                  field->name, bits_allocated, range);
+                  "Extracted field %s (%s) received an incomplete allocation %s", field->name,
+                  bits_allocated, range);
 
         return rv;
     }
 
-    bool preorder(IR::BFN::ParserState* state) override {
+    bool preorder(IR::BFN::ParserState *state) override {
         this->state = state;
         IR::Vector<IR::BFN::ParserPrimitive> new_statements;
 
@@ -244,17 +243,16 @@ struct SliceExtracts : public ParserModifier {
 };
 
 struct AllocateParserState : public ParserTransform {
-    const PhvInfo& phv;
-    ClotInfo& clot;
+    const PhvInfo &phv;
+    ClotInfo &clot;
 
-    AllocateParserState(const PhvInfo& phv, ClotInfo& clot) :
-        phv(phv), clot(clot) { }
+    AllocateParserState(const PhvInfo &phv, ClotInfo &clot) : phv(phv), clot(clot) {}
 
     class ParserStateAllocator {
         struct HasPacketRVal : Inspector {
             bool rv = false;
 
-            bool preorder(const IR::BFN::PacketRVal*) override {
+            bool preorder(const IR::BFN::PacketRVal *) override {
                 rv = true;
                 return false;
             }
@@ -288,13 +286,13 @@ struct AllocateParserState : public ParserTransform {
         /// ExtractAllocator looks at only the previous extract when considering whether to start a
         /// new group. By ordering by container, we keeps extracts together as much as possible.
         void reorderExtracts() {
-            std::vector<const IR::BFN::ExtractPhv*> const_extracts;
+            std::vector<const IR::BFN::ExtractPhv *> const_extracts;
             std::map<int, std::map<PHV::Container, std::vector<const IR::BFN::ExtractPhv *>>>
                 extracts_by_offset;
 
             PHV::FieldUse use(PHV::FieldUse::WRITE);
-            for (auto* extract : phv_extracts) {
-                if (auto* source = extract->source->to<IR::BFN::InputBufferRVal>()) {
+            for (auto *extract : phv_extracts) {
+                if (auto *source = extract->source->to<IR::BFN::InputBufferRVal>()) {
                     auto slices =
                         phv.get_alloc(extract->dest->field, PHV::AllocContext::PARSER, &use);
 
@@ -304,7 +302,7 @@ struct AllocateParserState : public ParserTransform {
                               "Expected extract %1% to correspond with 1 slice but saw %2% slices",
                               extract, slices.size());
 
-                    auto& slice = slices.front();
+                    auto &slice = slices.front();
                     auto buffer_range = source->interval();
                     auto container = slice.container();
                     unsigned int start_byte =
@@ -328,7 +326,7 @@ struct AllocateParserState : public ParserTransform {
 
         struct OutOfBuffer : Inspector {
             bool lo = false, hi = false;
-            bool preorder(const IR::BFN::PacketRVal* rval) override {
+            bool preorder(const IR::BFN::PacketRVal *rval) override {
                 auto max = Device::pardeSpec().byteInputBufferSize() * 8;
                 hi |= rval->range.hi >= max;
                 lo |= rval->range.lo >= max;
@@ -337,47 +335,45 @@ struct AllocateParserState : public ParserTransform {
         };
 
         template <typename T>
-        static bool out_of_buffer(const T* p) {
+        static bool out_of_buffer(const T *p) {
             OutOfBuffer oob;
             p->apply(oob);
             return oob.lo;
         }
 
         template <typename T>
-        static bool straddles_buffer(const T* p) {
+        static bool straddles_buffer(const T *p) {
             OutOfBuffer oob;
             p->apply(oob);
             return !oob.lo && oob.hi;
         }
 
         template <typename T>
-        static bool within_buffer(const T* p) {
+        static bool within_buffer(const T *p) {
             OutOfBuffer oob;
             p->apply(oob);
             return !oob.hi;
         }
 
         struct Allocator {
-            ParserStateAllocator& sa;
+            ParserStateAllocator &sa;
 
             IR::Vector<IR::BFN::ParserPrimitive> current, spilled;
 
-            explicit Allocator(ParserStateAllocator& sa) : sa(sa) { }
+            explicit Allocator(ParserStateAllocator &sa) : sa(sa) {}
 
             virtual void allocate() = 0;
 
             void add_to_result() {
-                for (auto c : current)
-                    sa.current_statements.push_back(c);
+                for (auto c : current) sa.current_statements.push_back(c);
 
-                for (auto s : spilled)
-                    sa.spilled_statements.push_back(s);
+                for (auto s : spilled) sa.spilled_statements.push_back(s);
             }
         };
 
         struct ExtractAllocator : Allocator {
-            std::list<std::pair<PHV::Container,
-                                ordered_set<const IR::BFN::ExtractPhv*>>> container_to_extracts;
+            std::list<std::pair<PHV::Container, ordered_set<const IR::BFN::ExtractPhv *>>>
+                container_to_extracts;
 
             // FIXME: Should look at the actual extractions (could extract to half a 32b
             // container for JBay), but requires consistent and accurate analysis across all passes
@@ -386,17 +382,14 @@ struct AllocateParserState : public ParserTransform {
             // Problem is that code currently calculates a constant number of extracts per
             // container, but JBay can extract only half of a 32b container if only some bits are
             // being written.
-            virtual
-            std::pair<size_t, unsigned>
-            inbuf_extractor_use(size_t container_size) = 0;
+            virtual std::pair<size_t, unsigned> inbuf_extractor_use(size_t container_size) = 0;
 
-            virtual
-            std::map<size_t, unsigned>
-            constant_extractor_use_choices(uint32_t value, size_t container_size) = 0;
+            virtual std::map<size_t, unsigned> constant_extractor_use_choices(
+                uint32_t value, size_t container_size) = 0;
 
-            std::map<size_t, unsigned>
-            constant_extractor_use_choices(PHV::Container container,
-                             const ordered_set<const IR::BFN::ExtractPhv*>& extracts) {
+            std::map<size_t, unsigned> constant_extractor_use_choices(
+                PHV::Container container,
+                const ordered_set<const IR::BFN::ExtractPhv *> &extracts) {
                 std::map<size_t, unsigned> rv;
                 bool has_clr_on_write = false;
 
@@ -407,16 +400,16 @@ struct AllocateParserState : public ParserTransform {
 
                     LOG4("constant: " << c);
 
-                    for (auto& kv : rv)
+                    for (auto &kv : rv)
                         LOG4("extractors needed: " << kv.first << " : " << kv.second);
                 }
 
                 return rv;
             }
 
-            std::map<size_t, unsigned>
-            inbuf_extractor_needed(PHV::Container container,
-                             const ordered_set<const IR::BFN::ExtractPhv*>& extracts) {
+            std::map<size_t, unsigned> inbuf_extractor_needed(
+                PHV::Container container,
+                const ordered_set<const IR::BFN::ExtractPhv *> &extracts) {
                 std::map<size_t, unsigned> rv;
 
                 if (has_inbuf_extract(extracts)) {
@@ -427,17 +420,15 @@ struct AllocateParserState : public ParserTransform {
                 return rv;
             }
 
-            bool has_inbuf_extract(const ordered_set<const IR::BFN::ExtractPhv*>& extracts) {
+            bool has_inbuf_extract(const ordered_set<const IR::BFN::ExtractPhv *> &extracts) {
                 for (auto e : extracts) {
-                    if (e->source->is<IR::BFN::InputBufferRVal>())
-                        return true;
+                    if (e->source->is<IR::BFN::InputBufferRVal>()) return true;
                 }
                 return false;
             }
 
-            unsigned
-            merge_const_source(const ordered_set<const IR::BFN::ExtractPhv*>& extracts,
-                               bool& has_clr_on_write) {
+            unsigned merge_const_source(const ordered_set<const IR::BFN::ExtractPhv *> &extracts,
+                                        bool &has_clr_on_write) {
                 unsigned merged = 0;
                 PHV::FieldUse use(PHV::FieldUse::WRITE);
 
@@ -446,11 +437,11 @@ struct AllocateParserState : public ParserTransform {
                         if (!c->constant->fitsUint())
                             BUG("large constants should have already been sliced");
 
-                        auto alloc_slices = sa.phv.get_alloc(e->dest->field,
-                                PHV::AllocContext::PARSER, &use);
+                        auto alloc_slices =
+                            sa.phv.get_alloc(e->dest->field, PHV::AllocContext::PARSER, &use);
 
                         BUG_CHECK(alloc_slices.size() == 1,
-                            "extract allocator expects dest to be individual slice");
+                                  "extract allocator expects dest to be individual slice");
 
                         merged |= c->constant->asUnsigned() << alloc_slices[0].container_slice().lo;
 
@@ -462,7 +453,7 @@ struct AllocateParserState : public ParserTransform {
                 return merged;
             }
 
-            bool extract_out_of_buffer(const IR::BFN::ExtractPhv* e) {
+            bool extract_out_of_buffer(const IR::BFN::ExtractPhv *e) {
                 GetExtractBufferPos get_buf_pos(sa.phv);
                 e->apply(get_buf_pos);
 
@@ -484,11 +475,11 @@ struct AllocateParserState : public ParserTransform {
                         if (v->dest) {
                             le_bitrange bits;
                             auto f = sa.phv.field(v->dest->field, &bits);
-                            auto alloc_slices = sa.phv.get_alloc(f, &bits,
-                                    PHV::AllocContext::PARSER, &use);  // TODO
+                            auto alloc_slices = sa.phv.get_alloc(
+                                f, &bits, PHV::AllocContext::PARSER, &use);  // TODO
 
                             BUG_CHECK(alloc_slices.size() == 1,
-                                "extract allocator expects dest to be individual slice");
+                                      "extract allocator expects dest to be individual slice");
 
                             auto slice = alloc_slices[0];
                             auto container = slice.container();
@@ -511,9 +502,9 @@ struct AllocateParserState : public ParserTransform {
                     }
                 }
 
-                for (auto& kv : container_to_extracts) {
+                for (auto &kv : container_to_extracts) {
                     auto container = kv.first;
-                    auto& extracts = kv.second;
+                    auto &extracts = kv.second;
 
                     auto ibuf_needed = inbuf_extractor_needed(container, extracts);
 
@@ -525,7 +516,7 @@ struct AllocateParserState : public ParserTransform {
                         if (Device::currentDevice() == Device::TOFINO) {
                             std::map<size_t, unsigned> valid_choices;
 
-                            for (auto& choice : constant_choices) {
+                            for (auto &choice : constant_choices) {
                                 if (choice.first == 16 || choice.first == 32) {
                                     if (choice.second + constants_by_size[choice.first] > 2)
                                         continue;
@@ -544,8 +535,7 @@ struct AllocateParserState : public ParserTransform {
                                 // Don't consider 32b extractors: no 64b containers.
                                 // Don't consider 8b extractors: all support constants.
                                 if (choice.first < container.size() &&
-                                        csum_verify_by_size[choice.first] == 1 &&
-                                        choice.first == 16)
+                                    csum_verify_by_size[choice.first] == 1 && choice.first == 16)
                                     continue;
 
                                 valid_choices.insert(choice);
@@ -567,8 +557,8 @@ struct AllocateParserState : public ParserTransform {
                     if (!constant_choices.empty()) {
                         extractor_avail = false;
 
-                        for (auto it = constant_choices.rbegin();
-                                  it != constant_choices.rend(); ++it) {
+                        for (auto it = constant_choices.rbegin(); it != constant_choices.rend();
+                             ++it) {
                             auto choice = *it;
 
                             total_needed = ibuf_needed;
@@ -580,7 +570,7 @@ struct AllocateParserState : public ParserTransform {
 
                             bool choice_ok = true;
 
-                            for (auto& kv : total_needed) {
+                            for (auto &kv : total_needed) {
                                 auto avail = Device::pardeSpec().extractorSpec().at(kv.first);
                                 if (extractors_by_size[kv.first] + kv.second > avail) {
                                     choice_ok = false;
@@ -597,7 +587,7 @@ struct AllocateParserState : public ParserTransform {
                     } else {
                         total_needed = ibuf_needed;
 
-                        for (auto& kv : total_needed) {
+                        for (auto &kv : total_needed) {
                             auto avail = Device::pardeSpec().extractorSpec().at(kv.first);
                             if (extractors_by_size[kv.first] + kv.second > avail) {
                                 extractor_avail = false;
@@ -619,11 +609,9 @@ struct AllocateParserState : public ParserTransform {
 
                     if (!oob && extractor_avail && constant_avail) {
                         // allocate
-                        for (auto e : extracts)
-                            current.push_back(e);
+                        for (auto e : extracts) current.push_back(e);
 
-                        for (auto& kv : total_needed)
-                            extractors_by_size[kv.first] += kv.second;
+                        for (auto &kv : total_needed) extractors_by_size[kv.first] += kv.second;
 
                         constants_by_size[constant_needed.first] += constant_needed.second;
                     } else {
@@ -633,26 +621,23 @@ struct AllocateParserState : public ParserTransform {
                         if (!extractor_avail) reason << "(ran out of extractors) ";
                         if (!constant_avail) reason << "(ran out of constants) ";
 
-                        for (auto e : extracts)
-                            LOG3("spill " << e << " { " << reason.str() << "}");
+                        for (auto e : extracts) LOG3("spill " << e << " { " << reason.str() << "}");
 
                         // spill
-                        for (auto e : extracts)
-                            spilled.push_back(e);
+                        for (auto e : extracts) spilled.push_back(e);
                     }
                 }
             }
 
-            explicit ExtractAllocator(ParserStateAllocator& sa) : Allocator(sa) {
+            explicit ExtractAllocator(ParserStateAllocator &sa) : Allocator(sa) {
                 PHV::FieldUse use(PHV::FieldUse::WRITE);
                 for (auto e : sa.phv_extracts) {
-                    auto alloc_slices = sa.phv.get_alloc(e->dest->field, PHV::AllocContext::PARSER,
-                            &use);
+                    auto alloc_slices =
+                        sa.phv.get_alloc(e->dest->field, PHV::AllocContext::PARSER, &use);
 
                     BUG_CHECK(!alloc_slices.empty(), "No slices allocated for %1%", e);
                     BUG_CHECK(alloc_slices.size() == 1,
-                        "extract allocator expects dest to be individual slice for %1%",
-                        e);
+                              "extract allocator expects dest to be individual slice for %1%", e);
 
                     auto slice = alloc_slices[0];
                     auto container = slice.container();
@@ -661,8 +646,8 @@ struct AllocateParserState : public ParserTransform {
                         // Only allow the merge with the last extract
                         if (container_to_extracts.empty() ||
                             container_to_extracts.back().first != container) {
-                            container_to_extracts.push_back(std::make_pair(container,
-                                ordered_set<const IR::BFN::ExtractPhv*>()));
+                            container_to_extracts.push_back(std::make_pair(
+                                container, ordered_set<const IR::BFN::ExtractPhv *>()));
                         }
                         container_to_extracts.back().second.insert(e);
                     } else {
@@ -677,8 +662,8 @@ struct AllocateParserState : public ParserTransform {
                             }
                         }
                         if (!merged) {
-                            container_to_extracts.push_back(std::make_pair(container,
-                                ordered_set<const IR::BFN::ExtractPhv*>()));
+                            container_to_extracts.push_back(std::make_pair(
+                                container, ordered_set<const IR::BFN::ExtractPhv *>()));
                             container_to_extracts.back().second.insert(e);
                         }
                     }
@@ -693,20 +678,17 @@ struct AllocateParserState : public ParserTransform {
                 switch (extractor_size) {
                     case 32:
                         for (int i = 0; i < 32; i++) {
-                            if ((val & 1) && (0x7 & val) == val)
-                                return true;
+                            if ((val & 1) && (0x7 & val) == val) return true;
                             val = ((val >> 1) | (val << 31)) & 0xffffffffU;
                         }
                         return false;
                     case 16:
-                        if ((val >> 16) && !can_extract(val >> 16, extractor_size))
-                            return false;
+                        if ((val >> 16) && !can_extract(val >> 16, extractor_size)) return false;
                         val &= 0xffff;
                         for (int i = 0; i < 16; i++) {
-                            if ((val & 1) && (0xf & val) == val)
-                                return true;
+                            if ((val & 1) && (0xf & val) == val) return true;
                             val = ((val >> 1) | (val << 15)) & 0xffffU;
-                         }
+                        }
                         return false;
                     case 8:
                         return true;
@@ -715,14 +697,13 @@ struct AllocateParserState : public ParserTransform {
                 return false;
             }
 
-            std::map<size_t, unsigned>
-            constant_extractor_use_choices(unsigned value, size_t container_size) override {
+            std::map<size_t, unsigned> constant_extractor_use_choices(
+                unsigned value, size_t container_size) override {
                 std::map<size_t, unsigned> rv;
 
-                for (const auto extractor_size : { PHV::Size::b32, PHV::Size::b16, PHV::Size::b8}) {
+                for (const auto extractor_size : {PHV::Size::b32, PHV::Size::b16, PHV::Size::b8}) {
                     // can not use larger extractor on smaller container
-                    if (container_size < size_t(extractor_size))
-                        continue;
+                    if (container_size < size_t(extractor_size)) continue;
 
                     if (can_extract(value, unsigned(extractor_size)))
                         rv[size_t(extractor_size)] = container_size / unsigned(extractor_size);
@@ -733,21 +714,20 @@ struct AllocateParserState : public ParserTransform {
                 return rv;
             }
 
-            std::pair<size_t, unsigned>
-            inbuf_extractor_use(size_t container_size) override {
+            std::pair<size_t, unsigned> inbuf_extractor_use(size_t container_size) override {
                 return {container_size, 1};
             }
 
          public:
-            explicit TofinoExtractAllocator(ParserStateAllocator& sa) : ExtractAllocator(sa) {
+            explicit TofinoExtractAllocator(ParserStateAllocator &sa) : ExtractAllocator(sa) {
                 allocate();
                 add_to_result();
             }
         };
 
         class JBayExtractAllocator : public ExtractAllocator {
-            std::map<size_t, unsigned>
-            constant_extractor_use_choices(uint32_t value, size_t container_size) override {
+            std::map<size_t, unsigned> constant_extractor_use_choices(
+                uint32_t value, size_t container_size) override {
                 std::map<size_t, unsigned> rv;
 
                 unsigned num = 0;
@@ -762,39 +742,36 @@ struct AllocateParserState : public ParserTransform {
                 return rv;
             }
 
-            std::pair<size_t, unsigned>
-            inbuf_extractor_use(size_t container_size) override {
+            std::pair<size_t, unsigned> inbuf_extractor_use(size_t container_size) override {
                 return {16, container_size == 32 ? 2 : 1};
             }
 
          public:
-            explicit JBayExtractAllocator(ParserStateAllocator& sa) : ExtractAllocator(sa) {
+            explicit JBayExtractAllocator(ParserStateAllocator &sa) : ExtractAllocator(sa) {
                 allocate();
                 add_to_result();
             }
         };
 
         struct ClipHi : Modifier {
-            bool preorder(IR::BFN::PacketRVal* rval) override {
+            bool preorder(IR::BFN::PacketRVal *rval) override {
                 rval->range.hi = Device::pardeSpec().byteInputBufferSize() * 8 - 1;
                 return false;
             }
         };
 
         struct ClipLo : Modifier {
-            bool preorder(IR::BFN::PacketRVal* rval) override {
+            bool preorder(IR::BFN::PacketRVal *rval) override {
                 rval->range.lo = Device::pardeSpec().byteInputBufferSize() * 8;
                 return false;
             }
         };
 
         struct ChecksumAllocator : Allocator {
-            std::pair<const IR::BFN::ParserPrimitive*,
-                      const IR::BFN::ParserPrimitive*>
-            slice_by_buffer(const IR::BFN::ParserPrimitive* c) {
-                BUG_CHECK(c->is<IR::BFN::ChecksumAdd>() ||
-                          c->is<IR::BFN::ChecksumSubtract>(),
-                         "unexpected checksum primitive %1%", c);
+            std::pair<const IR::BFN::ParserPrimitive *, const IR::BFN::ParserPrimitive *>
+            slice_by_buffer(const IR::BFN::ParserPrimitive *c) {
+                BUG_CHECK(c->is<IR::BFN::ChecksumAdd>() || c->is<IR::BFN::ChecksumSubtract>(),
+                          "unexpected checksum primitive %1%", c);
 
                 auto current = c->apply(ClipHi());
                 auto spilled = c->apply(ClipLo());
@@ -804,29 +781,29 @@ struct AllocateParserState : public ParserTransform {
             }
 
             struct GetPacketRVal : Inspector {
-                const IR::BFN::PacketRVal* rv = nullptr;
+                const IR::BFN::PacketRVal *rv = nullptr;
 
-                bool preorder(const IR::BFN::PacketRVal* rval) override {
+                bool preorder(const IR::BFN::PacketRVal *rval) override {
                     rv = rval;
                     return false;
                 }
             };
 
-            void sort_by_buffer_pos(std::vector<const IR::BFN::ParserChecksumPrimitive*>& prims) {
+            void sort_by_buffer_pos(std::vector<const IR::BFN::ParserChecksumPrimitive *> &prims) {
                 std::stable_sort(prims.begin(), prims.end(),
-                    [&] (const IR::BFN::ParserChecksumPrimitive* a,
-                         const IR::BFN::ParserChecksumPrimitive* b) {
-                    GetPacketRVal va, vb;
+                                 [&](const IR::BFN::ParserChecksumPrimitive *a,
+                                     const IR::BFN::ParserChecksumPrimitive *b) {
+                                     GetPacketRVal va, vb;
 
-                    a->apply(va);
-                    b->apply(vb);
+                                     a->apply(va);
+                                     b->apply(vb);
 
-                    return (va.rv && vb.rv) ? va.rv->range < vb.rv->range : false;
-                });
+                                     return (va.rv && vb.rv) ? va.rv->range < vb.rv->range : false;
+                                 });
             }
             template <typename T>
-            bool find_spill_needed_for_dup(std::map<nw_bitrange, int>& masked_ranges_map,
-                                           const T* csum_entry) {
+            bool find_spill_needed_for_dup(std::map<nw_bitrange, int> &masked_ranges_map,
+                                           const T *csum_entry) {
                 GetPacketRVal gpr;
                 csum_entry->apply(gpr);
                 if (!gpr.rv) return false;
@@ -849,33 +826,31 @@ struct AllocateParserState : public ParserTransform {
             }
 
             void allocate() override {
-                ordered_map<cstring,
-                         std::vector<const IR::BFN::ParserChecksumPrimitive*>> decl_to_checksums;
+                ordered_map<cstring, std::vector<const IR::BFN::ParserChecksumPrimitive *>>
+                    decl_to_checksums;
 
-                for (auto c : sa.checksums)
-                    decl_to_checksums[c->declName].push_back(c);
+                for (auto c : sa.checksums) decl_to_checksums[c->declName].push_back(c);
 
-                for (auto& kv : decl_to_checksums) {
+                for (auto &kv : decl_to_checksums) {
                     sort_by_buffer_pos(kv.second);
                 }
 
-                for (auto& kv : decl_to_checksums) {
+                for (auto &kv : decl_to_checksums) {
                     bool oob = false;
                     std::map<nw_bitrange, int> masked_ranges_map;
                     for (auto c : kv.second) {
                         if (oob) {
                             spilled.push_back(c);
                         } else if (within_buffer(c)) {
-                           if (find_spill_needed_for_dup(masked_ranges_map, c)) {
+                            if (find_spill_needed_for_dup(masked_ranges_map, c)) {
                                 spilled.push_back(c);
                                 LOG3("spill " << c << " (checksum entry duplication)");
                                 oob = true;
                             } else {
                                 current.push_back(c);
                             }
-                        } else if (out_of_buffer(c) ||
-                                (c->is<IR::BFN::ChecksumResidualDeposit>() &&
-                                 straddles_buffer(c))) {
+                        } else if (out_of_buffer(c) || (c->is<IR::BFN::ChecksumResidualDeposit>() &&
+                                                        straddles_buffer(c))) {
                             spilled.push_back(c);
                             LOG3("spill " << c << " (out of buffer)");
                             oob = true;
@@ -890,7 +865,7 @@ struct AllocateParserState : public ParserTransform {
                 }
             }
 
-            explicit ChecksumAllocator(ParserStateAllocator& sa) : Allocator(sa) {
+            explicit ChecksumAllocator(ParserStateAllocator &sa) : Allocator(sa) {
                 allocate();
                 add_to_result();
             }
@@ -898,17 +873,16 @@ struct AllocateParserState : public ParserTransform {
 
         struct CounterAllocator : Allocator {
             void allocate() override {
-                std::map<cstring,
-                         std::vector<const IR::BFN::ParserCounterPrimitive*>> decl_to_counters;
+                std::map<cstring, std::vector<const IR::BFN::ParserCounterPrimitive *>>
+                    decl_to_counters;
 
-                for (auto c : sa.counters)
-                    decl_to_counters[c->declName].push_back(c);
+                for (auto c : sa.counters) decl_to_counters[c->declName].push_back(c);
 
                 // HW only allows one counter primitive per state
                 // If successive primitives are add/sub, can constant-fold them
                 // into single primitive? TODO
 
-                for (auto& kv : decl_to_counters) {
+                for (auto &kv : decl_to_counters) {
                     for (auto c : kv.second) {
                         if (current.empty() && within_buffer(c)) {
                             current.push_back(c);
@@ -920,31 +894,30 @@ struct AllocateParserState : public ParserTransform {
                 }
             }
 
-            explicit CounterAllocator(ParserStateAllocator& sa) : Allocator(sa) {
+            explicit CounterAllocator(ParserStateAllocator &sa) : Allocator(sa) {
                 allocate();
                 add_to_result();
             }
         };
 
         struct ClotAllocator : Allocator {
-            const IR::BFN::ExtractClot*
-            create_extract(const IR::BFN::FieldLVal* dest, const IR::BFN::PacketRVal* rval) {
-                auto* extract_clot = new IR::BFN::ExtractClot(dest, rval);
+            const IR::BFN::ExtractClot *create_extract(const IR::BFN::FieldLVal *dest,
+                                                       const IR::BFN::PacketRVal *rval) {
+                auto *extract_clot = new IR::BFN::ExtractClot(dest, rval);
                 extract_clot->original_state = sa.state;
                 return extract_clot;
             }
 
-            const IR::BFN::FieldLVal*
-            slice_dest(const IR::BFN::ExtractClot* extract, int slice_hi, int slice_lo) {
+            const IR::BFN::FieldLVal *slice_dest(const IR::BFN::ExtractClot *extract, int slice_hi,
+                                                 int slice_lo) {
                 auto dest = extract->dest->field;
                 auto dest_slice = IR::Slice::make(dest, slice_lo, slice_hi);
                 auto dest_slice_lval = new IR::BFN::FieldLVal(dest_slice);
                 return dest_slice_lval;
             }
 
-            std::pair<const IR::BFN::ExtractClot*,
-                      const IR::BFN::ExtractClot*>
-            slice_by_buffer(const IR::BFN::ExtractClot* extract) {
+            std::pair<const IR::BFN::ExtractClot *, const IR::BFN::ExtractClot *> slice_by_buffer(
+                const IR::BFN::ExtractClot *extract) {
                 auto rval = extract->source->to<IR::BFN::PacketRVal>();
 
                 BUG_CHECK(rval, "unexpected source type for CLOT extract %1%", extract);
@@ -956,7 +929,7 @@ struct AllocateParserState : public ParserTransform {
 
                 auto current =
                     create_extract(slice_dest(extract, extract_size - 1, current_slice_lo),
-                                              rval->apply(ClipHi())->to<IR::BFN::PacketRVal>());
+                                   rval->apply(ClipHi())->to<IR::BFN::PacketRVal>());
 
                 auto spilled = create_extract(slice_dest(extract, current_slice_lo - 1, 0),
                                               rval->apply(ClipLo())->to<IR::BFN::PacketRVal>());
@@ -970,11 +943,11 @@ struct AllocateParserState : public ParserTransform {
                 for (auto t : sa.state->transitions)
                     if (static_cast<int>(t->shift) >= Device::pardeSpec().byteInputBufferSize())
                         return false;
-                return !sa.state->transitions.empty(); }
+                return !sa.state->transitions.empty();
+            }
 
             void allocate() override {
-                ordered_map<Clot*,
-                        ordered_set<const IR::BFN::ExtractClot*>> clot_to_extracts;
+                ordered_map<Clot *, ordered_set<const IR::BFN::ExtractClot *>> clot_to_extracts;
 
                 for (auto e : sa.clot_extracts) {
                     le_bitrange range;
@@ -989,7 +962,7 @@ struct AllocateParserState : public ParserTransform {
 
                 unsigned allocated_in_state = 0;
 
-                for (auto& kv : clot_to_extracts) {
+                for (auto &kv : clot_to_extracts) {
                     if (allocated_in_state < Device::pardeSpec().maxClotsPerState()) {
                         bool allocated = false;
 
@@ -1002,8 +975,7 @@ struct AllocateParserState : public ParserTransform {
                                 current.push_back(e);
                                 allocated = true;
                             } else if (straddles_buffer(e)) {
-                                if (e->is<IR::BFN::ExtractClot>() &&
-                                    buffer_is_lookahead()) {
+                                if (e->is<IR::BFN::ExtractClot>() && buffer_is_lookahead()) {
                                     /* CLOTs don't need to be all in the buffer -- they'll
                                      * spool in.  However if it has already been split due
                                      * to a checksum, we need to split it consistently */
@@ -1014,21 +986,20 @@ struct AllocateParserState : public ParserTransform {
                                     current.push_back(sliced.first);
                                     spilled.push_back(sliced.second);
                                     LOG4("have " << sliced.first << " (in buffer)");
-                                    LOG3("spill " << sliced.second << " (out of buffer)"); }
+                                    LOG3("spill " << sliced.second << " (out of buffer)");
+                                }
                                 allocated = true;
                             }
                         }
 
-                        if (allocated)
-                            allocated_in_state++;
+                        if (allocated) allocated_in_state++;
                     } else {
-                        for (auto e : kv.second)
-                            spilled.push_back(e);
+                        for (auto e : kv.second) spilled.push_back(e);
                     }
                 }
             };
 
-            explicit ClotAllocator(ParserStateAllocator& sa) : Allocator(sa) {
+            explicit ClotAllocator(ParserStateAllocator &sa) : Allocator(sa) {
                 allocate();
                 add_to_result();
             }
@@ -1090,7 +1061,7 @@ struct AllocateParserState : public ParserTransform {
 
             // Fix up for constraint that header end position must be less than the current state's
             // shift amount for residual checksum. See MODEL-542.
-            std::vector<const IR::BFN::ParserPrimitive*> to_spill;
+            std::vector<const IR::BFN::ParserPrimitive *> to_spill;
             bool spilledGet = false;
             for (auto s : current_statements) {
                 if (auto get = s->to<IR::BFN::ChecksumResidualDeposit>()) {
@@ -1117,7 +1088,7 @@ struct AllocateParserState : public ParserTransform {
                     // However in this case the subtract of b in the first state does not actually
                     // happen since it is not really extracted there
                     if (auto add = s->to<IR::BFN::ChecksumAdd>()) {
-                        const auto* src = add->source;
+                        const auto *src = add->source;
                         CHECK_NULL(src);
                         if (src->range.lo >= compute_max_shift_in_bits()) {
                             spilled_statements.push_back(s);
@@ -1125,7 +1096,7 @@ struct AllocateParserState : public ParserTransform {
                             LOG3("spill checksum add (pos > shift_amt)");
                         }
                     } else if (auto sub = s->to<IR::BFN::ChecksumSubtract>()) {
-                        const auto* src = sub->source;
+                        const auto *src = sub->source;
                         CHECK_NULL(src);
                         if (src->range.lo >= compute_max_shift_in_bits()) {
                             spilled_statements.push_back(s);
@@ -1144,32 +1115,32 @@ struct AllocateParserState : public ParserTransform {
         }
 
         struct GetExtractBufferPos : Inspector {
-            const PhvInfo& phv;
+            const PhvInfo &phv;
 
             int min = Device::pardeSpec().byteInputBufferSize() * 8;
             int max = -1;
 
-            explicit GetExtractBufferPos(const PhvInfo& phv) : phv(phv) { }
+            explicit GetExtractBufferPos(const PhvInfo &phv) : phv(phv) {}
 
-            bool preorder(const IR::BFN::ExtractPhv* extract) override {
+            bool preorder(const IR::BFN::ExtractPhv *extract) override {
                 PHV::FieldUse use(PHV::FieldUse::WRITE);
                 if (auto rval = extract->source->to<IR::BFN::PacketRVal>()) {
-                    auto alloc_slices = phv.get_alloc(extract->dest->field,
-                            PHV::AllocContext::PARSER, &use);
+                    auto alloc_slices =
+                        phv.get_alloc(extract->dest->field, PHV::AllocContext::PARSER, &use);
 
                     if (!alloc_slices.empty()) {
                         BUG_CHECK(alloc_slices.size() == 1,
-                          "extract allocator expects dest to be individual slice");
+                                  "extract allocator expects dest to be individual slice");
 
                         auto slice = alloc_slices[0];
 
                         const nw_bitrange container_range =
-                          slice.container_slice().toOrder<Endian::Network>
-                            (slice.container().size());
+                            slice.container_slice().toOrder<Endian::Network>(
+                                slice.container().size());
 
                         const nw_bitrange buffer_range =
-                          rval->range.shiftedByBits(-container_range.lo)
-                                     .resizedToBits(slice.container().size());
+                            rval->range.shiftedByBits(-container_range.lo)
+                                .resizedToBits(slice.container().size());
 
                         min = std::min(min, buffer_range.lo);
                         max = std::max(max, buffer_range.hi);
@@ -1212,9 +1183,9 @@ struct AllocateParserState : public ParserTransform {
             bool select_changed_shift = false;
             do {
                 select_changed_shift = false;
-                for (auto* select : state->selects) {
-                    if (auto* source = select->source->to<IR::BFN::SavedRVal>()) {
-                        if (auto* rval = source->source->to<IR::BFN::InputBufferRVal>()) {
+                for (auto *select : state->selects) {
+                    if (auto *source = select->source->to<IR::BFN::SavedRVal>()) {
+                        if (auto *rval = source->source->to<IR::BFN::InputBufferRVal>()) {
                             if (rval->range.lo < shift &&
                                 rval->range.hi >= Device::pardeSpec().byteInputBufferSize() * 8) {
                                 shift = (rval->range.lo / 8) * 8;
@@ -1228,22 +1199,21 @@ struct AllocateParserState : public ParserTransform {
             return shift;
         }
 
-        ParserStateAllocator(const IR::BFN::ParserState* s,
-                             const PhvInfo& phv, ClotInfo& clot) :
-                state(s), phv(phv), clot(clot) {
+        ParserStateAllocator(const IR::BFN::ParserState *s, const PhvInfo &phv, ClotInfo &clot)
+            : state(s), phv(phv), clot(clot) {
             allocate();
         }
 
-        const IR::BFN::ParserState* state;
+        const IR::BFN::ParserState *state;
 
-        const PhvInfo& phv;
-        ClotInfo& clot;
+        const PhvInfo &phv;
+        ClotInfo &clot;
 
-        std::vector<const IR::BFN::ExtractPhv*> phv_extracts;
-        std::vector<const IR::BFN::ExtractClot*> clot_extracts;
-        std::vector<const IR::BFN::ParserChecksumPrimitive*> checksums;
-        std::vector<const IR::BFN::ParserCounterPrimitive*> counters;
-        std::vector<const IR::BFN::ParserPrimitive*> others;
+        std::vector<const IR::BFN::ExtractPhv *> phv_extracts;
+        std::vector<const IR::BFN::ExtractClot *> clot_extracts;
+        std::vector<const IR::BFN::ParserChecksumPrimitive *> checksums;
+        std::vector<const IR::BFN::ParserCounterPrimitive *> counters;
+        std::vector<const IR::BFN::ParserPrimitive *> others;
 
         IR::Vector<IR::BFN::ParserPrimitive> current_statements, spilled_statements;
         bool spill_selects = false;
@@ -1253,7 +1223,7 @@ struct AllocateParserState : public ParserTransform {
         std::map<int, int> orig_idx_to_new_idx;
         int current_idx = 0;
         bool header_stack_present = false;
-        bool preorder(IR::HeaderStackItemRef* hs) override {
+        bool preorder(IR::HeaderStackItemRef *hs) override {
             header_stack_present = true;
             int orig_idx = hs->index_->to<IR::Constant>()->asInt();
             if (orig_idx_to_new_idx.count(orig_idx)) {
@@ -1267,15 +1237,14 @@ struct AllocateParserState : public ParserTransform {
     };
 
     class ParserStateSplitter {
-        const PhvInfo& phv;
-        ClotInfo& clot;
+        const PhvInfo &phv;
+        ClotInfo &clot;
 
         DumpSplitStates dbg;
 
      public:
-        ParserStateSplitter(const PhvInfo& phv, ClotInfo& clot,
-                            IR::BFN::ParserState* state) :
-                phv(phv), clot(clot), dbg(state->name.string()) {
+        ParserStateSplitter(const PhvInfo &phv, ClotInfo &clot, IR::BFN::ParserState *state)
+            : phv(phv), clot(clot), dbg(state->name.string()) {
             dbg.add_cluster({state});
 
             auto splits = split_parser_state(state, state->name, 0);
@@ -1283,27 +1252,25 @@ struct AllocateParserState : public ParserTransform {
 
             if (splits.size() > 1 && LOGGING(1)) {
                 LOG1(state->name << " is split into " << splits.size() << " states:");
-                for (auto s : splits)
-                    LOG1("  " << s->name);
+                for (auto s : splits) LOG1("  " << s->name);
             }
         }
 
      private:
-        IR::BFN::Transition*
-        shift_transition(const IR::BFN::Transition* t, int shift_amt) {
-             BUG_CHECK(shift_amt % 8 == 0, "Shift amount not byte-aligned?");
+        IR::BFN::Transition *shift_transition(const IR::BFN::Transition *t, int shift_amt) {
+            BUG_CHECK(shift_amt % 8 == 0, "Shift amount not byte-aligned?");
 
-             auto c = t->clone();
+            auto c = t->clone();
 
-             auto new_shift = t->shift - shift_amt / 8;
-             c->shift = new_shift;
-             c->saves = *(c->saves.apply(ShiftPacketRVal(shift_amt)));
+            auto new_shift = t->shift - shift_amt / 8;
+            c->shift = new_shift;
+            c->saves = *(c->saves.apply(ShiftPacketRVal(shift_amt)));
 
-             return c;
+            return c;
         }
 
-        IR::BFN::ParserState*
-        create_split_state(const IR::BFN::ParserState* state, cstring prefix, unsigned iteration) {
+        IR::BFN::ParserState *create_split_state(const IR::BFN::ParserState *state, cstring prefix,
+                                                 unsigned iteration) {
             cstring split_name = prefix + ".$split_"_cs + cstring::to_cstring(iteration);
             auto split = new IR::BFN::ParserState(state->p4States, split_name, state->gress);
 
@@ -1312,15 +1279,12 @@ struct AllocateParserState : public ParserTransform {
         }
 
         class VerifySplitStates {
-            IR::BFN::ParserState* orig = nullptr;
+            IR::BFN::ParserState *orig = nullptr;
 
          public:
-            explicit VerifySplitStates(const IR::BFN::ParserState* o) {
-                orig = o->clone();
-            }
+            explicit VerifySplitStates(const IR::BFN::ParserState *o) { orig = o->clone(); }
 
-            void check_sanity(const IR::BFN::ParserState* o,
-                              const IR::BFN::ParserState* s,
+            void check_sanity(const IR::BFN::ParserState *o, const IR::BFN::ParserState *s,
                               bool transition_split) {
                 BUG_CHECK(orig && o && s, "Sanity check on split parser states failed.");
 
@@ -1365,12 +1329,11 @@ struct AllocateParserState : public ParserTransform {
             }
         };
 
-        IR::BFN::ParserState*
-        insert_stall_if_needed(IR::BFN::ParserState* state, cstring prefix, unsigned idx) {
+        IR::BFN::ParserState *insert_stall_if_needed(IR::BFN::ParserState *state, cstring prefix,
+                                                     unsigned idx) {
             auto shift = get_state_shift(state);
 
-            if (int(shift) <= Device::pardeSpec().byteInputBufferSize())
-                return nullptr;
+            if (int(shift) <= Device::pardeSpec().byteInputBufferSize()) return nullptr;
 
             cstring name = prefix + ".$stall_"_cs + cstring::to_cstring(idx);
             auto stall = new IR::BFN::ParserState(state->p4States, name, state->gress);
@@ -1397,22 +1360,21 @@ struct AllocateParserState : public ParserTransform {
             return stall;
         }
 
-        std::vector<IR::BFN::ParserState*>
-        split_parser_state(IR::BFN::ParserState* state, cstring prefix, unsigned iteration) {
-            LOG3("split_parser_state(" << state->name << ", " << prefix << ", " <<
-                 iteration << ")" << IndentCtl::indent);
+        std::vector<IR::BFN::ParserState *> split_parser_state(IR::BFN::ParserState *state,
+                                                               cstring prefix, unsigned iteration) {
+            LOG3("split_parser_state(" << state->name << ", " << prefix << ", " << iteration << ")"
+                                       << IndentCtl::indent);
             ParserStateAllocator alloc(state, phv, clot);
 
             // No more splits = recursion end
-            if (alloc.spilled_statements.empty() && !alloc.spill_selects
-                ) {
+            if (alloc.spilled_statements.empty() && !alloc.spill_selects) {
                 LOG3("no need to split " << state->name << " (nothing spilled)");
 
                 // need to insert stall if next state is not reachable from current state
                 // (if the shift is greater than input buffer size)
                 unsigned idx = 0;
-                IR::BFN::ParserState* stall = state;
-                std::vector<IR::BFN::ParserState*> splits;
+                IR::BFN::ParserState *stall = state;
+                std::vector<IR::BFN::ParserState *> splits;
 
                 while ((stall = insert_stall_if_needed(stall, prefix, idx++))) {
                     LOG2("inserted stall after " << stall->name);
@@ -1432,14 +1394,15 @@ struct AllocateParserState : public ParserTransform {
             if (!alloc.spilled_statements.empty() || alloc.spill_selects) {
                 auto max_shift = alloc.compute_max_shift_in_bits();
 
-                LOG3("computed max shift = " << max_shift << " for split iteration "
-                     << iteration << " of " << state->name);
-                LOG4(alloc.spilled_statements.size() << " split, " <<
-                     alloc.current_statements.size() << " current");
+                LOG3("computed max shift = " << max_shift << " for split iteration " << iteration
+                                             << " of " << state->name);
+                LOG4(alloc.spilled_statements.size()
+                     << " split, " << alloc.current_statements.size() << " current");
                 if (max_shift == 0 && alloc.current_statements.empty()) {
                     error(ErrorType::ERR_OVERLIMIT, "lookahead in %s too far", state);
                     LOG3_UNINDENT;
-                    return std::vector<IR::BFN::ParserState*>(); }
+                    return std::vector<IR::BFN::ParserState *>();
+                }
 
                 state->statements = alloc.current_statements;
                 split->statements = *(alloc.spilled_statements.apply(ShiftPacketRVal(max_shift)));
@@ -1486,7 +1449,7 @@ struct AllocateParserState : public ParserTransform {
         }
     };
 
-    IR::BFN::ParserState* postorder(IR::BFN::ParserState* state) override {
+    IR::BFN::ParserState *postorder(IR::BFN::ParserState *state) override {
         try {
             ParserStateSplitter(phv, clot, state);
         } catch (const Util::CompilerBug &e) {
@@ -1509,34 +1472,31 @@ struct AllocateParserState : public ParserTransform {
 struct InsertParserCounterStall : public ParserTransform {
     std::map<cstring, int> stall_counts;
 
-    void insert_stall_state(IR::BFN::Transition* t) {
+    void insert_stall_state(IR::BFN::Transition *t) {
         auto src = findContext<IR::BFN::ParserState>();
 
         int suffix = stall_counts[src->name]++;
         cstring name = src->name + ".$ctr_stall"_cs + std::to_string(suffix).c_str();
         auto stall = new IR::BFN::ParserState(src->p4States, name, src->gress);
 
-        LOG2("created stall state for counter select on "
-              << src->name << " -> " << t->next->name);
+        LOG2("created stall state for counter select on " << src->name << " -> " << t->next->name);
 
         auto to_dst = new IR::BFN::Transition(match_t(), 0, t->next);
         stall->transitions.push_back(to_dst);
         t->next = stall;
     }
 
-    bool has_counter_select(const IR::BFN::ParserState* state) {
+    bool has_counter_select(const IR::BFN::ParserState *state) {
         for (auto s : state->selects) {
-            if (s->source->is<IR::BFN::ParserCounterRVal>())
-                return true;
+            if (s->source->is<IR::BFN::ParserCounterRVal>()) return true;
         }
 
         return false;
     }
 
-    bool has_counter_load(const IR::BFN::ParserState* state) {
+    bool has_counter_load(const IR::BFN::ParserState *state) {
         for (auto s : state->statements) {
-            if (s->is<IR::BFN::ParserCounterLoadImm>() ||
-                s->is<IR::BFN::ParserCounterLoadPkt>()) {
+            if (s->is<IR::BFN::ParserCounterLoadImm>() || s->is<IR::BFN::ParserCounterLoadPkt>()) {
                 return true;
             }
         }
@@ -1544,12 +1504,11 @@ struct InsertParserCounterStall : public ParserTransform {
         return false;
     }
 
-    IR::BFN::Transition* postorder(IR::BFN::Transition* t) override {
+    IR::BFN::Transition *postorder(IR::BFN::Transition *t) override {
         auto state = findContext<IR::BFN::ParserState>();
 
         if (has_counter_load(state)) {
-            if (t->next && has_counter_select(t->next))
-                insert_stall_state(t);
+            if (t->next && has_counter_select(t->next)) insert_stall_state(t);
         }
 
         return t;
@@ -1560,9 +1519,8 @@ struct InsertParserCounterStall : public ParserTransform {
 /// than 32 bytes (input buffer size), we can safely clip the shift amount to
 /// 32, as the remaining amount will not contribute to header length.
 struct ClipTerminalTransition : ParserModifier {
-    bool preorder(IR::BFN::Transition* t) override {
-        if (t->next == nullptr &&
-            int(t->shift) > Device::pardeSpec().byteInputBufferSize()) {
+    bool preorder(IR::BFN::Transition *t) override {
+        if (t->next == nullptr && int(t->shift) > Device::pardeSpec().byteInputBufferSize()) {
             t->shift = Device::pardeSpec().byteInputBufferSize();
         }
 
@@ -1574,21 +1532,20 @@ struct ClipTerminalTransition : ParserModifier {
 // state's input buffer, that means we cannot implement this program, i.e.
 // program error.
 struct CheckOutOfBufferExtracts : ParserInspector {
-    bool preorder(const IR::BFN::PacketRVal* rval) override {
+    bool preorder(const IR::BFN::PacketRVal *rval) override {
         if (auto extract = findContext<IR::BFN::Extract>()) {
             // CLOTs don't need to be entirely in the buffer to be extracted -- just the
             // start of the CLOT needs to be in the buffer
             if (rval->range.lo < 0 ||
                 (extract->is<IR::BFN::ExtractClot>()
-                 ? rval->range.lo >= Device::pardeSpec().byteInputBufferSize() * 8
-                 : rval->range.hi > Device::pardeSpec().byteInputBufferSize() * 8)) {
+                     ? rval->range.lo >= Device::pardeSpec().byteInputBufferSize() * 8
+                     : rval->range.hi > Device::pardeSpec().byteInputBufferSize() * 8)) {
                 auto state = findContext<IR::BFN::ParserState>();
 
-                ::fatal_error("Extraction source for %1% is out of state %2%'s input buffer"
-                               " (%3% bytes)",
-                               extract->dest->field,
-                               state->name,
-                               Device::pardeSpec().byteInputBufferSize());
+                ::fatal_error(
+                    "Extraction source for %1% is out of state %2%'s input buffer"
+                    " (%3% bytes)",
+                    extract->dest->field, state->name, Device::pardeSpec().byteInputBufferSize());
             }
         }
 
@@ -1598,18 +1555,14 @@ struct CheckOutOfBufferExtracts : ParserInspector {
 
 SplitParserState::SplitParserState(const PhvInfo &phv, ClotInfo &clot,
                                    const CollectParserInfo &parser_info) {
-    auto* field_to_states = new MapFieldToParserStates(phv);
-    addPasses({
-        field_to_states,
-        LOGGING(4) ? new DumpParser("before_split_parser_states") : nullptr,
-        new SliceExtracts(phv, clot, parser_info, *field_to_states),
-        LOGGING(4) ? new DumpParser("after_slice_extracts") : nullptr,
-        new AllocateParserState(phv, clot),
-        LOGGING(4) ? new DumpParser("after_alloc_state_prims") : nullptr,
-        new InsertParserCounterStall,
-        LOGGING(4) ? new DumpParser("after_insert_counter_stall") : nullptr,
-        new ClipTerminalTransition,
-        new CheckOutOfBufferExtracts,
-        LOGGING(4) ? new DumpParser("after_split_parser_states") : nullptr
-    });
+    auto *field_to_states = new MapFieldToParserStates(phv);
+    addPasses({field_to_states, LOGGING(4) ? new DumpParser("before_split_parser_states") : nullptr,
+               new SliceExtracts(phv, clot, parser_info, *field_to_states),
+               LOGGING(4) ? new DumpParser("after_slice_extracts") : nullptr,
+               new AllocateParserState(phv, clot),
+               LOGGING(4) ? new DumpParser("after_alloc_state_prims") : nullptr,
+               new InsertParserCounterStall,
+               LOGGING(4) ? new DumpParser("after_insert_counter_stall") : nullptr,
+               new ClipTerminalTransition, new CheckOutOfBufferExtracts,
+               LOGGING(4) ? new DumpParser("after_split_parser_states") : nullptr});
 }

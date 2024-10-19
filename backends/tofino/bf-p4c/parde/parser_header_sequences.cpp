@@ -20,27 +20,27 @@ Visitor::profile_t ParserHeaderSequences::init_apply(const IR::Node *node) {
     return Inspector::init_apply(node);
 }
 
-static void remove_duplicates(std::vector<ordered_set<cstring>>& seq) {
+static void remove_duplicates(std::vector<ordered_set<cstring>> &seq) {
     std::sort(seq.begin(), seq.end());
     auto it = std::unique(seq.begin(), seq.end());
     seq.erase(it, seq.end());
 }
 
-void ParserHeaderSequences::flow_merge(Visitor& other_) {
-    auto& other = dynamic_cast<ParserHeaderSequences&>(other_);
-    for (const auto& kv : other.headers) {
+void ParserHeaderSequences::flow_merge(Visitor &other_) {
+    auto &other = dynamic_cast<ParserHeaderSequences &>(other_);
+    for (const auto &kv : other.headers) {
         headers[kv.first].insert(kv.second.begin(), kv.second.end());
     }
-    for (const auto& kv : other.sequences) {
-        auto& sequences_gress = sequences[kv.first];
+    for (const auto &kv : other.sequences) {
+        auto &sequences_gress = sequences[kv.first];
         sequences_gress.insert(sequences_gress.end(), kv.second.begin(), kv.second.end());
         remove_duplicates(sequences_gress);
     }
     header_sizes.insert(other.header_sizes.begin(), other.header_sizes.end());
 }
 
-void ParserHeaderSequences::flow_copy(::ControlFlowVisitor& other_) {
-    auto& other = dynamic_cast<ParserHeaderSequences&>(other_);
+void ParserHeaderSequences::flow_copy(::ControlFlowVisitor &other_) {
+    auto &other = dynamic_cast<ParserHeaderSequences &>(other_);
     headers = other.headers;
     header_ids = other.header_ids;  // should always be empty/a noop?
     sequences = other.sequences;
@@ -48,7 +48,7 @@ void ParserHeaderSequences::flow_copy(::ControlFlowVisitor& other_) {
 }
 
 /** @brief Create an empty set of sequences for each parser */
-bool ParserHeaderSequences::preorder(const IR::BFN::Parser* parser) {
+bool ParserHeaderSequences::preorder(const IR::BFN::Parser *parser) {
     sequences[parser->gress] = {{}};
     return true;
 }
@@ -61,7 +61,7 @@ void ParserHeaderSequences::record_header(gress_t gress, cstring header, size_t 
               size);
     if (gress == INGRESS) header_sizes[header] = size;
     headers[gress].emplace(header);
-    for (auto& seq : sequences[gress]) seq.emplace(header);
+    for (auto &seq : sequences[gress]) seq.emplace(header);
 }
 
 /**
@@ -72,27 +72,27 @@ void ParserHeaderSequences::record_header(gress_t gress, cstring header, size_t 
  *  - Headers identified from `$stkvalid` extractions. The `$stkvalid` field is often wider than the
  *    stack depth to allow for left/right shifts corresponding to push/pop operations.
  */
-bool ParserHeaderSequences::preorder(const IR::BFN::Extract* extract) {
-    auto* lval = extract->dest->to<IR::BFN::FieldLVal>();
+bool ParserHeaderSequences::preorder(const IR::BFN::Extract *extract) {
+    auto *lval = extract->dest->to<IR::BFN::FieldLVal>();
     if (!lval) return true;
 
-    auto* field = phv.field(lval->field);
+    auto *field = phv.field(lval->field);
     if (!field || !field->header()) return false;
 
     // Stack valid ($stkvalid) processing
-    const auto* member = lval->field->to<IR::Member>();
+    const auto *member = lval->field->to<IR::Member>();
     size_t size = 0;
     if (member && member->expr) {
-        if (const auto* hdr_ref = member->expr->to<IR::HeaderRef>()) {
-            const auto* base_ref = hdr_ref->baseRef();
+        if (const auto *hdr_ref = member->expr->to<IR::HeaderRef>()) {
+            const auto *base_ref = hdr_ref->baseRef();
             if (base_ref && base_ref->type) size = base_ref->type->width_bits();
         }
     }
     if (member && member->member == "$stkvalid") {
-        const auto* ir = member->expr->to<IR::InstanceRef>();
-        const auto* tb = member->type->to<IR::Type_Bits>();
+        const auto *ir = member->expr->to<IR::InstanceRef>();
+        const auto *tb = member->type->to<IR::Type_Bits>();
         if (ir && tb) {
-            if (const auto* hs = ir->obj->to<IR::HeaderStack>()) {
+            if (const auto *hs = ir->obj->to<IR::HeaderStack>()) {
                 auto header = hs->name;
                 int depth = hs->size;
                 int stkvalid_width = tb->size;
@@ -102,7 +102,7 @@ bool ParserHeaderSequences::preorder(const IR::BFN::Extract* extract) {
                 // Walk through the $stkvalid bits being set and convert to stack indices.
                 // $stkvalid includes pad bits at top/bottom to accommodate the largest shifts;
                 // these should be ingored when converting to stack indices.
-                if (auto* rval_const = extract->source->to<IR::BFN::ConstantRVal>()) {
+                if (auto *rval_const = extract->source->to<IR::BFN::ConstantRVal>()) {
                     for (auto bit : bitvec(rval_const->constant->asInt())) {
                         if (bit < depth + shift && bit >= shift) {
                             int idx = depth - (bit - shift) - 1;
@@ -123,18 +123,17 @@ bool ParserHeaderSequences::preorder(const IR::BFN::Extract* extract) {
 }
 
 void ParserHeaderSequences::end_apply() {
-    for (auto& seq : sequences[INGRESS]) {
+    for (auto &seq : sequences[INGRESS]) {
         seq.emplace(payloadHeaderName);
     }
-    for (auto& [gress, seqs_gress] : sequences) {
+    for (auto &[gress, seqs_gress] : sequences) {
         remove_duplicates(seqs_gress);
     }
     headers[INGRESS].insert(payloadHeaderName);
     // Assign a unique header ID
     int header_id_cnt = 0;
     for (const auto &gress : headers)
-        for (const auto &header : gress.second)
-            header_ids[{gress.first, header}] = header_id_cnt++;
+        for (const auto &header : gress.second) header_ids[{gress.first, header}] = header_id_cnt++;
     header_ids[{INGRESS, payloadHeaderName}] = payloadHeaderID;
     header_sizes[payloadHeaderName] = 0;
     if (LOGGING(1)) {
@@ -143,7 +142,7 @@ void ParserHeaderSequences::end_apply() {
             std::stringstream ss;
             ss << "    " << gress << ": ";
             std::string sep = "";
-            for (auto& hdr : headers[gress]) {
+            for (auto &hdr : headers[gress]) {
                 ss << sep << hdr;
                 sep = " ";
             }
@@ -153,7 +152,7 @@ void ParserHeaderSequences::end_apply() {
         LOG1("Header sequences:");
         for (auto gress : {INGRESS, EGRESS}) {
             LOG1("  GRESS: " << gress);
-            for (const auto& seq : sequences[gress]) {
+            for (const auto &seq : sequences[gress]) {
                 std::stringstream ss;
                 ss << "    - [";
                 std::string sep = "";

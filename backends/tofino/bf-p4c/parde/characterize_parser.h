@@ -10,8 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PARDE_CHARACTERIZE_PARSER_H_
-#define EXTENSIONS_BF_P4C_PARDE_CHARACTERIZE_PARSER_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_CHARACTERIZE_PARSER_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_CHARACTERIZE_PARSER_H_
 
 #include "bf-p4c/bf-p4c-options.h"
 #include "bf-p4c/common/table_printer.h"
@@ -36,25 +36,25 @@ class CharacterizeParser : public Inspector {
     unsigned target_min_packet_size = 8 + 60 + 4 + ipg[line_rate];
 
     // Average consumption rates, in bytes per cycle
-    double target_min_avg_rate = line_rate*1e9 / (8.0 * clock_rate*1e9);
+    double target_min_avg_rate = line_rate * 1e9 / (8.0 * clock_rate * 1e9);
 
     CollectLoweredParserInfo cgl;
 
-    ordered_map<const IR::BFN::LoweredParser*,
-             ordered_set<const IR::BFN::LoweredParserState*>> parser_to_states;
+    ordered_map<const IR::BFN::LoweredParser *, ordered_set<const IR::BFN::LoweredParserState *>>
+        parser_to_states;
 
-    ordered_map<const IR::BFN::LoweredParserState*,
-             ordered_set<const IR::BFN::LoweredParserMatch*>> state_to_matches;
+    ordered_map<const IR::BFN::LoweredParserState *,
+                ordered_set<const IR::BFN::LoweredParserMatch *>>
+        state_to_matches;
 
-    ordered_map<const IR::BFN::LoweredParserMatch*,
-             const IR::BFN::LoweredParserState*> match_to_state;
+    ordered_map<const IR::BFN::LoweredParserMatch *, const IR::BFN::LoweredParserState *>
+        match_to_state;
 
     struct ExtractorUsage : public ordered_map<PHV::Type, unsigned> {
         unsigned get(PHV::Type type) const {
             unsigned rv = 0;
 
-            if (count(type))
-                rv = (*this).at(type);
+            if (count(type)) rv = (*this).at(type);
 
             return rv;
         }
@@ -63,29 +63,24 @@ class CharacterizeParser : public Inspector {
             unsigned rv = 0;
 
             for (auto use : *this) {
-                if (use.first.size() == size)
-                    rv += use.second;
+                if (use.first.size() == size) rv += use.second;
             }
 
             return rv;
         }
 
-        void add(PHV::Container c) {
-            (*this)[c.type()]++;
-        }
+        void add(PHV::Container c) { (*this)[c.type()]++; }
     };
 
-    ordered_map<const IR::BFN::LoweredParserMatch*,
-             const ExtractorUsage*> match_to_extractor_usage;
+    ordered_map<const IR::BFN::LoweredParserMatch *, const ExtractorUsage *>
+        match_to_extractor_usage;
 
-    ordered_map<const IR::BFN::LoweredParserMatch*,
-                std::set<unsigned>> match_to_checksum_usage;
+    ordered_map<const IR::BFN::LoweredParserMatch *, std::set<unsigned>> match_to_checksum_usage;
 
-    ordered_map<const IR::BFN::LoweredParserMatch*,
-                std::set<unsigned>> match_to_clot_usage;
+    ordered_map<const IR::BFN::LoweredParserMatch *, std::set<unsigned>> match_to_clot_usage;
 
  public:
-    Visitor::profile_t init_apply(const IR::Node* root) override {
+    Visitor::profile_t init_apply(const IR::Node *root) override {
         auto rv = Inspector::init_apply(root);
         root->apply(cgl);
 
@@ -93,36 +88,34 @@ class CharacterizeParser : public Inspector {
         return rv;
     }
 
-    bool preorder(const IR::BFN::LoweredParserState* state) override {
+    bool preorder(const IR::BFN::LoweredParserState *state) override {
         auto parser = findContext<IR::BFN::LoweredParser>();
         parser_to_states[parser].insert(state);
         return true;
     }
 
-    void get_extractor_usage(const IR::BFN::LoweredParserMatch* match) {
+    void get_extractor_usage(const IR::BFN::LoweredParserMatch *match) {
         auto rv = new ExtractorUsage;
 
         for (auto stmt : match->extracts) {
-            if (auto ep = stmt->to<IR::BFN::LoweredExtractPhv>())
-                rv->add(ep->dest->container);
+            if (auto ep = stmt->to<IR::BFN::LoweredExtractPhv>()) rv->add(ep->dest->container);
         }
 
         match_to_extractor_usage[match] = rv;
     }
 
-    void get_clot_usage(const IR::BFN::LoweredParserMatch* match) {
+    void get_clot_usage(const IR::BFN::LoweredParserMatch *match) {
         for (auto stmt : match->extracts) {
             if (auto ec = stmt->to<IR::BFN::LoweredExtractClot>())
                 match_to_clot_usage[match].insert(ec->dest->tag);
         }
     }
 
-    void get_checksum_usage(const IR::BFN::LoweredParserMatch* match) {
-        for (auto csum : match->checksums)
-            match_to_checksum_usage[match].insert(csum->unit_id);
+    void get_checksum_usage(const IR::BFN::LoweredParserMatch *match) {
+        for (auto csum : match->checksums) match_to_checksum_usage[match].insert(csum->unit_id);
     }
 
-    bool preorder(const IR::BFN::LoweredParserMatch* match) override {
+    bool preorder(const IR::BFN::LoweredParserMatch *match) override {
         auto state = findContext<IR::BFN::LoweredParserState>();
         state_to_matches[state].insert(match);
         match_to_state[match] = state;
@@ -134,15 +127,14 @@ class CharacterizeParser : public Inspector {
         return true;
     }
 
-    void print_state_usage(const IR::BFN::LoweredParser* parser) {
-        if (!parser_to_states.count(parser))
-            return;
+    void print_state_usage(const IR::BFN::LoweredParser *parser) {
+        if (!parser_to_states.count(parser)) return;
 
         std::string total_extract_label = "Total Extractors";
-        if (Device::currentDevice() != Device::TOFINO)
-            total_extract_label += " (16-bit)";
+        if (Device::currentDevice() != Device::TOFINO) total_extract_label += " (16-bit)";
 
-        TablePrinter tp(std::clog,
+        TablePrinter tp(
+            std::clog,
             {"State", "Match", "8-bit", "16-bit", "32-bit", total_extract_label, "Other"},
             TablePrinter::Align::LEFT);
 
@@ -153,7 +145,7 @@ class CharacterizeParser : public Inspector {
                 std::string state_label;
 
                 for (auto m : state_to_matches.at(s)) {
-                    auto& usage = match_to_extractor_usage.at(m);
+                    auto &usage = match_to_extractor_usage.at(m);
                     auto state = match_to_state.at(m);
 
                     auto usage_8b = usage->get(PHV::Size::b8);
@@ -176,22 +168,17 @@ class CharacterizeParser : public Inspector {
 
                     if (match_to_clot_usage.count(m)) {
                         other_usage << "clot ";
-                        for (auto c : match_to_clot_usage.at(m))
-                            other_usage << c << " ";
+                        for (auto c : match_to_clot_usage.at(m)) other_usage << c << " ";
                     }
 
                     if (match_to_checksum_usage.count(m)) {
                         other_usage << "csum ";
-                        for (auto c : match_to_checksum_usage.at(m))
-                            other_usage << c << " ";
+                        for (auto c : match_to_checksum_usage.at(m)) other_usage << c << " ";
                     }
 
-                    tp.addRow({state_label,
-                               std::string(m->value->toString()),
-                               std::to_string(usage_8b),
-                               std::to_string(usage_16b),
-                               std::to_string(usage_32b),
-                               std::to_string(sausage),
+                    tp.addRow({state_label, std::string(m->value->toString()),
+                               std::to_string(usage_8b), std::to_string(usage_16b),
+                               std::to_string(usage_32b), std::to_string(sausage),
                                other_usage.str()});
                 }
             }
@@ -205,11 +192,11 @@ class CharacterizeParser : public Inspector {
         return (val * round_by) / round_by;
     }
 
-    void print_timing_report(const IR::BFN::LoweredParser* parser,
-                             const std::vector<const IR::BFN::LoweredParserState*>& path) {
+    void print_timing_report(const IR::BFN::LoweredParser *parser,
+                             const std::vector<const IR::BFN::LoweredParserState *> &path) {
         unsigned total_user_header_bits = 0;
 
-        for (auto it =  path.begin(); it != path.end(); it++) {
+        for (auto it = path.begin(); it != path.end(); it++) {
             // need a better way of delineating metadata states vs. user header states
             if ((*it)->name.startsWith("$")) continue;
 
@@ -217,48 +204,43 @@ class CharacterizeParser : public Inspector {
 
             if (next != path.end()) {
                 auto matches = cgl.graphs().at(parser)->transitions(*it, *next);
-                if (!matches.empty())
-                    total_user_header_bits += (*matches.begin())->shift;
+                if (!matches.empty()) total_user_header_bits += (*matches.begin())->shift;
             } else {
                 auto matches = cgl.graphs().at(parser)->to_pipe(*it);
-                if (!matches.empty())
-                    total_user_header_bits += (*matches.begin())->shift;
+                if (!matches.empty()) total_user_header_bits += (*matches.begin())->shift;
             }
         }
 
-        if (total_user_header_bits < target_min_packet_size*8)
-            total_user_header_bits = target_min_packet_size*8;
+        if (total_user_header_bits < target_min_packet_size * 8)
+            total_user_header_bits = target_min_packet_size * 8;
 
         double avg_rate = total_user_header_bits / (8.0 * path.size());
 
         if (avg_rate < target_min_avg_rate) {
-            unsigned min_packet_size = std::max(target_min_packet_size,
-                                         unsigned(ceil(target_min_avg_rate*(path.size()))));
+            unsigned min_packet_size = std::max(
+                target_min_packet_size, unsigned(ceil(target_min_avg_rate * (path.size()))));
 
-            unsigned min_payload_size = min_packet_size - total_user_header_bits/8;
-            double max_data_rate = clock_rate * (total_user_header_bits/path.size());
-            double max_packet_rate = (1e3*max_data_rate) / total_user_header_bits;
+            unsigned min_payload_size = min_packet_size - total_user_header_bits / 8;
+            double max_data_rate = clock_rate * (total_user_header_bits / path.size());
+            double max_packet_rate = (1e3 * max_data_rate) / total_user_header_bits;
 
             max_data_rate = round(max_data_rate, 2);
             max_packet_rate = round(max_packet_rate, 2);
 
-            std::clog << "Average rate: " << avg_rate <<  " Bps" << std::endl;
+            std::clog << "Average rate: " << avg_rate << " Bps" << std::endl;
 
-            std::clog << "Min packet size at " << line_rate << " Gbps: "
-                      << min_packet_size << " B"
+            std::clog << "Min packet size at " << line_rate << " Gbps: " << min_packet_size << " B"
                       << " (" << min_payload_size << " B payload)" << std::endl;
 
-            std::clog << "Max data rate for min-sized packets: "
-                      << max_data_rate << " Gbps / "
+            std::clog << "Max data rate for min-sized packets: " << max_data_rate << " Gbps / "
                       << max_packet_rate << " MPps" << std::endl;
-       } else {
-            std::clog << "Timing is met for min-sized packet ("
-                      << target_min_packet_size << " B)"
+        } else {
+            std::clog << "Timing is met for min-sized packet (" << target_min_packet_size << " B)"
                       << " running at " << line_rate << " Gbps" << std::endl;
-       }
+        }
     }
 
-    void print_parser_summary(const IR::BFN::LoweredParser* parser) {
+    void print_parser_summary(const IR::BFN::LoweredParser *parser) {
         unsigned num_states = 0;
         unsigned num_matches = 0;
 
@@ -266,8 +248,7 @@ class CharacterizeParser : public Inspector {
             num_states = parser_to_states.at(parser).size();
 
             for (auto s : parser_to_states.at(parser)) {
-                if (state_to_matches.count(s))
-                    num_matches += state_to_matches.at(s).size();
+                if (state_to_matches.count(s)) num_matches += state_to_matches.at(s).size();
             }
         }
 
@@ -283,11 +264,10 @@ class CharacterizeParser : public Inspector {
 
         auto longest_path = cgl.graphs().at(parser)->longest_path_states(parser->start);
 
-        std::clog << "Longest path (" << longest_path.size()
-                  << " states) on " << gress << ":" << std::endl;
+        std::clog << "Longest path (" << longest_path.size() << " states) on " << gress << ":"
+                  << std::endl;
 
-        for (auto s : longest_path)
-            std::clog << "    " << s->name << std::endl;
+        for (auto s : longest_path) std::clog << "    " << s->name << std::endl;
 
         std::clog << std::endl;
 
@@ -296,8 +276,7 @@ class CharacterizeParser : public Inspector {
         std::clog << "Shortest path (" << shortest_path.size() << " states) on " << gress << ":"
                   << std::endl;
 
-        for (auto s : shortest_path)
-            std::clog << "    " << s->name << std::endl;
+        for (auto s : shortest_path) std::clog << "    " << s->name << std::endl;
 
         std::clog << std::endl;
 
@@ -317,10 +296,9 @@ class CharacterizeParser : public Inspector {
 
             std::clog << "Parser Characterization Report:" << std::endl;
 
-            for (auto ps : parser_to_states)
-                print_parser_summary(ps.first);
+            for (auto ps : parser_to_states) print_parser_summary(ps.first);
         }
     }
 };
 
-#endif  /* EXTENSIONS_BF_P4C_PARDE_CHARACTERIZE_PARSER_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_CHARACTERIZE_PARSER_H_ */

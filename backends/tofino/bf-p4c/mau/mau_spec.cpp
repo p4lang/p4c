@@ -26,7 +26,6 @@ int TofinoIMemSpec::address_bits() const { return 6; }
 
 int TofinoIMemSpec::map_table_entries() const { return 8; }
 
-
 int IXBarSpec::byteGroups() const { MAU_SPEC_UNSUPPORTED }
 
 int IXBarSpec::exactBytesPerGroup() const { MAU_SPEC_UNSUPPORTED }
@@ -79,8 +78,7 @@ int IXBarSpec::resilientModeHashBits() const { MAU_SPEC_UNSUPPORTED }
 
 int IXBarSpec::ternaryBytesPerBigGroup() const { MAU_SPEC_UNSUPPORTED }
 
-int IXBarSpec::tofinoMeterAluByteOffset() const { MAU_SPEC_UNSUPPORTED }
-
+int IXBarSpec::tofinoMeterAluByteOffset() const {MAU_SPEC_UNSUPPORTED}
 
 IR::Node *MauSpec::postTransformTables(IR::MAU::Table *const table) const {
     return table;
@@ -171,5 +169,3 @@ const IMemSpec &TofinoMauSpec::getIMemSpec() const { return imem_; }
 const IMemSpec &JBayMauSpec::getIMemSpec() const { return imem_; }
 
 const IXBarSpec &JBayMauSpec::getIXBarSpec() const { return ixbar_; }
-
-

@@ -12,7 +12,7 @@
 
 #include "parser_dominator_builder.h"
 
-Visitor::profile_t ParserDominatorBuilder::init_apply(const IR::Node* root) {
+Visitor::profile_t ParserDominatorBuilder::init_apply(const IR::Node *root) {
     auto rv = Inspector::init_apply(root);
 
     parser_graphs.clear();
@@ -23,12 +23,12 @@ Visitor::profile_t ParserDominatorBuilder::init_apply(const IR::Node* root) {
     return rv;
 }
 
-bool ParserDominatorBuilder::preorder(const IR::BFN::Parser* parser) {
+bool ParserDominatorBuilder::preorder(const IR::BFN::Parser *parser) {
     parser_graphs[parser->gress].parser = parser;
     return true;
 }
 
-bool ParserDominatorBuilder::preorder(const IR::BFN::ParserState* parser_state) {
+bool ParserDominatorBuilder::preorder(const IR::BFN::ParserState *parser_state) {
     states.insert(parser_state);
     for (auto transition : parser_state->transitions)
         parser_graphs[parser_state->gress].add_edge(parser_state, transition->next, transition);
@@ -56,14 +56,14 @@ ParserDominatorBuilder::get_immediate_post_dominators(boost::reverse_graph<Graph
 }
 
 ParserDominatorBuilder::StateImmediateDominatorMap ParserDominatorBuilder::index_map_to_state_map(
-    IndexImmediateDominatorMap& idom, ReversibleParserGraph& rpg) {
+    IndexImmediateDominatorMap &idom, ReversibleParserGraph &rpg) {
     LOG7("Converting from int map to a parser state map");
     StateImmediateDominatorMap idom_state;
-    for (auto& kv : idom) {
+    for (auto &kv : idom) {
         BUG_CHECK(rpg.vertex_to_state.count(kv.first),
                   "Unknown parser state with index %1% not found", kv.first);
-        const IR::BFN::ParserState* state = rpg.vertex_to_state.at(kv.first);
-        const IR::BFN::ParserState* dominator;
+        const IR::BFN::ParserState *state = rpg.vertex_to_state.at(kv.first);
+        const IR::BFN::ParserState *dominator;
         if (kv.second == -1) {
             dominator = state;
         } else {
@@ -78,14 +78,14 @@ ParserDominatorBuilder::StateImmediateDominatorMap ParserDominatorBuilder::index
     return idom_state;
 }
 
-std::set<const IR::BFN::ParserState*> ParserDominatorBuilder::get_all_dominatees(
-    const IR::BFN::ParserState* state, gress_t gress, bool get_post_dominatees) {
-    std::set<const IR::BFN::ParserState*> dominatees;
+std::set<const IR::BFN::ParserState *> ParserDominatorBuilder::get_all_dominatees(
+    const IR::BFN::ParserState *state, gress_t gress, bool get_post_dominatees) {
+    std::set<const IR::BFN::ParserState *> dominatees;
     if (state != nullptr) gress = state->gress;
 
     StateImmediateDominatorMap idom_map =
         get_post_dominatees ? immediate_post_dominators.at(gress) : immediate_dominators.at(gress);
-    for (const auto& kv : idom_map) {
+    for (const auto &kv : idom_map) {
         if (kv.second == state && kv.first != state && kv.first != nullptr) {
             auto child_dominatees = get_all_dominatees(kv.first, gress, get_post_dominatees);
             dominatees.insert(kv.first);
@@ -95,9 +95,9 @@ std::set<const IR::BFN::ParserState*> ParserDominatorBuilder::get_all_dominatees
     return dominatees;
 }
 
-std::set<const IR::BFN::ParserState*> ParserDominatorBuilder::get_all_dominators(
-    const IR::BFN::ParserState* state, gress_t gress, bool get_post_dominators) {
-    std::set<const IR::BFN::ParserState*> dominators;
+std::set<const IR::BFN::ParserState *> ParserDominatorBuilder::get_all_dominators(
+    const IR::BFN::ParserState *state, gress_t gress, bool get_post_dominators) {
+    std::set<const IR::BFN::ParserState *> dominators;
     if (state != nullptr) gress = state->gress;
 
     StateImmediateDominatorMap idom_map =
@@ -112,29 +112,29 @@ std::set<const IR::BFN::ParserState*> ParserDominatorBuilder::get_all_dominators
     return dominators;
 }
 
-std::set<const IR::BFN::ParserState*> ParserDominatorBuilder::get_all_dominatees(
-    const IR::BFN::ParserState* state, gress_t gress) {
+std::set<const IR::BFN::ParserState *> ParserDominatorBuilder::get_all_dominatees(
+    const IR::BFN::ParserState *state, gress_t gress) {
     return get_all_dominatees(state, gress, false);
 }
 
-std::set<const IR::BFN::ParserState*> ParserDominatorBuilder::get_all_post_dominatees(
-    const IR::BFN::ParserState* state, gress_t gress) {
+std::set<const IR::BFN::ParserState *> ParserDominatorBuilder::get_all_post_dominatees(
+    const IR::BFN::ParserState *state, gress_t gress) {
     return get_all_dominatees(state, gress, true);
 }
 
-std::set<const IR::BFN::ParserState*> ParserDominatorBuilder::get_all_dominators(
-    const IR::BFN::ParserState* state, gress_t gress) {
+std::set<const IR::BFN::ParserState *> ParserDominatorBuilder::get_all_dominators(
+    const IR::BFN::ParserState *state, gress_t gress) {
     return get_all_dominators(state, gress, false);
 }
 
-std::set<const IR::BFN::ParserState*> ParserDominatorBuilder::get_all_post_dominators(
-    const IR::BFN::ParserState* state, gress_t gress) {
+std::set<const IR::BFN::ParserState *> ParserDominatorBuilder::get_all_post_dominators(
+    const IR::BFN::ParserState *state, gress_t gress) {
     return get_all_dominators(state, gress, true);
 }
 
 void ParserDominatorBuilder::build_dominator_maps() {
     LOG3("Building immediate dominator and post-dominator maps.");
-    for (auto& kv : parser_graphs) {
+    for (auto &kv : parser_graphs) {
         auto idoms = get_immediate_dominators(kv.second.graph, kv.second.get_entry_point());
         auto idom_map = index_map_to_state_map(idoms, kv.second);
 

@@ -15,11 +15,11 @@
  * names beginning with a dot, which is an issue for p4i.
  */
 
-#include <string>
 #include <fstream>
-#include <streambuf>
 #include <iterator>
 #include <regex>
+#include <streambuf>
+#include <string>
 
 #include "bf_gtest_helpers.h"
 #include "gtest/gtest.h"

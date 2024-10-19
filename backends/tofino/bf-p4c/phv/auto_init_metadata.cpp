@@ -11,11 +11,12 @@
  */
 
 #include "auto_init_metadata.h"
+
 #include "bf-p4c/common/pragma/all_pragmas.h"
 #include "bf-p4c/phv/pragma/pa_no_init.h"
 
-bool DisableAutoInitMetadata::auto_init_metadata(const IR::BFN::Pipe* pipe) const {
-    for (auto* anno : pipe->global_pragmas) {
+bool DisableAutoInitMetadata::auto_init_metadata(const IR::BFN::Pipe *pipe) const {
+    for (auto *anno : pipe->global_pragmas) {
         if (anno->name.name == PragmaAutoInitMetadata::name) {
             return true;
         }
@@ -24,7 +25,7 @@ bool DisableAutoInitMetadata::auto_init_metadata(const IR::BFN::Pipe* pipe) cons
     return false;
 }
 
-const IR::Node* DisableAutoInitMetadata::preorder(IR::BFN::Pipe* pipe) {
+const IR::Node *DisableAutoInitMetadata::preorder(IR::BFN::Pipe *pipe) {
     // If the user requested automatic metadata initialization, then don't do anything here.
     if (auto_init_metadata(pipe)) return Transform::preorder(pipe);
 
@@ -81,21 +82,21 @@ const IR::Node* DisableAutoInitMetadata::preorder(IR::BFN::Pipe* pipe) {
             }
         }
 
-        auto annotation = new IR::Annotation(PragmaNoInit::name,
-                                             { new IR::StringLiteral(toString(gress)),
-                                               new IR::StringLiteral(field_name),
-                                             });
-        LOG1("Added annotation @" << PragmaNoInit::name
-            << "(\"" << gress << "\", \"" << field_name << "\")");
+        auto annotation =
+            new IR::Annotation(PragmaNoInit::name, {
+                                                       new IR::StringLiteral(toString(gress)),
+                                                       new IR::StringLiteral(field_name),
+                                                   });
+        LOG1("Added annotation @" << PragmaNoInit::name << "(\"" << gress << "\", \"" << field_name
+                                  << "\")");
         pipe->global_pragmas.push_back(annotation);
     }
 
     return Transform::preorder(pipe);
 }
 
-bool RemoveMetadataInits::elim_assign(const IR::BFN::Unit* unit,
-                                      const IR::Expression* left,
-                                      const IR::Expression* right) {
+bool RemoveMetadataInits::elim_assign(const IR::BFN::Unit *unit, const IR::Expression *left,
+                                      const IR::Expression *right) {
     // Make sure the right side is the constant 0 or false.
     auto c = right->to<IR::Constant>();
     auto b = right->to<IR::BoolLiteral>();
@@ -108,32 +109,27 @@ bool RemoveMetadataInits::elim_assign(const IR::BFN::Unit* unit,
     auto field = phv.field(left, &bits);
     if (!field) return false;
     if (!field->metadata) {
-        LOG4("Unable to remove initialization of " << field->name
-             << ": not metadata");
+        LOG4("Unable to remove initialization of " << field->name << ": not metadata");
         return false;
     }
     if (field->is_invalidate_from_arch()) {
-        LOG4("Unable to remove initialization of " << field->name
-             << ": not initially valid");
+        LOG4("Unable to remove initialization of " << field->name << ": not initially valid");
         return false;
     }
 
     // Make sure the metadata field is not annotated with @pa_no_init.
     if (pa_no_inits.count(field->name)) {
-        LOG4("Unable to remove initialization of " << field->name
-             << ": annotated @pa_no_init");
+        LOG4("Unable to remove initialization of " << field->name << ": annotated @pa_no_init");
         return false;
     }
 
     // Make sure the assignment only overwrites ImplicitParserInit.
-    auto& output_deps = defuse.getOutputDeps(unit, left);
-    if (output_deps.size() != 1
-            || !output_deps.front().second->to<ImplicitParserInit>()) {
+    auto &output_deps = defuse.getOutputDeps(unit, left);
+    if (output_deps.size() != 1 || !output_deps.front().second->to<ImplicitParserInit>()) {
         if (LOGGING(4)) {
             LOG4("Unable to remove initialization of " << field->name
-                 << ". Overwrites the following:");
-            for (auto& output_dep : output_deps)
-                LOG4("  " << output_dep.second);
+                                                       << ". Overwrites the following:");
+            for (auto &output_dep : output_deps) LOG4("  " << output_dep.second);
         }
         return false;
     }
@@ -145,11 +141,10 @@ bool RemoveMetadataInits::elim_assign(const IR::BFN::Unit* unit,
     if (!(unit->is<IR::BFN::ParserState>() || unit->is<IR::BFN::Parser>())) return true;
     // Second check byte alignment and look for other parser defs
     if ((bits.lo % 8) || ((bits.hi % 8) && (field->size > bits.hi))) {
-        for (auto& def : defuse.getAllDefs(field->id)) {
+        for (auto &def : defuse.getAllDefs(field->id)) {
             if (def.first->is<IR::BFN::ParserState>() || def.first->is<IR::BFN::Parser>()) {
                 le_bitrange d_bits;
-                if (phv.field(def.second, &d_bits) && !d_bits.overlaps(bits))
-                    return false;
+                if (phv.field(def.second, &d_bits) && !d_bits.overlaps(bits)) return false;
             }
         }
     }
@@ -157,8 +152,7 @@ bool RemoveMetadataInits::elim_assign(const IR::BFN::Unit* unit,
     return true;
 }
 
-bool RemoveMetadataInits::elim_extract(const IR::BFN::Unit* unit,
-                                       const IR::BFN::Extract* extract) {
+bool RemoveMetadataInits::elim_extract(const IR::BFN::Unit *unit, const IR::BFN::Extract *extract) {
     if (auto lval = extract->dest->to<IR::BFN::FieldLVal>()) {
         if (auto rval = extract->source->to<IR::BFN::ConstantRVal>()) {
             auto result = elim_assign(unit, lval->field, rval->constant);
@@ -170,26 +164,23 @@ bool RemoveMetadataInits::elim_extract(const IR::BFN::Unit* unit,
     return false;
 }
 
-const IR::BFN::Pipe* RemoveMetadataInits::preorder(IR::BFN::Pipe* pipe) {
+const IR::BFN::Pipe *RemoveMetadataInits::preorder(IR::BFN::Pipe *pipe) {
     pa_no_inits.clear();
 
     // Populate pa_no_inits.
     for (auto anno : pipe->global_pragmas) {
         if (anno->name != PragmaNoInit::name) continue;
 
-        BUG_CHECK(anno->expr.size() == 2,
-                  "%1% pragma expects two arguments, but got %2%: %3%",
+        BUG_CHECK(anno->expr.size() == 2, "%1% pragma expects two arguments, but got %2%: %3%",
                   PragmaNoInit::name, anno->expr.size(), anno);
 
         auto gress = anno->expr.at(0)->to<IR::StringLiteral>();
-        BUG_CHECK(gress,
-                  "First argument to %1% is not a string: %2%",
-                  PragmaNoInit::name, anno->expr.at(0));
+        BUG_CHECK(gress, "First argument to %1% is not a string: %2%", PragmaNoInit::name,
+                  anno->expr.at(0));
 
         auto field = anno->expr.at(1)->to<IR::StringLiteral>();
-        BUG_CHECK(field,
-                  "Second argument to %1% is not a string: %2%",
-                  PragmaNoInit::name, anno->expr.at(1));
+        BUG_CHECK(field, "Second argument to %1% is not a string: %2%", PragmaNoInit::name,
+                  anno->expr.at(1));
 
         pa_no_inits.insert(gress->value + "::" + field->value);
     }
@@ -197,7 +188,7 @@ const IR::BFN::Pipe* RemoveMetadataInits::preorder(IR::BFN::Pipe* pipe) {
     return pipe;
 }
 
-const IR::MAU::Instruction* RemoveMetadataInits::preorder(IR::MAU::Instruction* instr) {
+const IR::MAU::Instruction *RemoveMetadataInits::preorder(IR::MAU::Instruction *instr) {
     if (auto unit = findOrigCtxt<IR::BFN::Unit>()) {
         if (instr->name == "set" && elim_assign(unit, instr->operands[0], instr->operands[1])) {
             Log::TempIndent indent;
@@ -213,9 +204,8 @@ const IR::MAU::Instruction* RemoveMetadataInits::preorder(IR::MAU::Instruction* 
             // In order to skip elimination field must be deparsed.
             // NOTE: f->deparsed() does not work here
             bool is_deparsed = false;
-            for (const auto& use : defuse.getAllUses(f->id)) {
-                if (use.first->to<IR::BFN::Deparser>())
-                    is_deparsed = true;
+            for (const auto &use : defuse.getAllUses(f->id)) {
+                if (use.first->to<IR::BFN::Deparser>()) is_deparsed = true;
             }
             if (is_deparsed) {
                 LOG5("Added to zeroInitFields : " << *f);
@@ -228,7 +218,7 @@ const IR::MAU::Instruction* RemoveMetadataInits::preorder(IR::MAU::Instruction* 
     return instr;
 }
 
-Visitor::profile_t RemoveMetadataInits::init_apply(const IR::Node* root) {
+Visitor::profile_t RemoveMetadataInits::init_apply(const IR::Node *root) {
     Log::TempIndent indent;
     LOG3("RemoveMetadataInits init_apply" << indent);
     // Clear zeroInitFields
@@ -243,4 +233,3 @@ void RemoveMetadataInits::end_apply() {
         LOG4("ZeroInitField : " << z);
     }
 }
-

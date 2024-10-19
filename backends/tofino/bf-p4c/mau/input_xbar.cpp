@@ -11,6 +11,7 @@
  */
 
 #include "input_xbar.h"
+
 #include "bf-p4c/device.h"
 #include "bf-p4c/logging/resources.h"
 #include "bf-p4c/mau/gateway.h"
@@ -21,12 +22,12 @@
 #include "bf-p4c/phv/phv_fields.h"
 #include "bf-utils/include/dynamic_hash/dynamic_hash.h"
 #include "lib/algorithm.h"
-#include "lib/bitvec.h"
 #include "lib/bitops.h"
 #include "lib/bitrange.h"
+#include "lib/bitvec.h"
 #include "lib/hex.h"
-#include "lib/range.h"
 #include "lib/log.h"
+#include "lib/range.h"
 
 unsigned IXBarRandom::seed = 0x0572f1fa;
 std::uniform_int_distribution<unsigned> IXBarRandom::distribution10(0, 1023);
@@ -42,20 +43,15 @@ unsigned IXBarRandom::nextRandomNumber(unsigned numBits) {
 
 IXBar::HashDistDest_t IXBar::dest_location(const IR::Node *node, bool precolor) {
     if (auto ba = node->to<IR::MAU::BackendAttached>()) {
-        if (ba->attached->is<IR::MAU::ActionData>())
-            return HD_ACTIONDATA_ADR;
-        if (ba->attached->is<IR::MAU::Counter>())
-            return HD_STATS_ADR;
-        if (ba->attached->is<IR::MAU::StatefulAlu>())
-            return HD_METER_ADR;
+        if (ba->attached->is<IR::MAU::ActionData>()) return HD_ACTIONDATA_ADR;
+        if (ba->attached->is<IR::MAU::Counter>()) return HD_STATS_ADR;
+        if (ba->attached->is<IR::MAU::StatefulAlu>()) return HD_METER_ADR;
         if (ba->attached->is<IR::MAU::Meter>()) {
             return precolor ? HD_STATS_ADR : HD_METER_ADR;
         }
     }
-    if (node->is<IR::MAU::Meter>())
-        return HD_PRECOLOR;
-    if (node->is<IR::MAU::Selector>())
-        return HD_HASHMOD;
+    if (node->is<IR::MAU::Meter>()) return HD_PRECOLOR;
+    if (node->is<IR::MAU::Selector>()) return HD_HASHMOD;
 
     BUG("Invalid call of HashDist dest location");
     return HD_DESTS;
@@ -64,14 +60,30 @@ IXBar::HashDistDest_t IXBar::dest_location(const IR::Node *node, bool precolor) 
 std::string IXBar::hash_dist_name(HashDistDest_t dest) {
     std::string type;
     switch (dest) {
-        case HD_IMMED_LO: type = "immediate lo"; break;
-        case HD_IMMED_HI: type = "immediate hi"; break;
-        case HD_STATS_ADR: type = "stats address"; break;
-        case HD_METER_ADR: type = "meter address"; break;
-        case HD_ACTIONDATA_ADR: type = "action data address"; break;
-        case HD_PRECOLOR: type = "meter precolor"; break;
-        case HD_HASHMOD: type = "selector mod"; break;
-        default: BUG("unknown hash dist user"); break;
+        case HD_IMMED_LO:
+            type = "immediate lo";
+            break;
+        case HD_IMMED_HI:
+            type = "immediate hi";
+            break;
+        case HD_STATS_ADR:
+            type = "stats address";
+            break;
+        case HD_METER_ADR:
+            type = "meter address";
+            break;
+        case HD_ACTIONDATA_ADR:
+            type = "action data address";
+            break;
+        case HD_PRECOLOR:
+            type = "meter precolor";
+            break;
+        case HD_HASHMOD:
+            type = "selector mod";
+            break;
+        default:
+            BUG("unknown hash dist user");
+            break;
     }
     return type;
 }
@@ -83,7 +95,9 @@ int IXBar::Use::groups() const {
         assert(b.loc.group >= 0 && b.loc.group < 16);
         if (!(1 & (counted >> b.loc.group))) {
             ++rv;
-            counted |= 1U << b.loc.group; } }
+            counted |= 1U << b.loc.group;
+        }
+    }
     return rv;
 }
 
@@ -110,8 +124,7 @@ IXBar::Use::TotalBytes IXBar::Use::atcam_match() const {
     TotalBytes single_match;
     single_match.emplace_back(new safe_vector<Byte>());
     for (auto byte : use) {
-        if (byte.is_spec(ATCAM_INDEX))
-            continue;
+        if (byte.is_spec(ATCAM_INDEX)) continue;
         single_match[0]->push_back(byte);
         if (byte.is_spec(ATCAM_DOUBLE)) {
             auto repeat_byte = byte;
@@ -127,8 +140,7 @@ IXBar::Use::TotalBytes IXBar::Use::atcam_match() const {
 safe_vector<IXBar::Use::Byte> IXBar::Use::atcam_partition(int *) const {
     safe_vector<IXBar::Use::Byte> partition;
     for (auto byte : use) {
-        if (!byte.is_spec(ATCAM_INDEX))
-            continue;
+        if (!byte.is_spec(ATCAM_INDEX)) continue;
         partition.push_back(byte);
     }
     return partition;
@@ -187,8 +199,7 @@ void IXBar::Use::add(const IXBar::Use &alloc) {
 
     for (auto old_byte : use) {
         for (auto new_byte : alloc.use) {
-            if (old_byte.loc.group == new_byte.loc.group
-                && old_byte.loc.byte == new_byte.loc.byte)
+            if (old_byte.loc.group == new_byte.loc.group && old_byte.loc.byte == new_byte.loc.byte)
                 BUG("Two combined input xbar groups are using the same byte location");
         }
     }
@@ -200,7 +211,8 @@ void IXBar::Use::add(const IXBar::Use &alloc) {
     }
 
     use.insert(use.end(), alloc.use.begin(), alloc.use.end());
-    way_use.insert(way_use.end(), alloc.way_use.begin(), alloc.way_use.end());;
+    way_use.insert(way_use.end(), alloc.way_use.begin(), alloc.way_use.end());
+    ;
 }
 
 /** Visualization Information of Bytes and their corresponding Hash Matrix Bits
@@ -230,8 +242,7 @@ std::string IXBar::Use::used_for() const {
 }
 
 void IXBar::Use::update_resources(int stage, BFN::Resources::StageResources &stageResource) const {
-    LOG_FEATURE("resources", 2, "add_xbar_bytes_usage (stage=" << stage <<
-                                "), table: " << used_by);
+    LOG_FEATURE("resources", 2, "add_xbar_bytes_usage (stage=" << stage << "), table: " << used_by);
     for (auto &byte : use) {
         bool ternary = type == IXBar::Use::TERNARY_MATCH;
         LOG_FEATURE("resources", 3, "\tadding resource: xbar bytes " << byte.loc.getOrd(ternary));
@@ -246,44 +257,38 @@ void IXBar::Use::update_resources(int stage, BFN::Resources::StageResources &sta
         for (int bit = way.index.lo; bit <= way.index.hi; bit++) {
             auto key = std::make_pair(bit, way.source);
 
-            LOG_FEATURE("resources", 3, "\tadding resource hash_bits from way_use(" << bit <<
-                                        ", " << way.source << "): {" << used_by << " --> " <<
-                                        used_for() << ": " << "Hash Way " << wayIndex <<
-                                        " RAM line select" << "}");
-            stageResource.hashBits[key].append(
-                used_by,
-                used_for(),
-                UsageType::WayLineSelect,
-                wayIndex);
+            LOG_FEATURE("resources", 3,
+                        "\tadding resource hash_bits from way_use("
+                            << bit << ", " << way.source << "): {" << used_by << " --> "
+                            << used_for() << ": " << "Hash Way " << wayIndex << " RAM line select"
+                            << "}");
+            stageResource.hashBits[key].append(used_by, used_for(), UsageType::WayLineSelect,
+                                               wayIndex);
         }
 
         for (auto bit : bitvec(way.select_mask)) {
             bit += way.select.lo;
             auto key = std::make_pair(bit, way.source);
 
-            LOG_FEATURE("resources", 3, "\tadding resource hash_bits from way_use(" << bit <<
-                                        ", " << way.source << "): {" << used_by << " --> " <<
-                                        used_for() << ": " << "Hash Way " << wayIndex <<
-                                        " RAM select" << "}");
-            stageResource.hashBits[key].append(
-                used_by,
-                used_for(),
-                UsageType::WaySelect,
-                wayIndex);
+            LOG_FEATURE("resources", 3,
+                        "\tadding resource hash_bits from way_use("
+                            << bit << ", " << way.source << "): {" << used_by << " --> "
+                            << used_for() << ": " << "Hash Way " << wayIndex << " RAM select"
+                            << "}");
+            stageResource.hashBits[key].append(used_by, used_for(), UsageType::WaySelect, wayIndex);
         }
 
         wayIndex++;
     }
 }
 
-
-
 /** Visualization Information on Hash Distribution Units
  */
 std::ostream &operator<<(std::ostream &out, IXBar::Use::type_t type) {
-    static const char *types[] = { "Exact", "ATCam", "Ternary", "Trie", "Gateway", "Action",
-        "ProxyHash", "Selector", "Meter", "StatefulAlu", "HashDist" };
-    if (size_t(type) < sizeof(types)/sizeof(types[0]))
+    static const char *types[] = {"Exact",   "ATCam",       "Ternary",   "Trie",
+                                  "Gateway", "Action",      "ProxyHash", "Selector",
+                                  "Meter",   "StatefulAlu", "HashDist"};
+    if (size_t(type) < sizeof(types) / sizeof(types[0]))
         out << types[type];
     else
         out << "<type " << int(type) << ">";
@@ -292,25 +297,17 @@ std::ostream &operator<<(std::ostream &out, IXBar::Use::type_t type) {
 
 void IXBar::Use::dbprint(std::ostream &out) const {
     out << type;
-    for (auto &b : use)
-        out << Log::endl << b;
+    for (auto &b : use) out << Log::endl << b;
     for (auto &w : way_use)
-        out << Log::endl << "[ " << w.source << ", " << w.index << ", " << w.select << ", 0x"
+        out << Log::endl
+            << "[ " << w.source << ", " << w.index << ", " << w.select << ", 0x"
             << hex(w.select_mask) << " ]";
 }
 
-void dump(const IXBar::Use *use) {
-    std::cout << *use << std::endl;
-}
-void dump(const IXBar::Use &use) {
-    std::cout << use << std::endl;
-}
-void dump(const IXBar::Use::Byte *ub) {
-    std::cout << *ub << std::endl;
-}
-void dump(const IXBar::Use::Byte &ub) {
-    std::cout << ub << std::endl;
-}
+void dump(const IXBar::Use *use) { std::cout << *use << std::endl; }
+void dump(const IXBar::Use &use) { std::cout << use << std::endl; }
+void dump(const IXBar::Use::Byte *ub) { std::cout << *ub << std::endl; }
+void dump(const IXBar::Use::Byte &ub) { std::cout << ub << std::endl; }
 
 std::string IXBar::FieldInfo::visualization_detail() const {
     std::string rv = get_use_name() + "";
@@ -330,13 +327,12 @@ PHV::FieldSlice IXBar::FieldInfo::field_slice(const PhvInfo &phv) const {
  */
 std::string IXBar::Use::Byte::visualization_detail() const {
     const auto slices = get_slices_for_visualization();
-    return "{" + std::accumulate(
-            slices.begin() + 1,
-            slices.end(),
-            slices.begin()->visualization_detail(),
-            [] (const std::string &str, const FieldInfo &slice) {
-                return str + ", " + slice.visualization_detail();
-            }) + "}";
+    return "{" +
+           std::accumulate(slices.begin() + 1, slices.end(), slices.begin()->visualization_detail(),
+                           [](const std::string &str, const FieldInfo &slice) {
+                               return str + ", " + slice.visualization_detail();
+                           }) +
+           "}";
 }
 
 std::vector<IXBar::FieldInfo> IXBar::Use::Byte::get_slices_for_visualization() const {
@@ -354,12 +350,15 @@ std::vector<IXBar::FieldInfo> IXBar::Use::Byte::get_slices_for_visualization() c
     do {
         int used_end_bit = bit_use.ffz(used_start_bit);
         if (unused_start_bit < unused_end_bit) {
-            int lo = 0; int hi = (unused_end_bit - unused_start_bit) - 1;
+            int lo = 0;
+            int hi = (unused_end_bit - unused_start_bit) - 1;
             result.push_back(FieldInfo("unused"_cs, lo, hi, 0, std::nullopt));
         }
 
-        BUG_CHECK(used_start_bit != used_end_bit, "The bit_use object in %s is incorrectly "
-                 "configured", *this);
+        BUG_CHECK(used_start_bit != used_end_bit,
+                  "The bit_use object in %s is incorrectly "
+                  "configured",
+                  *this);
 
         while (it != field_bytes.end()) {
             if (it->cont_lo > used_end_bit) break;
@@ -376,7 +375,8 @@ std::vector<IXBar::FieldInfo> IXBar::Use::Byte::get_slices_for_visualization() c
     if (unused_start_bit < 8) {
         BUG_CHECK(!first_time, "Byte %s has no field slices", *this);
 
-        int lo = 0; int hi = 7 - unused_start_bit;
+        int lo = 0;
+        int hi = 7 - unused_start_bit;
         result.push_back(FieldInfo("unused"_cs, lo, hi, 0, std::nullopt));
     }
 
@@ -384,8 +384,7 @@ std::vector<IXBar::FieldInfo> IXBar::Use::Byte::get_slices_for_visualization() c
 }
 
 bool IXBar::Use::Byte::is_subset(const Byte &b) const {
-    if (container != b.container && lo != b.lo)
-        return false;
+    if (container != b.container && lo != b.lo) return false;
     for (auto fi : field_bytes) {
         bool is_subset = false;
         for (auto b_fi : b.field_bytes) {
@@ -394,8 +393,7 @@ bool IXBar::Use::Byte::is_subset(const Byte &b) const {
             is_subset = true;
             break;
         }
-        if (!is_subset)
-            return false;
+        if (!is_subset) return false;
     }
     return true;
 }
@@ -403,7 +401,7 @@ bool IXBar::Use::Byte::is_subset(const Byte &b) const {
 bool IXBar::Use::Byte::can_add_info(const FieldInfo &fi) const {
     bitvec overlap_bits = bit_use & fi.cont_loc();
     for (auto br : bitranges(overlap_bits)) {
-        le_bitrange field_bits = { br.first, br.second };
+        le_bitrange field_bits = {br.first, br.second};
         field_bits = field_bits.shiftedByBits(fi.lo - fi.cont_lo);
         bool is_subset = false;
         for (auto c_fi : field_bytes) {
@@ -423,26 +421,22 @@ void IXBar::Use::Byte::add_info(const FieldInfo &fi) {
     safe_vector<FieldInfo> add_fi;
     bitvec non_overlap_bits = fi.cont_loc() - bit_use;
     for (auto br : bitranges(non_overlap_bits)) {
-        le_bitrange field_bits = { br.first, br.second };
+        le_bitrange field_bits = {br.first, br.second};
         field_bits = field_bits.shiftedByBits(fi.lo - fi.cont_lo);
         add_fi.emplace_back(fi.field, field_bits.lo, field_bits.hi, br.first, fi.aliasSource);
     }
 
     field_bytes.insert(field_bytes.end(), add_fi.begin(), add_fi.end());
-    std::sort(field_bytes.begin(), field_bytes.end(), [](const FieldInfo &a, const FieldInfo &b) {
-        return a.cont_lo < b.cont_lo;
-    });
+    std::sort(field_bytes.begin(), field_bytes.end(),
+              [](const FieldInfo &a, const FieldInfo &b) { return a.cont_lo < b.cont_lo; });
 
     BUG_CHECK(field_bytes.size() > 0, "Should be at least one field slice on a byte");
     for (size_t i = 0; i < field_bytes.size() - 1; i++) {
         auto &field_a = field_bytes[i];
-        auto &field_b = field_bytes[i+1];
-        if (field_a.field != field_b.field)
-            continue;
-        if (field_a.cont_hi() + 1 != field_b.cont_lo)
-            continue;
-        if (field_a.hi + 1 != field_b.lo)
-            continue;
+        auto &field_b = field_bytes[i + 1];
+        if (field_a.field != field_b.field) continue;
+        if (field_a.cont_hi() + 1 != field_b.cont_lo) continue;
+        if (field_a.hi + 1 != field_b.lo) continue;
         field_a.hi += field_b.width();
         field_bytes.erase(field_bytes.begin() + i + 1);
         i--;
@@ -451,25 +445,28 @@ void IXBar::Use::Byte::add_info(const FieldInfo &fi) {
 }
 
 static int need_align_flags[4][4] = {
-    { 0, 0, 0, 0 },  // 8bit -- no alignment needed
-    { IXBar::Use::Align16lo, IXBar::Use::Align16hi, IXBar::Use::Align16lo, IXBar::Use::Align16hi },
-    { IXBar::Use::Align16lo | IXBar::Use::Align32lo,
-      IXBar::Use::Align16hi | IXBar::Use::Align32lo,
-      IXBar::Use::Align16lo | IXBar::Use::Align32hi,
-      IXBar::Use::Align16hi | IXBar::Use::Align32hi },
-    { 0, 0, 0, 0, },  // Not yet allocated -- assume no alignment required
+    {0, 0, 0, 0},  // 8bit -- no alignment needed
+    {IXBar::Use::Align16lo, IXBar::Use::Align16hi, IXBar::Use::Align16lo, IXBar::Use::Align16hi},
+    {IXBar::Use::Align16lo | IXBar::Use::Align32lo, IXBar::Use::Align16hi | IXBar::Use::Align32lo,
+     IXBar::Use::Align16lo | IXBar::Use::Align32hi, IXBar::Use::Align16hi | IXBar::Use::Align32hi},
+    {
+        0,
+        0,
+        0,
+        0,
+    },  // Not yet allocated -- assume no alignment required
 };
 
 /* Add the pre-allocated bytes to the Use structure */
-void IXBar::add_use(ContByteConversion &map_alloc, const PHV::Field *field,
-                    const PhvInfo &phv, const IR::MAU::Table *ctxt,
-                    std::optional<cstring> aliasSourceName, const le_bitrange *bits,
-                    int flags, byte_type_t byte_type, unsigned extra_align, int range_index,
-                    int ixbar_group_num) {
-    LOG5("Adding IXBar Use for field - " << field << Log::endl << "  on table : " << ctxt->name
-            << ", flags : " << flags << ", byte_type: " << byte_type
-            << ", extra_align: " << extra_align << ", range_index: " << range_index
-            << ", ixbar_group_num: " << ixbar_group_num);
+void IXBar::add_use(ContByteConversion &map_alloc, const PHV::Field *field, const PhvInfo &phv,
+                    const IR::MAU::Table *ctxt, std::optional<cstring> aliasSourceName,
+                    const le_bitrange *bits, int flags, byte_type_t byte_type, unsigned extra_align,
+                    int range_index, int ixbar_group_num) {
+    LOG5("Adding IXBar Use for field - "
+         << field << Log::endl
+         << "  on table : " << ctxt->name << ", flags : " << flags << ", byte_type: " << byte_type
+         << ", extra_align: " << extra_align << ", range_index: " << range_index
+         << ", ixbar_group_num: " << ixbar_group_num);
 
     bool ok = false;
     int index = 0;
@@ -489,12 +486,12 @@ void IXBar::add_use(ContByteConversion &map_alloc, const PHV::Field *field,
         // time may still be non-zero even though they aren't live.  This will always mark
         // all bits that are ever allocated
         bitvec all_bits = phv.bits_allocated(sl.container());
-        IXBar::Use::Byte byte(sl.container(), (sl.container_slice().lo/8U) * 8U);
+        IXBar::Use::Byte byte(sl.container(), (sl.container_slice().lo / 8U) * 8U);
 
         byte.non_zero_bits = all_bits.getslice((sl.container_slice().lo / 8U) * 8U, 8);
-        byte.flags =
-            flags | need_align_flags[sl.container().log2sz()][(sl.container_slice().lo/8U) & 3]
-                  | need_align_flags[extra_align][index & 3];
+        byte.flags = flags |
+                     need_align_flags[sl.container().log2sz()][(sl.container_slice().lo / 8U) & 3] |
+                     need_align_flags[extra_align][index & 3];
         // FIXME -- for (jbay) 128-bit salu, extra_align ends up being 3, so we're not adding
         // any extra alignment here as it falls into the 'not yet allocated'.  This is either
         // a happy accident, or incorrect -- I'm not sure if we need extra alignment for this
@@ -529,8 +526,10 @@ void IXBar::add_use(ContByteConversion &map_alloc, const PHV::Field *field,
     });
     if (!ok) {
         // should be ok as we'll backtrack and redo layout after final PHV alloc.
-        LOG1("field " << field->name << " is not allocated in the PHV, ixbar alloc will be "
-             "incorrect"); }
+        LOG1("field " << field->name
+                      << " is not allocated in the PHV, ixbar alloc will be "
+                         "incorrect");
+    }
 }
 
 /** In order to prevent some overlay bugs by the driver, this guarantees that if a table matches
@@ -577,8 +576,7 @@ void IXBar::create_alloc(ContByteConversion &map_alloc, safe_vector<Use::Byte> &
                 }
                 index++;
             }
-            if (add_new_byte)
-                created_bytes.emplace_back(entry.first);
+            if (add_new_byte) created_bytes.emplace_back(entry.first);
             created_bytes[index].add_info(fi);
         }
         bytes.insert(bytes.end(), created_bytes.begin(), created_bytes.end());
@@ -588,23 +586,19 @@ void IXBar::create_alloc(ContByteConversion &map_alloc, safe_vector<Use::Byte> &
     // le_bitrange order
     for (auto &byte : bytes) {
         std::sort(byte.field_bytes.begin(), byte.field_bytes.end(),
-            [](const FieldInfo &a, const FieldInfo &b) {
-            return a.cont_lo < b.cont_lo;
-        });
+                  [](const FieldInfo &a, const FieldInfo &b) { return a.cont_lo < b.cont_lo; });
     }
 
     for (auto &byte : bytes) {
         LOG5("Allocate " << byte);
         // Used to print initialization information for gtest
-        LOG_FEATURE("gtest", 2, "Allocate " << byte.container << " lo " << byte.lo
-             << " bit_use " << byte.bit_use
-             << " flag " << byte.flags
-             << " non_zero_bits " << byte.non_zero_bits
-             << " specialities " << byte.specialities
-             << " search_bus " << byte.search_bus
-             << " match_index " << byte.match_index
-             << " range_index " << byte.range_index
-             << " proxy_hash " << byte.proxy_hash);
+        LOG_FEATURE("gtest", 2,
+                    "Allocate " << byte.container << " lo " << byte.lo << " bit_use "
+                                << byte.bit_use << " flag " << byte.flags << " non_zero_bits "
+                                << byte.non_zero_bits << " specialities " << byte.specialities
+                                << " search_bus " << byte.search_bus << " match_index "
+                                << byte.match_index << " range_index " << byte.range_index
+                                << " proxy_hash " << byte.proxy_hash);
     }
 }
 
@@ -613,7 +607,7 @@ void IXBar::create_alloc(ContByteConversion &map_alloc, IXBar::Use &alloc) {
 }
 
 /** IXBar::FieldManagement: This is for adding fields to be allocated in the ixbar
-  * allocation scheme.  Used by match tables, selectors, and hash distribution */
+ * allocation scheme.  Used by match tables, selectors, and hash distribution */
 // BEWARE: The preorder implementations for ListExpression and StructExpression
 //         MUST be kept in sync. For future extensions, getListExprComponents()
 //         may come in handy.
@@ -637,8 +631,8 @@ bool IXBar::FieldManagement::preorder(const IR::Mask *) {
 
 bool IXBar::FieldManagement::preorder(const IR::MAU::TableKey *read) {
     if (ki.is_atcam) {
-        if (ki.partition != read->partition_index)
-            return false; }
+        if (ki.partition != read->partition_index) return false;
+    }
     return true;
 }
 
@@ -648,8 +642,10 @@ bool IXBar::FieldManagement::preorder(const IR::Constant *c) {
 }
 
 bool IXBar::FieldManagement::preorder(const IR::MAU::ActionArg *aa) {
-    error(ErrorType::ERR_INVALID, "Can't use action argument %1% in a hash in the same action;"
-          " try splitting the action", aa);
+    error(ErrorType::ERR_INVALID,
+          "Can't use action argument %1% in a hash in the same action;"
+          " try splitting the action",
+          aa);
     return false;
 }
 
@@ -663,13 +659,14 @@ static std::string db_slices(const IR::MAU::Table *tbl, const PHV::Field *field,
         else
             rv << ", ";
         rv << slice.container() << "[" << slice.container_slice().hi << ":"
-            << slice.container_slice().lo << "]"; });
+           << slice.container_slice().lo << "]";
+    });
     return rv.str();
 }
 
 bool IXBar::FieldManagement::preorder(const IR::Expression *e) {
     LOG3("IXBar::FieldManagement preorder expression : " << e);
-    le_bitrange bits = { };
+    le_bitrange bits = {};
     auto *finfo = phv.field(e, &bits);
     if (!finfo) return true;
     LOG4("  " << db_slices(tbl, finfo, bits));
@@ -677,8 +674,9 @@ bool IXBar::FieldManagement::preorder(const IR::Expression *e) {
     bitvec field_bits(bits.lo, bits.hi - bits.lo + 1);
     // Currently, due to driver, only one field is allowed to be the partition index
     if (map_alloc == nullptr || fields_needed == nullptr) {
-        BUG_CHECK(map_alloc == nullptr && fields_needed == nullptr, "Invalid call of the "
-            "IXBar::FieldManagement pass");
+        BUG_CHECK(map_alloc == nullptr && fields_needed == nullptr,
+                  "Invalid call of the "
+                  "IXBar::FieldManagement pass");
         return false;
     }
 
@@ -691,30 +689,27 @@ bool IXBar::FieldManagement::preorder(const IR::Expression *e) {
             else if (read->match_type.name == "ternary" || read->match_type.name == "lpm")
                 byte_type = ATCAM;
         }
-        if (read->match_type.name == "range")
-            byte_type = RANGE;
+        if (read->match_type.name == "range") byte_type = RANGE;
 
         ixbar_group_num = read->ixbar_group_num;
         LOG3("  " << read->match_type.name << " " << byte_type << " " << ixbar_group_num);
     }
     if (byte_type == PARTITION_INDEX) {
         int diff = bits.size() - ki.partition_bits;
-        if (diff > 0)
-            bits.hi -= diff;
+        if (diff > 0) bits.hi -= diff;
     }
 
     if (fields_needed->count(finfo->name)) {
         auto &allocated_bits = fields_needed->at(finfo->name);
-        if ((allocated_bits & field_bits).popcount() == field_bits.popcount())
-            return false;
+        if ((allocated_bits & field_bits).popcount() == field_bits.popcount()) return false;
         (*fields_needed)[finfo->name] |= field_bits;
     } else {
         (*fields_needed)[finfo->name] = field_bits;
     }
 
     std::optional<cstring> aliasSourceName = phv.get_alias_name(e);
-    add_use(*map_alloc, finfo, phv, tbl, aliasSourceName, &bits, 0, byte_type, 0,
-            ki.range_index, ixbar_group_num);
+    add_use(*map_alloc, finfo, phv, tbl, aliasSourceName, &bits, 0, byte_type, 0, ki.range_index,
+            ixbar_group_num);
     if (byte_type == RANGE) {
         ki.range_index++;
     }
@@ -726,8 +721,8 @@ void IXBar::FieldManagement::postorder(const IR::BFN::SignExtend *c) {
     BUG_CHECK(field_list_order.back() == c->expr, "SignExtend mismatch");
     int size = c->expr->type->width_bits();
     for (int i = c->type->width_bits(); i > size; --i) {
-        field_list_order.insert(field_list_order.end() - 1,
-            MakeSlice(c->expr, size - 1, size - 1)); }
+        field_list_order.insert(field_list_order.end() - 1, MakeSlice(c->expr, size - 1, size - 1));
+    }
 }
 
 /**
@@ -738,14 +733,12 @@ void IXBar::FieldManagement::postorder(const IR::BFN::SignExtend *c) {
  * this can go away.
  */
 void IXBar::FieldManagement::end_apply() {
-    if (ki.repeats_allowed)
-        return;
+    if (ki.repeats_allowed) return;
     std::map<cstring, bitvec> field_list_check;
     for (auto it = field_list_order.begin(); it != field_list_order.end(); it++) {
         le_bitrange bits;
         auto field = phv.field(*it, &bits);
-        if (field == nullptr)
-            continue;
+        if (field == nullptr) continue;
 
         bitvec used_bits(bits.lo, bits.size());
 
@@ -758,20 +751,17 @@ void IXBar::FieldManagement::end_apply() {
                 it--;
             } else {
                 error(ErrorType::ERR_INVALID,
-                        "Overlapping field %2% in table %1% not supported with the hashing "
-                        "algorithm", tbl, field->name);
+                      "Overlapping field %2% in table %1% not supported with the hashing "
+                      "algorithm",
+                      tbl, field->name);
             }
         }
         field_list_check[field->name] |= used_bits;
     }
 }
 
-void dump(const IXBar *ixbar) {
-    std::cout << *ixbar;
-}
-void dump(const IXBar &ixbar) {
-    std::cout << ixbar;
-}
+void dump(const IXBar *ixbar) { std::cout << *ixbar; }
+void dump(const IXBar &ixbar) { std::cout << ixbar; }
 
 void IXBar::update(const IR::MAU::Table *tbl, const TableResourceAlloc *rsrc) {
     const IR::MAU::Selector *as = nullptr;
@@ -779,24 +769,23 @@ void IXBar::update(const IR::MAU::Table *tbl, const TableResourceAlloc *rsrc) {
     const IR::MAU::StatefulAlu *salu = nullptr;
 
     for (auto ba : tbl->attached) {
-        if (auto as_p = ba->attached->to<IR::MAU::Selector>())
-            as = as_p;
-        if (auto mtr_p = ba->attached->to<IR::MAU::Meter>())
-            mtr = mtr_p;
-        if (auto salu_p = ba->attached->to<IR::MAU::StatefulAlu>())
-            salu = salu_p;
+        if (auto as_p = ba->attached->to<IR::MAU::Selector>()) as = as_p;
+        if (auto mtr_p = ba->attached->to<IR::MAU::Meter>()) mtr = mtr_p;
+        if (auto salu_p = ba->attached->to<IR::MAU::StatefulAlu>()) salu = salu_p;
     }
 
     auto name = tbl->name;
     if (as && (allocated_attached.count(as) == 0)) {
         if (rsrc->selector_ixbar) {
             update(name + "$select", *rsrc->selector_ixbar);
-            allocated_attached.emplace(as, *rsrc->selector_ixbar); }
+            allocated_attached.emplace(as, *rsrc->selector_ixbar);
+        }
     }
     if (mtr && (allocated_attached.count(mtr) == 0)) {
         if (rsrc->meter_ixbar) {
             update(name + "$mtr", *rsrc->meter_ixbar);
-            allocated_attached.emplace(mtr, *rsrc->meter_ixbar); }
+            allocated_attached.emplace(mtr, *rsrc->meter_ixbar);
+        }
     }
     if (salu && (allocated_attached.count(salu) == 0)) {
         if (!tbl->for_dleft() && salu->for_dleft()) {
@@ -807,28 +796,22 @@ void IXBar::update(const IR::MAU::Table *tbl, const TableResourceAlloc *rsrc) {
         } else {
             if (rsrc->salu_ixbar) {
                 update(name + "$salu", *rsrc->salu_ixbar);
-                allocated_attached.emplace(salu, *rsrc->salu_ixbar); }
+                allocated_attached.emplace(salu, *rsrc->salu_ixbar);
+            }
         }
     }
 
-    if (rsrc->proxy_hash_ixbar)
-        update(name + "$proxy_hash", *rsrc->proxy_hash_ixbar);
-    if (rsrc->gateway_ixbar)
-        update(name + "$gw", *rsrc->gateway_ixbar);
-    if (rsrc->action_ixbar)
-        update(name + "$act", *rsrc->action_ixbar);
-    if (rsrc->match_ixbar)
-        update(name, *rsrc->match_ixbar);
+    if (rsrc->proxy_hash_ixbar) update(name + "$proxy_hash", *rsrc->proxy_hash_ixbar);
+    if (rsrc->gateway_ixbar) update(name + "$gw", *rsrc->gateway_ixbar);
+    if (rsrc->action_ixbar) update(name + "$act", *rsrc->action_ixbar);
+    if (rsrc->match_ixbar) update(name, *rsrc->match_ixbar);
 }
 
 void IXBar::update(const IR::MAU::Table *tbl) {
-    if (tbl->is_placed())
-        update(tbl, tbl->resources);
+    if (tbl->is_placed()) update(tbl, tbl->resources);
 }
 
-IXBar *IXBar::create() {
-    return new Tofino::IXBar();
-}
+IXBar *IXBar::create() { return new Tofino::IXBar(); }
 
 void IXBar::add_names(cstring n, std::map<cstring, char> &names) {
     if (n && !names.count(n)) {
@@ -837,12 +820,15 @@ void IXBar::add_names(cstring n, std::map<cstring, char> &names) {
         else if (names.size() >= 26)
             names.emplace(n, 'a' + names.size() - 26);
         else
-            names.emplace(n, 'A' + names.size()); }
+            names.emplace(n, 'A' + names.size());
+    }
 }
-void IXBar::add_names(const std::pair<PHV::Container, int>& c, std::map<cstring, char> &names) {
-    add_names(c.first ? c.first.toString() : cstring(), names); }
+void IXBar::add_names(const std::pair<PHV::Container, int> &c, std::map<cstring, char> &names) {
+    add_names(c.first ? c.first.toString() : cstring(), names);
+}
 void IXBar::add_names(PHV::Container c, std::map<cstring, char> &names) {
-    add_names(c ? c.toString() : cstring(), names); }
+    add_names(c ? c.toString() : cstring(), names);
+}
 
 void IXBar::sort_names(std::map<cstring, char> &names) {
     char a = 'A' - 1;
@@ -850,21 +836,24 @@ void IXBar::sort_names(std::map<cstring, char> &names) {
         n.second = ++a;
         if (a == 'Z') a = 'a' - 1;
         if (a == 'z') a = '0' - 1;
-        if (a == '9' || a == '?') a = '?' - 1; }
+        if (a == '9' || a == '?') a = '?' - 1;
+    }
 }
 
 void IXBar::write_one(std::ostream &out, const std::pair<cstring, int> &f,
                       std::map<cstring, char> &fields) {
     if (f.first) {
-        out << fields.at(f.first) << hex(f.second/8);
+        out << fields.at(f.first) << hex(f.second / 8);
     } else {
-        out << ".."; }
+        out << "..";
+    }
 }
 void IXBar::write_one(std::ostream &out, cstring n, std::map<cstring, char> &names) {
     if (n) {
         out << names.at(n);
     } else {
-        out << '.'; }
+        out << '.';
+    }
 }
 void IXBar::write_one(std::ostream &out, const std::pair<PHV::Container, int> &f,
                       std::map<cstring, char> &fields) {

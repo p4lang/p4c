@@ -11,6 +11,7 @@
  */
 
 #include "bf-p4c/mau/attached_output.h"
+
 #include "bf-p4c/mau/action_format.h"
 #include "bf-p4c/mau/table_layout.h"
 
@@ -57,12 +58,12 @@ bool Format::Use::contains_adb_slot(ActionData::SlotType_t type, int start_byte)
     int bytes = ActionData::slot_type_to_bits(type) / 8;
     bitvec adb_range = table_bus_inputs[type].getslice(start_byte, bytes);
     BUG_CHECK(adb_range.empty() || (adb_range.is_contiguous() && adb_range.popcount() == bytes),
-        "Meter ALU action bus was improperly set up");
+              "Meter ALU action bus was improperly set up");
     return !adb_range.empty();
 }
 
-void Format::create_meter_alu(ActionData::ALUOperation &alu,
-        ActionAnalysis::ActionParam &read, le_bitrange container_bits) {
+void Format::create_meter_alu(ActionData::ALUOperation &alu, ActionAnalysis::ActionParam &read,
+                              le_bitrange container_bits) {
     auto ao = read.unsliced_expr()->to<IR::MAU::AttachedOutput>();
     BUG_CHECK(ao != nullptr, "Cannot create meter alu");
     ActionData::MeterALU *ma = new ActionData::MeterALU(ao->attached->name, read.range());
@@ -87,17 +88,15 @@ void Format::create_meter_alu(ActionData::ALUOperation &alu,
  *
  * The ops_per_action is a single ALU operation that contains stateful ALU data.
  */
-void Format::create_alu_ops_for_action(
-        ActionAnalysis::ContainerActionsMap &ca_map, cstring action_name,
-        OperationsPerAction &ops_per_action) {
+void Format::create_alu_ops_for_action(ActionAnalysis::ContainerActionsMap &ca_map,
+                                       cstring action_name, OperationsPerAction &ops_per_action) {
     LOG2("   Creating action data alus for " << action_name);
 
     for (auto &container_action_info : ca_map) {
         auto container = container_action_info.first;
         auto &cont_action = container_action_info.second;
         ActionData::ALUOPConstraint_t alu_cons = ActionData::DEPOSIT_FIELD;
-        if (!cont_action.specialities().getbit(ActionAnalysis::ActionParam::METER_ALU))
-            continue;
+        if (!cont_action.specialities().getbit(ActionAnalysis::ActionParam::METER_ALU)) continue;
 
         if (cont_action.convert_instr_to_bitmasked_set)
             BUG("Bitmasked set cannot be used on attached output in %1% : %2%",
@@ -114,26 +113,25 @@ void Format::create_alu_ops_for_action(
             le_bitrange container_bits;
             int write_count = 0;
             PHV::FieldUse use(PHV::FieldUse::WRITE);
-            write_field->foreach_alloc(bits, cont_action.table_context, &use,
-                                       [&](const PHV::AllocSlice &alloc) {
-                write_count++;
-                container_bits = alloc.container_slice();
-                BUG_CHECK(container_bits.lo >= 0, "Invalid negative container bit");
-                if (!alloc.container())
-                    LOG1("ERROR: Phv field " << write_field->name << " written in action "
-                          << action_name << " is not allocated?");
-            });
-            if (write_count > 1)
-                BUG("Splitting of writes handled incorrectly");
+            write_field->foreach_alloc(
+                bits, cont_action.table_context, &use, [&](const PHV::AllocSlice &alloc) {
+                    write_count++;
+                    container_bits = alloc.container_slice();
+                    BUG_CHECK(container_bits.lo >= 0, "Invalid negative container bit");
+                    if (!alloc.container())
+                        LOG1("ERROR: Phv field " << write_field->name << " written in action "
+                                                 << action_name << " is not allocated?");
+                });
+            if (write_count > 1) BUG("Splitting of writes handled incorrectly");
 
             for (auto &read : field_action.reads) {
-                if (read.type == ActionAnalysis::ActionParam::PHV)
-                    continue;
+                if (read.type == ActionAnalysis::ActionParam::PHV) continue;
                 if ((read.type == ActionAnalysis::ActionParam::ACTIONDATA &&
-                    read.speciality != ActionAnalysis::ActionParam::METER_ALU)
-                    || read.type == ActionAnalysis::ActionParam::CONSTANT) {
+                     read.speciality != ActionAnalysis::ActionParam::METER_ALU) ||
+                    read.type == ActionAnalysis::ActionParam::CONSTANT) {
                     BUG("Illegal instruction with both meter alu action data and non meter alu "
-                        "data 1% : %2%", container.toString(), cont_action.to_string());
+                        "data 1% : %2%",
+                        container.toString(), cont_action.to_string());
                 }
                 create_meter_alu(*alu, read, container_bits);
                 created_action_data = true;
@@ -144,7 +142,6 @@ void Format::create_alu_ops_for_action(
         }
     }
 }
-
 
 bool Format::preorder(const IR::MAU::Table *tbl) {
     auto &ops_per_action = operations_per_table[tbl];
@@ -168,13 +165,14 @@ bool Format::preorder(const IR::MAU::Table *tbl) {
 
     if (!found_attached_meter_or_stateful_alu) {
         for (auto action_ops : ops_per_action) {
-            BUG_CHECK(action_ops.second.empty(), "Operations on meter alu users in action %1% "
-                "in table %2% with no object attached", action_ops.first, tbl->externalName());
+            BUG_CHECK(action_ops.second.empty(),
+                      "Operations on meter alu users in action %1% "
+                      "in table %2% with no object attached",
+                      action_ops.first, tbl->externalName());
         }
     }
     return true;
 }
-
 
 /**
  * Bit 0 of the meter address user is output to bit 0 of the home row action bus, and

@@ -24,29 +24,35 @@ class NextTable : public virtual Visitor {
     virtual void dbprint(std::ostream &) const = 0;
     virtual const std::unordered_map<int, std::set<UniqueId>> &long_branches(UniqueId) const {
         static std::unordered_map<int, std::set<UniqueId>> empty;
-        return empty; }
+        return empty;
+    }
     virtual std::pair<ssize_t, ssize_t> get_live_range_for_lb_with_dest(UniqueId) const {
-        return { -1, -1 }; }
+        return {-1, -1};
+    }
     int long_branch_tag_for(UniqueId from, UniqueId to) const {
         for (auto &lb : long_branches(from))
-            if (lb.second.count(to))
-                return lb.first;
-        return -1; }
+            if (lb.second.count(to)) return lb.first;
+        return -1;
+    }
 };
 
 class DynamicNextTable : public DynamicVisitor, public NextTable, public IHasDbPrint {
-    NextTable   *pass = nullptr;
+    NextTable *pass = nullptr;
 
  public:
     ordered_set<UniqueId> next_for(const IR::MAU::Table *tbl, cstring what) const override {
-        return pass->next_for(tbl, what); }
+        return pass->next_for(tbl, what);
+    }
     bool uses_next_table(const IR::MAU::Table *tbl) const override {
-        return pass->uses_next_table(tbl); }
+        return pass->uses_next_table(tbl);
+    }
     void dbprint(std::ostream &out) const override { pass->dbprint(out); }
     const std::unordered_map<int, std::set<UniqueId>> &long_branches(UniqueId id) const override {
-        return pass->long_branches(id); }
+        return pass->long_branches(id);
+    }
     std::pair<ssize_t, ssize_t> get_live_range_for_lb_with_dest(UniqueId id) const override {
-        return pass->get_live_range_for_lb_with_dest(id); }
+        return pass->get_live_range_for_lb_with_dest(id);
+    }
     void setVisitor(NextTable *v) { DynamicVisitor::setVisitor((pass = v)); }
     DynamicNextTable *clone() const override { BUG("DynamicNextTable not cloneable"); }
 };

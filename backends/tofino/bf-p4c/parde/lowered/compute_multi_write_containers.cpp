@@ -14,23 +14,21 @@
 
 namespace Parde::Lowered {
 
-PHV::Container ComputeMultiWriteContainers::offset_container(const PHV::Container& container) {
+PHV::Container ComputeMultiWriteContainers::offset_container(const PHV::Container &container) {
     if (stack_offset == 0) return container;
 
     unsigned index = Device::phvSpec().physicalAddress(container, PhvSpec::PARSER);
-    auto curr = Device::phvSpec().physicalAddressToContainer(index + stack_offset,
-                                                             PhvSpec::PARSER);
+    auto curr = Device::phvSpec().physicalAddressToContainer(index + stack_offset, PhvSpec::PARSER);
     // If we have an 8b container on JBay, point to the correct
     // half in the 16b parser container
-    if ((Device::currentDevice() == Device::JBAY
-        ) &&  // NOLINT(whitespace/parens)
+    if ((Device::currentDevice() == Device::JBAY) &&  // NOLINT(whitespace/parens)
         container.type().size() == PHV::Size::b8 && container.index() % 2)
         curr = PHV::Container(curr->type(), curr->index() + 1);
 
     return *curr;
 }
 
-bool ComputeMultiWriteContainers::preorder(IR::BFN::LoweredParserMatch* match) {
+bool ComputeMultiWriteContainers::preorder(IR::BFN::LoweredParserMatch *match) {
     auto orig = getOriginal<IR::BFN::LoweredParserMatch>();
 
     auto match_offset = std::make_pair(orig, stack_offset);
@@ -45,8 +43,7 @@ bool ComputeMultiWriteContainers::preorder(IR::BFN::LoweredParserMatch* match) {
                 clear_on_write[container].insert(orig);
             } else {
                 // Two extraction in the same transition, container should be bitwise or
-                if (bitwise_or.count(container) &&
-                    bitwise_or[container].count(orig)) {
+                if (bitwise_or.count(container) && bitwise_or[container].count(orig)) {
                     bitwise_or_containers.insert(container);
                 }
                 bitwise_or[container].insert(orig);
@@ -76,19 +73,19 @@ bool ComputeMultiWriteContainers::preorder(IR::BFN::LoweredParserMatch* match) {
     return true;
 }
 
-void ComputeMultiWriteContainers::postorder(IR::BFN::LoweredParserMatch* match) {
+void ComputeMultiWriteContainers::postorder(IR::BFN::LoweredParserMatch *match) {
     if (match->offsetInc) stack_offset -= *match->offsetInc;
 }
 
-bool ComputeMultiWriteContainers::preorder(IR::BFN::LoweredParser*) {
+bool ComputeMultiWriteContainers::preorder(IR::BFN::LoweredParser *) {
     bitwise_or = clear_on_write = {};
     clear_on_write_containers = bitwise_or_containers = {};
     return true;
 }
 
 bool ComputeMultiWriteContainers::has_non_mutex_writes(
-    const IR::BFN::LoweredParser* parser,
-    const std::set<const IR::BFN::LoweredParserMatch*>& matches) {
+    const IR::BFN::LoweredParser *parser,
+    const std::set<const IR::BFN::LoweredParserMatch *> &matches) {
     for (auto i : matches) {
         for (auto j : matches) {
             if (i == j) continue;
@@ -102,9 +99,9 @@ bool ComputeMultiWriteContainers::has_non_mutex_writes(
 }
 
 void ComputeMultiWriteContainers::detect_multi_writes(
-    const IR::BFN::LoweredParser* parser,
-    const std::map<PHV::Container, std::set<const IR::BFN::LoweredParserMatch*>>& writes,
-    std::set<PHV::Container>& write_containers, const char* which) {
+    const IR::BFN::LoweredParser *parser,
+    const std::map<PHV::Container, std::set<const IR::BFN::LoweredParserMatch *>> &writes,
+    std::set<PHV::Container> &write_containers, const char *which) {
     for (const auto &w : writes) {
         if (has_non_mutex_writes(parser, w.second)) {
             write_containers.insert(w.first);
@@ -138,18 +135,18 @@ void ComputeMultiWriteContainers::detect_multi_writes(
     }
 }
 
-void ComputeMultiWriteContainers::postorder(IR::BFN::LoweredParser* parser) {
+void ComputeMultiWriteContainers::postorder(IR::BFN::LoweredParser *parser) {
     auto orig = getOriginal<IR::BFN::LoweredParser>();
 
     detect_multi_writes(orig, bitwise_or, bitwise_or_containers, "bitwise-or");
     detect_multi_writes(orig, clear_on_write, clear_on_write_containers, "clear-on-write");
 
-    for (const auto& f : phv) {
+    for (const auto &f : phv) {
         if (f.gress != parser->gress) continue;
 
         if (f.name.endsWith("$stkvalid")) {
             auto ctxt = PHV::AllocContext::PARSER;
-            f.foreach_alloc(ctxt, nullptr, [&](const PHV::AllocSlice& alloc) {
+            f.foreach_alloc(ctxt, nullptr, [&](const PHV::AllocSlice &alloc) {
                 bitwise_or_containers.insert(alloc.container());
             });
         }

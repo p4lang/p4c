@@ -19,11 +19,10 @@
 
 #include <boost/algorithm/string/replace.hpp>
 
-#include "gtest/gtest.h"
-#include "bf_gtest_helpers.h"
-
-#include "ir/ir.h"
 #include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "bf_gtest_helpers.h"
+#include "gtest/gtest.h"
+#include "ir/ir.h"
 #include "test/gtest/helpers.h"
 
 namespace P4::Test {
@@ -31,7 +30,8 @@ namespace P4::Test {
 using namespace Match;  // To remove noise & reduce line lengths.
 
 // P4 program shell for all tests
-std::string prog_shell_parser_elim_zero() { return R"(
+std::string prog_shell_parser_elim_zero() {
+    return R"(
     header ethernet_t {
         bit<48> dst_addr;
         bit<48> src_addr;
@@ -171,9 +171,8 @@ TEST(ParserElimLoweredZeroExtracts, ZeroBeforeNonZero) {
     std::string container = get_field_container(field_regex, phv_sec);
 
     // Verify that a zero assignment is never found
-    auto res =
-        blk.match(TestCode::CodeBlock::ParserIAsm,
-                  CheckList{"`.*`", R"(`\b" + container + ": 0\b`)"});
+    auto res = blk.match(TestCode::CodeBlock::ParserIAsm,
+                         CheckList{"`.*`", R"(`\b" + container + ": 0\b`)"});
     EXPECT_FALSE(res.success) << " pos=" << res.pos << " count=" << res.count << "\n'"
                               << blk.extract_code(TestCode::CodeBlock::ParserIAsm) << "'\n";
 }
@@ -247,21 +246,17 @@ TEST(ParserElimLoweredZeroExtracts, ZeroBeforeAndAfterNonZero) {
     std::string field_regex = R"(hdr\.h3\.f1\.8-15)";
     std::string container = get_field_container(field_regex, phv_sec);
 
-
     // Excpect one zero-assignment but not two
-    auto res =
-        blk.match(TestCode::CodeBlock::ParserIAsm,
-                  CheckList{"`.*`", R"(`\b)" + container + R"(: 0\b`)"});
-    EXPECT_TRUE(res.success) << " -- Looking for 1 x zero-extract:"
-                             << " pos=" << res.pos << " count=" << res.count << "\n'"
+    auto res = blk.match(TestCode::CodeBlock::ParserIAsm,
+                         CheckList{"`.*`", R"(`\b)" + container + R"(: 0\b`)"});
+    EXPECT_TRUE(res.success) << " -- Looking for 1 x zero-extract:" << " pos=" << res.pos
+                             << " count=" << res.count << "\n'"
                              << blk.extract_code(TestCode::CodeBlock::ParserIAsm) << "'\n";
 
-    res =
-        blk.match(TestCode::CodeBlock::ParserIAsm,
-                  CheckList{"`.*`", R"(`\bMB2: 0\b`)",
-                            "`.*`", R"(`\bMB2: 0\b`)"});
-    EXPECT_FALSE(res.success) << " -- Looking for 2 x zero-extracts:"
-                              << " pos=" << res.pos << " count=" << res.count << "\n'"
+    res = blk.match(TestCode::CodeBlock::ParserIAsm,
+                    CheckList{"`.*`", R"(`\bMB2: 0\b`)", "`.*`", R"(`\bMB2: 0\b`)"});
+    EXPECT_FALSE(res.success) << " -- Looking for 2 x zero-extracts:" << " pos=" << res.pos
+                              << " count=" << res.count << "\n'"
                               << blk.extract_code(TestCode::CodeBlock::ParserIAsm) << "'\n";
 }
 

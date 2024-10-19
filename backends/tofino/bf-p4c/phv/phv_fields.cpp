@@ -13,22 +13,24 @@
 #include "bf-p4c/phv/phv_fields.h"
 
 #include <string>
+
 #include <boost/range/adaptor/reversed.hpp>
+
 #include "bf-p4c/arch/bridge_metadata.h"
 #include "bf-p4c/common/bridged_packing.h"
 #include "bf-p4c/common/header_stack.h"
 #include "bf-p4c/common/pragma/all_pragmas.h"
 #include "bf-p4c/common/utils.h"
-#include "bf-p4c/mau/table_summary.h"
-#include "bf-p4c/mau/gateway.h"
 #include "bf-p4c/lib/error_type.h"
 #include "bf-p4c/lib/safe_width.h"
+#include "bf-p4c/mau/gateway.h"
+#include "bf-p4c/mau/table_summary.h"
 #include "bf-p4c/parde/parde_visitor.h"
 #include "lib/stringref.h"
 
 namespace {
 
-bitvec remove_non_byte_boundary_starts(const PHV::Field* field, const bitvec& startPositions) {
+bitvec remove_non_byte_boundary_starts(const PHV::Field *field, const bitvec &startPositions) {
     bitvec cloned = startPositions;
     for (int i : startPositions) {
         if (i % 8 != 0) {
@@ -42,31 +44,23 @@ bitvec remove_non_byte_boundary_starts(const PHV::Field* field, const bitvec& st
 
 }  // namespace
 
-FieldAlignment::FieldAlignment(nw_bitrange bitLayout)
-    : align(7 - bitLayout.hi % 8)
-{ }
+FieldAlignment::FieldAlignment(nw_bitrange bitLayout) : align(7 - bitLayout.hi % 8) {}
 
-FieldAlignment::FieldAlignment(le_bitrange bitLayout)
-    : align(bitLayout.lo % 8)
-{ }
+FieldAlignment::FieldAlignment(le_bitrange bitLayout) : align(bitLayout.lo % 8) {}
 
-bool FieldAlignment::operator==(const FieldAlignment& other) const {
-    return align == other.align;
-}
+bool FieldAlignment::operator==(const FieldAlignment &other) const { return align == other.align; }
 
-bool FieldAlignment::operator!=(const FieldAlignment& other) const {
-    return !(*this == other);
-}
+bool FieldAlignment::operator!=(const FieldAlignment &other) const { return !(*this == other); }
 
-std::ostream& operator<<(std::ostream& out, const FieldAlignment& alignment) {
+std::ostream &operator<<(std::ostream &out, const FieldAlignment &alignment) {
     out << "alignment = " << alignment.align;
     return out;
 }
 
-const PHV::AllocContext* PHV::AllocContext::PARSER =
+const PHV::AllocContext *PHV::AllocContext::PARSER =
     new PHV::AllocContext(AllocContext::Type::PARSER);
 
-const PHV::AllocContext* PHV::AllocContext::DEPARSER =
+const PHV::AllocContext *PHV::AllocContext::DEPARSER =
     new PHV::AllocContext(AllocContext::Type::DEPARSER);
 
 //
@@ -88,20 +82,18 @@ void PhvInfo::clear() {
     PhvInfo::resetDeparserStage();
 }
 
-PHV::Field* PhvInfo::add(
-        cstring name, gress_t gress, int size, int offset, bool meta, bool pov,
-        bool bridged, bool pad, bool overlay, bool flex, bool fixed_size,
-        std::optional<Util::SourceInfo> srcInfo) {
+PHV::Field *PhvInfo::add(cstring name, gress_t gress, int size, int offset, bool meta, bool pov,
+                         bool bridged, bool pad, bool overlay, bool flex, bool fixed_size,
+                         std::optional<Util::SourceInfo> srcInfo) {
     // Set the egress version of bridged fields to metadata
-    if (gress == EGRESS && bridged)
-        meta = true;
+    if (gress == EGRESS && bridged) meta = true;
     if (all_fields.count(name)) {
         LOG3("Already added field; skipping: " << name);
         return &all_fields.at(name);
     }
-    LOG3("PhvInfo adding " << (pad ? "padding" : (meta ? "metadata" : "header")) << " field " <<
-         name << " size " << size << " offset " << offset << (flex? " flexible" : "") <<
-         (fixed_size? " fixed_size" : ""));
+    LOG3("PhvInfo adding " << (pad ? "padding" : (meta ? "metadata" : "header")) << " field "
+                           << name << " size " << size << " offset " << offset
+                           << (flex ? " flexible" : "") << (fixed_size ? " fixed_size" : ""));
     auto *info = &all_fields[name];
     info->name = name;
     info->id = by_id.size();
@@ -120,13 +112,8 @@ PHV::Field* PhvInfo::add(
     return info;
 }
 
-void PhvInfo::add_struct(
-        cstring name,
-        const IR::Type_StructLike *type,
-        gress_t gress,
-        bool meta,
-        bool bridged,
-        int offset) {
+void PhvInfo::add_struct(cstring name, const IR::Type_StructLike *type, gress_t gress, bool meta,
+                         bool bridged, int offset) {
     BUG_CHECK(type, "No type for %1%", name);
     LOG3("PhvInfo adding " << (meta ? " metadata" : "header") << " for struct " << name);
     // header has its own offset regardless of the offset of struct.
@@ -139,15 +126,14 @@ void PhvInfo::add_struct(
         int size = safe_width_bits(f->type);
         cstring f_name = name + '.' + f->name;
         if (f->type->is<IR::Type_StructLike>()) {
-            auto* struct_type = f->type->to<IR::Type_StructLike>();
+            auto *struct_type = f->type->to<IR::Type_StructLike>();
             bool meta = !struct_type->is<IR::Type_Header>();
             // Add fields inside nested structs and headers.
             add_struct(f_name, struct_type, gress, meta, bridged, offset);
         }
         // path-expression may point to an empty header, which require no phv.
         // path-expression can also point to an error field, which is invalid on Tofino
-        if (size == 0)
-            continue;
+        if (size == 0) continue;
         // "hidden" annotation indicates padding introduced with bridged metadata fields
         bool isPad = f->getAnnotations()->getSingle("hidden"_cs) != nullptr ||
                      f->getAnnotations()->getSingle("padding"_cs) != nullptr;
@@ -156,8 +142,7 @@ void PhvInfo::add_struct(
         bool isFlexible = f->getAnnotations()->getSingle("flexible"_cs) != nullptr;
         bool isFixedSizeHeader = type->is<IR::BFN::Type_FixedSizeHeader>();
         std::optional<Util::SourceInfo> srcInfo = std::nullopt;
-        if (f->srcInfo.isValid())
-            srcInfo = f->srcInfo;
+        if (f->srcInfo.isValid()) srcInfo = f->srcInfo;
         add(f_name, gress, size, offset -= size, meta, false, bridged, isPad, isOverlayable,
             isFlexible, isFixedSizeHeader, srcInfo);
     }
@@ -171,15 +156,16 @@ void PhvInfo::add_struct(
 void PhvInfo::add_hdr(cstring name, const IR::Type_StructLike *type, gress_t gress, bool meta) {
     if (!type) {
         LOG3("PhvInfo no type for " << name);
-        return; }
+        return;
+    }
     if (all_structs.count(name)) {
         LOG3("Already added header; skipping: " << name);
-        return; }
+        return;
+    }
 
     int start = by_id.size();
     int offset = 0;
-    for (auto f : type->fields)
-        offset += safe_width_bits(f->type);
+    for (auto f : type->fields) offset += safe_width_bits(f->type);
     add_struct(name, type, gress, meta, false, offset);
 
     if (meta) {
@@ -198,23 +184,19 @@ void PhvInfo::addTempVar(const IR::TempVar *tv, gress_t gress) {
                   tv, all_fields.at(tv->name).gress, gress);
     } else {
         auto fld = add(tv->name, gress, safe_width_bits(tv->type), 0, true, tv->POV);
-        if (fld)
-            fields_to_tempvars_i[fld] = tv;
+        if (fld) fields_to_tempvars_i[fld] = tv;
     }
 }
 
-const IR::TempVar* PhvInfo::getTempVar(const PHV::Field* f) const {
-    if (fields_to_tempvars_i.count(f))
-        return fields_to_tempvars_i.at(f);
+const IR::TempVar *PhvInfo::getTempVar(const PHV::Field *f) const {
+    if (fields_to_tempvars_i.count(f)) return fields_to_tempvars_i.at(f);
     return nullptr;
 }
 
 bool PhvInfo::has_struct_info(cstring name_) const {
     cstring name = name_;
-    if (all_structs.find(name) != all_structs.end())
-        return true;
-    if (auto *pos = name.find("::"))
-        name = cstring(pos + 2);
+    if (all_structs.find(name) != all_structs.end()) return true;
+    if (auto *pos = name.find("::")) name = cstring(pos + 2);
     return all_structs.find(name) != all_structs.end();
 }
 
@@ -223,19 +205,18 @@ bool PhvInfo::has_struct_info(cstring name_) const {
 ///   name when it's unique.  Eg. using "ingress::bar" to find
 ///   "ingress::foo.bar" when there are no other "bar" suffixes.
 /// ----
-cstring PhvInfo::full_hdr_name(const cstring& name_) const {
+cstring PhvInfo::full_hdr_name(const cstring &name_) const {
     StringRef name = name_;
-    if (simple_headers.find(name) != simple_headers.end())
-        return name;
+    if (simple_headers.find(name) != simple_headers.end()) return name;
 
-    if (all_structs.find(name) != all_structs.end())
-        return name;
+    if (all_structs.find(name) != all_structs.end()) return name;
 
     StringRef prefixRef;
     StringRef suffixRef = name;
-    if (auto* p = name.findstr("::")) {
+    if (auto *p = name.findstr("::")) {
         prefixRef = name.before(p);
-        suffixRef = name.after(p + 2); }
+        suffixRef = name.after(p + 2);
+    }
     cstring prefix = prefixRef.toString();
     cstring suffix = suffixRef.toString();
 
@@ -243,16 +224,14 @@ cstring PhvInfo::full_hdr_name(const cstring& name_) const {
     LOG4("    ...with prefix " << prefix);
     LOG4("    ...with suffix " << suffix);
     std::set<cstring> matches;
-    for (auto& hdr : all_structs) {
-        if ((hdr.first).endsWith(suffix.string()))
-            LOG4("    ...found suffix: " << hdr.first);
+    for (auto &hdr : all_structs) {
+        if ((hdr.first).endsWith(suffix.string())) LOG4("    ...found suffix: " << hdr.first);
         if ((hdr.first).startsWith(prefix.string()) && (hdr.first).endsWith(suffix.string()))
             matches.insert(hdr.first);
     }
     if (matches.size() > 1) {
         std::stringstream msg;
-        for (auto& mp : matches)
-            msg << " " << mp;
+        for (auto &mp : matches) msg << " " << mp;
         LOG4("Name '" << name_ << "' could refer to:" << msg.str());
     } else if (matches.size() == 1) {
         return *(matches.begin());
@@ -263,7 +242,7 @@ cstring PhvInfo::full_hdr_name(const cstring& name_) const {
 
 /// Get all the fields of header named @p name_ and store them in set @p flds
 /// ---
-void PhvInfo::get_hdr_fields(cstring name_, ordered_set<const PHV::Field*> & flds) const {
+void PhvInfo::get_hdr_fields(cstring name_, ordered_set<const PHV::Field *> &flds) const {
     const PhvInfo::StructInfo arr_info = struct_info(full_hdr_name(name_));
 
     size_t fld_id = arr_info.first_field_id;
@@ -284,34 +263,30 @@ void PhvInfo::get_hdr_fields(cstring name_, ordered_set<const PHV::Field*> & fld
  * @param name_ Partial or complete name of a field, or a header or metadata collection
  * @return const PhvInfo::StructInfo* Information about collection
  */
-const PhvInfo::StructInfo* PhvInfo::hdr(const cstring& name_) const {
+const PhvInfo::StructInfo *PhvInfo::hdr(const cstring &name_) const {
     cstring full_name = full_hdr_name(name_);
-    if (full_name.size() && all_structs.count(full_name))
-        return &(all_structs.at(full_name));
+    if (full_name.size() && all_structs.count(full_name)) return &(all_structs.at(full_name));
 
     return nullptr;
 }
 
 void PhvInfo::addPadding(const IR::Padding *pad, gress_t gress) {
-    BUG_CHECK(pad->type->is<IR::Type::Bits>(),
-              "Can't create padding of type %s", pad->type);
+    BUG_CHECK(pad->type->is<IR::Type::Bits>(), "Can't create padding of type %s", pad->type);
     if (all_fields.count(pad->name) == 0) {
         dummyPaddingNames.insert(pad->name);
-        add(pad->name, gress, pad->type->width_bits(),
-                0, false, false, false, /* isPad = */ true);
+        add(pad->name, gress, pad->type->width_bits(), 0, false, false, false, /* isPad = */ true);
     }
 }
 
 const PhvInfo::StructInfo PhvInfo::struct_info(cstring name_) const {
     StringRef name = name_;
     auto it = all_structs.find(name);
-    if (it != all_structs.end())
-        return it->second;
+    if (it != all_structs.end()) return it->second;
     if (auto *p = name.findstr("::")) {
-        name = name.after(p+2); }
+        name = name.after(p + 2);
+    }
     it = all_structs.find(name);
-    if (it != all_structs.end())
-        return it->second;
+    if (it != all_structs.end()) return it->second;
     BUG("No PhvInfo::header for header named '%s'", name_);
 }
 
@@ -327,18 +302,16 @@ const PhvInfo::StructInfo PhvInfo::struct_info(cstring name_) const {
 const PHV::Field *PhvInfo::field(const IR::Expression *e, le_bitrange *bits) const {
     if (!e) return nullptr;
     BUG_CHECK(!e->is<IR::BFN::ContainerRef>(),
-        "Looking for PHV::Fields but found an IR::BFN::ContainerRef: %1%", e);
-    if (auto *fr = e->to<IR::Member>())
-        return field(fr, bits);
-    if (auto *cast = e->to<IR::BFN::ReinterpretCast>())
-        return field(cast->expr, bits);
+              "Looking for PHV::Fields but found an IR::BFN::ContainerRef: %1%", e);
+    if (auto *fr = e->to<IR::Member>()) return field(fr, bits);
+    if (auto *cast = e->to<IR::BFN::ReinterpretCast>()) return field(cast->expr, bits);
     // HACK. midend changes zero extend cast into 0 ++ expr. When the
     // expression is used in a 'add' operation, the compiler does not perform
     // any transformation to eliminate the '++' operator.
     if (auto *concat = e->to<IR::Concat>()) {
         if (auto k = concat->left->to<IR::Constant>())
-            if (k->value == 0)
-                return field(concat->right, bits); }
+            if (k->value == 0) return field(concat->right, bits);
+    }
     if (auto *sl = e->to<IR::Slice>()) {
         auto *rv = field(sl->e0, bits);
         if (rv && bits) {
@@ -346,61 +319,68 @@ const PHV::Field *PhvInfo::field(const IR::Expression *e, le_bitrange *bits) con
             if (!bits->contains(sliceRange)) {
                 warning("slice %d..%d invalid for field %s of size %d", sl->getL(), sl->getH(),
                         sl->e0, bits->size());
-                return nullptr; }
+                return nullptr;
+            }
             auto intersection = bits->intersectWith(sliceRange);
-            *bits = le_bitrange(StartLen(intersection.lo, intersection.size())); }
-        return rv; }
+            *bits = le_bitrange(StartLen(intersection.lo, intersection.size()));
+        }
+        return rv;
+    }
     if (auto *tv = e->to<IR::TempVar>()) {
         if (auto *rv = getref(all_fields, tv->name)) {
             if (bits) {
                 bits->lo = 0;
-                bits->hi = rv->size - 1; }
+                bits->hi = rv->size - 1;
+            }
             return rv;
         } else {
             // This can happen after a placement failure when we're trying to generate
             // minimal context.json to aid deubgging.  So we don't want to crash out
-            /*BUG("TempVar %s not in PhvInfo", tv->name);*/ } }
+            /* BUG("TempVar %s not in PhvInfo", tv->name); */
+        }
+    }
     if (auto *pad = e->to<IR::Padding>()) {
         if (auto *rv = getref(all_fields, pad->name)) {
             if (bits) {
                 bits->lo = 0;
-                bits->hi = rv->size - 1; }
+                bits->hi = rv->size - 1;
+            }
             return rv;
         } else {
-            BUG("Padding %s not in PhvInfo", pad->name); } }
-    if (auto *neg = e->to<IR::Neg>())
-        return field(neg->expr, bits);
+            BUG("Padding %s not in PhvInfo", pad->name);
+        }
+    }
+    if (auto *neg = e->to<IR::Neg>()) return field(neg->expr, bits);
     return 0;
 }
 
 const PHV::Field *PhvInfo::field(const IR::Member *fr, le_bitrange *bits) const {
     if (bits) {
         bits->lo = 0;
-        bits->hi = safe_width_bits(fr->type) - 1; }
+        bits->hi = safe_width_bits(fr->type) - 1;
+    }
 
     // No need to look up enums, which are really constants.  This sidesteps
     // the warning message for "can't find field" as well.
-    if (fr->type->is<IR::Type_Enum>())
-        return nullptr;
+    if (fr->type->is<IR::Type_Enum>()) return nullptr;
 
     return field(fr->toString());
 }
 
-const PHV::Field *PhvInfo::field(const cstring& name_) const {
+const PHV::Field *PhvInfo::field(const cstring &name_) const {
     if (externalNameMap.count(name_)) {
         LOG4("  Looking up PHV field from external name map entry: " << name_);
         return externalNameMap.at(name_);
     }
     StringRef name = name_;
     if (auto *p = name.find('[')) {
-        if (name.after(p).find(':'))
-            name = name.before(p); }
-    if (auto *rv = getref(all_fields, name))
-        return rv;
+        if (name.after(p).find(':')) name = name.before(p);
+    }
+    if (auto *rv = getref(all_fields, name)) return rv;
     if (auto *p = name.findstr("::")) {
-        name = name.after(p+2);
-        if (auto *rv = getref(all_fields, name))
-            return rv; }
+        name = name.after(p + 2);
+        if (auto *rv = getref(all_fields, name)) return rv;
+    }
 
     // PHV field names are fully qualified, but we sometimes look up a partial
     // name when it's unique.  Eg. using "ingress::bar.f" to find
@@ -410,26 +390,26 @@ const PHV::Field *PhvInfo::field(const cstring& name_) const {
     name = name_;
     StringRef prefixRef;
     StringRef suffixRef = name;
-    if (auto* p = name.findstr("::")) {
+    if (auto *p = name.findstr("::")) {
         prefixRef = name.before(p);
-        suffixRef = name.after(p + 2); }
+        suffixRef = name.after(p + 2);
+    }
     cstring prefix = prefixRef.toString();
     cstring suffix = suffixRef.toString();
 
     LOG4("Looking for PHV field " << name_);
     LOG4("    ...with prefix " << prefix);
     LOG4("    ...with suffix " << suffix);
-    std::set<std::pair<cstring, const PHV::Field*>> matches;
-    for (auto& kv : all_fields) {
+    std::set<std::pair<cstring, const PHV::Field *>> matches;
+    for (auto &kv : all_fields) {
         cstring name = kv.first;
-        if (name.endsWith(suffix.string()))
-            LOG4("    ...found suffix: " << kv.first);
+        if (name.endsWith(suffix.string())) LOG4("    ...found suffix: " << kv.first);
         if (name.startsWith(prefix.string()) && name.endsWith(suffix.string()))
-            matches.insert(std::make_pair(kv.first, &kv.second)); }
+            matches.insert(std::make_pair(kv.first, &kv.second));
+    }
     if (matches.size() > 1) {
         std::stringstream msg;
-        for (auto& kv : matches)
-            msg << " " << kv.first;
+        for (auto &kv : matches) msg << " " << kv.first;
         LOG4("Name '" << name_ << "' could refer to:" << msg.str());
     } else if (matches.size() == 1) {
         return matches.begin()->second;
@@ -439,17 +419,18 @@ const PHV::Field *PhvInfo::field(const cstring& name_) const {
     // called is just too great. We need to improve how that's handled, but for
     // now, silence those warnings.
     if (!name.toString().endsWith(".$valid")) {
-        LOG4("   ...can't find field " << name); }
+        LOG4("   ...can't find field " << name);
+    }
 
     return nullptr;
 }
 
-void PhvInfo::allocatePOV(const BFN::HeaderStackInfo& stacks) {
+void PhvInfo::allocatePOV(const BFN::HeaderStackInfo &stacks) {
     LOG3("BEGIN PhvInfo::allocatePOV");
     if (pov_alloc_done) BUG("trying to reallocate POV");
     pov_alloc_done = true;
 
-    int size[GRESS_T_COUNT] = { 0, 0, 0 };
+    int size[GRESS_T_COUNT] = {0, 0, 0};
     int stacks_num = 0;
     for (auto &stack : stacks) {
         StructInfo info = struct_info(stack.name);
@@ -457,23 +438,26 @@ void PhvInfo::allocatePOV(const BFN::HeaderStackInfo& stacks) {
         BUG_CHECK(!info.metadata, "metadata stack?");
         size[info.gress] += stack.size + stack.maxpush + stack.maxpop;  // size for $stkvalid
         size[info.gress] += stack.size;                                 // size for $valid
-        stacks_num++; }
+        stacks_num++;
+    }
 
     for (auto &hdr : simple_headers) {
         LOG3("    ...preanalyzing simple header " << hdr.first);
         auto hdr_info = hdr.second;
-        ++size[hdr_info.gress]; }
+        ++size[hdr_info.gress];
+    }
 
     for (auto &field : *this)
-        if (field.pov && field.metadata)
-            size[field.gress] += field.size;
+        if (field.pov && field.metadata) size[field.gress] += field.size;
 
-    for (auto gress : { INGRESS, EGRESS }) {
+    for (auto gress : {INGRESS, EGRESS}) {
         if (size[gress] == 0) continue;
         for (auto &field : *this) {
             if (field.pov && field.metadata && field.gress == gress) {
                 size[gress] -= field.size;
-                field.offset = size[gress]; } }
+                field.offset = size[gress];
+            }
+        }
 
         // Create fields for (non-header stack) validity bits.
         for (auto hdr : simple_headers)
@@ -493,11 +477,14 @@ void PhvInfo::allocatePOV(const BFN::HeaderStackInfo& stacks) {
                 size[gress] -= stack.size + stack.maxpush + stack.maxpop;
                 // Create $valid.
                 for (int i : boost::irange(0, stack.size))
-                    add(stack.name + "[" + std::to_string(i) + "].$valid",
-                        gress, 1, --size[gress], false, true); } }
+                    add(stack.name + "[" + std::to_string(i) + "].$valid", gress, 1, --size[gress],
+                        false, true);
+            }
+        }
 
         BUG_CHECK(size[gress] == 0, "Error creating %1% POV fields.  %2% bits not created.",
-                  cstring::to_cstring(gress), size[gress]); }
+                  cstring::to_cstring(gress), size[gress]);
+    }
 }
 
 //
@@ -507,24 +494,20 @@ void PhvInfo::allocatePOV(const BFN::HeaderStackInfo& stacks) {
 //
 //***********************************************************************************
 //
-void PhvInfo::add_container_to_field_entry(const PHV::Container c,
-                                           const PHV::Field *f) {
+void PhvInfo::add_container_to_field_entry(const PHV::Container c, const PHV::Field *f) {
     if (f == nullptr) return;
     container_to_fields[c].insert(f);
 }
 
-const ordered_set<const PHV::Field *>&
-PhvInfo::fields_in_container(const PHV::Container c) const {
+const ordered_set<const PHV::Field *> &PhvInfo::fields_in_container(const PHV::Container c) const {
     static const ordered_set<const PHV::Field *> empty_list;
-    if (container_to_fields.count(c))
-        return container_to_fields.at(c);
+    if (container_to_fields.count(c)) return container_to_fields.at(c);
     return empty_list;
 }
 
-std::vector<PHV::AllocSlice>
-PhvInfo::get_slices_in_container(const PHV::Container c) const {
+std::vector<PHV::AllocSlice> PhvInfo::get_slices_in_container(const PHV::Container c) const {
     std::vector<PHV::AllocSlice> rv;
-    for (auto* field : fields_in_container(c)) {
+    for (auto *field : fields_in_container(c)) {
         field->foreach_alloc([&](const PHV::AllocSlice &alloc) {
             if (alloc.container() != c) return;
             rv.push_back(alloc);
@@ -533,13 +516,11 @@ PhvInfo::get_slices_in_container(const PHV::Container c) const {
     return rv;
 }
 
-std::vector<PHV::AllocSlice>
-PhvInfo::get_slices_in_container(
-        const PHV::Container c,
-        const PHV::AllocContext *ctxt,
-        const PHV::FieldUse* use) const {
+std::vector<PHV::AllocSlice> PhvInfo::get_slices_in_container(const PHV::Container c,
+                                                              const PHV::AllocContext *ctxt,
+                                                              const PHV::FieldUse *use) const {
     std::vector<PHV::AllocSlice> rv;
-    for (auto* field : fields_in_container(c)) {
+    for (auto *field : fields_in_container(c)) {
         field->foreach_alloc(ctxt, use, [&](const PHV::AllocSlice &alloc) {
             if (alloc.container() != c) return;
             rv.push_back(alloc);
@@ -548,25 +529,20 @@ PhvInfo::get_slices_in_container(
     return rv;
 }
 
-bitvec PhvInfo::bits_allocated(
-        const PHV::Container c,
-        const PHV::AllocContext *ctxt,
-        const PHV::FieldUse* use) const {
+bitvec PhvInfo::bits_allocated(const PHV::Container c, const PHV::AllocContext *ctxt,
+                               const PHV::FieldUse *use) const {
     bitvec ret_bitvec;
-    for (auto* field : fields_in_container(c)) {
+    for (auto *field : fields_in_container(c)) {
         if (field->padding) continue;
         ret_bitvec |= bits_allocated(c, field, ctxt, use);
     }
     return ret_bitvec;
 }
 
-bitvec PhvInfo::bits_allocated(
-        const PHV::Container c,
-        const PHV::Field* field,
-        const PHV::AllocContext* ctxt,
-        const PHV::FieldUse* use) const {
+bitvec PhvInfo::bits_allocated(const PHV::Container c, const PHV::Field *field,
+                               const PHV::AllocContext *ctxt, const PHV::FieldUse *use) const {
     bitvec result;
-    field->foreach_alloc(ctxt, use, [&](const PHV::AllocSlice& alloc) {
+    field->foreach_alloc(ctxt, use, [&](const PHV::AllocSlice &alloc) {
         if (alloc.container() != c) return;
         if (alloc.isUninitializedRead()) return;
         le_bitrange bits = alloc.container_slice();
@@ -575,30 +551,27 @@ bitvec PhvInfo::bits_allocated(
     return result;
 }
 
-
 // Check which bits are allocated in Container (c) which contain field slices (writes) Based on the
 // context (ctxt), slices in container are filtered and compared against field slices to check for
 // container occupancy giving consideration to mutual exclusiveness, uninitialed read behavior,
 // aliasing and dark overlay.
 // The function returns a bitvec which sets occupied bits.
-bitvec PhvInfo::bits_allocated(
-        const PHV::Container c,
-        const ordered_set<const PHV::Field*>& writes,
-        const PHV::AllocContext *ctxt,
-        const PHV::FieldUse* use) const {
+bitvec PhvInfo::bits_allocated(const PHV::Container c,
+                               const ordered_set<const PHV::Field *> &writes,
+                               const PHV::AllocContext *ctxt, const PHV::FieldUse *use) const {
     Log::TempIndent indent;
     LOG3("Allocating bits for container : " << c << indent);
     LOG3("AllocContext: " << *ctxt << ", use: " << *use);
     LOG3("Writes: " << writes);
     bitvec ret_bitvec;
-    auto& fields = fields_in_container(c);
+    auto &fields = fields_in_container(c);
 
     if (fields.size() == 0) return ret_bitvec;
     LOG3("Fields: " << fields);
 
     // Gather all the slices of written fields allocated to container c
     std::vector<PHV::AllocSlice> write_slices_in_container;
-    for (auto* field : writes) {
+    for (auto *field : writes) {
         // use canonical alias set representant, the other once can have wrong
         // defuse/mutex/meta-mutex
         // FIXME: this should be fixed by calcualting information for all aliases correctly
@@ -613,15 +586,15 @@ bitvec PhvInfo::bits_allocated(
         });
     }
     LOG5("Write slices in container: " << write_slices_in_container);
-    for (auto* field : fields) {
+    for (auto *field : fields) {
         if (field->padding) continue;
         Log::TempIndent loopIndent;
         LOG3("Container field: " << field->name << loopIndent);
 
         field->foreach_alloc(ctxt, use, [&](const PHV::AllocSlice &alloc) {
-            LOG3("Alloc Container: " << alloc.container()
-                << ", isUninitializedRead: " << (alloc.isUninitializedRead() ? "Y" : "N")
-                << ", slice: " << alloc.container_slice());
+            LOG3("Alloc Container: " << alloc.container() << ", isUninitializedRead: "
+                                     << (alloc.isUninitializedRead() ? "Y" : "N")
+                                     << ", slice: " << alloc.container_slice());
             // Filter out alloc slices not in container
             if (alloc.container() != c) return;
             // If a slice is an uninitialized read then no bits are effectively occupied by that
@@ -630,35 +603,36 @@ bitvec PhvInfo::bits_allocated(
             le_bitrange bits = alloc.container_slice();
 
             // Discard the slices that are mutually exclusive with any of the written slices
-            bool mutually_exclusive = std::any_of(
-                write_slices_in_container.begin(), write_slices_in_container.end(),
-                [&](const PHV::AllocSlice& slice) {
-                    return field_mutex_i(slice.field()->id, alloc.field()->id);
-            });
-            bool meta_overlay = std::any_of(
-                write_slices_in_container.begin(), write_slices_in_container.end(),
-                [&](const PHV::AllocSlice& slice) {
-                    LOG5("Meta mutex with " << slice.field()->name << " is " <<
-                        metadata_mutex_i(slice.field()->id, alloc.field()->id));
-                    return metadata_mutex_i(slice.field()->id, alloc.field()->id);
-            });
+            bool mutually_exclusive =
+                std::any_of(write_slices_in_container.begin(), write_slices_in_container.end(),
+                            [&](const PHV::AllocSlice &slice) {
+                                return field_mutex_i(slice.field()->id, alloc.field()->id);
+                            });
+            bool meta_overlay =
+                std::any_of(write_slices_in_container.begin(), write_slices_in_container.end(),
+                            [&](const PHV::AllocSlice &slice) {
+                                LOG5("Meta mutex with "
+                                     << slice.field()->name << " is "
+                                     << metadata_mutex_i(slice.field()->id, alloc.field()->id));
+                                return metadata_mutex_i(slice.field()->id, alloc.field()->id);
+                            });
             bool dark_overlay = std::any_of(
                 write_slices_in_container.begin(), write_slices_in_container.end(),
-                [&](const PHV::AllocSlice& slice) {
-                    LOG5("Dark Mutex with " << slice.field()->name << " is " <<
-                        dark_mutex_i(slice.field()->id, alloc.field()->id));
+                [&](const PHV::AllocSlice &slice) {
+                    LOG5("Dark Mutex with " << slice.field()->name << " is "
+                                            << dark_mutex_i(slice.field()->id, alloc.field()->id));
                     return bits.overlaps(slice.container_slice()) &&
-                        dark_mutex_i(slice.field()->id, alloc.field()->id);
-            });
+                           dark_mutex_i(slice.field()->id, alloc.field()->id);
+                });
             bool noMutex = !mutually_exclusive && !meta_overlay;
 
             // In case of a dark container do not consider dark overlay feasibility
             if (Device::phvSpec().hasContainerKind(PHV::Kind::dark) && !c.is(PHV::Kind::dark))
                 noMutex = noMutex && !dark_overlay;
 
-            LOG3("For field " << field->name << "  mutex control:" << mutually_exclusive <<
-                 " meta:" << meta_overlay << " dark:" << dark_overlay
-                 << " noMutex: " << noMutex << " bits: " << bits);
+            LOG3("For field " << field->name << "  mutex control:" << mutually_exclusive
+                              << " meta:" << meta_overlay << " dark:" << dark_overlay
+                              << " noMutex: " << noMutex << " bits: " << bits);
 
             if (noMutex) {
                 ret_bitvec.setrange(bits.lo, bits.size());
@@ -668,13 +642,13 @@ bitvec PhvInfo::bits_allocated(
     return ret_bitvec;
 }
 
-std::optional<cstring> PhvInfo::get_alias_name(const IR::Expression* expr) const {
-    if (auto* alias = expr->to<IR::BFN::AliasMember>()) {
-        const PHV::Field* aliasSourceField = field(alias->source);
+std::optional<cstring> PhvInfo::get_alias_name(const IR::Expression *expr) const {
+    if (auto *alias = expr->to<IR::BFN::AliasMember>()) {
+        const PHV::Field *aliasSourceField = field(alias->source);
         BUG_CHECK(aliasSourceField, "Alias source field %s not found", alias->source);
         return aliasSourceField->name;
-    } else if (auto* alias = expr->to<IR::BFN::AliasSlice>()) {
-        const PHV::Field* aliasSourceField = field(alias->source);
+    } else if (auto *alias = expr->to<IR::BFN::AliasSlice>()) {
+        const PHV::Field *aliasSourceField = field(alias->source);
         BUG_CHECK(aliasSourceField, "Alias source field %s not found", alias->source);
         return aliasSourceField->name;
     } else if (auto sl = expr->to<IR::Slice>()) {
@@ -704,8 +678,7 @@ std::set<int> PhvInfo::physicalStages(const IR::MAU::Table *table) {
 
 void PhvInfo::addMinStageEntry(const IR::MAU::Table *table, int stage, bool remove_prev_stages) {
     auto tableName = TableSummary::getTableName(table);
-    if (remove_prev_stages)
-        table_to_min_stages[tableName].clear();
+    if (remove_prev_stages) table_to_min_stages[tableName].clear();
 
     table_to_min_stages[tableName].insert(stage);
     LOG6("Adding stage " << stage << " to table " << tableName);
@@ -715,7 +688,7 @@ void PhvInfo::addMinStageEntry(const IR::MAU::Table *table, int stage, bool remo
     }
 }
 
-void PhvInfo::setPhysicalStages(const IR::MAU::Table *table, const std::set<int>& stages) {
+void PhvInfo::setPhysicalStages(const IR::MAU::Table *table, const std::set<int> &stages) {
     auto tableName = TableSummary::getTableIName(table);
     table_to_physical_stages[tableName] = stages;
     if (table->gateway_name && table->gateway_name != tableName) {
@@ -731,32 +704,32 @@ cstring PhvInfo::reportMinStages() {
     std::stringstream ss;
     ss << "  TABLES MIN STAGES:";
     for (auto entry : table_to_min_stages) {
-        ss << "\n\t " << entry.first  << " stages: ";
+        ss << "\n\t " << entry.first << " stages: ";
         for (auto stg : entry.second) ss << " " << stg;
     }
     ss << std::endl;
     return ss.str();
 }
 
-bool PhvInfo::darkLivenessOkay(const IR::MAU::Table* gateway, const IR::MAU::Table* t) const {
-    BUG_CHECK(gateway->conditional_gateway_only(), "Trying to merge non gateway table %1% with "
-              "table %2%", gateway->name, t->name);
+bool PhvInfo::darkLivenessOkay(const IR::MAU::Table *gateway, const IR::MAU::Table *t) const {
+    BUG_CHECK(gateway->conditional_gateway_only(),
+              "Trying to merge non gateway table %1% with "
+              "table %2%",
+              gateway->name, t->name);
     auto t_stages = minStages(t);
     CollectGatewayFields collect_fields(*this);
     gateway->apply(collect_fields);
     static PHV::FieldUse use(PHV::FieldUse::READ);
-    for (auto& field_info : collect_fields.info) {
+    for (auto &field_info : collect_fields.info) {
         unsigned count = 0;
         field_info.first.field()->foreach_alloc(field_info.first.range(), t, &use,
-                [&](const PHV::AllocSlice&) {
-            ++count;
-        });
+                                                [&](const PHV::AllocSlice &) { ++count; });
         if (count == 0) return false;
     }
     return true;
 }
 
-PHV::Field* PhvInfo::create_dummy_padding(size_t sz, gress_t gress, bool overlayable) {
+PHV::Field *PhvInfo::create_dummy_padding(size_t sz, gress_t gress, bool overlayable) {
     cstring name = cstring::make_unique(
         dummyPaddingNames, cstring::to_cstring(gress) + "::" + "__phv_dummy_padding__");
     dummyPaddingNames.insert(name);
@@ -764,23 +737,23 @@ PHV::Field* PhvInfo::create_dummy_padding(size_t sz, gress_t gress, bool overlay
     return field(name);
 }
 
-std::vector<PHV::AllocSlice> PhvInfo::get_alloc(const IR::Expression* f,
-                                                const PHV::AllocContext* ctxt,
-                                                const PHV::FieldUse* use) const {
+std::vector<PHV::AllocSlice> PhvInfo::get_alloc(const IR::Expression *f,
+                                                const PHV::AllocContext *ctxt,
+                                                const PHV::FieldUse *use) const {
     CHECK_NULL(f);
     le_bitrange bits;
-    auto* phv_field = field(f, &bits);
+    auto *phv_field = field(f, &bits);
     BUG_CHECK(phv_field, "No PHV field for expression %1%", f);
     return get_alloc(phv_field, &bits, ctxt, use);
 }
 
-std::vector<PHV::AllocSlice> PhvInfo::get_alloc(const PHV::Field* phv_field, le_bitrange* bits,
-                                                const PHV::AllocContext* ctxt,
-                                                const PHV::FieldUse* use) const {
+std::vector<PHV::AllocSlice> PhvInfo::get_alloc(const PHV::Field *phv_field, le_bitrange *bits,
+                                                const PHV::AllocContext *ctxt,
+                                                const PHV::FieldUse *use) const {
     std::vector<PHV::AllocSlice> slices;
 
     phv_field->foreach_alloc(bits, ctxt, use,
-                             [&](const PHV::AllocSlice& alloc) { slices.push_back(alloc); });
+                             [&](const PHV::AllocSlice &alloc) { slices.push_back(alloc); });
 
     return slices;
 }
@@ -803,10 +776,10 @@ int PHV::Field::container_bytes(std::optional<le_bitrange> optBits) const {
     for (int bit = bits.lo; bit <= bits.hi; bit += w) {
         auto &sl = for_bit(bit);
         w = sl.width() - (bit - sl.field_slice().lo);
-        if (bit + w > bits.hi)
-            w = bits.hi - bit + 1;
+        if (bit + w > bits.hi) w = bits.hi - bit + 1;
         int cbit = bit + sl.container_slice().lo - sl.field_slice().lo;
-        rv += (cbit+w-1)/8U - cbit/8U + 1; }
+        rv += (cbit + w - 1) / 8U - cbit / 8U + 1;
+    }
     return rv;
 }
 
@@ -820,25 +793,26 @@ int PHV::Field::container_bytes(std::optional<le_bitrange> optBits) const {
 
 const PHV::AllocSlice &PHV::Field::for_bit(int bit) const {
     for (auto &sl : alloc_slice_i)
-        if (bit >= sl.field_slice().lo && bit < sl.field_slice().lo + sl.width())
-            return sl;
+        if (bit >= sl.field_slice().lo && bit < sl.field_slice().lo + sl.width()) return sl;
     LOG1("ERROR: No allocation for bit " << bit << " in " << name);
     static PHV::AllocSlice invalid(nullptr, PHV::Container(), 0, 0, 0);
     return invalid;
 }
 
 const std::vector<PHV::AllocSlice> PHV::Field::get_combined_alloc_bytes(
-        const PHV::AllocContext* ctxt,
-        const PHV::FieldUse* use,
-        SliceMatch useTblRefs) const {
+    const PHV::AllocContext *ctxt, const PHV::FieldUse *use, SliceMatch useTblRefs) const {
     std::vector<PHV::AllocSlice> slicesToProcess;
     // Map of container to byte within the container to the set of alloc slices in that container
     // byte.
     LOG6("   get_combined_alloc_bytes for " << name);
     ordered_map<PHV::Container, ordered_map<int, std::vector<PHV::AllocSlice>>> containerBytesMap;
-    foreach_byte(ctxt, use, [&](const PHV::AllocSlice& alloc) {
-        int byte = alloc.container_slice().lo / 8;
-        containerBytesMap[alloc.container()][byte].push_back(alloc); }, useTblRefs);
+    foreach_byte(
+        ctxt, use,
+        [&](const PHV::AllocSlice &alloc) {
+            int byte = alloc.container_slice().lo / 8;
+            containerBytesMap[alloc.container()][byte].push_back(alloc);
+        },
+        useTblRefs);
     for (auto container_and_byte : containerBytesMap) {
         LOG3("  Container: " << container_and_byte.first);
         for (auto byte_and_slices : container_and_byte.second) {
@@ -851,27 +825,26 @@ const std::vector<PHV::AllocSlice> PHV::Field::get_combined_alloc_bytes(
             // field slice range and container slice range), then combine all of them into a single
             // alloc_slice that we return.
             safe_vector<std::pair<le_bitrange, le_bitrange>> field_cont_pairs;
-            for (auto& slice : byte_and_slices.second) {
+            for (auto &slice : byte_and_slices.second) {
                 LOG3("\t  Slice: " << slice);
                 field_cont_pairs.emplace_back(slice.field_slice(), slice.container_slice());
             }
 
-            std::sort(field_cont_pairs.begin(), field_cont_pairs.end(),
+            std::sort(
+                field_cont_pairs.begin(), field_cont_pairs.end(),
                 [](const std::pair<le_bitrange, le_bitrange> &a,
-                   const std::pair<le_bitrange, le_bitrange> &b) {
-                return a.first < b.first;
-            });
+                   const std::pair<le_bitrange, le_bitrange> &b) { return a.first < b.first; });
 
             for (size_t i = 0; i < field_cont_pairs.size() - 1; i++) {
-                 auto a = field_cont_pairs[i];
-                 auto b = field_cont_pairs[i+1];
-                 if (a.first.hi + 1 == b.first.lo && a.second.hi + 1 == b.second.lo) {
-                     le_bitrange comb_fb = { a.first.lo, b.first.hi };
-                     le_bitrange comb_cb = { a.second.lo, b.second.hi };
-                     field_cont_pairs[i] = std::make_pair(comb_fb, comb_cb);
-                     field_cont_pairs.erase(field_cont_pairs.begin() + i + 1);
-                     i--;
-                 }
+                auto a = field_cont_pairs[i];
+                auto b = field_cont_pairs[i + 1];
+                if (a.first.hi + 1 == b.first.lo && a.second.hi + 1 == b.second.lo) {
+                    le_bitrange comb_fb = {a.first.lo, b.first.hi};
+                    le_bitrange comb_cb = {a.second.lo, b.second.hi};
+                    field_cont_pairs[i] = std::make_pair(comb_fb, comb_cb);
+                    field_cont_pairs.erase(field_cont_pairs.begin() + i + 1);
+                    i--;
+                }
             }
 
             for (auto fb_cb_pair : field_cont_pairs) {
@@ -885,13 +858,11 @@ const std::vector<PHV::AllocSlice> PHV::Field::get_combined_alloc_bytes(
 }
 
 const std::vector<PHV::AllocSlice> PHV::Field::get_combined_alloc_slices(
-        le_bitrange bits,
-        const PHV::AllocContext* ctxt,
-        const PHV::FieldUse* use) const {
+    le_bitrange bits, const PHV::AllocContext *ctxt, const PHV::FieldUse *use) const {
     std::vector<PHV::AllocSlice> slicesToProcess;
     // Map of container to set of alloc slices within that container.
     ordered_map<PHV::Container, std::vector<PHV::AllocSlice>> containerToSlicesMap;
-    foreach_alloc(bits, ctxt, use, [&](const PHV::AllocSlice& alloc) {
+    foreach_alloc(bits, ctxt, use, [&](const PHV::AllocSlice &alloc) {
         containerToSlicesMap[alloc.container()].push_back(alloc);
     });
     for (auto container_and_slices : containerToSlicesMap) {
@@ -902,7 +873,7 @@ const std::vector<PHV::AllocSlice> PHV::Field::get_combined_alloc_slices(
         }
         bitvec container_bits;
         bitvec field_bits;
-        for (auto& slice : container_and_slices.second) {
+        for (auto &slice : container_and_slices.second) {
             LOG3("\t  Slice: " << slice);
             container_bits |= bitvec(slice.container_slice().lo, slice.width());
             field_bits |= bitvec(slice.field_slice().lo, slice.width());
@@ -910,43 +881,37 @@ const std::vector<PHV::AllocSlice> PHV::Field::get_combined_alloc_slices(
         LOG3("\t\tContainer bits: " << container_bits << ", field_bits: " << field_bits);
         if (field_bits.is_contiguous() && container_bits.is_contiguous() &&
             container_bits.popcount() == field_bits.popcount()) {
-            PHV::AllocSlice* newCombinedSlice = new PHV::AllocSlice(this,
-                    container_and_slices.first, field_bits.min().index(),
-                    container_bits.min().index(), field_bits.popcount());
+            PHV::AllocSlice *newCombinedSlice =
+                new PHV::AllocSlice(this, container_and_slices.first, field_bits.min().index(),
+                                    container_bits.min().index(), field_bits.popcount());
             slicesToProcess.push_back(*newCombinedSlice);
         } else {
-            for (auto& slice : container_and_slices.second)
-                slicesToProcess.push_back(slice);
+            for (auto &slice : container_and_slices.second) slicesToProcess.push_back(slice);
         }
     }
     return slicesToProcess;
 }
 
-void PHV::Field::foreach_byte(
-        le_bitrange range,
-        const PHV::AllocContext* ctxt,
-        const PHV::FieldUse* use,
-        std::function<void(const PHV::AllocSlice &)> fn,
-        PHV::SliceMatch useTblRefs) const {
+void PHV::Field::foreach_byte(le_bitrange range, const PHV::AllocContext *ctxt,
+                              const PHV::FieldUse *use,
+                              std::function<void(const PHV::AllocSlice &)> fn,
+                              PHV::SliceMatch useTblRefs) const {
     // Iterate in reverse order, because alloc_i slices are ordered from field
     // MSB to LSB, but foreach_byte iterates from LSB to MSB.
-    for (const auto& slice : boost::adaptors::reverse(alloc_slice_i)) {
+    for (const auto &slice : boost::adaptors::reverse(alloc_slice_i)) {
         // Break after we've processed the last element.
-        if (range.hi < slice.field_slice().lo)
-            break;
+        if (range.hi < slice.field_slice().lo) break;
 
         // Otherwise, skip allocations that don't overlap with the target
         // range.
-        if (!range.overlaps(slice.field_slice()))
-            continue;
+        if (!range.overlaps(slice.field_slice())) continue;
 
         // TODO: HACK: clients of foreach_byte assume that @fn is invoked
         // exactly once for each byte of the field, which is violated if the
         // field is allocated in more than one place.  There was a time when
         // fields could be allocated to both PHV and TPHV (but this may not be
         // true any longer).  Hence, skip TPHV allocations.
-        if (slice.container().is(PHV::Kind::tagalong))
-            continue;
+        if (slice.container().is(PHV::Kind::tagalong)) continue;
 
         // ignore other stage alloc slices
         if (!slice.isReferenced(ctxt, use, useTblRefs)) {
@@ -972,10 +937,8 @@ void PHV::Field::foreach_byte(
 
             // Create an alloc_slice for this window.
             int offset = window->lo - containerRange.lo;
-            PHV::AllocSlice tmp(this,
-                                intersectedSlice.container(),
-                                intersectedSlice.field_slice().lo + offset,
-                                window->lo,
+            PHV::AllocSlice tmp(this, intersectedSlice.container(),
+                                intersectedSlice.field_slice().lo + offset, window->lo,
                                 window->size());
             tmp.setLiveness(slice.getEarliestLiveness(), slice.getLatestLiveness());
             tmp.setIsPhysicalStageBased(slice.isPhysicalStageBased());
@@ -984,18 +947,18 @@ void PHV::Field::foreach_byte(
             fn(tmp);
 
             // Increment the window.
-            byte = byte.shiftedByBits(8); } }
+            byte = byte.shiftedByBits(8);
+        }
+    }
 }
 
-void PHV::Field::foreach_alloc(
-        le_bitrange range,
-        const PHV::AllocContext* ctxt,
-        const PHV::FieldUse* use,
-        std::function<void(const PHV::AllocSlice &)> fn,
-        SliceMatch useTblRefs) const {
+void PHV::Field::foreach_alloc(le_bitrange range, const PHV::AllocContext *ctxt,
+                               const PHV::FieldUse *use,
+                               std::function<void(const PHV::AllocSlice &)> fn,
+                               SliceMatch useTblRefs) const {
     // TODO: Maintain all the candidate alloc slices here. I am going to filter later based on
     // context and use on this vector during stage based allocation.
-    auto apply_fn = [&] (const PHV::AllocSlice& slice) {
+    auto apply_fn = [&](const PHV::AllocSlice &slice) {
         LOG6("\tforeach_alloc slice: " << slice);
         fn(slice);
     };
@@ -1030,24 +993,23 @@ void PHV::Field::foreach_alloc(
 //
 // constraints, phv_widths
 //
-bool PHV::Field::is_tphv_candidate(const PhvUse& uses) const {
+bool PHV::Field::is_tphv_candidate(const PhvUse &uses) const {
     PHV::FieldSlice slice(this, StartLen(0, size));
     return slice.is_tphv_candidate(uses);
 }
 
-bool PHV::FieldSlice::is_tphv_candidate(const PhvUse& uses) const {
+bool PHV::FieldSlice::is_tphv_candidate(const PhvUse &uses) const {
     if (field_i->padding) return false;  // __pad_ fields are not considered as tphv.
     // TODO derive these rather than hard-coding the name
     std::string f_name(field_i->name.c_str());
     // TODO somehow phv allocation can't derive this one
-    if (f_name.find("$constant") != std::string::npos)
-        return true;
+    if (f_name.find("$constant") != std::string::npos) return true;
     return !uses.is_used_mau(field_i, range_i) && !field_i->pov && !field_i->deparsed_to_tm() &&
-        !field_i->is_digest() && (!field_i->metadata || uses.is_used_parde(field_i));
+           !field_i->is_digest() && (!field_i->metadata || uses.is_used_parde(field_i));
 }
 
-void PHV::Field::updateAlignment(PHV::AlignmentReason reason, const FieldAlignment& newAlignment,
-                                 const Util::SourceInfo& newAlignmentSource) {
+void PHV::Field::updateAlignment(PHV::AlignmentReason reason, const FieldAlignment &newAlignment,
+                                 const Util::SourceInfo &newAlignmentSource) {
     LOG3("Inferred alignment " << newAlignment << " for field " << name);
 
     // If there's no existing alignment for this field, just take this one.
@@ -1063,8 +1025,8 @@ void PHV::Field::updateAlignment(PHV::AlignmentReason reason, const FieldAlignme
     // If there is an existing alignment, it must agree with this new one.
     // Otherwise the program is inconsistent and we can't compile it.
     if (*alignment != newAlignment) {
-        auto alignmentSourceStr = [&](const FieldAlignment& alignment,
-                                      const Util::SourceInfo& srcInfo) {
+        auto alignmentSourceStr = [&](const FieldAlignment &alignment,
+                                      const Util::SourceInfo &srcInfo) {
             std::stringstream ss;
             ss << (srcInfo.isValid() ? srcInfo.toPositionString() : "Source unknown")
                << ": alignment = " << alignment.align << " (little endian)" << std::endl
@@ -1080,7 +1042,7 @@ void PHV::Field::updateAlignment(PHV::AlignmentReason reason, const FieldAlignme
 
         std::string errorExplanation;
         switch (reason) {
-            case PHV::AlignmentReason::PARSER :
+            case PHV::AlignmentReason::PARSER:
                 errorExplanation =
                     "Extracting or assigning values with different in-byte alignments "
                     "within packet to the same field is not supported in the parser.\n"
@@ -1092,8 +1054,8 @@ void PHV::Field::updateAlignment(PHV::AlignmentReason reason, const FieldAlignme
                 break;
         }
 
-        ::fatal_error("Inferred incompatible container alignments for field %1%:\n%2%%3%",
-                      name, inferredAlignments.str(), errorExplanation);
+        ::fatal_error("Inferred incompatible container alignments for field %1%:\n%2%%3%", name,
+                      inferredAlignments.str(), errorExplanation);
     } else {
         alignmentSources.push_back({newAlignment, newAlignmentSource});
 
@@ -1117,8 +1079,7 @@ void PHV::Field::setStartBits(PHV::Size size, bitvec startPositions) {
 }
 
 bitvec PHV::Field::getStartBits(PHV::Size size) const {
-    if (!startBitsByContainerSize_i.count(size))
-        return bitvec(0, int(size));
+    if (!startBitsByContainerSize_i.count(size)) return bitvec(0, int(size));
     return startBitsByContainerSize_i.at(size);
 }
 
@@ -1133,25 +1094,21 @@ void PHV::Field::setStartBitsToLowerBitsOfBottomByte() {
     }
     for (auto container_size : Device::phvSpec().containerSizes()) {
         startBitsByContainerSize_i[container_size] = bitvec(0, shiftable_bits + 1);
-        LOG3("Setting field " << name << " to bottom byte: " <<
-             startBitsByContainerSize_i[container_size]);
+        LOG3("Setting field " << name
+                              << " to bottom byte: " << startBitsByContainerSize_i[container_size]);
     }
 }
 
-
 PHV::AbstractField *PHV::AbstractField::create(const PhvInfo &info, const IR::Expression *e) {
-    if (auto *c = e->to<IR::Constant>())
-        return new PHV::Constant(c);
-    le_bitrange bits = { };
-    if (auto *field = info.field(e, &bits))
-        return new PHV::FieldSlice(field, bits);
+    if (auto *c = e->to<IR::Constant>()) return new PHV::Constant(c);
+    le_bitrange bits = {};
+    if (auto *field = info.field(e, &bits)) return new PHV::FieldSlice(field, bits);
     BUG("Can't turn %s into an AbstractField", e);
     return nullptr;
 }
 
-PHV::FieldSlice::FieldSlice(
-        const Field* field,
-        le_bitrange range) : field_i(field), range_i(range) {
+PHV::FieldSlice::FieldSlice(const Field *field, le_bitrange range)
+    : field_i(field), range_i(range) {
     BUG_CHECK(0 <= range.lo, "Trying to create field slice with negative start in range %1%",
               range);
     BUG_CHECK(range.size() <= field->size,
@@ -1160,8 +1117,8 @@ PHV::FieldSlice::FieldSlice(
     // Calculate relative alignment for this field slice.
     if (field->alignment) {
         le_bitrange field_range = StartLen(field->alignment->align, field->size);
-        le_bitrange slice_range = field_range.shiftedByBits(range_i.lo)
-            .resizedToBits(range_i.size());
+        le_bitrange slice_range =
+            field_range.shiftedByBits(range_i.lo).resizedToBits(range_i.size());
         alignment_i = FieldAlignment(slice_range);
     }
 
@@ -1229,13 +1186,14 @@ bitvec PHV::FieldSlice::getStartBits(PHV::Size size) const {
 }
 
 void PHV::Field::updateValidContainerRange(nw_bitrange newValidRange) {
-    LOG3("Inferred valid container range " << newValidRange <<
-         " for field " << name);
+    LOG3("Inferred valid container range " << newValidRange << " for field " << name);
 
     const auto intersection = validContainerRange_i.intersectWith(newValidRange);
     if (intersection.empty()) {
-        ::fatal_error("Inferred container alignments for field %1%"
-                      " that are impossible to satisfy", name);
+        ::fatal_error(
+            "Inferred container alignments for field %1%"
+            " that are impossible to satisfy",
+            name);
         return;
     }
 
@@ -1243,15 +1201,15 @@ void PHV::Field::updateValidContainerRange(nw_bitrange newValidRange) {
 }
 
 bool PHV::Field::no_split() const {
-    for (const auto& range : no_split_ranges_i) {
+    for (const auto &range : no_split_ranges_i) {
         if (range.size() == size) {
-            return true; } }
+            return true;
+        }
+    }
     return false;
 }
 
-bool PHV::Field::has_no_split_at_pos() const {
-    return (no_split_ranges_i.size() > 0);
-}
+bool PHV::Field::has_no_split_at_pos() const { return (no_split_ranges_i.size() > 0); }
 
 void PHV::Field::set_no_split(bool b) {
     if (b) {
@@ -1268,14 +1226,11 @@ bool PHV::Field::no_split_at(int pos) const {
     //    x[63:0] = y[63:0] + 1
     //    x and y must be split into slices as [63:32] and [31:0].
     //    When creating slices, slicing at bit position 32 should be allowed.
-    return std::any_of(
-            no_split_ranges_i.begin(), no_split_ranges_i.end(), [&] (const le_bitrange& r) {
-                return r.contains(pos) && r.lo != pos; });
+    return std::any_of(no_split_ranges_i.begin(), no_split_ranges_i.end(),
+                       [&](const le_bitrange &r) { return r.contains(pos) && r.lo != pos; });
 }
 
-void PHV::Field::set_no_split_at(le_bitrange range) {
-    no_split_ranges_i.push_back(range);
-}
+void PHV::Field::set_no_split_at(le_bitrange range) { no_split_ranges_i.push_back(range); }
 
 //***********************************************************************************
 //
@@ -1284,14 +1239,14 @@ void PHV::Field::set_no_split_at(le_bitrange range) {
 //***********************************************************************************
 
 class ClearPhvInfo : public Inspector {
-    PhvInfo& phv;
-    bool preorder(const IR::BFN::Pipe*) override {
+    PhvInfo &phv;
+    bool preorder(const IR::BFN::Pipe *) override {
         phv.clear();
         return false;
     }
 
  public:
-    explicit ClearPhvInfo(PhvInfo& phv) : phv(phv) { }
+    explicit ClearPhvInfo(PhvInfo &phv) : phv(phv) {}
 };
 
 /** Populates a PhvInfo object with Fields for each PHV-backed object in the
@@ -1304,7 +1259,7 @@ class ClearPhvInfo : public Inspector {
  * data structures are NOT cleared in init_apply.
  */
 class CollectPhvFields : public Inspector {
-    PhvInfo& phv;
+    PhvInfo &phv;
 
     // WARNING(cole): CollectPhvFields is usually invoked on an entire IR, not
     // a subtree, which means that we can get the gress from
@@ -1337,7 +1292,7 @@ class CollectPhvFields : public Inspector {
         return rv == GHOST ? INGRESS : rv;
     }
 
-    Visitor::profile_t init_apply(const IR::Node* root) override {
+    Visitor::profile_t init_apply(const IR::Node *root) override {
         auto rv = Inspector::init_apply(root);
 
         // Only clear if this is a new pass, i.e. gress == std::nullopt.
@@ -1345,24 +1300,25 @@ class CollectPhvFields : public Inspector {
             seen.clear();
             LOG3("Begin CollectPhvFields");
         } else {
-            LOG3("Begin CollectPhvFields (recursive)"); }
+            LOG3("Begin CollectPhvFields (recursive)");
+        }
 
         return rv;
     }
 
     /// Collect field information for alias sources.
-    bool preorder(const IR::BFN::AliasMember* alias) override {
+    bool preorder(const IR::BFN::AliasMember *alias) override {
         visit(alias->source);
         return true;
     }
 
     /// Collect field information for alias sources.
-    bool preorder(const IR::BFN::AliasSlice* alias) override {
+    bool preorder(const IR::BFN::AliasSlice *alias) override {
         visit(alias->source);
         return true;
     }
 
-    bool preorder(const IR::Header* h) override {
+    bool preorder(const IR::Header *h) override {
         // Skip headers that have already been visited.
         if (seen.find(h->name) != seen.end()) return false;
         seen.insert(h->name);
@@ -1375,19 +1331,18 @@ class CollectPhvFields : public Inspector {
 
         // Ensure that the header hasn't been seen before
         auto it = phv.simple_headers.find(h->name.name);
-        BUG_CHECK(it == phv.simple_headers.end(),
-            "Header %1% already seen!", h->name.name);
+        BUG_CHECK(it == phv.simple_headers.end(), "Header %1% already seen!", h->name.name);
 
         // Add the header to the simple_headers vector, as they
         // are seen in the program order
-        phv.simple_headers.emplace(h->name.name, PhvInfo::StructInfo(false, getGress(),
-                                                                     start, end - start));
+        phv.simple_headers.emplace(h->name.name,
+                                   PhvInfo::StructInfo(false, getGress(), start, end - start));
         LOG3("Adding header  " << h->name.name << " to simple_headers");
 
         return false;
     }
 
-    bool preorder(const IR::HeaderStack* h) override {
+    bool preorder(const IR::HeaderStack *h) override {
         // Skip headers that have already been visited.
         if (seen.find(h->name) != seen.end()) return false;
         seen.insert(h->name);
@@ -1397,17 +1352,17 @@ class CollectPhvFields : public Inspector {
         int start = phv.by_id.size();
         for (int i = 0; i < h->size; i++) {
             snprintf(buffer, sizeof(buffer), "[%d]", i);
-            phv.add_hdr(h->name.name + buffer, h->type, getGress(), false); }
+            phv.add_hdr(h->name.name + buffer, h->type, getGress(), false);
+        }
         int end = phv.by_id.size();
         LOG3("Adding header stack " << h->name);
-        phv.all_structs.emplace(
-            h->name.name,
-            PhvInfo::StructInfo(false, getGress(), start, end - start));
+        phv.all_structs.emplace(h->name.name,
+                                PhvInfo::StructInfo(false, getGress(), start, end - start));
         return false;
         LOG3("Adding headerStack  " << h->name.name << " to all_structs");
     }
 
-    bool preorder(const IR::Metadata* h) override {
+    bool preorder(const IR::Metadata *h) override {
         // Skip headers that have already been visited.
         if (seen.find(h->name) != seen.end()) return false;
         seen.insert(h->name);
@@ -1417,17 +1372,17 @@ class CollectPhvFields : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::TempVar* tv) override {
+    bool preorder(const IR::TempVar *tv) override {
         phv.addTempVar(tv, getGress());
 
         if (findContext<IR::BFN::MatchLVal>()) {
-            PHV::Field* f = phv.field(tv);
+            PHV::Field *f = phv.field(tv);
             BUG_CHECK(f, "No PhvInfo entry for a field we just added?");
             f->set_avoid_alloc(true);
         }
         // bridged_metadata_indicator must be placed in 8-bit container
         if (tv->name.endsWith(BFN::BRIDGED_MD_INDICATOR.string())) {
-            PHV::Field* f = phv.field(tv);
+            PHV::Field *f = phv.field(tv);
             BUG_CHECK(f, "No PhvInfo entry for a field we just added?");
             f->set_exact_containers(true);
             f->set_solitary(PHV::SolitaryReason::ARCH);
@@ -1436,10 +1391,10 @@ class CollectPhvFields : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::Padding* pad) override {
+    bool preorder(const IR::Padding *pad) override {
         LOG3("Set constraints on padding " << pad);
         phv.addPadding(pad, getGress());
-        PHV::Field* f = phv.field(pad);
+        PHV::Field *f = phv.field(pad);
         CHECK_NULL(f);
         f->set_exact_containers(true);
         f->set_deparsed(true);
@@ -1448,16 +1403,16 @@ class CollectPhvFields : public Inspector {
         return false;
     }
 
-    void postorder(const IR::BFN::LoweredParser*) override {
+    void postorder(const IR::BFN::LoweredParser *) override {
         BUG("Running CollectPhvInfo after the parser IR has been lowered; "
             "this will produce invalid results.");
     }
 
     void end_apply() override {
-        for (auto& f : phv) {
+        for (auto &f : phv) {
             std::string f_name(f.name.c_str());
-            if (f_name.find(BFN::COMPILER_META) != std::string::npos
-             && f_name.find("residual_checksum_") != std::string::npos) {
+            if (f_name.find(BFN::COMPILER_META) != std::string::npos &&
+                f_name.find("residual_checksum_") != std::string::npos) {
                 f.set_exact_containers(true);
                 f.set_solitary(PHV::SolitaryReason::CHECKSUM);
                 f.set_no_split(true);
@@ -1469,22 +1424,22 @@ class CollectPhvFields : public Inspector {
     }
 
  public:
-    explicit CollectPhvFields(PhvInfo& phv, std::optional<gress_t> gress = std::nullopt)
-    : phv(phv), gress(gress) { }
+    explicit CollectPhvFields(PhvInfo &phv, std::optional<gress_t> gress = std::nullopt)
+        : phv(phv), gress(gress) {}
 };
 
 /// Allocate POV bits for each header instance, metadata instance, or header
 /// stack that we visited in CollectPhvFields.
 struct AllocatePOVBits : public Inspector {
-    explicit AllocatePOVBits(PhvInfo& phv) : phv(phv) { }
+    explicit AllocatePOVBits(PhvInfo &phv) : phv(phv) {}
 
  private:
-    profile_t init_apply(const IR::Node* root) override {
+    profile_t init_apply(const IR::Node *root) override {
         LOG3("BEGIN AllocatePOVBits");
         return Inspector::init_apply(root);
     }
 
-    bool preorder(const IR::BFN::Pipe* pipe) override {
+    bool preorder(const IR::BFN::Pipe *pipe) override {
         BUG_CHECK(pipe->headerStackInfo != nullptr,
                   "Running AllocatePOVBits without running "
                   "CollectHeaderStackInfo first?");
@@ -1492,26 +1447,26 @@ struct AllocatePOVBits : public Inspector {
         return false;
     }
 
-    PhvInfo& phv;
+    PhvInfo &phv;
 };
 
 /// Examine how fields are used in the parser and deparser to compute their
 /// alignment requirements.
 struct ComputeFieldAlignments : public Inspector {
-    explicit ComputeFieldAlignments(PhvInfo& phv) : phv(phv) { }
+    explicit ComputeFieldAlignments(PhvInfo &phv) : phv(phv) {}
 
  private:
-    bool preorder(const IR::BFN::Extract* extract) override {
+    bool preorder(const IR::BFN::Extract *extract) override {
         // Only extracts from the input buffer introduce alignment constraints.
-        auto* bufferSource = extract->source->to<IR::BFN::InputBufferRVal>();
+        auto *bufferSource = extract->source->to<IR::BFN::InputBufferRVal>();
         if (!bufferSource) return false;
         auto lval = extract->dest->to<IR::BFN::FieldLVal>();
         if (!lval) return false;
 
-        auto* fieldInfo = phv.field(lval->field);
+        auto *fieldInfo = phv.field(lval->field);
         if (!fieldInfo) {
             warning(BFN::ErrorType::WARN_PHV_ALLOCATION, "No allocation for field %1%",
-                      extract->dest);
+                    extract->dest);
             return false;
         }
 
@@ -1520,8 +1475,8 @@ struct ComputeFieldAlignments : public Inspector {
         const auto extractedBits = bufferSource->range;
         const auto alignment = FieldAlignment(extractedBits);
         LOG3("A. Updating alignment of " << fieldInfo->name << " to " << alignment);
-        LOG3("Extract: " << extract << ", parser state: " <<
-                findContext<IR::BFN::ParserState>()->name);
+        LOG3("Extract: " << extract
+                         << ", parser state: " << findContext<IR::BFN::ParserState>()->name);
         fieldInfo->updateAlignment(PHV::AlignmentReason::PARSER, alignment,
                                    lval->field->getSourceInfo());
 
@@ -1559,29 +1514,29 @@ struct ComputeFieldAlignments : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::BFN::Deparser* deparser) override {
+    bool preorder(const IR::BFN::Deparser *deparser) override {
         unsigned currentBit = 0;
 
-        for (auto* emitPrimitive : deparser->emits) {
-            if (auto* checksum = emitPrimitive->to<IR::BFN::EmitChecksum>()) {
+        for (auto *emitPrimitive : deparser->emits) {
+            if (auto *checksum = emitPrimitive->to<IR::BFN::EmitChecksum>()) {
                 for (auto source : checksum->sources) {
                     auto f = phv.field(source->field->field);
                     if (f && f->metadata && f->size % 8) {
-                        const auto alignment = FieldAlignment(le_bitrange(
-                                    StartLen((source->offset + f->size), f->size)));
+                        const auto alignment = FieldAlignment(
+                            le_bitrange(StartLen((source->offset + f->size), f->size)));
                         LOG3("B. Updating alignment of " << f->name << " to " << alignment);
                         f->updateAlignment(PHV::AlignmentReason::DEPARSER, alignment,
                                            source->field->field->getSourceInfo());
                     }
                 }
             }
-            auto* emit = emitPrimitive->to<IR::BFN::EmitField>();
+            auto *emit = emitPrimitive->to<IR::BFN::EmitField>();
             if (!emit) continue;
 
-            auto* fieldInfo = phv.field(emit->source->field);
+            auto *fieldInfo = phv.field(emit->source->field);
             if (!fieldInfo) {
                 warning(BFN::ErrorType::WARN_PHV_ALLOCATION, "No allocation for field %1%",
-                          emit->source);
+                        emit->source);
                 currentBit = 0;
                 continue;
             }
@@ -1603,7 +1558,7 @@ struct ComputeFieldAlignments : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::MAU::Instruction* instr) {
+    bool preorder(const IR::MAU::Instruction *instr) {
         Log::TempIndent indent;
         LOG5("Preorder Instruction: " << *instr << "  name: " << instr->name << indent);
         PHV::Field *dst_f;
@@ -1621,14 +1576,14 @@ struct ComputeFieldAlignments : public Inspector {
                         if (slc->e0->to<IR::MAU::AttachedOutput>()) {
                             int rng = safe_width_bits(slc->e0->to<IR::Expression>()->type);
                             LOG5("Slice: " << slc->e0 << "[" << slc->getH() << ":" << slc->getL()
-                                 << "]" << " width: " << rng);
+                                           << "]" << " width: " << rng);
                             size_t lo_bit = slc->getL();
                             for (auto cnt_sz : Device::phvSpec().containerSizes()) {
                                 if ((int)cnt_sz < rng) continue;
                                 // Set container LSbit constraint
                                 dst_f->setStartBits(cnt_sz, bitvec(lo_bit, 1));
-                                LOG5("setStartBits(" << lo_bit << ", 1) for " << dst_f->name <<
-                                     " at container size: " << cnt_sz);
+                                LOG5("setStartBits(" << lo_bit << ", 1) for " << dst_f->name
+                                                     << " at container size: " << cnt_sz);
                             }
                             break;
                         }
@@ -1640,9 +1595,8 @@ struct ComputeFieldAlignments : public Inspector {
         return false;
     }
 
-    PhvInfo& phv;
+    PhvInfo &phv;
 };
-
 
 /** Mark certain intrinsic metadata fields as invalidate_from_arch so that
  * we don't initialize them in the parser (see ComputeInitZeroContainers pass
@@ -1667,7 +1621,7 @@ struct ComputeFieldAlignments : public Inspector {
  */
 
 class AddIntrinsicConstraints : public Inspector {
-    PhvInfo& phv;
+    PhvInfo &phv;
 
     bool preorder(const IR::BFN::Pipe *pipe) override {
         // make hw_constrained_fields visible to this Inspector
@@ -1677,10 +1631,10 @@ class AddIntrinsicConstraints : public Inspector {
     }
 
     void end_apply() override {
-        for (auto& f : phv) {
+        for (auto &f : phv) {
             if (f.pov) continue;
 
-            for (auto& intr : {"ingress::ig_intr_md", "egress::eg_intr_md"}) {
+            for (auto &intr : {"ingress::ig_intr_md", "egress::eg_intr_md"}) {
                 std::string f_name(f.name.c_str());
                 if (f_name.find(intr) != std::string::npos) {
                     f.set_intrinsic(true);
@@ -1691,9 +1645,9 @@ class AddIntrinsicConstraints : public Inspector {
     }
 
     bool preorder(const IR::BFN::HardwareConstrainedField *hw_constrained_field) override {
-        auto set_invalidate_from_arch = [&](const IR::Expression* expr) {
+        auto set_invalidate_from_arch = [&](const IR::Expression *expr) {
             BUG_CHECK(expr->is<IR::Member>() || expr->is<IR::Slice>(),
-                "invalidate from arch field %1% cannot be found", expr);
+                      "invalidate from arch field %1% cannot be found", expr);
             auto f = phv.field(expr);
             if (!f) return;
             f->set_solitary(PHV::SolitaryReason::ARCH);
@@ -1702,7 +1656,8 @@ class AddIntrinsicConstraints : public Inspector {
         };
 
         if (!(hw_constrained_field->constraint_type.getbit(
-            IR::BFN::HardwareConstrainedField::INVALIDATE_FROM_ARCH))) return false;
+                IR::BFN::HardwareConstrainedField::INVALIDATE_FROM_ARCH)))
+            return false;
 
         set_invalidate_from_arch(hw_constrained_field->expr);
 
@@ -1715,7 +1670,7 @@ class AddIntrinsicConstraints : public Inspector {
     }
 
  public:
-    explicit AddIntrinsicConstraints(PhvInfo& phv) : phv(phv) { }
+    explicit AddIntrinsicConstraints(PhvInfo &phv) : phv(phv) {}
 };
 
 /**
@@ -1734,9 +1689,9 @@ class AddIntrinsicConstraints : public Inspector {
  * field is controlled by the padded field, not the padding itself.
  */
 class MarkPaddingAsDeparsed : public Inspector {
-    PhvInfo& phv;
+    PhvInfo &phv;
 
-    bool preorder(const IR::HeaderRef* hr) {
+    bool preorder(const IR::HeaderRef *hr) {
         LOG5("Mark padding in HeaderRef " << hr);
 
         if (auto hdrref = hr->to<IR::HeaderStackItemRef>()) {
@@ -1744,21 +1699,21 @@ class MarkPaddingAsDeparsed : public Inspector {
             auto idx = (hdrref->index())->to<IR::Constant>();
             // Is the index a constant?
             if (idx == nullptr) {
-               BUG("For Tofino, Index of the header stack \"%s\" has to be a const value and "
-                   "can't be a variable. (Please Note: Don't use a const value with width.)",
-                   hdrref->base()->toString());
+                BUG("For Tofino, Index of the header stack \"%s\" has to be a const value and "
+                    "can't be a variable. (Please Note: Don't use a const value with width.)",
+                    hdrref->base()->toString());
             }
 
             // If the constant has non-zero width, It might be propagated from some variable.
             auto tb = (idx->type)->to<IR::Type_Bits>();
             if ((tb != nullptr) && (tb->size != 0)) {
-               BUG("For Tofino, Index of the header stack \"%s\" has to be a const value and "
-                   "can't be a variable. (Please Note: Don't use a const value with width.)",
-                   hdrref->base()->toString());
+                BUG("For Tofino, Index of the header stack \"%s\" has to be a const value and "
+                    "can't be a variable. (Please Note: Don't use a const value with width.)",
+                    hdrref->base()->toString());
             }
         }
 
-        const PhvInfo::StructInfo& struct_info = phv.struct_info(hr);
+        const PhvInfo::StructInfo &struct_info = phv.struct_info(hr);
 
         // Only analyze headers, not metadata structs.
         if (struct_info.metadata || struct_info.size == 0) {
@@ -1773,7 +1728,7 @@ class MarkPaddingAsDeparsed : public Inspector {
         bool lastDeparsedToTM = false;
 
         for (int fid : boost::adaptors::reverse(struct_info.field_ids())) {
-            PHV::Field* field = phv.field(fid);
+            PHV::Field *field = phv.field(fid);
             CHECK_NULL(field);
             LOG5("  found field " << field);
 
@@ -1795,19 +1750,18 @@ class MarkPaddingAsDeparsed : public Inspector {
     }
 
  public:
-    explicit MarkPaddingAsDeparsed(PhvInfo& phv) : phv(phv) { }
+    explicit MarkPaddingAsDeparsed(PhvInfo &phv) : phv(phv) {}
 };
 
 /** Sets constraint properties in PHV::Field objects based on constraints
  * induced by the parser/deparser.
  */
 class CollectPardeConstraints : public Inspector {
-    PhvInfo& phv;
+    PhvInfo &phv;
 
     void handle_parser_write(const IR::BFN::ParserPrimitive *prim) {
         auto lval = prim->getWriteDest();
-        if (!lval)
-            return;
+        if (!lval) return;
         auto f = phv.field(lval->field);
         BUG_CHECK(f, "Found extract %1% to a non-field object", lval->field);
         f->set_parsed(true);
@@ -1820,13 +1774,13 @@ class CollectPardeConstraints : public Inspector {
             if (f->pov) {
                 f->set_solitary(PHV::SolitaryReason::PRAGMA_SOLITARY);
                 LOG3("Marking parser multi-write field " << f << " as no_pack");
-            // Non POVs can at least be grouped among themselves (ones that
-            // are extracted together)
-            // Otherwise invalid superclusters are created for any field that is not
-            // 8 bit aligned
-            // Essentially this allows something like vlan.pcp (3b), vlan.cfi (1b)
-            // and vlan.vlan_id (12b) to be packed together (since the clear-on-write
-            // rewrites all of them together anyway)
+                // Non POVs can at least be grouped among themselves (ones that
+                // are extracted together)
+                // Otherwise invalid superclusters are created for any field that is not
+                // 8 bit aligned
+                // Essentially this allows something like vlan.pcp (3b), vlan.cfi (1b)
+                // and vlan.vlan_id (12b) to be packed together (since the clear-on-write
+                // rewrites all of them together anyway)
             } else {
                 f->set_solitary(PHV::SolitaryReason::CLEAR_ON_WRITE);
                 LOG3("Marking parser multi-write field " << f << " no_pack(clear_on_write)");
@@ -1834,13 +1788,13 @@ class CollectPardeConstraints : public Inspector {
         }
     }
 
-    bool preorder(const IR::BFN::Extract* extract) override {
+    bool preorder(const IR::BFN::Extract *extract) override {
         LOG4("\t CollectPardeConstraints: Extract " << *extract);
         handle_parser_write(extract);
         return false;
     }
 
-    bool preorder(const IR::BFN::ParserChecksumWritePrimitive* checksum) override {
+    bool preorder(const IR::BFN::ParserChecksumWritePrimitive *checksum) override {
         LOG4("\t CollectPardeConstraints: Checksum " << *checksum);
         handle_parser_write(checksum);
         return false;
@@ -1849,7 +1803,7 @@ class CollectPardeConstraints : public Inspector {
     // If two fields in deparser are predicated by different POV bits,
     // we cannot pack them in the same container (deparser can only deparse whole
     // container, not byte in container).
-    bool preorder(const IR::BFN::Deparser* deparser) override {
+    bool preorder(const IR::BFN::Deparser *deparser) override {
         for (auto it = deparser->emits.begin(); it != deparser->emits.end(); it++) {
             auto efi = (*it)->to<IR::BFN::EmitField>();
             if (!efi) continue;
@@ -1880,9 +1834,9 @@ class CollectPardeConstraints : public Inspector {
         return true;
     }
 
-    void postorder(const IR::BFN::EmitChecksum* checksum) override {
-        for (const auto* flval : checksum->sources) {
-            PHV::Field* f = phv.field(flval->field->field);
+    void postorder(const IR::BFN::EmitChecksum *checksum) override {
+        for (const auto *flval : checksum->sources) {
+            PHV::Field *f = phv.field(flval->field->field);
             BUG_CHECK(f != nullptr, "Field not created in PhvInfo");
             f->set_is_checksummed(true);
             if (f->metadata && f->size % 8) {
@@ -1896,10 +1850,9 @@ class CollectPardeConstraints : public Inspector {
         }
     }
 
-    void postorder(const IR::BFN::EmitField* emit) override {
-        auto* src_field = phv.field(emit->source->field);
-        BUG_CHECK(src_field, "Deparser Emit with a non-PHV source: %1%",
-                  cstring::to_cstring(emit));
+    void postorder(const IR::BFN::EmitField *emit) override {
+        auto *src_field = phv.field(emit->source->field);
+        BUG_CHECK(src_field, "Deparser Emit with a non-PHV source: %1%", cstring::to_cstring(emit));
         // TODO: These two constraints will be subsumed by deparser schema.
         src_field->set_deparsed(true);
         src_field->set_exact_containers(true);
@@ -1911,17 +1864,15 @@ class CollectPardeConstraints : public Inspector {
         static std::vector<cstring> rv;
 
         if (rv.empty()) {
-            rv = { "eg_intr_md.egress_port"_cs,
-                   "ig_intr_md_for_tm.mcast_grp_a"_cs,
-                   "ig_intr_md_for_tm.mcast_grp_b"_cs,
-                   "ig_intr_md_for_tm.ucast_egress_port"_cs};
+            rv = {"eg_intr_md.egress_port"_cs, "ig_intr_md_for_tm.mcast_grp_a"_cs,
+                  "ig_intr_md_for_tm.mcast_grp_b"_cs, "ig_intr_md_for_tm.ucast_egress_port"_cs};
 
             if (Device::currentDevice() == Device::TOFINO) {
-                rv.insert(rv.end(), { "ig_intr_md_for_tm.level1_mcast_hash"_cs,
-                                      "ig_intr_md_for_tm.level2_mcast_hash"_cs,
-                                      "ig_intr_md_for_tm.level1_exclusion_id"_cs,
-                                      "ig_intr_md_for_tm.level2_exclusion_id"_cs,
-                                      "ig_intr_md_for_tm.rid"_cs});
+                rv.insert(rv.end(),
+                          {"ig_intr_md_for_tm.level1_mcast_hash"_cs,
+                           "ig_intr_md_for_tm.level2_mcast_hash"_cs,
+                           "ig_intr_md_for_tm.level1_exclusion_id"_cs,
+                           "ig_intr_md_for_tm.level2_exclusion_id"_cs, "ig_intr_md_for_tm.rid"_cs});
             }
         }
 
@@ -1929,28 +1880,29 @@ class CollectPardeConstraints : public Inspector {
     }
 
     // make hw_constrained_fields visible to this Inspector
-    bool preorder(const IR::BFN::Pipe* pipe) override {
+    bool preorder(const IR::BFN::Pipe *pipe) override {
         visit(pipe->thread[INGRESS].hw_constrained_fields);
         visit(pipe->thread[EGRESS].hw_constrained_fields);
         return true;
     }
 
     bool preorder(const IR::BFN::HardwareConstrainedField *hw_constrained_field) override {
-        auto set_deparsed_bottom_bits = [&](const IR::Expression* expr) {
+        auto set_deparsed_bottom_bits = [&](const IR::Expression *expr) {
             BUG_CHECK(expr->is<IR::Member>() || expr->is<IR::Slice>(),
-                "deparsed bottom bits field %1% cannot be found", expr);
+                      "deparsed bottom bits field %1% cannot be found", expr);
             auto f = phv.field(expr);
             if (!f) return;
-            LOG3("D. Updating alignment of " << f->name << " to " <<
-                FieldAlignment(le_bitrange(StartLen(0, f->size))));
+            LOG3("D. Updating alignment of " << f->name << " to "
+                                             << FieldAlignment(le_bitrange(StartLen(0, f->size))));
             f->updateAlignment(PHV::AlignmentReason::DEPARSER,
-                FieldAlignment(le_bitrange(StartLen(0, f->size))),
-                hw_constrained_field->expr->getSourceInfo());
+                               FieldAlignment(le_bitrange(StartLen(0, f->size))),
+                               hw_constrained_field->expr->getSourceInfo());
             f->set_deparsed_bottom_bits(true);
         };
 
         if (!(hw_constrained_field->constraint_type.getbit(
-            IR::BFN::HardwareConstrainedField::DEPARSED_BOTTOM_BITS))) return false;
+                IR::BFN::HardwareConstrainedField::DEPARSED_BOTTOM_BITS)))
+            return false;
 
         set_deparsed_bottom_bits(hw_constrained_field->expr);
         if (auto alias_member = hw_constrained_field->expr->to<IR::BFN::AliasMember>()) {
@@ -1961,12 +1913,12 @@ class CollectPardeConstraints : public Inspector {
         return false;
     }
 
-    void postorder(const IR::BFN::DeparserParameter* param) override {
+    void postorder(const IR::BFN::DeparserParameter *param) override {
         if (!param->source) return;
 
         // extract deparser constraints from Deparser & Digest IR nodes ref: bf-p4c/ir/parde.def
         // set deparser constaints on field
-        PHV::Field* f = phv.field(param->source->field);
+        PHV::Field *f = phv.field(param->source->field);
         BUG_CHECK(f != nullptr, "Field not created in PhvInfo");
 
         f->set_deparsed_to_tm(true);
@@ -1981,23 +1933,24 @@ class CollectPardeConstraints : public Inspector {
             LOG3("setting StartBitsToBottomByte for " << f << ", because it is DeparserParameter");
         }
 
-        BUG_CHECK(f->size <= 32, "The architecture requires that field %1% not be split "
+        BUG_CHECK(f->size <= 32,
+                  "The architecture requires that field %1% not be split "
                   "across PHV containers, but the field is larger than the largest PHV container.",
                   cstring::to_cstring(f));
     }
 
-    void postorder(const IR::BFN::Digest* digest) override {
+    void postorder(const IR::BFN::Digest *digest) override {
         // learning, mirror, resubmit
         // have differing constraints -- bottom-bits, bridge-metadata mirror packing
         // learning, mirror field list in bottom bits of container, e.g.,
         // 301:ingress::$learning<3:0..2>
         // 590:egress::$mirror<3:0..2> specifies 1 of 8 field lists
         // currently, IR::BFN::Digest node has a string field to distinguish them by name
-        if (digest->name != "learning" && digest->name != "mirror"
-            && digest->name != "resubmit" && digest->name != "pktgen")
+        if (digest->name != "learning" && digest->name != "mirror" && digest->name != "resubmit" &&
+            digest->name != "pktgen")
             return;
 
-        PHV::Field* f = phv.field(digest->selector->field);
+        PHV::Field *f = phv.field(digest->selector->field);
         BUG_CHECK(f != nullptr, "Field not created in PhvInfo");
         f->set_deparsed_bottom_bits(true);
         f->set_no_split(true);
@@ -2021,21 +1974,19 @@ class CollectPardeConstraints : public Inspector {
         }
 
         if (digest->name == "resubmit") {
-            LOG3("\t resubmit metadata field (" << f << ") is set to be "
-                 << "exact container.");
+            LOG3("\t resubmit metadata field (" << f << ") is set to be " << "exact container.");
             for (auto fieldList : digest->fieldLists) {
                 LOG3("\t.....resubmit metadata field list....." << fieldList);
                 int total_bits = 0;
                 for (auto resubmit_field_expr : fieldList->sources) {
-                    PHV::Field* resubmit_field = phv.field(resubmit_field_expr->field);
+                    PHV::Field *resubmit_field = phv.field(resubmit_field_expr->field);
                     if (!resubmit_field) {
-                        BUG("\t\t resubmit field does not exist: %1%",
-                            resubmit_field_expr->field);
+                        BUG("\t\t resubmit field does not exist: %1%", resubmit_field_expr->field);
                     }
                     total_bits += resubmit_field->is_padding() ? 0 : resubmit_field->size;
                 }
                 for (auto resubmit_field_expr : fieldList->sources) {
-                    PHV::Field* resubmit_field = phv.field(resubmit_field_expr->field);
+                    PHV::Field *resubmit_field = phv.field(resubmit_field_expr->field);
                     if (resubmit_field) {
                         resubmit_field->set_exact_containers(true);
                         // an edge case for resubmit fields,
@@ -2049,8 +2000,7 @@ class CollectPardeConstraints : public Inspector {
                             LOG3("\t\t" << resubmit_field);
                         }
                     } else {
-                        BUG("\t\t resubmit field does not exist: %1%",
-                            resubmit_field_expr->field);
+                        BUG("\t\t resubmit field does not exist: %1%", resubmit_field_expr->field);
                     }
                 }
             }
@@ -2065,14 +2015,15 @@ class CollectPardeConstraints : public Inspector {
                     auto fieldInfo = phv.field(fieldListEntry->field);
                     CHECK_NULL(fieldInfo);
                     if (fieldInfo->metadata) {
-                        LOG3("E. Updating alignment of metadata field " << fieldInfo->name << " to "
-                                << FieldAlignment(le_bitrange(StartLen(0, fieldInfo->size))));
+                        LOG3("E. Updating alignment of metadata field "
+                             << fieldInfo->name << " to "
+                             << FieldAlignment(le_bitrange(StartLen(0, fieldInfo->size))));
                         fieldInfo->updateAlignment(
-                                PHV::AlignmentReason::DIGEST,
-                                FieldAlignment(le_bitrange(StartLen(0, fieldInfo->size))),
-                                fieldListEntry->field->getSourceInfo());
+                            PHV::AlignmentReason::DIGEST,
+                            FieldAlignment(le_bitrange(StartLen(0, fieldInfo->size))),
+                            fieldListEntry->field->getSourceInfo());
                         LOG3(fieldInfo << " is marked to be byte_aligned "
-                             "because it's in a field_list and digested.");
+                                          "because it's in a field_list and digested.");
                     } else if (fieldInfo->padding) {
                         fieldInfo->set_exact_containers(true);
                         fieldInfo->set_deparsed(true);
@@ -2089,7 +2040,7 @@ class CollectPardeConstraints : public Inspector {
                         if (fieldInfo)
                             LOG3("\t\t" << fieldInfo);
                         else
-                            LOG3("\t\t" <<"-f?");
+                            LOG3("\t\t" << "-f?");
                     }
                 }
             }
@@ -2111,7 +2062,7 @@ class CollectPardeConstraints : public Inspector {
             // from, and we need to be careful to ensure that it maintains the
             // expected layout exactly.
             if (!fieldList->sources.empty()) {
-                auto* fieldInfo = phv.field(fieldList->sources[0]->field);
+                auto *fieldInfo = phv.field(fieldList->sources[0]->field);
                 if (fieldInfo) {
                     fieldInfo->set_no_split(true);
                     fieldInfo->set_is_marshaled(true);
@@ -2119,8 +2070,8 @@ class CollectPardeConstraints : public Inspector {
             }
             // XXX (Only for P4-14)
             if (BackendOptions().langVersion == CompilerOptions::FrontendVersion::P4_14 &&
-                    fieldList->sources.size() > 1) {
-                auto* fieldInfo = phv.field(fieldList->sources[1]->field);
+                fieldList->sources.size() > 1) {
+                auto *fieldInfo = phv.field(fieldList->sources[1]->field);
                 if (fieldInfo) fieldInfo->set_no_split(true);
             }
 
@@ -2132,7 +2083,7 @@ class CollectPardeConstraints : public Inspector {
             // compiler_generated_meta.mirror_source must go to [B].
             // This constraint is handled in the phv allocation.
             for (auto mirroredField : fieldList->sources) {
-                PHV::Field* mirror = phv.field(mirroredField->field);
+                PHV::Field *mirror = phv.field(mirroredField->field);
                 if (mirror) {
                     if (mirror->metadata) {
                         mirror->mirror_field_list = {f, fieldListIndex};
@@ -2152,7 +2103,7 @@ class CollectPardeConstraints : public Inspector {
     }
 
  public:
-    explicit CollectPardeConstraints(PhvInfo& phv) : phv(phv) { }
+    explicit CollectPardeConstraints(PhvInfo &phv) : phv(phv) {}
 };
 
 /** The timestamp and version fields are located in a special part of the input
@@ -2168,24 +2119,26 @@ class CollectPardeConstraints : public Inspector {
  * problem.
  */
 class MarkTimestampAndVersion : public Inspector {
-    PhvInfo& phv_i;
+    PhvInfo &phv_i;
 
     void end_apply() {
-        for (auto& f : phv_i) {
+        for (auto &f : phv_i) {
             cstring name = f.name;
             bool isTstamp = name.endsWith("global_tstamp") && f.is_intrinsic();
             bool isVersion = name.endsWith("global_ver") && f.is_intrinsic();
             if (isTstamp || isVersion) {
                 LOG2("Setting exact_containers for " << f.name);
-                f.set_exact_containers(true); } }
+                f.set_exact_containers(true);
+            }
+        }
     }
 
  public:
-    explicit MarkTimestampAndVersion(PhvInfo& phv) : phv_i(phv) { }
+    explicit MarkTimestampAndVersion(PhvInfo &phv) : phv_i(phv) {}
 };
 
 class MarkFieldAsBridged : public Inspector {
-    PhvInfo& phv_i;
+    PhvInfo &phv_i;
 
     cstring getOppositeGressFieldName(cstring name) {
         if (name.startsWith("ingress::")) {
@@ -2199,12 +2152,11 @@ class MarkFieldAsBridged : public Inspector {
     }
 
     void end_apply() {
-        for (auto& f : phv_i) {
+        for (auto &f : phv_i) {
             if ((f.is_flexible() || f.metadata) && f.emitted()) {
                 // ignore $constant generated from decaf, which is never bridged
                 std::string f_name(f.name.c_str());
-                if (f_name.find("$constant") != std::string::npos)
-                    continue;
+                if (f_name.find("$constant") != std::string::npos) continue;
                 f.bridged = true;
                 LOG3("   marking field " << f << " as bridged");
             }
@@ -2212,24 +2164,23 @@ class MarkFieldAsBridged : public Inspector {
     }
 
  public:
-    explicit MarkFieldAsBridged(PhvInfo& phv) : phv_i(phv) { }
+    explicit MarkFieldAsBridged(PhvInfo &phv) : phv_i(phv) {}
 };
 
-bool CollectExtractedTogetherFields::preorder(const IR::BFN::ParserState* state) {
+bool CollectExtractedTogetherFields::preorder(const IR::BFN::ParserState *state) {
     /* map a byte in ibuf to the corresponding set of metadata fields sourced from the byte. */
-    ordered_map<int /* ibuf byte offset */, ordered_set<const PHV::Field*>> ibuf_to_fields[3];
+    ordered_map<int /* ibuf byte offset */, ordered_set<const PHV::Field *>> ibuf_to_fields[3];
 
-    for (auto& statement : state->statements) {
-        if (!statement->is<IR::BFN::Extract>())
-            continue;
+    for (auto &statement : state->statements) {
+        if (!statement->is<IR::BFN::Extract>()) continue;
         auto extract = statement->to<IR::BFN::Extract>();
         BUG_CHECK(extract->dest, "Extract %1% does not have a destination",
-                cstring::to_cstring(extract));
+                  cstring::to_cstring(extract));
         BUG_CHECK(extract->dest->field, "Extract %1% does not have a destination field",
-                cstring::to_cstring(extract));
-        const PHV::Field* destField = phv_i.field(extract->dest->field);
+                  cstring::to_cstring(extract));
+        const PHV::Field *destField = phv_i.field(extract->dest->field);
         BUG_CHECK(destField, "Could not find destination field for extract %1%",
-                cstring::to_cstring(extract));
+                  cstring::to_cstring(extract));
         if (auto rval = extract->source->to<IR::BFN::PacketRVal>()) {
             auto offset = rval->range.lo / 8;
             if (auto mem = extract->dest->to<IR::BFN::FieldLVal>()) {
@@ -2244,11 +2195,11 @@ bool CollectExtractedTogetherFields::preorder(const IR::BFN::ParserState* state)
     }
 
     // only generate extract_together constraint for egress metadata for now.
-    auto& matrix = phv_i.getBridgedExtractedTogether();
+    auto &matrix = phv_i.getBridgedExtractedTogether();
 
-    for (const auto& kv : ibuf_to_fields[EGRESS]) {
-        for (const auto& f1 : kv.second) {
-            for (const auto& f2 : kv.second) {
+    for (const auto &kv : ibuf_to_fields[EGRESS]) {
+        for (const auto &f1 : kv.second) {
+            for (const auto &f2 : kv.second) {
                 if (!f1 || !f2) continue;
                 if (f1->id == f2->id) continue;
                 if (f1->padding || f2->padding) continue;
@@ -2272,7 +2223,7 @@ bool CollectExtractedTogetherFields::preorder(const IR::BFN::ParserState* state)
  *  no_split which forces PHV allocation to allocate it into precise container.
  */
 class ConstrainSatAddResultTempVars : public Inspector {
-    PhvInfo& phv_i;
+    PhvInfo &phv_i;
 
     bool needsConstraining(const IR::MAU::Instruction *ins) const {
         // If we allow slicing of int<X> and casting the result back to int
@@ -2296,24 +2247,16 @@ class ConstrainSatAddResultTempVars : public Inspector {
         return false;
     }
 
-    explicit ConstrainSatAddResultTempVars(PhvInfo& phv) : phv_i(phv) { }
+    explicit ConstrainSatAddResultTempVars(PhvInfo &phv) : phv_i(phv) {}
 };
 
-CollectPhvInfo::CollectPhvInfo(PhvInfo& phv) {
-    addPasses({
-        new ClearPhvInfo(phv),
-        new CollectPhvFields(phv),
-        new AllocatePOVBits(phv),
-        new MapFieldToParserStates(phv),
-        new CollectPardeConstraints(phv),
-        new MarkFieldAsBridged(phv),
-        new ComputeFieldAlignments(phv),
-        new AddIntrinsicConstraints(phv),
-        new MarkTimestampAndVersion(phv),
-        new MarkPaddingAsDeparsed(phv),
-        new CollectExtractedTogetherFields(phv),
-        new ConstrainSatAddResultTempVars(phv)
-    });
+CollectPhvInfo::CollectPhvInfo(PhvInfo &phv) {
+    addPasses({new ClearPhvInfo(phv), new CollectPhvFields(phv), new AllocatePOVBits(phv),
+               new MapFieldToParserStates(phv), new CollectPardeConstraints(phv),
+               new MarkFieldAsBridged(phv), new ComputeFieldAlignments(phv),
+               new AddIntrinsicConstraints(phv), new MarkTimestampAndVersion(phv),
+               new MarkPaddingAsDeparsed(phv), new CollectExtractedTogetherFields(phv),
+               new ConstrainSatAddResultTempVars(phv)});
 }
 //
 //
@@ -2346,11 +2289,9 @@ std::ostream &PHV::operator<<(std::ostream &out, const PHV::Field &field) {
     if (field.is_intrinsic()) out << " intrinsic";
     if (field.is_digest()) out << " digest";
     if (field.mirror_field_list.member_field)
-        out << " mirror%{"
-            << field.mirror_field_list.member_field->id
-            << ":" << field.mirror_field_list.member_field->name
-            << "#" << field.mirror_field_list.field_list
-            << "}%";
+        out << " mirror%{" << field.mirror_field_list.member_field->id << ":"
+            << field.mirror_field_list.member_field->name << "#"
+            << field.mirror_field_list.field_list << "}%";
     if (field.pov) out << " pov";
     if (field.is_deparser_zero_candidate())
         out << " deparsed-zero";
@@ -2363,8 +2304,10 @@ std::ostream &PHV::operator<<(std::ostream &out, const PHV::Field &field) {
     if (field.no_split()) {
         out << " no_split";
     } else if (field.no_split_ranges().size() > 0) {
-        for (const auto& range : field.no_split_ranges()) {
-            out << " no_split_at" << range; } }
+        for (const auto &range : field.no_split_ranges()) {
+            out << " no_split_at" << range;
+        }
+    }
     if (field.no_holes()) out << " no_holes";
     if (field.deparsed_bottom_bits()) out << " deparsed_bottom_bits";
     if (field.deparsed_to_tm()) out << " deparsed_to_tm";
@@ -2385,12 +2328,15 @@ std::ostream &PHV::operator<<(std::ostream &out, const PHV::Field &field) {
         if (as.field_slice().lo != 0 || as.width() != field.size) {
             out << as.field_slice().lo;
             if (as.width() > 1) out << ".." << as.field_slice().hi;
-            out << ":"; }
+            out << ":";
+        }
         out << as.container();
         if (as.container_slice().lo != 0 || size_t(as.width()) != as.container().size()) {
             out << "(" << as.container_slice().lo;
             if (as.width() > 1) out << ".." << as.container_slice().hi;
-            out << ")"; } }
+            out << ")";
+        }
+    }
     return out;
 }
 
@@ -2400,7 +2346,7 @@ std::ostream &PHV::operator<<(std::ostream &out, const PHV::Field *fld) {
 }
 
 // ordered_set Field*
-std::ostream &operator<<(std::ostream &out, const ordered_set<PHV::Field *>& field_set) {
+std::ostream &operator<<(std::ostream &out, const ordered_set<PHV::Field *> &field_set) {
     for (auto &f : field_set) {
         out << f << std::endl;
     }
@@ -2408,7 +2354,7 @@ std::ostream &operator<<(std::ostream &out, const ordered_set<PHV::Field *>& fie
 }
 
 // ordered_set const Field*
-std::ostream &operator<<(std::ostream &out, const ordered_set<const PHV::Field *>& field_set) {
+std::ostream &operator<<(std::ostream &out, const ordered_set<const PHV::Field *> &field_set) {
     for (auto &f : field_set) {
         out << f << std::endl;
     }
@@ -2420,29 +2366,38 @@ std::ostream &operator<<(std::ostream &out, const PhvInfo &phv) {
         << std::endl
         << std::endl;
     //
-    for (auto& field : phv) {
-         out << &field << std::endl;
+    for (auto &field : phv) {
+        out << &field << std::endl;
     }
     return out;
 }
 
 std::ostream &operator<<(std::ostream &out, const PHV::FieldAccessType &op) {
     switch (op) {
-        case PHV::FieldAccessType::NONE: out << "None"; break;
-        case PHV::FieldAccessType::R: out << 'R'; break;
-        case PHV::FieldAccessType::W: out << 'W'; break;
-        case PHV::FieldAccessType::RW: out << "RW"; break;
-        default: out << "<FieldAccessType " << int(op) << ">"; }
+        case PHV::FieldAccessType::NONE:
+            out << "None";
+            break;
+        case PHV::FieldAccessType::R:
+            out << 'R';
+            break;
+        case PHV::FieldAccessType::W:
+            out << 'W';
+            break;
+        case PHV::FieldAccessType::RW:
+            out << "RW";
+            break;
+        default:
+            out << "<FieldAccessType " << int(op) << ">";
+    }
     return out;
 }
 
-
-std::ostream &operator<<(std::ostream& out, const PhvInfo::SameContainerAllocConstraint& c) {
+std::ostream &operator<<(std::ostream &out, const PhvInfo::SameContainerAllocConstraint &c) {
     out << "SameContainerAllocConstraint:\n";
-    for (const auto& set : c.same_byte_bits) {
+    for (const auto &set : c.same_byte_bits) {
         out << "{";
         std::string sep = "";
-        for (const auto& e : set) {
+        for (const auto &e : set) {
             out << sep << e;
             sep = ", ";
         }
@@ -2451,38 +2406,36 @@ std::ostream &operator<<(std::ostream& out, const PhvInfo::SameContainerAllocCon
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out,
-                         const PhvInfo::SameContainerAllocConstraint::FieldBit& fb) {
+std::ostream &operator<<(std::ostream &out,
+                         const PhvInfo::SameContainerAllocConstraint::FieldBit &fb) {
     out << fb.first->name << "[" << fb.second << "]";
     return out;
 }
 
 namespace PHV {
 
-std::ostream &operator<<(std::ostream &out, const PHV::FieldSlice& fs) {
+std::ostream &operator<<(std::ostream &out, const PHV::FieldSlice &fs) {
     if (fs.field() == nullptr) {
         out << "-field-slice-of-null-field-ptr-";
-        return out; }
+        return out;
+    }
 
     if (DBPrint::dbgetflags(out) & DBPrint::Brief) {
         out << fs.shortString();
-        return out; }
+        return out;
+    }
 
-    auto& field = *fs.field();
+    auto &field = *fs.field();
     out << field.name << "<" << field.size << ">";
-    if (fs.alignment())
-        out << " ^" << fs.alignment()->align;
-    if (fs.validContainerRange() != ZeroToMax())
-        out << " ^" << fs.validContainerRange();
+    if (fs.alignment()) out << " ^" << fs.alignment()->align;
+    if (fs.validContainerRange() != ZeroToMax()) out << " ^" << fs.validContainerRange();
     if (field.bridged) out << " bridge";
     if (field.metadata) out << " meta";
     if (field.is_intrinsic()) out << " intrinsic";
     if (field.mirror_field_list.member_field)
-        out << " mirror%{"
-            << field.mirror_field_list.member_field->id
-            << ":" << field.mirror_field_list.member_field->name
-            << "#" << field.mirror_field_list.field_list
-            << "}%";
+        out << " mirror%{" << field.mirror_field_list.member_field->id << ":"
+            << field.mirror_field_list.member_field->name << "#"
+            << field.mirror_field_list.field_list << "}%";
     if (field.pov) out << " pov";
     if (field.is_deparser_zero_candidate())
         out << " deparsed-zero";
@@ -2508,7 +2461,7 @@ std::ostream &operator<<(std::ostream &out, const PHV::FieldSlice& fs) {
     return out;
 }
 
-std::ostream &operator<<(std::ostream &out, const PHV::FieldSlice* fs) {
+std::ostream &operator<<(std::ostream &out, const PHV::FieldSlice *fs) {
     if (fs)
         out << *fs;
     else
@@ -2516,10 +2469,10 @@ std::ostream &operator<<(std::ostream &out, const PHV::FieldSlice* fs) {
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const PackingLayout& p) {
+std::ostream &operator<<(std::ostream &out, const PackingLayout &p) {
     out << "[";
     std::string sep = "";
-    for (const auto& v : p.layout) {
+    for (const auto &v : p.layout) {
         out << sep;
         sep = ", ";
         if (v.is_fs()) {
@@ -2532,23 +2485,23 @@ std::ostream& operator<<(std::ostream& out, const PackingLayout& p) {
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const PackingLayout* p) {
+std::ostream &operator<<(std::ostream &out, const PackingLayout *p) {
     out << *p;
     return out;
 }
 
-}   // namespace PHV
+}  // namespace PHV
 
 namespace std {
 
-ostream &operator<<(ostream &out, const list<::PHV::Field *>& field_list) {
+ostream &operator<<(ostream &out, const list<::PHV::Field *> &field_list) {
     for (auto &f : field_list) {
         out << f << std::endl;
     }
     return out;
 }
 
-ostream &operator<<(ostream &out, const set<const ::PHV::Field *>& field_list) {
+ostream &operator<<(ostream &out, const set<const ::PHV::Field *> &field_list) {
     for (auto &f : field_list) {
         out << f << std::endl;
     }
@@ -2563,7 +2516,7 @@ void dump(const PhvInfo *phv) { std::cout << *phv; }
 void dump(const PHV::Field &f) { std::cout << f << std::endl; }
 void dump(const PHV::Field *f) { std::cout << *f << std::endl; }
 
-const IR::Node* PhvInfo::DumpPhvFields::apply_visitor(const IR::Node *n, const char *) {
+const IR::Node *PhvInfo::DumpPhvFields::apply_visitor(const IR::Node *n, const char *) {
     LOG1("");
     LOG1("--- PHV FIELDS -------------------------------------------");
     LOG1("");
@@ -2572,13 +2525,12 @@ const IR::Node* PhvInfo::DumpPhvFields::apply_visitor(const IR::Node *n, const c
     LOG1("R: referenced anywhere");
     LOG1("D: is deparsed");
     LOG1("Alias source fields may have no labels");
-    for (auto& f : phv) {
-        LOG1("(" <<
-              (uses.is_used_parde(&f) ? "P" : " ") <<
-              (uses.is_used_mau(&f) ? "M" : " ") <<
-              (uses.is_referenced(&f) ? "R" : " ") <<
-              (uses.is_deparsed(&f) ? "D" : " ") << ") " << /*f.externalName()*/
-              f << " (" << f.gress << ")") ; }
+    for (auto &f : phv) {
+        LOG1("(" << (uses.is_used_parde(&f) ? "P" : " ") << (uses.is_used_mau(&f) ? "M" : " ")
+                 << (uses.is_referenced(&f) ? "R" : " ") << (uses.is_deparsed(&f) ? "D" : " ")
+                 << ") " << /*f.externalName()*/
+             f << " (" << f.gress << ")");
+    }
     LOG1("");
 
     LOG1("--- PHV FIELDS WIDTH HISTOGRAM----------------------------");
@@ -2595,34 +2547,37 @@ void PhvInfo::DumpPhvFields::generate_field_histogram(gress_t gress) const {
     std::map<int, size_t> size_distribution;
     size_t total_bits = 0;
     size_t total_fields = 0;
-    for (auto& field : phv) {
+    for (auto &field : phv) {
         if (field.gress == gress) {
             // Only report histogram for fields that aren't dead code eliminated
-            if (uses.is_referenced(&field) || uses.is_deparsed(&field) || uses.is_used_mau(&field)
-                    || uses.is_used_parde(&field)) {
+            if (uses.is_referenced(&field) || uses.is_deparsed(&field) ||
+                uses.is_used_mau(&field) || uses.is_used_parde(&field)) {
                 size_distribution[field.size] += 1;
                 total_bits += field.size;
-                total_fields++; } } }
+                total_fields++;
+            }
+        }
+    }
     // Print histogram
     LOG1("Fields to be allocated: " << total_fields);
     LOG1("Bits to be allocated: " << total_bits);
     for (auto entry : size_distribution) {
         std::stringstream row;
         row << entry.first << "\t";
-        for (size_t i = 0; i < entry.second; i++)
-            row << "x";
+        for (size_t i = 0; i < entry.second; i++) row << "x";
         row << " (" << entry.second << ")";
-        LOG1(row.str()); }
+        LOG1(row.str());
+    }
 }
 
-bool PhvInfo::SameContainerAllocConstraint::same_container(const PHV::FieldSlice& a,
-                                                           const PHV::FieldSlice& b) const {
+bool PhvInfo::SameContainerAllocConstraint::same_container(const PHV::FieldSlice &a,
+                                                           const PHV::FieldSlice &b) const {
     const FieldBit a_lo{a.field(), a.range().lo};
     const FieldBit a_hi{a.field(), a.range().hi};
     const FieldBit b_lo{b.field(), b.range().lo};
     const FieldBit b_hi{b.field(), b.range().hi};
-    std::initializer_list<const FieldBit*> bits{&a_lo, &a_hi, &b_lo, &b_hi};
-    for (const auto* b : bits) {
+    std::initializer_list<const FieldBit *> bits{&a_lo, &a_hi, &b_lo, &b_hi};
+    for (const auto *b : bits) {
         if (!same_byte_bits.contains(*b)) {
             return false;
         }
@@ -2631,18 +2586,17 @@ bool PhvInfo::SameContainerAllocConstraint::same_container(const PHV::FieldSlice
            same_byte_bits.find(a_hi) == same_byte_bits.find(b_lo);
 }
 
-PhvInfo::ContainterToSliceMap
-PhvInfo::getContainerToSlicesMap(std::function<bool(const PHV::Field*)> *f,
-                        std::function<bool(const PHV::AllocSlice*)> *s) const {
+PhvInfo::ContainterToSliceMap PhvInfo::getContainerToSlicesMap(
+    std::function<bool(const PHV::Field *)> *f,
+    std::function<bool(const PHV::AllocSlice *)> *s) const {
     ContainterToSliceMap cont_to_slices;
-    for (const PHV::Field& field : *this) {
+    for (const PHV::Field &field : *this) {
         if (f && (*f)(&field)) continue;
         const auto alloc_slices = get_alloc(&field);
-        for (const auto& alloc_slice : alloc_slices) {
+        for (const auto &alloc_slice : alloc_slices) {
             if (s && (*s)(&alloc_slice)) continue;
             cont_to_slices[alloc_slice.container()].push_back(alloc_slice);
-            LOG5("Container: " << alloc_slice.container()
-                               << " --> slice: " << alloc_slice);
+            LOG5("Container: " << alloc_slice.container() << " --> slice: " << alloc_slice);
         }
     }
     return cont_to_slices;

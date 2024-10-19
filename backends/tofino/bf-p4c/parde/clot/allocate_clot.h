@@ -10,8 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PARDE_CLOT_ALLOCATE_CLOT_H_
-#define EXTENSIONS_BF_P4C_PARDE_CLOT_ALLOCATE_CLOT_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_CLOT_ALLOCATE_CLOT_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_CLOT_ALLOCATE_CLOT_H_
 
 #include "clot_info.h"
 
@@ -22,8 +22,8 @@ class AllocateClot : public PassManager {
 
  public:
     explicit AllocateClot(ClotInfo &clotInfo, const PhvInfo &phv, PhvUse &uses,
-                          PragmaDoNotUseClot& pragmaDoNotUseClot,
-                          PragmaAlias& pragmaAlias, bool log = true);
+                          PragmaDoNotUseClot &pragmaDoNotUseClot, PragmaAlias &pragmaAlias,
+                          bool log = true);
 };
 
 /**
@@ -31,16 +31,16 @@ class AllocateClot : public PassManager {
  * \ref clot_alloc_adjust "CLOT allocation adjustment" (README.md).
  */
 class ClotAdjuster : public Visitor {
-    ClotInfo& clotInfo;
-    const PhvInfo& phv;
-    Logging::FileLog* log = nullptr;
+    ClotInfo &clotInfo;
+    const PhvInfo &phv;
+    Logging::FileLog *log = nullptr;
 
  public:
-    ClotAdjuster(ClotInfo& clotInfo, const PhvInfo& phv) : clotInfo(clotInfo), phv(phv) { }
+    ClotAdjuster(ClotInfo &clotInfo, const PhvInfo &phv) : clotInfo(clotInfo), phv(phv) {}
 
-    Visitor::profile_t init_apply(const IR::Node* root) override;
-    const IR::Node *apply_visitor(const IR::Node* root, const char*) override;
-    void end_apply(const IR::Node* root) override;
+    Visitor::profile_t init_apply(const IR::Node *root) override;
+    const IR::Node *apply_visitor(const IR::Node *root, const char *) override;
+    void end_apply(const IR::Node *root) override;
 };
 
-#endif /* EXTENSIONS_BF_P4C_PARDE_CLOT_ALLOCATE_CLOT_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_CLOT_ALLOCATE_CLOT_H_ */

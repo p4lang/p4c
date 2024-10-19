@@ -14,7 +14,7 @@
  * \defgroup RemoveActionParameters BFN::RemoveActionParameters
  * \ingroup midend
  * \brief Set of passes that specialize the p4c/frontends/RemoveActionParameters class.
- * 
+ *
  * This moves action parameters out of the actions.
  */
 #ifndef BF_P4C_MIDEND_REMOVE_ACTION_PARAMS_H_
@@ -29,13 +29,13 @@ namespace BFN {
  */
 class DoRemoveActionParametersTofino : public P4::DoRemoveActionParameters {
  public:
-    explicit DoRemoveActionParametersTofino(P4::ActionInvocation* inv)
+    explicit DoRemoveActionParametersTofino(P4::ActionInvocation *inv)
         : P4::DoRemoveActionParameters(inv) {}
 
     /**
      * Check if there is a mark_to_drop action and don't replace parameters.
      */
-    bool DoCheckReplaceParam(IR::P4Action* action, const IR::Parameter* p) {
+    bool DoCheckReplaceParam(IR::P4Action *action, const IR::Parameter *p) {
         int paramUses = 0;
         int num_mark_to_drop = 0;
         bool replace = true;
@@ -45,8 +45,10 @@ class DoRemoveActionParametersTofino : public P4::DoRemoveActionParameters {
             if (abc->is<IR::AssignmentStatement>()) {
                 auto as = abc->to<IR::AssignmentStatement>();
                 // TODO: Handle assignment statements with expressions
-                if (p->name == as->left->toString()) paramUses++;
-                else if (p->name == as->right->toString()) paramUses++;
+                if (p->name == as->left->toString())
+                    paramUses++;
+                else if (p->name == as->right->toString())
+                    paramUses++;
             } else if (abc->is<IR::MethodCallStatement>()) {
                 auto mcs = abc->to<IR::MethodCallStatement>();
                 auto mc = mcs->methodCall;
@@ -55,7 +57,7 @@ class DoRemoveActionParametersTofino : public P4::DoRemoveActionParameters {
                     num_mark_to_drop++;
                 } else {
                     for (auto arg : *(mce->arguments)) {
-                        auto* argMem = arg->expression->to<IR::Member>();
+                        auto *argMem = arg->expression->to<IR::Member>();
                         if (argMem && p->name == argMem->toString()) paramUses++;
                     }
                 }
@@ -70,7 +72,7 @@ class DoRemoveActionParametersTofino : public P4::DoRemoveActionParameters {
         return replace;
     }
 
-    const IR::Node* postorder(IR::P4Action* action) {
+    const IR::Node *postorder(IR::P4Action *action) {
         LOG1("Visiting " << dbp(action));
         BUG_CHECK(getParent<IR::P4Control>() || getParent<IR::P4Program>(),
                   "%1%: unexpected parent %2%", getOriginal(), getContext()->node);
@@ -79,8 +81,7 @@ class DoRemoveActionParametersTofino : public P4::DoRemoveActionParameters {
         auto initializers = new IR::IndexedVector<IR::StatOrDecl>();
         auto postamble = new IR::IndexedVector<IR::StatOrDecl>();
         auto invocation = getInvocations()->get(getOriginal<IR::P4Action>());
-        if (invocation == nullptr)
-            return action;
+        if (invocation == nullptr) return action;
         auto args = invocation->arguments;
 
         P4::ParameterSubstitution substitution;
@@ -94,8 +95,8 @@ class DoRemoveActionParametersTofino : public P4::DoRemoveActionParameters {
                 leftParams->push_back(p);
             } else {
                 if (replaceParam) {
-                    auto decl = new IR::Declaration_Variable(p->srcInfo, p->name,
-                            p->annotations, p->type, nullptr);
+                    auto decl = new IR::Declaration_Variable(p->srcInfo, p->name, p->annotations,
+                                                             p->type, nullptr);
                     LOG3("Added declaration " << decl << " annotations " << p->annotations);
                     result->push_back(decl);
 
@@ -105,20 +106,19 @@ class DoRemoveActionParametersTofino : public P4::DoRemoveActionParameters {
                         continue;
                     }
 
-                    if (p->direction == IR::Direction::In ||
-                            p->direction == IR::Direction::InOut ||
-                            p->direction == IR::Direction::None) {
+                    if (p->direction == IR::Direction::In || p->direction == IR::Direction::InOut ||
+                        p->direction == IR::Direction::None) {
                         auto left = new IR::PathExpression(p->name);
-                        auto assign = new IR::AssignmentStatement(arg->srcInfo, left,
-                                arg->expression);
+                        auto assign =
+                            new IR::AssignmentStatement(arg->srcInfo, left, arg->expression);
                         initializers->push_back(assign);
                     }
 
                     if (p->direction == IR::Direction::Out ||
-                            p->direction == IR::Direction::InOut) {
+                        p->direction == IR::Direction::InOut) {
                         auto right = new IR::PathExpression(p->name);
-                        auto assign = new IR::AssignmentStatement(arg->srcInfo,
-                                arg->expression, right);
+                        auto assign =
+                            new IR::AssignmentStatement(arg->srcInfo, arg->expression, right);
                         postamble->push_back(assign);
                     }
                 } else {
@@ -165,10 +165,9 @@ class DoRemoveActionParametersTofino : public P4::DoRemoveActionParameters {
  */
 class RemoveActionParameters : public PassManager {
  public:
-    RemoveActionParameters(P4::ReferenceMap *refMap,
-                           P4::TypeMap *typeMap,
+    RemoveActionParameters(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
                            P4::TypeChecking *tc = nullptr) {
-      setName("RemoveActionParameters");
+        setName("RemoveActionParameters");
         auto ai = new P4::ActionInvocation();
         // MoveDeclarations() is needed because of this case:
         // action a(inout x) { x = x + 1 }
@@ -179,8 +178,7 @@ class RemoveActionParameters : public PassManager {
         // bit<32> w;
         // table t() { actions = a(); ... }
         passes.emplace_back(new P4::MoveDeclarations());
-        if (!tc)
-            tc = new P4::TypeChecking(refMap, typeMap);
+        if (!tc) tc = new P4::TypeChecking(refMap, typeMap);
         passes.emplace_back(tc);
         passes.emplace_back(new P4::FindActionParameters(typeMap, ai));
         passes.emplace_back(new DoRemoveActionParametersTofino(ai));
@@ -190,4 +188,4 @@ class RemoveActionParameters : public PassManager {
 
 }  // end namespace BFN
 
-#endif  /* BF_P4C_MIDEND_REMOVE_ACTION_PARAMS_H_ */
+#endif /* BF_P4C_MIDEND_REMOVE_ACTION_PARAMS_H_ */

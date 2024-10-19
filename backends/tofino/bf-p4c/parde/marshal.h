@@ -14,8 +14,9 @@
 #define PARDE_MARSHAL_H_
 
 #include <iostream>
-#include "lib/cstring.h"
+
 #include "bf-p4c/ir/gress.h"
+#include "lib/cstring.h"
 
 namespace P4 {
 
@@ -35,34 +36,30 @@ struct MarshaledFrom {
 
     std::string toString() const;
 
-    bool operator==(const MarshaledFrom& other) const {
-        return gress == other.gress && field_name == other.field_name
-               && pre_padding == other.pre_padding;
+    bool operator==(const MarshaledFrom &other) const {
+        return gress == other.gress && field_name == other.field_name &&
+               pre_padding == other.pre_padding;
     }
 
     /// JSON serialization/deserialization.
-    void toJSON(JSONGenerator& json) const;
-    static MarshaledFrom fromJSON(JSONLoader& json);
+    void toJSON(JSONGenerator &json) const;
+    static MarshaledFrom fromJSON(JSONLoader &json);
 
-    friend std::ostream& operator<<(std::ostream& s, const MarshaledFrom& m);
-    friend P4::JSONGenerator& operator<<(P4::JSONGenerator& out, const MarshaledFrom& c);
+    friend std::ostream &operator<<(std::ostream &s, const MarshaledFrom &m);
+    friend P4::JSONGenerator &operator<<(P4::JSONGenerator &out, const MarshaledFrom &c);
 
-    MarshaledFrom()
-        : gress(INGRESS), field_name(""), pre_padding(0) { }
-    MarshaledFrom(gress_t gress, cstring name)
-        : gress(gress), field_name(name), pre_padding(0) { }
+    MarshaledFrom() : gress(INGRESS), field_name(""), pre_padding(0) {}
+    MarshaledFrom(gress_t gress, cstring name) : gress(gress), field_name(name), pre_padding(0) {}
     MarshaledFrom(gress_t gress, cstring name, size_t pre_padding)
-        : gress(gress), field_name(name), pre_padding(pre_padding) { }
+        : gress(gress), field_name(name), pre_padding(pre_padding) {}
 };
 
-inline std::ostream& operator<<(std::ostream& s, const MarshaledFrom& m) {
+inline std::ostream &operator<<(std::ostream &s, const MarshaledFrom &m) {
     s << "(" << m.gress << ", " << m.field_name << ", " << m.pre_padding << ")";
     return s;
 }
 
-inline JSONGenerator& operator<<(JSONGenerator& out, const MarshaledFrom& c) {
-    return out << c;
-}
+inline JSONGenerator &operator<<(JSONGenerator &out, const MarshaledFrom &c) { return out << c; }
 
 }  // namespace P4
 

@@ -10,7 +10,6 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-
 #include "bf_gtest_helpers.h"
 #include "gtest/gtest.h"
 

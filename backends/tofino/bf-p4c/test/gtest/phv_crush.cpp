@@ -12,16 +12,15 @@
 
 #include <sstream>
 
-#include "gtest/gtest.h"
-#include "lib/bitvec.h"
-#include "test/gtest/helpers.h"
-
 #include "bf-p4c/device.h"
 #include "bf-p4c/ir/gress.h"
 #include "bf-p4c/phv/allocate_phv.h"
 #include "bf-p4c/phv/slicing/phv_slicing_split.h"
 #include "bf-p4c/phv/utils/utils.h"
 #include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "gtest/gtest.h"
+#include "lib/bitvec.h"
+#include "test/gtest/helpers.h"
 
 namespace P4::Test {
 
@@ -31,34 +30,36 @@ class TofinoPhvCrush : public TofinoBackendTest {};
 
 /// Make a SuperCluster with slice lists (@lists), with each slice in each
 /// list in its own RotationalCluster.
-static PHV::SuperCluster* make_sc(ordered_set<PHV::SuperCluster::SliceList*> lists) {
-    ordered_set<const PHV::RotationalCluster*> clusters;
-    for (auto* list : lists) {
+static PHV::SuperCluster *make_sc(ordered_set<PHV::SuperCluster::SliceList *> lists) {
+    ordered_set<const PHV::RotationalCluster *> clusters;
+    for (auto *list : lists) {
         for (auto slice : *list) {
-            auto aligned = new PHV::AlignedCluster(PHV::Kind::normal,
-                                                   std::vector<PHV::FieldSlice>({ slice }));
+            auto aligned =
+                new PHV::AlignedCluster(PHV::Kind::normal, std::vector<PHV::FieldSlice>({slice}));
             auto rotational =
-                new PHV::RotationalCluster(ordered_set<PHV::AlignedCluster*>({ aligned }));
-            clusters.insert(rotational); } }
+                new PHV::RotationalCluster(ordered_set<PHV::AlignedCluster *>({aligned}));
+            clusters.insert(rotational);
+        }
+    }
     return new PHV::SuperCluster(clusters, lists);
 }
 
 /// Make a SuperCluster with a single slice list (@list), with each slice in
 /// @list in its own RotationalCluster.
-static PHV::SuperCluster* make_sc(PHV::SuperCluster::SliceList* slices) {
-    return make_sc(ordered_set<PHV::SuperCluster::SliceList*>({ slices }));
+static PHV::SuperCluster *make_sc(PHV::SuperCluster::SliceList *slices) {
+    return make_sc(ordered_set<PHV::SuperCluster::SliceList *>({slices}));
 }
 
 /// Make a SuperCluster with a single slice list holding @slice and a single
 /// RotationalCluster holding @slice.
-static PHV::SuperCluster* make_sc(PHV::FieldSlice slice) {
-    return make_sc(new PHV::SuperCluster::SliceList({ slice }));
+static PHV::SuperCluster *make_sc(PHV::FieldSlice slice) {
+    return make_sc(new PHV::SuperCluster::SliceList({slice}));
 }
 
 TEST_F(TofinoPhvCrush, sliceSuperCluster) {
-    ordered_map<int, const PHV::FieldSlice*> slices_by_size;
-    for (int i : { 7, 8, 9, 16, 24 }) {
-        auto* f = new PHV::Field();
+    ordered_map<int, const PHV::FieldSlice *> slices_by_size;
+    for (int i : {7, 8, 9, 16, 24}) {
+        auto *f = new PHV::Field();
         std::stringstream ss;
         f->id = i;
         f->size = i;
@@ -72,14 +73,15 @@ TEST_F(TofinoPhvCrush, sliceSuperCluster) {
         f->validContainerRange_i = ZeroToMax();
         f->alignment = std::nullopt;
         f->set_exact_containers(true);
-        slices_by_size[i] = new PHV::FieldSlice(f, StartLen(0, f->size)); }
-    auto* f16 = slices_by_size.at(16)->field();
-    auto* f24 = slices_by_size.at(24)->field();
-    ordered_map<PHV::SuperCluster::SliceList*, bitvec> schemas;
-    auto* list = new PHV::SuperCluster::SliceList({ *slices_by_size.at(16) });
+        slices_by_size[i] = new PHV::FieldSlice(f, StartLen(0, f->size));
+    }
+    auto *f16 = slices_by_size.at(16)->field();
+    auto *f24 = slices_by_size.at(24)->field();
+    ordered_map<PHV::SuperCluster::SliceList *, bitvec> schemas;
+    auto *list = new PHV::SuperCluster::SliceList({*slices_by_size.at(16)});
 
     // Test SuperCluster equality.
-    auto* list2 = new PHV::SuperCluster::SliceList({ *slices_by_size.at(16) });
+    auto *list2 = new PHV::SuperCluster::SliceList({*slices_by_size.at(16)});
     EXPECT_EQ(*make_sc(list), *make_sc(list2));
 
     // Test 16b -> 8b, 8b slicing.
@@ -97,7 +99,7 @@ TEST_F(TofinoPhvCrush, sliceSuperCluster) {
 
     // Test 24b -> 16b, 8b slicing.
     schemas.clear();
-    list = new PHV::SuperCluster::SliceList({ *slices_by_size.at(24) });
+    list = new PHV::SuperCluster::SliceList({*slices_by_size.at(24)});
     schemas[list] = bitvec(16, 1);
     res = PHV::Slicing::split(make_sc(list), schemas);
 #if !(__GNUC__ == 4 && __GNUC_MINOR__ == 9)
@@ -115,7 +117,7 @@ TEST_F(TofinoPhvCrush, sliceSuperCluster) {
     schemas[list].setbit(8);
     schemas[list].setbit(16);
     schemas[list2] = bitvec(8, 1);
-    res = PHV::Slicing::split(make_sc({ list, list2 }), schemas);
+    res = PHV::Slicing::split(make_sc({list, list2}), schemas);
 #if !(__GNUC__ == 4 && __GNUC_MINOR__ == 9)
     // Comparison with std::optional triggers an undefined reference
     // for basic_stream with GCC 4.9 !!!
@@ -131,7 +133,7 @@ TEST_F(TofinoPhvCrush, clusterAlignment) {
     // valid bits.
     using FieldData = struct {
         int field_size;
-        std::optional<int> relativeAlignment;     // little Endian
+        std::optional<int> relativeAlignment;  // little Endian
         nw_bitrange validContainerRange;
     };
     using TestData = struct {
@@ -143,45 +145,42 @@ TEST_F(TofinoPhvCrush, clusterAlignment) {
 
     std::vector<TestData> tests = {
         // No constraints
-        { 0, PHV::Size::b8, { { 8, std::nullopt, ZeroToMax() } } },
-        { 0, PHV::Size::b8, { { 8, std::nullopt, ZeroToMax() },
-                              { 8, std::nullopt, ZeroToMax() } } },
+        {0, PHV::Size::b8, {{8, std::nullopt, ZeroToMax()}}},
+        {0, PHV::Size::b8, {{8, std::nullopt, ZeroToMax()}, {8, std::nullopt, ZeroToMax()}}},
 
         // Relative alignment only
-        { 0, PHV::Size::b8,  { { 8, 0, ZeroToMax() } } },
-        { 0, PHV::Size::b8,  { { 8, 0, ZeroToMax() },
-                               { 8, 0, ZeroToMax() } } },
-        { 4, PHV::Size::b16, { { 8, 4, ZeroToMax() } } },
-        { 4, PHV::Size::b16, { { 8, 4, ZeroToMax() },
-                               { 8, 4, ZeroToMax() } } },
-        { 4, PHV::Size::b16, { { 8, std::nullopt, ZeroToMax() },
-                               { 8, 4, ZeroToMax() } } },
+        {0, PHV::Size::b8, {{8, 0, ZeroToMax()}}},
+        {0, PHV::Size::b8, {{8, 0, ZeroToMax()}, {8, 0, ZeroToMax()}}},
+        {4, PHV::Size::b16, {{8, 4, ZeroToMax()}}},
+        {4, PHV::Size::b16, {{8, 4, ZeroToMax()}, {8, 4, ZeroToMax()}}},
+        {4, PHV::Size::b16, {{8, std::nullopt, ZeroToMax()}, {8, 4, ZeroToMax()}}},
 
         // validContainerStartRange only
-        { 0, PHV::Size::b16, { { 8, std::nullopt, StartLen(0, 16) } } },
-        { 0, PHV::Size::b16, { { 8, std::nullopt, StartLen(0, 16) },
-                               { 8, std::nullopt, StartLen(0, 16) } } },
-        { 0, PHV::Size::b16, { { 8, std::nullopt, StartLen(0, 32) } } },
-        { 0, PHV::Size::b16, { { 8, std::nullopt, StartLen(0, 32) },
-                               { 8, std::nullopt, StartLen(0, 32) } } },
-        { 4, PHV::Size::b16, { { 8, std::nullopt, StartLen(0, 12) } } },
-        { 4, PHV::Size::b16, { { 8, std::nullopt, StartLen(0, 12) },
-                               { 8, std::nullopt, StartLen(0, 13) } } },
+        {0, PHV::Size::b16, {{8, std::nullopt, StartLen(0, 16)}}},
+        {0,
+         PHV::Size::b16,
+         {{8, std::nullopt, StartLen(0, 16)}, {8, std::nullopt, StartLen(0, 16)}}},
+        {0, PHV::Size::b16, {{8, std::nullopt, StartLen(0, 32)}}},
+        {0,
+         PHV::Size::b16,
+         {{8, std::nullopt, StartLen(0, 32)}, {8, std::nullopt, StartLen(0, 32)}}},
+        {4, PHV::Size::b16, {{8, std::nullopt, StartLen(0, 12)}}},
+        {4,
+         PHV::Size::b16,
+         {{8, std::nullopt, StartLen(0, 12)}, {8, std::nullopt, StartLen(0, 13)}}},
 
         // Both relative alignment and validContainerStartRange
-        { 0, PHV::Size::b16, { { 8, 0, StartLen(0, 16) } } },
-        { 0, PHV::Size::b16, { { 8, 0, StartLen(0, 16) },
-                               { 8, 0, StartLen(0, 16) } } },
-        { 4, PHV::Size::b16, { { 8, 4, StartLen(0, 12) } } },
-        { 4, PHV::Size::b16, { { 8, 4, StartLen(0, 12) },
-                               { 8, 4, StartLen(0, 13) } } },
+        {0, PHV::Size::b16, {{8, 0, StartLen(0, 16)}}},
+        {0, PHV::Size::b16, {{8, 0, StartLen(0, 16)}, {8, 0, StartLen(0, 16)}}},
+        {4, PHV::Size::b16, {{8, 4, StartLen(0, 12)}}},
+        {4, PHV::Size::b16, {{8, 4, StartLen(0, 12)}, {8, 4, StartLen(0, 13)}}},
     };
 
     int field_id = 0;
-    for (auto& test : tests) {
+    for (auto &test : tests) {
         std::vector<PHV::FieldSlice> slices;
-        for (auto& fdata : test.fields) {
-            auto* f = new PHV::Field();
+        for (auto &fdata : test.fields) {
+            auto *f = new PHV::Field();
             std::stringstream ss;
             f->id = field_id++;
             f->size = int(fdata.field_size);
@@ -194,9 +193,8 @@ TEST_F(TofinoPhvCrush, clusterAlignment) {
             f->pov = false;
             f->validContainerRange_i = fdata.validContainerRange;
             if (fdata.relativeAlignment)
-                f->alignment =
-                    FieldAlignment(le_bitrange(StartLen(*fdata.relativeAlignment,
-                                                        int(test.container_size))));
+                f->alignment = FieldAlignment(
+                    le_bitrange(StartLen(*fdata.relativeAlignment, int(test.container_size))));
             else
                 f->alignment = std::nullopt;
             slices.push_back(PHV::FieldSlice(f));
@@ -211,7 +209,7 @@ TEST_F(TofinoPhvCrush, clusterAlignment) {
 }
 
 TEST_F(TofinoPhvCrush, makeDeviceAllocation) {
-    const PhvSpec& phvSpec = Device::phvSpec();
+    const PhvSpec &phvSpec = Device::phvSpec();
     PhvInfo phv;
     PhvUse uses(phv);
     PHV::ConcreteAllocation alloc(phv, uses);
@@ -219,24 +217,28 @@ TEST_F(TofinoPhvCrush, makeDeviceAllocation) {
     // Check that all physical containers are accounted for and unallocated.
     for (auto cid : phvSpec.physicalContainers()) {
         auto c = phvSpec.idToContainer(cid);
-        EXPECT_EQ(0U, alloc.slices(c).size()); }
+        EXPECT_EQ(0U, alloc.slices(c).size());
+    }
 
     // Check that ONLY physical containers are present.
     for (auto kv : alloc) {
         auto cid = phvSpec.containerToId(kv.first);
-        EXPECT_TRUE(phvSpec.physicalContainers()[cid]); }
+        EXPECT_TRUE(phvSpec.physicalContainers()[cid]);
+    }
 
     // Check that all hard-wired gress has been set.
     for (auto cid : phvSpec.ingressOnly()) {
         auto c = phvSpec.idToContainer(cid);
-        EXPECT_EQ(INGRESS, alloc.gress(c)); }
+        EXPECT_EQ(INGRESS, alloc.gress(c));
+    }
     for (auto cid : phvSpec.egressOnly()) {
         auto c = phvSpec.idToContainer(cid);
-        EXPECT_EQ(EGRESS, alloc.gress(c)); }
+        EXPECT_EQ(EGRESS, alloc.gress(c));
+    }
 }
 
 TEST_F(TofinoPhvCrush, Transaction) {
-    const PhvSpec& phvSpec = Device::phvSpec();
+    const PhvSpec &phvSpec = Device::phvSpec();
     PhvInfo phv;
     PhvUse uses(phv);
     PHV::ConcreteAllocation alloc(phv, uses);
@@ -259,8 +261,7 @@ TEST_F(TofinoPhvCrush, Transaction) {
     EXPECT_NE(*mauGroup0.min(), *mauGroup1.min());
 
     std::vector<PHV::Container> containers;
-    for (auto cid : depGroup0)
-        containers.push_back(phvSpec.idToContainer(cid));
+    for (auto cid : depGroup0) containers.push_back(phvSpec.idToContainer(cid));
     EXPECT_LT(1U, containers.size());
 
     PHV::Container c0 = containers[0];
@@ -362,7 +363,7 @@ TEST_F(TofinoPhvCrush, Transaction) {
 
     EXPECT_EQ(std::nullopt, alloc.gress(c2));
     EXPECT_EQ(INGRESS, alloc_attempt.gress(c2));
-    EXPECT_EQ(ordered_set<PHV::AllocSlice>({ }), alloc.slices(c2));
+    EXPECT_EQ(ordered_set<PHV::AllocSlice>({}), alloc.slices(c2));
     EXPECT_EQ(ordered_set<PHV::AllocSlice>({s3}), alloc_attempt.slices(c2));
 
     // Other containers (out of deparser group range) don't change.
@@ -381,7 +382,7 @@ TEST_F(TofinoPhvCrush, Transaction) {
 
     EXPECT_EQ(std::nullopt, alloc.gress(c2));
     EXPECT_EQ(INGRESS, alloc_attempt.gress(c2));
-    EXPECT_EQ(ordered_set<PHV::AllocSlice>({ }), alloc.slices(c2));
+    EXPECT_EQ(ordered_set<PHV::AllocSlice>({}), alloc.slices(c2));
     EXPECT_EQ(ordered_set<PHV::AllocSlice>({s3}), alloc_attempt.slices(c2));
 
     // Other containers (out of deparser group range) don't change.
@@ -414,9 +415,8 @@ TEST_F(TofinoPhvCrush, Transaction) {
     EXPECT_EQ(0U, alloc_attempt.slices(c3).size());
 }
 
-
 TEST_F(TofinoPhvCrush, slicesByLiveness) {
-    const PhvSpec& phvSpec = Device::phvSpec();
+    const PhvSpec &phvSpec = Device::phvSpec();
 
     PhvInfo phv;
     PhvUse uses(phv);
@@ -426,9 +426,9 @@ TEST_F(TofinoPhvCrush, slicesByLiveness) {
 
     std::vector<PHV::Container> containers;
     for (auto cid : phvSpec.physicalContainers()) {
-        if (phvSpec.ingressOnly()[cid] || phvSpec.egressOnly()[cid])
-            continue;
-        containers.push_back(phvSpec.idToContainer(cid)); }
+        if (phvSpec.ingressOnly()[cid] || phvSpec.egressOnly()[cid]) continue;
+        containers.push_back(phvSpec.idToContainer(cid));
+    }
 
     PHV::Container c1 = containers[0];
 
@@ -450,20 +450,19 @@ TEST_F(TofinoPhvCrush, slicesByLiveness) {
     alloc.allocate(s1);
     alloc.allocate(s2);
 
-    EXPECT_NE(ordered_set<PHV::AllocSlice>({ s1, s2 }), ordered_set<PHV::AllocSlice>({ s1 }));
-    EXPECT_EQ(ordered_set<PHV::AllocSlice>({ s1, s2 }), alloc.slices(c1));
+    EXPECT_NE(ordered_set<PHV::AllocSlice>({s1, s2}), ordered_set<PHV::AllocSlice>({s1}));
+    EXPECT_EQ(ordered_set<PHV::AllocSlice>({s1, s2}), alloc.slices(c1));
 
     EXPECT_EQ(2U, alloc.slicesByLiveness(c1).size());
     EXPECT_EQ(ordered_set<PHV::AllocSlice>({s1}), alloc.slicesByLiveness(c1).front());
     EXPECT_EQ(ordered_set<PHV::AllocSlice>({s2}), alloc.slicesByLiveness(c1).back());
-    EXPECT_EQ(std::vector<ordered_set<PHV::AllocSlice>>({ { s1 }, { s2 } }),
-              alloc.slicesByLiveness(c1));
+    EXPECT_EQ(std::vector<ordered_set<PHV::AllocSlice>>({{s1}, {s2}}), alloc.slicesByLiveness(c1));
 }
 
 class JBayPhvCrush : public JBayBackendTest {};
 
 TEST_F(JBayPhvCrush, makeDeviceAllocation) {
-    const PhvSpec& phvSpec = Device::phvSpec();
+    const PhvSpec &phvSpec = Device::phvSpec();
 
     PhvInfo phv;
     PhvUse uses(phv);
@@ -472,20 +471,24 @@ TEST_F(JBayPhvCrush, makeDeviceAllocation) {
     // Check that all physical containers are accounted for and unallocated.
     for (auto cid : phvSpec.physicalContainers()) {
         auto c = phvSpec.idToContainer(cid);
-        EXPECT_EQ(0U, alloc.slices(c).size()); }
+        EXPECT_EQ(0U, alloc.slices(c).size());
+    }
 
     // Check that ONLY physical containers are present.
     for (auto kv : alloc) {
         auto cid = phvSpec.containerToId(kv.first);
-        EXPECT_TRUE(phvSpec.physicalContainers()[cid]); }
+        EXPECT_TRUE(phvSpec.physicalContainers()[cid]);
+    }
 
     // Check that all hard-wired gress has been set.
     for (auto cid : phvSpec.ingressOnly()) {
         auto c = phvSpec.idToContainer(cid);
-        EXPECT_EQ(INGRESS, alloc.gress(c)); }
+        EXPECT_EQ(INGRESS, alloc.gress(c));
+    }
     for (auto cid : phvSpec.egressOnly()) {
         auto c = phvSpec.idToContainer(cid);
-        EXPECT_EQ(EGRESS, alloc.gress(c)); }
+        EXPECT_EQ(EGRESS, alloc.gress(c));
+    }
 }
 
 }  // namespace P4::Test

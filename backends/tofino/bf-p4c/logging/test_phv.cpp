@@ -12,6 +12,7 @@
 
 #include <iostream>
 #include <map>
+
 #include "logging.h"
 #include "phv_schema.h"
 
@@ -45,9 +46,7 @@ int main() {
     using DeparserLocation = Phv_Schema_Logger::DeparserLocation;
     using ContainerSlice = Phv_Schema_Logger::ContainerSlice;
 
-    enum class ConstraintReason : std::size_t {
-        Bool, Int, List
-    };
+    enum class ConstraintReason : std::size_t { Bool, Int, List };
 
     // Structures
     auto structure1 = new Structure("ingress", "h1", "header");
@@ -79,7 +78,7 @@ int main() {
     auto src_location1_dup = new SourceLocation("test.p4", 56);
     auto pipeline_location1 = new Access(MAULocation("xbar", 2, "mau", "m_action1", "m_table1"));
     auto bool_constraint = new BoolConstraint(false, int(ConstraintReason::Bool), "TestBool",
-                                                    src_location1, pipeline_location1);
+                                              src_location1, pipeline_location1);
     f1_constraints->append(bool_constraint);
     field1->append_constraints(f1_constraints);
     logger.append_fields(field1);
@@ -103,8 +102,8 @@ int main() {
     auto src_location2 = new SourceLocation("test.p4", 34);
     auto src_location2_dup = new SourceLocation("test.p4", 34);
     auto pipeline_location2 = new Access(DeparserLocation("pkt", "deparser"));
-    auto int_constraint = new IntConstraint(1, int(ConstraintReason::Int), "TestInt",
-                                            src_location2, pipeline_location2);
+    auto int_constraint = new IntConstraint(1, int(ConstraintReason::Int), "TestInt", src_location2,
+                                            pipeline_location2);
 
     auto group_item_1 = new FieldGroupItem(f1_info_dup, src_location1_dup, slice1_dup);
     auto group_item_2 = new FieldGroupItem(f2_info_dup, src_location2_dup, slice2_dup);
@@ -113,7 +112,7 @@ int main() {
     logger.get_field_groups().push_back({0, 1});
 
     auto list_constraint = new ListConstraint({1}, int(ConstraintReason::List), "TestList",
-                                            src_location2, pipeline_location2);
+                                              src_location2, pipeline_location2);
     f2_constraints->append(int_constraint);
     f2_constraints->append(list_constraint);
     field2->append_constraints(f2_constraints);
@@ -147,14 +146,9 @@ int main() {
 
     // Constraints reason
     const std::map<ConstraintReason, std::string> test_reasons = {
-        {
-            ConstraintReason::Bool, "Reason for bool constraint."
-        }, {
-            ConstraintReason::Int,  "Reason for int constraint"
-        }, {
-            ConstraintReason::List, "Reason for list constraint"
-        }
-    };
+        {ConstraintReason::Bool, "Reason for bool constraint."},
+        {ConstraintReason::Int, "Reason for int constraint"},
+        {ConstraintReason::List, "Reason for list constraint"}};
 
     for (auto &pair : test_reasons) {
         logger.append_constraint_reasons(pair.second);

@@ -14,6 +14,7 @@
 #define BF_P4C_MAU_ADD_ALWAYS_RUN_H_
 
 #include <optional>
+
 #include "bf-p4c/logging/pass_manager.h"
 #include "bf-p4c/mau/table_flow_graph.h"
 #include "bf-p4c/phv/phv_fields.h"
@@ -28,7 +29,7 @@ class AddAlwaysRun : public PassManager {
 
  private:
     /// The tables to be added for each gress, mapped to the tables' constraints.
-    const ordered_map<gress_t, ConstraintMap>& allTablesToAdd;
+    const ordered_map<gress_t, ConstraintMap> &allTablesToAdd;
 
     /// Holds the control-flow graph for each gress in which a table is to be added. Cleared and
     /// recomputed every time this pass manager is run.
@@ -67,60 +68,60 @@ class AddAlwaysRun : public PassManager {
     /// before t2, equal to 0 if t1 is the same as t2, and greater than 0 otherwise. Think of this
     /// as returning something like "t1 - t2". Tables that are nullptr are considered to come after
     /// all other tables.
-    int compare(const IR::MAU::Table* t1, const IR::MAU::Table* t2) const;
-    int compare(const IR::MAU::Table* t1, std::optional<UniqueId> t2) const;
+    int compare(const IR::MAU::Table *t1, const IR::MAU::Table *t2) const;
+    int compare(const IR::MAU::Table *t1, std::optional<UniqueId> t2) const;
 
     /// Prepares for insertion by doing some precomputation to populate globalOrderings and
     /// subsequentTables.
     class PrepareToAdd : public MauInspector {
-        AddAlwaysRun& self;
+        AddAlwaysRun &self;
 
         /// The subsequent table for the current program point being visited.
-        const IR::MAU::Table* subsequentTable = nullptr;
+        const IR::MAU::Table *subsequentTable = nullptr;
 
         /// Maps each table to its earliest subsequent table.
-        std::map<const IR::MAU::Table*, const IR::MAU::Table*> minSubsequentTables;
+        std::map<const IR::MAU::Table *, const IR::MAU::Table *> minSubsequentTables;
 
-        profile_t init_apply(const IR::Node* root) override;
-        bool preorder(const IR::MAU::TableSeq*) override;
-        bool preorder(const IR::MAU::Table*) override;
-        void end_apply(const IR::Node* root) override;
+        profile_t init_apply(const IR::Node *root) override;
+        bool preorder(const IR::MAU::TableSeq *) override;
+        bool preorder(const IR::MAU::Table *) override;
+        void end_apply(const IR::Node *root) override;
 
      public:
-        explicit PrepareToAdd(AddAlwaysRun& self) : self(self) {}
+        explicit PrepareToAdd(AddAlwaysRun &self) : self(self) {}
     };
 
     /// Performs the actual insertion of tables into the IR.
     class AddTables : public MauTransform, ControlFlowVisitor {
-        AddAlwaysRun& self;
+        AddAlwaysRun &self;
 
         /// The list of remaining always-run tables to be added to the IR for the current gress
         /// being visited. This is sorted according to the order given by globalOrderings. Tables
         /// are popped off the front of this list as they are added to the IR.
         //
         // Invariant: this is empty at the start and end of each visit to each gress.
-        std::list<const IR::MAU::Table*> tablesToAdd;
+        std::list<const IR::MAU::Table *> tablesToAdd;
 
         /// A lower bound for the subsequent table for the current program point being visited.
         std::optional<UniqueId> subsequentTable;
 
-        const IR::BFN::Pipe* preorder(IR::BFN::Pipe*) override;
-        const IR::Node* preorder(IR::MAU::TableSeq*) override;
+        const IR::BFN::Pipe *preorder(IR::BFN::Pipe *) override;
+        const IR::Node *preorder(IR::MAU::TableSeq *) override;
 
-        AddTables* clone() const override;
-        AddTables& flow_clone() override;
-        void flow_merge(Visitor& v) override;
-        void flow_copy(::ControlFlowVisitor& v) override;
+        AddTables *clone() const override;
+        AddTables &flow_clone() override;
+        void flow_merge(Visitor &v) override;
+        void flow_copy(::ControlFlowVisitor &v) override;
 
-        AddTables(const AddTables&) = default;
-        AddTables(AddTables&&) = default;
+        AddTables(const AddTables &) = default;
+        AddTables(AddTables &&) = default;
 
      public:
-        explicit AddTables(AddAlwaysRun& self) : self(self) {}
+        explicit AddTables(AddAlwaysRun &self) : self(self) {}
     };
 
  public:
-    explicit AddAlwaysRun(const ordered_map<gress_t, ConstraintMap>& tablesToAdd);
+    explicit AddAlwaysRun(const ordered_map<gress_t, ConstraintMap> &tablesToAdd);
 };
 
 #endif /* BF_P4C_MAU_ADD_ALWAYS_RUN_H_ */

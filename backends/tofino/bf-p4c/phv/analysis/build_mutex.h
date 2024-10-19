@@ -10,17 +10,17 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PHV_ANALYSIS_BUILD_MUTEX_H_
-#define EXTENSIONS_BF_P4C_PHV_ANALYSIS_BUILD_MUTEX_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_ANALYSIS_BUILD_MUTEX_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_ANALYSIS_BUILD_MUTEX_H_
 
-#include "ir/ir.h"
-#include "ir/visitor.h"
-#include "lib/cstring.h"
-#include "lib/bitvec.h"
-#include "lib/symbitmatrix.h"
 #include "bf-p4c/ir/control_flow_visitor.h"
 #include "bf-p4c/phv/phv_fields.h"
 #include "bf-p4c/phv/pragma/phv_pragmas.h"
+#include "ir/ir.h"
+#include "ir/visitor.h"
+#include "lib/bitvec.h"
+#include "lib/cstring.h"
+#include "lib/symbitmatrix.h"
 
 /* Produces a SymBitMatrix where keys are PHV::Field ids and values indicate
  * whether two fields are mutually exclusive, based on analyzing the structure
@@ -56,38 +56,38 @@
  */
 class BuildMutex : public BFN::ControlFlowVisitor, public Inspector {
  public:
-    using FieldFilter_t = std::function<bool(const PHV::Field* f)>;
+    using FieldFilter_t = std::function<bool(const PHV::Field *f)>;
 
  protected:
-    PhvInfo&      phv;
-    const bitvec&       neverOverlay;
-    const PragmaNoOverlay&    pragma;
+    PhvInfo &phv;
+    const bitvec &neverOverlay;
+    const PragmaNoOverlay &pragma;
 
     /// If mutually_inclusive(f1->id, f2->id), then fields f1 and f2 are used
     /// or defined on the same control flow path.
-    SymBitMatrix     mutually_inclusive;
+    SymBitMatrix mutually_inclusive;
 
     /// If mutually_inclusive(f1, f2) == false, i.e. f1 and f2 never appear on
     /// the same control flow path, then f1 and f2 are mutually exclusive.
-    SymBitMatrix&    mutually_exclusive;
+    SymBitMatrix &mutually_exclusive;
 
     /// @returns true if @p f should be ignored in this analysis.
     FieldFilter_t IgnoreField;
 
     /// Tracks the fields encountered (and not ignored) during this analysis.
-    bitvec           fields_encountered;
+    bitvec fields_encountered;
 
-    virtual void mark(const PHV::Field*);
+    virtual void mark(const PHV::Field *);
 
-    profile_t init_apply(const IR::Node* root) override;
-    bool preorder(const IR::Expression*) override;
+    profile_t init_apply(const IR::Node *root) override;
+    bool preorder(const IR::Expression *) override;
     bool preorder(const IR::MAU::Action *act) override;
     void flow_merge(Visitor &) override;
     void flow_copy(::ControlFlowVisitor &) override;
     void end_apply() override;
 
  public:
-    BuildMutex(PhvInfo& phv, const bitvec& neverOverlay, const PragmaNoOverlay& pragma,
+    BuildMutex(PhvInfo &phv, const bitvec &neverOverlay, const PragmaNoOverlay &pragma,
                FieldFilter_t ignore_field)
         : phv(phv),
           neverOverlay(neverOverlay),
@@ -102,4 +102,4 @@ class BuildMutex : public BFN::ControlFlowVisitor, public Inspector {
     BuildMutex *clone() const override { return new BuildMutex(*this); }
 };
 
-#endif  /* EXTENSIONS_BF_P4C_PHV_ANALYSIS_BUILD_MUTEX_H_  */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_ANALYSIS_BUILD_MUTEX_H_  */

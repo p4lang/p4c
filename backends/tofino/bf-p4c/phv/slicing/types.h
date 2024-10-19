@@ -15,11 +15,10 @@
 
 #include <functional>
 
-#include "lib/bitvec.h"
-#include "lib/ordered_map.h"
-
 #include "bf-p4c/ir/bitrange.h"
 #include "bf-p4c/phv/utils/utils.h"
+#include "lib/bitvec.h"
+#include "lib/ordered_map.h"
 
 namespace PHV {
 namespace Slicing {
@@ -33,16 +32,16 @@ namespace Slicing {
 /// https://github.com/ivmai/bdwgc/issues/274
 /// https://github.com/ivmai/bdwgc/issues/150
 /// IterateCb returns false to stop iteration.
-using IterateCb = std::function<bool(std::list<SuperCluster*>)>;
+using IterateCb = std::function<bool(std::list<SuperCluster *>)>;
 
 /// PHVContainerSizeLayout maps phv fields to a vector of container sizes.
-using PHVContainerSizeLayout = ordered_map<const PHV::Field*, std::vector<int>>;
+using PHVContainerSizeLayout = ordered_map<const PHV::Field *, std::vector<int>>;
 
 /// PackConflictChecker return true if the fields @f1 and @f2 have a pack conflict.
 using PackConflictChecker = std::function<bool(const FieldSlice &fs1, const FieldSlice &fs2)>;
 
 /// IsReferencedChecker return true if the field is referenced.
-using IsReferencedChecker = std::function<bool(const Field* f1)>;
+using IsReferencedChecker = std::function<bool(const Field *f1)>;
 
 struct IteratorConfig {
     /// minimal_packing_mode sets the slicing preference to create minimal
@@ -103,14 +102,14 @@ struct IteratorConfig {
 class IteratorInterface {
  public:
     /// iterate will pass valid slicing results to cb. Stop when cb returns false.
-    virtual void iterate(const IterateCb& cb) = 0;
+    virtual void iterate(const IterateCb &cb) = 0;
 
     /// invalidate is the feedback mechanism for allocation algorithm to
     /// ask iterator to not produce slicing result contains @p sl.
-    virtual void invalidate(const SuperCluster::SliceList* sl) = 0;
+    virtual void invalidate(const SuperCluster::SliceList *sl) = 0;
 
     /// set iterator configs.
-    virtual void set_config(const IteratorConfig& cfg) = 0;
+    virtual void set_config(const IteratorConfig &cfg) = 0;
 };
 
 }  // namespace Slicing

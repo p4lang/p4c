@@ -66,12 +66,11 @@
 #include "bf-p4c/bf-p4c-options.h"
 #include "bf-p4c/common/table_printer.h"
 #include "bf-p4c/common/utils.h"
+#include "bf-p4c/ir/gress.h"
 #include "bf-p4c/logging/filelog.h"
 #include "bf-p4c/mau/memories.h"
 #include "bf-p4c/mau/resource_estimate.h"
 #include "bf-p4c/mau/table_placement.h"
-#include "bf-p4c/ir/gress.h"
-
 #include "lib/hex.h"
 #include "lib/map.h"
 using namespace State;
@@ -100,16 +99,16 @@ void TableSummary::resetPlacement() {
     state = BFNContext::get().options().alt_phv_alloc ? ALT_INITIAL : INITIAL;
 }
 
-TableSummary::TableSummary(
-    int pipe_id, const DependencyGraph& dg, const PhvInfo& phv, state_t &state)
+TableSummary::TableSummary(int pipe_id, const DependencyGraph &dg, const PhvInfo &phv,
+                           state_t &state)
     : pipe_id(pipe_id), deps(dg), phv(phv), state(state) {
     state = BFNContext::get().options().alt_phv_alloc ? ALT_INITIAL : INITIAL;
-    static std::set<int>        ids_seen;
+    static std::set<int> ids_seen;
     BUG_CHECK(ids_seen.count(pipe_id) == 0, "Duplicate pipe id %d", pipe_id);
     ids_seen.insert(pipe_id);
 }
 
-ordered_map<cstring, std::set<const IR::MAU::Table*>> TableSummary::tblName2IRptr;
+ordered_map<cstring, std::set<const IR::MAU::Table *>> TableSummary::tblName2IRptr;
 
 Visitor::profile_t TableSummary::init_apply(const IR::Node *root) {
     if (BackendOptions().verbose > 0) {
@@ -119,11 +118,12 @@ Visitor::profile_t TableSummary::init_apply(const IR::Node *root) {
 
     auto rv = MauInspector::init_apply(root);
     order.clear();
-    for (auto gress : { INGRESS, EGRESS }) {
+    for (auto gress : {INGRESS, EGRESS}) {
         ixbar[gress].clear();
         memory[gress].clear();
         action_data_bus[gress].clear();
-        imems[gress].clear(); }
+        imems[gress].clear();
+    }
     tables.clear();
     tableAlloc.clear();
     internalTableAlloc.clear();
@@ -137,11 +137,10 @@ Visitor::profile_t TableSummary::init_apply(const IR::Node *root) {
     egressDone = false;
     no_errors_before_summary = placementErrorCount() == 0;
     ++numInvoked;
-    for (auto gress : { INGRESS, EGRESS }) max_stages[gress] = -1;
+    for (auto gress : {INGRESS, EGRESS}) max_stages[gress] = -1;
     placedTables.clear();
     table_replay_fix_candidates.clear();
-    LOG1("Table allocation done " << numInvoked << " time(s), state = " <<
-         getActualStateStr());
+    LOG1("Table allocation done " << numInvoked << " time(s), state = " << getActualStateStr());
     return rv;
 }
 
@@ -149,7 +148,7 @@ void TableSummary::generateIxbarBytesInfo() {
     LOG3("Generating All Input XBar Usages - STATE : " << getActualStateStr());
     for (auto &f : phv.get_all_fields()) {
         le_bitrange bits(0, f.second.size - 1);
-        f.second.foreach_alloc(bits, [&](const PHV::AllocSlice& sl) {
+        f.second.foreach_alloc(bits, [&](const PHV::AllocSlice &sl) {
             auto fptr = sl.field();
             auto fname = fptr->name;
             auto frange = sl.field_slice();
@@ -160,8 +159,8 @@ void TableSummary::generateIxbarBytesInfo() {
                     auto stage = i.first;
                     auto ixByt = i.second;
                     ixbarBytes[fname][frange][stage] = ixByt;
-                    LOG5("\tAdding entry : " << fname << "-> ("
-                        << frange << ", (" << stage << ", " << ixByt << "))");
+                    LOG5("\tAdding entry : " << fname << "-> (" << frange << ", (" << stage << ", "
+                                             << ixByt << "))");
                 }
             }
         });
@@ -169,8 +168,7 @@ void TableSummary::generateIxbarBytesInfo() {
 }
 
 void TableSummary::printPlacedTables() const {
-    for (auto &pt : placedTables)
-        LOG5(*pt.second);
+    for (auto &pt : placedTables) LOG5(*pt.second);
 }
 
 void TableSummary::end_apply() {
@@ -191,17 +189,16 @@ bool TableSummary::preorder(const IR::MAU::Table *t) {
             addPlacementError(t->toString() + " not placed");
         return true;
     } else if (!t->global_id()) {
-        if (no_errors_before_summary)
-            addPlacementError(t->toString() + " not placed");
-        return true; }
+        if (no_errors_before_summary) addPlacementError(t->toString() + " not placed");
+        return true;
+    }
     int gid = *t->global_id();
-    BUG_CHECK(order.count(gid) == 0,
-              "Encountering table multiple times in IR traversal");
+    BUG_CHECK(order.count(gid) == 0, "Encountering table multiple times in IR traversal");
     assert(order.count(gid) == 0);
     order[gid] = t;
     logical_ids[t->name] = *t->logical_id;
     LOG3("Table " << t->name << ", id: " << logical_ids[t->name]
-            << ", global id : " << *t->global_id() << " stage: " << t->stage());
+                  << ", global id : " << *t->global_id() << " stage: " << t->stage());
     tableNames[t->name] = getTableName(t);
     tableINames[t->name] = getTableIName(t);
     if (t->gateway_name) {
@@ -211,16 +208,14 @@ bool TableSummary::preorder(const IR::MAU::Table *t) {
     }
     if (t->resources) {
         int gress = INGRESS;
-        if (!ixbar[gress][t->stage()])
-            ixbar[gress][t->stage()].reset(IXBar::create());
+        if (!ixbar[gress][t->stage()]) ixbar[gress][t->stage()].reset(IXBar::create());
         ixbar[gress][t->stage()]->update(t);
         if (!memory[gress][t->stage()]) memory[gress][t->stage()].reset(Memories::create());
         memory[gress][t->stage()]->update(t->resources->memuse);
         if (!action_data_bus[gress][t->stage()])
             action_data_bus[gress][t->stage()].reset(ActionDataBus::create());
         action_data_bus[gress][t->stage()]->update(t);
-        if (!imems[gress][t->stage()])
-            imems[gress][t->stage()].reset(InstructionMemory::create());
+        if (!imems[gress][t->stage()]) imems[gress][t->stage()].reset(InstructionMemory::create());
         imems[gress][t->stage()]->update(t);
         tables[t->stage()].insert(t);
     } else {
@@ -231,8 +226,9 @@ bool TableSummary::preorder(const IR::MAU::Table *t) {
     if (t->match_table && t->stage_split <= 0 && stage_pragma >= 0 && t->stage() != stage_pragma) {
         // FIXME -- move to TablePlacement
         addPlacementWarnError(BaseCompileContext::get().errorReporter().format_message(
-                "The stage specified for %s is %d, but we could not place it until stage %d",
-                t, t->get_provided_stage(), t->stage())); }
+            "The stage specified for %s is %d, but we could not place it until stage %d", t,
+            t->get_provided_stage(), t->stage()));
+    }
 
     // Create / Update a PlacedTable Object
     bool pTMerge = false;
@@ -244,22 +240,20 @@ bool TableSummary::preorder(const IR::MAU::Table *t) {
         // However split gateway tables should not be merged as these are split
         // through SplitComplexGateways earlier during Table Alloc, hence TP
         // should see the split gateways as is
-        if ((pt->internalTableName == getTableIName(t))
-            && (pt->stage == t->stage())
-            && (!t->is_a_gateway_table_only())) {
+        if ((pt->internalTableName == getTableIName(t)) && (pt->stage == t->stage()) &&
+            (!t->is_a_gateway_table_only())) {
             pt->add(t, state);
             pTMerge = true;
             LOG5("\tMerging with PlacedTable : " << pt->internalTableName);
             break;
         }
     }
-    if (!pTMerge)
-        placedTables[*t->global_id()] = new PlacedTable(t, state, deps);
+    if (!pTMerge) placedTables[*t->global_id()] = new PlacedTable(t, state, deps);
 
     return true;
 }
 
-cstring TableSummary::getTableIName(const IR::MAU::Table* tbl) {
+cstring TableSummary::getTableIName(const IR::MAU::Table *tbl) {
     // For split gateways, refer to the original name.
     if (!tbl->match_table && tbl->name.endsWith("$split")) {
         cstring newName = tbl->name.before(tbl->name.find('$'));
@@ -268,7 +262,7 @@ cstring TableSummary::getTableIName(const IR::MAU::Table* tbl) {
     return tbl->name;
 }
 
-cstring TableSummary::getTableName(const IR::MAU::Table* tbl) {
+cstring TableSummary::getTableName(const IR::MAU::Table *tbl) {
     if (tbl->match_table) {
         BUG_CHECK(tbl->match_table->externalName(), "Table %1% does not have a P4 name", tbl->name);
         return tbl->match_table->externalName();
@@ -282,31 +276,29 @@ cstring TableSummary::getTableName(const IR::MAU::Table* tbl) {
     return tbl->name;
 }
 
-void TableSummary::addTablePtr(const IR::MAU::Table* tbl) {
+void TableSummary::addTablePtr(const IR::MAU::Table *tbl) {
     cstring ref_name = tbl->name;
-    if (ref_name.endsWith("$split"))
-        ref_name = tbl->name.before(tbl->name.find('$'));
+    if (ref_name.endsWith("$split")) ref_name = tbl->name.before(tbl->name.find('$'));
     tblName2IRptr[ref_name].insert(tbl);
-    LOG6("   Adding table " << tbl->name << " as " << ref_name <<" to pointer " << tbl);
+    LOG6("   Adding table " << tbl->name << " as " << ref_name << " to pointer " << tbl);
     if (tbl->gateway_name.size() && (tbl->gateway_name != ref_name.c_str())) {
         tblName2IRptr[tbl->gateway_name].insert(tbl);
-        LOG6("   Adding gw table " << tbl->gateway_name <<" to pointer " << tbl);
+        LOG6("   Adding gw table " << tbl->gateway_name << " to pointer " << tbl);
     }
 }
 
-std::set<const IR::MAU::Table*> TableSummary::getTablePtr(const cstring t_name){
-    std::set<const IR::MAU::Table*> empty;
-    if (tblName2IRptr.count(t_name))
-        return tblName2IRptr.at(t_name);
+std::set<const IR::MAU::Table *> TableSummary::getTablePtr(const cstring t_name) {
+    std::set<const IR::MAU::Table *> empty;
+    if (tblName2IRptr.count(t_name)) return tblName2IRptr.at(t_name);
     return empty;
 }
 
 bool TableSummary::find_problematic_table() {
-    if ((table_replay_result == PlacementResult::FAIL_ON_ADB
-        || table_replay_result == PlacementResult::FAIL_ON_IXBAR
-        || table_replay_result == PlacementResult::FAIL_ON_MEM
-        || table_replay_result == PlacementResult::FAIL)
-        && order.size() == 0) {
+    if ((table_replay_result == PlacementResult::FAIL_ON_ADB ||
+         table_replay_result == PlacementResult::FAIL_ON_IXBAR ||
+         table_replay_result == PlacementResult::FAIL_ON_MEM ||
+         table_replay_result == PlacementResult::FAIL) &&
+        order.size() == 0) {
         // If table replay failed when placing the first table, then this table is problematic.
         table_replay_problematic_table = trivial_table_info.begin()->second;
         return true;
@@ -328,39 +320,39 @@ bool TableSummary::find_problematic_table() {
     int failure_stage = reverse_it->second->stage();
     // collect all tables on the stage on which failed table is. These are all problematic
     // table candidates.
-    for (; reverse_it != trivial_table_info.rend() &&
-        reverse_it->second->stage() == failure_stage; reverse_it++) {
+    for (; reverse_it != trivial_table_info.rend() && reverse_it->second->stage() == failure_stage;
+         reverse_it++) {
         table_replay_fix_candidates.insert(reverse_it->second);
     }
 
     auto select_problem_table_by_score =
-        [](ordered_map<const IR::MAU::Table *, int> table_to_score){
-        const IR::MAU::Table* problem_table = nullptr;
-        int max_diff = -1;
-        for (auto [table, diff] : table_to_score) {
-            if (diff > max_diff) {
-                problem_table = table;
-                max_diff = diff;
+        [](ordered_map<const IR::MAU::Table *, int> table_to_score) {
+            const IR::MAU::Table *problem_table = nullptr;
+            int max_diff = -1;
+            for (auto [table, diff] : table_to_score) {
+                if (diff > max_diff) {
+                    problem_table = table;
+                    max_diff = diff;
+                }
             }
-        }
-        LOG3("max score is " << max_diff);
-        return problem_table;
-    };
+            LOG3("max score is " << max_diff);
+            return problem_table;
+        };
 
     ordered_map<const IR::MAU::Table *, int> problematic_candidates;
     if (table_replay_result == PlacementResult::FAIL_ON_ADB) {
         // For FAIL_ON_ADB, the score is the difference of adb size allocated between real table
         // allocation and table allocation after trivial allocation.
         for (auto trivial_table_alloc : table_replay_fix_candidates) {
-            BUG_CHECK(trivial_table_alloc->global_id().has_value(),
-                "table %1% is not allocated", trivial_table_alloc->name);
+            BUG_CHECK(trivial_table_alloc->global_id().has_value(), "table %1% is not allocated",
+                      trivial_table_alloc->name);
             int gid = *(trivial_table_alloc->global_id());
             auto real_table_alloc = order[gid];
             if (trivial_table_alloc->layout.action_data_bytes <
                 real_table_alloc->layout.action_data_bytes) {
                 problematic_candidates[trivial_table_alloc] =
-                    real_table_alloc->layout.action_data_bytes
-                    - trivial_table_alloc->layout.action_data_bytes;
+                    real_table_alloc->layout.action_data_bytes -
+                    trivial_table_alloc->layout.action_data_bytes;
             }
         }
         if (problematic_candidates.size() == 0) {
@@ -375,15 +367,13 @@ bool TableSummary::find_problematic_table() {
         // For FAIL_ON_IXBAR, the score is the different of ixbar size allocated between real
         // table allocation and table allocation after trivial allocation.
         for (auto trivial_table_alloc : table_replay_fix_candidates) {
-            BUG_CHECK(trivial_table_alloc->global_id().has_value(),
-                "table %1% is not allocated", trivial_table_alloc->name);
+            BUG_CHECK(trivial_table_alloc->global_id().has_value(), "table %1% is not allocated",
+                      trivial_table_alloc->name);
             int gid = *(trivial_table_alloc->global_id());
             auto real_table_alloc = order[gid];
-            if (trivial_table_alloc->layout.ixbar_bytes <
-                real_table_alloc->layout.ixbar_bytes) {
+            if (trivial_table_alloc->layout.ixbar_bytes < real_table_alloc->layout.ixbar_bytes) {
                 problematic_candidates[trivial_table_alloc] =
-                    real_table_alloc->layout.ixbar_bytes
-                    - trivial_table_alloc->layout.ixbar_bytes;
+                    real_table_alloc->layout.ixbar_bytes - trivial_table_alloc->layout.ixbar_bytes;
             }
         }
         if (problematic_candidates.size() == 0) {
@@ -400,15 +390,16 @@ bool TableSummary::find_problematic_table() {
         // allocation and table allocation after trivial allocation.
         for (auto trivial_table_alloc : table_replay_fix_candidates) {
             auto trivial_block_size =
-                trivial_table_sram_alloc[failure_stage].count(trivial_table_alloc->name) ?
-                trivial_table_sram_alloc[failure_stage][trivial_table_alloc->name] : 0;
+                trivial_table_sram_alloc[failure_stage].count(trivial_table_alloc->name)
+                    ? trivial_table_sram_alloc[failure_stage][trivial_table_alloc->name]
+                    : 0;
             auto real_block_size =
-                real_table_sram_alloc[failure_stage].count(trivial_table_alloc->name) ?
-                real_table_sram_alloc[failure_stage][trivial_table_alloc->name] : 0;
-                if (real_block_size - trivial_block_size > 0) {
-                    problematic_candidates[trivial_table_alloc] =
-                    real_block_size - trivial_block_size;
-                }
+                real_table_sram_alloc[failure_stage].count(trivial_table_alloc->name)
+                    ? real_table_sram_alloc[failure_stage][trivial_table_alloc->name]
+                    : 0;
+            if (real_block_size - trivial_block_size > 0) {
+                problematic_candidates[trivial_table_alloc] = real_block_size - trivial_block_size;
+            }
         }
         if (problematic_candidates.size() == 0) {
             table_replay_problematic_table = failed_table;
@@ -442,16 +433,15 @@ void TableSummary::postorder(const IR::BFN::Pipe *pipe) {
         // FIXME -- should just use tbl->stage() here?
         int stage = static_cast<int>(*tbl->global_id() / NUM_LOGICAL_TABLES_PER_STAGE);
         maxStage = (maxStage < stage) ? stage : maxStage;
-        if (max_stages[tbl->gress] < stage)
-            max_stages[tbl->gress] = stage;
+        if (max_stages[tbl->gress] < stage) max_stages[tbl->gress] = stage;
         tableAlloc[tableNames[tbl->name]].insert(*tbl->global_id());
         internalTableAlloc[tableINames[tbl->name]].insert(*tbl->global_id());
     }
     // maxStage is counted from 0 to n-1
     ++maxStage;
-    for (auto gress : { INGRESS, EGRESS }) max_stages[gress] += 1;
+    for (auto gress : {INGRESS, EGRESS}) max_stages[gress] += 1;
     LOG1("Number of stages in table allocation: " << maxStage);
-    for (auto gress : { INGRESS, EGRESS })
+    for (auto gress : {INGRESS, EGRESS})
         LOG1("  Number of stages for " << gress << " table allocation: " << max_stages[gress]);
     LOG1("Critical path length through the table dependency graph: " << criticalPathLength);
 
@@ -461,15 +451,17 @@ void TableSummary::postorder(const IR::BFN::Pipe *pipe) {
         // stage
         if (!tblStages.count(-1)) {
             ordered_set<int> stages = tableAlloc[tableNames[entry.first]];
-            int const & (*min)(int const &, int const &) = std::min<int>;
+            int const &(*min)(int const &, int const &) = std::min<int>;
             // If a gateway is merged with a P4 table split into multiple stages, then the placement
             // of the gateway is always in the earliest stage into which the P4 table has been split
             int minStage = std::accumulate(stages.begin(), stages.end(),
-                    (maxStage + 1) * NUM_LOGICAL_TABLES_PER_STAGE, min);
+                                           (maxStage + 1) * NUM_LOGICAL_TABLES_PER_STAGE, min);
             tableAlloc[tableNames[entry.second.first]].insert(minStage);
             internalTableAlloc[tableINames[entry.second.first]].insert(minStage);
         } else {
-            warning("Source of merged gateway does not have stage allocated"); } }
+            warning("Source of merged gateway does not have stage allocated");
+        }
+    }
 
     const auto print_table_placement_errors = [&]() {
         for (auto &msg : tablePlacementErrors) {
@@ -483,150 +475,153 @@ void TableSummary::postorder(const IR::BFN::Pipe *pipe) {
     prev_state = state;
     if (BFNContext::get().options().alt_phv_alloc) {
         switch (state) {
-        case ALT_INITIAL: {
-            // table placement succeeded, backtrack to run actual PHV allocation.
-            if (!criticalPlacementFailure && maxStage <= deviceStages) {
-                LOG1("Alt phv alloc: Success after ALT_INITIAL");
-                generateIxbarBytesInfo();
-                LOG1(ixbarUsagesStr());
-                state = ALT_FINALIZE_TABLE_SAME_ORDER;
-                // collect table placement result after trivial phv allocation.
-                trivial_tableAlloc.clear();
-                trivial_tableAlloc.insert(tableAlloc.begin(), tableAlloc.end());
-                trivial_internalTableAlloc.clear();
-                trivial_internalTableAlloc.insert(
-                    internalTableAlloc.begin(), internalTableAlloc.end());
-                trivial_mergedGateways.clear();
-                trivial_mergedGateways.insert(mergedGateways.begin(), mergedGateways.end());
-                trivial_placedTables.clear();
-                trivial_placedTables.insert(placedTables.begin(), placedTables.end());
-                trivial_table_sram_alloc = collect_table_sram_alloc_info();
-                // record table allocation info after trivial phv allocation.
-                for (auto [gid, table] : order) {
-                    trivial_table_info[gid] = table;
-                }
-                throw PHVTrigger::failure(tableAlloc, internalTableAlloc,
-                                          mergedGateways, firstRoundFit);
-            } else {
-                if (maxStage > deviceStages) {
-                    // retry with table backtrack and resource-based allocation enabled.
-                    // DO NOT ignore container conflict conflict.
-                    state = ALT_RETRY_ENHANCED_TP;
-                    LOG1("Alt phv alloc: Invoking ALT_RETRY_ENHANCED_TP after ALT_INITIAL");
-                    throw RerunTablePlacementTrigger::failure(false);
+            case ALT_INITIAL: {
+                // table placement succeeded, backtrack to run actual PHV allocation.
+                if (!criticalPlacementFailure && maxStage <= deviceStages) {
+                    LOG1("Alt phv alloc: Success after ALT_INITIAL");
+                    generateIxbarBytesInfo();
+                    LOG1(ixbarUsagesStr());
+                    state = ALT_FINALIZE_TABLE_SAME_ORDER;
+                    // collect table placement result after trivial phv allocation.
+                    trivial_tableAlloc.clear();
+                    trivial_tableAlloc.insert(tableAlloc.begin(), tableAlloc.end());
+                    trivial_internalTableAlloc.clear();
+                    trivial_internalTableAlloc.insert(internalTableAlloc.begin(),
+                                                      internalTableAlloc.end());
+                    trivial_mergedGateways.clear();
+                    trivial_mergedGateways.insert(mergedGateways.begin(), mergedGateways.end());
+                    trivial_placedTables.clear();
+                    trivial_placedTables.insert(placedTables.begin(), placedTables.end());
+                    trivial_table_sram_alloc = collect_table_sram_alloc_info();
+                    // record table allocation info after trivial phv allocation.
+                    for (auto [gid, table] : order) {
+                        trivial_table_info[gid] = table;
+                    }
+                    throw PHVTrigger::failure(tableAlloc, internalTableAlloc, mergedGateways,
+                                              firstRoundFit);
                 } else {
-                    // critical failures, do not retry.
-                    state = FAILURE;
-                    LOG1("Alt phv alloc: Failure after ALT_INITIAL");
+                    if (maxStage > deviceStages) {
+                        // retry with table backtrack and resource-based allocation enabled.
+                        // DO NOT ignore container conflict conflict.
+                        state = ALT_RETRY_ENHANCED_TP;
+                        LOG1("Alt phv alloc: Invoking ALT_RETRY_ENHANCED_TP after ALT_INITIAL");
+                        throw RerunTablePlacementTrigger::failure(false);
+                    } else {
+                        // critical failures, do not retry.
+                        state = FAILURE;
+                        LOG1("Alt phv alloc: Failure after ALT_INITIAL");
+                    }
                 }
+                break;
             }
-            break;
-        }
-        case ALT_RETRY_ENHANCED_TP: {
-            // table placement succeeded, backtrack to run actual PHV allocation.
-            if (!criticalPlacementFailure && maxStage <= deviceStages) {
-                LOG1("Alt phv alloc: Success after ALT_RETRY_ENHANCED_TP");
-                generateIxbarBytesInfo();
-                LOG1(ixbarUsagesStr());
-                state = ALT_FINALIZE_TABLE_SAME_ORDER;
-                // collect table placement result after trivial phv allocation.
-                trivial_tableAlloc.clear();
-                trivial_tableAlloc.insert(tableAlloc.begin(), tableAlloc.end());
-                trivial_internalTableAlloc.clear();
-                trivial_internalTableAlloc.insert(
-                    internalTableAlloc.begin(), internalTableAlloc.end());
-                trivial_mergedGateways.clear();
-                trivial_mergedGateways.insert(mergedGateways.begin(), mergedGateways.end());
-                trivial_placedTables.clear();
-                trivial_placedTables.insert(placedTables.begin(), placedTables.end());
-                trivial_table_sram_alloc = collect_table_sram_alloc_info();
-                // clear the table allocation info allocated in ALT_INITIAL and record it again.
-                trivial_table_info.clear();
-                for (auto [gid, table] : order) {
-                    trivial_table_info[gid] = table;
-                }
-                throw PHVTrigger::failure(tableAlloc, internalTableAlloc,
-                                              mergedGateways, firstRoundFit);
-            } else {
-                // Use real physical stage for smart packer instead of minstage. This should get
-                // better packing result that can ultimately make it fit. Only going back to the
-                // initial stage once. The resource based allocation physical placement will be
-                // the one used to decide if two fields can be pack on the same container or not.
-                if (numInvoked == FIRST_ALT_RETRY_ENHANCED_TP_INVOCATION) {
-                    state = ALT_INITIAL;
-                    throw PHVTrigger::failure(tableAlloc, internalTableAlloc,
-                                              mergedGateways, firstRoundFit);
+            case ALT_RETRY_ENHANCED_TP: {
+                // table placement succeeded, backtrack to run actual PHV allocation.
+                if (!criticalPlacementFailure && maxStage <= deviceStages) {
+                    LOG1("Alt phv alloc: Success after ALT_RETRY_ENHANCED_TP");
+                    generateIxbarBytesInfo();
+                    LOG1(ixbarUsagesStr());
+                    state = ALT_FINALIZE_TABLE_SAME_ORDER;
+                    // collect table placement result after trivial phv allocation.
+                    trivial_tableAlloc.clear();
+                    trivial_tableAlloc.insert(tableAlloc.begin(), tableAlloc.end());
+                    trivial_internalTableAlloc.clear();
+                    trivial_internalTableAlloc.insert(internalTableAlloc.begin(),
+                                                      internalTableAlloc.end());
+                    trivial_mergedGateways.clear();
+                    trivial_mergedGateways.insert(mergedGateways.begin(), mergedGateways.end());
+                    trivial_placedTables.clear();
+                    trivial_placedTables.insert(placedTables.begin(), placedTables.end());
+                    trivial_table_sram_alloc = collect_table_sram_alloc_info();
+                    // clear the table allocation info allocated in ALT_INITIAL and record it again.
+                    trivial_table_info.clear();
+                    for (auto [gid, table] : order) {
+                        trivial_table_info[gid] = table;
+                    }
+                    throw PHVTrigger::failure(tableAlloc, internalTableAlloc, mergedGateways,
+                                              firstRoundFit);
                 } else {
-                    LOG1("Alt phv alloc: Failure after ALT_RETRY_ENHANCED_TP");
-                    state = FAILURE;
+                    // Use real physical stage for smart packer instead of minstage. This should get
+                    // better packing result that can ultimately make it fit. Only going back to the
+                    // initial stage once. The resource based allocation physical placement will be
+                    // the one used to decide if two fields can be pack on the same container or
+                    // not.
+                    if (numInvoked == FIRST_ALT_RETRY_ENHANCED_TP_INVOCATION) {
+                        state = ALT_INITIAL;
+                        throw PHVTrigger::failure(tableAlloc, internalTableAlloc, mergedGateways,
+                                                  firstRoundFit);
+                    } else {
+                        LOG1("Alt phv alloc: Failure after ALT_RETRY_ENHANCED_TP");
+                        state = FAILURE;
+                    }
                 }
+                break;
             }
-            break;
-        }
-        case ALT_FINALIZE_TABLE_SAME_ORDER: {
-            if (!criticalPlacementFailure && maxStage <= deviceStages) {
-                LOG1("Alt phv alloc: Success post ALT_FINALIZE_TABLE_SAME_ORDER");
-                state = SUCCESS;
-            } else {
-                LOG1("Alt phv alloc: Failure post ALT_FINALIZE_TABLE_SAME_ORDER");
-                // if ALT_FINALIZE_TABLE_SAME_ORDER failed, jump to
-                // ALT_FINALIZE_TABLE_SAME_ORDER_TABLE_FIXED and also restore the table placement
-                // result after trivial phv allocation.
-                if (alt_phv_alloc_table_fixed < ALT_PHV_ALLOC_TABLE_FIX_THRESHOLD &&
-                    find_problematic_table()){
-                    alt_phv_alloc_table_fixed++;
-                    state = ALT_FINALIZE_TABLE_SAME_ORDER_TABLE_FIXED;
+            case ALT_FINALIZE_TABLE_SAME_ORDER: {
+                if (!criticalPlacementFailure && maxStage <= deviceStages) {
+                    LOG1("Alt phv alloc: Success post ALT_FINALIZE_TABLE_SAME_ORDER");
+                    state = SUCCESS;
+                } else {
+                    LOG1("Alt phv alloc: Failure post ALT_FINALIZE_TABLE_SAME_ORDER");
+                    // if ALT_FINALIZE_TABLE_SAME_ORDER failed, jump to
+                    // ALT_FINALIZE_TABLE_SAME_ORDER_TABLE_FIXED and also restore the table
+                    // placement result after trivial phv allocation.
+                    if (alt_phv_alloc_table_fixed < ALT_PHV_ALLOC_TABLE_FIX_THRESHOLD &&
+                        find_problematic_table()) {
+                        alt_phv_alloc_table_fixed++;
+                        state = ALT_FINALIZE_TABLE_SAME_ORDER_TABLE_FIXED;
+                        placedTables.clear();
+                        placedTables.insert(trivial_placedTables.begin(),
+                                            trivial_placedTables.end());
+                        // rerun real phv allocation, since some pa_container_size constraints have
+                        // been added.
+                        throw PHVTrigger::failure(trivial_tableAlloc, trivial_internalTableAlloc,
+                                                  trivial_mergedGateways, firstRoundFit);
+                    } else {
+                        tableAlloc.clear();
+                        internalTableAlloc.clear();
+                        placedTables.clear();
+                        state = ALT_FINALIZE_TABLE;
+                        throw RerunTablePlacementTrigger::failure(false);
+                    }
+                }
+                break;
+            }
+            case ALT_FINALIZE_TABLE_SAME_ORDER_TABLE_FIXED: {
+                if (!criticalPlacementFailure && maxStage <= deviceStages) {
+                    state = SUCCESS;
+                } else {
+                    if (alt_phv_alloc_table_fixed < ALT_PHV_ALLOC_TABLE_FIX_THRESHOLD &&
+                        find_problematic_table()) {
+                        alt_phv_alloc_table_fixed++;
+                        state = ALT_FINALIZE_TABLE_SAME_ORDER_TABLE_FIXED;
+                    } else {
+                        // if failed, jump to ALT_FINALIZE_TABLE, and restore the table placement
+                        // result after trivial phv allocation.
+                        state = ALT_FINALIZE_TABLE;
+                    }
+
                     placedTables.clear();
                     placedTables.insert(trivial_placedTables.begin(), trivial_placedTables.end());
                     // rerun real phv allocation, since some pa_container_size constraints have been
-                    // added.
+                    // removed.
                     throw PHVTrigger::failure(trivial_tableAlloc, trivial_internalTableAlloc,
-                                                trivial_mergedGateways, firstRoundFit);
-                } else {
-                    tableAlloc.clear();
-                    internalTableAlloc.clear();
-                    placedTables.clear();
-                    state = ALT_FINALIZE_TABLE;
-                    throw RerunTablePlacementTrigger::failure(false);
+                                              trivial_mergedGateways, firstRoundFit);
                 }
+                break;
             }
-            break;
-        }
-        case ALT_FINALIZE_TABLE_SAME_ORDER_TABLE_FIXED: {
-            if (!criticalPlacementFailure && maxStage <= deviceStages) {
-                state = SUCCESS;
-            } else {
-                if (alt_phv_alloc_table_fixed < ALT_PHV_ALLOC_TABLE_FIX_THRESHOLD &&
-                    find_problematic_table()) {
-                    alt_phv_alloc_table_fixed++;
-                    state = ALT_FINALIZE_TABLE_SAME_ORDER_TABLE_FIXED;
+            case ALT_FINALIZE_TABLE: {
+                if (!criticalPlacementFailure && maxStage <= deviceStages) {
+                    LOG1("Alt phv alloc: Success post ALT_FINALIZE_TABLE");
+                    state = SUCCESS;
                 } else {
-                    // if failed, jump to ALT_FINALIZE_TABLE, and restore the table placement result
-                    // after trivial phv allocation.
-                    state = ALT_FINALIZE_TABLE;
+                    LOG1("Alt phv alloc: Failure post ALT_FINALIZE_TABLE");
+                    state = FAILURE;
                 }
-
-                placedTables.clear();
-                placedTables.insert(trivial_placedTables.begin(), trivial_placedTables.end());
-                // rerun real phv allocation, since some pa_container_size constraints have been
-                // removed.
-                throw PHVTrigger::failure(trivial_tableAlloc, trivial_internalTableAlloc,
-                                            trivial_mergedGateways, firstRoundFit);
+                break;
             }
-            break;
-        }
-        case ALT_FINALIZE_TABLE: {
-            if (!criticalPlacementFailure && maxStage <= deviceStages) {
-                LOG1("Alt phv alloc: Success post ALT_FINALIZE_TABLE");
-                state = SUCCESS;
-            } else {
-                LOG1("Alt phv alloc: Failure post ALT_FINALIZE_TABLE");
-                state = FAILURE;
-            }
-            break;
-        }
-        default:
-            BUG("incorrect current state when alt_phv_alloc is enabled: %1%", getActualStateStr());
+            default:
+                BUG("incorrect current state when alt_phv_alloc is enabled: %1%",
+                    getActualStateStr());
         }
         if (state == FAILURE) {
             print_table_placement_errors();
@@ -652,93 +647,110 @@ void TableSummary::postorder(const IR::BFN::Pipe *pipe) {
     }
 
     switch (state) {
-    case INITIAL:
-        // If there was a placement failure, then rerun table placements without container
-        // conflicts.
-        if (placementFailure) {
-            state = NOCC_TRY1;
-            throw RerunTablePlacementTrigger::failure(true); }
-        // If maxStage <= criticalPathLength + CRITICAL_PATH_THRESHOLD, then OK. No backtracking.
-        if (maxStage <= deviceStages && maxStage <= criticalPathLength + CRITICAL_PATH_THRESHOLD) {
-            state = SUCCESS;
-            return; }
-        // If criticalPathLength + CRITICAL_PATH_THRESHOLD < maxStages <= deviceStages, note that
-        // the first round of table placement fit.
-        // For this case and for the case where maxStages > deviceStages, then rerun table placement
-        // without container conflicts, and rerun PHV allocation based on the generated placement.
-        // This will invoke a second round of PHV allocation, which will be more table placement
-        // friendly because of the introduced pack conflicts.
-        state = NOCC_TRY1;
-        if (maxStage <= deviceStages) {
-            LOG1("Invoking table placement without container conflicts to generate a more "
-                 "compact placement.");
-            firstRoundFit = true;
-            throw RerunTablePlacementTrigger::failure(true);
-        }
-        LOG1("Invoking table placement without container conflicts because first round of table "
-             "placement required " << maxStage << " stages.");
-        throw RerunTablePlacementTrigger::failure(true);
-
-    case NOCC_TRY1:
-    case NOCC_TRY2:
-        // If there is no table placement failure, and if the number of stages are less than the
-        // available physical stages, redo PHV allocation, while taking into account all the pack
-        // conflicts produced by this table placement round, and also keeping metadata
-        // initialization enabled.
-        if (maxStage <= deviceStages) {
-            state = state == NOCC_TRY1 ? REDO_PHV1 : REDO_PHV2;
-            if (state == REDO_PHV2 && maxStage == deviceStages) {
-                LOG1("Invoking table placement without metadata initialization because container "
-                     "second conflict-free table placement required " << maxStage << " stages.");
-                throw PHVTrigger::failure(tableAlloc, internalTableAlloc,
-                                            mergedGateways, firstRoundFit,
-                    false /* ignorePackConflicts */, true /* metaInitDisable */);
-            } else {
-                throw PHVTrigger::failure(tableAlloc, internalTableAlloc,
-                                            mergedGateways, firstRoundFit);
+        case INITIAL:
+            // If there was a placement failure, then rerun table placements without container
+            // conflicts.
+            if (placementFailure) {
+                state = NOCC_TRY1;
+                throw RerunTablePlacementTrigger::failure(true);
             }
-        } else {
-            // If there is not table placement failure and the number of stages without container
-            // conflicts are greater than the available physical stages, redo PHV allocation, while
-            // taking into account al the pack conflicts produced by this table placement round, and
-            // also disabling metadata initialization. This is because metadata initialization has
-            // been found to increase the dependency chain length occasionally.
-            LOG1("Invoking table placement without metadata initialization because container "
-                 "conflict-free table placement required " << maxStage << " stages.");
-            state = state == NOCC_TRY1 ? REDO_PHV1 : REDO_PHV2;
-            throw PHVTrigger::failure(tableAlloc, internalTableAlloc, mergedGateways, firstRoundFit,
-                    false /* ignorePackConflicts */, true /* metaInitDisable */);
-        }
+            // If maxStage <= criticalPathLength + CRITICAL_PATH_THRESHOLD, then OK. No
+            // backtracking.
+            if (maxStage <= deviceStages &&
+                maxStage <= criticalPathLength + CRITICAL_PATH_THRESHOLD) {
+                state = SUCCESS;
+                return;
+            }
+            // If criticalPathLength + CRITICAL_PATH_THRESHOLD < maxStages <= deviceStages, note
+            // that the first round of table placement fit. For this case and for the case where
+            // maxStages > deviceStages, then rerun table placement without container conflicts, and
+            // rerun PHV allocation based on the generated placement. This will invoke a second
+            // round of PHV allocation, which will be more table placement friendly because of the
+            // introduced pack conflicts.
+            state = NOCC_TRY1;
+            if (maxStage <= deviceStages) {
+                LOG1(
+                    "Invoking table placement without container conflicts to generate a more "
+                    "compact placement.");
+                firstRoundFit = true;
+                throw RerunTablePlacementTrigger::failure(true);
+            }
+            LOG1(
+                "Invoking table placement without container conflicts because first round of table "
+                "placement required "
+                << maxStage << " stages.");
+            throw RerunTablePlacementTrigger::failure(true);
 
-    case REDO_PHV1:
-        // If there is no placement failure and we fit within deviceStages, then table placement is
-        // successful. No further backtracking required.
-        if (!placementFailure && maxStage <= deviceStages) {
-            state = SUCCESS;
-            return; }
-        // If there is table placement failure or if this round of table placement requires more
-        // than deviceStages, then redo table placement without container conflicts.
-        LOG1("Invoking table placement without container conflicts because previous round of "
-             "table placement took " << maxStage << " stages.");
-        PhvInfo::darkSpillARA = false;
-        state = NOCC_TRY2;
-        throw RerunTablePlacementTrigger::failure(true);
+        case NOCC_TRY1:
+        case NOCC_TRY2:
+            // If there is no table placement failure, and if the number of stages are less than the
+            // available physical stages, redo PHV allocation, while taking into account all the
+            // pack conflicts produced by this table placement round, and also keeping metadata
+            // initialization enabled.
+            if (maxStage <= deviceStages) {
+                state = state == NOCC_TRY1 ? REDO_PHV1 : REDO_PHV2;
+                if (state == REDO_PHV2 && maxStage == deviceStages) {
+                    LOG1(
+                        "Invoking table placement without metadata initialization because "
+                        "container "
+                        "second conflict-free table placement required "
+                        << maxStage << " stages.");
+                    throw PHVTrigger::failure(tableAlloc, internalTableAlloc, mergedGateways,
+                                              firstRoundFit, false /* ignorePackConflicts */,
+                                              true /* metaInitDisable */);
+                } else {
+                    throw PHVTrigger::failure(tableAlloc, internalTableAlloc, mergedGateways,
+                                              firstRoundFit);
+                }
+            } else {
+                // If there is not table placement failure and the number of stages without
+                // container conflicts are greater than the available physical stages, redo PHV
+                // allocation, while taking into account al the pack conflicts produced by this
+                // table placement round, and also disabling metadata initialization. This is
+                // because metadata initialization has been found to increase the dependency chain
+                // length occasionally.
+                LOG1(
+                    "Invoking table placement without metadata initialization because container "
+                    "conflict-free table placement required "
+                    << maxStage << " stages.");
+                state = state == NOCC_TRY1 ? REDO_PHV1 : REDO_PHV2;
+                throw PHVTrigger::failure(tableAlloc, internalTableAlloc, mergedGateways,
+                                          firstRoundFit, false /* ignorePackConflicts */,
+                                          true /* metaInitDisable */);
+            }
 
-    case FINAL_PLACEMENT:
-    case REDO_PHV2:
-        if (!placementFailure && maxStage <= deviceStages)
-            state = SUCCESS;
-        else
-            state = FAILURE;
-        print_table_placement_errors();
-        return;
+        case REDO_PHV1:
+            // If there is no placement failure and we fit within deviceStages, then table placement
+            // is successful. No further backtracking required.
+            if (!placementFailure && maxStage <= deviceStages) {
+                state = SUCCESS;
+                return;
+            }
+            // If there is table placement failure or if this round of table placement requires more
+            // than deviceStages, then redo table placement without container conflicts.
+            LOG1(
+                "Invoking table placement without container conflicts because previous round of "
+                "table placement took "
+                << maxStage << " stages.");
+            PhvInfo::darkSpillARA = false;
+            state = NOCC_TRY2;
+            throw RerunTablePlacementTrigger::failure(true);
 
-    default:
-        BUG("TableSummary state %s (pass %d) not handled", getActualStateStr(), numInvoked);
+        case FINAL_PLACEMENT:
+        case REDO_PHV2:
+            if (!placementFailure && maxStage <= deviceStages)
+                state = SUCCESS;
+            else
+                state = FAILURE;
+            print_table_placement_errors();
+            return;
+
+        default:
+            BUG("TableSummary state %s (pass %d) not handled", getActualStateStr(), numInvoked);
     }
 }
 
-const ordered_set<int> TableSummary::stages(const IR::MAU::Table* tbl, bool internal) const {
+const ordered_set<int> TableSummary::stages(const IR::MAU::Table *tbl, bool internal) const {
     ordered_set<int> rs;
     const ordered_map<cstring, ordered_set<int>> *tableAllocPtr;
     cstring tbl_name;
@@ -793,9 +805,9 @@ void TableSummary::printTablePlacement() {
         auto table_stage = std::to_string(table_stage_i);
 
         auto *table = pt.second;
-        auto table_name          = table->tableName.c_str();
-        auto table_min_stage     = toStr((table->min_stage      >= 0), table->min_stage);
-        auto table_max_stage     = toStr((table->max_stage      >= 0), table->max_stage);
+        auto table_name = table->tableName.c_str();
+        auto table_min_stage = toStr((table->min_stage >= 0), table->min_stage);
+        auto table_max_stage = toStr((table->max_stage >= 0), table->max_stage);
         auto table_min_max_stage = "[ " + table_min_stage + ", " + table_max_stage + " ]";
         if (table->max_stage >= 0 && table_stage_i > table->max_stage)
             table_min_max_stage += "*";
@@ -804,21 +816,20 @@ void TableSummary::printTablePlacement() {
 
         if (LOGGING(3)) {
             auto table_internal_name = table->internalTableName.c_str();
-            auto table_entries       = toStr((table->entries        >  0), table->entries);
-            auto table_entries_req   = toStr((table->entries_req    >  0), table->entries_req);
-            auto table_srams         = toStr((table->layout.srams   >  0), table->layout.srams);
-            auto table_tcams         = toStr((table->layout.tcams   >  0), table->layout.tcams);
-            auto table_maprams       = toStr((table->layout.maprams >  0), table->layout.maprams);
-            auto table_ways          = toStr((table->ways           >  0), table->ways);
-            auto table_key_size      = toStr((table->key_size       >  0), table->key_size);
+            auto table_entries = toStr((table->entries > 0), table->entries);
+            auto table_entries_req = toStr((table->entries_req > 0), table->entries_req);
+            auto table_srams = toStr((table->layout.srams > 0), table->layout.srams);
+            auto table_tcams = toStr((table->layout.tcams > 0), table->layout.tcams);
+            auto table_maprams = toStr((table->layout.maprams > 0), table->layout.maprams);
+            auto table_ways = toStr((table->ways > 0), table->ways);
+            auto table_key_size = toStr((table->key_size > 0), table->key_size);
 
             std::string table_gateway = "N";
             if (table->gateway_only) {
-                table_gateway       = "Y";
+                table_gateway = "Y";
             } else if (!table->gatewayName.isNullOrEmpty()) {
-                table_gateway       = "Y";
-                if (!table->gatewayMergeCond.isNullOrEmpty())
-                    table_gateway   += "(Merge)";
+                table_gateway = "Y";
+                if (!table->gatewayMergeCond.isNullOrEmpty()) table_gateway += "(Merge)";
             }
 
             std::string table_attached = "-";
@@ -880,9 +891,8 @@ std::map<int, int> TableSummary::findBytesOnIxbar(const PHV::FieldSlice &slice) 
             auto bytesOnIxbar = tbl_res->findBytesOnIxbar(slice);
             if (bytesOnIxbar > 0) {
                 ixbarBytesPerStage[tbl_stage] = bytesOnIxbar;
-                LOG5("In stage " << tbl_stage << " on table " << tbl->name
-                    << " with Field Slice : " << slice
-                    << ", IxbarBytes : " << bytesOnIxbar);
+                LOG5("In stage " << tbl_stage << " on table " << tbl->name << " with Field Slice : "
+                                 << slice << ", IxbarBytes : " << bytesOnIxbar);
                 break;
             }
         }
@@ -903,16 +913,15 @@ cstring TableSummary::ixbarUsagesStr(const PhvInfo *phv_i) const {
     header.push_back("GRESS");
     // auto deviceStages = Device::numStages();
     auto deviceStages = maxStages() + 1;
-    for (auto i = 0; i < deviceStages; i++)
-        header.push_back(std::to_string(i));
+    for (auto i = 0; i < deviceStages; i++) header.push_back(std::to_string(i));
     TablePrinter tp(ss, header, TablePrinter::Align::CENTER);
     for (auto &f : phv.get_all_fields()) {
         le_bitrange bits(0, f.second.size - 1);
         auto fn = f.second.name;
         if (ixbarBytes.count(fn) == 0) continue;
-        for (const auto& ixbar_alloc : ixbarBytes.at(fn)) {
-            const auto& fr = ixbar_alloc.first;
-            const auto& bytesOnIxbar = ixbar_alloc.second;
+        for (const auto &ixbar_alloc : ixbarBytes.at(fn)) {
+            const auto &fr = ixbar_alloc.first;
+            const auto &bytesOnIxbar = ixbar_alloc.second;
             if (bytesOnIxbar.size() > 0) {
                 std::vector<std::string> row;
                 row.push_back(std::string(stripThreadPrefix(f.first)));
@@ -932,22 +941,21 @@ cstring TableSummary::ixbarUsagesStr(const PhvInfo *phv_i) const {
 }
 
 cstring TableSummary::getActualStateStr() const {
-    BUG_CHECK((state >= INITIAL && state < FINAL),
-            "Placement in an invalid state");
+    BUG_CHECK((state >= INITIAL && state < FINAL), "Placement in an invalid state");
     return state_name.at(state);
 }
 
 std::ostream &operator<<(std::ostream &out, const TableSummary &ts) {
     LOG5("Generating TableSummary Info: ");
-    TablePrinter tp(out, {"Stage", "Logical ID", "Gress", "Name", "Ixbar Bytes", "Match Bits",
-                          "Gateway", "Action Data Bytes"},
+    TablePrinter tp(out,
+                    {"Stage", "Logical ID", "Gress", "Name", "Ixbar Bytes", "Match Bits", "Gateway",
+                     "Action Data Bytes"},
                     TablePrinter::Align::CENTER);
 
     int prev_stage = 0;
     for (auto *t : Values(ts.order)) {
         int curr_stage = t->stage();
-        if (curr_stage != prev_stage)
-            tp.addSep();
+        if (curr_stage != prev_stage) tp.addSep();
 
         tp.addRow({
             std::to_string(curr_stage),
@@ -958,7 +966,7 @@ std::ostream &operator<<(std::ostream &out, const TableSummary &ts) {
             std::to_string(t->layout.match_width_bits),
             std::string(1, (t->uses_gateway() ? 'Y' : 'N')),
             std::to_string(t->layout.action_data_bytes),
-          });
+        });
 
         prev_stage = curr_stage;
     }
@@ -967,11 +975,12 @@ std::ostream &operator<<(std::ostream &out, const TableSummary &ts) {
 
     if (LOGGING(3)) {
         LOG3("Generating Memory Allocation Info");
-        for (auto gress : { INGRESS, EGRESS }) {
+        for (auto gress : {INGRESS, EGRESS}) {
             for (auto &i : ts.ixbar[gress]) {
                 if (!Device::threadsSharePipe(INGRESS, EGRESS)) out << gress << " ";
-                out << "Stage " << i.first << std::endl << *i.second
-                    << *ts.memory[gress].at(i.first); }
+                out << "Stage " << i.first << std::endl
+                    << *i.second << *ts.memory[gress].at(i.first);
+            }
             if (Device::threadsSharePipe(INGRESS, EGRESS)) break;
         }
     }
@@ -984,8 +993,7 @@ void TableSummary::PlacedTable::add(const IR::MAU::Table *t, state_t state) {
     if (!t->resources) return;
     if (t->resources->memuse.count(t->unique_id()) == 0) return;  // BUG_CHECK?
 
-    if (t->layout.atcam &&
-        (state == ALT_INITIAL || state == ALT_RETRY_ENHANCED_TP)) {
+    if (t->layout.atcam && (state == ALT_INITIAL || state == ALT_RETRY_ENHANCED_TP)) {
         // In Table replay, atcam table entries size is the total atcam size on the same stage.
         // During table replay, table placement will only look at the first atcam partition.
         entries += t->atcam_entries_in_stage;
@@ -1022,21 +1030,19 @@ TableSummary::PlacedTable::PlacedTable(const IR::MAU::Table *t, state_t state,
         min_stage = stage_info.min_stage;
         max_stage = stage_info.max_stage;
     }
-    logicalId   = *t->logical_id;
-    layout      = t->resources->layout_option;
-    entries     = layout.entries ? layout.entries : t->layout.entries;
-    ways        = t->ways.size();
-    key_size    = t->get_match_key_width();
+    logicalId = *t->logical_id;
+    layout = t->resources->layout_option;
+    entries = layout.entries ? layout.entries : t->layout.entries;
+    ways = t->ways.size();
+    key_size = t->get_match_key_width();
     entries_req = entries;  // To be overwritten by table size if available
     if (t->match_table) {
-        if (auto size = t->match_table->getConstantProperty("size"_cs))
-            entries_req = size->asInt();
+        if (auto size = t->match_table->getConstantProperty("size"_cs)) entries_req = size->asInt();
     }
     // Choose lesser value as this could be a split table or overallocation
     LOG3("Adding " << entries << "(req=" << entries_req << ") entries to table");
 
-    if (t->layout.atcam &&
-        (state == ALT_INITIAL || state == ALT_RETRY_ENHANCED_TP)) {
+    if (t->layout.atcam && (state == ALT_INITIAL || state == ALT_RETRY_ENHANCED_TP)) {
         // In Table replay, atcam table entries size is the total atcam size on the same stage.
         // During table replay, table placement will only look at the first atcam partition.
         entries = t->atcam_entries_in_stage;
@@ -1049,15 +1055,14 @@ TableSummary::PlacedTable::PlacedTable(const IR::MAU::Table *t, state_t state,
         // If table is direct same entries as match table
         attached_entries[memName] = attEntries;
         LOG3("Adding " << attEntries << " attached entries to table for attached memory "
-                << memName);
+                       << memName);
     }
 }
 
 std::ostream &operator<<(std::ostream &out, const TableSummary::PlacedTable &pl) {
     Log::TempIndent indent;
     out << "Placed Table : " << pl.tableName << "(" << pl.internalTableName << ")";
-    if (pl.gatewayName)
-        out << " gateway: " << pl.gatewayName << "(" << pl.gatewayMergeCond << ")";
+    if (pl.gatewayName) out << " gateway: " << pl.gatewayName << "(" << pl.gatewayMergeCond << ")";
     out << " key size: " << pl.key_size;
     out << indent << Log::endl;
     out << "stage: " << pl.stage << ", logicalId: " << pl.logicalId;
@@ -1077,7 +1082,7 @@ ordered_map<int, ordered_map<cstring, int>> TableSummary::collect_table_sram_all
     ordered_map<int, ordered_map<cstring, int>> sram_block_alloced;
     Log::TempIndent indent;
     LOG5("Collect Table SRAM Block Info : " << state << indent);
-    for (auto gress : { INGRESS, EGRESS }) {
+    for (auto gress : {INGRESS, EGRESS}) {
         for (auto &i : ixbar[gress]) {
             auto sram_info = memory[gress].at(i.first)->collect_sram_block_alloc_info();
             ordered_map<cstring, int> table_sram_blocks_info;
@@ -1100,8 +1105,8 @@ ordered_map<int, ordered_map<cstring, int>> TableSummary::collect_table_sram_all
                     table_sram_blocks_info[tbl_name] = blocks;
                 }
             }
-            sram_block_alloced[i.first].insert(
-                table_sram_blocks_info.begin(), table_sram_blocks_info.end());
+            sram_block_alloced[i.first].insert(table_sram_blocks_info.begin(),
+                                               table_sram_blocks_info.end());
             LOG5("Adding for stage " << i.first);
             for (auto &t : table_sram_blocks_info)
                 LOG5("\tTable: " << t.first << ", blocks: " << t.second);

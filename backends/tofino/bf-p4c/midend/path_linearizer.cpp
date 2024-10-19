@@ -14,63 +14,57 @@
 
 namespace BFN {
 
-cstring LinearPath::to_cstring(cstring delimiter,
-        bool skip_path_expression) {
+cstring LinearPath::to_cstring(cstring delimiter, bool skip_path_expression) {
     cstring ret = ""_cs;
     for (auto c : components) {
         if (auto pathexpr = c->to<IR::PathExpression>()) {
-            if (skip_path_expression)
-                continue;
+            if (skip_path_expression) continue;
             ret += pathexpr->path->name;
         } else if (auto member = c->to<IR::Member>()) {
             ret += member->member;
         } else if (auto href = c->to<IR::ConcreteHeaderRef>()) {
             ret += href->ref->name;
         }
-        if (c != components.back())
-            ret += delimiter;
+        if (c != components.back()) ret += delimiter;
     }
     return ret;
 }
 
-cstring LinearPath::to_cstring() {
-    return to_cstring("."_cs, false);
-}
+cstring LinearPath::to_cstring() { return to_cstring("."_cs, false); }
 
-Visitor::profile_t PathLinearizer::init_apply(const IR::Node* root) {
-    BUG_CHECK(root->is<IR::PathExpression>() ||
-              root->is<IR::Member>() ||
-              root->is<IR::Slice>(),
+Visitor::profile_t PathLinearizer::init_apply(const IR::Node *root) {
+    BUG_CHECK(root->is<IR::PathExpression>() || root->is<IR::Member>() || root->is<IR::Slice>(),
               "Applying PathlikeExpressionAnalyzer to non-path-like "
-              "expression: %1%", root);
+              "expression: %1%",
+              root);
     linearPath.emplace();
     return Inspector::init_apply(root);
 }
 
-void PathLinearizer::postorder(const IR::Path*) {
+void PathLinearizer::postorder(const IR::Path *) {
     // Just ignore Paths; they'll be represented by the PathExpressions that
     // contain them.
 }
 
-void PathLinearizer::postorder(const IR::PathExpression* path) {
+void PathLinearizer::postorder(const IR::PathExpression *path) {
     if (linearPath) linearPath->components.push_back(path);
 }
 
-void PathLinearizer::postorder(const IR::Member* member) {
+void PathLinearizer::postorder(const IR::Member *member) {
     if (linearPath) linearPath->components.push_back(member);
 }
 
-void PathLinearizer::postorder(const IR::Slice* slice) {
+void PathLinearizer::postorder(const IR::Slice *slice) {
     if (linearPath) linearPath->components.push_back(slice);
 }
 
 // When applied to P4-14 ConcreteHeaderRef, convert it to P4-16 PathExpression.
-void PathLinearizer::postorder(const IR::ConcreteHeaderRef* href) {
+void PathLinearizer::postorder(const IR::ConcreteHeaderRef *href) {
     auto expr = new IR::PathExpression(href->srcInfo, href->type, new IR::Path(href->ref->name));
     if (linearPath) linearPath->components.push_back(expr);
 }
 
-bool PathLinearizer::preorder(const IR::HeaderOrMetadata*) {
+bool PathLinearizer::preorder(const IR::HeaderOrMetadata *) {
     // Do not visit IR::Header underneath the HeaderRef.
     return false;
 }
@@ -88,7 +82,7 @@ bool PathLinearizer::preorder(const IR::Constant *) {
     return false;
 }
 
-void PathLinearizer::postorder(const IR::Node* node) {
+void PathLinearizer::postorder(const IR::Node *node) {
     LOG2("Marking path-like expression invalid due to component: " << node);
     linearPath = std::nullopt;
 }

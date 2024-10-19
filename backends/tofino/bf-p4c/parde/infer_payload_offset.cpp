@@ -13,6 +13,7 @@
 #include "infer_payload_offset.h"
 
 #include <boost/range/adaptor/reversed.hpp>
+
 #include "bf-p4c/device.h"
 #include "bf-p4c/lib/assoc.h"
 #include "bf-p4c/parde/dump_parser.h"
@@ -20,78 +21,66 @@
 #include "bf-p4c/parde/parser_info.h"
 #include "bf-p4c/phv/phv_parde_mau_use.h"
 
-static bool is_mutable_field(const FieldDefUse& defuse, const PHV::Field* f) {
+static bool is_mutable_field(const FieldDefUse &defuse, const PHV::Field *f) {
     auto all_defs = defuse.getAllDefs(f->id);
 
     for (auto def : all_defs) {
         auto unit = def.first;
-        if (unit->is<IR::MAU::Table>())
-            return true;
+        if (unit->is<IR::MAU::Table>()) return true;
     }
     // Bridged metadata
-    if (f->parsed() && !f->deparsed() && !f->pov && !f->is_intrinsic())
-        return true;
+    if (f->parsed() && !f->deparsed() && !f->pov && !f->is_intrinsic()) return true;
     return false;
 }
 
 class GetAllChecksumDest : public Inspector {
  public:
     std::set<cstring> checksumDest;
-    bool is_checksum_dest(const PHV::Field* f) const {
-        return checksumDest.count(f->name);
-    }
-    bool preorder(const IR::BFN::EmitChecksum* ec) override {
+    bool is_checksum_dest(const PHV::Field *f) const { return checksumDest.count(f->name); }
+    bool preorder(const IR::BFN::EmitChecksum *ec) override {
         checksumDest.insert(ec->dest->toString());
         return false;
     }
 };
 
-using StateSet = ordered_set<const IR::BFN::ParserState*>;
+using StateSet = ordered_set<const IR::BFN::ParserState *>;
 
 class FindParsingFrontier : public ParserInspector {
  public:
     struct CutSet {
-        ordered_map<const IR::BFN::ParserState*, StateSet> transitions;
+        ordered_map<const IR::BFN::ParserState *, StateSet> transitions;
         StateSet transitions_to_pipe;
 
-        StateSet
-        get_all_srcs() const {
+        StateSet get_all_srcs() const {
             StateSet cutset_srcs;
 
-            for (auto& kv : transitions)
-                cutset_srcs.insert(kv.first);
+            for (auto &kv : transitions) cutset_srcs.insert(kv.first);
 
-            for (auto s : transitions_to_pipe)
-                cutset_srcs.insert(s);
+            for (auto s : transitions_to_pipe) cutset_srcs.insert(s);
 
             return cutset_srcs;
         }
 
-        StateSet
-        get_all_dsts() const {
+        StateSet get_all_dsts() const {
             StateSet cutset_dsts;
 
-            for (auto& kv : transitions) {
-                for (auto s : kv.second)
-                    cutset_dsts.insert(s);
+            for (auto &kv : transitions) {
+                for (auto s : kv.second) cutset_dsts.insert(s);
             }
 
             return cutset_dsts;
         }
 
-        StateSet
-        get_dsts_for(const IR::BFN::ParserState* state) const {
+        StateSet get_dsts_for(const IR::BFN::ParserState *state) const {
             if (!transitions.count(state)) return StateSet();
             return transitions.at(state);
         }
 
-        StateSet
-        get_srcs_for(const IR::BFN::ParserState* state) const {
+        StateSet get_srcs_for(const IR::BFN::ParserState *state) const {
             StateSet rv;
 
-            for (auto& kv : transitions) {
-                if (kv.second.count(state))
-                    rv.insert(kv.first);
+            for (auto &kv : transitions) {
+                if (kv.second.count(state)) rv.insert(kv.first);
             }
 
             return rv;
@@ -100,7 +89,7 @@ class FindParsingFrontier : public ParserInspector {
         void print() const {
             std::clog << "cutset:" << std::endl;
 
-            for (auto& kv : transitions) {
+            for (auto &kv : transitions) {
                 for (auto s : kv.second)
                     std::clog << "  " << kv.first->name << " -> " << s->name << std::endl;
             }
@@ -117,27 +106,26 @@ class FindParsingFrontier : public ParserInspector {
         void print() {
             std::clog << "frontier:" << std::endl;
 
-            for (auto s : states)
-                std::clog << "  " << s->name << std::endl;
+            for (auto s : states) std::clog << "  " << s->name << std::endl;
 
             cutset.print();
         }
     };
 
  private:
-    const PhvInfo& phv;
-    const FieldDefUse& defuse;
-    const CollectParserInfo& parserInfo;
-    const GetAllChecksumDest& checksumDest;
+    const PhvInfo &phv;
+    const FieldDefUse &defuse;
+    const CollectParserInfo &parserInfo;
+    const GetAllChecksumDest &checksumDest;
 
-    ordered_map<const IR::BFN::Parser*, StateSet> mutable_field_states;
+    ordered_map<const IR::BFN::Parser *, StateSet> mutable_field_states;
 
-    bool preorder(const IR::BFN::Parser* parser) override {
+    bool preorder(const IR::BFN::Parser *parser) override {
         mutable_field_states[parser] = {};
         return true;
     }
 
-    bool preorder(const IR::BFN::Extract* extract) override {
+    bool preorder(const IR::BFN::Extract *extract) override {
         auto parser = findContext<IR::BFN::Parser>();
         auto state = findContext<IR::BFN::ParserState>();
         auto f = phv.field(extract->dest->field);
@@ -156,23 +144,19 @@ class FindParsingFrontier : public ParserInspector {
             std::clog << "bipartition:" << std::endl;
 
             std::clog << "non_mutable_field_descendants:" << std::endl;
-            for (auto s : non_mutable_field_descendants)
-                std::clog << "  " << s->name << std::endl;
+            for (auto s : non_mutable_field_descendants) std::clog << "  " << s->name << std::endl;
 
             std::clog << "mutable_field_descendants:" << std::endl;
-            for (auto s : mutable_field_descendants)
-                std::clog << "  " << s->name << std::endl;
+            for (auto s : mutable_field_descendants) std::clog << "  " << s->name << std::endl;
         }
     };
 
-    BiPartition
-    compute_bipartition(const IR::BFN::ParserGraph& graph,
-                        const StateSet& mutable_field_states) {
+    BiPartition compute_bipartition(const IR::BFN::ParserGraph &graph,
+                                    const StateSet &mutable_field_states) {
         BiPartition bipartition;
 
         for (auto s : graph.states()) {
-            if (mutable_field_states.count(s))
-                continue;
+            if (mutable_field_states.count(s)) continue;
 
             bool is_mutable_field_descendant = true;
             for (auto m : mutable_field_states) {
@@ -181,8 +165,7 @@ class FindParsingFrontier : public ParserInspector {
                     break;
                 }
             }
-            if (is_mutable_field_descendant)
-                bipartition.mutable_field_descendants.insert(s);
+            if (is_mutable_field_descendant) bipartition.mutable_field_descendants.insert(s);
         }
 
         for (auto s : graph.states()) {
@@ -190,15 +173,13 @@ class FindParsingFrontier : public ParserInspector {
                 bipartition.non_mutable_field_descendants.insert(s);
         }
 
-        if (LOGGING(5))
-            bipartition.print();
+        if (LOGGING(5)) bipartition.print();
 
         return bipartition;
     }
 
-    CutSet
-    compute_bipartition_cutset(const IR::BFN::ParserGraph& graph,
-                               const BiPartition& bipartition) {
+    CutSet compute_bipartition_cutset(const IR::BFN::ParserGraph &graph,
+                                      const BiPartition &bipartition) {
         CutSet cutset;
 
         for (auto s : bipartition.mutable_field_descendants) {
@@ -211,12 +192,10 @@ class FindParsingFrontier : public ParserInspector {
         }
 
         for (auto s : bipartition.non_mutable_field_descendants) {
-            if (graph.to_pipe().count(s))
-                cutset.transitions_to_pipe.insert(s);
+            if (graph.to_pipe().count(s)) cutset.transitions_to_pipe.insert(s);
         }
 
-        if (LOGGING(5))
-            cutset.print();
+        if (LOGGING(5)) cutset.print();
 
         return cutset;
     }
@@ -224,8 +203,7 @@ class FindParsingFrontier : public ParserInspector {
     // See if we can absorb the transitions in cutset to their originating states.
     // s is a frontier state, if cutset originates from s == all outgoing transitions of s.
     // Otherwise, need to insert frontier state on all cutset originate from s.
-    Frontier
-    compute_frontier_by_push_up(const IR::BFN::ParserGraph& graph, const CutSet& cutset) {
+    Frontier compute_frontier_by_push_up(const IR::BFN::ParserGraph &graph, const CutSet &cutset) {
         Frontier frontier;
 
         auto cutset_srcs = cutset.get_all_srcs();
@@ -234,8 +212,7 @@ class FindParsingFrontier : public ParserInspector {
             bool is_frontier = true;
 
             if (graph.successors().count(s)) {
-                if (cutset.get_dsts_for(s) != graph.successors().at(s))
-                    is_frontier = false;
+                if (cutset.get_dsts_for(s) != graph.successors().at(s)) is_frontier = false;
             }
 
             if (is_frontier) {
@@ -252,8 +229,7 @@ class FindParsingFrontier : public ParserInspector {
         return frontier;
     }
 
-    Frontier
-    compute_frontier(const IR::BFN::ParserGraph& graph, const CutSet& cutset) {
+    Frontier compute_frontier(const IR::BFN::ParserGraph &graph, const CutSet &cutset) {
         auto push_up = compute_frontier_by_push_up(graph, cutset);
 
         if (LOGGING(5)) {
@@ -264,16 +240,14 @@ class FindParsingFrontier : public ParserInspector {
         return push_up;
     }
 
-    Frontier
-    find_frontier_by_bipartition(const IR::BFN::Parser* parser,
-                       const StateSet& mutable_field_states) {
+    Frontier find_frontier_by_bipartition(const IR::BFN::Parser *parser,
+                                          const StateSet &mutable_field_states) {
         if (LOGGING(4)) {
             std::clog << parser->gress << " mutable_field_states:" << std::endl;
-            for (auto s : mutable_field_states)
-                std::clog << "  " << s->name << std::endl;
+            for (auto s : mutable_field_states) std::clog << "  " << s->name << std::endl;
         }
 
-        auto& graph = parserInfo.graph(parser);
+        auto &graph = parserInfo.graph(parser);
 
         auto bipartition = compute_bipartition(graph, mutable_field_states);
 
@@ -284,8 +258,7 @@ class FindParsingFrontier : public ParserInspector {
         return frontier;
     }
 
-    void find_frontier(const IR::BFN::Parser* parser,
-                       const StateSet& mutable_field_states) {
+    void find_frontier(const IR::BFN::Parser *parser, const StateSet &mutable_field_states) {
         if (mutable_field_states.empty()) {
             LOG4(parser->gress << " mutable_field_states: <none>");
             Frontier frontier;
@@ -304,24 +277,21 @@ class FindParsingFrontier : public ParserInspector {
         create_color_groups_for_visualization(parser);
     }
 
-    void create_color_groups_for_visualization(const IR::BFN::Parser* parser) {
-        auto& graph = parserInfo.graph(parser);
-        auto& front = parser_to_frontier[parser->gress];
+    void create_color_groups_for_visualization(const IR::BFN::Parser *parser) {
+        auto &graph = parserInfo.graph(parser);
+        auto &front = parser_to_frontier[parser->gress];
 
-        assoc::set<void*> cg;
-        for (auto s : front.states)
-            cg.insert((void*)s);  // NOLINT
+        assoc::set<void *> cg;
+        for (auto s : front.states) cg.insert((void *)s);  // NOLINT
 
-        for (auto& st : front.cutset.transitions) {
+        for (auto &st : front.cutset.transitions) {
             for (auto d : st.second) {
-                for (auto t : graph.transitions(st.first, d))
-                    cg.insert((void*)t);  // NOLINT
+                for (auto t : graph.transitions(st.first, d)) cg.insert((void *)t);  // NOLINT
             }
         }
 
         for (auto s : front.cutset.transitions_to_pipe) {
-            for (auto t : graph.to_pipe(s))
-                cg.insert((void*)t);  // NOLINT
+            for (auto t : graph.to_pipe(s)) cg.insert((void *)t);  // NOLINT
         }
 
         color_groups.push_back(cg);
@@ -334,27 +304,23 @@ class FindParsingFrontier : public ParserInspector {
     }
 
     void end_apply() override {
-        for (auto& kv : mutable_field_states)
-            find_frontier(kv.first, kv.second);
+        for (auto &kv : mutable_field_states) find_frontier(kv.first, kv.second);
     }
 
  public:
     assoc::map<gress_t, Frontier> parser_to_frontier;
-    std::vector<assoc::set<void*>> color_groups;  // for DumpParser
+    std::vector<assoc::set<void *>> color_groups;  // for DumpParser
 
-    FindParsingFrontier(const PhvInfo& phv,
-                       const FieldDefUse& defuse,
-                       const CollectParserInfo& parserInfo,
-                       const GetAllChecksumDest& checksumDest) :
-        phv(phv), defuse(defuse), parserInfo(parserInfo), checksumDest(checksumDest) { }
+    FindParsingFrontier(const PhvInfo &phv, const FieldDefUse &defuse,
+                        const CollectParserInfo &parserInfo, const GetAllChecksumDest &checksumDest)
+        : phv(phv), defuse(defuse), parserInfo(parserInfo), checksumDest(checksumDest) {}
 };
 
 class InsertFrontierStates : public ParserTransform {
-    bool need_to_insert_dummy(const IR::BFN::ParserState* state,
-                              IR::BFN::Transition* transition,
-                              const FindParsingFrontier::Frontier& front) {
+    bool need_to_insert_dummy(const IR::BFN::ParserState *state, IR::BFN::Transition *transition,
+                              const FindParsingFrontier::Frontier &front) {
         if (transition->next) {
-            for (auto& kv : front.cutset.transitions) {
+            for (auto &kv : front.cutset.transitions) {
                 if (kv.first->name == state->name) {
                     for (auto s : kv.second) {
                         if (s->name == transition->next->name) {
@@ -374,9 +340,9 @@ class InsertFrontierStates : public ParserTransform {
         return false;
     }
 
-    const IR::Node* preorder(IR::BFN::ParserState* state) override {
+    const IR::Node *preorder(IR::BFN::ParserState *state) override {
         auto parser = findContext<IR::BFN::Parser>();
-        auto& front = frontier.parser_to_frontier.at(parser->gress);
+        auto &front = frontier.parser_to_frontier.at(parser->gress);
 
         for (auto s : front.states) {
             if (s->name == state->name) {
@@ -388,15 +354,14 @@ class InsertFrontierStates : public ParserTransform {
         return state;
     }
 
-    const IR::Node* preorder(IR::BFN::Transition* transition) override {
+    const IR::Node *preorder(IR::BFN::Transition *transition) override {
         auto parser = findContext<IR::BFN::Parser>();
-        auto& front = frontier.parser_to_frontier.at(parser->gress);
+        auto &front = frontier.parser_to_frontier.at(parser->gress);
 
         auto state = findContext<IR::BFN::ParserState>();
         bool need_to_insert = need_to_insert_dummy(state, transition, front);
 
-        if (!need_to_insert)
-            return transition;
+        if (!need_to_insert) return transition;
 
         int id = parser_to_frontier_state_names[parser->gress].size();
 
@@ -404,8 +369,8 @@ class InsertFrontierStates : public ParserTransform {
         cstring stopper_name = "$hdr_len_inc_stop_"_cs + cstring::to_cstring(id);
         auto stopper = new IR::BFN::ParserState(stopper_name, parser->gress, {}, {}, {to_state});
 
-        LOG3("insert parser state " << stopper->name << " on "
-             << state->name << " -> "
+        LOG3("insert parser state "
+             << stopper->name << " on " << state->name << " -> "
              << (transition->next ? transition->next->name : cstring("(pipe)")));
 
         transition->next = stopper;
@@ -420,19 +385,18 @@ class InsertFrontierStates : public ParserTransform {
         return ParserTransform::init_apply(root);
     }
 
-    const FindParsingFrontier& frontier;
+    const FindParsingFrontier &frontier;
 
  public:
     assoc::map<gress_t, std::set<cstring>> parser_to_frontier_state_names;
 
-    explicit InsertFrontierStates(const FindParsingFrontier& frontier) : frontier(frontier) {}
+    explicit InsertFrontierStates(const FindParsingFrontier &frontier) : frontier(frontier) {}
 };
 
 class RewriteParde : public PardeTransform {
     // Determines the exact location to add hdr_len_inc_stop statement
-    IR::Vector<IR::BFN::ParserPrimitive>::iterator
-    find_vector_position_for_stopper(const IR::BFN::PacketRVal* rval,
-                                     IR::Vector<IR::BFN::ParserPrimitive>& rv) {
+    IR::Vector<IR::BFN::ParserPrimitive>::iterator find_vector_position_for_stopper(
+        const IR::BFN::PacketRVal *rval, IR::Vector<IR::BFN::ParserPrimitive> &rv) {
         for (auto it = rv.begin(); it != rv.end(); it++) {
             if (auto source = get_packet_range(*it)) {
                 if (!source->range.overlaps(rval->range)) {
@@ -443,7 +407,7 @@ class RewriteParde : public PardeTransform {
         return rv.begin();
     }
 
-    void insert_hdr_len_inc_stop(IR::BFN::ParserState* state) {
+    void insert_hdr_len_inc_stop(IR::BFN::ParserState *state) {
         IR::Vector<IR::BFN::ParserPrimitive> rv;
 
         bool inserted = false;
@@ -454,8 +418,8 @@ class RewriteParde : public PardeTransform {
                 auto f = phv.field(extract->dest->field);
 
                 if (auto rval = extract->source->to<IR::BFN::PacketRVal>()) {
-                    if (!inserted && (is_mutable_field(defuse, f) ||
-                        checksumDest.is_checksum_dest(f))) {
+                    if (!inserted &&
+                        (is_mutable_field(defuse, f) || checksumDest.is_checksum_dest(f))) {
                         auto stopper = new IR::BFN::HdrLenIncStop(rval);
                         auto it = find_vector_position_for_stopper(rval, rv);
                         rv.insert(it, stopper);
@@ -473,8 +437,8 @@ class RewriteParde : public PardeTransform {
         }
         // state has no write-able fields, insert stopper at the beginning
         if (!inserted) {
-            auto stopper = new IR::BFN::HdrLenIncStop(
-                    new IR::BFN::PacketRVal(nw_bitrange(0, 0), false));
+            auto stopper =
+                new IR::BFN::HdrLenIncStop(new IR::BFN::PacketRVal(nw_bitrange(0, 0), false));
             rv.insert(rv.begin(), stopper);
 
             LOG4("insert hdr_len_inc_stop (null-extract) in " << state->name);
@@ -483,7 +447,7 @@ class RewriteParde : public PardeTransform {
         state->statements = rv;
     }
 
-    void elim_unused_field_in_frontier(IR::BFN::ParserState* state) {
+    void elim_unused_field_in_frontier(IR::BFN::ParserState *state) {
         IR::Vector<IR::BFN::ParserPrimitive> rv;
 
         bool seen_hdr_len_inc_stop = false;
@@ -491,7 +455,7 @@ class RewriteParde : public PardeTransform {
         for (auto stmt : state->statements) {
             auto stopper = stmt->to<IR::BFN::HdrLenIncStop>();
             auto extract = stmt->to<IR::BFN::Extract>();
-            const PHV::Field* field = nullptr;
+            const PHV::Field *field = nullptr;
             if (extract) {
                 field = phv.field(extract->dest->field);
             }
@@ -505,8 +469,8 @@ class RewriteParde : public PardeTransform {
             }
             if (seen_hdr_len_inc_stop) {
                 // Statements below hdr_len_inc_stop
-                if (!extract || !field->deparsed() ||
-                    uses.is_used_mau(field) || field->is_checksummed()) {
+                if (!extract || !field->deparsed() || uses.is_used_mau(field) ||
+                    field->is_checksummed()) {
                     if (orig_state_to_new_state_stmts.count(state->name)) {
                         orig_state_to_new_state_stmts[state->name].push_back(stmt);
                     } else {
@@ -522,25 +486,25 @@ class RewriteParde : public PardeTransform {
                 // Statements above hdr_len_inc_stop
                 rv.push_back(stmt);
                 if (field) {
-                   fields_above_frontier.insert(field);
+                    fields_above_frontier.insert(field);
                 }
             }
         }
         state->statements = rv;
     }
 
-    void elim_unused_fields_below_frontier(IR::BFN::ParserState* state) {
+    void elim_unused_fields_below_frontier(IR::BFN::ParserState *state) {
         IR::Vector<IR::BFN::ParserPrimitive> rv;
 
         // assumes primitives have been sorted by packet rval
         for (auto stmt : state->statements) {
             auto extract = stmt->to<IR::BFN::Extract>();
-            const PHV::Field* field = nullptr;
+            const PHV::Field *field = nullptr;
             if (extract) {
                 field = phv.field(extract->dest->field);
             }
-            if (!extract || !field->deparsed() ||
-                uses.is_used_mau(field) || field->is_checksummed()) {
+            if (!extract || !field->deparsed() || uses.is_used_mau(field) ||
+                field->is_checksummed()) {
                 rv.push_back(stmt);
             } else {
                 LOG4("elim " << stmt << " in " << state->name);
@@ -552,39 +516,37 @@ class RewriteParde : public PardeTransform {
         state->statements = rv;
     }
 
-    bool is_above_frontier(const IR::BFN::Parser* p, const IR::BFN::ParserState* s) {
-        auto& front = parser_to_frontier_states.at(p->gress);
-        auto& graph = parserInfo.graph(p);
+    bool is_above_frontier(const IR::BFN::Parser *p, const IR::BFN::ParserState *s) {
+        auto &front = parser_to_frontier_states.at(p->gress);
+        auto &graph = parserInfo.graph(p);
 
         for (auto f : front) {
-            if (graph.is_ancestor(s, f))
-                return true;
+            if (graph.is_ancestor(s, f)) return true;
         }
 
         return false;
     }
 
-    bool is_below_frontier(const IR::BFN::Parser* p, const IR::BFN::ParserState* s) {
-        auto& front = parser_to_frontier_states.at(p->gress);
-        auto& graph = parserInfo.graph(p);
+    bool is_below_frontier(const IR::BFN::Parser *p, const IR::BFN::ParserState *s) {
+        auto &front = parser_to_frontier_states.at(p->gress);
+        auto &graph = parserInfo.graph(p);
 
         for (auto f : front) {
-            if (graph.is_descendant(s, f))
-                return true;
+            if (graph.is_descendant(s, f)) return true;
         }
 
         return false;
     }
 
-    IR::Node* preorder(IR::BFN::Parser* parser) override {
+    IR::Node *preorder(IR::BFN::Parser *parser) override {
         orig_parser = getOriginal<IR::BFN::Parser>();
         return parser;
     }
 
-    IR::Node* preorder(IR::BFN::ParserState* state) override {
+    IR::Node *preorder(IR::BFN::ParserState *state) override {
         auto orig_state = getOriginal<IR::BFN::ParserState>();
 
-        IR::BFN::ParserState* rv = nullptr;
+        IR::BFN::ParserState *rv = nullptr;
 
         if (is_above_frontier(orig_parser, orig_state)) {
             // Some headers can be extracted is more than one states.
@@ -608,9 +570,9 @@ class RewriteParde : public PardeTransform {
             SortExtracts sort(rv);
             elim_unused_fields_below_frontier(rv);
         } else {
-            auto& front = parser_to_frontier_states.at(orig_parser->gress);
-            BUG_CHECK(front.count(orig_state),
-                      "Incorrect parsing frontier computation at %1%", state->name);
+            auto &front = parser_to_frontier_states.at(orig_parser->gress);
+            BUG_CHECK(front.count(orig_state), "Incorrect parsing frontier computation at %1%",
+                      state->name);
 
             rv = state->clone();
             SortExtracts sort(rv);
@@ -621,7 +583,7 @@ class RewriteParde : public PardeTransform {
         return rv;
     }
 
-    IR::Node* preorder(IR::BFN::EmitField* emit) override {
+    IR::Node *preorder(IR::BFN::EmitField *emit) override {
         prune();
 
         auto f = phv.field(emit->source->field);
@@ -633,18 +595,18 @@ class RewriteParde : public PardeTransform {
     }
 
     struct MapNameToState : Inspector {
-        assoc::map<cstring, const IR::BFN::ParserState*>& name_to_state;
+        assoc::map<cstring, const IR::BFN::ParserState *> &name_to_state;
 
-        explicit MapNameToState(assoc::map<cstring, const IR::BFN::ParserState*>& n2s) :
-            name_to_state(n2s) {}
+        explicit MapNameToState(assoc::map<cstring, const IR::BFN::ParserState *> &n2s)
+            : name_to_state(n2s) {}
 
-        bool preorder(const IR::BFN::ParserState* state) override {
+        bool preorder(const IR::BFN::ParserState *state) override {
             name_to_state[state->name] = state;
             return true;
         }
     };
 
-    profile_t init_apply(const IR::Node* root) override {
+    profile_t init_apply(const IR::Node *root) override {
         state_to_hdr_len_inc_stop.clear();
         orig_state_to_new_state_stmts.clear();
         parser_to_frontier_states.clear();
@@ -653,21 +615,21 @@ class RewriteParde : public PardeTransform {
         fields_below_frontier.clear();
         root->apply(MapNameToState(name_to_state));
 
-        for (auto& kv : frontier.parser_to_frontier_state_names) {
+        for (auto &kv : frontier.parser_to_frontier_state_names) {
             for (auto s : kv.second)
                 parser_to_frontier_states[kv.first].insert(name_to_state.at(s));
         }
 
         if (LOGGING(3)) {
-            std::vector<assoc::set<void*>> color_groups;
+            std::vector<assoc::set<void *>> color_groups;
 
-            for (auto& kv : parser_to_frontier_states) {
-                assoc::set<void*> cg;
+            for (auto &kv : parser_to_frontier_states) {
+                assoc::set<void *> cg;
 
                 std::clog << kv.first << " frontier states:" << std::endl;
                 for (auto s : kv.second) {
                     std::clog << "  " << s->name << std::endl;
-                    cg.insert((void*)s);  // NOLINT
+                    cg.insert((void *)s);  // NOLINT
                 }
                 color_groups.push_back(cg);
             }
@@ -679,48 +641,46 @@ class RewriteParde : public PardeTransform {
     }
 
     assoc::map<gress_t, StateSet> parser_to_frontier_states;
-    assoc::map<cstring, const IR::BFN::ParserState*> name_to_state;
-    assoc::set<const PHV::Field*> fields_above_frontier;
-    assoc::set<const PHV::Field*> fields_below_frontier;
+    assoc::map<cstring, const IR::BFN::ParserState *> name_to_state;
+    assoc::set<const PHV::Field *> fields_above_frontier;
+    assoc::set<const PHV::Field *> fields_below_frontier;
 
-    const IR::BFN::Parser* orig_parser = nullptr;
+    const IR::BFN::Parser *orig_parser = nullptr;
 
-
-    const PhvInfo& phv;
-    const PhvUse& uses;
-    const FieldDefUse& defuse;
-    const CollectParserInfo& parserInfo;
-    const InsertFrontierStates& frontier;
-    const GetAllChecksumDest& checksumDest;
+    const PhvInfo &phv;
+    const PhvUse &uses;
+    const FieldDefUse &defuse;
+    const CollectParserInfo &parserInfo;
+    const InsertFrontierStates &frontier;
+    const GetAllChecksumDest &checksumDest;
 
  public:
     // Maps state name to hdr_len_inc_stop statement
-    assoc::map<cstring, const IR::BFN::HdrLenIncStop*> state_to_hdr_len_inc_stop;
+    assoc::map<cstring, const IR::BFN::HdrLenIncStop *> state_to_hdr_len_inc_stop;
 
     // Unused
-    assoc::map <cstring,
-        IR::Vector<IR::BFN::ParserPrimitive>> orig_state_to_new_state_stmts;
+    assoc::map<cstring, IR::Vector<IR::BFN::ParserPrimitive>> orig_state_to_new_state_stmts;
 
-    RewriteParde(const PhvInfo& phv, const PhvUse& uses,
-                 const FieldDefUse& defuse,
-                 const CollectParserInfo& parserInfo,
-                 const InsertFrontierStates& frontier,
-                 const GetAllChecksumDest& checksumDest) :
-        phv(phv), uses(uses), defuse(defuse),
-        parserInfo(parserInfo), frontier(frontier), checksumDest(checksumDest) { }
+    RewriteParde(const PhvInfo &phv, const PhvUse &uses, const FieldDefUse &defuse,
+                 const CollectParserInfo &parserInfo, const InsertFrontierStates &frontier,
+                 const GetAllChecksumDest &checksumDest)
+        : phv(phv),
+          uses(uses),
+          defuse(defuse),
+          parserInfo(parserInfo),
+          frontier(frontier),
+          checksumDest(checksumDest) {}
 };
-
-
 
 class InsertStallState : public ParserTransform {
  public:
-    const RewriteParde& rewriteParde;
-    explicit InsertStallState(const RewriteParde& rewriteParde) : rewriteParde(rewriteParde) { }
+    const RewriteParde &rewriteParde;
+    explicit InsertStallState(const RewriteParde &rewriteParde) : rewriteParde(rewriteParde) {}
 
-    IR::Node* preorder(IR::BFN::ParserState* state) override {
+    IR::Node *preorder(IR::BFN::ParserState *state) override {
         if (rewriteParde.orig_state_to_new_state_stmts.count(state->name)) {
             BUG_CHECK(rewriteParde.state_to_hdr_len_inc_stop.count(state->name),
-                "%1% does not contains hdr_len_inc_stop? " , state->name);
+                      "%1% does not contains hdr_len_inc_stop? ", state->name);
             auto stopper = rewriteParde.state_to_hdr_len_inc_stop.at(state->name);
             auto stopper_range = stopper->source->range.toUnit<RangeUnit::Byte>();
             // Get final header amt
@@ -728,15 +688,15 @@ class InsertStallState : public ParserTransform {
             auto transition = *(state->transitions).begin();
             //  make a new state
 
-            unsigned  new_shift = transition->shift - hdr_stop;
+            unsigned new_shift = transition->shift - hdr_stop;
             cstring new_state_name = state->name + ".$hdr_len_stop_stall"_cs;
             auto new_state =
                 new IR::BFN::ParserState(state->p4States, new_state_name, state->gress);
-            auto orig_state_new_transition = new IR::BFN::Transition(match_t(),
-                                             hdr_stop, new_state);
+            auto orig_state_new_transition =
+                new IR::BFN::Transition(match_t(), hdr_stop, new_state);
 
             auto statements = rewriteParde.orig_state_to_new_state_stmts.at(state->name);
-            statements = *statements.apply(ShiftPacketRVal(hdr_stop*8, true));
+            statements = *statements.apply(ShiftPacketRVal(hdr_stop * 8, true));
             IR::Vector<IR::BFN::Transition> transitions;
             IR::Vector<IR::BFN::Select> selects;
 
@@ -746,7 +706,7 @@ class InsertStallState : public ParserTransform {
                 transitions.push_back(t);
             }
             new_state->transitions = transitions;
-            new_state->selects = *(state->selects).apply(ShiftPacketRVal(hdr_stop*8, true));
+            new_state->selects = *(state->selects).apply(ShiftPacketRVal(hdr_stop * 8, true));
             new_state->statements = statements;
             state->transitions = {orig_state_new_transition};
             LOG3("Adding " << new_state->name);
@@ -755,15 +715,14 @@ class InsertStallState : public ParserTransform {
     }
 };
 
-InferPayloadOffset::InferPayloadOffset(const PhvInfo& phv,
-                                       const FieldDefUse& defuse) {
+InferPayloadOffset::InferPayloadOffset(const PhvInfo &phv, const FieldDefUse &defuse) {
     auto uses = new PhvUse(phv);
     auto checksumDest = new GetAllChecksumDest;
     auto parserInfo = new CollectParserInfo;
     auto findFrontier = new FindParsingFrontier(phv, defuse, *parserInfo, *checksumDest);
     auto insertFrontier = new InsertFrontierStates(*findFrontier);
-    auto rewriteParde = new RewriteParde(phv, *uses, defuse, *parserInfo,
-                                         *insertFrontier, *checksumDest);
+    auto rewriteParde =
+        new RewriteParde(phv, *uses, defuse, *parserInfo, *insertFrontier, *checksumDest);
 
     addPasses({
         LOGGING(4) ? new DumpParser("before_infer_payload_offset") : nullptr,
@@ -771,8 +730,8 @@ InferPayloadOffset::InferPayloadOffset(const PhvInfo& phv,
         checksumDest,
         parserInfo,
         findFrontier,
-        LOGGING(5) ? new DumpParser("after_find_parsing_frontier",
-                                    findFrontier->color_groups) : nullptr,
+        LOGGING(5) ? new DumpParser("after_find_parsing_frontier", findFrontier->color_groups)
+                   : nullptr,
         insertFrontier,
         parserInfo,
         rewriteParde,

@@ -13,19 +13,18 @@
 #ifndef BF_P4C_MIDEND_BLOCKMAP_H_
 #define BF_P4C_MIDEND_BLOCKMAP_H_
 
-#include "ir/ir.h"
 #include "frontends/p4/evaluator/evaluator.h"
+#include "ir/ir.h"
 
 /* FIXME -- do we really need this pass?  Expression::type fields are set by TypeInferencing */
 
 class FillFromBlockMap : public Transform {
-    P4::ReferenceMap* refMap = nullptr;
-    P4::TypeMap* typeMap = nullptr;
+    P4::ReferenceMap *refMap = nullptr;
+    P4::TypeMap *typeMap = nullptr;
 
     const IR::Expression *preorder(IR::Expression *exp) override {
         if (exp->type == IR::Type::Unknown::get())
-            if (auto type = typeMap->getType(getOriginal()))
-                exp->type = type;
+            if (auto type = typeMap->getType(getOriginal())) exp->type = type;
         return exp;
     }
 
@@ -40,7 +39,7 @@ class FillFromBlockMap : public Transform {
         }
     }
 
-    const IR::StructExpression *preorder(IR::StructExpression * si) override {
+    const IR::StructExpression *preorder(IR::StructExpression *si) override {
         // Don't visit typeName, but visit everything else.
         preorder(static_cast<IR::Expression *>(si));
         visit(si->components, "components");
@@ -72,8 +71,10 @@ class FillFromBlockMap : public Transform {
     }
 
  public:
-    FillFromBlockMap(P4::ReferenceMap* refMap, P4::TypeMap* typeMap)
-    : refMap(refMap), typeMap(typeMap) { dontForwardChildrenBeforePreorder = true; }
+    FillFromBlockMap(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
+        : refMap(refMap), typeMap(typeMap) {
+        dontForwardChildrenBeforePreorder = true;
+    }
 };
 
 #endif /* BF_P4C_MIDEND_BLOCKMAP_H_ */

@@ -4,18 +4,25 @@
 This script produces a phv.json from an input context.json file.
 """
 
-import json, jsonschema, logging, math, os, sys
+import json
+import logging
+import math
+import os
+import sys
 from collections import OrderedDict
+
+import jsonschema
+
 from .utils import *
 
-if not getattr(sys,'frozen', False):
+if not getattr(sys, 'frozen', False):
     # standalone script
     MYPATH = os.path.dirname(__file__)
     SCHEMA_PATH = os.path.join(MYPATH, "../")
     sys.path.append(SCHEMA_PATH)
 from schemas.phv_schema import PhvJSONSchema
-from schemas.schema_keys import *
 from schemas.schema_enum_values import *
+from schemas.schema_keys import *
 
 # The minimum context.json schema version required.
 MINIMUM_CONTEXT_JSON_REQUIRED = "1.7.0"
@@ -30,9 +37,15 @@ PHV_JSON_FILE = "phv.json"
 
 
 class Access(object):
-    def __init__(self, location, location_detail=None,
-                 table_name=None, action_name=None,
-                 parser_state_name=None, deparser_access_type=None):
+    def __init__(
+        self,
+        location,
+        location_detail=None,
+        table_name=None,
+        action_name=None,
+        parser_state_name=None,
+        deparser_access_type=None,
+    ):
         self.location = location
         self.location_detail = location_detail
         self.table_name = table_name
@@ -56,17 +69,19 @@ class Access(object):
         return a
 
 
-
 # ----------------------------------------
 #  Produce PHV JSON
 # ----------------------------------------
+
 
 def get_reads_and_writes(field_name, gress, live_start, live_end, read_dict, write_dict):
     reads = []
     writes = []
 
     if live_start is not None and live_start == LIVE_PARSER:
-        writes.append(Access(LIVE_PARSER, parser_state_name="").get_dict())  # FIXME: How know parse state?
+        writes.append(
+            Access(LIVE_PARSER, parser_state_name="").get_dict()
+        )  # FIXME: How know parse state?
 
     if (field_name, gress) in read_dict:
         reads.extend([x.get_dict() for x in read_dict[(field_name, gress)]])
@@ -74,7 +89,9 @@ def get_reads_and_writes(field_name, gress, live_start, live_end, read_dict, wri
         writes.extend([x.get_dict() for x in write_dict[(field_name, gress)]])
 
     if live_end is not None and live_end == LIVE_DEPARSER:
-        reads.append(Access(LIVE_DEPARSER, deparser_access_type="pkt").get_dict())  # FIXME: How know deparser access type?
+        reads.append(
+            Access(LIVE_DEPARSER, deparser_access_type="pkt").get_dict()
+        )  # FIXME: How know deparser access type?
 
     return reads, writes
 
@@ -95,7 +112,9 @@ def scan_condition_table(table, reads, writes):
         if (fname, gress) not in reads:
             reads[(fname, gress)] = []
         for s in sorted(all_stages):
-            reads[(fname, gress)].append(Access(table_name=table_name, location=s, location_detail=XBAR))
+            reads[(fname, gress)].append(
+                Access(table_name=table_name, location=s, location_detail=XBAR)
+            )
 
 
 def scan_match_table(table, reads, writes):
@@ -124,8 +143,9 @@ def scan_match_table(table, reads, writes):
         if (field_name, gress) not in reads:
             reads[(field_name, gress)] = []
         for s in sorted(all_stages):
-            reads[(field_name, gress)].append(Access(table_name=table_name, location=s, location_detail=XBAR))
-
+            reads[(field_name, gress)].append(
+                Access(table_name=table_name, location=s, location_detail=XBAR)
+            )
 
     def _add_access(some_attr, action_name, which_access, detail=VLIW):
         if some_attr is not None:
@@ -135,12 +155,21 @@ def scan_match_table(table, reads, writes):
                 if (fname, gress) not in which_access:
                     which_access[(fname, gress)] = []
                 for s in sorted(all_stages):
-                    which_access[(fname, gress)].append(Access(table_name=table_name, action_name=action_name,
-                                                               location=s, location_detail=detail))
+                    which_access[(fname, gress)].append(
+                        Access(
+                            table_name=table_name,
+                            action_name=action_name,
+                            location=s,
+                            location_detail=detail,
+                        )
+                    )
 
     def _add_stateful_access(some_attr, action_name, which_access, detail=XBAR):
         if some_attr is not None:
-            for op_type, op_value in [(OPERAND_1_TYPE, OPERAND_1_VALUE), (OPERAND_2_TYPE, OPERAND_2_VALUE)]:
+            for op_type, op_value in [
+                (OPERAND_1_TYPE, OPERAND_1_VALUE),
+                (OPERAND_2_TYPE, OPERAND_2_VALUE),
+            ]:
                 the_type = get_optional_attr(op_type, some_attr)
                 if the_type is not None and the_type == PHV:
                     the_value = get_optional_attr(op_value, some_attr)
@@ -148,8 +177,14 @@ def scan_match_table(table, reads, writes):
                         if (the_value, gress) not in which_access:
                             which_access[(the_value, gress)] = []
                         for s in sorted(all_stages):
-                            which_access[(the_value, gress)].append(Access(table_name=table_name, action_name=action_name,
-                                                                           location=s, location_detail=detail))
+                            which_access[(the_value, gress)].append(
+                                Access(
+                                    table_name=table_name,
+                                    action_name=action_name,
+                                    location=s,
+                                    location_detail=detail,
+                                )
+                            )
 
     actions = get_attr(ACTIONS, table)
     for a in actions:
@@ -169,25 +204,65 @@ def scan_match_table(table, reads, writes):
                     if (fname, gress) not in reads:
                         reads[(fname, gress)] = []
                     for s in sorted(all_stages):
-                        reads[(fname, gress)].append(Access(table_name=table_name, action_name=action_name,
-                                                        location=s, location_detail=XBAR))
+                        reads[(fname, gress)].append(
+                            Access(
+                                table_name=table_name,
+                                action_name=action_name,
+                                location=s,
+                                location_detail=XBAR,
+                            )
+                        )
 
             stateful_alu_details = get_optional_attr(STATEFUL_ALU_DETAILS, p)
             if stateful_alu_details is not None:
-                _add_stateful_access(get_optional_attr(CONDITION_HI, stateful_alu_details), action_name, reads)
-                _add_stateful_access(get_optional_attr(CONDITION_LO, stateful_alu_details), action_name, reads)
-                _add_stateful_access(get_optional_attr(UPDATE_LO_1_PREDICATE, stateful_alu_details), action_name, reads)
-                _add_stateful_access(get_optional_attr(UPDATE_LO_1_VALUE, stateful_alu_details), action_name, reads)
-                _add_stateful_access(get_optional_attr(UPDATE_LO_2_PREDICATE, stateful_alu_details), action_name, reads)
-                _add_stateful_access(get_optional_attr(UPDATE_LO_2_VALUE, stateful_alu_details), action_name, reads)
-                _add_stateful_access(get_optional_attr(UPDATE_HI_1_PREDICATE, stateful_alu_details), action_name, reads)
-                _add_stateful_access(get_optional_attr(UPDATE_HI_1_VALUE, stateful_alu_details), action_name, reads)
-                _add_stateful_access(get_optional_attr(UPDATE_HI_2_PREDICATE, stateful_alu_details), action_name, reads)
-                _add_stateful_access(get_optional_attr(UPDATE_HI_2_VALUE, stateful_alu_details), action_name, reads)
-                _add_stateful_access(get_optional_attr(OUTPUT_PREDICATE, stateful_alu_details), action_name, reads)
-                _add_stateful_access(get_optional_attr(OUTPUT_VALUE, stateful_alu_details), action_name, reads)
+                _add_stateful_access(
+                    get_optional_attr(CONDITION_HI, stateful_alu_details), action_name, reads
+                )
+                _add_stateful_access(
+                    get_optional_attr(CONDITION_LO, stateful_alu_details), action_name, reads
+                )
+                _add_stateful_access(
+                    get_optional_attr(UPDATE_LO_1_PREDICATE, stateful_alu_details),
+                    action_name,
+                    reads,
+                )
+                _add_stateful_access(
+                    get_optional_attr(UPDATE_LO_1_VALUE, stateful_alu_details), action_name, reads
+                )
+                _add_stateful_access(
+                    get_optional_attr(UPDATE_LO_2_PREDICATE, stateful_alu_details),
+                    action_name,
+                    reads,
+                )
+                _add_stateful_access(
+                    get_optional_attr(UPDATE_LO_2_VALUE, stateful_alu_details), action_name, reads
+                )
+                _add_stateful_access(
+                    get_optional_attr(UPDATE_HI_1_PREDICATE, stateful_alu_details),
+                    action_name,
+                    reads,
+                )
+                _add_stateful_access(
+                    get_optional_attr(UPDATE_HI_1_VALUE, stateful_alu_details), action_name, reads
+                )
+                _add_stateful_access(
+                    get_optional_attr(UPDATE_HI_2_PREDICATE, stateful_alu_details),
+                    action_name,
+                    reads,
+                )
+                _add_stateful_access(
+                    get_optional_attr(UPDATE_HI_2_VALUE, stateful_alu_details), action_name, reads
+                )
+                _add_stateful_access(
+                    get_optional_attr(OUTPUT_PREDICATE, stateful_alu_details), action_name, reads
+                )
+                _add_stateful_access(
+                    get_optional_attr(OUTPUT_VALUE, stateful_alu_details), action_name, reads
+                )
 
-                _add_stateful_access(get_optional_attr(OUTPUT_DST, stateful_alu_details), action_name, writes, VLIW)
+                _add_stateful_access(
+                    get_optional_attr(OUTPUT_DST, stateful_alu_details), action_name, writes, VLIW
+                )
 
 
 def populate_reads_and_writes(context):
@@ -204,7 +279,6 @@ def populate_reads_and_writes(context):
             scan_condition_table(t, reads, writes)
 
     return reads, writes
-
 
 
 def produce_containers_node(context):
@@ -230,7 +304,7 @@ def produce_containers_node(context):
                 container_dict["phv_deparser_group_number"] = 0
                 container_dict["container_type"] = container_type
 
-                container_records =[]
+                container_records = []
                 for r in records:
                     is_pov = get_attr(IS_POV, r)
                     field_name = get_attr(FIELD_NAME, r)
@@ -244,13 +318,17 @@ def produce_containers_node(context):
 
                     rec = OrderedDict()
                     rec["field_name"] = field_name
-                    rec["field_class"] = "pkt"  # FIXME: Don't know how to get the value from context.json.
+                    rec["field_class"] = (
+                        "pkt"  # FIXME: Don't know how to get the value from context.json.
+                    )
                     rec["field_msb"] = field_msb
                     rec["field_lsb"] = field_lsb
                     rec["phv_msb"] = phv_msb
                     rec["phv_lsb"] = phv_lsb
                     rec["gress"] = g
-                    rec["reads"], rec["writes"] = get_reads_and_writes(field_name, g, live_start, live_end, reads, writes)
+                    rec["reads"], rec["writes"] = get_reads_and_writes(
+                        field_name, g, live_start, live_end, reads, writes
+                    )
                     if has_attr(FORMAT_TYPE, r):
                         rec["format_type"] = get_attr(FORMAT_TYPE, r)
 
@@ -372,10 +450,17 @@ if __name__ == "__main__":
     import sys
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('source', metavar='source', type=str,
-                        help='The input context.json source file to use.')
-    parser.add_argument('--output', '-o', type=str, action="store", default=".",
-                        help="The output directory to output mau.json.")
+    parser.add_argument(
+        'source', metavar='source', type=str, help='The input context.json source file to use.'
+    )
+    parser.add_argument(
+        '--output',
+        '-o',
+        type=str,
+        action="store",
+        default=".",
+        help="The output directory to output mau.json.",
+    )
     args = parser.parse_args()
 
     try:

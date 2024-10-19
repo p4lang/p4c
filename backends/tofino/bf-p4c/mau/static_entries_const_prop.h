@@ -25,21 +25,21 @@ using namespace P4;
   reduced to "hdr.b.$valid = true". This reduces the instruction from
   a two source instruction to a single source one, which is much friendly
   for POV bits packing.
-  
+
       action rewrite_b() {
           hdr.b = hdr.a;
           hdr.a.setInvalid();
       }
-  
+
       table decap {
           key = {
               hdr.a.isValid() : exact;
           }
-  
+
           actions = {
               rewrite_b;
           }
-  
+
           const entries = {
               { true } : rewrite_b();
           }
@@ -59,12 +59,12 @@ using namespace P4;
 */
 
 class StaticEntriesConstProp : public MauModifier {
-    const PhvInfo& phv;
+    const PhvInfo &phv;
 
  public:
-    explicit StaticEntriesConstProp(const PhvInfo& phv) : phv(phv) { }
+    explicit StaticEntriesConstProp(const PhvInfo &phv) : phv(phv) {}
 
-    bool equiv(const IR::MethodCallExpression* mc, const IR::MAU::Action* ac) {
+    bool equiv(const IR::MethodCallExpression *mc, const IR::MAU::Action *ac) {
         if (mc && ac) {
             if (auto path = mc->method->to<IR::PathExpression>()) {
                 if (path->path->name == ac->name) {
@@ -75,10 +75,9 @@ class StaticEntriesConstProp : public MauModifier {
         return false;
     }
 
-    bool preorder(IR::MAU::Instruction* instr) override {
+    bool preorder(IR::MAU::Instruction *instr) override {
         auto table = findContext<IR::MAU::Table>();
-        if (table->is_compiler_generated || table->entries_list == nullptr)
-            return false;
+        if (table->is_compiler_generated || table->entries_list == nullptr) return false;
 
         auto action = findContext<IR::MAU::Action>();
 
@@ -94,16 +93,15 @@ class StaticEntriesConstProp : public MauModifier {
             if (!op) continue;
 
             for (unsigned j = 0; j < table->match_key.size(); j++) {
-                if (table->match_key[j]->match_type.name != "exact")
-                    continue;
+                if (table->match_key[j]->match_type.name != "exact") continue;
 
                 auto key = phv.field(table->match_key[j]->expr);
                 if (op == key) {
                     bool can_const_prop = false;
-                    const IR::Expression * match = nullptr;
+                    const IR::Expression *match = nullptr;
                     // Check if constant values for one same action in multi-entries are unique.
                     // Don't do constant propagation if not unique or it's a default action.
-                    for (auto& ent : table->entries_list->entries) {
+                    for (auto &ent : table->entries_list->entries) {
                         if (equiv(ent->action->to<IR::MethodCallExpression>(), action) &&
                             (action->init_default == false)) {
                             if (can_const_prop == false) {
@@ -124,8 +122,7 @@ class StaticEntriesConstProp : public MauModifier {
                     if (can_const_prop) {
                         LOG4("rewrite " << instr);
                         if (auto b = match->to<IR::BoolLiteral>()) {
-                            instr->operands[i] =
-                                new IR::Constant(IR::Type::Bits::get(1), b->value);
+                            instr->operands[i] = new IR::Constant(IR::Type::Bits::get(1), b->value);
                         } else if (auto c = match->to<IR::Constant>()) {
                             instr->operands[i] = c;
                         } else {

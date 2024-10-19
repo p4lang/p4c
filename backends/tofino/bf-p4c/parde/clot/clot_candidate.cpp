@@ -18,8 +18,8 @@
 unsigned ClotCandidate::max_size_in_bits() const {
     auto it =
         std::max_element(parser_state_to_size_in_bits.begin(), parser_state_to_size_in_bits.end(),
-                         [](const std::pair<const IR::BFN::ParserState*, unsigned>& a,
-                            const std::pair<const IR::BFN::ParserState*, unsigned>& b) {
+                         [](const std::pair<const IR::BFN::ParserState *, unsigned> &a,
+                            const std::pair<const IR::BFN::ParserState *, unsigned> &b) {
                              return a.second < b.second;
                          });
     BUG_CHECK(it != parser_state_to_size_in_bits.end(),
@@ -27,21 +27,21 @@ unsigned ClotCandidate::max_size_in_bits() const {
     return it->second;
 }
 
-unsigned ClotCandidate::size_in_bits(const IR::BFN::ParserState* parser_state) const {
+unsigned ClotCandidate::size_in_bits(const IR::BFN::ParserState *parser_state) const {
     BUG_CHECK(parser_state_to_size_in_bits.count(parser_state),
               "Cannot get CLOT candidate %1%'s size, as it is not in parser state %2%", id,
               parser_state->name);
     return parser_state_to_size_in_bits.at(parser_state);
 }
 
-ClotCandidate::ClotCandidate(const ClotInfo& clotInfo,
-                             const Pseudoheader* pseudoheader,
-                             const std::vector<const FieldSliceExtractInfo*>& extract_infos,
-                             bool afterAllocatedClot,
-                             bool beforeAllocatedClot)
-                             : pseudoheader(pseudoheader), extract_infos(extract_infos),
-                               id(nextId++), afterAllocatedClot(afterAllocatedClot),
-                               beforeAllocatedClot(beforeAllocatedClot) {
+ClotCandidate::ClotCandidate(const ClotInfo &clotInfo, const Pseudoheader *pseudoheader,
+                             const std::vector<const FieldSliceExtractInfo *> &extract_infos,
+                             bool afterAllocatedClot, bool beforeAllocatedClot)
+    : pseudoheader(pseudoheader),
+      extract_infos(extract_infos),
+      id(nextId++),
+      afterAllocatedClot(afterAllocatedClot),
+      beforeAllocatedClot(beforeAllocatedClot) {
     unsigned offset = 0;
     unsigned idx = 0;
 
@@ -52,7 +52,7 @@ ClotCandidate::ClotCandidate(const ClotInfo& clotInfo,
         pov_bits = clotInfo.fields_to_pov_bits_.at(first_field);
     }
 
-    for (const auto* parser_state : extract_infos.front()->states()) {
+    for (const auto *parser_state : extract_infos.front()->states()) {
         parser_state_to_checksum_bits[parser_state];
         parser_state_to_modified_bits[parser_state];
         parser_state_to_readonly_bits[parser_state];
@@ -60,9 +60,9 @@ ClotCandidate::ClotCandidate(const ClotInfo& clotInfo,
         parser_state_to_size_in_bits[parser_state] = 0;
     }
 
-    for (const auto* extract_info : extract_infos) {
-        const PHV::FieldSlice* slice = extract_info->slice();
-        for (const auto* parser_state : extract_info->states()) {
+    for (const auto *extract_info : extract_infos) {
+        const PHV::FieldSlice *slice = extract_info->slice();
+        for (const auto *parser_state : extract_info->states()) {
             if (clotInfo.is_checksum(slice)) {
                 parser_state_to_checksum_bits[parser_state].setrange(offset, slice->size());
                 checksum_slices.insert(slice);
@@ -85,20 +85,18 @@ ClotCandidate::ClotCandidate(const ClotInfo& clotInfo,
             parser_state_to_size_in_bits[parser_state] += slice->size();
         }
 
-        if (clotInfo.can_start_clot(extract_info))
-            can_start_indices_.push_back(idx);
+        if (clotInfo.can_start_clot(extract_info)) can_start_indices_.push_back(idx);
 
-        if (clotInfo.can_end_clot(extract_info))
-            can_end_indices_.push_back(idx);
+        if (clotInfo.can_end_clot(extract_info)) can_end_indices_.push_back(idx);
 
         offset += slice->size();
         idx++;
     }
 
-    auto get_sum_of_bits = [](const std::set<const PHV::FieldSlice*>& slices) -> unsigned {
+    auto get_sum_of_bits = [](const std::set<const PHV::FieldSlice *> &slices) -> unsigned {
         return std::accumulate(
             slices.begin(), slices.end(), 0u,
-            [](unsigned sum, const PHV::FieldSlice* slice) { return sum + slice->size(); });
+            [](unsigned sum, const PHV::FieldSlice *slice) { return sum + slice->size(); });
     };
     checksum_bits = get_sum_of_bits(checksum_slices);
     modified_bits = get_sum_of_bits(modified_slices);
@@ -107,16 +105,14 @@ ClotCandidate::ClotCandidate(const ClotInfo& clotInfo,
     std::reverse(can_end_indices_.begin(), can_end_indices_.end());
 }
 
-ordered_set<const IR::BFN::ParserState*> ClotCandidate::states() const {
+ordered_set<const IR::BFN::ParserState *> ClotCandidate::states() const {
     return (*(extract_infos.begin()))->states();
 }
 
-gress_t ClotCandidate::thread() const {
-    return (*Keys(state_bit_offsets()).begin())->thread();
-}
+gress_t ClotCandidate::thread() const { return (*Keys(state_bit_offsets()).begin())->thread(); }
 
-const ordered_map<const IR::BFN::ParserState*, unsigned>&
-ClotCandidate::state_bit_offsets() const {
+const ordered_map<const IR::BFN::ParserState *, unsigned> &ClotCandidate::state_bit_offsets()
+    const {
     return (*(extract_infos.begin()))->state_bit_offsets();
 }
 
@@ -124,24 +120,20 @@ unsigned ClotCandidate::bit_in_byte_offset() const {
     return (*(extract_infos.begin()))->bit_in_byte_offset();
 }
 
-const std::vector<const FieldSliceExtractInfo*>& ClotCandidate::extracts() const {
+const std::vector<const FieldSliceExtractInfo *> &ClotCandidate::extracts() const {
     return extract_infos;
 }
 
-const std::vector<unsigned>& ClotCandidate::can_start_indices() const {
-    return can_start_indices_;
-}
+const std::vector<unsigned> &ClotCandidate::can_start_indices() const { return can_start_indices_; }
 
-const std::vector<unsigned>& ClotCandidate::can_end_indices() const {
-    return can_end_indices_;
-}
+const std::vector<unsigned> &ClotCandidate::can_end_indices() const { return can_end_indices_; }
 
-const std::map<unsigned, StatePairSet> ClotCandidate::byte_gaps(
-        const CollectParserInfo& parserInfo, const ClotCandidate* other) const {
+const std::map<unsigned, StatePairSet> ClotCandidate::byte_gaps(const CollectParserInfo &parserInfo,
+                                                                const ClotCandidate *other) const {
     std::map<unsigned, StatePairSet> byte_gaps;
-    for (const auto* state : states()) {
+    for (const auto *state : states()) {
         auto it = std::find_if(extract_infos.rbegin(), extract_infos.rend(),
-                               [&state](const FieldSliceExtractInfo* extract_info) {
+                               [&state](const FieldSliceExtractInfo *extract_info) {
                                    return extract_info->states().count(state);
                                });
         std::map<unsigned, StatePairSet> byte_gaps_for_state =
@@ -152,17 +144,17 @@ const std::map<unsigned, StatePairSet> ClotCandidate::byte_gaps(
         std::map<unsigned, StatePairSet> matches;
         std::copy_if(byte_gaps_for_state.begin(), byte_gaps_for_state.end(),
                      std::inserter(matches, matches.begin()),
-                     [&state](const std::pair<unsigned, StatePairSet>& kv) {
+                     [&state](const std::pair<unsigned, StatePairSet> &kv) {
                          auto it = std::find_if(kv.second.begin(), kv.second.end(),
-                                                [&state](const StatePair& state_pair) {
+                                                [&state](const StatePair &state_pair) {
                                                     return state_pair.first == state ||
                                                            state_pair.second == state;
                                                 });
                          return it != kv.second.end();
                      });
 
-        for (const auto& match : matches) {
-            for (const auto& state_pair : match.second) {
+        for (const auto &match : matches) {
+            for (const auto &state_pair : match.second) {
                 byte_gaps[match.first].insert(state_pair);
             }
         }
@@ -170,7 +162,7 @@ const std::map<unsigned, StatePairSet> ClotCandidate::byte_gaps(
     return byte_gaps;
 }
 
-const ClotCandidate* ClotCandidate::mark_adjacencies(bool afterAllocatedClot,
+const ClotCandidate *ClotCandidate::mark_adjacencies(bool afterAllocatedClot,
                                                      bool beforeAllocatedClot) const {
     afterAllocatedClot |= this->afterAllocatedClot;
     beforeAllocatedClot |= this->beforeAllocatedClot;
@@ -179,13 +171,13 @@ const ClotCandidate* ClotCandidate::mark_adjacencies(bool afterAllocatedClot,
         beforeAllocatedClot == this->beforeAllocatedClot)
         return this;
 
-    auto* result = new ClotCandidate(*this);
+    auto *result = new ClotCandidate(*this);
     result->afterAllocatedClot = afterAllocatedClot;
     result->beforeAllocatedClot = beforeAllocatedClot;
     return result;
 }
 
-bool ClotCandidate::operator<(const ClotCandidate& other) const {
+bool ClotCandidate::operator<(const ClotCandidate &other) const {
     if (unused_bits != other.unused_bits) return unused_bits < other.unused_bits;
 
     if (readonly_bits != other.readonly_bits) return readonly_bits < other.readonly_bits;
@@ -197,25 +189,24 @@ std::string ClotCandidate::print() const {
     std::stringstream out;
     out << "CLOT candidate " << id << ":" << std::endl;
 
-    if (afterAllocatedClot)
-        out << "  Appears after an allocated CLOT with 0-byte gap" << std::endl;
+    if (afterAllocatedClot) out << "  Appears after an allocated CLOT with 0-byte gap" << std::endl;
     if (beforeAllocatedClot)
         out << "  Appears before an allocated CLOT with 0-byte gap" << std::endl;
 
     TablePrinter tp(out, {"Parser State", "Fields", "Bits", "Property"},
                     TablePrinter::Align::CENTER);
 
-    ordered_set<const IR::BFN::ParserState*> parser_states = extract_infos.front()->states();
+    ordered_set<const IR::BFN::ParserState *> parser_states = extract_infos.front()->states();
     bool first_parser_state = true;
-    for (const auto* parser_state : parser_states) {
+    for (const auto *parser_state : parser_states) {
         if (!first_parser_state) tp.addSep();
         first_parser_state = false;
 
         int offset = 0;
         bool first_extract_info = true;
-        for (const auto* extract_info : extract_infos) {
-            const PHV::FieldSlice* slice = extract_info->slice();
-            ordered_set<const IR::BFN::ParserState*> subset_of_parser_states =
+        for (const auto *extract_info : extract_infos) {
+            const PHV::FieldSlice *slice = extract_info->slice();
+            ordered_set<const IR::BFN::ParserState *> subset_of_parser_states =
                 extract_info->states();
 
             if (!subset_of_parser_states.count(parser_state)) continue;

@@ -12,16 +12,13 @@ import shutil
 import subprocess
 import sys
 import tempfile
-
 from pathlib import Path
 
 # Top-level source dirs
 SRC_DIRS = ['bf-asm', 'bf-p4c']
 
-parser = argparse.ArgumentParser(
-        description='Clean the source prior to public release')
-parser.add_argument('-r', '--root',
-                    help='Root directory of the compile source tree')
+parser = argparse.ArgumentParser(description='Clean the source prior to public release')
+parser.add_argument('-r', '--root', help='Root directory of the compile source tree')
 args = parser.parse_args()
 
 # This script must either be invoked from the top-level directory or with a
@@ -33,9 +30,12 @@ if args.root:
 subdirs_present = all([os.path.exists(x) for x in SRC_DIRS])
 
 if not subdirs_present:
-    print("Error: '{}' does not appear to be the source tree top-level "
-          "directory. Expecting to find subdirectories: "
-          "{}.".format(os.getcwd(), SRC_DIRS), file=sys.stderr)
+    print(
+        "Error: '{}' does not appear to be the source tree top-level "
+        "directory. Expecting to find subdirectories: "
+        "{}.".format(os.getcwd(), SRC_DIRS),
+        file=sys.stderr,
+    )
     sys.exit(1)
 
 # Set up paths
@@ -76,8 +76,7 @@ def run_cppp(src_dir):
         path = os.path.join(src_dir, file)
         if os.path.isdir(path):
             run_cppp(path)
-        elif file.endswith(".c") or file.endswith(".cpp") or \
-                file.endswith(".h"):
+        elif file.endswith(".c") or file.endswith(".cpp") or file.endswith(".h"):
             tmp_path = path + ".new"
             CPPP_CMD = CPPP_CMD_BASE + [path, tmp_path]
             subprocess.run(CPPP_CMD)
@@ -103,6 +102,7 @@ CMAKE_LISTS = ['CMakeLists.txt']
 CMAKE_ALL = ['CMakeLists.txt', '*.cmake']
 
 SRC_AND_CMAKE = SRC_ONLY + CMAKE_LISTS
+
 
 def sed_delete(path, del_exp, patterns=SRC_ONLY):
     '''
@@ -134,9 +134,7 @@ for src_dir in SRC_DIRS:
 # Remove directories/files for unreleased targets
 # =======================================================
 
-UNRELEASED_TARGETS = [
-        'cloudbreak', 'flatrock', 'tofino3', 't5na', 't5na_program_structure'
-    ]
+UNRELEASED_TARGETS = ['cloudbreak', 'flatrock', 'tofino3', 't5na', 't5na_program_structure']
 
 for target in UNRELEASED_TARGETS:
     for path in sorted(Path().rglob(target)):
@@ -147,16 +145,16 @@ for target in UNRELEASED_TARGETS:
         path.unlink()
 
 EXTRA_DELETES = [
-        'bf-p4c/parde/lowered/lower_flatrock.h',
-        'bf-p4c/p4include/t3na.p4',
-        'bf-p4c/p4include/tofino3_arch.p4',
-        'bf-p4c/p4include/tofino3_base.p4',
-        'bf-p4c/p4include/tofino3_specs.p4',
-        'bf-p4c/p4include/tofino5arch.p4',
-        'bf-p4c/p4include/tofino5.p4',
-        'bf-p4c/driver/p4c.tofino3.cfg',
-        'bf-p4c/driver/p4c.tofino5.cfg',
-    ]
+    'bf-p4c/parde/lowered/lower_flatrock.h',
+    'bf-p4c/p4include/t3na.p4',
+    'bf-p4c/p4include/tofino3_arch.p4',
+    'bf-p4c/p4include/tofino3_base.p4',
+    'bf-p4c/p4include/tofino3_specs.p4',
+    'bf-p4c/p4include/tofino5arch.p4',
+    'bf-p4c/p4include/tofino5.p4',
+    'bf-p4c/driver/p4c.tofino3.cfg',
+    'bf-p4c/driver/p4c.tofino5.cfg',
+]
 for path in EXTRA_DELETES:
     if os.path.exists(path):
         print('Deleting', path)
@@ -169,9 +167,8 @@ for path in EXTRA_DELETES:
 # Files to rename
 RENAMES = {
     "bf-asm/parser-tofino-jbay-cloudbreak.h": "bf-asm/parser-tofino-jbay.h",
-    "bf-asm/parser-tofino-jbay-cloudbreak.cpp":
-        "bf-asm/parser-tofino-jbay.cpp",
-    }
+    "bf-asm/parser-tofino-jbay-cloudbreak.cpp": "bf-asm/parser-tofino-jbay.cpp",
+}
 
 # Per-directory src string substitutions
 SRC_SUBSTITUES = {
@@ -179,12 +176,12 @@ SRC_SUBSTITUES = {
         "parser-tofino-jbay-cloudbreak.h": "parser-tofino-jbay.h",
         "parser-tofino-jbay-cloudbreak.cpp": "parser-tofino-jbay.cpp",
         "PARSER_TOFINO_JBAY_CLOUDBREAK_H_": "PARSER_TOFINO_JBAY_H_",
-        },
+    },
     "bf-p4c": {
         r"\s*\/\/ \(Tofino5\|Flatrock\) specific$": "",
         r"\s*\/\/ TODO for \(Tofino5\|[Ff]latrock\)$": "",
-        },
-    }
+    },
+}
 
 for src, dst in RENAMES.items():
     if os.path.exists(src):
@@ -230,9 +227,7 @@ for path in P4_INCLUDE_DIRS:
 # =======================================================
 
 print("Cleaning cmake files")
-targets = UNRELEASED_TARGETS + [
-        'lower_flatrock', 't5na', 't5na_program_structure'
-    ]
+targets = UNRELEASED_TARGETS + ['lower_flatrock', 't5na', 't5na_program_structure']
 for src_dir in SRC_DIRS:
     for path in sorted(Path(src_dir).rglob('CMakeLists.txt')):
         print('Processing', path.as_posix())
@@ -250,10 +245,12 @@ ENDIF_RE = re.compile(r'^\s*endif\s*\((.*)\)')
 NOT_RE = re.compile(r'(?i)\bNOT\s+(\w+)')
 SET_RE = re.compile(r'^\s*set\s*\(\s*(\w+)')
 
-class IfContext():
+
+class IfContext:
     '''
     If statement context tracking for use in cmake clean-up
     '''
+
     def __init__(self, filtering, if_emitted, skip_rest):
         # Params:
         #  - filtering  = currently in an element being filtered
@@ -267,7 +264,7 @@ class IfContext():
 def clean_cmake_ifs(path):
     '''
     Clean up cmake files by removing if statement branches
-    
+
     '''
     dst_fp = tempfile.NamedTemporaryFile(mode='w', delete=False)
     with open(path) as src:
@@ -306,8 +303,7 @@ def clean_cmake_ifs(path):
                         keyword = 'else'
                     else:
                         keyword = 'endif'
-                    print('ERROR: {} without an if in {}:{}'.format(
-                        keyword, path, line_no))
+                    print('ERROR: {} without an if in {}:{}'.format(keyword, path, line_no))
                     print('Skipping processing of file')
                     return
 
@@ -421,16 +417,16 @@ for src_dir in ['p4-tests']:
 # =======================================================
 
 SED_EXTRA = {
-        'bf-asm/cmake/config.h.in': '/flatrock\|cloudbreak/Id',
-        'bf-asm/test/runtests': [
-            '/STF3/d',
-            '/tofino3/d',
-        ],
-        'bf-asm/instruction.cpp': [
-            's/tofino123/tofino12/g',
-            's/jb_cb_/jb_/g',
-        ],
-        }
+    'bf-asm/cmake/config.h.in': '/flatrock\|cloudbreak/Id',
+    'bf-asm/test/runtests': [
+        '/STF3/d',
+        '/tofino3/d',
+    ],
+    'bf-asm/instruction.cpp': [
+        's/tofino123/tofino12/g',
+        's/jb_cb_/jb_/g',
+    ],
+}
 
 for path, cmds in SED_EXTRA.items():
     if type(cmds) is not list:

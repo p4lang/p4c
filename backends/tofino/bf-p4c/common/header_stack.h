@@ -31,12 +31,12 @@ struct CollectHeaderStackInfo : public Modifier {
     CollectHeaderStackInfo();
 
  private:
-    Visitor::profile_t init_apply(const IR::Node* root) override;
-    void postorder(IR::HeaderStack* stack) override;
-    void postorder(IR::MAU::Primitive* primitive) override;
-    void postorder(IR::BFN::Pipe* pipe) override;
+    Visitor::profile_t init_apply(const IR::Node *root) override;
+    void postorder(IR::HeaderStack *stack) override;
+    void postorder(IR::MAU::Primitive *primitive) override;
+    void postorder(IR::BFN::Pipe *pipe) override;
 
-    BFN::HeaderStackInfo* stacks;
+    BFN::HeaderStackInfo *stacks;
 };
 
 /// Remove header stack info for unused headers, eg. removed by ElimUnused.  Can be used after
@@ -46,19 +46,19 @@ class ElimUnusedHeaderStackInfo : public PassManager {
 
     // Find unused headers.
     struct Find : public Inspector {
-        ElimUnusedHeaderStackInfo& self;
-        const BFN::HeaderStackInfo* stacks = nullptr;
+        ElimUnusedHeaderStackInfo &self;
+        const BFN::HeaderStackInfo *stacks = nullptr;
         ordered_set<cstring> used;
 
-        explicit Find(ElimUnusedHeaderStackInfo& self) : self(self) { }
+        explicit Find(ElimUnusedHeaderStackInfo &self) : self(self) {}
 
-        Visitor::profile_t init_apply(const IR::Node* root) override {
+        Visitor::profile_t init_apply(const IR::Node *root) override {
             self.unused.clear();
             used.clear();
             return Inspector::init_apply(root);
         }
 
-        bool preorder(const IR::BFN::Pipe* pipe) override {
+        bool preorder(const IR::BFN::Pipe *pipe) override {
             BUG_CHECK(pipe->headerStackInfo != nullptr,
                       "Running ElimUnusedHeaderStackInfo without running "
                       "CollectHeaderStackInfo first?");
@@ -66,24 +66,20 @@ class ElimUnusedHeaderStackInfo : public PassManager {
             return true;
         }
 
-        void postorder(const IR::HeaderStack* stack) override;
+        void postorder(const IR::HeaderStack *stack) override;
         void end_apply() override;
     };
 
     // Remove from pipe->headerStackInfo.
     struct Elim : public Modifier {
-        ElimUnusedHeaderStackInfo& self;
-        explicit Elim(ElimUnusedHeaderStackInfo& self) : self(self) { }
+        ElimUnusedHeaderStackInfo &self;
+        explicit Elim(ElimUnusedHeaderStackInfo &self) : self(self) {}
 
-        void postorder(IR::BFN::Pipe* pipe) override;
+        void postorder(IR::BFN::Pipe *pipe) override;
     };
 
  public:
-    ElimUnusedHeaderStackInfo() {
-        addPasses({
-            new Find(*this),
-            new Elim(*this) });
-    }
+    ElimUnusedHeaderStackInfo() { addPasses({new Find(*this), new Elim(*this)}); }
 };
 
 namespace BFN {
@@ -97,7 +93,7 @@ struct HeaderStackInfo {
         /// Which threads is this header stack visible in? By default, the same
         /// header stack is used in both threads, but after
         /// CreateThreadLocalInstances runs, header stacks are thread-specific.
-        bool inThread[2] = { true, true };
+        bool inThread[2] = {true, true};
 
         /// How many elements are in this header stack?
         int size = 0;
@@ -124,9 +120,8 @@ struct HeaderStackInfo {
     auto at(cstring n) const -> decltype(info.at(n)) { return info.at(n); }
     auto at(cstring n) -> decltype(info.at(n)) { return info.at(n); }
     auto count(cstring n) const -> decltype(info.count(n)) { return info.count(n); }
-    const Info* get(cstring n) const {
-        if (auto it = info.find(n); it != info.end())
-            return &it->second;
+    const Info *get(cstring n) const {
+        if (auto it = info.find(n); it != info.end()) return &it->second;
         return nullptr;
     }
 };
@@ -145,10 +140,10 @@ struct HeaderStackInfo {
  * it looks for "push_front" instructions.
  */
 class RemovePushInitialization : public Transform {
-    IR::Node* preorder(IR::MAU::Action* act) override;
+    IR::Node *preorder(IR::MAU::Action *act) override;
 
  public:
-    RemovePushInitialization() { }
+    RemovePushInitialization() {}
 };
 
 /** Replace the "$valid" suffix for header stacks with an AliasSlice index into
@@ -157,14 +152,14 @@ class RemovePushInitialization : public Transform {
  * @pre Must happen after ResolveComputedParserExpressions.
  */
 class ValidToStkvalid : public Transform {
-    struct BFN::HeaderStackInfo* stack_info_ = nullptr;
+    struct BFN::HeaderStackInfo *stack_info_ = nullptr;
 
     // Populate stack_info_.
-    IR::Node* preorder(IR::BFN::Pipe* pipe) override;
+    IR::Node *preorder(IR::BFN::Pipe *pipe) override;
 
     // Replace uses of stk[x].$valid with stk.$stkvalid[y:y], where the latter
     // corresponds to the validity bit in $stkvalid of element x of stk.
-    IR::Node* postorder(IR::Member* member) override;
+    IR::Node *postorder(IR::Member *member) override;
 
     // Replace extractions to slices of $stkvalid with equivalent extractions
     // to the entire field.  Eg. extract(stk.$stkvalid, 0x4) instead of
@@ -175,10 +170,10 @@ class ValidToStkvalid : public Transform {
     // this removes the AliasSlice node and hence loses the aliasing
     // information.  However, as parser extracts aren't exposed to the control
     // plane, this should be fine.
-    IR::Node* postorder(IR::BFN::Extract* extract) override;
+    IR::Node *postorder(IR::BFN::Extract *extract) override;
 
  public:
-    explicit ValidToStkvalid(PhvInfo&) { }
+    explicit ValidToStkvalid(PhvInfo &) {}
 };
 
 #endif /* BF_P4C_COMMON_HEADER_STACK_H_ */

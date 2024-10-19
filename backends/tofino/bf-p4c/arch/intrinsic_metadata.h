@@ -13,79 +13,69 @@
 #ifndef BF_P4C_ARCH_INTRINSIC_METADATA_H_
 #define BF_P4C_ARCH_INTRINSIC_METADATA_H_
 
-#include "ir/ir.h"
+#include "bf-p4c/arch/bridge_metadata.h"
 #include "bf-p4c/device.h"
+#include "bf-p4c/midend/type_checker.h"
 #include "frontends/p4/cloner.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
-#include "bf-p4c/arch/bridge_metadata.h"
-#include "bf-p4c/midend/type_checker.h"
+#include "ir/ir.h"
 
 namespace BFN {
 
-const IR::ParserState*
-    convertStartStateToNormalState(const IR::ParserState *state, cstring newName);
+const IR::ParserState *convertStartStateToNormalState(const IR::ParserState *state,
+                                                      cstring newName);
 
-const IR::ParserState *
-    convertStartStateToNormalState(IR::P4Parser *parser, cstring newName);
+const IR::ParserState *convertStartStateToNormalState(IR::P4Parser *parser, cstring newName);
 
-const IR::ParserState* addNewStartState(cstring name, cstring nextState);
+const IR::ParserState *addNewStartState(cstring name, cstring nextState);
 void addNewStartState(IR::P4Parser *parser, cstring name, cstring nextState);
 
-const IR::ParserState* createGeneratedParserState(cstring name,
-        IR::IndexedVector<IR::StatOrDecl> &&statements,
-        const IR::Expression *selectExpression);
-const IR::ParserState* createGeneratedParserState(cstring name,
-        IR::IndexedVector<IR::StatOrDecl> &&statements,
-        cstring nextState);
-const IR::Statement* createAdvanceCall(cstring pkt, int bits);
-const IR::SelectCase* createSelectCase(unsigned bitWidth, unsigned value,
-        unsigned mask, const IR::ParserState *nextState);
-const IR::Statement* createSetMetadata(cstring header,
-        cstring field, int bitWidth, int constant);
-const IR::Statement* createSetMetadata(cstring param, cstring header,
-        cstring field, int bitWidth, int constant);
-const IR::Statement* createSetMetadata(const IR::Expression* dest,
-        cstring header, cstring field);
-const IR::Statement* createSetValid(const Util::SourceInfo &, cstring header, cstring field);
-const IR::Statement* createExtractCall(cstring pkt, cstring type, cstring hdr);
-const IR::Statement* createExtractCall(cstring pkt, IR::Expression* member);
-const IR::Statement* createExtractCall(cstring pkt, cstring typeName, IR::Expression* member);
-const IR::Expression* createLookaheadExpr(cstring pkt, int bits);
+const IR::ParserState *createGeneratedParserState(cstring name,
+                                                  IR::IndexedVector<IR::StatOrDecl> &&statements,
+                                                  const IR::Expression *selectExpression);
+const IR::ParserState *createGeneratedParserState(cstring name,
+                                                  IR::IndexedVector<IR::StatOrDecl> &&statements,
+                                                  cstring nextState);
+const IR::Statement *createAdvanceCall(cstring pkt, int bits);
+const IR::SelectCase *createSelectCase(unsigned bitWidth, unsigned value, unsigned mask,
+                                       const IR::ParserState *nextState);
+const IR::Statement *createSetMetadata(cstring header, cstring field, int bitWidth, int constant);
+const IR::Statement *createSetMetadata(cstring param, cstring header, cstring field, int bitWidth,
+                                       int constant);
+const IR::Statement *createSetMetadata(const IR::Expression *dest, cstring header, cstring field);
+const IR::Statement *createSetValid(const Util::SourceInfo &, cstring header, cstring field);
+const IR::Statement *createExtractCall(cstring pkt, cstring type, cstring hdr);
+const IR::Statement *createExtractCall(cstring pkt, IR::Expression *member);
+const IR::Statement *createExtractCall(cstring pkt, cstring typeName, IR::Expression *member);
+const IR::Expression *createLookaheadExpr(cstring pkt, int bits);
 
 /// Add the standard TNA ingress metadata to the given parser. The original
 /// start state will remain in the program, but with a new name.
 static void addIngressMetadata(IR::BFN::TnaParser *parser) {
-    auto *p4EntryPointState =
-        convertStartStateToNormalState(parser, "ingress_p4_entry_point"_cs);
+    auto *p4EntryPointState = convertStartStateToNormalState(parser, "ingress_p4_entry_point"_cs);
 
     // Add a state that skips over any padding between the phase 0 data and the
     // beginning of the packet.
     const auto bitSkip = Device::pardeSpec().bitIngressPrePacketPaddingSize();
     auto packetInParam = parser->tnaParams.at("pkt"_cs);
-    auto *skipToPacketState =
-        createGeneratedParserState("skip_to_packet"_cs, {
-            createAdvanceCall(packetInParam, bitSkip)
-        }, p4EntryPointState->name);
+    auto *skipToPacketState = createGeneratedParserState(
+        "skip_to_packet"_cs, {createAdvanceCall(packetInParam, bitSkip)}, p4EntryPointState->name);
     parser->states.push_back(skipToPacketState);
-
 
     // Add a state that parses the phase 0 data. This is a placeholder that
     // just skips it; if we find a phase 0 table, it'll be replaced later.
     const auto bitPhase0Size = Device::pardeSpec().bitPhase0Size();
-    auto *phase0State =
-        createGeneratedParserState("phase0"_cs, {
-            createAdvanceCall(packetInParam, bitPhase0Size)
-        }, skipToPacketState->name);
+    auto *phase0State = createGeneratedParserState(
+        "phase0"_cs, {createAdvanceCall(packetInParam, bitPhase0Size)}, skipToPacketState->name);
     parser->states.push_back(phase0State);
 
     // This state parses resubmit data. Just like phase 0, the version we're
     // generating here is a placeholder that just skips the data; we'll replace
     // it later with an actual implementation.
     const auto bitResubmitSize = Device::pardeSpec().bitResubmitSize();
-    auto *resubmitState =
-        createGeneratedParserState("resubmit"_cs, {
-            createAdvanceCall(packetInParam, bitResubmitSize)
-        }, skipToPacketState->name);
+    auto *resubmitState = createGeneratedParserState(
+        "resubmit"_cs, {createAdvanceCall(packetInParam, bitResubmitSize)},
+        skipToPacketState->name);
     parser->states.push_back(resubmitState);
 
     // If this is a resubmitted packet, the initial intrinsic metadata will be
@@ -93,25 +83,21 @@ static void addIngressMetadata(IR::BFN::TnaParser *parser) {
     // data. This state checks the resubmit flag and branches accordingly.
     auto igIntrMd = parser->tnaParams.at("ig_intr_md"_cs);
     IR::Vector<IR::Expression> selectOn = {
-                     new IR::Member(new IR::PathExpression(igIntrMd),
-                                    "resubmit_flag"_cs)
-    };
-    auto *checkResubmitState =
-        createGeneratedParserState(
-            "check_resubmit"_cs, {},
-            new IR::SelectExpression(new IR::ListExpression(selectOn), {
-                createSelectCase(1, 0x0, 0x1, phase0State),
-                createSelectCase(1, 0x1, 0x1, resubmitState)
-            }));
+        new IR::Member(new IR::PathExpression(igIntrMd), "resubmit_flag"_cs)};
+    auto *checkResubmitState = createGeneratedParserState(
+        "check_resubmit"_cs, {},
+        new IR::SelectExpression(new IR::ListExpression(selectOn),
+                                 {createSelectCase(1, 0x0, 0x1, phase0State),
+                                  createSelectCase(1, 0x1, 0x1, resubmitState)}));
     parser->states.push_back(checkResubmitState);
 
     // This state handles the extraction of ingress intrinsic metadata.
-    auto *igMetadataState =
-        createGeneratedParserState("ingress_metadata"_cs, {
-                createSetMetadata("ig_intr_md_from_prsr"_cs, "parser_err"_cs, 16, 0),
-                createExtractCall(packetInParam, "ingress_intrinsic_metadata_t"_cs,
-                                  parser->tnaParams.at("ig_intr_md"_cs))
-        }, checkResubmitState->name);
+    auto *igMetadataState = createGeneratedParserState(
+        "ingress_metadata"_cs,
+        {createSetMetadata("ig_intr_md_from_prsr"_cs, "parser_err"_cs, 16, 0),
+         createExtractCall(packetInParam, "ingress_intrinsic_metadata_t"_cs,
+                           parser->tnaParams.at("ig_intr_md"_cs))},
+        checkResubmitState->name);
     parser->states.push_back(igMetadataState);
 
     addNewStartState(parser, "ingress_tna_entry_point"_cs, igMetadataState->name);
@@ -119,14 +105,12 @@ static void addIngressMetadata(IR::BFN::TnaParser *parser) {
 
 /// Add the standard TNA egress metadata to the given parser. The original
 /// start state will remain in the program, but with a new name.
-static void addEgressMetadata(IR::BFN::TnaParser *parser,
-                              const IR::ParserState *start_i2e_mirrored,
+static void addEgressMetadata(IR::BFN::TnaParser *parser, const IR::ParserState *start_i2e_mirrored,
                               const IR::ParserState *start_e2e_mirrored,
                               const IR::ParserState *start_coalesced,
                               const IR::ParserState *start_egress,
-                              std::map<cstring, const IR::SelectCase*> selMap) {
-    auto *p4EntryPointState =
-        convertStartStateToNormalState(parser, "egress_p4_entry_point"_cs);
+                              std::map<cstring, const IR::SelectCase *> selMap) {
+    auto *p4EntryPointState = convertStartStateToNormalState(parser, "egress_p4_entry_point"_cs);
 
     // Add a state that parses bridged metadata. This is just a placeholder;
     // we'll replace it once we know which metadata need to be bridged.
@@ -140,8 +124,8 @@ static void addEgressMetadata(IR::BFN::TnaParser *parser,
     IR::Vector<IR::Expression> selectOn;
     IR::Vector<IR::SelectCase> branchTo;
     if (start_i2e_mirrored || start_e2e_mirrored || start_coalesced)
-        selectOn.push_back(new IR::Member(
-            new IR::PathExpression(new IR::Path(COMPILER_META)), "instance_type"_cs));
+        selectOn.push_back(new IR::Member(new IR::PathExpression(new IR::Path(COMPILER_META)),
+                                          "instance_type"_cs));
     if (start_i2e_mirrored) {
         BUG_CHECK(selMap.count("start_i2e_mirrored"_cs) != 0,
                   "Couldn't find the start_i2e_mirrored state?");
@@ -158,14 +142,13 @@ static void addEgressMetadata(IR::BFN::TnaParser *parser,
         branchTo.push_back(selMap.at("start_coalesced"_cs));
     }
 
-    const IR::ParserState* mirroredState = nullptr;
+    const IR::ParserState *mirroredState = nullptr;
     if (branchTo.size()) {
         mirroredState = createGeneratedParserState(
             "mirrored"_cs, {},
             new IR::SelectExpression(new IR::ListExpression(selectOn), branchTo));
     } else {
-        mirroredState = createGeneratedParserState("mirrored"_cs, {},
-                                                          p4EntryPointState->name);
+        mirroredState = createGeneratedParserState("mirrored"_cs, {}, p4EntryPointState->name);
     }
     parser->states.push_back(mirroredState);
 
@@ -178,12 +161,11 @@ static void addEgressMetadata(IR::BFN::TnaParser *parser,
     // which has the mirror indicator flag set to zero.
     auto packetInParam = parser->tnaParams.at("pkt"_cs);
     selectOn = {createLookaheadExpr(packetInParam, 8)};
-    auto *checkMirroredState =
-        createGeneratedParserState("check_mirrored"_cs, {},
-                     new IR::SelectExpression(new IR::ListExpression(selectOn), {
-                         createSelectCase(8, 0, 1 << 3, bridgedMetadataState),
-                         createSelectCase(8, 1 << 3, 1 << 3, mirroredState)
-                     }));
+    auto *checkMirroredState = createGeneratedParserState(
+        "check_mirrored"_cs, {},
+        new IR::SelectExpression(new IR::ListExpression(selectOn),
+                                 {createSelectCase(8, 0, 1 << 3, bridgedMetadataState),
+                                  createSelectCase(8, 1 << 3, 1 << 3, mirroredState)}));
     parser->states.push_back(checkMirroredState);
 
     // This state handles the extraction of egress intrinsic metadata.
@@ -207,7 +189,7 @@ class RenameP4StartState : public Transform {
     bool found_start = false;
 
  public:
-    IR::ParserState* preorder(IR::ParserState *state) override {
+    IR::ParserState *preorder(IR::ParserState *state) override {
         auto anno = state->getAnnotation("name"_cs);
         if (!anno) return state;
         auto name = anno->expr.at(0)->to<IR::StringLiteral>();
@@ -221,7 +203,7 @@ class RenameP4StartState : public Transform {
         return state;
     }
 
-    IR::BFN::TnaParser* postorder(IR::BFN::TnaParser *parser) override {
+    IR::BFN::TnaParser *postorder(IR::BFN::TnaParser *parser) override {
         if (found_start) {
             LOG1("Renaming p4c generated start state for @packet_entry");
             convertStartStateToNormalState(parser, "old_p4_start_point_to_be_removed"_cs);
@@ -233,20 +215,20 @@ class RenameP4StartState : public Transform {
 // Add parser code to extract the standard TNA intrinsic metadata.
 // This pass is used by the P4-14 to V1model translation path.
 class AddMetadataFields : public Transform {
-    const IR::ParserState* start_i2e_mirrored = nullptr;
-    const IR::ParserState* start_e2e_mirrored = nullptr;
-    const IR::ParserState* start_coalesced = nullptr;
-    const IR::ParserState* start_egress = nullptr;
+    const IR::ParserState *start_i2e_mirrored = nullptr;
+    const IR::ParserState *start_e2e_mirrored = nullptr;
+    const IR::ParserState *start_coalesced = nullptr;
+    const IR::ParserState *start_egress = nullptr;
     // map the name of 'start_i2e_mirrored' ... to the IR::SelectCase
     // that is used to transit to these state. Used to support extra
     // entry point to P4-14 parser.
-    std::map<cstring, const IR::SelectCase*> selectCaseMap;
+    std::map<cstring, const IR::SelectCase *> selectCaseMap;
     cstring p4c_start = nullptr;
 
  public:
     AddMetadataFields() { setName("AddMetadataFields"); }
 
-    IR::ParserState* preorder(IR::ParserState* state) override {
+    IR::ParserState *preorder(IR::ParserState *state) override {
         auto anno = state->getAnnotation("packet_entry"_cs);
         if (!anno) return state;
         anno = state->getAnnotation("name"_cs);
@@ -264,7 +246,7 @@ class AddMetadataFields : public Transform {
     }
 
     // Delete the compiler-generated start state from frontend.
-    IR::ParserState* postorder(IR::ParserState* state) override {
+    IR::ParserState *postorder(IR::ParserState *state) override {
         auto anno = state->getAnnotation("name"_cs);
         if (!anno) return state;
         auto name = anno->expr.at(0)->to<IR::StringLiteral>();
@@ -301,38 +283,33 @@ class AddMetadataFields : public Transform {
     }
 
     // Also rename paths to start_0
-    IR::Path* postorder(IR::Path* path) override {
-        if (path->name.name == p4c_start)
-            path->name = IR::ParserState::start;
+    IR::Path *postorder(IR::Path *path) override {
+        if (path->name.name == p4c_start) path->name = IR::ParserState::start;
         return path;
     }
 
-    IR::BFN::TnaParser* postorder(IR::BFN::TnaParser *parser) override {
+    IR::BFN::TnaParser *postorder(IR::BFN::TnaParser *parser) override {
         if (parser->thread == INGRESS)
             addIngressMetadata(parser);
         else
-            addEgressMetadata(parser,
-                              start_i2e_mirrored,
-                              start_e2e_mirrored,
-                              start_coalesced,
-                              start_egress,
-                              selectCaseMap);
+            addEgressMetadata(parser, start_i2e_mirrored, start_e2e_mirrored, start_coalesced,
+                              start_egress, selectCaseMap);
         return parser;
     }
 };
 
 class AddIntrinsicMetadata : public PassManager {
  public:
-     AddIntrinsicMetadata(P4::ReferenceMap* refMap, P4::TypeMap* typeMap) {
+    AddIntrinsicMetadata(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
         setName("AddIntrinsicMetadata");
-         addPasses({
-             new RenameP4StartState(),
-             new AddMetadataFields(),
-             new P4::CloneExpressions(),
-             new P4::ClearTypeMap(typeMap),
-             new BFN::TypeChecking(refMap, typeMap, true),
-             });
-     }
+        addPasses({
+            new RenameP4StartState(),
+            new AddMetadataFields(),
+            new P4::CloneExpressions(),
+            new P4::ClearTypeMap(typeMap),
+            new BFN::TypeChecking(refMap, typeMap, true),
+        });
+    }
 };
 
 }  // namespace BFN

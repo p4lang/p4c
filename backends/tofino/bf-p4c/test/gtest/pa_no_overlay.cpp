@@ -11,17 +11,18 @@
  */
 
 #include <optional>
-#include <boost/algorithm/string/replace.hpp>
-#include "gtest/gtest.h"
 
+#include <boost/algorithm/string/replace.hpp>
+
+#include "bf-p4c/common/header_stack.h"
+#include "bf-p4c/phv/analysis/mutex_overlay.h"
+#include "bf-p4c/phv/phv_fields.h"
+#include "bf-p4c/phv/pragma/phv_pragmas.h"
+#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "gtest/gtest.h"
 #include "ir/ir.h"
 #include "lib/error.h"
 #include "test/gtest/helpers.h"
-#include "bf-p4c/common/header_stack.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/pragma/phv_pragmas.h"
-#include "bf-p4c/phv/analysis/mutex_overlay.h"
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
 
 namespace P4::Test {
 
@@ -29,8 +30,7 @@ class PaNoOverlayPragmaTest : public TofinoBackendTest {};
 
 namespace {
 
-std::optional<TofinoPipeTestCase>
-createPaNoOverlayPragmaTestCase() {
+std::optional<TofinoPipeTestCase> createPaNoOverlayPragmaTestCase() {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
         @pa_no_overlay("ingress", "h2.f1")
         header H1
@@ -86,7 +86,7 @@ createPaNoOverlayPragmaTestCase() {
                  computeChecksum(), deparse()) main;
     )");
 
-    auto& options = BackendOptions();
+    auto &options = BackendOptions();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.target = "tofino"_cs;
     options.arch = "v1model"_cs;
@@ -95,10 +95,9 @@ createPaNoOverlayPragmaTestCase() {
     return TofinoPipeTestCase::createWithThreadLocalInstances(source);
 }
 
-const IR::BFN::Pipe *runMockPassesPaNoOverlay(const IR::BFN::Pipe* pipe,
-                                   PhvInfo& phv) {
-    PHV::Pragmas* pragmas = new PHV::Pragmas(phv);
-    PhvUse* uses = new PhvUse(phv);
+const IR::BFN::Pipe *runMockPassesPaNoOverlay(const IR::BFN::Pipe *pipe, PhvInfo &phv) {
+    PHV::Pragmas *pragmas = new PHV::Pragmas(phv);
+    PhvUse *uses = new PhvUse(phv);
     PassManager quick_backend = {
         new CollectHeaderStackInfo,
         new CollectPhvInfo(phv),
@@ -119,11 +118,13 @@ TEST_F(PaNoOverlayPragmaTest, P4_16) {
 
     runMockPassesPaNoOverlay(test->pipe, phv);
 
-    EXPECT_EQ(phv.field_mutex()(phv.field("ingress::h2.f2"_cs)->id,
-                                 phv.field("ingress::h3.f2"_cs)->id), true);
+    EXPECT_EQ(
+        phv.field_mutex()(phv.field("ingress::h2.f2"_cs)->id, phv.field("ingress::h3.f2"_cs)->id),
+        true);
 
-    EXPECT_EQ(phv.field_mutex()(phv.field("ingress::h2.f1"_cs)->id,
-                                 phv.field("ingress::h3.f1"_cs)->id), false);
+    EXPECT_EQ(
+        phv.field_mutex()(phv.field("ingress::h2.f1"_cs)->id, phv.field("ingress::h3.f1"_cs)->id),
+        false);
 }
 
 }  // namespace P4::Test

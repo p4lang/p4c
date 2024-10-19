@@ -10,8 +10,9 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include "ir/ir.h"
 #include "table_seqdeps.h"
+
+#include "ir/ir.h"
 #include "lib/log.h"
 #include "lib/ltbitmatrix.h"
 
@@ -23,16 +24,18 @@ Visitor::profile_t TableFindSeqDependencies::init_apply(const IR::Node *root) {
 }
 
 static bool ignore_dep(const IR::MAU::Table *t1, const IR::MAU::Table *t2) {
-    std::vector<IR::ID>         pragmas;
+    std::vector<IR::ID> pragmas;
     if (t1->getAnnotation("ignore_table_dependency"_cs, pragmas)) {
         for (auto name : pragmas) {
-            if (t2->externalName().endsWith(name.string()))
-                return true; } }
+            if (t2->externalName().endsWith(name.string())) return true;
+        }
+    }
     pragmas.clear();
     if (t2->getAnnotation("ignore_table_dependency"_cs, pragmas)) {
         for (auto name : pragmas) {
-            if (t1->externalName().endsWith(name.string()))
-                return true; } }
+            if (t1->externalName().endsWith(name.string())) return true;
+        }
+    }
     return false;
 }
 
@@ -44,14 +47,15 @@ void TableFindSeqDependencies::postorder(IR::MAU::TableSeq *seq) {
         bitvec writes = uses.tables_modify(seq->tables[i]);
         bitvec access = uses.tables_access(seq->tables[i]);
         bool earlyExit = seq->tables[i]->has_exit_recursive();
-        for (int j = i+1; j < size; j++) {
+        for (int j = i + 1; j < size; j++) {
             if (ignore_dep(seq->tables[i], seq->tables[j])) continue;
             if (earlyExit || seq->tables[j]->has_exit_recursive() ||
                 (writes & uses.tables_access(seq->tables[j])) ||
                 (access & uses.tables_modify(seq->tables[j])))
-                seq->deps(j, i) = true; } }
+                seq->deps(j, i) = true;
+        }
+    }
     for (int j = 1; j < size; j++)
-        for (int i = j-1; i > 0; i--)
-            if (seq->deps(j, i))
-                seq->deps[j] |= seq->deps[i];
+        for (int i = j - 1; i > 0; i--)
+            if (seq->deps(j, i)) seq->deps[j] |= seq->deps[i];
 }

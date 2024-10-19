@@ -10,8 +10,9 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include "gtest/gtest.h"
 #include "bf-p4c/lib/union_find.hpp"
+
+#include "gtest/gtest.h"
 #include "lib/ordered_set.h"
 
 namespace P4::Test {
@@ -22,19 +23,17 @@ using namespace P4;
 
 /** @returns true if @left and @right contain the same elements. */
 template <typename T>
-static bool equivalent(const ordered_set<T>& left, const ordered_set<T>& right) {
-    if (left.size() != right.size())
-        return false;
+static bool equivalent(const ordered_set<T> &left, const ordered_set<T> &right) {
+    if (left.size() != right.size()) return false;
     for (auto x : left)
-        if (left.find(x) == right.end())
-            return false;
+        if (left.find(x) == right.end()) return false;
     return true;
 }
 
-}   // namespace
+}  // namespace
 
 TEST(UnionFind, ops) {
-    ordered_set<int> universe({ 1, 2, 3 });
+    ordered_set<int> universe({1, 2, 3});
     UnionFind<int> uf(universe);
 
     // After creation, all elements are in singleton sets.
@@ -131,4 +130,4 @@ TEST(UnionFind, move) {
     EXPECT_TRUE(equivalent(ordered_set{1, 2, 4}, uf3.setOf(4)));
 }
 
-}   /* end namespace P4::Test */
+} /* end namespace P4::Test */

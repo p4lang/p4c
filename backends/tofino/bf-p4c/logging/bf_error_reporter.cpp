@@ -10,22 +10,20 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+#include "bf_error_reporter.h"
+
 #include <fstream>
 #include <numeric>
 #include <regex>
-#include "bf_error_reporter.h"
+
 #include "bf-p4c-options.h"
 #include "event_logger.h"
 
-
-
 static bool has_output_already_been_silenced = false;
-void  reset_has_output_already_been_silenced() {  //  should this do more?
-            has_output_already_been_silenced = false;
+void reset_has_output_already_been_silenced() {  //  should this do more?
+    has_output_already_been_silenced = false;
 }
-bool    get_has_output_already_been_silenced() {
-     return has_output_already_been_silenced;
-}
+bool get_has_output_already_been_silenced() { return has_output_already_been_silenced; }
 
 using namespace std;
 
@@ -41,10 +39,8 @@ void redirect_all_standard_outputs_to_dev_null() {
     has_output_already_been_silenced = true;
 }
 
-
-
-void check_the_error_count_and_act_accordingly(const BfErrorReporter& BFER) {
-    const auto EC { BFER.getErrorCount() };
+void check_the_error_count_and_act_accordingly(const BfErrorReporter &BFER) {
+    const auto EC{BFER.getErrorCount()};
     if (Log::Detail::verbosity > 0) {
         // just  "if (Log::verbose)" wasn`t good enough: too much spew;
         //   "if ((*Log::verbose) > 1)" was even _worse_
@@ -57,8 +53,6 @@ void check_the_error_count_and_act_accordingly(const BfErrorReporter& BFER) {
         redirect_all_standard_outputs_to_dev_null();
     }
 }  //  end of “check_the_error_count_and_act_accordingly”
-
-
 
 void BfErrorReporter::emit_message(const ErrorMessage &msg) {
     check_the_error_count_and_act_accordingly(*this);
@@ -77,8 +71,6 @@ void BfErrorReporter::emit_message(const ErrorMessage &msg) {
     }
 #endif
 }
-
-
 
 void BfErrorReporter::emit_message(const ParserErrorMessage &msg) {
     check_the_error_count_and_act_accordingly(*this);
@@ -101,8 +93,7 @@ void BfErrorReporter::add_check(ErrorMessage::MessageType type, const std::strin
     add_check(type, NO_SOURCE, msg);
 }
 
-void BfErrorReporter::add_check(ErrorMessage::MessageType type, int line,
-                                    const std::string &msg) {
+void BfErrorReporter::add_check(ErrorMessage::MessageType type, int line, const std::string &msg) {
     BUG_CHECK(
         type == ErrorMessage::MessageType::Warning || type == ErrorMessage::MessageType::Error,
         "Invalid type %1%, should be Warning or Error.", std::size_t(type));
@@ -132,11 +123,11 @@ bool BfErrorReporter::match_checks(const ErrorMessage &msg) {
 }
 
 bool BfErrorReporter::match_check(ErrorMessage::MessageType type, int line,
-                                       const std::string &msg) {
+                                  const std::string &msg) {
     if (const auto it = checks.find(line); it != checks.end()) {
         for (auto &check : it->second) {
-            LOG5("Matching check on line " << line << ": " << check.msg
-                 << " (" << check.matched << ")");
+            LOG5("Matching check on line " << line << ": " << check.msg << " (" << check.matched
+                                           << ")");
             if (check.type == type && !check.matched) {
                 std::regex expected(check.msg);
                 if (std::regex_search(msg, expected)) {
@@ -168,9 +159,9 @@ BfErrorReporter::CheckResult BfErrorReporter::verify_checks() const {
         for (const auto &check : v) {
             if (!check.matched) {
                 error(ErrorType::ERR_NOT_FOUND,
-                        "Unmatched check: Expected %1% message \"%2%\"%3% not reported.",
-                        (check.type == ErrorMessage::MessageType::Error) ? "error" : "warning",
-                        check.msg, (line == NO_SOURCE) ? "" : " at line " + std::to_string(line));
+                      "Unmatched check: Expected %1% message \"%2%\"%3% not reported.",
+                      (check.type == ErrorMessage::MessageType::Error) ? "error" : "warning",
+                      check.msg, (line == NO_SOURCE) ? "" : " at line " + std::to_string(line));
                 success = false;
             }
         }

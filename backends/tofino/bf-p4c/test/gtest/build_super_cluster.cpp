@@ -12,10 +12,11 @@
 
 #include <iostream>
 #include <sstream>
-#include "gtest/gtest.h"
+
+#include "bf-p4c/../p4c/lib/log.h"
 #include "bf-p4c/test/gtest/tofino_gtest_utils.h"
 #include "bf-p4c/test/utils/super_cluster_builder.h"
-#include "bf-p4c/../p4c/lib/log.h"
+#include "gtest/gtest.h"
 
 namespace P4::Test {
 
@@ -72,7 +73,7 @@ TEST_F(BuildSuperCluster, basic) {
  )");
 
     // Build the supercluster
-    std::optional<PHV::SuperCluster*> sc = scb.build_super_cluster(input_super_cluster);
+    std::optional<PHV::SuperCluster *> sc = scb.build_super_cluster(input_super_cluster);
 
     // Check for errors
     if (!sc) {
@@ -86,11 +87,11 @@ TEST_F(BuildSuperCluster, basic) {
     std::string input_str = input_super_cluster.str();
     input_str.erase(0, input_str.find("\n") + 1);
     // Also erase the last empty line
-    input_str.erase(input_str.size()-3, 3);
+    input_str.erase(input_str.size() - 3, 3);
     std::string output_str = output_super_cluster.str();
     output_str.erase(0, output_str.find("\n") + 1);
     // Compare input and output
     EXPECT_EQ(output_str.compare(input_str), 0);
 }
 
-}   // namespace P4::Test
+}  // namespace P4::Test

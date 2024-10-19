@@ -10,14 +10,14 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef _EXTENSIONS_BF_P4C_LOGGING_PASS_MANAGER_H_
-#define _EXTENSIONS_BF_P4C_LOGGING_PASS_MANAGER_H_
+#ifndef _BACKENDS_TOFINO_BF_P4C_LOGGING_PASS_MANAGER_H_
+#define _BACKENDS_TOFINO_BF_P4C_LOGGING_PASS_MANAGER_H_
 
+#include "bf-p4c/bf-p4c-options.h"
+#include "bf-p4c/logging/filelog.h"
 #include "ir/ir.h"
 #include "ir/pass_manager.h"
 #include "lib/cstring.h"
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/logging/filelog.h"
 
 namespace Logging {
 
@@ -29,18 +29,17 @@ namespace Logging {
 /// file, opening it in init_apply and closing it in end_apply.
 class PassManager : public ::PassManager {
  protected:
-    cstring            _logFilePrefix;
-    Logging::Mode      _logMode;
-    Logging::FileLog * _logFile;
+    cstring _logFilePrefix;
+    Logging::Mode _logMode;
+    Logging::FileLog *_logFile;
 
     /// Used to index logfiles based on how many times this class
     /// was instantiated and invoked on pipe nodes (when logMode is CREATE)
-    static int         invocationCount;
+    static int invocationCount;
 
  public:
-    explicit PassManager(cstring logFilePrefix,
-                         Logging::Mode logMode = Logging::Mode::CREATE) :
-        _logFilePrefix(logFilePrefix), _logMode(logMode), _logFile(nullptr) {}
+    explicit PassManager(cstring logFilePrefix, Logging::Mode logMode = Logging::Mode::CREATE)
+        : _logFilePrefix(logFilePrefix), _logMode(logMode), _logFile(nullptr) {}
 
     static cstring getNewLogFileName(const cstring &prefix) {
         return prefix + std::to_string(invocationCount) + ".log";
@@ -74,4 +73,4 @@ class PassManager : public ::PassManager {
 };
 }  // end namespace Logging
 
-#endif  // _EXTENSIONS_BF_P4C_LOGGING_PASS_MANAGER_H_
+#endif  // _BACKENDS_TOFINO_BF_P4C_LOGGING_PASS_MANAGER_H_

@@ -10,14 +10,15 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PARDE_CLOT_PRAGMA_DO_NOT_USE_CLOT_H_
-#define EXTENSIONS_BF_P4C_PARDE_CLOT_PRAGMA_DO_NOT_USE_CLOT_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_CLOT_PRAGMA_DO_NOT_USE_CLOT_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_CLOT_PRAGMA_DO_NOT_USE_CLOT_H_
 
 #include <map>
 #include <optional>
-#include "ir/ir.h"
+
 #include "bf-p4c/phv/phv_fields.h"
 #include "bf-p4c/phv/utils/utils.h"
+#include "ir/ir.h"
 
 using namespace P4;
 
@@ -28,10 +29,10 @@ using namespace P4;
  * a set of fields that should not be allocated to CLOTs.
  */
 class PragmaDoNotUseClot : public Inspector {
-    const PhvInfo& phv_info;
-    ordered_set<const PHV::Field*> do_not_use_clot;
+    const PhvInfo &phv_info;
+    ordered_set<const PHV::Field *> do_not_use_clot;
 
-    profile_t init_apply(const IR::Node* root) override {
+    profile_t init_apply(const IR::Node *root) override {
         profile_t rv = Inspector::init_apply(root);
         do_not_use_clot.clear();
         return rv;
@@ -40,21 +41,21 @@ class PragmaDoNotUseClot : public Inspector {
     /**
      * @brief Get global pragma do_not_use_clot.
      */
-    bool preorder(const IR::BFN::Pipe* pipe) override;
+    bool preorder(const IR::BFN::Pipe *pipe) override;
 
  public:
-    explicit PragmaDoNotUseClot(const PhvInfo& phv_info) : phv_info(phv_info) { }
+    explicit PragmaDoNotUseClot(const PhvInfo &phv_info) : phv_info(phv_info) {}
 
     // BFN::Pragma interface
     static const char *name;
     static const char *description;
     static const char *help;
 
-    const ordered_set<const PHV::Field*>& do_not_use_clot_fields() const {
+    const ordered_set<const PHV::Field *> &do_not_use_clot_fields() const {
         return do_not_use_clot;
     }
 };
 
-std::ostream& operator<<(std::ostream& out, const PragmaDoNotUseClot& do_not_use_clot);
+std::ostream &operator<<(std::ostream &out, const PragmaDoNotUseClot &do_not_use_clot);
 
-#endif /* EXTENSIONS_BF_P4C_PARDE_CLOT_PRAGMA_DO_NOT_USE_CLOT_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_CLOT_PRAGMA_DO_NOT_USE_CLOT_H_ */

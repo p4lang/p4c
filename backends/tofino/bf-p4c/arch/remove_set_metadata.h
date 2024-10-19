@@ -49,13 +49,13 @@ namespace BFN {
  * egress parser.
  */
 struct RemoveSetMetadata : public Transform {
-    RemoveSetMetadata(P4::ReferenceMap* refMap, P4::TypeMap* typeMap);
+    RemoveSetMetadata(P4::ReferenceMap *refMap, P4::TypeMap *typeMap);
 
-    const IR::AssignmentStatement* preorder(IR::AssignmentStatement* assignment);
+    const IR::AssignmentStatement *preorder(IR::AssignmentStatement *assignment);
 
  private:
-    P4::ReferenceMap* refMap;
-    P4::TypeMap* typeMap;
+    P4::ReferenceMap *refMap;
+    P4::TypeMap *typeMap;
 };
 
 }  // namespace BFN

@@ -10,8 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PARDE_COALESCE_LEARNING_H_
-#define EXTENSIONS_BF_P4C_PARDE_COALESCE_LEARNING_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_COALESCE_LEARNING_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_COALESCE_LEARNING_H_
 
 #include "ir/ir.h"
 #include "parde_visitor.h"
@@ -34,6 +34,4 @@ class CoalesceLearning : public DeparserModifier {
     bool preorder(IR::BFN::LearningTableEntry *) override;
 };
 
-#endif /* EXTENSIONS_BF_P4C_PARDE_COALESCE_LEARNING_H_ */
-
-
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_COALESCE_LEARNING_H_ */

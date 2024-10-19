@@ -11,16 +11,17 @@
  */
 
 #include <optional>
-#include <boost/algorithm/string/replace.hpp>
-#include "gtest/gtest.h"
 
-#include "ir/ir.h"
-#include "lib/error.h"
-#include "test/gtest/helpers.h"
+#include <boost/algorithm/string/replace.hpp>
+
 #include "bf-p4c/common/header_stack.h"
 #include "bf-p4c/phv/phv_fields.h"
 #include "bf-p4c/phv/phv_parde_mau_use.h"
 #include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "gtest/gtest.h"
+#include "ir/ir.h"
+#include "lib/error.h"
+#include "test/gtest/helpers.h"
 
 namespace P4::Test {
 
@@ -72,7 +73,7 @@ std::optional<TofinoPipeTestCase> createTPHVSliceTestCase() {
 
         V1Switch(parse(), verifyChecksum(), mau(), mau(), computeChecksum(), deparse()) main;
     )");
-    auto& options = BackendOptions();
+    auto &options = BackendOptions();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.target = "tofino"_cs;
     options.arch = "v1model"_cs;
@@ -81,19 +82,12 @@ std::optional<TofinoPipeTestCase> createTPHVSliceTestCase() {
     return TofinoPipeTestCase::createWithThreadLocalInstances(source);
 }
 
-const IR::BFN::Pipe* runMockPasses(
-        const IR::BFN::Pipe* pipe,
-        PhvInfo& phv,
-        PhvUse& uses) {
-    PassManager quick_backend = {
-        new CollectHeaderStackInfo,
-        new CollectPhvInfo(phv),
-        &uses
-    };
+const IR::BFN::Pipe *runMockPasses(const IR::BFN::Pipe *pipe, PhvInfo &phv, PhvUse &uses) {
+    PassManager quick_backend = {new CollectHeaderStackInfo, new CollectPhvInfo(phv), &uses};
     return pipe->apply(quick_backend);
 }
 
-}   // namespace
+}  // namespace
 
 TEST_F(TPHVSliceTest, Basic) {
     auto test = createTPHVSliceTestCase();
@@ -103,10 +97,10 @@ TEST_F(TPHVSliceTest, Basic) {
     PhvUse uses(phv);
     runMockPasses(test->pipe, phv, uses);
 
-    auto* f1 = phv.field("ingress::h1.f1"_cs);
-    auto* f2 = phv.field("ingress::h1.f2"_cs);
-    auto* f3 = phv.field("ingress::h1.f3"_cs);
-    auto* f4 = phv.field("ingress::h1.f4"_cs);
+    auto *f1 = phv.field("ingress::h1.f1"_cs);
+    auto *f2 = phv.field("ingress::h1.f2"_cs);
+    auto *f3 = phv.field("ingress::h1.f3"_cs);
+    auto *f4 = phv.field("ingress::h1.f4"_cs);
 
     ASSERT_TRUE(f1);
     ASSERT_TRUE(f2);
@@ -129,4 +123,4 @@ TEST_F(TPHVSliceTest, Basic) {
     EXPECT_FALSE(f2b2.is_tphv_candidate(uses));
 }
 
-}   // namespace P4::Test
+}  // namespace P4::Test

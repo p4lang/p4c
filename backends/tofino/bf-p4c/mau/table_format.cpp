@@ -11,6 +11,7 @@
  */
 
 #include "table_format.h"
+
 #include "gateway.h"
 #include "hash_mask_annotations.h"
 #include "lib/dyn_vector.h"
@@ -61,27 +62,28 @@ bitvec TableFormat::Use::no_overhead_atcam_result_bus_words() const {
         int min_word = match_mask.min().index() / SINGLE_RAM_BITS;
         int max_word = match_mask.max().index() / SINGLE_RAM_BITS;
         bool shared = false;
-        if (rb_word < 0)
-            rb_word = min_word;
+        if (rb_word < 0) rb_word = min_word;
         if (min_word != max_word)
             shared = true;
         else if (rb_word != min_word)
             shared = true;
         if (shared) {
-            BUG_CHECK(groupNo <= 1, "Entries other than 0 & 1 cannot be shared "
-            "across words in an ATCAM\n. Invalid shared entry : %1%", groupNo);
+            BUG_CHECK(groupNo <= 1,
+                      "Entries other than 0 & 1 cannot be shared "
+                      "across words in an ATCAM\n. Invalid shared entry : %1%",
+                      groupNo);
             shared_across_boundaries.push_back(groupNo);
         }
         groupNo--;
     }
     std::ostringstream sab;
     std::copy(shared_across_boundaries.begin(), shared_across_boundaries.end() - 1,
-            std::ostream_iterator<int>(sab, ","));
+              std::ostream_iterator<int>(sab, ","));
     BUG_CHECK(shared_across_boundaries.size() <= MAX_SHARED_GROUPS,
-            "ATCAM table has illegitimate format\n. "
-            "Entries shared across word boundary exceeds max allowed (%1%)\n"
-            "Invalid Entries - %2% ",
-            MAX_SHARED_GROUPS, sab.str());
+              "ATCAM table has illegitimate format\n. "
+              "Entries shared across word boundary exceeds max allowed (%1%)\n"
+              "Invalid Entries - %2% ",
+              MAX_SHARED_GROUPS, sab.str());
     rv.setbit(rb_word);
     return rv;
 }
@@ -105,15 +107,14 @@ bitvec TableFormat::Use::no_overhead_atcam_result_bus_words() const {
 bitvec TableFormat::Use::result_bus_words() const {
     bitvec rv;
     bitvec overhead_mask;
-    for (const auto& match_group : match_groups) {
+    for (const auto &match_group : match_groups) {
         overhead_mask |= match_group.overhead_mask();
     }
 
     if (!overhead_mask.empty()) {
-        for (int i = 0; i <= overhead_mask.max().index(); i+= SINGLE_RAM_BITS) {
+        for (int i = 0; i <= overhead_mask.max().index(); i += SINGLE_RAM_BITS) {
             int word = i / SINGLE_RAM_BITS;
-            if (!overhead_mask.getslice(i, SINGLE_RAM_BITS).empty())
-                rv.setbit(word);
+            if (!overhead_mask.getslice(i, SINGLE_RAM_BITS).empty()) rv.setbit(word);
         }
 
         if (only_one_result_bus)
@@ -130,8 +131,7 @@ bitvec TableFormat::Use::result_bus_words() const {
         int min_word = match_mask.min().index() / SINGLE_RAM_BITS;
         int max_word = match_mask.max().index() / SINGLE_RAM_BITS;
 
-        if (min_word != max_word)
-            continue;
+        if (min_word != max_word) continue;
         rv.setbit(min_word);
     }
 
@@ -140,20 +140,17 @@ bitvec TableFormat::Use::result_bus_words() const {
         bitvec match_mask = match_group.match_bit_mask();
         int min_word = match_mask.min().index() / SINGLE_RAM_BITS;
         int max_word = match_mask.max().index() / SINGLE_RAM_BITS;
-        if (min_word == max_word)
-            continue;
+        if (min_word == max_word) continue;
         bool group_has_result_bus = false;
         for (int word = min_word; word <= max_word; word++) {
-            if (match_mask.getslice(word * SINGLE_RAM_BITS, SINGLE_RAM_BITS).empty())
-                continue;
+            if (match_mask.getslice(word * SINGLE_RAM_BITS, SINGLE_RAM_BITS).empty()) continue;
             if (rv.getbit(word)) {
                 group_has_result_bus = true;
                 break;
             }
         }
 
-        if (group_has_result_bus)
-            continue;
+        if (group_has_result_bus) continue;
         rv.setbit(min_word);
     }
     return rv;
@@ -179,17 +176,17 @@ bitvec TableFormat::Use::result_bus_words() const {
  */
 bool TableFormat::analyze_layout_option() {
     // FIXME: In total needs some information variable passed about ghosting
-    LOG2("  Layout option { pack : " << layout_option.way.match_groups << ", width : "
-         << layout_option.way.width << ", entries: " << layout_option.entries << " }");
+    LOG2("  Layout option { pack : " << layout_option.way.match_groups
+                                     << ", width : " << layout_option.way.width
+                                     << ", entries: " << layout_option.entries << " }");
 
     // If table has @dynamic_table_key_masks pragma, the driver expects all bits
     // to be available in the table pack format, so we disable ghosting
     if (!layout_option.layout.atcam && !tbl->dynamic_key_masks &&
         !layout_option.layout.proxy_hash && layout_option.entries > 0) {
-        int min_way_size = *std::min_element(layout_option.way_sizes.begin(),
-                                             layout_option.way_sizes.end());
-        ghost_bits_count = layout_option.layout.get_ram_ghost_bits()
-                            + floor_log2(min_way_size);
+        int min_way_size =
+            *std::min_element(layout_option.way_sizes.begin(), layout_option.way_sizes.end());
+        ghost_bits_count = layout_option.layout.get_ram_ghost_bits() + floor_log2(min_way_size);
     }
 
     use->only_one_result_bus = layout_option.layout.atcam;
@@ -212,8 +209,7 @@ bool TableFormat::analyze_layout_option() {
         use->identity_hash = layout_option.identity;
         auto total_info = match_ixbar->bits_per_search_bus();
 
-        for (auto gi : total_info[0].all_group_info)
-             LOG4("   Group info " << gi);
+        for (auto gi : total_info[0].all_group_info) LOG4("   Group info " << gi);
 
         single_match = *(match_ixbar->match_hash()[0]);
         if (!is_match_entry_wide()) {
@@ -227,16 +223,15 @@ bool TableFormat::analyze_layout_option() {
         for (auto &hi : total_info) {
             safe_vector<int> ixbar_groups;
             std::sort(hi.all_group_info.begin(), hi.all_group_info.end(),
-                [=](const IXBar::Use::GroupInfo &a, IXBar::Use::GroupInfo &b) {
-                return a.search_bus < b.search_bus;
-            });
+                      [=](const IXBar::Use::GroupInfo &a, IXBar::Use::GroupInfo &b) {
+                          return a.search_bus < b.search_bus;
+                      });
 
             for (auto sb : search_bus_per_width) {
                 if (sb >= 0) {
-                    auto it = std::find_if(hi.all_group_info.begin(), hi.all_group_info.end(),
-                                           [&](const IXBar::Use::GroupInfo &a) {
-                        return a.search_bus == sb;
-                    });
+                    auto it = std::find_if(
+                        hi.all_group_info.begin(), hi.all_group_info.end(),
+                        [&](const IXBar::Use::GroupInfo &a) { return a.search_bus == sb; });
                     if (it != hi.all_group_info.end())
                         ixbar_groups.push_back(it->ixbar_group);
                     else
@@ -269,15 +264,16 @@ void TableFormat::analyze_proxy_hash_option(int per_RAM) {
     auto *tphi = dynamic_cast<const Tofino::IXBar::Use *>(proxy_hash_ixbar);
     if (!tphi) return;
     auto &ph = tphi->proxy_hash_key_use;
-    BUG_CHECK(ph.allocated, "%s: Proxy Hash Table %s does not have an allocation for a proxy "
-              "hash key", tbl->srcInfo, tbl->name);
+    BUG_CHECK(ph.allocated,
+              "%s: Proxy Hash Table %s does not have an allocation for a proxy "
+              "hash key",
+              tbl->srcInfo, tbl->name);
 
     use->proxy_hash_group = ph.group;
     int hashMatrixSize = Device::ixbarSpec().hashMatrixSize();
     for (int i = 0; i < hashMatrixSize; i += 8) {
         auto bv = ph.hash_bits.getslice(i, 8);
-        if (bv.empty())
-            continue;
+        if (bv.empty()) continue;
         IXBar::Use::Byte b(PHV::Container(), i);
         b.bit_use = bv;
         b.proxy_hash = true;
@@ -306,18 +302,18 @@ void TableFormat::analyze_proxy_hash_option(int per_RAM) {
 /* Specifically for the allocation of groups that only require one RAM.  If it requires
    multiple match groups, then balance these match groups and corresponding overhead */
 bool TableFormat::analyze_skinny_layout_option(int per_RAM,
-        safe_vector<IXBar::Use::GroupInfo> &sizes) {
+                                               safe_vector<IXBar::Use::GroupInfo> &sizes) {
     // This checks to see if the algorithm  can possibly ghost off any extra search buses
     // to leave at most one search bus.  If that's the case, then choose_ghost_bits will
     // prioritize those search buses
     skinny = true;
     if (match_ixbar->search_buses_single() > 1) {
         std::sort(sizes.begin(), sizes.end(),
-            [](const IXBar::Use::GroupInfo &a, const IXBar::Use::GroupInfo &b) {
-            int t;
-            if ((t = a.bits - b.bits) != 0) return a.bits < b.bits;
-            return a.search_bus < b.search_bus;
-        });
+                  [](const IXBar::Use::GroupInfo &a, const IXBar::Use::GroupInfo &b) {
+                      int t;
+                      if ((t = a.bits - b.bits) != 0) return a.bits < b.bits;
+                      return a.search_bus < b.search_bus;
+                  });
 
         int ghostable_search_buses = 0;
         int bits_seen = 0;
@@ -330,8 +326,7 @@ bool TableFormat::analyze_skinny_layout_option(int per_RAM,
                 break;
             }
         }
-        if (match_ixbar->search_buses_single() - ghostable_search_buses > 1)
-            return false;
+        if (match_ixbar->search_buses_single() - ghostable_search_buses > 1) return false;
     }
 
     if (layout_option.layout.atcam) {
@@ -370,13 +365,14 @@ bool TableFormat::analyze_skinny_layout_option(int per_RAM,
    the overhead has to be, and which RAMs contain the particular match groups */
 bool TableFormat::analyze_wide_layout_option(safe_vector<IXBar::Use::GroupInfo> &sizes) {
     skinny = false;
-    size_t RAM_per = (layout_option.way.width + layout_option.way.match_groups - 1)
-                     / layout_option.way.match_groups;
-    if (layout_option.way.width % layout_option.way.match_groups == 0
-        && layout_option.way.match_groups != 1) {
-        warning("Format for table %s to be %d entries and %d width, when that allocation "
-                  "could easily be split.", tbl->name, layout_option.way.match_groups,
-                  layout_option.way.width);
+    size_t RAM_per = (layout_option.way.width + layout_option.way.match_groups - 1) /
+                     layout_option.way.match_groups;
+    if (layout_option.way.width % layout_option.way.match_groups == 0 &&
+        layout_option.way.match_groups != 1) {
+        warning(
+            "Format for table %s to be %d entries and %d width, when that allocation "
+            "could easily be split.",
+            tbl->name, layout_option.way.match_groups, layout_option.way.width);
     }
     if (size_t(match_ixbar->search_buses_single()) > RAM_per) {
         return false;  // FIXME: Again, can potentially be saved by ghosting off certain bits
@@ -385,11 +381,11 @@ bool TableFormat::analyze_wide_layout_option(safe_vector<IXBar::Use::GroupInfo> 
     // Whichever one has the least amount of bits will be the group in which the overhead
     // will be stored.  This is because we can ghost the most bits off in that section
     std::sort(sizes.begin(), sizes.end(),
-        [=](const IXBar::Use::GroupInfo &a, const IXBar::Use::GroupInfo &b) {
-        int t;
-        if ((t = a.bits - b.bits) != 0) return a.bits < b.bits;
-        return a.search_bus < b.search_bus;
-    });
+              [=](const IXBar::Use::GroupInfo &a, const IXBar::Use::GroupInfo &b) {
+                  int t;
+                  if ((t = a.bits - b.bits) != 0) return a.bits < b.bits;
+                  return a.search_bus < b.search_bus;
+              });
 
     bool search_bus_on_overhead = true;
     // full_RAMs are the number of RAMs that are dedicated to a non overhead RAMs
@@ -404,13 +400,12 @@ bool TableFormat::analyze_wide_layout_option(safe_vector<IXBar::Use::GroupInfo> 
         search_bus_on_overhead = false;
     }
 
-    if (overhead_RAMs * MAX_SHARED_GROUPS < layout_option.way.match_groups)
-        return false;
+    if (overhead_RAMs * MAX_SHARED_GROUPS < layout_option.way.match_groups) return false;
 
-    if (overhead_RAMs > 1 && layout_option.layout.atcam)
-        return false;
+    if (overhead_RAMs > 1 && layout_option.layout.atcam) return false;
 
-    BUG_CHECK(overhead_RAMs <= layout_option.way.match_groups, "Allocation for %s has %d RAMs for "
+    BUG_CHECK(overhead_RAMs <= layout_option.way.match_groups,
+              "Allocation for %s has %d RAMs for "
               "overhead allocation, but it only requires %d.  Issue in width calculation.",
               tbl->name, overhead_RAMs, layout_option.way.match_groups);
 
@@ -440,8 +435,7 @@ bool TableFormat::analyze_wide_layout_option(safe_vector<IXBar::Use::GroupInfo> 
 
     // Assign a search bus to the non overhead groups
     auto it = sizes.begin();
-    if (search_bus_on_overhead)
-        it++;
+    if (search_bus_on_overhead) it++;
 
     int match_groups_set = 0;
     for (int i = overhead_RAMs; i < layout_option.way.width; i++) {
@@ -465,13 +459,13 @@ bool TableFormat::analyze_wide_layout_option(safe_vector<IXBar::Use::GroupInfo> 
         match_groups_set++;
     }
 
-
     return true;
 }
 
-/** The algorithm find_format is to determine how to best pack the RAMs of match tables.  *  For any table using SRAMs only (i.e. exact match/atcam), this means determining how
- *  the RAM line is filled.  For tables using the TCAMs, (i.e. ternary), this is specifically
- *  for the ternary indirect packing.
+/** The algorithm find_format is to determine how to best pack the RAMs of match tables.  *  For any
+ * table using SRAMs only (i.e. exact match/atcam), this means determining how the RAM line is
+ * filled.  For tables using the TCAMs, (i.e. ternary), this is specifically for the ternary
+ * indirect packing.
  *
  *  The RAM is packed with two classes of information, match data and overhead.  Match data
  *  is anything that is to be directly compared with packet data.  Overhead is everything else.
@@ -506,68 +500,55 @@ bool TableFormat::find_format(Use *u) {
     use = u;
     LOG1("Find format for table " << tbl->name);
     LOG2("  Layout option action { adt_bytes: " << layout_option.layout.action_data_bytes_in_table
-         << ", immediate_bits: " << layout_option.layout.immediate_bits << " }");
+                                                << ", immediate_bits: "
+                                                << layout_option.layout.immediate_bits << " }");
     setup_pfes_and_types();
     if (layout_option.layout.ternary) {
         LOG3("Ternary table?");
         overhead_groups_per_RAM.push_back(1);
         use->match_groups.emplace_back();
-        if (!allocate_all_ternary_match())
-            return false;
-        if (!allocate_overhead())
-            return false;
+        if (!allocate_all_ternary_match()) return false;
+        if (!allocate_overhead()) return false;
         return true;
     }
 
     if (layout_option.layout.gateway_match) {
         BUG_CHECK(layout_option.way.match_groups > 0 &&
-                  layout_option.way.match_groups <= Device::gatewaySpec().ExactShifts,
+                      layout_option.way.match_groups <= Device::gatewaySpec().ExactShifts,
                   "Unsupported immediate profile on a gateway payload table");
         overhead_groups_per_RAM.push_back(layout_option.way.match_groups);
         LOG3("Gateway payload table");
-        for (int i = 0; i < layout_option.way.match_groups; i++)
-            use->match_groups.emplace_back();
-        if (!allocate_overhead())
-            return false;
-        if (Device::gatewaySpec().ExactShifts > 1)
-            build_payload_map();
+        for (int i = 0; i < layout_option.way.match_groups; i++) use->match_groups.emplace_back();
+        if (!allocate_overhead()) return false;
+        if (Device::gatewaySpec().ExactShifts > 1) build_payload_map();
         return true;
     } else if (layout_option.layout.no_match_miss_path()) {
         overhead_groups_per_RAM.push_back(1);
         LOG3("No match miss");
         use->match_groups.emplace_back();
-        if (!allocate_overhead())
-            return false;
+        if (!allocate_overhead()) return false;
         return true;
     } else if (layout_option.layout.no_match_hit_path()) {
         BUG_CHECK(layout_option.way.match_groups > 0 &&
-                  layout_option.way.match_groups <= Device::gatewaySpec().ExactShifts,
+                      layout_option.way.match_groups <= Device::gatewaySpec().ExactShifts,
                   "Unsupported immediate profile on a hash action table");
         overhead_groups_per_RAM.push_back(layout_option.way.match_groups);
         LOG3("No match hit");
-        for (int i = 0; i < layout_option.way.match_groups; i++)
-            use->match_groups.emplace_back();
-        if (!allocate_overhead())
-            return false;
+        for (int i = 0; i < layout_option.way.match_groups; i++) use->match_groups.emplace_back();
+        if (!allocate_overhead()) return false;
         return true;
     }
 
-
-    if (!analyze_layout_option())
-        return false;
-    if (!allocate_sram_match())
-        return false;
+    if (!analyze_layout_option()) return false;
+    if (!allocate_sram_match()) return false;
     LOG3("Match and Version");
     if (layout_option.layout.atcam) {
-        if (!redistribute_entry_priority())
-            return false;
+        if (!redistribute_entry_priority()) return false;
     }
     redistribute_next_table();
 
-
     LOG3("Build match group map");
-    if (!build_match_group_map())
-        return false;
+    if (!build_match_group_map()) return false;
     verify();
     LOG2("SRAM Table format is successful");
     return true;
@@ -588,40 +569,31 @@ bool TableFormat::find_format(Use *u) {
  */
 bool TableFormat::allocate_overhead(bool alloc_match) {
     BUG_CHECK(!alloc_match, "Allocating Match must be done independently");
-    if (!allocate_next_table())
-        return false;
+    if (!allocate_next_table()) return false;
     LOG3("Next Table");
     if (tbl->action_chain() && bits_necessary(NEXT) == 0) {
         // if we use action chaining and share action/next bits, allocate action bits
         // first, so group 0 ends up being at bit 0, as required for next
-        if (!allocate_all_instr_selection())
-            return false;
+        if (!allocate_all_instr_selection()) return false;
         LOG3("Instruction Selection");
-        if (!allocate_selector_length())
-            return false;
+        if (!allocate_selector_length()) return false;
         LOG3("Selector Length");
     } else {
-        if (!allocate_selector_length())
-            return false;
+        if (!allocate_selector_length()) return false;
         LOG3("Selector Length");
-        if (!allocate_all_instr_selection())
-            return false;
+        if (!allocate_all_instr_selection()) return false;
         LOG3("Instruction Selection");
     }
-    if (!allocate_all_indirect_ptrs())
-        return false;
+    if (!allocate_all_indirect_ptrs()) return false;
     LOG3("Indirect Pointers");
-    if (!allocate_all_immediate())
-        return false;
+    if (!allocate_all_immediate()) return false;
     LOG3("Immediate");
     return true;
 }
 
-
 bool TableFormat::allocate_sram_match() {
     if (allocate_overhead())
-        if (allocate_match())
-            return true;
+        if (allocate_match()) return true;
     clear_pre_allocation_state();
     return interleave_match_and_overhead();
 }
@@ -636,11 +608,9 @@ bool TableFormat::allocate_sram_match() {
 bitvec TableFormat::bitvec_necessary(type_t type) const {
     bitvec rv;
     if (type == NEXT) {
-        if (!tbl->action_chain() || hit_actions() <= NEXT_MAP_TABLE_ENTRIES)
-            return rv;
+        if (!tbl->action_chain() || hit_actions() <= NEXT_MAP_TABLE_ENTRIES) return rv;
         int next_tables = tbl->action_next_paths();
-        if (!tbl->has_default_path())
-            next_tables++;
+        if (!tbl->has_default_path()) next_tables++;
         if (next_tables <= NEXT_MAP_TABLE_ENTRIES)
             rv.setrange(0, ceil_log2(next_tables));
         else
@@ -658,8 +628,7 @@ bitvec TableFormat::bitvec_necessary(type_t type) const {
         // For no match miss path specifically a format is required, as a ternary indirect is how
         // this pathway is setup.  Therefore, we guarantee at least one overhead bit, though the
         // ternary indirect RAMs don't actually exist
-        if (instr_select == 0 && layout_option.layout.no_match_miss_path())
-            instr_select++;
+        if (instr_select == 0 && layout_option.layout.no_match_miss_path()) instr_select++;
         /* If actions cannot be fit inside a lookup table, the action instruction can be
            anywhere in the IMEM and will need entire imem bits. The assembler decides
            based on color scheme allocations. Assembler will flag an error if it fails
@@ -670,15 +639,13 @@ bitvec TableFormat::bitvec_necessary(type_t type) const {
     } else if (type == COUNTER || type == COUNTER_PFE) {
         const IR::MAU::AttachedMemory *stats_addr_user = nullptr;
         for (auto ba : tbl->attached) {
-             if (!ba->attached->is<IR::MAU::Counter>()) continue;
-             stats_addr_user = ba->attached;
-             break;
+            if (!ba->attached->is<IR::MAU::Counter>()) continue;
+            stats_addr_user = ba->attached;
+            break;
         }
 
-        if (!layout_option.layout.stats_addr.shifter_enabled)
-            return rv;
-        if (stats_addr_user == nullptr)
-            return rv;
+        if (!layout_option.layout.stats_addr.shifter_enabled) return rv;
+        if (stats_addr_user == nullptr) return rv;
         bool move_to_overhead = gw_linked && !stats_addr_user->direct;
 
         if (type == COUNTER) {
@@ -694,26 +661,22 @@ bitvec TableFormat::bitvec_necessary(type_t type) const {
     } else if (type == METER || type == METER_PFE || type == METER_TYPE) {
         const IR::MAU::AttachedMemory *meter_addr_user = nullptr;
         for (auto *ba : tbl->attached) {
-             if (ba->attached->is<IR::MAU::StatefulAlu>() &&
-                 ba->use != IR::MAU::StatefulUse::NO_USE) {
-                 meter_addr_user = ba->attached;
+            if (ba->attached->is<IR::MAU::StatefulAlu>() &&
+                ba->use != IR::MAU::StatefulUse::NO_USE) {
+                meter_addr_user = ba->attached;
             } else if (ba->attached->is<IR::MAU::Selector>() ||
                        ba->attached->is<IR::MAU::Meter>()) {
-                 meter_addr_user = ba->attached;
+                meter_addr_user = ba->attached;
             }
         }
-        if (!layout_option.layout.meter_addr.shifter_enabled)
-            return rv;
-        if (meter_addr_user == nullptr)
-            return rv;
-        bool move_to_overhead = gw_linked &&
-                                !(meter_addr_user->direct ||
-                                  meter_addr_user->is<IR::MAU::Selector>());
+        if (!layout_option.layout.meter_addr.shifter_enabled) return rv;
+        if (meter_addr_user == nullptr) return rv;
+        bool move_to_overhead =
+            gw_linked && !(meter_addr_user->direct || meter_addr_user->is<IR::MAU::Selector>());
         if (type == METER) {
             rv.setrange(0, layout_option.layout.meter_addr.address_bits);
         } else if (type == METER_PFE) {
-            if (layout_option.layout.meter_addr.per_flow_enable || move_to_overhead)
-                rv.setbit(1);
+            if (layout_option.layout.meter_addr.per_flow_enable || move_to_overhead) rv.setbit(1);
         } else if (type == METER_TYPE) {
             if (layout_option.layout.meter_addr.meter_type_bits > 0 || move_to_overhead)
                 rv.setrange(0, 3);
@@ -738,8 +701,7 @@ bitvec TableFormat::bitvec_necessary(type_t type) const {
          if (ad->size > Memories::SRAM_DEPTH)
              total += ActionDataHuffmanVPNBits(&layout_option.layout);
 #endif
-        if (!layout_option.layout.action_addr.shifter_enabled)
-            return rv;
+        if (!layout_option.layout.action_addr.shifter_enabled) return rv;
         int ad_adr_bits = layout_option.layout.action_addr.address_bits;
         ad_adr_bits += ActionDataHuffmanVPNBits(&layout_option.layout);
         rv.setrange(0, ad_adr_bits);
@@ -747,11 +709,9 @@ bitvec TableFormat::bitvec_necessary(type_t type) const {
         const IR::MAU::Selector *sel = nullptr;
         for (auto ba : tbl->attached) {
             sel = ba->attached->to<IR::MAU::Selector>();
-            if (sel != nullptr)
-                break;
+            if (sel != nullptr) break;
         }
-        if (sel == nullptr)
-            return rv;
+        if (sel == nullptr) return rv;
         if (type == SEL_LEN_MOD)
             rv.setrange(0, SelectorModBits(sel));
         else if (type == SEL_LEN_SHIFT)
@@ -764,9 +724,7 @@ bitvec TableFormat::bitvec_necessary(type_t type) const {
     return rv;
 }
 
-int TableFormat::bits_necessary(type_t type) const {
-    return bitvec_necessary(type).popcount();
-}
+int TableFormat::bits_necessary(type_t type) const { return bitvec_necessary(type).popcount(); }
 
 /**
  * Gather the number of bits for a non-overhead field, which is necessary to calculate the bits
@@ -799,9 +757,8 @@ int TableFormat::hit_actions() const {
  *     - RAM_word - the RAM in a wide match
  */
 bool TableFormat::allocate_overhead_field(type_t type, int lsb_mem_word_offset, int bit_width,
-        int entry, int RAM_word) {
-    if (lsb_mem_word_offset + bit_width > OVERHEAD_BITS)
-        return false;
+                                          int entry, int RAM_word) {
+    if (lsb_mem_word_offset + bit_width > OVERHEAD_BITS) return false;
     bitvec pack_req(RAM_word * SINGLE_RAM_BITS + lsb_mem_word_offset, bit_width);
     BUG_CHECK((total_use & pack_req).empty(), "Illegally packing data");
     use->match_groups[entry].mask[type] |= pack_req;
@@ -859,15 +816,13 @@ bool TableFormat::allocate_overhead_entry(int entry, int RAM_word, int lsb_mem_w
  */
 bool TableFormat::allocate_next_table() {
     int next_table_bits = bits_necessary(NEXT);
-    if (next_table_bits == 0)
-        return true;
+    if (next_table_bits == 0) return true;
 
     int group = 0;
     for (size_t i = 0; i < overhead_groups_per_RAM.size(); i++) {
         for (int j = 0; j < overhead_groups_per_RAM[i]; j++) {
             size_t start = total_use.ffz(i * SINGLE_RAM_BITS);
-            if (start + next_table_bits >= OVERHEAD_BITS + i * SINGLE_RAM_BITS)
-                return false;
+            if (start + next_table_bits >= OVERHEAD_BITS + i * SINGLE_RAM_BITS) return false;
             bitvec ptr_mask(start, next_table_bits);
             use->match_groups[group].mask[NEXT] |= ptr_mask;
             total_use |= ptr_mask;
@@ -1006,8 +961,7 @@ bool TableFormat::allocate_selector_length() {
     int sel_len_mod_bits = bits_necessary(SEL_LEN_MOD);
     int sel_len_shift_bits = bits_necessary(SEL_LEN_SHIFT);
 
-    if (sel_len_mod_bits == 0 && sel_len_shift_bits == 0)
-        return true;
+    if (sel_len_mod_bits == 0 && sel_len_shift_bits == 0) return true;
     if (sel_len_shift_bits > 0)
         BUG_CHECK(sel_len_mod_bits == ceil_log2(StageUseEstimate::MAX_MOD),
                   "Errors in the selection mod calculation");
@@ -1037,8 +991,7 @@ bool TableFormat::allocate_selector_length() {
    number of bits needed */
 bool TableFormat::allocate_indirect_ptr(int total, type_t type, int group, int RAM) {
     size_t start = total_use.ffz(RAM * SINGLE_RAM_BITS);
-    if (start + total > size_t(OVERHEAD_BITS + RAM * SINGLE_RAM_BITS))
-        return false;
+    if (start + total > size_t(OVERHEAD_BITS + RAM * SINGLE_RAM_BITS)) return false;
     bitvec ptr_mask;
     ptr_mask.setrange(start, total);
     use->match_groups[group].mask[type] |= ptr_mask;
@@ -1047,18 +1000,15 @@ bool TableFormat::allocate_indirect_ptr(int total, type_t type, int group, int R
 }
 
 void TableFormat::setup_pfes_and_types() {
-    IR::MAU::PfeLocation update_pfe_loc = layout_option.layout.no_match_hit_path() ?
-                                          IR::MAU::PfeLocation::GATEWAY_PAYLOAD :
-                                          IR::MAU::PfeLocation::OVERHEAD;
-    IR::MAU::TypeLocation update_type_loc = layout_option.layout.no_match_hit_path() ?
-                                            IR::MAU::TypeLocation::GATEWAY_PAYLOAD :
-                                            IR::MAU::TypeLocation::OVERHEAD;
-    if (bits_necessary(COUNTER_PFE) > 0)
-        use->stats_pfe_loc = update_pfe_loc;
-    if (bits_necessary(METER_PFE) > 0)
-        use->meter_pfe_loc = update_pfe_loc;
-    if (bits_necessary(METER_TYPE) > 0)
-        use->meter_type_loc = update_type_loc;
+    IR::MAU::PfeLocation update_pfe_loc = layout_option.layout.no_match_hit_path()
+                                              ? IR::MAU::PfeLocation::GATEWAY_PAYLOAD
+                                              : IR::MAU::PfeLocation::OVERHEAD;
+    IR::MAU::TypeLocation update_type_loc = layout_option.layout.no_match_hit_path()
+                                                ? IR::MAU::TypeLocation::GATEWAY_PAYLOAD
+                                                : IR::MAU::TypeLocation::OVERHEAD;
+    if (bits_necessary(COUNTER_PFE) > 0) use->stats_pfe_loc = update_pfe_loc;
+    if (bits_necessary(METER_PFE) > 0) use->meter_pfe_loc = update_pfe_loc;
+    if (bits_necessary(METER_TYPE) > 0) use->meter_type_loc = update_type_loc;
 }
 /* Algorithm to find the space for any indirect pointers.  Allocated back to back, as they are
    easiest to pack.  No gaps are possible at all within the indirect pointers */
@@ -1069,7 +1019,7 @@ bool TableFormat::allocate_all_indirect_ptrs() {
             int stats_addr_bits_required = bits_necessary(COUNTER);
             if (stats_addr_bits_required != 0) {
                 if (!allocate_indirect_ptr(stats_addr_bits_required, COUNTER, group, i))
-                       return false;
+                    return false;
             }
 
             int stats_pfe_bits_required = bits_necessary(COUNTER_PFE);
@@ -1080,10 +1030,8 @@ bool TableFormat::allocate_all_indirect_ptrs() {
 
             int meter_addr_bits_required = bits_necessary(METER);
             if (meter_addr_bits_required > 0) {
-                if (!allocate_indirect_ptr(meter_addr_bits_required, METER, group, i))
-                    return false;
+                if (!allocate_indirect_ptr(meter_addr_bits_required, METER, group, i)) return false;
             }
-
 
             int meter_pfe_bits_required = bits_necessary(METER_PFE);
             if (meter_pfe_bits_required > 0) {
@@ -1099,8 +1047,8 @@ bool TableFormat::allocate_all_indirect_ptrs() {
 
             int ad_addr_bits_required = bits_necessary(INDIRECT_ACTION);
             if (ad_addr_bits_required > 0) {
-                 if (!allocate_indirect_ptr(ad_addr_bits_required, INDIRECT_ACTION, group, i))
-                     return false;
+                if (!allocate_indirect_ptr(ad_addr_bits_required, INDIRECT_ACTION, group, i))
+                    return false;
             }
             group++;
         }
@@ -1113,8 +1061,7 @@ bool TableFormat::allocate_all_indirect_ptrs() {
    are left open for space to be filled by either instr selection or match bytes */
 bool TableFormat::allocate_all_immediate() {
     LOG5("Allocating all immediate bits: " << layout_option.layout.immediate_bits);
-    if (layout_option.layout.immediate_bits == 0)
-        return true;
+    if (layout_option.layout.immediate_bits == 0) return true;
     use->immed_mask = immediate_mask;
 
     // Allocate the immediate mask for each overhead section
@@ -1157,8 +1104,7 @@ bool TableFormat::allocate_all_instr_selection() {
             size_t start = total_use.ffz(end);
             bitvec instr_shift = instr_mask << start;
             total_use |= instr_shift;
-            if (start >= OVERHEAD_BITS + i * SINGLE_RAM_BITS)
-                return false;
+            if (start >= OVERHEAD_BITS + i * SINGLE_RAM_BITS) return false;
             use->match_groups[group].mask[ACTION] |= instr_shift;
             end = instr_shift.max().index();
             group++;
@@ -1183,55 +1129,49 @@ bool TableFormat::is_match_entry_wide() const {
  *  and cannot be reused by a separate entry.
  */
 bool TableFormat::initialize_byte(int byte_offset, int width_sect, const ByteInfo &info,
-        safe_vector<ByteInfo> &alloced, bitvec &byte_attempt, bitvec &bit_attempt) {
+                                  safe_vector<ByteInfo> &alloced, bitvec &byte_attempt,
+                                  bitvec &bit_attempt) {
     Log::TempIndent indent;
-    LOG5("Initialize Byte with byte_offset " << byte_offset
-            << ", width_sect: " << width_sect << indent);
+    LOG5("Initialize Byte with byte_offset " << byte_offset << ", width_sect: " << width_sect
+                                             << indent);
     int initial_offset = byte_offset + width_sect * SINGLE_RAM_BYTES;
 
-    if (match_byte_use.getbit(initial_offset) || byte_attempt.getbit(initial_offset))
-        return false;
+    if (match_byte_use.getbit(initial_offset) || byte_attempt.getbit(initial_offset)) return false;
     // Only interleaved bytes can go to the interleaved positions
     if (!info.il_info.interleaved && interleaved_match_byte_use.getbit(initial_offset))
         return false;
 
     auto use_slice = total_use.getslice(initial_offset * 8, 8);
     use_slice |= bit_attempt.getslice(initial_offset * 8, 8);
-    if (!info.il_info.interleaved)
-        use_slice |= interleaved_bit_use.getslice(initial_offset * 8, 8);
+    if (!info.il_info.interleaved) use_slice |= interleaved_bit_use.getslice(initial_offset * 8, 8);
 
-    if (!(use_slice & info.bit_use).empty())
-        return false;
+    if (!(use_slice & info.bit_use).empty()) return false;
 
     byte_attempt.setbit(initial_offset);
     bit_attempt |= info.bit_use << (initial_offset * 8);
     alloced.push_back(info);
     alloced.back().byte_location = initial_offset;
     LOG6("Initialized byte " << alloced);
-    LOG6("Initial offset: " << initial_offset << ", Bit attempt " << bit_attempt
-        << " Byte attempt " << byte_attempt << " Use slice " << use_slice);
+    LOG6("Initial offset: " << initial_offset << ", Bit attempt " << bit_attempt << " Byte attempt "
+                            << byte_attempt << " Use slice " << use_slice);
     return true;
 }
 
 bool TableFormat::allocate_match_byte(const ByteInfo &info, safe_vector<ByteInfo> &alloced,
-        int width_sect, bitvec &byte_attempt, bitvec &bit_attempt) {
+                                      int width_sect, bitvec &byte_attempt, bitvec &bit_attempt) {
     int lo = pa == SAVE_GW_SPACE ? GATEWAY_BYTES : 0;
     int hi = pa == SAVE_GW_SPACE ? VERSION_BYTES : SINGLE_RAM_BYTES;
     Log::TempIndent indent;
     LOG5("Allocate Match Byte [lo: " << lo << ", hi: " << hi << "]" << indent);
 
     for (int i = 0; i < SINGLE_RAM_BYTES; i++) {
-        if (i < lo || i >= hi)
-            continue;
-        if (initialize_byte(i, width_sect, info, alloced, byte_attempt, bit_attempt))
-            return true;
+        if (i < lo || i >= hi) continue;
+        if (initialize_byte(i, width_sect, info, alloced, byte_attempt, bit_attempt)) return true;
     }
 
     for (int i = 0; i < SINGLE_RAM_BYTES; i++) {
-        if (i >= lo && i < hi)
-            continue;
-        if (initialize_byte(i, width_sect, info, alloced, byte_attempt, bit_attempt))
-            return true;
+        if (i >= lo && i < hi) continue;
+        if (initialize_byte(i, width_sect, info, alloced, byte_attempt, bit_attempt)) return true;
     }
     return false;
 }
@@ -1241,20 +1181,22 @@ bool TableFormat::allocate_match_byte(const ByteInfo &info, safe_vector<ByteInfo
  * byte to that position.
  */
 bool TableFormat::allocate_interleaved_byte(const ByteInfo &info, safe_vector<ByteInfo> &alloced,
-        int width_sect, int entry, bitvec &byte_attempt, bitvec &bit_attempt) {
+                                            int width_sect, int entry, bitvec &byte_attempt,
+                                            bitvec &bit_attempt) {
     Log::TempIndent indent;
     LOG5("Allocate Interleaved Byte" << indent);
     BUG_CHECK(info.il_info.interleaved, "Illegally calling allocate_interleaved_byte");
 
     int first_oh_bit = use->match_groups[entry].overhead_mask().min().index();
-    int first_match_bit = first_oh_bit + info.il_info.match_byte_start
-                                       - info.il_info.overhead_start;
+    int first_match_bit =
+        first_oh_bit + info.il_info.match_byte_start - info.il_info.overhead_start;
     BUG_CHECK(first_match_bit % 8 == 0, "Interleaving incorrectly done");
-    BUG_CHECK(first_match_bit / SINGLE_RAM_BITS == width_sect, "Interleaving cannot find the "
-        "correct match bit location");
+    BUG_CHECK(first_match_bit / SINGLE_RAM_BITS == width_sect,
+              "Interleaving cannot find the "
+              "correct match bit location");
     int byte_offset = (first_match_bit / 8) % SINGLE_RAM_BYTES;
     BUG_CHECK(initialize_byte(byte_offset, width_sect, info, alloced, byte_attempt, bit_attempt),
-        "Always should be able to initialize a split byte");
+              "Always should be able to initialize a split byte");
     return true;
 }
 
@@ -1264,17 +1206,15 @@ void TableFormat::find_bytes_to_allocate(int width_sect, safe_vector<ByteInfo> &
     Log::TempIndent indent;
     LOG5("Find bytes to allocate" << indent);
     int search_bus = search_bus_per_width[width_sect];
-    for (const auto& info : match_bytes) {
+    for (const auto &info : match_bytes) {
         LOG6("Match Byte: " << info);
-        if (info.byte.search_bus != search_bus)
-            continue;
+        if (info.byte.search_bus != search_bus) continue;
         unalloced.push_back(info);
     }
 
     std::sort(unalloced.begin(), unalloced.end(), [=](const ByteInfo &a, const ByteInfo &b) {
         int t;
-        if ((t = a.bit_use.popcount() - b.bit_use.popcount()) != 0)
-            return t > 0;
+        if ((t = a.bit_use.popcount() - b.bit_use.popcount()) != 0) return t > 0;
         return a.byte < b.byte;
     });
 }
@@ -1297,14 +1237,12 @@ void TableFormat::find_bytes_to_allocate(int width_sect, safe_vector<ByteInfo> &
  *  succeed, then try to place in the upper two bytes at nibble alignment
  */
 bool TableFormat::allocate_version(int width_sect, const safe_vector<ByteInfo> &alloced,
-                                   bitvec &version_loc, bitvec &byte_attempt,
-                                   bitvec &bit_attempt) {
+                                   bitvec &version_loc, bitvec &byte_attempt, bitvec &bit_attempt) {
     bitvec lo_vers(0, VERSION_BITS);
     bitvec hi_vers(VERSION_BITS, VERSION_BITS);
     // Try to place with a match byte already
     for (auto &info : alloced) {
-        if (info.byte_location / SINGLE_RAM_BITS != width_sect)
-            continue;
+        if (info.byte_location / SINGLE_RAM_BITS != width_sect) continue;
         auto use_slice = total_use.getslice(info.byte_location * 8, 8);
         use_slice |= bit_attempt.getslice(info.byte_location * 8, 8);
         use_slice |= interleaved_bit_use.getslice(info.byte_location * 8, 8);
@@ -1323,8 +1261,7 @@ bool TableFormat::allocate_version(int width_sect, const safe_vector<ByteInfo> &
     // Look for a corresponding place within the overhead
 
     for (int i = 0; i < OVERHEAD_BITS / 8; i++) {
-        if (pa != PACK_TIGHT)
-            break;
+        if (pa != PACK_TIGHT) break;
         int byte = width_sect * SINGLE_RAM_BYTES + i;
         if (byte_attempt.getbit(byte) || match_byte_use.getbit(byte) ||
             interleaved_match_byte_use.getbit(byte))
@@ -1367,15 +1304,14 @@ bool TableFormat::allocate_version(int width_sect, const safe_vector<ByteInfo> &
     for (int i = 0; i < SINGLE_RAM_BYTES; i++) {
         bitvec version_bits(0, VERSION_BITS);
         int initial_byte = (width_sect * SINGLE_RAM_BYTES) + i;
-        if (match_byte_use.getbit(initial_byte) || byte_attempt.getbit(initial_byte)
-            || interleaved_match_byte_use.getbit(i))
+        if (match_byte_use.getbit(initial_byte) || byte_attempt.getbit(initial_byte) ||
+            interleaved_match_byte_use.getbit(i))
             continue;
         auto use_slice = total_use.getslice(initial_byte * 8, 8);
         use_slice |= bit_attempt.getslice(initial_byte * 8, 8);
         use_slice |= interleaved_bit_use.getslice(initial_byte * 8, 8);
 
-        if (!(use_slice & version_bits).empty())
-            continue;
+        if (!(use_slice & version_bits).empty()) continue;
         version_loc = version_bits << (initial_byte * 8);
         bit_attempt |= version_loc;
         byte_attempt.setbit(initial_byte);
@@ -1394,23 +1330,23 @@ bool TableFormat::allocate_version(int width_sect, const safe_vector<ByteInfo> &
 /// When @hash_mask() is not specified, the mask is set to byte.bit_use,
 /// allowing all bits to be candidates for ghost bits selection.
 ///
-void TableFormat::get_potential_ghost_byte(const IXBar::Use::Byte byte,
-                            const std::map<cstring, bitvec> &hash_masks,
-                            safe_vector<std::pair<IXBar::Use::Byte, bitvec>> &potential_ghost) {
+void TableFormat::get_potential_ghost_byte(
+    const IXBar::Use::Byte byte, const std::map<cstring, bitvec> &hash_masks,
+    safe_vector<std::pair<IXBar::Use::Byte, bitvec>> &potential_ghost) {
     bitvec hash_mask = byte.bit_use;
     if (!hash_masks.empty()) {
         for (auto &field_byte : byte.field_bytes) {
             if (hash_masks.count(field_byte.field)) {
                 // Get the section of annotation that's in this slice.
-                bitvec annot_slice = hash_masks.at(field_byte.field).getslice(
-                                                                field_byte.lo,
-                                                                field_byte.hi-field_byte.lo+1);
+                bitvec annot_slice =
+                    hash_masks.at(field_byte.field)
+                        .getslice(field_byte.lo, field_byte.hi - field_byte.lo + 1);
 
                 // Shift annotation slice to align with container position.
                 annot_slice <<= field_byte.cont_lo;
 
                 // Update associated hash mask slice
-                hash_mask.clrrange(field_byte.cont_lo, field_byte.hi-field_byte.lo+1);
+                hash_mask.clrrange(field_byte.cont_lo, field_byte.hi - field_byte.lo + 1);
                 hash_mask |= annot_slice;
             }
         }
@@ -1434,22 +1370,19 @@ void TableFormat::classify_match_bits() {
     // setting the mask to byte.bit_use.
     safe_vector<std::pair<IXBar::Use::Byte, bitvec>> potential_ghost;
 
-    for (const auto& byte : single_match)
-        get_potential_ghost_byte(byte, hash_mask_annotations.hash_masks(),
-                                 potential_ghost);
+    for (const auto &byte : single_match)
+        get_potential_ghost_byte(byte, hash_mask_annotations.hash_masks(), potential_ghost);
 
     if (LOGGING(5)) {
         LOG5("Potential ghost bytes:");
-        for (auto &g : potential_ghost)
-            LOG5("  byte: " << g.first << "  hash mask: " << g.second);
+        for (auto &g : potential_ghost) LOG5("  byte: " << g.first << "  hash mask: " << g.second);
     }
 
-    if (ghost_bits_count > 0)
-        choose_ghost_bits(potential_ghost);
+    if (ghost_bits_count > 0) choose_ghost_bits(potential_ghost);
 
     std::set<int> search_buses;
 
-    for (const auto& [byte, hash_mask] : potential_ghost) {
+    for (const auto &[byte, hash_mask] : potential_ghost) {
         search_buses.insert(byte.search_bus);
         match_bytes.emplace_back(byte, byte.bit_use);
     }
@@ -1457,16 +1390,17 @@ void TableFormat::classify_match_bits() {
     for (auto sb : search_buses) {
         BUG_CHECK(std::count(search_bus_per_width.begin(), search_bus_per_width.end(), sb) > 0,
                   "Byte on search bus %d appears as a match byte when no search bus is "
-                  "provided on match", sb);
+                  "provided on match",
+                  sb);
     }
 
-    for (const auto& info : ghost_bytes) {
+    for (const auto &info : ghost_bytes) {
         LOG5("\t\tGhost " << info.byte << " bit_use: 0x" << info.bit_use);
         use->ghost_bits[info.byte] = info.bit_use;
     }
 
     if (LOGGING(5)) {
-        for (const auto& info : match_bytes)
+        for (const auto &info : match_bytes)
             LOG5("\t\tMatch " << info.byte << " bit_use: 0x" << info.bit_use);
     }
 }
@@ -1496,47 +1430,45 @@ void TableFormat::classify_match_bits() {
  *            to be part of ghost bits.
  */
 void TableFormat::choose_ghost_bits(
-                            safe_vector<std::pair<IXBar::Use::Byte, bitvec>> &potential_ghost) {
+    safe_vector<std::pair<IXBar::Use::Byte, bitvec>> &potential_ghost) {
     std::sort(potential_ghost.begin(), potential_ghost.end(),
               [=](const std::pair<IXBar::Use::Byte, bitvec> &a,
-                  const std::pair<IXBar::Use::Byte, bitvec> &b){
-        int t = 0;
+                  const std::pair<IXBar::Use::Byte, bitvec> &b) {
+                  int t = 0;
 
-        IXBar::Use::Byte a_byte = a.first;
-        IXBar::Use::Byte b_byte = b.first;
+                  IXBar::Use::Byte a_byte = a.first;
+                  IXBar::Use::Byte b_byte = b.first;
 
-        auto a_loc = std::find(ghost_bit_buses.begin(), ghost_bit_buses.end(), a_byte.search_bus);
-        auto b_loc = std::find(ghost_bit_buses.begin(), ghost_bit_buses.end(), b_byte.search_bus);
+                  auto a_loc =
+                      std::find(ghost_bit_buses.begin(), ghost_bit_buses.end(), a_byte.search_bus);
+                  auto b_loc =
+                      std::find(ghost_bit_buses.begin(), ghost_bit_buses.end(), b_byte.search_bus);
 
-        BUG_CHECK(a_loc != ghost_bit_buses.end() && b_loc != ghost_bit_buses.end(),
-                  "Search bus must be found within possible ghost bit candidates");
+                  BUG_CHECK(a_loc != ghost_bit_buses.end() && b_loc != ghost_bit_buses.end(),
+                            "Search bus must be found within possible ghost bit candidates");
 
-        if (a_loc != b_loc)
-            return a_loc < b_loc;
+                  if (a_loc != b_loc) return a_loc < b_loc;
 
-        bitvec a_mask = a.second;
-        bitvec b_mask = b.second;
-        bitvec a_masked_bit_use = a_byte.bit_use & a_mask;
-        bitvec b_masked_bit_use = b_byte.bit_use & b_mask;
-        if ((t = a_masked_bit_use.popcount() - b_masked_bit_use.popcount()) != 0)
-            return t < 0;
-        return a < b;
-    });
+                  bitvec a_mask = a.second;
+                  bitvec b_mask = b.second;
+                  bitvec a_masked_bit_use = a_byte.bit_use & a_mask;
+                  bitvec b_masked_bit_use = b_byte.bit_use & b_mask;
+                  if ((t = a_masked_bit_use.popcount() - b_masked_bit_use.popcount()) != 0)
+                      return t < 0;
+                  return a < b;
+              });
 
     int ghost_bits_allocated = 0;
     while (ghost_bits_allocated < ghost_bits_count) {
         int diff = ghost_bits_count - ghost_bits_allocated;
         auto it = potential_ghost.begin();
-        if (it == potential_ghost.end())
-            break;
+        if (it == potential_ghost.end()) break;
         bitvec masked_bit_use = it->first.bit_use & it->second;
         if (diff >= masked_bit_use.popcount()) {
-            if (masked_bit_use.popcount())
-                ghost_bytes.emplace_back(it->first, masked_bit_use);
+            if (masked_bit_use.popcount()) ghost_bytes.emplace_back(it->first, masked_bit_use);
             ghost_bits_allocated += masked_bit_use.popcount();
             bitvec match_bits = it->first.bit_use - masked_bit_use;
-            if (match_bits.popcount())
-                match_bytes.emplace_back(it->first, match_bits);
+            if (match_bits.popcount()) match_bytes.emplace_back(it->first, match_bits);
         } else {
             bitvec ghosted_bits;
             int start = masked_bit_use.ffs();
@@ -1551,11 +1483,11 @@ void TableFormat::choose_ghost_bits(
                 }
                 start = masked_bit_use.ffs(end);
             } while (start >= 0);
-            BUG_CHECK(split_bit >= 0, "Could not correctly split a byte into a ghosted and "
+            BUG_CHECK(split_bit >= 0,
+                      "Could not correctly split a byte into a ghosted and "
                       "match section");
             bitvec match_bits = masked_bit_use - ghosted_bits;
-            if (ghosted_bits.popcount())
-                ghost_bytes.emplace_back(it->first, ghosted_bits);
+            if (ghosted_bits.popcount()) ghost_bytes.emplace_back(it->first, ghosted_bits);
             ghost_bits_allocated += ghosted_bits.popcount();
             match_bytes.emplace_back(it->first, match_bits);
         }
@@ -1571,8 +1503,7 @@ int TableFormat::determine_group(int width_sect, int groups_allocated) {
         int overhead_groups_seen = 0;
         for (int i = 0; i < layout_option.way.width; i++) {
             if (width_sect == i) {
-                if (groups_allocated == overhead_groups_per_RAM[i])
-                    return -1;
+                if (groups_allocated == overhead_groups_per_RAM[i]) return -1;
                 return overhead_groups_seen + groups_allocated;
             } else {
                 overhead_groups_seen += overhead_groups_per_RAM[i];
@@ -1586,12 +1517,10 @@ int TableFormat::determine_group(int width_sect, int groups_allocated) {
     for (int i = 0; i < layout_option.way.width; i++) {
         if (width_sect == i) {
             if (overhead_groups_per_RAM[i] > 0) {
-                if (groups_allocated == overhead_groups_per_RAM[i])
-                    return -1;
+                if (groups_allocated == overhead_groups_per_RAM[i]) return -1;
                 return search_bus_seen + groups_allocated;
             } else {
-                if (groups_allocated > 0)
-                    return -1;
+                if (groups_allocated > 0) return -1;
                 return search_bus_seen;
             }
         }
@@ -1614,7 +1543,7 @@ void TableFormat::fill_out_use(int group, const safe_vector<ByteInfo> &alloced,
     Log::TempIndent indent;
     LOG5("Filling out match byte and group use for group " << group << indent);
     auto &group_use = use->match_groups[group];
-    for (const auto& info : alloced) {
+    for (const auto &info : alloced) {
         bitvec match_location = info.bit_use << (8 * info.byte_location);
         group_use.match[info.byte] = match_location;
         group_use.mask[MATCH] |= match_location;
@@ -1628,12 +1557,11 @@ void TableFormat::fill_out_use(int group, const safe_vector<ByteInfo> &alloced,
         total_use |= version_loc;
         version_allocated.setbit(group);
         auto byte_offset = (version_loc.min().index() / 8);
-        if ((byte_offset % SINGLE_RAM_BYTES) < VERSION_BYTES)
-            match_byte_use.setbit(byte_offset);
+        if ((byte_offset % SINGLE_RAM_BYTES) < VERSION_BYTES) match_byte_use.setbit(byte_offset);
     }
 
     LOG6("Total Use: " << total_use << ", group use: " << group_use
-            << ", match byte use: " << match_byte_use);
+                       << ", match byte use: " << match_byte_use);
 }
 
 /** Given a number of overhead entries, this algorithm determines how many match groups
@@ -1646,7 +1574,8 @@ void TableFormat::fill_out_use(int group, const safe_vector<ByteInfo> &alloced,
 void TableFormat::allocate_full_fits(int width_sect, int group) {
     Log::TempIndent indent;
     LOG4("Allocating Full Fits on RAM word " << width_sect << " search bus "
-         << search_bus_per_width[width_sect] << " for group " << group << indent);
+                                             << search_bus_per_width[width_sect] << " for group "
+                                             << group << indent);
     safe_vector<ByteInfo> allocation_needed;
     safe_vector<ByteInfo> alloced;
     find_bytes_to_allocate(width_sect, allocation_needed);
@@ -1659,12 +1588,10 @@ void TableFormat::allocate_full_fits(int width_sect, int group) {
         alloced.clear();
         byte_attempt.clear();
         bit_attempt.clear();
-        if (!allocate_single_group)
-            group = determine_group(width_sect, groups_allocated);
-        if (group == -1)
-            break;
+        if (!allocate_single_group) group = determine_group(width_sect, groups_allocated);
+        if (group == -1) break;
         LOG4("Attempting Entry " << group);
-        for (const auto& info : allocation_needed) {
+        for (const auto &info : allocation_needed) {
             if (info.il_info.interleaved) {
                 if (!allocate_interleaved_byte(info, alloced, width_sect, group, byte_attempt,
                                                bit_attempt))
@@ -1675,8 +1602,7 @@ void TableFormat::allocate_full_fits(int width_sect, int group) {
             }
         }
 
-        if (allocation_needed.size() != alloced.size())
-            break;
+        if (allocation_needed.size() != alloced.size()) break;
 
         LOG6("Bytes used for match 0x"
              << byte_attempt.getslice(width_sect * SINGLE_RAM_BYTES, SINGLE_RAM_BYTES));
@@ -1697,7 +1623,8 @@ void TableFormat::allocate_full_fits(int width_sect, int group) {
         if (!version_allocated[group] && !version_loc.empty()) {
             int version_byte = version_loc.min().index() / 8;
             LOG6("Version Loc : { Byte : " << (version_byte % SINGLE_RAM_BYTES)
-                  << " Bits in Byte : " << version_loc.getslice(version_byte * 8, 8) << "}");
+                                           << " Bits in Byte : "
+                                           << version_loc.getslice(version_byte * 8, 8) << "}");
         } else {
             LOG6("Version not allocated on RAM word " << width_sect);
         }
@@ -1719,12 +1646,13 @@ void TableFormat::allocate_full_fits(int width_sect, int group) {
  *  previous RAMs as well.
  */
 void TableFormat::allocate_share(int width_sect, int group, safe_vector<ByteInfo> &unalloced_group,
-        safe_vector<ByteInfo> &alloced, bitvec &version_loc, bitvec &byte_attempt,
-        bitvec &bit_attempt, bool overhead_section) {
+                                 safe_vector<ByteInfo> &alloced, bitvec &version_loc,
+                                 bitvec &byte_attempt, bitvec &bit_attempt, bool overhead_section) {
     std::set<int> width_sections;
     int min_sect = width_sect;
 
-    BUG_CHECK(shared_groups_per_RAM[width_sect] < MAX_SHARED_GROUPS, "Trying to share a group "
+    BUG_CHECK(shared_groups_per_RAM[width_sect] < MAX_SHARED_GROUPS,
+              "Trying to share a group "
               "on a section that is already allocated");
 
     // Try all previous RAMs
@@ -1745,10 +1673,8 @@ void TableFormat::allocate_share(int width_sect, int group, safe_vector<ByteInfo
         }
     }
 
-
     for (int current_sect = min_sect; current_sect <= width_sect; current_sect++) {
-        if (shared_groups_per_RAM[width_sect] == MAX_SHARED_GROUPS)
-            continue;
+        if (shared_groups_per_RAM[width_sect] == MAX_SHARED_GROUPS) continue;
         LOG5("\t    Allocating shared entry " << group << " on RAM word " << width_sect);
         auto it = unalloced_group.begin();
         bitvec prev_attempt = byte_attempt;
@@ -1767,8 +1693,7 @@ void TableFormat::allocate_share(int width_sect, int group, safe_vector<ByteInfo
     }
 
     for (int current_sect = min_sect; current_sect <= width_sect; current_sect++) {
-        if (shared_groups_per_RAM[current_sect] == MAX_SHARED_GROUPS)
-            continue;
+        if (shared_groups_per_RAM[current_sect] == MAX_SHARED_GROUPS) continue;
         if (!requires_versioning()) break;
 
         if (!version_loc.empty()) break;
@@ -1776,7 +1701,8 @@ void TableFormat::allocate_share(int width_sect, int group, safe_vector<ByteInfo
             width_sections.emplace(current_sect);
             int version_byte = version_loc.min().index() / 8;
             LOG6("\t\tVersion Loc : { Byte : " << (version_byte % SINGLE_RAM_BYTES)
-                  << " Bits in Byte : " << version_loc.getslice(version_byte * 8, 8) << "}");
+                                               << " Bits in Byte : "
+                                               << version_loc.getslice(version_byte * 8, 8) << "}");
             break;
         }
     }
@@ -1794,7 +1720,6 @@ void TableFormat::allocate_share(int width_sect, int group, safe_vector<ByteInfo
         shared_groups_per_RAM[width_sect]++;
     }
 }
-
 
 /** Given that no entry can fully fit within a particular RAM line, this allocation fills in
  *  the gaps within those RAMs will currently unallocated groups.  The constraint that comes
@@ -1822,8 +1747,8 @@ bool TableFormat::allocate_shares() {
     // Initialize unallocated groups.  Group number is determined by what overhead is within
     // that section
     for (int width_sect = 0; width_sect < layout_option.way.width; width_sect++) {
-        int total_groups = overhead_groups_per_RAM[width_sect]
-                           - full_match_groups_per_RAM[width_sect];
+        int total_groups =
+            overhead_groups_per_RAM[width_sect] - full_match_groups_per_RAM[width_sect];
         for (int i = 0; i < total_groups; i++) {
             int unallocated_group = overhead_groups_seen + full_match_groups_per_RAM[width_sect];
             unallocated_group += i;
@@ -1839,20 +1764,17 @@ bool TableFormat::allocate_shares() {
     for (int width_sect = 0; width_sect < layout_option.way.width; width_sect++) {
         LOG4("\t  Attempting cross RAM entries on RAM word " << width_sect);
         // Groups that aren't allocated that will need sharing
-        int groups_to_start = overhead_groups_per_RAM[width_sect]
-                              - full_match_groups_per_RAM[width_sect];
-        if (groups_to_start == 0 && groups_begun.size() == 0)
-            continue;
+        int groups_to_start =
+            overhead_groups_per_RAM[width_sect] - full_match_groups_per_RAM[width_sect];
+        if (groups_to_start == 0 && groups_begun.size() == 0) continue;
         int shared_group_count = groups_to_start + groups_begun.size();
         // Cannot share the resources
-        if (shared_group_count > MAX_SHARED_GROUPS)
-            return false;
+        if (shared_group_count > MAX_SHARED_GROUPS) return false;
 
         // Try to complete all groups that have been previously placed, to try and get rid
         // of them as quickly as possible
         for (auto group : groups_begun) {
-            if (shared_groups_per_RAM[width_sect] > MAX_SHARED_GROUPS)
-                break;
+            if (shared_groups_per_RAM[width_sect] > MAX_SHARED_GROUPS) break;
             LOG4("\t  Attempting already split entry " << group);
             allocate_share(width_sect, group, unalloced_groups[group], allocated[group],
                            version_locs[group], byte_attempt, bit_attempt, false);
@@ -1860,8 +1782,7 @@ bool TableFormat::allocate_shares() {
 
         // Try to allocate new overhead groups
         for (int i = 0; i < groups_to_start; i++) {
-            if (shared_groups_per_RAM[width_sect] > MAX_SHARED_GROUPS)
-                break;
+            if (shared_groups_per_RAM[width_sect] > MAX_SHARED_GROUPS) break;
             int group = overhead_groups_seen + full_match_groups_per_RAM[width_sect] + i;
             LOG4("\t  Attempting newly split entry " << group);
             allocate_share(width_sect, group, unalloced_groups[group], allocated[group],
@@ -1890,29 +1811,28 @@ bool TableFormat::allocate_shares() {
 
     // If everything is not placed, then complain
     for (auto unalloced_group : unalloced_groups) {
-        if (!unalloced_group.second.empty())
-            return false;
+        if (!unalloced_group.second.empty()) return false;
     }
 
     if (requires_versioning()) {
         for (auto version_loc : version_locs) {
-            if (version_loc.second.empty())
-                return false;
+            if (version_loc.second.empty()) return false;
         }
     }
 
     for (auto entry : allocated) {
-        BUG_CHECK(entry.second.size() == unalloced.size(), "During sharing of match "
-                  "groups, allocation for group %d not filled out", entry.first);
+        BUG_CHECK(entry.second.size() == unalloced.size(),
+                  "During sharing of match "
+                  "groups, allocation for group %d not filled out",
+                  entry.first);
         BUG_CHECK(!requires_versioning() || !version_locs[entry.first].empty(),
                   "During sharing of match groups, allocation of version for group %d is "
-                  "not filled out", entry.first);
+                  "not filled out",
+                  entry.first);
         fill_out_use(entry.first, entry.second, version_locs[entry.first]);
     }
     return true;
 }
-
-
 
 /** This is a further optimization on allocating shares.  Because version is placed relatively
  *  early, occasionally this leads to a packing issue as versions in separate RAMs could be
@@ -1926,17 +1846,14 @@ bool TableFormat::allocate_shares() {
 bool TableFormat::attempt_allocate_shares() {
     LOG4("\t  Attempt Allocating Shares");
     // Try with all full fits
-    if (allocate_shares())
-        return true;
+    if (allocate_shares()) return true;
     // Eliminate a full fit section from the back one at a time, clear it out, and repeat
     // allocation
     for (int width_sect = layout_option.way.width - 1; width_sect >= 0; width_sect--) {
         std::fill(shared_groups_per_RAM.begin(), shared_groups_per_RAM.end(), 0);
         int overhead_groups_seen = 0;
-        if (full_match_groups_per_RAM[width_sect] == 0)
-            continue;
-        for (int j = 0; j < width_sect; j++)
-             overhead_groups_seen += overhead_groups_per_RAM[j];
+        if (full_match_groups_per_RAM[width_sect] == 0) continue;
+        for (int j = 0; j < width_sect; j++) overhead_groups_seen += overhead_groups_per_RAM[j];
         int group = overhead_groups_seen + full_match_groups_per_RAM[width_sect] - 1;
         total_use -= use->match_groups[group].mask[MATCH];
         total_use -= use->match_groups[group].mask[VERS];
@@ -1944,8 +1861,7 @@ bool TableFormat::attempt_allocate_shares() {
         use->match_groups[group].clear_match();
         full_match_groups_per_RAM[width_sect]--;
 
-        if (allocate_shares())
-            return true;
+        if (allocate_shares()) return true;
     }
     return false;
 }
@@ -2002,8 +1918,7 @@ bool TableFormat::allocate_match() {
         LOG4("\tAllocate match with algorithm " << pa);
         success = allocate_match_with_algorithm();
 
-        if (success)
-            break;
+        if (success) break;
     }
     return success;
 }
@@ -2042,29 +1957,26 @@ bool TableFormat::allocate_match_with_algorithm() {
     safe_vector<int> search_bus_alloc(match_ixbar->search_buses_single(), 0);
     for (int width_sect = 0; width_sect < layout_option.way.width; width_sect++) {
         int search_bus = search_bus_per_width[width_sect];
-        if (search_bus < 0)
-            continue;
+        if (search_bus < 0) continue;
         search_bus_alloc[search_bus] += full_match_groups_per_RAM[width_sect];
     }
 
     bool split_match = false;
 
     for (size_t sb = 0; sb < search_bus_alloc.size(); sb++) {
-        BUG_CHECK(search_bus_alloc[sb] <= layout_option.way.match_groups, "Allocating of more "
+        BUG_CHECK(search_bus_alloc[sb] <= layout_option.way.match_groups,
+                  "Allocating of more "
                   "match groups than actually required");
-        if (fully_ghosted_search_buses.count(sb) > 0)
-            continue;
+        if (fully_ghosted_search_buses.count(sb) > 0) continue;
         split_match |= search_bus_alloc[sb] < layout_option.way.match_groups;
     }
-
 
     if (requires_versioning())
         split_match |= version_allocated.popcount() != layout_option.way.match_groups;
 
     if (split_match) {
         // Will not split up wide matches
-        if (pa != PACK_TIGHT)
-            return false;
+        if (pa != PACK_TIGHT) return false;
         if (is_match_entry_wide()) {
             return false;
         } else {
@@ -2156,8 +2068,7 @@ void TableFormat::ternary_midbyte(int midbyte, size_t &index, bool lo_midbyte) {
 
     tcam_p->set_midbyte(midbyte, midbyte_type);
 
-    if (tcam_p == &tcam)
-        use->tcam_use.push_back(tcam);
+    if (tcam_p == &tcam) use->tcam_use.push_back(tcam);
     index++;
 }
 
@@ -2170,8 +2081,7 @@ void TableFormat::ternary_version(size_t &index) {
         tcam_version_p = &tcam_version;
     }
     tcam_version_p->set_midbyte(-1, MID_BYTE_VERS);
-    if (tcam_version_p == &tcam_version)
-        use->tcam_use.push_back(tcam_version);
+    if (tcam_version_p == &tcam_version) use->tcam_use.push_back(tcam_version);
     index++;
 }
 
@@ -2205,7 +2115,7 @@ bool TableFormat::allocate_all_ternary_match() {
         if (byte.loc.byte == Tofino::IXBar::TERNARY_BYTES_PER_GROUP) {
             // Reserves groups and the mid bytes
             used_midbytes.setbit(byte.loc.group / 2);
-            std::pair<bool, bool> lo_hi = { false, false };
+            std::pair<bool, bool> lo_hi = {false, false};
             if (byte.bit_use.min().index() <= 3) {
                 lo_hi.first = true;
             }
@@ -2235,19 +2145,17 @@ bool TableFormat::allocate_all_ternary_match() {
     // In order to maintain that split ranges are continuous
     std::sort(use->tcam_use.begin(), use->tcam_use.end(),
               [](const Use::TCAM_use &a, const Use::TCAM_use &b) {
-        int t;
-        if ((t = a.range_index - b.range_index) != 0)
-            return t > 0;
-        return a.group < b.group;
-    });
+                  int t;
+                  if ((t = a.range_index - b.range_index) != 0) return t > 0;
+                  return a.group < b.group;
+              });
 
     size_t index = 0;
     bitvec done_midbytes;
     // Because midbyte is shared between two TCAMs, make sure that contiguous TCAMs keep their
     // bytes together
     for (auto midbyte : used_midbytes) {
-        if (!(midbyte_lo_hi[midbyte].first && midbyte_lo_hi[midbyte].second))
-            continue;
+        if (!(midbyte_lo_hi[midbyte].first && midbyte_lo_hi[midbyte].second)) continue;
         for (int i = 0; i < 2; i++) {
             ternary_midbyte(midbyte, index, (i % 2) == 0);
         }
@@ -2261,7 +2169,8 @@ bool TableFormat::allocate_all_ternary_match() {
         if (done_midbytes.getbit(midbyte)) continue;
         bool lo = midbyte_lo_hi[midbyte].first;
         bool hi = midbyte_lo_hi[midbyte].second;
-        BUG_CHECK((lo || hi) && !(lo && hi), "Midbytes with both a lo and hi range should have "
+        BUG_CHECK((lo || hi) && !(lo && hi),
+                  "Midbytes with both a lo and hi range should have "
                   "been handled");
         ternary_midbyte(midbyte, index, lo);
         if (!version_placed) {
@@ -2271,16 +2180,14 @@ bool TableFormat::allocate_all_ternary_match() {
             index++;
         }
     }
-    if (!version_placed)
-        ternary_version(index);
+    if (!version_placed) ternary_version(index);
 
     // For corner cases, i.e. sharing midbytes, where extra gaps in the TCAMs have to be
     // added
     for (size_t i = 0; i < use->tcam_use.size(); i += 2) {
-        if (use->tcam_use.size() - 1 == i)
-            break;
-        if (use->tcam_use[i].byte_group >= 0 && use->tcam_use[i+1].byte_group >= 0
-            && use->tcam_use[i].byte_group != use->tcam_use[i+1].byte_group) {
+        if (use->tcam_use.size() - 1 == i) break;
+        if (use->tcam_use[i].byte_group >= 0 && use->tcam_use[i + 1].byte_group >= 0 &&
+            use->tcam_use[i].byte_group != use->tcam_use[i + 1].byte_group) {
             auto tcam = use->tcam_use[i];
             use->tcam_use.insert(use->tcam_use.begin() + i, tcam);
         }
@@ -2321,21 +2228,19 @@ bool TableFormat::redistribute_entry_priority() {
         auto wordHi = entry.entry_max_word();
         LOG3(" Entry " << idx << " word lo: " << wordLo << ", word hi: " << wordHi);
         // Note here we assume groups can only straddle adjacent words
-        for (int w = wordLo; w <= wordHi; w++)
-            groupsPerWord[w]++;
+        for (int w = wordLo; w <= wordHi; w++) groupsPerWord[w]++;
     }
 
     // Assign result bus word to the one having max no of groups
-    auto result_bus_word = std::distance(groupsPerWord.begin(),
-            std::max_element(groupsPerWord.begin(), groupsPerWord.end()));
+    auto result_bus_word = std::distance(
+        groupsPerWord.begin(), std::max_element(groupsPerWord.begin(), groupsPerWord.end()));
 
     LOG5("  result_bus_word : " << result_bus_word);
 
     // Reorder groups by adding groups not on result bus word first.
     safe_vector<Use::match_group_use> reordered_match_groups;
     for (auto &g : use->match_groups) {
-        if (g.entry_min_word() != result_bus_word ||
-                g.entry_max_word() != result_bus_word)
+        if (g.entry_min_word() != result_bus_word || g.entry_max_word() != result_bus_word)
             reordered_match_groups.push_back(g);
     }
 
@@ -2344,8 +2249,7 @@ bool TableFormat::redistribute_entry_priority() {
 
     // Now add groups on the result bus
     for (auto &g : use->match_groups) {
-        if (g.entry_min_word() == result_bus_word &&
-                g.entry_max_word() == result_bus_word)
+        if (g.entry_min_word() == result_bus_word && g.entry_max_word() == result_bus_word)
             reordered_match_groups.push_back(g);
     }
 
@@ -2398,7 +2302,6 @@ void TableFormat::redistribute_next_table() {
         }
     }
 
-
     for (int idx = 0; idx < layout_option.way.width; idx++) {
         safe_vector<bitvec> next_masks;
 
@@ -2426,7 +2329,6 @@ void TableFormat::redistribute_next_table() {
         }
     }
 }
-
 
 /**
  * In each RAM word, one can have data for up to 5 separate table entries.  These entries,
@@ -2518,27 +2420,25 @@ bool TableFormat::build_match_group_map() {
     for (int idx = 0; idx < layout_option.way.width; idx++) {
         for (int entry = result_buses_seen;
              entry < result_buses_seen + overhead_groups_per_RAM[idx]; entry++) {
-             bitvec entry_overhead = use->match_groups[entry].overhead_mask();
+            bitvec entry_overhead = use->match_groups[entry].overhead_mask();
 
-             // If an entry does not have any match data or overhead but does use the result bus
-             // of that RAM line, then that entry must be considered a hit-entry.  This is
-             // especially important for ATCAM tables, where the entries must chain to the same
-             // result bus in order for predication to work
-             BUG_CHECK(entry_overhead.empty() ||
-                       (entry_overhead.min().index() >= idx * SINGLE_RAM_BITS &&
-                        entry_overhead.max().index() < idx * SINGLE_RAM_BITS + OVERHEAD_BITS),
-                       "Illegal overhead entry");
-             std::set<int> ram_sections;
-             // Mark which entries are in which RAM sectionm and which entries are wide
-             for (int i = 0; i < layout_option.way.width; i++) {
-                 if (use->match_groups[entry].overhead_in_RAM_word(i) ||
-                     use->match_groups[entry].match_data_in_RAM_word(i))
-                     ram_sections.insert(i);
-             }
-             for (auto sect : ram_sections)
-                 entries_per_width[sect].push_back(entry);
-             if (ram_sections.size() > 1)
-                 wide_entries.insert(entry);
+            // If an entry does not have any match data or overhead but does use the result bus
+            // of that RAM line, then that entry must be considered a hit-entry.  This is
+            // especially important for ATCAM tables, where the entries must chain to the same
+            // result bus in order for predication to work
+            BUG_CHECK(entry_overhead.empty() ||
+                          (entry_overhead.min().index() >= idx * SINGLE_RAM_BITS &&
+                           entry_overhead.max().index() < idx * SINGLE_RAM_BITS + OVERHEAD_BITS),
+                      "Illegal overhead entry");
+            std::set<int> ram_sections;
+            // Mark which entries are in which RAM sectionm and which entries are wide
+            for (int i = 0; i < layout_option.way.width; i++) {
+                if (use->match_groups[entry].overhead_in_RAM_word(i) ||
+                    use->match_groups[entry].match_data_in_RAM_word(i))
+                    ram_sections.insert(i);
+            }
+            for (auto sect : ram_sections) entries_per_width[sect].push_back(entry);
+            if (ram_sections.size() > 1) wide_entries.insert(entry);
         }
         result_buses_seen += overhead_groups_per_RAM[idx];
     }
@@ -2550,8 +2450,7 @@ bool TableFormat::build_match_group_map() {
         int zero_ntp_non_wide_entry = -1;
         if (ntp_in_ram) {
             for (int entry = result_buses_seen;
-                 entry < result_buses_seen + overhead_groups_per_RAM[idx];
-                 entry++) {
+                 entry < result_buses_seen + overhead_groups_per_RAM[idx]; entry++) {
                 if (wide_entries.count(entry)) continue;
                 if (use->match_groups[entry].mask[next_index].min().index() ==
                     idx * SINGLE_RAM_BITS) {
@@ -2563,35 +2462,31 @@ bool TableFormat::build_match_group_map() {
 
         // Entries spanning multiple RAM lines have higher priority
         std::sort(entries_per_width[idx].begin(), entries_per_width[idx].end(),
-                [&](const ssize_t &a, const ssize_t &b) {
-            int t;
-            if (a == zero_ntp_non_wide_entry && b != zero_ntp_non_wide_entry)
-                return true;
-            if (b == zero_ntp_non_wide_entry && a != zero_ntp_non_wide_entry)
-                return false;
+                  [&](const ssize_t &a, const ssize_t &b) {
+                      int t;
+                      if (a == zero_ntp_non_wide_entry && b != zero_ntp_non_wide_entry) return true;
+                      if (b == zero_ntp_non_wide_entry && a != zero_ntp_non_wide_entry)
+                          return false;
 
-            if ((t = wide_entries.count(a) - wide_entries.count(b)) != 0)
-                return t > 0;
-            if (ntp_in_ram) {
-                // If you have two shared words, pick the shared word that is in the
-                // overhead
-                if (use->match_groups.at(a).overhead_in_RAM_word(idx) !=
-                    use->match_groups.at(b).overhead_in_RAM_word(idx))
-                    return use->match_groups.at(a).overhead_in_RAM_word(idx);
-                return use->match_groups.at(a).mask[next_index].min().index() <
-                       use->match_groups.at(b).mask[next_index].min().index();
-            }
-            return a < b;
-        });
+                      if ((t = wide_entries.count(a) - wide_entries.count(b)) != 0) return t > 0;
+                      if (ntp_in_ram) {
+                          // If you have two shared words, pick the shared word that is in the
+                          // overhead
+                          if (use->match_groups.at(a).overhead_in_RAM_word(idx) !=
+                              use->match_groups.at(b).overhead_in_RAM_word(idx))
+                              return use->match_groups.at(a).overhead_in_RAM_word(idx);
+                          return use->match_groups.at(a).mask[next_index].min().index() <
+                                 use->match_groups.at(b).mask[next_index].min().index();
+                      }
+                      return a < b;
+                  });
 
         int access_to_nt_bitpos_0 = 0;
         for (auto entry : entries_per_width[idx]) {
-            if (wide_entries.count(entry) > 0)
-                access_to_nt_bitpos_0++;
+            if (wide_entries.count(entry) > 0) access_to_nt_bitpos_0++;
         }
 
-        if (zero_ntp_non_wide_entry >= 0)
-            access_to_nt_bitpos_0++;
+        if (zero_ntp_non_wide_entry >= 0) access_to_nt_bitpos_0++;
 
         // As described in the comments, the algorithm currently cannot safely guarantee this
         // Just returning false for now, so that the algorithm can run with a different pack
@@ -2599,8 +2494,9 @@ bool TableFormat::build_match_group_map() {
 
         for (auto entry : entries_per_width[idx]) {
             if (ntp_in_ram && wide_entries.count(entry) == 0)
-                BUG_CHECK(use->match_groups.at(entry).overhead_in_RAM_word(idx), "Single entry "
-                   "must have data in this RAM");
+                BUG_CHECK(use->match_groups.at(entry).overhead_in_RAM_word(idx),
+                          "Single entry "
+                          "must have data in this RAM");
             // Assume that the ntp has been moved to the correct position by the
             // redistribute_next_table function
             if (ntp_in_ram && use->match_groups[entry].overhead_in_RAM_word(idx)) {
@@ -2608,13 +2504,13 @@ bool TableFormat::build_match_group_map() {
                 int max_next_bit = use->match_groups[entry].mask[next_index].max().index();
                 int next_bit_lower_bound = use->match_group_map[idx].size() == 0 ? 0 : 1;
                 next_bit_lower_bound += idx * SINGLE_RAM_BITS;
-                int next_bit_upper_bound = FULL_NEXT_TABLE_BITS *
-                                           (use->match_group_map[idx].size() + 1) - 1;
+                int next_bit_upper_bound =
+                    FULL_NEXT_TABLE_BITS * (use->match_group_map[idx].size() + 1) - 1;
                 next_bit_upper_bound += idx * SINGLE_RAM_BITS;
                 // Bounds described in the comments
-                BUG_CHECK(min_next_bit >= next_bit_lower_bound &&
-                          max_next_bit <= next_bit_upper_bound,
-                          "Next table pointers not saved correctly to entries");
+                BUG_CHECK(
+                    min_next_bit >= next_bit_lower_bound && max_next_bit <= next_bit_upper_bound,
+                    "Next table pointers not saved correctly to entries");
             }
             use->match_group_map[idx].push_back(entry);
         }
@@ -2622,7 +2518,6 @@ bool TableFormat::build_match_group_map() {
     }
     return true;
 }
-
 
 /**
  * A gateway that is used as small match table, similar to a normal exact match
@@ -2645,7 +2540,7 @@ bool TableFormat::build_match_group_map() {
  * The miss entry has null gateway row.
  */
 bool TableFormat::build_payload_map() {
-    std::vector<int> gateway_entry_to_table_entries = { 3, 2, 1, 0, 4 };
+    std::vector<int> gateway_entry_to_table_entries = {3, 2, 1, 0, 4};
     auto gw_tbl = fpc.convert_to_gateway(tbl);
     BUG_CHECK(gw_tbl, "Building a payload map requires a gateway option");
     int index = -1;
@@ -2654,8 +2549,10 @@ bool TableFormat::build_payload_map() {
         index++;
         if (gw_row.second.isNull()) continue;
         if (gw_row.first) {
-            BUG_CHECK(!miss_seen, "A miss entry on a table has a higher priority than "
-                "any other entry on table %1%", tbl->externalName());
+            BUG_CHECK(!miss_seen,
+                      "A miss entry on a table has a higher priority than "
+                      "any other entry on table %1%",
+                      tbl->externalName());
             use->payload_map[gateway_entry_to_table_entries.at(index)] = index;
         } else {
             miss_seen = true;
@@ -2666,15 +2563,12 @@ bool TableFormat::build_payload_map() {
 }
 
 int ByteInfo::hole_size(HoleType_t hole_type, int *hole_start_pos) const {
-    if (bit_use.empty())
-        return 0;
+    if (bit_use.empty()) return 0;
     if (hole_type == LSB) {
-        if (hole_start_pos)
-            *hole_start_pos = 0;
+        if (hole_start_pos) *hole_start_pos = 0;
         return bit_use.min().index();
     } else if (hole_type == MSB) {
-        if (hole_start_pos)
-            *hole_start_pos = bit_use.max().index() + 1;
+        if (hole_start_pos) *hole_start_pos = bit_use.max().index() + 1;
         return 7 - bit_use.max().index();
     } else if (hole_type == MIDDLE) {
         int max_hole = 0;
@@ -2683,8 +2577,7 @@ int ByteInfo::hole_size(HoleType_t hole_type, int *hole_start_pos) const {
         int hole_end = bit_use.ffs(hole_start);
         while (hole_end >= 0) {
             if (max_hole < hole_end - hole_start) {
-                if (hole_start_pos)
-                    *hole_start_pos = hole_start;
+                if (hole_start_pos) *hole_start_pos = hole_start;
                 max_hole = std::max(hole_end - hole_start, max_hole);
             }
             hole_start = bit_use.ffz(hole_end);
@@ -2702,10 +2595,8 @@ int ByteInfo::hole_size(HoleType_t hole_type, int *hole_start_pos) const {
  */
 bool ByteInfo::better_hole_type(int hole, int comp_hole, int overhead_bits) const {
     // Return the actual hole
-    if (hole != 0 && comp_hole == 0)
-        return true;
-    if (hole == 0 && comp_hole != 0)
-        return false;
+    if (hole != 0 && comp_hole == 0) return true;
+    if (hole == 0 && comp_hole != 0) return false;
 
     // The bits used by the match byte and the overhead
     int a_bits_used = overhead_bits + (8 - hole);
@@ -2715,8 +2606,7 @@ bool ByteInfo::better_hole_type(int hole, int comp_hole, int overhead_bits) cons
     int a_bytes_used = (a_bits_used + 7) / 8;
     int b_bytes_used = (b_bits_used + 7) / 8;
 
-    if (a_bytes_used != b_bytes_used)
-        return a_bytes_used < b_bytes_used;
+    if (a_bytes_used != b_bytes_used) return a_bytes_used < b_bytes_used;
 
     // Return the byte that uses the overlap best
     return a_bits_used > b_bits_used;
@@ -2728,7 +2618,6 @@ bool ByteInfo::better_hole_type(int hole, int comp_hole, int overhead_bits) cons
 bool ByteInfo::is_better_for_overhead(const ByteInfo &bi, int overhead_bits) const {
     int a_middle_hole_size = hole_size(MIDDLE);
     int b_middle_hole_size = bi.hole_size(MIDDLE);
-
 
     if (a_middle_hole_size >= overhead_bits && b_middle_hole_size < overhead_bits) {
         return true;
@@ -2764,13 +2653,12 @@ void ByteInfo::set_interleave_info(int overhead_bits) {
         return;
     }
 
-
     int lsb_hole_start;
     int msb_hole_start = 0;
-    HoleType_t best_hole
-        = better_hole_type(hole_size(LSB, &lsb_hole_start), hole_size(MSB, &msb_hole_start),
-                           overhead_bits)
-          ? LSB : MSB;
+    HoleType_t best_hole = better_hole_type(hole_size(LSB, &lsb_hole_start),
+                                            hole_size(MSB, &msb_hole_start), overhead_bits)
+                               ? LSB
+                               : MSB;
 
     // Hole for overhead is at the LSB of the byte
     if (best_hole == LSB) {
@@ -2797,14 +2685,16 @@ void ByteInfo::set_interleave_info(int overhead_bits) {
  * Let's take the following example:
  *     - 2 entries, 1 RAM wide
  *     - Each entry has 4 bits of overhead
- *     - Each entry has 8 match bytes, 2 of which are matching on a single nibble, let's say the lower
+ *     - Each entry has 8 match bytes, 2 of which are matching on a single nibble, let's say the
+ * lower
  *     - Each entry requires a nibble for version/validity
- * Could be thought of as an ATCAM entry with 28 bits of a ternary match key and some number of actions
+ * Could be thought of as an ATCAM entry with 28 bits of a ternary match key and some number of
+ * actions
  *
  * If we were to pack the overhead all at the lsb, this would be definition take up an entire byte,
  * and thus because 16 match bytes are needed, this would never fit.  However, because the overhead
- * and a match byte can be combined into a single byte requirement, this now becomes possible if match
- * data and overhead are interleaved.
+ * and a match byte can be combined into a single byte requirement, this now becomes possible if
+ * match data and overhead are interleaved.
  *
  * Right now, overhead is still allocated as one step.  One could take this even further, and
  * break up overhead into its constituent pieces, but a single block of overhead is easiest to
@@ -2814,8 +2704,7 @@ void ByteInfo::set_interleave_info(int overhead_bits) {
  * the msb and the lsb, but that in theory could still save bits if this corner case is found
  */
 bool TableFormat::interleave_match_and_overhead() {
-    if (tbl->action_chain() || bits_necessary(SEL_LEN_MOD) > 0
-        || bits_necessary(SEL_LEN_SHIFT) > 0)
+    if (tbl->action_chain() || bits_necessary(SEL_LEN_MOD) > 0 || bits_necessary(SEL_LEN_SHIFT) > 0)
         return false;
 
     int overhead_bits = overhead_bits_necessary();
@@ -2834,27 +2723,23 @@ bool TableFormat::interleave_match_and_overhead() {
         }
     }
 
-    if (search_bus_with_overhead < 0)
-        return false;
+    if (search_bus_with_overhead < 0) return false;
 
     // Determine the best byte to interleave with overhead
     ssize_t best_entry_index = -1;
     for (size_t i = 0; i < match_bytes.size(); i++) {
-        if (match_bytes[i].byte.search_bus != search_bus_with_overhead)
-            continue;
+        if (match_bytes[i].byte.search_bus != search_bus_with_overhead) continue;
         if (best_entry_index < 0) {
             best_entry_index = i;
             continue;
         }
-
 
         if (match_bytes[i].is_better_for_overhead(match_bytes[best_entry_index], overhead_bits)) {
             best_entry_index = i;
         }
     }
 
-    if (best_entry_index < 0)
-        return false;
+    if (best_entry_index < 0) return false;
 
     // If the byte has no holes, then this byte is generally not useful
     ByteInfo *il_byte = &match_bytes[best_entry_index];
@@ -2882,13 +2767,13 @@ bool TableFormat::interleave_match_and_overhead() {
             BUG_CHECK(match_bit_start % 8 == 0, "Interleaved match byte is not correct");
             interleaved_bit_use |= (il_byte->bit_use << match_bit_start);
             interleaved_match_byte_use.setbit(match_bit_start / 8);
-            BUG_CHECK((total_use & interleaved_bit_use).empty(), "Interleaving allocation is "
+            BUG_CHECK((total_use & interleaved_bit_use).empty(),
+                      "Interleaving allocation is "
                       "incorrect");
             start_byte += il_byte->il_info.byte_cycle;
             entry++;
         }
     }
-
 
     pa = PACK_TIGHT;
     return allocate_match_with_algorithm();
@@ -2907,8 +2792,7 @@ void TableFormat::verify() {
                     BUG("Overlap of multiple things in the format");
                     verify_mask |= use->match_groups[i].mask[j];
                 }
-                if (j == VERS)
-                    on_search_bus_mask |= use->match_groups[i].mask[j];
+                if (j == VERS) on_search_bus_mask |= use->match_groups[i].mask[j];
             } else if (j == VERS && requires_versioning()) {
                 BUG("A group has been allocated without version bits");
             }
@@ -2927,20 +2811,19 @@ void TableFormat::verify() {
 
     for (int i = 0; i < layout_option.way.width; i++) {
         for (int j = 0; j < GATEWAY_BYTES * 2; j++) {
-            if (on_search_bus_mask.getrange(i * SINGLE_RAM_BITS + j * 8, 8))
-                continue;
+            if (on_search_bus_mask.getrange(i * SINGLE_RAM_BITS + j * 8, 8)) continue;
             use->avail_sb_bytes.setbit(i * SINGLE_RAM_BYTES + j);
         }
     }
 }
 
-TableFormat* TableFormat::create(const LayoutOption &l, const IXBar::Use *mi, const IXBar::Use *phi,
-        const IR::MAU::Table *t, const bitvec im, bool gl, FindPayloadCandidates &fpc,
-        const PhvInfo &phv) {
+TableFormat *TableFormat::create(const LayoutOption &l, const IXBar::Use *mi, const IXBar::Use *phi,
+                                 const IR::MAU::Table *t, const bitvec im, bool gl,
+                                 FindPayloadCandidates &fpc, const PhvInfo &phv) {
     return new TableFormat(l, mi, phi, t, im, gl, fpc, phv);
 }
 
-std::ostream& operator<<(std::ostream &out, const TableFormat::Use::match_group_use &m) {
+std::ostream &operator<<(std::ostream &out, const TableFormat::Use::match_group_use &m) {
     out << "Match Group Use: [";
     out << " mask: " << *m.mask;
     out << ", match_byte_mask: " << m.match_byte_mask;

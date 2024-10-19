@@ -13,15 +13,15 @@
 #ifndef BF_P4C_PARDE_EXTRACT_PARSER_H_
 #define BF_P4C_PARDE_EXTRACT_PARSER_H_
 
+#include "bf-p4c/bf-p4c-options.h"
+#include "bf-p4c/ir/gress.h"
+#include "bf-p4c/parde/parde_visitor.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "logging/pass_manager.h"
-#include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4/typeMap.h"
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/ir/gress.h"
-#include "bf-p4c/parde/parde_visitor.h"
 
 namespace P4 {
 namespace IR {
@@ -49,10 +49,12 @@ class ExtractParser : public ParserInspector {
     Logging::FileLog *parserLog = nullptr;
 
  public:
-    explicit ExtractParser(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-            IR::BFN::Pipe *rv, ParseTna *arch)
-        : refMap(refMap), typeMap(typeMap), rv(rv), arch(arch) { setName("ExtractParser"); }
-    void postorder(const IR::BFN::TnaParser* parser) override;
+    explicit ExtractParser(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, IR::BFN::Pipe *rv,
+                           ParseTna *arch)
+        : refMap(refMap), typeMap(typeMap), rv(rv), arch(arch) {
+        setName("ExtractParser");
+    }
+    void postorder(const IR::BFN::TnaParser *parser) override;
     void end_apply() override;
 
     profile_t init_apply(const IR::Node *root) override {
