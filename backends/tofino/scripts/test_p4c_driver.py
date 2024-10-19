@@ -342,7 +342,6 @@ class Test:
             "tofino2h": 6,
             "tofino2m": 12,
             "tofino2u": 20,
-            "tofino3": 20,
         }
 
         if args.preprocessor_only:

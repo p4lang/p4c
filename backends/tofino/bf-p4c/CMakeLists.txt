@@ -926,9 +926,7 @@ set (p4include_HEADERS
   p4include/tofino2_base.p4
   p4include/tofino2_arch.p4
   p4include/t2na.p4
-  p4include/psa.p4
-  p4include/bmv2/psa.p4
-  p4include/dpdk/psa.p4
+  p4include/tofino/psa.p4
   )
 
 
@@ -1495,10 +1493,11 @@ if (ENABLE_GTESTS)
   set (GTEST_LDADD ${GTEST_LDADD}
       "bf_gtest_support;tofinobackend;${LIBDYNHASH_LIBRARY};bfn_p4runtime" PARENT_SCOPE)
 
-  add_test(NAME test_p4c_driver
-    COMMAND ${BFN_P4C_SOURCE_DIR}/scripts/test_p4c_driver.py -j 4 --print-on-failure --compiler ${P4C_BINARY_DIR}/bf-p4c
-    WORKING_DIRECTORY ${P4C_BINARY_DIR})
-  set_tests_properties(test_p4c_driver PROPERTIES LABELS lint)
+  # TODO: re-enable this test once p4-test is added to the build system
+  # add_test(NAME test_p4c_driver
+  #   COMMAND ${BFN_P4C_SOURCE_DIR}/scripts/test_p4c_driver.py -j 4 --print-on-failure --compiler ${P4C_BINARY_DIR}/bf-p4c
+  #   WORKING_DIRECTORY ${P4C_BINARY_DIR})
+  # set_tests_properties(test_p4c_driver PROPERTIES LABELS lint)
 
 endif(ENABLE_GTESTS)
 
