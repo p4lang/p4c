@@ -326,4 +326,7 @@ foreach(src IN LISTS BF_P4C_IR_SRCS)
 endforeach()
 set(EXTENSION_IR_SOURCES ${EXTENSION_IR_SOURCES} ${QUAL_BF_P4C_IR_SRCS} PARENT_SCOPE)
 
+include(cmake/FindZ3.cmake)
+bf_p4c_obtain_z3()
+
 add_subdirectory(bf-p4c)

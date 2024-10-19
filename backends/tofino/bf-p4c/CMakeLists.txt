@@ -88,12 +88,14 @@ add_definitions("-DRESOURCES_SCHEMA_VERSION=\"${RESOURCES_SCHEMA_VERSION}\"")
 
 include_directories(${BFN_P4C_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}
-  ${Boost_INCLUDE_DIRS} ${LIBDYNHASH_INCLUDE_DIR} ${Z3_INCLUDE_DIR} )
+  ${Boost_INCLUDE_DIRS} ${LIBDYNHASH_INCLUDE_DIR} ${BF_P4C_Z3_INCLUDE_DIR} )
 # The generated code for protobuf has an excessive number of warnings so we
 # include the build directory as a system directory
 include_directories(SYSTEM ${P4C_BINARY_DIR}/control-plane)
 set (HAVE_LIBBOOST_GRAPH 1)
-set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${Boost_GRAPH_LIBRARY};${LIBDYNHASH_LIBRARY};${Z3_LIBRARY}")
+message(STATUS "Z3_LIBRARY value: ${BF_P4C_Z3_LIB}")
+
+set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${Boost_GRAPH_LIBRARY};${LIBDYNHASH_LIBRARY};${BF_P4C_Z3_LIB}")
 set (P4C_LIB_DEPS ${P4C_LIB_DEPS} PARENT_SCOPE)
 
 add_subdirectory(logging)
