@@ -10,15 +10,13 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-
 #include <boost/algorithm/string/replace.hpp>
 
-#include "bf_gtest_helpers.h"
-
-#include "gtest/gtest.h"
-#include "frontends/p4/toP4/toP4.h"
-#include "lib/sourceCodeBuilder.h"
 #include "bf-p4c/midend/elim_cast.h"
+#include "bf_gtest_helpers.h"
+#include "frontends/p4/toP4/toP4.h"
+#include "gtest/gtest.h"
+#include "lib/sourceCodeBuilder.h"
 
 namespace P4::Test {
 
@@ -58,7 +56,7 @@ TEST(testBfGtestHelper, MatchMatchBasic) {
     EXPECT_EQ(match_basic("expression", "expression"), 10U);
     EXPECT_EQ(match_basic("exp", "expression"), 3U);
     EXPECT_EQ(match_basic("ress", "expression", 3), 3U + 4U);
-    EXPECT_EQ(match_basic("ress", "expression", 3, 3+4), 3U + 4U);
+    EXPECT_EQ(match_basic("ress", "expression", 3, 3 + 4), 3U + 4U);
     EXPECT_EQ(match_basic("ress", "expression", 3, 99), 3U + 4U);
     EXPECT_EQ(match_basic("ress", "expression", 3, std::string::npos), 3U + 4U);
     EXPECT_EQ(match_basic("a \n b", "a \n bcd"), 5U);
@@ -68,7 +66,7 @@ TEST(testBfGtestHelper, MatchMatchBasic) {
     EXPECT_EQ(match_basic("ress", "expression"), failed);
     EXPECT_EQ(match_basic("ress", "expression", 3, 4), failed);
     EXPECT_EQ(match_basic("ress", "expression", 3, 1), failed);  // Bad pos.
-    EXPECT_EQ(match_basic("ress", "expression", 13), failed);  // Bad pos.
+    EXPECT_EQ(match_basic("ress", "expression", 13), failed);    // Bad pos.
 }
 
 TEST(testBfGtestHelper, MatchResult) {
@@ -84,19 +82,19 @@ TEST(testBfGtestHelper, MatchMatch) {
     EXPECT_EQ(match(CheckList{""}, "expression"), Result(true, 0, 1));
     EXPECT_EQ(match(CheckList{"expression"}, "expression"), Result(true, 10, 1));
     EXPECT_EQ(match(CheckList{"exp"}, "expression"), Result(true, 3, 1));
-    EXPECT_EQ(match(CheckList{"ress"}, "expression", 3), Result(true, 3+4, 1));
-    EXPECT_EQ(match(CheckList{"ress"}, "expression", 3, 3+4), Result(true, 3+4, 1));
-    EXPECT_EQ(match(CheckList{"ress"}, "expression", 3, 99), Result(true, 3+4, 1));
-    EXPECT_EQ(match(CheckList{"ress"}, "expression", 3, std::string::npos), Result(true, 3+4, 1));
+    EXPECT_EQ(match(CheckList{"ress"}, "expression", 3), Result(true, 3 + 4, 1));
+    EXPECT_EQ(match(CheckList{"ress"}, "expression", 3, 3 + 4), Result(true, 3 + 4, 1));
+    EXPECT_EQ(match(CheckList{"ress"}, "expression", 3, 99), Result(true, 3 + 4, 1));
+    EXPECT_EQ(match(CheckList{"ress"}, "expression", 3, std::string::npos), Result(true, 3 + 4, 1));
     EXPECT_EQ(match(CheckList{"a \n b"}, "a \n bcd"), Result(true, 5, 1));
 
     EXPECT_FALSE(match(CheckList{"expression"}, "").success);
-    EXPECT_EQ(match(CheckList{"expression"}, ""), Result(false, 0, 0) );
+    EXPECT_EQ(match(CheckList{"expression"}, ""), Result(false, 0, 0));
     EXPECT_EQ(match(CheckList{"ress"}, "expre", 3), Result(false, 3, 0));
     EXPECT_EQ(match(CheckList{"ress"}, "expression"), Result(false, 0, 0));
     EXPECT_EQ(match(CheckList{"ress"}, "expression", 3, 4), Result(false, 3, 0));
     EXPECT_EQ(match(CheckList{"ress"}, "expression", 3, 1), Result(false, failed, 0));  // Bad pos.
-    EXPECT_EQ(match(CheckList{"ress"}, "expression", 13), Result(false, failed, 0));  // Bad pos.
+    EXPECT_EQ(match(CheckList{"ress"}, "expression", 13), Result(false, failed, 0));    // Bad pos.
 
     // Inline checking.
     EXPECT_TRUE(match(CheckList{""}, "").success);
@@ -122,36 +120,43 @@ TEST(testBfGtestHelper, MatchMatch) {
 
     // And with CheckList.
     EXPECT_EQ(match(CheckList{"hello", "world"}, "hello world!"), Result(false, 5, 1));
-    EXPECT_EQ(match(CheckList{"hello", "world"}, "hello world!", 0, std::string::npos,
-                        TrimWhiteSpace), Result(true, 11, 2));  // No space.
-    EXPECT_EQ(match(CheckList{"hello ", "world"}, "hello world!", 0, std::string::npos,
-                        TrimWhiteSpace), Result(true, 11, 2));  // Left space.
-    EXPECT_EQ(match(CheckList{"hello", " world"}, "hello world!", 0, std::string::npos,
-                        TrimWhiteSpace), Result(true, 11, 2));  // Right space.
-    EXPECT_EQ(match(CheckList{"hello ", " world"}, "hello world!", 0, std::string::npos,
-                        TrimWhiteSpace), Result(false, 6, 1));  // Two spaces!
-    EXPECT_EQ(match(CheckList{"The", "`(\\w+)`", "is", "`(\\d+)`"}, "The num is 42!",
-                    0, std::string::npos, TrimWhiteSpace), Result(true, 13, 4));
+    EXPECT_EQ(
+        match(CheckList{"hello", "world"}, "hello world!", 0, std::string::npos, TrimWhiteSpace),
+        Result(true, 11, 2));  // No space.
+    EXPECT_EQ(
+        match(CheckList{"hello ", "world"}, "hello world!", 0, std::string::npos, TrimWhiteSpace),
+        Result(true, 11, 2));  // Left space.
+    EXPECT_EQ(
+        match(CheckList{"hello", " world"}, "hello world!", 0, std::string::npos, TrimWhiteSpace),
+        Result(true, 11, 2));  // Right space.
+    EXPECT_EQ(
+        match(CheckList{"hello ", " world"}, "hello world!", 0, std::string::npos, TrimWhiteSpace),
+        Result(false, 6, 1));  // Two spaces!
+    EXPECT_EQ(match(CheckList{"The", "`(\\w+)`", "is", "`(\\d+)`"}, "The num is 42!", 0,
+                    std::string::npos, TrimWhiteSpace),
+              Result(true, 13, 4));
     // Back References across CheckList are fine.
-    EXPECT_EQ(match(CheckList{"How", "`(\\w+)`", "you", "`\\1`"}, "How do you do???",
-                    0, std::string::npos, TrimWhiteSpace), Result(true, 13, 4));
-    EXPECT_EQ(match(CheckList{"`(\\w+)`", "`(\\w\\w)`", "cad", "`\\1`", "`\\2`"}, "abracadabra!",
-                    0, std::string::npos, TrimWhiteSpace), Result(true, 11, 5));
+    EXPECT_EQ(match(CheckList{"How", "`(\\w+)`", "you", "`\\1`"}, "How do you do???", 0,
+                    std::string::npos, TrimWhiteSpace),
+              Result(true, 13, 4));
+    EXPECT_EQ(match(CheckList{"`(\\w+)`", "`(\\w\\w)`", "cad", "`\\1`", "`\\2`"}, "abracadabra!", 0,
+                    std::string::npos, TrimWhiteSpace),
+              Result(true, 11, 5));
 
     // Check for early miss-match & use 'pos' to skip over first word.
-    auto res = match(CheckList{"One", "`(\\w+)`", "3"}, "One One Two 3 Four",
-                     0, std::string::npos, TrimWhiteSpace);
+    auto res = match(CheckList{"One", "`(\\w+)`", "3"}, "One One Two 3 Four", 0, std::string::npos,
+                     TrimWhiteSpace);
     EXPECT_FALSE(res.success) << " pos=" << res.pos << " count=" << res.count << "'\n";
-    res =      match(CheckList{"One", "`(\\w+)`", "3"}, "One One Two 3 Four",
-                     3, std::string::npos, TrimWhiteSpace);
+    res = match(CheckList{"One", "`(\\w+)`", "3"}, "One One Two 3 Four", 3, std::string::npos,
+                TrimWhiteSpace);
     EXPECT_TRUE(res.success) << " pos=" << res.pos << " count=" << res.count << "'\n";
 }
 
 TEST(testBfGtestHelper, MatchFindNextEnd) {
-    EXPECT_THROW(find_next_end("", 0, ""), std::invalid_argument);      // Bad ends string
-    EXPECT_THROW(find_next_end("", 0, "1"), std::invalid_argument);     // Bad ends string
-    EXPECT_THROW(find_next_end("", 0, "123"), std::invalid_argument);   // Bad ends string
-    EXPECT_THROW(find_next_end("", 0, "11"), std::invalid_argument);    // Bad ends string
+    EXPECT_THROW(find_next_end("", 0, ""), std::invalid_argument);     // Bad ends string
+    EXPECT_THROW(find_next_end("", 0, "1"), std::invalid_argument);    // Bad ends string
+    EXPECT_THROW(find_next_end("", 0, "123"), std::invalid_argument);  // Bad ends string
+    EXPECT_THROW(find_next_end("", 0, "11"), std::invalid_argument);   // Bad ends string
     EXPECT_EQ(find_next_end("", 0, "12"), std::string::npos);
 
     EXPECT_EQ(find_next_end("   ", 0, "{}"), std::string::npos);
@@ -163,14 +168,14 @@ TEST(testBfGtestHelper, MatchFindNextEnd) {
 }
 
 TEST(testBfGtestHelper, MatchFindNextBlock) {
-    EXPECT_THROW(find_next_block("", 0, ""), std::invalid_argument);      // Bad ends string
-    EXPECT_EQ(find_next_block("   ", 0, "{}"), std::make_pair(std::string::npos,
-                                                              std::string::npos));
+    EXPECT_THROW(find_next_block("", 0, ""), std::invalid_argument);  // Bad ends string
+    EXPECT_EQ(find_next_block("   ", 0, "{}"),
+              std::make_pair(std::string::npos, std::string::npos));
     EXPECT_EQ(find_next_block("0{2", 0, "{}"), std::make_pair(1UL, std::string::npos));
     EXPECT_EQ(find_next_block("0{2{45}7}9", 0, "{}"), std::make_pair(1UL, 8UL));
     EXPECT_EQ(find_next_block("{12}4}6", 0, "{}"), std::make_pair(0UL, 3UL));
-    EXPECT_EQ(find_next_block("{12}4}6", 2, "{}"), std::make_pair(std::string::npos,
-                                                                  std::string::npos));
+    EXPECT_EQ(find_next_block("{12}4}6", 2, "{}"),
+              std::make_pair(std::string::npos, std::string::npos));
     EXPECT_EQ(find_next_block("AAZZZAZ", 0, "AZ"), std::make_pair(0UL, 3UL));
 }
 
@@ -189,7 +194,7 @@ TEST(testBfGtestHelper, MatchGetEnds) {
 }
 
 namespace {
-const char* Code = R"(
+const char *Code = R"(
     control TestIngress<H, M>(inout H hdr, inout M meta);
     package TestPackage<H, M>(TestIngress<H, M> ig);
     %0%
@@ -197,9 +202,9 @@ const char* Code = R"(
         %1%
     }
     TestPackage(testingress()) main;)";
-const char* EmptyDefs = R"(struct Metadata{}; struct Headers{};)";
-const char* EmptyAppy = R"(apply{})";
-const char* Marker = "control testingress`([^\\{]*\\{)`";
+const char *EmptyDefs = R"(struct Metadata{}; struct Headers{};)";
+const char *EmptyAppy = R"(apply{})";
+const char *Marker = "control testingress`([^\\{]*\\{)`";
 }  // namespace
 
 TEST(testBfGtestHelper, TestCodeTestCodeGood) {
@@ -219,27 +224,26 @@ TEST(testBfGtestHelper, TestCodeTestCodeGood) {
 TEST(testBfGtestHelperDeathTest, TestCodeTestCodeOptions) {
     // N.B. The first argument is always 'TestCode<N>' followed by the 'options' arguments.
     ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-    EXPECT_EXIT(TestCode(TestCode::Hdr::Tofino1arch, Code,
-                         {EmptyDefs, EmptyAppy}, Marker, {"--version"}),
+    EXPECT_EXIT(
+        TestCode(TestCode::Hdr::Tofino1arch, Code, {EmptyDefs, EmptyAppy}, Marker, {"--version"}),
         ::testing::ExitedWithCode(0), "TestCode[^V]*Version");
 }
 
 TEST(testBfGtestHelper, TestCodeTestCodeBad) {
     testing::internal::CaptureStderr();
-    EXPECT_THROW(TestCode(TestCode::Hdr::Tofino1arch, Code, {EmptyDefs}),
-                std::invalid_argument);
+    EXPECT_THROW(TestCode(TestCode::Hdr::Tofino1arch, Code, {EmptyDefs}), std::invalid_argument);
     auto stderr = testing::internal::GetCapturedStderr();
     EXPECT_NE(stderr.find("syntax error"), std::string::npos);
 
     testing::internal::CaptureStderr();
     EXPECT_THROW(TestCode(TestCode::Hdr::Tofino1arch, Code, {EmptyDefs, ""}),
-                std::invalid_argument);
+                 std::invalid_argument);
     stderr = testing::internal::GetCapturedStderr();
     EXPECT_NE(stderr.find("syntax error"), std::string::npos);
 
     testing::internal::CaptureStderr();
     EXPECT_THROW(TestCode(TestCode::Hdr::Tofino1arch, Code, {"", EmptyAppy}),
-                std::invalid_argument);
+                 std::invalid_argument);
     stderr = testing::internal::GetCapturedStderr();
     EXPECT_NE(stderr.find("syntax error"), std::string::npos);
 
@@ -258,20 +262,20 @@ TEST(testBfGtestHelper, TestCodeTestControlBlock) {
 }
 
 TEST(testBfGtestHelper, TestCodeGetBlock) {
-    auto blk = TestCode(TestCode::Hdr::Tofino1arch, Code,
-                        {EmptyDefs, "\napply\n\n{\n\n}\n"}, Marker);
+    auto blk =
+        TestCode(TestCode::Hdr::Tofino1arch, Code, {EmptyDefs, "\napply\n\n{\n\n}\n"}, Marker);
     // The default setting is  blk.flags(TrimWhiteSpace);
     EXPECT_EQ(blk.extract_code().compare("apply { }"), 0);
     EXPECT_EQ(blk.extract_code(6).compare("{ }"), 0);
 
-    blk = TestCode(TestCode::Hdr::Tofino1arch, Code,
-                   {EmptyDefs, "\n\napply\n\n{\n\n}\n\n"}, Marker);
+    blk =
+        TestCode(TestCode::Hdr::Tofino1arch, Code, {EmptyDefs, "\n\napply\n\n{\n\n}\n\n"}, Marker);
     blk.flags(Raw);
     // This 'Raw' test is dependant upon the parser, hence is brittle.
     // EXPECT_EQ(blk.extract_code().compare("   apply {\n    }"), 0);
 
-    blk = TestCode(TestCode::Hdr::Tofino1arch, Code,
-                   {EmptyDefs, "action a(){} apply{a();}"}, Marker);
+    blk =
+        TestCode(TestCode::Hdr::Tofino1arch, Code, {EmptyDefs, "action a(){} apply{a();}"}, Marker);
     blk.flags(TrimWhiteSpace | TrimAnnotations);
     EXPECT_EQ(blk.extract_code().compare("action a() { } apply { a(); }"), 0);
 
@@ -306,14 +310,9 @@ TEST(testBfGtestHelper, TestCodeApplyPassMutating) {
                 act();
             }
         })";
-    CheckList expected {
-        "action act() { }",
-        "apply {",
-            "if (hdr.h.field1 == 8w1 && hdr.h.field2 == 8w2) {",
-                "act();",
-            "}",
-        "}"
-    };
+    CheckList expected{
+        "action act() { }", "apply {", "if (hdr.h.field1 == 8w1 && hdr.h.field2 == 8w2) {",
+        "act();",           "}",       "}"};
     auto blk = TestCode(TestCode::Hdr::Tofino1arch, TestCode::tofino_shell(),
                         {defs, TestCode::empty_state(), input, TestCode::empty_appy()},
                         TestCode::tofino_shell_control_marker());
@@ -321,7 +320,7 @@ TEST(testBfGtestHelper, TestCodeApplyPassMutating) {
     EXPECT_TRUE(blk.apply_pass(TestCode::Pass::FullFrontend));
     EXPECT_TRUE(blk.apply_pass(new BFN::RewriteConcatToSlices()));
     auto res = blk.match(expected);
-    EXPECT_TRUE(res.success) << "    @ expected[" << res.count<< "], char pos=" << res.pos << "\n"
+    EXPECT_TRUE(res.success) << "    @ expected[" << res.count << "], char pos=" << res.pos << "\n"
                              << "    '" << expected[res.count] << "'\n"
                              << "    '" << blk.extract_code(res.pos) << "'\n";
 }
@@ -329,8 +328,9 @@ TEST(testBfGtestHelper, TestCodeApplyPassMutating) {
 
 TEST(testBfGtestHelper, TestCodeApplyPreconstructedPasses) {
     std::string EmptyDefs = "struct local_metadata_t{}; struct headers_t{};";
-    auto blk = TestCode(TestCode::Hdr::TofinoMin, TestCode::tofino_shell(),
-            {EmptyDefs, TestCode::empty_state(), TestCode::empty_appy(), TestCode::empty_appy()});
+    auto blk = TestCode(
+        TestCode::Hdr::TofinoMin, TestCode::tofino_shell(),
+        {EmptyDefs, TestCode::empty_state(), TestCode::empty_appy(), TestCode::empty_appy()});
     EXPECT_TRUE(blk.CreateBlockThreadLocalInstances());
     // If applying FullBackend, ThreadLocalInstances pass will run twice. And "thread-name::" will
     // be prepended to the names of headers and metadata structs twice. So disable apply FullBackend
@@ -341,25 +341,27 @@ TEST(testBfGtestHelper, TestCodeApplyPreconstructedPasses) {
 TEST(testBfGtestHelper, TestP4CodeMatch) {
     auto blk = TestCode(TestCode::Hdr::Tofino1arch, Code, {EmptyDefs, EmptyAppy}, Marker);
     auto res = blk.match(CheckList{"apply", "{", "}"});
-    EXPECT_TRUE(res.success) << " pos=" << res.pos << " count=" << res.count
-                             << "\n    '" << blk.extract_code() << "'\n";;
+    EXPECT_TRUE(res.success) << " pos=" << res.pos << " count=" << res.count << "\n    '"
+                             << blk.extract_code() << "'\n";
+    ;
     // EXPECT_EQ(res.pos, 9U);   // Dependant upon parser.
     EXPECT_EQ(res.count, 3U);
 
     blk = TestCode(TestCode::Hdr::Tofino1arch, Code, {EmptyDefs, EmptyAppy}, Marker);
     blk.flags(Raw);
     res = blk.match(CheckList{"`\\s*`apply`\\s*`{`\\s*`}`\\s*`"});
-    EXPECT_TRUE(res.success) << " pos=" << res.pos << " count=" << res.count
-                             << "\n    '" << blk.extract_code() << "'\n";
+    EXPECT_TRUE(res.success) << " pos=" << res.pos << " count=" << res.count << "\n    '"
+                             << blk.extract_code() << "'\n";
     // EXPECT_EQ(res.pos, 16U);   // Dependant upon parser.
     EXPECT_EQ(res.count, 1U);
 }
 
 TEST(testBfGtestHelper, TestAsmCodeMatch) {
     std::string EmptyDefs = "struct local_metadata_t{}; struct headers_t{};";
-    auto blk = TestCode(TestCode::Hdr::TofinoMin, TestCode::tofino_shell(),
-            {EmptyDefs, TestCode::empty_state(), TestCode::empty_appy(), TestCode::empty_appy()},
-            TestCode::tofino_shell_control_marker());
+    auto blk = TestCode(
+        TestCode::Hdr::TofinoMin, TestCode::tofino_shell(),
+        {EmptyDefs, TestCode::empty_state(), TestCode::empty_appy(), TestCode::empty_appy()},
+        TestCode::tofino_shell_control_marker());
     blk.flags(TrimWhiteSpace | TrimAnnotations);
     EXPECT_TRUE(blk.CreateBackend());
     EXPECT_TRUE(blk.apply_pass(TestCode::Pass::FullBackend));
@@ -394,6 +396,5 @@ TEST(testBfGtestHelper, TestAsmCodeMatch) {
     EXPECT_TRUE(res.success) << " pos=" << res.pos << " count=" << res.count << "\n'"
                              << blk.extract_code(TestCode::CodeBlock::DeparserEAsm) << "'\n";
 }
-
 
 }  // namespace P4::Test

@@ -19,9 +19,8 @@ ConstrainedSlice::ConstrainedSlice(const ConstrainedField &parent, le_bitrange r
     using Slice = Logging::Phv_Schema_Logger::Slice;
     using FieldSlice = Logging::Phv_Schema_Logger::FieldSlice;
 
-    logger = new Constraint(
-        new FieldSlice(std::string(stripThreadPrefix(parent.getName())),
-            new Slice(range.lo, range.hi)));
+    logger = new Constraint(new FieldSlice(std::string(stripThreadPrefix(parent.getName())),
+                                           new Slice(range.lo, range.hi)));
 }
 
 void ConstrainedSlice::setAlignment(const Constraints::AlignmentConstraint &alignment) {
@@ -48,9 +47,7 @@ ConstrainedField::ConstrainedField(const cstring &name) : name(name) {
     logger = new Constraint(nullptr);
 }
 
-void ConstrainedField::addSlice(const ConstrainedSlice &slice) {
-    slices.push_back(slice);
-}
+void ConstrainedField::addSlice(const ConstrainedSlice &slice) { slices.push_back(slice); }
 
 void ConstrainedField::setSolitary(const Constraints::SolitaryConstraint &solitary) {
     ConstrainedField::solitary = solitary;
@@ -68,29 +65,17 @@ void ConstrainedField::setContainerSize(const Constraints::ContainerSizeConstrai
     ConstrainedField::containerSize = containerSize;
 }
 
-void ConstrainedField::setBottomBits(bool b) {
-    deparsedBottomBits = b;
-}
+void ConstrainedField::setBottomBits(bool b) { deparsedBottomBits = b; }
 
-void ConstrainedField::setNoSplit(bool b) {
-    noSplit = b;
-}
+void ConstrainedField::setNoSplit(bool b) { noSplit = b; }
 
-void ConstrainedField::setNoOverlay(bool b) {
-    noOverlay = b;
-}
+void ConstrainedField::setNoOverlay(bool b) { noOverlay = b; }
 
-void ConstrainedField::setExactContainer(bool b) {
-    exactContainer = b;
-}
+void ConstrainedField::setExactContainer(bool b) { exactContainer = b; }
 
-void ConstrainedField::setNoHoles(bool b) {
-    noHoles = b;
-}
+void ConstrainedField::setNoHoles(bool b) { noHoles = b; }
 
-void ConstrainedField::setSameContainerGroup(bool b) {
-    sameContainerGroup = b;
-}
+void ConstrainedField::setSameContainerGroup(bool b) { sameContainerGroup = b; }
 
 /* ConstrainedFieldMap */
 
@@ -108,8 +93,7 @@ ConstrainedFieldMap ConstrainedFieldMapBuilder::buildMap(
             // NOTE: Bridge packing can overwrite alignment constraint of a field
             // so information about original reason can be lost
             Constraints::AlignmentConstraint alignment;
-            alignment.addConstraint(
-                f.getAlignmentConstraint().getReason(), f.alignment->align);
+            alignment.addConstraint(f.getAlignmentConstraint().getReason(), f.alignment->align);
             result[f.name].setAlignment(alignment);
         }
 
@@ -123,18 +107,16 @@ ConstrainedFieldMap ConstrainedFieldMapBuilder::buildMap(
 
     // Extract slices based on clustering
     for (auto sc : groups) {
-        sc->forall_fieldslices([&] (const PHV::FieldSlice &slice) {
+        sc->forall_fieldslices([&](const PHV::FieldSlice &slice) {
             BUG_CHECK(result.find(slice.field()->name) != result.end(),
-                "Field is not present in PhvInfo, but is in supercluster.");
+                      "Field is not present in PhvInfo, but is in supercluster.");
             auto &field = result.at(slice.field()->name);
 
             // Extract constraints for a slice
             ConstrainedSlice csl(field, slice.range());
             if (slice.alignment()) {
                 Constraints::AlignmentConstraint alignment;
-                alignment.addConstraint(
-                    field.getAlignment().getReason(),
-                    slice.alignment()->align);
+                alignment.addConstraint(field.getAlignment().getReason(), slice.alignment()->align);
                 csl.setAlignment(alignment);
             }
 

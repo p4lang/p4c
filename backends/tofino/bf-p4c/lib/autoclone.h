@@ -21,17 +21,18 @@
  *  all the autoclone_ptr-referenced objects avoid any accidental shallow copy aliasing
  *  or slicing (particularly useful for dynamic classes).
  */
-template<class T, class D = std::default_delete<T>>
+template <class T, class D = std::default_delete<T>>
 class autoclone_ptr : public std::unique_ptr<T, D> {
  public:
     autoclone_ptr() = default;
     autoclone_ptr(autoclone_ptr &&) = default;
     autoclone_ptr &operator=(autoclone_ptr &&) = default;
-    autoclone_ptr(const autoclone_ptr &a) : std::unique_ptr<T,D>(a ? a->clone() : nullptr) {}
+    autoclone_ptr(const autoclone_ptr &a) : std::unique_ptr<T, D>(a ? a->clone() : nullptr) {}
     autoclone_ptr &operator=(const autoclone_ptr &a) {
         auto *t = a.get();
         this->reset(t ? t->clone() : nullptr);
-        return *this; }
+        return *this;
+    }
 };
 
-#endif  /* _BF_P4C_LIB_AUTOCLONE_H_ */
+#endif /* _BF_P4C_LIB_AUTOCLONE_H_ */

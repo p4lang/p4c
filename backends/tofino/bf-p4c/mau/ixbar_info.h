@@ -10,10 +10,11 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_MAU_IXBAR_INFO_H_
-#define EXTENSIONS_BF_P4C_MAU_IXBAR_INFO_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_IXBAR_INFO_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_IXBAR_INFO_H_
 
 #include <array>
+
 #include "bf-p4c/mau/mau_visitor.h"
 #include "bf-p4c/mau/resource.h"
 #include "lib/safe_vector.h"
@@ -28,7 +29,7 @@ using namespace P4;
 class CollectIXBarInfo : public MauInspector {
     const PhvInfo &phv;
     std::map<int, safe_vector<IXBar::Use::Byte>> _stage;
-    std::map<IXBar::Use::Byte, const IR::MAU::Table*> _byteToTables;
+    std::map<IXBar::Use::Byte, const IR::MAU::Table *> _byteToTables;
 
     profile_t init_apply(const IR::Node *) override;
 
@@ -45,4 +46,4 @@ class CollectIXBarInfo : public MauInspector {
 
 }  // namespace BFN
 
-#endif  /* EXTENSIONS_BF_P4C_MAU_IXBAR_INFO_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_IXBAR_INFO_H_ */

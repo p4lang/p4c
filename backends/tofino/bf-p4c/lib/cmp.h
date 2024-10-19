@@ -19,22 +19,20 @@
 /// Provides templates for lifting comparison operators from objects to pointers, and deriving
 /// related comparison operators on objects.
 
-#define OPERATOR(op, Op)                                       \
-    struct Op {                                                \
-        bool operator()(const T* left, const T* right) const { \
-            return op(left, right);                            \
-        }                                                      \
-    };                                                         \
-    static bool op(const T* left, const T* right)
+#define OPERATOR(op, Op)                                                                 \
+    struct Op {                                                                          \
+        bool operator()(const T *left, const T *right) const { return op(left, right); } \
+    };                                                                                   \
+    static bool op(const T *left, const T *right)
 
 /// Lifts == on objects to functions and functors for == and != on pointers, and also derives !=
 /// on objects. The virtual operator== is assumed to implement an equivalence relation.
 template <class T>
 class LiftEqual {
  public:
-    virtual bool operator==(const T&) const = 0;
+    virtual bool operator==(const T &) const = 0;
 
-    bool operator!=(const T& other) const { return !(operator==(other)); }
+    bool operator!=(const T &other) const { return !(operator==(other)); }
 
     OPERATOR(equal, Equal) {
         if (left != right && left && right) return *left == *right;
@@ -50,33 +48,27 @@ class LiftEqual {
 template <class T>
 class LiftLess {
  public:
-    virtual bool operator<(const T&) const = 0;
+    virtual bool operator<(const T &) const = 0;
 
-    bool operator==(const T& other) const { return !operator!=(other); }
+    bool operator==(const T &other) const { return !operator!=(other); }
 
-    bool operator!=(const T& other) const {
-        return operator<(other) || operator>(other);
-    }
+    bool operator!=(const T &other) const { return operator<(other) || operator>(other); }
 
-    bool operator> (const T& other) const {
-        return other.operator<(*dynamic_cast<const T*>(this));
-    }
+    bool operator>(const T &other) const { return other.operator<(*dynamic_cast<const T *>(this)); }
 
-    bool operator<=(const T& other) const { return !operator>(other); }
-    bool operator>=(const T& other) const { return !(operator<(other)); }
+    bool operator<=(const T &other) const { return !operator>(other); }
+    bool operator>=(const T &other) const { return !(operator<(other)); }
 
-    OPERATOR(not_equal, NotEqual) {
-        return less(left, right) || greater(left, right);
-    }
+    OPERATOR(not_equal, NotEqual) { return less(left, right) || greater(left, right); }
 
     OPERATOR(less, Less) {
         if (left != right && left && right) return *left < *right;
         return left < right;
     }
 
-    OPERATOR(equal, Equal)                { return !not_equal(left, right); }
-    OPERATOR(greater, Greater)            { return less(right, left); }
-    OPERATOR(less_equal, LessEqual)       { return !greater(left, right); }
+    OPERATOR(equal, Equal) { return !not_equal(left, right); }
+    OPERATOR(greater, Greater) { return less(right, left); }
+    OPERATOR(less_equal, LessEqual) { return !greater(left, right); }
     OPERATOR(greater_equal, GreaterEqual) { return !less(left, right); }
 };
 
@@ -85,17 +77,11 @@ class LiftLess {
 template <class T>
 class LiftCompare : public LiftEqual<T>, public LiftLess<T> {
  public:
-    bool operator!=(const T& other) const {
-        return LiftEqual<T>::operator!=(other);
-    }
+    bool operator!=(const T &other) const { return LiftEqual<T>::operator!=(other); }
 
-    OPERATOR(equal, Equal) {
-        return LiftEqual<T>::equal(left, right);
-    }
+    OPERATOR(equal, Equal) { return LiftEqual<T>::equal(left, right); }
 
-    OPERATOR(not_equal, NotEqual) {
-        return LiftEqual<T>::not_equal(left, right);
-    }
+    OPERATOR(not_equal, NotEqual) { return LiftEqual<T>::not_equal(left, right); }
 };
 
 /// A type suitable as map comparator that will compare objects of type T.
@@ -125,11 +111,9 @@ class PairLess {
     using Pair = std::pair<A, B>;
     bool operator()(const Pair &a, const Pair &b) const {
         AComp acmp;
-        if (acmp(a.first, b.first))
-            return true;
+        if (acmp(a.first, b.first)) return true;
         // !(a < b) && !(b < a) => a == b
-        if (!acmp(b.first, a.first))
-            return BCmp()(a.second, b.second);
+        if (!acmp(b.first, a.first)) return BCmp()(a.second, b.second);
         return false;
     }
 };

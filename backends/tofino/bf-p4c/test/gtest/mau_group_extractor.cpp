@@ -11,14 +11,14 @@
  */
 
 #include <iostream>
-#include <sstream>
 #include <list>
+#include <sstream>
 
-#include "gtest/gtest.h"
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
-#include "bf-p4c/test/utils/super_cluster_builder.h"
 #include "bf-p4c/logging/constrained_fields.h"
 #include "bf-p4c/logging/group_constraint_extractor.h"
+#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "bf-p4c/test/utils/super_cluster_builder.h"
+#include "gtest/gtest.h"
 
 namespace P4::Test {
 
@@ -65,7 +65,7 @@ class MauGroupExtractorTest : public TofinoBackendTest {
 )");
 
     SuperClusterBuilder scb;
-    std::list<PHV::SuperCluster*> groups;
+    std::list<PHV::SuperCluster *> groups;
     PhvInfo info;
 
     ConstrainedFieldMap fieldMap;
@@ -74,14 +74,12 @@ class MauGroupExtractorTest : public TofinoBackendTest {
 TEST_F(MauGroupExtractorTest, GetGroupThrowsOnEmpty) {
     MauGroupExtractor extractor(groups, fieldMap);
 
-    EXPECT_THROW({
-        extractor.getGroups("dummy"_cs);
-    }, Util::CompilerBug);
+    EXPECT_THROW({ extractor.getGroups("dummy"_cs); }, Util::CompilerBug);
 }
 
 TEST_F(MauGroupExtractorTest, IgnoresSuperClustersWithSingleField) {
     // Build all superclusters
-    std::optional<PHV::SuperCluster*> sc1 = scb.build_super_cluster(CLUSTER_WITH_SINGLE_SLICE);
+    std::optional<PHV::SuperCluster *> sc1 = scb.build_super_cluster(CLUSTER_WITH_SINGLE_SLICE);
     if (!sc1) FAIL() << "Failed to build the cluster!";
     groups.push_back(*sc1);
 
@@ -98,7 +96,7 @@ TEST_F(MauGroupExtractorTest, IgnoresSuperClustersWithSingleField) {
 
 TEST_F(MauGroupExtractorTest, ExtractsWholeSlices) {
     // Build all superclusters
-    std::optional<PHV::SuperCluster*> sc1 = scb.build_super_cluster(CLUSTER_WITH_WHOLE_SLICES);
+    std::optional<PHV::SuperCluster *> sc1 = scb.build_super_cluster(CLUSTER_WITH_WHOLE_SLICES);
     if (!sc1) FAIL() << "Failed to build the cluster!";
     groups.push_back(*sc1);
 
@@ -123,7 +121,6 @@ TEST_F(MauGroupExtractorTest, ExtractsWholeSlices) {
     auto mgroups = extractor.getGroups("ingress::hdr.vn_tag.$valid"_cs);
     auto &group = *mgroups[0];
 
-
     EXPECT_EQ(group[0].getParent().getName(), "ingress::hdr.arp.$valid"_cs);
     EXPECT_EQ(group[0].getRange(), le_bitrange(0, 0));
     EXPECT_EQ(group[1].getParent().getName(), "ingress::hdr.cpu.$valid"_cs);
@@ -134,7 +131,7 @@ TEST_F(MauGroupExtractorTest, ExtractsWholeSlices) {
 
 TEST_F(MauGroupExtractorTest, ExtractsPartialSlices) {
     // Build all superclusters
-    std::optional<PHV::SuperCluster*> sc1 = scb.build_super_cluster(CLUSTER_WITH_PARTIAL_SLICES);
+    std::optional<PHV::SuperCluster *> sc1 = scb.build_super_cluster(CLUSTER_WITH_PARTIAL_SLICES);
     if (!sc1) FAIL() << "Failed to build the cluster!";
     groups.push_back(*sc1);
 
@@ -165,11 +162,11 @@ TEST_F(MauGroupExtractorTest, ExtractsPartialSlices) {
 
 TEST_F(MauGroupExtractorTest, ExtractFieldInMultipleGroups) {
     // Build all superclusters
-    std::optional<PHV::SuperCluster*> sc1 = scb.build_super_cluster(CLUSTER_MULTI_A);
+    std::optional<PHV::SuperCluster *> sc1 = scb.build_super_cluster(CLUSTER_MULTI_A);
     if (!sc1) FAIL() << "Failed to build the cluster!";
     groups.push_back(*sc1);
 
-    std::optional<PHV::SuperCluster*> sc2 = scb.build_super_cluster(CLUSTER_MULTI_B);
+    std::optional<PHV::SuperCluster *> sc2 = scb.build_super_cluster(CLUSTER_MULTI_B);
     if (!sc2) FAIL() << "Failed to build the cluster!";
     groups.push_back(*sc2);
 
@@ -212,4 +209,4 @@ TEST_F(MauGroupExtractorTest, ExtractFieldInMultipleGroups) {
     EXPECT_EQ(group1[2].getRange(), le_bitrange(1, 2));
 }
 
-}   // namespace P4::Test
+}  // namespace P4::Test

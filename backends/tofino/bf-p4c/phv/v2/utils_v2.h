@@ -14,21 +14,18 @@
 #define BF_P4C_PHV_V2_UTILS_V2_H_
 
 #include <iterator>
+#include <optional>
 #include <ostream>
 #include <sstream>
 #include <vector>
-
-#include <optional>
-
-#include "lib/cstring.h"
-#include "lib/exceptions.h"
 
 #include "bf-p4c/phv/phv.h"
 #include "bf-p4c/phv/phv_fields.h"
 #include "bf-p4c/phv/utils/utils.h"
 #include "bf-p4c/phv/v2/tx_score.h"
 #include "bf-p4c/phv/v2/types.h"
-
+#include "lib/cstring.h"
+#include "lib/exceptions.h"
 
 namespace PHV {
 namespace v2 {
@@ -80,7 +77,7 @@ enum class ErrorCode {
 };
 
 /// convert @p to string.
-cstring to_str(const ErrorCode& e);
+cstring to_str(const ErrorCode &e);
 
 /// AllocError contains a code of the failure reason and detailed messages.
 /// The additional cannot_allocate_sl may be specified if some allocation process
@@ -91,53 +88,53 @@ struct AllocError {
     cstring msg;
     /// when allocating slices, and action cannot be synthesized, alloc slices in the
     /// destination container will be saved here.
-    const std::vector<AllocSlice>* invalid_packing = nullptr;
+    const std::vector<AllocSlice> *invalid_packing = nullptr;
     /// when failed to allocate a super cluster because action cannot be synthesized, if it is
     /// intrinsic conflict of constraints, then either the destination slice list needs to be
     /// sliced more, or source slice list needs to be sliced less (packed together). Both
     /// sources and destination slice lists will be saved here.
-    const ordered_set<const SuperCluster::SliceList*>* reslice_required = nullptr;
+    const ordered_set<const SuperCluster::SliceList *> *reslice_required = nullptr;
     explicit AllocError(ErrorCode code) : code(code), msg(cstring::empty) {}
     AllocError(ErrorCode code, cstring msg) : code(code), msg(msg) {}
     std::string str() const;
 };
 
-template<class T>
-AllocError& operator<<(AllocError& e, const T& v) {
+template <class T>
+AllocError &operator<<(AllocError &e, const T &v) {
     std::stringstream ss;
     ss << v;
     e.msg += ss.str();
     return e;
 }
 
-std::ostream& operator<<(std::ostream& out, const AllocError& e);
+std::ostream &operator<<(std::ostream &out, const AllocError &e);
 
 /// AllocResult is the most common return type of an allocation function. It is either an error
 /// or a PHV::Transaction if succeeded.
 struct AllocResult {
-    const AllocError* err = nullptr;
+    const AllocError *err = nullptr;
     std::optional<PHV::Transaction> tx;
-    explicit AllocResult(const AllocError* err): err(err) {}
-    explicit AllocResult(const Transaction& tx): tx(tx) {}
+    explicit AllocResult(const AllocError *err) : err(err) {}
+    explicit AllocResult(const Transaction &tx) : tx(tx) {}
     bool ok() const { return err == nullptr; }
     std::string err_str() const;
     std::string tx_str(cstring prefix = ""_cs) const;
-    static std::string pretty_print_tx(const PHV::Transaction& tx, cstring prefix = cstring::empty);
-    bool operator==(const AllocResult& other) const;
+    static std::string pretty_print_tx(const PHV::Transaction &tx, cstring prefix = cstring::empty);
+    bool operator==(const AllocResult &other) const;
 };
 
 /// ScAllocAlignment is the alignment arrangement for a super cluster based on its alignment
 /// constraints of slice lists and aligned clusters.
 struct ScAllocAlignment {
     /// a cluster_alignment maps aligned cluster to start bit location in a container.
-    ordered_map<const AlignedCluster*, int> cluster_starts;
+    ordered_map<const AlignedCluster *, int> cluster_starts;
     /// @returns merged alignment constraint if no conflict was found.
-    std::optional<ScAllocAlignment> merge(const ScAllocAlignment& other) const;
+    std::optional<ScAllocAlignment> merge(const ScAllocAlignment &other) const;
     /// @returns pretty print string for the alignment of @p sc.
-    cstring pretty_print(cstring prefix, const SuperCluster* sc) const;
+    cstring pretty_print(cstring prefix, const SuperCluster *sc) const;
     /// @returns true if it is okay to place field slices in @p aligned to @p start index of
     /// a container.
-    bool ok(const AlignedCluster* aligned, int start) const {
+    bool ok(const AlignedCluster *aligned, int start) const {
         return !cluster_starts.count(aligned) || cluster_starts.at(aligned) == start;
     }
     /// @returns true if there is no alignment scheduled: cluster without slice lists.
@@ -150,8 +147,8 @@ struct ScAllocAlignment {
 /// NOTE: when @p sl_order is provided, it must have exactly all the slice list in @p sc and
 /// no more.
 std::vector<ScAllocAlignment> make_sc_alloc_alignment(
-    const SuperCluster* sc, const PHV::Size width, const int max_n,
-    const std::list<const SuperCluster::SliceList*>* sl_order = nullptr);
+    const SuperCluster *sc, const PHV::Size width, const int max_n,
+    const std::list<const SuperCluster::SliceList *> *sl_order = nullptr);
 
 /// a collection of allocation configurations that balances speed and performance of allocation.
 struct SearchConfig {
@@ -174,31 +171,31 @@ struct SearchConfig {
 /// ScoreContext is the allocation context that is updated and passed down during allocation.
 class ScoreContext {
     /// current super cluster that we are trying to allocate.
-    const SuperCluster* sc_i = nullptr;
+    const SuperCluster *sc_i = nullptr;
 
     /// current container group that we are trying to allocate.
-    const ContainerGroup* cont_group_i = nullptr;
+    const ContainerGroup *cont_group_i = nullptr;
 
     /// allocation ordered of a super cluster.
-    const std::vector<const SuperCluster::SliceList*>* alloc_order_i = {};
+    const std::vector<const SuperCluster::SliceList *> *alloc_order_i = {};
 
     /// decided allocation alignment under current context.
-    const ScAllocAlignment* alloc_alignment_i = nullptr;
+    const ScAllocAlignment *alloc_alignment_i = nullptr;
 
     /// factory for allocation score.
-    const TxScoreMaker* score_i = nullptr;
+    const TxScoreMaker *score_i = nullptr;
 
     /// t is the log level.
     int t_i = 0;
 
     /// search time related parameters.
-    const SearchConfig* search_config_i = new SearchConfig();
+    const SearchConfig *search_config_i = new SearchConfig();
 
     /// tracer will try to log steps of every allocation.
-    std::ostream* tracer = nullptr;
+    std::ostream *tracer = nullptr;
 
  private:
-    static constexpr const char* tab_table[] = {
+    static constexpr const char *tab_table[] = {
         "", " ", "  ", "   ", "    ", "     ", "      ", "       ", "        ",
     };
     static constexpr int max_log_level = sizeof(tab_table) / sizeof(tab_table[0]) - 1;
@@ -206,61 +203,58 @@ class ScoreContext {
  public:
     ScoreContext() {}
 
-    const SuperCluster* sc() const {
+    const SuperCluster *sc() const {
         BUG_CHECK(sc_i, "sc not added in ctx.");
         return sc_i;
     }
-    ScoreContext with_sc(const SuperCluster* sc) const {
+    ScoreContext with_sc(const SuperCluster *sc) const {
         auto cloned = *this;
         cloned.sc_i = sc;
         return cloned;
     }
 
-    const ContainerGroup* cont_group() const {
+    const ContainerGroup *cont_group() const {
         BUG_CHECK(cont_group_i, "container group not added in ctx.");
         return cont_group_i;
     }
-    ScoreContext with_cont_group(const ContainerGroup* cont_group) const {
+    ScoreContext with_cont_group(const ContainerGroup *cont_group) const {
         auto cloned = *this;
         cloned.cont_group_i = cont_group;
         return cloned;
     }
 
-    const std::vector<const SuperCluster::SliceList*>* alloc_order() const {
+    const std::vector<const SuperCluster::SliceList *> *alloc_order() const {
         BUG_CHECK(alloc_order_i, "sl alloc order not added in ctx.");
         return alloc_order_i;
     }
-    ScoreContext with_alloc_order(
-            const std::vector<const SuperCluster::SliceList*>* order) const {
+    ScoreContext with_alloc_order(const std::vector<const SuperCluster::SliceList *> *order) const {
         auto cloned = *this;
         cloned.alloc_order_i = order;
         return cloned;
     }
 
-    const ScAllocAlignment* alloc_alignment() const {
+    const ScAllocAlignment *alloc_alignment() const {
         BUG_CHECK(alloc_alignment_i, "alloc alignment not added in ctx.");
         return alloc_alignment_i;
     }
-    ScoreContext with_alloc_alignment(const ScAllocAlignment* alignment) const {
+    ScoreContext with_alloc_alignment(const ScAllocAlignment *alignment) const {
         auto cloned = *this;
         cloned.alloc_alignment_i = alignment;
         return cloned;
     }
 
-    const TxScoreMaker* score() const {
+    const TxScoreMaker *score() const {
         BUG_CHECK(score_i, "score not added in ctx.");
         return score_i;
     }
-    ScoreContext with_score(const TxScoreMaker* score) const {
+    ScoreContext with_score(const TxScoreMaker *score) const {
         auto cloned = *this;
         cloned.score_i = score;
         return cloned;
     }
 
     int t() const { return t_i; }
-    std::string t_tabs() const {
-        return tab_table[t_i];
-    }
+    std::string t_tabs() const { return tab_table[t_i]; }
     ScoreContext with_t(int t) const {
         if (t > max_log_level) t = max_log_level;
         auto cloned = *this;
@@ -268,8 +262,8 @@ class ScoreContext {
         return cloned;
     }
 
-    const SearchConfig* search_config() const { return search_config_i; }
-    ScoreContext with_search_config(const SearchConfig* c) const {
+    const SearchConfig *search_config() const { return search_config_i; }
+    ScoreContext with_search_config(const SearchConfig *c) const {
         auto cloned = *this;
         cloned.search_config_i = c;
         return cloned;

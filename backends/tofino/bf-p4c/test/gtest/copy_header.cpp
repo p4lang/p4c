@@ -12,11 +12,10 @@
 
 #include "bf-p4c/midend/copy_header.h"
 
-#include "bf-p4c/midend/type_checker.h"
-#include "frontends/p4/simplifyParsers.h"
 #include "bf-p4c/midend/elim_cast.h"
-
+#include "bf-p4c/midend/type_checker.h"
 #include "bf_gtest_helpers.h"
+#include "frontends/p4/simplifyParsers.h"
 #include "gtest/gtest.h"
 
 namespace P4::Test {
@@ -51,23 +50,24 @@ auto depaser = "apply{packet.emit(hdr);}";
 // We need to first `SimplifyParsers` viz collapse the states into a single state{} block.
 // Then we apply the CopyHeaders, which will not add redundant $valid assignments.
 // The single $valid=0 assignments will then be correctly handled by the back-end.
-#define RUN_TEST(parser, output) \
-    do { \
-    auto blk = TestCode(TestCode::Hdr::TofinoMin, TestCode::tofino_shell(), \
-                   {defs, parser, TestCode::empty_appy(), depaser}, \
-                   TestCode::tofino_shell_parser_marker()); \
-    EXPECT_TRUE(blk.apply_pass(TestCode::Pass::FullFrontend)); \
-    P4::ReferenceMap refMap; \
-    refMap.setIsV1(true); \
-    P4::TypeMap typeMap; \
-    auto typeChecking = new BFN::TypeChecking(&refMap, &typeMap, true); \
-    EXPECT_TRUE(blk.apply_pass(typeChecking)); \
-    EXPECT_TRUE(blk.apply_pass(new P4::SimplifyParsers())); \
-    EXPECT_TRUE(blk.apply_pass(new BFN::CopyHeaders(&refMap, &typeMap, typeChecking))); \
-    auto res = blk.match(output); \
-    EXPECT_TRUE(res.success) << "    @ output[" << res.count<< "], char pos=" << res.pos << "\n" \
-                             << "    '" << output[res.count] << "'\n" \
-                             << "    '" << blk.extract_code(res.pos) << "'\n"; \
+#define RUN_TEST(parser, output)                                                              \
+    do {                                                                                      \
+        auto blk = TestCode(TestCode::Hdr::TofinoMin, TestCode::tofino_shell(),               \
+                            {defs, parser, TestCode::empty_appy(), depaser},                  \
+                            TestCode::tofino_shell_parser_marker());                          \
+        EXPECT_TRUE(blk.apply_pass(TestCode::Pass::FullFrontend));                            \
+        P4::ReferenceMap refMap;                                                              \
+        refMap.setIsV1(true);                                                                 \
+        P4::TypeMap typeMap;                                                                  \
+        auto typeChecking = new BFN::TypeChecking(&refMap, &typeMap, true);                   \
+        EXPECT_TRUE(blk.apply_pass(typeChecking));                                            \
+        EXPECT_TRUE(blk.apply_pass(new P4::SimplifyParsers()));                               \
+        EXPECT_TRUE(blk.apply_pass(new BFN::CopyHeaders(&refMap, &typeMap, typeChecking)));   \
+        auto res = blk.match(output);                                                         \
+        EXPECT_TRUE(res.success) << "    @ output[" << res.count << "], char pos=" << res.pos \
+                                 << "\n"                                                      \
+                                 << "    '" << output[res.count] << "'\n"                     \
+                                 << "    '" << blk.extract_code(res.pos) << "'\n";            \
     } while (0)
 
 }  // namespace
@@ -78,12 +78,8 @@ TEST(CopyHeaders, IgnoreUnusedHeaderInline) {
             packet.extract(hdr.h);
             transition accept;
         })";
-    Match::CheckList output {
-        "state start {",
-            "packet.extract<Hdr>(hdr.h);",
-            "transition accept;",
-        "}"
-    };
+    Match::CheckList output{"state start {", "packet.extract<Hdr>(hdr.h);", "transition accept;",
+                            "}"};
     RUN_TEST(parser, output);
 }
 
@@ -94,14 +90,12 @@ TEST(CopyHeaders, IgnoreUnusedHeaderIndirect1) {
             indirect.apply(packet, hdr);
             transition accept;
         })";
-    Match::CheckList output {
-        "state start {",
-            "hdr.h.$valid = 1w0;",
-            "hdr.unused.$valid = 1w0;",
-            "packet.extract<Hdr>(hdr.h);",
-            "transition accept;",
-        "}"
-    };
+    Match::CheckList output{"state start {",
+                            "hdr.h.$valid = 1w0;",
+                            "hdr.unused.$valid = 1w0;",
+                            "packet.extract<Hdr>(hdr.h);",
+                            "transition accept;",
+                            "}"};
     RUN_TEST(parser, output);
 }
 
@@ -112,14 +106,12 @@ TEST(CopyHeaders, IgnoreUnusedHeaderIndirect2) {
             indirect.apply(packet, hdr);
             transition accept;
         })";
-    Match::CheckList output {
-        "state start {",
-            "hdr.h.$valid = 1w0;",
-            "hdr.unused.$valid = 1w0;",
-            "packet.extract<Hdr>(hdr.h);",
-            "transition accept;",
-        "}"
-    };
+    Match::CheckList output{"state start {",
+                            "hdr.h.$valid = 1w0;",
+                            "hdr.unused.$valid = 1w0;",
+                            "packet.extract<Hdr>(hdr.h);",
+                            "transition accept;",
+                            "}"};
     RUN_TEST(parser, output);
 }
 
@@ -162,54 +154,55 @@ TEST(CopyHeaders, Lower$valid) {
                 hdr.h[0].setInvalid();
             }
         })";
-    Match::CheckList expected {
+    Match::CheckList expected{
         "action NoAction_1() { }",
         "action act() { }",
         "table tbl_0 {",
-            "key = {",
-                "hdr.h[0].field : exact ;",
-                "hdr.h[1].boolean", ": exact ;",  // ENABLE_P4C3251 changes the whitespace!
+        "key = {",
+        "hdr.h[0].field : exact ;",
+        "hdr.h[1].boolean",
+        ": exact ;",  // ENABLE_P4C3251 changes the whitespace!
 #if ENABLE_P4C3251
-                "hdr.h[0].$valid : exact ;",
+        "hdr.h[0].$valid : exact ;",
 #else
-                "hdr.h[0].isValid(): exact ;",
+        "hdr.h[0].isValid(): exact ;",
 #endif
-            "}",
-            "actions = {",
-                "act();",
-                "NoAction_1();",
-            "}",
-            "const entries = {",
+        "}",
+        "actions = {",
+        "act();",
+        "NoAction_1();",
+        "}",
+        "const entries = {",
 #if ENABLE_P4C3251
-                "(1w1, true, 1w1) : act();",
-                "(1w0, default, 1w0) : act();",
+        "(1w1, true, 1w1) : act();",
+        "(1w0, default, 1w0) : act();",
 #else
-                "(1w1, true, true) : act();",
-                "(1w0, default, false) : act();",
+        "(1w1, true, true) : act();",
+        "(1w0, default, false) : act();",
 #endif
-                "(default, true, default) : act();",
-            "}",
-            "default_action = NoAction_1();",
+        "(default, true, default) : act();",
+        "}",
+        "default_action = NoAction_1();",
         "}",
         "apply {",
 #if ENABLE_P4C3251
-            "if (!(hdr.h[0].$valid == 1w1)) {",
+        "if (!(hdr.h[0].$valid == 1w1)) {",
 #else
-            "if (hdr.h[0].isValid()) { ; }",
-            "else {",
+        "if (hdr.h[0].isValid()) { ; }",
+        "else {",
 #endif
-                "hdr.h[0].$valid = 1w0;",
-                "tbl_0.apply();",
-            "}",
+        "hdr.h[0].$valid = 1w0;",
+        "tbl_0.apply();",
+        "}",
 #if ENABLE_P4C3251
-            "if (1w1 == (bit<1>)hdr.h[0].$valid) {",
+        "if (1w1 == (bit<1>)hdr.h[0].$valid) {",
 #else
-            "if (1w1 == (bit<1>)hdr.h[0].isValid()) {",
+        "if (1w1 == (bit<1>)hdr.h[0].isValid()) {",
 #endif
-                "hdr.h[0].$valid = 1w0;",
-                "hdr.h[0].$valid = 1w1;",
-                "hdr.h[0].$valid = 1w0;",
-            "}",
+        "hdr.h[0].$valid = 1w0;",
+        "hdr.h[0].$valid = 1w1;",
+        "hdr.h[0].$valid = 1w0;",
+        "}",
         "}",
     };
 
@@ -227,7 +220,7 @@ TEST(CopyHeaders, Lower$valid) {
     EXPECT_TRUE(blk.apply_pass(new P4::SimplifyParsers()));
     EXPECT_TRUE(blk.apply_pass(new BFN::CopyHeaders(&refMap, &typeMap, typeChecking)));
     auto res = blk.match(expected);
-    EXPECT_TRUE(res.success) << "    @ expected[" << res.count<< "], char pos=" << res.pos << "\n"
+    EXPECT_TRUE(res.success) << "    @ expected[" << res.count << "], char pos=" << res.pos << "\n"
                              << "    '" << expected[res.count] << "'\n"
                              << "    '" << blk.extract_code(res.pos) << "'\n";
 }

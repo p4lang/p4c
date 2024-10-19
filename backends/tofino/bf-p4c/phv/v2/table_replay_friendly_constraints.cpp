@@ -12,10 +12,11 @@
 
 #include "table_replay_friendly_constraints.h"
 
-std::ostream& operator<<(std::ostream &out, const AllocInfo &ai ) {
+std::ostream &operator<<(std::ostream &out, const AllocInfo &ai) {
     Log::TempIndent indent;
-    out << "AllocInfo [ " << ai.length << " " << ai.container_size << " " << ai.perfectly_aligned <<
-        " ]" << std::endl << indent;
+    out << "AllocInfo [ " << ai.length << " " << ai.container_size << " " << ai.perfectly_aligned
+        << " ]" << std::endl
+        << indent;
     out << "\tpack_with: [ ";
     for (auto pw : ai.pack_with) {
         out << pw << " ";
@@ -26,7 +27,7 @@ std::ostream& operator<<(std::ostream &out, const AllocInfo &ai ) {
 
 namespace PHV {
 namespace v2 {
-const IR::Node *TableReplayFriendlyPhvConstraints::preorder(IR::BFN::Pipe * pipe) {
+const IR::Node *TableReplayFriendlyPhvConstraints::preorder(IR::BFN::Pipe *pipe) {
     field_candidates.clear();
     action_to_fields.clear();
     if (mau_backtracker.get_table_summary()->getActualState() !=
@@ -38,8 +39,9 @@ const IR::Node *TableReplayFriendlyPhvConstraints::preorder(IR::BFN::Pipe * pipe
     } else {
         problematic_table =
             mau_backtracker.get_table_summary()->get_table_replay_problematic_table();
-        LOG1("problematic table is " << problematic_table->name << " due to " <<
-            mau_backtracker.get_table_summary()->get_table_replay_result());
+        LOG1("problematic table is "
+             << problematic_table->name << " due to "
+             << mau_backtracker.get_table_summary()->get_table_replay_result());
     }
     return pipe;
 }
@@ -50,8 +52,10 @@ const IR::Node *TableReplayFriendlyPhvConstraints::preorder(IR::Expression *expr
     if (!table) return expr;
     const IR::MAU::Action *action = findContext<IR::MAU::Action>();
     // If it failed due to adb or memory, we only care about fields in actions.
-    if ((table_replay_result == TableSummary::FAIL_ON_ADB
-        || table_replay_result == TableSummary::FAIL_ON_MEM) && !action) return expr;
+    if ((table_replay_result == TableSummary::FAIL_ON_ADB ||
+         table_replay_result == TableSummary::FAIL_ON_MEM) &&
+        !action)
+        return expr;
     // If it failed due to ixbar, we only care about table keys.
     const IR::MAU::TableKey *key = findContext<IR::MAU::TableKey>();
     if (table_replay_result == TableSummary::FAIL_ON_IXBAR && !key) return expr;
@@ -87,7 +91,7 @@ const IR::Node *TableReplayFriendlyPhvConstraints::preorder(IR::Expression *expr
             }
             auto real_alloc = real_allocation_info.at(f->name).at(index);
             if (!(trivial_alloc.length == real_alloc.length &&
-                trivial_alloc.container_size == real_alloc.container_size)) {
+                  trivial_alloc.container_size == real_alloc.container_size)) {
                 container_size_is_same = false;
                 break;
             }
@@ -142,8 +146,8 @@ void TableReplayFriendlyPhvConstraints::end_apply(const IR::Node *) {
         for (int index = 0; index < field_candidate->size;) {
             BUG_CHECK(alloc_info.find(index) != alloc_info.end(), "index not found");
             size_vec.push_back(PHV::Size(alloc_info[index].container_size));
-            fields_pack_with_trivial_alloc.insert(
-                alloc_info[index].pack_with.begin(), alloc_info[index].pack_with.end());
+            fields_pack_with_trivial_alloc.insert(alloc_info[index].pack_with.begin(),
+                                                  alloc_info[index].pack_with.end());
             if (alloc_info[index].length != (int)alloc_info[index].container_size) {
                 break;
             } else {
@@ -155,8 +159,7 @@ void TableReplayFriendlyPhvConstraints::end_apply(const IR::Node *) {
         if (!container_size_ok.count(field_candidate)) {
             add_pa_container_size[field_candidate->name] = size_vec;
             std::stringstream size_vec_str;
-            for (auto size : size_vec)
-                size_vec_str << " " << size;
+            for (auto size : size_vec) size_vec_str << " " << size;
             LOG3("adding pa_container_size for" << field_candidate << size_vec_str.str());
         }
         // pa_no_pack pragmas only for FAIL_ON_ADB and FAIL_ON_MEM
@@ -171,8 +174,8 @@ void TableReplayFriendlyPhvConstraints::end_apply(const IR::Node *) {
             }
             auto alloc_info = real_allocation_info.at(field_candidate->name);
             for (auto it : alloc_info) {
-                fields_pack_with_real_alloc.insert(
-                    it.second.pack_with.begin(), it.second.pack_with.end());
+                fields_pack_with_real_alloc.insert(it.second.pack_with.begin(),
+                                                   it.second.pack_with.end());
             }
             for (auto field : fields_pack_with_real_alloc) {
                 LOG5("\tFields pack with real alloc : " << field);
@@ -193,8 +196,8 @@ void TableReplayFriendlyPhvConstraints::end_apply(const IR::Node *) {
 
 void CollectPHVAllocationResult::end_apply(const IR::Node *) {
     auto state = mau_backtracker.get_table_summary()->getActualState();
-    auto &allocation_info = state == State::ALT_INITIAL ?
-        trivial_allocation_info : real_allocation_info;
+    auto &allocation_info =
+        state == State::ALT_INITIAL ? trivial_allocation_info : real_allocation_info;
     allocation_info.clear();
     for (auto &field : phv) {
         for (auto &alloc : field.get_alloc()) {
@@ -210,7 +213,7 @@ void CollectPHVAllocationResult::end_apply(const IR::Node *) {
 
     // perfectly_aligned means that except for the last AllocSlice, every AllocSlice of a fieldslice
     // can occupy a container entirely.
-    for (const auto &[ field_name, alloc_align ] : allocation_info) {
+    for (const auto &[field_name, alloc_align] : allocation_info) {
         bool perfectly_aligned = true;
         auto field = phv.field(field_name);
         LOG5("Checking field: " << field);

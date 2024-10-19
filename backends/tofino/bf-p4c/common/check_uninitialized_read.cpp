@@ -17,12 +17,12 @@
 #include "bf-p4c/mau/table_dependency_graph.h"
 
 // FindUninitializedAndOverlayedReads
-bool FindUninitializedAndOverlayedReads::preorder(const IR::BFN::DeparserParameter* param) {
+bool FindUninitializedAndOverlayedReads::preorder(const IR::BFN::DeparserParameter *param) {
     if (param->source) pov_protected_fields.insert(phv.field(param->source->field));
     return false;
 }
 
-bool FindUninitializedAndOverlayedReads::preorder(const IR::BFN::Digest* digest) {
+bool FindUninitializedAndOverlayedReads::preorder(const IR::BFN::Digest *digest) {
     pov_protected_fields.insert(phv.field(digest->selector->field));
     return false;
 }
@@ -31,7 +31,7 @@ void FindUninitializedAndOverlayedReads::end_apply() {
     Log::TempIndent indent;
     LOG1("FindUninitializedAndOverlayedReads end_apply" << indent);
 
-    auto is_ignored_field = [&](const PHV::Field &field){
+    auto is_ignored_field = [&](const PHV::Field &field) {
         if (pragmas.pa_no_init().getFields().count(&field)) {
             LOG3("\tIgnore fields with pa_no_init pragma : " << field);
             return true;
@@ -76,8 +76,7 @@ void FindUninitializedAndOverlayedReads::end_apply() {
     auto get_min_stage = [&](const IR::BFN::Unit *u) {
         int min_stage = Device::numStages();
         if (auto *table = u->to<IR::MAU::Table>()) {
-            min_stage = table->stage() > -1 ?
-                table->stage() : deps.min_stage(table);
+            min_stage = table->stage() > -1 ? table->stage() : deps.min_stage(table);
         } else if (u->is<IR::BFN::Parser>() || u->is<IR::BFN::ParserState>()) {
             min_stage = -1;
         }
@@ -87,7 +86,7 @@ void FindUninitializedAndOverlayedReads::end_apply() {
     auto get_slice_defs = [&](const PHV::AllocSlice &sl) {
         FieldDefUse::LocPairSet slice_defs;
         auto lr_start = sl.getEarliestLiveness();
-        auto lr_end   = sl.getLatestLiveness();
+        auto lr_end = sl.getLatestLiveness();
 
         for (const auto &def : defuse.getAllDefs(sl.field()->id)) {
             le_bitrange bits;
@@ -105,7 +104,7 @@ void FindUninitializedAndOverlayedReads::end_apply() {
     auto get_slice_uses = [&](const PHV::AllocSlice &sl) {
         FieldDefUse::LocPairSet slice_uses;
         auto lr_start = sl.getEarliestLiveness();
-        auto lr_end   = sl.getLatestLiveness();
+        auto lr_end = sl.getLatestLiveness();
 
         for (auto &use : defuse.getAllUses(sl.field()->id)) {
             le_bitrange bits;
@@ -159,8 +158,8 @@ void FindUninitializedAndOverlayedReads::end_apply() {
                     // live before or during the slice live range.
                     bool nodefs = defs_of_use.empty();
                     if (nodefs) {
-                        LOG6("\t\t\tUse of field [ " << use.first->toString() << " : "
-                             << use.second << " ] does not have a def");
+                        LOG6("\t\t\tUse of field [ " << use.first->toString() << " : " << use.second
+                                                     << " ] does not have a def");
                         // Get stage for the field use
                         auto field_min_stage = get_min_stage(use.first);
                         LOG5("f_use_stage: " << field_min_stage);
@@ -168,8 +167,8 @@ void FindUninitializedAndOverlayedReads::end_apply() {
                         int field2_min_stage = Device::numStages();
                         for (auto &def2 : get_slice_defs(f2sl)) {
                             int field2_def_min_stage = get_min_stage(def2.first);
-                            LOG5("f2_def_stage: " << field2_def_min_stage <<
-                                 " Implicit: " << def2.second->is<ImplicitParserInit>());
+                            LOG5("f2_def_stage: " << field2_def_min_stage << " Implicit: "
+                                                  << def2.second->is<ImplicitParserInit>());
                             if ((field2_def_min_stage < field2_min_stage) &&
                                 !def2.second->is<ImplicitParserInit>())
                                 field2_min_stage = field2_def_min_stage;
@@ -179,7 +178,8 @@ void FindUninitializedAndOverlayedReads::end_apply() {
                         // stage that field1 has a write
                         if (field_min_stage <= field2_min_stage) {
                             LOG1("\t\t\tField min stage " << field_min_stage
-                                 << " before overlay min stage " << field2_min_stage);
+                                                          << " before overlay min stage "
+                                                          << field2_min_stage);
                         } else {
                             // Check if overlayed field2 slice has defs which
                             // may corrupt field1
@@ -197,14 +197,14 @@ void FindUninitializedAndOverlayedReads::end_apply() {
                                 continue;
                             }
 
-                            auto field_slice = field.name
-                                + fsl.field_slice().formatAsSlice(field.size);
-                            auto overlay_slice = field2->name
-                                + f2sl.field_slice().formatAsSlice(field2->size);
-                            auto field_cont_slice = cont.toString()
-                                + csl.formatAsSlice(cont.size());
-                            auto overlay_cont_slice = cont.toString()
-                                + csl2.formatAsSlice(cont.size());
+                            auto field_slice =
+                                field.name + fsl.field_slice().formatAsSlice(field.size);
+                            auto overlay_slice =
+                                field2->name + f2sl.field_slice().formatAsSlice(field2->size);
+                            auto field_cont_slice =
+                                cont.toString() + csl.formatAsSlice(cont.size());
+                            auto overlay_cont_slice =
+                                cont.toString() + csl2.formatAsSlice(cont.size());
                             auto loc = use.first->toString();
 
                             uninit_reads.emplace(field_slice, overlay_slice, field_cont_slice,
@@ -215,11 +215,11 @@ void FindUninitializedAndOverlayedReads::end_apply() {
                                  << " at " << loc);
                         }
                     } else {
-                        LOG6("\t\t\tUse of field [ " << use.first->toString() << " : "
-                             << use.second << " ] has def(s)");
+                        LOG6("\t\t\tUse of field [ " << use.first->toString() << " : " << use.second
+                                                     << " ] has def(s)");
                         for (auto &def : defs_of_use) {
-                            LOG7("\t\t\t\tDef at [ " << def.first->toString() << " : "
-                                 << def.second << " ]");
+                            LOG7("\t\t\t\tDef at [ " << def.first->toString() << " : " << def.second
+                                                     << " ]");
                         }
                     }
                 }
@@ -232,7 +232,8 @@ void FindUninitializedAndOverlayedReads::end_apply() {
         std::stringstream ss;
         ss << " (CRITICAL)" << std::endl;
         ss << "Following field(s) have an uninitialized read with an overlay which can potentially"
-              " cause invalid field value for specified usage" << std::endl;
+              " cause invalid field value for specified usage"
+           << std::endl;
 
         std::vector<std::string> headers;
         headers.push_back("Field");
@@ -256,26 +257,29 @@ void FindUninitializedAndOverlayedReads::end_apply() {
            << std::endl;
         ss << "NOTES: " << std::endl;
         ss << " - For fields with headers setValid() in MAU please initialize all fields in"
-              " the header" << std::endl;
+              " the header"
+           << std::endl;
         ss << " - For padding fields please use @padding annotation on the field" << std::endl;
         ss << " - For metadata fields @pa_auto_init_metadata can be used to auto initialize"
-              " all metadata fields" << std::endl;
+              " all metadata fields"
+           << std::endl;
         ss << " - Warning can be ignored if uninitialized reads are intentional and do not affect"
-              " program execution in any way" << std::endl;
+              " program execution in any way"
+           << std::endl;
         ss << " - P4 Language Spec states an uninitialized field can have an unspecified value and"
-              " PHV allocation overlays such fields for more efficient packing" << std::endl;
+              " PHV allocation overlays such fields for more efficient packing"
+           << std::endl;
 
         warning(BFN::ErrorType::WARN_UNINIT_OVERLAY, "%s", ss.str());
     }
 }
 
 // CheckUninitializedAndOverlayedReads
-CheckUninitializedAndOverlayedReads::CheckUninitializedAndOverlayedReads(const FieldDefUse &defuse,
-        const PhvInfo& phv, const PHV::Pragmas &pragmas, const BFN_Options &options) {
+CheckUninitializedAndOverlayedReads::CheckUninitializedAndOverlayedReads(
+    const FieldDefUse &defuse, const PhvInfo &phv, const PHV::Pragmas &pragmas,
+    const BFN_Options &options) {
     auto *deps = new DependencyGraph();
-    addPasses({
-        new FindDependencyGraph(phv, *deps, &options, ""_cs, "Before Uninitialized Read Check"_cs),
-        new FindUninitializedAndOverlayedReads(defuse, phv, pragmas, *deps)
-    });
+    addPasses(
+        {new FindDependencyGraph(phv, *deps, &options, ""_cs, "Before Uninitialized Read Check"_cs),
+         new FindUninitializedAndOverlayedReads(defuse, phv, pragmas, *deps)});
 }
-

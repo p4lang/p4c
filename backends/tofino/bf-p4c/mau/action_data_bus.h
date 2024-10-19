@@ -13,8 +13,8 @@
 #ifndef BF_P4C_MAU_ACTION_DATA_BUS_H_
 #define BF_P4C_MAU_ACTION_DATA_BUS_H_
 
-#include "bf-p4c/mau/table_layout.h"
 #include "bf-p4c/mau/action_format.h"
+#include "bf-p4c/mau/table_layout.h"
 #include "lib/safe_vector.h"
 
 using namespace P4;
@@ -45,7 +45,7 @@ using namespace P4;
  *  half-word mux between bytes 16-63, and a full word mux between bytes 64-128.  These
  *  muxes can only have one input per immediate word.  Immediate allocation on the action bus
  *  occurs on a mod 4 post-shift in match central.
- * 
+ *
  *  The constraints are similar to action data tables in that regions of the immediate data must
  *  be contiguously allocated within a 16 byte region of the action data bus.  With immediate
  *  action data, the input allocation must be 4 byte contiguous.
@@ -65,7 +65,7 @@ struct ActionDataBus {
             if (type != loc.type) return false;
             return true;
         };
-        bool operator!=(const Loc &loc) const { return !(*this==loc); }
+        bool operator!=(const Loc &loc) const { return !(*this == loc); }
     };
     /** Information on the sharing of resources between the BYTE/HALF regions and a potential
      *  full setion sharing the same location in the action data table
@@ -82,15 +82,14 @@ struct ActionDataBus {
         }
     };
 
-
     /** The bytes used by an individual table, stored in the TableResourceAlloc */
     struct Use {
         /** An individual space within the Use.  Used to update the reserved space */
         struct ReservedSpace {
             Loc location;
             int byte_offset = -1;  ///> Bytes from the lsb of the Action Data Format
-            bitvec bytes_used;  ///> Not all of the bytes in the slot may necessarily be used,
-                                ///> if they don't contain action data
+            bitvec bytes_used;     ///> Not all of the bytes in the slot may necessarily be used,
+                                   ///> if they don't contain action data
             ActionData::Location_t source = ActionData::ALL_LOCATIONS;  ///> Is IMMED, ADT or METER
             ReservedSpace(Loc l, int bo, bitvec bu)
                 : location(l), byte_offset(bo), bytes_used(bu) {}
@@ -106,7 +105,7 @@ struct ActionDataBus {
                 if (source != rs.source) return false;
                 return true;
             }
-            bool operator!=(const ReservedSpace &rs) const { return !(*this==rs); }
+            bool operator!=(const ReservedSpace &rs) const { return !(*this == rs); }
         };
         // Locations of action data where the ALUs will pull action data
         safe_vector<ReservedSpace> action_data_locs;
@@ -115,7 +114,8 @@ struct ActionDataBus {
         virtual ~Use() {}
         virtual void clear() {
             action_data_locs.clear();
-            clobber_locs.clear(); }
+            clobber_locs.clear();
+        }
         virtual Use *clone() const = 0;
         virtual bool emit_adb_asm(std::ostream &, const IR::MAU::Table *, bitvec source) const = 0;
         virtual bool empty() const { return action_data_locs.empty() && clobber_locs.empty(); }
@@ -125,13 +125,19 @@ struct ActionDataBus {
             if (clobber_locs != use.clobber_locs) return false;
             return true;
         };
-        bool operator!=(const Use &use) const { return !(*this==use); }
+        bool operator!=(const Use &use) const { return !(*this == use); }
         friend std::ostream &operator<<(std::ostream &out, const Use &u);
     };
 
     /** Location Algorithm: For finding an allocation within the correct type region */
-    enum loc_alg_t {FIND_NORMAL, FIND_LOWER, FIND_FULL, FIND_IMMED_UPPER, FIND_FULL_HALF,
-                    FIND_FULL_BYTE };
+    enum loc_alg_t {
+        FIND_NORMAL,
+        FIND_LOWER,
+        FIND_FULL,
+        FIND_IMMED_UPPER,
+        FIND_FULL_HALF,
+        FIND_FULL_BYTE
+    };
 
     virtual void clear();
 
@@ -142,20 +148,21 @@ struct ActionDataBus {
     ordered_map<cstring, const Use &> reduction_or_mapping;
 
  public:
-    virtual ~ActionDataBus() { }
+    virtual ~ActionDataBus() {}
 
     virtual bool alloc_action_data_bus(const IR::MAU::Table *tbl,
-        const ActionData::Format::Use *use, TableResourceAlloc &alloc) = 0;
-    virtual bool alloc_action_data_bus(const IR::MAU::Table *tbl,
-        const MeterALU::Format::Use *use, TableResourceAlloc &alloc) = 0;
+                                       const ActionData::Format::Use *use,
+                                       TableResourceAlloc &alloc) = 0;
+    virtual bool alloc_action_data_bus(const IR::MAU::Table *tbl, const MeterALU::Format::Use *use,
+                                       TableResourceAlloc &alloc) = 0;
     virtual void update(cstring name, const Use &alloc);
     virtual void update(cstring name, const Use::ReservedSpace &rs) = 0;
     virtual void update(const IR::MAU::Table *tbl);
     virtual void update(cstring name, const TableResourceAlloc *alloc, const IR::MAU::Table *tbl);
     virtual void update_action_data(cstring name, const TableResourceAlloc *alloc,
-        const IR::MAU::Table *tbl);
+                                    const IR::MAU::Table *tbl);
     virtual void update_meter(cstring name, const TableResourceAlloc *alloc,
-        const IR::MAU::Table *tbl);
+                              const IR::MAU::Table *tbl);
 
     static ActionDataBus *create();
     static int getAdbSize();

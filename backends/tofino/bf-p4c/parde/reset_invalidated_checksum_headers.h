@@ -13,8 +13,8 @@
 #ifndef BF_P4C_PARDE_RESET_INVALIDATED_CHECKSUM_HEADERS_H_
 #define BF_P4C_PARDE_RESET_INVALIDATED_CHECKSUM_HEADERS_H_
 
-#include "ir/ir.h"
 #include "bf-p4c/phv/phv_fields.h"
+#include "ir/ir.h"
 
 /**
  * \defgroup ResetInvalidatedChecksumHeaders ResetInvalidatedChecksumHeaders
@@ -31,14 +31,13 @@
 struct CollectPovBitToFields : public DeparserInspector {
     const PhvInfo &phv;
 
-    std::map<const PHV::Field*,
-             std::set<const PHV::Field*>> pov_bit_to_fields;
+    std::map<const PHV::Field *, std::set<const PHV::Field *>> pov_bit_to_fields;
 
-    std::map<const PHV::Field*, const IR::Expression*> phv_field_to_expr;
+    std::map<const PHV::Field *, const IR::Expression *> phv_field_to_expr;
 
-    explicit CollectPovBitToFields(const PhvInfo& phv) : phv(phv) { }
+    explicit CollectPovBitToFields(const PhvInfo &phv) : phv(phv) {}
 
-    bool preorder(const IR::BFN::EmitField* emit) override {
+    bool preorder(const IR::BFN::EmitField *emit) override {
         auto pov_bit = phv.field(emit->povBit->field);
         auto source = phv.field(emit->source->field);
 
@@ -49,7 +48,7 @@ struct CollectPovBitToFields : public DeparserInspector {
         return false;
     }
 
-    Visitor::profile_t init_apply(const IR::Node* root) override {
+    Visitor::profile_t init_apply(const IR::Node *root) override {
         profile_t rv = Inspector::init_apply(root);
         pov_bit_to_fields.clear();
         phv_field_to_expr.clear();
@@ -62,20 +61,19 @@ struct CollectPovBitToFields : public DeparserInspector {
  */
 struct CollectInvalidatedHeaders : public Inspector {
     const PhvInfo &phv;
-    const std::map<const PHV::Field*,
-             std::set<const PHV::Field*>>& pov_bit_to_fields;
+    const std::map<const PHV::Field *, std::set<const PHV::Field *>> &pov_bit_to_fields;
 
-    std::map<gress_t, ordered_set<const PHV::Field*>> invalidated_header_pov_bits;
+    std::map<gress_t, ordered_set<const PHV::Field *>> invalidated_header_pov_bits;
 
-    std::map<const PHV::Field*, const PHV::Field*> invalidated_field_to_pov_bit;
+    std::map<const PHV::Field *, const PHV::Field *> invalidated_field_to_pov_bit;
 
-    std::map<const PHV::Field*,
-             ordered_set<const PHV::Field*>> pov_bit_to_invalidated_checksum_fields;
+    std::map<const PHV::Field *, ordered_set<const PHV::Field *>>
+        pov_bit_to_invalidated_checksum_fields;
 
-    CollectInvalidatedHeaders(const PhvInfo& phv,
-            const std::map<const PHV::Field*,
-                           std::set<const PHV::Field*>>& pov_bit_to_fields) :
-        phv(phv), pov_bit_to_fields(pov_bit_to_fields) { }
+    CollectInvalidatedHeaders(
+        const PhvInfo &phv,
+        const std::map<const PHV::Field *, std::set<const PHV::Field *>> &pov_bit_to_fields)
+        : phv(phv), pov_bit_to_fields(pov_bit_to_fields) {}
 
     bool preorder(const IR::MAU::Primitive *p) override {
         auto table = findContext<IR::MAU::Table>();
@@ -101,7 +99,7 @@ struct CollectInvalidatedHeaders : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::BFN::EmitChecksum* checksum) override {
+    bool preorder(const IR::BFN::EmitChecksum *checksum) override {
         auto csum_dest = phv.field(checksum->dest->field);
         for (auto source : checksum->sources) {
             auto field = phv.field(source->field->field);
@@ -121,7 +119,7 @@ struct CollectInvalidatedHeaders : public Inspector {
         return false;
     }
 
-    Visitor::profile_t init_apply(const IR::Node* root) override {
+    Visitor::profile_t init_apply(const IR::Node *root) override {
         profile_t rv = Inspector::init_apply(root);
         invalidated_field_to_pov_bit.clear();
         invalidated_header_pov_bits.clear();
@@ -134,18 +132,17 @@ struct CollectInvalidatedHeaders : public Inspector {
  * \ingroup ResetInvalidatedChecksumHeaders
  */
 class InsertParsedValidBits : public ParserModifier {
-    const PhvInfo& phv;
-    const CollectInvalidatedHeaders& invalidated_headers;
+    const PhvInfo &phv;
+    const CollectInvalidatedHeaders &invalidated_headers;
 
  public:
-    std::map<const PHV::Field*, const IR::TempVar*> pov_bit_to_parsed_valid_bit;
+    std::map<const PHV::Field *, const IR::TempVar *> pov_bit_to_parsed_valid_bit;
 
-    InsertParsedValidBits(const PhvInfo& phv,
-                          const CollectInvalidatedHeaders& invalidated_headers) :
-        phv(phv), invalidated_headers(invalidated_headers) { }
+    InsertParsedValidBits(const PhvInfo &phv, const CollectInvalidatedHeaders &invalidated_headers)
+        : phv(phv), invalidated_headers(invalidated_headers) {}
 
  private:
-    IR::TempVar* create_parsed_valid_bit(const PHV::Field* pov_bit) {
+    IR::TempVar *create_parsed_valid_bit(const PHV::Field *pov_bit) {
         std::string pov_bit_name(pov_bit->name.c_str());
         auto pos = pov_bit_name.find("$valid");
 
@@ -153,15 +150,14 @@ class InsertParsedValidBits : public ParserModifier {
 
         std::string parsed_valid_bit_name = pov_bit_name.replace(pos, 7, "$parsed");
 
-        auto parsed_valid_bit = new IR::TempVar(IR::Type::Bits::get(1), false,
-                                         cstring(parsed_valid_bit_name));
+        auto parsed_valid_bit =
+            new IR::TempVar(IR::Type::Bits::get(1), false, cstring(parsed_valid_bit_name));
 
         LOG4("created " << parsed_valid_bit_name);
         return parsed_valid_bit;
     }
 
-
-    bool preorder(IR::BFN::ParserState* state) override {
+    bool preorder(IR::BFN::ParserState *state) override {
         IR::Vector<IR::BFN::ParserPrimitive> statements;
 
         for (auto stmt : state->statements) {
@@ -187,7 +183,7 @@ class InsertParsedValidBits : public ParserModifier {
         return true;
     }
 
-    Visitor::profile_t init_apply(const IR::Node* root) override {
+    Visitor::profile_t init_apply(const IR::Node *root) override {
         profile_t rv = ParserModifier::init_apply(root);
         pov_bit_to_parsed_valid_bit.clear();
         return rv;
@@ -198,28 +194,28 @@ class InsertParsedValidBits : public ParserModifier {
  * \ingroup ResetInvalidatedChecksumHeaders
  */
 class InsertTableToResetInvalidatedHeaders : public MauTransform {
-    const std::map<const PHV::Field*, const IR::Expression*>& phv_field_to_expr;
-    const CollectInvalidatedHeaders& invalidated_headers;
-    const InsertParsedValidBits& parsed_valid_bits;
+    const std::map<const PHV::Field *, const IR::Expression *> &phv_field_to_expr;
+    const CollectInvalidatedHeaders &invalidated_headers;
+    const InsertParsedValidBits &parsed_valid_bits;
 
-    std::map<gress_t, std::vector<IR::MAU::Table*>> tables_to_insert;
-    IR::MAU::Table*
-    create_actions(gress_t gress, const ordered_set<const PHV::Field*>& fields_to_reset,
-                   IR::BFN::Pipe* pipe) {
+    std::map<gress_t, std::vector<IR::MAU::Table *>> tables_to_insert;
+    IR::MAU::Table *create_actions(gress_t gress,
+                                   const ordered_set<const PHV::Field *> &fields_to_reset,
+                                   IR::BFN::Pipe *pipe) {
         auto action = new IR::MAU::Action("__reset_invalidated_checksum_fields__");
         action->default_allowed = action->init_default = true;
 
         for (auto field : fields_to_reset) {
             auto field_expr = phv_field_to_expr.at(field);
-            auto reset = new IR::MAU::Instruction("set"_cs, field_expr,
-                             new IR::Constant(IR::Type_Bits::get(field->size), 0));
+            auto reset = new IR::MAU::Instruction(
+                "set"_cs, field_expr, new IR::Constant(IR::Type_Bits::get(field->size), 0));
             action->action.push_back(reset);
-            auto* annotation = new IR::Annotation(IR::ID("pa_no_overlay"), {
-                               new IR::StringLiteral(IR::ID(toString(gress))),
-                               new IR::StringLiteral(IR::ID(field->name))} );
+            auto *annotation = new IR::Annotation(IR::ID("pa_no_overlay"),
+                                                  {new IR::StringLiteral(IR::ID(toString(gress))),
+                                                   new IR::StringLiteral(IR::ID(field->name))});
             pipe->global_pragmas.push_back(annotation);
-            LOG3("Added pa_no_overlay pragma on field: " << field->name << " in gress: "
-                  << field->gress);
+            LOG3("Added pa_no_overlay pragma on field: " << field->name
+                                                         << " in gress: " << field->gress);
         }
 
         static int id = 0;
@@ -235,15 +231,14 @@ class InsertTableToResetInvalidatedHeaders : public MauTransform {
         return t;
     }
 
-    IR::MAU::Table*
-    create_reset_table(gress_t gress, const PHV::Field* pov_bit,
-                       const ordered_set<const PHV::Field*>& fields_to_reset,
-                       IR::BFN::Pipe* pipe) {
+    IR::MAU::Table *create_reset_table(gress_t gress, const PHV::Field *pov_bit,
+                                       const ordered_set<const PHV::Field *> &fields_to_reset,
+                                       IR::BFN::Pipe *pipe) {
         auto ac = create_actions(gress, fields_to_reset, pipe);
 
         static int id = 0;
-        cstring gateway_name = toString(gress) +
-            "_reset_invalidated_checksum_fields_cond_" + cstring::to_cstring(id++);
+        cstring gateway_name = toString(gress) + "_reset_invalidated_checksum_fields_cond_" +
+                               cstring::to_cstring(id++);
 
         auto pov_bit_expr = phv_field_to_expr.at(pov_bit);
         auto parsed_valid_bit = parsed_valid_bits.pov_bit_to_parsed_valid_bit.at(pov_bit);
@@ -257,33 +252,30 @@ class InsertTableToResetInvalidatedHeaders : public MauTransform {
         return gw;
     }
 
-    IR::MAU::TableSeq*
-    preorder(IR::MAU::TableSeq* seq) override {
+    IR::MAU::TableSeq *preorder(IR::MAU::TableSeq *seq) override {
         prune();
 
         gress_t gress = VisitingThread(this);
 
         if (tables_to_insert.count(gress)) {
-            auto& tables = tables_to_insert.at(gress);
+            auto &tables = tables_to_insert.at(gress);
 
-            LOG4(tables.size()
-                     << " reset invalidated checksum fields table to insert at " << gress);
+            LOG4(tables.size() << " reset invalidated checksum fields table to insert at "
+                               << gress);
 
-            for (auto t : tables)
-                seq->tables.push_back(t);
+            for (auto t : tables) seq->tables.push_back(t);
         }
 
         return seq;
     }
 
-    IR::BFN::Pipe*
-    preorder(IR::BFN::Pipe* pipe) override {
-        for (auto& gf  : invalidated_headers.invalidated_header_pov_bits) {
+    IR::BFN::Pipe *preorder(IR::BFN::Pipe *pipe) override {
+        for (auto &gf : invalidated_headers.invalidated_header_pov_bits) {
             auto gress = gf.first;
 
             for (auto pov_bit : gf.second) {
                 if (invalidated_headers.pov_bit_to_invalidated_checksum_fields.count(pov_bit)) {
-                    auto& fields_to_reset =
+                    auto &fields_to_reset =
                         invalidated_headers.pov_bit_to_invalidated_checksum_fields.at(pov_bit);
 
                     // At the end of the control flow, insert table to reset invalidated header:
@@ -304,7 +296,7 @@ class InsertTableToResetInvalidatedHeaders : public MauTransform {
         return pipe;
     }
 
-    Visitor::profile_t init_apply(const IR::Node* root) override {
+    Visitor::profile_t init_apply(const IR::Node *root) override {
         profile_t rv = MauTransform::init_apply(root);
         tables_to_insert.clear();
         return rv;
@@ -312,12 +304,12 @@ class InsertTableToResetInvalidatedHeaders : public MauTransform {
 
  public:
     InsertTableToResetInvalidatedHeaders(
-            const std::map<const PHV::Field*, const IR::Expression*>& phv_field_to_expr,
-            const CollectInvalidatedHeaders& invalidated_headers,
-            const InsertParsedValidBits& parsed_valid_bits) :
-        phv_field_to_expr(phv_field_to_expr),
-        invalidated_headers(invalidated_headers),
-        parsed_valid_bits(parsed_valid_bits) {}
+        const std::map<const PHV::Field *, const IR::Expression *> &phv_field_to_expr,
+        const CollectInvalidatedHeaders &invalidated_headers,
+        const InsertParsedValidBits &parsed_valid_bits)
+        : phv_field_to_expr(phv_field_to_expr),
+          invalidated_headers(invalidated_headers),
+          parsed_valid_bits(parsed_valid_bits) {}
 };
 
 /**
@@ -326,7 +318,7 @@ class InsertTableToResetInvalidatedHeaders : public MauTransform {
  */
 class ResetInvalidatedChecksumHeaders : public PassManager {
  public:
-    explicit ResetInvalidatedChecksumHeaders(const PhvInfo& phv) {
+    explicit ResetInvalidatedChecksumHeaders(const PhvInfo &phv) {
         auto collect_pov_bit_to_fields = new CollectPovBitToFields(phv);
 
         auto collect_invalidated_headers =
@@ -335,17 +327,12 @@ class ResetInvalidatedChecksumHeaders : public PassManager {
         auto insert_parsed_valid_bits =
             new InsertParsedValidBits(phv, *collect_invalidated_headers);
 
-        auto insert_reset_tables =
-            new InsertTableToResetInvalidatedHeaders(collect_pov_bit_to_fields->phv_field_to_expr,
-                                                     *collect_invalidated_headers,
-                                                     *insert_parsed_valid_bits);
+        auto insert_reset_tables = new InsertTableToResetInvalidatedHeaders(
+            collect_pov_bit_to_fields->phv_field_to_expr, *collect_invalidated_headers,
+            *insert_parsed_valid_bits);
 
-        addPasses({
-            collect_pov_bit_to_fields,
-            collect_invalidated_headers,
-            insert_parsed_valid_bits,
-            insert_reset_tables
-        });
+        addPasses({collect_pov_bit_to_fields, collect_invalidated_headers, insert_parsed_valid_bits,
+                   insert_reset_tables});
     }
 };
 

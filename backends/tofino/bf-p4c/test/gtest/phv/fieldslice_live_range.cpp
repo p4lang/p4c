@@ -13,21 +13,21 @@
 #include "bf-p4c/phv/fieldslice_live_range.h"
 
 #include <boost/algorithm/string/split.hpp>
-#include "gtest/gtest.h"
 
-#include "lib/exceptions.h"
 #include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "gtest/gtest.h"
+#include "lib/exceptions.h"
 
 namespace P4::Test {
 
 namespace {
 
-PHV::LiveRange make_lr(
-        int start, PHV::FieldUse::use_t start_op, int end, PHV::FieldUse::use_t end_op) {
+PHV::LiveRange make_lr(int start, PHV::FieldUse::use_t start_op, int end,
+                       PHV::FieldUse::use_t end_op) {
     return PHV::LiveRange{PHV::StageAndAccess{start, start_op}, PHV::StageAndAccess{end, end_op}};
 }
 
-PHV::LiveRangeInfo::OpInfo parse_info(const std::string& s) {
+PHV::LiveRangeInfo::OpInfo parse_info(const std::string &s) {
     if (s == "R") {
         return PHV::LiveRangeInfo::OpInfo::READ;
     } else if (s == "W") {
@@ -43,7 +43,7 @@ PHV::LiveRangeInfo::OpInfo parse_info(const std::string& s) {
     }
 }
 
-PHV::LiveRangeInfo make(const std::string& str) {
+PHV::LiveRangeInfo make(const std::string &str) {
     std::list<std::string> ops;
     boost::split(ops, str, boost::is_any_of(" "), boost::token_compress_on);
     BUG_CHECK(ops.size() <= 14,
@@ -60,14 +60,14 @@ PHV::LiveRangeInfo make(const std::string& str) {
         ops.pop_back();
     }
     int i = 0;
-    for (const auto& v : ops) {
+    for (const auto &v : ops) {
         rst.stage(i) = parse_info(v);
         i++;
     }
     return rst;
 }
 
-}  // helpers to make field live range
+}  // namespace
 
 // require TofinoBackendTest to initialize Device::*.
 class FieldSliceLiveRangeTest : public TofinoBackendTest {};
@@ -79,36 +79,22 @@ TEST_F(FieldSliceLiveRangeTest, can_overlay) {
         bool can_overlay;
     };
     std::vector<testcase> cases = {
-        {"W L L  L R",
-         "W L RW L D", false},
-        {"D D W L R",
-         "W R D D D", true},
-        {"D D W L R",
-         "W R R D D", true},
-        {"D D W  L R",
-         "W R RW R D", false},
-        {"D D W L R",
-         "W R R L R", false},
-        {"D D W L R",
-         "W R R R D", false},
-        {"W L L R D D D",
-         "D D D W L L R", true},
-        {"W L L R D D D",
-         "D D W RW L L R", false},
-        {"W R D D D D",
-         "W R D D D D", false},
-        {"W L L L R D",
-         "D D W L R D", false},
-        {"D W L L L R",
-         "W L RW L D", false},
-        {"W R L L L R D D D W L L R",
-         "D D D D D W L L L R D D D", true},
-        {"D W L L L R D D  D D D D D D",
-         "D D D D D W L RW L L R L L R", true},
-        {"W W L L L R D D  D D D D D D",
-         "D D D D D W L RW L L R L L R", true},
+        {"W L L  L R", "W L RW L D", false},
+        {"D D W L R", "W R D D D", true},
+        {"D D W L R", "W R R D D", true},
+        {"D D W  L R", "W R RW R D", false},
+        {"D D W L R", "W R R L R", false},
+        {"D D W L R", "W R R R D", false},
+        {"W L L R D D D", "D D D W L L R", true},
+        {"W L L R D D D", "D D W RW L L R", false},
+        {"W R D D D D", "W R D D D D", false},
+        {"W L L L R D", "D D W L R D", false},
+        {"D W L L L R", "W L RW L D", false},
+        {"W R L L L R D D D W L L R", "D D D D D W L L L R D D D", true},
+        {"D W L L L R D D  D D D D D D", "D D D D D W L RW L L R L L R", true},
+        {"W W L L L R D D  D D D D D D", "D D D D D W L RW L L R L L R", true},
     };
-    for (const auto& tc : cases) {
+    for (const auto &tc : cases) {
         EXPECT_EQ(tc.can_overlay, make(tc.a).can_overlay(make(tc.b)))
             << tc.a << " and " << tc.b << " can_be_overlaid should be: " << tc.can_overlay;
     }
@@ -208,7 +194,7 @@ TEST_F(FieldSliceLiveRangeTest, disjoint_ranges) {
              make_lr(2, WRITE, 2, WRITE),
          }},
     };
-    for (const auto& tc : cases) {
+    for (const auto &tc : cases) {
         auto rst = make(tc.info).disjoint_ranges();
         ASSERT_EQ(tc.expected.size(), rst.size()) << "range unequal length: " << tc.info;
         for (int i = 0; i < int(rst.size()); ++i) {
@@ -311,11 +297,11 @@ TEST_F(FieldSliceLiveRangeTest, merge_invalid_ranges) {
             },
         },
     };
-    for (const auto& tc : cases) {
+    for (const auto &tc : cases) {
         auto rst = PHV::LiveRangeInfo::merge_invalid_ranges(tc.input);
         ASSERT_EQ(tc.expected.size(), rst.size()) << "range unequal length: " << rst.size();
         for (int i = 0; i < int(rst.size()); ++i) {
-            EXPECT_EQ(tc.expected[i], rst[i]) << "unequal at index " << i ;
+            EXPECT_EQ(tc.expected[i], rst[i]) << "unequal at index " << i;
         }
     }
 }

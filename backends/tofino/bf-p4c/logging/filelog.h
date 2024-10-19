@@ -10,17 +10,18 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef _EXTENSIONS_BF_P4C_LOGGING_FILELOG_H_
-#define _EXTENSIONS_BF_P4C_LOGGING_FILELOG_H_
+#ifndef _BACKENDS_TOFINO_BF_P4C_LOGGING_FILELOG_H_
+#define _BACKENDS_TOFINO_BF_P4C_LOGGING_FILELOG_H_
 
 #include <sys/stat.h>
+
 #include <fstream>
 #include <streambuf>
 #include <string>
 #include <utility>
 
-#include "lib/cstring.h"
 #include "bf-p4c/logging/manifest.h"
+#include "lib/cstring.h"
 
 namespace Logging {
 
@@ -40,19 +41,25 @@ enum Mode {
 
 class FileLog {
  private:
-    std::basic_streambuf<char>* clog_buff = nullptr;
+    std::basic_streambuf<char> *clog_buff = nullptr;
     std::ofstream *log = nullptr;
 
-    static const cstring& name2type(cstring logName);
+    static const cstring &name2type(cstring logName);
     static std::set<cstring> filesWritten;
 
  public:
     explicit FileLog(int pipe, cstring logName, Mode mode = AUTO) {
         bool append = true;
         switch (mode) {
-        case APPEND: append = true; break;
-        case CREATE: append = false; break;
-        case AUTO : append = filesWritten.count(logName); break;
+            case APPEND:
+                append = true;
+                break;
+            case CREATE:
+                append = false;
+                break;
+            case AUTO:
+                append = filesWritten.count(logName);
+                break;
         }
 
         filesWritten.insert(logName);
@@ -75,9 +82,7 @@ class FileLog {
     }
 
     /// Closes the log using close
-    ~FileLog() {
-        close();
-    }
+    ~FileLog() { close(); }
 
     /// Untie the file and close the filestream.
     void close() {
@@ -85,14 +90,15 @@ class FileLog {
             std::clog.rdbuf(clog_buff);
         }
         if (log) {
-            log->flush(); log->close();
+            log->flush();
+            log->close();
             delete log;
             log = nullptr;
         }
     }
 
     /// Closes a FileLog and cleans up.
-    static void close(FileLog*& log) {
+    static void close(FileLog *&log) {
         if (!log) return;
         delete log;
         log = nullptr;
@@ -101,4 +107,4 @@ class FileLog {
 
 }  // end namespace Logging
 
-#endif  /* _EXTENSIONS_BF_P4C_LOGGING_FILELOG_H_ */
+#endif /* _BACKENDS_TOFINO_BF_P4C_LOGGING_FILELOG_H_ */

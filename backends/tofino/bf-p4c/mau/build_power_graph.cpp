@@ -11,6 +11,7 @@
  */
 
 #include "bf-p4c/mau/build_power_graph.h"
+
 #include "bf-p4c/bf-p4c-options.h"
 #include "bf-p4c/mau/default_next.h"
 #include "bf-p4c/mau/jbay_next_table.h"
@@ -135,8 +136,7 @@ void BuildPowerGraph::flow_merge(Visitor & /* v */) {
     LOG5(" ------ merge ----- ");
     // nothing to do yet.
 }
-void BuildPowerGraph::flow_copy(::ControlFlowVisitor& /* v */) {
-}
+void BuildPowerGraph::flow_copy(::ControlFlowVisitor & /* v */) {}
 
 ordered_set<UniqueId> BuildPowerGraph::next_for(const IR::MAU::Table *tbl, cstring what) const {
     return next_table_properties_->next_for(tbl, what);

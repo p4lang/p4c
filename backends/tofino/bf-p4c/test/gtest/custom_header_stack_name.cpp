@@ -15,16 +15,16 @@
  * are correct for different pipes.
  */
 
-#include <string>
 #include <fstream>
 #include <streambuf>
+#include <string>
 
-#include "bf_gtest_helpers.h"
-#include "gtest/gtest.h"
 #include "bf-p4c/bf-p4c-options.h"
 #include "bf-p4c/control-plane/runtime.h"
+#include "bf_gtest_helpers.h"
 #include "control-plane/p4RuntimeArchStandard.h"
 #include "control-plane/p4RuntimeSerializer.h"
+#include "gtest/gtest.h"
 
 namespace P4::Test {
 
@@ -135,22 +135,19 @@ TEST(CustomHeaderStackName, Test1) {
     std::string bfrt_file = output_dir + "/bf-rt.json";
 
     // Create a program
-    auto testCode = TestCode(TestCode::Hdr::Tofino2arch, source,
-                        {}, "",
-                        {"-o", output_dir,
-                         "--bf-rt-schema", bfrt_file});
+    auto testCode = TestCode(TestCode::Hdr::Tofino2arch, source, {}, "",
+                             {"-o", output_dir, "--bf-rt-schema", bfrt_file});
     // Run frontend
     EXPECT_TRUE(testCode.apply_pass(TestCode::Pass::FullFrontend));
 
     // Generate runtime information
-    auto& options = BackendOptions();
+    auto &options = BackendOptions();
     BFN::generateRuntime(testCode.get_program(), options);
     // BFN's generateRuntime re-registers handler for psa architecture to a BFN handler
     // Re-register the original p4c one so that (plain) p4c tests are not affected
     auto p4RuntimeSerializer = P4::P4RuntimeSerializer::get();
-    p4RuntimeSerializer->registerArch(
-        "psa"_cs,
-        new P4::ControlPlaneAPI::Standard::PSAArchHandlerBuilder());
+    p4RuntimeSerializer->registerArch("psa"_cs,
+                                      new P4::ControlPlaneAPI::Standard::PSAArchHandlerBuilder());
     // Check the runtime JSON file
     std::ifstream bfrt_stream(bfrt_file);
     EXPECT_TRUE(bfrt_stream);

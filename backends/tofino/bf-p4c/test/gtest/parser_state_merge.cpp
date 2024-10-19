@@ -19,11 +19,10 @@
 #include <sstream>
 #include <string>
 
-#include "gtest/gtest.h"
-#include "bf_gtest_helpers.h"
-
-#include "ir/ir.h"
 #include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "bf_gtest_helpers.h"
+#include "gtest/gtest.h"
+#include "ir/ir.h"
 #include "test/gtest/helpers.h"
 
 namespace P4::Test {
@@ -40,8 +39,8 @@ namespace P4::Test {
  *          $hdr_len_stop_stall_
  */
 TEST(ParserStateMergeTest, DoNotMergeStallStates) {
-// P4 program
-const char * p4_prog = R"(
+    // P4 program
+    const char *p4_prog = R"(
 header ethernet_t {
     bit<48> dst_addr;
     bit<48> src_addr;
@@ -222,19 +221,19 @@ Switch(pipe) main;)";
     EXPECT_TRUE(blk.apply_pass(TestCode::Pass::FullBackend));
 
     // Check that stall states are present in the output file.
-    auto res =
-        blk.match(TestCode::CodeBlock::ParserEAsm,
-            Match::CheckList{"parser egress: start", "`.*`", "parse_h1.$stall_0:"});
+    auto res = blk.match(TestCode::CodeBlock::ParserEAsm,
+                         Match::CheckList{"parser egress: start", "`.*`", "parse_h1.$stall_0:"});
+    EXPECT_TRUE(res.success) << " pos=" << res.pos << " count=" << res.count << "\n'"
+                             << blk.extract_code(TestCode::CodeBlock::ParserEAsm) << "'\n";
+
+    res = blk.match(
+        TestCode::CodeBlock::ParserEAsm,
+        Match::CheckList{"parser egress: start", "`.*`", "parse_h2.$split_0.$ctr_stall0:"});
     EXPECT_TRUE(res.success) << " pos=" << res.pos << " count=" << res.count << "\n'"
                              << blk.extract_code(TestCode::CodeBlock::ParserEAsm) << "'\n";
 
     res = blk.match(TestCode::CodeBlock::ParserEAsm,
-            Match::CheckList{"parser egress: start", "`.*`", "parse_h2.$split_0.$ctr_stall0:"});
-    EXPECT_TRUE(res.success) << " pos=" << res.pos << " count=" << res.count << "\n'"
-                             << blk.extract_code(TestCode::CodeBlock::ParserEAsm) << "'\n";
-
-    res = blk.match(TestCode::CodeBlock::ParserEAsm,
-            Match::CheckList{"parser egress: start", "`.*`", "parse_h3.$oob_stall_0:"});
+                    Match::CheckList{"parser egress: start", "`.*`", "parse_h3.$oob_stall_0:"});
     EXPECT_TRUE(res.success) << " pos=" << res.pos << " count=" << res.count << "\n'"
                              << blk.extract_code(TestCode::CodeBlock::ParserEAsm) << "'\n";
 }
@@ -246,7 +245,7 @@ Switch(pipe) main;)";
  *           is not the case.
  */
 TEST(ParserStateMergeTest, ConsiderLoopInMergeDecision) {
-const char *p4_prog = R"(
+    const char *p4_prog = R"(
 header segment_t {
     bit<128> sid;
 }
@@ -355,9 +354,8 @@ Switch(pipe) main;
     EXPECT_TRUE(blk.apply_pass(TestCode::Pass::FullBackend));
 
     // Check that state parse_seg_list is still present in the output file.
-    auto res =
-        blk.match(TestCode::CodeBlock::ParserIAsm,
-            Match::CheckList{"parser ingress: start", "`.*`", "parse_seg_list:"});
+    auto res = blk.match(TestCode::CodeBlock::ParserIAsm,
+                         Match::CheckList{"parser ingress: start", "`.*`", "parse_seg_list:"});
     EXPECT_TRUE(res.success) << " pos=" << res.pos << " count=" << res.count << "\n'"
                              << blk.extract_code(TestCode::CodeBlock::ParserEAsm) << "'\n";
 }
@@ -367,7 +365,7 @@ Switch(pipe) main;
  * in case the state which they are extracted in is merged.
  */
 TEST(ParserStateMergeTest, CheckStateInPhvJsonAfterMerge) {
-const char *p4_prog = R"(
+    const char *p4_prog = R"(
 const bit<16> ETHERTYPE_TPID = 0x8100;
 const bit<16> ETHERTYPE_IPV4 = 0x0800;
 const bit<16> ETHERTYPE_IPV6 = 0x86DD;
@@ -565,7 +563,7 @@ Switch(pipe) main;
     std::string phv_json = output_dir + "/pipe/logs/phv.json";
 
     auto blk = TestCode(TestCode::Hdr::Tofino1arch, p4_prog, {}, "",
-        {"-o", output_dir, "-g", "--verbose"});
+                        {"-o", output_dir, "-g", "--verbose"});
     blk.flags(Match::TrimWhiteSpace | Match::TrimAnnotations);
     blk.set_phv_log_file(phv_json);
 
@@ -587,23 +585,23 @@ Switch(pipe) main;
     // Only "field_name" and "state" are relevant in this test, irrelevant parts are wildcarded.
     std::regex phv_regex_struct(
         ".*\\{\\n"
-            " *\"field_slice\": \\{\\n"
-                " *\"field_name\": \"hdr.ipv4_options_h_ipv4_options_data_32b.field\",\\n"
-                ".*\\n.*\\n.*\\n.*\\n"  // "slice_info"
-            " *\\},\\n"
-            ".*\\n"  // "phv_number"
-            ".*\\n.*\\n.*\\n.*\\n.*\\n.*\\n.*\\n.*\\n"  // "reads"
-            ".*\\n.*\\n.*\\n.*\\n"  // "slice_info"
-            " *\"writes\": \\[\\n"
-                " *\\{\\n"
-                    " *\"location\": \\{\\n"
-                        " *\"detail\": \"ibuf\",\\n"
-                        " *\"state\": \"parse_ipv4_options\",\\n"
-                        " *\"type\": \"parser\"\\n"
-                    " *\\}\\n"
-                " *\\}\\n"
-            " *\\],\\n"
-            ".*\\n.*\\n.*\\n"  // "mutually_exclusive_with"
+        " *\"field_slice\": \\{\\n"
+        " *\"field_name\": \"hdr.ipv4_options_h_ipv4_options_data_32b.field\",\\n"
+        ".*\\n.*\\n.*\\n.*\\n"  // "slice_info"
+        " *\\},\\n"
+        ".*\\n"                                     // "phv_number"
+        ".*\\n.*\\n.*\\n.*\\n.*\\n.*\\n.*\\n.*\\n"  // "reads"
+        ".*\\n.*\\n.*\\n.*\\n"                      // "slice_info"
+        " *\"writes\": \\[\\n"
+        " *\\{\\n"
+        " *\"location\": \\{\\n"
+        " *\"detail\": \"ibuf\",\\n"
+        " *\"state\": \"parse_ipv4_options\",\\n"
+        " *\"type\": \"parser\"\\n"
+        " *\\}\\n"
+        " *\\}\\n"
+        " *\\],\\n"
+        ".*\\n.*\\n.*\\n"  // "mutually_exclusive_with"
         " *\\},\\n");
 
     EXPECT_TRUE(std::regex_search(ss.str(), phv_regex_struct));

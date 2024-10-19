@@ -13,14 +13,14 @@
 #ifndef BF_P4C_MAU_IXBAR_EXPR_H_
 #define BF_P4C_MAU_IXBAR_EXPR_H_
 
-#include "bf-p4c/common/utils.h"
-#include "ir/ir-generated.h"
-#include "ir/ir.h"
-#include "boost/range/adaptor/reversed.hpp"
-#include "lib/bitvec.h"
 #include "bf-p4c/bf-p4c-options.h"
+#include "bf-p4c/common/utils.h"
 #include "bf-p4c/mau/mau_visitor.h"
 #include "bf-p4c/phv/phv_fields.h"
+#include "boost/range/adaptor/reversed.hpp"
+#include "ir/ir-generated.h"
+#include "ir/ir.h"
+#include "lib/bitvec.h"
 
 using namespace P4;
 
@@ -30,12 +30,11 @@ class CanBeIXBarExpr : public Inspector {
 
     static int get_max_hash_bits() {
         // If hash parity is enabled reserve a bit for parity
-        if (!BackendOptions().disable_gfm_parity)
-            return MAX_HASH_BITS - 1;
+        if (!BackendOptions().disable_gfm_parity) return MAX_HASH_BITS - 1;
         return MAX_HASH_BITS;
     }
 
-    bool        rv = true;
+    bool rv = true;
     // FIXME -- if we want to run this *before* SimplifyReferences has converted all
     // PathExpressions into the referred to object, we need some way of resolving what the
     // path expressions refer to, or at least whether they refer to something that can be
@@ -51,19 +50,21 @@ class CanBeIXBarExpr : public Inspector {
     std::function<bool(const IR::PathExpression *)> checkPath;
 
     static const IR::Type_Extern *externType(const IR::Type *type) {
-        if (auto *spec = type->to<IR::Type_SpecializedCanonical>())
-            type = spec->baseType;
-        return type->to<IR::Type_Extern>(); }
+        if (auto *spec = type->to<IR::Type_SpecializedCanonical>()) type = spec->baseType;
+        return type->to<IR::Type_Extern>();
+    }
 
     profile_t init_apply(const IR::Node *n) {
         auto *expr = n->to<IR::Expression>();
         BUG_CHECK(expr, "CanBeIXBarExpr called on non-expression");
         rv = expr->type->width_bits() <= get_max_hash_bits();
-        return Inspector::init_apply(n); }
+        return Inspector::init_apply(n);
+    }
     bool preorder(const IR::Node *) { return false; }  // ignore non-expressions
     bool preorder(const IR::PathExpression *pe) {
         if (!checkPath(pe)) rv = false;
-        return false; }
+        return false;
+    }
     bool preorder(const IR::Constant *) { return false; }
     bool preorder(const IR::Member *m) {
         auto *base = m->expr;
@@ -73,8 +74,10 @@ class CanBeIXBarExpr : public Inspector {
         } else if (base->is<IR::HeaderRef>() || base->is<IR::TempVar>()) {
             // ok
         } else {
-            rv = false; }
-        return false; }
+            rv = false;
+        }
+        return false;
+    }
     bool preorder(const IR::TempVar *) { return false; }
     bool preorder(const IR::Slice *) { return rv; }
     bool preorder(const IR::Concat *) { return rv; }
@@ -84,42 +87,49 @@ class CanBeIXBarExpr : public Inspector {
     bool preorder(const IR::BXor *) { return rv; }
     bool preorder(const IR::BAnd *e) {
         if (!e->left->is<IR::Constant>() && !e->right->is<IR::Constant>()) rv = false;
-        return rv; }
+        return rv;
+    }
     bool preorder(const IR::BOr *e) {
         if (!e->left->is<IR::Constant>() && !e->right->is<IR::Constant>()) rv = false;
-        return rv; }
+        return rv;
+    }
     bool preorder(const IR::MethodCallExpression *mce) {
         if (auto *method = mce->method->to<IR::Member>()) {
             if (auto *ext = externType(method->type)) {
                 if (ext->name == "Hash" && method->member == "get") {
-                    return false; } } }
-        return rv = false; }
+                    return false;
+                }
+            }
+        }
+        return rv = false;
+    }
     // any other expression cannot be an ixbar expression
     bool preorder(const IR::Expression *) { return rv = false; }
 
  public:
-    explicit CanBeIXBarExpr(const IR::Expression *e,
-                            std::function<bool(const IR::PathExpression *)> checkPath =
-        [](const IR::PathExpression *)->bool { BUG("Unexpected path expression"); })
-    : checkPath(checkPath) { e->apply(*this); }
+    explicit CanBeIXBarExpr(
+        const IR::Expression *e,
+        std::function<bool(const IR::PathExpression *)> checkPath =
+            [](const IR::PathExpression *) -> bool { BUG("Unexpected path expression"); })
+        : checkPath(checkPath) {
+        e->apply(*this);
+    }
     operator bool() const { return rv; }
 };
-
 
 /* FIXME -- this should be a constructor of bitvec in the open source code */
 inline bitvec to_bitvec(big_int v) {
     bitvec rv(static_cast<uintptr_t>(v));
     v >>= sizeof(uintptr_t) * CHAR_BIT;
-    if (v > 0)
-        rv |= to_bitvec(v) << (sizeof(uintptr_t) * CHAR_BIT);
+    if (v > 0) rv |= to_bitvec(v) << (sizeof(uintptr_t) * CHAR_BIT);
     return rv;
 }
 
 /** Functor to compute the constant (seed) part of an IXBar expression */
 class IXBarExprSeed : public Inspector {
     le_bitrange slice;
-    int         shift = 0;
-    bitvec      rv;
+    int shift = 0;
+    bitvec rv;
 
     bool preorder(const IR::Annotation *) { return false; }
     bool preorder(const IR::Type *) { return false; }
@@ -127,26 +137,31 @@ class IXBarExprSeed : public Inspector {
     bool preorder(const IR::Constant *k) {
         if (getParent<IR::BAnd>()) return false;
         rv ^= to_bitvec((k->value >> slice.lo) & ((big_int(1) << slice.size()) - 1)) << shift;
-        return false; }
+        return false;
+    }
     bool preorder(const IR::Concat *e) {
         auto tmp = slice;
         int rwidth = e->right->type->width_bits();
         if (slice.lo < rwidth) {
-            slice = slice.intersectWith(0, rwidth-1);
-            visit(e->right, "right"); }
+            slice = slice.intersectWith(0, rwidth - 1);
+            visit(e->right, "right");
+        }
         if (tmp.hi >= rwidth) {
             slice = tmp;
             slice.lo = rwidth;
             shift += rwidth;
             slice = slice.shiftedByBits(-rwidth);
             visit(e->left, "left");
-            shift -= rwidth; }
+            shift -= rwidth;
+        }
         slice = tmp;
-        return false; }
+        return false;
+    }
     bool preorder(const IR::StructExpression *fl) {
         // delegate to the ListExpression case
         IR::ListExpression listExpr(*getListExprComponents(*fl));
-        return preorder(&listExpr); }
+        return preorder(&listExpr);
+    }
     bool preorder(const IR::ListExpression *fl) {
         auto tmp = slice;
         auto old_shift = shift;
@@ -154,27 +169,31 @@ class IXBarExprSeed : public Inspector {
             int width = e->type->width_bits();
             if (slice.lo < width) {
                 auto t2 = slice;
-                slice = slice.intersectWith(0, width-1);
+                slice = slice.intersectWith(0, width - 1);
                 visit(e);
-                slice = t2; }
+                slice = t2;
+            }
             if (slice.hi < width) break;
             slice = slice.shiftedByBits(-width);
-            shift += width; }
+            shift += width;
+        }
         slice = tmp;
         shift = old_shift;
-        return false; }
+        return false;
+    }
     bool preorder(const IR::Slice *sl) {
         auto tmp = slice;
         slice = slice.shiftedByBits(-sl->getL());
         int width = sl->getH() - sl->getL() + 1;
-        if (slice.size() > width)
-            slice.hi = slice.lo + width - 1;
+        if (slice.size() > width) slice.hi = slice.lo + width - 1;
         visit(sl->e0, "e0");
         slice = tmp;
-        return false; }
+        return false;
+    }
     bool preorder(const IR::MethodCallExpression *mce) {
         BUG("MethodCallExpression not supported in IXBarExprSeed: %s", mce);
-        return false; }
+        return false;
+    }
 
  public:
     IXBarExprSeed(const IR::Expression *e, le_bitrange sl) : slice(sl) { e->apply(*this); }
@@ -193,16 +212,16 @@ struct P4HashFunction : public IHasDbPrint {
     // compute the (raw) GFM bits here instead?
 
     bool is_dynamic() const {
-       bool rv = !dyn_hash_name.isNull();
-       // Symmetric is currently not supported with the dynamic hash library in bf-utils
-       if (rv)
-           BUG_CHECK(symmetrically_hashed_inputs.empty(), "Dynamically hashed values cannot "
-               "have symmetric fields");
-       return rv;
+        bool rv = !dyn_hash_name.isNull();
+        // Symmetric is currently not supported with the dynamic hash library in bf-utils
+        if (rv)
+            BUG_CHECK(symmetrically_hashed_inputs.empty(),
+                      "Dynamically hashed values cannot "
+                      "have symmetric fields");
+        return rv;
     }
     bool equiv_dyn(const P4HashFunction *func) const;
     bool equiv_inputs_alg(const P4HashFunction *func) const;
-
 
     void slice(le_bitrange hash_slice);
     cstring name() const { return is_dynamic() ? dyn_hash_name : "static_hash"_cs; }
@@ -222,13 +241,9 @@ struct P4HashFunction : public IHasDbPrint {
  * Currently full string literals are required, perhaps at sometime this can be a function
  * within the tna/t2na files.
  */
-bool verifySymmetricHashPairs(
-    const PhvInfo &phv,
-    safe_vector<const IR::Expression *> &field_list,
-    const IR::Annotations *annotations,
-    gress_t gress,
-    const IR::MAU::HashFunction& hf,
-    LTBitMatrix *sym_pairs);
+bool verifySymmetricHashPairs(const PhvInfo &phv, safe_vector<const IR::Expression *> &field_list,
+                              const IR::Annotations *annotations, gress_t gress,
+                              const IR::MAU::HashFunction &hf, LTBitMatrix *sym_pairs);
 
 /**
  * The purpose of this function is to convert an Expression into a P4HashFunction, which can
@@ -243,7 +258,7 @@ bool verifySymmetricHashPairs(
  * gathers a list of functions to allocate
  */
 class BuildP4HashFunction : public PassManager {
-    P4HashFunction* _func = nullptr;
+    P4HashFunction *_func = nullptr;
     const PhvInfo &phv;
 
     Visitor::profile_t init_apply(const IR::Node *node) override {
@@ -279,16 +294,15 @@ class BuildP4HashFunction : public PassManager {
         bool preorder(const IR::MAU::ActionArg *) override;
         bool preorder(const IR::Mask *) override;
         bool preorder(const IR::Cast *) override;
-        bool preorder(const IR::Concat*) override;
-        bool preorder(const IR::StructExpression*) override;
-        bool preorder(const IR::ListExpression*) override;
+        bool preorder(const IR::Concat *) override;
+        bool preorder(const IR::StructExpression *) override;
+        bool preorder(const IR::ListExpression *) override;
         void postorder(const IR::BFN::SignExtend *) override;
         void postorder(const IR::MAU::HashGenExpression *) override;
 
      public:
         explicit InsideHashGenExpr(BuildP4HashFunction &s) : self(s) {}
     };
-
 
     class OutsideHashGenExpr : public MauInspector {
         BuildP4HashFunction &self;
@@ -303,10 +317,7 @@ class BuildP4HashFunction : public PassManager {
 
  public:
     explicit BuildP4HashFunction(const PhvInfo &p) : phv(p) {
-        addPasses({
-            new InsideHashGenExpr(*this),
-            new OutsideHashGenExpr(*this)
-        });
+        addPasses({new InsideHashGenExpr(*this), new OutsideHashGenExpr(*this)});
     }
 
     P4HashFunction *func() { return _func; }

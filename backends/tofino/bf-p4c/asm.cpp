@@ -13,6 +13,7 @@
 #include "bf-p4c/asm.h"
 
 #include <sys/stat.h>
+
 #include <climits>
 #include <csignal>
 #include <cstdio>
@@ -88,7 +89,8 @@ bool AsmOutput::preorder(const IR::BFN::Pipe *pipe) {
 
         pipe->apply(*mauasm);
 
-        out << "version:" << std::endl
+        out << "version:"
+            << std::endl
             // << "  version: " << BFASM::Version::getVersion() << std::endl
             << "  run_id: \"" << RunId::getId() << "\"" << std::endl
             << "  target: " << Device::name() << std::endl;

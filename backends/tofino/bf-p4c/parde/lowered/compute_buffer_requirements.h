@@ -10,8 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PARDE_LOWERED_COMPUTE_BUFFER_REQUIREMENTS_H_
-#define EXTENSIONS_BF_P4C_PARDE_LOWERED_COMPUTE_BUFFER_REQUIREMENTS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_LOWERED_COMPUTE_BUFFER_REQUIREMENTS_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_LOWERED_COMPUTE_BUFFER_REQUIREMENTS_H_
 
 #include "bf-p4c/parde/parde_visitor.h"
 
@@ -23,9 +23,9 @@ namespace Parde::Lowered {
  *        to avoid a stall.
  */
 class ComputeBufferRequirements : public ParserModifier {
-    void postorder(IR::BFN::LoweredParserMatch* match) override;
+    void postorder(IR::BFN::LoweredParserMatch *match) override;
 };
 
 }  // namespace Parde::Lowered
 
-#endif /* EXTENSIONS_BF_P4C_PARDE_LOWERED_COMPUTE_BUFFER_REQUIREMENTS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_LOWERED_COMPUTE_BUFFER_REQUIREMENTS_H_ */

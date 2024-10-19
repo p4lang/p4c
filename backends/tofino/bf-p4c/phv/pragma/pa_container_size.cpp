@@ -12,31 +12,34 @@
 
 #include "bf-p4c/phv/pragma/pa_container_size.h"
 
-#include <string>
 #include <numeric>
+#include <string>
 
-#include "bf-p4c/ir/bitrange.h"
-#include "lib/log.h"
 #include "bf-p4c/common/utils.h"
+#include "bf-p4c/ir/bitrange.h"
 #include "bf-p4c/phv/pragma/phv_pragmas.h"
+#include "lib/log.h"
 
 namespace {
 
-std::optional<PHV::Size> convert_to_phv_size(const IR::Constant* ir) {
+std::optional<PHV::Size> convert_to_phv_size(const IR::Constant *ir) {
     int rst = ir->asInt();
     if (rst != 8 && rst != 16 && rst != 32) {
-        warning("@pragma pa_container_size's third argument "
-                  "must be one of {8, 16, 32}, but  %1% is not, skipped", rst);
-        return std::nullopt; }
+        warning(
+            "@pragma pa_container_size's third argument "
+            "must be one of {8, 16, 32}, but  %1% is not, skipped",
+            rst);
+        return std::nullopt;
+    }
     return std::make_optional(static_cast<PHV::Size>(rst));
 }
 
-ordered_map<const PHV::Field*, std::vector<int>> compute_field_layouts(
-    const ordered_map<const PHV::Field*, std::vector<PHV::Size>>& pa_container_sizes) {
-    ordered_map<const PHV::Field*, std::vector<int>> rst;
-    for (const auto& kv : pa_container_sizes) {
-        const auto* field = kv.first;
-        const auto& sizes = kv.second;
+ordered_map<const PHV::Field *, std::vector<int>> compute_field_layouts(
+    const ordered_map<const PHV::Field *, std::vector<PHV::Size>> &pa_container_sizes) {
+    ordered_map<const PHV::Field *, std::vector<int>> rst;
+    for (const auto &kv : pa_container_sizes) {
+        const auto *field = kv.first;
+        const auto &sizes = kv.second;
         rst[field] = {};
         if (sizes.size() == 1) {
             int sz_int = static_cast<int>(sizes.front());
@@ -47,7 +50,7 @@ ordered_map<const PHV::Field*, std::vector<int>> compute_field_layouts(
             }
         } else {
             int sum = 0;
-            for (const auto& sz : sizes) {
+            for (const auto &sz : sizes) {
                 sum += static_cast<int>(sz);
                 rst[field].push_back(static_cast<int>(sz));
             }
@@ -101,18 +104,18 @@ const char *PragmaContainerSize::help =
     "to the corresponding pipeline. If not provided, it is applied to "
     "all pipelines.";
 
-bool PragmaContainerSize::preorder(const IR::BFN::Pipe* pipe) {
+bool PragmaContainerSize::preorder(const IR::BFN::Pipe *pipe) {
     auto global_pragmas = pipe->global_pragmas;
-    for (const auto* annotation : global_pragmas) {
+    for (const auto *annotation : global_pragmas) {
         if (annotation->name.name != PragmaContainerSize::name) continue;
 
-        auto& exprs = annotation->expr;
+        auto &exprs = annotation->expr;
 
         const unsigned min_required_arguments = 3;  // gress, field, size1, ...
         unsigned required_arguments = min_required_arguments;
         unsigned expr_index = 0;
-        const IR::StringLiteral* pipe_arg = nullptr;
-        const IR::StringLiteral* gress_arg = nullptr;
+        const IR::StringLiteral *pipe_arg = nullptr;
+        const IR::StringLiteral *gress_arg = nullptr;
 
         if (!PHV::Pragmas::determinePipeGressArgs(exprs, expr_index, required_arguments, pipe_arg,
                                                   gress_arg)) {
@@ -132,8 +135,8 @@ bool PragmaContainerSize::preorder(const IR::BFN::Pipe* pipe) {
         auto field_ir = exprs[expr_index]->to<IR::StringLiteral>();
         if (!field_ir) {
             warning(ErrorType::WARN_INVALID,
-                      "%1%: Found a non-string literal argument `field'. Ignoring pragma.",
-                      exprs[expr_index]);
+                    "%1%: Found a non-string literal argument `field'. Ignoring pragma.",
+                    exprs[expr_index]);
             continue;
         }
         expr_index++;
@@ -156,8 +159,8 @@ bool PragmaContainerSize::preorder(const IR::BFN::Pipe* pipe) {
             auto container_size_ir = exprs[expr_index]->to<IR::Constant>();
             if (!container_size_ir) {
                 warning(ErrorType::WARN_INVALID,
-                          "%1%: Found a non-integer literal argument `size'. Ignoring pragma.",
-                          exprs[expr_index]);
+                        "%1%: Found a non-integer literal argument `size'. Ignoring pragma.",
+                        exprs[expr_index]);
                 failed = true;
                 break;
             }
@@ -198,12 +201,12 @@ void PragmaContainerSize::end_apply() {
 }
 
 std::optional<PHV::Size> PragmaContainerSize::expected_container_size(
-    const PHV::FieldSlice& fs) const {
+    const PHV::FieldSlice &fs) const {
     if (!field_layouts_i.count(fs.field())) {
         return std::nullopt;
     }
     int offset = 0;
-    for (const auto& v : field_layouts_i.at(fs.field())) {
+    for (const auto &v : field_layouts_i.at(fs.field())) {
         le_bitrange range = StartLen(offset, v);
         if (range.contains(fs.range())) {
             return PHV::Size(v);
@@ -213,7 +216,7 @@ std::optional<PHV::Size> PragmaContainerSize::expected_container_size(
     return PHV::Size::null;
 }
 
-void PragmaContainerSize::check_and_add_no_split(PHV::Field* field) const {
+void PragmaContainerSize::check_and_add_no_split(PHV::Field *field) const {
     // Add no-split constraint if the field has only one container size associated with it and
     // the size of the container is larger than or equal to the size of the field. The pragma
     // also implies that the entire field must be packed into a single specified size container.
@@ -231,42 +234,40 @@ void PragmaContainerSize::check_and_add_no_split(PHV::Field* field) const {
     }
 }
 
-std::ostream& operator<<(std::ostream& out, const PragmaContainerSize& pa_cs) {
+std::ostream &operator<<(std::ostream &out, const PragmaContainerSize &pa_cs) {
     std::stringstream logs;
-    for (const auto& kv : pa_cs.field_to_sizes()) {
-        auto& field = kv.first;
-        auto& container_sizes = kv.second;
-        logs << "Add @pa_container_size that: " << field
-             << " must be allocated to " << " [ ";
-        for (const auto& sz : container_sizes) {
-            logs << sz << " "; }
-        logs << " ] " << " container(s)" << std::endl; }
+    for (const auto &kv : pa_cs.field_to_sizes()) {
+        auto &field = kv.first;
+        auto &container_sizes = kv.second;
+        logs << "Add @pa_container_size that: " << field << " must be allocated to " << " [ ";
+        for (const auto &sz : container_sizes) {
+            logs << sz << " ";
+        }
+        logs << " ] " << " container(s)" << std::endl;
+    }
 
     out << logs.str();
     return out;
 }
 
-void PragmaContainerSize::add_constraint(
-        const PHV::Field* field, std::vector<PHV::Size> sizes) {
+void PragmaContainerSize::add_constraint(const PHV::Field *field, std::vector<PHV::Size> sizes) {
     pa_container_sizes_i[field] = sizes;
     field_layouts_i = compute_field_layouts(pa_container_sizes_i);
-    PHV::Field* nonConstField = phv_i.field(field->name);
+    PHV::Field *nonConstField = phv_i.field(field->name);
     check_and_add_no_split(nonConstField);
 }
 
-cstring PragmaContainerSize::printSizeConstraints(
-        const std::vector<PHV::Size>& sizes) const {
+cstring PragmaContainerSize::printSizeConstraints(const std::vector<PHV::Size> &sizes) const {
     std::stringstream ss;
     ss << "[ ";
-    for (auto sz : sizes)
-        ss << sz << " ";
+    for (auto sz : sizes) ss << sz << " ";
     ss << "]";
     return ss.str();
 }
 
 // Only used by PardePhvConstraints.
-bool PragmaContainerSize::check_and_add_constraint(
-        const PHV::Field* field, std::vector<PHV::Size> sizes) {
+bool PragmaContainerSize::check_and_add_constraint(const PHV::Field *field,
+                                                   std::vector<PHV::Size> sizes) {
     if (!pa_container_sizes_i.count(field)) {
         add_constraint(field, sizes);
         return true;
@@ -289,11 +290,10 @@ bool PragmaContainerSize::check_and_add_constraint(
     }
 
     if (!sameAsExisting) {
-       warning("@pragma pa_container_size already specified for field %1% %2%.",
-                 field->name, printSizeConstraints(existingSizePragmas));
-       return false;
+        warning("@pragma pa_container_size already specified for field %1% %2%.", field->name,
+                printSizeConstraints(existingSizePragmas));
+        return false;
     }
 
     return true;
 }
-

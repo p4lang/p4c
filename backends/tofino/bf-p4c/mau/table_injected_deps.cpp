@@ -10,19 +10,20 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+#include "table_injected_deps.h"
+
 #include <algorithm>
 #include <sstream>
+
+#include "bf-p4c/common/field_defuse.h"
 #include "ir/ir.h"
 #include "lib/log.h"
 #include "lib/ltbitmatrix.h"
 
-#include "table_injected_deps.h"
-#include "bf-p4c/common/field_defuse.h"
-
 bool InjectControlDependencies::preorder(const IR::MAU::TableSeq *seq) {
     const Context *ctxt = getContext();
     if (ctxt && dynamic_cast<const IR::MAU::Table *>(ctxt->node)) {
-        const IR::MAU::Table* parent;
+        const IR::MAU::Table *parent;
         parent = dynamic_cast<const IR::MAU::Table *>(ctxt->node);
         auto seq_size = seq->size();
         auto seq_front = seq->front();
@@ -47,9 +48,8 @@ bool InjectControlDependencies::preorder(const IR::MAU::TableSeq *seq) {
             // Find control type relationship between parent & child
             for (auto options : parent->next) {
                 LOG5("      ICD seq:" << options.first);
-                if (options.second->size()  != seq_size  ||
-                    options.second->front() != seq_front ||
-                    options.second->back()  != seq_back)
+                if (options.second->size() != seq_size || options.second->front() != seq_front ||
+                    options.second->back() != seq_back)
                     continue;
 
                 for (auto dst : options.second->tables) {
@@ -57,16 +57,16 @@ bool InjectControlDependencies::preorder(const IR::MAU::TableSeq *seq) {
                     if (dst == child) {
                         ctrl_annot = options.first;
                         if (edge_label != DependencyGraph::NONE)
-                            LOG3("\t\tICD Multiple deps to DST " << child->name << " from SRC " <<
-                                 parent->name << ". Prev dep = " << edge_label << " Curr dep = " <<
-                                 ctrl_annot);
+                            LOG3("\t\tICD Multiple deps to DST "
+                                 << child->name << " from SRC " << parent->name
+                                 << ". Prev dep = " << edge_label << " Curr dep = " << ctrl_annot);
                         edge_label = DependencyGraph::get_control_edge_type(ctrl_annot);
                         break;
                     }
                 }
             }
             BUG_CHECK(edge_label != DependencyGraph::NONE,
-                    "Cannot resolve Injected Control Edge Type");
+                      "Cannot resolve Injected Control Edge Type");
 
             auto edge_pair = dg.add_edge(parent, child, edge_label);
             if (!edge_pair.first) continue;
@@ -100,7 +100,6 @@ bool InjectControlDependencies::preorder(const IR::MAU::TableSeq *seq) {
 // In this example, InjectControlDependencies walks up the IR starting at t4
 // and inserts a control dependence within t4's parent table sequence [t2, t3]
 // between t2 and t4's parent, t3. The walk up the IR stop's at t1, t4's dominator.
-
 
 /**
  * In Tofino, extra ordering is occasionally required due to the requirements of each table
@@ -136,8 +135,7 @@ bool InjectControlDependencies::preorder(const IR::MAU::TableSeq *seq) {
 void PredicationBasedControlEdges::postorder(const IR::MAU::Table *tbl) {
     name_to_table[tbl->externalName()] = tbl;
     auto dom = ctrl_paths.find_dominator(tbl);
-    if (dom == tbl)
-        return;
+    if (dom == tbl) return;
     auto paths = ctrl_paths.table_pathways.at(tbl);
 
     std::set<const IR::MAU::Table *> ignore_tables;
@@ -172,8 +170,8 @@ void PredicationBasedControlEdges::postorder(const IR::MAU::Table *tbl) {
             first_seq = false;
         } else {
             std::set<const IR::MAU::Table *> intersection;
-            std::set_intersection(ignore_tables.begin(), ignore_tables.end(),
-                                  local_set.begin(), local_set.end(),
+            std::set_intersection(ignore_tables.begin(), ignore_tables.end(), local_set.begin(),
+                                  local_set.end(),
                                   std::inserter(intersection, intersection.begin()));
             ignore_tables = intersection;
         }
@@ -246,23 +244,28 @@ void PredicationBasedControlEdges::end_apply() {
  * rather than calculating it directly.
  */
 void InjectMetadataControlDependencies::end_apply() {
-    if (tables_placed)
-        return;
+    if (tables_placed) return;
 
     for (auto kv_pair : phv.getMetadataDeps()) {
         cstring first_table = kv_pair.first;
-        BUG_CHECK(name_to_table.count(first_table), "Table %s has a metadata dependency, but "
-                  "doesn't appear in the TableGraph?", first_table);
+        BUG_CHECK(name_to_table.count(first_table),
+                  "Table %s has a metadata dependency, but "
+                  "doesn't appear in the TableGraph?",
+                  first_table);
         for (cstring second_table : kv_pair.second) {
-            BUG_CHECK(name_to_table.count(second_table), "Table %s has a metadata dependency, but "
-                      "doesn't appear in the TableGraph?", second_table);
+            BUG_CHECK(name_to_table.count(second_table),
+                      "Table %s has a metadata dependency, but "
+                      "doesn't appear in the TableGraph?",
+                      second_table);
             auto inject_points = ctrl_paths.get_inject_points(name_to_table.at(first_table),
-                                                             name_to_table.at(second_table));
+                                                              name_to_table.at(second_table));
             BUG_CHECK(fg.can_reach(name_to_table.at(first_table), name_to_table.at(second_table)),
-                "Metadata initialization analysis incorrect.  Live ranges between %s and %s "
-                "overlap", first_table, second_table);
-            auto edge_pair = dg.add_edge(name_to_table.at(first_table),
-                    name_to_table.at(second_table), DependencyGraph::ANTI_NEXT_TABLE_METADATA);
+                      "Metadata initialization analysis incorrect.  Live ranges between %s and %s "
+                      "overlap",
+                      first_table, second_table);
+            auto edge_pair =
+                dg.add_edge(name_to_table.at(first_table), name_to_table.at(second_table),
+                            DependencyGraph::ANTI_NEXT_TABLE_METADATA);
             if (!edge_pair.first) continue;
             auto tpair = std::make_pair(first_table, second_table);
             auto mdDepFields = phv.getMetadataDepFields();
@@ -271,14 +274,17 @@ void InjectMetadataControlDependencies::end_apply() {
                 dg.data_annotations_metadata.emplace(*edge_pair.first, mdDepField);
             }
             LOG5("  Injecting ANTI dep between " << first_table << " and " << second_table
-                 << " due to metadata initializaation");
+                                                 << " due to metadata initializaation");
             for (auto inject_point : inject_points) {
                 auto inj1 = inject_point.first->to<IR::MAU::Table>();
                 auto inj2 = inject_point.second->to<IR::MAU::Table>();
                 LOG3("  Metadata inject points " << inj1->name << " " << inj2->name
-                     << " from tables " << first_table << " " << second_table);
-                BUG_CHECK(fg.can_reach(inj1, inj2), "Metadata initialization analysis incorrect.  "
-                     "Cannot inject dependency between %s and %s", inj1, inj2);
+                                                 << " from tables " << first_table << " "
+                                                 << second_table);
+                BUG_CHECK(fg.can_reach(inj1, inj2),
+                          "Metadata initialization analysis incorrect.  "
+                          "Cannot inject dependency between %s and %s",
+                          inj1, inj2);
                 // Instead of adding injection points at the control point, just going to
                 // rely on the metadata check in table placement, as this could eventually be
                 // replaced, along with TableSeqDeps, with a function call
@@ -304,15 +310,15 @@ void InjectMetadataControlDependencies::end_apply() {
  *   - to T' from the next-table leaves of every predecessor of T' in S.
  *   - from each next-table leaf of T' to every successor of T' in S.
  */
-void InjectActionExitAntiDependencies::postorder(const IR::MAU::Table* table) {
+void InjectActionExitAntiDependencies::postorder(const IR::MAU::Table *table) {
     if (tables_placed) return;
     if (!table->has_exit_action()) return;
 
-    std::set<const IR::MAU::Table*> processed;
+    std::set<const IR::MAU::Table *> processed;
 
     // Walk up to the top level of the pipe along each control-flow path to the table.
     for (auto path : ctrl_paths.table_pathways.at(table)) {
-        const IR::MAU::Table* curTable = nullptr;
+        const IR::MAU::Table *curTable = nullptr;
         for (auto parent : path) {
             if (auto t = parent->to<IR::MAU::Table>()) {
                 curTable = t;
@@ -339,7 +345,7 @@ void InjectActionExitAntiDependencies::postorder(const IR::MAU::Table* table) {
                         auto edge_pair = dg.add_edge(leaf, curTable, DependencyGraph::ANTI_EXIT);
                         if (!edge_pair.first) continue;
                         dg.data_annotations_exit.emplace(*edge_pair.first,
-                                                            table->get_exit_actions());
+                                                         table->get_exit_actions());
                     }
                 } else {
                     // Add an anti-dependency edge from each next-table leaf of curTable to the
@@ -348,7 +354,7 @@ void InjectActionExitAntiDependencies::postorder(const IR::MAU::Table* table) {
                         auto edge_pair = dg.add_edge(leaf, sibling, DependencyGraph::ANTI_EXIT);
                         if (!edge_pair.first) continue;
                         dg.data_annotations_exit.emplace(*edge_pair.first,
-                                                            table->get_exit_actions());
+                                                         table->get_exit_actions());
                     }
                 }
             }
@@ -356,7 +362,7 @@ void InjectActionExitAntiDependencies::postorder(const IR::MAU::Table* table) {
     }
 }
 
-bool InjectControlExitDependencies::preorder(const IR::MAU::Table* table) {
+bool InjectControlExitDependencies::preorder(const IR::MAU::Table *table) {
     if (tables_placed) return false;
     tables_placed |= table->is_placed();
     if (!table->run_before_exit) return false;
@@ -364,29 +370,25 @@ bool InjectControlExitDependencies::preorder(const IR::MAU::Table* table) {
     return true;
 }
 
-void InjectControlExitDependencies::postorder(const IR::MAU::Table* table) {
+void InjectControlExitDependencies::postorder(const IR::MAU::Table *table) {
     if (tables_placed) return;
     if (!is_first_run_before_exit_table_in_gress(table)) return;
     inject_dependencies_from_gress_root_tables_to_first_rbe_table(table);
 }
 
-void InjectControlExitDependencies::collect_run_before_exit_table(
-        const IR::MAU::Table* rbe_table) {
+void InjectControlExitDependencies::collect_run_before_exit_table(const IR::MAU::Table *rbe_table) {
     auto it = run_before_exit_tables.find(rbe_table->gress);
-    LOG3("  Adding "
-         << rbe_table->gress
-         << " "
-         << rbe_table->name
-         << " to run_before_exit_tables map");
+    LOG3("  Adding " << rbe_table->gress << " " << rbe_table->name
+                     << " to run_before_exit_tables map");
     if (it != run_before_exit_tables.end())
         it->second.push_back(rbe_table);
     else
         run_before_exit_tables.emplace(rbe_table->gress,
-                                       std::vector<const IR::MAU::Table *>{ rbe_table });
+                                       std::vector<const IR::MAU::Table *>{rbe_table});
 }
 
 bool InjectControlExitDependencies::is_first_run_before_exit_table_in_gress(
-        const IR::MAU::Table* rbe_table) {
+    const IR::MAU::Table *rbe_table) {
     auto first = run_before_exit_tables[rbe_table->gress].begin();
     if (run_before_exit_tables[rbe_table->gress].empty())
         return false;
@@ -395,20 +397,18 @@ bool InjectControlExitDependencies::is_first_run_before_exit_table_in_gress(
 }
 
 void InjectControlExitDependencies::inject_dependencies_from_gress_root_tables_to_first_rbe_table(
-        const IR::MAU::Table* first_rbe_table) {
+    const IR::MAU::Table *first_rbe_table) {
     LOG3("  Injecting CONTROL_EXIT dependencies from all "
-         << first_rbe_table->gress
-         << " root tables to first run before exit table "
+         << first_rbe_table->gress << " root tables to first run before exit table "
          << first_rbe_table->name);
     auto root_table_seq = get_gress_root_table_seq(first_rbe_table);
     for (auto source : root_table_seq->tables) {
-        if (!source->run_before_exit)
-            inject_control_exit_dependency(source, first_rbe_table);
+        if (!source->run_before_exit) inject_control_exit_dependency(source, first_rbe_table);
     }
 }
 
-const IR::MAU::TableSeq* InjectControlExitDependencies::get_gress_root_table_seq(
-        const IR::MAU::Table* table) {
+const IR::MAU::TableSeq *InjectControlExitDependencies::get_gress_root_table_seq(
+    const IR::MAU::Table *table) {
     auto paths = ctrl_paths.table_pathways.at(table);
     auto root_table_seq = paths[0][1]->to<IR::MAU::TableSeq>();
     return root_table_seq;
@@ -419,42 +419,34 @@ void InjectControlExitDependencies::link_run_before_exit_tables() {
         LOG3("  Linking " << kv.first << " run before exit tables");
         auto first = kv.second.begin();
         auto last = kv.second.empty() ? kv.second.end() : std::prev(kv.second.end());
-        for (auto it = first; it != last; ++it)
-            inject_control_exit_dependency(*it, *std::next(it));
+        for (auto it = first; it != last; ++it) inject_control_exit_dependency(*it, *std::next(it));
     }
 }
 
 void InjectControlExitDependencies::inject_control_exit_dependency(
-        const IR::MAU::Table* source,
-        const IR::MAU::Table* destination) {
+    const IR::MAU::Table *source, const IR::MAU::Table *destination) {
     auto annotation = "exit"_cs;
     auto edge_pair = dg.add_edge(source, destination, DependencyGraph::CONTROL_EXIT);
     if (!edge_pair.first) return;
-    LOG4("    Injecting CONTROL_EXIT dependency: "
-         << source->name
-         << " --> "
-         << destination->name);
+    LOG4("    Injecting CONTROL_EXIT dependency: " << source->name << " --> " << destination->name);
     dg.ctrl_annotations[*edge_pair.first] = annotation;
 }
 
-const IR::MAU::Table* InjectDarkAntiDependencies::getTable(UniqueId uid) {
-    if (id_to_table.count(uid))
-        return id_to_table.at(uid);
+const IR::MAU::Table *InjectDarkAntiDependencies::getTable(UniqueId uid) {
+    if (id_to_table.count(uid)) return id_to_table.at(uid);
 
     // Check if we can find same-name UniqueId
     std::vector<UniqueId> same_name_tbls;
 
     for (auto entry : id_to_table) {
-        if (entry.first.name == uid.name)
-            same_name_tbls.push_back(entry.first);
+        if (entry.first.name == uid.name) same_name_tbls.push_back(entry.first);
     }
 
     BUG_CHECK(same_name_tbls.size() > 0, "Cannot find UniqueId %1% in id_to_table", uid);
 
     if (same_name_tbls.size() > 1) {
         LOG1("UniqueId " << uid << " shares name with " << same_name_tbls.size() << " tables!!!");
-        for (auto tbl_id : same_name_tbls)
-            LOG1("\t\t " << tbl_id);
+        for (auto tbl_id : same_name_tbls) LOG1("\t\t " << tbl_id);
     }
 
     return id_to_table.at(*(same_name_tbls.begin()));
@@ -462,8 +454,7 @@ const IR::MAU::Table* InjectDarkAntiDependencies::getTable(UniqueId uid) {
 
 bool InjectDarkAntiDependencies::preorder(const IR::MAU::Table *tbl) {
     placed |= tbl->is_placed();
-    if (placed)
-        return false;
+    if (placed) return false;
     id_to_table[tbl->pp_unique_id()] = tbl;
     LOG7("\t Table: " << tbl->name << "  pp_id:" << tbl->pp_unique_id());
     return true;
@@ -475,7 +466,7 @@ void InjectDarkAntiDependencies::end_apply() {
     LOG7("\t\t ARA Constraints have " << phv.getARAConstraints().size() << " gresses");
     int gress_idx = 1;
 
-    for (auto & per_gress_map : Values(phv.getARAConstraints())) {
+    for (auto &per_gress_map : Values(phv.getARAConstraints())) {
         LOG7("\t\t Gress " << gress_idx << " has " << per_gress_map.size() << " ara tables");
         int ara_idx = 0;
 
@@ -483,26 +474,27 @@ void InjectDarkAntiDependencies::end_apply() {
             auto orig_ar_id = pair.first->pp_unique_id();
             // auto curr_ar_table = id_to_table.at(orig_ar_id);
             auto curr_ar_table = getTable(orig_ar_id);
-            LOG7("\t\t ARA table " << ara_idx << " has " << pair.second.first.size() <<
-                 " prior tables and " << pair.second.second.size() << " post tables");
+            LOG7("\t\t ARA table " << ara_idx << " has " << pair.second.first.size()
+                                   << " prior tables and " << pair.second.second.size()
+                                   << " post tables");
 
             for (auto orig_id : pair.second.first) {
                 auto curr_table = getTable(orig_id);
 
                 auto edge_pair = dg.add_edge(curr_table, curr_ar_table,
-                            DependencyGraph::ANTI_NEXT_TABLE_METADATA);
+                                             DependencyGraph::ANTI_NEXT_TABLE_METADATA);
                 if (!edge_pair.first) continue;
-                LOG6("\t\tInjectDarkAntiDependence(1): " << curr_table->name << " --> " <<
-                     curr_ar_table->name);
+                LOG6("\t\tInjectDarkAntiDependence(1): " << curr_table->name << " --> "
+                                                         << curr_ar_table->name);
             }
 
             for (auto orig_id : pair.second.second) {
                 auto curr_table = getTable(orig_id);
                 auto edge_pair = dg.add_edge(curr_ar_table, curr_table,
-                            DependencyGraph::ANTI_NEXT_TABLE_METADATA);
+                                             DependencyGraph::ANTI_NEXT_TABLE_METADATA);
                 if (!edge_pair.first) continue;
-                LOG6("\t\tInjectDarkAntiDependence(2): " << curr_ar_table->name << " --> " <<
-                     curr_table->name);
+                LOG6("\t\tInjectDarkAntiDependence(2): " << curr_ar_table->name << " --> "
+                                                         << curr_table->name);
             }
             ara_idx++;
         }
@@ -515,27 +507,26 @@ void InjectDepForAltPhvAlloc::end_apply() {
 
     // Field Filtering Function
     // Field is an alias
-    std::function<bool(const PHV::Field*)>
-    fieldIsAlias = [&](const PHV::Field* f) {
+    std::function<bool(const PHV::Field *)> fieldIsAlias = [&](const PHV::Field *f) {
         if (!f) return false;
         return (f->aliasSource != nullptr);
     };
 
     // Slice Filtering Function
     // Slice is read only & deparsed zero
-    std::function<bool(const PHV::AllocSlice*)>
-    sliceIsReadOnlyOrDeparseZero = [&](const PHV::AllocSlice* sl) {
-        if (!sl) return false;
-        return ((sl->getEarliestLiveness().second.isRead()
-                && sl->getLatestLiveness().second.isRead())
-               || sl->field()->is_deparser_zero_candidate());
-    };
-    auto container_to_slices = phv.getContainerToSlicesMap(&fieldIsAlias,
-                                                            &sliceIsReadOnlyOrDeparseZero);
+    std::function<bool(const PHV::AllocSlice *)> sliceIsReadOnlyOrDeparseZero =
+        [&](const PHV::AllocSlice *sl) {
+            if (!sl) return false;
+            return ((sl->getEarliestLiveness().second.isRead() &&
+                     sl->getLatestLiveness().second.isRead()) ||
+                    sl->field()->is_deparser_zero_candidate());
+        };
+    auto container_to_slices =
+        phv.getContainerToSlicesMap(&fieldIsAlias, &sliceIsReadOnlyOrDeparseZero);
 
-    for (const auto& kv : container_to_slices) {
-        const auto& c = kv.first;
-        const auto& slices = kv.second;
+    for (const auto &kv : container_to_slices) {
+        const auto &c = kv.first;
+        const auto &slices = kv.second;
 
         // Skip container with single or no slice allocation
         if (slices.size() <= 1) continue;
@@ -543,8 +534,8 @@ void InjectDepForAltPhvAlloc::end_apply() {
         for (auto i = slices.begin(); i != (slices.end() - 1); i++) {
             LOG4("Injecting for container: " << c << " --> slice A: " << *i << IndentCtl::indent);
             for (auto j = i + 1; j != slices.end(); j++) {
-                const auto& si = *i;
-                const auto& sj = *j;
+                const auto &si = *i;
+                const auto &sj = *j;
                 LOG4("Start slice B: " << sj);
 
                 // Filter slice pairs to those which are overlayed,
@@ -586,37 +577,36 @@ void InjectDepForAltPhvAlloc::end_apply() {
 
                 // Determine dependency direction (from / to) based on live range
                 bool siBeforeSj = si.getEarliestLiveness() < sj.getEarliestLiveness();
-                const PHV::AllocSlice& fromSlice = siBeforeSj ? si : sj;
-                const PHV::AllocSlice& toSlice   = siBeforeSj ? sj : si;
+                const PHV::AllocSlice &fromSlice = siBeforeSj ? si : sj;
+                const PHV::AllocSlice &toSlice = siBeforeSj ? sj : si;
 
                 LOG6("From Slice : " << fromSlice << " --> To Slice : " << toSlice);
-                std::map<int, const IR::MAU::Table*> id_from_tables;
-                std::map<int, const IR::MAU::Table*> id_to_tables;
-                for (const auto& from_locpair : defuse.getAllDefsAndUses(fromSlice.field())) {
+                std::map<int, const IR::MAU::Table *> id_from_tables;
+                std::map<int, const IR::MAU::Table *> id_to_tables;
+                for (const auto &from_locpair : defuse.getAllDefsAndUses(fromSlice.field())) {
                     const auto from_table = from_locpair.first->to<IR::MAU::Table>();
                     if (!from_table) continue;
                     id_from_tables[from_table->id] = from_table;
                     LOG6("Table Read / Write (From Slice): " << from_table->name);
                 }
-                for (const auto& to_locpair : defuse.getAllDefsAndUses(toSlice.field())) {
+                for (const auto &to_locpair : defuse.getAllDefsAndUses(toSlice.field())) {
                     const auto to_table = to_locpair.first->to<IR::MAU::Table>();
                     if (!to_table) continue;
                     id_to_tables[to_table->id] = to_table;
                     LOG6("Table Read / Write (To Slice): " << to_table->name);
                 }
-                for (const auto& from_table : id_from_tables) {
-                    for (const auto& to_table : id_to_tables) {
-                        if (from_table.second == to_table.second)
-                            continue;
+                for (const auto &from_table : id_from_tables) {
+                    for (const auto &to_table : id_to_tables) {
+                        if (from_table.second == to_table.second) continue;
 
                         auto mutex_tables = mutex(from_table.second, to_table.second);
                         if (mutex_tables) {
                             LOG5("Tables " << from_table.second->name << " and "
-                                    << to_table.second->name << " are mutually exclusive");
+                                           << to_table.second->name << " are mutually exclusive");
                             continue;
                         }
-                        LOG4("Adding edge between " << from_table.second->name
-                                                   << " and " << to_table.second->name);
+                        LOG4("Adding edge between " << from_table.second->name << " and "
+                                                    << to_table.second->name);
                         dg.add_edge(from_table.second, to_table.second,
                                     DependencyGraph::ANTI_NEXT_TABLE_CONTROL);
                     }
@@ -631,47 +621,35 @@ void InjectDepForAltPhvAlloc::end_apply() {
     LOG3_UNINDENT;
 }
 
-TableFindInjectedDependencies
-        ::TableFindInjectedDependencies(const PhvInfo &p, DependencyGraph& d,
-                                        FlowGraph& f, const BFN_Options *options,
-                                        const TableSummary *summary)
-        : phv(p), dg(d), fg(f), summary(summary) {
+TableFindInjectedDependencies ::TableFindInjectedDependencies(const PhvInfo &p, DependencyGraph &d,
+                                                              FlowGraph &f,
+                                                              const BFN_Options *options,
+                                                              const TableSummary *summary)
+    : phv(p), dg(d), fg(f), summary(summary) {
     auto mutex = new TablesMutuallyExclusive();
     auto defuse = new FieldDefUse(phv);
-    addPasses({
-        // new DominatorAnalysis(dg, dominators),
-        // new InjectControlDependencies(dg, dominators),
-        // After Table Placement for JBay, it is unsafe to run DefaultNext, which is run for
-        // flow graph at the moment.  This is only used for a validation check for metadata
-        // dependencies, nothing else.  Has never failed after table placement
-        new InjectControlDependencies(dg),
-        new FindFlowGraph(fg),
-        &ctrl_paths,
-        new PassIf(
-            [options] {
-                return !Device::hasLongBranches() || (options && options->disable_long_branch);
-            },
-            { new PredicationBasedControlEdges(&dg, ctrl_paths) }),
-        new InjectMetadataControlDependencies(phv, dg, fg, ctrl_paths),
-        &cntp,
-        new InjectActionExitAntiDependencies(dg, cntp, ctrl_paths),
-        new PassIf(
-            [] {
-                return Device::currentDevice() == Device::TOFINO;
-            },
-            { new InjectControlExitDependencies(dg, ctrl_paths) }),
-        new InjectDarkAntiDependencies(phv, dg, ctrl_paths),
-        // During Alt finalize table inject dependencies between overlayed fields
-        new PassIf(
-            [options, summary] {
-                return (options && options->alt_phv_alloc && summary
-                        && summary->getActualState() == State::ALT_FINALIZE_TABLE);
-            },
-            {
-                mutex,
-                defuse,
-                new InjectDepForAltPhvAlloc(phv, dg, *defuse, *mutex)
-            })
-    });
+    addPasses({// new DominatorAnalysis(dg, dominators),
+               // new InjectControlDependencies(dg, dominators),
+               // After Table Placement for JBay, it is unsafe to run DefaultNext, which is run for
+               // flow graph at the moment.  This is only used for a validation check for metadata
+               // dependencies, nothing else.  Has never failed after table placement
+               new InjectControlDependencies(dg), new FindFlowGraph(fg), &ctrl_paths,
+               new PassIf(
+                   [options] {
+                       return !Device::hasLongBranches() ||
+                              (options && options->disable_long_branch);
+                   },
+                   {new PredicationBasedControlEdges(&dg, ctrl_paths)}),
+               new InjectMetadataControlDependencies(phv, dg, fg, ctrl_paths), &cntp,
+               new InjectActionExitAntiDependencies(dg, cntp, ctrl_paths),
+               new PassIf([] { return Device::currentDevice() == Device::TOFINO; },
+                          {new InjectControlExitDependencies(dg, ctrl_paths)}),
+               new InjectDarkAntiDependencies(phv, dg, ctrl_paths),
+               // During Alt finalize table inject dependencies between overlayed fields
+               new PassIf(
+                   [options, summary] {
+                       return (options && options->alt_phv_alloc && summary &&
+                               summary->getActualState() == State::ALT_FINALIZE_TABLE);
+                   },
+                   {mutex, defuse, new InjectDepForAltPhvAlloc(phv, dg, *defuse, *mutex)})});
 }
-

@@ -31,11 +31,11 @@ enum class ErrorCode {
 class Error : public std::stringstream {
  public:
     ErrorCode code;
-    Error(): code(ErrorCode::ok) {}
+    Error() : code(ErrorCode::ok) {}
     void set(ErrorCode c) { code = c; }
     bool is(ErrorCode c) { return code == c; }
 };
 
 }  // namespace PHV
 
-#endif  /* BF_P4C_PHV_ERROR_H_ */
+#endif /* BF_P4C_PHV_ERROR_H_ */

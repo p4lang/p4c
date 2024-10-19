@@ -11,24 +11,22 @@
  */
 
 #include "bf-p4c/phv/table_phv_constraints.h"
+
 #include "bf-p4c/mau/table_layout.h"
 
-Visitor::profile_t TernaryMatchKeyConstraints::init_apply(const IR::Node* root) {
+Visitor::profile_t TernaryMatchKeyConstraints::init_apply(const IR::Node *root) {
     profile_t rv = MauModifier::init_apply(root);
     return rv;
 }
 
-bool TernaryMatchKeyConstraints::preorder(IR::MAU::Table* tbl) {
+bool TernaryMatchKeyConstraints::preorder(IR::MAU::Table *tbl) {
     if (tbl->uses_gateway()) return true;
     if (isATCAM(tbl)) return true;
-    if (isTernary(tbl))
-        calculateTernaryMatchKeyConstraints(tbl);
+    if (isTernary(tbl)) calculateTernaryMatchKeyConstraints(tbl);
     return true;
 }
 
-void TernaryMatchKeyConstraints::end_apply() {
-    return;
-}
+void TernaryMatchKeyConstraints::end_apply() { return; }
 
 bool TernaryMatchKeyConstraints::isATCAM(IR::MAU::Table *tbl) const {
     cstring partition_index;
@@ -44,8 +42,8 @@ bool TernaryMatchKeyConstraints::isTernary(IR::MAU::Table *tbl) const {
     return layout.ternary;
 }
 
-void
-TernaryMatchKeyConstraints::calculateTernaryMatchKeyConstraints(const IR::MAU::Table* tbl) const {
+void TernaryMatchKeyConstraints::calculateTernaryMatchKeyConstraints(
+    const IR::MAU::Table *tbl) const {
     LOG4("\tCalculating ternary match key constraints for " << tbl->name);
     size_t totalRoundedUpBytes = 0;
     size_t totalMetadataBytesUsed = 0;
@@ -60,13 +58,13 @@ TernaryMatchKeyConstraints::calculateTernaryMatchKeyConstraints(const IR::MAU::T
 
     // Calculate total rounded up (to nearest byte) size of all match key fields
     // Also calculate total rounded up (to nearest byte) size of all match key metadata fields
-    for (const IR::MAU::TableKey* matchKey : tbl->match_key) {
+    for (const IR::MAU::TableKey *matchKey : tbl->match_key) {
         LOG5("\t\t" << matchKey->expr);
         le_bitrange bits;
-        PHV::Field* f = phv.field(matchKey->expr, &bits);
+        PHV::Field *f = phv.field(matchKey->expr, &bits);
         CHECK_NULL(f);
-        size_t roundedUpSize = (f->size % BITS_IN_BYTE == 0) ? (f->size / BITS_IN_BYTE) :
-            ((f->size / BITS_IN_BYTE) + 1);
+        size_t roundedUpSize = (f->size % BITS_IN_BYTE == 0) ? (f->size / BITS_IN_BYTE)
+                                                             : ((f->size / BITS_IN_BYTE) + 1);
         totalBitsUsed += bits.size();
         totalRoundedUpBytes += roundedUpSize;
         if (f->metadata && !f->deparsed_to_tm()) {
@@ -75,15 +73,16 @@ TernaryMatchKeyConstraints::calculateTernaryMatchKeyConstraints(const IR::MAU::T
         }
     }
     LOG4("\tTotal bits used for match key by ternary table : " << totalBitsUsed);
-    LOG4("\tTotal bytes used for match key by ternary table : " <<
-         (((totalBitsUsed % BITS_IN_BYTE) == 0) ? (totalBitsUsed / BITS_IN_BYTE) :
-          ((totalBitsUsed / BITS_IN_BYTE) + 1)));
+    LOG4("\tTotal bytes used for match key by ternary table : "
+         << (((totalBitsUsed % BITS_IN_BYTE) == 0) ? (totalBitsUsed / BITS_IN_BYTE)
+                                                   : ((totalBitsUsed / BITS_IN_BYTE) + 1)));
 
     if (totalBitsUsed > MAX_TERNARY_MATCH_KEY_BITS) {
-        error("Ternary table %1% uses %2%b as ternary match key. Maximum number of bits "
-                "allowed is %3%b.\nRewrite your program to use fewer ternary match key bits."
-                "\nTable %1% cannot fit within a single input crossbar in an MAU stage.",
-                tbl->name, totalBitsUsed, MAX_TERNARY_MATCH_KEY_BITS);
+        error(
+            "Ternary table %1% uses %2%b as ternary match key. Maximum number of bits "
+            "allowed is %3%b.\nRewrite your program to use fewer ternary match key bits."
+            "\nTable %1% cannot fit within a single input crossbar in an MAU stage.",
+            tbl->name, totalBitsUsed, MAX_TERNARY_MATCH_KEY_BITS);
         return;
     }
 
@@ -95,18 +94,18 @@ TernaryMatchKeyConstraints::calculateTernaryMatchKeyConstraints(const IR::MAU::T
     return;
 }
 
-bool CollectForceImmediateFields::preorder(const IR::MAU::Action* action) {
-    const auto* tbl = findContext<IR::MAU::Table>();
+bool CollectForceImmediateFields::preorder(const IR::MAU::Action *action) {
+    const auto *tbl = findContext<IR::MAU::Table>();
     if (!tbl) return true;
     if (tbl->get_immediate_ctrl() != IR::MAU::Table::FORCE_IMMEDIATE) return true;
     LOG3("\t  Action " << action->name << " belongs to force_immediate table " << tbl->name);
     auto writtenFields = actions.actionWrites(action);
-    ordered_set<const PHV::Field*> fields;
-    for (const auto* f : writtenFields) {
+    ordered_set<const PHV::Field *> fields;
+    for (const auto *f : writtenFields) {
         if (actions.written_by_ad_constant(f, action)) {
             fields.insert(f);
             if (!f->metadata) continue;
-            PHV::Field* field = phv.field(f->id);
+            PHV::Field *field = phv.field(f->id);
             CHECK_NULL(field);
             field->set_written_in_force_immediate(true);
             LOG3("\t\tSetting written in force immediate property for " << f->name);
@@ -114,10 +113,9 @@ bool CollectForceImmediateFields::preorder(const IR::MAU::Action* action) {
     }
     if (fields.size() == 0) return true;
     LOG3("\t\tListing fields written by action data/constant in this action:");
-    for (auto* f : fields)
-        LOG3("\t\t  " << f);
-    for (const auto* f1 : fields) {
-        for (const auto* f2 : writtenFields) {
+    for (auto *f : fields) LOG3("\t\t  " << f);
+    for (const auto *f1 : fields) {
+        for (const auto *f2 : writtenFields) {
             if (f1 == f2) continue;
             PHV::FieldSlice fs1(f1);
             PHV::FieldSlice fs2(f2);
@@ -129,7 +127,7 @@ bool CollectForceImmediateFields::preorder(const IR::MAU::Action* action) {
     return true;
 }
 
-Visitor::profile_t TableFieldPackOptimization::init_apply(const IR::Node* root) {
+Visitor::profile_t TableFieldPackOptimization::init_apply(const IR::Node *root) {
     profile_t rv = MauInspector::init_apply(root);
     candidate.clear();
     f_to_fs.clear();
@@ -148,8 +146,7 @@ void TableFieldPackOptimization::end_apply() {
             std::list<PHV::FieldSlice> fs_list = getPackCandidate(fs);
             if (!fs_list.empty()) {
                 LOG3("\t\t Pack Candidate:");
-                for (const auto &fs_cand : fs_list)
-                    LOG3("\t\t\t FieldSlice: " << fs_cand);
+                for (const auto &fs_cand : fs_list) LOG3("\t\t\t FieldSlice: " << fs_cand);
             }
         }
     }
@@ -158,11 +155,10 @@ void TableFieldPackOptimization::end_apply() {
 
 // Get the number of entries for various type of table to estimate the weigth of the latter when
 // packing field. This does not need to be fully accurate.
-int TableFieldPackOptimization::getNumberOfEntriesInTable(const IR::MAU::Table* tbl) {
+int TableFieldPackOptimization::getNumberOfEntriesInTable(const IR::MAU::Table *tbl) {
     int entries = 512;  // default number of entries
 
-    if (tbl->layout.no_match_data())
-        entries = 1;
+    if (tbl->layout.no_match_data()) entries = 1;
     if (tbl->layout.pre_classifier)
         entries = tbl->layout.pre_classifer_number_entries;
     else if (auto k = tbl->match_table->getConstantProperty("size"_cs))
@@ -181,21 +177,19 @@ int TableFieldPackOptimization::getNumberOfEntriesInTable(const IR::MAU::Table* 
 // slice packing. Score of a specific pair is increased based on the table size. At the end both
 // candidate[fs1][fs2] and candidate[fs2][fs1] should have the same score but tracking both simplify
 // things at the getFieldSlicePackScore() level.
-bool TableFieldPackOptimization::preorder(const IR::MAU::Table* tbl) {
-    if (!tbl->match_table)
-        return true;
+bool TableFieldPackOptimization::preorder(const IR::MAU::Table *tbl) {
+    if (!tbl->match_table) return true;
 
     LOG3("\tGet match key for " << tbl->name);
     int num_entries = getNumberOfEntriesInTable(tbl);
     LOG3("\tNumber of entries " << num_entries);
     std::list<PHV::FieldSlice> matchfs;
-    for (const IR::MAU::TableKey* matchKey : tbl->match_key) {
-        if (matchKey->for_selection())
-            continue;
+    for (const IR::MAU::TableKey *matchKey : tbl->match_key) {
+        if (matchKey->for_selection()) continue;
 
         LOG3("\t\t" << matchKey->expr);
         le_bitrange bits;
-        const PHV::Field* f = phv.field(matchKey->expr, &bits);
+        const PHV::Field *f = phv.field(matchKey->expr, &bits);
         CHECK_NULL(f);
         if (f->is_solitary()) {
             LOG3("\t\t Skipping since solitary attribute set");
@@ -207,8 +201,7 @@ bool TableFieldPackOptimization::preorder(const IR::MAU::Table* tbl) {
         const PHV::FieldSlice &fs = *cit;
         for (auto cit2 = matchfs.cbegin(); cit2 != matchfs.cend(); cit2++) {
             const PHV::FieldSlice &fs2 = *cit2;
-            if (fs == fs2)
-                continue;
+            if (fs == fs2) continue;
 
             if (phv.isFieldNoPack(fs.field(), fs2.field())) {
                 LOG3("\t\t No pack set between " << fs.field() << " and " << fs2.field());
@@ -216,15 +209,16 @@ bool TableFieldPackOptimization::preorder(const IR::MAU::Table* tbl) {
             }
             int original_score = candidate[fs][fs2];
             candidate[fs][fs2] = original_score + num_entries;
-            LOG3("\t\t Increasing score from " << original_score << " to " <<
-                 original_score + num_entries << " between " << fs << " and " << fs2);
+            LOG3("\t\t Increasing score from " << original_score << " to "
+                                               << original_score + num_entries << " between " << fs
+                                               << " and " << fs2);
         }
         // Increasing slice score with itself to also increase chance of packing slice of the same
         // field in the same byte boundary.
         int original_score = candidate[fs][fs];
         candidate[fs][fs] = original_score + num_entries;
-        LOG3("\t\t Increasing score from " << original_score << " to " <<
-             original_score + num_entries << " on " << fs);
+        LOG3("\t\t Increasing score from " << original_score << " to "
+                                           << original_score + num_entries << " on " << fs);
         f_to_fs[fs.field()].insert(fs);
     }
     return true;
@@ -235,24 +229,18 @@ bool TableFieldPackOptimization::preorder(const IR::MAU::Table* tbl) {
 // the field differently than how it is matched.
 int TableFieldPackOptimization::getFieldSlicePackScore(const PHV::AllocSlice &slice,
                                                        const PHV::AllocSlice &slice2) const {
-    const PHV::Field* f = slice.field();
-    if (!f_to_fs.count(f))
-        return 0;
-    const PHV::Field* f2 = slice2.field();
-    if (!f_to_fs.count(f2))
-        return 0;
+    const PHV::Field *f = slice.field();
+    if (!f_to_fs.count(f)) return 0;
+    const PHV::Field *f2 = slice2.field();
+    if (!f_to_fs.count(f2)) return 0;
 
     // Dark spilling should also not be part of the compute.
-    if (slice.hasInitPrimitive() || slice2.hasInitPrimitive())
-        return 0;
+    if (slice.hasInitPrimitive() || slice2.hasInitPrimitive()) return 0;
 
-    le_byterange byte_range(slice.container_slice().loByte(),
-                            slice.container_slice().hiByte());
+    le_byterange byte_range(slice.container_slice().loByte(), slice.container_slice().hiByte());
 
-    le_byterange byte_range2(slice2.container_slice().loByte(),
-                             slice2.container_slice().hiByte());
-    if (!byte_range.overlaps(byte_range2))
-        return 0;
+    le_byterange byte_range2(slice2.container_slice().loByte(), slice2.container_slice().hiByte());
+    if (!byte_range.overlaps(byte_range2)) return 0;
     le_bitrange range = slice.field_slice();
     le_bitrange range2 = slice2.field_slice();
     int pack_score = 0;
@@ -277,8 +265,7 @@ int TableFieldPackOptimization::getFieldSlicePackScore(const PHV::AllocSlice &sl
  */
 int TableFieldPackOptimization::getPackScore(const ordered_set<PHV::AllocSlice> &parent,
                                              const ordered_set<PHV::AllocSlice> &slices) const {
-    if (parent.size() + slices.size() <= 1 || slices.size() == 0)
-        return 0;
+    if (parent.size() + slices.size() <= 1 || slices.size() == 0) return 0;
 
     const PHV::Container container = slices.begin()->container();
     int pack_score = 0;
@@ -312,14 +299,13 @@ int TableFieldPackOptimization::getPackScore(const ordered_set<PHV::AllocSlice> 
  *
  *  An empty list can be returned if no potential candidate are found.
  **/
-std::list<PHV::FieldSlice>
-TableFieldPackOptimization::getPackCandidate(const PHV::FieldSlice &fs) const {
-    const PHV::Field* f = fs.field();
+std::list<PHV::FieldSlice> TableFieldPackOptimization::getPackCandidate(
+    const PHV::FieldSlice &fs) const {
+    const PHV::Field *f = fs.field();
     const le_bitrange &fs_range = fs.range();
     std::list<PHV::FieldSlice> rv;
 
-    if (!f->metadata || ((fs_range.size() % 8) == 0) || !f_to_fs.count(f))
-        return rv;
+    if (!f->metadata || ((fs_range.size() % 8) == 0) || !f_to_fs.count(f)) return rv;
 
     ordered_map<PHV::FieldSlice, int> pack_candidate;
 
@@ -328,9 +314,8 @@ TableFieldPackOptimization::getPackCandidate(const PHV::FieldSlice &fs) const {
         if (tracked_fs_range.overlaps(fs_range)) {
             if (candidate.count(tracked_fs)) {
                 for (const auto &kv : candidate.at(tracked_fs)) {
-                    const PHV::Field* candidate_f = kv.first.field();
-                    if (!candidate_f->metadata)
-                        continue;
+                    const PHV::Field *candidate_f = kv.first.field();
+                    if (!candidate_f->metadata) continue;
 
                     if (candidate_f == f && kv.first.range().overlaps(fs_range)) {
                         le_bitinterval low_range;
@@ -356,16 +341,13 @@ TableFieldPackOptimization::getPackCandidate(const PHV::FieldSlice &fs) const {
         }
     }
 
-    for (const auto &kv : pack_candidate)
-        rv.push_back(kv.first);
+    for (const auto &kv : pack_candidate) rv.push_back(kv.first);
 
-    rv.sort([&](const PHV::FieldSlice &fs1, const PHV::FieldSlice &fs2) -> bool
-        {
-            int score1 = pack_candidate[fs1] / fs1.range().size();
-            int score2 = pack_candidate[fs2] / fs2.range().size();
-            return (score1 > score2);
-        });
+    rv.sort([&](const PHV::FieldSlice &fs1, const PHV::FieldSlice &fs2) -> bool {
+        int score1 = pack_candidate[fs1] / fs1.range().size();
+        int score2 = pack_candidate[fs2] / fs2.range().size();
+        return (score1 > score2);
+    });
 
     return rv;
 }
-

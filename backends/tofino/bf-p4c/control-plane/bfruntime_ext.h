@@ -10,8 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_CONTROL_PLANE_BFRUNTIME_EXT_H_
-#define EXTENSIONS_BF_P4C_CONTROL_PLANE_BFRUNTIME_EXT_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_CONTROL_PLANE_BFRUNTIME_EXT_H_
+#define BACKENDS_TOFINO_BF_P4C_CONTROL_PLANE_BFRUNTIME_EXT_H_
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -19,8 +19,8 @@
 #include "barefoot/p4info.pb.h"
 #pragma GCC diagnostic pop
 #include "bf-p4c/device.h"
-#include "bfruntime.h"
 #include "bf-utils/include/dynamic_hash/bfn_hash_algorithm.h"
+#include "bfruntime.h"
 
 namespace BFN {
 
@@ -41,11 +41,11 @@ using namespace BFN::BFRT;
 /// approach fairly easily if needed.
 class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
  public:
-    explicit BFRuntimeSchemaGenerator(const p4configv1::P4Info& p4info)
-        : BFRuntimeGenerator(p4info) { }
+    explicit BFRuntimeSchemaGenerator(const p4configv1::P4Info &p4info)
+        : BFRuntimeGenerator(p4info) {}
 
     /// Generates the schema as a Json object for the provided P4Info instance.
-    const Util::JsonObject* genSchema() const override;
+    const Util::JsonObject *genSchema() const override;
 
  private:
     // TODO: these values may need to be available to the BF-RT
@@ -153,42 +153,40 @@ class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
     struct ValueSet;
     struct ActionSelector;
 
-    static void addLpfDataFields(Util::JsonArray* dataJson);
-    static void addWredDataFields(Util::JsonArray* dataJson);
+    static void addLpfDataFields(Util::JsonArray *dataJson);
+    static void addWredDataFields(Util::JsonArray *dataJson);
 
-    void addDebugCounterTable(Util::JsonArray* tablesJson) const;
-    void addDynHash(Util::JsonArray* tablesJson, const DynHash& dynHash) const;
-    void addDynHashAlgorithm(Util::JsonArray* tablesJson, const DynHash& dynHash) const;
-    void addDynHashCompute(Util::JsonArray* tablesJson, const DynHash& dynHash) const;
-    void addDynHashConfig(Util::JsonArray* tablesJson, const DynHash& dynHash) const;
-    void addLpf(Util::JsonArray* tablesJson, const Lpf& lpf) const;
-    void addParserChoices(Util::JsonArray* tablesJson, const ParserChoices& parserChoices) const;
-    void addPortMetadata(Util::JsonArray* tablesJson, const PortMetadata& portMetadata) const;
-    void addPortMetadataDefault(Util::JsonArray* tablesJson) const;
-    void addPortMetadataExtern(Util::JsonArray* tablesJson) const;
-    void addRegisterParam(Util::JsonArray* tablesJson, const RegisterParam&) const;
+    void addDebugCounterTable(Util::JsonArray *tablesJson) const;
+    void addDynHash(Util::JsonArray *tablesJson, const DynHash &dynHash) const;
+    void addDynHashAlgorithm(Util::JsonArray *tablesJson, const DynHash &dynHash) const;
+    void addDynHashCompute(Util::JsonArray *tablesJson, const DynHash &dynHash) const;
+    void addDynHashConfig(Util::JsonArray *tablesJson, const DynHash &dynHash) const;
+    void addLpf(Util::JsonArray *tablesJson, const Lpf &lpf) const;
+    void addParserChoices(Util::JsonArray *tablesJson, const ParserChoices &parserChoices) const;
+    void addPortMetadata(Util::JsonArray *tablesJson, const PortMetadata &portMetadata) const;
+    void addPortMetadataDefault(Util::JsonArray *tablesJson) const;
+    void addPortMetadataExtern(Util::JsonArray *tablesJson) const;
+    void addRegisterParam(Util::JsonArray *tablesJson, const RegisterParam &) const;
     /// Add register parameter data fields to the JSON data array for a BFRT table. Field
     /// ids are assigned incrementally starting at @p idOffset, which is 1 by
     /// default.
-    void addRegisterParamDataFields(Util::JsonArray* dataJson,
-                                    const RegisterParam& register_param_,
+    void addRegisterParamDataFields(Util::JsonArray *dataJson, const RegisterParam &register_param_,
                                     P4Id idOffset = 1) const;
-    void addSnapshot(Util::JsonArray* tablesJson, const Snapshot& snapshot) const;
-    void addSnapshotLiveness(Util::JsonArray* tablesJson, const Snapshot& snapshot) const;
-    void addTNAExterns(Util::JsonArray* tablesJson,
-                                    Util::JsonArray* learnFiltersJson) const;
-    void addWred(Util::JsonArray* tablesJson, const Wred& wred) const;
-    void addDirectResources(const p4configv1::Table& table, Util::JsonArray* dataJson,
-            Util::JsonArray* operationsJson, Util::JsonArray* attributesJson,
-            P4Id maxActionParamId) const override;
-    void addValueSet(Util::JsonArray* tablesJson, const ValueSet& valueSet) const;
-    void addActionSelectorCommon(Util::JsonArray* tablesJson,
-                                 const ActionSelector& actionProf) const;
-    void addActionSelectorGetMemberCommon(Util::JsonArray* tablesJson,
-                                    const ActionSelector& actionProf) const;
-    void addActionProfs(Util::JsonArray* tablesJson) const override;
-    bool addActionProfIds(const p4configv1::Table& table,
-                            Util::JsonObject* tableJson) const override;
+    void addSnapshot(Util::JsonArray *tablesJson, const Snapshot &snapshot) const;
+    void addSnapshotLiveness(Util::JsonArray *tablesJson, const Snapshot &snapshot) const;
+    void addTNAExterns(Util::JsonArray *tablesJson, Util::JsonArray *learnFiltersJson) const;
+    void addWred(Util::JsonArray *tablesJson, const Wred &wred) const;
+    void addDirectResources(const p4configv1::Table &table, Util::JsonArray *dataJson,
+                            Util::JsonArray *operationsJson, Util::JsonArray *attributesJson,
+                            P4Id maxActionParamId) const override;
+    void addValueSet(Util::JsonArray *tablesJson, const ValueSet &valueSet) const;
+    void addActionSelectorCommon(Util::JsonArray *tablesJson,
+                                 const ActionSelector &actionProf) const;
+    void addActionSelectorGetMemberCommon(Util::JsonArray *tablesJson,
+                                          const ActionSelector &actionProf) const;
+    void addActionProfs(Util::JsonArray *tablesJson) const override;
+    bool addActionProfIds(const p4configv1::Table &table,
+                          Util::JsonObject *tableJson) const override;
 
     std::optional<bool> actProfHasSelector(P4Id actProfId) const override;
 
@@ -198,24 +196,22 @@ class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
     std::optional<Meter> getDirectMeter(P4Id meterId) const override;
     std::optional<Register> getDirectRegister(P4Id registerId) const;
 
-    static std::optional<ActionProf>
-    fromTNAActionProfile(const p4configv1::P4Info& p4info,
-            const p4configv1::ExternInstance& externInstance) {
-        const auto& pre = externInstance.preamble();
+    static std::optional<ActionProf> fromTNAActionProfile(
+        const p4configv1::P4Info &p4info, const p4configv1::ExternInstance &externInstance) {
+        const auto &pre = externInstance.preamble();
         ::barefoot::ActionProfile actionProfile;
         if (!externInstance.info().UnpackTo(&actionProfile)) {
             error("Extern instance %1% does not pack an ActionProfile object", pre.name());
             return std::nullopt;
         }
-        auto tableIds = collectTableIds(
-            p4info, actionProfile.table_ids().begin(), actionProfile.table_ids().end());
+        auto tableIds = collectTableIds(p4info, actionProfile.table_ids().begin(),
+                                        actionProfile.table_ids().end());
         return ActionProf{pre.name(), pre.id(), actionProfile.size(), tableIds,
                           transformAnnotations(pre)};
     };
 
-    static std::optional<Counter>
-    fromTNACounter(const p4configv1::ExternInstance& externInstance) {
-        const auto& pre = externInstance.preamble();
+    static std::optional<Counter> fromTNACounter(const p4configv1::ExternInstance &externInstance) {
+        const auto &pre = externInstance.preamble();
         ::barefoot::Counter counter;
         if (!externInstance.info().UnpackTo(&counter)) {
             error("Extern instance %1% does not pack a Counter object", pre.name());
@@ -225,9 +221,9 @@ class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
         return Counter{pre.name(), pre.id(), counter.size(), unit, transformAnnotations(pre)};
     }
 
-    static std::optional<Counter>
-    fromTNADirectCounter(const p4configv1::ExternInstance& externInstance) {
-        const auto& pre = externInstance.preamble();
+    static std::optional<Counter> fromTNADirectCounter(
+        const p4configv1::ExternInstance &externInstance) {
+        const auto &pre = externInstance.preamble();
         ::barefoot::DirectCounter counter;
         if (!externInstance.info().UnpackTo(&counter)) {
             error("Extern instance %1% does not pack a DirectCounter object", pre.name());
@@ -237,9 +233,8 @@ class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
         return Counter{pre.name(), pre.id(), 0, unit, transformAnnotations(pre)};
     }
 
-    static std::optional<Meter>
-    fromTNAMeter(const p4configv1::ExternInstance& externInstance) {
-        const auto& pre = externInstance.preamble();
+    static std::optional<Meter> fromTNAMeter(const p4configv1::ExternInstance &externInstance) {
+        const auto &pre = externInstance.preamble();
         ::barefoot::Meter meter;
         if (!externInstance.info().UnpackTo(&meter)) {
             error("Extern instance %1% does not pack a Meter object", pre.name());
@@ -250,9 +245,9 @@ class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
         return Meter{pre.name(), pre.id(), meter.size(), unit, type, transformAnnotations(pre)};
     }
 
-    static std::optional<Meter>
-    fromTNADirectMeter(const p4configv1::ExternInstance& externInstance) {
-        const auto& pre = externInstance.preamble();
+    static std::optional<Meter> fromTNADirectMeter(
+        const p4configv1::ExternInstance &externInstance) {
+        const auto &pre = externInstance.preamble();
         ::barefoot::DirectMeter meter;
         if (!externInstance.info().UnpackTo(&meter)) {
             error("Extern instance %1% does not pack a Meter object", pre.name());
@@ -263,9 +258,8 @@ class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
         return Meter{pre.name(), pre.id(), 0, unit, type, transformAnnotations(pre)};
     }
 
-    static std::optional<Digest>
-    fromTNADigest(const p4configv1::ExternInstance& externInstance) {
-        const auto& pre = externInstance.preamble();
+    static std::optional<Digest> fromTNADigest(const p4configv1::ExternInstance &externInstance) {
+        const auto &pre = externInstance.preamble();
         ::barefoot::Digest digest;
         if (!externInstance.info().UnpackTo(&digest)) {
             error("Extern instance %1% does not pack a Digest object", pre.name());
@@ -274,28 +268,28 @@ class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
         return Digest{pre.name(), pre.id(), digest.type_spec(), transformAnnotations(pre)};
     }
 
-    static std::optional<Register>
-    fromTNARegister(const p4configv1::ExternInstance& externInstance) {
-        const auto& pre = externInstance.preamble();
+    static std::optional<Register> fromTNARegister(
+        const p4configv1::ExternInstance &externInstance) {
+        const auto &pre = externInstance.preamble();
         ::barefoot::Register register_;
         if (!externInstance.info().UnpackTo(&register_)) {
             error("Extern instance %1% does not pack a Register object", pre.name());
             return std::nullopt;
         }
-        return Register{pre.name(), register_.data_field_name(), pre.id(),
-                register_.size(), register_.type_spec(), transformAnnotations(pre)};
+        return Register{pre.name(),       register_.data_field_name(), pre.id(),
+                        register_.size(), register_.type_spec(),       transformAnnotations(pre)};
     }
 
-    static std::optional<Register>
-    fromTNADirectRegister(const p4configv1::ExternInstance& externInstance) {
-        const auto& pre = externInstance.preamble();
+    static std::optional<Register> fromTNADirectRegister(
+        const p4configv1::ExternInstance &externInstance) {
+        const auto &pre = externInstance.preamble();
         ::barefoot::DirectRegister register_;
         if (!externInstance.info().UnpackTo(&register_)) {
             error("Extern instance %1% does not pack a Register object", pre.name());
             return std::nullopt;
         }
-        return Register{pre.name(), register_.data_field_name(), pre.id(), 0,
-                register_.type_spec(), transformAnnotations(pre)};
+        return Register{pre.name(), register_.data_field_name(), pre.id(),
+                        0,          register_.type_spec(),       transformAnnotations(pre)};
     }
 };
 
@@ -303,4 +297,4 @@ class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
 
 }  // namespace BFN
 
-#endif  // EXTENSIONS_BF_P4C_CONTROL_PLANE_BFRUNTIME_EXT_H_
+#endif  // BACKENDS_TOFINO_BF_P4C_CONTROL_PLANE_BFRUNTIME_EXT_H_

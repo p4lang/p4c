@@ -10,22 +10,24 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include <cmath>
-#include "ir/ir.h"
 #include "alpm.h"
+
+#include <cmath>
+
 #include "bf-p4c/arch/helpers.h"
 #include "bf-p4c/common/pragma/all_pragmas.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeChecking/bindVariables.h"
-#include "lib/error_catalog.h"
+#include "ir/ir.h"
 #include "lib/bitops.h"
+#include "lib/error_catalog.h"
 #include "lib/log.h"
 
 namespace BFN {
 
 const std::set<unsigned> SplitAlpm::valid_partition_values = {1024, 2048, 4096, 8192};
-const cstring SplitAlpm::ALGORITHMIC_LPM_PARTITIONS  = cstring(PragmaAlpmPartitions::name);
+const cstring SplitAlpm::ALGORITHMIC_LPM_PARTITIONS = cstring(PragmaAlpmPartitions::name);
 const cstring SplitAlpm::ALGORITHMIC_LPM_SUBTREES_PER_PARTITION =
     cstring(PragmaAlpmSubtreePartitions::name);
 const cstring SplitAlpm::ALGORITHMIC_LPM_ATCAM_EXCLUDE_FIELD_MSBS =
@@ -37,65 +39,58 @@ bool SplitAlpm::use_funnel_shift(int lpm_key_width) {
 /* syntheisze a funnel_shift_operation that takes two 32-bit fields
  * and right_shift by shift_amt and return a 32-bit output
  */
-const IR::StatOrDecl* SplitAlpm::synth_funnel_shift_ops(
-        const IR::P4Table* tbl, const IR::Expression* lpm_key, int shift_amt) {
+const IR::StatOrDecl *SplitAlpm::synth_funnel_shift_ops(const IR::P4Table *tbl,
+                                                        const IR::Expression *lpm_key,
+                                                        int shift_amt) {
     int lpm_key_width = lpm_key->type->width_bits();
 
-    auto* shift_amt_const = new IR::Constant(IR::Type_Bits::get(lpm_key_width, true), shift_amt);
+    auto *shift_amt_const = new IR::Constant(IR::Type_Bits::get(lpm_key_width, true), shift_amt);
     if (shift_amt > 32) {
         shift_amt -= 32;
         return new IR::AssignmentStatement(
-                    new IR::PathExpression(IR::ID(tbl->name + "_partition_key")),
-                        new IR::Shr(
-                            new IR::Slice(lpm_key, lpm_key_width - 1, 32),
-                            shift_amt_const));
+            new IR::PathExpression(IR::ID(tbl->name + "_partition_key")),
+            new IR::Shr(new IR::Slice(lpm_key, lpm_key_width - 1, 32), shift_amt_const));
     } else if (shift_amt == 32) {
         return new IR::AssignmentStatement(
-                    new IR::PathExpression(IR::ID(tbl->name + "_partition_key")),
-                        new IR::Slice(lpm_key, lpm_key_width - 1, 32));
+            new IR::PathExpression(IR::ID(tbl->name + "_partition_key")),
+            new IR::Slice(lpm_key, lpm_key_width - 1, 32));
     } else {
         auto typeArguments = new IR::Vector<IR::Type>({IR::Type_Bits::get(32)});
         auto arguments = new IR::Vector<IR::Argument>();
-        arguments->push_back(new IR::Argument(
-                    new IR::PathExpression(IR::ID(tbl->name + "_partition_key"))));
+        arguments->push_back(
+            new IR::Argument(new IR::PathExpression(IR::ID(tbl->name + "_partition_key"))));
 
         // cast to bit<32> if the upper half is less than 32 bit wide
-        IR::Expression* upper = new IR::Slice(lpm_key, lpm_key_width - 1, 32);
-        if (lpm_key_width != 64)
-            upper = new IR::Cast(IR::Type_Bits::get(32), upper);
+        IR::Expression *upper = new IR::Slice(lpm_key, lpm_key_width - 1, 32);
+        if (lpm_key_width != 64) upper = new IR::Cast(IR::Type_Bits::get(32), upper);
         arguments->push_back(new IR::Argument(upper));
         arguments->push_back(new IR::Argument(new IR::Slice(lpm_key, 31, 0)));
         arguments->push_back(new IR::Argument(shift_amt_const));
         return new IR::MethodCallStatement(new IR::MethodCallExpression(
-                    new IR::PathExpression(new IR::Path(IR::ID("funnel_shift_right"))),
-                    typeArguments, arguments));
+            new IR::PathExpression(new IR::Path(IR::ID("funnel_shift_right"))), typeArguments,
+            arguments));
     }
 }
 
-const IR::IndexedVector<IR::Declaration>* SplitAlpm::create_temp_var(
-        const IR::P4Table* tbl, unsigned number_actions,
-        unsigned partition_index_bits,
-        unsigned atcam_subset_width,
-        unsigned subtrees_per_partition,
-        const IR::Expression* lpm_key) {
+const IR::IndexedVector<IR::Declaration> *SplitAlpm::create_temp_var(
+    const IR::P4Table *tbl, unsigned number_actions, unsigned partition_index_bits,
+    unsigned atcam_subset_width, unsigned subtrees_per_partition, const IR::Expression *lpm_key) {
     auto tempvar = new IR::IndexedVector<IR::Declaration>();
 
-    tempvar->push_back(new IR::Declaration_Variable(
-                IR::ID(tbl->name + "_partition_index"),
-                IR::Type_Bits::get(partition_index_bits)));
+    tempvar->push_back(new IR::Declaration_Variable(IR::ID(tbl->name + "_partition_index"),
+                                                    IR::Type_Bits::get(partition_index_bits)));
 
     if (number_actions > 1) {
         int partition_key_width = atcam_subset_width;
-        if (use_funnel_shift(lpm_key->type->width_bits()))
-            partition_key_width = 32;
-        tempvar->push_back(new IR::Declaration_Variable(
-                    IR::ID(tbl->name + "_partition_key"),
-                    IR::Type_Bits::get(partition_key_width)));
+        if (use_funnel_shift(lpm_key->type->width_bits())) partition_key_width = 32;
+        tempvar->push_back(new IR::Declaration_Variable(IR::ID(tbl->name + "_partition_key"),
+                                                        IR::Type_Bits::get(partition_key_width)));
         if (subtrees_per_partition > 1) {
             auto subtree_id_bits = ::ceil_log2(subtrees_per_partition);
-            tempvar->push_back(new IR::Declaration_Variable(
-                        IR::ID(tbl->name + "_subtree_id"),
-                        IR::Type_Bits::get(subtree_id_bits))); } }
+            tempvar->push_back(new IR::Declaration_Variable(IR::ID(tbl->name + "_subtree_id"),
+                                                            IR::Type_Bits::get(subtree_id_bits)));
+        }
+    }
 
     return tempvar;
 }
@@ -132,31 +127,27 @@ const IR::IndexedVector<IR::Declaration>* SplitAlpm::create_temp_var(
  * efficiently implemented with a single PHV container.
  *
  */
-const IR::IndexedVector<IR::Declaration>* SplitAlpm::create_preclassifer_actions(
-        const IR::P4Table* tbl,
-        unsigned number_actions,
-        unsigned partition_index_bits,
-        unsigned atcam_subset_width,
-        unsigned shift_granularity,
-        unsigned subtrees_per_partition,
-        const IR::Expression* lpm_key) {
+const IR::IndexedVector<IR::Declaration> *SplitAlpm::create_preclassifer_actions(
+    const IR::P4Table *tbl, unsigned number_actions, unsigned partition_index_bits,
+    unsigned atcam_subset_width, unsigned shift_granularity, unsigned subtrees_per_partition,
+    const IR::Expression *lpm_key) {
     auto actions = new IR::IndexedVector<IR::Declaration>();
 
     auto params = new IR::ParameterList();
     params->push_back(new IR::Parameter(IR::ID("index"), IR::Direction::None,
-                IR::Type_Bits::get(partition_index_bits)));
+                                        IR::Type_Bits::get(partition_index_bits)));
     if (number_actions > 1 && subtrees_per_partition > 1) {
         auto subtree_id_bits = ::ceil_log2(subtrees_per_partition);
         params->push_back(new IR::Parameter(IR::ID("subtree_id"), IR::Direction::None,
-                IR::Type_Bits::get(subtree_id_bits)));
+                                            IR::Type_Bits::get(subtree_id_bits)));
     }
 
     for (unsigned n = 0; n < number_actions; n++) {
         auto body = new IR::BlockStatement;
 
         body->push_back(new IR::AssignmentStatement(
-                    new IR::PathExpression(IR::ID(tbl->name + "_partition_index")),
-                    new IR::PathExpression(IR::ID("index"))));
+            new IR::PathExpression(IR::ID(tbl->name + "_partition_index")),
+            new IR::PathExpression(IR::ID("index"))));
 
         if (number_actions > 1) {
             if (use_funnel_shift(lpm_key->type->width_bits())) {
@@ -166,30 +157,32 @@ const IR::IndexedVector<IR::Declaration>* SplitAlpm::create_preclassifer_actions
                 body->push_back(stmt);
             } else {
                 body->push_back(new IR::AssignmentStatement(
-                            new IR::PathExpression(IR::ID(tbl->name + "_partition_key")),
-                            new IR::Slice(
-                                new IR::Shr(lpm_key,
-                                    new IR::Constant(lpm_key->type,
-                                        lpm_key->type->width_bits() -
-                                        atcam_subset_width - n * shift_granularity)),
-                                atcam_subset_width-1, 0)));
+                    new IR::PathExpression(IR::ID(tbl->name + "_partition_key")),
+                    new IR::Slice(
+                        new IR::Shr(lpm_key,
+                                    new IR::Constant(lpm_key->type, lpm_key->type->width_bits() -
+                                                                        atcam_subset_width -
+                                                                        n * shift_granularity)),
+                        atcam_subset_width - 1, 0)));
             }
         }
 
         if (number_actions > 1 && subtrees_per_partition > 1) {
             body->push_back(new IR::AssignmentStatement(
-                        new IR::PathExpression(IR::ID(tbl->name + "_subtree_id")),
-                        new IR::PathExpression(IR::ID("subtree_id")))); }
+                new IR::PathExpression(IR::ID(tbl->name + "_subtree_id")),
+                new IR::PathExpression(IR::ID("subtree_id"))));
+        }
 
         auto name = tbl->name + "_set_partition_index_" + cstring::to_cstring(n);
-        actions->push_back(new IR::P4Action(IR::ID(name), params, body)); }
+        actions->push_back(new IR::P4Action(IR::ID(name), params, body));
+    }
 
     return actions;
 }
 
-void SplitAlpm::apply_pragma_exclude_msbs(const IR::P4Table* tbl,
-        const ordered_map<cstring, int>* fields_to_exclude,
-        IR::Vector<IR::KeyElement>& keys) {
+void SplitAlpm::apply_pragma_exclude_msbs(const IR::P4Table *tbl,
+                                          const ordered_map<cstring, int> *fields_to_exclude,
+                                          IR::Vector<IR::KeyElement> &keys) {
     for (auto k : tbl->getKey()->keyElements) {
         cstring fname;
         if (auto annot = k->getAnnotation(IR::Annotation::nameAnnotation)) {
@@ -201,21 +194,22 @@ void SplitAlpm::apply_pragma_exclude_msbs(const IR::P4Table* tbl,
             auto msb = fields_to_exclude->at(fname);
             auto key_width = k->expression->type->width_bits();
             if (msb < key_width) {
-                keys.push_back(
-                    new IR::KeyElement(k->srcInfo, k->annotations,
-                        new IR::Slice(k->expression, key_width - msb - 1, 0),
-                        k->matchType)); }
+                keys.push_back(new IR::KeyElement(
+                    k->srcInfo, k->annotations,
+                    new IR::Slice(k->expression, key_width - msb - 1, 0), k->matchType));
+            }
         } else {
-            keys.push_back(k); }
+            keys.push_back(k);
+        }
     }
 }
 
-const IR::P4Table* SplitAlpm::create_atcam_table(const IR::P4Table* tbl,
-        unsigned partition_count,
-        unsigned subtrees_per_partition, unsigned number_actions,
-        int atcam_subset_width, int shift_granularity,
-        ordered_map<cstring, int>& fields_to_exclude,
-        const IR::Expression* lpm_key) {
+const IR::P4Table *SplitAlpm::create_atcam_table(const IR::P4Table *tbl, unsigned partition_count,
+                                                 unsigned subtrees_per_partition,
+                                                 unsigned number_actions, int atcam_subset_width,
+                                                 int shift_granularity,
+                                                 ordered_map<cstring, int> &fields_to_exclude,
+                                                 const IR::Expression *lpm_key) {
     auto properties = new IR::IndexedVector<IR::Property>;
 
     // create partition_index
@@ -223,40 +217,37 @@ const IR::P4Table* SplitAlpm::create_atcam_table(const IR::P4Table* tbl,
     if (number_actions > 1) {
         // context.json requires subtree_id to be first key
         if (subtrees_per_partition > 1) {
-            keys.push_back(new IR::KeyElement(
-                        new IR::PathExpression(IR::ID(tbl->name + "_subtree_id")),
-                        new IR::PathExpression(IR::ID("exact")))); }
-        IR::Expression* partition_key =
+            keys.push_back(
+                new IR::KeyElement(new IR::PathExpression(IR::ID(tbl->name + "_subtree_id")),
+                                   new IR::PathExpression(IR::ID("exact"))));
+        }
+        IR::Expression *partition_key =
             new IR::PathExpression(IR::ID(tbl->name + "_partition_key"));
         if (use_funnel_shift(lpm_key->type->width_bits())) {
             partition_key = new IR::Slice(partition_key, atcam_subset_width - 1, 0);
         }
-        keys.push_back(new IR::KeyElement(
-                    partition_key,
-                    new IR::PathExpression(IR::ID("lpm"))));
+        keys.push_back(new IR::KeyElement(partition_key, new IR::PathExpression(IR::ID("lpm"))));
     } else {
         apply_pragma_exclude_msbs(tbl, &fields_to_exclude, keys);
     }
-    keys.push_back(new IR::KeyElement(
-                new IR::PathExpression(IR::ID(tbl->name + "_partition_index")),
-                new IR::PathExpression(IR::ID("atcam_partition_index"))));
+    keys.push_back(
+        new IR::KeyElement(new IR::PathExpression(IR::ID(tbl->name + "_partition_index")),
+                           new IR::PathExpression(IR::ID("atcam_partition_index"))));
 
-
-    properties->push_back(new IR::Property("key"_cs,
-                          new IR::Key(keys), false));
+    properties->push_back(new IR::Property("key"_cs, new IR::Key(keys), false));
 
     // create partition_key for further alpm optimization
     properties->push_back(new IR::Property("actions"_cs, tbl->getActionList(), false));
 
     // create size
-    properties->push_back(new IR::Property("size"_cs,
-        new IR::ExpressionValue(tbl->getSizeProperty()), false));
+    properties->push_back(
+        new IR::Property("size"_cs, new IR::ExpressionValue(tbl->getSizeProperty()), false));
 
     // create default_action
     if (tbl->getDefaultAction()) {
-        properties->push_back(new IR::Property("default_action"_cs,
-                              new IR::ExpressionValue(tbl->getDefaultAction()),
-                              false)); }
+        properties->push_back(new IR::Property(
+            "default_action"_cs, new IR::ExpressionValue(tbl->getDefaultAction()), false));
+    }
 
     if (auto prop = tbl->properties->getProperty("idle_timeout"_cs)) {
         properties->push_back(prop);
@@ -266,32 +257,38 @@ const IR::P4Table* SplitAlpm::create_atcam_table(const IR::P4Table* tbl,
         properties->push_back(prop);
     }
 
-    properties->push_back(new IR::Property("as_atcam"_cs,
-                new IR::Annotations({new IR::Annotation(IR::Annotation::hiddenAnnotation, {})}),
-                new IR::ExpressionValue(new IR::BoolLiteral(true)), false));
+    properties->push_back(new IR::Property(
+        "as_atcam"_cs,
+        new IR::Annotations({new IR::Annotation(IR::Annotation::hiddenAnnotation, {})}),
+        new IR::ExpressionValue(new IR::BoolLiteral(true)), false));
 
-    properties->push_back(new IR::Property("as_alpm"_cs,
-                new IR::Annotations({new IR::Annotation(IR::Annotation::hiddenAnnotation, {})}),
-                new IR::ExpressionValue(new IR::BoolLiteral(true)), false));
+    properties->push_back(new IR::Property(
+        "as_alpm"_cs,
+        new IR::Annotations({new IR::Annotation(IR::Annotation::hiddenAnnotation, {})}),
+        new IR::ExpressionValue(new IR::BoolLiteral(true)), false));
 
-    properties->push_back(new IR::Property("atcam_partition_count"_cs,
-                new IR::Annotations({new IR::Annotation(IR::Annotation::hiddenAnnotation, {})}),
-                new IR::ExpressionValue(new IR::Constant(partition_count)), false));
+    properties->push_back(new IR::Property(
+        "atcam_partition_count"_cs,
+        new IR::Annotations({new IR::Annotation(IR::Annotation::hiddenAnnotation, {})}),
+        new IR::ExpressionValue(new IR::Constant(partition_count)), false));
 
-    properties->push_back(new IR::Property("atcam_subtrees_per_partition"_cs,
-                new IR::Annotations({new IR::Annotation(IR::Annotation::hiddenAnnotation, {})}),
-                new IR::ExpressionValue(new IR::Constant(subtrees_per_partition)), false));
+    properties->push_back(new IR::Property(
+        "atcam_subtrees_per_partition"_cs,
+        new IR::Annotations({new IR::Annotation(IR::Annotation::hiddenAnnotation, {})}),
+        new IR::ExpressionValue(new IR::Constant(subtrees_per_partition)), false));
 
     if (atcam_subset_width != -1) {
-        properties->push_back(new IR::Property("atcam_subset_width"_cs,
-                    new IR::Annotations({new IR::Annotation(IR::Annotation::hiddenAnnotation, {})}),
-                    new IR::ExpressionValue(new IR::Constant(atcam_subset_width)), false));
+        properties->push_back(new IR::Property(
+            "atcam_subset_width"_cs,
+            new IR::Annotations({new IR::Annotation(IR::Annotation::hiddenAnnotation, {})}),
+            new IR::ExpressionValue(new IR::Constant(atcam_subset_width)), false));
     }
 
     if (shift_granularity != -1) {
-        properties->push_back(new IR::Property("shift_granularity"_cs,
-                    new IR::Annotations({new IR::Annotation(IR::Annotation::hiddenAnnotation, {})}),
-                    new IR::ExpressionValue(new IR::Constant(shift_granularity)), false));
+        properties->push_back(new IR::Property(
+            "shift_granularity"_cs,
+            new IR::Annotations({new IR::Annotation(IR::Annotation::hiddenAnnotation, {})}),
+            new IR::ExpressionValue(new IR::Constant(shift_granularity)), false));
     }
 
     // Used a list of lists to save the excluded_field_msb_bits due to the limitation in
@@ -305,9 +302,10 @@ const IR::P4Table* SplitAlpm::create_atcam_table(const IR::P4Table* tbl,
             auto elem = new IR::ListExpression(entry);
             property.push_back(elem);
         }
-        properties->push_back(new IR::Property("excluded_field_msb_bits",
-                    new IR::Annotations({new IR::Annotation(IR::Annotation::hiddenAnnotation, {})}),
-                    new IR::ExpressionValue(new IR::ListExpression(property)), false));
+        properties->push_back(new IR::Property(
+            "excluded_field_msb_bits",
+            new IR::Annotations({new IR::Annotation(IR::Annotation::hiddenAnnotation, {})}),
+            new IR::ExpressionValue(new IR::ListExpression(property)), false));
     }
 
     auto table_property = new IR::TableProperties(*properties);
@@ -315,9 +313,11 @@ const IR::P4Table* SplitAlpm::create_atcam_table(const IR::P4Table* tbl,
     return table;
 }
 
-const IR::P4Table* SplitAlpm::create_preclassifier_table(const IR::P4Table* tbl,
-        unsigned number_entries, unsigned number_actions, unsigned partition_index_bits,
-        unsigned subtrees_per_partition) {
+const IR::P4Table *SplitAlpm::create_preclassifier_table(const IR::P4Table *tbl,
+                                                         unsigned number_entries,
+                                                         unsigned number_actions,
+                                                         unsigned partition_index_bits,
+                                                         unsigned subtrees_per_partition) {
     auto properties = new IR::IndexedVector<IR::Property>;
 
     // create key
@@ -325,64 +325,63 @@ const IR::P4Table* SplitAlpm::create_preclassifier_table(const IR::P4Table* tbl,
     for (auto f : tbl->getKey()->keyElements) {
         if (f->matchType->path->name == "ternary")
             error(ErrorType::ERR_UNSUPPORTED, "Ternary match key %1% not supported in table %2%",
-                    f->expression, tbl->name);
+                  f->expression, tbl->name);
         if (f->matchType->path->name == "lpm") {
-            auto k = new IR::KeyElement(f->annotations, f->expression,
-                     new IR::PathExpression("lpm"));
+            auto k =
+                new IR::KeyElement(f->annotations, f->expression, new IR::PathExpression("lpm"));
             keys.push_back(k);
         } else {
             keys.push_back(f);
         }
     }
-    properties->push_back(new IR::Property("key",
-                          new IR::Key(keys), false));
+    properties->push_back(new IR::Property("key", new IR::Key(keys), false));
 
     // create action
     IR::IndexedVector<IR::ActionListElement> action_list;
     for (unsigned n = 0; n < number_actions; n++) {
         auto name = tbl->name + "_set_partition_index_" + cstring::to_cstring(n);
         action_list.push_back(new IR::ActionListElement(
-                    new IR::MethodCallExpression(new IR::PathExpression(IR::ID(name)), {})));
+            new IR::MethodCallExpression(new IR::PathExpression(IR::ID(name)), {})));
     }
 
-    properties->push_back(new IR::Property("actions",
-                new IR::ActionList(action_list), false));
+    properties->push_back(new IR::Property("actions", new IR::ActionList(action_list), false));
 
     // Assume that the preclassifier always has an catch-all entry to set the
     // default partition index to 0.
     if (number_actions != 0) {
         auto act = new IR::PathExpression(IR::ID(tbl->name + "_set_partition_index_0"));
         auto args = new IR::Vector<IR::Argument>();
-        args->push_back(new IR::Argument(
-            new IR::Constant(IR::Type::Bits::get(partition_index_bits), 0)));
+        args->push_back(
+            new IR::Argument(new IR::Constant(IR::Type::Bits::get(partition_index_bits), 0)));
         if (number_actions > 1 && subtrees_per_partition > 1) {
             auto subtree_id_bits = ::ceil_log2(subtrees_per_partition);
-            args->push_back(new IR::Argument(
-                        new IR::Constant(IR::Type::Bits::get(subtree_id_bits), 0))); }
+            args->push_back(
+                new IR::Argument(new IR::Constant(IR::Type::Bits::get(subtree_id_bits), 0)));
+        }
         auto methodCall = new IR::MethodCallExpression(act, args);
-        auto prop = new IR::Property(
-                IR::ID(IR::TableProperties::defaultActionPropertyName),
-                new IR::ExpressionValue(methodCall),
-                /* isConstant = */ false);
+        auto prop = new IR::Property(IR::ID(IR::TableProperties::defaultActionPropertyName),
+                                     new IR::ExpressionValue(methodCall),
+                                     /* isConstant = */ false);
         properties->push_back(prop);
     }
 
     // size field is not used
-    properties->push_back(new IR::Property("size",
-                new IR::ExpressionValue(tbl->getSizeProperty()), false));
+    properties->push_back(
+        new IR::Property("size", new IR::ExpressionValue(tbl->getSizeProperty()), false));
 
-    properties->push_back(new IR::Property("alpm_preclassifier",
-                new IR::Annotations({new IR::Annotation(IR::Annotation::hiddenAnnotation, {})}),
-                new IR::ExpressionValue(new IR::BoolLiteral(true)), false));
+    properties->push_back(new IR::Property(
+        "alpm_preclassifier",
+        new IR::Annotations({new IR::Annotation(IR::Annotation::hiddenAnnotation, {})}),
+        new IR::ExpressionValue(new IR::BoolLiteral(true)), false));
 
-    properties->push_back(new IR::Property("alpm_preclassifier_number_entries",
-                new IR::Annotations({new IR::Annotation(IR::Annotation::hiddenAnnotation, {})}),
-                new IR::ExpressionValue(new IR::Constant(number_entries)), false));
+    properties->push_back(new IR::Property(
+        "alpm_preclassifier_number_entries",
+        new IR::Annotations({new IR::Annotation(IR::Annotation::hiddenAnnotation, {})}),
+        new IR::ExpressionValue(new IR::Constant(number_entries)), false));
 
     if (auto prop = tbl->properties->getProperty("requires_versioning"_cs)) {
         properties->push_back(prop);
     }
-
 
     auto table_property = new IR::TableProperties(*properties);
     auto name = tbl->name + "__alpm_preclassifier";
@@ -393,58 +392,64 @@ const IR::P4Table* SplitAlpm::create_preclassifier_table(const IR::P4Table* tbl,
     return table;
 }
 
-bool SplitAlpm::values_through_pragmas(const IR::P4Table *tbl,
-                                       int &number_partitions,
+bool SplitAlpm::values_through_pragmas(const IR::P4Table *tbl, int &number_partitions,
                                        int &number_subtrees_per_partition) {
     auto annot = tbl->getAnnotations();
     if (auto s = annot->getSingle(ALGORITHMIC_LPM_PARTITIONS)) {
-        ERROR_CHECK(s->expr.size() > 0, "%s: Please provide a valid %s "
-                "for table %s", tbl->srcInfo, ALGORITHMIC_LPM_PARTITIONS, tbl->name);
+        ERROR_CHECK(s->expr.size() > 0,
+                    "%s: Please provide a valid %s "
+                    "for table %s",
+                    tbl->srcInfo, ALGORITHMIC_LPM_PARTITIONS, tbl->name);
         auto pragma_val = s->expr.at(0)->to<IR::Constant>();
-        ERROR_CHECK(pragma_val != nullptr, "%s: Please provide a valid %s "
-                "for table %s", tbl->srcInfo, ALGORITHMIC_LPM_PARTITIONS, tbl->name);
+        ERROR_CHECK(pragma_val != nullptr,
+                    "%s: Please provide a valid %s "
+                    "for table %s",
+                    tbl->srcInfo, ALGORITHMIC_LPM_PARTITIONS, tbl->name);
 
         auto alg_lpm_partitions_value = static_cast<unsigned>(pragma_val->value);
         if (valid_partition_values.find(alg_lpm_partitions_value) != valid_partition_values.end()) {
             number_partitions = static_cast<int>(pragma_val->value);
         } else {
-            error("Unsupported %s value of %s for table %s."
-                            "\n  Allowed values are 1024, 2048, 4096, and 8192.",
-                    ALGORITHMIC_LPM_PARTITIONS, pragma_val->value, tbl->name);
+            error(
+                "Unsupported %s value of %s for table %s."
+                "\n  Allowed values are 1024, 2048, 4096, and 8192.",
+                ALGORITHMIC_LPM_PARTITIONS, pragma_val->value, tbl->name);
         }
     }
 
     if (auto s = annot->getSingle(ALGORITHMIC_LPM_SUBTREES_PER_PARTITION)) {
-        ERROR_CHECK(s->expr.size() > 0, "%s: Please provide a valid %s "
-                "for table %s", tbl->srcInfo, ALGORITHMIC_LPM_SUBTREES_PER_PARTITION, tbl->name);
+        ERROR_CHECK(s->expr.size() > 0,
+                    "%s: Please provide a valid %s "
+                    "for table %s",
+                    tbl->srcInfo, ALGORITHMIC_LPM_SUBTREES_PER_PARTITION, tbl->name);
         auto pragma_val = s->expr.at(0)->to<IR::Constant>();
-        ERROR_CHECK(pragma_val != nullptr, "%s: Please provide a valid %s "
-                "for table %s", tbl->srcInfo, ALGORITHMIC_LPM_SUBTREES_PER_PARTITION, tbl->name);
+        ERROR_CHECK(pragma_val != nullptr,
+                    "%s: Please provide a valid %s "
+                    "for table %s",
+                    tbl->srcInfo, ALGORITHMIC_LPM_SUBTREES_PER_PARTITION, tbl->name);
 
         auto alg_lpm_subtrees_value = static_cast<int>(pragma_val->value);
         if (alg_lpm_subtrees_value <= 10) {
             number_subtrees_per_partition = alg_lpm_subtrees_value;
         } else {
-            error("Unsupported %s value of %s for table %s."
-                            "\n  Allowed values are in the range [1:10].",
-                    ALGORITHMIC_LPM_SUBTREES_PER_PARTITION, pragma_val->value, tbl->name);
+            error(
+                "Unsupported %s value of %s for table %s."
+                "\n  Allowed values are in the range [1:10].",
+                ALGORITHMIC_LPM_SUBTREES_PER_PARTITION, pragma_val->value, tbl->name);
         }
     }
 
     return errorCount() == 0;
 }
 
-bool SplitAlpm::values_through_impl(const IR::P4Table *tbl,
-                                    int &number_partitions,
-                                    int &number_subtrees_per_partition,
-                                    int &atcam_subset_width,
+bool SplitAlpm::values_through_impl(const IR::P4Table *tbl, int &number_partitions,
+                                    int &number_subtrees_per_partition, int &atcam_subset_width,
                                     int &shift_granularity) {
     using BFN::getExternInstanceFromPropertyByTypeName;
 
     bool found_in_implementation = false;
 
-    auto extract_alpm_config_from_property =
-        [&](std::optional<P4::ExternInstance>& instance) {
+    auto extract_alpm_config_from_property = [&](std::optional<P4::ExternInstance> &instance) {
         bool argHasName = false;
         for (auto arg : *instance->arguments) {
             cstring argName = arg->name.name;
@@ -455,17 +460,13 @@ bool SplitAlpm::values_through_impl(const IR::P4Table *tbl,
             for (auto arg : *instance->arguments) {
                 cstring argName = arg->name.name;
                 if (argName == "number_partitions")
-                    number_partitions =
-                        arg->expression->to<IR::Constant>()->asInt();
+                    number_partitions = arg->expression->to<IR::Constant>()->asInt();
                 else if (argName == "subtrees_per_partition")
-                    number_subtrees_per_partition =
-                        arg->expression->to<IR::Constant>()->asInt();
+                    number_subtrees_per_partition = arg->expression->to<IR::Constant>()->asInt();
                 else if (argName == "atcam_subset_width")
-                    atcam_subset_width =
-                        arg->expression->to<IR::Constant>()->asInt();
+                    atcam_subset_width = arg->expression->to<IR::Constant>()->asInt();
                 else if (argName == "shift_granularity")
-                    shift_granularity =
-                        arg->expression->to<IR::Constant>()->asInt();
+                    shift_granularity = arg->expression->to<IR::Constant>()->asInt();
             }
         } else {
             if (instance->arguments->size() > 0) {
@@ -495,31 +496,31 @@ bool SplitAlpm::values_through_impl(const IR::P4Table *tbl,
 
     // for backward compatibility, also check the 'alpm' table property
     auto alpm = getExternInstanceFromProperty(tbl, "alpm"_cs, refMap, typeMap);
-    if (alpm == std::nullopt)
-        return false;
+    if (alpm == std::nullopt) return false;
     if (alpm->type->name != "Alpm") {
-        error("Unexpected extern %1% on 'alpm' property, only ALPM is allowed",
-                alpm->type->name);
-        return false; }
+        error("Unexpected extern %1% on 'alpm' property, only ALPM is allowed", alpm->type->name);
+        return false;
+    }
     if (found_in_implementation) {
-        warning("Alpm already found on 'implementation' table property,"
-                " ignored the 'alpm' property");
-        return false; }
+        warning(
+            "Alpm already found on 'implementation' table property,"
+            " ignored the 'alpm' property");
+        return false;
+    }
     extract_alpm_config_from_property(alpm);
     return true;
 }
 
-bool SplitAlpm::pragma_exclude_msbs(const IR::P4Table* tbl,
-        ordered_map<cstring, int>& fields_to_exclude) {
+bool SplitAlpm::pragma_exclude_msbs(const IR::P4Table *tbl,
+                                    ordered_map<cstring, int> &fields_to_exclude) {
     ordered_map<cstring, int> field_name_to_width;
     ordered_set<cstring> field_name_is_lpm;
     ordered_set<cstring> field_name_is_partition_index;
     ordered_map<cstring, int> field_name_cnt;
 
-    auto analyze_key_name_and_type = [&](const IR::KeyElement* k, cstring fname) {
+    auto analyze_key_name_and_type = [&](const IR::KeyElement *k, cstring fname) {
         field_name_to_width.emplace(fname, k->expression->type->width_bits());
-        if (k->matchType->path->name == "lpm")
-            field_name_is_lpm.insert(fname);
+        if (k->matchType->path->name == "lpm") field_name_is_lpm.insert(fname);
         if (k->matchType->path->name == "atcam_partition_index")
             field_name_is_partition_index.insert(fname);
         field_name_cnt[fname] += 1;
@@ -541,12 +542,13 @@ bool SplitAlpm::pragma_exclude_msbs(const IR::P4Table* tbl,
     }
     auto annot = tbl->getAnnotations();
     for (auto an : annot->annotations) {
-        if (an->name != ALGORITHMIC_LPM_ATCAM_EXCLUDE_FIELD_MSBS)
-            continue;
+        if (an->name != ALGORITHMIC_LPM_ATCAM_EXCLUDE_FIELD_MSBS) continue;
         if (an->expr.size() != 1 && an->expr.size() != 2) {
-            error("Invalid %s pragma on table %s.\n Expected field name "
-                    "and optional msb bits %s",
-                ALGORITHMIC_LPM_ATCAM_EXCLUDE_FIELD_MSBS, tbl->name, an->expr); }
+            error(
+                "Invalid %s pragma on table %s.\n Expected field name "
+                "and optional msb bits %s",
+                ALGORITHMIC_LPM_ATCAM_EXCLUDE_FIELD_MSBS, tbl->name, an->expr);
+        }
         cstring fname;
         if (auto annot = an->expr.at(0)->to<IR::StringLiteral>()) {
             fname = annot->value;
@@ -555,15 +557,17 @@ bool SplitAlpm::pragma_exclude_msbs(const IR::P4Table* tbl,
         }
         if (field_name_to_width.find(fname) == field_name_to_width.end()) {
             error("Invalid %s pragma on table %s.\n Field %s is not part of the table key.",
-                    ALGORITHMIC_LPM_ATCAM_EXCLUDE_FIELD_MSBS, tbl->name, fname);
+                  ALGORITHMIC_LPM_ATCAM_EXCLUDE_FIELD_MSBS, tbl->name, fname);
         } else if (field_name_is_partition_index.count(fname) != 0) {
-            error("Invalid %s pragma on table %s.\n Pragma cannot be used on "
-                    "the table's partition index '%s'.",
-                    ALGORITHMIC_LPM_ATCAM_EXCLUDE_FIELD_MSBS, tbl->name, fname);
+            error(
+                "Invalid %s pragma on table %s.\n Pragma cannot be used on "
+                "the table's partition index '%s'.",
+                ALGORITHMIC_LPM_ATCAM_EXCLUDE_FIELD_MSBS, tbl->name, fname);
         } else if (field_name_cnt.at(fname) != 1) {
-            error("Invalid %s pragma on table %s.\n Pragma cannot be used when "
-                    "different slices of field '%s' are used.",
-                    ALGORITHMIC_LPM_ATCAM_EXCLUDE_FIELD_MSBS, tbl->name, fname);
+            error(
+                "Invalid %s pragma on table %s.\n Pragma cannot be used when "
+                "different slices of field '%s' are used.",
+                ALGORITHMIC_LPM_ATCAM_EXCLUDE_FIELD_MSBS, tbl->name, fname);
         }
         std::stringstream additional;
         bool msb_error = false;
@@ -575,7 +579,7 @@ bool SplitAlpm::pragma_exclude_msbs(const IR::P4Table* tbl,
                 msb_error = true;
                 additional << "Bits specified is larger than the field.";
             } else if (field_name_is_lpm.count(fname) > 0 &&
-                    msb_bits_to_exclude >= field_name_to_width.at(fname)) {
+                       msb_bits_to_exclude >= field_name_to_width.at(fname)) {
                 msb_error = true;
                 additional << "The field with match type 'lpm' cannot be completely excluded.";
             }
@@ -589,20 +593,19 @@ bool SplitAlpm::pragma_exclude_msbs(const IR::P4Table* tbl,
             fields_to_exclude.emplace(fname, msb_bits_to_exclude);
         }
         if (msb_error) {
-            error("Invalid %s pragma on table %s.\n "
-                    "  Invalid most significant bits to exclude value of '%s'.\n"
-                    "%s",
-                    ALGORITHMIC_LPM_ATCAM_EXCLUDE_FIELD_MSBS, tbl->name, an->expr[0],
-                    additional.str());
+            error(
+                "Invalid %s pragma on table %s.\n "
+                "  Invalid most significant bits to exclude value of '%s'.\n"
+                "%s",
+                ALGORITHMIC_LPM_ATCAM_EXCLUDE_FIELD_MSBS, tbl->name, an->expr[0], additional.str());
         }
     }
 
     return errorCount() == 0;
 }
 
-const IR::Node* SplitAlpm::postorder(IR::P4Table* tbl) {
-    if (alpm_info->alpm_table.count(tbl->name) == 0)
-        return tbl;
+const IR::Node *SplitAlpm::postorder(IR::P4Table *tbl) {
+    if (alpm_info->alpm_table.count(tbl->name) == 0) return tbl;
 
     int number_partitions = 1024;
     int number_subtrees_per_partition = 2;
@@ -611,7 +614,7 @@ const IR::Node* SplitAlpm::postorder(IR::P4Table* tbl) {
     int lpm_key_width = -1;
 
     auto lpm_cnt = 0;
-    const IR::Expression* lpm_key = nullptr;
+    const IR::Expression *lpm_key = nullptr;
     for (auto f : tbl->getKey()->keyElements) {
         if (f->matchType->path->name == "lpm") {
             lpm_cnt += 1;
@@ -620,11 +623,13 @@ const IR::Node* SplitAlpm::postorder(IR::P4Table* tbl) {
         }
     }
     CHECK_NULL(lpm_key);
-    ERROR_CHECK(lpm_cnt == 1, "To use algorithmic lpm, exactly one field in the match key "
-            "must have a match type of lpm.  Table '%s' has %d.", tbl->name, lpm_cnt);
+    ERROR_CHECK(lpm_cnt == 1,
+                "To use algorithmic lpm, exactly one field in the match key "
+                "must have a match type of lpm.  Table '%s' has %d.",
+                tbl->name, lpm_cnt);
 
     if (!values_through_impl(tbl, number_partitions, number_subtrees_per_partition,
-                atcam_subset_width, shift_granularity) &&
+                             atcam_subset_width, shift_granularity) &&
         !values_through_pragmas(tbl, number_partitions, number_subtrees_per_partition))
         return tbl;
 
@@ -632,8 +637,7 @@ const IR::Node* SplitAlpm::postorder(IR::P4Table* tbl) {
     auto number_entries = number_partitions * number_subtrees_per_partition;
 
     ordered_map<cstring, int> fields_to_exclude;
-    if (!pragma_exclude_msbs(tbl, fields_to_exclude))
-        return tbl;
+    if (!pragma_exclude_msbs(tbl, fields_to_exclude)) return tbl;
 
     // @alpm_atcam_exclude_field_msbs pragma and
     // Alpm( ..., ..., atcam_subset_width, shift_granularity) are
@@ -643,54 +647,52 @@ const IR::Node* SplitAlpm::postorder(IR::P4Table* tbl) {
     ERROR_CHECK(!(used_pragma_exclude_msb_bits && used_alpm_subset_width_opt),
                 "@alpm_atcam_exclude_field_msbs cannot be applied to alpm table %s"
                 " if 'atcam_subset_width' and 'shift_granularity' are specified on"
-                " the Alpm extern", tbl->name);
+                " the Alpm extern",
+                tbl->name);
 
-    if (atcam_subset_width == -1)
-        atcam_subset_width = lpm_key_width;
+    if (atcam_subset_width == -1) atcam_subset_width = lpm_key_width;
 
-    if (shift_granularity == -1)
-        shift_granularity = lpm_key_width;
+    if (shift_granularity == -1) shift_granularity = lpm_key_width;
 
     LOG3("atcam_subset_width " << atcam_subset_width << " shift_granularity " << shift_granularity);
-    ERROR_CHECK(atcam_subset_width % shift_granularity == 0, "To use algorithmic lpm, "
-            "atcam_subset_width must be an integer multiple of shift_granularity.");
+    ERROR_CHECK(atcam_subset_width % shift_granularity == 0,
+                "To use algorithmic lpm, "
+                "atcam_subset_width must be an integer multiple of shift_granularity.");
     auto number_actions = (lpm_key_width - atcam_subset_width) / shift_granularity + 1;
 
     auto decls = new IR::IndexedVector<IR::Declaration>();
     decls->append(*create_temp_var(tbl, number_actions, partition_index_bits, atcam_subset_width,
-                number_subtrees_per_partition, lpm_key));
+                                   number_subtrees_per_partition, lpm_key));
 
-    auto classifier_actions = create_preclassifer_actions(tbl,
-            number_actions, partition_index_bits, atcam_subset_width, shift_granularity,
-            number_subtrees_per_partition, lpm_key);
+    auto classifier_actions =
+        create_preclassifer_actions(tbl, number_actions, partition_index_bits, atcam_subset_width,
+                                    shift_granularity, number_subtrees_per_partition, lpm_key);
     decls->append(*classifier_actions);
 
     // create tcam table
-    auto classifier_table = create_preclassifier_table(tbl, number_entries, number_actions,
-            partition_index_bits, number_subtrees_per_partition);
+    auto classifier_table = create_preclassifier_table(
+        tbl, number_entries, number_actions, partition_index_bits, number_subtrees_per_partition);
     decls->push_back(classifier_table);
 
     // create atcam
-    auto atcam_table = create_atcam_table(tbl, number_partitions,
-            number_subtrees_per_partition, number_actions,
-            atcam_subset_width, shift_granularity, fields_to_exclude, lpm_key);
+    auto atcam_table =
+        create_atcam_table(tbl, number_partitions, number_subtrees_per_partition, number_actions,
+                           atcam_subset_width, shift_granularity, fields_to_exclude, lpm_key);
     decls->push_back(atcam_table);
 
     return decls;
 }
 
-const IR::Node* SplitAlpm::postorder(IR::MethodCallStatement* node) {
+const IR::Node *SplitAlpm::postorder(IR::MethodCallStatement *node) {
     auto mi = P4::MethodInstance::resolve(node, refMap, typeMap);
-    if (!mi->is<P4::ApplyMethod>() || !mi->to<P4::ApplyMethod>()->isTableApply())
-        return node;
+    if (!mi->is<P4::ApplyMethod>() || !mi->to<P4::ApplyMethod>()->isTableApply()) return node;
     if (auto tbl = mi->object->to<IR::P4Table>()) {
-        if (alpm_info->alpm_table.count(tbl->name) == 0)
-            return node;
+        if (alpm_info->alpm_table.count(tbl->name) == 0) return node;
         auto stmts = new IR::IndexedVector<IR::StatOrDecl>();
-        stmts->push_back(new IR::MethodCallStatement(
-            new IR::MethodCallExpression(new IR::Member(
-                new IR::PathExpression(
-                    IR::ID(tbl->name + "__alpm_preclassifier")), IR::ID("apply")), {})));
+        stmts->push_back(new IR::MethodCallStatement(new IR::MethodCallExpression(
+            new IR::Member(new IR::PathExpression(IR::ID(tbl->name + "__alpm_preclassifier")),
+                           IR::ID("apply")),
+            {})));
         stmts->push_back(node);
         auto result = new IR::BlockStatement(*stmts);
         return result;
@@ -698,45 +700,37 @@ const IR::Node* SplitAlpm::postorder(IR::MethodCallStatement* node) {
     return node;
 }
 
-const IR::Node* SplitAlpm::postorder(IR::IfStatement* c) {
+const IR::Node *SplitAlpm::postorder(IR::IfStatement *c) {
     HasTableApply hta(refMap, typeMap);
-    (void) c->condition->apply(hta);
-    if (hta.table == nullptr)
-        return c;
-    if (alpm_info->alpm_table.count(hta.table->name) == 0)
-        return c;
+    (void)c->condition->apply(hta);
+    if (hta.table == nullptr) return c;
+    if (alpm_info->alpm_table.count(hta.table->name) == 0) return c;
     auto stmts = new IR::BlockStatement();
-    stmts->push_back(new IR::MethodCallStatement(
-        new IR::MethodCallExpression(new IR::Member(
-            new IR::PathExpression(IR::ID(hta.table->name + "__alpm_preclassifier")),
-            IR::ID("apply")), {})));
+    stmts->push_back(new IR::MethodCallStatement(new IR::MethodCallExpression(
+        new IR::Member(new IR::PathExpression(IR::ID(hta.table->name + "__alpm_preclassifier")),
+                       IR::ID("apply")),
+        {})));
     stmts->push_back(c);
     return stmts;
 }
 
-const IR::Node* SplitAlpm::postorder(IR::SwitchStatement* statement) {
+const IR::Node *SplitAlpm::postorder(IR::SwitchStatement *statement) {
     auto expr = statement->expression;
     auto member = expr->to<IR::Member>();
-    if (member->member != "action_run")
-        return statement;
-    if (!member->expr->is<IR::MethodCallExpression>())
-        return statement;
+    if (member->member != "action_run") return statement;
+    if (!member->expr->is<IR::MethodCallExpression>()) return statement;
     auto mce = member->expr->to<IR::MethodCallExpression>();
     auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
     auto gen_apply = [](cstring table) {
-        IR::Statement *expr = new IR::MethodCallStatement(
-                new IR::MethodCallExpression(
-                new IR::Member(new IR::PathExpression(table),
-                IR::ID(IR::IApply::applyMethodName))));
+        IR::Statement *expr = new IR::MethodCallStatement(new IR::MethodCallExpression(
+            new IR::Member(new IR::PathExpression(table), IR::ID(IR::IApply::applyMethodName))));
         return expr;
     };
 
     if (auto apply = mi->to<P4::ApplyMethod>()) {
-        if (!apply->isTableApply())
-            return statement;
+        if (!apply->isTableApply()) return statement;
         auto table = apply->object->to<IR::P4Table>();
-        if (alpm_tables.count(table->name) == 0)
-            return statement;
+        if (alpm_tables.count(table->name) == 0) return statement;
         // switch(t0.apply()) {} is converted to
         //
         // t0_preclassifier.apply();
@@ -745,7 +739,8 @@ const IR::Node* SplitAlpm::postorder(IR::SwitchStatement* statement) {
         auto tableName = apply->object->getName().name;
         if (preclassifier_tables.count(tableName) == 0) {
             error("Unable to find member table %1%", tableName);
-            return statement; }
+            return statement;
+        }
         auto preclassifier_table = preclassifier_tables.at(tableName);
         auto preclassifier_apply = gen_apply(preclassifier_table);
 
@@ -757,7 +752,7 @@ const IR::Node* SplitAlpm::postorder(IR::SwitchStatement* statement) {
     return statement;
 }
 
-AlpmImplementation::AlpmImplementation(P4::ReferenceMap* refMap, P4::TypeMap* typeMap) {
+AlpmImplementation::AlpmImplementation(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
     auto collectAlpmInfo = new CollectAlpmInfo(refMap, typeMap);
     addPasses({
         collectAlpmInfo,
@@ -765,33 +760,35 @@ AlpmImplementation::AlpmImplementation(P4::ReferenceMap* refMap, P4::TypeMap* ty
     });
 }
 
-void CollectAlpmInfo::postorder(const IR::P4Table* tbl) {
+void CollectAlpmInfo::postorder(const IR::P4Table *tbl) {
     // Alpm is identified with either extern or pragma
-    using BFN::getExternInstanceFromPropertyByTypeName;
     using BFN::getExternInstanceFromProperty;
+    using BFN::getExternInstanceFromPropertyByTypeName;
 
-    auto instance = getExternInstanceFromPropertyByTypeName(
-            tbl, "implementation"_cs, "Alpm"_cs, refMap, typeMap);
+    auto instance = getExternInstanceFromPropertyByTypeName(tbl, "implementation"_cs, "Alpm"_cs,
+                                                            refMap, typeMap);
     if (instance) alpm_table.insert(tbl->name);
 
     // for backward compatibility, also check the 'alpm' property
     auto alpm = getExternInstanceFromProperty(tbl, "alpm"_cs, refMap, typeMap);
     if (alpm != std::nullopt) {
-        warning(ErrorType::WARN_DEPRECATED, "table property 'alpm' is deprecated,"
+        warning(ErrorType::WARN_DEPRECATED,
+                "table property 'alpm' is deprecated,"
                 " use 'implementation' instead.");
-        alpm_table.insert(tbl->name); }
+        alpm_table.insert(tbl->name);
+    }
 
     // support @alpm(1) or @alpm(true)
     auto annot = tbl->getAnnotations();
     if (auto s = annot->getSingle(cstring(PragmaAlpm::name))) {
-        ERROR_CHECK(s->expr.size() > 0, "%s: Please provide a valid alpm "
-                "for table %s", tbl->srcInfo, tbl->name);
+        ERROR_CHECK(s->expr.size() > 0,
+                    "%s: Please provide a valid alpm "
+                    "for table %s",
+                    tbl->srcInfo, tbl->name);
         if (auto pragma_val = s->expr.at(0)->to<IR::Constant>()) {
-            if (pragma_val->asInt())
-                alpm_table.insert(tbl->name);
+            if (pragma_val->asInt()) alpm_table.insert(tbl->name);
         } else if (auto pragma_val = s->expr.at(0)->to<IR::BoolLiteral>()) {
-            if (pragma_val->value)
-                alpm_table.insert(tbl->name);
+            if (pragma_val->value) alpm_table.insert(tbl->name);
         } else {
             error("%s: Please provide a valid alpm for table %s", tbl->srcInfo, tbl->name);
         }
@@ -802,8 +799,8 @@ void CollectAlpmInfo::postorder(const IR::P4Table* tbl) {
         for (auto key : tbl->getKey()->keyElements) {
             if (key->matchType->path->toString() == "ternary") {
                 error(ErrorType::ERR_UNSUPPORTED,
-                        "ternary match %s in ALPM table %s is not supported",
-                        key->expression, tbl->name);
+                      "ternary match %s in ALPM table %s is not supported", key->expression,
+                      tbl->name);
                 break;
             }
         }

@@ -13,16 +13,17 @@
 #ifndef BF_P4C_MAU_ATTACHED_ENTRIES_H_
 #define BF_P4C_MAU_ATTACHED_ENTRIES_H_
 
-#include "lib/ordered_map.h"
 #include <ostream>
+
+#include "lib/ordered_map.h"
 
 namespace P4 {
 namespace IR {
 namespace MAU {
 class AttachedMemory;  // forward declaration
 }
-}
-}
+}  // namespace IR
+}  // namespace P4
 
 using namespace P4;
 
@@ -34,9 +35,9 @@ using namespace P4;
 // header that can be included before anything else
 
 struct attached_entries_element_t {
-    int         entries;
-    bool        need_more = false;      // need more entries in a later stage
-    bool        first_stage = true;     // no entries are in any earlier stage
+    int entries;
+    bool need_more = false;   // need more entries in a later stage
+    bool first_stage = true;  // no entries are in any earlier stage
     attached_entries_element_t() = delete;
     explicit attached_entries_element_t(int e) : entries(e) {}
 };
@@ -44,9 +45,9 @@ struct attached_entries_element_t {
 typedef ordered_map<const IR::MAU::AttachedMemory *, attached_entries_element_t> attached_entries_t;
 
 // not a consistent ordering -- true if first has more of anything than second
-bool operator>(const attached_entries_t&, const attached_entries_t &);
+bool operator>(const attached_entries_t &, const attached_entries_t &);
 
-std::ostream& operator<<(std::ostream &, const attached_entries_t &);
-std::ostream& operator<<(std::ostream &, const attached_entries_element_t &);
+std::ostream &operator<<(std::ostream &, const attached_entries_t &);
+std::ostream &operator<<(std::ostream &, const attached_entries_element_t &);
 
 #endif /* BF_P4C_MAU_ATTACHED_ENTRIES_H_ */

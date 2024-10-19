@@ -10,23 +10,24 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+#include "bf-p4c/common/multiple_apply.h"
+
 #include <optional>
 #include <type_traits>
-#include <boost/algorithm/string/replace.hpp>
-#include "gtest/gtest.h"
 
+#include <boost/algorithm/string/replace.hpp>
+
+#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "gtest/gtest.h"
 #include "ir/ir.h"
 #include "lib/error.h"
-#include "bf-p4c/common/multiple_apply.h"
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
 #include "test/gtest/helpers.h"
-
 
 namespace P4::Test {
 
 class MultipleApplyTest : public TofinoBackendTest {};
 
-std::optional<TofinoPipeTestCase> createMultipleApplyTest(const std::string& ingressApply) {
+std::optional<TofinoPipeTestCase> createMultipleApplyTest(const std::string &ingressApply) {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
         header data_t {
             bit<16> h1;
@@ -124,7 +125,7 @@ bit<1> b;
 
     boost::replace_first(source, "%INGRESS_APPLY%", ingressApply);
 
-    auto& options = BackendOptions();
+    auto &options = BackendOptions();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.target = "tofino"_cs;
     options.arch = "v1model"_cs;
@@ -297,7 +298,7 @@ TEST_F(MultipleApplyTest, CommonTail2) {
     EXPECT_FALSE(ma.topological_error("ingress.t3"_cs));
 }
 
-std::optional<TofinoPipeTestCase> createMultipleApplyFullIngTest(const std::string& ingress) {
+std::optional<TofinoPipeTestCase> createMultipleApplyFullIngTest(const std::string &ingress) {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
         header data_t {
             bit<16> h1;
@@ -352,14 +353,13 @@ bit<1> b;
 
     boost::replace_first(source, "%INGRESS%", ingress);
 
-    auto& options = BackendOptions();
+    auto &options = BackendOptions();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.target = "tofino"_cs;
     options.arch = "v1model"_cs;
     options.disable_parse_min_depth_limit = true;
     return TofinoPipeTestCase::create(source);
 }
-
 
 TEST_F(MultipleApplyTest, SWI_2941_example1) {
     auto test = createMultipleApplyFullIngTest(P4_SOURCE(P4Headers::NONE, R"(

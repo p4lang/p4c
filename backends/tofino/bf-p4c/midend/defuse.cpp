@@ -11,14 +11,14 @@
  */
 
 #include "defuse.h"
+
 #include "frontends/p4/methodInstance.h"
 
 const ordered_set<const ComputeDefUse::loc_t *> ComputeDefUse::empty = {};
 
 void ComputeDefUse::flow_merge(Visitor &a_) {
     ComputeDefUse &a = dynamic_cast<ComputeDefUse &>(a_);
-    for (auto &di : a.def_info)
-        def_info[di.first].flow_merge(di.second);
+    for (auto &di : a.def_info) def_info[di.first].flow_merge(di.second);
 }
 void ComputeDefUse::flow_copy(ControlFlowVisitor &a_) {
     ComputeDefUse &a = dynamic_cast<ComputeDefUse &>(a_);
@@ -27,16 +27,23 @@ void ComputeDefUse::flow_copy(ControlFlowVisitor &a_) {
 }
 
 ComputeDefUse::def_info_t::def_info_t(const def_info_t &a)
-: defs(a.defs), live(a.live), parent(a.parent), valid_bit_defs(a.valid_bit_defs),
-  fields(a.fields), slices(a.slices) {
+    : defs(a.defs),
+      live(a.live),
+      parent(a.parent),
+      valid_bit_defs(a.valid_bit_defs),
+      fields(a.fields),
+      slices(a.slices) {
     for (auto &v : Values(fields)) v.parent = this;
     for (auto &v : Values(slices)) v.parent = this;
 }
 
 ComputeDefUse::def_info_t::def_info_t(def_info_t &&a)
-: defs(std::move(a.defs)), live(std::move(a.live)), parent(std::move(a.parent)),
-  valid_bit_defs(std::move(a.valid_bit_defs)), fields(std::move(a.fields)),
-  slices(std::move(a.slices)) {
+    : defs(std::move(a.defs)),
+      live(std::move(a.live)),
+      parent(std::move(a.parent)),
+      valid_bit_defs(std::move(a.valid_bit_defs)),
+      fields(std::move(a.fields)),
+      slices(std::move(a.slices)) {
     for (auto &v : Values(fields)) v.parent = this;
     for (auto &v : Values(slices)) v.parent = this;
 }
@@ -45,14 +52,15 @@ void ComputeDefUse::def_info_t::flow_merge(def_info_t &a) {
     defs.insert(a.defs.begin(), a.defs.end());
     live |= a.live;
     valid_bit_defs.insert(a.valid_bit_defs.begin(), a.valid_bit_defs.end());
-    for (auto &f : a.fields)
-        fields[f.first].flow_merge(f.second);
+    for (auto &f : a.fields) fields[f.first].flow_merge(f.second);
     for (auto &s : a.slices) {
         split_slice(s.first);
         for (auto it = slices_overlap_begin(s.first);
              it != slices.end() && it->first.overlaps(s.first); ++it) {
             BUG_CHECK(s.first.contains(it->first), "slice_split failed to work");
-            it->second.flow_merge(s.second); } }
+            it->second.flow_merge(s.second);
+        }
+    }
     slices_sanity();
 }
 
@@ -60,43 +68,47 @@ class ComputeDefUse::SetupJoinPoints : public ControlFlowVisitor::SetupJoinPoint
                                        public P4::ResolutionContext {
     bool preorder(const IR::ParserState *n) override {
         LOG6("SetupJoinPoints(ParserState " << n->name << ")" << Log::indent);
-        return true; }
+        return true;
+    }
     void revisit(const IR::ParserState *n) override {
         if (n->isBuiltin() && n->components.empty() && !n->selectExpression) {
             // FIXME -- P4-14->16 conversion uses a single accept and reject state for
             // both ingress and egress, which will cause problems, so we avoid it.
             // Perhaps we should ignore/not revisit all states with components.empty()
             // as they by definition don't do anything?
-            return; }
+            return;
+        }
         ++join_points[n].count;
-        LOG6("SetupJoinPoints::revisit(ParserState " << n->name << ") [" <<
-             join_points[n].count << "]"); }
-    void loop_revisit(const IR::ParserState *n) override {
-        LOG6("  * loop into " << n->name); }
-    void postorder(const IR::ParserState *) override {
-        LOG6_UNINDENT; }
-    void revisit(const IR::Node *) override { }
+        LOG6("SetupJoinPoints::revisit(ParserState " << n->name << ") [" << join_points[n].count
+                                                     << "]");
+    }
+    void loop_revisit(const IR::ParserState *n) override { LOG6("  * loop into " << n->name); }
+    void postorder(const IR::ParserState *) override { LOG6_UNINDENT; }
+    void revisit(const IR::Node *) override {}
     bool preorder(const IR::PathExpression *pe) override {
         if (pe->type->is<IR::Type_State>()) {
             auto *d = resolveUnique(pe->path->name, P4::ResolutionType::Any);
             BUG_CHECK(d, "failed to resolve %s", pe);
             auto ps = d->to<IR::ParserState>();
             BUG_CHECK(ps, "%s is not a parser state", d);
-            visit(ps, "transition"); }
-        return false; }
+            visit(ps, "transition");
+        }
+        return false;
+    }
     bool preorder(const IR::P4Parser *p) override {
         IndentCtl::TempIndent indent;
         LOG6("SetupJoinPoints(P4Parser " << p->name << ")" << indent);
         LOG8("    " << Log::indent << Log::indent << *p << Log::unindent << Log::unindent);
         if (auto start = p->states.getDeclaration<IR::ParserState>("start"_cs))
             visit(start, "start"_cs);
-        return false; }
+        return false;
+    }
     bool preorder(const IR::P4Control *) override { return false; }
     bool preorder(const IR::Type *) override { return false; }
 
  public:
     explicit SetupJoinPoints(decltype(join_points) &fjp)
-    : ControlFlowVisitor::SetupJoinPoints(fjp) { }
+        : ControlFlowVisitor::SetupJoinPoints(fjp) {}
 };
 
 void ComputeDefUse::applySetupJoinPoints(const IR::Node *root) {
@@ -104,23 +116,22 @@ void ComputeDefUse::applySetupJoinPoints(const IR::Node *root) {
 }
 
 bool ComputeDefUse::filter_join_point(const IR::Node *n) {
-    LOG6("init_join_flows " << n->to<IR::ParserState>()->name <<
-         " = " << flow_join_points->at(n).count);
+    LOG6("init_join_flows " << n->to<IR::ParserState>()->name << " = "
+                            << flow_join_points->at(n).count);
     return false;
 }
 
 const ComputeDefUse::loc_t *ComputeDefUse::getLoc(const Visitor::Context *ctxt) {
     if (!ctxt) return nullptr;
-    loc_t tmp{ ctxt->node, getLoc(ctxt->parent) };
+    loc_t tmp{ctxt->node, getLoc(ctxt->parent)};
     return &*cached_locs.insert(tmp).first;
 }
 
 const ComputeDefUse::loc_t *ComputeDefUse::getLoc(const IR::Node *n, const Visitor::Context *ctxt) {
     for (auto *p = ctxt; p; p = p->parent)
-        if (p->node == n)
-            return getLoc(p);
+        if (p->node == n) return getLoc(p);
     auto rv = getLoc(ctxt);
-    loc_t tmp{ n, rv };
+    loc_t tmp{n, rv};
     return &*cached_locs.insert(tmp).first;
 }
 
@@ -128,9 +139,9 @@ const ComputeDefUse::loc_t *ComputeDefUse::getLoc(const IR::Node *n, const Visit
 void ComputeDefUse::def_info_t::slices_sanity() {
     auto prev = slices.end();
     for (auto it = slices.begin(); it != slices.end(); ++it) {
-        if (prev != slices.end())
-            BUG_CHECK(!prev->first.overlaps(it->first), "Overlapping slices");
-        prev = it; }
+        if (prev != slices.end()) BUG_CHECK(!prev->first.overlaps(it->first), "Overlapping slices");
+        prev = it;
+    }
     BUG_CHECK(fields.empty() || slices.empty(), "Both fields and slices present");
 }
 
@@ -141,7 +152,8 @@ ComputeDefUse::def_info_t::slices_overlap_begin(le_bitrange range) {
     auto rv = slices.lower_bound(range);
     if (rv != slices.begin()) {
         auto p = std::prev(rv);
-        if (range.overlaps(p->first)) rv = p; }
+        if (range.overlaps(p->first)) rv = p;
+    }
     return rv;
 }
 
@@ -153,12 +165,17 @@ void ComputeDefUse::def_info_t::erase_slice(le_bitrange range) {
         if (!range.contains(it->first)) {
             if (it->first.lo < range.lo) {
                 bool i = slices.emplace(le_bitrange(it->first.lo, range.lo - 1), it->second).second;
-                BUG_CHECK(i, "inserting already present range?"); }
+                BUG_CHECK(i, "inserting already present range?");
+            }
             if (it->first.hi > range.hi) {
-                bool i = slices.emplace(le_bitrange(range.hi + 1, it->first.hi),
-                                               std::move(it->second)).second;
-                BUG_CHECK(i, "inserting already present range?"); } }
-        it = slices.erase(it); }
+                bool i =
+                    slices.emplace(le_bitrange(range.hi + 1, it->first.hi), std::move(it->second))
+                        .second;
+                BUG_CHECK(i, "inserting already present range?");
+            }
+        }
+        it = slices.erase(it);
+    }
     slices_sanity();
 }
 
@@ -172,10 +189,12 @@ void ComputeDefUse::def_info_t::split_slice(le_bitrange range) {
             // first, insert the pieces of it->first that do not overlap range
             if (it->first.lo < range.lo) {
                 bool i = slices.emplace(le_bitrange(it->first.lo, range.lo - 1), it->second).second;
-                BUG_CHECK(i, "inserting already present range?"); }
+                BUG_CHECK(i, "inserting already present range?");
+            }
             if (it->first.hi > range.hi) {
                 bool i = slices.emplace(le_bitrange(range.hi + 1, it->first.hi), it->second).second;
-                BUG_CHECK(i, "inserting already present range?"); }
+                BUG_CHECK(i, "inserting already present range?");
+            }
             // then insert the intersecion of range and it->first
             bool i = slices.emplace(range.intersectWith(it->first), std::move(it->second)).second;
             BUG_CHECK(i, "inserting already present range?");
@@ -208,19 +227,18 @@ bool ComputeDefUse::preorder(const IR::P4Table *tbl) {
     if (state == SKIPPING) return false;
     IndentCtl::TempIndent indent;
     LOG5("ComputeDefUse(P4Table " << tbl->name << ")" << indent);
-    if (auto key = tbl->getKey())
-        visit(key, "key"_cs);
+    if (auto key = tbl->getKey()) visit(key, "key"_cs);
     if (auto actions = tbl->getActionList()) {
         parallel_visit(actions->actionList, "actions");
     } else {
-        BUG("No actions in %s", tbl); }
+        BUG("No actions in %s", tbl);
+    }
     return false;
 }
 
 bool ComputeDefUse::preorder(const IR::P4Action *act) {
     if (state == SKIPPING) return false;
-    for (auto *p : *act->parameters)
-        def_info[p].defs.insert(getLoc(p));
+    for (auto *p : *act->parameters) def_info[p].defs.insert(getLoc(p));
     IndentCtl::TempIndent indent;
     LOG5("ComputeDefUse(P4Action " << act->name << ")" << indent);
     visit(act->body, "body"_cs);
@@ -238,7 +256,8 @@ bool ComputeDefUse::preorder(const IR::P4Parser *p) {
     if (auto start = p->states.getDeclaration<IR::ParserState>("start"_cs)) {
         visit(start, "start"_cs);
     } else {
-        BUG("No start state in %s", p); }
+        BUG("No start state in %s", p);
+    }
     for (auto *a : p->getApplyParameters()->parameters)
         if (a->direction == IR::Direction::Out || a->direction == IR::Direction::InOut)
             add_uses(getLoc(a), def_info[a]);
@@ -250,15 +269,9 @@ bool ComputeDefUse::preorder(const IR::ParserState *p) {
     LOG5("ComputeDefUse(ParserState " << p->name << ")" << Log::indent);
     return true;
 }
-void ComputeDefUse::revisit(const IR::ParserState *p) {
-    LOG5("  * revisit " << p->name);
-}
-void ComputeDefUse::loop_revisit(const IR::ParserState *p) {
-    LOG5("  * loop into " << p->name);
-}
-void ComputeDefUse::postorder(const IR::ParserState *) {
-    LOG5_UNINDENT;
-}
+void ComputeDefUse::revisit(const IR::ParserState *p) { LOG5("  * revisit " << p->name); }
+void ComputeDefUse::loop_revisit(const IR::ParserState *p) { LOG5("  * loop into " << p->name); }
+void ComputeDefUse::postorder(const IR::ParserState *) { LOG5_UNINDENT; }
 
 bool ComputeDefUse::preorder(const IR::KeyElement *ke) {
     visit(ke->expression, "expression");
@@ -270,17 +283,15 @@ bool ComputeDefUse::preorder(const IR::KeyElement *ke) {
 void ComputeDefUse::add_uses(const loc_t *loc, def_info_t &di) {
     for (auto *l : di.defs) {
         defuse.uses[l->node].insert(loc);
-        defuse.defs[loc->node].insert(l); }
-    for (auto &f : Values(di.fields))
-        add_uses(loc, f);
-    for (auto &sl : Values(di.slices))
-        add_uses(loc, sl);
+        defuse.defs[loc->node].insert(l);
+    }
+    for (auto &f : Values(di.fields)) add_uses(loc, f);
+    for (auto &sl : Values(di.slices)) add_uses(loc, sl);
 }
 
 static const IR::Expression *get_primary(const IR::Expression *e, const Visitor::Context *ctxt) {
-    if (ctxt &&
-        (ctxt->node->is<IR::Member>() || ctxt->node->is<IR::Slice>() ||
-         ctxt->node->is<IR::ArrayIndex>())) {
+    if (ctxt && (ctxt->node->is<IR::Member>() || ctxt->node->is<IR::Slice>() ||
+                 ctxt->node->is<IR::ArrayIndex>())) {
         return get_primary(ctxt->node->to<IR::Expression>(), ctxt->parent);
     } else {
         return e;
@@ -304,7 +315,8 @@ const IR::Expression *ComputeDefUse::do_read(def_info_t &di, const IR::Expressio
             auto loc = getLoc(t);
             for (auto *l : di.valid_bit_defs) {
                 defuse.uses[l->node].insert(loc);
-                defuse.defs[loc->node].insert(l); }
+                defuse.defs[loc->node].insert(l);
+            }
             return t;
         } else if (auto *str = m->expr->type->to<IR::Type_StructLike>()) {
             int fi = str->getFieldIndex(m->member.name);
@@ -321,8 +333,7 @@ const IR::Expression *ComputeDefUse::do_read(def_info_t &di, const IR::Expressio
                 // amything that writes to the stack as a whole is considered
                 e = m;
             } else if (m->member.name == "next" || m->member.name == "last") {
-                for (auto &el : di.slices)
-                    add_uses(getLoc(m), el.second);
+                for (auto &el : di.slices) add_uses(getLoc(m), el.second);
                 e = m;
             } else {
                 BUG("invalid read of header stack: %s", m);
@@ -335,7 +346,8 @@ const IR::Expression *ComputeDefUse::do_read(def_info_t &di, const IR::Expressio
         for (auto it = di.slices_overlap_begin(range);
              it != di.slices.end() && range.overlaps(it->first); ++it) {
             e = do_read(it->second, sl, ctxt->parent);
-            BUG_CHECK(e == sl, "slice %s is not primary in ComputeDefUse::do_read", sl); }
+            BUG_CHECK(e == sl, "slice %s is not primary in ComputeDefUse::do_read", sl);
+        }
         e = sl;
         if (!di.live.getrange(range.lo, range.size())) return e;
     } else if (auto *ai = ctxt->node->to<IR::ArrayIndex>()) {
@@ -348,15 +360,15 @@ const IR::Expression *ComputeDefUse::do_read(def_info_t &di, const IR::Expressio
                 e = get_primary(ai, ctxt->parent);
             if (!di.live[i]) return e;
         } else {
-            for (auto &sl : Values(di.slices))
-                do_read(sl, ai, ctxt->parent);
+            for (auto &sl : Values(di.slices)) do_read(sl, ai, ctxt->parent);
             e = get_primary(ai, ctxt->parent);
         }
     }
     auto loc = getLoc(e);
     for (auto *l : di.defs) {
         defuse.uses[l->node].insert(loc);
-        defuse.defs[loc->node].insert(l); }
+        defuse.defs[loc->node].insert(l);
+    }
     return e;
 }
 
@@ -396,13 +408,15 @@ const IR::Expression *ComputeDefUse::do_write(def_info_t &di, const IR::Expressi
                     di.live.clrrange(ts->getSize(), cnt);
                 } else {
                     di.live >>= cnt;
-                    cnt = -cnt; }
+                    cnt = -cnt;
+                }
                 if (!di.live) di.defs.clear();
                 decltype(di.slices) tmp;
                 for (auto &sl : di.slices) {
                     int ni = sl.first.lo + cnt;
                     if (size_t(ni) < ts->getSize())
-                        tmp.emplace(le_bitrange(ni, ni), std::move(sl.second)); }
+                        tmp.emplace(le_bitrange(ni, ni), std::move(sl.second));
+                }
                 di.slices = std::move(tmp);
             } else {
                 BUG("invalid write to header stack: %s", m);
@@ -426,7 +440,8 @@ const IR::Expression *ComputeDefUse::do_write(def_info_t &di, const IR::Expressi
         } else {
             di.defs.insert(getLoc(ai));
             di.live.setrange(0, ai->left->type->to<IR::Type_Indexed>()->getSize());
-            e = ai; }
+            e = ai;
+        }
         return e;
     }
     di.defs.clear();
@@ -461,14 +476,13 @@ bool ComputeDefUse::preorder(const IR::PathExpression *pe) {
         auto ps = d->to<IR::ParserState>();
         BUG_CHECK(ps, "%s is not a parser state", d);
         visit(ps, "transition");
-        return false; }
+        return false;
+    }
     if (state == SKIPPING) return false;
     auto *d = resolveUnique(pe->path->name, P4::ResolutionType::Any);
     BUG_CHECK(d, "failed to resolve %s", pe);
-    if (isRead() && state != WRITE_ONLY)
-        do_read(def_info[d], pe, getContext());
-    if (isWrite() && state != READ_ONLY)
-        do_write(def_info[d], pe, getContext());
+    if (isRead() && state != WRITE_ONLY) do_read(def_info[d], pe, getContext());
+    if (isWrite() && state != READ_ONLY) do_write(def_info[d], pe, getContext());
     return false;
 }
 void ComputeDefUse::loop_revisit(const IR::PathExpression *pe) {
@@ -481,7 +495,8 @@ bool ComputeDefUse::preorder(const IR::MethodCallExpression *mc) {
         BUG_CHECK(!isWrite(), "Method call in out or inout arg should have failed typechecking");
         return false;
     } else if (state == READ_ONLY) {
-        if (!isRead()) return false; }
+        if (!isRead()) return false;
+    }
     auto saved_state = state;
     state = READ_ONLY;
     visit(mc->arguments, "arguments");
@@ -500,20 +515,19 @@ bool ComputeDefUse::preorder(const IR::MethodCallExpression *mc) {
             BUG("unknown BuiltInMethod: %s", mc);
         }
         visit(mc->method, "method");
-    } else  {
+    } else {
         if (mi->object) {
             auto obj = mi->object->getNode();  // FIXME -- should be able to visit an INode
-            if (!isInContext(obj))
-                visit(obj, "object"); } }
+            if (!isInContext(obj)) visit(obj, "object");
+        }
+    }
     state = WRITE_ONLY;
     visit(mc->arguments, "arguments");
     state = saved_state;
     return false;
 }
 
-void ComputeDefUse::end_apply() {
-    LOG5(defuse);
-}
+void ComputeDefUse::end_apply() { LOG5(defuse); }
 
 // Debugging
 #if BAREFOOT_INTERNAL
@@ -523,12 +537,13 @@ std::ostream &operator<<(std::ostream &out, const ComputeDefUse::loc_t &loc) {
     if (loc.node->srcInfo) {
         unsigned line, col;
         out << '(' << loc.node->srcInfo.toSourcePositionData(&line, &col);
-        out << ':' << line << ':' << (col+1) << ')';
+        out << ':' << line << ':' << (col + 1) << ')';
     }
     return out;
 }
 
-std::ostream &operator<<(std::ostream &out,
+std::ostream &operator<<(
+    std::ostream &out,
     const std::pair<const IR::Node *, const ordered_set<const ComputeDefUse::loc_t *>> &p) {
     out << Log::endl;
     out << DBPrint::setprec(DBPrint::Prec_Low);
@@ -536,13 +551,15 @@ std::ostream &operator<<(std::ostream &out,
     if (p.first->srcInfo) {
         unsigned line, col;
         out << '(' << p.first->srcInfo.toSourcePositionData(&line, &col);
-        out << ':' << line << ':' << (col+1) << ')'; }
+        out << ':' << line << ':' << (col + 1) << ')';
+    }
     out << ": {";
     const char *sep = " ";
     for (auto *l : p.second) {
         out << sep << *l;
-        sep = ", "; }
-    out << (sep+1) << "}";
+        sep = ", ";
+    }
+    out << (sep + 1) << "}";
     return out;
 }
 
@@ -561,17 +578,20 @@ void dump(const ComputeDefUse::def_info_t &di) {
         std::cout << "{ ";
         for (auto *d : di.defs) {
             std::cout << sep << *d;
-            sep = ", "; }
-        std::cout << " }"; }
+            sep = ", ";
+        }
+        std::cout << " }";
+    }
     for (auto &f : di.fields) {
         std::cout << Log::endl << '.' << f.first << ": " << Log::indent;
         dump(f.second);
-        std::cout << Log::unindent; }
+        std::cout << Log::unindent;
+    }
     for (auto &sl : di.slices) {
-        std::cout << Log::endl
-                  << "[" << sl.first.hi << ":" << sl.first.lo << "]: " << Log::indent;
+        std::cout << Log::endl << "[" << sl.first.hi << ":" << sl.first.lo << "]: " << Log::indent;
         dump(sl.second);
-        std::cout << Log::unindent; }
+        std::cout << Log::unindent;
+    }
 }
 
 void dump(const ordered_map<const IR::IDeclaration *, ComputeDefUse::def_info_t> &def_info) {

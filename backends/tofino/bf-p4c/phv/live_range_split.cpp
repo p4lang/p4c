@@ -11,6 +11,7 @@
  */
 
 #include "live_range_split.h"
+
 #include "bf-p4c/device.h"
 #include "bf-p4c/phv/allocate_phv.h"
 #include "bf-p4c/phv/fieldslice_live_range.h"
@@ -633,7 +634,7 @@ void LiveRangeSplit::report(const ContainerSequences &splits) {
     unsigned i = 0;
     for (const auto &seq : splits) {
         LOG_DEBUG1("\tsplit " << i++);
-        for (const auto cs : seq) {
+        for (const auto &cs : seq) {
             LOG_DEBUG1("\t\t" << cs.container << "[" << cs.range.lo << ":" << cs.range.hi << "] {"
                               << cs.lr.start << ", " << cs.lr.end << "}");
         }

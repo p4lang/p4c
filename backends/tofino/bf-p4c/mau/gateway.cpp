@@ -11,60 +11,70 @@
  */
 
 #include "gateway.h"
+
 #include <deque>
-#include "split_gateways.h"
+
 #include "bf-p4c/common/ir_utils.h"
 #include "bf-p4c/common/slice.h"
 #include "bf-p4c/lib/safe_width.h"
-#include "bf-p4c/phv/phv_fields.h"
 #include "bf-p4c/mau/asm_output.h"
+#include "bf-p4c/phv/phv_fields.h"
 #include "ir/pattern.h"
+#include "split_gateways.h"
 
 const Device::GatewaySpec &TofinoDevice::getGatewaySpec() const {
     static const Device::GatewaySpec spec = {
-        /* .PhvBytes = */       4,
-        /* .HashBits = */       12,
-        /* .PredicateBits = */  0,
-        /* .MaxRows = */        4,
-        /* .SupportXor = */     true,
-        /* .SupportRange = */   true,
-        /* .ExactShifts = */    1,
-        /* .ByteSwizzle = */    true,
-        /* .PerByteMatch = */   0,
-        /* .XorByteSlots = */   0xf0,
+        /* .PhvBytes = */ 4,
+        /* .HashBits = */ 12,
+        /* .PredicateBits = */ 0,
+        /* .MaxRows = */ 4,
+        /* .SupportXor = */ true,
+        /* .SupportRange = */ true,
+        /* .ExactShifts = */ 1,
+        /* .ByteSwizzle = */ true,
+        /* .PerByteMatch = */ 0,
+        /* .XorByteSlots = */ 0xf0,
     };
-    return spec; }
+    return spec;
+}
 #if HAVE_JBAY
 const Device::GatewaySpec &JBayDevice::getGatewaySpec() const {
     static const Device::GatewaySpec spec = {
-        /* .PhvBytes = */       4,
-        /* .HashBits = */       12,
-        /* .PredicateBits = */  0,
-        /* .MaxRows = */        4,
-        /* .SupportXor = */     true,
-        /* .SupportRange = */   true,
-        /* .ExactShifts = */    5,
-        /* .ByteSwizzle = */    true,
-        /* .PerByteMatch = */   0,
-        /* .XorByteSlots = */   0xf0,
+        /* .PhvBytes = */ 4,
+        /* .HashBits = */ 12,
+        /* .PredicateBits = */ 0,
+        /* .MaxRows = */ 4,
+        /* .SupportXor = */ true,
+        /* .SupportRange = */ true,
+        /* .ExactShifts = */ 5,
+        /* .ByteSwizzle = */ true,
+        /* .PerByteMatch = */ 0,
+        /* .XorByteSlots = */ 0xf0,
     };
-    return spec; }
+    return spec;
+}
 #endif
 
 class CanonGatewayExpr::NeedNegate : public Inspector {
-    bool        rv = false;
+    bool rv = false;
     bool preorder(const IR::Expression *) override { return !rv; }
     bool preorder(const IR::Neq *neq) override {
         if (safe_width_bits(neq->left->type) == 1) {
             /* 1-bit != can be done directly; no need to negate it into == */
-            return true; }
-        rv = true; return false; }
+            return true;
+        }
+        rv = true;
+        return false;
+    }
+
  public:
     explicit NeedNegate(const IR::Expression *e) { e->apply(*this); }
     explicit NeedNegate(safe_vector<GWRow_t> &rows) {
         for (auto &row : rows) {
             if (row.first) row.first->apply(*this);
-            if (rv) break; } }
+            if (rv) break;
+        }
+    }
     explicit operator bool() const { return rv; }
 };
 
@@ -78,7 +88,8 @@ static big_int SliceReduce(IR::Operation::Relation *rel, big_int val) {
         LOG4("Slicing " << slice << " bits off the bottom of " << rel);
         rel->left = MakeSlice(rel->left, slice, safe_width_bits(rel->left->type) - 1);
         rel->right = new IR::Constant(val);
-        LOG4("Now have " << rel); }
+        LOG4("Now have " << rel);
+    }
     return val;
 }
 
@@ -86,21 +97,16 @@ static big_int SliceReduce(IR::Operation::Relation *rel, big_int val) {
 /// by slicing on a byte boundary.  @returns the bit-within-byte of the lowest bit of the
 /// expression (0..7)
 static int byte_align(const IR::Expression *e) {
-    if (auto *sl = e->to<IR::Slice>())
-        return (sl->getL() + byte_align(sl->e0)) & 7;
-    if (auto *b = e->to<IR::Operation::Binary>())
-        return byte_align(b->left);
-    if (auto *m = e->to<IR::Member>())
-        return m->offset_bits() & 7;
-    if (auto *u = e->to<IR::Operation::Unary>())
-        return byte_align(u->expr);
+    if (auto *sl = e->to<IR::Slice>()) return (sl->getL() + byte_align(sl->e0)) & 7;
+    if (auto *b = e->to<IR::Operation::Binary>()) return byte_align(b->left);
+    if (auto *m = e->to<IR::Member>()) return m->offset_bits() & 7;
+    if (auto *u = e->to<IR::Operation::Unary>()) return byte_align(u->expr);
     return 0;
 }
 
 IR::Node *CanonGatewayExpr::preorder(IR::MAU::Table *tbl) {
     auto &rows = tbl->gateway_rows;
-    if (rows.empty() || !rows[0].first)
-        return tbl;
+    if (rows.empty() || !rows[0].first) return tbl;
     if (!tbl->gateway_cond.isNullOrEmpty()) return tbl;
     // Store original condition string as specified in p4 program
     cstring gateway_cond = cstring::to_cstring(rows[0].first);
@@ -123,9 +129,11 @@ const IR::Expression *CanonGatewayExpr::postorder(IR::Operation::Relation *e) {
     // will continuously change, resulting in an infinite loop for GatewayOpt::PassRepeat
     // FIXME -- should have been constant folded?
     if (e->left->is<IR::Literal>() && !e->right->is<IR::Literal>()) {
-        std::swap(e->left, e->right); }
+        std::swap(e->left, e->right);
+    }
     if (e->right->is<IR::Operation::Relation>()) {
-        std::swap(e->left, e->right); }
+        std::swap(e->left, e->right);
+    }
     if (e->left->is<IR::Operation::Relation>()) {
         // comparing the result of a comparison with a boolean value
         bool add_not = e->is<IR::Neq>();
@@ -139,14 +147,14 @@ const IR::Expression *CanonGatewayExpr::postorder(IR::Operation::Relation *e) {
             // we could also potentially transform to (a && !b) || (!a && b) instead of a^b
             // which might fit in one gateway without requiring added stages
             IR::Expression *rv = new IR::BXor(e->srcInfo, e->left, e->right);
-            if (!add_not)
-                rv = new IR::LNot(e);
-            return rv; }
-        if (add_not)
-            return postorder(new IR::LNot(e->left));
-        return e->left; }
-    Pattern::Match<IR::Expression>      e1, e2;
-    Pattern::Match<IR::Constant>        k1, k2;
+            if (!add_not) rv = new IR::LNot(e);
+            return rv;
+        }
+        if (add_not) return postorder(new IR::LNot(e->left));
+        return e->left;
+    }
+    Pattern::Match<IR::Expression> e1, e2;
+    Pattern::Match<IR::Constant> k1, k2;
     int width = safe_width_bits(e->left->type);
     if (((e1 & k1) == k2).match(e) || ((e1 & k1) != k2).match(e)) {
         BUG_CHECK(!e1->is<IR::Constant>(), "constant folding failed");
@@ -154,45 +162,51 @@ const IR::Expression *CanonGatewayExpr::postorder(IR::Operation::Relation *e) {
         if ((abs(k1->value) & abs(k2->value)) != abs(k2->value)) {
             auto rv = new IR::BoolLiteral(e->srcInfo, e->is<IR::Equ>() ? false : true);
             warning("Masked comparison is always %s", rv);
-            return rv; }
+            return rv;
+        }
         // masked comparison
         auto shift = ffs(abs(k1->value));
         if (shift > 0) {
             if (unsigned(ffs(abs(k2->value))) >= unsigned(shift)) {
                 // subtle point -- unsigned casts above to be true when ffs returns -1
-                e->left = new IR::BAnd(MakeSlice(e1, shift, width - 1),
-                                       MakeSlice(k1, shift, width - 1));
+                e->left =
+                    new IR::BAnd(MakeSlice(e1, shift, width - 1), MakeSlice(k1, shift, width - 1));
                 e->right = new IR::Constant(e->left->type, k2->value >> shift);
                 width -= shift;
             } else {
                 auto rv = new IR::BoolLiteral(e->srcInfo, e->is<IR::Equ>() ? false : true);
                 warning("Masked comparison is always %s", rv);
-                return rv; } }
+                return rv;
+            }
+        }
     } else if (((e1 & k1) == (e2 & k2)).match(e) || ((e1 & k1) != (e2 & k2)).match(e)) {
         BUG_CHECK(!e1->is<IR::Constant>(), "constant folding failed");
         BUG_CHECK(!e2->is<IR::Constant>(), "constant folding failed");
         BUG_CHECK(width == safe_width_bits(e1->type), "Type mismatch in CanonGatewayExpr");
         auto shift = ffs(k1->value | k2->value);
         if (shift > 0) {
-            e->left = new IR::BAnd(MakeSlice(e1, shift, width - 1),
-                                   MakeSlice(k1, shift, width - 1));
-            e->right = new IR::BAnd(MakeSlice(e2, shift, width - 1),
-                                    MakeSlice(k2, shift, width - 1));
-            width -= shift; } }
+            e->left =
+                new IR::BAnd(MakeSlice(e1, shift, width - 1), MakeSlice(k1, shift, width - 1));
+            e->right =
+                new IR::BAnd(MakeSlice(e2, shift, width - 1), MakeSlice(k2, shift, width - 1));
+            width -= shift;
+        }
+    }
     if (width > 32) {
         // We can't handle wide matches in one go, so split it.
         int slice_at = 32 - byte_align(e->left);
         auto *clone = e->clone();
-        e->left = MakeSlice(e->left, slice_at, width-1);
-        e->right = MakeSlice(e->right, slice_at, width-1);
-        clone->left = MakeSlice(clone->left, 0, slice_at-1);
-        clone->right = MakeSlice(clone->right, 0, slice_at-1);
-        LOG5(_debugIndent << "  Split wide to: " << clone <<
-             (e->is<IR::Equ>() ? " && " : " || ") << e);
+        e->left = MakeSlice(e->left, slice_at, width - 1);
+        e->right = MakeSlice(e->right, slice_at, width - 1);
+        clone->left = MakeSlice(clone->left, 0, slice_at - 1);
+        clone->right = MakeSlice(clone->right, 0, slice_at - 1);
+        LOG5(_debugIndent << "  Split wide to: " << clone << (e->is<IR::Equ>() ? " && " : " || ")
+                          << e);
         if (e->is<IR::Equ>())
             return new IR::LAnd(postorder(e), postorder(clone));
         else
-            return new IR::LOr(postorder(e), postorder(clone)); }
+            return new IR::LOr(postorder(e), postorder(clone));
+    }
     return e;
 }
 
@@ -204,17 +218,15 @@ static big_int maxValueOfType(const IR::Type *type_) {
     return rv - 1;
 }
 
-
 const IR::Expression *CanonGatewayExpr::postorder(IR::Leq *e) {
     LOG5(_debugIndent << "IR::Leq " << e);
     if (e->left->equiv(*e->right))  // if the two sides are the same expression, fold it
         return new IR::BoolLiteral(true);
-    if (e->left->is<IR::Constant>())
-        return postorder(new IR::Geq(e->right, e->left));
+    if (e->left->is<IR::Constant>()) return postorder(new IR::Geq(e->right, e->left));
     if (auto k = e->right->to<IR::Constant>()) {
-        if (k->value == maxValueOfType(k->type))
-            return new IR::BoolLiteral(true);
-        return postorder(new IR::Lss(e->left, new IR::Constant(k->type, k->value + 1))); }
+        if (k->value == maxValueOfType(k->type)) return new IR::BoolLiteral(true);
+        return postorder(new IR::Lss(e->left, new IR::Constant(k->type, k->value + 1)));
+    }
     return e;
 }
 
@@ -224,18 +236,21 @@ const IR::Expression *CanonGatewayExpr::postorder(IR::Lss *e) {
         return new IR::BoolLiteral(false);
     if (auto k = e->left->to<IR::Constant>()) {
         BUG_CHECK(!e->right->is<IR::Constant>(), "constant folding failed");
-        if (k->value == maxValueOfType(k->type))
-            return new IR::BoolLiteral(false);
-        return postorder(new IR::Geq(e->right, new IR::Constant(k->type, k->value + 1))); }
+        if (k->value == maxValueOfType(k->type)) return new IR::BoolLiteral(false);
+        return postorder(new IR::Geq(e->right, new IR::Constant(k->type, k->value + 1)));
+    }
     if (auto k = e->right->to<IR::Constant>()) {
         if (k->value == 0) {
             if (isSigned(e->left->type)) {
                 int signbit = e->left->type->width_bits() - 1;
                 return new IR::Equ(MakeSlice(e->left, signbit, signbit), new IR::Constant(1));
             } else {
-                return new IR::BoolLiteral(false); } }
+                return new IR::BoolLiteral(false);
+            }
+        }
         if (!isSigned(e->left->type) && SliceReduce(e, k->value) == 1)
-            return postorder(new IR::Equ(e->left, new IR::Constant(0))); }
+            return postorder(new IR::Equ(e->left, new IR::Constant(0)));
+    }
     return e;
 }
 
@@ -245,18 +260,21 @@ const IR::Expression *CanonGatewayExpr::postorder(IR::Geq *e) {
         return new IR::BoolLiteral(true);
     if (auto k = e->left->to<IR::Constant>()) {
         BUG_CHECK(!e->right->is<IR::Constant>(), "constant folding failed");
-        if (k->value == maxValueOfType(k->type))
-            return new IR::BoolLiteral(true);
-        return postorder(new IR::Lss(e->right, new IR::Constant(k->type, k->value + 1))); }
+        if (k->value == maxValueOfType(k->type)) return new IR::BoolLiteral(true);
+        return postorder(new IR::Lss(e->right, new IR::Constant(k->type, k->value + 1)));
+    }
     if (auto k = e->right->to<IR::Constant>()) {
         if (k->value == 0) {
             if (isSigned(e->left->type)) {
                 int signbit = e->left->type->width_bits() - 1;
                 return new IR::Equ(MakeSlice(e->left, signbit, signbit), new IR::Constant(0));
             } else {
-                return new IR::BoolLiteral(true); } }
+                return new IR::BoolLiteral(true);
+            }
+        }
         if (!isSigned(e->left->type) && SliceReduce(e, k->value) == 1)
-            return postorder(new IR::Neq(e->left, new IR::Constant(0))); }
+            return postorder(new IR::Neq(e->left, new IR::Constant(0)));
+    }
     return e;
 }
 
@@ -264,42 +282,31 @@ const IR::Expression *CanonGatewayExpr::postorder(IR::Grt *e) {
     LOG5(_debugIndent << "IR::Grt " << e);
     if (e->left->equiv(*e->right))  // if the two sides are the same expression, fold it
         return new IR::BoolLiteral(false);
-    if (e->left->is<IR::Constant>())
-        return postorder(new IR::Lss(e->right, e->left));
+    if (e->left->is<IR::Constant>()) return postorder(new IR::Lss(e->right, e->left));
     if (auto k = e->right->to<IR::Constant>()) {
-        if (k->value == maxValueOfType(k->type))
-            return new IR::BoolLiteral(false);
-        return postorder(new IR::Geq(e->left, new IR::Constant(k->type, k->value + 1))); }
+        if (k->value == maxValueOfType(k->type)) return new IR::BoolLiteral(false);
+        return postorder(new IR::Geq(e->left, new IR::Constant(k->type, k->value + 1)));
+    }
     return e;
 }
 
 /// Simplify as fast as possible to avoid expansion when going between deMorgan
 /// and distribution
 const IR::Expression *CanonGatewayExpr::preorder(IR::LAnd *e) {
-    if (e->left->equiv(*e->right))
-        return e->left;
-    if (auto k = e->left->to<IR::Constant>())
-        return k->value ? e->right : k;
-    if (auto k = e->left->to<IR::BoolLiteral>())
-        return k->value ? e->right : k;
-    if (auto k = e->right->to<IR::Constant>())
-        return k->value ? e->left : k;
-    if (auto k = e->right->to<IR::BoolLiteral>())
-        return k->value ? e->left : k;
+    if (e->left->equiv(*e->right)) return e->left;
+    if (auto k = e->left->to<IR::Constant>()) return k->value ? e->right : k;
+    if (auto k = e->left->to<IR::BoolLiteral>()) return k->value ? e->right : k;
+    if (auto k = e->right->to<IR::Constant>()) return k->value ? e->left : k;
+    if (auto k = e->right->to<IR::BoolLiteral>()) return k->value ? e->left : k;
     return e;
 }
 
 const IR::Expression *CanonGatewayExpr::preorder(IR::LOr *e) {
-    if (e->left->equiv(*e->right))
-        return e->left;
-    if (auto k = e->left->to<IR::Constant>())
-        return k->value ? k : e->right;
-    if (auto k = e->left->to<IR::BoolLiteral>())
-        return k->value ? k : e->right;
-    if (auto k = e->right->to<IR::Constant>())
-        return k->value ? k : e->left;
-    if (auto k = e->right->to<IR::BoolLiteral>())
-        return k->value ? k : e->left;
+    if (e->left->equiv(*e->right)) return e->left;
+    if (auto k = e->left->to<IR::Constant>()) return k->value ? k : e->right;
+    if (auto k = e->left->to<IR::BoolLiteral>()) return k->value ? k : e->right;
+    if (auto k = e->right->to<IR::Constant>()) return k->value ? k : e->left;
+    if (auto k = e->right->to<IR::BoolLiteral>()) return k->value ? k : e->left;
     return e;
 }
 
@@ -314,19 +321,15 @@ const IR::Expression *CanonGatewayExpr::preorder(IR::LNot *e) {
 const IR::Expression *CanonGatewayExpr::postorder(IR::LAnd *e) {
     LOG5(_debugIndent++ << "IR::LAnd " << e);
     const IR::Expression *rv = e;
-    if (e->left->equiv(*e->right))
-        return e->left;
-    if (auto k = e->left->to<IR::Constant>())
-        return k->value ? e->right : k;
-    if (auto k = e->left->to<IR::BoolLiteral>())
-        return k->value ? e->right : k;
-    if (auto k = e->right->to<IR::Constant>())
-        return k->value ? e->left : k;
-    if (auto k = e->right->to<IR::BoolLiteral>())
-        return k->value ? e->left : k;
+    if (e->left->equiv(*e->right)) return e->left;
+    if (auto k = e->left->to<IR::Constant>()) return k->value ? e->right : k;
+    if (auto k = e->left->to<IR::BoolLiteral>()) return k->value ? e->right : k;
+    if (auto k = e->right->to<IR::Constant>()) return k->value ? e->left : k;
+    if (auto k = e->right->to<IR::BoolLiteral>()) return k->value ? e->left : k;
     while (auto r = e->right->to<IR::LAnd>()) {
         e->left = postorder(new IR::LAnd(e->left, r->left));
-        e->right = r->right; }
+        e->right = r->right;
+    }
     if (auto l = e->left->to<IR::LOr>()) {
         if (auto r = e->right->to<IR::LOr>()) {
             auto c1 = new IR::LAnd(l->left, r->left);
@@ -338,7 +341,8 @@ const IR::Expression *CanonGatewayExpr::postorder(IR::LAnd *e) {
         } else {
             auto c1 = new IR::LAnd(l->left, e->right);
             auto c2 = new IR::LAnd(l->right, e->right);
-            rv = new IR::LOr(c1, c2); }
+            rv = new IR::LOr(c1, c2);
+        }
         LOG5(_debugIndent << "/ IR::LAnd " << rv);
     } else if (auto r = e->right->to<IR::LOr>()) {
         auto c1 = new IR::LAnd(e->left, r->left);
@@ -346,27 +350,22 @@ const IR::Expression *CanonGatewayExpr::postorder(IR::LAnd *e) {
         rv = new IR::LOr(c1, c2);
         LOG5(_debugIndent << "* IR::LAnd " << rv);
     }
-    if (rv != e)
-        visit(rv);
+    if (rv != e) visit(rv);
     LOG5(--_debugIndent << "- IR::LAnd " << rv);
     return rv;
 }
 
 const IR::Expression *CanonGatewayExpr::postorder(IR::LOr *e) {
     LOG5(_debugIndent++ << "IR::LOr " << e);
-    if (e->left->equiv(*e->right))
-        return e->left;
-    if (auto k = e->left->to<IR::Constant>())
-        return k->value ? k : e->right;
-    if (auto k = e->left->to<IR::BoolLiteral>())
-        return k->value ? k : e->right;
-    if (auto k = e->right->to<IR::Constant>())
-        return k->value ? k : e->left;
-    if (auto k = e->right->to<IR::BoolLiteral>())
-        return k->value ? k : e->left;
+    if (e->left->equiv(*e->right)) return e->left;
+    if (auto k = e->left->to<IR::Constant>()) return k->value ? k : e->right;
+    if (auto k = e->left->to<IR::BoolLiteral>()) return k->value ? k : e->right;
+    if (auto k = e->right->to<IR::Constant>()) return k->value ? k : e->left;
+    if (auto k = e->right->to<IR::BoolLiteral>()) return k->value ? k : e->left;
     while (auto r = e->right->to<IR::LOr>()) {
         e->left = postorder(new IR::LOr(e->left, r->left));
-        e->right = r->right; }
+        e->right = r->right;
+    }
     LOG5(--_debugIndent << "-IR::LOr " << e);
     return e;
 }
@@ -376,11 +375,13 @@ const IR::Expression *CanonGatewayExpr::postorder(IR::LNot *e) {
     const IR::Expression *rv = e;
     if (auto a = e->expr->to<IR::LNot>()) {
         LOG5(--_debugIndent << "r IR::LNot " << e);
-        return a->expr; }
+        return a->expr;
+    }
     if (auto k = e->expr->to<IR::Constant>()) {
         return new IR::Constant(k->value == 0);
     } else if (auto k = e->expr->to<IR::BoolLiteral>()) {
-        return new IR::BoolLiteral(!k->value); }
+        return new IR::BoolLiteral(!k->value);
+    }
     if (auto a = e->expr->to<IR::LAnd>()) {
         rv = new IR::LOr(new IR::LNot(a->left), new IR::LNot(a->right));
     } else if (auto a = e->expr->to<IR::LOr>()) {
@@ -396,9 +397,9 @@ const IR::Expression *CanonGatewayExpr::postorder(IR::LNot *e) {
     } else if (auto a = e->expr->to<IR::Geq>()) {
         rv = new IR::Lss(a->left, a->right);
     } else if (auto a = e->expr->to<IR::Grt>()) {
-        rv = new IR::Grt(a->left, a->right); }
-    if (rv != e)
-        visit(rv);
+        rv = new IR::Grt(a->left, a->right);
+    }
+    if (rv != e) visit(rv);
     LOG5(--_debugIndent << "-IR::LNot " << rv);
     return rv;
 }
@@ -408,12 +409,15 @@ const IR::Expression *CanonGatewayExpr::postorder(IR::BAnd *e) {
         BUG_CHECK(!e->right->is<IR::Constant>(), "constant folding failed");
         auto *t = e->left;
         e->left = e->right;
-        e->right = t; }
+        e->right = t;
+    }
     if (auto k = e->right->to<IR::Constant>()) {
         int maxbit = floor_log2(k->value);
         if (maxbit >= 0 && e->left->type->width_bits() > maxbit + 1) {
             e->left = MakeSlice(e->left, 0, maxbit);
-            e->type = e->left->type; } }
+            e->type = e->left->type;
+        }
+    }
     return e;
 }
 const IR::Expression *CanonGatewayExpr::postorder(IR::BOr *e) {
@@ -421,7 +425,8 @@ const IR::Expression *CanonGatewayExpr::postorder(IR::BOr *e) {
         BUG_CHECK(!e->right->is<IR::Constant>(), "constant folding failed");
         auto *t = e->left;
         e->left = e->right;
-        e->right = t; }
+        e->right = t;
+    }
     return e;
 }
 
@@ -431,11 +436,9 @@ const IR::Expression *CanonGatewayExpr::postorder(IR::BOr *e) {
  * is automatically assumed to be set due to an earlier assignment.
  */
 const IR::Expression *CanonGatewayExpr::postorder(IR::MAU::TypedPrimitive *p) {
-    if (p->name != "is_validated")
-        error("%scondition too complex", p->srcInfo);
+    if (p->name != "is_validated") error("%scondition too complex", p->srcInfo);
     auto e = p->operands.at(0);
-    if (e->is<IR::Constant>())
-        return new IR::BoolLiteral(true);
+    if (e->is<IR::Constant>()) return new IR::BoolLiteral(true);
     return p;
 }
 
@@ -450,7 +453,8 @@ static bool contradictory(const IR::Expression *a_, const IR::Expression *b_) {
         /* a and be are both 'x relop y' for two different relops */
         if (a->is<IR::Equ>() && (b->is<IR::Neq>() || b->is<IR::Lss>())) return true;
         if (b->is<IR::Equ>() && (a->is<IR::Neq>() || a->is<IR::Lss>())) return true;
-        return false; }
+        return false;
+    }
     auto ak = a->right->to<IR::Constant>();
     auto bk = b->right->to<IR::Constant>();
     if (!ak || !bk) return false;
@@ -460,7 +464,8 @@ static bool contradictory(const IR::Expression *a_, const IR::Expression *b_) {
             return true;
     } else {
         if ((a->is<IR::Equ>() || a->is<IR::Geq>()) && (b->is<IR::Equ>() || b->is<IR::Lss>()))
-            return true; }
+            return true;
+    }
     return false;
 }
 
@@ -477,21 +482,27 @@ static const IR::Expression *simplifyRow(const IR::Expression *e) {
             if (t->equiv(*p))
                 remove = true;
             else if (contradictory(t, p))
-                return new IR::BoolLiteral(e->srcInfo, false); }
+                return new IR::BoolLiteral(e->srcInfo, false);
+        }
         if (remove) {
             delta = true;
         } else {
-            terms.push_back(t); }
+            terms.push_back(t);
+        }
         rest = nullptr;
         if (conj) {
             rest = conj->left;
-            conj = rest->to<IR::LAnd>(); } }
+            conj = rest->to<IR::LAnd>();
+        }
+    }
     if (delta) {
         e = terms.back();
         terms.pop_back();
         while (!terms.empty()) {
             e = new IR::LAnd(e, terms.back());
-            terms.pop_back(); } }
+            terms.pop_back();
+        }
+    }
     return e;
 }
 
@@ -500,7 +511,8 @@ static std::set<const IR::Expression *> rowConjuncts(const IR::Expression *e) {
     std::set<const IR::Expression *> rv;
     while (auto *conj = e->to<IR::LAnd>()) {
         rv.insert(conj->right);
-        e = conj->left; }
+        e = conj->left;
+    }
     rv.insert(e);
     return rv;
 }
@@ -513,7 +525,8 @@ static void removeConjunct(std::set<const IR::Expression *> &s, const IR::Expres
         if (e->equiv(**it))
             it = s.erase(it);
         else
-            ++it; }
+            ++it;
+    }
 }
 
 /** Test a row conjunction to see if it contains every term in a previous row.  If it
@@ -524,7 +537,8 @@ static bool rowDominates(std::set<const IR::Expression *> prev, const IR::Expres
     while (auto *conj = e->to<IR::LAnd>()) {
         removeConjunct(prev, conj->right);
         if (prev.empty()) return true;
-        e = conj->left; }
+        e = conj->left;
+    }
     removeConjunct(prev, e);
     return prev.empty();
 }
@@ -537,52 +551,60 @@ void CanonGatewayExpr::removeUnusedRows(IR::MAU::Table *tbl, bool isCanon) {
     // - condition is 'false'.
     // While doing that, track the next tags that we remove and keep.
     bool erase_rest = false;
-    std::set<cstring>   removed, present;  // next tags in the table from the gateway
+    std::set<cstring> removed, present;  // next tags in the table from the gateway
     std::vector<std::set<const IR::Expression *>> prevRowTerms;
     for (auto row = rows.begin(); row != rows.end();) {
         if (erase_rest) {
             removed.insert(row->second);
             row = rows.erase(row);
-            continue; }
+            continue;
+        }
         if (!row->first) {
             erase_rest = true;
             present.insert(row->second);
             ++row;
-            continue; }
+            continue;
+        }
         row->first = simplifyRow(row->first);
         if (auto k = row->first->to<IR::Constant>()) {
             if (k->value == 0) {
                 removed.insert(row->second);
                 row = rows.erase(row);
             } else {
-                row->first = nullptr; }
-            continue; }
+                row->first = nullptr;
+            }
+            continue;
+        }
         if (auto k = row->first->to<IR::BoolLiteral>()) {
             if (k->value == 0) {
                 removed.insert(row->second);
                 row = rows.erase(row);
             } else {
-                row->first = nullptr; }
-            continue; }
+                row->first = nullptr;
+            }
+            continue;
+        }
         bool remove_row = false;
         for (auto &prev : prevRowTerms) {
             if (rowDominates(prev, row->first)) {
                 remove_row = true;
-                break; } }
+                break;
+            }
+        }
         if (remove_row) {
             removed.insert(row->second);
             row = rows.erase(row);
         } else {
-            if (isCanon)
-                prevRowTerms.push_back(rowConjuncts(row->first));
+            if (isCanon) prevRowTerms.push_back(rowConjuncts(row->first));
             present.insert(row->second);
-            ++row; } }
+            ++row;
+        }
+    }
     // If we removed ALL gateway rows that refer to a next tag, remove that tag from
     // next, as it's unreachable.  This relies on the fact that gateway next tags and
     // action next tags are always disjoint.
     for (auto next_tag : removed)
-        if (!present.count(next_tag))
-            tbl->next.erase(next_tag);
+        if (!present.count(next_tag)) tbl->next.erase(next_tag);
 }
 
 /* return the number of conjunct terms in a gateway row expression */
@@ -591,7 +613,8 @@ static int conjuncts(const IR::Expression *e) {
     int rv = 1;
     while (auto cj = e->to<IR::LAnd>()) {
         rv += conjuncts(cj->right);  // should always be 1 if canonicalized
-        e = cj->left; }
+        e = cj->left;
+    }
     return rv;
 }
 
@@ -605,8 +628,10 @@ void CanonGatewayExpr::sortGatewayRows(safe_vector<GWRow_t> &rows) {
     while (s != rows.end()) {
         while (e != rows.end() && e->second == s->second) ++e;
         std::stable_sort(s, e, [](const GWRow_t &a, const GWRow_t &b) {
-            return conjuncts(a.first) < conjuncts(b.first); });
-        s = e; }
+            return conjuncts(a.first) < conjuncts(b.first);
+        });
+        s = e;
+    }
 }
 
 void CanonGatewayExpr::splitGatewayRows(safe_vector<GWRow_t> &rows) {
@@ -617,9 +642,10 @@ void CanonGatewayExpr::splitGatewayRows(safe_vector<GWRow_t> &rows) {
             auto act = it->second;
             it->first = e->left;
             it = rows.emplace(++it, e->right, act);
-            --it; } }
-    if (rows.back().first)
-        rows.emplace_back(nullptr, cstring());
+            --it;
+        }
+    }
+    if (rows.back().first) rows.emplace_back(nullptr, cstring());
 }
 
 void CanonGatewayExpr::removeNotEquals(safe_vector<GWRow_t> &rows) {
@@ -631,17 +657,19 @@ void CanonGatewayExpr::removeNotEquals(safe_vector<GWRow_t> &rows) {
      */
     std::deque<GWRow_t> need_negate;
     /* move things that need negation to the end and negate them */
-    for (auto it = rows.begin(); it != rows.end()-1;) {
-        if (!it->first)
-            break;
+    for (auto it = rows.begin(); it != rows.end() - 1;) {
+        if (!it->first) break;
         if (NeedNegate(it->first)) {
             need_negate.push_back(*it);
             it = rows.erase(it);
         } else {
             for (auto &n : need_negate) {
                 if (n.second != it->second)
-                    it->first = new IR::LAnd(it->first, new IR::LNot(n.first)); }
-            ++it; } }
+                    it->first = new IR::LAnd(it->first, new IR::LNot(n.first));
+            }
+            ++it;
+        }
+    }
     while (!need_negate.empty()) {
         auto &back = rows.back();
         for (auto &n : need_negate) {
@@ -649,16 +677,16 @@ void CanonGatewayExpr::removeNotEquals(safe_vector<GWRow_t> &rows) {
             if (back.first)
                 back.first = new IR::LAnd(back.first, new IR::LNot(n.first));
             else
-                back.first = new IR::LNot(n.first); }
-        if (back.first)
-            rows.emplace_back(nullptr, need_negate.back().second);
-        need_negate.pop_front(); }
+                back.first = new IR::LNot(n.first);
+        }
+        if (back.first) rows.emplace_back(nullptr, need_negate.back().second);
+        need_negate.pop_front();
+    }
 }
 
 const IR::Node *CanonGatewayExpr::postorder(IR::MAU::Table *tbl) {
     auto &rows = tbl->gateway_rows;
-    if (rows.empty() || !rows[0].first)
-        return tbl;
+    if (rows.empty() || !rows[0].first) return tbl;
     LOG2("CanonGateway on table " << tbl->name);
     LOG1("Postorder gateway cond: " << tbl->gateway_cond);
     removeUnusedRows(tbl, false);
@@ -668,8 +696,10 @@ const IR::Node *CanonGatewayExpr::postorder(IR::MAU::Table *tbl) {
             LOG3("eliminating completely dead gateway-only table " << tbl->name);
             if (!rows.empty() && tbl->next.count(rows.front().second))
                 return &tbl->next.at(rows.front().second)->tables;
-            return nullptr; }
-        return tbl; }
+            return nullptr;
+        }
+        return tbl;
+    }
 
     /* The process for removing != operations doesn't always work immediately -- it might
      * require a second pass to get rid of more != operations.  More passes could be done,
@@ -681,31 +711,32 @@ const IR::Node *CanonGatewayExpr::postorder(IR::MAU::Table *tbl) {
         removeUnusedRows(tbl, true);
         if (LOGGING(4)) {
             LOG4("gateway " << tbl->name << " after canonicalization trial=" << trial);
-            for (auto &r : rows) LOG4("  " << r.first << " -> " << r.second); }
-        if (!NeedNegate(rows))
-            return tbl;
+            for (auto &r : rows) LOG4("  " << r.first << " -> " << r.second);
+        }
+        if (!NeedNegate(rows)) return tbl;
         if (trial >= 2 || rows.size() > 32) {
             error("%sgateway condition too complex", rows.front().first->srcInfo);
-            return tbl; }
+            return tbl;
+        }
         removeNotEquals(rows);
         /* reprocess this gateway to re-canonicalize it. */
         if (LOGGING(4)) {
             LOG4("reprocess gateway " << tbl->name << " trial=" << trial);
-            for (auto &r : rows) LOG4("  " << r.first << " -> " << r.second); }
-        for (auto &row : rows)
-            visit(row.first); }
+            for (auto &r : rows) LOG4("  " << r.first << " -> " << r.second);
+        }
+        for (auto &row : rows) visit(row.first);
+    }
 }
 
 bool CollectGatewayFields::preorder(const IR::MAU::Table *tbl) {
     unsigned row = 0;
-    BUG_CHECK(info.empty() && !this->tbl , "reusing CollectGatewayFields");
-    if (tbl->uses_gateway())
-        LOG5("CollectGatewayFields for table " << tbl->name);
+    BUG_CHECK(info.empty() && !this->tbl, "reusing CollectGatewayFields");
+    if (tbl->uses_gateway()) LOG5("CollectGatewayFields for table " << tbl->name);
     this->tbl = tbl;
     for (auto &gw : tbl->gateway_rows) {
-        if (++row > row_limit)
-            return false;
-        visit(gw.first, "gateway_row"); }
+        if (++row > row_limit) return false;
+        visit(gw.first, "gateway_row");
+    }
     return false;
 }
 
@@ -721,20 +752,22 @@ bool CollectMatchFieldsAsGateway::preorder(const IR::MAU::Table *tbl) {
         for (auto key : tbl->match_key) {
             if (!key->for_match()) {
                 fail = true;
-                break; }
+                break;
+            }
             if (key->for_range()) {
                 // FIXME -- could deal with this, but need update to expression code below
                 fail = true;
-                break; }
-            visit(key->expr, "match_key"); }
+                break;
+            }
+            visit(key->expr, "match_key");
+        }
     }
     return false;
 }
 
 // TOFINO1-ONLY
 bool CollectGatewayFields::preorder(const IR::MAU::TypedPrimitive *prim) {
-    if (prim->name != "is_validated")
-        error("%scondition too complex", prim->srcInfo);
+    if (prim->name != "is_validated") error("%scondition too complex", prim->srcInfo);
     le_bitrange bits;
     auto e = prim->operands.at(0);
     auto finfo = phv.field(e, &bits);
@@ -761,18 +794,20 @@ bool CollectGatewayFields::preorder(const IR::Expression *e) {
             else
                 info.const_eq = true;
         } else {
-            xor_match = PHV::FieldSlice(finfo, bits); }
+            xor_match = PHV::FieldSlice(finfo, bits);
+        }
     } else {
-        info.const_eq = true; }
+        info.const_eq = true;
+    }
     if (aliasSourceName != std::nullopt) {
         info_to_uses[&info] = *aliasSourceName;
-        LOG5("Adding entry to info_to_uses: " << &info << " : " << *aliasSourceName); }
+        LOG5("Adding entry to info_to_uses: " << &info << " : " << *aliasSourceName);
+    }
     return false;
 }
 
 void CollectGatewayFields::postorder(const IR::Literal *) {
-    if (xor_match.field() && getParent<IR::Operation::Relation>())
-        info[xor_match].const_eq = true;
+    if (xor_match.field() && getParent<IR::Operation::Relation>()) info[xor_match].const_eq = true;
 }
 
 bool CollectGatewayFields::compute_offsets() {
@@ -785,12 +820,14 @@ bool CollectGatewayFields::compute_offsets() {
     for (auto &field : info) {
         sort_by_size.push_back(&field);
         field.second.offsets.clear();
-        field.second.xor_offsets.clear(); }
+        field.second.xor_offsets.clear();
+    }
     std::sort(sort_by_size.begin(), sort_by_size.end(),
               [](decltype(info)::value_type *a, decltype(info)::value_type *b) -> bool {
-                  return a->first.size() > b->first.size(); });
+                  return a->first.size() > b->first.size();
+              });
     // track where each container byte is located on the gateway input
-    std::map<std::pair<PHV::Container, int>, std::set<int>>       alloc_bytes;
+    std::map<std::pair<PHV::Container, int>, std::set<int>> alloc_bytes;
     std::map<std::pair<std::pair<PHV::Container, int>, int>, std::pair<PHV::Container, int>>
         xor_pairs;
 
@@ -828,52 +865,60 @@ bool CollectGatewayFields::compute_offsets() {
                            sl.container_slice().lo % 8U;
                 with.offsets.emplace_back(bit, sl.field_slice());
                 info.xor_offsets.emplace_back(bit, sl.field_slice().shiftedByBits(shift));
-                LOG5("  " << (duplicate ? "duplicate " : "") << "byte " << (bit/8) << " " <<
-                     field << "(" << info.xor_offsets.back().second << ") xor " << xor_with <<
-                     ' ' << sl << " (" << with.offsets.back().second << ")");
+                LOG5("  " << (duplicate ? "duplicate " : "") << "byte " << (bit / 8) << " " << field
+                          << "(" << info.xor_offsets.back().second << ") xor " << xor_with << ' '
+                          << sl << " (" << with.offsets.back().second << ")");
                 if (!duplicate) {
                     alloc_bytes[alloc_byte].insert(bytes);
                     auto source = std::make_pair(alloc_byte, bytes);
                     xor_pairs[source] = field_byte;
-                    ++bytes; }
+                    ++bytes;
+                }
                 ++field_byte_idx;
-            }); } }
+            });
+        }
+    }
     // we collect slices that could be allocated to either bytes or bits here, then
     // allocate the largest ones to the bytes and then try to pack any remaining ones
     // into the bits
     struct need_alloc_t {
-        const PHV::FieldSlice   *field;
-        info_t                  *info;
-        PHV::AllocSlice         slice;    // need a copy as the ref from foreach_byte is local
+        const PHV::FieldSlice *field;
+        info_t *info;
+        PHV::AllocSlice slice;  // need a copy as the ref from foreach_byte is local
     };
-    std::vector<need_alloc_t>                   need_alloc;
+    std::vector<need_alloc_t> need_alloc;
     for (auto *it : sort_by_size) {
         const PHV::FieldSlice &field = it->first;
         info_t &info = it->second;
         if (!info.need_range && !info.const_eq) continue;
-        int size = field.is_unallocated() ? (field.size() + 7)/8U : field.container_bytes();
+        int size = field.is_unallocated() ? (field.size() + 7) / 8U : field.container_bytes();
         bitvec field_bits(field.range().lo, field.size());  // bits of the field needed
         if (auto ixbar = dynamic_cast<const Tofino::IXBar::Use *>(this->ixbar)) {
             for (auto &f : ixbar->bit_use) {
                 if (f.field == field.field()->name && field.range().overlaps(f.lo, f.hi())) {
                     // Portions of the field could be in the hash vs in the search bus, and
                     // this is only for the hash
-                    auto boost_sl = toClosedRange<RangeUnit::Bit, Endian::Little>
-                                        (field.range().intersectWith(f.lo, f.hi()));
-                    BUG_CHECK(boost_sl != std::nullopt, "Gateway field cannot find correct "
+                    auto boost_sl = toClosedRange<RangeUnit::Bit, Endian::Little>(
+                        field.range().intersectWith(f.lo, f.hi()));
+                    BUG_CHECK(boost_sl != std::nullopt,
+                              "Gateway field cannot find correct "
                               "overlap in input xbar");
                     le_bitrange b = *boost_sl;
                     info.offsets.emplace_back(f.bit + b.lo - f.lo + 32, b);
                     LOG5("  bit " << f.bit + b.lo - f.lo + 32 << " " << field);
                     field_bits.clrrange(b.lo, b.size());
-                    if (f.bit + b.hi - f.lo >= bits)
-                        bits = f.bit + b.hi - f.lo + 1; } }
-            if (field_bits.empty()) continue; }
+                    if (f.bit + b.hi - f.lo >= bits) bits = f.bit + b.hi - f.lo + 1;
+                }
+            }
+            if (field_bits.empty()) continue;
+        }
         bool alloc_in_bits = info.need_range;
         if (!alloc_in_bits && size == 1) {
-            if (bytes+size > gws.PhvBytes && bits+field.size() <= gws.HashBits) {
+            if (bytes + size > gws.PhvBytes && bits + field.size() <= gws.HashBits) {
                 // if we've run out of bytes and there are available hash bits, try using them
-                alloc_in_bits = true; } }
+                alloc_in_bits = true;
+            }
+        }
         if (alloc_in_bits) {
             BUG_CHECK(field_bits.ffz(field.range().lo) == size_t(field.range().hi + 1),
                       "field only partly in hash needed all in hash");
@@ -885,29 +930,35 @@ bool CollectGatewayFields::compute_offsets() {
             field.foreach_byte(tbl, &use_read, [&](const PHV::AllocSlice &sl) {
                 if (size_t(field_bits.ffs(sl.field_slice().lo)) > size_t(sl.field_slice().hi)) {
                     LOG5(sl << " already done via hash");
-                    return; }
+                    return;
+                }
                 auto alloc_byte = sl.container_byte();
                 bool add_to_need_alloc = false;
                 if (alloc_bytes.count(alloc_byte)) {
                     for (auto byte : alloc_bytes.at(alloc_byte)) {
                         auto bit = byte * 8U + sl.container_slice().lo % 8U;
                         if (std::find_if(info.offsets.begin(), info.offsets.end(),
-                                 [&](const std::pair<int, le_bitrange> &offset) {
-                                     return le_bitinterval(offset.first,
-                                                           offset.first + offset.second.size())
-                                         .overlaps(bit, bit + sl.container_slice().size());
-                                 }) != info.offsets.end()) {
+                                         [&](const std::pair<int, le_bitrange> &offset) {
+                                             return le_bitinterval(
+                                                        offset.first,
+                                                        offset.first + offset.second.size())
+                                                 .overlaps(bit, bit + sl.container_slice().size());
+                                         }) != info.offsets.end()) {
                             add_to_need_alloc = true;
                         } else {
                             info.offsets.emplace_back(bit, sl.field_slice());
-                            LOG5("  duplicate byte " << (bit/8) << " " << field << ' ' << sl);
+                            LOG5("  duplicate byte " << (bit / 8) << " " << field << ' ' << sl);
                         }
                     }
                 } else {
-                    add_to_need_alloc = true; }
+                    add_to_need_alloc = true;
+                }
                 if (add_to_need_alloc) {
-                    need_alloc.push_back({ &field, &info, sl }); }
-                field_bits.clrrange(sl.field_slice().lo, sl.width()); }); }
+                    need_alloc.push_back({&field, &info, sl});
+                }
+                field_bits.clrrange(sl.field_slice().lo, sl.width());
+            });
+        }
 #if 0
         // FIXME -- should check this, but sometimes this gets run when PHV allocation has failed
         // to allocate this field, in which case we don't want to crash here.
@@ -925,11 +976,13 @@ bool CollectGatewayFields::compute_offsets() {
             info.offsets.emplace_back(bits + 32, le_bitrange(0, 0));
             LOG5("  bit " << bits + 32 << " " << field);
             bits += 1;
-        } }
+        }
+    }
 
     std::stable_sort(need_alloc.begin(), need_alloc.end(),
                      [](const need_alloc_t &a, const need_alloc_t &b) {
-                             return a.slice.width() > b.slice.width(); });
+                         return a.slice.width() > b.slice.width();
+                     });
     for (need_alloc_t &n : need_alloc) {
         if (bytes < gws.PhvBytes) {
             auto bit = (bytes * 8U) + (n.slice.container_slice().lo % 8U);
@@ -939,14 +992,15 @@ bool CollectGatewayFields::compute_offsets() {
         } else {
             n.info->offsets.emplace_back(32 + bits, n.slice.field_slice());
             LOG5("  bit " << bits << ' ' << *n.field << ' ' << n.slice);
-            bits += n.slice.width(); } }
+            bits += n.slice.width();
+        }
+    }
 
     LOG6("CollectGatewayFields::compute_offsets finished " << *this << DBPrint::Reset);
     if (bytes > gws.PhvBytes) return false;
     if (bits > gws.HashBits) return false;
     return bits <= Tofino::IXBar::get_hash_single_bits();
 }
-
 
 /** SetupRanges: convert IR::Operation::Relation expressions into IR::RangeMatch operations
  * for encoding in a gateway DirtCAM.  A Relation just a </<=/>/>=/==/!= comparison.  TCAMs
@@ -967,12 +1021,24 @@ bool CollectGatewayFields::compute_offsets() {
  * the rest into 4 bit RangeMatches.
  */
 class GatewayRangeMatch::SetupRanges : public Transform {
-    const PhvInfo               &phv;
-    const CollectGatewayFields  &fields;
-    IR::MAU::Action *preorder(IR::MAU::Action *af) override { prune(); return af; }
-    IR::P4Table *preorder(IR::P4Table *t) override { prune(); return t; }
-    IR::Attached *preorder(IR::Attached *a) override { prune(); return a; }
-    IR::MAU::TableSeq *preorder(IR::MAU::TableSeq *s) override { prune(); return s; }
+    const PhvInfo &phv;
+    const CollectGatewayFields &fields;
+    IR::MAU::Action *preorder(IR::MAU::Action *af) override {
+        prune();
+        return af;
+    }
+    IR::P4Table *preorder(IR::P4Table *t) override {
+        prune();
+        return t;
+    }
+    IR::Attached *preorder(IR::Attached *a) override {
+        prune();
+        return a;
+    }
+    IR::MAU::TableSeq *preorder(IR::MAU::TableSeq *s) override {
+        prune();
+        return s;
+    }
 
     const IR::Expression *postorder(IR::Operation::Relation *rel) override {
         le_bitrange bits;
@@ -994,19 +1060,24 @@ class GatewayRangeMatch::SetupRanges : public Transform {
                     bits.lo = alloc.second.hi + 1;
                     if (bits.lo > bits.hi) {
                         LOG4("  all bits in lower 32, skipping");
-                        return rel; } }
-                continue; }
+                        return rel;
+                    }
+                }
+                continue;
+            }
             if (!alloc.second.overlaps(bits)) continue;
             BUG_CHECK(base == 0, "bits for %s split in range match", f->name);
             base = alloc.first + bits.lo - alloc.second.lo;
             BUG_CHECK(base >= 32 && base + bits.size() <= alloc.first + alloc.second.size(),
                       "bad gateway field layout for range match");
-            break; }
+            break;
+        }
         if (!base) return rel;
         if (base & 3) {
             bits.lo -= base & 3;
             val <<= base & 3;
-            base &= ~3; }
+            base &= ~3;
+        }
         bits.lo -= orig_lo;
         bits.hi -= orig_lo;
         const IR::Expression *rv = nullptr, *himatch = nullptr;
@@ -1030,38 +1101,45 @@ class GatewayRangeMatch::SetupRanges : public Transform {
                     minval = 1U << (1U << (size - 1));
                     if (minval > data) {
                         minval++;
-                        data += mask + 1; } }
-                data -= minval; }
+                        data += mask + 1;
+                    }
+                }
+                data -= minval;
+            }
             BUG_CHECK(data <= mask, "bit snafu in RangeMatch");
             if (reverse) {
                 data ^= mask;
                 if (forceRange && lo != bits.lo) {
-                    if (sign)  {
+                    if (sign) {
                         // rotate 2^size bits left by 1
                         data = ((data << 1) | (data >> ((1 << size) - 1))) & mask;
                         // clear the bit corresponding to most negative value
                         data &= ~(1U << (1U << (size - 1)));
                     } else {
-                        data = (data << 1) & mask; } } }
+                        data = (data << 1) & mask;
+                    }
+                }
+            }
             c = new IR::RangeMatch(MakeSlice(rel->left, std::max(0, lo), hi), data);
-            if (forceRange)
-                c = himatch ? new IR::LAnd(himatch, c) : c;
+            if (forceRange) c = himatch ? new IR::LAnd(himatch, c) : c;
             if (rv) {
                 if (forceRange || reverse)
                     rv = new IR::LOr(rv, c);
                 else
                     rv = new IR::LAnd(rv, c);
             } else {
-                rv = c; }
+                rv = c;
+            }
             himatch = himatch ? new IR::LAnd(himatch, eq) : eq;
-            sign = false; }
+            sign = false;
+        }
         LOG3("SetupRange result: " << rv);
         return rv;
     }
 
  public:
     SetupRanges(const PhvInfo &phv, const CollectGatewayFields &fields)
-    : phv(phv), fields(fields) {}
+        : phv(phv), fields(fields) {}
 };
 
 void GatewayRangeMatch::postorder(IR::MAU::Table *tbl) {
@@ -1078,43 +1156,41 @@ bool CheckGatewayExpr::preorder(const IR::MAU::Table *tbl) {
     CollectGatewayFields collect(phv);
     tbl->apply(collect);
     if (!collect.compute_offsets()) {
-        char tmp[32] = { 0 };
+        char tmp[32] = {0};
         if (Device::gatewaySpec().HashBits > 0)
             snprintf(tmp, sizeof tmp, " + %d bits", Tofino::IXBar::get_hash_single_bits());
-        error("%s: condition too complex, limit of %d bytes%s of PHV input exceeded",
-              tbl->srcInfo, Device::gatewaySpec().PhvBytes, tmp); }
+        error("%s: condition too complex, limit of %d bytes%s of PHV input exceeded", tbl->srcInfo,
+              Device::gatewaySpec().PhvBytes, tmp);
+    }
     return true;
 }
 
 bool CheckGatewayExpr::preorder(const IR::Expression *e) {
-    if (e->is<IR::MAU::TypedPrimitive>())
-        return false;
-    if (!phv.field(e))
-        error("%s: condition expression too complex", e->srcInfo);
+    if (e->is<IR::MAU::TypedPrimitive>()) return false;
+    if (!phv.field(e)) error("%s: condition expression too complex", e->srcInfo);
     return false;
 }
 
 bool CheckGatewayExpr::needConstOperand(const IR::Operation::Binary *e) {
     if (!e->right->is<IR::Constant>()) {
         error("condition too complex, one operand of %s must be constant", e);
-        return false; }
+        return false;
+    }
     return true;
 }
 
 BuildGatewayMatch::BuildGatewayMatch(const PhvInfo &phv, CollectGatewayFields &f)
-: phv(phv), fields(f) {
+    : phv(phv), fields(f) {
     // FIXME -- we need to shift down the match so bit 0 of the match is the lowest
     // valid bit in the match: format.  This is to match up with the hack in the assembler
     // to ignore all bits that are not part of the match: format.  See FIXME in
     // GatewayTable::pass1 in the assembler
-    shift = INT_MAX;    // lowest bit being matched
-    maxbit = 0;         // one more than highest bit being matched
+    shift = INT_MAX;  // lowest bit being matched
+    maxbit = 0;       // one more than highest bit being matched
     for (auto &info : fields.info) {
         for (auto &off : info.second.offsets) {
-            if (off.first < shift)
-                shift = off.first;
-            if (off.first + off.second.size() > maxbit)
-                maxbit = off.first + off.second.size();
+            if (off.first < shift) shift = off.first;
+            if (off.first + off.second.size() > maxbit) maxbit = off.first + off.second.size();
         }
     }
 }
@@ -1123,10 +1199,10 @@ Visitor::profile_t BuildGatewayMatch::init_apply(const IR::Node *root) {
     LOG3("BuildGatewayMatch for " << root);
     match.setwidth(0);  // clear out old value
     if (fields.need_range || !fields.bits) {
-        if (fields.bytes)
-            match.setwidth(maxbit - shift);
+        if (fields.bytes) match.setwidth(maxbit - shift);
     } else {
-        match.setwidth(32 + fields.bits - shift); }
+        match.setwidth(32 + fields.bits - shift);
+    }
     range_match.clear();
     match_field = {};
     andmask = UINT64_MAX;
@@ -1137,10 +1213,9 @@ Visitor::profile_t BuildGatewayMatch::init_apply(const IR::Node *root) {
 bool BuildGatewayMatch::preorder(const IR::Expression *e) {
     le_bitrange bits;
     auto field = phv.field(e, &bits);
-    if (!field)
-        BUG("Unhandled expression in BuildGatewayMatch: %s", e);
+    if (!field) BUG("Unhandled expression in BuildGatewayMatch: %s", e);
     if (!match_field) {
-        match_field = { field, bits };
+        match_field = {field, bits};
         LOG4("  match_field = " << field->name << ' ' << bits);
         if (bits.size() == 1 && !findContext<IR::Operation::Relation>()) {
             auto &match_info = fields.info.at(match_field);
@@ -1149,8 +1224,10 @@ bool BuildGatewayMatch::preorder(const IR::Expression *e) {
                 if (getParent<IR::LNot>())
                     match.word1 &= ~(UINT64_C(1) << off.first >> shift);
                 else
-                    match.word0 &= ~(UINT64_C(1) << off.first >> shift); }
-            match_field = {}; }
+                    match.word0 &= ~(UINT64_C(1) << off.first >> shift);
+            }
+            match_field = {};
+        }
     } else {
         LOG4("  xor_field = " << field->name << ' ' << bits);
         auto &gws = Device::gatewaySpec();
@@ -1166,8 +1243,8 @@ bool BuildGatewayMatch::preorder(const IR::Expression *e) {
         auto *match_info = &fields.info.at(match_field);
         if (match_info->offsets.empty() && !match_info->xor_offsets.empty())
             std::swap(field_info, match_info);
-        LOG4("  match_info = " << *match_info << ", mask=0x" << std::hex << mask << std::dec <<
-             " shift=" << shift);
+        LOG4("  match_info = " << *match_info << ", mask=0x" << std::hex << mask << std::dec
+                               << " shift=" << shift);
         LOG4("  xor_match_info = " << *field_info);
         auto it = field_info->xor_offsets.begin();
         auto end = field_info->xor_offsets.end();
@@ -1178,14 +1255,16 @@ bool BuildGatewayMatch::preorder(const IR::Expression *e) {
             if (it == end) break;
             if (off.first < it->first) continue;
             if (it->first != off.first || it->second.size() != off.second.size()) {
-                BUG("field equality comparison misaligned in gateway"); }
+                BUG("field equality comparison misaligned in gateway");
+            }
             big_int elmask = ~(~big_int(0) << off.second.size()) << off.second.lo;
             if ((elmask &= mask) == 0) continue;
-            if (off.first/8 < gws.PerByteMatch) {
+            if (off.first / 8 < gws.PerByteMatch) {
                 if (!check_per_byte_match(off, mask, val)) continue;
                 mask &= ~elmask;
             } else {
-                upper_bit_mask |= elmask; }
+                upper_bit_mask |= elmask;
+            }
             int shft = off.first - off.second.lo - shift;
             LOG6("    elmask=0x" << std::hex << elmask << std::dec << " shft=" << shft);
             if (shft >= 0) {
@@ -1193,29 +1272,30 @@ bool BuildGatewayMatch::preorder(const IR::Expression *e) {
                 match.word1 &= (val << shft) | ~(elmask << shft);
             } else {
                 match.word0 &= ~(val >> -shft) | ~(elmask >> -shft);
-                match.word1 &= (val >> -shft) | ~(elmask >> -shft); }
+                match.word1 &= (val >> -shft) | ~(elmask >> -shft);
+            }
             LOG6("    match now " << match);
             donemask |= elmask;
-            if (++it == end) break; }
+            if (++it == end) break;
+        }
         const IR::Expression *tmp;
         BUG_CHECK(orig_mask == donemask, "failed to match all bits of %s",
                   (tmp = findContext<IR::Operation::Relation>()) ? tmp : e);
         BUG_CHECK((mask ^ upper_bit_mask) << shift == 0, "Didn't cover all bytes");
-        match_field = {}; }
+        match_field = {};
+    }
     return false;
 }
 
 //  TOFINO1-ONLY
 bool BuildGatewayMatch::preorder(const IR::MAU::TypedPrimitive *prim) {
-    if (Device::currentDevice() != Device::TOFINO)
-        return false;
+    if (Device::currentDevice() != Device::TOFINO) return false;
     if (prim->name != "is_validated")
         error("%sunsupported primitive %s", prim->srcInfo, prim->name);
     le_bitrange bits;
     auto e = prim->operands.at(0);
     auto field = phv.field(e, &bits);
-    if (!field)
-        BUG("Unhandled expression in BuildGatewayMatch: %s", e);
+    if (!field) BUG("Unhandled expression in BuildGatewayMatch: %s", e);
     match_field = {field, bits};
     auto &match_info = fields.info.at(match_field);
     for (auto &off : match_info.offsets) {
@@ -1229,8 +1309,8 @@ bool BuildGatewayMatch::preorder(const IR::MAU::TypedPrimitive *prim) {
 }
 
 /** Unused */
-bool BuildGatewayMatch::check_per_byte_match(const std::pair<int, le_bitrange> &byte,
-                                             big_int mask, big_int val) {
+bool BuildGatewayMatch::check_per_byte_match(const std::pair<int, le_bitrange> &byte, big_int mask,
+                                             big_int val) {
     BUG_CHECK((byte.first % 8) + byte.second.size() <= 8, "match crosses byte boundary");
     int byte_idx = byte.first / 8;
     int shft = (byte.second.lo & -8) + (byte.first % 8);
@@ -1239,8 +1319,10 @@ bool BuildGatewayMatch::check_per_byte_match(const std::pair<int, le_bitrange> &
     BUG_CHECK(bmask != 0, "no bits in the identified byte?");
     match_t &bmatch = byte_matches.emplace(byte_idx, match_t::dont_care(8)).first->second;
     if ((~bval & bmask & ~bmatch.word0) || (bval & bmask & ~bmatch.word1)) {
-        LOG6("    skip byte " << (byte.first/8) << " " << match_t(8, bval, bmask) << " " << bmatch);
-        return false; }
+        LOG6("    skip byte " << (byte.first / 8) << " " << match_t(8, bval, bmask) << " "
+                              << bmatch);
+        return false;
+    }
     bmatch.word0 &= ~bval;
     bmatch.word1 &= ~bmask | bval;
     return true;
@@ -1264,30 +1346,34 @@ void BuildGatewayMatch::constant(big_int c) {
         mask <<= match_field.range().lo;
         val <<= match_field.range().lo;
         auto &match_info = fields.info.at(match_field);
-        LOG4("  match_info = " << match_info << ", val=" << val << " mask=0x" << std::hex <<
-             mask << std::dec << " shift=" << shift);
-        big_int upper_bits_mask = 0;   // bits being matched that don't require per-bye sharing
+        LOG4("  match_info = " << match_info << ", val=" << val << " mask=0x" << std::hex << mask
+                               << std::dec << " shift=" << shift);
+        big_int upper_bits_mask = 0;  // bits being matched that don't require per-bye sharing
         for (auto &off : match_info.offsets) {
             big_int elmask = ~(~big_int(0) << off.second.size()) << off.second.lo;
             if ((elmask &= mask) == 0) continue;
             int shft = off.first - off.second.lo - shift;
-            if (off.first/8 < gws.PerByteMatch) {
+            if (off.first / 8 < gws.PerByteMatch) {
                 if (!check_per_byte_match(off, mask, val)) continue;
                 mask &= ~elmask;
             } else {
-                upper_bits_mask |= elmask; }
+                upper_bits_mask |= elmask;
+            }
             LOG6("    elmask=0x" << std::hex << elmask << std::dec << " shft=" << shft);
             if (shft >= 0) {
                 match.word0 &= ~(val << shft) | ~(elmask << shft);
                 match.word1 &= (val << shft) | ~(elmask << shft);
             } else {
                 match.word0 &= ~(val >> -shft) | ~(elmask >> -shft);
-                match.word1 &= (val >> -shft) | ~(elmask >> -shft); }
-            LOG6("    match now " << match); }
+                match.word1 &= (val >> -shft) | ~(elmask >> -shft);
+            }
+            LOG6("    match now " << match);
+        }
         BUG_CHECK((mask ^ upper_bits_mask) << shift == 0, "Didn't cover all bytes");
         match_field = {};
     } else {
-        BUG("Invalid context for constant in BuildGatewayMatch"); }
+        BUG("Invalid context for constant in BuildGatewayMatch");
+    }
 }
 
 bool BuildGatewayMatch::preorder(const IR::Equ *) {
@@ -1313,37 +1399,36 @@ bool BuildGatewayMatch::preorder(const IR::RangeMatch *rm) {
     BUG_CHECK(field, "invalid RangeMatch in BuildGatewayMatch");
     int unit = -1;
     for (auto &alloc : fields.info.at({field, bits}).offsets) {
-        if (alloc.first < 32 || !alloc.second.overlaps(bits))
-            continue;
+        if (alloc.first < 32 || !alloc.second.overlaps(bits)) continue;
         unit = (alloc.first + bits.lo - alloc.second.lo - 32) / 4;
         BUG_CHECK(unit == (alloc.first + bits.hi - alloc.second.lo - 32) / 4,
                   "RangeMatch source (%s) misaligned at %d..%d", rm->expr,
                   alloc.first + bits.lo - alloc.second.lo, alloc.first + bits.lo - alloc.second.lo);
-        break; }
+        break;
+    }
     BUG_CHECK(unit >= 0 && unit < 3, "invalid RangeMatch unit %d", unit);
-    LOG4("RangeMatch " << rm->expr << " unit=" << unit << " size=" << bits.size() <<
-         " data=0x" << hex(rm->data));
-    while (range_match.size() <= size_t(unit))
-        range_match.push_back(0xffff);
+    LOG4("RangeMatch " << rm->expr << " unit=" << unit << " size=" << bits.size() << " data=0x"
+                       << hex(rm->data));
+    while (range_match.size() <= size_t(unit)) range_match.push_back(0xffff);
     unsigned val = rm->data;
     int size = bits.size();
     if (size < 2) {
         val &= 0x3;
-        val |= val << 2; }
+        val |= val << 2;
+    }
     if (size < 3) {
         val &= 0xf;
-        val |= val << 4; }
+        val |= val << 4;
+    }
     if (size < 4) {
         val &= 0xff;
-        val |= val << 8; }
+        val |= val << 8;
+    }
     range_match.at(unit) &= val;
     return false;
 }
 
-GatewayOpt::GatewayOpt(const PhvInfo &phv) : PassManager {
-    new PassRepeated {
-        new CanonGatewayExpr,
-        new SplitComplexGateways(phv),
-        new GatewayRangeMatch(phv) },
-    new CheckGatewayExpr(phv)
-} {}
+GatewayOpt::GatewayOpt(const PhvInfo &phv)
+    : PassManager{new PassRepeated{new CanonGatewayExpr, new SplitComplexGateways(phv),
+                                   new GatewayRangeMatch(phv)},
+                  new CheckGatewayExpr(phv)} {}

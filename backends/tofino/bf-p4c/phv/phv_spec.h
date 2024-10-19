@@ -10,15 +10,16 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PHV_PHV_SPEC_H_
-#define EXTENSIONS_BF_P4C_PHV_PHV_SPEC_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_PHV_SPEC_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_PHV_SPEC_H_
 
 #include <optional>
 #include <vector>
+
 #include "bf-p4c/phv/phv.h"
-#include "lib/ordered_map.h"
 #include "lib/bitvec.h"
 #include "lib/json.h"
+#include "lib/ordered_map.h"
 
 namespace P4 {
 class cstring;
@@ -75,20 +76,18 @@ class PhvSpec {
     /// A single MAU group description. Members include the number of these groups in a device and a
     /// map from the type of container to number of containers in each group.
     struct MauGroupType {
-        unsigned numGroups;     // Number of MAU groups
+        unsigned numGroups;  // Number of MAU groups
         std::map<PHV::Type, unsigned> types;
-                                // Type and number of containers in each group
+        // Type and number of containers in each group
 
         explicit MauGroupType(unsigned n, std::map<PHV::Type, unsigned> t)
-            : numGroups(n), types(t) { }
+            : numGroups(n), types(t) {}
 
-        explicit MauGroupType(unsigned n) : numGroups(n) { }
+        explicit MauGroupType(unsigned n) : numGroups(n) {}
 
-        MauGroupType() : numGroups(0) { }
+        MauGroupType() : numGroups(0) {}
 
-        void addType(PHV::Type t, unsigned n) {
-            types.emplace(t, n);
-        }
+        void addType(PHV::Type t, unsigned n) { types.emplace(t, n); }
     };
 
     /**
@@ -102,7 +101,7 @@ class PhvSpec {
     std::map<PHV::Size, MauGroupType> mauGroupSpec;
 
     /** Number of containers in a single MAU group.
-      */
+     */
     unsigned containersPerGroup = 0;
 
     std::map<PHV::Size, std::vector<unsigned>> ingressOnlyMauGroupIds;
@@ -127,17 +126,17 @@ class PhvSpec {
 
     /// Return the number of containers in an MAU group.
     unsigned getContainersPerGroup(
-            const std::map<PHV::Size, unsigned>& numContainersPerGroup) const;
+        const std::map<PHV::Size, unsigned> &numContainersPerGroup) const;
 
  public:
     /// @return the PHV container types available on this device.
-    const std::vector<PHV::Type>& containerTypes() const;
+    const std::vector<PHV::Type> &containerTypes() const;
 
     /// @return the PHV container sizes available on this device.
-    const std::set<PHV::Size>& containerSizes() const;
+    const std::set<PHV::Size> &containerSizes() const;
 
     /// @return the PHV container kinds available on this device.
-    const std::set<PHV::Kind>& containerKinds() const;
+    const std::set<PHV::Kind> &containerKinds() const;
 
     /// Determines whether the device has the given kind of PHV container.
     bool hasContainerKind(PHV::Kind kind) const;
@@ -175,11 +174,11 @@ class PhvSpec {
     unsigned containerToId(PHV::Container container) const;
 
     /// Filters a set of containers for a single container kind or type.
-    bitvec filterContainerSet(const bitvec& set, PHV::Kind kind) const;
-    bitvec filterContainerSet(const bitvec& set, PHV::Type type) const;
+    bitvec filterContainerSet(const bitvec &set, PHV::Kind kind) const;
+    bitvec filterContainerSet(const bitvec &set, PHV::Type type) const;
 
     /// @return a string representation of the provided @p set of containers.
-    cstring containerSetToString(const bitvec& set) const;
+    cstring containerSetToString(const bitvec &set) const;
 
     /** The JBay parser treats the PHV as 256 x 16b containers, where each
      * extractor can write to the upper/lower/both 8b segments of each 16b
@@ -231,19 +230,19 @@ class PhvSpec {
 
     /// @return containers that constraint to either ingress or egress
     bitvec ingressOrEgressOnlyContainers(
-        const std::map<PHV::Size, std::vector<unsigned>>& gressOnlyMauGroupIds) const;
+        const std::map<PHV::Size, std::vector<unsigned>> &gressOnlyMauGroupIds) const;
 
     /// @return a bitvec of the containers which are hard-wired to ingress.
-    const bitvec& ingressOnly() const;
+    const bitvec &ingressOnly() const;
 
     /// @return a bitvec of the containers which are hard-wired to egress.
-    const bitvec& egressOnly() const;
+    const bitvec &egressOnly() const;
 
     /// @return MAU groups of a given size @p sz.
-    const std::vector<bitvec>& mauGroups(PHV::Size sz) const;
+    const std::vector<bitvec> &mauGroups(PHV::Size sz) const;
 
     /// @return MAU groups of all types
-    const std::map<PHV::Size, std::vector<bitvec>>& mauGroups() const;
+    const std::map<PHV::Size, std::vector<bitvec>> &mauGroups() const;
 
     /// @return the ids of every container in the MAU group of @p container_id, or
     /// std::nullopt if @p container_id is not part of any MAU group.
@@ -270,7 +269,7 @@ class PhvSpec {
     unsigned getNumTagalongCollections() const { return numTagalongCollections; }
 
     /// @return a bitvec of available tagalong collections.
-    const std::vector<bitvec>& tagalongCollections() const;
+    const std::vector<bitvec> &tagalongCollections() const;
 
     /// @return the ids of every container in the tagalong collection of @p container_id, or
     /// std::nullopt if @p container_id is not part of any collection.
@@ -281,11 +280,11 @@ class PhvSpec {
 
     /// @return the ids of containers that can be assigned to a thread
     /// individually.
-    virtual const bitvec& individuallyAssignedContainers() const = 0;
+    virtual const bitvec &individuallyAssignedContainers() const = 0;
 
     /// @return the ids of all containers which actually exist on the Tofino
     /// hardware - i.e., all non-overflow containers.
-    const bitvec& physicalContainers() const;
+    const bitvec &physicalContainers() const;
 
     /// @return the target-specific address of @p container_id, for the specified interface
     /// in the pipeline: PARSER, MAU, DEPARSER.
@@ -304,9 +303,8 @@ class PhvSpec {
                                                              ArchBlockType_t interface) const;
 
     /// apply global pragmas to cached info about available PHV containers
-    void applyGlobalPragmas(const std::vector<const IR::Annotation*>& global_pragmas) const;
+    void applyGlobalPragmas(const std::vector<const IR::Annotation *> &global_pragmas) const;
 };
-
 
 class TofinoPhvSpec : public PhvSpec {
  public:
@@ -330,7 +328,7 @@ class TofinoPhvSpec : public PhvSpec {
     /// @see PhvSpec::deparserGroupId(const PHV::Container &)
     unsigned deparserGroupId(const PHV::Container &c) const override;
 
-    const bitvec& individuallyAssignedContainers() const override;
+    const bitvec &individuallyAssignedContainers() const override;
 
     /// @see PhvSpec::physicalAddress(unsigned container_id, BFN::ArchBlockType interface).
     /// For Tofino all interfaces are the same.
@@ -368,7 +366,7 @@ class JBayPhvSpec : public PhvSpec {
     /// @see PhvSpec::deparserGroupId(const PHV::Container &)
     unsigned deparserGroupId(const PHV::Container &c) const override;
 
-    const bitvec& individuallyAssignedContainers() const override;
+    const bitvec &individuallyAssignedContainers() const override;
 
     /// @see PhvSpec::physicalAddress(unsigned container_id, BFN::ArchBlockType interface).
     /// For JBay, PARSER/DEPARSER have normal and mocha, MAU has additional darks
@@ -377,11 +375,14 @@ class JBayPhvSpec : public PhvSpec {
     /// @see PhvSpec::physicalAddressSpec(ArchBlockType_t)
     AddressSpec &physicalAddressSpec(ArchBlockType_t interface) const override {
         switch (interface) {
-        case PhvSpec::MAU: return _physicalMauAddresses;
-        case PhvSpec::PARSER: return _physicalParserAddresses;
-        case PhvSpec::DEPARSER: return _physicalDeparserAddresses;
-        default:
-            BUG("Invalid interface");
+            case PhvSpec::MAU:
+                return _physicalMauAddresses;
+            case PhvSpec::PARSER:
+                return _physicalParserAddresses;
+            case PhvSpec::DEPARSER:
+                return _physicalDeparserAddresses;
+            default:
+                BUG("Invalid interface");
         }
     }
 
@@ -391,6 +392,4 @@ class JBayPhvSpec : public PhvSpec {
     static AddressSpec _physicalDeparserAddresses;
 };
 
-
-
-#endif /* EXTENSIONS_BF_P4C_PHV_PHV_SPEC_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_PHV_SPEC_H_ */

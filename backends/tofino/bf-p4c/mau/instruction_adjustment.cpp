@@ -12,15 +12,16 @@
 
 #include "bf-p4c/mau/instruction_adjustment.h"
 
-#include <queue>
 #include <optional>
+#include <queue>
+
 #include <boost/range/adaptor/reversed.hpp>
 
+#include "bf-p4c/common/asm_output.h"
+#include "bf-p4c/common/slice.h"
 #include "bf-p4c/mau/ixbar_expr.h"
 #include "bf-p4c/mau/tofino/input_xbar.h"
-#include "bf-p4c/common/slice.h"
 #include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/common/asm_output.h"
 #include "lib/indent.h"
 #include "lib/log.h"
 
@@ -59,8 +60,8 @@ static void split_shl_instruction(IR::Vector<IR::MAU::Primitive> *split,
     BUG_CHECK(c != nullptr, "No shift constant found");
     shift_val = c->asInt();
 
-    const IR::Expression* dest_expr = inst->operands[0];
-    const IR::Expression* src_expr = inst->operands[1];
+    const IR::Expression *dest_expr = inst->operands[0];
+    const IR::Expression *src_expr = inst->operands[1];
 
     for (auto slice : slices) {
         const PHV::AllocSlice &alloc_slice = field->for_bit(slice.lo);
@@ -71,7 +72,7 @@ static void split_shl_instruction(IR::Vector<IR::MAU::Primitive> *split,
                       "Trying to funnel shift on PHV with different size");
 
         le_bitrange dst_range = alloc_slice.field_slice();
-        const IR::Expression* slice_expr = new IR::Slice(dest_expr, dst_range.hi, dst_range.lo);
+        const IR::Expression *slice_expr = new IR::Slice(dest_expr, dst_range.hi, dst_range.lo);
         slices_q.push(dst_range);
 
         // Shifting with a value greater than the container slice high bit result in zero value
@@ -85,74 +86,80 @@ static void split_shl_instruction(IR::Vector<IR::MAU::Primitive> *split,
         // ****|-->  instruction:set(ingress::hdr.mul32_64.res[31:0], 0);
         //     |-->  instruction:shl(ingress::hdr.mul32_64.res[63:32], ingress::tmp0_0[31:0], 8);
         if (shift_val > slice.hi) {
-            const IR::Expression* zero = new IR::Constant(
-                                            IR::Type_Bits::get(alloc_slice.width()), 0);
-            auto* prim = new IR::MAU::Instruction("set"_cs, { slice_expr, zero });
+            const IR::Expression *zero =
+                new IR::Constant(IR::Type_Bits::get(alloc_slice.width()), 0);
+            auto *prim = new IR::MAU::Instruction("set"_cs, {slice_expr, zero});
             split->push_back(prim);
-        // Shifting with a value equal to a container boundary result in a set instruction with
-        // shifted slices. e.g.:
-        // bit<64> tmp0 = 0;
-        // bit<64> tmp1 = 0;
-        // tmp1 = tmp0 << 32;
-        //
-        // Will be split as (if tmpx uses 16-bit container):
-        // Splitting instruction:shl(ingress::hdr.mul32_64.res, ingress::tmp0_0, 32);
-        //     |-->  instruction:set(ingress::hdr.mul32_64.res[15:0], 0);
-        //     |-->  instruction:set(ingress::hdr.mul32_64.res[31:16], 0);
-        // ****|-->  instruction:set(ingress::hdr.mul32_64.res[47:32], ingress::tmp0_0[15:0]);
-        // ****|-->  instruction:set(ingress::hdr.mul32_64.res[63:48], ingress::tmp0_0[31:16]);
+            // Shifting with a value equal to a container boundary result in a set instruction with
+            // shifted slices. e.g.:
+            // bit<64> tmp0 = 0;
+            // bit<64> tmp1 = 0;
+            // tmp1 = tmp0 << 32;
+            //
+            // Will be split as (if tmpx uses 16-bit container):
+            // Splitting instruction:shl(ingress::hdr.mul32_64.res, ingress::tmp0_0, 32);
+            //     |-->  instruction:set(ingress::hdr.mul32_64.res[15:0], 0);
+            //     |-->  instruction:set(ingress::hdr.mul32_64.res[31:16], 0);
+            // ****|-->  instruction:set(ingress::hdr.mul32_64.res[47:32], ingress::tmp0_0[15:0]);
+            // ****|-->  instruction:set(ingress::hdr.mul32_64.res[63:48], ingress::tmp0_0[31:16]);
         } else if (shift_val >= container_size && (shift_val % container_size) == 0) {
             le_bitrange src_range = slices_q.front();
             slices_q.pop();
-            const IR::Expression* slice_src = new IR::Slice(src_expr, src_range.hi, src_range.lo);
-            auto* prim = new IR::MAU::Instruction("set"_cs, { slice_expr, slice_src });
+            const IR::Expression *slice_src = new IR::Slice(src_expr, src_range.hi, src_range.lo);
+            auto *prim = new IR::MAU::Instruction("set"_cs, {slice_expr, slice_src});
             split->push_back(prim);
-        // First container to be shifted normally. e.g.:
-        // bit<64> tmp0 = 0;
-        // bit<64> tmp1 = 0;
-        // tmp1 = tmp0 << 10;
-        //
-        // Will be split as (if tmpx uses 16-bit container):
-        // Splitting instruction:shl(ingress::hdr.mul32_64.res, ingress::tmp0_0, 10);
-        // ****|-->  instruction:shl(ingress::hdr.mul32_64.res[15:0], ingress::tmp0_0[15:0], 10);
-        //     |-->  instruction:funnel-shift(ingress::hdr.mul32_64.res[31:16],
-        //     |                              ingress::tmp0_0[31:16], ingress::tmp0_0[15:0], 6);
-        //     |-->  instruction:funnel-shift(ingress::hdr.mul32_64.res[47:32],
-        //     |                              ingress::tmp0_0[47:32], ingress::tmp0_0[31:16], 6);
-        //     |-->  instruction:funnel-shift(ingress::hdr.mul32_64.res[63:48],
-        //                                    ingress::tmp0_0[63:48], ingress::tmp0_0[47:32], 6);
+            // First container to be shifted normally. e.g.:
+            // bit<64> tmp0 = 0;
+            // bit<64> tmp1 = 0;
+            // tmp1 = tmp0 << 10;
+            //
+            // Will be split as (if tmpx uses 16-bit container):
+            // Splitting instruction:shl(ingress::hdr.mul32_64.res, ingress::tmp0_0, 10);
+            // ****|-->  instruction:shl(ingress::hdr.mul32_64.res[15:0], ingress::tmp0_0[15:0],
+            // 10);
+            //     |-->  instruction:funnel-shift(ingress::hdr.mul32_64.res[31:16],
+            //     |                              ingress::tmp0_0[31:16], ingress::tmp0_0[15:0], 6);
+            //     |-->  instruction:funnel-shift(ingress::hdr.mul32_64.res[47:32],
+            //     |                              ingress::tmp0_0[47:32], ingress::tmp0_0[31:16],
+            //     6);
+            //     |-->  instruction:funnel-shift(ingress::hdr.mul32_64.res[63:48],
+            //                                    ingress::tmp0_0[63:48], ingress::tmp0_0[47:32],
+            //                                    6);
         } else if (shift_val >= slice.lo) {
-            const IR::Expression* shift_adj = new IR::Constant(shift_val % container_size);
+            const IR::Expression *shift_adj = new IR::Constant(shift_val % container_size);
             le_bitrange src_range = slices_q.front();
-            const IR::Expression* slice_src = new IR::Slice(src_expr, src_range.hi, src_range.lo);
-            auto* prim = new IR::MAU::Instruction("shl"_cs, { slice_expr, slice_src, shift_adj });
+            const IR::Expression *slice_src = new IR::Slice(src_expr, src_range.hi, src_range.lo);
+            auto *prim = new IR::MAU::Instruction("shl"_cs, {slice_expr, slice_src, shift_adj});
             split->push_back(prim);
-        // Following container to be shifted normally. e.g.:
-        // bit<64> tmp0 = 0;
-        // bit<64> tmp1 = 0;
-        // tmp1 = tmp0 << 10;
-        //
-        // Will be split as (if tmpx uses 16-bit container):
-        // Splitting instruction:shl(ingress::hdr.mul32_64.res, ingress::tmp0_0, 10);
-        //     |-->  instruction:shl(ingress::hdr.mul32_64.res[15:0], ingress::tmp0_0[15:0], 10);
-        // ****|-->  instruction:funnel-shift(ingress::hdr.mul32_64.res[31:16],
-        //     |                              ingress::tmp0_0[31:16], ingress::tmp0_0[15:0], 6);
-        // ****|-->  instruction:funnel-shift(ingress::hdr.mul32_64.res[47:32],
-        //     |                              ingress::tmp0_0[47:32], ingress::tmp0_0[31:16], 6);
-        // ****|-->  instruction:funnel-shift(ingress::hdr.mul32_64.res[63:48],
-        //                                    ingress::tmp0_0[63:48], ingress::tmp0_0[47:32], 6);
+            // Following container to be shifted normally. e.g.:
+            // bit<64> tmp0 = 0;
+            // bit<64> tmp1 = 0;
+            // tmp1 = tmp0 << 10;
+            //
+            // Will be split as (if tmpx uses 16-bit container):
+            // Splitting instruction:shl(ingress::hdr.mul32_64.res, ingress::tmp0_0, 10);
+            //     |-->  instruction:shl(ingress::hdr.mul32_64.res[15:0], ingress::tmp0_0[15:0],
+            //     10);
+            // ****|-->  instruction:funnel-shift(ingress::hdr.mul32_64.res[31:16],
+            //     |                              ingress::tmp0_0[31:16], ingress::tmp0_0[15:0], 6);
+            // ****|-->  instruction:funnel-shift(ingress::hdr.mul32_64.res[47:32],
+            //     |                              ingress::tmp0_0[47:32], ingress::tmp0_0[31:16],
+            //     6);
+            // ****|-->  instruction:funnel-shift(ingress::hdr.mul32_64.res[63:48],
+            //                                    ingress::tmp0_0[63:48], ingress::tmp0_0[47:32],
+            //                                    6);
         } else {
-            const IR::Expression* shift_adj = new IR::Constant(container_size -
-                                                               (shift_val % container_size));
+            const IR::Expression *shift_adj =
+                new IR::Constant(container_size - (shift_val % container_size));
             le_bitrange src_range_lo = slices_q.front();
             slices_q.pop();
             le_bitrange src_range_hi = slices_q.front();
-            const IR::Expression* slice_src2 = new IR::Slice(src_expr, src_range_hi.hi,
-                                                             src_range_hi.lo);
-            const IR::Expression* slice_src1 = new IR::Slice(src_expr, src_range_lo.hi,
-                                                             src_range_lo.lo);
-            auto* prim = new IR::MAU::Instruction("funnel-shift"_cs,
-                                                { slice_expr, slice_src2, slice_src1, shift_adj });
+            const IR::Expression *slice_src2 =
+                new IR::Slice(src_expr, src_range_hi.hi, src_range_hi.lo);
+            const IR::Expression *slice_src1 =
+                new IR::Slice(src_expr, src_range_lo.hi, src_range_lo.lo);
+            auto *prim = new IR::MAU::Instruction("funnel-shift"_cs,
+                                                  {slice_expr, slice_src2, slice_src1, shift_adj});
             split->push_back(prim);
         }
     }
@@ -194,8 +201,8 @@ static void split_shr_instruction(IR::Vector<IR::MAU::Primitive> *split,
     BUG_CHECK(c != nullptr, "No shift constant found");
     shift_val = c->asInt();
 
-    const IR::Expression* dest_expr = inst->operands[0];
-    const IR::Expression* src_expr = inst->operands[1];
+    const IR::Expression *dest_expr = inst->operands[0];
+    const IR::Expression *src_expr = inst->operands[1];
 
     // Process the slices from the highest bit range to the lowest.
     for (auto slice : boost::adaptors::reverse(slices)) {
@@ -209,7 +216,7 @@ static void split_shr_instruction(IR::Vector<IR::MAU::Primitive> *split,
         }
 
         le_bitrange dst_range = alloc_slice.field_slice();
-        const IR::Expression* slice_expr = new IR::Slice(dest_expr, dst_range.hi, dst_range.lo);
+        const IR::Expression *slice_expr = new IR::Slice(dest_expr, dst_range.hi, dst_range.lo);
         slices_q.push(dst_range);
 
         // Shifting with a value greater than the container slice high bit result in zero value
@@ -229,132 +236,142 @@ static void split_shr_instruction(IR::Vector<IR::MAU::Primitive> *split,
         //     |-->  instruction:shrs(ingress::hdr.mul32_64.res[31:0], ingress::tmp0_0[63:32], 8);
         if (shift_val > high_bit - slice.lo) {
             if (signed_opcode) {
-                const IR::Expression* shift_adj = new IR::Constant(container_size - 1);
+                const IR::Expression *shift_adj = new IR::Constant(container_size - 1);
                 le_bitrange src_range = slices_q.front();
-                const IR::Expression* slice_src = new IR::Slice(src_expr, src_range.hi,
-                                                                src_range.lo);
+                const IR::Expression *slice_src =
+                    new IR::Slice(src_expr, src_range.hi, src_range.lo);
                 auto *prim =
                     new IR::MAU::Instruction("shrs"_cs, {slice_expr, slice_src, shift_adj});
                 split->push_back(prim);
             } else {
-                const IR::Expression *zero = new IR::Constant(
-                                                IR::Type_Bits::get(alloc_slice.width()), 0);
-                auto* prim = new IR::MAU::Instruction("set"_cs, { slice_expr, zero });
+                const IR::Expression *zero =
+                    new IR::Constant(IR::Type_Bits::get(alloc_slice.width()), 0);
+                auto *prim = new IR::MAU::Instruction("set"_cs, {slice_expr, zero});
                 split->push_back(prim);
             }
-        // Shifting with a value equal to a container boundary result in a set instruction with
-        // shifted slices. e.g.:
-        // bit<64> tmp0 = 0;
-        // bit<64> tmp1 = 0;
-        // tmp1 = tmp0 >> 32;
-        //
-        // Will be split as (if tmpx uses 16-bit container):
-        // Splitting instruction:shrs(ingress::hdr.mul32_64.res, ingress::tmp0_0, 32);
-        //     |-->  instruction:shrs(ingress::hdr.mul32_64.res[63:48], ingress::tmp0_0[63:48], 15);
-        //     |-->  instruction:shrs(ingress::hdr.mul32_64.res[47:32], ingress::tmp0_0[63:48], 15);
-        // ****|-->  instruction:set(ingress::hdr.mul32_64.res[31:16], ingress::tmp0_0[63:48]);
-        // ****|-->  instruction:set(ingress::hdr.mul32_64.res[15:0], ingress::tmp0_0[47:32]);
+            // Shifting with a value equal to a container boundary result in a set instruction with
+            // shifted slices. e.g.:
+            // bit<64> tmp0 = 0;
+            // bit<64> tmp1 = 0;
+            // tmp1 = tmp0 >> 32;
+            //
+            // Will be split as (if tmpx uses 16-bit container):
+            // Splitting instruction:shrs(ingress::hdr.mul32_64.res, ingress::tmp0_0, 32);
+            //     |-->  instruction:shrs(ingress::hdr.mul32_64.res[63:48], ingress::tmp0_0[63:48],
+            //     15);
+            //     |-->  instruction:shrs(ingress::hdr.mul32_64.res[47:32], ingress::tmp0_0[63:48],
+            //     15);
+            // ****|-->  instruction:set(ingress::hdr.mul32_64.res[31:16], ingress::tmp0_0[63:48]);
+            // ****|-->  instruction:set(ingress::hdr.mul32_64.res[15:0], ingress::tmp0_0[47:32]);
         } else if (shift_val >= container_size && (shift_val % container_size) == 0) {
             le_bitrange src_range = slices_q.front();
             slices_q.pop();
-            const IR::Expression* slice_src = new IR::Slice(src_expr, src_range.hi, src_range.lo);
-            auto* prim = new IR::MAU::Instruction("set"_cs, { slice_expr, slice_src });
+            const IR::Expression *slice_src = new IR::Slice(src_expr, src_range.hi, src_range.lo);
+            auto *prim = new IR::MAU::Instruction("set"_cs, {slice_expr, slice_src});
             split->push_back(prim);
-        // First container to be shifted normally. e.g.:
-        // bit<64> tmp0 = 0;
-        // bit<64> tmp1 = 0;
-        // tmp1 = tmp0 >> 10;
-        //
-        // Will be split as (if tmpx uses 16-bit container):
-        // Splitting instruction:shru(ingress::hdr.mul32_64.res, ingress::tmp0_0, 10);
-        // ****|-->  instruction:shru(ingress::hdr.mul32_64.res[63:48], ingress::tmp0_0[63:48], 10);
-        //     |-->  instruction:funnel-shift(ingress::hdr.mul32_64.res[47:32],
-        //     |                              ingress::tmp0_0[63:48], ingress::tmp0_0[47:32], 10);
-        //     |-->  instruction:funnel-shift(ingress::hdr.mul32_64.res[31:16],
-        //     |                              ingress::tmp0_0[47:32], ingress::tmp0_0[31:16], 10);
-        //     |-->  instruction:funnel-shift(ingress::hdr.mul32_64.res[15:0],
-        //                                    ingress::tmp0_0[31:16], ingress::tmp0_0[15:0], 10);
+            // First container to be shifted normally. e.g.:
+            // bit<64> tmp0 = 0;
+            // bit<64> tmp1 = 0;
+            // tmp1 = tmp0 >> 10;
+            //
+            // Will be split as (if tmpx uses 16-bit container):
+            // Splitting instruction:shru(ingress::hdr.mul32_64.res, ingress::tmp0_0, 10);
+            // ****|-->  instruction:shru(ingress::hdr.mul32_64.res[63:48], ingress::tmp0_0[63:48],
+            // 10);
+            //     |-->  instruction:funnel-shift(ingress::hdr.mul32_64.res[47:32],
+            //     |                              ingress::tmp0_0[63:48], ingress::tmp0_0[47:32],
+            //     10);
+            //     |-->  instruction:funnel-shift(ingress::hdr.mul32_64.res[31:16],
+            //     |                              ingress::tmp0_0[47:32], ingress::tmp0_0[31:16],
+            //     10);
+            //     |-->  instruction:funnel-shift(ingress::hdr.mul32_64.res[15:0],
+            //                                    ingress::tmp0_0[31:16], ingress::tmp0_0[15:0],
+            //                                    10);
         } else if (shift_val >= high_bit - slice.hi) {
-            const IR::Expression* shift_adj = new IR::Constant(shift_val % container_size);
+            const IR::Expression *shift_adj = new IR::Constant(shift_val % container_size);
             le_bitrange src_range = slices_q.front();
-            const IR::Expression* slice_src = new IR::Slice(src_expr, src_range.hi, src_range.lo);
-            auto* prim = new IR::MAU::Instruction(signed_opcode ? "shrs"_cs : "shru"_cs,
-                                                  { slice_expr, slice_src, shift_adj });
+            const IR::Expression *slice_src = new IR::Slice(src_expr, src_range.hi, src_range.lo);
+            auto *prim = new IR::MAU::Instruction(signed_opcode ? "shrs"_cs : "shru"_cs,
+                                                  {slice_expr, slice_src, shift_adj});
             split->push_back(prim);
-        // Following container to be shifted normally. e.g.:
-        // bit<64> tmp0 = 0;
-        // bit<64> tmp1 = 0;
-        // tmp1 = tmp0 >> 10;
-        //
-        // Will be split as (if tmpx uses 16-bit container):
-        // Splitting instruction:shru(ingress::hdr.mul32_64.res, ingress::tmp0_0, 10);
-        //     |-->  instruction:shru(ingress::hdr.mul32_64.res[63:48], ingress::tmp0_0[63:48], 10);
-        // ****|-->  instruction:funnel-shift(ingress::hdr.mul32_64.res[47:32],
-        //     |                              ingress::tmp0_0[63:48], ingress::tmp0_0[47:32], 10);
-        // ****|-->  instruction:funnel-shift(ingress::hdr.mul32_64.res[31:16],
-        //     |                              ingress::tmp0_0[47:32], ingress::tmp0_0[31:16], 10);
-        // ****|-->  instruction:funnel-shift(ingress::hdr.mul32_64.res[15:0],
-        //                                    ingress::tmp0_0[31:16], ingress::tmp0_0[15:0], 10);
+            // Following container to be shifted normally. e.g.:
+            // bit<64> tmp0 = 0;
+            // bit<64> tmp1 = 0;
+            // tmp1 = tmp0 >> 10;
+            //
+            // Will be split as (if tmpx uses 16-bit container):
+            // Splitting instruction:shru(ingress::hdr.mul32_64.res, ingress::tmp0_0, 10);
+            //     |-->  instruction:shru(ingress::hdr.mul32_64.res[63:48], ingress::tmp0_0[63:48],
+            //     10);
+            // ****|-->  instruction:funnel-shift(ingress::hdr.mul32_64.res[47:32],
+            //     |                              ingress::tmp0_0[63:48], ingress::tmp0_0[47:32],
+            //     10);
+            // ****|-->  instruction:funnel-shift(ingress::hdr.mul32_64.res[31:16],
+            //     |                              ingress::tmp0_0[47:32], ingress::tmp0_0[31:16],
+            //     10);
+            // ****|-->  instruction:funnel-shift(ingress::hdr.mul32_64.res[15:0],
+            //                                    ingress::tmp0_0[31:16], ingress::tmp0_0[15:0],
+            //                                    10);
         } else {
-            const IR::Expression* shift_adj = new IR::Constant(shift_val % container_size);
+            const IR::Expression *shift_adj = new IR::Constant(shift_val % container_size);
             le_bitrange src_range_hi = slices_q.front();
             slices_q.pop();
             le_bitrange src_range_lo = slices_q.front();
-            const IR::Expression* slice_src2 = new IR::Slice(src_expr, src_range_hi.hi,
-                                                             src_range_hi.lo);
-            const IR::Expression* slice_src1 = new IR::Slice(src_expr, src_range_lo.hi,
-                                                             src_range_lo.lo);
-            auto* prim = new IR::MAU::Instruction("funnel-shift"_cs,
-                                                { slice_expr, slice_src2, slice_src1, shift_adj });
+            const IR::Expression *slice_src2 =
+                new IR::Slice(src_expr, src_range_hi.hi, src_range_hi.lo);
+            const IR::Expression *slice_src1 =
+                new IR::Slice(src_expr, src_range_lo.hi, src_range_lo.lo);
+            auto *prim = new IR::MAU::Instruction("funnel-shift"_cs,
+                                                  {slice_expr, slice_src2, slice_src1, shift_adj});
             split->push_back(prim);
         }
     }
 }
 
 /** AdjustShiftInstructions pass adjust shift instruction that only write to a single slice but
-  * sourced from multiple containers. This is a list of various shift + slice operation and
-  * their expected translation:
-  *     header my_header_t {
-  *         bit<32> a;
-  *         bit<32> b; }
-  *  ...
-  *     struct ig_md_t {
-  *         int<32> a;
-  *         bit<32> b; }
-  *  ...
-  *(1)  h.my_header.a[7:0] = (ig_md.a >> 3)[15:8];
-  *  ----> shrs(ingress::hdr.my_header.a[7:0], ingress::ig_md.a[15:8], 3);
-  *  -> Translated to --> funnel-shift(ingress::hdr.my_header.a[7:0], ingress::ig_md.a[23:16],
-  *                                    ingress::ig_md.a[15:8], 3);
-  *
-  *(2)  h.my_header.a[7:0] = ig_md.a[15:8] >> 3;
-  *  ----> shru(ingress::hdr.my_header.a[7:0], ingress::ig_md.a[15:8], 3);
-  *  -> No Translation needed
-  *
-  *(3)  h.my_header.b[7:0] = (ig_md.b >> 3)[15:8];
-  *  ----> set(ingress::hdr.my_header.b[7:0], ingress::ig_md.b[18:11]);
-  *  -> No Translation needed
-  *
-  *(4)  h.my_header.b[7:0] = ig_md.b[15:8] >> 3;
-  *  ----> shru(ingress::hdr.my_header.a[7:0], ingress::ig_md.a[15:8], 3);
-  *  -> No Translation needed
-  *
-  *(5) h.my_header.a[7:0] = (ig_md.a << 3)[15:8];
-  *  ----> set(ingress::hdr.my_header.a[7:0], ingress::ig_md.a[12:5]);
-  *  -> No Translation needed
-  *
-  *(6)  h.my_header.a[7:0] = ig_md.a[15:8] << 3;
-  *  ----> shl(ingress::hdr.my_header.a[7:0], ingress::ig_md.a[15:8], 3);
-  *  -> No Translation needed
-  *
-  *(7)  h.my_header.b[7:0] = (ig_md.b << 3)[15:8];
-  *  ----> set(ingress::hdr.my_header.b[7:0], ingress::ig_md.b[12:5]);
-  *  -> No Translation needed
-  *
-  *(8)  h.my_header.b[7:0] = ig_md.b[15:8] << 3;
-  *  ----> shl(ingress::hdr.my_header.b[7:0], ingress::ig_md.b[15:8], 3);
-  *  -> No Translation needed
-  */
+ * sourced from multiple containers. This is a list of various shift + slice operation and
+ * their expected translation:
+ *     header my_header_t {
+ *         bit<32> a;
+ *         bit<32> b; }
+ *  ...
+ *     struct ig_md_t {
+ *         int<32> a;
+ *         bit<32> b; }
+ *  ...
+ *(1)  h.my_header.a[7:0] = (ig_md.a >> 3)[15:8];
+ *  ----> shrs(ingress::hdr.my_header.a[7:0], ingress::ig_md.a[15:8], 3);
+ *  -> Translated to --> funnel-shift(ingress::hdr.my_header.a[7:0], ingress::ig_md.a[23:16],
+ *                                    ingress::ig_md.a[15:8], 3);
+ *
+ *(2)  h.my_header.a[7:0] = ig_md.a[15:8] >> 3;
+ *  ----> shru(ingress::hdr.my_header.a[7:0], ingress::ig_md.a[15:8], 3);
+ *  -> No Translation needed
+ *
+ *(3)  h.my_header.b[7:0] = (ig_md.b >> 3)[15:8];
+ *  ----> set(ingress::hdr.my_header.b[7:0], ingress::ig_md.b[18:11]);
+ *  -> No Translation needed
+ *
+ *(4)  h.my_header.b[7:0] = ig_md.b[15:8] >> 3;
+ *  ----> shru(ingress::hdr.my_header.a[7:0], ingress::ig_md.a[15:8], 3);
+ *  -> No Translation needed
+ *
+ *(5) h.my_header.a[7:0] = (ig_md.a << 3)[15:8];
+ *  ----> set(ingress::hdr.my_header.a[7:0], ingress::ig_md.a[12:5]);
+ *  -> No Translation needed
+ *
+ *(6)  h.my_header.a[7:0] = ig_md.a[15:8] << 3;
+ *  ----> shl(ingress::hdr.my_header.a[7:0], ingress::ig_md.a[15:8], 3);
+ *  -> No Translation needed
+ *
+ *(7)  h.my_header.b[7:0] = (ig_md.b << 3)[15:8];
+ *  ----> set(ingress::hdr.my_header.b[7:0], ingress::ig_md.b[12:5]);
+ *  -> No Translation needed
+ *
+ *(8)  h.my_header.b[7:0] = ig_md.b[15:8] << 3;
+ *  ----> shl(ingress::hdr.my_header.b[7:0], ingress::ig_md.b[15:8], 3);
+ *  -> No Translation needed
+ */
 const IR::Node *AdjustShiftInstructions::preorder(IR::MAU::Instruction *inst) {
     cstring opcode = inst->name;
 
@@ -363,24 +380,24 @@ const IR::Node *AdjustShiftInstructions::preorder(IR::MAU::Instruction *inst) {
     if (opcode != "shrs") return inst;
 
     le_bitrange bits;
-    auto* field = phv.field(inst->operands.at(0), &bits);
+    auto *field = phv.field(inst->operands.at(0), &bits);
     if (!field) return inst;  // error?
 
     int num_slices = 0;
     int dst_cont_size;
     const PHV::FieldUse use(PHV::FieldUse::WRITE);
     field->foreach_alloc(bits, findContext<IR::MAU::Table>(), &use,
-                         [&](const PHV::AllocSlice& alloc) {
-        num_slices++;
-        dst_cont_size = alloc.container().size();
-    });
+                         [&](const PHV::AllocSlice &alloc) {
+                             num_slices++;
+                             dst_cont_size = alloc.container().size();
+                         });
     BUG_CHECK(num_slices >= 1, "No PHV slices allocated for %1%", PHV::FieldSlice(field, bits));
     if (num_slices > 1) return inst;  // This will be handled by split instruction
 
     // Instruction only needs to be adjusted if the destination container is smaller than the
     // source field. Otherwise, the operation will be aligned properly.
     le_bitrange src_bits;
-    auto* src_field = phv.field(inst->operands.at(1), &src_bits);
+    auto *src_field = phv.field(inst->operands.at(1), &src_bits);
     if (src_field->size <= dst_cont_size) return inst;
 
     // Instruction format is "instruction:shrx(dest, src, shift);"
@@ -393,8 +410,8 @@ const IR::Node *AdjustShiftInstructions::preorder(IR::MAU::Instruction *inst) {
 
     LOG5("Adjusting signed shift right instruction: " << inst);
     IR::MAU::Instruction *adjust = nullptr;
-    const IR::Expression* dest_expr = inst->operands[0];
-    const IR::Expression* src_expr = inst->operands[1];
+    const IR::Expression *dest_expr = inst->operands[0];
+    const IR::Expression *src_expr = inst->operands[1];
 
     const IR::Slice *src_slice = src_expr->to<IR::Slice>();
     BUG_CHECK(src_slice != nullptr, "No source slice found");
@@ -404,36 +421,35 @@ const IR::Node *AdjustShiftInstructions::preorder(IR::MAU::Instruction *inst) {
     // Translating instruction:shrs(ingress::my_header.a[7:0], ingress::my_md.a[7:0], 24);
     // ******|-->  instruction:set(ingress::my_header.a[7:0], ingress::my_md.a[31:24]);
     if ((offset % dst_cont_size) == 0 && (offset < src_field->size)) {
-        const IR::Expression *new_src_expr = new IR::Slice(src_slice->e0,
-                                                           offset + dst_cont_size - 1, offset);
-        adjust = new IR::MAU::Instruction("set"_cs, { dest_expr, new_src_expr });
+        const IR::Expression *new_src_expr =
+            new IR::Slice(src_slice->e0, offset + dst_cont_size - 1, offset);
+        adjust = new IR::MAU::Instruction("set"_cs, {dest_expr, new_src_expr});
 
-    // Translating instruction:shrs(ingress::my_header.a[7:0], ingress::my_md.a[7:0], 25);
-    // ******|-->  instruction:shrs(ingress::my_header.a[7:0], ingress::my_md.a[31:24], 1);
+        // Translating instruction:shrs(ingress::my_header.a[7:0], ingress::my_md.a[7:0], 25);
+        // ******|-->  instruction:shrs(ingress::my_header.a[7:0], ingress::my_md.a[31:24], 1);
     } else if (offset + dst_cont_size > src_field->size) {
         shift_val = (offset + dst_cont_size) - src_field->size;
-        if (shift_val >= dst_cont_size)
-            shift_val = dst_cont_size - 1;
+        if (shift_val >= dst_cont_size) shift_val = dst_cont_size - 1;
 
-        const IR::Expression* shift_adj = new IR::Constant(shift_val);
-        const IR::Expression *new_src_expr = new IR::Slice(src_slice->e0, src_field->size - 1,
-                                                           src_field->size - dst_cont_size);
-        adjust = new IR::MAU::Instruction("shrs"_cs, { dest_expr, new_src_expr, shift_adj });
+        const IR::Expression *shift_adj = new IR::Constant(shift_val);
+        const IR::Expression *new_src_expr =
+            new IR::Slice(src_slice->e0, src_field->size - 1, src_field->size - dst_cont_size);
+        adjust = new IR::MAU::Instruction("shrs"_cs, {dest_expr, new_src_expr, shift_adj});
 
-    // Translating instruction:shrs(ingress::my_header.a[7:0], ingress::my_md.a[7:0], 9);
-    // ******|-->  instruction:funnel-shift(ingress::my_header.a[7:0], ingress::my_md.a[23:16],
-    //                                      ingress::my_md.a[15:8], 1);
+        // Translating instruction:shrs(ingress::my_header.a[7:0], ingress::my_md.a[7:0], 9);
+        // ******|-->  instruction:funnel-shift(ingress::my_header.a[7:0], ingress::my_md.a[23:16],
+        //                                      ingress::my_md.a[15:8], 1);
     } else {
-        const IR::Expression* shift_adj = new IR::Constant(offset % dst_cont_size);
+        const IR::Expression *shift_adj = new IR::Constant(offset % dst_cont_size);
         int container_offset = offset / dst_cont_size;
         int high_bit = ((container_offset + 1) * dst_cont_size) - 1;
         int low_bit = container_offset * dst_cont_size;
 
-        const IR::Expression* slice_src1 = new IR::Slice(src_slice->e0, high_bit, low_bit);
-        const IR::Expression* slice_src2 = new IR::Slice(src_slice->e0, high_bit + dst_cont_size,
-                                                         low_bit + dst_cont_size);
+        const IR::Expression *slice_src1 = new IR::Slice(src_slice->e0, high_bit, low_bit);
+        const IR::Expression *slice_src2 =
+            new IR::Slice(src_slice->e0, high_bit + dst_cont_size, low_bit + dst_cont_size);
         adjust = new IR::MAU::Instruction("funnel-shift"_cs,
-                                          { dest_expr, slice_src2, slice_src1, shift_adj });
+                                          {dest_expr, slice_src2, slice_src1, shift_adj});
     }
 
     LOG5("Translated instruction: " << adjust);
@@ -443,15 +459,14 @@ const IR::Node *AdjustShiftInstructions::preorder(IR::MAU::Instruction *inst) {
 /** SplitInstructions */
 const IR::Node *SplitInstructions::preorder(IR::MAU::Instruction *inst) {
     le_bitrange bits;
-    auto* field = phv.field(inst->operands.at(0), &bits);
+    auto *field = phv.field(inst->operands.at(0), &bits);
     if (!field) return inst;  // error?
 
     std::vector<le_bitrange> slices;
     PHV::FieldUse use(PHV::FieldUse::WRITE);
-    field->foreach_alloc(bits, findContext<IR::MAU::Table>(), &use,
-                         [&](const PHV::AllocSlice& alloc) {
-        slices.push_back(alloc.field_slice());
-    });
+    field->foreach_alloc(
+        bits, findContext<IR::MAU::Table>(), &use,
+        [&](const PHV::AllocSlice &alloc) { slices.push_back(alloc.field_slice()); });
     BUG_CHECK(slices.size() >= 1, "No PHV slices allocated for %1%, instruction: %2%.",
               PHV::FieldSlice(field, bits), inst);
     if (slices.size() == 1) return inst;  // nothing to split
@@ -460,9 +475,8 @@ const IR::Node *SplitInstructions::preorder(IR::MAU::Instruction *inst) {
 
     // Check if this is an operator that cannot be split
     cstring opcode = inst->name;
-    BUG_CHECK(opcode != "saddu" && opcode != "sadds" &&
-            opcode != "ssubu" && opcode != "ssubs",
-            "Saturating arithmetic operations cannot be split");
+    BUG_CHECK(opcode != "saddu" && opcode != "sadds" && opcode != "ssubu" && opcode != "ssubs",
+              "Saturating arithmetic operations cannot be split");
 
     auto split = new IR::Vector<IR::MAU::Primitive>();
 
@@ -483,18 +497,20 @@ const IR::Node *SplitInstructions::preorder(IR::MAU::Instruction *inst) {
             // give an error?
             if (opcode == "add" || opcode == "sub") {
                 opcode += "c";
-                check_pairing = true; } }
+                check_pairing = true;
+            }
+        }
         if (check_pairing) {
             BUG_CHECK(slices.size() == 2, "PHV pairing failure for wide %s", inst->name);
             auto &s1 = field->for_bit(slices[0].lo);
             auto &s2 = field->for_bit(slices[1].lo);
             BUG_CHECK(s1.container().index() + 1 == s2.container().index() &&
-                      (s1.container().index() & 1) == 0,
-                      "PHV alloc failed to put wide %s into even/odd PHV pair", inst->name); }
+                          (s1.container().index() & 1) == 0,
+                      "PHV alloc failed to put wide %s into even/odd PHV pair", inst->name);
+        }
     }
 
-    for (auto &split_inst : *split)
-        LOG5("Splitted instruction:" << split_inst);
+    for (auto &split_inst : *split) LOG5("Splitted instruction:" << split_inst);
 
     return split;
 }
@@ -539,7 +555,6 @@ const IR::MAU::Action *ConstantsToActionData::preorder(IR::MAU::Action *act) {
     return act;
 }
 
-
 const IR::Node *ConstantsToActionData::preorder(IR::Node *node) {
     visitOnce();
     return node;
@@ -556,9 +571,7 @@ const IR::MAU::Instruction *ConstantsToActionData::preorder(IR::MAU::Instruction
     return instr;
 }
 
-const IR::MAU::ActionArg *ConstantsToActionData::preorder(IR::MAU::ActionArg *arg) {
-    return arg;
-}
+const IR::MAU::ActionArg *ConstantsToActionData::preorder(IR::MAU::ActionArg *arg) { return arg; }
 
 const IR::MAU::Primitive *ConstantsToActionData::preorder(IR::MAU::Primitive *prim) {
     prune();
@@ -568,11 +581,11 @@ const IR::MAU::Primitive *ConstantsToActionData::preorder(IR::MAU::Primitive *pr
 const IR::Constant *ConstantsToActionData::preorder(IR::Constant *constant) {
     LOG1("ConstantsToActionData preorder on constant : " << constant);
     has_constant = true;
-    unsigned constant_value = constant->value < 0 ?
-        static_cast<unsigned>(static_cast<int>(constant->value)) :
-        static_cast<unsigned>(constant->value);
-    ActionData::Parameter *param = new ActionData::Constant(constant_value,
-                                                            constant->type->width_bits());
+    unsigned constant_value = constant->value < 0
+                                  ? static_cast<unsigned>(static_cast<int>(constant->value))
+                                  : static_cast<unsigned>(constant->value);
+    ActionData::Parameter *param =
+        new ActionData::Constant(constant_value, constant->type->width_bits());
     constant_rename_key.param = param;
     LOG3("  Setting constant_rename_key param: : " << constant_rename_key.param);
     return constant;
@@ -582,29 +595,26 @@ void ConstantsToActionData::analyze_phv_field(IR::Expression *expr) {
     le_bitrange bits;
     auto *field = phv.field(expr, &bits);
 
-    if (field == nullptr)
-        return;
+    if (field == nullptr) return;
 
     LOG3("  analyzing phv field " << field);
     if (isWrite()) {
         LOG3("  analyzing phv field for writes ");
-        if (write_found)
-            BUG("Multiple writes found within a single field instruction");
+        if (write_found) BUG("Multiple writes found within a single field instruction");
 
         int write_count = 0;
         le_bitrange container_bits;
         PHV::Container container;
         PHV::FieldUse use(PHV::FieldUse::WRITE);
-        field->foreach_alloc(bits, findContext<IR::MAU::Table>(), &use,
-                             [&](const PHV::AllocSlice &alloc) {
-            write_count++;
-            container_bits = alloc.container_slice();
-            container = alloc.container();
-            LOG3("  writing " << container_bits << " on container " << container);
-        });
+        field->foreach_alloc(
+            bits, findContext<IR::MAU::Table>(), &use, [&](const PHV::AllocSlice &alloc) {
+                write_count++;
+                container_bits = alloc.container_slice();
+                container = alloc.container();
+                LOG3("  writing " << container_bits << " on container " << container);
+            });
 
-        if (write_count != 1)
-            BUG("Splitting of writes did not work in ConstantsToActionData");
+        if (write_count != 1) BUG("Splitting of writes did not work in ConstantsToActionData");
 
         constant_rename_key.container = container;
         constant_rename_key.phv_bits = container_bits;
@@ -614,8 +624,7 @@ void ConstantsToActionData::analyze_phv_field(IR::Expression *expr) {
 
 const IR::Slice *ConstantsToActionData::preorder(IR::Slice *sl) {
     LOG1(" ConstantsToActionData preorder on Slice " << sl);
-    if (phv.field(sl))
-        analyze_phv_field(sl);
+    if (phv.field(sl)) analyze_phv_field(sl);
 
     prune();
     return sl;
@@ -653,13 +662,11 @@ const IR::MAU::HashDist *ConstantsToActionData::preorder(IR::MAU::HashDist *hd) 
  */
 const IR::MAU::Instruction *ConstantsToActionData::postorder(IR::MAU::Instruction *instr) {
     LOG1(" ConstantsToActionData postorder on instruction " << instr);
-    if (!write_found)
-        BUG("No write found in an instruction in ConstantsToActionData?");
+    if (!write_found) BUG("No write found in an instruction in ConstantsToActionData?");
 
     if (constant_containers.find(constant_rename_key.container) == constant_containers.end())
         return instr;
-    if (!has_constant)
-        return instr;
+    if (!has_constant) return instr;
 
     LOG1("   instruction has constant : " << has_constant);
 
@@ -671,18 +678,15 @@ const IR::MAU::Instruction *ConstantsToActionData::postorder(IR::MAU::Instructio
     auto *alu_parameter = action_format.find_param_alloc(constant_rename_key, nullptr);
     bool constant_found = alu_parameter != nullptr;
 
-    if (constant_found != has_constant)
-        BUG("Constant lookup does not match the ActionFormat");
+    if (constant_found != has_constant) BUG("Constant lookup does not match the ActionFormat");
 
-    if (!constant_found)
-        return instr;
+    if (!constant_found) return instr;
 
     auto alias = alu_parameter->param->to<ActionData::Constant>()->alias();
 
     for (size_t i = 0; i < instr->operands.size(); i++) {
         const IR::Constant *c = instr->operands[i]->to<IR::Constant>();
-        if (c == nullptr)
-            continue;
+        if (c == nullptr) continue;
         int size = c->type->width_bits();
         auto *adc = new IR::MAU::ActionDataConstant(IR::Type::Bits::get(size), alias, c);
         instr->operands[i] = adc;
@@ -694,7 +698,6 @@ const IR::MAU::Action *ConstantsToActionData::postorder(IR::MAU::Action *act) {
     LOG1(" ConstantsToActionData postorder on action " << act);
     return act;
 }
-
 
 /**
  * Certain Expressions (currently only IR::Constants) because of their associated uses in
@@ -721,8 +724,7 @@ const IR::MAU::Action *ExpressionsToHash::preorder(IR::MAU::Action *act) {
         }
     }
 
-    if (expr_to_hash_containers.empty())
-        prune();
+    if (expr_to_hash_containers.empty()) prune();
     return act;
 }
 
@@ -751,8 +753,7 @@ const IR::MAU::Instruction *ExpressionsToHash::preorder(IR::MAU::Instruction *in
 
     BUG_CHECK(write_count == 1, "An expression writes to more than one container position");
 
-    if (expr_to_hash_containers.count(expr_lookup.container) == 0)
-        return instr;
+    if (expr_to_hash_containers.count(expr_lookup.container) == 0) return instr;
 
     IR::MAU::Instruction *rv = new IR::MAU::Instruction(instr->srcInfo, instr->name);
     rv->operands.push_back(instr->operands[0]);
@@ -769,12 +770,13 @@ const IR::MAU::Instruction *ExpressionsToHash::preorder(IR::MAU::Instruction *in
             P4HashFunction func;
             func.inputs.push_back(con);
             func.algorithm = IR::MAU::HashFunction::identity();
-            func.hash_bits = { 0, con->type->width_bits() - 1 };
+            func.hash_bits = {0, con->type->width_bits() - 1};
             ActionData::Hash *param = new ActionData::Hash(func);
             expr_lookup.param = param;
             auto alu_parameter = action_format.find_param_alloc(expr_lookup, nullptr);
-            BUG_CHECK(alu_parameter != nullptr, "%1% Constant in instruction has not correctly "
-                   "been converted to hash");
+            BUG_CHECK(alu_parameter != nullptr,
+                      "%1% Constant in instruction has not correctly "
+                      "been converted to hash");
             auto *hge = new IR::MAU::HashGenExpression(con->srcInfo, con->type, con,
                                                        IR::MAU::HashFunction::identity());
             auto *hd = new IR::MAU::HashDist(hge->srcInfo, hge->type, hge);
@@ -786,7 +788,6 @@ const IR::MAU::Instruction *ExpressionsToHash::preorder(IR::MAU::Instruction *in
     }
     return rv;
 }
-
 
 /** Merge Instructions */
 
@@ -805,11 +806,11 @@ const IR::MAU::Action *MergeInstructions::preorder(IR::MAU::Action *act) {
     aa.set_verbose();
     act->apply(aa);
 
-    unsigned allowed_errors = ActionAnalysis::ContainerAction::PARTIAL_OVERWRITE
-                            | ActionAnalysis::ContainerAction::REFORMAT_CONSTANT
-                            | ActionAnalysis::ContainerAction::UNRESOLVED_REPEATED_ACTION_DATA
-                            | ActionAnalysis::ContainerAction::IMPOSSIBLE_ALIGNMENT
-                            | ActionAnalysis::ContainerAction::ILLEGAL_OVERWRITE;
+    unsigned allowed_errors = ActionAnalysis::ContainerAction::PARTIAL_OVERWRITE |
+                              ActionAnalysis::ContainerAction::REFORMAT_CONSTANT |
+                              ActionAnalysis::ContainerAction::UNRESOLVED_REPEATED_ACTION_DATA |
+                              ActionAnalysis::ContainerAction::IMPOSSIBLE_ALIGNMENT |
+                              ActionAnalysis::ContainerAction::ILLEGAL_OVERWRITE;
     unsigned error_mask = ~allowed_errors;
 
     for (auto &container_action : container_actions_map) {
@@ -818,25 +819,24 @@ const IR::MAU::Action *MergeInstructions::preorder(IR::MAU::Action *act) {
         LOG5(cont_action << ", error_mask: " << std::hex << error_mask << std::dec);
         if ((cont_action.error_code & error_mask) != 0) continue;
         LOG5(" Container Action ops: " << cont_action.operands()
-                << ", alignment_counts: " << cont_action.alignment_counts());
+                                       << ", alignment_counts: " << cont_action.alignment_counts());
         if (cont_action.operands() == cont_action.alignment_counts()) {
-            if (!cont_action.convert_instr_to_deposit_field
-                && !cont_action.convert_instr_to_bitmasked_set
-                && !cont_action.convert_instr_to_byte_rotate_merge
-                && !cont_action.is_total_overwrite_possible()
-                && !cont_action.adi.specialities.getbit(ActionAnalysis::ActionParam::HASH_DIST)
-                && !cont_action.adi.specialities.getbit(ActionAnalysis::ActionParam::RANDOM)
-                && !cont_action.adi.specialities.getbit(ActionAnalysis::ActionParam::METER_ALU)
-                && (cont_action.error_code & ~error_mask) == 0)
+            if (!cont_action.convert_instr_to_deposit_field &&
+                !cont_action.convert_instr_to_bitmasked_set &&
+                !cont_action.convert_instr_to_byte_rotate_merge &&
+                !cont_action.is_total_overwrite_possible() &&
+                !cont_action.adi.specialities.getbit(ActionAnalysis::ActionParam::HASH_DIST) &&
+                !cont_action.adi.specialities.getbit(ActionAnalysis::ActionParam::RANDOM) &&
+                !cont_action.adi.specialities.getbit(ActionAnalysis::ActionParam::METER_ALU) &&
+                (cont_action.error_code & ~error_mask) == 0)
                 continue;
-        // Currently skip unresolved ActionAnalysis issues
+            // Currently skip unresolved ActionAnalysis issues
         }
         merged_fields.insert(container);
         LOG4("  Adding merged field: " << container);
     }
 
-    if (merged_fields.empty())
-        prune();
+    if (merged_fields.empty()) prune();
 
     return act;
 }
@@ -865,30 +865,31 @@ void MergeInstructions::analyze_phv_field(IR::Expression *expr) {
 
         PHV::FieldUse use(PHV::FieldUse::WRITE);
         PHV::Container cntr = PHV::Container();
-        field->foreach_alloc(bits, findContext<IR::MAU::Table>(), &use,
-                             [&](const PHV::AllocSlice &alloc) {
-            if (cntr == PHV::Container())
-                cntr = alloc.container();
-            else
-                BUG_CHECK((cntr == alloc.container()),
-                          "Instruction on field %s not a single container instruction",
-                          field->name);
-            merged_location = merged_fields.find(cntr);
-            write_found = true;
+        field->foreach_alloc(
+            bits, findContext<IR::MAU::Table>(), &use, [&](const PHV::AllocSlice &alloc) {
+                if (cntr == PHV::Container())
+                    cntr = alloc.container();
+                else
+                    BUG_CHECK((cntr == alloc.container()),
+                              "Instruction on field %s not a single container instruction",
+                              field->name);
+                merged_location = merged_fields.find(cntr);
+                write_found = true;
 
-            if (saturationArith && cntr.size() != static_cast<size_t>(field->size)) {
-                BUG("Destination of saturation add was allocated to bigger container than the "
-                    "field itself, which would cause saturation to produce wrong results. You can "
-                    "try constraining source operand with @pa_container_size to achieve correct "
-                    "container allocation on both source and destination.");
-            }
-        });
+                if (saturationArith && cntr.size() != static_cast<size_t>(field->size)) {
+                    BUG("Destination of saturation add was allocated to bigger container than the "
+                        "field itself, which would cause saturation to produce wrong results. You "
+                        "can "
+                        "try constraining source operand with @pa_container_size to achieve "
+                        "correct "
+                        "container allocation on both source and destination.");
+                }
+            });
     }
 }
 
 const IR::Slice *MergeInstructions::preorder(IR::Slice *sl) {
-    if (phv.field(sl))
-        analyze_phv_field(sl);
+    if (phv.field(sl)) analyze_phv_field(sl);
     prune();
     return sl;
 }
@@ -902,8 +903,7 @@ const IR::Expression *MergeInstructions::preorder(IR::Expression *expr) {
         return expr;
     }
 
-    if (phv.field(expr))
-        analyze_phv_field(expr);
+    if (phv.field(expr)) analyze_phv_field(expr);
     prune();
     return expr;
 }
@@ -949,8 +949,7 @@ const IR::MAU::Instruction *MergeInstructions::postorder(IR::MAU::Instruction *i
     LOG5("MergeInstructions::postorder on Instruction: " << instr);
     saturationArith = false;
 
-    if (!write_found)
-        BUG("No write found within the instruction");
+    if (!write_found) BUG("No write found within the instruction");
 
     if (merged_location == merged_fields.end()) {
         return instr;
@@ -984,7 +983,7 @@ const IR::MAU::Action *MergeInstructions::postorder(IR::MAU::Action *act) {
  *  the field actions.  Thus the size of the IR node is still maintained.
  */
 const IR::Constant *MergeInstructions::find_field_action_constant(
-         ActionAnalysis::ContainerAction &cont_action) {
+    ActionAnalysis::ContainerAction &cont_action) {
     for (auto &fa : cont_action.field_actions) {
         for (auto read : fa.reads) {
             if (read.type == ActionAnalysis::ActionParam::CONSTANT) {
@@ -1005,14 +1004,14 @@ const IR::Constant *MergeInstructions::find_field_action_constant(
  * immed_lo/immed_hi to use, as well as the input_xbar alloc, in order to understand which
  * unit coordinates to hash_dist lo/hash_dist hi
  */
-const IR::Expression * MergeInstructions::fill_out_hash_operand(PHV::Container container,
-        ActionAnalysis::ContainerAction &cont_action) {
+const IR::Expression *MergeInstructions::fill_out_hash_operand(
+    PHV::Container container, ActionAnalysis::ContainerAction &cont_action) {
     auto tbl = findContext<IR::MAU::Table>();
     BUG_CHECK(tbl != nullptr, "No table found while building action data for hash operands");
 
     auto &adi = cont_action.adi;
     BUG_CHECK(adi.specialities.getbit(ActionAnalysis::ActionParam::HASH_DIST) &&
-              adi.specialities.popcount() == 1,
+                  adi.specialities.popcount() == 1,
               "Can only create hash dist from hash dist associated objects");
 
     bitvec op_bits_used_bv = adi.alignment.read_bits();
@@ -1023,8 +1022,8 @@ const IR::Expression * MergeInstructions::fill_out_hash_operand(PHV::Container c
     // hash dist sections
     bitvec hash_dist_units_used;
     for (int i = 0; i < 2; i++) {
-        if (!immed_bits_used_bv.getslice(i * ixbSpec.hashDistBits(),
-                                         ixbSpec.hashDistBits()).empty())
+        if (!immed_bits_used_bv.getslice(i * ixbSpec.hashDistBits(), ixbSpec.hashDistBits())
+                 .empty())
             hash_dist_units_used.setbit(i);
     }
 
@@ -1033,8 +1032,7 @@ const IR::Expression * MergeInstructions::fill_out_hash_operand(PHV::Container c
     IR::Vector<IR::Expression> hash_dist_parts;
     for (auto &fa : cont_action.field_actions) {
         for (auto read : fa.reads) {
-            if (read.speciality != ActionAnalysis::ActionParam::HASH_DIST)
-                continue;
+            if (read.speciality != ActionAnalysis::ActionParam::HASH_DIST) continue;
             hash_dist_parts.push_back(read.expr);
         }
     }
@@ -1048,55 +1046,57 @@ const IR::Expression * MergeInstructions::fill_out_hash_operand(PHV::Container c
         hd->units.push_back(tbl_hash_dists.at(bit));
     }
 
-    int wrapped_lo = 0;  int wrapped_hi = 0;
+    int wrapped_lo = 0;
+    int wrapped_hi = 0;
     // Wrapping the slice in the function outside
     if (adi.alignment.is_wrapped_shift(container, &wrapped_lo, &wrapped_hi)) {
         return hd;
     }
 
-    BUG_CHECK(immed_bits_used_bv.is_contiguous(), "Hash Dist object must be contiguous, if it "
-          "not a Wrapped Sliced");
+    BUG_CHECK(immed_bits_used_bv.is_contiguous(),
+              "Hash Dist object must be contiguous, if it "
+              "not a Wrapped Sliced");
     // If a single hash dist object is used, only the 16 bit slices are necessary, so start
     // at the first position
-    le_bitrange immed_bits_used = { immed_bits_used_bv.min().index(),
-                                    immed_bits_used_bv.max().index() };
+    le_bitrange immed_bits_used = {immed_bits_used_bv.min().index(),
+                                   immed_bits_used_bv.max().index()};
     int hash_dist_bits_shift = (immed_bits_used.lo / ixbSpec.hashDistBits());
     hash_dist_bits_shift *= ixbSpec.hashDistBits();
     le_bitrange hash_dist_bits_used = immed_bits_used.shiftedByBits(-1 * hash_dist_bits_shift);
     return MakeSlice(hd, hash_dist_bits_used.lo, hash_dist_bits_used.hi);
 }
 
-
 /**
  * The RNG_unit is assigned in this particular function (coordinated through ActionAnalysis)
  * and the rng allocation in the action data bus
  */
-const IR::Expression *MergeInstructions::fill_out_rand_operand(PHV::Container container,
-        ActionAnalysis::ContainerAction &cont_action) {
+const IR::Expression *MergeInstructions::fill_out_rand_operand(
+    PHV::Container container, ActionAnalysis::ContainerAction &cont_action) {
     auto tbl = findContext<IR::MAU::Table>();
     BUG_CHECK(tbl != nullptr, "No table found for building action data for random operands");
 
     auto &adi = cont_action.adi;
     BUG_CHECK(adi.specialities.getbit(ActionAnalysis::ActionParam::RANDOM) &&
-              adi.specialities.popcount() == 1,
+                  adi.specialities.popcount() == 1,
               "Can only create random number from random number associated objects");
 
     int unit = tbl->resources->rng_unit();
-    auto *rn = new IR::MAU::RandomNumber(tbl->srcInfo,
-                                          IR::Type::Bits::get(ActionData::Format::IMMEDIATE_BITS),
-                                          "hw_rng"_cs);
+    auto *rn = new IR::MAU::RandomNumber(
+        tbl->srcInfo, IR::Type::Bits::get(ActionData::Format::IMMEDIATE_BITS), "hw_rng"_cs);
     rn->rng_unit = unit;
 
-    int wrapped_lo = 0;  int wrapped_hi = 0;
+    int wrapped_lo = 0;
+    int wrapped_hi = 0;
     // Wrapping the slice in the function outside
     if (adi.alignment.is_wrapped_shift(container, &wrapped_lo, &wrapped_hi)) {
         return rn;
     }
 
     bitvec op_bits_used_bv = adi.alignment.read_bits();
-    BUG_CHECK(op_bits_used_bv.is_contiguous(), "Random Number must be contiguous if it is not a "
-        "wrapped slice");
-    le_bitrange op_bits_used = { op_bits_used_bv.min().index(), op_bits_used_bv.max().index() };
+    BUG_CHECK(op_bits_used_bv.is_contiguous(),
+              "Random Number must be contiguous if it is not a "
+              "wrapped slice");
+    le_bitrange op_bits_used = {op_bits_used_bv.min().index(), op_bits_used_bv.max().index()};
     le_bitrange immed_bits_used = op_bits_used.shiftedByBits(adi.start * 8);
     return MakeSlice(rn, immed_bits_used.lo, immed_bits_used.hi);
 }
@@ -1107,32 +1107,31 @@ const IR::Expression *MergeInstructions::fill_out_rand_operand(PHV::Container co
  *  use these fields in any way after this.  However, we may at some point.
  */
 void MergeInstructions::fill_out_read_multi_operand(ActionAnalysis::ContainerAction &cont_action,
-        ActionAnalysis::ActionParam::type_t type, cstring match_name,
-        IR::MAU::MultiOperand *mo) {
+                                                    ActionAnalysis::ActionParam::type_t type,
+                                                    cstring match_name, IR::MAU::MultiOperand *mo) {
     for (auto &fa : cont_action.field_actions) {
-         for (auto read : fa.reads) {
-             if (read.type != type) continue;
-             if (type == ActionAnalysis::ActionParam::ACTIONDATA) {
-                 mo->push_back(read.expr);
-             } else if (type == ActionAnalysis::ActionParam::PHV) {
+        for (auto read : fa.reads) {
+            if (read.type != type) continue;
+            if (type == ActionAnalysis::ActionParam::ACTIONDATA) {
+                mo->push_back(read.expr);
+            } else if (type == ActionAnalysis::ActionParam::PHV) {
                 le_bitrange bits;
                 auto *field = phv.field(read.expr, &bits);
                 int split_count = 0;
                 PHV::FieldUse use(PHV::FieldUse::READ);
-                field->foreach_alloc(bits, cont_action.table_context, &use,
-                                     [&](const PHV::AllocSlice &alloc) {
-                    split_count++;
-                    if (alloc.container().toString() != match_name)
-                       return;
-                    const IR::Expression* read_mo_expr = read.expr;
-                    if (alloc.width() != read.size()) {
-                        int start = alloc.field_slice().lo - bits.lo;
-                        read_mo_expr = MakeSlice(read.expr, start, start + alloc.width() - 1);
-                    }
-                    mo->push_back(read_mo_expr);
-                });
-             }
-         }
+                field->foreach_alloc(
+                    bits, cont_action.table_context, &use, [&](const PHV::AllocSlice &alloc) {
+                        split_count++;
+                        if (alloc.container().toString() != match_name) return;
+                        const IR::Expression *read_mo_expr = read.expr;
+                        if (alloc.width() != read.size()) {
+                            int start = alloc.field_slice().lo - bits.lo;
+                            read_mo_expr = MakeSlice(read.expr, start, start + alloc.width() - 1);
+                        }
+                        mo->push_back(read_mo_expr);
+                    });
+            }
+        }
     }
 }
 
@@ -1140,12 +1139,11 @@ void MergeInstructions::fill_out_read_multi_operand(ActionAnalysis::ContainerAct
  *  write.
  */
 void MergeInstructions::fill_out_write_multi_operand(ActionAnalysis::ContainerAction &cont_action,
-        IR::MAU::MultiOperand *mo) {
+                                                     IR::MAU::MultiOperand *mo) {
     for (auto &fa : cont_action.field_actions) {
         mo->push_back(fa.write.expr);
     }
 }
-
 
 /** The purpose of this is to convert any full container instruction destination to the container
  *  in order for the container to be the correct size.  The assembler will only parse full
@@ -1153,11 +1151,12 @@ void MergeInstructions::fill_out_write_multi_operand(ActionAnalysis::ContainerAc
  *  verify_overwritten check in ActionAnalysis in order to determine that a partial overwrite of
  *  the container is actually valid, due to the rest of the container being unoccupied.
  */
-IR::MAU::Instruction *MergeInstructions::dest_slice_to_container(PHV::Container container,
-        ActionAnalysis::ContainerAction &cont_action) {
+IR::MAU::Instruction *MergeInstructions::dest_slice_to_container(
+    PHV::Container container, ActionAnalysis::ContainerAction &cont_action) {
     LOG3("Convert destination slice to container");
-    BUG_CHECK(cont_action.field_actions.size() == 1, "Can only call this function on an operation "
-                                                     "that has one field action");
+    BUG_CHECK(cont_action.field_actions.size() == 1,
+              "Can only call this function on an operation "
+              "that has one field action");
     IR::MAU::Instruction *rv = new IR::MAU::Instruction(cont_action.name);
     IR::Vector<IR::Expression> components;
     auto *dst_mo = new IR::MAU::MultiOperand(components, container.toString(), true);
@@ -1171,8 +1170,10 @@ IR::MAU::Instruction *MergeInstructions::dest_slice_to_container(PHV::Container 
 }
 
 void MergeInstructions::build_actiondata_source(ActionAnalysis::ContainerAction &cont_action,
-        const IR::Expression **src1_p, bitvec &src1_writebits, ByteRotateMergeInfo &brm_info,
-        PHV::Container container) {
+                                                const IR::Expression **src1_p,
+                                                bitvec &src1_writebits,
+                                                ByteRotateMergeInfo &brm_info,
+                                                PHV::Container container) {
     Log::TempIndent indent;
     LOG5("Building action data source " << indent);
     IR::Vector<IR::Expression> components;
@@ -1197,18 +1198,16 @@ void MergeInstructions::build_actiondata_source(ActionAnalysis::ContainerAction 
         bitvec read_bits;
         for (auto &field_action : cont_action.field_actions) {
             for (auto &read : field_action.reads) {
-                if (read.type != ActionAnalysis::ActionParam::ACTIONDATA)
-                    continue;
-                if (read.is_conditional)
-                    continue;
+                if (read.type != ActionAnalysis::ActionParam::ACTIONDATA) continue;
+                if (read.is_conditional) continue;
 
                 src1_writebits = adi.alignment.write_bits();
                 BUG_CHECK(!read_bits.getrange(read.range().lo, read.range().size()),
-                    "Overlapping AD read params ...?");
+                          "Overlapping AD read params ...?");
                 read_bits.setrange(read.range().lo, read.range().size());
                 *src1_p = read.expr;
-                LOG5("field " << field_action.name << " src1_p:" << **src1_p << "  writebits:" <<
-                     src1_writebits << "  readbits: " << read_bits);
+                LOG5("field " << field_action.name << " src1_p:" << **src1_p
+                              << "  writebits:" << src1_writebits << "  readbits: " << read_bits);
 
                 if (auto *slc = (*src1_p)->to<IR::Slice>()) {
                     // Store first source AD expression
@@ -1231,15 +1230,15 @@ void MergeInstructions::build_actiondata_source(ActionAnalysis::ContainerAction 
                     } else {
                         // Compare first AD expression with current AD expression
                         BUG_CHECK(prv_expr == *src1_p, "Multiple AD sources?");
-                        BUG_CHECK((read_bits.is_contiguous()),
-                                  "Non contiguous AD sources?");
+                        BUG_CHECK((read_bits.is_contiguous()), "Non contiguous AD sources?");
                     }
                 }
-           }
+            }
         }
     }
 
-    int wrapped_lo = 0;  int wrapped_hi = 0;
+    int wrapped_lo = 0;
+    int wrapped_hi = 0;
     if (cont_action.convert_instr_to_byte_rotate_merge) {
         brm_info.src1_shift = adi.alignment.right_shift / 8;
         brm_info.src1_byte_mask = adi.alignment.byte_rotate_merge_byte_mask(container);
@@ -1253,8 +1252,10 @@ void MergeInstructions::build_actiondata_source(ActionAnalysis::ContainerAction 
 }
 
 void MergeInstructions::build_phv_source(ActionAnalysis::ContainerAction &cont_action,
-        const IR::Expression **src1_p, const IR::Expression **src2_p, bitvec &src1_writebits,
-        bitvec &src2_writebits, ByteRotateMergeInfo &brm_info, PHV::Container container) {
+                                         const IR::Expression **src1_p,
+                                         const IR::Expression **src2_p, bitvec &src1_writebits,
+                                         bitvec &src2_writebits, ByteRotateMergeInfo &brm_info,
+                                         PHV::Container container) {
     Log::TempIndent indent;
     LOG5("Building PHV Source on container " << container << indent);
     IR::Vector<IR::Expression> components;
@@ -1269,7 +1270,8 @@ void MergeInstructions::build_phv_source(ActionAnalysis::ContainerAction &cont_a
             *src1_p = mo;
             src1_writebits = read_alignment.write_bits();
             bitvec src1_read_bits = read_alignment.read_bits();
-            int wrapped_lo = 0;  int wrapped_hi = 0;
+            int wrapped_lo = 0;
+            int wrapped_hi = 0;
             if (cont_action.convert_instr_to_byte_rotate_merge) {
                 brm_info.src1_shift = read_alignment.right_shift / 8;
                 brm_info.src1_byte_mask = read_alignment.byte_rotate_merge_byte_mask(container);
@@ -1319,15 +1321,15 @@ void MergeInstructions::build_phv_source(ActionAnalysis::ContainerAction &cont_a
  *  The instruction formats are setup as a destination and two sources.  ActionAnalysis can
  *  now determine which parameters go to which source.
  */
-IR::MAU::Instruction *MergeInstructions::build_merge_instruction(PHV::Container container,
-         ActionAnalysis::ContainerAction &cont_action) {
+IR::MAU::Instruction *MergeInstructions::build_merge_instruction(
+    PHV::Container container, ActionAnalysis::ContainerAction &cont_action) {
     Log::TempIndent indent;
-    LOG3("Building merge instruction for container : " << std::dec
-            << container << " on container action : " << cont_action << indent);
+    LOG3("Building merge instruction for container : "
+         << std::dec << container << " on container action : " << cont_action << indent);
     if (cont_action.is_shift()) {
         unsigned error_mask = ActionAnalysis::ContainerAction::PARTIAL_OVERWRITE;
         BUG_CHECK((cont_action.error_code & error_mask) != 0,
-            "Invalid call to build a merged instruction");
+                  "Invalid call to build a merged instruction");
         return dest_slice_to_container(container, cont_action);
     }
 
@@ -1336,11 +1338,13 @@ IR::MAU::Instruction *MergeInstructions::build_merge_instruction(PHV::Container 
     IR::Vector<IR::Expression> components;
     ByteRotateMergeInfo brm_info;
 
-    BUG_CHECK(cont_action.counts[ActionAnalysis::ActionParam::ACTIONDATA] <= 1, "At most "
+    BUG_CHECK(cont_action.counts[ActionAnalysis::ActionParam::ACTIONDATA] <= 1,
+              "At most "
               "one section of action data is allowed in a merge instruction");
 
     BUG_CHECK(!(cont_action.counts[ActionAnalysis::ActionParam::ACTIONDATA] == 1 &&
-                cont_action.counts[ActionAnalysis::ActionParam::CONSTANT] >= 1), "Before "
+                cont_action.counts[ActionAnalysis::ActionParam::CONSTANT] >= 1),
+              "Before "
               "merge instructions, some constant was not converted to action data");
 
     // Go through all PHV sources and create src1/src2 if a source is contained within these
@@ -1356,15 +1360,16 @@ IR::MAU::Instruction *MergeInstructions::build_merge_instruction(PHV::Container 
             // Constant merged into a single constant over the entire container
             unsigned constant_value = cont_action.ci.valid_instruction_constant(container.size());
             int width_bits;
-            if ((cont_action.error_code & ActionAnalysis::ContainerAction::REFORMAT_CONSTANT) == 0
-              && (cont_action.error_code & ActionAnalysis::ContainerAction::PARTIAL_OVERWRITE) == 0)
+            if ((cont_action.error_code & ActionAnalysis::ContainerAction::REFORMAT_CONSTANT) ==
+                    0 &&
+                (cont_action.error_code & ActionAnalysis::ContainerAction::PARTIAL_OVERWRITE) == 0)
                 width_bits = cont_action.ci.alignment.bitrange_cover_size();
             else
                 width_bits = container.size();
             *src = new IR::Constant(IR::Type::Bits::get(width_bits), constant_value);
             src_writebits = cont_action.ci.alignment.write_bits();
-            LOG5("CONSTANT SOURCE for " << cont_action.name
-                    << " : " << src_writebits << ", value: " << *src);
+            LOG5("CONSTANT SOURCE for " << cont_action.name << " : " << src_writebits
+                                        << ", value: " << *src);
         }
     };
 
@@ -1376,9 +1381,9 @@ IR::MAU::Instruction *MergeInstructions::build_merge_instruction(PHV::Container 
     } else {
         build_non_phv_source(&src1, src1_writebits);
     }
-    LOG5("PHV / ACTIONDATA / CONSTANT SOURCE for " << cont_action.name
-            << " SRC1: " << src1 << "(" << src1_writebits << ")"
-            << " SRC2: " << src2 << "(" << src2_writebits << ")");
+    LOG5("PHV / ACTIONDATA / CONSTANT SOURCE for " << cont_action.name << " SRC1: " << src1 << "("
+                                                   << src1_writebits << ")" << " SRC2: " << src2
+                                                   << "(" << src2_writebits << ")");
 
     // Src1 is not sourced from parameters, but instead is equal to the destination
     if (cont_action.implicit_src1) {
@@ -1400,12 +1405,11 @@ IR::MAU::Instruction *MergeInstructions::build_merge_instruction(PHV::Container 
     fill_out_write_multi_operand(cont_action, dst_mo);
     dst = dst_mo;
     LOG5("Partial overwrite: " << cont_action.partial_overwrite()
-        << " total overwrite: " << cont_action.total_overwrite_possible
-        << " write bits: " << src1_writebits.popcount()
-        << " container size: " << std::dec << container.size());
+                               << " total overwrite: " << cont_action.total_overwrite_possible
+                               << " write bits: " << src1_writebits.popcount()
+                               << " container size: " << std::dec << container.size());
     // Deposit field is the only case which should allow for a slice to be generated
-    if (cont_action.convert_instr_to_deposit_field
-            || cont_action.is_deposit_field_variant) {
+    if (cont_action.convert_instr_to_deposit_field || cont_action.is_deposit_field_variant) {
         dst = MakeSlice(dst, src1_writebits.min().index(), src1_writebits.max().index());
         LOG5("DESTINATION for " << cont_action.name << " : " << dst);
     }
@@ -1481,23 +1485,22 @@ const IR::MAU::IXBarExpression *AdjustStatefulInstructions::preorder(IR::MAU::IX
  *  field and beginning position on the input xbar
  */
 bool AdjustStatefulInstructions::check_bit_positions(std::map<int, le_bitrange> &salu_inputs,
-        le_bitrange field_bits, int starting_bit) {
+                                                     le_bitrange field_bits, int starting_bit) {
     bitvec all_bits;
     for (auto entry : salu_inputs) {
         int ixbar_bit_start = entry.first - starting_bit;
-        if (ixbar_bit_start + field_bits.lo != entry.second.lo)
-            return false;
+        if (ixbar_bit_start + field_bits.lo != entry.second.lo) return false;
         all_bits.setrange(entry.second.lo, entry.second.size());
     }
 
-    if (all_bits.popcount() != field_bits.size() || !all_bits.is_contiguous())
-        return false;
+    if (all_bits.popcount() != field_bits.size() || !all_bits.is_contiguous()) return false;
     return true;
 }
 
 bool AdjustStatefulInstructions::verify_on_search_bus(const IR::MAU::StatefulAlu *salu,
-        const Tofino::IXBar::Use &salu_ixbar, const PHV::Field *field, le_bitrange &bits,
-        bool &is_hi) {
+                                                      const Tofino::IXBar::Use &salu_ixbar,
+                                                      const PHV::Field *field, le_bitrange &bits,
+                                                      bool &is_hi) {
     std::map<int, le_bitrange> salu_inputs;
     bitvec salu_bytes;
     int group = 0;
@@ -1510,39 +1513,43 @@ bool AdjustStatefulInstructions::verify_on_search_bus(const IR::MAU::StatefulAlu
                 byte_used = false;
             }
         }
-        if (!byte_used)
-            continue;
+        if (!byte_used) continue;
 
         if (!group_set) {
             group = byte.loc.group;
             group_set = true;
         } else if (group != byte.loc.group) {
-            error("Input %s for a stateful alu %s allocated across multiple groups, and "
-                     "cannot be resolved", field->name, salu->name);
-             return false;
+            error(
+                "Input %s for a stateful alu %s allocated across multiple groups, and "
+                "cannot be resolved",
+                field->name, salu->name);
+            return false;
         }
         salu_bytes.setbit(byte.loc.byte);
         for (auto fi : byte.field_bytes) {
-            le_bitrange field_bits = { fi.lo, fi.hi };
+            le_bitrange field_bits = {fi.lo, fi.hi};
             salu_inputs[byte.loc.byte * 8 + fi.cont_lo] = field_bits;
         }
     }
 
     int phv_width = salu->source_width();
     if (salu_bytes.popcount() > (phv_width / 8)) {
-        error("The input %s to stateful alu %s is allocated to more input xbar bytes than the "
-                "width of the ALU and cannot be resolved.", field->name, salu->name);
+        error(
+            "The input %s to stateful alu %s is allocated to more input xbar bytes than the "
+            "width of the ALU and cannot be resolved.",
+            field->name, salu->name);
         return false;
     }
 
     if (!salu_bytes.is_contiguous()) {
         // FIXME -- we've lost the source info on 'field' so can't generate a decent error
         // message here -- should pass in `expr` from the caller to this function.
-        error("The input %s to stateful alu %s is not allocated contiguously by byte on the "
-                "input xbar and cannot be resolved.", field->name, salu->name);
-       return false;
+        error(
+            "The input %s to stateful alu %s is not allocated contiguously by byte on the "
+            "input xbar and cannot be resolved.",
+            field->name, salu->name);
+        return false;
     }
-
 
     std::set<int> valid_start_positions;
 
@@ -1550,34 +1557,39 @@ bool AdjustStatefulInstructions::verify_on_search_bus(const IR::MAU::StatefulAlu
     if (Device::currentDevice() == Device::TOFINO)
         initial_offset = Tofino::IXBar::TOFINO_METER_ALU_BYTE_OFFSET;
 
-
     valid_start_positions.insert(initial_offset);
     valid_start_positions.insert(initial_offset + (phv_width / 8));
     if (phv_width >= 64) {
         // HACK -- tofino2 flyovers for outputs allow for 4 byte chunks when in 64+ bit mode
         valid_start_positions.insert(initial_offset + 4);
-        valid_start_positions.insert(initial_offset + 12); }
+        valid_start_positions.insert(initial_offset + 12);
+    }
 
     if (valid_start_positions.count(salu_bytes.min().index()) == 0) {
-        error("The input %s to stateful alu %s is not allocated in a valid region on the input "
-                "xbar to be a source of an ALU operation", field->name, salu->name);
+        error(
+            "The input %s to stateful alu %s is not allocated in a valid region on the input "
+            "xbar to be a source of an ALU operation",
+            field->name, salu->name);
         return false;
     }
 
     if (!check_bit_positions(salu_inputs, bits, salu_bytes.min().index() * 8)) {
-        error("The input %s to stateful alu %s is not allocated contiguously by bit on the "
-                "input xbar and cannot be resolved.", field->name, salu->name);
+        error(
+            "The input %s to stateful alu %s is not allocated contiguously by bit on the "
+            "input xbar and cannot be resolved.",
+            field->name, salu->name);
         return false;
     }
 
-    is_hi = salu_bytes.min().index() >= initial_offset + phv_width/8;
+    is_hi = salu_bytes.min().index() >= initial_offset + phv_width / 8;
     bits = bits.shiftedByBits((salu_bytes.min().index() - initial_offset) * 8 - bits.lo);
     return true;
 }
 
 bool AdjustStatefulInstructions::verify_on_hash_bus(const IR::MAU::StatefulAlu *salu,
-        const Tofino::IXBar::Use::MeterAluHash &mah, const IR::Expression *expr, le_bitrange &bits,
-        bool &is_hi) {
+                                                    const Tofino::IXBar::Use::MeterAluHash &mah,
+                                                    const IR::Expression *expr, le_bitrange &bits,
+                                                    bool &is_hi) {
     for (auto &exp : mah.computed_expressions) {
         const IR::Expression *pos_expr;
         if (auto *neg = exp.second->to<IR::Neg>())
@@ -1587,10 +1599,11 @@ bool AdjustStatefulInstructions::verify_on_hash_bus(const IR::MAU::StatefulAlu *
         if (pos_expr->equiv(*expr)) {
             is_hi = exp.first != 0;
             bits = bits.shiftedByBits(exp.first - bits.lo);
-            return true; } }
+            return true;
+        }
+    }
 
-    BUG("The input %s to the stateful alu %s cannot be found on the hash input",
-        expr, salu->name);
+    BUG("The input %s to the stateful alu %s cannot be found on the hash input", expr, salu->name);
     return false;
 }
 
@@ -1642,7 +1655,8 @@ const IR::Expression *AdjustStatefulInstructions::preorder(IR::Expression *expr)
             return expr;
         }
     }
-    BUG_CHECK(is_hi == (bits.lo >= salu->source_width()), "inconsistent hi/bits result from "
+    BUG_CHECK(is_hi == (bits.lo >= salu->source_width()),
+              "inconsistent hi/bits result from "
               "verify_on_hash/search_bus");
 
     if (is_hi)
@@ -1650,9 +1664,8 @@ const IR::Expression *AdjustStatefulInstructions::preorder(IR::Expression *expr)
     else
         name += "_lo";
 
-    IR::MAU::SaluReg *salu_reg
-        = new IR::MAU::SaluReg(expr->srcInfo, IR::Type::Bits::get(salu->source_width()), name,
-                               is_hi);
+    IR::MAU::SaluReg *salu_reg =
+        new IR::MAU::SaluReg(expr->srcInfo, IR::Type::Bits::get(salu->source_width()), name, is_hi);
     int phv_width = ((bits.size() + 7) / 8) * 8;
     salu_reg->phv_src = pos_expr;
     const IR::Expression *rv = salu_reg;
@@ -1708,15 +1721,15 @@ class RewriteReductionOr : public MauModifier {
 };
 
 /** Eliminate Instructions */
-const IR::MAU::Synth2Port* EliminateNoopInstructions::preorder(IR::MAU::Synth2Port *s) {
+const IR::MAU::Synth2Port *EliminateNoopInstructions::preorder(IR::MAU::Synth2Port *s) {
     LOG3("EliminateNoopInstructions preorder on synth2port: " << s);
     // Skip these tables
     prune();
     return s;
 }
 
-bool EliminateNoopInstructions::get_alloc_slice(IR::MAU::Instruction *ins,
-                                    OP_TYPE type, AllocContainerSlice &op_alloc) const {
+bool EliminateNoopInstructions::get_alloc_slice(IR::MAU::Instruction *ins, OP_TYPE type,
+                                                AllocContainerSlice &op_alloc) const {
     le_bitrange op_bits;
     auto op = ins->operands[type];
 
@@ -1726,24 +1739,21 @@ bool EliminateNoopInstructions::get_alloc_slice(IR::MAU::Instruction *ins,
     PHV::FieldUse use(type == DST ? PHV::FieldUse::WRITE : PHV::FieldUse::READ);
 
     auto tbl = findContext<IR::MAU::Table>();
-    field->foreach_alloc(op_bits, tbl, &use, [&](const PHV::AllocSlice& sl) {
+    field->foreach_alloc(op_bits, tbl, &use, [&](const PHV::AllocSlice &sl) {
         le_bitrange cs = sl.container_slice();
         PHV::Container cont = sl.container();
-        if (op_bits.lo <= cs.lo && op_bits.hi >= cs.hi)
-            op_alloc.insert(std::make_pair(cont, cs));
+        if (op_bits.lo <= cs.lo && op_bits.hi >= cs.hi) op_alloc.insert(std::make_pair(cont, cs));
     });
 
     if (op_alloc.empty()) return false;
 
     for (auto s : op_alloc)
-        LOG4("  OP: " << op << " type: " << toString(type)
-                        << " " << s.first << ":" << s.second);
+        LOG4("  OP: " << op << " type: " << toString(type) << " " << s.first << ":" << s.second);
 
     return true;
 }
 
-const IR::MAU::Instruction*
-EliminateNoopInstructions::preorder(IR::MAU::Instruction *ins) {
+const IR::MAU::Instruction *EliminateNoopInstructions::preorder(IR::MAU::Instruction *ins) {
     LOG3("EliminateNoopInstructions preorder on instruction: " << ins);
 
     int numOps = ins->operands.size();
@@ -1766,16 +1776,16 @@ EliminateNoopInstructions::preorder(IR::MAU::Instruction *ins) {
         }
     }
 
-    LOG4("  NumOps: " << numOps << " opsWithSameAlloc: "
-            << opsWithSameAlloc << " ins name: " << ins->name);
+    LOG4("  NumOps: " << numOps << " opsWithSameAlloc: " << opsWithSameAlloc
+                      << " ins name: " << ins->name);
 
     bool eliminateIns = false;
     // DST = SRC1 OR SRC2
-    if (numOps == 3 && opsWithSameAlloc && ins->name == "or")   eliminateIns = true;
+    if (numOps == 3 && opsWithSameAlloc && ins->name == "or") eliminateIns = true;
     // DST = SRC1 AND SRC2
-    if (numOps == 3 && opsWithSameAlloc && ins->name == "and")  eliminateIns = true;
+    if (numOps == 3 && opsWithSameAlloc && ins->name == "and") eliminateIns = true;
     // DST = SRC1
-    if (numOps == 2 && opsWithSameAlloc && ins->name == "set")  eliminateIns = true;
+    if (numOps == 2 && opsWithSameAlloc && ins->name == "set") eliminateIns = true;
 
     if (eliminateIns) {
         LOG3("  Instruction eliminated");
@@ -1787,14 +1797,8 @@ EliminateNoopInstructions::preorder(IR::MAU::Instruction *ins) {
 
 /** Instruction Adjustment */
 InstructionAdjustment::InstructionAdjustment(const PhvInfo &phv, const ReductionOrInfo &ri) {
-    addPasses({
-        new EliminateNoopInstructions(phv),
-        new AdjustShiftInstructions(phv),
-        new RewriteReductionOr(phv, ri),
-        new SplitInstructions(phv),
-        new ConstantsToActionData(phv, ri),
-        new ExpressionsToHash(phv, ri),
-        new MergeInstructions(phv, ri),
-        new AdjustStatefulInstructions(phv)
-    });
+    addPasses({new EliminateNoopInstructions(phv), new AdjustShiftInstructions(phv),
+               new RewriteReductionOr(phv, ri), new SplitInstructions(phv),
+               new ConstantsToActionData(phv, ri), new ExpressionsToHash(phv, ri),
+               new MergeInstructions(phv, ri), new AdjustStatefulInstructions(phv)});
 }

@@ -11,45 +11,44 @@
  */
 
 #include "bf-p4c/arch/arch.h"
+
 #include <utility>
-#include "bf-p4c/arch/tna.h"
-#include "bf-p4c/arch/t2na.h"
-#include "bf-p4c/arch/v1model.h"
+
 #include "bf-p4c/arch/psa/psa.h"
-#include "bf-p4c/device.h"
-#include "bf-p4c/common/pragma/collect_global_pragma.h"
+#include "bf-p4c/arch/t2na.h"
+#include "bf-p4c/arch/tna.h"
+#include "bf-p4c/arch/v1model.h"
 #include "bf-p4c/bf-p4c-options.h"
+#include "bf-p4c/common/pragma/collect_global_pragma.h"
+#include "bf-p4c/device.h"
+#include "frontends/p4/methodInstance.h"
 #include "ir/declaration.h"
 #include "ir/id.h"
 #include "ir/ir-generated.h"
-#include "frontends/p4/methodInstance.h"
 #include "lib/cstring.h"
 
 namespace BFN {
 
-Pipeline::Pipeline(cstring name,
-                   const IR::BFN::P4Thread* ingress,
-                   const IR::BFN::P4Thread* egress,
-                   const IR::BFN::P4Thread* ghost) : names({name})
-{
+Pipeline::Pipeline(cstring name, const IR::BFN::P4Thread *ingress, const IR::BFN::P4Thread *egress,
+                   const IR::BFN::P4Thread *ghost)
+    : names({name}) {
     threads[INGRESS] = ingress;
     threads[EGRESS] = egress;
-    if (ghost)
-        threads[GHOST] = ghost;
+    if (ghost) threads[GHOST] = ghost;
 
     CollectGlobalPragma cgp;
-    for (const auto& [gress, thread] : threads) {
+    for (const auto &[gress, thread] : threads) {
         thread->apply(cgp);
     }
     insertPragmas(cgp.global_pragmas());
 }
 
-bool Pipeline::equiv(const Pipeline& other) const {
+bool Pipeline::equiv(const Pipeline &other) const {
     if (pragmas != other.pragmas) {
         return false;
     }
     if (threads.size() != other.threads.size()) return false;
-    for (const auto& [gress, thread] : threads) {
+    for (const auto &[gress, thread] : threads) {
         if (other.threads.count(gress) == 0) return false;
         if (!thread->equiv(*other.threads.at(gress))) {
             return false;
@@ -58,8 +57,8 @@ bool Pipeline::equiv(const Pipeline& other) const {
     return true;
 }
 
-void Pipeline::insertPragmas(const std::vector<const IR::Annotation*>& all_pragmas) {
-    auto applies = [this] (const IR::Annotation* p) {
+void Pipeline::insertPragmas(const std::vector<const IR::Annotation *> &all_pragmas) {
+    auto applies = [this](const IR::Annotation *p) {
         if (p->expr.empty() || p->expr.at(0) == nullptr) {
             return true;
         }
@@ -73,15 +72,15 @@ void Pipeline::insertPragmas(const std::vector<const IR::Annotation*>& all_pragm
         }
         return true;
     };
-    for (const auto* pragma : all_pragmas) {
+    for (const auto *pragma : all_pragmas) {
         if (applies(pragma)) {
             pragmas.push_back(pragma);
         }
     }
 }
 
-ArchTranslation::ArchTranslation(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                                 BFN_Options& options) {
+ArchTranslation::ArchTranslation(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                                 BFN_Options &options) {
     if (Architecture::currentArchitecture() == Architecture::V1MODEL) {
         passes.push_back(new BFN::SimpleSwitchTranslation(refMap, typeMap, options /*map*/));
     } else if (Architecture::currentArchitecture() == Architecture::TNA) {
@@ -102,7 +101,7 @@ ArchTranslation::ArchTranslation(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
     }
 }
 
-bool Architecture::preorder(const IR::PackageBlock* pkg) {
+bool Architecture::preorder(const IR::PackageBlock *pkg) {
     if (pkg->type->name == "V1Switch") {
         architecture = V1MODEL;
         version = "1.0.0"_cs;  // V1model arch does not have a version
@@ -127,7 +126,7 @@ bool Architecture::preorder(const IR::PackageBlock* pkg) {
 }
 
 // parse tna pipeline with single parser.
-void ParseTna::parseSingleParserPipeline(const IR::PackageBlock* block, unsigned index) {
+void ParseTna::parseSingleParserPipeline(const IR::PackageBlock *block, unsigned index) {
     auto thread_i = new IR::BFN::P4Thread();
     bool isMultiParserProgram = (block->type->name == "MultiParserPipeline");
     cstring pipeName;
@@ -140,14 +139,14 @@ void ParseTna::parseSingleParserPipeline(const IR::PackageBlock* block, unsigned
         auto idxParam = cparams->getParameter(index);
         pipeName = idxParam->name;
     }
-    BUG_CHECK(!pipeName.isNullOrEmpty(),
-        "Cannot determine pipe name for pipe block at index %d", index);
+    BUG_CHECK(!pipeName.isNullOrEmpty(), "Cannot determine pipe name for pipe block at index %d",
+              index);
 
     if (isMultiParserProgram) {
         auto ingress_parsers = block->getParameterValue("ig_prsr"_cs);
         BUG_CHECK(ingress_parsers->is<IR::PackageBlock>(), "Expected PackageBlock");
-        parseMultipleParserInstances(ingress_parsers->to<IR::PackageBlock>(),
-                                                        pipeName, thread_i, INGRESS);
+        parseMultipleParserInstances(ingress_parsers->to<IR::PackageBlock>(), pipeName, thread_i,
+                                     INGRESS);
     } else {
         auto ingress_parser = block->getParameterValue("ingress_parser"_cs);
         BlockInfo ingress_parser_block_info(index, pipeName, INGRESS, PARSER);
@@ -195,7 +194,7 @@ void ParseTna::parseSingleParserPipeline(const IR::PackageBlock* block, unsigned
     toBlockInfo.emplace(egress_deparser->to<IR::ControlBlock>()->container,
                         egress_deparser_block_info);
 
-    IR::BFN::P4Thread* thread_g = nullptr;
+    IR::BFN::P4Thread *thread_g = nullptr;
     if (auto ghost = block->findParameterValue("ghost"_cs)) {
         auto ghost_cb = ghost->to<IR::ControlBlock>()->container;
         thread_g = new IR::BFN::P4Thread();
@@ -207,7 +206,7 @@ void ParseTna::parseSingleParserPipeline(const IR::PackageBlock* block, unsigned
     pipelines.addPipeline(index, pipeline, pipeName);
 }
 
-void ParseTna::parsePortMapAnnotation(const IR::PackageBlock* block, DefaultPortMap& map) {
+void ParseTna::parsePortMapAnnotation(const IR::PackageBlock *block, DefaultPortMap &map) {
     if (auto anno = block->node->getAnnotation("default_portmap"_cs)) {
         int index = 0;
         for (auto expr : anno->expr) {
@@ -229,8 +228,8 @@ void ParseTna::parsePortMapAnnotation(const IR::PackageBlock* block, DefaultPort
     }
 }
 
-void ParseTna::parseMultipleParserInstances(const IR::PackageBlock* block,
-        cstring pipe, IR::BFN::P4Thread *thread, gress_t gress) {
+void ParseTna::parseMultipleParserInstances(const IR::PackageBlock *block, cstring pipe,
+                                            IR::BFN::P4Thread *thread, gress_t gress) {
     int index = 0;
     DefaultPortMap map;
     parsePortMapAnnotation(block, map);
@@ -240,14 +239,13 @@ void ParseTna::parseMultipleParserInstances(const IR::PackageBlock* block,
         auto p = param.first->to<IR::Parameter>();
         cstring archName = gress == INGRESS ? "ig_prsr"_cs : "eg_prsr"_cs;
         auto decl = block->node->to<IR::Declaration_Instance>();
-        if (decl)
-            archName = decl->controlPlaneName();
+        if (decl) archName = decl->controlPlaneName();
         archName = p ? archName + "." + p->name : "";
 
         BlockInfo block_info(index, pipe, gress, PARSER, archName);
         if (map.count(index) != 0)
-            block_info.portmap.insert(block_info.portmap.end(),
-                    map[index].begin(), map[index].end());
+            block_info.portmap.insert(block_info.portmap.end(), map[index].begin(),
+                                      map[index].end());
         thread->parsers.push_back(param.second->to<IR::ParserBlock>()->container);
         toBlockInfo.emplace(param.second->to<IR::ParserBlock>()->container, block_info);
         index++;
@@ -255,7 +253,7 @@ void ParseTna::parseMultipleParserInstances(const IR::PackageBlock* block,
     hasMultipleParsers = true;
 }
 
-bool ParseTna::preorder(const IR::PackageBlock* block) {
+bool ParseTna::preorder(const IR::PackageBlock *block) {
     mainBlock = block;
 
     auto pos = 0;
@@ -268,13 +266,14 @@ bool ParseTna::preorder(const IR::PackageBlock* block) {
     return false;
 }
 
-const IR::Node* DoRewriteControlAndParserBlocks::postorder(IR::P4Parser *node) {
+const IR::Node *DoRewriteControlAndParserBlocks::postorder(IR::P4Parser *node) {
     auto orig = getOriginal();
     if (!block_info->count(orig)) {
-        error(ErrorType::ERR_INVALID, "%1% parser. You are compiling for the %2% "
-                "P4 architecture.\n"
-                "Please verify that you included the correct architecture file.",
-                node, BackendOptions().arch);
+        error(ErrorType::ERR_INVALID,
+              "%1% parser. You are compiling for the %2% "
+              "P4 architecture.\n"
+              "Please verify that you included the correct architecture file.",
+              node, BackendOptions().arch);
         return node;
     }
 
@@ -298,14 +297,14 @@ const IR::Node* DoRewriteControlAndParserBlocks::postorder(IR::P4Parser *node) {
     std::map<gress_t, cstring> block_used_in_gress_generated;
     for (auto &[_, blockinfo] : block_info->equal_range(orig)) {
         cstring name = node->name;
-        if (block_used_in_gress.size() > 1)
-            name = refMap->newName(node->name.name.string());
+        if (block_used_in_gress.size() > 1) name = refMap->newName(node->name.name.string());
         if (block_used_in_gress_generated.count(blockinfo.gress) != 0) {
             block_name_map.emplace(std::make_pair(blockinfo.pipe_name, blockinfo.block_index),
                                    block_used_in_gress_generated.at(blockinfo.gress));
-            continue; }
+            continue;
+        }
         block_used_in_gress_generated.emplace(blockinfo.gress, name);
-        const auto* parser = new IR::BFN::TnaParser(
+        const auto *parser = new IR::BFN::TnaParser(
             node->srcInfo, name, node->type, node->constructorParams, node->parserLocals,
             node->states, {}, blockinfo.gress, blockinfo.portmap);
         block_name_map.emplace(std::make_pair(blockinfo.pipe_name, blockinfo.block_index), name);
@@ -314,13 +313,14 @@ const IR::Node* DoRewriteControlAndParserBlocks::postorder(IR::P4Parser *node) {
     return tnaBlocks;
 }
 
-const IR::Node* DoRewriteControlAndParserBlocks::postorder(IR::P4Control *node) {
+const IR::Node *DoRewriteControlAndParserBlocks::postorder(IR::P4Control *node) {
     auto orig = getOriginal();
     if (!block_info->count(orig)) {
-        error(ErrorType::ERR_INVALID, "%1% control. You are compiling for the %2% "
-                "P4 architecture.\n"
-                "Please verify that you included the correct architecture file.",
-                node, BackendOptions().arch);
+        error(ErrorType::ERR_INVALID,
+              "%1% control. You are compiling for the %2% "
+              "P4 architecture.\n"
+              "Please verify that you included the correct architecture file.",
+              node, BackendOptions().arch);
         return node;
     }
 
@@ -330,20 +330,20 @@ const IR::Node* DoRewriteControlAndParserBlocks::postorder(IR::P4Control *node) 
     for (auto &[_, blockinfo] : block_info->equal_range(orig))
         block_used_in_gress.insert(blockinfo.gress);
     std::map<gress_t, cstring> block_used_in_gress_generated;
-    for (auto& [_, blockinfo] : block_info->equal_range(orig)) {
+    for (auto &[_, blockinfo] : block_info->equal_range(orig)) {
         cstring name = node->name;
-        if (block_used_in_gress.size() > 1)
-            name = refMap->newName(node->name.name.string());
+        if (block_used_in_gress.size() > 1) name = refMap->newName(node->name.name.string());
         if (block_used_in_gress_generated.count(blockinfo.gress) != 0) {
             block_name_map.emplace(std::make_pair(blockinfo.pipe_name, blockinfo.block_index),
                                    block_used_in_gress_generated.at(blockinfo.gress));
-            continue; }
+            continue;
+        }
         block_used_in_gress_generated.emplace(blockinfo.gress, name);
 
         const auto type = node->type;
-        const auto* nType = new IR::Type_Control(type->srcInfo, name, type->annotations,
+        const auto *nType = new IR::Type_Control(type->srcInfo, name, type->annotations,
                                                  type->typeParameters, type->applyParams);
-        const IR::Node* tnaBlock = nullptr;
+        const IR::Node *tnaBlock = nullptr;
         if (blockinfo.block_type == ArchBlock_t::MAU) {
             tnaBlock = new IR::BFN::TnaControl(node->srcInfo, name, nType, node->constructorParams,
                                                node->controlLocals, node->body, {}, blockinfo.gress,
@@ -361,23 +361,21 @@ const IR::Node* DoRewriteControlAndParserBlocks::postorder(IR::P4Control *node) 
     return tnaBlocks;
 }
 
-const IR::Node* DoRewriteControlAndParserBlocks::postorder(IR::Declaration_Instance *decl) {
+const IR::Node *DoRewriteControlAndParserBlocks::postorder(IR::Declaration_Instance *decl) {
     auto inst = P4::Instantiation::resolve(decl, refMap, typeMap);
-    if (!inst->is<P4::PackageInstantiation>())
-        return decl;
+    if (!inst->is<P4::PackageInstantiation>()) return decl;
     auto pkg = inst->to<P4::PackageInstantiation>()->package;
-    if (pkg->name != "Pipeline")
-        return decl;
+    if (pkg->name != "Pipeline") return decl;
 
     auto newArgs = new IR::Vector<IR::Argument>();
     int index = 0;
     for (auto arg : *decl->arguments) {
         const auto newName = ::get(block_name_map, std::make_pair(decl->name, index));
         CHECK_NULL(newName);
-        const auto* typeRef = new IR::Type_Name(IR::ID(newName, nullptr));
-        const auto* cc = arg->expression->to<IR::ConstructorCallExpression>();
+        const auto *typeRef = new IR::Type_Name(IR::ID(newName, nullptr));
+        const auto *cc = arg->expression->to<IR::ConstructorCallExpression>();
         CHECK_NULL(cc);
-        const auto* expr = new IR::ConstructorCallExpression(typeRef, cc->arguments);
+        const auto *expr = new IR::ConstructorCallExpression(typeRef, cc->arguments);
         newArgs->push_back(new IR::Argument(expr));
         index++;
     }
@@ -385,15 +383,15 @@ const IR::Node* DoRewriteControlAndParserBlocks::postorder(IR::Declaration_Insta
                                         newArgs);
 }
 
-void add_param(ordered_map<cstring, cstring>& tnaParams, const IR::ParameterList* params,
-               IR::ParameterList* newParams, cstring hdr, size_t index, cstring hdr_type = ""_cs,
+void add_param(ordered_map<cstring, cstring> &tnaParams, const IR::ParameterList *params,
+               IR::ParameterList *newParams, cstring hdr, size_t index, cstring hdr_type = ""_cs,
                IR::Direction dir = IR::Direction::None) {
     if (params->parameters.size() > index) {
-        auto* param = params->parameters.at(index);
+        auto *param = params->parameters.at(index);
         tnaParams.emplace(hdr, param->name);
     } else {
         // add optional parameter to parser and control type
-        auto* annotations = new IR::Annotations();
+        auto *annotations = new IR::Annotations();
         annotations->annotations.push_back(new IR::Annotation("optional"_cs, {}));
         newParams->push_back(
             new IR::Parameter(IR::ID(hdr), annotations, dir, new IR::Type_Name(IR::ID(hdr_type))));
@@ -401,10 +399,10 @@ void add_param(ordered_map<cstring, cstring>& tnaParams, const IR::ParameterList
     }
 }
 
-const IR::Node* RestoreParams::postorder(IR::BFN::TnaControl* control) {
-    auto* params = control->type->getApplyParameters();
+const IR::Node *RestoreParams::postorder(IR::BFN::TnaControl *control) {
+    auto *params = control->type->getApplyParameters();
     ordered_map<cstring, cstring> tnaParams;
-    auto* newParams = new IR::ParameterList();
+    auto *newParams = new IR::ParameterList();
     for (auto p : params->parameters) {
         newParams->push_back(p);
     }
@@ -412,35 +410,34 @@ const IR::Node* RestoreParams::postorder(IR::BFN::TnaControl* control) {
         add_param(tnaParams, params, newParams, "hdr"_cs, 0);
         add_param(tnaParams, params, newParams, "ig_md"_cs, 1);
         add_param(tnaParams, params, newParams, "ig_intr_md"_cs, 2);
-            add_param(tnaParams, params, newParams, "ig_intr_md_from_prsr"_cs, 3,
-                      "ingress_intrinsic_metadata_from_parser_t"_cs, IR::Direction::In);
-            add_param(tnaParams, params, newParams, "ig_intr_md_for_dprsr"_cs, 4,
-                      "ingress_intrinsic_metadata_for_deparser_t"_cs, IR::Direction::InOut);
-            add_param(tnaParams, params, newParams, "ig_intr_md_for_tm"_cs, 5,
-                      "ingress_intrinsic_metadata_for_tm_t"_cs, IR::Direction::InOut);
-            // Check for optional ghost_intrinsic_metadata_t for t2na arch
-            // Note that we use the pkginfo annotation on the package to
-            // determine if the ghost intrinsic metadata is present, because the
-            // tna arch is designated to be the 'portable' architecture for
-            // tofino, and programmer could compile a tna program for tofino2
-            // with flags such as --target tofino2 --arch t2na.  In this case,
-            // the ghost intrinsic metadata should not be present because the
-            // program includes 'tna.p4', instead of 't2na.p4'
-            if (Architecture::currentArchitecture() == Architecture::T2NA
-                ) {
-                add_param(tnaParams, params, newParams, "gh_intr_md"_cs, 6,
-                          "ghost_intrinsic_metadata_t"_cs, IR::Direction::In);
-            }
+        add_param(tnaParams, params, newParams, "ig_intr_md_from_prsr"_cs, 3,
+                  "ingress_intrinsic_metadata_from_parser_t"_cs, IR::Direction::In);
+        add_param(tnaParams, params, newParams, "ig_intr_md_for_dprsr"_cs, 4,
+                  "ingress_intrinsic_metadata_for_deparser_t"_cs, IR::Direction::InOut);
+        add_param(tnaParams, params, newParams, "ig_intr_md_for_tm"_cs, 5,
+                  "ingress_intrinsic_metadata_for_tm_t"_cs, IR::Direction::InOut);
+        // Check for optional ghost_intrinsic_metadata_t for t2na arch
+        // Note that we use the pkginfo annotation on the package to
+        // determine if the ghost intrinsic metadata is present, because the
+        // tna arch is designated to be the 'portable' architecture for
+        // tofino, and programmer could compile a tna program for tofino2
+        // with flags such as --target tofino2 --arch t2na.  In this case,
+        // the ghost intrinsic metadata should not be present because the
+        // program includes 'tna.p4', instead of 't2na.p4'
+        if (Architecture::currentArchitecture() == Architecture::T2NA) {
+            add_param(tnaParams, params, newParams, "gh_intr_md"_cs, 6,
+                      "ghost_intrinsic_metadata_t"_cs, IR::Direction::In);
+        }
     } else if (control->thread == EGRESS) {
         add_param(tnaParams, params, newParams, "hdr"_cs, 0);
         add_param(tnaParams, params, newParams, "eg_md"_cs, 1);
         add_param(tnaParams, params, newParams, "eg_intr_md"_cs, 2);
-            add_param(tnaParams, params, newParams, "eg_intr_md_from_prsr"_cs, 3,
-                      "egress_intrinsic_metadata_from_parser_t"_cs, IR::Direction::In);
-            add_param(tnaParams, params, newParams, "eg_intr_md_for_dprsr"_cs, 4,
-                      "egress_intrinsic_metadata_for_deparser_t"_cs, IR::Direction::InOut);
-            add_param(tnaParams, params, newParams, "eg_intr_md_for_oport"_cs, 5,
-                      "egress_intrinsic_metadata_for_output_port_t"_cs, IR::Direction::InOut);
+        add_param(tnaParams, params, newParams, "eg_intr_md_from_prsr"_cs, 3,
+                  "egress_intrinsic_metadata_from_parser_t"_cs, IR::Direction::In);
+        add_param(tnaParams, params, newParams, "eg_intr_md_for_dprsr"_cs, 4,
+                  "egress_intrinsic_metadata_for_deparser_t"_cs, IR::Direction::InOut);
+        add_param(tnaParams, params, newParams, "eg_intr_md_for_oport"_cs, 5,
+                  "egress_intrinsic_metadata_for_output_port_t"_cs, IR::Direction::InOut);
     }
 
     auto newType = new IR::Type_Control(control->srcInfo, control->name, control->type->annotations,
@@ -450,8 +447,8 @@ const IR::Node* RestoreParams::postorder(IR::BFN::TnaControl* control) {
                                    control->body, tnaParams, control->thread, control->pipeName);
 }
 
-const IR::Node* RestoreParams::postorder(IR::BFN::TnaParser* parser) {
-    auto* params = parser->type->getApplyParameters();
+const IR::Node *RestoreParams::postorder(IR::BFN::TnaParser *parser) {
+    auto *params = parser->type->getApplyParameters();
     ordered_map<cstring, cstring> tnaParams;
 
     auto *newParams = new IR::ParameterList();
@@ -463,14 +460,11 @@ const IR::Node* RestoreParams::postorder(IR::BFN::TnaParser* parser) {
         add_param(tnaParams, params, newParams, "hdr"_cs, 1);
         add_param(tnaParams, params, newParams, "ig_md"_cs, 2);
         add_param(tnaParams, params, newParams, "ig_intr_md"_cs, 3,
-                  "ingress_intrinsic_metadata_t"_cs,
-                  IR::Direction::Out);
+                  "ingress_intrinsic_metadata_t"_cs, IR::Direction::Out);
         add_param(tnaParams, params, newParams, "ig_intr_md_for_tm"_cs, 4,
-                  "ingress_intrinsic_metadata_for_tm_t"_cs,
-                  IR::Direction::Out);
-            add_param(tnaParams, params, newParams, "ig_intr_md_from_prsr"_cs, 5,
-                      "ingress_intrinsic_metadata_from_parser_t"_cs,
-                      IR::Direction::Out);
+                  "ingress_intrinsic_metadata_for_tm_t"_cs, IR::Direction::Out);
+        add_param(tnaParams, params, newParams, "ig_intr_md_from_prsr"_cs, 5,
+                  "ingress_intrinsic_metadata_from_parser_t"_cs, IR::Direction::Out);
     } else if (parser->thread == EGRESS) {
         add_param(tnaParams, params, newParams, "pkt"_cs, 0);
         add_param(tnaParams, params, newParams, "hdr"_cs, 1);
@@ -478,11 +472,9 @@ const IR::Node* RestoreParams::postorder(IR::BFN::TnaParser* parser) {
         add_param(tnaParams, params, newParams, "eg_intr_md"_cs, 3,
                   "egress_intrinsic_metadata_t"_cs, IR::Direction::Out);
         add_param(tnaParams, params, newParams, "eg_intr_md_from_prsr"_cs, 4,
-                  "egress_intrinsic_metadata_from_parser_t"_cs,
-                  IR::Direction::Out);
+                  "egress_intrinsic_metadata_from_parser_t"_cs, IR::Direction::Out);
         add_param(tnaParams, params, newParams, "eg_intr_md_for_dprsr"_cs, 5,
-                  "egress_intrinsic_metadata_for_deparser_t"_cs,
-                  IR::Direction::Out);
+                  "egress_intrinsic_metadata_for_deparser_t"_cs, IR::Direction::Out);
     }
 
     auto newType = new IR::Type_Parser(parser->name, parser->type->annotations,
@@ -492,8 +484,8 @@ const IR::Node* RestoreParams::postorder(IR::BFN::TnaParser* parser) {
                                   parser->phase0, parser->pipeName, parser->portmap);
 }
 
-const IR::Node* RestoreParams::postorder(IR::BFN::TnaDeparser* control) {
-    auto* params = control->type->getApplyParameters();
+const IR::Node *RestoreParams::postorder(IR::BFN::TnaDeparser *control) {
+    auto *params = control->type->getApplyParameters();
     ordered_map<cstring, cstring> tnaParams;
     auto *newParams = new IR::ParameterList();
     for (auto p : params->parameters) {
@@ -504,23 +496,19 @@ const IR::Node* RestoreParams::postorder(IR::BFN::TnaDeparser* control) {
         add_param(tnaParams, params, newParams, "hdr"_cs, 1);
         add_param(tnaParams, params, newParams, "metadata"_cs, 2);
         add_param(tnaParams, params, newParams, "ig_intr_md_for_dprsr"_cs, 3,
-                  "ingress_intrinsic_metadata_for_deparser_t"_cs,
-                  IR::Direction::In);
+                  "ingress_intrinsic_metadata_for_deparser_t"_cs, IR::Direction::In);
         add_param(tnaParams, params, newParams, "ig_intr_md"_cs, 4,
-                  "ingress_intrinsic_metadata_t"_cs,
-                  IR::Direction::In);
+                  "ingress_intrinsic_metadata_t"_cs, IR::Direction::In);
     } else if (control->thread == EGRESS) {
         add_param(tnaParams, params, newParams, "pkt"_cs, 0);
         add_param(tnaParams, params, newParams, "hdr"_cs, 1);
         add_param(tnaParams, params, newParams, "metadata"_cs, 2);
-            add_param(tnaParams, params, newParams, "eg_intr_md_for_dprsr"_cs, 3,
-                      "egress_intrinsic_metadata_for_deparser_t"_cs,
-                      IR::Direction::In);
-            add_param(tnaParams, params, newParams, "eg_intr_md"_cs, 4,
-                      "egress_intrinsic_metadata_t"_cs, IR::Direction::In);
-            add_param(tnaParams, params, newParams, "eg_intr_md_from_prsr"_cs, 5,
-                      "egress_intrinsic_metadata_from_parser_t"_cs,
-                      IR::Direction::In);
+        add_param(tnaParams, params, newParams, "eg_intr_md_for_dprsr"_cs, 3,
+                  "egress_intrinsic_metadata_for_deparser_t"_cs, IR::Direction::In);
+        add_param(tnaParams, params, newParams, "eg_intr_md"_cs, 4,
+                  "egress_intrinsic_metadata_t"_cs, IR::Direction::In);
+        add_param(tnaParams, params, newParams, "eg_intr_md_from_prsr"_cs, 5,
+                  "egress_intrinsic_metadata_from_parser_t"_cs, IR::Direction::In);
     }
 
     auto newType = new IR::Type_Control(control->name, control->type->annotations,

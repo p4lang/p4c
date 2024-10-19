@@ -10,8 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PHV_LIVE_RANGE_SPLIT_H_
-#define EXTENSIONS_BF_P4C_PHV_LIVE_RANGE_SPLIT_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_LIVE_RANGE_SPLIT_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_LIVE_RANGE_SPLIT_H_
 
 #include <set>
 #include <vector>
@@ -216,4 +216,4 @@ class LiveRangeSplitOrFail : public Visitor {
 
 }  // namespace PHV
 
-#endif /* EXTENSIONS_BF_P4C_PHV_LIVE_RANGE_SPLIT_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_LIVE_RANGE_SPLIT_H_ */

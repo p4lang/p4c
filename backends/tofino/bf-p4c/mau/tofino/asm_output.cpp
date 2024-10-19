@@ -10,33 +10,34 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+#include "bf-p4c/mau/asm_output.h"
+
+#include <iterator>
 #include <map>
+#include <memory>
 #include <regex>
 #include <string>
 #include <vector>
-#include <iterator>
-#include <memory>
 
 #include "action_data_bus.h"
-#include "boost/range/adaptor/reversed.hpp"
 #include "bf-p4c/common/alias.h"
 #include "bf-p4c/common/ir_utils.h"
 #include "bf-p4c/common/slice.h"
-#include "bf-p4c/lib/error_type.h"
 #include "bf-p4c/ir/tofino_write_context.h"
-#include "bf-p4c/mau/asm_output.h"
-#include "bf-p4c/mau/asm_hash_output.h"
+#include "bf-p4c/lib/error_type.h"
 #include "bf-p4c/mau/asm_format_hash.h"
+#include "bf-p4c/mau/asm_hash_output.h"
 #include "bf-p4c/mau/gateway.h"
+#include "bf-p4c/mau/jbay_next_table.h"
 #include "bf-p4c/mau/payload_gateway.h"
 #include "bf-p4c/mau/resource.h"
 #include "bf-p4c/mau/table_format.h"
 #include "bf-p4c/mau/tofino/asm_output.h"
 #include "bf-p4c/mau/tofino/input_xbar.h"
 #include "bf-p4c/parde/asm_output.h"
-#include "bf-p4c/mau/jbay_next_table.h"
 #include "bf-p4c/parde/phase0.h"
 #include "bf-p4c/phv/asm_output.h"
+#include "boost/range/adaptor/reversed.hpp"
 #include "lib/algorithm.h"
 #include "lib/bitops.h"
 #include "lib/bitrange.h"
@@ -50,10 +51,10 @@ namespace Tofino {
  *  be the identity, this coordinates the field slice to a portion of the bit range.  This
  *  really only applies for identity matches.
  */
-void emit_ixbar_hash_dist_ident(const PhvInfo &phv, std::ostream &out,
-        indent_t indent, safe_vector<Slice> &match_data,
-        const Tofino::IXBar::Use::HashDistHash &hdh,
-        const safe_vector<const IR::Expression *> & /*field_list_order*/) {
+void emit_ixbar_hash_dist_ident(const PhvInfo &phv, std::ostream &out, indent_t indent,
+                                safe_vector<Slice> &match_data,
+                                const Tofino::IXBar::Use::HashDistHash &hdh,
+                                const safe_vector<const IR::Expression *> & /*field_list_order*/) {
     if (hdh.hash_gen_expr) {
         int hash_gen_expr_width = hdh.hash_gen_expr->type->width_bits();
         BUG_CHECK(hash_gen_expr_width > 0, "zero width hash expression: %s ?", hdh.hash_gen_expr);
@@ -64,18 +65,22 @@ void emit_ixbar_hash_dist_ident(const PhvInfo &phv, std::ostream &out,
                 le_bitrange slice(in_bit, in_bit + width - 1);
                 slice = slice.intersectWith(bit_pos.second);
                 out << indent << out_bit;
-                if (width > 1 ) out << ".." << (out_bit + slice.size() - 1);
+                if (width > 1) out << ".." << (out_bit + slice.size() - 1);
                 out << ": ";
                 if (!FormatHash::ZeroHash(phv, hdh.hash_gen_expr, slice, match_data)) {
                     FormatHash::Output(phv, out, hdh.hash_gen_expr, slice, match_data);
                 } else {
-                    out << "0"; }
+                    out << "0";
+                }
                 out << std::endl;
                 in_bit += slice.size();
-                out_bit += slice.size(); }
+                out_bit += slice.size();
+            }
             BUG_CHECK(in_bit == bit_pos.second.hi + 1 || in_bit >= hash_gen_expr_width,
-                      "mismatched hash width"); }
-        return; }
+                      "mismatched hash width");
+        }
+        return;
+    }
 
     BUG("still need this code?");
 #if 0
@@ -120,9 +125,10 @@ void emit_ixbar_hash_dist_ident(const PhvInfo &phv, std::ostream &out,
 }
 
 void emit_ixbar_meter_alu_hash(const PhvInfo &phv, std::ostream &out, indent_t indent,
-        const safe_vector<Slice> &match_data, const Tofino::IXBar::Use::MeterAluHash &mah,
-        const safe_vector<const IR::Expression *> &field_list_order,
-        const LTBitMatrix &sym_keys) {
+                               const safe_vector<Slice> &match_data,
+                               const Tofino::IXBar::Use::MeterAluHash &mah,
+                               const safe_vector<const IR::Expression *> &field_list_order,
+                               const LTBitMatrix &sym_keys) {
     if (mah.algorithm.type == IR::MAU::HashFunction::IDENTITY) {
         auto mask = mah.bit_mask;
         for (auto &el : mah.computed_expressions) {
@@ -134,49 +140,51 @@ void emit_ixbar_meter_alu_hash(const PhvInfo &phv, std::ostream &out, indent_t i
             out << indent << to_clear;
             if (end - 1 > to_clear) out << ".." << (end - 1);
             out << ": 0" << std::endl;
-            to_clear = mask.ffs(end); }
+            to_clear = mask.ffs(end);
+        }
     } else {
-        le_bitrange br = { mah.bit_mask.min().index(), mah.bit_mask.max().index() };
+        le_bitrange br = {mah.bit_mask.min().index(), mah.bit_mask.max().index()};
         int total_bits = 0;
         std::multimap<int, Slice> match_data_map;
-        std::map<le_bitrange, const IR::Constant*> constant_map;
+        std::map<le_bitrange, const IR::Constant *> constant_map;
         bool use_map = false;
         if (mah.algorithm.ordered()) {
-            emit_ixbar_gather_map(phv, match_data_map, constant_map, match_data,
-                    field_list_order, sym_keys, total_bits);
+            emit_ixbar_gather_map(phv, match_data_map, constant_map, match_data, field_list_order,
+                                  sym_keys, total_bits);
             use_map = true;
         }
         out << indent << br.lo << ".." << br.hi << ": ";
         if (use_map)
-            out << FormatHash(nullptr, &match_data_map, nullptr, nullptr,
-                    mah.algorithm, total_bits, &br);
+            out << FormatHash(nullptr, &match_data_map, nullptr, nullptr, mah.algorithm, total_bits,
+                              &br);
         else
-            out << FormatHash(&match_data, nullptr, nullptr, nullptr,
-                    mah.algorithm, total_bits, &br);
+            out << FormatHash(&match_data, nullptr, nullptr, nullptr, mah.algorithm, total_bits,
+                              &br);
         out << std::endl;
     }
 }
 
 void emit_ixbar_proxy_hash(const PhvInfo &phv, std::ostream &out, indent_t indent,
-        safe_vector<Slice> &match_data, const Tofino::IXBar::Use::ProxyHashKey &ph,
-        const safe_vector<const IR::Expression *> &field_list_order,
-        const LTBitMatrix &sym_keys) {
+                           safe_vector<Slice> &match_data,
+                           const Tofino::IXBar::Use::ProxyHashKey &ph,
+                           const safe_vector<const IR::Expression *> &field_list_order,
+                           const LTBitMatrix &sym_keys) {
     int start_bit = ph.hash_bits.ffs();
     do {
         int end_bit = ph.hash_bits.ffz(start_bit);
-        le_bitrange br = { start_bit, end_bit - 1 };
+        le_bitrange br = {start_bit, end_bit - 1};
         int total_bits = 0;
         out << indent << br.lo << ".." << br.hi << ": ";
         if (ph.algorithm.ordered()) {
             std::multimap<int, Slice> match_data_map;
-            std::map<le_bitrange, const IR::Constant*> constant_map;
-            emit_ixbar_gather_map(phv, match_data_map, constant_map, match_data,
-                    field_list_order, sym_keys, total_bits);
-            out << FormatHash(nullptr, &match_data_map, nullptr, nullptr,
-                    ph.algorithm, total_bits, &br);
+            std::map<le_bitrange, const IR::Constant *> constant_map;
+            emit_ixbar_gather_map(phv, match_data_map, constant_map, match_data, field_list_order,
+                                  sym_keys, total_bits);
+            out << FormatHash(nullptr, &match_data_map, nullptr, nullptr, ph.algorithm, total_bits,
+                              &br);
         } else {
-            out << FormatHash(&match_data, nullptr, nullptr, nullptr,
-                    ph.algorithm, total_bits, &br);
+            out << FormatHash(&match_data, nullptr, nullptr, nullptr, ph.algorithm, total_bits,
+                              &br);
         }
         out << std::endl;
         start_bit = ph.hash_bits.ffs(end_bit);
@@ -186,8 +194,8 @@ void emit_ixbar_proxy_hash(const PhvInfo &phv, std::ostream &out, indent_t inden
 /* Generate asm for the hash of a table, specifically either a match, gateway, or selector
    table.  Also used for hash distribution hash */
 void emit_ixbar_hash(const PhvInfo &phv, std::ostream &out, indent_t indent,
-        safe_vector<Slice> &match_data, safe_vector<Slice> &ghost, const ::IXBar::Use *use_,
-        int hash_group, int &ident_bits_prev_alloc) {
+                     safe_vector<Slice> &match_data, safe_vector<Slice> &ghost,
+                     const ::IXBar::Use *use_, int hash_group, int &ident_bits_prev_alloc) {
     auto *use = dynamic_cast<const Tofino::IXBar::Use *>(use_);
     if (!use) return;
     if (!use->way_use.empty()) {
@@ -204,7 +212,6 @@ void emit_ixbar_hash(const PhvInfo &phv, std::ostream &out, indent_t indent,
         emit_ixbar_proxy_hash(phv, out, indent, match_data, use->proxy_hash_key_use,
                               use->field_list_order, use->symmetric_keys);
     }
-
 
     // Printing out the hash for gateway tables
     for (auto ident : use->bit_use) {
@@ -224,13 +231,11 @@ void emit_ixbar_hash(const PhvInfo &phv, std::ostream &out, indent_t indent,
                 if (!overlap) continue;
                 int bit = 40 + ident.bit + overlap.get_lo() - range_sl.get_lo();
                 out << indent << bit;
-                if (overlap.width() > 1)
-                    out << ".." << (bit + overlap.width() - 1);
-                out << ": " << overlap << std:: endl;
+                if (overlap.width() > 1) out << ".." << (bit + overlap.width() - 1);
+                out << ": " << overlap << std::endl;
             }
         }
     }
-
 
     if (use->hash_dist_hash.allocated) {
         auto &hdh = use->hash_dist_hash;
@@ -239,12 +244,12 @@ void emit_ixbar_hash(const PhvInfo &phv, std::ostream &out, indent_t indent,
             return;
         }
         std::multimap<int, Slice> match_data_map;
-        std::map<le_bitrange, const IR::Constant*> constant_map;
+        std::map<le_bitrange, const IR::Constant *> constant_map;
         bool use_map = false;
         int total_bits = 0;
         if (hdh.algorithm.ordered()) {
             emit_ixbar_gather_map(phv, match_data_map, constant_map, match_data,
-                    use->field_list_order, use->symmetric_keys, total_bits);
+                                  use->field_list_order, use->symmetric_keys, total_bits);
             use_map = true;
         }
 
@@ -254,34 +259,33 @@ void emit_ixbar_hash(const PhvInfo &phv, std::ostream &out, indent_t indent,
             int end_bit = start_bit + br.size() - 1;
             out << indent << start_bit << ".." << end_bit;
             if (use_map)
-                out << ": " << FormatHash(nullptr, &match_data_map, &constant_map,
-                        nullptr, hdh.algorithm, total_bits, &br);
+                out << ": "
+                    << FormatHash(nullptr, &match_data_map, &constant_map, nullptr, hdh.algorithm,
+                                  total_bits, &br);
             else
-                out << ": " << FormatHash(&match_data, nullptr, nullptr,
-                        nullptr, hdh.algorithm, total_bits, &br);
+                out << ": "
+                    << FormatHash(&match_data, nullptr, nullptr, nullptr, hdh.algorithm, total_bits,
+                                  &br);
             out << std::endl;
         }
     }
 }
 
 void Tofino::IXBar::Use::emit_ixbar_asm(const PhvInfo &phv, std::ostream &out, indent_t indent,
-        const TableMatch *fmt, const IR::MAU::Table *tbl) const {
+                                        const TableMatch *fmt, const IR::MAU::Table *tbl) const {
     std::map<int, std::map<int, Slice>> sort;
     std::map<int, std::map<int, Slice>> midbytes;
-    emit_ixbar_gather_bytes(phv, use, sort, midbytes, tbl,
-                            type == IXBar::Use::TERNARY_MATCH);
+    emit_ixbar_gather_bytes(phv, use, sort, midbytes, tbl, type == IXBar::Use::TERNARY_MATCH);
     cstring group_type = type == IXBar::Use::TERNARY_MATCH ? "ternary"_cs : "exact"_cs;
     for (auto &group : sort)
-        out << indent << group_type << " group "
-            << group.first << ": " << group.second << std::endl;
+        out << indent << group_type << " group " << group.first << ": " << group.second
+            << std::endl;
     for (auto &midbyte : midbytes)
-        out << indent << "byte group "
-            << midbyte.first << ": " << midbyte.second << std::endl;
+        out << indent << "byte group " << midbyte.first << ": " << midbyte.second << std::endl;
     if (type == IXBar::Use::ATCAM_MATCH) {
         sort.clear();
         midbytes.clear();
-        emit_ixbar_gather_bytes(phv, use, sort, midbytes, tbl,
-                                type == IXBar::Use::TERNARY_MATCH,
+        emit_ixbar_gather_bytes(phv, use, sort, midbytes, tbl, type == IXBar::Use::TERNARY_MATCH,
                                 type == IXBar::Use::ATCAM_MATCH);
     }
     for (int hash_group = 0; hash_group < IXBar::HASH_GROUPS; hash_group++) {
@@ -307,8 +311,7 @@ void Tofino::IXBar::Use::emit_ixbar_asm(const PhvInfo &phv, std::ostream &out, i
                 out << indent << "table: [" << emit_vector(bitvec(hash_table_input), ", ") << "]"
                     << std::endl;
             out << indent << "seed: 0x" << hash_seed << std::endl;
-            if (is_parity_enabled())
-                out << indent << "seed_parity: true" << std::endl;
+            if (is_parity_enabled()) out << indent << "seed_parity: true" << std::endl;
             --indent;
         }
     }
@@ -325,35 +328,31 @@ bool Tofino::ActionDataBus::Use::emit_adb_asm(std::ostream &out, const IR::MAU::
         auto source_is_immed = (rs.source == ActionData::IMMEDIATE);
         auto source_is_adt = (rs.source == ActionData::ACTION_DATA_TABLE);
         auto source_is_meter = (rs.source == ActionData::METER_ALU);
-        BUG_CHECK(source_is_immed || source_is_adt || source_is_meter,
-                  "bad action data source %1%", rs.source);
-        if (source_is_meter &&
-            !meter_use.contains_adb_slot(rs.location.type, rs.byte_offset)) continue;
+        BUG_CHECK(source_is_immed || source_is_adt || source_is_meter, "bad action data source %1%",
+                  rs.source);
+        if (source_is_meter && !meter_use.contains_adb_slot(rs.location.type, rs.byte_offset))
+            continue;
         bitvec total_range(0, ActionData::slot_type_to_bits(rs.location.type));
         int byte_sz = ActionData::slot_type_to_bits(rs.location.type) / 8;
-        if (!first)
-            out << ", ";
+        if (!first) out << ", ";
         first = false;
         out << rs.location.byte;
-        if (byte_sz > 1)
-            out << ".." << (rs.location.byte + byte_sz - 1);
+        if (byte_sz > 1) out << ".." << (rs.location.byte + byte_sz - 1);
         out << " : ";
 
         // For emitting hash distribution sections on the action_bus directly.  Must find
         // which slices of hash distribution are to go to which bytes, requiring coordination
         // from the input xbar and action format allocation
-        if (source_is_immed
-            && format.is_byte_offset<ActionData::Hash>(rs.byte_offset)) {
+        if (source_is_immed && format.is_byte_offset<ActionData::Hash>(rs.byte_offset)) {
             safe_vector<int> all_hash_dist_units = tbl->resources->hash_dist_immed_units();
             bitvec slot_hash_dist_units;
             int immed_lo = rs.byte_offset * 8;
             int immed_hi = immed_lo + (8 << rs.location.type) - 1;
-            le_bitrange immed_range = { immed_lo, immed_hi };
+            le_bitrange immed_range = {immed_lo, immed_hi};
             for (int i = 0; i < 2; i++) {
-                le_bitrange immed_impact = { i * IXBar::HASH_DIST_BITS,
-                                             (i + 1) * IXBar::HASH_DIST_BITS - 1 };
-                if (!immed_impact.overlaps(immed_range))
-                    continue;
+                le_bitrange immed_impact = {i * IXBar::HASH_DIST_BITS,
+                                            (i + 1) * IXBar::HASH_DIST_BITS - 1};
+                if (!immed_impact.overlaps(immed_range)) continue;
                 slot_hash_dist_units.setbit(i);
             }
 
@@ -381,15 +380,15 @@ bool Tofino::ActionDataBus::Use::emit_adb_asm(std::ostream &out, const IR::MAU::
                 out << ", " << lo_hi;
             }
             out << ")";
-        } else if (source_is_immed
-                   && format.is_byte_offset<ActionData::RandomNumber>(rs.byte_offset)) {
+        } else if (source_is_immed &&
+                   format.is_byte_offset<ActionData::RandomNumber>(rs.byte_offset)) {
             int rng_unit = tbl->resources->rng_unit();
             out << "rng(" << rng_unit << ", ";
             int lo = rs.byte_offset * 8;
             int hi = lo + byte_sz * 8 - 1;
             out << lo << ".." << hi << ")";
-        } else if (source_is_immed
-                   && format.is_byte_offset<ActionData::MeterColor>(rs.byte_offset)) {
+        } else if (source_is_immed &&
+                   format.is_byte_offset<ActionData::MeterColor>(rs.byte_offset)) {
             for (auto back_at : tbl->attached) {
                 auto at = back_at->attached;
                 auto *mtr = at->to<IR::MAU::Meter>();
@@ -414,8 +413,8 @@ bool Tofino::ActionDataBus::Use::emit_adb_asm(std::ostream &out, const IR::MAU::
 }
 
 void MauAsmOutput::emit_table_format(std::ostream &out, indent_t indent,
-        const TableFormat::Use &use, const TableMatch *tm,
-        bool ternary, bool no_match) const {
+                                     const TableFormat::Use &use, const TableMatch *tm,
+                                     bool ternary, bool no_match) const {
     ::MauAsmOutput::emit_table_format(out, indent, use, tm, ternary, no_match);
 
     if (!use.match_group_map.empty()) {
@@ -431,8 +430,9 @@ void MauAsmOutput::emit_table_format(std::ostream &out, indent_t indent,
 }
 
 void MauAsmOutput::emit_memory(std::ostream &out, indent_t indent, const Memories::Use &mem,
-         const IR::MAU::Table::Layout *layout, const TableFormat::Use *format) const {
+                               const IR::MAU::Table::Layout *layout,
+                               const TableFormat::Use *format) const {
     ::MauAsmOutput::emit_memory(out, indent, mem, layout, format);
 }
 
-}  // end Tofino namespace
+}  // namespace Tofino

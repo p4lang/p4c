@@ -13,6 +13,7 @@
 #ifndef BF_P4C_MAU_TOFINO_INPUT_XBAR_H_
 #define BF_P4C_MAU_TOFINO_INPUT_XBAR_H_
 
+/* clang-format off */
 #include "bf-p4c/mau/input_xbar.h"
 #include "bf-p4c/common/alloc.h"
 
@@ -735,5 +736,7 @@ struct IXBar : public ::IXBar {
 };
 
 }  // namespace Tofino
+
+/* clang-format on */
 
 #endif /* BF_P4C_MAU_TOFINO_INPUT_XBAR_H_ */

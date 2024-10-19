@@ -12,9 +12,8 @@
 
 #include "add_metadata_pov.h"
 
-#include "ir/ir.h"
 #include "bf-p4c/phv/phv_fields.h"
-
+#include "ir/ir.h"
 
 bool AddMetadataPOV::equiv(const IR::Expression *a, const IR::Expression *b) {
     if (auto field = phv.field(a)) return field == phv.field(b);
@@ -54,8 +53,8 @@ IR::MAU::Primitive *AddMetadataPOV::create_pov_write(const IR::Expression *povBi
 IR::Node *AddMetadataPOV::insert_deparser_param_pov_write(const IR::MAU::Primitive *p,
                                                           bool validate) {
     Log::TempIndent indent;
-    LOG5("Insert deparser param for pov write : " << p
-            << ", validate: " << (validate ? "Y" : "N") << indent);
+    LOG5("Insert deparser param for pov write : " << p << ", validate: " << (validate ? "Y" : "N")
+                                                  << indent);
     auto *dest = p->operands.at(0);
     for (auto *param : dp->params) {
         if (equiv(dest, param->source->field)) {
@@ -93,11 +92,11 @@ IR::Node *AddMetadataPOV::insert_deparser_digest_pov_write(const IR::MAU::Primit
  * @param p represents the method call to is_validated()
  * @return reference to <field>.$valid
  */
-IR::Node *
-AddMetadataPOV::insert_field_pov_read(const IR::MAU::Primitive* p) {
+IR::Node *AddMetadataPOV::insert_field_pov_read(const IR::MAU::Primitive *p) {
     if (p->is<IR::MAU::TypedPrimitive>()) {
-        return new IR::TempVar(
-            IR::Type::Bits::get(1), true, p->operands.at(0)->toString() + ".$valid"); }
+        return new IR::TempVar(IR::Type::Bits::get(1), true,
+                               p->operands.at(0)->toString() + ".$valid");
+    }
     return nullptr;
 }
 

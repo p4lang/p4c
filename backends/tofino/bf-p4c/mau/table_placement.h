@@ -21,15 +21,16 @@
 #define BF_P4C_MAU_TABLE_PLACEMENT_H_
 
 #include <map>
-#include "bf-p4c/mau/mau_visitor.h"
-#include "lib/ordered_set.h"
-#include "bf-p4c/mau/dynamic_dep_metrics.h"
-#include "bf-p4c/mau/table_mutex.h"
-#include "bf-p4c/mau/table_flow_graph.h"
+
 #include "bf-p4c/backend.h"
+#include "bf-p4c/mau/dynamic_dep_metrics.h"
+#include "bf-p4c/mau/mau_visitor.h"
 #include "bf-p4c/mau/resource.h"
 #include "bf-p4c/mau/resource_estimate.h"
+#include "bf-p4c/mau/table_flow_graph.h"
+#include "bf-p4c/mau/table_mutex.h"
 #include "bf-p4c/mau/table_summary.h"
+#include "lib/ordered_set.h"
 
 using namespace P4;
 
@@ -44,7 +45,7 @@ class FindPayloadCandidates;
 class TablePlacement : public PassManager {
  public:
     const BFN_Options &options;
-    DependencyGraph   &deps;
+    DependencyGraph &deps;
     const TablesMutuallyExclusive &mutex;
     PhvInfo &phv;
     LayoutChoices &lc;
@@ -65,16 +66,16 @@ class TablePlacement : public PassManager {
         int uid = -1;
         const IR::MAU::Table *table;
         ordered_set<const IR::MAU::TableSeq *> refs;
-        bitvec      parents;    // Tables that invoke seqs containing this table
-        bitvec      tables;     // this table and all tables control dependent on it
+        bitvec parents;  // Tables that invoke seqs containing this table
+        bitvec tables;   // this table and all tables control dependent on it
     };
 
     struct TableSeqInfo {
         bool root = false;
         int uid = -1;
-        bitvec      parents;    // same as 'refs', as a bitvec
-        bitvec      immed_tables;       // the tables directly in the sequence
-        bitvec      tables;     // the tables in the seqence and their control dependent children
+        bitvec parents;       // same as 'refs', as a bitvec
+        bitvec immed_tables;  // the tables directly in the sequence
+        bitvec tables;        // the tables in the seqence and their control dependent children
         ordered_set<const IR::MAU::Table *> refs;  // parent tables of this seq
     };
 
@@ -89,26 +90,28 @@ class TablePlacement : public PassManager {
     std::map<const IR::MAU::AttachedMemory *, ordered_set<const IR::MAU::Table *>> attached_to;
     std::set<const IR::MAU::Table *> not_eligible;
     int uid(const IR::MAU::Table *t) { return tblInfo.at(t).uid; }
-    int uid(cstring t) {
-        return tblByName.at(t)->uid; }
+    int uid(cstring t) { return tblByName.at(t)->uid; }
     int uid(const IR::MAU::TableSeq *t) {
         if (seqInfo.count(t) == 0) return -1;
-        return seqInfo.at(t).uid; }
-    const IR::MAU::Table * getTblByName(cstring t) {
-        if (auto *ti = get(tblByName, t)) { return ti->table; }
+        return seqInfo.at(t).uid;
+    }
+    const IR::MAU::Table *getTblByName(cstring t) {
+        if (auto *ti = get(tblByName, t)) {
+            return ti->table;
+        }
         LOG5("No tbl info found for table : " << t);
-        return nullptr;}
+        return nullptr;
+    }
     class SetupInfo;
 
-    TablePlacement(const BFN_Options &, DependencyGraph &,
-                   const TablesMutuallyExclusive &, PhvInfo &, LayoutChoices &,
-                   const SharedIndirectAttachedAnalysis &, SplitAttachedInfo &, TableSummary &,
-                   MauBacktracker &);
+    TablePlacement(const BFN_Options &, DependencyGraph &, const TablesMutuallyExclusive &,
+                   PhvInfo &, LayoutChoices &, const SharedIndirectAttachedAnalysis &,
+                   SplitAttachedInfo &, TableSummary &, MauBacktracker &);
 
     struct FinalRerunTablePlacementTrigger : public Backtrack::trigger {
         bool limit_tmp_creation;
-        explicit FinalRerunTablePlacementTrigger(bool l) : Backtrack::trigger(OK),
-            limit_tmp_creation(l) {}
+        explicit FinalRerunTablePlacementTrigger(bool l)
+            : Backtrack::trigger(OK), limit_tmp_creation(l) {}
 
         DECLARE_TYPEINFO(FinalRerunTablePlacementTrigger);
     };
@@ -139,33 +142,30 @@ class TablePlacement : public PassManager {
     // tracking reasons tables were passed up for logging.  Currently not backtracking
     // friendly
     struct RejectReason {
-        choice_t                reason;
-        int                     stage;
-        int                     entries;
-        attached_entries_t      attached_entries;
+        choice_t reason;
+        int stage;
+        int entries;
+        attached_entries_t attached_entries;
     };
-    std::map<cstring, std::map<cstring, RejectReason>>  rejected_placements;
+    std::map<cstring, std::map<cstring, RejectReason>> rejected_placements;
     void reject_placement(const Placed *of, choice_t reason, const Placed *better);
 
     // In both in class.  Remove
-    std::array<bool, 3> table_in_gress = { { false, false, false } };
+    std::array<bool, 3> table_in_gress = {{false, false, false}};
     cstring error_message;
     bool ignoreContainerConflicts = false;
     bool limit_tmp_creation = false;
-    std::array<const IR::MAU::Table *, 2> starter_pistol = { { nullptr, nullptr } };
+    std::array<const IR::MAU::Table *, 2> starter_pistol = {{nullptr, nullptr}};
     bool alloc_done = false;
 
     profile_t init_apply(const IR::Node *root) override;
     void end_apply() override { placement_round++; };
 
-    bool try_pick_layout(const gress_t &gress,
-                         std::vector<Placed *> tables_to_allocate,
+    bool try_pick_layout(const gress_t &gress, std::vector<Placed *> tables_to_allocate,
                          std::vector<Placed *> tables_placed);
-    bool try_alloc_adb(const gress_t &gress,
-                       std::vector<Placed *> tables_to_allocate,
+    bool try_alloc_adb(const gress_t &gress, std::vector<Placed *> tables_to_allocate,
                        std::vector<Placed *> tables_placed);
-    bool try_alloc_imem(const gress_t &gress,
-                        std::vector<Placed *> tables_to_allocate,
+    bool try_alloc_imem(const gress_t &gress, std::vector<Placed *> tables_to_allocate,
                         std::vector<Placed *> tables_placed);
 
     bool try_alloc_ixbar(Placed *next, std::vector<Placed *> allocated_layout);
@@ -179,13 +179,13 @@ class TablePlacement : public PassManager {
     bool shrink_estimate(Placed *next, int &srams_left, int &tcams_left, int min_entries);
     bool shrink_preferred_lo(Placed *next);
     TableSummary::PlacementResult try_alloc_all(Placed *next, std::vector<Placed *> whole_stage,
-        const char *what, bool no_memory = false);
+                                                const char *what, bool no_memory = false);
     bool initial_stage_and_entries(TablePlacement::Placed *rv, int &furthest_stage);
     Placed *try_place_table(Placed *rv, const StageUseEstimate &current,
                             const TableSummary::PlacedTable *pt = nullptr);
-    safe_vector<Placed *>
-    try_place_table(const IR::MAU::Table *t, const Placed *done, const StageUseEstimate &current,
-                    GatewayMergeChoices &gmc, const TableSummary::PlacedTable *pt = nullptr);
+    safe_vector<Placed *> try_place_table(const IR::MAU::Table *t, const Placed *done,
+                                          const StageUseEstimate &current, GatewayMergeChoices &gmc,
+                                          const TableSummary::PlacedTable *pt = nullptr);
 
     friend std::ostream &operator<<(std::ostream &out, choice_t choice);
 
@@ -194,14 +194,17 @@ class TablePlacement : public PassManager {
 
     std::multimap<cstring, const Placed *> table_placed;
     std::multimap<cstring, const Placed *>::const_iterator find_placed(cstring name) const;
-    void find_dependency_stages(const IR::MAU::Table *tbl,
-            std::map<int, ordered_map<const Placed *, DependencyGraph::dependencies_t>> &) const;
+    void find_dependency_stages(
+        const IR::MAU::Table *tbl,
+        std::map<int, ordered_map<const Placed *, DependencyGraph::dependencies_t>> &) const;
 
-    template <class... Args> void error(Args... args) {
+    template <class... Args>
+    void error(Args... args) {
         auto &ctxt = BaseCompileContext::get();
         auto msg = ctxt.errorReporter().format_message(args...);
         LOG5("    defer error: " << msg);
-        summary.addPlacementError(msg); }
+        summary.addPlacementError(msg);
+    }
     int errorCount() const { return P4::errorCount() + summary.placementErrorCount(); }
 };
 
@@ -228,16 +231,16 @@ class DecidePlacement : public MauInspector {
     int jobs = 4;
 #endif
     struct save_placement_t;
-    std::map<cstring, save_placement_t>  saved_placements;
+    std::map<cstring, save_placement_t> saved_placements;
     int backtrack_count = 0;  // number of times backtracked in this pipe
     int MaxBacktracksPerPipe = 32;
     bool resource_mode = false;
     std::map<cstring, std::set<int>> bt_attempts;
     void savePlacement(const Placed *, const ordered_set<const GroupPlace *> &, bool);
     void recomputePartlyPlaced(const Placed *, ordered_set<const IR::MAU::Table *> &);
-    std::optional<BacktrackPlacement*> find_previous_placement(const Placed *best, int offset,
-                                                               bool local_bt, int process_stage);
-    std::optional<BacktrackPlacement*> find_backtrack_point(const Placed *, int, bool);
+    std::optional<BacktrackPlacement *> find_previous_placement(const Placed *best, int offset,
+                                                                bool local_bt, int process_stage);
+    std::optional<BacktrackPlacement *> find_backtrack_point(const Placed *, int, bool);
     bool is_better(const Placed *, const Placed *, TablePlacement::choice_t &);
     int get_control_anti_split_adj_score(const Placed *) const;
     int longBranchTagsNeeded(const Placed *, const ordered_set<const GroupPlace *> &,
@@ -248,23 +251,28 @@ class DecidePlacement : public MauInspector {
     /// @returns true if all the metadata initialization induced dependencies for table @p t are
     /// satisfied, i.e. all the tables that must be placed before table @p t (due to ordering
     /// imposed by the live range shrinking pass) have been placed. @returns false otherwise.
-    bool are_metadata_deps_satisfied(const Placed *placed, const IR::MAU::Table* t) const;
+    bool are_metadata_deps_satisfied(const Placed *placed, const IR::MAU::Table *t) const;
     Placed *try_backfill_table(const Placed *done, const IR::MAU::Table *tbl, cstring before);
     bool can_place_with_partly_placed(const IR::MAU::Table *tbl,
-        const ordered_set<const IR::MAU::Table *> &partly_placed, const Placed *placed);
+                                      const ordered_set<const IR::MAU::Table *> &partly_placed,
+                                      const Placed *placed);
     bool gateway_thread_can_start(const IR::MAU::Table *, const Placed *placed);
     IR::MAU::Table *create_starter_table(gress_t gress);
-    const Placed *place_table(ordered_set<const GroupPlace *>&work, const Placed *pl);
-    template <class... Args> void error(Args... args) { self.error(args...); }
+    const Placed *place_table(ordered_set<const GroupPlace *> &work, const Placed *pl);
+    template <class... Args>
+    void error(Args... args) {
+        self.error(args...);
+    }
     int errorCount() const { return self.errorCount(); }
-    std::pair<bool, const Placed*> alt_table_placement(const IR::BFN::Pipe *pipe);
-    const Placed* default_table_placement(const IR::BFN::Pipe *pipe);
+    std::pair<bool, const Placed *> alt_table_placement(const IR::BFN::Pipe *pipe);
+    const Placed *default_table_placement(const IR::BFN::Pipe *pipe);
 };
 
 class TransformTables : public MauTransform {
     TablePlacement &self;
     ordered_set<const IR::MAU::Table *> always_run_actions;  // always run actions to be
-                // moved to the top-level TableSeq.  A set so we avoid duplicate references
+                                                             // moved to the top-level TableSeq.  A
+                                                             // set so we avoid duplicate references
 
  public:
     explicit TransformTables(TablePlacement &s) : self(s) {}
@@ -278,13 +286,17 @@ class TransformTables : public MauTransform {
     IR::Node *preorder(IR::BFN::Pipe *pipe) override;
     IR::Node *postorder(IR::BFN::Pipe *pipe) override;
     void merge_match_and_gateway(IR::MAU::Table *tbl, const TablePlacement::Placed *placed,
-        IR::MAU::Table::Layout &gw_layout);
+                                 IR::MAU::Table::Layout &gw_layout);
     IR::MAU::Table *break_up_atcam(IR::MAU::Table *tbl, const TablePlacement::Placed *placed,
-        int stage_table = -1, IR::MAU::Table **last = nullptr);
+                                   int stage_table = -1, IR::MAU::Table **last = nullptr);
     IR::Vector<IR::MAU::Table> *break_up_dleft(IR::MAU::Table *tbl,
-        const TablePlacement::Placed *placed, int stage_table = -1);
+                                               const TablePlacement::Placed *placed,
+                                               int stage_table = -1);
     void table_set_resources(IR::MAU::Table *tbl, const TableResourceAlloc *res, const int entries);
-    template <class... Args> void error(Args... args) { self.error(args...); }
+    template <class... Args>
+    void error(Args... args) {
+        self.error(args...);
+    }
     int errorCount() const { return self.errorCount(); }
 };
 
@@ -293,16 +305,15 @@ std::ostream &operator<<(std::ostream &out, TablePlacement::choice_t choice);
 class MergeAlwaysRunActions : public PassManager {
     TablePlacement &self;
 
-    using TableFieldSlices = std::map<IR::MAU::Table* , PHV::FieldSlice>;
+    using TableFieldSlices = std::map<IR::MAU::Table *, PHV::FieldSlice>;
 
     struct AlwaysRunKey {
         int stage;
         gress_t gress;
 
         bool operator<(const AlwaysRunKey &ark) const {
-           if (stage != ark.stage)
-               return stage < ark.stage;
-           return gress < ark.gress;
+            if (stage != ark.stage) return stage < ark.stage;
+            return gress < ark.gress;
         }
 
         AlwaysRunKey(int s, gress_t g) : stage(s), gress(g) {}
@@ -311,14 +322,14 @@ class MergeAlwaysRunActions : public PassManager {
     std::map<AlwaysRunKey, ordered_set<const IR::MAU::Table *>> ar_tables_per_stage;
     std::map<AlwaysRunKey, const IR::MAU::Table *> merge_per_stage;
     std::map<AlwaysRunKey, std::set<int>> merged_ar_minStages;
-    ordered_map<const IR::MAU::Table*, std::set<PHV::FieldSlice>> written_fldSlice;
-    ordered_map<const IR::MAU::Table*, std::set<PHV::FieldSlice>> read_fldSlice;
+    ordered_map<const IR::MAU::Table *, std::set<PHV::FieldSlice>> written_fldSlice;
+    ordered_map<const IR::MAU::Table *, std::set<PHV::FieldSlice>> read_fldSlice;
 
     // Keep the original start and end of AllocSlice liveranges that have
     // shifted due to table merging
-    typedef std::map<const IR::MAU::Table*, int> premerge_table_stg_t;
-    ordered_map<PHV::AllocSlice*, premerge_table_stg_t> premergeLRstart;
-    ordered_map<PHV::AllocSlice*, premerge_table_stg_t> premergeLRend;
+    typedef std::map<const IR::MAU::Table *, int> premerge_table_stg_t;
+    ordered_map<PHV::AllocSlice *, premerge_table_stg_t> premergeLRstart;
+    ordered_map<PHV::AllocSlice *, premerge_table_stg_t> premergeLRend;
 
     bool mergedARAwitNewStage;
 
@@ -369,9 +380,9 @@ class MergeAlwaysRunActions : public PassManager {
     class UpdateAffectedTableMinStage : public MauInspector, public TofinoWriteContext {
         MergeAlwaysRunActions &self;
         // Map affected tables to pair of <old, new> minStages
-        ordered_map<const IR::MAU::Table*, std::pair<int, int>> tableMinStageShifts;
-        ordered_map<PHV::AllocSlice*, std::pair<int, int>> sliceLRshifts;
-        std::map<PHV::AllocSlice*, std::pair<bool, bool>> sliceLRmodifies;
+        ordered_map<const IR::MAU::Table *, std::pair<int, int>> tableMinStageShifts;
+        ordered_map<PHV::AllocSlice *, std::pair<int, int>> sliceLRshifts;
+        std::map<PHV::AllocSlice *, std::pair<bool, bool>> sliceLRmodifies;
 
         bool preorder(const IR::MAU::Table *) override;
         bool preorder(const IR::Expression *) override;
@@ -389,17 +400,16 @@ class MergeAlwaysRunActions : public PassManager {
         return *(set.begin());
     }
 
-    template <class... Args> void error(Args... args) { self.error(args...); }
+    template <class... Args>
+    void error(Args... args) {
+        self.error(args...);
+    }
     int errorCount() const { return self.errorCount(); }
 
  public:
-        explicit MergeAlwaysRunActions(TablePlacement &s) : self(s) {
-        addPasses({
-            new Scan(*this),
-            new Update(*this),
-            new FindDependencyGraph(self.phv, self.deps),
-            new UpdateAffectedTableMinStage(*this)
-        });
+    explicit MergeAlwaysRunActions(TablePlacement &s) : self(s) {
+        addPasses({new Scan(*this), new Update(*this), new FindDependencyGraph(self.phv, self.deps),
+                   new UpdateAffectedTableMinStage(*this)});
     }
 };
 

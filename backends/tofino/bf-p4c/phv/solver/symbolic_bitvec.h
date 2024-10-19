@@ -15,6 +15,7 @@
 
 #include <sstream>
 #include <vector>
+
 #include "lib/bitvec.h"
 #include "lib/cstring.h"
 
@@ -31,12 +32,7 @@ using namespace P4;
 /// > 1  represents a boolean variable.
 using BitID = int;
 
-enum ExprNodeType {
-  BIT_NODE,
-  AND_NODE,
-  OR_NODE,
-  NEG_NODE
-};
+enum ExprNodeType { BIT_NODE, AND_NODE, OR_NODE, NEG_NODE };
 
 class Expr {
  public:
@@ -45,10 +41,11 @@ class Expr {
     ExprNodeType type;
     BitID value;
 
-    Expr(const Expr *left, const Expr *right, ExprNodeType type, BitID value=-1);
-    Expr(ExprNodeType type, BitID value, const Expr *left=nullptr, const Expr *right=nullptr);
+    Expr(const Expr *left, const Expr *right, ExprNodeType type, BitID value = -1);
+    Expr(ExprNodeType type, BitID value, const Expr *left = nullptr, const Expr *right = nullptr);
     bool eq(const Expr *other) const;
     cstring to_cstring() const;
+
  private:
     void simplify();
 };
@@ -56,34 +53,32 @@ class Expr {
 // Bitvec is a vector of Bits. The size is fixed after construction.
 class BitVec {
  private:
-    std::vector<const Expr*> bits;
+    std::vector<const Expr *> bits;
 
  private:
-    void size_check(const BitVec& other) const;
+    void size_check(const BitVec &other) const;
 
-    BitVec bin_op(const BitVec& other, ExprNodeType type) const;
+    BitVec bin_op(const BitVec &other, ExprNodeType type) const;
 
  public:
-    explicit BitVec(std::vector<const Expr*>& bits) : bits(bits) {}
-    void set(int i, bool value) {
-       bits[i] = new Expr(ExprNodeType::BIT_NODE, int(value));
-    }
-    const Expr* get(int i) const { return bits[i]; }
+    explicit BitVec(std::vector<const Expr *> &bits) : bits(bits) {}
+    void set(int i, bool value) { bits[i] = new Expr(ExprNodeType::BIT_NODE, int(value)); }
+    const Expr *get(int i) const { return bits[i]; }
     BitVec slice(int start, int sz) const;
-    bool eq(const BitVec& other) const;
+    bool eq(const BitVec &other) const;
     cstring to_cstring() const;
-    BitVec bv_and(const BitVec& other) const;
-    BitVec bv_or(const BitVec& other) const;
+    BitVec bv_and(const BitVec &other) const;
+    BitVec bv_or(const BitVec &other) const;
     BitVec bv_neg() const;
     BitVec rotate_right(int amount) const;
     BitVec rotate_left(int amount) const;
-    bool operator==(const BitVec& other) const { return eq(other); }
-    bool operator!=(const BitVec& other) const { return !eq(other); }
+    bool operator==(const BitVec &other) const { return eq(other); }
+    bool operator!=(const BitVec &other) const { return !eq(other); }
     BitVec operator<<(int v) const { return rotate_left(v); }
     BitVec operator>>(int v) const { return rotate_right(v); }
     BitVec operator~() const { return bv_neg(); }
-    BitVec operator&(const BitVec& other) const { return bv_and(other); }
-    BitVec operator|(const BitVec& other) const { return bv_or(other); }
+    BitVec operator&(const BitVec &other) const { return bv_and(other); }
+    BitVec operator|(const BitVec &other) const { return bv_or(other); }
 };
 
 // BvContext maintains a context for symbolic bit vectors and bit expressions created.

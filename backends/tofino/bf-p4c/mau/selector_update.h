@@ -34,7 +34,8 @@ class AddSelectorSalu : public PassManager {
         AddSelectorSalu &self;
         bool preorder(const IR::MAU::StatefulAlu *salu) {
             if (salu->selector) self.sel2salu[salu->selector] = salu;
-            return false; }
+            return false;
+        }
         bool preorder(const IR::Expression *) { return false; }  // prune all expressions
      public:
         explicit FindSelectorSalu(AddSelectorSalu &self) : self(self) {}
@@ -49,10 +50,7 @@ class AddSelectorSalu : public PassManager {
     };
 
  public:
-    AddSelectorSalu() : PassManager({
-        new FindSelectorSalu(*this),
-        new AddSaluIfNeeded(*this)
-    }) {}
+    AddSelectorSalu() : PassManager({new FindSelectorSalu(*this), new AddSaluIfNeeded(*this)}) {}
 };
 
 #endif /* BF_P4C_MAU_SELECTOR_UPDATE_H_ */

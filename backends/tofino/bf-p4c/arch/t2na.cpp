@@ -10,23 +10,24 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include "frontends/common/resolveReferences/resolveReferences.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
-#include "frontends/p4/evaluator/evaluator.h"
-#include "midend/validateProperties.h"
-#include "bf-p4c/arch/arch.h"
+#include "bf-p4c/arch/t2na.h"
+
 #include "bf-p4c/arch/add_t2na_meta.h"
+#include "bf-p4c/arch/arch.h"
 #include "bf-p4c/arch/check_extern_invocation.h"
 #include "bf-p4c/arch/fromv1.0/phase0.h"
-#include "bf-p4c/arch/t2na.h"
 #include "bf-p4c/arch/rewrite_action_selector.h"
 #include "bf-p4c/bf-p4c-options.h"
 #include "bf-p4c/midend/type_checker.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/evaluator/evaluator.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "midend/validateProperties.h"
 
 namespace BFN {
 
-T2naArchTranslation::T2naArchTranslation(P4::ReferenceMap *refMap,
-                                         P4::TypeMap *typeMap, BFN_Options &options) {
+T2naArchTranslation::T2naArchTranslation(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                                         BFN_Options &options) {
     setName("T2naArchTranslation");
     addDebugHook(options.getDebugHook());
     addPasses({

@@ -28,12 +28,12 @@ class PhvInfo;
  */
 class SplitPadding : public Transform {
  protected:
-    const PhvInfo& phv;
+    const PhvInfo &phv;
 
-    const IR::Node* preorder(IR::BFN::ParserState* state) override;
+    const IR::Node *preorder(IR::BFN::ParserState *state) override;
 
  public:
-    explicit SplitPadding(const PhvInfo& phv) : phv(phv) { }
+    explicit SplitPadding(const PhvInfo &phv) : phv(phv) {}
 };
 
-#endif  /* BF_P4C_PHV_SPLIT_PADDING_H_ */
+#endif /* BF_P4C_PHV_SPLIT_PADDING_H_ */

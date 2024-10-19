@@ -10,10 +10,11 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include "bf-p4c/common/pragma/all_pragmas.h"
 #include "bf-p4c/phv/analysis/mocha.h"
 
-Visitor::profile_t CollectMochaCandidates::init_apply(const IR::Node* root) {
+#include "bf-p4c/common/pragma/all_pragmas.h"
+
+Visitor::profile_t CollectMochaCandidates::init_apply(const IR::Node *root) {
     profile_t rv = Inspector::init_apply(root);
     mochaCount = 0;
     mochaSize = 0;
@@ -32,8 +33,8 @@ Visitor::profile_t CollectMochaCandidates::init_apply(const IR::Node* root) {
     return rv;
 }
 
-bool CollectMochaCandidates::preorder(const IR::MAU::Action* act) {
-    auto* tbl = findContext<IR::MAU::Table>();
+bool CollectMochaCandidates::preorder(const IR::MAU::Action *act) {
+    auto *tbl = findContext<IR::MAU::Table>();
     ActionAnalysis aa(phv, false, false, tbl, red_info);
     ActionAnalysis::FieldActionsMap fieldActionsMap;
     aa.set_field_actions_map(&fieldActionsMap);
@@ -42,7 +43,7 @@ bool CollectMochaCandidates::preorder(const IR::MAU::Action* act) {
 }
 
 void CollectMochaCandidates::end_apply() {
-    for (PHV::Field& f : phv) {
+    for (PHV::Field &f : phv) {
         std::stringstream ss;
         ss << "    Examining field: " << f << std::endl;
         // Padding field should be marked as mocha candidate. For example, the
@@ -98,8 +99,7 @@ void CollectMochaCandidates::end_apply() {
         // }
         if (f.pov) {
             ss << "    ...pov field ";
-            if (uses.is_written_mau(phv.field(f.id)))
-                ss << "(written in MAU)";
+            if (uses.is_written_mau(phv.field(f.id))) ss << "(written in MAU)";
             if (!pov_on_mocha) {
                 if (uses.is_written_mau(phv.field(f.id))) {
                     LOG5(ss.str());
@@ -117,7 +117,6 @@ void CollectMochaCandidates::end_apply() {
     LOG2("\tNumber of mocha candidates identified: " << mochaCount);
     LOG2("\tBit width of mocha candidates        : " << mochaSize);
     LOG2("\tMocha candidates:");
-    for (const PHV::Field& f : phv)
-        if (f.is_mocha_candidate())
-            LOG2("\t  " << f);
+    for (const PHV::Field &f : phv)
+        if (f.is_mocha_candidate()) LOG2("\t  " << f);
 }

@@ -16,22 +16,22 @@
 #include <algorithm>
 #include <string>
 
+#include "bf-p4c/common/field_defuse.h"
 #include "bf-p4c/device.h"
 #include "bf-p4c/ir/tofino_write_context.h"
-#include "bf-p4c/common/field_defuse.h"
+#include "bf-p4c/logging/constrained_fields.h"
+#include "bf-p4c/logging/group_constraint_extractor.h"
+#include "bf-p4c/logging/logging.h"
 #include "bf-p4c/mau/action_analysis.h"
 #include "bf-p4c/mau/table_summary.h"
 #include "bf-p4c/parde/clot/clot_info.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/make_clusters.h"
-#include "bf-p4c/phv/phv_parde_mau_use.h"
 #include "bf-p4c/phv/constraints/constraints.h"
+#include "bf-p4c/phv/make_clusters.h"
+#include "bf-p4c/phv/phv_fields.h"
+#include "bf-p4c/phv/phv_parde_mau_use.h"
 #include "bf-p4c/phv/phv_spec.h"
-#include "bf-p4c/phv/utils/utils.h"
-#include "bf-p4c/logging/logging.h"
-#include "bf-p4c/logging/constrained_fields.h"
 #include "bf-p4c/phv/pragma/phv_pragmas.h"
-#include "bf-p4c/logging/group_constraint_extractor.h"
+#include "bf-p4c/phv/utils/utils.h"
 #include "ir/ir.h"
 #include "phv_schema.h"
 
@@ -39,14 +39,14 @@ using Logging::Phv_Schema_Logger;
 using namespace P4;
 
 /** This class gathers information related to the MAU use of various fields for use during Phv
-  * Logging. This pass must be run prior to Instruction Adjustment because action analysis does not
-  * currently handle some IR structures (e.g. MultiOperands) introduced in that pass. This split
-  * pass structure allows us to use existing infrastructure to gather MAU related information.
-  */
+ * Logging. This pass must be run prior to Instruction Adjustment because action analysis does not
+ * currently handle some IR structures (e.g. MultiOperands) introduced in that pass. This split
+ * pass structure allows us to use existing infrastructure to gather MAU related information.
+ */
 struct CollectPhvLoggingInfo : public MauInspector {
     /// Information about PHV fields.
-    const PhvInfo       &phv;
-    const PhvUse        &uses;
+    const PhvInfo &phv;
+    const PhvUse &uses;
     const ReductionOrInfo &red_info;
 
     /// Mapping of table names in the backend to the P4 name.
@@ -54,13 +54,13 @@ struct CollectPhvLoggingInfo : public MauInspector {
 
     /// Action-related and table-related maps.
     /// Mapping from an action to the table which may execute it.
-    ordered_map<const IR::MAU::Action*, const IR::MAU::Table*> actionsToTables;
+    ordered_map<const IR::MAU::Action *, const IR::MAU::Table *> actionsToTables;
 
     /// Mapping from a FieldSlice to all the actions in which it is written.
-    ordered_map<const PHV::FieldSlice, ordered_set<const IR::MAU::Action*>> sliceWriteToActions;
+    ordered_map<const PHV::FieldSlice, ordered_set<const IR::MAU::Action *>> sliceWriteToActions;
 
     /// Mapping from a FieldSlice to all the actions in which it is read.
-    ordered_map<const PHV::FieldSlice, ordered_set<const IR::MAU::Action*>> sliceReadToActions;
+    ordered_map<const PHV::FieldSlice, ordered_set<const IR::MAU::Action *>> sliceReadToActions;
 
     /// Mapping from a FieldSlice to all the tables in which it is used in the input crossbar.
     ordered_map<const PHV::FieldSlice, ordered_set<cstring>> sliceXbarToTables;
@@ -70,7 +70,7 @@ struct CollectPhvLoggingInfo : public MauInspector {
     ConstrainedFieldMap fieldConstraints;
 
     /// Superclusters used to extract certain group constraints (MAU groups, equivalent alignment)
-    const std::list<PHV::SuperCluster*> *superclusters = nullptr;
+    const std::list<PHV::SuperCluster *> *superclusters = nullptr;
 
     /// Pointer to pragma object computed during PHV Analysis
     const PHV::Pragmas *pragmas = nullptr;
@@ -86,26 +86,26 @@ struct CollectPhvLoggingInfo : public MauInspector {
     void collectConstraints();
 
     /// Clear all local state.
-    profile_t init_apply(const IR::Node* root) override;
+    profile_t init_apply(const IR::Node *root) override;
     /// Gather the P4 names of all tables allocated.
-    bool preorder(const IR::MAU::Table* tbl) override;
+    bool preorder(const IR::MAU::Table *tbl) override;
     /// Gather action writes and reads related information and populate relevant data structures.
-    bool preorder(const IR::MAU::Action* act) override;
+    bool preorder(const IR::MAU::Action *act) override;
     /// Gather information related to input xbar reads.
-    bool preorder(const IR::MAU::TableKey* read) override;
+    bool preorder(const IR::MAU::TableKey *read) override;
 
-    CollectPhvLoggingInfo(const PhvInfo& p, const PhvUse& u, const ReductionOrInfo &ri)
-        : phv(p), uses(u), red_info(ri) { }
+    CollectPhvLoggingInfo(const PhvInfo &p, const PhvUse &u, const ReductionOrInfo &ri)
+        : phv(p), uses(u), red_info(ri) {}
 
  private:
     /// Get a set of FieldSlices matching the field uses for writes/reads in actions and
     /// input xbar uses based on the Field expression
-    ordered_set<PHV::FieldSlice> getSlices(const IR::Expression*, const IR::MAU::Table*);
+    ordered_set<PHV::FieldSlice> getSlices(const IR::Expression *, const IR::MAU::Table *);
 };
 
 /** This class is meant to generate logging information about PHV allocation and usage and output it
-  * in JSON format defined in logging/phv_schema.json.
-  */
+ * in JSON format defined in logging/phv_schema.json.
+ */
 class PhvLogging : public MauInspector {
  public:
     using Phv_Schema_Logger = Logging::Phv_Schema_Logger;
@@ -131,25 +131,23 @@ class PhvLogging : public MauInspector {
         std::string unit;
         std::string parserState;
 
-        bool operator < (PardeInfo other) const {
-            if (unit != other.unit)
-                return unit < other.unit;
+        bool operator<(PardeInfo other) const {
+            if (unit != other.unit) return unit < other.unit;
             return parserState < other.parserState;
         }
 
-        bool operator == (PardeInfo other) const {
+        bool operator==(PardeInfo other) const {
             return (unit == other.unit && parserState == other.parserState);
         }
 
-        explicit PardeInfo(std::string u, std::string name = "")
-            : unit(u), parserState(name) { }
+        explicit PardeInfo(std::string u, std::string name = "") : unit(u), parserState(name) {}
     };
 
     /** This class gathers defuse information about the fields which can then be used
-      * during PHV logging.
-      * This pass has to be run prior LowerParser pass which needs to update the names
-      * of merged states during MergeLoweredParserStates pass.
-      */
+     * during PHV logging.
+     * This pass has to be run prior LowerParser pass which needs to update the names
+     * of merged states during MergeLoweredParserStates pass.
+     */
     class CollectDefUseInfo : public Visitor {
         /// Defuse information for PHV fields.
         const FieldDefUse &defuse;
@@ -193,15 +191,15 @@ class PhvLogging : public MauInspector {
 
  private:
     /// Information about PHV fields.
-    const PhvInfo       &phv;
+    const PhvInfo &phv;
     /// Information about CLOT-allocated fields.
-    const ClotInfo      &clot;
+    const ClotInfo &clot;
     /// Information collected about PHV fields usage.
-    const CollectPhvLoggingInfo& info;
+    const CollectPhvLoggingInfo &info;
     /// Collected defuse information for PHV fields.
     const CollectDefUseInfo &defuseInfo;
     /// Table allocation.
-    const ordered_map<cstring, ordered_set<int>>& tableAlloc;
+    const ordered_map<cstring, ordered_set<int>> &tableAlloc;
     /// Table summary.
     const TableSummary &tableSummary;
 
@@ -209,9 +207,9 @@ class PhvLogging : public MauInspector {
     ordered_set<PHV::FieldSlice> unallocatedSlices;
 
     /// Logger class automatically generated from phv_schema.json.
-    Phv_Schema_Logger   logger;
+    Phv_Schema_Logger logger;
 
-    profile_t init_apply(const IR::Node* root) override {
+    profile_t init_apply(const IR::Node *root) override {
         unallocatedSlices.clear();
         return Inspector::init_apply(root);
     }
@@ -228,68 +226,67 @@ class PhvLogging : public MauInspector {
 
     /// Field Slice related methods.
     /// @returns a Records::field_class_t value indicating the type of field slice.
-    const char * getFieldType(const PHV::Field* f) const;
+    const char *getFieldType(const PHV::Field *f) const;
 
     /// @returns the gress for a field slice.
-    const char * getGress(const PHV::Field* f) const;
+    const char *getGress(const PHV::Field *f) const;
 
-    const char * getDeparserAccessType(const PHV::Field* f) const;
+    const char *getDeparserAccessType(const PHV::Field *f) const;
 
     // @returns the name with the prefix '.' stripped out
     std::string stripDotPrefix(const cstring name) const;
 
-    void getAllParserDefs(const PHV::Field* f, ordered_set<PardeInfo>& rv) const;
-    void getAllDeparserUses(const PHV::Field* f, ordered_set<PardeInfo>& rv) const;
+    void getAllParserDefs(const PHV::Field *f, ordered_set<PardeInfo> &rv) const;
+    void getAllDeparserUses(const PHV::Field *f, ordered_set<PardeInfo> &rv) const;
 
-    void addPardeReadsAndWrites(const PHV::Field* f, ordered_set<PardeInfo>& rv,
-                                 ContainerSlice *cs) const;
-    void addTableKeys(const PHV::FieldSlice& sl, ContainerSlice *cs) const;
-    void addVLIWReads(const PHV::FieldSlice& sl, ContainerSlice *cs) const;
-    void addVLIWWrites(const PHV::FieldSlice& sl, ContainerSlice *cs) const;
-    void addMutexFields(const PHV::AllocSlice& sl,
-                           ContainerSlice *cs) const;
+    void addPardeReadsAndWrites(const PHV::Field *f, ordered_set<PardeInfo> &rv,
+                                ContainerSlice *cs) const;
+    void addTableKeys(const PHV::FieldSlice &sl, ContainerSlice *cs) const;
+    void addVLIWReads(const PHV::FieldSlice &sl, ContainerSlice *cs) const;
+    void addVLIWWrites(const PHV::FieldSlice &sl, ContainerSlice *cs) const;
+    void addMutexFields(const PHV::AllocSlice &sl, ContainerSlice *cs) const;
 
-    PHV::Field::AllocState getAllocatedState(const PHV::Field* f);
+    PHV::Field::AllocState getAllocatedState(const PHV::Field *f);
 
     /** An ordered map of field names and the fields that can be used
      * by various logging functions for specific purposes, headerFiels,
      * digestFields, etc.
      */
-    ordered_map<cstring, ordered_set<const PHV::Field*>> getFields();
+    ordered_map<cstring, ordered_set<const PHV::Field *>> getFields();
 
     /** An ordered map of field aliases and their fields
      */
-    ordered_map<const PHV::Field*, const PHV::Field*> getFieldAliases();
+    ordered_map<const PHV::Field *, const PHV::Field *> getFieldAliases();
 
     /**
      *  Transform @p f to loggable field info
      */
-    FieldInfo* getFieldInfo(const PHV::Field *f) const;
+    FieldInfo *getFieldInfo(const PHV::Field *f) const;
 
     /**
      *  If @p f has srcInfo, return SourceLocation with fileName and sourceLine
      *  Otherwise return DummyFile:-1
      */
-    SourceLocation* getSourceLoc(const PHV::Field *f) const;
+    SourceLocation *getSourceLoc(const PHV::Field *f) const;
 
     /** If @p f is a field then return a logger FieldSlice object to log the field
      * info. Substitue the field name with the one in its @a aliasSource field if
      * @p use_alias is set to true
      */
-    FieldSlice* logFieldSlice(const PHV::Field* f, bool use_alias);
+    FieldSlice *logFieldSlice(const PHV::Field *f, bool use_alias);
 
     /** If @p sl is a slice of the field's alloc slices then return a logger
      * FieldSlice object to log the field slice info. Substitue the field name
      * with the one in its @a aliasSource field if @p use_alias is set to true.
      */
-    FieldSlice* logFieldSlice(const PHV::AllocSlice& sl, bool use_alias);
+    FieldSlice *logFieldSlice(const PHV::AllocSlice &sl, bool use_alias);
 
     /** If @p sl is a slice of the field's alloc slices then return a logger
      * ContainerSlice object to log the container slice info. Substitue the
      * field name with the one in its @a aliasSource field if @p use_alias is set
      * to true.
      */
-    ContainerSlice* logContainerSlice(const PHV::AllocSlice& sl, bool use_alias);
+    ContainerSlice *logContainerSlice(const PHV::AllocSlice &sl, bool use_alias);
 
     /// Add header-specific information to the logger object.
     void logHeaders();
@@ -308,12 +305,11 @@ class PhvLogging : public MauInspector {
 
     void logSolitaryConstraints(ConstrainedField &field, const SourceLocation *srcLoc);
 
-    void logNoPackConstraint(ConstrainedField &field,
-                                                 const FieldInfo *fieldInfo,
-                                                 const SourceLocation *srcLoc);
+    void logNoPackConstraint(ConstrainedField &field, const FieldInfo *fieldInfo,
+                             const SourceLocation *srcLoc);
 
     void logGroupConstraint(ConstrainedField &field, ListConstraint *c,
-                                                 std::vector<ConstrainedSlice> &group);
+                            std::vector<ConstrainedSlice> &group);
 
     void logMauGroupConstraint(ConstrainedField &field, const SourceLocation *srcLoc);
 
@@ -337,7 +333,7 @@ class PhvLogging : public MauInspector {
     // Index of the item is then returned.
     // This template is supposed to be used with FieldGroupItem
     // and FieldGroups
-    template<typename T>
+    template <typename T>
     int getDatabaseIndex(std::vector<T> &db, T item);
 
  public:
@@ -346,4 +342,4 @@ class PhvLogging : public MauInspector {
                         const ordered_map<cstring, ordered_set<int>> &t, const TableSummary &ts);
 };
 
-#endif  /* BF_P4C_LOGGING_PHV_LOGGING_H_ */
+#endif /* BF_P4C_LOGGING_PHV_LOGGING_H_ */

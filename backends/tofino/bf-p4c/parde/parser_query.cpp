@@ -19,8 +19,7 @@ bool ParserQuery::same_const_source(const IR::BFN::ParserPrimitive *pp,
                                     const IR::BFN::ParserPrimitive *qp) const {
     auto p = pp->to<IR::BFN::Extract>();
     auto q = qp->to<IR::BFN::Extract>();
-    if (!p || !q)
-        return false;
+    if (!p || !q) return false;
     auto pc = p->source->to<IR::BFN::ConstantRVal>();
     auto qc = q->source->to<IR::BFN::ConstantRVal>();
 
@@ -45,10 +44,8 @@ bool ParserQuery::is_before(const ordered_set<const IR::BFN::ParserPrimitive *> 
         return true;  // q always happens after p
     }
 
-    if (!ps)
-        ps = field_to_states.write_to_state.at(p);
-    if (!qs)
-        qs = field_to_states.write_to_state.at(q);
+    if (!ps) ps = field_to_states.write_to_state.at(p);
+    if (!qs) qs = field_to_states.write_to_state.at(q);
 
     // case 1. p is in a parser state that is an ancestor to q (including loops)
     if (parser_info.graph(parser).is_reachable(ps, qs)) {
@@ -58,26 +55,23 @@ bool ParserQuery::is_before(const ordered_set<const IR::BFN::ParserPrimitive *> 
     // case 2. p and q are in the same parser state but p happens before q
     if (p != q && ps == qs) {
         for (auto o : writes) {
-            if (o == p)
-                return true;
-            if (o == q)
-                return false;
+            if (o == p) return true;
+            if (o == q) return false;
         }
     }
     return false;
 }
 
 ordered_set<const IR::BFN::ParserPrimitive *> ParserQuery::get_previous_writes(
-        const IR::BFN::ParserPrimitive *p,
-        const ordered_set<const IR::BFN::ParserPrimitive *> &writes) const {
-    ordered_set<const IR::BFN::ParserPrimitive*> rv;
+    const IR::BFN::ParserPrimitive *p,
+    const ordered_set<const IR::BFN::ParserPrimitive *> &writes) const {
+    ordered_set<const IR::BFN::ParserPrimitive *> rv;
 
     auto ps = field_to_states.write_to_state.at(p);
     auto parser = field_to_states.state_to_parser.at(ps);
 
     for (auto q : writes) {
-        if (!same_const_source(p, q) &&
-            is_before(writes, parser, q, nullptr, p, ps)) {
+        if (!same_const_source(p, q) && is_before(writes, parser, q, nullptr, p, ps)) {
             rv.insert(q);
         }
     }
@@ -90,16 +84,15 @@ bool ParserQuery::is_single_write(
     for (auto x : writes) {
         auto prev = get_previous_writes(x, writes);
 
-        if (!prev.empty())
-            return false;
+        if (!prev.empty()) return false;
     }
 
     return true;
 }
 
-ordered_set<const IR::BFN::ParserPrimitive*>
-ParserQuery::find_inits(const ordered_set<const IR::BFN::ParserPrimitive*>& writes) const {
-    ordered_set<const IR::BFN::ParserPrimitive*> inits;
+ordered_set<const IR::BFN::ParserPrimitive *> ParserQuery::find_inits(
+    const ordered_set<const IR::BFN::ParserPrimitive *> &writes) const {
+    ordered_set<const IR::BFN::ParserPrimitive *> inits;
 
     for (auto p : writes) {
         bool has_predecessor = false;
@@ -108,21 +101,18 @@ ParserQuery::find_inits(const ordered_set<const IR::BFN::ParserPrimitive*>& writ
         auto parser = field_to_states.state_to_parser.at(ps);
 
         for (auto q : writes) {
-            if ((has_predecessor = is_before(writes, parser, q, nullptr, p, ps)))
-                break;
+            if ((has_predecessor = is_before(writes, parser, q, nullptr, p, ps))) break;
         }
 
-        if (!has_predecessor)
-           inits.insert(p);
+        if (!has_predecessor) inits.insert(p);
     }
 
     return inits;
 }
 
-ordered_set<const IR::BFN::ParserPrimitive*> ParserQuery::find_inits(PHV::Container c) const {
+ordered_set<const IR::BFN::ParserPrimitive *> ParserQuery::find_inits(PHV::Container c) const {
     if (!field_to_states.container_to_writes.count(c))
         return ordered_set<const IR::BFN::ParserPrimitive *>();
 
     return find_inits(field_to_states.container_to_writes.at(c));
 }
-

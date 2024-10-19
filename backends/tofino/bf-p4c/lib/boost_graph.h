@@ -17,6 +17,7 @@
 
 #include <map>
 #include <optional>
+
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/tuple/tuple.hpp>
 
@@ -28,14 +29,13 @@ using namespace P4;
 
 /// Graph reachability via the Floyd-Warshall algorithm. Absent cycles, vertices are not considered
 /// reachable from themselves.
-template<class Graph>
+template <class Graph>
 class Reachability {
  public:
     using Vertex = typename Graph::vertex_descriptor;
 
-    using EdgeSet = typename boost::container_gen<
-                                    typename Graph::vertex_list_selector,
-                                    bitvec>::type;
+    using EdgeSet =
+        typename boost::container_gen<typename Graph::vertex_list_selector, bitvec>::type;
 
     /// Determines whether vertex @p v2 is reachable from the vertex @p v1.
     bool canReach(Vertex v1, Vertex v2) {
@@ -64,7 +64,7 @@ class Reachability {
         clear();
     }
 
-    explicit Reachability(const Graph& g) : g(g) { }
+    explicit Reachability(const Graph &g) : g(g) {}
 
  private:
     /// Recomputes reachability information from the graph.
@@ -110,7 +110,7 @@ class Reachability {
 
     /// Helper for recompute(). If @p reachMatrix indicates that @p src can reach @p mid,
     /// then the entry for @p src is updated with nodes reachable from @p mid.
-    void recompute(EdgeSet& reachMatrix, Vertex src, Vertex mid) {
+    void recompute(EdgeSet &reachMatrix, Vertex src, Vertex mid) {
         // If we can't reach mid from src, don't bother going through dsts.
         if (!reachMatrix[src].getbit(mid)) return;
 
@@ -125,7 +125,7 @@ class Reachability {
     }
 
     /// The graph on which this object is operating.
-    const Graph& g;
+    const Graph &g;
 
     /// Sink node. If provided, no nodes will be considered reachable from this node.
     std::optional<Vertex> sink = std::nullopt;

@@ -12,29 +12,28 @@
 
 #include "bf-p4c/phv/v2/phv_allocation_v2.h"
 
-#include "lib/error.h"
-
 #include "bf-p4c/phv/v2/allocator_base.h"
 #include "bf-p4c/phv/v2/greedy_allocator.h"
-#include "bf-p4c/phv/v2/trivial_allocator.h"
 #include "bf-p4c/phv/v2/smart_packing.h"
+#include "bf-p4c/phv/v2/trivial_allocator.h"
+#include "lib/error.h"
 
 namespace PHV {
 namespace v2 {
 
-const IR::Node* PhvAllocation::apply_visitor(const IR::Node* root_, const char *) {
+const IR::Node *PhvAllocation::apply_visitor(const IR::Node *root_, const char *) {
     Log::TempIndent indent;
     LOG1("Starting PHV V2 Allocation" << indent);
     BUG_CHECK(root_->is<IR::BFN::Pipe>(), "IR root is not a BFN::Pipe: %s", root_);
-    const auto* root = root_->to<IR::BFN::Pipe>();
+    const auto *root = root_->to<IR::BFN::Pipe>();
     pipe_id_i = root->canon_id();
 
     // clear allocation result to create an empty concrete allocation.
     PhvKit::clear_slices(phv_i);
-    PHV::ConcreteAllocation alloc = ConcreteAllocation(phv_i, kit_i.uses,
-                                                        kit_i.settings.trivial_alloc);
+    PHV::ConcreteAllocation alloc =
+        ConcreteAllocation(phv_i, kit_i.uses, kit_i.settings.trivial_alloc);
 
-    std::list<PHV::SuperCluster*> clusters = kit_i.make_superclusters();
+    std::list<PHV::SuperCluster *> clusters = kit_i.make_superclusters();
     LOG2("Made " << clusters.size() << " superclusters");
 
     // remove singleton unreferenced fields
@@ -43,7 +42,7 @@ const IR::Node* PhvAllocation::apply_visitor(const IR::Node* root_, const char *
     clusters = PhvKit::remove_singleton_metadata_slicelist(clusters);
     LOG2("Removed unreferenced, clot allocated and singleton metadata clusters");
 
-    const MauBacktracker* mau = kit_i.settings.physical_stage_trivial ? &kit_i.mau : nullptr;
+    const MauBacktracker *mau = kit_i.settings.physical_stage_trivial ? &kit_i.mau : nullptr;
 
     AllocatorMetrics trivial_alloc_metrics("TrivialAllocator"_cs);
     AllocatorMetrics greedy_alloc_metrics("GreedyAllocator"_cs);
@@ -51,7 +50,7 @@ const IR::Node* PhvAllocation::apply_visitor(const IR::Node* root_, const char *
 
     // apply table-layout-friendly packing on super clusters.
     auto trivial_allocator = new PHV::v2::TrivialAllocator(kit_i, phv_i, pipe_id_i);
-    const auto alloc_verifier = [&](const PHV::SuperCluster* sc, AllocatorMetrics &alloc_metrics) {
+    const auto alloc_verifier = [&](const PHV::SuperCluster *sc, AllocatorMetrics &alloc_metrics) {
         return trivial_allocator->can_be_allocated(alloc.makeTransaction(), sc, alloc_metrics);
     };
     IxbarFriendlyPacking packing(phv_i, kit_i.tb_keys, kit_i.table_mutex, kit_i.defuse, kit_i.deps,

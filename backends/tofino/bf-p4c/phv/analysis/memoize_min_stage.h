@@ -10,8 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PHV_ANALYSIS_MEMOIZE_MIN_STAGE_H_
-#define EXTENSIONS_BF_P4C_PHV_ANALYSIS_MEMOIZE_MIN_STAGE_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_ANALYSIS_MEMOIZE_MIN_STAGE_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_ANALYSIS_MEMOIZE_MIN_STAGE_H_
 
 #include "bf-p4c/mau/table_dependency_graph.h"
 #include "bf-p4c/mau/table_summary.h"
@@ -22,15 +22,15 @@
 // both physical stage and min stage.
 class MemoizeStage : public Inspector {
  private:
-    const DependencyGraph& dg;  // for min stages
-    const MauBacktracker& backtracker;  // for physical stages
+    const DependencyGraph &dg;          // for min stages
+    const MauBacktracker &backtracker;  // for physical stages
 
-    profile_t init_apply(const IR::Node* root) override;
-    bool preorder(const IR::MAU::Table* tbl) override;
+    profile_t init_apply(const IR::Node *root) override;
+    bool preorder(const IR::MAU::Table *tbl) override;
 
  public:
-    explicit MemoizeStage(const DependencyGraph& d, const MauBacktracker& backtracker)
+    explicit MemoizeStage(const DependencyGraph &d, const MauBacktracker &backtracker)
         : dg(d), backtracker(backtracker) {}
 };
 
-#endif  /*  EXTENSIONS_BF_P4C_PHV_ANALYSIS_MEMOIZE_MIN_STAGE_H_  */
+#endif /*  BACKENDS_TOFINO_BF_P4C_PHV_ANALYSIS_MEMOIZE_MIN_STAGE_H_  */

@@ -20,4 +20,4 @@ static inline int getAlignment(int bitSize) {
     return (nextByteBoundary - bitSize);
 }
 
-#endif  /* PAD_ALIGNMENT_H_ */
+#endif /* PAD_ALIGNMENT_H_ */

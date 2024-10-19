@@ -11,7 +11,9 @@
  */
 
 #include "bf-p4c/phv/utils/report.h"
+
 #include <numeric>
+
 #include "bf-p4c/common/table_printer.h"
 
 using ContainerAllocStatus = PHV::Allocation::ContainerAllocStatus;
@@ -25,7 +27,7 @@ void PHV::AllocationReport::collectStatus() {
         container_to_bits_used[c] = 0;
         container_to_bits_allocated[c] = 0;
         bitvec allocatedBits;
-        auto& slices = kv.second.slices;
+        auto &slices = kv.second.slices;
 
         auto gress = kv.second.gress;
         container_to_gress[c] = gress;
@@ -41,14 +43,13 @@ void PHV::AllocationReport::collectStatus() {
             status = ContainerAllocStatus::FULL;
             container_to_bits_used[c] = c.size();
         } else if (!allocatedBits.empty()) {
-            int used = std::accumulate(allocatedBits.begin(),
-                                       allocatedBits.end(), 0,
-                                       [] (int a, int) { return a + 1; });
+            int used = std::accumulate(allocatedBits.begin(), allocatedBits.end(), 0,
+                                       [](int a, int) { return a + 1; });
             partial_containers_stat[c] = c.size() - used;
             container_to_bits_used[c] = used;
             total_unallocated_bits += partial_containers_stat[c];
-            if (slices.size() > 1
-                || (slices.size() == 1 && !slices.begin()->field()->is_solitary())) {
+            if (slices.size() > 1 ||
+                (slices.size() == 1 && !slices.begin()->field()->is_solitary())) {
                 if (gress && *gress == INGRESS) {
                     valid_ingress_unallocated_bits += partial_containers_stat[c];
                 } else if (gress && *gress == EGRESS) {
@@ -62,8 +63,7 @@ void PHV::AllocationReport::collectStatus() {
     }
 }
 
-static std::string
-format_bit_slice(unsigned lo, unsigned hi) {
+static std::string format_bit_slice(unsigned lo, unsigned hi) {
     std::stringstream slice;
     slice << "[" << hi;
     if (lo != hi) slice << ":" << lo;
@@ -71,45 +71,39 @@ format_bit_slice(unsigned lo, unsigned hi) {
     return slice.str();
 }
 
-static std::pair<std::string, std::string>
-format_alloc_slice(const PHV::AllocSlice& slice) {
+static std::pair<std::string, std::string> format_alloc_slice(const PHV::AllocSlice &slice) {
     std::stringstream container_slice;
     std::stringstream field_slice;
     if (slice.container_slice().size() != int(slice.container().size()))
-        container_slice << format_bit_slice(slice.container_slice().lo,
-                                            slice.container_slice().hi);
+        container_slice << format_bit_slice(slice.container_slice().lo, slice.container_slice().hi);
     if (slice.field_slice().size() != slice.field()->size)
-        field_slice << format_bit_slice(slice.field_slice().lo,
-                                        slice.field_slice().hi);
+        field_slice << format_bit_slice(slice.field_slice().lo, slice.field_slice().hi);
     if (LOGGING(4)) {
-        field_slice << " {" << slice.getEarliestLiveness().first <<
-            slice.getEarliestLiveness().second;
-        field_slice << ", " << slice.getLatestLiveness().first <<
-            slice.getLatestLiveness().second << "}";
+        field_slice << " {" << slice.getEarliestLiveness().first
+                    << slice.getEarliestLiveness().second;
+        field_slice << ", " << slice.getLatestLiveness().first << slice.getLatestLiveness().second
+                    << "}";
     }
 
     return {container_slice.str(), field_slice.str()};
 }
 
 std::vector<std::string> getPrinterSliceRow(const PHV::AllocSlice &slice,
-    const std::optional<gress_t> &gress, bool first, bool hardwired = false) {
+                                            const std::optional<gress_t> &gress, bool first,
+                                            bool hardwired = false) {
     auto formatted = format_alloc_slice(slice);
     std::string is_ara("");
     if (slice.getInitPrimitive().isAlwaysRunActionPrim()) is_ara += " ARA";
 
-    return {
-        first ? std::string(slice.container().toString()) : "",
-        first ? (std::string(toSymbol(*gress)) + (hardwired ? "-HW" : "")) : "",
-        formatted.first,
-        std::string(slice.field()->name + formatted.second + is_ara)
-    };
+    return {first ? std::string(slice.container().toString()) : "",
+            first ? (std::string(toSymbol(*gress)) + (hardwired ? "-HW" : "")) : "",
+            formatted.first, std::string(slice.field()->name + formatted.second + is_ara)};
 }
 
-cstring
-PHV::AllocationReport::printAllocation() const {
+cstring PHV::AllocationReport::printAllocation() const {
     std::stringstream out;
 
-    auto& phvSpec = Device::phvSpec();
+    auto &phvSpec = Device::phvSpec();
 
     // Use this vector to control the order in which containers are printed,
     // i.e. MAU groups (ordered by group) first.
@@ -123,18 +117,20 @@ PHV::AllocationReport::printAllocation() const {
     for (auto typeAndGroup : phvSpec.mauGroups()) {
         for (auto group : typeAndGroup.second) {
             seen |= group;
-            order.push_back(group); } }
+            order.push_back(group);
+        }
+    }
     for (auto tagalong : phvSpec.tagalongCollections()) {
         seen |= tagalong;
-        order.push_back(tagalong); }
+        order.push_back(tagalong);
+    }
     order.push_back(phvSpec.physicalContainers() - seen);
 
     out << "PHV Allocation" << std::endl;
-    TablePrinter tp(out, { "Container", "Gress", "Container Slice", "Field Slice" },
-                   TablePrinter::Align::LEFT);
+    TablePrinter tp(out, {"Container", "Gress", "Container Slice", "Field Slice"},
+                    TablePrinter::Align::LEFT);
 
-    std::map<gress_t,
-             std::map<PHV::Container, std::vector<PHV::AllocSlice>>> pov_bits;
+    std::map<gress_t, std::map<PHV::Container, std::vector<PHV::AllocSlice>>> pov_bits;
 
     bool firstEmpty = true;
     for (bitvec group : order) {
@@ -172,25 +168,22 @@ PHV::AllocationReport::printAllocation() const {
 
     unsigned total_available_bits = Device::phvSpec().getNumPovBits();
 
-    for (auto& gp : pov_bits) {
+    for (auto &gp : pov_bits) {
         out << std::endl << "POV Allocation (" << toString(gp.first) << "):" << std::endl;
-        TablePrinter tp2(out, { "Container", "Container Slice", "Field Slice" },
+        TablePrinter tp2(out, {"Container", "Container Slice", "Field Slice"},
                          TablePrinter::Align::LEFT);
 
         unsigned total_container_bits = 0, total_used_bits = 0;
 
-        for (auto& cs : gp.second) {
-            auto& container = cs.first;
+        for (auto &cs : gp.second) {
+            auto &container = cs.first;
 
             bool firstSlice = true;
-            for (auto& slice : cs.second) {
+            for (auto &slice : cs.second) {
                 auto formatted = format_alloc_slice(slice);
 
-                tp2.addRow({
-                    firstSlice ? std::string(container.toString()) : "",
-                    formatted.first,
-                    std::string(slice.field()->name) + formatted.second
-                });
+                tp2.addRow({firstSlice ? std::string(container.toString()) : "", formatted.first,
+                            std::string(slice.field()->name) + formatted.second});
 
                 firstSlice = false;
             }
@@ -200,11 +193,10 @@ PHV::AllocationReport::printAllocation() const {
             tp2.addSep();
         }
 
-        tp2.addRow({"", "Total Bits Used",
-                        formatUsage(total_used_bits, total_available_bits, true)});
+        tp2.addRow(
+            {"", "Total Bits Used", formatUsage(total_used_bits, total_available_bits, true)});
 
-        tp2.addRow({"", "Pack Density",
-                        formatUsage(total_used_bits, total_container_bits, true)});
+        tp2.addRow({"", "Pack Density", formatUsage(total_used_bits, total_container_bits, true)});
 
         tp2.print();
     }
@@ -212,8 +204,7 @@ PHV::AllocationReport::printAllocation() const {
     return out.str();
 }
 
-cstring
-PHV::AllocationReport::printAllocSlices() const {
+cstring PHV::AllocationReport::printAllocSlices() const {
     std::stringstream out;
 
     TablePrinter tp(out,
@@ -223,14 +214,14 @@ PHV::AllocationReport::printAllocSlices() const {
     for (auto slice = alloc_slices.sorted_begin(); slice != alloc_slices.sorted_end(); slice++) {
         auto formatted = format_alloc_slice(*slice);
         std::stringstream lr_str;
-        lr_str << (slice->isPhysicalStageBased() ? "P" : "") << "["
-               << slice->getEarliestLiveness() << ", " << slice->getLatestLiveness() << "]";
+        lr_str << (slice->isPhysicalStageBased() ? "P" : "") << "[" << slice->getEarliestLiveness()
+               << ", " << slice->getLatestLiveness() << "]";
         tp.addRow({
-                std::string(slice->field()->name) + formatted.second,
-                lr_str.str(),
-                std::string(slice->container().toString()),
-                std::string(slice->container().type().toString()),
-                formatted.first,
+            std::string(slice->field()->name) + formatted.second,
+            lr_str.str(),
+            std::string(slice->container().toString()),
+            std::string(slice->container().type().toString()),
+            formatted.first,
         });
     }
 
@@ -239,8 +230,7 @@ PHV::AllocationReport::printAllocSlices() const {
     return out.str();
 }
 
-cstring
-PHV::AllocationReport::printOverlayStatus() const {
+cstring PHV::AllocationReport::printOverlayStatus() const {
     std::stringstream ss;
 
     // Compute overlay status.
@@ -250,35 +240,39 @@ PHV::AllocationReport::printOverlayStatus() const {
         PHV::Container c = kv.first;
         int n_overlay = -c.size();
         for (auto i = c.lsb(); i <= c.msb(); ++i) {
-            const auto& slices = kv.second.slices;
-            n_overlay += std::accumulate(
-                slices.begin(), slices.end(), 0,
-                [&] (int l, const PHV::AllocSlice& r) {
-                    return l + r.container_slice().contains(i); }); }
+            const auto &slices = kv.second.slices;
+            n_overlay += std::accumulate(slices.begin(), slices.end(), 0,
+                                         [&](int l, const PHV::AllocSlice &r) {
+                                             return l + r.container_slice().contains(i);
+                                         });
+        }
         if (n_overlay > 0) {
             overlay_result[c] = n_overlay;
             if (c.type().kind() == PHV::Kind::tagalong) {
                 overlay_statistics[*kv.second.gress][0] += n_overlay;
             } else {
-                overlay_statistics[*kv.second.gress][1] += n_overlay; } } }
+                overlay_statistics[*kv.second.gress][1] += n_overlay;
+            }
+        }
+    }
 
     if (LOGGING(2)) {
         ss << "======== CONTAINER OVERLAY STAT ===========" << std::endl;
         ss << "TOTAL INGRESS T-PHV OVERLAY BITS: " << overlay_statistics[INGRESS][0] << std::endl;
-        ss << "TOTAL INGRESS PHV OVERLAY BITS: "   << overlay_statistics[INGRESS][1] << std::endl;
-        ss << "TOTAL EGRESS T-PHV OVERLAY BITS: "  << overlay_statistics[EGRESS][0] << std::endl;
-        ss << "TOTAL EGRESS PHV OVERLAY BITS: "    << overlay_statistics[EGRESS][1] << std::endl;
+        ss << "TOTAL INGRESS PHV OVERLAY BITS: " << overlay_statistics[INGRESS][1] << std::endl;
+        ss << "TOTAL EGRESS T-PHV OVERLAY BITS: " << overlay_statistics[EGRESS][0] << std::endl;
+        ss << "TOTAL EGRESS PHV OVERLAY BITS: " << overlay_statistics[EGRESS][1] << std::endl;
 
         if (LOGGING(3) && !overlay_result.empty()) {
-            TablePrinter tp(ss, { "Container", "Gress", "Container Slice", "Field Slice" },
-                           TablePrinter::Align::LEFT);
+            TablePrinter tp(ss, {"Container", "Gress", "Container Slice", "Field Slice"},
+                            TablePrinter::Align::LEFT);
 
-            for (auto& kv : overlay_result) {
+            for (auto &kv : overlay_result) {
                 auto container = kv.first;
                 auto gress = container_to_gress.at(container);
 
                 bool first = true;
-                for (const auto& slice : alloc.slices(kv.first)) {
+                for (const auto &slice : alloc.slices(kv.first)) {
                     tp.addRow(getPrinterSliceRow(slice, gress, first));
                     first = false;
                 }
@@ -297,10 +291,13 @@ PHV::AllocationReport::printOverlayStatus() const {
         ss << "VALID EGRESS UNALLOCATED BITS: " << valid_egress_unallocated_bits << std::endl;
 
         if (LOGGING(3)) {
-            for (const auto& kv : partial_containers_stat) {
+            for (const auto &kv : partial_containers_stat) {
                 ss << kv.first << " has unallocated bits: " << kv.second << std::endl;
-                for (const auto& slice : alloc.slices(kv.first)) {
-                    ss << slice << std::endl; } } }
+                for (const auto &slice : alloc.slices(kv.first)) {
+                    ss << slice << std::endl;
+                }
+            }
+        }
 
         // compute tphv fields allocated on phv fields
         int total_tphv_on_phv = 0;
@@ -308,14 +305,18 @@ PHV::AllocationReport::printOverlayStatus() const {
         for (auto kv : alloc) {
             PHV::Container c = kv.first;
             if (c.is(PHV::Kind::tagalong)) {
-                continue; }
+                continue;
+            }
             int n_tphvs = 0;
             for (auto slice : kv.second.slices) {
                 if (slice.field()->is_tphv_candidate(uses)) {
-                    n_tphvs += slice.width(); } }
+                    n_tphvs += slice.width();
+                }
+            }
             if (n_tphvs == 0) continue;
             tphv_on_phv[c] = n_tphvs;
-            total_tphv_on_phv += n_tphvs; }
+            total_tphv_on_phv += n_tphvs;
+        }
 
         ss << "======== TPHV ON PHV STAT ========" << std::endl;
         ss << "Total bits: " << total_tphv_on_phv << std::endl;
@@ -323,56 +324,65 @@ PHV::AllocationReport::printOverlayStatus() const {
         if (LOGGING(3)) {
             for (auto kv : tphv_on_phv) {
                 ss << kv.first << " has " << kv.second << " bits " << std::endl;
-                for (const auto& slice : alloc.slices(kv.first)) {
+                for (const auto &slice : alloc.slices(kv.first)) {
                     if (slice.field()->is_tphv_candidate(uses)) {
-                        ss << slice << std::endl; } } } } }
+                        ss << slice << std::endl;
+                    }
+                }
+            }
+        }
+    }
 
     return ss.str();
 }
 
-cstring
-PHV::AllocationReport::printContainerStatus() {
+cstring PHV::AllocationReport::printContainerStatus() {
     std::stringstream ss;
 
     if (LOGGING(3)) {
         // Print container status.
         ss << "CONTAINER STATUS (after allocation so far):" << std::endl;
-        ss << boost::format("%1% %|10t| %2% %|20t| %3% %|30t| %4%\n")
-            % "GRESS" % "TYPE" % "STATUS" % "COUNT";
+        ss << boost::format("%1% %|10t| %2% %|20t| %3% %|30t| %4%\n") % "GRESS" % "TYPE" %
+                  "STATUS" % "COUNT";
 
         bool first_by_gress = true;
         auto gresses = std::vector<std::optional<gress_t>>({INGRESS, EGRESS, std::nullopt});
-        auto statuses = {ContainerAllocStatus::EMPTY,
-                         ContainerAllocStatus::PARTIAL,
+        auto statuses = {ContainerAllocStatus::EMPTY, ContainerAllocStatus::PARTIAL,
                          ContainerAllocStatus::FULL};
         for (auto gress : gresses) {
             first_by_gress = true;
             for (auto status : statuses) {
                 for (auto type : Device::phvSpec().containerTypes()) {
-                    if (alloc_status[gress][type][status] == 0)
-                        continue;
+                    if (alloc_status[gress][type][status] == 0) continue;
                     std::stringstream ss_gress;
                     std::string s_status;
                     ss_gress << gress;
                     switch (status) {
-                      case ContainerAllocStatus::EMPTY:   s_status = "EMPTY"; break;
-                      case ContainerAllocStatus::PARTIAL: s_status = "PARTIAL"; break;
-                      case ContainerAllocStatus::FULL:    s_status = "FULL"; break; }
-                    ss << boost::format("%1% %|10t| %3% %|20t| %2% %|30t| %4%\n")
-                          % (first_by_gress  ? ss_gress.str() : "")
-                          % type.toString()
-                          % s_status
-                          % alloc_status[gress][type][status];
-                    first_by_gress = false; } } }
+                        case ContainerAllocStatus::EMPTY:
+                            s_status = "EMPTY";
+                            break;
+                        case ContainerAllocStatus::PARTIAL:
+                            s_status = "PARTIAL";
+                            break;
+                        case ContainerAllocStatus::FULL:
+                            s_status = "FULL";
+                            break;
+                    }
+                    ss << boost::format("%1% %|10t| %3% %|20t| %2% %|30t| %4%\n") %
+                              (first_by_gress ? ss_gress.str() : "") % type.toString() % s_status %
+                              alloc_status[gress][type][status];
+                    first_by_gress = false;
+                }
+            }
+        }
         ss << std::endl;
     }
 
     return ss.str();
 }
 
-cstring
-PHV::AllocationReport::printMauGroupsOccupancyMetrics() const {
-    const auto& phvSpec = Device::phvSpec();
+cstring PHV::AllocationReport::printMauGroupsOccupancyMetrics() const {
+    const auto &phvSpec = Device::phvSpec();
 
     ordered_map<bitvec, MauGroupInfo> mauGroupInfos;
 
@@ -387,11 +397,12 @@ PHV::AllocationReport::printMauGroupsOccupancyMetrics() const {
             auto gress = container_to_gress.at(c);
 
             if (mauGroupInfos.count(*mauGroup)) {
-                mauGroupInfos[*mauGroup].update(c.type().kind(), containerUsed,
-                        bits_used, bits_allocated, gress);
+                mauGroupInfos[*mauGroup].update(c.type().kind(), containerUsed, bits_used,
+                                                bits_allocated, gress);
             } else {
-                mauGroupInfos[*mauGroup] = MauGroupInfo(c.size(), groupID,
-                        c.type().kind(), containerUsed, bits_used, bits_allocated, gress);
+                mauGroupInfos[*mauGroup] =
+                    MauGroupInfo(c.size(), groupID, c.type().kind(), containerUsed, bits_used,
+                                 bits_allocated, gress);
             }
         }
     }
@@ -403,12 +414,11 @@ PHV::AllocationReport::printMauGroupsOccupancyMetrics() const {
     std::set<PHV::Kind> containerKinds(phvSpec.containerKinds());
     containerKinds.erase(PHV::Kind::tagalong);
 
-    TablePrinter tp(ss, {
-        containerKinds.size() == 1 ? "MAU Group" : "Container Set", "Containers Used",
-            "Bits Used", "Bits Used on Ingress", "Bits Used on Egress",
-            "Bits Allocated", "Bits Allocated on Ingress", "Bits Allocated on Egress",
-            "Available Bits"
-        }, TablePrinter::Align::CENTER);
+    TablePrinter tp(ss,
+                    {containerKinds.size() == 1 ? "MAU Group" : "Container Set", "Containers Used",
+                     "Bits Used", "Bits Used on Ingress", "Bits Used on Egress", "Bits Allocated",
+                     "Bits Allocated on Ingress", "Bits Allocated on Egress", "Available Bits"},
+                    TablePrinter::Align::CENTER);
 
     PhvOccupancyMetric overallStats;
     auto overallTotalBits = 0;
@@ -424,11 +434,11 @@ PHV::AllocationReport::printMauGroupsOccupancyMetrics() const {
     int groupNum = 1;
 
     for (auto containerSize : phvSpec.containerSizes()) {
-        auto& sizeStats = statsByContainerSize[containerSize];
+        auto &sizeStats = statsByContainerSize[containerSize];
 
         bool firstGroup = true;
         for (auto mauGroup : phvSpec.mauGroups(containerSize)) {
-            auto& info = mauGroupInfos[mauGroup];
+            auto &info = mauGroupInfos[mauGroup];
 
             sizeStats += info.totalStats;
             totalContainersBySize[containerSize] += mauGroup.popcount();
@@ -442,9 +452,9 @@ PHV::AllocationReport::printMauGroupsOccupancyMetrics() const {
             firstGroup = false;
 
             // Print a line for each container kind in this group.
-            for (auto& kv : info.statsByContainerKind) {
-                auto& kind = kv.first;
-                auto& kindInfo = kv.second;
+            for (auto &kv : info.statsByContainerKind) {
+                auto &kind = kv.first;
+                auto &kindInfo = kv.second;
 
                 auto subgroup = phvSpec.filterContainerSet(mauGroup, kind);
                 auto curTotalBits = subgroup.popcount() * size_t(containerSize);
@@ -499,9 +509,9 @@ PHV::AllocationReport::printMauGroupsOccupancyMetrics() const {
     }
 
     // Print stats for usage by container size.
-    for (auto& kv : statsByContainerSize) {
-        auto& size = kv.first;
-        auto& stats = kv.second;
+    for (auto &kv : statsByContainerSize) {
+        auto &size = kv.first;
+        auto &stats = kv.second;
 
         auto totalContainers = totalContainersBySize.at(size);
         auto curTotalBits = totalContainers * size_t(size);
@@ -509,8 +519,7 @@ PHV::AllocationReport::printMauGroupsOccupancyMetrics() const {
         std::stringstream ss;
         ss << "Usage for " << size_t(size) << "b";
 
-        tp.addRow({ss.str(),
-                   formatUsage(stats.total.containersUsed, totalContainers),
+        tp.addRow({ss.str(), formatUsage(stats.total.containersUsed, totalContainers),
                    formatUsage(stats.total.bitsUsed, curTotalBits),
                    formatUsage(stats.gress[INGRESS].bitsUsed, curTotalBits),
                    formatUsage(stats.gress[EGRESS].bitsUsed, curTotalBits),
@@ -524,9 +533,9 @@ PHV::AllocationReport::printMauGroupsOccupancyMetrics() const {
 
     if (containerKinds.size() > 1) {
         // Print stats for usage by container kind.
-        for (auto& kv : statsByContainerKind) {
-            auto& kind = kv.first;
-            auto& stats = kv.second;
+        for (auto &kv : statsByContainerKind) {
+            auto &kind = kv.first;
+            auto &stats = kv.second;
 
             auto curTotalBits = totalBitsByKind.at(kind);
             auto totalContainers = totalContainersByKind.at(kind);
@@ -534,8 +543,7 @@ PHV::AllocationReport::printMauGroupsOccupancyMetrics() const {
             std::stringstream ss;
             ss << "Usage for " << PHV::STR_OF_KIND.at(kind);
 
-            tp.addRow({ss.str(),
-                       formatUsage(stats.total.containersUsed, totalContainers),
+            tp.addRow({ss.str(), formatUsage(stats.total.containersUsed, totalContainers),
                        formatUsage(stats.total.bitsUsed, curTotalBits),
                        formatUsage(stats.gress[INGRESS].bitsUsed, curTotalBits),
                        formatUsage(stats.gress[EGRESS].bitsUsed, curTotalBits),
@@ -557,43 +565,39 @@ PHV::AllocationReport::printMauGroupsOccupancyMetrics() const {
                formatUsage(overallStats.total.bitsAllocated, overallTotalBits),
                formatUsage(overallStats.gress[INGRESS].bitsAllocated, overallTotalBits),
                formatUsage(overallStats.gress[EGRESS].bitsAllocated, overallTotalBits),
-               std::to_string(overallTotalBits)
-              });
+               std::to_string(overallTotalBits)});
 
     tp.print();
 
     return ss.str();
 }
 
-cstring
-PHV::AllocationReport::printTagalongCollectionsOccupancyMetrics() const {
-    const auto& phvSpec = Device::phvSpec();
+cstring PHV::AllocationReport::printTagalongCollectionsOccupancyMetrics() const {
+    const auto &phvSpec = Device::phvSpec();
 
     std::map<unsigned, TagalongCollectionInfo> tagalongCollectionInfos;
 
     auto tagalongCollectionSpec = phvSpec.getTagalongCollectionSpec();
 
     for (unsigned i = 0; i < phvSpec.getNumTagalongCollections(); i++) {
-        auto& collectionInfo = tagalongCollectionInfos[i];
+        auto &collectionInfo = tagalongCollectionInfos[i];
 
-        for (auto& kv : tagalongCollectionSpec)
+        for (auto &kv : tagalongCollectionSpec)
             collectionInfo.totalContainers[kv.first] = kv.second;
     }
 
-    for (auto& kv : container_to_bits_used) {
+    for (auto &kv : container_to_bits_used) {
         auto container = kv.first;
         auto bits_used_in_container = kv.second;
         auto bits_allocated_in_container = container_to_bits_allocated.at(container);
         auto gress = container_to_gress.at(container);
 
-        if (!container.is(PHV::Kind::tagalong))
-            continue;
+        if (!container.is(PHV::Kind::tagalong)) continue;
 
-        if (bits_used_in_container == 0)
-            continue;
+        if (bits_used_in_container == 0) continue;
 
         int collectionID = phvSpec.getTagalongCollectionId(container);
-        auto& collectionInfo = tagalongCollectionInfos[collectionID];
+        auto &collectionInfo = tagalongCollectionInfos[collectionID];
 
         collectionInfo.containersUsed[container.type()]++;
         collectionInfo.bitsUsed[container.type()] += bits_used_in_container;
@@ -601,8 +605,9 @@ PHV::AllocationReport::printTagalongCollectionsOccupancyMetrics() const {
 
         if (collectionInfo.gress && gress) {
             BUG_CHECK(*(collectionInfo.gress) == *gress,
-                    "Tagalong collection for container %1% assigned with fields from both "
-                    "ingress and egress?", container);
+                      "Tagalong collection for container %1% assigned with fields from both "
+                      "ingress and egress?",
+                      container);
         }
 
         collectionInfo.gress = gress;
@@ -611,33 +616,23 @@ PHV::AllocationReport::printTagalongCollectionsOccupancyMetrics() const {
     std::stringstream ss;
     ss << std::endl << "Tagalong Collections:" << std::endl;
 
-    TablePrinter tp(ss, {
-       "Collection",
-       "Gress",
-       "8b Containers Used",
-       "16b Containers Used",
-       "32b Containers Used",
-       "Bits Used",
-       "Bits Allocated"
-    });
+    TablePrinter tp(ss, {"Collection", "Gress", "8b Containers Used", "16b Containers Used",
+                         "32b Containers Used", "Bits Used", "Bits Allocated"});
 
     std::map<PHV::Type, int> totalUsed;
     std::map<PHV::Type, int> totalAvail;
 
     int totalUsedBits = 0, totalAllocatedBits = 0, totalAvailBits = 0;
 
-    for (auto& kv : tagalongCollectionInfos) {
-        auto& info = kv.second;
+    for (auto &kv : tagalongCollectionInfos) {
+        auto &info = kv.second;
 
         tp.addRow({std::to_string(kv.first),
-                  info.getTotalUsedBits() ? std::string(toSymbol(*(info.gress)).c_str()) : "",
-                  info.printUsage(PHV::Type::TB),
-                  info.printUsage(PHV::Type::TH),
-                  info.printUsage(PHV::Type::TW),
-                  info.printTotalUsage(),
-                  info.printTotalAlloc()});
+                   info.getTotalUsedBits() ? std::string(toSymbol(*(info.gress)).c_str()) : "",
+                   info.printUsage(PHV::Type::TB), info.printUsage(PHV::Type::TH),
+                   info.printUsage(PHV::Type::TW), info.printTotalUsage(), info.printTotalAlloc()});
 
-        for (auto type : { PHV::Type::TB, PHV::Type::TH, PHV::Type::TW }) {
+        for (auto type : {PHV::Type::TB, PHV::Type::TH, PHV::Type::TW}) {
             totalUsed[type] += info.containersUsed[type];
             totalAvail[type] += info.totalContainers[type];
         }
@@ -648,9 +643,7 @@ PHV::AllocationReport::printTagalongCollectionsOccupancyMetrics() const {
     }
 
     tp.addSep();
-    tp.addRow({"Total",
-               "",
-               formatUsage(totalUsed[PHV::Type::TB], totalAvail[PHV::Type::TB]),
+    tp.addRow({"Total", "", formatUsage(totalUsed[PHV::Type::TB], totalAvail[PHV::Type::TB]),
                formatUsage(totalUsed[PHV::Type::TH], totalAvail[PHV::Type::TH]),
                formatUsage(totalUsed[PHV::Type::TW], totalAvail[PHV::Type::TW]),
                formatUsage(totalUsedBits, totalAvailBits),
@@ -661,13 +654,11 @@ PHV::AllocationReport::printTagalongCollectionsOccupancyMetrics() const {
     return ss.str();
 }
 
-cstring
-PHV::AllocationReport::printOccupancyMetrics() const {
+cstring PHV::AllocationReport::printOccupancyMetrics() const {
     std::stringstream ss;
     ss << std::endl << "PHV Allocation State" << std::endl;
     ss << printMauGroupsOccupancyMetrics();
     ss << std::endl;
-    if (Device::currentDevice() == Device::TOFINO)
-        ss << printTagalongCollectionsOccupancyMetrics();
+    if (Device::currentDevice() == Device::TOFINO) ss << printTagalongCollectionsOccupancyMetrics();
     return ss.str();
 }

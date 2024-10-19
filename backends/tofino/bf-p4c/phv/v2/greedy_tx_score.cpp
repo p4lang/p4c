@@ -13,10 +13,9 @@
 #include "bf-p4c/phv/v2/greedy_tx_score.h"
 
 #include <algorithm>
+#include <optional>
 #include <sstream>
 #include <utility>
-
-#include <optional>
 
 #include "bf-p4c/common/table_printer.h"
 #include "bf-p4c/device.h"
@@ -36,15 +35,15 @@ using ContGress = Vision::ContGress;
 namespace {
 
 /// convert slices to a bitvec where 1 represents an occupied bit.
-bitvec make_allocated_bitvec(const ordered_set<PHV::AllocSlice>& slices) {
+bitvec make_allocated_bitvec(const ordered_set<PHV::AllocSlice> &slices) {
     bitvec allocated;
-    for (const auto& slice : slices) {
+    for (const auto &slice : slices) {
         allocated.setrange(slice.container_slice().lo, slice.container_slice().size());
     }
     return allocated;
 }
 
-ContGress from(const gress_t& t) {
+ContGress from(const gress_t &t) {
     switch (t) {
         case INGRESS: {
             return ContGress::ingress;
@@ -65,8 +64,8 @@ ContGress from(const gress_t& t) {
 //     return from(*t);
 // }
 
-ContGress device_gress(const Container& c) {
-    const auto& phv_spec = Device::phvSpec();
+ContGress device_gress(const Container &c) {
+    const auto &phv_spec = Device::phvSpec();
     if (phv_spec.ingressOnly()[phv_spec.containerToId(c)]) {
         return ContGress::ingress;
     } else if (phv_spec.egressOnly()[phv_spec.containerToId(c)]) {
@@ -79,10 +78,9 @@ ContGress device_gress(const Container& c) {
 /// call @p f with AllocSlice(s) that slices of the same field slices with different live ranges
 /// will be passed to @p f only once (de-duplicate by {field, range} pair).
 template <typename T>
-void deduped_iterate(const T& alloc_slices,
-                     const std::function<void(const AllocSlice&)>& f) {
-    ordered_set<std::pair<const PHV::Field*, le_bitrange>> seen;
-    for (const auto& slice : alloc_slices) {
+void deduped_iterate(const T &alloc_slices, const std::function<void(const AllocSlice &)> &f) {
+    ordered_set<std::pair<const PHV::Field *, le_bitrange>> seen;
+    for (const auto &slice : alloc_slices) {
         auto fs = std::make_pair(slice.field(), slice.field_slice());
         if (seen.count(fs)) continue;
         seen.insert(fs);
@@ -90,19 +88,19 @@ void deduped_iterate(const T& alloc_slices,
     }
 }
 
-void update_table_stage_ixbar_bytes(const PhvKit& kit, const Container& c,
-                                    const ordered_set<AllocSlice>& slices,
-                                    TableIxbarContBytesMap& table_ixbar_cont_bytes,
-                                    StageIxbarContBytesMap& stage_sram_ixbar_cont_bytes,
-                                    StageIxbarContBytesMap& stage_tcam_ixbar_cont_bytes) {
-    for (const auto& sl : slices) {
-        for (const auto& tb_key : kit.uses.ixbar_read(sl.field(), sl.field_slice())) {
-            const auto* tb = tb_key.first;
-            const auto& c_range = sl.container_slice();
+void update_table_stage_ixbar_bytes(const PhvKit &kit, const Container &c,
+                                    const ordered_set<AllocSlice> &slices,
+                                    TableIxbarContBytesMap &table_ixbar_cont_bytes,
+                                    StageIxbarContBytesMap &stage_sram_ixbar_cont_bytes,
+                                    StageIxbarContBytesMap &stage_tcam_ixbar_cont_bytes) {
+    for (const auto &sl : slices) {
+        for (const auto &tb_key : kit.uses.ixbar_read(sl.field(), sl.field_slice())) {
+            const auto *tb = tb_key.first;
+            const auto &c_range = sl.container_slice();
             for (int i = c_range.loByte(); i <= c_range.hiByte(); i++) {
                 const auto cont_byte = std::make_pair(c, i);
                 table_ixbar_cont_bytes[tb].insert(cont_byte);
-                for (const auto& stage : kit.mau.stage(tb, true)) {
+                for (const auto &stage : kit.mau.stage(tb, true)) {
                     if (PhvKit::is_ternary(tb)) {
                         stage_tcam_ixbar_cont_bytes[stage].insert(cont_byte);
                     } else {
@@ -116,10 +114,10 @@ void update_table_stage_ixbar_bytes(const PhvKit& kit, const Container& c,
 
 }  // namespace
 
-int Vision::bits_demand(const PHV::Kind& k) const {
+int Vision::bits_demand(const PHV::Kind &k) const {
     int rv = 0;
-    for (const auto& db : Values(cont_required)) {
-        for (const auto& ks_n : db.m) {
+    for (const auto &db : Values(cont_required)) {
+        for (const auto &ks_n : db.m) {
             if (ks_n.first.first != k) continue;
             rv += static_cast<int>(ks_n.first.second) * ks_n.second;
         }
@@ -127,10 +125,10 @@ int Vision::bits_demand(const PHV::Kind& k) const {
     return rv;
 }
 
-int Vision::bits_supply(const PHV::Kind& k) const {
+int Vision::bits_supply(const PHV::Kind &k) const {
     int rv = 0;
-    for (const auto& db : Values(cont_available)) {
-        for (const auto& ks_n : db.m) {
+    for (const auto &db : Values(cont_available)) {
+        for (const auto &ks_n : db.m) {
             if (ks_n.first.first != k) continue;
             rv += static_cast<int>(ks_n.first.second) * ks_n.second;
         }
@@ -138,15 +136,15 @@ int Vision::bits_supply(const PHV::Kind& k) const {
     return rv;
 }
 
-int GreedyTxScoreMaker::ixbar_imbalanced_alignment(const ordered_set<ContainerByte>& cont_bytes) {
+int GreedyTxScoreMaker::ixbar_imbalanced_alignment(const ordered_set<ContainerByte> &cont_bytes) {
     std::vector<int> counters(4, 0);
     // allocate 32-bit container bytes first.
-    for (const auto& cont_byte : cont_bytes) {
+    for (const auto &cont_byte : cont_bytes) {
         if (cont_byte.first.type().size() != PHV::Size::b32) continue;
         counters[cont_byte.second]++;
     }
     // then 16-bit, greedy algorithm, pick the smaller one to allocate.
-    for (const auto& cont_byte : cont_bytes) {
+    for (const auto &cont_byte : cont_bytes) {
         if (cont_byte.first.type().size() != PHV::Size::b16) continue;
         if (counters[cont_byte.second] <= counters[cont_byte.second + 2]) {
             counters[cont_byte.second]++;
@@ -158,44 +156,43 @@ int GreedyTxScoreMaker::ixbar_imbalanced_alignment(const ordered_set<ContainerBy
     std::sort(counters.begin(), counters.end());
     const int min_pressure = std::max(1, counters.front());
     int total_imba = 0;
-    for (const auto& c : counters) {
+    for (const auto &c : counters) {
         total_imba += std::max(0, c - min_pressure);
     }
     return total_imba;
 }
 
 GreedyTxScoreMaker::GreedyTxScoreMaker(
-    const PhvKit& kit,
-    const std::list<ContainerGroup*>& container_groups,
-    const std::list<SuperCluster*>& sorted_clusters,
-    const ordered_map<const SuperCluster*, KindSizeIndexedMap>& baseline)
+    const PhvKit &kit, const std::list<ContainerGroup *> &container_groups,
+    const std::list<SuperCluster *> &sorted_clusters,
+    const ordered_map<const SuperCluster *, KindSizeIndexedMap> &baseline)
     : kit_i(kit) {
     ///// compute container kind and size indexed availability and demand.
     // initialization
-    for (const auto& gress : {INGRESS, EGRESS}) {
+    for (const auto &gress : {INGRESS, EGRESS}) {
         vision_i.cont_available[from(gress)] = KindSizeIndexedMap();
         vision_i.cont_required[gress] = KindSizeIndexedMap();
     }
     vision_i.cont_available[ContGress::unassigned] = KindSizeIndexedMap();
 
     // container size pressure.
-    for (auto* sc : sorted_clusters) {
+    for (auto *sc : sorted_clusters) {
         vision_i.sc_cont_required[sc] = baseline.at(sc);
         auto gress = sc->slices().front().field()->gress;
-        for (const auto& kv : vision_i.sc_cont_required[sc].m) {
+        for (const auto &kv : vision_i.sc_cont_required[sc].m) {
             vision_i.cont_required[gress][kv.first] += kv.second;
         }
     }
     // container availability
-    for (const auto& group : container_groups) {
-        for (const auto& c : *group) {
+    for (const auto &group : container_groups) {
+        for (const auto &c : *group) {
             auto kind_sz = std::make_pair(c.type().kind(), c.type().size());
             vision_i.cont_available[device_gress(c)].m[kind_sz]++;
         }
     }
 
     // Record all fields that are TCAM table keys
-    for (const auto& [table, prop] : kit_i.tb_keys.props()) {
+    for (const auto &[table, prop] : kit_i.tb_keys.props()) {
         if (prop.is_tcam && prop.is_range) {
             for (const FieldSlice &fs : prop.keys) {
                 table_key_with_ranges.insert(fs.field());
@@ -204,12 +201,12 @@ GreedyTxScoreMaker::GreedyTxScoreMaker(
     }
 }
 
-void GreedyTxScoreMaker::record_commit(const Transaction& tx, const SuperCluster* sc) {
+void GreedyTxScoreMaker::record_commit(const Transaction &tx, const SuperCluster *sc) {
     using AllocStatus = Allocation::ContainerAllocStatus;
-    auto* parent = tx.getParent();
-    for (const auto& container_status : tx.get_actual_diff()) {
-        const auto& c = container_status.first;
-        const auto& slices = container_status.second.slices;
+    auto *parent = tx.getParent();
+    for (const auto &container_status : tx.get_actual_diff()) {
+        const auto &c = container_status.first;
+        const auto &slices = container_status.second.slices;
         auto parent_c_status = AllocStatus::EMPTY;
         if (auto parent_status = parent->getStatus(c)) {
             parent_c_status = parent_status->alloc_status;
@@ -227,26 +224,26 @@ void GreedyTxScoreMaker::record_commit(const Transaction& tx, const SuperCluster
     // update cont required.
     // skip special clusters: deparser-zero, strided...
     if (vision_i.sc_cont_required.count(sc)) {
-        for (const auto& kindsize_n : vision_i.sc_cont_required.at(sc).m) {
+        for (const auto &kindsize_n : vision_i.sc_cont_required.at(sc).m) {
             vision_i.cont_required[sc->gress()][kindsize_n.first] -= kindsize_n.second;
         }
     }
 }
 
-KindSizeIndexedMap GreedyTxScoreMaker::record_deallocation(const SuperCluster* sc,
-                                                           const ConcreteAllocation& curr_alloc,
-                                                           const ordered_set<AllocSlice>& slices) {
+KindSizeIndexedMap GreedyTxScoreMaker::record_deallocation(const SuperCluster *sc,
+                                                           const ConcreteAllocation &curr_alloc,
+                                                           const ordered_set<AllocSlice> &slices) {
     KindSizeIndexedMap baseline;
     ordered_map<Container, ordered_set<AllocSlice>> cont_slices;
-    for (const auto& sl : slices) {
+    for (const auto &sl : slices) {
         cont_slices[sl.container()].insert(sl);
     }
-    for (const auto& c_slices : cont_slices) {
-        const auto& c = c_slices.first;
-        const auto& slices = c_slices.second;
-        const auto& status = curr_alloc.getStatus(c);
+    for (const auto &c_slices : cont_slices) {
+        const auto &c = c_slices.first;
+        const auto &slices = c_slices.second;
+        const auto &status = curr_alloc.getStatus(c);
         bool no_other_cluster = true;
-        for (const auto& sl : status->slices) {
+        for (const auto &sl : status->slices) {
             no_other_cluster &= slices.count(sl);
             if (!no_other_cluster) break;
         }
@@ -263,31 +260,30 @@ KindSizeIndexedMap GreedyTxScoreMaker::record_deallocation(const SuperCluster* s
     vision_i.table_ixbar_cont_bytes.clear();
     vision_i.stage_sram_ixbar_cont_bytes.clear();
     vision_i.stage_tcam_ixbar_cont_bytes.clear();
-    for (const auto& cont_status : curr_alloc) {
-        const auto& c = cont_status.first;
+    for (const auto &cont_status : curr_alloc) {
+        const auto &c = cont_status.first;
         auto slices = cont_status.second.slices;
         if (cont_slices.count(c)) {
-            for (const auto& erased : cont_slices.at(c)) {
+            for (const auto &erased : cont_slices.at(c)) {
                 slices.erase(erased);
             }
         }
-        update_table_stage_ixbar_bytes(kit_i, c, slices,
-                                       vision_i.table_ixbar_cont_bytes,
+        update_table_stage_ixbar_bytes(kit_i, c, slices, vision_i.table_ixbar_cont_bytes,
                                        vision_i.stage_sram_ixbar_cont_bytes,
                                        vision_i.stage_tcam_ixbar_cont_bytes);
     }
     return baseline;
 }
 
-TxScore* GreedyTxScoreMaker::make(const Transaction& tx) const {
-    auto* rv = new GreedyTxScore(&vision_i);
-    const auto* parent = tx.getParent();
+TxScore *GreedyTxScoreMaker::make(const Transaction &tx) const {
+    auto *rv = new GreedyTxScore(&vision_i);
+    const auto *parent = tx.getParent();
     std::optional<gress_t> tx_gress = std::nullopt;
     ordered_map<Vision::ContGress, KindSizeIndexedMap> newly_used;
-    for (const auto& kv : tx.get_actual_diff()) {
-        const auto& c = kv.first;
-        const auto& slices = kv.second.slices;
-        const auto& parent_slices = parent->slices(c);
+    for (const auto &kv : tx.get_actual_diff()) {
+        const auto &c = kv.first;
+        const auto &slices = kv.second.slices;
+        const auto &parent_slices = parent->slices(c);
         if (slices.size() == 0) continue;
         tx_gress = slices.front().field()->gress;
 
@@ -304,7 +300,7 @@ TxScore* GreedyTxScoreMaker::make(const Transaction& tx) const {
         const auto c_kind_size = std::make_pair(c_kind, c_size);
         const bool has_solitary =
             std::any_of(slices.begin(), slices.end(),
-                        [&](const AllocSlice& sl) { return sl.field()->is_solitary(); });
+                        [&](const AllocSlice &sl) { return sl.field()->is_solitary(); });
         const bool no_more_packing =
             has_solitary || c_kind == PHV::Kind::mocha || c_kind == PHV::Kind::dark;
 
@@ -324,9 +320,9 @@ TxScore* GreedyTxScoreMaker::make(const Transaction& tx) const {
             newly_used[device_gress(c)][{c.type().kind(), c.type().size()}]++;
         }
 
-        const auto& gress = kv.second.gress;
-        const auto& parser_group_gress = kv.second.parserGroupGress;
-        const auto& deparser_group_gress = kv.second.deparserGroupGress;
+        const auto &gress = kv.second.gress;
+        const auto &parser_group_gress = kv.second.parserGroupGress;
+        const auto &deparser_group_gress = kv.second.deparserGroupGress;
 
         // gress deparser gress mismatch.
         if (!parent->gress(c) && gress) {
@@ -345,7 +341,7 @@ TxScore* GreedyTxScoreMaker::make(const Transaction& tx) const {
         // deparser group gress
         if (!parent->deparserGroupGress(c) && deparser_group_gress) {
             rv->n_set_deparser_gress[c_kind_size]++;
-            const auto& phv_spec = Device::phvSpec();
+            const auto &phv_spec = Device::phvSpec();
             // count mismatches of assigning different gress to a deparser group of containers.
             for (unsigned other_id : phv_spec.deparserGroup(phv_spec.containerToId(c))) {
                 auto other_cont = phv_spec.idToContainer(other_id);
@@ -358,7 +354,7 @@ TxScore* GreedyTxScoreMaker::make(const Transaction& tx) const {
 
         // tphv_on_phv_bits
         if (Device::phvSpec().hasContainerKind(PHV::Kind::tagalong) && c_kind != Kind::tagalong) {
-            deduped_iterate(slices, [&](const AllocSlice& slice) {
+            deduped_iterate(slices, [&](const AllocSlice &slice) {
                 if (slice.field()->is_tphv_candidate(kit_i.uses)) {
                     rv->n_tphv_on_phv_bits += slices.size();
                 }
@@ -366,21 +362,20 @@ TxScore* GreedyTxScoreMaker::make(const Transaction& tx) const {
         }
 
         // n_delta_pov_deparser_read_bits
-        const bool has_pov = std::any_of(
-                slices.begin(), slices.end(),
-                [&](const AllocSlice& sl) { return sl.field()->pov; });
-        const bool parent_has_pov = std::any_of(
-                parent_slices.begin(), parent_slices.end(),
-                [&](const AllocSlice& sl) { return sl.field()->pov; });
+        const bool has_pov = std::any_of(slices.begin(), slices.end(),
+                                         [&](const AllocSlice &sl) { return sl.field()->pov; });
+        const bool parent_has_pov =
+            std::any_of(parent_slices.begin(), parent_slices.end(),
+                        [&](const AllocSlice &sl) { return sl.field()->pov; });
         if (!parent_has_pov && has_pov) {
             rv->n_pov_deparser_read_bits += c.size();
         }
 
         // n_deparser_read_digest_fields_bytes
         // TODO: must use this uses.is_learning because it includes selector field.
-        const bool has_learning = std::any_of(
-            slices.begin(), slices.end(),
-            [&](const AllocSlice& sl) { return kit_i.uses.is_learning(sl.field()); });
+        const bool has_learning =
+            std::any_of(slices.begin(), slices.end(),
+                        [&](const AllocSlice &sl) { return kit_i.uses.is_learning(sl.field()); });
         if (has_learning) {
             rv->n_deparser_read_learning_bytes += c.size() / 8;
         }
@@ -392,9 +387,9 @@ TxScore* GreedyTxScoreMaker::make(const Transaction& tx) const {
     TableIxbarContBytesMap new_table_ixbar_cont_bytes;
     StageIxbarContBytesMap new_stage_sram_ixbar_cont_bytes;
     StageIxbarContBytesMap new_stage_tcam_ixbar_cont_bytes;
-    for (const auto& kv : tx.get_actual_diff()) {
-        const auto& c = kv.first;
-        const auto& slices = kv.second.slices;
+    for (const auto &kv : tx.get_actual_diff()) {
+        const auto &c = kv.first;
+        const auto &slices = kv.second.slices;
         update_table_stage_ixbar_bytes(kit_i, c, slices, new_table_ixbar_cont_bytes,
                                        new_stage_sram_ixbar_cont_bytes,
                                        new_stage_tcam_ixbar_cont_bytes);
@@ -403,13 +398,13 @@ TxScore* GreedyTxScoreMaker::make(const Transaction& tx) const {
         // of ixbar allocation: it will use two TCAM groups, which will double the
         // number of bytes used.
         if (c.type().size() == PHV::Size::b32) {
-            for (const auto& sl : slices) {
+            for (const auto &sl : slices) {
                 if (range_match_double_bytes_container.count(c)) break;
                 if (sl.field()->size >= 24) continue;
-                const auto& fs = FieldSlice(sl.field(), sl.field_slice());
-                for (const auto& tb_key : kit_i.uses.ixbar_read(fs.field(), fs.range())) {
-                    const auto* tb = tb_key.first;
-                    const auto* key = tb_key.second;
+                const auto &fs = FieldSlice(sl.field(), sl.field_slice());
+                for (const auto &tb_key : kit_i.uses.ixbar_read(fs.field(), fs.range())) {
+                    const auto *tb = tb_key.first;
+                    const auto *key = tb_key.second;
                     for (const int stage : kit_i.mau.stage(tb, true)) {
                         if (!sl.isLiveAt(stage, FieldUse(FieldUse::READ))) continue;
                         if (key->for_range()) {
@@ -422,13 +417,13 @@ TxScore* GreedyTxScoreMaker::make(const Transaction& tx) const {
         }
     }
     // n_table_ixbar_imbalance_alignments and n_table_new_ixbar_bytes.
-    for (auto& table_cont_bytes : new_table_ixbar_cont_bytes) {
-        const auto& tb = table_cont_bytes.first;
-        auto& cont_bytes = table_cont_bytes.second;
+    for (auto &table_cont_bytes : new_table_ixbar_cont_bytes) {
+        const auto &tb = table_cont_bytes.first;
+        auto &cont_bytes = table_cont_bytes.second;
         // merge with allocated byte stats.
         if (vision_i.table_ixbar_cont_bytes.count(tb)) {
-            const auto& allocated = vision_i.table_ixbar_cont_bytes.at(tb);
-            for (const auto& cont_byte : cont_bytes) {
+            const auto &allocated = vision_i.table_ixbar_cont_bytes.at(tb);
+            for (const auto &cont_byte : cont_bytes) {
                 if (!allocated.count(cont_byte)) {
                     rv->n_table_new_ixbar_bytes +=
                         range_match_double_bytes_container.count(cont_byte.first) ? 2 : 1;
@@ -439,7 +434,7 @@ TxScore* GreedyTxScoreMaker::make(const Transaction& tx) const {
         const int imba = ixbar_imbalanced_alignment(cont_bytes);
         rv->n_table_ixbar_imbalanced_alignments += imba;
         LOG6("Allocated match-key container bytes of table " << tb->name);
-        for (const auto& b : cont_bytes) {
+        for (const auto &b : cont_bytes) {
             LOG6(b);
         }
         LOG6("imba score: " << imba);
@@ -447,16 +442,16 @@ TxScore* GreedyTxScoreMaker::make(const Transaction& tx) const {
 
     constexpr int STAGE_SRAM_IXBAR_BYTES = 128;
     constexpr int STAGE_TCAM_IXBAR_BYTES = 66;
-    const auto add_stage_pressure = [&](StageIxbarContBytesMap& stage_ixbar_bytes,
-                                        const StageIxbarContBytesMap& stage_allocated,
+    const auto add_stage_pressure = [&](StageIxbarContBytesMap &stage_ixbar_bytes,
+                                        const StageIxbarContBytesMap &stage_allocated,
                                         const int limit) {
-        for (auto& stage_cont_bytes : stage_ixbar_bytes) {
-            const auto& stage = stage_cont_bytes.first;
-            auto& cont_bytes = stage_cont_bytes.second;
+        for (auto &stage_cont_bytes : stage_ixbar_bytes) {
+            const auto &stage = stage_cont_bytes.first;
+            auto &cont_bytes = stage_cont_bytes.second;
             // merge with allocated byte stats.
             if (stage_allocated.count(stage)) {
-                const auto& allocated = stage_allocated.at(stage);
-                for (const auto& cont_byte : cont_bytes) {
+                const auto &allocated = stage_allocated.at(stage);
+                for (const auto &cont_byte : cont_bytes) {
                     if (!allocated.count(cont_byte)) {
                         rv->n_stage_new_ixbar_bytes +=
                             range_match_double_bytes_container.count(cont_byte.first) ? 2 : 1;
@@ -471,11 +466,9 @@ TxScore* GreedyTxScoreMaker::make(const Transaction& tx) const {
             }
         }
     };
-    add_stage_pressure(new_stage_sram_ixbar_cont_bytes,
-                       vision_i.stage_sram_ixbar_cont_bytes,
+    add_stage_pressure(new_stage_sram_ixbar_cont_bytes, vision_i.stage_sram_ixbar_cont_bytes,
                        STAGE_SRAM_IXBAR_BYTES);
-    add_stage_pressure(new_stage_tcam_ixbar_cont_bytes,
-                       vision_i.stage_tcam_ixbar_cont_bytes,
+    add_stage_pressure(new_stage_tcam_ixbar_cont_bytes, vision_i.stage_tcam_ixbar_cont_bytes,
                        STAGE_TCAM_IXBAR_BYTES);
 
     // empty tx.
@@ -486,7 +479,7 @@ TxScore* GreedyTxScoreMaker::make(const Transaction& tx) const {
     rv->n_max_overflowed = 0;
     for (const auto s : Device::phvSpec().containerSizes()) {
         int this_size_total_overflow = 0;
-        for (const auto& gress : {INGRESS, EGRESS}) {
+        for (const auto &gress : {INGRESS, EGRESS}) {
             // we do not count size overflow Kind::tagalong, Kind::dark and because they are
             // usually more than required. Especially for TPHV, there are many headers that
             // can be overlaid.
@@ -527,9 +520,8 @@ TxScore* GreedyTxScoreMaker::make(const Transaction& tx) const {
     if (Device::currentDevice() == Device::TOFINO) {
         const auto tx_used = tx.getTagalongCollectionsUsed();
         const auto parent_used = parent->getTagalongCollectionsUsed();
-        for (const auto& col : tx_used) {
-            if (!parent_used.count(col))
-                rv->n_inc_used_tphv_collection++;
+        for (const auto &col : tx_used) {
+            if (!parent_used.count(col)) rv->n_inc_used_tphv_collection++;
         }
     }
 
@@ -564,9 +556,9 @@ int GreedyTxScore::used_L2_bits() const {
     return total_used_bits;
 }
 
-bool GreedyTxScore::better_than(const TxScore* other_score) const {
+bool GreedyTxScore::better_than(const TxScore *other_score) const {
     if (other_score == nullptr) return true;
-    const GreedyTxScore* other = dynamic_cast<const GreedyTxScore*>(other_score);
+    const GreedyTxScore *other = dynamic_cast<const GreedyTxScore *>(other_score);
     BUG_CHECK(other, "comparing GreedyTxScore with score of different type: %1%",
               other_score->str());
     BUG_CHECK(vision_i == other->vision_i, "comparing with different maker vision");
@@ -585,10 +577,8 @@ bool GreedyTxScore::better_than(const TxScore* other_score) const {
     // useless. In the future, if we could have some post-phv-alloc optimization
     // passes for ixbar usages, maybe we could lower the priority.
     // less ixbar bytes.
-    IF_NEQ_RETURN_IS_LESS(n_table_new_ixbar_bytes,
-                          other->n_table_new_ixbar_bytes);
-    IF_NEQ_RETURN_IS_LESS(n_stage_new_ixbar_bytes,
-                          other->n_stage_new_ixbar_bytes);
+    IF_NEQ_RETURN_IS_LESS(n_table_new_ixbar_bytes, other->n_table_new_ixbar_bytes);
+    IF_NEQ_RETURN_IS_LESS(n_stage_new_ixbar_bytes, other->n_stage_new_ixbar_bytes);
 
     // container balance has the second highest priority.
     IF_NEQ_RETURN_IS_LESS(n_size_overflow, other->n_size_overflow);
@@ -615,8 +605,7 @@ bool GreedyTxScore::better_than(const TxScore* other_score) const {
                           other->used_containers.sum(Kind::normal));
 
     // less gress setting is preferred.
-    IF_NEQ_RETURN_IS_LESS(n_set_gress.sum(Kind::normal),
-                          other->n_set_gress.sum(Kind::normal));
+    IF_NEQ_RETURN_IS_LESS(n_set_gress.sum(Kind::normal), other->n_set_gress.sum(Kind::normal));
     IF_NEQ_RETURN_IS_LESS(n_set_deparser_gress.sum(Kind::normal),
                           other->n_set_deparser_gress.sum(Kind::normal));
     IF_NEQ_RETURN_IS_LESS(n_mismatched_deparser_gress.sum(Kind::normal),
@@ -627,8 +616,7 @@ bool GreedyTxScore::better_than(const TxScore* other_score) const {
     // less tphv collection use (same as gress setting).
     IF_NEQ_RETURN_IS_LESS(n_inc_used_tphv_collection, other->n_inc_used_tphv_collection);
 
-    IF_NEQ_RETURN_IS_LESS(n_range_match_nibbles_occupied,
-                          other->n_range_match_nibbles_occupied);
+    IF_NEQ_RETURN_IS_LESS(n_range_match_nibbles_occupied, other->n_range_match_nibbles_occupied);
 
     return false;
 }
@@ -679,15 +667,15 @@ std::string GreedyTxScore::str() const {
     return ss.str();
 }
 
-std::ostream& operator<<(std::ostream& out, const ContainerByte& c) {
+std::ostream &operator<<(std::ostream &out, const ContainerByte &c) {
     out << c.first << "@" << c.second;
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const KindSizeIndexedMap& m) {
+std::ostream &operator<<(std::ostream &out, const KindSizeIndexedMap &m) {
     out << "{";
     std::string sep = "";
-    for (const auto& kv : m.m) {
+    for (const auto &kv : m.m) {
         out << sep << kv.first.first << kv.first.second << ": " << kv.second;
         sep = ", ";
     }
@@ -695,19 +683,19 @@ std::ostream& operator<<(std::ostream& out, const KindSizeIndexedMap& m) {
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const Vision& v) {
+std::ostream &operator<<(std::ostream &out, const Vision &v) {
     out << "Vision {\n";
     out << " overall container bits status: " << "\n";
     auto kinds = std::vector<PHV::Kind>{Kind::mocha};
     if (Device::currentDevice() == Device::TOFINO) {
         kinds = {Kind::tagalong};
     }
-    for (const auto& k : kinds) {
-        out << "  " << k << "'s demand v.s. supply: " << v.bits_demand(k)
-            << "/" << v.bits_supply(k) << "\n";
+    for (const auto &k : kinds) {
+        out << "  " << k << "'s demand v.s. supply: " << v.bits_demand(k) << "/" << v.bits_supply(k)
+            << "\n";
     }
     out << " container demand v.s. supply: \n";
-    for (const auto& gress : {gress_t::INGRESS, gress_t::EGRESS}) {
+    for (const auto &gress : {gress_t::INGRESS, gress_t::EGRESS}) {
         for (const auto k : {Kind::tagalong, Kind::dark, Kind::mocha, Kind::normal}) {
             for (const auto s : {PHV::Size::b8, PHV::Size::b16, PHV::Size::b32}) {
                 auto n_req = v.cont_required.at(gress).get(k, s);
@@ -722,18 +710,17 @@ std::ostream& operator<<(std::ostream& out, const Vision& v) {
     }
     std::stringstream ss;
     std::vector<std::string> headers = {"Type"};
-    for (auto i = 0; i < Device::numStages(); i++)
-        headers.push_back(std::to_string(i));
+    for (auto i = 0; i < Device::numStages(); i++) headers.push_back(std::to_string(i));
     TablePrinter tp(ss, headers, TablePrinter::Align::CENTER);
-    for (const auto& t : {std::string("SRAM"), std::string("TCAM")}) {
+    for (const auto &t : {std::string("SRAM"), std::string("TCAM")}) {
         std::vector<std::string> row;
         row.push_back(t);
-        const StageIxbarContBytesMap* bytes = &v.stage_sram_ixbar_cont_bytes;
+        const StageIxbarContBytesMap *bytes = &v.stage_sram_ixbar_cont_bytes;
         if (t == "TCAM") {
             bytes = &v.stage_tcam_ixbar_cont_bytes;
         }
         for (auto i = 0; i < Device::numStages(); i++) {
-            row.push_back(std::to_string(bytes->count(i) ? bytes->at(i).size(): 0));
+            row.push_back(std::to_string(bytes->count(i) ? bytes->at(i).size() : 0));
         }
         tp.addRow(row);
     }

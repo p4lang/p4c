@@ -10,17 +10,17 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-
 #include <optional>
 #include <regex>
+
 #include <boost/algorithm/string/replace.hpp>
-#include "gtest/gtest.h"
 
 #include "bf-p4c/common/header_stack.h"
 #include "bf-p4c/phv/analysis/mutex_overlay.h"
 #include "bf-p4c/phv/phv_fields.h"
 #include "bf-p4c/phv/pragma/pa_mutually_exclusive.h"
 #include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "gtest/gtest.h"
 #include "ir/ir.h"
 #include "lib/error.h"
 #include "test/gtest/helpers.h"
@@ -227,11 +227,13 @@ TEST_F(PaMutuallyExclusivePragmaTest, P4_16) {
     EXPECT_FALSE(checkNoMatchingPhvField(stderr, "h1.f1"));
     EXPECT_FALSE(checkNoMatchingPhvField(stderr, "h2.f1"));
 
-    EXPECT_EQ(phv.field_mutex()(phv.field("ingress::h1.f2"_cs)->id, phv.field("ingress::h2.f1"_cs)->id),
-              false);
+    EXPECT_EQ(
+        phv.field_mutex()(phv.field("ingress::h1.f2"_cs)->id, phv.field("ingress::h2.f1"_cs)->id),
+        false);
 
-    EXPECT_EQ(phv.field_mutex()(phv.field("ingress::h1.f1"_cs)->id, phv.field("ingress::h2.f1"_cs)->id),
-              true);
+    EXPECT_EQ(
+        phv.field_mutex()(phv.field("ingress::h1.f1"_cs)->id, phv.field("ingress::h2.f1"_cs)->id),
+        true);
 
     auto test2 = createPaMutuallyExclusiveHeaderPragmaTestCase();
     ASSERT_TRUE(test2);
@@ -244,13 +246,13 @@ TEST_F(PaMutuallyExclusivePragmaTest, P4_16) {
     EXPECT_FALSE(checkNoMatchingPhvField(stderr, "headers.h1"));
     EXPECT_FALSE(checkNoMatchingPhvField(stderr, "h2"));
 
-    EXPECT_EQ(
-        phv2.field_mutex()(phv2.field("ingress::h1.f2"_cs)->id, phv2.field("ingress::h2.f2"_cs)->id),
-        true);
+    EXPECT_EQ(phv2.field_mutex()(phv2.field("ingress::h1.f2"_cs)->id,
+                                 phv2.field("ingress::h2.f2"_cs)->id),
+              true);
 
-    EXPECT_EQ(
-        phv2.field_mutex()(phv2.field("ingress::h1.f1"_cs)->id, phv2.field("ingress::h2.f1"_cs)->id),
-        true);
+    EXPECT_EQ(phv2.field_mutex()(phv2.field("ingress::h1.f1"_cs)->id,
+                                 phv2.field("ingress::h2.f1"_cs)->id),
+              true);
 }
 
 TEST_F(PaMutuallyExclusivePragmaTest, P4_16_NoMatchingPhvField) {

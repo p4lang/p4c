@@ -1,7 +1,8 @@
-import os
-import sys
 import argparse
 import difflib
+import os
+import sys
+
 
 def process_file(filename, dry_run=False):
     with open(filename, 'r', encoding='utf-8') as f:
@@ -129,7 +130,7 @@ def process_file(filename, dry_run=False):
                 modified_lines,
                 fromfile=f'{filename} (original)',
                 tofile=f'{filename} (modified)',
-                lineterm=''
+                lineterm='',
             )
             print('\n'.join(diff))
         else:
@@ -139,6 +140,7 @@ def process_file(filename, dry_run=False):
     else:
         print(f"No changes in: {filename}")
 
+
 def process_directory(directory, dry_run=False):
     for root, dirs, files in os.walk(directory):
         for file in files:
@@ -146,10 +148,13 @@ def process_directory(directory, dry_run=False):
                 filepath = os.path.join(root, file)
                 process_file(filepath, dry_run=dry_run)
 
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Update string literals in .cpp files.')
     parser.add_argument('directory', nargs='?', default='.', help='Directory to process')
-    parser.add_argument('-n', '--dry-run', action='store_true', help='Dry run without modifying files')
+    parser.add_argument(
+        '-n', '--dry-run', action='store_true', help='Dry run without modifying files'
+    )
 
     args = parser.parse_args()
 

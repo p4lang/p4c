@@ -10,16 +10,16 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+#include "bf-p4c/logging/container_size_extractor.h"
+
 #include <algorithm>
 #include <numeric>
-
-#include "bf-p4c/logging/container_size_extractor.h"
 
 void ContainerSizeExtractor::extract(const PragmaContainerSize &pragma, ConstrainedFieldMap &dst) {
     for (auto &kv : pragma.field_to_layout()) {
         auto fieldName = kv.first->name;
-        BUG_CHECK(dst.find(fieldName) != dst.end(),
-            "Field %s not present in ConstrainedFieldMap", fieldName);
+        BUG_CHECK(dst.find(fieldName) != dst.end(), "Field %s not present in ConstrainedFieldMap",
+                  fieldName);
 
         applyConstraintToField(dst[fieldName], kv.second);
     }
@@ -48,7 +48,7 @@ bool ContainerSizeExtractor::isLoggableOnField(const std::vector<int> &layout) {
     /* Constraint is loggable on field (rather than on slices) iff layout
        all items in layout have the same value. */
     for (unsigned i = 0; i < layout.size() - 1; i++) {
-        if (layout[i] != layout[i+1]) return false;
+        if (layout[i] != layout[i + 1]) return false;
     }
 
     return true;
@@ -57,17 +57,19 @@ bool ContainerSizeExtractor::isLoggableOnField(const std::vector<int> &layout) {
 unsigned ContainerSizeExtractor::getFieldSize(const ConstrainedField &field) {
     le_bitrange aggregated;
     auto &slices = field.getSlices();
-    for (const auto & slice : slices) {
+    for (const auto &slice : slices) {
         aggregated |= slice.getRange();
     }
     return aggregated.size();
 }
 
-std::vector<le_bitrange> ContainerSizeExtractor::computeSlicing(
-                                            unsigned fieldSize, const std::vector<int> &layout) {
+std::vector<le_bitrange> ContainerSizeExtractor::computeSlicing(unsigned fieldSize,
+                                                                const std::vector<int> &layout) {
     unsigned layoutSum = static_cast<unsigned>(std::accumulate(layout.begin(), layout.end(), 0));
-    BUG_CHECK(fieldSize <= layoutSum, "Invalid container size constraint"
-        ", sum of layout is %d, field size is %d", layoutSum, fieldSize);
+    BUG_CHECK(fieldSize <= layoutSum,
+              "Invalid container size constraint"
+              ", sum of layout is %d, field size is %d",
+              layoutSum, fieldSize);
 
     std::vector<le_bitrange> result;
     result.reserve(layout.size());
@@ -92,25 +94,25 @@ std::vector<le_bitrange> ContainerSizeExtractor::computeSlicing(
     return result;
 }
 
-void ContainerSizeExtractor::updateFieldSlicesWithSlicing(
-                            const std::vector<le_bitrange> &slicing, ConstrainedField &field) {
+void ContainerSizeExtractor::updateFieldSlicesWithSlicing(const std::vector<le_bitrange> &slicing,
+                                                          ConstrainedField &field) {
     auto &slices = field.getSlices();
 
     // First add non-duplicate slices to field
     for (auto range : slicing) {
         // If range is not represented by anything in slices
-        if (std::none_of(slices.begin(), slices.end(), [range] (const ConstrainedSlice &slice) {
-            return slice.getRange() == range;
-        })) {
+        if (std::none_of(slices.begin(), slices.end(), [range](const ConstrainedSlice &slice) {
+                return slice.getRange() == range;
+            })) {
             field.addSlice(ConstrainedSlice(field, range));
         }
     }
 }
 
-std::vector<ConstrainedSlice*> ContainerSizeExtractor::getSortedSlicePointers(
-                            const std::vector<le_bitrange> &slicing, ConstrainedField &field) {
+std::vector<ConstrainedSlice *> ContainerSizeExtractor::getSortedSlicePointers(
+    const std::vector<le_bitrange> &slicing, ConstrainedField &field) {
     auto &slices = field.getSlices();
-    std::vector<ConstrainedSlice*> result;
+    std::vector<ConstrainedSlice *> result;
     result.reserve(slicing.size());
 
     for (auto range : slicing) {
@@ -124,12 +126,14 @@ std::vector<ConstrainedSlice*> ContainerSizeExtractor::getSortedSlicePointers(
     return result;
 }
 
-void ContainerSizeExtractor::applyConstraintToSlices(std::vector<ConstrainedSlice*> &slices,
+void ContainerSizeExtractor::applyConstraintToSlices(std::vector<ConstrainedSlice *> &slices,
                                                      const std::vector<int> &layout) {
     using ContainerSizeReason = Constraints::ContainerSizeConstraint::ContainerSizeReason;
 
-    BUG_CHECK(slices.size() == layout.size(), "Container Size constraint layout size %d"
-        " mismatches number of slices %d.", layout.size(), slices.size());
+    BUG_CHECK(slices.size() == layout.size(),
+              "Container Size constraint layout size %d"
+              " mismatches number of slices %d.",
+              layout.size(), slices.size());
 
     for (unsigned i = 0; i < slices.size(); i++) {
         Constraints::ContainerSizeConstraint c;

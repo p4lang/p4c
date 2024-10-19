@@ -13,8 +13,8 @@
 #ifndef BF_P4C_MIDEND_DEFUSE_H_
 #define BF_P4C_MIDEND_DEFUSE_H_
 
-#include "ir/ir.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "ir/ir.h"
 
 /**
  * @ingroup midend
@@ -34,7 +34,9 @@
  * expected to run after inlining when all such calls have been flattened.
  * It could be extended to deal with the before inlining case.
  */
-class ComputeDefUse : public Inspector, public ControlFlowVisitor, public P4WriteContext,
+class ComputeDefUse : public Inspector,
+                      public ControlFlowVisitor,
+                      public P4WriteContext,
                       public P4::ResolutionContext {
     ComputeDefUse *clone() const { return new ComputeDefUse(*this); }
     void flow_merge(Visitor &) override;
@@ -46,20 +48,24 @@ class ComputeDefUse : public Inspector, public ControlFlowVisitor, public P4Writ
     // be copied out of the Visitor::Context objects, as they are allocated on the stack and
     // will become invalid as the IR traversal continues
     struct loc_t {
-        const IR::Node  *node;
-        const loc_t     *parent;
+        const IR::Node *node;
+        const loc_t *parent;
         bool operator<(const loc_t &a) const {
             if (node != a.node) return node->id < a.node->id;
             if (!a.parent) return parent != nullptr;
-            return *parent < *a.parent; }
-        template<class T> const T *find() const {
+            return *parent < *a.parent;
+        }
+        template <class T>
+        const T *find() const {
             for (auto *p = this; p; p = p->parent) {
-                if (auto *t = p->node->to<T>()) return t; }
-            return nullptr; }
+                if (auto *t = p->node->to<T>()) return t;
+            }
+            return nullptr;
+        }
     };
 
  private:
-    std::set<loc_t>             &cached_locs;
+    std::set<loc_t> &cached_locs;
     const loc_t *getLoc(const Visitor::Context *ctxt);
     const loc_t *getLoc() { return getLoc(getChildContext()); }
     const loc_t *getLoc(const IR::Node *, const Visitor::Context *);
@@ -70,14 +76,14 @@ class ComputeDefUse : public Inspector, public ControlFlowVisitor, public P4Writ
         // definitions of a symbol (or part of a symbol) visible at this point in the
         // program.  `defs` will be empty if `live` is; if not those defs are visible only
         // for those bits/elements/fields where live is set.
-        ordered_set<const loc_t *>      defs;
-        bitvec                          live;
-        def_info_t                      *parent = nullptr;
+        ordered_set<const loc_t *> defs;
+        bitvec live;
+        def_info_t *parent = nullptr;
         // track valid bit access for headers separate from the rest of the header
-        ordered_set<const loc_t *>      valid_bit_defs;
+        ordered_set<const loc_t *> valid_bit_defs;
         // one of these maps will always be empty.
-        std::map<cstring, def_info_t>           fields;
-        std::map<le_bitrange, def_info_t>       slices;  // also used for arrays
+        std::map<cstring, def_info_t> fields;
+        std::map<le_bitrange, def_info_t> slices;  // also used for arrays
         // keys in slices are always non-overlapping (checked by slices_sanity)
         void slices_sanity();
         std::map<le_bitrange, def_info_t>::iterator slices_overlap_begin(le_bitrange);
@@ -88,7 +94,7 @@ class ComputeDefUse : public Inspector, public ControlFlowVisitor, public P4Writ
         def_info_t(const def_info_t &);
         def_info_t(def_info_t &&);
     };
-    ordered_map<const IR::IDeclaration *, def_info_t>      def_info;
+    ordered_map<const IR::IDeclaration *, def_info_t> def_info;
     void add_uses(const loc_t *, def_info_t &);
 
     // computed defuse info for all uses and defs in the program
@@ -98,14 +104,15 @@ class ComputeDefUse : public Inspector, public ControlFlowVisitor, public P4Writ
         // uses/defs are lvalue expressions, or param declarations.
         ordered_map<const IR::Node *, ordered_set<const loc_t *>> defs;
         ordered_map<const IR::Node *, ordered_set<const loc_t *>> uses;
-    } &defuse;
+    } & defuse;
     static const ordered_set<const loc_t *> empty;
 
     profile_t init_apply(const IR::Node *root) override {
         auto rv = Inspector::init_apply(root);
         state = SKIPPING;
         clear();
-        return rv; }
+        return rv;
+    }
     bool preorder(const IR::P4Control *) override;
     bool preorder(const IR::P4Table *) override;
     bool preorder(const IR::P4Action *) override;
@@ -127,27 +134,33 @@ class ComputeDefUse : public Inspector, public ControlFlowVisitor, public P4Writ
     class SetupJoinPoints;
     void applySetupJoinPoints(const IR::Node *root) override;
     bool filter_join_point(const IR::Node *) override;
+
  public:
-    ComputeDefUse() : ResolutionContext(true),
-                      cached_locs(*new std::set<loc_t>), defuse(*new defuse_t) {
-        joinFlows = true; }
+    ComputeDefUse()
+        : ResolutionContext(true), cached_locs(*new std::set<loc_t>), defuse(*new defuse_t) {
+        joinFlows = true;
+    }
     void clear() {
         cached_locs.clear();
         def_info.clear();
         defuse.defs.clear();
-        defuse.uses.clear(); }
+        defuse.uses.clear();
+    }
 
     const ordered_set<const loc_t *> &getDefs(const IR::Node *n) const {
         auto it = defuse.defs.find(n);
-        return it == defuse.defs.end() ? empty : it->second; }
+        return it == defuse.defs.end() ? empty : it->second;
+    }
     const ordered_set<const loc_t *> &getUses(const IR::Node *n) const {
         auto it = defuse.uses.find(n);
-        return it == defuse.uses.end() ? empty : it->second; }
+        return it == defuse.uses.end() ? empty : it->second;
+    }
 
     // for debugging
     friend std::ostream &operator<<(std::ostream &, const defuse_t &);
     friend std::ostream &operator<<(std::ostream &out, const ComputeDefUse &cdu) {
-        return out << cdu.defuse; }
+        return out << cdu.defuse;
+    }
 #if BAREFOOT_INTERNAL
     friend void dump(const def_info_t &);
     friend void dump(const ordered_map<const IR::IDeclaration *, def_info_t> &);

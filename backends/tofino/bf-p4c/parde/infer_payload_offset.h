@@ -13,10 +13,10 @@
 #ifndef BF_P4C_PARDE_INFER_PAYLOAD_OFFSET_H_
 #define BF_P4C_PARDE_INFER_PAYLOAD_OFFSET_H_
 
-#include "ir/ir.h"
 #include "bf-p4c/common/field_defuse.h"
-#include "bf-p4c/parde/parde_visitor.h"
 #include "bf-p4c/parde/parde_utils.h"
+#include "bf-p4c/parde/parde_visitor.h"
+#include "ir/ir.h"
 
 /**
  * @ingroup parde
@@ -101,7 +101,7 @@
 
 class InferPayloadOffset : public PassManager {
  public:
-    InferPayloadOffset(const PhvInfo& phv, const FieldDefUse& defuse);
+    InferPayloadOffset(const PhvInfo &phv, const FieldDefUse &defuse);
 };
 
-#endif  /* BF_P4C_PARDE_INFER_PAYLOAD_OFFSET_H_ */
+#endif /* BF_P4C_PARDE_INFER_PAYLOAD_OFFSET_H_ */

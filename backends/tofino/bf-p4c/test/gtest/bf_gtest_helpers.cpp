@@ -10,37 +10,37 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-
 #include "bf_gtest_helpers.h"
 
 #include <climits>
-#include <regex>
 #include <exception>
+#include <regex>
 #include <sstream>
 #include <utility>
+
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/trim_all.hpp>
 
-#include "ir/ir.h"
-#include "p4headers.h"
-#include "lib/exceptions.h"
-#include "lib/sourceCodeBuilder.h"
 #include "bf-p4c/arch/arch.h"
-#include "bf-p4c/common/bridged_packing.h"
+#include "bf-p4c/asm.h"
+#include "bf-p4c/backend.h"
 #include "bf-p4c/bf-p4c-options.h"
+#include "bf-p4c/common/bridged_packing.h"
 #include "bf-p4c/common/front_end_policy.h"
 #include "bf-p4c/common/parse_annotations.h"
 #include "bf-p4c/logging/phv_logging.h"
 #include "bf-p4c/logging/source_info_logging.h"
-#include "bf-p4c/phv/create_thread_local_instances.h"
-#include "frontends/parsers/parserDriver.h"
-#include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4/typeMap.h"
-#include "frontends/p4/toP4/toP4.h"
-#include "frontends/p4/frontend.h"    // Used by run_p4c_frontend_passes
 #include "bf-p4c/midend.h"
-#include "bf-p4c/backend.h"
-#include "bf-p4c/asm.h"
+#include "bf-p4c/phv/create_thread_local_instances.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/frontend.h"  // Used by run_p4c_frontend_passes
+#include "frontends/p4/toP4/toP4.h"
+#include "frontends/p4/typeMap.h"
+#include "frontends/parsers/parserDriver.h"
+#include "ir/ir.h"
+#include "lib/exceptions.h"
+#include "lib/sourceCodeBuilder.h"
+#include "p4headers.h"
 
 namespace P4::Test {
 
@@ -50,7 +50,7 @@ std::string trimWhiteSpace(std::string str) {
     return str;
 }
 
-std::string trimAnnotations(const std::string& str) {
+std::string trimAnnotations(const std::string &str) {
     // Are nested parentheses legal? If they are count them.
     auto nestedParen = R"(@\w+\([^\)]*\()";
     if (std::regex_search(str, std::regex(nestedParen)))
@@ -59,7 +59,7 @@ std::string trimAnnotations(const std::string& str) {
     return std::regex_replace(str, std::regex(annotation), "");
 }
 
-std::string convert_to_regex(const std::string& expr) {
+std::string convert_to_regex(const std::string &expr) {
     auto exprLen = expr.length();
     auto stepOverChar = [exprLen](size_t pos) {
         ++pos;
@@ -73,19 +73,17 @@ std::string convert_to_regex(const std::string& expr) {
     for (;;) {
         auto p = expr.find_first_of(specialChars, pos);
         regex += expr.substr(pos, p - pos);  // Copy everything up to p.
-        if (p == std::string::npos)
-            return regex;
+        if (p == std::string::npos) return regex;
         if (expr[p] == '`') {
             pos = stepOverChar(p);
             p = expr.find_first_of('`', pos);
             // If range contains a "\x60", the regex parser will escape it.
             regex += expr.substr(pos, p - pos);  // Copy everything up to p.
-            if (p == std::string::npos)
-                throw std::invalid_argument("Mismatch back quote");
+            if (p == std::string::npos) throw std::invalid_argument("Mismatch back quote");
             pos = stepOverChar(p);
         } else if (expr.compare(p, 4, "\\x60") == 0) {
             // We don't want to add a second '\'. Leave it for the regex parser.
-            regex += expr[p];   // The "x60" will be copied as normal.
+            regex += expr[p];  // The "x60" will be copied as normal.
             pos = stepOverChar(p);
         } else {
             // A regex special char that needs escaping.
@@ -96,28 +94,23 @@ std::string convert_to_regex(const std::string& expr) {
     }
 }
 
-size_t match_basic(const std::string& expr,
-                   const std::string& str, const size_t pos, const size_t n_pos) {
+size_t match_basic(const std::string &expr, const std::string &str, const size_t pos,
+                   const size_t n_pos) {
     auto strLen = str.length();
     // std::compare does not mind if n_pos > strLen.
-    if (pos > strLen || pos > n_pos)
-        return failed;  // Handle bad arguments.
+    if (pos > strLen || pos > n_pos) return failed;  // Handle bad arguments.
     auto exprLen = expr.length();
     auto next_pos = pos + exprLen;
-    if (next_pos > n_pos)
-        return failed;  // Not enough characters to match against.
-    if (str.compare(pos, exprLen, expr) != 0)
-        return failed;  // Not an exact match.
-    return next_pos;  // Maybe one beyond the end of 'str'.
+    if (next_pos > n_pos) return failed;  // Not enough characters to match against.
+    if (str.compare(pos, exprLen, expr) != 0) return failed;  // Not an exact match.
+    return next_pos;                                          // Maybe one beyond the end of 'str'.
 }
 
-Result match(const CheckList& exprs,
-             const std::string& str, size_t pos, size_t n_pos, Flag flag) {
+Result match(const CheckList &exprs, const std::string &str, size_t pos, size_t n_pos, Flag flag) {
     auto strLen = str.length();
-    if (n_pos > strLen)
-        n_pos = strLen;
+    if (n_pos > strLen) n_pos = strLen;
     if (pos > strLen || pos > n_pos)
-        return Result(/* success */ false, /* pos */ failed, /* count */0);  // Handle bad 'pos'.
+        return Result(/* success */ false, /* pos */ failed, /* count */ 0);  // Handle bad 'pos'.
 
     auto from = str.cbegin() + pos;
     auto to = str.cbegin() + n_pos;
@@ -127,81 +120,73 @@ Result match(const CheckList& exprs,
     std::smatch sm;
 
     // First attempt the whole CheckList.
-    for (const auto& expr : exprs) {
+    for (const auto &expr : exprs) {
         // Trim spaces if present & required.
         std::string e;
-        if (flag & TrimWhiteSpace)
-            e += "` *`";
+        if (flag & TrimWhiteSpace) e += "` *`";
         e += expr;
         regex_exprs.emplace_back(convert_to_regex(e));
         regex += regex_exprs.back();
     }
-    if (std::regex_search(from, to, sm, std::regex(regex))
-        && !sm.prefix().length())
+    if (std::regex_search(from, to, sm, std::regex(regex)) && !sm.prefix().length())
         return Result(/* success */ true, /* pos */ pos + sm[0].length(),
                       /* count */ exprs.size(), /* match */ sm);
 
     // Re-run to find out where we failed. Linear search is good enough.
     Result res(/* success */ false, pos, /* count */ 0);
     regex = "";
-    for (const auto& r_e : regex_exprs) {
+    for (const auto &r_e : regex_exprs) {
         regex += r_e;  // Reuse the saved 'convert_to_regex()' value.
         if (!std::regex_search(from, to, sm, std::regex(regex)) ||
             sm.prefix().length())  // Once we have a prefix, it wont go away.
-            return res;     // Found the fail point.
+            return res;            // Found the fail point.
         ++res.count;
         res.pos = pos + sm[0].length();
     }
     BUG("Unreachable code");
 }
 
-size_t find_next_end(const std::string& blk, size_t pos, const std::string& ends) {
-    if (ends.length() != 2 || ends[0] == ends[1])
-        throw std::invalid_argument("Bad ends string");
+size_t find_next_end(const std::string &blk, size_t pos, const std::string &ends) {
+    if (ends.length() != 2 || ends[0] == ends[1]) throw std::invalid_argument("Bad ends string");
     int count = 1;
     pos = blk.find_first_of(ends, pos);
     while (pos != std::string::npos) {
         if (blk[pos] == ends[0])
             ++count;
         else if (blk[pos] == ends[1])
-            if (--count == 0)
-                return pos;
+            if (--count == 0) return pos;
         pos = blk.find_first_of(ends, pos + 1);
     }
     return pos;
 }
 
-std::pair<size_t, size_t> find_next_block(const std::string& blk, size_t pos,
-                                          const std::string& ends) {
-    if (ends.length() != 2 || ends[0] == ends[1])
-        throw std::invalid_argument("Bad ends string");
+std::pair<size_t, size_t> find_next_block(const std::string &blk, size_t pos,
+                                          const std::string &ends) {
+    if (ends.length() != 2 || ends[0] == ends[1]) throw std::invalid_argument("Bad ends string");
     pos = blk.find_first_of(ends[0], pos);
-    if (pos == std::string::npos)
-        return std::make_pair(pos, pos);
+    if (pos == std::string::npos) return std::make_pair(pos, pos);
     return std::make_pair(pos, find_next_end(blk, pos + 1, ends));
 }
 
 std::string get_ends(char opening) {
     switch (opening) {
-    case '{':
-        return BraceEnds();
-    case '(':
-        return ParenEnds();
-    case '[':
-        return SquareEnds();
-    case '<':
-        return AngleEnds();
-    default:
-        return "";
+        case '{':
+            return BraceEnds();
+        case '(':
+            return ParenEnds();
+        case '[':
+            return SquareEnds();
+        case '<':
+            return AngleEnds();
+        default:
+            return "";
     }
 }
 
-
 }  // namespace Match
 
-
 namespace {
-char marker_last_char(const std::string& blockMarker) {
+char marker_last_char(const std::string &blockMarker) {
     // Find the actual last character of marker e.g. the '{' of the any_to_open_brace.
     size_t len = blockMarker.length();
     while (len > 1 && blockMarker[len - 1] == '`') {
@@ -212,19 +197,16 @@ char marker_last_char(const std::string& blockMarker) {
         } else {
             // Remove sub-pattern markers etc.
             int count = 0;
-            while (len > 1 &&
-                   blockMarker[len - 2] != '\\' &&   // not escaped.
+            while (len > 1 && blockMarker[len - 2] != '\\' &&  // not escaped.
                    (blockMarker[len - 1] == '(' || blockMarker[len - 1] == ')')) {
-                count += (blockMarker[len - 1] == ')')? 1 : -1;
-                if (count < 0)
-                    throw std::invalid_argument("Invalid blockMarker parentheses");
+                count += (blockMarker[len - 1] == ')') ? 1 : -1;
+                if (count < 0) throw std::invalid_argument("Invalid blockMarker parentheses");
                 --len;  // Remove sub-pattern.
             }
             if (!count && blockMarker[len - 1] != '`') {
                 --len;  // Remove opening `. It was an empty regex.
-            } else if (len > 1 &&
-                       blockMarker[len - 2] != '\\' &&   // not escaped.
-                       blockMarker.find_first_of("^$.|?*+{}[]\\", len-1) == len-1) {
+            } else if (len > 1 && blockMarker[len - 2] != '\\' &&  // not escaped.
+                       blockMarker.find_first_of("^$.|?*+{}[]\\", len - 1) == len - 1) {
                 // Ends with a special regex char.
                 throw std::invalid_argument("marker_last_char must be a literal");
             } else {
@@ -232,8 +214,7 @@ char marker_last_char(const std::string& blockMarker) {
             }
         }
     }
-    if (len)
-        return blockMarker[len - 1];
+    if (len) return blockMarker[len - 1];
     return 0;
 }
 
@@ -437,12 +418,12 @@ std::string TofinoMin() {
 }  // namespace
 
 TestCode::TestCode(Hdr header, std::string code,
-                   const std::initializer_list<std::string>& insertion,
-                   const std::string& blockMarker,
-                   const std::initializer_list<std::string>& options) :
-                   context(new BFNContext()) {
+                   const std::initializer_list<std::string> &insertion,
+                   const std::string &blockMarker,
+                   const std::initializer_list<std::string> &options)
+    : context(new BFNContext()) {
     // Set up default options.
-    auto& o = BackendOptions();
+    auto &o = BackendOptions();
     o.langVersion = CompilerOptions::FrontendVersion::P4_16;
     switch (header) {
         default:
@@ -455,16 +436,15 @@ TestCode::TestCode(Hdr header, std::string code,
         case Hdr::Tofino2arch:
             o.target = "tofino2"_cs;
             o.arch = "t2na"_cs;
-           break;
+            break;
     }
 
-    std::vector<char*> argv;
+    std::vector<char *> argv;
     // We must have at least one command-line option viz the name.
-    static const char* testcode = "TestCode";
-    argv.push_back(const_cast<char*>(testcode));
+    static const char *testcode = "TestCode";
+    argv.push_back(const_cast<char *>(testcode));
     // Add the input options.
-    for (const auto& arg : options)
-        argv.push_back(const_cast<char*>(arg.data()));
+    for (const auto &arg : options) argv.push_back(const_cast<char *>(arg.data()));
     argv.push_back(nullptr);
     o.process(argv.size() - 1, argv.data());
     Device::init(o.target);
@@ -504,8 +484,7 @@ TestCode::TestCode(Hdr header, std::string code,
     source << code;
 
     program = P4::P4ParserDriver::parse(source, testcode);
-    if (::errorCount() || !program)
-        throw std::invalid_argument("TestCode built a bad program.");
+    if (::errorCount() || !program) throw std::invalid_argument("TestCode built a bad program.");
 
     if (!blockMarker.empty()) {
         marker = std::regex(Match::convert_to_regex(blockMarker));
@@ -515,16 +494,18 @@ TestCode::TestCode(Hdr header, std::string code,
     }
 }
 
-std::string TestCode::min_control_shell() {return R"(
+std::string TestCode::min_control_shell() {
+    return R"(
     %0%                                                 // Defines 'struct Headers'
     control TestIngress<H>(inout H hdr);
     @pkginfo(arch="FOO", version="0.0.0")
     package Switch<H>(TestIngress<H> ig);
     control testingress(inout Headers headers) {%1%}    // The control block
-    Switch(testingress()) main;)";}
+    Switch(testingress()) main;)";
+}
 
-
-std::string TestCode::tofino_shell() {return R"(
+std::string TestCode::tofino_shell() {
+    return R"(
     %0% // Define struct headers_t{}; struct local_metadata_t{}
     parser ingress_parser(packet_in packet, out headers_t hdr,
                           out local_metadata_t ig_md, out ingress_intrinsic_metadata_t ig_intr_md)
@@ -556,22 +537,20 @@ std::string TestCode::tofino_shell() {return R"(
              egress_parser(),
              egress_control(),
              egress_deparser()) pipeline;
-    Switch(pipeline) main;)";}
+    Switch(pipeline) main;)";
+}
 
-bool TestCode::apply_pass(Visitor& pass, const Visitor_Context* context) {
+bool TestCode::apply_pass(Visitor &pass, const Visitor_Context *context) {
     auto before = ::errorCount();
     if (pipe) {
         pipe = pipe->apply(pass, context);
-        if (!pipe)
-            std::cerr << "apply_pass to pipe failed\n";
+        if (!pipe) std::cerr << "apply_pass to pipe failed\n";
     } else {
         program = program->apply(pass, context);
-        if (!program)
-            std::cerr << "apply_pass to program failed\n";
+        if (!program) std::cerr << "apply_pass to program failed\n";
     }
     return ::errorCount() == before;
 }
-
 
 bool TestCode::apply_pass(Pass pass) {
     constexpr bool skip_side_effect_ordering = true;
@@ -585,8 +564,7 @@ bool TestCode::apply_pass(Pass pass) {
             // The 'frontendPasses' are encapsulated in a run method, so we have to call that.
             auto parseAnnotations = BFN::ParseAnnotations();
             auto policy = BFN::FrontEndPolicy(&parseAnnotations, skip_side_effect_ordering);
-            program = P4::FrontEnd(&policy)
-                .run(options, program);
+            program = P4::FrontEnd(&policy).run(options, program);
             // program->apply(*new BFN::FindArchitecture());
             return ::errorCount() == before;
         }
@@ -604,12 +582,11 @@ bool TestCode::apply_pass(Pass pass) {
             pipe = nullptr;
             backend = nullptr;
             mauasm = nullptr;
-            ordered_map<cstring, const IR::Type_StructLike*> emptyRepackedMap;
+            ordered_map<cstring, const IR::Type_StructLike *> emptyRepackedMap;
             P4::ReferenceMap emptyRefMap;
             CollectSourceInfoLogging emptySrcInfoLog(emptyRefMap);
             SubstitutePackedHeaders extractPipes(options, emptyRepackedMap, emptySrcInfoLog);
-            if (!apply_pass(extractPipes) || !extractPipes.pipe.size())
-                return false;
+            if (!apply_pass(extractPipes) || !extractPipes.pipe.size()) return false;
             pipe = extractPipes.pipe[0];
             return pipe != nullptr;
         }
@@ -631,21 +608,19 @@ bool TestCode::apply_pass(Pass pass) {
         }
 
         case Pass::PhvLogging: {
-            if (!backend)
-                throw std::invalid_argument("FullBackend must be run first");
+            if (!backend) throw std::invalid_argument("FullBackend must be run first");
             if (phv_log_file.empty())
                 throw std::invalid_argument("Path to phv log file must be set first");
-            return apply_pass(new PhvLogging(phv_log_file.c_str(),
-                backend->get_phv(), backend->get_clot(),
-                *(backend->get_phv_logging()),
-                *(backend->get_phv_logging_defuse_info()),
+            return apply_pass(new PhvLogging(
+                phv_log_file.c_str(), backend->get_phv(), backend->get_clot(),
+                *(backend->get_phv_logging()), *(backend->get_phv_logging_defuse_info()),
                 backend->get_table_alloc(), backend->get_tbl_summary()));
         }
     }
     return false;
 }
 
-Match::Result TestCode::match(CodeBlock blk_type, const Match::CheckList& exprs) const {
+Match::Result TestCode::match(CodeBlock blk_type, const Match::CheckList &exprs) const {
     return Match::match(exprs, extract_code(blk_type), 0, std::string::npos, flag);
 }
 
@@ -655,8 +630,7 @@ std::string TestCode::extract_p4() const {
     auto before = ::errorCount();
     auto pass = P4::ToP4(builder, false);
     program->apply(pass);
-    if (::errorCount() != before)
-        return "Invalid Program";
+    if (::errorCount() != before) return "Invalid Program";
     auto blk = builder.toString();
 
     // Trim out the block - the block may move location.
@@ -664,9 +638,8 @@ std::string TestCode::extract_p4() const {
     if (!ends.empty() && std::regex_search(blk, sm, marker)) {
         size_t start = sm.prefix().length() + sm[0].length();
         size_t end = Match::find_next_end(blk, start, ends);
-        if (end != std::string::npos)
-            --end;
-        blk = blk.substr(start, end-start);
+        if (end != std::string::npos) --end;
+        blk = blk.substr(start, end - start);
     }
     return blk;
 }
@@ -679,11 +652,10 @@ std::string TestCode::extract_asm(CodeBlock blk_type) const {
     // TODO do we need to apply this pass before we can extract a non-Mau CodeBlock?
     if (!mauasm) {
         auto before = ::errorCount();
-        mauasm = new Tofino::MauAsmOutput {backend->get_phv(), pipe, backend->get_nxt_tbl(),
-                                   backend->get_power_and_mpr(), BackendOptions()};
+        mauasm = new Tofino::MauAsmOutput{backend->get_phv(), pipe, backend->get_nxt_tbl(),
+                                          backend->get_power_and_mpr(), BackendOptions()};
         pipe->apply(*mauasm);
-        if (::errorCount() != before)
-            return "Invalid MauAsmOutput";
+        if (::errorCount() != before) return "Invalid MauAsmOutput";
     }
 
     std::ostringstream oss;
@@ -718,13 +690,11 @@ std::string TestCode::extract_asm(CodeBlock blk_type) const {
 }
 
 std::string TestCode::extract_code(CodeBlock blk_type, size_t pos) const {
-    auto blk = (blk_type == CodeBlock::P4Code)? extract_p4() : extract_asm(blk_type);
+    auto blk = (blk_type == CodeBlock::P4Code) ? extract_p4() : extract_asm(blk_type);
 
     // Apply any requested options.
-    if (flag & Match::TrimAnnotations)
-        blk = Match::trimAnnotations(blk);
-    if (flag & Match::TrimWhiteSpace)
-        blk = Match::trimWhiteSpace(blk);
+    if (flag & Match::TrimAnnotations) blk = Match::trimAnnotations(blk);
+    if (flag & Match::TrimWhiteSpace) blk = Match::trimWhiteSpace(blk);
     return blk.substr(pos);
 }
 

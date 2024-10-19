@@ -14,12 +14,13 @@
 #define BF_P4C_COMMON_MULTIPLE_APPLY_H_
 
 #include <set>
+
 #include "bf-p4c/ir/thread_visitor.h"
 #include "bf-p4c/lib/union_find.hpp"
 #include "bf-p4c/mau/mau_visitor.h"
 #include "bf-p4c/mau/table_mutex.h"
-#include "lib/ordered_set.h"
 #include "lib/ordered_map.h"
+#include "lib/ordered_set.h"
 
 using namespace P4;
 
@@ -65,7 +66,7 @@ class MultipleApply : public PassManager {
     std::set<cstring> topological_errors;
     std::set<cstring> default_next_errors;
 
-    const BFN_Options& options;
+    const BFN_Options &options;
 
     /// Disable long branches
     bool longBranchDisabled = false;
@@ -75,26 +76,26 @@ class MultipleApply : public PassManager {
 
     /// Checks that tables are applied at most once in all paths through the program.
     class MutuallyExclusiveApplies : public MauInspector {
-        TablesMutuallyExclusive& mutex;
+        TablesMutuallyExclusive &mutex;
 
         /// Any tables failing this mutual-exclusion check will have their names added to this set.
         /// Used by gtest.
-        std::set<cstring>& errors;
+        std::set<cstring> &errors;
 
         /// Maps each source-level P4 table to the Table objects representing the various
         /// invocations of that P4 table.
-        ordered_map<const IR::P4Table*, ordered_set<const IR::MAU::Table*>> mutex_apply;
+        ordered_map<const IR::P4Table *, ordered_set<const IR::MAU::Table *>> mutex_apply;
 
-        Visitor::profile_t init_apply(const IR::Node* root) override;
-        void postorder(const IR::MAU::Table*) override;
+        Visitor::profile_t init_apply(const IR::Node *root) override;
+        void postorder(const IR::MAU::Table *) override;
 
      public:
-        explicit MutuallyExclusiveApplies(TablesMutuallyExclusive& m, std::set<cstring>& e)
+        explicit MutuallyExclusiveApplies(TablesMutuallyExclusive &m, std::set<cstring> &e)
             : mutex(m), errors(e) {}
     };
 
     /// Groups together tables that will be de-duplicated.
-    UnionFind<const IR::MAU::Table*> duplicate_tables;
+    UnionFind<const IR::MAU::Table *> duplicate_tables;
 
     /// Checks the invariant that the conditional control flow that follows each table is the same
     /// across all calls of that table. It also populates \p duplicate_tables
@@ -103,22 +104,22 @@ class MultipleApply : public PassManager {
         MultipleApply &self;
 
         /// Gives the canonical Table object for each P4Table.
-        ordered_map<const IR::P4Table*, const IR::MAU::Table*> canon_table;
+        ordered_map<const IR::P4Table *, const IR::MAU::Table *> canon_table;
 
         /// A set of all gateways
         ordered_set<const IR::MAU::Table *> all_gateways;
 
         /// Marks two Tables as being duplicates and determines whether they are equivalent.
-        bool check_equiv(const IR::MAU::Table* table1, const IR::MAU::Table* table2,
-            bool makeUnion = true);
+        bool check_equiv(const IR::MAU::Table *table1, const IR::MAU::Table *table2,
+                         bool makeUnion = true);
 
         /// Marks the Tables in two TableSeqs as being duplicates and determines whether they are
         /// equivalent.
-        bool check_equiv(const IR::MAU::TableSeq* seq1, const IR::MAU::TableSeq* seq2,
-            bool makeUnion = true);
+        bool check_equiv(const IR::MAU::TableSeq *seq1, const IR::MAU::TableSeq *seq2,
+                         bool makeUnion = true);
 
         /// Determines whether two gateway conditions are equivalent.
-        bool equiv_gateway(const IR::Expression* expr1, const IR::Expression* expr2);
+        bool equiv_gateway(const IR::Expression *expr1, const IR::Expression *expr2);
 
         Visitor::profile_t init_apply(const IR::Node *root) override;
 
@@ -126,7 +127,7 @@ class MultipleApply : public PassManager {
         void postorder(const IR::MAU::Table *) override;
 
      public:
-        explicit CheckStaticNextTable(MultipleApply &s) : self(s) { }
+        explicit CheckStaticNextTable(MultipleApply &s) : self(s) {}
     };
 
     /// De-duplicates Table and TableSeq objects using \p duplicate_tables.
@@ -140,23 +141,21 @@ class MultipleApply : public PassManager {
 
         /// Gives the replacement Table object for each representative table
         /// in \p duplicate_tables.
-        std::map<gress_t, std::map<const IR::MAU::Table*, const IR::MAU::Table*>> replacements;
+        std::map<gress_t, std::map<const IR::MAU::Table *, const IR::MAU::Table *>> replacements;
 
         /// The TableSeq objects we've already produced.
-        std::map<gress_t, std::vector<const IR::MAU::TableSeq*>> table_seqs_seen;
+        std::map<gress_t, std::vector<const IR::MAU::TableSeq *>> table_seqs_seen;
 
         /// @returns the input gress, if provided at construction, or VisitingThread(this).
-        gress_t getGress() const {
-            return gress ? *gress : VisitingThread(this);
-        }
+        gress_t getGress() const { return gress ? *gress : VisitingThread(this); }
 
-        Visitor::profile_t init_apply(const IR::Node* root) override;
-        const IR::Node* postorder(IR::MAU::Table* tbl) override;
-        const IR::Node* postorder(IR::MAU::TableSeq* seq) override;
+        Visitor::profile_t init_apply(const IR::Node *root) override;
+        const IR::Node *postorder(IR::MAU::Table *tbl) override;
+        const IR::Node *postorder(IR::MAU::TableSeq *seq) override;
 
      public:
-        explicit DeduplicateTables(MultipleApply &s, std::optional<gress_t> gress = std::nullopt):
-        self(s), gress(gress) { }
+        explicit DeduplicateTables(MultipleApply &s, std::optional<gress_t> gress = std::nullopt)
+            : self(s), gress(gress) {}
     };
 
     /// Checks the invariant that tables have a topological order. This is done by using
@@ -168,26 +167,22 @@ class MultipleApply : public PassManager {
     /// (MutuallyExclusiveApplies).
     class CheckTopologicalTables : public MauInspector {
         /// Any tables failing this check will have their names added to this set. Used by gtest.
-        std::set<cstring>& errors;
+        std::set<cstring> &errors;
 
-        bool preorder(const IR::MAU::TableSeq*) override;
+        bool preorder(const IR::MAU::TableSeq *) override;
 
      public:
-        explicit CheckTopologicalTables(std::set<cstring>& errors) : errors(errors) {}
+        explicit CheckTopologicalTables(std::set<cstring> &errors) : errors(errors) {}
     };
 
-    Visitor::profile_t init_apply(const IR::Node* root) override;
+    Visitor::profile_t init_apply(const IR::Node *root) override;
 
  public:
-    bool mutex_error(cstring name) {
-        return mutex_errors.count(name);
-    }
+    bool mutex_error(cstring name) { return mutex_errors.count(name); }
 
     unsigned num_mutex_errors() { return mutex_errors.size(); }
 
-    bool topological_error(cstring name) {
-        return topological_errors.count(name);
-    }
+    bool topological_error(cstring name) { return topological_errors.count(name); }
 
     unsigned num_topological_errors() { return topological_errors.size(); }
 
@@ -199,12 +194,8 @@ class MultipleApply : public PassManager {
 
     // For gtests, allow doing just the passes for de-duplicating tables and allow specifying which
     // gress is being visited.
-    MultipleApply(
-        const BFN_Options& options,
-        std::optional<gress_t> gress = std::nullopt,
-        bool dedup_only = false,
-        bool run_default_next = true);
+    MultipleApply(const BFN_Options &options, std::optional<gress_t> gress = std::nullopt,
+                  bool dedup_only = false, bool run_default_next = true);
 };
-
 
 #endif /* BF_P4C_COMMON_MULTIPLE_APPLY_H_ */

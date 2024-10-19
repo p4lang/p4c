@@ -10,8 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_LOGGING_COLLECT_DIAGNOSTIC_CHECKS_H_
-#define EXTENSIONS_BF_P4C_LOGGING_COLLECT_DIAGNOSTIC_CHECKS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_LOGGING_COLLECT_DIAGNOSTIC_CHECKS_H_
+#define BACKENDS_TOFINO_BF_P4C_LOGGING_COLLECT_DIAGNOSTIC_CHECKS_H_
 #include "bf-p4c/bf-p4c-options.h"
 #include "bf-p4c/logging/bf_error_reporter.h"
 
@@ -57,4 +57,4 @@ void collect_diagnostic_checks(BfErrorReporter &reporter, BFN_Options &options);
 
 }  // namespace BFN
 
-#endif /* EXTENSIONS_BF_P4C_LOGGING_COLLECT_DIAGNOSTIC_CHECKS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_LOGGING_COLLECT_DIAGNOSTIC_CHECKS_H_ */

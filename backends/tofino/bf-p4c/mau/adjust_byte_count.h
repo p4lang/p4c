@@ -10,8 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_MAU_ADJUST_BYTE_COUNT_H_
-#define EXTENSIONS_BF_P4C_MAU_ADJUST_BYTE_COUNT_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_ADJUST_BYTE_COUNT_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_ADJUST_BYTE_COUNT_H_
 
 #include "bf-p4c/logging/pass_manager.h"
 #include "bf-p4c/mau/mau_visitor.h"
@@ -27,28 +27,30 @@ using namespace P4;
 // single value as adjust byte count. Post verification the value is stored in
 // the extern object
 class AdjustByteCountSetup : public PassManager {
-    std::map<const IR::MAU::AttachedMemory*, const int64_t> adjust_byte_counts;
+    std::map<const IR::MAU::AttachedMemory *, const int64_t> adjust_byte_counts;
 
     class Scan : public MauInspector {
         AdjustByteCountSetup &self;
-     public :
+
+     public:
         explicit Scan(AdjustByteCountSetup &self) : self(self) {}
         bool preorder(const IR::MAU::Primitive *prim) override;
     };
 
     class Update : public MauTransform {
         AdjustByteCountSetup &self;
-     public :
+
+     public:
         int get_bytecount(IR::MAU::AttachedMemory *am);
         const IR::MAU::Counter *preorder(IR::MAU::Counter *counter) override;
         const IR::MAU::Meter *preorder(IR::MAU::Meter *meter) override;
         explicit Update(AdjustByteCountSetup &self) : self(self) {}
     };
 
- public :
+ public:
     AdjustByteCountSetup();
 };
 
 }  // namespace BFN
 
-#endif  /* EXTENSIONS_BF_P4C_MAU_ADJUST_BYTE_COUNT_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_ADJUST_BYTE_COUNT_H_ */

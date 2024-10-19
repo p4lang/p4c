@@ -6,7 +6,6 @@ major_version = 8
 minor_version = 6
 patch_version = 0
 
+
 def get_code_version():
-    return "%s.%s.%s" % (str(major_version),
-                         str(minor_version),
-                         str(patch_version))
+    return "%s.%s.%s" % (str(major_version), str(minor_version), str(patch_version))

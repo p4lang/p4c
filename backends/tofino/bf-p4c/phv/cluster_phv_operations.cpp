@@ -11,40 +11,25 @@
  */
 
 #include "bf-p4c/phv/cluster_phv_operations.h"
-#include "bf-p4c/phv/phv_fields.h"
+
 #include "bf-p4c/ir/bitrange.h"
+#include "bf-p4c/phv/phv_fields.h"
 #include "common/utils.h"
 #include "lib/log.h"
 
-const ordered_set<cstring> PHV_Field_Operations::BITWISE_OPS = {
-    "set"_cs,
-    "conditionally-set"_cs,
-    "and"_cs,
-    "or"_cs,
-    "not"_cs,
-    "nor"_cs,
-    "andca"_cs,
-    "andcb"_cs,
-    "nand"_cs,
-    "orca"_cs,
-    "orcb"_cs,
-    "xnor"_cs,
-    "xor"_cs
-};
+const ordered_set<cstring> PHV_Field_Operations::BITWISE_OPS = {"set"_cs,   "conditionally-set"_cs,
+                                                                "and"_cs,   "or"_cs,
+                                                                "not"_cs,   "nor"_cs,
+                                                                "andca"_cs, "andcb"_cs,
+                                                                "nand"_cs,  "orca"_cs,
+                                                                "orcb"_cs,  "xnor"_cs,
+                                                                "xor"_cs};
 
-const ordered_set<cstring> PHV_Field_Operations::SHIFT_OPS = {
-    "shl"_cs,
-    "shru"_cs,
-    "shrs"_cs,
-    "funnel-shift"_cs
-};
+const ordered_set<cstring> PHV_Field_Operations::SHIFT_OPS = {"shl"_cs, "shru"_cs, "shrs"_cs,
+                                                              "funnel-shift"_cs};
 
-const ordered_set<cstring> PHV_Field_Operations::SATURATE_OPS = {
-    "saddu"_cs,
-    "sadds"_cs,
-    "ssubu"_cs,
-    "ssubs"_cs
-};
+const ordered_set<cstring> PHV_Field_Operations::SATURATE_OPS = {"saddu"_cs, "sadds"_cs, "ssubu"_cs,
+                                                                 "ssubs"_cs};
 
 bool PHV_Field_Operations::Find_Salu_Sources::preorder(const IR::MAU::SaluAction *a) {
     visit(a->action, "action");  // just visit the action instructions
@@ -70,8 +55,7 @@ bool PHV_Field_Operations::Find_Salu_Sources::preorder(const IR::MAU::HashDist *
 
 bool PHV_Field_Operations::Find_Salu_Sources::preorder(const IR::MAU::IXBarExpression *e) {
     for (auto ex : hash_sources)
-        if (ex->equiv(*e))
-            return true;
+        if (ex->equiv(*e)) return true;
     hash_sources.push_back(e);
     return true;
 }
@@ -83,23 +67,26 @@ bool PHV_Field_Operations::Find_Salu_Sources::preorder(const IR::MAU::IXBarExpre
  * If a range have overlap with another one, both will be kept intact and the
  * max_total_operand_size might be overvalued triggering an unneeded alignment constraint.
  */
-void PHV_Field_Operations::Find_Salu_Sources::collapse_contained(std::map<le_bitrange,
-                                                                 const IR::Expression *> &m) {
+void PHV_Field_Operations::Find_Salu_Sources::collapse_contained(
+    std::map<le_bitrange, const IR::Expression *> &m) {
     for (auto it = m.begin(); it != m.end();) {
         bool remove = false;
         for (auto &el : Keys(m)) {
             if (el == it->first) continue;
             if (el.contains(it->first)) {
                 remove = true;
-                break; }
-            if (el.lo > it->first.lo) break; }
+                break;
+            }
+            if (el.lo > it->first.lo) break;
+        }
         if (remove)
             it = m.erase(it);
         else
-            ++it; }
+            ++it;
+    }
 }
 
-void PHV_Field_Operations::processSaluInst(const IR::MAU::Instruction* inst) {
+void PHV_Field_Operations::processSaluInst(const IR::MAU::Instruction *inst) {
     LOG4("Stateful instruction: " << inst);
     // SALU operands have the following constraints:
     //
@@ -120,7 +107,7 @@ void PHV_Field_Operations::processSaluInst(const IR::MAU::Instruction* inst) {
     //
     // TODO: This last constraint is not implemented!
 
-    auto* statefulAlu = findContext<IR::MAU::StatefulAlu>();
+    auto *statefulAlu = findContext<IR::MAU::StatefulAlu>();
     BUG_CHECK(statefulAlu, "Found an SALU instruction not in a Stateful ALU IR node: %1%", inst);
     int sourceWidth = statefulAlu->source_width();
 
@@ -149,16 +136,13 @@ void PHV_Field_Operations::processSaluInst(const IR::MAU::Instruction* inst) {
     if (!inst->operands.empty()) {
         for (int idx = 0; idx < int(inst->operands.size()); ++idx) {
             le_bitrange field_bits;
-            PHV::Field* field = phv.field(inst->operands[idx], &field_bits);
+            PHV::Field *field = phv.field(inst->operands[idx], &field_bits);
             if (!field) continue;
 
             // Add details of this operation to the field object.
-            field->operations().push_back({
-                is_bitwise_op,
-                true /* is_salu_inst */,
-                inst,
-                idx == 0 ? PHV::FieldAccessType::W : PHV::FieldAccessType::R,
-                field_bits });
+            field->operations().push_back(
+                {is_bitwise_op, true /* is_salu_inst */, inst,
+                 idx == 0 ? PHV::FieldAccessType::W : PHV::FieldAccessType::R, field_bits});
 
             // Require SALU operands to be placed in the bottom bits of their
             // PHV containers.  In the future, this can be handled by
@@ -204,19 +188,21 @@ void PHV_Field_Operations::processSaluInst(const IR::MAU::Instruction* inst) {
                     LOG4("Setting Field:" << field << " setStartBits(" << size << ", bitvec(0, 1)");
                     field->setStartBits(size, bitvec(0, 1));
                 } else {
-                    LOG4("Setting Field:" << field << " setStartBits(" << size << ", bitvec(" <<
-                         int(idx * int(size)) << ", 1)");
-                    field->setStartBits(size, bitvec(idx * int(size), 1)); } } }
+                    LOG4("Setting Field:" << field << " setStartBits(" << size << ", bitvec("
+                                          << int(idx * int(size)) << ", 1)");
+                    field->setStartBits(size, bitvec(idx * int(size), 1));
                 }
+            }
+        }
+    }
 }
 
-void PHV_Field_Operations::processInst(const IR::MAU::Instruction* inst) {
-    if (inst->operands.empty())
-        return;
+void PHV_Field_Operations::processInst(const IR::MAU::Instruction *inst) {
+    if (inst->operands.empty()) return;
 
     LOG4("Instruction: " << inst);
     le_bitrange dest_bits;
-    auto* dst = phv.field(inst->operands[0], &dest_bits);
+    auto *dst = phv.field(inst->operands[0], &dest_bits);
     bool alignStatefulSource = false;
     for (int idx = 0; idx < int(inst->operands.size()); ++idx) {
         if (idx > 0) {
@@ -227,7 +213,7 @@ void PHV_Field_Operations::processInst(const IR::MAU::Instruction* inst) {
             }
         }
         le_bitrange field_bits;
-        PHV::Field* field = phv.field(inst->operands[idx], &field_bits);
+        PHV::Field *field = phv.field(inst->operands[idx], &field_bits);
         if (!field) {
             // Each variant of subtraction must have PHV as the last operand. Constant are
             // pre-processed and transformed as "add" instruction prior to this pass.
@@ -236,8 +222,7 @@ void PHV_Field_Operations::processInst(const IR::MAU::Instruction* inst) {
                  inst->name == "ssubs")) {
                 // sizeInBytes and sizeInBits will be resolved as constant.
                 const IR::Expression *e = inst->operands[idx];
-                if (auto *sl = e->to<IR::Slice>())
-                    e = sl->e0;
+                if (auto *sl = e->to<IR::Slice>()) e = sl->e0;
 
                 if (e->is<IR::MAU::TypedPrimitive>()) {
                     if (e->to<IR::MAU::TypedPrimitive>()->name == "sizeInBytes" ||
@@ -245,31 +230,31 @@ void PHV_Field_Operations::processInst(const IR::MAU::Instruction* inst) {
                         continue;
                 }
 
-                fatal_error("Second operand of arithmetic subtraction cannot be sourced from "
-                            "action data. The second operand must either come from a packet field, "
-                            "metadata or a constant. %1%", inst);
+                fatal_error(
+                    "Second operand of arithmetic subtraction cannot be sourced from "
+                    "action data. The second operand must either come from a packet field, "
+                    "metadata or a constant. %1%",
+                    inst);
             }
             continue;
         }
 
         // Add details of this operation to the field object.
         bool is_bitwise_op = BITWISE_OPS.count(inst->name) > 0;
-        field->operations().push_back({
-            is_bitwise_op,
-            false /* is_salu_inst */,
-            inst,
-            idx == 0 ? PHV::FieldAccessType::W : PHV::FieldAccessType::R,
-            field_bits });
+        field->operations().push_back({is_bitwise_op, false /* is_salu_inst */, inst,
+                                       idx == 0 ? PHV::FieldAccessType::W : PHV::FieldAccessType::R,
+                                       field_bits});
 
         // The remaining constraints only apply to non-bitwise operations.
-        if (is_bitwise_op)
-            continue;
+        if (is_bitwise_op) continue;
 
         // For shift operations, the sources must be assigned no-pack.
         bool is_shift = SHIFT_OPS.count(inst->name) > 0;
         if (is_shift) {
-            LOG3("Marking " << field->name << " as 'no pack' because it is a source of a shift "
-                 "operation " << inst);
+            LOG3("Marking " << field->name
+                            << " as 'no pack' because it is a source of a shift "
+                               "operation "
+                            << inst);
             field->set_solitary(PHV::SolitaryReason::ALU);
             if (inst->name == "funnel-shift") {
                 field->set_exact_containers(true);
@@ -285,7 +270,7 @@ void PHV_Field_Operations::processInst(const IR::MAU::Instruction* inst) {
             // applied to a slice and not the entire field.
             for (int op_idx = 0; op_idx < int(inst->operands.size()); ++op_idx) {
                 le_bitrange op_bits;
-                PHV::Field* op_field = phv.field(inst->operands[op_idx], &op_bits);
+                PHV::Field *op_field = phv.field(inst->operands[op_idx], &op_bits);
                 if (op_field && (op_bits.size() != op_field->size)) {
                     no_split = true;
                     break;
@@ -295,9 +280,10 @@ void PHV_Field_Operations::processInst(const IR::MAU::Instruction* inst) {
             // sure the most significant bit is located at the most significant bit of a container
             if (inst->name == "shrs") {
                 if ((field_bits.size() % 8) != 0)
-                    fatal_error("Operands of a signed shift right operations must have a size "
-                                "aligned to a byte boundary but field %1% is %2% bits wide in: %3%",
-                                field->name, field_bits.size(), inst);
+                    fatal_error(
+                        "Operands of a signed shift right operations must have a size "
+                        "aligned to a byte boundary but field %1% is %2% bits wide in: %3%",
+                        field->name, field_bits.size(), inst);
 
                 field->set_exact_containers(true);
                 field->set_same_container_group(true);
@@ -317,8 +303,8 @@ void PHV_Field_Operations::processInst(const IR::MAU::Instruction* inst) {
         if (field_bits.size() > 64)
             fatal_error(
                 "Operands of arithmetic operations cannot be greater than 64 bits, "
-                "but field %1% is %2% bits and is involved in: %3%", field->name,
-                field_bits.size(), inst);
+                "but field %1% is %2% bits and is involved in: %3%",
+                field->name, field_bits.size(), inst);
 
         if (field_bits.size() > 32) {
             if (field->exact_containers() && field->size % 32 != 0) {
@@ -335,14 +321,16 @@ void PHV_Field_Operations::processInst(const IR::MAU::Instruction* inst) {
             }
             bool success = field->add_wide_arith_start_bit(field_bits.lo);
             if (!success) {
-              fatal_error(
-                  "Operand field bit %1% of wide arithmetic operation cannot have even and odd "
-                  "container placement constraints.  Field %2% has an even alignement "
-                  "constraint from: %3%", field_bits.lo, field->name, inst);
+                fatal_error(
+                    "Operand field bit %1% of wide arithmetic operation cannot have even and odd "
+                    "container placement constraints.  Field %2% has an even alignement "
+                    "constraint from: %3%",
+                    field_bits.lo, field->name, inst);
             }
-            LOG3("Marking " << field->name << "[" << field_bits.lo <<
-                 "] as used in wide arithmetic operation for "
-                 "instruction " << inst->name << ".");
+            LOG3("Marking " << field->name << "[" << field_bits.lo
+                            << "] as used in wide arithmetic operation for "
+                               "instruction "
+                            << inst->name << ".");
 
             LOG6("  field_bits = " << field_bits);
             int lo_lsb = field_bits.lo;
@@ -446,21 +434,23 @@ void PHV_Field_Operations::processInst(const IR::MAU::Instruction* inst) {
                     Device::phvSpec().containerSizes().count((PHV::Size)field->size) == 0
                     // TODO: fallback to solitary constrain until we implement mechanism
                     // to set per-fieldslice valid container range.
-                    && field_bits.hi == field->size - 1
-                    && inst->operands.at(0)->equiv(*src1)
-                    && src2->is<IR::Constant>())
-                {
-                    field->updateValidContainerRange(nw_bitrange(0, field->size-1));
+                    && field_bits.hi == field->size - 1 && inst->operands.at(0)->equiv(*src1) &&
+                    src2->is<IR::Constant>()) {
+                    field->updateValidContainerRange(nw_bitrange(0, field->size - 1));
                     LOG3("Setting " << field->name << " to MSB part of container");
                 } else {
                     field->set_solitary(PHV::SolitaryReason::ALU);
-                    LOG3("Marking " << field->name << " as 'no pack' because it is written in "
-                         "non-MOVE instruction " << inst->name << ".");
+                    LOG3("Marking " << field->name
+                                    << " as 'no pack' because it is written in "
+                                       "non-MOVE instruction "
+                                    << inst->name << ".");
                 }
             } else {
                 field->set_solitary(PHV::SolitaryReason::ALU);
-                LOG3("Marking " << field->name << " as 'no pack' because it is written in "
-                     "non-MOVE instruction " << inst->name << ".");
+                LOG3("Marking " << field->name
+                                << " as 'no pack' because it is written in "
+                                   "non-MOVE instruction "
+                                << inst->name << ".");
             }
         }
 
@@ -469,16 +459,21 @@ void PHV_Field_Operations::processInst(const IR::MAU::Instruction* inst) {
         // so that the missing bits (in the source compared to the destination) do not
         // contain any value that can affect the result of the operation
         if (dst && dst != field && field_bits.size() < dest_bits.size()) {
-            LOG3("Marking " << field->name << " as 'no pack' because it is a source of a "
-                 "non-MOVE operation to a larger field " << dst->name);
-            field->set_solitary(PHV::SolitaryReason::ALU); }
+            LOG3("Marking " << field->name
+                            << " as 'no pack' because it is a source of a "
+                               "non-MOVE operation to a larger field "
+                            << dst->name);
+            field->set_solitary(PHV::SolitaryReason::ALU);
+        }
 
         // For saturate operations, the sources must be assigned no-pack.
         auto is_saturate = SATURATE_OPS.count(inst->name);
         if (is_saturate && field != dst) {
-            LOG3("Marking "  << field->name << " as 'no pack' because it is a source of a " <<
-                 "saturate operation " << inst);
-            field->set_solitary(PHV::SolitaryReason::ALU); } }
+            LOG3("Marking " << field->name << " as 'no pack' because it is a source of a "
+                            << "saturate operation " << inst);
+            field->set_solitary(PHV::SolitaryReason::ALU);
+        }
+    }
 
     if (!alignStatefulSource) return;
 
@@ -488,7 +483,7 @@ void PHV_Field_Operations::processInst(const IR::MAU::Instruction* inst) {
     // container.
     for (int idx = 0; idx < int(inst->operands.size()); ++idx) {
         le_bitrange field_bits;
-        PHV::Field* field = phv.field(inst->operands[idx], &field_bits);
+        PHV::Field *field = phv.field(inst->operands[idx], &field_bits);
         if (!field) continue;
         if (field_bits.size() == field->size) {
             field->set_deparsed_bottom_bits(true);

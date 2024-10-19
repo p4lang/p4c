@@ -12,17 +12,18 @@
 
 #include <optional>
 #include <type_traits>
-#include <boost/algorithm/string/replace.hpp>
-#include "gtest/gtest.h"
 
-#include "ir/ir.h"
-#include "lib/cstring.h"
-#include "lib/error.h"
-#include "test/gtest/helpers.h"
+#include <boost/algorithm/string/replace.hpp>
+
 #include "bf-p4c/common/field_defuse.h"
 #include "bf-p4c/common/header_stack.h"
 #include "bf-p4c/phv/phv_fields.h"
 #include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "gtest/gtest.h"
+#include "ir/ir.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "test/gtest/helpers.h"
 
 namespace P4::Test {
 
@@ -30,8 +31,7 @@ class TofinoFieldAlignment : public TofinoBackendTest {};
 
 namespace {
 
-std::optional<TofinoPipeTestCase>
-createFieldAlignmentTestCase(const std::string& headerSource) {
+std::optional<TofinoPipeTestCase> createFieldAlignmentTestCase(const std::string &headerSource) {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
         header H {
 %HEADER_SOURCE%
@@ -66,7 +66,7 @@ createFieldAlignmentTestCase(const std::string& headerSource) {
 
     boost::replace_first(source, "%HEADER_SOURCE%", headerSource);
 
-    auto& options = BackendOptions();
+    auto &options = BackendOptions();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.target = "tofino"_cs;
     options.arch = "v1model"_cs;
@@ -81,24 +81,19 @@ createFieldAlignmentTestCase(const std::string& headerSource) {
 /// have been inferred.
 using ExpectedAlignmentMap = std::map<cstring, std::optional<unsigned>>;
 
-
 /// Given a Tofino program, infer alignments for its fields and check that they
 /// agree with the alignments we expect.
-void checkFieldAlignment(const IR::BFN::Pipe* pipe,
-                         const ExpectedAlignmentMap& expected) {
+void checkFieldAlignment(const IR::BFN::Pipe *pipe, const ExpectedAlignmentMap &expected) {
     PhvInfo phv;
-    PassManager computeAlignment = {
-        new CollectHeaderStackInfo,
-        new CollectPhvInfo(phv)
-    };
+    PassManager computeAlignment = {new CollectHeaderStackInfo, new CollectPhvInfo(phv)};
     pipe->apply(computeAlignment);
 
-    for (auto& item : expected) {
+    for (auto &item : expected) {
         auto fieldName = item.first;
         auto expectedAlignment = item.second;
         SCOPED_TRACE(fieldName);
 
-        auto* fieldInfo = phv.field(fieldName);
+        auto *fieldInfo = phv.field(fieldName);
         ASSERT_TRUE(fieldInfo != nullptr);
 
         if (!expectedAlignment) {
@@ -126,12 +121,12 @@ TEST_F(TofinoFieldAlignment, ByteAlignedFields) {
     EXPECT_EQ(0u, ::diagnosticCount());
 
     checkFieldAlignment(test->pipe, {
-        { "h.field1"_cs, 0 },
-        { "h.field2"_cs, 0 },
-        { "h.field3"_cs, 0 },
-        { "h.field4"_cs, 0 },
-        { "h.field5"_cs, 0 },
-    });
+                                        {"h.field1"_cs, 0},
+                                        {"h.field2"_cs, 0},
+                                        {"h.field3"_cs, 0},
+                                        {"h.field4"_cs, 0},
+                                        {"h.field5"_cs, 0},
+                                    });
 }
 
 TEST_F(TofinoFieldAlignment, SmallUnalignedFields) {
@@ -148,13 +143,13 @@ TEST_F(TofinoFieldAlignment, SmallUnalignedFields) {
     EXPECT_EQ(0u, ::diagnosticCount());
 
     checkFieldAlignment(test->pipe, {
-        { "h.field1"_cs, 7 },
-        { "h.field2"_cs, 4 },
-        { "h.field3"_cs, 0 },
-        { "h.field4"_cs, 3 },
-        { "h.field5"_cs, 6 },
-        { "h.field6"_cs, 0 },
-    });
+                                        {"h.field1"_cs, 7},
+                                        {"h.field2"_cs, 4},
+                                        {"h.field3"_cs, 0},
+                                        {"h.field4"_cs, 3},
+                                        {"h.field5"_cs, 6},
+                                        {"h.field6"_cs, 0},
+                                    });
 }
 
 TEST_F(TofinoFieldAlignment, LargeUnalignedFields) {
@@ -170,16 +165,16 @@ TEST_F(TofinoFieldAlignment, LargeUnalignedFields) {
     EXPECT_EQ(0u, ::diagnosticCount());
 
     checkFieldAlignment(test->pipe, {
-        { "h.field1"_cs, 1 },
-        { "h.field2"_cs, 0 },
-        { "h.field3"_cs, 7 },
-        { "h.field4"_cs, 3 },
-        { "h.field5"_cs, 0 },
-    });
+                                        {"h.field1"_cs, 1},
+                                        {"h.field2"_cs, 0},
+                                        {"h.field3"_cs, 7},
+                                        {"h.field4"_cs, 3},
+                                        {"h.field5"_cs, 0},
+                                    });
 }
 
 TEST_F(TofinoFieldAlignment, NonPardeFieldsDoNotForceAlignment) {
-    auto& options = BackendOptions();
+    auto &options = BackendOptions();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.target = "tofino"_cs;
     options.arch = "v1model"_cs;
@@ -227,10 +222,10 @@ TEST_F(TofinoFieldAlignment, NonPardeFieldsDoNotForceAlignment) {
     EXPECT_EQ(0u, ::diagnosticCount());
 
     checkFieldAlignment(test->pipe, {
-        { "usedInParser.field"_cs, 0 },
-        { "usedOnlyInMAU.field"_cs, std::nullopt },
-        { "meta.metadataField"_cs, std::nullopt },
-    });
+                                        {"usedInParser.field"_cs, 0},
+                                        {"usedOnlyInMAU.field"_cs, std::nullopt},
+                                        {"meta.metadataField"_cs, std::nullopt},
+                                    });
 }
 
 }  // namespace P4::Test

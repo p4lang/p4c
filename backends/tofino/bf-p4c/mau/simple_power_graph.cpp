@@ -10,6 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+#include "simple_power_graph.h"
+
 #include <array>
 #include <fstream>
 #include <iostream>
@@ -22,7 +24,6 @@
 
 #include "ir/ir.h"
 #include "lib/map.h"
-#include "simple_power_graph.h"
 
 namespace MauPower {
 
@@ -97,7 +98,8 @@ Node *SimplePowerGraph::create_node(UniqueId id) {
     Node *&n = nodes_[id];
     if (!n) {
         LOG4("create_node " << name_ << "::" << id);
-        n = new Node(id, get_next_id()); }
+        n = new Node(id, get_next_id());
+    }
     return n;
 }
 
@@ -321,7 +323,8 @@ double SimplePowerGraph::visit_node_power(Node *n, const std::map<UniqueId, Powe
     // LOG3("Visiting node for power: " << n->unique_id_ << indent);
     if (computed_power_.find(n->id_) != computed_power_.end()) {
         worst_path = computed_worst_path_.at(n->id_);
-        return computed_power_.at(n->id_); }
+        return computed_power_.at(n->id_);
+    }
     // Determine which outgoing edge has the worst-case power estimate.
     double worst_power = 0.0;
     std::set<UniqueId> local_worst_path;  // after determine worst path, return in worst path
@@ -380,7 +383,8 @@ void Node::dbprint(std::ostream &out, NodeAndEdgeSet *seen) const {
             out << Log::indent;
             for (auto *e : out_edges_) {
                 out << Log::endl;
-                e->dbprint(out, seen); }
+                e->dbprint(out, seen);
+            }
             out << Log::unindent;
         }
     } else {
@@ -395,7 +399,8 @@ void Edge::dbprint(std::ostream &out, NodeAndEdgeSet *seen) const {
             out << Log::indent;
             for (auto *c : child_nodes_) {
                 out << Log::endl;
-                c->dbprint(out, seen); }
+                c->dbprint(out, seen);
+            }
             out << Log::unindent;
         }
     } else {

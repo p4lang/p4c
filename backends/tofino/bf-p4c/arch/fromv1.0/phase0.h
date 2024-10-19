@@ -25,7 +25,7 @@ namespace P4 {
 namespace P4V1 {
 class TnaProgramStructure;
 }
-}
+}  // namespace P4
 
 namespace BFN {
 
@@ -53,26 +53,27 @@ namespace BFN {
  * @post The transformations above are applied if a phase 0 table is found.
  */
 struct TranslatePhase0 : public PassManager {
-    TranslatePhase0(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-            P4V1::TnaProgramStructure* s = nullptr);
+    TranslatePhase0(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                    P4V1::TnaProgramStructure *s = nullptr);
 };
 
-typedef std::map<const IR::BFN::TnaParser*, const IR::Type_StructLike*> Phase0CallMap;
+typedef std::map<const IR::BFN::TnaParser *, const IR::Type_StructLike *> Phase0CallMap;
 
 /* Check if phase0 extern - port_metadata_unpack - is used in the program.
  * Since we can have multiple ingress parsers, we create a map of parser -
  * fields to extract for each parser
  * Fields can be specified as a Type_Header/Type_Struct
  */
-class CheckPhaseZeroExtern: public Inspector {
+class CheckPhaseZeroExtern : public Inspector {
  public:
     CheckPhaseZeroExtern(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
-            Phase0CallMap *phase0_calls) :
-            refMap(refMap), typeMap(typeMap), phase0_calls(phase0_calls) {
-        setName("CheckPhaseZeroExtern"); }
+                         Phase0CallMap *phase0_calls)
+        : refMap(refMap), typeMap(typeMap), phase0_calls(phase0_calls) {
+        setName("CheckPhaseZeroExtern");
+    }
 
  private:
-    bool preorder(const IR::MethodCallExpression* expr) override;
+    bool preorder(const IR::MethodCallExpression *expr) override;
 
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
@@ -83,54 +84,58 @@ using Phase0AnnotMap = std::map<cstring, cstring>;
 
 class CollectPhase0Annotation : public Inspector {
  public:
-    explicit CollectPhase0Annotation(Phase0AnnotMap* name, Phase0AnnotMap* action) :
-        phase0_name_annot(name), phase0_action_annot(action) {
+    explicit CollectPhase0Annotation(Phase0AnnotMap *name, Phase0AnnotMap *action)
+        : phase0_name_annot(name), phase0_action_annot(action) {
         CHECK_NULL(name);
         CHECK_NULL(action);
     }
-    bool preorder(const IR::ParserState* state) override;
-    Phase0AnnotMap* phase0_name_annot;
-    Phase0AnnotMap* phase0_action_annot;
+    bool preorder(const IR::ParserState *state) override;
+    Phase0AnnotMap *phase0_name_annot;
+    Phase0AnnotMap *phase0_action_annot;
 };
 
-class UpdatePhase0NodeInParser: public Transform {
+class UpdatePhase0NodeInParser : public Transform {
  public:
-    explicit UpdatePhase0NodeInParser(
-            Phase0CallMap *phase0_calls, IR::IndexedVector<IR::Node> *decls,
-            Phase0AnnotMap *phase0_name_annot, Phase0AnnotMap *phase0_action_annot)
-            : phase0_calls(phase0_calls), declarations(decls),
-              phase0_name_annot(phase0_name_annot),
-              phase0_action_annot(phase0_action_annot) {
-        setName("UpdatePhase0NodeInParser"); }
+    explicit UpdatePhase0NodeInParser(Phase0CallMap *phase0_calls,
+                                      IR::IndexedVector<IR::Node> *decls,
+                                      Phase0AnnotMap *phase0_name_annot,
+                                      Phase0AnnotMap *phase0_action_annot)
+        : phase0_calls(phase0_calls),
+          declarations(decls),
+          phase0_name_annot(phase0_name_annot),
+          phase0_action_annot(phase0_action_annot) {
+        setName("UpdatePhase0NodeInParser");
+    }
 
  private:
-    IR::IndexedVector<IR::StructField>* canPackDataIntoPhase0(
-            const IR::IndexedVector<IR::StructField>* fields,
-            const int);
+    IR::IndexedVector<IR::StructField> *canPackDataIntoPhase0(
+        const IR::IndexedVector<IR::StructField> *fields, const int);
     // Populate Phase0 Node in Parser & generate new Phase0 Header type
-    IR::BFN::TnaParser* preorder(IR::BFN::TnaParser *parser) override;
+    IR::BFN::TnaParser *preorder(IR::BFN::TnaParser *parser) override;
 
     Phase0CallMap *phase0_calls;
     IR::IndexedVector<IR::Node> *declarations;
-    Phase0AnnotMap* phase0_name_annot;
-    Phase0AnnotMap* phase0_action_annot;
+    Phase0AnnotMap *phase0_name_annot;
+    Phase0AnnotMap *phase0_action_annot;
     int phase0_count = 0;
 };
 
 // Replace phase0 struct/header declaration to new phase0 header with flexible
 // layout annotation for backend
-class UpdatePhase0Header: public Transform {
+class UpdatePhase0Header : public Transform {
  public:
-    explicit UpdatePhase0Header(IR::IndexedVector<IR::Node>* decls)
-            : declarations(decls) {
-        setName("UpdatePhase0Header"); }
+    explicit UpdatePhase0Header(IR::IndexedVector<IR::Node> *decls) : declarations(decls) {
+        setName("UpdatePhase0Header");
+    }
 
  private:
-    IR::Node* preorder(IR::Type_Struct* s) override {
-        if (auto* d = declarations->getDeclaration(s->name.toString())) {
+    IR::Node *preorder(IR::Type_Struct *s) override {
+        if (auto *d = declarations->getDeclaration(s->name.toString())) {
             LOG4("modifying struct " << s << " to header " << d->to<IR::Type_Header>());
-            return d->to<IR::Node>()->clone(); }
-        return s; }
+            return d->to<IR::Node>()->clone();
+        }
+        return s;
+    }
 
     IR::IndexedVector<IR::Node> *declarations;
 };
@@ -154,18 +159,18 @@ class UpdatePhase0Header: public Transform {
  * Used when we dont wish to extract the fields but simply advance or skip
  * through phase0 or port metadata
  */
-class ConvertPhase0AssignToExtract: public Transform {
+class ConvertPhase0AssignToExtract : public Transform {
  public:
-    ConvertPhase0AssignToExtract(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) :
-            refMap(refMap), typeMap(typeMap) {
+    ConvertPhase0AssignToExtract(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
+        : refMap(refMap), typeMap(typeMap) {
         setName("ConvertPhase0MceToExtract");
     }
 
  private:
-    IR::MethodCallExpression* generate_phase0_extract_method_call(
-            const IR::Expression* lExpr, const IR::MethodCallExpression *rExpr);
-    IR::Node* preorder(IR::MethodCallExpression* expr) override;
-    IR::Node* preorder(IR::AssignmentStatement* stmt) override;
+    IR::MethodCallExpression *generate_phase0_extract_method_call(
+        const IR::Expression *lExpr, const IR::MethodCallExpression *rExpr);
+    IR::Node *preorder(IR::MethodCallExpression *expr) override;
+    IR::Node *preorder(IR::AssignmentStatement *stmt) override;
 
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
@@ -174,15 +179,15 @@ class ConvertPhase0AssignToExtract: public Transform {
 class ConvertPhase0 : public PassManager {
  public:
     ConvertPhase0(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
-        auto* phase0_calls = new Phase0CallMap();
-        auto* decls = new IR::IndexedVector<IR::Node>();
-        auto* phase0_name_annot = new Phase0AnnotMap();
-        auto* phase0_action_annot = new Phase0AnnotMap();
+        auto *phase0_calls = new Phase0CallMap();
+        auto *decls = new IR::IndexedVector<IR::Node>();
+        auto *phase0_name_annot = new Phase0AnnotMap();
+        auto *phase0_action_annot = new Phase0AnnotMap();
         addPasses({
             new CheckPhaseZeroExtern(refMap, typeMap, phase0_calls),
             new CollectPhase0Annotation(phase0_name_annot, phase0_action_annot),
-            new UpdatePhase0NodeInParser(phase0_calls, decls,
-                    phase0_name_annot, phase0_action_annot),
+            new UpdatePhase0NodeInParser(phase0_calls, decls, phase0_name_annot,
+                                         phase0_action_annot),
             new UpdatePhase0Header(decls),
             new ConvertPhase0AssignToExtract(refMap, typeMap),
         });

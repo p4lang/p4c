@@ -10,9 +10,10 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_DEVICE_H_
-#define EXTENSIONS_BF_P4C_DEVICE_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_DEVICE_H_
+#define BACKENDS_TOFINO_BF_P4C_DEVICE_H_
 
+#include "arch/arch_spec.h"
 #include "ir/gress.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
@@ -21,11 +22,12 @@
 #include "mau/power_spec.h"
 #include "parde/parde_spec.h"
 #include "phv/phv_spec.h"
-#include "arch/arch_spec.h"
 
 class Device {
  public:
-    enum Device_t { TOFINO, JBAY,
+    enum Device_t {
+        TOFINO,
+        JBAY,
     };
     /**
      * Initialize the global device context for the provided target - e.g.
@@ -36,25 +38,25 @@ class Device {
      */
     static void init(cstring name);
 
-    static const Device& get() {
-       BUG_CHECK(instance_ != nullptr, "Target device not initialized!");
-       return *instance_;
+    static const Device &get() {
+        BUG_CHECK(instance_ != nullptr, "Target device not initialized!");
+        return *instance_;
     }
 
     static Device_t currentDevice() { return Device::get().device_type(); }
     static cstring name() { return Device::get().get_name(); }
 
-    static const PhvSpec& phvSpec() { return Device::get().getPhvSpec(); }
-    static const PardeSpec& pardeSpec() { return Device::get().getPardeSpec(); }
+    static const PhvSpec &phvSpec() { return Device::get().getPhvSpec(); }
+    static const PardeSpec &pardeSpec() { return Device::get().getPardeSpec(); }
     struct GatewaySpec;
-    static const GatewaySpec& gatewaySpec() { return Device::get().getGatewaySpec(); }
+    static const GatewaySpec &gatewaySpec() { return Device::get().getGatewaySpec(); }
     struct StatefulAluSpec;
-    static const StatefulAluSpec& statefulAluSpec() { return Device::get().getStatefulAluSpec(); }
-    static const ArchSpec& archSpec() { return Device::get().getArchSpec(); }
-    static const MauPowerSpec& mauPowerSpec() { return Device::get().getMauPowerSpec(); }
-    static const MauSpec& mauSpec() { return Device::get().getMauSpec(); }
-    static const IXBarSpec& ixbarSpec() { return Device::get().getMauSpec().getIXBarSpec(); }
-    static const IMemSpec& imemSpec() { return Device::get().getMauSpec().getIMemSpec(); }
+    static const StatefulAluSpec &statefulAluSpec() { return Device::get().getStatefulAluSpec(); }
+    static const ArchSpec &archSpec() { return Device::get().getArchSpec(); }
+    static const MauPowerSpec &mauPowerSpec() { return Device::get().getMauPowerSpec(); }
+    static const MauSpec &mauSpec() { return Device::get().getMauSpec(); }
+    static const IXBarSpec &ixbarSpec() { return Device::get().getMauSpec().getIXBarSpec(); }
+    static const IMemSpec &imemSpec() { return Device::get().getMauSpec().getIMemSpec(); }
     static int numPipes() { return Device::get().getNumPipes(); }
     static int numStages() {
         return numStagesRuntimeOverride_ ? numStagesRuntimeOverride_ : Device::get().getNumStages();
@@ -86,7 +88,8 @@ class Device {
     static bool hasEgressParser() { return Device::get().getHasEgressParser(); }
     static bool hasGhostThread() { return Device::get().getHasGhostThread(); }
     static bool threadsSharePipe(gress_t a, gress_t b) {
-        return Device::get().getThreadsSharePipe(a, b); }
+        return Device::get().getThreadsSharePipe(a, b);
+    }
     static bool hasMirrorIOSelect() { return Device::get().getHasMirrorIOSelect(); }
     static bool hasMetadataPOV() { return Device::get().getHasMetadataPOV(); }
     static int sramMinPackEntries() { return Device::get().getSramMinPackEntries(); }
@@ -111,13 +114,13 @@ class Device {
     virtual Device_t device_type() const = 0;
     virtual cstring get_name() const = 0;
 
-    virtual const PhvSpec& getPhvSpec() const = 0;
-    virtual const PardeSpec& getPardeSpec() const = 0;
-    virtual const GatewaySpec& getGatewaySpec() const = 0;
-    virtual const StatefulAluSpec& getStatefulAluSpec() const = 0;
-    virtual const MauPowerSpec& getMauPowerSpec() const = 0;
-    virtual const MauSpec& getMauSpec() const = 0;
-    virtual const ArchSpec& getArchSpec() const = 0;
+    virtual const PhvSpec &getPhvSpec() const = 0;
+    virtual const PardeSpec &getPardeSpec() const = 0;
+    virtual const GatewaySpec &getGatewaySpec() const = 0;
+    virtual const StatefulAluSpec &getStatefulAluSpec() const = 0;
+    virtual const MauPowerSpec &getMauPowerSpec() const = 0;
+    virtual const MauSpec &getMauSpec() const = 0;
+    virtual const ArchSpec &getArchSpec() const = 0;
     virtual int getNumPipes() const = 0;
     virtual int getNumPortsPerPipe() const = 0;
     virtual int getNumChannelsPerPort() const = 0;
@@ -155,11 +158,10 @@ class Device {
     virtual unsigned int getEgressIntrinsicMetadataMinLen() const = 0;
 
  private:
-    static Device* instance_;
+    static Device *instance_;
     static int numStagesRuntimeOverride_;
     cstring name_;
 };
-
 
 class TofinoDevice : public Device {
     const TofinoPhvSpec phv_;
@@ -180,9 +182,12 @@ class TofinoDevice : public Device {
     int getAlwaysRunIMemAddr() const override { return -1; }
     unsigned getMaxCloneId(gress_t gress) const override {
         switch (gress) {
-        case INGRESS: return 7;  // one id reserved for IBuf
-        case EGRESS:  return 8;
-        default:      return 8;
+            case INGRESS:
+                return 7;  // one id reserved for IBuf
+            case EGRESS:
+                return 8;
+            default:
+                return 8;
         }
     }
     gress_t getMaxGress() const override { return EGRESS; }
@@ -194,16 +199,17 @@ class TofinoDevice : public Device {
     int getPortBitWidth() const override { return 9; }
     int getMaxParserMatchBits() const override { return 32; }
     int getNumMaxChannels() const override {
-        return getNumPipes() * getNumPortsPerPipe() * getNumChannelsPerPort(); }
-    unsigned getMaxDigestSizeInBytes() const override { return (384/8); }
+        return getNumPipes() * getNumPortsPerPipe() * getNumChannelsPerPort();
+    }
+    unsigned getMaxDigestSizeInBytes() const override { return (384 / 8); }
 
-    const PhvSpec& getPhvSpec() const override { return phv_; }
-    const PardeSpec& getPardeSpec() const override { return parde_; }
-    const GatewaySpec& getGatewaySpec() const override;
-    const StatefulAluSpec& getStatefulAluSpec() const override;
-    const MauPowerSpec& getMauPowerSpec() const override { return mau_power_; }
-    const MauSpec& getMauSpec() const override { return mau_; }
-    const ArchSpec& getArchSpec() const override { return arch_; }
+    const PhvSpec &getPhvSpec() const override { return phv_; }
+    const PardeSpec &getPardeSpec() const override { return parde_; }
+    const GatewaySpec &getGatewaySpec() const override;
+    const StatefulAluSpec &getStatefulAluSpec() const override;
+    const MauPowerSpec &getMauPowerSpec() const override { return mau_power_; }
+    const MauSpec &getMauSpec() const override { return mau_; }
+    const ArchSpec &getArchSpec() const override { return arch_; }
     bool getIfMemoryCoreSplit() const override { return false; }
     bool getHasCompareInstructions() const override { return false; }
     int getNumLogTablesPerStage() const override { return 16; }
@@ -252,22 +258,23 @@ class JBayDevice : public Device {
     gress_t getMaxGress() const override { return GHOST; }
     unsigned getMaxResubmitId() const override { return 8; }
     unsigned getMaxDigestId() const override { return 8; }
-    unsigned getMaxDigestSizeInBytes() const override { return (384/8); }
+    unsigned getMaxDigestSizeInBytes() const override { return (384 / 8); }
     int getMirrorTypeWidth() const override { return 4; }
     int getCloneSessionIdWidth() const override { return 8; }
     int getQueueIdWidth() const override { return 7; }
     int getPortBitWidth() const override { return 9; }
     int getMaxParserMatchBits() const override { return 32; }
     int getNumMaxChannels() const override {
-        return getNumPipes() * getNumPortsPerPipe() * getNumChannelsPerPort(); }
+        return getNumPipes() * getNumPortsPerPipe() * getNumChannelsPerPort();
+    }
 
-    const PhvSpec& getPhvSpec() const override { return phv_; }
-    const PardeSpec& getPardeSpec() const override { return parde_; }
-    const GatewaySpec& getGatewaySpec() const override;
-    const StatefulAluSpec& getStatefulAluSpec() const override;
-    const MauSpec& getMauSpec() const override { return mau_; }
-    const MauPowerSpec& getMauPowerSpec() const override { return mau_power_; }
-    const ArchSpec& getArchSpec() const override { return arch_; }
+    const PhvSpec &getPhvSpec() const override { return phv_; }
+    const PardeSpec &getPardeSpec() const override { return parde_; }
+    const GatewaySpec &getGatewaySpec() const override;
+    const StatefulAluSpec &getStatefulAluSpec() const override;
+    const MauSpec &getMauSpec() const override { return mau_; }
+    const MauPowerSpec &getMauPowerSpec() const override { return mau_power_; }
+    const ArchSpec &getArchSpec() const override { return arch_; }
     bool getIfMemoryCoreSplit() const override { return true; }
     bool getHasCompareInstructions() const override { return true; }
     int getNumLogTablesPerStage() const override { return 16; }
@@ -296,7 +303,7 @@ class JBayHDevice : public JBayDevice {
     int getNumStages() const override { return 6; }
     cstring get_name() const override { return "Tofino2H"_cs; }
 };
-#endif  /* BAREFOOT_INTERNAL */
+#endif /* BAREFOOT_INTERNAL */
 
 class JBayMDevice : public JBayDevice {
  public:
@@ -313,10 +320,8 @@ class JBayUDevice : public JBayDevice {
 class JBayA0Device : public JBayDevice {
  public:
     const JBayA0PardeSpec parde_{};
-    const PardeSpec& getPardeSpec() const override { return parde_; }
+    const PardeSpec &getPardeSpec() const override { return parde_; }
     cstring get_name() const override { return "Tofino2A0"_cs; }
 };
 
-
-
-#endif /* EXTENSIONS_BF_P4C_DEVICE_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_DEVICE_H_ */

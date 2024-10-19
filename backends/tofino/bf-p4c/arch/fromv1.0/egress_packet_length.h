@@ -13,10 +13,10 @@
 #ifndef BF_P4C_ARCH_FROMV1_0_EGRESS_PACKET_LENGTH_H_
 #define BF_P4C_ARCH_FROMV1_0_EGRESS_PACKET_LENGTH_H_
 
-#include "ir/ir.h"
-#include "ir/pass_manager.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
+#include "ir/pass_manager.h"
 
 // Issue:
 //
@@ -47,8 +47,9 @@
 class AdjustEgressPacketLength : public PassManager {
     bool egressParsesMirror = false;
     bool egressUsesPacketLength = false;
+
  public:
-    AdjustEgressPacketLength(P4::ReferenceMap* refMap, P4::TypeMap* typeMap);
+    AdjustEgressPacketLength(P4::ReferenceMap *refMap, P4::TypeMap *typeMap);
 };
 
-#endif  /* BF_P4C_ARCH_FROMV1_0_EGRESS_PACKET_LENGTH_H_ */
+#endif /* BF_P4C_ARCH_FROMV1_0_EGRESS_PACKET_LENGTH_H_ */

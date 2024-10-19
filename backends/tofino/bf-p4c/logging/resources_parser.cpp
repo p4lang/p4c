@@ -10,12 +10,14 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+/* clang-format off */
+
 #include "bf-p4c/device.h"
 #include "resources_parser.h"
 
 namespace BFN {
 
-bool ParserResourcesLogging::preorder(const IR::BFN::LoweredParser* parser) {
+bool ParserResourcesLogging::preorder(const IR::BFN::LoweredParser *parser) {
     LOG1("Parser: " << parser->name);
 
     const auto gress = ::toString(parser->gress).c_str();
@@ -39,17 +41,17 @@ bool ParserResourcesLogging::preorder(const IR::BFN::LoweredParser* parser) {
     return true;
 }
 
-bool ParserResourcesLogging::preorder(const IR::BFN::LoweredParserState* state) {
+bool ParserResourcesLogging::preorder(const IR::BFN::LoweredParserState *state) {
     auto parserIR = findContext<IR::BFN::LoweredParser>();
     BUG_CHECK(parserIR, "State does not belong to a parser? %1%", state);
-    BUG_CHECK(parsers.count(parserIR->name) > 0,
-        "Parser %1% not added to parsers map", parserIR->name);
+    BUG_CHECK(parsers.count(parserIR->name) > 0, "Parser %1% not added to parsers map",
+              parserIR->name);
     ParserLogData &p = parsers[parserIR->name];
 
     for (const auto *match : state->transitions) {
         LOG1("State Match: " << match);
-        std::string nextStateName = (match->next ?
-            match->next->name : (match->loop ? match->loop : "END"));
+        std::string nextStateName =
+            (match->next ? match->next->name : (match->loop ? match->loop : "END"));
         nextStateName = stripThreadPrefix(nextStateName);
         auto states = logStateTransitionsByMatch(nextStateName, state, match);
         for (auto state : states) {
@@ -60,10 +62,10 @@ bool ParserResourcesLogging::preorder(const IR::BFN::LoweredParserState* state) 
     return true;
 }
 
-std::vector<ParserResourcesLogging::ParserStateTransition*>
-ParserResourcesLogging::logStateTransitionsByMatch(const std::string& nextStateName,
-                                                   const IR::BFN::LoweredParserState* prevState,
-                                                   const IR::BFN::LoweredParserMatch* match) {
+std::vector<ParserResourcesLogging::ParserStateTransition *>
+ParserResourcesLogging::logStateTransitionsByMatch(const std::string &nextStateName,
+                                                   const IR::BFN::LoweredParserState *prevState,
+                                                   const IR::BFN::LoweredParserMatch *match) {
     auto tcamRow = getTcamId(match, prevState->gress);
     const auto shifts = match->shift;
     const auto hasCounter = !match->counters.empty();
@@ -71,23 +73,22 @@ ParserResourcesLogging::logStateTransitionsByMatch(const std::string& nextStateN
     const auto prevStateId = getStateId(prevState->name.c_str());
     const auto prevStateName = prevState->name.c_str();
 
-    std::vector<ParserResourcesLogging::ParserStateTransition*> result;
+    std::vector<ParserResourcesLogging::ParserStateTransition *> result;
 
-    auto addStateTransition = [&] () {
-        ParserStateTransition* const parser_state_transition = new ParserStateTransition(
+    auto addStateTransition = [&]() {
+        ParserStateTransition *const parser_state_transition = new ParserStateTransition(
             hasCounter, nextStateId, nextStateName, prevStateId, shifts, tcamRow, prevStateName);
 
         CHECK_NULL(match);
-        for (auto* stmt : match->extracts) {
+        for (auto *stmt : match->extracts) {
           CHECK_NULL(stmt);
 
-            if (auto* extract = stmt->to<IR::BFN::LoweredExtractClot>()) {
+            if (auto *extract = stmt->to<IR::BFN::LoweredExtractClot>()) {
                 if (extract->dest) {
-                    parser_state_transition->append_clot_extracts(
-                        new ClotExtracts(
+                    parser_state_transition->append_clot_extracts(new ClotExtracts(
                             extract->source->to<IR::BFN::LoweredPacketRVal>()->range.lo,
                             extract->source->to<IR::BFN::LoweredPacketRVal>()->range.size(),
-                            extract->dest->tag) );
+                        extract->dest->tag));
                 }
             }
         }
@@ -117,8 +118,8 @@ ParserResourcesLogging::logStateTransitionsByMatch(const std::string& nextStateN
 }
 
 /// Assign a tcam id for this match, higher the number, higher the priority.
-int ParserResourcesLogging::getTcamId(const IR::BFN::LoweredParserMatch* match, gress_t gress) {
-    auto* pvs = match->value->to<IR::BFN::ParserPvsMatchValue>();
+int ParserResourcesLogging::getTcamId(const IR::BFN::LoweredParserMatch *match, gress_t gress) {
+    auto *pvs = match->value->to<IR::BFN::ParserPvsMatchValue>();
     if (!tcamIds[gress].count(match)) {
         tcamIds[gress][match] = nextTcamId[gress];
         nextTcamId[gress] -= pvs ? pvs->size : 1;  // pvs uses multiple TCAM rows
@@ -127,16 +128,16 @@ int ParserResourcesLogging::getTcamId(const IR::BFN::LoweredParserMatch* match, 
     return tcamIds[gress].at(match);
 }
 
-void ParserResourcesLogging::logStateExtracts(const IR::BFN::LoweredParserMatch* match,
-                                           std::vector<StateExtracts*> &result) {
+void ParserResourcesLogging::logStateExtracts(const IR::BFN::LoweredParserMatch *match,
+                                              std::vector<StateExtracts *> &result) {
     std::map<size_t, int> extractorIds;
-    for (const auto* prim : match->extracts) {
+    for (const auto *prim : match->extracts) {
         auto extractIR = prim->to<IR::BFN::LoweredExtractPhv>();
         if (extractIR) {
             const size_t bitWidth = extractIR->dest->container.size();
             const auto &phvSpec = Device::phvSpec();
             const auto cid = phvSpec.containerToId(extractIR->dest->container);
-            const auto destContainer = phvSpec.physicalAddress(cid,  PhvSpec::MAU);
+            const auto destContainer = phvSpec.physicalAddress(cid, PhvSpec::MAU);
             const auto extractorId = extractorIds[bitWidth]++;
             auto buffer = extractIR->source->to<IR::BFN::LoweredInputBufferRVal>();
             auto constVal = extractIR->source->to<IR::BFN::LoweredConstantRVal>();
@@ -151,19 +152,18 @@ void ParserResourcesLogging::logStateExtracts(const IR::BFN::LoweredParserMatch*
     }
 }
 
-
-void ParserResourcesLogging::logStateMatches(const IR::BFN::LoweredParserState* prevState,
-                                          const IR::BFN::LoweredParserMatch* match,
-                                          std::vector<StateMatchesOn*> &result) {
+void ParserResourcesLogging::logStateMatches(const IR::BFN::LoweredParserState *prevState,
+                                             const IR::BFN::LoweredParserMatch *match,
+                                             std::vector<StateMatchesOn *> &result) {
     if (!prevState) return;
 
-    auto getConstVal = [] (const IR::BFN::ParserConstMatchValue *val,
-                           unsigned bitw, unsigned &shift) {
+    auto getConstVal = [](const IR::BFN::ParserConstMatchValue *val, unsigned bitw,
+                          unsigned &shift) {
         std::stringstream v;
         auto w0 = val->value.word0 >> shift;
         auto w1 = val->value.word1 >> shift;
         auto mask = (1U << bitw) - 1;
-        match_t m = { w0 & mask, w1 & mask };
+        match_t m = {w0 & mask, w1 & mask};
         v << m;
 
         shift += bitw;
@@ -188,9 +188,9 @@ void ParserResourcesLogging::logStateMatches(const IR::BFN::LoweredParserState* 
     }
 }
 
-void ParserResourcesLogging::logStateSaves(const IR::BFN::LoweredParserMatch* match,
-                                        std::vector<StateSavesTo*> &result) {
-    for (const auto& save : match->saves) {
+void ParserResourcesLogging::logStateSaves(const IR::BFN::LoweredParserMatch *match,
+                                           std::vector<StateSavesTo *> &result) {
+    for (const auto &save : match->saves) {
         const auto hardwareId = save->dest.id;
         const auto buffer = save->source->to<IR::BFN::LoweredInputBufferRVal>();
         BUG_CHECK(buffer, "Unknown match save source : %1%", save);
@@ -220,3 +220,5 @@ const ParserResourcesLogging::ParserResources *ParserResourcesLogging::getLogger
 }
 
 }  // namespace BFN
+
+/* clang-format on */

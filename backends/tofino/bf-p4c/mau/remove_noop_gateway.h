@@ -25,19 +25,22 @@ class RemoveNoopGateway : public MauTransform {
     const IR::MAU::TableSeq *preorder(IR::MAU::TableSeq *seq) override {
         if (seq->size() < 1) return seq;
         auto *last = seq->back();
-        if (!last->conditional_gateway_only() || last->gateway_rows.size() != 1
-            || last->next.size() != 1) {
+        if (!last->conditional_gateway_only() || last->gateway_rows.size() != 1 ||
+            last->next.size() != 1) {
             // not a noop gateway
-            return seq; }
+            return seq;
+        }
         if (seq->size() == 1) {
             // drop the noop gateway, going directly to the target TableSeq
-            return last->next.begin()->second; }
+            return last->next.begin()->second;
+        }
         auto *prev = seq->tables.at(seq->size() - 2);
         if (!prev->next.empty()) {
             // can't move the dependent tables to the previous table
-            return seq; }
-        seq->tables.pop_back();         // toss the gateway;
-        auto *clone = prev->clone();    // clone the last table
+            return seq;
+        }
+        seq->tables.pop_back();       // toss the gateway;
+        auto *clone = prev->clone();  // clone the last table
         clone->next["$default"_cs] = last->next.begin()->second;
         // move the dependent sequence to the last table as default next
         seq->tables.back() = clone;

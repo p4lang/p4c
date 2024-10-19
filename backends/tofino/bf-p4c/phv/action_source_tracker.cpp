@@ -11,6 +11,7 @@
  */
 
 #include "bf-p4c/phv/action_source_tracker.h"
+
 #include "bf-p4c/common/asm_output.h"
 #include "bf-p4c/ir/bitrange.h"
 #include "bf-p4c/mau/action_analysis.h"
@@ -23,10 +24,10 @@ namespace PHV {
 namespace {
 
 /// slice all sourceOp in @p sources by @p start, @p len.
-ActionClassifiedSources slice(const ActionClassifiedSources& sources, int start, int len) {
+ActionClassifiedSources slice(const ActionClassifiedSources &sources, int start, int len) {
     ActionClassifiedSources rv;
-    for (const auto& kv : sources) {
-        for (const auto& op : kv.second) {
+    for (const auto &kv : sources) {
+        for (const auto &op : kv.second) {
             rv[kv.first].push_back(op.slice(start, len));
         }
     }
@@ -57,10 +58,10 @@ bool ActionSourceTracker::preorder(const IR::MAU::Action *act) {
     return true;
 }
 
-void ActionSourceTracker::add_sources(const IR::MAU::Action* act,
-                                      const ActionAnalysis::FieldActionsMap& instructions) {
+void ActionSourceTracker::add_sources(const IR::MAU::Action *act,
+                                      const ActionAnalysis::FieldActionsMap &instructions) {
     using ActionParam = ActionAnalysis::ActionParam;
-    for (const auto& field_action : Values(instructions)) {
+    for (const auto &field_action : Values(instructions)) {
         le_bitrange dest_range;
         const auto *dest = phv.field(field_action.write.expr, &dest_range);
         BUG_CHECK(dest != nullptr, "action does not have a write: %1%", act);
@@ -69,7 +70,7 @@ void ActionSourceTracker::add_sources(const IR::MAU::Action* act,
             SourceOp src_op;
             if (read.type == ActionParam::PHV) {
                 le_bitrange read_range;
-                auto* f_read = phv.field(read.expr, &read_range);
+                auto *f_read = phv.field(read.expr, &read_range);
                 // TODO: There are some unsupported cases in ActionAnalysis
                 // see issue983-bmv2.p4 for example.
                 if (read_range.size() != dest_range.size()) {
@@ -77,8 +78,7 @@ void ActionSourceTracker::add_sources(const IR::MAU::Action* act,
                     continue;
                 }
                 src_op.phv_src = PHV::FieldSlice(f_read, read_range);
-            } else if (read.type == ActionParam::ACTIONDATA ||
-                       read.type == ActionParam::CONSTANT) {
+            } else if (read.type == ActionParam::ACTIONDATA || read.type == ActionParam::CONSTANT) {
                 src_op.ad_or_const = true;
             } else {
                 BUG("Read must either be of a PHV, action data, or constant.");
@@ -102,12 +102,12 @@ void ActionSourceTracker::end_apply() {
     // pre-compute the fine slicing for all fields. This is a speed optimization that
     // later when the user calls get_sources, there will be only one range that contains
     // the requested range, as long as the argument of fieldslice is fine-sliced.
-    ordered_map<const PHV::Field*, ordered_map<le_bitrange, ActionClassifiedSources>> fine_sliced;
-    for (const auto& source_kv : sources) {
-        const auto* f = source_kv.first;
+    ordered_map<const PHV::Field *, ordered_map<le_bitrange, ActionClassifiedSources>> fine_sliced;
+    for (const auto &source_kv : sources) {
+        const auto *f = source_kv.first;
         std::set<int> bounds = {0, f->size};
-        for (const auto& range_sources : source_kv.second) {
-            const auto& range = range_sources.first;
+        for (const auto &range_sources : source_kv.second) {
+            const auto &range = range_sources.first;
             // convert this range to a half-open range, i.e. [lo, hi + 1), for fine-slicing.
             // Half open range allows us to split ranges simply based on the numers of lo and hi.
             // For example, if we have two ranges from a 32-bit field, [0, 15], [24, 31]
@@ -115,8 +115,7 @@ void ActionSourceTracker::end_apply() {
             bounds.insert(range.lo);
             bounds.insert(range.hi + 1);
         }
-        for (auto itr = bounds.begin();
-             itr != bounds.end() && std::next(itr) != bounds.end();
+        for (auto itr = bounds.begin(); itr != bounds.end() && std::next(itr) != bounds.end();
              itr++) {
             // convert half open range back to closed range.
             auto new_range = le_bitrange(FromTo(*itr, *std::next(itr) - 1));
@@ -129,33 +128,33 @@ void ActionSourceTracker::end_apply() {
     LOG3(*this);
 }
 
-ActionClassifiedSources ActionSourceTracker::get_sources(const PHV::FieldSlice& fs) const {
+ActionClassifiedSources ActionSourceTracker::get_sources(const PHV::FieldSlice &fs) const {
     if (!sources.count(fs.field())) {
         return {};
     }
     ActionClassifiedSources rv;
-    for (const auto& range_sources : sources.at(fs.field())) {
-        const auto& range = range_sources.first;
+    for (const auto &range_sources : sources.at(fs.field())) {
+        const auto &range = range_sources.first;
         if (range.contains(fs.range())) {
-            auto sliced = slice(
-                    range_sources.second, fs.range().lo - range.lo, fs.range().size());
-            for (const auto& kv : sliced) {
+            auto sliced = slice(range_sources.second, fs.range().lo - range.lo, fs.range().size());
+            for (const auto &kv : sliced) {
                 rv[kv.first].insert(rv[kv.first].end(), kv.second.begin(), kv.second.end());
             }
         } else {
-            BUG_CHECK(range.intersectWith(fs.range()).empty(), "%1% is not fine-sliced. "
-                      "Saved range is %2%", fs, range);
+            BUG_CHECK(range.intersectWith(fs.range()).empty(),
+                      "%1% is not fine-sliced. "
+                      "Saved range is %2%",
+                      fs, range);
         }
     }
     return rv;
 }
 
-
-std::ostream &operator<<(std::ostream &out, const SourceOp& src) {
+std::ostream &operator<<(std::ostream &out, const SourceOp &src) {
     out << "(";
     if (src.t == SourceOp::OpType::move) {
         out << "move";
-    } else if (src.t == SourceOp::OpType::bitwise){
+    } else if (src.t == SourceOp::OpType::bitwise) {
         out << "bitwise";
     } else if (src.t == SourceOp::OpType::whole_container) {
         out << "whole_container";
@@ -172,11 +171,11 @@ std::ostream &operator<<(std::ostream &out, const SourceOp& src) {
     return out;
 }
 
-std::ostream &operator<<(std::ostream &out, const ActionClassifiedSources& sources) {
-    for (const auto& action_sources : sources) {
+std::ostream &operator<<(std::ostream &out, const ActionClassifiedSources &sources) {
+    for (const auto &action_sources : sources) {
         out << "{ " << canon_name(action_sources.first->externalName()) << ": ";
         std::string sep = "";
-        for (const auto& s : action_sources.second) {
+        for (const auto &s : action_sources.second) {
             out << sep << s;
             sep = ", ";
         }
@@ -185,12 +184,12 @@ std::ostream &operator<<(std::ostream &out, const ActionClassifiedSources& sourc
     return out;
 }
 
-std::ostream &operator<<(std::ostream &out, const ActionSourceTracker& tracker) {
-    for (const auto& source_kv : tracker.sources) {
-        const auto* f = source_kv.first;
-        for (const auto& range_sources : source_kv.second) {
-            const auto& range = range_sources.first;
-            const ActionClassifiedSources& action_sources = range_sources.second;
+std::ostream &operator<<(std::ostream &out, const ActionSourceTracker &tracker) {
+    for (const auto &source_kv : tracker.sources) {
+        const auto *f = source_kv.first;
+        for (const auto &range_sources : source_kv.second) {
+            const auto &range = range_sources.first;
+            const ActionClassifiedSources &action_sources = range_sources.second;
             if (action_sources.empty()) continue;
             out << f->name << " [" << range.lo << ":" << range.hi << "] ";
             out << action_sources;

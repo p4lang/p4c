@@ -10,11 +10,11 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include "bf_gtest_helpers.h"
-#include "gtest/gtest.h"
 #include "bf-p4c/bf-p4c-options.h"
 #include "bf-p4c/control-plane/runtime.h"
+#include "bf_gtest_helpers.h"
 #include "control-plane/p4RuntimeArchStandard.h"
+#include "gtest/gtest.h"
 
 namespace P4::Test {
 
@@ -97,17 +97,14 @@ TEST(RegisterAction, SignedNegative) {
         }
     )";
 
-    auto testCode = TestCode(TestCode::Hdr::Tofino2arch, std::string(source)+MAIN_P4_CODE);
+    auto testCode = TestCode(TestCode::Hdr::Tofino2arch, std::string(source) + MAIN_P4_CODE);
     EXPECT_TRUE(testCode.CreateBackend());
     EXPECT_TRUE(testCode.apply_pass(TestCode::Pass::FullBackend));
 
-    Match::CheckList expected {
-        "`.*`",
-        "initial_value: { lo: -42 }"
-    };
-    auto res = testCode.match(TestCode::CodeBlock::MauAsm, expected); \
-    EXPECT_TRUE(res.success) << "Mismatch in the generated assembly. "
-                             << "pos=" << res.pos << ", count=" << res.count << "\n"
+    Match::CheckList expected{"`.*`", "initial_value: { lo: -42 }"};
+    auto res = testCode.match(TestCode::CodeBlock::MauAsm, expected);
+    EXPECT_TRUE(res.success) << "Mismatch in the generated assembly. " << "pos=" << res.pos
+                             << ", count=" << res.count << "\n"
                              << testCode.extract_code(TestCode::CodeBlock::MauAsm) << "\n";
 }
 
@@ -153,18 +150,15 @@ TEST(RegisterAction, UnsignedBitInt) {
         }
     )";
 
-    auto testCode = TestCode(TestCode::Hdr::Tofino2arch, std::string(source)+MAIN_P4_CODE);
+    auto testCode = TestCode(TestCode::Hdr::Tofino2arch, std::string(source) + MAIN_P4_CODE);
     EXPECT_TRUE(testCode.CreateBackend());
     EXPECT_TRUE(testCode.apply_pass(TestCode::Pass::FullBackend));
 
-    Match::CheckList expected {
-        "`.*`",
-        "initial_value: { lo: 2147483648 }"
-    };
-    auto res = testCode.match(TestCode::CodeBlock::MauAsm, expected); \
-    EXPECT_TRUE(res.success) << "Mismatch in the generated assembly. "
-                             << "pos=" << res.pos << ", count=" << res.count << "\n"
+    Match::CheckList expected{"`.*`", "initial_value: { lo: 2147483648 }"};
+    auto res = testCode.match(TestCode::CodeBlock::MauAsm, expected);
+    EXPECT_TRUE(res.success) << "Mismatch in the generated assembly. " << "pos=" << res.pos
+                             << ", count=" << res.count << "\n"
                              << testCode.extract_code(TestCode::CodeBlock::MauAsm) << "\n";
 }
 
-}
+}  // namespace P4::Test

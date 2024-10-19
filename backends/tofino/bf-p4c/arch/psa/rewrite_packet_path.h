@@ -10,26 +10,25 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_ARCH_PSA_REWRITE_PACKET_PATH_H_
-#define EXTENSIONS_BF_P4C_ARCH_PSA_REWRITE_PACKET_PATH_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_ARCH_PSA_REWRITE_PACKET_PATH_H_
+#define BACKENDS_TOFINO_BF_P4C_ARCH_PSA_REWRITE_PACKET_PATH_H_
 
-#include "ir/ir.h"
 #include "bf-p4c/arch/program_structure.h"
 #include "bf-p4c/arch/psa/programStructure.h"
 #include "bf-p4c/arch/psa/psa.h"
+#include "ir/ir.h"
 
 namespace BFN {
 
 namespace PSA {
 
 struct RewritePacketPath : public PassManager {
-    explicit RewritePacketPath(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-        PSA::ProgramStructure* structure);
+    explicit RewritePacketPath(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                               PSA::ProgramStructure *structure);
 };
 
 }  // namespace PSA
 
 }  // namespace BFN
 
-#endif /* EXTENSIONS_BF_P4C_ARCH_PSA_REWRITE_PACKET_PATH_H_ */
-
+#endif /* BACKENDS_TOFINO_BF_P4C_ARCH_PSA_REWRITE_PACKET_PATH_H_ */

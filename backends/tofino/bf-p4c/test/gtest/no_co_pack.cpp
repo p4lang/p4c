@@ -12,23 +12,23 @@
 
 #include <optional>
 #include <type_traits>
-#include <boost/algorithm/string/replace.hpp>
-#include "gtest/gtest.h"
 
+#include <boost/algorithm/string/replace.hpp>
+
+#include "bf-p4c/common/header_stack.h"
+#include "bf-p4c/phv/phv_fields.h"
+#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "gtest/gtest.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
 #include "test/gtest/helpers.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/common/header_stack.h"
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
 
 namespace P4::Test {
 
 namespace NoCoPackTest {
 
-std::optional<TofinoPipeTestCase>
-createActionTest() {
+std::optional<TofinoPipeTestCase> createActionTest() {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
         header H1 { bit<8> f1; bit<8> f2; bit<8> f3; bit<8> f4; }
         header H2 { bit<16> f1; bit<16> f2; bit<16> f3; bit<16> f4; }
@@ -82,7 +82,7 @@ createActionTest() {
                  computeChecksum(), deparse()) main;
     )");
 
-    auto& options = BackendOptions();
+    auto &options = BackendOptions();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.target = "tofino"_cs;
     options.arch = "v1model"_cs;
@@ -91,7 +91,7 @@ createActionTest() {
     return TofinoPipeTestCase::createWithThreadLocalInstances(source);
 }
 
-const IR::BFN::Pipe *runInitialPassManager(const IR::BFN::Pipe* pipe, PhvInfo *phv) {
+const IR::BFN::Pipe *runInitialPassManager(const IR::BFN::Pipe *pipe, PhvInfo *phv) {
     PassManager quick_backend = {
         new CollectHeaderStackInfo,
         new CollectPhvInfo(*phv),
@@ -100,9 +100,9 @@ const IR::BFN::Pipe *runInitialPassManager(const IR::BFN::Pipe* pipe, PhvInfo *p
     return pipe->apply(quick_backend);
 }
 
-}  // namespace
+}  // namespace NoCoPackTest
 
-class NoCoPack : public TofinoBackendTest { };
+class NoCoPack : public TofinoBackendTest {};
 
 TEST_F(NoCoPack, Sanity) {
     auto test = NoCoPackTest::createActionTest();

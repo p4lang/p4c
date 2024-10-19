@@ -11,10 +11,11 @@
  */
 
 #include "slice.h"
+
 #include "bf-p4c/common/ir_utils.h"
 
-static IR::Constant* sliceConstant(const IR::Constant* k, int lo, int hi) {
-    int size = hi-lo+1;
+static IR::Constant *sliceConstant(const IR::Constant *k, int lo, int hi) {
+    int size = hi - lo + 1;
     big_int value = (k->value >> lo) & bigBitMask(size);
     return new IR::Constant(IR::Type::Bits::get(size), value);
 }
@@ -29,10 +30,8 @@ std::pair<int, int> getSliceLoHi(const IR::Expression *e) {
 const IR::Expression *MakeSliceDestination(const IR::Expression *e, int lo, int hi) {
     LOG6("\tExpression: " << e);
     LOG6("\tLo: " << lo << ", Hi: " << hi);
-    if (auto s = e->to<IR::Slice>())
-        LOG6("\tOriginal Expression: " << s->e0);
-    if (e->is<IR::MAU::MultiOperand>())
-        return new IR::Slice(e, hi, lo);
+    if (auto s = e->to<IR::Slice>()) LOG6("\tOriginal Expression: " << s->e0);
+    if (e->is<IR::MAU::MultiOperand>()) return new IR::Slice(e, hi, lo);
     if (auto k = e->to<IR::Constant>()) {
         auto rv = sliceConstant(k, lo, hi);
         LOG6("\tReturning a constant: " << rv);
@@ -42,24 +41,28 @@ const IR::Expression *MakeSliceDestination(const IR::Expression *e, int lo, int 
     LOG6("\tFor slice, lo: " << slLoHi.first << ", hi: " << slLoHi.second);
     if ((lo - slLoHi.first) >= e->type->width_bits()) {
         LOG6("\tReturning 0's");
-        return new IR::Constant(IR::Type::Bits::get(hi-lo+1), 0); }
+        return new IR::Constant(IR::Type::Bits::get(hi - lo + 1), 0);
+    }
     if (hi > slLoHi.second) {
         LOG6("\tShrink hi bit to within the slice");
-        hi = slLoHi.second; }
+        hi = slLoHi.second;
+    }
     if (lo == slLoHi.first && hi == slLoHi.second) {
         LOG6("\tSame width as the expression itself");
-        return e; }
+        return e;
+    }
     if (auto sl = e->to<IR::Slice>()) {
         LOG6("Encountered a slice [" << sl->getL() << ", " << sl->getH() << "]");
         LOG6("Original expression: " << sl->e0);
         BUG_CHECK(lo >= int(sl->getL()) && hi <= int(sl->getH()),
                   "MakeSlice slice on slice type mismatch");
-        e = sl->e0; }
+        e = sl->e0;
+    }
     return new IR::Slice(e, hi, lo);
 }
 
-const IR::Expression *MakeSliceSource(const IR::Expression *read, int lo, int hi, const
-        IR::Expression *write) {
+const IR::Expression *MakeSliceSource(const IR::Expression *read, int lo, int hi,
+                                      const IR::Expression *write) {
     LOG6("\tMakeSliceSource Expression: " << read);
     LOG6("\tLo: " << lo << ", Hi: " << hi);
     LOG6("\tMakeSliceSource Destination: " << write);
@@ -68,8 +71,7 @@ const IR::Expression *MakeSliceSource(const IR::Expression *read, int lo, int hi
     std::pair<int, int> readLoHi = getSliceLoHi(read);
     std::pair<int, int> writeLoHi = getSliceLoHi(write);
 
-    if (read->is<IR::MAU::MultiOperand>())
-        return new IR::Slice(read, hi, lo);
+    if (read->is<IR::MAU::MultiOperand>()) return new IR::Slice(read, hi, lo);
     if (auto k = read->to<IR::Constant>()) {
         auto sliceLo = lo - writeLoHi.first;
         auto sliceHi = hi - lo + sliceLo;
@@ -86,30 +88,32 @@ const IR::Expression *MakeSliceSource(const IR::Expression *read, int lo, int hi
 
     if ((lo - readLoHi.first) >= read->type->width_bits()) {
         LOG6("\tReturning 0's");
-        return new IR::Constant(IR::Type::Bits::get(hi-lo+1), 0); }
+        return new IR::Constant(IR::Type::Bits::get(hi - lo + 1), 0);
+    }
     if (hi > readLoHi.second) {
         LOG6("\thi : " << hi << " readLoHi.second: " << readLoHi.second);
         LOG6("\tShrink hi bit to within the read slice");
-        hi = readLoHi.second; }
+        hi = readLoHi.second;
+    }
     if (lo == readLoHi.first && hi == readLoHi.second) {
         LOG6("\tRequested same slice as the read expression");
-        return read; }
+        return read;
+    }
     if (auto sl = read->to<IR::Slice>()) {
         LOG6("\tEncountered a slice [" << sl->getL() << ", " << sl->getH() << "]");
         LOG6("\tOriginal expression: " << sl->e0);
         BUG_CHECK(lo >= int(sl->getL()) && hi <= int(sl->getH()),
                   "MakeSlice slice on slice type mismatch");
-        read = sl->e0; }
+        read = sl->e0;
+    }
     LOG6("\tReturn " << read << " lo: " << lo << " hi: " << hi);
     return new IR::Slice(read, hi, lo);
 }
 
 const IR::Expression *MakeSlice(const IR::Expression *e, int lo, int hi) {
     BUG_CHECK(hi >= lo, "Invalid args to MakeSlice(%s, %d, %d", e, lo, hi);
-    if (lo == 0 && hi == e->type->width_bits() - 1)
-        return e;
-    if (e->is<IR::MAU::MultiOperand>())
-        return new IR::Slice(e, hi, lo);
+    if (lo == 0 && hi == e->type->width_bits() - 1) return e;
+    if (e->is<IR::MAU::MultiOperand>()) return new IR::Slice(e, hi, lo);
     if (auto k = e->to<IR::Constant>()) {
         auto rv = sliceConstant(k, lo, hi);
         return rv;
@@ -125,19 +129,22 @@ const IR::Expression *MakeSlice(const IR::Expression *e, int lo, int hi) {
         if (hi < rsize) return MakeSlice(cc->right, lo, hi);
         if (lo >= rsize) return MakeSlice(cc->left, lo - rsize, hi - rsize);
         return new IR::Concat(cc->srcInfo, MakeSlice(cc->left, 0, hi - rsize),
-                                           MakeSlice(cc->right, lo, rsize - 1)); }
+                              MakeSlice(cc->right, lo, rsize - 1));
+    }
     if (lo >= e->type->width_bits()) {
-        return new IR::Constant(IR::Type::Bits::get(hi-lo+1), 0); }
+        return new IR::Constant(IR::Type::Bits::get(hi - lo + 1), 0);
+    }
     if (hi >= e->type->width_bits()) {
-        hi = e->type->width_bits() - 1; }
+        hi = e->type->width_bits() - 1;
+    }
     if (auto sl = e->to<IR::Slice>()) {
         lo += sl->getL();
         hi += sl->getL();
         BUG_CHECK(lo >= int(sl->getL()) && hi <= int(sl->getH()),
                   "MakeSlice slice on slice type mismatch");
-        e = sl->e0; }
-    if (auto *neg = e->to<IR::Neg>())
-        return new IR::Neg(e->srcInfo, MakeSlice(neg->expr, lo, hi));
+        e = sl->e0;
+    }
+    if (auto *neg = e->to<IR::Neg>()) return new IR::Neg(e->srcInfo, MakeSlice(neg->expr, lo, hi));
     return new IR::Slice(e, hi, lo);
 }
 
@@ -162,8 +169,8 @@ safe_vector<const IR::Expression *> convertMaskToSlices(const IR::Mask *mask) {
 
 const IR::Expression *MakeWrappedSlice(const IR::Expression *e, int lo, int hi, int wrap_size) {
     BUG_CHECK(wrap_size > lo && lo > hi, "The creation of this wrap slice is incorrect");
-    if (e->is<IR::MAU::MultiOperand>() || e->is<IR::MAU::HashDist>()
-        || e->is<IR::MAU::RandomNumber>()) {
+    if (e->is<IR::MAU::MultiOperand>() || e->is<IR::MAU::HashDist>() ||
+        e->is<IR::MAU::RandomNumber>()) {
         return new IR::MAU::WrappedSlice(e, hi, lo, wrap_size);
     } else {
         BUG("Cannot create wrapped slice on anything that is not a MultiOperand/HashDist/Random");

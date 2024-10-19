@@ -10,20 +10,22 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+#include "bf-p4c/phv/analysis/dominator_tree.h"
+
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/dominator_tree.hpp>
-#include "bf-p4c/phv/analysis/dominator_tree.h"
+
 #include "bf-p4c/device.h"
 
 using namespace boost;
 
 void BuildDominatorTree::setupDomTree() {
     // Generate dominator tree for each gress.
-    for (const auto& entry : flowGraph) {
-        const auto& gress = entry.first;
-        const auto& fg = entry.second;
+    for (const auto &entry : flowGraph) {
+        const auto &gress = entry.first;
+        const auto &fg = entry.second;
 
-        ordered_map<int, const IR::MAU::Table*> indexMap;
+        ordered_map<int, const IR::MAU::Table *> indexMap;
         // If the flow graph is empty (e.g. no egress tables), no need to build the dominator map.
         // However, we still create an ImmediateDominatorMap for the particular gress.
         if (fg.emptyFlowGraph) {
@@ -56,24 +58,23 @@ bool BuildDominatorTree::preorder(const IR::BFN::Pipe *pipe) {
     return true;
 }
 
-bool BuildDominatorTree::preorder(const IR::MAU::Table* tbl) {
+bool BuildDominatorTree::preorder(const IR::MAU::Table *tbl) {
     BUG_CHECK(!tbl->is_always_run_action(),
               "BuildDomintorTree cannot be run after always-run action tables are inserted. ARA "
-              "table: %1%", tbl->name);
+              "table: %1%",
+              tbl->name);
     return false;
 }
 
-Visitor::profile_t BuildDominatorTree::init_apply(const IR::Node* root) {
+Visitor::profile_t BuildDominatorTree::init_apply(const IR::Node *root) {
     flowGraph.clear();
-    for (auto idom : iDominator)
-        idom.second->clear();
+    for (auto idom : iDominator) idom.second->clear();
     iDominator.clear();
     return Inspector::init_apply(root);
 }
 
 void BuildDominatorTree::generateIndexToTableMap(
-        const FlowGraph& fg,
-        ordered_map<int, const IR::MAU::Table*>& indexMap) const {
+    const FlowGraph &fg, ordered_map<int, const IR::MAU::Table *> &indexMap) const {
     graph_traits<G>::vertex_iterator uItr, uEnd;
     // For each vertex, create a map of the index of the vertex to the table that vertex represents.
     // This is useful for translating the results of the boost dominator algorithm (which operates
@@ -84,14 +85,12 @@ void BuildDominatorTree::generateIndexToTableMap(
     if (!LOGGING(4)) return;
     LOG4("      Printing index to table names");
     for (auto kv : indexMap)
-        if (kv.second != nullptr)
-            LOG4("        " << kv.first << "\t:\t" << kv.second->name);
+        if (kv.second != nullptr) LOG4("        " << kv.first << "\t:\t" << kv.second->name);
 }
 
 void BuildDominatorTree::generateDominatorTree(
-        const FlowGraph& fg,
-        const ordered_map<int, const IR::MAU::Table*>& indexToTableMap,
-        ImmediateDominatorMap& iDom) {
+    const FlowGraph &fg, const ordered_map<int, const IR::MAU::Table *> &indexToTableMap,
+    ImmediateDominatorMap &iDom) {
     // idom is a mapping from index of a vertex to the index of its immediate dominator vertex.
     ordered_map<int, int> idom;
 
@@ -111,8 +110,9 @@ void BuildDominatorTree::generateDominatorTree(
         if (boost::get(domTreePredMap, *uItr) != graph_traits<G>::null_vertex()) {
             idom[boost::get(indexMap, *uItr)] =
                 boost::get(indexMap, boost::get(domTreePredMap, *uItr));
-            LOG4("\t\tSetting dominator for " << boost::get(indexMap, *uItr) << " to " <<
-                            boost::get(indexMap, boost::get(domTreePredMap, *uItr)));
+            LOG4("\t\tSetting dominator for "
+                 << boost::get(indexMap, *uItr) << " to "
+                 << boost::get(indexMap, boost::get(domTreePredMap, *uItr)));
         } else {
             idom[boost::get(indexMap, *uItr)] = -1;
             LOG4("\t\tSetting dominator for " << boost::get(indexMap, *uItr) << " to -1");
@@ -136,7 +136,7 @@ void BuildDominatorTree::generateDominatorTree(
     }
 }
 
-void BuildDominatorTree::printDominatorTree(const ImmediateDominatorMap& idom) const {
+void BuildDominatorTree::printDominatorTree(const ImmediateDominatorMap &idom) const {
     for (auto kv : idom) {
         std::string idominator;
         std::string source;
@@ -148,22 +148,22 @@ void BuildDominatorTree::printDominatorTree(const ImmediateDominatorMap& idom) c
             source = "SINK";
         else
             source = kv.first->name;
-        LOG1("\t\t" << boost::format("%=25s") % source << "\t:\t" <<
-             boost::format("%=25s") % idominator);
+        LOG1("\t\t" << boost::format("%=25s") % source << "\t:\t"
+                    << boost::format("%=25s") % idominator);
     }
 }
 
-std::optional<const IR::MAU::Table*>
-BuildDominatorTree::getImmediateDominator(const IR::MAU::Table* t, gress_t gress) const {
+std::optional<const IR::MAU::Table *> BuildDominatorTree::getImmediateDominator(
+    const IR::MAU::Table *t, gress_t gress) const {
     cstring tableName = (t == NULL) ? "deparser"_cs : t->name;
     BUG_CHECK(iDominator.count(gress) > 0, "Invalid gress %1% for table %2%", gress, tableName);
-    const ImmediateDominatorMap* iDom = iDominator.at(gress);
+    const ImmediateDominatorMap *iDom = iDominator.at(gress);
     if (!iDom->count(t)) return std::nullopt;
     return iDom->at(t);
 }
 
-std::optional<const IR::MAU::Table*>
-BuildDominatorTree::getNonGatewayImmediateDominator(const IR::MAU::Table* t, gress_t gress) const {
+std::optional<const IR::MAU::Table *> BuildDominatorTree::getNonGatewayImmediateDominator(
+    const IR::MAU::Table *t, gress_t gress) const {
     cstring tableName = (t == NULL) ? "deparser"_cs : t->name;
     BUG_CHECK(iDominator.count(gress) > 0, "Invalid gress %1% for table %2%", gress, tableName);
     auto dom = getImmediateDominator(t, gress);
@@ -176,25 +176,25 @@ BuildDominatorTree::getNonGatewayImmediateDominator(const IR::MAU::Table* t, gre
     return getNonGatewayImmediateDominator(*dom, gress);
 }
 
-bool BuildDominatorTree::strictlyDominates(const IR::BFN::Unit* u1, const IR::BFN::Unit* u2) const {
+bool BuildDominatorTree::strictlyDominates(const IR::BFN::Unit *u1, const IR::BFN::Unit *u2) const {
     if (u1 == u2) return false;
     bool isParser1 = u1->is<IR::BFN::Parser>() || u1->is<IR::BFN::ParserState>();
     if (isParser1) return true;
     bool isParser2 = u2->is<IR::BFN::Parser>() || u2->is<IR::BFN::ParserState>();
     // Parser can never be dominated by a table or deparser.
     if (isParser2) return false;
-    const auto* t1 = u1->to<IR::MAU::Table>();
-    const auto* t2 = u2->to<IR::MAU::Table>();
+    const auto *t1 = u1->to<IR::MAU::Table>();
+    const auto *t2 = u2->to<IR::MAU::Table>();
     return strictlyDominates(t1, t2);
 }
 
-bool
-BuildDominatorTree::strictlyDominates(const IR::MAU::Table* t1, const IR::MAU::Table* t2) const {
+bool BuildDominatorTree::strictlyDominates(const IR::MAU::Table *t1,
+                                           const IR::MAU::Table *t2) const {
     if (t1 == t2) return false;
     // nullptr is passed if the unit is the deparser, and deparser is always strictly dominated by
     // tables.
     if (t1 == nullptr) return false;
-    const ImmediateDominatorMap* iDom = iDominator.at(t1->gress);
+    const ImmediateDominatorMap *iDom = iDominator.at(t1->gress);
     if (t2 == nullptr) {
         // TODO: Remove this device-dependent dominator tree condition. This is needed currently to
         // get over fitting issues.
@@ -217,10 +217,10 @@ BuildDominatorTree::strictlyDominates(const IR::MAU::Table* t1, const IR::MAU::T
     return false;
 }
 
-const std::vector<const IR::MAU::Table*>
-BuildDominatorTree::getAllDominators(const IR::MAU::Table* t, gress_t gress) const {
-    std::vector<const IR::MAU::Table*> rv;
-    const ImmediateDominatorMap* iDom = iDominator.at(gress);
+const std::vector<const IR::MAU::Table *> BuildDominatorTree::getAllDominators(
+    const IR::MAU::Table *t, gress_t gress) const {
+    std::vector<const IR::MAU::Table *> rv;
+    const ImmediateDominatorMap *iDom = iDominator.at(gress);
     BUG_CHECK(iDom->count(t) > 0, "Table '%s' not found in ImmediateDominatorMap", t->name);
     while (t != iDom->at(t)) {
         t = iDom->at(t);
@@ -229,11 +229,11 @@ BuildDominatorTree::getAllDominators(const IR::MAU::Table* t, gress_t gress) con
     return rv;
 }
 
-const IR::MAU::Table*
-BuildDominatorTree::getNonGatewayGroupDominator(ordered_set<const IR::MAU::Table*>& tables) const {
+const IR::MAU::Table *BuildDominatorTree::getNonGatewayGroupDominator(
+    ordered_set<const IR::MAU::Table *> &tables) const {
     // Validate that all tables are of the same gress.
     std::optional<gress_t> gress = std::nullopt;
-    for (const auto* t : tables) {
+    for (const auto *t : tables) {
         if (!gress) {
             gress = t->gress;
             continue;
@@ -244,25 +244,25 @@ BuildDominatorTree::getNonGatewayGroupDominator(ordered_set<const IR::MAU::Table
     }
 
     // Find all the nodes from the given table to the source.
-    ordered_map<const IR::MAU::Table*, std::vector<const IR::MAU::Table*>> pathsToSource;
+    ordered_map<const IR::MAU::Table *, std::vector<const IR::MAU::Table *>> pathsToSource;
     std::optional<unsigned> minDepth = std::nullopt;
-    for (const auto* t : tables) {
+    for (const auto *t : tables) {
         pathsToSource[t] = getAllDominators(t, gress.value());
-        LOG3("\t\t\tTable " << t->name << " is at depth " << pathsToSource[t].size() << " in the "
-             "dominator tree.");
+        LOG3("\t\t\tTable " << t->name << " is at depth " << pathsToSource[t].size()
+                            << " in the "
+                               "dominator tree.");
         if (minDepth == std::nullopt || pathsToSource[t].size() < *minDepth) {
             minDepth = pathsToSource[t].size();
             LOG4("\t\t\t  Setting minDepth to " << *minDepth);
         }
     }
-    if (minDepth)
-        LOG3("\t\t  Min depth: " << minDepth.value());
+    if (minDepth) LOG3("\t\t  Min depth: " << minDepth.value());
 
     // Trim all the nodes that are greater in depth than the minimum depth. Note that the position
     // of table pointers in the vector are reversed; i.e. the 0th position in the vector is
     // occupied by the immediate dominator, or the node deepest in the path from the source to the
     // dominator node in question.
-    for (const auto* t : tables) {
+    for (const auto *t : tables) {
         LOG4("\t\t\tReducing the size paths for table " << t->name);
         unsigned tableDepth = pathsToSource[t].size();
         while (tableDepth > minDepth.value()) {
@@ -274,21 +274,23 @@ BuildDominatorTree::getNonGatewayGroupDominator(ordered_set<const IR::MAU::Table
             LOG4(ss.str());
         }
         if (minDepth)
-            LOG4("\t\t\t  minDepth: " << minDepth.value() << ", new  depth: " <<
-                    pathsToSource[t].size());
-        BUG_CHECK(minDepth && pathsToSource[t].size() == *minDepth, "Paths for table %1% (%2%)"
-                  " not reduced" " to the min depth %3%", t->name, pathsToSource[t].size(),
-                  *minDepth);
+            LOG4("\t\t\t  minDepth: " << minDepth.value()
+                                      << ", new  depth: " << pathsToSource[t].size());
+        BUG_CHECK(minDepth && pathsToSource[t].size() == *minDepth,
+                  "Paths for table %1% (%2%)"
+                  " not reduced"
+                  " to the min depth %3%",
+                  t->name, pathsToSource[t].size(), *minDepth);
     }
 
     // Starting from the minDepth level, keep going up one level at a time and see if we encounter
     // the same table. If we do encounter the same table, then that table is the group dominator.
     // Return the non gateway dominator for that group dominator.
     for (unsigned i = 0; minDepth && i < *minDepth; ++i) {
-        std::optional<const IR::MAU::Table*> dom = std::nullopt;
+        std::optional<const IR::MAU::Table *> dom = std::nullopt;
         bool foundCommonAncestor = true;
         LOG4("\t\t\t  i = " << i);
-        for (const auto* t : tables) {
+        for (const auto *t : tables) {
             if (!dom) {
                 dom = pathsToSource[t].at(i);
                 LOG4("\t\t\t\tNew table encountered: " << (*dom)->name);
@@ -315,7 +317,7 @@ BuildDominatorTree::getNonGatewayGroupDominator(ordered_set<const IR::MAU::Table
 
 cstring BuildDominatorTree::hasImmediateDominator(gress_t g, cstring t) const {
     BUG_CHECK(iDominator.count(g) > 0, "Invalid gress %1% for unit %2%", g, t);
-    const ImmediateDominatorMap* iDom = iDominator.at(g);
+    const ImmediateDominatorMap *iDom = iDominator.at(g);
     for (auto kv : *iDom) {
         // If it is a sink node, then check corresponding to the nullptr entry in the dominator map.
         if (kv.first == nullptr && t == "SINK") return kv.second->name;
@@ -327,9 +329,9 @@ cstring BuildDominatorTree::hasImmediateDominator(gress_t g, cstring t) const {
 }
 
 bool BuildDominatorTree::strictlyDominates(cstring t1, cstring t2, gress_t gress) const {
-    const ImmediateDominatorMap* iDom = iDominator.at(gress);
-    const IR::MAU::Table* tbl1 = nullptr;
-    const IR::MAU::Table* tbl2 = nullptr;
+    const ImmediateDominatorMap *iDom = iDominator.at(gress);
+    const IR::MAU::Table *tbl1 = nullptr;
+    const IR::MAU::Table *tbl2 = nullptr;
     for (auto kv : *iDom) {
         if (kv.first == nullptr) continue;
         if (kv.first->name == t1) tbl1 = kv.first;
@@ -339,9 +341,9 @@ bool BuildDominatorTree::strictlyDominates(cstring t1, cstring t2, gress_t gress
 }
 
 bool BuildDominatorTree::isDominator(cstring t1, gress_t gress, cstring t2) const {
-    const ImmediateDominatorMap* iDom = iDominator.at(gress);
-    const IR::MAU::Table* tbl1 = nullptr;
-    const IR::MAU::Table* tbl2 = nullptr;
+    const ImmediateDominatorMap *iDom = iDominator.at(gress);
+    const IR::MAU::Table *tbl1 = nullptr;
+    const IR::MAU::Table *tbl2 = nullptr;
     for (auto kv : *iDom) {
         if (kv.first == nullptr) continue;
         if (kv.first->name == t1) tbl1 = kv.first;

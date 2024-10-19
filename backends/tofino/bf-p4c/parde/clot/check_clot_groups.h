@@ -10,12 +10,13 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PARDE_CLOT_CHECK_CLOT_GROUPS_H_
-#define EXTENSIONS_BF_P4C_PARDE_CLOT_CHECK_CLOT_GROUPS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_CLOT_CHECK_CLOT_GROUPS_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_CLOT_CHECK_CLOT_GROUPS_H_
 
 #include <iostream>
-#include "parde/parde_visitor.h"
+
 #include "clot_info.h"
+#include "parde/parde_visitor.h"
 
 class CheckClotGroups : public DeparserInspector {
     const PhvInfo &phv;
@@ -30,13 +31,13 @@ class CheckClotGroups : public DeparserInspector {
     unsigned DEPARSER_CLOTS_PER_GROUP;
 
     struct fde_span {
-        const Clot      *clot = nullptr;  // nullptr for no clot/data from PHV
-        unsigned        size = 0;   // in bits
-        unsigned        chunk = 0;
+        const Clot *clot = nullptr;  // nullptr for no clot/data from PHV
+        unsigned size = 0;           // in bits
+        unsigned chunk = 0;
         fde_span() {}
         explicit fde_span(const Clot *cl) : clot(cl) {}
     };
-    std::vector<fde_span>       field_dictionary;
+    std::vector<fde_span> field_dictionary;
 
  public:
     CheckClotGroups(const PhvInfo &phv, const ClotInfo &clot) : phv(phv), clot(clot) {
@@ -48,4 +49,4 @@ class CheckClotGroups : public DeparserInspector {
     }
 };
 
-#endif  /* EXTENSIONS_BF_P4C_PARDE_CLOT_CHECK_CLOT_GROUPS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_CLOT_CHECK_CLOT_GROUPS_H_ */

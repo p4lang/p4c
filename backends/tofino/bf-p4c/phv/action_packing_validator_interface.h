@@ -35,9 +35,9 @@ class ActionPackingValidatorInterface {
         /// and the destination. If it is an intrinsic conflict of constraint, then either
         /// (1)the destination needs to be split more, or (2) sources needs to be split
         /// less to be packed together.
-        ordered_set<const SuperCluster::SliceList*>* invalid_packing =
-            new ordered_set<const SuperCluster::SliceList*>();
-        std::optional<const IR::MAU::Action*> invalid_action = std::nullopt;
+        ordered_set<const SuperCluster::SliceList *> *invalid_packing =
+            new ordered_set<const SuperCluster::SliceList *>();
+        std::optional<const IR::MAU::Action *> invalid_action = std::nullopt;
         Result() = default;
         explicit Result(Code code, cstring err = cstring::empty) : code(code), err(err) {}
     };
@@ -59,11 +59,11 @@ class ActionPackingValidatorInterface {
     /// can be split further later to avoid corruption, it is sometimes useful to use loose_mode
     /// so that caller can solve the problem in a divide-and-conquer way.
     virtual Result can_pack(
-        const ordered_set<const SuperCluster::SliceList*>& slice_lists,
-        const ordered_set<const SuperCluster::SliceList*>& can_be_further_split = {},
+        const ordered_set<const SuperCluster::SliceList *> &slice_lists,
+        const ordered_set<const SuperCluster::SliceList *> &can_be_further_split = {},
         const bool loose_mode = false) const = 0;
 };
 
-}
+}  // namespace PHV
 
 #endif /* BF_P4C_PHV_ACTION_PACKING_VALIDATOR_INTERFACE_H_ */

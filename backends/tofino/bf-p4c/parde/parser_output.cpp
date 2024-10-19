@@ -11,19 +11,19 @@
  */
 
 #include <algorithm>
-#include <boost/optional/optional_io.hpp>
 
-#include "lib/match.h"
-#include "lib/log.h"
-#include "lib/range.h"
+#include <boost/optional/optional_io.hpp>
 
 #include "bf-p4c/common/asm_output.h"
 #include "bf-p4c/common/autoindent.h"
 #include "bf-p4c/common/debug_info.h"
 #include "bf-p4c/parde/asm_output.h"
-#include "bf-p4c/parde/parde_visitor.h"
 #include "bf-p4c/parde/clot/clot_info.h"
+#include "bf-p4c/parde/parde_visitor.h"
 #include "bf-p4c/phv/phv_fields.h"
+#include "lib/log.h"
+#include "lib/match.h"
+#include "lib/range.h"
 #include "midend/parser_enforce_depth_req.h"
 
 namespace {
@@ -49,16 +49,17 @@ static std::map<cstring, int> pvs_handles;
  * - P4-16: Share PVS Handle only within ig/eg, don't share across ig/eg
  */
 struct ParserAsmSerializer : public ParserInspector {
-    explicit ParserAsmSerializer(std::ostream& out, const PhvInfo& phv, const ClotInfo& clot_info)
-       : out(out), phv(phv), clot_info(clot_info) {
-        is_v1Model = (BackendOptions().arch == "v1model"); }
+    explicit ParserAsmSerializer(std::ostream &out, const PhvInfo &phv, const ClotInfo &clot_info)
+        : out(out), phv(phv), clot_info(clot_info) {
+        is_v1Model = (BackendOptions().arch == "v1model");
+    }
 
  private:
     bool is_v1Model = false;
     void init_apply() {
-       // If not v1Model share pvs handles only when pvs is invoked multiple
-       // times within the same parser.
-       if (!is_v1Model) pvs_handles.clear();
+        // If not v1Model share pvs handles only when pvs is invoked multiple
+        // times within the same parser.
+        if (!is_v1Model) pvs_handles.clear();
     }
 
     int getPvsHandle(cstring pvsName) {
@@ -74,8 +75,7 @@ struct ParserAsmSerializer : public ParserInspector {
         return handle;
     }
 
-
-    bool preorder(const IR::BFN::LoweredParser* parser) override {
+    bool preorder(const IR::BFN::LoweredParser *parser) override {
         AutoIndent indentParser(indent);
 
         out << "parser " << parser->gress;
@@ -90,12 +90,10 @@ struct ParserAsmSerializer : public ParserInspector {
         out << ":" << std::endl;
 
         if (parser->name && parser->portmap.size() != 0)
-            out << indent << "name: " << canon_name(parser->name)
-                << std::endl;
+            out << indent << "name: " << canon_name(parser->name) << std::endl;
 
         if (parser->start)
-            out << indent << "start: " << canon_name(parser->start->name)
-                << std::endl;
+            out << indent << "start: " << canon_name(parser->start->name) << std::endl;
 
         if (!parser->initZeroContainers.empty()) {
             out << indent << "init_zero: ";
@@ -129,8 +127,7 @@ struct ParserAsmSerializer : public ParserInspector {
 
         out << indent << "hdr_len_adj: " << parser->hdrLenAdj << std::endl;
 
-        if (parser->metaOpt)
-            out << indent << "meta_opt: " << *(parser->metaOpt) << std::endl;
+        if (parser->metaOpt) out << indent << "meta_opt: " << *(parser->metaOpt) << std::endl;
 
         if (parser->parserError)
             out << indent << "parser_error: " << parser->parserError << std::endl;
@@ -171,16 +168,16 @@ struct ParserAsmSerializer : public ParserInspector {
             out << indent << "max: " << bubble_max << std::endl;
             if (Device::currentDevice() == Device::TOFINO) {
                 out << indent << "dec: " << bubble_dec << std::endl;
-                LOG3("Bubble Rate Limiter ( load : " << pps_load << "%, bubble: "
-                        << bubble_load << "%, max: " << bubble_max
-                        << ", inc: " << bubble_inc <<", dec: " << bubble_dec << ")");
+                LOG3("Bubble Rate Limiter ( load : "
+                     << pps_load << "%, bubble: " << bubble_load << "%, max: " << bubble_max
+                     << ", inc: " << bubble_inc << ", dec: " << bubble_dec << ")");
             } else {
                 int bubble_intvl = 100 / bubble_gcd;
                 bubble_inc = pps_load / bubble_gcd;
                 out << indent << "interval: " << bubble_intvl << std::endl;
-                LOG3("Bubble Rate Limiter ( load : " << pps_load << "%, bubble: "
-                        << bubble_load << "%, max: " << bubble_max
-                        << ", inc: " << bubble_inc <<", intvl: " << bubble_intvl << ")");
+                LOG3("Bubble Rate Limiter ( load : "
+                     << pps_load << "%, bubble: " << bubble_load << "%, max: " << bubble_max
+                     << ", inc: " << bubble_inc << ", intvl: " << bubble_intvl << ")");
             }
             out << indent << "inc: " << bubble_inc << std::endl;
             indent--;
@@ -191,7 +188,7 @@ struct ParserAsmSerializer : public ParserInspector {
         return true;
     }
 
-    bool preorder(const IR::BFN::LoweredParserState* state) override {
+    bool preorder(const IR::BFN::LoweredParserState *state) override {
         AutoIndent indentState(indent, 2);
 
         out << indent << canon_name(state->name) << ':' << std::endl;
@@ -201,14 +198,14 @@ struct ParserAsmSerializer : public ParserInspector {
 
             out << indent << "match: ";
             const char *sep = "[ ";
-            for (const auto& c : state->select->counters) {
+            for (const auto &c : state->select->counters) {
                 if (c->is<IR::BFN::ParserCounterIsZero>())
                     out << sep << "ctr_zero";
                 else if (c->is<IR::BFN::ParserCounterIsNegative>())
                     out << sep << "ctr_neg";
                 sep = ", ";
             }
-            for (const auto& r : state->select->regs) {
+            for (const auto &r : state->select->regs) {
                 out << sep << r;
                 sep = ", ";
             }
@@ -216,8 +213,7 @@ struct ParserAsmSerializer : public ParserInspector {
 
             // Print human-friendly debug info about what the select offsets
             // mean in terms of the original P4 program.
-            for (auto& info : state->select->debug.info)
-                out << "      # - " << info << std::endl;
+            for (auto &info : state->select->debug.info) out << "      # - " << info << std::endl;
         }
 
         if (state->name.startsWith(BFN::ParserEnforceDepthReq::pad_state_name.string())) {
@@ -226,31 +222,28 @@ struct ParserAsmSerializer : public ParserInspector {
             out << indent << "  option: ignore_max_depth" << std::endl;
         }
 
-        for (auto* match : state->transitions)
-            outputMatch(match, state->thread());
+        for (auto *match : state->transitions) outputMatch(match, state->thread());
 
         return true;
     }
 
-    void outputMatch(const IR::BFN::LoweredParserMatch* match, gress_t gress) {
+    void outputMatch(const IR::BFN::LoweredParserMatch *match, gress_t gress) {
         AutoIndent indentMatchPattern(indent);
 
-        if (auto* const_val = match->value->to<IR::BFN::ParserConstMatchValue>()) {
+        if (auto *const_val = match->value->to<IR::BFN::ParserConstMatchValue>()) {
             out << indent << const_val->value << ':' << std::endl;
-        } else if (auto* pvs = match->value->to<IR::BFN::ParserPvsMatchValue>()) {
+        } else if (auto *pvs = match->value->to<IR::BFN::ParserPvsMatchValue>()) {
             out << indent << "value_set " << pvs->name << " " << pvs->size << ":" << std::endl;
             AutoIndent indentMatch(indent);
             out << indent << "handle: " << getPvsHandle(pvs->name) << std::endl;
             out << indent << "field_mapping:" << std::endl;
             AutoIndent indentFieldMap(indent);
-            for (const auto& m : pvs->mapping) {
+            for (const auto &m : pvs->mapping) {
                 cstring fieldname = m.first.first;
                 cstring reg_name = m.second.first.name;
-                out << indent
-                    << fieldname << "(" << m.first.second.lo << ".." << m.first.second.hi << ")"
-                    << " : "
-                    << reg_name  << "(" << m.second.second.lo << ".." << m.second.second.hi << ")"
-                    << std::endl;
+                out << indent << fieldname << "(" << m.first.second.lo << ".." << m.first.second.hi
+                    << ")" << " : " << reg_name << "(" << m.second.second.lo << ".."
+                    << m.second.second.hi << ")" << std::endl;
             }
         } else {
             BUG("unknown parser match value %1%", match->value);
@@ -258,20 +251,17 @@ struct ParserAsmSerializer : public ParserInspector {
 
         AutoIndent indentMatch(indent);
 
-        if (match->priority)
-            out << indent << "priority: " << match->priority->val << std::endl;
+        if (match->priority) out << indent << "priority: " << match->priority->val << std::endl;
 
-        for (auto* csum : match->checksums)
-            outputChecksum(csum);
+        for (auto *csum : match->checksums) outputChecksum(csum);
 
-        for (auto* cntr : match->counters)
-            outputCounter(cntr);
+        for (auto *cntr : match->counters) outputCounter(cntr);
 
         int intrinsic_width = 0;
-        for (auto* stmt : match->extracts) {
-            if (auto* extract = stmt->to<IR::BFN::LoweredExtractPhv>())
+        for (auto *stmt : match->extracts) {
+            if (auto *extract = stmt->to<IR::BFN::LoweredExtractPhv>())
                 outputExtractPhv(extract, intrinsic_width);
-            else if (auto* extract = stmt->to<IR::BFN::LoweredExtractClot>())
+            else if (auto *extract = stmt->to<IR::BFN::LoweredExtractClot>())
                 outputExtractClot(extract);
             else
                 BUG("unknown lowered parser primitive type");
@@ -280,14 +270,11 @@ struct ParserAsmSerializer : public ParserInspector {
         if (intrinsic_width > 0 && gress == EGRESS)
             out << indent << "intr_md: " << intrinsic_width << std::endl;
 
-        if (!match->saves.empty())
-            outputSave(match->saves);
+        if (!match->saves.empty()) outputSave(match->saves);
 
-        if (!match->scratches.empty())
-            outputScratch(match->scratches);
+        if (!match->scratches.empty()) outputScratch(match->scratches);
 
-        if (match->shift != 0)
-            out << indent << "shift: " << match->shift << std::endl;
+        if (match->shift != 0) out << indent << "shift: " << match->shift << std::endl;
 
         if (match->hdrLenIncFinalAmt)
             out << indent << "hdr_len_inc_stop: " << *match->hdrLenIncFinalAmt << std::endl;
@@ -295,11 +282,9 @@ struct ParserAsmSerializer : public ParserInspector {
         if (match->bufferRequired)
             out << indent << "buf_req: " << *match->bufferRequired << std::endl;
 
-        if (match->offsetInc)
-            out << indent << "offset_inc: " << *match->offsetInc << std::endl;
+        if (match->offsetInc) out << indent << "offset_inc: " << *match->offsetInc << std::endl;
 
-        if (match->partialHdrErrProc)
-            out << indent << "partial_hdr_err_proc: 1" << std::endl;
+        if (match->partialHdrErrProc) out << indent << "partial_hdr_err_proc: 1" << std::endl;
 
         out << indent << "next: ";
         if (match->next)
@@ -312,11 +297,11 @@ struct ParserAsmSerializer : public ParserInspector {
         out << std::endl;
     }
 
-    void outputSave(const IR::Vector<IR::BFN::LoweredSave>& saves) {
-        const char* sep = "load: { ";
+    void outputSave(const IR::Vector<IR::BFN::LoweredSave> &saves) {
+        const char *sep = "load: { ";
         out << indent;
-        for (const auto* save : saves) {
-            if (auto* source = save->source->to<IR::BFN::LoweredInputBufferRVal>()) {
+        for (const auto *save : saves) {
+            if (auto *source = save->source->to<IR::BFN::LoweredInputBufferRVal>()) {
                 auto bytes = source->range;
                 out << sep << save->dest << " : " << Range(bytes.lo, bytes.hi);
                 sep = ", ";
@@ -325,8 +310,8 @@ struct ParserAsmSerializer : public ParserInspector {
         out << " }" << std::endl;
     }
 
-    void outputScratch(const std::set<MatchRegister>& scratches) {
-        const char* sep = "save: [ ";
+    void outputScratch(const std::set<MatchRegister> &scratches) {
+        const char *sep = "save: [ ";
         out << indent;
         for (auto reg : scratches) {
             out << sep << reg.name;
@@ -335,15 +320,15 @@ struct ParserAsmSerializer : public ParserInspector {
         out << " ]" << std::endl;
     }
 
-    void outputExtractPhv(const IR::BFN::LoweredExtractPhv* extract, int &intrinsic_width) {
+    void outputExtractPhv(const IR::BFN::LoweredExtractPhv *extract, int &intrinsic_width) {
         // Generate the assembly that actually implements the extract.
-        if (auto* source = extract->source->to<IR::BFN::LoweredInputBufferRVal>()) {
+        if (auto *source = extract->source->to<IR::BFN::LoweredInputBufferRVal>()) {
             auto bytes = source->range;
             out << indent << Range(bytes.lo, bytes.hi) << ": " << extract->dest;
             for (auto sl : phv.get_slices_in_container(extract->dest->container)) {
                 if (sl.field()->is_intrinsic()) intrinsic_width += sl.width();
             }
-        } else if (auto* source = extract->source->to<IR::BFN::LoweredConstantRVal>()) {
+        } else if (auto *source = extract->source->to<IR::BFN::LoweredConstantRVal>()) {
             out << indent << extract->dest << ": " << source->constant;
         } else {
             BUG("Can't generate assembly for: %1%", extract);
@@ -351,7 +336,7 @@ struct ParserAsmSerializer : public ParserInspector {
 
         // Print human-friendly debug info about the extract - what it's writing
         // to, what higher-level extracts it may have been generated from, etc.
-        for (auto& info : extract->debug.info) {
+        for (auto &info : extract->debug.info) {
             if (extract->debug.info.size() == 1)
                 out << "  # ";
             else
@@ -362,12 +347,12 @@ struct ParserAsmSerializer : public ParserInspector {
         out << std::endl;
     }
 
-    void outputExtractClot(const IR::BFN::LoweredExtractClot* extract) {
+    void outputExtractClot(const IR::BFN::LoweredExtractClot *extract) {
         if (extract->is_start) {
             out << indent << "clot " << extract->dest->tag << " :" << std::endl;
             AutoIndent ai(indent, 1);
 
-            auto* source = extract->source->to<IR::BFN::LoweredPacketRVal>();
+            auto *source = extract->source->to<IR::BFN::LoweredPacketRVal>();
             cstring name = clot_info.sanitize_state_name(extract->higher_parser_state->name,
                                                          extract->higher_parser_state->gress);
 
@@ -390,7 +375,7 @@ struct ParserAsmSerializer : public ParserInspector {
         }
     }
 
-    void outputChecksum(const IR::BFN::LoweredParserChecksum* csum) {
+    void outputChecksum(const IR::BFN::LoweredParserChecksum *csum) {
         out << indent << "checksum " << csum->unit_id << ":" << std::endl;
         AutoIndent indentCsum(indent, 1);
         out << indent << "type: " << csum->type << std::endl;
@@ -402,15 +387,14 @@ struct ParserAsmSerializer : public ParserInspector {
         for (auto r : csum->masked_ranges) {
             out << Range(r.lo, r.hi);
 
-            if (i != csum->masked_ranges.size() - 1)
-                out << ", ";
+            if (i != csum->masked_ranges.size() - 1) out << ", ";
             i++;
         }
 
         out << " ]" << std::endl;
         out << indent << "swap: " << csum->swap << std::endl;
-        out << indent << "start: " << csum->start  << std::endl;
-        out << indent << "end: " << csum->end  << std::endl;
+        out << indent << "start: " << csum->start << std::endl;
+        out << indent << "end: " << csum->end << std::endl;
         if (csum->multiply_2 > 0) {
             out << indent << "mul_2: " << csum->multiply_2 << std::endl;
         }
@@ -424,26 +408,24 @@ struct ParserAsmSerializer : public ParserInspector {
                 out << indent << "dest: clot " << csum->clot_dest.tag << std::endl;
 
             if (csum->type == IR::BFN::ChecksumMode::RESIDUAL)
-                out << indent << "end_pos: " << csum->end_pos  << std::endl;
+                out << indent << "end_pos: " << csum->end_pos << std::endl;
         }
     }
 
-    void outputCounter(const IR::BFN::ParserCounterPrimitive* cntr) {
-        if (auto* init = cntr->to<IR::BFN::ParserCounterLoadImm>()) {
+    void outputCounter(const IR::BFN::ParserCounterPrimitive *cntr) {
+        if (auto *init = cntr->to<IR::BFN::ParserCounterLoadImm>()) {
             out << indent << "counter:" << std::endl;
 
             indent++;
 
             out << indent << "imm: " << init->imm << std::endl;
 
-            if (init->push)
-                out << indent << "push: 1" << std::endl;
+            if (init->push) out << indent << "push: 1" << std::endl;
 
-            if (init->update_with_top)
-                out << indent << "update_with_top: 1"  << std::endl;
+            if (init->update_with_top) out << indent << "update_with_top: 1" << std::endl;
 
             indent--;
-        } else if (auto* load = cntr->to<IR::BFN::ParserCounterLoadPkt>()) {
+        } else if (auto *load = cntr->to<IR::BFN::ParserCounterLoadPkt>()) {
             out << indent << "counter:" << std::endl;
 
             BUG_CHECK(load->source->reg_slices.size() == 1,
@@ -457,50 +439,43 @@ struct ParserAsmSerializer : public ParserInspector {
             indent++;
             out << indent << "src: " << reg.name;
 
-            if (reg.size == 2)
-                out << (slice.lo ? "_hi" : "_lo");
+            if (reg.size == 2) out << (slice.lo ? "_hi" : "_lo");
 
             out << std::endl;
 
-            if (load->max)
-                out << indent << "max: " << *(load->max) << std::endl;
+            if (load->max) out << indent << "max: " << *(load->max) << std::endl;
 
-            if (load->rotate)
-                out << indent << "rotate: " << *(load->rotate) << std::endl;
+            if (load->rotate) out << indent << "rotate: " << *(load->rotate) << std::endl;
 
-            if (load->mask)
-                out << indent << "mask: " << *(load->mask) << std::endl;
+            if (load->mask) out << indent << "mask: " << *(load->mask) << std::endl;
 
-            if (load->add)
-                out << indent << "add: " << *(load->add) << std::endl;
+            if (load->add) out << indent << "add: " << *(load->add) << std::endl;
 
-            if (load->push)
-                out << indent << "push: 1" << std::endl;
+            if (load->push) out << indent << "push: 1" << std::endl;
 
-            if (load->update_with_top)
-                out << indent << "update_with_top: 1"  << std::endl;
+            if (load->update_with_top) out << indent << "update_with_top: 1" << std::endl;
 
             indent--;
-        } else if (auto* inc = cntr->to<IR::BFN::ParserCounterIncrement>()) {
+        } else if (auto *inc = cntr->to<IR::BFN::ParserCounterIncrement>()) {
             out << indent << "counter: inc " << inc->value << std::endl;
-        } else if (auto* inc = cntr->to<IR::BFN::ParserCounterDecrement>()) {
+        } else if (auto *inc = cntr->to<IR::BFN::ParserCounterDecrement>()) {
             out << indent << "counter: dec " << inc->value << std::endl;
         } else if (cntr->is<IR::BFN::ParserCounterPop>()) {
             out << indent << "counter: pop" << std::endl;
         }
     }
 
-    std::ostream& out;
-    const PhvInfo& phv;
-    const ClotInfo& clot_info;
+    std::ostream &out;
+    const PhvInfo &phv;
+    const ClotInfo &clot_info;
     indent_t indent;
 };
 
 }  // namespace
 
-ParserAsmOutput::ParserAsmOutput(const IR::BFN::Pipe* pipe, const PhvInfo& phv,
-                                 const ClotInfo& clot_info, gress_t gress)
-        : phv(phv), clot_info(clot_info) {
+ParserAsmOutput::ParserAsmOutput(const IR::BFN::Pipe *pipe, const PhvInfo &phv,
+                                 const ClotInfo &clot_info, gress_t gress)
+    : phv(phv), clot_info(clot_info) {
     BUG_CHECK(pipe->thread[gress].parsers.size() != 0, "No parser?");
     for (auto parser : pipe->thread[gress].parsers) {
         auto lowered_parser = parser->to<IR::BFN::BaseLoweredParser>();
@@ -509,7 +484,7 @@ ParserAsmOutput::ParserAsmOutput(const IR::BFN::Pipe* pipe, const PhvInfo& phv,
     }
 }
 
-std::ostream& operator<<(std::ostream& out, const ParserAsmOutput& parserOut) {
+std::ostream &operator<<(std::ostream &out, const ParserAsmOutput &parserOut) {
     ParserAsmSerializer serializer(out, parserOut.phv, parserOut.clot_info);
     for (auto p : parserOut.parsers) {
         LOG1("write asm for " << p);
@@ -517,4 +492,3 @@ std::ostream& operator<<(std::ostream& out, const ParserAsmOutput& parserOut) {
     }
     return out;
 }
-

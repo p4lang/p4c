@@ -10,14 +10,16 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PARDE_PARSER_DOMINATOR_BUILDER_H_
-#define EXTENSIONS_BF_P4C_PARDE_PARSER_DOMINATOR_BUILDER_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_PARSER_DOMINATOR_BUILDER_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_PARSER_DOMINATOR_BUILDER_H_
 
 #include <optional>
+
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/dominator_tree.hpp>
 #include <boost/graph/graph_utility.hpp>
 #include <boost/graph/reverse_graph.hpp>
+
 #include "bf-p4c/logging/event_logger.h"
 #include "bf-p4c/parde/parser_info.h"
 #include "ir/ir.h"
@@ -36,7 +38,7 @@ class ParserDominatorBuilder : public PardeInspector {
  public:
     using IndexImmediateDominatorMap = ordered_map<int, int>;
     using StateImmediateDominatorMap =
-        ordered_map<const IR::BFN::ParserState*, const IR::BFN::ParserState*>;
+        ordered_map<const IR::BFN::ParserState *, const IR::BFN::ParserState *>;
     using Graph = ReversibleParserGraph::Graph;
     using Vertex = boost::graph_traits<Graph>::vertex_descriptor;
     using IndexMap = boost::property_map<Graph, boost::vertex_index_t>::type;
@@ -46,18 +48,18 @@ class ParserDominatorBuilder : public PardeInspector {
     ordered_map<gress_t, ReversibleParserGraph> parser_graphs;
     ordered_map<gress_t, StateImmediateDominatorMap> immediate_dominators;
     ordered_map<gress_t, StateImmediateDominatorMap> immediate_post_dominators;
-    std::set<const IR::BFN::ParserState*> states;
+    std::set<const IR::BFN::ParserState *> states;
 
  private:
     /**
      * @brief Associate graph data structure to its parser.
      */
-    bool preorder(const IR::BFN::Parser* parser) override;
+    bool preorder(const IR::BFN::Parser *parser) override;
 
     /**
      * @brief Build ReversibleParserGraph for use with Boost Graph Library algorithms.
      */
-    bool preorder(const IR::BFN::ParserState* parser_state) override;
+    bool preorder(const IR::BFN::ParserState *parser_state) override;
 
     /**
      * @brief Using the Boost Graph Library, get a vertex index (int) to vertex index (int)
@@ -134,8 +136,8 @@ class ParserDominatorBuilder : public PardeInspector {
      * state map
      * @return ParserDominatorBuilder::StateImmediateDominatorMap
      */
-    StateImmediateDominatorMap index_map_to_state_map(IndexImmediateDominatorMap& idom,
-                                                      ReversibleParserGraph& rpg);
+    StateImmediateDominatorMap index_map_to_state_map(IndexImmediateDominatorMap &idom,
+                                                      ReversibleParserGraph &rpg);
 
     /**
      * @brief Get all parser states that are dominated by @p state.
@@ -146,9 +148,9 @@ class ParserDominatorBuilder : public PardeInspector {
      * this->immediate_dominators
      * @return std::set<const IR::BFN::ParserState*> A set of all dominatees of @p state
      */
-    std::set<const IR::BFN::ParserState*> get_all_dominatees(const IR::BFN::ParserState* state,
-                                                             gress_t gress,
-                                                             bool get_post_dominatees);
+    std::set<const IR::BFN::ParserState *> get_all_dominatees(const IR::BFN::ParserState *state,
+                                                              gress_t gress,
+                                                              bool get_post_dominatees);
 
     /**
      * @brief Get all parser states that dominate @p state.
@@ -159,9 +161,9 @@ class ParserDominatorBuilder : public PardeInspector {
      * this->immediate_dominators
      * @return std::set<const IR::BFN::ParserState*> A set of all dominators of @p state
      */
-    std::set<const IR::BFN::ParserState*> get_all_dominators(const IR::BFN::ParserState* state,
-                                                             gress_t gress,
-                                                             bool get_post_dominators);
+    std::set<const IR::BFN::ParserState *> get_all_dominators(const IR::BFN::ParserState *state,
+                                                              gress_t gress,
+                                                              bool get_post_dominators);
 
     /**
      * @brief Build immediate dominator and post-dominator maps for all parser graphs.
@@ -177,8 +179,8 @@ class ParserDominatorBuilder : public PardeInspector {
      * the End of Parser belongs to cannot be deduced without it
      * @return std::set<const IR::BFN::ParserState*> A set of all dominatees of @p state
      */
-    std::set<const IR::BFN::ParserState*> get_all_dominatees(const IR::BFN::ParserState* state,
-                                                             gress_t gress = INGRESS);
+    std::set<const IR::BFN::ParserState *> get_all_dominatees(const IR::BFN::ParserState *state,
+                                                              gress_t gress = INGRESS);
 
     /**
      * @brief Get all parser states that are post-dominated by @p state.
@@ -188,8 +190,8 @@ class ParserDominatorBuilder : public PardeInspector {
      * the End of Parser belongs to cannot be deduced without it
      * @return std::set<const IR::BFN::ParserState*> A set of all post-dominatees of @p state
      */
-    std::set<const IR::BFN::ParserState*> get_all_post_dominatees(const IR::BFN::ParserState* state,
-                                                                  gress_t gress = INGRESS);
+    std::set<const IR::BFN::ParserState *> get_all_post_dominatees(
+        const IR::BFN::ParserState *state, gress_t gress = INGRESS);
 
     /**
      * @brief Get all parser states that dominate @p state.
@@ -199,8 +201,8 @@ class ParserDominatorBuilder : public PardeInspector {
      * the End of Parser belongs to cannot be deduced without it
      * @return std::set<const IR::BFN::ParserState*> A set of all dominators of @p state
      */
-    std::set<const IR::BFN::ParserState*> get_all_dominators(const IR::BFN::ParserState* state,
-                                                             gress_t gress = INGRESS);
+    std::set<const IR::BFN::ParserState *> get_all_dominators(const IR::BFN::ParserState *state,
+                                                              gress_t gress = INGRESS);
 
     /**
      * @brief Get all post-dominators of a given parser @p state.
@@ -210,14 +212,14 @@ class ParserDominatorBuilder : public PardeInspector {
      * the End of Parser belongs to cannot be deduced without it
      * @return std::set<const IR::BFN::ParserState*> A set of all post-dominators of @p state
      */
-    std::set<const IR::BFN::ParserState*> get_all_post_dominators(const IR::BFN::ParserState* state,
-                                                                  gress_t gress = INGRESS);
+    std::set<const IR::BFN::ParserState *> get_all_post_dominators(
+        const IR::BFN::ParserState *state, gress_t gress = INGRESS);
 
-    profile_t init_apply(const IR::Node* root) override;
+    profile_t init_apply(const IR::Node *root) override;
     void end_apply() override;
 
  public:
     ParserDominatorBuilder() {}
 };
 
-#endif /* EXTENSIONS_BF_P4C_PARDE_PARSER_DOMINATOR_BUILDER_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_PARSER_DOMINATOR_BUILDER_H_ */

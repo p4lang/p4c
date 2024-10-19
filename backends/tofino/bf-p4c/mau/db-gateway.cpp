@@ -10,8 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include "gateway.h"
 #include "bf-p4c/phv/phv_fields.h"
+#include "gateway.h"
 #include "ir/dbprint.h"
 #include "lib/indent.h"
 #include "lib/log.h"
@@ -33,25 +33,24 @@ std::ostream &operator<<(std::ostream &out, const CollectGatewayFields &gwf) {
     out << Brief << indent;
     if (gwf.tbl) {
         out << "table: " << gwf.tbl->name;
-        if (gwf.ixbar) out << "  "; }
+        if (gwf.ixbar) out << "  ";
+    }
     if (gwf.ixbar) out << "ixbar: " << indent << *gwf.ixbar << unindent;
     for (auto &i : gwf.info) {
         out << Log::endl << i.first << i.second;
-        for (auto x : i.second.xor_with)
-            out << " xor " << x; }
-    if (gwf.bytes || gwf.bits)
-        out << Log::endl << "bytes=" << gwf.bytes << " bits=" << gwf.bits;
+        for (auto x : i.second.xor_with) out << " xor " << x;
+    }
+    if (gwf.bytes || gwf.bits) out << Log::endl << "bytes=" << gwf.bytes << " bits=" << gwf.bits;
     out << unindent;
     dbsetflags(out, flags);
     return out;
 }
 
 std::ostream &operator<<(std::ostream &out, const BuildGatewayMatch &m) {
-    if (m.range_match.empty())
-        return out << m.match;
+    if (m.range_match.empty()) return out << m.match;
     // only used as a gateway key, so format it as a YAML complex key
     out << "? [ ";
-    for (int i = m.range_match.size()-1; i >= 0; --i)
+    for (int i = m.range_match.size() - 1; i >= 0; --i)
         out << "0x" << hex(m.range_match[i]) << ", ";
     return out << m.match << " ] ";
 }

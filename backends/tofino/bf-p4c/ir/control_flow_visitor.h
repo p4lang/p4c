@@ -10,11 +10,11 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_IR_CONTROL_FLOW_VISITOR_H_
-#define EXTENSIONS_BF_P4C_IR_CONTROL_FLOW_VISITOR_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_IR_CONTROL_FLOW_VISITOR_H_
+#define BACKENDS_TOFINO_BF_P4C_IR_CONTROL_FLOW_VISITOR_H_
 
-#include "ir/ir.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "ir/ir.h"
 
 namespace BFN {
 
@@ -59,4 +59,4 @@ class ControlFlowVisitor : public ::ControlFlowVisitor, virtual public P4::Resol
 
 }  // end namespace BFN
 
-#endif /* EXTENSIONS_BF_P4C_IR_CONTROL_FLOW_VISITOR_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_IR_CONTROL_FLOW_VISITOR_H_ */

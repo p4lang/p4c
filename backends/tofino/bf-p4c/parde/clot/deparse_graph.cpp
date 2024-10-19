@@ -12,7 +12,7 @@
 
 #include "deparse_graph.h"
 
-DeparseGraph::Node DeparseGraph::addField(const PHV::Field* f) {
+DeparseGraph::Node DeparseGraph::addField(const PHV::Field *f) {
     if (fieldToVertex.count(f)) return fieldToVertex.at(f);
 
     fields.insert(f);
@@ -20,7 +20,7 @@ DeparseGraph::Node DeparseGraph::addField(const PHV::Field* f) {
     return fieldToVertex[f] = boost::add_vertex(NodeInfo(f), g);
 }
 
-DeparseGraph::Node DeparseGraph::addConst(const IR::Constant* c) {
+DeparseGraph::Node DeparseGraph::addConst(const IR::Constant *c) {
     reachability.clear();
     return boost::add_vertex(NodeInfo(c), g);
 }
@@ -44,7 +44,7 @@ bool DeparseGraph::addEdge(Node src, Node dst) {
     return true;
 }
 
-bool DeparseGraph::canReach(const PHV::Field* f1, const PHV::Field* f2) const {
+bool DeparseGraph::canReach(const PHV::Field *f1, const PHV::Field *f2) const {
     BUG_CHECK(fieldToVertex.count(f1), "Field %1% not found in deparser graph", f1->name);
     BUG_CHECK(fieldToVertex.count(f2), "Field %1% not found in deparser graph", f2->name);
 
@@ -54,8 +54,8 @@ bool DeparseGraph::canReach(const PHV::Field* f1, const PHV::Field* f2) const {
     return reachability.canReach(n1, n2);
 }
 
-const std::vector<DeparseGraph::NodeInfo>
-DeparseGraph::nodesBetween(const PHV::Field* f1, const PHV::Field* f2) const {
+const std::vector<DeparseGraph::NodeInfo> DeparseGraph::nodesBetween(const PHV::Field *f1,
+                                                                     const PHV::Field *f2) const {
     BUG_CHECK(fieldToVertex.count(f1), "Field %1% not found in deparser graph", f1->name);
     BUG_CHECK(fieldToVertex.count(f2), "Field %1% not found in deparser graph", f2->name);
 

@@ -11,27 +11,28 @@
  */
 
 #include "program_structure.h"
-#include <set>
+
 #include <algorithm>
+#include <set>
+
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/iostreams/stream.hpp>
 
 #include "ir/ir.h"
 // #include "lib/path.h"
-#include "lib/big_int_util.h"
-
+#include "bf-p4c/common/parse_annotations.h"
+#include "frontends/common/constantFolding.h"
 #include "frontends/common/options.h"
 #include "frontends/common/parseInput.h"
-#include "frontends/common/constantFolding.h"
-#include "frontends/parsers/parserDriver.h"
-#include "frontends/p4/reservedWords.h"
-#include "frontends/p4/coreLibrary.h"
-#include "frontends/p4/tableKeyNames.h"
-#include "frontends/p4/cloner.h"
 #include "frontends/p4-14/fromv1.0/converters.h"
 #include "frontends/p4-14/header_type.h"
 #include "frontends/p4-14/typecheck.h"
-#include "bf-p4c/common/parse_annotations.h"
+#include "frontends/p4/cloner.h"
+#include "frontends/p4/coreLibrary.h"
+#include "frontends/p4/reservedWords.h"
+#include "frontends/p4/tableKeyNames.h"
+#include "frontends/parsers/parserDriver.h"
+#include "lib/big_int_util.h"
 
 namespace BFN {
 
@@ -58,8 +59,7 @@ void ProgramStructure::include(cstring filename, IR::Vector<IR::Node> *vector) {
 
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
 
-    if (filename == "tna.p4")
-        options.preprocessor_options += " -D__TARGET_TOFINO__=1";
+    if (filename == "tna.p4") options.preprocessor_options += " -D__TARGET_TOFINO__=1";
     if (auto preprocessorResult = options.preprocess(); preprocessorResult.has_value()) {
         FILE *file = preprocessorResult.value().get();
 
@@ -87,20 +87,18 @@ void ProgramStructure::include(cstring filename, IR::Vector<IR::Node> *vector) {
 }
 
 cstring ProgramStructure::getBlockName(cstring name) {
-    BUG_CHECK(blockNames.find(name) != blockNames.end(),
-              "Cannot find block %1% in package", name);
+    BUG_CHECK(blockNames.find(name) != blockNames.end(), "Cannot find block %1% in package", name);
     auto blockname = blockNames.at(name);
     return blockname;
 }
 
 void ProgramStructure::createTofinoArch() {
     for (auto decl : targetTypes) {
-        if (decl->is<IR::Type_Error>())
-            continue;
+        if (decl->is<IR::Type_Error>()) continue;
         if (auto td = decl->to<IR::Type_Typedef>()) {
             if (auto def = declarations.getDeclaration(td->name)) {
-                LOG3("Type " << td->name << " is already defined to "
-                                << def->getName() << ", ignored.");
+                LOG3("Type " << td->name << " is already defined to " << def->getName()
+                             << ", ignored.");
                 continue;
             }
         }
@@ -136,8 +134,7 @@ void ProgramStructure::createErrors() {
 void ProgramStructure::createTypes() {
     for (auto h : type_declarations) {
         if (auto def = declarations.getDeclaration(h.first)) {
-            LOG3("Type " << h.first << " is already defined to " << def->getName()
-                            << ", ignored.");
+            LOG3("Type " << h.first << " is already defined to " << def->getName() << ", ignored.");
             continue;
         }
         declarations.push_back(h.second);
@@ -151,10 +148,9 @@ void ProgramStructure::createActions() {
 }
 
 std::ostream &operator<<(std::ostream &out, const BFN::MetadataField &m) {
-    out << "Metadata Field { struct : " << m.structName
-        << ", field : " << m.fieldName << ", width : " << m.width
-        << ", offset : " << m.offset << ", isCG : " << m.isCG
-        << " }" << std::endl;
+    out << "Metadata Field { struct : " << m.structName << ", field : " << m.fieldName
+        << ", width : " << m.width << ", offset : " << m.offset << ", isCG : " << m.isCG << " }"
+        << std::endl;
     return out;
 }
 

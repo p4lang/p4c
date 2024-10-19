@@ -25,7 +25,7 @@ namespace BFN {
 
 using FieldListId = std::tuple<gress_t, unsigned, cstring>;
 using MirroredFieldList = IR::Vector<IR::Expression>;
-using MirroredFieldLists = std::map<FieldListId, const MirroredFieldList*>;
+using MirroredFieldLists = std::map<FieldListId, const MirroredFieldList *>;
 
 /**
  * Searches for invocations of the `mirror_packet.add_metadata()` extern in
@@ -47,8 +47,7 @@ class FixupMirrorMetadata : public PassManager {
     MirroredFieldLists fieldLists;
 
  public:
-    FixupMirrorMetadata(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
-            bool use_bridge_metadata);
+    FixupMirrorMetadata(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, bool use_bridge_metadata);
 };
 
 }  // namespace BFN

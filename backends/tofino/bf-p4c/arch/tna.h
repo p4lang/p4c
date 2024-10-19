@@ -18,8 +18,8 @@
 #ifndef BF_P4C_ARCH_TNA_H_
 #define BF_P4C_ARCH_TNA_H_
 
-#include "ir/ir.h"
 #include "arch.h"
+#include "ir/ir.h"
 
 namespace P4 {
 class ReferenceMap;
@@ -31,9 +31,9 @@ class BFN_Options;
 namespace BFN {
 
 /** \ingroup TnaArchTranslation */
-const cstring ExternPortMetadataUnpackString    = "port_metadata_unpack"_cs;
+const cstring ExternPortMetadataUnpackString = "port_metadata_unpack"_cs;
 /** \ingroup TnaArchTranslation */
-const cstring ExternDynamicHashString           = "hash"_cs;
+const cstring ExternDynamicHashString = "hash"_cs;
 
 /**
  * \ingroup TnaArchTranslation
@@ -55,9 +55,7 @@ const cstring ExternDynamicHashString           = "hash"_cs;
  * specified by the architecture present.
  */
 struct NormalizeNativeProgram : public PassManager {
-    NormalizeNativeProgram(P4::ReferenceMap* refMap,
-                           P4::TypeMap* typeMap,
-                           BFN_Options& options);
+    NormalizeNativeProgram(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, BFN_Options &options);
 };
 
 /**
@@ -65,15 +63,11 @@ struct NormalizeNativeProgram : public PassManager {
  * \brief PassManager that governs normalization of TNA architecture.
  */
 struct TnaArchTranslation : public PassManager {
-    TnaArchTranslation(P4::ReferenceMap* refMap,
-                       P4::TypeMap* typeMap,
-                       BFN_Options& options);
+    TnaArchTranslation(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, BFN_Options &options);
 
     ProgramPipelines threads;
 };
 
-
 }  // namespace BFN
 
 #endif /* BF_P4C_ARCH_TNA_H_ */
-

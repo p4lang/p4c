@@ -14,7 +14,7 @@
  * \defgroup CheckDesignPattern BFN::CheckDesignPattern
  * \ingroup midend
  * \brief Set of passes that check for design patterns.
- * 
+ *
  * Sometimes, we would like to guide user to write P4 program in certain ways
  * that can be supported by our backend. This might be desirable for a couple
  * reasons:
@@ -38,20 +38,20 @@
  * that these rules can be reinforced, and error message are generated to steer
  * programmer in the right direction.
  */
-#ifndef EXTENSIONS_BF_P4C_MIDEND_CHECK_DESIGN_PATTERN_H_
-#define EXTENSIONS_BF_P4C_MIDEND_CHECK_DESIGN_PATTERN_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MIDEND_CHECK_DESIGN_PATTERN_H_
+#define BACKENDS_TOFINO_BF_P4C_MIDEND_CHECK_DESIGN_PATTERN_H_
 
 #include "bf-p4c-options.h"
-#include "ir/ir.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
 
 namespace BFN {
 /**
  * \ingroup CheckDesignPattern
  * \brief Checks if the emit function call is valid with the TNA constraints.
- * 
+ *
  * As the name suggested, TNA requires the emit() function call
  * to provide the type of the field list. There are a few rules:
  *
@@ -63,66 +63,65 @@ namespace BFN {
  * unimplemented constraint.
  */
 class CheckExternValidity : public Inspector {
-    P4::ReferenceMap* refMap;
-    P4::TypeMap* typeMap;
+    P4::ReferenceMap *refMap;
+    P4::TypeMap *typeMap;
 
  public:
-     CheckExternValidity(P4::ReferenceMap *refMap, P4::TypeMap* typeMap) :
-        refMap(refMap), typeMap(typeMap) {}
-     bool preorder(const IR::MethodCallExpression*) override;
+    CheckExternValidity(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
+        : refMap(refMap), typeMap(typeMap) {}
+    bool preorder(const IR::MethodCallExpression *) override;
 };
 
 /**
  * \typedef ActionExterns
  * \ingroup CheckDesignPattern
  */
-typedef std::map<const IR::P4Action*, std::vector<const P4::ExternMethod*>> ActionExterns;
+typedef std::map<const IR::P4Action *, std::vector<const P4::ExternMethod *>> ActionExterns;
 /**
  * \ingroup CheckDesignPattern
  */
 class FindDirectExterns : public Inspector {
-    P4::ReferenceMap* refMap;
-    P4::TypeMap* typeMap;
+    P4::ReferenceMap *refMap;
+    P4::TypeMap *typeMap;
     ActionExterns &directExterns;
 
  public:
-     FindDirectExterns(P4::ReferenceMap *refMap, P4::TypeMap* typeMap,
-                        ActionExterns &directExterns) :
-        refMap(refMap), typeMap(typeMap), directExterns(directExterns) {}
-     bool preorder(const IR::MethodCallExpression*) override;
-    profile_t init_apply(const IR::Node* root) override;
+    FindDirectExterns(P4::ReferenceMap *refMap, P4::TypeMap *typeMap, ActionExterns &directExterns)
+        : refMap(refMap), typeMap(typeMap), directExterns(directExterns) {}
+    bool preorder(const IR::MethodCallExpression *) override;
+    profile_t init_apply(const IR::Node *root) override;
 };
 
 /**
  * \ingroup CheckDesignPattern
  */
-class CheckDirectExternsOnTables: public Modifier {
-    P4::ReferenceMap* refMap;
+class CheckDirectExternsOnTables : public Modifier {
+    P4::ReferenceMap *refMap;
     ActionExterns &directExterns;
 
  public:
-     CheckDirectExternsOnTables(P4::ReferenceMap *refMap, P4::TypeMap*,
-                        ActionExterns &directExterns) :
-        refMap(refMap), directExterns(directExterns) {}
-     bool preorder(IR::P4Table*) override;
+    CheckDirectExternsOnTables(P4::ReferenceMap *refMap, P4::TypeMap *,
+                               ActionExterns &directExterns)
+        : refMap(refMap), directExterns(directExterns) {}
+    bool preorder(IR::P4Table *) override;
 };
 
 /**
  * \ingroup CheckDesignPattern
- * 
+ *
  * Direct resources declared in the program and used in an action need to be
  * also specified on the table. Throw a compile time error if resources are
  * missing on the table. As otherwise, the appropriate control plane api's do
  * not get generated for that resource.
  */
-class CheckDirectResourceInvocation: public PassManager {
+class CheckDirectResourceInvocation : public PassManager {
     ActionExterns directExterns;
 
  public:
     static const std::map<cstring, cstring> externsToProperties;
-    CheckDirectResourceInvocation(P4::ReferenceMap *refMap, P4::TypeMap* typeMap) {
-         passes.push_back(new FindDirectExterns(refMap, typeMap, directExterns));
-         passes.push_back(new CheckDirectExternsOnTables(refMap, typeMap, directExterns));
+    CheckDirectResourceInvocation(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
+        passes.push_back(new FindDirectExterns(refMap, typeMap, directExterns));
+        passes.push_back(new CheckDirectExternsOnTables(refMap, typeMap, directExterns));
     }
 };
 
@@ -141,20 +140,19 @@ class CheckTableConstEntries : public Inspector {
     bool preorder(const IR::P4Table *) override;
 };
 
-
 /**
  * \ingroup CheckDesignPattern
  * \brief Top level PassManager that governs checking for design patterns.
  */
 class CheckDesignPattern : public PassManager {
  public:
-    CheckDesignPattern(P4::ReferenceMap* refMap, P4::TypeMap* typeMap) {
+    CheckDesignPattern(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
         passes.push_back(new CheckExternValidity(refMap, typeMap));
         if (BackendOptions().arch != "v1model")
-        passes.push_back(new CheckDirectResourceInvocation(refMap, typeMap));
+            passes.push_back(new CheckDirectResourceInvocation(refMap, typeMap));
     }
 };
 
 }  // namespace BFN
 
-#endif  // EXTENSIONS_BF_P4C_MIDEND_CHECK_DESIGN_PATTERN_H_
+#endif  // BACKENDS_TOFINO_BF_P4C_MIDEND_CHECK_DESIGN_PATTERN_H_

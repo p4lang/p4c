@@ -13,10 +13,10 @@
 #ifndef BF_P4C_ARCH_REWRITE_ACTION_SELECTOR_H_
 #define BF_P4C_ARCH_REWRITE_ACTION_SELECTOR_H_
 
-#include "ir/ir.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 
 namespace BFN {
 
@@ -39,9 +39,9 @@ class RewriteActionSelector : public Transform {
     RewriteActionSelector(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
         : refMap(refMap), typeMap(typeMap) {}
 
-    const IR::Node* postorder(IR::Declaration_Instance *inst) override;
-    const IR::Node* postorder(IR::ConstructorCallExpression *cce) override;
-    const IR::Node* postorder(IR::ExpressionValue *ev) override;
+    const IR::Node *postorder(IR::Declaration_Instance *inst) override;
+    const IR::Node *postorder(IR::ConstructorCallExpression *cce) override;
+    const IR::Node *postorder(IR::ExpressionValue *ev) override;
 };
 
 }  // namespace BFN

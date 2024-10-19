@@ -10,12 +10,12 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_MAU_HANDLE_ASSIGN_H_
-#define EXTENSIONS_BF_P4C_MAU_HANDLE_ASSIGN_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MAU_HANDLE_ASSIGN_H_
+#define BACKENDS_TOFINO_BF_P4C_MAU_HANDLE_ASSIGN_H_
 
+#include "bf-p4c/mau/ixbar_expr.h"
 #include "bf-p4c/mau/mau_visitor.h"
 #include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/mau/ixbar_expr.h"
 
 using namespace P4;
 
@@ -32,7 +32,10 @@ class AssignActionHandle : public PassManager {
     class ActionProfileImposedConstraints : public MauInspector {
         ordered_map<const IR::MAU::ActionData *, std::set<cstring>> profile_actions;
         bool preorder(const IR::MAU::ActionData *) override;
-        bool preorder(const IR::MAU::Table *) override { visitOnce(); return true; }
+        bool preorder(const IR::MAU::Table *) override {
+            visitOnce();
+            return true;
+        }
 
      public:
         ActionProfileImposedConstraints() { visitDagOnce = false; }
@@ -58,7 +61,7 @@ class AssignActionHandle : public PassManager {
         }
 
      public:
-        explicit DetermineHandle(AssignActionHandle &aah) : self(aah) { }
+        explicit DetermineHandle(AssignActionHandle &aah) : self(aah) {}
     };
 
     class AssignHandle : public MauModifier {
@@ -66,7 +69,7 @@ class AssignActionHandle : public PassManager {
         bool preorder(IR::MAU::Action *) override;
 
      public:
-        explicit AssignHandle(const AssignActionHandle &aah) : self(aah) { }
+        explicit AssignHandle(const AssignActionHandle &aah) : self(aah) {}
     };
 
     class GuaranteeUniqueHandle : public MauInspector {
@@ -87,13 +90,14 @@ class AssignActionHandle : public PassManager {
 
         profile_t init_apply(const IR::Node *root) override;
 
-
-
         class ValidateKey : public MauInspector {
             ValidateSelectors &self;
 
             bool preorder(const IR::MAU::Selector *sel) override;
-            bool preorder(const IR::MAU::Table *) override { visitOnce(); return true; }
+            bool preorder(const IR::MAU::Table *) override {
+                visitOnce();
+                return true;
+            }
 
          public:
             explicit ValidateKey(ValidateSelectors &s) : self(s) { visitDagOnce = false; }
@@ -104,32 +108,20 @@ class AssignActionHandle : public PassManager {
             bool preorder(IR::MAU::Table *tbl) override;
 
          public:
-            explicit SetSymmetricSelectorKeys(ValidateSelectors &s) : self(s) { }
+            explicit SetSymmetricSelectorKeys(ValidateSelectors &s) : self(s) {}
         };
-
-
 
      public:
         explicit ValidateSelectors(const PhvInfo &phv) : phv(phv) {
-            addPasses({
-                new ValidateKey(*this),
-                new SetSymmetricSelectorKeys(*this)
-            });
+            addPasses({new ValidateKey(*this), new SetSymmetricSelectorKeys(*this)});
         }
     };
 
-
-
  public:
     explicit AssignActionHandle(const PhvInfo &phv) {
-        addPasses({
-            new ValidateSelectors(phv),
-            new ActionProfileImposedConstraints,
-            new DetermineHandle(*this),
-            new AssignHandle(*this),
-            new GuaranteeUniqueHandle
-        });
+        addPasses({new ValidateSelectors(phv), new ActionProfileImposedConstraints,
+                   new DetermineHandle(*this), new AssignHandle(*this), new GuaranteeUniqueHandle});
     }
 };
 
-#endif  /* EXTENSIONS_BF_P4C_MAU_HANDLE_ASSIGN_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MAU_HANDLE_ASSIGN_H_ */

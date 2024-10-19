@@ -11,6 +11,7 @@
  */
 
 #include "marshal.h"
+
 #include "ir/ir.h"
 
 std::string MarshaledFrom::toString() const {
@@ -19,12 +20,10 @@ std::string MarshaledFrom::toString() const {
     return tmp.str();
 }
 
-void MarshaledFrom::toJSON(JSONGenerator& json) const {
-    json << *this;
-}
+void MarshaledFrom::toJSON(JSONGenerator &json) const { json << *this; }
 
 /* static */
-MarshaledFrom MarshaledFrom::fromJSON(JSONLoader&) {
+MarshaledFrom MarshaledFrom::fromJSON(JSONLoader &) {
     BUG("Uninmplemented");
     return MarshaledFrom();
 }

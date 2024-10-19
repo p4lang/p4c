@@ -15,7 +15,7 @@
 namespace BFN {
 
 // Add mirror_io_select initialization to egress parser
-const IR::Node* DoInitializeMirrorIOSelect::preorder(IR::BFN::TnaParser* parser) {
+const IR::Node *DoInitializeMirrorIOSelect::preorder(IR::BFN::TnaParser *parser) {
     // Process egress parser only, skip others
     if (parser->thread != EGRESS) {
         prune();
@@ -33,68 +33,49 @@ const IR::Node* DoInitializeMirrorIOSelect::preorder(IR::BFN::TnaParser* parser)
     ordered_map<cstring, cstring> newTnaParams(parser->tnaParams);
     if (parser->tnaParams.find("eg_intr_md_from_prsr"_cs) == parser->tnaParams.end()) {
         LOG3("InitializeMirrorIOSelect : Adding __eg_intr_md_from_prsr parameter to egress parser");
-        const auto* newEgIntrMdFromPrsrParam =
-            new IR::Parameter(
-                "__eg_intr_md_from_prsr"_cs,
-                IR::Direction::Out,
-                new IR::Type_Name(new IR::Path("egress_intrinsic_metadata_from_parser_t")));
+        const auto *newEgIntrMdFromPrsrParam = new IR::Parameter(
+            "__eg_intr_md_from_prsr"_cs, IR::Direction::Out,
+            new IR::Type_Name(new IR::Path("egress_intrinsic_metadata_from_parser_t")));
         newTnaParams.emplace("eg_intr_md_from_prsr"_cs, newEgIntrMdFromPrsrParam->name);
         newParameters.push_back(newEgIntrMdFromPrsrParam);
     }
     LOG3("InitializeMirrorIOSelect : Adding __eg_intr_md_for_dprsr parameter to egress parser");
-    const auto* newEgIntrMdForDprsrParam =
-        new IR::Parameter(
-            "__eg_intr_md_for_dprsr"_cs,
-            IR::Direction::Out,
-            new IR::Type_Name(new IR::Path("egress_intrinsic_metadata_for_deparser_t"_cs)));
+    const auto *newEgIntrMdForDprsrParam = new IR::Parameter(
+        "__eg_intr_md_for_dprsr"_cs, IR::Direction::Out,
+        new IR::Type_Name(new IR::Path("egress_intrinsic_metadata_for_deparser_t"_cs)));
     newTnaParams.emplace("eg_intr_md_for_dprsr"_cs, newEgIntrMdForDprsrParam->name);
     newParameters.push_back(newEgIntrMdForDprsrParam);
-    const auto* newTypeParams = new IR::ParameterList(parser->type->applyParams->srcInfo,
-                                                      newParameters);
-    const auto* newType = new IR::Type_Parser(parser->type->srcInfo,
-                                              parser->type->name,
-                                              parser->type->annotations,
-                                              parser->type->typeParameters,
-                                              newTypeParams);
-    const auto* newParser = new IR::BFN::TnaParser(parser->srcInfo,
-                                                   parser->name,
-                                                   newType,
-                                                   parser->constructorParams,
-                                                   parser->parserLocals,
-                                                   parser->states,
-                                                   newTnaParams,
-                                                   parser->thread,
-                                                   parser->phase0,
-                                                   parser->pipeName,
-                                                   parser->portmap);
+    const auto *newTypeParams =
+        new IR::ParameterList(parser->type->applyParams->srcInfo, newParameters);
+    const auto *newType =
+        new IR::Type_Parser(parser->type->srcInfo, parser->type->name, parser->type->annotations,
+                            parser->type->typeParameters, newTypeParams);
+    const auto *newParser =
+        new IR::BFN::TnaParser(parser->srcInfo, parser->name, newType, parser->constructorParams,
+                               parser->parserLocals, parser->states, newTnaParams, parser->thread,
+                               parser->phase0, parser->pipeName, parser->portmap);
     // Save new eg_intr_md_for_dprsr parameter name for later use
     egIntrMdForDprsrName = newEgIntrMdForDprsrParam->name;
     return newParser;
 }
-const IR::Node* DoInitializeMirrorIOSelect::preorder(IR::ParserState* state) {
+const IR::Node *DoInitializeMirrorIOSelect::preorder(IR::ParserState *state) {
     prune();
     // Process start state only, skip others
     if (state->name.name != "start") {
         return state;
     }
 
-    LOG3("InitializeMirrorIOSelect : Initializing " <<
-         egIntrMdForDprsrName << ".mirror_io_select to 1");
-    const auto* mirrorIOSelectInit =
-        new IR::AssignmentStatement(
-            new IR::Member(
-                new IR::PathExpression(new IR::Path(egIntrMdForDprsrName)),
-                "mirror_io_select"_cs),
-            new IR::Constant(IR::Type_Bits::get(1), 1));
+    LOG3("InitializeMirrorIOSelect : Initializing " << egIntrMdForDprsrName
+                                                    << ".mirror_io_select to 1");
+    const auto *mirrorIOSelectInit = new IR::AssignmentStatement(
+        new IR::Member(new IR::PathExpression(new IR::Path(egIntrMdForDprsrName)),
+                       "mirror_io_select"_cs),
+        new IR::Constant(IR::Type_Bits::get(1), 1));
     IR::IndexedVector<IR::StatOrDecl> newStateComponents;
     newStateComponents.push_back(mirrorIOSelectInit);
-    for (const auto* component : state->components)
-        newStateComponents.push_back(component);
-    const auto* newState = new IR::ParserState(state->srcInfo,
-                                               state->name,
-                                               state->annotations,
-                                               newStateComponents,
-                                               state->selectExpression);
+    for (const auto *component : state->components) newStateComponents.push_back(component);
+    const auto *newState = new IR::ParserState(state->srcInfo, state->name, state->annotations,
+                                               newStateComponents, state->selectExpression);
     return newState;
 }
 

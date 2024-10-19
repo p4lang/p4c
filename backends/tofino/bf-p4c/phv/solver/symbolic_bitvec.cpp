@@ -20,25 +20,20 @@ namespace symbolic_bitvec {
 
 using namespace P4;
 
-Expr::Expr(const Expr *left, const Expr *right, ExprNodeType type, BitID value) :
-                                                        left{left},
-                                                        right{right},
-                                                        type{type},
-                                                        value{value} {
+Expr::Expr(const Expr *left, const Expr *right, ExprNodeType type, BitID value)
+    : left{left}, right{right}, type{type}, value{value} {
     this->simplify();
 }
 
-Expr::Expr(ExprNodeType type, BitID value, const Expr *left, const Expr *right) :
-                                                        left{left},
-                                                        right{right},
-                                                        type{type},
-                                                        value{value} {
+Expr::Expr(ExprNodeType type, BitID value, const Expr *left, const Expr *right)
+    : left{left}, right{right}, type{type}, value{value} {
     this->simplify();
 }
 
 void Expr::simplify() {
     switch (type) {
-        case ExprNodeType::BIT_NODE: break;
+        case ExprNodeType::BIT_NODE:
+            break;
         case ExprNodeType::AND_NODE:
             if (left->type == ExprNodeType::BIT_NODE && (left->value == 0 || left->value == 1)) {
                 if (left->value == 0) {
@@ -69,7 +64,7 @@ void Expr::simplify() {
                     this->left = this->left->left;
                 }
             }
-        break;
+            break;
         case ExprNodeType::OR_NODE:
             if (left->type == ExprNodeType::BIT_NODE && (left->value == 0 || left->value == 1)) {
                 if (left->value == 1) {
@@ -100,7 +95,7 @@ void Expr::simplify() {
                     this->left = this->left->left;
                 }
             }
-        break;
+            break;
         case ExprNodeType::NEG_NODE:
             if (left->type == ExprNodeType::BIT_NODE) {
                 if (left->value == 1) {
@@ -115,11 +110,11 @@ void Expr::simplify() {
                     this->left = nullptr;
                 }
             }
-        break;
+            break;
     }
 }
 
-bool Expr::eq(const Expr* other) const {
+bool Expr::eq(const Expr *other) const {
     if (type != other->type) {
         return false;
     } else if (type == ExprNodeType::BIT_NODE) {
@@ -137,13 +132,13 @@ cstring Expr::to_cstring() const {
     switch (type) {
         case ExprNodeType::AND_NODE:
             ss << "(And " << left->to_cstring() << " " << right->to_cstring() << ")";
-        break;
+            break;
         case ExprNodeType::OR_NODE:
             ss << "(Or " << left->to_cstring() << " " << right->to_cstring() << ")";
-        break;
+            break;
         case ExprNodeType::NEG_NODE:
             ss << "(Neg " << left->to_cstring() << ")";
-        break;
+            break;
         default:
             if (value == 0) {
                 ss << "0";
@@ -152,18 +147,18 @@ cstring Expr::to_cstring() const {
             } else {
                 ss << "{" << value << "}";
             }
-        break;
+            break;
     }
     return ss.str();
 }
 
-void BitVec::size_check(const BitVec& other) const {
+void BitVec::size_check(const BitVec &other) const {
     BUG_CHECK(other.bits.size() == bits.size(), "BitVec size mismatch");
 }
 
-BitVec BitVec::bin_op(const BitVec& other, ExprNodeType type) const {
+BitVec BitVec::bin_op(const BitVec &other, ExprNodeType type) const {
     size_check(other);
-    std::vector<const Expr*> rst(bits.size());
+    std::vector<const Expr *> rst(bits.size());
     for (size_t i = 0; i < bits.size(); i++) {
         rst[i] = new Expr(bits[i], other.bits[i], type);
     }
@@ -186,11 +181,11 @@ cstring BitVec::to_cstring() const {
 BitVec BitVec::slice(int start, int sz) const {
     BUG_CHECK(start >= 0 && start < int(bits.size()), "invalid start: %1%");
     BUG_CHECK(start + sz <= int(bits.size()), "invalid sz: %1%");
-    auto s = std::vector<const Expr*>(bits.begin() + start, bits.begin() + start + sz);
+    auto s = std::vector<const Expr *>(bits.begin() + start, bits.begin() + start + sz);
     return BitVec{s};
 }
 
-bool BitVec::eq(const BitVec& other) const {
+bool BitVec::eq(const BitVec &other) const {
     BUG_CHECK(bits.size() == other.bits.size(), "BitVec size mismatch: %1% != %2%", bits.size(),
               other.bits.size());
     for (size_t i = 0; i < bits.size(); i++) {
@@ -201,12 +196,12 @@ bool BitVec::eq(const BitVec& other) const {
     return true;
 }
 
-BitVec BitVec::bv_and(const BitVec& other) const { return bin_op(other, ExprNodeType::AND_NODE); }
+BitVec BitVec::bv_and(const BitVec &other) const { return bin_op(other, ExprNodeType::AND_NODE); }
 
-BitVec BitVec::bv_or(const BitVec& other) const { return bin_op(other, ExprNodeType::OR_NODE); }
+BitVec BitVec::bv_or(const BitVec &other) const { return bin_op(other, ExprNodeType::OR_NODE); }
 
 BitVec BitVec::bv_neg() const {
-    std::vector<const Expr*> rst(bits.size());
+    std::vector<const Expr *> rst(bits.size());
     for (size_t i = 0; i < bits.size(); i++) {
         rst[i] = new Expr(bits[i], nullptr, ExprNodeType::NEG_NODE);
     }
@@ -218,7 +213,7 @@ BitVec BitVec::rotate_right(int amount) const {
     // rounding to 0 is a definied behavior, e.g. (-3) % 7 = -3, different from python.
     if (bits.size() == 0) return *this;
     amount %= bits.size();
-    std::vector<const Expr*> rst(bits.size());
+    std::vector<const Expr *> rst(bits.size());
     for (size_t i = 0; i < bits.size(); i++) {
         int new_i = i - amount;
         if (new_i >= int(bits.size())) {
@@ -234,7 +229,7 @@ BitVec BitVec::rotate_right(int amount) const {
 BitVec BitVec::rotate_left(int amount) const { return rotate_right(-amount); }
 
 BitVec BvContext::new_bv(int sz) {
-    std::vector<const Expr*> bits(sz);
+    std::vector<const Expr *> bits(sz);
     for (int i = 0; i < sz; i++) {
         bits[i] = new Expr(ExprNodeType::BIT_NODE, new_uid());
     }
@@ -242,7 +237,7 @@ BitVec BvContext::new_bv(int sz) {
 }
 
 BitVec BvContext::new_bv_const(int sz, bitvec val) {
-    std::vector<const Expr*> bits(sz);
+    std::vector<const Expr *> bits(sz);
     for (int i = 0; i < sz; i++) {
         int bit_val = int(val.getbit(i));
         bits[i] = new Expr(ExprNodeType::BIT_NODE, bit_val);

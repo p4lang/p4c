@@ -25,8 +25,7 @@
  */
 void ActionMutuallyExclusive::postorder(const IR::MAU::Table *tbl) {
     bitvec all_actions_in_table;
-    for (const auto *act : Values(tbl->actions))
-        all_actions_in_table.setbit(action_ids[act]);
+    for (const auto *act : Values(tbl->actions)) all_actions_in_table.setbit(action_ids[act]);
 
     std::map<cstring, bitvec> actions_running_on_branch;
 
@@ -57,12 +56,10 @@ void ActionMutuallyExclusive::postorder(const IR::MAU::Table *tbl) {
         cstring branch_name = next_table_seq_kv.first;
         auto next_table_seq = next_table_seq_kv.second;
         bitvec local_succ;
-        for (auto next_table : next_table_seq->tables)
-            local_succ |= action_succ[next_table];
+        for (auto next_table : next_table_seq->tables) local_succ |= action_succ[next_table];
         // All actions that begin a particular branch would not be mutually exclusive with tables
         // on that branch
-        for (auto i : actions_running_on_branch[branch_name])
-            not_mutex[i] |= local_succ;
+        for (auto i : actions_running_on_branch[branch_name]) not_mutex[i] |= local_succ;
         all_succ |= local_succ;
     }
 
@@ -79,23 +76,22 @@ void ActionMutuallyExclusive::postorder(const IR::MAU::Table *tbl) {
  *     a2: { t3.apply(); }
  *   }
  *   t4.apply();
- * 
+ *
  * is represented by
- * 
+ *
  *   [ t1  t4 ]
  *    /  \
  * [t2]  [t3]
- * 
+ *
  * Here, we ensure that t4's actions are marked as not mutually exclusive with all of actions of
  * each of the entries in t1's table_succ.
  */
 void ActionMutuallyExclusive::postorder(const IR::MAU::TableSeq *seq) {
     for (size_t i = 0; i < seq->tables.size(); i++) {
         auto i_tbl = seq->tables.at(i);
-        for (size_t j = i+1; j < seq->tables.size(); j++) {
+        for (size_t j = i + 1; j < seq->tables.size(); j++) {
             auto j_tbl = seq->tables.at(j);
-            for (auto i_id : action_succ[i_tbl])
-                not_mutex[i_id] |= action_succ[j_tbl];
+            for (auto i_id : action_succ[i_tbl]) not_mutex[i_id] |= action_succ[j_tbl];
         }
     }
 }

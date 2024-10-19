@@ -14,10 +14,11 @@
 #define BF_P4C_PARDE_CHECK_PARSER_MULTI_WRITE_H_
 
 #include <ir/ir.h>
-#include "ir/pass_manager.h"
+
 #include "bf-p4c/parde/parde_visitor.h"
 #include "bf-p4c/parde/parser_info.h"
 #include "bf-p4c/parde/parser_query.h"
+#include "ir/pass_manager.h"
 
 using namespace P4;
 
@@ -27,9 +28,9 @@ using namespace P4;
  */
 
 struct CheckParserMultiWrite : public PassManager {
-    const PhvInfo& phv;
+    const PhvInfo &phv;
 
-    explicit CheckParserMultiWrite(const PhvInfo& phv);
+    explicit CheckParserMultiWrite(const PhvInfo &phv);
 };
 
 class PhvInfo;
@@ -40,16 +41,16 @@ class MapFieldToParserStates;
 struct CheckWriteModeConsistency : public ParserTransform {
  protected:
     const PhvInfo &phv;
-    const MapFieldToParserStates& field_to_states;
+    const MapFieldToParserStates &field_to_states;
     const ParserQuery pq;
 
-    std::map<const IR::BFN::ParserPrimitive*, IR::BFN::ParserWriteMode> extract_to_write_mode;
+    std::map<const IR::BFN::ParserPrimitive *, IR::BFN::ParserWriteMode> extract_to_write_mode;
     std::map<std::pair<PHV::FieldSlice, PHV::FieldSlice>, bool> compatability;
 
     /**
      * @brief Check that the write modes of all extracts are consistent.
      */
-    bool check(const std::vector<const IR::BFN::Extract*> extracts) const;
+    bool check(const std::vector<const IR::BFN::Extract *> extracts) const;
 
     /**
      * @brief Check and adjust the write modes of all extracts to be consistent.
@@ -57,7 +58,7 @@ struct CheckWriteModeConsistency : public ParserTransform {
      * Checks whether the write modes of all extracts are consistent. If not, record the adjustments
      * necessary to make them consistent, or produce an error if they can't be made consistent.
      */
-    void check_and_adjust(const std::vector<const IR::BFN::Extract*> extracts);
+    void check_and_adjust(const std::vector<const IR::BFN::Extract *> extracts);
 
     /**
      * Find all extracts that stard/end in mid byte and add them to a map by the partial byte
@@ -78,7 +79,7 @@ struct CheckWriteModeConsistency : public ParserTransform {
      * NOTE: the ranges coming from one P4 extract may not be consecutive due to dead-extract
      * elimination.
      */
-    void check_pre_alloc(const ordered_set<const IR::BFN::ParserPrimitive*>& state_writes);
+    void check_pre_alloc(const ordered_set<const IR::BFN::ParserPrimitive *> &state_writes);
 
     /**
      * @brief Verify/unify parser write mode consistency post PHV allocation.
@@ -88,23 +89,22 @@ struct CheckWriteModeConsistency : public ParserTransform {
      */
     void check_post_alloc();
 
-    profile_t init_apply(const IR::Node* root) override;
-    IR::Node* preorder(IR::BFN::Extract* extract) override;
-    IR::Node* preorder(IR::BFN::ParserChecksumWritePrimitive* pcw) override;
+    profile_t init_apply(const IR::Node *root) override;
+    IR::Node *preorder(IR::BFN::Extract *extract) override;
+    IR::Node *preorder(IR::BFN::ParserChecksumWritePrimitive *pcw) override;
 
-    template<typename T>
-    IR::Node* set_write_mode(T *write);
+    template <typename T>
+    IR::Node *set_write_mode(T *write);
 
  public:
-    CheckWriteModeConsistency(const PhvInfo& p,
-                              const MapFieldToParserStates& fs,
-                              const CollectParserInfo& pi) :
-        phv(p), field_to_states(fs), pq(pi, fs) { }
+    CheckWriteModeConsistency(const PhvInfo &p, const MapFieldToParserStates &fs,
+                              const CollectParserInfo &pi)
+        : phv(p), field_to_states(fs), pq(pi, fs) {}
 
     /**
      * Check if the extracts for two slices can be made compatible
      */
-    bool check_compatability(const PHV::FieldSlice& slice_a, const PHV::FieldSlice& slice_b);
+    bool check_compatability(const PHV::FieldSlice &slice_a, const PHV::FieldSlice &slice_b);
 };
 
 #endif /*BF_P4C_PARDE_CHECK_PARSER_MULTI_WRITE_H_*/

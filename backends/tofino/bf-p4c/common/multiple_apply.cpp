@@ -11,17 +11,18 @@
  */
 
 #include "multiple_apply.h"
+
 #include "bf-p4c/bf-p4c-options.h"
+#include "bf-p4c/common/utils.h"
 #include "bf-p4c/mau/default_next.h"
 #include "bf-p4c/mau/table_flow_graph.h"
-#include "bf-p4c/common/utils.h"
 
 Visitor::profile_t MultipleApply::MutuallyExclusiveApplies::init_apply(const IR::Node *root) {
     mutex_apply.clear();
     return MauInspector::init_apply(root);
 }
 
-void MultipleApply::MutuallyExclusiveApplies::postorder(const IR::MAU::Table* tbl) {
+void MultipleApply::MutuallyExclusiveApplies::postorder(const IR::MAU::Table *tbl) {
     // Ensure the table being visited was derived from an actual table in the P4 source.
     if (tbl->match_table == nullptr) return;
 
@@ -30,8 +31,8 @@ void MultipleApply::MutuallyExclusiveApplies::postorder(const IR::MAU::Table* tb
         // application is mutually exclusive with all those other applications.
         for (auto other_table : mutex_apply.at(tbl->match_table)) {
             if (!mutex(tbl, other_table)) {
-                error("%s: Not all applies of table %s are mutually exclusive",
-                        tbl->srcInfo, tbl->externalName());
+                error("%s: Not all applies of table %s are mutually exclusive", tbl->srcInfo,
+                      tbl->externalName());
                 errors.emplace(tbl->match_table->externalName());
             }
         }
@@ -94,7 +95,7 @@ Visitor::profile_t MultipleApply::CheckStaticNextTable::init_apply(const IR::Nod
  * Because the conditions are equivalent, the control flow under them must be equivalent.
  * The default next table of those separate control flows also must be equivalent (if it is a
  * valid P4 program).  By then de-duplicating the condition, this has no affect on the default
- * next able of controlA, meaning that the de-duplication was safe. 
+ * next able of controlA, meaning that the de-duplication was safe.
  */
 void MultipleApply::CheckStaticNextTable::check_all_gws(const IR::MAU::Table *tbl) {
     // Do nothing if we've encountered tis gateway already
@@ -144,22 +145,24 @@ void MultipleApply::CheckStaticNextTable::postorder(const IR::MAU::Table *tbl) {
     // First, check that the next-table entries for the table being visited also appear as
     // next-table entries for the canonical table.
     auto canon_tbl = canon_table.at(tbl->match_table);
-    for (auto& entry : tbl->next) {
-        auto& key = entry.first;
-        auto& cur_seq = entry.second;
+    for (auto &entry : tbl->next) {
+        auto &key = entry.first;
+        auto &cur_seq = entry.second;
 
         if (canon_tbl->next.count(key) == 0) {
-            error("Table %1% has incompatible next-table chains: not all applications of this "
-                    "table have a next-table chain for %2%.",
-                    tbl->externalName(), key);
+            error(
+                "Table %1% has incompatible next-table chains: not all applications of this "
+                "table have a next-table chain for %2%.",
+                tbl->externalName(), key);
             return;
         }
 
         auto canon_seq = canon_tbl->next.at(key);
         if (canon_seq->size() != cur_seq->size()) {
-            error("Table %1% has incompatible next-table chains: not all applications of this "
-                    "table have the same chain length for %2%.",
-                    tbl->externalName(), key);
+            error(
+                "Table %1% has incompatible next-table chains: not all applications of this "
+                "table have the same chain length for %2%.",
+                tbl->externalName(), key);
             return;
         }
 
@@ -167,22 +170,25 @@ void MultipleApply::CheckStaticNextTable::postorder(const IR::MAU::Table *tbl) {
             auto cur_seq_tbl = cur_seq->tables.at(i);
             auto canon_seq_tbl = canon_seq->tables.at(i);
             if (!check_equiv(cur_seq_tbl, canon_seq_tbl)) {
-                error("Table %1% has incompatible next-table chains for %2%, differing at "
-                        "position %3%, with tables %4% and %5%", tbl->externalName(), key,
-                        i, cur_seq_tbl->externalName(), canon_seq_tbl->externalName());
+                error(
+                    "Table %1% has incompatible next-table chains for %2%, differing at "
+                    "position %3%, with tables %4% and %5%",
+                    tbl->externalName(), key, i, cur_seq_tbl->externalName(),
+                    canon_seq_tbl->externalName());
             }
         }
     }
 
     // Also check the reverse: the next-table entries for the canonical table also appear as
     // next-table entries for the table being visited.
-    for (auto& entry : canon_tbl->next) {
-        auto& key = entry.first;
+    for (auto &entry : canon_tbl->next) {
+        auto &key = entry.first;
 
         if (tbl->next.count(key) == 0) {
-            error("Table %1% has incompatible next-table chains: not all applications of this "
-                    "table have a next-table chain for %2%.",
-                    tbl->externalName(), key);
+            error(
+                "Table %1% has incompatible next-table chains: not all applications of this "
+                "table have a next-table chain for %2%.",
+                tbl->externalName(), key);
             return;
         }
     }
@@ -191,8 +197,9 @@ void MultipleApply::CheckStaticNextTable::postorder(const IR::MAU::Table *tbl) {
     self.duplicate_tables.makeUnion(tbl, canon_tbl);
 }
 
-bool MultipleApply::CheckStaticNextTable::check_equiv(const IR::MAU::Table* table1,
-        const IR::MAU::Table* table2, bool makeUnion) {
+bool MultipleApply::CheckStaticNextTable::check_equiv(const IR::MAU::Table *table1,
+                                                      const IR::MAU::Table *table2,
+                                                      bool makeUnion) {
     if (table1 == table2) return true;
     if (!table1 || !table2) return false;
 
@@ -233,14 +240,14 @@ bool MultipleApply::CheckStaticNextTable::check_equiv(const IR::MAU::Table* tabl
     }
 
     // Mark the tables as duplicates.
-    if (makeUnion)
-        self.duplicate_tables.makeUnion(table1, table2);
+    if (makeUnion) self.duplicate_tables.makeUnion(table1, table2);
 
     return true;
 }
 
-bool MultipleApply::CheckStaticNextTable::check_equiv(const IR::MAU::TableSeq* seq1,
-        const IR::MAU::TableSeq* seq2, bool makeUnion) {
+bool MultipleApply::CheckStaticNextTable::check_equiv(const IR::MAU::TableSeq *seq1,
+                                                      const IR::MAU::TableSeq *seq2,
+                                                      bool makeUnion) {
     if (seq1 == seq2) return true;
     if (!seq1 || !seq2) return false;
 
@@ -254,9 +261,8 @@ bool MultipleApply::CheckStaticNextTable::check_equiv(const IR::MAU::TableSeq* s
     return true;
 }
 
-bool MultipleApply::CheckStaticNextTable::equiv_gateway(
-    const IR::Expression* expr1, const IR::Expression* expr2
-) {
+bool MultipleApply::CheckStaticNextTable::equiv_gateway(const IR::Expression *expr1,
+                                                        const IR::Expression *expr2) {
     // This implements a simple check, which just determines whether the two expressions are
     // structurally equivalent, without considering semantic equivalence.
     if (expr1 == expr2) return true;
@@ -264,30 +270,30 @@ bool MultipleApply::CheckStaticNextTable::equiv_gateway(
     return expr1->equiv(*expr2);
 }
 
-Visitor::profile_t MultipleApply::DeduplicateTables::init_apply(const IR::Node* root) {
+Visitor::profile_t MultipleApply::DeduplicateTables::init_apply(const IR::Node *root) {
     auto result = MauTransform::init_apply(root);
     replacements.clear();
     table_seqs_seen.clear();
     return result;
 }
 
-const IR::Node* MultipleApply::DeduplicateTables::postorder(IR::MAU::Table* tbl) {
+const IR::Node *MultipleApply::DeduplicateTables::postorder(IR::MAU::Table *tbl) {
     auto orig_tbl = getOriginal<IR::MAU::Table>();
     auto canon_tbl = self.duplicate_tables.find(orig_tbl);
 
-    auto& replacements = this->replacements[getGress()];
+    auto &replacements = this->replacements[getGress()];
     if (replacements.count(canon_tbl)) return replacements.at(canon_tbl);
 
     // This is the first time we are encountering this table. No replacement to make here, but if
     // tbl hasn't been changed, then return orig_tbl to make sure the visitor framework doesn't
     // throw away our result.
-    const IR::MAU::Table* result = *tbl == *orig_tbl ? orig_tbl : tbl;
+    const IR::MAU::Table *result = *tbl == *orig_tbl ? orig_tbl : tbl;
     replacements[canon_tbl] = result;
     return result;
 }
 
-const IR::Node* MultipleApply::DeduplicateTables::postorder(IR::MAU::TableSeq* seq) {
-    auto& table_seqs_seen = this->table_seqs_seen[getGress()];
+const IR::Node *MultipleApply::DeduplicateTables::postorder(IR::MAU::TableSeq *seq) {
+    auto &table_seqs_seen = this->table_seqs_seen[getGress()];
     for (auto seq_seen : table_seqs_seen) {
         if (*seq == *seq_seen) return seq_seen;
     }
@@ -296,21 +302,21 @@ const IR::Node* MultipleApply::DeduplicateTables::postorder(IR::MAU::TableSeq* s
     // but if seq hasn't been changed, then return orig_seq to make sure the visitor framework
     // doesn't throw away our result.
     auto orig_seq = getOriginal<IR::MAU::TableSeq>();
-    const IR::MAU::TableSeq* result = *seq == *orig_seq ? orig_seq : seq;
+    const IR::MAU::TableSeq *result = *seq == *orig_seq ? orig_seq : seq;
     table_seqs_seen.push_back(result);
     return result;
 }
 
-bool MultipleApply::CheckTopologicalTables::preorder(const IR::MAU::TableSeq* thread) {
+bool MultipleApply::CheckTopologicalTables::preorder(const IR::MAU::TableSeq *thread) {
     // Each top-level TableSeq should represent the whole MAU pipeline for a single gress. Build
     // the control-flow graph for that.
     FlowGraph graph;
     thread->apply(FindFlowGraph(graph));
 
     // Check for cycles in the control-flow graph.
-    std::set<const IR::MAU::Table*> tables_reported;
-    for (const auto& entry : graph.tableToVertex) {
-        const auto* table = entry.first;
+    std::set<const IR::MAU::Table *> tables_reported;
+    for (const auto &entry : graph.tableToVertex) {
+        const auto *table = entry.first;
 
         // Ignore graph's sink node.
         if (table == nullptr) continue;
@@ -335,8 +341,10 @@ bool MultipleApply::CheckTopologicalTables::preorder(const IR::MAU::TableSeq* th
 
             first = false;
         }
-        error("%s: The following tables are applied in an inconsistent order on different "
-                "branches: %s", table->srcInfo, out.str());
+        error(
+            "%s: The following tables are applied in an inconsistent order on different "
+            "branches: %s",
+            table->srcInfo, out.str());
 
         // Update tables_reported with the cycle.
         tables_reported.insert(cycle.begin(), cycle.end());
@@ -352,12 +360,9 @@ Visitor::profile_t MultipleApply::init_apply(const IR::Node *root) {
     return result;
 }
 
-MultipleApply::MultipleApply(
-    const BFN_Options& options,
-    std::optional<gress_t> gress,
-    bool dedup_only,
-    bool run_default_next
-) : options(options) {
+MultipleApply::MultipleApply(const BFN_Options &options, std::optional<gress_t> gress,
+                             bool dedup_only, bool run_default_next)
+    : options(options) {
     addPasses({
         &mutex,
         dedup_only ? nullptr : new MutuallyExclusiveApplies(mutex, mutex_errors),
@@ -365,7 +370,6 @@ MultipleApply::MultipleApply(
         new DeduplicateTables(*this, gress),
         dedup_only ? nullptr : new CheckTopologicalTables(topological_errors),
         dedup_only || !run_default_next ? nullptr
-            : new DefaultNext(longBranchDisabled, &default_next_errors),
+                                        : new DefaultNext(longBranchDisabled, &default_next_errors),
     });
 }
-

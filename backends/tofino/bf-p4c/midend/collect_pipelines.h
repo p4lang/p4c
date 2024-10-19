@@ -13,14 +13,15 @@
 /**
  *  Detects multiple pipelines in a program
  */
-#ifndef EXTENSIONS_BF_P4C_MIDEND_COLLECT_PIPELINES_H_
-#define EXTENSIONS_BF_P4C_MIDEND_COLLECT_PIPELINES_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MIDEND_COLLECT_PIPELINES_H_
+#define BACKENDS_TOFINO_BF_P4C_MIDEND_COLLECT_PIPELINES_H_
 
-#include <unordered_map>
 #include <set>
+#include <unordered_map>
 #include <vector>
-#include "ir/ir.h"
+
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "ir/ir.h"
 
 namespace BFN {
 
@@ -34,7 +35,7 @@ namespace BFN {
  */
 class CollectPipelines : public Inspector {
     // Checks the "main"
-    bool preorder(const IR::Declaration_Instance*) override;
+    bool preorder(const IR::Declaration_Instance *) override;
 
  public:
     /// Description ingress or egress
@@ -74,15 +75,14 @@ class CollectPipelines : public Inspector {
         friend class CollectPipelines;
         std::vector<Pipe> pipes;
         std::map<const IR::Type_Declaration *, std::unordered_set<int>,
-                 ByNameLess<const IR::Type_Declaration>> declarationToPipe;
+                 ByNameLess<const IR::Type_Declaration>>
+            declarationToPipe;
 
         PipeSet _get(const IR::Type_Declaration *dec) const {
             auto it = declarationToPipe.find(dec);
-            BUG_CHECK(it != declarationToPipe.end(),
-                      "Declaration %1% not found in pipes", dec);
+            BUG_CHECK(it != declarationToPipe.end(), "Declaration %1% not found in pipes", dec);
             PipeSet out;
-            for (int idx : it->second)
-                out.insert(pipes[idx]);
+            for (int idx : it->second) out.insert(pipes[idx]);
             return out;
         }
 
@@ -106,11 +106,10 @@ class CollectPipelines : public Inspector {
  public:
     /// Pipelines data filed by the pass. Arguments must be non-null, no other
     /// asumptions taken.
-    explicit CollectPipelines(P4::ReferenceMap *refMap, Pipelines *pipelines) :
-        refMap(refMap), pipelines(pipelines)
-    {}
+    explicit CollectPipelines(P4::ReferenceMap *refMap, Pipelines *pipelines)
+        : refMap(refMap), pipelines(pipelines) {}
 };
 
 }  // namespace BFN
 
-#endif  // EXTENSIONS_BF_P4C_MIDEND_COLLECT_PIPELINES_H_
+#endif  // BACKENDS_TOFINO_BF_P4C_MIDEND_COLLECT_PIPELINES_H_

@@ -16,12 +16,14 @@
 /* a pointer that inherits const-ness from its context (so is a const T * if it is itself
  * const and is a (non-const) T * if it is not const.  It is incidentally non-copyable or movable,
  * as that would result in losing the const-ness. */
-template<class T> class pointer_wrap {
+template <class T>
+class pointer_wrap {
     T *ptr;
+
  public:
     pointer_wrap() : ptr(nullptr) {}
-    pointer_wrap(pointer_wrap &a) : ptr(a.ptr) {}       // NOLINT(runtime/explicit)
-    pointer_wrap(T *p) : ptr(p) {}                      // NOLINT(runtime/explicit)
+    pointer_wrap(pointer_wrap &a) : ptr(a.ptr) {}  // NOLINT(runtime/explicit)
+    pointer_wrap(T *p) : ptr(p) {}                 // NOLINT(runtime/explicit)
     pointer_wrap(const pointer_wrap &) = delete;
     pointer_wrap(pointer_wrap &&) = delete;
     explicit operator bool() { return ptr != nullptr; }

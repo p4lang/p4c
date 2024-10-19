@@ -13,9 +13,9 @@
 #ifndef BF_P4C_IR_GATEWAY_CONTROL_FLOW_H_
 #define BF_P4C_IR_GATEWAY_CONTROL_FLOW_H_
 
+#include "control_flow_visitor.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
-#include "control_flow_visitor.h"
 
 namespace BFN {
 

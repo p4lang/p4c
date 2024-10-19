@@ -10,8 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PARDE_PARDE_SPEC_H_
-#define EXTENSIONS_BF_P4C_PARDE_PARDE_SPEC_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_PARDE_SPEC_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_PARDE_SPEC_H_
 
 #include <map>
 #include <vector>
@@ -392,14 +392,11 @@ class PardeSpec {
     /// @return the size in bytes of the padding between the ingress static
     /// per-port metadata and the beginning of the packet.
     virtual size_t byteIngressPrePacketPaddingSize() const = 0;
-    size_t bitIngressPrePacketPaddingSize() const {
-        return byteIngressPrePacketPaddingSize() * 8;
-    }
+    size_t bitIngressPrePacketPaddingSize() const { return byteIngressPrePacketPaddingSize() * 8; }
 
     /// @return the total size of all ingress metadata on this device.
     size_t byteTotalIngressMetadataSize() const {
-        return byteIngressIntrinsicMetadataSize() +
-               bytePhase0Size() +
+        return byteIngressIntrinsicMetadataSize() + bytePhase0Size() +
                byteIngressPrePacketPaddingSize();
     }
 
@@ -408,14 +405,12 @@ class PardeSpec {
 
     /// The region of the input buffer that contains special intrinsic
     /// metadata rather than packet data. In bytes.
-    nw_byterange byteInputBufferMetadataRange() const {
-        return StartLen(32, 32);
-    }
+    nw_byterange byteInputBufferMetadataRange() const { return StartLen(32, 32); }
 
     /// Specifies the available kinds of extractors, specified as sizes in bits,
     /// and the number of extractors of each kind available in each hardware parser
     /// state.
-    virtual const std::map<unsigned, unsigned>& extractorSpec() const = 0;
+    virtual const std::map<unsigned, unsigned> &extractorSpec() const = 0;
 
     /// Specifies the available match registers
     virtual const std::vector<MatchRegister> matchRegisters() const = 0;
@@ -493,10 +488,10 @@ class PardeSpec {
     virtual unsigned lineRate() const = 0;
 
     /// Unused
-    virtual const std::vector<std::string>& mdpValidVecFields() const = 0;
+    virtual const std::vector<std::string> &mdpValidVecFields() const = 0;
 
     /// Unused
-    virtual const std::unordered_set<std::string>& mdpValidVecFieldsSet() const = 0;
+    virtual const std::unordered_set<std::string> &mdpValidVecFieldsSet() const = 0;
 };
 
 class TofinoPardeSpec : public PardeSpec {
@@ -504,12 +499,8 @@ class TofinoPardeSpec : public PardeSpec {
     size_t bytePhase0Size() const override { return 8; }
     size_t byteIngressPrePacketPaddingSize() const override { return 0; }
 
-    const std::map<unsigned, unsigned>& extractorSpec() const override {
-        static const std::map<unsigned, unsigned> extractorSpec = {
-            {8,  4},
-            {16, 4},
-            {32, 4}
-        };
+    const std::map<unsigned, unsigned> &extractorSpec() const override {
+        static const std::map<unsigned, unsigned> extractorSpec = {{8, 4}, {16, 4}, {32, 4}};
         return extractorSpec;
     }
 
@@ -517,17 +508,13 @@ class TofinoPardeSpec : public PardeSpec {
         static std::vector<MatchRegister> spec;
 
         if (spec.empty()) {
-            spec = { MatchRegister("half"_cs),
-                     MatchRegister("byte0"_cs),
-                     MatchRegister("byte1"_cs) };
+            spec = {MatchRegister("half"_cs), MatchRegister("byte0"_cs), MatchRegister("byte1"_cs)};
         }
 
         return spec;
     }
 
-    const std::vector<MatchRegister> scratchRegisters() const override {
-        return { };
-    }
+    const std::vector<MatchRegister> scratchRegisters() const override { return {}; }
 
     const nw_bitrange bitScratchRegisterRange(const MatchRegister &reg) const override {
         // Bug check while silencing unused variable warning.
@@ -535,9 +522,7 @@ class TofinoPardeSpec : public PardeSpec {
         return nw_bitrange();
     }
 
-    bool byteScratchRegisterRangeValid(nw_byterange) const override {
-        return false;
-    }
+    bool byteScratchRegisterRangeValid(nw_byterange) const override { return false; }
 
     int numParsers() const override { return 18; }
     int numTcamRows() const override { return 256; }
@@ -546,9 +531,7 @@ class TofinoPardeSpec : public PardeSpec {
     unsigned byteMaxClotSize() const override { BUG("No CLOTs in Tofino"); }
     unsigned numClotsPerGress() const override { return 0; }
 
-    unsigned maxClotsLivePerGress() const override {
-        BUG("No CLOTs in Tofino");
-    }
+    unsigned maxClotsLivePerGress() const override { BUG("No CLOTs in Tofino"); }
 
     unsigned byteInterClotGap() const override { BUG("No CLOTs in Tofino"); }
 
@@ -572,12 +555,12 @@ class TofinoPardeSpec : public PardeSpec {
     double clkFreq() const override { return 1.22; }
     unsigned lineRate() const override { return 100; }
 
-    const std::vector<std::string>& mdpValidVecFields() const override {
+    const std::vector<std::string> &mdpValidVecFields() const override {
         static std::vector<std::string> vldVecFields;
         return vldVecFields;
     }
 
-    const std::unordered_set<std::string>& mdpValidVecFieldsSet() const override {
+    const std::unordered_set<std::string> &mdpValidVecFieldsSet() const override {
         static std::unordered_set<std::string> vldVecSet;
         return vldVecSet;
     }
@@ -588,10 +571,8 @@ class JBayPardeSpec : public PardeSpec {
     size_t bytePhase0Size() const override { return 16; }
     size_t byteIngressPrePacketPaddingSize() const override { return 8; }
 
-    const std::map<unsigned, unsigned>& extractorSpec() const override {
-        static const std::map<unsigned, unsigned> extractorSpec = {
-            {16, 20}
-        };
+    const std::map<unsigned, unsigned> &extractorSpec() const override {
+        static const std::map<unsigned, unsigned> extractorSpec = {{16, 20}};
         return extractorSpec;
     }
 
@@ -599,10 +580,8 @@ class JBayPardeSpec : public PardeSpec {
         static std::vector<MatchRegister> spec;
 
         if (spec.empty()) {
-            spec = { MatchRegister("byte0"_cs),
-                     MatchRegister("byte1"_cs),
-                     MatchRegister("byte2"_cs),
-                     MatchRegister("byte3"_cs) };
+            spec = {MatchRegister("byte0"_cs), MatchRegister("byte1"_cs), MatchRegister("byte2"_cs),
+                    MatchRegister("byte3"_cs)};
         }
 
         return spec;
@@ -614,10 +593,8 @@ class JBayPardeSpec : public PardeSpec {
         if (spec.empty()) {
             matchRegisters();  // make sure the match registers are created first
 
-            spec = { MatchRegister("save_byte0"_cs),
-                     MatchRegister("save_byte1"_cs),
-                     MatchRegister("save_byte2"_cs),
-                     MatchRegister("save_byte3"_cs) };
+            spec = {MatchRegister("save_byte0"_cs), MatchRegister("save_byte1"_cs),
+                    MatchRegister("save_byte2"_cs), MatchRegister("save_byte3"_cs)};
         }
 
         return spec;
@@ -625,13 +602,13 @@ class JBayPardeSpec : public PardeSpec {
 
     const nw_bitrange bitScratchRegisterRange(const MatchRegister &reg) const override {
         if (reg.name == "save_byte0")
-            return nw_bitrange(504,511);
+            return nw_bitrange(504, 511);
         else if (reg.name == "save_byte1")
-            return nw_bitrange(496,503);
+            return nw_bitrange(496, 503);
         else if (reg.name == "save_byte2")
-            return nw_bitrange(488,495);
+            return nw_bitrange(488, 495);
         else if (reg.name == "save_byte3")
-            return nw_bitrange(480,487);
+            return nw_bitrange(480, 487);
         else
             BUG("Invalid scratch register %1%", reg.name);
         return nw_bitrange();
@@ -649,7 +626,8 @@ class JBayPardeSpec : public PardeSpec {
 
     // Cap max size to 56 as a workaround of TF2LAB-44
     unsigned byteMaxClotSize() const override {
-        return BackendOptions().tof2lab44_workaround ? 56 : 64; }
+        return BackendOptions().tof2lab44_workaround ? 56 : 64;
+    }
 
     unsigned numClotsPerGress() const override { return 64; }
     unsigned maxClotsLivePerGress() const override { return 16; }
@@ -672,12 +650,12 @@ class JBayPardeSpec : public PardeSpec {
     double clkFreq() const override { return 1.35; }
     unsigned lineRate() const override { return 400; }
 
-    const std::vector<std::string>& mdpValidVecFields() const override {
+    const std::vector<std::string> &mdpValidVecFields() const override {
         static std::vector<std::string> vldVecFields;
         return vldVecFields;
     }
 
-    const std::unordered_set<std::string>& mdpValidVecFieldsSet() const override {
+    const std::unordered_set<std::string> &mdpValidVecFieldsSet() const override {
         static std::unordered_set<std::string> vldVecSet;
         return vldVecSet;
     }
@@ -688,6 +666,4 @@ class JBayA0PardeSpec : public JBayPardeSpec {
     unsigned numDeparserInvertChecksumUnits() const override { return 0; }
 };
 
-
-
-#endif /* EXTENSIONS_BF_P4C_PARDE_PARDE_SPEC_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_PARDE_SPEC_H_ */

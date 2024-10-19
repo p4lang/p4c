@@ -10,16 +10,17 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef _EXTENSIONS_BF_P4C_LOGGING_EVENT_LOGGER_H_
-#define _EXTENSIONS_BF_P4C_LOGGING_EVENT_LOGGER_H_
+#ifndef _BACKENDS_TOFINO_BF_P4C_LOGGING_EVENT_LOGGER_H_
+#define _BACKENDS_TOFINO_BF_P4C_LOGGING_EVENT_LOGGER_H_
 
-#include <functional>
-#include <string>
-#include <map>
-#include <vector>
 #include <ctime>
-#include "lib/log.h"
+#include <functional>
+#include <map>
+#include <string>
+#include <vector>
+
 #include "lib/error_message.h"
+#include "lib/log.h"
 
 namespace P4 {
 
@@ -32,7 +33,7 @@ class SourceInfo;  // Forward declare Util::SourceInfo for errors/warnings
 }
 
 // Copy typedef of DebugHook so we don't have to depend on ir/ir.h
-typedef std::function<void(const char*, unsigned, const char*, const IR::Node*)> DebugHook;
+typedef std::function<void(const char *, unsigned, const char *, const IR::Node *)> DebugHook;
 
 }  // namespace P4
 
@@ -117,7 +118,7 @@ class EventLogger {
      *  be serialized, serializes it to JSON and then calls underlying logger
      *  to dump it to output.
      */
-    template<typename T>
+    template <typename T>
     void logSink(const T *obj);
 
     /**
@@ -132,9 +133,7 @@ class EventLogger {
     void passChange(const std::string &manager, const std::string &pass, unsigned seq);
 
  public:
-    enum class AllocPhase {
-        PhvAllocation, TablePlacement
-    };
+    enum class AllocPhase { PhvAllocation, TablePlacement };
 
     static EventLogger &get();
 
@@ -206,7 +205,7 @@ class EventLogger {
      *  Get callback for logging changes in pass managers
      */
     static P4::DebugHook getDebugHook() {
-        return [] (const char *m, unsigned s, const char *p, const IR::Node*) {
+        return [](const char *m, unsigned s, const char *p, const IR::Node *) {
             get().passChange(m, p, s);
         };
     }
@@ -228,10 +227,12 @@ class EventLogger {
  *
  *  These macros log into both Event Log and regular LOGn.
  */
-#define LOG_DEBUG(level, message) if (LOGGING(level)) { \
-    std::stringstream out; \
-    out << message; \
-    EventLogger::get().debug(level, __FILE__, out.str()); }
+#define LOG_DEBUG(level, message)                             \
+    if (LOGGING(level)) {                                     \
+        std::stringstream out;                                \
+        out << message;                                       \
+        EventLogger::get().debug(level, __FILE__, out.str()); \
+    }
 #define LOG_DEBUG1(message) LOG_DEBUG(1, message)
 #define LOG_DEBUG2(message) LOG_DEBUG(2, message)
 #define LOG_DEBUG3(message) LOG_DEBUG(3, message)
@@ -258,4 +259,4 @@ class EventLogger {
 #define LOG_DECISION8(description, chosen, why) LOG_DECISION(8, description, chosen, why);
 #define LOG_DECISION9(description, chosen, why) LOG_DECISION(9, description, chosen, why);
 
-#endif  /* _EXTENSIONS_BF_P4C_LOGGING_EVENT_LOGGER_H_ */
+#endif /* _BACKENDS_TOFINO_BF_P4C_LOGGING_EVENT_LOGGER_H_ */

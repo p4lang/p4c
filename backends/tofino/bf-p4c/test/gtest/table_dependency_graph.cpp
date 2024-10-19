@@ -10,28 +10,27 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+#include "bf-p4c/mau/table_dependency_graph.h"
+
 #include <array>
 #include <initializer_list>
 #include <optional>
 
 #include <boost/algorithm/string/replace.hpp>
 
-#include "bf-p4c/test/gtest/bf_gtest_helpers.h"
-#include "gtest/gtest.h"
-
 #include "bf-p4c/common/field_defuse.h"
 #include "bf-p4c/common/header_stack.h"
 #include "bf-p4c/common/multiple_apply.h"
 #include "bf-p4c/ir/table_tree.h"
 #include "bf-p4c/mau/instruction_selection.h"
-#include "bf-p4c/mau/table_dependency_graph.h"
 #include "bf-p4c/mau/table_injected_deps.h"
 #include "bf-p4c/phv/phv_fields.h"
+#include "bf-p4c/test/gtest/bf_gtest_helpers.h"
 #include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "gtest/gtest.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
-
 #include "test/gtest/helpers.h"
 
 namespace P4::Test {
@@ -41,9 +40,8 @@ class TableDependencyGraphTestForTofino2 : public JBayBackendTest {};
 
 namespace {
 
-std::optional<TofinoPipeTestCase>
-createTableDependencyGraphTestCase(const std::string& parserSource,
-        const std::string target = "tofino") {
+std::optional<TofinoPipeTestCase> createTableDependencyGraphTestCase(
+    const std::string &parserSource, const std::string target = "tofino") {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
 header H1
 {
@@ -106,7 +104,7 @@ V1Switch(parse(), verifyChecksum(), igrs(), my_egress(),
 
     boost::replace_first(source, "%MAU%", parserSource);
 
-    auto& options = BackendOptions();
+    auto &options = BackendOptions();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.target = target;
     options.arch = "v1model"_cs;
@@ -115,7 +113,7 @@ V1Switch(parse(), verifyChecksum(), igrs(), my_egress(),
     return TofinoPipeTestCase::createWithThreadLocalInstances(source);
 }
 
-const IR::BFN::Pipe *runMockPasses(const IR::BFN::Pipe* pipe, PhvInfo& phv, FieldDefUse& defuse) {
+const IR::BFN::Pipe *runMockPasses(const IR::BFN::Pipe *pipe, PhvInfo &phv, FieldDefUse &defuse) {
     auto options = new BFN_Options();  // dummy options used in Pass
     ReductionOrInfo red_info;
     PassManager quick_backend = {
@@ -129,14 +127,14 @@ const IR::BFN::Pipe *runMockPasses(const IR::BFN::Pipe* pipe, PhvInfo& phv, Fiel
     return pipe->apply(quick_backend);
 }
 
-void check_dependency_graph_summary(std::optional<TofinoPipeTestCase>& test,
-                                    const DependencyGraph& dg, Match::CheckList& expected) {
+void check_dependency_graph_summary(std::optional<TofinoPipeTestCase> &test,
+                                    const DependencyGraph &dg, Match::CheckList &expected) {
     auto *print_dg = new PrintDependencyGraph(dg);
     test->pipe->apply(*print_dg);
     std::stringstream ss;
     ss = print_dg->print_graph(dg);
     auto res = Match::match(expected, ss.str());
-    EXPECT_TRUE(res.success) << "    @ expected[" << res.count<< "], char pos=" << res.pos << "\n" \
+    EXPECT_TRUE(res.success) << "    @ expected[" << res.count << "], char pos=" << res.pos << "\n"
                              << "       " << expected[res.count] << "\n"
                              << "found: " << ss.str().substr(res.pos) << "\n";
 }
@@ -144,8 +142,7 @@ void check_dependency_graph_summary(std::optional<TofinoPipeTestCase>& test,
 }  // namespace
 
 TEST_F(TableDependencyGraphTest, GraphInjectedControl) {
-    auto test = createTableDependencyGraphTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableDependencyGraphTestCase(P4_SOURCE(P4Headers::NONE, R"(
 
     action a1(bit<8> val) {
         headers.h1.f6 = val;
@@ -236,9 +233,7 @@ TEST_F(TableDependencyGraphTest, GraphInjectedControl) {
     int num_checks = 0;
 
     DependencyGraph::Graph::edge_iterator edges, edges_end;
-    for (boost::tie(edges, edges_end) = boost::edges(dg.g);
-         edges != edges_end;
-         ++edges) {
+    for (boost::tie(edges, edges_end) = boost::edges(dg.g); edges != edges_end; ++edges) {
         const IR::MAU::Table *src = dg.get_vertex(boost::source(*edges, dg.g));
         const IR::MAU::Table *dst = dg.get_vertex(boost::target(*edges, dg.g));
         DependencyGraph::dependencies_t edge_type = dg.g[*edges];
@@ -258,26 +253,25 @@ TEST_F(TableDependencyGraphTest, GraphInjectedControl) {
     EXPECT_EQ(num_checks, NUM_CHECKS_EXPECTED);
 
     Match::CheckList expected = {
-    "#pipeline pipe\n",
-    "#stage 0\n",
-    "#stage -1\n",
-    " ^---- t1_0(0,11) : ingress\n",
-    " A^--- cond-`(\\d+)`(0,11) : ingress\n",
-    " -B^-- t2_0(0,11) : ingress\n",
-    " -BC^- t3_0(0,11) : ingress\n",
-    " D--D^ t4_0.0(0,11) : ingress\n",
-    "#dependencies\n",
-    "A :  CONTROL_DEFAULT_NEXT_TABLE\n",
-    "B :  CONTROL_COND_TRUE\n",
-    "C :  ANTI_NEXT_TABLE_DATA ANTI_NEXT_TABLE_CONTROL\n",
-    "D :  CONTROL_ACTION\n",
+        "#pipeline pipe\n",
+        "#stage 0\n",
+        "#stage -1\n",
+        " ^---- t1_0(0,11) : ingress\n",
+        " A^--- cond-`(\\d+)`(0,11) : ingress\n",
+        " -B^-- t2_0(0,11) : ingress\n",
+        " -BC^- t3_0(0,11) : ingress\n",
+        " D--D^ t4_0.0(0,11) : ingress\n",
+        "#dependencies\n",
+        "A :  CONTROL_DEFAULT_NEXT_TABLE\n",
+        "B :  CONTROL_COND_TRUE\n",
+        "C :  ANTI_NEXT_TABLE_DATA ANTI_NEXT_TABLE_CONTROL\n",
+        "D :  CONTROL_ACTION\n",
     };
     check_dependency_graph_summary(test, dg, expected);
 }
 
 TEST_F(TableDependencyGraphTest, GraphEdgeAnnotations) {
-    auto test = createTableDependencyGraphTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableDependencyGraphTestCase(P4_SOURCE(P4Headers::NONE, R"(
     action setb1(bit<32> val, bit<8> port) {
         headers.h2.b1 = val;
     }
@@ -408,7 +402,7 @@ TEST_F(TableDependencyGraphTest, GraphEdgeAnnotations) {
 
     ordered_set<cstring> field_names;
     ordered_set<DependencyGraph::dependencies_t> dep_types;
-    for (const auto& kv : dep_info) {
+    for (const auto &kv : dep_info) {
         field_names.insert(kv.first.first->name);
         if (kv.first.first->name == "ingress::headers.h2.f12") {
             dep_types.insert(kv.first.second);
@@ -420,25 +414,23 @@ TEST_F(TableDependencyGraphTest, GraphEdgeAnnotations) {
     EXPECT_NE(dep_types.count(DependencyGraph::IXBAR_READ), UINT32_C(0));
     EXPECT_NE(dep_types.count(DependencyGraph::ACTION_READ), UINT32_C(0));
     EXPECT_NE(dep_types.count(DependencyGraph::OUTPUT), UINT32_C(0));
-    EXPECT_EQ(dep_types.count(DependencyGraph::CONTROL_ACTION),              UINT32_C(0));
-    EXPECT_EQ(dep_types.count(DependencyGraph::CONTROL_COND_TRUE),           UINT32_C(0));
-    EXPECT_EQ(dep_types.count(DependencyGraph::CONTROL_COND_FALSE),          UINT32_C(0));
-    EXPECT_EQ(dep_types.count(DependencyGraph::CONTROL_TABLE_HIT),           UINT32_C(0));
-    EXPECT_EQ(dep_types.count(DependencyGraph::CONTROL_TABLE_MISS),          UINT32_C(0));
-    EXPECT_EQ(dep_types.count(DependencyGraph::CONTROL_DEFAULT_NEXT_TABLE),  UINT32_C(0));
+    EXPECT_EQ(dep_types.count(DependencyGraph::CONTROL_ACTION), UINT32_C(0));
+    EXPECT_EQ(dep_types.count(DependencyGraph::CONTROL_COND_TRUE), UINT32_C(0));
+    EXPECT_EQ(dep_types.count(DependencyGraph::CONTROL_COND_FALSE), UINT32_C(0));
+    EXPECT_EQ(dep_types.count(DependencyGraph::CONTROL_TABLE_HIT), UINT32_C(0));
+    EXPECT_EQ(dep_types.count(DependencyGraph::CONTROL_TABLE_MISS), UINT32_C(0));
+    EXPECT_EQ(dep_types.count(DependencyGraph::CONTROL_DEFAULT_NEXT_TABLE), UINT32_C(0));
     EXPECT_EQ(field_names.size(), UINT32_C(2));
     EXPECT_EQ(dep_info.size(), UINT32_C(4));
 
-    for (const auto& kv : dep_info) {
+    for (const auto &kv : dep_info) {
         auto field = kv.first.first;
         auto dep_type = kv.first.second;
         auto upstream_actions = kv.second.first;
         auto downstream_actions = kv.second.second;
         ordered_set<cstring> up_names, down_names;
-        for (auto action : upstream_actions)
-            up_names.insert(action->externalName());
-        for (auto action : downstream_actions)
-            down_names.insert(action->externalName());
+        for (auto action : upstream_actions) up_names.insert(action->externalName());
+        for (auto action : downstream_actions) down_names.insert(action->externalName());
         if (field->name == "ingress::headers.h2.f12") {
             if (dep_type == DependencyGraph::IXBAR_READ) {
                 EXPECT_NE(up_names.count("igrs.setf12"_cs), UINT32_C(0));
@@ -474,21 +466,19 @@ TEST_F(TableDependencyGraphTest, GraphEdgeAnnotations) {
     }
 
     Match::CheckList expected = {
-    "#pipeline pipe\n",
-    "#stage 0\n",
-    "#stage -1\n",
-    " ^--- t11_0(0,10) : ingress\n",
-    " A^-- t12_0(1,11) : ingress\n",
-    " B-^- t1_0(0,11) : ingress\n",
-    " --B^ t2_0(0,11) : ingress\n",
+        "#pipeline pipe\n",
+        "#stage 0\n",
+        "#stage -1\n",
+        " ^--- t11_0(0,10) : ingress\n",
+        " A^-- t12_0(1,11) : ingress\n",
+        " B-^- t1_0(0,11) : ingress\n",
+        " --B^ t2_0(0,11) : ingress\n",
     };
     check_dependency_graph_summary(test, dg, expected);
 }
 
-
 TEST_F(TableDependencyGraphTest, GraphLayeredControl) {
-    auto test = createTableDependencyGraphTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableDependencyGraphTestCase(P4_SOURCE(P4Headers::NONE, R"(
     action setb1(bit<32> val, bit<8> port) {
         headers.h2.b1 = val;
     }
@@ -715,21 +705,21 @@ TEST_F(TableDependencyGraphTest, GraphLayeredControl) {
     EXPECT_EQ(dg.dependence_tail_size(t12), 0);
 
     Match::CheckList expected = {
-    "#pipeline pipe\n",
-    "#stage 0\n",
-    "#stage -1\n",
-    " ^----------- t11_0(0,7) : ingress\n",
-    " A^---------- t12_0(1,11) : ingress\n",
-    " B-^--------- t1_0(0,7) : ingress\n",
-    " --B^-------- t2_0(0,7) : ingress\n",
-    " ----^------- t3_0(0,11) : ingress\n",
-    " -----^------ t4_0(0,11) : ingress\n",
-    " ------^----- t5_0(0,11) : ingress\n",
-    " -------^---- t6_0(0,11) : ingress\n",
-    " ---C----^--- t7_0(1,8) : ingress\n",
-    " ---D----D^-- t8_0(2,9) : ingress\n",
-    " ---D----DE^- t9_0(3,10) : ingress\n",
-    " ---D----DEE^ t10_0(4,11) : ingress\n",
+        "#pipeline pipe\n",
+        "#stage 0\n",
+        "#stage -1\n",
+        " ^----------- t11_0(0,7) : ingress\n",
+        " A^---------- t12_0(1,11) : ingress\n",
+        " B-^--------- t1_0(0,7) : ingress\n",
+        " --B^-------- t2_0(0,7) : ingress\n",
+        " ----^------- t3_0(0,11) : ingress\n",
+        " -----^------ t4_0(0,11) : ingress\n",
+        " ------^----- t5_0(0,11) : ingress\n",
+        " -------^---- t6_0(0,11) : ingress\n",
+        " ---C----^--- t7_0(1,8) : ingress\n",
+        " ---D----D^-- t8_0(2,9) : ingress\n",
+        " ---D----DE^- t9_0(3,10) : ingress\n",
+        " ---D----DEE^ t10_0(4,11) : ingress\n",
     };
     check_dependency_graph_summary(test, dg, expected);
 }
@@ -754,8 +744,7 @@ Alpha -> Beta -> Gamma
 */
 
 TEST_F(TableDependencyGraphTest, GraphMinStage) {
-    auto test = createTableDependencyGraphTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableDependencyGraphTestCase(P4_SOURCE(P4Headers::NONE, R"(
     action setb1(bit<32> val) { headers.h2.b1 = val; }
     action setf2(bit<32> val) { headers.h2.f2 = val; }
     action noop() { }
@@ -912,27 +901,26 @@ TEST_F(TableDependencyGraphTest, GraphMinStage) {
     EXPECT_EQ(dg.stage_info[t2].min_stage, 1);
 
     Match::CheckList expected = {
-    "#pipeline pipe\n",
-    "#stage 0\n",
-    "#stage -1\n",
-    " ^------------- A_0(0,8) : ingress\n",
-    " A^------------ B_0(0,8) : ingress\n",
-    " -A^----------- X_0(0,9) : ingress\n",
-    " -B-^---------- Y_0(0,9) : ingress\n",
-    " B---^--------- C_0(0,11) : ingress\n",
-    " ----A^-------- X2_0(0,11) : ingress\n",
-    " ----B-^------- Y2_0(0,11) : ingress\n",
-    " -------^----C- beta_0(1,10) : ingress\n",
-    " -------A^----- t2_0(1,11) : ingress\n",
-    " -DEE-----^---- Z1_0(1,9) : ingress\n",
-    " -DEE-----C^--- Z2_0(2,10) : ingress\n",
-    " -DEE-----CC^-- Z3_0(3,11) : ingress\n",
-    " ------------^- alpha_0(0,9) : ingress\n",
-    " -------FE---C^ gamma_0(2,11) : ingress\n",
+        "#pipeline pipe\n",
+        "#stage 0\n",
+        "#stage -1\n",
+        " ^------------- A_0(0,8) : ingress\n",
+        " A^------------ B_0(0,8) : ingress\n",
+        " -A^----------- X_0(0,9) : ingress\n",
+        " -B-^---------- Y_0(0,9) : ingress\n",
+        " B---^--------- C_0(0,11) : ingress\n",
+        " ----A^-------- X2_0(0,11) : ingress\n",
+        " ----B-^------- Y2_0(0,11) : ingress\n",
+        " -------^----C- beta_0(1,10) : ingress\n",
+        " -------A^----- t2_0(1,11) : ingress\n",
+        " -DEE-----^---- Z1_0(1,9) : ingress\n",
+        " -DEE-----C^--- Z2_0(2,10) : ingress\n",
+        " -DEE-----CC^-- Z3_0(3,11) : ingress\n",
+        " ------------^- alpha_0(0,9) : ingress\n",
+        " -------FE---C^ gamma_0(2,11) : ingress\n",
     };
     check_dependency_graph_summary(test, dg, expected);
 }
-
 
 /**
  * The dependency graph is the following:
@@ -948,8 +936,7 @@ TEST_F(TableDependencyGraphTest, GraphMinStage) {
  * pushes the min stage of D forward.
  */
 TEST_F(TableDependencyGraphTest, AntiGraph1) {
-    auto test = createTableDependencyGraphTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableDependencyGraphTestCase(P4_SOURCE(P4Headers::NONE, R"(
     action set_f2(bit<8> f2) {
         headers.h1.f2 = f2;
     }
@@ -1049,8 +1036,7 @@ TEST_F(TableDependencyGraphTest, AntiGraph1) {
  * pushes the min stage of D forward.
  */
 TEST_F(TableDependencyGraphTest, DomFrontier1) {
-    auto test = createTableDependencyGraphTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableDependencyGraphTestCase(P4_SOURCE(P4Headers::NONE, R"(
     action set_f2(bit<8> f2) {
         headers.h1.f2 = f2;
     }
@@ -1152,8 +1138,7 @@ TEST_F(TableDependencyGraphTest, DomFrontier1) {
  * pushes the min stage of D forward.
  */
 TEST_F(TableDependencyGraphTest, DomFrontier2) {
-    auto test = createTableDependencyGraphTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableDependencyGraphTestCase(P4_SOURCE(P4Headers::NONE, R"(
     action set_f2(bit<8> f2) {
         headers.h1.f2 = f2;
     }
@@ -1230,13 +1215,13 @@ TEST_F(TableDependencyGraphTest, DomFrontier2) {
     EXPECT_EQ(dg.stage_info.at(a).dep_stages_dom_frontier, 2);
 
     Match::CheckList expected = {
-    "#pipeline pipe\n",
-    "#stage 0\n",
-    "#stage -1\n",
-    " ^--- node_a_0(0,9) : ingress\n",
-    " A^-- node_b_0(1,10) : ingress\n",
-    " BC^- node_c_0(1,10) : ingress\n",
-    " B-D^ node_d_0(2,11) : ingress\n",
+        "#pipeline pipe\n",
+        "#stage 0\n",
+        "#stage -1\n",
+        " ^--- node_a_0(0,9) : ingress\n",
+        " A^-- node_b_0(1,10) : ingress\n",
+        " BC^- node_c_0(1,10) : ingress\n",
+        " B-D^ node_d_0(2,11) : ingress\n",
     };
     check_dependency_graph_summary(test, dg, expected);
 }
@@ -1255,8 +1240,7 @@ TEST_F(TableDependencyGraphTest, DomFrontier2) {
  * pushes the min stage of D forward.
  */
 TEST_F(TableDependencyGraphTest, AntiGraph2) {
-    auto test = createTableDependencyGraphTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableDependencyGraphTestCase(P4_SOURCE(P4Headers::NONE, R"(
     action set_f1(bit<8> f1) {
         headers.h1.f1 = f1;
     }
@@ -1330,13 +1314,13 @@ TEST_F(TableDependencyGraphTest, AntiGraph2) {
     EXPECT_EQ(dg.dependence_tail_size_control_anti(d), 0);
 
     Match::CheckList expected = {
-    "#pipeline pipe\n",
-    "#stage 0\n",
-    "#stage -1\n",
-    " ^--- node_a_0(0,10) : ingress\n",
-    " A^-- node_b_0(0,10) : ingress\n",
-    " --^- node_c_0(0,11) : ingress\n",
-    " -BA^ node_d_0(1,11) : ingress\n",
+        "#pipeline pipe\n",
+        "#stage 0\n",
+        "#stage -1\n",
+        " ^--- node_a_0(0,10) : ingress\n",
+        " A^-- node_b_0(0,10) : ingress\n",
+        " --^- node_c_0(0,11) : ingress\n",
+        " -BA^ node_d_0(1,11) : ingress\n",
     };
     check_dependency_graph_summary(test, dg, expected);
 }
@@ -1362,8 +1346,7 @@ TEST_F(TableDependencyGraphTest, AntiGraph2) {
  * after A, and thus B, which pushes C into stage 1.
  */
 TEST_F(TableDependencyGraphTest, LogicalThruControl) {
-    auto test = createTableDependencyGraphTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableDependencyGraphTestCase(P4_SOURCE(P4Headers::NONE, R"(
     action noop() {}
 
     action set_f1(bit<8> f1) {
@@ -1439,13 +1422,13 @@ TEST_F(TableDependencyGraphTest, LogicalThruControl) {
     EXPECT_EQ(dg.dependence_tail_size_control_anti(d), 0);
 
     Match::CheckList expected = {
-    "#pipeline pipe\n",
-    "#stage 0\n",
-    "#stage -1\n",
-    " ^--- node_a_0(0,9) : ingress\n",
-    " A^-- node_b_0(1,10) : ingress\n",
-    " BC^- node_c_0(1,10) : ingress\n",
-    " --D^ node_d_0(2,11) : ingress\n",
+        "#pipeline pipe\n",
+        "#stage 0\n",
+        "#stage -1\n",
+        " ^--- node_a_0(0,9) : ingress\n",
+        " A^-- node_b_0(1,10) : ingress\n",
+        " BC^- node_c_0(1,10) : ingress\n",
+        " --D^ node_d_0(2,11) : ingress\n",
     };
     check_dependency_graph_summary(test, dg, expected);
 }
@@ -1467,8 +1450,7 @@ TEST_F(TableDependencyGraphTest, LogicalThruControl) {
  * table A and C, (which is captured by the TableSeqDeps information)
  */
 TEST_F(TableDependencyGraphTest, LogicalThruControl2) {
-    auto test = createTableDependencyGraphTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableDependencyGraphTestCase(P4_SOURCE(P4Headers::NONE, R"(
     action noop() {}
 
     action set_f1(bit<8> f1) {
@@ -1546,13 +1528,13 @@ TEST_F(TableDependencyGraphTest, LogicalThruControl2) {
     EXPECT_EQ(dg.dependence_tail_size_control_anti(d), 0);
 
     Match::CheckList expected = {
-    "#pipeline pipe\n",
-    "#stage 0\n",
-    "#stage -1\n",
-    " ^--- node_a_0(0,9) : ingress\n",
-    " A^-- node_b_0(1,10) : ingress\n",
-    " -B^- node_c_0(1,11) : ingress\n",
-    " -CD^ node_d_0(2,11) : ingress\n",
+        "#pipeline pipe\n",
+        "#stage 0\n",
+        "#stage -1\n",
+        " ^--- node_a_0(0,9) : ingress\n",
+        " A^-- node_b_0(1,10) : ingress\n",
+        " -B^- node_c_0(1,11) : ingress\n",
+        " -CD^ node_d_0(2,11) : ingress\n",
     };
     check_dependency_graph_summary(test, dg, expected);
 }
@@ -1568,8 +1550,7 @@ TEST_F(TableDependencyGraphTest, LogicalThruControl2) {
          E
  */
 TEST_F(TableDependencyGraphTest, GraphA) {
-    auto test = createTableDependencyGraphTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableDependencyGraphTestCase(P4_SOURCE(P4Headers::NONE, R"(
     action set_f1(bit<8> f1) {
         headers.h1.f1 = f1;
     }
@@ -1639,7 +1620,6 @@ TEST_F(TableDependencyGraphTest, GraphA) {
     auto *find_dg = new FindDependencyGraph(phv, dg);
     test->pipe->apply(*find_dg);
 
-
     // the  suffix means it's ingress
     const IR::MAU::Table *a = dg.name_to_table.at("igrs.node_a"_cs);
     const IR::MAU::Table *b = dg.name_to_table.at("igrs.node_b"_cs);
@@ -1698,8 +1678,7 @@ TEST_F(TableDependencyGraphTest, GraphA) {
 }
 
 TEST_F(TableDependencyGraphTest, HitMissValidation) {
-    auto test = createTableDependencyGraphTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableDependencyGraphTestCase(P4_SOURCE(P4Headers::NONE, R"(
     action set_f1(bit<8> f1) {
         headers.h1.f1 = f1;
     }
@@ -1753,7 +1732,6 @@ TEST_F(TableDependencyGraphTest, HitMissValidation) {
     auto *find_dg = new FindDependencyGraph(phv, dg);
     test->pipe->apply(*find_dg);
 
-
     // the  suffix means it's ingress
     const IR::MAU::Table *a = dg.name_to_table.at("igrs.node_a"_cs);
     const IR::MAU::Table *b = dg.name_to_table.at("igrs.node_b"_cs);
@@ -1764,20 +1742,18 @@ TEST_F(TableDependencyGraphTest, HitMissValidation) {
     EXPECT_EQ(dg.min_stage(c), 0);
 
     Match::CheckList expected = {
-    "#pipeline pipe\n",
-    "#stage 0\n",
-    "#stage -1\n",
-    " ^-- node_a_0(0,10) : ingress\n",
-    " A^- node_b_0(1,11) : ingress\n",
-    " B-^ node_c_0(0,11) : ingress\n",
+        "#pipeline pipe\n",
+        "#stage 0\n",
+        "#stage -1\n",
+        " ^-- node_a_0(0,10) : ingress\n",
+        " A^- node_b_0(1,11) : ingress\n",
+        " B-^ node_c_0(0,11) : ingress\n",
     };
     check_dependency_graph_summary(test, dg, expected);
 }
 
-
 TEST_F(TableDependencyGraphTest, ExitTest) {
-    auto test = createTableDependencyGraphTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableDependencyGraphTestCase(P4_SOURCE(P4Headers::NONE, R"(
     action set_f1(bit<8> f1) {
         headers.h1.f1 = f1;
     }
@@ -1836,7 +1812,6 @@ TEST_F(TableDependencyGraphTest, ExitTest) {
     auto *find_dg = new FindDependencyGraph(phv, dg);
     test->pipe->apply(*find_dg);
 
-
     // the  suffix means it's ingress
     const IR::MAU::Table *a = dg.name_to_table.at("igrs.node_a"_cs);
     const IR::MAU::Table *b = dg.name_to_table.at("igrs.node_b"_cs);
@@ -1849,20 +1824,19 @@ TEST_F(TableDependencyGraphTest, ExitTest) {
     EXPECT_EQ(dg.min_stage(d), 0);
 
     Match::CheckList expected = {
-    "#pipeline pipe\n",
-    "#stage 0\n",
-    "#stage -1\n",
-    " ^--- node_a_0(0,10) : ingress\n",
-    " A^-- node_b_0(0,11) : ingress\n",
-    " BA^- node_c_0(1,11) : ingress\n",
-    " AA-^ node_d_0(0,11) : ingress\n",
+        "#pipeline pipe\n",
+        "#stage 0\n",
+        "#stage -1\n",
+        " ^--- node_a_0(0,10) : ingress\n",
+        " A^-- node_b_0(0,11) : ingress\n",
+        " BA^- node_c_0(1,11) : ingress\n",
+        " AA-^ node_d_0(0,11) : ingress\n",
     };
     check_dependency_graph_summary(test, dg, expected);
 }
 
 TEST_F(TableDependencyGraphTest, LogicalVsPhysicalTest) {
-    auto test = createTableDependencyGraphTestCase(
-            P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableDependencyGraphTestCase(P4_SOURCE(P4Headers::NONE, R"(
             action set_f1(bit<8> f1) {
               headers.h1.f1 = f1;
             }
@@ -1958,59 +1932,55 @@ TEST_F(TableDependencyGraphTest, LogicalVsPhysicalTest) {
     auto hlam = dg.happens_logi_after_map;
 
     // Expected physical sets
-    std::set<const IR::MAU::Table*> pd_a;
-    std::set<const IR::MAU::Table*> pd_b {a};
-    std::set<const IR::MAU::Table*> pd_c {a};
-    std::set<const IR::MAU::Table*> pd_d;
-    std::set<const IR::MAU::Table*> pd_e {a, b, c, d};
-    std::set<const IR::MAU::Table*> pd_f {a, b, c, d, e};  // WAW on f1
-    std::set<const IR::MAU::Table*> pd_g {a, c};  // WAW on f2
-    std::set<const IR::MAU::Table*> pd_h {a, c, g};  // RAW/WAW on f2
+    std::set<const IR::MAU::Table *> pd_a;
+    std::set<const IR::MAU::Table *> pd_b{a};
+    std::set<const IR::MAU::Table *> pd_c{a};
+    std::set<const IR::MAU::Table *> pd_d;
+    std::set<const IR::MAU::Table *> pd_e{a, b, c, d};
+    std::set<const IR::MAU::Table *> pd_f{a, b, c, d, e};  // WAW on f1
+    std::set<const IR::MAU::Table *> pd_g{a, c};           // WAW on f2
+    std::set<const IR::MAU::Table *> pd_h{a, c, g};        // RAW/WAW on f2
 
     // Expected logical sets
-    std::set<const IR::MAU::Table*> ld_a;
-    std::set<const IR::MAU::Table*> ld_b {a};
-    std::set<const IR::MAU::Table*> ld_c {a, b};
-    std::set<const IR::MAU::Table*> ld_d {a};
-    std::set<const IR::MAU::Table*> ld_e {a, b, c, d};
-    std::set<const IR::MAU::Table*> ld_f {a, b, c, e, d};
-    std::set<const IR::MAU::Table*> ld_g {a, b, c, d, e, f};
-    std::set<const IR::MAU::Table*> ld_h {a, b, c, d, e, f, g};
+    std::set<const IR::MAU::Table *> ld_a;
+    std::set<const IR::MAU::Table *> ld_b{a};
+    std::set<const IR::MAU::Table *> ld_c{a, b};
+    std::set<const IR::MAU::Table *> ld_d{a};
+    std::set<const IR::MAU::Table *> ld_e{a, b, c, d};
+    std::set<const IR::MAU::Table *> ld_f{a, b, c, e, d};
+    std::set<const IR::MAU::Table *> ld_g{a, b, c, d, e, f};
+    std::set<const IR::MAU::Table *> ld_h{a, b, c, d, e, f, g};
 
-    std::map<const IR::MAU::Table*, std::set<const IR::MAU::Table*>>
-        physical_sets {{a, pd_a}, {b, pd_b}, {c, pd_c}, {d, pd_d}, {e, pd_e}, {f, pd_f},
-                       {g, pd_g}, {h, pd_h}};
-    std::map<const IR::MAU::Table*, std::set<const IR::MAU::Table*>>
-        logical_sets {{a, ld_a}, {b, ld_b}, {c, ld_c}, {d, ld_d}, {e, ld_e}, {f, ld_f},
-                      {g, ld_g}, {h, ld_h}};
+    std::map<const IR::MAU::Table *, std::set<const IR::MAU::Table *>> physical_sets{
+        {a, pd_a}, {b, pd_b}, {c, pd_c}, {d, pd_d}, {e, pd_e}, {f, pd_f}, {g, pd_g}, {h, pd_h}};
+    std::map<const IR::MAU::Table *, std::set<const IR::MAU::Table *>> logical_sets{
+        {a, ld_a}, {b, ld_b}, {c, ld_c}, {d, ld_d}, {e, ld_e}, {f, ld_f}, {g, ld_g}, {h, ld_h}};
 
     // Check physical dependence sets are correct
-    for (auto it = physical_sets.begin(), end = physical_sets.end();
-         it != end; ++it) {
+    for (auto it = physical_sets.begin(), end = physical_sets.end(); it != end; ++it) {
         for (auto d : (*it).second) {
             EXPECT_TRUE(hpam[(*it).first].count(d));
         }
     }
     // Check logical dependence sets are correct
-    for (auto it = logical_sets.begin(), end = logical_sets.end();
-         it != end; ++it) {
+    for (auto it = logical_sets.begin(), end = logical_sets.end(); it != end; ++it) {
         for (auto d : (*it).second) {
             EXPECT_TRUE(hlam[(*it).first].count(d));
         }
     }
 
     Match::CheckList expected = {
-    "#pipeline pipe\n",
-    "#stage 0\n",
-    "#stage -1\n",
-    " ^------- node_a_0(0,7) : ingress\n",
-    " A^------ node_b_0(1,8) : ingress\n",
-    " BC^----- node_c_0(1,8) : ingress\n",
-    " D--^---- node_d_0(0,8) : ingress\n",
-    " EFGF^--- node_e_0(2,9) : ingress\n",
-    " ----B^-- node_f_0(3,10) : ingress\n",
-    " HIH-ID^- node_g_0(3,10) : ingress\n",
-    " JCFKI-F^ node_h_0(4,11) : ingress\n",
+        "#pipeline pipe\n",
+        "#stage 0\n",
+        "#stage -1\n",
+        " ^------- node_a_0(0,7) : ingress\n",
+        " A^------ node_b_0(1,8) : ingress\n",
+        " BC^----- node_c_0(1,8) : ingress\n",
+        " D--^---- node_d_0(0,8) : ingress\n",
+        " EFGF^--- node_e_0(2,9) : ingress\n",
+        " ----B^-- node_f_0(3,10) : ingress\n",
+        " HIH-ID^- node_g_0(3,10) : ingress\n",
+        " JCFKI-F^ node_h_0(4,11) : ingress\n",
     };
     check_dependency_graph_summary(test, dg, expected);
 }
@@ -2023,8 +1993,7 @@ TEST_F(TableDependencyGraphTest, LogicalVsPhysicalTest) {
  * tables that have control dependents
  */
 TEST_F(TableDependencyGraphTest, ControlPathwayValidation) {
-    auto test = createTableDependencyGraphTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableDependencyGraphTestCase(P4_SOURCE(P4Headers::NONE, R"(
     action set_f1(bit<8> f1) {
         headers.h1.f1 = f1;
     }
@@ -2228,8 +2197,7 @@ TEST_F(TableDependencyGraphTest, ControlPathwayValidation) {
  *   D: 0
  */
 TEST_F(TableDependencyGraphTest, ExitGraph1) {
-    auto test = createTableDependencyGraphTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableDependencyGraphTestCase(P4_SOURCE(P4Headers::NONE, R"(
                 action noop() { }
 
                 table node_a {
@@ -2322,8 +2290,7 @@ TEST_F(TableDependencyGraphTest, ExitGraph1) {
  *   D: 0
  */
 TEST_F(TableDependencyGraphTest, ExitGraph2) {
-    auto test = createTableDependencyGraphTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableDependencyGraphTestCase(P4_SOURCE(P4Headers::NONE, R"(
                 action noop() { }
 
                 table node_a {
@@ -2417,8 +2384,7 @@ TEST_F(TableDependencyGraphTest, ExitGraph2) {
  *   E: 0
  */
 TEST_F(TableDependencyGraphTest, ExitGraph3) {
-    auto test = createTableDependencyGraphTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableDependencyGraphTestCase(P4_SOURCE(P4Headers::NONE, R"(
                 action noop() { }
 
                 table node_a {
@@ -2524,8 +2490,7 @@ TEST_F(TableDependencyGraphTest, ExitGraph3) {
  *   D: 0
  */
 TEST_F(TableDependencyGraphTest, ExitGraph4) {
-    auto test = createTableDependencyGraphTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableDependencyGraphTestCase(P4_SOURCE(P4Headers::NONE, R"(
                 action noop() { }
 
                 table node_a {
@@ -2585,13 +2550,13 @@ TEST_F(TableDependencyGraphTest, ExitGraph4) {
     EXPECT_EQ(dg.dependence_tail_size_control_anti(d), 0);
 
     Match::CheckList expected = {
-    "#pipeline pipe\n",
-    "#stage 0\n",
-    "#stage -1\n",
-    " ^--- node_a_0(0,10) : ingress\n",
-    " A^-- node_b_0(0,10) : ingress\n",
-    " -B^- node_c_0(0,10) : ingress\n",
-    " -BC^ node_d_0(1,11) : ingress\n",
+        "#pipeline pipe\n",
+        "#stage 0\n",
+        "#stage -1\n",
+        " ^--- node_a_0(0,10) : ingress\n",
+        " A^-- node_b_0(0,10) : ingress\n",
+        " -B^- node_c_0(0,10) : ingress\n",
+        " -BC^ node_d_0(1,11) : ingress\n",
     };
     check_dependency_graph_summary(test, dg, expected);
 }
@@ -2626,8 +2591,7 @@ TEST_F(TableDependencyGraphTest, ExitGraph4) {
  *   G: 0
  */
 TEST_F(TableDependencyGraphTest, ExitGraph5) {
-    auto test = createTableDependencyGraphTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableDependencyGraphTestCase(P4_SOURCE(P4Headers::NONE, R"(
                 action noop() { }
 
                 table node_a {
@@ -2716,24 +2680,22 @@ TEST_F(TableDependencyGraphTest, ExitGraph5) {
     EXPECT_EQ(dg.dependence_tail_size_control_anti(g), 0);
 
     Match::CheckList expected = {
-    "#pipeline pipe\n",
-    "#stage 0\n",
-    "#stage -1\n",
-    " ^---A-- node_b_0(0,10) : ingress\n",
-    " B^----- node_c_0(0,10) : ingress\n",
-    " B-^---- node_d_0(0,10) : ingress\n",
-    " B--^--- node_e_0(0,10) : ingress\n",
-    " ----^-- node_a_0(0,10) : ingress\n",
-    " -AAA-^- node_f_0(0,10) : ingress\n",
-    " -AAA-C^ node_g_0(1,11) : ingress\n",
+        "#pipeline pipe\n",
+        "#stage 0\n",
+        "#stage -1\n",
+        " ^---A-- node_b_0(0,10) : ingress\n",
+        " B^----- node_c_0(0,10) : ingress\n",
+        " B-^---- node_d_0(0,10) : ingress\n",
+        " B--^--- node_e_0(0,10) : ingress\n",
+        " ----^-- node_a_0(0,10) : ingress\n",
+        " -AAA-^- node_f_0(0,10) : ingress\n",
+        " -AAA-C^ node_g_0(1,11) : ingress\n",
     };
     check_dependency_graph_summary(test, dg, expected);
 }
 
-
 TEST_F(TableDependencyGraphTestForTofino2, Tofino2GraphTest) {
-    auto test = createTableDependencyGraphTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableDependencyGraphTestCase(P4_SOURCE(P4Headers::NONE, R"(
                 action a(bit<8> v) {
                     headers.h1.f1 = v;
                 }
@@ -2808,7 +2770,8 @@ TEST_F(TableDependencyGraphTestForTofino2, Tofino2GraphTest) {
                         c : { node_f.apply(); multi.apply(); node_g.apply(); }
                     }
                 }
-            )"), "tofino2");
+            )"),
+                                                   "tofino2");
 
     ASSERT_TRUE(test);
     PhvInfo phv;
@@ -2853,17 +2816,17 @@ TEST_F(TableDependencyGraphTestForTofino2, Tofino2GraphTest) {
     EXPECT_FALSE(dg.happens_phys_before(b, g));
 
     Match::CheckList expected = {
-    "#pipeline pipe\n",
-    "#stage 0\n",
-    "#stage -1\n",
-    " ^------- node_a_0(0,17) : ingress\n",
-    " A^------ node_b_0(0,17) : ingress\n",
-    " AB^-C--- multi_0(1,18) : ingress\n",
-    " A-B^---- node_c_0(2,19) : ingress\n",
-    " A---^--- node_d_0(0,18) : ingress\n",
-    " A-C--^-- node_e_0(1,19) : ingress\n",
-    " A-----^- node_f_0(0,19) : ingress\n",
-    " A------^ node_g_0(0,19) : ingress\n",
+        "#pipeline pipe\n",
+        "#stage 0\n",
+        "#stage -1\n",
+        " ^------- node_a_0(0,17) : ingress\n",
+        " A^------ node_b_0(0,17) : ingress\n",
+        " AB^-C--- multi_0(1,18) : ingress\n",
+        " A-B^---- node_c_0(2,19) : ingress\n",
+        " A---^--- node_d_0(0,18) : ingress\n",
+        " A-C--^-- node_e_0(1,19) : ingress\n",
+        " A-----^- node_f_0(0,19) : ingress\n",
+        " A------^ node_g_0(0,19) : ingress\n",
     };
     check_dependency_graph_summary(test, dg, expected);
 }
@@ -2874,8 +2837,7 @@ TEST_F(TableDependencyGraphTestForTofino2, Tofino2GraphTest) {
  * These dependencies are explained in the comments in that pass.
  */
 TEST_F(TableDependencyGraphTest, PredicationBasedEdges1) {
-    auto test = createTableDependencyGraphTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableDependencyGraphTestCase(P4_SOURCE(P4Headers::NONE, R"(
                 action a(bit<8> v) {
                     headers.h1.f1 = v;
                 }
@@ -2958,8 +2920,7 @@ TEST_F(TableDependencyGraphTest, PredicationBasedEdges1) {
 }
 
 TEST_F(TableDependencyGraphTest, PredicationBasedEdges2) {
-    auto test = createTableDependencyGraphTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableDependencyGraphTestCase(P4_SOURCE(P4Headers::NONE, R"(
                 action a(bit<8> v) {
                     headers.h1.f1 = v;
                 }
@@ -3086,8 +3047,7 @@ TEST_F(TableDependencyGraphTest, PredicationBasedEdges2) {
 }
 
 TEST_F(TableDependencyGraphTest, PredicationBasedEdges3) {
-    auto test = createTableDependencyGraphTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableDependencyGraphTestCase(P4_SOURCE(P4Headers::NONE, R"(
                 action a(bit<8> v) {
                     headers.h1.f1 = v;
                 }
@@ -3223,8 +3183,7 @@ TEST_F(TableDependencyGraphTest, PredicationBasedEdges3) {
 }
 
 TEST_F(TableDependencyGraphTest, P4C_2716_Test1) {
-    auto test = createTableDependencyGraphTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createTableDependencyGraphTestCase(P4_SOURCE(P4Headers::NONE, R"(
                 action a(bit<8> v) {
                     headers.h1.f1 = v;
                 }

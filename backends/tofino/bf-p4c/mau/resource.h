@@ -13,15 +13,18 @@
 #ifndef BF_P4C_MAU_RESOURCE_H_
 #define BF_P4C_MAU_RESOURCE_H_
 
+/* clang-format off */
+
 #include <map>
+
 #include "bf-p4c/lib/autoclone.h"
 #include "bf-p4c/mau/action_data_bus.h"
 #include "bf-p4c/mau/instruction_memory.h"
 #include "bf-p4c/mau/memories.h"
 #include "bf-p4c/mau/table_format.h"
+#include "bf-p4c/mau/tofino/input_xbar.h"
 #include "ir/ir.h"
 #include "lib/safe_vector.h"
-#include "bf-p4c/mau/tofino/input_xbar.h"
 
 using namespace P4;
 
@@ -29,19 +32,18 @@ struct TableResourceAlloc {
     // TODO: Currently we only have a std::map for the UniqueId objects for Memories.  This would
     // make sense to eventually move to IXBar::Use, and even potentially
     // ActionFormat::Use/ActionDataBus::Use for the different types of allocations
-    autoclone_ptr<IXBar::Use>           match_ixbar, gateway_ixbar, proxy_hash_ixbar,
-                                        action_ixbar,
-                                        selector_ixbar, salu_ixbar, meter_ixbar;
-    TableFormat::Use                    table_format;
-    std::map<UniqueId, Memories::Use>   memuse;
-    ActionData::Format::Use             action_format;
-    MeterALU::Format::Use               meter_format;
-    autoclone_ptr<ActionDataBus::Use>   action_data_xbar, meter_xbar;
-    InstructionMemory::Use              instr_mem;
-    LayoutOption                        layout_option;
+    autoclone_ptr<IXBar::Use> match_ixbar, gateway_ixbar, proxy_hash_ixbar, action_ixbar,
+        selector_ixbar, salu_ixbar, meter_ixbar;
+    TableFormat::Use table_format;
+    std::map<UniqueId, Memories::Use> memuse;
+    ActionData::Format::Use action_format;
+    MeterALU::Format::Use meter_format;
+    autoclone_ptr<ActionDataBus::Use> action_data_xbar, meter_xbar;
+    InstructionMemory::Use instr_mem;
+    LayoutOption layout_option;
 
     // only relevant to tofino 1/2
-    safe_vector<Tofino::IXBar::HashDistUse>     hash_dists;
+    safe_vector<Tofino::IXBar::HashDistUse> hash_dists;
 
     TableResourceAlloc *clone() const { return new TableResourceAlloc(*this); }
     TableResourceAlloc *rename(const IR::MAU::Table *tbl, int stage_table = -1,
@@ -73,11 +75,13 @@ struct TableResourceAlloc {
     bool has_tind() const;
     safe_vector<int> hash_dist_immed_units() const;
     int rng_unit() const;
-    int findBytesOnIxbar(const PHV::FieldSlice&) const;
+    int findBytesOnIxbar(const PHV::FieldSlice &) const;
 
-    ::IXBar::Use* find_ixbar(IXBar::Use::type_t type) const;
+    ::IXBar::Use *find_ixbar(IXBar::Use::type_t type) const;
 };
 
 std::ostream &operator<<(std::ostream &, const TableResourceAlloc &);
+
+/* clang-format on */
 
 #endif /* BF_P4C_MAU_RESOURCE_H_ */

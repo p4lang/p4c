@@ -10,23 +10,25 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+#include "psa.h"
+
 #include <cmath>
 #include <fstream>
+
+#include "bf-p4c/arch/bridge_metadata.h"
+#include "bf-p4c/arch/fromv1.0/add_metadata_parser_states.h"
+#include "bf-p4c/arch/intrinsic_metadata.h"
+#include "bf-p4c/arch/rewrite_action_selector.h"
 #include "bf-p4c/device.h"
-#include "psa.h"
-#include "rewrite_packet_path.h"
-#include "lib/bitops.h"
+#include "bf-p4c/midend/type_checker.h"
 #include "ir/ir.h"
+#include "lib/bitops.h"
 #include "midend/convertEnums.h"
 #include "midend/copyStructures.h"
 #include "midend/validateProperties.h"
 #include "psa_converters.h"
-#include "bf-p4c/midend/type_checker.h"
-#include "bf-p4c/arch/bridge_metadata.h"
-#include "bf-p4c/arch/intrinsic_metadata.h"
-#include "bf-p4c/arch/rewrite_action_selector.h"
-#include "bf-p4c/arch/fromv1.0/add_metadata_parser_states.h"
 #include "rewrite_bridge_metadata.h"
+#include "rewrite_packet_path.h"
 
 namespace BFN {
 
@@ -69,15 +71,14 @@ class PacketPathTo8Bits : public P4::ChooseEnumRepresentation {
  * To overcome this issue, 'MeterColor_t' assignments occurring in Structs and
  * Headers must be explicitly converted to an 8 bit value
  */
-class MeterColorTypeTo8Bits: public Transform {
-    const IR::Node* postorder(IR::Type_Name *t) override {
+class MeterColorTypeTo8Bits : public Transform {
+    const IR::Node *postorder(IR::Type_Name *t) override {
         auto path = t->path->to<IR::Path>();
         if (path->name != "MeterColor_t") {
             return t;
         }
-        if (!findContext<IR::Type_Struct>()
-                && !findContext<IR::Type_Header>()
-                && !findContext<IR::Declaration_Variable>())
+        if (!findContext<IR::Type_Struct>() && !findContext<IR::Type_Header>() &&
+            !findContext<IR::Declaration_Variable>())
             return t;
         LOG3("Convert L-Value of MeterColor_t to 8 Bits " << path);
         return IR::Type_Bits::get(8);
@@ -86,7 +87,7 @@ class MeterColorTypeTo8Bits: public Transform {
 
 /** \ingroup PortableSwitchTranslation */
 class AnalyzeProgram : public Inspector {
-    template<class P4Type, class BlockType>
+    template <class P4Type, class BlockType>
     void analyzeArchBlock(cstring gressName, cstring blockName, cstring type) {
         auto main = structure->toplevel->getMain();
         CHECK_NULL(main);
@@ -103,77 +104,70 @@ class AnalyzeProgram : public Inspector {
     }
 
  public:
-    explicit AnalyzeProgram(PSA::ProgramStructure* structure,
-                            P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
-        : structure(structure), refMap(refMap), typeMap(typeMap)
-    { CHECK_NULL(structure); }
+    explicit AnalyzeProgram(PSA::ProgramStructure *structure, P4::ReferenceMap *refMap,
+                            P4::TypeMap *typeMap)
+        : structure(structure), refMap(refMap), typeMap(typeMap) {
+        CHECK_NULL(structure);
+    }
 
-    bool preorder(const IR::P4Program*) override {
-        analyzeArchBlock<IR::P4Parser, IR::ParserBlock>(
-            "ingress"_cs, "ip"_cs, PSA::ProgramStructure::INGRESS_PARSER);
-        analyzeArchBlock<IR::P4Control, IR::ControlBlock>(
-            "ingress"_cs, "ig"_cs, PSA::ProgramStructure::INGRESS);
-        analyzeArchBlock<IR::P4Control, IR::ControlBlock>(
-            "ingress"_cs, "id"_cs, PSA::ProgramStructure::INGRESS_DEPARSER);
-        analyzeArchBlock<IR::P4Parser, IR::ParserBlock>(
-            "egress"_cs, "ep"_cs, PSA::ProgramStructure::EGRESS_PARSER);
-        analyzeArchBlock<IR::P4Control, IR::ControlBlock>(
-            "egress"_cs, "eg"_cs, PSA::ProgramStructure::EGRESS);
-        analyzeArchBlock<IR::P4Control, IR::ControlBlock>(
-            "egress"_cs, "ed"_cs, PSA::ProgramStructure::EGRESS_DEPARSER);
+    bool preorder(const IR::P4Program *) override {
+        analyzeArchBlock<IR::P4Parser, IR::ParserBlock>("ingress"_cs, "ip"_cs,
+                                                        PSA::ProgramStructure::INGRESS_PARSER);
+        analyzeArchBlock<IR::P4Control, IR::ControlBlock>("ingress"_cs, "ig"_cs,
+                                                          PSA::ProgramStructure::INGRESS);
+        analyzeArchBlock<IR::P4Control, IR::ControlBlock>("ingress"_cs, "id"_cs,
+                                                          PSA::ProgramStructure::INGRESS_DEPARSER);
+        analyzeArchBlock<IR::P4Parser, IR::ParserBlock>("egress"_cs, "ep"_cs,
+                                                        PSA::ProgramStructure::EGRESS_PARSER);
+        analyzeArchBlock<IR::P4Control, IR::ControlBlock>("egress"_cs, "eg"_cs,
+                                                          PSA::ProgramStructure::EGRESS);
+        analyzeArchBlock<IR::P4Control, IR::ControlBlock>("egress"_cs, "ed"_cs,
+                                                          PSA::ProgramStructure::EGRESS_DEPARSER);
         return true;
     }
-    void postorder(const IR::Type_Action* node) override {
+    void postorder(const IR::Type_Action *node) override {
         structure->action_types.push_back(node);
     }
-    void postorder(const IR::Type_StructLike* node) override {
+    void postorder(const IR::Type_StructLike *node) override {
         structure->type_declarations.emplace(node->name, node);
     }
-    void postorder(const IR::Type_Typedef* node) override {
+    void postorder(const IR::Type_Typedef *node) override {
         structure->type_declarations.emplace(node->name, node);
     }
-    void postorder(const IR::Type_Enum* node) override {
+    void postorder(const IR::Type_Enum *node) override {
         structure->enums.emplace(node->name, node);
     }
-    void postorder(const IR::Type_SerEnum* node) override {
+    void postorder(const IR::Type_SerEnum *node) override {
         LOG3("ser enum " << node);
         structure->ser_enums.emplace(node->name, node);
     }
-    void postorder(const IR::P4Parser* node) override {
+    void postorder(const IR::P4Parser *node) override {
         structure->parsers.emplace(node->name, node);
         process_packet_path_params(node);
     }
-    void postorder(const IR::P4Control* node) override {
+    void postorder(const IR::P4Control *node) override {
         structure->controls.emplace(node->name, node);
         process_packet_path_params(node);
     }
 
     // 'compiler_generated_metadata_t' is the last struct in the program.
     void end_apply() override {
-        auto* cgAnnotation = new IR::Annotations({
-             new IR::Annotation(IR::ID("__compiler_generated"), { })});
+        auto *cgAnnotation =
+            new IR::Annotations({new IR::Annotation(IR::ID("__compiler_generated"), {})});
 
         auto cgm = new IR::Type_Struct("compiler_generated_metadata_t", cgAnnotation);
-        cgm->fields.push_back(
-            new IR::StructField("mirror_id", IR::Type::Bits::get(10)));
-        cgm->fields.push_back(
-            new IR::StructField("packet_path", IR::Type::Bits::get(8)));
+        cgm->fields.push_back(new IR::StructField("mirror_id", IR::Type::Bits::get(10)));
+        cgm->fields.push_back(new IR::StructField("packet_path", IR::Type::Bits::get(8)));
         // TODO: Map clone_src + clone_digest_id to packet_path
-        cgm->fields.push_back(
-            new IR::StructField("clone_src", IR::Type::Bits::get(4)));
-        cgm->fields.push_back(
-            new IR::StructField("clone_digest_id", IR::Type::Bits::get(4)));
+        cgm->fields.push_back(new IR::StructField("clone_src", IR::Type::Bits::get(4)));
+        cgm->fields.push_back(new IR::StructField("clone_digest_id", IR::Type::Bits::get(4)));
         // add bridge metadata
-        cgm->fields.push_back(new IR::StructField(BFN::BRIDGED_MD,
-                                                  structure->bridge.p4Type));
-        cgm->fields.push_back(new IR::StructField("__recirculate_data",
-                                                  structure->recirculate.p4Type));
-        cgm->fields.push_back(new IR::StructField("__resubmit_data",
-                                                  structure->resubmit.p4Type));
-        cgm->fields.push_back(new IR::StructField("__clone_i2e_data",
-                                                  structure->clone_i2e.p4Type));
-        cgm->fields.push_back(new IR::StructField("__clone_e2e_data",
-                                                  structure->clone_e2e.p4Type));
+        cgm->fields.push_back(new IR::StructField(BFN::BRIDGED_MD, structure->bridge.p4Type));
+        cgm->fields.push_back(
+            new IR::StructField("__recirculate_data", structure->recirculate.p4Type));
+        cgm->fields.push_back(new IR::StructField("__resubmit_data", structure->resubmit.p4Type));
+        cgm->fields.push_back(new IR::StructField("__clone_i2e_data", structure->clone_i2e.p4Type));
+        cgm->fields.push_back(new IR::StructField("__clone_e2e_data", structure->clone_e2e.p4Type));
         cgm->fields.push_back(new IR::StructField("drop", IR::Type::Boolean::get()));
         cgm->fields.push_back(new IR::StructField("resubmit", IR::Type::Boolean::get()));
         cgm->fields.push_back(new IR::StructField("clone_i2e", IR::Type::Boolean::get()));
@@ -184,7 +178,7 @@ class AnalyzeProgram : public Inspector {
 
     // program structure keeps a map from architecture param name to user-provided param name
     // it also keeps the relevant information to translate resubmit/clone/recirc operation to tna.
-    void process_packet_path_params(const IR::P4Parser* node) {
+    void process_packet_path_params(const IR::P4Parser *node) {
         if (node->name == structure->getBlockName(PSA::ProgramStructure::INGRESS_PARSER)) {
             auto param = node->getApplyParameters()->getParameter(1);
             structure->ingress_parser.psaParams.emplace("hdr"_cs, param->name);
@@ -227,8 +221,8 @@ class AnalyzeProgram : public Inspector {
         }
     }
 
-    void create_metadata_header(const IR::Parameter* param, cstring headername,
-                                gress_t gress, PacketPathInfo& packetStructure) {
+    void create_metadata_header(const IR::Parameter *param, cstring headername, gress_t gress,
+                                PacketPathInfo &packetStructure) {
         auto md_type = typeMap->getTypeType(param->type, true);
         if (auto t = md_type->to<IR::Type_StructLike>()) {
             cstring typeName =
@@ -236,10 +230,9 @@ class AnalyzeProgram : public Inspector {
             auto header = new IR::Type_Header(typeName, t->annotations, t->fields);
             structure->type_declarations[typeName] = header;
             for (auto f : header->to<IR::Type_StructLike>()->fields) {
-                    structure->addMetadata(gress,
-                        MetadataField{param->name, f->name, f->type->width_bits()},
-                        MetadataField{headername, f->name,
-                                  f->type->width_bits(), true});
+                structure->addMetadata(
+                    gress, MetadataField{param->name, f->name, f->type->width_bits()},
+                    MetadataField{headername, f->name, f->type->width_bits(), true});
             }
             packetStructure.p4Type = new IR::Type_Name(new IR::Path(typeName));
             packetStructure.structType = header;
@@ -247,7 +240,7 @@ class AnalyzeProgram : public Inspector {
         return;
     }
 
-    void analyzeIfStatement(const IR::IfStatement* ifStatement) {
+    void analyzeIfStatement(const IR::IfStatement *ifStatement) {
         CHECK_NULL(ifStatement);
         if (!ifStatement->ifTrue || ifStatement->ifFalse) {
             return;
@@ -273,7 +266,7 @@ class AnalyzeProgram : public Inspector {
     }
 
     // assume only used in deparser.
-    void collectPacketPathInfo(const IR::P4Control* node) {
+    void collectPacketPathInfo(const IR::P4Control *node) {
         for (auto stmt : node->body->components) {
             if (auto ifStatement = stmt->to<IR::IfStatement>()) {
                 analyzeIfStatement(ifStatement);
@@ -281,7 +274,7 @@ class AnalyzeProgram : public Inspector {
         }
     }
 
-    void process_packet_path_params(const IR::P4Control* node) {
+    void process_packet_path_params(const IR::P4Control *node) {
         if (node->name == structure->getBlockName(ProgramStructure::INGRESS_DEPARSER)) {
             auto param = node->getApplyParameters()->getParameter(1);
             structure->clone_i2e.paramNameInDeparser = param->name;
@@ -341,35 +334,33 @@ class AnalyzeProgram : public Inspector {
     }
 
  private:
-    PSA::ProgramStructure* structure;
+    PSA::ProgramStructure *structure;
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
 };
 
 /** \ingroup PortableSwitchTranslation */
 class TranslateProgram : public Inspector {
-    PSA::ProgramStructure* structure;
+    PSA::ProgramStructure *structure;
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
     // Used for deparser checksum
     std::map<cstring, IR::Vector<IR::Expression>> fieldListMap;
 
  public:
-    explicit TranslateProgram(PSA::ProgramStructure* structure,
-                                  P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
-            : structure(structure), refMap(refMap), typeMap(typeMap) {
-        CHECK_NULL(structure); setName("TranslateProgram");
+    explicit TranslateProgram(PSA::ProgramStructure *structure, P4::ReferenceMap *refMap,
+                              P4::TypeMap *typeMap)
+        : structure(structure), refMap(refMap), typeMap(typeMap) {
+        CHECK_NULL(structure);
+        setName("TranslateProgram");
     }
 
-
-    void InternetChecksumTranslation(const IR::StatOrDecl* stmt,
-                                     const P4::ExternMethod* em) {
+    void InternetChecksumTranslation(const IR::StatOrDecl *stmt, const P4::ExternMethod *em) {
         auto declName = em->object->to<IR::Declaration_Instance>()->name;
         if (em->method->name == "add" || em->method->name == "subtract") {
-            auto sourceList = (*em->expr->arguments)[0]->
-                                   expression->to<IR::ListExpression>();
-            auto typeArgs = new IR::Vector<IR::Type>({ sourceList->type });
-            auto args = new IR::Vector<IR::Argument>({ new IR::Argument(sourceList) });
+            auto sourceList = (*em->expr->arguments)[0]->expression->to<IR::ListExpression>();
+            auto typeArgs = new IR::Vector<IR::Type>({sourceList->type});
+            auto args = new IR::Vector<IR::Argument>({new IR::Argument(sourceList)});
             auto mce = new IR::MethodCallExpression(
                 new IR::Member(new IR::PathExpression(declName), em->method->name), typeArgs, args);
             auto csumCall = new IR::MethodCallStatement(mce);
@@ -393,17 +384,15 @@ class TranslateProgram : public Inspector {
         return 0;
     }
 
-    void evaluateVerifyEnd(const IR::StatOrDecl* stmt,
-                           const P4::ExternFunction* em,
-                           gress_t gress,
+    void evaluateVerifyEnd(const IR::StatOrDecl *stmt, const P4::ExternFunction *em, gress_t gress,
                            cstring stateName) {
         auto equ = (*em->expr->arguments)[0]->expression;
         auto err = (*em->expr->arguments)[1]->expression->to<IR::Member>();
         CHECK_NULL(equ);
         Pattern::Match<IR::Expression> member;
         Pattern::Match<IR::MethodCallExpression> expr;
-        cstring metaParam = gress == INGRESS ? "ig_intr_md_from_prsr"_cs :
-                                                "eg_intr_md_from_prsr"_cs;
+        cstring metaParam =
+            gress == INGRESS ? "ig_intr_md_from_prsr"_cs : "eg_intr_md_from_prsr"_cs;
         int error_idx = getErrorIdx(err->member);
         if ((expr == member).match(equ)) {
             auto miExpr = P4::MethodInstance::resolve(expr, refMap, typeMap);
@@ -412,19 +401,17 @@ class TranslateProgram : public Inspector {
                 if (nameExpr == "InternetChecksum" && emExpr->method->name == "get") {
                     auto declName = emExpr->object->to<IR::Declaration_Instance>()->name;
                     auto list = new IR::ListExpression({member});
-                    auto typeArgs = new IR::Vector<IR::Type>({ list->type });
-                    auto args = new IR::Vector<IR::Argument>({ new IR::Argument(list) });
+                    auto typeArgs = new IR::Vector<IR::Type>({list->type});
+                    auto args = new IR::Vector<IR::Argument>({new IR::Argument(list)});
                     auto mce = new IR::MethodCallExpression(
-                               new IR::Member(new IR::PathExpression(declName), "add"),
-                               typeArgs, args);
+                        new IR::Member(new IR::PathExpression(declName), "add"), typeArgs, args);
                     auto addCall = new IR::MethodCallStatement(mce);
                     structure->_map.emplace(stmt, addCall);
-                    auto verify = new IR::MethodCallExpression(new IR::Member(
-                                  new IR::PathExpression(declName), "verify"));
+                    auto verify = new IR::MethodCallExpression(
+                        new IR::Member(new IR::PathExpression(declName), "verify"));
                     auto rhs = new IR::Cast(IR::Type::Bits::get(1), verify);
-                    auto parser_err = new IR::Member(
-                                          new IR::PathExpression(metaParam),
-                                          "parser_err");
+                    auto parser_err =
+                        new IR::Member(new IR::PathExpression(metaParam), "parser_err");
                     auto lhs = new IR::Slice(parser_err, error_idx, error_idx);
                     auto verifyEnd = new IR::AssignmentStatement(lhs, rhs);
                     if (gress == INGRESS) {
@@ -440,27 +427,26 @@ class TranslateProgram : public Inspector {
         }
     }
 
-    void translateResidualGet(const IR::Member* member, const P4::ExternMethod* emExpr,
-                              const IR::StatOrDecl* stmt,
-                              gress_t gress) {
+    void translateResidualGet(const IR::Member *member, const P4::ExternMethod *emExpr,
+                              const IR::StatOrDecl *stmt, gress_t gress) {
         auto declName = emExpr->object->to<IR::Declaration_Instance>()->name;
-        auto mce = new IR::MethodCallExpression(
-                      new IR::Member(new IR::PathExpression(declName), "get"));
+        auto mce =
+            new IR::MethodCallExpression(new IR::Member(new IR::PathExpression(declName), "get"));
         if (gress == INGRESS) {
-              auto metaparam = structure->ingress_parser.psaParams.at("metadata"_cs);
-              auto residual = new IR::Member(new IR::PathExpression(metaparam), member->member);
-              auto get = new IR::AssignmentStatement(residual, mce);
-              structure->_map.emplace(stmt, get);
+            auto metaparam = structure->ingress_parser.psaParams.at("metadata"_cs);
+            auto residual = new IR::Member(new IR::PathExpression(metaparam), member->member);
+            auto get = new IR::AssignmentStatement(residual, mce);
+            structure->_map.emplace(stmt, get);
         } else if (gress == EGRESS) {
-             auto metaparam = structure->egress_parser.psaParams.at("metadata"_cs);
-             auto residual = new IR::Member(new IR::PathExpression(metaparam), member->member);
-             auto get = new IR::AssignmentStatement(residual, mce);
-             structure->_map.emplace(stmt, get);
+            auto metaparam = structure->egress_parser.psaParams.at("metadata"_cs);
+            auto residual = new IR::Member(new IR::PathExpression(metaparam), member->member);
+            auto get = new IR::AssignmentStatement(residual, mce);
+            structure->_map.emplace(stmt, get);
         }
         return;
     }
 
-    void postorder(const IR::ParserState* state) {
+    void postorder(const IR::ParserState *state) {
         auto ctxt = findContext<IR::P4Parser>();
         CHECK_NULL(ctxt);
         for (auto stmt : state->components) {
@@ -477,10 +463,10 @@ class TranslateProgram : public Inspector {
                     cstring name = em->method->name;
                     if (name == "verify") {
                         if (ctxt->name ==
-                                 structure->getBlockName(PSA::ProgramStructure::INGRESS_PARSER)) {
+                            structure->getBlockName(PSA::ProgramStructure::INGRESS_PARSER)) {
                             evaluateVerifyEnd(stmt, em, INGRESS, state->name);
                         } else if (ctxt->name ==
-                                  structure->getBlockName(PSA::ProgramStructure::EGRESS_PARSER)) {
+                                   structure->getBlockName(PSA::ProgramStructure::EGRESS_PARSER)) {
                             evaluateVerifyEnd(stmt, em, EGRESS, state->name);
                         }
                     }
@@ -494,10 +480,10 @@ class TranslateProgram : public Inspector {
                     cstring nameExpr = emExpr->actualExternType->name;
                     if (nameExpr == "InternetChecksum" && emExpr->method->name == "get") {
                         if (ctxt->name ==
-                                structure->getBlockName(PSA::ProgramStructure::INGRESS_PARSER)) {
+                            structure->getBlockName(PSA::ProgramStructure::INGRESS_PARSER)) {
                             translateResidualGet(member, emExpr, stmt, INGRESS);
                         } else if (ctxt->name ==
-                                structure->getBlockName(PSA::ProgramStructure::EGRESS_PARSER)) {
+                                   structure->getBlockName(PSA::ProgramStructure::EGRESS_PARSER)) {
                             translateResidualGet(member, emExpr, stmt, EGRESS);
                         }
                     }
@@ -506,42 +492,39 @@ class TranslateProgram : public Inspector {
         }
     }
 
-    void translateDeparserAdd(const IR::MethodCallStatement* addStmt) {
+    void translateDeparserAdd(const IR::MethodCallStatement *addStmt) {
         auto mi = P4::MethodInstance::resolve(addStmt, refMap, typeMap);
         auto addMethod = mi->to<P4::ExternMethod>();
         auto declName = addMethod->object->to<IR::Declaration_Instance>()->name;
-        auto sourceList = (*addMethod->expr->arguments)[0]->
-                                           expression->to<IR::ListExpression>();
+        auto sourceList = (*addMethod->expr->arguments)[0]->expression->to<IR::ListExpression>();
         for (auto source : sourceList->components) {
             fieldListMap[declName].push_back(source);
         }
         structure->_map.emplace(addStmt, nullptr);
     }
 
-    IR::AssignmentStatement* translateDeparserGet(const IR::AssignmentStatement* getStmt) {
+    IR::AssignmentStatement *translateDeparserGet(const IR::AssignmentStatement *getStmt) {
         auto dest = getStmt->left->to<IR::Member>();
         auto expr = getStmt->right->to<IR::MethodCallExpression>();
         auto mi = P4::MethodInstance::resolve(expr, refMap, typeMap);
         auto getMethod = mi->to<P4::ExternMethod>();
         auto declName = getMethod->object->to<IR::Declaration_Instance>()->name;
         if (fieldListMap.count(declName)) {
-            auto decl = new IR::Declaration_Instance(declName,
-                   new IR::Type_Name("Checksum"), new IR::Vector<IR::Argument>());
+            auto decl = new IR::Declaration_Instance(declName, new IR::Type_Name("Checksum"),
+                                                     new IR::Vector<IR::Argument>());
             auto list = new IR::ListExpression(fieldListMap.at(declName));
-            auto typeArgs = new IR::Vector<IR::Type>({ list->type });
-            auto args = new IR::Vector<IR::Argument>({ new IR::Argument(list) });
-            structure->_map.emplace(getMethod->object->to<IR::Declaration_Instance>(),
-                                                                        decl);
-            auto update = new IR::MethodCallExpression(new IR::Member(
-                           new IR::PathExpression(declName), "update"),
-                           typeArgs, args);
+            auto typeArgs = new IR::Vector<IR::Type>({list->type});
+            auto args = new IR::Vector<IR::Argument>({new IR::Argument(list)});
+            structure->_map.emplace(getMethod->object->to<IR::Declaration_Instance>(), decl);
+            auto update = new IR::MethodCallExpression(
+                new IR::Member(new IR::PathExpression(declName), "update"), typeArgs, args);
             auto assignUpdate = new IR::AssignmentStatement(dest, update);
             return assignUpdate;
         }
         return nullptr;
     }
 
-    bool isDeparserAdd(const IR::MethodCallStatement* methodStmt) {
+    bool isDeparserAdd(const IR::MethodCallStatement *methodStmt) {
         auto mi = P4::MethodInstance::resolve(methodStmt, refMap, typeMap);
         if (auto em = mi->to<P4::ExternMethod>()) {
             cstring name = em->actualExternType->name;
@@ -552,7 +535,7 @@ class TranslateProgram : public Inspector {
         return false;
     }
 
-    bool isDeparserGet(const IR::AssignmentStatement* assignStmt) {
+    bool isDeparserGet(const IR::AssignmentStatement *assignStmt) {
         auto member = assignStmt->left->to<IR::Member>();
         auto expr = assignStmt->right->to<IR::MethodCallExpression>();
         if (!member || !expr) return false;
@@ -566,10 +549,9 @@ class TranslateProgram : public Inspector {
         return false;
     }
 
-    IR::BlockStatement*
-    translateDeparserCsumIfBlock(const IR::BlockStatement* block) {
+    IR::BlockStatement *translateDeparserCsumIfBlock(const IR::BlockStatement *block) {
         if (!block) return nullptr;
-        IR::BlockStatement* if_block = nullptr;
+        IR::BlockStatement *if_block = nullptr;
         for (auto stmt : block->components) {
             if (auto methodStmt = stmt->to<IR::MethodCallStatement>()) {
                 if (isDeparserAdd(methodStmt)) {
@@ -585,7 +567,7 @@ class TranslateProgram : public Inspector {
         return if_block;
     }
 
-    void postorder(const IR::P4Control* control) override {
+    void postorder(const IR::P4Control *control) override {
         if (control->name != structure->getBlockName(ProgramStructure::INGRESS_DEPARSER) &&
             control->name != structure->getBlockName(ProgramStructure::EGRESS_DEPARSER))
             return;
@@ -594,20 +576,20 @@ class TranslateProgram : public Inspector {
         for (auto comp : body->components) {
             // Find if the ifstatement is the condition for checksum
             if (auto ifStatement = comp->to<IR::IfStatement>()) {
-                IR::BlockStatement* new_true_block = nullptr;
-                IR::BlockStatement* new_false_block = nullptr;
+                IR::BlockStatement *new_true_block = nullptr;
+                IR::BlockStatement *new_false_block = nullptr;
                 if (ifStatement->ifTrue) {
-                    new_true_block = translateDeparserCsumIfBlock(
-                                      ifStatement->ifTrue->to<IR::BlockStatement>());
+                    new_true_block =
+                        translateDeparserCsumIfBlock(ifStatement->ifTrue->to<IR::BlockStatement>());
                 }
                 if (ifStatement->ifFalse) {
                     new_false_block = translateDeparserCsumIfBlock(
-                                       ifStatement->ifFalse->to<IR::BlockStatement>());
+                        ifStatement->ifFalse->to<IR::BlockStatement>());
                 }
                 // Not a checksum if statement
                 if (!new_true_block && !new_false_block) continue;
-                auto ifStmt = new IR::IfStatement(ifStatement->condition, new_true_block,
-                                                       new_false_block);
+                auto ifStmt =
+                    new IR::IfStatement(ifStatement->condition, new_true_block, new_false_block);
                 structure->_map.emplace(ifStatement, ifStmt);
             } else if (auto methodStmt = comp->to<IR::MethodCallStatement>()) {
                 if (isDeparserAdd(methodStmt)) {
@@ -623,7 +605,7 @@ class TranslateProgram : public Inspector {
         return;
     }
 
-    void postorder(const IR::Member* node) override {
+    void postorder(const IR::Member *node) override {
         ordered_set<cstring> toTranslateInControl = {PSA::INP_INTR_MD, PSA::OUT_INTR_MD};
         ordered_set<cstring> toTranslateInParser = {PSA::INP_INTR_MD, PSA::OUT_INTR_MD};
         auto gress = findOrigCtxt<IR::P4Control>();
@@ -633,18 +615,17 @@ class TranslateProgram : public Inspector {
                 CHECK_NULL(path);
                 auto it = toTranslateInControl.find(path->name);
                 if (it != toTranslateInControl.end()) {
-                    if (gress->name == structure->getBlockName(
-                            PSA::ProgramStructure::INGRESS)) {
+                    if (gress->name == structure->getBlockName(PSA::ProgramStructure::INGRESS)) {
                         structure->pathsThread.emplace(node, INGRESS);
                         structure->pathsToDo.emplace(node, node);
-                    } else if (gress->name == structure->getBlockName(
-                            PSA::ProgramStructure::EGRESS)) {
+                    } else if (gress->name ==
+                               structure->getBlockName(PSA::ProgramStructure::EGRESS)) {
                         structure->pathsThread.emplace(node, EGRESS);
 
                         structure->pathsToDo.emplace(node, node);
                     } else {
-                        LOG1("WARNING: path " << node << " in "
-                                        << gress->name.name << " is not translated");
+                        LOG1("WARNING: path " << node << " in " << gress->name.name
+                                              << " is not translated");
                     }
                 }
             } else if (auto expr = node->expr->to<IR::TypeNameExpression>()) {
@@ -664,14 +645,15 @@ class TranslateProgram : public Inspector {
                         structure->_map.emplace(node, new IR::Constant(IR::Type::Bits::get(16), 4));
                     } else if (node->member == "ParserTimeout") {
                         // timeout_cycle_err_en
-                        structure->_map.emplace(node, new IR::Constant(
-                                                                    IR::Type::Bits::get(16), 16));
+                        structure->_map.emplace(node,
+                                                new IR::Constant(IR::Type::Bits::get(16), 16));
                     } else if (structure->error_to_constant.count(node->member)) {
                         // custom errors
-                        structure->_map.emplace(node,
-                                         new IR::Constant(IR::Type::Bits::get(16),
-                                         1 << structure->error_to_constant.at(node->member)));
-                   }
+                        structure->_map.emplace(
+                            node,
+                            new IR::Constant(IR::Type::Bits::get(16),
+                                             1 << structure->error_to_constant.at(node->member)));
+                    }
                 }
                 structure->typeNamesToDo.emplace(node, node);
             } else {
@@ -684,8 +666,7 @@ class TranslateProgram : public Inspector {
                 auto path = expr->path->to<IR::Path>();
                 CHECK_NULL(path);
                 auto it = toTranslateInParser.find(path->name);
-                if (it == toTranslateInParser.end())
-                    return;
+                if (it == toTranslateInParser.end()) return;
                 if (expr->type->is<IR::Type_Struct>()) {
                     structure->pathsToDo.emplace(node, node);
                 } else {
@@ -701,7 +682,7 @@ class TranslateProgram : public Inspector {
         }
     }
 
-    void cvtActionSelector(const IR::Declaration_Instance* node) {
+    void cvtActionSelector(const IR::Declaration_Instance *node) {
         auto declarations = new IR::IndexedVector<IR::Declaration>();
 
         // Create a new instance of Hash<W>
@@ -712,13 +693,10 @@ class TranslateProgram : public Inspector {
         auto args = new IR::Vector<IR::Argument>();
         args->push_back(node->arguments->at(0));
 
-        auto specializedType = new IR::Type_Specialized(
-            new IR::Type_Name("Hash"), typeArgs);
-        auto hashName = cstring::make_unique(
-            structure->unique_names, node->name + "__hash_", '_');
+        auto specializedType = new IR::Type_Specialized(new IR::Type_Name("Hash"), typeArgs);
+        auto hashName = cstring::make_unique(structure->unique_names, node->name + "__hash_", '_');
         structure->unique_names.insert(hashName);
-        declarations->push_back(
-            new IR::Declaration_Instance(hashName, specializedType, args));
+        declarations->push_back(new IR::Declaration_Instance(hashName, specializedType, args));
 
         args = new IR::Vector<IR::Argument>();
         // size
@@ -726,8 +704,7 @@ class TranslateProgram : public Inspector {
         // hash
         args->push_back(new IR::Argument(new IR::PathExpression(hashName)));
         // selector_mode
-        auto sel_mode = new IR::Member(
-            new IR::TypeNameExpression("SelectorMode_t"), "FAIR");
+        auto sel_mode = new IR::Member(new IR::TypeNameExpression("SelectorMode_t"), "FAIR");
         if (auto anno = node->annotations->getSingle("mode"_cs)) {
             auto mode = anno->expr.at(0)->to<IR::StringLiteral>();
             if (mode->value == "resilient")
@@ -739,12 +716,12 @@ class TranslateProgram : public Inspector {
         }
         args->push_back(new IR::Argument(sel_mode));
 
-        declarations->push_back(new IR::Declaration_Instance(
-            node->srcInfo, node->name, node->annotations, node->type, args));
+        declarations->push_back(new IR::Declaration_Instance(node->srcInfo, node->name,
+                                                             node->annotations, node->type, args));
         structure->_map.emplace(node, declarations);
     }
 
-    void cvtRandom(const IR::Declaration_Instance* node) {
+    void cvtRandom(const IR::Declaration_Instance *node) {
         // TODO: check min/max of random, can only support 0 ~ 2**w-1 on tofino
         auto args = new IR::Vector<IR::Argument>();
         auto inst = new IR::Declaration_Instance(node->name, node->type, args);
@@ -753,34 +730,31 @@ class TranslateProgram : public Inspector {
 
     // top level PSA_Switch could instantiate anonymous instances of
     // IngressPipeline and EgressPipeline
-    void process_package_instance(const IR::Type_Specialized* tp) {
-        if (!tp->baseType->is<IR::Type_Name>())
-            return;
+    void process_package_instance(const IR::Type_Specialized *tp) {
+        if (!tp->baseType->is<IR::Type_Name>()) return;
         auto tn = tp->baseType->to<IR::Type_Name>();
         if (tn->path->name == "IngressPipeline") {
             structure->type_params[PSA::TYPE_IH] =
-                    tp->arguments->at(0)->to<IR::Type_Name>()->path->name;
+                tp->arguments->at(0)->to<IR::Type_Name>()->path->name;
             structure->type_params[PSA::TYPE_IM] =
-                    tp->arguments->at(1)->to<IR::Type_Name>()->path->name;
+                tp->arguments->at(1)->to<IR::Type_Name>()->path->name;
         } else if (tn->path->name == "EgressPipeline") {
             structure->type_params[PSA::TYPE_EH] =
-                    tp->arguments->at(0)->to<IR::Type_Name>()->path->name;
+                tp->arguments->at(0)->to<IR::Type_Name>()->path->name;
             structure->type_params[PSA::TYPE_EM] =
-                    tp->arguments->at(1)->to<IR::Type_Name>()->path->name;
+                tp->arguments->at(1)->to<IR::Type_Name>()->path->name;
         }
     }
 
-    void postorder(const IR::Declaration_Instance* node) override {
+    void postorder(const IR::Declaration_Instance *node) override {
         if (auto ts = node->type->to<IR::Type_Specialized>()) {
-            if (!ts->baseType->is<IR::Type_Name>())
-                return;
+            if (!ts->baseType->is<IR::Type_Name>()) return;
             auto name = ts->baseType->to<IR::Type_Name>();
             if (name->path->name == "PSA_Switch") {
                 for (auto arg : *node->arguments) {
                     if (auto ctr = arg->expression->to<IR::ConstructorCallExpression>()) {
                         // skip PacketReplicationEngine and BufferingQueueingEngine
-                        if (!ctr->constructedType->is<IR::Type_Specialized>())
-                            continue;
+                        if (!ctr->constructedType->is<IR::Type_Specialized>()) continue;
                         auto type = ctr->constructedType->to<IR::Type_Specialized>();
                         process_package_instance(type);
                     }
@@ -797,14 +771,14 @@ class TranslateProgram : public Inspector {
                 cvtActionSelector(node);
             } else if (name == "InternetChecksum") {
                 auto declName = node->name;
-                auto decl = new IR::Declaration_Instance(declName,
-                           new IR::Type_Name("Checksum"), new IR::Vector<IR::Argument>());
+                auto decl = new IR::Declaration_Instance(declName, new IR::Type_Name("Checksum"),
+                                                         new IR::Vector<IR::Argument>());
                 structure->_map.emplace(node, decl);
             }
         }
     }
 
-    void addExternMethodCall(cstring name, const IR::Node* node) {
+    void addExternMethodCall(cstring name, const IR::Node *node) {
         if (structure->methodcalls.count(name) == 0) {
             TranslationMap m;
             structure->methodcalls.emplace(name, m);
@@ -847,64 +821,51 @@ class TranslateProgram : public Inspector {
 
 /** \ingroup PortableSwitchTranslation */
 class LoadTargetArchitecture : public Inspector {
-    PSA::ProgramStructure* structure;
+    PSA::ProgramStructure *structure;
 
  public:
-    explicit LoadTargetArchitecture(PSA::ProgramStructure* structure) : structure(structure) {
+    explicit LoadTargetArchitecture(PSA::ProgramStructure *structure) : structure(structure) {
         setName("LoadTargetArchitecture");
         CHECK_NULL(structure);
     }
 
     void setup_metadata_map() {
-        structure->addMetadata(INGRESS,
-                               MetadataField{PSA::INP_INTR_MD, "ingress_port"_cs, 9},
+        structure->addMetadata(INGRESS, MetadataField{PSA::INP_INTR_MD, "ingress_port"_cs, 9},
                                MetadataField{"ig_intr_md"_cs, "ingress_port"_cs, 9});
-        structure->addMetadata(EGRESS,
-                               MetadataField{PSA::INP_INTR_MD, "ingress_port"_cs, 9},
+        structure->addMetadata(EGRESS, MetadataField{PSA::INP_INTR_MD, "ingress_port"_cs, 9},
                                MetadataField{"eg_intr_md"_cs, "ingress_port"_cs, 9});
 
-        structure->addMetadata(INGRESS,
-                               MetadataField{PSA::INP_INTR_MD, "ingress_timestamp"_cs, 48},
+        structure->addMetadata(INGRESS, MetadataField{PSA::INP_INTR_MD, "ingress_timestamp"_cs, 48},
                                MetadataField{"ig_intr_md"_cs, "ingress_mac_tstamp"_cs, 48});
-        structure->addMetadata(INGRESS,
-                               MetadataField{PSA::INP_INTR_MD, "parser_error"_cs, 16},
+        structure->addMetadata(INGRESS, MetadataField{PSA::INP_INTR_MD, "parser_error"_cs, 16},
                                MetadataField{"ig_intr_md_from_parser"_cs, "parser_err"_cs, 16});
-        structure->addMetadata(INGRESS,
-                               MetadataField{PSA::OUT_INTR_MD, "class_of_service"_cs, 3},
+        structure->addMetadata(INGRESS, MetadataField{PSA::OUT_INTR_MD, "class_of_service"_cs, 3},
                                MetadataField{"ig_intr_md_for_tm"_cs, "ingress_cos"_cs, 3});
-        structure->addMetadata(INGRESS,
-                               MetadataField{PSA::OUT_INTR_MD, "drop"_cs, 1},
+        structure->addMetadata(INGRESS, MetadataField{PSA::OUT_INTR_MD, "drop"_cs, 1},
                                MetadataField{COMPILER_META, "drop"_cs, 1});
         structure->addMetadata(INGRESS, MetadataField{PSA::OUT_INTR_MD, "multicast_group"_cs, 16},
                                MetadataField{"ig_intr_md_for_tm"_cs, "mcast_grp_a"_cs, 16});
-        structure->addMetadata(INGRESS,
-                               MetadataField{PSA::OUT_INTR_MD, "egress_port"_cs, 9},
+        structure->addMetadata(INGRESS, MetadataField{PSA::OUT_INTR_MD, "egress_port"_cs, 9},
                                MetadataField{"ig_intr_md_for_tm"_cs, "ucast_egress_port"_cs, 9});
         structure->addMetadata(INGRESS, MetadataField{PSA::OUT_INTR_MD, "resubmit"_cs, 1},
                                MetadataField{COMPILER_META, "resubmit"_cs, 1});
         structure->addMetadata(INGRESS, MetadataField{PSA::OUT_INTR_MD, "clone"_cs, 1},
                                MetadataField{COMPILER_META, "clone_i2e"_cs, 1});
-        structure->addMetadata(INGRESS,
-                               MetadataField{PSA::INP_INTR_MD, "packet_path"_cs, 0},
+        structure->addMetadata(INGRESS, MetadataField{PSA::INP_INTR_MD, "packet_path"_cs, 0},
                                MetadataField{COMPILER_META, "packet_path"_cs, 0});
 
-        structure->addMetadata(EGRESS,
-                               MetadataField{PSA::INP_INTR_MD, "egress_port"_cs, 9},
+        structure->addMetadata(EGRESS, MetadataField{PSA::INP_INTR_MD, "egress_port"_cs, 9},
                                MetadataField{"eg_intr_md"_cs, "egress_port"_cs, 9});
-        structure->addMetadata(EGRESS,
-                               MetadataField{PSA::INP_INTR_MD, "egress_timestamp"_cs, 48},
-                               MetadataField{"eg_intr_md_for_dprsr"_cs,
-                                             "egress_global_tstamp"_cs, 48});
-        structure->addMetadata(EGRESS,
-                               MetadataField{PSA::INP_INTR_MD, "parser_error"_cs, 16},
+        structure->addMetadata(
+            EGRESS, MetadataField{PSA::INP_INTR_MD, "egress_timestamp"_cs, 48},
+            MetadataField{"eg_intr_md_for_dprsr"_cs, "egress_global_tstamp"_cs, 48});
+        structure->addMetadata(EGRESS, MetadataField{PSA::INP_INTR_MD, "parser_error"_cs, 16},
                                MetadataField{"eg_intr_md_from_parser"_cs, "parser_err"_cs, 16});
-        structure->addMetadata(EGRESS,
-                               MetadataField{PSA::OUT_INTR_MD, "drop"_cs, 1},
+        structure->addMetadata(EGRESS, MetadataField{PSA::OUT_INTR_MD, "drop"_cs, 1},
                                MetadataField{COMPILER_META, "drop"_cs, 1});
         structure->addMetadata(EGRESS, MetadataField{PSA::OUT_INTR_MD, "clone"_cs, 1},
                                MetadataField{COMPILER_META, "clone_e2e"_cs, 1});
-        structure->addMetadata(EGRESS,
-                               MetadataField{PSA::INP_INTR_MD, "packet_path"_cs, 0},
+        structure->addMetadata(EGRESS, MetadataField{PSA::INP_INTR_MD, "packet_path"_cs, 0},
                                MetadataField{COMPILER_META, "packet_path"_cs, 0});
         structure->addMetadata(MetadataField{PSA::OUT_INTR_MD, "clone_session_id"_cs, 10},
                                MetadataField{COMPILER_META, "mirror_id"_cs, 10});
@@ -924,14 +885,14 @@ class LoadTargetArchitecture : public Inspector {
         }
     }
 
-    void postorder(const IR::P4Program*) override {
+    void postorder(const IR::P4Program *) override {
         setup_metadata_map();
-        char* drvP4IncludePath = getenv("P4C_16_INCLUDE_PATH");
+        char *drvP4IncludePath = getenv("P4C_16_INCLUDE_PATH");
         std::filesystem::path path(drvP4IncludePath ? drvP4IncludePath : p4includePath);
         LOG1("path " << p4includePath << " " << drvP4IncludePath);
         char tempPath[PATH_MAX];
-        snprintf(tempPath, PATH_MAX-1, "/tmp/arch_XXXXXX.p4");
-        std::vector<const char *>filenames;
+        snprintf(tempPath, PATH_MAX - 1, "/tmp/arch_XXXXXX.p4");
+        std::vector<const char *> filenames;
         if (Device::currentDevice() == Device::TOFINO) {
             filenames.push_back("tofino1_specs.p4");
             filenames.push_back("tofino1_base.p4");
@@ -988,12 +949,11 @@ class LoadTargetArchitecture : public Inspector {
  */
 struct ConvertNames : public PassManager {
     explicit ConvertNames(ProgramStructure *structure, P4::ReferenceMap *refMap,
-            P4::TypeMap *typeMap) {
+                          P4::TypeMap *typeMap) {
         addPasses({new BFN::PSA::PathExpressionConverter(structure),
                    new BFN::PSA::TypeNameExpressionConverter(structure),
                    new BFN::PSA::TypeNameConverter(structure),
-                   new BFN::PSA::MeterColorTypeTo8Bits(),
-                   new P4::ClearTypeMap(typeMap),
+                   new BFN::PSA::MeterColorTypeTo8Bits(), new P4::ClearTypeMap(typeMap),
                    new P4::TypeChecking(refMap, typeMap, true),
                    new P4::EliminateSerEnums(typeMap)});
     }
@@ -1001,41 +961,37 @@ struct ConvertNames : public PassManager {
 
 /** \ingroup PortableSwitchTranslation */
 struct CreateErrorStates : public Transform {
-    PSA::ProgramStructure* structure;
-    std::map<gress_t, std::set<const IR::ParserState*>> newStates;
+    PSA::ProgramStructure *structure;
+    std::map<gress_t, std::set<const IR::ParserState *>> newStates;
 
  public:
-    explicit CreateErrorStates(PSA::ProgramStructure* structure)
-        : structure(structure) { }
+    explicit CreateErrorStates(PSA::ProgramStructure *structure) : structure(structure) {}
 
-    const IR::ParserState* create_error_state(const IR::ParserState* origState,
-                                              int error_idx,
+    const IR::ParserState *create_error_state(const IR::ParserState *origState, int error_idx,
                                               cstring metaParam) {
         auto statements = new IR::IndexedVector<IR::StatOrDecl>();
-        auto parser_err = new IR::Member(new IR::PathExpression(metaParam),
-                                         "parser_err");
+        auto parser_err = new IR::Member(new IR::PathExpression(metaParam), "parser_err");
         auto lhs = new IR::Slice(parser_err, error_idx, error_idx);
-        auto assign = new IR::AssignmentStatement(lhs, new IR::Constant(
-                                                           IR::Type::Bits::get(1), 1));
+        auto assign = new IR::AssignmentStatement(lhs, new IR::Constant(IR::Type::Bits::get(1), 1));
         statements->push_back(assign);
-        auto newStateName = IR::ID(cstring("__" + origState->name + "_error_" +
-                                           std::to_string(error_idx)));
+        auto newStateName =
+            IR::ID(cstring("__" + origState->name + "_error_" + std::to_string(error_idx)));
         auto selectExpression = new IR::PathExpression(IR::ID("accept"));
         auto newState = new IR::ParserState(newStateName, *statements, selectExpression);
         return newState;
     }
 
-    const IR::Node* preorder(IR::ParserState* state) override {
+    const IR::Node *preorder(IR::ParserState *state) override {
         auto parser = findContext<IR::BFN::TnaParser>();
         if (structure->state_to_verify.count(parser->thread) &&
-           (structure->state_to_verify.at(parser->thread).count(state->name))) {
+            (structure->state_to_verify.at(parser->thread).count(state->name))) {
             auto stmt = structure->state_to_verify.at(parser->thread).at(state->name);
             auto expr = (*stmt->arguments)[0]->expression;
             auto err = (*stmt->arguments)[1]->expression->to<IR::Member>();
             Pattern::Match<IR::Member> member;
             Pattern::Match<IR::Constant> constant;
-            cstring metaParam = parser->thread == INGRESS ? "ig_intr_md_from_prsr"_cs :
-                                                   "eg_intr_md_from_prsr"_cs;
+            cstring metaParam =
+                parser->thread == INGRESS ? "ig_intr_md_from_prsr"_cs : "eg_intr_md_from_prsr"_cs;
             int error_idx = structure->error_to_constant.at(err->member);
             if (expr->is<IR::Equ>()) {
                 (member == constant).match(expr);
@@ -1048,22 +1004,21 @@ struct CreateErrorStates : public Transform {
             newStates[parser->thread].insert(errorState);
             auto stateName = IR::ID(cstring("__" + state->name + "_non_error"));
             auto statements = new IR::IndexedVector<IR::StatOrDecl>();
-            auto origTransState = new IR::ParserState(stateName, *statements,
-                                                       state->selectExpression);
+            auto origTransState =
+                new IR::ParserState(stateName, *statements, state->selectExpression);
             newStates[parser->thread].insert(origTransState);
             auto selectCases = new IR::Vector<IR::SelectCase>();
             selectCases->push_back(new IR::SelectCase(
-                                   constant, new IR::PathExpression(
-                                   expr->is<IR::Equ>() ? origTransState->name :
-                                                         errorState->name)));
+                constant, new IR::PathExpression(expr->is<IR::Equ>() ? origTransState->name
+                                                                     : errorState->name)));
             selectCases->push_back(new IR::SelectCase(
-                               new IR::DefaultExpression(IR::Type_Dontcare::get()),
-                               new IR::PathExpression(expr->is<IR::Equ>() ? errorState->name :
-                                                       origTransState->name)));
+                new IR::DefaultExpression(IR::Type_Dontcare::get()),
+                new IR::PathExpression(expr->is<IR::Equ>() ? errorState->name
+                                                           : origTransState->name)));
             IR::Vector<IR::Expression> selectOn;
             selectOn.push_back(member);
-            auto selectExpression = new IR::SelectExpression(new IR::ListExpression(selectOn),
-                                                                        *selectCases);
+            auto selectExpression =
+                new IR::SelectExpression(new IR::ListExpression(selectOn), *selectCases);
             state->selectExpression = selectExpression;
         }
         return state;
@@ -1072,11 +1027,12 @@ struct CreateErrorStates : public Transform {
 
 /** \ingroup PortableSwitchTranslation */
 struct AddParserStates : public Transform {
-    const CreateErrorStates* createErrorStates;
+    const CreateErrorStates *createErrorStates;
+
  public:
-    explicit AddParserStates(const CreateErrorStates* createErrorStates) :
-                             createErrorStates(createErrorStates) { }
-    const IR::BFN::TnaParser* preorder(IR::BFN::TnaParser* parser) override {
+    explicit AddParserStates(const CreateErrorStates *createErrorStates)
+        : createErrorStates(createErrorStates) {}
+    const IR::BFN::TnaParser *preorder(IR::BFN::TnaParser *parser) override {
         if (!createErrorStates->newStates.count(parser->thread)) return parser;
         for (auto newState : createErrorStates->newStates.at(parser->thread)) {
             parser->states.push_back(newState);
@@ -1087,18 +1043,19 @@ struct AddParserStates : public Transform {
 
 /** \ingroup PortableSwitchTranslation */
 struct RewriteParserVerify : public PassManager {
-    explicit RewriteParserVerify(PSA::ProgramStructure* structure) {
+    explicit RewriteParserVerify(PSA::ProgramStructure *structure) {
         auto createErrorStates = new BFN::PSA::CreateErrorStates(structure);
-        addPasses({ createErrorStates,
-                    new BFN::PSA::AddParserStates(createErrorStates),
-                   });
+        addPasses({
+            createErrorStates,
+            new BFN::PSA::AddParserStates(createErrorStates),
+        });
     }
 };
 
 }  // namespace PSA
 
-PortableSwitchTranslation::PortableSwitchTranslation(
-        P4::ReferenceMap* refMap, P4::TypeMap* typeMap, BFN_Options& options) {
+PortableSwitchTranslation::PortableSwitchTranslation(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                                                     BFN_Options &options) {
     setName("Translation");
     addDebugHook(options.getDebugHook());
     auto evaluator = new P4::EvaluatorPass(refMap, typeMap);

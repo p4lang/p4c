@@ -10,8 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_LOGGING_CONSTRAINED_FIELDS_H_
-#define EXTENSIONS_BF_P4C_LOGGING_CONSTRAINED_FIELDS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_LOGGING_CONSTRAINED_FIELDS_H_
+#define BACKENDS_TOFINO_BF_P4C_LOGGING_CONSTRAINED_FIELDS_H_
 
 #include <map>
 
@@ -30,13 +30,9 @@ class LoggableEntity {
     Constraint *logger = nullptr;
 
  public:
-    Constraint *getLogger() {
-        return logger;
-    }
+    Constraint *getLogger() { return logger; }
 
-    bool hasLoggedConstraints() const {
-        return logger->get_base_constraint().size() > 0;
-    }
+    bool hasLoggedConstraints() const { return logger->get_base_constraint().size() > 0; }
 };
 
 class ConstrainedField;
@@ -56,12 +52,12 @@ class ConstrainedSlice : public LoggableEntity, public LiftCompare<ConstrainedSl
  public:
     ConstrainedSlice(const ConstrainedField &parent, le_bitrange range);
 
-    const le_bitrange &getRange() const                           { return range; }
-    const ConstrainedField &getParent() const                     { return *parent; }
+    const le_bitrange &getRange() const { return range; }
+    const ConstrainedField &getParent() const { return *parent; }
 
     /// Constraints
     void setAlignment(const Constraints::AlignmentConstraint &alignment);
-    const Constraints::AlignmentConstraint &getAlignment() const  { return alignment; }
+    const Constraints::AlignmentConstraint &getAlignment() const { return alignment; }
 
     void setContainerSize(const Constraints::ContainerSizeConstraint &containerSize);
     const Constraints::ContainerSizeConstraint getContainerSize() const { return containerSize; }
@@ -96,42 +92,42 @@ class ConstrainedField : public LoggableEntity {
     ConstrainedField() {}
     explicit ConstrainedField(const cstring &name);
 
-    const cstring &getName() const                                        { return name; }
+    const cstring &getName() const { return name; }
 
     void addSlice(const ConstrainedSlice &slice);
-    std::vector<ConstrainedSlice> &getSlices()                            { return slices; }
-    const std::vector<ConstrainedSlice> &getSlices() const                { return slices; }
+    std::vector<ConstrainedSlice> &getSlices() { return slices; }
+    const std::vector<ConstrainedSlice> &getSlices() const { return slices; }
 
     /// Constraints
     void setSolitary(const Constraints::SolitaryConstraint &solitary);
-    const Constraints::SolitaryConstraint &getSolitary() const            { return solitary; }
+    const Constraints::SolitaryConstraint &getSolitary() const { return solitary; }
 
     void setAlignment(const Constraints::AlignmentConstraint &alignment);
-    const Constraints::AlignmentConstraint &getAlignment() const          { return alignment; }
+    const Constraints::AlignmentConstraint &getAlignment() const { return alignment; }
 
     void setDigest(const Constraints::DigestConstraint &digest);
-    const Constraints::DigestConstraint &getDigest() const                { return digest; }
+    const Constraints::DigestConstraint &getDigest() const { return digest; }
 
     void setContainerSize(const Constraints::ContainerSizeConstraint &containerSize);
     const Constraints::ContainerSizeConstraint getContainerSize() const { return containerSize; }
 
     void setBottomBits(bool b);
-    bool hasBottomBits() const                                       { return deparsedBottomBits; }
+    bool hasBottomBits() const { return deparsedBottomBits; }
 
     void setNoSplit(bool b);
-    bool hasNoSplit() const                                               { return noSplit; }
+    bool hasNoSplit() const { return noSplit; }
 
     void setNoOverlay(bool b);
-    bool hasNoOverlay() const                                             { return noOverlay; }
+    bool hasNoOverlay() const { return noOverlay; }
 
     void setExactContainer(bool b);
-    bool hasExactContainer() const                                       { return exactContainer; }
+    bool hasExactContainer() const { return exactContainer; }
 
     void setNoHoles(bool b);
-    bool hasNoHoles() const                                               { return noHoles; }
+    bool hasNoHoles() const { return noHoles; }
 
     void setSameContainerGroup(bool b);
-    bool hasSameContainerGroup()                                     { return sameContainerGroup; }
+    bool hasSameContainerGroup() { return sameContainerGroup; }
 };
 
 typedef std::map<cstring, ConstrainedField> ConstrainedFieldMap;
@@ -143,7 +139,7 @@ typedef std::map<cstring, ConstrainedField> ConstrainedFieldMap;
 class ConstrainedFieldMapBuilder {
  public:
     static ConstrainedFieldMap buildMap(const PhvInfo &phv,
-                                        const std::list<PHV::SuperCluster*> &groups);
+                                        const std::list<PHV::SuperCluster *> &groups);
 };
 
-#endif  /* EXTENSIONS_BF_P4C_LOGGING_CONSTRAINED_FIELDS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_LOGGING_CONSTRAINED_FIELDS_H_ */

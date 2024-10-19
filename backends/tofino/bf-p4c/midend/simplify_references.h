@@ -14,6 +14,7 @@
 #define _MIDEND_SIMPLIFY_REFERENCES_H_
 
 #include <vector>
+
 #include "ir/ir.h"
 #include "ir/pass_manager.h"
 
@@ -52,8 +53,7 @@ struct SimplifyReferences : public PassManager {
      * @param refMap    Resolved references for the P4 program.
      * @param typeMap   Resolved types for the P4 program.
      */
-    SimplifyReferences(ParamBinding* bindings, P4::ReferenceMap* refMap,
-                       P4::TypeMap* typeMap);
+    SimplifyReferences(ParamBinding *bindings, P4::ReferenceMap *refMap, P4::TypeMap *typeMap);
 };
 
 #endif /* _MIDEND_SIMPLIFY_REFERENCES_H_ */

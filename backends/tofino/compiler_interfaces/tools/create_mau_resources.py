@@ -4,18 +4,22 @@
 This script produces a mau.resources.log from an input resources.json file.
 """
 
-import json, logging, os, sys
+import json
+import logging
+import os
+import sys
 from collections import OrderedDict
+
 from .utils import *
 
-if not getattr(sys,'frozen', False):
+if not getattr(sys, 'frozen', False):
     # standalone script
     MYPATH = os.path.dirname(__file__)
     SCHEMA_PATH = os.path.join(MYPATH, "../")
     sys.path.append(SCHEMA_PATH)
 
-from schemas.schema_keys import *
 from schemas.schema_enum_values import *
+from schemas.schema_keys import *
 
 # The minimum resources.json schema version required.
 MINIMUM_RESOURCES_JSON_REQUIRED = "1.1.0"
@@ -24,12 +28,29 @@ LOGGER_NAME = "MAU-RESOURCE-RESULT-LOG"
 
 
 class Totals(object):
-    def __init__(self, exm_xbar=0, tern_xbar=0, hash_bits=0, hash_dist_units=0,
-                 gateway=0, sram=0, map_ram=0, tcam=0, vliw=0,
-                 meter_alu=0, stats_alu=0, stash=0, exm_search_bus=0,
-                 exm_result_bus=0, tind_result_bus=0, action_data_bytes=0,
-                 action_slots_8=0, action_slots_16=0, action_slots_32=0,
-                 logical_table_id=0):
+    def __init__(
+        self,
+        exm_xbar=0,
+        tern_xbar=0,
+        hash_bits=0,
+        hash_dist_units=0,
+        gateway=0,
+        sram=0,
+        map_ram=0,
+        tcam=0,
+        vliw=0,
+        meter_alu=0,
+        stats_alu=0,
+        stash=0,
+        exm_search_bus=0,
+        exm_result_bus=0,
+        tind_result_bus=0,
+        action_data_bytes=0,
+        action_slots_8=0,
+        action_slots_16=0,
+        action_slots_32=0,
+        logical_table_id=0,
+    ):
         self.exm_xbar = exm_xbar
         self.tern_xbar = tern_xbar
         self.hash_bits = hash_bits
@@ -88,20 +109,48 @@ class Totals(object):
             return new_row
 
         if tables:
-            return [self.exm_xbar + self.tern_xbar, self.hash_bits, self.gateway, self.sram, self.tcam,
-                    self.map_ram, self.action_data_bytes, self.vliw,
-                    self.exm_search_bus, self.exm_result_bus, self.tind_result_bus]
+            return [
+                self.exm_xbar + self.tern_xbar,
+                self.hash_bits,
+                self.gateway,
+                self.sram,
+                self.tcam,
+                self.map_ram,
+                self.action_data_bytes,
+                self.vliw,
+                self.exm_search_bus,
+                self.exm_result_bus,
+                self.tind_result_bus,
+            ]
 
-        return [self.exm_xbar, self.tern_xbar, self.hash_bits, self.hash_dist_units, self.gateway, self.sram,
-                self.map_ram, self.tcam, self.vliw, self.meter_alu, self.stats_alu, self.stash,
-                self.exm_search_bus, self.exm_result_bus, self.tind_result_bus,
-                self.action_data_bytes, self.action_slots_8, self.action_slots_16, self.action_slots_32,
-                self.logical_table_id]
+        return [
+            self.exm_xbar,
+            self.tern_xbar,
+            self.hash_bits,
+            self.hash_dist_units,
+            self.gateway,
+            self.sram,
+            self.map_ram,
+            self.tcam,
+            self.vliw,
+            self.meter_alu,
+            self.stats_alu,
+            self.stash,
+            self.exm_search_bus,
+            self.exm_result_bus,
+            self.tind_result_bus,
+            self.action_data_bytes,
+            self.action_slots_8,
+            self.action_slots_16,
+            self.action_slots_32,
+            self.logical_table_id,
+        ]
 
 
 # ----------------------------------------
 #  Produce log file
 # ----------------------------------------
+
 
 def _parse_context_json(context):
     # If we ever want to sort the 'tables' table by gress, we can parse context.json to determine gress
@@ -161,7 +210,7 @@ def _parse_resources_json(context):
         stage_tot = stage_totals[stage_number]
         stage_avail = stage_available[stage_number]
 
-        #------------------------------------------------------------------------------
+        # ------------------------------------------------------------------------------
         xbar_bytes = get_attr(XBAR_BYTES, mau_stage)
         exact_size = get_attr(EXACT_SIZE, xbar_bytes)
         ternary_size = get_attr(TERNARY_SIZE, xbar_bytes)
@@ -187,7 +236,7 @@ def _parse_resources_json(context):
         hash_bits = get_attr(HASH_BITS, mau_stage)
         nBits = get_attr(NBITS, hash_bits)
         nFunctions = get_attr(NFUNCTIONS, hash_bits)
-        stage_avail.add(Totals(hash_bits=nBits*nFunctions))
+        stage_avail.add(Totals(hash_bits=nBits * nFunctions))
         bits = get_attr(BITS, hash_bits)
         cnt = 0
         for b in bits:
@@ -202,7 +251,7 @@ def _parse_resources_json(context):
         hash_dist_units = get_attr(HASH_DISTRIBUTION_UNITS, mau_stage)
         nHashIds = get_attr(NHASHIDS, hash_dist_units)
         nUnitIds = get_attr(NUNITIDS, hash_dist_units)
-        stage_avail.add(Totals(hash_dist_units=nHashIds*nUnitIds))
+        stage_avail.add(Totals(hash_dist_units=nHashIds * nUnitIds))
         units = get_attr(UNITS, hash_dist_units)
         cnt = 0
         for unit in units:
@@ -222,7 +271,7 @@ def _parse_resources_json(context):
         gateways = get_attr(GATEWAYS, mau_stage)
         nRows = get_attr(NROWS, gateways)
         nUnits = get_attr(NUNITS, gateways)
-        stage_avail.add(Totals(gateway=nRows*nUnits))
+        stage_avail.add(Totals(gateway=nRows * nUnits))
         gw = get_attr(GATEWAYS, gateways)
         cnt = 0
         for unit in gw:
@@ -240,7 +289,7 @@ def _parse_resources_json(context):
         rams = get_attr(RAMS, mau_stage)
         nRows = get_attr(NROWS, rams)
         nColumns = get_attr(NCOLUMNS, rams)
-        stage_avail.add(Totals(sram=nRows*nColumns))
+        stage_avail.add(Totals(sram=nRows * nColumns))
         srams = get_attr(SRAMS, rams)
         cnt = 0
         for unit in srams:
@@ -258,7 +307,7 @@ def _parse_resources_json(context):
         map_rams = get_attr(MAP_RAMS, mau_stage)
         nRows = get_attr(NROWS, map_rams)
         nUnits = get_attr(NUNITS, map_rams)
-        stage_avail.add(Totals(map_ram=nRows*nUnits))
+        stage_avail.add(Totals(map_ram=nRows * nUnits))
         maprams = get_attr(MAPRAMS, map_rams)
         cnt = 0
         for unit in maprams:
@@ -276,7 +325,7 @@ def _parse_resources_json(context):
         tcams = get_attr(TCAMS, mau_stage)
         nRows = get_attr(NROWS, tcams)
         nColumns = get_attr(NCOLUMNS, tcams)
-        stage_avail.add(Totals(tcam=nRows*nColumns))
+        stage_avail.add(Totals(tcam=nRows * nColumns))
         t = get_attr(TCAMS, tcams)
         cnt = 0
         for unit in t:
@@ -351,7 +400,7 @@ def _parse_resources_json(context):
         stashes = get_attr(STASHES, mau_stage)
         nRows = get_attr(NROWS, stashes)
         nUnits = get_attr(NUNITS, stashes)
-        stage_avail.add(Totals(stash=nRows*nUnits))
+        stage_avail.add(Totals(stash=nRows * nUnits))
         s = get_attr(STASHES, stashes)
         cnt = 0
         for unit in s:
@@ -468,18 +517,69 @@ def _parse_resources_json(context):
 
     return stage_totals, stage_available, table_name_stage
 
+
 def build_table(data_dict, total_available=None, tables=False, ingress_names=None):
-    hdrs = [["Stage Number", "Exact Match Input xbar", "Ternary Match Input xbar", "Hash Bit", "Hash Dist Unit",
-             "Gateway", "SRAM", "Map RAM", "TCAM", "VLIW Instr", "Meter ALU", "Stats ALU", "Stash",
-             "Exact Match Search Bus", "Exact Match Result Bus", "Tind Result Bus", "Action Data Bus Bytes",
-             "8-bit Action Slots", "16-bit Action Slots", "32-bit Action Slots", "Logical TableID"]]
+    hdrs = [
+        [
+            "Stage Number",
+            "Exact Match Input xbar",
+            "Ternary Match Input xbar",
+            "Hash Bit",
+            "Hash Dist Unit",
+            "Gateway",
+            "SRAM",
+            "Map RAM",
+            "TCAM",
+            "VLIW Instr",
+            "Meter ALU",
+            "Stats ALU",
+            "Stash",
+            "Exact Match Search Bus",
+            "Exact Match Result Bus",
+            "Tind Result Bus",
+            "Action Data Bus Bytes",
+            "8-bit Action Slots",
+            "16-bit Action Slots",
+            "32-bit Action Slots",
+            "Logical TableID",
+        ]
+    ]
 
     if tables:
-        hdrs = [["Table", "Stage",  "Crossbar", "Hash", "Gateways", "RAMs", "TCAMs", "Map",  "Action", "VLIW",  "Exm",    "Exm",    "Tind"],
-                ["Name",  "Number", "Bytes",    "Bits", "",         "",     "",      "RAMs", "Data",   "Slots", "Search", "Result", "Result"],
-                ["",      "",       "",         "",     "",         "",     "",      "",     "Bus",    "",      "Bus",    "Bus",    "Bus"],
-                ["",      "",       "",         "",     "",         "",     "",      "",     "Bytes",  "",      "",       "",       ""]]
-
+        hdrs = [
+            [
+                "Table",
+                "Stage",
+                "Crossbar",
+                "Hash",
+                "Gateways",
+                "RAMs",
+                "TCAMs",
+                "Map",
+                "Action",
+                "VLIW",
+                "Exm",
+                "Exm",
+                "Tind",
+            ],
+            [
+                "Name",
+                "Number",
+                "Bytes",
+                "Bits",
+                "",
+                "",
+                "",
+                "RAMs",
+                "Data",
+                "Slots",
+                "Search",
+                "Result",
+                "Result",
+            ],
+            ["", "", "", "", "", "", "", "", "Bus", "", "Bus", "Bus", "Bus"],
+            ["", "", "", "", "", "", "", "", "Bytes", "", "", "", ""],
+        ]
 
     def gress_sort(table_name):
         if ingress_names is not None:
@@ -564,10 +664,12 @@ def produce_mau_resources(source, output):
 
     box = "+---------------------------------------------------------------------+"
     log.info(box)
-    for s in ["Log file: %s" % RESULTS_FILE,
-              "Compiler version: %s" % str(compiler_version),
-              "Created on: %s" % str(build_date),
-              "Run ID: %s" % str(run_id)]:
+    for s in [
+        "Log file: %s" % RESULTS_FILE,
+        "Compiler version: %s" % str(compiler_version),
+        "Created on: %s" % str(build_date),
+        "Run ID: %s" % str(run_id),
+    ]:
         line = "|  %s" % s
         while len(line) < (len(box) - 1):
             line += " "
@@ -597,12 +699,19 @@ if __name__ == "__main__":
     import sys
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('source', metavar='source', type=str,
-                        help='The input resources.json source file to use.')
+    parser.add_argument(
+        'source', metavar='source', type=str, help='The input resources.json source file to use.'
+    )
     # parser.add_argument('source2', metavar='source2', type=str,
     #                     help='The input context.json source file to use.')
-    parser.add_argument('--output', '-o', type=str, action="store", default=".",
-                        help="The output directory to output %s." % RESULTS_FILE)
+    parser.add_argument(
+        '--output',
+        '-o',
+        type=str,
+        action="store",
+        default=".",
+        help="The output directory to output %s." % RESULTS_FILE,
+    )
     args = parser.parse_args()
 
     try:

@@ -12,10 +12,9 @@
 
 #include "bf-p4c/parde/create_pov_encoder.h"
 
-static const IR::Entry* create_static_entry(unsigned key_size,
-                                            unsigned match,
-                                            const IR::MAU::Action* action,
-                                            const ordered_set<const IR::TempVar*>& outputs,
+static const IR::Entry *create_static_entry(unsigned key_size, unsigned match,
+                                            const IR::MAU::Action *action,
+                                            const ordered_set<const IR::TempVar *> &outputs,
                                             unsigned action_param) {
     IR::Vector<IR::Expression> components;
 
@@ -51,12 +50,10 @@ static const IR::Entry* create_static_entry(unsigned key_size,
     return entry;
 }
 
-IR::MAU::Table* create_pov_encoder(gress_t gress,
-                                   cstring tableName,
-                                   cstring action_name,
-                                   const MatchAction& match_action) {
+IR::MAU::Table *create_pov_encoder(gress_t gress, cstring tableName, cstring action_name,
+                                   const MatchAction &match_action) {
     static int id = 0;
-    std::string table_name = toString(gress) + tableName+ std::to_string(id++);
+    std::string table_name = toString(gress) + tableName + std::to_string(id++);
     LOG1("\ncreating a table " << table_name << " for match action:");
     LOG3(match_action.print());
     auto encoder = new IR::MAU::Table(table_name, gress);
@@ -84,19 +81,16 @@ IR::MAU::Table* create_pov_encoder(gress_t gress,
         std::string arg_name = "x" + std::to_string(i++);
 
         auto arg = new IR::MAU::ActionArg(IR::Type::Bits::get(1), generated_action->name,
-                                             arg_name.c_str());
+                                          arg_name.c_str());
         auto instr = new IR::MAU::Instruction("set"_cs, {o, arg});
 
         generated_action->action.push_back(instr);
         generated_action->args.push_back(arg);
     }
 
-    for (auto& ma : match_action.match_to_action_param) {
-        auto static_entry = create_static_entry(key_size,
-                                                ma.first,
-                                                generated_action,
-                                                match_action.outputs,
-                                                ma.second);
+    for (auto &ma : match_action.match_to_action_param) {
+        auto static_entry = create_static_entry(key_size, ma.first, generated_action,
+                                                match_action.outputs, ma.second);
         static_entries.push_back(static_entry);
     }
 

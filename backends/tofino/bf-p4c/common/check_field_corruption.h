@@ -29,7 +29,7 @@ class CheckFieldCorruption : public Inspector, TofinoWriteContext {
     const PhvInfo &phv;
     const PHV::Pragmas &pragmas;
     Phv_Parde_Mau_Use uses;
-    ordered_set<const PHV::Field*> pov_protected_fields;
+    ordered_set<const PHV::Field *> pov_protected_fields;
     std::map<const IR::BFN::ParserState *, std::set<const IR::Expression *>> state_extracts;
     std::map<const PHV::Field *, std::set<const IR::Expression *>> parser_inits;
 
@@ -41,14 +41,11 @@ class CheckFieldCorruption : public Inspector, TofinoWriteContext {
     ///
     /// @return Boolean value indicating whether one or more other fields share a container with
     ///         @p f that are extracted from packet data and not mutually exclusive.
-    bool copackedFieldExtractedSeparately(const FieldDefUse::locpair& use);
+    bool copackedFieldExtractedSeparately(const FieldDefUse::locpair &use);
 
  public:
-    CheckFieldCorruption(
-        const FieldDefUse &defuse,
-        const PhvInfo &phv,
-        const PHV::Pragmas &pragmas) :
-        defuse(defuse), phv(phv), pragmas(pragmas), uses(phv) {}
+    CheckFieldCorruption(const FieldDefUse &defuse, const PhvInfo &phv, const PHV::Pragmas &pragmas)
+        : defuse(defuse), phv(phv), pragmas(pragmas), uses(phv) {}
 
     void end_apply() override;
     bool preorder(const IR::BFN::Pipe *) override;

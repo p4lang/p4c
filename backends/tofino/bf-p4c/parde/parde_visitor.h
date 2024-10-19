@@ -10,8 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PARDE_PARDE_VISITOR_H_
-#define EXTENSIONS_BF_P4C_PARDE_PARDE_VISITOR_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_PARDE_VISITOR_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_PARDE_VISITOR_H_
 
 #include "ir/ir.h"
 
@@ -39,10 +39,19 @@ class PardeModifier : public Modifier {
  * \ingroup parde
  */
 class PardeTransform : public Transform {
-    IR::MAU::Table *preorder(IR::MAU::Table *t) override { prune(); return t; }
-    IR::MAU::TableSeq *preorder(IR::MAU::TableSeq *s) override { prune(); return s; }
+    IR::MAU::Table *preorder(IR::MAU::Table *t) override {
+        prune();
+        return t;
+    }
+    IR::MAU::TableSeq *preorder(IR::MAU::TableSeq *s) override {
+        prune();
+        return s;
+    }
     /// for traversing midend IR
-    IR::Node *preorder(IR::BFN::TnaControl *c) override { prune(); return c; }
+    IR::Node *preorder(IR::BFN::TnaControl *c) override {
+        prune();
+        return c;
+    }
 };
 
 /**
@@ -73,14 +82,28 @@ class ParserModifier : public Modifier {
  * \ingroup parde
  */
 class ParserTransform : public Transform {
-    IR::BFN::Deparser *preorder(IR::BFN::Deparser *d) override { prune(); return d; }
-    IR::MAU::Table *preorder(IR::MAU::Table *t) override { prune(); return t; }
-    IR::MAU::TableSeq *preorder(IR::MAU::TableSeq *s) override { prune(); return s; }
+    IR::BFN::Deparser *preorder(IR::BFN::Deparser *d) override {
+        prune();
+        return d;
+    }
+    IR::MAU::Table *preorder(IR::MAU::Table *t) override {
+        prune();
+        return t;
+    }
+    IR::MAU::TableSeq *preorder(IR::MAU::TableSeq *s) override {
+        prune();
+        return s;
+    }
     /// for traversing midend IR
-    IR::Node *preorder(IR::BFN::TnaDeparser *d) override { prune(); return d; }
-    IR::Node *preorder(IR::BFN::TnaControl *c) override { prune(); return c; }
+    IR::Node *preorder(IR::BFN::TnaDeparser *d) override {
+        prune();
+        return d;
+    }
+    IR::Node *preorder(IR::BFN::TnaControl *c) override {
+        prune();
+        return c;
+    }
 };
-
 
 /**
  * \ingroup parde
@@ -110,12 +133,27 @@ class DeparserModifier : public Modifier {
  * \ingroup parde
  */
 class DeparserTransform : public Transform {
-    IR::BFN::AbstractParser *preorder(IR::BFN::AbstractParser *p) override { prune(); return p; }
-    IR::MAU::Table *preorder(IR::MAU::Table *t) override { prune(); return t; }
-    IR::MAU::TableSeq *preorder(IR::MAU::TableSeq *s) override { prune(); return s; }
+    IR::BFN::AbstractParser *preorder(IR::BFN::AbstractParser *p) override {
+        prune();
+        return p;
+    }
+    IR::MAU::Table *preorder(IR::MAU::Table *t) override {
+        prune();
+        return t;
+    }
+    IR::MAU::TableSeq *preorder(IR::MAU::TableSeq *s) override {
+        prune();
+        return s;
+    }
     /// for traversing midend IR
-    IR::Node *preorder(IR::BFN::TnaParser * p) override { prune(); return p; }
-    IR::Node *preorder(IR::BFN::TnaControl * c) override { prune(); return c; }
+    IR::Node *preorder(IR::BFN::TnaParser *p) override {
+        prune();
+        return p;
+    }
+    IR::Node *preorder(IR::BFN::TnaControl *c) override {
+        prune();
+        return c;
+    }
 };
 
-#endif /* EXTENSIONS_BF_P4C_PARDE_PARDE_VISITOR_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_PARDE_VISITOR_H_ */

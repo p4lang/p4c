@@ -11,14 +11,13 @@
  */
 
 #include "bf-p4c/test/utils/super_cluster_builder.h"
+
 #include "bf-p4c/../p4c/lib/log.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Helpfull inline functions
 ////////////////////////////////////////////////////////////////////////////////
-void print_error(std::string str) {
-    LOGN(-1, "ERROR: SuperClusterBuilder :" + str);
-}
+void print_error(std::string str) { LOGN(-1, "ERROR: SuperClusterBuilder :" + str); }
 
 std::string get_token(std::istream &fs) {
     std::string token;
@@ -34,17 +33,15 @@ int expect_token(std::istream &fs, std::string exp_token) {
     int ret = token.compare(exp_token);
 
     if (ret != 0)
-        print_error("Unexpected token \"" +
-            token +
-            "\" found during analyze_super_cluster. Expected: \"" +
-            exp_token);
+        print_error("Unexpected token \"" + token +
+                    "\" found during analyze_super_cluster. Expected: \"" + exp_token);
     return ret;
 }
 
 // Starts from a given index and finds first full set of "[...]"
 // Returns 0 if this was sucessfull, 1 if nothing was found
-int get_whole_parentheses(std::string &s, unsigned int start_from,
-                                 unsigned int *lb, unsigned int *ub) {
+int get_whole_parentheses(std::string &s, unsigned int start_from, unsigned int *lb,
+                          unsigned int *ub) {
     int level = 1;
     unsigned int iter = start_from;
     unsigned int len = s.length();
@@ -68,7 +65,7 @@ int get_whole_parentheses(std::string &s, unsigned int start_from,
     }
 
     // Set the upper bound - discount the last increment
-    *ub = iter-1;
+    *ub = iter - 1;
 
     return 0;
 }
@@ -76,10 +73,10 @@ int get_whole_parentheses(std::string &s, unsigned int start_from,
 ////////////////////////////////////////////////////////////////////////////////
 // Class functions
 ////////////////////////////////////////////////////////////////////////////////
-std::optional<PHV::SuperCluster*> SuperClusterBuilder::build_super_cluster(std::istream &scs) {
+std::optional<PHV::SuperCluster *> SuperClusterBuilder::build_super_cluster(std::istream &scs) {
     // Set the member variable
 
-    std::optional<PHV::SuperCluster*> sc = analyze_super_cluster(scs);
+    std::optional<PHV::SuperCluster *> sc = analyze_super_cluster(scs);
 
     // Return the SuperCluster
     return sc;
@@ -87,16 +84,16 @@ std::optional<PHV::SuperCluster*> SuperClusterBuilder::build_super_cluster(std::
 
 // Parses the input of the whole SuperCluster in format produced by the
 // << operator on PHV::SuperCluster (can be found in phv/utils/utils.cpp)
-std::optional<PHV::SuperCluster*> SuperClusterBuilder::analyze_super_cluster(std::istream &scs) {
-    int ret = 0;            // Return value
-    std::string t;          // Next token
-    std::streampos pos;     // Keeping track of positions for returning
+std::optional<PHV::SuperCluster *> SuperClusterBuilder::analyze_super_cluster(std::istream &scs) {
+    int ret = 0;         // Return value
+    std::string t;       // Next token
+    std::streampos pos;  // Keeping track of positions for returning
 
-    std::optional<PHV::SuperCluster*> sc;
+    std::optional<PHV::SuperCluster *> sc;
     /// Set of rotational clusters extracted
-    ordered_set<const PHV::RotationalCluster*> clusters;
+    ordered_set<const PHV::RotationalCluster *> clusters;
     /// Set of slice lists extracted
-    ordered_set<PHV::SuperCluster::SliceList*> slice_lists;
+    ordered_set<PHV::SuperCluster::SliceList *> slice_lists;
 
     if ((ret = expect_token(scs, "SUPERCLUSTER")) != 0) return sc;
     if ((ret = expect_token(scs, "Uid:")) != 0) return sc;
@@ -117,7 +114,7 @@ std::optional<PHV::SuperCluster*> SuperClusterBuilder::analyze_super_cluster(std
 
         // Repeat until there are lists to analyze
         while (next_list) {
-            PHV::SuperCluster::SliceList* sl = analyze_slice_list(scs);
+            PHV::SuperCluster::SliceList *sl = analyze_slice_list(scs);
             if (sl == nullptr) {
                 print_error("analyze_super_cluster() Failed while extracting slice lists");
                 return sc;
@@ -147,7 +144,7 @@ std::optional<PHV::SuperCluster*> SuperClusterBuilder::analyze_super_cluster(std
         std::getline(scs, t);
         // Repeat until the end of the file (for each rot. cluster)
         while (!scs.eof()) {
-            PHV::RotationalCluster* rc = analyze_rotational_cluster(scs);
+            PHV::RotationalCluster *rc = analyze_rotational_cluster(scs);
             if (rc == nullptr) {
                 print_error("analyze_super_cluster() Failed while extracting rotational clusters");
                 return sc;
@@ -157,7 +154,7 @@ std::optional<PHV::SuperCluster*> SuperClusterBuilder::analyze_super_cluster(std
                 clusters.insert(rc);
             }
         }
-    // Otherwise this should be the end
+        // Otherwise this should be the end
     } else {
         if ((ret = expect_token(scs, "}")) != 0) return sc;
     }
@@ -168,18 +165,19 @@ std::optional<PHV::SuperCluster*> SuperClusterBuilder::analyze_super_cluster(std
 
 // Parses the input of the whole SliceList in format produced by the
 // << operator on PHV::SliceList (can be found in phv/utils/utils.cpp)
-PHV::SuperCluster::SliceList* SuperClusterBuilder::analyze_slice_list(std::istream &scs) {
-    std::string line;                   // One line == one slice
-    bool next_slice = true;             // Is there another slice?
+PHV::SuperCluster::SliceList *SuperClusterBuilder::analyze_slice_list(std::istream &scs) {
+    std::string line;        // One line == one slice
+    bool next_slice = true;  // Is there another slice?
     // The resulting SliceList
-    PHV::SuperCluster::SliceList* sl = new PHV::SuperCluster::SliceList;
-    PHV::FieldSlice* slice;
+    PHV::SuperCluster::SliceList *sl = new PHV::SuperCluster::SliceList;
+    PHV::FieldSlice *slice;
 
     // In this case each line is a single slice
     while (next_slice) {
         std::getline(scs, line);
         // If the line ends with the additional " ]" we know this is the last slice
-        if (line.length() >= 2 && line[line.length()-1] == ']' && line[line.length()-2] == ' ') {
+        if (line.length() >= 2 && line[line.length() - 1] == ']' &&
+            line[line.length() - 2] == ' ') {
             next_slice = false;
             // Remove the 2 extra characters
             line.resize(line.size() - 2);
@@ -201,9 +199,9 @@ PHV::SuperCluster::SliceList* SuperClusterBuilder::analyze_slice_list(std::istre
 
 // Parses the input of the whole RotationalCluster in format produced by the
 // << operator on PHV::RotationalCluster (can be found in phv/utils/utils.cpp)
-PHV::RotationalCluster* SuperClusterBuilder::analyze_rotational_cluster(std::istream &scs) {
+PHV::RotationalCluster *SuperClusterBuilder::analyze_rotational_cluster(std::istream &scs) {
     std::string rot_clust("");
-    ordered_set<PHV::AlignedCluster*> clusters;
+    ordered_set<PHV::AlignedCluster *> clusters;
 
     // The whole cluster is on one line
     std::getline(scs, rot_clust);
@@ -211,28 +209,29 @@ PHV::RotationalCluster* SuperClusterBuilder::analyze_rotational_cluster(std::ist
     // Remove initial whitespaces
     unsigned int i = 0;
     while (rot_clust.length() > i && ::isspace(rot_clust[i])) i++;
-    rot_clust = rot_clust.substr(i, rot_clust.length()-1);
+    rot_clust = rot_clust.substr(i, rot_clust.length() - 1);
 
     // Skip empty lines
     if (rot_clust.empty()) return new PHV::RotationalCluster(clusters);
 
     // Check and remove the outer '[]'
-    if (rot_clust.length() < 2 || rot_clust[0] != '[' || rot_clust[rot_clust.length()-1] != ']') {
+    if (rot_clust.length() < 2 || rot_clust[0] != '[' || rot_clust[rot_clust.length() - 1] != ']') {
         print_error("analyze_rotational_cluster() Failed - outer \'[]\' not found");
         return nullptr;
     }
-    rot_clust = rot_clust.substr(1, rot_clust.length()-2);
+    rot_clust = rot_clust.substr(1, rot_clust.length() - 2);
 
     unsigned int al_clust_from = 0;
     unsigned int al_clust_to = 0;
     unsigned int iter = 0;
-    while (al_clust_to != rot_clust.length()-1) {
+    while (al_clust_to != rot_clust.length() - 1) {
         if (get_whole_parentheses(rot_clust, iter, &al_clust_from, &al_clust_to)) {
             print_error("analyze_rotational_cluster() Failed while extracting Aligned Cluster");
             return nullptr;
         }
         // Cut out the substring, without the outer '[]'
-        std::string al_cluster_str = rot_clust.substr(al_clust_from+1, al_clust_to-al_clust_from-1);
+        std::string al_cluster_str =
+            rot_clust.substr(al_clust_from + 1, al_clust_to - al_clust_from - 1);
         PHV::AlignedCluster *al_cluster = analyze_aligned_cluster(al_cluster_str);
         if (al_cluster == nullptr) {
             print_error("analyze_rotational_cluster() Failed while extracting Aligned Cluster");
@@ -249,9 +248,9 @@ PHV::RotationalCluster* SuperClusterBuilder::analyze_rotational_cluster(std::ist
 
 // Parses the input of the whole AlignedCluster in format produced by the
 // << operator on PHV::AlignedCluster (can be found in phv/utils/utils.cpp)
-PHV::AlignedCluster* SuperClusterBuilder::analyze_aligned_cluster(std::string &str) {
+PHV::AlignedCluster *SuperClusterBuilder::analyze_aligned_cluster(std::string &str) {
     std::string slice_str;
-    PHV::FieldSlice* slice;
+    PHV::FieldSlice *slice;
 
     // Create slices list
     ordered_set<PHV::FieldSlice> slices;
@@ -271,10 +270,9 @@ PHV::AlignedCluster* SuperClusterBuilder::analyze_aligned_cluster(std::string &s
     return new PHV::AlignedCluster(PHV::Kind::normal, slices);
 }
 
-
 // Parses the input of a single FieldSlice in format produced byt the
 // << operator on PHV::FieldSlice (can be found in phv/phv_fields.cpp)
-PHV::FieldSlice* SuperClusterBuilder::analyze_field_slice(std::string &str) {
+PHV::FieldSlice *SuperClusterBuilder::analyze_field_slice(std::string &str) {
     std::string t;
     unsigned align;
     bool was_align = false;
@@ -282,17 +280,16 @@ PHV::FieldSlice* SuperClusterBuilder::analyze_field_slice(std::string &str) {
     unsigned vr_hi;
     bool was_vr = false;
     bool new_field = true;
-    PHV::Field* f;
+    PHV::Field *f;
 
     // Remove whitespaces to get just the relevant str data for the key
     std::string slice_map_key = str;
     slice_map_key.erase(remove_if(slice_map_key.begin(), slice_map_key.end(), ::isspace),
-                                  slice_map_key.end());
+                        slice_map_key.end());
     // Check if this slice already exists
     auto const find_slice = str_to_slice_m.find(slice_map_key);
     // Found - just return it
-    if (find_slice != str_to_slice_m.end())
-        return find_slice->second;
+    if (find_slice != str_to_slice_m.end()) return find_slice->second;
 
     // At this point the slice does not yet exist => analyze and create it
     // Create string stream
@@ -306,7 +303,7 @@ PHV::FieldSlice* SuperClusterBuilder::analyze_field_slice(std::string &str) {
     if (fm != str_to_field_m.end()) {
         f = fm->second;
         new_field = false;
-    // Otherwise init new one
+        // Otherwise init new one
     } else {
         f = new PHV::Field;
         f->metadata = false;
@@ -318,7 +315,7 @@ PHV::FieldSlice* SuperClusterBuilder::analyze_field_slice(std::string &str) {
         f->name = cstring(name);
         // Get the width
         namestr >> f->size;
-        str_to_field_m.insert(std::pair<const std::string, PHV::Field*>(t, f));
+        str_to_field_m.insert(std::pair<const std::string, PHV::Field *>(t, f));
         new_field = true;
     }
 
@@ -326,7 +323,7 @@ PHV::FieldSlice* SuperClusterBuilder::analyze_field_slice(std::string &str) {
     if (t.length() >= 2 && t[0] == '^' && t[1] != 'b') {
         if (new_field) {
             // Remove '^'
-            t = t.substr(1, t.length()-1);
+            t = t.substr(1, t.length() - 1);
             std::istringstream alignstr(t);
             alignstr >> align;
             was_align = true;
@@ -336,7 +333,7 @@ PHV::FieldSlice* SuperClusterBuilder::analyze_field_slice(std::string &str) {
     if (t.length() >= 2 && t[0] == '^' && t[1] == 'b') {
         if (new_field) {
             // Remove '^bit['
-            t = t.substr(5, t.length()-5);
+            t = t.substr(5, t.length() - 5);
             std::istringstream vrstr(t);
             vrstr >> vr_lo;
             // Skip '..'
@@ -437,8 +434,8 @@ PHV::FieldSlice* SuperClusterBuilder::analyze_field_slice(std::string &str) {
     }
 
     // Remove '[]'
-    if (t.length() >= 2 && t[0] == '[' && t[t.length()-1] == ']') {
-        t = t.substr(1, t.length()-2);
+    if (t.length() >= 2 && t[0] == '[' && t[t.length() - 1] == ']') {
+        t = t.substr(1, t.length() - 2);
     } else {
         print_error("analyze_field_slice() Slice range not defined properly");
         return nullptr;
@@ -460,9 +457,8 @@ PHV::FieldSlice* SuperClusterBuilder::analyze_field_slice(std::string &str) {
         // This means it has to be higher, while still retaining its
         // modulo 8 equivalence class
         if ((unsigned)br.lo > align) {
-            align += 8*((br.lo-align)/8);
-            if ((br.lo-align) % 8)
-                align += 8;
+            align += 8 * ((br.lo - align) / 8);
+            if ((br.lo - align) % 8) align += 8;
         }
         // Decrease by lower bound
         align -= br.lo;
@@ -479,9 +475,9 @@ PHV::FieldSlice* SuperClusterBuilder::analyze_field_slice(std::string &str) {
     }
 
     // Create the slice
-    PHV::FieldSlice* slice = new PHV::FieldSlice(f, br);
+    PHV::FieldSlice *slice = new PHV::FieldSlice(f, br);
     // Add it to the map of slices
-    str_to_slice_m.insert(std::pair<const std::string, PHV::FieldSlice*>(slice_map_key, slice));
+    str_to_slice_m.insert(std::pair<const std::string, PHV::FieldSlice *>(slice_map_key, slice));
     // And return it
     return slice;
 }

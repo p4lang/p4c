@@ -10,6 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+/* clang-format off */
+
 #include "bf-p4c/mau/instruction_memory.h"
 #include "bf-p4c/mau/resource.h"
 #include "bf-p4c/mau/table_format.h"
@@ -19,14 +21,11 @@
 #include "bf-p4c/mau/tofino/instruction_memory.h"
 
 GenerateVLIWInstructions::GenerateVLIWInstructions(PhvInfo &p, ActionData::FormatType_t ft,
-        SplitAttachedInfo &sai, const IR::MAU::Table* tbl)
-    : phv(p)
-    , format_type(ft)
-    , split_attached(sai)
-    , tbl(tbl)
-{
+                                                   SplitAttachedInfo &sai,
+                                                   const IR::MAU::Table *tbl)
+    : phv(p), format_type(ft), split_attached(sai), tbl(tbl) {
     LOG3("GenerateVLIWInstructions for table " << tbl->name);
-    for (const auto& act : tbl->actions) {
+    for (const auto &act : tbl->actions) {
         generate_for_action(act.second);
     }
 }
@@ -37,12 +36,11 @@ void GenerateVLIWInstructions::generate_for_action(const IR::MAU::Action *act) {
     bool current_has_unalloc_tempvar = false;
     // Need to capture the instructions that will be created during the splitting of the tables
     auto *act_to_visit = split_attached.get_split_action(act, tbl, format_type);
-    if (act_to_visit == nullptr)
-        return;
+    if (act_to_visit == nullptr) return;
     BUG_CHECK(act_to_visit, "Somehow have a nullptr action for %1%", format_type);
 
     LOG4("\tSplit action found " << act_to_visit);
-    for (auto* prim : act_to_visit->action) {
+    for (auto *prim : act_to_visit->action) {
         auto instr = prim->to<IR::MAU::Instruction>();
         BUG_CHECK(instr, "Unexpected IR::Primitive, expected IR::MAU::Instruction");
         auto output = instr->getOutput();
@@ -52,16 +50,15 @@ void GenerateVLIWInstructions::generate_for_action(const IR::MAU::Action *act) {
             auto field = phv.field(output, &bits);
             BUG_CHECK(field != nullptr, "Instruction writing to a non-phv allocated object");
             auto isTempVar = phv.isTempVar(field);
-            LOG2("\t\tExpression is write for field " << field << " tempvar "
-                    << isTempVar << " alloc size " << field->alloc_size());
+            LOG2("\t\tExpression is write for field " << field << " tempvar " << isTempVar
+                                                      << " alloc size " << field->alloc_size());
             if (field->alloc_size() == 0 && isTempVar) {
                 current_has_unalloc_tempvar = true;
                 return;
             }
             // Mark which containers are to have non noop instructions
             PHV::FieldUse use(PHV::FieldUse::WRITE);
-            field->foreach_alloc(bits, tbl, &use,
-                                 [&](const PHV::AllocSlice &alloc) {
+            field->foreach_alloc(bits, tbl, &use, [&](const PHV::AllocSlice &alloc) {
                 if (!alloc.container()) return;
                 current_vliw.setbit(Device::phvSpec().containerToId(alloc.container()));
             });
@@ -73,7 +70,8 @@ void GenerateVLIWInstructions::generate_for_action(const IR::MAU::Action *act) {
 }
 
 void InstructionMemory::Use::merge(const Use &alloc) {
-    BUG_CHECK(all_instrs.size() == 1 && alloc.all_instrs.size() == 1, "Only always run "
+    BUG_CHECK(all_instrs.size() == 1 && alloc.all_instrs.size() == 1,
+              "Only always run "
         "tables can be merged");
     cstring key = all_instrs.begin()->first;
     VLIW_Instruction a_instr = all_instrs.begin()->second;
@@ -81,23 +79,23 @@ void InstructionMemory::Use::merge(const Use &alloc) {
 
     BUG_CHECK(static_cast<int>(a_instr.gen_addr()) == Device::alwaysRunIMemAddr() &&
               static_cast<int>(b_instr.gen_addr()) == Device::alwaysRunIMemAddr() &&
-              key == "$always_run", "Only always run tables can be merged");
+                  key == "$always_run",
+              "Only always run tables can be merged");
 
     VLIW_Instruction m_instr(a_instr.non_noop_instructions | b_instr.non_noop_instructions,
-                             a_instr.row,
-                             a_instr.color);
-    all_instrs.emplace(key, m_instr);;
+                             a_instr.row, a_instr.color);
+    all_instrs.emplace(key, m_instr);
+    ;
 }
 
-std::ostream & operator<<(std::ostream &out, const InstructionMemory::Use &u) {
+std::ostream &operator<<(std::ostream &out, const InstructionMemory::Use &u) {
     out << "Instruction Memory: [" << std::endl;
-    for (auto &instr : u.all_instrs)
-        out << instr.first << ": " << instr.second << std::endl;
+    for (auto &instr : u.all_instrs) out << instr.first << ": " << instr.second << std::endl;
     out << " ]" << std::endl;
     return out;
 }
 
-std::ostream & operator<<(std::ostream &out, const InstructionMemory::Use::VLIW_Instruction &i) {
+std::ostream &operator<<(std::ostream &out, const InstructionMemory::Use::VLIW_Instruction &i) {
     out << "non_noop_instructions=" << i.non_noop_instructions;
     out << " row=" << i.row;
     out << " color=" << i.color;
@@ -109,12 +107,11 @@ bool InstructionMemory::is_noop_slot(int row, int color) {
     return row == NOOP_ROW && color == NOOP_COLOR;
 }
 
-bool InstructionMemory::find_row_and_color(bitvec current_bv, gress_t gress,
-                                            int &row, int &color, bool &first_noop,
-                                            bool has_unalloc_temp) {
-    LOG3("Finding row and color for " << current_bv
-        << " in gress " << gress << " first noop " << first_noop
-        << " has unallocated tempvar " << has_unalloc_temp);
+bool InstructionMemory::find_row_and_color(bitvec current_bv, gress_t gress, int &row, int &color,
+                                           bool &first_noop, bool has_unalloc_temp) {
+    LOG3("Finding row and color for " << current_bv << " in gress " << gress << " first noop "
+                                      << first_noop << " has unallocated tempvar "
+                                      << has_unalloc_temp);
     auto &use = imem_use(gress);
     auto &slot_in_use = imem_slot_inuse(gress);
 
@@ -131,8 +128,8 @@ bool InstructionMemory::find_row_and_color(bitvec current_bv, gress_t gress,
             row = NOOP_ROW;
             color = NOOP_COLOR;
             int addr = (row << spec.color_bits()) | color;
-            LOG2("\tFixing row " << row << ", color " << color
-                    << ", addr " << addr << " for first noop");
+            LOG2("\tFixing row " << row << ", color " << color << ", addr " << addr
+                                 << " for first noop");
             first_noop = false;
             return true;
         }
@@ -142,32 +139,25 @@ bool InstructionMemory::find_row_and_color(bitvec current_bv, gress_t gress,
         bitvec current_row;
         bool occupied = true;
         for (int j = 0; j < spec.colors(); j++) {
-            if (is_noop_slot(i, j))
-                continue;
+            if (is_noop_slot(i, j)) continue;
 
-            if (use[i][j].isNull())
-                occupied = false;
+            if (use[i][j].isNull()) occupied = false;
             current_row |= slot_in_use[i][j];
         }
-        if (occupied)
-            continue;
+        if (occupied) continue;
 
         // Make sure that no color collision exists
-        if (!(current_row & current_bv).empty())
-            continue;
+        if (!(current_row & current_bv).empty()) continue;
 
         for (int j = 0; j < spec.colors(); j++) {
-            if (is_noop_slot(i, j))
-                continue;
-            if (!use[i][j].isNull())
-                continue;
+            if (is_noop_slot(i, j)) continue;
+            if (!use[i][j].isNull()) continue;
 
             row = i;
             color = j;
             int addr = (row << spec.color_bits()) | color;
             LOG2("\tFixing row " << i << ", color " << j << ", addr " << addr);
-            if (Device::hasAlwaysRunInstr() && Device::alwaysRunIMemAddr() == addr)
-                continue;
+            if (Device::hasAlwaysRunInstr() && Device::alwaysRunIMemAddr() == addr) continue;
             return true;
         }
         BUG("Unreachable section of the instruction memory allocation");
@@ -208,18 +198,17 @@ bool InstructionMemory::shared_instr(const IR::MAU::Table *tbl, Use &alloc, bool
         }
     }
 
-    if (ad_use == nullptr || cached_use == nullptr)
-        return false;
+    if (ad_use == nullptr || cached_use == nullptr) return false;
 
     int hit_actions = tbl->hit_actions();
-    if (gw_linked)
-        hit_actions += 1;
+    if (gw_linked) hit_actions += 1;
 
     bool can_use_hitmap = hit_actions <= TableFormat::IMEM_MAP_TABLE_ENTRIES;
     int hit_action_index = gw_linked ? 1 : 0;
     for (auto action : Values(tbl->actions)) {
         auto instr_pos = cached_use->all_instrs.find(action->name);
-        BUG_CHECK(instr_pos != cached_use->all_instrs.end(), "%s: Error when programming action "
+        BUG_CHECK(instr_pos != cached_use->all_instrs.end(),
+                  "%s: Error when programming action "
                   "%s on shared action profile %s and table %s",
                   ad_use->srcInfo, ad_use->name, tbl->name);
 
@@ -248,10 +237,8 @@ bool InstructionMemory::alloc_always_run_instr(const IR::MAU::Table *tbl, Use &a
     // at this point, no container conflicts
     int row = Device::alwaysRunIMemAddr() / 2;
     bitvec reserved;
-    for (int color = 0; color < 2; color++)
-        reserved |= slot_in_use[row][color];
-    if (!(reserved & current_bv).empty())
-        return false;
+    for (int color = 0; color < 2; color++) reserved |= slot_in_use[row][color];
+    if (!(reserved & current_bv).empty()) return false;
     int ar_color = Device::alwaysRunIMemAddr() % 2;
     use[row][ar_color] = "$always_run_action"_cs;
     slot_in_use[row][ar_color] |= current_bv;
@@ -261,13 +248,13 @@ bool InstructionMemory::alloc_always_run_instr(const IR::MAU::Table *tbl, Use &a
 }
 
 bool InstructionMemory::allocate_imem(const IR::MAU::Table *tbl, Use &alloc, PhvInfo &phv,
-        bool gw_linked, ActionData::FormatType_t format_type, SplitAttachedInfo &sai) {
+                                      bool gw_linked, ActionData::FormatType_t format_type,
+                                      SplitAttachedInfo &sai) {
     BUG_CHECK(format_type.valid(), "invalid format type in InstructionMemory::allocate_imem");
     LOG1("Allocating instruction memory for " << tbl->name << " " << format_type);
 
     // Action Profiles always have the same instructions for every table
-    if (shared_instr(tbl, alloc, gw_linked))
-        return true;
+    if (shared_instr(tbl, alloc, gw_linked)) return true;
     gw_linked |= !format_type.matchThisStage();
 
     GenerateVLIWInstructions gen_vliw(phv, format_type, sai, tbl);
@@ -281,8 +268,7 @@ bool InstructionMemory::allocate_imem(const IR::MAU::Table *tbl, Use &alloc, Phv
 
     // TODO: potentially sharing mem_codes between identical actions
     int hit_actions = tbl->hit_actions();
-    if (gw_linked)
-        hit_actions += 1;
+    if (gw_linked) hit_actions += 1;
 
     bool can_use_hitmap = hit_actions <= TableFormat::IMEM_MAP_TABLE_ENTRIES;
 
@@ -290,8 +276,8 @@ bool InstructionMemory::allocate_imem(const IR::MAU::Table *tbl, Use &alloc, Phv
     bool first_noop = true;
     for (auto action : Values(tbl->actions)) {
         if (sai.get_split_action(action, tbl, format_type) == nullptr) {
-            LOG2("  Not generating instruction for " << action->name
-                    << " as it is not necessary post attached split");
+            LOG2("  Not generating instruction for "
+                 << action->name << " as it is not necessary post attached split");
             continue;
         }
 
@@ -299,8 +285,8 @@ bool InstructionMemory::allocate_imem(const IR::MAU::Table *tbl, Use &alloc, Phv
         bool action_has_unalloc_tempvar = gen_vliw.instr_has_unalloc_tempvar(action);
         int row = -1;
         int color = -1;
-        if (!find_row_and_color(current_bv, tbl->gress, row, color,
-                                first_noop, action_has_unalloc_tempvar))
+        if (!find_row_and_color(current_bv, tbl->gress, row, color, first_noop,
+                                action_has_unalloc_tempvar))
             return false;
         Use::VLIW_Instruction single_instr(current_bv, row, color);
         if (!action->miss_only()) {
@@ -313,9 +299,8 @@ bool InstructionMemory::allocate_imem(const IR::MAU::Table *tbl, Use &alloc, Phv
         alloc.all_instrs.emplace(action->name, single_instr);
         use[row][color] = tbl->name + "$" + action->name.originalName;
         slot_in_use[row][color] = current_bv;
-        LOG2("\tAllocated Row " << row << " color " << color
-                << " mem code " << single_instr.mem_code
-                << " for action " << use[row][color]);
+        LOG2("\tAllocated Row " << row << " color " << color << " mem code "
+                                << single_instr.mem_code << " for action " << use[row][color]);
     }
 
     for (auto back_at : tbl->attached) {
@@ -340,16 +325,17 @@ void InstructionMemory::update(cstring name, const Use &alloc, gress_t gress) {
         int row = instr.row;
         int color = instr.color;
         if (is_noop_slot(row, color)) {
-            BUG_CHECK(instr.non_noop_instructions.empty(), "Allocating %s, which has ALU "
-                      "operations, to the noop slot in the instruction memory", a_name);
+            BUG_CHECK(instr.non_noop_instructions.empty(),
+                      "Allocating %s, which has ALU "
+                      "operations, to the noop slot in the instruction memory",
+                      a_name);
 
-            if (!use[row][color].isNull())
-                use[row][color] = a_name;
+            if (!use[row][color].isNull()) use[row][color] = a_name;
 
         } else {
             if (!use[row][color].isNull() && use[row][color] != a_name) {
-                BUG("Instructions %s and %s are assigned to the same slot.",
-                     use[row][color], a_name);
+                BUG("Instructions %s and %s are assigned to the same slot.", use[row][color],
+                    a_name);
             }
             use[row][color] = a_name;
         }
@@ -398,8 +384,7 @@ void InstructionMemory::update(cstring name, const TableResourceAlloc *alloc,
         auto at = back_at->attached;
         auto ad = at->to<IR::MAU::ActionData>();
         if (ad == nullptr) continue;
-        if (shared_action_profiles.count(ad))
-            return;
+        if (shared_action_profiles.count(ad)) return;
         shared_action_profiles.emplace(ad, &alloc->instr_mem);
     }
     update(name, alloc, tbl->gress);
@@ -408,13 +393,12 @@ void InstructionMemory::update(cstring name, const TableResourceAlloc *alloc,
 void InstructionMemory::update(const IR::MAU::Table *tbl) {
     if (tbl->layout.atcam && tbl->is_placed()) {
         auto orig_name = tbl->name.before(tbl->name.findlast('$'));
-        if (atcam_updates.count(orig_name))
-            return;
+        if (atcam_updates.count(orig_name)) return;
         atcam_updates.emplace(orig_name);
     }
     update(tbl->name, tbl->resources, tbl);
 }
 
-InstructionMemory *InstructionMemory::create() {
-    return new Tofino::InstructionMemory();
-}
+InstructionMemory *InstructionMemory::create() { return new Tofino::InstructionMemory(); }
+
+/* clang-format on */

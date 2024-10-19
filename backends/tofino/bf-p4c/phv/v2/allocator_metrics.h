@@ -102,7 +102,7 @@ class AllocatorMetrics {
     }
 };
 
-std::ostream& operator<<(std::ostream& out, const AllocatorMetrics &am);
+std::ostream &operator<<(std::ostream &out, const AllocatorMetrics &am);
 
 }  // namespace v2
 }  // namespace PHV

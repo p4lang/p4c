@@ -10,8 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PARDE_COMMON_MATCH_REDUCER_H_
-#define EXTENSIONS_BF_P4C_PARDE_COMMON_MATCH_REDUCER_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_COMMON_MATCH_REDUCER_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_COMMON_MATCH_REDUCER_H_
 
 #include <stdint.h>
 
@@ -30,7 +30,7 @@ class HasFullMatchCoverage {
      *
      */
     struct cmp {
-        bool operator() (const match_t& a, const match_t& b) const {
+        bool operator()(const match_t &a, const match_t &b) const {
             return std::tie(a.word1, a.word0) < std::tie(b.word1, b.word0);
         }
     };
@@ -51,8 +51,7 @@ class HasFullMatchCoverage {
         for (const auto &match1 : matches) {
             bool combined_matches = false;
             for (const auto &match2 : matches) {
-                big_int xor0 = match1.word0 ^ match2.word0,
-                        xor1 = match1.word1 ^ match2.word1;
+                big_int xor0 = match1.word0 ^ match2.word0, xor1 = match1.word1 ^ match2.word1;
 
                 if (xor0 == 0 && xor1 == 0) continue;
                 if (xor0 != xor1) continue;
@@ -91,9 +90,9 @@ class HasFullMatchCoverage {
  public:
     bool rv = false;
 
-    explicit HasFullMatchCoverage(const std::vector<match_t>& matches) : matches_(matches) {
+    explicit HasFullMatchCoverage(const std::vector<match_t> &matches) : matches_(matches) {
         has_full_match_coverage();
     }
 };
 
-#endif /* EXTENSIONS_BF_P4C_PARDE_COMMON_MATCH_REDUCER_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_COMMON_MATCH_REDUCER_H_ */

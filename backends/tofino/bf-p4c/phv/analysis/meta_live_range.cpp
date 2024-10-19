@@ -14,32 +14,35 @@
 
 cstring MetadataLiveRange::printAccess(int access) {
     switch (access) {
-        case 1: return "R"_cs;
-        case 2: return "W"_cs;
-        case 3: return "RW"_cs;
-        default: return "U"_cs;
+        case 1:
+            return "R"_cs;
+        case 2:
+            return "W"_cs;
+        case 3:
+            return "RW"_cs;
+        default:
+            return "U"_cs;
     }
 }
 
-bool MetadataLiveRange::notOverlapping(std::pair<int, int>& range1, std::pair<int, int>& range2, int
-        depDist) {
+bool MetadataLiveRange::notOverlapping(std::pair<int, int> &range1, std::pair<int, int> &range2,
+                                       int depDist) {
     return notOverlapping(range1.first, range1.second, range2.first, range2.second, depDist);
 }
 
-bool MetadataLiveRange::notOverlapping(int minStage1, int maxStage1, int minStage2, int
-        maxStage2, int depDist) {
-    bool range1LTrange2 = ((minStage1 + depDist) < minStage2) && ((maxStage1 + depDist) <
-            minStage2);
-    bool range2LTrange1 = ((minStage2 + depDist) < minStage1) && ((maxStage2 + depDist) <
-            minStage1);
-    LOG9("\tnotOverlapping [" << minStage1 << ", " << maxStage1
-         << "] <> [" << minStage2 << " , " << maxStage2
-         << "]: range1 < range2 " << range1LTrange2 << ", range2 < range1 " << range2LTrange1);
+bool MetadataLiveRange::notOverlapping(int minStage1, int maxStage1, int minStage2, int maxStage2,
+                                       int depDist) {
+    bool range1LTrange2 =
+        ((minStage1 + depDist) < minStage2) && ((maxStage1 + depDist) < minStage2);
+    bool range2LTrange1 =
+        ((minStage2 + depDist) < minStage1) && ((maxStage2 + depDist) < minStage1);
+    LOG9("\tnotOverlapping [" << minStage1 << ", " << maxStage1 << "] <> [" << minStage2 << " , "
+                              << maxStage2 << "]: range1 < range2 " << range1LTrange2
+                              << ", range2 < range1 " << range2LTrange1);
     return (range1LTrange2 || range2LTrange1);
 }
 
-
-Visitor::profile_t MetadataLiveRange::init_apply(const IR::Node* root) {
+Visitor::profile_t MetadataLiveRange::init_apply(const IR::Node *root) {
     livemap.clear();
     livemapUsage.clear();
     minStages.clear();
@@ -48,13 +51,13 @@ Visitor::profile_t MetadataLiveRange::init_apply(const IR::Node* root) {
     return Inspector::init_apply(root);
 }
 
-bool MetadataLiveRange::preorder(const IR::MAU::Table* t) {
+bool MetadataLiveRange::preorder(const IR::MAU::Table *t) {
     int minStage = dg.min_stage(t);
     minStages[minStage].insert(t);
     return true;
 }
 
-void MetadataLiveRange::setFieldLiveMap(const PHV::Field* f) {
+void MetadataLiveRange::setFieldLiveMap(const PHV::Field *f) {
     Log::TempIndent indent;
     LOG2("Setting live range for field " << f << indent);
     // minUse = earliest stage for uses of the field.
@@ -75,14 +78,13 @@ void MetadataLiveRange::setFieldLiveMap(const PHV::Field* f) {
 
     // For each use/def of the field, parser imply stage -1, deparser imply stage
     // `Devices::numStages` (12 for Tofino), and a table implies the corresponding dg.min_stage.
-    auto set_access = [this, f, DEPARSER](const FieldDefUse::LocPairSet &accessSet,
-                                          int& min, int& max, int& minAccess, int& maxAccess,
+    auto set_access = [this, f, DEPARSER](const FieldDefUse::LocPairSet &accessSet, int &min,
+                                          int &max, int &minAccess, int &maxAccess,
                                           int accessMode) {
         Log::TempIndent indent;
         LOG4("Looking for " << (accessMode == READ ? "uses" : "definitions") << indent);
         const auto kind = accessMode == READ ? "Used" : "Defined";
-        if (accessSet.empty())
-            LOG5(kind << " accessSet empty");
+        if (accessSet.empty()) LOG5(kind << " accessSet empty");
         for (const auto &[unit, expr] : accessSet) {
             if (unit->is<IR::BFN::ParserState>() || unit->is<IR::BFN::Parser>() ||
                 unit->to<IR::BFN::GhostParser>()) {
@@ -111,7 +113,7 @@ void MetadataLiveRange::setFieldLiveMap(const PHV::Field* f) {
                 max = DEPARSER;
                 maxAccess = accessMode;
             } else if (unit->is<IR::MAU::Table>()) {
-                const auto* t = unit->to<IR::MAU::Table>();
+                const auto *t = unit->to<IR::MAU::Table>();
                 int stage = dg.min_stage(t);
                 LOG4(kind << " in stage " << stage << " in table " << t->name);
                 // Update min and max based on the min_stage of the table.
@@ -139,18 +141,18 @@ void MetadataLiveRange::setFieldLiveMap(const PHV::Field* f) {
     set_access(defuse.getAllUses(f->id), minUse, maxUse, minUseAccess, maxUseAccess, READ);
     set_access(defuse.getAllDefs(f->id), minDef, maxDef, minDefAccess, maxDefAccess, WRITE);
 
-    LOG2("minUse: " << minUse << " (" << printAccess(minUseAccess) << "), minDef: " << minDef <<
-         " (" << printAccess(minDefAccess) << ")");
-    LOG2("maxUse: " << maxUse << " (" << printAccess(maxUseAccess) << "), maxDef: " << maxDef <<
-         " (" << printAccess(maxDefAccess) << ")");
+    LOG2("minUse: " << minUse << " (" << printAccess(minUseAccess) << "), minDef: " << minDef
+                    << " (" << printAccess(minDefAccess) << ")");
+    LOG2("maxUse: " << maxUse << " (" << printAccess(maxUseAccess) << "), maxDef: " << maxDef
+                    << " (" << printAccess(maxDefAccess) << ")");
     livemap[f->id] = std::make_pair(std::min(minUse, minDef), std::max(maxUse, maxDef));
 
     // Update the access information for the minStage and maxStage uses by synthesizing the separate
     // access information maintained for uses and defs of the field.
-    int minStageAccess = (minUse == minDef) ? (minUseAccess | minDefAccess) :
-                        ((minUse > minDef) ? minDefAccess : minUseAccess);
-    int maxStageAccess = (maxUse == maxDef) ? (maxUseAccess | maxDefAccess) :
-                        ((maxUse < maxDef) ? maxDefAccess : maxUseAccess);
+    int minStageAccess = (minUse == minDef) ? (minUseAccess | minDefAccess)
+                                            : ((minUse > minDef) ? minDefAccess : minUseAccess);
+    int maxStageAccess = (maxUse == maxDef) ? (maxUseAccess | maxDefAccess)
+                                            : ((maxUse < maxDef) ? maxDefAccess : maxUseAccess);
     // If the field's live range is only one stage, then make sure the usages are set up
     // correct.
     if (livemap[f->id].first == livemap[f->id].second) {
@@ -159,12 +161,13 @@ void MetadataLiveRange::setFieldLiveMap(const PHV::Field* f) {
     } else {
         livemapUsage[f->id] = std::make_pair(minStageAccess, maxStageAccess);
     }
-    LOG2("Live range for " << f->name << " is [" << livemap[f->id].first << ", " <<
-         livemap[f->id].second << "]. Access is [" << printAccess(livemapUsage[f->id].first) << ", "
-         << printAccess(livemapUsage[f->id].second) << "].");
+    LOG2("Live range for " << f->name << " is [" << livemap[f->id].first << ", "
+                           << livemap[f->id].second << "]. Access is ["
+                           << printAccess(livemapUsage[f->id].first) << ", "
+                           << printAccess(livemapUsage[f->id].second) << "].");
 }
 
-void MetadataLiveRange::setPaddingFieldLiveMap(const PHV::Field* f) {
+void MetadataLiveRange::setPaddingFieldLiveMap(const PHV::Field *f) {
     const int DEPARSER = dg.max_min_stage + 1;
     // For padding fields (marked by overlayable), the live range is the deparser (for
     // ingress fields) and the parser (for egress fields).
@@ -182,8 +185,8 @@ void MetadataLiveRange::end_apply() {
     if (dg.max_min_stage < 0) return;
 
     // Set of fields whose live ranges must be calculated.
-    ordered_set<const PHV::Field*> fieldsConsidered;
-    for (const PHV::Field& f : phv) {
+    ordered_set<const PHV::Field *> fieldsConsidered;
+    for (const PHV::Field &f : phv) {
         // Ignore metadata fields marked as no_init because initialization would cause their
         // container to become valid.
         if (f.is_invalidate_from_arch()) continue;
@@ -196,19 +199,18 @@ void MetadataLiveRange::end_apply() {
         // Ignore pa_no_overlay fields.
         if (noOverlay.get_no_overlay_fields().count(&f)) continue;
         // Ignore unreferenced fields because they are not allocated anyway.
-        if (!uses.is_referenced(&f))
-            continue;
+        if (!uses.is_referenced(&f)) continue;
         fieldsConsidered.insert(&f);
     }
-    for (const auto* f : fieldsConsidered) {
+    for (const auto *f : fieldsConsidered) {
         if (f->overlayable)
             setPaddingFieldLiveMap(f);
         else
             setFieldLiveMap(f);
     }
     LOG1("Metadata live range overlay potential, subject to initialization");
-    for (const auto* f1 : fieldsConsidered) {
-        for (const auto* f2 : fieldsConsidered) {
+    for (const auto *f1 : fieldsConsidered) {
+        for (const auto *f2 : fieldsConsidered) {
             if (f1 == f2) continue;
             std::pair<int, int> range1 = livemap[f1->id];
             std::pair<int, int> range2 = livemap[f2->id];
@@ -248,8 +250,7 @@ void MetadataLiveRange::end_apply() {
             }
         }
     }
-    if (LOGGING(1))
-        printLiveRanges();
+    if (LOGGING(1)) printLiveRanges();
 }
 
 void MetadataLiveRange::printLiveRanges() const {
@@ -258,18 +259,16 @@ void MetadataLiveRange::printLiveRanges() const {
     const int DEPARSER = dg.max_min_stage + 1;
     auto numStages = DEPARSER;
     const unsigned dashWidth = 125 + (numStages + 2) * 3;
-    for (unsigned i = 0; i < dashWidth; i++)
-        dashes << "-";
+    for (unsigned i = 0; i < dashWidth; i++) dashes << "-";
     LOG1(dashes.str());
     std::stringstream colTitle;
     colTitle << (boost::format("%=100s") % "Field Name") << "|  gress  | P |";
-    for (int i = 0; i < numStages; i++)
-        colTitle << boost::format("%=3s") % i << "|";
+    for (int i = 0; i < numStages; i++) colTitle << boost::format("%=3s") % i << "|";
     colTitle << " D |";
     LOG1(colTitle.str());
     LOG1(dashes.str());
     for (auto entry : livemap) {
-        const auto* f = phv.field(entry.first);
+        const auto *f = phv.field(entry.first);
         int minUse = entry.second.first;
         int maxUse = entry.second.second;
         std::stringstream ss;
@@ -278,7 +277,8 @@ void MetadataLiveRange::printLiveRanges() const {
             if (minUse <= i && i <= maxUse)
                 ss << " x |";
             else
-                ss << "   |"; }
+                ss << "   |";
+        }
         LOG1(ss.str());
     }
     LOG1(dashes.str());

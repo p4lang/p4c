@@ -13,10 +13,10 @@
 #ifndef BF_P4C_PHV_ANALYSIS_CRITICAL_PATH_CLUSTERS_H_
 #define BF_P4C_PHV_ANALYSIS_CRITICAL_PATH_CLUSTERS_H_
 
+#include "bf-p4c/phv/analysis/parser_critical_path.h"
+#include "bf-p4c/phv/make_clusters.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
-#include "bf-p4c/phv/make_clusters.h"
-#include "bf-p4c/phv/analysis/parser_critical_path.h"
 
 /** Provide a function to produces an ordered_set<const SuperCluster*> that
  * those SuperClusters have at least one cluster that
@@ -32,19 +32,19 @@
 class CalcCriticalPathClusters : public Inspector {
  private:
     ordered_set<const PHV::Field *> critical_fields_i;
-    const CalcParserCriticalPath& parser_critical_path;
+    const CalcParserCriticalPath &parser_critical_path;
     const IR::Node *apply_visitor(const IR::Node *, const char *name = 0) override;
 
  public:
-    explicit CalcCriticalPathClusters(const CalcParserCriticalPath& parser_critical_path)
+    explicit CalcCriticalPathClusters(const CalcParserCriticalPath &parser_critical_path)
         : parser_critical_path(parser_critical_path) {}
 
-    ordered_set<PHV::SuperCluster *>
-    calc_critical_clusters(const std::list<PHV::SuperCluster *>& clusters) const;
+    ordered_set<PHV::SuperCluster *> calc_critical_clusters(
+        const std::list<PHV::SuperCluster *> &clusters) const;
 
-    profile_t init_apply(const IR::Node* root) override;
+    profile_t init_apply(const IR::Node *root) override;
 
-    void print(std::ostream& out, const ordered_set<PHV::SuperCluster *>& clusters) const;
+    void print(std::ostream &out, const ordered_set<PHV::SuperCluster *> &clusters) const;
 };
 
 #endif /* BF_P4C_PHV_ANALYSIS_CRITICAL_PATH_CLUSTERS_H_ */

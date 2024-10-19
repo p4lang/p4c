@@ -11,26 +11,25 @@
  */
 
 #include <optional>
+
 #include <boost/algorithm/string/replace.hpp>
 
-#include "gtest/gtest.h"
-
-#include "ir/ir.h"
-#include "lib/cstring.h"
-#include "lib/error.h"
-#include "test/gtest/helpers.h"
 #include "bf-p4c/bf-p4c-options.h"
 #include "bf-p4c/common/field_defuse.h"
 #include "bf-p4c/common/header_stack.h"
 #include "bf-p4c/mau/instruction_selection.h"
+#include "bf-p4c/phv/analysis/dark.h"
+#include "bf-p4c/phv/analysis/mocha.h"
+#include "bf-p4c/phv/analysis/non_mocha_dark_fields.h"
 #include "bf-p4c/phv/phv_fields.h"
 #include "bf-p4c/phv/phv_parde_mau_use.h"
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
-
-#include "bf-p4c/phv/analysis/mocha.h"
-#include "bf-p4c/phv/analysis/dark.h"
-#include "bf-p4c/phv/analysis/non_mocha_dark_fields.h"
 #include "bf-p4c/phv/pragma/phv_pragmas.h"
+#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "gtest/gtest.h"
+#include "ir/ir.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "test/gtest/helpers.h"
 
 namespace P4::Test {
 
@@ -38,8 +37,7 @@ class MochaAnalysisTest : public TofinoBackendTest {};
 
 namespace {
 
-std::optional<TofinoPipeTestCase>
-createMochaAnalysisTest(const std::string& parserSource) {
+std::optional<TofinoPipeTestCase> createMochaAnalysisTest(const std::string &parserSource) {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
 header H1
 {
@@ -86,7 +84,7 @@ V1Switch(parse(), verifyChecksum(), mau(), mau(),
 
     boost::replace_first(source, "%MAU%", parserSource);
 
-    auto& options = BackendOptions();
+    auto &options = BackendOptions();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.target = "tofino"_cs;
     options.arch = "v1model"_cs;
@@ -95,25 +93,17 @@ V1Switch(parse(), verifyChecksum(), mau(), mau(),
     return TofinoPipeTestCase::createWithThreadLocalInstances(source);
 }
 
-const IR::BFN::Pipe *runMockPasses(const IR::BFN::Pipe* pipe,
-                                   PhvInfo& phv,
-                                   FieldDefUse& defuse,
-                                   PhvUse& uses) {
-    PassManager quick_backend = {
-        new CollectHeaderStackInfo,
-        new CollectPhvInfo(phv),
-        new DoInstructionSelection(phv),
-        &defuse,
-        &uses
-    };
+const IR::BFN::Pipe *runMockPasses(const IR::BFN::Pipe *pipe, PhvInfo &phv, FieldDefUse &defuse,
+                                   PhvUse &uses) {
+    PassManager quick_backend = {new CollectHeaderStackInfo, new CollectPhvInfo(phv),
+                                 new DoInstructionSelection(phv), &defuse, &uses};
     return pipe->apply(quick_backend);
 }
 
 }  // namespace
 
 TEST_F(MochaAnalysisTest, AnalyzeMochaCandidates) {
-    auto test = createMochaAnalysisTest(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createMochaAnalysisTest(P4_SOURCE(P4Headers::NONE, R"(
 action do1() {
     meta.f1 = headers.h1.f1;
     meta.f2 = headers.h1.f2;
@@ -158,28 +148,28 @@ apply {
     PHV::Pragmas pragmas(phv);
     NonMochaDarkFields nonMochaDark(phv, uses, defuse, red_info, pragmas);
 
-    auto* pipe = runMockPasses(test->pipe, phv, defuse, uses);
+    auto *pipe = runMockPasses(test->pipe, phv, defuse, uses);
     ASSERT_TRUE(pipe);
 
-    auto* mocha = new CollectMochaCandidates(phv, uses, red_info, nonMochaDark);
-    auto* after_analysis = pipe->apply(*mocha);
+    auto *mocha = new CollectMochaCandidates(phv, uses, red_info, nonMochaDark);
+    auto *after_analysis = pipe->apply(*mocha);
     ASSERT_TRUE(after_analysis);
 
-    CollectNonDarkUses  nonDarkUses(phv, red_info);
-    auto* dark = new MarkDarkCandidates(phv, uses, nonDarkUses);
+    CollectNonDarkUses nonDarkUses(phv, red_info);
+    auto *dark = new MarkDarkCandidates(phv, uses, nonDarkUses);
     after_analysis = after_analysis->apply(nonDarkUses);
     after_analysis = after_analysis->apply(*dark);
     ASSERT_TRUE(after_analysis);
 
-    const PHV::Field* h1f1 = phv.field("ingress::h1.f1"_cs);
-    const PHV::Field* h1f2 = phv.field("ingress::h1.f2"_cs);
-    const PHV::Field* h1f3 = phv.field("ingress::h1.f3"_cs);
-    const PHV::Field* h1f4 = phv.field("ingress::h1.f4"_cs);
-    const PHV::Field* h1p0 = phv.field("ingress::h1.pad_0"_cs);
-    const PHV::Field* m1f1 = phv.field("ingress::meta.f1"_cs);
-    const PHV::Field* m1f2 = phv.field("ingress::meta.f2"_cs);
-    const PHV::Field* m1f3 = phv.field("ingress::meta.f3"_cs);
-    const PHV::Field* m1f4 = phv.field("ingress::meta.f4"_cs);
+    const PHV::Field *h1f1 = phv.field("ingress::h1.f1"_cs);
+    const PHV::Field *h1f2 = phv.field("ingress::h1.f2"_cs);
+    const PHV::Field *h1f3 = phv.field("ingress::h1.f3"_cs);
+    const PHV::Field *h1f4 = phv.field("ingress::h1.f4"_cs);
+    const PHV::Field *h1p0 = phv.field("ingress::h1.pad_0"_cs);
+    const PHV::Field *m1f1 = phv.field("ingress::meta.f1"_cs);
+    const PHV::Field *m1f2 = phv.field("ingress::meta.f2"_cs);
+    const PHV::Field *m1f3 = phv.field("ingress::meta.f3"_cs);
+    const PHV::Field *m1f4 = phv.field("ingress::meta.f4"_cs);
 
     ASSERT_TRUE(h1f1 && h1f2 && h1f3 && h1f4 && h1p0 && m1f1 && m1f2 && m1f3 && m1f4);
 

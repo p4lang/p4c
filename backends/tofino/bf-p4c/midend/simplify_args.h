@@ -61,18 +61,18 @@
  *        }
  *
  */
-#ifndef EXTENSIONS_BF_P4C_MIDEND_SIMPLIFY_ARGS_H_
-#define EXTENSIONS_BF_P4C_MIDEND_SIMPLIFY_ARGS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MIDEND_SIMPLIFY_ARGS_H_
+#define BACKENDS_TOFINO_BF_P4C_MIDEND_SIMPLIFY_ARGS_H_
 
-#include "ir/ir.h"
-#include "frontends/common/resolveReferences/resolveReferences.h"
-#include "frontends/p4/moveDeclarations.h"
-#include "frontends/p4/typeMap.h"
-#include "frontends/p4/cloner.h"
-#include "midend/flattenHeaders.h"
-#include "bf-p4c/midend/type_checker.h"
 #include "bf-p4c/midend/check_header_alignment.h"
 #include "bf-p4c/midend/copy_header.h"
+#include "bf-p4c/midend/type_checker.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/cloner.h"
+#include "frontends/p4/moveDeclarations.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
+#include "midend/flattenHeaders.h"
 
 namespace BFN {
 
@@ -172,8 +172,8 @@ struct InjectTmpVar : public PassManager {
         bool isNestedStruct(const IR::Expression *expr);
 
      public:
-        explicit DoInject(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) :
-                refMap(refMap), typeMap(typeMap) {}
+        explicit DoInject(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
+            : refMap(refMap), typeMap(typeMap) {}
         const IR::Node *postorder(IR::AssignmentStatement *as) override;
         const IR::Node *postorder(IR::MethodCallStatement *mcs) override;
     };
@@ -216,48 +216,49 @@ struct InjectTmpVar : public PassManager {
  */
 class FlattenHeader : public Modifier {
     P4::CloneExpressions cloner;
-    const P4::TypeMap* typeMap;
-    IR::Type_Header* flattenedHeader = nullptr;
+    const P4::TypeMap *typeMap;
+    IR::Type_Header *flattenedHeader = nullptr;
     std::vector<cstring> nameSegments{};
-    std::vector<const IR::Annotations*> allAnnotations{};
+    std::vector<const IR::Annotations *> allAnnotations{};
     std::vector<Util::SourceInfo> srcInfos{};
     cstring makeName(std::string_view sep) const;
-    void flattenType(const IR::Type* type);
-    const IR::Annotations* mergeAnnotations() const;
+    void flattenType(const IR::Type *type);
+    const IR::Annotations *mergeAnnotations() const;
 
-    const IR::Member* flattenedMember;
+    const IR::Member *flattenedMember;
     std::vector<cstring> memberSegments{};
     std::map<cstring, cstring> fieldNameMap;
-    std::map<cstring, std::tuple<const IR::Expression*, cstring>> replacementMap;
+    std::map<cstring, std::tuple<const IR::Expression *, cstring>> replacementMap;
     cstring makeMember(std::string_view sep) const;
-    void flattenMember(const IR::Member* member);
-    const IR::Member* doFlattenMember(const IR::Member* member);
+    void flattenMember(const IR::Member *member);
+    const IR::Member *doFlattenMember(const IR::Member *member);
 
     std::vector<cstring> pathSegments{};
     cstring makePath(std::string_view sep) const;
-    void flattenStructInitializer(const IR::StructExpression* e,
-            IR::IndexedVector<IR::NamedExpression>* c);
-    IR::StructExpression* doFlattenStructInitializer(const IR::StructExpression* e);
-    IR::ListExpression* flatten_list(const IR::ListExpression* args);
-    void explode(const IR::Expression*, IR::Vector<IR::Expression>*);
-    int memberDepth(const IR::Member* m);
-    const IR::Member *getTailMembers(const IR::Member* m, int depth);
+    void flattenStructInitializer(const IR::StructExpression *e,
+                                  IR::IndexedVector<IR::NamedExpression> *c);
+    IR::StructExpression *doFlattenStructInitializer(const IR::StructExpression *e);
+    IR::ListExpression *flatten_list(const IR::ListExpression *args);
+    void explode(const IR::Expression *, IR::Vector<IR::Expression> *);
+    int memberDepth(const IR::Member *m);
+    const IR::Member *getTailMembers(const IR::Member *m, int depth);
     const IR::PathExpression *replaceSrcInfo(const IR::PathExpression *tgt,
                                              const IR::PathExpression *src);
     const IR::Member *replaceSrcInfo(const IR::Member *tgt, const IR::Member *src);
     const IR::Expression *balancedReplaceSrcInfo(const IR::Expression *tgt, const IR::Member *src);
 
-    std::function<bool(const Context*, const IR::Type_StructLike*)> policy;
+    std::function<bool(const Context *, const IR::Type_StructLike *)> policy;
 
  public:
-    explicit FlattenHeader(P4::TypeMap* typeMap,
-            std::function<bool(const Context*, const IR::Type_StructLike*)> policy =
-            [](const Context*, const IR::Type_StructLike*) -> bool { return false; }) :
-        typeMap(typeMap), policy(policy) {}
-    bool preorder(IR::Type_Header* header) override;
-    bool preorder(IR::Member* member) override;
-    void postorder(IR::Member* member) override;
-    bool preorder(IR::MethodCallExpression* mc) override;
+    explicit FlattenHeader(
+        P4::TypeMap *typeMap,
+        std::function<bool(const Context *, const IR::Type_StructLike *)> policy =
+            [](const Context *, const IR::Type_StructLike *) -> bool { return false; })
+        : typeMap(typeMap), policy(policy) {}
+    bool preorder(IR::Type_Header *header) override;
+    bool preorder(IR::Member *member) override;
+    void postorder(IR::Member *member) override;
+    bool preorder(IR::MethodCallExpression *mc) override;
 };
 
 /**
@@ -266,29 +267,32 @@ class FlattenHeader : public Modifier {
  * Assume header type are flattend, no nested struct.
  */
 class EliminateHeaders : public Transform {
-    P4::ReferenceMap* refMap;
-    P4::TypeMap* typeMap;
-    std::function<bool(const Context*, const IR::Type_StructLike*)> policy;
+    P4::ReferenceMap *refMap;
+    P4::TypeMap *typeMap;
+    std::function<bool(const Context *, const IR::Type_StructLike *)> policy;
 
  public:
     EliminateHeaders(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
-            std::function<bool(const Context*, const IR::Type_StructLike*)> policy) :
-        refMap(refMap), typeMap(typeMap), policy(policy) { setName("EliminateHeaders"); }
+                     std::function<bool(const Context *, const IR::Type_StructLike *)> policy)
+        : refMap(refMap), typeMap(typeMap), policy(policy) {
+        setName("EliminateHeaders");
+    }
     std::map<cstring, IR::IndexedVector<IR::NamedExpression>> rewriteTupleType;
-    std::map<const IR::MethodCallExpression* , const IR::Type*> rewriteOtherType;
-    const IR::Node* preorder(IR::Argument* arg) override;
-    void elimConcat(IR::IndexedVector<IR::NamedExpression>& output, const IR::Concat* expr);
+    std::map<const IR::MethodCallExpression *, const IR::Type *> rewriteOtherType;
+    const IR::Node *preorder(IR::Argument *arg) override;
+    void elimConcat(IR::IndexedVector<IR::NamedExpression> &output, const IR::Concat *expr);
 };
 
 /**
  * \ingroup SimplifyEmitArgs
  */
 class RewriteTypeArguments : public Transform {
-     const EliminateHeaders* eeh;
+    const EliminateHeaders *eeh;
+
  public:
-    explicit RewriteTypeArguments(const EliminateHeaders* eeh) : eeh(eeh) {}
-    const IR::Node* preorder(IR::Type_Struct* type_struct) override;
-    const IR::Node* preorder(IR::MethodCallExpression* mc) override;
+    explicit RewriteTypeArguments(const EliminateHeaders *eeh) : eeh(eeh) {}
+    const IR::Node *preorder(IR::Type_Struct *type_struct) override;
+    const IR::Node *preorder(IR::MethodCallExpression *mc) override;
 };
 
 /**
@@ -300,9 +304,10 @@ class RewriteTypeArguments : public Transform {
  */
 class SimplifyEmitArgs : public PassManager {
  public:
-    SimplifyEmitArgs(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-            std::function<bool(const Context *, const IR::Type_StructLike*)> policy =
-            [](const Context*, const IR::Type_StructLike*) -> bool { return false; } ) {
+    SimplifyEmitArgs(
+        P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+        std::function<bool(const Context *, const IR::Type_StructLike *)> policy =
+            [](const Context *, const IR::Type_StructLike *) -> bool { return false; }) {
         auto eliminateHeaders = new EliminateHeaders(refMap, typeMap, policy);
         auto rewriteTypeArguments = new RewriteTypeArguments(eliminateHeaders);
         passes.push_back(new InjectTmpVar(refMap, typeMap));
@@ -316,11 +321,11 @@ class SimplifyEmitArgs : public PassManager {
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.push_back(new BFN::TypeChecking(refMap, typeMap, true));
         passes.push_back(new PadFlexibleField(refMap, typeMap)),
-        passes.push_back(new P4::ClearTypeMap(typeMap));
+            passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.push_back(new BFN::TypeChecking(refMap, typeMap, true));
     }
 };
 
 }  // namespace BFN
 
-#endif /* EXTENSIONS_BF_P4C_MIDEND_SIMPLIFY_ARGS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MIDEND_SIMPLIFY_ARGS_H_ */

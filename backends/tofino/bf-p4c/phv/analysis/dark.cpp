@@ -11,9 +11,10 @@
  */
 
 #include "bf-p4c/phv/analysis/dark.h"
+
 #include <queue>
 
-Visitor::profile_t CollectNonDarkUses::init_apply(const IR::Node* root) {
+Visitor::profile_t CollectNonDarkUses::init_apply(const IR::Node *root) {
     profile_t rv = Inspector::init_apply(root);
     nonDarkMauUses.clear();
     return rv;
@@ -21,20 +22,16 @@ Visitor::profile_t CollectNonDarkUses::init_apply(const IR::Node* root) {
 
 bool CollectNonDarkUses::contextNeedsIXBar() {
     for (auto c = getContext(); c; c = c->parent) {
-        if (c->node->is<IR::MAU::IXBarExpression>() ||
-            c->node->is<IR::MAU::StatefulCall>() ||
-            c->node->is<IR::MAU::StatefulAlu>() ||
-            c->node->is<IR::MAU::Table>() ||
-            c->node->is<IR::MAU::Meter>() ||
-            c->node->is<IR::MAU::HashDist>())
+        if (c->node->is<IR::MAU::IXBarExpression>() || c->node->is<IR::MAU::StatefulCall>() ||
+            c->node->is<IR::MAU::StatefulAlu>() || c->node->is<IR::MAU::Table>() ||
+            c->node->is<IR::MAU::Meter>() || c->node->is<IR::MAU::HashDist>())
             return true;
-        if (c->node->is<IR::MAU::Action>())
-            return false;
+        if (c->node->is<IR::MAU::Action>()) return false;
     }
     BUG("invalid context in CollectNonDarkUses");
 }
 
-bool CollectNonDarkUses::preorder(const IR::MAU::Table* table) {
+bool CollectNonDarkUses::preorder(const IR::MAU::Table *table) {
     // Ensure that we visit all expressions in the table, even if they have been previously visited
     // in a different context.
     auto result = Inspector::preorder(table);
@@ -45,23 +42,25 @@ bool CollectNonDarkUses::preorder(const IR::MAU::Table* table) {
 bool CollectNonDarkUses::preorder(const IR::Expression *e) {
     if (auto *field = phv.field(e)) {
         if (contextNeedsIXBar()) {
-            nonDarkMauUses[field->id] = true; }
-        return false; }
+            nonDarkMauUses[field->id] = true;
+        }
+        return false;
+    }
     return true;
 }
 
-bool CollectNonDarkUses::preorder(const IR::MAU::Action* act) {
-    auto* tbl = findContext<IR::MAU::Table>();
+bool CollectNonDarkUses::preorder(const IR::MAU::Action *act) {
+    auto *tbl = findContext<IR::MAU::Table>();
     ActionAnalysis aa(phv, false, false, tbl, red_info);
     ActionAnalysis::FieldActionsMap fieldActionsMap;
     aa.set_field_actions_map(&fieldActionsMap);
     act->apply(aa);
-    for (auto& fieldAction : Values(fieldActionsMap)) {
-        const PHV::Field* field = phv.field(fieldAction.write.expr);
+    for (auto &fieldAction : Values(fieldActionsMap)) {
+        const PHV::Field *field = phv.field(fieldAction.write.expr);
         BUG_CHECK(field, "Action %1% does not have a write?", fieldAction.write.expr);
         // Mocha support Action Data and Constant source, Dark do not support it.
         if (fieldAction.name == "set") {
-            for (auto& readSrc : fieldAction.reads) {
+            for (auto &readSrc : fieldAction.reads) {
                 if (readSrc.type == ActionAnalysis::ActionParam::ACTIONDATA ||
                     readSrc.type == ActionAnalysis::ActionParam::CONSTANT) {
                     nonDarkMauUses[field->id] = true;
@@ -72,11 +71,9 @@ bool CollectNonDarkUses::preorder(const IR::MAU::Action* act) {
     return true;
 }
 
-bool CollectNonDarkUses::hasNonDarkUse(const PHV::Field* f) const {
-    return nonDarkMauUses[f->id];
-}
+bool CollectNonDarkUses::hasNonDarkUse(const PHV::Field *f) const { return nonDarkMauUses[f->id]; }
 
-Visitor::profile_t MarkDarkCandidates::init_apply(const IR::Node* root) {
+Visitor::profile_t MarkDarkCandidates::init_apply(const IR::Node *root) {
     profile_t rv = Inspector::init_apply(root);
     nonDarkMauUses.clear();
     darkCount = 0;
@@ -85,7 +82,7 @@ Visitor::profile_t MarkDarkCandidates::init_apply(const IR::Node* root) {
 }
 
 void MarkDarkCandidates::end_apply() {
-    for (PHV::Field& f : phv) {
+    for (PHV::Field &f : phv) {
         std::stringstream ss;
 
         ss << "    Candidate field for dark: " << f << std::endl;
@@ -98,27 +95,32 @@ void MarkDarkCandidates::end_apply() {
         if (uses.is_used_parde(&f) || uses.is_deparsed(&f)) {
             ss << "    ...field used in parde.";
             LOG5(ss.str());
-            continue; }
+            continue;
+        }
 
         if (nonDarkUses.hasNonDarkUse(&f)) {
             ss << "    ...used for non-dark MAU operations.";
             LOG5(ss.str());
-            continue; }
+            continue;
+        }
 
         if (f.bridged || f.padding) {
             ss << "    ...encountered bridged/padding/phase0 field.";
             LOG5(ss.str());
-            continue; }
+            continue;
+        }
 
         if (f.is_checksummed()) {
             ss << "    ...checksum field encountered.";
             LOG5(ss.str());
-            continue; }
+            continue;
+        }
 
         if (f.is_digest()) {
             ss << "    ...digest field encountered.";
             LOG5(ss.str());
-            continue; }
+            continue;
+        }
 
         // Ignore dark analysis is field is not a mocha candidate.
         // Dark fields can go into mocha and so are definitely mocha candidates.
@@ -135,7 +137,8 @@ void MarkDarkCandidates::end_apply() {
         f.set_dark_candidate(true);
         ++darkCount;
         darkSize += f.size;
-        LOG1("    Dark candidate: " << f); }
+        LOG1("    Dark candidate: " << f);
+    }
     LOG1("    Number of dark candidate fields: " << darkCount);
     LOG1("    Total size of dark candidates  : " << darkSize << "b.");
 }

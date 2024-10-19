@@ -11,11 +11,12 @@
  */
 
 #include <cmath>
-#include "frontends/p4-14/fromv1.0/converters.h"
+
 #include "bf-p4c/arch/fromv1.0/programStructure.h"
 #include "bf-p4c/arch/intrinsic_metadata.h"
-#include "bf-p4c/device.h"
 #include "bf-p4c/bf-p4c-options.h"
+#include "bf-p4c/device.h"
+#include "frontends/p4-14/fromv1.0/converters.h"
 
 // Converters for converting from P4-14 to TNA For a full list of supported
 // tofino primitives, see google doc titled: "Supported Tofino Primitives"
@@ -98,8 +99,8 @@ static bool using_tna_arch() {
     // executable, but the user elects to use a non-Barefoot backend with non-Barefoot options.
     // In this scenario, this function still gets called from primitive converters that are
     // statically registered by this compilation unit.
-    auto& context = P4CContext::get();
-    auto* bfn_context = dynamic_cast<BFNContext*>(&context);
+    auto &context = P4CContext::get();
+    auto *bfn_context = dynamic_cast<BFNContext *>(&context);
 
     if (bfn_context != nullptr && tna_architectures.count(bfn_context->options().arch) != 0)
         return true;
@@ -116,10 +117,9 @@ CONVERT_PRIMITIVE(bypass_egress, 1) {
 /*
  * FIXME: duplicate with helper function in TnaProgramStructure
  */
-static unsigned computeDigestIndex(TnaProgramStructure* structure,
-        const IR::Primitive *prim, const IR::Expression* expr) {
-    if (!expr)
-        expr = new IR::ListExpression({});
+static unsigned computeDigestIndex(TnaProgramStructure *structure, const IR::Primitive *prim,
+                                   const IR::Expression *expr) {
+    if (!expr) expr = new IR::ListExpression({});
     unsigned index = 0;
     if (prim->name == "resubmit") {
         index = computeHashOverFieldList(expr, structure->resubmitIndexHashes);
@@ -142,13 +142,13 @@ static unsigned computeDigestIndex(TnaProgramStructure* structure,
 /*
  * FIXME: duplicate with helper function in CollectDigestFields
  */
-static IR::Expression* flatten(const IR::ListExpression* args) {
+static IR::Expression *flatten(const IR::ListExpression *args) {
     IR::Vector<IR::Expression> components;
-    for (const auto* expr : args->components) {
-        if (const auto* list_arg = expr->to<IR::ListExpression>()) {
-            auto* flattened = flatten(list_arg);
+    for (const auto *expr : args->components) {
+        if (const auto *list_arg = expr->to<IR::ListExpression>()) {
+            auto *flattened = flatten(list_arg);
             BUG_CHECK(flattened->is<IR::ListExpression>(), "flatten must return ListExpression");
-            for (const auto* comp : flattened->to<IR::ListExpression>()->components)
+            for (const auto *comp : flattened->to<IR::ListExpression>()->components)
                 components.push_back(comp);
         } else {
             components.push_back(expr);
@@ -157,28 +157,26 @@ static IR::Expression* flatten(const IR::ListExpression* args) {
     return new IR::ListExpression(components);
 }
 
-static const IR::Statement *
-convertClone(ProgramStructure *structure, const IR::Primitive *primitive, gress_t gress,
-             bool /* reserve_entry_zero */ = false) {
+static const IR::Statement *convertClone(ProgramStructure *structure,
+                                         const IR::Primitive *primitive, gress_t gress,
+                                         bool /* reserve_entry_zero */ = false) {
     BUG_CHECK(primitive->operands.size() == 1 || primitive->operands.size() == 2,
               "Expected 1 or 2 operands for %1%", primitive);
     ExpressionConverter conv(structure);
 
-    auto *deparserMetadataPath =
-        new IR::PathExpression((gress == INGRESS) ? "ig_intr_md_for_dprsr"
-                                                  : "eg_intr_md_for_dprsr");
+    auto *deparserMetadataPath = new IR::PathExpression(
+        (gress == INGRESS) ? "ig_intr_md_for_dprsr" : "eg_intr_md_for_dprsr");
 
-    const IR::Expression* list = nullptr;
+    const IR::Expression *list = nullptr;
     if (primitive->operands.size() == 2) {
         list = structure->convertFieldList(primitive->operands.at(1));
         // flatten nested field_list in p4-14 to one-level list expression in P4-16
-        if (auto liste = list->to<IR::ListExpression>())
-            list = flatten(liste);
+        if (auto liste = list->to<IR::ListExpression>()) list = flatten(liste);
     }
 
     auto *block = new IR::BlockStatement;
 
-    auto st = dynamic_cast<TnaProgramStructure*>(structure);
+    auto st = dynamic_cast<TnaProgramStructure *>(structure);
     if (!st) return nullptr;
     auto index = computeDigestIndex(st, primitive, list);
     auto *rhs = new IR::Constant(index);
@@ -187,15 +185,13 @@ convertClone(ProgramStructure *structure, const IR::Primitive *primitive, gress_
     auto *mirrorIdx = new IR::Member(deparserMetadataPath, "mirror_type");
     block->components.push_back(new IR::AssignmentStatement(mirrorIdx, rhs));
 
-    auto *compilerMetadataPath =
-            new IR::Member(new IR::PathExpression("meta"), COMPILER_META);
+    auto *compilerMetadataPath = new IR::Member(new IR::PathExpression("meta"), COMPILER_META);
     auto *mirrorId = new IR::Member(compilerMetadataPath, "mirror_id");
     auto *mirrorIdValue = conv.convert(primitive->operands.at(0));
     /// p4-14 mirror_id is 32bit, cast to bit<10>
-    auto *castedMirrorIdValue = new IR::Cast(
-            IR::Type::Bits::get(Device::cloneSessionIdWidth()), mirrorIdValue);
-    block->components.push_back(new IR::AssignmentStatement(mirrorId,
-                castedMirrorIdValue));
+    auto *castedMirrorIdValue =
+        new IR::Cast(IR::Type::Bits::get(Device::cloneSessionIdWidth()), mirrorIdValue);
+    block->components.push_back(new IR::AssignmentStatement(mirrorId, castedMirrorIdValue));
 
     // Construct a value for `mirror_source`, which is
     // compiler-generated metadata that's prepended to the user field
@@ -216,38 +212,36 @@ convertClone(ProgramStructure *structure, const IR::Primitive *primitive, gress_
     const unsigned isMirroredTag = 1 << 3;
     const unsigned gressTag = (gress == INGRESS) ? 0 : 1 << 4;
     unsigned mirror_source = index | isMirroredTag | gressTag;
-    block->components.push_back(BFN::createSetMetadata("meta"_cs,
-                COMPILER_META, "mirror_source"_cs, 8, mirror_source));
+    block->components.push_back(
+        BFN::createSetMetadata("meta"_cs, COMPILER_META, "mirror_source"_cs, 8, mirror_source));
 
     return block;
 }
 
 CONVERT_PRIMITIVE(clone_egress_pkt_to_egress, 1) {
-    return convertClone(structure, primitive, EGRESS); }
-CONVERT_PRIMITIVE(clone_e2e, 1) {
-    return convertClone(structure, primitive, EGRESS); }
+    return convertClone(structure, primitive, EGRESS);
+}
+CONVERT_PRIMITIVE(clone_e2e, 1) { return convertClone(structure, primitive, EGRESS); }
 CONVERT_PRIMITIVE(clone_ingress_pkt_to_egress, 1) {
-    return convertClone(structure, primitive, INGRESS); }
-CONVERT_PRIMITIVE(clone_i2e, 1) {
-    return convertClone(structure, primitive, INGRESS); }
+    return convertClone(structure, primitive, INGRESS);
+}
+CONVERT_PRIMITIVE(clone_i2e, 1) { return convertClone(structure, primitive, INGRESS); }
 
-static const IR::Statement*
-convertResubmit(ProgramStructure *structure, const IR::Primitive* primitive) {
-    BUG_CHECK(primitive->operands.size() <= 1,
-              "Expected 0 or 1 operands for %1%", primitive);
+static const IR::Statement *convertResubmit(ProgramStructure *structure,
+                                            const IR::Primitive *primitive) {
+    BUG_CHECK(primitive->operands.size() <= 1, "Expected 0 or 1 operands for %1%", primitive);
     ExpressionConverter conv(structure);
 
     auto *deparserMetadataPath = new IR::PathExpression("ig_intr_md_for_dprsr");
 
-    const IR::Expression* list = nullptr;
+    const IR::Expression *list = nullptr;
     if (primitive->operands.size() == 1) {
         list = structure->convertFieldList(primitive->operands.at(0));
-        if (auto liste = list->to<IR::ListExpression>())
-            list = flatten(liste);
+        if (auto liste = list->to<IR::ListExpression>()) list = flatten(liste);
     }
     auto *block = new IR::BlockStatement;
 
-    auto st = dynamic_cast<TnaProgramStructure*>(structure);
+    auto st = dynamic_cast<TnaProgramStructure *>(structure);
     if (!st) return nullptr;
     auto index = computeDigestIndex(st, primitive, list);
     auto *rhs = new IR::Constant(IR::Type::Bits::get(3), index);
@@ -264,8 +258,8 @@ convertResubmit(ProgramStructure *structure, const IR::Primitive* primitive) {
     //
     // TODO: reuse the PHV container for `resubmit_type`
     unsigned resubmit_source = index;
-    block->components.push_back(BFN::createSetMetadata("meta"_cs,
-                COMPILER_META, "resubmit_source"_cs, 8, resubmit_source));
+    block->components.push_back(
+        BFN::createSetMetadata("meta"_cs, COMPILER_META, "resubmit_source"_cs, 8, resubmit_source));
 
     return block;
 }
@@ -275,17 +269,15 @@ CONVERT_PRIMITIVE(resubmit, 1) {
     return convertResubmit(structure, primitive);
 }
 
-static const IR::Statement *
-convertDrop(ProgramStructure *structure, const IR::Primitive *) {
+static const IR::Statement *convertDrop(ProgramStructure *structure, const IR::Primitive *) {
     // walk all controls.
     // walk all tables.
     // walk all actions.
     // walk all drop.
-    auto st = dynamic_cast<TnaProgramStructure*>(structure);
-    if (!st)
-        return nullptr;
-    cstring meta = (st->currentGress == INGRESS) ? "ig_intr_md_for_dprsr"_cs :
-        "eg_intr_md_for_dprsr"_cs;
+    auto st = dynamic_cast<TnaProgramStructure *>(structure);
+    if (!st) return nullptr;
+    cstring meta =
+        (st->currentGress == INGRESS) ? "ig_intr_md_for_dprsr"_cs : "eg_intr_md_for_dprsr"_cs;
     BUG_CHECK(st != nullptr, "Cannot cast structure to TnaProgramStructure");
     auto path = new IR::Member(new IR::PathExpression(meta), "drop_ctl");
     auto val = new IR::Constant(IR::Type::Bits::get(3), 1);
@@ -295,17 +287,17 @@ convertDrop(ProgramStructure *structure, const IR::Primitive *) {
 
 CONVERT_PRIMITIVE(drop, 1) {
     if (!using_tna_arch()) return nullptr;
-    return convertDrop(structure, primitive); }
+    return convertDrop(structure, primitive);
+}
 
 CONVERT_PRIMITIVE(invalidate, 1) {
     if (!using_tna_arch()) return nullptr;
     if (primitive->operands.size() != 1) return nullptr;
     ExpressionConverter conv(structure);
     auto arg = conv.convert(primitive->operands.at(0));
-    if (arg->is<IR::Constant>())
-        error("Expected a field reference %1%", arg);
-    return new IR::MethodCallStatement(primitive->srcInfo,
-            IR::ID(primitive->srcInfo, "invalidate"_cs), { new IR::Argument(arg) });
+    if (arg->is<IR::Constant>()) error("Expected a field reference %1%", arg);
+    return new IR::MethodCallStatement(
+        primitive->srcInfo, IR::ID(primitive->srcInfo, "invalidate"_cs), {new IR::Argument(arg)});
 }
 
 CONVERT_PRIMITIVE(invalidate_digest, 1) {
@@ -314,21 +306,24 @@ CONVERT_PRIMITIVE(invalidate_digest, 1) {
     IR::PathExpression *path = new IR::PathExpression("ig_intr_md_for_dprsr");
     auto mem = new IR::Member(path, "digest_type");
     auto stmt = new IR::MethodCallStatement(primitive->srcInfo, IR::ID("invalidate"_cs),
-            { new IR::Argument(mem) } );
-    return stmt; }
+                                            {new IR::Argument(mem)});
+    return stmt;
+}
 
 CONVERT_PRIMITIVE(mark_to_drop, 1) {
     if (!using_tna_arch()) return nullptr;
-    return convertDrop(structure, primitive); }
+    return convertDrop(structure, primitive);
+}
 
 CONVERT_PRIMITIVE(mark_for_drop, 1) {
     if (!using_tna_arch()) return nullptr;
-    return convertDrop(structure, primitive); }
+    return convertDrop(structure, primitive);
+}
 
 static bool makeTnaMeterExecCall(const Util::SourceInfo &srcInfo, ProgramStructure *structure,
-                              IR::BlockStatement *block, const IR::Expression *mref,
-                              const IR::Expression *index, const IR::Expression *dest,
-                              const IR::Expression *color = nullptr) {
+                                 IR::BlockStatement *block, const IR::Expression *mref,
+                                 const IR::Expression *index, const IR::Expression *dest,
+                                 const IR::Expression *color = nullptr) {
     const IR::Meter *meter = nullptr;
     if (auto gr = mref->to<IR::GlobalRef>())
         meter = gr->obj->to<IR::Meter>();
@@ -336,7 +331,8 @@ static bool makeTnaMeterExecCall(const Util::SourceInfo &srcInfo, ProgramStructu
         meter = structure->meters.get(nr->path->name);
     if (meter == nullptr) {
         error("Expected a meter reference %1%", mref);
-        return false; }
+        return false;
+    }
     auto meterref = new IR::PathExpression(structure->meters.get(meter));
     auto method = new IR::Member(meterref, "execute");
     auto arg = new IR::Cast(IR::Type::Bits::get(meter->index_width()), index);
@@ -353,10 +349,10 @@ static bool makeTnaMeterExecCall(const Util::SourceInfo &srcInfo, ProgramStructu
         }
         args->push_back(new IR::Argument(color));
     }
-    IR::Expression *expr = new IR::MethodCallExpression(srcInfo,
-            IR::Type::Bits::get(8), method, args);
-    block->push_back(structure->assign(srcInfo, dest, expr,
-                IR::Type::Bits::get(dest->type->width_bits())));
+    IR::Expression *expr =
+        new IR::MethodCallExpression(srcInfo, IR::Type::Bits::get(8), method, args);
+    block->push_back(
+        structure->assign(srcInfo, dest, expr, IR::Type::Bits::get(dest->type->width_bits())));
     return true;
 }
 
@@ -372,15 +368,16 @@ CONVERT_PRIMITIVE(count_from_hash, 2) {
         counter = structure->counters.get(nr->path->name);
     if (counter == nullptr) {
         error("Expected a counter reference %1%", ref);
-        return nullptr; }
+        return nullptr;
+    }
     cstring temp = structure->makeUniqueName("temp"_cs);
     auto block = P4V1::generate_hash_block_statement(structure, primitive, temp, conv, 2);
     auto counterref = new IR::PathExpression(structure->counters.get(counter));
     auto method = new IR::Member(counterref, structure->v1model.counter.increment.Id());
     auto arg = new IR::Cast(IR::Type::Bits::get(counter->index_width()),
                             new IR::PathExpression(new IR::Path(temp)));
-    block->push_back(new IR::MethodCallStatement(primitive->srcInfo, method,
-                                                 { new IR::Argument(arg) }));
+    block->push_back(
+        new IR::MethodCallStatement(primitive->srcInfo, method, {new IR::Argument(arg)}));
     return block;
 }
 
@@ -390,18 +387,16 @@ CONVERT_PRIMITIVE(execute_meter, 6) {
     auto block = new IR::BlockStatement;
     LOG3("convert meter primitive " << primitive);
     if (primitive->operands.size() == 3) {
-        if (!makeTnaMeterExecCall(primitive->srcInfo, structure, block,
-                    conv.convert(primitive->operands.at(0)),
-                    conv.convert(primitive->operands.at(1)),
-                    conv.convert(primitive->operands.at(2)))) {
+        if (!makeTnaMeterExecCall(
+                primitive->srcInfo, structure, block, conv.convert(primitive->operands.at(0)),
+                conv.convert(primitive->operands.at(1)), conv.convert(primitive->operands.at(2)))) {
             return nullptr;
         }
     } else if (primitive->operands.size() == 4) {
-        if (!makeTnaMeterExecCall(primitive->srcInfo, structure, block,
-                    conv.convert(primitive->operands.at(0)),
-                    conv.convert(primitive->operands.at(1)),
-                    conv.convert(primitive->operands.at(2)),
-                    conv.convert(primitive->operands.at(3)))) {
+        if (!makeTnaMeterExecCall(
+                primitive->srcInfo, structure, block, conv.convert(primitive->operands.at(0)),
+                conv.convert(primitive->operands.at(1)), conv.convert(primitive->operands.at(2)),
+                conv.convert(primitive->operands.at(3)))) {
             return nullptr;
         }
     }
@@ -411,7 +406,7 @@ CONVERT_PRIMITIVE(execute_meter, 6) {
 // used by p4-14 to tna conversion
 CONVERT_PRIMITIVE(modify_field_with_hash_based_offset, 2) {
     if (!using_tna_arch()) return nullptr;
-    auto st = dynamic_cast<P4V1::TnaProgramStructure*>(structure);
+    auto st = dynamic_cast<P4V1::TnaProgramStructure *>(structure);
     ExpressionConverter conv(st);
     auto dest = conv.convert(primitive->operands.at(0));
     return generate_tna_hash_block_statement(st, primitive, ""_cs, conv, 4, dest);
@@ -427,10 +422,8 @@ CONVERT_PRIMITIVE(modify_field_rng_uniform, 2) {
     auto hi = conv.convert(primitive->operands.at(2));
     auto max_value = hi->to<IR::Constant>()->value;
     auto min_value = lo->to<IR::Constant>()->value;
-    if (lo->type != field->type)
-        lo = new IR::Cast(primitive->srcInfo, field->type, lo);
-    if (hi->type != field->type)
-        hi = new IR::Cast(primitive->srcInfo, field->type, hi);
+    if (lo->type != field->type) lo = new IR::Cast(primitive->srcInfo, field->type, lo);
+    if (hi->type != field->type) hi = new IR::Cast(primitive->srcInfo, field->type, hi);
 
     auto typeArgs = new IR::Vector<IR::Type>({field->type});
     auto type = new IR::Type_Specialized(new IR::Type_Name("Random"), typeArgs);
@@ -438,16 +431,14 @@ CONVERT_PRIMITIVE(modify_field_rng_uniform, 2) {
 
     // check hi bound must be 2**W-1
     if (max_value > LONG_MAX)
-        error("The random declaration %s max size %d is too large to be supported",
-                randName, max_value);
+        error("The random declaration %s max size %d is too large to be supported", randName,
+              max_value);
     bool isPowerOfTwoMinusOne = false;
     isPowerOfTwoMinusOne = ((max_value & (max_value + 1)) == 0);
     if (!isPowerOfTwoMinusOne)
         error("The random declaration %s max size must be a power of two minus one", randName);
     // check lo bound must be zero
-    if (min_value != 0)
-        error("The random declaration %s min size must be zero",
-                randName);
+    if (min_value != 0) error("The random declaration %s min size must be zero", randName);
     auto args = new IR::Vector<IR::Argument>();
 
     auto method = new IR::PathExpression(randName);
@@ -460,25 +451,22 @@ CONVERT_PRIMITIVE(modify_field_rng_uniform, 2) {
     return block;
 }
 
-const IR::BlockStatement*
-generate_recirc_port_assignment(const IR::Expression* port) {
-    auto egress_spec = new IR::Member(
-            new IR::PathExpression("ig_intr_md_for_tm"), "ucast_egress_port");
-    auto ingress_port = new IR::Member(
-            new IR::PathExpression("ig_intr_md"), "ingress_port");
+const IR::BlockStatement *generate_recirc_port_assignment(const IR::Expression *port) {
+    auto egress_spec =
+        new IR::Member(new IR::PathExpression("ig_intr_md_for_tm"), "ucast_egress_port");
+    auto ingress_port = new IR::Member(new IR::PathExpression("ig_intr_md"), "ingress_port");
     auto block = new IR::BlockStatement;
-    block->push_back(new IR::AssignmentStatement(new IR::Slice(egress_spec, 6, 0),
-                new IR::Slice(port, 6, 0)));
+    block->push_back(
+        new IR::AssignmentStatement(new IR::Slice(egress_spec, 6, 0), new IR::Slice(port, 6, 0)));
     block->push_back(new IR::AssignmentStatement(new IR::Slice(egress_spec, 8, 7),
-                new IR::Slice(ingress_port, 8, 7)));
+                                                 new IR::Slice(ingress_port, 8, 7)));
     return block;
 }
 
 // used by p4-14 to tna conversion,
 CONVERT_PRIMITIVE(recirculate, 8) {
     if (!using_tna_arch()) return nullptr;
-    if (primitive->operands.size() != 1)
-        return nullptr;
+    if (primitive->operands.size() != 1) return nullptr;
     ExpressionConverter conv(structure);
     auto operand = primitive->operands.at(0);
     if (operand->is<IR::Constant>() || operand->is<IR::ActionArg>()) {
@@ -487,15 +475,13 @@ CONVERT_PRIMITIVE(recirculate, 8) {
         return generate_recirc_port_assignment(port);
     } else if (auto path = operand->to<IR::PathExpression>()) {
         auto fl = structure->field_lists.get(path->path->name);
-        if (fl == nullptr)
-            return nullptr;
+        if (fl == nullptr) return nullptr;
         auto right = structure->convertFieldList(operand);
-        if (right == nullptr)
-            return nullptr;
-        computeDigestIndex(dynamic_cast<TnaProgramStructure*>(structure), primitive, right);
+        if (right == nullptr) return nullptr;
+        computeDigestIndex(dynamic_cast<TnaProgramStructure *>(structure), primitive, right);
         auto block = new IR::BlockStatement;
         block->push_back(
-                generate_recirc_port_assignment(new IR::Constant(IR::Type::Bits::get(9), 68)));
+            generate_recirc_port_assignment(new IR::Constant(IR::Type::Bits::get(9), 68)));
         // FIXME: init recirculated_header
         return block;
     }
@@ -510,11 +496,11 @@ CONVERT_PRIMITIVE(swap, 1) {
     auto v1 = primitive->operands.at(0);
     auto v2 = primitive->operands.at(1);
     auto type = v1->type;
-    return new IR::BlockStatement({
-        new IR::Declaration_Variable(temp, type, conv.convert(v1)),
-        structure->assign(primitive->srcInfo, conv.convert(v1), conv.convert(v2), type),
-        structure->assign(primitive->srcInfo, conv.convert(v2), new IR::PathExpression(temp), type)
-    });
+    return new IR::BlockStatement(
+        {new IR::Declaration_Variable(temp, type, conv.convert(v1)),
+         structure->assign(primitive->srcInfo, conv.convert(v1), conv.convert(v2), type),
+         structure->assign(primitive->srcInfo, conv.convert(v2), new IR::PathExpression(temp),
+                           type)});
 }
 
 CONVERT_PRIMITIVE(execute_meter_with_or, 1) {
@@ -527,22 +513,21 @@ CONVERT_PRIMITIVE(execute_meter_with_or, 1) {
     block->push_back(new IR::Declaration_Variable(temp2, dest->type));
     if (primitive->operands.size() == 3) {
         if (!makeTnaMeterExecCall(primitive->srcInfo, structure, block,
-                               conv.convert(primitive->operands.at(0)),
-                               conv.convert(primitive->operands.at(1)),
-                               new IR::PathExpression(dest->type, new IR::Path(temp2))))
+                                  conv.convert(primitive->operands.at(0)),
+                                  conv.convert(primitive->operands.at(1)),
+                                  new IR::PathExpression(dest->type, new IR::Path(temp2))))
             return nullptr;
     } else {
         // has pre-color, so need TNA specific call
-        block->push_back(
-            new IR::MethodCallStatement(primitive->srcInfo,
-                IR::ID(primitive->srcInfo, "execute_meter_with_color"_cs), {
-                    new IR::Argument(conv.convert(primitive->operands.at(0))),
-                    new IR::Argument(conv.convert(primitive->operands.at(1))),
-                    new IR::Argument(new IR::PathExpression(new IR::Path(temp2))),
-                    new IR::Argument(conv.convert(primitive->operands.at(3))) })); }
-    block->push_back(
-        new IR::AssignmentStatement(dest,
-            new IR::BOr(dest, new IR::PathExpression(new IR::Path(temp2)))));
+        block->push_back(new IR::MethodCallStatement(
+            primitive->srcInfo, IR::ID(primitive->srcInfo, "execute_meter_with_color"_cs),
+            {new IR::Argument(conv.convert(primitive->operands.at(0))),
+             new IR::Argument(conv.convert(primitive->operands.at(1))),
+             new IR::Argument(new IR::PathExpression(new IR::Path(temp2))),
+             new IR::Argument(conv.convert(primitive->operands.at(3)))}));
+    }
+    block->push_back(new IR::AssignmentStatement(
+        dest, new IR::BOr(dest, new IR::PathExpression(new IR::Path(temp2)))));
     return block;
 }
 
@@ -555,19 +540,19 @@ CONVERT_PRIMITIVE(execute_meter_from_hash, 1) {
     block = P4V1::generate_hash_block_statement(structure, primitive, temp, conv, 3);
     if (primitive->operands.size() == 3) {
         if (!makeTnaMeterExecCall(primitive->srcInfo, structure, block,
-                               conv.convert(primitive->operands.at(0)),
-                               new IR::PathExpression(new IR::Path(temp)),
-                               conv.convert(primitive->operands.at(2))))
+                                  conv.convert(primitive->operands.at(0)),
+                                  new IR::PathExpression(new IR::Path(temp)),
+                                  conv.convert(primitive->operands.at(2))))
             return nullptr;
     } else {
         // has pre-color, so need TNA specific call
-        block->push_back(
-            new IR::MethodCallStatement(primitive->srcInfo,
-                IR::ID(primitive->srcInfo, "execute_meter_with_color"_cs), {
-                    new IR::Argument(conv.convert(primitive->operands.at(0))),
-                    new IR::Argument(new IR::PathExpression(new IR::Path(temp))),
-                    new IR::Argument(conv.convert(primitive->operands.at(2))),
-                    new IR::Argument(conv.convert(primitive->operands.at(3))) })); }
+        block->push_back(new IR::MethodCallStatement(
+            primitive->srcInfo, IR::ID(primitive->srcInfo, "execute_meter_with_color"_cs),
+            {new IR::Argument(conv.convert(primitive->operands.at(0))),
+             new IR::Argument(new IR::PathExpression(new IR::Path(temp))),
+             new IR::Argument(conv.convert(primitive->operands.at(2))),
+             new IR::Argument(conv.convert(primitive->operands.at(3)))}));
+    }
     return block;
 }
 
@@ -582,23 +567,22 @@ CONVERT_PRIMITIVE(execute_meter_from_hash_with_or, 1) {
     block->push_back(new IR::Declaration_Variable(temp2, dest->type));
     if (primitive->operands.size() == 3) {
         if (!makeTnaMeterExecCall(primitive->srcInfo, structure, block,
-                    conv.convert(primitive->operands.at(0)),
-                    new IR::PathExpression(temp),
-                    new IR::PathExpression(dest->type, new IR::Path(temp2)))) {
+                                  conv.convert(primitive->operands.at(0)),
+                                  new IR::PathExpression(temp),
+                                  new IR::PathExpression(dest->type, new IR::Path(temp2)))) {
             return nullptr;
         }
     } else {
         // has pre-color, so need TNA specific call
-        block->push_back(
-            new IR::MethodCallStatement(primitive->srcInfo,
-                IR::ID(primitive->srcInfo, "execute_meter_with_color"_cs), {
-                    new IR::Argument(conv.convert(primitive->operands.at(0))),
-                    new IR::Argument(new IR::PathExpression(new IR::Path(temp))),
-                    new IR::Argument(new IR::PathExpression(new IR::Path(temp2))),
-                    new IR::Argument(conv.convert(primitive->operands.at(3))) })); }
-    block->push_back(
-        new IR::AssignmentStatement(dest,
-            new IR::BOr(dest, new IR::PathExpression(new IR::Path(temp2)))));
+        block->push_back(new IR::MethodCallStatement(
+            primitive->srcInfo, IR::ID(primitive->srcInfo, "execute_meter_with_color"_cs),
+            {new IR::Argument(conv.convert(primitive->operands.at(0))),
+             new IR::Argument(new IR::PathExpression(new IR::Path(temp))),
+             new IR::Argument(new IR::PathExpression(new IR::Path(temp2))),
+             new IR::Argument(conv.convert(primitive->operands.at(3)))}));
+    }
+    block->push_back(new IR::AssignmentStatement(
+        dest, new IR::BOr(dest, new IR::PathExpression(new IR::Path(temp2)))));
     return block;
 }
 
@@ -608,9 +592,8 @@ CONVERT_PRIMITIVE(sample_e2e, 1) {
     (void)primitive;
 
     if (using_tna_arch()) {
-        error(
-            ErrorType::ERR_UNSUPPORTED,
-            "sample_e2e primitive is not currently supported by the TNA architecture");
+        error(ErrorType::ERR_UNSUPPORTED,
+              "sample_e2e primitive is not currently supported by the TNA architecture");
     }
     return nullptr;
 }

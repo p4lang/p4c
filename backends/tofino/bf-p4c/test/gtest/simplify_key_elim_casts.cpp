@@ -20,13 +20,12 @@
 #include "bf-p4c/midend/elim_cast.h"
 #include "bf-p4c/midend/simplify_key_policy.h"
 #include "bf-p4c/midend/type_checker.h"
+#include "bf_gtest_helpers.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
-#include "midend/simplifyKey.h"
-
-#include "bf_gtest_helpers.h"
 #include "gtest/gtest.h"
+#include "midend/simplifyKey.h"
 
 namespace P4::Test {
 
@@ -56,10 +55,8 @@ Visitor *setup_passes() {
     auto typeMap = new P4::TypeMap;
     auto typeChecking = new BFN::TypeChecking(refMap, typeMap);
     return new PassManager{
-        new P4::SimplifyKey(typeMap, BFN::KeyIsSimple::getPolicy(*typeMap),
-                            typeChecking),
-        new BFN::ElimCasts(refMap, typeMap),
-        new P4::ConstantFolding(typeMap, true, typeChecking)};
+        new P4::SimplifyKey(typeMap, BFN::KeyIsSimple::getPolicy(*typeMap), typeChecking),
+        new BFN::ElimCasts(refMap, typeMap), new P4::ConstantFolding(typeMap, true, typeChecking)};
 }
 
 }  // namespace SimplifyKeyElimCastsTests

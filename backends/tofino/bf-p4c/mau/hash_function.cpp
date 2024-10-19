@@ -10,6 +10,7 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+/* clang-format off */
 #include <exception>
 #include "ir/ir.h"
 #include "ir/json_loader.h"
@@ -28,54 +29,53 @@ using namespace P4::literals;
  * to the programmer if a simple spelling mistake is found.
  */
 static std::map<cstring, bfn_crc_alg_t> standard_crcs_t = {
-    { "crc8"_cs, CRC_8 },
-    { "crc_8"_cs, CRC_8 },
-    { "crc_8_darc"_cs, CRC_8_DARC },
-    { "crc_8_i_code"_cs, CRC_8_I_CODE },
-    { "crc_8_itu"_cs, CRC_8_ITU },
-    { "crc_8_maxim"_cs, CRC_8_MAXIM },
-    { "crc_8_rohc"_cs, CRC_8_ROHC },
-    { "crc_8_wcdma"_cs, CRC_8_WCDMA },
-    { "crc_16"_cs, CRC_16 },
-    { "crc16"_cs, CRC_16 },  // Note multiple entries
-    { "crc_16_custom"_cs, CRC_16 },
-    { "crc_16_bypass"_cs, CRC_16_BYPASS },
-    { "crc_16_dds_110"_cs, CRC_16_DDS_110 },
-    { "crc_16_dect"_cs, CRC_16_DECT },
-    { "crc_16_dect_r"_cs, CRC_16_DECT_R },
-    { "crc_16_dect_x"_cs, CRC_16_DECT_X },
-    { "crc_16_dnp"_cs, CRC_16_DNP },
-    { "crc_16_en_13757"_cs, CRC_16_EN_13757 },
-    { "crc_16_genibus"_cs, CRC_16_GENIBUS },
-    { "crc_16_maxim"_cs, CRC_16_MAXIM },
-    { "crc_16_mcrf4xx"_cs, CRC_16_MCRF4XX },
-    { "crc_16_riello"_cs, CRC_16_RIELLO },
-    { "crc_16_t10_dif"_cs, CRC_16_T10_DIF },
-    { "crc_16_teledisk"_cs, CRC_16_TELEDISK },
-    { "crc_16_usb"_cs, CRC_16_USB },
-    { "x_25"_cs, X_25 },
-    { "xmodem"_cs, XMODEM },
-    { "modbus"_cs, MODBUS },
-    { "kermit"_cs, KERMIT },
-    { "crc_ccitt_false"_cs, CRC_CCITT_FALSE },
-    { "crc_aug_ccitt"_cs, CRC_AUG_CCITT },
-    { "crc_32"_cs, CRC_32 },
-    { "crc32"_cs, CRC_32 },  // Repeated value
-    { "crc_32_custom"_cs, CRC_32 },
-    { "crc_32_bzip2"_cs, CRC_32_BZIP2 },
-    { "crc_32c"_cs, CRC_32C },
-    { "crc_32d"_cs, CRC_32D },
-    { "crc_32_mpeg"_cs, CRC_32_MPEG },
-    { "posix"_cs, POSIX },
-    { "crc_32q"_cs, CRC_32Q },
-    { "jamcrc"_cs, JAMCRC },
-    { "xfer"_cs, XFER },
-    { "crc64"_cs, CRC_64 },
-    { "crc_64"_cs, CRC_64 },
-    { "crc_64"_cs, CRC_64_GO_ISO },
-    { "crc_64_we"_cs, CRC_64_WE },
-    { "crc_64_jones"_cs, CRC_64_JONES }
-};
+    {"crc8"_cs, CRC_8},
+    {"crc_8"_cs, CRC_8},
+    {"crc_8_darc"_cs, CRC_8_DARC},
+    {"crc_8_i_code"_cs, CRC_8_I_CODE},
+    {"crc_8_itu"_cs, CRC_8_ITU},
+    {"crc_8_maxim"_cs, CRC_8_MAXIM},
+    {"crc_8_rohc"_cs, CRC_8_ROHC},
+    {"crc_8_wcdma"_cs, CRC_8_WCDMA},
+    {"crc_16"_cs, CRC_16},
+    {"crc16"_cs, CRC_16},  // Note multiple entries
+    {"crc_16_custom"_cs, CRC_16},
+    {"crc_16_bypass"_cs, CRC_16_BYPASS},
+    {"crc_16_dds_110"_cs, CRC_16_DDS_110},
+    {"crc_16_dect"_cs, CRC_16_DECT},
+    {"crc_16_dect_r"_cs, CRC_16_DECT_R},
+    {"crc_16_dect_x"_cs, CRC_16_DECT_X},
+    {"crc_16_dnp"_cs, CRC_16_DNP},
+    {"crc_16_en_13757"_cs, CRC_16_EN_13757},
+    {"crc_16_genibus"_cs, CRC_16_GENIBUS},
+    {"crc_16_maxim"_cs, CRC_16_MAXIM},
+    {"crc_16_mcrf4xx"_cs, CRC_16_MCRF4XX},
+    {"crc_16_riello"_cs, CRC_16_RIELLO},
+    {"crc_16_t10_dif"_cs, CRC_16_T10_DIF},
+    {"crc_16_teledisk"_cs, CRC_16_TELEDISK},
+    {"crc_16_usb"_cs, CRC_16_USB},
+    {"x_25"_cs, X_25},
+    {"xmodem"_cs, XMODEM},
+    {"modbus"_cs, MODBUS},
+    {"kermit"_cs, KERMIT},
+    {"crc_ccitt_false"_cs, CRC_CCITT_FALSE},
+    {"crc_aug_ccitt"_cs, CRC_AUG_CCITT},
+    {"crc_32"_cs, CRC_32},
+    {"crc32"_cs, CRC_32},  // Repeated value
+    {"crc_32_custom"_cs, CRC_32},
+    {"crc_32_bzip2"_cs, CRC_32_BZIP2},
+    {"crc_32c"_cs, CRC_32C},
+    {"crc_32d"_cs, CRC_32D},
+    {"crc_32_mpeg"_cs, CRC_32_MPEG},
+    {"posix"_cs, POSIX},
+    {"crc_32q"_cs, CRC_32Q},
+    {"jamcrc"_cs, JAMCRC},
+    {"xfer"_cs, XFER},
+    {"crc64"_cs, CRC_64},
+    {"crc_64"_cs, CRC_64},
+    {"crc_64"_cs, CRC_64_GO_ISO},
+    {"crc_64_we"_cs, CRC_64_WE},
+    {"crc_64_jones"_cs, CRC_64_JONES}};
 
 /**
  * The purpose of this function is to directly convert a p4_14 algorithm string to a crc
@@ -89,8 +89,8 @@ static std::map<cstring, bfn_crc_alg_t> standard_crcs_t = {
  * node is needed.  64 bit hashes have 65 bit polynomials, and thus cannot be parsed
  * by stoll.  Any polynomial over 64 bits is currently unsupported by the bf-utils library
  */
-static bool direct_crc_string_conversion(bfn_hash_algorithm_ *hash_alg,
-        cstring alg_name_c, Util::SourceInfo srcInfo) {
+static bool direct_crc_string_conversion(bfn_hash_algorithm_ *hash_alg, cstring alg_name_c,
+                                         Util::SourceInfo srcInfo) {
     std::string alg_name = alg_name_c + "";
     size_t pos = 0;
     if ((pos = alg_name.find("poly_")) != std::string::npos) {
@@ -189,8 +189,8 @@ const IR::Expression *IR::MAU::HashFunction::convertHashAlgorithmBFN(Util::Sourc
             endianness_set = true;
             alg_name = alg_name.substr(0, pos) + alg_name.substr(pos + 4);
         } else if ((pos = alg_name.find("_extend")) != std::string::npos) {
-            ERROR_CHECK(!extension_set, "%s: Extension set multiple times in algorithm %s",
-                    srcInfo, algorithm.name);
+            ERROR_CHECK(!extension_set, "%s: Extension set multiple times in algorithm %s", srcInfo,
+                        algorithm.name);
             extend = true;
             extension_set = true;
             alg_name = alg_name.substr(0, pos) + alg_name.substr(pos + 7);
@@ -249,8 +249,8 @@ const IR::Expression *IR::MAU::HashFunction::convertHashAlgorithmInner(
     } else if (direct_crc_string_conversion(&hash_alg, alg_name, srcInfo)) {
         char *error_message;
         if (!verify_algorithm(&hash_alg, &error_message)) {
-            error("%s: Crc algorithm %s incorrect for the following reason : %s",
-                   srcInfo, algorithm.name, error_message);
+            error("%s: Crc algorithm %s incorrect for the following reason : %s", srcInfo,
+                  algorithm.name, error_message);
             return nullptr;
         } else {
             detected_algorithm = CRC;
@@ -378,8 +378,8 @@ const IR::MethodCallExpression *IR::MAU::HashFunction::hash_to_mce(const IR::Exp
 
     const IR::MethodCallExpression *mce = nullptr;
     if (conv_e == nullptr || (mce = conv_e->to<IR::MethodCallExpression>()) == nullptr) {
-        error("%s: Cannot properly set up the hash function on the hash matrix : %s",
-                e->srcInfo, error_alg_name);
+        error("%s: Cannot properly set up the hash function on the hash matrix : %s", e->srcInfo,
+              error_alg_name);
         return nullptr;
     }
 
@@ -549,11 +549,14 @@ void IR::MAU::HashFunction::toJSON(JSONGenerator &json) const {
 void IR::MAU::HashFunction::build_algorithm_t(bfn_hash_algorithm_ *alg) const {
     switch (type) {
         case RANDOM:
-            alg->hash_alg = RANDOM_DYN; break;
+            alg->hash_alg = RANDOM_DYN;
+            break;
         case IDENTITY:
-            alg->hash_alg = IDENTITY_DYN; break;
+            alg->hash_alg = IDENTITY_DYN;
+            break;
         case CRC:
-            alg->hash_alg = CRC_DYN; break;
+            alg->hash_alg = CRC_DYN;
+            break;
         case XOR:
             alg->hash_alg = XOR_DYN;
             break;
@@ -585,3 +588,5 @@ IR::MAU::HashFunction *IR::MAU::HashFunction::fromJSON(JSONLoader &json) {
     json.load("extend", rv->extend);
     return rv;
 }
+
+/* clang-format on */

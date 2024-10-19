@@ -25,13 +25,12 @@ namespace v2 {
 using AllocVerifier = std::function<bool(const SuperCluster *, AllocatorMetrics &)>;
 
 /// @returns true if two field slices cannot be packed into one container.
-using HasPackConflict = std::function<
-    bool(const PHV::FieldSlice &fs1, const PHV::FieldSlice &fs2)>;
+using HasPackConflict = std::function<bool(const PHV::FieldSlice &fs1, const PHV::FieldSlice &fs2)>;
 
 /// map field slices to their starting position in a container.
 using FieldSliceStart = std::pair<PHV::FieldSlice, int>;
 using FieldSliceAllocStartMap = ordered_map<PHV::FieldSlice, int>;
-std::ostream& operator<<(std::ostream& out, const FieldSliceAllocStartMap& fs);
+std::ostream &operator<<(std::ostream &out, const FieldSliceAllocStartMap &fs);
 
 /// type of container groups grouped by sizes.
 using ContainerGroupsBySize = std::map<PHV::Size, std::vector<ContainerGroup>>;

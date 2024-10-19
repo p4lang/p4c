@@ -11,6 +11,7 @@
  */
 
 #include <optional>
+
 #include <boost/algorithm/string/replace.hpp>
 
 #include "bf-p4c/mau/instruction_selection.h"
@@ -31,13 +32,11 @@ class ClotTest : public JBayBackendTest {};
 
 namespace {
 
-std::optional<TofinoPipeTestCase>
-createClotTest(const std::string& doNotUseClotPragmas,
-               const std::string& headerTypes,
-               const std::string& headerInstances,
-               const std::string& parser,
-               const std::string& mau,
-               const std::string& deparser) {
+std::optional<TofinoPipeTestCase> createClotTest(const std::string &doNotUseClotPragmas,
+                                                 const std::string &headerTypes,
+                                                 const std::string &headerInstances,
+                                                 const std::string &parser, const std::string &mau,
+                                                 const std::string &deparser) {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
 %DO_NOT_USE_CLOT_PRAGMAS%
 
@@ -83,7 +82,7 @@ V1Switch(parse(), verifyChecksum(), mau(), mau(), computeChecksum(), deparse()) 
     boost::replace_first(source, "%MAU%", mau);
     boost::replace_first(source, "%DEPARSER%", deparser);
 
-    auto& options = BackendOptions();
+    auto &options = BackendOptions();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.target = "tofino"_cs;
     options.arch = "v1model"_cs;
@@ -98,12 +97,14 @@ struct SliceSpec {
     std::string fieldName;
     std::optional<le_bitrange> slice;
 
-    SliceSpec(const char* fieldName) : fieldName(fieldName),  // NOLINT(runtime/explicit)
-                                       slice(std::nullopt) {}
-    SliceSpec(const cstring fieldName) : fieldName(fieldName),  // NOLINT(runtime/explicit)
-                                         slice(std::nullopt) {}
+    SliceSpec(const char *fieldName)  // NOLINT(runtime/explicit)
+        : fieldName(fieldName),       // NOLINT(runtime/explicit)
+          slice(std::nullopt) {}
+    SliceSpec(const cstring fieldName)  // NOLINT(runtime/explicit)
+        : fieldName(fieldName),         // NOLINT(runtime/explicit)
+          slice(std::nullopt) {}
 
-    SliceSpec(const char* fieldName, le_bitrange slice) : fieldName(fieldName), slice(slice) {}
+    SliceSpec(const char *fieldName, le_bitrange slice) : fieldName(fieldName), slice(slice) {}
     SliceSpec(const cstring fieldName, le_bitrange slice) : fieldName(fieldName), slice(slice) {}
 
     bool operator<(const SliceSpec other) const {
@@ -120,35 +121,27 @@ struct SliceSpec {
         return other.slice < slice;
     }
 
-    bool operator<=(const SliceSpec other) const {
-        return !(*this > other);
-    }
+    bool operator<=(const SliceSpec other) const { return !(*this > other); }
 
-    bool operator!=(const SliceSpec other) const {
-        return !(*this == other);
-    }
+    bool operator!=(const SliceSpec other) const { return !(*this == other); }
 
-    bool operator>=(const SliceSpec other) const {
-        return !(*this < other);
-    }
+    bool operator>=(const SliceSpec other) const { return !(*this < other); }
 
  private:
-    friend std::ostream& operator<<(std::ostream&, const SliceSpec&);
+    friend std::ostream &operator<<(std::ostream &, const SliceSpec &);
 };
 
-std::ostream& operator<<(std::ostream& out, const SliceSpec& sliceSpec) {
+std::ostream &operator<<(std::ostream &out, const SliceSpec &sliceSpec) {
     out << sliceSpec.fieldName;
-    if (sliceSpec.slice)
-        out << "[" << sliceSpec.slice->hi << ".." << sliceSpec.slice->lo << "]";
+    if (sliceSpec.slice) out << "[" << sliceSpec.slice->hi << ".." << sliceSpec.slice->lo << "]";
     return out;
 }
 
 using ExpectedClot = std::vector<SliceSpec>;
 using ExpectedAllocation = std::set<ExpectedClot>;
 
-void runClotTest(std::optional<TofinoPipeTestCase> test,
-             ExpectedAllocation expectedAlloc,
-             ExpectedAllocation expectedAliases = {}) {
+void runClotTest(std::optional<TofinoPipeTestCase> test, ExpectedAllocation expectedAlloc,
+                 ExpectedAllocation expectedAliases = {}) {
     PhvInfo phvInfo;
     PhvUse phvUse(phvInfo);
     ClotInfo clotInfo(phvUse);
@@ -165,15 +158,9 @@ void runClotTest(std::optional<TofinoPipeTestCase> test,
     AllocateClot allocateClot(clotInfo, phvInfo, phvUse, pragmaDoNotUseClot, pragmaAlias, false);
 
     PassManager passes = {
-      &collectHeaderStackInfo,
-      &collectPhvInfo,
-      &clotInfo.parserInfo,
-      &instructionSelection,
-      &pragmaAlias,
-      &pragmaDoNotUseClot,
-      &fieldPovAnalysis,
-      &collectClotInfo,
-      &allocateClot,
+        &collectHeaderStackInfo, &collectPhvInfo,  &clotInfo.parserInfo,
+        &instructionSelection,   &pragmaAlias,     &pragmaDoNotUseClot,
+        &fieldPovAnalysis,       &collectClotInfo, &allocateClot,
     };
 
     ASSERT_TRUE(test);
@@ -181,17 +168,17 @@ void runClotTest(std::optional<TofinoPipeTestCase> test,
 
     // Specialize each expected CLOT for each gress and populate any missing slice ranges.
     ExpectedAllocation expectedClots;
-    for (auto& clot : expectedAlloc) {
+    for (auto &clot : expectedAlloc) {
         EXPECT_NE(clot.size(), 0UL);
         for (auto gress : {INGRESS, EGRESS}) {
             ExpectedClot specializedClot;
-            for (auto& slice : clot) {
+            for (auto &slice : clot) {
                 auto fieldName = toString(gress) + "::hdr." + slice.fieldName;
                 BUG_CHECK(phvInfo.field(fieldName),
                           "Field %1% in expected test result is not present in the P4 program",
                           fieldName);
-                auto bitrange = slice.slice ? *slice.slice
-                                            : StartLen(0, phvInfo.field(fieldName)->size);
+                auto bitrange =
+                    slice.slice ? *slice.slice : StartLen(0, phvInfo.field(fieldName)->size);
                 specializedClot.emplace_back(fieldName, bitrange);
             }
 
@@ -201,10 +188,10 @@ void runClotTest(std::optional<TofinoPipeTestCase> test,
 
     // Convert the actual allocation into an ExpectedAllocation.
     ExpectedAllocation actualClots;
-    for (const auto* clot : clotInfo.clots()) {
+    for (const auto *clot : clotInfo.clots()) {
         // Convert the actual CLOT into an ExpectedClot.
         ExpectedClot expectedClot;
-        for (const auto& kv : clot->fields_to_slices()) {
+        for (const auto &kv : clot->fields_to_slices()) {
             expectedClot.emplace_back(kv.first->name, kv.second->range());
         }
 
@@ -222,13 +209,13 @@ void runClotTest(std::optional<TofinoPipeTestCase> test,
         // Identify all fields participating in aliases
         std::map<cstring, cstring> aliasSrcToDst;
         std::set<cstring> aliasDst;
-        for (auto& [src, dst] : pragmaAlias.getAliasMap()) {
+        for (auto &[src, dst] : pragmaAlias.getAliasMap()) {
             aliasSrcToDst.emplace(src, dst.field);
             aliasDst.emplace(dst.field);
         }
 
         // Verify that the fields in each group participate in the same alias
-        for (auto& aliasGrp : expectedAliases) {
+        for (auto &aliasGrp : expectedAliases) {
             EXPECT_NE(aliasGrp.size(), 0UL);
             for (auto gress : {INGRESS, EGRESS}) {
                 cstring dst = ""_cs;
@@ -262,19 +249,23 @@ void runClotTest(std::optional<TofinoPipeTestCase> test,
 
 TEST_F(ClotTest, Basic1) {
     auto test = createClotTest(P4_SOURCE(R"(
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             header H {
                 bit<64> f1;
                 bit<8> f2;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             H h;
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             state start {
                 pkt.extract(hdr.h);
                 transition accept;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             action act1() { hdr.h.f2 = 0; }
 
             table t1 {
@@ -286,7 +277,8 @@ TEST_F(ClotTest, Basic1) {
             apply {
                 t1.apply();
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             pkt.emit(hdr.h);
         )"));
 
@@ -299,21 +291,25 @@ TEST_F(ClotTest, Basic1) {
 
 TEST_F(ClotTest, AdjacentHeaders1) {
     auto test = createClotTest(P4_SOURCE(R"(
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             header H {
                 bit<64> f1;
                 bit<8> f2;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             H h1;
             H h2;
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             state start {
                 pkt.extract(hdr.h1);
                 pkt.extract(hdr.h2);
                 transition accept;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             action act1() { hdr.h2.f2 = 0; }
 
             table t1 {
@@ -325,7 +321,8 @@ TEST_F(ClotTest, AdjacentHeaders1) {
             apply {
                 t1.apply();
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             pkt.emit(hdr.h1);
             pkt.emit(hdr.h2);
         )"));
@@ -337,14 +334,13 @@ TEST_F(ClotTest, AdjacentHeaders1) {
     // -----
     // h2.f2  written
     // -----
-    runClotTest(test, {
-        {"h1.f1", "h1.f2", "h2.f1"}
-    });
+    runClotTest(test, {{"h1.f1", "h1.f2", "h2.f1"}});
 }
 
 TEST_F(ClotTest, HeaderRemoval1) {
     auto test = createClotTest(P4_SOURCE(R"(
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             header H1 {
                 bit<32> f;
             }
@@ -357,18 +353,21 @@ TEST_F(ClotTest, HeaderRemoval1) {
                 bit<96> f1;
                 bit<8> f2;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             H1 h1;
             H2 h2;
             H3 h3;
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             state start {
                 pkt.extract(hdr.h1);
                 pkt.extract(hdr.h2);
                 pkt.extract(hdr.h3);
                 transition accept;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             action act1() {
                 hdr.h2.setInvalid();
                 hdr.h3.f2 = 0;
@@ -383,7 +382,8 @@ TEST_F(ClotTest, HeaderRemoval1) {
             apply {
                 t1.apply();
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             pkt.emit(hdr.h1);
             pkt.emit(hdr.h2);
             pkt.emit(hdr.h3);
@@ -399,15 +399,16 @@ TEST_F(ClotTest, HeaderRemoval1) {
     // h3.f2        written
     // -----------
     runClotTest(test, {
-        {"h1.f"},
-        {{"h2.f", FromTo(24, 63)}},
-        {"h3.f1"},
-    });
+                          {"h1.f"},
+                          {{"h2.f", FromTo(24, 63)}},
+                          {"h3.f1"},
+                      });
 }
 
 TEST_F(ClotTest, HeaderRemoval2) {
     auto test = createClotTest(P4_SOURCE(R"(
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             header H1 {
                 bit<32> f;
             }
@@ -420,18 +421,21 @@ TEST_F(ClotTest, HeaderRemoval2) {
                 bit<96> f1;
                 bit<8> f2;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             H1 h1;
             H2 h2;
             H3 h3;
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             state start {
                 pkt.extract(hdr.h1);
                 pkt.extract(hdr.h2);
                 pkt.extract(hdr.h3);
                 transition accept;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             action act1() {
                 hdr.h2.setInvalid();
                 hdr.h3.setInvalid();
@@ -446,7 +450,8 @@ TEST_F(ClotTest, HeaderRemoval2) {
             apply {
                 t1.apply();
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             pkt.emit(hdr.h1);
             pkt.emit(hdr.h2);
             pkt.emit(hdr.h3);
@@ -461,14 +466,15 @@ TEST_F(ClotTest, HeaderRemoval2) {
     // h3.f2  CLOT
     // -----
     runClotTest(test, {
-        {"h1.f"},
-        {"h2.f", "h3.f1", "h3.f2"},
-    });
+                          {"h1.f"},
+                          {"h2.f", "h3.f1", "h3.f2"},
+                      });
 }
 
 TEST_F(ClotTest, MutualExclusion1) {
     auto test = createClotTest(P4_SOURCE(R"(
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             header H1 {
                 bit<32> f1;
                 bit<8> f2;
@@ -482,12 +488,14 @@ TEST_F(ClotTest, MutualExclusion1) {
                 bit<96> f1;
                 bit<8> f2;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             H1 h1;
             H2 h2a;
             H2 h2b;
             H3 h3;
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             state start {
                 pkt.extract(hdr.h1);
                 transition select(hdr.h1.f2) {
@@ -510,7 +518,8 @@ TEST_F(ClotTest, MutualExclusion1) {
                 pkt.extract(hdr.h3);
                 transition accept;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             action act1() {
                 hdr.h3.f2 = 0;
             }
@@ -524,7 +533,8 @@ TEST_F(ClotTest, MutualExclusion1) {
             apply {
                 t1.apply();
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             pkt.emit(hdr.h1);
             pkt.emit(hdr.h2b);
             pkt.emit(hdr.h2a);
@@ -542,16 +552,17 @@ TEST_F(ClotTest, MutualExclusion1) {
     //           h3.f2  written
     //           -----
     runClotTest(test, {
-        {"h1.f1", "h1.f2"},
-        {"h2a.f"},
-        {"h2b.f"},
-        {"h3.f1"},
-    });
+                          {"h1.f1", "h1.f2"},
+                          {"h2a.f"},
+                          {"h2b.f"},
+                          {"h3.f1"},
+                      });
 }
 
 TEST_F(ClotTest, Insertion1) {
     auto test = createClotTest(P4_SOURCE(R"(
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             header H1 {
                 bit<32> f1;
                 bit<8> f2;
@@ -565,12 +576,14 @@ TEST_F(ClotTest, Insertion1) {
                 bit<96> f1;
                 bit<8> f2;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             H1 h1;
             H2 h2a;
             H2 h2b;
             H3 h3;
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             state start {
                 pkt.extract(hdr.h1);
                 transition select(hdr.h1.f2) {
@@ -593,7 +606,8 @@ TEST_F(ClotTest, Insertion1) {
                 pkt.extract(hdr.h3);
                 transition accept;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             action act1() {
                 hdr.h2b.setValid();
                 hdr.h3.f2 = 0;
@@ -608,7 +622,8 @@ TEST_F(ClotTest, Insertion1) {
             apply {
                 t1.apply();
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             pkt.emit(hdr.h1);
             pkt.emit(hdr.h2b);
             pkt.emit(hdr.h2a);
@@ -626,15 +641,16 @@ TEST_F(ClotTest, Insertion1) {
     //           h3.f2         written
     //           -----
     runClotTest(test, {
-        {{"h1.f1", FromTo(16, 31)}},
-        {"h2a.f"},
-        {"h3.f1"},
-    });
+                          {{"h1.f1", FromTo(16, 31)}},
+                          {"h2a.f"},
+                          {"h3.f1"},
+                      });
 }
 
 TEST_F(ClotTest, Insertion2) {
     auto test = createClotTest(P4_SOURCE(R"(
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             header H1 {
                 bit<32> f1;
                 bit<8> f2;
@@ -648,12 +664,14 @@ TEST_F(ClotTest, Insertion2) {
                 bit<96> f1;
                 bit<8> f2;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             H1 h1;
             H2 h2a;
             H2 h2b;
             H3 h3;
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             state start {
                 pkt.extract(hdr.h1);
                 transition select(hdr.h1.f2) {
@@ -676,7 +694,8 @@ TEST_F(ClotTest, Insertion2) {
                 pkt.extract(hdr.h3);
                 transition accept;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             action act1() {
                 hdr.h2a.setValid();
                 hdr.h3.f2 = 0;
@@ -691,7 +710,8 @@ TEST_F(ClotTest, Insertion2) {
             apply {
                 t1.apply();
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             pkt.emit(hdr.h1);
             pkt.emit(hdr.h2b);
             pkt.emit(hdr.h2a);
@@ -711,15 +731,16 @@ TEST_F(ClotTest, Insertion2) {
     // h3.f2         written
     // -----
     runClotTest(test, {
-        {"h1.f1", "h1.f2"},
-        {{"h2b.f", FromTo(24, 63)}},
-        {"h3.f1"},
-    });
+                          {"h1.f1", "h1.f2"},
+                          {{"h2b.f", FromTo(24, 63)}},
+                          {"h3.f1"},
+                      });
 }
 
 TEST_F(ClotTest, Reorder1) {
     auto test = createClotTest(P4_SOURCE(R"(
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             header H1 {
                 bit<32> f;
             }
@@ -736,12 +757,14 @@ TEST_F(ClotTest, Reorder1) {
                 bit<104> f1;
                 bit<8> f2;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             H1 h1;
             H2 h2;
             H3 h3;
             H4 h4;
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             state start {
                 pkt.extract(hdr.h1);
                 pkt.extract(hdr.h2);
@@ -749,7 +772,8 @@ TEST_F(ClotTest, Reorder1) {
                 pkt.extract(hdr.h4);
                 transition accept;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             action act1() {
                 hdr.h4.f2 = 0;
             }
@@ -763,7 +787,8 @@ TEST_F(ClotTest, Reorder1) {
             apply {
                 t1.apply();
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             pkt.emit(hdr.h1);
             pkt.emit(hdr.h3);
             pkt.emit(hdr.h2);
@@ -784,16 +809,17 @@ TEST_F(ClotTest, Reorder1) {
     // h4.f2        written
     // -----
     runClotTest(test, {
-        {{"h1.f", FromTo(24, 31)}},
-        {{"h2.f", FromTo(24, 63)}},
-        {{"h3.f", FromTo(24, 95)}},
-        {"h4.f1"},
-    });
+                          {{"h1.f", FromTo(24, 31)}},
+                          {{"h2.f", FromTo(24, 63)}},
+                          {{"h3.f", FromTo(24, 95)}},
+                          {"h4.f1"},
+                      });
 }
 
 TEST_F(ClotTest, Reorder2) {
     auto test = createClotTest(P4_SOURCE(R"(
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             header H1 {
                 bit<32> f;
             }
@@ -810,12 +836,14 @@ TEST_F(ClotTest, Reorder2) {
                 bit<96> f1;
                 bit<8> f2;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             H1 h1;
             H2 h2;
             H3 h3;
             H4 h4;
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             state start {
                 pkt.extract(hdr.h1);
                 pkt.extract(hdr.h2);
@@ -823,7 +851,8 @@ TEST_F(ClotTest, Reorder2) {
                 pkt.extract(hdr.h4);
                 transition accept;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             action act1() {
                 hdr.h4.f2 = 0;
             }
@@ -837,7 +866,8 @@ TEST_F(ClotTest, Reorder2) {
             apply {
                 t1.apply();
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             pkt.emit(hdr.h1);
             pkt.emit(hdr.h3);
             pkt.emit(hdr.h2);
@@ -857,15 +887,16 @@ TEST_F(ClotTest, Reorder2) {
     // h4.f2        written
     // -----
     runClotTest(test, {
-        {"h1.f"},
-        {{"h3.f", FromTo(24, 63)}},
-        {"h4.f1"},
-    });
+                          {"h1.f"},
+                          {{"h3.f", FromTo(24, 63)}},
+                          {"h4.f1"},
+                      });
 }
 
 TEST_F(ClotTest, AdjacentHeaders2) {
     auto test = createClotTest(P4_SOURCE(R"(
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             header H1 {
                 bit<96> f1;
                 bit<8> f2;
@@ -883,12 +914,14 @@ TEST_F(ClotTest, AdjacentHeaders2) {
                 bit<32> f1;
                 bit<8> f2;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             H1 h1;
             H2 h2;
             H3 h3;
             H4 h4;
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             state start {
                 pkt.extract(hdr.h1);
                 transition select(hdr.h1.f2) {
@@ -907,7 +940,8 @@ TEST_F(ClotTest, AdjacentHeaders2) {
                 pkt.extract(hdr.h4);
                 transition accept;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             action act1() {
                 hdr.h4.f2 = 0;
             }
@@ -921,7 +955,8 @@ TEST_F(ClotTest, AdjacentHeaders2) {
             apply {
                 t1.apply();
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             pkt.emit(hdr.h1);
             pkt.emit(hdr.h2);
             pkt.emit(hdr.h3);
@@ -959,31 +994,31 @@ TEST_F(ClotTest, AdjacentHeaders2) {
     // -----
     // h4.f1        CLOT 2
     // h4.f2        written
-    runClotTest(test, {
-        {"h1.f1", "h1.f2"},
-        {"h2.f", "h3.f"},
-        {"h4.f1"}
-    });
+    runClotTest(test, {{"h1.f1", "h1.f2"}, {"h2.f", "h3.f"}, {"h4.f1"}});
 }
 
 TEST_F(ClotTest, FieldPragma) {
     auto test = createClotTest(P4_SOURCE(R"(
             @do_not_use_clot("ingress", "hdr.h.f1")
             @do_not_use_clot("egress", "hdr.h.f1")
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             header H {
                 bit<64> f1;
                 bit<64> f2;
                 bit<8> f3;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             H h;
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             state start {
                 pkt.extract(hdr.h);
                 transition accept;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             action act1() { hdr.h.f3 = 0; }
 
             table t1 {
@@ -995,7 +1030,8 @@ TEST_F(ClotTest, FieldPragma) {
             apply {
                 t1.apply();
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             pkt.emit(hdr.h);
         )"));
 
@@ -1011,20 +1047,24 @@ TEST_F(ClotTest, HeaderPragma) {
     auto test = createClotTest(P4_SOURCE(R"(
             @do_not_use_clot("ingress", "hdr.h")
             @do_not_use_clot("egress", "hdr.h")
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             header H {
                 bit<64> f1;
                 bit<64> f2;
                 bit<8> f3;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             H h;
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             state start {
                 pkt.extract(hdr.h);
                 transition accept;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             action act1() { hdr.h.f3 = 0; }
 
             table t1 {
@@ -1036,7 +1076,8 @@ TEST_F(ClotTest, HeaderPragma) {
             apply {
                 t1.apply();
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             pkt.emit(hdr.h);
         )"));
 
@@ -1050,7 +1091,8 @@ TEST_F(ClotTest, HeaderPragma) {
 
 TEST_F(ClotTest, AdjacentMultiheaderVariableSize) {
     auto test = createClotTest(P4_SOURCE(R"(
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             header H1 {
                 bit<96> f1;
                 bit<8> f2;
@@ -1073,13 +1115,15 @@ TEST_F(ClotTest, AdjacentMultiheaderVariableSize) {
                 bit<40> f1;
                 bit<8> f2;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             H1 a;
             H2 b;
             H3 c;
             H4 d;
             H5 e;
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             state start {
                 pkt.extract(hdr.a);
                 transition select(hdr.a.f2) {
@@ -1110,7 +1154,8 @@ TEST_F(ClotTest, AdjacentMultiheaderVariableSize) {
                 pkt.extract(hdr.e);
                 transition accept;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             action act1() {
                 hdr.e.f2 = 0;
             }
@@ -1124,7 +1169,8 @@ TEST_F(ClotTest, AdjacentMultiheaderVariableSize) {
             apply {
                 t1.apply();
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             pkt.emit(hdr.a);
             pkt.emit(hdr.b);
             pkt.emit(hdr.c);
@@ -1149,16 +1195,13 @@ TEST_F(ClotTest, AdjacentMultiheaderVariableSize) {
     // e.f1        CLOT 2
     // e.f2        written
 
-    runClotTest(test, {
-        {"b.f", "c.f", "d.f1", "d.f2"},
-        {"a.f1", "a.f2"},
-        {"e.f1"}
-    });
+    runClotTest(test, {{"b.f", "c.f", "d.f1", "d.f2"}, {"a.f1", "a.f2"}, {"e.f1"}});
 }
 
 TEST_F(ClotTest, NotAdjacentMultiheaderVariableSize) {
     auto test = createClotTest(P4_SOURCE(R"(
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             header H1 {
                 bit<96> f1;
                 bit<8> f2;
@@ -1181,13 +1224,15 @@ TEST_F(ClotTest, NotAdjacentMultiheaderVariableSize) {
                 bit<40> f1;
                 bit<8> f2;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             H1 a;
             H2 b;
             H3 c;
             H4 d;
             H5 e;
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             state start {
                 pkt.extract(hdr.a);
                 transition select(hdr.a.f2) {
@@ -1218,7 +1263,8 @@ TEST_F(ClotTest, NotAdjacentMultiheaderVariableSize) {
                 pkt.extract(hdr.e);
                 transition accept;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             action act1() {
                 hdr.d.f2 = 0;
             }
@@ -1232,7 +1278,8 @@ TEST_F(ClotTest, NotAdjacentMultiheaderVariableSize) {
             apply {
                 t1.apply();
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             pkt.emit(hdr.a);
             pkt.emit(hdr.b);
             pkt.emit(hdr.c);
@@ -1258,23 +1305,23 @@ TEST_F(ClotTest, NotAdjacentMultiheaderVariableSize) {
     // e.f1[15:0]   CLOT 2
     // e.f2         CLOT 2
 
-    runClotTest(test, {
-        {"b.f", "c.f", "d.f1"},
-        {"a.f1", "a.f2"},
-        {{"e.f1", FromTo(0, 15)}, "e.f2"}
-    });
+    runClotTest(test,
+                {{"b.f", "c.f", "d.f1"}, {"a.f1", "a.f2"}, {{"e.f1", FromTo(0, 15)}, "e.f2"}});
 }
 
 TEST_F(ClotTest, AdjacentMultiheaderVariableSizeHeaderStack) {
     auto test = createClotTest(P4_SOURCE(R"(
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             header hdr_t {
                 bit<32> f1;
                 bit<16> f2;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             hdr_t[5] stack;
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             state start {
                 pkt.extract(hdr.stack[0]);
                 transition select(hdr.stack[0].f1) {
@@ -1305,7 +1352,8 @@ TEST_F(ClotTest, AdjacentMultiheaderVariableSizeHeaderStack) {
                 pkt.extract(hdr.stack[4]);
                 transition accept;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             action act1() {
                 hdr.stack[4].f2 = 0;
             }
@@ -1319,7 +1367,8 @@ TEST_F(ClotTest, AdjacentMultiheaderVariableSizeHeaderStack) {
             apply {
                 t1.apply();
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             pkt.emit(hdr);
         )"));
 
@@ -1343,21 +1392,24 @@ TEST_F(ClotTest, AdjacentMultiheaderVariableSizeHeaderStack) {
     // stack[4].f2        written
 
     runClotTest(test, {{"stack[1].f1", "stack[1].f2", "stack[2].f1", "stack[2].f2", "stack[3].f1",
-                    "stack[3].f2"},
-                   {"stack[0].f1", "stack[0].f2"},
-                   {"stack[4].f1"}});
+                        "stack[3].f2"},
+                       {"stack[0].f1", "stack[0].f2"},
+                       {"stack[4].f1"}});
 }
 
 TEST_F(ClotTest, NotAdjacentMultiheaderVariableSizeHeaderStack) {
     auto test = createClotTest(P4_SOURCE(R"(
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             header hdr_t {
                 bit<32> f1;
                 bit<16> f2;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             hdr_t[5] stack;
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             state start {
                 pkt.extract(hdr.stack[0]);
                 transition select(hdr.stack[0].f1) {
@@ -1388,7 +1440,8 @@ TEST_F(ClotTest, NotAdjacentMultiheaderVariableSizeHeaderStack) {
                 pkt.extract(hdr.stack[4]);
                 transition accept;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             action act1() {
                 hdr.stack[3].f2 = 0;
             }
@@ -1402,7 +1455,8 @@ TEST_F(ClotTest, NotAdjacentMultiheaderVariableSizeHeaderStack) {
             apply {
                 t1.apply();
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             pkt.emit(hdr);
         )"));
 
@@ -1427,8 +1481,8 @@ TEST_F(ClotTest, NotAdjacentMultiheaderVariableSizeHeaderStack) {
     // stack[4].f2        CLOT 2
 
     runClotTest(test, {{"stack[1].f1", "stack[1].f2", "stack[2].f1", "stack[2].f2", "stack[3].f1"},
-                   {"stack[0].f1", "stack[0].f2"},
-                   {{"stack[4].f1", FromTo(0, 7)}, "stack[4].f2"}});
+                       {"stack[0].f1", "stack[0].f2"},
+                       {{"stack[4].f1", FromTo(0, 7)}, "stack[4].f2"}});
 }
 
 // If fields are zero intialized or extracted by a constant between two CLOTs, those two CLOT are
@@ -1437,19 +1491,22 @@ TEST_F(ClotTest, NotAdjacentMultiheaderVariableSizeHeaderStack) {
 // CLOTs.
 TEST_F(ClotTest, ZeroInitsBetweenTwoClots) {
     auto test = createClotTest(P4_SOURCE(R"(
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             header hdr_t {
                 bit<32> f1;
                 bit<32> f2;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             hdr_t a;
             hdr_t b;
             hdr_t c;
             hdr_t d;
             hdr_t e;
             hdr_t f;
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             state start {
                 pkt.extract(hdr.a);
                 transition parse_b;
@@ -1484,7 +1541,8 @@ TEST_F(ClotTest, ZeroInitsBetweenTwoClots) {
                 pkt.extract(hdr.e);
                 transition accept;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             action act1() { hdr.e.f2 = 0; }
 
             table t1 {
@@ -1496,29 +1554,33 @@ TEST_F(ClotTest, ZeroInitsBetweenTwoClots) {
             apply {
                 t1.apply();
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             pkt.emit(hdr);
         )"));
 
     runClotTest(test,
-                    {{"a.f1", "a.f2", "b.f1", "b.f2"}, {"d.f1", "d.f2"}, {{"e.f1", FromTo(0, 7)}}});
+                {{"a.f1", "a.f2", "b.f1", "b.f2"}, {"d.f1", "d.f2"}, {{"e.f1", FromTo(0, 7)}}});
 }
 
 TEST_F(ClotTest, ExtractConstantsBetweenTwoClots) {
     auto test = createClotTest(P4_SOURCE(R"(
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             header hdr_t {
                 bit<32> f1;
                 bit<32> f2;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             hdr_t a;
             hdr_t b;
             hdr_t c;
             hdr_t d;
             hdr_t e;
             hdr_t f;
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             state start {
                 pkt.extract(hdr.a);
                 transition parse_b;
@@ -1553,7 +1615,8 @@ TEST_F(ClotTest, ExtractConstantsBetweenTwoClots) {
                 pkt.extract(hdr.e);
                 transition accept;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             action act1() { hdr.e.f2 = 0; }
 
             table t1 {
@@ -1565,29 +1628,33 @@ TEST_F(ClotTest, ExtractConstantsBetweenTwoClots) {
             apply {
                 t1.apply();
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             pkt.emit(hdr);
         )"));
 
     runClotTest(test,
-                    {{"a.f1", "a.f2", "b.f1", "b.f2"}, {"d.f1", "d.f2"}, {{"e.f1", FromTo(0, 7)}}});
+                {{"a.f1", "a.f2", "b.f1", "b.f2"}, {"d.f1", "d.f2"}, {{"e.f1", FromTo(0, 7)}}});
 }
 
 TEST_F(ClotTest, ZeroInitAndExtractConstantBetweenTwoClots) {
     auto test = createClotTest(P4_SOURCE(R"(
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             header hdr_t {
                 bit<32> f1;
                 bit<32> f2;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             hdr_t a;
             hdr_t b;
             hdr_t c;
             hdr_t d;
             hdr_t e;
             hdr_t f;
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             state start {
                 pkt.extract(hdr.a);
                 transition parse_b;
@@ -1622,7 +1689,8 @@ TEST_F(ClotTest, ZeroInitAndExtractConstantBetweenTwoClots) {
                 pkt.extract(hdr.e);
                 transition accept;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             action act1() { hdr.e.f2 = 0; }
 
             table t1 {
@@ -1634,17 +1702,19 @@ TEST_F(ClotTest, ZeroInitAndExtractConstantBetweenTwoClots) {
             apply {
                 t1.apply();
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             pkt.emit(hdr);
         )"));
 
     runClotTest(test,
-                    {{"a.f1", "a.f2", "b.f1", "b.f2"}, {"d.f1", "d.f2"}, {{"e.f1", FromTo(0, 7)}}});
+                {{"a.f1", "a.f2", "b.f1", "b.f2"}, {"d.f1", "d.f2"}, {{"e.f1", FromTo(0, 7)}}});
 }
 
 TEST_F(ClotTest, MergeVarbitValidsForClots) {
     auto test = createClotTest(P4_SOURCE(R"(
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             header variable_h {
                 varbit<64> bits;
             }
@@ -1652,12 +1722,14 @@ TEST_F(ClotTest, MergeVarbitValidsForClots) {
             header sample_h {
                 bit<8> counterIndex;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             sample_h sample;
             variable_h var;
             sample_h sample2;
             sample_h sample3;
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             state start {
                 pkt.extract(hdr.sample);
                 transition select(hdr.sample.counterIndex[6:0]) {
@@ -1681,7 +1753,8 @@ TEST_F(ClotTest, MergeVarbitValidsForClots) {
                 pkt.extract(hdr.sample2);
                 transition accept;
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             apply {
                 if (hdr.sample.counterIndex[7:7] == 1w1) {
                     hdr.sample.counterIndex = 8w0xff;
@@ -1691,7 +1764,8 @@ TEST_F(ClotTest, MergeVarbitValidsForClots) {
                     hdr.sample3.counterIndex = 8w0xf8;
                 }
             }
-        )"), P4_SOURCE(R"(
+        )"),
+                               P4_SOURCE(R"(
             pkt.emit(hdr);
         )"));
 

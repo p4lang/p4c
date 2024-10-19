@@ -10,12 +10,12 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include "bf_gtest_helpers.h"
-#include "gtest/gtest.h"
 #include "bf-p4c/bf-p4c-options.h"
 #include "bf-p4c/control-plane/runtime.h"
+#include "bf_gtest_helpers.h"
 #include "control-plane/p4RuntimeArchStandard.h"
 #include "control-plane/p4RuntimeSerializer.h"
+#include "gtest/gtest.h"
 
 namespace P4::Test {
 
@@ -132,14 +132,13 @@ TEST(MultiplePragmas, Test1) {
     EXPECT_TRUE(BackendOptions().parser_bandwidth_opt);
 
     // Generate runtime information
-    auto& options = BackendOptions();
+    auto &options = BackendOptions();
     BFN::generateRuntime(testCode.get_program(), options);
     // BFN's generateP4Runtime re-registers handler for psa architecture to a BFN handler
     // Re-register the original p4c one so that (plain) p4c tests are not affected
     auto p4RuntimeSerializer = P4::P4RuntimeSerializer::get();
-    p4RuntimeSerializer->registerArch(
-        "psa"_cs,
-        new P4::ControlPlaneAPI::Standard::PSAArchHandlerBuilder());
+    p4RuntimeSerializer->registerArch("psa"_cs,
+                                      new P4::ControlPlaneAPI::Standard::PSAArchHandlerBuilder());
 }
 
-}
+}  // namespace P4::Test

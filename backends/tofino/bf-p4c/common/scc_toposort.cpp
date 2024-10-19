@@ -17,12 +17,13 @@
 #include <sstream>
 #include <stack>
 #include <stdexcept>
+
 #include "lib/log.h"
 
 namespace {
 
 // return node id to scc id mapping.
-std::unordered_map<int, int> tarjan(const int n, const SccTopoSorter::Graph& graph) {
+std::unordered_map<int, int> tarjan(const int n, const SccTopoSorter::Graph &graph) {
     std::unordered_map<int, int> scc_id;
     std::unordered_map<int, int> dfn;
     std::unordered_map<int, int> low;
@@ -34,7 +35,7 @@ std::unordered_map<int, int> tarjan(const int n, const SccTopoSorter::Graph& gra
         low[curr] = dfn[curr] = ++dfc;
         stack.push(curr);
         if (graph.count(curr)) {
-            for (const auto& to : graph.at(curr)) {
+            for (const auto &to : graph.at(curr)) {
                 if (!dfn.count(to)) {
                     dfs(to);
                     low[curr] = std::min(low[curr], low[to]);
@@ -70,8 +71,8 @@ std::unordered_map<int, int> tarjan(const int n, const SccTopoSorter::Graph& gra
 // c, d: 0
 // b: 1
 // a: 2
-std::unordered_map<int, int> toposort_levels(int n, const SccTopoSorter::Graph& graph) {
-    std::vector<int> n_deps(n+1);
+std::unordered_map<int, int> toposort_levels(int n, const SccTopoSorter::Graph &graph) {
+    std::vector<int> n_deps(n + 1);
     for (int i = 1; i <= n; i++) {
         if (!graph.count(i)) {
             continue;
@@ -109,7 +110,7 @@ std::unordered_map<int, int> toposort_levels(int n, const SccTopoSorter::Graph& 
     return rst;
 }
 
-std::string string_graph(const int n, const SccTopoSorter::Graph& graph) {
+std::string string_graph(const int n, const SccTopoSorter::Graph &graph) {
     std::stringstream ss;
     for (int i = 1; i <= n; i++) {
         ss << i << ": [";
@@ -125,13 +126,11 @@ std::string string_graph(const int n, const SccTopoSorter::Graph& graph) {
 
 }  // namespace
 
-
 int SccTopoSorter::new_node() {
     int id = ++n_nodes_i;
     graph_i[id] = {};
     return id;
 }
-
 
 void SccTopoSorter::validate_node_id(int id) const {
     if (id <= 0 || id > n_nodes_i) {
@@ -160,7 +159,7 @@ std::unordered_map<int, int> SccTopoSorter::scc_topo_sort() const {
         const int from_scc_id = scc_mapping.at(i);
         max_scc_id = std::max(from_scc_id, max_scc_id);
         if (graph_i.count(i)) {
-            for (const int& to : graph_i.at(i)) {
+            for (const int &to : graph_i.at(i)) {
                 const int to_scc_id = scc_mapping.at(to);
                 if (from_scc_id != to_scc_id) {
                     non_scc_graph[from_scc_id].insert(to_scc_id);

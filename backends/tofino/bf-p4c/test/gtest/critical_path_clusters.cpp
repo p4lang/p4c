@@ -10,31 +10,33 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include <optional>
-#include <boost/algorithm/string/replace.hpp>
-#include "gtest/gtest.h"
+#include "bf-p4c/phv/analysis/critical_path_clusters.h"
 
+#include <optional>
+
+#include <boost/algorithm/string/replace.hpp>
+
+#include "bf-p4c/common/elim_unused.h"
+#include "bf-p4c/common/field_defuse.h"
+#include "bf-p4c/common/header_stack.h"
+#include "bf-p4c/common/map_tables_to_actions.h"
+#include "bf-p4c/mau/action_mutex.h"
+#include "bf-p4c/mau/instruction_selection.h"
+#include "bf-p4c/mau/table_dependency_graph.h"
+#include "bf-p4c/mau/table_mutex.h"
+#include "bf-p4c/phv/action_phv_constraints.h"
+#include "bf-p4c/phv/analysis/mutex_overlay.h"
+#include "bf-p4c/phv/analysis/pack_conflicts.h"
+#include "bf-p4c/phv/cluster_phv_operations.h"
+#include "bf-p4c/phv/mau_backtracker.h"
+#include "bf-p4c/phv/phv_fields.h"
+#include "bf-p4c/phv/pragma/pa_mutually_exclusive.h"
+#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "gtest/gtest.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
 #include "test/gtest/helpers.h"
-#include "bf-p4c/common/header_stack.h"
-#include "bf-p4c/common/field_defuse.h"
-#include "bf-p4c/common/elim_unused.h"
-#include "bf-p4c/common/map_tables_to_actions.h"
-#include "bf-p4c/mau/instruction_selection.h"
-#include "bf-p4c/phv/action_phv_constraints.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/cluster_phv_operations.h"
-#include "bf-p4c/phv/mau_backtracker.h"
-#include "bf-p4c/mau/action_mutex.h"
-#include "bf-p4c/mau/table_mutex.h"
-#include "bf-p4c/mau/table_dependency_graph.h"
-#include "bf-p4c/phv/analysis/critical_path_clusters.h"
-#include "bf-p4c/phv/analysis/mutex_overlay.h"
-#include "bf-p4c/phv/analysis/pack_conflicts.h"
-#include "bf-p4c/phv/pragma/pa_mutually_exclusive.h"
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
 
 namespace P4::Test {
 
@@ -42,9 +44,8 @@ class CriticalPathClustersTest : public TofinoBackendTest {};
 
 namespace {
 
-std::optional<TofinoPipeTestCase>
-createCriticalPathClustersTestCase(const std::string& ingressPipeline,
-                                   const std::string& egressPipeline) {
+std::optional<TofinoPipeTestCase> createCriticalPathClustersTestCase(
+    const std::string &ingressPipeline, const std::string &egressPipeline) {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
 header Eth { bit<8> nxt; }
 header H1 { bit<8> f1; bit<32> f2; }
@@ -104,7 +105,7 @@ V1Switch(parse(), verifyChecksum(), ingress(), egress(),
     boost::replace_first(source, "%INGRESS_PIPELINE%", ingressPipeline);
     boost::replace_first(source, "%EGRESS_PIPELINE%", egressPipeline);
 
-    auto& options = BackendOptions();
+    auto &options = BackendOptions();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.target = "tofino"_cs;
     options.arch = "v1model"_cs;
@@ -113,18 +114,13 @@ V1Switch(parse(), verifyChecksum(), ingress(), egress(),
     return TofinoPipeTestCase::createWithThreadLocalInstances(source);
 }
 
-const IR::BFN::Pipe *runMockPasses(const IR::BFN::Pipe* pipe,
-                                   PhvInfo& phv,
-                                   PhvUse& uses,
-                                   FieldDefUse& defuse,
-                                   Clustering& clustering,
-                                   MauBacktracker& table_alloc,
-                                   DependencyGraph& deps,
-                                   PackConflicts& conflicts,
-                                   MapTablesToActions& tableActionsMap,
-                                   ActionPhvConstraints& actions,
-                                   CalcParserCriticalPath& parser_critical_path,
-                                   PHV::Pragmas& pragmas) {
+const IR::BFN::Pipe *runMockPasses(const IR::BFN::Pipe *pipe, PhvInfo &phv, PhvUse &uses,
+                                   FieldDefUse &defuse, Clustering &clustering,
+                                   MauBacktracker &table_alloc, DependencyGraph &deps,
+                                   PackConflicts &conflicts, MapTablesToActions &tableActionsMap,
+                                   ActionPhvConstraints &actions,
+                                   CalcParserCriticalPath &parser_critical_path,
+                                   PHV::Pragmas &pragmas) {
     std::set<cstring> zeroInitFields;
     PassManager quick_backend = {
         new CollectHeaderStackInfo,
@@ -148,25 +144,26 @@ const IR::BFN::Pipe *runMockPasses(const IR::BFN::Pipe* pipe,
     return pipe->apply(quick_backend);
 }
 
-std::vector<cstring> slices_to_names(const ordered_set<PHV::FieldSlice>& slices) {
+std::vector<cstring> slices_to_names(const ordered_set<PHV::FieldSlice> &slices) {
     std::vector<cstring> rtn(slices.size());
     transform(slices.begin(), slices.end(), rtn.begin(),
-              [] (const PHV::FieldSlice& slice) {
-                  return slice.field()->name;
-              });
+              [](const PHV::FieldSlice &slice) { return slice.field()->name; });
     sort(rtn.begin(), rtn.end());
     return rtn;
 }
 
-bool resultHas(const ordered_set<PHV::SuperCluster *>& result,
-               const std::vector<cstring>& field_names) {
-    for (const auto& super_cluster : result) {
-        for (auto* rotational_cluster : super_cluster->clusters()) {
-            for (auto* aligned_cluster : rotational_cluster->clusters()) {
-                const auto& slices = aligned_cluster->slices();
-                if (slices.size() == field_names.size()
-                    && slices_to_names(slices) == field_names) {
-                    return true; } } } }
+bool resultHas(const ordered_set<PHV::SuperCluster *> &result,
+               const std::vector<cstring> &field_names) {
+    for (const auto &super_cluster : result) {
+        for (auto *rotational_cluster : super_cluster->clusters()) {
+            for (auto *aligned_cluster : rotational_cluster->clusters()) {
+                const auto &slices = aligned_cluster->slices();
+                if (slices.size() == field_names.size() && slices_to_names(slices) == field_names) {
+                    return true;
+                }
+            }
+        }
+    }
     return false;
 }
 
@@ -195,7 +192,8 @@ TEST_F(CriticalPathClustersTest, DISABLED_Basic) {
             test1.apply();
         }
 
-    )"), P4_SOURCE(P4Headers::NONE, R"(
+    )"),
+                                                   P4_SOURCE(P4Headers::NONE, R"(
         apply { }
     )"));
     ASSERT_TRUE(test);
@@ -206,7 +204,7 @@ TEST_F(CriticalPathClustersTest, DISABLED_Basic) {
     DependencyGraph deps;
     TablesMutuallyExclusive table_mutex;
     ActionMutuallyExclusive action_mutex;
-    PHV::Pragmas* pragmas = new PHV::Pragmas(phv);
+    PHV::Pragmas *pragmas = new PHV::Pragmas(phv);
     PackConflicts conflicts(phv, deps, table_mutex, table_alloc, action_mutex,
                             pragmas->pa_no_pack());
     MapTablesToActions tableActionsMap;
@@ -216,9 +214,10 @@ TEST_F(CriticalPathClustersTest, DISABLED_Basic) {
     PHV::AllocSetting settings;
 
     Clustering clustering(phv, uses, conflicts, pragmas->pa_container_sizes(),
-        pragmas->pa_byte_pack(), actions, defuse, deps, table_mutex, settings, table_alloc);
+                          pragmas->pa_byte_pack(), actions, defuse, deps, table_mutex, settings,
+                          table_alloc);
 
-    auto* post_pm_pipe =
+    auto *post_pm_pipe =
         runMockPasses(test->pipe, phv, uses, defuse, clustering, table_alloc, deps, conflicts,
                       tableActionsMap, actions, parser_critical_path, *pragmas);
 
@@ -229,13 +228,10 @@ TEST_F(CriticalPathClustersTest, DISABLED_Basic) {
 
     EXPECT_EQ(resultHas(result, {"ingress::eth.nxt"_cs}), true);
     EXPECT_EQ(resultHas(result, {"ingress::eth.$valid"_cs}), true);
-    EXPECT_EQ(resultHas(result, {"ingress::h2.f1"_cs,
-                                 "ingress::h2.f2"_cs,
-                                 "ingress::h2.f3"_cs}), true);
+    EXPECT_EQ(resultHas(result, {"ingress::h2.f1"_cs, "ingress::h2.f2"_cs, "ingress::h2.f3"_cs}),
+              true);
 
-    EXPECT_EQ(resultHas(result, {"ingress::h1.f1"_cs,
-                                 "ingress::h1.f2"_cs}), false);
+    EXPECT_EQ(resultHas(result, {"ingress::h1.f1"_cs, "ingress::h1.f2"_cs}), false);
 }
 
 }  // namespace P4::Test
-

@@ -13,8 +13,8 @@
 #ifndef BF_P4C_MAU_TABLE_CONTROL_DEPS_H_
 #define BF_P4C_MAU_TABLE_CONTROL_DEPS_H_
 
-#include "lib/ordered_map.h"
 #include "bf-p4c/mau/mau_visitor.h"
+#include "lib/ordered_map.h"
 
 using namespace P4;
 
@@ -26,14 +26,15 @@ using namespace P4;
  */
 class TableControlDeps : public MauTableInspector {
     struct info_t {  // info per table
-        ordered_set<const IR::MAU::Table *>     parents = {};
-        int                                     dependent_paths = 0;
+        ordered_set<const IR::MAU::Table *> parents = {};
+        int dependent_paths = 0;
     };
     ordered_map<const IR::MAU::Table *, info_t> info;
 
     profile_t init_apply(const IR::Node *root) override {
         info.clear();
-        return MauTableInspector::init_apply(root); }
+        return MauTableInspector::init_apply(root);
+    }
     ordered_set<const IR::MAU::Table *> parents();
     void postorder(const IR::MAU::Table *tbl) override;
     void revisit(const IR::MAU::Table *tbl) override;

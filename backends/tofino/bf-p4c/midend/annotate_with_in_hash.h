@@ -20,17 +20,17 @@
  * operands are casted or concatenated.
  *
  * E.g.:
- * 
+ *
  *     meta.index = meta.index + (3w0 ++ hdr.vlan.pcp);
- * 
+ *
  * is converted to:
- * 
+ *
  *     \@in_hash { meta.index = meta.index + (3w0 ++ hdr.vlan.pcp); }
- * 
+ *
  * The first statement looked originally like:
- * 
+ *
  *     meta.index = meta.index + (bit<6>)hdr.vlan.pcp;
- * 
+ *
  * And was modified with the ElimCasts pass.
  *
  * The pass performs several checks to be sure that annotating is added
@@ -45,11 +45,11 @@
  *
  * Also see the limitations of the \@in_hash annotation.
  */
-#ifndef EXTENSIONS_BF_P4C_MIDEND_ANNOTATE_WITH_IN_HASH_H_
-#define EXTENSIONS_BF_P4C_MIDEND_ANNOTATE_WITH_IN_HASH_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MIDEND_ANNOTATE_WITH_IN_HASH_H_
+#define BACKENDS_TOFINO_BF_P4C_MIDEND_ANNOTATE_WITH_IN_HASH_H_
 
-#include "ir/ir.h"
 #include "bf-p4c/midend/type_checker.h"
+#include "ir/ir.h"
 
 namespace BFN {
 
@@ -61,7 +61,7 @@ class DoAnnotateWithInHash : public Transform {
 
     bool checkKeyDefaultAction(const IR::P4Control &control, const IR::P4Action &action) const;
     bool checkAssignmentStructure(const IR::AssignmentStatement &assignment,
-            const IR::Expression **op, const IR::Expression **opConcat);
+                                  const IR::Expression **op, const IR::Expression **opConcat);
     bool checkAluSuitability(const IR::Expression &op) const;
     bool checkHeaderMetadataReference(const IR::Expression &op) const;
 
@@ -80,10 +80,9 @@ class DoAnnotateWithInHash : public Transform {
 
 class AnnotateWithInHash : public PassManager {
  public:
-    AnnotateWithInHash(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-            BFN::TypeChecking* typeChecking = nullptr) {
-        if (!typeChecking)
-            typeChecking = new BFN::TypeChecking(refMap, typeMap);
+    AnnotateWithInHash(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                       BFN::TypeChecking *typeChecking = nullptr) {
+        if (!typeChecking) typeChecking = new BFN::TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new DoAnnotateWithInHash(typeMap));
     }
@@ -91,4 +90,4 @@ class AnnotateWithInHash : public PassManager {
 
 }  // namespace BFN
 
-#endif  // EXTENSIONS_BF_P4C_MIDEND_ANNOTATE_WITH_IN_HASH_H_
+#endif  // BACKENDS_TOFINO_BF_P4C_MIDEND_ANNOTATE_WITH_IN_HASH_H_

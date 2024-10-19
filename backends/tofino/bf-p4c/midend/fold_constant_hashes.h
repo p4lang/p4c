@@ -13,6 +13,7 @@
 #ifndef BF_P4C_MIDEND_FOLD_CONSTANT_HASHES_H_
 #define BF_P4C_MIDEND_FOLD_CONSTANT_HASHES_H_
 
+/* clang-format off */
 #include "ir/ir.h"
 #include "bf-p4c/midend/type_checker.h"
 #include "bf-p4c/mau/hash_function.h"
@@ -49,8 +50,8 @@ namespace BFN {
  * Hash extern objects of the custom type.
  */
 class FoldConstantHashes : public PassManager {
-    P4::ReferenceMap* refMap = nullptr;
-    P4::TypeMap* typeMap = nullptr;
+    P4::ReferenceMap *refMap = nullptr;
+    P4::TypeMap *typeMap = nullptr;
 
     // The set of declid's of the Hash or CRCPolynomial objects that are candidates for removal
     std::set<int> candidatesToRemove;
@@ -60,85 +61,68 @@ class FoldConstantHashes : public PassManager {
     class DoFoldConstantHashes : public Transform {
         FoldConstantHashes &self;
 
-        bool checkConstantInput(
-                const IR::Expression *expr);
-        void foldListToConstant(
-                uint64_t &value, size_t &shift,
-                const IR::ListExpression *list);
-        void foldListToConstant(
-                uint64_t &value, size_t &shift,
-                const IR::StructExpression *list);
-        const IR::Expression *substituteIdentityHash(
-                const IR::ListExpression *hash_list,
+        bool checkConstantInput(const IR::Expression *expr);
+        void foldListToConstant(uint64_t &value, size_t &shift, const IR::ListExpression *list);
+        void foldListToConstant(uint64_t &value, size_t &shift, const IR::StructExpression *list);
+        const IR::Expression *substituteIdentityHash(const IR::ListExpression *hash_list,
                 const IR::Type *hash_type);
-        const IR::Expression *substituteIdentityHash(
-                const IR::StructExpression *hash_list,
+        const IR::Expression *substituteIdentityHash(const IR::StructExpression *hash_list,
                 const IR::Type *hash_type);
 
-        hash_seed_t computeHash(
-                IR::MAU::HashFunction &hash_function,
+        hash_seed_t computeHash(IR::MAU::HashFunction &hash_function,
+                                const IR::ListExpression *hash_list, const IR::Type *hash_type);
+        hash_seed_t computeHash(IR::MAU::HashFunction &hash_function,
+                                const IR::StructExpression *hash_list, const IR::Type *hash_type);
+        const IR::Expression *substituteCustomHash(const IR::PathExpression *crc_poly_path,
                 const IR::ListExpression *hash_list,
                 const IR::Type *hash_type);
-        hash_seed_t computeHash(
-                IR::MAU::HashFunction &hash_function,
+        const IR::Expression *substituteCustomHash(const IR::PathExpression *crc_poly_path,
                 const IR::StructExpression *hash_list,
                 const IR::Type *hash_type);
-        const IR::Expression *substituteCustomHash(
-                const IR::PathExpression *crc_poly_path,
+        const IR::Expression *substituteOtherHash(const IR::Expression *hash_algo_expr,
                 const IR::ListExpression *hash_list,
                 const IR::Type *hash_type);
-        const IR::Expression *substituteCustomHash(
-                const IR::PathExpression *crc_poly_path,
-                const IR::StructExpression *hash_list,
-                const IR::Type *hash_type);
-        const IR::Expression *substituteOtherHash(
-                const IR::Expression *hash_algo_expr,
-                const IR::ListExpression *hash_list,
-                const IR::Type *hash_type);
-        const IR::Expression *substituteOtherHash(
-                const IR::Expression *hash_algo_expr,
+        const IR::Expression *substituteOtherHash(const IR::Expression *hash_algo_expr,
                 const IR::StructExpression *hash_list,
                 const IR::Type *hash_type);
 
      public:
         explicit DoFoldConstantHashes(FoldConstantHashes &self) : self(self) {}
-        const IR::Node* preorder(IR::MethodCallExpression *mce) override;
+        const IR::Node *preorder(IR::MethodCallExpression *mce) override;
     };
 
     class CheckCandidesToRemove : public Transform {
         FoldConstantHashes &self;
+
      public:
         explicit CheckCandidesToRemove(FoldConstantHashes &self) : self(self) {}
-        const IR::Node* preorder(IR::PathExpression *path) override;
+        const IR::Node *preorder(IR::PathExpression *path) override;
     };
 
     class RemoveHangingCandidates : public Transform {
         FoldConstantHashes &self;
+
      public:
         explicit RemoveHangingCandidates(FoldConstantHashes &self) : self(self) {}
-        const IR::Node* preorder(IR::Declaration_Instance *decl) override;
-        const IR::Node* preorder(IR::MethodCallStatement *mcs) override;
+        const IR::Node *preorder(IR::Declaration_Instance *decl) override;
+        const IR::Node *preorder(IR::MethodCallStatement *mcs) override;
     };
 
-    const IR::Type* checkHashExtern(const IR::Declaration_Instance *decl);
+    const IR::Type *checkHashExtern(const IR::Declaration_Instance *decl);
 
  public:
-    FoldConstantHashes(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-            BFN::TypeChecking* typeChecking = nullptr) : refMap(refMap), typeMap(typeMap) {
-        if (!typeChecking)
-            typeChecking = new BFN::TypeChecking(refMap, typeMap);
-        addPasses({
-            typeChecking,
-            new DoFoldConstantHashes(*this),
-            new P4::ClearTypeMap(typeMap),
-            typeChecking,
-            new CheckCandidesToRemove(*this),
-            new RemoveHangingCandidates(*this),
-            new P4::ClearTypeMap(typeMap)
-        });
+    FoldConstantHashes(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                       BFN::TypeChecking *typeChecking = nullptr)
+        : refMap(refMap), typeMap(typeMap) {
+        if (!typeChecking) typeChecking = new BFN::TypeChecking(refMap, typeMap);
+        addPasses({typeChecking, new DoFoldConstantHashes(*this), new P4::ClearTypeMap(typeMap),
+                   typeChecking, new CheckCandidesToRemove(*this),
+                   new RemoveHangingCandidates(*this), new P4::ClearTypeMap(typeMap)});
     }
 };
 
 }  // namespace BFN
+
+/* clang-format on */
 
 #endif  // BF_P4C_MIDEND_FOLD_CONSTANT_HASHES_H_

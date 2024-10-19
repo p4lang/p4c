@@ -10,25 +10,25 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+#include "bf-p4c/ir/gateway_control_flow.h"
+
 #include <optional>
 
+#include "bf-p4c/mau/gateway.h"
 #include "gtest/gtest.h"
-
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
 #include "test/gtest/helpers.h"
 #include "tofino_gtest_utils.h"
-#include "bf-p4c/ir/gateway_control_flow.h"
-#include "bf-p4c/mau/gateway.h"
 namespace P4::Test {
 
 class GatewayControlFlowTest : public TofinoBackendTest {};
 
 namespace {
 
-std::optional<TofinoPipeTestCase>
-createGatewayControlFlowTestCase(const std::string &ingress_source) {
+std::optional<TofinoPipeTestCase> createGatewayControlFlowTestCase(
+    const std::string &ingress_source) {
     auto pre_ingress = P4_SOURCE(tna_header(), R"(
 
 extern void probe(int v);
@@ -127,7 +127,7 @@ Switch(pipe) main;
 
     std::string source = pre_ingress + ingress_source + post_ingress;
 
-    auto& options = BackendOptions();
+    auto &options = BackendOptions();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.target = "tofino"_cs;
     options.arch = "tna"_cs;
@@ -137,18 +137,19 @@ Switch(pipe) main;
 
 class GCFTVisitor : public Inspector, public BFN::GatewayControlFlow, public TofinoWriteContext {
     struct global_t {
-        std::map<cstring, int>  headers;
-        std::vector<cstring>    idx2hdr;
-        std::map<int, bitvec>   probes;
+        std::map<cstring, int> headers;
+        std::vector<cstring> idx2hdr;
+        std::map<int, bitvec> probes;
         int hdr2idx(cstring hdr) {
             if (headers.count(hdr)) return headers.at(hdr);
             headers[hdr] = idx2hdr.size();
             idx2hdr.push_back(hdr);
-            return idx2hdr.size() - 1; }
+            return idx2hdr.size() - 1;
+        }
     } *glob;
     bitvec live;  // headers possibly valid
     const IR::MAU::Table *visiting = nullptr;
-    std::map<cstring, std::map<int, bool>>      tag_live_info;
+    std::map<cstring, std::map<int, bool>> tag_live_info;
 
     GCFTVisitor *clone() const override { return new GCFTVisitor(*this); }
     void flow_merge(Visitor &a_) override {
@@ -166,8 +167,10 @@ class GCFTVisitor : public Inspector, public BFN::GatewayControlFlow, public Tof
         if (prim->name == "probe") {
             int i = prim->operands.at(0)->to<IR::Constant>()->asInt();
             BUG_CHECK(glob->probes.count(i) == 0, "duplicate probe %d", i);
-            glob->probes[i] = live; }
-        return false; }
+            glob->probes[i] = live;
+        }
+        return false;
+    }
 
     int writeVal() const {
         if (auto *ext = findContext<IR::BFN::Extract>()) {
@@ -191,9 +194,9 @@ class GCFTVisitor : public Inspector, public BFN::GatewayControlFlow, public Tof
         } else if (auto *mem = n->to<IR::Member>()) {
             rv = mem->member;
         } else {
-            BUG("not a header? %s", n); }
-        if (auto *suffix = rv.findlast('.'))
-            rv = cstring(suffix+1);
+            BUG("not a header? %s", n);
+        }
+        if (auto *suffix = rv.findlast('.')) rv = cstring(suffix + 1);
         return rv;
     }
     bool compareWith(const IR::Expression *e) {
@@ -221,19 +224,20 @@ class GCFTVisitor : public Inspector, public BFN::GatewayControlFlow, public Tof
             if (auto *tbl = gateway_context(tag)) {
                 if (visiting != tbl) {
                     visiting = tbl;
-                    tag_live_info.clear(); }
+                    tag_live_info.clear();
+                }
                 bool isLive = compareWith(mem);
                 auto prev_tags = gateway_earlier_tags();
-                if (!prev_tags.count(tag))
-                    tag_live_info[tag][idx] = isLive;
+                if (!prev_tags.count(tag)) tag_live_info[tag][idx] = isLive;
                 for (auto lt : gateway_later_tags()) {
-                    if (lt != tag && !prev_tags.count(lt))
-                        tag_live_info[lt][idx] = !isLive; }
+                    if (lt != tag && !prev_tags.count(lt)) tag_live_info[lt][idx] = !isLive;
+                }
             } else {
                 // read not in a gateway -- perhaps a copy_header?
             }
         } else {
-            BUG("$valid is neither read nor written?"); }
+            BUG("$valid is neither read nor written?");
+        }
         return false;
     }
 
@@ -242,8 +246,8 @@ class GCFTVisitor : public Inspector, public BFN::GatewayControlFlow, public Tof
             visiting = nullptr;
             tag_live_info.clear();
         } else if (tag_live_info.count(tag)) {
-            for (auto h : tag_live_info.at(tag))
-                live[h.first] = h.second; }
+            for (auto h : tag_live_info.at(tag)) live[h.first] = h.second;
+        }
     }
 
  public:
@@ -251,14 +255,14 @@ class GCFTVisitor : public Inspector, public BFN::GatewayControlFlow, public Tof
     bool probe_live(int p, cstring hdr) {
         BUG_CHECK(glob->headers.count(hdr), "header %s not seen", hdr);
         BUG_CHECK(glob->probes.count(p), "probe %s not seen", p);
-        return glob->probes.at(p)[glob->headers.at(hdr)]; }
+        return glob->probes.at(p)[glob->headers.at(hdr)];
+    }
 };
 
 }  // namespace
 
 TEST_F(GatewayControlFlowTest, Basic) {
-    auto program = createGatewayControlFlowTestCase(
-        P4_SOURCE(R"(
+    auto program = createGatewayControlFlowTestCase(P4_SOURCE(R"(
     apply {
         probe(0);
         if (headers.h2.isValid()) {

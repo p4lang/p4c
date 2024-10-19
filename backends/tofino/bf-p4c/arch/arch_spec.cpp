@@ -40,42 +40,36 @@ ArchSpec::ArchSpec() {
 
 void ArchSpec::setTofinoIntrinsicTypes() {
     parser_intrinsic_types[INGRESS] = {
-        { "ingress_intrinsic_metadata_t", "ingress_intrinsic_metadata" },
-        { "ingress_intrinsic_metadata_for_tm_t", "ingress_intrinsic_metadata_for_tm" },
-        { "ingress_intrinsic_metadata_from_parser_t", "ingress_intrinsic_metadata_from_parser" }
-    };
+        {"ingress_intrinsic_metadata_t", "ingress_intrinsic_metadata"},
+        {"ingress_intrinsic_metadata_for_tm_t", "ingress_intrinsic_metadata_for_tm"},
+        {"ingress_intrinsic_metadata_from_parser_t", "ingress_intrinsic_metadata_from_parser"}};
 
     parser_intrinsic_types[EGRESS] = {
-        { "egress_intrinsic_metadata_t", "egress_intrinsic_metadata" },
-        { "egress_intrinsic_metadata_from_parser_t", "egress_intrinsic_metadata_from_parser" },
-        { "egress_intrinsic_metadata_for_deparser_t", "egress_intrinsic_metadata_for_deparser" }
-    };
+        {"egress_intrinsic_metadata_t", "egress_intrinsic_metadata"},
+        {"egress_intrinsic_metadata_from_parser_t", "egress_intrinsic_metadata_from_parser"},
+        {"egress_intrinsic_metadata_for_deparser_t", "egress_intrinsic_metadata_for_deparser"}};
 
     mauppu_intrinsic_types[INGRESS] = {
-        { "ingress_intrinsic_metadata_t", "ingress_intrinsic_metadata" },
-        { "ingress_intrinsic_metadata_for_tm_t", "ingress_intrinsic_metadata_for_tm" },
-        { "ingress_intrinsic_metadata_from_parser_t", "ingress_intrinsic_metadata_from_parser" },
-        { "ingress_intrinsic_metadata_for_deparser_t", "ingress_intrinsic_metadata_for_deparser" }
-    };
+        {"ingress_intrinsic_metadata_t", "ingress_intrinsic_metadata"},
+        {"ingress_intrinsic_metadata_for_tm_t", "ingress_intrinsic_metadata_for_tm"},
+        {"ingress_intrinsic_metadata_from_parser_t", "ingress_intrinsic_metadata_from_parser"},
+        {"ingress_intrinsic_metadata_for_deparser_t", "ingress_intrinsic_metadata_for_deparser"}};
 
     mauppu_intrinsic_types[EGRESS] = {
-        { "egress_intrinsic_metadata_t", "egress_intrinsic_metadata" },
-        { "egress_intrinsic_metadata_from_parser_t", "egress_intrinsic_metadata_from_parser" },
-        { "egress_intrinsic_metadata_for_deparser_t", "egress_intrinsic_metadata_for_deparser" },
-        { "egress_intrinsic_metadata_for_output_port_t",
-          "egress_intrinsic_metadata_for_output_port" }
-    };
+        {"egress_intrinsic_metadata_t", "egress_intrinsic_metadata"},
+        {"egress_intrinsic_metadata_from_parser_t", "egress_intrinsic_metadata_from_parser"},
+        {"egress_intrinsic_metadata_for_deparser_t", "egress_intrinsic_metadata_for_deparser"},
+        {"egress_intrinsic_metadata_for_output_port_t",
+         "egress_intrinsic_metadata_for_output_port"}};
 
     deparser_intrinsic_types[INGRESS] = {
-        { "ingress_intrinsic_metadata_t", "ingress_intrinsic_metadata" },
-        { "ingress_intrinsic_metadata_for_deparser_t", "ingress_intrinsic_metadata_for_deparser" }
-    };
+        {"ingress_intrinsic_metadata_t", "ingress_intrinsic_metadata"},
+        {"ingress_intrinsic_metadata_for_deparser_t", "ingress_intrinsic_metadata_for_deparser"}};
 
     deparser_intrinsic_types[EGRESS] = {
-        { "egress_intrinsic_metadata_t", "egress_intrinsic_metadata" },
-        { "egress_intrinsic_metadata_from_parser_t", "egress_intrinsic_metadata_from_parser" },
-        { "egress_intrinsic_metadata_for_deparser_t", "egress_intrinsic_metadata_for_deparser" }
-    };
+        {"egress_intrinsic_metadata_t", "egress_intrinsic_metadata"},
+        {"egress_intrinsic_metadata_from_parser_t", "egress_intrinsic_metadata_from_parser"},
+        {"egress_intrinsic_metadata_for_deparser_t", "egress_intrinsic_metadata_for_deparser"}};
 }
 
 TofinoArchSpec::TofinoArchSpec() : ArchSpec() {
@@ -152,5 +146,3 @@ JBayArchSpec::JBayArchSpec() : ArchSpec() {
 
     setTofinoIntrinsicTypes();
 }
-
-

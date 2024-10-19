@@ -32,32 +32,27 @@ namespace Slicing {
 /// (2) split by deparsed_bottom_bits already.
 class ItrContext : public IteratorInterface {
  private:
-    IteratorInterface* pImpl;
+    IteratorInterface *pImpl;
 
  public:
-    ItrContext(const PhvInfo& phv,
-               const MapFieldToParserStates& fs,
-               const CollectParserInfo& pi,
-               const SuperCluster* sc, const PHVContainerSizeLayout& pa,
-               const ActionPackingValidatorInterface& action_packing_validator,
-               const ParserPackingValidatorInterface& parser_packing_validator,
-               const PackConflictChecker pack_conflict,
-               const IsReferencedChecker is_referenced);
+    ItrContext(const PhvInfo &phv, const MapFieldToParserStates &fs, const CollectParserInfo &pi,
+               const SuperCluster *sc, const PHVContainerSizeLayout &pa,
+               const ActionPackingValidatorInterface &action_packing_validator,
+               const ParserPackingValidatorInterface &parser_packing_validator,
+               const PackConflictChecker pack_conflict, const IsReferencedChecker is_referenced);
 
     /// iterate will pass valid slicing results to cb. Stop when cb returns false.
-    void iterate(const IterateCb& cb) override { pImpl->iterate(cb); }
+    void iterate(const IterateCb &cb) override { pImpl->iterate(cb); }
 
     /// invalidate is the feedback mechanism for allocation algorithm to
     /// ask iterator to not produce slicing result contains @p sl. This function can be called
     /// multiple times, and the implementation decides which one will be respected.
     /// For example, a DFS slicing iterator may choose to respect the list of top-most stack frame,
     /// i.e., the most recent decision made by DFS.
-    void invalidate(const SuperCluster::SliceList* sl) override { pImpl->invalidate(sl); }
+    void invalidate(const SuperCluster::SliceList *sl) override { pImpl->invalidate(sl); }
 
     /// set iterator configs.
-    void set_config(const IteratorConfig& cfg) override {
-        pImpl->set_config(cfg);
-    };
+    void set_config(const IteratorConfig &cfg) override { pImpl->set_config(cfg); };
 };
 
 }  // namespace Slicing

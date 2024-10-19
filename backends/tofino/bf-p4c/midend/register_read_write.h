@@ -10,19 +10,19 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_MIDEND_REGISTER_READ_WRITE_H_
-#define EXTENSIONS_BF_P4C_MIDEND_REGISTER_READ_WRITE_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MIDEND_REGISTER_READ_WRITE_H_
+#define BACKENDS_TOFINO_BF_P4C_MIDEND_REGISTER_READ_WRITE_H_
 
-#include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4/typeMap.h"
 #include "bf-p4c/midend/copy_header.h"
 #include "bf-p4c/midend/type_checker.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 #include "table_mutex.h"
 
 namespace BFN {
 
-class SearchAndReplaceExpr: public Transform {
+class SearchAndReplaceExpr : public Transform {
     IR::Expression *replace;
     const IR::Expression *search;
 
@@ -32,22 +32,27 @@ class SearchAndReplaceExpr: public Transform {
     }
 
  public:
-    SearchAndReplaceExpr(IR::Expression *replace, const IR::Expression *search) :
-        replace(replace), search(search) {}
+    SearchAndReplaceExpr(IR::Expression *replace, const IR::Expression *search)
+        : replace(replace), search(search) {}
 };
 
 // Action -> register -> read/write statements
 // the action is either a P4Action or a Declaration_Instance representing a RegisterAction extern
 typedef std::unordered_map<const IR::Declaration *,
-            std::unordered_map<const IR::Declaration_Instance *,  // Register declaration
-                ordered_set<const IR::Statement*>>> RegisterCallsByAction;
+                           std::unordered_map<const IR::Declaration_Instance *,  // Register
+                                                                                 // declaration
+                                              ordered_set<const IR::Statement *>>>
+    RegisterCallsByAction;
 typedef std::unordered_map<const IR::Declaration *,
-            std::unordered_map<const IR::Declaration_Instance *,  // Register declaration
-                IR::MethodCallExpression*>> RegisterExecuteCallByAction;
-typedef std::unordered_map<const IR::P4Control*,
-        ordered_set<IR::Declaration_Instance *>> RegisterActionsByControl;
+                           std::unordered_map<const IR::Declaration_Instance *,  // Register
+                                                                                 // declaration
+                                              IR::MethodCallExpression *>>
+    RegisterExecuteCallByAction;
+typedef std::unordered_map<const IR::P4Control *, ordered_set<IR::Declaration_Instance *>>
+    RegisterActionsByControl;
 typedef std::unordered_map<const IR::Declaration *,  // Register declaration
-        std::unordered_set<const IR::Declaration *>> ActionsByRegister;
+                           std::unordered_set<const IR::Declaration *>>
+    ActionsByRegister;
 
 /**
  * \ingroup stateful_alu
@@ -82,11 +87,11 @@ class RegisterReadWrite : public PassManager {
     class CheckRegisterActions : public Inspector {
         RegisterReadWrite &self;
         std::unordered_map<const IR::Declaration *,  // Register -> RegisterAction
-            std::vector<const IR::Declaration *>> all_register_actions;
+                           std::vector<const IR::Declaration *>>
+            all_register_actions;
 
      public:
-        explicit CheckRegisterActions(RegisterReadWrite &self) :
-             self(self) {}
+        explicit CheckRegisterActions(RegisterReadWrite &self) : self(self) {}
 
         bool preorder(const IR::Declaration_Instance *) override;
         void end_apply() override;
@@ -101,17 +106,16 @@ class RegisterReadWrite : public PassManager {
      */
     class UpdateRegisterActionsAndExecuteCalls : public Transform {
         RegisterReadWrite &self;
-        std::map<const IR::P4Control*, IR::Declaration_Instance*> register_actions;
-        IR::Node *preorder(IR::P4Action*) override;
-        IR::Node *preorder(IR::Declaration_Instance*) override;
-        IR::Node *postorder(IR::P4Control* ctrl) override;
+        std::map<const IR::P4Control *, IR::Declaration_Instance *> register_actions;
+        IR::Node *preorder(IR::P4Action *) override;
+        IR::Node *preorder(IR::Declaration_Instance *) override;
+        IR::Node *postorder(IR::P4Control *ctrl) override;
 
         bool processDeclaration(const IR::Declaration *action, const IR::BlockStatement *&body)
             __attribute__((__warn_unused_result__));
 
      public:
-        explicit UpdateRegisterActionsAndExecuteCalls(RegisterReadWrite &self) :
-             self(self) {}
+        explicit UpdateRegisterActionsAndExecuteCalls(RegisterReadWrite &self) : self(self) {}
     };
 
     /**
@@ -126,7 +130,7 @@ class RegisterReadWrite : public PassManager {
      *    which newly created RegisterAction.execute() calls will be placed in which
      *    actions.
      */
-    class AnalyzeActionWithRegisterCalls: public Inspector {
+    class AnalyzeActionWithRegisterCalls : public Inspector {
         RegisterReadWrite &self;
         struct RegActionInfo {
             // infomation and IR about RegisterAction being created to implement a
@@ -137,15 +141,15 @@ class RegisterReadWrite : public PassManager {
             IR::MethodCallExpression *execute_call = nullptr;
             const IR::Expression *read_expr = nullptr;
         };
-        bool preorder(const IR::Declaration*) override;
+        bool preorder(const IR::Declaration *) override;
 
         void createRegisterExecute(RegActionInfo &reg_info, const IR::Statement *reg_stmt,
                                    cstring action_name);
         void createRegisterAction(RegActionInfo &reg_info, const IR::Statement *reg_stmt,
                                   const IR::Declaration *act);
+
      public:
-        explicit AnalyzeActionWithRegisterCalls(RegisterReadWrite &self) :
-             self(self) {}
+        explicit AnalyzeActionWithRegisterCalls(RegisterReadWrite &self) : self(self) {}
     };
 
     /**
@@ -156,13 +160,12 @@ class RegisterReadWrite : public PassManager {
      */
     class CollectRegisterReadsWrites : public Inspector {
         RegisterReadWrite &self;
-        bool preorder(const IR::MethodCallExpression*) override;
+        bool preorder(const IR::MethodCallExpression *) override;
         void end_apply() override;
-        void collectRegReadWrite(const IR::MethodCallExpression*, const IR::Declaration*);
+        void collectRegReadWrite(const IR::MethodCallExpression *, const IR::Declaration *);
 
      public:
-        explicit CollectRegisterReadsWrites(RegisterReadWrite &self) :
-             self(self) {}
+        explicit CollectRegisterReadsWrites(RegisterReadWrite &self) : self(self) {}
     };
 
     /**
@@ -182,36 +185,26 @@ class RegisterReadWrite : public PassManager {
         bool preorder(IR::P4Control *c) override;
 
      public:
-        explicit MoveRegisterParameters(RegisterReadWrite &self) :
-             self(self) {}
+        explicit MoveRegisterParameters(RegisterReadWrite &self) : self(self) {}
     };
 
  public:
-    RegisterReadWrite(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-            BFN::TypeChecking* typeChecking = nullptr) :
-                refMap(refMap), typeMap(typeMap) {
-        if (!typeChecking)
-            typeChecking = new BFN::TypeChecking(refMap, typeMap);
-        addPasses({
-            typeChecking,
-            &table_mutex,
-            new MoveRegisterParameters(*this),
-            new CollectRegisterReadsWrites(*this),
-            new AnalyzeActionWithRegisterCalls(*this),
-            new UpdateRegisterActionsAndExecuteCalls(*this),
-            new P4::ClearTypeMap(typeMap),
-            new CopyHeaders(refMap, typeMap, typeChecking),
-            new P4::ClearTypeMap(typeMap),
-            typeChecking,
-            new CheckRegisterActions(*this)
-        });
+    RegisterReadWrite(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                      BFN::TypeChecking *typeChecking = nullptr)
+        : refMap(refMap), typeMap(typeMap) {
+        if (!typeChecking) typeChecking = new BFN::TypeChecking(refMap, typeMap);
+        addPasses({typeChecking, &table_mutex, new MoveRegisterParameters(*this),
+                   new CollectRegisterReadsWrites(*this), new AnalyzeActionWithRegisterCalls(*this),
+                   new UpdateRegisterActionsAndExecuteCalls(*this), new P4::ClearTypeMap(typeMap),
+                   new CopyHeaders(refMap, typeMap, typeChecking), new P4::ClearTypeMap(typeMap),
+                   typeChecking, new CheckRegisterActions(*this)});
     }
 
-    static
-    std::pair<const IR::MethodCallExpression * /*call*/, const IR::Expression * /*read_expr*/>
+    static std::pair<const IR::MethodCallExpression * /*call*/,
+                     const IR::Expression * /*read_expr*/>
     extractRegisterReadWrite(const IR::Statement *reg_stmt);
 };
 
 }  // namespace BFN
 
-#endif  // EXTENSIONS_BF_P4C_MIDEND_REGISTER_READ_WRITE_H_
+#endif  // BACKENDS_TOFINO_BF_P4C_MIDEND_REGISTER_READ_WRITE_H_

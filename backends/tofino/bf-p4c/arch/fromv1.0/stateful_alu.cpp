@@ -10,19 +10,18 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include <vector>
-#include <utility>
-
 #include "stateful_alu.h"
+
+#include <utility>
+#include <vector>
+
+#include "frontends/common/constantFolding.h"
 #include "frontends/p4-14/typecheck.h"
 #include "frontends/p4/strengthReduction.h"
-#include "frontends/common/constantFolding.h"
 #include "lib/bitops.h"
 #include "programStructure.h"
 
-P4V1::StatefulAluConverter::StatefulAluConverter() {
-    addConverter("stateful_alu"_cs, this);
-}
+P4V1::StatefulAluConverter::StatefulAluConverter() { addConverter("stateful_alu"_cs, this); }
 
 const IR::Type_Extern *P4V1::StatefulAluConverter::convertExternType(
     P4V1::ProgramStructure *structure, const IR::Type_Extern *, cstring) {
@@ -54,7 +53,7 @@ class ConstantLogicValue : public Inspector {
      * (e.g., there is no other relation operator in subtree)
      */
     struct CollectRelationAtoms : public Inspector {
-        std::vector<const IR::Operation_Relation*> m_rel_atoms;
+        std::vector<const IR::Operation_Relation *> m_rel_atoms;
         // Flag which means that all nodes were collected without any error
         // bool m_collection_ok = true;
 
@@ -62,20 +61,19 @@ class ConstantLogicValue : public Inspector {
             // Check if we have any relation operator as a sub-expression
             for (auto node : {op->left, op->right}) {
                 bool has_relation = false;
-                forAllMatching<IR::Operation_Relation>(node,
-                    [&has_relation](const IR::Operation_Relation *){ has_relation = true; });
+                forAllMatching<IR::Operation_Relation>(
+                    node, [&has_relation](const IR::Operation_Relation *) { has_relation = true; });
                 if (has_relation) {
-                   LOG4("We need to continue into the expression");
-                   return true;
+                    LOG4("We need to continue into the expression");
+                    return true;
                 }
             }
 
             // Everything seems fine insert the node if it is unique, the operator is inserted
             // if needed
-            auto result = std::find_if(m_rel_atoms.begin(), m_rel_atoms.end(),
-                [&](const IR::Operation_Relation *node) {
-                    return node->equiv(*op);
-            });
+            auto result =
+                std::find_if(m_rel_atoms.begin(), m_rel_atoms.end(),
+                             [&](const IR::Operation_Relation *node) { return node->equiv(*op); });
             if (result == m_rel_atoms.end()) {
                 // Check that we have a format required for the analysis
                 LOG4("Pushing the node into the collection: " << op);
@@ -87,23 +85,22 @@ class ConstantLogicValue : public Inspector {
     };
 
     // Data vector configuration
-    using ExpressionConfig = std::pair<const IR::Expression*, bool>;
+    using ExpressionConfig = std::pair<const IR::Expression *, bool>;
 
     /**
      * @brief Replace all relation operators with a passed
      * value vector.
      */
     class RewriteTerms : public Transform {
-        const std::vector<ExpressionConfig>& m_config;
+        const std::vector<ExpressionConfig> &m_config;
 
      public:
-        IR::Node* preorder(IR::Operation_Relation *op) override {
+        IR::Node *preorder(IR::Operation_Relation *op) override {
             // Check if the operation exists and copy the configuration if yes
             LOG4("Trying to replace: " << op);
-            auto result = std::find_if(m_config.begin(), m_config.end(),
-                [&](const ExpressionConfig &rel) {
-                    return rel.first->equiv(*op);
-                });
+            auto result =
+                std::find_if(m_config.begin(), m_config.end(),
+                             [&](const ExpressionConfig &rel) { return rel.first->equiv(*op); });
             // Return the original node if we don't have a configuration
             // for this expression
             if (result == m_config.end()) {
@@ -115,8 +112,7 @@ class ConstantLogicValue : public Inspector {
             }
         }
 
-        explicit RewriteTerms(const std::vector<ExpressionConfig> &conf) :
-            m_config(conf) {}
+        explicit RewriteTerms(const std::vector<ExpressionConfig> &conf) : m_config(conf) {}
     };
 
     // Computed flags for the next analysis
@@ -135,7 +131,7 @@ class ConstantLogicValue : public Inspector {
         if (collect_exprs.m_rel_atoms.size() == 0) return;
 
         bool is_always_false = true;
-        bool is_always_true  = true;
+        bool is_always_true = true;
 
         unsigned max_iter = (1 << collect_exprs.m_rel_atoms.size()) - 1;
         for (unsigned it = 0; it <= max_iter; it++) {
@@ -146,7 +142,7 @@ class ConstantLogicValue : public Inspector {
             std::vector<ExpressionConfig> ep;
             std::stringstream ss;
             ss << "Creating the following expression configuration:" << std::endl;
-            for (unsigned bit = 0; bit < collect_exprs.m_rel_atoms.size(); bit ++) {
+            for (unsigned bit = 0; bit < collect_exprs.m_rel_atoms.size(); bit++) {
                 auto econf = std::make_pair(collect_exprs.m_rel_atoms[bit], tmp_conf & 0x1);
                 ss << "\t* " << econf.first << " =====> " << econf.second << std::endl;
                 ep.push_back(econf);
@@ -172,25 +168,25 @@ class ConstantLogicValue : public Inspector {
             if (!rew_expr->is<IR::BoolLiteral>()) {
                 // We cannot distinguish the real value
                 is_always_false = false;
-                is_always_true  = false;
+                is_always_true = false;
                 LOG4("Cannot distinguish the constant value (true/false)");
                 break;
             }
             auto bl = rew_expr->to<IR::BoolLiteral>();
             is_always_false &= !bl->value;
-            is_always_true  &= bl->value;
+            is_always_true &= bl->value;
         }
 
         // Store computed flags
         m_always_false = is_always_false;
-        m_always_true  = is_always_true;
-        LOG4("Analysis result always_false=" << m_always_false << ", always_true=" <<
-            m_always_true);
+        m_always_true = is_always_true;
+        LOG4("Analysis result always_false=" << m_always_false
+                                             << ", always_true=" << m_always_true);
     }
 
  public:
-    explicit ConstantLogicValue(const IR::Expression *expr) :
-        m_always_false(false), m_always_true(false), m_expression(expr) {
+    explicit ConstantLogicValue(const IR::Expression *expr)
+        : m_always_false(false), m_always_true(false), m_expression(expr) {
         LOG4("Starting the analysis of: " << expr);
         CollectRelationAtoms collect_exprs;
         m_expression->apply(collect_exprs);
@@ -200,13 +196,9 @@ class ConstantLogicValue : public Inspector {
         compute_flags(collect_exprs);
     }
 
-    bool is_false() const {
-        return m_always_false;
-    }
+    bool is_false() const { return m_always_false; }
 
-    bool is_true() const {
-        return m_always_true;
-    }
+    bool is_true() const { return m_always_true; }
 };
 
 class CreateSaluApplyFunction : public Inspector {
@@ -226,13 +218,13 @@ class CreateSaluApplyFunction : public Inspector {
     // Each expression there has a predicate on corresponding index
     // where index is of type expr_index_t.
     // The NUM_EXPR_INDEX_T --> number of available slots in SALU
-    static const unsigned NUM_EXPR_INDEX_T  = 5;
-    const IR::Expression *expr[NUM_EXPR_INDEX_T]       = { nullptr };
-    const IR::Expression *expr_pred[NUM_EXPR_INDEX_T]  = { nullptr };
-    const IR::Expression *expr_dest[NUM_EXPR_INDEX_T]  = { nullptr };
-    int                   expr_idx[NUM_EXPR_INDEX_T]   = { 0 };
-    Util::SourceInfo      expr_src_info[NUM_EXPR_INDEX_T];
-    Util::SourceInfo      expr_pred_src_info[NUM_EXPR_INDEX_T];
+    static const unsigned NUM_EXPR_INDEX_T = 5;
+    const IR::Expression *expr[NUM_EXPR_INDEX_T] = {nullptr};
+    const IR::Expression *expr_pred[NUM_EXPR_INDEX_T] = {nullptr};
+    const IR::Expression *expr_dest[NUM_EXPR_INDEX_T] = {nullptr};
+    int expr_idx[NUM_EXPR_INDEX_T] = {0};
+    Util::SourceInfo expr_src_info[NUM_EXPR_INDEX_T];
+    Util::SourceInfo expr_pred_src_info[NUM_EXPR_INDEX_T];
     const IR::Statement *output = nullptr;
     const Util::SourceInfo *applyLoc = nullptr;
     enum expr_index_t { LO1, LO2, HI1, HI2, OUT, UNUSED } expr_index = UNUSED;
@@ -248,13 +240,15 @@ class CreateSaluApplyFunction : public Inspector {
     IR::Expression *makeRegFieldMember(IR::Expression *e, int idx) {
         if (auto st = rtype->to<IR::Type_Struct>()) {
             for (auto f : st->fields)
-                if (--idx < 0)
-                    return new IR::Member(e, f->name);
-            idx = 1; }
+                if (--idx < 0) return new IR::Member(e, f->name);
+            idx = 1;
+        }
         if (idx > 0) {
             need_alu_hi = true;
-            e = new IR::PathExpression(utype, new IR::Path("alu_hi")); }
-        return e; }
+            e = new IR::PathExpression(utype, new IR::Path("alu_hi"));
+        }
+        return e;
+    }
 
     // cast an expression to a type if necessary
     const IR::Expression *castTo(const IR::Type *type, const IR::Expression *e) {
@@ -264,8 +258,10 @@ class CreateSaluApplyFunction : public Inspector {
             if (t1 && t2 && t1->size != t2->size && t1->isSigned != t2->isSigned) {
                 /* P4_16 does not allow changing both size and signedness with a single cast,
                  * so we need two, changing size first, then signedness */
-                e = new IR::Cast(IR::Type::Bits::get(t2->size, t1->isSigned), e); }
-            e = new IR::Cast(type, e); }
+                e = new IR::Cast(IR::Type::Bits::get(t2->size, t1->isSigned), e);
+            }
+            e = new IR::Cast(type, e);
+        }
         return e;
     }
 
@@ -273,22 +269,26 @@ class CreateSaluApplyFunction : public Inspector {
         CreateSaluApplyFunction &self;
         const IR::Expression *preorder(IR::Cast *c) override {
             if (c->expr->is<IR::AttribLocal>()) return c->expr;
-            return c; };
+            return c;
+        };
         const IR::Expression *preorder(IR::Constant *c) override {
             // re-infer the types of all constants from context, as it may have changed
             // FIXME -- probably only want this for constants that did not have an explicit
             // FIXME -- type originally, but we have no good way of knowing.
             // If we fix P4_14 typechecking to understand externs, need for this goes away
             c->type = IR::Type_InfInt::get();
-            return c; }
+            return c;
+        }
         const IR::Expression *postorder(IR::Add *e) override {
             if (self.convert_to_saturating)
                 return new IR::AddSat(e->srcInfo, e->type, e->left, e->right);
-            return e; }
+            return e;
+        }
         const IR::Expression *postorder(IR::Sub *e) override {
             if (self.convert_to_saturating)
                 return new IR::SubSat(e->srcInfo, e->type, e->left, e->right);
-            return e; }
+            return e;
+        }
         const IR::Expression *postorder(IR::Neg *e) override {
             if (e->type->is<IR::Type_InfInt>())
                 return new IR::Neg(e->srcInfo, e->expr->type, e->expr);
@@ -351,18 +351,17 @@ class CreateSaluApplyFunction : public Inspector {
                 var = new IR::Path("in_value");
             } else if (attr->name == "math_unit") {
                 auto *mu = new IR::PathExpression(IR::ID(attr->srcInfo, self.math_unit_name));
-                return new IR::MethodCallExpression(attr->srcInfo,
-                        new IR::Member(mu, "execute"), { new IR::Argument(self.math_input) });
+                return new IR::MethodCallExpression(attr->srcInfo, new IR::Member(mu, "execute"),
+                                                    {new IR::Argument(self.math_input)});
             } else if (attr->name == "predicate") {
                 auto *args = new IR::Vector<IR::Argument>;
                 if (self.cond_lo)
                     args->push_back(new IR::Argument(self.cond_lo));
                 else if (self.cond_hi)
                     args->push_back(new IR::Argument(new IR::BoolLiteral(false)));
-                if (self.cond_hi)
-                    args->push_back(new IR::Argument(self.cond_hi));
-                return new IR::MethodCallExpression(attr->srcInfo,
-                    new IR::Member(new IR::This, "predicate"), args);
+                if (self.cond_hi) args->push_back(new IR::Argument(self.cond_hi));
+                return new IR::MethodCallExpression(
+                    attr->srcInfo, new IR::Member(new IR::This, "predicate"), args);
             } else if (attr->name == "combined_predicate") {
                 // combined_predicate is an 1-bit output equal to any boolean function of
                 // the predicate results.  We translate to a conditional setting of the
@@ -378,17 +377,21 @@ class CreateSaluApplyFunction : public Inspector {
                     else if (self.cond_lo)
                         self.pred = self.cond_lo;
                     else
-                        self.pred = new IR::BoolLiteral(false); }
+                        self.pred = new IR::BoolLiteral(false);
+                }
                 return new IR::Constant(self.utype, 1);
             } else {
                 error("Unrecognized attribute %s", attr);
-                return attr; }
-            return self.makeRegFieldMember(
-                    new IR::PathExpression(attr->srcInfo, self.rtype, var), idx); }
+                return attr;
+            }
+            return self.makeRegFieldMember(new IR::PathExpression(attr->srcInfo, self.rtype, var),
+                                           idx);
+        }
         const IR::Expression *postorder(IR::Primitive *prim) override {
             if (prim->name == "salu_min") prim->name = "min"_cs;
             if (prim->name == "salu_max") prim->name = "max"_cs;
-            return prim; }
+            return prim;
+        }
 
      public:
         explicit RewriteExpr(CreateSaluApplyFunction &self) : self(self) {}
@@ -413,13 +416,15 @@ class CreateSaluApplyFunction : public Inspector {
             math_input = prop->value->to<IR::ExpressionValue>()->expression->apply(rewrite);
             math_input = castTo(utype, math_input);
             return false;
-        } else if ((prop->name == "initial_register_lo_value")
-                || (prop->name == "initial_register_hi_value")) {
+        } else if ((prop->name == "initial_register_lo_value") ||
+                   (prop->name == "initial_register_hi_value")) {
             if (auto ev = prop->value->to<IR::ExpressionValue>()) {
                 if (auto k = ev->expression->to<IR::Constant>()) {
                     annots->addAnnotation(prop->name.toString(), ev->expression);
                     LOG5("adding annotation '" << prop->name << "' with value " << k->asInt());
-                    return false; } }
+                    return false;
+                }
+            }
             error("%s: %s must be a constant", prop->value->srcInfo, prop->name);
             return false;
         } else if (prop->name == "update_lo_1_predicate") {
@@ -459,7 +464,8 @@ class CreateSaluApplyFunction : public Inspector {
             expr_index = OUT;
             idx = -1;
         } else {
-            return false; }
+            return false;
+        }
 
         applyLoc = &prop->value->srcInfo;
         convert_to_saturating = saturating && !predicate;
@@ -477,8 +483,8 @@ class CreateSaluApplyFunction : public Inspector {
 
         // Prepare the destination expression based on the detected
         // property.
-        IR::Expression *dest = new IR::PathExpression(utype,
-            new IR::Path(idx < 0 ? "rv" : "value"));
+        IR::Expression *dest =
+            new IR::PathExpression(utype, new IR::Path(idx < 0 ? "rv" : "value"));
         if (idx >= 0) {
             dest = makeRegFieldMember(dest, idx);
         } else if (cmpl_out) {
@@ -486,11 +492,12 @@ class CreateSaluApplyFunction : public Inspector {
         }
 
         // Remember everything important for the next iteration
-        expr_dest[expr_index]     = dest;
-        expr[expr_index]          = e;
-        expr_idx[expr_index]      = idx;
+        expr_dest[expr_index] = dest;
+        expr[expr_index] = e;
+        expr_idx[expr_index] = idx;
         expr_src_info[expr_index] = prop->srcInfo;
-        return false; }
+        return false;
+    }
 
     /**
      * @brief Create the standard assignment statement for captured
@@ -500,9 +507,9 @@ class CreateSaluApplyFunction : public Inspector {
      * @return const IR::Statement* of the IR::AssignmentStatement, the statement
      * can be also wrapped in the IF statement when needed.
      */
-    const IR::Statement* standard_assignment(int alu_idx) {
-        const IR::Statement *instr = structure->assign(expr_src_info[alu_idx],
-                                expr_dest[alu_idx], expr[alu_idx], utype);
+    const IR::Statement *standard_assignment(int alu_idx) {
+        const IR::Statement *instr =
+            structure->assign(expr_src_info[alu_idx], expr_dest[alu_idx], expr[alu_idx], utype);
         LOG2("adding " << instr << " with pred " << expr_pred[alu_idx]);
         // Add the IF condition in a case that we have a not null predicate
         if (expr_pred[alu_idx]) {
@@ -519,25 +526,25 @@ class CreateSaluApplyFunction : public Inspector {
      *  } else {
      *      res = E2;
      *  }
-     * 
+     *
      * @param alu_idx ALU IDX where we are starting the analysis
      * @return const IR::Statement* instance of created if-else statement
      */
-    const IR::Statement* merge_assigment_with_if(int alu_idx) {
+    const IR::Statement *merge_assigment_with_if(int alu_idx) {
         // Prepare individual parts of the expression above, assignments, predicate
         // and false branch. Individual parts of captured data depends on not null
         // predicate occupancy
-        auto assig1 = structure->assign(expr_src_info[alu_idx], expr_dest[alu_idx],
-            expr[alu_idx], utype);
-        auto assig2 = structure->assign(expr_src_info[alu_idx+1], expr_dest[alu_idx+1],
-            expr[alu_idx+1], utype);
-        auto pred = expr_pred[alu_idx] ? expr_pred[alu_idx] : expr_pred[alu_idx+1];
+        auto assig1 =
+            structure->assign(expr_src_info[alu_idx], expr_dest[alu_idx], expr[alu_idx], utype);
+        auto assig2 = structure->assign(expr_src_info[alu_idx + 1], expr_dest[alu_idx + 1],
+                                        expr[alu_idx + 1], utype);
+        auto pred = expr_pred[alu_idx] ? expr_pred[alu_idx] : expr_pred[alu_idx + 1];
         auto false_branch = expr_pred[alu_idx] ? assig2 : assig1;
 
-        auto ret_if = new IR::IfStatement(pred,
+        auto ret_if = new IR::IfStatement(
+            pred,
             // res = E1 | E2
-            new IR::AssignmentStatement(assig1->left,
-                new IR::BOr(assig1->right, assig2->right)),
+            new IR::AssignmentStatement(assig1->left, new IR::BOr(assig1->right, assig2->right)),
             // res = E2
             false_branch);
 
@@ -552,13 +559,13 @@ class CreateSaluApplyFunction : public Inspector {
      * @param alu_idx ALU IDX where to start the analysis
      * @return const IR::Statement* instance of created if-else statement
      */
-    const IR::Statement* merge_if_statements(int alu_idx) {
+    const IR::Statement *merge_if_statements(int alu_idx) {
         auto pred1 = expr_pred[alu_idx];
-        auto pred2 = expr_pred[alu_idx+1];
-        auto assig1 = structure->assign(expr_src_info[alu_idx], expr_dest[alu_idx],
-            expr[alu_idx], utype);
-        auto assig2 = structure->assign(expr_src_info[alu_idx+1], expr_dest[alu_idx+1],
-            expr[alu_idx+1], utype);
+        auto pred2 = expr_pred[alu_idx + 1];
+        auto assig1 =
+            structure->assign(expr_src_info[alu_idx], expr_dest[alu_idx], expr[alu_idx], utype);
+        auto assig2 = structure->assign(expr_src_info[alu_idx + 1], expr_dest[alu_idx + 1],
+                                        expr[alu_idx + 1], utype);
 
         const IR::Statement *ret_stmt;
         if (pred1->equiv(*pred2)) {
@@ -566,10 +573,11 @@ class CreateSaluApplyFunction : public Inspector {
             // if (pred) {
             //    value = expr1 | expr2;
             // }
-            ret_stmt = new IR::IfStatement(pred1,
-                new IR::AssignmentStatement(assig1->left,
-                    new IR::BOr(assig1->right, assig2->right)),
-                nullptr);
+            ret_stmt =
+                new IR::IfStatement(pred1,
+                                    new IR::AssignmentStatement(
+                                        assig1->left, new IR::BOr(assig1->right, assig2->right)),
+                                    nullptr);
         } else {
             // Both predicates are different and we need to generate a more complicated
             // structure of IF statements which reflects the SALU behavior:
@@ -579,19 +587,20 @@ class CreateSaluApplyFunction : public Inspector {
 
             // if (pred1) ...
             // else if(pred2) ...
-            ret_stmt = new IR::IfStatement(pred1, assig1,
-                new IR::IfStatement(pred2, assig2, nullptr));
+            ret_stmt =
+                new IR::IfStatement(pred1, assig1, new IR::IfStatement(pred2, assig2, nullptr));
 
             // Run the always false analysis to check if we can insert the
             // AND-ed condition here
             auto and_pred = new IR::LAnd(pred1, pred2);
             ConstantLogicValue always_false(and_pred);
             if (!always_false.is_false()) {
-                    // if (pred1 && pred2 ) {
-                ret_stmt = new IR::IfStatement(and_pred,
+                // if (pred1 && pred2 ) {
+                ret_stmt = new IR::IfStatement(
+                    and_pred,
                     // dst = expr1 | expr2; }
                     new IR::AssignmentStatement(assig1->left,
-                        new IR::BOr(assig1->right, assig2->right)),
+                                                new IR::BOr(assig1->right, assig2->right)),
                     ret_stmt);
             }
         }
@@ -610,7 +619,7 @@ class CreateSaluApplyFunction : public Inspector {
 
     /**
      * @brief Check the predicate and return error message
-     * 
+     *
      * @warning The code assumes that nullptr value of the expression was checked from callee
      * @param alu_idx ALU Index to check
      */
@@ -618,7 +627,7 @@ class CreateSaluApplyFunction : public Inspector {
         if (!expr_pred[alu_idx]) return;
 
         error("Corresponding expression for the predicate wasn't found! %s",
-            expr_pred_src_info[alu_idx]);
+              expr_pred_src_info[alu_idx]);
     }
 
     /**
@@ -637,39 +646,39 @@ class CreateSaluApplyFunction : public Inspector {
             // 1] LO1/HI1 isn't null but LO2/HI2 is
             // 2] LO2/HI2 isn't null but LO1/HI1 is
             // 3] Both expression are not null
-            if (!expr[alu_idx] && !expr[alu_idx+1]) {
-                  check_predicate_for_null(alu_idx);
-                  check_predicate_for_null(alu_idx+1);
-                  continue;
+            if (!expr[alu_idx] && !expr[alu_idx + 1]) {
+                check_predicate_for_null(alu_idx);
+                check_predicate_for_null(alu_idx + 1);
+                continue;
             }
 
-            if (expr[alu_idx] && !expr[alu_idx+1]) {
-                check_predicate_for_null(alu_idx+1);
+            if (expr[alu_idx] && !expr[alu_idx + 1]) {
+                check_predicate_for_null(alu_idx + 1);
                 body->components.push_back(standard_assignment(alu_idx));
                 continue;
             }
-            if (!expr[alu_idx] && expr[alu_idx+1]) {
+            if (!expr[alu_idx] && expr[alu_idx + 1]) {
                 check_predicate_for_null(alu_idx);
-                body->components.push_back(standard_assignment(alu_idx+1));
+                body->components.push_back(standard_assignment(alu_idx + 1));
                 continue;
             }
 
             // Both expressions are there, the next behavior is based on predicates
-            if (!expr_pred[alu_idx] && !expr_pred[alu_idx+1]) {
+            if (!expr_pred[alu_idx] && !expr_pred[alu_idx + 1]) {
                 // Predicates aren't available and we can merge
                 // expressions together
                 auto assig1 = standard_assignment(alu_idx)->to<IR::AssignmentStatement>();
-                auto assig2 = standard_assignment(alu_idx+1)->to<IR::AssignmentStatement>();
+                auto assig2 = standard_assignment(alu_idx + 1)->to<IR::AssignmentStatement>();
                 BUG_CHECK(assig1 && assig2,
-                    "IR::AssignmentStatement statements are expected here!");
+                          "IR::AssignmentStatement statements are expected here!");
                 auto instr = new IR::AssignmentStatement(assig1->left,
-                    new IR::BOr(assig1->right, assig2->right));
+                                                         new IR::BOr(assig1->right, assig2->right));
                 LOG2("Adding the merged assignment " << instr);
                 body->components.push_back(instr);
                 continue;
             }
-            if ((expr_pred[alu_idx] && !expr_pred[alu_idx+1]) ||
-                (!expr_pred[alu_idx] && expr_pred[alu_idx+1])) {
+            if ((expr_pred[alu_idx] && !expr_pred[alu_idx + 1]) ||
+                (!expr_pred[alu_idx] && expr_pred[alu_idx + 1])) {
                 // Only one predicate is there and we need to emit a specialized
                 // IF statement (see the method for details).
                 body->push_back(merge_assigment_with_if(alu_idx));
@@ -680,60 +689,69 @@ class CreateSaluApplyFunction : public Inspector {
             body->components.push_back(merge_if_statements(alu_idx));
         }
         // Generate the output instruction if required
-        if (defer_out && have_output)
-            emit_output();
+        if (defer_out && have_output) emit_output();
     }
 
  public:
     CreateSaluApplyFunction(IR::Annotations *annots, P4V1::ProgramStructure *s,
                             const IR::Type *rtype, const IR::Type::Bits *utype, cstring mu,
                             bool saturating)
-        : annots(annots), structure(s), rtype(rtype), utype(utype), math_unit_name(mu),
+        : annots(annots),
+          structure(s),
+          rtype(rtype),
+          utype(utype),
+          math_unit_name(mu),
           saturating(saturating),
-          rewrite({ new RewriteExpr(*this), new TypeCheck }) {
-        body = new IR::BlockStatement({
-            new IR::Declaration_Variable("in_value"_cs, rtype),
-            new IR::AssignmentStatement(new IR::PathExpression("in_value"),
-                                        new IR::PathExpression("value")) });
-        if (auto st = rtype->to<IR::Type_StructLike>())
-            rtype = new IR::Type_Name(st->name); }
+          rewrite({new RewriteExpr(*this), new TypeCheck}) {
+        body =
+            new IR::BlockStatement({new IR::Declaration_Variable("in_value"_cs, rtype),
+                                    new IR::AssignmentStatement(new IR::PathExpression("in_value"),
+                                                                new IR::PathExpression("value"))});
+        if (auto st = rtype->to<IR::Type_StructLike>()) rtype = new IR::Type_Name(st->name);
+    }
     void end_apply(const IR::Node *) {
         // Emit helping alu_hi & rv when needed
         if (need_alu_hi)
-            body->components.insert(body->components.begin(),
-                    new IR::Declaration_Variable("alu_hi", utype, new IR::Constant(utype, 0)));
-        auto apply_params = new IR::ParameterList({
-                     new IR::Parameter("value", IR::Direction::InOut, rtype) });
+            body->components.insert(
+                body->components.begin(),
+                new IR::Declaration_Variable("alu_hi", utype, new IR::Constant(utype, 0)));
+        auto apply_params =
+            new IR::ParameterList({new IR::Parameter("value", IR::Direction::InOut, rtype)});
         if (have_output) {
             body->components.insert(body->components.begin(),
-                new IR::AssignmentStatement(new IR::PathExpression("rv"),
-                                            new IR::Constant(utype, 0)));
-            apply_params->push_back(new IR::Parameter("rv", IR::Direction::Out, utype)); }
+                                    new IR::AssignmentStatement(new IR::PathExpression("rv"),
+                                                                new IR::Constant(utype, 0)));
+            apply_params->push_back(new IR::Parameter("rv", IR::Direction::Out, utype));
+        }
         // Emit body and prepare the apply method
         emit_salu_body();
-        apply = new IR::Function("apply",
-                new IR::Type_Method(IR::Type_Void::get(), apply_params, "apply"_cs), body);
+        apply = new IR::Function(
+            "apply", new IR::Type_Method(IR::Type_Void::get(), apply_params, "apply"_cs), body);
     }
     static const IR::Function *create(IR::Annotations *annots, P4V1::ProgramStructure *structure,
-                const IR::Declaration_Instance *ext, const IR::Type *rtype,
-                const IR::Type::Bits *utype, cstring math_unit_name = cstring(),
-                bool saturating = false) {
-        CreateSaluApplyFunction create_apply(annots, structure, rtype, utype,
-                                             math_unit_name, saturating);
+                                      const IR::Declaration_Instance *ext, const IR::Type *rtype,
+                                      const IR::Type::Bits *utype,
+                                      cstring math_unit_name = cstring(), bool saturating = false) {
+        CreateSaluApplyFunction create_apply(annots, structure, rtype, utype, math_unit_name,
+                                             saturating);
         // need a separate traversal here as "update" will be visited after "output"
         forAllMatching<IR::AttribLocal>(&ext->properties, [&](const IR::AttribLocal *attr) {
-            if (attr->name.name.endsWith("_bitc")) { create_apply.cmpl_out = true; } });
+            if (attr->name.name.endsWith("_bitc")) {
+                create_apply.cmpl_out = true;
+            }
+        });
         ext->apply(create_apply);
-        return create_apply.apply; }
+        return create_apply.apply;
+    }
 };
 
 static bool usesRegHi(const IR::Declaration_Instance *salu) {
     struct scanVisitor : public Inspector {
         bool result = false;
         bool preorder(const IR::AttribLocal *attr) override {
-            if (attr->name == "register_hi")
-                result = true;
-            return !result; }
+            if (attr->name == "register_hi") result = true;
+            return !result;
+        }
         bool preorder(const IR::Expression *) override { return !result; }
     } scan;
 
@@ -754,14 +772,12 @@ class CreateMathUnit : public Inspector {
         if (prop->name == "math_unit_exponent_invert") {
             have_unit = true;
             if (auto ev = prop->value->to<IR::ExpressionValue>())
-                if ((exp_invert = ev->expression->to<IR::BoolLiteral>()))
-                    return false;
+                if ((exp_invert = ev->expression->to<IR::BoolLiteral>())) return false;
             error("%s: %s must be a constant", prop->value->srcInfo, prop->name);
         } else if (prop->name == "math_unit_exponent_shift") {
             have_unit = true;
             if (auto ev = prop->value->to<IR::ExpressionValue>())
-                if ((exp_shift = ev->expression->to<IR::Constant>()))
-                    return false;
+                if ((exp_shift = ev->expression->to<IR::Constant>())) return false;
             error("%s: %s must be a constant", prop->value->srcInfo, prop->name);
         } else if (prop->name == "math_unit_input") {
             have_unit = true;
@@ -772,9 +788,9 @@ class CreateMathUnit : public Inspector {
         } else if (prop->name == "math_unit_output_scale") {
             have_unit = true;
             if (auto ev = prop->value->to<IR::ExpressionValue>())
-                if ((output_scale = ev->expression->to<IR::Constant>()))
-                    return false;
-            error("%s: %s must be a constant", prop->value->srcInfo, prop->name); }
+                if ((output_scale = ev->expression->to<IR::Constant>())) return false;
+            error("%s: %s must be a constant", prop->value->srcInfo, prop->name);
+        }
         return false;
     }
 
@@ -783,41 +799,41 @@ class CreateMathUnit : public Inspector {
     void end_apply(const IR::Node *) {
         if (!have_unit) {
             unit = nullptr;
-            return; }
+            return;
+        }
         if (!exp_invert) exp_invert = new IR::BoolLiteral(false);
         if (!exp_shift) exp_shift = new IR::Constant(0);
         if (!output_scale) output_scale = new IR::Constant(0);
         if (!table) table = new IR::ExpressionListValue({});
         /// TODO: remove when v1model is retired
-        IR::Type* mutype;
+        IR::Type *mutype;
         if (P4V1::use_v1model()) {
             auto *tuple_type = new IR::Type_Tuple;
             for (int i = table->expressions.size(); i > 0; --i)
                 tuple_type->components.push_back(utype);
             mutype = new IR::Type_Specialized(new IR::Type_Name("math_unit"),
-                    new IR::Vector<IR::Type>({ utype, tuple_type }));
+                                              new IR::Vector<IR::Type>({utype, tuple_type}));
         } else {
             mutype = new IR::Type_Specialized(new IR::Type_Name("MathUnit"),
-                    new IR::Vector<IR::Type>({ utype }));
+                                              new IR::Vector<IR::Type>({utype}));
         }
-        auto *ctor_args = new IR::Vector<IR::Argument>({
-            new IR::Argument(exp_invert),
-            new IR::Argument(exp_shift),
-            new IR::Argument(output_scale),
-            new IR::Argument(new IR::ListExpression(table->expressions))
-        });
-        auto* externalName = new IR::StringLiteral(IR::ID("." + name));
-        auto* annotations = new IR::Annotations({
-                new IR::Annotation(IR::ID("name"), { externalName })
-                });
+        auto *ctor_args = new IR::Vector<IR::Argument>(
+            {new IR::Argument(exp_invert), new IR::Argument(exp_shift),
+             new IR::Argument(output_scale),
+             new IR::Argument(new IR::ListExpression(table->expressions))});
+        auto *externalName = new IR::StringLiteral(IR::ID("." + name));
+        auto *annotations =
+            new IR::Annotations({new IR::Annotation(IR::ID("name"), {externalName})});
         unit = new IR::Declaration_Instance(name, annotations, mutype, ctor_args);
     }
     static const IR::Declaration_Instance *create(P4V1::ProgramStructure *structure,
-                const IR::Declaration_Instance *ext, const IR::Type::Bits *utype) {
+                                                  const IR::Declaration_Instance *ext,
+                                                  const IR::Type::Bits *utype) {
         LOG3("creating math unit " << ext);
         CreateMathUnit create_math(structure->makeUniqueName(ext->name + "_math_unit"), utype);
         ext->apply(create_math);
-        return create_math.unit; }
+        return create_math.unit;
+    }
 };
 
 /* FIXME -- still need to deal with the following stateful_alu properties:
@@ -829,20 +845,21 @@ class CreateMathUnit : public Inspector {
 
 // FIXME -- this should be a method of IR::IndexedVector, or better yet, have a
 // FIXME -- replace method that doesn't need an iterator.
-IR::IndexedVector<IR::Node>::iterator find_in_scope(
-        IR::Vector<IR::Node> *scope, cstring name) {
+IR::IndexedVector<IR::Node>::iterator find_in_scope(IR::Vector<IR::Node> *scope, cstring name) {
     for (auto it = scope->begin(); it != scope->end(); ++it) {
         if (auto decl = (*it)->to<IR::Declaration>()) {
             if (decl->name == name) {
-                return it; } }
+                return it;
+            }
+        }
     }
     BUG_CHECK("%s not in scope", name);
     return scope->end();
 }
 
 P4V1::StatefulAluConverter::reg_info P4V1::StatefulAluConverter::getRegInfo(
-        P4V1::ProgramStructure *structure, const IR::Declaration_Instance *ext,
-        IR::Vector<IR::Node> *scope) {
+    P4V1::ProgramStructure *structure, const IR::Declaration_Instance *ext,
+    IR::Vector<IR::Node> *scope) {
     reg_info rv;
     if (auto rp = ext->properties.get<IR::Property>("reg"_cs)) {
         auto rpv = rp->value->to<IR::ExpressionValue>();
@@ -856,16 +873,12 @@ P4V1::StatefulAluConverter::reg_info P4V1::StatefulAluConverter::getRegInfo(
                 } else if (auto st = rv.rtype->to<IR::Type_Struct>()) {
                     auto nfields = st->fields.size();
                     bool sameTypes = false;
-                    if (nfields > 0)
-                        rv.utype = st->fields.at(0)->type->to<IR::Type::Bits>();
+                    if (nfields > 0) rv.utype = st->fields.at(0)->type->to<IR::Type::Bits>();
                     if (nfields > 1) {
-                        auto* secondType = st->fields.at(1)->type;
-                        if (rv.utype && secondType)
-                            sameTypes = rv.utype->equiv(*secondType);
+                        auto *secondType = st->fields.at(1)->type;
+                        if (rv.utype && secondType) sameTypes = rv.utype->equiv(*secondType);
                     }
-                    if (nfields < 1 || nfields > 2 ||
-                        !rv.utype ||
-                        (nfields > 1 && !sameTypes))
+                    if (nfields < 1 || nfields > 2 || !rv.utype || (nfields > 1 && !sameTypes))
                         rv.utype = nullptr;
                     if (!rv.utype)
                         error("%s not a valid register layout for stateful_alu", rv.reg->layout);
@@ -876,19 +889,19 @@ P4V1::StatefulAluConverter::reg_info P4V1::StatefulAluConverter::getRegInfo(
                 int width = 1 << ceil_log2(rv.reg->width);
                 if (width > 1 && width < 8) width = 8;
                 if (width > 32 || usesRegHi(ext)) {
-                    rv.utype = IR::Type::Bits::get(width/2, rv.reg->signed_);
+                    rv.utype = IR::Type::Bits::get(width / 2, rv.reg->signed_);
                     cstring rtype_name = structure->makeUniqueName(ext->name + "_layout"_cs);
-                    rv.rtype = new IR::Type_Struct(IR::ID(rtype_name), {
-                        new IR::StructField("lo", rv.utype),
-                        new IR::StructField("hi", rv.utype) });
+                    rv.rtype = new IR::Type_Struct(
+                        IR::ID(rtype_name),
+                        {new IR::StructField("lo", rv.utype), new IR::StructField("hi", rv.utype)});
                     auto iter = find_in_scope(scope, structure->registers.get(rv.reg));
-                    if (iter != scope->end())
-                        iter = scope->erase(iter);
-                    scope->insert(iter, structure->convert(
-                            rv.reg, structure->registers.get(rv.reg), rv.rtype));
+                    if (iter != scope->end()) iter = scope->erase(iter);
+                    scope->insert(iter, structure->convert(rv.reg, structure->registers.get(rv.reg),
+                                                           rv.rtype));
                     scope->insert(iter, rv.rtype);
                 } else {
-                    rv.rtype = rv.utype = IR::Type::Bits::get(width, rv.reg->signed_); }
+                    rv.rtype = rv.utype = IR::Type::Bits::get(width, rv.reg->signed_);
+                }
             } else {
                 error("register %s width %d not supported for stateful_alu", rv.reg, rv.reg->width);
             }
@@ -896,35 +909,39 @@ P4V1::StatefulAluConverter::reg_info P4V1::StatefulAluConverter::getRegInfo(
             error("%s reg property %s not a register", ext->name, rp);
         }
     } else {
-        error("No reg property in %s", ext); }
+        error("No reg property in %s", ext);
+    }
     if (rv.reg) cache[rv.reg] = rv;
     return rv;
 }
 
 const IR::ActionProfile *P4V1::StatefulAluConverter::getSelectorProfile(
-        P4V1::ProgramStructure *structure, const IR::Declaration_Instance *ext) {
+    P4V1::ProgramStructure *structure, const IR::Declaration_Instance *ext) {
     if (auto sel_bind = ext->properties.get<IR::Property>("selector_binding"_cs)) {
         auto ev = sel_bind->value->to<IR::ExpressionValue>();
         auto gref = ev ? ev->expression->to<IR::GlobalRef>() : nullptr;
         auto tbl = gref ? gref->obj->to<IR::V1Table>() : nullptr;
         if (!tbl) {
             error("%s is not a table", sel_bind);
-            return nullptr; }
+            return nullptr;
+        }
         auto ap = structure->action_profiles.get(tbl->action_profile);
         auto sel = ap ? structure->action_selectors.get(ap->selector) : nullptr;
         if (!sel) {
             error("No action selector for table %s", tbl);
-            return nullptr; }
-        return ap; }
+            return nullptr;
+        }
+        return ap;
+    }
     return nullptr;
 }
 
 const IR::Declaration_Instance *P4V1::StatefulAluConverter::convertExternInstance(
-        P4V1::ProgramStructure *structure, const IR::Declaration_Instance *ext, cstring name,
-        IR::IndexedVector<IR::Declaration> *scope) {
+    P4V1::ProgramStructure *structure, const IR::Declaration_Instance *ext, cstring name,
+    IR::IndexedVector<IR::Declaration> *scope) {
     auto *et = ext->type->to<IR::Type_Extern>();
-    BUG_CHECK(et && et->name == "stateful_alu",
-              "Extern %s is not stateful_alu type, but %s", ext, ext->type);
+    BUG_CHECK(et && et->name == "stateful_alu", "Extern %s is not stateful_alu type, but %s", ext,
+              ext->type);
 
     auto *annots = new IR::Annotations();
     if (auto prop = ext->properties.get<IR::Property>("reduction_or_group"_cs)) {
@@ -945,19 +962,18 @@ const IR::Declaration_Instance *P4V1::StatefulAluConverter::convertExternInstanc
         LOG6(ext);
         auto satype = new IR::Type_Name("SelectorAction");
         auto bit1 = IR::Type::Bits::get(1);
-        auto *ctor_args = new IR::Vector<IR::Argument>({
-                new IR::Argument(new IR::PathExpression(new IR::Path(
-                    structure->action_profiles.get(ap)))) });
-        auto *block = new IR::BlockStatement({
-            CreateSaluApplyFunction::create(annots, structure, ext, bit1, bit1) });
-        auto* externalName = new IR::StringLiteral(IR::ID("." + name));
+        auto *ctor_args = new IR::Vector<IR::Argument>({new IR::Argument(
+            new IR::PathExpression(new IR::Path(structure->action_profiles.get(ap))))});
+        auto *block = new IR::BlockStatement(
+            {CreateSaluApplyFunction::create(annots, structure, ext, bit1, bit1)});
+        auto *externalName = new IR::StringLiteral(IR::ID("." + name));
         annots->addAnnotation(IR::ID("name"), externalName);
         // 1-bit selector alu may not need a 'fake' reg property
         // see sful_sel1.p4
         if (ext->properties.get<IR::Property>("reg"_cs)) {
             auto info = getRegInfo(structure, ext, structure->declarations);
             if (info.utype) {
-                auto* regName = new IR::StringLiteral(IR::ID(info.reg->name));
+                auto *regName = new IR::StringLiteral(IR::ID(info.reg->name));
                 annots->addAnnotation(IR::ID("reg"), regName);
             }
         }
@@ -973,24 +989,21 @@ const IR::Declaration_Instance *P4V1::StatefulAluConverter::convertExternInstanc
         // auto reg_index_width = info.reg->index_width();
         auto ratype = new IR::Type_Specialized(
             new IR::Type_Name("RegisterAction"),
-            new IR::Vector<IR::Type>({info.rtype,
-                IR::Type::Bits::get(reg_index_width), info.utype}));
+            new IR::Vector<IR::Type>(
+                {info.rtype, IR::Type::Bits::get(reg_index_width), info.utype}));
         if (info.reg->instance_count == -1) {
-            ratype = new IR::Type_Specialized(
-                new IR::Type_Name("DirectRegisterAction"),
-                new IR::Vector<IR::Type>({info.rtype, info.utype}));
+            ratype = new IR::Type_Specialized(new IR::Type_Name("DirectRegisterAction"),
+                                              new IR::Vector<IR::Type>({info.rtype, info.utype}));
         }
 
-        auto *ctor_args = new IR::Vector<IR::Argument>({
-                new IR::Argument(new IR::PathExpression(new IR::Path(info.reg->name))) });
+        auto *ctor_args = new IR::Vector<IR::Argument>(
+            {new IR::Argument(new IR::PathExpression(new IR::Path(info.reg->name)))});
         auto *math = CreateMathUnit::create(structure, ext, info.utype);
-        if (math)
-            scope->push_back(math);
-        auto *block = new IR::BlockStatement({
-            CreateSaluApplyFunction::create(annots, structure, ext, info.rtype, info.utype,
-                                            math ? math->name.name : cstring(),
-                                            info.reg->saturating) });
-        auto* externalName = new IR::StringLiteral(IR::ID("." + name));
+        if (math) scope->push_back(math);
+        auto *block = new IR::BlockStatement({CreateSaluApplyFunction::create(
+            annots, structure, ext, info.rtype, info.utype, math ? math->name.name : cstring(),
+            info.reg->saturating)});
+        auto *externalName = new IR::StringLiteral(IR::ID("." + name));
         annots->addAnnotation(IR::ID("name"), externalName);
         auto *rv = new IR::Declaration_Instance(name, annots, ratype, ctor_args, block);
         LOG3("Created apply function: " << *rv);
@@ -1002,11 +1015,11 @@ const IR::Declaration_Instance *P4V1::StatefulAluConverter::convertExternInstanc
 }
 
 const IR::Statement *P4V1::StatefulAluConverter::convertExternCall(
-            P4V1::ProgramStructure *structure, const IR::Declaration_Instance *ext,
-            const IR::Primitive *prim) {
+    P4V1::ProgramStructure *structure, const IR::Declaration_Instance *ext,
+    const IR::Primitive *prim) {
     auto *et = ext->type->to<IR::Type_Extern>();
-    BUG_CHECK(et && et->name == "stateful_alu",
-              "Extern %s is not stateful_alu type, but %s", ext, ext->type);
+    BUG_CHECK(et && et->name == "stateful_alu", "Extern %s is not stateful_alu type, but %s", ext,
+              ext->type);
     const IR::Attached *target = getSelectorProfile(structure, ext);
     auto rtype = IR::Type::Bits::get(1);
     bool direct = false;
@@ -1022,7 +1035,8 @@ const IR::Statement *P4V1::StatefulAluConverter::convertExternCall(
     }
     if (!rtype) {
         BUG_CHECK(errorCount() > 0, "Failed to find rtype for %s", ext);
-        return new IR::EmptyStatement(); }
+        return new IR::EmptyStatement();
+    }
     ExpressionConverter conv(structure);
     const IR::Statement *rv = nullptr;
     IR::BlockStatement *block = nullptr;
@@ -1034,29 +1048,31 @@ const IR::Statement *P4V1::StatefulAluConverter::convertExternCall(
         if (prim->operands.size() == 2) {
             auto *idx = conv.convert(prim->operands.at(1));
             if (idx->is<IR::ListExpression>())
-                error("%s%s expects a simple expression, not a %s",
-                      prim->operands.at(1)->srcInfo, prim->name, idx);
+                error("%s%s expects a simple expression, not a %s", prim->operands.at(1)->srcInfo,
+                      prim->name, idx);
             args->push_back(new IR::Argument(idx));
-            if (direct)
-                error("%scalling direct %s with an index", prim->srcInfo, target);
+            if (direct) error("%scalling direct %s with an index", prim->srcInfo, target);
         } else if (!direct) {
-            error("%scalling indirect %s with no index", prim->srcInfo, target); }
+            error("%scalling indirect %s with no index", prim->srcInfo, target);
+        }
     } else if (prim->name == "execute_stateful_alu_from_hash") {
         BUG_CHECK(prim->operands.size() == 2, "Wrong number of operands to %s", prim->name);
         auto flc = structure->getFieldListCalculation(prim->operands.at(1));
         if (!flc) {
             error("%s: Expected a field_list_calculation", prim->operands.at(1));
-            return nullptr; }
+            return nullptr;
+        }
         block = new IR::BlockStatement;
         cstring temp = structure->makeUniqueName("temp"_cs);
         block = P4V1::generate_hash_block_statement(structure, prim, temp, conv, 2);
         args->push_back(new IR::Argument(new IR::Cast(IR::Type_Bits::get(reg_index_width),
-                        new IR::PathExpression(new IR::Path(temp)))));
+                                                      new IR::PathExpression(new IR::Path(temp)))));
     } else if (prim->name == "execute_stateful_log") {
         BUG_CHECK(prim->operands.size() == 1, "Wrong number of operands to %s", prim->name);
         method = new IR::Member(prim->srcInfo, extref, "execute_log");
     } else {
-        BUG("Unknown method %s in stateful_alu", prim->name); }
+        BUG("Unknown method %s in stateful_alu", prim->name);
+    }
 
     auto mc = new IR::MethodCallExpression(prim->srcInfo, rtype, method, args);
     if (auto prop = ext->properties.get<IR::Property>("output_dst"_cs)) {
@@ -1064,8 +1080,7 @@ const IR::Statement *P4V1::StatefulAluConverter::convertExternCall(
             auto type = ev->expression->type;
             if (ext->properties.get<IR::Property>("reduction_or_group"_cs)) {
                 const IR::Expression *expr = mc;
-                if (expr->type != type)
-                    expr = new IR::Cast(type, expr);
+                if (expr->type != type) expr = new IR::Cast(type, expr);
                 expr = new IR::BOr(conv.convert(ev->expression), expr);
                 rv = structure->assign(prim->srcInfo, conv.convert(ev->expression), expr, type);
             } else {
@@ -1073,12 +1088,15 @@ const IR::Statement *P4V1::StatefulAluConverter::convertExternCall(
             }
         } else {
             error("%s: output_dst property is not an expression", prop->value->srcInfo);
-            return nullptr; }
+            return nullptr;
+        }
     } else {
-        rv = new IR::MethodCallStatement(prim->srcInfo, mc); }
+        rv = new IR::MethodCallStatement(prim->srcInfo, mc);
+    }
     if (block) {
         block->push_back(rv);
-        rv = block; }
+        rv = block;
+    }
     return rv;
 }
 

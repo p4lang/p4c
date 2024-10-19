@@ -16,11 +16,10 @@
 
 #include <boost/algorithm/string/replace.hpp>
 
-#include "gtest/gtest.h"
-#include "bf_gtest_helpers.h"
-
-#include "ir/ir.h"
 #include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "bf_gtest_helpers.h"
+#include "gtest/gtest.h"
+#include "ir/ir.h"
 #include "test/gtest/helpers.h"
 
 namespace P4::Test {
@@ -34,8 +33,8 @@ namespace P4::Test {
  *   - adding the container to the init_zero list
  */
 TEST(ParserContainerValidTest, Tof1SetHeaderFieldZero) {
-// P4 program
-const char * p4_prog = R"(
+    // P4 program
+    const char *p4_prog = R"(
 header h {
     bit<32> d1;
 }
@@ -140,8 +139,7 @@ Switch(pipe) main;)";
 
     // Identify the container assigned to the h1.d1 field
     auto res =
-        blk.match(TestCode::CodeBlock::PhvAsm,
-            Match::CheckList{"`.*`", R"(`hdr.h1.d1: (\w+)`)"});
+        blk.match(TestCode::CodeBlock::PhvAsm, Match::CheckList{"`.*`", R"(`hdr.h1.d1: (\w+)`)"});
     EXPECT_TRUE(res.success) << " pos=" << res.pos << " count=" << res.count << "\n'"
                              << blk.extract_code(TestCode::CodeBlock::ParserEAsm) << "'\n";
     if (res.success) {

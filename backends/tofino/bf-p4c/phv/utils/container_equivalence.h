@@ -47,13 +47,9 @@ class ContainerEquivalenceTracker {
             parser_extract_group_source = cstat->parserExtractGroupSource;
         }
 
-        bool operator==(const ContainerClass &o) const {
-            return as_tuple() == o.as_tuple();
-        }
+        bool operator==(const ContainerClass &o) const { return as_tuple() == o.as_tuple(); }
 
-        bool operator<(const ContainerClass &o) const {
-            return as_tuple() < o.as_tuple();
-        }
+        bool operator<(const ContainerClass &o) const { return as_tuple() < o.as_tuple(); }
 
         std::tuple<bool, Parity, PHV::Kind, GressAssignment, GressAssignment, GressAssignment,
                    ExtractSource>
@@ -64,7 +60,7 @@ class ContainerEquivalenceTracker {
     };
 
  public:
-    explicit ContainerEquivalenceTracker(const PHV::Allocation& alloc);
+    explicit ContainerEquivalenceTracker(const PHV::Allocation &alloc);
 
     /// When called with a container c, this will return either:
     /// - std::nullopt if the container is first of its class and should be checked for allocation
@@ -75,8 +71,7 @@ class ContainerEquivalenceTracker {
     /// Never consider this container to be equivalent to any other. Useful to mark containers
     /// appearing in exact container constraints
     void exclude(PHV::Container c) {
-        if (c != PHV::Container())
-            excluded.insert(c);
+        if (c != PHV::Container()) excluded.insert(c);
     }
 
     /// Invalidate this container for the purpose of equivalence. That is, this container will not
@@ -102,7 +97,7 @@ class ContainerEquivalenceTracker {
 
     std::map<ContainerClass, PHV::Container> equivalenceClasses;
     std::set<PHV::Container> excluded;
-    const PHV::Allocation& alloc;
+    const PHV::Allocation &alloc;
     bool wideArith = false;
     bool wideArithLow = false;
     /// For Tofino 2 we need to keep track of parity of 8bit containers & treat W0 specially

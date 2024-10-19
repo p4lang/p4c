@@ -11,6 +11,7 @@
  */
 
 #include "copy_block_pragmas.h"
+
 #include "frontends/p4/methodInstance.h"
 
 class CopyBlockPragmas::FindPragmasFromApply : public Inspector {
@@ -25,7 +26,9 @@ class CopyBlockPragmas::FindPragmasFromApply : public Inspector {
                     for (auto *annot : blk->annotations->annotations)
                         if (self.pragmas.count(annot->name) &&
                             !self.toAdd[table].count(annot->name))
-                            self.toAdd[table][annot->name] = annot; } }
+                            self.toAdd[table][annot->name] = annot;
+            }
+        }
         return false;
     }
 
@@ -49,10 +52,6 @@ class CopyBlockPragmas::CopyToTables : public Modifier {
 
 CopyBlockPragmas::CopyBlockPragmas(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
                                    P4::TypeChecking *typeChecking, std::set<cstring> pragmas)
-: refMap(refMap), typeMap(typeMap), pragmas(pragmas) {
-    addPasses({
-        typeChecking,
-        new FindPragmasFromApply(*this),
-        new CopyToTables(*this)
-    });
+    : refMap(refMap), typeMap(typeMap), pragmas(pragmas) {
+    addPasses({typeChecking, new FindPragmasFromApply(*this), new CopyToTables(*this)});
 }

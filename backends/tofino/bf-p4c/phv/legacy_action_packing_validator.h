@@ -27,20 +27,19 @@ namespace legacy {
 /// to synthesize actions.
 class ActionPackingValidator : public ActionPackingValidatorInterface {
  private:
-    const ActionSourceTracker& sources_i;
-    const PhvUse& uses_i;
+    const ActionSourceTracker &sources_i;
+    const PhvUse &uses_i;
 
  public:
-    explicit ActionPackingValidator(const ActionSourceTracker& sources, const PhvUse& uses)
+    explicit ActionPackingValidator(const ActionSourceTracker &sources, const PhvUse &uses)
         : sources_i(sources), uses_i(uses) {}
 
     /// can_pack checks action phv constraints if fieldslices packed in @p slice_lists will be
     /// allocated without further split. Currently, we only support validation of move-based
     /// instructions.
-    Result can_pack(const ordered_set<const SuperCluster::SliceList*>& slice_lists,
-                    const ordered_set<const SuperCluster::SliceList*>& can_be_further_split = {},
-                    const bool loose_mode = false)
-        const override;
+    Result can_pack(const ordered_set<const SuperCluster::SliceList *> &slice_lists,
+                    const ordered_set<const SuperCluster::SliceList *> &can_be_further_split = {},
+                    const bool loose_mode = false) const override;
 };
 
 }  // namespace legacy

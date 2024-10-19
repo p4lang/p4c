@@ -12,7 +12,7 @@
 
 #include "bf-p4c/parde/rewrite_parser_locals.h"
 
-bool GetSelectFieldInfo::preorder(const IR::BFN::Select* select) {
+bool GetSelectFieldInfo::preorder(const IR::BFN::Select *select) {
     auto state = findContext<IR::BFN::ParserState>();
     auto save = select->source->to<IR::BFN::SavedRVal>();
     if (save) {
@@ -22,7 +22,7 @@ bool GetSelectFieldInfo::preorder(const IR::BFN::Select* select) {
     return true;
 }
 
-bool AddParserMatchDefs::preorder(IR::BFN::Extract* extract) {
+bool AddParserMatchDefs::preorder(IR::BFN::Extract *extract) {
     auto parser = findOrigCtxt<IR::BFN::Parser>();
     auto state = findOrigCtxt<IR::BFN::ParserState>();
     auto graph = parserInfo.graph(parser);
@@ -43,16 +43,10 @@ bool AddParserMatchDefs::preorder(IR::BFN::Extract* extract) {
     return true;
 }
 
-RewriteParserMatchDefs::RewriteParserMatchDefs(const PhvInfo& phv) {
-    auto* parserInfo = new CollectParserInfo;
-    auto* selectFieldInfo = new GetSelectFieldInfo(phv);
-    auto* uses = new PhvUse(phv);
-    addPasses({
-        uses,
-        new ResolveExtractSaves(phv),
-        parserInfo,
-        selectFieldInfo,
-        new AddParserMatchDefs(phv, *parserInfo, *selectFieldInfo, *uses)
-    });
+RewriteParserMatchDefs::RewriteParserMatchDefs(const PhvInfo &phv) {
+    auto *parserInfo = new CollectParserInfo;
+    auto *selectFieldInfo = new GetSelectFieldInfo(phv);
+    auto *uses = new PhvUse(phv);
+    addPasses({uses, new ResolveExtractSaves(phv), parserInfo, selectFieldInfo,
+               new AddParserMatchDefs(phv, *parserInfo, *selectFieldInfo, *uses)});
 }
-

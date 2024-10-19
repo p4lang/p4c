@@ -21,18 +21,18 @@
 
 struct TransactData {
     // Mapping table of Transaction -> SuperCluster
-    std::unordered_map<PHV::Transaction*, PHV::SuperCluster*> tr_to_sc_i;
+    std::unordered_map<PHV::Transaction *, PHV::SuperCluster *> tr_to_sc_i;
     // Mapping table of Transaction -> Unique Transaction ID
-    std::unordered_map<PHV::Transaction*, int>                tr_to_tr_id_i;
+    std::unordered_map<PHV::Transaction *, int> tr_to_tr_id_i;
     // Ordered Mapping table of Unique Transaction ID -> Transaction
-    std::map<int, PHV::Transaction*>                          tr_id_to_tr_i;
+    std::map<int, PHV::Transaction *> tr_id_to_tr_i;
     // Ordered Mapping table of Container -> Set of Unique Transaction ID
-    std::map<PHV::Container, std::set<int>>                   container_to_tr_ids_i;
+    std::map<PHV::Container, std::set<int>> container_to_tr_ids_i;
     // Next Transaction ID to use. Removed Transaction ID are never re-used
     int next_tr_id = 0;
 
     // Mapping table of Unique Transaction ID -> Diff for logging purpose
-    std::map<int, const cstring>                              tr_id_to_diff;
+    std::map<int, const cstring> tr_id_to_diff;
 };
 
 /**
@@ -60,51 +60,53 @@ class BruteForceOptimizationStrategy {
     static constexpr int MAX_PRUNED_TRANSACTIONS = 16;
     // Limit the number of passes we spend on trying to optimize the solution. One pass is equal
     // to the number of transaction eligible to be replaced.
-    static constexpr int MAX_OPT_PASS            = 2;
+    static constexpr int MAX_OPT_PASS = 2;
     // Number of passes that try to optimize the solution without any dark spilling. This is to
     // help Table Allocation fitting.
-    static constexpr int MAX_OPT_PASS_WO_DARK    = 1;
+    static constexpr int MAX_OPT_PASS_WO_DARK = 1;
     // Only apply this optimization process if the solution have at least 32 Transactions. This is
     // to avoid trying to optimize the pounding rounds except if that one is huge and have
     // potential to be swapped differently.
-    static constexpr int MIN_TR_SIZE             = 32;
+    static constexpr int MIN_TR_SIZE = 32;
     // Largest SuperCluster to optimize. If at least one SuperCluster is larger than that, cancel
     // the optimization process since we don't have much chance to find a solution.
-    static constexpr size_t MAX_SC_BIT           = 64;
+    static constexpr size_t MAX_SC_BIT = 64;
     // Maximum number of bits to place through the optimization process.
-    static constexpr size_t MAX_TOTAL_SC_BIT     = 256;
+    static constexpr size_t MAX_TOTAL_SC_BIT = 256;
 
     // Required to call the BruteForceAllocationStrategy allocation services.
-    BruteForceAllocationStrategy&          alloc_strategy_i;
-    const std::list<PHV::ContainerGroup*>& container_groups_i;
-    const ScoreContext&                    score_ctx_i;
+    BruteForceAllocationStrategy &alloc_strategy_i;
+    const std::list<PHV::ContainerGroup *> &container_groups_i;
+    const ScoreContext &score_ctx_i;
 
     // Transaction Data that is continuously updated to increase the solution score.
-    TransactData                           *data;
+    TransactData *data;
 
     // Build a sequence of Transaction In/Out if tr_id is removed.
-    bool buildSeqWithout(int tr_id, std::list<int>& tr_in, std::list<int>& tr_out);
+    bool buildSeqWithout(int tr_id, std::list<int> &tr_in, std::list<int> &tr_out);
 
     // Play a sequence on top of a particular Transaction.
-    BruteForceOptimizationStrategy playSeq(std::list<int>& tr_in, PHV::Transaction& partial_alloc);
+    BruteForceOptimizationStrategy playSeq(std::list<int> &tr_in, PHV::Transaction &partial_alloc);
 
  public:
     explicit BruteForceOptimizationStrategy(
-        BruteForceAllocationStrategy& alloc_strategy_i,
-        const std::list<PHV::ContainerGroup *>& container_groups,
-        const ScoreContext& score_ctx) : alloc_strategy_i(alloc_strategy_i),
-                                         container_groups_i(container_groups),
-                                         score_ctx_i(score_ctx) { data = new TransactData(); }
+        BruteForceAllocationStrategy &alloc_strategy_i,
+        const std::list<PHV::ContainerGroup *> &container_groups, const ScoreContext &score_ctx)
+        : alloc_strategy_i(alloc_strategy_i),
+          container_groups_i(container_groups),
+          score_ctx_i(score_ctx) {
+        data = new TransactData();
+    }
 
     // Insert a Transaction/SuperCluster to the optimization strategy.
-    void addTransaction(PHV::Transaction& transaction, PHV::SuperCluster& sc, int tr_id = -1);
+    void addTransaction(PHV::Transaction &transaction, PHV::SuperCluster &sc, int tr_id = -1);
 
     // Start the optimization process.
-    std::list<PHV::SuperCluster*> optimize(std::list<PHV::SuperCluster*>& unallocated_sc,
-                                           PHV::Transaction& rst);
+    std::list<PHV::SuperCluster *> optimize(std::list<PHV::SuperCluster *> &unallocated_sc,
+                                            PHV::Transaction &rst);
 
     // Print the Container to Transaction Dependencies.
     void printContDependency();
 };
 
-#endif  /* BF_P4C_PHV_OPTIMIZE_PHV_H_ */
+#endif /* BF_P4C_PHV_OPTIMIZE_PHV_H_ */

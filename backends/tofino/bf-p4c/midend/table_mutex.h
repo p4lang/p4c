@@ -10,8 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_MIDEND_TABLE_MUTEX_H_
-#define EXTENSIONS_BF_P4C_MIDEND_TABLE_MUTEX_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MIDEND_TABLE_MUTEX_H_
+#define BACKENDS_TOFINO_BF_P4C_MIDEND_TABLE_MUTEX_H_
 
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "ir/ir.h"
@@ -42,4 +42,4 @@ class TableMutex : public Inspector, public ControlFlowVisitor, public P4::Resol
     bool operator()(const IR::Declaration *, const IR::Declaration *);
 };
 
-#endif /* EXTENSIONS_BF_P4C_MIDEND_TABLE_MUTEX_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MIDEND_TABLE_MUTEX_H_ */

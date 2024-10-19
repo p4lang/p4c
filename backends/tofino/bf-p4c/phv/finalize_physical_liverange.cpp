@@ -11,8 +11,10 @@
  */
 
 #include "bf-p4c/phv/finalize_physical_liverange.h"
+
 #include <sstream>
 #include <utility>
+
 #include "bf-p4c/common/field_defuse.h"
 #include "bf-p4c/device.h"
 #include "bf-p4c/ir/bitrange.h"
@@ -30,11 +32,12 @@ namespace {
 
 /// return all overlapping AllocSlices without taking subslice based on range. We need to use
 /// these AllocSlices as keys for updating live ranges.
-safe_vector<AllocSlice> find_all_overlapping_alloc_slices(
-        const Field* f, const le_bitrange range, const PHV::AllocContext* ctx, bool is_write) {
+safe_vector<AllocSlice> find_all_overlapping_alloc_slices(const Field *f, const le_bitrange range,
+                                                          const PHV::AllocContext *ctx,
+                                                          bool is_write) {
     safe_vector<AllocSlice> rst;
     const PHV::FieldUse use(is_write ? PHV::FieldUse::WRITE : PHV::FieldUse::READ);
-    f->foreach_alloc(StartLen(0, f->size), ctx, &use, [&](const PHV::AllocSlice& slice) {
+    f->foreach_alloc(StartLen(0, f->size), ctx, &use, [&](const PHV::AllocSlice &slice) {
         if (slice.field_slice().overlaps(range)) {
             rst.push_back(slice);
         }
@@ -42,15 +45,14 @@ safe_vector<AllocSlice> find_all_overlapping_alloc_slices(
     return rst;
 }
 
-StageAndAccess to_stage_and_access(const IR::BFN::Unit* unit,
-                                   const bool is_write,
-                                   const PHV::Field* f) {
+StageAndAccess to_stage_and_access(const IR::BFN::Unit *unit, const bool is_write,
+                                   const PHV::Field *f) {
     if (unit->is<IR::BFN::ParserState>() || unit->is<IR::BFN::Parser>() ||
         unit->is<IR::BFN::GhostParser>()) {
         return {-1, FieldUse(FieldUse::WRITE)};
     } else if (unit->is<IR::BFN::Deparser>()) {
         return {Device::numStages(), FieldUse(FieldUse::READ)};
-    } else if (const auto* t = unit->to<IR::MAU::Table>()) {
+    } else if (const auto *t = unit->to<IR::MAU::Table>()) {
         return {t->stage(), FieldUse(is_write ? FieldUse::WRITE : FieldUse::READ)};
     } else {
         BUG("unknown unit: %1%, field: %2%", unit, f);
@@ -59,9 +61,9 @@ StageAndAccess to_stage_and_access(const IR::BFN::Unit* unit,
 
 }  // namespace
 
-void FinalizePhysicalLiverange::update_liverange(const safe_vector<AllocSlice>& slices,
-                                                 const StageAndAccess& op) {
-    for (const auto& slice : slices) {
+void FinalizePhysicalLiverange::update_liverange(const safe_vector<AllocSlice> &slices,
+                                                 const StageAndAccess &op) {
+    for (const auto &slice : slices) {
         // update AllocSlice-based live range.
         if (slice.field()->pov) {
             // POV fields are marked as live through the whole pipeline, do not adjust based on
@@ -77,8 +79,7 @@ void FinalizePhysicalLiverange::update_liverange(const safe_vector<AllocSlice>& 
     }
 }
 
-
-bool FinalizePhysicalLiverange::preorder(const IR::BFN::Pipe* pipe) {
+bool FinalizePhysicalLiverange::preorder(const IR::BFN::Pipe *pipe) {
     BUG_CHECK(pipe->headerStackInfo != nullptr,
               "Running FinalizePhysicalLiverange without running CollectHeaderStackInfo first?");
     headerStacks = pipe->headerStackInfo;
@@ -86,14 +87,14 @@ bool FinalizePhysicalLiverange::preorder(const IR::BFN::Pipe* pipe) {
 }
 
 /// collect table to stage.
-bool FinalizePhysicalLiverange::preorder(const IR::MAU::Table* t) {
+bool FinalizePhysicalLiverange::preorder(const IR::MAU::Table *t) {
     tables_i.insert(t);
     table_stages_i[TableSummary::getTableIName(t)].insert(t->stage());
     return true;
 }
 
-void FinalizePhysicalLiverange::mark_access(const PHV::Field* f, le_bitrange bits,
-                                            const IR::BFN::Unit* unit, bool is_write,
+void FinalizePhysicalLiverange::mark_access(const PHV::Field *f, le_bitrange bits,
+                                            const IR::BFN::Unit *unit, bool is_write,
                                             bool allow_unallocated) {
     // skip clot-allocated unused fields.
     if (clot_i.fully_allocated(FieldSlice(f, bits))) {
@@ -113,8 +114,8 @@ void FinalizePhysicalLiverange::mark_access(const PHV::Field* f, le_bitrange bit
         //     remove `(f->padding && f->is_digest())` and run p4_16_samples/issue1043-bmv2.p4
         BUG_CHECK(
             phv_i.isTempVar(f) ||
-            (unit->is<IR::BFN::Deparser>() && clot_i.allocated_unmodified_undigested(f)) ||
-            (f->padding && f->is_digest()),
+                (unit->is<IR::BFN::Deparser>() && clot_i.allocated_unmodified_undigested(f)) ||
+                (f->padding && f->is_digest()),
             "cannot find corresponding slice, field: %1%, range: %2%, is_write: %3%.\n unit: %4%",
             f, bits, is_write, unit);
         // memorize live range of unallocated temp vars.
@@ -131,11 +132,10 @@ void FinalizePhysicalLiverange::mark_access(const PHV::Field* f, le_bitrange bit
     update_liverange(alloc_slices, access);
 
     // Handle aliased fields
-    if (const PHV::Field* alias_dest = phv_i.getAliasDestination(f)) {
+    if (const PHV::Field *alias_dest = phv_i.getAliasDestination(f)) {
         LOG2("   field " << f->name << " has alias dest: " << alias_dest->name);
-        const auto dest_slices =
-            find_all_overlapping_alloc_slices(alias_dest, bits, AllocContext::of_unit(unit),
-                                              is_write);
+        const auto dest_slices = find_all_overlapping_alloc_slices(
+            alias_dest, bits, AllocContext::of_unit(unit), is_write);
         update_liverange(dest_slices, access);
     }
 }
@@ -149,25 +149,25 @@ void FinalizePhysicalLiverange::mark_access(const PHV::Field* f, le_bitrange bit
 // information here. Once I see a `extract 2^n to xxx.$stkvalid`, I construct a `xxx[n].valid` expr
 // and mark field as being written in parser. As for xxx.$stkvalid's live range, it is captured in
 // FinalizePhysicalLiverange::preorder(const IR::Expression* e).
-bool FinalizePhysicalLiverange::preorder(const IR::BFN::Extract* extract) {
-    auto* fieldLVal = extract->dest->to<IR::BFN::FieldLVal>();
+bool FinalizePhysicalLiverange::preorder(const IR::BFN::Extract *extract) {
+    auto *fieldLVal = extract->dest->to<IR::BFN::FieldLVal>();
     if (!fieldLVal) return true;
-    auto* member = fieldLVal->field->to<IR::Member>();
+    auto *member = fieldLVal->field->to<IR::Member>();
     if (!member) return true;
     if (member->member.toString() != "$stkvalid") return true;
 
     LOG9("$stkvalid extract: " << extract);
-    auto* src = extract->source->to<IR::BFN::ConstantRVal>();
+    auto *src = extract->source->to<IR::BFN::ConstantRVal>();
     BUG_CHECK(src, "extract non-constant to validity bit");
     BUG_CHECK(src->constant->fitsUint(), "Constant too big in extract: %1%", extract);
     const auto src_value = bitvec(src->constant->asUnsigned());
 
-    BUG_CHECK(headerStacks != nullptr, "No HeaderStackInfo; was FinalizePhysicalLiverange "
+    BUG_CHECK(headerStacks != nullptr,
+              "No HeaderStackInfo; was FinalizePhysicalLiverange "
               "applied to a non-Pipe node?");
     auto stack = member->expr->toString();
-    auto* stackInfo = headerStacks->get(stack);
-    BUG_CHECK(stackInfo, "No HeaderStackInfo for %1% which is needed for %2%",
-              stack, extract);
+    auto *stackInfo = headerStacks->get(stack);
+    BUG_CHECK(stackInfo, "No HeaderStackInfo for %1% which is needed for %2%", stack, extract);
 
     // Parde/StackPushShims can create writes to $stkvalid which are not power of 2 constant.
     // These writes are writes of "push_bits" that are used to implement stack push.
@@ -179,41 +179,40 @@ bool FinalizePhysicalLiverange::preorder(const IR::BFN::Extract* extract) {
         auto stack_index = stkvalid_bit_index - stackInfo->maxpop;
         if (stack_index < 0 || stack_index > stackInfo->size)
             continue;  // write to popbits/pushbits -> does not correspond to stack index
-        auto valid_bit_expr = new IR::Member(
-            IR::Type_Bits::get(1),
-            new IR::HeaderStackItemRef(member->expr, new IR::Constant(stack_index)),
-            IR::ID("$valid"));
-        const auto* unit = findContext<IR::BFN::Unit>();
+        auto valid_bit_expr =
+            new IR::Member(IR::Type_Bits::get(1),
+                           new IR::HeaderStackItemRef(member->expr, new IR::Constant(stack_index)),
+                           IR::ID("$valid"));
+        const auto *unit = findContext<IR::BFN::Unit>();
         le_bitrange bits;
         auto f = phv_i.field(valid_bit_expr, &bits);
-        if (!f)
-            continue;
-        const bool allow_unallocated = unit->is<IR::BFN::ParserState>()
-            || unit->is<IR::BFN::Parser>()
-            || unit->is<IR::BFN::GhostParser>();
+        if (!f) continue;
+        const bool allow_unallocated = unit->is<IR::BFN::ParserState>() ||
+                                       unit->is<IR::BFN::Parser>() ||
+                                       unit->is<IR::BFN::GhostParser>();
         LOG5("$stkvalid to index " << stack_index << " for " << extract);
         mark_access(f, bits, unit, true, allow_unallocated);
     }
     return true;
 }
 
-bool FinalizePhysicalLiverange::preorder(const IR::Expression* e) {
-    LOG5("FinalizePhysicalLiverange preorder : " << e);;
+bool FinalizePhysicalLiverange::preorder(const IR::Expression *e) {
+    LOG5("FinalizePhysicalLiverange preorder : " << e);
+    ;
     le_bitrange bits;
-    const PhvInfo& phv = phv_i;  // const ref to ensure that we do not create new fields.
-    auto* f = phv.field(e, &bits);
+    const PhvInfo &phv = phv_i;  // const ref to ensure that we do not create new fields.
+    auto *f = phv.field(e, &bits);
     if (!f) {
         LOG5("Found non-field expr: " << e);
         return true;
     }
     LOG5("Found " << f->name << " " << bits << " from " << e);
-    const auto* unit = findContext<IR::BFN::Unit>();
+    const auto *unit = findContext<IR::BFN::Unit>();
     BUG_CHECK(unit, "cannot find unit: %1%", e);
     const bool is_write = isWrite();
     // There could be unallocated parser temp vars that are not eliminated before lowering.
     const bool allow_unallocated = unit->is<IR::BFN::ParserState>() ||
-                                   unit->is<IR::BFN::Parser>() ||
-                                   unit->is<IR::BFN::GhostParser>();
+                                   unit->is<IR::BFN::Parser>() || unit->is<IR::BFN::GhostParser>();
     mark_access(f, bits, unit, is_write, allow_unallocated);
     // NOTE: We do not need to visit alias source/destinations because we have already reinstate
     // all aliased field in IR.
@@ -248,14 +247,16 @@ void FinalizePhysicalLiverange::end_apply() {
     }
 
     // update AllocSlices' live range.
-    for (auto& f : phv_i) {
+    for (auto &f : phv_i) {
         bool have_read_to_read_live_range = false;
         std::vector<AllocSlice> live_start_rw;
         std::set<AllocSlice> uninit_read_allocs;
         std::multiset<AllocSlice> all_slices;
-        for (auto& slice : f.get_alloc()) {
-            BUG_CHECK(slice.isPhysicalStageBased(), "FinalizePhysicalLiverange can only be applied"
-                    " on physical-stage AllocSlices (%1%)", slice.toString());
+        for (auto &slice : f.get_alloc()) {
+            BUG_CHECK(slice.isPhysicalStageBased(),
+                      "FinalizePhysicalLiverange can only be applied"
+                      " on physical-stage AllocSlices (%1%)",
+                      slice.toString());
             // Although it should be safe to drop allocated but unreferenced slices,
             // but because most analysis pass were built on field-level, dropping them
             // will make some later passes fail. For example,
@@ -270,7 +271,7 @@ void FinalizePhysicalLiverange::end_apply() {
                     have_read_to_read_live_range = true;
                 }
                 const auto old = LiveRange(slice.getEarliestLiveness(), slice.getLatestLiveness());
-                const auto& updated = live_ranges_i.at(slice);
+                const auto &updated = live_ranges_i.at(slice);
                 LOG3("Adjusting " << old << " => " << updated << " : " << slice);
                 slice.setLiveness(updated.start, updated.end);
             }
@@ -288,14 +289,14 @@ void FinalizePhysicalLiverange::end_apply() {
             merged.setEarliestLiveness(invalid_liveness);
             merged.setLatestLiveness(invalid_liveness);
 
-            auto record_slice = [&new_slices](const PHV::AllocSlice& slice, int count) {
+            auto record_slice = [&new_slices](const PHV::AllocSlice &slice, int count) {
                 if (slice.getEarliestLiveness().first >= -1) {
                     new_slices.push_back(slice);
                     if (count > 1) LOG3("Merging " << count << " slices to produce " << slice);
                 }
             };
 
-            for (auto& slice : all_slices) {
+            for (auto &slice : all_slices) {
                 if (slice.container() == merged.container() &&
                     slice.representsSameFieldSlice(merged) && !slice.isLiveRangeDisjoint(merged)) {
                     merged.setEarliestLiveness(
@@ -314,7 +315,7 @@ void FinalizePhysicalLiverange::end_apply() {
             f.sort_alloc();
         }
 
-        for (auto& slice : f.get_alloc()) {
+        for (auto &slice : f.get_alloc()) {
             if (slice.getEarliestLiveness().second.isReadAndWrite()) {
                 LOG5("Found RW start of liverange for" << slice);
                 live_start_rw.push_back(slice);
@@ -325,19 +326,19 @@ void FinalizePhysicalLiverange::end_apply() {
 
         // For the liveranges starting with RW determine if other liveranges cover the R part
         // - If not then create read-only slice for the uninitialized R liverange
-        for (auto& sl : live_start_rw) {
+        for (auto &sl : live_start_rw) {
             auto rng = sl.field_slice();
-            int stg = sl.getEarliestLiveness(). first;
+            int stg = sl.getEarliestLiveness().first;
             bool covered = false;
 
-            for (auto& slice : f.get_alloc()) {
+            for (auto &slice : f.get_alloc()) {
                 if (sl == slice) continue;
                 if (!rng.overlaps(slice.field_slice())) continue;
 
                 // Check if slice's liverange covers stage stg
                 if ((slice.getEarliestLiveness().first < stg ||
-                    (slice.getEarliestLiveness().first == stg &&
-                     slice.getEarliestLiveness().second.isRead())) &&
+                     (slice.getEarliestLiveness().first == stg &&
+                      slice.getEarliestLiveness().second.isRead())) &&
                     slice.getLatestLiveness().first >= stg) {
                     covered = true;
                     BUG_CHECK(sl.field_slice() == slice.field_slice(),
@@ -352,7 +353,7 @@ void FinalizePhysicalLiverange::end_apply() {
                 StageAndAccess singleRd = std::make_pair(stg, FieldUse(FieldUse::READ));
                 uninit_alloc.setLiveness(singleRd, singleRd);
                 LOG4("\t  creating slice: " << uninit_alloc);
-                uninit_read_allocs.insert(uninit_alloc);\
+                uninit_read_allocs.insert(uninit_alloc);
             }
         }
 
@@ -381,10 +382,11 @@ void FinalizePhysicalLiverange::end_apply() {
             // possibly being read on stage 1 onwards. And [..., 0r] and [0w, ...] do not count
             // for overlapping live range, because in tofino, it always reads then writes a
             // fieldslice.
-            for (auto& slice : f.get_alloc()) {
+            for (auto &slice : f.get_alloc()) {
                 if (!(slice.getEarliestLiveness().second.isOnlyReadAndNotLive() &&
-                    slice.getLatestLiveness().second.isOnlyReadAndNotLive())) {
-                    normal_live_range.setrange(slice.getEarliestLiveness().first + 1,
+                      slice.getLatestLiveness().second.isOnlyReadAndNotLive())) {
+                    normal_live_range.setrange(
+                        slice.getEarliestLiveness().first + 1,
                         slice.getLatestLiveness().first - slice.getEarliestLiveness().first);
                 }
             }
@@ -401,7 +403,7 @@ void FinalizePhysicalLiverange::end_apply() {
             // this case, it is stage 1, 2) that is also included in read to read live range, read
             // to read live range can remove this stage from its live range, since the read access
             // will be correctly represented in bfa file by the normal live range.
-            for (auto& slice : f.get_alloc()) {
+            for (auto &slice : f.get_alloc()) {
                 // only consider uninit read on table that is allocated on multiple stages.
                 if (slice.getEarliestLiveness().second.isOnlyReadAndNotLive() &&
                     slice.getLatestLiveness().second.isOnlyReadAndNotLive() &&
@@ -414,11 +416,11 @@ void FinalizePhysicalLiverange::end_apply() {
                             (uninit_read_range ^ normal_live_range) & uninit_read_range;
                     }
                     BUG_CHECK(uninit_read_range.popcount() > 0,
-                        "uninit read live range should not be totally eliminated");
+                              "uninit read live range should not be totally eliminated");
                     BUG_CHECK(uninit_read_range.is_contiguous(),
-                        "uninit read live range should be contiguous");
+                              "uninit read live range should be contiguous");
                     slice.setLiveness({uninit_read_range.min().index(), FieldUse(FieldUse::READ)},
-                        {uninit_read_range.max().index(), FieldUse(FieldUse::READ)});
+                                      {uninit_read_range.max().index(), FieldUse(FieldUse::READ)});
                 }
             }
         }
@@ -428,7 +430,7 @@ void FinalizePhysicalLiverange::end_apply() {
     }
     // update physical stage info.
     PhvInfo::clearPhysicalStageInfo();
-    for (const auto* table : tables_i) {
+    for (const auto *table : tables_i) {
         BUG_CHECK(table_stages_i.count(TableSummary::getTableIName(table)),
                   "cannot find stage info of table: %1%", table);
         PhvInfo::setPhysicalStages(table, table_stages_i.at(TableSummary::getTableIName(table)));
@@ -436,8 +438,8 @@ void FinalizePhysicalLiverange::end_apply() {
 
     // BUG_CHECK for overlapped live ranges of overlaying but non-mutex fields.
     // Slice Filtering Function
-    std::function<bool(const PHV::AllocSlice* sl)> need_skip_slices =
-        [&](const PHV::AllocSlice* sl) -> bool {
+    std::function<bool(const PHV::AllocSlice *sl)> need_skip_slices =
+        [&](const PHV::AllocSlice *sl) -> bool {
         if (!sl) return true;
         if (!sl->field()) return true;
         // skip alias destination fields and deparsed-zero fields
@@ -466,13 +468,13 @@ void FinalizePhysicalLiverange::end_apply() {
     // ---|
     //    |--------------------- t_b reads B0
     //
-    for (const auto& c_slices : phv_i.getContainerToSlicesMap(nullptr, &need_skip_slices)) {
-        const auto& slices = c_slices.second;
+    for (const auto &c_slices : phv_i.getContainerToSlicesMap(nullptr, &need_skip_slices)) {
+        const auto &slices = c_slices.second;
         if (slices.size() <= 1) continue;
         for (auto i = slices.begin(); i != (slices.end() - 1); i++) {
             for (auto j = i + 1; j != slices.end(); j++) {
-                const auto& si = *i;
-                const auto& sj = *j;
+                const auto &si = *i;
+                const auto &sj = *j;
                 if (!si.container_slice().overlaps(sj.container_slice())) {
                     continue;
                 }
@@ -483,12 +485,12 @@ void FinalizePhysicalLiverange::end_apply() {
                     continue;
                 }
                 bool is_i_before_j = si.getEarliestLiveness() < sj.getEarliestLiveness();
-                const PHV::AllocSlice& from = is_i_before_j ? si : sj;
-                const PHV::AllocSlice& to   = is_i_before_j ? sj : si;
-                for (const auto& from_locpair : defuse_i.getAllUses(from.field()->id)) {
+                const PHV::AllocSlice &from = is_i_before_j ? si : sj;
+                const PHV::AllocSlice &to = is_i_before_j ? sj : si;
+                for (const auto &from_locpair : defuse_i.getAllUses(from.field()->id)) {
                     const auto from_table = from_locpair.first->to<IR::MAU::Table>();
                     if (!from_table) continue;
-                    for (const auto& to_locpair : defuse_i.getAllDefs(to.field()->id)) {
+                    for (const auto &to_locpair : defuse_i.getAllDefs(to.field()->id)) {
                         const auto to_table = to_locpair.first->to<IR::MAU::Table>();
                         if (!to_table) continue;
                         if (TableSummary::getTableIName(from_table) ==
@@ -522,26 +524,26 @@ void FinalizePhysicalLiverange::end_apply() {
     if (LOGGING(3)) {
         // log final phv allocation
         LOG3("PHV Allocation Result After Live Range Finalization");
-        for (const auto& f : phv_i) {
-            for (const auto& alloc_sl : f.get_alloc()) {
+        for (const auto &f : phv_i) {
+            for (const auto &alloc_sl : f.get_alloc()) {
                 LOG3(alloc_sl);
             }
         }
         // log table to physical stages
         LOG3("Table Physical Liverange Map After Live Range Finalization");
-        for (const auto& kv : PhvInfo::table_to_physical_stages) {
+        for (const auto &kv : PhvInfo::table_to_physical_stages) {
             const cstring table = kv.first;
             std::stringstream ss;
             ss << table << ": ";
             std::string sep = "";
-            for (const auto& v : kv.second) {
+            for (const auto &v : kv.second) {
                 ss << sep << v;
                 sep = ", ";
             }
             LOG3(ss.str());
         }
         // log temp var physical liveranges
-        for (const auto& kv : temp_var_live_ranges_i) {
+        for (const auto &kv : temp_var_live_ranges_i) {
             LOG3("liverange of temp var " << kv.first << ":" << kv.second);
         }
     }

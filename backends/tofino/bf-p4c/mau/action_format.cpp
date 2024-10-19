@@ -10,11 +10,13 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include <algorithm>
-#include "bf-p4c/common/utils.h"
 #include "bf-p4c/mau/action_format.h"
-#include "lib/bitrange.h"  // DANGER -- two (very) different bitrange.h source files...
+
+#include <algorithm>
+
+#include "bf-p4c/common/utils.h"
 #include "bf-p4c/phv/phv_fields.h"
+#include "lib/bitrange.h"  // DANGER -- two (very) different bitrange.h source files...
 #include "lib/indent.h"
 
 using namespace P4;
@@ -30,26 +32,25 @@ SlotType_t bits_to_slot_type(size_t bits) {
     BUG_CHECK(bits == 8 || bits == 16 || bits == 32,
               "Invalid container size %zd in bits_to_slot_type", bits);
     // SlotType_t enum: BYTE = 0, HALF = 1, FULL = 2
-    SlotType_t rv = static_cast<SlotType_t>(bits/16);
+    SlotType_t rv = static_cast<SlotType_t>(bits / 16);
     return rv;
 }
 
-bool Parameter::can_overlap_ranges(le_bitrange my_range, le_bitrange ad_range,
-        le_bitrange &overlap, le_bitrange *my_overlap, le_bitrange *ad_overlap) const {
-    auto boost_sl = toClosedRange<RangeUnit::Bit, Endian::Little>
-                        (my_range.intersectWith(ad_range));
+bool Parameter::can_overlap_ranges(le_bitrange my_range, le_bitrange ad_range, le_bitrange &overlap,
+                                   le_bitrange *my_overlap, le_bitrange *ad_overlap) const {
+    auto boost_sl = toClosedRange<RangeUnit::Bit, Endian::Little>(my_range.intersectWith(ad_range));
     if (boost_sl == std::nullopt) return false;
     overlap = *boost_sl;
     if (my_overlap) {
-        auto ov_boost_sl = toClosedRange<RangeUnit::Bit, Endian::Little>
-                           (my_range.intersectWith(overlap));
+        auto ov_boost_sl =
+            toClosedRange<RangeUnit::Bit, Endian::Little>(my_range.intersectWith(overlap));
         *my_overlap = *ov_boost_sl;
         *my_overlap = my_overlap->shiftedByBits(-1 * my_range.lo);
     }
 
     if (ad_overlap) {
-        auto ov_boost_sl = toClosedRange<RangeUnit::Bit, Endian::Little>
-                           (ad_range.intersectWith(overlap));
+        auto ov_boost_sl =
+            toClosedRange<RangeUnit::Bit, Endian::Little>(ad_range.intersectWith(overlap));
         *ad_overlap = *ov_boost_sl;
         *ad_overlap = ad_overlap->shiftedByBits(-1 * ad_range.lo);
     }
@@ -67,27 +68,27 @@ bool Parameter::can_overlap_ranges(le_bitrange my_range, le_bitrange ad_range,
  *     [4:7]
  *     [0:3]
  */
-const Parameter *Argument::overlap(const Parameter *ad, bool,
-        le_bitrange *my_overlap, le_bitrange *ad_overlap) const {
+const Parameter *Argument::overlap(const Parameter *ad, bool, le_bitrange *my_overlap,
+                                   le_bitrange *ad_overlap) const {
     const Argument *arg = ad->to<Argument>();
     if (arg == nullptr) return nullptr;
     if (_name != arg->_name) return nullptr;
     if (!equiv_cond(ad)) return nullptr;
-    auto boost_sl = toClosedRange<RangeUnit::Bit, Endian::Little>
-                        (_param_field.intersectWith(arg->_param_field));
+    auto boost_sl = toClosedRange<RangeUnit::Bit, Endian::Little>(
+        _param_field.intersectWith(arg->_param_field));
     if (boost_sl == std::nullopt) return nullptr;
     le_bitrange overlap = *boost_sl;
     auto rv = new Argument(_name, overlap);
     if (my_overlap) {
-        auto ov_boost_sl = toClosedRange<RangeUnit::Bit, Endian::Little>
-                           (_param_field.intersectWith(overlap));
+        auto ov_boost_sl =
+            toClosedRange<RangeUnit::Bit, Endian::Little>(_param_field.intersectWith(overlap));
         *my_overlap = *ov_boost_sl;
         my_overlap->lo -= _param_field.lo;
         my_overlap->hi -= _param_field.lo;
     }
     if (ad_overlap) {
-        auto ov_boost_sl = toClosedRange<RangeUnit::Bit, Endian::Little>
-                           (arg->_param_field.intersectWith(overlap));
+        auto ov_boost_sl =
+            toClosedRange<RangeUnit::Bit, Endian::Little>(arg->_param_field.intersectWith(overlap));
         *ad_overlap = *ov_boost_sl;
         ad_overlap->lo -= arg->_param_field.lo;
         ad_overlap->hi -= arg->_param_field.lo;
@@ -106,8 +107,9 @@ bool Argument::is_next_bit_of_param(const Parameter *ad, bool) const {
 }
 
 const Parameter *Constant::split(int lo, int hi) const {
-    le_bitrange split_range = { lo, hi };
-    BUG_CHECK(range().contains(split_range), "Illegally splitting a parameter, as the "
+    le_bitrange split_range = {lo, hi};
+    BUG_CHECK(range().contains(split_range),
+              "Illegally splitting a parameter, as the "
               "split contains bits outside of the range");
     auto rv = new Constant(_value.getslice(split_range.lo, split_range.size()), split_range.size());
     rv->set_cond(this);
@@ -121,15 +123,12 @@ const Parameter *Constant::split(int lo, int hi) const {
  * next constant
  */
 bool Constant::is_next_bit_of_param(const Parameter *ad, bool same_alias) const {
-    if (size() != 1)
-        return false;
+    if (size() != 1) return false;
     auto constant = ad->to<Constant>();
-    if (constant == nullptr)
-        return false;
+    if (constant == nullptr) return false;
     if (!equiv_cond(ad)) return false;
     if (same_alias) {
-        if (_alias != constant->_alias)
-            return false;
+        if (_alias != constant->_alias) return false;
     }
     return true;
 }
@@ -140,8 +139,9 @@ bool Constant::is_next_bit_of_param(const Parameter *ad, bool same_alias) const 
 const Parameter *Constant::get_extended_param(uint32_t extension, const Parameter *ad) const {
     auto con = ad->to<Constant>();
     BUG_CHECK(con != nullptr, "Cannot extend a non-constant on constant");
-    BUG_CHECK(con->size() <= static_cast<int>(extension), "The extension constant is smaller "
-                                                          "than the extension size");
+    BUG_CHECK(con->size() <= static_cast<int>(extension),
+              "The extension constant is smaller "
+              "than the extension size");
     BUG_CHECK(equiv_cond(con), "The conditional masks between two constants are indentical");
     Constant *rv = new Constant(*this);
     rv->_value |= (con->_value << this->_size);
@@ -165,12 +165,10 @@ const Parameter *Constant::get_extended_param(uint32_t extension, const Paramete
  * Constants do not have this property and will always return a no solution
  */
 const Parameter *Constant::overlap(const Parameter *ad, bool only_one_overlap_solution,
-        le_bitrange *my_overlap, le_bitrange *ad_overlap) const {
-    if (only_one_overlap_solution)
-        return nullptr;
+                                   le_bitrange *my_overlap, le_bitrange *ad_overlap) const {
+    if (only_one_overlap_solution) return nullptr;
     auto con = ad->to<Constant>();
-    if (con == nullptr)
-        return nullptr;
+    if (con == nullptr) return nullptr;
 
     if (!equiv_cond(ad)) return nullptr;
 
@@ -184,16 +182,13 @@ const Parameter *Constant::overlap(const Parameter *ad, bool only_one_overlap_so
             break;
         }
     }
-    if (offset == -1)
-        return nullptr;
+    if (offset == -1) return nullptr;
     const Constant *rv = larger->split(offset, offset + smaller->size() - 1)->to<Constant>();
     le_bitrange smaller_overlap = smaller->range();
-    le_bitrange larger_overlap = { offset, offset + smaller->size() - 1 };
+    le_bitrange larger_overlap = {offset, offset + smaller->size() - 1};
 
-    if (my_overlap)
-        *my_overlap = (larger == this) ? larger_overlap : smaller_overlap;
-    if (ad_overlap)
-        *ad_overlap = (larger == con) ? larger_overlap : smaller_overlap;
+    if (my_overlap) *my_overlap = (larger == this) ? larger_overlap : smaller_overlap;
+    if (ad_overlap) *ad_overlap = (larger == con) ? larger_overlap : smaller_overlap;
     return rv;
 }
 
@@ -226,27 +221,20 @@ const Parameter *Hash::get_extended_param(uint32_t extension, const Parameter *)
  * Use the P4HashFunction overlap to determine if the two parameters can overlap.
  */
 const Parameter *Hash::overlap(const Parameter *ad, bool only_one_overlap_solution,
-    le_bitrange *my_overlap, le_bitrange *ad_overlap) const {
-    if (only_one_overlap_solution)
-        return nullptr;
+                               le_bitrange *my_overlap, le_bitrange *ad_overlap) const {
+    if (only_one_overlap_solution) return nullptr;
 
     auto hash = ad->to<Hash>();
-    if (hash == nullptr)
-        return nullptr;
-    if (!equiv_cond(ad))
-        return nullptr;
+    if (hash == nullptr) return nullptr;
+    if (!equiv_cond(ad)) return nullptr;
     le_bitrange local_my_overlap;
     le_bitrange local_ad_overlap;
-    if (!_func.overlap(&hash->_func, &local_my_overlap, &local_ad_overlap))
-        return nullptr;
-
+    if (!_func.overlap(&hash->_func, &local_my_overlap, &local_ad_overlap)) return nullptr;
 
     auto rv = new Hash(_func);
     rv->_func.slice(local_my_overlap);
-    if (my_overlap)
-        *my_overlap = local_my_overlap;
-    if (ad_overlap)
-        *ad_overlap = local_ad_overlap;
+    if (my_overlap) *my_overlap = local_my_overlap;
+    if (ad_overlap) *ad_overlap = local_ad_overlap;
     return rv;
 }
 
@@ -258,27 +246,30 @@ bool Hash::equiv_value(const Parameter *ad, bool check_cond) const {
 }
 
 int RandomNumber::size() const {
-    BUG_CHECK(_rand_nums.size() > 0, "Random Number in ActionFormat allocation not tied to a "
-        "P4 based random number");
+    BUG_CHECK(_rand_nums.size() > 0,
+              "Random Number in ActionFormat allocation not tied to a "
+              "P4 based random number");
     int rv = -1;
     for (auto &entry : _rand_nums) {
         if (rv == -1)
             rv = entry.second.size();
         else
-            BUG_CHECK(static_cast<int>(entry.second.size()) == rv, "Random number has allocations "
-                "of different sizes");
+            BUG_CHECK(static_cast<int>(entry.second.size()) == rv,
+                      "Random number has allocations "
+                      "of different sizes");
     }
     return rv;
 }
 
 const Parameter *RandomNumber::split(int lo, int hi) const {
     int new_size = hi - lo + 1;
-    BUG_CHECK(new_size <= size(), "Splitting a random number larger into a section larger than "
-                                  "itself");
+    BUG_CHECK(new_size <= size(),
+              "Splitting a random number larger into a section larger than "
+              "itself");
     auto rv = new RandomNumber();
     for (auto &entry : _rand_nums) {
         auto ua = entry.first;
-        le_bitrange range = { entry.second.lo + lo, entry.second.lo + hi };
+        le_bitrange range = {entry.second.lo + lo, entry.second.lo + hi};
         rv->add_alloc(ua.random(), ua.action(), range);
     }
     return rv;
@@ -291,18 +282,14 @@ bool RandomNumber::is_next_bit_of_param(const Parameter *ad, bool) const {
     if (rn == nullptr) return false;
     for (auto entry : _rand_nums) {
         auto rn_pos = rn->_rand_nums.find(entry.first);
-        if (rn_pos == rn->_rand_nums.end())
-            return false;
-        if (entry.second.lo != rn_pos->second.hi + 1)
-            return false;
+        if (rn_pos == rn->_rand_nums.end()) return false;
+        if (entry.second.lo != rn_pos->second.hi + 1) return false;
     }
 
     for (auto entry : rn->_rand_nums) {
         auto rn_pos = _rand_nums.find(entry.first);
-        if (rn_pos == _rand_nums.end())
-            return false;
-        if (entry.second.hi + 1 != rn_pos->second.lo)
-            return false;
+        if (rn_pos == _rand_nums.end()) return false;
+        if (entry.second.hi + 1 != rn_pos->second.lo) return false;
     }
     return true;
 }
@@ -310,12 +297,11 @@ bool RandomNumber::is_next_bit_of_param(const Parameter *ad, bool) const {
 const Parameter *RandomNumber::get_extended_param(uint32_t extension, const Parameter *) const {
     auto rv = new RandomNumber();
     for (auto entry : _rand_nums) {
-        le_bitrange range = { entry.second.lo, entry.second.hi + static_cast<int>(extension) };
+        le_bitrange range = {entry.second.lo, entry.second.hi + static_cast<int>(extension)};
         rv->_rand_nums.emplace(entry.first, range);
     }
     return rv;
 }
-
 
 /**
  * Each action in a table is mutually exclusive, thus random externs that are used in different
@@ -341,28 +327,22 @@ const Parameter *RandomNumber::get_extended_param(uint32_t extension, const Para
  * Because these bits can always overlap, just return the max size position
  */
 const Parameter *RandomNumber::overlap(const Parameter *ad, bool only_one_overlap_solution,
-        le_bitrange *my_overlap, le_bitrange *ad_overlap) const {
-    if (only_one_overlap_solution)
-        return nullptr;
-    if (!equiv_cond(ad))
-        return nullptr;
+                                       le_bitrange *my_overlap, le_bitrange *ad_overlap) const {
+    if (only_one_overlap_solution) return nullptr;
+    if (!equiv_cond(ad)) return nullptr;
 
     auto rn = ad->to<RandomNumber>();
     auto rp = ad->to<RandomPadding>();
 
-    if (rn == nullptr && rp == nullptr)
-        return nullptr;
+    if (rn == nullptr && rp == nullptr) return nullptr;
 
     size_t min_size = std::min(size(), ad->size());
 
-    if (rn && (!rand_nums_overlap_into(rn) || !rn->rand_nums_overlap_into(this)))
-        return nullptr;
+    if (rn && (!rand_nums_overlap_into(rn) || !rn->rand_nums_overlap_into(this))) return nullptr;
 
     auto rv = this->split(0, min_size - 1)->merge(ad->split(0, min_size - 1));
-    if (my_overlap)
-        *my_overlap = { 0, static_cast<int>(min_size) - 1 };
-    if (ad_overlap)
-        *ad_overlap = { 0, static_cast<int>(min_size) - 1 };
+    if (my_overlap) *my_overlap = {0, static_cast<int>(min_size) - 1};
+    if (ad_overlap) *ad_overlap = {0, static_cast<int>(min_size) - 1};
     return rv;
 }
 
@@ -384,45 +364,35 @@ bool RandomNumber::rand_nums_overlap_into(const RandomNumber *rn) const {
         auto ua = entry.first;
         for (auto entry_check : rn->_rand_nums) {
             auto ua_check = entry_check.first;
-            if (ua.action() == ua_check.action())
-                return false;
+            if (ua.action() == ua_check.action()) return false;
         }
     }
     return true;
 }
 
 bool RandomNumber::is_subset_of(const Parameter *ad) const {
-    if (ad == nullptr)
-        return false;
-    if (size() != ad->size())
-        return false;
+    if (ad == nullptr) return false;
+    if (size() != ad->size()) return false;
     // Random Number is not a subset of Random Padding!!
-    if (ad->is<RandomPadding>())
-        return false;
+    if (ad->is<RandomPadding>()) return false;
     auto rn = ad->to<RandomNumber>();
-    return std::includes(rn->_rand_nums.begin(), rn->_rand_nums.end(),
-                         _rand_nums.begin(), _rand_nums.end());
+    return std::includes(rn->_rand_nums.begin(), rn->_rand_nums.end(), _rand_nums.begin(),
+                         _rand_nums.end());
 }
 
 bool RandomNumber::can_merge(const Parameter *ad) const {
-    if (ad == nullptr)
-        return true;
-    if (size() != ad->size())
-        return false;
-    if (ad->is<RandomPadding>())
-        return true;
+    if (ad == nullptr) return true;
+    if (size() != ad->size()) return false;
+    if (ad->is<RandomPadding>()) return true;
     auto rn = ad->to<RandomNumber>();
-    if (rn == nullptr)
-        return false;
+    if (rn == nullptr) return false;
     return rand_nums_overlap_into(rn) && rn->rand_nums_overlap_into(this);
 }
 
 const Parameter *RandomNumber::merge(const Parameter *ad) const {
-    if (ad == nullptr)
-        return this;
+    if (ad == nullptr) return this;
     BUG_CHECK(size() == ad->size(), "Parameters in merge must be the same size");
-    if (ad->is<RandomPadding>())
-        return this;
+    if (ad->is<RandomPadding>()) return this;
     auto rn = ad->to<RandomNumber>();
     BUG_CHECK(rn != nullptr, "Attempting to merge a random number with a non-random number");
     auto rv = new RandomNumber(*this);
@@ -432,8 +402,9 @@ const Parameter *RandomNumber::merge(const Parameter *ad) const {
 
 const Parameter *RandomPadding::split(int lo, int hi) const {
     int new_size = hi - lo + 1;
-    BUG_CHECK(new_size <= size(), "Splitting a random number larger into a section larger than "
-                                  "itself");
+    BUG_CHECK(new_size <= size(),
+              "Splitting a random number larger into a section larger than "
+              "itself");
     return new RandomPadding(new_size);
 }
 
@@ -446,24 +417,19 @@ const Parameter *RandomPadding::get_extended_param(uint32_t extension, const Par
 }
 
 const Parameter *RandomPadding::overlap(const Parameter *ad, bool only_one_overlap_solution,
-        le_bitrange *my_overlap, le_bitrange *ad_overlap) const {
-    if (only_one_overlap_solution)
-        return nullptr;
-    if (!equiv_cond(ad))
-        return nullptr;
+                                        le_bitrange *my_overlap, le_bitrange *ad_overlap) const {
+    if (only_one_overlap_solution) return nullptr;
+    if (!equiv_cond(ad)) return nullptr;
 
     auto rn = ad->to<RandomNumber>();
     auto rp = ad->to<RandomPadding>();
 
-    if (rn == nullptr && rp == nullptr)
-        return nullptr;
+    if (rn == nullptr && rp == nullptr) return nullptr;
     size_t min_size = std::min(size(), ad->size());
 
     auto rv = this->split(0, min_size - 1)->merge(ad->split(0, min_size - 1));
-    if (my_overlap)
-        *my_overlap = { 0, static_cast<int>(min_size) - 1 };
-    if (ad_overlap)
-        *ad_overlap = { 0, static_cast<int>(min_size) - 1 };
+    if (my_overlap) *my_overlap = {0, static_cast<int>(min_size) - 1};
+    if (ad_overlap) *ad_overlap = {0, static_cast<int>(min_size) - 1};
     return rv;
 }
 
@@ -475,36 +441,31 @@ bool RandomPadding::equiv_value(const Parameter *ad, bool check_cond) const {
 }
 
 bool RandomPadding::is_subset_of(const Parameter *ad) const {
-    if (ad == nullptr)
-        return false;
-    if (size() != ad->size())
-        return false;
+    if (ad == nullptr) return false;
+    if (size() != ad->size()) return false;
     return ad->is<RandomPadding>() || ad->is<RandomNumber>();
 }
 
 bool RandomPadding::can_merge(const Parameter *ad) const {
-    if (ad == nullptr)
-        return true;
-    if (size() != ad->size())
-        return false;
+    if (ad == nullptr) return true;
+    if (size() != ad->size()) return false;
     return ad->is<RandomPadding>() || ad->is<RandomNumber>();
 }
 
 const Parameter *RandomPadding::merge(const Parameter *ad) const {
-    if (ad == nullptr)
-        return this;
+    if (ad == nullptr) return this;
     BUG_CHECK(size() == ad->size(), "Parameters in merge must be the same size");
-    if (ad->is<RandomPadding>())
-        return this;
+    if (ad->is<RandomPadding>()) return this;
     BUG_CHECK(ad->is<RandomNumber>(), "Can only merge Randoms with Randoms");
     return ad;
 }
 
 const Parameter *MeterColor::split(int lo, int hi) const {
-    le_bitrange split_range = { lo, hi };
+    le_bitrange split_range = {lo, hi};
     split_range = split_range.shiftedByBits(_range.lo);
-    BUG_CHECK(_range.contains(split_range), "Illegally splitting a meter color, as the split "
-        "contains bits outside of the range");
+    BUG_CHECK(_range.contains(split_range),
+              "Illegally splitting a meter color, as the split "
+              "contains bits outside of the range");
     auto rv = new MeterColor(_meter_name, split_range);
     rv->set_cond(this);
     return rv;
@@ -518,22 +479,23 @@ bool MeterColor::is_next_bit_of_param(const Parameter *ad, bool) const {
 }
 
 const Parameter *MeterColor::get_extended_param(uint32_t extension, const Parameter *) const {
-    BUG_CHECK(size() + extension < Format::METER_COLOR_SIZE, "Cannot make %1% color argument more "
-        "than %2% bits", _meter_name, Format::METER_COLOR_SIZE);
+    BUG_CHECK(size() + extension < Format::METER_COLOR_SIZE,
+              "Cannot make %1% color argument more "
+              "than %2% bits",
+              _meter_name, Format::METER_COLOR_SIZE);
     auto rv = new MeterColor(*this);
     rv->_range.hi += extension;
     return rv;
 }
 
 const Parameter *MeterColor::overlap(const Parameter *ad, bool, le_bitrange *my_overlap,
-         le_bitrange *ad_overlap) const {
+                                     le_bitrange *ad_overlap) const {
     const MeterColor *mc = ad->to<MeterColor>();
     if (mc == nullptr) return nullptr;
     if (_meter_name != mc->_meter_name) return nullptr;
     if (!equiv_cond(ad)) return nullptr;
-    le_bitrange overlap = { 0, 0 };
-    if (!can_overlap_ranges(_range, mc->_range, overlap, my_overlap, ad_overlap))
-        return nullptr;
+    le_bitrange overlap = {0, 0};
+    if (!can_overlap_ranges(_range, mc->_range, overlap, my_overlap, ad_overlap)) return nullptr;
     auto rv = new MeterColor(_meter_name, overlap);
     return rv;
 }
@@ -554,27 +516,25 @@ bool MeterColor::is_subset_of(const Parameter *ad) const {
 }
 
 bool MeterColor::can_merge(const Parameter *ad) const {
-    if (ad == nullptr)
-        return true;
+    if (ad == nullptr) return true;
     const MeterColor *mc = ad->to<MeterColor>();
-    if (mc == nullptr)
-        return false;
+    if (mc == nullptr) return false;
     return is_subset_of(mc) || mc->is_subset_of(this);
 }
 
 const Parameter *MeterColor::merge(const Parameter *ad) const {
-    if (ad == nullptr)
-        return this;
+    if (ad == nullptr) return this;
     const MeterColor *mc = ad->to<MeterColor>();
     BUG_CHECK(mc != nullptr, "Attempting to merge a meter color with a non meter color");
     return is_padding() ? mc : this;
 }
 
 const Parameter *MeterALU::split(int lo, int hi) const {
-    le_bitrange split_range = { lo, hi };
+    le_bitrange split_range = {lo, hi};
     split_range = split_range.shiftedByBits(_range.lo);
-    BUG_CHECK(_range.contains(split_range), "Illegally splitting a meter color, as the split "
-        "contains bits outside of the range");
+    BUG_CHECK(_range.contains(split_range),
+              "Illegally splitting a meter color, as the split "
+              "contains bits outside of the range");
     auto rv = new MeterALU(_alu_user, split_range);
     rv->set_cond(this);
     return rv;
@@ -583,8 +543,7 @@ const Parameter *MeterALU::split(int lo, int hi) const {
 bool MeterALU::is_next_bit_of_param(const Parameter *ad, bool) const {
     if (size() != 1) return false;
     auto ma = ad->to<MeterALU>();
-    if (ma == nullptr)
-        return false;
+    if (ma == nullptr) return false;
     return ma->_range.lo == _range.hi + 1;
 }
 
@@ -618,14 +577,13 @@ const Parameter *MeterALU::get_extended_param(uint32_t extension, const Paramete
  * Because these bits can always overlap, just return the max size position
  */
 const Parameter *MeterALU::overlap(const Parameter *ad, bool, le_bitrange *my_overlap,
-        le_bitrange *ad_overlap) const {
+                                   le_bitrange *ad_overlap) const {
     const MeterALU *ma = ad->to<MeterALU>();
     if (ma == nullptr) return nullptr;
     if (_alu_user != ma->_alu_user) return nullptr;
     if (!equiv_cond(ad)) return nullptr;
-    le_bitrange overlap = { 0, 0 };
-    if (!can_overlap_ranges(_range, ma->_range, overlap, my_overlap, ad_overlap))
-        return nullptr;
+    le_bitrange overlap = {0, 0};
+    if (!can_overlap_ranges(_range, ma->_range, overlap, my_overlap, ad_overlap)) return nullptr;
     auto rv = new MeterColor(_alu_user, overlap);
     return rv;
 }
@@ -662,14 +620,12 @@ void RotationInfo::rotate(int bit_rotation) {
  * constraints can be rotated recursively.
  */
 bool PackingConstraint::can_rotate(int bit_width, int init_bit, int final_bit) const {
-    if (init_bit == final_bit)
-        return true;
-    if (!is_rotational())
-        return false;
-    if (rotational_granularity == 1)
-        return true;
+    if (init_bit == final_bit) return true;
+    if (!is_rotational()) return false;
+    if (rotational_granularity == 1) return true;
     size_t total_sections = bit_width / rotational_granularity;
-    BUG_CHECK(recursive_constraints.size() == total_sections, "Packing Constraints not set "
+    BUG_CHECK(recursive_constraints.size() == total_sections,
+              "Packing Constraints not set "
               "correctly");
     int index = init_bit / rotational_granularity;
     int next_init_bit = init_bit % rotational_granularity;
@@ -682,10 +638,10 @@ bool PackingConstraint::can_rotate(int bit_width, int init_bit, int final_bit) c
  * Helper function for can_rotate_in_range (please look at their comments)
  */
 bool PackingConstraint::under_rotate(LocalPacking &lp, le_bitrange open_range, int &final_bit,
-        int right_shift) const {
+                                     int right_shift) const {
     int under_rotation = (right_shift / rotational_granularity) * rotational_granularity;
-    le_bitrange shifted_br_in_use
-         = { lp.max_br_in_use().lo + under_rotation, lp.max_br_in_use().hi + under_rotation };
+    le_bitrange shifted_br_in_use = {lp.max_br_in_use().lo + under_rotation,
+                                     lp.max_br_in_use().hi + under_rotation};
     if (open_range.contains(shifted_br_in_use)) {
         final_bit += under_rotation;
         return true;
@@ -694,9 +650,10 @@ bool PackingConstraint::under_rotate(LocalPacking &lp, le_bitrange open_range, i
     } else {
         int rec_open_range_lo = open_range.lo % rotational_granularity;
         int rec_open_range_hi =
-            (open_range.hi / rotational_granularity == open_range.lo / rotational_granularity) ?
-             open_range.hi % rotational_granularity : rotational_granularity - 1;
-        le_bitrange rec_open_range = { rec_open_range_lo, rec_open_range_hi };
+            (open_range.hi / rotational_granularity == open_range.lo / rotational_granularity)
+                ? open_range.hi % rotational_granularity
+                : rotational_granularity - 1;
+        le_bitrange rec_open_range = {rec_open_range_lo, rec_open_range_hi};
         int index = (lp.max_br_in_use().lo / rotational_granularity);
         LocalPacking rec_lp = lp.split(index * rotational_granularity, rotational_granularity);
         if (recursive_constraints[index].can_rotate_in_range(rec_lp, rec_open_range, final_bit)) {
@@ -711,12 +668,11 @@ bool PackingConstraint::under_rotate(LocalPacking &lp, le_bitrange open_range, i
  * Helper function for can_rotate_in_range (please look at their comments)
  */
 bool PackingConstraint::over_rotate(LocalPacking &lp, le_bitrange open_range, int &final_bit,
-        int right_shift) const {
+                                    int right_shift) const {
     int over_rotation = ((right_shift / rotational_granularity) + 1) * rotational_granularity;
-    le_bitrange shifted_br_in_use
-        = { lp.max_br_in_use().lo + over_rotation, lp.max_br_in_use().hi + over_rotation };
-    if (!open_range.contains(shifted_br_in_use))
-        return false;
+    le_bitrange shifted_br_in_use = {lp.max_br_in_use().lo + over_rotation,
+                                     lp.max_br_in_use().hi + over_rotation};
+    if (!open_range.contains(shifted_br_in_use)) return false;
     final_bit += over_rotation;
     return true;
 }
@@ -752,20 +708,17 @@ bool PackingConstraint::over_rotate(LocalPacking &lp, le_bitrange open_range, in
  * This is all based on the idea that the algorithm is trying to pack data as close to the lsb.
  */
 bool PackingConstraint::can_rotate_in_range(LocalPacking &lp, le_bitrange open_range,
-        int &final_bit) const {
-    if (open_range.contains(lp.max_br_in_use()))
-        return true;
+                                            int &final_bit) const {
+    if (open_range.contains(lp.max_br_in_use())) return true;
 
-    if (!is_rotational())
-        return false;
+    if (!is_rotational()) return false;
 
     int right_shift = open_range.lo - lp.max_br_in_use().lo;
     if (rotational_granularity == 1) {
         le_bitrange shifted_br_in_use = lp.max_br_in_use();
         shifted_br_in_use.lo += right_shift;
         shifted_br_in_use.hi += right_shift;
-        if (!open_range.contains(shifted_br_in_use))
-            return false;
+        if (!open_range.contains(shifted_br_in_use)) return false;
         final_bit += right_shift;
         return true;
     } else if (under_rotate(lp, open_range, final_bit, right_shift)) {
@@ -794,8 +747,7 @@ bool PackingConstraint::can_rotate_in_range(LocalPacking &lp, le_bitrange open_r
  * This is because both bytes are rotated, but only the byte at the final bit is rotated.
  */
 void PackingConstraint::rotate(RotationInfo &ri, int init_bit, int final_bit) {
-    if (init_bit == final_bit)
-        return;
+    if (init_bit == final_bit) return;
     BUG_CHECK(is_rotational(), "Cannot rotate at this point");
     int total_splits = ri.size() / rotational_granularity;
     int init_index = init_bit / rotational_granularity;
@@ -837,29 +789,27 @@ void PackingConstraint::rotate(RotationInfo &ri, int init_bit, int final_bit) {
  * This is displayed in the gtests for CrossSizeMerge as well as the Google Doc notes.
  */
 PackingConstraint PackingConstraint::merge(const PackingConstraint &pc, const LocalPacking &lp,
-        const LocalPacking &pc_lp) const {
+                                           const LocalPacking &pc_lp) const {
     BUG_CHECK(is_rotational() == (recursive_constraints.size() != 0),
               "Cannot have non-underlying recursive constraints");
     BUG_CHECK(pc.is_rotational() == (pc.recursive_constraints.size() != 0),
               "Cannot have non-underlying recursive constraints");
     PackingConstraint rv;
-    BUG_CHECK(lp.bit_width == pc_lp.bit_width, "Cannot condense different sized Packing "
+    BUG_CHECK(lp.bit_width == pc_lp.bit_width,
+              "Cannot condense different sized Packing "
               "Constraints");
     ///> Recursive constraints should only be merged, if the data was to merge
-    if (lp.empty() && pc_lp.empty())
-        return rv;
-    if (lp.empty() && !pc_lp.empty())
-        return pc;
-    if (!lp.empty() && pc_lp.empty())
-        return *this;
+    if (lp.empty() && pc_lp.empty()) return rv;
+    if (lp.empty() && !pc_lp.empty()) return pc;
+    if (!lp.empty() && pc_lp.empty()) return *this;
 
     // If both sections are not rotational, then the merged constraints is not rotational
     if (!(is_rotational() && pc.is_rotational())) {
         return rv;
     }
 
-    const PackingConstraint *higher_gran = rotational_granularity > pc.rotational_granularity
-                                           ? this : &pc;
+    const PackingConstraint *higher_gran =
+        rotational_granularity > pc.rotational_granularity ? this : &pc;
     const LocalPacking *higher_lp = higher_gran == this ? &lp : &pc_lp;
     const LocalPacking *lower_lp = higher_gran == this ? &pc_lp : &lp;
     rv.rotational_granularity = higher_gran->rotational_granularity;
@@ -884,8 +834,7 @@ PackingConstraint PackingConstraint::expand(int current_size, int expand_size) c
     safe_vector<PackingConstraint> bits_vec(current_size, PackingConstraint());
     safe_vector<PackingConstraint> rv_rec;
     rv_rec.push_back(*this);
-    for (int i = 1; i < expand_size / current_size; i++)
-        rv_rec.emplace_back(1, bits_vec);
+    for (int i = 1; i < expand_size / current_size; i++) rv_rec.emplace_back(1, bits_vec);
     return PackingConstraint(current_size, rv_rec);
 }
 
@@ -895,14 +844,13 @@ PackingConstraint PackingConstraint::expand(int current_size, int expand_size) c
  * to.
  */
 int PackingConstraint::bit_rotation_position(int bit_width, int init_bit, int final_bit,
-        int init_bit_comp) const {
-    if (init_bit == final_bit)
-        return init_bit_comp;
-    if (init_bit == init_bit_comp)
-        return final_bit;
+                                             int init_bit_comp) const {
+    if (init_bit == final_bit) return init_bit_comp;
+    if (init_bit == init_bit_comp) return final_bit;
     BUG_CHECK(is_rotational(), "Cannot get to this point without being rotational");
     size_t total_sections = bit_width / rotational_granularity;
-    BUG_CHECK(total_sections == recursive_constraints.size(), "Rotational granularity is not "
+    BUG_CHECK(total_sections == recursive_constraints.size(),
+              "Rotational granularity is not "
               "correct");
     // Find the rotation at this granularity of packing
     int init_index = init_bit / rotational_granularity;
@@ -920,9 +868,8 @@ int PackingConstraint::bit_rotation_position(int bit_width, int init_bit, int fi
     int next_init_bit_comp = init_bit_comp % rotational_granularity;
     // Determine the rotation of the layer underneath, and then rotate that position
     // by the shift in the current level
-    int next_level_bit_pos
-        = next_level.bit_rotation_position(rotational_granularity, next_init_bit, next_final_bit,
-                                           next_init_bit_comp);
+    int next_level_bit_pos = next_level.bit_rotation_position(rotational_granularity, next_init_bit,
+                                                              next_final_bit, next_init_bit_comp);
 
     return (next_level_bit_pos + shift + bit_width) % bit_width;
 }
@@ -977,10 +924,9 @@ safe_vector<le_bitrange> ALUParameter::slot_bits_brs(PHV::Container cont) const 
  */
 bitvec ALUOperation::phv_bytes() const {
     bitvec rv;
-    int bytes = _phv_bits.max().index()/8 + 1;
+    int bytes = _phv_bits.max().index() / 8 + 1;
     for (int i = 0; i < bytes; ++i)
-        if (_phv_bits.getrange(i*8, 8) != 0)
-            rv[i] = 1;
+        if (_phv_bits.getrange(i * 8, 8) != 0) rv[i] = 1;
     return rv;
 }
 
@@ -990,23 +936,19 @@ bitvec ALUOperation::phv_bytes() const {
  * where they are in RAM.
  */
 const RamSection *ALUOperation::create_RamSection(bool shift_to_lsb) const {
-    if (has_param<MeterColor>())
-        return create_meter_color_RamSection();
-    if (has_param<MeterALU>())
-        return create_meter_alu_RamSection();
+    if (has_param<MeterColor>()) return create_meter_color_RamSection();
+    if (has_param<MeterALU>()) return create_meter_alu_RamSection();
 
     size_t sec_size = size();
     // Because of Action Data Bus constraints, bitmasked-set information must be packed as
     // a two container wide RamSection
-    if (_constraint == BITMASKED_SET)
-        sec_size *= 2;
+    if (_constraint == BITMASKED_SET) sec_size *= 2;
 
     PackingConstraint pc;
     if (_constraint == DEPOSIT_FIELD)
         pc = pc.expand(1, sec_size);
     else if (_constraint == BYTE_ROTATE_MERGE)
         pc = pc.expand(8, sec_size);
-
 
     RamSection *init_rv = new RamSection(sec_size, pc);
     bool has_hash = false;
@@ -1026,7 +968,7 @@ const RamSection *ALUOperation::create_RamSection(bool shift_to_lsb) const {
                 P4HashFunction func;
                 func.inputs.push_back(new IR::Constant(IR::Type::Bits::get(br_size), 0));
                 func.algorithm = IR::MAU::HashFunction::identity();
-                func.hash_bits = { 0, br_size - 1 };
+                func.hash_bits = {0, br_size - 1};
                 param = new Hash(func);
             } else {
                 param = new Constant(bitvec(), br_size);
@@ -1047,7 +989,6 @@ const RamSection *ALUOperation::create_RamSection(bool shift_to_lsb) const {
             init_rv->add_param(size() + br.first, con);
         }
     }
-
 
     init_rv->add_alu_req(this);
     const RamSection *rv = nullptr;
@@ -1087,11 +1028,10 @@ const ALUOperation *ALUOperation::add_right_shift(int right_shift, int *rot_alia
     bool rotational_alias = false;
     LOG6("  add_right_shift: params size = " << rv->_params.size());
     for (auto &param : rv->_params) {
-        LOG6("    add_right_shift: param (" << std::hex << param.param << ","
-             << param.phv_bits << "," << right_shift << ")");
+        LOG6("    add_right_shift: param (" << std::hex << param.param << "," << param.phv_bits
+                                            << "," << right_shift << ")");
         param.right_shift = right_shift;
-        if (param.is_wrapped(_container))
-            rotational_alias = true;
+        if (param.is_wrapped(_container)) rotational_alias = true;
     }
     LOG6("  add_right_shift: done with params");
     if (rotational_alias && rv->_alias.isNull() && rot_alias_idx) {
@@ -1105,12 +1045,12 @@ const ALUOperation *ALUOperation::add_right_shift(int right_shift, int *rot_alia
 const ALUParameter *ALUOperation::find_param_alloc(UniqueLocationKey &key) const {
     const ALUParameter *rv = nullptr;
     for (auto param : _params) {
-        if (!param.param->equiv_value(key.param, false))
-            continue;
-        if (param.phv_bits != key.phv_bits)
-            continue;
-        BUG_CHECK(rv == nullptr, "A non-unique allocation of parameter in Container %s in action "
-                  "%s", key.container, key.action_name);
+        if (!param.param->equiv_value(key.param, false)) continue;
+        if (param.phv_bits != key.phv_bits) continue;
+        BUG_CHECK(rv == nullptr,
+                  "A non-unique allocation of parameter in Container %s in action "
+                  "%s",
+                  key.container, key.action_name);
         rv = new ALUParameter(param);
     }
     return rv;
@@ -1129,11 +1069,9 @@ std::string ALUOperation::parameter_positions_to_string() const {
 cstring ALUOperation::wrapped_constant() const {
     cstring rv;
     for (auto param : _params) {
-        if (!param.is_wrapped(_container))
-            continue;
+        if (!param.is_wrapped(_container)) continue;
         auto con = param.param->to<Constant>();
-        if (con == nullptr)
-            continue;
+        if (con == nullptr) continue;
         rv = con->alias();
         break;
     }
@@ -1148,13 +1086,12 @@ bitvec ALUOperation::static_entry_of_arg(const Argument *arg, bitvec value) cons
     bitvec my_op;
     for (auto param : _params) {
         auto overlap = param.param->overlap(arg, true, nullptr, nullptr);
-        if (overlap == nullptr)
-            continue;
+        if (overlap == nullptr) continue;
 
         auto param_arg = param.param->to<Argument>();
         le_bitrange overlap_range = overlap->to<Argument>()->param_field();
-        bitvec arg_val = value.getslice(overlap_range.lo - arg->param_field().lo,
-                                        overlap_range.size());
+        bitvec arg_val =
+            value.getslice(overlap_range.lo - arg->param_field().lo, overlap_range.size());
         arg_val <<= param.phv_bits.lo + (overlap_range.lo - param_arg->param_field().lo);
         my_op |= arg_val;
         delete overlap;
@@ -1164,8 +1101,7 @@ bitvec ALUOperation::static_entry_of_arg(const Argument *arg, bitvec value) cons
     bitvec mask_op;
     for (auto param : _mask_params) {
         auto overlap = param.param->overlap(arg, true, nullptr, nullptr);
-        if (overlap == nullptr)
-            continue;
+        if (overlap == nullptr) continue;
         le_bitrange overlap_range = overlap->to<Argument>()->param_field();
         bitvec arg_val = value.getslice(overlap_range.lo, overlap_range.size());
         arg_val <<= param.phv_bits.lo;
@@ -1183,8 +1119,7 @@ bitvec ALUOperation::static_entry_of_constants() const {
     bitvec my_op;
     for (auto param : _params) {
         const Constant *c = param.param->to<Constant>();
-        if (c == nullptr)
-            continue;
+        if (c == nullptr) continue;
         my_op |= c->value() <<= param.phv_bits.lo;
     }
     my_op = my_op.rotate_right_copy(0, _right_shift, _container.size());
@@ -1192,8 +1127,7 @@ bitvec ALUOperation::static_entry_of_constants() const {
     bitvec mask_op;
     for (auto param : _mask_params) {
         const Constant *c = param.param->to<Constant>();
-        if (c == nullptr)
-            continue;
+        if (c == nullptr) continue;
         mask_op |= c->value() <<= param.phv_bits.lo;
     }
     return my_op | (mask_op << _container.size());
@@ -1204,27 +1138,24 @@ int ALUOperation::hw_right_shift() const {
 
     int calculated_right_shift = -1;
     for (auto param : _params) {
-        le_bitrange range = { -1, -1 };
+        le_bitrange range = {-1, -1};
         auto mc = param.param->to<MeterColor>();
-        if (mc)
-            range = mc->range();
+        if (mc) range = mc->range();
         auto ma = param.param->to<MeterALU>();
-        if (ma)
-            range = ma->range();
+        if (ma) range = ma->range();
         if (range.lo == -1) continue;
         int slot_lo = range.lo;
         int potential_right_shift = param.phv_bits.lo - slot_lo;
-        while (potential_right_shift < 0)
-            potential_right_shift += _container.size();
+        while (potential_right_shift < 0) potential_right_shift += _container.size();
         if (calculated_right_shift < 0)
             calculated_right_shift = potential_right_shift;
         else
-            BUG_CHECK(calculated_right_shift == potential_right_shift, "Cannot calculate right "
-                "shift in a hw locked right shift (Meter Color or Meter ?");
+            BUG_CHECK(calculated_right_shift == potential_right_shift,
+                      "Cannot calculate right "
+                      "shift in a hw locked right shift (Meter Color or Meter ?");
     }
     return calculated_right_shift;
 }
-
 
 /**
  * Meter Color is always output to bits 24..31 of immediate.  There are multiple implications
@@ -1241,9 +1172,9 @@ int ALUOperation::hw_right_shift() const {
 const RamSection *ALUOperation::create_meter_color_RamSection() const {
     int calculated_right_shift = hw_right_shift();
     if (right_shift_set())
-        BUG_CHECK(calculated_right_shift == _right_shift, "Right shift for a meter color "
-            "operation has not been calculated correctly");
-
+        BUG_CHECK(calculated_right_shift == _right_shift,
+                  "Right shift for a meter color "
+                  "operation has not been calculated correctly");
 
     bitvec meter_bits_in_use;
     PackingConstraint pc;
@@ -1260,12 +1191,14 @@ const RamSection *ALUOperation::create_meter_color_RamSection() const {
     }
 
     if (calculated_right_shift != 0 && _constraint != DEPOSIT_FIELD)
-        error("Meter color from %1% in action %2% requires a stricter alignment with its "
-                "destination", meter_name, _action_name);
+        error(
+            "Meter color from %1% in action %2% requires a stricter alignment with its "
+            "destination",
+            meter_name, _action_name);
 
     // Padding the unused bits rest with all meter color padding
     for (auto br : bitranges(bitvec(0, Format::METER_COLOR_SIZE) - meter_bits_in_use)) {
-        le_bitrange pad_range = { br.first, br.second };
+        le_bitrange pad_range = {br.first, br.second};
         MeterColor *mc_padding = new MeterColor("$padding"_cs, pad_range);
         rv->add_param(pad_range.lo + Format::METER_COLOR_START_BIT, mc_padding);
     }
@@ -1275,7 +1208,6 @@ const RamSection *ALUOperation::create_meter_color_RamSection() const {
     BUG_CHECK(rv->alu_requirements.size() == 1, "Must have an alu requirement");
     return rv;
 }
-
 
 /**
  * Specifically for creating Meter ALU Ram Sections.
@@ -1291,8 +1223,9 @@ const RamSection *ALUOperation::create_meter_color_RamSection() const {
 const RamSection *ALUOperation::create_meter_alu_RamSection() const {
     int calculated_right_shift = hw_right_shift();
     if (right_shift_set())
-        BUG_CHECK(calculated_right_shift == _right_shift, "Right shift for a meter color "
-            "operation has not been calculated correctly");
+        BUG_CHECK(calculated_right_shift == _right_shift,
+                  "Right shift for a meter color "
+                  "operation has not been calculated correctly");
     PackingConstraint pc;
     size_t sec_size = size();
     RamSection *rv = new RamSection(sec_size, pc);
@@ -1301,7 +1234,7 @@ const RamSection *ALUOperation::create_meter_alu_RamSection() const {
         auto ma = param.param->to<MeterALU>();
         BUG_CHECK(ma, "If an instruction uses meter alu, it can only use meter alu");
         int left_shift = (ma->range().lo / _container.size()) * _container.size();
-        le_bitrange slot_total = { 0, static_cast<int>(_container.size()) - 1 };
+        le_bitrange slot_total = {0, static_cast<int>(_container.size()) - 1};
         le_bitrange slot_bits = ma->range().shiftedByBits(-1 * left_shift);
         BUG_CHECK(slot_total.contains(slot_bits), "Invalid Meter ALU operation on %1%", ma->name());
         rv->add_param(slot_bits.lo, ma);
@@ -1313,7 +1246,6 @@ const RamSection *ALUOperation::create_meter_alu_RamSection() const {
     return rv;
 }
 
-
 /**
  * In order to perform the merge function, the two RamSections have to be the same
  * size, i.e. the same number of bits wide.
@@ -1323,8 +1255,7 @@ const RamSection *ALUOperation::create_meter_alu_RamSection() const {
  * is done through the expansion of the PackingConstraint
  */
 const RamSection *RamSection::expand_to_size(size_t expand_size) const {
-    if (size() >= expand_size)
-        return new RamSection(*this);
+    if (size() >= expand_size) return new RamSection(*this);
     BUG_CHECK(size() % expand_size, "Cannot expand this section into this size");
 
     PackingConstraint rv_pack_info = pack_info.expand(size(), expand_size);
@@ -1336,7 +1267,8 @@ const RamSection *RamSection::expand_to_size(size_t expand_size) const {
 }
 
 void RamSection::add_param(int bit, const Parameter *adp) {
-    BUG_CHECK(bit + adp->size() <= static_cast<int>(size()), "The size of the parameter is "
+    BUG_CHECK(bit + adp->size() <= static_cast<int>(size()),
+              "The size of the parameter is "
               "outside the size of the RAM section");
     for (int i = 0; i < adp->size(); i++) {
         BUG_CHECK(action_data_bits[bit + i] == nullptr, "Overwritting an already written bit");
@@ -1358,8 +1290,8 @@ ParameterPositions RamSection::parameter_positions(bool from_p4_program) const {
     size_t bit_pos = 0;
     const Parameter *next_entry = nullptr;
     for (size_t i = 0; i < size(); i++) {
-        if (action_data_bits[i] == nullptr
-            || (from_p4_program && !action_data_bits[i]->from_p4_program())) {
+        if (action_data_bits[i] == nullptr ||
+            (from_p4_program && !action_data_bits[i]->from_p4_program())) {
             if (next_entry == nullptr) {
                 continue;
             } else {
@@ -1383,8 +1315,7 @@ ParameterPositions RamSection::parameter_positions(bool from_p4_program) const {
             }
         }
     }
-    if (next_entry)
-        rv.emplace(bit_pos, next_entry);
+    if (next_entry) rv.emplace(bit_pos, next_entry);
     return rv;
 }
 
@@ -1394,7 +1325,7 @@ std::string RamSection::parameter_positions_to_string(bool from_p4_program) cons
     std::string sep = "";
     sstr << "[ ";
     for (auto &entry : pp) {
-        le_bitrange cont_bits = { entry.first, entry.first + entry.second->size() - 1 };
+        le_bitrange cont_bits = {entry.first, entry.first + entry.second->size() - 1};
         sstr << sep << entry.second << " : " << cont_bits;
         sep = ", ";
     }
@@ -1416,10 +1347,9 @@ void RamSection::gather_shared_params(const RamSection *ad,
             int b_start_bit = b_param_loc_pair.first;
             auto b_param_loc = b_param_loc_pair.second;
             le_bitrange a_br, b_br;
-            auto shared_param = a_param_loc->overlap(b_param_loc, only_one_overlap_solution,
-                                                     &a_br, &b_br);
-            if (shared_param == nullptr)
-                continue;
+            auto shared_param =
+                a_param_loc->overlap(b_param_loc, only_one_overlap_solution, &a_br, &b_br);
+            if (shared_param == nullptr) continue;
             shared_params.emplace_back(shared_param, a_start_bit + a_br.lo, b_start_bit + b_br.lo);
         }
     }
@@ -1428,8 +1358,7 @@ void RamSection::gather_shared_params(const RamSection *ad,
 bitvec RamSection::bits_in_use() const {
     bitvec rv;
     for (size_t i = 0; i < size(); i++) {
-        if (action_data_bits[i])
-            rv.setbit(i);
+        if (action_data_bits[i]) rv.setbit(i);
     }
     return rv;
 }
@@ -1444,17 +1373,16 @@ safe_vector<le_bitrange> RamSection::open_holes() const {
     int start_bit = bits_inuse.ffz();
     while (start_bit < static_cast<int>(size())) {
         int end_bit = bits_inuse.ffs(start_bit) - 1;
-        if (end_bit < 0)
-            end_bit = size() - 1;
+        if (end_bit < 0) end_bit = size() - 1;
         rv.emplace_back(start_bit, end_bit);
         start_bit = bits_inuse.ffz(end_bit + 1);
     }
 
     std::sort(rv.begin(), rv.end(), [=](const le_bitrange &a, const le_bitrange &b) {
-    // A second check about full rotational on a bit by bit granularity, as more moveability
-    // of action data is generally better for the algorithm.  This will keep same sized container
-    // deposit-fields packed together, possibly at the expense of better packing, but in
-    // general is an improvement over the original algorithm which could only do that
+        // A second check about full rotational on a bit by bit granularity, as more moveability
+        // of action data is generally better for the algorithm.  This will keep same sized
+        // container deposit-fields packed together, possibly at the expense of better packing, but
+        // in general is an improvement over the original algorithm which could only do that
         int t;
         if ((t = a.size() - b.size()) != 0) return t < 0;
         return a.lo < b.lo;
@@ -1463,8 +1391,7 @@ safe_vector<le_bitrange> RamSection::open_holes() const {
 }
 
 const RamSection *RamSection::can_rotate(int init_bit, int final_bit) const {
-    if (!pack_info.can_rotate(size(), init_bit, final_bit))
-        return nullptr;
+    if (!pack_info.can_rotate(size(), init_bit, final_bit)) return nullptr;
     RamSection *rv = new RamSection(*this);
     RotationInfo ri(rv->action_data_bits.begin(), rv->action_data_bits.end());
     rv->pack_info.rotate(ri, init_bit, final_bit);
@@ -1473,19 +1400,17 @@ const RamSection *RamSection::can_rotate(int init_bit, int final_bit) const {
 
 const RamSection *RamSection::merge(const RamSection *ad) const {
     for (size_t i = 0; i < size(); i++) {
-        if (action_data_bits[i] == nullptr || ad->action_data_bits[i] == nullptr)
-            continue;
-        if (action_data_bits[i]->can_merge(ad->action_data_bits[i]))
-            continue;
+        if (action_data_bits[i] == nullptr || ad->action_data_bits[i] == nullptr) continue;
+        if (action_data_bits[i]->can_merge(ad->action_data_bits[i])) continue;
         return nullptr;
     }
     RamSection *rv = new RamSection(size());
 
     for (size_t i = 0; i < size(); i++) {
-        const Parameter *a_param = action_data_bits[i] != nullptr ? action_data_bits[i]
-                                                                  : ad->action_data_bits[i];
-        const Parameter *b_param = a_param == action_data_bits[i] ? ad->action_data_bits[i]
-                                                                  : action_data_bits[i];
+        const Parameter *a_param =
+            action_data_bits[i] != nullptr ? action_data_bits[i] : ad->action_data_bits[i];
+        const Parameter *b_param =
+            a_param == action_data_bits[i] ? ad->action_data_bits[i] : action_data_bits[i];
         const Parameter *bit_param = a_param ? a_param->merge(b_param) : nullptr;
         rv->action_data_bits[i] = bit_param;
     }
@@ -1509,14 +1434,12 @@ const RamSection *RamSection::rotate_in_range(le_bitrange hole) const {
     int init_bit = bits_in_use().min().index();
     int final_bit = init_bit;
     LocalPacking lp(size(), bits_in_use());
-    if (!pack_info.can_rotate_in_range(lp, hole, final_bit))
-        return nullptr;
+    if (!pack_info.can_rotate_in_range(lp, hole, final_bit)) return nullptr;
     RamSection *rv = new RamSection(*this);
     RotationInfo ri(rv->action_data_bits.begin(), rv->action_data_bits.end());
     rv->pack_info.rotate(ri, init_bit, final_bit);
     return rv;
 }
-
 
 /**
  * Returns a merged RamSection of two independent ranges, if the merge was possible.
@@ -1530,12 +1453,11 @@ const RamSection *RamSection::no_overlap_merge(const RamSection *ad) const {
 
     safe_vector<le_bitrange> holes = open_holes();
     bitvec ad_bits_in_use = ad->bits_in_use();
-    le_bitrange max_bit_diff = { ad_bits_in_use.min().index(), ad_bits_in_use.max().index() };
+    le_bitrange max_bit_diff = {ad_bits_in_use.min().index(), ad_bits_in_use.max().index()};
     LOG6("Action Data Bits in use 0x" << ad_bits_in_use << ", max_bit_diff: " << max_bit_diff);
     for (auto hole : holes) {
         LOG7("For hole found: " << hole);
-        if (hole.size() < max_bit_diff.size())
-            continue;
+        if (hole.size() < max_bit_diff.size()) continue;
         auto rotated_ad = ad->rotate_in_range(hole);
 
         if (rotated_ad != nullptr) {
@@ -1560,19 +1482,15 @@ const RamSection *RamSection::no_overlap_merge(const RamSection *ad) const {
 bool RamSection::is_better_merge_than(const RamSection *compare) const {
     int t;
     // Bit utilization (preferring more overlap)
-    if ((t = bits_in_use().popcount() - compare->bits_in_use().popcount()) != 0)
-        return t < 0;
+    if ((t = bits_in_use().popcount() - compare->bits_in_use().popcount()) != 0) return t < 0;
 
     auto comp_holes = compare->open_holes();
     // Prefer less fragmentation
     auto holes = open_holes();
-    if ((t = holes.size() - comp_holes.size()) != 0)
-        return t < 0;
+    if ((t = holes.size() - comp_holes.size()) != 0) return t < 0;
 
-    if (pack_info.is_rotational() && !compare->pack_info.is_rotational())
-        return true;
-    if (!pack_info.is_rotational() && compare->pack_info.is_rotational())
-        return false;
+    if (pack_info.is_rotational() && !compare->pack_info.is_rotational()) return true;
+    if (!pack_info.is_rotational() && compare->pack_info.is_rotational()) return false;
     // Prefer closer to the least significant bit
     return bits_in_use().max().index() < compare->bits_in_use().max().index();
 }
@@ -1595,8 +1513,8 @@ const RamSection *RamSection::condense(const RamSection *ad) const {
     LOG5("--------------------------|");
     size_t max_size = std::max(size(), ad->size());
     if (size() != ad->size())
-        LOG6("Expanded Ram Sections of size " << size() << " and "
-            << ad->size() << " to size " << max_size);
+        LOG6("Expanded Ram Sections of size " << size() << " and " << ad->size() << " to size "
+                                              << max_size);
     else
         LOG6("No expansion required for Ram Sections of size " << size());
     const RamSection *a = expand_to_size(max_size);
@@ -1633,13 +1551,13 @@ const RamSection *RamSection::condense(const RamSection *ad) const {
 
     // Have no data overlap and just merge
     auto no_overlap_b_in_a = a->no_overlap_merge(b);
-    LOG7("No overlap B in A: " << (no_overlap_b_in_a? "Y" : "N"));
+    LOG7("No overlap B in A: " << (no_overlap_b_in_a ? "Y" : "N"));
     if (no_overlap_b_in_a) {
         possible_rvs.push_back(no_overlap_b_in_a);
         LOG7(no_overlap_b_in_a->get_action_data_bits_str());
     }
     auto no_overlap_a_in_b = b->no_overlap_merge(a);
-    LOG7("No overlap A in B: " << (no_overlap_a_in_b? "Y" : "N"));
+    LOG7("No overlap A in B: " << (no_overlap_a_in_b ? "Y" : "N"));
     if (no_overlap_a_in_b) {
         possible_rvs.push_back(no_overlap_a_in_b);
         LOG7(no_overlap_a_in_b->get_action_data_bits_str());
@@ -1648,8 +1566,7 @@ const RamSection *RamSection::condense(const RamSection *ad) const {
     // Pick the best choice
     const RamSection *best = nullptr;
     for (auto choice : possible_rvs) {
-        if (best == nullptr || !best->is_better_merge_than(choice))
-            best = choice;
+        if (best == nullptr || !best->is_better_merge_than(choice)) best = choice;
     }
     if (best) LOG7("Picking best : " << best->get_action_data_bits_str());
 
@@ -1673,12 +1590,9 @@ bool RamSection::is_data_subset_of(const RamSection *ad) const {
     for (size_t i = 0; i < size(); i++) {
         auto subset_bit = action_data_bits.at(i);
         auto superset_bit = ad->action_data_bits.at(i);
-        if (subset_bit == nullptr)
-            continue;
-        if (superset_bit == nullptr)
-            return false;
-        if (!subset_bit->is_subset_of(superset_bit))
-            return false;
+        if (subset_bit == nullptr) continue;
+        if (superset_bit == nullptr) return false;
+        if (!subset_bit->is_subset_of(superset_bit)) return false;
     }
     return true;
 }
@@ -1687,8 +1601,7 @@ bool RamSection::is_data_subset_of(const RamSection *ad) const {
  * Uses shared parameters to see if the ad_small is contained within *this
  * Full Description: @sa contains(const ALUOperation *)
  */
-bool RamSection::contains(const RamSection *ad_small, int init_bit_pos,
-                          int *final_bit_pos) const {
+bool RamSection::contains(const RamSection *ad_small, int init_bit_pos, int *final_bit_pos) const {
     const RamSection *ad = ad_small->expand_to_size(size());
 
     safe_vector<SharedParameter> shared_params;
@@ -1698,10 +1611,9 @@ bool RamSection::contains(const RamSection *ad_small, int init_bit_pos,
         if (ad_rotated) {
             if (ad_rotated->is_data_subset_of(this)) {
                 if (final_bit_pos) {
-                    *final_bit_pos
-                        = ad->pack_info.bit_rotation_position(ad->size(), shared_param.b_start_bit,
-                                                              shared_param.a_start_bit,
-                                                              init_bit_pos);
+                    *final_bit_pos =
+                        ad->pack_info.bit_rotation_position(ad->size(), shared_param.b_start_bit,
+                                                            shared_param.a_start_bit, init_bit_pos);
                 }
                 delete ad_rotated;
                 delete ad;
@@ -1718,16 +1630,16 @@ bool RamSection::contains(const RamSection *ad_small, int init_bit_pos,
  * Uses rotations from 0 to see if ad_small is contained within *this
  * Full Description: @sa contains(const ALUOperation *)
  */
-bool RamSection::contains_any_rotation_from_0(const RamSection *ad_small,
-                                              int init_bit_pos, int *final_bit_pos) const {
+bool RamSection::contains_any_rotation_from_0(const RamSection *ad_small, int init_bit_pos,
+                                              int *final_bit_pos) const {
     const RamSection *ad = ad_small->expand_to_size(size());
     for (size_t i = 0; i < size(); i++) {
         auto ad_rotated = ad->can_rotate(0, i);
         if (ad_rotated) {
             if (ad_rotated->is_data_subset_of(this)) {
                 if (final_bit_pos)
-                    *final_bit_pos = ad->pack_info.bit_rotation_position(ad->size(), 0, i,
-                                                                         init_bit_pos);
+                    *final_bit_pos =
+                        ad->pack_info.bit_rotation_position(ad->size(), 0, i, init_bit_pos);
                 delete ad_rotated;
                 delete ad;
                 return true;
@@ -1760,8 +1672,7 @@ bool RamSection::contains_any_rotation_from_0(const RamSection *ad_small,
  * in order to eventually determine the position of action data.  The *final_first_phv_bit_pos
  * is the position of this bit.
  */
-bool RamSection::contains(const ALUOperation *ad_alu,
-        int *final_first_phv_bit_pos) const {
+bool RamSection::contains(const ALUOperation *ad_alu, int *final_first_phv_bit_pos) const {
     auto ad = ad_alu->create_RamSection(false);
     bool rv = false;
     int init_first_phv_bit_pos = ad_alu->phv_bits().min().index();
@@ -1787,7 +1698,7 @@ bool RamSection::contains(const ALUOperation *ad_alu,
  * an action data table.
  */
 BusInputs RamSection::bus_inputs() const {
-    BusInputs rv = {{ bitvec(), bitvec(), bitvec() }};
+    BusInputs rv = {{bitvec(), bitvec(), bitvec()}};
     for (auto ad_alu : alu_requirements) {
         int final_first_phv_bit_pos = 0;
         bool is_contained = contains(ad_alu, &final_first_phv_bit_pos);
@@ -1797,12 +1708,12 @@ BusInputs RamSection::bus_inputs() const {
         size_t start_byte = start_alu_offset * (ad_alu->size() / 8);
 
         if (ad_alu->valid()) {
-            size_t sz = ad_alu->is_constrained(BITMASKED_SET) ? ad_alu->size() * 2: ad_alu->size();
+            size_t sz = ad_alu->is_constrained(BITMASKED_SET) ? ad_alu->size() * 2 : ad_alu->size();
             sz /= 8;
             BUG_CHECK(start_byte + sz <= size() / 8, "Action Data For ALU outside of RAM section");
             BUG_CHECK(start_byte % sz == 0, "Non slot size offset");
             rv[ad_alu->index()].setrange(start_byte, sz);
-       } else {
+        } else {
             // For any created parameter, the assumption is that all 8, 16, and 32 bit ADB slots
             // will be reserved, as it is not yet clear which size the parameter is yet in
             for (int i = 0; i < SLOT_TYPES; i++) {
@@ -1819,8 +1730,7 @@ BusInputs RamSection::bus_inputs() const {
                 while (slot_pos != end_pos) {
                     rv[i].setrange(slot_pos * sz, sz);
                     slot_pos++;
-                    if (slot_pos == rotation)
-                        slot_pos = 0;
+                    if (slot_pos == rotation) slot_pos = 0;
                 }
                 rv[i].setrange(slot_pos * sz, sz);
             }
@@ -1876,7 +1786,7 @@ size_t SingleActionPositions::adt_bits_required() const {
  * which come from the ALUOperation objects.
  */
 std::array<int, SECT_TYPES> SingleActionPositions::sections_of_size() const {
-    std::array<int, SECT_TYPES> rv = {{ 0 }};
+    std::array<int, SECT_TYPES> rv = {{0}};
     for (auto &input : all_inputs) {
         rv[input.section->index()]++;
     }
@@ -1892,7 +1802,7 @@ std::array<int, SECT_TYPES> SingleActionPositions::sections_of_size() const {
  * possible sizes
  */
 std::array<int, SECT_TYPES> SingleActionPositions::minmax_bit_req() const {
-    std::array<int, SECT_TYPES> rv = { { 8, 16, 32, 64 } };
+    std::array<int, SECT_TYPES> rv = {{8, 16, 32, 64}};
     for (auto &input : all_inputs) {
         int *rv_i = &rv[input.section->index()];
         *rv_i = std::min(*rv_i, input.section->bits_in_use().max().index() + 1);
@@ -1905,7 +1815,7 @@ std::array<int, SECT_TYPES> SingleActionPositions::minmax_bit_req() const {
  * to determine which size should be the most significant action data in immediate.
  */
 std::array<int, SECT_TYPES> SingleActionPositions::min_bit_of_contiguous_sect() const {
-    std::array<int, SECT_TYPES> rv = {{ 0 }};
+    std::array<int, SECT_TYPES> rv = {{0}};
     for (int i = 0; i < SECT_TYPES; i++) {
         if (sections_of_size()[i] > 0) {
             rv[i] = (sections_of_size()[i] - 1) + minmax_bit_req()[i];
@@ -1915,13 +1825,12 @@ std::array<int, SECT_TYPES> SingleActionPositions::min_bit_of_contiguous_sect() 
 }
 
 void SingleActionPositions::move_to_immed_from_adt(safe_vector<RamSectionPosition> &rv,
-        size_t slot_sz, bool move_minmax_bit_req) {
+                                                   size_t slot_sz, bool move_minmax_bit_req) {
     for (auto it = all_inputs.begin(); it != all_inputs.end(); it++) {
-        if (it->section->size() != slot_sz)
-            continue;
+        if (it->section->size() != slot_sz) continue;
         if (move_minmax_bit_req) {
-            if (minmax_bit_req()[it->section->index()]
-                != it->section->bits_in_use().max().index() + 1) {
+            if (minmax_bit_req()[it->section->index()] !=
+                it->section->bits_in_use().max().index() + 1) {
                 continue;
             }
         }
@@ -1946,10 +1855,8 @@ void SingleActionPositions::move_to_immed_from_adt(safe_vector<RamSectionPositio
  * at least 16 bits
  */
 std::array<bool, SECT_TYPES> SingleActionPositions::can_be_immed_msb(int bits_to_move) const {
-    std::array<bool, SECT_TYPES> rv = { { sections_of_size()[BYTE] > 0,
-                                          sections_of_size()[HALF] > 0 ,
-                                          sections_of_size()[FULL] > 0,
-                                          false } };
+    std::array<bool, SECT_TYPES> rv = {{sections_of_size()[BYTE] > 0, sections_of_size()[HALF] > 0,
+                                        sections_of_size()[FULL] > 0, false}};
     int total_bits_under_size = 0;
     int last_section_under_size = -1;
     for (int i = 0; i < SECT_TYPES; i++) {
@@ -1964,8 +1871,7 @@ std::array<bool, SECT_TYPES> SingleActionPositions::can_be_immed_msb(int bits_to
     }
 
     if (bits_to_move % 16 == 0) {
-        if (sections_of_size()[BYTE] % 2 != 0)
-            rv[BYTE] = false;
+        if (sections_of_size()[BYTE] % 2 != 0) rv[BYTE] = false;
     }
 
     if (total_bits_under_size < bits_to_move) {
@@ -1982,8 +1888,8 @@ std::array<bool, SECT_TYPES> SingleActionPositions::can_be_immed_msb(int bits_to
  * The purpose of this function is to determine which other sections to move to immediate
  * as well.
  */
-void SingleActionPositions::move_other_sections_to_immed(int bits_to_move, SlotType_t minmax_sz,
-        safe_vector<RamSectionPosition> &immed_vec) {
+void SingleActionPositions::move_other_sections_to_immed(
+    int bits_to_move, SlotType_t minmax_sz, safe_vector<RamSectionPosition> &immed_vec) {
     int bits_moved_to_immed = slot_type_to_bits(minmax_sz);
     move_to_immed_from_adt(immed_vec, slot_type_to_bits(minmax_sz), true);
     while (bits_moved_to_immed < bits_to_move) {
@@ -1993,11 +1899,11 @@ void SingleActionPositions::move_other_sections_to_immed(int bits_to_move, SlotT
             // Generally prefer to move 8 bit slots to immediate, as generally they have
             // tough action data bus requirements
             if (sections_of_size()[BYTE] > 0) {
-                 move_to_immed_from_adt(immed_vec, 8, false);
-                 moved_slot = BYTE;
+                move_to_immed_from_adt(immed_vec, 8, false);
+                moved_slot = BYTE;
             } else if (sections_of_size()[HALF] > 0) {
-                 move_to_immed_from_adt(immed_vec, 16, false);
-                 moved_slot = HALF;
+                move_to_immed_from_adt(immed_vec, 16, false);
+                moved_slot = HALF;
             }
         } else {
             if (sections_of_size()[BYTE] >= 2) {
@@ -2009,11 +1915,11 @@ void SingleActionPositions::move_other_sections_to_immed(int bits_to_move, SlotT
             }
         }
 
-        if (moved_slot == SECT_TYPES)
-            BUG("Could not remove enough bits from adt to immediate");
+        if (moved_slot == SECT_TYPES) BUG("Could not remove enough bits from adt to immediate");
         bits_moved_to_immed += slot_type_to_bits(moved_slot);
-        BUG_CHECK(bits_moved_to_immed <= Format::IMMEDIATE_BITS, "Illegally moved too "
-            "many bits to immediate");
+        BUG_CHECK(bits_moved_to_immed <= Format::IMMEDIATE_BITS,
+                  "Illegally moved too "
+                  "many bits to immediate");
     }
 }
 
@@ -2040,17 +1946,14 @@ void SingleActionPositions::move_other_sections_to_immed(int bits_to_move, SlotT
  */
 safe_vector<RamSectionPosition> SingleActionPositions::best_inputs_to_move(int bits_to_move) {
     safe_vector<RamSectionPosition> rv;
-    if (bits_to_move <= 0)
-        return rv;
-
+    if (bits_to_move <= 0) return rv;
 
     // Basically from surveying the action, this determines which action data should be the
     // the last slot in immediate, due to requiring the smallest mask
     int minmax_use_slot_i = -1;
     int minmax_bits = Format::IMMEDIATE_BITS;
     for (int i = 0; i < SLOT_TYPES; i++) {
-        if (!can_be_immed_msb(bits_to_move)[i])
-            continue;
+        if (!can_be_immed_msb(bits_to_move)[i]) continue;
         int bits_in_slot_sz = 1 << (i + 3);
         // If this was to be the last section, what would be the impact
         int prev_slots_required = (bits_to_move - 1) / bits_in_slot_sz;
@@ -2061,8 +1964,7 @@ safe_vector<RamSectionPosition> SingleActionPositions::best_inputs_to_move(int b
         }
     }
 
-    if (minmax_use_slot_i == -1)
-        return rv;
+    if (minmax_use_slot_i == -1) return rv;
     move_other_sections_to_immed(bits_to_move, static_cast<SlotType_t>(minmax_use_slot_i), rv);
     return rv;
 }
@@ -2077,8 +1979,7 @@ void Format::Use::determine_immediate_mask() {
     for (auto act_alu_positions : alu_positions) {
         for (auto alu_position : act_alu_positions.second) {
             LOG7("For action alu position " << alu_position);
-            if (alu_position.loc != IMMEDIATE)
-                continue;
+            if (alu_position.loc != IMMEDIATE) continue;
             bitvec bv = alu_position.alu_op->slot_bits() << (alu_position.start_byte * 8);
             immediate_mask |= bv;
             if (alu_position.alu_op->is_constrained(BITMASKED_SET)) {
@@ -2093,8 +1994,9 @@ void Format::Use::determine_immediate_mask() {
     // for simple printing during the assembly mask
     immediate_mask = bitvec(0, immediate_mask.max().index() + 1);
     LOG2("Immediate mask 0x" << immediate_mask);
-    BUG_CHECK(immediate_mask.max().index() < bytes_per_loc[IMMEDIATE] * 8, "Immediate mask has "
-        "more bits than the alloted bytes for immediate");
+    BUG_CHECK(immediate_mask.max().index() < bytes_per_loc[IMMEDIATE] * 8,
+              "Immediate mask has "
+              "more bits than the alloted bytes for immediate");
 }
 
 /**
@@ -2121,9 +2023,9 @@ void Format::Use::determine_mod_cond_maps() {
                     }
 
                     int lo = param_position.first;
-                    le_bitrange cond_controlled_bits = { lo, lo + param->size() - 1 };
-                    cond_controlled_bits
-                        = cond_controlled_bits.shiftedByBits(alu_position.start_byte * 8);
+                    le_bitrange cond_controlled_bits = {lo, lo + param->size() - 1};
+                    cond_controlled_bits =
+                        cond_controlled_bits.shiftedByBits(alu_position.start_byte * 8);
                     bitvec cond_bv(cond_controlled_bits.lo, cond_controlled_bits.size());
                     mod_map.at(param->cond_name()).at(alu_position.loc) |= cond_bv;
                     conditional_params.insert(param->cond_name());
@@ -2132,7 +2034,8 @@ void Format::Use::determine_mod_cond_maps() {
                     if (verified_conditional_params.count(cond_param)) continue;
                     for (int i = 0; i < AD_LOCATIONS; i++) {
                         bitvec param_use = mod_map.at(cond_param).at(i);
-                        BUG_CHECK((verify_unique_per_mask[i] & param_use).empty(), "Two "
+                        BUG_CHECK((verify_unique_per_mask[i] & param_use).empty(),
+                                  "Two "
                                   "conditional parameters set the same bits");
                         verify_unique_per_mask[i] |= param_use;
                     }
@@ -2148,21 +2051,20 @@ void Format::Use::determine_mod_cond_maps() {
  * all actions.  Each ALUOperation in all of these are also marked with the action_name as
  * well, though in other lookups, the parameter can be looked up as a per action
  */
-const ALUParameter *Format::Use::find_locked_in_all_actions_param_alloc(UniqueLocationKey &key,
-         const ALUPosition **alu_pos_p) const {
+const ALUParameter *Format::Use::find_locked_in_all_actions_param_alloc(
+    UniqueLocationKey &key, const ALUPosition **alu_pos_p) const {
     const ALUParameter *rv = nullptr;
     for (auto alu_position : locked_in_all_actions_alu_positions) {
-        if (alu_position.alu_op->container() != key.container)
-            continue;
-        if (alu_position.alu_op->action_name() != key.action_name)
-            continue;
+        if (alu_position.alu_op->container() != key.container) continue;
+        if (alu_position.alu_op->action_name() != key.action_name) continue;
         auto *loc = alu_position.alu_op->find_param_alloc(key);
         BUG_CHECK(loc != nullptr, "A container operation cannot find the associated key");
-        BUG_CHECK(rv == nullptr, "A parameter has multiple allocations in container %s in "
-            "action %s", key.container, key.action_name);
+        BUG_CHECK(rv == nullptr,
+                  "A parameter has multiple allocations in container %s in "
+                  "action %s",
+                  key.container, key.action_name);
         rv = loc;
-        if (alu_pos_p)
-            *alu_pos_p = new ALUPosition(alu_position);
+        if (alu_pos_p) *alu_pos_p = new ALUPosition(alu_position);
     }
     return rv;
 }
@@ -2184,30 +2086,29 @@ const ALUParameter *Format::Use::find_locked_in_all_actions_param_alloc(UniqueLo
  * object
  */
 const ALUParameter *Format::Use::find_param_alloc(UniqueLocationKey &key,
-        const ALUPosition **alu_pos_p) const {
+                                                  const ALUPosition **alu_pos_p) const {
     if (key.param->is<Hash>() || key.param->is<RandomNumber>())
         return find_locked_in_all_actions_param_alloc(key, alu_pos_p);
 
     auto action_alu_positions = alu_positions.at(key.action_name);
     const ALUParameter *rv = nullptr;
     Log::TempIndent indent;
-    LOG3("  Finding ALU Param with container " << indent << indent
-            << key.container << " for action " << key.action_name);
+    LOG3("  Finding ALU Param with container " << indent << indent << key.container
+                                               << " for action " << key.action_name);
     bool container_match = false;
     for (auto alu_position : action_alu_positions) {
         LOG3(alu_position);
-        if (alu_position.alu_op->container() != key.container)
-            continue;
-        if (alu_position.alu_op->container().size() != key.container.size())
-            continue;
+        if (alu_position.alu_op->container() != key.container) continue;
+        if (alu_position.alu_op->container().size() != key.container.size()) continue;
         auto *loc = alu_position.alu_op->find_param_alloc(key);
         if (!loc) continue;
-        BUG_CHECK(rv == nullptr, "A parameter has multiple allocations "
-                  "in container %s in action %s", key.container, key.action_name);
+        BUG_CHECK(rv == nullptr,
+                  "A parameter has multiple allocations "
+                  "in container %s in action %s",
+                  key.container, key.action_name);
         rv = loc;
         container_match |= alu_position.alu_op->container() == key.container;
-        if (alu_pos_p)
-            *alu_pos_p = new ALUPosition(alu_position);
+        if (alu_pos_p) *alu_pos_p = new ALUPosition(alu_position);
     }
     if (!rv) {
         LOG3("No ALU Param Found");
@@ -2218,13 +2119,11 @@ const ALUParameter *Format::Use::find_param_alloc(UniqueLocationKey &key,
 }
 
 cstring Format::Use::get_format_name(const ALUPosition &alu_pos, bool bitmasked_set,
-        le_bitrange *slot_bits, le_bitrange *postpone_range) const {
+                                     le_bitrange *slot_bits, le_bitrange *postpone_range) const {
     int byte_offset = alu_pos.start_byte;
     SlotType_t slot_type = static_cast<SlotType_t>(alu_pos.alu_op->index());
-    if (bitmasked_set)
-        byte_offset += slot_type_to_bits(slot_type) / 8;
-    return get_format_name(slot_type, alu_pos.loc, byte_offset, slot_bits,
-                           postpone_range);
+    if (bitmasked_set) byte_offset += slot_type_to_bits(slot_type) / 8;
+    return get_format_name(slot_type, alu_pos.loc, byte_offset, slot_bits, postpone_range);
 }
 
 /**
@@ -2256,28 +2155,37 @@ cstring Format::Use::get_format_name(const ALUPosition &alu_pos, bool bitmasked_
  *        of the generated range
  */
 cstring Format::Use::get_format_name(SlotType_t slot_type, Location_t loc, int byte_offset,
-        le_bitrange *slot_bits, le_bitrange *postpone_range) const {
+                                     le_bitrange *slot_bits, le_bitrange *postpone_range) const {
     cstring rv = ""_cs;
-    BUG_CHECK(slot_bits == nullptr || postpone_range == nullptr, "Invalid call of the "
-         "get_format_name function");
+    BUG_CHECK(slot_bits == nullptr || postpone_range == nullptr,
+              "Invalid call of the "
+              "get_format_name function");
     int size = slot_type_to_bits(slot_type);
     int byte_sz = size / 8;
 
     BUG_CHECK((byte_offset % byte_sz) == 0, "Byte offset does not have an allocation");
     auto &bus_inp = bus_inputs[loc];
-    BUG_CHECK(bus_inp[slot_type].getrange(byte_offset, byte_sz), "Nothing allocated to "
+    BUG_CHECK(bus_inp[slot_type].getrange(byte_offset, byte_sz),
+              "Nothing allocated to "
               "the byte position that is named in the assembly output");
     if (loc == ACTION_DATA_TABLE) {
         rv += "$adf_";
         switch (slot_type) {
-            case BYTE: rv += "b"; break;
-            case HALF: rv += "h"; break;
-            case FULL: rv += "f"; break;
-            default: BUG("Unrecognized size of action data packing");
+            case BYTE:
+                rv += "b";
+                break;
+            case HALF:
+                rv += "h";
+                break;
+            case FULL:
+                rv += "f";
+                break;
+            default:
+                BUG("Unrecognized size of action data packing");
         }
         rv += std::to_string(byte_offset / byte_sz);
         if (postpone_range)
-            *postpone_range = { 0, size - 1 };
+            *postpone_range = {0, size - 1};
         else if (slot_bits)
             rv += "(" + std::to_string(slot_bits->lo) + ".." + std::to_string(slot_bits->hi) + ")";
     } else if (loc == IMMEDIATE) {
@@ -2285,7 +2193,7 @@ cstring Format::Use::get_format_name(SlotType_t slot_type, Location_t loc, int b
         int lo = byte_offset * 8;
         int hi = std::min(lo + size - 1, immediate_mask.max().index());
         if (postpone_range) {
-            *postpone_range = { lo, hi };
+            *postpone_range = {lo, hi};
         } else {
             if (slot_bits) {
                 lo += slot_bits->lo;
@@ -2307,8 +2215,7 @@ bool Format::Use::if_action_has_action_data_table(cstring action_name) const {
     if (if_action_has_action_data(action_name)) {
         auto act_alu_positions = alu_positions.at(action_name);
         for (auto act_alu_pos : act_alu_positions) {
-            if (act_alu_pos.loc == ActionData::ACTION_DATA_TABLE)
-                return true;
+            if (act_alu_pos.loc == ActionData::ACTION_DATA_TABLE) return true;
         }
     }
     return false;
@@ -2336,20 +2243,17 @@ const RamSection *Format::Use::build_locked_in_sect() const {
     return rv;
 }
 
-
 /**
  * Creates an Argument from an IR::MAU::ActionArg or slice of one
  */
-void Format::create_argument(ALUOperation &alu,
-        ActionAnalysis::ActionParam &read, le_bitrange container_bits,
-        const IR::MAU::ConditionalArg *cond_arg) {
+void Format::create_argument(ALUOperation &alu, ActionAnalysis::ActionParam &read,
+                             le_bitrange container_bits, const IR::MAU::ConditionalArg *cond_arg) {
     Log::TempIndent indent;
     LOG7("Create argument" << indent);
     auto ir_arg = read.unsliced_expr()->to<IR::MAU::ActionArg>();
     BUG_CHECK(ir_arg != nullptr, "Cannot create argument");
     Argument *arg = new Argument(ir_arg->name.name, read.range());
-    if (cond_arg)
-        arg->set_cond(VALUE, cond_arg->orig_arg->name.toString());
+    if (cond_arg) arg->set_cond(VALUE, cond_arg->orig_arg->name.toString());
     ALUParameter ap(arg, container_bits);
     LOG6("Creating Argument " << arg << " at container bits " << container_bits);
     alu.add_param(ap);
@@ -2360,8 +2264,8 @@ void Format::create_argument(ALUOperation &alu,
  * at most are 32 bit ALU operations.
  */
 void Format::create_constant(ALUOperation &alu, const IR::Expression *read,
-        le_bitrange container_bits, int &constant_alias_index,
-        const IR::MAU::ConditionalArg *cond_arg) {
+                             le_bitrange container_bits, int &constant_alias_index,
+                             const IR::MAU::ConditionalArg *cond_arg) {
     LOG7("Create constant");
     auto ir_con = read->to<IR::Constant>();
     BUG_CHECK(ir_con != nullptr, "Cannot create constant");
@@ -2374,8 +2278,7 @@ void Format::create_constant(ALUOperation &alu, const IR::Expression *read,
     else
         BUG("Any constant used in an ALU operation would by definition have to be < 32 bits");
     Constant *con = new Constant(constant_value, read->type->width_bits());
-    if (cond_arg)
-        con->set_cond(VALUE, cond_arg->orig_arg->name.toString());
+    if (cond_arg) con->set_cond(VALUE, cond_arg->orig_arg->name.toString());
     con->set_alias("$constant" + std::to_string(constant_alias_index++));
     ALUParameter ap(con, container_bits);
     LOG6("    Creating Constant " << con << " at container bits " << container_bits);
@@ -2386,7 +2289,7 @@ void Format::create_constant(ALUOperation &alu, const IR::Expression *read,
  * Creates a Hash parameter from an IR::MAU::HashDist based read
  */
 void Format::create_hash(ALUOperation &alu, ActionAnalysis::ActionParam &read,
-       le_bitrange container_bits) {
+                         le_bitrange container_bits) {
     Log::TempIndent indent;
     LOG7("Create hash for " << read << indent);
     auto ir_hd = read.unsliced_expr()->to<IR::MAU::HashDist>();
@@ -2395,7 +2298,7 @@ void Format::create_hash(ALUOperation &alu, ActionAnalysis::ActionParam &read,
     ir_hd->apply(builder);
     P4HashFunction *func = builder.func();
     if (auto sl = read.expr->to<IR::Slice>()) {
-        le_bitrange hash_range = { static_cast<int>(sl->getL()), static_cast<int>(sl->getH()) };
+        le_bitrange hash_range = {static_cast<int>(sl->getL()), static_cast<int>(sl->getH())};
         func->slice(hash_range);
     }
     Hash *hash = new Hash(*func);
@@ -2410,7 +2313,7 @@ void Format::create_hash(ALUOperation &alu, ActionAnalysis::ActionParam &read,
  * converted to one of the outputs of the HashFunction
  */
 void Format::create_hash_constant(ALUOperation &alu, ActionAnalysis::ActionParam &read,
-        le_bitrange container_bits) {
+                                  le_bitrange container_bits) {
     Log::TempIndent indent;
     LOG7("Create hash constant" << indent);
     auto ir_con = read.unsliced_expr()->to<IR::Constant>();
@@ -2418,7 +2321,7 @@ void Format::create_hash_constant(ALUOperation &alu, ActionAnalysis::ActionParam
     P4HashFunction func;
     func.inputs.push_back(ir_con);
     func.algorithm = IR::MAU::HashFunction::identity();
-    func.hash_bits = { 0, ir_con->type->width_bits() - 1 };
+    func.hash_bits = {0, ir_con->type->width_bits() - 1};
     Hash *hash = new Hash(func);
     ALUParameter ap(hash, container_bits);
     alu.add_param(ap);
@@ -2429,7 +2332,7 @@ void Format::create_hash_constant(ALUOperation &alu, ActionAnalysis::ActionParam
  * Creates a RandomNumber parameter that is associated with a source in an action
  */
 void Format::create_random_number(ALUOperation &alu, ActionAnalysis::ActionParam &read,
-        le_bitrange container_bits, cstring action_name) {
+                                  le_bitrange container_bits, cstring action_name) {
     Log::TempIndent indent;
     LOG7("Create random number" << indent);
     auto ir_rn = read.unsliced_expr()->to<IR::MAU::RandomNumber>();
@@ -2458,15 +2361,17 @@ void Format::create_random_padding(ALUOperation &alu, le_bitrange container_bits
  * Creates a MeterColor parameter, associated with an AttachedOutput
  */
 void Format::create_meter_color(ALUOperation &alu, ActionAnalysis::ActionParam &read,
-        le_bitrange container_bits) {
+                                le_bitrange container_bits) {
     Log::TempIndent indent;
     LOG7("Create meter color" << indent);
     auto ir_ao = read.unsliced_expr()->to<IR::MAU::AttachedOutput>();
     BUG_CHECK(ir_ao != nullptr, "Cannot create meter color");
     auto meter_name = ir_ao->attached->name;
     auto range = read.range();
-    BUG_CHECK(range.hi < METER_COLOR_SIZE, "Meter color of %1% parameter is greater than %2% "
-        "bits", ir_ao, METER_COLOR_SIZE);
+    BUG_CHECK(range.hi < METER_COLOR_SIZE,
+              "Meter color of %1% parameter is greater than %2% "
+              "bits",
+              ir_ao, METER_COLOR_SIZE);
     MeterColor *mc = new MeterColor(meter_name, range);
     ALUParameter ap(mc, container_bits);
     alu.add_param(ap);
@@ -2478,7 +2383,7 @@ void Format::create_meter_color(ALUOperation &alu, ActionAnalysis::ActionParam &
  * of the argument to be set conditionally
  */
 void Format::create_mask_argument(ALUOperation &alu, ActionAnalysis::ActionParam &read,
-        le_bitrange container_bits) {
+                                  le_bitrange container_bits) {
     Log::TempIndent indent;
     LOG7("Create mask argument" << indent);
     auto cond_arg = read.unsliced_expr()->to<IR::MAU::ConditionalArg>();
@@ -2495,7 +2400,7 @@ void Format::create_mask_argument(ALUOperation &alu, ActionAnalysis::ActionParam
  * Standard constants used as masks in bitmasked-sets.
  */
 void Format::create_mask_constant(ALUOperation &alu, bitvec value, le_bitrange container_bits,
-        int &constant_alias_index) {
+                                  int &constant_alias_index) {
     LOG7("Create mask constant");
     Constant *con = new Constant(value, container_bits.size());
     con->set_alias("$constant" + std::to_string(constant_alias_index++));
@@ -2583,14 +2488,14 @@ void Format::create_alu_ops_for_action(ActionAnalysis::ContainerActionsMap &ca_m
     for (auto &container_action_info : ca_map) {
         auto container = container_action_info.first;
         auto &cont_action = container_action_info.second;
-        LOG5("Analyzing action data for " << container << " ----->" << Log::TempIndent() <<
-             Log::endl << cont_action << Log::endl << "----------------------------|");
+        LOG5("Analyzing action data for " << container << " ----->" << Log::TempIndent()
+                                          << Log::endl
+                                          << cont_action << Log::endl
+                                          << "----------------------------|");
 
         ALUOPConstraint_t alu_cons = DEPOSIT_FIELD;
-        if (cont_action.convert_instr_to_byte_rotate_merge)
-            alu_cons = BYTE_ROTATE_MERGE;
-        if (cont_action.convert_instr_to_bitmasked_set)
-            alu_cons = BITMASKED_SET;
+        if (cont_action.convert_instr_to_byte_rotate_merge) alu_cons = BYTE_ROTATE_MERGE;
+        if (cont_action.convert_instr_to_bitmasked_set) alu_cons = BITMASKED_SET;
         if (cont_action.action_data_isolated() || container.is(PHV::Kind::mocha))
             alu_cons = ISOLATED;
 
@@ -2611,26 +2516,26 @@ void Format::create_alu_ops_for_action(ActionAnalysis::ContainerActionsMap &ca_m
             le_bitrange container_bits;
             int write_count = 0;
             PHV::FieldUse use(PHV::FieldUse::WRITE);
-            write_field->foreach_alloc(bits, cont_action.table_context, &use,
-                                       [&](const PHV::AllocSlice &alloc) {
-                write_count++;
-                container_bits = alloc.container_slice();
-                BUG_CHECK(container_bits.lo >= 0, "Invalid negative container bit");
-                if (!alloc.container())
-                    LOG1("ERROR: Phv field " << write_field->name << " written in action "
-                          << action_name << " is not allocated?");
-            });
+            write_field->foreach_alloc(
+                bits, cont_action.table_context, &use, [&](const PHV::AllocSlice &alloc) {
+                    write_count++;
+                    container_bits = alloc.container_slice();
+                    BUG_CHECK(container_bits.lo >= 0, "Invalid negative container bit");
+                    if (!alloc.container())
+                        LOG1("ERROR: Phv field " << write_field->name << " written in action "
+                                                 << action_name << " is not allocated?");
+                });
             total_write_bits |= bitvec(container_bits.lo, container_bits.size());
 
-            if (write_count > 1)
-                BUG("Splitting of writes handled incorrectly");
+            if (write_count > 1) BUG("Splitting of writes handled incorrectly");
 
             const IR::MAU::ConditionalArg *cond_arg = nullptr;
             if (field_action.name == "conditionally-set") {
                 auto last_read = field_action.reads.back();
                 cond_arg = last_read.unsliced_expr()->to<IR::MAU::ConditionalArg>();
-                BUG_CHECK(cond_arg != nullptr, "Last read of set-conditional instruction should "
-                    "be a conditional argument");
+                BUG_CHECK(cond_arg != nullptr,
+                          "Last read of set-conditional instruction should "
+                          "be a conditional argument");
             }
 
             for (auto &read : field_action.reads) {
@@ -2641,7 +2546,7 @@ void Format::create_alu_ops_for_action(ActionAnalysis::ContainerActionsMap &ca_m
                     continue;
                 }
 
-                if (read.speciality == ActionAnalysis::ActionParam::HASH_DIST)  {
+                if (read.speciality == ActionAnalysis::ActionParam::HASH_DIST) {
                     create_hash(*alu, read, container_bits);
                     contains_speciality = true;
                 } else if (read.speciality == ActionAnalysis::ActionParam::RANDOM) {
@@ -2679,7 +2584,7 @@ void Format::create_alu_ops_for_action(ActionAnalysis::ContainerActionsMap &ca_m
             // So in theory this could just be only the bytes that have to overlap, but the
             // action data bus portion will only understand outputs in their container sizes
             for (auto br : bitranges(bitvec(0, container.size()) - rand_num_write_bits)) {
-                le_bitrange padding_bits = { br.first, br.second };
+                le_bitrange padding_bits = {br.first, br.second};
                 create_random_padding(*alu, padding_bits);
             }
         }
@@ -2693,7 +2598,6 @@ void Format::create_alu_ops_for_action(ActionAnalysis::ContainerActionsMap &ca_m
                     action_name, container, cont_action);
         }
 
-
         if (alias_required_reads > 1 || cont_action.unresolved_ad()) {
             alu->set_alias("$data" + std::to_string(alias_index++));
         }
@@ -2701,7 +2605,7 @@ void Format::create_alu_ops_for_action(ActionAnalysis::ContainerActionsMap &ca_m
         if (alu->is_constrained(BITMASKED_SET)) {
             bitvec constant_mask = alu->phv_bits() - alu->mask_bits();
             for (auto br : bitranges(constant_mask)) {
-                le_bitrange container_bits = { br.first, br.second };
+                le_bitrange container_bits = {br.first, br.second};
                 bitvec value(0, container_bits.size());
                 create_mask_constant(*alu, value, container_bits, constant_alias_index);
             }
@@ -2734,18 +2638,18 @@ void Format::create_alu_ops_for_action(ActionAnalysis::ContainerActionsMap &ca_m
  * and the newly condensed algorithm.
  */
 void Format::initial_possible_condenses(PossibleCondenses &condenses,
-        const RamSec_vec_t &ram_sects) {
+                                        const RamSec_vec_t &ram_sects) {
     Log::TempIndent indent;
     LOG5("Setting initial_possible_condenses" << indent);
     for (size_t i = 0; i < ram_sects.size(); i++) {
-        for (size_t j = i+1; j < ram_sects.size(); j++) {
+        for (size_t j = i + 1; j < ram_sects.size(); j++) {
             condenses[i][j] = ram_sects[i]->condense(ram_sects[j]);
         }
     }
 }
 
 void Format::incremental_possible_condenses(PossibleCondenses &condenses,
-        const RamSec_vec_t &ram_sects) {
+                                            const RamSec_vec_t &ram_sects) {
     Log::TempIndent indent;
     size_t last_index = ram_sects.size() - 1;
     LOG5("Setting incremental_possible_condenses : last_index " << last_index << indent);
@@ -2763,9 +2667,9 @@ void Format::incremental_possible_condenses(PossibleCondenses &condenses,
  * Though these heuristics are simple now, they still are better than the current round
  * and can always be improved by some kind of weighted score.
  */
-bool Format::is_better_condense(RamSec_vec_t &ram_sects,
-                                const RamSection *best, size_t best_skip1, size_t best_skip2,
-                                const RamSection *comp, size_t comp_skip1, size_t comp_skip2) {
+bool Format::is_better_condense(RamSec_vec_t &ram_sects, const RamSection *best, size_t best_skip1,
+                                size_t best_skip2, const RamSection *comp, size_t comp_skip1,
+                                size_t comp_skip2) {
     // First comparison is about total number of bits used, and whether one has a reduction
     // of bits over another due to good sharing
     size_t best_bits = best->bits_in_use().popcount();
@@ -2780,8 +2684,7 @@ bool Format::is_better_condense(RamSec_vec_t &ram_sects,
         comp_bits += ram_sects[i]->bits_in_use().popcount();
     }
 
-    if (best_bits != comp_bits)
-        return comp_bits < best_bits;
+    if (best_bits != comp_bits) return comp_bits < best_bits;
 
     // A second check about full rotational on a bit by bit granularity, as more moveability
     // of action data is generally better for the algorithm.  This will keep same sized container
@@ -2790,15 +2693,13 @@ bool Format::is_better_condense(RamSec_vec_t &ram_sects,
     size_t best_fully_rotational = (best->get_pack_info().get_granularity() == 1) ? 1 : 0;
     for (size_t i = 0; i < ram_sects.size(); i++) {
         if (i == best_skip1 || i == best_skip2) continue;
-        if (ram_sects[i]->get_pack_info().get_granularity() == 1)
-            best_fully_rotational++;
+        if (ram_sects[i]->get_pack_info().get_granularity() == 1) best_fully_rotational++;
     }
 
     size_t comp_fully_rotational = (comp->get_pack_info().get_granularity() == 1) ? 1 : 0;
     for (size_t i = 0; i < ram_sects.size(); i++) {
         if (i == comp_skip1 || i == comp_skip2) continue;
-        if (ram_sects[i]->get_pack_info().get_granularity() == 1)
-            comp_fully_rotational++;
+        if (ram_sects[i]->get_pack_info().get_granularity() == 1) comp_fully_rotational++;
     }
 
     if (comp_fully_rotational != best_fully_rotational)
@@ -2818,8 +2719,7 @@ bool Format::is_better_condense(RamSec_vec_t &ram_sects,
             comp_fully_packed++;
     }
 
-    if (comp_fully_packed != best_fully_packed)
-        return comp_fully_packed > best_fully_packed;
+    if (comp_fully_packed != best_fully_packed) return comp_fully_packed > best_fully_packed;
 
     return false;
 }
@@ -2842,10 +2742,10 @@ void Format::shrink_possible_condenses(PossibleCondenses &pc, RamSec_vec_t &ram_
     LOG6("Shrinking possible condeses for ram section " << *ad << indent);
     if (ram_sects.at(i_pos)->size() < ad->size())
         LOG7("Expanding a RAM Section from " << ram_sects.at(i_pos)->size() << " to "
-             << ad->size());
+                                             << ad->size());
     if (ram_sects.at(j_pos)->size() < ad->size())
         LOG7("Expanding a RAM Section from " << ram_sects.at(j_pos)->size() << " to "
-             << ad->size());
+                                             << ad->size());
 
     for (auto &pc_vec : pc) {
         pc_vec.erase(pc_vec.begin() + larger_pos);
@@ -2888,7 +2788,7 @@ void Format::condense_action(cstring action_name, RamSec_vec_t &ram_sects) {
 
     Log::TempIndent indent;
     LOG2("Condensing action " << action_name << " with " << init_ram_sects_size
-            << " initial RAM sections" << indent);
+                              << " initial RAM sections" << indent);
 
     bool initial = true;
 
@@ -2902,12 +2802,12 @@ void Format::condense_action(cstring action_name, RamSec_vec_t &ram_sects) {
         }
 
         const RamSection *best = nullptr;
-        size_t i_pos = 0; size_t j_pos = 0;
+        size_t i_pos = 0;
+        size_t j_pos = 0;
         // Determine the best condense
         for (size_t i = 0; i < ram_sects.size(); i++) {
-            for (size_t j = i+1; j < ram_sects.size(); j++) {
-                if (condenses[i][j] == nullptr)
-                    continue;
+            for (size_t j = i + 1; j < ram_sects.size(); j++) {
+                if (condenses[i][j] == nullptr) continue;
                 if (best == nullptr ||
                     is_better_condense(ram_sects, best, i_pos, j_pos, condenses[i][j], i, j)) {
                     best = condenses[i][j];
@@ -2918,9 +2818,9 @@ void Format::condense_action(cstring action_name, RamSec_vec_t &ram_sects) {
             }
         }
 
-        if (best == nullptr)
-            break;
-        BUG_CHECK(best->alu_requirements.size() > 1, "By definition more than one ALU op should "
+        if (best == nullptr) break;
+        BUG_CHECK(best->alu_requirements.size() > 1,
+                  "By definition more than one ALU op should "
                   "be there");
         // Remove the old pair and add the new condense
         shrink_possible_condenses(condenses, ram_sects, best, i_pos, j_pos);
@@ -2937,14 +2837,16 @@ void Format::condense_action(cstring action_name, RamSec_vec_t &ram_sects) {
             total_alus++;
         }
         total_bits += sect->size();
-        LOG5("   Ram Section " << sect->get_action_data_bits_str()
-                << ", total_alus: " << total_alus << ", total bits: " << total_bits);
+        LOG5("   Ram Section " << sect->get_action_data_bits_str() << ", total_alus: " << total_alus
+                               << ", total bits: " << total_bits);
         size_counts[ceil_log2(sect->size()) - 3]++;
     }
-    BUG_CHECK(init_ram_sects_size == total_alus, "Somehow the ALUs are not kept during "
+    BUG_CHECK(init_ram_sects_size == total_alus,
+              "Somehow the ALUs are not kept during "
               "condense_action");
     LOG2("After condense total bits : " << total_bits << ", size_counts : " << size_counts
-          << ", total_alus : " << total_alus << ", total_sections : " << ram_sects.size());
+                                        << ", total_alus : " << total_alus
+                                        << ", total_sections : " << ram_sects.size());
     calc_max_size = std::max(calc_max_size, total_bits < 8 ? 0 : 1 << ceil_log2(total_bits / 8));
 }
 
@@ -2963,8 +2865,7 @@ bool Format::analyze_actions(FormatType_t format_type) {
         // If the split parameters exist within the PHV allocation, then add the objects
         // to the IR action in order to correctly understand the split action
         auto *act_to_analyze = att_info.get_split_action(action, tbl, format_type);
-        if (act_to_analyze)
-            act_to_analyze->apply(aa);
+        if (act_to_analyze) act_to_analyze->apply(aa);
         create_alu_ops_for_action(container_actions_map, action->name);
     }
 
@@ -2994,10 +2895,12 @@ bool Format::analyze_actions(FormatType_t format_type) {
 
     if (locked_in_all_actions_bits > Format::IMMEDIATE_BITS) {
         if (format_type.normal())
-            error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "\nIn table %1%, the number of bits "
+            error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                  "\nIn table %1%, the number of bits "
                   "required to go through the immediate pathway %2% (e.g. data coming from Hash, "
                   "RNG, Meter Color) is greater than the available bits %3%, and can not be "
-                  "allocated", tbl, locked_in_all_actions_bits, Format::IMMEDIATE_BITS);
+                  "allocated",
+                  tbl, locked_in_all_actions_bits, Format::IMMEDIATE_BITS);
         // Don't flag an error if this happens with non-NORMAL format, instead just don't create
         // any formats of that type.  If TablePlacement ends up needing such a format, it will
         // flag an error then.
@@ -3028,10 +2931,8 @@ bool Format::determine_next_immediate_bytes(bool immediate_forced) {
     // was 2.  Neither of these entry can fit within a single byte, but these entries can
     // both fit within immediate.  Potentially, an entry size can be skipped
     for (auto &adt_entry : adt_bus_inputs) {
-        int bit_diff = static_cast<int>(adt_entry.bits_required()) -
-                           next_adt_bytes * 8;
-        if (bit_diff > IMMEDIATE_BITS)
-            return false;
+        int bit_diff = static_cast<int>(adt_entry.bits_required()) - next_adt_bytes * 8;
+        if (bit_diff > IMMEDIATE_BITS) return false;
 
         auto immed_vec = adt_entry.best_inputs_to_move(bit_diff);
         if (immed_vec.empty()) {
@@ -3039,7 +2940,8 @@ bool Format::determine_next_immediate_bytes(bool immediate_forced) {
                 return false;
             }
         } else {
-            BUG_CHECK(adt_entry.bits_required() <= (next_adt_bytes * 8U), "Cannot "
+            BUG_CHECK(adt_entry.bits_required() <= (next_adt_bytes * 8U),
+                      "Cannot "
                       "move things to immediate without fitting into action data table");
         }
 
@@ -3052,19 +2954,23 @@ bool Format::determine_next_immediate_bytes(bool immediate_forced) {
         adt_bytes = std::max(adt_bytes, static_cast<int>(adt_entry.adt_bits_required()) / 8);
         cstring action_name = adt_entry.action_name;
         BUG_CHECK(adt_entry.all_inputs.size() + immed_entry.all_inputs.size() ==
-                  init_ram_sections.at(action_name).size(), "Somehow an action did not "
-                  "correctly move entries on action %s", action_name);
+                      init_ram_sections.at(action_name).size(),
+                  "Somehow an action did not "
+                  "correctly move entries on action %s",
+                  action_name);
     }
-    BUG_CHECK(immed_bytes <= IMMEDIATE_BITS / 8, "Trying to allocate %d bytes to immediate, "
-              "when the max is 4", immed_bytes);
+    BUG_CHECK(immed_bytes <= IMMEDIATE_BITS / 8,
+              "Trying to allocate %d bytes to immediate, "
+              "when the max is 4",
+              immed_bytes);
     BUG_CHECK(adt_bytes <= next_adt_bytes, "The action data table bytes did not shrink");
     bytes_per_loc[ACTION_DATA_TABLE] = adt_bytes;
     bytes_per_loc[IMMEDIATE] = immed_bytes;
-    LOG2("  Bytes per location : { ACTION_DATA_TABLE : " << bytes_per_loc[ACTION_DATA_TABLE]
-         << ", IMMEDIATE : " << bytes_per_loc[IMMEDIATE] << " }");
+    LOG2("  Bytes per location : { ACTION_DATA_TABLE : "
+         << bytes_per_loc[ACTION_DATA_TABLE] << ", IMMEDIATE : " << bytes_per_loc[IMMEDIATE]
+         << " }");
     return true;
 }
-
 
 /**
  * The goal of the action format algorithm is to generate a number of possibly action data
@@ -3121,8 +3027,7 @@ bool Format::determine_bytes_per_loc(bool &initialized,
         }
         all_bus_inputs.emplace_back(entry.first, single_action_inputs);
         auto adt_bits_reqd = all_bus_inputs.back().adt_bits_required();
-        max_bytes = std::max(max_bytes,
-                             (static_cast<int>(adt_bits_reqd) + 7)/ 8);
+        max_bytes = std::max(max_bytes, (static_cast<int>(adt_bits_reqd) + 7) / 8);
     }
 
     locked_in_all_actions_inputs.clear();
@@ -3142,8 +3047,9 @@ bool Format::determine_bytes_per_loc(bool &initialized,
         initialized = true;
         bytes_per_loc[ACTION_DATA_TABLE] = max_bytes;
         bytes_per_loc[IMMEDIATE] = 0;
-        LOG2("  Bytes per location : { ACTION_DATA_TABLE : " << bytes_per_loc[ACTION_DATA_TABLE]
-              << ", IMMEDIATE : " << bytes_per_loc[IMMEDIATE] << " }");
+        LOG2("  Bytes per location : { ACTION_DATA_TABLE : "
+             << bytes_per_loc[ACTION_DATA_TABLE] << ", IMMEDIATE : " << bytes_per_loc[IMMEDIATE]
+             << " }");
         return true;
     }
     bool go_imm = true, go_imm2 = true;
@@ -3152,42 +3058,41 @@ bool Format::determine_bytes_per_loc(bool &initialized,
     for (auto ba : tbl->attached) {
         if (ba->attached->is<IR::MAU::ActionData>()) {
             go_imm = false;
-            break; }
+            break;
+        }
     }
 
-    if (imm_ctrl == IR::MAU::Table::FORCE_NON_IMMEDIATE)
-        go_imm = false;
+    if (imm_ctrl == IR::MAU::Table::FORCE_NON_IMMEDIATE) go_imm = false;
 
     bool imm_forced = imm_ctrl == IR::MAU::Table::FORCE_IMMEDIATE;
     bool imm_path_used = locked_in_all_actions_sects.size() > 0;
 
     go_imm &= !(imm_path_used);
 
-    if (imm_path_used)
-        go_imm = false;
+    if (imm_path_used) go_imm = false;
 
-    if (bytes_per_loc[ACTION_DATA_TABLE] == 0)
-        go_imm2 = false;
+    if (bytes_per_loc[ACTION_DATA_TABLE] == 0) go_imm2 = false;
 
     if (!go_imm) {
         if (imm_forced) {
-          fatal_error("%s: Unable to force_immediate on table %s.  Action parameters cannot "
-                      "be stored in match overhead when the action data table is indirectly "
-                      "addressed, the immediate is needed for hash distribution or random "
-                      "numbers, or when there are no action parameters.",
-                      tbl->srcInfo, tbl->name);
+            fatal_error(
+                "%s: Unable to force_immediate on table %s.  Action parameters cannot "
+                "be stored in match overhead when the action data table is indirectly "
+                "addressed, the immediate is needed for hash distribution or random "
+                "numbers, or when there are no action parameters.",
+                tbl->srcInfo, tbl->name);
         }
         return false;
     }
-    if (!go_imm2)
-        return false;
+    if (!go_imm2) return false;
 
     bool alloc_imm = determine_next_immediate_bytes(imm_forced);
     if (imm_forced && !alloc_imm) {
-        fatal_error("%s: Unable to force_immediate on table %s.  Cannot fit all action "
-                    "data in match overhead.  %d bytes in the action data table. "
-                    "%d bytes in match overhead.", tbl->srcInfo, tbl->name,
-                    bytes_per_loc[ACTION_DATA_TABLE], bytes_per_loc[IMMEDIATE]);
+        fatal_error(
+            "%s: Unable to force_immediate on table %s.  Cannot fit all action "
+            "data in match overhead.  %d bytes in the action data table. "
+            "%d bytes in match overhead.",
+            tbl->srcInfo, tbl->name, bytes_per_loc[ACTION_DATA_TABLE], bytes_per_loc[IMMEDIATE]);
         return false;
     }
     return alloc_imm;
@@ -3198,7 +3103,8 @@ bool Format::determine_bytes_per_loc(bool &initialized,
  * with the impact of this RamSection's inputs
  */
 void Format::set_ram_sect_byte(SingleActionAllocation &single_action_alloc,
-        bitvec &allocated_slots_in_action, RamSectionPosition &ram_sect, int byte_position) {
+                               bitvec &allocated_slots_in_action, RamSectionPosition &ram_sect,
+                               int byte_position) {
     ram_sect.byte_offset = byte_position;
     allocated_slots_in_action.setrange(byte_position, ram_sect.section->byte_sz());
     for (int i = 0; i < SLOT_TYPES; i++) {
@@ -3218,7 +3124,8 @@ void Format::set_ram_sect_byte(SingleActionAllocation &single_action_alloc,
  * @sa alloc_immed_bytes
  */
 void Format::alloc_immed_slots_of_size(SlotType_t slot_type,
-        SingleActionAllocation &single_action_alloc, int max_bytes_required) {
+                                       SingleActionAllocation &single_action_alloc,
+                                       int max_bytes_required) {
     int ss_i = static_cast<int>(slot_type);
     auto it = single_action_alloc.orig_inputs.begin();
     bitvec allocated_slots_in_action = bytes_in_use(single_action_alloc.current_action_inputs);
@@ -3232,14 +3139,14 @@ void Format::alloc_immed_slots_of_size(SlotType_t slot_type,
         int byte_position = 0;
         int byte_sz = ram_sect.section->byte_sz();
         for (int i = 0; i <= max_bytes_required; i += byte_sz) {
-            if (!allocated_slots_in_action.getslice(i, byte_sz).empty())
-                continue;
+            if (!allocated_slots_in_action.getslice(i, byte_sz).empty()) continue;
             found = true;
             byte_position = i;
             break;
         }
 
-        BUG_CHECK(found && byte_position + byte_sz <= max_bytes_required, "The byte position is "
+        BUG_CHECK(found && byte_position + byte_sz <= max_bytes_required,
+                  "The byte position is "
                   "outside of the range of the region");
         set_ram_sect_byte(single_action_alloc, allocated_slots_in_action, ram_sect, byte_position);
         it = single_action_alloc.orig_inputs.erase(it);
@@ -3268,21 +3175,33 @@ bitvec Format::adt_iteration(SlotType_t slot_type, int &iteration) {
     bitvec rv;
     if (slot_type == BYTE) {
         switch (iteration) {
-            case 0: rv.setrange(0, 4); break;
-            case 1: rv.setrange(4, 4); break;
-            case 2: rv.setrange(0, 8); break;
-            case 3: rv.setrange(0, 16);
-            default: break;
+            case 0:
+                rv.setrange(0, 4);
+                break;
+            case 1:
+                rv.setrange(4, 4);
+                break;
+            case 2:
+                rv.setrange(0, 8);
+                break;
+            case 3:
+                rv.setrange(0, 16);
+            default:
+                break;
         }
     } else if (slot_type == HALF) {
         switch (iteration) {
-            case 0: rv.setrange(0, 8); break;
-            case 1: rv.setrange(0, 16); break;
-            default: break;
+            case 0:
+                rv.setrange(0, 8);
+                break;
+            case 1:
+                rv.setrange(0, 16);
+                break;
+            default:
+                break;
         }
     } else {
-        if (iteration == 0)
-            rv.setrange(0, 16);
+        if (iteration == 0) rv.setrange(0, 16);
     }
     return rv;
 }
@@ -3297,7 +3216,8 @@ bitvec Format::adt_iteration(SlotType_t slot_type, int &iteration) {
  * @sa alloc_adt_bytes
  */
 void Format::alloc_adt_slots_of_size(SlotType_t slot_type,
-        SingleActionAllocation &single_action_alloc, int max_bytes_required) {
+                                     SingleActionAllocation &single_action_alloc,
+                                     int max_bytes_required) {
     int ss_i = static_cast<int>(slot_type);
     auto it = single_action_alloc.orig_inputs.begin();
     bitvec allocated_slots_in_action = bytes_in_use(single_action_alloc.current_action_inputs);
@@ -3313,11 +3233,9 @@ void Format::alloc_adt_slots_of_size(SlotType_t slot_type,
         int byte_position = 0;
         // Try to reuse other actions inputs of the same size
         for (int i = 0; i < max_bytes_required; i += byte_sz) {
-            if (!allocated_slots_in_action.getslice(i, byte_sz).empty())
-                continue;
+            if (!allocated_slots_in_action.getslice(i, byte_sz).empty()) continue;
             bitvec slots_in_use = (*single_action_alloc.all_action_inputs)[ss_i];
-            if ((slots_in_use & ram_sect.section->bus_inputs()[ss_i]).empty())
-                continue;
+            if ((slots_in_use & ram_sect.section->bus_inputs()[ss_i]).empty()) continue;
             found = true;
             byte_position = i;
             break;
@@ -3329,24 +3247,22 @@ void Format::alloc_adt_slots_of_size(SlotType_t slot_type,
             bitvec ram_bytes_avail = adt_iteration(slot_type, iteration);
             while (!ram_bytes_avail.empty()) {
                 for (int i = 0; i < max_bytes_required; i += byte_sz) {
-                    bitvec can_alloc_bytes = ram_bytes_avail.getslice(i % ACTION_RAM_BYTES,
-                                                                      byte_sz);
-                    if (can_alloc_bytes.popcount() != byte_sz)
-                        continue;
-                    if (!allocated_slots_in_action.getslice(i, byte_sz).empty())
-                        continue;
+                    bitvec can_alloc_bytes =
+                        ram_bytes_avail.getslice(i % ACTION_RAM_BYTES, byte_sz);
+                    if (can_alloc_bytes.popcount() != byte_sz) continue;
+                    if (!allocated_slots_in_action.getslice(i, byte_sz).empty()) continue;
                     found = true;
                     byte_position = i;
                     break;
                 }
-                if (found)
-                    break;
+                if (found) break;
                 iteration++;
                 ram_bytes_avail = adt_iteration(slot_type, iteration);
             }
         }
 
-        BUG_CHECK(found && byte_position + byte_sz <= max_bytes_required, "The byte position is "
+        BUG_CHECK(found && byte_position + byte_sz <= max_bytes_required,
+                  "The byte position is "
                   "outside of the range of the region");
 
         set_ram_sect_byte(single_action_alloc, allocated_slots_in_action, ram_sect, byte_position);
@@ -3360,15 +3276,17 @@ void Format::alloc_adt_slots_of_size(SlotType_t slot_type,
  */
 void Format::verify_placement(SingleActionAllocation &single_action_alloc) {
     auto &current_action_inputs = single_action_alloc.current_action_inputs;
-    LOG3("    Action Bus Input for BYTE: " << current_action_inputs[BYTE] << " HALF: "
-         << current_action_inputs[HALF] << " FULL: " << current_action_inputs[FULL]);
+    LOG3("    Action Bus Input for BYTE: " << current_action_inputs[BYTE]
+                                           << " HALF: " << current_action_inputs[HALF]
+                                           << " FULL: " << current_action_inputs[FULL]);
     bitvec verify_legal_placement;
     for (auto &input : single_action_alloc.alloc_inputs) {
         BUG_CHECK(input.byte_offset >= 0, "A section was not allocated to a byte offset");
         int sz = input.section->size() / 8;
-        BUG_CHECK(verify_legal_placement.getslice(input.byte_offset, sz).empty(), "Two "
-            "RAM sections in action %s are at the same location",
-            single_action_alloc.action_name());
+        BUG_CHECK(verify_legal_placement.getslice(input.byte_offset, sz).empty(),
+                  "Two "
+                  "RAM sections in action %s are at the same location",
+                  single_action_alloc.action_name());
         verify_legal_placement.setrange(input.byte_offset, sz);
     }
 
@@ -3380,40 +3298,39 @@ void Format::verify_placement(SingleActionAllocation &single_action_alloc) {
  * @sa determine_action_data_table_bytes
  */
 void Format::determine_single_action_input(SingleActionAllocation &single_action_alloc,
-        int max_bytes_required) {
+                                           int max_bytes_required) {
     LOG3("    Determining Ram Allocation for action " << single_action_alloc.action_name());
 
     BusInputs current_action_inputs;
     // Prefer to place RamSections that have BYTE inputs
     std::sort(single_action_alloc.orig_inputs.begin(), single_action_alloc.orig_inputs.end(),
-        [](const RamSectionPosition &a, const RamSectionPosition &b) {
-        int t;
-        if ((t = a.total_slots_of_type(BYTE) - b.total_slots_of_type(BYTE)) != 0)
-            return t > 0;
-        if ((t = a.total_slots_of_type(HALF) - b.total_slots_of_type(HALF)) != 0)
-            return t > 0;
-        return a.section->size() > b.section->size();
-    });
+              [](const RamSectionPosition &a, const RamSectionPosition &b) {
+                  int t;
+                  if ((t = a.total_slots_of_type(BYTE) - b.total_slots_of_type(BYTE)) != 0)
+                      return t > 0;
+                  if ((t = a.total_slots_of_type(HALF) - b.total_slots_of_type(HALF)) != 0)
+                      return t > 0;
+                  return a.section->size() > b.section->size();
+              });
 
     alloc_adt_slots_of_size(BYTE, single_action_alloc, max_bytes_required);
 
     // Prefer to place RamSections that contain HALF inputs
     std::sort(single_action_alloc.orig_inputs.begin(), single_action_alloc.orig_inputs.end(),
-        [](const RamSectionPosition &a, const RamSectionPosition &b) {
-        int t;
-        if ((t = a.total_slots_of_type(HALF) - b.total_slots_of_type(HALF)) != 0)
-            return t > 0;
-        if ((t = a.section->size() > b.section->size()) != 0)
-            return t > 0;
-        return a.section->size() > b.section->size();
-    });
+              [](const RamSectionPosition &a, const RamSectionPosition &b) {
+                  int t;
+                  if ((t = a.total_slots_of_type(HALF) - b.total_slots_of_type(HALF)) != 0)
+                      return t > 0;
+                  if ((t = a.section->size() > b.section->size()) != 0) return t > 0;
+                  return a.section->size() > b.section->size();
+              });
     alloc_adt_slots_of_size(HALF, single_action_alloc, max_bytes_required);
 
     // Place all only FULL inputs
     std::sort(single_action_alloc.orig_inputs.begin(), single_action_alloc.orig_inputs.end(),
-        [](const RamSectionPosition &a, const RamSectionPosition &b) {
-        return a.section->size() > b.section->size();
-    });
+              [](const RamSectionPosition &a, const RamSectionPosition &b) {
+                  return a.section->size() > b.section->size();
+              });
 
     alloc_adt_slots_of_size(FULL, single_action_alloc, max_bytes_required);
     verify_placement(single_action_alloc);
@@ -3450,29 +3367,27 @@ void Format::determine_single_action_input(SingleActionAllocation &single_action
  * plenty of options if that becomes an issue).
  */
 void Format::assign_action_data_table_bytes(AllActionPositions &all_bus_inputs,
-        BusInputs &total_inputs) {
+                                            BusInputs &total_inputs) {
     Log::TempIndent indent;
     LOG2("Assigning Action Data Byte Positions" << indent);
     std::sort(all_bus_inputs.begin(), all_bus_inputs.end(),
-        [](const SingleActionPositions &a, const SingleActionPositions &b) {
-        int t;
-        if ((t = a.total_slots_of_type(BYTE) - b.total_slots_of_type(BYTE)) != 0)
-            return t > 0;
-        if ((t = a.total_slots_of_type(HALF) - b.total_slots_of_type(HALF)) != 0)
-            return t > 0;
-        if ((t = a.bits_required() - b.bits_required()) != 0)
-            return t > 0;
-        return a.action_name < b.action_name;
-    });
+              [](const SingleActionPositions &a, const SingleActionPositions &b) {
+                  int t;
+                  if ((t = a.total_slots_of_type(BYTE) - b.total_slots_of_type(BYTE)) != 0)
+                      return t > 0;
+                  if ((t = a.total_slots_of_type(HALF) - b.total_slots_of_type(HALF)) != 0)
+                      return t > 0;
+                  if ((t = a.bits_required() - b.bits_required()) != 0) return t > 0;
+                  return a.action_name < b.action_name;
+              });
 
     for (auto &single_action_input : all_bus_inputs) {
         SingleActionAllocation single_action_alloc(&single_action_input, &total_inputs);
-        determine_single_action_input(single_action_alloc,
-                                      bytes_per_loc[ACTION_DATA_TABLE]);
+        determine_single_action_input(single_action_alloc, bytes_per_loc[ACTION_DATA_TABLE]);
     }
 
     LOG2("Total inputs BYTE: 0x" << total_inputs[BYTE] << " HALF: 0x" << total_inputs[HALF]
-         << " FULL: 0x" << total_inputs[FULL]);
+                                 << " FULL: 0x" << total_inputs[FULL]);
 }
 
 /**
@@ -3485,8 +3400,8 @@ void Format::assign_action_data_table_bytes(AllActionPositions &all_bus_inputs,
  * data is itself the least number contiguous bits necessary as a mask, as the bit granularity
  * is important for packing data on the match RAM line.
  */
-void Format::assign_immediate_bytes(AllActionPositions &all_bus_inputs,
-        BusInputs &total_inputs, int max_bytes_needed) {
+void Format::assign_immediate_bytes(AllActionPositions &all_bus_inputs, BusInputs &total_inputs,
+                                    int max_bytes_needed) {
     LOG2("  Assigning Immediate Byte Positions");
     for (auto &single_action_inputs : all_bus_inputs) {
         LOG3("    Determining immediate allocation for action "
@@ -3509,18 +3424,18 @@ void Format::assign_immediate_bytes(AllActionPositions &all_bus_inputs,
         safe_vector<RamSectionPosition> orig_inputs;
         safe_vector<RamSectionPosition> alloc_inputs;
         BusInputs current_action_inputs;
-        safe_vector<SlotType_t> slot_type_alloc = { first_byte_or_half, last_byte_or_half, FULL };
+        safe_vector<SlotType_t> slot_type_alloc = {first_byte_or_half, last_byte_or_half, FULL};
         SingleActionAllocation single_action_alloc(&single_action_inputs, &total_inputs);
 
         // Guarantee that the minmax object is the last in the vector, so that placing the
         // inputs in order will place the minmax slot last
         std::sort(orig_inputs.begin(), orig_inputs.end(),
-            [](const RamSectionPosition &a, const RamSectionPosition &b) {
-            int t;
-            if ((t = a.section->size() - b.section->size()) != 0)
-                return t < 0;
-            return a.section->bits_in_use().max().index() > b.section->bits_in_use().max().index();
-        });
+                  [](const RamSectionPosition &a, const RamSectionPosition &b) {
+                      int t;
+                      if ((t = a.section->size() - b.section->size()) != 0) return t < 0;
+                      return a.section->bits_in_use().max().index() >
+                             b.section->bits_in_use().max().index();
+                  });
 
         for (auto slot_type : slot_type_alloc) {
             alloc_immed_slots_of_size(slot_type, single_action_alloc, max_bytes_needed);
@@ -3528,7 +3443,7 @@ void Format::assign_immediate_bytes(AllActionPositions &all_bus_inputs,
         verify_placement(single_action_alloc);
     }
     LOG2("   Total inputs BYTE: 0x" << total_inputs[BYTE] << " HALF: 0x" << total_inputs[HALF]
-         << " FULL: 0x" << total_inputs[FULL]);
+                                    << " FULL: 0x" << total_inputs[FULL]);
 }
 
 void Format::assign_RamSections_to_bytes() {
@@ -3537,9 +3452,9 @@ void Format::assign_RamSections_to_bytes() {
     assign_action_data_table_bytes(action_bus_inputs[ACTION_DATA_TABLE],
                                    action_bus_input_bitvecs[ACTION_DATA_TABLE]);
     assign_immediate_bytes(action_bus_inputs[IMMEDIATE], action_bus_input_bitvecs[IMMEDIATE],
-        bytes_per_loc[IMMEDIATE]);
+                           bytes_per_loc[IMMEDIATE]);
     assign_immediate_bytes(locked_in_all_actions_inputs, locked_in_all_actions_input_bitvecs,
-        Format::IMMEDIATE_BITS / 8);
+                           Format::IMMEDIATE_BITS / 8);
 }
 
 /**
@@ -3547,8 +3462,10 @@ void Format::assign_RamSections_to_bytes() {
  * MeterColor, which cannot be rotated to, as the rotation doesn't work for locked in shifts
  */
 const ALUOperation *Format::finalize_locked_shift_alu_operation(const RamSection *ram_sect,
-        const ALUOperation *init_ad_alu, int right_shift) {
-    BUG_CHECK(init_ad_alu->has_param<MeterColor>(), "Locked shift alu operation must contain "
+                                                                const ALUOperation *init_ad_alu,
+                                                                int right_shift) {
+    BUG_CHECK(init_ad_alu->has_param<MeterColor>(),
+              "Locked shift alu operation must contain "
               "MeterColor");
     int right_shift_validate = init_ad_alu->hw_right_shift();
     BUG_CHECK(right_shift == right_shift_validate, "Meter Color right shift miscalculated");
@@ -3564,8 +3481,8 @@ const ALUOperation *Format::finalize_locked_shift_alu_operation(const RamSection
 }
 
 const ALUOperation *Format::finalize_alu_operation(const RamSection *ram_sect,
-        const ALUOperation *init_ad_alu, int right_shift, int section_byte_offset,
-        int *rot_alias_idx) {
+                                                   const ALUOperation *init_ad_alu, int right_shift,
+                                                   int section_byte_offset, int *rot_alias_idx) {
     auto ad_alu = init_ad_alu->add_right_shift(right_shift, rot_alias_idx);
     // Validates that the right shift is calculated correctly, by shifting the
     // alu operation by that much, and determining if the ALU operation is
@@ -3575,7 +3492,7 @@ const ALUOperation *Format::finalize_alu_operation(const RamSection *ram_sect,
     // built into the RamSection
     auto ram_sect_check1 = ad_alu->create_RamSection(false);
     auto ram_sect_check2 = ram_sect_check1->expand_to_size(ram_sect->size());
-    auto ram_sect_check  = ram_sect_check2->can_rotate(0, section_byte_offset * 8);
+    auto ram_sect_check = ram_sect_check2->can_rotate(0, section_byte_offset * 8);
     BUG_CHECK(ram_sect_check != nullptr, "Finalize ALU operation has unsafe rotation");
 
     bool is_subset = ram_sect_check->is_data_subset_of(ram_sect);
@@ -3587,9 +3504,9 @@ const ALUOperation *Format::finalize_alu_operation(const RamSection *ram_sect,
     return ad_alu;
 }
 
-
 void Format::build_single_ram_sect(RamSectionPosition &ram_sect, Location_t loc,
-        safe_vector<ALUPosition> &alu_positions, BusInputs &verify_inputs, int *rot_alias_idx) {
+                                   safe_vector<ALUPosition> &alu_positions,
+                                   BusInputs &verify_inputs, int *rot_alias_idx) {
     for (auto *init_ad_alu : ram_sect.section->alu_requirements) {
         const ALUOperation *ad_alu = nullptr;
         // Determines right shift of each ALU operation
@@ -3602,14 +3519,13 @@ void Format::build_single_ram_sect(RamSectionPosition &ram_sect, Location_t loc,
         int right_shift = init_ad_alu->phv_bits().min().index() - first_phv_bit_pos;
         right_shift = (right_shift + init_ad_alu->size()) % init_ad_alu->size();
         if (init_ad_alu->is_right_shift_from_hw())
-            ad_alu = finalize_locked_shift_alu_operation(ram_sect.section, init_ad_alu,
-                                                         right_shift);
+            ad_alu =
+                finalize_locked_shift_alu_operation(ram_sect.section, init_ad_alu, right_shift);
         else
             ad_alu = finalize_alu_operation(ram_sect.section, init_ad_alu, right_shift,
                                             section_byte_offset, rot_alias_idx);
         int start_byte = section_byte_offset + ram_sect.byte_offset;
-        int byte_sz = ad_alu->is_constrained(BITMASKED_SET) ? ad_alu->size() * 2
-                                                            : ad_alu->size();
+        int byte_sz = ad_alu->is_constrained(BITMASKED_SET) ? ad_alu->size() * 2 : ad_alu->size();
         byte_sz /= 8;
         alu_positions.emplace_back(ad_alu, loc, start_byte);
         LOG5("  Adding " << Log::TempIndent() << Log::TempIndent() << alu_positions.back());
@@ -3627,11 +3543,11 @@ void Format::build_single_ram_sect(RamSectionPosition &ram_sect, Location_t loc,
     }
 }
 
-
 void Format::build_locked_in_format(Use &use) {
-    BusInputs verify_inputs = {{ bitvec(), bitvec(), bitvec() }};
-    BUG_CHECK(locked_in_all_actions_inputs.size() == 1, "Action format allocation for "
-        "specialities is not correctly done");
+    BusInputs verify_inputs = {{bitvec(), bitvec(), bitvec()}};
+    BUG_CHECK(locked_in_all_actions_inputs.size() == 1,
+              "Action format allocation for "
+              "specialities is not correctly done");
     auto &single_action_input = locked_in_all_actions_inputs.at(0);
     for (auto &ram_sect : single_action_input.all_inputs) {
         build_single_ram_sect(ram_sect, IMMEDIATE, use.locked_in_all_actions_alu_positions,
@@ -3639,8 +3555,8 @@ void Format::build_locked_in_format(Use &use) {
     }
     for (int i = 0; i < SLOT_TYPES; i++) {
         BUG_CHECK(locked_in_all_actions_input_bitvecs.at(i) == verify_inputs.at(i),
-            "The action data bus inputs from the vector do not align with the calculated "
-            "input positions during allocation");
+                  "The action data bus inputs from the vector do not align with the calculated "
+                  "input positions during allocation");
     }
     use.locked_in_all_actions_bus_inputs = locked_in_all_actions_input_bitvecs;
 }
@@ -3667,7 +3583,7 @@ void Format::build_potential_format(bool immediate_forced) {
     for (auto &loc_inputs : action_bus_inputs) {
         bitvec all_double_fulls;
         Location_t loc = static_cast<Location_t>(loc_i);
-        BusInputs verify_inputs = { { bitvec(), bitvec(), bitvec() } };
+        BusInputs verify_inputs = {{bitvec(), bitvec(), bitvec()}};
         for (auto &single_action_input : loc_inputs) {
             LOG6("For loc_inputs: " << single_action_input);
             int rot_alias_idx = act_to_rot_alias.at(single_action_input.action_name);
@@ -3677,8 +3593,9 @@ void Format::build_potential_format(bool immediate_forced) {
                 build_single_ram_sect(ram_sect, loc, alu_positions, verify_inputs, rot_alias_idx_p);
 
                 if (ram_sect.section->index() == DOUBLE_FULL) {
-                    BUG_CHECK(loc == ACTION_DATA_TABLE, "Cannot have a 64 bit requirement in "
-                        "immediate as the maximum bit allowance is 32 bits");
+                    BUG_CHECK(loc == ACTION_DATA_TABLE,
+                              "Cannot have a 64 bit requirement in "
+                              "immediate as the maximum bit allowance is 32 bits");
                     all_double_fulls.setrange(ram_sect.byte_offset,
                                               slot_type_to_bits(DOUBLE_FULL) / 8);
                 }
@@ -3690,13 +3607,12 @@ void Format::build_potential_format(bool immediate_forced) {
         }
         for (int i = 0; i < SLOT_TYPES; i++) {
             BUG_CHECK(action_bus_input_bitvecs.at(loc_i).at(i) == verify_inputs.at(i),
-                "The action data bus inputs from the vector do not align with the calculated "
-                "input positions during allocation");
+                      "The action data bus inputs from the vector do not align with the calculated "
+                      "input positions during allocation");
         }
 
         use.bus_inputs[loc_i] = action_bus_input_bitvecs.at(loc_i);
-        if (loc == ACTION_DATA_TABLE)
-            use.full_words_bitmasked = all_double_fulls;
+        if (loc == ACTION_DATA_TABLE) use.full_words_bitmasked = all_double_fulls;
         loc_i++;
     }
     build_locked_in_format(use);
@@ -3707,9 +3623,9 @@ void Format::build_potential_format(bool immediate_forced) {
     if (!immediate_forced || (immediate_forced && bytes_per_loc[ACTION_DATA_TABLE] == 0))
         uses->push_back(use);
     else
-        LOG2("Skipping action parameter allocation with ADT = " <<
-             bytes_per_loc[ACTION_DATA_TABLE] << " and IMM = " <<
-             bytes_per_loc[IMMEDIATE] << " due to force_immediate.");
+        LOG2("Skipping action parameter allocation with ADT = "
+             << bytes_per_loc[ACTION_DATA_TABLE] << " and IMM = " << bytes_per_loc[IMMEDIATE]
+             << " due to force_immediate.");
 }
 
 /**
@@ -3739,16 +3655,14 @@ void Format::allocate_format(IR::MAU::Table::ImmediateControl_t imm_ctrl,
                              FormatType_t format_type) {
     BUG_CHECK(format_type.valid(), "invalid format in Format::allocate_format");
     Log::TempIndent indent;
-    LOG1("Determining Formats for table " << tbl->name
-            << " with immediate ctrl " << imm_ctrl << indent);
+    LOG1("Determining Formats for table " << tbl->name << " with immediate ctrl " << imm_ctrl
+                                          << indent);
     bool possible = analyze_actions(format_type);
-    if (!possible)
-        return;
+    if (!possible) return;
     bool initialized = false;
     while (true) {
         bool can_allocate = determine_bytes_per_loc(initialized, imm_ctrl);
-        if (!can_allocate)
-            break;
+        if (!can_allocate) break;
         assign_RamSections_to_bytes();
         build_potential_format(imm_ctrl == IR::MAU::Table::FORCE_IMMEDIATE);
     }
@@ -3756,11 +3670,18 @@ void Format::allocate_format(IR::MAU::Table::ImmediateControl_t imm_ctrl,
 
 std::ostream &operator<<(std::ostream &out, Location_t loc) {
     switch (loc) {
-    case ActionData::ACTION_DATA_TABLE: out << "ad_table"; break;
-    case ActionData::IMMEDIATE: out << "immed"; break;
-    case ActionData::METER_ALU: out << "meter_alu"; break;
-    default:
-        out << "Location_t<" << static_cast<int>(loc) << ">"; }
+        case ActionData::ACTION_DATA_TABLE:
+            out << "ad_table";
+            break;
+        case ActionData::IMMEDIATE:
+            out << "immed";
+            break;
+        case ActionData::METER_ALU:
+            out << "meter_alu";
+            break;
+        default:
+            out << "Location_t<" << static_cast<int>(loc) << ">";
+    }
     return out;
 }
 
@@ -3771,29 +3692,49 @@ std::ostream &operator<<(std::ostream &out, const Format::Use &use) {
         if (!first) out << endl;
         TempIndent indent;
         out << alupos.first << ":" << indent;
-        for (auto &pos : alupos.second)
-            out << endl << pos;
-        first = false; }
+        for (auto &pos : alupos.second) out << endl << pos;
+        first = false;
+    }
     return out;
 }
 
 std::ostream &operator<<(std::ostream &out, SlotType_t st) {
     switch (st) {
-    case ActionData::BYTE:              out << "BYTE";          break;
-    case ActionData::HALF:              out << "HALF";          break;
-    case ActionData::FULL:              out << "FULL";          break;
-    case ActionData::DOUBLE_FULL:       out << "DOUBLE_FULL";   break;
-    default:            out << "SlotType_t(" << int(st) << ")"; }
+        case ActionData::BYTE:
+            out << "BYTE";
+            break;
+        case ActionData::HALF:
+            out << "HALF";
+            break;
+        case ActionData::FULL:
+            out << "FULL";
+            break;
+        case ActionData::DOUBLE_FULL:
+            out << "DOUBLE_FULL";
+            break;
+        default:
+            out << "SlotType_t(" << int(st) << ")";
+    }
     return out;
 }
 
 std::ostream &operator<<(std::ostream &out, ALUOPConstraint_t c) {
     switch (c) {
-    case ActionData::ISOLATED:          out << "ISOL"; break;
-    case ActionData::BITMASKED_SET:     out << "BMS"; break;
-    case ActionData::DEPOSIT_FIELD:     out << "DPF"; break;
-    case ActionData::BYTE_ROTATE_MERGE: out << "BRM"; break;
-    default:    out << "ALUOPConstraint_t(" << int(c) << ")"; }
+        case ActionData::ISOLATED:
+            out << "ISOL";
+            break;
+        case ActionData::BITMASKED_SET:
+            out << "BMS";
+            break;
+        case ActionData::DEPOSIT_FIELD:
+            out << "DPF";
+            break;
+        case ActionData::BYTE_ROTATE_MERGE:
+            out << "BRM";
+            break;
+        default:
+            out << "ALUOPConstraint_t(" << int(c) << ")";
+    }
     return out;
 }
 

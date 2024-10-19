@@ -10,11 +10,12 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef _EXTENSIONS_BF_P4C_LOGGING_MANIFEST_H_
-#define _EXTENSIONS_BF_P4C_LOGGING_MANIFEST_H_
+#ifndef _BACKENDS_TOFINO_BF_P4C_LOGGING_MANIFEST_H_
+#define _BACKENDS_TOFINO_BF_P4C_LOGGING_MANIFEST_H_
 
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
+
 #include <cstdarg>
 #include <fstream>
 #include <map>
@@ -41,19 +42,19 @@ class Manifest : public Inspector {
 
     // to use PathAndType as std::set
     struct PathCmp {
-        bool operator()(const PathAndType& lhs, const PathAndType& rhs) const;
+        bool operator()(const PathAndType &lhs, const PathAndType &rhs) const;
     };
 
  private:
     /// the collection of inputs for the program
     struct InputFiles {
-        cstring           m_rootPath;
-        cstring           m_sourceInfo;  // path to source.json relative to manifest.json
+        cstring m_rootPath;
+        cstring m_sourceInfo;  // path to source.json relative to manifest.json
         std::set<cstring> m_includePaths;
         std::set<cstring> m_defines;
 
-        explicit InputFiles(const BFN_Options&);
-        void serialize(Writer&) const;
+        explicit InputFiles(const BFN_Options &);
+        void serialize(Writer &) const;
     };
 
     /// represents a graph file
@@ -63,18 +64,16 @@ class Manifest : public Inspector {
         cstring m_type;
         cstring m_format;
         GraphOutput(const cstring path_in, const gress_t gress_in, const cstring type_in,
-            const cstring format_in = ".dot"_cs) :
-            m_path(path_in), m_gress(gress_in), m_type(type_in), m_format(format_in) { }
+                    const cstring format_in = ".dot"_cs)
+            : m_path(path_in), m_gress(gress_in), m_type(type_in), m_format(format_in) {}
 
-        void serialize(Writer&) const;
+        void serialize(Writer &) const;
 
-        cstring getHash() const {
-            return m_path + toString(m_gress) + m_type + m_format;
-        }
+        cstring getHash() const { return m_path + toString(m_gress) + m_type + m_format; }
     };
 
     struct GraphOutputCmp {
-        bool operator()(const GraphOutput& lhs, const GraphOutput& rhs) const {
+        bool operator()(const GraphOutput &lhs, const GraphOutput &rhs) const {
             return std::less<const char *>()(lhs.getHash().c_str(), rhs.getHash().c_str());
         }
     };
@@ -84,26 +83,26 @@ class Manifest : public Inspector {
         cstring m_context;  // path to the context file
         cstring m_binary;   // path to the binary file
         // pairs of path and resource type
-        std::set<PathAndType, PathCmp>        m_resources;
+        std::set<PathAndType, PathCmp> m_resources;
         // pairs of path and log type
-        std::set<PathAndType, PathCmp>        m_logs;
+        std::set<PathAndType, PathCmp> m_logs;
         std::set<GraphOutput, GraphOutputCmp> m_graphs;
 
-        void serialize(Writer&) const;
+        void serialize(Writer &) const;
     };
 
-    const BFN_Options& m_options;
+    const BFN_Options &m_options;
     // pairs of <pipe_id, pipe_name>
     std::map<unsigned int, cstring> m_pipes;
     /// map of pipe-id to OutputFiles
-    std::map<unsigned int, OutputFiles*> m_pipeOutputs;
+    std::map<unsigned int, OutputFiles *> m_pipeOutputs;
     InputFiles m_programInputs;
     cstring m_eventLogPath, m_frontendIrLogPath;
     /// reference to ProgramPipelines to generate the architecture configuration
     BFN::ProgramPipelines m_pipelines;
     int m_pipeId = -1;  /// the current pipe id (for the visitor methods)
     /// to generate parser and control graphs
-    P4::ReferenceMap* m_refMap = nullptr;
+    P4::ReferenceMap *m_refMap = nullptr;
     std::ofstream m_manifestStream;
     /// compilation succeeded or failed
     bool m_success = false;
@@ -112,17 +111,17 @@ class Manifest : public Inspector {
     Manifest();
     ~Manifest();
 
-    OutputFiles* getPipeOutputs(unsigned int pipe);
+    OutputFiles *getPipeOutputs(unsigned int pipe);
 
  public:
-    static Manifest& getManifest();  //  singleton
+    static Manifest &getManifest();  //  singleton
 
     /// Visitor methods to generate graphs
-    void postorder(const IR::BFN::TnaParser* parser)   override;
-    void postorder(const IR::BFN::TnaControl* control) override;
+    void postorder(const IR::BFN::TnaParser *parser) override;
+    void postorder(const IR::BFN::TnaControl *control) override;
     /// helper methods for the graph generators
     /// one can set any of the maps and invoke the appropriate visitors
-    void setRefMap(/* intentionally no "const" here */ P4::ReferenceMap* const refMap_in) {
+    void setRefMap(/* intentionally no "const" here */ P4::ReferenceMap *const refMap_in) {
         m_refMap = refMap_in;
     }
 
@@ -130,21 +129,17 @@ class Manifest : public Inspector {
 
     void setSuccess(const bool success) { m_success = success; }
 
-    void addContext(const int pipe, const cstring path) {
-        getPipeOutputs(pipe) -> m_context = path;
-    }
+    void addContext(const int pipe, const cstring path) { getPipeOutputs(pipe)->m_context = path; }
     void addResources(const int pipe, const cstring path, const cstring type = "resources"_cs) {
-        getPipeOutputs(pipe) -> m_resources.insert(PathAndType(path, type));
+        getPipeOutputs(pipe)->m_resources.insert(PathAndType(path, type));
     }
     void addGraph(int pipe, const cstring graphType, const cstring graphName, const gress_t gress,
                   const cstring extension_including_the_leading_period = ".dot"_cs);
     void addLog(int pipe, const cstring logType, const cstring logName);
-    void addArchitecture(const BFN::ProgramPipelines& pipelines_in) {
-        m_pipelines = pipelines_in;
-    }
+    void addArchitecture(const BFN::ProgramPipelines &pipelines_in) { m_pipelines = pipelines_in; }
     void setSourceInfo(const cstring sourceInfo_in) {
         BUG_CHECK(m_programInputs.m_sourceInfo.size() == 0,
-            "Trying to redefine path to source info!");
+                  "Trying to redefine path to source info!");
         m_programInputs.m_sourceInfo = sourceInfo_in;
     }
     void setEventLog(const cstring eventLogPath_in) {
@@ -160,13 +155,13 @@ class Manifest : public Inspector {
     virtual void serialize();
 
  private:
-    void serialize_target_data(Writer&);
+    void serialize_target_data(Writer &);
 
     /// serialize all the output in an array of pipes ("pipes" : [ OutputFiles ])
-    void serializePipes(Writer&);
+    void serializePipes(Writer &);
 
-    void sendTo(Writer&, int pipe, gress_t);
+    void sendTo(Writer &, int pipe, gress_t);
 };
 }  // end namespace Logging
 
-#endif  /* _EXTENSIONS_BF_P4C_LOGGING_MANIFEST_H_ */
+#endif /* _BACKENDS_TOFINO_BF_P4C_LOGGING_MANIFEST_H_ */

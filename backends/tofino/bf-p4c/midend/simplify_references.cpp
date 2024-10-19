@@ -12,28 +12,33 @@
 
 #include "simplify_references.h"
 
+#include "bf-p4c/common/utils.h"
+#include "bf-p4c/midend/copy_header.h"  // ENABLE_P4C3251
+#include "bf-p4c/midend/param_binding.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/typeMap.h"
-#include "bf-p4c/midend/param_binding.h"
-#include "bf-p4c/common/utils.h"
-
-#include "bf-p4c/midend/copy_header.h"   // ENABLE_P4C3251
 
 namespace {
 
 class ApplyParamBindings : public Transform {
-    ParamBinding* bindings;
+    ParamBinding *bindings;
     const P4::ReferenceMap *refMap;
-    const IR::Node *preorder(IR::Type_Parser *n) override { prune(); return n; }
-    const IR::Node *preorder(IR::Type_Control *n) override { prune(); return n; }
+    const IR::Node *preorder(IR::Type_Parser *n) override {
+        prune();
+        return n;
+    }
+    const IR::Node *preorder(IR::Type_Control *n) override {
+        prune();
+        return n;
+    }
     const IR::Expression *postorder(IR::PathExpression *pe) override;
     const IR::Expression *postorder(IR::Member *mem) override;
     const IR::Node *postorder(IR::MAU::SaluAction *salu) override;
 
  public:
-    ApplyParamBindings(ParamBinding* bindings, const P4::ReferenceMap* refMap)
-        : bindings(bindings), refMap(refMap) { }
+    ApplyParamBindings(ParamBinding *bindings, const P4::ReferenceMap *refMap)
+        : bindings(bindings), refMap(refMap) {}
 };
 
 const IR::Expression *ApplyParamBindings::postorder(IR::PathExpression *pe) {
@@ -43,7 +48,8 @@ const IR::Expression *ApplyParamBindings::postorder(IR::PathExpression *pe) {
                 LOG2("binding " << pe << " to " << ref);
                 return ref;
             } else {
-                LOG3("no binding for " << param->name); }
+                LOG3("no binding for " << param->name);
+            }
         } else if (auto var = decl->to<IR::Declaration_Variable>()) {
             if (auto ref = bindings->get(var)) {
                 LOG3("return existing instance for var " << var->name);
@@ -54,9 +60,11 @@ const IR::Expression *ApplyParamBindings::postorder(IR::PathExpression *pe) {
                 return bindings->get(var);
             }
         } else {
-            LOG4(decl << " is not a parameter"); }
+            LOG4(decl << " is not a parameter");
+        }
     } else {
-        LOG3("nothing in blockMap for " << pe); }
+        LOG3("nothing in blockMap for " << pe);
+    }
     return pe;
 }
 
@@ -64,15 +72,18 @@ const IR::Expression *ApplyParamBindings::postorder(IR::Member *mem) {
     if (auto iref = mem->expr->to<IR::V1InstanceRef>()) {
         if ((iref = iref->nested.get<IR::V1InstanceRef>(mem->member))) {
             LOG2("collapsing " << mem << " to " << iref);
-            return iref; }
+            return iref;
+        }
         LOG3("not collapsing " << mem << " (no nested iref)");
     } else if (auto iref = mem->expr->to<IR::InstanceRef>()) {
         if ((iref = iref->nested.get<IR::InstanceRef>(iref->name + "." + mem->member))) {
             LOG2("collapsing " << mem << " to " << iref);
-            return iref; }
+            return iref;
+        }
         LOG3("not collapsing " << mem << " (no nested iref)");
     } else {
-        LOG3("not collapsing " << mem << " (not an iref)"); }
+        LOG3("not collapsing " << mem << " (not an iref)");
+    }
     return mem;
 }
 
@@ -84,8 +95,7 @@ const IR::Node *ApplyParamBindings::postorder(IR::MAU::SaluAction *salu) {
 }
 
 class SplitComplexInstanceRef : public Transform {
-    profile_t init_apply(const IR::Node *root) override {
-        return Transform::init_apply(root); }
+    profile_t init_apply(const IR::Node *root) override { return Transform::init_apply(root); }
     const IR::Node *preorder(IR::MethodCallStatement *prim) override;
 };
 
@@ -112,9 +122,10 @@ const IR::Node *SplitComplexInstanceRef::preorder(IR::MethodCallStatement *mc) {
             for (auto &op : *args)
                 if (auto ir = op->expression->to<IR::InstanceRef>())
                     if (ir->obj == hs)
-                        op = new IR::Argument(
-                            new IR::HeaderStackItemRef(ir, new IR::Constant(idx)));
-            rv->components.push_back(new IR::MethodCallStatement(mc->srcInfo, split)); }
+                        op =
+                            new IR::Argument(new IR::HeaderStackItemRef(ir, new IR::Constant(idx)));
+            rv->components.push_back(new IR::MethodCallStatement(mc->srcInfo, split));
+        }
         return rv;
     } else if (!dest->nested.empty()) {
         auto *rv = new IR::BlockStatement;
@@ -125,18 +136,20 @@ const IR::Node *SplitComplexInstanceRef::preorder(IR::MethodCallStatement *mc) {
             for (auto &op : *args)
                 if (auto ir = op->expression->to<IR::InstanceRef>())
                     op = new IR::Argument(ir->nested.at(nest.first));
-            rv->components.push_back(new IR::MethodCallStatement(mc->srcInfo, split)); }
-        return rv; }
+            rv->components.push_back(new IR::MethodCallStatement(mc->srcInfo, split));
+        }
+        return rv;
+    }
     return mc;
 }
 
 class RemoveInstanceRef : public Transform {
-    std::map<cstring, const IR::Expression *>   created_tempvars;
+    std::map<cstring, const IR::Expression *> created_tempvars;
 
  public:
-    RemoveInstanceRef() : RemoveInstanceRef(std::map<cstring, const IR::Expression *>()) { }
+    RemoveInstanceRef() : RemoveInstanceRef(std::map<cstring, const IR::Expression *>()) {}
     explicit RemoveInstanceRef(std::map<cstring, const IR::Expression *> created_tempvars)
-            : created_tempvars(created_tempvars) {
+        : created_tempvars(created_tempvars) {
         dontForwardChildrenBeforePreorder = true;
     }
     const IR::Expression *preorder(IR::InstanceRef *ir) override {
@@ -147,14 +160,17 @@ class RemoveInstanceRef : public Transform {
                 LOG2("RemoveInstanceRef existing TempVar " << ir->name.name);
             } else {
                 created_tempvars[ir->name.name] = rv = new IR::TempVar(ir->type, ir->name.name);
-                LOG2("RemoveInstanceRef new TempVar " << ir->name.name); }
+                LOG2("RemoveInstanceRef new TempVar " << ir->name.name);
+            }
             return rv;
         } else if (!ir->obj->is<IR::HeaderStack>()) {
             LOG2("RemoveInstanceRef new ConcreteheaderRef " << ir->obj);
             return new IR::ConcreteHeaderRef(ir->obj);
         } else {
             LOG2("RemoveInstanceRef not removing " << ir->name.name);
-            return ir; } }
+            return ir;
+        }
+    }
 
     const IR::Node *postorder(IR::MAU::SaluAction *salu) override {
         // Also transform p4func for the benefit of p4v.
@@ -183,16 +199,16 @@ class RemoveInstanceRef : public Transform {
  * form (IR::MAU::TypedPrimitives), which this code cannot handle (and ignores).
  */
 struct SimplifyHeaderValidMethods : public Transform {
-    const IR::Expression* preorder(IR::MethodCallExpression* call) override {
-        auto* method = call->method->to<IR::Member>();
+    const IR::Expression *preorder(IR::MethodCallExpression *call) override {
+        auto *method = call->method->to<IR::Member>();
         if (!method) return call;
         if (method->member != "isValid") return call;
         return replaceWithPOVRead(call, method);
     }
 
-    const IR::Statement* preorder(IR::MethodCallStatement* statement) override {
-        auto* call = statement->methodCall;
-        auto* method = call->method->to<IR::Member>();
+    const IR::Statement *preorder(IR::MethodCallStatement *statement) override {
+        auto *call = statement->methodCall;
+        auto *method = call->method->to<IR::Member>();
         if (!method) return statement;
 
         if (method->member == "setValid")
@@ -205,20 +221,19 @@ struct SimplifyHeaderValidMethods : public Transform {
         return statement;
     }
 
-    const IR::Expression*
-    replaceWithPOVRead(const IR::MethodCallExpression* call,
-                       const IR::Member* method) {
-        BUG_CHECK(call->arguments->size() == 0,
-                  "Wrong number of arguments for method call: %1%", call);
-        auto* target = method->expr;
+    const IR::Expression *replaceWithPOVRead(const IR::MethodCallExpression *call,
+                                             const IR::Member *method) {
+        BUG_CHECK(call->arguments->size() == 0, "Wrong number of arguments for method call: %1%",
+                  call);
+        auto *target = method->expr;
         BUG_CHECK(target != nullptr, "Method has no target: %1%", call);
-        BUG_CHECK(target->type->is<IR::Type_Header>(),
-                  "Invoking isValid() on unexpected type %1%", target->type);
+        BUG_CHECK(target->type->is<IR::Type_Header>(), "Invoking isValid() on unexpected type %1%",
+                  target->type);
 
         // On Tofino, calling a header's `isValid()` method is implemented by
         // reading the header's POV bit, which is a simple bit<1> value.
         const cstring validField = "$valid"_cs;
-        auto* member = new IR::Member(call->srcInfo, target, validField);
+        auto *member = new IR::Member(call->srcInfo, target, validField);
         member->type = IR::Type::Bits::get(1);
 
         // If isValid() is being used as a table key element, it already behaves
@@ -227,31 +242,30 @@ struct SimplifyHeaderValidMethods : public Transform {
 
         // In other contexts, rewrite isValid() into a comparison with a constant.
         // This maintains a boolean type for the overall expression.
-        auto* constant = new IR::Constant(IR::Type::Bits::get(1), 1);
-        auto* result = new IR::Equ(call->srcInfo, member, constant);
+        auto *constant = new IR::Constant(IR::Type::Bits::get(1), 1);
+        auto *result = new IR::Equ(call->srcInfo, member, constant);
         result->type = IR::Type::Boolean::get();
         return result;
     }
 
-    const IR::Statement*
-    replaceWithPOVWrite(const IR::MethodCallStatement* statement,
-                        const IR::Member* method, unsigned value) {
+    const IR::Statement *replaceWithPOVWrite(const IR::MethodCallStatement *statement,
+                                             const IR::Member *method, unsigned value) {
         BUG_CHECK(statement->methodCall->arguments->size() == 0,
                   "Wrong number of arguments for method call: %1%", statement);
-        auto* target = method->expr;
+        auto *target = method->expr;
         BUG_CHECK(target != nullptr, "Method has no target: %1%", statement);
-        BUG_CHECK(target->type->is<IR::Type_Header>(),
-                  "Invoking isValid() on unexpected type %1%", target->type);
+        BUG_CHECK(target->type->is<IR::Type_Header>(), "Invoking isValid() on unexpected type %1%",
+                  target->type);
 
         // On Barefoot architectures, calling a header's `setValid()` and
         // `setInvalid()` methods is implemented by write the header's POV bit,
         // which is a simple bit<1> value.
         const cstring validField = "$valid"_cs;
-        auto* member = new IR::Member(statement->srcInfo, target, validField);
+        auto *member = new IR::Member(statement->srcInfo, target, validField);
         member->type = IR::Type::Bits::get(1);
 
         // Rewrite the method call into an assignment with the same effect.
-        auto* constant = new IR::Constant(IR::Type::Bits::get(1), value);
+        auto *constant = new IR::Constant(IR::Type::Bits::get(1), value);
         return new IR::AssignmentStatement(statement->srcInfo, member, constant);
     }
 };
@@ -264,28 +278,25 @@ class ConvertIndexToHeaderStackItemRef : public Transform {
         return new IR::HeaderStackItemRef(idx->srcInfo, type, idx->left, idx->right);
     }
 
-    const IR::Expression* preorder(IR::Member* member) override {
+    const IR::Expression *preorder(IR::Member *member) override {
         auto type = member->type->to<IR::Type_Header>();
         if (!type) return member;
         if (member->member == "next" || member->member == "last")
-            return new IR::HeaderStackItemRef(member->srcInfo, type, member->expr,
-                          new IR::BFN::UnresolvedHeaderStackIndex(member->member));
+            return new IR::HeaderStackItemRef(
+                member->srcInfo, type, member->expr,
+                new IR::BFN::UnresolvedHeaderStackIndex(member->member));
         return member;
     }
 };
 
 }  // namespace
 
-SimplifyReferences::SimplifyReferences(ParamBinding* bindings,
-                                       P4::ReferenceMap* refMap,
-                                       P4::TypeMap* ) {
-    addPasses({
-        new ApplyParamBindings(bindings, refMap),
-        new SplitComplexInstanceRef(),
-        new RemoveInstanceRef,
+SimplifyReferences::SimplifyReferences(ParamBinding *bindings, P4::ReferenceMap *refMap,
+                                       P4::TypeMap *) {
+    addPasses({new ApplyParamBindings(bindings, refMap), new SplitComplexInstanceRef(),
+               new RemoveInstanceRef,
 #if !ENABLE_P4C3251
-        new SimplifyHeaderValidMethods,
+               new SimplifyHeaderValidMethods,
 #endif
-        new ConvertIndexToHeaderStackItemRef
-    });
+               new ConvertIndexToHeaderStackItemRef});
 }

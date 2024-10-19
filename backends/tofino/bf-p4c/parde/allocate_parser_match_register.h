@@ -10,8 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PARDE_ALLOCATE_PARSER_MATCH_REGISTER_H_
-#define EXTENSIONS_BF_P4C_PARDE_ALLOCATE_PARSER_MATCH_REGISTER_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_ALLOCATE_PARSER_MATCH_REGISTER_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_ALLOCATE_PARSER_MATCH_REGISTER_H_
 
 /**
  * @ingroup LowerParserIR
@@ -40,11 +40,11 @@
  */
 
 struct AllocateParserMatchRegisters : public PassManager {
-    explicit AllocateParserMatchRegisters(const PhvInfo& phv);
+    explicit AllocateParserMatchRegisters(const PhvInfo &phv);
 
  private:
     /// Iteration count for allocation
     int iteration = 0;
 };
 
-#endif  /* EXTENSIONS_BF_P4C_PARDE_ALLOCATE_PARSER_MATCH_REGISTER_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_ALLOCATE_PARSER_MATCH_REGISTER_H_ */

@@ -19,7 +19,7 @@ bool GroupConstraintExtractor::isFieldInAnyGroup(const cstring &name) const {
 }
 
 void GroupConstraintExtractor::processSlice(unsigned groupId, const PHV::FieldSlice &slice,
-                        const ConstrainedFieldMap &map) {
+                                            const ConstrainedFieldMap &map) {
     auto &field = map.at(slice.field()->name);
 
     for (auto &ls : field.getSlices()) {
@@ -30,10 +30,10 @@ void GroupConstraintExtractor::processSlice(unsigned groupId, const PHV::FieldSl
     }
 }
 
-std::vector<const Group*> GroupConstraintExtractor::getGroups(const cstring &name) const {
+std::vector<const Group *> GroupConstraintExtractor::getGroups(const cstring &name) const {
     BUG_CHECK(isFieldInAnyGroup(name), "Field %s is not present in any group!", name.c_str());
 
-    std::vector<const Group*> result;
+    std::vector<const Group *> result;
     for (auto &item : fieldToGroupMap.at(name)) {
         result.push_back(&groups[item]);
     }
@@ -44,29 +44,28 @@ std::vector<const Group*> GroupConstraintExtractor::getGroups(const cstring &nam
 /* MauGroupExtractor */
 bool MauGroupExtractor::superClusterContainsOnlySingleField(const PHV::SuperCluster *sc) const {
     cstring fieldName = ""_cs;
-    return sc->all_of_fieldslices([&fieldName] (const PHV::FieldSlice &slice) {
+    return sc->all_of_fieldslices([&fieldName](const PHV::FieldSlice &slice) {
         if (fieldName == "") fieldName = slice.field()->name;
         return fieldName == slice.field()->name;
     });
 }
 
-MauGroupExtractor::MauGroupExtractor(const std::list<PHV::SuperCluster*> &clusterGroups,
-                                      const ConstrainedFieldMap &map) {
+MauGroupExtractor::MauGroupExtractor(const std::list<PHV::SuperCluster *> &clusterGroups,
+                                     const ConstrainedFieldMap &map) {
     for (auto &sc : clusterGroups) {
         if (superClusterContainsOnlySingleField(sc)) continue;
 
         groups.push_back(Group());
         unsigned groupId = groups.size() - 1;
 
-        sc->forall_fieldslices([&] (const PHV::FieldSlice &slice) {
-            processSlice(groupId, slice, map);
-        });
+        sc->forall_fieldslices(
+            [&](const PHV::FieldSlice &slice) { processSlice(groupId, slice, map); });
     }
 }
 
 /* EquivalentAlignExtractor */
 void EquivalentAlignExtractor::processCluster(const PHV::AlignedCluster *cluster,
-    const ConstrainedFieldMap &map) {
+                                              const ConstrainedFieldMap &map) {
     if (cluster->slices().size() < 2) return;
 
     groups.push_back(Group());
@@ -78,7 +77,7 @@ void EquivalentAlignExtractor::processCluster(const PHV::AlignedCluster *cluster
 }
 
 EquivalentAlignExtractor::EquivalentAlignExtractor(
-    const std::list<PHV::SuperCluster*> &superclusters, const ConstrainedFieldMap &map) {
+    const std::list<PHV::SuperCluster *> &superclusters, const ConstrainedFieldMap &map) {
     for (auto &sc : superclusters) {
         for (auto &rc : sc->clusters()) {
             for (auto &ac : rc->clusters()) {

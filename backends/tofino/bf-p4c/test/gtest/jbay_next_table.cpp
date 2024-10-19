@@ -10,23 +10,23 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+#include "bf-p4c/mau/jbay_next_table.h"
+
 #include <array>
 #include <initializer_list>
 #include <optional>
-#include <boost/algorithm/string/replace.hpp>
 
-#include "gtest/gtest.h"
+#include <boost/algorithm/string/replace.hpp>
 
 #include "bf-p4c/common/header_stack.h"
 #include "bf-p4c/common/multiple_apply.h"
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
-#include "bf-p4c/mau/jbay_next_table.h"
-#include "bf-p4c/mau/table_flow_graph.h"
 #include "bf-p4c/mau/resource.h"
+#include "bf-p4c/mau/table_flow_graph.h"
+#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "gtest/gtest.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
-
 #include "test/gtest/helpers.h"
 
 class GTestTablePlacement : public PassManager {
@@ -122,17 +122,12 @@ class GTestTablePlacement : public PassManager {
         }
     };
 
-
  public:
     GTestTablePlacement() {
-        addPasses({
-                new FindFlowGraph(fg),
-                new VerifyFlowGraphAndPragmas(fg),
-                new PlaceTablesFromPragmas
-            });
+        addPasses(
+            {new FindFlowGraph(fg), new VerifyFlowGraphAndPragmas(fg), new PlaceTablesFromPragmas});
     }
 };
-
 
 /**
  * Specifically for running GTests to verify and validate the long branch allocation
@@ -140,15 +135,14 @@ class GTestTablePlacement : public PassManager {
  * a stage and a stage itself
  */
 
-
 namespace P4::Test {
 
-class NextTablePropTest  : public JBayBackendTest {};
+class NextTablePropTest : public JBayBackendTest {};
 
 namespace {
 
-std::optional<TofinoPipeTestCase>
-    createNextTableCase(const std::string& ig_source, const std::string& eg_source = "apply {} ") {
+std::optional<TofinoPipeTestCase> createNextTableCase(const std::string &ig_source,
+                                                      const std::string &eg_source = "apply {} ") {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
 header H1
 {
@@ -214,7 +208,7 @@ V1Switch(parse(), verifyChecksum(), mau(), my_egress(),
     boost::replace_first(source, "%MAU1%", ig_source);
     boost::replace_first(source, "%MAU2%", eg_source);
 
-    auto& options = BackendOptions();
+    auto &options = BackendOptions();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.target = "tofino2"_cs;
     options.arch = "v1model"_cs;
@@ -222,24 +216,18 @@ V1Switch(parse(), verifyChecksum(), mau(), my_egress(),
     return TofinoPipeTestCase::createWithThreadLocalInstances(source);
 }
 
-const IR::BFN::Pipe *runMockPasses(const IR::BFN::Pipe* pipe, JbayNextTable* nt ) {
-    PassManager quick_backend = {
-        new MultipleApply(BackendOptions()),
-        new GTestTablePlacement,
-        nt
-    };
+const IR::BFN::Pipe *runMockPasses(const IR::BFN::Pipe *pipe, JbayNextTable *nt) {
+    PassManager quick_backend = {new MultipleApply(BackendOptions()), new GTestTablePlacement, nt};
     return pipe->apply(quick_backend);
 }
 
 }  // namespace
 
-
 /* This test checks that when two uses overlap on the same gress that they are allocated onto
  * separate tags. We have one use from 0 to 3 and another from 0 to 5. These should not get merged
  * or dumb tabled. */
 TEST_F(NextTablePropTest, OnGressOverlapLB) {
-    auto test = createNextTableCase(
-            P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createNextTableCase(P4_SOURCE(P4Headers::NONE, R"(
      action noop() { }
 
      @stage(0)
@@ -300,7 +288,7 @@ TEST_F(NextTablePropTest, OnGressOverlapLB) {
     }
 )"));
     ASSERT_TRUE(test);
-    JbayNextTable* nt = new JbayNextTable(true);
+    JbayNextTable *nt = new JbayNextTable(true);
     test->pipe = runMockPasses(test->pipe, nt);
     ASSERT_EQ(nt->get_num_lbs(), 2UL);
 }
@@ -308,8 +296,7 @@ TEST_F(NextTablePropTest, OnGressOverlapLB) {
 /* Checks that the tightest on-gress merge occurs correctly. One use ends on 3 and the other begins
  * on 3, which should be merged. */
 TEST_F(NextTablePropTest, TightOnGressMerge) {
-    auto test = createNextTableCase(
-            P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createNextTableCase(P4_SOURCE(P4Headers::NONE, R"(
      action noop() { }
 
      @stage(0)
@@ -370,7 +357,7 @@ TEST_F(NextTablePropTest, TightOnGressMerge) {
     }
 )"));
     ASSERT_TRUE(test);
-    JbayNextTable* nt = new JbayNextTable(true);
+    JbayNextTable *nt = new JbayNextTable(true);
     test->pipe = runMockPasses(test->pipe, nt);
     ASSERT_EQ(nt->get_num_lbs(), 1U);  // Should be able to merge
 }
@@ -378,8 +365,7 @@ TEST_F(NextTablePropTest, TightOnGressMerge) {
 /* Checks that no merge occurs when one use ends on the same stage that another begins when the uses
  * are on different gresses. */
 TEST_F(NextTablePropTest, TightOffGressOverlap) {
-    auto test = createNextTableCase(
-            P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createNextTableCase(P4_SOURCE(P4Headers::NONE, R"(
      action noop() { }
 
      @stage(0)
@@ -412,7 +398,7 @@ TEST_F(NextTablePropTest, TightOffGressOverlap) {
         }
     }
 )"),
-            P4_SOURCE(P4Headers::NONE, R"(
+                                    P4_SOURCE(P4Headers::NONE, R"(
     action noop() { }
 
     @stage(3)
@@ -445,7 +431,7 @@ TEST_F(NextTablePropTest, TightOffGressOverlap) {
     }
 )"));
     ASSERT_TRUE(test);
-    JbayNextTable* nt = new JbayNextTable(true);
+    JbayNextTable *nt = new JbayNextTable(true);
     test->pipe = runMockPasses(test->pipe, nt);
     ASSERT_EQ(nt->get_num_lbs(), 2U);  // Can't merge!
 }
@@ -453,8 +439,7 @@ TEST_F(NextTablePropTest, TightOffGressOverlap) {
 /* Checks that a merge occurs when one use ends one stage before another begins when the uses
  * are on different gresses. This is the tightest cross-gress merge possible. */
 TEST_F(NextTablePropTest, TightOffGressMerge) {
-    auto test = createNextTableCase(
-            P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createNextTableCase(P4_SOURCE(P4Headers::NONE, R"(
      action noop() { }
 
      @stage(0)
@@ -487,7 +472,7 @@ TEST_F(NextTablePropTest, TightOffGressMerge) {
         }
     }
 )"),
-            P4_SOURCE(P4Headers::NONE, R"(
+                                    P4_SOURCE(P4Headers::NONE, R"(
     action noop() { }
 
     @stage(4)
@@ -520,7 +505,7 @@ TEST_F(NextTablePropTest, TightOffGressMerge) {
     }
 )"));
     ASSERT_TRUE(test);
-    JbayNextTable* nt = new JbayNextTable(true);
+    JbayNextTable *nt = new JbayNextTable(true);
     test->pipe = runMockPasses(test->pipe, nt);
     ASSERT_EQ(nt->get_num_lbs(), 1U);
 }
@@ -528,8 +513,7 @@ TEST_F(NextTablePropTest, TightOffGressMerge) {
 /* Checks that tags are successfully merged when we require 9 tags. All of the tags are from stage 0
  * to 13. As such, it is a full overlap and 12 dumb tables need to be used to merge the tags. */
 TEST_F(NextTablePropTest, OnGressFullOverlapDumbTables) {
-    auto test = createNextTableCase(
-            P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createNextTableCase(P4_SOURCE(P4Headers::NONE, R"(
     action noop() { }
 
     @stage(0)
@@ -780,7 +764,7 @@ TEST_F(NextTablePropTest, OnGressFullOverlapDumbTables) {
     }
 )"));
     ASSERT_TRUE(test);
-    JbayNextTable* nt = new JbayNextTable(true);
+    JbayNextTable *nt = new JbayNextTable(true);
     test->pipe = runMockPasses(test->pipe, nt);
     ASSERT_EQ(nt->get_num_lbs(), size_t(Device::numLongBranchTags()));  // Check reduction success
     ASSERT_EQ(nt->get_num_dts(), 12U);  // Every possible merge requires 12 tables
@@ -790,8 +774,7 @@ TEST_F(NextTablePropTest, OnGressFullOverlapDumbTables) {
  * 4 to 10, while the use between t17 and t18 spans from stage 7 to 13. Since they're on the same
  * gress, requires only 3 dumb tables. */
 TEST_F(NextTablePropTest, OnGressPartialOverlapDumbTables) {
-    auto test = createNextTableCase(
-            P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createNextTableCase(P4_SOURCE(P4Headers::NONE, R"(
     action noop() { }
 
     @stage(0)
@@ -1042,7 +1025,7 @@ TEST_F(NextTablePropTest, OnGressPartialOverlapDumbTables) {
     }
 )"));
     ASSERT_TRUE(test);
-    JbayNextTable* nt = new JbayNextTable(true);
+    JbayNextTable *nt = new JbayNextTable(true);
     test->pipe = runMockPasses(test->pipe, nt);
     ASSERT_EQ(nt->get_num_lbs(), size_t(Device::numLongBranchTags()));  // Check reduction success
     ASSERT_EQ(nt->get_num_dts(), 3U);  // Merge final two tags with only 3 tables
@@ -1051,8 +1034,7 @@ TEST_F(NextTablePropTest, OnGressPartialOverlapDumbTables) {
 /* Same as last, but now we have two partial overlaps. Best to select the one that only requires 1
  * dumb table. 0-6 and 5-13 tags can be merged with a single dumb table. */
 TEST_F(NextTablePropTest, OnGressPartialOverlapDumbTables2) {
-    auto test = createNextTableCase(
-            P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createNextTableCase(P4_SOURCE(P4Headers::NONE, R"(
     action noop() { }
 
     @stage(0)
@@ -1303,7 +1285,7 @@ TEST_F(NextTablePropTest, OnGressPartialOverlapDumbTables2) {
     }
 )"));
     ASSERT_TRUE(test);
-    JbayNextTable* nt = new JbayNextTable(true);
+    JbayNextTable *nt = new JbayNextTable(true);
     test->pipe = runMockPasses(test->pipe, nt);
     ASSERT_EQ(nt->get_num_lbs(), size_t(Device::numLongBranchTags()));
     ASSERT_EQ(nt->get_num_dts(), 1U);
@@ -1312,8 +1294,7 @@ TEST_F(NextTablePropTest, OnGressPartialOverlapDumbTables2) {
 /* Same as OnGressFullOverlap, but now the 9th tag is on the other gress. Since these are fully
  * overlapping tags, the merge will require elimination of an entire long branch. */
 TEST_F(NextTablePropTest, OffGressFullOverlapDumbTables) {
-    auto test = createNextTableCase(
-            P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createNextTableCase(P4_SOURCE(P4Headers::NONE, R"(
     action noop() { }
 
     @stage(0)
@@ -1536,7 +1517,7 @@ TEST_F(NextTablePropTest, OffGressFullOverlapDumbTables) {
       }
     }
 )"),
-            P4_SOURCE(P4Headers::NONE, R"(
+                                    P4_SOURCE(P4Headers::NONE, R"(
     action noop() { }
 
     @stage(7)
@@ -1570,7 +1551,7 @@ TEST_F(NextTablePropTest, OffGressFullOverlapDumbTables) {
     }
 )"));
     ASSERT_TRUE(test);
-    JbayNextTable* nt = new JbayNextTable(true);
+    JbayNextTable *nt = new JbayNextTable(true);
     test->pipe = runMockPasses(test->pipe, nt);
     ASSERT_EQ(nt->get_num_lbs(), size_t(Device::numLongBranchTags()));
     ASSERT_EQ(nt->get_num_dts(), 2U);  // Add two tags to the 7-10 use to eliminate it
@@ -1580,8 +1561,7 @@ TEST_F(NextTablePropTest, OffGressFullOverlapDumbTables) {
  * across gresses with partial overlap requires one more table than with partial overlap on the same
  * gress. */
 TEST_F(NextTablePropTest, OffGressPartialOverlapDumbTables) {
-    auto test = createNextTableCase(
-            P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createNextTableCase(P4_SOURCE(P4Headers::NONE, R"(
     action noop() { }
 
     @stage(0)
@@ -1804,7 +1784,7 @@ TEST_F(NextTablePropTest, OffGressPartialOverlapDumbTables) {
       }
     }
 )"),
-            P4_SOURCE(P4Headers::NONE, R"(
+                                    P4_SOURCE(P4Headers::NONE, R"(
     action noop() { }
 
     @stage(7)
@@ -1838,7 +1818,7 @@ TEST_F(NextTablePropTest, OffGressPartialOverlapDumbTables) {
     }
 )"));
     ASSERT_TRUE(test);
-    JbayNextTable* nt = new JbayNextTable(true);
+    JbayNextTable *nt = new JbayNextTable(true);
     test->pipe = runMockPasses(test->pipe, nt);
     ASSERT_EQ(nt->get_num_lbs(), size_t(Device::numLongBranchTags()));
     ASSERT_EQ(nt->get_num_dts(), 4U);  // Add 4 to either partial overlaps is sufficient
@@ -1849,8 +1829,7 @@ TEST_F(NextTablePropTest, OffGressPartialOverlapDumbTables) {
  * tags, it is most optimal to merge the egress tag with a large 0-13 tag on ingress, which should
  * correctly be discovered. */
 TEST_F(NextTablePropTest, OffGressPartialOverlapMultiUseDumbTables) {
-    auto test = createNextTableCase(
-            P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createNextTableCase(P4_SOURCE(P4Headers::NONE, R"(
     action noop() { }
 
     @stage(0)
@@ -2100,7 +2079,7 @@ TEST_F(NextTablePropTest, OffGressPartialOverlapMultiUseDumbTables) {
       }
     }
 )"),
-            P4_SOURCE(P4Headers::NONE, R"(
+                                    P4_SOURCE(P4Headers::NONE, R"(
     action noop() { }
 
     @stage(2)
@@ -2134,7 +2113,7 @@ TEST_F(NextTablePropTest, OffGressPartialOverlapMultiUseDumbTables) {
     }
 )"));
     ASSERT_TRUE(test);
-    JbayNextTable* nt = new JbayNextTable(true);
+    JbayNextTable *nt = new JbayNextTable(true);
     test->pipe = runMockPasses(test->pipe, nt);
     ASSERT_EQ(nt->get_num_lbs(), size_t(Device::numLongBranchTags()));
     ASSERT_EQ(nt->get_num_dts(), 3U);  // Need to add 3 tables from stages 3-5 to the tag on egress
@@ -2144,8 +2123,7 @@ TEST_F(NextTablePropTest, OffGressPartialOverlapMultiUseDumbTables) {
  * overlap. This tests a number of cornerc cases, including assuring that the selection of the best
  * tags to merge handles multiple uses. */
 TEST_F(NextTablePropTest, OffGressPartialOverlapMultiUseDumbTables2) {
-    auto test = createNextTableCase(
-            P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createNextTableCase(P4_SOURCE(P4Headers::NONE, R"(
     action noop() { }
 
     @stage(0)
@@ -2395,7 +2373,7 @@ TEST_F(NextTablePropTest, OffGressPartialOverlapMultiUseDumbTables2) {
       }
     }
 )"),
-            P4_SOURCE(P4Headers::NONE, R"(
+                                    P4_SOURCE(P4Headers::NONE, R"(
     action noop() { }
 
     @stage(2)
@@ -2429,10 +2407,10 @@ TEST_F(NextTablePropTest, OffGressPartialOverlapMultiUseDumbTables2) {
     }
 )"));
     ASSERT_TRUE(test);
-    JbayNextTable* nt = new JbayNextTable(true);
+    JbayNextTable *nt = new JbayNextTable(true);
     test->pipe = runMockPasses(test->pipe, nt);
     ASSERT_EQ(nt->get_num_lbs(), size_t(Device::numLongBranchTags()));
     ASSERT_EQ(nt->get_num_dts(), 4U);  // Best option is to add 4 tables to deal with the
-                                      // double-partial overlap.
+                                       // double-partial overlap.
 }
 }  // namespace P4::Test

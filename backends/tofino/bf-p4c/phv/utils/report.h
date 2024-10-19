@@ -18,13 +18,13 @@
 namespace PHV {
 
 class AllocationReport {
-    const PhvUse& uses;
-    const Allocation& alloc;
+    const PhvUse &uses;
+    const Allocation &alloc;
     bool printMetricsOnly = false;
 
     ordered_map<std::optional<gress_t>,
-        ordered_map<PHV::Type,
-          ordered_map<Allocation::ContainerAllocStatus, int>>> alloc_status;
+                ordered_map<PHV::Type, ordered_map<Allocation::ContainerAllocStatus, int>>>
+        alloc_status;
 
     ordered_map<PHV::Container, int> partial_containers_stat;
 
@@ -41,15 +41,13 @@ class AllocationReport {
     int valid_ingress_unallocated_bits = 0;
     int valid_egress_unallocated_bits = 0;
 
-    static std::string
-    formatPercent(int div, int den) {
+    static std::string formatPercent(int div, int den) {
         std::stringstream ss;
         ss << boost::format("(%=6.3g%%)") % (100.0 * div / den);
         return ss.str();
     }
 
-    static std::string
-    formatUsage(int used, int total, bool show_total = false) {
+    static std::string formatUsage(int used, int total, bool show_total = false) {
         std::stringstream ss;
         ss << used << " ";
         if (show_total) ss << "/ " << total << " ";
@@ -59,13 +57,13 @@ class AllocationReport {
 
     struct PhvOccupancyMetricFields {
         unsigned containersUsed = 0;
-        unsigned bitsUsed       = 0;
-        unsigned bitsAllocated  = 0;
+        unsigned bitsUsed = 0;
+        unsigned bitsAllocated = 0;
 
-        inline PhvOccupancyMetricFields& operator+=(const PhvOccupancyMetricFields& src) {
-            containersUsed  += src.containersUsed;
-            bitsUsed        += src.bitsUsed;
-            bitsAllocated   += src.bitsAllocated;
+        inline PhvOccupancyMetricFields &operator+=(const PhvOccupancyMetricFields &src) {
+            containersUsed += src.containersUsed;
+            bitsUsed += src.bitsUsed;
+            bitsAllocated += src.bitsAllocated;
 
             return *this;
         }
@@ -74,13 +72,13 @@ class AllocationReport {
     /// Information about a set of PHV containers.
     struct PhvOccupancyMetric {
         // in total
-        PhvOccupancyMetricFields                    total;
+        PhvOccupancyMetricFields total;
         // per gress
         std::map<gress_t, PhvOccupancyMetricFields> gress;
 
-        inline PhvOccupancyMetric& operator+=(const PhvOccupancyMetric& src) {
+        inline PhvOccupancyMetric &operator+=(const PhvOccupancyMetric &src) {
             total += src.total;
-            for (const auto& gr : src.gress) {
+            for (const auto &gr : src.gress) {
                 gress[gr.first] += gr.second;
             }
 
@@ -90,7 +88,7 @@ class AllocationReport {
         inline std::string gressToSymbolString() const {
             std::stringstream ss;
             std::string sep = "";
-            for (const auto& gr : gress) {
+            for (const auto &gr : gress) {
                 ss << sep;
                 ss << toSymbol(gr.first);
                 sep = "/";
@@ -101,8 +99,8 @@ class AllocationReport {
 
     /// Information about PHV containers in each MAU group
     struct MauGroupInfo {
-        size_t  size = 0;
-        int     groupID = 0;
+        size_t size = 0;
+        int groupID = 0;
 
         PhvOccupancyMetric totalStats;
         std::map<PHV::Kind, PhvOccupancyMetric, std::greater<PHV::Kind>> statsByContainerKind;
@@ -118,12 +116,12 @@ class AllocationReport {
 
         /// Adds usage information from a single container
         void update(PHV::Kind containerKind, bool cont, size_t used, size_t allocated,
-                std::optional<gress_t> gr) {
-            auto& kindStats = statsByContainerKind[containerKind];
+                    std::optional<gress_t> gr) {
+            auto &kindStats = statsByContainerKind[containerKind];
 
             // Update total stats
-            auto& totalStatsTotal = totalStats.total;
-            auto& kindStatsTotal = kindStats.total;
+            auto &totalStatsTotal = totalStats.total;
+            auto &kindStatsTotal = kindStats.total;
 
             if (cont) {
                 ++totalStatsTotal.containersUsed;
@@ -138,8 +136,8 @@ class AllocationReport {
 
             if (gr) {
                 // Update per gress stats
-                auto& totalStatsGress = totalStats.gress[*gr];
-                auto& kindStatsGress = kindStats.gress[*gr];
+                auto &totalStatsGress = totalStats.gress[*gr];
+                auto &kindStatsGress = kindStats.gress[*gr];
 
                 if (cont) {
                     ++totalStatsGress.containersUsed;
@@ -166,22 +164,19 @@ class AllocationReport {
 
         size_t getTotalUsedBits() {
             size_t rv = 0;
-            for (auto kv : bitsUsed)
-                rv += kv.second;
+            for (auto kv : bitsUsed) rv += kv.second;
             return rv;
         }
 
         size_t getTotalAllocatedBits() {
             size_t rv = 0;
-            for (auto kv : bitsAllocated)
-                rv += kv.second;
+            for (auto kv : bitsAllocated) rv += kv.second;
             return rv;
         }
 
         size_t getTotalAvailableBits() {
             size_t rv = 0;
-            for (auto& kv : totalContainers)
-                rv += (size_t)kv.first.size() * kv.second;
+            for (auto &kv : totalContainers) rv += (size_t)kv.first.size() * kv.second;
             return rv;
         }
 
@@ -208,8 +203,8 @@ class AllocationReport {
     };
 
  public:
-    explicit AllocationReport(const Allocation& alloc, bool printMetricsOnly = false)
-        : uses(*(alloc.uses_i)), alloc(alloc), printMetricsOnly(printMetricsOnly) { }
+    explicit AllocationReport(const Allocation &alloc, bool printMetricsOnly = false)
+        : uses(*(alloc.uses_i)), alloc(alloc), printMetricsOnly(printMetricsOnly) {}
 
     /// @returns a summary of the status of each container by type and gress.
     cstring printSummary() {
@@ -217,11 +212,9 @@ class AllocationReport {
 
         std::stringstream ss;
 
-        if (!printMetricsOnly)
-            ss << printAllocation() << std::endl;
+        if (!printMetricsOnly) ss << printAllocation() << std::endl;
 
-        if (!printMetricsOnly)
-            ss << printAllocSlices() << std::endl;
+        if (!printMetricsOnly) ss << printAllocSlices() << std::endl;
 
         ss << printContainerStatus() << std::endl;
         ss << printOverlayStatus() << std::endl;
@@ -244,4 +237,4 @@ class AllocationReport {
 
 }  // namespace PHV
 
-#endif  /* BF_P4C_PHV_UTILS_REPORT_H_ */
+#endif /* BF_P4C_PHV_UTILS_REPORT_H_ */

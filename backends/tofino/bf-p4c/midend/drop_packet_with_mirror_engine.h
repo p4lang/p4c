@@ -23,16 +23,16 @@
  * instead mirror them to a disabled mirroring session to drop them by the
  * mirror block. This fix applies to Tofino 1 and 2.
  */
-#ifndef EXTENSIONS_BF_P4C_MIDEND_DROP_PACKET_WITH_MIRROR_ENGINE_H_
-#define EXTENSIONS_BF_P4C_MIDEND_DROP_PACKET_WITH_MIRROR_ENGINE_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_MIDEND_DROP_PACKET_WITH_MIRROR_ENGINE_H_
+#define BACKENDS_TOFINO_BF_P4C_MIDEND_DROP_PACKET_WITH_MIRROR_ENGINE_H_
 
-#include "ir/ir.h"
-#include "frontends/common/resolveReferences/resolveReferences.h"
-#include "type_checker.h"
 #include "bf-p4c/common/pragma/all_pragmas.h"
 #include "bf-p4c/common/pragma/collect_global_pragma.h"
 #include "bf-p4c/common/pragma/pragma.h"
 #include "bf-p4c/device.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
+#include "ir/ir.h"
+#include "type_checker.h"
 
 namespace BFN {
 
@@ -57,49 +57,44 @@ class DropPacketWithMirrorEngine_ : public Transform {
 
  public:
     DropPacketWithMirrorEngine_() {}
-    const IR::Node* preorder(IR::P4Program* p) override {
+    const IR::Node *preorder(IR::P4Program *p) override {
         // This pass only applies to TNA architecture
-        if (BackendOptions().arch == "v1model" || BackendOptions().arch == "psa")
-            prune();
+        if (BackendOptions().arch == "v1model" || BackendOptions().arch == "psa") prune();
         // collect and set global_pragmas
         CollectGlobalPragma collect_pragma;
         p->apply(collect_pragma);
         // Workaround can be disabled by pragma
-        if (collect_pragma.exists(PragmaDisableI2EReservedDropImplementation::name))
-            prune();
+        if (collect_pragma.exists(PragmaDisableI2EReservedDropImplementation::name)) prune();
         return p;
     }
     // const IR::Node* preorder(IR::BFN::TnaControl*) override;
-    const IR::Node* preorder(IR::Declaration_Instance*) override;
-    const IR::Node* postorder(IR::BFN::TnaDeparser*) override;
-    const IR::Node* preorder(IR::BFN::TnaParser* parser) override { prune(); return parser; }
-
-    profile_t init_apply(const IR::Node* root) override {
-        return Transform::init_apply(root);
+    const IR::Node *preorder(IR::Declaration_Instance *) override;
+    const IR::Node *postorder(IR::BFN::TnaDeparser *) override;
+    const IR::Node *preorder(IR::BFN::TnaParser *parser) override {
+        prune();
+        return parser;
     }
+
+    profile_t init_apply(const IR::Node *root) override { return Transform::init_apply(root); }
 };
 
 class DropPacketWithMirrorEngine : public PassManager {
  public:
-    DropPacketWithMirrorEngine(P4::ReferenceMap* refMap, P4::TypeMap* typeMap) {
-        addPasses({
-            new PassIf([]() {
+    DropPacketWithMirrorEngine(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
+        addPasses({new PassIf(
+            []() {
                 // TOFINO1, 2 has the same hardware bug that need this workaround.
-                return Device::currentDevice() == Device::TOFINO
-                    || Device::currentDevice() == Device::JBAY
-                    ;
-            }, {
-                new DropPacketWithMirrorEngine_(),
-                new P4::ClearTypeMap(typeMap),
-                new P4::ResolveReferences(refMap),
-                new BFN::TypeInference(typeMap, false), /* extended P4::TypeInference */
-                new P4::ApplyTypesToExpressions(typeMap),
-                new P4::ResolveReferences(refMap) })
-        });
+                return Device::currentDevice() == Device::TOFINO ||
+                       Device::currentDevice() == Device::JBAY;
+            },
+            {new DropPacketWithMirrorEngine_(), new P4::ClearTypeMap(typeMap),
+             new P4::ResolveReferences(refMap),
+             new BFN::TypeInference(typeMap, false), /* extended P4::TypeInference */
+             new P4::ApplyTypesToExpressions(typeMap), new P4::ResolveReferences(refMap)})});
         setName("DropPacketWithMirrorEngine");
     }
 };
 
 }  // namespace BFN
 
-#endif  /* EXTENSIONS_BF_P4C_MIDEND_DROP_PACKET_WITH_MIRROR_ENGINE_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_MIDEND_DROP_PACKET_WITH_MIRROR_ENGINE_H_ */

@@ -27,8 +27,9 @@
 
 class AddParserMetadata : public ParserModifier {
  public:
-    explicit AddParserMetadata(const IR::BFN::Pipe* pipe, bool isV1)
-            : pipe(pipe), isV1(isV1) { CHECK_NULL(pipe); }
+    explicit AddParserMetadata(const IR::BFN::Pipe *pipe, bool isV1) : pipe(pipe), isV1(isV1) {
+        CHECK_NULL(pipe);
+    }
 
  private:
     bool preorder(IR::BFN::Parser *) override;
@@ -39,8 +40,7 @@ class AddParserMetadata : public ParserModifier {
     void addTofinoIngressParserEntryPoint(IR::BFN::Parser *);
     void addTofinoEgressParserEntryPoint(IR::BFN::Parser *);
 
-
-    const IR::BFN::Pipe* pipe;
+    const IR::BFN::Pipe *pipe;
     bool isV1;
 };
 
@@ -57,8 +57,7 @@ class AddParserMetadata : public ParserModifier {
  */
 class AddDeparserMetadata : public DeparserModifier {
  public:
-    explicit AddDeparserMetadata(const IR::BFN::Pipe* pipe)
-        : pipe(pipe) { CHECK_NULL(pipe); }
+    explicit AddDeparserMetadata(const IR::BFN::Pipe *pipe) : pipe(pipe) { CHECK_NULL(pipe); }
 
     /// Process the deparser instances to add parameters
     bool preorder(IR::BFN::Deparser *) override;
@@ -69,7 +68,7 @@ class AddDeparserMetadata : public DeparserModifier {
     // Add egress deparser parameters
     void addEgressMetadata(IR::BFN::Deparser *d);
 
-    const IR::BFN::Pipe* pipe;
+    const IR::BFN::Pipe *pipe;
 };
 
 #endif /* BF_P4C_PARDE_ADD_PARDE_METADATA_H_ */

@@ -10,52 +10,56 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_COMMON_PARSE_ANNOTATIONS_H_
-#define EXTENSIONS_BF_P4C_COMMON_PARSE_ANNOTATIONS_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_COMMON_PARSE_ANNOTATIONS_H_
+#define BACKENDS_TOFINO_BF_P4C_COMMON_PARSE_ANNOTATIONS_H_
 
-#include "ir/ir.h"
 #include "bf-p4c/common/pragma/all_pragmas.h"
 #include "frontends/p4/parseAnnotations.h"
+#include "ir/ir.h"
 
 namespace BFN {
 
 // wrapper for PARSE, PARSE_PAIR, and PARSE_TRIPLE
-#define BFN_PARSE(pragmaClass, parse, tname, internal) {                                     \
-    auto p = new Pragma(pragmaClass::name, pragmaClass::description, pragmaClass::help);     \
-    std::pair<std::string, P4::ParseAnnotations::Handler> h = parse(pragmaClass::name, tname);   \
-    addHandler(h.first, h.second);                                                           \
-    Pragma::registerPragma(p, internal);                                                     \
+#define BFN_PARSE(pragmaClass, parse, tname, internal)                                             \
+    {                                                                                              \
+        auto p = new Pragma(pragmaClass::name, pragmaClass::description, pragmaClass::help);       \
+        std::pair<std::string, P4::ParseAnnotations::Handler> h = parse(pragmaClass::name, tname); \
+        addHandler(h.first, h.second);                                                             \
+        Pragma::registerPragma(p, internal);                                                       \
     }
 
 // wrapper for PARSE_EMPTY, PARSE_CONSTANT_OR_STRING_LITERAL, PARSE_EXPRESSION_LIST,
 // PARSE_CONSTANT_LIST, PARSE_CONSTANT_OR_STRING_LITERAL_LIST, PARSE_STRING_LITERAL_LIST and
 // PARSE_SKIP
-#define BFN_PARSE_EMPTY(pragmaClass, parse, internal) {                                      \
-    auto p = new Pragma(pragmaClass::name, pragmaClass::description, pragmaClass::help);     \
-    std::pair<std::string, P4::ParseAnnotations::Handler> h = parse(pragmaClass::name);          \
-    addHandler(h.first, h.second);                                                           \
-    Pragma::registerPragma(p, internal);                                                     \
+#define BFN_PARSE_EMPTY(pragmaClass, parse, internal)                                        \
+    {                                                                                        \
+        auto p = new Pragma(pragmaClass::name, pragmaClass::description, pragmaClass::help); \
+        std::pair<std::string, P4::ParseAnnotations::Handler> h = parse(pragmaClass::name);  \
+        addHandler(h.first, h.second);                                                       \
+        Pragma::registerPragma(p, internal);                                                 \
     }
-
 
 /** Parses Barefoot-specific annotations. */
 class ParseAnnotations : public P4::ParseAnnotations {
  public:
-    ParseAnnotations() : P4::ParseAnnotations("BFN"_cs, true, {
-                // Ignore p4v annotations.
-                PARSE_SKIP("assert"_cs),
-                PARSE_SKIP("assume"_cs),
+    ParseAnnotations()
+        : P4::ParseAnnotations("BFN"_cs, true,
+                               {
+                                   // Ignore p4v annotations.
+                                   PARSE_SKIP("assert"_cs),
+                                   PARSE_SKIP("assume"_cs),
 
-                // Ignore p4runtime annotations
-                PARSE_SKIP("brief"_cs),
-                PARSE_SKIP("description"_cs),
+                                   // Ignore p4runtime annotations
+                                   PARSE_SKIP("brief"_cs),
+                                   PARSE_SKIP("description"_cs),
 
-                // Ignore unused annotations appearing in headers for v1model.
-                PARSE_SKIP("metadata"_cs),
-                PARSE_SKIP("alias"_cs),
-                PARSE_SKIP("pipeline"_cs),
-                PARSE_SKIP("deparser"_cs),
-            }, true) {
+                                   // Ignore unused annotations appearing in headers for v1model.
+                                   PARSE_SKIP("metadata"_cs),
+                                   PARSE_SKIP("alias"_cs),
+                                   PARSE_SKIP("pipeline"_cs),
+                                   PARSE_SKIP("deparser"_cs),
+                               },
+                               true) {
         constexpr bool extPragma = false;  // externally supported
         constexpr bool intPragma = true;   // Barefoot internal
         BFN_PARSE(PragmaAdjustByteCount, PARSE, Expression, intPragma);
@@ -141,9 +145,9 @@ class ParseAnnotations : public P4::ParseAnnotations {
         BFN_PARSE(PragmaYellow, PARSE, Expression, intPragma);
         BFN_PARSE(PragmaGreen, PARSE, Expression, intPragma);
         BFN_PARSE(PragmaMeterProfile, PARSE, Expression, extPragma);
-        BFN_PARSE_EMPTY(PragmaTrueEgressAccounting,  PARSE_EMPTY, extPragma);
+        BFN_PARSE_EMPTY(PragmaTrueEgressAccounting, PARSE_EMPTY, extPragma);
 
-        BFN_PARSE_EMPTY(PragmaHeaderChecksum,  PARSE_EMPTY, intPragma);
+        BFN_PARSE_EMPTY(PragmaHeaderChecksum, PARSE_EMPTY, intPragma);
         BFN_PARSE_EMPTY(PragmaPayloadChecksum, PARSE_EMPTY, intPragma);
 
         // pa_ pragmas
@@ -178,4 +182,4 @@ class ParseAnnotations : public P4::ParseAnnotations {
 
 }  // namespace BFN
 
-#endif /* EXTENSIONS_BF_P4C_COMMON_PARSE_ANNOTATIONS_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_COMMON_PARSE_ANNOTATIONS_H_ */

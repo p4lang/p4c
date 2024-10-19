@@ -13,13 +13,13 @@
 #ifndef BF_P4C_LOGGING_GROUP_CONSTRAINT_EXTRACTOR_H_
 #define BF_P4C_LOGGING_GROUP_CONSTRAINT_EXTRACTOR_H_
 
-#include <vector>
 #include <map>
 #include <set>
+#include <vector>
 
+#include "bf-p4c/logging/constrained_fields.h"
 #include "bf-p4c/phv/phv_fields.h"
 #include "bf-p4c/phv/utils/utils.h"
-#include "bf-p4c/logging/constrained_fields.h"
 
 class PhvInfo;
 
@@ -35,10 +35,10 @@ class GroupConstraintExtractor {
     std::map<cstring, std::set<unsigned>> fieldToGroupMap;  // Key is name of the field
 
     void processSlice(unsigned groupId, const PHV::FieldSlice &slice,
-                        const ConstrainedFieldMap &map);
+                      const ConstrainedFieldMap &map);
 
  public:
-    std::vector<const Group*> getGroups(const cstring &name) const;
+    std::vector<const Group *> getGroups(const cstring &name) const;
 
     // For a given field, check whether it is contained in any group
     bool isFieldInAnyGroup(const cstring &name) const;
@@ -55,8 +55,8 @@ class MauGroupExtractor : public GroupConstraintExtractor {
     bool superClusterContainsOnlySingleField(const PHV::SuperCluster *sc) const;
 
  public:
-    MauGroupExtractor(const std::list<PHV::SuperCluster*> &clusterGroups,
-                       const ConstrainedFieldMap &map);
+    MauGroupExtractor(const std::list<PHV::SuperCluster *> &clusterGroups,
+                      const ConstrainedFieldMap &map);
 };
 
 /**
@@ -67,8 +67,8 @@ class EquivalentAlignExtractor : public GroupConstraintExtractor {
     void processCluster(const PHV::AlignedCluster *cluster, const ConstrainedFieldMap &map);
 
  public:
-    EquivalentAlignExtractor(const std::list<PHV::SuperCluster*> &superclusters,
-                        const ConstrainedFieldMap &map);
+    EquivalentAlignExtractor(const std::list<PHV::SuperCluster *> &superclusters,
+                             const ConstrainedFieldMap &map);
 };
 
-#endif  /* BF_P4C_LOGGING_GROUP_CONSTRAINT_EXTRACTOR_H_ */
+#endif /* BF_P4C_LOGGING_GROUP_CONSTRAINT_EXTRACTOR_H_ */

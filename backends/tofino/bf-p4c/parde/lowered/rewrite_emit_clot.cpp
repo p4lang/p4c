@@ -14,7 +14,7 @@
 
 namespace Parde::Lowered {
 
-bool RewriteEmitClot::preorder(IR::BFN::Deparser* deparser) {
+bool RewriteEmitClot::preorder(IR::BFN::Deparser *deparser) {
     // Replace Emits covered in a CLOT with EmitClot
 
     IR::Vector<IR::BFN::Emit> newEmits;
@@ -38,8 +38,8 @@ bool RewriteEmitClot::preorder(IR::BFN::Deparser* deparser) {
     // There are many different orders in which the deparser could emit each field slice. For
     // example: ABCDEFGXY, AXYBCDEFG, AXBYCDEFG, AXBCDEFG, AXBYCDEFG, ABXYCDEFG, etc. All these
     // combinations would lead to the 3 stacks being emptied.
-    std::vector<std::stack<const PHV::FieldSlice*>> expectedNextSlices;
-    const Clot* lastClot = nullptr;
+    std::vector<std::stack<const PHV::FieldSlice *>> expectedNextSlices;
+    const Clot *lastClot = nullptr;
 
     LOG4("[RewriteEmitClot] Rewriting EmitFields and EmitChecksums as EmitClots for "
          << deparser->gress);
@@ -49,7 +49,7 @@ bool RewriteEmitClot::preorder(IR::BFN::Deparser* deparser) {
 
         // For each derived Emit class, assign the member that represents the field being
         // emitted to "source".
-        const IR::Expression* source = nullptr;
+        const IR::Expression *source = nullptr;
         if (auto emitField = emit->to<IR::BFN::EmitField>()) {
             source = emitField->source->field;
         } else if (auto emitChecksum = emit->to<IR::BFN::EmitChecksum>()) {
@@ -96,8 +96,8 @@ bool RewriteEmitClot::preorder(IR::BFN::Deparser* deparser) {
         // Handle any slices left over from the last emitted CLOT.
         if (!expectedNextSlices.empty()) {
             // The current slice being emitted had better line up with the next expected slice.
-            const PHV::FieldSlice* nextSlice = nullptr;
-            for (auto& stack : expectedNextSlices) {
+            const PHV::FieldSlice *nextSlice = nullptr;
+            for (auto &stack : expectedNextSlices) {
                 if (stack.top()->field() != field) continue;
 
                 BUG_CHECK(!(nextSlice != nullptr && *nextSlice != *stack.top()),
@@ -187,17 +187,18 @@ bool RewriteEmitClot::preorder(IR::BFN::Deparser* deparser) {
 
             nextFieldBit = firstSlice->range().lo - 1;
 
-            if (std::all_of(clotSlices.begin(), clotSlices.end(),
-                            [](std::pair<const cstring, std::vector<const PHV::FieldSlice*>> pair) {
-                                return pair.second.size() == 1;
-                            }))
+            if (std::all_of(
+                    clotSlices.begin(), clotSlices.end(),
+                    [](std::pair<const cstring, std::vector<const PHV::FieldSlice *>> pair) {
+                        return pair.second.size() == 1;
+                    }))
                 continue;
 
             // There are more slices in the CLOT. We had better be done with the current field.
             BUG_CHECK(nextFieldBit == -1, "%1% is missing slice %2%", *clot,
                       PHV::FieldSlice(field, StartLen(0, nextFieldBit + 1)).shortString());
 
-            for (const auto& kv : clotSlices) {
+            for (const auto &kv : clotSlices) {
                 // Don't add empty stacks to expectedNextSlices. A stack of size = 1 is
                 // considered empty since the element currently being processed will
                 // immediately be popped below.
@@ -205,7 +206,7 @@ bool RewriteEmitClot::preorder(IR::BFN::Deparser* deparser) {
 
                 // Make a std::deque that is a reversed copy of
                 // clot->parser_state_to_slices().second.
-                std::deque<const PHV::FieldSlice*> deq;
+                std::deque<const PHV::FieldSlice *> deq;
                 std::copy(kv.second.rbegin(), kv.second.rend(), std::back_inserter(deq));
                 deq.pop_back();
                 // The std::deque is used to construct a std::stack where the first field
@@ -232,7 +233,7 @@ bool RewriteEmitClot::preorder(IR::BFN::Deparser* deparser) {
             << "deparser before RewriteEmitClot: ";
         for (auto it = expectedNextSlices.rbegin(); it != expectedNextSlices.rend(); ++it) {
             if (it != expectedNextSlices.rbegin()) out << ", ";
-            std::stack<const PHV::FieldSlice*>& stack = *it;
+            std::stack<const PHV::FieldSlice *> &stack = *it;
             while (!stack.empty()) {
                 out << stack.top()->shortString();
                 if (stack.size() > 1) out << ", ";
@@ -242,7 +243,7 @@ bool RewriteEmitClot::preorder(IR::BFN::Deparser* deparser) {
         BUG("%s", out.str());
     }
     LOG4("Rewriting complete. Deparser emits for " << deparser->gress << " are now:");
-    for (const auto* emit : newEmits) LOG4("  " << emit);
+    for (const auto *emit : newEmits) LOG4("  " << emit);
 
     deparser->emits = newEmits;
     return false;

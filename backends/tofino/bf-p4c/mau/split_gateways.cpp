@@ -10,8 +10,9 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include "ir/ir.h"
 #include "split_gateways.h"
+
+#include "ir/ir.h"
 #include "lib/log.h"
 
 Visitor::profile_t SpreadGatewayAcrossSeq::init_apply(const IR::Node *root) {
@@ -27,7 +28,8 @@ const IR::Node *SpreadGatewayAcrossSeq::postorder(IR::MAU::Table *t) {
 #if 1
     if (!do_splitting) {
         prune();
-        return t; }
+        return t;
+    }
 #endif
     if (!t->uses_gateway()) return t;
     if (!t->conditional_gateway_only()) return t;
@@ -44,29 +46,30 @@ const IR::Node *SpreadGatewayAcrossSeq::postorder(IR::MAU::Table *t) {
                 snprintf(suffix, sizeof(suffix), ".%d", ++counter);
                 newtable = t->clone_rename(cstring(suffix));
                 newtable->next.clear();
-                rv->push_back(newtable); }
-            newtable->next[it->first] =
-                new IR::MAU::TableSeq(newtable->next[it->first], table);
-            if (uses.tables_modify(table) & uses.table_reads(t))
-                splitting = false; } }
-    if (rv->size() <= 1)
-        return t;
+                rv->push_back(newtable);
+            }
+            newtable->next[it->first] = new IR::MAU::TableSeq(newtable->next[it->first], table);
+            if (uses.tables_modify(table) & uses.table_reads(t)) splitting = false;
+        }
+    }
+    if (rv->size() <= 1) return t;
     for (int i = 1; i <= counter; i++) {
         snprintf(suffix, sizeof(suffix), ".%d", i);
-        uses.cloning_table(t->name, t->name + suffix); }
+        uses.cloning_table(t->name, t->name + suffix);
+    }
     return rv;
 }
 
 static void erase_unused_next(IR::MAU::Table *tbl) {
     BUG_CHECK(tbl->match_table == nullptr, "Can only run erase_unused_next on pure gateways");
     std::set<cstring> results;
-    for (auto &row : tbl->gateway_rows)
-        results.insert(row.second);
+    for (auto &row : tbl->gateway_rows) results.insert(row.second);
     for (auto it = tbl->next.begin(); it != tbl->next.end();) {
         if (results.count(it->first) == 0)
             it = tbl->next.erase(it);
         else
-            ++it; }
+            ++it;
+    }
 }
 
 namespace P4 {
@@ -76,7 +79,7 @@ std::ostream &operator<<(std::ostream &out,
     out << (p.second ? p.second : "_");
     return out;
 }
-}
+}  // namespace P4
 
 const IR::MAU::Table *SplitComplexGateways::preorder(IR::MAU::Table *tbl) {
     if (tbl->gateway_rows.empty()) return tbl;
@@ -102,6 +105,8 @@ const IR::MAU::Table *SplitComplexGateways::preorder(IR::MAU::Table *tbl) {
             tbl->next.emplace("$gwcont"_cs, new IR::MAU::TableSeq(rest));
             erase_unused_next(rest);
             erase_unused_next(tbl);
-            return tbl; } }
+            return tbl;
+        }
+    }
     return tbl;
 }

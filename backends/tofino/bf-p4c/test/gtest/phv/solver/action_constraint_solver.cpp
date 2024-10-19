@@ -11,7 +11,9 @@
  */
 
 #include "bf-p4c/phv/solver/action_constraint_solver.h"
+
 #include <exception>
+
 #include "gmock/gmock-matchers.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
@@ -29,7 +31,7 @@ TEST(action_constraint_solver, invalid_missing_container_spec) {
         solver.add_assign(make_container_operand("H1"_cs, StartLen(0, 3)),
                           make_container_operand("H2"_cs, StartLen(0, 3)));
         FAIL();
-    } catch (const Util::CompilerBug& e) {
+    } catch (const Util::CompilerBug &e) {
         EXPECT_THAT(e.what(), HasSubstr("container used missing spec: H2"));
     }
 }
@@ -42,7 +44,7 @@ TEST(action_constraint_solver, invalid_out_of_range_assign) {
         solver.add_assign(make_container_operand("H1"_cs, StartLen(0, 17)),
                           make_container_operand("H2"_cs, StartLen(0, 16)));
         FAIL();
-    } catch (const Util::CompilerBug& e) {
+    } catch (const Util::CompilerBug &e) {
         EXPECT_THAT(e.what(), HasSubstr("out of index range: H1 bit[16..0]"));
     }
 }
@@ -55,7 +57,7 @@ TEST(action_constraint_solver, invalid_range_not_equal) {
         solver.add_assign(make_container_operand("H1"_cs, StartLen(0, 3)),
                           make_container_operand("H2"_cs, StartLen(0, 4)));
         FAIL();
-    } catch (const Util::CompilerBug& e) {
+    } catch (const Util::CompilerBug &e) {
         EXPECT_THAT(e.what(), HasSubstr("assignment range mismatch: H1 bit[2..0] = H2 bit[3..0]"));
     }
 }
@@ -70,7 +72,7 @@ TEST(action_constraint_solver, invalid_assign_to_bits_not_live) {
         solver.add_assign(make_container_operand("H1"_cs, StartLen(0, 3)),
                           make_container_operand("H2"_cs, StartLen(0, 3)));
         FAIL();
-    } catch (const Util::CompilerBug& e) {
+    } catch (const Util::CompilerBug &e) {
         EXPECT_THAT(e.what(),
                     HasSubstr("container H1's 2th bit is not claimed live, but was set by "
                               "H1 bit[2..0] = H2 bit[2..0]"));
@@ -196,7 +198,8 @@ TEST(action_constraint_solver, wrap_around_1) {
     solver.set_container_spec("H1"_cs, 16, h1_live);
     solver.set_container_spec("H2"_cs, 16, bitvec());
     // [0:3] is used by other field.
-    // solver.add_assign(Operand{false, "H1"_cs, FromTo(0, 3)}, Operand{false, "H1"_cs, FromTo(0, 3)});
+    // solver.add_assign(Operand{false, "H1"_cs, FromTo(0, 3)}, Operand{false, "H1"_cs, FromTo(0,
+    // 3)});
     solver.add_assign(make_container_operand("H1"_cs, FromTo(4, 6)),
                       make_container_operand("H2"_cs, FromTo(3, 5)));
     auto rst = solver.solve();
@@ -208,7 +211,8 @@ TEST(action_constraint_solver, wrap_around_2) {
     auto solver = ActionMoveSolver();
     solver.set_container_spec("H1"_cs, 16, bitvec(0, 16));
     solver.set_container_spec("H2"_cs, 16, bitvec());
-    // solver.add_assign(Operand{false, "H1"_cs, FromTo(8, 9)}, Operand{false, "H1"_cs, FromTo(8, 9)});
+    // solver.add_assign(Operand{false, "H1"_cs, FromTo(8, 9)}, Operand{false, "H1"_cs, FromTo(8,
+    // 9)});
     solver.add_assign(make_container_operand("H1"_cs, FromTo(13, 14)),
                       make_container_operand("H2"_cs, FromTo(0, 1)));
     solver.add_assign(make_container_operand("H1"_cs, FromTo(15, 15)),
@@ -224,13 +228,11 @@ TEST(action_constraint_solver, wrap_around_3) {
     auto solver = ActionMoveSolver();
     solver.set_container_spec("H1"_cs, 16, bitvec(0, 16));
     solver.set_container_spec("H2"_cs, 16, bitvec());
-    // solver.add_assign(Operand{false, "H1"_cs, FromTo(8, 9)}, Operand{false, "H1"_cs, FromTo(8, 9)});
-    solver.add_assign(make_container_operand("H1"_cs, FromTo(13, 14)),
-                      make_ad_or_const_operand());
-    solver.add_assign(make_container_operand("H1"_cs, FromTo(15, 15)),
-                      make_ad_or_const_operand());
-    solver.add_assign(make_container_operand("H1"_cs, FromTo(11, 12)),
-                      make_ad_or_const_operand());
+    // solver.add_assign(Operand{false, "H1"_cs, FromTo(8, 9)}, Operand{false, "H1"_cs, FromTo(8,
+    // 9)});
+    solver.add_assign(make_container_operand("H1"_cs, FromTo(13, 14)), make_ad_or_const_operand());
+    solver.add_assign(make_container_operand("H1"_cs, FromTo(15, 15)), make_ad_or_const_operand());
+    solver.add_assign(make_container_operand("H1"_cs, FromTo(11, 12)), make_ad_or_const_operand());
     auto rst = solver.solve();
     EXPECT_TRUE(rst.ok());
 }
@@ -344,8 +346,7 @@ TEST(action_constraint_solver, unallocated_src_optimization_deposit_field_1) {
     auto solver = ActionMoveSolver();
     solver.set_container_spec("W0"_cs, 32, bitvec(0, 32));
     solver.add_src_unallocated_assign("W0"_cs, FromTo(0, 8));
-    solver.add_assign(make_container_operand("W0"_cs, FromTo(9, 15)),
-                      make_ad_or_const_operand());
+    solver.add_assign(make_container_operand("W0"_cs, FromTo(9, 15)), make_ad_or_const_operand());
     auto rst = solver.solve();
     EXPECT_FALSE(rst.ok());
 }
@@ -361,8 +362,7 @@ TEST(action_constraint_solver, unallocated_src_optimization_deposit_field_2) {
     solver.set_container_spec("W0"_cs, 32, bitvec(0, 32));
     solver.add_src_unallocated_assign("W0"_cs, FromTo(0, 3));
     solver.add_src_unallocated_assign("W0"_cs, FromTo(7, 8));
-    solver.add_assign(make_container_operand("W0"_cs, FromTo(9, 15)),
-                      make_ad_or_const_operand());
+    solver.add_assign(make_container_operand("W0"_cs, FromTo(9, 15)), make_ad_or_const_operand());
     auto rst = solver.solve();
     EXPECT_FALSE(rst.ok());
 }
@@ -376,10 +376,8 @@ TEST(action_constraint_solver, unallocated_src_optimization_byte_rotate_merge_ok
     solver.set_container_spec("W0"_cs, 32, bitvec(0, 32));
     solver.add_src_unallocated_assign("W0"_cs, FromTo(8, 15));
     solver.add_src_unallocated_assign("W0"_cs, FromTo(24, 31));
-    solver.add_assign(make_container_operand("W0"_cs, FromTo(0, 7)),
-                      make_ad_or_const_operand());
-    solver.add_assign(make_container_operand("W0"_cs, FromTo(16, 23)),
-                      make_ad_or_const_operand());
+    solver.add_assign(make_container_operand("W0"_cs, FromTo(0, 7)), make_ad_or_const_operand());
+    solver.add_assign(make_container_operand("W0"_cs, FromTo(16, 23)), make_ad_or_const_operand());
     auto rst = solver.solve();
     EXPECT_TRUE(rst.ok());
 }
@@ -395,10 +393,8 @@ TEST(action_constraint_solver, unallocated_src_optimization_byte_rotate_merge_ok
     solver.add_assign(make_container_operand("W0"_cs, FromTo(8, 15)),
                       make_container_operand("W1"_cs, FromTo(24, 31)));
     solver.add_src_unallocated_assign("W0"_cs, FromTo(24, 31));
-    solver.add_assign(make_container_operand("W0"_cs, FromTo(0, 7)),
-                      make_ad_or_const_operand());
-    solver.add_assign(make_container_operand("W0"_cs, FromTo(16, 23)),
-                      make_ad_or_const_operand());
+    solver.add_assign(make_container_operand("W0"_cs, FromTo(0, 7)), make_ad_or_const_operand());
+    solver.add_assign(make_container_operand("W0"_cs, FromTo(16, 23)), make_ad_or_const_operand());
     auto rst = solver.solve();
     EXPECT_TRUE(rst.ok());
 }
@@ -429,8 +425,7 @@ TEST(action_constraint_solver, mocha_solver) {
     // okay, full set, action data.
     solver.set_container_spec("W35"_cs, 32, bitvec());
     solver.set_container_spec("W0"_cs, 32, bitvec(0, 32));
-    solver.add_assign(make_container_operand("W0"_cs, FromTo(0, 31)),
-                      make_ad_or_const_operand());
+    solver.add_assign(make_container_operand("W0"_cs, FromTo(0, 31)), make_ad_or_const_operand());
     EXPECT_TRUE(solver.solve().ok());
     solver.clear();
 
@@ -462,8 +457,7 @@ TEST(action_constraint_solver, dark_solver) {
     auto solver = ActionDarkSolver();
     // not okay, action data source.
     solver.set_container_spec("W0"_cs, 32, bitvec(0, 32));
-    solver.add_assign(make_container_operand("W0"_cs, FromTo(0, 1)),
-                      make_ad_or_const_operand());
+    solver.add_assign(make_container_operand("W0"_cs, FromTo(0, 1)), make_ad_or_const_operand());
     EXPECT_FALSE(solver.solve().ok());
     solver.clear();
 
@@ -505,7 +499,5 @@ TEST(action_constraint_solver, dark_solver) {
     EXPECT_TRUE(solver.solve().ok());
     solver.clear();
 }
-
-
 
 }  // namespace P4::Test

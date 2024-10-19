@@ -12,12 +12,12 @@
 
 #include "error_type.h"
 
-#include <vector>
 #include <numeric>
+#include <vector>
 
 #include "lib/exceptions.h"
 
-void BFN::ErrorType::printWarningsHelp(std::ostream& out) {
+void BFN::ErrorType::printWarningsHelp(std::ostream &out) {
     std::vector<int> warningTypes;
 
     auto &catalog = ErrorCatalog::getCatalog();
@@ -33,12 +33,15 @@ void BFN::ErrorType::printWarningsHelp(std::ostream& out) {
     out << "These are supported warning types for --Werror and --Wdisable: ";
 
     auto helptext = std::accumulate(warningTypes.begin() + 1, warningTypes.end(),
-        std::string(catalog.getName(warningTypes.front()).c_str()),
-        [&catalog] (const std::string &r, int type) -> std::string {
-            return r + ", " + catalog.getName(type); });
+                                    std::string(catalog.getName(warningTypes.front()).c_str()),
+                                    [&catalog](const std::string &r, int type) -> std::string {
+                                        return r + ", " + catalog.getName(type);
+                                    });
 
     out << helptext << std::endl << std::endl;
 
     out << "You can provide one or more of these types as a "
-           "comma separated list to --Werror/--Wdisable options." << std::endl << std::endl;
+           "comma separated list to --Werror/--Wdisable options."
+        << std::endl
+        << std::endl;
 }

@@ -11,10 +11,11 @@
  */
 
 #include "bf-p4c/mau/gen_prim_json.h"
+
 #include "bf-p4c/mau/mau_visitor.h"
 
-Util::JsonObject *GeneratePrimitiveInfo::add_op_json(Util::JsonObject *prim,
-        const std::string op, const std::string type, cstring name) {
+Util::JsonObject *GeneratePrimitiveInfo::add_op_json(Util::JsonObject *prim, const std::string op,
+                                                     const std::string type, cstring name) {
     auto op_json = new Util::JsonObject();
     op_json->emplace("type"_cs, type);
     op_json->emplace("name"_cs, name);
@@ -23,7 +24,9 @@ Util::JsonObject *GeneratePrimitiveInfo::add_op_json(Util::JsonObject *prim,
 }
 
 Util::JsonObject *GeneratePrimitiveInfo::add_stful_op_json(Util::JsonObject *prim,
-        const std::string op, const std::string op_pfx, const std::string type, cstring name) {
+                                                           const std::string op,
+                                                           const std::string op_pfx,
+                                                           const std::string type, cstring name) {
     auto op_json = new Util::JsonObject();
     op_json->emplace(cstring(op_pfx + "_type"), type);
     op_json->emplace(cstring(op_pfx + "_value"), name);
@@ -32,8 +35,10 @@ Util::JsonObject *GeneratePrimitiveInfo::add_stful_op_json(Util::JsonObject *pri
 }
 
 void GeneratePrimitiveInfo::add_hash_dist_json(Util::JsonObject *_primitive,
-        const std::string prim_name, const std::string dst_type, const cstring dst_name,
-        const IR::Expression *dst, const IR::MAU::HashDist *hd) {
+                                               const std::string prim_name,
+                                               const std::string dst_type, const cstring dst_name,
+                                               const IR::Expression *dst,
+                                               const IR::MAU::HashDist *hd) {
     _primitive->emplace("name"_cs, prim_name);
     if (dst)
         validate_add_op_json(_primitive, "dst", dst);
@@ -55,8 +60,8 @@ void GeneratePrimitiveInfo::add_hash_dist_json(Util::JsonObject *_primitive,
     _primitive->emplace("hash_inputs"_cs, hash_inputs);
 }
 
-void
-GeneratePrimitiveInfo::add_primitive(Util::JsonArray *primitives, Util::JsonObject *primitive) {
+void GeneratePrimitiveInfo::add_primitive(Util::JsonArray *primitives,
+                                          Util::JsonObject *primitive) {
     if (!primitives) return;
     // TODO: Check if primitive already exists. For tables spanning
     // multiple stages, the same resource gets added as an attached resource
@@ -74,8 +79,8 @@ GeneratePrimitiveInfo::add_primitive(Util::JsonArray *primitives, Util::JsonObje
     if (!found) primitives->append(primitive);
 }
 
-void GeneratePrimitiveInfo::gen_action_json(const IR::MAU::Table *tbl,
-        const IR::MAU::Action *act, Util::JsonObject *_action) {
+void GeneratePrimitiveInfo::gen_action_json(const IR::MAU::Table *tbl, const IR::MAU::Action *act,
+                                            Util::JsonObject *_action) {
     LOG3("GeneratePrimitiveInfo Act: " << canon_name(act->name));
     auto _primitives = new Util::JsonArray();
     for (auto call : act->stateful_calls) {
@@ -94,7 +99,7 @@ void GeneratePrimitiveInfo::gen_action_json(const IR::MAU::Table *tbl,
             if (auto ci = call->index) {
                 if (auto hd = ci->to<IR::MAU::HashDist>()) {
                     add_hash_dist_json(_primitive, "ExecuteStatefulAluFromHashPrimitive",
-                        "stateful", canon_name(at->name), nullptr, hd);
+                                       "stateful", canon_name(at->name), nullptr, hd);
                 } else {
                     _primitive->emplace("name"_cs, "ExecuteStatefulAluPrimitive");
                     add_op_json(_primitive, "dst", "stateful", canon_name(salu->name));
@@ -116,8 +121,8 @@ void GeneratePrimitiveInfo::gen_action_json(const IR::MAU::Table *tbl,
                 for (auto &sact_inst : sact->action) {
                     std::string inst_name = sact_inst->name.c_str();
                     auto *sact_update = new Util::JsonObject();
-                    if (inst_name == "alu_a" || inst_name == "alu_b"
-                            || inst_name == "add" || inst_name == "sub") {
+                    if (inst_name == "alu_a" || inst_name == "alu_b" || inst_name == "add" ||
+                        inst_name == "sub") {
                         if (sact_inst->operands.size() == 2) {
                             auto src = sact_inst->operands[1];
                             auto src_string = src->toString();
@@ -127,7 +132,7 @@ void GeneratePrimitiveInfo::gen_action_json(const IR::MAU::Table *tbl,
                             } else if (auto *s = src->to<IR::MAU::SaluRegfileRow>()) {
                                 sact_update->emplace("operand_1_type"_cs, "register_param");
                                 sact_update->emplace("operand_1_value"_cs,
-                                    canon_name(s->externalName));
+                                                     canon_name(s->externalName));
                             } else if (phv.field(src_string)) {
                                 sact_update->emplace("operand_1_type"_cs, "phv");
                                 sact_update->emplace("operand_1_value"_cs, src_string);
@@ -145,7 +150,7 @@ void GeneratePrimitiveInfo::gen_action_json(const IR::MAU::Table *tbl,
                             } else if (auto *s = src1->to<IR::MAU::SaluRegfileRow>()) {
                                 sact_update->emplace("operand_1_type"_cs, "register_param");
                                 sact_update->emplace("operand_1_value"_cs,
-                                    canon_name(s->externalName));
+                                                     canon_name(s->externalName));
                             }
                             if (auto *k = src2->to<IR::Constant>()) {
                                 sact_update->emplace("operand_2_type"_cs, "immediate");
@@ -153,11 +158,11 @@ void GeneratePrimitiveInfo::gen_action_json(const IR::MAU::Table *tbl,
                             } else if (auto *s = src2->to<IR::MAU::SaluRegfileRow>()) {
                                 sact_update->emplace("operand_2_type"_cs, "register_param");
                                 sact_update->emplace("operand_2_value"_cs,
-                                    canon_name(s->externalName));
+                                                     canon_name(s->externalName));
                             } else if (auto phv_field = phv.field(src2)) {
                                 sact_update->emplace("operand_2_type"_cs, "phv");
                                 sact_update->emplace("operand_2_value"_cs,
-                                        canon_name(phv_field->externalName()));
+                                                     canon_name(phv_field->externalName()));
                             }
                         }
                         if (sact_inst->operands.size() > 1) {
@@ -173,9 +178,9 @@ void GeneratePrimitiveInfo::gen_action_json(const IR::MAU::Table *tbl,
                         if (sact_inst->operands.size() == 1) {
                             if (auto dst = sact_inst->operands[0]->to<IR::MAU::SaluReg>()) {
                                 sact_update->emplace("operand_1_type"_cs, "memory");
-                                auto dst_name = (dst->name == "alu_lo") ? "memory_lo" :
-                                                (dst->name == "alu_hi") ? "memory_hi" :
-                                                dst->name;
+                                auto dst_name = (dst->name == "alu_lo")   ? "memory_lo"
+                                                : (dst->name == "alu_hi") ? "memory_hi"
+                                                                          : dst->name;
                                 sact_update->emplace("operand_1_value"_cs, dst_name);
                                 salu_details->emplace("output_value"_cs, sact_update);
                             }
@@ -189,9 +194,9 @@ void GeneratePrimitiveInfo::gen_action_json(const IR::MAU::Table *tbl,
         auto *meter = at->to<IR::MAU::Meter>();
         if (meter) {
             if (is_hash_dist) {
-               add_hash_dist_json(_primitive, "ExecuteMeterFromHashPrimitive",
-                   "meter", canon_name(meter->name), nullptr, hd);
-               add_primitive(_primitives, _primitive);
+                add_hash_dist_json(_primitive, "ExecuteMeterFromHashPrimitive", "meter",
+                                   canon_name(meter->name), nullptr, hd);
+                add_primitive(_primitives, _primitive);
             } else {
                 _primitive->emplace("name"_cs, "ExecuteMeterPrimitive");
                 add_op_json(_primitive, "dst", "meter", canon_name(meter->name));
@@ -215,8 +220,8 @@ void GeneratePrimitiveInfo::gen_action_json(const IR::MAU::Table *tbl,
         auto *counter = at->to<IR::MAU::Counter>();
         if (counter) {
             if (is_hash_dist) {
-                add_hash_dist_json(_primitive, "CountFromHashPrimitive",
-                    "counter", canon_name(counter->name), nullptr, hd);
+                add_hash_dist_json(_primitive, "CountFromHashPrimitive", "counter",
+                                   canon_name(counter->name), nullptr, hd);
                 add_primitive(_primitives, _primitive);
             } else {
                 _primitive->emplace("name"_cs, "CountPrimitive");
@@ -226,29 +231,24 @@ void GeneratePrimitiveInfo::gen_action_json(const IR::MAU::Table *tbl,
         }
     }
 
-    std::vector<std::string> modifyPrimVec = { "set" };
-    std::vector<std::string> modifyCondPrimVec { "conditionally-set" };
-    std::vector<std::string> invalidatePrimVec = { "invalidate" };
-    std::vector<std::string> shiftPrimVec = { "shru", "shl", "shrs", "funnel-shift" };
+    std::vector<std::string> modifyPrimVec = {"set"};
+    std::vector<std::string> modifyCondPrimVec{"conditionally-set"};
+    std::vector<std::string> invalidatePrimVec = {"invalidate"};
+    std::vector<std::string> shiftPrimVec = {"shru", "shl", "shrs", "funnel-shift"};
     std::vector<std::string> directAluPrimVec = {
-        "add", "addc", "saddu", "sadds",
-        "and", "andca", "andcb", "nand",
-        "nor", "not", "or", "orca", "orcb",
-        "xnor", "xor", "maxu", "minu",
-        "sub", "subc", "ssubu", "ssubs" };
-    std::map<std::string, std::vector<std::string>* > prims = {
-        { "ModifyFieldPrimitive", &modifyPrimVec },
-        { "ModifyFieldConditionallyPrimitive", &modifyCondPrimVec },
-        { "InvalidatePrimitive", &invalidatePrimVec },
-        { "ShiftPrimitive", &shiftPrimVec },
-        { "DirectAluPrimitive", &directAluPrimVec }
-    };
+        "add",  "addc", "saddu", "sadds", "and",  "andca", "andcb", "nand", "nor",   "not",  "or",
+        "orca", "orcb", "xnor",  "xor",   "maxu", "minu",  "sub",   "subc", "ssubu", "ssubs"};
+    std::map<std::string, std::vector<std::string> *> prims = {
+        {"ModifyFieldPrimitive", &modifyPrimVec},
+        {"ModifyFieldConditionallyPrimitive", &modifyCondPrimVec},
+        {"InvalidatePrimitive", &invalidatePrimVec},
+        {"ShiftPrimitive", &shiftPrimVec},
+        {"DirectAluPrimitive", &directAluPrimVec}};
     for (auto inst : act->action) {
         auto _primitive = new Util::JsonObject();
         std::string inst_name = inst->name.c_str();
         bool skip_prim_check = false;
-        if ((inst_name == "set")
-                && (inst->operands.size() == 2)) {
+        if ((inst_name == "set") && (inst->operands.size() == 2)) {
             auto dst = inst->operands[0];
             cstring dst_name = inst->operands[0]->toString();
             auto src = inst->operands[1];
@@ -273,8 +273,8 @@ void GeneratePrimitiveInfo::gen_action_json(const IR::MAU::Table *tbl,
                     }
                 }
             } else if (auto hd = src->to<IR::MAU::HashDist>()) {
-                add_hash_dist_json(_primitive, "SetFieldToHashIndexPrimitive",
-                        "", canon_name(dst_name), dst, hd);
+                add_hash_dist_json(_primitive, "SetFieldToHashIndexPrimitive", "",
+                                   canon_name(dst_name), dst, hd);
                 skip_prim_check = true;
             }
         }
@@ -282,9 +282,9 @@ void GeneratePrimitiveInfo::gen_action_json(const IR::MAU::Table *tbl,
         if (!skip_prim_check) {
             for (auto &p : prims) {
                 auto pv = *p.second;
-                if (std::any_of(pv.begin(), pv.end(),
-                        [&inst_name](std::string const& elem) {
-                        return inst_name == elem; })) {
+                if (std::any_of(pv.begin(), pv.end(), [&inst_name](std::string const &elem) {
+                        return inst_name == elem;
+                    })) {
                     _primitive->emplace("name"_cs, p.first);
                     _primitive->emplace("operation"_cs, inst_name);
                     if (inst->operands.size() == 2) {
@@ -293,8 +293,7 @@ void GeneratePrimitiveInfo::gen_action_json(const IR::MAU::Table *tbl,
                             if (ao->attached->to<IR::MAU::StatefulAlu>()) {
                                 auto op0 = inst->operands[0];
                                 auto dst_op = op0->toString();
-                                if (auto *sl = op0->to<IR::Slice>())
-                                    dst_op = sl->e0->toString();
+                                if (auto *sl = op0->to<IR::Slice>()) dst_op = sl->e0->toString();
                                 cstring dst = cstring::to_cstring(canon_name(dst_op));
                                 // Add output_dst to previously added stateful
                                 // primitive
@@ -306,9 +305,8 @@ void GeneratePrimitiveInfo::gen_action_json(const IR::MAU::Table *tbl,
                                     auto _prim_o_name_val_str = _prim_o_name_val->getString();
                                     std::string sprim_1 = "ExecuteStatefulAluPrimitive";
                                     std::string sprim_2 = "ExecuteStatefulAluFromHashPrimitive";
-                                    bool stful_prim =
-                                        ((_prim_o_name_val_str == sprim_1) ||
-                                        (_prim_o_name_val_str == sprim_2));
+                                    bool stful_prim = ((_prim_o_name_val_str == sprim_1) ||
+                                                       (_prim_o_name_val_str == sprim_2));
                                     if (!stful_prim) continue;
                                     auto _salu_d = _prim_o->get("stateful_alu_details"_cs);
                                     if (_salu_d) {
@@ -332,8 +330,8 @@ void GeneratePrimitiveInfo::gen_action_json(const IR::MAU::Table *tbl,
                         if (inst_name == "invalidate") {
                             auto dst = inst->operands[0]->to<IR::Expression>();
                             if (auto phv_field = phv.field(dst)) {
-                                add_op_json(_primitive,
-                                        "dst", "phv", canon_name(phv_field->externalName()));
+                                add_op_json(_primitive, "dst", "phv",
+                                            canon_name(phv_field->externalName()));
                             }
                         }
                     }
@@ -342,7 +340,6 @@ void GeneratePrimitiveInfo::gen_action_json(const IR::MAU::Table *tbl,
             // Don't output operand json if instruction is a stateful destination,
             // this info goes within the stateful primitive evaluated above.
 
-
             if ((inst->operands.size() >= 2) && (!is_stful_dest)) {
                 // Add dst operands
                 auto dst = inst->operands[0]->to<IR::Expression>();
@@ -350,7 +347,7 @@ void GeneratePrimitiveInfo::gen_action_json(const IR::MAU::Table *tbl,
                 if (auto phv_field = phv.field(dst, &bits)) {
                     add_op_json(_primitive, "dst", "phv", canon_name(phv_field->externalName()));
                     add_op_json(_primitive, "dst_mask", "immediate",
-                            std::to_string((1ULL << bits.size()) - 1));
+                                std::to_string((1ULL << bits.size()) - 1));
                 }
 
                 if (inst->name == "conditionally-set") {
@@ -358,14 +355,20 @@ void GeneratePrimitiveInfo::gen_action_json(const IR::MAU::Table *tbl,
                     for (int idx = inst->operands.size() - 1; idx > 0; idx--) {
                         std::string src_name;
                         switch (iteration) {
-                            case 0: src_name = "cond"; break;
-                            case 1: src_name = "src1"; break;
-                            case 2: src_name = "src2"; break;
-                            default: BUG("Too many operands in a conditional-set");
+                            case 0:
+                                src_name = "cond";
+                                break;
+                            case 1:
+                                src_name = "src1";
+                                break;
+                            case 2:
+                                src_name = "src2";
+                                break;
+                            default:
+                                BUG("Too many operands in a conditional-set");
                         }
                         auto src = inst->operands.at(idx);
-                        if (iteration == 0)
-                            src = src->to<IR::MAU::ConditionalArg>()->orig_arg;
+                        if (iteration == 0) src = src->to<IR::MAU::ConditionalArg>()->orig_arg;
                         validate_add_op_json(_primitive, src_name, src);
                         iteration++;
                     }
@@ -392,15 +395,16 @@ void GeneratePrimitiveInfo::gen_action_json(const IR::MAU::Table *tbl,
 }
 
 void GeneratePrimitiveInfo::validate_add_op_json(Util::JsonObject *_primitive,
-        const std::string op_name, const IR::Expression *exp) {
+                                                 const std::string op_name,
+                                                 const IR::Expression *exp) {
     if (auto phv_field = phv.field(exp)) {
-         add_op_json(_primitive, op_name, "phv", canon_name(phv_field->externalName()));
-    } else  if (auto cnst = exp->to<IR::Constant>()) {
-         add_op_json(_primitive, op_name, "immediate", cnst->toString());
-     } else if (auto aarg = exp->to<IR::MAU::ActionArg>()) {
-         add_op_json(_primitive, op_name, "action_param", canon_name(aarg->name.toString()));
-     } else if (auto *sl = exp->to<IR::Slice>()) {
-         if (auto e0 = sl->e0) {
+        add_op_json(_primitive, op_name, "phv", canon_name(phv_field->externalName()));
+    } else if (auto cnst = exp->to<IR::Constant>()) {
+        add_op_json(_primitive, op_name, "immediate", cnst->toString());
+    } else if (auto aarg = exp->to<IR::MAU::ActionArg>()) {
+        add_op_json(_primitive, op_name, "action_param", canon_name(aarg->name.toString()));
+    } else if (auto *sl = exp->to<IR::Slice>()) {
+        if (auto e0 = sl->e0) {
             if (auto *ao = e0->to<IR::MAU::AttachedOutput>()) {
                 if (auto stful = ao->attached->to<IR::MAU::StatefulAlu>()) {
                     if (op_name == "dst")
@@ -408,14 +412,14 @@ void GeneratePrimitiveInfo::validate_add_op_json(Util::JsonObject *_primitive,
                     else
                         add_op_json(_primitive, op_name, "phv", canon_name(stful->name));
                 } else if (auto meter = ao->attached->to<IR::MAU::Meter>()) {
-                   if (op_name == "src1")
-                       add_op_json(_primitive, op_name, "action_param", canon_name(meter->name));
-                   else
-                       add_op_json(_primitive, op_name, "phv", canon_name(meter->name));
+                    if (op_name == "src1")
+                        add_op_json(_primitive, op_name, "action_param", canon_name(meter->name));
+                    else
+                        add_op_json(_primitive, op_name, "phv", canon_name(meter->name));
                 }
             }
-         }
-     }
+        }
+    }
 }
 
 bool GeneratePrimitiveInfo::preorder(const IR::MAU::Table *tbl) {

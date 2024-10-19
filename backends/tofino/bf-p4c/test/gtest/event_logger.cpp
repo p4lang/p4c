@@ -10,29 +10,26 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include <unistd.h>
-#include <fstream>
-#include "bf_gtest_helpers.h"
-#include "gtest/gtest.h"
 #include "bf-p4c/logging/event_logger.h"
-#include "lib/source_file.h"
-#include "frontends/parsers/parserDriver.h"
+
+#include <unistd.h>
+
+#include <fstream>
+
 #include "bf-p4c/bf-p4c-options.h"
+#include "bf_gtest_helpers.h"
+#include "frontends/parsers/parserDriver.h"
+#include "gtest/gtest.h"
+#include "lib/source_file.h"
 
 namespace P4::Test {
 class EventLoggerTestable : public EventLogger {
  private:
-    int getTimeDifference() const override {
-        return 0;
-    }
+    int getTimeDifference() const override { return 0; }
 
-    std::string getStartTimestamp() const override {
-        return "TIMESTAMP";
-    }
+    std::string getStartTimestamp() const override { return "TIMESTAMP"; }
 
-    std::ostream &getDebugStream(unsigned, const std::string &) const override {
-        return std::clog;
-    }
+    std::ostream &getDebugStream(unsigned, const std::string &) const override { return std::clog; }
 
  public:
     static EventLoggerTestable &get2() {
@@ -41,14 +38,12 @@ class EventLoggerTestable : public EventLogger {
     }
 
     static DebugHook getDebugHook2() {
-        return [] (const char *m, unsigned s, const char *p, const IR::Node*) {
+        return [](const char *m, unsigned s, const char *p, const IR::Node *) {
             get2().passChange(m, p, s);
         };
     }
 
-    void restore() {
-        EventLogger::nullInit();
-    }
+    void restore() { EventLogger::nullInit(); }
 };
 
 class EventLoggerTest : public ::testing::Test {
@@ -66,11 +61,21 @@ class EventLoggerTest : public ::testing::Test {
     const Util::SourceInfo srcInfo = program->objects[0]->srcInfo;
 
     const std::string SCHEMA_VERSION = R"("schema_version":"1.2.0")";
-    const std::string EVENT_IDS = R"("event_ids":["Properties","Pass Changed","Parse Error","Compilation Error","Compilation Warning","Debug","Decision","Pipe Changed","Iteration Changed"])";
-    const std::string DEFAULT_PROPERTIES = R"({"enabled":true,)" + EVENT_IDS + R"(,"file_ids":[],"i":0,"manager_ids":[],)" + SCHEMA_VERSION + R"(,"start_time":"TIMESTAMP"})";
-    const std::string DEFAULT_PROPERTIES_DISABLED = R"({"enabled":false,)" + EVENT_IDS + R"(,"file_ids":[],"i":0,"manager_ids":[],)" + SCHEMA_VERSION + R"(,"start_time":"TIMESTAMP"})";
-    const std::string PROPERTIES_WITH_FILE = R"({"enabled":true,)" + EVENT_IDS + R"(,"file_ids":["file.cpp"],"i":0,"manager_ids":[],)" + SCHEMA_VERSION + R"(,"start_time":"TIMESTAMP"})";
-    const std::string PROPERTIES_WITH_MGRS = R"({"enabled":true,)" + EVENT_IDS + R"(,"file_ids":[],"i":0,"manager_ids":["mgr","mgr2"],)" + SCHEMA_VERSION + R"(,"start_time":"TIMESTAMP"})";
+    const std::string EVENT_IDS =
+        R"("event_ids":["Properties","Pass Changed","Parse Error","Compilation Error","Compilation Warning","Debug","Decision","Pipe Changed","Iteration Changed"])";
+    const std::string DEFAULT_PROPERTIES = R"({"enabled":true,)" + EVENT_IDS +
+                                           R"(,"file_ids":[],"i":0,"manager_ids":[],)" +
+                                           SCHEMA_VERSION + R"(,"start_time":"TIMESTAMP"})";
+    const std::string DEFAULT_PROPERTIES_DISABLED =
+        R"({"enabled":false,)" + EVENT_IDS + R"(,"file_ids":[],"i":0,"manager_ids":[],)" +
+        SCHEMA_VERSION + R"(,"start_time":"TIMESTAMP"})";
+    const std::string PROPERTIES_WITH_FILE = R"({"enabled":true,)" + EVENT_IDS +
+                                             R"(,"file_ids":["file.cpp"],"i":0,"manager_ids":[],)" +
+                                             SCHEMA_VERSION + R"(,"start_time":"TIMESTAMP"})";
+    const std::string PROPERTIES_WITH_MGRS =
+        R"({"enabled":true,)" + EVENT_IDS +
+        R"(,"file_ids":[],"i":0,"manager_ids":["mgr","mgr2"],)" + SCHEMA_VERSION +
+        R"(,"start_time":"TIMESTAMP"})";
 
     void SetUp() {
         /**
@@ -102,12 +107,10 @@ class EventLoggerTest : public ::testing::Test {
         if (enable) EventLogger::get2().enable();
     }
 
-    void deinitLogger() {
-        EventLogger::get2().deinit();
-    }
+    void deinitLogger() { EventLogger::get2().deinit(); }
 
-    void compareFileWithExpected(std::ifstream& file,
-                                 const std::vector<std::string>& expectedLines) {
+    void compareFileWithExpected(std::ifstream &file,
+                                 const std::vector<std::string> &expectedLines) {
         {  // unpredicated inner scope for controlling the lifetime of the temporary
             std::string dev_null;
             std::getline(file, dev_null);  // throw away the first line [the one with the metadata]
@@ -141,9 +144,7 @@ TEST_F(EventLoggerTest, InitializedButDisabled) {
     std::ifstream load(PATH);
     EXPECT_TRUE(load.good());
 
-    std::vector<std::string> expectedLines = {
-        DEFAULT_PROPERTIES_DISABLED
-    };
+    std::vector<std::string> expectedLines = {DEFAULT_PROPERTIES_DISABLED};
     compareFileWithExpected(load, expectedLines);
 
     EXPECT_TRUE(load.eof());
@@ -171,9 +172,7 @@ TEST_F(EventLoggerTest, DoesNotExportEventsWhenDisabled) {
     std::ifstream load(PATH);
     EXPECT_TRUE(load.good());
 
-    std::vector<std::string> expectedLines = {
-        DEFAULT_PROPERTIES_DISABLED
-    };
+    std::vector<std::string> expectedLines = {DEFAULT_PROPERTIES_DISABLED};
     compareFileWithExpected(load, expectedLines);
 
     EXPECT_TRUE(load.eof());
@@ -186,9 +185,7 @@ TEST_F(EventLoggerTest, ExportsEnabledEventLogProperties) {
     std::ifstream load(PATH);
     EXPECT_TRUE(load.good());
 
-    std::vector<std::string> expectedLines = {
-        DEFAULT_PROPERTIES
-    };
+    std::vector<std::string> expectedLines = {DEFAULT_PROPERTIES};
     compareFileWithExpected(load, expectedLines);
 
     EXPECT_TRUE(load.eof());
@@ -206,8 +203,7 @@ TEST_F(EventLoggerTest, ExportsParserError) {
 
     std::vector<std::string> expectedLines = {
         R"({"i":2,"m":"Parser error","si":{"c":7,"f":0,"l":0,"p":"header hdr { bit<8> field; }\n       ^^^\n"},"t":0})",
-        PROPERTIES_WITH_FILE
-    };
+        PROPERTIES_WITH_FILE};
     compareFileWithExpected(load, expectedLines);
 
     EXPECT_TRUE(load.eof());
@@ -217,9 +213,9 @@ TEST_F(EventLoggerTest, ExportsEventCompilationError) {
     using Type = ErrorMessage::MessageType;
 
     ErrorMessage msg1(Type::Error, "", "Plain error", {}, "");
-    ErrorMessage msg2(Type::Error, "", "Error with srcinfo", { srcInfo}, "");
+    ErrorMessage msg2(Type::Error, "", "Error with srcinfo", {srcInfo}, "");
     ErrorMessage msg3(Type::Error, "type", "Error with type", {}, "");
-    ErrorMessage msg4(Type::Error, "type", "Error with type and srcinfo", { srcInfo }, "");
+    ErrorMessage msg4(Type::Error, "type", "Error with type and srcinfo", {srcInfo}, "");
     ErrorMessage msg5(Type::Error, "", "Error with suffix", {}, "suffix");
 
     initLogger();
@@ -239,8 +235,7 @@ TEST_F(EventLoggerTest, ExportsEventCompilationError) {
         R"({"i":3,"m":"Error with type","t":0,"cn":"type"})",
         R"({"i":3,"m":"Error with type and srcinfo","t":0,"cn":"type","si":[{"c":7,"f":0,"l":0,"p":"header hdr { bit<8> field; }\n       ^^^\n"}]})",
         R"({"i":3,"m":"Error with suffix","t":0,"a":"suffix"})",
-        PROPERTIES_WITH_FILE
-    };
+        PROPERTIES_WITH_FILE};
     compareFileWithExpected(load, expectedLines);
 
     EXPECT_TRUE(load.eof());
@@ -250,9 +245,9 @@ TEST_F(EventLoggerTest, ExportsEventCompilationWarning) {
     using Type = ErrorMessage::MessageType;
 
     ErrorMessage msg1(Type::Warning, "", "Plain warning", {}, "");
-    ErrorMessage msg2(Type::Warning, "", "Warning with srcinfo", { srcInfo}, "");
+    ErrorMessage msg2(Type::Warning, "", "Warning with srcinfo", {srcInfo}, "");
     ErrorMessage msg3(Type::Warning, "type", "Warning with type", {}, "");
-    ErrorMessage msg4(Type::Warning, "type", "Warning with type and srcinfo", { srcInfo }, "");
+    ErrorMessage msg4(Type::Warning, "type", "Warning with type and srcinfo", {srcInfo}, "");
     ErrorMessage msg5(Type::Warning, "", "Warning with suffix", {}, "suffix");
 
     initLogger();
@@ -272,8 +267,7 @@ TEST_F(EventLoggerTest, ExportsEventCompilationWarning) {
         R"({"i":4,"m":"Warning with type","t":0,"cn":"type"})",
         R"({"i":4,"m":"Warning with type and srcinfo","t":0,"cn":"type","si":[{"c":7,"f":0,"l":0,"p":"header hdr { bit<8> field; }\n       ^^^\n"}]})",
         R"({"i":4,"m":"Warning with suffix","t":0,"a":"suffix"})",
-        PROPERTIES_WITH_FILE
-    };
+        PROPERTIES_WITH_FILE};
     compareFileWithExpected(load, expectedLines);
 
     EXPECT_TRUE(load.eof());
@@ -287,10 +281,8 @@ TEST_F(EventLoggerTest, ExportsEventDebug) {
     std::ifstream load(PATH);
     EXPECT_TRUE(load.good());
 
-    std::vector<std::string> expectedLines = {
-        R"({"f":0,"i":5,"m":"Debug","t":0,"v":6})",
-        PROPERTIES_WITH_FILE
-    };
+    std::vector<std::string> expectedLines = {R"({"f":0,"i":5,"m":"Debug","t":0,"v":6})",
+                                              PROPERTIES_WITH_FILE};
     compareFileWithExpected(load, expectedLines);
 
     EXPECT_TRUE(load.eof());
@@ -306,8 +298,7 @@ TEST_F(EventLoggerTest, ExportsEventDecision) {
 
     std::vector<std::string> expectedLines = {
         R"({"d":"Picked decision","f":0,"i":6,"m":"Description","r":"Reason","t":0,"v":3})",
-        PROPERTIES_WITH_FILE
-    };
+        PROPERTIES_WITH_FILE};
     compareFileWithExpected(load, expectedLines);
 
     EXPECT_TRUE(load.eof());
@@ -327,11 +318,8 @@ TEST_F(EventLoggerTest, ExportsDeduplicatedPassChange) {
     EXPECT_TRUE(load.good());
 
     std::vector<std::string> expectedLines = {
-        R"({"i":1,"mgr":0,"n":"pass","s":0,"t":0})",
-        R"({"i":1,"mgr":0,"n":"pass2","s":1,"t":0})",
-        R"({"i":1,"mgr":1,"n":"pass","s":0,"t":0})",
-        PROPERTIES_WITH_MGRS
-    };
+        R"({"i":1,"mgr":0,"n":"pass","s":0,"t":0})", R"({"i":1,"mgr":0,"n":"pass2","s":1,"t":0})",
+        R"({"i":1,"mgr":1,"n":"pass","s":0,"t":0})", PROPERTIES_WITH_MGRS};
     compareFileWithExpected(load, expectedLines);
 
     EXPECT_TRUE(load.eof());
@@ -345,10 +333,7 @@ TEST_F(EventLoggerTest, ExportsPipeChange) {
     std::ifstream load(PATH);
     EXPECT_TRUE(load.good());
 
-    std::vector<std::string> expectedLines = {
-        R"({"i":7,"pipe":1,"t":0})",
-        DEFAULT_PROPERTIES
-    };
+    std::vector<std::string> expectedLines = {R"({"i":7,"pipe":1,"t":0})", DEFAULT_PROPERTIES};
     compareFileWithExpected(load, expectedLines);
 
     EXPECT_TRUE(load.eof());
@@ -363,11 +348,9 @@ TEST_F(EventLoggerTest, ExportsIterationChange) {
     std::ifstream load(PATH);
     EXPECT_TRUE(load.good());
 
-    std::vector<std::string> expectedLines = {
-        R"({"i":8,"num":1,"phase":"phv_allocation","t":0})",
-        R"({"i":8,"num":2,"phase":"table_placement","t":0})",
-        DEFAULT_PROPERTIES
-    };
+    std::vector<std::string> expectedLines = {R"({"i":8,"num":1,"phase":"phv_allocation","t":0})",
+                                              R"({"i":8,"num":2,"phase":"table_placement","t":0})",
+                                              DEFAULT_PROPERTIES};
     compareFileWithExpected(load, expectedLines);
 
     EXPECT_TRUE(load.eof());

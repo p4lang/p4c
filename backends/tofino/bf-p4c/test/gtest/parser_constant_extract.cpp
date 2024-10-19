@@ -11,19 +11,20 @@
  */
 
 #include <optional>
-#include <boost/algorithm/string/replace.hpp>
-#include "gtest/gtest.h"
 
-#include "ir/ir.h"
-#include "lib/cstring.h"
-#include "lib/error.h"
-#include "test/gtest/helpers.h"
-#include "bf-p4c/common/field_defuse.h"
+#include <boost/algorithm/string/replace.hpp>
+
 #include "bf-p4c/common/elim_unused.h"
+#include "bf-p4c/common/field_defuse.h"
 #include "bf-p4c/lib/union_find.hpp"
 #include "bf-p4c/phv/parde_phv_constraints.h"
 #include "bf-p4c/phv/phv_fields.h"
 #include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "gtest/gtest.h"
+#include "ir/ir.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "test/gtest/helpers.h"
 
 // Changes related to inserting parser states might break
 // these tests.
@@ -34,8 +35,8 @@ class ParserConstantExtractTest : public TofinoBackendTest {};
 
 namespace {
 
-std::optional<TofinoPipeTestCase>
-createParserConstantExtractTestCase(const std::string& parserSource) {
+std::optional<TofinoPipeTestCase> createParserConstantExtractTestCase(
+    const std::string &parserSource) {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
         header H1
         {
@@ -72,7 +73,7 @@ createParserConstantExtractTestCase(const std::string& parserSource) {
 
     boost::replace_first(source, "%PARSER_SOURCE%", parserSource);
 
-    auto& options = BackendOptions();
+    auto &options = BackendOptions();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.target = "tofino"_cs;
     options.arch = "v1model"_cs;
@@ -84,8 +85,7 @@ createParserConstantExtractTestCase(const std::string& parserSource) {
 }  // namespace
 
 TEST_F(ParserConstantExtractTest, Test1) {
-    auto test = createParserConstantExtractTestCase(
-        P4_SOURCE(P4Headers::NONE, R"(
+    auto test = createParserConstantExtractTestCase(P4_SOURCE(P4Headers::NONE, R"(
 
 state start {
     packet.extract(headers.h1);
@@ -142,25 +142,22 @@ state parse6 {
     // ingress and egress should be the same here
     PhvInfo phv;
 
-    PassManager quick_backend = {
-        new CollectHeaderStackInfo,
-        new CollectPhvInfo(phv),
-        new TofinoParserConstantExtract(phv)
-    };
+    PassManager quick_backend = {new CollectHeaderStackInfo, new CollectPhvInfo(phv),
+                                 new TofinoParserConstantExtract(phv)};
 
     test->pipe->apply(quick_backend);
 
-    const auto& unionFind = phv.getSameSetConstantExtraction();
-    PHV::Field* v1 = phv.field("ingress::h1.$valid"_cs);
-    PHV::Field* v2 = phv.field("ingress::h2.$valid"_cs);
-    PHV::Field* v3 = phv.field("ingress::h3.$valid"_cs);
-    PHV::Field* v4 = phv.field("ingress::h4.$valid"_cs);
-    PHV::Field* v5 = phv.field("ingress::h5.$valid"_cs);
-    PHV::Field* v6 = phv.field("ingress::h6.$valid"_cs);
-    PHV::Field* v7 = phv.field("ingress::h7.$valid"_cs);
-    PHV::Field* v8 = phv.field("ingress::h8.$valid"_cs);
-    PHV::Field* v9 = phv.field("ingress::h9.$valid"_cs);
-    PHV::Field* v10 = phv.field("ingress::h10.$valid"_cs);
+    const auto &unionFind = phv.getSameSetConstantExtraction();
+    PHV::Field *v1 = phv.field("ingress::h1.$valid"_cs);
+    PHV::Field *v2 = phv.field("ingress::h2.$valid"_cs);
+    PHV::Field *v3 = phv.field("ingress::h3.$valid"_cs);
+    PHV::Field *v4 = phv.field("ingress::h4.$valid"_cs);
+    PHV::Field *v5 = phv.field("ingress::h5.$valid"_cs);
+    PHV::Field *v6 = phv.field("ingress::h6.$valid"_cs);
+    PHV::Field *v7 = phv.field("ingress::h7.$valid"_cs);
+    PHV::Field *v8 = phv.field("ingress::h8.$valid"_cs);
+    PHV::Field *v9 = phv.field("ingress::h9.$valid"_cs);
+    PHV::Field *v10 = phv.field("ingress::h10.$valid"_cs);
 
     // Check that the field objects are correctly referenced.
     EXPECT_TRUE(v1);
@@ -188,8 +185,8 @@ state parse6 {
     EXPECT_FALSE(phv.hasParserConstantExtract(v10));
 
     // Check set membership for each of the fields.
-    const auto& s1 = unionFind.setOf(v1);
-    const auto& s2 = unionFind.setOf(v2);
+    const auto &s1 = unionFind.setOf(v1);
+    const auto &s2 = unionFind.setOf(v2);
     EXPECT_EQ(1U, s1.count(v2));
     EXPECT_EQ(1U, s2.count(v1));
     EXPECT_EQ(0U, s1.count(v3));
@@ -200,14 +197,14 @@ state parse6 {
     EXPECT_EQ(0U, s2.count(v6));
     EXPECT_EQ(0U, s2.count(v8));
     EXPECT_EQ(0U, s2.count(v10));
-    const auto& s3 = unionFind.setOf(v3);
-    const auto& s4 = unionFind.setOf(v4);
-    const auto& s5 = unionFind.setOf(v5);
-    const auto& s6 = unionFind.setOf(v6);
-    const auto& s7 = unionFind.setOf(v7);
-    const auto& s8 = unionFind.setOf(v8);
-    const auto& s9 = unionFind.setOf(v9);
-    const auto& s10 = unionFind.setOf(v10);
+    const auto &s3 = unionFind.setOf(v3);
+    const auto &s4 = unionFind.setOf(v4);
+    const auto &s5 = unionFind.setOf(v5);
+    const auto &s6 = unionFind.setOf(v6);
+    const auto &s7 = unionFind.setOf(v7);
+    const auto &s8 = unionFind.setOf(v8);
+    const auto &s9 = unionFind.setOf(v9);
+    const auto &s10 = unionFind.setOf(v10);
     EXPECT_EQ(1U, s3.count(v4));
     EXPECT_EQ(1U, s4.count(v3));
     EXPECT_EQ(1U, s5.count(v6));

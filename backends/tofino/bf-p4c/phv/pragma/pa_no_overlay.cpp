@@ -12,13 +12,13 @@
 
 #include "bf-p4c/phv/pragma/pa_no_overlay.h"
 
-#include <string>
 #include <numeric>
+#include <string>
 
-#include "lib/log.h"
+#include "bf-p4c/arch/bridge_metadata.h"
 #include "bf-p4c/common/utils.h"
 #include "bf-p4c/phv/pragma/phv_pragmas.h"
-#include "bf-p4c/arch/bridge_metadata.h"
+#include "lib/log.h"
 
 /// BFN::Pragma interface
 const char *PragmaNoOverlay::name = "pa_no_overlay";
@@ -36,31 +36,31 @@ const char *PragmaNoOverlay::help =
     " other field in the group."
     "The gress value can be either ingress or egress. ";
 
-bool PragmaNoOverlay::preorder(const IR::MAU::Instruction* inst) {
+bool PragmaNoOverlay::preorder(const IR::MAU::Instruction *inst) {
     // TODO: Until we handle concat operations in the backend properly (by adding metadata
     // fields with concat operations to a slice list, also containing padding fields that must be
     // initialized to 0), we have to disable overlay for any field used in concat operations (concat
     // operations that survive in the backend).
     if (inst->operands.empty()) return true;
-    for (auto* operand : inst->operands) {
+    for (auto *operand : inst->operands) {
         if (!operand->is<IR::Concat>()) continue;
-        const PHV::Field* f = phv_i.field(operand);
+        const PHV::Field *f = phv_i.field(operand);
         if (f) {
             no_overlay.insert(f);
-            LOG1("\tAdding pa_no_overlay on " << f->name << " because of a concat "
-                 "operation.");
+            LOG1("\tAdding pa_no_overlay on " << f->name
+                                              << " because of a concat "
+                                                 "operation.");
         }
     }
     return true;
 }
 
-bool PragmaNoOverlay::preorder(const IR::BFN::Pipe* pipe) {
+bool PragmaNoOverlay::preorder(const IR::BFN::Pipe *pipe) {
     auto global_pragmas = pipe->global_pragmas;
-    for (const auto* annotation : global_pragmas) {
-        if (annotation->name.name != PragmaNoOverlay::name)
-            continue;
+    for (const auto *annotation : global_pragmas) {
+        if (annotation->name.name != PragmaNoOverlay::name) continue;
 
-        auto& exprs = annotation->expr;
+        auto &exprs = annotation->expr;
 
         if (!PHV::Pragmas::checkStringLiteralArgs(exprs)) {
             continue;
@@ -72,14 +72,14 @@ bool PragmaNoOverlay::preorder(const IR::BFN::Pipe* pipe) {
         const IR::StringLiteral *pipe_arg = nullptr;
         const IR::StringLiteral *gress_arg = nullptr;
 
-        if (!PHV::Pragmas::determinePipeGressArgs(exprs, expr_index,
-                required_arguments, pipe_arg, gress_arg)) {
+        if (!PHV::Pragmas::determinePipeGressArgs(exprs, expr_index, required_arguments, pipe_arg,
+                                                  gress_arg)) {
             continue;
         }
 
-        if (!PHV::Pragmas::checkNumberArgs(annotation, required_arguments,
-                min_required_arguments, false, cstring(PragmaNoOverlay::name),
-                "`gress', `field'"_cs)) {
+        if (!PHV::Pragmas::checkNumberArgs(annotation, required_arguments, min_required_arguments,
+                                           false, cstring(PragmaNoOverlay::name),
+                                           "`gress', `field'"_cs)) {
             continue;
         }
 
@@ -88,17 +88,17 @@ bool PragmaNoOverlay::preorder(const IR::BFN::Pipe* pipe) {
         }
 
         // Extract the rest of the arguments
-        std::vector<const IR::StringLiteral*> field_irs;
+        std::vector<const IR::StringLiteral *> field_irs;
         for (; expr_index < exprs.size(); ++expr_index) {
-            const IR::StringLiteral* name = exprs[expr_index]->to<IR::StringLiteral>();
+            const IR::StringLiteral *name = exprs[expr_index]->to<IR::StringLiteral>();
             field_irs.push_back(name);
         }
 
         bool processPragma = true;
-        std::vector<const PHV::Field*> fields;
-        for (const auto* field_ir : field_irs) {
+        std::vector<const PHV::Field *> fields;
+        for (const auto *field_ir : field_irs) {
             cstring field_name = gress_arg->value + "::"_cs + field_ir->value;
-            const auto* field = phv_i.field(field_name);
+            const auto *field = phv_i.field(field_name);
             if (!field) {
                 PHV::Pragmas::reportNoMatchingPHV(pipe, field_ir, field_name);
                 processPragma = false;
@@ -113,8 +113,8 @@ bool PragmaNoOverlay::preorder(const IR::BFN::Pipe* pipe) {
         } else {
             for (size_t i = 0; i < fields.size(); i++) {
                 for (size_t j = i + 1; j < fields.size(); j++) {
-                    const auto* f1 = fields[i];
-                    const auto* f2 = fields[j];
+                    const auto *f1 = fields[i];
+                    const auto *f2 = fields[j];
                     mutually_inclusive(f1->id, f2->id) = true;
                 }
             }
@@ -124,10 +124,10 @@ bool PragmaNoOverlay::preorder(const IR::BFN::Pipe* pipe) {
     // TODO tmp workaround to disable bridged residual checksum fields from being
     // overlaid. Proper bridged metadata overlay requires mutex analysis on ingress and
     // coordination of ingress deparser and egress parser (TODO).
-    for (auto& nf : phv_i.get_all_fields()) {
+    for (auto &nf : phv_i.get_all_fields()) {
         std::string f_name(nf.first.c_str());
-        if (f_name.find(BFN::COMPILER_META) != std::string::npos
-         && f_name.find("residual_checksum_") != std::string::npos) {
+        if (f_name.find(BFN::COMPILER_META) != std::string::npos &&
+            f_name.find("residual_checksum_") != std::string::npos) {
             no_overlay.insert(&nf.second);
         }
     }
@@ -135,13 +135,13 @@ bool PragmaNoOverlay::preorder(const IR::BFN::Pipe* pipe) {
     return true;
 }
 
-std::ostream& operator<<(std::ostream& out, const PragmaNoOverlay& pa_no) {
+std::ostream &operator<<(std::ostream &out, const PragmaNoOverlay &pa_no) {
     std::stringstream logs;
-    for (auto* f : pa_no.get_no_overlay_fields())
-        logs << "@pa_no_overlay specifies that " << f->name << " should not be overlaid" <<
-            std::endl;
-    for (const auto& f1 : pa_no.phv_i) {
-        for (const auto& f2 : pa_no.phv_i) {
+    for (auto *f : pa_no.get_no_overlay_fields())
+        logs << "@pa_no_overlay specifies that " << f->name << " should not be overlaid"
+             << std::endl;
+    for (const auto &f1 : pa_no.phv_i) {
+        for (const auto &f2 : pa_no.phv_i) {
             if (f1 != f2 && pa_no.mutually_inclusive(f1.id, f2.id)) {
                 logs << "@pa_no_overlay specifies that " << f1.name << " and " << f2.name
                      << " should not be overlaid\n";

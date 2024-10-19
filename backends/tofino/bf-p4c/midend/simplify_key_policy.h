@@ -19,15 +19,13 @@ namespace BFN {
 
 class IsPhase0 : public P4::KeyIsSimple {
  public:
-    IsPhase0() { }
+    IsPhase0() {}
 
     bool isSimple(const IR::Expression *, const Visitor::Context *ctxt) override {
         while (true) {
-            if (ctxt == nullptr)
-                return false;
+            if (ctxt == nullptr) return false;
             auto *n = ctxt->node;
-            if (n->is<IR::P4Program>())
-                return false;
+            if (n->is<IR::P4Program>()) return false;
             if (auto table = n->to<IR::P4Table>()) {
                 auto annot = table->getAnnotations();
                 if (annot->getSingle("phase0"_cs)) {
@@ -43,15 +41,13 @@ class IsPhase0 : public P4::KeyIsSimple {
 
 class IsSlice : public P4::KeyIsSimple {
  public:
-    IsSlice() { }
+    IsSlice() {}
 
     bool isSimple(const IR::Expression *expr, const Visitor::Context *) override {
         auto slice = expr->to<IR::Slice>();
-        if (!slice)
-            return false;
+        if (!slice) return false;
         auto *e = slice->e0;
-        while (e->is<IR::Member>())
-            e = e->to<IR::Member>()->expr;
+        while (e->is<IR::Member>()) e = e->to<IR::Member>()->expr;
         return e->to<IR::PathExpression>() != nullptr;
     }
 };
@@ -78,15 +74,13 @@ class IsSliceMask : public P4::IsMask {
 class KeyIsSimple {
  public:
     static P4::KeyIsSimple *getPolicy(P4::TypeMap &typeMap) {
-        return
-            new P4::OrPolicy(
-                new P4::OrPolicy(
-                    new P4::OrPolicy(new P4::IsValid(&typeMap), new P4::IsMask()),
-                    new BFN::IsPhase0()),
-                new P4::OrPolicy(new BFN::IsSlice(), new BFN::IsSliceMask()));
+        return new P4::OrPolicy(
+            new P4::OrPolicy(new P4::OrPolicy(new P4::IsValid(&typeMap), new P4::IsMask()),
+                             new BFN::IsPhase0()),
+            new P4::OrPolicy(new BFN::IsSlice(), new BFN::IsSliceMask()));
     }
 };
 
 }  // namespace BFN
 
-#endif  /* BF_P4C_MIDEND_SIMPLIFY_KEY_POLICY_H_ */
+#endif /* BF_P4C_MIDEND_SIMPLIFY_KEY_POLICY_H_ */

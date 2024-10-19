@@ -14,7 +14,7 @@
 
 namespace Parde::Lowered {
 
-IR::BFN::ParserState* SplitGreedyParserStates::split_state(IR::BFN::ParserState* state,
+IR::BFN::ParserState *SplitGreedyParserStates::split_state(IR::BFN::ParserState *state,
                                                            cstring new_state_name) {
     LOG4("  Greedy split for state " << state->name << " --> " << new_state_name);
     IR::Vector<IR::BFN::ParserPrimitive> first_statements;
@@ -69,15 +69,15 @@ IR::BFN::ParserState* SplitGreedyParserStates::split_state(IR::BFN::ParserState*
     // Create next_state guaranteed to have partial_hdr_err_proc compatible with
     // each other.
     //
-    IR::BFN::ParserState* next_state = new IR::BFN::ParserState(
+    IR::BFN::ParserState *next_state = new IR::BFN::ParserState(
         new_state_name, state->gress, IR::Vector<IR::BFN::ParserPrimitive>(),
         IR::Vector<IR::BFN::Select>(), IR::Vector<IR::BFN::Transition>());
 
     // Add statements to next state, while adjusting range values
     // when required.
-    for (auto& statement : next_state_statements) {
-        if (auto* extract = statement->to<IR::BFN::Extract>()) {
-            if (auto* pkt_rval = extract->source->to<IR::BFN::PacketRVal>()) {
+    for (auto &statement : next_state_statements) {
+        if (auto *extract = statement->to<IR::BFN::Extract>()) {
+            if (auto *pkt_rval = extract->source->to<IR::BFN::PacketRVal>()) {
                 LOG4("  Adjusting extract from ["
                      << pkt_rval->range.lo << ".." << pkt_rval->range.hi << "] to ["
                      << pkt_rval->range.lo - new_transitions_shift_bits << ".."
@@ -96,8 +96,8 @@ IR::BFN::ParserState* SplitGreedyParserStates::split_state(IR::BFN::ParserState*
 
     // Add selects to next state and adjust ranges.
     for (auto select : state->selects) {
-        if (auto* saved = select->source->to<IR::BFN::SavedRVal>()) {
-            if (auto* pkt_rval = saved->source->to<IR::BFN::PacketRVal>()) {
+        if (auto *saved = select->source->to<IR::BFN::SavedRVal>()) {
+            if (auto *pkt_rval = saved->source->to<IR::BFN::PacketRVal>()) {
                 LOG4("  Adjusting select from ["
                      << pkt_rval->range.lo << ".." << pkt_rval->range.hi << "] to ["
                      << pkt_rval->range.lo - new_transitions_shift_bits << ".."
@@ -128,18 +128,19 @@ IR::BFN::ParserState* SplitGreedyParserStates::split_state(IR::BFN::ParserState*
     // might not be all compatible at this point, if that's the case this is going
     // to be fixed on the next iteration.
     //
-    IR::BFN::Transition* new_transition =
+    IR::BFN::Transition *new_transition =
         new IR::BFN::Transition(match_t(), new_transitions_shift_bits >> 3, next_state);
-    IR::BFN::ParserState* new_state = new IR::BFN::ParserState(
+    IR::BFN::ParserState *new_state = new IR::BFN::ParserState(
         state->name, state->gress, new_state_statements, IR::Vector<IR::BFN::Select>(),
         IR::Vector<IR::BFN::Transition>(new_transition));
     return new_state;
 }
 
-void SplitGreedyParserStates::split_statements(
-    const IR::Vector<IR::BFN::ParserPrimitive> in, IR::Vector<IR::BFN::ParserPrimitive>& first,
-    IR::Vector<IR::BFN::ParserPrimitive>& last, int& last_statements_shift_bit,
-    std::optional<bool>& last_statements_partial_proc) {
+void SplitGreedyParserStates::split_statements(const IR::Vector<IR::BFN::ParserPrimitive> in,
+                                               IR::Vector<IR::BFN::ParserPrimitive> &first,
+                                               IR::Vector<IR::BFN::ParserPrimitive> &last,
+                                               int &last_statements_shift_bit,
+                                               std::optional<bool> &last_statements_partial_proc) {
     std::optional<bool> curr_partial_proc = std::nullopt;
     int curr_statements_shift_bit = 0;
 
@@ -149,9 +150,9 @@ void SplitGreedyParserStates::split_statements(
     last_statements_partial_proc = std::nullopt;
 
     for (auto statement : in) {
-        if (auto* extract = statement->to<IR::BFN::Extract>()) {
+        if (auto *extract = statement->to<IR::BFN::Extract>()) {
             // Look for change in partial_hdr_err_proc compared to the previous value.
-            if (auto* pkt_rval = extract->source->to<IR::BFN::PacketRVal>()) {
+            if (auto *pkt_rval = extract->source->to<IR::BFN::PacketRVal>()) {
                 bool extract_partial_hdr_proc = pkt_rval->partial_hdr_err_proc;
                 if (!curr_partial_proc || (extract_partial_hdr_proc != *curr_partial_proc)) {
                     first.append(last);
@@ -186,16 +187,16 @@ void SplitGreedyParserStates::split_statements(
 }
 
 bool SplitGreedyParserStates::partial_hdr_err_proc_verify(
-    const IR::Vector<IR::BFN::ParserPrimitive>* statements,
-    const IR::Vector<IR::BFN::Select>* selects, const IR::Vector<IR::BFN::Transition>* transitions,
-    std::optional<bool>* partial_proc_value = nullptr) {
+    const IR::Vector<IR::BFN::ParserPrimitive> *statements,
+    const IR::Vector<IR::BFN::Select> *selects, const IR::Vector<IR::BFN::Transition> *transitions,
+    std::optional<bool> *partial_proc_value = nullptr) {
     std::optional<bool> value = std::nullopt;
     if (partial_proc_value) *partial_proc_value = std::nullopt;
 
     if (statements) {
         for (auto statement : *statements) {
-            if (auto* extract = statement->to<IR::BFN::Extract>())
-                if (auto* pkt_rval = extract->source->to<IR::BFN::PacketRVal>()) {
+            if (auto *extract = statement->to<IR::BFN::Extract>())
+                if (auto *pkt_rval = extract->source->to<IR::BFN::PacketRVal>()) {
                     auto v = pkt_rval->partial_hdr_err_proc;
                     if (value && *value != v) return false;
                     value = v;
@@ -205,8 +206,8 @@ bool SplitGreedyParserStates::partial_hdr_err_proc_verify(
 
     if (selects) {
         for (auto select : *selects) {
-            if (auto* saved = select->source->to<IR::BFN::SavedRVal>())
-                if (auto* pkt_rval = saved->source->to<IR::BFN::PacketRVal>()) {
+            if (auto *saved = select->source->to<IR::BFN::SavedRVal>())
+                if (auto *pkt_rval = saved->source->to<IR::BFN::PacketRVal>()) {
                     auto v = pkt_rval->partial_hdr_err_proc;
                     if (value && *value != v) return false;
                     value = v;
@@ -234,8 +235,8 @@ bool SplitGreedyParserStates::partial_hdr_err_proc_verify(
     return true;
 }
 
-bool SplitGreedyParserStates::state_pkt_too_short_verify(const IR::BFN::ParserState* state,
-                                                         bool& select_args_incompatible) {
+bool SplitGreedyParserStates::state_pkt_too_short_verify(const IR::BFN::ParserState *state,
+                                                         bool &select_args_incompatible) {
     select_args_incompatible = false;
     if (state->selects.size()) {
         // Look for incompatibility in select arguments.
@@ -259,7 +260,7 @@ bool SplitGreedyParserStates::state_pkt_too_short_verify(const IR::BFN::ParserSt
     return true;
 }
 
-IR::BFN::ParserState* SplitGreedyParserStates::postorder(IR::BFN::ParserState* state) {
+IR::BFN::ParserState *SplitGreedyParserStates::postorder(IR::BFN::ParserState *state) {
     LOG4("SplitGreedyParserStates(" << state->name << ")");
 
     int cnt = 0;
@@ -268,8 +269,8 @@ IR::BFN::ParserState* SplitGreedyParserStates::postorder(IR::BFN::ParserState* s
     while (!state_pkt_too_short_verify(state, select_args_incompatible)) {
         if (select_args_incompatible) {
             error(ErrorType::ERR_UNSUPPORTED,
-                    "Mixing non-greedy and greedy extracted fields in select "
-                    "statement is unsupported.");
+                  "Mixing non-greedy and greedy extracted fields in select "
+                  "statement is unsupported.");
         } else {
             cstring new_name = state->name + ".$greedy_"_cs + cstring::to_cstring(cnt++);
             state = split_state(state, new_name);

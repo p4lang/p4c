@@ -28,11 +28,11 @@ namespace Slicing {
 // Helper function to update internal state of split_super_cluster after
 // splitting a rotational cluster.  Mutates each argument.
 static void update_slices(
-    const RotationalCluster* old, const SliceResult<RotationalCluster>& split_res,
-    ordered_set<const RotationalCluster*>& new_clusters,
-    ordered_set<SuperCluster::SliceList*>& slice_lists,
-    ordered_map<FieldSlice, ordered_set<SuperCluster::SliceList*>>& slices_to_slice_lists,
-    assoc::hash_map<const FieldSlice, const RotationalCluster*>& slices_to_clusters) {
+    const RotationalCluster *old, const SliceResult<RotationalCluster> &split_res,
+    ordered_set<const RotationalCluster *> &new_clusters,
+    ordered_set<SuperCluster::SliceList *> &slice_lists,
+    ordered_map<FieldSlice, ordered_set<SuperCluster::SliceList *>> &slices_to_slice_lists,
+    assoc::hash_map<const FieldSlice, const RotationalCluster *> &slices_to_clusters) {
     // Update the set of live clusters.
     auto old_it = new_clusters.find(old);
     if (old_it != new_clusters.end()) {
@@ -46,15 +46,15 @@ static void update_slices(
 
     // Update the slices_to_clusters map.
     LOG6("    ...updating slices_to_clusters");
-    for (auto& kv : split_res.slice_map) {
+    for (auto &kv : split_res.slice_map) {
         BUG_CHECK(slices_to_clusters.find(kv.first) != slices_to_clusters.end(),
                   "Slice not in map: %1%", cstring::to_cstring(kv.first));
         LOG6("        - erasing " << kv.first);
         slices_to_clusters.erase(kv.first);
-        auto& slice_lo = kv.second.first;
+        auto &slice_lo = kv.second.first;
         LOG6("        - adding " << slice_lo);
         slices_to_clusters[slice_lo] = split_res.lo;
-        if (auto& slice_hi = kv.second.second) {
+        if (auto &slice_hi = kv.second.second) {
             LOG6("        - adding " << *slice_hi);
             slices_to_clusters[*slice_hi] = split_res.hi;
         }
@@ -63,12 +63,12 @@ static void update_slices(
     // Replace the old slices with the new, split slices in each slice
     // list.
     LOG6("    ...updating slice_lists");
-    for (auto* slice_list : slice_lists) {
+    for (auto *slice_list : slice_lists) {
         for (auto slice_it = slice_list->begin(); slice_it != slice_list->end(); slice_it++) {
-            auto& old_slice = *slice_it;
+            auto &old_slice = *slice_it;
             if (split_res.slice_map.find(old_slice) != split_res.slice_map.end()) {
-                auto& slice_lo = split_res.slice_map.at(old_slice).first;
-                auto& slice_hi = split_res.slice_map.at(old_slice).second;
+                auto &slice_lo = split_res.slice_map.at(old_slice).first;
+                auto &slice_hi = split_res.slice_map.at(old_slice).second;
                 LOG6("        - erasing " << old_slice);
                 slice_it = slice_list->erase(slice_it);  // erase after log
                 slice_it = slice_list->insert(slice_it, slice_lo);
@@ -84,7 +84,7 @@ static void update_slices(
 
     // Update the slices_to_slice_lists map.
     LOG6("    ...updating slices_to_slice_lists");
-    for (auto& kv : split_res.slice_map) {
+    for (auto &kv : split_res.slice_map) {
         // Slices in RotationalClusters but not in slice lists do not need to
         // be updated.
         if (slices_to_slice_lists.find(kv.first) == slices_to_slice_lists.end()) continue;
@@ -95,13 +95,13 @@ static void update_slices(
     }
 }
 
-static std::list<PHV::SuperCluster*> merge_same_container_group(
-    const std::list<PHV::SuperCluster*> clusters) {
-    ordered_map<const PHV::Field*, ordered_set<PHV::SuperCluster*>> same_container_groups;
-    UnionFind<PHV::SuperCluster*> cluster_uf;
-    for (auto& sc : clusters) {
+static std::list<PHV::SuperCluster *> merge_same_container_group(
+    const std::list<PHV::SuperCluster *> clusters) {
+    ordered_map<const PHV::Field *, ordered_set<PHV::SuperCluster *>> same_container_groups;
+    UnionFind<PHV::SuperCluster *> cluster_uf;
+    for (auto &sc : clusters) {
         bool has_same_container_group = false;
-        sc->forall_fieldslices([&](const PHV::FieldSlice& fs) {
+        sc->forall_fieldslices([&](const PHV::FieldSlice &fs) {
             if (fs.field()->same_container_group()) {
                 same_container_groups[fs.field()].insert(sc);
                 has_same_container_group = true;
@@ -111,16 +111,16 @@ static std::list<PHV::SuperCluster*> merge_same_container_group(
     }
 
     // union by same_container_groups.
-    for (const auto& kv : same_container_groups) {
-        const auto& clusters = kv.second;
+    for (const auto &kv : same_container_groups) {
+        const auto &clusters = kv.second;
         for (auto itr = clusters.begin(); std::next(itr) != clusters.end(); itr++) {
             cluster_uf.makeUnion(*itr, *std::next(itr));
         }
     }
 
-    std::list<PHV::SuperCluster*> rst;
-    for (auto& clusters : cluster_uf) {
-        PHV::SuperCluster* merged = clusters.front();
+    std::list<PHV::SuperCluster *> rst;
+    for (auto &clusters : cluster_uf) {
+        PHV::SuperCluster *merged = clusters.front();
         for (auto itr = std::next(clusters.begin()); itr != clusters.end(); itr++) {
             merged = merged->merge(*itr);
         }
@@ -131,17 +131,17 @@ static std::list<PHV::SuperCluster*> merge_same_container_group(
 
 // return a list of clusters that participates in wide arithmetic are
 // merged and ordered for allocation.
-static std::list<PHV::SuperCluster*> merge_wide_arith(const std::list<PHV::SuperCluster*> sc) {
+static std::list<PHV::SuperCluster *> merge_wide_arith(const std::list<PHV::SuperCluster *> sc) {
     LOG6("Merge wide arith super clusters");
-    std::list<PHV::SuperCluster*> wide;
-    std::list<PHV::SuperCluster*> rv;
+    std::list<PHV::SuperCluster *> wide;
+    std::list<PHV::SuperCluster *> rv;
     for (auto it = sc.begin(); it != sc.end(); ++it) {
         auto cluster = *it;
         if (std::find(wide.begin(), wide.end(), cluster) != wide.end()) {
             continue;
         }  // Already processed this cluster.
 
-        bool used_in_wide_arith = cluster->any_of_fieldslices([&](const PHV::FieldSlice& fs) {
+        bool used_in_wide_arith = cluster->any_of_fieldslices([&](const PHV::FieldSlice &fs) {
             return fs.field()->bit_used_in_wide_arith(fs.range().lo);
         });
         if (used_in_wide_arith) {
@@ -173,38 +173,39 @@ static std::list<PHV::SuperCluster*> merge_wide_arith(const std::list<PHV::Super
 // Returns a new list of SuperClusters, where any SuperCluster that
 // (1) participates in wide arithmetic has been merged and ordered for allocation.
 // (2) clusters of fieldslices of a same_container_group field will be merged.
-static std::list<PHV::SuperCluster*> merge_by_constraints(const std::list<PHV::SuperCluster*> sc) {
+static std::list<PHV::SuperCluster *> merge_by_constraints(
+    const std::list<PHV::SuperCluster *> sc) {
     return merge_wide_arith(merge_same_container_group(sc));
 }
 
 /// Split a SuperCluster with slice lists according to @split_schema.
-std::optional<std::list<SuperCluster*>> split(const SuperCluster* sc,
-                                                const SplitSchema& split_schemas_input) {
+std::optional<std::list<SuperCluster *>> split(const SuperCluster *sc,
+                                               const SplitSchema &split_schemas_input) {
     LOG6(split_schemas_input);
 
     // mutable copy.
     SplitSchema split_schemas = split_schemas_input;
 
     //// 1. deep copy states.
-    ordered_set<const PHV::RotationalCluster*> new_clusters(sc->clusters());
+    ordered_set<const PHV::RotationalCluster *> new_clusters(sc->clusters());
     // Keep a map of slices to clusters (both old and new for this schema).
-    assoc::hash_map<const PHV::FieldSlice, const PHV::RotationalCluster*> slices_to_clusters;
-    for (auto* rotational : new_clusters)
-        for (auto* aligned : rotational->clusters())
-            for (auto& slice : *aligned) slices_to_clusters[slice] = rotational;
+    assoc::hash_map<const PHV::FieldSlice, const PHV::RotationalCluster *> slices_to_clusters;
+    for (auto *rotational : new_clusters)
+        for (auto *aligned : rotational->clusters())
+            for (auto &slice : *aligned) slices_to_clusters[slice] = rotational;
 
     // Deep copy all slice lists, so they can be updated without mutating sc.
     // Update split_schemas to point to the new slice lists, and build a map
     // of slices to new slice lists.
     // Track live RotationalClusters. Clusters that have been split are no
     // longer live.
-    ordered_set<PHV::SuperCluster::SliceList*> slice_lists;
-    ordered_map<PHV::FieldSlice, ordered_set<PHV::SuperCluster::SliceList*>> slices_to_slice_lists;
-    for (auto* old_list : sc->slice_lists()) {
+    ordered_set<PHV::SuperCluster::SliceList *> slice_lists;
+    ordered_map<PHV::FieldSlice, ordered_set<PHV::SuperCluster::SliceList *>> slices_to_slice_lists;
+    for (auto *old_list : sc->slice_lists()) {
         BUG_CHECK(old_list->size(), "Empty slice list in SuperCluster %1%",
                   cstring::to_cstring(sc));
         // Make new list.
-        auto* new_list = new PHV::SuperCluster::SliceList(old_list->begin(), old_list->end());
+        auto *new_list = new PHV::SuperCluster::SliceList(old_list->begin(), old_list->end());
         slice_lists.insert(new_list);
 
         // Update split_schema.
@@ -213,7 +214,7 @@ std::optional<std::list<SuperCluster*>> split(const SuperCluster* sc,
             split_schemas.erase(old_list);
         }
         // Build map.
-        for (auto& slice : *new_list) {
+        for (auto &slice : *new_list) {
             slices_to_slice_lists[slice].insert(new_list);
         }
     }
@@ -223,8 +224,8 @@ std::optional<std::list<SuperCluster*>> split(const SuperCluster* sc,
     // then split its RotationalCluster.  Produces a new set of slice lists and
     // rotational clusters.  Fail if a proposed split would violate
     // constraints, like `no_split`.
-    for (auto& kv : split_schemas) {
-        auto* slice_list = kv.first;
+    for (auto &kv : split_schemas) {
+        auto *slice_list = kv.first;
         bitvec split_schema = kv.second;
 
         // If there are no bits set in the split schema, then no split has been
@@ -236,7 +237,7 @@ std::optional<std::list<SuperCluster*>> split(const SuperCluster* sc,
 
         // Iterate through split positions.
         int offset = 0;
-        auto* slice_list_lo = new PHV::SuperCluster::SliceList();
+        auto *slice_list_lo = new PHV::SuperCluster::SliceList();
         bitvec::nonconst_bitref next_split = split_schema.begin();
         BUG_CHECK(*next_split >= 0, "Trying to split slice list at negative index");
         auto next_slice = slice_list->begin();
@@ -294,7 +295,7 @@ std::optional<std::list<SuperCluster*>> split(const SuperCluster* sc,
                                 << slice);
 
                 // Split slice.
-                auto* rotational = slices_to_clusters.at(slice);
+                auto *rotational = slices_to_clusters.at(slice);
                 auto split_result = rotational->slice(*next_split - offset);
                 if (!split_result) {
                     LOG6("    ...(" << offset << ") but split failed");
@@ -311,7 +312,7 @@ std::optional<std::list<SuperCluster*>> split(const SuperCluster* sc,
                     if (split_result->slice_map.find(s) == split_result->slice_map.end()) continue;
                     bool is_this_slice = it == next_slice;
                     // Replace s with its two new subslices.
-                    auto& subs = split_result->slice_map.at(s);
+                    auto &subs = split_result->slice_map.at(s);
                     it = slice_list->erase(it);
                     LOG6("    ...erasing " << s << " in this slice list");
                     it = slice_list->insert(it, subs.first);
@@ -329,7 +330,7 @@ std::optional<std::list<SuperCluster*>> split(const SuperCluster* sc,
                 ++next_slice;
 
                 // Add current list, make new list, advance next_split.
-                auto& new_slices = split_result->slice_map.at(slice);
+                auto &new_slices = split_result->slice_map.at(slice);
                 slice_list_lo->push_back(new_slices.first);
                 LOG6("    ...(" << offset << ") adding to slice list: " << slice);
                 slice_lists.insert(slice_list_lo);
@@ -369,25 +370,25 @@ std::optional<std::list<SuperCluster*>> split(const SuperCluster* sc,
     slices_to_slice_lists.clear();
 
     // Populate UF universe.
-    auto* empty_slice_list = new PHV::SuperCluster::SliceList();
-    for (auto* slice_list : slice_lists) {
-        for (auto& slice : *slice_list) {
+    auto *empty_slice_list = new PHV::SuperCluster::SliceList();
+    for (auto *slice_list : slice_lists) {
+        for (auto &slice : *slice_list) {
             BUG_CHECK(slices_to_clusters.find(slice) != slices_to_clusters.end(),
                       "No slice to cluster map for %1%", cstring::to_cstring(slice));
-            auto* cluster = slices_to_clusters.at(slice);
+            auto *cluster = slices_to_clusters.at(slice);
             uf.insert({slice_list, cluster});
             slices_to_slice_lists[slice].insert(slice_list);
         }
     }
-    for (auto* rotational : new_clusters) uf.insert({empty_slice_list, rotational});
+    for (auto *rotational : new_clusters) uf.insert({empty_slice_list, rotational});
 
     // Union over slice lists.
-    for (auto* slice_list : slice_lists) {
+    for (auto *slice_list : slice_lists) {
         BUG_CHECK(slices_to_clusters.find(slice_list->front()) != slices_to_clusters.end(),
                   "No slice to cluster map for front slice %1%",
                   cstring::to_cstring(slice_list->front()));
         auto first = uf.find({slice_list, slices_to_clusters.at(slice_list->front())});
-        for (auto& slice : *slice_list) {
+        for (auto &slice : *slice_list) {
             BUG_CHECK(slices_to_clusters.find(slice) != slices_to_clusters.end(),
                       "No slice to cluster map for slice %1%", cstring::to_cstring(slice));
             uf.makeUnion(first, {slice_list, slices_to_clusters.at(slice)});
@@ -395,21 +396,21 @@ std::optional<std::list<SuperCluster*>> split(const SuperCluster* sc,
     }
 
     // Union over clusters.
-    for (auto* rotational : new_clusters) {
+    for (auto *rotational : new_clusters) {
         ListClusterPair first = {empty_slice_list, rotational};
-        for (auto* aligned : rotational->clusters()) {
-            for (auto& slice : *aligned) {
-                for (auto* slice_list : slices_to_slice_lists[slice])
+        for (auto *aligned : rotational->clusters()) {
+            for (auto &slice : *aligned) {
+                for (auto *slice_list : slices_to_slice_lists[slice])
                     uf.makeUnion(first, {slice_list, rotational});
             }
         }
     }
 
-    std::list<PHV::SuperCluster*> rv;
-    for (auto& pairs : uf) {
-        ordered_set<const PHV::RotationalCluster*> clusters;
-        ordered_set<PHV::SuperCluster::SliceList*> slice_lists;
-        for (auto& pair : pairs) {
+    std::list<PHV::SuperCluster *> rv;
+    for (auto &pairs : uf) {
+        ordered_set<const PHV::RotationalCluster *> clusters;
+        ordered_set<PHV::SuperCluster::SliceList *> slice_lists;
+        for (auto &pair : pairs) {
             if (pair.first->size()) slice_lists.insert(pair.first);
             clusters.insert(pair.second);
         }
@@ -422,8 +423,9 @@ std::optional<std::list<SuperCluster*>> split(const SuperCluster* sc,
 
 /// Split the RotationalCluster in a SuperCluster without a slice list
 /// according to @split_schema.
-std::optional<std::list<PHV::SuperCluster*>> split_rotational_cluster(
-        const PHV::SuperCluster* sc, bitvec split_schema, int max_aligment) {
+std::optional<std::list<PHV::SuperCluster *>> split_rotational_cluster(const PHV::SuperCluster *sc,
+                                                                       bitvec split_schema,
+                                                                       int max_aligment) {
     // This method cannot handle super clusters with slice lists.
     if (sc->slice_lists().size() > 0) return std::nullopt;
 
@@ -435,13 +437,13 @@ std::optional<std::list<PHV::SuperCluster*>> split_rotational_cluster(
 
     // An empty split schema means no split is necessary.
     if (split_schema.empty())
-        return std::list<PHV::SuperCluster*>(
+        return std::list<PHV::SuperCluster *>(
             {new PHV::SuperCluster(sc->clusters(), sc->slice_lists())});
 
     // Otherwise, if this SuperCluster doesn't have any slice lists, then slice
     // the rotational clusters directly.
-    std::list<PHV::SuperCluster*> rv;
-    auto* remainder = *sc->clusters().begin();
+    std::list<PHV::SuperCluster *> rv;
+    auto *remainder = *sc->clusters().begin();
     int offset = max_aligment;
     for (int next_split : split_schema) {
         BUG_CHECK(next_split >= 0, "Trying to split remainder cluster at negative index");
@@ -460,14 +462,14 @@ std::optional<std::list<PHV::SuperCluster*>> split_rotational_cluster(
 }  // namespace PHV
 
 // Helper for split_super_cluster;
-std::ostream& operator<<(std::ostream& out, const PHV::Slicing::ListClusterPair& pair) {
+std::ostream &operator<<(std::ostream &out, const PHV::Slicing::ListClusterPair &pair) {
     out << std::endl;
     out << "(    " << pair.first << std::endl;
     out << ",    " << pair.second << "    )";
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const PHV::Slicing::ListClusterPair* pair) {
+std::ostream &operator<<(std::ostream &out, const PHV::Slicing::ListClusterPair *pair) {
     if (pair)
         out << *pair;
     else
@@ -475,9 +477,9 @@ std::ostream& operator<<(std::ostream& out, const PHV::Slicing::ListClusterPair*
     return out;
 }
 
-std::ostream& operator<<(std::ostream& out, const PHV::Slicing::SplitSchema& schema) {
+std::ostream &operator<<(std::ostream &out, const PHV::Slicing::SplitSchema &schema) {
     out << "Bit schema:\n";
-    for (auto& kv : schema) {
+    for (auto &kv : schema) {
         int size = 0;
         for (auto slice : *kv.first) {
             size += slice.size();

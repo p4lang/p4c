@@ -30,7 +30,7 @@ namespace BFN {
 struct FieldPacking;
 
 using ResubmitSources = IR::Vector<IR::Expression>;
-using ResubmitExtracts = std::map<unsigned, std::pair<cstring, const ResubmitSources*>>;
+using ResubmitExtracts = std::map<unsigned, std::pair<cstring, const ResubmitSources *>>;
 
 class FixupResubmitMetadata : public PassManager {
     ResubmitExtracts fieldExtracts;

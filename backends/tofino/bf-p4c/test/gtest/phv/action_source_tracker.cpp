@@ -10,28 +10,29 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+#include "bf-p4c/phv/action_source_tracker.h"
+
 #include <optional>
 #include <type_traits>
-#include <boost/algorithm/string/replace.hpp>
-#include "gtest/gtest.h"
 
+#include <boost/algorithm/string/replace.hpp>
+
+#include "bf-p4c/common/header_stack.h"
+#include "bf-p4c/mau/instruction_selection.h"
+#include "bf-p4c/phv/phv_fields.h"
+#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "gtest/gtest.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
 #include "test/gtest/helpers.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/common/header_stack.h"
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
-#include "bf-p4c/phv/action_source_tracker.h"
-#include "bf-p4c/mau/instruction_selection.h"
 
 namespace P4::Test {
 
 namespace ActionSourceTrackerTestNs {
 
-std::optional<TofinoPipeTestCase>
-createActionTest(const std::string& ingressPipeline,
-                 const std::string& egressPipeline) {
+std::optional<TofinoPipeTestCase> createActionTest(const std::string &ingressPipeline,
+                                                   const std::string &egressPipeline) {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
         header H { bit<8> f1; bit<16> f2; bit<24> f3; bit<32> f4; bit<7> f5; bit<9> f6; bit<32> f7; }
         struct Headers { H h1; H h2; }
@@ -74,7 +75,7 @@ createActionTest(const std::string& ingressPipeline,
     boost::replace_first(source, "%INGRESS_PIPELINE%", ingressPipeline);
     boost::replace_first(source, "%EGRESS_PIPELINE%", egressPipeline);
 
-    auto& options = BackendOptions();
+    auto &options = BackendOptions();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.target = "tofino"_cs;
     options.arch = "v1model"_cs;
@@ -83,19 +84,16 @@ createActionTest(const std::string& ingressPipeline,
     return TofinoPipeTestCase::createWithThreadLocalInstances(source);
 }
 
-const IR::BFN::Pipe *runInitialPassManager(const IR::BFN::Pipe* pipe, PhvInfo *phv) {
-    PassManager quick_backend = {
-        new CollectHeaderStackInfo,
-        new CollectPhvInfo(*phv),
-        new DoInstructionSelection(*phv)
-    };
+const IR::BFN::Pipe *runInitialPassManager(const IR::BFN::Pipe *pipe, PhvInfo *phv) {
+    PassManager quick_backend = {new CollectHeaderStackInfo, new CollectPhvInfo(*phv),
+                                 new DoInstructionSelection(*phv)};
 
     return pipe->apply(quick_backend);
 }
 
-}  // namespace
+}  // namespace ActionSourceTrackerTestNs
 
-class ActionSourceTrackerTest : public TofinoBackendTest { };
+class ActionSourceTrackerTest : public TofinoBackendTest {};
 
 TEST_F(ActionSourceTrackerTest, basic) {
     auto test = ActionSourceTrackerTestNs::createActionTest(P4_SOURCE(P4Headers::NONE, R"(
@@ -136,7 +134,8 @@ TEST_F(ActionSourceTrackerTest, basic) {
     apply {
         test1.apply();
     }
-    )"), P4_SOURCE(P4Headers::NONE, R"(
+    )"),
+                                                            P4_SOURCE(P4Headers::NONE, R"(
         apply { }
     )"));
 

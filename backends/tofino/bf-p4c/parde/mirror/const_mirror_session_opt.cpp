@@ -11,18 +11,17 @@
  */
 
 #include "bf-p4c/parde/mirror/const_mirror_session_opt.h"
+
 #include "ir/ir.h"
 
-IR::Node* ConstMirrorSessionOpt::preorder(IR::BFN::Digest* d) {
+IR::Node *ConstMirrorSessionOpt::preorder(IR::BFN::Digest *d) {
     prune();
-    if (d->name != "mirror")
-        return d;
+    if (d->name != "mirror") return d;
     for (auto fl : d->fieldLists) {
         ERROR_CHECK(fl->sources.size() != 0, "%1%: Expected one or more fields", fl);
         auto arg = fl->sources.at(0);
         if (auto cst = arg->to<IR::Constant>()) {
-            if (cst->value != 0)
-                continue;
+            if (cst->value != 0) continue;
             visit(arg);
         }
     }
@@ -41,11 +40,9 @@ IR::Node* ConstMirrorSessionOpt::preorder(IR::BFN::Digest* d) {
  * the same. However, the 8b mirror_id is more efficient because we
  * can reuse B0, thus save a container.
  */
-IR::Node* ConstMirrorSessionOpt::preorder(IR::TempVar* tv) {
-    if (!tv->deparsed_zero)
-        return tv;
-    if (tv->type != IR::Type_Bits::get(10))
-        return tv;
+IR::Node *ConstMirrorSessionOpt::preorder(IR::TempVar *tv) {
+    if (!tv->deparsed_zero) return tv;
+    if (tv->type != IR::Type_Bits::get(10)) return tv;
     auto *new_tv = new IR::TempVar(IR::Type_Bits::get(8));
     new_tv->name = tv->name;
     new_tv->srcInfo = tv->srcInfo;

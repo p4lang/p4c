@@ -12,24 +12,22 @@
 
 #include "bf-p4c/phv/analysis/build_mutex.h"
 
-Visitor::profile_t BuildMutex::init_apply(const IR::Node* root) {
+Visitor::profile_t BuildMutex::init_apply(const IR::Node *root) {
     auto rv = Inspector::init_apply(root);
     mutually_inclusive.clear();
     fields_encountered.clear();
     return rv;
 }
 
-void BuildMutex::mark(const PHV::Field* f) {
-    if (!f)
-        return;
+void BuildMutex::mark(const PHV::Field *f) {
+    if (!f) return;
     if (IgnoreField(f)) {
         LOG5("Ignoring field    " << f);
         return;
     } else {
-        LOG5("Considering field " << f << " ( "
-             << (f->pov ? "pov " : "")
-             << (f->metadata ? "metadata " : "")
-             << (!f->pov && !f->metadata ? "header " : "") << ")");
+        LOG5("Considering field " << f << " ( " << (f->pov ? "pov " : "")
+                                  << (f->metadata ? "metadata " : "")
+                                  << (!f->pov && !f->metadata ? "header " : "") << ")");
     }
     int new_field = f->id;
     fields_encountered[new_field] = true;
@@ -44,17 +42,18 @@ bool BuildMutex::preorder(const IR::MAU::Action *act) {
 bool BuildMutex::preorder(const IR::Expression *e) {
     if (auto *f = phv.field(e)) {
         mark(f);
-        return false; }
+        return false;
+    }
     return true;
 }
 
-void BuildMutex::flow_merge(Visitor& other_) {
+void BuildMutex::flow_merge(Visitor &other_) {
     BuildMutex &other = dynamic_cast<BuildMutex &>(other_);
     fields_encountered |= other.fields_encountered;
     mutually_inclusive |= other.mutually_inclusive;
 }
 
-void BuildMutex::flow_copy(::ControlFlowVisitor& other_) {
+void BuildMutex::flow_copy(::ControlFlowVisitor &other_) {
     BuildMutex &other = dynamic_cast<BuildMutex &>(other_);
     fields_encountered = other.fields_encountered;
     mutually_inclusive = other.mutually_inclusive;
@@ -63,7 +62,7 @@ void BuildMutex::flow_copy(::ControlFlowVisitor& other_) {
 void BuildMutex::end_apply() {
     LOG4("mutually exclusive fields:");
     for (auto it1 = fields_encountered.begin(); it1 != fields_encountered.end(); ++it1) {
-        const PHV::Field* f1 = phv.field(*it1);
+        const PHV::Field *f1 = phv.field(*it1);
         CHECK_NULL(f1);
         if (neverOverlay[*it1]) {
             if (f1->overlayable) {
@@ -77,7 +76,7 @@ void BuildMutex::end_apply() {
             if (*it1 == *it2) continue;
 
             // Consider fields marked neverOverlay to always be mutually inclusive.
-            const PHV::Field* f2 = phv.field(*it2);
+            const PHV::Field *f2 = phv.field(*it2);
             CHECK_NULL(f2);
             if (neverOverlay[*it2]) {
                 if (f2->overlayable) {
@@ -93,6 +92,7 @@ void BuildMutex::end_apply() {
             if (mutually_inclusive(*it1, *it2)) continue;
 
             mutually_exclusive(*it1, *it2) = true;
-            LOG4("(" << f1->name << ", " << f2->name << ")"); }
+            LOG4("(" << f1->name << ", " << f2->name << ")");
+        }
     }
 }

@@ -40,26 +40,25 @@ namespace PHV {
  */
 class ValidateAllocation final : public Inspector {
  public:
-    ValidateAllocation(PhvInfo& phv, const ClotInfo& clot,
-                       const PHV::FieldSliceLiveRangeDB& physical_liverange,
-                       const PHV::AllocSetting& setting)
-        : phv(phv), clot(clot), physical_liverange(physical_liverange),
-        setting(setting) {}
+    ValidateAllocation(PhvInfo &phv, const ClotInfo &clot,
+                       const PHV::FieldSliceLiveRangeDB &physical_liverange,
+                       const PHV::AllocSetting &setting)
+        : phv(phv), clot(clot), physical_liverange(physical_liverange), setting(setting) {}
 
     void set_physical_liverange_overlay(bool enable) { physical_liverange_overlay = enable; }
 
  private:
-    PhvInfo& phv;
-    const ClotInfo& clot;
-    const PHV::FieldSliceLiveRangeDB& physical_liverange;
+    PhvInfo &phv;
+    const ClotInfo &clot;
+    const PHV::FieldSliceLiveRangeDB &physical_liverange;
     bool physical_liverange_overlay = false;
-    const PHV::AllocSetting& setting;
+    const PHV::AllocSetting &setting;
 
     SymBitMatrix mutually_exclusive_field_ids;
-    profile_t init_apply(const IR::Node* root) override;
-    bool preorder(const IR::BFN::Digest* digest) override;
-    bool preorder(const IR::BFN::Pipe* pipe) override;
-    bool preorder(const IR::BFN::DeparserParameter* dp) override;
+    profile_t init_apply(const IR::Node *root) override;
+    bool preorder(const IR::BFN::Digest *digest) override;
+    bool preorder(const IR::BFN::Pipe *pipe) override;
+    bool preorder(const IR::BFN::DeparserParameter *dp) override;
 
     /// @returns total number of container bits used for POV bit allocation in @p gress.
     size_t getPOVContainerBytes(gress_t gress) const;

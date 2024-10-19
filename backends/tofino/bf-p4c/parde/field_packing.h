@@ -15,9 +15,9 @@
 
 #include <vector>
 
-#include "lib/cstring.h"
 #include "bf-p4c/ir/bitrange.h"
 #include "bf-p4c/ir/gress.h"
+#include "lib/cstring.h"
 
 namespace P4 {
 namespace IR {
@@ -39,7 +39,7 @@ using namespace P4;
 struct FieldPacking {
     struct PackedItem {
         /// The packed field, or null if this is a padding item.
-        const IR::Expression* field;
+        const IR::Expression *field;
         gress_t gress;
 
         /// For phase 0, the logical source of this field - generally an action
@@ -51,16 +51,11 @@ struct FieldPacking {
 
         bool isPadding() const { return field == nullptr; }
 
-        explicit PackedItem(unsigned width)
-            : field(nullptr), width(width) { }
-        PackedItem(const IR::Expression* field,
-                   gress_t gress,
-                   cstring source,
-                   unsigned width)
-            : field(field), gress(gress), source(source), width(width) { }
+        explicit PackedItem(unsigned width) : field(nullptr), width(width) {}
+        PackedItem(const IR::Expression *field, gress_t gress, cstring source, unsigned width)
+            : field(field), gress(gress), source(source), width(width) {}
 
-        static PackedItem makePadding(unsigned width) {
-            return PackedItem(width); }
+        static PackedItem makePadding(unsigned width) { return PackedItem(width); }
     };
 
     typedef std::vector<PackedItem>::iterator iterator;
@@ -78,13 +73,13 @@ struct FieldPacking {
     template <Endian Order, typename Func>
     void forEachField(Func func) const {
         int posBits = 0;
-        for (auto& field : fields) {
+        for (auto &field : fields) {
             if (field.isPadding()) {
                 posBits += field.width;
                 continue;
             }
-            const auto fieldRange = nw_bitrange(StartLen(posBits, field.width))
-                                      .toOrder<Order>(totalWidth);
+            const auto fieldRange =
+                nw_bitrange(StartLen(posBits, field.width)).toOrder<Order>(totalWidth);
             posBits += field.width;
             func(fieldRange, field.field, field.source);
         }
@@ -104,16 +99,16 @@ struct FieldPacking {
      * @param width  The width in bits of the field.
      * @param gress  The gress of the field, if it matters.
      */
-    void appendField(const IR::Expression* field, cstring source,
-                     unsigned width, gress_t gress = INGRESS);
-    void appendField(const IR::Expression* field, unsigned width, gress_t gress = INGRESS);
+    void appendField(const IR::Expression *field, cstring source, unsigned width,
+                     gress_t gress = INGRESS);
+    void appendField(const IR::Expression *field, unsigned width, gress_t gress = INGRESS);
 
     /// Appends the specified number of bits of padding to the sequence of
     /// packed items.
     void appendPadding(unsigned width);
 
     /// Appends another sequence of packed items to this one.
-    void append(const FieldPacking& packing);
+    void append(const FieldPacking &packing);
 
     /**
      * Appends enough padding to make the total width of this sequence a
@@ -150,9 +145,8 @@ struct FieldPacking {
      *                    its work is complete.
      * @return the root of the resulting parser program.
      */
-    IR::BFN::ParserState*
-    createExtractionState(gress_t gress, cstring stateName,
-                          const IR::BFN::ParserState* finalState) const;
+    IR::BFN::ParserState *createExtractionState(gress_t gress, cstring stateName,
+                                                const IR::BFN::ParserState *finalState) const;
 
     /// The sequence of packed items (fields and padding).
     std::vector<PackedItem> fields;
@@ -163,6 +157,6 @@ struct FieldPacking {
 
 }  // namespace BFN
 
-std::ostream& operator<<(std::ostream& out, const BFN::FieldPacking* packing);
+std::ostream &operator<<(std::ostream &out, const BFN::FieldPacking *packing);
 
 #endif /* BF_P4C_PARDE_FIELD_PACKING_H_ */

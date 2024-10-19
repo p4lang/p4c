@@ -10,14 +10,15 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include "lib/bitvec.h"
 #include "check_extern_invocation.h"
+
 #include "bf-p4c/device.h"
+#include "lib/bitvec.h"
 
 namespace BFN {
 
 void CheckExternInvocationCommon::checkExtern(const P4::ExternMethod *extMethod,
-        const IR::MethodCallExpression *expr) {
+                                              const IR::MethodCallExpression *expr) {
     cstring externName = extMethod->object->getName().name;
     cstring externType = extMethod->originalExternType->name;
     bitvec pos;
@@ -83,9 +84,7 @@ void CheckExternInvocationCommon::initCommonPipeConstraints() {
     setPipeConstraints("packet_in"_cs, validInParsers);
 }
 
-void CheckTNAExternInvocation::initPipeConstraints() {
-    initCommonPipeConstraints();
-}
+void CheckTNAExternInvocation::initPipeConstraints() { initCommonPipeConstraints(); }
 
 void CheckT2NAExternInvocation::initPipeConstraints() {
     initCommonPipeConstraints();
@@ -136,7 +135,6 @@ void CheckT2NAExternInvocation::initPipeConstraints() {
     bitvec validInIngressDeparser;
     validInIngressDeparser.setbit(genIndex(INGRESS, DEPARSER));
     setPipeConstraints("Pktgen"_cs, validInIngressDeparser);
-
 }
 
 }  // namespace BFN

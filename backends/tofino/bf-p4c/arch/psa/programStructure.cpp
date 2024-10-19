@@ -11,10 +11,11 @@
  */
 
 #include "programStructure.h"
-#include "psa_converters.h"
-#include "midend/validateProperties.h"
-#include "bf-p4c/common/pragma/all_pragmas.h"
+
 #include "bf-p4c/arch/arch.h"
+#include "bf-p4c/common/pragma/all_pragmas.h"
+#include "midend/validateProperties.h"
+#include "psa_converters.h"
 
 namespace BFN {
 
@@ -31,7 +32,6 @@ void ProgramStructure::createParsers() {
     egressParser = cvt_e.convert(egressParser);
     declarations.push_back(egressParser);
 }
-
 
 void ProgramStructure::createControls() {
     IngressControlConverter cvt_i(this);
@@ -114,8 +114,7 @@ void ProgramStructure::createMain() {
     typeArgs->push_back(new IR::Type_Name(type_params[TYPE_EM]));
     typeArgs->push_back(new IR::Type_Name("compiler_generated_metadata_t"));
     // PSA only uses one pipeline, hence the other type arguments are dont_care.
-    for (auto i=0; i < 15; i++)
-        typeArgs->push_back(IR::Type_Dontcare::get());
+    for (auto i = 0; i < 15; i++) typeArgs->push_back(IR::Type_Dontcare::get());
     auto typeSpecialized = new IR::Type_Specialized(type, typeArgs);
 
     auto args = new IR::Vector<IR::Argument>();
@@ -123,7 +122,7 @@ void ProgramStructure::createMain() {
     auto expr = new IR::PathExpression(pipe0);
     args->push_back(new IR::Argument(expr));
 
-    auto* annotations = new IR::Annotations();
+    auto *annotations = new IR::Annotations();
     annotations->annotations.push_back(
         new IR::Annotation(IR::ID(PragmaAutoInitMetadata::name), {}));
 

@@ -14,15 +14,14 @@
 
 #include <cctype>
 
-#include "ir/ir.h"
-
-#include "bf-p4c/ir/gress.h"
 #include "bf-p4c/common/alias.h"
+#include "bf-p4c/ir/gress.h"
 #include "bf-p4c/parde/clot/clot_info.h"
 #include "bf-p4c/parde/parde_visitor.h"
 #include "bf-p4c/parde/parser_info.h"
 #include "bf-p4c/phv/phv_fields.h"
 #include "bf-p4c/phv/pragma/pa_alias.h"
+#include "ir/ir.h"
 
 using namespace P4;
 
@@ -32,21 +31,21 @@ using namespace P4;
  */
 class CreateAliasesForVarbitHeaders : public ParserInspector {
  protected:
-    const PhvInfo& phv;
-    const ClotInfo& clot_info;
-    PragmaAlias& pragma;
+    const PhvInfo &phv;
+    const ClotInfo &clot_info;
+    PragmaAlias &pragma;
 
     /* Desugared varbit headers in each gress */
     std::map<gress_t, std::set<cstring>> desugared_headers;
 
-    Visitor::profile_t init_apply(const IR::Node* root) override {
+    Visitor::profile_t init_apply(const IR::Node *root) override {
         auto rv = Inspector::init_apply(root);
         desugared_headers.clear();
         return rv;
     }
 
-    bool preorder(const IR::HeaderOrMetadata* h) override {
-        auto* state = findContext<IR::BFN::ParserState>();
+    bool preorder(const IR::HeaderOrMetadata *h) override {
+        auto *state = findContext<IR::BFN::ParserState>();
         if (!state) return true;
 
         auto state_name = stripThreadPrefix(state->name);
@@ -71,7 +70,7 @@ class CreateAliasesForVarbitHeaders : public ParserInspector {
      * Create aliases for the validity bits for sliced varbit headers that are placed in CLOTS.
      */
     void end_apply() override {
-        for (auto& [gress, headers] : desugared_headers) {
+        for (auto &[gress, headers] : desugared_headers) {
             std::map<cstring, std::map<int, cstring>> varbit_headers_to_merge;
 
             for (auto hdr : headers) {
@@ -85,7 +84,7 @@ class CreateAliasesForVarbitHeaders : public ParserInspector {
                 }
             }
 
-            for (auto& [base, headers] : varbit_headers_to_merge) {
+            for (auto &[base, headers] : varbit_headers_to_merge) {
                 auto first_hdr = headers.rbegin()->second;
                 const auto *first_field = phv.field(first_hdr + ".$valid");
                 for (auto itr = std::next(headers.rbegin()); itr != headers.rend(); ++itr) {
@@ -111,7 +110,7 @@ class CreateAliasesForVarbitHeaders : public ParserInspector {
         auto len = name.size();
 
         // End with b
-        if (name.get(len-1) != 'b') return false;
+        if (name.get(len - 1) != 'b') return false;
 
         // Expect a sequence of digits, preceded by an underscore
         bool seen_digit = false;
@@ -129,11 +128,11 @@ class CreateAliasesForVarbitHeaders : public ParserInspector {
     /**
      * Split the header name into a base and a size
      */
-    static std::pair<cstring, int>  getHeaderBaseAndSize(cstring name) {
+    static std::pair<cstring, int> getHeaderBaseAndSize(cstring name) {
         auto len = name.size();
 
         // End with b
-        if (name.get(len-1) != 'b') return std::make_pair(name, 0);
+        if (name.get(len - 1) != 'b') return std::make_pair(name, 0);
 
         // Expect a sequence of digits, preceded by an underscore
         for (int idx = len - 2; idx >= 0; --idx) {

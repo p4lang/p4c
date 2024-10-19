@@ -10,8 +10,8 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PARDE_MERGE_PARSER_STATE_H_
-#define EXTENSIONS_BF_P4C_PARDE_MERGE_PARSER_STATE_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_MERGE_PARSER_STATE_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_MERGE_PARSER_STATE_H_
 
 #include "ir/ir.h"
 #include "ir/pass_manager.h"
@@ -30,4 +30,4 @@ struct MergeParserStates : public PassManager {
     MergeParserStates();
 };
 
-#endif /* EXTENSIONS_BF_P4C_PARDE_MERGE_PARSER_STATE_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_MERGE_PARSER_STATE_H_ */

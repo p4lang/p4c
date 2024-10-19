@@ -9,7 +9,7 @@ import os.path
 import sys
 
 MYPATH = os.path.dirname(__file__)
-if not getattr(sys,'frozen', False):
+if not getattr(sys, 'frozen', False):
     # standalone script
     SCHEMA_PATH = os.path.join(MYPATH, "../")
     sys.path.append(SCHEMA_PATH)
@@ -17,7 +17,7 @@ if not getattr(sys,'frozen', False):
 if os.path.exists(os.path.join(MYPATH, 'targets.py')):
     from schemas.targets import TARGETS
 else:
-    TARGETS=['tofino', 'tofino2', 'tofino2h', 'tofino2m', 'tofino2u']
+    TARGETS = ['tofino', 'tofino2', 'tofino2h', 'tofino2m', 'tofino2u']
 
 # ----------------------------------------
 # MAU Schema Enum Values
@@ -59,21 +59,34 @@ OH_SELECTION_LENGTH_SHIFT = "selector_shift"
 OH_IMMEDIATE = "immediate"
 
 # Do not include version/valid in this list
-ALL_OH = [OH_VERSION, OH_INSTR, OH_ADT_PTR, OH_METER_PTR, OH_SEL_PTR, OH_STATS_PTR, OH_STFUL_PTR,
-          OH_NEXT_TABLE, OH_SELECTION_LENGTH, OH_SELECTION_LENGTH_SHIFT, OH_IMMEDIATE]
+ALL_OH = [
+    OH_VERSION,
+    OH_INSTR,
+    OH_ADT_PTR,
+    OH_METER_PTR,
+    OH_SEL_PTR,
+    OH_STATS_PTR,
+    OH_STFUL_PTR,
+    OH_NEXT_TABLE,
+    OH_SELECTION_LENGTH,
+    OH_SELECTION_LENGTH_SHIFT,
+    OH_IMMEDIATE,
+]
 
-OVERHEAD_SOURCE_TO_NAME = {OH_VERSION: OH_VERSION,
-                           OH_VERSION_VALID: OH_VERSION_VALID,
-                           OH_INSTR: ACTION_INSTR,
-                           OH_ADT_PTR: ACTION_DATA_ADDR,
-                           OH_METER_PTR: METER_ADDR,
-                           OH_SEL_PTR: SELECTOR_ADDR,
-                           OH_STATS_PTR: STATISTICS_ADDR,
-                           OH_STFUL_PTR: STATEFUL_ADDR,
-                           OH_NEXT_TABLE: OH_NEXT_TABLE,
-                           OH_SELECTION_LENGTH: SELECTOR_LENGTH,
-                           OH_SELECTION_LENGTH_SHIFT: SELECTOR_SHIFT,
-                           OH_IMMEDIATE: OH_IMMEDIATE}
+OVERHEAD_SOURCE_TO_NAME = {
+    OH_VERSION: OH_VERSION,
+    OH_VERSION_VALID: OH_VERSION_VALID,
+    OH_INSTR: ACTION_INSTR,
+    OH_ADT_PTR: ACTION_DATA_ADDR,
+    OH_METER_PTR: METER_ADDR,
+    OH_SEL_PTR: SELECTOR_ADDR,
+    OH_STATS_PTR: STATISTICS_ADDR,
+    OH_STFUL_PTR: STATEFUL_ADDR,
+    OH_NEXT_TABLE: OH_NEXT_TABLE,
+    OH_SELECTION_LENGTH: SELECTOR_LENGTH,
+    OH_SELECTION_LENGTH_SHIFT: SELECTOR_SHIFT,
+    OH_IMMEDIATE: OH_IMMEDIATE,
+}
 
 
 # ----------------------------------------

@@ -12,7 +12,7 @@
 
 #include "bf-p4c/phv/analysis/deparser_zero.h"
 
-Visitor::profile_t IdentifyDeparserZeroCandidates::init_apply(const IR::Node* root) {
+Visitor::profile_t IdentifyDeparserZeroCandidates::init_apply(const IR::Node *root) {
     profile_t rv = Inspector::init_apply(root);
     candidateFields.clear();
     mauReadFields.clear();
@@ -23,43 +23,42 @@ Visitor::profile_t IdentifyDeparserZeroCandidates::init_apply(const IR::Node* ro
     return rv;
 }
 
-bool IdentifyDeparserZeroCandidates::preorder(const IR::MAU::Action* act) {
-    auto* tbl = findContext<IR::MAU::Table>();
+bool IdentifyDeparserZeroCandidates::preorder(const IR::MAU::Action *act) {
+    auto *tbl = findContext<IR::MAU::Table>();
     ActionAnalysis aa(phv, false, false, tbl, red_info);
     ActionAnalysis::FieldActionsMap fieldActionsMap;
     aa.set_field_actions_map(&fieldActionsMap);
     act->apply(aa);
     for (auto &fieldAction : Values(fieldActionsMap)) {
-        PHV::Field* write = phv.field(fieldAction.write.expr);
+        PHV::Field *write = phv.field(fieldAction.write.expr);
         BUG_CHECK(write, "Action %1% does not have a write?", fieldAction.write.expr);
         mauWrittenFields[write->id] = true;
-        if (fieldAction.name != "set")
-            mauWrittenByNonSets[write->id] = true;
+        if (fieldAction.name != "set") mauWrittenByNonSets[write->id] = true;
         LOG4("\t\tField " << write->name << " written in action " << act->name);
-        for (auto& readSrc : fieldAction.reads) {
+        for (auto &readSrc : fieldAction.reads) {
             if (readSrc.type == ActionAnalysis::ActionParam::CONSTANT) {
-                const IR::Expression* sourceExpr = readSrc.expr;
+                const IR::Expression *sourceExpr = readSrc.expr;
                 if (!sourceExpr->is<IR::Constant>()) {
                     mauWrittenToNonZeroFields[write->id] = true;
-                    LOG4("\t\tField " << write->name << " written by non-constant in " <<
-                         act->name);
+                    LOG4("\t\tField " << write->name << " written by non-constant in "
+                                      << act->name);
                     continue;
                 }
-                const IR::Constant* const_mem = sourceExpr->to<IR::Constant>();
+                const IR::Constant *const_mem = sourceExpr->to<IR::Constant>();
                 if (!const_mem->fitsLong()) {
                     mauWrittenToNonZeroFields[write->id] = true;
-                    LOG4("\t\tField " << write->name << " set using a constant " << const_mem <<
-                         " in " << act->name);
+                    LOG4("\t\tField " << write->name << " set using a constant " << const_mem
+                                      << " in " << act->name);
                 } else if (const_mem->asLong() == 0) {
                     mauWrittenToZeroFields[write->id] = true;
                     LOG4("\t\tField " << write->name << " set to 0 in " << act->name);
                 } else {
                     mauWrittenToNonZeroFields[write->id] = true;
-                    LOG4("\t\tField " << write->name << " set to non-zero constant " <<
-                         const_mem->asLong() << " in " << act->name);
+                    LOG4("\t\tField " << write->name << " set to non-zero constant "
+                                      << const_mem->asLong() << " in " << act->name);
                 }
             } else if (readSrc.type == ActionAnalysis::ActionParam::PHV) {
-                PHV::Field* read = phv.field(readSrc.expr);
+                PHV::Field *read = phv.field(readSrc.expr);
                 if (!read) continue;
                 mauReadFields[read->id] = true;
                 mauWrittenToNonZeroFields[write->id] = true;
@@ -74,7 +73,7 @@ bool IdentifyDeparserZeroCandidates::preorder(const IR::MAU::Action* act) {
     return true;
 }
 
-bool IdentifyDeparserZeroCandidates::preorder(const IR::BFN::DigestFieldList* list) {
+bool IdentifyDeparserZeroCandidates::preorder(const IR::BFN::DigestFieldList *list) {
     for (auto source : list->sources) {
         if (auto temp = source->field->to<IR::TempVar>()) {
             if (temp->deparsed_zero) {
@@ -88,22 +87,21 @@ bool IdentifyDeparserZeroCandidates::preorder(const IR::BFN::DigestFieldList* li
 
 void IdentifyDeparserZeroCandidates::eliminateNonByteAlignedFields() {
     LOG1("\tEliminating non byte aligned fields");
-    ordered_set<const PHV::Field*> fieldsToBeRemoved;
-    for (const auto* f : candidateFields) {
-        if (f->size % 8 == 0 && f->offset % 8 == 0)
-            continue;
+    ordered_set<const PHV::Field *> fieldsToBeRemoved;
+    for (const auto *f : candidateFields) {
+        if (f->size % 8 == 0 && f->offset % 8 == 0) continue;
         auto lo = f->offset % 8;
         auto minOffset = (lo == 0) ? f->offset : f->offset - lo;
         auto maxOffset = (8 * (((f->offset + f->size - 1) + 7) / 8)) - 1;
         bitvec totalOccupancy(f->offset - minOffset, f->size);
         LOG4("\t  Field f " << f << ", min offset: " << minOffset << ", max offset: " << maxOffset
-             << ", occupancy: " << totalOccupancy);
+                            << ", occupancy: " << totalOccupancy);
         // At this point, field f shares its byte with at least one other field.
         // [minOffset, maxOffset] is the range of offsets within the header that we are interested
         // in checking now. If the field f shares a byte with only deparsed zero fields, then allow
         // the deparsed zero optimization for f, otherwise remove f from the list of deparsed zero
         // fields.
-        for (const auto* f1 : candidateFields) {
+        for (const auto *f1 : candidateFields) {
             if (f == f1) continue;
             if (f1->size % 8 == 0) continue;
             if (f->header() != f1->header()) continue;
@@ -122,24 +120,22 @@ void IdentifyDeparserZeroCandidates::eliminateNonByteAlignedFields() {
                 f1_occupancy |= f1_occupancy << (min_f1_offset - minOffset);
                 min_f1_offset = minOffset;
             }
-            LOG4("\t    Field f1 " << f1 << ", occupancy: " << f1_occupancy << ", min offset: " <<
-                 min_f1_offset << ", max_f1_offset: " << max_f1_offset);
+            LOG4("\t    Field f1 " << f1 << ", occupancy: " << f1_occupancy << ", min offset: "
+                                   << min_f1_offset << ", max_f1_offset: " << max_f1_offset);
             if (fAfterf1 || f1Afterf) {
                 LOG4("\t\tFields " << f->name << " and " << f1->name << " share same byte.");
                 totalOccupancy |= f1_occupancy;
             }
         }
         LOG4("\t\tTotal occupancy of relevant bits: " << totalOccupancy);
-        if (totalOccupancy.popcount() % 8 != 0)
-            fieldsToBeRemoved.insert(f);
+        if (totalOccupancy.popcount() % 8 != 0) fieldsToBeRemoved.insert(f);
     }
-    for (const auto* f : fieldsToBeRemoved)
-        candidateFields.erase(f);
+    for (const auto *f : fieldsToBeRemoved) candidateFields.erase(f);
 }
 
 void IdentifyDeparserZeroCandidates::end_apply() {
     LOG4("\tExamining fields for deparser zero optimization:");
-    for (auto& f : phv) {
+    for (auto &f : phv) {
         if (f.isGhostField()) continue;
         if (f.metadata || f.pov) continue;
         if (f.padding) continue;
@@ -161,8 +157,8 @@ void IdentifyDeparserZeroCandidates::end_apply() {
             LOG4("\t\tField written by non set operations");
             continue;
         }
-        if (mauWrittenFields[f.id] && (!mauWrittenToZeroFields[f.id] ||
-                    mauWrittenToNonZeroFields[f.id])) {
+        if (mauWrittenFields[f.id] &&
+            (!mauWrittenToZeroFields[f.id] || mauWrittenToNonZeroFields[f.id])) {
             LOG4("\t\tField written by PHV/action data/non-zero constant in MAU: " << f);
             continue;
         }
@@ -170,17 +166,17 @@ void IdentifyDeparserZeroCandidates::end_apply() {
     }
     eliminateNonByteAlignedFields();
     LOG1("\tCandidates for deparser zero optimization:");
-    for (auto& f : phv) {
+    for (auto &f : phv) {
         if (!candidateFields.count(&f)) continue;
         LOG1("\t\t" << f);
         f.set_deparser_zero_candidate(true);
     }
 }
 
-IR::Node* ImplementDeparserZero::preorder(IR::BFN::Extract* extract) {
-    auto* fieldLVal = extract->dest->to<IR::BFN::FieldLVal>();
+IR::Node *ImplementDeparserZero::preorder(IR::BFN::Extract *extract) {
+    auto *fieldLVal = extract->dest->to<IR::BFN::FieldLVal>();
     if (!fieldLVal) return extract;
-    auto* f = phv.field(fieldLVal->field);
+    auto *f = phv.field(fieldLVal->field);
     if (!f) return extract;
     // For now, ignore CLOT fields in the deparser zero optimization.
     // TODO: Move deparser zero before CLOT allocation so that we save some bandwidth for
@@ -190,24 +186,19 @@ IR::Node* ImplementDeparserZero::preorder(IR::BFN::Extract* extract) {
     return extract;
 }
 
-IR::Node* ImplementDeparserZero::preorder(IR::MAU::Instruction* inst) {
-    if (inst->operands.empty())
-        return inst;
-    auto* dst = phv.field(inst->operands[0]);
+IR::Node *ImplementDeparserZero::preorder(IR::MAU::Instruction *inst) {
+    if (inst->operands.empty()) return inst;
+    auto *dst = phv.field(inst->operands[0]);
     if (!dst) return inst;
     if (clots.fully_allocated(dst)) return inst;
     if (candidateFields.count(dst)) return nullptr;
     return inst;
 }
 
-DeparserZeroOptimization::DeparserZeroOptimization(
-        PhvInfo& p,
-        const FieldDefUse& d,
-        const ReductionOrInfo& ri,
-        const PragmaDeparserZero& pf,
-        const ClotInfo& c) {
-    addPasses({
-        new IdentifyDeparserZeroCandidates(p, d, ri, pf, candidateFields),
-        new ImplementDeparserZero(p, candidateFields, c)
-    });
+DeparserZeroOptimization::DeparserZeroOptimization(PhvInfo &p, const FieldDefUse &d,
+                                                   const ReductionOrInfo &ri,
+                                                   const PragmaDeparserZero &pf,
+                                                   const ClotInfo &c) {
+    addPasses({new IdentifyDeparserZeroCandidates(p, d, ri, pf, candidateFields),
+               new ImplementDeparserZero(p, candidateFields, c)});
 }

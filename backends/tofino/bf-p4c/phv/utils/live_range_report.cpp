@@ -10,21 +10,21 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include "bf-p4c/phv/analysis/meta_live_range.h"
-#include "bf-p4c/common/table_printer.h"
 #include "bf-p4c/phv/utils/live_range_report.h"
 
+#include "bf-p4c/common/table_printer.h"
+#include "bf-p4c/phv/analysis/meta_live_range.h"
+
 std::map<int, PHV::FieldUse> LiveRangeReport::processUseDefSet(
-        const FieldDefUse::LocPairSet& defuseSet,
-        PHV::FieldUse usedef) const {
+    const FieldDefUse::LocPairSet &defuseSet, PHV::FieldUse usedef) const {
     const int DEPARSER = maxStages;
     const int PARSER = -1;
     std::map<int, PHV::FieldUse> fieldMap;
     for (const FieldDefUse::locpair &use : defuseSet) {
-        const IR::BFN::Unit* use_unit = use.first;
+        const IR::BFN::Unit *use_unit = use.first;
         if (use_unit->is<IR::BFN::ParserState>() || use_unit->is<IR::BFN::Parser>() ||
             use_unit->is<IR::BFN::GhostParser>()) {
-            auto* ps = use_unit->to<IR::BFN::ParserState>();
+            auto *ps = use_unit->to<IR::BFN::ParserState>();
             cstring use_location;
             if (!ps) {
                 use_location = " to parser"_cs;
@@ -42,7 +42,7 @@ std::map<int, PHV::FieldUse> LiveRangeReport::processUseDefSet(
             fieldMap[DEPARSER] |= usedef;
             LOG4("\tAssign " << usedef << " to deparser");
         } else if (use_unit->is<IR::MAU::Table>()) {
-            const auto* t = use_unit->to<IR::MAU::Table>();
+            const auto *t = use_unit->to<IR::MAU::Table>();
             LOG4("\tTable " << t->name);
             auto stages = alloc.stages(t);
             for (auto stage : stages) {
@@ -61,7 +61,7 @@ std::map<int, PHV::FieldUse> LiveRangeReport::processUseDefSet(
     return fieldMap;
 }
 
-void LiveRangeReport::setFieldLiveMap(const PHV::Field* f) {
+void LiveRangeReport::setFieldLiveMap(const PHV::Field *f) {
     auto usemap = processUseDefSet(defuse.getAllUses(f->id), PHV::FieldUse(READ));
     auto defmap = processUseDefSet(defuse.getAllDefs(f->id), PHV::FieldUse(WRITE));
 
@@ -74,8 +74,7 @@ void LiveRangeReport::setFieldLiveMap(const PHV::Field* f) {
         }
         if (min != maxStages + 1 && max != -2) {
             LOG4("Min-max for " << f->name << " : [" << min << ", " << max << "]");
-            for (int i = min; i <= max; i++)
-                usemap[i] |= PHV::FieldUse(LIVE);
+            for (int i = min; i <= max; i++) usemap[i] |= PHV::FieldUse(LIVE);
         }
     };
 
@@ -90,8 +89,7 @@ void LiveRangeReport::setFieldLiveMap(const PHV::Field* f) {
     };
 
     // Combine the maps into a single map.
-    for (auto kv : defmap)
-        usemap[kv.first] |= kv.second;
+    for (auto kv : defmap) usemap[kv.first] |= kv.second;
 
     // If alias present, update usemap and alias field in livemap
     if (f->aliasSource) {
@@ -107,8 +105,7 @@ void LiveRangeReport::setFieldLiveMap(const PHV::Field* f) {
     }
 
     // For no alias just update the usemap
-    if (!f->aliasSource && aliases.count(f) == 0)
-        update_usemap();
+    if (!f->aliasSource && aliases.count(f) == 0) update_usemap();
 
     livemap[f] = usemap;
 }
@@ -120,8 +117,7 @@ cstring LiveRangeReport::printFieldLiveness() {
     headers.push_back("Field");
     headers.push_back("Bit Size");
     headers.push_back("P");
-    for (int i = 0; i < maxStages; i++)
-        headers.push_back(std::to_string(i));
+    for (int i = 0; i < maxStages; i++) headers.push_back(std::to_string(i));
     headers.push_back("D");
     TablePrinter tp(ss, headers, TablePrinter::Align::LEFT);
     for (auto kv : livemap) {
@@ -135,12 +131,9 @@ cstring LiveRangeReport::printFieldLiveness() {
                 row.push_back(std::string(use_type.toString()));
                 // Skip aliased fields for bit calculation
                 if (aliases.count(kv.first)) continue;
-                if (kv.second.at(i).isRead())
-                    stageToReadBits[i] += kv.first->size;
-                if (kv.second.at(i).isWrite())
-                    stageToWriteBits[i] += kv.first->size;
-                if (kv.second.at(i).isLive())
-                    stageToLiveBits[i] += kv.first->size;
+                if (kv.second.at(i).isRead()) stageToReadBits[i] += kv.first->size;
+                if (kv.second.at(i).isWrite()) stageToWriteBits[i] += kv.first->size;
+                if (kv.second.at(i).isLive()) stageToLiveBits[i] += kv.first->size;
             } else {
                 row.push_back("");
             }
@@ -151,9 +144,8 @@ cstring LiveRangeReport::printFieldLiveness() {
     return ss.str();
 }
 
-std::vector<std::string> LiveRangeReport::createStatRow(
-        std::string title,
-        const std::map<int, int>& data) const {
+std::vector<std::string> LiveRangeReport::createStatRow(std::string title,
+                                                        const std::map<int, int> &data) const {
     std::vector<std::string> rv;
     rv.push_back(title);
     for (int i = -1; i <= maxStages; i++) {
@@ -171,8 +163,7 @@ cstring LiveRangeReport::printBitStats() const {
     std::vector<std::string> headers;
     headers.push_back("Statistic");
     headers.push_back("P");
-    for (int i = 0; i < maxStages; i++)
-        headers.push_back(std::to_string(i));
+    for (int i = 0; i < maxStages; i++) headers.push_back(std::to_string(i));
     headers.push_back("D");
     TablePrinter tp(ss, headers, TablePrinter::Align::LEFT);
     tp.addRow(createStatRow("Bits Read", stageToReadBits));
@@ -199,7 +190,7 @@ cstring LiveRangeReport::printAliases() const {
     return ss.str();
 }
 
-Visitor::profile_t LiveRangeReport::init_apply(const IR::Node* root) {
+Visitor::profile_t LiveRangeReport::init_apply(const IR::Node *root) {
     stageToReadBits.clear();
     stageToWriteBits.clear();
     stageToAccessBits.clear();
@@ -210,11 +201,10 @@ Visitor::profile_t LiveRangeReport::init_apply(const IR::Node* root) {
     int maxStagesInAlloc = alloc.maxStages();
     int maxDeviceStages = Device::numStages();
     maxStages = (maxStagesInAlloc > maxDeviceStages) ? maxStagesInAlloc : maxDeviceStages;
-    for (const PHV::Field& f : phv) {
+    for (const PHV::Field &f : phv) {
         bool only_tphv_allocation = true;
-        f.foreach_alloc([&](const PHV::AllocSlice& slice) {
-            if (!slice.container().is(PHV::Kind::tagalong))
-                only_tphv_allocation = false;
+        f.foreach_alloc([&](const PHV::AllocSlice &slice) {
+            if (!slice.container().is(PHV::Kind::tagalong)) only_tphv_allocation = false;
         });
         if (only_tphv_allocation) continue;
         setFieldLiveMap(&f);

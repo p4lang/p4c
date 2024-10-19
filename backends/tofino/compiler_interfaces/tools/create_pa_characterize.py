@@ -4,18 +4,23 @@
 This script produces a pa.characterize.log from an input phv.json file.
 """
 
-import json, logging, math, os, sys
+import json
+import logging
+import math
+import os
+import sys
 from collections import OrderedDict
+
 from .utils import *
 
-if not getattr(sys,'frozen', False):
+if not getattr(sys, 'frozen', False):
     # standalone script
     MYPATH = os.path.dirname(__file__)
     SCHEMA_PATH = os.path.join(MYPATH, "../")
     sys.path.append(SCHEMA_PATH)
 
-from schemas.schema_keys import *
 from schemas.schema_enum_values import *
+from schemas.schema_keys import *
 
 # The minimum phv.json schema version required.
 MINIMUM_PHV_JSON_REQUIRED = "2.0.0"
@@ -27,9 +32,18 @@ LOGGER_NAME = "PA-CHAR-RESULT-LOG"
 # Helpers
 # ----------------------------------------
 
+
 class Record(object):
-    def __init__(self, container_msb, container_lsb, field_name, field_msb, field_lsb,
-                 field_class, field_gress):
+    def __init__(
+        self,
+        container_msb,
+        container_lsb,
+        field_name,
+        field_msb,
+        field_lsb,
+        field_class,
+        field_gress,
+    ):
         self.container_msb = container_msb
         self.container_lsb = container_lsb
         self.field_name = field_name
@@ -89,12 +103,14 @@ class Record(object):
         return live_start, live_end
 
     def log_record(self, num_stages):
-        data = [" [%d:%d]" % (self.container_msb, self.container_lsb),
-                self.field_gress,
-                "%s[%d:%d]" % (self.field_name, self.field_msb, self.field_lsb),
-                self.field_class]
-        data.append("") # blank column
-        stages = [""]*(num_stages + 2)
+        data = [
+            " [%d:%d]" % (self.container_msb, self.container_lsb),
+            self.field_gress,
+            "%s[%d:%d]" % (self.field_name, self.field_msb, self.field_lsb),
+            self.field_class,
+        ]
+        data.append("")  # blank column
+        stages = [""] * (num_stages + 2)
         live_start, live_end = self.get_live_start_end(num_stages)
 
         if live_start == 0:
@@ -170,7 +186,7 @@ class Container(object):
 
     def log_container(self, num_stages):
         data = []
-        blank_stages = [""]*(num_stages + 3)  # empty column, parser, stages, deparser
+        blank_stages = [""] * (num_stages + 3)  # empty column, parser, stages, deparser
 
         c = ["phv%d" % self.address, self.get_gress(), "", self.get_container_class()]
         c.extend(blank_stages)
@@ -189,6 +205,7 @@ class Container(object):
 #  Produce log file
 # ----------------------------------------
 
+
 def _add_access(access, record, access_type):
     # table_name = get_attr(TABLE_NAME, access)
     location = get_attr(LOCATION, access)
@@ -199,16 +216,19 @@ def _add_access(access, record, access_type):
     else:
         record.add_access(location_type, access_type)
 
+
 def _get_field_info(field_name, fields):
     for field in fields:
         field_info = get_attr(FIELD_INFO, field)
         if get_attr(FIELD_NAME, field_info) == field_name:
             return field_info
 
+
 def _get_gress_info(phv_number, containers):
     for container in containers:
         if get_attr(PHV_NUMBER, container) == phv_number:
             return get_attr(GRESS, container)
+
 
 def _parse_phv_json(context):
 
@@ -262,7 +282,9 @@ def _parse_phv_json(context):
                 reads = get_attr(READS, r)
                 writes = get_attr(WRITES, r)
 
-                crec = Record(phv_msb, phv_lsb, field_name, field_msb, field_lsb, field_class, gress)
+                crec = Record(
+                    phv_msb, phv_lsb, field_name, field_msb, field_lsb, field_class, gress
+                )
                 for rd in reads:
                     _add_access(rd, crec, READ)
                 for wr in writes:
@@ -270,7 +292,10 @@ def _parse_phv_json(context):
 
                 cobj.add_record(crec)
         else:
-            error_msg = "Container number '%s' was not specified as an address in %s node." % (str(phv_number), RESOURCES)
+            error_msg = "Container number '%s' was not specified as an address in %s node." % (
+                str(phv_number),
+                RESOURCES,
+            )
             print_error_and_exit(error_msg)
 
     return num_stages, all_containers
@@ -279,7 +304,18 @@ def _parse_phv_json(context):
 def log_stage_liveness(num_stages, all_containers):
     log = logging.getLogger(LOGGER_NAME)
 
-    hdrs = [["Direction", "Location", "Fields Live", "Bits Live", "Header Fields Live", "Header Bits Live", "Metadata Fields Live", "Metadata Bits Live"]]
+    hdrs = [
+        [
+            "Direction",
+            "Location",
+            "Fields Live",
+            "Bits Live",
+            "Header Fields Live",
+            "Header Bits Live",
+            "Metadata Fields Live",
+            "Metadata Bits Live",
+        ]
+    ]
     data = []
     blank = [""] * len(hdrs[0])
 
@@ -325,12 +361,12 @@ def log_stage_liveness(num_stages, all_containers):
                             else:
                                 meta_live[gress][loc] += 1
 
-                        total_bits_live[gress][loc] += (r.field_msb - r.field_lsb + 1)
+                        total_bits_live[gress][loc] += r.field_msb - r.field_lsb + 1
                         if r.field_class == PKT:
-                            hdr_bits_live[gress][loc] += (r.field_msb - r.field_lsb + 1)
+                            hdr_bits_live[gress][loc] += r.field_msb - r.field_lsb + 1
                             total_hdr_saw[gress].add(r.field_name)
                         else:
-                            meta_bits_live[gress][loc] += (r.field_msb - r.field_lsb + 1)
+                            meta_bits_live[gress][loc] += r.field_msb - r.field_lsb + 1
                             total_meta_saw[gress].add(r.field_name)
 
                         fields_saw.add((r.field_name, r.field_gress, loc))
@@ -357,10 +393,18 @@ def log_stage_liveness(num_stages, all_containers):
             if total_meta > 0:
                 meta_pcent = 100.0 * float(meta_live[g][loc]) / float(total_meta)
 
-            data.append([g, actual_loc,
-                         "%d (%.2f%%)" % (fields_live[g][loc], fields_pcent), total_bits_live[g][loc],
-                         "%d (%.2f%%)" % (hdrs_live[g][loc], hdr_pcent), hdr_bits_live[g][loc],
-                         "%d (%.2f%%)" % (meta_live[g][loc], meta_pcent), meta_bits_live[g][loc]])
+            data.append(
+                [
+                    g,
+                    actual_loc,
+                    "%d (%.2f%%)" % (fields_live[g][loc], fields_pcent),
+                    total_bits_live[g][loc],
+                    "%d (%.2f%%)" % (hdrs_live[g][loc], hdr_pcent),
+                    hdr_bits_live[g][loc],
+                    "%d (%.2f%%)" % (meta_live[g][loc], meta_pcent),
+                    meta_bits_live[g][loc],
+                ]
+            )
 
         if g == INGRESS:
             data.append(blank)
@@ -446,10 +490,12 @@ def produce_pa_characterize(source, output):
 
     box = "+---------------------------------------------------------------------+"
     log.info(box)
-    for s in ["Log file: %s" % RESULTS_FILE,
-              "Compiler version: %s" % str(compiler_version),
-              "Created on: %s" % str(build_date),
-              "Run ID: %s" % str(run_id)]:
+    for s in [
+        "Log file: %s" % RESULTS_FILE,
+        "Compiler version: %s" % str(compiler_version),
+        "Created on: %s" % str(build_date),
+        "Run ID: %s" % str(run_id),
+    ]:
         line = "|  %s" % s
         while len(line) < (len(box) - 1):
             line += " "
@@ -469,7 +515,7 @@ def produce_pa_characterize(source, output):
     hdrs.extend(stages)
     hdrs.append("D")
     hdrs = [hdrs]
-    blank = [""]*len(hdrs[0])
+    blank = [""] * len(hdrs[0])
 
     data = []
     addr_keys = list(all_containers.keys())
@@ -510,7 +556,9 @@ def produce_pa_characterize(source, output):
         pcent_share = 100.0 * float(containers_with_share) / float(containers_used)
 
     log.info("\nContainers used: %d" % containers_used)
-    log.info("Containers with data overlayed: %d  (%.2f%%)" % (containers_with_overlay, pcent_overlay))
+    log.info(
+        "Containers with data overlayed: %d  (%.2f%%)" % (containers_with_overlay, pcent_overlay)
+    )
     log.info("Containers shared: %d  (%.2f%%)" % (containers_with_share, pcent_share))
 
     log.info("\n------------------------")
@@ -541,10 +589,17 @@ if __name__ == "__main__":
     import sys
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('source', metavar='source', type=str,
-                        help='The input phv.json source file to use.')
-    parser.add_argument('--output', '-o', type=str, action="store", default=".",
-                        help="The output directory to output %s." % RESULTS_FILE)
+    parser.add_argument(
+        'source', metavar='source', type=str, help='The input phv.json source file to use.'
+    )
+    parser.add_argument(
+        '--output',
+        '-o',
+        type=str,
+        action="store",
+        default=".",
+        help="The output directory to output %s." % RESULTS_FILE,
+    )
     args = parser.parse_args()
 
     try:

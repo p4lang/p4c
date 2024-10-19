@@ -14,8 +14,8 @@
 #define BF_P4C_MAU_VALIDATE_ACTIONS_H_
 
 #include "bf-p4c/mau/mau_visitor.h"
-#include "ir/visitor.h"
 #include "bf-p4c/phv/phv_fields.h"
+#include "ir/visitor.h"
 
 class PhvInfo;
 class ReductionOrInfo;
@@ -32,7 +32,7 @@ class ValidateActions final : public MauInspector {
     // true if action analysis finds a PHV allocation that violates MAU constraints.
     bool error_found = false;
 
-    profile_t init_apply(const IR::Node* root) override;
+    profile_t init_apply(const IR::Node *root) override;
     bool preorder(const IR::MAU::Action *act) override;
     void end_apply() override;
 

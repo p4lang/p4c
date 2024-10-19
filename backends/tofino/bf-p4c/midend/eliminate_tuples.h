@@ -13,9 +13,9 @@
 #ifndef BF_P4C_MIDEND_ELIMINATE_TUPLES_H_
 #define BF_P4C_MIDEND_ELIMINATE_TUPLES_H_
 
-#include "ir/ir.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/ir.h"
 #include "midend/eliminateTuples.h"
 
 namespace BFN {
@@ -25,23 +25,23 @@ namespace BFN {
 // (which converts ListExpression to StructExpression,
 // and since HashListExpression is also ListExpression
 // it gets transformed and the extra data are lost)
-class SaveHashListExpression: public Inspector {
+class SaveHashListExpression : public Inspector {
  public:
-    std::map<const IR::Expression*, const IR::HashListExpression*> update_hashes;
+    std::map<const IR::Expression *, const IR::HashListExpression *> update_hashes;
 
     bool preorder(const IR::HashListExpression *hle) override;
 };
 
 // Inserts back the information from HashListExpressions to new HashStructExpressions
-class InsertHashStructExpression: public Transform {
-    std::map<const IR::Expression*, const IR::HashListExpression*>* update_hashes;
+class InsertHashStructExpression : public Transform {
+    std::map<const IR::Expression *, const IR::HashListExpression *> *update_hashes;
 
  public:
     InsertHashStructExpression(
-        std::map<const IR::Expression*, const IR::HashListExpression*>* update_hashes) :
-            update_hashes(update_hashes) { };
+        std::map<const IR::Expression *, const IR::HashListExpression *> *update_hashes)
+        : update_hashes(update_hashes){};
 
-    const IR::Node* preorder(IR::StructExpression *se) override;
+    const IR::Node *preorder(IR::StructExpression *se) override;
 };
 
 /**
@@ -49,11 +49,10 @@ class InsertHashStructExpression: public Transform {
  */
 class EliminateTuples final : public PassManager {
  public:
-    EliminateTuples(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-            P4::TypeChecking* typeChecking = nullptr,
-            P4::TypeInference* typeInference = nullptr) {
-        if (!typeChecking)
-            typeChecking = new P4::TypeChecking(refMap, typeMap);
+    EliminateTuples(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                    P4::TypeChecking *typeChecking = nullptr,
+                    P4::TypeInference *typeInference = nullptr) {
+        if (!typeChecking) typeChecking = new P4::TypeChecking(refMap, typeMap);
         passes.push_back(typeChecking);
         passes.push_back(new P4::DoReplaceTuples(typeMap));
         // Save any HashListExpressions
@@ -65,8 +64,7 @@ class EliminateTuples final : public PassManager {
         // into StructExpression where tuples were converted
         // to structs.
         passes.push_back(new P4::ResolveReferences(refMap));
-        if (!typeInference)
-            typeInference = new P4::TypeInference(typeMap, false);
+        if (!typeInference) typeInference = new P4::TypeInference(typeMap, false);
         passes.push_back(typeInference);
         // Reinsert HashListExpression information
         passes.push_back(new InsertHashStructExpression(&shle->update_hashes));
@@ -76,4 +74,4 @@ class EliminateTuples final : public PassManager {
 
 }  // namespace BFN
 
-#endif  /* BF_P4C_MIDEND_ELIMINATE_TUPLES_H_ */
+#endif /* BF_P4C_MIDEND_ELIMINATE_TUPLES_H_ */

@@ -10,12 +10,12 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PARDE_SPLIT_PARSER_STATE_H_
-#define EXTENSIONS_BF_P4C_PARDE_SPLIT_PARSER_STATE_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_SPLIT_PARSER_STATE_H_
+#define BACKENDS_TOFINO_BF_P4C_PARDE_SPLIT_PARSER_STATE_H_
 
-#include "parde_visitor.h"
-#include "bf-p4c/parde/clot/clot_info.h"
 #include "bf-p4c/ir/bitrange.h"
+#include "bf-p4c/parde/clot/clot_info.h"
+#include "parde_visitor.h"
 
 /**
  * @ingroup LowerParserIR
@@ -27,11 +27,11 @@
  * the parser IR. Specifically, parser states may need to split into
  * multiple states to account for various resource contraints of
  * a single parser state, these are
- * 
+ *
  *    - Input buffer (can only see 32 bytes of packet data in a state)
  *    - Extractors for PHV container
  *    - Constant extracts
- *    - Parser counter 
+ *    - Parser counter
  *    - Checksum calculation
  *    - CLOT issurance (JBAY)
  *    - Stage rules (FTR)
@@ -40,4 +40,4 @@ struct SplitParserState : public PassManager {
     SplitParserState(const PhvInfo &phv, ClotInfo &clot, const CollectParserInfo &parser_info);
 };
 
-#endif /* EXTENSIONS_BF_P4C_PARDE_SPLIT_PARSER_STATE_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_SPLIT_PARSER_STATE_H_ */

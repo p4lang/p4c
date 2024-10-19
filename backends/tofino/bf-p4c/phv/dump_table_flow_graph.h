@@ -16,26 +16,24 @@
 #include "bf-p4c/mau/table_flow_graph.h"
 
 struct DumpTableFlowGraph : public Visitor {
-    const PhvInfo& phv;
+    const PhvInfo &phv;
 
-    explicit DumpTableFlowGraph(const PhvInfo& p) : phv(p) { }
+    explicit DumpTableFlowGraph(const PhvInfo &p) : phv(p) {}
 
     struct CollectPhvReadsAndWrites : public Inspector {
-        const PhvInfo& phv;
-        explicit CollectPhvReadsAndWrites(const PhvInfo& p) : phv(p) { }
+        const PhvInfo &phv;
+        explicit CollectPhvReadsAndWrites(const PhvInfo &p) : phv(p) {}
 
-        ordered_set<const PHV::Field*> reads, writes;
+        ordered_set<const PHV::Field *> reads, writes;
 
         // An MAU::Table object may have TableSeq on the $default path,
         // make sure these tables are not visited.
-        bool preorder(const IR::MAU::TableSeq*) override {
-            return false;
-        }
-        bool preorder(const IR::MAU::Table* tbl) override {
+        bool preorder(const IR::MAU::TableSeq *) override { return false; }
+        bool preorder(const IR::MAU::Table *tbl) override {
             return !tbl->is_a_gateway_table_only();
         }
 
-        bool preorder(const IR::MAU::Instruction* inst) override {
+        bool preorder(const IR::MAU::Instruction *inst) override {
             for (unsigned i = 0; i < inst->operands.size(); i++) {
                 auto f = phv.field(inst->operands[i]);
                 if (f) {
@@ -51,21 +49,22 @@ struct DumpTableFlowGraph : public Visitor {
     };
 
     struct PhvDetails : public FlowGraph::DumpTableDetails {
-        const PhvInfo& phv;
-        explicit PhvDetails(const PhvInfo& p) : phv(p) { }
+        const PhvInfo &phv;
+        explicit PhvDetails(const PhvInfo &p) : phv(p) {}
 
-        void dump(std::ostream &out, const IR::MAU::Table* tbl) const override {
+        void dump(std::ostream &out, const IR::MAU::Table *tbl) const override {
             out << FlowGraph::viz_node_name(tbl) << " [ shape=record, style=\"filled\","
                 << " fillcolor=cornsilk, label=\""
-                << (tbl->is_a_gateway_table_only() ? tbl->gateway_cond  : tbl->name)
-                << "\\l\\l" << std::endl;
+                << (tbl->is_a_gateway_table_only() ? tbl->gateway_cond : tbl->name) << "\\l\\l"
+                << std::endl;
 
             if (!tbl->match_key.empty()) {
                 out << "M:\\l" << std::endl;
                 for (auto m : tbl->match_key) {
                     auto f = phv.field(m->expr);
                     // When match on an error type is used the PHV does not exist
-                    BUG_CHECK(f,
+                    BUG_CHECK(
+                        f,
                         "PHV details for %s not found. Possibly trying to match on an error type?",
                         m->expr);
                     out << " " << stripThreadPrefix(f->name) << "\\l" << std::endl;
@@ -93,28 +92,27 @@ struct DumpTableFlowGraph : public Visitor {
         }
     };
 
-    std::ofstream* open_file(gress_t gress, int pipe_id, cstring directory = "graphs"_cs) {
+    std::ofstream *open_file(gress_t gress, int pipe_id, cstring directory = "graphs"_cs) {
         auto outdir = BFNContext::get().getOutputDirectory(directory, pipe_id);
-        if (!outdir)
-            return nullptr;
+        if (!outdir) return nullptr;
 
         static int fid = 0;
-        auto filepath = outdir + "/" + std::to_string(fid++) + "_" + "table_flow_graph"
-            + "_" + ::toString(gress) + ".dot";
+        auto filepath = outdir + "/" + std::to_string(fid++) + "_" + "table_flow_graph" + "_" +
+                        ::toString(gress) + ".dot";
 
         return new std::ofstream(filepath);
     }
 
-    const IR::Node *apply_visitor(const IR::Node *n, const char*) override { return n; }
+    const IR::Node *apply_visitor(const IR::Node *n, const char *) override { return n; }
 
-    Visitor::profile_t init_apply(const IR::Node* root) override {
+    Visitor::profile_t init_apply(const IR::Node *root) override {
         auto rv = Visitor::init_apply(root);
 
         ordered_map<gress_t, FlowGraph> graphs;
         FindFlowGraphs ffg(graphs);
         root->apply(ffg);
 
-        for (auto& kv : graphs) {
+        for (auto &kv : graphs) {
             if (kv.second.emptyFlowGraph) continue;
 
             auto fs = open_file(kv.first, root->to<IR::BFN::Pipe>()->canon_id());

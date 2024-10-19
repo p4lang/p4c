@@ -10,8 +10,10 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#include <vector>
 #include "selector_update.h"
+
+#include <vector>
+
 #include "bf-p4c/mau/resource_estimate.h"
 
 bool AddSelectorSalu::AddSaluIfNeeded::preorder(IR::MAU::Table *tbl) {
@@ -29,9 +31,11 @@ bool AddSelectorSalu::AddSaluIfNeeded::preorder(IR::MAU::Table *tbl) {
                 ram_lines = ((ram_lines + 1023) / 1024) * 1024;
                 salu->size = ram_lines * 128;
                 salu->synthetic_for_selector = true;
-                self.sel2salu[sel] = salu; }
-            toAdd.push_back(self.sel2salu[sel]); } }
-    for (auto salu : toAdd)
-        tbl->attached.push_back(new IR::MAU::BackendAttached(salu));
+                self.sel2salu[sel] = salu;
+            }
+            toAdd.push_back(self.sel2salu[sel]);
+        }
+    }
+    for (auto salu : toAdd) tbl->attached.push_back(new IR::MAU::BackendAttached(salu));
     return true;
 }

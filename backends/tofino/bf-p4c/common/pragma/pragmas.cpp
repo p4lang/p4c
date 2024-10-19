@@ -36,7 +36,8 @@ const char *PragmaAdjustByteCount::help =
 const char *PragmaAlpm::name = "alpm";
 const char *PragmaAlpm::description =
     "Requests the associated match table to be implemented as an Alogrithmic LPM (ALPM) table.";
-const char *PragmaAlpm::help = "@pragma alpm 1\n"
+const char *PragmaAlpm::help =
+    "@pragma alpm 1\n"
     "+ attached to P4 match tables\n"
     "\n"
     "Specifies that the associated match table should be implemented as an "
@@ -53,7 +54,8 @@ const char *PragmaAlpm::help = "@pragma alpm 1\n"
 const char *PragmaAlpmPartitions::name = "alpm_partitions";
 const char *PragmaAlpmPartitions::description =
     "Specifies the number of partitions for an ALPM table";
-const char *PragmaAlpmPartitions::help = "@pragma alpm_partitions 2048\n"
+const char *PragmaAlpmPartitions::help =
+    "@pragma alpm_partitions 2048\n"
     "+ attached to P4 match tables\n"
     "\n"
     "If the associated match table has been specified to be implemented as "
@@ -64,7 +66,8 @@ const char *PragmaAlpmPartitions::help = "@pragma alpm_partitions 2048\n"
 const char *PragmaAlpmSubtreePartitions::name = "alpm_subtrees_per_partition";
 const char *PragmaAlpmSubtreePartitions::description =
     "Specifies the number of subtrees per ALPM partition.";
-const char *PragmaAlpmSubtreePartitions::help = "@pragma alpm_subtrees_per_partition 2\n"
+const char *PragmaAlpmSubtreePartitions::help =
+    "@pragma alpm_subtrees_per_partition 2\n"
     "+ attached to P4 match tables\n"
     "\n"
     "If the associated match table has been specified to be implemented as "
@@ -79,7 +82,8 @@ const char *PragmaAlpmSubtreePartitions::help = "@pragma alpm_subtrees_per_parti
 const char *PragmaAtcamPartitions::name = "atcam_number_partitions";
 const char *PragmaAtcamPartitions::description =
     "Specifies the number of partitions for an ATCAM table.";
-const char *PragmaAtcamPartitions::help = "@pragma atcam_number_partitions 1024\n"
+const char *PragmaAtcamPartitions::help =
+    "@pragma atcam_number_partitions 1024\n"
     "+ attached to P4 match tables\n"
     "\n"
     "Specifies the number of partitions to use for an algorithmic TCAM (ATCAM) "
@@ -113,8 +117,7 @@ const char *PragmaAlpmAtcamExcludeFieldMsbs::help =
     "from atcam keys.";
 
 const char *PragmaAutoInitMetadata::name = "pa_auto_init_metadata";
-const char *PragmaAutoInitMetadata::description =
-    "Enables automatic metadata initialization.";
+const char *PragmaAutoInitMetadata::description = "Enables automatic metadata initialization.";
 const char *PragmaAutoInitMetadata::help =
     "@pragma pa_auto_init_metadata\n"
     "+ at the beginning of the P4 source file"
@@ -126,23 +129,25 @@ const char *PragmaAutoInitMetadata::help =
 const char *PragmaQuickPhvAlloc::name = "pa_quick_phv_alloc";
 const char *PragmaQuickPhvAlloc::description =
     "Reduce PHV allocation search space for faster compilation.";
-const char *PragmaQuickPhvAlloc::help = "@pragma pa_quick_phv_alloc\n"
+const char *PragmaQuickPhvAlloc::help =
+    "@pragma pa_quick_phv_alloc\n"
     "\n"
     "Specifies that the compiler should reduce the search space for possible PHV allocation to "
     "reduce the time it takes to do a PHV allocation. This might affect the PHV allocation results "
     "and may even result in PHV allocation being unsuccessful.";
 
 const char *PragmaParserBandwidthOpt::name = "pa_parser_bandwidth_opt";
-const char *PragmaParserBandwidthOpt::description =
-    "Optimize for parser bandwidth.";
-const char *PragmaParserBandwidthOpt::help = "@pragma pa_parser_bandwidth_opt\n"
+const char *PragmaParserBandwidthOpt::description = "Optimize for parser bandwidth.";
+const char *PragmaParserBandwidthOpt::help =
+    "@pragma pa_parser_bandwidth_opt\n"
     "\n"
     "Specifies that the compiler should optimize PHV allocation for parser bandwidth.";
 
 const char *PragmaBackwardCompatible::name = "backward_compatible";
 const char *PragmaBackwardCompatible::description =
     "Set compiler to be backward compatible with p4c-tofino.";
-const char *PragmaBackwardCompatible::help = "@pragma backward_compatible\n"
+const char *PragmaBackwardCompatible::help =
+    "@pragma backward_compatible\n"
     "\n"
     "Set compiler to be backward compatible with p4c-tofino.";
 
@@ -225,7 +230,8 @@ const char *PragmaCalculatedFieldUpdateLocation::help =
 const char *PragmaChainAddress::name = "chain_address";
 const char *PragmaChainAddress::description =
     "Workaround used to create multistage FIFOs with Registers.";
-const char *PragmaChainAddress::help = "@pragma chain_address "
+const char *PragmaChainAddress::help =
+    "@pragma chain_address "
     "+ attached to initialization of each RegisterAction in a multistage FIFO\n"
     "\n"
     "For example:\n"
@@ -286,7 +292,8 @@ const char *PragmaCritical::help = "To be documented";
 
 const char *PragmaCommandLine::name = "command_line";
 const char *PragmaCommandLine::description = "Adds the argument as a command line options.";
-const char *PragmaCommandLine::help = "@pragma command_line <cmd_line_option(s)>\n"
+const char *PragmaCommandLine::help =
+    "@pragma command_line <cmd_line_option(s)>\n"
     "+ at the beginning of the P4 source file"
     "\n"
     "Adds the cmd_line_option to the set of options for the compiler. "
@@ -312,7 +319,8 @@ const char *PragmaDefaultPortmap::help = "To be documented";
 const char *PragmaDisableAtomicModify::name = "disable_atomic_modify";
 const char *PragmaDisableAtomicModify::description =
     "Do not reserve any table entries to handle atomic table modifications.";
-const char *PragmaDisableAtomicModify::help = "@disable_atomic_modify(1)\n"
+const char *PragmaDisableAtomicModify::help =
+    "@disable_atomic_modify(1)\n"
     "+attached to P4 match tables\n"
     "\n"
     "By default, tables reserve at least one table entry to handle table\n"
@@ -349,7 +357,8 @@ const char *PragmaDontTranslateExternMethod::help = "To be documented";
 const char *PragmaDynamicTableKeyMasks::name = "dynamic_table_key_masks";
 const char *PragmaDynamicTableKeyMasks::description =
     "Enable runtime programmable mask for table key fields.";
-const char *PragmaDynamicTableKeyMasks::help = "@pragma dynamic_table_key_masks 1\n"
+const char *PragmaDynamicTableKeyMasks::help =
+    "@pragma dynamic_table_key_masks 1\n"
     "+attached to P4 match tables\n"
     "\n"
     "Specifies that the associated match table, if it is an exact match "
@@ -361,7 +370,8 @@ const char *PragmaDynamicTableKeyMasks::help = "@pragma dynamic_table_key_masks 
 const char *PragmaEntriesWithRanges::name = "entries_with_ranges";
 const char *PragmaEntriesWithRanges::description =
     "Specifies how many entries in the table will have ranges.";
-const char *PragmaEntriesWithRanges::help = "@pragma entries_with_ranges <number>\n"
+const char *PragmaEntriesWithRanges::help =
+    "@pragma entries_with_ranges <number>\n"
     "+ attached to P4 match tables\n"
     "\n"
     "If the match table uses ranges, this pragma specifies how many of the "
@@ -375,7 +385,8 @@ const char *PragmaEntriesWithRanges::help = "@pragma entries_with_ranges <number
 const char *PragmaEgressIntrinsicMetadataOpt::name = "egress_intrinsic_metadata_opt";
 const char *PragmaEgressIntrinsicMetadataOpt::description =
     "Optimize unused egress intrinsic metadata.";
-const char *PragmaEgressIntrinsicMetadataOpt::help = "@pragma egress_intrinsic_metadata_opt\n"
+const char *PragmaEgressIntrinsicMetadataOpt::help =
+    "@pragma egress_intrinsic_metadata_opt\n"
     "+ at the beginning of the P4 source file"
     "\n"
     "Removes unused egress intrinsic metadata fields,"
@@ -419,7 +430,8 @@ const char *PragmaFieldListFieldSlice::help =
 
 const char *PragmaFlexible::name = "flexible";
 const char *PragmaFlexible::description = "";
-const char *PragmaFlexible::help = "@flexible\n"
+const char *PragmaFlexible::help =
+    "@flexible\n"
     "+attached to struct or struct field definitions\n"
     "\n"
     "Bridged metadata is user defined metadata that is made available in "
@@ -472,7 +484,8 @@ const char *PragmaImmediate::description =
     "Specifies that some parameters from the match table’s associated "
     "action data table should try to be packed in match overhead instead of in "
     "the action data table.";
-const char *PragmaImmediate::help = "@pragma immediate 1\n"
+const char *PragmaImmediate::help =
+    "@pragma immediate 1\n"
     "+attached to P4 match tables\n"
     "\n"
     "Specifies that some parameters from the match table’s associated action "
@@ -484,11 +497,11 @@ const char *PragmaImmediate::help = "@pragma immediate 1\n"
     "cannot be packed in match overhead for indirectly referenced action data "
     "tables.";
 
-
 const char *PragmaForceImmediate::name = "force_immediate";
 const char *PragmaForceImmediate::description =
     "Requires that action parameters are packed in the match overhead of the table.";
-const char *PragmaForceImmediate::help = "@pragma force_immediate 1\n"
+const char *PragmaForceImmediate::help =
+    "@pragma force_immediate 1\n"
     "+attached to P4 match tables\n"
     "\n"
     "Specifies that all action parameters from the match table’s associated "
@@ -501,7 +514,8 @@ const char *PragmaForceImmediate::help = "@pragma force_immediate 1\n"
 
 const char *PragmaForceShift::name = "force_shift";
 const char *PragmaForceShift::description = "Forces parser to shift cursor.";
-const char *PragmaForceShift::help = "@pragma force_shift [ingress/egress] [bits]\n"
+const char *PragmaForceShift::help =
+    "@pragma force_shift [ingress/egress] [bits]\n"
     "+attached to P4 parser state\n"
     "\n"
     "Forces the attached state of the ingress or egress parser to shift out "
@@ -512,7 +526,8 @@ const char *PragmaForceShift::help = "@pragma force_shift [ingress/egress] [bits
 const char *PragmaGFMParityEnable::name = "gfm_parity_enable";
 const char *PragmaGFMParityEnable::description =
     "Enable hash parity checking on the Galois Field Matrix (GFM)";
-const char *PragmaGFMParityEnable::help = "@gfm_parity_enable\n"
+const char *PragmaGFMParityEnable::help =
+    "@gfm_parity_enable\n"
     "Global pragma which applies to the entire program. Compiler reserves a single bit"
     " on each row of the GFM for parity and sets up the hardware to enable"
     " parity checking on hash groups used in the program";
@@ -520,7 +535,8 @@ const char *PragmaGFMParityEnable::help = "@gfm_parity_enable\n"
 const char *PragmaGhostMetadata::name = "__ghost_metadata";
 const char *PragmaGhostMetadata::description =
     "Declare metadata that is shared between Ingress and Ghost thread.";
-const char *PragmaGhostMetadata::help = "@__ghost_metatada\n"
+const char *PragmaGhostMetadata::help =
+    "@__ghost_metatada\n"
     "+ attached to an intrinsic metadata struct\n"
     "\n"
     "Ghost intrinsic metadata is declared separately as arguments to both"
@@ -529,7 +545,8 @@ const char *PragmaGhostMetadata::help = "@__ghost_metatada\n"
 const char *PragmaIdletimeInterval::name = "idletime_interval";
 const char *PragmaIdletimeInterval::description =
     "Specifies the sweep interval for a table that has idletime.";
-const char *PragmaIdletimeInterval::help = "@pragma idletime_interval 7\n"
+const char *PragmaIdletimeInterval::help =
+    "@pragma idletime_interval 7\n"
     "+attached to P4 match tables\n"
     "\n"
     "Specifies, if the match table utilizes idle time counters, what the "
@@ -573,7 +590,8 @@ const char *PragmaIdletimeInterval::help = "@pragma idletime_interval 7\n"
 const char *PragmaIdletimePerFlow::name = "idletime_per_flow_idletime";
 const char *PragmaIdletimePerFlow::description =
     "Enables per-flow ideletime for a table that has idletime.";
-const char *PragmaIdletimePerFlow::help = "@pragma idletime_per_flow_idletime 1\n"
+const char *PragmaIdletimePerFlow::help =
+    "@pragma idletime_per_flow_idletime 1\n"
     "+attached to P4 match tables\n"
     "\n"
     "For a match table that uses idle time counters, this pragma specifies "
@@ -588,7 +606,8 @@ const char *PragmaIdletimePerFlow::help = "@pragma idletime_per_flow_idletime 1\
 const char *PragmaIdletimePrecision::name = "idletime_precision";
 const char *PragmaIdletimePrecision::description =
     "Specifies the counter precision for idletime counters.";
-const char *PragmaIdletimePrecision::help = "@pragma idletime_precision 3\n"
+const char *PragmaIdletimePrecision::help =
+    "@pragma idletime_precision 3\n"
     "+attached to P4 match tables\n"
     "\n"
     "Specifies, if the match table utilizes idle time counters, what the "
@@ -598,7 +617,8 @@ const char *PragmaIdletimePrecision::help = "@pragma idletime_precision 3\n"
 const char *PragmaIdletimeTwoWayNotification::name = "idletime_two_way_notification";
 const char *PragmaIdletimeTwoWayNotification::description =
     "Specifies whether to send CPU notifications for idletime events.";
-const char *PragmaIdletimeTwoWayNotification::help = "@pragma idletime_two_way_notification 1\n"
+const char *PragmaIdletimeTwoWayNotification::help =
+    "@pragma idletime_two_way_notification 1\n"
     "+attached to P4 match tables\n"
     "\n"
     "For a match table that uses idle time counters, this pragma specifies "
@@ -614,7 +634,8 @@ const char *PragmaIgnoreTableDependency::name = "ignore_table_dependency";
 const char *PragmaIgnoreTableDependency::description =
     "Override dependency analysis and force the compiler to ignore match and action "
     "dependencies for this table.";
-const char *PragmaIgnoreTableDependency::help = "@pragma ignore_table_dependency table_name\n"
+const char *PragmaIgnoreTableDependency::help =
+    "@pragma ignore_table_dependency table_name\n"
     "+attached to P4 match tables\n"
     "\n"
     "Specifies that the associated match table should ignore match and/or "
@@ -627,20 +648,23 @@ const char *PragmaInHash::name = "in_hash";
 const char *PragmaInHash::description =
     "Action code that should be computed in a hash function and use hash dist to "
     "avoid container group constraints";
-const char *PragmaInHash::help = "@in_hash { ..code.. }\n"
+const char *PragmaInHash::help =
+    "@in_hash { ..code.. }\n"
     "code should use hash tables and hash_dist";
 
 const char *PragmaIntrinsicMetadata::name = "__intrinsic_metadata";
 const char *PragmaIntrinsicMetadata::description =
     "Declare metadata that needs to be processed for architecture specific semantics.";
-const char *PragmaIntrinsicMetadata::help = "@__intrinsic_metatada\n"
+const char *PragmaIntrinsicMetadata::help =
+    "@__intrinsic_metatada\n"
     "+ attached to intrinsic metadata\n"
     "\n"
     "Intrinsic metadata that requires special processing in the backend";
 
 const char *PragmaIxbarGroupNum::name = "ixbar_group_num";
 const char *PragmaIxbarGroupNum::description = "Force field to use the specific ixbar group";
-const char *PragmaIxbarGroupNum::help = "@pragma ixbar_group_num \n"
+const char *PragmaIxbarGroupNum::help =
+    "@pragma ixbar_group_num \n"
     "+ attached to P4 table match keys\n"
     "\n"
     "Force the table key to be allocated to the specified input xbar group."
@@ -648,7 +672,8 @@ const char *PragmaIxbarGroupNum::help = "@pragma ixbar_group_num \n"
 
 const char *PragmaLrtEnable::name = "lrt_enable";
 const char *PragmaLrtEnable::description = "Enable automatic cache evictions.";
-const char *PragmaLrtEnable::help = "@pragma lrt_enable 1\n"
+const char *PragmaLrtEnable::help =
+    "@pragma lrt_enable 1\n"
     "+ attached to P4 statistics tables\n"
     "\n"
     "By default, Tofino performs automatic cache evictions of counter "
@@ -665,7 +690,8 @@ const char *PragmaLrtEnable::help = "@pragma lrt_enable 1\n"
 const char *PragmaLrtScale::name = "lrt_scale";
 const char *PragmaLrtScale::description =
     "Specifies the scale factor for the LR(t) threshold and interval.";
-const char *PragmaLrtScale::help = "@pragma lrt_scale 200\n"
+const char *PragmaLrtScale::help =
+    "@pragma lrt_scale 200\n"
     "+ attached to P4 statistics tables\n"
     "\n"
     "For testing purposes, specifies that the computed LR(t) threshold and "
@@ -676,7 +702,8 @@ const char *PragmaLrtScale::help = "@pragma lrt_scale 200\n"
 const char *PragmaMaxActions::name = "max_actions";
 const char *PragmaMaxActions::description =
     "Specify the maximum number of actions supported by a table.";
-const char *PragmaMaxActions::help = "@pragma max_actions 16\n"
+const char *PragmaMaxActions::help =
+    "@pragma max_actions 16\n"
     "+ attached to P4 match tables\n"
     "\n"
     "This pragma is intended for future-proofing against table layout "
@@ -698,7 +725,8 @@ const char *PragmaMaxActions::help = "@pragma max_actions 16\n"
 const char *PragmaMaxLoopDepth::name = "max_loop_depth";
 const char *PragmaMaxLoopDepth::description =
     "Specifies the maximum number of loops in the parser.";
-const char *PragmaMaxLoopDepth::help = "@pragma max_loop_depth [count]\n"
+const char *PragmaMaxLoopDepth::help =
+    "@pragma max_loop_depth [count]\n"
     "+ attached to P4 parser state\n"
     "\n"
     "Allows the parser to infer the maximum number of loops that could "
@@ -714,9 +742,11 @@ const char *PragmaMode::description = "To be documented";
 const char *PragmaMode::help = "To be documented";
 
 const char *PragmaDontMerge::name = "dontmerge";
-const char *PragmaDontMerge::description = "The specific parser state will not be merged with "
-                                           "any other state.";
-const char *PragmaDontMerge::help = "@dontmerge gress state state_name\n"
+const char *PragmaDontMerge::description =
+    "The specific parser state will not be merged with "
+    "any other state.";
+const char *PragmaDontMerge::help =
+    "@dontmerge gress state state_name\n"
     "+ attached to P4 parser state\n"
     "\n"
     "Instructs the compiler not to merge the parser state with any other parser states. Without "
@@ -730,9 +760,11 @@ const char *PragmaDontMerge::help = "@dontmerge gress state state_name\n"
     "}\n";
 
 const char *PragmaNotExtractedInEgress::name = "not_extracted_in_egress";
-const char *PragmaNotExtractedInEgress::description = "Removes extracts of the annotated header "
-                                                      "from the egress parser instance";
-const char *PragmaNotExtractedInEgress::help = "@pragma not_extracted_in_egress "
+const char *PragmaNotExtractedInEgress::description =
+    "Removes extracts of the annotated header "
+    "from the egress parser instance";
+const char *PragmaNotExtractedInEgress::help =
+    "@pragma not_extracted_in_egress "
     "+ attached to P4 header definition\n"
     "\n"
     "Workaround introduced to deal with “v1model” architecture limitation of only "
@@ -752,7 +784,8 @@ const char *PragmaNotExtractedInEgress::help = "@pragma not_extracted_in_egress 
 
 const char *PragmaDoNotBridge::name = "pa_do_not_bridge";
 const char *PragmaDoNotBridge::description = "Do not bridge the annotated metadata field.";
-const char *PragmaDoNotBridge::help = "@pragma pa_do_not_bridge gress instance_name.field_name\n"
+const char *PragmaDoNotBridge::help =
+    "@pragma pa_do_not_bridge gress instance_name.field_name\n"
     "+ attached to P4 header instances\n"
     "\n"
     "Specifies that the indicated metadata field should not be included in "
@@ -764,13 +797,15 @@ const char *PragmaDoNotBridge::help = "@pragma pa_do_not_bridge gress instance_n
 const char *PragmaNoGatewayConversion::name = "no_gateway_conversion";
 const char *PragmaNoGatewayConversion::description =
     "Disables conversion of small tables into gateways";
-const char *PragmaNoGatewayConversion::help = "@pragma no_gateway_conversion\n"
+const char *PragmaNoGatewayConversion::help =
+    "@pragma no_gateway_conversion\n"
     "+ attached to P4 match tables";
 
 const char *PragmaNoVersioning::name = "no_versioning";
 const char *PragmaNoVersioning::description =
     "Specifies whether or not to allocate version/valid bits for each table entry";
-const char *PragmaNoVersioning::help = "@pragma no_versioning 1\n"
+const char *PragmaNoVersioning::help =
+    "@pragma no_versioning 1\n"
     "+attached to P4 match tables\n"
     "\n"
     "A boolean parameter, i.e. only 0 or 1 is allowed."
@@ -780,7 +815,8 @@ const char *PragmaNoVersioning::help = "@pragma no_versioning 1\n"
 const char *PragmaPack::name = "pack";
 const char *PragmaPack::description =
     "Specifies the number of entries to pack per wide table word.";
-const char *PragmaPack::help = "@pragma pack 2\n"
+const char *PragmaPack::help =
+    "@pragma pack 2\n"
     "+attached to P4 match tables\n"
     "\n"
     "Specifies that the associated match table, if it is an exact match "
@@ -791,9 +827,9 @@ const char *PragmaPack::help = "@pragma pack 2\n"
     "table from being placed.";
 
 const char *PragmaPadding::name = "padding";
-const char *PragmaPadding::description =
-    "Specifies the padding bits in header.";
-const char *PragmaPadding::help = "@pragma padding\n"
+const char *PragmaPadding::description = "Specifies the padding bits in header.";
+const char *PragmaPadding::help =
+    "@pragma padding\n"
     "+attached to header fields\n"
     "\n"
     "Specifies that the associated header field is padding field. A padding field represents a "
@@ -801,10 +837,10 @@ const char *PragmaPadding::help = "@pragma padding\n"
     "it is. This allows the compiler to overlap it with other fields and involve them in ALU "
     "operations that may polute the value stored.";
 
-
 const char *PragmaPacketEntry::name = "packet_entry";
 const char *PragmaPacketEntry::description = "Specifies additional parser entry states.";
-const char *PragmaPacketEntry::help = "@pragma packet_entry\n"
+const char *PragmaPacketEntry::help =
+    "@pragma packet_entry\n"
     "+attached to P4 parser states\n"
     "\n"
     "Indicates the attached parser state is an special entrypoint for "
@@ -824,7 +860,8 @@ const char *PragmaPacketEntry::help = "@pragma packet_entry\n"
 
 const char *PragmaPhase0::name = "phase0";
 const char *PragmaPhase0::description = "";
-const char *PragmaPhase0::help = "@pragma phase0 1\n"
+const char *PragmaPhase0::help =
+    "@pragma phase0 1\n"
     "+ attached to P4 match tables\n"
     "\n"
     "Specifies that the indicated table must or must not be implemented as "
@@ -886,21 +923,24 @@ const char *PragmaPhase0::help = "@pragma phase0 1\n"
 
 const char *PragmaPhvLimit::name = "phv_limit";
 const char *PragmaPhvLimit::description = "limit phvs available for allocation";
-const char *PragmaPhvLimit::help = "@pragma phv_limit(...)\n"
+const char *PragmaPhvLimit::help =
+    "@pragma phv_limit(...)\n"
     "+ at the beginning of the P4 source file"
     "\n"
     "Specifies PHV containers to be used or not used";
 
 const char *PragmaOverridePhase0TableName::name = "override_phase0_table_name";
 const char *PragmaOverridePhase0TableName::description = "";
-const char *PragmaOverridePhase0TableName::help = "@pragma override_phase0_table_name(...)\n"
+const char *PragmaOverridePhase0TableName::help =
+    "@pragma override_phase0_table_name(...)\n"
     "+ attached to P4 parser state\n"
     "\n"
     "Specifies the name of phase0 table in context.json\n";
 
 const char *PragmaOverridePhase0ActionName::name = "override_phase0_action_name";
 const char *PragmaOverridePhase0ActionName::description = "";
-const char *PragmaOverridePhase0ActionName::help = "@pragma override_phase0_action_name(...)\n"
+const char *PragmaOverridePhase0ActionName::help =
+    "@pragma override_phase0_action_name(...)\n"
     "+ attached to P4 parser state\n"
     "\n"
     "Specifies the name of phase0 action in context.json\n";
@@ -908,7 +948,8 @@ const char *PragmaOverridePhase0ActionName::help = "@pragma override_phase0_acti
 const char *PragmaPlacementPriority::name = "placement_priority";
 const char *PragmaPlacementPriority::description =
     "Changes the order in which tables are considered for placement in a stage.";
-const char *PragmaPlacementPriority::help = "@pragma placement_priority (N)\n"
+const char *PragmaPlacementPriority::help =
+    "@pragma placement_priority (N)\n"
     "+attached to P4 match tables\n"
     "\n"
     "Specifies that a table should have higher (or lower) priority when "
@@ -924,7 +965,8 @@ const char *PragmaPreColor::help = "To be documented";
 const char *PragmaProxyHashAlgorithm::name = "proxy_hash_algorithm";
 const char *PragmaProxyHashAlgorithm::description =
     "Specifies the hash algorithm to use for a proxy hash table implementation.";
-const char *PragmaProxyHashAlgorithm::help = "@pragma proxy_hash_algorithm crc16\n"
+const char *PragmaProxyHashAlgorithm::help =
+    "@pragma proxy_hash_algorithm crc16\n"
     "+ attached to P4 match tables\n"
     "\n"
     "Specifies the hash algorithm to use to compute the proxy hash value to "
@@ -935,7 +977,8 @@ const char *PragmaProxyHashAlgorithm::help = "@pragma proxy_hash_algorithm crc16
 const char *PragmaProxyHashWidth::name = "proxy_hash_width";
 const char *PragmaProxyHashWidth::description =
     "Specifies the width of a proxy hash table implementation.";
-const char *PragmaProxyHashWidth::help = "@pragma proxy_hash_width 32\n"
+const char *PragmaProxyHashWidth::help =
+    "@pragma proxy_hash_width 32\n"
     "+ attached to P4 match tables\n"
     "\n"
     "Specifies that an exact match table should be specified with a proxy "
@@ -949,7 +992,8 @@ const char *PragmaProxyHashWidth::help = "@pragma proxy_hash_width 32\n"
 const char *PragmaRandomSeed::name = "random_seed";
 const char *PragmaRandomSeed::description =
     "Specifies the seed for the random number generator for the hash computation.";
-const char *PragmaRandomSeed::help = "@pragma random_seed 0x1234\n"
+const char *PragmaRandomSeed::help =
+    "@pragma random_seed 0x1234\n"
     "+ attached to P4 match tables\n"
     "\n"
     "Specifies that the associated match table, if it is an exact match "
@@ -974,9 +1018,9 @@ const char *PragmaResidualChecksumParserUpdateLocation::description = "To be doc
 const char *PragmaResidualChecksumParserUpdateLocation::help = "To be documented";
 
 const char *PragmaSelectorMaxGroupSize::name = "selector_max_group_size";
-const char *PragmaSelectorMaxGroupSize::description =
-    "Specifies the maximum size for a selector.";
-const char *PragmaSelectorMaxGroupSize::help = "@pragma selector_max_group_size 512\n"
+const char *PragmaSelectorMaxGroupSize::description = "Specifies the maximum size for a selector.";
+const char *PragmaSelectorMaxGroupSize::help =
+    "@pragma selector_max_group_size 512\n"
     "+attached to P4 match tables[v]\n"
     "\n"
     "Specifies that the match table’s selector should allocate enough space "
@@ -987,7 +1031,8 @@ const char *PragmaSelectorMaxGroupSize::help = "@pragma selector_max_group_size 
 const char *PragmaSelectorNumMaxGroups::name = "selector_max_group_size";
 const char *PragmaSelectorNumMaxGroups::description =
     "Specifies the maximum number of groups in a selector.";
-const char *PragmaSelectorNumMaxGroups::help = "@pragma selector_num_max_groups 32\n"
+const char *PragmaSelectorNumMaxGroups::help =
+    "@pragma selector_num_max_groups 32\n"
     "+attached to P4 match tables\n"
     "\n"
     "Specifies that the match table’s selector should allocate enough "
@@ -997,7 +1042,8 @@ const char *PragmaSelectorNumMaxGroups::help = "@pragma selector_num_max_groups 
 const char *PragmaSelectorEnableScramble::name = "selector_enable_scramble";
 const char *PragmaSelectorEnableScramble::description =
     "Specifies whether to enable or disable SPS scrambling.";
-const char *PragmaSelectorEnableScramble::help = "@pragma selector_enable_scramble 0\n"
+const char *PragmaSelectorEnableScramble::help =
+    "@pragma selector_enable_scramble 0\n"
     "+attached to P4 match tables\n"
     "\n"
     "Specifies that the match table’s selector should enable or disable the "
@@ -1005,9 +1051,9 @@ const char *PragmaSelectorEnableScramble::help = "@pragma selector_enable_scramb
     "of 1 enables the scramble logic.  By default, scrambling is enabled.";
 
 const char *PragmaSymmetric::name = "symmetric";
-const char *PragmaSymmetric::description =
-    "Specifies the symmetric hash fields.";
-const char *PragmaSymmetric::help = "@pragma symmetric field_1, field_2\n"
+const char *PragmaSymmetric::description = "Specifies the symmetric hash fields.";
+const char *PragmaSymmetric::help =
+    "@pragma symmetric field_1, field_2\n"
     "+attached to P4 hash extern\n"
     "\n"
     "Specifies that the two fields specified are to be considered symmetric "
@@ -1016,9 +1062,9 @@ const char *PragmaSymmetric::help = "@pragma symmetric field_1, field_2\n"
     "ignored.  It is an error if the two fields are not the same bit width.";
 
 const char *PragmaStage::name = "stage";
-const char *PragmaStage::description =
-    "Specifies the stage for a table.";
-const char *PragmaStage::help = "@stage(<stage> [,<entries>] [,<flags>])\n"
+const char *PragmaStage::description = "Specifies the stage for a table.";
+const char *PragmaStage::help =
+    "@stage(<stage> [,<entries>] [,<flags>])\n"
     "+attached to P4 match tables\n"
     "\n"
     "Specifies that the associated match table must be placed in the "
@@ -1058,7 +1104,8 @@ const char *PragmaStage::help = "@stage(<stage> [,<entries>] [,<flags>])\n"
 const char *PragmaTerminateParsing::name = "terminate_parsing";
 const char *PragmaTerminateParsing::description =
     "Unconditionally terminate parsing in the annotated parser state.";
-const char *PragmaTerminateParsing::help = "@pragma terminate_parsing ingress/egress\n"
+const char *PragmaTerminateParsing::help =
+    "@pragma terminate_parsing ingress/egress\n"
     "+ attached to a parser state.\n"
     "\n"
     "It informs the ingress/egress parser to ignore the instructions, "
@@ -1071,7 +1118,8 @@ const char *PragmaTerminateParsing::help = "@pragma terminate_parsing ingress/eg
 const char *PragmaDontUnroll::name = "dont_unroll";
 const char *PragmaDontUnroll::description =
     "do not unroll the annotated parser state (if in a loop).";
-const char *PragmaDontUnroll::help = "@pragma dont_unroll\n"
+const char *PragmaDontUnroll::help =
+    "@pragma dont_unroll\n"
     "+ attached to a parser state.\n"
     "\n"
     "By default, the compiler unrolls parser loops. "
@@ -1079,7 +1127,8 @@ const char *PragmaDontUnroll::help = "@pragma dont_unroll\n"
 
 const char *PragmaTernary::name = "ternary";
 const char *PragmaTernary::description = "Forces the use of TCAM memories for the table.";
-const char *PragmaTernary::help = "@pragma ternary 1\n"
+const char *PragmaTernary::help =
+    "@pragma ternary 1\n"
     "+attached to P4 match tables\n"
     "\n"
     "Specifies that the match table should be placed within TCAM resources. "
@@ -1089,7 +1138,8 @@ const char *PragmaTernary::help = "@pragma ternary 1\n"
 const char *PragmaUseHashAction::name = "use_hash_action";
 const char *PragmaUseHashAction::description =
     "Specifies that the match table should use the hash-action path";
-const char *PragmaUseHashAction::help = "@pragma use_hash_action 1\n"
+const char *PragmaUseHashAction::help =
+    "@pragma use_hash_action 1\n"
     "+ attached to P4 match tables\n"
     "\n"
     "Specifies that the match table should use the hash-action path.  This "
@@ -1102,7 +1152,8 @@ const char *PragmaUseHashAction::help = "@pragma use_hash_action 1\n"
 const char *PragmaUserAnnotation::name = "user_annotation";
 const char *PragmaUserAnnotation::description =
     "Specifies a list of strings that should be passed through to context.json.";
-const char *PragmaUserAnnotation::help = "@pragma user_annotation str_1 .. str_N\n"
+const char *PragmaUserAnnotation::help =
+    "@pragma user_annotation str_1 .. str_N\n"
     "+attached to P4 action declarations\n"
     "+attached to P4 action parameters\n"
     "+attached to P4 extern instantiations\n"
@@ -1113,9 +1164,9 @@ const char *PragmaUserAnnotation::help = "@pragma user_annotation str_1 .. str_N
     "associated P4 program element.";
 
 const char *PragmaWays::name = "ways";
-const char *PragmaWays::description =
-    "Specifies the number of ways for an exact match table";
-const char *PragmaWays::help = "@pragma ways 4\n"
+const char *PragmaWays::description = "Specifies the number of ways for an exact match table";
+const char *PragmaWays::help =
+    "@pragma ways 4\n"
     "+attached to P4 match tables\n"
     "\n"
     "Specifies that the associated match table, if it is an exact match "
@@ -1128,7 +1179,8 @@ const char *PragmaWays::help = "@pragma ways 4\n"
 const char *PragmaNoFieldInits::name = "no_field_initialization";
 const char *PragmaNoFieldInits::description =
     "Forbids the insertion of initialization instructions in the actions of the match table";
-const char *PragmaNoFieldInits::help = "@pragma no_field_initialization \n"
+const char *PragmaNoFieldInits::help =
+    "@pragma no_field_initialization \n"
     "+attached to P4 match tables\n"
     "\n"
     "Specifies that the associated match table should not allow insertion of "
@@ -1137,7 +1189,8 @@ const char *PragmaNoFieldInits::help = "@pragma no_field_initialization \n"
 const char *PragmaSeparateGateway::name = "separate_gateway";
 const char *PragmaSeparateGateway::description =
     "Only power up the match table lookup if the gateway conditions are satisfied";
-const char *PragmaSeparateGateway::help = "@pragma separate_gateway \n"
+const char *PragmaSeparateGateway::help =
+    "@pragma separate_gateway \n"
     "+attached to P4 match tables\n"
     "\n"
     "Specifies that the associated match table must not be placed in the same stage as the "
@@ -1146,8 +1199,7 @@ const char *PragmaSeparateGateway::help = "@pragma separate_gateway \n"
     "extend dependency chain leading to potential fitting issues.";
 
 const char *PragmaRed::name = "red";
-const char *PragmaRed::description =
-    "Specifies alternative encoding for 'red' color";
+const char *PragmaRed::description = "Specifies alternative encoding for 'red' color";
 const char *PragmaRed::help =
     "@pragma red\n"
     "+ attached to a meter.\n"
@@ -1155,8 +1207,7 @@ const char *PragmaRed::help =
     "Specifies the encoding for 'red' color in meter. Supported values are in the range [0:255].";
 
 const char *PragmaYellow::name = "yellow";
-const char *PragmaYellow::description =
-    "Specifies alternative encoding for 'yellow' color";
+const char *PragmaYellow::description = "Specifies alternative encoding for 'yellow' color";
 const char *PragmaYellow::help =
     "@pragma yellow\n"
     "+ attached to a meter.\n"
@@ -1165,8 +1216,7 @@ const char *PragmaYellow::help =
     "[0:255].";
 
 const char *PragmaGreen::name = "green";
-const char *PragmaGreen::description =
-    "Specifies alternative encoding for 'green' color";
+const char *PragmaGreen::description = "Specifies alternative encoding for 'green' color";
 const char *PragmaGreen::help =
     "@pragma green\n"
     "+ attached to a meter.\n"
@@ -1176,7 +1226,8 @@ const char *PragmaGreen::help =
 const char *PragmaMeterProfile::name = "meter_profile";
 const char *PragmaMeterProfile::description =
     "Specifies the range of rates supported by a color-based meter.";
-const char *PragmaMeterProfile::help = "@pragma meter_profile\n"
+const char *PragmaMeterProfile::help =
+    "@pragma meter_profile\n"
     "+ attached to a meter.\n"
     "\n"
     "@meter_profile can be used to adjust the time scale of a meter that is measuring either bytes"
@@ -1188,7 +1239,8 @@ const char *PragmaMeterProfile::help = "@pragma meter_profile\n"
 const char *PragmaTrueEgressAccounting::name = "true_egress_accounting";
 const char *PragmaTrueEgressAccounting::description =
     "Use the final byte count for the packet for counter or meter.";
-const char *PragmaTrueEgressAccounting::help = "@pragma true_egress_accounting\n"
+const char *PragmaTrueEgressAccounting::help =
+    "@pragma true_egress_accounting\n"
     "+ attached to a counter or meter (egress only).\n"
     "\n"
     "By default, counter or meter at egress uses the computed packet length "
@@ -1222,7 +1274,6 @@ const char *PragmaPayloadChecksum::help =
     "field is a calculated payload checksum (i.e., one whose computation "
     "involves the packet payload) that undergoes checksum verification.";
 
-
 const char *PragmaDisableDeparseZero::name = "pa_disable_deparse_0_optimization";
 const char *PragmaDisableDeparseZero::description = "To be documented";  // FIXME
 const char *PragmaDisableDeparseZero::help = "To be documented";
@@ -1230,7 +1281,8 @@ const char *PragmaDisableDeparseZero::help = "To be documented";
 const char *PragmaNotDeparsed::name = "not_deparsed";
 const char *PragmaNotDeparsed::description =
     "Specifies that the header instance should not be deparsed.";
-const char *PragmaNotDeparsed::help = "@pragma not_deparsed[a][b] [pipe] [ingress/egress]\n"
+const char *PragmaNotDeparsed::help =
+    "@pragma not_deparsed[a][b] [pipe] [ingress/egress]\n"
     "+attached to P4 header instances\n"
     "\n"
     "Prevents the attached header instance from being deparsed in the "
@@ -1248,9 +1300,9 @@ const char *PragmaNotDeparsed::help = "@pragma not_deparsed[a][b] [pipe] [ingres
     "liveness.";
 
 const char *PragmaNotParsed::name = "not_parsed";
-const char *PragmaNotParsed::description =
-    "Specifies that the header is not parsed.";
-const char *PragmaNotParsed::help = "@pragma not_parsed [pipe] [ingress/egress]\n"
+const char *PragmaNotParsed::description = "Specifies that the header is not parsed.";
+const char *PragmaNotParsed::help =
+    "@pragma not_parsed [pipe] [ingress/egress]\n"
     "+attached to P4 header instances\n"
     "\n"
     "Indicates the attached header instance, though appearing in the parse "

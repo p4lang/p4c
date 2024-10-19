@@ -69,7 +69,7 @@ class PHV_Field_Operations : public Inspector {
 
     // Strip down version of input_xbar.cpp FindSaluSources
     class Find_Salu_Sources : public Inspector {
-        const PhvInfo              &phv;
+        const PhvInfo &phv;
 
         bool preorder(const IR::MAU::SaluAction *) override;
         bool preorder(const IR::Expression *e) override;
@@ -83,19 +83,18 @@ class PHV_Field_Operations : public Inspector {
         static void collapse_contained(std::map<le_bitrange, const IR::Expression *> &m);
 
      public:
-        explicit Find_Salu_Sources(const PhvInfo &phv): phv(phv) {}
+        explicit Find_Salu_Sources(const PhvInfo &phv) : phv(phv) {}
 
-        ordered_map<const PHV::Field *, std::map<le_bitrange, const IR::Expression *>>
-                                                        phv_sources;
-        std::vector<const IR::MAU::IXBarExpression *>   hash_sources;
+        ordered_map<const PHV::Field *, std::map<le_bitrange, const IR::Expression *>> phv_sources;
+        std::vector<const IR::MAU::IXBarExpression *> hash_sources;
     };
 
-    void processSaluInst(const IR::MAU::Instruction*);
-    void processInst(const IR::MAU::Instruction*);
-    bool preorder(const IR::MAU::Instruction*) override;
+    void processSaluInst(const IR::MAU::Instruction *);
+    void processInst(const IR::MAU::Instruction *);
+    bool preorder(const IR::MAU::Instruction *) override;
 
  public:
-    explicit PHV_Field_Operations(PhvInfo &phv_f) : phv(phv_f) { }
+    explicit PHV_Field_Operations(PhvInfo &phv_f) : phv(phv_f) {}
 };
 
 #endif /* BF_P4C_PHV_CLUSTER_PHV_OPERATIONS_H_ */

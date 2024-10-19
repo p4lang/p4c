@@ -21,13 +21,14 @@ using namespace P4;
 class DumpJsonGraph : public PassManager {
     FlowGraph fg;
     DependencyGraph &dg;
-    Util::JsonObject* dgJson;
+    Util::JsonObject *dgJson;
     cstring passContext;
     bool placed;
 
     void end_apply(const IR::Node *root) override;
+
  public:
-    DumpJsonGraph(DependencyGraph &dg, Util::JsonObject* dgJson, cstring passContext, bool placed);
+    DumpJsonGraph(DependencyGraph &dg, Util::JsonObject *dgJson, cstring passContext, bool placed);
 };
 
-#endif  /* BF_P4C_MAU_DUMP_JSON_GRAPH_H_ */
+#endif /* BF_P4C_MAU_DUMP_JSON_GRAPH_H_ */

@@ -10,30 +10,31 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+#include "bf-p4c/phv/pragma/pa_byte_pack.h"
+
+#include <exception>
 #include <optional>
 #include <ostream>
 #include <sstream>
-#include <exception>
 
 #include <boost/algorithm/string/replace.hpp>
 
+#include "bf-p4c/common/header_stack.h"
+#include "bf-p4c/phv/phv_fields.h"
+#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
 #include "gmock/gmock-matchers.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-
 #include "ir/ir.h"
 #include "lib/error.h"
 #include "test/gtest/helpers.h"
-#include "bf-p4c/common/header_stack.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/pragma/pa_byte_pack.h"
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
 
 namespace P4::Test {
 
 class PaBytePackPragmaTest : public TofinoBackendTest {
  private:
-    std::ostream* backup;
+    std::ostream *backup;
+
  public:
     std::stringstream err_stream;
 
@@ -54,8 +55,7 @@ class PaBytePackPragmaTest : public TofinoBackendTest {
 
 namespace {
 
-std::optional<TofinoPipeTestCase>
-createPaBytePackPragmaTestCase(const std::string& pragmas) {
+std::optional<TofinoPipeTestCase> createPaBytePackPragmaTestCase(const std::string &pragmas) {
     auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
         %PRAGMAS%
         header H1
@@ -132,7 +132,7 @@ createPaBytePackPragmaTestCase(const std::string& pragmas) {
 
     boost::replace_first(source, "%PRAGMAS%", pragmas);
 
-    auto& options = BackendOptions();
+    auto &options = BackendOptions();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.target = "tofino"_cs;
     options.arch = "v1model"_cs;
@@ -141,23 +141,17 @@ createPaBytePackPragmaTestCase(const std::string& pragmas) {
     return TofinoPipeTestCase::createWithThreadLocalInstances(source);
 }
 
-const IR::BFN::Pipe *runMockPasses(const IR::BFN::Pipe* pipe,
-                                   PhvInfo& phv,
-                                   PragmaBytePack& pa_bp) {
-    PassManager quick_backend = {
-        new CollectHeaderStackInfo,
-        new CollectPhvInfo(phv),
-        &pa_bp
-    };
+const IR::BFN::Pipe *runMockPasses(const IR::BFN::Pipe *pipe, PhvInfo &phv, PragmaBytePack &pa_bp) {
+    PassManager quick_backend = {new CollectHeaderStackInfo, new CollectPhvInfo(phv), &pa_bp};
     return pipe->apply(quick_backend);
 }
 
 }  // namespace
 
 TEST_F(PaBytePackPragmaTest, BasicCase) {
-    auto test = createPaBytePackPragmaTestCase(
-            P4_SOURCE(P4Headers::NONE,
-                      R"(@pa_byte_pack("ingress", "md.m1", "md.m2", 6)
+    auto test =
+        createPaBytePackPragmaTestCase(P4_SOURCE(P4Headers::NONE,
+                                                 R"(@pa_byte_pack("ingress", "md.m1", "md.m2", 6)
                          @pa_byte_pack("ingress", 1, "md.m_r2", 1, "md.m_r1"))"));
     ASSERT_TRUE(test);
 
@@ -165,9 +159,9 @@ TEST_F(PaBytePackPragmaTest, BasicCase) {
     PragmaBytePack pa_bp(phv);
     runMockPasses(test->pipe, phv, pa_bp);
 
-    const auto& packings = pa_bp.packings();
+    const auto &packings = pa_bp.packings();
     std::stringstream layout_ss;
-    for (const auto& pack : packings) {
+    for (const auto &pack : packings) {
         EXPECT_FALSE(pack.compiler_added);
         EXPECT_TRUE(pack.src_info.has_value());
         layout_ss << pack.packing;
@@ -180,17 +174,16 @@ TEST_F(PaBytePackPragmaTest, BasicCase) {
 
 TEST_F(PaBytePackPragmaTest, WarnParsedField) {
     auto test = createPaBytePackPragmaTestCase(
-            P4_SOURCE(P4Headers::NONE,
-                      R"(@pa_byte_pack("ingress", "md.m1", "md.m2", "md.m3", 3))"));
+        P4_SOURCE(P4Headers::NONE, R"(@pa_byte_pack("ingress", "md.m1", "md.m2", "md.m3", 3))"));
     ASSERT_TRUE(test);
 
     PhvInfo phv;
     PragmaBytePack pa_bp(phv);
     runMockPasses(test->pipe, phv, pa_bp);
 
-    const auto& packings = pa_bp.packings();
+    const auto &packings = pa_bp.packings();
     ASSERT_EQ(size_t(1), packings.size());
-    const auto& pack = packings.front();
+    const auto &pack = packings.front();
     EXPECT_FALSE(pack.compiler_added);
     EXPECT_TRUE(pack.src_info.has_value());
     std::stringstream layout_ss;
@@ -205,15 +198,14 @@ TEST_F(PaBytePackPragmaTest, WarnParsedField) {
 
 TEST_F(PaBytePackPragmaTest, ErrorHeaderField) {
     auto test = createPaBytePackPragmaTestCase(
-            P4_SOURCE(P4Headers::NONE,
-                      R"(@pa_byte_pack("ingress", "headers.h1.op"))"));
+        P4_SOURCE(P4Headers::NONE, R"(@pa_byte_pack("ingress", "headers.h1.op"))"));
     ASSERT_TRUE(test);
 
     PhvInfo phv;
     PragmaBytePack pa_bp(phv);
     runMockPasses(test->pipe, phv, pa_bp);
 
-    const auto& packings = pa_bp.packings();
+    const auto &packings = pa_bp.packings();
     ASSERT_TRUE(packings.empty());
     // check error
     EXPECT_THAT(err_stream.str(),
@@ -223,15 +215,14 @@ TEST_F(PaBytePackPragmaTest, ErrorHeaderField) {
 
 TEST_F(PaBytePackPragmaTest, ErrorInvalidTotalSize) {
     auto test = createPaBytePackPragmaTestCase(
-            P4_SOURCE(P4Headers::NONE,
-                      R"(@pa_byte_pack("ingress", "md.m1", "md.m2", 5))"));
+        P4_SOURCE(P4Headers::NONE, R"(@pa_byte_pack("ingress", "md.m1", "md.m2", 5))"));
     ASSERT_TRUE(test);
 
     PhvInfo phv;
     PragmaBytePack pa_bp(phv);
     runMockPasses(test->pipe, phv, pa_bp);
 
-    const auto& packings = pa_bp.packings();
+    const auto &packings = pa_bp.packings();
     ASSERT_TRUE(packings.empty());
 
     // check error
@@ -242,21 +233,18 @@ TEST_F(PaBytePackPragmaTest, ErrorInvalidTotalSize) {
 
 TEST_F(PaBytePackPragmaTest, ErrorInvalidPaddingSize) {
     auto test = createPaBytePackPragmaTestCase(
-            P4_SOURCE(P4Headers::NONE,
-                      R"(@pa_byte_pack("ingress", "md.m1", "md.m2", 14))"));
+        P4_SOURCE(P4Headers::NONE, R"(@pa_byte_pack("ingress", "md.m1", "md.m2", 14))"));
     ASSERT_TRUE(test);
 
     PhvInfo phv;
     PragmaBytePack pa_bp(phv);
     runMockPasses(test->pipe, phv, pa_bp);
 
-    const auto& packings = pa_bp.packings();
+    const auto &packings = pa_bp.packings();
     ASSERT_TRUE(packings.empty());
 
     // check error
-    EXPECT_THAT(
-        err_stream.str(),
-        testing::HasSubstr("Invalid size of padding"));
+    EXPECT_THAT(err_stream.str(), testing::HasSubstr("Invalid size of padding"));
 }
 
 }  // namespace P4::Test

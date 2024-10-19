@@ -19,7 +19,6 @@
 #include "bf-p4c/mau/table_format.h"
 #include "bf-p4c/phv/phv_fields.h"
 
-
 /**
  * A gateway in Tofino2 and future generations can be used to implement a small match table.
  * For some context, a gateway is a 5 entry TCAM that has been used to implement conditionals.
@@ -34,9 +33,9 @@
  *
  * The gateway as a logical table can set the next table based on the evaluation of the condition.
  * The gateway rows can be thought of as:
- * 
+ *
  *  ____match____|__next_table__
- *    condition  |      x 
+ *    condition  |      x
  *      miss     |      y
  *
  * A gateway can be linked with a match table as a single logical table.  The gateway will verify
@@ -60,7 +59,7 @@
  * programmed to interpret the all 0 payload as a noop.  Let's extend the table
  *
  *  ____match____|__inhibit__|__next_table__|__payload__
- *    condition  |   false   |     N/A      |    N/A 
+ *    condition  |   false   |     N/A      |    N/A
  *      miss     |   true    |      y       |    0x0
  *
  * Now, Tofino has corner cases that require the payload to be a non-zero value.  Say I have
@@ -68,7 +67,7 @@
  *
  *     field = register_action.execute(hash) // hash based index
  *     b.apply();
- * 
+ *
  *
  * In this program, if the condition is true, then an action that runs a register action
  * addressed by hash is run.  Now this action will be translated in our midend to a single
@@ -94,7 +93,7 @@
  * an action.  The table in this case would be:
  *
  *  ____match____|__inhibit__|__next_table__|__payload__
- *      true     |    yes    |      b       |    0x0 
+ *      true     |    yes    |      b       |    0x0
  *
  * In this case, the table is executed by the gateway inhibiting.  Inhibit in this case runs
  * a table.  The gateway must always match, as we unconditionally want to run the table.  The
@@ -128,7 +127,7 @@
  *
  * This feature has now been extended in Tofino2.  The major difference between Tofino and Tofino2
  * is that in Tofino, there is only a single entry allowed in the gateway format.  In Tofino2, up
- * to 5 entries are allowed in the format.  This allows for separate behavior per entry. 
+ * to 5 entries are allowed in the format.  This allows for separate behavior per entry.
  *
  * Say for instance, I had the following program:
  *
@@ -145,7 +144,7 @@
  *
  *
  *  ____match____|__inhibit__|__next_table__|__payload__
- *    field == 3 |    yes    |      b       |    payload1 
+ *    field == 3 |    yes    |      b       |    payload1
  *    field == 7 |    yes    |      b       |    payload2
  *      miss     |    no     |     N/A      |    N/A
  *
@@ -170,33 +169,28 @@ void FindPayloadCandidates::add_option(const IR::MAU::Table *tbl, LayoutChoices 
 
     CollectMatchFieldsAsGateway collect(phv);
     tbl->apply(collect);
-    if (!collect || !collect.compute_offsets())
-        return;
+    if (!collect || !collect.compute_offsets()) return;
 
     auto action_formats = lc.get_action_formats(tbl);
     auto last_af = action_formats.back();
     // Currently we don't allow Action Data in a table, though in theory this could
     // be allowed in the future.  We'd have to program a RAM line, which is much more difficult
     // in the assembler than programming a register
-    if (last_af.bytes_per_loc.at(ActionData::ACTION_DATA_TABLE) > 0)
-        return;
+    if (last_af.bytes_per_loc.at(ActionData::ACTION_DATA_TABLE) > 0) return;
 
     auto table_layouts = lc.get_layout_options(tbl);
     const LayoutOption *single_lo = nullptr;
     for (auto &lo : table_layouts) {
-        if (lo.action_format_index != static_cast<int>(action_formats.size()) - 1)
-            continue;
-        if (lo.way.match_groups != 1 && !lo.layout.ternary)
-            continue;
+        if (lo.action_format_index != static_cast<int>(action_formats.size()) - 1) continue;
+        if (lo.way.match_groups != 1 && !lo.layout.ternary) continue;
         single_lo = &lo;
         break;
     }
 
-    if (single_lo == nullptr)
-        return;
+    if (single_lo == nullptr) return;
     // Guarantee that we fit all of the overhead
-    if (single_lo->layout.overhead_bits * (tbl->entries_list->entries.size())
-        > TableFormat::OVERHEAD_BITS)
+    if (single_lo->layout.overhead_bits * (tbl->entries_list->entries.size()) >
+        TableFormat::OVERHEAD_BITS)
         return;
 
     candidates.insert(tbl->name);
@@ -204,13 +198,12 @@ void FindPayloadCandidates::add_option(const IR::MAU::Table *tbl, LayoutChoices 
 }
 
 IR::MAU::Table *FindPayloadCandidates::convert_to_gateway(const IR::MAU::Table *tbl) {
-    if (candidates.count(tbl->name) == 0)
-        return nullptr;
+    if (candidates.count(tbl->name) == 0) return nullptr;
 
     // see FindPayloadCandidates::add_option()
     // for the check that ensures the conversion doesn't happen
     BUG_CHECK(!tbl->match_table->getAnnotation("no_gateway_conversion"_cs),
-        "attempt to perform a disabled optimisation");
+              "attempt to perform a disabled optimisation");
 
     IR::MAU::Table *gw_tbl = new IR::MAU::Table(*tbl);
 
@@ -218,19 +211,18 @@ IR::MAU::Table *FindPayloadCandidates::convert_to_gateway(const IR::MAU::Table *
     int entry_index = 0;
     for (auto &entry : tbl->entries_list->entries) {
         // for each entry line we create a single gw_expr, combining the key values.
-        IR::Expression* gw_expr = nullptr;
+        IR::Expression *gw_expr = nullptr;
 
         // Iterate over tbl->match_key & entry->keys->components together.
         BUG_CHECK(entry->keys->size() == tbl->match_key.size(),
-                     "entry keys size != match_key size");
+                  "entry keys size != match_key size");
         for (auto tup : boost::combine(tbl->match_key, entry->keys->components)) {
-            const IR::MAU::TableKey* tbl_key;
-            const IR::Expression* value;
+            const IR::MAU::TableKey *tbl_key;
+            const IR::Expression *value;
             boost::tie(tbl_key, value) = tup;  // Oh for C++17 structured binding.
             auto key = tbl_key->expr;
 
-            if (value->is<IR::DefaultExpression>())
-                continue;  // Always true.
+            if (value->is<IR::DefaultExpression>()) continue;  // Always true.
             if (auto mask = value->to<IR::Mask>()) {
                 // Move the masking onto the key itself.
                 key = new IR::BAnd(key, mask->right);
@@ -265,10 +257,10 @@ IR::MAU::Table *FindPayloadCandidates::convert_to_gateway(const IR::MAU::Table *
     /**
      * A table may originally have next table propagation information in the next table map
      * that now has to be updated for this program.
-     * 
+     *
      * Essentially each gateway row (in order to have an entry in to the gateway_payload map),
      * will have a unique tag: $entry#.  The miss entry will currently have a $miss entry.
-     * 
+     *
      * If the table is a hit or miss, then all entries that run the gateway payload will tie
      * to the hit pathway, while the entry for the miss pathway goes through $miss.  With an
      * action_chain, because the actions of each entry is known ahead of time, each gateway
@@ -328,9 +320,8 @@ IR::MAU::Table *FindPayloadCandidates::convert_to_gateway(const IR::MAU::Table *
  * to a list of IR::Constants, which will either be saved on the gateway_row or used in
  * an entry.
  */
-FindPayloadCandidates::PayloadArguments
-        FindPayloadCandidates::convert_entry_to_payload_args(const IR::MAU::Table *tbl,
-        const IR::Entry *entry, cstring *act_name) {
+FindPayloadCandidates::PayloadArguments FindPayloadCandidates::convert_entry_to_payload_args(
+    const IR::MAU::Table *tbl, const IR::Entry *entry, cstring *act_name) {
     std::vector<const IR::Constant *> rv;
     auto mc = entry->action->to<IR::MethodCallExpression>();
     auto pe = mc->method->to<IR::PathExpression>();
@@ -364,11 +355,10 @@ FindPayloadCandidates::PayloadArguments
  * the VLIW Instruction allocation, which must be done before this value is calculated
  */
 bitvec FindPayloadCandidates::determine_instr_address_payload(const IR::MAU::Action *act,
-        const TableResourceAlloc *alloc) {
+                                                              const TableResourceAlloc *alloc) {
     auto &instr_mem = alloc->instr_mem;
     auto vliw_instr = instr_mem.all_instrs.at(act->name);
-    if (vliw_instr.mem_code < 0)
-        BUG("A gateway cannot have a miss action");
+    if (vliw_instr.mem_code < 0) BUG("A gateway cannot have a miss action");
     return bitvec(vliw_instr.mem_code);
 }
 
@@ -376,7 +366,8 @@ bitvec FindPayloadCandidates::determine_instr_address_payload(const IR::MAU::Act
  * Determines the value of the immediate data based on the PayloadArguments
  */
 bitvec FindPayloadCandidates::determine_immediate_payload(const IR::MAU::Action *act,
-        PayloadArguments &payload_args, const TableResourceAlloc *alloc) {
+                                                          PayloadArguments &payload_args,
+                                                          const TableResourceAlloc *alloc) {
     auto &af = alloc->action_format;
     auto &alu_positions = af.alu_positions.at(act->name);
     if (act->args.size() != payload_args.size())
@@ -385,13 +376,15 @@ bitvec FindPayloadCandidates::determine_immediate_payload(const IR::MAU::Action 
     bitvec payload;
     for (auto param : act->args) {
         bitvec param_value;
-        ActionData::Argument ad_arg(param->name, { 0, param->type->width_bits() - 1});
+        ActionData::Argument ad_arg(param->name, {0, param->type->width_bits() - 1});
         if (param_index < payload_args.size()) {
             auto constant = payload_args.at(param_index);
-            param_value = bitvec(constant->asUnsigned()); }
+            param_value = bitvec(constant->asUnsigned());
+        }
 
         for (auto &alu_pos : alu_positions) {
-            BUG_CHECK(alu_pos.loc == ActionData::IMMEDIATE, "Only can have immediate values "
+            BUG_CHECK(alu_pos.loc == ActionData::IMMEDIATE,
+                      "Only can have immediate values "
                       "on gateway payloads currently");
             auto alu_op = alu_pos.alu_op;
             bitvec param_payload = alu_op->static_entry_of_arg(&ad_arg, param_value);
@@ -413,7 +406,8 @@ bitvec FindPayloadCandidates::determine_immediate_payload(const IR::MAU::Action 
  * payload arguments.
  */
 bitvec FindPayloadCandidates::determine_indirect_addr_payload(const IR::MAU::Action *act,
-        PayloadArguments &payload_args, const IR::MAU::AttachedMemory *at) {
+                                                              PayloadArguments &payload_args,
+                                                              const IR::MAU::AttachedMemory *at) {
     const IR::MAU::StatefulCall *call = nullptr;
     for (auto sc : act->stateful_calls) {
         if (sc->attached_callee->clone_id != at->clone_id) continue;
@@ -423,8 +417,9 @@ bitvec FindPayloadCandidates::determine_indirect_addr_payload(const IR::MAU::Act
     bitvec rv;
 
     if (call == nullptr) {
-        BUG_CHECK(act->per_flow_enables.count(at->unique_id()) == 0, "Attached memory enabled "
-            "with no call?");
+        BUG_CHECK(act->per_flow_enables.count(at->unique_id()) == 0,
+                  "Attached memory enabled "
+                  "with no call?");
         return rv;
     }
 
@@ -432,8 +427,9 @@ bitvec FindPayloadCandidates::determine_indirect_addr_payload(const IR::MAU::Act
     if (call->index == nullptr) return rv;
 
     if (auto aa = call->index->to<IR::MAU::ActionArg>()) {
-        BUG_CHECK(act->args.size() == payload_args.size(), "Cannot have an action argument "
-            "without a payload argument");
+        BUG_CHECK(act->args.size() == payload_args.size(),
+                  "Cannot have an action argument "
+                  "without a payload argument");
         int param_index = 0;
         for (auto param : act->args) {
             if (param->equiv(*aa)) break;
@@ -443,8 +439,7 @@ bitvec FindPayloadCandidates::determine_indirect_addr_payload(const IR::MAU::Act
         if (auto c = expr->to<IR::Constant>()) {
             rv = bitvec(c->asUnsigned());
         } else if (auto b = expr->to<IR::BoolLiteral>()) {
-            if (b->value)
-                rv.setbit(0);
+            if (b->value) rv.setbit(0);
         } else {
             BUG("Unhandled type in the static entry parameter list");
         }
@@ -455,13 +450,12 @@ bitvec FindPayloadCandidates::determine_indirect_addr_payload(const IR::MAU::Act
 }
 
 /**
- * Returns a bool if that attached memory runs in that action 
+ * Returns a bool if that attached memory runs in that action
  */
 bitvec FindPayloadCandidates::determine_indirect_pfe_payload(const IR::MAU::Action *act,
-        const IR::MAU::AttachedMemory *at) {
+                                                             const IR::MAU::AttachedMemory *at) {
     bitvec rv;
-    if (act->per_flow_enables.count(at->unique_id()))
-        rv.setbit(0);
+    if (act->per_flow_enables.count(at->unique_id())) rv.setbit(0);
     return rv;
 }
 
@@ -469,14 +463,16 @@ bitvec FindPayloadCandidates::determine_indirect_pfe_payload(const IR::MAU::Acti
  * The meter type value is returned from the meter type of that action
  */
 bitvec FindPayloadCandidates::determine_meter_type_payload(const IR::MAU::Action *act,
-        const IR::MAU::AttachedMemory *at) {
+                                                           const IR::MAU::AttachedMemory *at) {
     if (act->meter_types.count(at->unique_id()) == 0) {
-        BUG_CHECK(act->per_flow_enables.count(at->unique_id()) == 0, "Per flow enable "
-            "on but missing meter type");
+        BUG_CHECK(act->per_flow_enables.count(at->unique_id()) == 0,
+                  "Per flow enable "
+                  "on but missing meter type");
         return bitvec();
     }
-    BUG_CHECK(act->per_flow_enables.count(at->unique_id()), "Per flow enable "
-            "off but has a meter type");
+    BUG_CHECK(act->per_flow_enables.count(at->unique_id()),
+              "Per flow enable "
+              "off but has a meter type");
     return bitvec(static_cast<int>(act->meter_types.at(at->unique_id())));
 }
 
@@ -485,15 +481,14 @@ bitvec FindPayloadCandidates::determine_meter_type_payload(const IR::MAU::Action
  * a particular action, and set of parameters from a static entry for that action, this
  * will return the payload value for that entry.
  */
-bitvec FindPayloadCandidates::determine_match_group_payload(const IR::MAU::Table *tbl,
-        const TableResourceAlloc *alloc, const IR::MAU::Action *act,
-        std::vector<const IR::Constant *> arguments, int entry_idx) {
+bitvec FindPayloadCandidates::determine_match_group_payload(
+    const IR::MAU::Table *tbl, const TableResourceAlloc *alloc, const IR::MAU::Action *act,
+    std::vector<const IR::Constant *> arguments, int entry_idx) {
     bitvec rv;
-    const IR::MAU::AttachedMemory *stats_alu_user  = nullptr;
+    const IR::MAU::AttachedMemory *stats_alu_user = nullptr;
     const IR::MAU::AttachedMemory *meter_alu_user = nullptr;
     for (auto attached : tbl->attached) {
-        if (attached->attached->to<IR::MAU::Counter>())
-            stats_alu_user = attached->attached;
+        if (attached->attached->to<IR::MAU::Counter>()) stats_alu_user = attached->attached;
         if (attached->attached->to<IR::MAU::Meter>() ||
             attached->attached->to<IR::MAU::StatefulAlu>())
             meter_alu_user = attached->attached;
@@ -512,27 +507,32 @@ bitvec FindPayloadCandidates::determine_match_group_payload(const IR::MAU::Table
                 current_value = determine_immediate_payload(act, arguments, alloc);
                 break;
             case TableFormat::COUNTER:
-                BUG_CHECK(stats_alu_user != nullptr, "Must have a counter to have a counter "
+                BUG_CHECK(stats_alu_user != nullptr,
+                          "Must have a counter to have a counter "
                           "address");
                 current_value = determine_indirect_addr_payload(act, arguments, stats_alu_user);
                 break;
             case TableFormat::COUNTER_PFE:
-                BUG_CHECK(stats_alu_user != nullptr, "Must have a counter to have a counter "
+                BUG_CHECK(stats_alu_user != nullptr,
+                          "Must have a counter to have a counter "
                           "address");
                 current_value = determine_indirect_pfe_payload(act, stats_alu_user);
                 break;
             case TableFormat::METER:
-                BUG_CHECK(meter_alu_user != nullptr, "Must have a meter to have a meter "
+                BUG_CHECK(meter_alu_user != nullptr,
+                          "Must have a meter to have a meter "
                           "address");
                 current_value = determine_indirect_addr_payload(act, arguments, meter_alu_user);
                 break;
             case TableFormat::METER_PFE:
-                BUG_CHECK(meter_alu_user != nullptr, "Must have a meter to have a meter "
+                BUG_CHECK(meter_alu_user != nullptr,
+                          "Must have a meter to have a meter "
                           "address");
                 current_value = determine_indirect_pfe_payload(act, meter_alu_user);
                 break;
             case TableFormat::METER_TYPE:
-                BUG_CHECK(meter_alu_user != nullptr, "Must have a meter to have a meter "
+                BUG_CHECK(meter_alu_user != nullptr,
+                          "Must have a meter to have a meter "
                           "address");
                 current_value = determine_meter_type_payload(act, meter_alu_user);
                 break;
@@ -563,7 +563,8 @@ bitvec FindPayloadCandidates::determine_match_group_payload(const IR::MAU::Table
  *    - meter_type
  */
 bitvec FindPayloadCandidates::determine_payload(const IR::MAU::Table *tbl,
-        const TableResourceAlloc *alloc, const IR::MAU::Table::Layout *layout) {
+                                                const TableResourceAlloc *alloc,
+                                                const IR::MAU::Table::Layout *layout) {
     bitvec payload;
     auto &tf = alloc->table_format;
     if (tbl->entries_list && tbl->entries_list->entries.size() == tf.match_groups.size()) {
@@ -588,7 +589,8 @@ bitvec FindPayloadCandidates::determine_payload(const IR::MAU::Table *tbl,
         }
         return payload;
     } else if (layout->hash_action) {
-        BUG_CHECK(tf.match_groups.size() == 1 && tbl->hit_actions() == 1, "Not a no match hit "
+        BUG_CHECK(tf.match_groups.size() == 1 && tbl->hit_actions() == 1,
+                  "Not a no match hit "
                   "table");
         std::vector<const IR::Constant *> payload_args;
         const IR::MAU::Action *hit_act = nullptr;
@@ -599,10 +601,12 @@ bitvec FindPayloadCandidates::determine_payload(const IR::MAU::Table *tbl,
         }
         return determine_match_group_payload(tbl, alloc, hit_act, payload_args, 0);
     } else if (tbl->entries_list) {
-        BUG_CHECK(tbl->entries_list->entries.size() == tf.match_groups.size(), "Not every payload "
+        BUG_CHECK(tbl->entries_list->entries.size() == tf.match_groups.size(),
+                  "Not every payload "
                   "is accounted for");
     } else if (!tbl->gateway_payload.empty()) {
-        BUG_CHECK(tbl->gateway_payload.size() == tf.match_groups.size(), "Not every payload is "
+        BUG_CHECK(tbl->gateway_payload.size() == tf.match_groups.size(),
+                  "Not every payload is "
                   "accounted for");
     }
     BUG("Unreachable");

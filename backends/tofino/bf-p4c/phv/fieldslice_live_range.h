@@ -10,19 +10,19 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_PHV_FIELDSLICE_LIVE_RANGE_H_
-#define EXTENSIONS_BF_P4C_PHV_FIELDSLICE_LIVE_RANGE_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_PHV_FIELDSLICE_LIVE_RANGE_H_
+#define BACKENDS_TOFINO_BF_P4C_PHV_FIELDSLICE_LIVE_RANGE_H_
 
 #include <algorithm>
 
-#include "bf-p4c/parde/clot/clot_info.h"
-#include "mau_backtracker.h"
-#include "lib/safe_vector.h"
 #include "bf-p4c/common/field_defuse.h"
-#include "bf-p4c/mau/action_analysis.h"
 #include "bf-p4c/common/map_tables_to_actions.h"
+#include "bf-p4c/mau/action_analysis.h"
+#include "bf-p4c/parde/clot/clot_info.h"
 #include "bf-p4c/phv/phv.h"
 #include "bf-p4c/phv/pragma/phv_pragmas.h"
+#include "lib/safe_vector.h"
+#include "mau_backtracker.h"
 
 namespace PHV {
 
@@ -44,13 +44,7 @@ class LiveRangeInfo {
     // f2's paired defuse(s): [-1, 2R]            // will produce [-1W, 0L, 1L, 2R]
     // f1 have two disjoint live ranges and they can be allocated to different containers
     // but f2 has to be allocated into one container.
-    enum class OpInfo {
-        DEAD,
-        READ,
-        WRITE,
-        READ_WRITE,
-        LIVE
-    };
+    enum class OpInfo { DEAD, READ, WRITE, READ_WRITE, LIVE };
 
  private:
     /// Number of table stages
@@ -73,12 +67,12 @@ class LiveRangeInfo {
         if (num_table_stages <= 0) num_table_stages = Device::numStages();
         lives_i.resize(num_table_stages + 2, OpInfo::DEAD);
     }
-    OpInfo& parser() { return lives_i[0]; }
-    const OpInfo& parser() const { return lives_i[0]; }
-    OpInfo& deparser() { return lives_i[num_table_stages + 1]; }
-    const OpInfo& deparser() const { return lives_i[num_table_stages + 1]; }
-    OpInfo& stage(int i) { return lives_i[i + 1]; }
-    const OpInfo& stage(int i) const { return lives_i[i + 1]; }
+    OpInfo &parser() { return lives_i[0]; }
+    const OpInfo &parser() const { return lives_i[0]; }
+    OpInfo &deparser() { return lives_i[num_table_stages + 1]; }
+    const OpInfo &deparser() const { return lives_i[num_table_stages + 1]; }
+    OpInfo &stage(int i) { return lives_i[i + 1]; }
+    const OpInfo &stage(int i) const { return lives_i[i + 1]; }
 
     /// Record the number of table stages in use
     ///
@@ -88,7 +82,7 @@ class LiveRangeInfo {
     }
 
     /// @returns live info in a vector: [Parser 0 1 ... max_stage Deparser]
-    const safe_vector<OpInfo>& vec() const { return lives_i; }
+    const safe_vector<OpInfo> &vec() const { return lives_i; }
 
     /// @returns true when this and @p other can be overlaid, defined as:
     /// (1) For any stage *s*, at least one of OpInfo at *s* of this or @p other is dead.
@@ -106,7 +100,7 @@ class LiveRangeInfo {
     /// TODO: we do not need to use this function during PHV allocation because
     /// AllocSlices already have the presice live range info already.
     /// This function is kept here for future overlay analysis before PHV allocation.
-    bool can_overlay(const LiveRangeInfo& other) const;
+    bool can_overlay(const LiveRangeInfo &other) const;
 
     /// @returns a vector of disjoint live ranges. For example
     ///         P 0 1 2 3 4 ... D
@@ -128,30 +122,30 @@ class LiveRangeInfo {
     /// {(1R, 1W), (2W, 2W), (3W, 3W)} => {(1R, 1W), (2W, 3W)}
     /// premise: @p ranges must be disjoint and sorted in increasing order of LiveRange.
     /// a compiler BUG will be thrown if not satisfied.
-    static std::vector<LiveRange> merge_invalid_ranges(const std::vector<LiveRange>& ranges);
+    static std::vector<LiveRange> merge_invalid_ranges(const std::vector<LiveRange> &ranges);
 };
 
-LiveRangeInfo::OpInfo operator|(const LiveRangeInfo::OpInfo&, const LiveRangeInfo::OpInfo&);
-LiveRangeInfo::OpInfo& operator|=(LiveRangeInfo::OpInfo&, const LiveRangeInfo::OpInfo&);
+LiveRangeInfo::OpInfo operator|(const LiveRangeInfo::OpInfo &, const LiveRangeInfo::OpInfo &);
+LiveRangeInfo::OpInfo &operator|=(LiveRangeInfo::OpInfo &, const LiveRangeInfo::OpInfo &);
 
-std::ostream &operator<<(std::ostream &out, const LiveRangeInfo::OpInfo& opinfo);
-std::ostream &operator<<(std::ostream &out, const LiveRangeInfo& lr);
+std::ostream &operator<<(std::ostream &out, const LiveRangeInfo::OpInfo &opinfo);
+std::ostream &operator<<(std::ostream &out, const LiveRangeInfo &lr);
 
 class IFieldSliceLiveRangeDB {
  public:
     /// @returns a const pointer to live range info, nullptr if not exist.
-    virtual const LiveRangeInfo* get_liverange(const PHV::FieldSlice &) const = 0;
+    virtual const LiveRangeInfo *get_liverange(const PHV::FieldSlice &) const = 0;
     /// @returns a default live range that should live from parser to deparser.
-    virtual const LiveRangeInfo* default_liverange() const = 0;
+    virtual const LiveRangeInfo *default_liverange() const = 0;
 };
 
 /// FieldSliceLiveRangeDB compute and save the physical liverange for fieldslices.
 /// Premise:
 ///  (1) when auto-init-metadata is disabled, all fields that may read implicit parser init def
 ///      must be annotated with pa_no_init and saved in pragmas.pa_no_init().getFields().
-class FieldSliceLiveRangeDB : public IFieldSliceLiveRangeDB, public PassManager  {
+class FieldSliceLiveRangeDB : public IFieldSliceLiveRangeDB, public PassManager {
     class MapFieldSliceToAction : public Inspector {
-        const PhvInfo& phv;
+        const PhvInfo &phv;
         const ReductionOrInfo &red_info;
         Visitor::profile_t init_apply(const IR::Node *root) override;
 
@@ -165,22 +159,18 @@ class FieldSliceLiveRangeDB : public IFieldSliceLiveRangeDB, public PassManager 
         ordered_map<const IR::MAU::Action *, ordered_set<PHV::FieldSlice>> action_to_reads;
 
         bool preorder(const IR::MAU::Action *act) override;
-        MapFieldSliceToAction(const PhvInfo& phv, const ReductionOrInfo &ri)
+        MapFieldSliceToAction(const PhvInfo &phv, const ReductionOrInfo &ri)
             : phv(phv), red_info(ri) {}
     };
 
     class DBSetter : public Inspector {
         struct Location {
-            enum unit {
-                PARSER,
-                TABLE,
-                DEPARSER
-            };
+            enum unit { PARSER, TABLE, DEPARSER };
             unit u;
             ordered_set<int> stages;
         };
-        const PhvInfo& phv;
-        const ClotInfo& clot;
+        const PhvInfo &phv;
+        const ClotInfo &clot;
         const MauBacktracker *backtracker;
         const FieldDefUse *defuse;
         const MapFieldSliceToAction *fs_action_map;
@@ -193,8 +183,8 @@ class FieldSliceLiveRangeDB : public IFieldSliceLiveRangeDB, public PassManager 
         /// When is_read is false, then for fields marked as no_implicit_init,
         /// locations of parser implicit init unit will be std::nullopt,
         /// and for fields marked as not_parsed_fields(), locations of parser unit will be none.
-        std::optional<Location> to_location(
-                const PHV::Field *field, const FieldDefUse::locpair& loc, bool is_read) const;
+        std::optional<Location> to_location(const PHV::Field *field,
+                                            const FieldDefUse::locpair &loc, bool is_read) const;
 
         /// update @p liverange based on @p loc and @p is_read.
         /// @returns the range of stages (including parde) that has been updated. Indexes of stages
@@ -209,7 +199,7 @@ class FieldSliceLiveRangeDB : public IFieldSliceLiveRangeDB, public PassManager 
                                     const Location &def_loc, LiveRangeInfo &liverange) const;
 
         /// @returns fields that are marked as not deparsed in pragmas.
-        const ordered_set<const PHV::Field*> &not_implicit_init_fields() const {
+        const ordered_set<const PHV::Field *> &not_implicit_init_fields() const {
             return pragmas.pa_no_init().getFields();
         }
 
@@ -233,26 +223,26 @@ class FieldSliceLiveRangeDB : public IFieldSliceLiveRangeDB, public PassManager 
     MapFieldSliceToAction *fs_action_map;
     DBSetter *setter;
 
-    ordered_map<const PHV::Field*, ordered_map<PHV::FieldSlice, LiveRangeInfo>> live_range_map;
+    ordered_map<const PHV::Field *, ordered_map<PHV::FieldSlice, LiveRangeInfo>> live_range_map;
     Visitor::profile_t init_apply(const IR::Node *root) override;
 
-    void set_liverange(const PHV::FieldSlice&, const LiveRangeInfo&);
+    void set_liverange(const PHV::FieldSlice &, const LiveRangeInfo &);
 
  public:
     FieldSliceLiveRangeDB(const MauBacktracker *backtracker, const FieldDefUse *defuse,
-                          const PhvInfo &phv, const ReductionOrInfo &red_info,
-                          const ClotInfo& clot, const PHV::Pragmas &pragmas)
+                          const PhvInfo &phv, const ReductionOrInfo &red_info, const ClotInfo &clot,
+                          const PHV::Pragmas &pragmas)
         : pragmas(pragmas) {
         fs_action_map = new MapFieldSliceToAction(phv, red_info);
         setter = new DBSetter(phv, clot, backtracker, defuse, fs_action_map, *this, pragmas);
         addPasses({fs_action_map, setter});
     }
     /// @returns a const pointer to live range info, nullptr if not exist.
-    const LiveRangeInfo* get_liverange(const PHV::FieldSlice&) const override;
+    const LiveRangeInfo *get_liverange(const PHV::FieldSlice &) const override;
     /// @returns default liverange that live from parser to deparser.
-    const LiveRangeInfo* default_liverange() const override;
+    const LiveRangeInfo *default_liverange() const override;
 };
 
 }  // namespace PHV
 
-#endif  /* EXTENSIONS_BF_P4C_PHV_FIELDSLICE_LIVE_RANGE_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_PHV_FIELDSLICE_LIVE_RANGE_H_ */

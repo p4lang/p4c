@@ -10,38 +10,38 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
+#include "bf-p4c/mau/asm_output.h"
+
+#include <iterator>
 #include <map>
+#include <memory>
 #include <regex>
 #include <string>
 #include <vector>
-#include <iterator>
-#include <memory>
 
-#include "boost/range/adaptor/reversed.hpp"
 #include "bf-p4c/common/alias.h"
 #include "bf-p4c/common/ir_utils.h"
 #include "bf-p4c/common/slice.h"
 #include "bf-p4c/common/utils.h"
-#include "bf-p4c/lib/error_type.h"
 #include "bf-p4c/ir/tofino_write_context.h"
-#include "bf-p4c/mau/asm_output.h"
+#include "bf-p4c/lib/error_type.h"
 #include "bf-p4c/mau/default_next.h"
 #include "bf-p4c/mau/finalize_mau_pred_deps_power.h"
 #include "bf-p4c/mau/gateway.h"
+#include "bf-p4c/mau/jbay_next_table.h"
 #include "bf-p4c/mau/payload_gateway.h"
 #include "bf-p4c/mau/resource.h"
 #include "bf-p4c/mau/table_format.h"
 #include "bf-p4c/parde/asm_output.h"
-#include "bf-p4c/mau/jbay_next_table.h"
 #include "bf-p4c/parde/phase0.h"
 #include "bf-p4c/phv/asm_output.h"
+#include "boost/range/adaptor/reversed.hpp"
 #include "lib/algorithm.h"
 #include "lib/bitops.h"
 #include "lib/bitrange.h"
 #include "lib/hex.h"
 #include "lib/indent.h"
 #include "lib/stringref.h"
-
 
 int DefaultNext::id_counter = 0;
 
@@ -50,15 +50,14 @@ static int teop = 0;
 
 namespace {
 // Create the key name that will be output to the assembler & context.json files.
-cstring keyAnnotationName(const IR::MAU::TableKey* table_key, cstring table_name = nullptr) {
+cstring keyAnnotationName(const IR::MAU::TableKey *table_key, cstring table_name = nullptr) {
     cstring annName = ""_cs;
     if (auto ann = table_key->getAnnotation(IR::Annotation::nameAnnotation)) {
         annName = ann->getName();
         // P4_14-->P4_16 translation names valid matches with a
         // "$valid$" suffix (note the trailing "$").  However, Brig
         // and pdgen use "$valid".
-        if (annName.endsWith("$valid$"))
-            annName = annName.substr(0, annName.size() - 1);
+        if (annName.endsWith("$valid$")) annName = annName.substr(0, annName.size() - 1);
         // TODO: This is a hack to remove slices from key annName annotations,
         // eg. "foo.bar[3:0]" becomes "foo.bar".
         // TODO: The hack is here because frontend uses @name annotation to keep
@@ -80,12 +79,12 @@ cstring keyAnnotationName(const IR::MAU::TableKey* table_key, cstring table_name
                 if (!table_name.isNullOrEmpty())
                     // TODO: It would be nice to report srcInfo here.
                     warning(BFN::ErrorType::WARN_SUBSTITUTION,
-                              "%1%: Table key name not supported. "
-                              "Replacing \"%2%\" with \"%3%\".", table_name, annName, newAnnName);
+                            "%1%: Table key name not supported. "
+                            "Replacing \"%2%\" with \"%3%\".",
+                            table_name, annName, newAnnName);
                 annName = newAnnName;
             }
-            LOG3(ann << ": setting external annName of key " << table_key
-                     << " to " << annName);
+            LOG3(ann << ": setting external annName of key " << table_key << " to " << annName);
         }
     }
     return annName;
@@ -94,11 +93,11 @@ cstring keyAnnotationName(const IR::MAU::TableKey* table_key, cstring table_name
 // Helper function for printing as hex.
 // TODO this needs moving to p4c/lib/hex.h
 class hex_big_int {
-    const big_int& v;       // N.B. We expect the caller to manage life-times!
+    const big_int &v;  // N.B. We expect the caller to manage life-times!
 
  public:
-    explicit hex_big_int(const big_int& val) : v(val) {}
-    friend std::ostream &operator<<(std::ostream &os, const hex_big_int& value) {
+    explicit hex_big_int(const big_int &val) : v(val) {}
+    friend std::ostream &operator<<(std::ostream &os, const hex_big_int &value) {
         auto save = os.flags();
         os << "0x" << std::hex << value.v;
         os.flags(save);
@@ -110,15 +109,15 @@ class hex_big_int {
 // This results in code that is more complex, but maintains compactness and readability of
 // the BFA for the common case when we don't have user annotations.
 class Item_Format {
-    const IR::MAU::TableKey* table_key;
-    const indent_t& indent;
+    const IR::MAU::TableKey *table_key;
+    const indent_t &indent;
 
  public:
-    std::function<std::ostream&(std::ostream&)> open;
-    std::function<std::ostream&(std::ostream&)> separator;
-    std::function<std::ostream&(std::ostream&)> annotate_and_close;
-    Item_Format(const IR::MAU::TableKey* table_key, const indent_t& indent)
-                : table_key(table_key), indent(indent) {
+    std::function<std::ostream &(std::ostream &)> open;
+    std::function<std::ostream &(std::ostream &)> separator;
+    std::function<std::ostream &(std::ostream &)> annotate_and_close;
+    Item_Format(const IR::MAU::TableKey *table_key, const indent_t &indent)
+        : table_key(table_key), indent(indent) {
         if (has_user_annotation(table_key)) {
             open = [=](std::ostream &out) -> std::ostream & {
                 out << std::endl << indent;
@@ -156,7 +155,7 @@ class Item_Format {
 struct SliceRange {
     int start_bit;
     int width;
-    SliceRange(const IR::Expression* expr, int default_size) : start_bit(0), width(default_size) {
+    SliceRange(const IR::Expression *expr, int default_size) : start_bit(0), width(default_size) {
         if (const auto s = expr->to<IR::Slice>()) {
             const auto hi = s->e1->to<IR::Constant>();
             const auto lo = s->e2->to<IR::Constant>();
@@ -194,41 +193,38 @@ class ExtractKeyDetails {
     class Iterator;
 
     class KeyDetails {
-        const KeyConfig& config;
-        OriginalIterator key;       // Will be a nullptr if match_table is null.
-        OriginalIterator key_end;   // Will be a nullptr if `key` is a nullptr.
+        const KeyConfig &config;
+        OriginalIterator key;      // Will be a nullptr if match_table is null.
+        OriginalIterator key_end;  // Will be a nullptr if `key` is a nullptr.
         bool recombine_mask = false;
 
         friend class Iterator;  // Only the iterator will construct KeyDetails.
-        KeyDetails(OriginalIterator begin, OriginalIterator end,
-                   const KeyConfig& config) : config{config} {
+        KeyDetails(OriginalIterator begin, OriginalIterator end, const KeyConfig &config)
+            : config{config} {
             // N.B. *end (and *begin) may be nullptr;
             for (key = begin; key != end; ++key) {
                 // We are ignoring param generated by compiler, e.g., alpm partition index.
-                if ((*key)->for_alpm_partition_index())
-                    continue;
-                if ((*key)->for_match())
-                    break;  // Found one.
+                if ((*key)->for_alpm_partition_index()) continue;
+                if ((*key)->for_match()) break;  // Found one.
             }
             // Initialise with a range of one (or empty range).
-            key_end = (key == end)? end : key + 1;
-            if (key != end)
-                recombine_mask = (*key)->from_mask;
+            key_end = (key == end) ? end : key + 1;
+            if (key != end) recombine_mask = (*key)->from_mask;
             // And widen the range of matches.
-            while (key_end != end &&
-                   (*key_end)->p4_param_order == (*key)->p4_param_order) {
+            while (key_end != end && (*key_end)->p4_param_order == (*key)->p4_param_order) {
                 if (!config.tbl_name.isNullOrEmpty())
                     ERROR_CHECK((*key)->from_mask && (*key_end)->from_mask, ErrorType::ERR_INVALID,
                                 "Unexpected recombination of non mask keys "
-                                "in match field for table %1%.", config.tbl_name);
+                                "in match field for table %1%.",
+                                config.tbl_name);
                 ++key_end;
             }
         }
 
-        inline const PHV::Field* phv_field(const OriginalIterator& key) const {
+        inline const PHV::Field *phv_field(const OriginalIterator &key) const {
             return config.phv.field((*key)->expr);
         }
-        inline cstring original_name(const OriginalIterator& key) const {
+        inline cstring original_name(const OriginalIterator &key) const {
             // Replace any alias nodes with their original sources, in order to
             // ensure the original names are emitted.
             return phv_field(key)->externalName();
@@ -239,10 +235,9 @@ class ExtractKeyDetails {
         cstring key_name(bool use_name) const {
             auto annName = keyAnnotationName(*key, config.tbl_name);
             auto plainName = name();
-            if (annName.isNullOrEmpty() ||
-                cstring::to_cstring(canon_name(annName)) ==
-                    cstring::to_cstring(canon_name(plainName))) {
-                return use_name? plainName : nullptr;
+            if (annName.isNullOrEmpty() || cstring::to_cstring(canon_name(annName)) ==
+                                               cstring::to_cstring(canon_name(plainName))) {
+                return use_name ? plainName : nullptr;
             }
             return annName;
         }
@@ -252,13 +247,11 @@ class ExtractKeyDetails {
             // It carries one more bit of information about which field is used as the
             // atcam_partition_index and this information is conveyed to low-level driver
             // via the 'partition_field_name' attribute under the algorithm tcam node.
-            if ((*key)->match_type.name == "atcam_partition_index")
-                return "exact"_cs;
+            if ((*key)->match_type.name == "atcam_partition_index") return "exact"_cs;
             return (*key)->match_type.name;
         }
         int start_bit() const {
-            if (recombine_mask)
-                return 0;  // A masked value is full width.
+            if (recombine_mask) return 0;              // A masked value is full width.
             SliceRange slice_range{(*key)->expr, -1};  // We don't care about width.
             return slice_range.start_bit;
         }
@@ -280,9 +273,8 @@ class ExtractKeyDetails {
                 if (auto ann = (*key)->getAnnotation(IR::Annotation::nameAnnotation)) {
                     auto annName = ann->getName();
                     auto km = get_key_and_mask(annName);
-                    auto [ isSlice, keyStr, slhi, sllo ] = get_key_slice_info(km.first);
-                    if (isSlice)
-                        return (slhi - sllo + 1);
+                    auto [isSlice, keyStr, slhi, sllo] = get_key_slice_info(km.first);
+                    if (isSlice) return (slhi - sllo + 1);
                 }
                 return full_size();  // A masked value is full width.
             }
@@ -290,8 +282,7 @@ class ExtractKeyDetails {
             return slice_range.width;
         }
         big_int mask() const {
-            if (!recombine_mask)
-                return 0;
+            if (!recombine_mask) return 0;
             big_int mask = 0;
             for (auto i = key; i != key_end; ++i) {
                 SliceRange slice_range{(*i)->expr, -1};
@@ -305,54 +296,64 @@ class ExtractKeyDetails {
         int full_size() const { return (phv_field(key) ? phv_field(key)->size : 0); }
         big_int field_mask() const { return Util::mask(full_size()); }
         big_int expression_mask() const { return Util::mask((*key)->expr->type->width_bits()); }
-        const IR::MAU::TableKey* table_keys() const {
-            return key == key_end? nullptr : *key;  // We return the next, if there are any!
+        const IR::MAU::TableKey *table_keys() const {
+            return key == key_end ? nullptr : *key;  // We return the next, if there are any!
         }
     };
 
     class Iterator : public std::iterator<std::input_iterator_tag, IR::MAU::TableKey> {
-        const ExtractKeyDetails* ekd;
+        const ExtractKeyDetails *ekd;
         std::unique_ptr<const KeyDetails> details;
 
-        friend class ExtractKeyDetails;   // Only allow construction via begin() & end().
-        Iterator(const OriginalIterator& begin, const ExtractKeyDetails* ekd) :
-                ekd(ekd), details{new KeyDetails{begin, ekd->table_end, ekd->config}} {}
+        friend class ExtractKeyDetails;  // Only allow construction via begin() & end().
+        Iterator(const OriginalIterator &begin, const ExtractKeyDetails *ekd)
+            : ekd(ekd), details{new KeyDetails{begin, ekd->table_end, ekd->config}} {}
 
      public:
-        Iterator& operator++() {
+        Iterator &operator++() {
             details.reset(new KeyDetails{details->key_end, ekd->table_end, ekd->config});
             return *this;
         }
-        bool operator==(const Iterator& other) const {
-                        return details->table_keys() == other.details->table_keys();
+        bool operator==(const Iterator &other) const {
+            return details->table_keys() == other.details->table_keys();
         }
-        bool operator!=(const Iterator& other) const { return !operator==(other); }
+        bool operator!=(const Iterator &other) const { return !operator==(other); }
 
         // The user should have already checked they were not at `end()`.
-        const KeyDetails& operator*() { CHECK_NULL(details->table_keys()); return *details; }
-        const KeyDetails* operator->() { CHECK_NULL(details->table_keys()); return details.get(); }
+        const KeyDetails &operator*() {
+            CHECK_NULL(details->table_keys());
+            return *details;
+        }
+        const KeyDetails *operator->() {
+            CHECK_NULL(details->table_keys());
+            return details.get();
+        }
     };
 
     friend class Iterator;
-    Iterator begin() { auto ekd = this; return Iterator{table_begin, ekd}; }
-    Iterator end() { auto ekd = this; return Iterator{table_end, ekd}; }
+    Iterator begin() {
+        auto ekd = this;
+        return Iterator{table_begin, ekd};
+    }
+    Iterator end() {
+        auto ekd = this;
+        return Iterator{table_end, ekd};
+    }
 
-    ExtractKeyDetails(const IR::Vector<IR::MAU::TableKey>& match_key, const PhvInfo &phv,
-                      cstring tbl_name) :
-                table_begin{match_key.begin()},
-                table_end{match_key.end()},
-                config{phv, tbl_name} {}
+    ExtractKeyDetails(const IR::Vector<IR::MAU::TableKey> &match_key, const PhvInfo &phv,
+                      cstring tbl_name)
+        : table_begin{match_key.begin()}, table_end{match_key.end()}, config{phv, tbl_name} {}
 };
 
 }  // namespace
 
 class MauAsmOutput::EmitAttached : public Inspector {
     friend class MauAsmOutput;
-    const MauAsmOutput          &self;
-    std::ostream                &out;
-    const IR::MAU::Table        *tbl;
-    int                         stage;
-    gress_t                     gress;
+    const MauAsmOutput &self;
+    std::ostream &out;
+    const IR::MAU::Table *tbl;
+    int stage;
+    gress_t gress;
     bool is_unattached(const IR::MAU::AttachedMemory *at);
     bool preorder(const IR::MAU::Counter *) override;
     bool preorder(const IR::MAU::Meter *) override;
@@ -364,10 +365,12 @@ class MauAsmOutput::EmitAttached : public Inspector {
     // therefore we're emitting idletime inlined, see MauAsmOutput::emit_idletime
     bool preorder(const IR::MAU::IdleTime *) override { return false; }
     bool preorder(const IR::Attached *att) override {
-        BUG("unknown attached table type %s", typeid(*att).name()); }
-    EmitAttached(const MauAsmOutput &s, std::ostream &o, const IR::MAU::Table *t,
-        int stg, gress_t gt)
-    : self(s), out(o), tbl(t), stage(stg), gress(gt) {}};
+        BUG("unknown attached table type %s", typeid(*att).name());
+    }
+    EmitAttached(const MauAsmOutput &s, std::ostream &o, const IR::MAU::Table *t, int stg,
+                 gress_t gt)
+        : self(s), out(o), tbl(t), stage(stg), gress(gt) {}
+};
 
 std::ostream &operator<<(std::ostream &out, const MauAsmOutput &mauasm) {
     indent_t indent(1);
@@ -377,19 +380,17 @@ std::ostream &operator<<(std::ostream &out, const MauAsmOutput &mauasm) {
     // needs to be added to specify phase0 for each parser. Correspondingly,
     // context.json schema for phase0 table must be changed to include
     // phase0 info within the parser node
-    auto* pipe = mauasm.pipe;
+    auto *pipe = mauasm.pipe;
 
     std::vector<gress_t> gr;
     gr.push_back(INGRESS);
     gr.push_back(EGRESS);
-    if (Device::currentDevice() != Device::TOFINO)
-      gr.push_back(GHOST);
+    if (Device::currentDevice() != Device::TOFINO) gr.push_back(GHOST);
 
     for (auto p : pipe->thread[INGRESS].parsers) {
-        if (auto* parser = p->to<IR::BFN::LoweredParser>()) {
+        if (auto *parser = p->to<IR::BFN::LoweredParser>()) {
             if (auto p0 = parser->phase0) {
-                if (!phase0OutputAsm)
-                    out << "stage 0 ingress:" << std::endl;
+                if (!phase0OutputAsm) out << "stage 0 ingress:" << std::endl;
                 mauasm.power_and_mpr->emit_stage_asm(out, INGRESS, 0);
                 out << p0;
                 phase0OutputAsm = true;
@@ -397,14 +398,17 @@ std::ostream &operator<<(std::ostream &out, const MauAsmOutput &mauasm) {
         }
     }
 
-    int maxStages[3] = { -1, -1, -1 };
+    int maxStages[3] = {-1, -1, -1};
     for (auto &stage : mauasm.by_stage) {
         if (stage.first.second > maxStages[stage.first.first]) {
             for (int st = maxStages[stage.first.first] + 1; st < stage.first.second; ++st) {
                 if (mauasm.power_and_mpr->requires_stage_asm(stage.first.first, st)) {
                     out << "stage " << st << ' ' << stage.first.first << ':' << std::endl;
-                    mauasm.power_and_mpr->emit_stage_asm(out, stage.first.first, st); } }
-            maxStages[stage.first.first] = stage.first.second; }
+                    mauasm.power_and_mpr->emit_stage_asm(out, stage.first.first, st);
+                }
+            }
+            maxStages[stage.first.first] = stage.first.second;
+        }
         if (!phase0OutputAsm || stage.first.second != 0 || stage.first.first != INGRESS) {
             out << "stage " << stage.first.second << ' ' << stage.first.first << ':' << std::endl;
             mauasm.power_and_mpr->emit_stage_asm(out, stage.first.first, stage.first.second);
@@ -417,21 +421,21 @@ std::ostream &operator<<(std::ostream &out, const MauAsmOutput &mauasm) {
 
         for (auto &tbl : stage.second) {
             switch (tbl.tableInfo->always_run) {
-            case IR::MAU::AlwaysRun::NONE:
-            case IR::MAU::AlwaysRun::TABLE:
-                mauasm.emit_table(out, tbl.tableInfo, stage.first.second /* stage */,
-                    stage.first.first /* gress */);
-                break;
+                case IR::MAU::AlwaysRun::NONE:
+                case IR::MAU::AlwaysRun::TABLE:
+                    mauasm.emit_table(out, tbl.tableInfo, stage.first.second /* stage */,
+                                      stage.first.first /* gress */);
+                    break;
 
-            case IR::MAU::AlwaysRun::ACTION:
-                if (!found_ara_tables) {
-                    ara_out << indent << "always_run_action:" << std::endl;
-                    found_ara_tables = true;
-                }
+                case IR::MAU::AlwaysRun::ACTION:
+                    if (!found_ara_tables) {
+                        ara_out << indent << "always_run_action:" << std::endl;
+                        found_ara_tables = true;
+                    }
 
-                mauasm.emit_always_run_action(ara_out, tbl.tableInfo,
-                                              stage.first.second /* stage */,
-                                              stage.first.first /* gress */);
+                    mauasm.emit_always_run_action(ara_out, tbl.tableInfo,
+                                                  stage.first.second /* stage */,
+                                                  stage.first.first /* gress */);
             }
         }
 
@@ -439,22 +443,23 @@ std::ostream &operator<<(std::ostream &out, const MauAsmOutput &mauasm) {
     }
     if (mauasm.by_stage.empty() && !phase0OutputAsm) {
         // minimal pipe config for empty program
-        out << "stage 0 ingress: {}" << std::endl; }
+        out << "stage 0 ingress: {}" << std::endl;
+    }
     return out;
 }
 
 void MauAsmOutput::emit_single_alias(std::ostream &out, std::string &sep,
-        const ActionData::Parameter *param, le_bitrange adt_range, cstring alias,
-        safe_vector<ActionData::Argument> &full_args, cstring action_name) const {
+                                     const ActionData::Parameter *param, le_bitrange adt_range,
+                                     cstring alias, safe_vector<ActionData::Argument> &full_args,
+                                     cstring action_name) const {
     LOG3("Emitting single alias for " << param << " in action : " << action_name);
     bool found = false;
     cstring found_arg_name;
     bool single_value = true;
-    le_bitrange arg_bits = { 0, 0 };
+    le_bitrange arg_bits = {0, 0};
     if (auto arg = param->to<ActionData::Argument>()) {
         for (auto full_arg : full_args) {
-            if (arg->name() != full_arg.name())
-                continue;
+            if (arg->name() != full_arg.name()) continue;
             if (arg->param_field() != full_arg.param_field()) {
                 single_value = false;
                 arg_bits = arg->param_field();
@@ -463,8 +468,8 @@ void MauAsmOutput::emit_single_alias(std::ostream &out, std::string &sep,
             found_arg_name = full_arg.originalName();
             break;
         }
-        BUG_CHECK(found, "An argument %s was not found in the parameters of action %s",
-                  arg->name(), action_name);
+        BUG_CHECK(found, "An argument %s was not found in the parameters of action %s", arg->name(),
+                  action_name);
     }
 
     std::string param_name_suffix = "";
@@ -487,8 +492,8 @@ void MauAsmOutput::emit_single_alias(std::ostream &out, std::string &sep,
         // equivalent. With changes in frontend, all action params
         // will become unique to fix issues with inlining and need this mapping.
         if (param->name() != found_arg_name) {
-            out << ", " << found_arg_name << param_name_suffix
-                << ": " << param->name() << param_name_suffix;
+            out << ", " << found_arg_name << param_name_suffix << ": " << param->name()
+                << param_name_suffix;
         }
     }
 }
@@ -520,12 +525,13 @@ void MauAsmOutput::emit_single_alias(std::ostream &out, std::string &sep,
  *  Instruction Adjustment
  */
 void MauAsmOutput::emit_action_data_alias(std::ostream &out, indent_t indent,
-        const IR::MAU::Table *tbl, const IR::MAU::Action *af) const {
+                                          const IR::MAU::Table *tbl,
+                                          const IR::MAU::Action *af) const {
     auto &format = tbl->resources->action_format;
     auto all_alu_positions = format.alu_positions.at(af->name);
     safe_vector<ActionData::Argument> full_args;
     for (auto arg : af->args) {
-        le_bitrange full_arg_bits = { 0, arg->type->width_bits() - 1};
+        le_bitrange full_arg_bits = {0, arg->type->width_bits() - 1};
         full_args.emplace_back(arg->name, full_arg_bits);
     }
 
@@ -533,9 +539,9 @@ void MauAsmOutput::emit_action_data_alias(std::ostream &out, indent_t indent,
     std::string sep = "";
     for (auto alu_pos : all_alu_positions) {
         cstring alias_name = alu_pos.alu_op->alias();
-        le_bitrange slot_bits = { alu_pos.alu_op->slot_bits().min().index(),
-                                 alu_pos.alu_op->slot_bits().max().index() };
-        le_bitrange postpone_range = { 0, 0 };
+        le_bitrange slot_bits = {alu_pos.alu_op->slot_bits().min().index(),
+                                 alu_pos.alu_op->slot_bits().max().index()};
+        le_bitrange postpone_range = {0, 0};
         bool second_alias;
         cstring second_level_alias;
         if (!alias_name.isNull()) {
@@ -554,9 +560,8 @@ void MauAsmOutput::emit_action_data_alias(std::ostream &out, indent_t indent,
         int wrapped_con_idx = 0;
         for (auto pos : ad_pos) {
             // Stop at the bitmasked-set
-            if (pos.first >= static_cast<int>(alu_pos.alu_op->size()))
-                break;
-            le_bitrange adt_range = { pos.first, pos.first + pos.second->size() - 1 };
+            if (pos.first >= static_cast<int>(alu_pos.alu_op->size())) break;
+            le_bitrange adt_range = {pos.first, pos.first + pos.second->size() - 1};
             // The alias already has subtracted out the slot_bits range.
             if (second_alias) {
                 adt_range = adt_range.shiftedByBits(-1 * slot_bits.lo);
@@ -580,22 +585,20 @@ void MauAsmOutput::emit_action_data_alias(std::ostream &out, indent_t indent,
                 param = next_con;
             }
 
-            emit_single_alias(out, sep, param, adt_range, second_level_alias,
-                              full_args, af->name);
+            emit_single_alias(out, sep, param, adt_range, second_level_alias, full_args, af->name);
         }
 
         // Because the mask can now be built up of both parameters and constants, the alias
         // mechanism is similar to the data fields
         if (alu_pos.alu_op->is_constrained(ActionData::BITMASKED_SET)) {
-            le_bitrange mask_slot_bits = { alu_pos.alu_op->mask_bits().min().index(),
-                                           alu_pos.alu_op->mask_bits().max().index() };
+            le_bitrange mask_slot_bits = {alu_pos.alu_op->mask_bits().min().index(),
+                                          alu_pos.alu_op->mask_bits().max().index()};
             out << sep << alu_pos.alu_op->mask_alias() << ": ";
             out << format.get_format_name(alu_pos, true, &mask_slot_bits);
             sep = ", ";
             for (auto pos : ad_pos) {
-                if (pos.first < static_cast<int>(alu_pos.alu_op->size()))
-                    continue;
-                le_bitrange adt_range = { pos.first, pos.first + pos.second->size() -1 };
+                if (pos.first < static_cast<int>(alu_pos.alu_op->size())) continue;
+                le_bitrange adt_range = {pos.first, pos.first + pos.second->size() - 1};
                 adt_range = adt_range.shiftedByBits(-1 * alu_pos.alu_op->size());
                 adt_range = adt_range.shiftedByBits(-1 * slot_bits.lo);
                 emit_single_alias(out, sep, pos.second, adt_range, alu_pos.alu_op->mask_alias(),
@@ -606,27 +609,23 @@ void MauAsmOutput::emit_action_data_alias(std::ostream &out, indent_t indent,
     out << " }" << std::endl;
 }
 
-
-
 // Simply emits the action data format of the action data table or action profile
 void MauAsmOutput::emit_action_data_format(std::ostream &out, indent_t indent,
-        const IR::MAU::Table *tbl, const IR::MAU::Action *af) const {
+                                           const IR::MAU::Table *tbl,
+                                           const IR::MAU::Action *af) const {
     auto &format = tbl->resources->action_format;
     auto &alu_pos_vec = format.alu_positions.at(af->name);
-    if (alu_pos_vec.empty())
-        return;
+    if (alu_pos_vec.empty()) return;
 
     std::set<std::pair<int, int>> single_placements;
     for (auto &alu_pos : alu_pos_vec) {
         auto single_placement = std::make_pair(alu_pos.start_byte, alu_pos.alu_op->size());
 
-        if (alu_pos.loc == ActionData::IMMEDIATE)
-            continue;
+        if (alu_pos.loc == ActionData::IMMEDIATE) continue;
         single_placements.insert(single_placement);
     }
 
-    if (single_placements.empty())
-        return;
+    if (single_placements.empty()) return;
 
     out << indent << "format " << canon_name(af->name) << ": { ";
     std::string sep = "";
@@ -634,8 +633,7 @@ void MauAsmOutput::emit_action_data_format(std::ostream &out, indent_t indent,
     for (auto &alu_pos : alu_pos_vec) {
         auto single_placement = std::make_pair(alu_pos.start_byte, alu_pos.alu_op->size());
 
-        if (alu_pos.loc == ActionData::IMMEDIATE)
-            continue;
+        if (alu_pos.loc == ActionData::IMMEDIATE) continue;
         if (single_placements.count(single_placement) == 0) {
             cstring alias_name = format.get_format_name(alu_pos, false);
             out << sep << alias_name;
@@ -666,9 +664,8 @@ void MauAsmOutput::emit_action_data_format(std::ostream &out, indent_t indent,
 /* Generate asm for the way information, such as the size, select mask, and specifically which
    RAMs belong to a specific way */
 void MauAsmOutput::emit_ways(std::ostream &out, indent_t indent, const IXBar::Use *use,
-        const Memories::Use *mem) const {
-    if (use == nullptr || use->way_use.empty())
-        return;
+                             const Memories::Use *mem) const {
+    if (use == nullptr || use->way_use.empty()) return;
     out << indent++ << "ways:" << std::endl;
 
     auto ixbar_way = use->way_use.begin();
@@ -676,33 +673,33 @@ void MauAsmOutput::emit_ways(std::ostream &out, indent_t indent, const IXBar::Us
         BUG_CHECK(ixbar_way != use->way_use.end(), "No more ixbar ways to output in asm_output");
         out << indent << "- { " << use->way_source_kind() << ": " << ixbar_way->source << ", "
             << "index: " << ixbar_way->index.lo << ".." << ixbar_way->index.hi << ", "
-            << "select: " << ixbar_way->select.lo << ".." << ixbar_way->select.hi << " & "
-            << "0x" << hex(mem_way.select_mask) << ", rams: [";
+            << "select: " << ixbar_way->select.lo << ".." << ixbar_way->select.hi << " & " << "0x"
+            << hex(mem_way.select_mask) << ", rams: [";
         size_t index = 0;
         for (auto ram : mem_way.rams) {
             out << "[" << ram.first << ", " << (ram.second + 2) << "]";
-            if (index < mem_way.rams.size() - 1)
-                out << ", ";
+            if (index < mem_way.rams.size() - 1) out << ", ";
             index++;
         }
-        out  << "] }" << std::endl;
+        out << "] }" << std::endl;
         // ATCAM tables have only one input xbar way
         if (use->type != IXBar::Use::ATCAM_MATCH) ++ixbar_way;
     }
 }
 
 void MauAsmOutput::emit_hash_dist(std::ostream &out, indent_t indent,
-        const safe_vector<Tofino::IXBar::HashDistUse> *hash_dist_use, bool hashmod) const {
-    if (hash_dist_use == nullptr || hash_dist_use->empty())
-        return;
+                                  const safe_vector<Tofino::IXBar::HashDistUse> *hash_dist_use,
+                                  bool hashmod) const {
+    if (hash_dist_use == nullptr || hash_dist_use->empty()) return;
 
     bool first = true;
     for (auto &hash_dist : *hash_dist_use) {
         for (auto &ir_alloc : hash_dist.ir_allocations) {
-            BUG_CHECK(ir_alloc.use->type == IXBar::Use::HASH_DIST, "Hash Dist allocation on "
+            BUG_CHECK(ir_alloc.use->type == IXBar::Use::HASH_DIST,
+                      "Hash Dist allocation on "
                       "a non-hash dist xbar region");
         }
-    // if (hash_dist.use.type != IXBar::Use::HASH_DIST) continue;
+        // if (hash_dist.use.type != IXBar::Use::HASH_DIST) continue;
         if ((hash_dist.destinations().getbit(IXBar::HD_HASHMOD)) != hashmod) continue;
         if (first) {
             out << indent++ << "hash_dist:" << std::endl;
@@ -710,12 +707,9 @@ void MauAsmOutput::emit_hash_dist(std::ostream &out, indent_t indent,
         }
         out << indent << hash_dist.unit << ": { ";
         out << "hash: " << hash_dist.hash_group();
-        if (!hash_dist.mask.empty())
-            out << ", mask: 0x" << hash_dist.mask;
-        if (hash_dist.shift >= 0)
-            out << ", shift: " << hash_dist.shift;
-        if (hash_dist.expand >= 0)
-            out << ", expand: " << hash_dist.expand;
+        if (!hash_dist.mask.empty()) out << ", mask: 0x" << hash_dist.mask;
+        if (hash_dist.shift >= 0) out << ", shift: " << hash_dist.shift;
+        if (hash_dist.expand >= 0) out << ", expand: " << hash_dist.expand;
         auto &set = hash_dist.outputs;
         if (set.size() > 0) {
             out << ", output: ";
@@ -723,7 +717,8 @@ void MauAsmOutput::emit_hash_dist(std::ostream &out, indent_t indent,
                 const char *sep = "[ ";
                 for (auto el : set) {
                     out << sep << el;
-                    sep = ", "; }
+                    sep = ", ";
+                }
                 out << " ]";
             } else {
                 out << *set.begin();
@@ -742,10 +737,10 @@ void MauAsmOutput::emit_random_seed(std::ostream &out, indent_t indent,
 
 bool MauAsmOutput::require_ixbar(const IR::MAU::Table *tbl, IXBar::Use::type_t type) const {
     if (type == IXBar::Use::HASH_DIST) {
-        return tbl->resources->hash_dists.size() > 0; }
+        return tbl->resources->hash_dists.size() > 0;
+    }
     auto *use = tbl->resources->find_ixbar(type);
-    if (use && !use->use.empty())
-        return true;
+    if (use && !use->use.empty()) return true;
     return false;
 }
 
@@ -753,8 +748,7 @@ bool MauAsmOutput::require_ixbar(const IR::MAU::Table *tbl,
                                  std::initializer_list<IXBar::Use::type_t> types) const {
     if (tbl == nullptr) return false;
     for (auto type : types) {
-        if (require_ixbar(tbl, type))
-            return true;
+        if (require_ixbar(tbl, type)) return true;
     }
     return false;
 }
@@ -773,7 +767,8 @@ void MauAsmOutput::emit_ixbar(std::ostream &out, indent_t indent, const IR::MAU:
     }
     const TableMatch *fmt = nullptr;
     if (type == IXBar::Use::EXACT_MATCH || type == IXBar::Use::TERNARY_MATCH) {
-        fmt = TableMatch::create(phv, tbl); }
+        fmt = TableMatch::create(phv, tbl);
+    }
 
     ::IXBar::Use *use = tbl->resources->find_ixbar(type);
     if (use && !use->use.empty()) {
@@ -784,8 +779,7 @@ void MauAsmOutput::emit_ixbar(std::ostream &out, indent_t indent, const IR::MAU:
 /* recommended to use, it handles the print of 'input_xbar:' key and indent properly */
 void MauAsmOutput::emit_ixbar(std::ostream &out, indent_t indent, const IR::MAU::Table *tbl,
                               std::initializer_list<IXBar::Use::type_t> types) const {
-    if (require_ixbar(tbl, types))
-        out << indent << "input_xbar:" << std::endl;
+    if (require_ixbar(tbl, types)) out << indent << "input_xbar:" << std::endl;
     for (auto type : types) {
         emit_ixbar(out, indent + 1, tbl, type);
     }
@@ -795,21 +789,24 @@ std::ostream &operator<<(std::ostream &out, const memory_vector &v) {
     if (v.vec.size() != 1) out << "[ ";
     const char *sep = "";
 
-    int col_adjust = (v.type == Memories::Use::TERNARY  ||
-                      v.type == Memories::Use::IDLETIME || v.is_mapcol)  ?
-                     0 : Device::sramColumnAdjust();
+    int col_adjust =
+        (v.type == Memories::Use::TERNARY || v.type == Memories::Use::IDLETIME || v.is_mapcol)
+            ? 0
+            : Device::sramColumnAdjust();
 
     bool logical = v.type >= Memories::Use::COUNTER;
     int col_mod = logical ? 6 : 12;
     for (auto c : v.vec) {
         out << sep << (c + col_adjust) % col_mod;
-        sep = ", "; }
+        sep = ", ";
+    }
     if (v.vec.size() != 1) out << " ]";
     return out;
 }
 
 void MauAsmOutput::emit_memory(std::ostream &out, indent_t indent, const Memories::Use &mem,
-         const IR::MAU::Table::Layout *layout, const TableFormat::Use *format) const {
+                               const IR::MAU::Table::Layout *layout,
+                               const TableFormat::Use *format) const {
     safe_vector<int> row, bus, result_bus, word;
     std::map<int, safe_vector<int>> home_rows;
     safe_vector<int> stash_rows;
@@ -828,14 +825,13 @@ void MauAsmOutput::emit_memory(std::ostream &out, indent_t indent, const Memorie
     // Also explicitly print out search bus and hash bus if the layout has no overhead
     if (layout != nullptr && format != nullptr) {
         if (!layout->no_match_rams()) {
-            if (!format->has_overhead())
-                separate_bus = true;
+            if (!format->has_overhead()) separate_bus = true;
         }
     }
 
     for (auto &r : mem.row) {
         if (logical) {
-            int logical_row = 2*r.row + (r.col[0] >= Memories::LEFT_SIDE_COLUMNS);
+            int logical_row = 2 * r.row + (r.col[0] >= Memories::LEFT_SIDE_COLUMNS);
             row.push_back(logical_row);
             have_col = true;
             if (r.bus >= 0) {
@@ -864,18 +860,16 @@ void MauAsmOutput::emit_memory(std::ostream &out, indent_t indent, const Memorie
             row.push_back(r.row);
             bus.push_back(r.bus);
             if (r.bus >= 0) have_bus = true;
-            if (separate_bus)
-                result_bus.push_back(r.result_bus);
+            if (separate_bus) result_bus.push_back(r.result_bus);
             if (r.col.size() > 0) have_col = true;
         }
-        if (have_word)
-            word.push_back(r.word);
+        if (have_word) word.push_back(r.word);
         if ((r.stash_unit >= 0) && (r.stash_col >= 0)) {
             stash_rows.push_back(r.row);
             stash_cols.push_back(r.stash_col);
             stash_units.push_back(r.stash_unit);
-            LOG4("Adding stash on row: " << r.row << ", col: "
-                    << r.stash_col << ", unit: " << r.stash_unit);
+            LOG4("Adding stash on row: " << r.row << ", col: " << r.stash_col
+                                         << ", unit: " << r.stash_unit);
         }
     }
     if (row.size() > 1) {
@@ -893,8 +887,7 @@ void MauAsmOutput::emit_memory(std::ostream &out, indent_t indent, const Memorie
         } else if (separate_bus) {
             out << indent << "result_bus: " << result_bus << std::endl;
         }
-        if (have_word)
-            out << indent << "word: " << word << std::endl;
+        if (have_word) out << indent << "word: " << word << std::endl;
         if (have_col) {
             out << indent << "column:" << std::endl;
             for (auto &r : mem.row)
@@ -928,14 +921,13 @@ void MauAsmOutput::emit_memory(std::ostream &out, indent_t indent, const Memorie
         }
         if (have_col) {
             out << indent << "column: " << memory_vector(mem.row[0].col, mem.type, false)
-            << std::endl;
+                << std::endl;
         }
         if (have_mapcol) {
             out << indent << "maprams: " << memory_vector(mem.row[0].mapcol, mem.type, true)
                 << std::endl;
         }
-        if (have_vpn)
-           out << indent << "vpns: " << mem.row[0].vpn << std::endl;
+        if (have_vpn) out << indent << "vpns: " << mem.row[0].vpn << std::endl;
     }
     for (auto r : mem.home_row) {
         home_rows[r.second].push_back(r.first);
@@ -973,8 +965,7 @@ void MauAsmOutput::emit_memory(std::ostream &out, indent_t indent, const Memorie
             for (auto &r : mem.color_mapram)
                 out << indent << "- " << memory_vector(r.col, mem.type, true) << std::endl;
             out << indent << "vpns:" << std::endl;
-            for (auto &r : mem.color_mapram)
-                out << indent << "- " << r.vpn << std::endl;
+            for (auto &r : mem.color_mapram) out << indent << "- " << r.vpn << std::endl;
         } else {
             out << indent << "row: " << color_mapram_row[0] << std::endl;
             out << indent << "bus: " << color_mapram_bus[0] << std::endl;
@@ -996,9 +987,7 @@ void MauAsmOutput::emit_memory(std::ostream &out, indent_t indent, const Memorie
     if (mem.type == Memories::Use::TERNARY && mem.tind_result_bus >= 0)
         out << indent << "indirect_bus: " << mem.tind_result_bus << std::endl;
 
-
-    if ((mem.type == Memories::Use::EXACT) &&
-            (stash_rows.size() > 0) && (stash_units.size() > 0)) {
+    if ((mem.type == Memories::Use::EXACT) && (stash_rows.size() > 0) && (stash_units.size() > 0)) {
         out << indent++ << "stash: " << std::endl;
         out << indent << "row: " << stash_rows << std::endl;
         out << indent << "col: " << stash_cols << std::endl;
@@ -1008,34 +997,20 @@ void MauAsmOutput::emit_memory(std::ostream &out, indent_t indent, const Memorie
 }
 
 cstring format_name(int type) {
-    if (type == TableFormat::MATCH)
-        return "match"_cs;
-    if (type == TableFormat::NEXT)
-        return "next"_cs;
-    if (type == TableFormat::ACTION)
-        return "action"_cs;
-    if (type == TableFormat::IMMEDIATE)
-        return "immediate"_cs;
-    if (type == TableFormat::VERS)
-        return "version"_cs;
-    if (type == TableFormat::COUNTER)
-        return "counter_addr"_cs;
-    if (type == TableFormat::COUNTER_PFE)
-        return "counter_pfe"_cs;
-    if (type == TableFormat::METER)
-        return "meter_addr"_cs;
-    if (type == TableFormat::METER_PFE)
-        return "meter_pfe"_cs;
-    if (type == TableFormat::METER_TYPE)
-        return "meter_type"_cs;
-    if (type == TableFormat::INDIRECT_ACTION)
-        return "action_addr"_cs;
-    if (type == TableFormat::SEL_LEN_MOD)
-        return "sel_len_mod"_cs;
-    if (type == TableFormat::SEL_LEN_SHIFT)
-        return "sel_len_shift"_cs;
-    if (type == TableFormat::VALID)
-        return "valid"_cs;
+    if (type == TableFormat::MATCH) return "match"_cs;
+    if (type == TableFormat::NEXT) return "next"_cs;
+    if (type == TableFormat::ACTION) return "action"_cs;
+    if (type == TableFormat::IMMEDIATE) return "immediate"_cs;
+    if (type == TableFormat::VERS) return "version"_cs;
+    if (type == TableFormat::COUNTER) return "counter_addr"_cs;
+    if (type == TableFormat::COUNTER_PFE) return "counter_pfe"_cs;
+    if (type == TableFormat::METER) return "meter_addr"_cs;
+    if (type == TableFormat::METER_PFE) return "meter_pfe"_cs;
+    if (type == TableFormat::METER_TYPE) return "meter_type"_cs;
+    if (type == TableFormat::INDIRECT_ACTION) return "action_addr"_cs;
+    if (type == TableFormat::SEL_LEN_MOD) return "sel_len_mod"_cs;
+    if (type == TableFormat::SEL_LEN_SHIFT) return "sel_len_shift"_cs;
+    if (type == TableFormat::VALID) return "valid"_cs;
     return ""_cs;
 }
 
@@ -1049,7 +1024,7 @@ cstring format_name(int type) {
  * deferred until the new format is used to determine their allocation
  */
 void MauAsmOutput::emit_action_data_bus(std::ostream &out, indent_t indent,
-        const IR::MAU::Table *tbl, bitvec source) const {
+                                        const IR::MAU::Table *tbl, bitvec source) const {
     bool have_ad = false, have_meter = false;
     std::stringstream out_ad, out_meter;
 
@@ -1060,15 +1035,15 @@ void MauAsmOutput::emit_action_data_bus(std::ostream &out, indent_t indent,
 
     if (have_ad || have_meter) {
         out << indent << "action_bus: { " << out_ad.str();
-        if (have_ad && have_meter)
-            out << ", ";
+        if (have_ad && have_meter) out << ", ";
         out << out_meter.str() << " }" << std::endl;
     }
 }
 
 /* Emits the format portion of tind tables and for exact match tables. */
 void MauAsmOutput::emit_table_format(std::ostream &out, indent_t indent,
-          const TableFormat::Use &use, const TableMatch *tm, bool ternary, bool gateway) const {
+                                     const TableFormat::Use &use, const TableMatch *tm,
+                                     bool ternary, bool gateway) const {
     fmt_state fmt;
     out << indent << "format: {";
     int group = (ternary || gateway) ? -1 : 0;
@@ -1087,8 +1062,7 @@ void MauAsmOutput::emit_table_format(std::ostream &out, indent_t indent,
             int start = match_group.mask[type].ffs();
             while (start >= 0) {
                 int end = match_group.mask[type].ffz(start);
-                if (end == -1)
-                    end = match_group.mask[type].max().index();
+                if (end == -1) end = match_group.mask[type].max().index();
                 bits.emplace_back(start, end - 1);
                 start = match_group.mask[type].ffs(end);
             }
@@ -1097,8 +1071,7 @@ void MauAsmOutput::emit_table_format(std::ostream &out, indent_t indent,
             if (type == TableFormat::IMMEDIATE) {
                 for (size_t i = 0; i < bits.size(); i++) {
                     cstring name = format_name(type);
-                    if (bits.size() > 1)
-                        name = name + std::to_string(i);
+                    if (bits.size() > 1) name = name + std::to_string(i);
                     fmt.emit(out, name, group, bits[i].first, bits[i].second - bits[i].first + 1);
                 }
             } else {
@@ -1111,11 +1084,14 @@ void MauAsmOutput::emit_table_format(std::ostream &out, indent_t indent,
                 ++group;
                 continue;
             } else {
-                break; } }
+                break;
+            }
+        }
         type = TableFormat::MATCH;
 
         bits.clear();
-        int start = -1; int end = -1;
+        int start = -1;
+        int end = -1;
 
         // For every single match byte information.  Have to understand the byte alignment in
         // PHV to understand exactly which bits to use
@@ -1145,8 +1121,7 @@ void MauAsmOutput::emit_table_format(std::ostream &out, indent_t indent,
     }
 
     out << (fmt.sep + 1) << "}" << std::endl;
-    if (ternary || gateway)
-        return;
+    if (ternary || gateway) return;
 
     if (tm->proxy_hash) {
         out << indent << "match: [ ";
@@ -1167,24 +1142,22 @@ void MauAsmOutput::emit_table_format(std::ostream &out, indent_t indent,
             out << indent << "match: [ ";
             first = false;
         } else {
-            out << ", "; }
-        out << field; }
+            out << ", ";
+        }
+        out << field;
+    }
     if (!first) out << " ]" << std::endl;
 }
 
 void MauAsmOutput::emit_ternary_match(std::ostream &out, indent_t indent,
-        const TableFormat::Use &use) const {
-    if (use.tcam_use.size() == 0)
-        return;
+                                      const TableFormat::Use &use) const {
+    if (use.tcam_use.size() == 0) return;
     out << indent << "match:" << std::endl;
     for (auto tcam_use : use.tcam_use) {
         out << indent << "- { ";
-        if (tcam_use.group != -1)
-            out << "group: " << tcam_use.group << ", ";
-        if (tcam_use.byte_group != -1)
-            out << "byte_group: " << tcam_use.byte_group << ", ";
-        if (tcam_use.byte_config != -1)
-            out << "byte_config: " << tcam_use.byte_config << ", ";
+        if (tcam_use.group != -1) out << "group: " << tcam_use.group << ", ";
+        if (tcam_use.byte_group != -1) out << "byte_group: " << tcam_use.byte_group << ", ";
+        if (tcam_use.byte_config != -1) out << "byte_config: " << tcam_use.byte_config << ", ";
         out << "dirtcam: 0x" << tcam_use.dirtcam;
         out << " }" << std::endl;
     }
@@ -1202,39 +1175,46 @@ class MauAsmOutput::NextTableSet {
     NextTableSet(NextTableSet &&) = default;
     NextTableSet &operator=(const NextTableSet &) = default;
     NextTableSet &operator=(NextTableSet &&) = default;
-    NextTableSet(const IR::MAU::Table *t) {                     // NOLINT(runtime/explicit)
-        if (t) tables.insert(t->unique_id()); }
-    NextTableSet(UniqueId ui) {                                 // NOLINT(runtime/explicit)
-        tables.insert(ui); }
-    NextTableSet(ordered_set<UniqueId> s) : tables(s) {}        // NOLINT(runtime/explicit)
+    NextTableSet(const IR::MAU::Table *t) {  // NOLINT(runtime/explicit)
+        if (t) tables.insert(t->unique_id());
+    }
+    NextTableSet(UniqueId ui) {  // NOLINT(runtime/explicit)
+        tables.insert(ui);
+    }
+    NextTableSet(ordered_set<UniqueId> s) : tables(s) {}  // NOLINT(runtime/explicit)
 
     operator cstring() const {
         BUG_CHECK(tables.size() == 1, "not a single next table");
-        return tables.front().build_name(); }
+        return tables.front().build_name();
+    }
     bool operator==(const NextTableSet &a) const { return tables == a.tables; }
     bool operator<(const NextTableSet &a) const { return tables < a.tables; }
     bool empty() const { return tables.empty(); }
     bool insert(const IR::MAU::Table *t) {
-        return t ? tables.insert(t->unique_id()).second : false; }
+        return t ? tables.insert(t->unique_id()).second : false;
+    }
     bool insert(UniqueId ui) { return tables.insert(ui).second; }
     friend inline std::ostream &operator<<(std::ostream &out, const NextTableSet &nxt) {
         const char *sep = " ";
         if (nxt.tables.size() != 1) {
             BUG_CHECK(nxt.tables.empty() || Device::numLongBranchTags() > 0, "long branch snafu");
-            out << '['; }
+            out << '[';
+        }
         for (auto ui : nxt.tables) {
             out << sep << ui;
-            sep = ", "; }
-        if (nxt.tables.size() != 1) out << (sep+1) << ']';
-        return out; }
+            sep = ", ";
+        }
+        if (nxt.tables.size() != 1) out << (sep + 1) << ']';
+        return out;
+    }
     bool isEND() const {
-        return tables.size() == 0 || (tables.size() == 1 && tables.front() == UniqueId("END"_cs)); }
+        return tables.size() == 0 || (tables.size() == 1 && tables.front() == UniqueId("END"_cs));
+    }
 };
 
 MauAsmOutput::NextTableSet MauAsmOutput::next_for(const IR::MAU::Table *tbl, cstring what) const {
     NextTableSet rv = nxt_tbl->next_for(tbl, what);
-    if (rv.empty())
-        rv.insert(UniqueId("END"_cs));
+    if (rv.empty()) rv.insert(UniqueId("END"_cs));
     return rv;
 }
 
@@ -1243,13 +1223,13 @@ MauAsmOutput::NextTableSet MauAsmOutput::next_for(const IR::MAU::Table *tbl, cst
    unit corresponding to it. */
 class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
  protected:
-    const MauAsmOutput          &self;
-    std::ostream                &out;
-    const IR::MAU::Table        *table;
-    indent_t                    indent;
-    const char                  *sep = nullptr;
-    std::map<cstring, cstring>  alias;
-    bool                        is_empty = false;
+    const MauAsmOutput &self;
+    std::ostream &out;
+    const IR::MAU::Table *table;
+    indent_t indent;
+    const char *sep = nullptr;
+    std::map<cstring, cstring> alias;
+    bool is_empty = false;
 
     /**
      * Outputs the next table configuration for this action:
@@ -1268,14 +1248,14 @@ class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
                 out << "END" << std::endl;
             else
                 out << self.next_for(table, "$miss"_cs) << std::endl;
-            if (act->miss_only())
-                return;
+            if (act->miss_only()) return;
         }
 
         if (table->action_chain()) {
             if (act->miss_only()) {
-                out << indent << "- next_table_miss: "
-                    << self.next_for(table, act->name.originalName) << std::endl;
+                out << indent
+                    << "- next_table_miss: " << self.next_for(table, act->name.originalName)
+                    << std::endl;
                 return;
             }
         }
@@ -1318,16 +1298,15 @@ class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
      */
     void mod_cond_value(const IR::MAU::Action *act) {
         auto mod_cond_map = table->resources->action_format.mod_cond_values.at(act->name);
-        if (mod_cond_map.empty())
-            return;
+        if (mod_cond_map.empty()) return;
         out << indent << "- mod_cond_value: {";
         std::string sep = "";
         for (auto entry : mod_cond_map) {
             out << sep << entry.first << ": [ ";
             std::string sep2 = "";
             for (int i = 0; i < ActionData::AD_LOCATIONS; i++) {
-                cstring location = i == ActionData::ACTION_DATA_TABLE ? "action_data_table"_cs
-                                                                      : "immediate"_cs;
+                cstring location =
+                    i == ActionData::ACTION_DATA_TABLE ? "action_data_table"_cs : "immediate"_cs;
                 for (auto br : bitranges(entry.second.at(i))) {
                     out << sep2 << location << "(" << br.first << ".." << br.second << ")";
                     sep2 = ", ";
@@ -1343,13 +1322,13 @@ class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
         if (act->args.size() > 0) {
             // Use the more verbose, multiline format if we have user annotations.
             bool verbose = false;
-            for (auto arg : act->args)
-                verbose |= has_user_annotation(arg);
+            for (auto arg : act->args) verbose |= has_user_annotation(arg);
 
             out << indent++ << "- p4_param_order:";
-            if (verbose) out << std::endl;
+            if (verbose)
+                out << std::endl;
             else
-              out << " { ";
+                out << " { ";
 
             bool first = true;
             for (auto arg : act->args) {
@@ -1385,17 +1364,14 @@ class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
         BUG_CHECK(vliw_instr, "failed to allocate instruction memory for %s", act);
         out << "(" << vliw_instr->mem_code << ", " << vliw_instr->gen_addr() << "):" << std::endl;
         action_context_json(act);
-        out << indent << "- hit_allowed: {"
-            << " allowed: " << std::boolalpha << (act->hit_allowed);
-        if (!act->hit_allowed)
-            out << ", reason: " << act->hit_disallowed_reason;
+        out << indent << "- hit_allowed: {" << " allowed: " << std::boolalpha << (act->hit_allowed);
+        if (!act->hit_allowed) out << ", reason: " << act->hit_disallowed_reason;
         out << " }" << std::endl;
         out << indent << "- default_" << (act->miss_only() ? "only_" : "") << "action: {"
             << " allowed: " << std::boolalpha << (act->default_allowed || act->hit_path_imp_only);
         if (!act->default_allowed || act->hit_path_imp_only)
             out << ", reason: " << act->disallowed_reason;
-        if (act->is_constant_action)
-            out << ", is_constant: " << act->is_constant_action;
+        if (act->is_constant_action) out << ", is_constant: " << act->is_constant_action;
         out << " }" << std::endl;
         out << indent << "- handle: 0x" << hex(act->handle) << std::endl;
         next_table(act, vliw_instr->mem_code);
@@ -1409,7 +1385,8 @@ class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
         if (!alias.empty()) {
             out << indent << "- " << alias << std::endl;
             is_empty = false;
-            alias.clear(); }
+            alias.clear();
+        }
         act->action.visit_children(*this);
         // Dumping the information on stateful calls.  For anything that has a meter type,
         // the meter type is dumped first, followed by the address location.  This is
@@ -1428,7 +1405,8 @@ class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
                     // have a name in asm, nor does STFUL_CLEAR
                     IR::MAU::MeterType type = act->meter_types.at(at->unique_id());
                     out << static_cast<int>(type);
-                    sep = ", "; }
+                    sep = ", ";
+                }
                 BUG_CHECK((call->index == nullptr) == at->direct,
                           "%s Indexing scheme doesn't match up for %s", at->srcInfo, at->name);
                 if (call->index != nullptr) {
@@ -1445,8 +1423,8 @@ class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
                         out << sep << "$stful_counter";
                         sep = ", ";
                     } else {
-                        BUG("%s: Index %s for %s is not supported", at->srcInfo,
-                            call->index, at->name);
+                        BUG("%s: Index %s for %s is not supported", at->srcInfo, call->index,
+                            at->name);
                     }
                 } else {
                     out << sep << "$DIRECT";
@@ -1465,9 +1443,11 @@ class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
         if (act->inst_code >= 0) out << " " << act->inst_code;
         out << ":" << std::endl;
         is_empty = true;
-        return true; }
+        return true;
+    }
     void postorder(const IR::MAU::Action *) override {
-        if (is_empty) out << indent << "- 0" << std::endl; }
+        if (is_empty) out << indent << "- 0" << std::endl;
+    }
     bool preorder(const IR::Annotations *) override { return false; }
 
     bool preorder(const IR::MAU::Instruction *inst) override {
@@ -1475,7 +1455,8 @@ class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
         out << indent << "- " << inst->name;
         sep = " ";
         is_empty = false;
-        return true; }
+        return true;
+    }
     /** With instructions now over potential slices, must keep this information passed
      *  down through the entirety of the action pass
      */
@@ -1495,25 +1476,24 @@ class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
                 LOG5("    field : " << field << ", name: " << canon_name(field->externalName()));
                 out << sep << canon_name(field->externalName());
                 int count = 0;
-                field->foreach_alloc(bits, table, &use, [&](const PHV::AllocSlice &) {
-                    count++;
-                });
+                field->foreach_alloc(bits, table, &use, [&](const PHV::AllocSlice &) { count++; });
                 if (count == 1) {
                     field->foreach_alloc(table, &use, [&](const PHV::AllocSlice &alloc) {
                         if (!(alloc.field_slice().lo <= bits.lo &&
-                            alloc.field_slice().hi >= bits.hi))
+                              alloc.field_slice().hi >= bits.hi))
                             return;
                         bool single_loc = (alloc.width() == field->size);
                         if (!single_loc)
                             out << "." << alloc.field_slice().lo << "-" << alloc.field_slice().hi;
                         if (bits.lo > alloc.field_slice().lo || bits.hi < alloc.field_slice().hi)
-                            out << "(" << bits.lo - alloc.field_slice().lo << ".." <<
-                                          bits.hi - alloc.field_slice().lo  << ")";
+                            out << "(" << bits.lo - alloc.field_slice().lo << ".."
+                                << bits.hi - alloc.field_slice().lo << ")";
                     });
                 }
             } else {
-                LOG1("ERROR: " << expr << " does not have a PHV allocation though it is used "
-                     "in an action");
+                LOG1("ERROR: " << expr
+                               << " does not have a PHV allocation though it is used "
+                                  "in an action");
                 out << sep;
             }
             sep = ", ";
@@ -1527,7 +1507,8 @@ class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
      */
     void handle_hash_dist(const IR::Expression *expr) {
         LOG5("  EmitAction handle_hash_dist for expr: " << expr);
-        int lo = -1; int hi = -1;
+        int lo = -1;
+        int hi = -1;
         const IR::MAU::HashDist *hd = nullptr;
         bool is_wrapped = false;
         if (auto sl = expr->to<IR::Slice>()) {
@@ -1544,8 +1525,10 @@ class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
             hi = hd->type->width_bits() - 1;
         }
 
-        BUG_CHECK(hd && !hd->units.empty(), "Hash Dist object %1% not correctly converted in "
-                  "InstructionAdjustment", hd);
+        BUG_CHECK(hd && !hd->units.empty(),
+                  "Hash Dist object %1% not correctly converted in "
+                  "InstructionAdjustment",
+                  hd);
         out << sep << "hash_dist(";
         std::string sep2 = "";
         for (auto unit : hd->units) {
@@ -1553,8 +1536,7 @@ class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
             sep2 = ", ";
         }
         out << sep2 << lo;
-        if (!is_wrapped)
-            out << ".." << hi;
+        if (!is_wrapped) out << ".." << hi;
         // This extra lo has to be printed out because the hash_dist has to understand this as
         // a range from deposit-field, even though the only thing that matters in this source
         // is the first lo, the range of the deposit-field is determined on the destination
@@ -1563,10 +1545,10 @@ class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
         out << ")";
     }
 
-
     void handle_random_number(const IR::Expression *expr) {
         LOG5("  EmitAction handle_random_number for expr: " << expr);
-        int lo = -1;  int hi = -1;
+        int lo = -1;
+        int hi = -1;
         const IR::MAU::RandomNumber *rn = nullptr;
         bool is_wrapped = false;
         if (auto sl = expr->to<IR::Slice>()) {
@@ -1583,13 +1565,13 @@ class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
             hi = rn->type->width_bits() - 1;
         }
         assert(sep);
-        BUG_CHECK(rn != nullptr && rn->allocated(), "Printing an invalid random number in the "
+        BUG_CHECK(rn != nullptr && rn->allocated(),
+                  "Printing an invalid random number in the "
                   "assembly");
         out << sep << "rng(";
         out << rn->rng_unit << ", ";
         out << lo;
-        if (!is_wrapped)
-            out << ".." << hi;
+        if (!is_wrapped) out << ".." << hi;
         // This extra lo has to be printed out because the hash_dist has to understand this as
         // a range from deposit-field, even though the only thing that matters in this source
         // is the first lo, the range of the deposit-field is determined on the destination
@@ -1660,22 +1642,22 @@ class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
         sep = ", ";
         return false;
     }
-    bool preorder(const IR::MAU::ConditionalArg *) override {
-        return false;
-    }
+    bool preorder(const IR::MAU::ConditionalArg *) override { return false; }
 
     bool preorder(const IR::MAU::ActionArg *a) override {
         LOG5("  EmitAction preorder ActionArg : " << a);
         assert(sep);
         out << sep << a->toString();
         sep = ", ";
-        return false; }
+        return false;
+    }
     bool preorder(const IR::MAU::SaluReg *r) override {
         LOG5("  EmitAction preorder SaluReg: " << r);
         assert(sep);
         out << sep << r->name;
         sep = ", ";
-        return false; }
+        return false;
+    }
     bool preorder(const IR::MAU::SaluFunction *fn) override {
         LOG5("  EmitAction preorder SaluFunction: " << fn);
         assert(sep);
@@ -1684,22 +1666,24 @@ class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
         visit(fn->expr, "expr");
         out << ")";
         sep = ", ";
-        return false; }
+        return false;
+    }
     bool preorder(const IR::MAU::SaluRegfileRow *srr) override {
         assert(sep);
         out << sep << "register_param(" << srr->index << ")";
         sep = ", ";
-        return false; }
+        return false;
+    }
     bool preorder(const IR::MAU::AttachedOutput *att) override {
         LOG5("  EmitAction preorder AttachedOutput: " << att);
         assert(sep);
         out << sep << self.find_attached_name(table, att->attached);
         if (auto mtr = att->attached->to<IR::MAU::Meter>()) {
-            if (mtr->color_output())
-                out << " color";
+            if (mtr->color_output()) out << " color";
         }
         sep = ", ";
-        return false; }
+        return false;
+    }
     bool preorder(const IR::Member *m) override {
         LOG5("  EmitAction preorder Member: " << m);
         if (m->expr->is<IR::MAU::AttachedOutput>()) {
@@ -1707,18 +1691,22 @@ class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
             out << " " << m->member;
             return false;
         } else {
-            return preorder(static_cast<const IR::Expression *>(m)); } }
+            return preorder(static_cast<const IR::Expression *>(m));
+        }
+    }
     bool preorder(const IR::MAU::StatefulCounter *sc) override {
         LOG5("  EmitAction preorder StatefulCounter: " << sc);
         assert(sep);
         out << sep << self.find_attached_name(table, sc->attached);
         out << " address";
         sep = ", ";
-        return false; }
+        return false;
+    }
     bool preorder(const IR::MAU::HashDist *hd) override {
         LOG5("  EmitAction preorder HashDist: " << hd);
         handle_hash_dist(hd);
-        return false; }
+        return false;
+    }
     bool preorder(const IR::MAU::RandomNumber *rn) override {
         LOG5("  EmitAction preorder RandomNumber: " << rn);
         handle_random_number(rn);
@@ -1727,11 +1715,13 @@ class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
     bool preorder(const IR::LNot *) override {
         out << sep << "!";
         sep = "";
-        return true; }
+        return true;
+    }
     bool preorder(const IR::Neg *) override {
         out << sep << "-";
         sep = "";
-        return true; }
+        return true;
+    }
     bool preorder_binop(const IR::Operation::Binary *bin, const char *op) {
         out << sep << "(";
         sep = "";
@@ -1740,7 +1730,8 @@ class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
         visit(bin->right);
         out << ")";
         sep = ", ";
-        return false; }
+        return false;
+    }
     bool preorder(const IR::LAnd *e) override { return preorder_binop(e, " & "); }
     bool preorder(const IR::LOr *e) override { return preorder_binop(e, " | "); }
     bool preorder(const IR::BAnd *e) override { return preorder_binop(e, " & "); }
@@ -1750,7 +1741,8 @@ class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
     }
     bool preorder(const IR::Cast *c) override {
         LOG5("  EmitAction preorder Cast: " << c);
-        visit(c->expr); return false;
+        visit(c->expr);
+        return false;
     }
     bool preorder(const IR::MAU::IXBarExpression *e) override {
         LOG5("  EmitAction preorder IXBarExpression : " << e);
@@ -1762,7 +1754,8 @@ class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
             BUG("IXBarExpression %s not in an action?", e);
         }
         sep = ", ";
-        return false; }
+        return false;
+    }
     bool preorder(const IR::Expression *exp) override {
         LOG5("  EmitAction preorder Expression : " << exp);
         handle_phv_expr(exp);
@@ -1772,7 +1765,9 @@ class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
 
  public:
     EmitAction(const MauAsmOutput &s, std::ostream &o, const IR::MAU::Table *tbl, indent_t i)
-    : self(s), out(o), table(tbl), indent(i) { visitDagOnce = false; }
+        : self(s), out(o), table(tbl), indent(i) {
+        visitDagOnce = false;
+    }
 };
 
 /// Behaves mostly the same as EmitAction, except all the preamble before the action's instructions
@@ -1787,11 +1782,11 @@ class MauAsmOutput::EmitAlwaysRunAction : public MauAsmOutput::EmitAction {
 
  public:
     EmitAlwaysRunAction(const MauAsmOutput &s, std::ostream &o, const IR::MAU::Table *tbl,
-                        indent_t i) : EmitAction(s, o, tbl, i) {
-    }
+                        indent_t i)
+        : EmitAction(s, o, tbl, i) {}
 };
 
-TableMatch* TableMatch::create(const PhvInfo &phv, const IR::MAU::Table *tbl) {
+TableMatch *TableMatch::create(const PhvInfo &phv, const IR::MAU::Table *tbl) {
     return new TableMatch(phv, tbl);
 }
 
@@ -1807,7 +1802,7 @@ void TableMatch::init_proxy_hash() {
             int end_bit = byte_layout.ffz(start_bit);
             int lo = byte.lo + (start_bit - initial_bit);
             int hi = byte.lo + (end_bit - initial_bit) - 1;
-            le_bitrange bits = { lo, hi };
+            le_bitrange bits = {lo, hi};
             proxy_hash_fields.emplace_back(bits);
             start_bit = byte_layout.ffs(end_bit);
         } while (start_bit >= 0);
@@ -1822,12 +1817,11 @@ void TableMatch::populate_slices(safe_vector<Slice> &slices,
         for (auto &fi : byte.field_bytes) {
             LOG7("\tFor field byte : " << fi);
             bitvec cont_loc = fi.cont_loc();
-            bitvec layout_shifted
-                = byte_layout.getslice(byte_layout.min().index() / 8 * 8, 8);
+            bitvec layout_shifted = byte_layout.getslice(byte_layout.min().index() / 8 * 8, 8);
             bitvec total_cont_loc = fi.cont_loc();
             int first_cont_bit = total_cont_loc.min().index();
             auto field = phv.field(fi.get_use_name());
-            le_bitrange field_bits = { fi.lo, fi.hi };
+            le_bitrange field_bits = {fi.lo, fi.hi};
             int bits_seen = 0;
             // It is not a guarantee, especially in Tofino2 due to live ranges being different
             // that a FieldInfo is not corresponding to a single alloc_slice object
@@ -1837,14 +1831,11 @@ void TableMatch::populate_slices(safe_vector<Slice> &slices,
                 bitvec cont_loc = total_cont_loc & bitvec(bits_seen + first_cont_bit, sl.width());
                 bitvec set_bits = layout_shifted & cont_loc;
                 bits_seen += sl.width();
-                LOG8("\t\tField Slice: " << sl << ", total_cont_loc: " << total_cont_loc
-                        << ", bits_seen: " << bits_seen
-                        << ", first_cont_bit: " << first_cont_bit
-                        << ", layout_shifted: " << layout_shifted
-                        << ", cont_loc: " << cont_loc
-                        << ", set_bits: " << set_bits);
-                if (set_bits.empty())
-                    return;
+                LOG8("\t\tField Slice: "
+                     << sl << ", total_cont_loc: " << total_cont_loc << ", bits_seen: " << bits_seen
+                     << ", first_cont_bit: " << first_cont_bit << ", layout_shifted: "
+                     << layout_shifted << ", cont_loc: " << cont_loc << ", set_bits: " << set_bits);
+                if (set_bits.empty()) return;
 
                 // The @hash_mask() annotation can create sub-slices within "sl" that need
                 // to be taken into account here.  These sub-slices exist when bits in
@@ -1859,7 +1850,7 @@ void TableMatch::populate_slices(safe_vector<Slice> &slices,
                     int lo_index = it.index();
                     hi_index = lo_index;
                     ++it;
-                    while ((it.index() == hi_index+1) && (it != set_bits.end())) {
+                    while ((it.index() == hi_index + 1) && (it != set_bits.end())) {
                         hi_index = it.index();
                         ++it;
                     }
@@ -1900,13 +1891,11 @@ void TableMatch::populate_match_fields() {
  * and the hashing information.  Comes directly from the table_format object in the resources
  * of a table
  */
-TableMatch::TableMatch(const PhvInfo &phv, const IR::MAU::Table *tbl)
-        : table(tbl), phv(phv) {
+TableMatch::TableMatch(const PhvInfo &phv, const IR::MAU::Table *tbl) : table(tbl), phv(phv) {
     Log::TempIndent indent;
     LOG5("Create TableMatch for table " << table->name << indent);
 
-    if (tbl->resources->table_format.match_groups.size() == 0)
-        return;
+    if (tbl->resources->table_format.match_groups.size() == 0) return;
 
     if (table->layout.proxy_hash) {
         init_proxy_hash();
@@ -1978,9 +1967,8 @@ TableMatch::TableMatch(const PhvInfo &phv, const IR::MAU::Table *tbl)
  *  When f != 1, the gateway will not override, and the table will automatically miss.  Then,
  *  the miss next table is used to determine where to go next
  */
-bool MauAsmOutput::emit_gateway(std::ostream &out, indent_t gw_indent,
-        const IR::MAU::Table *tbl, bool no_match, NextTableSet next_hit,
-        NextTableSet &gw_miss) const {
+bool MauAsmOutput::emit_gateway(std::ostream &out, indent_t gw_indent, const IR::MAU::Table *tbl,
+                                bool no_match, NextTableSet next_hit, NextTableSet &gw_miss) const {
     CollectGatewayFields collect(phv, tbl->resources->gateway_ixbar.get());
     tbl->apply(collect);
     bool gw_can_miss = false;
@@ -1992,19 +1980,15 @@ bool MauAsmOutput::emit_gateway(std::ostream &out, indent_t gw_indent,
         bitvec bits_done;
         for (auto &f : collect.info) {
             auto *field = f.first.field();
-            if (!f.second.xor_offsets.empty())
-                have_xor = true;
+            if (!f.second.xor_offsets.empty()) have_xor = true;
             for (auto &offset : f.second.offsets) {
-                field->foreach_alloc(offset.second, tbl, &use,
-                        [&](const PHV::AllocSlice &sl) {
+                field->foreach_alloc(offset.second, tbl, &use, [&](const PHV::AllocSlice &sl) {
                     int bit = offset.first + (sl.field_slice().lo - offset.second.lo);
                     if (bits_done[bit]) return;  // supress duplicates
                     out << sep << bit << ": ";
-                    if (f.second.valid_bit)
-                        out << "$valid(";
+                    if (f.second.valid_bit) out << "$valid(";
                     out << Slice(field, sl.field_slice());
-                    if (f.second.valid_bit)
-                        out << ")";
+                    if (f.second.valid_bit) out << ")";
                     sep = ", ";
                     BUG_CHECK(bits_done.getrange(bit, sl.width()) == 0,
                               "partial overlapping gateway fields in %s", tbl);
@@ -2012,7 +1996,7 @@ bool MauAsmOutput::emit_gateway(std::ostream &out, indent_t gw_indent,
                 });
             }
         }
-        out << (sep+1) << "}" << std::endl;
+        out << (sep + 1) << "}" << std::endl;
         if (have_xor) {
             out << gw_indent << "xor: {";
             sep = " ";
@@ -2020,8 +2004,7 @@ bool MauAsmOutput::emit_gateway(std::ostream &out, indent_t gw_indent,
             for (auto &f : collect.info) {
                 auto *field = f.first.field();
                 for (auto &offset : f.second.xor_offsets) {
-                    field->foreach_alloc(offset.second, tbl, &use,
-                                         [&](const PHV::AllocSlice &sl) {
+                    field->foreach_alloc(offset.second, tbl, &use, [&](const PHV::AllocSlice &sl) {
                         int bit = offset.first + (sl.field_slice().lo - offset.second.lo);
                         if (bits_done[bit]) return;  // supress duplicates
                         out << sep << bit << ": " << Slice(field, sl.field_slice());
@@ -2032,10 +2015,9 @@ bool MauAsmOutput::emit_gateway(std::ostream &out, indent_t gw_indent,
                     });
                 }
             }
-            out << (sep+1) << "}" << std::endl;
+            out << (sep + 1) << "}" << std::endl;
         }
-        if (collect.need_range)
-            out << gw_indent << "range: 4" << std::endl;
+        if (collect.need_range) out << gw_indent << "range: 4" << std::endl;
         BuildGatewayMatch match(phv, collect);
         std::map<cstring, NextTableSet> cond_tables;
         for (auto &line : tbl->gateway_rows) {
@@ -2053,8 +2035,7 @@ bool MauAsmOutput::emit_gateway(std::ostream &out, indent_t gw_indent,
                         nxt_tbl = next_for(tbl, line.second);
                         if (auto act = tbl->gateway_payload.at(line.second).first) {
                             out << gw_indent << "  action: " << act << std::endl;
-                            if (tbl->actions.at(act)->exitAction)
-                                nxt_tbl = UniqueId("END"_cs);
+                            if (tbl->actions.at(act)->exitAction) nxt_tbl = UniqueId("END"_cs);
                         }
                         out << gw_indent << "  next: " << nxt_tbl << std::endl;
                     } else {
@@ -2072,9 +2053,9 @@ bool MauAsmOutput::emit_gateway(std::ostream &out, indent_t gw_indent,
                 }
             } else {
                 if (!tbl->gateway_payload.empty()) {
-                   out << gw_indent << "  run_table: true" << std::endl;
-                   gw_miss = nxt_tbl = next_for(tbl, "$miss"_cs);
-                   gw_can_miss = true;
+                    out << gw_indent << "  run_table: true" << std::endl;
+                    gw_miss = nxt_tbl = next_for(tbl, "$miss"_cs);
+                    gw_can_miss = true;
                 } else if (no_match) {
                     out << gw_indent << "  next: " << next_hit << std::endl;
                     nxt_tbl = next_hit;
@@ -2085,8 +2066,7 @@ bool MauAsmOutput::emit_gateway(std::ostream &out, indent_t gw_indent,
                 }
             }
             bool split_gateway = (line.second == "$gwcont");
-            auto cond = (line.second.isNullOrEmpty() || split_gateway) ?
-                "$torf"_cs : line.second;
+            auto cond = (line.second.isNullOrEmpty() || split_gateway) ? "$torf"_cs : line.second;
             cond_tables[cond] = nxt_tbl;
         }
         if (tbl->gateway_rows.back().first) {
@@ -2105,7 +2085,8 @@ bool MauAsmOutput::emit_gateway(std::ostream &out, indent_t gw_indent,
             if (cond_tables.count("$false"_cs))
                 out << gw_indent << "false: " << cond_tables["$false"_cs] << std::endl;
             else if (cond_tables.count("$torf"_cs))
-                out << gw_indent << "false: " << cond_tables["$torf"_cs] << std::endl; }
+                out << gw_indent << "false: " << cond_tables["$torf"_cs] << std::endl;
+        }
     } else {
         LOG1("WARNING: Failed to fit gateway expression for " << tbl->name);
     }
@@ -2117,7 +2098,7 @@ bool MauAsmOutput::emit_gateway(std::ostream &out, indent_t gw_indent,
  * FIXME -- why do we use this for a noop action?  A noop does not require the hit path, so
  * could use the miss path and save the gateway (power if nothing else).  */
 void MauAsmOutput::emit_no_match_gateway(std::ostream &out, indent_t gw_indent,
-        const IR::MAU::Table *tbl) const {
+                                         const IR::MAU::Table *tbl) const {
     BUG_CHECK(tbl->actions.size() <= 1, "not an always hit hash_action table");
     cstring act_name = tbl->actions.empty() ? ""_cs : tbl->actions.begin()->first;
     auto nxt_tbl = next_for(tbl, act_name);
@@ -2130,7 +2111,7 @@ void MauAsmOutput::emit_no_match_gateway(std::ostream &out, indent_t gw_indent,
 }
 
 void MauAsmOutput::emit_table_context_json(std::ostream &out, indent_t indent,
-        const IR::MAU::Table *tbl) const {
+                                           const IR::MAU::Table *tbl) const {
     if (tbl->suppress_context_json) return;
     if (tbl->match_table) {
         auto p4Name = cstring::to_cstring(canon_name(tbl->match_table->externalName()));
@@ -2138,15 +2119,12 @@ void MauAsmOutput::emit_table_context_json(std::ostream &out, indent_t indent,
         if (auto k = tbl->match_table->getConstantProperty("size"_cs))
             out << ", size: " << k->asInt();
     }
-    if (tbl->layout.pre_classifier || tbl->layout.alpm)
-        out << ", match_type: alpm";
-    if (tbl->is_compiler_generated)
-        out << ", hidden: true";
+    if (tbl->layout.pre_classifier || tbl->layout.alpm) out << ", match_type: alpm";
+    if (tbl->is_compiler_generated) out << ", hidden: true";
     for (auto back_at : tbl->attached) {
         auto at = back_at->attached;
         if (auto ap = at->to<IR::MAU::ActionData>())
-            if (!ap->direct)
-                out << ", action_profile: " << canon_name(ap->name);
+            if (!ap->direct) out << ", action_profile: " << canon_name(ap->name);
     }
     // Output 'disable_atomic_modify' pragma if present. This will be plugged
     // into the context json for the driver. COMPILER-944
@@ -2172,10 +2150,9 @@ void MauAsmOutput::emit_table_context_json(std::ostream &out, indent_t indent,
 #endif
     out << " }" << std::endl;
 
-    if (tbl->match_key.empty() && tbl->gateway_constant_entries_key.empty())
-        return;
+    if (tbl->match_key.empty() && tbl->gateway_constant_entries_key.empty()) return;
 
-    out << indent++ <<  "p4_param_order: " << std::endl;
+    out << indent++ << "p4_param_order: " << std::endl;
     IR::Vector<IR::MAU::TableKey> match_key;
     // Include regular match keys
     if (!tbl->match_key.empty()) {
@@ -2186,7 +2163,7 @@ void MauAsmOutput::emit_table_context_json(std::ostream &out, indent_t indent,
     if (!tbl->gateway_constant_entries_key.empty()) {
         match_key.append(tbl->gateway_constant_entries_key);
     }
-    for (const auto& key_info : ExtractKeyDetails(match_key, phv, tbl->externalName())) {
+    for (const auto &key_info : ExtractKeyDetails(match_key, phv, tbl->externalName())) {
         out << indent++ << canon_name(key_info.name()) << ":";
         Item_Format format(key_info.table_keys(), indent);
         out << format.open << "type: " << key_info.match_type();
@@ -2201,26 +2178,22 @@ void MauAsmOutput::emit_table_context_json(std::ostream &out, indent_t indent,
                 out << '"' << canon_name(key_name) << '"';
         }
         auto start_bit = key_info.start_bit();
-        if ( start_bit > 0)
-            out << format.separator << "start_bit: " << start_bit;
-        if (auto mask = key_info.mask())
-            out << format.separator << "mask: " << hex_big_int(mask);
+        if (start_bit > 0) out << format.separator << "start_bit: " << start_bit;
+        if (auto mask = key_info.mask()) out << format.separator << "mask: " << hex_big_int(mask);
         out << format.annotate_and_close;
         indent--;
     }
-    if (tbl->dynamic_key_masks)
-        out << --indent << "dynamic_key_masks: true" << std::endl;
+    if (tbl->dynamic_key_masks) out << --indent << "dynamic_key_masks: true" << std::endl;
 }
 
-void MauAsmOutput::emit_static_entries(std::ostream &, indent_t indent,
-        const IR::MAU::Table *tbl,
-        std::stringstream &context_json_entries) const {
-    if (tbl->entries_list == nullptr)
-        return;
+void MauAsmOutput::emit_static_entries(std::ostream &, indent_t indent, const IR::MAU::Table *tbl,
+                                       std::stringstream &context_json_entries) const {
+    if (tbl->entries_list == nullptr) return;
 
     for (auto k : tbl->match_key) {
         if (k->match_type.name == "lpm")
-            P4C_UNIMPLEMENTED("Static entries are not supported for lpm-match"
+            P4C_UNIMPLEMENTED(
+                "Static entries are not supported for lpm-match"
                 ". Needs p4 language support to specify prefix length"
                 " with the static entry.");
     }
@@ -2250,31 +2223,32 @@ void MauAsmOutput::emit_static_entries(std::ostream &, indent_t indent,
         for (auto key : entry->getKeys()->components) {
             ERROR_CHECK(key_info != extract.end(), ErrorType::ERR_INVALID,
                         "invalid %1% key. Static entry has more keys than those specified "
-                        "in match field for table %2%.", key, tbl->externalName());
+                        "in match field for table %2%.",
+                        key, tbl->externalName());
 
             auto key_name = key_info->key_name(true);
-            context_json_entries << indent++
-                << "- field_name: " << canon_name(key_name) << std::endl;
+            context_json_entries << indent++ << "- field_name: " << canon_name(key_name)
+                                 << std::endl;
 
             // Helper functions for formatting field entries.
-            auto out_value = [&context_json_entries, &indent]
-                             (const big_int& val, cstring match_type, const big_int& mask) {
-                context_json_entries << indent
-                    << "value: " << '"' << hex_big_int(val) << '"' << std::endl;
+            auto out_value = [&context_json_entries, &indent](
+                                 const big_int &val, cstring match_type, const big_int &mask) {
+                context_json_entries << indent << "value: " << '"' << hex_big_int(val) << '"'
+                                     << std::endl;
                 if (match_type == "ternary")
-                    context_json_entries << indent
-                        << "mask: " << '"' << hex_big_int(mask) << '"' << std::endl;
+                    context_json_entries << indent << "mask: " << '"' << hex_big_int(mask) << '"'
+                                         << std::endl;
             };
-            auto out_range =
-            [&context_json_entries, &indent](const big_int& start, const big_int& end) {
-                context_json_entries << indent
-                    << "range_start: " << '"' << hex_big_int(start) << '"' << std::endl;
-                context_json_entries << indent
-                    << "range_end: " << '"' << hex_big_int(end) << '"' << std::endl;
+            auto out_range = [&context_json_entries, &indent](const big_int &start,
+                                                              const big_int &end) {
+                context_json_entries << indent << "range_start: " << '"' << hex_big_int(start)
+                                     << '"' << std::endl;
+                context_json_entries << indent << "range_end: " << '"' << hex_big_int(end) << '"'
+                                     << std::endl;
             };
 
             if (const auto b = key->to<IR::BoolLiteral>()) {
-                out_value(b->value?1:0, key_info->match_type(), 1);
+                out_value(b->value ? 1 : 0, key_info->match_type(), 1);
             } else if (const auto val = key->to<IR::Constant>()) {
                 auto mask = key_info->field_mask();
                 out_value(val->value, key_info->match_type(), mask);
@@ -2289,19 +2263,20 @@ void MauAsmOutput::emit_static_entries(std::ostream &, indent_t indent,
                 const auto hasValue = ts->left->to<IR::Constant>();
                 const auto hasMask = ts->right->to<IR::Constant>();
                 // TODO Should we ERROR_CHECK(hasValue && hasMask)?
-                auto value = hasValue? hasValue->value : 0;
-                auto mask = hasMask? hasMask->value : key_info->field_mask();
+                auto value = hasValue ? hasValue->value : 0;
+                auto mask = hasMask ? hasMask->value : key_info->field_mask();
                 out_value(value, key_info->match_type(), mask);
             } else if (const auto r = key->to<IR::Range>()) {
                 // This error should be caught in front end as an invalid key expression.
                 ERROR_CHECK(key_info->match_type() == "range", ErrorType::ERR_INVALID,
                             "range value specified in static entry for field %2% a "
-                            "non range match type in table %1%.", tbl, key_name);
+                            "non range match type in table %1%.",
+                            tbl, key_name);
                 const auto hasStart = r->left->to<IR::Constant>();
                 const auto hasEnd = r->right->to<IR::Constant>();
                 // TODO Should we ERROR_CHECK(hasStart && hasEnd)?
-                auto start = hasStart? hasStart->value : 0;
-                auto end = hasEnd? hasEnd->value : key_info->expression_mask();
+                auto start = hasStart ? hasStart->value : 0;
+                auto end = hasEnd ? hasEnd->value : key_info->expression_mask();
                 out_range(start, end);
             } else if (key->to<IR::DefaultExpression>()) {
                 if (key_info->match_type() == "range") {
@@ -2310,7 +2285,8 @@ void MauAsmOutput::emit_static_entries(std::ostream &, indent_t indent,
                     out_value(0, key_info->match_type(), 0);
                 }
             } else {
-                P4C_UNIMPLEMENTED("Static entries are only supported for "
+                P4C_UNIMPLEMENTED(
+                    "Static entries are only supported for "
                     "match keys with bit-string type");
             }
             ++key_info;
@@ -2318,28 +2294,30 @@ void MauAsmOutput::emit_static_entries(std::ostream &, indent_t indent,
         }
         ERROR_CHECK(key_info == extract.end(), ErrorType::ERR_INVALID,
                     "missing key. Static entry has less keys than those specified "
-                    "in match field for table %1%.", tbl->externalName());
+                    "in match field for table %1%.",
+                    tbl->externalName());
 
         auto method = method_call->method->to<IR::PathExpression>();
         auto path = method->path;
         for (auto action : Values(tbl->actions)) {
             if (action->name.name == path->name) {
-                context_json_entries << indent
-                    << "action_handle: 0x" << hex(action->handle) << std::endl;
+                context_json_entries << indent << "action_handle: 0x" << hex(action->handle)
+                                     << std::endl;
                 break;
             }
         }
 
-        context_json_entries << indent << "is_default_entry: false" <<  std::endl;
+        context_json_entries << indent << "is_default_entry: false" << std::endl;
         auto num_mc_args = method_call->arguments->size();
         context_json_entries << indent << "action_parameters_values:";
         if (num_mc_args > 0) {
             auto mc_type = method->type->to<IR::Type_Action>();
             auto param_list = mc_type->parameters->parameters;
             if (param_list.size() != num_mc_args)
-            BUG_CHECK((param_list.size() == num_mc_args),
-                "Total arguments on method call differ from those on method"
-                " parameters in table %s", tbl->name);
+                BUG_CHECK((param_list.size() == num_mc_args),
+                          "Total arguments on method call differ from those on method"
+                          " parameters in table %s",
+                          tbl->name);
             context_json_entries << std::endl;
             size_t param_index = 0;
             for (auto param : *method_call->arguments) {
@@ -2364,27 +2342,26 @@ void MauAsmOutput::emit_static_entries(std::ostream &, indent_t indent,
 }
 
 void MauAsmOutput::next_table_non_action_map(const IR::MAU::Table *tbl,
-         safe_vector<NextTableSet> &next_table_map) const {
-     ordered_set<NextTableSet> possible_next_tables;
-     for (auto act : Values(tbl->actions)) {
-         if (act->miss_only()) continue;
-         possible_next_tables.insert(next_for(tbl, act->name.originalName));
-     }
-     for (auto &nt : possible_next_tables) {
-         next_table_map.push_back(nt);
-     }
+                                             safe_vector<NextTableSet> &next_table_map) const {
+    ordered_set<NextTableSet> possible_next_tables;
+    for (auto act : Values(tbl->actions)) {
+        if (act->miss_only()) continue;
+        possible_next_tables.insert(next_for(tbl, act->name.originalName));
+    }
+    for (auto &nt : possible_next_tables) {
+        next_table_map.push_back(nt);
+    }
 }
 
-void MauAsmOutput::emit_atcam_match(std::ostream &out, indent_t indent,
-        const IR::MAU::Table *tbl,
-        std::stringstream &context_json_entries) const {
-    out << indent << "number_partitions: "
-        << tbl->layout.partition_count << std::endl;
+void MauAsmOutput::emit_atcam_match(std::ostream &out, indent_t indent, const IR::MAU::Table *tbl,
+                                    std::stringstream &context_json_entries) const {
+    out << indent << "number_partitions: " << tbl->layout.partition_count << std::endl;
     if (tbl->layout.alpm) {
-        out << indent << "subtrees_per_partition: "
-            << tbl->layout.subtrees_per_partition << std::endl;
-        auto tbl_entries = tbl->match_table->getConstantProperty("size"_cs) ?
-                            tbl->match_table->getConstantProperty("size"_cs)->asInt() : 0;
+        out << indent << "subtrees_per_partition: " << tbl->layout.subtrees_per_partition
+            << std::endl;
+        auto tbl_entries = tbl->match_table->getConstantProperty("size"_cs)
+                               ? tbl->match_table->getConstantProperty("size"_cs)->asInt()
+                               : 0;
         /* table size is optional in p4-14. first check if it comes from p4, otherwise
          * figure it out based on allocation */
         if (tbl_entries == 0) {
@@ -2396,29 +2373,28 @@ void MauAsmOutput::emit_atcam_match(std::ostream &out, indent_t indent,
             }
             tbl_entries = rams * tbl->resources->table_format.match_groups.size() * 1024;
         }
-        out << indent << "bins_per_partition: " <<
-          tbl_entries/tbl->layout.partition_count + 1 << std::endl;
+        out << indent << "bins_per_partition: " << tbl_entries / tbl->layout.partition_count + 1
+            << std::endl;
 
-        out << indent << "atcam_subset_width: " <<
-          tbl->layout.atcam_subset_width << std::endl;
-        out << indent << "shift_granularity: " <<
-          tbl->layout.shift_granularity << std::endl;
-        context_json_entries << indent+1 << "excluded_field_msb_bits: " << "[" << std::endl;
+        out << indent << "atcam_subset_width: " << tbl->layout.atcam_subset_width << std::endl;
+        out << indent << "shift_granularity: " << tbl->layout.shift_granularity << std::endl;
+        context_json_entries << indent + 1 << "excluded_field_msb_bits: " << "[" << std::endl;
         std::string sep = "";
         for (auto v : tbl->layout.excluded_field_msb_bits) {
             context_json_entries << sep;
             if (sep == "") sep = ", ";
-            context_json_entries << indent+2 << "{ ";
+            context_json_entries << indent + 2 << "{ ";
             context_json_entries << "field_name : " << v.first << ",";
             context_json_entries << "msb_bits_excluded: " << v.second;
             context_json_entries << "}";
         }
-        context_json_entries << indent+1 << "]" << std::endl;
+        context_json_entries << indent + 1 << "]" << std::endl;
     }
     for (auto ixr : tbl->match_key) {
         if (ixr->partition_index) {
-            out << indent << "partition_field_name: " <<
-                canon_name(phv.field(ixr->expr)->externalName()) << std::endl;
+            out << indent
+                << "partition_field_name: " << canon_name(phv.field(ixr->expr)->externalName())
+                << std::endl;
             break;
         }
     }
@@ -2456,16 +2432,16 @@ void MauAsmOutput::emit_atcam_match(std::ostream &out, indent_t indent,
 // validate each resource associated with the pragma as attached to the table
 // actions. A valid resource is directly output in the bfa as a context json
 // node syntax which the assembler plugs in to the match table context json
-void MauAsmOutput::emit_indirect_res_context_json(std::ostream &,
-        indent_t indent, const IR::MAU::Table *tbl,
-        std::stringstream &context_json_entries) const {
+void MauAsmOutput::emit_indirect_res_context_json(std::ostream &, indent_t indent,
+                                                  const IR::MAU::Table *tbl,
+                                                  std::stringstream &context_json_entries) const {
     ordered_set<cstring> bind_res;
     for (auto back_at : tbl->attached) {
         auto at = back_at->attached;
         for (auto annot : at->annotations->annotations) {
             if (annot->name != "bind_indirect_res_to_match") continue;
-            BUG_CHECK((at->is<IR::MAU::ActionData>() && at->direct == false)
-                      || at->is<IR::MAU::Selector>(),
+            BUG_CHECK((at->is<IR::MAU::ActionData>() && at->direct == false) ||
+                          at->is<IR::MAU::Selector>(),
                       "bind_indirect_res_to_match only allowed on action profiles");
             auto res_name = annot->expr[0]->to<IR::StringLiteral>()->value;
             // Ignore multiple pragmas for same resource name
@@ -2570,7 +2546,8 @@ void MauAsmOutput::emit_indirect_res_context_json(std::ostream &,
  * assumption that a hitmap.size() > 1 means that the next table must be saved
  */
 void MauAsmOutput::emit_table_hitmap(std::ostream &out, indent_t indent, const IR::MAU::Table *tbl,
-        NextTableSet &next_hit, NextTableSet &gw_miss, bool no_match_hit, bool gw_can_miss) const {
+                                     NextTableSet &next_hit, NextTableSet &gw_miss,
+                                     bool no_match_hit, bool gw_can_miss) const {
     ordered_set<NextTableSet> gw_next_tables;
     for (auto row : tbl->gateway_rows) {
         if (!row.second) continue;
@@ -2618,7 +2595,8 @@ void MauAsmOutput::emit_table_hitmap(std::ostream &out, indent_t indent, const I
             for (auto entry : gw_next_tables) {
                 if (entry.isEND()) continue;  // END does not require the lut
                 need_gw_lut = true;
-                break; }
+                break;
+            }
             // Guaranteeing that the next table for the match and gateway can fit in the same
             // space.  Entry 0 can potentially be used
             if (need_gw_lut) {
@@ -2631,10 +2609,11 @@ void MauAsmOutput::emit_table_hitmap(std::ostream &out, indent_t indent, const I
 
             // FIXME -- table placement should avoid combining this table with this gateway to
             // avoid getting into this situation
-            ERROR_CHECK(unique_gw_next_tables.size() + next_table_map.size() - reserved_entry_0
-                <= TableFormat::NEXT_MAP_TABLE_ENTRIES, ErrorType::ERR_OVERLIMIT,
-                "%sTable % combined with a gateway has too many next tables",
-                tbl->srcInfo, tbl->externalName());
+            ERROR_CHECK(unique_gw_next_tables.size() + next_table_map.size() - reserved_entry_0 <=
+                            TableFormat::NEXT_MAP_TABLE_ENTRIES,
+                        ErrorType::ERR_OVERLIMIT,
+                        "%sTable % combined with a gateway has too many next tables", tbl->srcInfo,
+                        tbl->externalName());
 
             if (reserved_entry_0 && unique_gw_next_tables.size() > 0)
                 next_table_map[0] = *unique_gw_next_tables.begin();
@@ -2658,13 +2637,12 @@ void MauAsmOutput::emit_table_hitmap(std::ostream &out, indent_t indent, const I
 }
 
 void MauAsmOutput::emit_table(std::ostream &out, const IR::MAU::Table *tbl, int stage,
-       gress_t gress) const {
+                              gress_t gress) const {
     BUG_CHECK(tbl->always_run != IR::MAU::AlwaysRun::ACTION,
-        "Emitting always-run action as a table");
-    BUG_CHECK(tbl->stage() == stage, "Emitting table %s for stage %d in stage %d",
-        tbl->name, tbl->stage(), stage);
-    BUG_CHECK(tbl->gress == gress, "Emitting table %s for %s in %s",
-        tbl->name, tbl->gress, gress);
+              "Emitting always-run action as a table");
+    BUG_CHECK(tbl->stage() == stage, "Emitting table %s for stage %d in stage %d", tbl->name,
+              tbl->stage(), stage);
+    BUG_CHECK(tbl->gress == gress, "Emitting table %s for %s in %s", tbl->name, tbl->gress, gress);
 
     /* FIXME -- some of this should be method(s) in IR::MAU::Table? */
     auto unique_id = tbl->unique_id();
@@ -2678,8 +2656,7 @@ void MauAsmOutput::emit_table(std::ostream &out, const IR::MAU::Table *tbl, int 
     std::stringstream context_json_entries;
 
     BUG_CHECK(tbl->logical_id, "Table %s was not assigned a table ID", tbl->name);
-    out << indent++ << tbl->get_table_type_string()
-        << ' ' << unique_id << ' ' << *tbl->logical_id
+    out << indent++ << tbl->get_table_type_string() << ' ' << unique_id << ' ' << *tbl->logical_id
         << ':' << std::endl;
     if (tbl->always_run == IR::MAU::AlwaysRun::TABLE) {
         out << indent << "always_run: true" << std::endl;
@@ -2699,7 +2676,8 @@ void MauAsmOutput::emit_table(std::ostream &out, const IR::MAU::Table *tbl, int 
                     tbl->layout.ternary ? IXBar::Use::TERNARY_MATCH : IXBar::Use::EXACT_MATCH;
                 ::IXBar::Use *use = tbl->resources->find_ixbar(type);
                 auto mem = &tbl->resources->memuse.at(tbl->unique_id());
-                emit_ways(out, indent, use, mem); }
+                emit_ways(out, indent, use, mem);
+            }
 
             emit_hash_dist(out, indent, &tbl->resources->hash_dists, false);
 
@@ -2714,11 +2692,9 @@ void MauAsmOutput::emit_table(std::ostream &out, const IR::MAU::Table *tbl, int 
             emit_table_format(out, indent, tbl->resources->table_format, fmt, false, false);
         }
 
-        if (tbl->layout.ternary)
-            emit_ternary_match(out, indent, tbl->resources->table_format);
+        if (tbl->layout.ternary) emit_ternary_match(out, indent, tbl->resources->table_format);
 
-        if (tbl->layout.atcam)
-            emit_atcam_match(out, indent, tbl, context_json_entries);
+        if (tbl->layout.atcam) emit_atcam_match(out, indent, tbl, context_json_entries);
     }
     if (tbl->resources->action_ixbar && !emitted_action_ixbar) {
         emit_ixbar(out, indent, tbl, {IXBar::Use::ACTION});
@@ -2733,8 +2709,10 @@ void MauAsmOutput::emit_table(std::ostream &out, const IR::MAU::Table *tbl, int 
     bool gw_can_miss = false;
     if (!tbl->action_chain()) {
         if (tbl->has_exit_action()) {
-            BUG_CHECK(!tbl->has_non_exit_action(), "Need action chaining to handle both exit "
-                      "and non-exit actions in table %1%", tbl);
+            BUG_CHECK(!tbl->has_non_exit_action(),
+                      "Need action chaining to handle both exit "
+                      "and non-exit actions in table %1%",
+                      tbl);
             next_hit = next_for(tbl, tbl->get_exit_actions().at(0)->name.originalName);
         } else {
             next_hit = next_for(tbl, "$hit"_cs);
@@ -2751,16 +2729,15 @@ void MauAsmOutput::emit_table(std::ostream &out, const IR::MAU::Table *tbl, int 
                 out << sep << id.build_name();
                 sep = ", ";
             }
-            out << (sep+1) << "]" << std::endl;
+            out << (sep + 1) << "]" << std::endl;
         }
         --indent;
     }
 
     if (tbl->uses_gateway() || tbl->layout.no_match_hit_path() || tbl->conditional_gateway_only()) {
         indent_t gw_indent = indent;
-        if (!tbl->conditional_gateway_only())
-            out << gw_indent++ << "gateway:" << std::endl;
-        out << gw_indent << "name: " <<  tbl->build_gateway_name() << std::endl;
+        if (!tbl->conditional_gateway_only()) out << gw_indent++ << "gateway:" << std::endl;
+        out << gw_indent << "name: " << tbl->build_gateway_name() << std::endl;
         emit_ixbar(out, gw_indent, tbl, {IXBar::Use::GATEWAY});
         auto *ixb = tbl->resources->gateway_ixbar.get();
         bool ok = ixb ? ixb->emit_gateway_asm(*this, out, gw_indent, tbl) : false;
@@ -2768,9 +2745,10 @@ void MauAsmOutput::emit_table(std::ostream &out, const IR::MAU::Table *tbl, int 
             if (use.type == Memories::Use::GATEWAY) {
                 if (!use.row.empty()) {
                     out << gw_indent << "row: " << use.row[0].row << std::endl;
-                    out << gw_indent << "bus: " << use.row[0].bus << std::endl; }
+                    out << gw_indent << "bus: " << use.row[0].bus << std::endl;
+                }
                 if (use.gateway.unit >= 0)
-                out << gw_indent << "unit: " << use.gateway.unit << std::endl;
+                    out << gw_indent << "unit: " << use.gateway.unit << std::endl;
                 if (use.gateway.payload_row >= 0)
                     out << gw_indent << "payload_row: " << use.gateway.payload_row << std::endl;
                 if (use.gateway.payload_unit >= 0)
@@ -2779,13 +2757,14 @@ void MauAsmOutput::emit_table(std::ostream &out, const IR::MAU::Table *tbl, int 
                 if (use.gateway.payload_value != 0ULL) {
                     out << gw_indent << "payload: 0x" << hex(use.gateway.payload_value)
                         << std::endl;
-                    emit_table_format(out, gw_indent, tbl->resources->table_format, nullptr,
-                                      false, true);
+                    emit_table_format(out, gw_indent, tbl->resources->table_format, nullptr, false,
+                                      true);
                     // FIXME: Assembler doesn't yet support payload bus/row for every table
                 }
                 if (use.gateway.payload_match_address > 0) {
                     out << gw_indent << "match_address: 0x"
-                        << hex(use.gateway.payload_match_address) << std::endl; }
+                        << hex(use.gateway.payload_match_address) << std::endl;
+                }
 
                 auto &payload_map = tbl->resources->table_format.payload_map;
                 if (!payload_map.empty()) {
@@ -2810,8 +2789,7 @@ void MauAsmOutput::emit_table(std::ostream &out, const IR::MAU::Table *tbl, int 
             gw_can_miss = emit_gateway(out, gw_indent, tbl, no_match_hit, next_hit, gw_miss);
         else
             emit_no_match_gateway(out, gw_indent, tbl);
-        if (tbl->conditional_gateway_only())
-            return;
+        if (tbl->conditional_gateway_only()) return;
     }
 
     emit_table_hitmap(out, indent, tbl, next_hit, gw_miss, no_match_hit, gw_can_miss);
@@ -2837,7 +2815,9 @@ void MauAsmOutput::emit_table(std::ostream &out, const IR::MAU::Table *tbl, int 
             bool ad_check = tbl->layout.action_data_bytes_in_table > 0;
             ad_check |= tbl->layout.action_addr.address_bits > 0;
             BUG_CHECK(ad_check, "Action Data Table %s misconfigured", ad->name);
-            have_action = true; } }
+            have_action = true;
+        }
+    }
     BUG_CHECK(have_action || tbl->layout.action_data_bytes_in_table == 0,
               "have action data with no action data table?");
 
@@ -2846,12 +2826,11 @@ void MauAsmOutput::emit_table(std::ostream &out, const IR::MAU::Table *tbl, int 
     source.setbit(ActionData::METER_ALU);
 
     if (!have_indirect) {
-        if (!tbl->layout.no_match_miss_path())
-            emit_action_data_bus(out, indent, tbl, source);
+        if (!tbl->layout.no_match_miss_path()) emit_action_data_bus(out, indent, tbl, source);
         emit_table_indir(out, indent, tbl, nullptr);
     }
 
-    const IR::MAU::IdleTime* idletime = nullptr;
+    const IR::MAU::IdleTime *idletime = nullptr;
     for (auto back_at : tbl->attached) {
         auto at = back_at->attached;
         if (auto *id = at->to<IR::MAU::IdleTime>()) {
@@ -2859,21 +2838,18 @@ void MauAsmOutput::emit_table(std::ostream &out, const IR::MAU::Table *tbl, int 
             break;
         }
     }
-    if (idletime)
-        emit_idletime(out, indent, tbl, idletime);
+    if (idletime) emit_idletime(out, indent, tbl, idletime);
 
-    for (auto back_at : tbl->attached)
-        back_at->apply(EmitAttached(*this, out, tbl, stage, gress));
+    for (auto back_at : tbl->attached) back_at->apply(EmitAttached(*this, out, tbl, stage, gress));
 }
 
 void MauAsmOutput::emit_always_run_action(std::ostream &out, const IR::MAU::Table *tbl, int stage,
-       gress_t gress) const {
+                                          gress_t gress) const {
     BUG_CHECK(tbl->always_run == IR::MAU::AlwaysRun::ACTION,
-        "Emitting table %s as always-run action", tbl->name);
+              "Emitting table %s as always-run action", tbl->name);
     BUG_CHECK(tbl->stage() == stage, "Emitting always-run action for stage %d in stage %d",
-        tbl->stage(), stage);
-    BUG_CHECK(tbl->gress == gress, "Emitting always-run action for %s in %s",
-        tbl->gress, gress);
+              tbl->stage(), stage);
+    BUG_CHECK(tbl->gress == gress, "Emitting always-run action for %s in %s", tbl->gress, gress);
 
     indent_t indent(1);
     for (auto action : Values(tbl->actions)) {
@@ -2885,10 +2861,8 @@ void MauAsmOutput::emit_always_run_action(std::ostream &out, const IR::MAU::Tabl
  * Indirect address type.
  */
 std::string MauAsmOutput::indirect_address(const IR::MAU::AttachedMemory *am) const {
-    if (am->is<IR::MAU::ActionData>())
-        return "action_addr";
-    if (am->is<IR::MAU::Counter>())
-        return "counter_addr";
+    if (am->is<IR::MAU::ActionData>()) return "action_addr";
+    if (am->is<IR::MAU::Counter>()) return "counter_addr";
     if (am->is<IR::MAU::Selector>() || am->is<IR::MAU::Meter>() || am->is<IR::MAU::StatefulAlu>())
         return "meter_addr";
     BUG("Should not reach this point in indirect address");
@@ -2896,8 +2870,7 @@ std::string MauAsmOutput::indirect_address(const IR::MAU::AttachedMemory *am) co
 }
 
 std::string MauAsmOutput::indirect_pfe(const IR::MAU::AttachedMemory *am) const {
-    if (am->is<IR::MAU::Counter>())
-        return "counter_pfe";
+    if (am->is<IR::MAU::Counter>()) return "counter_pfe";
     if (am->is<IR::MAU::Selector>() || am->is<IR::MAU::Meter>() || am->is<IR::MAU::StatefulAlu>())
         return "meter_pfe";
     BUG("Should not reach this point in indirect pfe");
@@ -2906,16 +2879,22 @@ std::string MauAsmOutput::indirect_pfe(const IR::MAU::AttachedMemory *am) const 
 
 std::string MauAsmOutput::stateful_counter_addr(IR::MAU::StatefulUse use) const {
     switch (use) {
-        case IR::MAU::StatefulUse::LOG: return "counter";
-        case IR::MAU::StatefulUse::FIFO_PUSH: return "fifo push";
-        case IR::MAU::StatefulUse::FIFO_POP: return "fifo pop";
-        case IR::MAU::StatefulUse::STACK_PUSH: return "stack push";
-        case IR::MAU::StatefulUse::STACK_POP: return "stack pop";
-        case IR::MAU::StatefulUse::FAST_CLEAR: return "clear";
-        default: return "";
+        case IR::MAU::StatefulUse::LOG:
+            return "counter";
+        case IR::MAU::StatefulUse::FIFO_PUSH:
+            return "fifo push";
+        case IR::MAU::StatefulUse::FIFO_POP:
+            return "fifo pop";
+        case IR::MAU::StatefulUse::STACK_PUSH:
+            return "stack push";
+        case IR::MAU::StatefulUse::STACK_POP:
+            return "stack pop";
+        case IR::MAU::StatefulUse::FAST_CLEAR:
+            return "clear";
+        default:
+            return "";
     }
 }
-
 
 /** Figure out which overhead field in the table is being used to index an attached
  *  indirect table (counter, meter, stateful, action data) and return its asm name.  Contained
@@ -2931,7 +2910,8 @@ std::string MauAsmOutput::stateful_counter_addr(IR::MAU::StatefulUse use) const 
  *      2. $DEFAULT - the parameter is defaulted on through the default register
  */
 std::string MauAsmOutput::build_call(const IR::MAU::AttachedMemory *at_mem,
-        const IR::MAU::BackendAttached *ba, const IR::MAU::Table *tbl) const {
+                                     const IR::MAU::BackendAttached *ba,
+                                     const IR::MAU::Table *tbl) const {
     if (at_mem->is<IR::MAU::IdleTime>()) {
         return "";
     }
@@ -2971,8 +2951,7 @@ std::string MauAsmOutput::build_call(const IR::MAU::AttachedMemory *at_mem,
         rv += "$DEFAULT";
     }
 
-    if (!at_mem->unique_id().has_meter_type())
-        return rv + ")";
+    if (!at_mem->unique_id().has_meter_type()) return rv + ")";
 
     rv += ", ";
     if (ba->type_location == IR::MAU::TypeLocation::OVERHEAD ||
@@ -2991,7 +2970,8 @@ std::string MauAsmOutput::build_call(const IR::MAU::AttachedMemory *at_mem,
  * the same as the meter address enable bit.
  */
 std::string MauAsmOutput::build_meter_color_call(const IR::MAU::Meter *mtr,
-        const IR::MAU::BackendAttached *ba, const IR::MAU::Table *tbl) const {
+                                                 const IR::MAU::BackendAttached *ba,
+                                                 const IR::MAU::Table *tbl) const {
     std::string rv = "(";
     if (ba->addr_location == IR::MAU::AddrLocation::DIRECT) {
         rv += "$DIRECT";
@@ -3011,7 +2991,8 @@ std::string MauAsmOutput::build_meter_color_call(const IR::MAU::Meter *mtr,
                 }
             }
         }
-        BUG_CHECK(hd_use != nullptr, "No associated hash distribution group for a color mapram "
+        BUG_CHECK(hd_use != nullptr,
+                  "No associated hash distribution group for a color mapram "
                   "address");
         rv += "hash_dist " + std::to_string(hd_use->unit);
     } else {
@@ -3047,7 +3028,7 @@ std::string MauAsmOutput::build_sel_len_call(const IR::MAU::Selector *sel) const
 }
 
 cstring MauAsmOutput::find_attached_name(const IR::MAU::Table *tbl,
-        const IR::MAU::AttachedMemory *at) {
+                                         const IR::MAU::AttachedMemory *at) {
     auto unique_id = tbl->unique_id();
     auto at_unique_id = tbl->unique_id(at);
     auto &memuse = tbl->resources->memuse.at(unique_id);
@@ -3062,21 +3043,21 @@ cstring MauAsmOutput::find_attached_name(const IR::MAU::Table *tbl,
 }
 
 ordered_set<UniqueId> MauAsmOutput::find_attached_ids(const IR::MAU::Table *tbl,
-        const IR::MAU::AttachedMemory *at) {
+                                                      const IR::MAU::AttachedMemory *at) {
     auto unique_id = tbl->unique_id();
     auto at_unique_id = tbl->unique_id(at);
     auto &memuse = tbl->resources->memuse.at(unique_id);
 
     auto unattached_pos = memuse.unattached_tables.find(at_unique_id);
     if (unattached_pos == memuse.unattached_tables.end()) {
-        return { at_unique_id };
+        return {at_unique_id};
     } else {
         return unattached_pos->second;
     }
 }
 
-void MauAsmOutput::emit_table_indir(std::ostream &out, indent_t indent,
-        const IR::MAU::Table *tbl, const IR::MAU::TernaryIndirect *ti) const {
+void MauAsmOutput::emit_table_indir(std::ostream &out, indent_t indent, const IR::MAU::Table *tbl,
+                                    const IR::MAU::TernaryIndirect *ti) const {
     for (auto back_at : tbl->attached) {
         auto at_mem = back_at->attached;
         if (at_mem->is<IR::MAU::TernaryIndirect>()) continue;
@@ -3085,7 +3066,8 @@ void MauAsmOutput::emit_table_indir(std::ostream &out, indent_t indent,
             continue;  // synthetic salu for driver to write to selector; not used directly
         for (auto id : find_attached_ids(tbl, at_mem)) {
             out << indent << at_mem->kind() << ": " << id.build_name()
-                << build_call(at_mem, back_at, tbl) << std::endl; }
+                << build_call(at_mem, back_at, tbl) << std::endl;
+        }
 
         if (auto mtr = at_mem->to<IR::MAU::Meter>()) {
             if (mtr->color_output()) {
@@ -3098,11 +3080,10 @@ void MauAsmOutput::emit_table_indir(std::ostream &out, indent_t indent,
 
         auto as = at_mem->to<IR::MAU::Selector>();
         if (as != nullptr) {
-            out << indent <<  "selector_length: " << find_attached_name(tbl, at_mem);
+            out << indent << "selector_length: " << find_attached_name(tbl, at_mem);
             out << build_sel_len_call(as) << std::endl;
         }
     }
-
 
     if (!tbl->actions.empty()) {
         // Local tinds are attached to the parent table
@@ -3116,7 +3097,8 @@ void MauAsmOutput::emit_table_indir(std::ostream &out, indent_t indent,
             else
                 out << "action";
         } else {
-            out << "$DEFAULT"; }
+            out << "$DEFAULT";
+        }
         out << ", " << "$DEFAULT)" << std::endl;
 
         out << indent++ << "actions:" << std::endl;
@@ -3131,18 +3113,19 @@ void MauAsmOutput::emit_table_indir(std::ostream &out, indent_t indent,
         for (auto act : Values(tbl->actions)) {
             if (!act->init_default) continue;
             found_def_act = true;
-            out << indent << "default_" << (act->miss_only() ? "only_" : "") << "action: "
-                << canon_name(act->externalName()) << std::endl;
-            if (act->default_params.size() == 0)
-                break;
-            BUG_CHECK(act->default_params.size() == act->args.size(), "Wrong number of params "
-                      "to default action %s", act->name);
+            out << indent << "default_" << (act->miss_only() ? "only_" : "")
+                << "action: " << canon_name(act->externalName()) << std::endl;
+            if (act->default_params.size() == 0) break;
+            BUG_CHECK(act->default_params.size() == act->args.size(),
+                      "Wrong number of params "
+                      "to default action %s",
+                      act->name);
             out << indent++ << "default_action_parameters:" << std::endl;
             int index = 0;
             for (auto param : act->default_params) {
                 if (const auto pval = param->expression->to<IR::Constant>())
-                    out << indent << act->args[index++]->name.toString() << ": "
-                        << '"' << hex_big_int(pval->value) << '"' << std::endl;
+                    out << indent << act->args[index++]->name.toString() << ": " << '"'
+                        << hex_big_int(pval->value) << '"' << std::endl;
             }
             indent--;
             break;
@@ -3158,40 +3141,45 @@ void MauAsmOutput::emit_table_indir(std::ostream &out, indent_t indent,
 static void counter_format(std::ostream &out, const IR::MAU::DataAggregation type, int per_row) {
     if (type == IR::MAU::DataAggregation::PACKETS) {
         for (int i = 0; i < per_row; i++) {
-            int first_bit = (per_row - i - 1) * 128/per_row;
-            int last_bit = first_bit + 128/per_row - 1;
+            int first_bit = (per_row - i - 1) * 128 / per_row;
+            int last_bit = first_bit + 128 / per_row - 1;
             out << "packets(" << i << "): " << first_bit << ".." << last_bit;
-            if (i != per_row - 1)
-                out << ", ";
+            if (i != per_row - 1) out << ", ";
         }
     } else if (type == IR::MAU::DataAggregation::BYTES) {
         for (int i = 0; i < per_row; i++) {
-            int first_bit = (per_row - i - 1) * 128/per_row;
-            int last_bit = first_bit + 128/per_row - 1;
+            int first_bit = (per_row - i - 1) * 128 / per_row;
+            int last_bit = first_bit + 128 / per_row - 1;
             out << "bytes(" << i << "): " << first_bit << ".." << last_bit;
-            if (i != per_row - 1)
-                out << ", ";
+            if (i != per_row - 1) out << ", ";
         }
     } else if (type == IR::MAU::DataAggregation::BOTH) {
         int packet_size, byte_size;
         switch (per_row) {
             case 1:
-                packet_size = 64; byte_size = 64; break;
+                packet_size = 64;
+                byte_size = 64;
+                break;
             case 2:
-                packet_size = 28; byte_size = 36; break;
+                packet_size = 28;
+                byte_size = 36;
+                break;
             case 3:
-                packet_size = 17; byte_size = 25; break;
+                packet_size = 17;
+                byte_size = 25;
+                break;
             default:
-                packet_size = 0; byte_size = 0; break;
+                packet_size = 0;
+                byte_size = 0;
+                break;
         }
         for (int i = 0; i < per_row; i++) {
-            int first_bit = (per_row - i - 1) * 128/per_row;
-            out << "packets(" << i << "): " <<  first_bit << ".." << first_bit + packet_size - 1;
+            int first_bit = (per_row - i - 1) * 128 / per_row;
+            out << "packets(" << i << "): " << first_bit << ".." << first_bit + packet_size - 1;
             out << ", ";
             out << "bytes(" << i << "): " << first_bit + packet_size << ".."
                 << first_bit + packet_size + byte_size - 1;
-            if (i != per_row - 1)
-                out << ", ";
+            if (i != per_row - 1) out << ", ";
         }
     }
 }
@@ -3204,22 +3192,18 @@ bool MauAsmOutput::EmitAttached::is_unattached(const IR::MAU::AttachedMemory *at
     auto &memuse = tbl->resources->memuse.at(unique_id);
     auto at_unique_id = tbl->unique_id(at);
     auto unattached_loc = memuse.unattached_tables.find(at_unique_id);
-    if (unattached_loc != memuse.unattached_tables.end())
-        return true;
+    if (unattached_loc != memuse.unattached_tables.end()) return true;
     return false;
 }
 
 bool MauAsmOutput::EmitAttached::preorder(const IR::MAU::Counter *counter) {
     indent_t indent(1);
-    if (is_unattached(counter))
-        return false;
+    if (is_unattached(counter)) return false;
     auto unique_id = tbl->unique_id(counter);
     out << indent++ << "counter " << unique_id << ":" << std::endl;
     out << indent << "p4: { name: " << canon_name(counter->name);
-    if (!counter->direct)
-        out << ", size: " << counter->size;
-    if (counter->direct && tbl->layout.hash_action)
-        out << ", how_referenced: direct";
+    if (!counter->direct) out << ", size: " << counter->size;
+    if (counter->direct && tbl->layout.hash_action) out << ", how_referenced: direct";
     out << " }" << std::endl;
     if (tbl->resources->memuse.count(unique_id))
         self.emit_memory(out, indent, tbl->resources->memuse.at(unique_id));
@@ -3228,11 +3212,14 @@ bool MauAsmOutput::EmitAttached::preorder(const IR::MAU::Counter *counter) {
     std::string count_type;
     switch (counter->type) {
         case IR::MAU::DataAggregation::PACKETS:
-            count_type = "packets"; break;
+            count_type = "packets";
+            break;
         case IR::MAU::DataAggregation::BYTES:
-            count_type = "bytes"; break;
+            count_type = "bytes";
+            break;
         case IR::MAU::DataAggregation::BOTH:
-            count_type = "packets_and_bytes"; break;
+            count_type = "packets_and_bytes";
+            break;
         default:
             count_type = "";
     }
@@ -3241,8 +3228,7 @@ bool MauAsmOutput::EmitAttached::preorder(const IR::MAU::Counter *counter) {
     if (bytecount_adjust != 0)
         out << indent << "bytecount_adjust: " << bytecount_adjust << std::endl;
     if (counter->true_egress_accounting) {
-        if (teop == 4)
-            error("Ran out of tEOP buses for true egress accounting: %1%", counter);
+        if (teop == 4) error("Ran out of tEOP buses for true egress accounting: %1%", counter);
         out << indent << "teop: " << teop++ << std::endl;
     }
     out << indent << "format: {";
@@ -3257,8 +3243,9 @@ bool MauAsmOutput::EmitAttached::preorder(const IR::MAU::Counter *counter) {
         // 3 indicies to populate, all with same value for "simple LR(t)"
         out << indent << "lrt:" << std::endl;
         for (int e = 0; e < 3; e++) {
-            out << indent << "- { threshold: " << counter->threshold <<
-                 ", interval: " << counter->interval << " }" << std::endl; }
+            out << indent << "- { threshold: " << counter->threshold
+                << ", interval: " << counter->interval << " }" << std::endl;
+        }
     }
     emit_user_annotation_context_json(out, indent, counter);
     return false;
@@ -3266,19 +3253,17 @@ bool MauAsmOutput::EmitAttached::preorder(const IR::MAU::Counter *counter) {
 
 bool MauAsmOutput::EmitAttached::preorder(const IR::MAU::Meter *meter) {
     indent_t indent(1);
-    if (is_unattached(meter))
-        return false;
+    if (is_unattached(meter)) return false;
 
     auto unique_id = tbl->unique_id(meter);
     out << indent++ << "meter " << unique_id << ":" << std::endl;
     out << indent << "p4: { name: " << canon_name(meter->name);
-    if (!meter->direct)
-        out << ", size: " << meter->size;
-    if (meter->direct && tbl->layout.hash_action)
-        out << ", how_referenced: direct";
+    if (!meter->direct) out << ", size: " << meter->size;
+    if (meter->direct && tbl->layout.hash_action) out << ", how_referenced: direct";
     out << " }" << std::endl;
     if (meter->input) {
-        self.emit_ixbar(out, indent, tbl, {IXBar::Use::METER}); }
+        self.emit_ixbar(out, indent, tbl, {IXBar::Use::METER});
+    }
 
     if (tbl->resources->memuse.count(unique_id))
         self.emit_memory(out, indent, tbl->resources->memuse.at(unique_id));
@@ -3292,8 +3277,7 @@ bool MauAsmOutput::EmitAttached::preorder(const IR::MAU::Meter *meter) {
         imp_type = meter->implementation.name;
     out << indent << "type: " << imp_type << std::endl;
     if (meter->true_egress_accounting) {
-        if (teop == 4)
-            error("Ran out of tEOP buses for true egress accounting: %1%", meter);
+        if (teop == 4) error("Ran out of tEOP buses for true egress accounting: %1%", meter);
         out << indent << "teop: " << teop++ << std::endl;
     }
     if (imp_type == "wred") {
@@ -3325,15 +3309,17 @@ bool MauAsmOutput::EmitAttached::preorder(const IR::MAU::Meter *meter) {
         for (auto &hash_dist_use : hash_dist_uses) {
             for (auto &ir_alloc : hash_dist_use.ir_allocations) {
                 if (ir_alloc.dest == dest) {
-                    BUG_CHECK(hd_use == nullptr && hd_ir_use == nullptr, "Hash Dist Address "
+                    BUG_CHECK(hd_use == nullptr && hd_ir_use == nullptr,
+                              "Hash Dist Address "
                               "allocated multiple times");
                     hd_use = &hash_dist_use;
                     hd_ir_use = &ir_alloc;
                 }
             }
         }
-        BUG_CHECK(hd_use != nullptr, "Could not find hash distribution unit in link up "
-                                     "for meter precolor");
+        BUG_CHECK(hd_use != nullptr,
+                  "Could not find hash distribution unit in link up "
+                  "for meter precolor");
         out << indent << "pre_color: hash_dist(";
         auto gm_bits = hd_ir_use->use->galois_matrix_bits();
         auto &ixbSpec = Device::ixbarSpec();
@@ -3345,20 +3331,21 @@ bool MauAsmOutput::EmitAttached::preorder(const IR::MAU::Meter *meter) {
         out << indent << "color_aware: true" << std::endl;
     }
 
-
     std::string count_type;
     switch (meter->type) {
         case IR::MAU::DataAggregation::PACKETS:
-            count_type = "packets"; break;
+            count_type = "packets";
+            break;
         case IR::MAU::DataAggregation::BYTES:
-            count_type = "bytes"; break;
+            count_type = "bytes";
+            break;
         case IR::MAU::DataAggregation::BOTH:
-            count_type = "packets_and_bytes"; break;
+            count_type = "packets_and_bytes";
+            break;
         default:
             count_type = "";
     }
-    if (count_type != "")
-        out << indent << "count: " << count_type << std::endl;
+    if (count_type != "") out << indent << "count: " << count_type << std::endl;
     auto bytecount_adjust = meter->get_bytecount_adjust();
     if (bytecount_adjust != 0)
         out << indent << "bytecount_adjust: " << bytecount_adjust << std::endl;
@@ -3378,8 +3365,7 @@ bool MauAsmOutput::EmitAttached::preorder(const IR::MAU::Selector *as) {
 
     out << indent++ << "selection " << unique_id << ":" << std::endl;
     out << indent << "p4: { name: " << canon_name(as->name);
-    if (!as->direct && as->size != 0)
-        out << ", size: " << as->size;
+    if (!as->direct && as->size != 0) out << ", size: " << as->size;
     out << " }" << std::endl;
     if (tbl->resources->memuse.count(unique_id))
         self.emit_memory(out, indent, tbl->resources->memuse.at(unique_id));
@@ -3389,7 +3375,7 @@ bool MauAsmOutput::EmitAttached::preorder(const IR::MAU::Selector *as) {
     self.emit_ixbar(out, indent, tbl, {IXBar::Use::SELECTOR});
 
     out << indent << "mode: ";
-    out << ((as->mode == IR::MAU::SelectorMode::FAIR) ? "fair": "resilient");
+    out << ((as->mode == IR::MAU::SelectorMode::FAIR) ? "fair" : "resilient");
     /**
      * This is the parameter that programs the following two registers:
      *     rams.match.map_alu.meter_group.selector.selector_alu_ctl.resilient_hash_enable
@@ -3405,11 +3391,10 @@ bool MauAsmOutput::EmitAttached::preorder(const IR::MAU::Selector *as) {
         bitvec galois_bits = tbl->resources->selector_ixbar->meter_bit_mask();
         auto &ixbSpec = Device::ixbarSpec();
         BUG_CHECK(galois_bits.is_contiguous() &&
-                  galois_bits.popcount() == ixbSpec.fairModeHashBits() &&
-                  (galois_bits.min().index() % ixbSpec.fairModeHashBits()) == 0,
+                      galois_bits.popcount() == ixbSpec.fairModeHashBits() &&
+                      (galois_bits.min().index() % ixbSpec.fairModeHashBits()) == 0,
                   "Selector Bits for fair selector incorrectly programmed");
-        out << " " << (galois_bits.min().index() / ixbSpec.fairModeHashBits())
-            << std::endl;
+        out << " " << (galois_bits.min().index() / ixbSpec.fairModeHashBits()) << std::endl;
     } else {
         out << " 7" << std::endl;
     }
@@ -3436,7 +3421,7 @@ bool MauAsmOutput::EmitAttached::preorder(const IR::MAU::Selector *as) {
 }
 
 bool MauAsmOutput::EmitAttached::preorder(const IR::MAU::TernaryIndirect *ti) {
-    indent_t    indent(1);
+    indent_t indent(1);
     auto unique_id = tbl->unique_id(ti);
     if (tbl->layout.is_local_tind) {
         indent++;
@@ -3460,17 +3445,14 @@ bool MauAsmOutput::EmitAttached::preorder(const IR::MAU::TernaryIndirect *ti) {
 }
 
 bool MauAsmOutput::EmitAttached::preorder(const IR::MAU::ActionData *ad) {
-    indent_t    indent(1);
-    if (is_unattached(ad))
-        return false;
+    indent_t indent(1);
+    if (is_unattached(ad)) return false;
 
     auto unique_id = tbl->unique_id(ad);
     out << indent++ << "action " << unique_id << ':' << std::endl;
     out << indent << "p4: { name: " << canon_name(ad->name);
-    if (!ad->direct)
-        out << ", size: " << ad->size;
-    if (ad->direct && tbl->layout.hash_action)
-        out << ", how_referenced: direct";
+    if (!ad->direct) out << ", size: " << ad->size;
+    if (ad->direct && tbl->layout.hash_action) out << ", how_referenced: direct";
     out << " }" << std::endl;
     if (tbl->resources->memuse.count(unique_id))
         self.emit_memory(out, indent, tbl->resources->memuse.at(unique_id));
@@ -3486,37 +3468,35 @@ bool MauAsmOutput::EmitAttached::preorder(const IR::MAU::ActionData *ad) {
 }
 
 bool MauAsmOutput::EmitAttached::preorder(const IR::MAU::StatefulAlu *salu) {
-    indent_t    indent(1);
-    if (is_unattached(salu))
-        return false;
+    indent_t indent(1);
+    if (is_unattached(salu)) return false;
 
     auto unique_id = tbl->unique_id(salu);
     out << indent++ << "stateful " << unique_id << ':' << std::endl;
     out << indent << "p4: { name: " << canon_name(salu->name);
-    if (!salu->direct)
-        out << ", size: " << salu->size;
-    if (salu->direct && tbl->layout.hash_action)
-        out << ", how_referenced: direct";
-    if (salu->synthetic_for_selector)
-        out << ", hidden: true";
+    if (!salu->direct) out << ", size: " << salu->size;
+    if (salu->direct && tbl->layout.hash_action) out << ", how_referenced: direct";
+    if (salu->synthetic_for_selector) out << ", hidden: true";
     out << " }" << std::endl;
 
     if (salu->selector) {
         auto sel_mem_index = std::make_pair(tbl->stage(), salu->selector);
         BUG_CHECK(self.selector_memory.count(sel_mem_index),
-            "Stateful selector %s not found in selector memory map for stage %d on table %s",
-            salu->selector->name, tbl->stage(), tbl->unique_id());
+                  "Stateful selector %s not found in selector memory map for stage %d on table %s",
+                  salu->selector->name, tbl->stage(), tbl->unique_id());
         if (self.selector_memory.count(sel_mem_index)) {
             auto &sel_info = self.selector_memory.at(sel_mem_index);
             out << indent << "selection_table: " << sel_info.first << std::endl;
             self.emit_memory(out, indent, *sel_info.second);
         } else {
-            INTERNAL_WARNING("No selector memory found on table %s", tbl->name); }
+            INTERNAL_WARNING("No selector memory found on table %s", tbl->name);
+        }
     } else {
         if (tbl->resources->memuse.count(unique_id))
             self.emit_memory(out, indent, tbl->resources->memuse.at(unique_id));
         else
-            INTERNAL_WARNING("No resource named %s found on table %s", unique_id, tbl->name); }
+            INTERNAL_WARNING("No resource named %s found on table %s", unique_id, tbl->name);
+    }
 
     auto &ixbar = tbl->resources->salu_ixbar;
     BUG_CHECK(ixbar->type == IXBar::Use::STATEFUL_ALU || ixbar->type == IXBar::Use::TYPES,
@@ -3526,7 +3506,7 @@ bool MauAsmOutput::EmitAttached::preorder(const IR::MAU::StatefulAlu *salu) {
 
     out << indent << "format: { lo: ";
     if (salu->dual)
-        out << salu->width/2 << ", hi:" << salu->width/2;
+        out << salu->width / 2 << ", hi:" << salu->width / 2;
     else
         out << salu->width;
     out << " }" << std::endl;
@@ -3534,25 +3514,22 @@ bool MauAsmOutput::EmitAttached::preorder(const IR::MAU::StatefulAlu *salu) {
     if (salu->init_reg_lo || salu->init_reg_hi) {
         out << indent << "initial_value: ";
         out << "{ lo: " << salu->init_reg_lo;
-        if (salu->dual || salu->init_reg_hi)
-            out << " , hi: " << salu->init_reg_hi;
+        if (salu->dual || salu->init_reg_hi) out << " , hi: " << salu->init_reg_hi;
         out << " }" << std::endl;
     }
     if (salu->regfile.size() > 0) {
         out << indent << "register_params: {";
         const char *sep = "";
         for (auto regfile_row : Keys(salu->regfile)) {
-            out << sep << ' ' << salu->regfile.at(regfile_row)->index << ": "
-                       << "{ " << salu->regfile.at(regfile_row)->externalName << ": "
-                               << salu->regfile.at(regfile_row)->initial_value << " }";
+            out << sep << ' ' << salu->regfile.at(regfile_row)->index << ": " << "{ "
+                << salu->regfile.at(regfile_row)->externalName << ": "
+                << salu->regfile.at(regfile_row)->initial_value << " }";
             sep = ",";
         }
         out << " }" << std::endl;
     }
-    if (salu->clear_value)
-        out << indent << "clear_value : 0x" << salu->clear_value << std::endl;
-    if (salu->busy_value)
-        out << indent << "busy_value : 0x" << hex(salu->busy_value) << std::endl;
+    if (salu->clear_value) out << indent << "clear_value : 0x" << salu->clear_value << std::endl;
+    if (salu->busy_value) out << indent << "busy_value : 0x" << hex(salu->busy_value) << std::endl;
 
     if (salu->math.valid) {
         out << indent++ << "math_table:" << std::endl;
@@ -3563,9 +3540,11 @@ bool MauAsmOutput::EmitAttached::preorder(const IR::MAU::StatefulAlu *salu) {
         const char *sep = " ";
         for (auto v : salu->math.table) {
             out << sep << v;
-            sep = ", "; }
-        out << (sep+1) << ']' << std::endl;
-        --indent; }
+            sep = ", ";
+        }
+        out << (sep + 1) << ']' << std::endl;
+        --indent;
+    }
     if (salu->overflow) out << indent << "overflow: " << salu->overflow << std::endl;
     if (salu->underflow) out << indent << "underflow: " << salu->underflow << std::endl;
     if (!salu->instruction.empty()) {
@@ -3574,15 +3553,15 @@ bool MauAsmOutput::EmitAttached::preorder(const IR::MAU::StatefulAlu *salu) {
             // Ideally, this check should never fail as an empty action is validated in
             // 'CheckStatefulAlu' earlier in backend.
             BUG_CHECK((act->action.size() > 0),
-                " Stateful %1% must have instructions assigned for action '%1%'."
-                " Please verify the action is valid.",
-                salu, act);
+                      " Stateful %1% must have instructions assigned for action '%1%'."
+                      " Please verify the action is valid.",
+                      salu, act);
             act->apply(EmitAction(self, out, tbl, indent));
         }
-        --indent; }
+        --indent;
+    }
 
-    if (salu->pred_shift >= 0)
-        out << indent << "pred_shift: " << salu->pred_shift << std::endl;
+    if (salu->pred_shift >= 0) out << indent << "pred_shift: " << salu->pred_shift << std::endl;
     if (salu->pred_comb_shift >= 0)
         out << indent << "pred_comb_shift: " << salu->pred_comb_shift << std::endl;
 
@@ -3594,7 +3573,8 @@ bool MauAsmOutput::EmitAttached::preorder(const IR::MAU::StatefulAlu *salu) {
             out << indent << "learn: [" << emit_vector(memuse.dleft_learn) << "]" << std::endl;
         if (!memuse.dleft_match.empty())
             out << indent << "match: [" << emit_vector(memuse.dleft_match) << "]" << std::endl;
-        --indent; }
+        --indent;
+    }
 
     auto *back_at = getParent<IR::MAU::BackendAttached>();
     if (salu->chain_vpn || (back_at && back_at->chain_vpn)) {
@@ -3608,7 +3588,8 @@ bool MauAsmOutput::EmitAttached::preorder(const IR::MAU::StatefulAlu *salu) {
     }
     if (salu->learn_action) {
         // FIXME -- fixed 8-bit shift for LearnAction -- will we ever want anything else?
-        out << indent << "phv_hash_shift: 8" << std::endl; }
+        out << indent << "phv_hash_shift: 8" << std::endl;
+    }
     if (salu->chain_total_size > salu->size)
         out << indent << "log_vpn: 0.." << ((salu->chain_total_size * salu->width >> 17) - 1)
             << std::endl;

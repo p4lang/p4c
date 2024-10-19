@@ -10,12 +10,9 @@
  * warranties, other than those that are expressly stated in the License.
  */
 
-#ifndef EXTENSIONS_BF_P4C_ARCH_PSA_PROGRAMSTRUCTURE_H_
-#define EXTENSIONS_BF_P4C_ARCH_PSA_PROGRAMSTRUCTURE_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_ARCH_PSA_PROGRAMSTRUCTURE_H_
+#define BACKENDS_TOFINO_BF_P4C_ARCH_PSA_PROGRAMSTRUCTURE_H_
 
-#include "ir/ir.h"
-#include "ir/namemap.h"
-#include "lib/ordered_set.h"
 #include "bf-p4c/arch/program_structure.h"
 #include "bf-p4c/arch/psa/psa_model.h"
 #include "bf-p4c/ir/gress.h"
@@ -23,6 +20,9 @@
 #include "bf-p4c/midend/type_categories.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/evaluator/evaluator.h"
+#include "ir/ir.h"
+#include "ir/namemap.h"
+#include "lib/ordered_set.h"
 #include "midend/eliminateSerEnums.h"
 
 namespace BFN {
@@ -51,17 +51,17 @@ struct PacketPathInfo {
 
     /// A P4 type for the data, based on the type of the parameter to
     /// the parser.
-    const IR::Type* p4Type = nullptr;
-    const IR::Type* structType = nullptr;
+    const IR::Type *p4Type = nullptr;
+    const IR::Type *structType = nullptr;
     // the statements in deparser to emit resubmit/clone/recir metadata, in PSA, the emit
     // is represented with assignments to out parameter in the deparser block.
     // the source typically has the following code pattern.
     // if (psa_resubmit(istd)) {
     //    resub_meta = user_meta.resub_meta;
     // }
-    const IR::IfStatement* ifStatement = nullptr;
+    const IR::IfStatement *ifStatement = nullptr;
 
-    ordered_map<const IR::StatOrDecl*, std::vector<const IR::Node*>> fieldLists;
+    ordered_map<const IR::StatOrDecl *, std::vector<const IR::Node *>> fieldLists;
 };
 
 using ParamInfo = ordered_map<cstring, cstring>;
@@ -71,9 +71,17 @@ struct PsaBlockInfo {
 };
 
 enum PSA_TYPES {
-    TYPE_IH = 0, TYPE_IM, TYPE_EH, TYPE_EM, TYPE_NM,
-    TYPE_CI2EM, TYPE_CE2EM, TYPE_RESUBM, TYPE_RECIRCM,
-    PSA_TOTAL_TYPES};
+    TYPE_IH = 0,
+    TYPE_IM,
+    TYPE_EH,
+    TYPE_EM,
+    TYPE_NM,
+    TYPE_CI2EM,
+    TYPE_CE2EM,
+    TYPE_RESUBM,
+    TYPE_RECIRCM,
+    PSA_TOTAL_TYPES
+};
 
 static const cstring INP_INTR_MD = "__psa_inp_intrinsic_md__"_cs;
 static const cstring OUT_INTR_MD = "__psa_out_intrinsic_md__"_cs;
@@ -89,7 +97,7 @@ struct ProgramStructure : BFN::ProgramStructure {
 
     ordered_map<cstring, TranslationMap> methodcalls;
 
-    const IR::Type* metadataType = nullptr;
+    const IR::Type *metadataType = nullptr;
 
     PacketPathInfo resubmit;
     PacketPathInfo clone_i2e;
@@ -110,20 +118,19 @@ struct ProgramStructure : BFN::ProgramStructure {
     void createPipeline();
     std::map<cstring, int> error_to_constant;
 
-    std::map<gress_t, std::map<cstring, const IR::MethodCallExpression*>> state_to_verify;
+    std::map<gress_t, std::map<cstring, const IR::MethodCallExpression *>> state_to_verify;
 
     // Vector of bridge field assignment in deparser in PSA. These will be moved to ingress
     // control later
-    std::vector<IR::AssignmentStatement*> bridgeFieldAssignments;
+    std::vector<IR::AssignmentStatement *> bridgeFieldAssignments;
     const IR::P4Program *create(const IR::P4Program *program) override;
     void loadModel();
 
-    ProgramStructure() :
-        BFN::ProgramStructure(), psa_model(PsaModel::instance) { }
+    ProgramStructure() : BFN::ProgramStructure(), psa_model(PsaModel::instance) {}
 };
 
 }  // namespace PSA
 
 }  // namespace BFN
 
-#endif  /* EXTENSIONS_BF_P4C_ARCH_PSA_PROGRAMSTRUCTURE_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_ARCH_PSA_PROGRAMSTRUCTURE_H_ */

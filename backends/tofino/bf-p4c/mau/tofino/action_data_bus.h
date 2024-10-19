@@ -13,13 +13,14 @@
 #ifndef BF_P4C_MAU_TOFINO_ACTION_DATA_BUS_H_
 #define BF_P4C_MAU_TOFINO_ACTION_DATA_BUS_H_
 
+/* clang-format off */
 #include "bf-p4c/mau/action_data_bus.h"
 #include "bf-p4c/mau/table_layout.h"
 #include "bf-p4c/mau/action_format.h"
 #include "lib/autoclone.h"
 #include "lib/safe_vector.h"
 #include "bf-p4c/common/alloc.h"
-
+/* clang-format on */
 namespace Tofino {
 
 using namespace P4;
@@ -50,7 +51,7 @@ using namespace P4;
  *  half-word mux between bytes 16-63, and a full word mux between bytes 64-128.  These
  *  muxes can only have one input per immediate word.  Immediate allocation on the action bus
  *  occurs on a mod 4 post-shift in match central.
- * 
+ *
  *  The constraints are similar to action data tables in that regions of the immediate data must
  *  be contiguously allocated within a 16 byte region of the action data bus.  With immediate
  *  action data, the input allocation must be 4 byte contiguous.
@@ -103,7 +104,8 @@ struct ActionDataBus : public ::ActionDataBus {
     struct Use : public ::ActionDataBus::Use {
         void clear() override {
             ::ActionDataBus::Use::clear();
-            rng_locs.clear(); }
+            rng_locs.clear();
+        }
         Use *clone() const override { return new Use(*this); }
         bool emit_adb_asm(std::ostream &, const IR::MAU::Table *, bitvec source) const override;
         bool empty() const override { return ::ActionDataBus::Use::empty() && rng_locs.empty(); }
@@ -113,8 +115,7 @@ struct ActionDataBus : public ::ActionDataBus {
             int unit;
             bitvec bytes;
 
-            RandomNumberGenerator(int u, bitvec b)
-                : unit(u), bytes(b) { }
+            RandomNumberGenerator(int u, bitvec b) : unit(u), bytes(b) {}
 
             bool operator==(const RandomNumberGenerator &rng) const {
                 if (unit != rng.unit) return false;
@@ -133,7 +134,7 @@ struct ActionDataBus : public ::ActionDataBus {
     void clear() override;
 
     bool operator==(const ActionDataBus &adb) const;
-    bool operator!=(ActionDataBus &adb) { return !(*this==adb); }
+    bool operator!=(ActionDataBus &adb) { return !(*this == adb); }
 
  private:
     static Use &getUse(autoclone_ptr<::ActionDataBus::Use> &ac);
@@ -157,35 +158,33 @@ struct ActionDataBus : public ::ActionDataBus {
     bool find_location(bitvec combined_adjacent, int diff, ActionData::SlotType_t init_type,
                        loc_alg_t loc_alg, ActionData::Location_t source, int byte_offset,
                        int &start_byte);
-    bool find_location(bitvec combined_adjacent, int diff, int initial_adb_byte,
-                       int final_adb_byte, bool reset, ActionData::SlotType_t type,
-                       ActionData::Location_t source, int byte_offset, int &start_byte);
+    bool find_location(bitvec combined_adjacent, int diff, int initial_adb_byte, int final_adb_byte,
+                       bool reset, ActionData::SlotType_t type, ActionData::Location_t source,
+                       int byte_offset, int &start_byte);
 
-    void analyze_full_share(Use &use, ActionData::BusInputs layouts,
-                            FullShare &full_share, int init_byte_offset,
-                            int add_byte_offset, ActionData::Location_t source);
-    void analyze_full_shares(Use &use, ActionData::BusInputs layouts,
-                             bitvec full_bitmasked, FullShare full_shares[4],
-                             int init_byte_offset, ActionData::Location_t source);
+    void analyze_full_share(Use &use, ActionData::BusInputs layouts, FullShare &full_share,
+                            int init_byte_offset, int add_byte_offset,
+                            ActionData::Location_t source);
+    void analyze_full_shares(Use &use, ActionData::BusInputs layouts, bitvec full_bitmasked,
+                             FullShare full_shares[4], int init_byte_offset,
+                             ActionData::Location_t source);
     void reserve_space(Use &use, ActionData::SlotType_t type, bitvec adjacent,
                        bitvec combined_adjacent, int start_byte, int byte_offset,
                        ActionData::Location_t source, cstring name);
     bool fit_adf_section(Use &use, bitvec adjacent, bitvec combined_adjacent,
-                         ActionData::SlotType_t type, loc_alg_t loc_alg,
-                         int init_byte_offset, int sec_begin, int size, cstring name,
-                         ActionData::Location_t source);
+                         ActionData::SlotType_t type, loc_alg_t loc_alg, int init_byte_offset,
+                         int sec_begin, int size, cstring name, ActionData::Location_t source);
     bool alloc_bytes(Use &use, bitvec layout, bitvec combined_layout, int init_byte_offset,
                      cstring name, ActionData::Location_t source);
     bool alloc_halves(Use &use, bitvec layout, bitvec combined_layout, int init_byte_offset,
                       cstring name, ActionData::Location_t source);
-    bool alloc_fulls(Use &use, ActionData::BusInputs layouts,
-                     bitvec full_bitmasked, int init_byte_offset, cstring name,
-                     ActionData::Location_t source);
+    bool alloc_fulls(Use &use, ActionData::BusInputs layouts, bitvec full_bitmasked,
+                     int init_byte_offset, cstring name, ActionData::Location_t source);
     bool alloc_full_sect(Use &use, FullShare full_shares[4], bitvec combined_layout, int begin,
                          int init_byte_offset, cstring name, bitvec full_bitmasked,
                          ActionData::Location_t source);
     bool alloc_ad_table(const ActionData::BusInputs total_layouts,
-        const bitvec full_layout_bitmasked, Use &use, cstring name);
+                        const bitvec full_layout_bitmasked, Use &use, cstring name);
     bool alloc_meter_output(ActionData::BusInputs total_layouts, Use &use, cstring name);
 
     bitvec paired_immediate(bitvec layout, ActionData::SlotType_t type);

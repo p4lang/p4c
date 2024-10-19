@@ -11,18 +11,20 @@
  */
 
 #include "allocate_clot.h"
+
 #include <optional>
-#include "check_clot_groups.h"
-#include "clot_candidate.h"
-#include "field_slice_extract_info.h"
-#include "field_pov_analysis.h"
-#include "header_validity_analysis.h"
-#include "merge_desugared_varbit_valids.h"
+
 #include "bf-p4c/common/utils.h"
 #include "bf-p4c/parde/count_strided_header_refs.h"
 #include "bf-p4c/parde/parser_info.h"
 #include "bf-p4c/phv/pragma/pa_alias.h"
+#include "check_clot_groups.h"
+#include "clot_candidate.h"
+#include "field_pov_analysis.h"
+#include "field_slice_extract_info.h"
+#include "header_validity_analysis.h"
 #include "lib/log_fixup.h"
+#include "merge_desugared_varbit_valids.h"
 
 /**
  * \ingroup parde
@@ -30,24 +32,24 @@
  * \ref clot_alloc_and_metric "CLOT allocator and metric" (README.md).
  */
 class GreedyClotAllocator : public Visitor {
-    ClotInfo& clotInfo;
-    const PhvInfo& phvInfo;
-    const CollectParserInfo& parserInfo;
-    Logging::FileLog* log = nullptr;
+    ClotInfo &clotInfo;
+    const PhvInfo &phvInfo;
+    const CollectParserInfo &parserInfo;
+    Logging::FileLog *log = nullptr;
     const bool logAllocation;
 
  public:
-    explicit GreedyClotAllocator(const PhvInfo& phvInfo, ClotInfo& clotInfo, bool logAllocation) :
-        clotInfo(clotInfo),
-        phvInfo(phvInfo),
-        parserInfo(clotInfo.parserInfo),
-        logAllocation(logAllocation) { }
+    explicit GreedyClotAllocator(const PhvInfo &phvInfo, ClotInfo &clotInfo, bool logAllocation)
+        : clotInfo(clotInfo),
+          phvInfo(phvInfo),
+          parserInfo(clotInfo.parserInfo),
+          logAllocation(logAllocation) {}
 
  private:
-    typedef std::map<const Pseudoheader*,
-                     ordered_map<const PHV::Field*, FieldSliceExtractInfo*>,
-                     Pseudoheader::Less> FieldSliceExtractInfoMap;
-    typedef std::set<const ClotCandidate*, ClotCandidate::Greater> ClotCandidateSet;
+    typedef std::map<const Pseudoheader *, ordered_map<const PHV::Field *, FieldSliceExtractInfo *>,
+                     Pseudoheader::Less>
+        FieldSliceExtractInfoMap;
+    typedef std::set<const ClotCandidate *, ClotCandidate::Greater> ClotCandidateSet;
 
     /// Generates a FieldExtractInfo object for each field that is (1) extracted in the
     /// subgraph rooted at the given state and (2) can be part of a clot (@see
@@ -58,18 +60,16 @@ class GreedyClotAllocator : public Visitor {
     /// This method assumes the graph is an unrolled DAG.
     ///
     /// @invariant @p state is not an element of  @p visited
-    FieldExtractInfo* group_extracts(
-            const IR::BFN::ParserGraph* graph,
-            const IR::BFN::ParserState* state = nullptr,
-            FieldExtractInfo* result = nullptr,
-            ordered_set<std::pair<const IR::BFN::ParserState*, unsigned>>* visited = nullptr,
-            unsigned stack_offset = 0) {
+    FieldExtractInfo *group_extracts(
+        const IR::BFN::ParserGraph *graph, const IR::BFN::ParserState *state = nullptr,
+        FieldExtractInfo *result = nullptr,
+        ordered_set<std::pair<const IR::BFN::ParserState *, unsigned>> *visited = nullptr,
+        unsigned stack_offset = 0) {
         // Initialize parameters if needed.
         if (!state) state = graph->root;
         if (!result) result = new FieldExtractInfo();
         if (!visited)
-            visited = new ordered_set<
-                std::pair<const IR::BFN::ParserState*, unsigned>>();
+            visited = new ordered_set<std::pair<const IR::BFN::ParserState *, unsigned>>();
 
         LOG6("Finding extracts in state " << state->name << " (offset=" << stack_offset << ")");
         visited->insert(std::make_pair(state, stack_offset));
@@ -78,8 +78,8 @@ class GreedyClotAllocator : public Visitor {
         cstring header_stack_name;
         std::set<unsigned> header_stack_indices;
         if (clotInfo.field_range_.count(state)) {
-            for (const auto& [field, bitrange] : clotInfo.field_range_.at(state)) {
-                const auto* adj_field = field;
+            for (const auto &[field, bitrange] : clotInfo.field_range_.at(state)) {
+                const auto *adj_field = field;
                 if (auto stack_index = get_element_index(field)) {
                     cstring name = field->name;
                     cstring field_name = cstring(name.findlast('.') + 1);
@@ -98,8 +98,8 @@ class GreedyClotAllocator : public Visitor {
 
                 // Add to result->fieldMap.
                 result->updateFieldMap(adj_field, state, stack_offset,
-                                       static_cast<unsigned>(bitrange.lo),
-                                       min_packet_offset, max_packet_offset);
+                                       static_cast<unsigned>(bitrange.lo), min_packet_offset,
+                                       max_packet_offset);
 
                 if (!clotInfo.can_be_in_clot(adj_field)) continue;
 
@@ -110,8 +110,7 @@ class GreedyClotAllocator : public Visitor {
 
                 // Add to result->pseudoheaderMap.
                 for (auto pseudoheader : clotInfo.field_to_pseudoheaders_.at(adj_field)) {
-                    result->updatePseudoheaderMap(pseudoheader, adj_field, state,
-                                                  stack_offset,
+                    result->updatePseudoheaderMap(pseudoheader, adj_field, state, stack_offset,
                                                   static_cast<unsigned>(bitrange.lo),
                                                   min_packet_offset, max_packet_offset);
                 }
@@ -129,7 +128,7 @@ class GreedyClotAllocator : public Visitor {
         unsigned succ_offset = 0;
         if (state->stride && count.header_stack_to_indices.size() == 1) {
             // Case of > 1 is handled in compute_lowered_parser_ir
-            auto& indices = count.header_stack_to_indices.begin()->second;
+            auto &indices = count.header_stack_to_indices.begin()->second;
             succ_offset = stack_offset + indices.size();
         }
 
@@ -150,9 +149,8 @@ class GreedyClotAllocator : public Visitor {
     /// given candidate set.
     ///
     /// Precondition: the extracts are a valid CLOT prefix.
-    void try_add_clot_candidate(ClotCandidateSet* candidates,
-                                const Pseudoheader* pseudoheader,
-                                std::vector<const FieldSliceExtractInfo*>& extracts) const {
+    void try_add_clot_candidate(ClotCandidateSet *candidates, const Pseudoheader *pseudoheader,
+                                std::vector<const FieldSliceExtractInfo *> &extracts) const {
         // Trim the first extract so that it extends past minimum CLOT position
         // (after port metadata) and is byte-aligned.
         extracts[0] = extracts.front()->trim_head_to_min_clot_pos();
@@ -167,14 +165,13 @@ class GreedyClotAllocator : public Visitor {
             // all other slices could be different. Therefore, we need to make sure that, after we
             // remove extracts in each state, the extract sequence from the deparser remains
             // contiguous.
-            std::map<const IR::BFN::ParserState*, std::vector<const FieldSliceExtractInfo*>>
+            std::map<const IR::BFN::ParserState *, std::vector<const FieldSliceExtractInfo *>>
                 state_to_extracts;
-            for (const auto& state : extracts.front()->states()) {
-                std::vector<const FieldSliceExtractInfo*> extracts_copy(extracts);
+            for (const auto &state : extracts.front()->states()) {
+                std::vector<const FieldSliceExtractInfo *> extracts_copy(extracts);
 
-                while (!extracts_copy.empty() &&
-                       (!clotInfo.can_end_clot(extracts_copy.back()) ||
-                        !extracts_copy.back()->states().count(state)))
+                while (!extracts_copy.empty() && (!clotInfo.can_end_clot(extracts_copy.back()) ||
+                                                  !extracts_copy.back()->states().count(state)))
                     extracts_copy.pop_back();
 
                 // If no extracts are left in any of the states, forming a CLOT with these
@@ -183,9 +180,9 @@ class GreedyClotAllocator : public Visitor {
 
                 state_to_extracts[state] = extracts_copy;
             }
-            for (auto it = std::next(extracts.begin()); it != extracts.end(); ) {
+            for (auto it = std::next(extracts.begin()); it != extracts.end();) {
                 bool any_extracts_contains_it = false;
-                for (const auto& kv : state_to_extracts) {
+                for (const auto &kv : state_to_extracts) {
                     if (std::find(kv.second.begin(), kv.second.end(), *it) != kv.second.end()) {
                         any_extracts_contains_it = true;
                         break;
@@ -207,13 +204,12 @@ class GreedyClotAllocator : public Visitor {
             // position.
             extracts.back()->trim_tail_to_max_clot_pos();
 
-            for (const auto& existing_candidate : *candidates) {
+            for (const auto &existing_candidate : *candidates) {
                 if (existing_candidate->extracts().size() == extracts.size() &&
                     std::equal(existing_candidate->extracts().begin(),
                                existing_candidate->extracts().end(), extracts.begin(),
-                               [](const FieldSliceExtractInfo* a,
-                                  const FieldSliceExtractInfo* b) {
-                                    return *a == *b;
+                               [](const FieldSliceExtractInfo *a, const FieldSliceExtractInfo *b) {
+                                   return *a == *b;
                                })) {
                     LOG4("Tried to add a candidate with the same extracts "
                          << "as an existing candidate.");
@@ -221,7 +217,7 @@ class GreedyClotAllocator : public Visitor {
                 }
             }
 
-            const ClotCandidate* candidate = new ClotCandidate(clotInfo, pseudoheader, extracts);
+            const ClotCandidate *candidate = new ClotCandidate(clotInfo, pseudoheader, extracts);
             candidates->insert(candidate);
             LOG6("  Created candidate");
             LOG6(candidate->print());
@@ -231,16 +227,15 @@ class GreedyClotAllocator : public Visitor {
     /// A helper. Adds to the given @p result any CLOT candidates that can be made from a given
     /// set of extracts into field slices that all belong to a given pseudoheader.
     void add_clot_candidates(
-            ClotCandidateSet* result,
-            const Pseudoheader* pseudoheader,
-            const std::map<const PHV::Field*,
-                           std::vector<const FieldSliceExtractInfo*>>& extract_map) const {
+        ClotCandidateSet *result, const Pseudoheader *pseudoheader,
+        const std::map<const PHV::Field *, std::vector<const FieldSliceExtractInfo *>> &extract_map)
+        const {
         // Invariant: `extracts` forms a valid prefix for a potential CLOT candidate. When
         // `extracts` is non-empty, `next_offset_by_state` maps each parser state for the potential
         // CLOT candidate to the expected state-relative offset for the next field slice. When
         // `extracts` is empty, then so is `next_offset_by_state`.
-        std::vector<const FieldSliceExtractInfo*> extracts;
-        ordered_map<const IR::BFN::ParserState*, unsigned> next_offset_by_state;
+        std::vector<const FieldSliceExtractInfo *> extracts;
+        ordered_map<const IR::BFN::ParserState *, unsigned> next_offset_by_state;
 
         LOG6("Finding CLOT candidates for pseudoheader " << pseudoheader->id);
         for (auto field : pseudoheader->fields) {
@@ -267,15 +262,15 @@ class GreedyClotAllocator : public Visitor {
                     // different set of states than the current candidate or if the current
                     // extract_info has any state-relative bit offsets that are different from what
                     // we are expecting.
-                    auto& extract_state_bit_offsets = extract_info->state_bit_offsets();
+                    auto &extract_state_bit_offsets = extract_info->state_bit_offsets();
 
                     bool have_contiguity_break =
                         extract_state_bit_offsets.size() != next_offset_by_state.size();
                     if (have_contiguity_break) {
                         LOG6("  Contiguity break: extracted in a different set of states");
                     } else {
-                        for (auto& entry : next_offset_by_state) {
-                            auto& state = entry.first;
+                        for (auto &entry : next_offset_by_state) {
+                            auto &state = entry.first;
                             auto next_offset = entry.second;
 
                             have_contiguity_break = !extract_state_bit_offsets.count(state);
@@ -306,15 +301,14 @@ class GreedyClotAllocator : public Visitor {
                     // Starting a new candidate.
                     if (!clotInfo.can_start_clot(extract_info)) continue;
 
-                    auto& state_bit_offsets = extract_info->state_bit_offsets();
-                    next_offset_by_state.insert(state_bit_offsets.begin(),
-                                                state_bit_offsets.end());
+                    auto &state_bit_offsets = extract_info->state_bit_offsets();
+                    next_offset_by_state.insert(state_bit_offsets.begin(), state_bit_offsets.end());
                 }
 
                 // Add to the existing prefix.
                 extracts.push_back(extract_info);
                 auto slice = extract_info->slice();
-                for (auto& next_offset : Values(next_offset_by_state)) {
+                for (auto &next_offset : Values(next_offset_by_state)) {
                     next_offset += slice->size();
                 }
 
@@ -336,13 +330,13 @@ class GreedyClotAllocator : public Visitor {
     //   - No pair of extracted field slices have a deparserNoPack constraint.
     //   - Neither the first nor last field in the candidate is modified or is a checksum.
     //   - The fields in the candidate are all extracted in the same set of parser states.
-    ClotCandidateSet*
-    find_clot_candidates(const FieldExtractInfo::PseudoheaderMap& extract_info_map) {
+    ClotCandidateSet *find_clot_candidates(
+        const FieldExtractInfo::PseudoheaderMap &extract_info_map) {
         auto result = new ClotCandidateSet();
 
-        for (const auto& entry : extract_info_map) {
-            std::map<const PHV::Field*, std::vector<const FieldSliceExtractInfo*>> submap;
-            for (const auto& subentry : entry.second) {
+        for (const auto &entry : extract_info_map) {
+            std::map<const PHV::Field *, std::vector<const FieldSliceExtractInfo *>> submap;
+            for (const auto &subentry : entry.second) {
                 submap[subentry.first].push_back(subentry.second);
             }
 
@@ -356,15 +350,14 @@ class GreedyClotAllocator : public Visitor {
     /// CLOT candidates, when @p c1 is parsed before @p c2. If @p c1 is never parsed before @p c2,
     /// or if @p c1 and @p c2 are always separated by at least the inter-CLOT gap requirement,
     /// then this conservatively returns true.
-    bool needInterClotGap(const ClotCandidate* c1,
-                          const ClotCandidate* c2,
+    bool needInterClotGap(const ClotCandidate *c1, const ClotCandidate *c2,
                           const HeaderValidityAnalysis::ResultMap header_removals) const {
         BUG_CHECK(c1->thread() == c2->thread(),
-                  "Candidate %1% comes from %2%, but candidate %3% comes from %4%",
-                  c1->id, c1->thread(), c2->id, c2->thread());
+                  "Candidate %1% comes from %2%, but candidate %3% comes from %4%", c1->id,
+                  c1->thread(), c2->id, c2->thread());
 
         auto gress = c1->thread();
-        const auto& deparse_graph = clotInfo.deparse_graph_[gress];
+        const auto &deparse_graph = clotInfo.deparse_graph_[gress];
 
         auto gaps = c1->byte_gaps(parserInfo, c2);
         if (gaps.empty()) {
@@ -377,7 +370,7 @@ class GreedyClotAllocator : public Visitor {
         // Need gap if CLOTs are never zero-separated.
         if (!gaps.count(0)) {
             LOG5("      Candidate " << c1->id << " never appears immediately before candidate "
-                << c2->id << " in parsed packet");
+                                    << c2->id << " in parsed packet");
             return true;
         }
 
@@ -393,21 +386,21 @@ class GreedyClotAllocator : public Visitor {
         // Need gap if c1 can become invalid in MAU when c2 is still valid.
         auto c1_pov_bits = c1->pov_bits;
         auto c2_pov_bits = c2->pov_bits;
-        auto check = [&](const PHV::FieldSlice* f1) {
-            auto check = [&](const PHV::FieldSlice* f2) {
+        auto check = [&](const PHV::FieldSlice *f1) {
+            auto check = [&](const PHV::FieldSlice *f2) {
                 return f1 != f2 && header_removals.at({f1, f2}).count({f1});
             };
             return std::any_of(c2_pov_bits.begin(), c2_pov_bits.end(), check);
         };
         if (std::any_of(c1_pov_bits.begin(), c1_pov_bits.end(), check)) {
             LOG5("      Candidate " << c1->id << " might be invalidated by MAU while candidate "
-                 << c2->id << " remains valid");
+                                    << c2->id << " remains valid");
             return true;
         }
 
         // Need gap if c2 can be deparsed before c1.
-        const auto* c2_last_field = c2->extracts().back()->slice()->field();
-        const auto* c1_first_field = c1->extracts().front()->slice()->field();
+        const auto *c2_last_field = c2->extracts().back()->slice()->field();
+        const auto *c1_first_field = c1->extracts().front()->slice()->field();
         if (deparse_graph.canReach(c2_last_field, c1_first_field)) {
             LOG5("      Candidate " << c2->id << " might be deparsed before candidate " << c1->id);
             return true;
@@ -415,10 +408,10 @@ class GreedyClotAllocator : public Visitor {
 
         // Need gap if c1 can become separated from c2 during deparsing.
         {
-            const auto* c1_last_slice = c1->extracts().back()->slice();
-            const auto* c2_first_slice = c2->extracts().front()->slice();
-            const auto* c1_last_field = c1_last_slice->field();
-            const auto* c2_first_field = c2_first_slice->field();
+            const auto *c1_last_slice = c1->extracts().back()->slice();
+            const auto *c2_first_slice = c2->extracts().front()->slice();
+            const auto *c1_last_field = c1_last_slice->field();
+            const auto *c2_first_field = c2_first_slice->field();
 
             if (c1_last_field == c2_first_field) {
                 // c1's last slice and c2's first slice come from the same field. This means that
@@ -446,15 +439,16 @@ class GreedyClotAllocator : public Visitor {
                 // 0 ∈ gaps, c1's last slice must cover the last bit of its field, and c2's first
                 // slice must cover the first bit of its field. It suffices, then, to check
                 // entities that might be deparsed between those two fields.
-                for (const auto &nodeInfo : deparse_graph.nodesBetween(c1_last_field,
-                                                                      c2_first_field)) {
+                for (const auto &nodeInfo :
+                     deparse_graph.nodesBetween(c1_last_field, c2_first_field)) {
                     if (nodeInfo.isConstant()) {
-                        LOG5("      Constant " << nodeInfo.constant << " might be deparsed "
-                             "between CLOT candidates");
+                        LOG5("      Constant " << nodeInfo.constant
+                                               << " might be deparsed "
+                                                  "between CLOT candidates");
                         return true;
                     }
 
-                    const auto* f = nodeInfo.field;
+                    const auto *f = nodeInfo.field;
 
                     // If a state exists in the parser where the field f has its POV bit set
                     // but f is not extracted from the packet (zero init or extracted from
@@ -463,16 +457,16 @@ class GreedyClotAllocator : public Visitor {
                     // are, then the candidates could be adjacent in the parser but not adjacent in
                     // the deparser, which is not allowed. Thus, a gap would be required.
                     if (!clotInfo.extracted_with_pov(f)) {
-                        std::set<const IR::BFN::ParserState*>
+                        std::set<const IR::BFN::ParserState *>
                             states_where_f_is_not_extracted_from_packet;
-                        for (const auto& [state, source] : clotInfo.field_to_parser_states_.at(f)) {
+                        for (const auto &[state, source] : clotInfo.field_to_parser_states_.at(f)) {
                             if (!source->is<IR::BFN::PacketRVal>()) {
                                 states_where_f_is_not_extracted_from_packet.insert(state);
                             }
                         }
-                        for (const auto& f_state : states_where_f_is_not_extracted_from_packet) {
-                            for (const auto& [c1_state, c2_state] : gaps.at(0)) {
-                                const auto& parser_graph = parserInfo.graph(f_state);
+                        for (const auto &f_state : states_where_f_is_not_extracted_from_packet) {
+                            for (const auto &[c1_state, c2_state] : gaps.at(0)) {
+                                const auto &parser_graph = parserInfo.graph(f_state);
                                 if (!parser_graph.is_ancestor(f_state, c1_state) &&
                                     (!parser_graph.is_ancestor(c1_state, f_state) ||
                                      !parser_graph.is_ancestor(f_state, c2_state)) &&
@@ -489,8 +483,9 @@ class GreedyClotAllocator : public Visitor {
                     // The field f might be deparsed between c1 and c2, so the two CLOT candidates
                     // might be separated if f's header might be added by the MAU pipeline.
                     if (clotInfo.is_added_by_mau(f->header())) {
-                        LOG5("      Field " << f->name << " might be deparsed between candidates, "
-                             "and its header might be added by MAU");
+                        LOG5("      Field " << f->name
+                                            << " might be deparsed between candidates, "
+                                               "and its header might be added by MAU");
                         return true;
                     }
 
@@ -501,8 +496,8 @@ class GreedyClotAllocator : public Visitor {
                     // not if it is parsed from a constant. So look directly at the
                     // field_to_parser_states_ map as that contains packet and constant extracts.
                     if (clotInfo.field_to_parser_states_.count(f)) {
-                        for (const auto* fState : Keys(clotInfo.field_to_parser_states_.at(f))) {
-                            for (const auto& [c1State, c2State] : gaps.at(0)) {
+                        for (const auto *fState : Keys(clotInfo.field_to_parser_states_.at(f))) {
+                            for (const auto &[c1State, c2State] : gaps.at(0)) {
                                 // Look at cases where f comes before c1 or after c2, or at the same
                                 // time as either.
                                 // (c1 and c2 are adjacent, so we can't have a case of f after c1
@@ -526,25 +521,25 @@ class GreedyClotAllocator : public Visitor {
 
     /// Adjusts a CLOT candidate to account for the allocation of another (possibly the same)
     /// candidate.
-    ClotCandidateSet* adjust_for_allocation(const ClotCandidate* to_adjust,
-            const ClotCandidate* allocated,
-            const HeaderValidityAnalysis::ResultMap header_removals) const {
+    ClotCandidateSet *adjust_for_allocation(
+        const ClotCandidate *to_adjust, const ClotCandidate *allocated,
+        const HeaderValidityAnalysis::ResultMap header_removals) const {
         const auto GAP_BYTES = Device::pardeSpec().byteInterClotGap();
         const auto GAP_BITS = 8 * GAP_BYTES;
 
         LOG5("");
         LOG5("  Adjusting candidate " << to_adjust->id << " for allocated CLOT");
 
-        ClotCandidateSet* result = new ClotCandidateSet();
+        ClotCandidateSet *result = new ClotCandidateSet();
 
         // If the states from one candidate are mutually exclusive with the states from another,
         // then no need to adjust.
         const auto to_adjust_states = to_adjust->states();
         const auto allocated_states = allocated->states();
-        const auto& graph = parserInfo.graph(parserInfo.parser(*allocated_states.begin()));
+        const auto &graph = parserInfo.graph(parserInfo.parser(*allocated_states.begin()));
         bool mutually_exclusive = true;
-        for (auto& to_adjust_state : to_adjust_states) {
-            for (auto& allocated_state : allocated_states) {
+        for (auto &to_adjust_state : to_adjust_states) {
+            for (auto &allocated_state : allocated_states) {
                 mutually_exclusive = graph.is_mutex(to_adjust_state, allocated_state);
                 if (!mutually_exclusive) break;
             }
@@ -575,18 +570,16 @@ class GreedyClotAllocator : public Visitor {
         le_bitinterval candidate_interval = StartLen(0, to_adjust->max_size_in_bits());
         if (to_adjust->afterAllocatedClot) {
             // Get the first extract and figure out what parts of it don't conflict.
-            const auto* first_extract = to_adjust->extracts().front();
-            const auto* non_conflicts = first_extract->remove_conflicts(parserInfo,
-                                                                        preGapBits,
-                                                                        allocated,
-                                                                        postGapBits);
+            const auto *first_extract = to_adjust->extracts().front();
+            const auto *non_conflicts =
+                first_extract->remove_conflicts(parserInfo, preGapBits, allocated, postGapBits);
 
             // Figure out if first byte conflicts.
             bool first_byte_conflicts;
             if (non_conflicts->empty()) {
                 first_byte_conflicts = true;
             } else {
-                const auto* first_adjusted = non_conflicts->front();
+                const auto *first_adjusted = non_conflicts->front();
                 first_byte_conflicts =
                     first_extract->slice()->range().hi != first_adjusted->slice()->range().hi;
             }
@@ -602,18 +595,16 @@ class GreedyClotAllocator : public Visitor {
         // Similarly, we may need to remove the last few bytes of the candidate.
         if (to_adjust->beforeAllocatedClot) {
             // Get the last extract and figure out what parts of it don't conflict.
-            const auto* last_extract = to_adjust->extracts().back();
-            const auto* non_conflicts = last_extract->remove_conflicts(parserInfo,
-                                                                       preGapBits,
-                                                                       allocated,
-                                                                       postGapBits);
+            const auto *last_extract = to_adjust->extracts().back();
+            const auto *non_conflicts =
+                last_extract->remove_conflicts(parserInfo, preGapBits, allocated, postGapBits);
 
             // Figure out if last byte conflicts.
             bool last_byte_conflicts;
             if (non_conflicts->empty()) {
                 last_byte_conflicts = true;
             } else {
-                const auto* last_adjusted = non_conflicts->back();
+                const auto *last_adjusted = non_conflicts->back();
                 last_byte_conflicts =
                     last_extract->slice()->range().lo != last_adjusted->slice()->range().lo;
             }
@@ -622,18 +613,18 @@ class GreedyClotAllocator : public Visitor {
             if (last_byte_conflicts) {
                 LOG5("    Last byte of candidate " << to_adjust->id << " conflicts");
                 int new_size = std::max(0L, candidate_interval.size() - GAP_BITS);
-                candidate_interval = candidate_interval.resizedToBits(new_size)
-                                                       .shiftedByBits(GAP_BITS);
+                candidate_interval =
+                    candidate_interval.resizedToBits(new_size).shiftedByBits(GAP_BITS);
             }
         }
 
         // Figure out whether the candidates conflict. Build an extract_map for the set of
         // non-conflicting extracts. This map will be used for the slow path below.
         bool have_conflict = false;
-        std::map<const PHV::Field*, std::vector<const FieldSliceExtractInfo*>> extract_map;
+        std::map<const PHV::Field *, std::vector<const FieldSliceExtractInfo *>> extract_map;
         unsigned extract_bit_pos = to_adjust->max_size_in_bits();
         for (auto extract : to_adjust->extracts()) {
-            const PHV::FieldSlice* slice = extract->slice();
+            const PHV::FieldSlice *slice = extract->slice();
             extract_bit_pos -= slice->size();
 
             // Adjust the extract so it lands within candidate_bitinterval. If the extract is
@@ -643,13 +634,13 @@ class GreedyClotAllocator : public Visitor {
                                   .intersectWith(candidate_interval)
                                   .shiftedByBits(-extract_bit_pos)
                                   .shiftedByBits(-slice->range().lo);
-            const FieldSliceExtractInfo* adjusted_extract =
+            const FieldSliceExtractInfo *adjusted_extract =
                 trim_range.empty() ? nullptr : extract->trim(trim_range.lo, trim_range.size());
 
-            const std::vector<const FieldSliceExtractInfo*>* non_conflicts =
+            const std::vector<const FieldSliceExtractInfo *> *non_conflicts =
                 adjusted_extract ? adjusted_extract->remove_conflicts(parserInfo, preGapBits,
                                                                       allocated, postGapBits)
-                                 : new std::vector<const FieldSliceExtractInfo*>();
+                                 : new std::vector<const FieldSliceExtractInfo *>();
 
             // Figure out whether this extract conflicts with the allocated candidate, and add the
             // non-conflicting extracts to extract_map.
@@ -669,9 +660,8 @@ class GreedyClotAllocator : public Visitor {
 
                 bool first_replacement = true;
                 for (auto adjusted : *non_conflicts) {
-                    LOG5("       "
-                        << (first_replacement ? "with: " : "      ")
-                        << adjusted->slice()->shortString());
+                    LOG5("       " << (first_replacement ? "with: " : "      ")
+                                   << adjusted->slice()->shortString());
                     first_replacement = false;
                 }
             }
@@ -690,27 +680,31 @@ class GreedyClotAllocator : public Visitor {
 
                 if (!allocatedNeedsPostGap) {
                     if (to_adjust->afterAllocatedClot) {
-                        LOG5("    Candidate already appears after an allocated CLOT with 0-byte "
-                             "gap");
+                        LOG5(
+                            "    Candidate already appears after an allocated CLOT with 0-byte "
+                            "gap");
                     } else {
-                        LOG5("    Marking candidate as appearing after allocated CLOT with 0-byte "
-                             "gap");
+                        LOG5(
+                            "    Marking candidate as appearing after allocated CLOT with 0-byte "
+                            "gap");
                     }
                 }
 
                 if (!allocatedNeedsPreGap) {
                     if (to_adjust->beforeAllocatedClot) {
-                        LOG5("    Candidate already appears before an allocated CLOT with 0-byte "
-                             "gap");
+                        LOG5(
+                            "    Candidate already appears before an allocated CLOT with 0-byte "
+                            "gap");
                     } else {
-                        LOG5("    Marking candidate as appearing before allocated CLOT with "
-                             "0-byte gap");
+                        LOG5(
+                            "    Marking candidate as appearing before allocated CLOT with "
+                            "0-byte gap");
                     }
                 }
             }
 
-            result->insert(to_adjust->mark_adjacencies(!allocatedNeedsPostGap,
-                                                       !allocatedNeedsPreGap));
+            result->insert(
+                to_adjust->mark_adjacencies(!allocatedNeedsPostGap, !allocatedNeedsPreGap));
         } else if (!extract_map.empty() && to_adjust->pseudoheader) {
             add_clot_candidates(result, to_adjust->pseudoheader, extract_map);
         } else if (!to_adjust->pseudoheader) {
@@ -726,7 +720,7 @@ class GreedyClotAllocator : public Visitor {
     //
     // We can be fancier here, but this just greedily picks the first longest subsequence of
     // extracts that fits the CLOT-allocation constraints.
-    const ClotCandidate* resize(const ClotCandidate* candidate) const {
+    const ClotCandidate *resize(const ClotCandidate *candidate) const {
         const int MAX_SIZE = Device::pardeSpec().byteMaxClotSize() * 8;
         unsigned best_start_idx = 0;
         unsigned best_end_idx = 0;
@@ -736,9 +730,9 @@ class GreedyClotAllocator : public Visitor {
         // Since the CLOT candidate looks the same (has the same contiguous sequence of field
         // slices) in all parser states that it appears in, we can just work within a single such
         // parser state.
-        const auto* state = *Keys(candidate->state_bit_offsets()).begin();
+        const auto *state = *Keys(candidate->state_bit_offsets()).begin();
 
-        const auto& extracts = candidate->extracts();
+        const auto &extracts = candidate->extracts();
         for (auto start_idx : candidate->can_start_indices()) {
             auto start = extracts.at(start_idx)->trim_head_to_min_clot_pos();
             start = start->trim_head_to_byte();
@@ -782,8 +776,8 @@ class GreedyClotAllocator : public Visitor {
             return candidate;
 
         // Create the list of extracts for the resized candidate.
-        auto resized = new std::vector<const FieldSliceExtractInfo*>();
-        for (auto idx = best_start_idx ; idx <= best_end_idx; idx++)
+        auto resized = new std::vector<const FieldSliceExtractInfo *>();
+        for (auto idx = best_start_idx; idx <= best_end_idx; idx++)
             resized->push_back(extracts.at(idx));
 
         // Trim first and last extract to byte boundary.
@@ -826,9 +820,9 @@ class GreedyClotAllocator : public Visitor {
     }
 
     /// Get the element index for a field
-    std::optional<unsigned> get_element_index(const PHV::Field* field) {
+    std::optional<unsigned> get_element_index(const PHV::Field *field) {
         cstring header_name = field->header();
-        const char* index_pos = strrchr(header_name, '[');
+        const char *index_pos = strrchr(header_name, '[');
         if (index_pos) {
             size_t idx_start = index_pos - header_name.c_str() + 1;
             size_t idx_len = header_name.size() - idx_start - 1;
@@ -839,8 +833,8 @@ class GreedyClotAllocator : public Visitor {
     }
 
     /// Get the element index for an extract to a header stack element
-    std::optional<unsigned> get_element_index(const FieldSliceExtractInfo* extract) {
-        const auto* slice = extract->slice();
+    std::optional<unsigned> get_element_index(const FieldSliceExtractInfo *extract) {
+        const auto *slice = extract->slice();
         return get_element_index(slice->field());
     }
 
@@ -848,20 +842,21 @@ class GreedyClotAllocator : public Visitor {
     /// and record information about the stacks. Trim the list of candidates based on
     /// which states are missing elements.
     ClotCandidateSet *identify_stacks_and_trim_candidates(
-            ClotCandidateSet *candidates,
-            std::map<const ClotCandidate *, const IR::HeaderStack *> &stack_candidates,
-            std::map<const IR::HeaderStack *, int> &stack_delta) {
-        std::map<const IR::HeaderStack*, std::set<const IR::BFN::ParserState*>> stack_states;
-        std::map<std::pair<const IR::BFN::ParserState*, const IR::HeaderStack*>,
-                 std::set<unsigned>> stack_elements;
+        ClotCandidateSet *candidates,
+        std::map<const ClotCandidate *, const IR::HeaderStack *> &stack_candidates,
+        std::map<const IR::HeaderStack *, int> &stack_delta) {
+        std::map<const IR::HeaderStack *, std::set<const IR::BFN::ParserState *>> stack_states;
+        std::map<std::pair<const IR::BFN::ParserState *, const IR::HeaderStack *>,
+                 std::set<unsigned>>
+            stack_elements;
 
-        auto& parser_state_header_stacks = clotInfo.parser_state_to_header_stacks();
-        for (auto* candidate : *candidates) {
+        auto &parser_state_header_stacks = clotInfo.parser_state_to_header_stacks();
+        for (auto *candidate : *candidates) {
             bool is_stack = false;
             bool is_non_stack = false;
-            const IR::HeaderStack* hs = nullptr;
+            const IR::HeaderStack *hs = nullptr;
             for (auto extract : candidate->extracts()) {
-                for (const auto* state : extract->states()) {
+                for (const auto *state : extract->states()) {
                     if (parser_state_header_stacks.count(state)) {
                         is_stack = true;
                         hs = parser_state_header_stacks.at(state).front();
@@ -882,8 +877,7 @@ class GreedyClotAllocator : public Visitor {
 
                         // Record the element being written
                         auto index = get_element_index(extract);
-                        if (index)
-                            stack_elements[state_stack].emplace(*index);
+                        if (index) stack_elements[state_stack].emplace(*index);
                     } else {
                         is_non_stack = true;
                     }
@@ -904,10 +898,10 @@ class GreedyClotAllocator : public Visitor {
         // FIXME: We can extract to a mix of CLOTs and PHVs if all paths through the loop extract
         // identical numbers of CLOTs at identical stack indices.
         std::set<const IR::HeaderStack *> stacks_missing_elements;
-        for (auto& [hs, states] : stack_states) {
+        for (auto &[hs, states] : stack_states) {
             bool seen_all = true;
-            for (auto& [other_state, stacks] : clotInfo.parser_state_to_header_stacks()) {
-                for (auto* other_hs : stacks) {
+            for (auto &[other_state, stacks] : clotInfo.parser_state_to_header_stacks()) {
+                for (auto *other_hs : stacks) {
                     if (other_hs == hs) {
                         auto state_stack = std::make_pair(other_state, hs);
                         seen_all &= states.count(other_state) &&
@@ -925,8 +919,8 @@ class GreedyClotAllocator : public Visitor {
         }
 
         // Eliminate candidates corresponding to missing states
-        auto* new_candidates = new ClotCandidateSet();
-        for (auto* candidate : *candidates) {
+        auto *new_candidates = new ClotCandidateSet();
+        for (auto *candidate : *candidates) {
             if (stack_candidates.count(candidate)) {
                 if (!stacks_missing_elements.count(stack_candidates.at(candidate)))
                     new_candidates->insert(candidate);
@@ -942,19 +936,19 @@ class GreedyClotAllocator : public Visitor {
     }
 
     /// Uses a greedy algorithm to allocate the given candidates.
-    void allocate(ClotCandidateSet* candidates,
+    void allocate(ClotCandidateSet *candidates,
                   const HeaderValidityAnalysis::ResultMap header_removals) {
         const auto MAX_CLOTS_PER_GRESS = Device::pardeSpec().numClotsPerGress();
 
-        std::map<const ClotCandidate*, const IR::HeaderStack*> stack_candidates;
+        std::map<const ClotCandidate *, const IR::HeaderStack *> stack_candidates;
         std::map<const IR::HeaderStack *, int> stack_delta;
 
         candidates = identify_stacks_and_trim_candidates(candidates, stack_candidates, stack_delta);
 
         // Pool of available tags
-        std::set<unsigned> free_tags;;
-        for (unsigned i = 0; i < MAX_CLOTS_PER_GRESS; ++i)
-            free_tags.insert(free_tags.end(), i);
+        std::set<unsigned> free_tags;
+        ;
+        for (unsigned i = 0; i < MAX_CLOTS_PER_GRESS; ++i) free_tags.insert(free_tags.end(), i);
 
         // Invariant: all members of the candidate set can be allocated. That is, if we were to
         // allocate any single member, it would not violate any CLOT-allocation constraints.
@@ -988,7 +982,7 @@ class GreedyClotAllocator : public Visitor {
 
             unsigned first_idx = 0;
             if (hs) {
-                auto* extract = candidate->extracts().front();
+                auto *extract = candidate->extracts().front();
                 first_idx = *get_element_index(extract);
             }
 
@@ -1024,7 +1018,7 @@ class GreedyClotAllocator : public Visitor {
                                             << extra);
 
                     bool first_state = true;
-                    for (auto* state : states) {
+                    for (auto *state : states) {
                         LOG3("  " << (first_state ? "states: " : "        ") << state->name);
                         first_state = false;
                     }
@@ -1034,7 +1028,7 @@ class GreedyClotAllocator : public Visitor {
                 // Add field slices.
                 for (auto extract : candidate->extracts()) {
                     auto extract_slice = extract->slice();
-                    const PHV::FieldSlice* slice = extract_slice;
+                    const PHV::FieldSlice *slice = extract_slice;
                     if (tag != first_tag) {
                         cstring name = slice->field()->name;
                         cstring field_name = cstring(name.findlast('.') + 1);
@@ -1055,24 +1049,28 @@ class GreedyClotAllocator : public Visitor {
                     else
                         kind = Clot::FieldKind::UNUSED;
 
-                    for (const auto& state : extract->states()) {
+                    for (const auto &state : extract->states()) {
                         cstring state_name = clotInfo.sanitize_state_name(state->name, gress);
                         clot->add_slice(state_name, kind, slice);
                         if (LOGGING(4)) {
                             std::string kind_str;
                             switch (kind) {
-                            case Clot::FieldKind::CHECKSUM:
-                                kind_str = "checksum field"; break;
-                            case Clot::FieldKind::MODIFIED:
-                                kind_str = "modified phv field"; break;
-                            case Clot::FieldKind::READONLY:
-                                kind_str = "read-only phv field"; break;
-                            case Clot::FieldKind::UNUSED:
-                                kind_str = "field"; break;
+                                case Clot::FieldKind::CHECKSUM:
+                                    kind_str = "checksum field";
+                                    break;
+                                case Clot::FieldKind::MODIFIED:
+                                    kind_str = "modified phv field";
+                                    break;
+                                case Clot::FieldKind::READONLY:
+                                    kind_str = "read-only phv field";
+                                    break;
+                                case Clot::FieldKind::UNUSED:
+                                    kind_str = "field";
+                                    break;
                             }
                             LOG4("  Added " << kind_str << " " << slice->shortString() << " at bit "
-                                 << clot->bit_offset(state_name, slice) << " in parser state "
-                                 << state_name);
+                                            << clot->bit_offset(state_name, slice)
+                                            << " in parser state " << state_name);
                         }
                     }
                 }
@@ -1091,30 +1089,27 @@ class GreedyClotAllocator : public Visitor {
             auto new_candidates = new ClotCandidateSet();
             auto num_clots_allocated = clotInfo.num_clots_allocated(gress);
             BUG_CHECK(num_clots_allocated <= MAX_CLOTS_PER_GRESS,
-                "%d CLOTs allocated in %s, when at most %d are allowed",
-                num_clots_allocated,
-                toString(gress),
-                MAX_CLOTS_PER_GRESS);
+                      "%d CLOTs allocated in %s, when at most %d are allowed", num_clots_allocated,
+                      toString(gress), MAX_CLOTS_PER_GRESS);
             if (clotInfo.num_clots_allocated(gress) == MAX_CLOTS_PER_GRESS) {
                 // We've allocated the last CLOT available in the gress. Remove all other
                 // candidates for the gress.
                 for (auto candidate : *candidates) {
-                    if (candidate->thread() != gress)
-                        new_candidates->insert(candidate);
+                    if (candidate->thread() != gress) new_candidates->insert(candidate);
                 }
             } else {
                 auto graph = parserInfo.graphs().at(parserInfo.parser(*states.begin()));
                 auto full_states = clotInfo.find_full_states(graph);
                 if (!full_states->empty()) {
                     if (LOGGING(6)) {
-                      LOG6("The following states are now full.");
-                      LOG6("Allocating more CLOTs would violate the max-CLOTs-per-packet "
-                           "constraint.");
+                        LOG6("The following states are now full.");
+                        LOG6(
+                            "Allocating more CLOTs would violate the max-CLOTs-per-packet "
+                            "constraint.");
 
-                      for (auto state : *full_states)
-                          LOG6("  " << state->name);
+                        for (auto state : *full_states) LOG6("  " << state->name);
 
-                      LOG6("");
+                        LOG6("");
                     }
                 }
 
@@ -1136,15 +1131,15 @@ class GreedyClotAllocator : public Visitor {
                 }
 
                 if (LOGGING(3) && !removed_candidates.empty()) {
-                    LOG3("Removed the following from candidacy to satisfy the "
-                         "max-CLOTs-per-packet constraint:");
+                    LOG3(
+                        "Removed the following from candidacy to satisfy the "
+                        "max-CLOTs-per-packet constraint:");
                     for (auto candidate : removed_candidates) {
                         LOG3("  Candidate " << candidate->id);
 
                         bool first_state = true;
-                        for (auto* state : candidate->states()) {
-                            LOG3("  " << (first_state ? "states: " : "        ")
-                                      << state->name);
+                        for (auto *state : candidate->states()) {
+                            LOG3("  " << (first_state ? "states: " : "        ") << state->name);
                             first_state = false;
                         }
                     }
@@ -1160,28 +1155,27 @@ class GreedyClotAllocator : public Visitor {
                     LOG3("CLOT allocation complete: no remaining CLOT candidates.");
                 } else {
                     LOG3(candidates->size() << " remaining CLOT candidates:");
-                    for (auto candidate : *candidates)
-                        LOG3(logfix(candidate->print()));
+                    for (auto candidate : *candidates) LOG3(logfix(candidate->print()));
                 }
             }
         }
     }
 
-    HeaderValidityAnalysis::ResultMap analyze_header_removals(const ClotCandidateSet* candidates,
-                                                             const IR::MAU::TableSeq* mau) {
+    HeaderValidityAnalysis::ResultMap analyze_header_removals(const ClotCandidateSet *candidates,
+                                                              const IR::MAU::TableSeq *mau) {
         // Build the set of correlations that we're interested in.
         std::set<FieldSliceSet> correlations = {};
-        for (const auto* c1 : *candidates) {
-            for (const auto* c2 : *candidates) {
+        for (const auto *c1 : *candidates) {
+            for (const auto *c2 : *candidates) {
                 if (c1 == c2) continue;
 
                 // Only interesting if c1 and c2 can appear back-to-back in the packet.
-                if (!c1->byte_gaps(parserInfo, c2).count(0)
-                        && !c2->byte_gaps(parserInfo, c1).count(0))
+                if (!c1->byte_gaps(parserInfo, c2).count(0) &&
+                    !c2->byte_gaps(parserInfo, c1).count(0))
                     continue;
 
-                for (const auto* pov1 : c1->pov_bits) {
-                    for (const auto* pov2 : c2->pov_bits) {
+                for (const auto *pov1 : c1->pov_bits) {
+                    for (const auto *pov2 : c2->pov_bits) {
                         FieldSliceSet set = {pov1, pov2};
                         correlations.emplace(set);
                     }
@@ -1194,11 +1188,11 @@ class GreedyClotAllocator : public Visitor {
         return hva.resultMap;
     }
 
-    void filter_stack_extracts(FieldExtractInfo* field_extract_info) {
+    void filter_stack_extracts(FieldExtractInfo *field_extract_info) {
         // Identify pseudoheaders with header stacks
-        std::map<cstring, std::map<unsigned, const Pseudoheader*>> pseudoheader_stacks;
-        for (const auto& [pseudoheader, extracts] : field_extract_info->pseudoheaderMap) {
-            for (const auto* field : Keys(extracts)) {
+        std::map<cstring, std::map<unsigned, const Pseudoheader *>> pseudoheader_stacks;
+        for (const auto &[pseudoheader, extracts] : field_extract_info->pseudoheaderMap) {
+            for (const auto *field : Keys(extracts)) {
                 if (auto stack_index = get_element_index(field)) {
                     cstring header_name = field->header();
                     header_name = header_name.before(strrchr(header_name, '['));
@@ -1210,10 +1204,10 @@ class GreedyClotAllocator : public Visitor {
         }
 
         if (LOGGING(6)) {
-            for (auto& [stack, index_map] : pseudoheader_stacks) {
+            for (auto &[stack, index_map] : pseudoheader_stacks) {
                 Log::TempIndent indent;
                 LOG6("Indeces/pseudoheaders for Header stack " << stack << ":" << indent);
-                for (auto& [index, pseudoheader] : index_map) {
+                for (auto &[index, pseudoheader] : index_map) {
                     LOG6("    " << index << " in " << pseudoheader->id);
                 }
             }
@@ -1223,16 +1217,16 @@ class GreedyClotAllocator : public Visitor {
         // indices are missing for a state
         bool done = false;
         auto header_stack_map = field_extract_info->headerStackMap;
-        ordered_set<const Pseudoheader*> pseudoheaders_to_remove;
+        ordered_set<const Pseudoheader *> pseudoheaders_to_remove;
         while (!done) {
             done = true;
-            for (auto& [stack, index_map] : pseudoheader_stacks) {
+            for (auto &[stack, index_map] : pseudoheader_stacks) {
                 ordered_set<unsigned> indices_to_remove;
                 BUG_CHECK(header_stack_map.count(stack),
                           "Header stack %1% missing from CLOT header stack map");
-                for (auto& [index, pseudoheader] : index_map) {
+                for (auto &[index, pseudoheader] : index_map) {
                     bool failed = false;
-                    for (auto& [_, state_indices] : header_stack_map.at(stack)) {
+                    for (auto &[_, state_indices] : header_stack_map.at(stack)) {
                         if (state_indices.count(index)) {
                             for (auto state_index : state_indices) {
                                 if (!index_map.count(state_index)) {
@@ -1262,7 +1256,7 @@ class GreedyClotAllocator : public Visitor {
         }
     }
 
-    Visitor::profile_t init_apply(const IR::Node* root) override {
+    Visitor::profile_t init_apply(const IR::Node *root) override {
         // Configure logging for this visitor.
         if (BackendOptions().verbose > 0) {
             if (auto pipe = root->to<IR::BFN::Pipe>())
@@ -1276,25 +1270,24 @@ class GreedyClotAllocator : public Visitor {
     }
 
     const IR::Node *apply_visitor(const IR::Node *root, const char *) override {
-        const auto* pipe = root->to<IR::BFN::Pipe>();
+        const auto *pipe = root->to<IR::BFN::Pipe>();
         BUG_CHECK(pipe, "GreedyClotAllocator must be applied to pipe");
 
         // Loop over each gress.
-        for (const auto& entry : parserInfo.graphs()) {
-            const auto* parser = entry.first;
-            const auto* graph = entry.second;
+        for (const auto &entry : parserInfo.graphs()) {
+            const auto *parser = entry.first;
+            const auto *graph = entry.second;
 
             // Build auxiliary data structures.
             auto field_extract_info = group_extracts(graph);
             if (LOGGING(4)) {
                 LOG4("Extracts found that can be part of a CLOT:");
-                for (const auto& entry2 : field_extract_info->pseudoheaderMap) {
-                    const auto* pseudoheader = entry2.first;
-                    const auto& extracts = entry2.second;
+                for (const auto &entry2 : field_extract_info->pseudoheaderMap) {
+                    const auto *pseudoheader = entry2.first;
+                    const auto &extracts = entry2.second;
 
                     LOG4("  In pseudoheader " << pseudoheader->id << ":");
-                    for (const auto* field : Keys(extracts))
-                        LOG4("    " << field->name);
+                    for (const auto *field : Keys(extracts)) LOG4("    " << field->name);
                     LOG4("");
                 }
                 LOG4("");
@@ -1304,25 +1297,22 @@ class GreedyClotAllocator : public Visitor {
             // Identify CLOT candidates (using older pseudoheader technique)
             auto candidates = find_clot_candidates(field_extract_info->pseudoheaderMap);
             // Identify additional CLOT candidates (using deparser analysis)
-            const auto* deparser = pipe->thread[parser->gress].deparser->to<IR::BFN::Deparser>();
-            const auto* mau = pipe->thread[parser->gress].mau;
+            const auto *deparser = pipe->thread[parser->gress].deparser->to<IR::BFN::Deparser>();
+            const auto *mau = pipe->thread[parser->gress].mau;
             HeaderValidityAnalysis hva(phvInfo, {});
             mau->apply(hva);
-            auto sequences = find_multiheader_sequences(deparser,
-                                                        field_extract_info->fieldMap,
+            auto sequences = find_multiheader_sequences(deparser, field_extract_info->fieldMap,
                                                         hva.povBitsSetInvalidInMau,
                                                         hva.povBitsAlwaysInvalidateTogether);
-            for (auto& sequence : sequences)
-                if (!sequence.empty())
-                    try_add_clot_candidate(candidates, nullptr, sequence);
+            for (auto &sequence : sequences)
+                if (!sequence.empty()) try_add_clot_candidate(candidates, nullptr, sequence);
 
             if (LOGGING(3)) {
                 if (candidates->empty()) {
                     LOG3("No CLOT candidates found.");
                 } else {
                     LOG3(candidates->size() << " CLOT candidates:");
-                    for (auto candidate : *candidates)
-                        LOG3(logfix(candidate->print()));
+                    for (auto candidate : *candidates) LOG3(logfix(candidate->print()));
                 }
             }
 
@@ -1343,21 +1333,19 @@ class GreedyClotAllocator : public Visitor {
     }
 
     void end_apply() override {
-        if (log)
-            Logging::FileLog::close(log);
+        if (log) Logging::FileLog::close(log);
         Visitor::end_apply();
     }
 
-    void clear() {
-    }
+    void clear() {}
 
-    const std::set<const PHV::Field*> get_fields_emitted_more_than_once(
-            const IR::BFN::Deparser* deparser) {
-        std::set<const PHV::Field*> fields_emitted;
-        std::set<const PHV::Field*> fields_emitted_more_than_once;
+    const std::set<const PHV::Field *> get_fields_emitted_more_than_once(
+        const IR::BFN::Deparser *deparser) {
+        std::set<const PHV::Field *> fields_emitted;
+        std::set<const PHV::Field *> fields_emitted_more_than_once;
         for (auto emit : deparser->emits) {
             if (auto emit_field = emit->to<IR::BFN::EmitField>()) {
-                const PHV::Field* field = phvInfo.field(emit_field->source->field);
+                const PHV::Field *field = phvInfo.field(emit_field->source->field);
                 auto pair = fields_emitted.insert(field);
                 if (pair.second == true) continue;
                 fields_emitted_more_than_once.insert(field);
@@ -1366,39 +1354,39 @@ class GreedyClotAllocator : public Visitor {
         return fields_emitted_more_than_once;
     }
 
-    std::vector<std::vector<const FieldSliceExtractInfo*>> find_multiheader_sequences(
-            const IR::BFN::Deparser* deparser,
-            ordered_map<const PHV::Field*, FieldSliceExtractInfo*> field_map,
-            std::set<const PHV::Field*> pov_bits_set_invalid_in_mau,
-            SymBitMatrix pov_bits_always_set_invalid_together) {
+    std::vector<std::vector<const FieldSliceExtractInfo *>> find_multiheader_sequences(
+        const IR::BFN::Deparser *deparser,
+        ordered_map<const PHV::Field *, FieldSliceExtractInfo *> field_map,
+        std::set<const PHV::Field *> pov_bits_set_invalid_in_mau,
+        SymBitMatrix pov_bits_always_set_invalid_together) {
         LOG4("Finding multiheader extract sequences based on deparser emits");
 
-        const auto* clot_eligible_fields = clotInfo.clot_eligible_fields();
-        auto is_clot_eligible = [&clot_eligible_fields](const PHV::Field* field) -> bool {
+        const auto *clot_eligible_fields = clotInfo.clot_eligible_fields();
+        auto is_clot_eligible = [&clot_eligible_fields](const PHV::Field *field) -> bool {
             return clot_eligible_fields->find(field) != clot_eligible_fields->end();
         };
 
         const auto fields_emitted_more_than_once = get_fields_emitted_more_than_once(deparser);
         auto is_emitted_more_than_once =
-            [&fields_emitted_more_than_once](const PHV::Field* field) -> bool {
-                return fields_emitted_more_than_once.count(field);
-            };
-
-        std::vector<const IR::BFN::EmitChecksum*> checksum_updates;
-        auto get_checksum_updates = [&](const PHV::Field* field) {
-            return clotInfo.field_to_checksum_updates().count(field) ?
-                clotInfo.field_to_checksum_updates().at(field) :
-                std::vector<const IR::BFN::EmitChecksum*>();
+            [&fields_emitted_more_than_once](const PHV::Field *field) -> bool {
+            return fields_emitted_more_than_once.count(field);
         };
 
-        std::vector<std::vector<const FieldSliceExtractInfo*>> sequences;
-        std::vector<const FieldSliceExtractInfo*> sequence;
-        std::map<const IR::BFN::ParserState*, int> state_to_size_in_bits;
-        const PHV::Field* prev_pov_bit = nullptr;
+        std::vector<const IR::BFN::EmitChecksum *> checksum_updates;
+        auto get_checksum_updates = [&](const PHV::Field *field) {
+            return clotInfo.field_to_checksum_updates().count(field)
+                       ? clotInfo.field_to_checksum_updates().at(field)
+                       : std::vector<const IR::BFN::EmitChecksum *>();
+        };
+
+        std::vector<std::vector<const FieldSliceExtractInfo *>> sequences;
+        std::vector<const FieldSliceExtractInfo *> sequence;
+        std::map<const IR::BFN::ParserState *, int> state_to_size_in_bits;
+        const PHV::Field *prev_pov_bit = nullptr;
 
         for (auto emit : deparser->emits) {
-            const PHV::Field* field = nullptr;
-            const PHV::Field* pov_bit = nullptr;
+            const PHV::Field *field = nullptr;
+            const PHV::Field *pov_bit = nullptr;
             if (auto emit_field = emit->to<IR::BFN::EmitField>()) {
                 field = phvInfo.field(emit_field->source->field);
                 if (auto alias_slice = emit_field->povBit->field->to<IR::BFN::AliasSlice>())
@@ -1457,8 +1445,9 @@ class GreedyClotAllocator : public Visitor {
             if (!sequence.empty() && !checksum_updates.empty() &&
                 !get_checksum_updates(field).empty() &&
                 checksum_updates != get_checksum_updates(field)) {
-                LOG4("  Ended sequence: " << field->name << " is involved in different checksum "
-                     "updates than previous field in sequence");
+                LOG4("  Ended sequence: " << field->name
+                                          << " is involved in different checksum "
+                                             "updates than previous field in sequence");
                 sequences.push_back(sequence);
                 sequence.clear();
                 prev_pov_bit = nullptr;
@@ -1468,7 +1457,7 @@ class GreedyClotAllocator : public Visitor {
                 checksum_updates = get_checksum_updates(field);
             }
 
-            auto try_start_new_sequence = [&](FieldSliceExtractInfo* extract_info) {
+            auto try_start_new_sequence = [&](FieldSliceExtractInfo *extract_info) {
                 bool can_start_new_sequence = clotInfo.can_start_clot(extract_info) &&
                                               parserInfo.graph(*extract_info->states().begin())
                                                   .is_mutex(extract_info->states());
@@ -1477,7 +1466,7 @@ class GreedyClotAllocator : public Visitor {
                     LOG4("  Started a sequence with field: " << field->name);
                     sequence.push_back(extract_info);
                     prev_pov_bit = pov_bit;
-                    for (const auto& state : extract_info->states())
+                    for (const auto &state : extract_info->states())
                         state_to_size_in_bits[state] = extract_info->slice()->size();
                 } else {
                     LOG4("  Cannot start a new sequence: "
@@ -1495,10 +1484,10 @@ class GreedyClotAllocator : public Visitor {
 
                 if (contains(sequence.front()->states(), extract_info->states())) {
                     bool extracts_are_adjacent_in_all_states = true;
-                    for (const auto& state : extract_info->states()) {
+                    for (const auto &state : extract_info->states()) {
                         auto previous_extract_info =
                             std::find_if(sequence.rbegin(), sequence.rend(),
-                                         [&state](const FieldSliceExtractInfo* extract_info) {
+                                         [&state](const FieldSliceExtractInfo *extract_info) {
                                              return extract_info->states().count(state);
                                          });
                         unsigned expected_bit_offset =
@@ -1513,21 +1502,23 @@ class GreedyClotAllocator : public Visitor {
                         LOG4("    Added " << field->name << " to sequence");
                         sequence.push_back(extract_info);
                         if (pov_bit) prev_pov_bit = pov_bit;
-                        for (const auto& state : extract_info->states())
+                        for (const auto &state : extract_info->states())
                             state_to_size_in_bits[state] += extract_info->slice()->size();
                     } else {
-                        LOG4("  Ended sequence: extracts for " << field->name
+                        LOG4("  Ended sequence: extracts for "
+                             << field->name
                              << " are not adjacent to the last field in the sequence in all parser "
-                             "states");
+                                "states");
                         sequences.push_back(sequence);
                         sequence.clear();
                         prev_pov_bit = nullptr;
                         try_start_new_sequence(extract_info);
                     }
                 } else {
-                    LOG4("  Ended sequence: " << field->name
+                    LOG4("  Ended sequence: "
+                         << field->name
                          << " is not extracted in the same parser states as the first field in "
-                         "the sequence");
+                            "the sequence");
                     sequences.push_back(sequence);
                     sequence.clear();
                     prev_pov_bit = nullptr;
@@ -1536,10 +1527,11 @@ class GreedyClotAllocator : public Visitor {
             }
 
             const int MAX_SIZE = Device::pardeSpec().byteMaxClotSize() * 8;
-            auto it = std::find_if(state_to_size_in_bits.begin(), state_to_size_in_bits.end(),
-                [&MAX_SIZE](const std::pair<const IR::BFN::ParserState*, int>& pair) {
-                    return pair.second > MAX_SIZE;
-                });
+            auto it =
+                std::find_if(state_to_size_in_bits.begin(), state_to_size_in_bits.end(),
+                             [&MAX_SIZE](const std::pair<const IR::BFN::ParserState *, int> &pair) {
+                                 return pair.second > MAX_SIZE;
+                             });
 
             if (it != state_to_size_in_bits.end()) {
                 sequence.pop_back();
@@ -1559,11 +1551,11 @@ class GreedyClotAllocator : public Visitor {
         }
 
         LOG4("Multiheader extract sequences found: " << sequences.size());
-        for (const auto& sequence : sequences) {
+        for (const auto &sequence : sequences) {
             std::stringstream out;
             out << "[ ";
             std::string delimiter = "";
-            for (const auto& extract : sequence) {
+            for (const auto &extract : sequence) {
                 out << delimiter << extract->slice()->shortString();
                 delimiter = ", ";
             }
@@ -1576,8 +1568,8 @@ class GreedyClotAllocator : public Visitor {
 };
 
 AllocateClot::AllocateClot(ClotInfo &clotInfo, const PhvInfo &phv, PhvUse &uses,
-                           PragmaDoNotUseClot &pragmaDoNotUseClot,
-                           PragmaAlias &pragmaAlias, bool log)
+                           PragmaDoNotUseClot &pragmaDoNotUseClot, PragmaAlias &pragmaAlias,
+                           bool log)
     : clotInfo(clotInfo) {
     addPasses({
         &uses,
@@ -1595,7 +1587,7 @@ AllocateClot::AllocateClot(ClotInfo &clotInfo, const PhvInfo &phv, PhvUse &uses,
     });
 }
 
-Visitor::profile_t ClotAdjuster::init_apply(const IR::Node* root) {
+Visitor::profile_t ClotAdjuster::init_apply(const IR::Node *root) {
     auto result = Visitor::init_apply(root);
 
     // Configure logging for this visitor.
@@ -1607,19 +1599,17 @@ Visitor::profile_t ClotAdjuster::init_apply(const IR::Node* root) {
     return result;
 }
 
-const IR::Node *ClotAdjuster::apply_visitor(const IR::Node* root, const char*) {
+const IR::Node *ClotAdjuster::apply_visitor(const IR::Node *root, const char *) {
     clotInfo.adjust_clots(phv);
 
     const IR::BFN::Pipe *pipe = root->to<IR::BFN::Pipe>();
-    if (pipe)
-        Logging::FileLog parserLog(pipe->canon_id(), "clot_allocation.log"_cs);
+    if (pipe) Logging::FileLog parserLog(pipe->canon_id(), "clot_allocation.log"_cs);
     LOG1(clotInfo.print(&phv));
 
     return root;
 }
 
-void ClotAdjuster::end_apply(const IR::Node*) {
-    if (log)
-        Logging::FileLog::close(log);
+void ClotAdjuster::end_apply(const IR::Node *) {
+    if (log) Logging::FileLog::close(log);
     Visitor::end_apply();
 }

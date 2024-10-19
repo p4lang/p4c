@@ -17,14 +17,13 @@
 
 #include "bf-p4c/midend/initialize_mirror_io_select.h"
 
-#include "bf_gtest_helpers.h"
-#include "gtest/gtest.h"
-
 #include "bf-p4c/arch/arch.h"
 #include "bf-p4c/bf-p4c-options.h"
 #include "bf-p4c/midend/type_checker.h"
+#include "bf_gtest_helpers.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
+#include "gtest/gtest.h"
 
 namespace P4::Test {
 
@@ -138,7 +137,6 @@ TEST(InitializeMirrorIOSelect, Tofino2ParserBodyCompleteMeta) {
               InitializeMirrorIOSelectTest::tofino_shell_egress_parser_body_marker(), expected);
 }
 
-
 TEST(InitializeMirrorIOSelect, Tofino1ParserParams) {
     Match::CheckList expected{"packet_in packet, out headers_t hdr, out local_metadata_t eg_md, ",
                               "out egress_intrinsic_metadata_t eg_intr_m"};
@@ -175,7 +173,6 @@ TEST(InitializeMirrorIOSelect, Tofino2ParserParamsCompleteMeta) {
               out egress_intrinsic_metadata_for_deparser_t eg_intr_md_for_dprsr",
               InitializeMirrorIOSelectTest::tofino_shell_egress_parser_params_marker(), expected);
 }
-
 
 // Keep definition of RUN_CHECK local for unity builds.
 #undef RUN_CHECK

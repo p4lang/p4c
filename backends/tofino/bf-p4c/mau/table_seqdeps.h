@@ -13,18 +13,18 @@
 #ifndef BF_P4C_MAU_TABLE_SEQDEPS_H_
 #define BF_P4C_MAU_TABLE_SEQDEPS_H_
 
-#include "mau_visitor.h"
 #include "field_use.h"
+#include "mau_visitor.h"
 
 using namespace P4;
 
 class TableFindSeqDependencies : public MauModifier {
-    FieldUse    uses;
+    FieldUse uses;
     profile_t init_apply(const IR::Node *root) override;
     void postorder(IR::MAU::TableSeq *) override;
 
  public:
-    explicit TableFindSeqDependencies(const PhvInfo& p) : uses(p) { }
+    explicit TableFindSeqDependencies(const PhvInfo &p) : uses(p) {}
 };
 
 #endif /* BF_P4C_MAU_TABLE_SEQDEPS_H_ */

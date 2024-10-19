@@ -27,14 +27,14 @@ class TableTree {
     const IR::MAU::TableSeq *seq;
     const IR::BFN::Pipe *pipe;
 
-    void print(std::ostream &out,
-               const safe_vector<cstring> &tag,
+    void print(std::ostream &out, const safe_vector<cstring> &tag,
                const IR::MAU::TableSeq *s) const {
         const char *sep = "";
         out << indent++;
         for (auto n : tag) {
             out << sep << n;
-            sep = ", "; }
+            sep = ", ";
+        }
         out << ": [" << s->seq_uid << "]";
         if (done.count(s)) {
             out << "..." << std::endl;
@@ -46,16 +46,21 @@ class TableTree {
                 if (big) out << std::endl << indent << " ";
                 out << ' ';
                 for (unsigned j = 0; j < i; ++j) out << (s->deps(i, j) ? '1' : '0');
-                if (big) out << "+--" << s->tables[i]->name; }
+                if (big) out << "+--" << s->tables[i]->name;
+            }
             out << std::endl;
             done.insert(s);
-            for (auto tbl : s->tables) print(out, tbl); }
-        --indent; }
+            for (auto tbl : s->tables) print(out, tbl);
+        }
+        --indent;
+    }
     void print(std::ostream &out, const IR::MAU::Table *tbl) const {
         ordered_map<const IR::MAU::TableSeq *, safe_vector<cstring>> next;
         out << indent++;
-        if (tbl->global_id()) out << hex(*tbl->global_id()) << ": ";
-        else if (tbl->stage() != -1) out << hex(tbl->stage() * 16) << ": ";
+        if (tbl->global_id())
+            out << hex(*tbl->global_id()) << ": ";
+        else if (tbl->stage() != -1)
+            out << hex(tbl->stage() * 16) << ": ";
         out << tbl->name;
         const char *sep = "(";
         for (auto &row : tbl->gateway_rows) {
@@ -65,35 +70,38 @@ class TableTree {
             else
                 out << "1";
             if (row.second) out << " => " << row.second;
-            sep = ", "; }
+            sep = ", ";
+        }
         out << (*sep == ',' ? ")" : "");
         if (tbl->layout.match_width_bits || tbl->layout.overhead_bits) {
-            out << "{ " << (tbl->layout.gateway ? "G" : "")
-                << (tbl->layout.ternary ? "T" : "E") << " " << tbl->layout.match_width_bits << "+"
-                << tbl->layout.overhead_bits << ", " << tbl->layout.action_data_bytes;
+            out << "{ " << (tbl->layout.gateway ? "G" : "") << (tbl->layout.ternary ? "T" : "E")
+                << " " << tbl->layout.match_width_bits << "+" << tbl->layout.overhead_bits << ", "
+                << tbl->layout.action_data_bytes;
             if (!tbl->ways.empty()) {
                 out << " [" << tbl->ways[0].width << 'x' << tbl->ways[0].match_groups;
-                for (auto &way : tbl->ways) out << " " << (way.entries/1024U) << "K";
+                for (auto &way : tbl->ways) out << " " << (way.entries / 1024U) << "K";
                 out << "]";
             } else {
-                out << " " << (tbl->layout.entries / 1024U) << "K"; }
-            out << " }"; }
+                out << " " << (tbl->layout.entries / 1024U) << "K";
+            }
+            out << " }";
+        }
         auto stage = tbl->get_provided_stage();
         if (stage >= 0) out << " @stage(" << stage << ")";
         out << std::endl;
         for (auto &at : tbl->attached) {
             if (at->attached->direct) continue;
-            out << indent << at->attached->kind() << " " << at->attached->name
-                << " " << n4(at->attached->size) << std::endl; }
-        for (auto &n : tbl->next)
-            next[n.second].push_back(n.first);
-        for (auto &n : next)
-            print(out, n.second, n.first);
-        --indent; }
+            out << indent << at->attached->kind() << " " << at->attached->name << " "
+                << n4(at->attached->size) << std::endl;
+        }
+        for (auto &n : tbl->next) next[n.second].push_back(n.first);
+        for (auto &n : next) print(out, n.second, n.first);
+        --indent;
+    }
 
  public:
-    TableTree(cstring name, const IR::MAU::TableSeq *seq) : name{name}, seq(seq), pipe(nullptr)  {}
-    explicit TableTree(const IR::BFN::Pipe *pipe) : name{}, seq(nullptr), pipe(pipe)  {}
+    TableTree(cstring name, const IR::MAU::TableSeq *seq) : name{name}, seq(seq), pipe(nullptr) {}
+    explicit TableTree(const IR::BFN::Pipe *pipe) : name{}, seq(nullptr), pipe(pipe) {}
     friend std::ostream &operator<<(std::ostream &out, const TableTree &tt) {
         tt.indent = indent_t();
         tt.done.clear();
@@ -105,8 +113,10 @@ class TableTree {
             if (tt.pipe->ghost_thread.ghost_mau)
                 tt.print(out, {"ghost mau"_cs}, tt.pipe->ghost_thread.ghost_mau);
         } else if (tt.seq) {
-            tt.print(out, tt.name, tt.seq); }
-        return out; }
+            tt.print(out, tt.name, tt.seq);
+        }
+        return out;
+    }
 };
 
 #endif /* BF_P4C_IR_TABLE_TREE_H_ */
