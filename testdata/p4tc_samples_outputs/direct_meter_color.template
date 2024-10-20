@@ -22,7 +22,7 @@ control_path tc_key index ptype bit32 id 1 param cir ptype bit64 id 2 param cbs 
 $TC p4template create table/direct_meter_color/ingress/nh_table \
 	tblid 1 \
 	type exact \
-	keysz 32 nummasks 8 permissions 0x3da4 tentries 2048 \
+	keysz 32 permissions 0x3da4 tentries 2048 nummasks 1 \
 	pna_direct_meter DirectMeter/ingress.global_meter \
 	table_acts act name direct_meter_color/ingress/meter_exec \
 	act name direct_meter_color/ingress/drop

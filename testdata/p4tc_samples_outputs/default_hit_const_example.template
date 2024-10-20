@@ -17,7 +17,7 @@ $TC p4template update action/default_hit_const_example/MainControlImpl/tcp_other
 $TC p4template create table/default_hit_const_example/MainControlImpl/set_ct_options \
 	tblid 1 \
 	type ternary \
-	keysz 8 nummasks 8 permissions 0x3da4 tentries 1024 \
+	keysz 8 permissions 0x3da4 tentries 1024 nummasks 8 \
 	table_acts act name default_hit_const_example/MainControlImpl/tcp_syn_packet \
 	act name default_hit_const_example/MainControlImpl/tcp_fin_or_rst_packet \
 	act name default_hit_const_example/MainControlImpl/tcp_other_packets

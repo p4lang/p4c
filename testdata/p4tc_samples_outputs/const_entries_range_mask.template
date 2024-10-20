@@ -15,7 +15,7 @@ $TC p4template update action/const_entries_range_mask/MainControlImpl/a_with_con
 $TC p4template create table/const_entries_range_mask/MainControlImpl/t_range \
 	tblid 1 \
 	type ternary \
-	keysz 8 nummasks 8 permissions 0x3da4 tentries 1024 \
+	keysz 8 permissions 0x3da4 tentries 1024 nummasks 8 \
 	table_acts act name const_entries_range_mask/MainControlImpl/a \
 	act name const_entries_range_mask/MainControlImpl/a_with_control_params
 $TC p4template update table/const_entries_range_mask/MainControlImpl/t_range default_miss_action action const_entries_range_mask/MainControlImpl/a

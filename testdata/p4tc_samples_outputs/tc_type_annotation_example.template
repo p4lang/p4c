@@ -16,7 +16,7 @@ $TC p4template update action/tc_type_annotation_example/MainControlImpl/default_
 $TC p4template create table/tc_type_annotation_example/MainControlImpl/ipv4_tbl_1 \
 	tblid 1 \
 	type exact \
-	keysz 32 nummasks 8 permissions 0x3da4 tentries 1024 \
+	keysz 32 permissions 0x3da4 tentries 1024 nummasks 1 \
 	table_acts act name tc_type_annotation_example/MainControlImpl/next_hop \
 	act name tc_type_annotation_example/MainControlImpl/default_route_drop \
 	act name NoAction flags defaultonly
@@ -24,6 +24,6 @@ $TC p4template create table/tc_type_annotation_example/MainControlImpl/ipv4_tbl_
 $TC p4template create table/tc_type_annotation_example/MainControlImpl/ipv4_tbl_2 \
 	tblid 2 \
 	type exact \
-	keysz 3 nummasks 8 permissions 0x3da4 tentries 1024 \
+	keysz 3 permissions 0x3da4 tentries 1024 nummasks 1 \
 	table_acts act name NoAction
 $TC p4template update pipeline/tc_type_annotation_example state ready

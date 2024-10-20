@@ -12,7 +12,7 @@ $TC p4template update action/test_ipv6_example/MainControlImpl/set_dst state act
 $TC p4template create table/test_ipv6_example/MainControlImpl/tbl_default \
 	tblid 1 \
 	type exact \
-	keysz 128 nummasks 8 permissions 0x3da4 tentries 100 \
+	keysz 128 permissions 0x3da4 tentries 100 nummasks 1 \
 	table_acts act name test_ipv6_example/MainControlImpl/set_dst \
 	act name NoAction
 $TC p4template update table/test_ipv6_example/MainControlImpl/tbl_default default_miss_action action test_ipv6_example/MainControlImpl/set_dst param addr6 0xffff111122223333444455556666aaaa

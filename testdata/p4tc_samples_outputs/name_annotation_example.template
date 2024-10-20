@@ -18,7 +18,7 @@ $TC p4template update action/name_annotation_example/MainControlImpl/drop state 
 $TC p4template create table/name_annotation_example/MainControlImpl/ipv4_tbl_1 \
 	tblid 1 \
 	type exact \
-	keysz 32 nummasks 8 permissions 0x3da4 tentries 1024 \
+	keysz 32 permissions 0x3da4 tentries 1024 nummasks 1 \
 	table_acts act name name_annotation_example/MainControlImpl/next_hop \
 	act name name_annotation_example/MainControlImpl/default_route_drop
 $TC p4template update table/name_annotation_example/MainControlImpl/ipv4_tbl_1 default_miss_action action name_annotation_example/MainControlImpl/default_route_drop
@@ -26,7 +26,7 @@ $TC p4template update table/name_annotation_example/MainControlImpl/ipv4_tbl_1 d
 $TC p4template create table/name_annotation_example/MainControlImpl/ipv4_tbl_2 \
 	tblid 2 \
 	type exact \
-	keysz 72 nummasks 8 permissions 0x3da4 tentries 1024 \
+	keysz 72 permissions 0x3da4 tentries 1024 nummasks 1 \
 	table_acts act name name_annotation_example/MainControlImpl/next_hop \
 	act name name_annotation_example/MainControlImpl/drop
 $TC p4template update table/name_annotation_example/MainControlImpl/ipv4_tbl_2 default_miss_action action name_annotation_example/MainControlImpl/drop

@@ -18,7 +18,7 @@ $TC p4template update action/matchtype/MainControlImpl/drop state active
 $TC p4template create table/matchtype/MainControlImpl/ipv4_tbl_1 \
 	tblid 1 \
 	type exact \
-	keysz 32 nummasks 8 permissions 0x3da4 tentries 1024 \
+	keysz 32 permissions 0x3da4 tentries 1024 nummasks 1 \
 	table_acts act name matchtype/MainControlImpl/next_hop \
 	act name matchtype/MainControlImpl/default_route_drop
 $TC p4template update table/matchtype/MainControlImpl/ipv4_tbl_1 default_miss_action action matchtype/MainControlImpl/default_route_drop
@@ -26,7 +26,7 @@ $TC p4template update table/matchtype/MainControlImpl/ipv4_tbl_1 default_miss_ac
 $TC p4template create table/matchtype/MainControlImpl/ipv4_tbl_2 \
 	tblid 2 \
 	type ternary \
-	keysz 72 nummasks 8 permissions 0x3da4 tentries 1024 \
+	keysz 72 permissions 0x3da4 tentries 1024 nummasks 8 \
 	table_acts act name matchtype/MainControlImpl/next_hop \
 	act name matchtype/MainControlImpl/drop
 $TC p4template update table/matchtype/MainControlImpl/ipv4_tbl_2 default_miss_action action matchtype/MainControlImpl/drop
@@ -34,7 +34,7 @@ $TC p4template update table/matchtype/MainControlImpl/ipv4_tbl_2 default_miss_ac
 $TC p4template create table/matchtype/MainControlImpl/ipv4_tbl_3 \
 	tblid 3 \
 	type ternary \
-	keysz 32 nummasks 8 permissions 0x3da4 tentries 1024 \
+	keysz 32 permissions 0x3da4 tentries 1024 nummasks 8 \
 	table_acts act name matchtype/MainControlImpl/next_hop \
 	act name matchtype/MainControlImpl/drop
 $TC p4template update table/matchtype/MainControlImpl/ipv4_tbl_3 default_miss_action action matchtype/MainControlImpl/drop
@@ -42,7 +42,7 @@ $TC p4template update table/matchtype/MainControlImpl/ipv4_tbl_3 default_miss_ac
 $TC p4template create table/matchtype/MainControlImpl/ipv4_tbl_4 \
 	tblid 4 \
 	type lpm \
-	keysz 72 nummasks 8 permissions 0x3da4 tentries 1024 \
+	keysz 72 permissions 0x3da4 tentries 1024 nummasks 8 \
 	table_acts act name matchtype/MainControlImpl/next_hop \
 	act name matchtype/MainControlImpl/drop
 $TC p4template update table/matchtype/MainControlImpl/ipv4_tbl_4 default_miss_action action matchtype/MainControlImpl/drop

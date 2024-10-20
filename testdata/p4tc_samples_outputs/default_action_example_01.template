@@ -15,7 +15,7 @@ $TC p4template update action/default_action_example_01/MainControlImpl/default_r
 $TC p4template create table/default_action_example_01/MainControlImpl/ipv4_tbl_1 \
 	tblid 1 \
 	type exact \
-	keysz 64 nummasks 8 permissions 0x3da4 tentries 1024 \
+	keysz 64 permissions 0x3da4 tentries 1024 nummasks 1 \
 	table_acts act name default_action_example_01/MainControlImpl/next_hop \
 	act name default_action_example_01/MainControlImpl/default_route_drop \
 	act name NoAction flags defaultonly
@@ -23,6 +23,6 @@ $TC p4template create table/default_action_example_01/MainControlImpl/ipv4_tbl_1
 $TC p4template create table/default_action_example_01/MainControlImpl/ipv4_tbl_2 \
 	tblid 2 \
 	type exact \
-	keysz 72 nummasks 8 permissions 0x3da4 tentries 1024 \
+	keysz 72 permissions 0x3da4 tentries 1024 nummasks 1 \
 	table_acts act name NoAction flags defaultonly
 $TC p4template update pipeline/default_action_example_01 state ready
