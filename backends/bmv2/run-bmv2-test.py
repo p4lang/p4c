@@ -292,7 +292,6 @@ def process_file(options, argv):
 
     args = [binary, "-o", jsonfile] + options.compilerOptions
     if "p4_14" in options.p4filename or "v1_samples" in options.p4filename:
-        args.extend(["--excludeFrontendPasses", "DuplicateHierarchicalNameCheck"])
         args.extend(["--std", "p4-14"])
     args.append(options.p4filename)
     args.extend(argv)
