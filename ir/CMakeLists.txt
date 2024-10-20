@@ -43,6 +43,8 @@ set (IR_HDRS
   ir-inline.h
   ir-tree-macros.h
   ir.h
+  ir-traversal.h
+  ir-traversal-internal.h
   irutils.h
   json_generator.h
   json_loader.h

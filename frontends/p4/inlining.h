@@ -18,6 +18,7 @@ limitations under the License.
 #define FRONTENDS_P4_INLINING_H_
 
 #include "commonInlining.h"
+#include "frontends/common/parser_options.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/evaluator/substituteParameters.h"
@@ -436,7 +437,7 @@ class InlinePass : public PassManager {
                        new DiscoverInlining(&toInline, refMap, typeMap, evaluator),
                        new InlineDriver<InlineList, InlineSummary>(
                            &toInline, new GeneralInliner(refMap, optimizeParserInlining)),
-                       new RemoveAllUnusedDeclarations(refMap, policy)}) {
+                       new RemoveAllUnusedDeclarations(policy)}) {
         setName("InlinePass");
     }
 };
@@ -446,16 +447,23 @@ Performs inlining as many times as necessary.  Most frequently once
 will be enough.  Multiple iterations are necessary only when instances are
 passed as arguments using constructor arguments.
 */
-class Inline : public PassRepeated {
+class Inline : public PassManager {
     static std::set<cstring> noPropagateAnnotations;
+    ReferenceMap refMap;
 
  public:
-    Inline(ReferenceMap *refMap, TypeMap *typeMap, EvaluatorPass *evaluator,
-           const RemoveUnusedPolicy &policy, bool optimizeParserInlining)
-        : PassManager({new InlinePass(refMap, typeMap, evaluator, policy, optimizeParserInlining),
-                       // After inlining the output of the evaluator changes, so
-                       // we have to run it again
-                       evaluator}) {
+    Inline(TypeMap *typeMap, const RemoveUnusedPolicy &policy, bool optimizeParserInlining,
+           EvaluatorPass *evaluator = nullptr) {
+        refMap.setIsV1(P4CContext::get().options().isv1());
+        auto *evInstance = evaluator ? evaluator : new EvaluatorPass(&refMap, typeMap);
+        addPasses({
+            evInstance,
+            new PassRepeated(
+                {new InlinePass(&refMap, typeMap, evInstance, policy, optimizeParserInlining),
+                 // After inlining the output of the evaluator changes, so we have to
+                 // run it again
+                 evInstance}),
+        });
         setName("Inline");
     }
 

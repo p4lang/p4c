@@ -14,6 +14,7 @@
 #include "backends/p4tools/common/lib/trace_event_types.h"
 #include "backends/p4tools/common/lib/variables.h"
 #include "ir/id.h"
+#include "ir/ir-traversal.h"
 #include "ir/ir.h"
 #include "ir/irutils.h"
 #include "ir/vector.h"
@@ -31,6 +32,14 @@
 #include "backends/p4tools/modules/testgen/options.h"
 
 namespace P4::P4Tools::P4Testgen {
+
+/// Replace argument of given index in a method call with given value.
+const IR::MethodCallExpression *replaceCallArg(const IR::MethodCallExpression *call, size_t argIdx,
+                                               const IR::Expression *replacement) {
+    return IR::Traversal::apply(call, &IR::MethodCallExpression::arguments,
+                                IR::Traversal::Index(argIdx), &IR::Argument::expression,
+                                IR::Traversal::Assign(replacement));
+}
 
 std::vector<std::pair<IR::StateVariable, const IR::Expression *>> ExprStepper::setFields(
     ExecutionState &nextState, const std::vector<IR::StateVariable> &flatFields,
@@ -392,12 +401,8 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::CORE_EXTERN_METHO
          if (!SymbolicEnv::isSymbolicValue(advanceExpr)) {
              stepToSubexpr(advanceExpr, stepper.result, stepper.state,
                            [&externInfo](const Continuation::Parameter *v) {
-                               auto *clonedCall = externInfo.originalCall.clone();
-                               auto *arguments = clonedCall->arguments->clone();
-                               auto *arg = arguments->at(0)->clone();
-                               arg->expression = v->param;
-                               (*arguments)[0] = arg;
-                               clonedCall->arguments = arguments;
+                               const auto *clonedCall =
+                                   replaceCallArg(&externInfo.originalCall, 0, v->param);
                                return Continuation::Return(clonedCall);
                            });
              return;
@@ -541,12 +546,8 @@ const ExprStepper::ExternMethodImpls<ExprStepper> ExprStepper::CORE_EXTERN_METHO
          if (!SymbolicEnv::isSymbolicValue(varbitExtractExpr)) {
              stepToSubexpr(varbitExtractExpr, stepper.result, stepper.state,
                            [&externInfo](const Continuation::Parameter *v) {
-                               auto *clonedCall = externInfo.originalCall.clone();
-                               auto *arguments = clonedCall->arguments->clone();
-                               auto *arg = arguments->at(1)->clone();
-                               arg->expression = v->param;
-                               (*arguments)[1] = arg;
-                               clonedCall->arguments = arguments;
+                               const auto *clonedCall =
+                                   replaceCallArg(&externInfo.originalCall, 1, v->param);
                                return Continuation::Return(clonedCall);
                            });
              return;
