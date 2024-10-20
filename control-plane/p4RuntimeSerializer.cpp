@@ -1584,7 +1584,7 @@ void P4RuntimeSerializer::serializeP4RuntimeIfRequired(const IR::P4Program *prog
     std::vector<cstring> files;
     std::vector<P4::P4RuntimeFormat> formats;
 
-    // only generate P4Info is required by use-provided options
+    // only generate P4Info is required by user-provided options
     if (options.p4RuntimeFile.isNullOrEmpty() && options.p4RuntimeFiles.isNullOrEmpty() &&
         options.p4RuntimeEntriesFile.isNullOrEmpty() &&
         options.p4RuntimeEntriesFiles.isNullOrEmpty()) {

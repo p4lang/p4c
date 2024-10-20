@@ -239,7 +239,15 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     if (policy->optimize(options)) {
         passes.addPasses({
             new Inline(&refMap, &typeMap, evaluator, *policy, options.optimizeParserInlining),
+        });
+    }
+    if (policy->controlPlaneAPIGenEnabled(options)) {
+        passes.addPasses({
             new DuplicateHierarchicalNameCheck(),
+        });
+    }
+    if (policy->optimize(options)) {
+        passes.addPasses({
             new InlineActions(&refMap, &typeMap, *policy),
             new LocalizeAllActions(&refMap, *policy),
             new UniqueNames(),
