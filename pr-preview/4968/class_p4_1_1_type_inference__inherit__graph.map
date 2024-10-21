@@ -1,0 +1,15 @@
+<map id="P4::TypeInference" name="P4::TypeInference">
+<area shape="rect" id="Node000001" title=" " alt="" coords="73,225,211,251"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_transform.html" title=" " alt="" coords="5,152,116,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="86,184,130,223,127,227,82,188"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="51,5,139,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="92,45,66,152,61,151,87,44"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_type_inference_base.html" title=" " alt="" coords="140,152,309,177"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="106,43,119,73,139,102,170,130,203,150,200,154,167,134,135,106,114,75,101,45"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_resolution_context.html" title="Visitor mixin for looking up names in enclosing scopes from the Visitor::Context." alt="" coords="149,79,316,104"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="131,34,211,76,209,81,128,39"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="203,188,157,227,154,223,199,184"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="232,118,229,152,223,152,227,117"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_declaration_lookup.html" title=" " alt="" coords="164,5,331,31"/>
+<area shape="poly" id="edge7_Node000005_Node000006" title=" " alt="" coords="245,45,238,79,232,78,240,44"/>
+</map>

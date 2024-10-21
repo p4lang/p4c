@@ -1,0 +1,31 @@
+<map id="P4::Modifier" name="P4::Modifier">
+<area shape="rect" id="Node000001" title=" " alt="" coords="141,228,240,253"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_check_header_types.html" title=" " alt="" coords="333,5,504,31"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="194,214,204,175,222,127,249,80,266,58,286,40,308,27,332,19,334,24,311,32,290,44,270,62,253,83,227,130,209,176,199,215"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_check_table_size.html" title="Checks some possible misuses of the table size property." alt="" coords="345,55,492,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="199,214,212,184,230,150,255,117,287,89,315,75,345,68,346,73,316,80,289,94,259,120,235,153,216,187,204,216"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_do_single_argument_select.html" title=" " alt="" coords="315,104,523,129"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="206,215,240,176,262,156,287,140,318,127,320,132,289,144,265,160,244,179,210,219"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_header_type_max_length_calculator.html" title=" " alt="" coords="288,153,549,179"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="223,219,287,189,334,176,335,181,289,194,225,224"/>
+<area shape="rect" id="Node000007" href="$class_p4_1_1_move_to_else_after_branch.html" title=" " alt="" coords="319,203,518,228"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="254,231,319,224,319,229,254,236"/>
+<area shape="rect" id="Node000008" href="$class_p4_1_1_parse_annotations.html" title=" " alt="" coords="339,252,498,277"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="254,245,339,254,339,259,253,250"/>
+<area shape="rect" id="Node000012" href="$class_p4_1_1_switch_add_default.html" title=" " alt="" coords="337,301,500,327"/>
+<area shape="poly" id="edge11_Node000001_Node000012" title=" " alt="" coords="225,258,289,287,338,300,336,305,287,293,223,263"/>
+<area shape="rect" id="Node000013" href="$class_p4_1_1_type_check_1_1_assign_action_arg_types.html" title=" " alt="" coords="315,351,523,391"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="211,263,245,302,266,321,289,337,316,349,314,354,287,342,263,325,241,305,207,267"/>
+<area shape="rect" id="Node000014" href="$class_p4_1_1_type_check_1_1_infer_expressions_bottom_up.html" title="Bottom up type inferencing – set the types of expression nodes based on operands." alt="" coords="303,415,535,455"/>
+<area shape="poly" id="edge13_Node000001_Node000014" title=" " alt="" coords="202,265,215,297,233,334,258,371,290,401,309,413,306,417,286,405,254,374,229,337,210,299,198,267"/>
+<area shape="rect" id="Node000015" href="$class_p4_1_1_type_check_1_1_infer_expressions_top_down.html" title="Top down type inferencing – set the type of expression nodes based on their uses." alt="" coords="303,479,535,519"/>
+<area shape="poly" id="edge14_Node000001_Node000015" title=" " alt="" coords="198,267,207,311,224,364,251,419,269,444,290,465,307,477,304,481,286,469,265,447,246,422,219,366,202,312,193,268"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="5,228,93,253"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,238,141,238,141,243,107,243"/>
+<area shape="rect" id="Node000009" href="$class_p4_1_1_b_m_v2_1_1_parse_annotations.html" title="Parses BMV2&#45;specific annotations." alt="" coords="602,195,807,220"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="503,247,549,238,646,217,647,223,550,243,504,252"/>
+<area shape="rect" id="Node000010" href="$class_p4_1_1_control_plane_a_p_i_1_1_parse_p4_runtime_annotations.html" title="Parses P4Runtime&#45;specific annotations." alt="" coords="597,245,812,285"/>
+<area shape="poly" id="edge9_Node000008_Node000010" title=" " alt="" coords="512,262,597,262,597,267,512,267"/>
+<area shape="rect" id="Node000011" href="$class_p4_1_1_t_c_1_1_parse_t_c_annotations.html" title=" " alt="" coords="605,309,804,335"/>
+<area shape="poly" id="edge10_Node000008_Node000011" title=" " alt="" coords="499,277,550,287,644,307,642,312,549,293,498,283"/>
+</map>

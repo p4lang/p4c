@@ -1,0 +1,13 @@
+<map id="P4::ParseAnnotations" name="P4::ParseAnnotations">
+<area shape="rect" id="Node000001" title=" " alt="" coords="288,63,447,88"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_b_m_v2_1_1_parse_annotations.html" title="Parses BMV2&#45;specific annotations." alt="" coords="499,5,705,31"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="431,57,494,41,546,28,547,33,495,46,432,62"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_control_plane_a_p_i_1_1_parse_p4_runtime_annotations.html" title="Parses P4Runtime&#45;specific annotations." alt="" coords="495,55,709,95"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="461,73,495,73,495,78,461,78"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_t_c_1_1_parse_t_c_annotations.html" title=" " alt="" coords="503,120,701,145"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="432,89,495,105,547,117,546,123,494,110,431,94"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_modifier.html" title=" " alt="" coords="141,63,240,88"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="254,73,287,73,287,78,254,78"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="5,63,93,88"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="107,73,141,73,141,78,107,78"/>
+</map>
