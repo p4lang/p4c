@@ -53,8 +53,7 @@ const IR::Node *TagGlobalActions::preorder(IR::P4Action *action) {
             if (!nameString.startsWith(".")) {
                 nameString = "."_cs + nameString;
                 auto newLit = new IR::StringLiteral(e0->srcInfo, nameString);
-                annos = annos->addOrReplace(IR::Annotation::nameAnnotation,
-                                            newLit);
+                annos = annos->addOrReplace(IR::Annotation::nameAnnotation, newLit);
             }
         } else {
             // Add new name annotation beginning with "."
