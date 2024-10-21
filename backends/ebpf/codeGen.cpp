@@ -39,14 +39,14 @@ bool CodeGenInspector::preorder(const IR::Constant *expression) {
     cstring str = EBPFInitializerUtils::genHexStr(expression->value, width, expression);
     builder->append("{ ");
     for (size_t i = 0; i < str.size() / 2; ++i)
-        builder->appendFormat("0x%s, ", str.substr(2 * i, 2));
+        builder->appendFormat("0x%v, ", str.substr(2 * i, 2));
     builder->append("}");
 
     return false;
 }
 
 bool CodeGenInspector::preorder(const IR::StringLiteral *expression) {
-    builder->appendFormat("\"%s\"", expression->toString());
+    builder->appendFormat("\"%v\"", expression->toString());
     return true;
 }
 
@@ -491,7 +491,7 @@ void CodeGenInspector::emitAndConvertByteOrder(const IR::Expression *expr, cstri
         loadSize = 64;
     }
     unsigned shift = loadSize - widthToEmit;
-    builder->appendFormat("%s(", emit);
+    builder->appendFormat("%v(", emit);
     visit(expr);
     if (shift != 0 && byte_order == "HOST") builder->appendFormat(" << %d", shift);
     builder->append(")");

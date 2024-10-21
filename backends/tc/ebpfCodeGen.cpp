@@ -136,7 +136,7 @@ void PNAEbpfGenerator::emitP4TCActionParam(EBPF::CodeBuilder *builder) const {
                 cstring placeholder = tblName + "_" + defaultActionName + "_" + paramName;
                 cstring typeName = param->paramDetail->getParamType();
                 builder->emitIndent();
-                builder->appendFormat("%s %s", typeName, placeholder);
+                builder->appendFormat("%v %v", typeName, placeholder);
                 builder->endOfStatement(true);
             }
         }
@@ -151,7 +151,7 @@ void PNAEbpfGenerator::emitP4TCActionParam(EBPF::CodeBuilder *builder) const {
                 cstring placeholder = tblName + "_" + defaultActionName + "_" + paramName;
                 cstring typeName = param->paramDetail->getParamType();
                 builder->emitIndent();
-                builder->appendFormat("%s %s", typeName, placeholder);
+                builder->appendFormat("%v %v", typeName, placeholder);
                 builder->endOfStatement(true);
             }
         }
@@ -183,7 +183,7 @@ void PNAArchTC::emit(EBPF::CodeBuilder *builder) const {
      * 2. Include header file.
      */
     cstring headerFile = getProgramName() + "_parser.h";
-    builder->appendFormat("#include \"%s\"", headerFile);
+    builder->appendFormat("#include \"%v\"", headerFile);
     builder->newline();
     /*
      * 3. Headers, structs
@@ -222,7 +222,7 @@ void PNAArchTC::emitParser(EBPF::CodeBuilder *builder) const {
      */
     xdp->emitGeneratedComment(builder);
     cstring headerFile = getProgramName() + "_parser.h";
-    builder->appendFormat("#include \"%s\"", headerFile);
+    builder->appendFormat("#include \"%v\"", headerFile);
     builder->newline();
     builder->newline();
     builder->appendLine("struct p4tc_filter_fields p4tc_filter_fields;");
@@ -261,11 +261,11 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
     // FIXME: use Target to generate metadata type
     cstring func_name = (name == "tc-parse") ? "run_parser"_cs : "process"_cs;
     builder->appendFormat(
-        "int %s(%s *%s, %s %s *%s, "
-        "struct pna_global_metadata *%s",
+        "int %v(%v *%s, %v %v *%v, "
+        "struct pna_global_metadata *%v",
         func_name, builder->target->packetDescriptorType(), model.CPacketName.str(),
         parser->headerType->as<EBPF::EBPFStructType>().kind,
-        parser->headerType->as<EBPF::EBPFStructType>().name, parser->headers->name.name,
+        parser->headerType->as<EBPF::EBPFStructType>().name, parser->headers->name,
         compilerGlobalMetadata);
 
     builder->append(")");
@@ -291,7 +291,7 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
         builder->newline();
         builder->emitIndent();
         builder->emitIndent();
-        builder->appendFormat("return %s;", dropReturnCode());
+        builder->appendFormat("return %v;", dropReturnCode());
         builder->newline();
         builder->emitIndent();
         builder->appendFormat("unsigned %s = hdrMd->%s;", offsetVar.c_str(), offsetVar.c_str());
@@ -308,10 +308,10 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
 
     if (name == "tc-parse") {
         msgStr = absl::StrFormat(
-            "%s parser: parsing new packet, input_port=%%d, path=%%d, "
+            "%v parser: parsing new packet, input_port=%%d, path=%%d, "
             "pkt_len=%%d",
             sectionName);
-        varStr = absl::StrFormat("%s->packet_path", compilerGlobalMetadata);
+        varStr = absl::StrFormat("%v->packet_path", compilerGlobalMetadata);
         builder->target->emitTraceMessage(builder, msgStr.c_str(), 3, inputPortVar.c_str(), varStr,
                                           lengthVar.c_str());
 
@@ -328,21 +328,21 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
     if (name == "tc-ingress") {
         // CONTROL
         builder->blockStart();
-        msgStr = absl::StrFormat("%s control: packet processing started", sectionName);
+        msgStr = absl::StrFormat("%v control: packet processing started", sectionName);
         builder->target->emitTraceMessage(builder, msgStr.c_str());
         ((EBPFControlPNA *)control)->emitExternDefinition(builder);
         control->emit(builder);
         builder->blockEnd(true);
-        msgStr = absl::StrFormat("%s control: packet processing finished", sectionName);
+        msgStr = absl::StrFormat("%v control: packet processing finished", sectionName);
         builder->target->emitTraceMessage(builder, msgStr.c_str());
 
         // DEPARSER
         builder->emitIndent();
         builder->blockStart();
-        msgStr = absl::StrFormat("%s deparser: packet deparsing started", sectionName);
+        msgStr = absl::StrFormat("%v deparser: packet deparsing started", sectionName);
         builder->target->emitTraceMessage(builder, msgStr.c_str());
         deparser->emit(builder);
-        msgStr = absl::StrFormat("%s deparser: packet deparsing finished", sectionName);
+        msgStr = absl::StrFormat("%v deparser: packet deparsing finished", sectionName);
         builder->target->emitTraceMessage(builder, msgStr.c_str());
         builder->blockEnd(true);
     }
@@ -360,7 +360,7 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
     if (name == "tc-ingress") {
         builder->target->emitCodeSection(builder, sectionName);
         builder->emitIndent();
-        builder->appendFormat("int %s(%s *%s)", functionName,
+        builder->appendFormat("int %v(%v *%s)", functionName,
                               builder->target->packetDescriptorType(), model.CPacketName.str());
         builder->spc();
 
@@ -375,12 +375,12 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
         builder->appendFormat("int ret = %d;", actUnspecCode);
         builder->newline();
         builder->emitIndent();
-        builder->appendFormat("ret = %s(skb, ", func_name);
+        builder->appendFormat("ret = %v(skb, ", func_name);
 
-        builder->appendFormat("(%s %s *) %s, %s);",
+        builder->appendFormat("(%v %v *) %v, %v);",
                               parser->headerType->as<EBPF::EBPFStructType>().kind,
                               parser->headerType->as<EBPF::EBPFStructType>().name,
-                              parser->headers->name.name, compilerGlobalMetadata);
+                              parser->headers->name, compilerGlobalMetadata);
 
         builder->newline();
         builder->emitIndent();
@@ -398,7 +398,7 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
         builder->newline();
         builder->target->emitCodeSection(builder, sectionName);
         builder->emitIndent();
-        builder->appendFormat("int %s(%s *%s)", functionName,
+        builder->appendFormat("int %v(%v *%s)", functionName,
                               builder->target->packetDescriptorType(), model.CPacketName.str());
         builder->spc();
 
@@ -406,7 +406,7 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
 
         builder->emitIndent();
         builder->appendFormat(
-            "struct pna_global_metadata *%s = (struct pna_global_metadata *) skb->cb;",
+            "struct pna_global_metadata *%v = (struct pna_global_metadata *) skb->cb;",
             compilerGlobalMetadata);
         builder->newline();
 
@@ -417,12 +417,12 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
         builder->appendFormat("int ret = %d;", actUnspecCode);
         builder->newline();
         builder->emitIndent();
-        builder->appendFormat("ret = %s(skb, ", func_name);
+        builder->appendFormat("ret = %v(skb, ", func_name);
 
-        builder->appendFormat("(%s %s *) %s, %s);",
+        builder->appendFormat("(%v %v *) %v, %v);",
                               parser->headerType->as<EBPF::EBPFStructType>().kind,
                               parser->headerType->as<EBPF::EBPFStructType>().name,
-                              parser->headers->name.name, compilerGlobalMetadata);
+                              parser->headers->name, compilerGlobalMetadata);
 
         builder->newline();
         builder->emitIndent();
@@ -443,7 +443,7 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
 void TCIngressPipelinePNA::emitGlobalMetadataInitializer(EBPF::CodeBuilder *builder) {
     builder->emitIndent();
     builder->appendFormat(
-        "struct pna_global_metadata *%s = (struct pna_global_metadata *) skb->cb;",
+        "struct pna_global_metadata *%v = (struct pna_global_metadata *) skb->cb;",
         compilerGlobalMetadata);
     builder->newline();
 
@@ -460,7 +460,7 @@ void TCIngressPipelinePNA::emitGlobalMetadataInitializer(EBPF::CodeBuilder *buil
     // workaround to make TC protocol-independent, DO NOT REMOVE
     builder->emitIndent();
     // replace ether_type only if a packet comes from XDP
-    builder->appendFormat("if (!%s->recirculated) ", compilerGlobalMetadata);
+    builder->appendFormat("if (!%v->recirculated) ", compilerGlobalMetadata);
     builder->blockStart();
     builder->emitIndent();
     builder->appendFormat("compiler_meta__->mark = %u", packetMark);
@@ -483,7 +483,7 @@ void TCIngressPipelinePNA::emitGlobalMetadataInitializer(EBPF::CodeBuilder *buil
 
 void TCIngressPipelinePNA::emitTrafficManager(EBPF::CodeBuilder *builder) {
     builder->emitIndent();
-    builder->appendFormat("if (!%s->drop && %s->egress_port == 0) ", compilerGlobalMetadata,
+    builder->appendFormat("if (!%v->drop && %v->egress_port == 0) ", compilerGlobalMetadata,
                           compilerGlobalMetadata);
     builder->blockStart();
     builder->target->emitTraceMessage(builder, "IngressTM: Sending packet up to the kernel stack");
@@ -502,13 +502,13 @@ void TCIngressPipelinePNA::emitTrafficManager(EBPF::CodeBuilder *builder) {
     builder->endOfStatement(true);
     builder->blockEnd(true);
 
-    cstring eg_port = absl::StrFormat("%s->egress_port", compilerGlobalMetadata);
+    cstring eg_port = absl::StrFormat("%v->egress_port", compilerGlobalMetadata);
     cstring cos =
-        absl::StrFormat("%s.class_of_service", control->outputStandardMetadata->name.name);
+        absl::StrFormat("%v.class_of_service", control->outputStandardMetadata->name.name);
     builder->target->emitTraceMessage(
         builder, "IngressTM: Sending packet out of port %d with priority %d", 2, eg_port, cos);
     builder->emitIndent();
-    builder->appendFormat("return bpf_redirect(%s->egress_port, 0)", compilerGlobalMetadata);
+    builder->appendFormat("return bpf_redirect(%v->egress_port, 0)", compilerGlobalMetadata);
     builder->endOfStatement(true);
 }
 
@@ -637,7 +637,7 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
         }
     }
 
-    msgStr = absl::StrFormat("Parser: extracting field %s", fieldName);
+    msgStr = absl::StrFormat("Parser: extracting field %v", fieldName);
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 
     if (widthToExtract <= 64) {
@@ -667,15 +667,14 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
         if (noEndiannessConversion) {
             builder->appendFormat("__builtin_memcpy(&");
             visit(expr);
-            builder->appendFormat(".%s, %s + BYTES(%s), %d)", fieldName,
-                                  program->packetStartVar.c_str(), program->offsetVar.c_str(),
-                                  widthToExtract / 8);
+            builder->appendFormat(".%v, %v + BYTES(%v), %d)", fieldName, program->packetStartVar,
+                                  program->offsetVar, widthToExtract / 8);
         } else {
             visit(expr);
-            builder->appendFormat(".%s = (", fieldName);
+            builder->appendFormat(".%v = (", fieldName);
             type->emit(builder);
-            builder->appendFormat(")((%s(%s, BYTES(%s))", helper, program->packetStartVar.c_str(),
-                                  program->offsetVar.c_str());
+            builder->appendFormat(")((%s(%v, BYTES(%v))", helper, program->packetStartVar,
+                                  program->offsetVar);
             if (shift != 0) builder->appendFormat(" >> %d", shift);
             builder->append(")");
             if (widthToExtract != loadSize) {
@@ -754,13 +753,13 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
                 }
             }
         }
-        cstring tmp = absl::StrFormat("(unsigned long long) %s.%s", exprStr, fieldName);
+        cstring tmp = absl::StrFormat("(unsigned long long) %v.%v", exprStr, fieldName);
 
         msgStr =
-            absl::StrFormat("Parser: extracted %s=0x%%llx (%u bits)", fieldName, widthToExtract);
+            absl::StrFormat("Parser: extracted %v=0x%%llx (%u bits)", fieldName, widthToExtract);
         builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, tmp.c_str());
     } else {
-        msgStr = absl::StrFormat("Parser: extracted %s (%u bits)", fieldName, widthToExtract);
+        msgStr = absl::StrFormat("Parser: extracted %v (%u bits)", fieldName, widthToExtract);
         builder->target->emitTraceMessage(builder, msgStr.c_str());
     }
 
@@ -768,9 +767,8 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
 }
 
 void PnaStateTranslationVisitor::compileLookahead(const IR::Expression *destination) {
-    cstring msgStr = absl::StrFormat("Parser: lookahead for %s %s",
-                                     state->parser->typeMap->getType(destination)->toString(),
-                                     destination->toString());
+    cstring msgStr = absl::StrFormat("Parser: lookahead for %v %v",
+                                     state->parser->typeMap->getType(destination), destination);
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 
     builder->emitIndent();
@@ -846,7 +844,7 @@ void EBPFTablePNA::emitKeyType(EBPF::CodeBuilder *builder) {
     if (isTernaryTable()) {
         // generate mask key
         builder->emitIndent();
-        builder->appendFormat("#define MAX_%s_MASKS %u", keyTypeName.toUpper(),
+        builder->appendFormat("#define MAX_%v_MASKS %u", keyTypeName.toUpper(),
                               program->options.maxTernaryMasks);
         builder->newline();
 
@@ -922,7 +920,7 @@ void EBPFTablePNA::emitValueStructStructure(EBPF::CodeBuilder *builder) {
 cstring EBPFTablePNA::p4ActionToActionIDName(const IR::P4Action *action) const {
     cstring actionName = EBPFObject::externalName(action);
     cstring tableInstance = dataMapName;
-    return absl::StrFormat("%s_ACT_%s", tableInstance.toUpper(), actionName.toUpper());
+    return absl::StrFormat("%v_ACT_%v", tableInstance.toUpper(), actionName.toUpper());
 }
 
 void EBPFTablePNA::emitActionArguments(EBPF::CodeBuilder *builder, const IR::P4Action *action,
@@ -965,24 +963,23 @@ void EBPFTablePNA::emitAction(EBPF::CodeBuilder *builder, cstring valueName,
         cstring name = EBPF::EBPFObject::externalName(action), msgStr, convStr;
         builder->emitIndent();
         cstring actionName = p4ActionToActionIDName(action);
-        builder->appendFormat("case %s: ", actionName);
+        builder->appendFormat("case %v: ", actionName);
         builder->newline();
         builder->increaseIndent();
 
-        msgStr = absl::StrFormat("Control: executing action %s", name);
+        msgStr = absl::StrFormat("Control: executing action %v", name);
         builder->target->emitTraceMessage(builder, msgStr.c_str());
         for (auto param : *(action->parameters)) {
             auto etype = EBPF::EBPFTypeFactory::instance->create(param->type);
             unsigned width = etype->as<EBPF::IHasWidth>().widthInBits();
 
             if (width <= 64) {
-                convStr = absl::StrFormat("(unsigned long long) (%s->u.%s.%s)", valueName, name,
-                                          param->toString());
-                msgStr = absl::StrFormat("Control: param %s=0x%%llx (%d bits)", param->toString(),
-                                         width);
+                convStr =
+                    absl::StrFormat("(unsigned long long) (%v->u.%v.%v)", valueName, name, param);
+                msgStr = absl::StrFormat("Control: param %v=0x%%llx (%d bits)", param, width);
                 builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, convStr.c_str());
             } else {
-                msgStr = absl::StrFormat("Control: param %s (%d bits)", param->toString(), width);
+                msgStr = absl::StrFormat("Control: param %v (%d bits)", param, width);
                 builder->target->emitTraceMessage(builder, msgStr.c_str());
             }
         }
@@ -1063,9 +1060,9 @@ void EBPFTablePNA::emitAction(EBPF::CodeBuilder *builder, cstring valueName,
         cstring noActionName = P4::P4CoreLibrary::instance().noAction.name;
         cstring tableInstance = dataMapName;
         cstring actionName =
-            absl::StrFormat("%s_ACT_%s", tableInstance.toUpper(), noActionName.toUpper());
+            absl::StrFormat("%v_ACT_%v", tableInstance.toUpper(), noActionName.toUpper());
         builder->emitIndent();
-        builder->appendFormat("case %s: ", actionName);
+        builder->appendFormat("case %v: ", actionName);
         builder->newline();
         builder->increaseIndent();
         builder->emitIndent();
@@ -1121,17 +1118,17 @@ void EBPFTablePNA::emitValueActionIDNames(EBPF::CodeBuilder *builder) {
             noActionGenerated = true;
         unsigned int action_idx = tcIR->getActionId(tcIR->externalName(action));
         builder->emitIndent();
-        builder->appendFormat("#define %s %d", p4ActionToActionIDName(action), action_idx);
+        builder->appendFormat("#define %v %d", p4ActionToActionIDName(action), action_idx);
         builder->newline();
     }
     if (!noActionGenerated) {
         cstring noActionName = P4::P4CoreLibrary::instance().noAction.name;
         cstring tableInstance = dataMapName;
         cstring actionName =
-            absl::StrFormat("%s_ACT_%s", tableInstance.toUpper(), noActionName.toUpper());
+            absl::StrFormat("%v_ACT_%v", tableInstance.toUpper(), noActionName.toUpper());
         unsigned int action_idx = tcIR->getActionId(noActionName);
         builder->emitIndent();
-        builder->appendFormat("#define %s %d", actionName, action_idx);
+        builder->appendFormat("#define %v %d", actionName, action_idx);
         builder->newline();
     }
     builder->emitIndent();
@@ -1174,7 +1171,7 @@ void IngressDeparserPNA::emitPreDeparser(EBPF::CodeBuilder *builder) {
     builder->emitIndent();
     CHECK_NULL(program);
     auto pipeline = program->checkedTo<EBPF::EBPFPipeline>();
-    builder->appendFormat("if (%s->drop) ", pipeline->compilerGlobalMetadata);
+    builder->appendFormat("if (%v->drop) ", pipeline->compilerGlobalMetadata);
     builder->blockStart();
     builder->target->emitTraceMessage(builder, "PreDeparser: dropping packet..");
     builder->emitIndent();
@@ -1214,11 +1211,11 @@ void IngressDeparserPNA::emit(EBPF::CodeBuilder *builder) {
 
     emitBufferAdjusts(builder);
     builder->emitIndent();
-    builder->appendFormat("%s = %s;", program->packetStartVar,
+    builder->appendFormat("%v = %v;", program->packetStartVar,
                           builder->target->dataOffset(program->model.CPacketName.toString()));
     builder->newline();
     builder->emitIndent();
-    builder->appendFormat("%s = %s;", program->packetEndVar,
+    builder->appendFormat("%v = %v;", program->packetEndVar,
                           builder->target->dataEnd(program->model.CPacketName.toString()));
     builder->newline();
 
@@ -1727,19 +1724,19 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
                                         actionName);
                         }
                         builder->emitIndent();
-                        builder->appendFormat("update_act_bpf_val->u.%s.%s = ", actionExtName,
-                                              param->toString());
+                        builder->appendFormat("update_act_bpf_val->u.%v.%v = ", actionExtName,
+                                              param);
                         visit(components.at(index)->expression);
                         builder->endOfStatement();
                         builder->newline();
                     }
                     builder->emitIndent();
-                    builder->appendFormat("update_act_bpf_val->action = %s;",
+                    builder->appendFormat("update_act_bpf_val->action = %v;",
                                           table->p4ActionToActionIDName(action));
                     builder->newline();
                 } else {
                     builder->emitIndent();
-                    builder->appendFormat("update_act_bpf.act_id = %s;",
+                    builder->appendFormat("update_act_bpf.act_id = %v;",
                                           table->p4ActionToActionIDName(action));
                     builder->newline();
                 }
@@ -1796,7 +1793,7 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
     auto table = control->getTable(method->object->getName().name);
     BUG_CHECK(table != nullptr, "No table for %1%", method->expr);
 
-    msgStr = absl::StrFormat("Control: applying %s", method->object->getName().name);
+    msgStr = absl::StrFormat("Control: applying %v", method->object->getName());
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 
     builder->emitIndent();
@@ -1896,10 +1893,10 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
 
             cstring msgStr, varStr;
             if (memcpy) {
-                msgStr = absl::StrFormat("Control: key %s", c->expression->toString());
+                msgStr = absl::StrFormat("Control: key %v", c->expression);
                 builder->target->emitTraceMessage(builder, msgStr.c_str());
             } else {
-                msgStr = absl::StrFormat("Control: key %s=0x%%llx", c->expression->toString());
+                msgStr = absl::StrFormat("Control: key %v=0x%%llx", c->expression);
                 varStr = absl::StrFormat("(unsigned long long) %s.%s", keyname.c_str(),
                                          fieldName.c_str());
                 builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, varStr.c_str());
@@ -1959,7 +1956,7 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
     toDereference.clear();
     builder->blockEnd(true);
 
-    msgStr = absl::StrFormat("Control: %s applied", method->object->getName().name);
+    msgStr = absl::StrFormat("Control: %v applied", method->object->getName());
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 }
 
@@ -2087,9 +2084,9 @@ cstring ActionTranslationVisitorPNA::getParamInstanceName(const IR::Expression *
 
     if (isDefaultAction) {
         cstring actionName = action->name.originalName;
-        auto paramStr = absl::StrFormat("p4tc_filter_fields.%s_%s_%s",
-                                        table->table->container->name.originalName, actionName,
-                                        expression->toString());
+        auto paramStr =
+            absl::StrFormat("p4tc_filter_fields.%v_%v_%v",
+                            table->table->container->name.originalName, actionName, expression);
         return paramStr;
     } else {
         return EBPF::ActionTranslationVisitor::getParamInstanceName(expression);
@@ -2267,13 +2264,13 @@ void DeparserHdrEmitTranslatorPNA::emitField(EBPF::CodeBuilder *builder, cstring
             visit(hdrExpr);
             builder->appendFormat(".%s", field.c_str());
             builder->endOfStatement(true);
-            msgStr = absl::StrFormat("Deparser: emitting field %s=0x%%llx (%u bits)", field,
+            msgStr = absl::StrFormat("Deparser: emitting field %v=0x%%llx (%u bits)", field,
                                      widthToEmit);
             builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, "tmp");
             builder->blockEnd(true);
         }
     } else {
-        msgStr = absl::StrFormat("Deparser: emitting field %s (%u bits)", field, widthToEmit);
+        msgStr = absl::StrFormat("Deparser: emitting field %v (%u bits)", field, widthToEmit);
         builder->target->emitTraceMessage(builder, msgStr.c_str());
     }
 
@@ -2295,9 +2292,9 @@ void DeparserHdrEmitTranslatorPNA::emitField(EBPF::CodeBuilder *builder, cstring
     if (!swap.isNullOrEmpty() && !noEndiannessConversion) {
         builder->emitIndent();
         visit(hdrExpr);
-        builder->appendFormat(".%s = %s(", field, swap);
+        builder->appendFormat(".%v = %v(", field, swap);
         visit(hdrExpr);
-        builder->appendFormat(".%s", field);
+        builder->appendFormat(".%v", field);
         if (shift != 0) builder->appendFormat(" << %d", shift);
         builder->append(")");
         builder->endOfStatement(true);
@@ -2310,7 +2307,7 @@ void DeparserHdrEmitTranslatorPNA::emitField(EBPF::CodeBuilder *builder, cstring
         builder->emitIndent();
         builder->appendFormat("%s = ((char*)(&", program->byteVar.c_str());
         visit(hdrExpr);
-        builder->appendFormat(".%s))[%d]", field, i);
+        builder->appendFormat(".%v))[%d]", field, i);
         builder->endOfStatement(true);
         unsigned freeBits = alignment != 0 ? (8 - alignment) : 8;
         bitsInCurrentByte = left >= 8 ? 8 : left;

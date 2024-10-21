@@ -252,14 +252,14 @@ void UBPFListType::emitInitializer(EBPF::CodeBuilder *builder) {
     for (auto f : elements) {
         if (!f->is<Padding>()) continue;
         builder->emitIndent();
-        builder->appendFormat(".%s = {0},", f->to<Padding>()->name);
+        builder->appendFormat(".%v = {0},", f->to<Padding>()->name);
         builder->newline();
     }
     builder->blockEnd(false);
 }
 
 void UBPFListType::emitPadding(EBPF::CodeBuilder *builder, UBPF::UBPFListType::Padding *pad) {
-    builder->appendFormat("uint8_t %s[%u]", pad->name, pad->widthInBytes);
+    builder->appendFormat("uint8_t %v[%u]", pad->name, pad->widthInBytes);
 }
 
 /***

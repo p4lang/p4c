@@ -38,9 +38,10 @@ struct ID : Util::IHasSourceInfo, public IHasDbPrint {
     ID(Util::SourceInfo si, cstring n) : srcInfo(si), name(n), originalName(n) {
         if (n.isNullOrEmpty()) BUG("Identifier with no name");
     }
+    // FIXME: Replace with single string_view constructor
     ID(const char *n) : ID(Util::SourceInfo(), cstring(n)) {}  // NOLINT(runtime/explicit)
     ID(cstring n) : ID(Util::SourceInfo(), n) {}               // NOLINT(runtime/explicit)
-    ID(std::string n) : ID(Util::SourceInfo(), n) {}           // NOLINT(runtime/explicit)
+    ID(const std::string &n) : ID(Util::SourceInfo(), n) {}    // NOLINT(runtime/explicit)
     ID(cstring n, cstring old) : ID(Util::SourceInfo(), n, old) {}
     void dbprint(std::ostream &out) const override {
         out << name;
@@ -65,6 +66,11 @@ struct ID : Util::IHasSourceInfo, public IHasDbPrint {
     bool isDontCare() const { return name == "_"; }
     Util::SourceInfo getSourceInfo() const override { return srcInfo; }
     cstring toString() const override { return originalName.isNullOrEmpty() ? name : originalName; }
+
+    template <typename Sink>
+    friend void AbslStringify(Sink &sink, const ID &id) {
+        sink.Append(id.string_view());
+    }
 };
 
 }  // namespace P4::IR

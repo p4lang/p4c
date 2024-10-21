@@ -201,13 +201,13 @@ void DeparserHdrEmitTranslator::emitField(CodeBuilder *builder, cstring field,
             visit(hdrExpr);
             builder->appendFormat(".%s", field.c_str());
             builder->endOfStatement(true);
-            msgStr = absl::StrFormat("Deparser: emitting field %s=0x%%llx (%u bits)", field,
+            msgStr = absl::StrFormat("Deparser: emitting field %v=0x%%llx (%u bits)", field,
                                      widthToEmit);
             builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, "tmp");
             builder->blockEnd(true);
         }
     } else {
-        msgStr = absl::StrFormat("Deparser: emitting field %s (%u bits)", field, widthToEmit);
+        msgStr = absl::StrFormat("Deparser: emitting field %v (%u bits)", field, widthToEmit);
         builder->target->emitTraceMessage(builder, msgStr.c_str());
     }
 
@@ -229,9 +229,9 @@ void DeparserHdrEmitTranslator::emitField(CodeBuilder *builder, cstring field,
     if (!swap.isNullOrEmpty()) {
         builder->emitIndent();
         visit(hdrExpr);
-        builder->appendFormat(".%s = %s(", field, swap);
+        builder->appendFormat(".%v = %v(", field, swap);
         visit(hdrExpr);
-        builder->appendFormat(".%s", field);
+        builder->appendFormat(".%v", field);
         if (shift != 0) builder->appendFormat(" << %d", shift);
         builder->append(")");
         builder->endOfStatement(true);
@@ -244,7 +244,7 @@ void DeparserHdrEmitTranslator::emitField(CodeBuilder *builder, cstring field,
         builder->emitIndent();
         builder->appendFormat("%s = ((char*)(&", program->byteVar.c_str());
         visit(hdrExpr);
-        builder->appendFormat(".%s))[%d]", field, i);
+        builder->appendFormat(".%v))[%d]", field, i);
         builder->endOfStatement(true);
         unsigned freeBits = alignment != 0 ? (8 - alignment) : 8;
         bitsInCurrentByte = left >= 8 ? 8 : left;
@@ -371,14 +371,14 @@ void EBPFDeparser::emit(CodeBuilder *builder) {
     emitBufferAdjusts(builder);
 
     builder->emitIndent();
-    builder->appendFormat("%s = %s;", program->packetStartVar,
+    builder->appendFormat("%v = %v;", program->packetStartVar,
                           builder->target->dataOffset(program->model.CPacketName.toString()));
     builder->newline();
     builder->emitIndent();
-    builder->appendFormat("%s = %s;", program->headerStartVar, program->packetStartVar);
+    builder->appendFormat("%v = %v;", program->headerStartVar, program->packetStartVar);
     builder->newline();
     builder->emitIndent();
-    builder->appendFormat("%s = %s;", program->packetEndVar,
+    builder->appendFormat("%v = %v;", program->packetEndVar,
                           builder->target->dataEnd(program->model.CPacketName.toString()));
     builder->newline();
 

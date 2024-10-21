@@ -36,7 +36,7 @@ namespace detail {
 static inline std::pair<std::string_view, std::string> getPositionTail(const Util::SourceInfo &info,
                                                                        std::string_view position,
                                                                        std::string_view tail) {
-    std::string_view posString = info.toPositionString().string_view();
+    std::string_view posString = info.toPositionString();
     std::string outTail(tail);
     if (position.empty()) {
         position = posString;

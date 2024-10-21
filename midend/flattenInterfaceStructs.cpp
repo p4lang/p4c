@@ -74,7 +74,7 @@ const IR::Node *ReplaceStructs::postorder(IR::Member *expression) {
     std::string prefix;
     while (auto mem = e->to<IR::Member>()) {
         e = mem->expr;
-        prefix = absl::StrCat(".", mem->member.string_view(), prefix);
+        prefix = absl::StrCat(".", mem->member, prefix);
     }
     auto pe = e->to<IR::PathExpression>();
     if (pe == nullptr) return expression;

@@ -118,7 +118,7 @@ class cstring {
 
     // construct cstring from std::string_view. Do not use if possible, this is linear
     // time operation if string not exists in table, because the underlying string must be copied.
-    explicit cstring(std::string_view string) {  // NOLINT(runtime/explicit)
+    explicit cstring(std::string_view string) {
         construct_from_shared(string.data(), string.length());
     }
 
@@ -178,7 +178,7 @@ class cstring {
 
     template <typename Iter>
     cstring(Iter begin, Iter end) {
-        *this = std::string(begin, end);
+        *this = cstring(std::string(begin, end));
     }
 
     char get(unsigned index) const { return (index < size()) ? str[index] : 0; }
@@ -191,7 +191,7 @@ class cstring {
     std::string_view string_view() const {
         return str ? std::string_view(str) : std::string_view("");
     }
-    explicit operator std::string_view() const { return string_view(); }
+    operator std::string_view() const { return string_view(); }
 
     // Size tests. Constant time except for size(), which is linear time.
     size_t size() const {
@@ -202,6 +202,7 @@ class cstring {
     }
     bool isNull() const { return str == nullptr; }
     bool isNullOrEmpty() const { return str == nullptr ? true : str[0] == 0; }
+    explicit operator bool() const { return str; }
 
     // iterate over characters
     const char *begin() const { return str; }
@@ -307,6 +308,11 @@ class cstring {
     cstring capitalize() const;
     /// Append this many spaces after each newline (and before the first string).
     cstring indent(size_t amount) const;
+
+    template <typename Sink>
+    friend void AbslStringify(Sink &sink, cstring s) {
+        sink.Append(s.string_view());
+    }
 };
 
 inline bool operator==(const char *a, cstring b) { return b == a; }
@@ -350,19 +356,19 @@ inline std::string operator+(char a, cstring b) {
 }
 
 inline cstring cstring::operator+=(cstring a) {
-    *this = *this + a;
+    *this = cstring(*this + a);
     return *this;
 }
 inline cstring cstring::operator+=(const char *a) {
-    *this = *this + a;
+    *this = cstring(*this + a);
     return *this;
 }
 inline cstring cstring::operator+=(std::string a) {
-    *this = *this + a;
+    *this = cstring(*this + a);
     return *this;
 }
 inline cstring cstring::operator+=(char a) {
-    *this = *this + a;
+    *this = cstring(*this + a);
     return *this;
 }
 
@@ -382,7 +388,7 @@ cstring cstring::make_unique(const T &inuse, cstring base, int &counter, char se
     cstring rv = base;
     do {
         snprintf(suffix, sizeof(suffix) / sizeof(suffix[0]), "%c%d", sep, counter++);
-        rv = base + suffix;
+        rv = cstring(base + (const char *)suffix);
     } while (inuse.count(rv));
     return rv;
 }
@@ -394,7 +400,7 @@ cstring cstring::make_unique(const T &inuse, cstring base, char sep) {
 }
 
 inline std::ostream &operator<<(std::ostream &out, cstring s) {
-    return out << (s ? s.c_str() : "<null>");
+    return out << (s.isNull() ? "<null>" : s.string_view());
 }
 
 }  // namespace P4
