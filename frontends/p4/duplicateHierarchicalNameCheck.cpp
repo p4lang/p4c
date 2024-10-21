@@ -24,6 +24,59 @@ cstring DuplicateHierarchicalNameCheck::getName(const IR::IDeclaration *decl) {
     return decl->getName();
 }
 
+void DuplicateHierarchicalNameCheck::checkForDuplicateName(cstring name, const IR::Node *node) {
+    bool foundDuplicate = false;
+    auto *otherNode = node;
+    if (node->is<IR::P4Table>()) {
+        auto [it, inserted] = annotatedTables.insert(std::pair(name, node));
+        if (!inserted) {
+            foundDuplicate = true;
+            otherNode = (*it).second;
+        }
+    } else if (node->is<IR::P4Action>()) {
+        auto [it, inserted] = annotatedActions.insert(std::pair(name, node));
+        if (!inserted) {
+            foundDuplicate = true;
+            otherNode = (*it).second;
+        }
+    } else {
+        auto [it, inserted] = annotatedOthers.insert(std::pair(name, node));
+        if (!inserted) {
+            foundDuplicate = true;
+            otherNode = (*it).second;
+        }
+    }
+    if (foundDuplicate) {
+        error(ErrorType::ERR_DUPLICATE, "%1%: conflicting control plane name: %2%", node,
+              otherNode);
+    }
+}
+
+const IR::Node *DuplicateHierarchicalNameCheck::postorder(IR::P4Action *action) {
+    // Actions declared at the top level that the developer did not
+    // write a @name annotation for it, should be included in the
+    // duplicate name check.  They do not yet have a @name annotation
+    // by the time this pass executes, so this method will handle
+    // such actions.
+    if (findContext<IR::P4Control>() == nullptr) {
+        auto annos = action->annotations;
+        bool hasNameAnnotation = false;
+        if (annos != nullptr) {
+            auto nameAnno = annos->getSingle(IR::Annotation::nameAnnotation);
+            if (nameAnno) {
+                hasNameAnnotation = true;
+            }
+        }
+        if (!hasNameAnnotation) {
+            // name is what this top-level action's @name annotation
+            // will be, after LocalizeAllActions pass adds one.
+            cstring name = "." + action->name;
+            checkForDuplicateName(name, action);
+        }
+    }
+    return action;
+}
+
 const IR::Node *DuplicateHierarchicalNameCheck::postorder(IR::Annotation *annotation) {
     if (annotation->name != IR::Annotation::nameAnnotation) return annotation;
 
@@ -47,34 +100,7 @@ const IR::Node *DuplicateHierarchicalNameCheck::postorder(IR::Annotation *annota
     if (annotatedNode->is<IR::Declaration_Variable>() || annotatedNode->is<IR::Type_Struct>()) {
         return annotation;
     }
-    bool foundDuplicate = false;
-    auto *otherNode = annotatedNode;
-    if (annotatedNode->is<IR::P4Table>()) {
-        if (annotatedTables.count(name)) {
-            foundDuplicate = true;
-            otherNode = annotatedTables[name];
-        } else {
-            annotatedTables[name] = annotatedNode;
-        }
-    } else if (annotatedNode->is<IR::P4Action>()) {
-        if (annotatedActions.count(name)) {
-            foundDuplicate = true;
-            otherNode = annotatedActions[name];
-        } else {
-            annotatedActions[name] = annotatedNode;
-        }
-    } else {
-        if (annotatedOthers.count(name)) {
-            foundDuplicate = true;
-            otherNode = annotatedOthers[name];
-        } else {
-            annotatedOthers[name] = annotatedNode;
-        }
-    }
-    if (foundDuplicate) {
-        error(ErrorType::ERR_DUPLICATE, "%1%: conflicting control plane name: %2%", annotatedNode,
-              otherNode);
-    }
+    checkForDuplicateName(name, annotatedNode);
     return annotation;
 }
 

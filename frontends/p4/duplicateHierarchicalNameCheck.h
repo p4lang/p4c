@@ -79,6 +79,10 @@ class DuplicateHierarchicalNameCheck : public Transform {
         return table;
     }
 
+    void checkForDuplicateName(cstring name, const IR::Node *node);
+
+    const IR::Node *postorder(IR::P4Action *action) override;
+
     const IR::Node *postorder(IR::Annotation *annotation) override;
     // Do not change name annotations on parameters
     const IR::Node *preorder(IR::Parameter *parameter) override {
