@@ -35,7 +35,7 @@ limitations under the License.
 #include "deprecated.h"
 #include "directCalls.h"
 #include "dontcareArgs.h"
-#include "duplicateHierarchicalNameCheck.h"
+#include "duplicateActionControlPlaneNameCheck.h"
 #include "entryPriorities.h"
 #include "evaluator/evaluator.h"
 #include "frontends/common/constantFolding.h"
@@ -239,7 +239,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     }
     if (policy->controlPlaneAPIGenEnabled(options)) {
         passes.addPasses({
-            new DuplicateHierarchicalNameCheck(),
+            new DuplicateActionControlPlaneNameCheck(),
         });
     }
     if (policy->optimize(options)) {

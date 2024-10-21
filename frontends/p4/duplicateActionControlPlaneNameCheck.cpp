@@ -14,37 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "duplicateHierarchicalNameCheck.h"
+#include "duplicateActionControlPlaneNameCheck.h"
 
 #include "lib/log.h"
 
 namespace P4 {
 
-cstring DuplicateHierarchicalNameCheck::getName(const IR::IDeclaration *decl) {
+cstring DuplicateActionControlPlaneNameCheck::getName(const IR::IDeclaration *decl) {
     return decl->getName();
 }
 
-void DuplicateHierarchicalNameCheck::checkForDuplicateName(cstring name, const IR::Node *node) {
+void DuplicateActionControlPlaneNameCheck::checkForDuplicateName(cstring name, const IR::Node *node) {
     bool foundDuplicate = false;
     auto *otherNode = node;
-    if (node->is<IR::P4Table>()) {
-        auto [it, inserted] = annotatedTables.insert(std::pair(name, node));
-        if (!inserted) {
-            foundDuplicate = true;
-            otherNode = (*it).second;
-        }
-    } else if (node->is<IR::P4Action>()) {
-        auto [it, inserted] = annotatedActions.insert(std::pair(name, node));
-        if (!inserted) {
-            foundDuplicate = true;
-            otherNode = (*it).second;
-        }
-    } else {
-        auto [it, inserted] = annotatedOthers.insert(std::pair(name, node));
-        if (!inserted) {
-            foundDuplicate = true;
-            otherNode = (*it).second;
-        }
+    auto [it, inserted] = actions.insert(std::pair(name, node));
+    if (!inserted) {
+        foundDuplicate = true;
+        otherNode = (*it).second;
     }
     if (foundDuplicate) {
         error(ErrorType::ERR_DUPLICATE, "%1%: conflicting control plane name: %2%", node,
@@ -52,7 +38,7 @@ void DuplicateHierarchicalNameCheck::checkForDuplicateName(cstring name, const I
     }
 }
 
-const IR::Node *DuplicateHierarchicalNameCheck::postorder(IR::P4Action *action) {
+const IR::Node *DuplicateActionControlPlaneNameCheck::postorder(IR::P4Action *action) {
     // Actions declared at the top level that the developer did not
     // write a @name annotation for it, should be included in the
     // duplicate name check.  They do not yet have a @name annotation
@@ -77,9 +63,18 @@ const IR::Node *DuplicateHierarchicalNameCheck::postorder(IR::P4Action *action) 
     return action;
 }
 
-const IR::Node *DuplicateHierarchicalNameCheck::postorder(IR::Annotation *annotation) {
+const IR::Node *DuplicateActionControlPlaneNameCheck::postorder(IR::Annotation *annotation) {
     if (annotation->name != IR::Annotation::nameAnnotation) return annotation;
-
+    // The node the annotation belongs to
+    CHECK_NULL(getContext()->parent);
+    auto *annotatedNode = getContext()->parent->node;
+    CHECK_NULL(annotatedNode);
+    // We are only interested in name annotations on actions here, as
+    // the P4Runtime API control plane generation code already checks
+    // for duplicate control plane names for other kinds of objects.
+    if (!annotatedNode->is<IR::P4Action>()) {
+        return annotation;
+    }
     cstring name = annotation->getName();
     if (!name.startsWith(".")) {
         if (!stack.empty()) {
@@ -89,16 +84,6 @@ const IR::Node *DuplicateHierarchicalNameCheck::postorder(IR::Annotation *annota
                                               }),
                                 ".", name.string_view());
         }
-    }
-    // The node the annotation belongs to
-    CHECK_NULL(getContext()->parent);
-    auto *annotatedNode = getContext()->parent->node;
-    CHECK_NULL(annotatedNode);
-    // variable and struct declarations are fine if they have identical
-    // name annotations, and such name annotations can be synthesized by
-    // p4c before this pass.  Ignore them.
-    if (annotatedNode->is<IR::Declaration_Variable>() || annotatedNode->is<IR::Type_Struct>()) {
-        return annotation;
     }
     checkForDuplicateName(name, annotatedNode);
     return annotation;

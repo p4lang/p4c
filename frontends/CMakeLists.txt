@@ -33,7 +33,7 @@ set (P4_FRONTEND_SRCS
   p4/frontend.cpp
   p4/functionsInlining.cpp
   p4/hierarchicalNames.cpp
-  p4/duplicateHierarchicalNameCheck.cpp
+  p4/duplicateActionControlPlaneNameCheck.cpp
   p4/inlining.cpp
   p4/localizeActions.cpp
   p4/methodInstance.cpp

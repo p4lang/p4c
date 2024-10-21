@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef FRONTENDS_P4_DUPLICATEHIERARCHICALNAMECHECK_H_
-#define FRONTENDS_P4_DUPLICATEHIERARCHICALNAMECHECK_H_
+#ifndef FRONTENDS_P4_DUPLICATEACTIONCONTROLPLANENAMECHECK_H_
+#define FRONTENDS_P4_DUPLICATEACTIONCONTROLPLANENAMECHECK_H_
 
 #include "ir/ir.h"
 #include "ir/visitor.h"
@@ -38,21 +38,16 @@ namespace P4 {
  * design, that were not created by the P4 developer.  We should not
  * issue an error if that pass creates duplicate hierarchical names.
  */
-class DuplicateHierarchicalNameCheck : public Transform {
+class DuplicateActionControlPlaneNameCheck : public Transform {
     std::vector<cstring> stack;
     /// Used for detection of conflicting control plane names among actions.
-    string_map<const IR::Node *> annotatedActions;
-    /// Used for detection of conflicting control plane names among tables.
-    string_map<const IR::Node *> annotatedTables;
-    /// Used for detection of conflicting control plane names among
-    /// objects other than actions and tables.
-    string_map<const IR::Node *> annotatedOthers;
+    string_map<const IR::Node *> actions;
 
  public:
     cstring getName(const IR::IDeclaration *decl);
 
-    DuplicateHierarchicalNameCheck() {
-        setName("DuplicateHierarchicalNameCheck");
+    DuplicateActionControlPlaneNameCheck() {
+        setName("DuplicateActionControlPlaneNameCheck");
         visitDagOnce = false;
     }
     const IR::Node *preorder(IR::P4Parser *parser) override {
@@ -93,4 +88,4 @@ class DuplicateHierarchicalNameCheck : public Transform {
 
 }  // namespace P4
 
-#endif /* FRONTENDS_P4_DUPLICATEHIERARCHICALNAMECHECK_H_ */
+#endif /* FRONTENDS_P4_DUPLICATEACTIONCONTROLPLANENAMECHECK_H_ */
