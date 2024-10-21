@@ -183,7 +183,7 @@ class cstring {
 
     char get(unsigned index) const { return (index < size()) ? str[index] : 0; }
     const char *c_str() const { return str; }
-    operator const char *() const { return str; }
+    explicit operator const char *() const { return str; }
 
     std::string string() const { return str ? std::string(str) : std::string(""); }
     explicit operator std::string() const { return string(); }

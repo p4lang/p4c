@@ -454,7 +454,7 @@ class ReturnStatement : Statement {
     NullOK Expression expression;
     toString{ return absl::StrCat("return ",
                                   (expression ?
-                                   expression->toString() : "")); }
+                                   expression->toString() : ""_cs)); }
 }
 
 class EmptyStatement : Statement {

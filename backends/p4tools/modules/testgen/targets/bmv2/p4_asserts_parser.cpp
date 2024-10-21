@@ -326,7 +326,7 @@ std::vector<Token> combineTokensToNames(const std::vector<Token> &inputVector) {
         } else {
             if (txt.size() > 0) {
                 cstring buf(txt);
-                result.emplace_back(Token::Kind::Text, buf, buf.size());
+                result.emplace_back(Token::Kind::Text, buf);
                 txt = "";
             }
             result.push_back(input);
@@ -362,7 +362,7 @@ std::vector<Token> combineTokensToNumbers(std::vector<Token> input) {
 
             if (str.rfind("0x", 0) == 0 || str.rfind("0X", 0) == 0) {
                 cstring cstr = str;
-                result.emplace_back(Token::Kind::Number, cstr, cstr.size());
+                result.emplace_back(Token::Kind::Number, cstr);
                 continue;
             }
 
@@ -380,14 +380,14 @@ std::vector<Token> combineTokensToNumbers(std::vector<Token> input) {
             numb += std::string(input[i].lexeme());
             if (i + 1 == input.size()) {
                 cstring cstr(numb);
-                result.emplace_back(Token::Kind::Number, cstr, cstr.size());
+                result.emplace_back(Token::Kind::Number, cstr);
                 numb = "";
                 continue;
             }
         } else {
             if (numb.size() > 0) {
                 cstring cstr(numb);
-                result.emplace_back(Token::Kind::Number, cstr, cstr.size());
+                result.emplace_back(Token::Kind::Number, cstr);
                 numb = "";
             }
             result.push_back(input[i]);
@@ -416,26 +416,26 @@ std::vector<Token> combineTokensToTableKeys(std::vector<Token> input, cstring ta
         auto substr = str.substr(0, str.find("::mask"));
         if (substr != str) {
             cstring cstr = tableName + "_mask_" + substr;
-            result.emplace_back(Token::Kind::Text, cstr, cstr.size());
+            result.emplace_back(Token::Kind::Text, cstr);
             continue;
         }
         substr = str.substr(0, str.find("::prefix_length"));
         if (substr != str) {
             cstring cstr = tableName + "_lpm_prefix_" + substr;
-            result.emplace_back(Token::Kind::Text, cstr, cstr.size());
+            result.emplace_back(Token::Kind::Text, cstr);
             continue;
         }
 
         substr = str.substr(0, str.find("::priority"));
         if (substr != str) {
             cstring cstr = tableName + "_priority";
-            result.emplace_back(Token::Kind::Priority, cstr, cstr.size());
+            result.emplace_back(Token::Kind::Priority, cstr);
             continue;
         }
 
         if (str.find("isValid") != std::string::npos) {
             cstring cstr = tableName + "_key_" + str;
-            result.emplace_back(Token::Kind::Text, cstr, cstr.size());
+            result.emplace_back(Token::Kind::Text, cstr);
             idx += 2;
             continue;
         }
@@ -443,12 +443,12 @@ std::vector<Token> combineTokensToTableKeys(std::vector<Token> input, cstring ta
         substr = str.substr(0, str.find("::value"));
         if (substr != str) {
             cstring cstr = tableName + "_key_" + substr;
-            result.emplace_back(Token::Kind::Text, cstr, cstr.size());
+            result.emplace_back(Token::Kind::Text, cstr);
             continue;
         }
 
         cstring cstr = tableName + "_key_" + str;
-        result.emplace_back(Token::Kind::Text, cstr, cstr.size());
+        result.emplace_back(Token::Kind::Text, cstr);
     }
     return result;
 }
@@ -481,7 +481,7 @@ std::vector<Token> removeComments(const std::vector<Token> &input) {
 std::vector<const IR::Expression *> AssertsParser::genIRStructs(cstring tableName,
                                                                 cstring restrictionString,
                                                                 const IdenitifierTypeMap &typeMap) {
-    Lexer lex(restrictionString);
+    Lexer lex(restrictionString.c_str());
     std::vector<Token> tmp;
     for (auto token = lex.next(); !token.isOneOf(Token::Kind::End, Token::Kind::Unknown);
          token = lex.next()) {

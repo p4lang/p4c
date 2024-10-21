@@ -447,7 +447,7 @@ bool Z3Translator::preorder(const IR::BoolLiteral *boolLiteral) {
 }
 
 bool Z3Translator::preorder(const IR::StringLiteral *stringLiteral) {
-    result = solver.get().ctx().string_val(stringLiteral->value);
+    result = solver.get().ctx().string_val(stringLiteral->value.c_str());
     return false;
 }
 

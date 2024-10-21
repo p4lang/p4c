@@ -491,7 +491,7 @@ IR::ForInStatement *DoLocalCopyPropagation::preorder(IR::ForInStatement *s) {
 }
 
 bool isAsync(const IR::Vector<IR::Method> methods, cstring callee, cstring caller) {
-    if (callee[0] == '.') callee = callee.substr(1);
+    if (callee.startsWith(".")) callee = callee.substr(1);
     for (auto *m : methods) {
         if (m->name != callee) continue;
         auto sync = m->getAnnotation(IR::Annotation::synchronousAnnotation);

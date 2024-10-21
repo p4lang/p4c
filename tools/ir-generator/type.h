@@ -68,7 +68,7 @@ struct LookupScope : public Util::IHasSourceInfo {
     Util::SourceInfo getSourceInfo() const override { return srcInfo; }
     cstring toString() const override {
         if (global) return "IR::"_cs;
-        return absl::StrCat(in ? in->toString() : "", name, "::");
+        return absl::StrCat(in ? in->toString() : ""_cs, name, "::");
     }
     IrNamespace *resolve(const IrNamespace *) const;
     bool operator==(const LookupScope &l) const {

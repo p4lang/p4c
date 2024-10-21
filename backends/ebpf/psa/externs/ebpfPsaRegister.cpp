@@ -136,9 +136,9 @@ void EBPFRegisterPSA::emitInitializer(CodeBuilder *builder) {
     builder->emitIndent();
     builder->appendFormat("if (%s) ", ret.c_str());
     builder->blockStart();
-    cstring msgStr = absl::StrFormat("Map initializer: Error while map (%v) update, code: %s",
-                                     instanceName, "%d");
-    builder->target->emitTraceMessage(builder, msgStr, 1, ret.c_str());
+    auto msgStr = absl::StrFormat("Map initializer: Error while map (%v) update, code: %s",
+                                  instanceName, "%d");
+    builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, ret.c_str());
 
     builder->blockEnd(true);
 
@@ -216,7 +216,7 @@ void EBPFRegisterPSA::emitRegisterRead(CodeBuilder *builder, const P4::ExternMet
 
 void EBPFRegisterPSA::emitRegisterWrite(CodeBuilder *builder, const P4::ExternMethod *method,
                                         ControlBodyTranslatorPSA *translator) {
-    cstring msgStr = absl::StrFormat("Register: writing %s", instanceName.c_str());
+    auto msgStr = absl::StrFormat("Register: writing %s", instanceName.c_str());
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 
     builder->emitIndent();
@@ -232,7 +232,7 @@ void EBPFRegisterPSA::emitRegisterWrite(CodeBuilder *builder, const P4::ExternMe
     builder->appendFormat("if (%s) ", ret.c_str());
     builder->blockStart();
     msgStr = absl::StrFormat("Register: Error while map (%v) update, code: %s", instanceName, "%d");
-    builder->target->emitTraceMessage(builder, msgStr, 1, ret.c_str());
+    builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, ret.c_str());
 
     builder->blockEnd(true);
 }

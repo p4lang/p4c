@@ -575,7 +575,7 @@ class Type_Stack : Type_Indexed, Type {
         return
             absl::StrCat(elementType,
                          "[",
-                         sizeKnown() ? size->toString() : "?",
+                         sizeKnown() ? size->toString() : "?"_cs,
                          "]"); }
     dbprint{ out << elementType << "[" << size << "]"; }
     bool sizeKnown() const;

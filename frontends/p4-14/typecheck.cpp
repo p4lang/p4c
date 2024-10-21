@@ -257,7 +257,7 @@ class TypeCheck::AssignInitialTypes : public Transform {
     }
 
     const IR::Node *postorder(IR::Member *ref) override {
-        if (ref->member.toString()[0] == '$') {
+        if (ref->member.toString().startsWith("$")) {
             if (ref->member == "$valid") setType(ref, IR::Type::Boolean::get());
         } else if (auto ht = ref->expr->type->to<IR::Type_StructLike>()) {
             auto f = ht->getField(ref->member);

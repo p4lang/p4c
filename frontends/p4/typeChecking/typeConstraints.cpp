@@ -74,7 +74,8 @@ bool TypeConstraints::solve(const BinaryConstraint *constraint) {
             LOG3("Binding " << leftTv << " => " << right);
             auto error = currentSubstitution->compose(leftTv, right);
             if (!error.isNullOrEmpty())
-                return constraint->reportError(getCurrentSubstitution(), error, leftTv, right);
+                return constraint->reportError(getCurrentSubstitution(), error.c_str(), leftTv,
+                                               right);
             return true;
         } else {
             add(constraint->create(leftSubst, constraint->right));
@@ -91,7 +92,8 @@ bool TypeConstraints::solve(const BinaryConstraint *constraint) {
             LOG3("Binding " << rightTv << " => " << left);
             auto error = currentSubstitution->compose(rightTv, left);
             if (!error.isNullOrEmpty())
-                return constraint->reportError(getCurrentSubstitution(), error, rightTv, left);
+                return constraint->reportError(getCurrentSubstitution(), error.c_str(), rightTv,
+                                               left);
             return true;
         } else {
             add(constraint->create(constraint->left, rightSubst));
@@ -124,7 +126,7 @@ std::string TypeConstraint::localError(Explain *explainer) const {
     if (errFormat.isNullOrEmpty()) return "";
 
     std::string message, explanation;
-    boost::format fmt = boost::format(errFormat);
+    boost::format fmt = boost::format(errFormat.c_str());
     switch (errArguments.size()) {
         case 0:
             message = boost::str(fmt);

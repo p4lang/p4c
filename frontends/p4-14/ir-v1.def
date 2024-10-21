@@ -252,7 +252,7 @@ class CalculatedField : IAnnotated {
     Annotations getAnnotations() const override { return annotations; }
     visit_children {
         v.visit(field, "field");
-        for (auto &s : specs) v.visit(s.cond, s.name.name);
+        for (auto &s : specs) v.visit(s.cond, s.name.name.c_str());
         v.visit(annotations, "annotations"); }
 }
 

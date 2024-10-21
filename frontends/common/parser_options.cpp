@@ -328,9 +328,9 @@ ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(de
         "when it can inline the subparser's states only once for multiple\n"
         "invocations of the same subparser instance.");
     registerOption(
-        "--doNotEmitIncludes", "condition",
-        [this](const char *arg) {
-            noIncludes = cstring(arg);
+        "--doNotEmitIncludes", nullptr,
+        [this](const char *) {
+            noIncludes = true;
             return true;
         },
         "[Compiler debugging] If true do not generate #include statements\n");
@@ -481,7 +481,7 @@ void ParserOptions::dumpPass(const char *manager, unsigned seq, const char *pass
     for (auto s : top4) {
         bool match = false;
         try {
-            auto sRegex = std::regex(s, std::regex::ECMAScript | std::regex::icase);
+            auto sRegex = std::regex(s.c_str(), std::regex::ECMAScript | std::regex::icase);
             // We use std::regex_search instead of std::regex_match.
             // std::regex_match compares the regex against the entire string.
             // std::regex_search checks if the regex is contained as substring.
