@@ -1,4 +1,5 @@
 # Handle the Z3 installation with this macro. Users have the option to supply their own Z3.
+include(${P4C_SOURCE_DIR}/cmake/Z3.cmake)
 p4tools_obtain_z3()
 
 # Generate version information.

@@ -1,7 +1,7 @@
-macro(bf_p4c_obtain_z3)
-  option(BF_P4C_USE_PREINSTALLED_Z3 "Look for a preinstalled version of Z3 instead of installing a prebuilt binary using FetchContent." OFF)
+macro(p4tools_obtain_z3)
+  option(TOOLS_USE_PREINSTALLED_Z3 "Look for a preinstalled version of Z3 instead of installing a prebuilt binary using FetchContent." OFF)
 
-  if(BF_P4C_USE_PREINSTALLED_Z3)
+  if(TOOLS_USE_PREINSTALLED_Z3)
     # We need a fairly recent version of Z3.
     set(Z3_MIN_VERSION "4.8.14")
     # But 4.12+ is currently broken with libGC
@@ -15,12 +15,12 @@ macro(bf_p4c_obtain_z3)
       message(FATAL_ERROR "The Z3 version has to be lower than ${Z3_MAX_VERSION_EXCL} (the latter currently does no work with libGC). Has ${Z3_VERSION_STRING}.")
     endif()
     # Set variables for later consumption.
-    set(BF_P4C_Z3_LIB z3::z3)
-    set(BF_P4C_Z3_INCLUDE_DIR ${Z3_INCLUDE_DIR})
+    set(P4TOOLS_Z3_LIB z3::z3)
+    set(P4TOOLS_Z3_INCLUDE_DIR ${Z3_INCLUDE_DIR})
   else()
     # Pull in a specific version of Z3 and link against it.
-    set(BF_P4C_Z3_VERSION "4.11.2")
-    message("Fetching Z3 version ${BF_P4C_Z3_VERSION} for Tofino..")
+    set(P4TOOLS_Z3_VERSION "4.11.2")
+    message("Fetching Z3 version ${P4TOOLS_Z3_VERSION} for P4Tools...")
 
     # Determine platform to fetch pre-built Z3
     if (CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "x86_64")
@@ -51,7 +51,7 @@ macro(bf_p4c_obtain_z3)
     set(FETCHCONTENT_QUIET OFF)
     fetchcontent_declare(
       z3
-      URL https://github.com/Z3Prover/z3/releases/download/z3-${BF_P4C_Z3_VERSION}/z3-${BF_P4C_Z3_VERSION}-${Z3_ARCH}-${Z3_PLATFORM_SUFFIX}.zip
+      URL https://github.com/Z3Prover/z3/releases/download/z3-${P4TOOLS_Z3_VERSION}/z3-${P4TOOLS_Z3_VERSION}-${Z3_ARCH}-${Z3_PLATFORM_SUFFIX}.zip
       URL_HASH SHA256=${Z3_ZIP_HASH}
       USES_TERMINAL_DOWNLOAD TRUE
       GIT_PROGRESS TRUE
@@ -62,7 +62,7 @@ macro(bf_p4c_obtain_z3)
 
     # Other projects may also pull in Z3.
     # We have to make sure we only include our local version with P4Tools.
-    set(BF_P4C_Z3_LIB ${z3_SOURCE_DIR}/bin/libz3${CMAKE_STATIC_LIBRARY_SUFFIX})
-    set(BF_P4C_Z3_INCLUDE_DIR ${z3_SOURCE_DIR}/include)
+    set(P4TOOLS_Z3_LIB ${z3_SOURCE_DIR}/bin/libz3${CMAKE_STATIC_LIBRARY_SUFFIX})
+    set(P4TOOLS_Z3_INCLUDE_DIR ${z3_SOURCE_DIR}/include)
   endif()
-endmacro(bf_p4c_obtain_z3)
+endmacro(p4tools_obtain_z3)

@@ -1,48 +1,16 @@
 ####### Barefoot Compilers Toolchain
 MESSAGE("-- Adding p4c-barefoot")
 
-message(STATUS "Fetching spdlog")
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/spdlog.cmake)
+include(${P4C_SOURCE_DIR}/cmake/Z3.cmake)
 
-include(FetchContent)
-
-# Preserve previous FETCHCONTENT_QUIET setting
-set(FETCHCONTENT_QUIET_PREV ${FETCHCONTENT_QUIET})
-set(FETCHCONTENT_QUIET OFF)
-
-FetchContent_Declare(
-  spdlog
-  GIT_REPOSITORY https://github.com/gabime/spdlog.git
-  GIT_TAG v1.8.3
-  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/spdlog
-  USES_TERMINAL_DOWNLOAD TRUE
-  GIT_PROGRESS TRUE
-)
-
-FetchContent_MakeAvailable(spdlog)
-
-# Restore FETCHCONTENT_QUIET setting
-set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
-
-message("Done fetching spdlog")
+p4tools_obtain_z3()
 
 set (BFN_P4C_SOURCE_DIR ${PROJECT_SOURCE_DIR}/backends/tofino)
 
 OPTION(ENABLE_STATIC_LIBS OFF)
 OPTION(ENABLE_BAREFOOT_INTERNAL "Enable Barefoot Internal" ON)
-OPTION(ENABLE_TESTING "Enable generation of ctests" ON)
-OPTION(ENABLE_GTESTS "Enable building and running GTest unit tests" ON)
-OPTION(ENABLE_DOXYGEN "Build Doxygen-based developer documentation" ON)
-OPTION(ENABLE_WERROR "Treat build warnings as errors" ON)
-OPTION(FIXED_LIBDYNHASH "Use future version of the Dynamic hash library" OFF)
-OPTION(INSTALL_LIBDYNHASH "Install the Dynamic hash library" OFF)
 OPTION(ENABLE_ASSERTIONS "Enable assertions" ON)
-
-OPTION(ENABLE_TEST_ISOLATION "Run tests in isolated network using Linux network namespaces. \
-                              This allows running multiple PTF tests in parallel, but it makes \
-                              then isolated from the normal network so it can make debugging \
-                              harder (e.g. it is not possible to inspect PTF-set packets using \
-                              packet sniffers). Requires running tests using user who has \
-                              privileges to unshare namespaces (usually just root)" OFF)
 
 # BUILD_STATIC_BFP4C_LIBS should never be used directly, see BUILD_STATIC_BFP4C_LIBS_INTERNAL below
 OPTION(BUILD_STATIC_BFP4C_LIBS OFF "Build static libs (archives) of bf-p4c components \
@@ -72,12 +40,6 @@ if (ENABLE_STATIC_LIBS)
   set(Boost_USE_STATIC_RUNTIME OFF)
 endif()
 
-# enable C++17
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-# set this explicitly for clarity, at this point, bfas uses ##__VA_ARGS__ which
-# is an extension
-set(CMAKE_CXX_EXTENSIONS ON)
 
 if (ENABLE_ASSERTIONS)
   # NDEBUG is automatically defined on non-Debug builds by CMake.
@@ -93,12 +55,6 @@ endif()
 
 set(BOOST_MIN_VERSION "1.58.0")
 find_package(Boost ${BOOST_MIN_VERSION} REQUIRED)
-
-# Additional P4C_CPP_FLAGS may be passed (via bootstrap_bfn_compilers.sh script)
-# from p4factory when configuring bf-p4c-compilers to specify certain predefined
-# features when building the compiler
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${P4C_CPP_FLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${P4C_CPP_FLAGS}")
 
 # Get the version from bf-p4c/version.h
 file (STRINGS "${BFN_P4C_SOURCE_DIR}/bf-p4c/version.h"
@@ -168,22 +124,6 @@ if (ENABLE_WERROR)
   # fixme: we do want implicit-fallthrough to be an error, but we have to
   # supress in in p4c and in generated code somehow
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wno-error=implicit-fallthrough")
-endif()
-
-if(ENABLE_LTO AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  # On some older systems ar has no support for lto plugin. Use gcc-ar,
-  # a wrapper around ar adding the appropriate --plugin option for GCC.
-  # Note: option ENABLE_LTO is handled in p4c, but p4c does not officially
-  # support systems older then Ubuntu 20, so we need to handle this case here.
-  find_program(GCC_AR gcc-ar-9)
-  # We use gcc/g++ 9, so try to find corresponding gcc-ar-9.
-  if (GCC_AR)
-    set(CMAKE_AR ${GCC_AR})
-    set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> qcs <TARGET> <LINK_FLAGS> <OBJECTS>")
-    set(CMAKE_C_ARCHIVE_FINISH true)
-    set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> qcs <TARGET> <LINK_FLAGS> <OBJECTS>")
-    set(CMAKE_CXX_ARCHIVE_FINISH true)
-  endif()
 endif()
 
 # # Gtest needs additional includes, add them here.
