@@ -65,7 +65,7 @@ StorageLocation *StorageFactory::create(const IR::Type *type, cstring name) cons
         auto *result = construct<TupleLocation>(type, name);
         size_t index = 0;
         for (const auto *t : bl->components) {
-            cstring fieldName = absl::StrCat(name.string_view(), "[", index, "]");
+            cstring fieldName = absl::StrCat(name, "[", index, "]");
             auto *sl = create(t, fieldName);
             result->createElement(index, sl);
             index++;
@@ -103,11 +103,11 @@ StorageLocation *StorageFactory::create(const IR::Type *type, cstring name) cons
     } else if (auto st = type->to<IR::Type_Stack>()) {
         auto *result = construct<ArrayLocation>(st, name);
         for (unsigned i = 0; i < st->getSize(); i++) {
-            auto *sl = create(st->elementType, absl::StrCat(name.string_view(), "[", i, "]"));
+            auto *sl = create(st->elementType, absl::StrCat(name, "[", i, "]"));
             result->createElement(i, sl);
         }
         result->setLastIndexField(
-            create(IR::Type_Bits::get(32), absl::StrCat(name.string_view(), ".", indexFieldName)));
+            create(IR::Type_Bits::get(32), absl::StrCat(name, ".", indexFieldName)));
         return result;
     }
 

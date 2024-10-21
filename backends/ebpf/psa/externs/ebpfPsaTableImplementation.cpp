@@ -279,7 +279,7 @@ void EBPFActionSelectorPSA::emitInitializer(CodeBuilder *builder) {
         if (action->name.originalName == P4::P4CoreLibrary::instance().noAction.name) {
             builder->append(".action = 0,");
         } else {
-            builder->appendFormat(".action = %s,", p4ActionToActionIDName(action));
+            builder->appendFormat(".action = %v,", p4ActionToActionIDName(action));
         }
         builder->newline();
         builder->blockEnd(false);

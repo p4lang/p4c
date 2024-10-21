@@ -130,7 +130,7 @@ const IR::Expression *makeConstant(Token input, const IdenitifierTypeMap &typeMa
         for (const auto &[identifier, keyType] : typeMap) {
             auto annoSize = identifier.size();
             auto tokenLength = inputStr.length();
-            if (inputStr.compare(tokenLength - annoSize, annoSize, identifier) != 0) {
+            if (inputStr.compare(tokenLength - annoSize, annoSize, identifier.string_view()) != 0) {
                 continue;
             }
             if (const auto *bit = keyType->to<IR::Type_Bits>()) {

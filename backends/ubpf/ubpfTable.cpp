@@ -86,10 +86,10 @@ class UbpfActionTranslationVisitor : public EBPF::CodeGenInspector {
         auto ef = mi->to<P4::ExternFunction>();
         if (ef != nullptr) {
             if (ef->method->name.name == program->model.drop.name) {
-                builder->appendFormat("%s = false", program->control->passVariable);
+                builder->appendFormat("%v = false", program->control->passVariable);
                 return false;
             } else if (ef->method->name.name == program->model.pass.name) {
-                builder->appendFormat("%s = true", program->control->passVariable);
+                builder->appendFormat("%v = true", program->control->passVariable);
                 return false;
             } else if (ef->method->name.name == program->model.ubpf_time_get_ns.name) {
                 builder->emitIndent();
@@ -484,8 +484,8 @@ void UBPFTable::emitInitializer(EBPF::CodeBuilder *builder) {
     builder->endOfStatement(true);
 
     builder->emitIndent();
-    builder->appendFormat("INIT_UBPF_TABLE(\"%s\", sizeof(%s), sizeof(%s));", defaultTable,
-                          program->zeroKey.c_str(), value);
+    builder->appendFormat("INIT_UBPF_TABLE(\"%v\", sizeof(%v), sizeof(%v));", defaultTable,
+                          program->zeroKey, value);
     builder->newline();
 
     builder->emitIndent();

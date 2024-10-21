@@ -82,7 +82,7 @@ class EBPFDigestPSAValueVisitor : public CodeGenInspector {
 
         for (const auto *f : se->components) {
             auto type = typeMap->getType(f->expression);
-            cstring path = absl::StrFormat("%s.%s", tmpVar, f->name.name);
+            cstring path = absl::StrFormat("%v.%v", tmpVar, f->name);
             codegen->emitAssignStatement(type, nullptr, path, f->expression);
             builder->newline();
         }
@@ -123,7 +123,7 @@ void EBPFDigestPSA::emitTypes(CodeBuilder *builder) {
 }
 
 void EBPFDigestPSA::emitInstance(CodeBuilder *builder) const {
-    builder->appendFormat("REGISTER_TABLE_NO_KEY_TYPE(%s, BPF_MAP_TYPE_QUEUE, 0, ", instanceName);
+    builder->appendFormat("REGISTER_TABLE_NO_KEY_TYPE(%v, BPF_MAP_TYPE_QUEUE, 0, ", instanceName);
 
     if (valueTypeName.isNullOrEmpty()) {
         valueType->declare(builder, cstring::empty, false);
@@ -151,7 +151,7 @@ void EBPFDigestPSA::processMethod(CodeBuilder *builder, cstring method,
 void EBPFDigestPSA::emitPushElement(CodeBuilder *builder, const IR::Expression *elem,
                                     Inspector *codegen) const {
     builder->emitIndent();
-    builder->appendFormat("bpf_map_push_elem(&%s, &", instanceName);
+    builder->appendFormat("bpf_map_push_elem(&%v, &", instanceName);
     codegen->visit(elem);
     builder->append(", BPF_EXIST)");
     builder->endOfStatement(true);
@@ -159,7 +159,7 @@ void EBPFDigestPSA::emitPushElement(CodeBuilder *builder, const IR::Expression *
 
 void EBPFDigestPSA::emitPushElement(CodeBuilder *builder, cstring elem) const {
     builder->emitIndent();
-    builder->appendFormat("bpf_map_push_elem(&%s, &%s, BPF_EXIST)", instanceName, elem);
+    builder->appendFormat("bpf_map_push_elem(&%v, &%v, BPF_EXIST)", instanceName, elem);
     builder->endOfStatement(true);
 }
 

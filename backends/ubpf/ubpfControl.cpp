@@ -35,10 +35,10 @@ UBPFControlBodyTranslator::UBPFControlBodyTranslator(const UBPFControl *control)
 
 void UBPFControlBodyTranslator::processFunction(const P4::ExternFunction *function) {
     if (function->method->name.name == control->program->model.drop.name) {
-        builder->appendFormat("%s = false", control->passVariable);
+        builder->appendFormat("%v = false", control->passVariable);
         return;
     } else if (function->method->name.name == control->program->model.pass.name) {
-        builder->appendFormat("%s = true", control->passVariable);
+        builder->appendFormat("%v = true", control->passVariable);
         return;
     } else if (function->method->name.name == control->program->model.ubpf_time_get_ns.name) {
         builder->append(control->program->model.ubpf_time_get_ns.name + "()");
@@ -56,7 +56,7 @@ void UBPFControlBodyTranslator::processFunction(const P4::ExternFunction *functi
         auto algorithmType = algorithmTypeArgument->member.name;
 
         if (algorithmType == control->program->model.hashAlgorithm.lookup3.name) {
-            builder->appendFormat(" = ubpf_hash(&%s, sizeof(%s))", hashKeyInstanceName,
+            builder->appendFormat(" = ubpf_hash(&%v, sizeof(%v))", hashKeyInstanceName,
                                   hashKeyInstanceName);
         } else {
             ::P4::error(ErrorType::ERR_UNSUPPORTED, "%1%: Not supported hash algorithm type",
@@ -129,7 +129,7 @@ cstring UBPFControlBodyTranslator::createHashKeyInstance(const P4::ExternFunctio
         if (!f->type)  // If nullptr it's a padding.
             continue;
         builder->emitIndent();
-        builder->appendFormat("%s.%s = ", hashKeyInstance, f->name);
+        builder->appendFormat("%v.%v = ", hashKeyInstance, f->name);
         auto c = dataArgument->components.at(idx);
         visit(c);
         builder->endOfStatement(true);
@@ -358,7 +358,7 @@ bool UBPFControlBodyTranslator::emitRegisterRead(const IR::AssignmentStatement *
 
     builder->newline();
     builder->emitIndent();
-    builder->appendFormat("if (%s != NULL) ", tmp);
+    builder->appendFormat("if (%v != NULL) ", tmp);
     builder->blockStart();
 
     builder->emitIndent();

@@ -97,7 +97,7 @@ void UBPFProgram::emitC(UbpfCodeBuilder *builder, const std::filesystem::path &h
     emitLocalVariables(builder);
     builder->newline();
     builder->emitIndent();
-    builder->appendFormat("goto %s;", IR::ParserState::start.c_str());
+    builder->appendFormat("goto %v;", IR::ParserState::start);
     builder->newline();
 
     parser->emit(builder);
@@ -105,23 +105,23 @@ void UBPFProgram::emitC(UbpfCodeBuilder *builder, const std::filesystem::path &h
     emitPipeline(builder);
 
     builder->emitIndent();
-    builder->appendFormat("%s:\n", endLabel.c_str());
+    builder->appendFormat("%v:\n", endLabel);
     builder->emitIndent();
     builder->blockStart();
     deparser->emit(builder);
     builder->blockEnd(true);
 
     builder->emitIndent();
-    builder->appendFormat("if (%s)\n", control->passVariable);
+    builder->appendFormat("if (%v)\n", control->passVariable);
     builder->increaseIndent();
     builder->emitIndent();
-    builder->appendFormat("return %s;\n", builder->target->forwardReturnCode().c_str());
+    builder->appendFormat("return %v;\n", builder->target->forwardReturnCode());
     builder->decreaseIndent();
     builder->emitIndent();
     builder->appendLine("else");
     builder->increaseIndent();
     builder->emitIndent();
-    builder->appendFormat("return %s;\n", builder->target->dropReturnCode().c_str());
+    builder->appendFormat("return %v;\n", builder->target->dropReturnCode());
     builder->decreaseIndent();
     builder->blockEnd(true);
 }
@@ -267,11 +267,11 @@ void UBPFProgram::emitLocalVariables(EBPF::CodeBuilder *builder) {
     builder->newline();
 
     builder->emitIndent();
-    builder->appendFormat("uint8_t %s = 1;", control->passVariable);
+    builder->appendFormat("uint8_t %v = 1;", control->passVariable);
     builder->newline();
 
     builder->emitIndent();
-    builder->appendFormat("uint8_t %s = 0;", control->hitVariable);
+    builder->appendFormat("uint8_t %v = 0;", control->hitVariable);
     builder->newline();
 
     builder->emitIndent();

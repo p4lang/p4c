@@ -147,7 +147,7 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
         }
         auto *externType = p4info->add_externs();
         externType->set_extern_type_id(static_cast<p4rt_id_t>(typeId));
-        externType->set_extern_type_name(typeName);
+        externType->set_extern_type_name(typeName.string_view());
         return externType;
     }
 
@@ -161,8 +161,8 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
         auto *externInstance = externType->add_instances();
         auto *pre = externInstance->mutable_preamble();
         pre->set_id(symbols.getId(typeId, name));
-        pre->set_name(prefix(pipeName, name));
-        pre->set_alias(symbols.getAlias(name));
+        pre->set_name(prefix(pipeName, name).string_view());
+        pre->set_alias(symbols.getAlias(name).string_view());
         Helpers::addAnnotations(pre, annotations);
         Helpers::addDocumentation(pre, annotations);
         externInstance->mutable_info()->PackFrom(message);
@@ -237,7 +237,7 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
         auto pipeName = getBlockNamePrefix(tableBlock);
         auto *pre = table->mutable_preamble();
         if (pre->name() == tableDeclaration->controlPlaneName())
-            pre->set_name(prefix(pipeName, pre->name()));
+            pre->set_name(prefix(pipeName, pre->name()).string_view());
     }
 
     void addExternInstance(const P4RuntimeSymbolTableIface &symbols, p4configv1::P4Info *p4info,
@@ -261,7 +261,7 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
             for (auto &extType : *p4info->mutable_action_profiles()) {
                 auto *pre = extType.mutable_preamble();
                 if (pre->name() == decl->controlPlaneName()) {
-                    pre->set_name(prefix(pipeName, pre->name()));
+                    pre->set_name(prefix(pipeName, pre->name()).string_view());
                     break;
                 }
             }
@@ -269,7 +269,7 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
             for (auto &extType : *p4info->mutable_action_profiles()) {
                 auto *pre = extType.mutable_preamble();
                 if (pre->name() == decl->controlPlaneName()) {
-                    pre->set_name(prefix(pipeName, pre->name()));
+                    pre->set_name(prefix(pipeName, pre->name()).string_view());
                     break;
                 }
             }
@@ -277,7 +277,7 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
             for (auto &extType : *p4info->mutable_meters()) {
                 auto *pre = extType.mutable_preamble();
                 if (pre->name() == decl->controlPlaneName()) {
-                    pre->set_name(prefix(pipeName, pre->name()));
+                    pre->set_name(prefix(pipeName, pre->name()).string_view());
                     break;
                 }
             }
@@ -285,7 +285,7 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
             for (auto &extType : *p4info->mutable_counters()) {
                 auto *pre = extType.mutable_preamble();
                 if (pre->name() == decl->controlPlaneName()) {
-                    pre->set_name(prefix(pipeName, pre->name()));
+                    pre->set_name(prefix(pipeName, pre->name()).string_view());
                     break;
                 }
             }
@@ -293,7 +293,7 @@ class BFRuntimeArchHandler : public P4RuntimeArchHandlerCommon<arch> {
             for (auto &extType : *p4info->mutable_registers()) {
                 auto *pre = extType.mutable_preamble();
                 if (pre->name() == decl->controlPlaneName()) {
-                    pre->set_name(prefix(pipeName, pre->name()));
+                    pre->set_name(prefix(pipeName, pre->name()).string_view());
                     break;
                 }
             }

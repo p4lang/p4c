@@ -272,7 +272,7 @@ method
                 yyerror("'%s' invalid on method", IrMethod::modifier(mod)); }
       optArgList ')' optConst optOverride body
           { ($$ = $<irMethod>5)->body = $10;
-            if (!$10 || $10[0] == '=') {
+            if (!$10 || $10.startsWith("=")) {
                 if (!$$->inImpl)
                     yyerror("inline method %s with no body", $3);
                 $$->inImpl = false; }
@@ -361,7 +361,7 @@ nonRefType
     | lookup_scope IDENTIFIER           { $$ = new NamedType(@2, $1, $2); }
     | lookup_scope OPTIONAL             { $$ = new NamedType(@2, $1, "optional"_cs); }
     | nonRefType '<' type_args '>'      { $$ = new TemplateInstantiation(@1+@4, $1, *$3); }
-    | nonRefType '[' INTEGER ']'        { $$ = new ArrayType(@1+@4, $1, atoi($3)); }
+    | nonRefType '[' INTEGER ']'        { $$ = new ArrayType(@1+@4, $1, atoi($3.c_str())); }
     ;
 
 type: nonRefType

@@ -53,7 +53,7 @@ void UbpfTarget::emitTableDecl(Util::SourceCodeBuilder *builder, cstring tblName
                                EBPF::TableKind tableKind, cstring keyType, cstring valueType,
                                unsigned size) const {
     builder->append("struct ");
-    builder->appendFormat("ubpf_map_def %s = ", tblName);
+    builder->appendFormat("ubpf_map_def %v = ", tblName);
     builder->spc();
     builder->blockStart();
 
@@ -69,15 +69,15 @@ void UbpfTarget::emitTableDecl(Util::SourceCodeBuilder *builder, cstring tblName
     }
 
     builder->emitIndent();
-    builder->appendFormat(".type = %s,", type);
+    builder->appendFormat(".type = %v,", type);
     builder->newline();
 
     builder->emitIndent();
-    builder->appendFormat(".key_size = sizeof(%s),", keyType);
+    builder->appendFormat(".key_size = sizeof(%v),", keyType);
     builder->newline();
 
     builder->emitIndent();
-    builder->appendFormat(".value_size = sizeof(%s),", valueType);
+    builder->appendFormat(".value_size = sizeof(%v),", valueType);
 
     builder->newline();
 

@@ -71,7 +71,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
           }
           buf << ";" << std::endl;
           buf << cl->indent << "}";
-          return buf.str();
+          return {buf};
       }}},
     {"equiv"_cs,
      {&NamedType::Bool(),
@@ -126,7 +126,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
               buf << ";" << std::endl;
           }
           buf << cl->indent << "}";
-          return buf.str();
+          return {buf};
       }}},
     {"operator<<"_cs,
      {&ReferenceType::OstreamRef,
@@ -137,7 +137,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
           buf << "{";
           if (body) buf << LineDirective(srcInfo, true) << body;
           buf << LineDirective(true) << cl->indent << "return out; }";
-          return buf.str();
+          return {buf};
       }}},
     {"visit_children"_cs,
      {&NamedType::Void(),
@@ -162,7 +162,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
               needed = true;
           }
           buf << "}";
-          return needed ? buf.str() : cstring();
+          return needed ? buf : cstring();
       }}},
     {"validate"_cs,
      {&NamedType::Void(),
@@ -189,7 +189,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
               needed = true;
           }
           buf << " }";
-          return needed ? buf.str() : cstring();
+          return needed ? buf : cstring();
       }}},
     {"node_type_name"_cs,
      {&NamedType::Cstring(),
@@ -198,7 +198,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
       [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
           std::stringstream buf;
           buf << "{ return \"" << cl->containedIn << cl->name << "\"_cs; }";
-          return buf.str();
+          return {buf};
       }}},
     {"dbprint"_cs,
      {&NamedType::Void(),
@@ -227,7 +227,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
               }
           }
           buf << "}";
-          return needed ? buf.str() : cstring();
+          return needed ? buf : cstring();
       }}},
     {"toJSON"_cs,
      {&NamedType::Void(),
@@ -247,7 +247,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
                   << "\\\" : \" << " << "this->" << f->name << ";" << std::endl;
           }
           buf << "}";
-          return buf.str();
+          return {buf};
       }}},
     {nullptr,
      {nullptr,
@@ -264,7 +264,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
                   << std::endl;
           }
           buf << "}";
-          return buf.str();
+          return {buf};
       }}},
     {"fromJSON"_cs,
      {nullptr,
@@ -275,7 +275,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
       [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
           std::stringstream buf;
           buf << "{ return new " << cl->name << "(json); }";
-          return buf.str();
+          return {buf};
       }}},
     {"toString"_cs,
      {&NamedType::Cstring(),

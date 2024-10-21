@@ -158,7 +158,7 @@ class EBPFTablePSAInitializerCodeGen : public CodeGenInspector {
             cstring mask = EBPFInitializerUtils::genHexStr(rc->value, width, expr->right);
             builder->append("{ ");
             for (size_t i = 0; i < value.size() / 2; ++i)
-                builder->appendFormat("(0x%s & 0x%s), ", value.substr(2 * i, 2),
+                builder->appendFormat("(0x%v & 0x%v), ", value.substr(2 * i, 2),
                                       mask.substr(2 * i, 2));
             builder->append("}");
         }
@@ -239,11 +239,11 @@ class EBPFTablePSAInitializerCodeGen : public CodeGenInspector {
 
         builder->blockStart();
         builder->emitIndent();
-        builder->appendFormat(".action = %s,", fullActionName);
+        builder->appendFormat(".action = %v,", fullActionName);
         builder->newline();
 
         builder->emitIndent();
-        builder->appendFormat(".u = {.%s = {", actionName.c_str());
+        builder->appendFormat(".u = {.%v = {", actionName);
         for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
             visit(mi->substitution.lookup(p));
             builder->append(", ");
@@ -614,14 +614,14 @@ void EBPFTablePSA::emitMapUpdateTraceMsg(CodeBuilder *builder, cstring mapName,
     builder->appendFormat("if (%s) ", returnCode.c_str());
     builder->blockStart();
     cstring msgStr =
-        absl::StrFormat("Map initializer: Error while map (%s) update, code: %s", mapName, "%d");
+        absl::StrFormat("Map initializer: Error while map (%v) update, code: %s", mapName, "%d");
     builder->target->emitTraceMessage(builder, msgStr, 1, returnCode.c_str());
 
     builder->blockEnd(false);
     builder->append(" else ");
 
     builder->blockStart();
-    msgStr = absl::StrFormat("Map initializer: Map (%s) update succeed", mapName);
+    msgStr = absl::StrFormat("Map initializer: Map (%v) update succeed", mapName);
     builder->target->emitTraceMessage(builder, msgStr);
     builder->blockEnd(true);
 }
@@ -679,7 +679,7 @@ void EBPFTablePSA::emitTernaryConstEntriesInitializer(CodeBuilder *builder) {
     // emit key head mask
     cstring headName = program->refMap->newName("key_mask");
     builder->emitIndent();
-    builder->appendFormat("struct %s_mask %s = {0}", keyTypeName, headName);
+    builder->appendFormat("struct %v_mask %v = {0}", keyTypeName, headName);
     builder->endOfStatement(true);
 
     // emit key masks
@@ -695,7 +695,7 @@ void EBPFTablePSA::emitTernaryConstEntriesInitializer(CodeBuilder *builder) {
     builder->newline();
 
     builder->emitIndent();
-    builder->appendFormat("%s(0, 0, &%s, &%s, &%s, &%s, NULL, NULL)", addPrefixFunctionName,
+    builder->appendFormat("%v(0, 0, &%v, &%v, &%v, &%v, NULL, NULL)", addPrefixFunctionName,
                           tuplesMapName, prefixesMapName, headName, valueMask);
     builder->endOfStatement(true);
     builder->newline();
@@ -722,23 +722,22 @@ void EBPFTablePSA::emitTernaryConstEntriesInitializer(CodeBuilder *builder) {
         // construct keys array
         builder->newline();
         builder->emitIndent();
-        builder->appendFormat("void *%s[] = {", keysArray);
-        for (auto keyName : keyNames) builder->appendFormat("&%s,", keyName);
+        builder->appendFormat("void *%v[] = {", keysArray);
+        for (auto keyName : keyNames) builder->appendFormat("&%v,", keyName);
         builder->append("}");
         builder->endOfStatement(true);
 
         // construct values array
         builder->emitIndent();
-        builder->appendFormat("void *%s[] = {", valuesArray);
-        for (auto valueName : valueNames) builder->appendFormat("&%s,", valueName);
+        builder->appendFormat("void *%v[] = {", valuesArray);
+        for (auto valueName : valueNames) builder->appendFormat("&%v,", valueName);
         builder->append("}");
         builder->endOfStatement(true);
 
         builder->newline();
         builder->emitIndent();
-        builder->appendFormat("%s(%s, %s, &%s, &%s, &%s, &%s, %s, %s)", addPrefixFunctionName,
-                              cstring::to_cstring(sameMaskEntries.size()),
-                              cstring::to_cstring(tuple_id), tuplesMapName, prefixesMapName,
+        builder->appendFormat("%v(%d, %d, &%v, &%v, &%v, &%v, %v, %v)", addPrefixFunctionName,
+                              sameMaskEntries.size(), tuple_id, tuplesMapName, prefixesMapName,
                               keyMaskVarName, valueMask, keysArray, valuesArray);
         builder->endOfStatement(true);
 
@@ -784,12 +783,12 @@ void EBPFTablePSA::emitKeyMasks(CodeBuilder *builder, EntriesGroupedByMask_t &en
         keyMasksNames.push_back(keyFieldName);
 
         builder->emitIndent();
-        builder->appendFormat("struct %s_mask %s = {0}", keyTypeName, keyFieldName);
+        builder->appendFormat("struct %v_mask %v = {0}", keyTypeName, keyFieldName);
         builder->endOfStatement(true);
 
         builder->emitIndent();
         cstring keyFieldNamePtr = program->refMap->newName(keyFieldName + "_ptr");
-        builder->appendFormat("char *%s = &%s.mask", keyFieldNamePtr, keyFieldName);
+        builder->appendFormat("char *%v = &%v.mask", keyFieldNamePtr, keyFieldName);
         builder->endOfStatement(true);
 
         for (size_t i = 0; i < keyGenerator->keyElements.size(); i++) {
@@ -803,11 +802,11 @@ void EBPFTablePSA::emitKeyMasks(CodeBuilder *builder, EntriesGroupedByMask_t &en
             expr->apply(cg);
             builder->endOfStatement(true);
             builder->emitIndent();
-            builder->appendFormat("__builtin_memcpy(%s, &%s, sizeof(%s))", keyFieldNamePtr,
+            builder->appendFormat("__builtin_memcpy(%v, &%v, sizeof(%v))", keyFieldNamePtr,
                                   fieldName, fieldName);
             builder->endOfStatement(true);
             builder->emitIndent();
-            builder->appendFormat("%s = %s + sizeof(%s)", keyFieldNamePtr, keyFieldNamePtr,
+            builder->appendFormat("%v = %v + sizeof(%v)", keyFieldNamePtr, keyFieldNamePtr,
                                   fieldName);
             builder->endOfStatement(true);
         }
@@ -817,21 +816,21 @@ void EBPFTablePSA::emitKeyMasks(CodeBuilder *builder, EntriesGroupedByMask_t &en
 void EBPFTablePSA::emitValueMask(CodeBuilder *builder, const cstring valueMask,
                                  const cstring nextMask, int tupleId) const {
     builder->emitIndent();
-    builder->appendFormat("struct %s_mask %s = {0}", valueTypeName, valueMask);
+    builder->appendFormat("struct %v_mask %v = {0}", valueTypeName, valueMask);
     builder->endOfStatement(true);
 
     builder->emitIndent();
-    builder->appendFormat("%s.tuple_id = %s", valueMask, cstring::to_cstring(tupleId));
+    builder->appendFormat("%v.tuple_id = %d", valueMask, tupleId);
     builder->endOfStatement(true);
     builder->emitIndent();
     if (nextMask.isNullOrEmpty()) {
-        builder->appendFormat("%s.has_next = 0", valueMask);
+        builder->appendFormat("%v.has_next = 0", valueMask);
         builder->endOfStatement(true);
     } else {
-        builder->appendFormat("%s.next_tuple_mask = %s", valueMask, nextMask);
+        builder->appendFormat("%v.next_tuple_mask = %v", valueMask, nextMask);
         builder->endOfStatement(true);
         builder->emitIndent();
-        builder->appendFormat("%s.has_next = 1", valueMask);
+        builder->appendFormat("%v.has_next = 1", valueMask);
         builder->endOfStatement(true);
     }
 }

@@ -44,7 +44,7 @@ bool ActionTranslationVisitor::isActionParameter(const IR::PathExpression *expre
 
 cstring ActionTranslationVisitor::getParamInstanceName(const IR::Expression *expression) const {
     cstring actionName = EBPFObject::externalName(action);
-    return absl::StrFormat("%s->u.%s.%s", valueName, actionName, expression->toString());
+    return absl::StrFormat("%v->u.%v.%v", valueName, actionName, expression);
 }
 
 bool ActionTranslationVisitor::preorder(const IR::P4Action *act) {
@@ -219,16 +219,16 @@ void EBPFTable::emitKeyType(CodeBuilder *builder) {
     if (isTernaryTable()) {
         // generate mask key
         builder->emitIndent();
-        builder->appendFormat("#define MAX_%s_MASKS %u", keyTypeName.toUpper(),
+        builder->appendFormat("#define MAX_%v_MASKS %u", keyTypeName.toUpper(),
                               program->options.maxTernaryMasks);
         builder->newline();
 
         builder->emitIndent();
-        builder->appendFormat("struct %s_mask ", keyTypeName.c_str());
+        builder->appendFormat("struct %v_mask ", keyTypeName);
         builder->blockStart();
 
         builder->emitIndent();
-        builder->appendFormat("__u8 mask[sizeof(struct %s)];", keyTypeName.c_str());
+        builder->appendFormat("__u8 mask[sizeof(struct %v)];", keyTypeName);
         builder->newline();
 
         builder->blockEnd(false);
@@ -261,7 +261,7 @@ void EBPFTable::emitValueType(CodeBuilder *builder) {
 
     // a type-safe union: a struct with a tag and an union
     builder->emitIndent();
-    builder->appendFormat("struct %s ", valueTypeName.c_str());
+    builder->appendFormat("struct %v ", valueTypeName);
     builder->blockStart();
 
     emitValueStructStructure(builder);
@@ -273,13 +273,13 @@ void EBPFTable::emitValueType(CodeBuilder *builder) {
     if (isTernaryTable()) {
         // emit ternary mask value
         builder->emitIndent();
-        builder->appendFormat("struct %s_mask ", valueTypeName.c_str());
+        builder->appendFormat("struct %v_mask ", valueTypeName);
         builder->blockStart();
 
         builder->emitIndent();
         builder->appendLine("__u32 tuple_id;");
         builder->emitIndent();
-        builder->appendFormat("struct %s_mask next_tuple_mask;", keyTypeName.c_str());
+        builder->appendFormat("struct %v_mask next_tuple_mask;", keyTypeName);
         builder->newline();
         builder->emitIndent();
         builder->appendLine("__u8 has_next;");
@@ -301,7 +301,7 @@ void EBPFTable::emitValueActionIDNames(CodeBuilder *builder) {
             continue;
         }
         builder->emitIndent();
-        builder->appendFormat("#define %s %d", p4ActionToActionIDName(action), action_idx);
+        builder->appendFormat("#define %v %d", p4ActionToActionIDName(action), action_idx);
         builder->newline();
         action_idx++;
     }
@@ -453,8 +453,8 @@ void EBPFTable::emitKey(CodeBuilder *builder, cstring keyName) {
 
     if (isLPMTable()) {
         builder->emitIndent();
-        builder->appendFormat("%s.%s = sizeof(%s)*8 - %d", keyName.c_str(), prefixFieldName,
-                              keyName, prefixLenFieldWidth);
+        builder->appendFormat("%v.%v = sizeof(%v)*8 - %d", keyName, prefixFieldName, keyName,
+                              prefixLenFieldWidth);
         builder->endOfStatement(true);
     }
 
@@ -498,13 +498,12 @@ void EBPFTable::emitKey(CodeBuilder *builder, cstring keyName) {
 
         builder->emitIndent();
         if (memcpy) {
-            builder->appendFormat("__builtin_memcpy(&(%s.%s[0]), &(", keyName.c_str(),
-                                  fieldName.c_str());
+            builder->appendFormat("__builtin_memcpy(&(%v.%v[0]), &(", keyName, fieldName);
             codeGen->visit(c->expression);
             builder->appendFormat("[0]), %d)", scalar->bytesRequired());
         } else {
-            builder->appendFormat("%s.%s = ", keyName.c_str(), fieldName.c_str());
-            if (isLPMKeyBigEndian) builder->appendFormat("%s(", swap.c_str());
+            builder->appendFormat("%v.%v = ", keyName, fieldName);
+            if (isLPMKeyBigEndian) builder->appendFormat("%v(", swap);
             codeGen->visit(c->expression);
             if (isLPMKeyBigEndian) builder->append(")");
         }
@@ -512,10 +511,10 @@ void EBPFTable::emitKey(CodeBuilder *builder, cstring keyName) {
 
         cstring msgStr, varStr;
         if (memcpy) {
-            msgStr = absl::StrFormat("Control: key %s", c->expression->toString());
+            msgStr = absl::StrFormat("Control: key %v", c->expression);
             builder->target->emitTraceMessage(builder, msgStr.c_str());
         } else {
-            msgStr = absl::StrFormat("Control: key %s=0x%%llx", c->expression->toString());
+            msgStr = absl::StrFormat("Control: key %v=0x%%llx", c->expression);
             varStr =
                 absl::StrFormat("(unsigned long long) %s.%s", keyName.c_str(), fieldName.c_str());
             builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, varStr.c_str());
@@ -534,24 +533,23 @@ void EBPFTable::emitAction(CodeBuilder *builder, cstring valueName, cstring acti
         cstring name = EBPFObject::externalName(action), msgStr, convStr;
         builder->emitIndent();
         cstring actionName = p4ActionToActionIDName(action);
-        builder->appendFormat("case %s: ", actionName);
+        builder->appendFormat("case %v: ", actionName);
         builder->newline();
         builder->increaseIndent();
 
-        msgStr = absl::StrFormat("Control: executing action %s", name);
+        msgStr = absl::StrFormat("Control: executing action %v", name);
         builder->target->emitTraceMessage(builder, msgStr.c_str());
         for (auto param : *(action->parameters)) {
             auto etype = EBPFTypeFactory::instance->create(param->type);
             unsigned width = etype->as<IHasWidth>().widthInBits();
 
             if (width <= 64) {
-                convStr = absl::StrFormat("(unsigned long long) (%s->u.%s.%s)", valueName, name,
-                                          param->toString());
-                msgStr = absl::StrFormat("Control: param %s=0x%%llx (%d bits)", param->toString(),
-                                         width);
+                convStr =
+                    absl::StrFormat("(unsigned long long) (%v->u.%v.%v)", valueName, name, param);
+                msgStr = absl::StrFormat("Control: param %v=0x%%llx (%d bits)", param, width);
                 builder->target->emitTraceMessage(builder, msgStr.c_str(), 1, convStr.c_str());
             } else {
-                msgStr = absl::StrFormat("Control: param %s (%d bits)", param->toString(), width);
+                msgStr = absl::StrFormat("Control: param %v (%d bits)", param, width);
                 builder->target->emitTraceMessage(builder, msgStr.c_str());
             }
         }
@@ -623,7 +621,7 @@ void EBPFTable::emitInitializer(CodeBuilder *builder) {
     builder->blockStart();
     builder->emitIndent();
     cstring actionName = p4ActionToActionIDName(action);
-    builder->appendFormat(".action = %s,", actionName);
+    builder->appendFormat(".action = %v,", actionName);
     builder->newline();
 
     CodeGenInspector cg(program->refMap, program->typeMap);
@@ -695,7 +693,7 @@ void EBPFTable::emitInitializer(CodeBuilder *builder) {
         builder->blockStart();
         builder->emitIndent();
         cstring actionName = p4ActionToActionIDName(action);
-        builder->appendFormat(".action = %s,", actionName);
+        builder->appendFormat(".action = %v,", actionName);
         builder->newline();
 
         CodeGenInspector cg(program->refMap, program->typeMap);
@@ -739,25 +737,25 @@ void EBPFTable::emitLookup(CodeBuilder *builder, cstring key, cstring value) {
     }
 
     // for ternary tables
-    builder->appendFormat("struct %s_mask head = {0};", keyTypeName);
+    builder->appendFormat("struct %v_mask head = {0};", keyTypeName);
     builder->newline();
     builder->emitIndent();
-    builder->appendFormat("struct %s_mask *", valueTypeName);
+    builder->appendFormat("struct %v_mask *", valueTypeName);
     builder->target->emitTableLookup(builder, instanceName + "_prefixes", "head"_cs, "val"_cs);
     builder->endOfStatement(true);
     builder->emitIndent();
     builder->append("if (val && val->has_next != 0) ");
     builder->blockStart();
     builder->emitIndent();
-    builder->appendFormat("struct %s_mask next = val->next_tuple_mask;", keyTypeName);
+    builder->appendFormat("struct %v_mask next = val->next_tuple_mask;", keyTypeName);
     builder->newline();
     builder->emitIndent();
     builder->appendLine("#pragma clang loop unroll(disable)");
     builder->emitIndent();
-    builder->appendFormat("for (int i = 0; i < MAX_%s_MASKS; i++) ", keyTypeName.toUpper());
+    builder->appendFormat("for (int i = 0; i < MAX_%v_MASKS; i++) ", keyTypeName.toUpper());
     builder->blockStart();
     builder->emitIndent();
-    builder->appendFormat("struct %s_mask *", valueTypeName);
+    builder->appendFormat("struct %v_mask *", valueTypeName);
     builder->target->emitTableLookup(builder, instanceName + "_prefixes", "next"_cs, "v"_cs);
     builder->endOfStatement(true);
     builder->emitIndent();
@@ -769,25 +767,25 @@ void EBPFTable::emitLookup(CodeBuilder *builder, cstring key, cstring value) {
     builder->blockEnd(true);
     builder->emitIndent();
     cstring new_key = "k"_cs;
-    builder->appendFormat("struct %s %s = {};", keyTypeName, new_key);
+    builder->appendFormat("struct %v %v = {};", keyTypeName, new_key);
     builder->newline();
     builder->emitIndent();
-    builder->appendFormat("__u32 *chunk = ((__u32 *) &%s);", new_key);
+    builder->appendFormat("__u32 *chunk = ((__u32 *) &%v);", new_key);
     builder->newline();
     builder->emitIndent();
     builder->appendLine("__u32 *mask = ((__u32 *) &next);");
     builder->emitIndent();
     builder->appendLine("#pragma clang loop unroll(disable)");
     builder->emitIndent();
-    builder->appendFormat("for (int i = 0; i < sizeof(struct %s_mask) / 4; i++) ", keyTypeName);
+    builder->appendFormat("for (int i = 0; i < sizeof(struct %v_mask) / 4; i++) ", keyTypeName);
     builder->blockStart();
-    cstring str = absl::StrFormat("*(((__u32 *) &%s) + i)", key);
+    cstring str = absl::StrFormat("*(((__u32 *) &%v) + i)", key);
     builder->target->emitTraceMessage(
         builder, "Control: [Ternary] Masking next 4 bytes of %llx with mask %llx", 2, str,
         "mask[i]");
 
     builder->emitIndent();
-    builder->appendFormat("chunk[i] = ((__u32 *) &%s)[i] & mask[i];", key);
+    builder->appendFormat("chunk[i] = ((__u32 *) &%v)[i] & mask[i];", key);
     builder->newline();
     builder->blockEnd(true);
 
@@ -805,7 +803,7 @@ void EBPFTable::emitLookup(CodeBuilder *builder, cstring key, cstring value) {
     builder->append("if (!tuple) ");
     builder->blockStart();
     builder->target->emitTraceMessage(
-        builder, absl::StrFormat("Control: Tuples map %s not found during ternary lookup. Bug?",
+        builder, absl::StrFormat("Control: Tuples map %v not found during ternary lookup. Bug?",
                                  instanceName)
                      .c_str());
     builder->emitIndent();
@@ -815,8 +813,8 @@ void EBPFTable::emitLookup(CodeBuilder *builder, cstring key, cstring value) {
 
     builder->emitIndent();
     builder->appendFormat(
-        "struct %s *tuple_entry = "
-        "bpf_map_lookup_elem(%s, &%s)",
+        "struct %v *tuple_entry = "
+        "bpf_map_lookup_elem(%s, &%v)",
         valueTypeName, "tuple", new_key);
     builder->endOfStatement(true);
     builder->emitIndent();
@@ -836,10 +834,10 @@ void EBPFTable::emitLookup(CodeBuilder *builder, cstring key, cstring value) {
                                       "tuple_entry->priority");
 
     builder->emitIndent();
-    builder->appendFormat("if (%s == NULL || tuple_entry->priority > %s->priority) ", value, value);
+    builder->appendFormat("if (%v == NULL || tuple_entry->priority > %v->priority) ", value, value);
     builder->blockStart();
     builder->emitIndent();
-    builder->appendFormat("%s = tuple_entry;", value);
+    builder->appendFormat("%v = tuple_entry;", value);
     builder->newline();
     builder->blockEnd(true);
 
@@ -861,7 +859,7 @@ cstring EBPFTable::p4ActionToActionIDName(const IR::P4Action *action) const {
 
     cstring actionName = EBPFObject::externalName(action);
     cstring tableInstance = dataMapName;
-    return absl::StrFormat("%s_ACT_%s", tableInstance.toUpper(), actionName.toUpper());
+    return absl::StrFormat("%v_ACT_%v", tableInstance.toUpper(), actionName.toUpper());
 }
 
 /// As ternary has precedence over lpm, this function checks if any
@@ -1121,7 +1119,7 @@ void EBPFValueSet::emitTypes(CodeBuilder *builder) {
 
     if (auto tsl = elemType->to<IR::Type_StructLike>()) {
         for (auto field : tsl->fields) {
-            fieldNames.emplace_back(std::make_pair(field->name.name, field->type));
+            fieldNames.emplace_back(field->name.name, field->type);
         }
         // Do not re-declare this type
         return;
@@ -1147,7 +1145,7 @@ void EBPFValueSet::emitTypes(CodeBuilder *builder) {
         for (auto field : tuple->components) {
             cstring name = absl::StrFormat("field%d", i++);
             fieldEmitter(field, name);
-            fieldNames.emplace_back(std::make_pair(name, field));
+            fieldNames.emplace_back(name, field);
         }
     } else {
         BUG("Type for value_set not implemented %1%", pvs->elementType);

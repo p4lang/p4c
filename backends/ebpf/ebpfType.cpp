@@ -209,7 +209,7 @@ void EBPFStructType::emitInitializer(CodeBuilder *builder) {
     if (type->is<IR::Type_Struct>() || type->is<IR::Type_HeaderUnion>()) {
         for (auto f : fields) {
             builder->emitIndent();
-            builder->appendFormat(".%s = ", f->field->name.name);
+            builder->appendFormat(".%v = ", f->field->name);
             f->type->emitInitializer(builder);
             builder->append(",");
             builder->newline();
