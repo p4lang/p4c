@@ -30,8 +30,11 @@ const IR::Node *DuplicateHierarchicalNameCheck::postorder(IR::Annotation *annota
     cstring name = annotation->getName();
     if (!name.startsWith(".")) {
         if (!stack.empty()) {
-            name = absl::StrCat(absl::StrJoin(stack, ".", [](std::string *out, cstring s) {
-                absl::StrAppend(out, s.string_view()); }), ".", name.string_view());
+            name = absl::StrCat(absl::StrJoin(stack, ".",
+                                              [](std::string *out, cstring s) {
+                                                  absl::StrAppend(out, s.string_view());
+                                              }),
+                                ".", name.string_view());
         }
     }
     // The node the annotation belongs to
