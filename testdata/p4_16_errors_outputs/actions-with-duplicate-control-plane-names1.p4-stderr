@@ -1,0 +1,6 @@
+actions-with-duplicate-control-plane-names1.p4(77): [--Werror=duplicate] error: .foo1: conflicting control plane name: foo1
+    @name(".foo1") action a1 (bit<8> x, bit<8> y) { tmp1 = x; tmp2 = y; }
+                          ^^
+actions-with-duplicate-control-plane-names1.p4(58)
+action foo1() {
+       ^^^^
