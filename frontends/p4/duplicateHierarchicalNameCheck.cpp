@@ -29,10 +29,10 @@ const IR::Node *DuplicateHierarchicalNameCheck::postorder(IR::Annotation *annota
 
     cstring name = annotation->getName();
     if (!name.startsWith(".")) {
-        std::string newName = "";
-        for (cstring s : stack) newName += s + ".";
-        newName += name;
-        name = newName;
+        if (!stack.empty()) {
+            name = absl::StrCat(absl::StrJoin(stack, ".", [](std::string *out, cstring s) {
+                absl::StrAppend(out, s.string_view()); }), ".", name.string_view());
+        }
     }
     // The node the annotation belongs to
     CHECK_NULL(getContext()->parent);
