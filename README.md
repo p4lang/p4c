@@ -212,7 +212,7 @@ sudo dpkg -i /path/to/package.deb
     make -j4 check
     ```
     The cmake command takes the following optional arguments to
-    further customize the build:
+    further customize the build (see file `CMakeLists.txt` for the full list):
      - `-DCMAKE_BUILD_TYPE=RELEASE|DEBUG` -- set CMAKE_BUILD_TYPE to
       RELEASE or DEBUG to build with optimizations or with debug
       symbols to run in gdb. Default is RELEASE.
@@ -220,9 +220,11 @@ sudo dpkg -i /path/to/package.deb
        `make install` installs the compiler. Defaults to /usr/local.
      - `-DENABLE_BMV2=ON|OFF`. Enable [the bmv2 backend](backends/bmv2/README.md). Default ON.
      - `-DENABLE_EBPF=ON|OFF`. Enable [the ebpf backend](backends/ebpf/README.md). Default ON.
+     - `-DENABLE_P4TC=ON|OFF`. Enable [the TC backend](backends/tc/README.md). Default ON.
      - `-DENABLE_UBPF=ON|OFF`. Enable [the ubpf backend](backends/ubpf/README.md). Default ON.
      - `-DENABLE_DPDK=ON|OFF`. Enable [the DPDK backend](backends/dpdk/README.md). Default ON.
      - `-DENABLE_P4C_GRAPHS=ON|OFF`. Enable [the p4c-graphs backend](backends/graphs/README.md). Default ON.
+     - `-DENABLE_P4FMT=ON|OFF`. Enable [the p4fmt backend](backends/p4fmt/README.md). Default ON.
      - `-DENABLE_P4TEST=ON|OFF`. Enable [the p4test backend](backends/p4test/README.md). Default ON.
      - `-DENABLE_TEST_TOOLS=ON|OFF`. Enable [the p4tools backend](backends/p4tools/README.md). Default OFF.
      - `-DENABLE_DOCS=ON|OFF`. Build documentation. Default is OFF.
