@@ -165,6 +165,11 @@ class Node : public virtual INode {
 
     bool operator!=(const Node &n) const { return !operator==(n); }
 
+    template <typename Sink>
+    friend void AbslStringify(Sink &sink, const IR::Node *n) {
+        sink.Append(n->toString());
+    }
+
     DECLARE_TYPEINFO_WITH_TYPEID(Node, NodeKind::Node, INode);
 };
 

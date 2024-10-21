@@ -89,7 +89,7 @@ inline constexpr bool has_toString_v = has_toString<T>::value;
 
 template <typename T, typename = decltype(std::to_string(std::declval<T>()))>
 cstring toString(T value) {
-    return std::to_string(value);
+    return cstring(std::to_string(value));
 }
 
 template <typename T>

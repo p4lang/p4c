@@ -29,7 +29,7 @@ void EBPFRegisterPNA::emitInitializer(EBPF::CodeBuilder *builder, const P4::Exte
     builder->emitIndent();
     auto extId = translator->tcIR->getExternId(externName);
     BUG_CHECK(!extId.isNullOrEmpty(), "Extern ID not found");
-    builder->appendFormat("ext_params.ext_id = %s;", extId);
+    builder->appendFormat("ext_params.ext_id = %v;", extId);
     builder->newline();
     builder->emitIndent();
     auto instId = translator->tcIR->getExternInstanceId(externName, this->instanceName);
@@ -151,7 +151,7 @@ void EBPFCounterPNA::emitCount(EBPF::CodeBuilder *builder, const P4::ExternMetho
     builder->emitIndent();
     auto extId = translator->tcIR->getExternId(externName);
     BUG_CHECK(!extId.isNullOrEmpty(), "Extern ID not found");
-    builder->appendFormat("ext_params.ext_id = %s;", extId);
+    builder->appendFormat("ext_params.ext_id = %v;", extId);
     builder->newline();
     builder->emitIndent();
     auto instId = translator->tcIR->getExternInstanceId(externName, instanceName);
@@ -350,7 +350,7 @@ void InternetChecksumAlgorithmPNA::updateChecksum(EBPF::CodeBuilder *builder,
                     auto etype = EBPF::EBPFTypeFactory::instance->create(field->type);
                     builder->emitIndent();
                     etype->declare(builder, field_temp, false);
-                    builder->appendFormat(" = %s(", getConvertByteOrderFunction(width, "HOST"_cs));
+                    builder->appendFormat(" = %v(", getConvertByteOrderFunction(width, "HOST"_cs));
                     visitor->visit(field);
                     builder->appendLine(");");
                 }
@@ -366,7 +366,7 @@ void InternetChecksumAlgorithmPNA::updateChecksum(EBPF::CodeBuilder *builder,
                     remainingBits -= bitsToRead;
                     builder->append("(");
                     if (fieldByteOrder == "NETWORK"_cs) {
-                        builder->appendFormat("%s", field_temp);
+                        builder->appendFormat("%v", field_temp);
                     } else {
                         visitor->visit(field);
                     }
@@ -375,7 +375,7 @@ void InternetChecksumAlgorithmPNA::updateChecksum(EBPF::CodeBuilder *builder,
                 } else if (bitsToRead == remainingBits) {
                     remainingBits = 0;
                     if (fieldByteOrder == "NETWORK"_cs) {
-                        builder->appendFormat("%s", field_temp);
+                        builder->appendFormat("%v", field_temp);
                     } else {
                         visitor->visit(field);
                     }
@@ -385,7 +385,7 @@ void InternetChecksumAlgorithmPNA::updateChecksum(EBPF::CodeBuilder *builder,
                     remainingBits = 0;
                     builder->append("(");
                     if (fieldByteOrder == "NETWORK"_cs) {
-                        builder->appendFormat("%s", field_temp);
+                        builder->appendFormat("%v", field_temp);
                     } else {
                         visitor->visit(field);
                     }
@@ -444,7 +444,7 @@ void EBPFDigestPNA::emitInitializer(EBPF::CodeBuilder *builder) const {
     builder->emitIndent();
     auto extId = tcIR->getExternId(externName);
     BUG_CHECK(!extId.isNullOrEmpty(), "Extern ID not found");
-    builder->appendFormat("ext_params.ext_id = %s;", extId);
+    builder->appendFormat("ext_params.ext_id = %v;", extId);
     builder->newline();
     builder->emitIndent();
     auto instId = tcIR->getExternInstanceId(externName, instanceName);
@@ -507,7 +507,7 @@ void CRCChecksumAlgorithmPNA::emitAddData(EBPF::CodeBuilder *builder,
     for (auto field : arguments) {
         builder->newline();
         builder->emitIndent();
-        builder->appendFormat("%s(&", kfunc);
+        builder->appendFormat("%v(&", kfunc);
         visitor->visit(field);
         builder->append(", sizeof(");
         visitor->visit(field);
@@ -516,9 +516,9 @@ void CRCChecksumAlgorithmPNA::emitAddData(EBPF::CodeBuilder *builder,
             visitor->visit(expr->arguments->at(0));
             builder->append(", ");
             visitor->visit(expr->arguments->at(2));
-            builder->appendFormat(", %s);", registerVar);
+            builder->appendFormat(", %v);", registerVar);
         } else {
-            builder->appendFormat("), %s);", registerVar);
+            builder->appendFormat("), %v);", registerVar);
         }
     }
 }
@@ -542,7 +542,7 @@ void EBPFDigestPNA::emitPushElement(EBPF::CodeBuilder *builder, cstring elem) co
     emitInitializer(builder);
     builder->newline();
     builder->emitIndent();
-    builder->appendFormat("__builtin_memcpy(ext_params.in_params, &%s, sizeof(", elem);
+    builder->appendFormat("__builtin_memcpy(ext_params.in_params, &%v, sizeof(", elem);
     this->valueType->declare(builder, cstring::empty, false);
     builder->append("));");
     builder->newline();
@@ -559,11 +559,11 @@ void EBPFMeterPNA::emitInitializer(EBPF::CodeBuilder *builder, const ConvertToBa
     builder->emitIndent();
     auto extId = tcIR->getExternId(externName);
     BUG_CHECK(!extId.isNullOrEmpty(), "Extern ID not found");
-    builder->appendFormat("ext_params.ext_id = %s;", extId);
+    builder->appendFormat("ext_params.ext_id = %v;", extId);
     builder->newline();
     cstring ext_flags = isDirect ? "P4TC_EXT_METER_DIRECT"_cs : "P4TC_EXT_METER_INDIRECT"_cs;
     builder->emitIndent();
-    builder->appendFormat("ext_params.flags = %s;", ext_flags);
+    builder->appendFormat("ext_params.flags = %v;", ext_flags);
 }
 
 void EBPFMeterPNA::emitExecute(EBPF::CodeBuilder *builder, const P4::ExternMethod *method,
@@ -597,7 +597,7 @@ void EBPFMeterPNA::emitExecute(EBPF::CodeBuilder *builder, const P4::ExternMetho
         etype->declare(builder, color_aware, true);
         builder->appendLine(" = (u32 *)ext_params.in_params;");
         builder->emitIndent();
-        builder->appendFormat("*%s = ", color_aware);
+        builder->appendFormat("*%v = ", color_aware);
         translator->visit(value);
         builder->endOfStatement();
     }
@@ -655,7 +655,7 @@ void EBPFMeterPNA::emitDirectMeterExecute(EBPF::CodeBuilder *builder,
         etype->declare(builder, color_aware, true);
         builder->appendLine(" = (u32 *)ext_params.in_params;");
         builder->emitIndent();
-        builder->appendFormat("*%s = ", color_aware);
+        builder->appendFormat("*%v = ", color_aware);
         translator->visit(value);
         builder->endOfStatement();
     }

@@ -874,7 +874,8 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
             setCounterCommon(symbols, counter, id, counterInstance);
             counter->set_size(counterInstance.size);
             if (counterInstance.index_type_name) {
-                counter->mutable_index_type_name()->set_name(counterInstance.index_type_name);
+                counter->mutable_index_type_name()->set_name(
+                    counterInstance.index_type_name.string_view());
             }
         }
     }
@@ -903,7 +904,8 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
             setMeterCommon(symbols, meter, id, meterInstance);
             meter->set_size(meterInstance.size);
             if (meterInstance.index_type_name) {
-                meter->mutable_index_type_name()->set_name(meterInstance.index_type_name);
+                meter->mutable_index_type_name()->set_name(
+                    meterInstance.index_type_name.string_view());
             }
         }
     }
@@ -917,7 +919,8 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         register_->set_size(registerInstance.size);
         register_->mutable_type_spec()->CopyFrom(*registerInstance.typeSpec);
         if (registerInstance.index_type_name) {
-            register_->mutable_index_type_name()->set_name(registerInstance.index_type_name);
+            register_->mutable_index_type_name()->set_name(
+                registerInstance.index_type_name.string_view());
         }
     }
 

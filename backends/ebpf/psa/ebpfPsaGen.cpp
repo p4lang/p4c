@@ -46,7 +46,7 @@ class PSAErrorCodesGen : public Inspector {
             }
 
             builder->emitIndent();
-            builder->appendFormat("static const ParserError_t %s = %d", decl->name.name, id);
+            builder->appendFormat("static const ParserError_t %v = %d", decl->name, id);
             builder->endOfStatement(true);
 
             // Type ParserError_t is u8, which can have values from 0 to 255.
@@ -567,7 +567,7 @@ void PSAArchXDP::emitInitializerSection(CodeBuilder *builder) const {
 void PSAArchXDP::emitXDP2TCInternalStructures(CodeBuilder *builder) const {
     builder->appendFormat(
         "struct xdp2tc_metadata {\n"
-        "    struct %s headers;\n"
+        "    struct %v headers;\n"
         "    struct psa_ingress_output_metadata_t ostd;\n"
         "    __u32 packetOffsetInBits;\n"
         "    __u16 pkt_ether_type;\n"

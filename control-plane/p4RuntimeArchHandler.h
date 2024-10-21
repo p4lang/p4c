@@ -321,7 +321,7 @@ void addDocumentation(Message *message, const IR::IAnnotated *annotated) {
             auto brief = annotation->expr[0]->to<IR::StringLiteral>();
             // guaranteed by ParseAnnotations pass
             CHECK_NULL(brief);
-            doc.set_brief(brief->value);
+            doc.set_brief(brief->value.string_view());
             hasDoc = true;
             continue;
         }
@@ -329,7 +329,7 @@ void addDocumentation(Message *message, const IR::IAnnotated *annotated) {
             auto description = annotation->expr[0]->to<IR::StringLiteral>();
             // guaranteed by ParseAnnotations pass
             CHECK_NULL(description);
-            doc.set_description(description->value);
+            doc.set_description(description->value.string_view());
             hasDoc = true;
             continue;
         }
@@ -346,8 +346,8 @@ void setPreamble(::p4::config::v1::Preamble *preamble, p4rt_id_t id, cstring nam
                  const IR::IAnnotated *annotated, UnaryPredicate p) {
     CHECK_NULL(preamble);
     preamble->set_id(id);
-    preamble->set_name(name);
-    preamble->set_alias(alias);
+    preamble->set_name(name.string_view());
+    preamble->set_alias(alias.string_view());
     addAnnotations(preamble, annotated, p);
     addDocumentation(preamble, annotated);
 }
