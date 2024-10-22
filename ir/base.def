@@ -313,16 +313,18 @@ class Annotation {
     /// Annotations described as key-value pairs
     inline IndexedVector<NamedExpression> kv;
 
+#emit
     /// Whether the annotation body needs to be parsed.
     /// Invariant: if this is true, then expr and kv must both be empty. If the
     /// annotation is compiler-generated (e.g., derived from a P4₁₄ pragma),
     /// then needsParsing will be false and the body will be empty, but expr or
     /// kv may be populated.
-    bool needsParsing;
+    bool needsParsing : 1;
 
     /// If this is true this is a structured annotation, and there are some
     /// constraints on its contents.
-    bool structured;
+    bool structured : 1;
+#end
 }
 
 /// There can be several annotations with the same "name", so this is a vector.
