@@ -304,11 +304,8 @@ void ConvertToBackendIR::updateConstEntries(const IR::P4Table *t, IR::TCTable *t
         for (size_t itr = 0; itr < keyset->components.size(); itr++) {
             auto keyElement = keys->keyElements.at(itr);
             auto keyString = keyElement->expression->toString();
-            auto annotations = keyElement->getAnnotations();
-            if (annotations) {
-                if (auto anno = annotations->getSingle("name"_cs)) {
-                    keyString = anno->expr.at(0)->to<IR::StringLiteral>()->value;
-                }
+            if (auto anno = keyElement->getAnnotation("name"_cs)) {
+                keyString = anno->expr.at(0)->to<IR::StringLiteral>()->value;
             }
             auto keySetElement = keyset->components.at(itr);
             auto key = keySetElement->toString();
@@ -385,8 +382,7 @@ void ConvertToBackendIR::updateDefaultMissAction(const IR::P4Table *t, IR::TCTab
                 }
                 bool isTCMayOverrideMiss = false;
                 const IR::Annotation *overrideAnno =
-                    defaultActionProperty->getAnnotations()->getSingle(
-                        ParseTCAnnotations::tcMayOverride);
+                    defaultActionProperty->getAnnotation(ParseTCAnnotations::tcMayOverride);
                 if (overrideAnno) {
                     isTCMayOverrideMiss = true;
                 }
@@ -876,12 +872,12 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::processExternConstructor(
         for (unsigned itr = 0; itr < params->size(); itr++) {
             auto parameter = params->getParameter(itr);
             auto exp = decl->arguments->at(itr)->expression;
-            if (parameter->getAnnotations()->getSingle(ParseTCAnnotations::tc_numel)) {
+            if (parameter->getAnnotation(ParseTCAnnotations::tc_numel)) {
                 if (exp->is<IR::Constant>()) {
                     instance->is_num_elements = true;
                     instance->num_elements = exp->to<IR::Constant>()->asInt();
                 }
-            } else if (parameter->getAnnotations()->getSingle(ParseTCAnnotations::tc_init_val)) {
+            } else if (parameter->getAnnotation(ParseTCAnnotations::tc_init_val)) {
                 // TODO: Process tc_init_val.
             } else {
                 /* If a parameter is not annoated by tc_init or tc_numel then it is emitted as
@@ -1022,7 +1018,7 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::HandleTypeNameStructField(
             if (auto param_struct = param_val->to<IR::Type_Struct>()) {
                 for (auto f : param_struct->fields) {
                     cstring ptype = absl::StrCat("bit", f->type->width_bits());
-                    if (auto anno = f->getAnnotations()->getSingle(ParseTCAnnotations::tcType)) {
+                    if (auto anno = f->getAnnotation(ParseTCAnnotations::tcType)) {
                         auto expr = anno->expr[0];
                         if (auto typeLiteral = expr->to<IR::StringLiteral>()) {
                             ptype = typeLiteral->value;
@@ -1034,7 +1030,7 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::HandleTypeNameStructField(
                 }
             } else {
                 cstring ptype = absl::StrCat("bit", param_val->width_bits());
-                if (auto anno = field->getAnnotations()->getSingle(ParseTCAnnotations::tcType)) {
+                if (auto anno = field->getAnnotation(ParseTCAnnotations::tcType)) {
                     auto expr = anno->expr[0];
                     if (auto typeLiteral = expr->to<IR::StringLiteral>()) {
                         ptype = typeLiteral->value;
@@ -1057,7 +1053,7 @@ bool ConvertToBackendIR::hasExecuteMethod(const IR::Type_Extern *extn) {
         }
         auto method = gd->getNode()->to<IR::Method>();
         const IR::Annotation *execAnnotation =
-            method->getAnnotations()->getSingle(ParseTCAnnotations::tc_md_exec);
+            method->getAnnotation(ParseTCAnnotations::tc_md_exec);
         if (execAnnotation) {
             return true;
         }

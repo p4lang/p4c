@@ -20,7 +20,7 @@ namespace P4 {
 
 void Deprecated::warnIfDeprecated(const IR::IAnnotated *annotated, const IR::Node *errorNode) {
     if (annotated == nullptr) return;
-    auto anno = annotated->getAnnotations()->getSingle(IR::Annotation::deprecatedAnnotation);
+    auto anno = annotated->getAnnotation(IR::Annotation::deprecatedAnnotation);
     if (anno == nullptr) return;
 
     std::string message;

@@ -555,7 +555,7 @@ const IR::ParserState *ProgramStructure::convertParser(
                 value_sets_implemented.emplace(first->path->name);
 
                 auto type = explodeType(fieldTypes);
-                auto sizeAnnotation = value_set->annotations->getSingle("parser_value_set_size"_cs);
+                auto sizeAnnotation = value_set->getAnnotation("parser_value_set_size"_cs);
                 const IR::Constant *sizeConstant;
                 if (sizeAnnotation) {
                     if (sizeAnnotation->expr.size() != 1) {

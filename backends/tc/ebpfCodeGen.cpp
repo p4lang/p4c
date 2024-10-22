@@ -1607,8 +1607,7 @@ const IR::P4Action *ControlBodyTranslatorPNA::GetAddOnMissHitAction(cstring acti
         auto adecl = control->program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->to<IR::P4Action>();
         if (action->name.originalName == actionName) {
-            auto annotations = a->getAnnotations();
-            if (annotations && annotations->getSingle("defaultonly"_cs)) {
+            if (a->getAnnotation("defaultonly"_cs)) {
                 ::P4::error(ErrorType::ERR_UNEXPECTED,
                             "add_entry hit action %1% cannot be annotated with defaultonly.",
                             actionName);

@@ -54,7 +54,7 @@ class RemoveHidden : public Transform {
     const IR::Node *postorder(IR::BlockStatement *stat) override {
         if (!stat->components.empty()) return stat;
         if (stat->annotations->size() != 1) return stat;
-        auto anno = stat->annotations->getSingle(IR::Annotation::hiddenAnnotation);
+        auto anno = stat->getAnnotation(IR::Annotation::hiddenAnnotation);
         if (!anno) return stat;
         // Lose the annotation.
         return new IR::BlockStatement(stat->srcInfo);

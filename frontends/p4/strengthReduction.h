@@ -111,7 +111,7 @@ class DoStrengthReduction final : public Transform {
     const IR::Node *postorder(IR::ArrayIndex *expr) override;
 
     const IR::BlockStatement *preorder(IR::BlockStatement *bs) override {
-        if (bs->annotations->getSingle("disable_optimization"_cs)) prune();
+        if (bs->getAnnotation("disable_optimization"_cs)) prune();
         return bs;
     }
 };

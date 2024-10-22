@@ -213,7 +213,7 @@ bool TypeInferenceBase::checkAbstractMethods(const IR::Declaration_Instance *ins
     }
     bool rv = true;
     for (const auto &vm : virt) {
-        if (!vm.second->annotations->getSingle("optional"_cs)) {
+        if (!vm.second->getAnnotation("optional"_cs)) {
             typeError("%1%: %2% abstract method not implemented", inst, vm.second);
             rv = false;
         }

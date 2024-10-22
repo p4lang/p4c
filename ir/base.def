@@ -375,7 +375,9 @@ class Annotations {
 interface IAnnotated {
     virtual Annotations getAnnotations() const = 0;
     Annotation getAnnotation(cstring name) const override {
-        return getAnnotations()->getSingle(name); }
+        auto annotations = getAnnotations();
+        return annotations ? annotations->getSingle(name) : nullptr;
+    }
 }
 
 interface IInstance {
