@@ -647,7 +647,10 @@ class P4RuntimeTest(BaseTest):
         action_id = self.get_action_id(a_name)
         if action_id is None:
             self.fail(
-                "Failed to get id of action '{}' - perhaps the action name is misspelled?".format(a_name))
+                "Failed to get id of action '{}' - perhaps the action name is misspelled?".format(
+                    a_name
+                )
+            )
         action.action_id = action_id
         for p_name, v in params:
             param = action.params.add()
