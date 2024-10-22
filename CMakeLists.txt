@@ -282,6 +282,31 @@ endif()
 # enable CTest
 enable_testing ()
 
+# Macro to check dependencies before adding tests
+
+macro(CHECK_DEPENDENCIES TEST_DEPENDENCY_PROGRAMS TEST_DEPENDENCY_LIBRARIES)
+    foreach(PROG ${TEST_DEPENDENCY_PROGRAMS})
+        find_program(${PROG}_FOUND ${PROG})
+        if (${PROG}_FOUND)
+            message(STATUS "Found program ${PROG} at ${${PROG}_FOUND}")
+        else()
+            message(WARNING "Missing program ${PROG}, disabling relevant tests."
+            " Please install ${PROG} and ensure it is in your PATH.")
+            set(TEST_DEPENDENCY_PRESENT FALSE)
+        endif()
+    endforeach()
+
+    foreach(LIB ${TEST_DEPENDENCY_LIBRARIES})
+        find_library(${LIB}_FOUND ${LIB} HINTS "${CMAKE_CURRENT_SOURCE_DIR}/runtime/usr/lib64/")
+        if (${LIB}_FOUND)
+            message(STATUS "Found library ${LIB} at ${${LIB}_FOUND}")
+        else()
+            message(WARNING "Missing library ${LIB}, disabling relevant tests."
+            " Please install ${LIB}.")
+            set(TEST_DEPENDENCY_PRESENT FALSE)
+        endif()
+    endforeach()
+endmacro()
 
 # if we want to manage versions in CMake ...
 # include (cmake/P4CVersion.cmake)
