@@ -425,7 +425,7 @@ void EmitDpdkTableConfig::addAction(const IR::Expression *actionRef, P4::Referen
         actionName = newNameMap[actionDecl->name.name];
     else
         actionName = actionDecl->name.name;
-    print(actionName.string_view(), " ");
+    print(actionName, " ");
     if (actionDecl->parameters->parameters.size() == 1) {
         std::vector<cstring> paramNames;
         std::vector<big_int> argVals;
@@ -458,7 +458,7 @@ void EmitDpdkTableConfig::addAction(const IR::Expression *actionRef, P4::Referen
         }
 
         for (size_t i = 0; i < argVals.size(); i++) {
-            print(paramNames[i].string_view(), " ");
+            print(paramNames[i], " ");
             print(argVals[i], " ");
         }
     }

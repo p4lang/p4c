@@ -181,7 +181,7 @@ const T *P4ParserDriver::parse(P4AnnotationLexer::Type type, const Util::SourceI
     LOG3("Parsing P4-16 annotation " << srcInfo);
 
     P4AnnotationLexer lexer(type, srcInfo, body);
-    if (!parse(lexer, srcInfo.getSourceFile().string_view())) {
+    if (!parse(lexer, srcInfo.getSourceFile())) {
         return nullptr;
     }
 

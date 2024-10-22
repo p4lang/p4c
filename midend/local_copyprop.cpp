@@ -234,8 +234,8 @@ bool DoLocalCopyPropagation::operator==(const ControlFlowVisitor &a_) const {
 /// test to see if names denote overlapping locations
 bool DoLocalCopyPropagation::name_overlap(cstring name1, cstring name2) {
     if (name1 == name2) return true;
-    if (name1.startsWith(name2.string_view()) && strchr(".[", name1.get(name2.size()))) return true;
-    if (name2.startsWith(name1.string_view()) && strchr(".[", name2.get(name1.size()))) return true;
+    if (name1.startsWith(name2) && strchr(".[", name1.get(name2.size()))) return true;
+    if (name2.startsWith(name1) && strchr(".[", name2.get(name1.size()))) return true;
     return false;
 }
 
@@ -259,8 +259,7 @@ void DoLocalCopyPropagation::forOverlapAvail(cstring name,
         if (it != available.end()) fn(it->first, &it->second);
     }
     for (auto it = available.upper_bound(name); it != available.end(); ++it) {
-        if (!it->first.startsWith(name.string_view()) || !strchr(".[", it->first.get(name.size())))
-            break;
+        if (!it->first.startsWith(name) || !strchr(".[", it->first.get(name.size()))) break;
         fn(it->first, &it->second);
     }
 }

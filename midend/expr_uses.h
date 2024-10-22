@@ -31,7 +31,7 @@ class exprUses : public Inspector {
     const char *search_tail = nullptr;  // pointer into look_for for partial match
     bool result = false;
     bool preorder(const IR::Path *p) override {
-        if (look_for.startsWith(p->name.name.string_view())) {
+        if (look_for.startsWith(p->name.name)) {
             search_tail = look_for.c_str() + p->name.name.size();
             if (*search_tail == 0 || *search_tail == '.' || *search_tail == '[') result = true;
         }
@@ -46,7 +46,7 @@ class exprUses : public Inspector {
     void postorder(const IR::Member *m) override {
         if (result && search_tail && *search_tail) {
             if (*search_tail == '.') search_tail++;
-            if (cstring(search_tail).startsWith(m->member.name.string_view())) {
+            if (cstring(search_tail).startsWith(m->member.name)) {
                 search_tail += m->member.name.size();
                 if (*search_tail == 0 || *search_tail == '.' || *search_tail == '[') return;
             }

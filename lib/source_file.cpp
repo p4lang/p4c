@@ -183,7 +183,7 @@ SourceFileLine InputSources::getSourceLine(unsigned line) const {
     // So we have to subtract one to get the real line number.
     const auto nominalLine = line - it->first + it->second.sourceLine;
     const auto realLine = nominalLine > 0 ? nominalLine - 1 : 0;
-    return SourceFileLine(it->second.fileName.string_view(), realLine);
+    return SourceFileLine(it->second.fileName, realLine);
 }
 
 unsigned InputSources::getCurrentLineNumber() const { return contents.size(); }

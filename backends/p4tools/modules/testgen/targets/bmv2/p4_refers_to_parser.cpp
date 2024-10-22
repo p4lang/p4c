@@ -110,7 +110,7 @@ const IR::SymbolicVariable *RefersToParser::getReferencedKey(const IR::P4Control
     const IR::IDeclaration *tableDeclaration = nullptr;
     for (const auto *decl : *ctrlContext.getDeclarations()) {
         auto declName = decl->controlPlaneName();
-        if (declName.endsWith(tableReference.string_view())) {
+        if (declName.endsWith(tableReference)) {
             tableDeclaration = decl;
             break;
         }

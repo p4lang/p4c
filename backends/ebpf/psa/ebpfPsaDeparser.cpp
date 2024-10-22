@@ -201,7 +201,7 @@ void XDPIngressDeparserPSA::emitPreDeparser(CodeBuilder *builder) {
     cstring conditionSendToTC =
         "if (%s->clone || %s->multicast_group != 0 ||"
         " (!%s->drop && %s->egress_port == 0 && !%s->resubmit && %s->multicast_group == 0)) "_cs;
-    conditionSendToTC = conditionSendToTC.replace("%s", istd->name.name.string_view());
+    conditionSendToTC = conditionSendToTC.replace("%s", istd->name.name);
     builder->append(conditionSendToTC);
     builder->blockStart();
     builder->emitIndent();

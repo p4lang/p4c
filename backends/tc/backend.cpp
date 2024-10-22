@@ -712,8 +712,8 @@ cstring ConvertToBackendIR::HandleTableAccessPermission(const IR::P4Table *t) {
         }
     }
     // FIXME: refactor not to require cstring
-    auto access_cp = GetAccessNumericValue(control_path.string_view());
-    auto access_dp = GetAccessNumericValue(data_path.string_view());
+    auto access_cp = GetAccessNumericValue(control_path);
+    auto access_dp = GetAccessNumericValue(data_path);
     auto access_permisson = (access_cp << 7) | access_dp;
     std::stringstream value;
     value << "0x" << std::hex << access_permisson;
@@ -847,8 +847,8 @@ cstring ConvertToBackendIR::processExternPermission(const IR::Type_Extern *ext) 
     if (data_path.isNullOrEmpty()) {
         data_path = cstring(DEFAULT_EXTERN_DATA_PATH_ACCESS);
     }
-    auto access_cp = GetAccessNumericValue(control_path.string_view());
-    auto access_dp = GetAccessNumericValue(data_path.string_view());
+    auto access_cp = GetAccessNumericValue(control_path);
+    auto access_dp = GetAccessNumericValue(data_path);
     auto access_permisson = (access_cp << 7) | access_dp;
     std::stringstream value;
     value << "0x" << std::hex << access_permisson;
