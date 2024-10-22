@@ -142,7 +142,7 @@ void serializeStructuredExpression(const IR::Expression *expr, p4configv1::Expre
     } else if (expr->is<IR::BoolLiteral>()) {
         sExpr->set_bool_value(expr->to<IR::BoolLiteral>()->value);
     } else if (expr->is<IR::StringLiteral>()) {
-        sExpr->set_string_value(expr->to<IR::StringLiteral>()->value.string_view());
+        sExpr->set_string_value(expr->to<IR::StringLiteral>()->value);
     } else {
         // guaranteed by the type checker.
         BUG("%1%: structured annotation expression must be a compile-time value", expr);
@@ -150,13 +150,13 @@ void serializeStructuredExpression(const IR::Expression *expr, p4configv1::Expre
 }
 
 void serializeStructuredKVPair(const IR::NamedExpression *kv, p4configv1::KeyValuePair *sKV) {
-    sKV->set_key(kv->name.string_view());
+    sKV->set_key(kv->name.name);
     serializeStructuredExpression(kv->expression, sKV->mutable_value());
 }
 
 void serializeOneStructuredAnnotation(const IR::Annotation *annotation,
                                       p4configv1::StructuredAnnotation *structuredAnnotation) {
-    structuredAnnotation->set_name(annotation->name.string_view());
+    structuredAnnotation->set_name(annotation->name.name);
     switch (annotation->annotationKind()) {
         case IR::Annotation::Kind::StructuredEmpty:
             // nothing to do, body oneof should be empty.

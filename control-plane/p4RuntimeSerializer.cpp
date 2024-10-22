@@ -562,7 +562,7 @@ class P4RuntimeAnalyzer {
             auto paramName = actionParam->controlPlaneName();
             auto id = idAllocator.getId(actionParam);
             param->set_id(id);
-            param->set_name(paramName.string_view());
+            param->set_name(paramName);
             addAnnotations(param, actionParam->to<IR::IAnnotated>());
             addDocumentation(param, actionParam->to<IR::IAnnotated>());
 
@@ -586,7 +586,7 @@ class P4RuntimeAnalyzer {
             auto type_name = getTypeName(paramType, typeMap);
             if (type_name) {
                 auto namedType = param->mutable_type_name();
-                namedType->set_name(type_name.string_view());
+                namedType->set_name(type_name);
             } else if (auto e = paramType->to<IR::Type_Enum>()) {
                 param->mutable_type_name()->set_name(std::string(e->controlPlaneName()));
             }
@@ -626,7 +626,7 @@ class P4RuntimeAnalyzer {
             auto fieldName = headerField->controlPlaneName();
             auto id = idAllocator.getId(headerField);
             metadata->set_id(id);
-            metadata->set_name(fieldName.string_view());
+            metadata->set_name(fieldName);
             addAnnotations(metadata, headerField->to<IR::IAnnotated>());
 
             auto fieldType = typeMap->getType(headerField, true);
@@ -643,7 +643,7 @@ class P4RuntimeAnalyzer {
             auto type_name = getTypeName(fieldType, typeMap);
             if (type_name) {
                 auto namedType = metadata->mutable_type_name();
-                namedType->set_name(type_name.string_view());
+                namedType->set_name(type_name);
             }
         }
     }
@@ -729,17 +729,17 @@ class P4RuntimeAnalyzer {
         for (const auto &field : matchFields) {
             auto match_field = table->add_match_fields();
             match_field->set_id(field.id);
-            match_field->set_name(field.name.string_view());
+            match_field->set_name(field.name);
             addAnnotations(match_field, field.annotations);
             addDocumentation(match_field, field.annotations);
             match_field->set_bitwidth(field.bitwidth);
             if (field.type != MatchField::MatchTypes::UNSPECIFIED)
                 match_field->set_match_type(field.type);
             else
-                match_field->set_other_match_type(field.other_match_type.string_view());
+                match_field->set_other_match_type(field.other_match_type);
             if (field.type_name) {
                 auto namedType = match_field->mutable_type_name();
-                namedType->set_name(field.type_name.string_view());
+                namedType->set_name(field.type_name);
             }
         }
 
@@ -840,7 +840,7 @@ class P4RuntimeAnalyzer {
             if (matchType != MatchField::MatchTypes::UNSPECIFIED)
                 match->set_match_type(*matchType);
             else
-                match->set_other_match_type(matchTypeName.string_view());
+                match->set_other_match_type(matchTypeName);
         };
 
         // TODO(antonin): handle new types
@@ -872,7 +872,7 @@ class P4RuntimeAnalyzer {
                 auto *match = vs->add_match();
                 auto fieldId = idAllocator.getId(f);
                 match->set_id(fieldId);
-                match->set_name(f->controlPlaneName().string_view());
+                match->set_name(f->controlPlaneName());
                 match->set_bitwidth(fType->width_bits());
                 setMatchType(f, match);
                 // add annotations save for the @match one
@@ -896,7 +896,7 @@ class P4RuntimeAnalyzer {
             for (auto f : fields) {
                 auto *match = vs->add_match();
                 match->set_id(index++);
-                match->set_name(f->controlPlaneName().string_view());
+                match->set_name(f->controlPlaneName());
                 match->set_bitwidth(fType->width_bits());
                 match->set_match_type(MatchField::MatchTypes::EXACT);
             }
@@ -933,7 +933,7 @@ class P4RuntimeAnalyzer {
         CHECK_NULL(decl);
         auto *pkginfo = p4Info->mutable_pkg_info();
 
-        pkginfo->set_arch(arch.string_view());
+        pkginfo->set_arch(arch);
 
         std::set<cstring> keysVisited;
 

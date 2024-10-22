@@ -131,15 +131,15 @@ bool TypeSpecConverter::preorder(const IR::Type_Name *type) {
     auto decl = refMap->getDeclaration(type->path, true);
     auto name = decl->controlPlaneName();
     if (decl->is<IR::Type_Struct>()) {
-        typeSpec->mutable_struct_()->set_name(name.string_view());
+        typeSpec->mutable_struct_()->set_name(name);
     } else if (decl->is<IR::Type_Header>()) {
-        typeSpec->mutable_header()->set_name(name.string_view());
+        typeSpec->mutable_header()->set_name(name);
     } else if (decl->is<IR::Type_HeaderUnion>()) {
-        typeSpec->mutable_header_union()->set_name(name.string_view());
+        typeSpec->mutable_header_union()->set_name(name);
     } else if (decl->is<IR::Type_Enum>()) {
-        typeSpec->mutable_enum_()->set_name(name.string_view());
+        typeSpec->mutable_enum_()->set_name(name);
     } else if (decl->is<IR::Type_SerEnum>()) {
-        typeSpec->mutable_serializable_enum()->set_name(name.string_view());
+        typeSpec->mutable_serializable_enum()->set_name(name);
     } else if (decl->is<IR::Type_Error>()) {
         // enable "error" field in P4DataTypeSpec's type_spec oneof
         (void)typeSpec->mutable_error();
@@ -154,7 +154,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Name *type) {
         map.emplace(type, typeSpec);
         return false;
     } else if (decl->is<IR::Type_Newtype>()) {
-        typeSpec->mutable_new_type()->set_name(name.string_view());
+        typeSpec->mutable_new_type()->set_name(name);
     } else {
         BUG("Unexpected named type %1%", type);
     }
@@ -244,11 +244,11 @@ bool TypeSpecConverter::preorder(const IR::Type_Stack *type) {
 
     if (decl->is<IR::Type_Header>()) {
         auto headerStackTypeSpec = typeSpec->mutable_header_stack();
-        headerStackTypeSpec->mutable_header()->set_name(name.string_view());
+        headerStackTypeSpec->mutable_header()->set_name(name);
         headerStackTypeSpec->set_size(size);
     } else if (decl->is<IR::Type_HeaderUnion>()) {
         auto headerUnionStackTypeSpec = typeSpec->mutable_header_union_stack();
-        headerUnionStackTypeSpec->mutable_header_union()->set_name(name.string_view());
+        headerUnionStackTypeSpec->mutable_header_union()->set_name(name);
         headerUnionStackTypeSpec->set_size(size);
     } else {
         BUG("Unexpected declaration %1%", decl);
@@ -270,7 +270,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Struct *type) {
                 auto fTypeSpec = map.at(fType);
                 CHECK_NULL(fTypeSpec);
                 auto member = structTypeSpec->add_members();
-                member->set_name(f->controlPlaneName().string_view());
+                member->set_name(f->controlPlaneName());
                 member->mutable_type_spec()->CopyFrom(*fTypeSpec);
             }
             (*structs)[name] = *structTypeSpec;
@@ -296,7 +296,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Header *type) {
                           "Only bitstring fields expected in flattened header type %1%",
                           flattenedHeaderType);
                 auto member = headerTypeSpec->add_members();
-                member->set_name(f->controlPlaneName().string_view());
+                member->set_name(f->controlPlaneName());
                 member->mutable_type_spec()->CopyFrom(fTypeSpec->bitstring());
             }
             (*headers)[name] = *headerTypeSpec;
@@ -320,7 +320,7 @@ bool TypeSpecConverter::preorder(const IR::Type_HeaderUnion *type) {
                 BUG_CHECK(fTypeSpec->has_header(),
                           "Only header fields expected in header union declaration %1%", type);
                 auto member = headerUnionTypeSpec->add_members();
-                member->set_name(f->controlPlaneName().string_view());
+                member->set_name(f->controlPlaneName());
                 member->mutable_header()->CopyFrom(fTypeSpec->header());
             }
             (*headerUnions)[name] = *headerUnionTypeSpec;
@@ -338,7 +338,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Enum *type) {
             auto enumTypeSpec = new p4configv1::P4EnumTypeSpec();
             for (auto m : type->members) {
                 auto member = enumTypeSpec->add_members();
-                member->set_name(m->controlPlaneName().string_view());
+                member->set_name(m->controlPlaneName());
             }
             (*enums)[name] = *enumTypeSpec;
         }
@@ -358,7 +358,7 @@ bool TypeSpecConverter::preorder(const IR::Type_SerEnum *type) {
             bitTypeSpec->set_bitwidth(width);
             for (auto m : type->members) {
                 auto member = enumTypeSpec->add_members();
-                member->set_name(m->controlPlaneName().string_view());
+                member->set_name(m->controlPlaneName());
                 if (!m->value->is<IR::Constant>()) {
                     ::P4::error(ErrorType::ERR_UNSUPPORTED, "%1% unsupported SerEnum member value",
                                 m->value);
@@ -378,8 +378,7 @@ bool TypeSpecConverter::preorder(const IR::Type_SerEnum *type) {
 bool TypeSpecConverter::preorder(const IR::Type_Error *type) {
     if (p4RtTypeInfo && !p4RtTypeInfo->has_error()) {
         auto errorTypeSpec = p4RtTypeInfo->mutable_error();
-        for (auto m : type->members)
-            errorTypeSpec->add_members(m->controlPlaneName().string_view());
+        for (auto m : type->members) errorTypeSpec->add_members(m->controlPlaneName());
     }
     map.emplace(type, nullptr);
     return false;
