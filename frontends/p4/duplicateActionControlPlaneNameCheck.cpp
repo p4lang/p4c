@@ -84,10 +84,11 @@ const IR::Node *DuplicateActionControlPlaneNameCheck::postorder(IR::Annotation *
         if (stack.empty()) {
             name = absl::StrCat(".", name.string_view());
         } else {
-            name = absl::StrCat(".", absl::StrJoin(stack, ".",
-                                                   [](std::string *out, cstring s) {
-                                                       absl::StrAppend(out, s.string_view());
-                                                   }),
+            name = absl::StrCat(".",
+                                absl::StrJoin(stack, ".",
+                                              [](std::string *out, cstring s) {
+                                                  absl::StrAppend(out, s.string_view());
+                                              }),
                                 ".", name.string_view());
         }
     }
