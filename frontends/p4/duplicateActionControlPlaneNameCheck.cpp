@@ -24,7 +24,8 @@ cstring DuplicateActionControlPlaneNameCheck::getName(const IR::IDeclaration *de
     return decl->getName();
 }
 
-void DuplicateActionControlPlaneNameCheck::checkForDuplicateName(cstring name, const IR::Node *node) {
+void DuplicateActionControlPlaneNameCheck::checkForDuplicateName(cstring name,
+                                                                 const IR::Node *node) {
     bool foundDuplicate = false;
     auto *otherNode = node;
     auto [it, inserted] = actions.insert(std::pair(name, node));

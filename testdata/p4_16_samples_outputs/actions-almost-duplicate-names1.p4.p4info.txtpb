@@ -1,0 +1,146 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 49173205
+    name: "ingressImpl.t1"
+    alias: "t1"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.etherType"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21257015
+  }
+  action_refs {
+    id: 30176274
+  }
+  action_refs {
+    id: 21008649
+  }
+  action_refs {
+    id: 27458909
+  }
+  action_refs {
+    id: 24058105
+  }
+  action_refs {
+    id: 25646030
+  }
+  action_refs {
+    id: 17174663
+  }
+  action_refs {
+    id: 28708850
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 512
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 25646030
+    name: "foo1"
+    alias: "foo1"
+  }
+}
+actions {
+  preamble {
+    id: 17174663
+    name: "ingressImpl.foo2"
+    alias: "foo2"
+  }
+}
+actions {
+  preamble {
+    id: 28708850
+    name: "baz"
+    alias: "baz"
+  }
+}
+actions {
+  preamble {
+    id: 30176274
+    name: "ingressImpl.foo1"
+    alias: "ingressImpl.foo1"
+  }
+  params {
+    id: 1
+    name: "x"
+    bitwidth: 8
+  }
+  params {
+    id: 2
+    name: "y"
+    bitwidth: 8
+  }
+}
+actions {
+  preamble {
+    id: 21008649
+    name: "bar"
+    alias: "bar"
+  }
+  params {
+    id: 1
+    name: "x"
+    bitwidth: 8
+  }
+  params {
+    id: 2
+    name: "y"
+    bitwidth: 8
+  }
+}
+actions {
+  preamble {
+    id: 27458909
+    name: "ingressImpl.bar"
+    alias: "ingressImpl.bar"
+  }
+  params {
+    id: 1
+    name: "x"
+    bitwidth: 8
+  }
+  params {
+    id: 2
+    name: "y"
+    bitwidth: 8
+  }
+}
+actions {
+  preamble {
+    id: 24058105
+    name: "ingressImpl.baz"
+    alias: "ingressImpl.baz"
+  }
+  params {
+    id: 1
+    name: "x"
+    bitwidth: 8
+  }
+  params {
+    id: 2
+    name: "y"
+    bitwidth: 8
+  }
+}
+type_info {
+}
