@@ -69,7 +69,7 @@ class Vector : public VectorBase {
     Vector &operator=(Vector &&) = default;
     explicit Vector(const T *a) { vec.emplace_back(std::move(a)); }
     explicit Vector(const safe_vector<const T *> &a) { vec.insert(vec.end(), a.begin(), a.end()); }
-    Vector(const std::initializer_list<const T *> &a) : vec(a) {}
+    Vector(std::initializer_list<const T *> a) : vec(a) {}
     static Vector<T> *fromJSON(JSONLoader &json);
     typedef typename safe_vector<const T *>::iterator iterator;
     typedef typename safe_vector<const T *>::const_iterator const_iterator;
