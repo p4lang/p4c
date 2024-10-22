@@ -1,6 +1,24 @@
-actions-with-duplicate-control-plane-names1.p4(77): [--Werror=duplicate] error: .foo1: conflicting control plane name: foo1
-    @name(".foo1") action a1 (bit<8> x, bit<8> y) { tmp1 = x; tmp2 = y; }
+actions-with-duplicate-control-plane-names1.p4(67): [--Werror=duplicate] error: .foo3: conflicting control plane name: foo3
+@name(".foo3") action topa4() { }
+                      ^^^^^
+actions-with-duplicate-control-plane-names1.p4(62)
+@name("foo3") action topa3() { }
+                     ^^^^^
+actions-with-duplicate-control-plane-names1.p4(83): [--Werror=duplicate] error: .foo1: conflicting control plane name: foo1
+    @name(".foo1") action a1 (bit<8> x, bit<8> y) { tmp1 = x >> 1; tmp2 = y; }
                           ^^
 actions-with-duplicate-control-plane-names1.p4(58)
-action foo1() {
+action foo1() { }
        ^^^^
+actions-with-duplicate-control-plane-names1.p4(88): [--Werror=duplicate] error: .foo2: conflicting control plane name: foo2
+    @name(".foo2") action a2 (bit<8> x, bit<8> y) { tmp1 = x >> 2; tmp2 = y; }
+                          ^^
+actions-with-duplicate-control-plane-names1.p4(60)
+@name("foo2") action topa2() { }
+                     ^^^^^
+actions-with-duplicate-control-plane-names1.p4(93): [--Werror=duplicate] error: foo5: conflicting control plane name: .ingressImpl.foo5
+    @name("foo5") action a5 (bit<8> x, bit<8> y) { tmp1 = x >> 4; tmp2 = y; }
+                         ^^
+actions-with-duplicate-control-plane-names1.p4(69)
+@name(".ingressImpl.foo5") action topa5() { }
+                                  ^^^^^

@@ -41,6 +41,10 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         tmp1 = x >> 1;
         tmp2 = y;
     }
+    @name("foo2") action a2(bit<8> x, bit<8> y) {
+        tmp1 = x >> 2;
+        tmp2 = y;
+    }
     @name(".bar") action a3(bit<8> x, bit<8> y) {
         tmp1 = x >> 3;
         tmp2 = y;
@@ -57,6 +61,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         actions = {
             NoAction();
             a1();
+            a2();
             a3();
             a4();
             a5();

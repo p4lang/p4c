@@ -34,7 +34,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     }
     @name(".foo1") action foo1_0() {
     }
-    @name("ingressImpl.foo2") action foo2_0() {
+    @name(".foo2") action foo2_0() {
     }
     @name(".baz") action foo3_0() {
     }
@@ -42,22 +42,27 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         tmp1_0 = x >> 1;
         tmp2_0 = y;
     }
-    @name(".bar") action a3(@name("x") bit<8> x_4, @name("y") bit<8> y_4) {
-        tmp1_0 = x_4 >> 3;
-        tmp2_0 = y_4;
-    }
-    @name("ingressImpl.bar") action a4(@name("x") bit<8> x_5, @name("y") bit<8> y_5) {
-        tmp1_0 = x_5 >> 4;
+    @name("ingressImpl.foo2") action a2(@name("x") bit<8> x_5, @name("y") bit<8> y_5) {
+        tmp1_0 = x_5 >> 2;
         tmp2_0 = y_5;
     }
-    @name("ingressImpl.baz") action a5(@name("x") bit<8> x_6, @name("y") bit<8> y_6) {
-        tmp1_0 = x_6 >> 5;
+    @name(".bar") action a3(@name("x") bit<8> x_6, @name("y") bit<8> y_6) {
+        tmp1_0 = x_6 >> 3;
         tmp2_0 = y_6;
+    }
+    @name("ingressImpl.bar") action a4(@name("x") bit<8> x_7, @name("y") bit<8> y_7) {
+        tmp1_0 = x_7 >> 4;
+        tmp2_0 = y_7;
+    }
+    @name("ingressImpl.baz") action a5(@name("x") bit<8> x_8, @name("y") bit<8> y_8) {
+        tmp1_0 = x_8 >> 5;
+        tmp2_0 = y_8;
     }
     @name("ingressImpl.t1") table t1_0 {
         actions = {
             NoAction_1();
             a1();
+            a2();
             a3();
             a4();
             a5();
@@ -71,29 +76,29 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         default_action = NoAction_1();
         size = 512;
     }
-    @hidden action actionsalmostduplicatenames1l113() {
+    @hidden action actionsalmostduplicatenames1l111() {
         tmp1_0 = hdr.ethernet.srcAddr[7:0];
         tmp2_0 = hdr.ethernet.dstAddr[7:0];
     }
-    @hidden action actionsalmostduplicatenames1l119() {
+    @hidden action actionsalmostduplicatenames1l117() {
         hdr.ethernet.etherType = (bit<16>)(tmp1_0 - tmp2_0);
     }
-    @hidden table tbl_actionsalmostduplicatenames1l113 {
+    @hidden table tbl_actionsalmostduplicatenames1l111 {
         actions = {
-            actionsalmostduplicatenames1l113();
+            actionsalmostduplicatenames1l111();
         }
-        const default_action = actionsalmostduplicatenames1l113();
+        const default_action = actionsalmostduplicatenames1l111();
     }
-    @hidden table tbl_actionsalmostduplicatenames1l119 {
+    @hidden table tbl_actionsalmostduplicatenames1l117 {
         actions = {
-            actionsalmostduplicatenames1l119();
+            actionsalmostduplicatenames1l117();
         }
-        const default_action = actionsalmostduplicatenames1l119();
+        const default_action = actionsalmostduplicatenames1l117();
     }
     apply {
-        tbl_actionsalmostduplicatenames1l113.apply();
+        tbl_actionsalmostduplicatenames1l111.apply();
         t1_0.apply();
-        tbl_actionsalmostduplicatenames1l119.apply();
+        tbl_actionsalmostduplicatenames1l117.apply();
     }
 }
 

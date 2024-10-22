@@ -55,12 +55,18 @@ control verifyChecksum(
     apply { }
 }
 
-action foo1() {
-}
+action foo1() { }
 
-@name("foo2")
-action bar() {
-}
+@name("foo2") action topa2() { }
+
+@name("foo3") action topa3() { }
+
+// Action topa4's control plane name should conflict with the control
+// plane name of action topa3, and cause a compile-time error message,
+// if you enable P4Info file generation.
+@name(".foo3") action topa4() { }
+
+@name(".ingressImpl.foo5") action topa5() { }
 
 control ingressImpl(
     inout headers_t hdr,
@@ -74,15 +80,30 @@ control ingressImpl(
     // Action a1's control plane name should conflict with the name of
     // top-level action foo1, and cause a compile-time error message,
     // if you enable P4Info file generation.
-    @name(".foo1") action a1 (bit<8> x, bit<8> y) { tmp1 = x; tmp2 = y; }
+    @name(".foo1") action a1 (bit<8> x, bit<8> y) { tmp1 = x >> 1; tmp2 = y; }
 
     // Action a2's control plane name should conflict with the control
-    // plane name of top-level action bar, and cause a compile-time
-    // error message, if you enable P4Info file generation.
-    @name(".foo2") action a2 (bit<8> x, bit<8> y) { tmp1 = x; tmp2 = y; }
+    // plane name of topa2, and cause a compile-time error message, if
+    // you enable P4Info file generation.
+    @name(".foo2") action a2 (bit<8> x, bit<8> y) { tmp1 = x >> 2; tmp2 = y; }
+
+    // Action a5's control plane name should conflict with the control
+    // plane name of topa5, and cause a compile-time error message, if
+    // you enable P4Info file generation.
+    @name("foo5") action a5 (bit<8> x, bit<8> y) { tmp1 = x >> 4; tmp2 = y; }
 
     table t1 {
-        actions = { NoAction; a1; a2; foo1; bar; }
+        actions = {
+            NoAction;
+            a1;
+            a2;
+            a5;
+            foo1;
+            topa2;
+            topa3;
+            topa4;
+            topa5;
+        }
         key = { hdr.ethernet.etherType: exact; }
         default_action = NoAction();
         size = 512;

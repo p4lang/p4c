@@ -30,17 +30,27 @@ control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
 
 action foo1() {
 }
-@name("foo2") action bar() {
+@name("foo2") action topa2() {
+}
+@name("foo3") action topa3() {
+}
+@name(".foo3") action topa4() {
+}
+@name(".ingressImpl.foo5") action topa5() {
 }
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     bit<8> tmp1;
     bit<8> tmp2;
     @name(".foo1") action a1(bit<8> x, bit<8> y) {
-        tmp1 = x;
+        tmp1 = x >> 1;
         tmp2 = y;
     }
     @name(".foo2") action a2(bit<8> x, bit<8> y) {
-        tmp1 = x;
+        tmp1 = x >> 2;
+        tmp2 = y;
+    }
+    @name("foo5") action a5(bit<8> x, bit<8> y) {
+        tmp1 = x >> 4;
         tmp2 = y;
     }
     table t1 {
@@ -48,8 +58,12 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
             NoAction;
             a1;
             a2;
+            a5;
             foo1;
-            bar;
+            topa2;
+            topa3;
+            topa4;
+            topa5;
         }
         key = {
             hdr.ethernet.etherType: exact;

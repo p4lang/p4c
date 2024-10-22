@@ -78,11 +78,16 @@ const IR::Node *DuplicateActionControlPlaneNameCheck::postorder(IR::Annotation *
     }
     cstring name = annotation->getName();
     if (!name.startsWith(".")) {
-        if (!stack.empty()) {
-            name = absl::StrCat(absl::StrJoin(stack, ".",
-                                              [](std::string *out, cstring s) {
-                                                  absl::StrAppend(out, s.string_view());
-                                              }),
+        // Create a fully hierarchical name beginning with ".", so we
+        // can compare it against any other @name annotation value
+        // that begins with "." and is equal.
+        if (stack.empty()) {
+            name = absl::StrCat(".", name.string_view());
+        } else {
+            name = absl::StrCat(".", absl::StrJoin(stack, ".",
+                                                   [](std::string *out, cstring s) {
+                                                       absl::StrAppend(out, s.string_view());
+                                                   }),
                                 ".", name.string_view());
         }
     }

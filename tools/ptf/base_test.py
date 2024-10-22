@@ -286,14 +286,30 @@ class P4RuntimeTest(BaseTest):
             "meters",
             "direct_meters",
         ]:
+            # First add the full hierarchical names of all objects.
+            full_names = {}
+            for obj in getattr(self.p4info, obj_type):
+                key = (obj_type, obj.preamble.name)
+                self.p4info_obj_map[key] = obj
+                full_names[key] = True
+            # Now add suffixes of hierarchical names, but only if they
+            # are not equal to any full name.
+            # Example: If we have two objects, obj1 with name
+            # "foo.bar.baz" and obj2 with name "baz", at the end we
+            # should have the name "baz" referring to obj2 and both
+            # the full name "foo.bar.baz" and the suffix "bar.baz"
+            # referring to obj1.
             for obj in getattr(self.p4info, obj_type):
                 pre = obj.preamble
                 suffix = None
                 for s in reversed(pre.name.split(".")):
                     suffix = s if suffix is None else s + "." + suffix
                     key = (obj_type, suffix)
-                    self.p4info_obj_map[key] = obj
-                    suffix_count[key] += 1
+                    if key not in full_names:
+                        self.p4info_obj_map[key] = obj
+                        suffix_count[key] += 1
+        # Now remove any suffixes that are ambiguous, because they are
+        # equal to some other suffix.
         for key, c in list(suffix_count.items()):
             if c > 1:
                 del self.p4info_obj_map[key]
@@ -631,8 +647,7 @@ class P4RuntimeTest(BaseTest):
         action_id = self.get_action_id(a_name)
         if action_id is None:
             self.fail(
-                "Failed to get id of action '{}' - perhaps the action name is misspelled?"
-            ).format(a_name)
+                "Failed to get id of action '{}' - perhaps the action name is misspelled?".format(a_name))
         action.action_id = action_id
         for p_name, v in params:
             param = action.params.add()

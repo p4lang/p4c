@@ -78,9 +78,7 @@ control ingressImpl(
     // This should not be a name conflict with foo2, because it has a
     // top level name ".foo2", but a2 will have hierarchical name
     // "ingressImpl.foo2".
-    // TODO: However, it is a @name conflict in the current p4c
-    // implementation until a PR like #4970 is merged in.
-    //@name("foo2") action a2 (bit<8> x, bit<8> y) { tmp1 = x >> 2; tmp2 = y; }
+    @name("foo2") action a2 (bit<8> x, bit<8> y) { tmp1 = x >> 2; tmp2 = y; }
 
     @name(".bar") action a3 (bit<8> x, bit<8> y) { tmp1 = x >> 3; tmp2 = y; }
     // This is not a name conflict with a3, because it has a top level
@@ -97,7 +95,7 @@ control ingressImpl(
         actions = {
             NoAction;
             a1;
-            //a2;
+            a2;
             a3;
             a4;
             a5;
