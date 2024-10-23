@@ -21,7 +21,6 @@ jobs:
       CTEST_PARALLEL_LEVEL: 4
       IMAGE_TYPE: test
       BUILD_GENERATOR: Ninja
-      ENABLE_TOFINO: ON
     steps:
       - uses: actions/checkout@v4
         with:
@@ -42,6 +41,39 @@ jobs:
         # Need to use sudo for the eBPF kernel tests.
         run: sudo -E ctest --output-on-failure --schedule-random
         working-directory: ./build
+
+  # Build with GCC and test Tofino backend on Ubuntu 22.04.
+  test-ubuntu22-tofino:
+    runs-on: ubuntu-22.04
+    env:
+      CTEST_PARALLEL_LEVEL: 4
+      IMAGE_TYPE: test
+      BUILD_GENERATOR: Ninja
+      ENABLE_GTESTS: ON
+      ENABLE_TOFINO: ON
+      ENABLE_BMV2: OFF
+      ENABLE_EBPF: OFF
+      ENABLE_UBPF: OFF
+      ENABLE_DPDK: OFF
+      ENABLE_P4TC: OFF
+      ENABLE_P4FMT: OFF
+      ENABLE_P4TEST: OFF
+      ENABLE_P4C_GRAPHS: OFF
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: test-${{ runner.os }}-gcc
+          max-size: 1000M
+
+      - name: Build (Ubuntu 22.04, GCC)
+        run: |
+          tools/ci-build.sh
 
   # Build with GCC and test P4C on Ubuntu 20.04.
   test-ubuntu20:
