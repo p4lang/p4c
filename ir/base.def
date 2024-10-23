@@ -272,22 +272,25 @@ class Annotation {
     : name(n), needsParsing(false), structured(structured) {
         expr.push_back(new StringLiteral(v)); }
 
-    static const cstring nameAnnotation;  /// Indicates the control-plane name.
-    static const cstring tableOnlyAnnotation;  /// Action cannot be a default_action.
-    static const cstring defaultOnlyAnnotation;  /// action can only be a default_action.
     static const cstring atomicAnnotation;  /// Code should be executed atomically.
+    static const cstring debugLoggingAnnotation;  /// Used by compiler implementer to limit debug log to the annotated IR context.
+    static const cstring defaultOnlyAnnotation;  /// action can only be a default_action.
+    static const cstring deprecatedAnnotation;  /// Deprecation annotation.
+    static const cstring fieldListAnnotation;  /// Used for recirculate, etc.
     static const cstring hiddenAnnotation;  /// Object should not be exposed to the control-plane.
     static const cstring lengthAnnotation;  /// P4-14 annotation for varbit fields.
-    static const cstring optionalAnnotation;  /// Optional parameter annotation
-    static const cstring pkginfoAnnotation;  /// Package documentation annotation.
-    static const cstring deprecatedAnnotation;  /// Deprecation annotation.
-    static const cstring synchronousAnnotation;  /// Synchronous annotation.
-    static const cstring pureAnnotation;  /// extern function/method annotation.
+    static const cstring likelyAnnotation;  /// annotation for likely taken blocks/branchs
+    static const cstring matchAnnotation;  /// Match annotation (for value sets).
+    static const cstring nameAnnotation;  /// Indicates the control-plane name.
     static const cstring noSideEffectsAnnotation;  /// extern function/method annotation.
     static const cstring noWarnAnnotation;  /// noWarn annotation.
-    static const cstring matchAnnotation;  /// Match annotation (for value sets).
-    static const cstring fieldListAnnotation;  /// Used for recirculate, etc.
-    static const cstring debugLoggingAnnotation;  /// Used by compiler implementer to limit debug log to the annotated IR context.
+    static const cstring optionalAnnotation;  /// Optional parameter annotation
+    static const cstring pkginfoAnnotation;  /// Package documentation annotation.
+    static const cstring pureAnnotation;  /// extern function/method annotation.
+    static const cstring synchronousAnnotation;  /// Synchronous annotation.
+    static const cstring tableOnlyAnnotation;  /// Action cannot be a default_action.
+    static const cstring unlikelyAnnotation;  /// annotation for likely not taken blocks/branchs
+
     toString{ return absl::StrCat("@", name.string_view()); }
     validate{
         BUG_CHECK(!name.name.isNullOrEmpty(), "empty annotation name");
