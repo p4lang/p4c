@@ -282,6 +282,7 @@ endif()
 # enable CTest
 enable_testing ()
 
+
 # if we want to manage versions in CMake ...
 # include (cmake/P4CVersion.cmake)
 # set (CPACK_PACKAGE_VERSION_MAJOR ${__P4C_VERSION_MAJOR})
