@@ -75,3 +75,4 @@ add_test(NAME driver_inputs_test_2 COMMAND ${P4C_SOURCE_DIR}/tools/driver/test_s
 add_test(NAME driver_inputs_test_3 COMMAND ${P4C_SOURCE_DIR}/tools/driver/test_scripts/driver_inputs_test_3 ${P4C_DRIVER_PATH})
 add_test(NAME driver_inputs_test_4 COMMAND ${P4C_SOURCE_DIR}/tools/driver/test_scripts/driver_inputs_test_4 ${P4C_DRIVER_PATH})
 
+
