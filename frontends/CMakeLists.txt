@@ -111,7 +111,7 @@ set (P4_FRONTEND_HDRS
   p4/frontend.h
   p4/functionsInlining.h
   p4/hierarchicalNames.h
-  p4/duplicateHierarchicalNameCheck.h
+  p4/duplicateActionControlPlaneNameCheck.h
   p4/inlining.h
   p4/localizeActions.h
   p4/methodInstance.h
