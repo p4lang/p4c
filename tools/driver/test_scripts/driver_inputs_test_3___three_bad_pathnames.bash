@@ -2,25 +2,28 @@
 
 ### ensure that when _three_ non-existant input pathnames are given, each one results in an error output that mentions that pathname.
 
+SCRIPT_NAME=$(basename "$0")
+USAGE="Usage: $SCRIPT_NAME <path-to-driver-binary>"
 
+show_usage() {
+    echo "$USAGE"
+}
+
+if [ $# -eq 0 ]; then
+    echo "Error: No path to driver binary provided."
+    show_usage
+    exit 1
+fi
 
 source $(dirname "`realpath "${BASH_SOURCE[0]}"`")/driver_inputs_test___shared_code.bash
 
 check_for_inadvisable_sourcing; returned=$?
 if [ $returned -ne 0 ]; then return $returned; fi ### simulating exception handling for an exception that is not caught at this level
 
-
+driver_path="$1"
+validate_driver_binary "$driver_path"
 
 humanReadable_test_pathname="`resolve_symlink_only_of_basename "$0"`"
-
-
-
-if ! P4C=`try_to_find_the_driver`; then
-  echo "Unable to find the driver of the P4 compiler.  Aborting the test ''$humanReadable_test_pathname'' with a non-zero exit code.  This test failed." >& 2
-  exit 255
-fi
-echo "In ''$humanReadable_test_pathname'', using ''$P4C'' as the path to the driver of the P4 compiler." >& 2
-
 
 
 BAD_PATHNAME_BASE=/path/to/a/nonexistant/supposedly-P4/source/file
@@ -31,13 +34,13 @@ BAD_PATHNAME_2=$BAD_PATHNAME_BASE/2
 BAD_PATHNAME_3=$BAD_PATHNAME_BASE/3
 
 ### Using ASCII double quotes to guard against bugs due to ASCII spaces, even though this test-script file is free of such bugs as of this writing.
-check_for_pathname_error_in_P4_compiler_driver_output "$P4C" "$BAD_PATHNAME_1" 1 3
+check_for_pathname_error_in_P4_compiler_driver_output "$driver_path" "$BAD_PATHNAME_1" 1 3
 result_1=$?
 echo
-check_for_pathname_error_in_P4_compiler_driver_output "$P4C" "$BAD_PATHNAME_2" 2 3
+check_for_pathname_error_in_P4_compiler_driver_output "$driver_path" "$BAD_PATHNAME_2" 2 3
 result_2=$?
 echo
-check_for_pathname_error_in_P4_compiler_driver_output "$P4C" "$BAD_PATHNAME_3" 3 3
+check_for_pathname_error_in_P4_compiler_driver_output "$driver_path" "$BAD_PATHNAME_3" 3 3
 result_3=$?
 echo
 
