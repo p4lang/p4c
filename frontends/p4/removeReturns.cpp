@@ -215,7 +215,7 @@ const IR::Node *DoRemoveReturns::preorder(IR::ExitStatement *statement) {
 }
 
 const IR::Node *DoRemoveReturns::preorder(IR::BlockStatement *statement) {
-    auto block = new IR::BlockStatement;
+    auto block = new IR::BlockStatement(statement->srcInfo, statement->annotations);
     auto currentBlock = block;
     TernaryBool ret = TernaryBool::No;
     for (auto s : statement->components) {
