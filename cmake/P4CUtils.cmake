@@ -420,3 +420,36 @@ function(get_all_targets _result _dir)
   get_directory_property(_sub_targets DIRECTORY "${_dir}" BUILDSYSTEM_TARGETS)
   set(${_result} ${${_result}} ${_sub_targets} PARENT_SCOPE)
 endfunction()
+
+# Checks for presence of programs and dependencies 
+function(CHECK_DEPENDENCIES OUT_VAR TEST_DEPENDENCY_PROGRAMS TEST_DEPENDENCY_LIBRARIES)
+    set(ALL_FOUND TRUE)
+
+    foreach(PROG ${TEST_DEPENDENCY_PROGRAMS})
+        find_program(PROG_PATH ${PROG})
+        if (NOT PROG_PATH)
+            message(WARNING "Missing program ${PROG}."
+                    " Please install ${PROG} and ensure it is in your PATH.")
+            set(ALL_FOUND FALSE)
+        else()
+            message(STATUS "Found program ${PROG} at ${PROG_PATH}")
+        endif()
+    endforeach()
+
+    foreach(LIB ${TEST_DEPENDENCY_LIBRARIES})
+        find_library(LIB_PATH ${LIB} HINTS "${CMAKE_CURRENT_SOURCE_DIR}/runtime/usr/lib64/")
+        if (NOT LIB_PATH)
+            message(WARNING "Missing library ${LIB}."
+                    " Please install ${LIB}.")
+            set(ALL_FOUND FALSE)
+        else()
+            message(STATUS "Found library ${LIB} at ${LIB_PATH}")
+        endif()
+    endforeach()
+
+    if (ALL_FOUND)
+        set(${OUT_VAR} TRUE PARENT_SCOPE)
+    else()
+        set(${OUT_VAR} FALSE PARENT_SCOPE)
+    endif()
+endfunction()
