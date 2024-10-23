@@ -580,7 +580,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
 
 const IR::Node *DoSimplifyExpressions::postorder(IR::Function *function) {
     if (toInsert.empty()) return function;
-    auto body = new IR::BlockStatement(function->body->srcInfo);
+    auto body = new IR::BlockStatement(function->body->srcInfo, function->body->annotations);
     for (auto a : toInsert) body->push_back(a);
     for (auto s : function->body->components) body->push_back(s);
     function->body = body;
@@ -604,7 +604,7 @@ const IR::Node *DoSimplifyExpressions::postorder(IR::P4Control *control) {
 
 const IR::Node *DoSimplifyExpressions::postorder(IR::P4Action *action) {
     if (toInsert.empty()) return action;
-    auto body = new IR::BlockStatement(action->body->srcInfo);
+    auto body = new IR::BlockStatement(action->body->srcInfo, action->body->annotations);
     for (auto a : toInsert) body->push_back(a);
     for (auto s : action->body->components) body->push_back(s);
     action->body = body;
