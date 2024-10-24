@@ -16,7 +16,7 @@ class Attach : public Inspector {
     using CommentsMap = std::unordered_map<NodeId, Comments>;
     enum class TraversalType { Preorder, Postorder };
 
-    explicit Attach(const std::unordered_map<const Util::Comment *, bool> &processedComments)
+    explicit Attach(std::unordered_map<const Util::Comment *, bool> &processedComments)
         : processedComments(processedComments){};
 
     void attachCommentsToNode(const IR::Node *, TraversalType);
@@ -31,7 +31,7 @@ class Attach : public Inspector {
  private:
     /// This Hashmap tracks each comment’s attachment status to IR nodes. Initially, all comments
     /// are set to 'false'.
-    std::unordered_map<const Util::Comment *, bool> processedComments;
+    std::unordered_map<const Util::Comment *, bool> &processedComments;
 
     CommentsMap commentsMap;
 };
