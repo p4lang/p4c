@@ -1,0 +1,189 @@
+#!/usr/bin/env python3
+
+"""
+This script is a wrapper to create all the logs.
+"""
+
+
+import os, shlex, subprocess, sys, traceback
+
+if getattr(sys,'frozen', False):
+    # running in a bundle
+    MYPATH = sys._MEIPASS
+else :
+    # running live
+    MYPATH = os.path.dirname(__file__)
+sys.path.insert(1, MYPATH)
+
+from tools.utils import *
+from tools.create_mau_json import produce_mau_json
+from tools.create_phv_json import produce_phv_json
+from tools.create_mau_characterize import produce_mau_characterize
+from tools.create_pa_characterize import produce_pa_characterize
+from tools.create_pa_results import produce_pa_results
+from tools.create_mau_resources import produce_mau_resources
+from tools.create_metrics import produce_metrics
+
+def build_logs(args):
+    """
+    JSON files must be created first, then logs can be created.
+    * create_mau_json
+    * create_phv_json
+
+    * create_mau_characterize
+    * create_mau_resources
+    * create_pa_characterize
+    * create_pa_results
+    * create_metrics
+    """
+    error_messages = []
+
+    context_file = args.source
+    context_exists = True
+    phv_json_exists = False
+    if not os.path.exists(context_file):
+        context_exists = False
+        error_messages.append("Cannot find file '%s'" % str(context_file))
+
+    mau_json_file = "%s/mau.json" % str(os.path.abspath(args.output))
+    phv_json_file = "%s/phv.json" % str(os.path.abspath(args.output))
+
+
+    if context_exists and not args.disable_mau_json:
+        try:
+            status, err_msg = produce_mau_json(context_file, args.output)
+            if status == FAILURE:
+                error_messages.append(err_msg)
+        except Exception as ex:
+            error_messages.append("Error producing mau.json: " + str(ex))
+            if args.traceback:
+                error_messages.append("".join(traceback
+                        .TracebackException.from_exception(ex).format()))
+    if context_exists and not args.disable_phv_json:
+        try:
+            status, err_msg = produce_phv_json(context_file, args.output)
+            if status == FAILURE:
+                error_messages.append(err_msg)
+        except Exception as ex:
+            error_messages.append("Error producing phv.json: " + str(ex))
+            if args.traceback:
+                error_messages.append("".join(traceback
+                        .TracebackException.from_exception(ex).format()))
+    if os.path.exists(mau_json_file):
+        try:
+            status, err_msg = produce_mau_characterize(mau_json_file, args.output)
+            if status == FAILURE:
+                error_messages.append(err_msg)
+        except Exception as ex:
+            error_messages.append("Error producing mau.characterize.log: " + str(ex))
+            if args.traceback:
+                error_messages.append("".join(traceback
+                        .TracebackException.from_exception(ex).format()))
+    else:
+        error_messages.append("Cannot open '%s'" % mau_json_file)
+    if os.path.exists(phv_json_file):
+        phv_json_exists = True
+        try:
+            status, err_msg = produce_pa_characterize(phv_json_file, args.output)
+            if status == FAILURE:
+                error_messages.append(err_msg)
+        except Exception as ex:
+            error_messages.append("Error producing pa.characterize.log: " + str(ex))
+            if args.traceback:
+                error_messages.append("".join(traceback
+                        .TracebackException.from_exception(ex).format()))
+        try:
+            status, err_msg = produce_pa_results(phv_json_file, args.output)
+            if status == FAILURE:
+                error_messages.append(err_msg)
+        except Exception as ex:
+            error_messages.append("Error producing pa.results.log: " + str(ex))
+            if args.traceback:
+                error_messages.append("".join(traceback
+                        .TracebackException.from_exception(ex).format()))
+    else:
+        error_messages.append("Cannot open '%s'" % phv_json_file)
+
+    resources_file = args.resources
+    if resources_file is not None:
+        if os.path.exists(resources_file):
+            try:
+                status, err_msg = produce_mau_resources(resources_file, args.output)
+                if status == FAILURE:
+                    error_messages.append(err_msg)
+            except Exception as ex:
+                error_messages.append("Error producing mau.resources.log: " + str(ex))
+                if args.traceback:
+                    error_messages.append("".join(traceback
+                            .TracebackException.from_exception(ex).format()))
+
+            if context_exists and phv_json_exists:
+                try:
+                    power_file = args.power
+                    if power_file is not None and not os.path.exists(power_file):
+                        error_messages.append("Cannot open '%s'" % power_file)
+                        power_file = None
+
+                    manifest_file = args.manifest
+                    if manifest_file is not None and not os.path.exists(manifest_file):
+                        error_messages.append("Cannot open '%s'" % manifest_file)
+                        manifest_file = None
+
+                    status, err_msg = produce_metrics(context_file, resources_file, phv_json_file,
+                                                      power_file, manifest_file, args.output)
+                    if status == FAILURE:
+                        error_messages.append(err_msg)
+                except Exception as ex:
+                    error_messages.append("Error producing metrics.json: " + str(ex))
+                    if args.traceback:
+                        error_messages.append("".join(traceback
+                            .TracebackException.from_exception(ex).format()))
+        else:
+            error_messages.append("Cannot open '%s'" % resources_file)
+
+    if len(error_messages) > 0:
+        # print("\nError:")
+        return FAILURE, "Unable to produce all summary logs\n  " + "\n  ".join(error_messages)
+
+    return SUCCESS, "ok"
+
+
+if __name__ == "__main__":
+    import argparse
+    import sys
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('source', metavar='source', type=str,
+                        help='The input context.json source file to use.')
+    parser.add_argument('--resources', '-r', type=str, action="store", default=None,
+                        help="The resources.json file.")
+    parser.add_argument('--power', '-p', type=str, action="store", default=None,
+                        help="The power.json file.")
+    parser.add_argument('--manifest', '-m', type=str, action="store", default=None,
+                        help="The manifest.json file.")
+    parser.add_argument('--disable-phv-json', action="store_true", default=False,
+                        help="Disable creating phv.json.")
+    parser.add_argument('--disable-mau-json', action="store_true", default=False,
+                        help="Disable creating mau.json.")
+    parser.add_argument('--output', '-o', type=str, action="store", default=".",
+                        help="The output directory to output the results.")
+    parser.add_argument('--traceback', action="store_true", default=False,
+                        help="output stack trace for unexpected exceptions")
+    args = parser.parse_args()
+
+    try:
+        if not os.path.exists(args.output):
+            os.mkdir(args.output)
+    except:
+        print_error_and_exit("Unable to create directory %s." % str(args.output))
+
+    return_code = SUCCESS
+    err_msg = ""
+    try:
+        return_code, err_msg = build_logs(args)
+    except:
+        return_code = FAILURE
+
+    if return_code == FAILURE:
+        print_error_and_exit(err_msg)
+    sys.exit(SUCCESS)

@@ -23,6 +23,7 @@ list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/ubpf/runtime")
 list(FILTER P4C_LINT_LIST EXCLUDE REGEX "control-plane/p4runtime")
 list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/tc/runtime")
 list(FILTER P4C_LINT_LIST EXCLUDE REGEX "test/frameworks")
+list(FILTER P4C_LINT_LIST EXCLUDE REGEX "backends/tofino/third_party")
 
 #################### CPPLINT
 add_cpplint_files(${P4C_SOURCE_DIR} "${P4C_LINT_LIST}")

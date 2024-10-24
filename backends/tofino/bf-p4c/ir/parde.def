@@ -1,0 +1,751 @@
+/**
+ * Copyright (C) 2024 Intel Corporation
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License.  You may obtain a copy
+ * of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed
+ * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations under the License.
+ * 
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+
+/* -*-C++-*- */
+
+#emit
+#include "lib/match.h"
+#include <optional>
+#include "bf-p4c/common/debug_info.h"
+#include "bf-p4c/ir/bitrange.h"
+#include "bf-p4c/parde/marshal.h"
+#include "bf-p4c/parde/match_register.h"
+#end
+
+namespace BFN {
+
+class UnresolvedHeaderStackIndex : Expression {
+    IR::ID index;
+
+    validate {
+        BUG_CHECK(index == "next" || index == "last",
+            "Unexpected header stack index %1%", index);
+    }
+
+    dbprint { out << index; }
+}
+
+/// A value that can *conceptually* be read from in the parser. This is a
+/// superset of the values that can actually be read from on the hardware.
+abstract ParserRVal : Expression { }
+
+/// An r-value that represents a read from a range of bits in the input buffer.
+/// The coordinate system used will depend on the specific type of
+/// `InputBufferRVal`.
+abstract InputBufferRVal : ParserRVal {
+    /// @return this buffer range as a half-open range of bits in network order.
+    nw_bitinterval interval() const { return toHalfOpenRange(range); }
+
+    /// The region represented by this `InputBufferRVal`, expressed as a range of
+    /// bits in network order.
+    nw_bitrange range;
+}
+
+/// location in the packet data section of the input buffer
+class PacketRVal : InputBufferRVal {
+
+    /// Enables and disables the partial_hdr_err_proc bit in the parser
+    /// transition.  Controls the extraction behavior when packets
+    /// with incomplete headers are received (i.e. greedy extract).
+    bool partial_hdr_err_proc;
+
+    dbprint {
+        out << "inbuf " << range;
+    }
+}
+
+/// location in the metadata secion of the input buffer
+class MetadataRVal : InputBufferRVal {
+    dbprint {
+        out << "inbuf(metadata) " << range;
+    }
+}
+
+/// A constant used as an r-value in the parser.
+class ConstantRVal : ParserRVal {
+    ConstantRVal(big_int value) : constant(new IR::Constant(value)) { }
+    ConstantRVal(int value) : constant(new IR::Constant(value)) { }
+    ConstantRVal(const IR::Type* type, big_int value)
+      : constant(new IR::Constant(type, value)) { }
+    ConstantRVal(Util::SourceInfo si, const IR::Type* type, big_int value)
+      : ParserRVal(si), constant(new IR::Constant(type, value)) { }
+
+    dbprint { out << "constant " << constant; }
+
+    Constant constant;
+}
+
+/// An r-value which is saved from input buffer to the match register.
+class SavedRVal : ParserRVal {
+    dbprint {
+        out << "[ ";
+        if (reg_slices.empty()) {
+            out << source;
+        } else {
+            for (const auto& rs : reg_slices)
+                out << " " << rs.first << " : " << rs.second;
+        }
+        out << " ]";
+    }
+
+    /// An expression which should evaluate to an r-value usable in the parser.
+    Expression source;
+
+    /// The registers to match on.
+    optional std::vector<std::pair<MatchRegister, nw_bitrange>> reg_slices;
+}
+
+/// Common base class for parser write destination
+abstract ParserLVal {
+    toString { return field->toString(); }
+
+    int size() const { return field->type->width_bits(); }
+
+    validate {
+        CHECK_NULL(field);
+        BUG_CHECK(field->is<IR::Member>() || field->is<IR::TempVar>() ||
+                  field->is<IR::Slice>() || field->is<IR::ConcreteHeaderRef>() ||
+                  field->is<IR::Concat>() || field->is<IR::Padding>(),
+                  "FieldLVal contains unexpected value: %1%", field);
+    }
+
+    Expression field;
+}
+
+/// Parser write dest that will ultimately be backed by a PHV container.
+class FieldLVal : ParserLVal {
+    dbprint { out << field; }
+}
+
+class MatchLVal : ParserLVal {
+    dbprint { out << field; }
+}
+
+/// Parser write dest that will be backed by non-PHV container.
+class ChecksumLVal : FieldLVal {
+    dbprint { out << "checksummed " << field; }
+}
+
+// Total container size (in byte) for a given set of fields.
+// This is useful if we need PHV allocation to derive the size.
+class TotalContainerSize : ParserRVal {
+    dbprint { out << toString(); }
+    toString { return "total size of containers for fields"_cs; }
+
+    inline Vector<FieldLVal> fields;
+}
+
+/// Supertype for all parser primitives - i.e., actions that can be executed in
+/// parser states.
+abstract ParserPrimitive {
+#emit
+    /// Get destination out of a parser write primitive -- either Emit, or
+    /// ParserChecksumWritePrimitive. Fails if input is not a write primitive.
+    virtual const ParserLVal* getWriteDest() const {
+        BUG("%1%: Write is neither extract nor checksum write", this);
+    }
+
+    /// Get parser write mode out of a parser write primitive -- either Emit, or
+    /// ParserChecksumWritePrimitive. Fails if input is not a write primitive.
+    virtual ParserWriteMode getWriteMode() const {
+        BUG("%1%: Write is neither extract nor checksum write", this);
+    }
+#end
+}
+
+/// A parser extraction operation, representing a write by the parser into some
+/// l-value.
+class Extract : ParserPrimitive {
+    Extract(Expression dest, ParserRVal source)
+      : dest(new FieldLVal(dest)), source(source) { }
+    Extract(Util::SourceInfo si, Expression dest, ParserRVal source)
+      : ParserPrimitive(si), dest(new FieldLVal(dest)), source(source) { }
+
+    dbprint {
+        out << "extract " << source << " to " << dest;
+    }
+
+    ParserLVal getWriteDest() const override { return dest; }
+    IR::BFN::ParserWriteMode getWriteMode() const override { return write_mode; }
+
+    /// The location to be written to.
+    ParserLVal dest;
+
+    /// The location that will be read from.
+    ParserRVal source;
+
+    ParserWriteMode write_mode = ParserWriteMode::SINGLE_WRITE;
+
+    /// The original state this extract originated from (before parser state splitting).
+    const ParserState* original_state = nullptr;
+
+    /// This extract expects that data on the wire is marshaled from a `field`.
+    optional std::optional<MarshaledFrom> marshaled_from;  // not visited
+
+    dump_fields {
+       ParserPrimitive::dump_fields(out);
+       out << " write_mode=" << write_mode;
+       out << " original_state=" << DBPrint::Brief << original_state; }
+}
+
+/// An Extract node that is destined to become a LoweredExtractPhv. This is a
+/// short-lived type, used internally by the parser IR lowering passes.
+/// Instances are introduced during state splitting, and are eliminated once
+/// the parser IR is lowered.
+class ExtractPhv : Extract {
+    dbprint { out << "extract " << source << " to PHV-allocated " << dest; }
+}
+
+/// An Extract node that is destined to become a LoweredExtractClot. This is a
+/// short-lived type, used internally by the parser IR lowering passes.
+/// Instances are introduced during state splitting, and are eliminated once
+/// the parser IR is lowered.
+class ExtractClot : Extract {
+    dbprint {
+        out << "extract " << source << " to CLOT-allocated " << dest << " from "
+            << (original_state ? original_state->name : "(nullptr)");
+    }
+
+    validate {
+        BUG_CHECK(source->to<IR::BFN::PacketRVal>(),
+                  "ExtractClot source for %1% is not a PacketRVal: %2%",
+                  dest, source);
+    }
+}
+
+/// Save data from input buffer to a match register.
+class SaveToRegister : ParserPrimitive {
+#emit
+    SaveToRegister(const MatchRegister& reg, nw_byterange source)
+      : source(new PacketRVal(source.toUnit<RangeUnit::Bit>(), false)), dest(reg) { }
+#end
+    dbprint { out << "save " << source << " to " << dest.name; }
+
+    /// The location that will be read from.
+    InputBufferRVal source;
+
+    /// The register this save writes to.
+    MatchRegister dest;
+}
+
+abstract ParserCounterPrimitive : ParserPrimitive {
+    cstring declName;
+}
+
+class ParserZeroInit : ParserPrimitive {
+    ParserLVal field;
+    dbprint { out << "Parser zero init: " << field; }
+}
+
+class ParserCounterLoadImm : ParserCounterPrimitive {
+    dbprint { out << "parser counter load imm " << imm; }
+    int imm = 0;
+
+    bool push = false;
+    bool update_with_top = false;
+}
+
+class ParserCounterLoadPkt : ParserCounterPrimitive {
+#noconstructor
+    ParserCounterLoadPkt(cstring n, const SavedRVal* s) :
+        ParserCounterPrimitive(n), source(s) { }
+
+    dbprint { out << "parser counter set " << source; }
+
+    SavedRVal source;
+
+    std::optional<int> max;
+    std::optional<int> rotate;
+    std::optional<int> mask;
+    std::optional<int> add;
+
+    bool push = false;
+    bool update_with_top = false;
+}
+
+class ParserCounterIncrement : ParserCounterPrimitive {
+    dbprint { out << "parser counter inc " << value; }
+    int value = 0;
+}
+
+class ParserCounterDecrement : ParserCounterPrimitive {
+    dbprint { out << "parser counter dec " << value; }
+    int value = 0;
+}
+
+class ParserCounterPop : ParserCounterPrimitive {
+    dbprint { out << "parser counter pop"; }
+}
+
+abstract ParserCounterRVal : ParserRVal {
+    cstring declName;
+}
+
+class ParserCounterIsZero : ParserCounterRVal {
+    dbprint { out << "parser counter is zero? "; }
+}
+
+class ParserCounterIsNegative : ParserCounterRVal {
+    dbprint { out << "parser counter is negative? "; }
+}
+
+class ParserPrioritySet : ParserPrimitive {
+    dbprint { out << "priority set " << val; }
+    unsigned val;
+}
+
+abstract ParserChecksumPrimitive : ParserPrimitive {
+    cstring declName;
+}
+
+abstract ParserChecksumWritePrimitive : ParserChecksumPrimitive {
+    // this is here to declare that all checksum writes return FieldLVal not just ParserLVal
+    FieldLVal getWriteDest() const override {
+        BUG("calling getWriteDest from abtract base, this should have beed overwritten");
+    }
+
+    IR::BFN::ParserWriteMode getWriteMode() const override { return write_mode; }
+
+    ParserWriteMode write_mode = ParserWriteMode::SINGLE_WRITE;
+}
+
+class ChecksumVerify : ParserChecksumWritePrimitive {
+    dbprint { out << "verify checksum " << declName; }
+
+    FieldLVal getWriteDest() const override { return dest; }
+
+    optional NullOK FieldLVal dest;
+}
+
+class ChecksumResidualDeposit : ParserChecksumWritePrimitive {
+    dbprint { out << "subtract and deposit checksum " << declName; }
+
+    FieldLVal getWriteDest() const { return dest; }
+
+    FieldLVal dest;
+    // header end position relative to current state's input buffer
+    PacketRVal header_end_byte;
+}
+
+class ChecksumDepositToClot : ParserChecksumPrimitive {
+    dbprint { out << "deposit checksum " << declName << " to clot " << clot->tag; }
+
+#emit
+    const Clot* clot = nullptr;
+#end
+}
+
+class ChecksumAdd : ParserChecksumPrimitive {
+    dbprint { out << "add " << source << " to checksum " << declName; }
+    PacketRVal source;
+    // Indicates if even and odd byte in the field need to be swapped
+    bool swap;
+    bool isHeaderChecksum;
+}
+
+class ChecksumSubtract : ParserChecksumPrimitive {
+    dbprint { out << "subtract " << source << " from checksum " << declName; }
+    PacketRVal source;
+    // Indicates if even and odd byte in the field need to be swapped
+    bool swap;
+    bool isPayloadChecksum;
+}
+
+// Stop incrementing the header length counter after source
+class HdrLenIncStop : ParserPrimitive {
+    dbprint { out << "hdr_len_inc_stop " << source; }
+    PacketRVal source;
+}
+
+abstract ParserMatchValue { }
+
+class ParserConstMatchValue : ParserMatchValue {
+    match_t value;
+    dbprint { out << "const: " << value; }
+    toString { std::stringstream ss; ss << value; return cstring(ss.str()); }
+}
+
+/// One PVS is value vector that is matched against ALL select fields in that states.
+class ParserPvsMatchValue : ParserMatchValue {
+#emit
+    using FieldSlice = std::pair<cstring, nw_bitrange>;
+    using MatcherSlice = std::pair<MatchRegister, le_bitrange>;
+    ordered_map<FieldSlice, MatcherSlice> mapping;
+#end
+    cstring name;
+    int size;
+    dbprint { out << "name: " << name << " " << size; }
+    toString { return name; }
+}
+
+/// Phase0 representation in the parser. The phase0 or port metadata can be
+/// represented through a table in P4-14 or parser extract/extern in P4-16. In
+/// both cases, the representation is converted to a Phase0 node for the backend.
+class Phase0 {
+    IR::IndexedVector<IR::StructField> fields;
+    int size;
+    int handle;
+    cstring tableName;
+    cstring actionName;
+    cstring keyName;
+    // true if name is from @phase0 annotation
+    bool namedByAnnotation;
+
+    dbprint {
+        out << "phase0: tableName: " << tableName
+                << " size: " << size << " handle: 0x " << hex(handle) << std::endl;
+        out << "actionName: " << actionName << " keyName: " << keyName << " fields: " << fields; }
+}
+
+/// The high-level representation of a parser state transition.
+class Transition {
+    validate {
+        if (next && loop) {
+            BUG("Transition cannot have both loop and non-loop next states");
+        }
+    }
+
+#emit
+    Transition(match_t v)
+        : value(new ParserConstMatchValue(v)), next(nullptr) { }
+    Transition(match_t v, unsigned shift)
+        : value(new ParserConstMatchValue(v)), shift(shift), next(nullptr) { }
+    Transition(match_t v, unsigned shift, const ParserState* next)
+        : value(new ParserConstMatchValue(v)), shift(shift), next(next) { }
+#end
+
+    /// The owning state's select expressions evaluate to a value which
+    /// matches this...
+    ParserMatchValue               value;
+
+    /// number of bytes to shift out of the input buffer
+    unsigned                       shift;
+
+    /// ...and transition to this state (or, if null, end the parser program).
+    NullOK ParserState             next;
+
+#emit
+    cstring loop;
+#end
+
+    /// The save to registers need to perform for this transition.
+    optional inline Vector<SaveToRegister>  saves;
+
+    /// registers to scratch pad on write
+    optional std::set<MatchRegister> scratches;
+}
+
+/// A parser selection operation. These represent a load of a value from some
+/// source which will be compared against the state's Transitions to select the
+/// next state to transition to.
+class Select {
+    Select(ParserRVal source, Expression p4Source)
+	        : source(source), p4Source(p4Source) { }
+
+    validate {
+        CHECK_NULL(source);
+        BUG_CHECK(source->is<IR::BFN::SavedRVal>() ||
+                  source->is<IR::BFN::ParserCounterRVal>(),
+                  "Select source can only be match register or parser counter: %1%", source);
+    }
+
+    /// The value to match against.
+    ParserRVal source;
+
+#emit
+    /// Original p4 source.
+    const Expression* p4Source = nullptr;
+#end
+}
+
+/// A high-level parser state. Contains primitives which operate on fields and
+/// field-like objects.
+class ParserState : Unit {
+    ParserState(IR::ParserState p4State, cstring name, gress_t gr)
+        : name(name), gress(gr) { if (p4State) p4States.emplace(p4State); }
+    ParserState(std::set<const IR::ParserState*> p4States, cstring name, gress_t gr)
+        : p4States(p4States), name(name), gress(gr) { }
+
+    int stage() const override { return -1; }
+    gress_t thread() const override { return gress; }
+    toString { return name; }
+    visit_children {
+        statements.visit_children(v);
+        selects.visit_children(v);
+        transitions.parallel_visit_children(v); }
+    const IR::ParserState* p4State() const {
+        BUG_CHECK(p4States.size() == 1, "Expecing exactly one state in p4States but saw %1%",
+                  p4States.size());
+        return *p4States.begin();
+    }
+
+#emit
+    /// The original P4 state(s). Empty if this is a generated state that doesn't
+    /// correspond to anything in the P4 program. Not visited.
+    /// Can contain multiple states due to state merging.
+    std::set<const IR::ParserState*> p4States;
+
+    /// Debugging information about the P4 state or states that were used to
+    /// generate this ParserState.
+    ::BFN::DebugInfo debug;
+#end
+
+    cstring name;
+    gress_t gress;
+
+    /// If true, extract at stridded offset on state re-entry
+    bool stride = false;
+
+    // If true, do not merge this state with any other state
+    bool dontMerge = false;
+
+    inline Vector<ParserPrimitive> statements;
+    inline Vector<Select> selects;
+    inline Vector<Transition> transitions;
+}
+
+/// The supertype for all BFN IR parsers.
+abstract AbstractParser : Unit {
+#apply
+    int stage() const override { return -1; }
+    gress_t thread() const override { return gress; }
+
+    gress_t gress;
+}
+
+/// The high-level representation of a parser in backend.
+/// This is the representation used prior to PHV allocation.
+/// It is created from IR::BFN::TnaParser by BFN::ExtractParser in post-midend
+/// passes BridgedPacking and SubstitutePackedHeaders.
+/// It contains primitives which operate on fields and field-like objects;
+/// some operands may be expressions that can't yet be evaluated.
+class Parser : AbstractParser {
+#apply
+    toString { return gress ? "egress parser"_cs : "ingress parser"_cs; }
+
+    ParserState start;
+    optional IR::ID name;
+    optional NullOK cstring pipeName;
+    optional NullOK Phase0 phase0; // only valid for ingress
+    optional inline std::vector<int> portmap;  // used for multiple parser support
+}
+
+/// Ghost Parser to account for implicit ghost MD writes. This is a fake Parser
+/// and does not have a P4 equivalent. This parser must be present on all pipes
+/// in the P4 program whenever there is atleast one Ghost Control present on a
+/// pipe. The ParserLVal consists of ghost intrinsic metadata header fields which
+/// are recognized by PHV allocation for allocation and correct live range
+/// analysis.
+class GhostParser : AbstractParser {
+    toString { return "ghost parser"_cs; }
+    // Header ordering must be preserved
+    ParserLVal ghost_md;  // field is a ConcreteHeaderRef
+    optional IR::ID name;
+    optional NullOK cstring pipeName;
+}
+
+/// A list of fields which will be written into a buffer as part of a deparser
+/// digest.
+class DigestFieldList {
+    /// Index of this field list in the digest table
+    int idx;
+
+    /// The fields to be copied into the buffer.
+    inline Vector<FieldLVal> sources;
+
+    NullOK Type_StructLike type;
+
+    /// Learning needs control plane name for the field list.
+    optional cstring controlPlaneName;
+}
+
+/// A deparser digest. Each digest writes one of several lists of fields into a
+/// special hardware buffer, with the list to be used chosen by the value of a
+/// selector field.
+class Digest {
+    Digest(cstring name) : name(name) { }
+    Digest(cstring name, FieldLVal selector) : name(name), selector(selector) { }
+    Digest(cstring name, Expression selector)
+        : name(name), selector(new FieldLVal(selector)) { }
+
+    /// The name of the digest, identifying a special buffer to be filled in by
+    /// the deparser hardware. The name is chosen to match the corresponding
+    /// assembly directive, which in turn is named based on definitions in the
+    /// CSRs.
+    cstring name;
+
+    /// The field which controls which field list will be written into the
+    /// buffer. Selector is nullptr when only one field list is supported.
+    /// For example, tofino2 pktgen only supports one field list.
+    optional NullOK FieldLVal selector;
+
+    /// The available field lists
+    inline Vector<DigestFieldList> fieldLists;
+
+    /// If present, the POV bit controlling whether the contents of the source
+    /// location are valid. Not used on Tofino.
+    NullOK FieldLVal povBit = nullptr;
+}
+
+/// Supertype for all deparser primitives - i.e., actions that can be executed
+/// in a deparser control.
+abstract DeparserPrimitive { }
+
+/// Common abstract base class for all deparser emit types
+abstract Emit : DeparserPrimitive {
+    Emit(Expression povBit)
+      : povBit(new FieldLVal(povBit)) { }
+    Emit(Util::SourceInfo si, Expression povBit)
+      : DeparserPrimitive(si), povBit(new FieldLVal(povBit)) { }
+
+    /// The POV bit this emit is predicated on
+    FieldLVal povBit;
+}
+
+/// A deparser emit operation, representing a copy by the deparser of the
+/// contents of some location (ultimately backed by a PHV container) to the
+/// output packet.
+class EmitField : Emit {
+    EmitField(Expression source, Expression povBit)
+      : Emit(povBit), source(new FieldLVal(source)) { }
+    EmitField(Util::SourceInfo si, Expression source, Expression povBit)
+      : Emit(si, povBit), source(new FieldLVal(source)) { }
+
+    dbprint {
+        out << "emit " << source->field->toString()
+            << " if " << povBit->field->toString();
+    }
+
+    /// The location to be copied into the output packet.
+    FieldLVal source;
+}
+
+class EmitConstant : Emit {
+    dbprint {
+        out << "emit " << constant << " if " << povBit->field->toString();
+    }
+
+    Constant constant;
+}
+
+/// A deparser emit operation, representing a copy by the deparser of the
+/// contents of some location (ultimately backed by a CLOT) to the
+/// output packet.
+class EmitClot : Emit {
+    dbprint {
+        out << "emit clot " << clot->tag << " if " << povBit->field->toString();
+    }
+
+#emit
+    Clot* clot = nullptr;
+#end
+}
+// Will be used only for as an entry in deparser checksum list
+class ChecksumEntry {
+    dbprint {
+        out << "checksum entry " << field->field->toString() << " if "
+            << povBit->field->toString();
+    }
+    FieldLVal field;
+    FieldLVal povBit;
+
+    /// Corresponds to an offset of the FieldVal in the checksum list.
+    int offset;
+}
+
+/// A deparser computed checksum operation. This instructs the deparser to
+/// compute the checksum of a group of fields and write the result into the
+/// output packet.
+class EmitChecksum : Emit {
+    /// The fields from which the checksum will be computed.
+    inline Vector<ChecksumEntry> sources;
+
+    // Indicate if zeros_as_ones feature is active
+    bool zeros_as_ones = false;
+
+    ChecksumLVal dest;
+
+    // Needed for nested checksums in JBayB0.
+    // This checksum will need the checksum of these destination.
+    optional inline Vector<EmitChecksum> nested_checksum;
+}
+
+/// Configures the location from which an intrinsic deparser parameter should
+/// obtain its value.
+class DeparserParameter {
+    DeparserParameter(cstring name, Expression source)
+      : name(name), source(new FieldLVal(source)), povBit(nullptr) { }
+    DeparserParameter(Util::SourceInfo si, cstring name, Expression source)
+      : Node(si), name(name), source(new FieldLVal(source)), povBit(nullptr) { }
+
+    dbprint {
+        out << "parameter " << name << " = ";
+        if (source) {
+            out << source->field->toString();
+            if (povBit) out << " if " << povBit->field->toString();
+        } else {
+            out << "pov " << povBit->field->toString();
+        }
+    }
+
+    /// The deparser parameter to configure. The name is the one used in the
+    /// assembly, which in turn derives from the CSR register name.
+    cstring name;
+
+    /// The location to read the parameter value from.
+    NullOK FieldLVal source;
+
+    /// If present, the POV bit controlling whether the contents of the source
+    /// location are valid. Not used on Tofino.
+    NullOK FieldLVal povBit = nullptr;
+
+    /// A source is required. If this is false, then a DeparserParameter can
+    /// exist that is just a povBit.
+    bool sourceReq = true;
+
+    validate {
+        if (sourceReq)
+            CHECK_NULL(source);
+        else
+            BUG_CHECK(source || povBit,
+                      "DeparserParameter %1% must have either a source or a povBit", name);
+    }
+}
+
+/// The supertype for all BFN IR deparsers.
+abstract AbstractDeparser : Unit {
+#apply
+    int stage() const override { return std::numeric_limits<int>::max(); }
+    gress_t thread() const override { return gress; }
+
+    gress_t gress;
+}
+
+class Deparser : AbstractDeparser {
+#noconstructor
+    Deparser(gress_t gr) : AbstractDeparser(gr) {}
+#apply
+    toString { return gress ? "egress deparser"_cs : "ingress deparser"_cs; }
+
+    inline Vector<Emit>                 emits;
+    inline Vector<DeparserParameter>    params;
+    inline NameMap<Digest>              digests;
+}
+
+}  // end namespace BFN
