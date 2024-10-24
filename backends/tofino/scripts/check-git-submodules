@@ -1,0 +1,64 @@
+#!/bin/bash
+
+# This checks that the refpoint for each git submodule is on the respective
+# branch that we are tracking.
+
+### Begin configuration #######################################################
+
+declare -A branchOverrides=(
+  # Looks like we have a custom branch of google-tor that omits PTF tests.
+  ['p4-tests/p4_16/internal/google-tor']=4afb7169
+  ['p4-tests/internal/p4-programs']='origin/rel_9_13'
+  ['p4-tests/p4testutils']='origin/rel_9_13'
+  ['p4-tests/p4_16/switch_16']='origin/rel_9_13'
+  ['p4c']='origin/main'
+  ['compiler_interfaces']='origin/open_source_safe'
+)
+
+### End configuration #########################################################
+
+set -e
+
+skipFetch=false
+if [[ $# -gt 0 && "$1" == '--skip-fetch' ]] ; then
+  skipFetch=true
+  shift
+fi
+
+if [[ $# == 0 ]] ; then
+  # No arguments given. Create a temporary file and call ourselves on each git
+  # submodule. If the check fails for any submodule, the temporary file will be
+  # removed.
+  tmpfile="$(mktemp --tmpdir check-git-submodules.XXXXXXXXXX)"
+
+  ${skipFetch} || git fetch --quiet origin
+  git submodule --quiet foreach \
+    '${toplevel}/scripts/check-git-submodules ${sm_path} ${sha1} '"${tmpfile}"
+
+  rm "${tmpfile}" &>/dev/null
+else
+  sm_path="$1"
+  sha1="$2"
+  tmpfile="$3"
+
+  # Figure out what branch we are tracking (e.g., "origin/master") and derive a
+  # simple name for that branch (e.g., "master").
+  trackingBranch="${branchOverrides["${sm_path}"]}"
+  if [[ -z "${trackingBranch}" ]] ; then
+    trackingBranch="$(git symbolic-ref refs/remotes/origin/HEAD | sed s%^refs/remotes/%%)"
+    simpleBranchName="${trackingBranch:7}"
+  else
+    simpleBranchName="${trackingBranch}"
+  fi
+
+  # Check that the top of the branch being tracked is an ancestor of the
+  # current refpoint.
+  if ! git merge-base --is-ancestor "${sha1}" "${trackingBranch}" ; then
+    echo "Submodule ${sm_path} is not on ${simpleBranchName}"
+
+    # Remove the temporary file to signal an error. We don't use the exit
+    # status for this because it would cause `git submodule foreach` to stop
+    # looping, and we'd like to continue to check all remaining submodules.
+    rm -f "${tmpfile}"
+  fi
+fi

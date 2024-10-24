@@ -1,0 +1,51 @@
+#! /usr/bin/env python3
+
+# Script to parse manifest.json
+
+import os
+import sys
+import argparse
+import json
+import re
+
+def parse_version(value):
+    match = re.search(r"^(\d+)\.(\d+)\.(\d+)$", value)
+    if not match:
+        raise ValueError("Invalid version: '{}'".format(value))
+    return tuple(map(int, match.groups()))
+
+parser=argparse.ArgumentParser()
+
+parser.add_argument ("--pipe", action = 'store_true', default = None,
+                     help="return pipe names")
+
+parser.add_argument ("manifest_file", help="manifest.json to parse")
+opts = parser.parse_args()
+
+try:
+    manifest_json = json.load(open(opts.manifest_file, 'r'))
+    programs = manifest_json['programs']
+
+    if len(programs) != 1:
+        print("manifest-config only supports one program")
+        sys.exit(1)
+
+    schema_version = parse_version(manifest_json['schema_version'])
+    pipe_name_label = 'pipe_name'
+    if schema_version == parse_version("1.0.0"): pipe_name_label = 'pipe'
+
+    pipe_names = []
+    if schema_version < parse_version("2.0.0"):
+        pipelines = programs[0]['contexts']
+    else:
+        pipelines = programs[0]['pipes']
+
+    for pipeline in pipelines:
+        pipe_names.append(pipeline[pipe_name_label])
+
+    if opts.pipe is not None:
+        print(' '.join(pipe_names))
+        sys.exit(0)
+
+except Exception as e:
+    print(e)

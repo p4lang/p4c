@@ -1,0 +1,17 @@
+#! /usr/bin/env python3
+
+# Script to validate the compiler manifest
+#
+
+import os, sys
+from jsonvalidator import JSONValidator
+
+MYPATH = os.path.dirname(os.path.realpath(__file__))
+GEN_SCHEMA_PATH=os.path.join(MYPATH, "../compiler_interfaces")
+sys.path.append(GEN_SCHEMA_PATH)
+
+from schemas.manifest_schema import BFNCompilerArchive, get_schema_version
+
+v = JSONValidator()
+if not v.validate('manifest.json', BFNCompilerArchive, get_schema_version()):
+    sys.exit(1)

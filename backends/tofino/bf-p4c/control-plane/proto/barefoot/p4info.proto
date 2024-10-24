@@ -1,0 +1,223 @@
+/**
+ * Copyright (C) 2024 Intel Corporation
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License.  You may obtain a copy
+ * of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed
+ * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations under the License.
+ * 
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ */
+syntax = "proto3";
+
+import "p4/config/v1/p4types.proto";
+
+package barefoot;
+
+message P4Ids {
+  enum Prefix {
+    UNSPECIFIED                 = 0;
+    ACTION_PROFILE              = 0x81;
+    ACTION_SELECTOR             = 0x82;
+    COUNTER                     = 0x83;
+    DIRECT_COUNTER              = 0x84;
+    METER                       = 0x85;
+    DIRECT_METER                = 0x86;
+    WRED                        = 0x87;
+    DIRECT_WRED                 = 0x88;
+    LPF                         = 0x89;
+    DIRECT_LPF                  = 0x8A;
+    REGISTER                    = 0x8B;
+    DIRECT_REGISTER             = 0x8C;
+    REGISTER_PARAM              = 0x8D;
+    DIGEST                      = 0x8E;
+    HASH                        = 0x8F;
+    PORT_METADATA               = 0x90;
+    SNAPSHOT                    = 0x91;
+    SNAPSHOT_TRIGGER            = 0x92;
+    SNAPSHOT_DATA               = 0x93;
+    SNAPSHOT_LIVENESS           = 0x94;  // reserved for BFRT
+    HASH_CONFIGURE              = 0x95;
+    HASH_COMPUTE                = 0x96;  // reserved for BFRT
+    HASH_ALGORITHM              = 0x97;  // reserved for BFRT
+    PARSER_CHOICES              = 0x98;
+    DEBUG_COUNTER               = 0x99;
+    ACTION_SELECTOR_GET_MEMBER  = 0x9A;
+    // Temporary, see ValueSet message definition below
+    VALUE_SET                   = 0xfe;
+  }
+}
+
+enum Direction {
+  DIRECTION_INGRESS = 0;
+  DIRECTION_EGRESS = 1;
+}
+
+message MeterSpec {
+  enum Unit {
+    UNSPECIFIED = 0;
+    BYTES = 1;
+    PACKETS = 2;
+  }
+
+  enum Type {
+    COLOR_UNAWARE = 0;  // default value
+    COLOR_AWARE = 1;
+  }
+
+  Unit unit = 1;
+  Type type = 2;
+}
+
+message CounterSpec {
+  // Corresponds to `type` attribute for counter in P4 spec.
+  enum Unit {
+    UNSPECIFIED = 0;
+    BYTES = 1;
+    PACKETS = 2;
+    PACKETS_AND_BYTES = 3;
+  }
+
+  Unit unit = 1;
+}
+
+message ActionProfile {
+  repeated uint32 table_ids = 1;
+  int64 size = 2;
+}
+
+message ActionSelector {
+  repeated uint32 table_ids = 1;
+  uint32 hash_id = 2;
+  int64 max_group_size = 3;
+  int64 num_groups = 4;
+  uint32 action_profile_id = 5;
+  int64 adt_offset = 6;
+}
+
+message Counter {
+  CounterSpec spec = 1;
+  int64 size = 2;
+}
+
+message DirectCounter {
+  CounterSpec spec = 1;
+  uint32 direct_table_id = 2;
+}
+
+message Meter {
+  MeterSpec spec = 1;
+  int64 size = 2;
+}
+
+message DirectMeter {
+  MeterSpec spec = 1;
+  uint32 direct_table_id = 2;
+}
+
+message WredSpec {
+  uint32 drop_value = 1;
+  uint32 no_drop_value = 2;
+}
+
+message Wred {
+  WredSpec spec = 1;
+  int64 size = 2;
+}
+
+message DirectWred {
+  WredSpec spec = 1;
+  uint32 direct_table_id = 2;
+}
+
+message Lpf {
+  int64 size = 1;
+}
+
+message DirectLpf {
+  uint32 direct_table_id = 1;
+}
+
+message Register {
+  p4.config.v1.P4DataTypeSpec type_spec = 1;
+  int64 size = 2;
+  string data_field_name = 3;
+}
+
+message DirectRegister {
+  p4.config.v1.P4DataTypeSpec type_spec = 1;
+  string data_field_name = 2;
+}
+
+
+message RegisterParam {
+  p4.config.v1.P4DataTypeSpec type_spec = 1;
+  uint32 table_id = 2;
+  int64 initial_value = 3;
+  string data_field_name = 4;
+}
+
+message Digest {
+  p4.config.v1.P4DataTypeSpec type_spec = 1;
+}
+
+message DynHash {
+  p4.config.v1.P4DataTypeSpec type_spec = 1;
+  message field_info {
+      string field_name = 1;
+      bool is_constant = 2;
+  }
+  repeated field_info field_infos = 2;
+  int32 hash_width = 3;
+}
+
+// Any metadata associated with ingress port.
+message PortMetadata {
+  string key_name = 1;
+  p4.config.v1.P4DataTypeSpec type_spec = 2;
+}
+
+// This should not be required, since this is a built-in P4_16 object and there
+// is already a ValueSet message defined in p4/config/v1/p4info.proto. However,
+// P4Runtime v1.0.0 assumes that value sets are limited to storing simple
+// bitstring values and we need more general support for TNA. When P4Runtime
+// removes this restriction in future versions, we should be able to get rid of
+// this message.
+message ValueSet {
+  p4.config.v1.P4DataTypeSpec type_spec = 1;
+  int32 size = 2;
+}
+
+message Snapshot {
+  string pipe = 1;
+  Direction direction = 2;
+  message Field {
+    uint32 id = 1;
+    string name = 2;
+    int32 bitwidth = 3;
+  }
+  repeated Field fields = 3;
+}
+
+message ParserChoices {
+  string pipe = 1;
+  Direction direction = 2;
+  // as of now, only the arch_name is used
+  message ParserChoice {
+    string arch_name = 1;  // ingress_parserX or egress_parserX
+    // name of the corresponding P4 Parser: several choices may refer to the
+    // same parser type
+    string type_name = 2;
+    // the user-provided name, or an empty string if this is an anonymous
+    // instance
+    string user_name = 3;
+  }
+  repeated ParserChoice choices = 3;
+}

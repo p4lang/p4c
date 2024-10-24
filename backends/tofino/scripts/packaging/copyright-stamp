@@ -1,0 +1,286 @@
+#!/bin/bash
+
+set -e
+
+# Show usage and exit, unless we were given exactly one argument that points to
+# an existing directory.
+if [[ $# != 1 || ! -d "$1" ]] ; then
+  cat >&2 <<EOF
+Usage: $(basename "$0") DIR
+
+  Stamps all source file(s) below the given directory with an Intel copyright
+  notice.
+EOF
+  exit 1
+fi
+
+### Helpers ###################################################################
+
+# `setType type [regex...]` sets files matching the given `regex` to have the
+# given `type`.
+declare -A fileType
+declare -a fileTypeOrder
+function setType() {
+  typ="$1" ; shift
+  for regex in "$@" ; do
+    fileType["${regex}"]="${typ}"
+    fileTypeOrder+=("${regex}")
+  done
+}
+
+# `mktemp foo` creates a temporary file, registers it for deletion, and stores
+# its name in $foo.
+declare -a tmpFiles
+function mktemp() {
+  declare -g $1="$(/bin/mktemp --tmpdir copyright-stamp.XXXXXXXXXX)"
+  tmpFiles+=("${!1}")
+}
+
+function exitHandler() {
+  rm -f -- "${tmpFiles[@]}"
+}
+
+### Configuration #############################################################
+
+# Location of the LICENSE file, relative to the given directory. This file is
+# used as the basis for generating the copyright header.
+licenceFile='LICENSE'
+
+# Location of the script for producing the LICENSE file, relative to the given
+# directory.
+generateLicence='scripts/generate-license.sh'
+
+# Any file whose path relative to the given directory matches any regex in this
+# list will be ignored.
+ignoreFilePatterns=(
+  '(^|/)[A-Z]+(|\.txt)$'  # These tend to be text files.
+  '(^|/)\.git$'
+  '(^|/)\.gitignore$'
+  '(^|/)\.gitmodules$'
+  '(^|/)requirements\.txt$'
+  '.*\.csv$'   # comma-separated values
+  '.*\.json$'  # JSON doesn't support comments
+  '.*\.md$'    # Markdown
+  '^LICENSE.in$'
+  '^\.git/'
+  '(^|/)CPPLINT\.cfg$'  # cpplint controls -- no comments
+  '^bf-asm/test/'
+  '^build/'
+  '^docker/'
+  '^p4-tests/'
+  '^p4c/'  # Files from P4.org compiler should have their own copyright notice.
+  '^scripts/gen_reference_outputs/inputs/.*\.p4$'
+  '^scripts/pkg-src/src/.*\.patch$'
+  '^scripts/run_custom_tests/patches/scapy/.*\.py$'
+  '^scripts/flatrock_utilities/.*\.py$'
+  '^scripts/flatrock_utilities/.*\.schema$'
+  '^third_party/'
+  '^ci/' # CI Klocwork Differential Analysis files 
+  '^scripts/_deps/' # Will be added for packaging_sources
+
+  # The only file we ship from Glass seems to be primitives.json, which can't
+  # have comments anyway.
+  '^glass/'
+)
+
+# Any file whose path relative to the given directories matches any regex in
+# this list will not be checked for an existing copyright notice. This script
+# will always add an Intel copyright notice to these files. Use
+# `ignoreFilePatterns` to disable this behaviour for specific files.
+noCopyrightCheckPatterns=(
+  '^[a-zA-Z\.-_]*Jenkinsfile$'
+  '^jenkins/'
+  '^scripts/package_p4c_for_tofino\.sh$'
+  '^scripts/package_sources\.sh$'
+  '^scripts/packaging/copyright-stamp$'
+)
+
+# When a file's path relative to the given directory matches a regex declared
+# below, the file will be assumed to have the corresponding file type. When
+# multiple regexes match, earlier regexes have precedence over later ones.
+setType c \
+  '(^|/)[a-zA-Z\.-_]*Jenkinsfile$' \
+  '^jenkins/' \
+  '.*/proto/.*\.proto$' `# Protobuf` \
+  '/ir/.*\.def$' `# IR definitions` \
+  '\.(c|cpp|h|h\.in|hpp|l|p4|ypp)$' \
+
+setType sh \
+  '(^|/)CMakeLists\.txt$' \
+  '(^|/)Doxyfile\.in$' \
+  '(^|/)MANIFEST\.in$'  `# Python manifest file` \
+  '(^|/)\.clang-format$' \
+  '(^|/)\.dockerignore$' \
+  '(^|/)\.gdbinit$' \
+  '\.(cmake|py|sh|spec|yaml|yml)$' \
+  '^bf-p4c/driver/bfn_version\.in$'  `# Python` \
+  '^bf-p4c/driver/p4c\..*\.cfg$'  `# Python` \
+
+### Main body #################################################################
+
+cd "$1"
+
+# Register clean-up hook.
+trap 'exitHandler' EXIT
+
+# Generate the LICENSE file and verify that it was created. This file will be
+# used as the basis for the copyright notice.
+"${generateLicence}"
+if [[ ! -f "${licenceFile}" ]] ; then
+  echo "Licence file missing: ${licenceFile}" >&2
+  exit 1
+fi
+
+# Create a C-style version of the copyright notice in a temporary file.
+mktemp cNoticeFile
+cat "${licenceFile}" \
+  | fmt -w 96 \
+  | sed -e '1i/**' -e 's/^/ * /' -e '$a\ */' -e 's/ *$//' \
+  > "${cNoticeFile}"
+
+# Create a Bash-style version of the copyright notice in a temporary file.
+mktemp shNoticeFile
+cat "${licenceFile}" \
+  | fmt -w 78 \
+  | sed -e 's/^/# /' -e 's/ *$//' \
+  > "${shNoticeFile}"
+
+# Associate each file with its type, and look for files with unknown type or
+# with copyright notices.
+declare -A filesToTypes
+declare -a unknownFiles
+declare -a copyrightedFiles
+while IFS= read -r -d '' -u 9 path ; do
+  # Ignore if we have a zero-length file.
+  [[ -s "${path}" ]] || continue
+
+  # Remove the "./" prefix.
+  path="${path:2}"
+
+  # Ignore according to ignoreFilePatterns.
+  for pattern in "${ignoreFilePatterns[@]}" ; do
+    [[ "${path}" =~ ${pattern} ]] && continue 2
+  done
+
+  # Figure out what kind of file we have. We could use `file`, but that
+  # sometimes gives false matches, so we are paranoid here and ask the user to
+  # classify most things in the source tree.
+  fileType=
+  for pattern in "${fileTypeOrder[@]}" ; do
+    if [[ "${path}" =~ ${pattern} ]] ; then
+      fileType="${fileType["${pattern}"]}"
+      break
+    fi
+  done
+
+  # Files whose names are lowercase alphanumeric and don't contain a file
+  # extension tend to be scripts. Defer to `file` for these if we haven't
+  # classified them already.
+  if [[ -z "${fileType}" && "${path}" =~ (^|/)[a-z0-9_-]+$ ]] ; then
+    if [[ "$(file -b "${path}")" =~ 'script, ASCII text executable' ]] ; then
+      fileType=sh
+    fi
+  fi
+
+  # if file says it is a bash script, believe it.
+  if [[ -z "${fileType}" && "$(file -b "${path}")" =~ 'Bourne-Again shell script' ]] ; then
+      fileType=sh
+  fi
+
+  # If we haven't classified the file yet, ignore if `file` says we have a
+  # binary file.
+  if [[ -z "${fileType}" && ! "$(file -b "${path}")" =~ 'ASCII text' ]] ; then
+    continue
+  fi
+
+  if [[ -z "${fileType}" ]] ; then
+    unknownFiles+=("${path}")
+    continue
+  fi
+
+  filesToTypes["${path}"]="${fileType}"
+
+  # Stop here if we don't want to check for an existing copyright notice.
+  for pattern in "${noCopyrightCheckPatterns[@]}" ; do
+    [[ "${path}" =~ ${pattern} ]] && continue 2
+  done
+
+  # See if the file already has a copyright notice.
+  if grep -i 'copyright' "${path}" >&/dev/null ; then
+    copyrightedFiles+=("${path}")
+  fi
+done 9< <(find . -type f -print0)
+
+# Notify if we've found unknown files.
+if [[ ${#unknownFiles[@]} -gt 0 ]] ; then
+  cat >&2 <<EOF
+
+The following files have unknown type. Please classify these files by editing
+$0
+
+EOF
+
+  for path in "${unknownFiles[@]}" ; do
+    echo "  ${path}" >&2
+  done
+fi
+
+# Notify if we've found copyrighted files.
+if [[ ${#copyrightedFiles[@]} -gt 0 ]] ; then
+  cat >&2 <<EOF
+
+The following files already have a copyright notice. Please remove the notice,
+or ignore the file by editing $0
+
+EOF
+
+  for path in "${copyrightedFiles[@]}" ; do
+    echo "  ${path}" >&2
+  done
+fi
+
+# Fail if we've found unknown or copyrighted files.
+[[ $((${#unknownFiles[@]} + ${#copyrightedFiles[@]})) -gt 0 ]] && exit 1
+
+# Create a scratch file for inserting copyright notices.
+mktemp scratchFile
+
+# Add copyrights.
+for path in "${!filesToTypes[@]}" ; do
+  typ="${filesToTypes["${path}"]}"
+  noticeFileVar="${typ}NoticeFile"
+
+  # Rewrite each file as follows:
+  #   1. Rename the original file to a temporary location,
+  #   2. Write the result into the original location, and
+  #   3. Copy attributes from the original file to the new file.
+  #
+  # This ensures that the new file occupies a new inode, so that if the file is
+  # a currently running script, this rewriting won't alter the script's
+  # behaviour.
+  {
+    mv "${path}" "${scratchFile}"
+
+    if [[ "${typ}" == "sh" ]] \
+      && IFS= LC_ALL=C read -rn2 -d '' shebang < "${scratchFile}" \
+      && [[ "${shebang}" == '#!' ]]
+    then
+      # We have a script that starts with a shebang. Put a blank line after
+      # the shebang, followed by the copyright header, then the rest of the
+      # original file.
+      cat >"${path}" \
+        <(head -n 1 "${scratchFile}") \
+        <(echo) \
+        "${!noticeFileVar}" \
+        <(tail -n +2 "${scratchFile}")
+    else
+      # Add copyright header to the beginning of the file.
+      cat >"${path}" \
+        "${!noticeFileVar}" \
+        <(echo) \
+        "${scratchFile}"
+    fi
+
+    cp -a --attributes-only "${scratchFile}" "${path}"
+  }
+done

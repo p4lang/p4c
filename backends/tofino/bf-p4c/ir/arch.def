@@ -1,0 +1,122 @@
+/**
+ * Copyright (C) 2024 Intel Corporation
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License.  You may obtain a copy
+ * of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed
+ * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations under the License.
+ * 
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+
+/* -*-C++-*- */
+
+#emit
+#include "bf-p4c/ir/gress.h"
+#include "lib/ordered_map.h"
+#end
+
+namespace BFN {
+
+/// A P4Control produced by TNA translation; contains some additional useful
+/// metadata.
+class TnaControl : P4Control {
+    toString { return P4Control::toString() + " on " + cstring::to_cstring(thread); }
+
+    /// A map from standard TNA parameter names to the names actually used in
+    /// the P4 program. For example, a TNA control prototype may include a
+    /// parameter "inout M ig_md", but the user program instantiating the
+    /// control may use "inout M user_metadata"; this map would include a
+    /// mapping from "ig_md" to "user_metadata".
+    ordered_map<cstring, cstring> tnaParams;
+
+    /// The thread this control is associated with.
+    gress_t thread;
+
+    /// The pipe name this control belongs to
+    optional NullOK cstring pipeName;
+#nodbprint
+}
+
+/// A P4Deparser produced by TNA translation; contains some additional useful
+/// metadata.
+class TnaDeparser : P4Control {
+    toString { return P4Control::toString() + " on " + cstring::to_cstring(thread); }
+
+    /// A map from standard TNA parameter names to the names actually used in
+    /// the P4 program. For example, a TNA control prototype may include a
+    /// parameter "inout M ig_md", but the user program instantiating the
+    /// control may use "inout M user_metadata"; this map would include a
+    /// mapping from "ig_md" to "user_metadata".
+    ordered_map<cstring, cstring> tnaParams;
+
+    /// The thread this control is associated with.
+    gress_t thread;
+
+    /// The pipe name this control belongs to
+    optional NullOK cstring pipeName;
+#nodbprint
+}
+
+/// A P4Parser produced by TNA translation; contains some additional useful
+/// metadata.
+class TnaParser : P4Parser {
+    toString { return P4Parser::toString() + " on " + cstring::to_cstring(thread); }
+    dbprint { out << thread << " "; P4Parser::dbprint(out); }
+
+    /// A map from standard TNA parameter names to the names actually used in
+    /// the P4 program. @see TnaControl::tnaParams.
+    ordered_map<cstring, cstring> tnaParams;
+
+    /// The thread this parser is associated with.
+    gress_t thread;
+
+    /// Phase0 Info
+    optional NullOK Phase0 phase0;
+
+    /// The pipe name this parser belongs to
+    optional NullOK cstring pipeName;
+
+    /// The port to configure at initialization time.
+    optional inline std::vector<int> portmap;
+}
+
+/// A thread of P4 execution expressed in frontend IR;
+/// Used to identify the parser/mau/deparser block from
+/// architecture PackageBlock.
+class P4Thread {
+    toString { return "P4Thread"_cs; }
+    dbprint { out << toString(); }
+#noconstructor
+    P4Thread() = default;
+    inline Vector<IR::P4Parser> parsers = {};
+    const IR::P4Control *mau = nullptr;
+    const IR::P4Control *deparser = nullptr;
+    toJSON {
+        json << json.indent << "\"parsers\" : " << parsers << "," << std::endl
+             << json.indent << "\"mau\" : " << mau << "," << std::endl
+             << json.indent << "\"deparser\" : " << deparser; }
+    fromJSON {
+        IR::BFN::P4Thread * thread = new IR::BFN::P4Thread();
+        json.load("parsers", thread->parsers);
+        json.load("mau", thread->mau);
+        json.load("deparser", thread->deparser);
+        return thread;
+    }
+#apply
+    visit_children {
+        parsers.parallel_visit_children(v);
+        v.visit(mau);
+        v.visit(deparser);
+    }
+}
+
+}  // end namespace BFN
