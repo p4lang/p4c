@@ -420,3 +420,46 @@ function(get_all_targets _result _dir)
   get_directory_property(_sub_targets DIRECTORY "${_dir}" BUILDSYSTEM_TARGETS)
   set(${_result} ${${_result}} ${_sub_targets} PARENT_SCOPE)
 endfunction()
+
+# Checks for presence of programs and dependencies
+# This function supports a optional parameter HINTS_DIRS.
+# In case cmake is unable to find a library even if it is present,
+# you can pass the exact directory path as the last parameter of this function.
+# Eg. CHECK_DEPENDENCIES(VAR "${TEST_PROGRAMS}" "${TEST_LIBRARIES}" "${HINTS_DIRS}")
+function(CHECK_DEPENDENCIES OUT_VAR TEST_DEPENDENCY_PROGRAMS TEST_DEPENDENCY_LIBRARIES)
+    set(ALL_FOUND TRUE)
+
+    foreach(PROG ${TEST_DEPENDENCY_PROGRAMS})
+        find_program(PROG_PATH ${PROG})
+        if (NOT PROG_PATH)
+            message(WARNING "Missing program ${PROG}."
+                    " Please install ${PROG} and ensure it is in your PATH.")
+            set(ALL_FOUND FALSE)
+        else()
+            message(STATUS "Found program ${PROG} at ${PROG_PATH}")
+        endif()
+    endforeach()
+
+    foreach(LIB ${TEST_DEPENDENCY_LIBRARIES})
+        if (ARGC GREATER 3)
+          set(HINTS_DIRS_ARG ${ARGV4})
+          find_library(LIB_PATH ${LIB} HINTS ${HINTS_DIRS})
+        else()
+          find_library(LIB_PATH ${LIB})
+        endif()
+
+        if (NOT LIB_PATH)
+            message(WARNING "Missing library ${LIB}."
+                    " Please install ${LIB}.")
+            set(ALL_FOUND FALSE)
+        else()
+            message(STATUS "Found library ${LIB} at ${LIB_PATH}")
+        endif()
+    endforeach()
+
+    if (ALL_FOUND)
+        set(${OUT_VAR} TRUE PARENT_SCOPE)
+    else()
+        set(${OUT_VAR} FALSE PARENT_SCOPE)
+    endif()
+endfunction()
