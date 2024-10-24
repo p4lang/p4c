@@ -4,11 +4,11 @@
 #include <optional>
 #include <vector>
 
-#include "absl/container/btree_map.h"
 #include "ir/compare.h"
 #include "ir/ir.h"
 #include "lib/castable.h"
 #include "lib/cstring.h"
+#include "lib/flat_map.h"
 
 namespace P4 {
 
@@ -18,7 +18,7 @@ using Constraint = IR::Expression;
 
 /// This type maps symbolic variables to their value assigned by the solver.
 using SymbolicMapping =
-    absl::btree_map<const IR::SymbolicVariable *, const IR::Expression *, IR::SymbolicVariableLess>;
+    P4::flat_map<const IR::SymbolicVariable *, const IR::Expression *, IR::SymbolicVariableLess>;
 
 /// Provides a higher-level interface for an SMT solver.
 class AbstractSolver : public ICastable {
