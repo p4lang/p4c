@@ -38,20 +38,13 @@ HOMEBREW_PREFIX=$(brew --prefix)
 # Fetch the latest formulae
 brew update
 
-BOOST_LIB="boost@1.85"
 REQUIRED_PACKAGES=(
     autoconf automake ccache cmake libtool
     openssl pkg-config coreutils bison grep ninja
-    ${BOOST_LIB}
 )
 for package in "${REQUIRED_PACKAGES[@]}"; do
   brew_install ${package}
 done
-
-# Check if linking is needed.
-if ! brew ls --linked --formula ${BOOST_LIB} > /dev/null 2>&1; then
-  brew link ${BOOST_LIB}
-fi
 
 # Check if PATH modification is needed.
 if ! grep -q "$(brew --prefix bison)/bin" ~/.bash_profile; then

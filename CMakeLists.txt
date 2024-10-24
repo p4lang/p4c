@@ -43,7 +43,7 @@ OPTION (ENABLE_P4TC "Build the P4TC backend" ON)
 OPTION (ENABLE_P4FMT "Build the P4FMT backend" ON)
 OPTION (ENABLE_P4TEST "Build the P4Test backend (required for the full test suite)" ON)
 OPTION (ENABLE_TEST_TOOLS "Build the P4Tools development platform" OFF)
-OPTION (ENABLE_P4C_GRAPHS "Build the p4c-graphs backend" ON)
+OPTION (ENABLE_P4C_GRAPHS "Build the p4c-graphs backend" OFF)
 OPTION (ENABLE_PROTOBUF_STATIC "Link against Protobuf statically" ON)
 OPTION (ENABLE_GC "Compile with the Boehm-Demers-Weiser garbage collector." ON)
 OPTION (ENABLE_WERROR "Treat warnings as errors" OFF)
@@ -55,6 +55,7 @@ likely depend on the standard libary anyway. If you have some non-static C++ dep
 STATIC_BUILD_WITH_DYNAMIC_STDLIB." OFF)
 OPTION (STATIC_BUILD_WITH_DYNAMIC_STDLIB "Build a (mostly) statically linked release binary. \
 Glibc and C++ standard library is linked dynamically." OFF)
+set(ADDITIONAL_P4C_BOOST_LIBRARIES "" CACHE STRING "Build and make these additional boost modules available. Modules are separated with semicolons.")
 
 if (STATIC_BUILD_WITH_DYNAMIC_GLIBC OR STATIC_BUILD_WITH_DYNAMIC_STDLIB)
     # We want to optimize the binary size for a static release binary by default.
@@ -153,10 +154,6 @@ if(STATIC_BUILD_WITH_DYNAMIC_GLIBC OR STATIC_BUILD_WITH_DYNAMIC_STDLIB)
   endif()
   set(BUILD_SHARED_LIBS OFF)
   set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
-  # Link Boost statically
-  # See https://cmake.org/cmake/help/latest/module/FindBoost.html for details
-  set(Boost_USE_STATIC_LIBS ON)
-  set(Boost_USE_STATIC_RUNTIME OFF)
   # Set the static variable
   set(P4C_STATIC_BUILD STATIC)
   # TODO: We can not use -static here because of compilation and portability problems:
@@ -204,19 +201,16 @@ include(Abseil)
 p4c_obtain_abseil()
 include(Protobuf)
 p4c_obtain_protobuf()
+# The boost graph module is optional and only required by the graphs back end.
+if(ENABLE_P4C_GRAPHS AND NOT P4C_USE_PREINSTALLED_BOOST)
+  list(APPEND ADDITIONAL_P4C_BOOST_LIBRARIES graph)
+endif()
+include(Boost)
+p4c_obtain_boost()
 
 # We require -pthread to make std::call_once work, even if we're not using threads...
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
-
-# The boost graph headers are optional and only required by the graphs back end.
-find_package (Boost QUIET COMPONENTS graph)
-if (Boost_FOUND)
-  set (HAVE_LIBBOOST_GRAPH 1)
-else ()
-  message (WARNING "Boost graph headers not found, will not build 'graphs' backend")
-endif ()
-find_package (Boost REQUIRED COMPONENTS iostreams)
 
 # Compile with the Boehm garbage collector (https://github.com/ivmai/bdwgc), if requested.
 # One can disable the GC, e.g., to run under Valgrind, by editing config.h.
@@ -228,9 +222,6 @@ if (ENABLE_MULTITHREAD)
   add_definitions(-DMULTITHREAD)
 endif()
 list (APPEND P4C_LIB_DEPS ${CMAKE_THREAD_LIBS_INIT})
-include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
-set (HAVE_LIBBOOST_IOSTREAMS 1)
-list (APPEND P4C_LIB_DEPS ${Boost_LIBRARIES})
 if (ENABLE_GC)
   list (APPEND P4C_LIB_DEPS ${LIBGC_LIBRARIES})
 endif ()
@@ -469,7 +460,7 @@ endif ()
 if (ENABLE_EBPF)
     add_subdirectory (backends/ebpf)
 endif ()
-if (ENABLE_P4C_GRAPHS AND HAVE_LIBBOOST_GRAPH EQUAL 1)
+if (ENABLE_P4C_GRAPHS)
   add_subdirectory (backends/graphs)
 endif ()
 if (ENABLE_P4TC)
