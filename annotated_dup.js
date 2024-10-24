@@ -452,6 +452,7 @@ var annotated_dup =
         [ "InlineActions", "class_p4_1_1_p4__14_1_1_inline_actions.html", null ]
       ] ],
       [ "P4Fmt", null, [
+        [ "Attach", "class_p4_1_1_p4_fmt_1_1_attach.html", "class_p4_1_1_p4_fmt_1_1_attach" ],
         [ "P4fmtOptions", "class_p4_1_1_p4_fmt_1_1_p4fmt_options.html", null ],
         [ "P4Formatter", "class_p4_1_1_p4_fmt_1_1_p4_formatter.html", "class_p4_1_1_p4_fmt_1_1_p4_formatter" ]
       ] ],
@@ -879,7 +880,7 @@ var annotated_dup =
         ] ],
         [ "AsEnumerator", "class_p4_1_1_util_1_1_as_enumerator.html", "class_p4_1_1_util_1_1_as_enumerator" ],
         [ "BitRange", "struct_p4_1_1_util_1_1_bit_range.html", null ],
-        [ "Comment", "class_p4_1_1_util_1_1_comment.html", null ],
+        [ "Comment", "class_p4_1_1_util_1_1_comment.html", "class_p4_1_1_util_1_1_comment" ],
         [ "CompilationError", "class_p4_1_1_util_1_1_compilation_error.html", null ],
         [ "CompilerBug", "class_p4_1_1_util_1_1_compiler_bug.html", null ],
         [ "CompilerUnimplemented", "class_p4_1_1_util_1_1_compiler_unimplemented.html", null ],

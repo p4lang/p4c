@@ -1,5 +1,7 @@
 var NAVTREEINDEX16 =
 {
+"class_p4_1_1_replace_structs.html":[13,0,0,396],
+"class_p4_1_1_replace_type_uses.html":[12,0,0,381],
 "class_p4_1_1_replace_type_uses.html":[13,0,0,397],
 "class_p4_1_1_replacement_map.html":[12,0,0,378],
 "class_p4_1_1_replacement_map.html":[13,0,0,394],
@@ -247,7 +249,5 @@ var NAVTREEINDEX16 =
 "class_p4_1_1_t_c_1_1_inspect_pna_program.html":[13,0,0,22,32],
 "class_p4_1_1_t_c_1_1_internet_checksum_algorithm_p_n_a.html":[12,0,0,9,33],
 "class_p4_1_1_t_c_1_1_internet_checksum_algorithm_p_n_a.html":[13,0,0,22,33],
-"class_p4_1_1_t_c_1_1_internet_checksum_algorithm_p_n_a.html#aee1e472d9b1e866310ee677763cf03f9":[12,0,0,9,33,0],
-"class_p4_1_1_t_c_1_1_internet_checksum_algorithm_p_n_a.html#aee1e472d9b1e866310ee677763cf03f9":[13,0,0,22,33,0],
-"class_p4_1_1_t_c_1_1_introspection_generator.html":[12,0,0,9,34]
+"class_p4_1_1_t_c_1_1_internet_checksum_algorithm_p_n_a.html#aee1e472d9b1e866310ee677763cf03f9":[12,0,0,9,33,0]
 };

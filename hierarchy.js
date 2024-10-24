@@ -710,6 +710,7 @@ var hierarchy =
         [ "P4::P4Tools::CompilerConfiguration", "class_p4_1_1_p4_tools_1_1_compiler_configuration.html", null ]
       ] ]
     ] ],
+    [ "P4::P4Fmt::Attach::Comments", "class_p4_1_1_p4_fmt_1_1_attach.html#struct_p4_1_1_p4_fmt_1_1_attach_1_1_comments", null ],
     [ "P4::P4RuntimeAPI", "struct_p4_1_1_p4_runtime_a_p_i.html", null ],
     [ "P4::P4RuntimeSerializer", "class_p4_1_1_p4_runtime_serializer.html", null ],
     [ "P4::P4Tools::AbstractExecutionState", "class_p4_1_1_p4_tools_1_1_abstract_execution_state.html", [
@@ -1257,7 +1258,8 @@ var hierarchy =
     [ "P4::Util::Hasher< T * >", "struct_p4_1_1_util_1_1_hasher_3_01_t_01_5_01_4.html", null ],
     [ "P4::Util::IHasSourceInfo", "class_p4_1_1_util_1_1_i_has_source_info.html", [
       [ "P4::IR::ID", "struct_p4_1_1_i_r_1_1_i_d.html", null ],
-      [ "P4::IR::INode", "class_p4_1_1_i_r_1_1_i_node.html", null ]
+      [ "P4::IR::INode", "class_p4_1_1_i_r_1_1_i_node.html", null ],
+      [ "P4::Util::Comment", "class_p4_1_1_util_1_1_comment.html", null ]
     ] ],
     [ "P4::Util::InputSources", "class_p4_1_1_util_1_1_input_sources.html", null ],
     [ "P4::Util::iterator_range< Iter, Sentinel >", "class_p4_1_1_util_1_1iterator__range.html", null ],
@@ -1569,6 +1571,7 @@ var hierarchy =
         [ "P4::KeyNameGenerator", "class_p4_1_1_key_name_generator.html", null ],
         [ "P4::MidEndLast", "class_p4_1_1_mid_end_last.html", null ],
         [ "P4::MinimalNameGenerator", "class_p4_1_1_minimal_name_generator.html", null ],
+        [ "P4::P4Fmt::Attach", "class_p4_1_1_p4_fmt_1_1_attach.html", null ],
         [ "P4::P4Fmt::P4Formatter", "class_p4_1_1_p4_fmt_1_1_p4_formatter.html", null ],
         [ "P4::P4Tools::P4ProgramDCGCreator", "class_p4_1_1_p4_tools_1_1_p4_program_d_c_g_creator.html", null ],
         [ "P4::P4Tools::P4Testgen::AbstractStepper", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_abstract_stepper.html", [

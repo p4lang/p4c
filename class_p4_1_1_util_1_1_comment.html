@@ -129,7 +129,7 @@ $(function(){initNavTree('class_p4_1_1_util_1_1_comment.html',''); initResizable
 <div class="dynheader">
 Inheritance diagram for P4::Util::Comment:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="class_p4_1_1_util_1_1_comment__inherit__graph.svg" width="152" height="110"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><iframe scrolling="no" frameborder="0" src="class_p4_1_1_util_1_1_comment__inherit__graph.svg" width="334" height="110"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 <center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
@@ -139,9 +139,11 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a2672e8bc3f30a5f3889b2edb50c51b5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1196196f796cee6da7565aabee6b8b20" id="r_a1196196f796cee6da7565aabee6b8b20"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a1196196f796cee6da7565aabee6b8b20">dbprint</a> (std::ostream &amp;out) const override</td></tr>
 <tr class="separator:a1196196f796cee6da7565aabee6b8b20"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a48bf4159f71a3e5554ca218bfa2e117e" id="r_a48bf4159f71a3e5554ca218bfa2e117e"><td class="memItemLeft" align="right" valign="top"><a id="a48bf4159f71a3e5554ca218bfa2e117e" name="a48bf4159f71a3e5554ca218bfa2e117e"></a>
-<a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>toString</b> () const</td></tr>
-<tr class="separator:a48bf4159f71a3e5554ca218bfa2e117e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acd3180bcbd5233909c59e93a077ebd57" id="r_acd3180bcbd5233909c59e93a077ebd57"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_p4_1_1_util_1_1_source_info.html">SourceInfo</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acd3180bcbd5233909c59e93a077ebd57">getSourceInfo</a> () const override</td></tr>
+<tr class="memdesc:acd3180bcbd5233909c59e93a077ebd57"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the source position associated with this comment.  <br /></td></tr>
+<tr class="separator:acd3180bcbd5233909c59e93a077ebd57"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6f36662c8feea6bcbcc1234a3bcd2df2" id="r_a6f36662c8feea6bcbcc1234a3bcd2df2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6f36662c8feea6bcbcc1234a3bcd2df2">toString</a> () const override</td></tr>
+<tr class="separator:a6f36662c8feea6bcbcc1234a3bcd2df2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
 <a id="a1196196f796cee6da7565aabee6b8b20" name="a1196196f796cee6da7565aabee6b8b20"></a>
@@ -168,6 +170,62 @@ Public Member Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Implements <a class="el" href="class_p4_1_1_i_has_db_print.html">P4::IHasDbPrint</a>.</p>
+
+</div>
+</div>
+<a id="acd3180bcbd5233909c59e93a077ebd57" name="acd3180bcbd5233909c59e93a077ebd57"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acd3180bcbd5233909c59e93a077ebd57">&#9670;&#160;</a></span>getSourceInfo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="class_p4_1_1_util_1_1_source_info.html">SourceInfo</a> P4::Util::Comment::getSourceInfo </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">nodiscard</span><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Retrieve the source position associated with this comment. </p>
+
+<p>Implements <a class="el" href="class_p4_1_1_util_1_1_i_has_source_info.html">P4::Util::IHasSourceInfo</a>.</p>
+
+</div>
+</div>
+<a id="a6f36662c8feea6bcbcc1234a3bcd2df2" name="a6f36662c8feea6bcbcc1234a3bcd2df2"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6f36662c8feea6bcbcc1234a3bcd2df2">&#9670;&#160;</a></span>toString()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="class_p4_1_1cstring.html">cstring</a> P4::Util::Comment::toString </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Implements <a class="el" href="class_p4_1_1_util_1_1_i_has_source_info.html">P4::Util::IHasSourceInfo</a>.</p>
 
 </div>
 </div>

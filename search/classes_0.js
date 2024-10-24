@@ -73,5 +73,6 @@ var searchData=
   ['assignactionargtypes_70',['AssignActionArgTypes',['../class_p4_1_1_type_check_1_1_assign_action_arg_types.html',1,'P4::TypeCheck']]],
   ['assigninitialtypes_71',['AssignInitialTypes',['../class_p4_1_1_type_check_1_1_assign_initial_types.html',1,'P4::TypeCheck']]],
   ['assignmentstatement_72',['AssignmentStatement',['../class_p4_1_1_p4_tools_1_1_trace_events_1_1_assignment_statement.html',1,'P4::P4Tools::TraceEvents']]],
-  ['autocompilecontext_73',['AutoCompileContext',['../struct_p4_1_1_auto_compile_context.html',1,'P4']]]
+  ['attach_73',['Attach',['../class_p4_1_1_p4_fmt_1_1_attach.html',1,'P4::P4Fmt']]],
+  ['autocompilecontext_74',['AutoCompileContext',['../struct_p4_1_1_auto_compile_context.html',1,'P4']]]
 ];
