@@ -421,7 +421,11 @@ function(get_all_targets _result _dir)
   set(${_result} ${${_result}} ${_sub_targets} PARENT_SCOPE)
 endfunction()
 
-# Checks for presence of programs and dependencies 
+# Checks for presence of programs and dependencies
+# This function supports a optional parameter HINTS_DIRS.
+# In case cmake is unable to find a library even if it is present,
+# you can pass the exact directory path as the last parameter of this function.
+# Eg. CHECK_DEPENDENCIES(VAR "${TEST_PROGRAMS}" "${TEST_LIBRARIES}" "${HINTS_DIRS}")
 function(CHECK_DEPENDENCIES OUT_VAR TEST_DEPENDENCY_PROGRAMS TEST_DEPENDENCY_LIBRARIES)
     set(ALL_FOUND TRUE)
 
@@ -437,7 +441,13 @@ function(CHECK_DEPENDENCIES OUT_VAR TEST_DEPENDENCY_PROGRAMS TEST_DEPENDENCY_LIB
     endforeach()
 
     foreach(LIB ${TEST_DEPENDENCY_LIBRARIES})
-        find_library(LIB_PATH ${LIB} HINTS "${CMAKE_CURRENT_SOURCE_DIR}/runtime/usr/lib64/")
+        if (ARGC GREATER 3)
+          set(HINTS_DIRS_ARG ${ARGV4})
+          find_library(LIB_PATH ${LIB} HINTS ${HINTS_DIRS})
+        else()
+          find_library(LIB_PATH ${LIB})
+        endif()
+
         if (NOT LIB_PATH)
             message(WARNING "Missing library ${LIB}."
                     " Please install ${LIB}.")
