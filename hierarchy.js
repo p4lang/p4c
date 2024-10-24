@@ -430,9 +430,6 @@ var hierarchy =
           [ "P4::IR::VectorBase", "class_p4_1_1_i_r_1_1_vector_base.html", [
             [ "P4::IR::Vector< IR::Type >", "class_p4_1_1_i_r_1_1_vector.html", null ],
             [ "P4::IR::Vector< IR::Argument >", "class_p4_1_1_i_r_1_1_vector.html", null ],
-            [ "P4::IR::Vector< IR::DpdkAsmStatement >", "class_p4_1_1_i_r_1_1_vector.html", [
-              [ "P4::IR::IndexedVector< IR::DpdkAsmStatement >", "class_p4_1_1_i_r_1_1_indexed_vector.html", null ]
-            ] ],
             [ "P4::IR::Vector< P4::IR::Node >", "class_p4_1_1_i_r_1_1_vector.html", [
               [ "P4::IR::IndexedVector< P4::IR::Node >", "class_p4_1_1_i_r_1_1_indexed_vector.html", null ]
             ] ],
@@ -441,6 +438,9 @@ var hierarchy =
             ] ],
             [ "P4::IR::Vector< IR::StatOrDecl >", "class_p4_1_1_i_r_1_1_vector.html", [
               [ "P4::IR::IndexedVector< IR::StatOrDecl >", "class_p4_1_1_i_r_1_1_indexed_vector.html", null ]
+            ] ],
+            [ "P4::IR::Vector< IR::DpdkAsmStatement >", "class_p4_1_1_i_r_1_1_vector.html", [
+              [ "P4::IR::IndexedVector< IR::DpdkAsmStatement >", "class_p4_1_1_i_r_1_1_indexed_vector.html", null ]
             ] ],
             [ "P4::IR::Vector< IR::DpdkTable >", "class_p4_1_1_i_r_1_1_vector.html", [
               [ "P4::IR::IndexedVector< IR::DpdkTable >", "class_p4_1_1_i_r_1_1_indexed_vector.html", null ]
@@ -659,6 +659,7 @@ var hierarchy =
     [ "P4::ordered_map< cstring, const TestObject * >", "class_p4_1_1ordered__map.html", null ],
     [ "P4::ordered_map< P4::cstring, const IR::Declaration_Instance * >", "class_p4_1_1ordered__map.html", null ],
     [ "P4::ordered_map< P4::cstring, const IR::Declaration_Variable * >", "class_p4_1_1ordered__map.html", null ],
+    [ "P4::ordered_map< P4::cstring, const IR::DpdkHeaderInstance * >", "class_p4_1_1ordered__map.html", null ],
     [ "P4::ordered_map< P4::cstring, const IR::Member * >", "class_p4_1_1ordered__map.html", null ],
     [ "P4::ordered_map< P4::cstring, const IR::P4Action * >", "class_p4_1_1ordered__map.html", null ],
     [ "P4::ordered_map< P4::cstring, const IR::P4Control * >", "class_p4_1_1ordered__map.html", null ],
@@ -1934,10 +1935,10 @@ var hierarchy =
     [ "std::vector< T >", null, [
       [ "P4::safe_vector< const IR::Type * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::Argument * >", "class_p4_1_1safe__vector.html", null ],
-      [ "P4::safe_vector< const IR::DpdkAsmStatement * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const P4::IR::Node * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::Declaration * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::StatOrDecl * >", "class_p4_1_1safe__vector.html", null ],
+      [ "P4::safe_vector< const IR::DpdkAsmStatement * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::DpdkTable * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::DpdkSelector * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::DpdkLearner * >", "class_p4_1_1safe__vector.html", null ],

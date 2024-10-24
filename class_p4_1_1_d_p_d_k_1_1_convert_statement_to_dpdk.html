@@ -122,6 +122,7 @@ $(function(){initNavTree('class_p4_1_1_d_p_d_k_1_1_convert_statement_to_dpdk.htm
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#friends">Friends</a> &#124;
 <a href="class_p4_1_1_d_p_d_k_1_1_convert_statement_to_dpdk-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">P4::DPDK::ConvertStatementToDpdk Class Reference</div></div>
 </div><!--header-->
@@ -140,6 +141,15 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a5a82a8084e1a9bcc518615bfb68dc45f" id="r_a5a82a8084e1a9bcc518615bfb68dc45f"><td class="memItemLeft" align="right" valign="top"><a id="a5a82a8084e1a9bcc518615bfb68dc45f" name="a5a82a8084e1a9bcc518615bfb68dc45f"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>ConvertStatementToDpdk</b> (<a class="el" href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a> *refmap, <a class="el" href="class_p4_1_1_type_map.html">P4::TypeMap</a> *typemap, <a class="el" href="struct_p4_1_1_dpdk_program_structure.html">DpdkProgramStructure</a> *structure, IR::Type_Struct *metadataStruct)</td></tr>
 <tr class="separator:a5a82a8084e1a9bcc518615bfb68dc45f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae1766c52358c803d3e0e339bed0d89bd" id="r_ae1766c52358c803d3e0e339bed0d89bd"><td class="memItemLeft" align="right" valign="top"><a id="ae1766c52358c803d3e0e339bed0d89bd" name="ae1766c52358c803d3e0e339bed0d89bd"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>add128bitComplInstr</b> (const IR::Expression *, const IR::Expression *)</td></tr>
+<tr class="separator:ae1766c52358c803d3e0e339bed0d89bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae30241e06a6c388f589933742a5c832c" id="r_ae30241e06a6c388f589933742a5c832c"><td class="memItemLeft" align="right" valign="top"><a id="ae30241e06a6c388f589933742a5c832c" name="ae30241e06a6c388f589933742a5c832c"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>add128bitwiseInstr</b> (const IR::Expression *src1Op, const IR::Expression *src2Op, const char *op)</td></tr>
+<tr class="separator:ae30241e06a6c388f589933742a5c832c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a90ff5abb30b833d63db2020a8dab9087" id="r_a90ff5abb30b833d63db2020a8dab9087"><td class="memItemLeft" align="right" valign="top"><a id="a90ff5abb30b833d63db2020a8dab9087" name="a90ff5abb30b833d63db2020a8dab9087"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>add128ComparisonInstr</b> (<a class="el" href="class_p4_1_1cstring.html">cstring</a> true_label, const IR::Expression *src1Op, const IR::Expression *src2Op, const char *op)</td></tr>
+<tr class="separator:a90ff5abb30b833d63db2020a8dab9087"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a06a953e835f11f3ddf5d7f6546f19c9b" id="r_a06a953e835f11f3ddf5d7f6546f19c9b"><td class="memItemLeft" align="right" valign="top"><a id="a06a953e835f11f3ddf5d7f6546f19c9b" name="a06a953e835f11f3ddf5d7f6546f19c9b"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>add_instr</b> (const IR::DpdkAsmStatement *s)</td></tr>
 <tr class="separator:a06a953e835f11f3ddf5d7f6546f19c9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -149,6 +159,9 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>add_instr</b> (const 
 <tr class="memitem:a2709760a7bb2f234da708b707bed28d1" id="r_a2709760a7bb2f234da708b707bed28d1"><td class="memItemLeft" align="right" valign="top"><a id="a2709760a7bb2f234da708b707bed28d1" name="a2709760a7bb2f234da708b707bed28d1"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>branchingInstructionGeneration</b> (<a class="el" href="class_p4_1_1cstring.html">cstring</a> true_label, <a class="el" href="class_p4_1_1cstring.html">cstring</a> false_label, const IR::Expression *expr)</td></tr>
 <tr class="separator:a2709760a7bb2f234da708b707bed28d1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac20755577d03fc464e724d52d178c021" id="r_ac20755577d03fc464e724d52d178c021"><td class="memItemLeft" align="right" valign="top"><a id="ac20755577d03fc464e724d52d178c021" name="ac20755577d03fc464e724d52d178c021"></a>
+bool&#160;</td><td class="memItemRight" valign="bottom"><b>checkIf128bitOp</b> (const IR::Expression *, const IR::Expression *)</td></tr>
+<tr class="separator:ac20755577d03fc464e724d52d178c021"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ada014c6e1dd69620c8e9e03cc8744759" id="r_ada014c6e1dd69620c8e9e03cc8744759"><td class="memItemLeft" align="right" valign="top"><a id="ada014c6e1dd69620c8e9e03cc8744759" name="ada014c6e1dd69620c8e9e03cc8744759"></a>
 <a class="el" href="class_p4_1_1_i_r_1_1_indexed_vector.html">IR::IndexedVector</a>&lt; IR::DpdkAsmStatement &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>get_instr</b> ()</td></tr>
 <tr class="separator:ada014c6e1dd69620c8e9e03cc8744759"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -360,6 +373,12 @@ template&lt;class T , typename  = std::enable_if_t&lt;Util::has_SourceInfo_v&lt;
 <tr class="separator:a647556f1c95e9850dc8ac09637145089 inherit pub_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a855598301a9252de50b2a46715286605 inherit pub_methods_class_p4_1_1_visitor" id="r_a855598301a9252de50b2a46715286605"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_visitor.html#a855598301a9252de50b2a46715286605">warning_enabled</a> (int warning_kind) const</td></tr>
 <tr class="separator:a855598301a9252de50b2a46715286605 inherit pub_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="friends" name="friends"></a>
+Friends</h2></td></tr>
+<tr class="memitem:a1c3abe5c7e5160392082014d8ba846ab" id="r_a1c3abe5c7e5160392082014d8ba846ab"><td class="memItemLeft" align="right" valign="top"><a id="a1c3abe5c7e5160392082014d8ba846ab" name="a1c3abe5c7e5160392082014d8ba846ab"></a>
+class&#160;</td><td class="memItemRight" valign="bottom"><b>BranchingInstructionGeneration</b></td></tr>
+<tr class="separator:a1c3abe5c7e5160392082014d8ba846ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
