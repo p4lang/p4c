@@ -8,7 +8,7 @@ clang-format==18.1.0
 isort==5.13.2; python_version > '3.6'
 black==24.3.0; python_version > '3.6'
 protobuf==3.20.2; python_version > '3.6'
-grpcio==1.59.3; python_version > '3.6'
+grpcio==1.67.0; python_version > '3.6'
 googleapis-common-protos==1.53.0; python_version > '3.6'
 # Ubuntu 18.04 uses Python 3.6, which is not supported by recent versions of Protobuf and Black.
 protobuf==3.19.2; python_version <= '3.6'
