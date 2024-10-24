@@ -26,6 +26,7 @@ p4c_add_xfail_reason("dpdk"
   testdata/p4_16_samples/pna-dpdk-invalid-hdr-warnings5.p4
   testdata/p4_16_samples/pna-dpdk-invalid-hdr-warnings6.p4
   testdata/p4_16_samples/pna-dpdk-header-union-stack2.p4
+  testdata/p4_16_samples/dash/dash-pipeline-pna-dpdk.p4
   )
 
 p4c_add_xfail_reason("dpdk"

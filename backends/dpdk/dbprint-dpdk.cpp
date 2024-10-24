@@ -70,4 +70,8 @@ void IR::DpdkMovStatement::dbprint(std::ostream &out) const {
     out << "mov " << dst << " " << src << std::endl;
 }
 
+void IR::DpdkMovhStatement::dbprint(std::ostream &out) const {
+    out << "movh " << dst << " " << src << std::endl;
+}
+
 }  // namespace P4

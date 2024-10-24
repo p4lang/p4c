@@ -36,6 +36,7 @@ struct DpdkProgramStructure {
     ordered_map<cstring, const IR::P4Table *> learner_action_table;
     ordered_map<cstring, enum InternalTableType> table_type_map;
     ordered_map<cstring, const IR::P4Table *> direct_resource_map;
+    ordered_map<cstring, const IR::DpdkHeaderInstance *> header_instances;
 
     IR::IndexedVector<IR::DpdkDeclaration> variables;
 
@@ -69,6 +70,12 @@ struct DpdkProgramStructure {
 
     void push_variable(const IR::DpdkDeclaration *d) { variables.push_back(d); }
     IR::IndexedVector<IR::DpdkDeclaration> &get_globals() { return variables; }
+
+    void addHeaderInstances(const IR::DpdkHeaderInstance *d) {
+        if (header_instances.find(d->name->toString()) == header_instances.end()) {
+            header_instances.emplace(d->name->toString(), d);
+        }
+    }
 
     bool hasVisited(const IR::Type_StructLike *st) {
         if (auto h = st->to<IR::Type_Header>())
