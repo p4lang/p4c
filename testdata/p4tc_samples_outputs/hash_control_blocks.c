@@ -1,4 +1,4 @@
-#include "hash1_parser.h"
+#include "hash_parser.h"
 struct p4tc_filter_fields p4tc_filter_fields;
 
 struct internal_metadata {
@@ -29,17 +29,17 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
     hdr = &(hdrMd->cpumap_hdr);
     meta = &(hdrMd->cpumap_usermeta);
 {
-        u16 ingress_h_reg = 0;
+        u32 ingress_h_reg = 0;
         u8 hit;
         {
             ingress_h_reg = 0;
 
-            bpf_p4tc_ext_hash_base_crc16(&hdr->crc.f1, sizeof(hdr->crc.f1), 15, 32, ingress_h_reg);
-            bpf_p4tc_ext_hash_base_crc16(&hdr->crc.f2, sizeof(hdr->crc.f2), 15, 32, ingress_h_reg);
-            bpf_p4tc_ext_hash_base_crc16(&hdr->crc.f3, sizeof(hdr->crc.f3), 15, 32, ingress_h_reg);
-            bpf_p4tc_ext_hash_base_crc16(&hdr->crc.f4, sizeof(hdr->crc.f4), 15, 32, ingress_h_reg);
-                        hdr->crc.crc = /* h_0.get_hash(15, {hdr->crc.f1, hdr->crc.f2, hdr->crc.f3, hdr->crc.f4}, 32) */
-ingress_h_reg;
+            bpf_p4tc_ext_hash_crc32(&hdr->crc.f1, sizeof(hdr->crc.f1), ingress_h_reg);
+            bpf_p4tc_ext_hash_crc32(&hdr->crc.f2, sizeof(hdr->crc.f2), ingress_h_reg);
+            bpf_p4tc_ext_hash_crc32(&hdr->crc.f3, sizeof(hdr->crc.f3), ingress_h_reg);
+            bpf_p4tc_ext_hash_crc32(&hdr->crc.f4, sizeof(hdr->crc.f4), ingress_h_reg);
+                        hdr->crc.crc = /* h_0.get_hash({hdr->crc.f1, hdr->crc.f2, hdr->crc.f3, hdr->crc.f4}) */
+ingress_h_reg ^ 0xFFFFFFFF;
         }
     }
     {
@@ -56,7 +56,7 @@ ingress_h_reg;
             outHeaderLength += 112;
         }
 ;        if (hdr->crc.ebpf_valid) {
-            outHeaderLength += 88;
+            outHeaderLength += 104;
         }
 ;
         int outHeaderOffset = BYTES(outHeaderLength) - (hdr_start - (u8*)pkt);
@@ -112,7 +112,7 @@ ingress_h_reg;
 
         }
 ;        if (hdr->crc.ebpf_valid) {
-            if (ebpf_packetEnd < pkt + BYTES(ebpf_packetOffsetInBits + 88)) {
+            if (ebpf_packetEnd < pkt + BYTES(ebpf_packetOffsetInBits + 104)) {
                 return TC_ACT_SHOT;
             }
             
@@ -146,12 +146,16 @@ ingress_h_reg;
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
             ebpf_packetOffsetInBits += 32;
 
-            hdr->crc.crc = bpf_htons(hdr->crc.crc);
+            hdr->crc.crc = htonl(hdr->crc.crc);
             ebpf_byte = ((char*)(&hdr->crc.crc))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->crc.crc))[1];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 1, (ebpf_byte));
-            ebpf_packetOffsetInBits += 16;
+            ebpf_byte = ((char*)(&hdr->crc.crc))[2];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 2, (ebpf_byte));
+            ebpf_byte = ((char*)(&hdr->crc.crc))[3];
+            write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 3, (ebpf_byte));
+            ebpf_packetOffsetInBits += 32;
 
         }
 ;

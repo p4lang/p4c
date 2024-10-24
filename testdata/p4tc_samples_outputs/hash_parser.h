@@ -32,17 +32,28 @@ struct ipv4_t {
     u32 dstAddr; /* bit<32> */
     u8 ebpf_valid;
 };
+struct crc_t {
+    u8 f1; /* bit<4> */
+    u8 f2; /* bit<4> */
+    u32 f3; /* bit<32> */
+    u32 f4; /* bit<32> */
+    u32 crc; /* bit<32> */
+    u8 ebpf_valid;
+};
 struct my_ingress_headers_t {
     struct ethernet_t ethernet; /* ethernet_t */
     struct ipv4_t ipv4; /* ipv4_t */
+    struct crc_t crc; /* crc_t */
 };
 struct my_ingress_metadata_t {
 };
 struct empty_metadata_t {
 };
-struct reg_val_t {
-    u8 protocol; /* bit<8> */
-    u8 aux; /* bit<8> */
+struct tuple_0 {
+    u8 f0; /* bit<4> */
+    u8 f1; /* bit<4> */
+    u32 f2; /* bit<32> */
+    u32 f3; /* bit<32> */
 };
 
 struct hdr_md {
