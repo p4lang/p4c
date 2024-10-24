@@ -888,6 +888,7 @@ var hierarchy =
             [ "P4::EBPF::EBPFHashPSA", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_hash_p_s_a.html", null ],
             [ "P4::EBPF::EBPFInternetChecksumPSA", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_internet_checksum_p_s_a.html", null ],
             [ "P4::TC::EBPFChecksumPNA", "class_p4_1_1_t_c_1_1_e_b_p_f_checksum_p_n_a.html", [
+              [ "P4::TC::EBPFHashPNA", "class_p4_1_1_t_c_1_1_e_b_p_f_hash_p_n_a.html", null ],
               [ "P4::TC::EBPFInternetChecksumPNA", "class_p4_1_1_t_c_1_1_e_b_p_f_internet_checksum_p_n_a.html", null ]
             ] ]
           ] ],
@@ -919,10 +920,7 @@ var hierarchy =
             [ "P4::EBPF::CRCChecksumAlgorithm", "class_p4_1_1_e_b_p_f_1_1_c_r_c_checksum_algorithm.html", [
               [ "P4::EBPF::CRC16ChecksumAlgorithm", "class_p4_1_1_e_b_p_f_1_1_c_r_c16_checksum_algorithm.html", null ],
               [ "P4::EBPF::CRC32ChecksumAlgorithm", "class_p4_1_1_e_b_p_f_1_1_c_r_c32_checksum_algorithm.html", null ],
-              [ "P4::TC::CRCChecksumAlgorithmPNA", "class_p4_1_1_t_c_1_1_c_r_c_checksum_algorithm_p_n_a.html", [
-                [ "P4::TC::CRC16ChecksumAlgorithmPNA", "class_p4_1_1_t_c_1_1_c_r_c16_checksum_algorithm_p_n_a.html", null ],
-                [ "P4::TC::CRC32ChecksumAlgorithmPNA", "class_p4_1_1_t_c_1_1_c_r_c32_checksum_algorithm_p_n_a.html", null ]
-              ] ]
+              [ "P4::TC::CRCChecksumAlgorithmPNA", "class_p4_1_1_t_c_1_1_c_r_c_checksum_algorithm_p_n_a.html", null ]
             ] ],
             [ "P4::EBPF::InternetChecksumAlgorithm", "class_p4_1_1_e_b_p_f_1_1_internet_checksum_algorithm.html", null ],
             [ "P4::TC::InternetChecksumAlgorithmPNA", "class_p4_1_1_t_c_1_1_internet_checksum_algorithm_p_n_a.html", null ]
