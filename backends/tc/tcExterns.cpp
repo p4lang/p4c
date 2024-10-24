@@ -481,7 +481,11 @@ void EBPFHashPNA::calculateHash(EBPF::CodeBuilder *builder, const IR::MethodCall
 }
 
 void CRCChecksumAlgorithmPNA::emitGet(EBPF::CodeBuilder *builder) {
-    builder->appendFormat("%s", registerVar.c_str());
+    if (crcWidth == 16) {
+        builder->appendFormat("%s", registerVar.c_str());
+    } else {
+        builder->appendFormat("%s ^ 0xFFFFFFFF", registerVar.c_str());
+    }
 }
 
 void CRCChecksumAlgorithmPNA::emitAddData(EBPF::CodeBuilder *builder, int dataPos,

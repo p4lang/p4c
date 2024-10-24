@@ -192,12 +192,14 @@ class CRCChecksumAlgorithmPNA : public EBPF::CRCChecksumAlgorithm {
  public:
     CRCChecksumAlgorithmPNA(const EBPF::EBPFProgram *program, cstring name, int width)
         : EBPF::CRCChecksumAlgorithm(program, name, width) {
+        BUG_CHECK(width == 16 || width == 32, "Must be 16 bits width or 32 bits width.");
         initialValue = "0"_cs;
     }
     void emitGet(EBPF::CodeBuilder *builder) override;
     void emitAddData(EBPF::CodeBuilder *builder, const ArgumentsList &arguments,
                      const IR::MethodCallExpression *expr);
-    void emitAddData(EBPF::CodeBuilder *builder, int dataPos, const IR::MethodCallExpression *expr);
+    void emitAddData(EBPF::CodeBuilder *builder, int dataPos,
+                     const IR::MethodCallExpression *expr) override;
 };
 
 class EBPFDigestPNA : public EBPF::EBPFDigestPSA {

@@ -39,7 +39,7 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
             bpf_p4tc_ext_hash_crc32(&hdr->crc.f3, sizeof(hdr->crc.f3), ingress_h_reg);
             bpf_p4tc_ext_hash_crc32(&hdr->crc.f4, sizeof(hdr->crc.f4), ingress_h_reg);
                         hdr->crc.crc = /* h_0.get_hash({hdr->crc.f1, hdr->crc.f2, hdr->crc.f3, hdr->crc.f4}) */
-ingress_h_reg;
+ingress_h_reg ^ 0xFFFFFFFF;
         }
     }
     {

@@ -293,7 +293,6 @@ class EBPFControlPNA : public EBPF::EBPFControlPSA {
     }
     EBPFHashPNA *getHash(cstring name) const {
         auto result = ::P4::get(pna_hashes, name);
-        BUG_CHECK(result != nullptr, "No hash named %1%", name);
         return result;
     }
     void emitExternDefinition(EBPF::CodeBuilder *builder) {
