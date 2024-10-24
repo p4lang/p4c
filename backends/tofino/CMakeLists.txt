@@ -4,7 +4,7 @@ MESSAGE("-- Adding p4c-barefoot")
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/spdlog.cmake)
 include(${P4C_SOURCE_DIR}/cmake/Z3.cmake)
 
-p4tools_obtain_z3()
+obtain_z3()
 
 set (BFN_P4C_SOURCE_DIR ${PROJECT_SOURCE_DIR}/backends/tofino)
 
