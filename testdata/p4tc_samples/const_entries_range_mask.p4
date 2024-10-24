@@ -23,7 +23,8 @@ parser MainParserImpl(packet_in b, out Header_t h, inout Meta_t m, in pna_main_p
 
 control MainControlImpl(inout Header_t h, inout Meta_t m,
                         in    pna_main_input_metadata_t istd,
-                        inout pna_main_output_metadata_t ostd) {
+                        inout pna_main_output_metadata_t ostd,
+                        tc_skb_metadata sm) {
 
     action a() { h.h.e = 0; }
     action a_with_control_params(bit<16> x) { h.h.t = x; }
@@ -58,7 +59,8 @@ control MainControlImpl(inout Header_t h, inout Meta_t m,
 /*********************  D E P A R S E R  ************************/
 
 control MainDeparserImpl(
-    packet_out b, inout Header_t h, in Meta_t m, in pna_main_output_metadata_t ostd)
+    packet_out b, inout Header_t h, in Meta_t m, in pna_main_output_metadata_t ostd,
+    tc_skb_metadata sm)
 {
     apply {}
 }

@@ -184,11 +184,27 @@ class EBPFTablePNA : public EBPF::EBPFTablePSA {
     DECLARE_TYPEINFO(EBPFTablePNA, EBPF::EBPFTablePSA);
 };
 
+class IngressDeparserPNA;
+
+class DeparserBodyTranslatorPNA : public EBPF::DeparserBodyTranslatorPSA {
+ public:
+    explicit DeparserBodyTranslatorPNA(const IngressDeparserPNA *deparser);
+
+    void processMethod(const P4::ExternMethod *method) override;
+};
+
 class IngressDeparserPNA : public EBPF::EBPFDeparserPSA {
  public:
+    const IR::Parameter *skb_metadata;
+    mutable bool touched_skb_metadata;
+
     IngressDeparserPNA(const EBPF::EBPFProgram *program, const IR::ControlBlock *control,
                        const IR::Parameter *parserHeaders, const IR::Parameter *istd)
-        : EBPF::EBPFDeparserPSA(program, control, parserHeaders, istd) {}
+        : EBPF::EBPFDeparserPSA(program, control, parserHeaders, istd),
+          skb_metadata(nullptr),
+          touched_skb_metadata(false) {
+        codeGen = new DeparserBodyTranslatorPNA(this);
+    }
 
     bool addExternDeclaration = false;
     bool build() override;
@@ -280,9 +296,14 @@ class EBPFControlPNA : public EBPF::EBPFControlPSA {
     bool addExternDeclaration = false;
     std::map<cstring, EBPFRegisterPNA *> pna_registers;
 
+    const IR::Parameter *skb_metadata;
+    mutable bool touched_skb_metadata;
+
     EBPFControlPNA(const EBPF::EBPFProgram *program, const IR::ControlBlock *control,
                    const IR::Parameter *parserHeaders)
-        : EBPF::EBPFControlPSA(program, control, parserHeaders) {}
+        : EBPF::EBPFControlPSA(program, control, parserHeaders),
+          skb_metadata(nullptr),
+          touched_skb_metadata(false) {}
 
     EBPFRegisterPNA *getRegister(cstring name) const {
         auto result = ::P4::get(pna_registers, name);

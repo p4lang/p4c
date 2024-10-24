@@ -444,6 +444,27 @@ extern Counter<W, S> {
 }
 // END:Counter_extern
 
+// BEGIN: tc_skb_metadata extern
+extern tc_skb_metadata {
+  void get();
+  void set();
+  bit<64> get_tstamp();
+  bit<32> get_mark();
+  bit<16> get_tc_classid();
+  bit<16> get_tc_index();
+  bit<16> get_queue_mapping();
+  bit<16> get_protocol();
+  bit<1> get_tc_at_ingress();
+  bit<1> get_from_ingress();
+  void set_tstamp(in bit<64> ts);
+  void set_mark(in bit<32> m);
+  void set_tc_classid(in bit<16> cid);
+  void set_tc_index(in bit<16> x);
+  void set_queue_mapping(in bit<16> m);
+  void set_protocol(in bit<16> p);
+}
+// END: tc_skb_metadata extern
+
 struct tc_ControlPath_Counter<W, S> {
   @tc_key S index;
   @tc_data W pkts;
@@ -899,13 +920,15 @@ control MainControlT<MH, MM>(
     inout MH main_hdr,
     inout MM main_user_meta,
     in    pna_main_input_metadata_t  istd,
-    inout pna_main_output_metadata_t ostd);
+    inout pna_main_output_metadata_t ostd,
+          tc_skb_metadata skb_meta);
 
 control MainDeparserT<MH, MM>(
     packet_out pkt,
     inout    MH main_hdr,
     in    MM main_user_meta,
-    in    pna_main_output_metadata_t ostd);
+    in    pna_main_output_metadata_t ostd,
+    tc_skb_metadata skb_meta);
 
 package PNA_NIC<MH, MM>(
     MainParserT<MH, MM> main_parser,

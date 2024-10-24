@@ -71,7 +71,8 @@ control MainControlImpl(
     inout headers_t hdr,                 // from main parser
     inout main_metadata_t user_meta,     // from main parser, to "next block"
     in    pna_main_input_metadata_t istd,
-    inout pna_main_output_metadata_t ostd)
+    inout pna_main_output_metadata_t ostd,
+    tc_skb_metadata sm)
 {
     action send_nh( @tc_type("macaddr") bit<48> dmac, bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
@@ -115,7 +116,8 @@ control MainDeparserImpl(
     packet_out pkt,
     inout headers_t hdr,                    // from main control
     in main_metadata_t user_meta,        // from main control
-    in pna_main_output_metadata_t ostd)
+    in pna_main_output_metadata_t ostd,
+    tc_skb_metadata sm)
 {
     apply {
         pkt.emit(hdr.ethernet);

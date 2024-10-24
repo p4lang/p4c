@@ -87,8 +87,8 @@ control Main(
     inout headers_t  hdr,
     inout metadata_t meta,
     in pna_main_input_metadata_t  istd,
-    inout pna_main_output_metadata_t ostd
-)
+    inout pna_main_output_metadata_t ostd,
+    tc_skb_metadata sm)
 {
    action set_ipip(@tc_type("ipv4") bit<32> src, @tc_type("ipv4") bit<32> dst, @tc_type("dev") PortId_t port) {
       meta.src = src;
@@ -134,7 +134,8 @@ control Deparser(
     packet_out pkt,
     inout    headers_t hdr,
     in    metadata_t meta,
-    in    pna_main_output_metadata_t ostd)
+    in    pna_main_output_metadata_t ostd,
+    tc_skb_metadata sm)
 {
 
     apply {

@@ -18,6 +18,12 @@ and limitations under the License.
 
 namespace P4::TC {
 
+DeparserBodyTranslatorPNA::DeparserBodyTranslatorPNA(const IngressDeparserPNA *deparser)
+    : CodeGenInspector(deparser->program->refMap, deparser->program->typeMap),
+      DeparserBodyTranslatorPSA(deparser) {
+    setName("DeparserBodyTranslatorPNA");
+}
+
 // =====================PNAEbpfGenerator=============================
 void PNAEbpfGenerator::emitPNAIncludes(EBPF::CodeBuilder *builder) const {
     builder->appendLine("#include <stdbool.h>");
@@ -49,10 +55,14 @@ void PNAEbpfGenerator::emitCommonPreamble(EBPF::CodeBuilder *builder) const {
 void PNAEbpfGenerator::emitInternalStructures(EBPF::CodeBuilder *builder) const {
     builder->appendLine("struct p4tc_filter_fields p4tc_filter_fields;");
     builder->newline();
-    builder->appendLine(
+    builder->append(
         "struct internal_metadata {\n"
         "    __u16 pkt_ether_type;\n"
-        "} __attribute__((aligned(4)));");
+        "} __attribute__((aligned(4)));\n\n"
+        "struct skb_aggregate {\n"
+        "    struct p4tc_skb_meta_get get;\n"
+        "    struct p4tc_skb_meta_set set;\n"
+        "};\n");
     builder->newline();
 }
 
@@ -260,16 +270,19 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
     builder->spc();
     // FIXME: use Target to generate metadata type
     cstring func_name = (name == "tc-parse") ? "run_parser"_cs : "process"_cs;
-    builder->appendFormat(
-        "int %s(%s *%s, %s %s *%s, "
-        "struct pna_global_metadata *%s",
-        func_name, builder->target->packetDescriptorType(), model.CPacketName.str(),
-        parser->headerType->as<EBPF::EBPFStructType>().kind,
-        parser->headerType->as<EBPF::EBPFStructType>().name, parser->headers->name.name,
-        compilerGlobalMetadata);
+    builder->appendFormat("int %s(\n", func_name);
+    builder->appendFormat("\t%s *%s,\n", builder->target->packetDescriptorType(),
+                          model.CPacketName.str());
+    builder->appendFormat("\t%s %s *%s,\n", parser->headerType->as<EBPF::EBPFStructType>().kind,
+                          parser->headerType->as<EBPF::EBPFStructType>().name,
+                          parser->headers->name.name);
+    if (func_name == "run_parser") {
+        builder->appendFormat("\tstruct pna_global_metadata *%s )\n", compilerGlobalMetadata);
+    } else {
+        builder->appendFormat("\tstruct pna_global_metadata *%s,\n", compilerGlobalMetadata);
+        builder->append("\tstruct skb_aggregate *sa )\n");
+    }
 
-    builder->append(")");
-    builder->newline();
     builder->blockStart();
 
     emitCPUMAPHeadersInitializers(builder);
@@ -366,18 +379,36 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
 
         builder->blockStart();
 
+        builder->emitIndent();
+
+        if (((EBPFControlPNA *)control)->touched_skb_metadata ||
+            ((IngressDeparserPNA *)deparser)->touched_skb_metadata) {
+            builder->append("struct skb_aggregate skbstuff = {\n");
+            builder->newline();
+            builder->increaseIndent();
+            builder->emitIndent();
+            builder->appendFormat(
+                ".get = { .bitmask = P4TC_SKB_META_GET_AT_INGRESS_BIT | "
+                "P4TC_SKB_META_GET_FROM_INGRESS_BIT },");
+            builder->newline();
+            // XXX { } initializer is a C99 syntax error but accepted by EBPF
+            builder->emitIndent();
+            builder->appendFormat(".set = { },");
+            builder->newline();
+            builder->decreaseIndent();
+            builder->append("};\n");
+        } else {
+            builder->append("struct skb_aggregate skbstuff;\n");
+        }
+
         emitGlobalMetadataInitializer(builder);
 
         emitHeaderInstances(builder);
+
         builder->newline();
 
         builder->emitIndent();
-        builder->appendFormat("int ret = %d;", actUnspecCode);
-        builder->newline();
-        builder->emitIndent();
-        builder->appendFormat("ret = %s(skb, ", func_name);
-
-        builder->appendFormat("(%s %s *) %s, %s);",
+        builder->appendFormat("int ret = %s(skb, (%s %s *) %s, %s, &skbstuff);", func_name,
                               parser->headerType->as<EBPF::EBPFStructType>().kind,
                               parser->headerType->as<EBPF::EBPFStructType>().name,
                               parser->headers->name.name, compilerGlobalMetadata);
@@ -596,9 +627,8 @@ void EBPFPnaParser::emitDeclaration(EBPF::CodeBuilder *builder, const IR::Declar
             instance->emitVariables(builder);
             return;
         }
-    }
-
-    EBPFParser::emitDeclaration(builder, decl);
+    } else
+        EBPFParser::emitDeclaration(builder, decl);
 }
 
 //  This code is similar to compileExtractField function in PsaStateTranslationVisitor.
@@ -628,7 +658,7 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
                 std::string sInt = annoVal->text.substr(2).c_str();
                 unsigned int width = std::stoi(sInt);
                 if (widthToExtract != width) {
-                    ::P4::error("Width of the field doesnt match the annotation width. '%1%'",
+                    ::P4::error("Width of the field doesn't match the annotation width. '%1%'",
                                 field);
                 }
                 noEndiannessConversion = true;
@@ -1169,8 +1199,8 @@ void EBPFTablePNA::initDirectMeters() {
 bool IngressDeparserPNA::build() {
     auto pl = controlBlock->container->type->applyParams;
 
-    if (pl->size() != 4) {
-        ::P4::error(ErrorType::ERR_EXPECTED, "Expected deparser to have exactly 4 parameters");
+    if (pl->size() != 5) {
+        ::P4::error(ErrorType::ERR_EXPECTED, "Expected deparser to have exactly 5 parameters");
         return false;
     }
 
@@ -1215,9 +1245,6 @@ void IngressDeparserPNA::emit(EBPF::CodeBuilder *builder) {
         emitDeclaration(builder, a);
     }
 
-    emitDeparserExternCalls(builder);
-    builder->newline();
-
     emitPreDeparser(builder);
 
     builder->emitIndent();
@@ -1231,6 +1258,10 @@ void IngressDeparserPNA::emit(EBPF::CodeBuilder *builder) {
     controlBlock->container->body->apply(*prepareBufferTranslator);
 
     emitBufferAdjusts(builder);
+
+    emitDeparserExternCalls(builder);
+    builder->newline();
+
     builder->emitIndent();
     builder->appendFormat("%s = %s;", program->packetStartVar,
                           builder->target->dataOffset(program->model.CPacketName.toString()));
@@ -1267,6 +1298,70 @@ void IngressDeparserPNA::emitDeclaration(EBPF::CodeBuilder *builder, const IR::D
     }
 
     EBPFDeparser::emitDeclaration(builder, decl);
+}
+
+static void gen_skb_call(EBPF::CodeBuilder *b, const P4::ExternMethod *m,
+                         EBPF::CodeGenInspector *xlat) {
+    b->appendFormat("/* SKB metadata: call %s */", m->method->name.name);
+    if (m->method->name.name == "get") {
+        if (!m->expr->arguments->empty()) {
+            ::P4::error("%1%: takes no arguments", m->method->name.name);
+        }
+        b->appendFormat("bpf_p4tc_skb_meta_get(skb,&sa->get,sizeof(sa->get))");
+    } else if (m->method->name.name == "set") {
+        if (!m->expr->arguments->empty()) {
+            ::P4::error("%1%: takes no arguments", m->method->name.name);
+        }
+        b->appendFormat("bpf_p4tc_skb_meta_set(skb,&sa->set,sizeof(sa->set))");
+    }
+#define GETSET(n)                                                                  \
+    else if (m->method->name.name == ("get_" #n)) {                                \
+        if (!m->expr->arguments->empty()) {                                        \
+            P4::error("%1%: takes no arguments", m->method->name.name);            \
+        }                                                                          \
+        b->append("bpf_p4tc_skb_get_" #n "(skb,&sa->get)");                        \
+    }                                                                              \
+    else if (m->method->name.name == ("set_" #n)) {                                \
+        if (m->expr->arguments->size() != 1) {                                     \
+            P4::error("%1%: requires exactly one argument", m->method->name.name); \
+        }                                                                          \
+        b->append("bpf_p4tc_skb_set_" #n "(skb,&sa->set,");                        \
+        xlat->visit(m->expr->arguments->at(0)->expression);                        \
+        b->append(")");                                                            \
+    }
+    GETSET(tstamp)
+    GETSET(mark)
+    GETSET(tc_classid)
+    GETSET(tc_index)
+    GETSET(queue_mapping)
+    GETSET(protocol)
+    GETSET(tc_at_ingress)
+    GETSET(from_ingress)
+#undef GETSET
+    else {
+        P4::error("Unsupported SKB metadata method call %1%", m->method->name.name);
+    }
+}
+
+static void gen_skb_call_deparser(EBPF::CodeBuilder *b, const P4::ExternMethod *m,
+                                  const IngressDeparserPNA *dprs, DeparserBodyTranslatorPNA *xlat) {
+    EBPF::CodeGenInspector *inspector = xlat;
+    dprs->touched_skb_metadata = true;
+
+    gen_skb_call(b, m, inspector);
+}
+
+void DeparserBodyTranslatorPNA::processMethod(const P4::ExternMethod *method) {
+    auto dprs = deparser->to<IngressDeparserPNA>();
+    CHECK_NULL(dprs);
+    auto externName = method->originalExternType->name.name;
+
+    if (externName == "tc_skb_metadata") {
+        gen_skb_call_deparser(builder, method, dprs, this);
+        return;
+    }
+
+    EBPF::DeparserBodyTranslatorPSA::processMethod(method);
 }
 
 // =====================ConvertToEbpfPNA=============================
@@ -1401,7 +1496,7 @@ bool ConvertToEBPFControlPNA::preorder(const IR::ControlBlock *ctrl) {
     program->as<EBPF::EBPFPipeline>().control = control;
     control->hitVariable = refmap->newName("hit");
     auto pl = ctrl->container->type->applyParams;
-    unsigned numOfParams = 4;
+    unsigned numOfParams = 5;
     if (pl->size() != numOfParams) {
         ::P4::error(ErrorType::ERR_EXPECTED, "Expected control to have exactly %1% parameters",
                     numOfParams);
@@ -1415,6 +1510,9 @@ bool ConvertToEBPFControlPNA::preorder(const IR::ControlBlock *ctrl) {
     control->inputStandardMetadata = *it;
     ++it;
     control->outputStandardMetadata = *it;
+    ++it;
+    control->skb_metadata = *it;
+    control->touched_skb_metadata = false;
 
     auto codegen = new ControlBodyTranslatorPNA(control, tcIR);
     codegen->substitute(control->headers, parserHeaders);
@@ -1981,6 +2079,14 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 }
 
+static void gen_skb_call_ctrl(const EBPFControlPNA *c, EBPF::CodeBuilder *b,
+                              const P4::ExternMethod *m, ControlBodyTranslatorPNA *xlat) {
+    EBPF::CodeGenInspector *inspector = xlat;
+
+    c->touched_skb_metadata = true;
+    gen_skb_call(b, m, inspector);
+}
+
 void ControlBodyTranslatorPNA::processMethod(const P4::ExternMethod *method) {
     auto decl = method->object;
     auto declType = method->originalExternType;
@@ -2012,9 +2118,12 @@ void ControlBodyTranslatorPNA::processMethod(const P4::ExternMethod *method) {
         auto hash = control->to<EBPF::EBPFControlPSA>()->getHash(name);
         hash->processMethod(builder, method->method->name.name, method->expr, this);
         return;
+    } else if (declType->name.name == "tc_skb_metadata") {
+        gen_skb_call_ctrl(pnaControl, builder, method, this);
+        return;
     } else {
-        ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: Unexpected method call",
-                    method->expr);
+        ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: [C] [%2%] Unexpected method call",
+                    method->expr, declType->name.name);
     }
 }
 
@@ -2124,9 +2233,9 @@ cstring ActionTranslationVisitorPNA::getParamName(const IR::PathExpression *expr
 void ActionTranslationVisitorPNA::processMethod(const P4::ExternMethod *method) {
     auto declType = method->originalExternType;
     auto decl = method->object;
-    BUG_CHECK(decl->is<IR::Declaration_Instance>(), "Extern has not been declared: %1%", decl);
-    auto di = decl->to<IR::Declaration_Instance>();
-    auto instanceName = EBPF::EBPFObject::externalName(di);
+    BUG_CHECK(decl->is<IR::Declaration>(), "Extern has not been declared: %1% (is a %2%)", decl,
+              decl->node_type_name());
+    auto instanceName = EBPF::EBPFObject::externalName(decl->to<IR::Declaration>());
     cstring name = EBPF::EBPFObject::externalName(decl);
 
     if (declType->name.name == "DirectCounter") {

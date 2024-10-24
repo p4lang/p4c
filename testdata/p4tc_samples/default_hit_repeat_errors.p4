@@ -105,7 +105,8 @@ control MainControlImpl(
     inout headers_t hdr,                 // from main parser
     inout metadata_t meta,               // from main parser, to "next block"
     in    pna_main_input_metadata_t istd,
-    inout pna_main_output_metadata_t ostd)
+    inout pna_main_output_metadata_t ostd,
+    tc_skb_metadata sm)
 {
     action drop() {
         drop_packet();
@@ -159,7 +160,8 @@ control MainDeparserImpl(
     packet_out pkt,
     inout headers_t hdr,                    // from main control
     in metadata_t meta,                  // from main control
-    in pna_main_output_metadata_t ostd)
+    in pna_main_output_metadata_t ostd,
+    tc_skb_metadata sm)
 {
     apply {
         pkt.emit(hdr.eth);
