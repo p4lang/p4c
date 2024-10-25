@@ -43,9 +43,24 @@ const IR::Node *TagGlobalActions::preorder(IR::P4Action *action) {
     if (findContext<IR::P4Control>() == nullptr) {
         auto annos = action->annotations;
         if (annos == nullptr) annos = IR::Annotations::empty;
-        cstring name = "."_cs + action->name;
-        annos = annos->addAnnotationIfNew(IR::Annotation::nameAnnotation,
-                                          new IR::StringLiteral(name), false);
+        auto nameAnno = annos->getSingle(IR::Annotation::nameAnnotation);
+        if (nameAnno) {
+            // If the value of the existing name annotation does not
+            // begin with ".", prepend "." so that the name remains
+            // global if control plane APIs are generated later.
+            const auto *e0 = nameAnno->expr.at(0);
+            auto nameString = e0->to<IR::StringLiteral>()->value;
+            if (!nameString.startsWith(".")) {
+                nameString = "."_cs + nameString;
+                auto newLit = new IR::StringLiteral(e0->srcInfo, nameString);
+                annos = annos->addOrReplace(IR::Annotation::nameAnnotation, newLit);
+            }
+        } else {
+            // Add new name annotation beginning with "."
+            cstring name = "."_cs + action->name;
+            annos = annos->addAnnotationIfNew(IR::Annotation::nameAnnotation,
+                                              new IR::StringLiteral(name), false);
+        }
         action->annotations = annos;
     }
     prune();
