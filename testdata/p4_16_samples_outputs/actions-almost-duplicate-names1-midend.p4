@@ -32,6 +32,8 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     @name("ingressImpl.tmp2") bit<8> tmp2_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
+    }
     @name(".foo1") action foo1_0() {
     }
     @name(".foo2") action foo2_0() {
@@ -42,21 +44,21 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         tmp1_0 = x >> 1;
         tmp2_0 = y;
     }
-    @name("ingressImpl.foo2") action a2(@name("x") bit<8> x_5, @name("y") bit<8> y_5) {
-        tmp1_0 = x_5 >> 2;
-        tmp2_0 = y_5;
-    }
-    @name(".bar") action a3(@name("x") bit<8> x_6, @name("y") bit<8> y_6) {
-        tmp1_0 = x_6 >> 3;
+    @name("ingressImpl.foo2") action a2(@name("x") bit<8> x_6, @name("y") bit<8> y_6) {
+        tmp1_0 = x_6 >> 2;
         tmp2_0 = y_6;
     }
-    @name("ingressImpl.bar") action a4(@name("x") bit<8> x_7, @name("y") bit<8> y_7) {
-        tmp1_0 = x_7 >> 4;
+    @name(".bar") action a3(@name("x") bit<8> x_7, @name("y") bit<8> y_7) {
+        tmp1_0 = x_7 >> 3;
         tmp2_0 = y_7;
     }
-    @name("ingressImpl.baz") action a5(@name("x") bit<8> x_8, @name("y") bit<8> y_8) {
-        tmp1_0 = x_8 >> 5;
+    @name("ingressImpl.bar") action a4(@name("x") bit<8> x_8, @name("y") bit<8> y_8) {
+        tmp1_0 = x_8 >> 4;
         tmp2_0 = y_8;
+    }
+    @name("ingressImpl.baz") action a5(@name("x") bit<8> x_9, @name("y") bit<8> y_9) {
+        tmp1_0 = x_9 >> 5;
+        tmp2_0 = y_9;
     }
     @name("ingressImpl.t1") table t1_0 {
         actions = {
@@ -76,29 +78,45 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         default_action = NoAction_1();
         size = 512;
     }
-    @hidden action actionsalmostduplicatenames1l111() {
+    @name("ingressImpl.c1.bar") action c1_bar_0(@name("x") bit<8> x_10, @name("y") bit<8> y_10) {
+        tmp1_0 = x_10;
+        tmp2_0 = y_10 >> 3;
+    }
+    @name("ingressImpl.c1.t2") table c1_t2 {
+        actions = {
+            c1_bar_0();
+            @defaultonly NoAction_2();
+        }
+        key = {
+            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr");
+        }
+        size = 32;
+        default_action = NoAction_2();
+    }
+    @hidden action actionsalmostduplicatenames1l133() {
         tmp1_0 = hdr.ethernet.srcAddr[7:0];
         tmp2_0 = hdr.ethernet.dstAddr[7:0];
     }
-    @hidden action actionsalmostduplicatenames1l117() {
+    @hidden action actionsalmostduplicatenames1l140() {
         hdr.ethernet.etherType = (bit<16>)(tmp1_0 - tmp2_0);
     }
-    @hidden table tbl_actionsalmostduplicatenames1l111 {
+    @hidden table tbl_actionsalmostduplicatenames1l133 {
         actions = {
-            actionsalmostduplicatenames1l111();
+            actionsalmostduplicatenames1l133();
         }
-        const default_action = actionsalmostduplicatenames1l111();
+        const default_action = actionsalmostduplicatenames1l133();
     }
-    @hidden table tbl_actionsalmostduplicatenames1l117 {
+    @hidden table tbl_actionsalmostduplicatenames1l140 {
         actions = {
-            actionsalmostduplicatenames1l117();
+            actionsalmostduplicatenames1l140();
         }
-        const default_action = actionsalmostduplicatenames1l117();
+        const default_action = actionsalmostduplicatenames1l140();
     }
     apply {
-        tbl_actionsalmostduplicatenames1l111.apply();
+        tbl_actionsalmostduplicatenames1l133.apply();
+        c1_t2.apply();
         t1_0.apply();
-        tbl_actionsalmostduplicatenames1l117.apply();
+        tbl_actionsalmostduplicatenames1l140.apply();
     }
 }
 

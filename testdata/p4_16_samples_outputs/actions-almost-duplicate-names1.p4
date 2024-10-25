@@ -34,6 +34,25 @@ action foo1() {
 }
 @name(".baz") action foo3() {
 }
+control c1(inout headers_t hdr, inout bit<8> tmp1, inout bit<8> tmp2) {
+    @name("bar") action suba1(bit<8> x, bit<8> y) {
+        tmp1 = x;
+        tmp2 = y >> 3;
+    }
+    table t2 {
+        actions = {
+            suba1;
+        }
+        key = {
+            hdr.ethernet.srcAddr: exact;
+        }
+        size = 32;
+    }
+    apply {
+        t2.apply();
+    }
+}
+
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     bit<8> tmp1;
     bit<8> tmp2;
@@ -78,6 +97,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     apply {
         tmp1 = hdr.ethernet.srcAddr[7:0];
         tmp2 = hdr.ethernet.dstAddr[7:0];
+        c1.apply(hdr, tmp1, tmp2);
         t1.apply();
         hdr.ethernet.etherType = (bit<16>)(tmp1 - tmp2);
     }

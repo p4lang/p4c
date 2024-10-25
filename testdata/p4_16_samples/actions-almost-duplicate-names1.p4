@@ -62,6 +62,28 @@ action foo2() {
 action foo3() {
 }
 
+control c1(
+    inout headers_t hdr,
+    inout bit<8> tmp1,
+    inout bit<8> tmp2)
+{
+    // This is not a name conflict with a4 in control ingressImpl,
+    // because it has a hierarchical name "ingressImpl.bar", but suba1
+    // will have hierarchical name "ingressImpl.c1.bar".
+    @name("bar") action suba1 (bit<8> x, bit<8> y) { tmp1 = x; tmp2 = y >> 3; }
+
+    table t2 {
+        actions = {
+            suba1;
+        }
+        key = { hdr.ethernet.srcAddr: exact; }
+        size = 32;
+    }
+    apply {
+        t2.apply();
+    }
+}
+
 control ingressImpl(
     inout headers_t hdr,
     inout metadata_t meta,
@@ -110,6 +132,7 @@ control ingressImpl(
     apply {
         tmp1 = hdr.ethernet.srcAddr[7:0];
         tmp2 = hdr.ethernet.dstAddr[7:0];
+        c1.apply(hdr, tmp1, tmp2);
         t1.apply();
         // This is here simply to ensure that the compiler cannot
         // optimize away the effects of t1 and t2, which can only

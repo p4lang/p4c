@@ -48,6 +48,31 @@ tables {
   }
   size: 512
 }
+tables {
+  preamble {
+    id: 43840731
+    name: "ingressImpl.c1.t2"
+    alias: "t2"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.srcAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 25482417
+  }
+  action_refs {
+    id: 21257015
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 32
+}
 actions {
   preamble {
     id: 21257015
@@ -150,6 +175,23 @@ actions {
     id: 24058105
     name: "ingressImpl.baz"
     alias: "ingressImpl.baz"
+  }
+  params {
+    id: 1
+    name: "x"
+    bitwidth: 8
+  }
+  params {
+    id: 2
+    name: "y"
+    bitwidth: 8
+  }
+}
+actions {
+  preamble {
+    id: 25482417
+    name: "ingressImpl.c1.bar"
+    alias: "c1.bar"
   }
   params {
     id: 1
