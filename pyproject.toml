@@ -23,8 +23,27 @@ no_implicit_optional = true
 warn_return_any = true
 warn_unused_ignores = true
 
+[tool.ruff]
+# Same as Black.
+line-length = 100
+indent-width = 4
+
+[tool.ruff.lint]
+# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
+# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
+# McCabe complexity (`C901`) by default.
+select = ["E4", "E7", "E9", "F"]
+ignore = []
+
+# Allow fix for all enabled rules (when `--fix`) is provided.
+fixable = ["ALL"]
+unfixable = []
+
+# Allow unused variables when underscore-prefixed.
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
 [tool.pylint.main]
-init-hook="from pylint.config import find_default_config_files; import os, sys; sys.path.append(os.path.dirname(next(find_default_config_files())))"
+init-hook="from pylint.config import find_default_config_files; import os, sys, pathlib; sys.path.append(next(find_default_config_files()).parent);sys.path.append(f'{pathlib.Path().home()}.local/lib/python{sys.version_info[0]}.{sys.version_info[1]}/site-packages/');"
 [tool.pylint.messages_control]
 max-line-length = 100
 disable = [
