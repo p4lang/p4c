@@ -1,0 +1,579 @@
+/**
+ * Copyright (C) 2024 Intel Corporation
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License.  You may obtain a copy
+ * of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed
+ * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations under the License.
+ * 
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+
+/* -*-C++-*- */
+
+#emit
+#include "lib/ordered_set.h"
+#include "bf-p4c/common/debug_info.h"
+#include "bf-p4c/ir/bitrange.h"
+#include "bf-p4c/ir/ir_enums.h"
+#include "bf-p4c/parde/clot/clot.h"
+#include "bf-p4c/parde/match_register.h"
+#include "bf-p4c/phv/phv.h"
+
+namespace BFN {
+struct FieldPacking;
+}  // namespace BFN
+#end
+
+namespace BFN {
+
+/// A value that can be read from in the parser on the hardware.
+abstract LoweredParserRVal { }
+
+/// An r-value that represents a read from a range of input buffer bytes (rather
+/// than bits, as in the high-level parser IR) in the input buffer. The
+/// coordinate system used will depend on the specific type of
+/// `LoweredInputBufferRVal`.
+abstract LoweredInputBufferRVal : LoweredParserRVal {
+    /// @return this buffer range as a half-open range of bytes in network order.
+    nw_byteinterval byteInterval() const { return toHalfOpenRange(range); }
+
+    /// The region represented by this `LoweredInputBufferRVal`, expressed as a
+    /// range of bytes in network order.
+    nw_byterange range;
+}
+
+// An r-value originating from the input packet. Represented as a range of bytes
+// in the coordinate system of some parser state. @see PacketRVal for more
+// details about the coordinate system.
+class LoweredPacketRVal : LoweredInputBufferRVal {
+    dbprint {
+        out << "inbuf " << range;
+    }
+}
+
+/// An r-value representing a range of bits from the region of the input buffer
+/// that's mapped onto special metadata, rather than data from the input packet.
+/// @see BufferRVal for more details about the coordinate system.
+class LoweredMetadataRVal : LoweredInputBufferRVal {
+    dbprint {
+        out << "inbuf(metadata) " << range;
+    }
+}
+
+/// A lowered representation of a constant used as an r-value in the parser.
+class LoweredConstantRVal : LoweredParserRVal {
+    dbprint { out << "constant " << constant; }
+
+    /// The constant to extract.
+    uint32_t constant;
+}
+
+abstract LoweredParserPrimitive { }
+
+/// A lowered parser extraction operation, representing a write by the parser
+/// into a PHV container.
+class LoweredExtractPhv : LoweredParserPrimitive {
+#emit
+    /// Convenience constructors for accepting a raw PHV::Container.
+    LoweredExtractPhv(PHV::Container dest, const LoweredParserRVal* source)
+      : source(source), dest(new BFN::ContainerRef(dest)) { }
+    LoweredExtractPhv(Util::SourceInfo si, PHV::Container dest,
+                   const LoweredParserRVal* source)
+      : LoweredParserPrimitive(si), source(source), dest(new BFN::ContainerRef(dest)) { }
+#end
+
+    dbprint {
+        out << "extract " << source << " to " << dest;
+    }
+
+    validate { BUG_CHECK(bool(dest->container), "Invalid PHV container"); }
+
+    /// The location that will be read from.
+    LoweredParserRVal source;
+
+    /// The PHV container this extract writes to.
+    BFN::ContainerRef dest;
+
+    ParserWriteMode write_mode = ParserWriteMode::SINGLE_WRITE;
+
+#emit
+    /// Debugging information about the high-level operations that are
+    /// implemented by this low-level extract.
+    ::BFN::DebugInfo debug;
+#end
+}
+
+class LoweredExtractClot : LoweredParserPrimitive {
+    dbprint { out << "extract " << source << " to " << dest; }
+
+    /// Indicates that this is the first extract into the CLOT
+    bool is_start;
+
+    /// The location that will be read from.
+    LoweredPacketRVal source;
+
+    /// The CLOT this extract writes to.
+    Clot* dest;
+
+    /// The higher order parser state this CLOT started in.
+    /// Used to get the proper length of the CLOT from dest->length_in_bytes(parser_state).
+    const ParserState* higher_parser_state = nullptr;
+#emit
+    /// Debugging information about the high-level operations that are
+    /// implemented by this low-level extract.
+    ::BFN::DebugInfo debug;
+#end
+
+    dump_fields {
+        LoweredParserPrimitive::dump_fields(out);
+        out << " is_start=" << is_start;
+        out << " dest=" << dest;
+        out << " higher_parser_state=" << DBPrint::Brief << higher_parser_state;
+    }
+}
+
+class LoweredParserChecksum : LoweredParserPrimitive {
+    dbprint {
+        out << "parser checksum: ";
+        out << "unit = "  << unit_id << ", ";
+        out << "mask = [";
+        for (auto& r : masked_ranges) {
+            out << r << ", "; }
+        out << "] ";
+        out << "swap = " << swap << ", ";
+        out << "start = " << start << ", ";
+        out << "end = " << end << ", ";
+        out << "end_pos = " << end_pos << ", ";
+        out << "type = " << type << ", ";
+        out << "write_mode = " << write_mode << ".";
+    }
+
+    unsigned unit_id;
+    std::set<nw_byterange> masked_ranges;
+    unsigned swap;
+    bool start;
+    bool end;
+    unsigned end_pos;
+    BFN::ChecksumMode type;
+    unsigned multiply_2;
+    NullOK BFN::ContainerBitRef csum_err = nullptr;
+    Clot clot_dest = {};
+    NullOK BFN::ContainerRef phv_dest = nullptr;
+    ParserWriteMode write_mode;
+}
+
+/// A lowered save operation; represents saving bits from input buffer to match register
+class LoweredSave : LoweredParserPrimitive {
+    /// Convenience constructors for accepting a raw source
+    LoweredSave(const MatchRegister& reg, const LoweredInputBufferRVal* source)
+      : source(source), dest(reg) { }
+
+    dbprint { out << "save " << source << " to " << dest.name; }
+
+    /// The location that will be read from.
+    LoweredInputBufferRVal source;
+
+    /// The register this save writes to.
+    MatchRegister dest;
+#emit
+
+    /// Debugging information about the high-level operations that are
+    /// implemented by this low-level extract.
+    ::BFN::DebugInfo debug;
+#end
+}
+
+/// A lowered parser selection operation; represents a vector of
+/// registers that have data loaded from input buffer in an earlier state
+/// which will be compared against in the state's LoweredParserMatch
+/// entries to select the next state to transition to.
+class LoweredSelect {
+#emit
+    explicit LoweredSelect(const ordered_set<MatchRegister>& regs)
+        : regs(regs) { }
+
+    /// The registers to match against.
+    ordered_set<MatchRegister> regs;
+
+    /// The counter output (is_zero, is_negative) to match against.
+    std::vector<const IR::BFN::ParserCounterRVal*> counters;
+
+    /// Debugging information about the high-level operations that are
+    /// implemented by this low-level select operation.
+    ::BFN::DebugInfo debug;
+#end
+}
+
+/// This class represents the operations to perform on a match at
+/// the current parser state. Each LoweredParserMatch uses a single
+/// TCAM row in the parser for constant matches, and multiple TCAM rows
+/// for value sets. Operations use a row in their associated action RAMs
+/// (Early Action RAM and Checksum Control RAM).
+class LoweredParserMatch {
+#emit
+    LoweredParserMatch(match_t value, unsigned shift, const LoweredParserState* next)
+        : value(new ParserConstMatchValue(value)),
+          shift(shift), bufferRequired(0), next(next) { }
+#end
+    /// The match value: constant or a value set
+    ParserMatchValue value;
+
+    /// Number of bytes to shift out of input buffer at current state
+    unsigned shift;
+
+    /// Final amount to add to header length
+    optional std::optional<unsigned> hdrLenIncFinalAmt;
+
+    /// Extractions to perform
+    inline Vector<LoweredParserPrimitive> extracts;
+
+    /// Save match word to registers
+    inline Vector<LoweredSave> saves;
+
+    /// registers to scratch pad on write
+    std::set<MatchRegister> scratches;
+
+    /// Checksum calculations
+    inline Vector<LoweredParserChecksum> checksums;
+
+    /// Counter instructions
+    inline Vector<ParserCounterPrimitive> counters;
+
+    /// Priority set
+    NullOK ParserPrioritySet priority;
+
+    /// The number of packet bytes which must be available in the input buffer
+    /// for the extractions to be performed successfully. If `std::nullopt`,
+    /// there is no particular requirement; the assembler will choose a default.
+    optional std::optional<unsigned> bufferRequired;
+
+    // Controls partial header extraction.
+    bool partialHdrErrProc;
+
+    /// Next state to transition to (null means terminal state)
+    NullOK LoweredParserState next;
+
+    /// Increment destination offset on state re-entry
+    optional std::optional<unsigned> offsetInc;
+
+#emit
+    cstring loop;
+#end
+
+#emit
+    /// Debugging information about the high-level parser states that were used
+    /// to generate this low-level match construct.
+    ::BFN::DebugInfo debug;
+#end
+}
+
+/// A lowered parser state, representing a group of related parser TCAM rows.
+/// We do not maintain a 1-to-1 mapping between LoweredParserStates and parser
+/// states in the original P4 program.
+class LoweredParserState : Unit {
+#noconstructor
+    LoweredParserState(cstring name, gress_t gress)
+        : name(name), gress(gress),
+          select(new LoweredSelect(ordered_set<MatchRegister>())) { }
+    int stage() const override { return -1; }
+    gress_t thread() const override { return gress; }
+    toString { return name; }
+    visit_children {
+        v.visit(select);
+        transitions.parallel_visit_children(v); }
+
+    /// The name of this state. This does not necessarily correspond to any
+    /// state name in the P4 program.
+    cstring name;
+
+    /// The thread to which this state is assigned.
+    gress_t gress;
+
+    /// The bytes from the input buffer which will be loaded into the match
+    /// registers and used to select a LoweredParserMatch transition to take.
+    LoweredSelect select;
+
+    /// The possible transitions out of this state.
+    inline Vector<LoweredParserMatch> transitions;
+}
+
+class BaseLoweredParser : AbstractParser {
+#noconstructor
+    BaseLoweredParser(gress_t gress) : AbstractParser(gress) {}
+#apply
+
+    toString {
+        return gress ? "lowered egress parser"_cs : "lowered ingress parser"_cs;
+    }
+#nodbprint
+}
+
+/**
+ * @brief The lowered representation of a Tofino 1/2 parser in backend.
+ * @ingroup parde
+ *
+ * This is the representation used after PHV allocation.
+ * It is created from IR::BFN::Parser by backend pass LowerParser.
+ * It contains primitives which operate on PHV containers and numeric constants.
+ */
+class LoweredParser : BaseLoweredParser {
+#noconstructor
+    LoweredParser(gress_t gress, LoweredParserState start, Phase0 phase0,
+        cstring name, std::vector<int> portmap)
+        : BaseLoweredParser(gress), start(start), phase0(phase0),
+        name(name), portmap(portmap) {}
+#apply
+
+    /// The entry point to the parser.
+    LoweredParserState start;
+
+    /// parser error
+    optional NullOK BFN::ContainerRef parserError;
+
+    /// The set of PHV containers that are allowed to be written more than once (bitwise OR on rewrite)
+    inline Vector<BFN::ContainerRef> bitwiseOrContainers;
+
+    /// The set of PHV containers that are allowed to be written more than once (clear on rewrite)
+    inline Vector<BFN::ContainerRef> clearOnWriteContainers;
+
+    /// The set of PHV containers that are zero initialized
+    inline Vector<BFN::ContainerRef> initZeroContainers;
+
+    /// Num of bytes of metadata prepended to user packet
+    unsigned hdrLenAdj = 0;
+
+    optional NullOK Phase0 phase0; // only valid for ingress
+
+    optional inline cstring name;  // parser name defined in architecture
+
+    optional inline std::vector<int> portmap;  // used for multiple parser support
+
+#emit
+    /// bitmask for selection of optional metadata metadata (egress only)
+    /// refer to CSR for what metadata field each bit means
+    std::optional<unsigned> metaOpt;
+#end
+}
+
+/// Common base type for all emit types -- write data to output packet
+abstract LoweredEmit { }
+
+/// A primitive that writes the contents of a PHV container to the output
+/// packet.
+class LoweredEmitPhv : LoweredEmit {
+    dbprint { out << "emit " << source << " if " << povBit; }
+
+    /// The POV bit the emit is predicated on
+    BFN::ContainerBitRef povBit;
+
+    /// The container whose contents will be written to the packet.
+    BFN::ContainerRef source;
+}
+
+/// A primitive that writes the result of a checksum unit to the output packet.
+class LoweredEmitChecksum : LoweredEmit {
+    dbprint { out << "emit checksum " << unit << " if " << povBit; }
+
+    /// The POV bit the emit is predicated on
+    BFN::ContainerBitRef povBit;
+
+    /// The checksum unit whose result will be written to the packet.
+    unsigned unit;
+}
+
+/// A primitive that writes the contents of a CLOT to the output packet.
+class LoweredEmitClot : LoweredEmit {
+    EmitClot clot;
+}
+
+class LoweredEmitConstant : LoweredEmit {
+    dbprint {
+        out << "emit " << (unsigned)constant << " if " << povBit;
+    }
+
+    /// The POV bit the emit is predicated on
+    BFN::ContainerBitRef povBit;
+
+    uint8_t constant;
+}
+
+/// Configures the container whose value will be used to set an intrinsic
+/// deparser parameter.
+class LoweredDeparserParameter {
+    dbprint {
+        out << "parameter " << name << " = ";
+        if (sources.size() > 1) {
+            out << "[";
+            std::string sep = "";
+            for (const auto* source : sources) {
+                out << sep << source->toString();
+                sep = ", ";
+            }
+            out << "]";
+        } else {
+            out << sources.front()->toString();
+        }
+    }
+
+    validate {
+        BUG_CHECK(sources.size() != 0, "LoweredDeparserParameter with 0 sources");
+        for (const auto* source : sources) CHECK_NULL(source);
+    }
+
+    /// The deparser parameter to configure. The name is the one used in the
+    /// assembly, which in turn derives from the CSR register name.
+    cstring name;
+
+    /// The container whose contents will be used for the parameter.
+    inline Vector<BFN::ContainerRef> sources;
+
+    /// On JBay, each deparser parameter has a POV bit which determines whether
+    /// the container's contents are valid (and often implicitly enables or
+    /// disables the corresponding feature). On Tofino, the hidden per-container
+    /// validity bits serve the same role.
+    optional NullOK BFN::ContainerBitRef povBit;
+}
+
+/// An entry in a digest table, consisting of a sequence of containers.
+class DigestTableEntry {
+    /// The index for the entry
+    int idx;
+    /// The PHV containers in the entry.
+    inline Vector<BFN::ContainerRef> sources;
+}
+
+/// Digest Field contains information on how a field is placed within a
+/// phv container within a digest format. A digest format (controlPlaneFormat) is a
+/// collection of multiple digest fields placed in network order.
+class DigestField {
+    /// P4 Name of the digest field
+    cstring fieldName;
+    /// The start byte in digest format for field location in network order
+    unsigned startByte;
+    /// The start bit within byte in digest format for field location in network
+    /// order
+    unsigned startBit;
+    /// The width of field within the phv container
+    unsigned fieldWidth;
+    /// The field offset within the phv container
+    unsigned fieldOffset;
+#nodbprint
+}
+
+/// An entry in the learning digest table.
+class LearningTableEntry : DigestTableEntry {
+#noconstructor
+#emit
+    using DigestPacking = safe_vector<DigestField>;
+    LearningTableEntry(int idx,
+                       const IR::Vector<IR::BFN::ContainerRef>& sources,
+                       cstring controlPlaneName,
+                       const DigestPacking* controlPlaneFormat)
+      : DigestTableEntry(idx, sources), controlPlaneName(controlPlaneName),
+        controlPlaneFormat(controlPlaneFormat) { }
+#end
+
+    validate { CHECK_NULL(controlPlaneFormat); }
+
+    /// The control plane name for this type of learn quanta.
+    cstring controlPlaneName;
+
+#emit
+    /// The packing format for this type of learn quanta; this describes to the
+    /// driver how the fields included in the learn quantum are laid out.
+    const DigestPacking* controlPlaneFormat = nullptr;
+#end
+}
+
+/// A lowered deparser digest. Each kind of digest has a set of table entries
+/// which identify containers to be written into a specific buffer. The table
+/// entry is chosen based on the value in the selector container.
+class LoweredDigest {
+    /// The name of the digest, identifying a special buffer to be filled in by
+    /// the deparser hardware. The name is chosen to match the corresponding
+    /// assembly directive, which in turn is named based on definitions in the
+    /// CSRs.
+    cstring name;
+
+    /// The container which selects a digest table entry.
+    optional NullOK BFN::ContainerRef selector;
+
+    /// The available table entries; the index of each entry in the vector
+    /// corresponds to the selector value which chooses it.
+    optional inline Vector<DigestTableEntry> entries;
+
+    optional NullOK BFN::ContainerBitRef povBit;
+}
+
+/// An input to a checksum unit.
+class ChecksumPhvInput {
+    /// A container whose contents will be included in the checksum.
+    BFN::ContainerRef source;
+    unsigned swap = 0;
+    /// On JBay, each checksum input has an independent POV bit, which makes it
+    /// easier to safely compute a checksum involving headers which may be
+    /// present in different combinations. On Tofino, this is always null.
+    optional NullOK BFN::ContainerBitRef povBit;
+}
+
+class ChecksumClotInput {
+    Clot* clot;
+    bool invert = false;
+    BFN::ContainerBitRef povBit;
+}
+
+class PartialChecksumUnitConfig {
+    // In JBay, several of these partial checksum units can be used to compute a single
+    // checksum. In Tofino, only one one of this unit cn be used.
+    unsigned unit;
+    /// The phv inputs to this checksum unit
+    optional inline Vector<ChecksumPhvInput> phvs;
+
+    optional NullOK BFN::ContainerBitRef povBit;
+
+    // Flag to invert the output
+    bool invert = false;
+}
+
+class FullChecksumUnitConfig {
+// In JBay, multiple partial checksum units can form a single fullchecksum unit.
+// In Tofino, there is not concept of partial checksum unit. There is just one unit which
+// does computation for a checksum.
+/// The unit number to configure; this is referenced by LoweredEmitChecksum
+/// to actually write the checksum unit's output to the packet. On Tofino,
+/// these unit numbers exist in a separate namespace for ingress and egress;
+/// on JBay, both threads share the same checksum units.
+    optional inline unsigned unit;
+    // Size of this vector for Tofino should be strictly 1
+    optional inline Vector<PartialChecksumUnitConfig> partialUnits;
+     /// clot inputs
+    optional inline Vector<ChecksumClotInput> clots;
+    // Indicate zeros as ones feature
+    optional bool zeros_as_ones = false;
+}
+
+/// The lowered representation of the deparser. This representation is
+/// constructed after PHV allocation and refers only to PHV containers;
+/// references to high level objects like fields have all been eliminated.
+class LoweredDeparser : AbstractDeparser {
+#noconstructor
+    LoweredDeparser(gress_t gress) : AbstractDeparser(gress) { }
+#apply
+    toString { return gress ? "lowered egress deparser"_cs : "lowered ingress deparser"_cs; }
+
+    inline Vector<LoweredEmit> emits;
+    inline Vector<LoweredDeparserParameter> params;
+    inline Vector<LoweredDigest> digests;
+    inline Vector<FullChecksumUnitConfig> checksums;
+}
+
+}  // end namespace BFN

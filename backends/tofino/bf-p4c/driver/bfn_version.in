@@ -1,0 +1,27 @@
+# Copyright (C) 2024 Intel Corporation
+# 
+# Licensed under the Apache License, Version 2.0 (the "License"); you may not
+# use this file except in compliance with the License.  You may obtain a copy
+# of the License at
+# 
+# http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software distributed
+# under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+# CONDITIONS OF ANY KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations under the License.
+# 
+# SPDX-License-Identifier: Apache-2.0
+#
+# define the set of macros that provide info about compiler version
+# to be exposed to the P4 program
+
+# __p4c__ defined as 1
+p4c_major=@BFN_P4C_VERSION_MAJOR@
+p4c_minor=@BFN_P4C_VERSION_MINOR@
+p4c_patchlevel=@BFN_P4C_VERSION_PATCH@
+p4c_version="@BFN_P4C_VERSION@"
+# and finally, a string that defines the entire set
+macro_defs = '-D__p4c__=1 -D__p4c_major__={} -D__p4c_minor__={} \
+              -D__p4c_patchlevel__={} -D__p4c_version__=\\"{}\\"'. \
+              format(p4c_major, p4c_minor, p4c_patchlevel, p4c_version)

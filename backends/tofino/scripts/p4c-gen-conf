@@ -1,0 +1,196 @@
+#!/usr/bin/env python3
+
+import argparse
+import json
+import os.path
+
+pd_template="""
+{
+    "chip_list": [
+        {
+            "chip_family": "",
+            "instance": 0,
+            "pcie_sysfs_prefix": "/sys/devices/pci0000:00/0000:00:03.0/0000:05:00.0",
+            "sds_fw_path": "share/tofino_sds_fw/avago/firmware"
+        }
+    ],
+    "p4_program_list": [
+        {
+            "instance": 0,
+            "path": "dummy",
+            "program-name": "dummy",
+            "pd": "",
+            "pd-thrift": "",
+            "table-config": "",
+            "tofino-bin": "",
+            "with_pi" : true,
+            "agent0": "lib/libpltfm_mgr.so"
+        }
+    ]
+}
+"""
+
+bfrt_template="""
+{
+    "chip_list": [
+        {
+            "chip_family": "",
+            "instance": 0,
+            "pcie_sysfs_prefix": "/sys/devices/pci0000:00/0000:00:03.0/0000:05:00.0",
+            "sds_fw_path": "share/tofino_sds_fw/avago/firmware"
+        }
+    ],
+    "p4_devices": [
+        {
+            "device-id": 0,
+            "p4_programs": [
+                {
+                    "program-name": "",
+                    "bfrt-config": "",
+                    "p4_pipelines": [ ]
+                }
+            ],
+            "agent0": "lib/libpltfm_mgr.so"
+        }
+    ]
+}
+"""
+
+def get_parser():
+    parser = argparse.ArgumentParser(description='Driver configuration file generator')
+    parser.add_argument('--conf-type', help='The configuration type',
+                        choices=['BF-RT', 'PD', 'P4Runtime'], default='BF-RT',
+                        type=str, action='store', required=True)
+    parser.add_argument('--device', help='Target device',
+#                        choices=['tofino', 'tofino2', 'tofino2h', 'tofino2m', 'tofino2u',
+#                        'tofino3'],
+                        default='tofino', type=str, action='store', required=True)
+    parser.add_argument('--name', help='Name of P4 program',
+                        type=str, action='store', required=True)
+    parser.add_argument('--outputdir', help='Output directory (default compiler output dir)',
+                        type=str, action='store', required=True)
+    parser.add_argument('--bfrt-name', help='Name of BF-RT output',
+                        type=str, default='bf-rt.json', action='store', required=False)
+    parser.add_argument('--installdir', help='Location of installed outputs',
+                        type=str, action='store', required=False)
+    parser.add_argument('--switch-api', help='API to use for switch',
+                        choices=['switchapi', 'switchsai'], default=None,
+                        type=str, action='store', required=False)
+    parser.add_argument('--p4-version', help='P4 language version',
+                        choices=['p4-14', 'p4-16'], default='p4-16',
+                        type=str, action='store', required=True)
+    parser.add_argument('--pipe', help='Pipeline Names',
+                        default='', nargs="+",
+                        type=str, required=True)
+    parser.add_argument('--max-pipe', help='Max number of pipes',
+                        default=4, type=int, action='store', required=False)
+    return parser
+
+def get_tofino3_subdev_list():
+    return [
+        {
+            "subdev_instance" : 0,
+            "pcie_sysfs_prefix": "/sys/devices/pci0000:00/0000:00:03.0/0000:05:00.0",
+            "cdev_name": "/dev/bf0s0"
+        },
+        {
+            "subdev_instance" : 1,
+            "pcie_sysfs_prefix": "/sys/devices/pci0000:00/0000:00:03.0/0000:06:00.0",
+            "cdev_name": "/dev/bf0s1"
+        }
+    ]
+
+def gen_bfrt_conf(args):
+    base_conf = json.loads(bfrt_template)
+    # assume one chip
+    chip = base_conf["chip_list"][0]
+    if 'tofino2' in args.device:
+        # Tofino-2 variants such as tofino2m should use the tofino2 chip family
+        chip["chip_family"] = 'tofino2'
+    else:
+        chip["chip_family"] = args.device
+    if 'tofino3' == args.device:
+        chip["subdev_list"] = get_tofino3_subdev_list()
+    # only support one device
+    p4_device = base_conf["p4_devices"][0]
+    # only support one program
+    p4_info = p4_device["p4_programs"][0]
+    p4_info["program-name"] = args.name
+    p4_info["bfrt-config"] = args.bfrt_name
+    p4_info["model_json_path"] = os.path.join(args.outputdir, 'share', args.name, 'aug_model.json')
+    p4_pipelines=p4_info['p4_pipelines']
+    npipes = len(args.pipe)
+    for index, pipe in zip(list(range(npipes)),args.pipe):
+        pipe_config = {}
+        pipe_config["p4_pipeline_name"] = pipe
+        share_path = os.path.join(args.installdir, pipe)
+        pipe_config["context"] = os.path.join(share_path, 'context.json')
+        pipe_config["config"] = os.path.join(share_path, args.device + '.bin')
+        if 'tofino2' in args.device:
+            # Tofino-2 uses pipes 0,1 as external and 2,3 as internal
+            pipe_config["pipe_scope"] = [int(args.max_pipe/npipes)*index+x for x in range(int(args.max_pipe/npipes))]
+        else:
+            # Tofino-1 32Q folded pipe systems uses pipes 0,2 as the external pipes and 1,3 as the internal pipes
+            pipe_config["pipe_scope"] = [x*npipes+index for x in range(int(args.max_pipe/npipes))]
+        pipe_config["path"] = args.installdir
+        p4_pipelines.append(pipe_config)
+    return base_conf
+
+def gen_pd_conf(args):
+    base_conf = json.loads(pd_template)
+    # assume one chip
+    chip = base_conf["chip_list"][0]
+    chip["chip_family"] = args.device
+    if 'tofino3' == args.device:
+        chip["subdev_list"] = get_tofino3_subdev_list()
+    p4_info = base_conf["p4_program_list"][0]
+    p4_info["program-name"] = args.name
+    # libpath = os.path.join(args.outputdir, 'lib', args.device+'pd', args.name)
+    libpath = os.path.join('lib', args.device+'pd', args.name)
+    p4_info["path"] = os.path.join(args.outputdir, 'lib')
+
+    p4_info["pd"] = os.path.join(libpath, 'libpd.so')
+    p4_info["pd-thrift"] = os.path.join(libpath, 'libpdthrift.so')
+
+    share_path = os.path.join('share', args.device+'pd', args.name)
+    if args.p4_version == 'p4-16':
+        share_path = os.path.join(share_path, args.pipe[0])
+
+    p4_info["table-config"] = os.path.join(share_path, 'context.json')
+    p4_info["tofino-bin"] = os.path.join(share_path, args.device + '.bin')
+    p4_info["with_pi"] = False if args.conf_type == 'PD' else True
+    p4_info["id"] = args.outputdir + ':' + args.name + '-0'
+    p4_info["cpu_port"] = "veth251" # this depends on the target!!
+
+    if args.switch_api == "switchapi":
+        # bf-switch has a different so name for switchapi
+        if 'switch_16' in args.outputdir:
+            p4_info["switchapi"] = os.path.join(args.outputdir, "lib", "libbf_switch.so")
+        else:
+            p4_info["switchapi"] = os.path.join(args.outputdir, "lib", "libswitchapi.so")
+        p4_info["agent0"] = os.path.join(args.outputdir, "lib", "libpltfm_mgr.so")
+
+    if args.switch_api == "switchsai":
+        p4_info["switchapi"] = os.path.join(args.outputdir, "lib", "libswitchapi.so")
+        p4_info["switchsai"] = os.path.join(args.outputdir, "lib", "libswitchsai.so")
+        p4_info["agent0"] = os.path.join(args.outputdir, "lib", "libpltfm_mgr.so")
+    return base_conf
+
+
+def main():
+    args = get_parser().parse_args()
+    if args.installdir is None:
+        args.installdir = args.outputdir
+
+    if args.conf_type == 'BF-RT':
+        base_conf = gen_bfrt_conf(args)
+    else:
+        base_conf = gen_pd_conf(args)
+
+    conf_name = os.path.join(args.outputdir, args.name + '.conf')
+    with open(conf_name, 'w') as fconf:
+        json.dump(base_conf, fconf, indent=4, separators=(',', ': '))
+        fconf.write('\n')
+
+if __name__ == '__main__':
+    main()

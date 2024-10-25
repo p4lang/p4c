@@ -54,6 +54,8 @@ P4C_DIR=$(readlink -f ${THIS_DIR}/..)
 : "${INSTALL_EBPF:=ON}"
 # Install DPDK and its dependencies.
 : "${INSTALL_DPDK:=OFF}"
+# Install Tofino and its dependencies.
+: "${INSTALL_TOFINO:=ON}"
 
 . /etc/lsb-release
 
@@ -207,11 +209,23 @@ function build_dpdk() {
   sudo pip3 install protobuf==3.20.3 netaddr==0.9.0
 }
 
-if [ "$INSTALL_DPDK" == "ON" ]; then
+if [[ "${INSTALL_DPDK}" == "ON" ]]; then
   build_dpdk
 fi
 # ! ------  END DPDK -----------------------------------------------
 
+# ! ------  BEGIN TOFINO --------------------------------------------
+
+function build_tofino() {
+    P4C_TOFINO_PACKAGES="rapidjson-dev"
+    sudo apt-get install -y --no-install-recommends ${P4C_TOFINO_PACKAGES}
+}
+
+if [[ "${INSTALL_TOFINO}" == "ON" ]]; then
+  echo "Installing Tofino dependencies"
+  build_tofino
+fi
+# ! ------  END TOFINO ----------------------------------------------
 
 # ! ------  BEGIN VALIDATION -----------------------------------------------
 function build_gauntlet() {
@@ -254,6 +268,35 @@ CMAKE_FLAGS+="-DENABLE_WERROR=${ENABLE_WERROR} "
 CMAKE_FLAGS+="-DENABLE_SANITIZERS=${ENABLE_SANITIZERS} "
 # Enable auto var initialization with pattern.
 CMAKE_FLAGS+="-DBUILD_AUTO_VAR_INIT_PATTERN=${BUILD_AUTO_VAR_INIT_PATTERN} "
+# Enable Tofino.
+if [ -n "${ENABLE_TOFINO}" ]; then
+  CMAKE_FLAGS+="-DENABLE_TOFINO=${ENABLE_TOFINO} "
+fi
+if [ -n "${ENABLE_BMV2}" ]; then
+  CMAKE_FLAGS+="-DENABLE_BMV2=${ENABLE_BMV2} "
+fi
+if [ -n "${ENABLE_EBPF}" ]; then
+  CMAKE_FLAGS+="-DENABLE_EBPF=${ENABLE_EBPF} "
+fi
+if [ -n "${ENABLE_UBPF}" ]; then
+  CMAKE_FLAGS+="-DENABLE_UBPF=${ENABLE_UBPF} "
+fi
+if [ -n "${ENABLE_DPDK}" ]; then
+  CMAKE_FLAGS+="-DENABLE_DPDK=${ENABLE_DPDK} "
+fi
+if [ -n "${ENABLE_P4TC}" ]; then
+  CMAKE_FLAGS+="-DENABLE_P4TC=${ENABLE_P4TC} "
+fi
+if [ -n "${ENABLE_P4FMT}" ]; then
+  CMAKE_FLAGS+="-DENABLE_P4FMT=${ENABLE_P4FMT} "
+fi
+if [ -n "${ENABLE_P4TEST}" ]; then
+  CMAKE_FLAGS+="-DENABLE_P4TEST=${ENABLE_P4TEST} "
+fi
+if [ -n "${ENABLE_P4C_GRAPHS}" ]; then
+  CMAKE_FLAGS+="-DENABLE_P4C_GRAPHS=${ENABLE_P4C_GRAPHS} "
+fi
+
 
 if [ "$ENABLE_SANITIZERS" == "ON" ]; then
   CMAKE_FLAGS+="-DENABLE_GC=OFF"

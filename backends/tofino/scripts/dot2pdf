@@ -1,0 +1,46 @@
+#!/bin/bash
+
+tempdir="$(mktemp -d)"
+trap 'rm -rf -- "$tempdir"' EXIT
+
+target="-Tpdf"
+ext=".pdf"
+input=""
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+    -T*)
+        target=$1
+        ext=".${1#-T}"
+        ;;
+    *)
+        if [[ -r "$1" ]]; then
+            if [[ -z "$input" ]]; then
+                input="$1"
+            else
+                echo >&2 "only one input file supported, found '$input' and '$1'"
+                exit 1
+            fi
+        else
+            echo >&2 "ignoring unknown option '$1'"
+        fi
+    esac
+    shift
+done
+
+if [[ -z "$input" ]]; then
+    echo >&2 "usage: $0 file.dot"
+    echo >&2 "    convert a .dot file with one or more graphs into a pdf with one per page"
+    echo >&2 "    graphs in the input should end with // -- END -- comments to be split"
+else
+    output=${input%.dot}$ext
+    rm -f $output
+fi
+
+csplit -s -f $tempdir/f -b '%03u.dot' -z "$input" '/-- END --/' '{*}'
+
+for f in $tempdir/f*.dot; do
+    dot $target $f >${f%.dot}$ext
+done
+
+gs -dBATCH -dNOPAUSE -dSAFER -q -sDEVICE=pdfwrite -dPDFSETTINGS=/prepress -sOutputFile=$output $tempdir/f*${ext}

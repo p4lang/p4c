@@ -1,0 +1,6 @@
+#ifndef GIT_SHA_VERSION_H_
+#define GIT_SHA_VERSION_H_
+
+#define BF_P4C_GIT_SHA "@P4C_GIT_SHA@"
+
+#endif  // GIT_SHA_VERSION_H_
