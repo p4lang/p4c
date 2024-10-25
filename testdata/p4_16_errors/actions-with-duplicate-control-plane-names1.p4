@@ -68,6 +68,37 @@ action foo1() { }
 
 @name(".ingressImpl.foo5") action topa5() { }
 
+control c1(
+    inout headers_t hdr,
+    inout bit<8> tmp1,
+    inout bit<8> tmp2)
+{
+    // Action suba1's control plane name should conflict with the name
+    // of top-level action foo1, and cause a compile-time error
+    // message, if you enable P4Info file generation.
+    @name(".foo1") action suba1 (bit<8> x, bit<8> y) { tmp1 = x; tmp2 = y >> 1; }
+
+    // Action suba2's control plane name should conflict with the
+    // control plane name of topa2, and cause a compile-time error
+    // message, if you enable P4Info file generation.
+    @name(".foo2") action suba2 (bit<8> x, bit<8> y) { tmp1 = x; tmp2 = y >> 2; }
+
+    @name("bar1") action suba3 (bit<8> x, bit<8> y) { tmp1 = x; tmp2 = y >> 3; }
+
+    table t2 {
+        actions = {
+            suba1;
+            suba2;
+            suba3;
+        }
+        key = { hdr.ethernet.srcAddr: exact; }
+        size = 32;
+    }
+    apply {
+        t2.apply();
+    }
+}
+
 control ingressImpl(
     inout headers_t hdr,
     inout metadata_t meta,
@@ -90,7 +121,12 @@ control ingressImpl(
     // Action a5's control plane name should conflict with the control
     // plane name of topa5, and cause a compile-time error message, if
     // you enable P4Info file generation.
-    @name("foo5") action a5 (bit<8> x, bit<8> y) { tmp1 = x >> 4; tmp2 = y; }
+    @name("foo5") action a5 (bit<8> x, bit<8> y) { tmp1 = x >> 5; tmp2 = y; }
+
+    // Action a6's control plane name should conflict with the
+    // control plane name of suba3, and cause a compile-time error
+    // message, if you enable P4Info file generation.
+    @name("c1.bar1") action a6 (bit<8> x, bit<8> y) { tmp1 = x >> 6; tmp2 = y; }
 
     table t1 {
         actions = {
@@ -98,6 +134,7 @@ control ingressImpl(
             a1;
             a2;
             a5;
+            a6;
             foo1;
             topa2;
             topa3;
@@ -111,6 +148,7 @@ control ingressImpl(
     apply {
         tmp1 = hdr.ethernet.srcAddr[7:0];
         tmp2 = hdr.ethernet.dstAddr[7:0];
+        c1.apply(hdr, tmp1, tmp2);
         t1.apply();
         // This is here simply to ensure that the compiler cannot
         // optimize away the effects of t1 and t2, which can only
