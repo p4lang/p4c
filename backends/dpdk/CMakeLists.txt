@@ -129,7 +129,8 @@ set (P4_16_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/pna-*.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_16_psa_errors/*.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_16_dpdk_errors/*.p4"
-  "${P4C_SOURCE_DIR}/testdata/p4_16_pna_errors/*.p4")
+  "${P4C_SOURCE_DIR}/testdata/p4_16_pna_errors/*.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/dash/dash-pipeline-pna-dpdk.p4")
  p4c_add_tests("dpdk" ${DPDK_COMPILER_DRIVER} "${P4_16_SUITES}" "" "--bfrt")
 
 #### DPDK-PTF Tests

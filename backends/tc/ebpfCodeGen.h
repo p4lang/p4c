@@ -28,6 +28,7 @@ using namespace P4::literals;
 class ConvertToBackendIR;
 class EBPFPnaParser;
 class EBPFRegisterPNA;
+class EBPFHashPNA;
 
 //  Similar to class PSAEbpfGenerator in backends/ebpf/psa/ebpfPsaGen.h
 
@@ -279,6 +280,7 @@ class EBPFControlPNA : public EBPF::EBPFControlPSA {
  public:
     bool addExternDeclaration = false;
     std::map<cstring, EBPFRegisterPNA *> pna_registers;
+    std::map<cstring, EBPFHashPNA *> pna_hashes;
 
     EBPFControlPNA(const EBPF::EBPFProgram *program, const IR::ControlBlock *control,
                    const IR::Parameter *parserHeaders)
@@ -287,6 +289,10 @@ class EBPFControlPNA : public EBPF::EBPFControlPSA {
     EBPFRegisterPNA *getRegister(cstring name) const {
         auto result = ::P4::get(pna_registers, name);
         BUG_CHECK(result != nullptr, "No register named %1%", name);
+        return result;
+    }
+    EBPFHashPNA *getHash(cstring name) const {
+        auto result = ::P4::get(pna_hashes, name);
         return result;
     }
     void emitExternDefinition(EBPF::CodeBuilder *builder) {
@@ -300,6 +306,7 @@ class EBPFControlPNA : public EBPF::EBPFControlPSA {
         }
     }
     void emitTableTypes(EBPF::CodeBuilder *builder) { EBPF::EBPFControl::emitTableTypes(builder); }
+    void emit(EBPF::CodeBuilder *builder);
 };
 
 // Similar to class ConvertToEBPFControlPSA in backends/ebpf/psa/ebpfPsaGen.h
@@ -415,54 +422,11 @@ class DeparserHdrEmitTranslatorPNA : public EBPF::DeparserPrepareBufferTranslato
                    unsigned alignment, EBPF::EBPFType *type, bool isMAC);
 };
 
-class CRCChecksumAlgorithmPNA : public EBPF::CRCChecksumAlgorithm {
- public:
-    CRCChecksumAlgorithmPNA(const EBPF::EBPFProgram *program, cstring name, int width)
-        : EBPF::CRCChecksumAlgorithm(program, name, width) {}
-
-    static void emitUpdateMethod(EBPF::CodeBuilder *builder, int crcWidth);
-};
-
-class CRC16ChecksumAlgorithmPNA : public CRCChecksumAlgorithmPNA {
- public:
-    CRC16ChecksumAlgorithmPNA(const EBPF::EBPFProgram *program, cstring name)
-        : CRCChecksumAlgorithmPNA(program, name, 16) {
-        initialValue = "0"_cs;
-        // We use a 0x8005 polynomial.
-        // 0xA001 comes from 0x8005 value bits reflection.
-        polynomial = "0xA001"_cs;
-        updateMethod = "crc16_update"_cs;
-        finalizeMethod = "crc16_finalize"_cs;
-    }
-
-    static void emitGlobals(EBPF::CodeBuilder *builder);
-};
-
-class CRC32ChecksumAlgorithmPNA : public CRCChecksumAlgorithmPNA {
- public:
-    CRC32ChecksumAlgorithmPNA(const EBPF::EBPFProgram *program, cstring name)
-        : CRCChecksumAlgorithmPNA(program, name, 32) {
-        initialValue = "0xffffffff"_cs;
-        // We use a 0x04C11DB7 polynomial.
-        // 0xEDB88320 comes from 0x04C11DB7 value bits reflection.
-        polynomial = "0xEDB88320"_cs;
-        updateMethod = "crc32_update"_cs;
-        finalizeMethod = "crc32_finalize"_cs;
-    }
-
-    static void emitGlobals(EBPF::CodeBuilder *builder);
-};
-
 class EBPFHashAlgorithmTypeFactoryPNA : public EBPF::EBPFHashAlgorithmTypeFactoryPSA {
  public:
     static EBPFHashAlgorithmTypeFactoryPNA *instance() {
         static EBPFHashAlgorithmTypeFactoryPNA factory;
         return &factory;
-    }
-
-    void emitGlobals(EBPF::CodeBuilder *builder) {
-        CRC16ChecksumAlgorithmPNA::emitGlobals(builder);
-        CRC32ChecksumAlgorithmPNA::emitGlobals(builder);
     }
 
     EBPF::EBPFHashAlgorithmPSA *create(int type, const EBPF::EBPFProgram *program, cstring name);

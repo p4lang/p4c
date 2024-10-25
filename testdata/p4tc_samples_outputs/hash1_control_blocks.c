@@ -33,15 +33,13 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
         u8 hit;
         {
             ingress_h_reg = 0;
-            {
-                u8 ingress_h_tmp = 0;
-                ingress_h_tmp = (hdr->crc.f1 << 4) | (hdr->crc.f2 << 0);
-                crc16_update(&ingress_h_reg, &ingress_h_tmp, 1, 0xA001);
-                crc16_update(&ingress_h_reg, (u8 *) &(hdr->crc.f3), 4, 0xA001);
-                crc16_update(&ingress_h_reg, (u8 *) &(hdr->crc.f4), 4, 0xA001);
-            }
-                        hdr->crc.crc = /* h_0.get_hash({hdr->crc.f1, hdr->crc.f2, hdr->crc.f3, hdr->crc.f4}) */
-crc16_finalize(ingress_h_reg);
+
+            bpf_p4tc_ext_hash_base_crc16(&hdr->crc.f1, sizeof(hdr->crc.f1), 15, 32, ingress_h_reg);
+            bpf_p4tc_ext_hash_base_crc16(&hdr->crc.f2, sizeof(hdr->crc.f2), 15, 32, ingress_h_reg);
+            bpf_p4tc_ext_hash_base_crc16(&hdr->crc.f3, sizeof(hdr->crc.f3), 15, 32, ingress_h_reg);
+            bpf_p4tc_ext_hash_base_crc16(&hdr->crc.f4, sizeof(hdr->crc.f4), 15, 32, ingress_h_reg);
+                        hdr->crc.crc = /* h_0.get_hash(15, {hdr->crc.f1, hdr->crc.f2, hdr->crc.f3, hdr->crc.f4}, 32) */
+ingress_h_reg;
         }
     }
     {

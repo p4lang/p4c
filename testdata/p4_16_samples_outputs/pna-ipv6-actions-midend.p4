@@ -80,8 +80,10 @@ parser MainParserImpl(packet_in p, out headers_t headers, inout main_metadata_t 
 }
 
 control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    @name("MainControlImpl.tmp") bit<128> tmp_0;
+    @name("MainControlImpl.tmp") bit<128> tmp;
     @name("MainControlImpl.tmp1") bit<32> tmp1_0;
+    @name("MainControlImpl.tmp") bit<128> tmp_0;
+    @name("MainControlImpl.tmp_1") bit<128> tmp_1;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MainControlImpl.Reject") action Reject() {
@@ -90,9 +92,37 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
     @name("MainControlImpl.ipv6_modify_dstAddr") action ipv6_modify_dstAddr(@name("dstAddr") bit<32> dstAddr_1) {
         headers.ipv6.dstAddr = (bit<128>)dstAddr_1;
     }
+    @name("MainControlImpl.ipv6_addr_or") action ipv6_addr_or() {
+        headers.ipv6.dstAddr = headers.ipv6.dstAddr | headers.ipv6.srcAddr;
+    }
+    @name("MainControlImpl.ipv6_addr_and") action ipv6_addr_and() {
+        headers.ipv6.dstAddr = tmp & headers.ipv6.srcAddr;
+    }
+    @name("MainControlImpl.ipv6_addr_xor") action ipv6_addr_xor() {
+        headers.ipv6.dstAddr = headers.ipv6.dstAddr ^ tmp;
+    }
+    @name("MainControlImpl.ipv6_addr_comp1") action ipv6_addr_comp1() {
+        if (headers.ipv6.dstAddr == headers.ipv6.srcAddr) {
+            tmp_0 = headers.ipv6.dstAddr;
+        } else {
+            tmp_0 = headers.ipv6.srcAddr;
+        }
+        headers.ipv6.dstAddr = tmp_0;
+    }
+    @name("MainControlImpl.ipv6_addr_comp2") action ipv6_addr_comp2() {
+        if (headers.ipv6.dstAddr != headers.ipv6.srcAddr) {
+            tmp_1 = headers.ipv6.dstAddr;
+        } else {
+            tmp_1 = headers.ipv6.srcAddr;
+        }
+        headers.ipv6.dstAddr = tmp_1;
+    }
+    @name("MainControlImpl.ipv6_addr_cmpl") action ipv6_addr_cmpl() {
+        headers.ipv6.dstAddr = ~headers.ipv6.srcAddr;
+    }
     @name("MainControlImpl.ipv6_swap_addr") action ipv6_swap_addr() {
         headers.ipv6.dstAddr = headers.ipv6.srcAddr;
-        headers.ipv6.srcAddr = tmp_0;
+        headers.ipv6.srcAddr = tmp;
     }
     @name("MainControlImpl.set_flowlabel") action set_flowlabel(@name("label") bit<20> label_2) {
         headers.ipv6.flowLabel = label_2;
@@ -119,6 +149,12 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
             ipv6_modify_dstAddr();
             ipv6_swap_addr();
             set_flowlabel();
+            ipv6_addr_or();
+            ipv6_addr_xor();
+            ipv6_addr_and();
+            ipv6_addr_comp1();
+            ipv6_addr_comp2();
+            ipv6_addr_cmpl();
             set_traffic_class_flow_label();
             set_ipv6_version();
             set_next_hdr();
@@ -129,7 +165,7 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
         default_action = NoAction_1();
     }
     @hidden action pnaipv6actions109() {
-        tmp_0 = 128w0x76;
+        tmp = 128w0x76;
     }
     @hidden table tbl_pnaipv6actions109 {
         actions = {
@@ -144,20 +180,20 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
 }
 
 control MainDeparserImpl(packet_out packet, in headers_t headers, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaipv6actions180() {
+    @hidden action pnaipv6actions210() {
         packet.emit<Ethernet_h>(headers.ethernet);
         packet.emit<mpls_h>(headers.mpls);
         packet.emit<IPv6_h>(headers.ipv6);
         packet.emit<IPv4_h>(headers.ipv4);
     }
-    @hidden table tbl_pnaipv6actions180 {
+    @hidden table tbl_pnaipv6actions210 {
         actions = {
-            pnaipv6actions180();
+            pnaipv6actions210();
         }
-        const default_action = pnaipv6actions180();
+        const default_action = pnaipv6actions210();
     }
     apply {
-        tbl_pnaipv6actions180.apply();
+        tbl_pnaipv6actions210.apply();
     }
 }
 

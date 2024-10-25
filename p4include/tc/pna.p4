@@ -350,7 +350,7 @@ extern Hash<O> {
   /// Compute the hash for data.
   /// @param data The data over which to calculate the hash.
   /// @return The hash value.
-  O get_hash<D>(in D data);
+  @tc_md_exec O get_hash<D>(in D data);
 
   /// Compute the hash for data, with modulo by max, then add base.
   /// @param base Minimum return value.
@@ -362,7 +362,7 @@ extern Hash<O> {
   ///        limit their choice to such values if they wish to
   ///        maximize portability.
   /// @return (base + (h % max)) where h is the hash value.
-  O get_hash<T, D>(in T base, in D data, in T max);
+  @tc_md_exec O get_hash<T, D>(in T base, in D data, in T max);
 }
 // END:Hash_extern
 

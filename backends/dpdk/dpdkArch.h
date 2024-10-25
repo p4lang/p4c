@@ -1101,6 +1101,12 @@ class ValidateOperandSize : public Inspector {
     }
 
     void postorder(const IR::Operation_Binary *binop) override {
+        if (binop->is<IR::BOr>() || binop->is<IR::BAnd>() || binop->is<IR::BXor>() ||
+            binop->is<IR::Equ>() || binop->is<IR::Neq>()) {
+            if (auto src1Type = binop->left->type->to<IR::Type_Bits>()) {
+                if (src1Type->width_bits() == 128) return;
+            }
+        }
         isValidOperandSize(binop->left);
         isValidOperandSize(binop->right);
     }
@@ -1108,6 +1114,11 @@ class ValidateOperandSize : public Inspector {
     // Reject all operations except typecast if the operand size is beyond the supported limit
     void postorder(const IR::Operation_Unary *unop) override {
         if (unop->is<IR::Cast>()) return;
+        if (unop->is<IR::Cmpl>()) {
+            if (auto src1Type = unop->expr->type->to<IR::Type_Bits>()) {
+                if (src1Type->width_bits() == 128) return;
+            }
+        }
         isValidOperandSize(unop->expr);
     }
 

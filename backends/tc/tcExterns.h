@@ -177,6 +177,31 @@ class EBPFInternetChecksumPNA : public EBPFChecksumPNA {
                        const IR::MethodCallExpression *expr, Visitor *visitor) override;
 };
 
+class EBPFHashPNA : public EBPFChecksumPNA {
+ public:
+    EBPFHashPNA(const EBPF::EBPFProgram *program, const IR::Declaration_Instance *block,
+                cstring name)
+        : EBPFChecksumPNA(program, block, name) {}
+    void processMethod(EBPF::CodeBuilder *builder, cstring method,
+                       const IR::MethodCallExpression *expr, Visitor *visitor) override;
+    void calculateHash(EBPF::CodeBuilder *builder, const IR::MethodCallExpression *expr,
+                       Visitor *visitor);
+    void emitVariables(EBPF::CodeBuilder *builder);
+};
+class CRCChecksumAlgorithmPNA : public EBPF::CRCChecksumAlgorithm {
+ public:
+    CRCChecksumAlgorithmPNA(const EBPF::EBPFProgram *program, cstring name, int width)
+        : EBPF::CRCChecksumAlgorithm(program, name, width) {
+        BUG_CHECK(width == 16 || width == 32, "Must be 16 bits width or 32 bits width.");
+        initialValue = "0"_cs;
+    }
+    void emitGet(EBPF::CodeBuilder *builder) override;
+    void emitAddData(EBPF::CodeBuilder *builder, const ArgumentsList &arguments,
+                     const IR::MethodCallExpression *expr);
+    void emitAddData(EBPF::CodeBuilder *builder, int dataPos,
+                     const IR::MethodCallExpression *expr) override;
+};
+
 class EBPFDigestPNA : public EBPF::EBPFDigestPSA {
     const ConvertToBackendIR *tcIR;
     cstring externName;

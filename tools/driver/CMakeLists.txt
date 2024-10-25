@@ -53,12 +53,14 @@ foreach (__f IN LISTS P4C_DRIVER_SRCS P4C_TARGET_CFGS)
   list (APPEND P4C_DRIVER_DST "${P4C_BINARY_DIR}/${__f}")
 endforeach(__f)
 
+set (P4C_DRIVER_PATH ${P4C_BINARY_DIR}/${P4C_DRIVER_NAME})
+
 add_custom_command(OUTPUT ${P4C_DRIVER_DST}
   COMMAND ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/p4c_src &&
           for f in ${P4C_DRIVER_SRCS} ${P4C_TARGET_CFGS} \; do
           ${CMAKE_COMMAND} -E copy_if_different \$$f ${P4C_BINARY_DIR}/p4c_src \;
           done
-  COMMAND chmod a+x ${P4C_BINARY_DIR}/${P4C_DRIVER_NAME}
+  COMMAND chmod a+x ${P4C_DRIVER_PATH}
   DEPENDS ${P4C_DRIVER_SRCS}
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   COMMENT "Copying p4c driver"
@@ -68,9 +70,7 @@ add_custom_target(p4c_driver ALL DEPENDS ${P4C_DRIVER_DST})
 
 
 
-### Added by Abe starting April 6 2022; these tests are all expected to fail until Abe`s branch with driver improvements is merged.
-
-add_test(NAME driver_inputs_test_1 COMMAND ${P4C_SOURCE_DIR}/tools/driver/test_scripts/driver_inputs_test_1)
-add_test(NAME driver_inputs_test_2 COMMAND ${P4C_SOURCE_DIR}/tools/driver/test_scripts/driver_inputs_test_2)
-add_test(NAME driver_inputs_test_3 COMMAND ${P4C_SOURCE_DIR}/tools/driver/test_scripts/driver_inputs_test_3)
-add_test(NAME driver_inputs_test_4 COMMAND ${P4C_SOURCE_DIR}/tools/driver/test_scripts/driver_inputs_test_4)
+add_test(NAME driver_inputs_test_1 COMMAND ${P4C_SOURCE_DIR}/tools/driver/test_scripts/driver_inputs_test_1 ${P4C_DRIVER_PATH})
+add_test(NAME driver_inputs_test_2 COMMAND ${P4C_SOURCE_DIR}/tools/driver/test_scripts/driver_inputs_test_2 ${P4C_DRIVER_PATH})
+add_test(NAME driver_inputs_test_3 COMMAND ${P4C_SOURCE_DIR}/tools/driver/test_scripts/driver_inputs_test_3 ${P4C_DRIVER_PATH})
+add_test(NAME driver_inputs_test_4 COMMAND ${P4C_SOURCE_DIR}/tools/driver/test_scripts/driver_inputs_test_4 ${P4C_DRIVER_PATH})

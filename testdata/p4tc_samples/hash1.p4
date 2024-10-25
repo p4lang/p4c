@@ -88,9 +88,10 @@ control ingress(
 )
 {
     Hash<bit<16>>(PNA_HashAlgorithm_t.CRC16) h;
-
+    const bit<16> base = 15;
+    const bit<16> max = 32;
     apply {
-        hdr.crc.crc = h.get_hash({hdr.crc.f1, hdr.crc.f2, hdr.crc.f3, hdr.crc.f4});
+        hdr.crc.crc = h.get_hash(base, {hdr.crc.f1, hdr.crc.f2, hdr.crc.f3, hdr.crc.f4}, max);
     }
 }
 
