@@ -1,7 +1,9 @@
 <map id="P4::IHasBlock" name="P4::IHasBlock">
-<area shape="rect" id="Node000001" title=" " alt="" coords="77,5,188,31"/>
-<area shape="rect" id="Node000002" href="$class_p4_1_1_evaluator.html" title=" " alt="" coords="5,79,113,104"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="113,42,73,80,69,77,109,38"/>
-<area shape="rect" id="Node000003" href="$class_p4_1_1_evaluator_pass.html" title=" " alt="" coords="137,79,275,104"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="156,38,196,77,192,80,153,42"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="176,5,287,31"/>
+<area shape="rect" id="Node000002" href="$group__midend.html#class_b_f_n_1_1_evaluator_pass" title="A modified version of P4::EvaluatorPass that uses BFN::TypeChecking." alt="" coords="5,79,153,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="196,39,105,81,103,76,194,34"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_evaluator.html" title=" " alt="" coords="177,79,285,104"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="234,44,234,79,229,79,229,44"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_evaluator_pass.html" title=" " alt="" coords="309,79,447,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="268,34,355,76,353,81,266,39"/>
 </map>

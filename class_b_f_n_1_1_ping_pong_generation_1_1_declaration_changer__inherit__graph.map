@@ -1,0 +1,13 @@
+<map id="BFN::PingPongGeneration::DeclarationChanger" name="BFN::PingPongGeneration::DeclarationChanger">
+<area shape="rect" id="Node000001" title="Base visitor class for other classes that change declarations." alt="" coords="300,69,489,109"/>
+<area shape="rect" id="Node000004" href="$class_b_f_n_1_1_ping_pong_generation_1_1_p4_action_changer.html" title="This visitor changes specific references in new cloned P4 action." alt="" coords="537,5,727,45"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="482,63,557,43,558,48,483,68"/>
+<area shape="rect" id="Node000005" href="$class_b_f_n_1_1_ping_pong_generation_1_1_p4_table_changer.html" title="This visitor changes specific references in new cloned P4 table." alt="" coords="537,69,727,109"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="503,87,537,87,537,92,503,92"/>
+<area shape="rect" id="Node000006" href="$class_b_f_n_1_1_ping_pong_generation_1_1_reg_action_changer.html" title="This visitor changes specific references in new cloned register action." alt="" coords="537,133,727,173"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="483,110,558,131,557,136,482,116"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_transform.html" title=" " alt="" coords="141,77,252,102"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="266,87,300,87,300,92,266,92"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="5,77,93,102"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="107,87,141,87,141,92,107,92"/>
+</map>

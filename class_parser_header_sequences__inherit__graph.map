@@ -1,0 +1,11 @@
+<map id="ParserHeaderSequences" name="ParserHeaderSequences">
+<area shape="rect" id="Node000001" title="Identify parsed header sequences." alt="" coords="82,152,261,177"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_control_flow_visitor.html" title=" " alt="" coords="5,79,172,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="114,111,160,150,156,154,111,115"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="45,5,133,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="91,44,91,79,86,79,86,44"/>
+<area shape="rect" id="Node000004" href="$group__parde.html#class_parde_inspector" title=" " alt="" coords="196,79,315,104"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="233,115,187,154,183,150,230,111"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="214,5,297,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="258,44,258,79,253,79,253,44"/>
+</map>

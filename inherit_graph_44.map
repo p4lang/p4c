@@ -1,3 +1,19 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$class_p4_1_1_b_m_v2_1_1_match_implementation.html" title=" " alt="" coords="5,5,241,31"/>
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,178,60,203"/>
+<area shape="rect" id="Node000001" href="$classassoc_1_1detail_1_1_cond_iterable_assoc_base.html" title=" " alt="" coords="121,119,315,174"/>
+<area shape="poly" id="edge6_Node000000_Node000001" title=" " alt="" coords="73,179,120,167,121,172,74,184"/>
+<area shape="rect" id="Node000008" href="$classassoc_1_1detail_1_1_cond_iterable_assoc_base_3_01_base_00_01_itble_00_01typename_01__void_301be9afc473011af99b0061f318d14aa.html" title=" " alt="" coords="108,199,328,268"/>
+<area shape="poly" id="edge13_Node000000_Node000008" title=" " alt="" coords="74,197,109,205,107,211,73,202"/>
+<area shape="rect" id="Node000002" href="$classassoc_1_1detail_1_1_cond_iterable_assoc.html" title=" " alt="" coords="376,127,571,167"/>
+<area shape="poly" id="edge7_Node000001_Node000002" title=" " alt="" coords="329,144,376,144,376,149,329,149"/>
+<area shape="rect" id="Node000003" href="$classassoc_1_1set.html" title=" " alt="" coords="621,5,814,45"/>
+<area shape="poly" id="edge8_Node000002_Node000003" title=" " alt="" coords="513,116,562,85,618,55,647,43,649,48,620,60,564,90,516,121"/>
+<area shape="rect" id="Node000004" href="$classassoc_1_1set.html" title=" " alt="" coords="640,69,795,109"/>
+<area shape="poly" id="edge9_Node000002_Node000004" title=" " alt="" coords="572,121,639,105,640,110,573,126"/>
+<area shape="rect" id="Node000005" href="$classassoc_1_1set.html" title=" " alt="" coords="639,134,795,159"/>
+<area shape="poly" id="edge10_Node000002_Node000005" title=" " alt="" coords="584,144,639,144,639,149,584,149"/>
+<area shape="rect" id="Node000006" href="$classassoc_1_1set.html" title=" " alt="" coords="633,184,801,224"/>
+<area shape="poly" id="edge11_Node000002_Node000006" title=" " alt="" coords="573,167,634,182,633,187,572,172"/>
+<area shape="rect" id="Node000007" href="$classassoc_1_1set.html" title=" " alt="" coords="619,248,816,288"/>
+<area shape="poly" id="edge12_Node000002_Node000007" title=" " alt="" coords="516,172,564,204,620,234,649,245,647,250,618,238,562,208,513,177"/>
 </map>

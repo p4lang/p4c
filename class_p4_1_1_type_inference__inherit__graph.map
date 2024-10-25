@@ -1,5 +1,7 @@
 <map id="P4::TypeInference" name="P4::TypeInference">
 <area shape="rect" id="Node000001" title=" " alt="" coords="73,225,211,251"/>
+<area shape="rect" id="Node000007" href="$group__midend.html#class_b_f_n_1_1_type_inference" title="Extended type inference pass from p4c used in barefoot&#39;s midend." alt="" coords="68,299,216,324"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="145,264,145,299,139,299,139,264"/>
 <area shape="rect" id="Node000002" href="$class_p4_1_1_transform.html" title=" " alt="" coords="5,152,116,177"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="86,184,130,223,127,227,82,188"/>
 <area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="51,5,139,31"/>

@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['intermediate_20representation_20ir_0',['P4C Intermediate Representation (IR)',['../intermediate_representation_ir.html',1,'']]],
-  ['ir_1',['P4C Intermediate Representation (IR)',['../intermediate_representation_ir.html',1,'']]]
+  ['getting_20started_0',['Getting Started',['../getting_started.html',1,'']]],
+  ['graphs_20backend_1',['Graphs Backend',['../graphs_backend.html',1,'']]],
+  ['gtest_2',['Using GTEST',['../using-gtest.html',1,'']]]
 ];
