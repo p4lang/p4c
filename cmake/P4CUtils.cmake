@@ -430,30 +430,30 @@ function(CHECK_DEPENDENCIES OUT_VAR TEST_DEPENDENCY_PROGRAMS TEST_DEPENDENCY_LIB
     set(ALL_FOUND TRUE)
 
     foreach(PROG ${TEST_DEPENDENCY_PROGRAMS})
-        find_program(PROG_PATH ${PROG})
-        if (NOT PROG_PATH)
+        find_program(${PROG}_PROG_PATH ${PROG} NO_CACHE)
+        if (NOT ${PROG}_PROG_PATH)
             message(WARNING "Missing program ${PROG}."
                     " Please install ${PROG} and ensure it is in your PATH.")
             set(ALL_FOUND FALSE)
         else()
-            message(STATUS "Found program ${PROG} at ${PROG_PATH}")
+            message(STATUS "Found program ${PROG}")
         endif()
     endforeach()
 
     foreach(LIB ${TEST_DEPENDENCY_LIBRARIES})
         if (ARGC GREATER 3)
           set(HINTS_DIRS_ARG ${ARGV4})
-          find_library(LIB_PATH ${LIB} HINTS ${HINTS_DIRS})
+          find_library(${LIB}_LIB_PATH NAMES ${LIB} NO_CACHE HINTS ${HINTS_DIRS})
         else()
-          find_library(LIB_PATH ${LIB})
+          find_library(${LIB}_LIB_PATH NAMES ${LIB} NO_CACHE)
         endif()
 
-        if (NOT LIB_PATH)
+        if (NOT ${LIB}_LIB_PATH)
             message(WARNING "Missing library ${LIB}."
                     " Please install ${LIB}.")
             set(ALL_FOUND FALSE)
         else()
-            message(STATUS "Found library ${LIB} at ${LIB_PATH}")
+            message(STATUS "Found library ${LIB}")
         endif()
     endforeach()
 

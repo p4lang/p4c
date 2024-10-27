@@ -262,7 +262,7 @@ if(TEST_DEPENDENCY_PRESENT)
   # We do not have support for dynamic addition of tables in the test framework
   p4c_add_test_with_args("ebpf" ${EBPF_DRIVER_TEST} TRUE "testdata/p4_16_samples/ebpf_conntrack_extern.p4" "testdata/p4_16_samples/ebpf_conntrack_extern.p4" "--extern-file ${P4C_SOURCE_DIR}/testdata/extern_modules/extern-conntrack-ebpf.c" "")
 else()
-  message(WARNING "Skipped adding Tests due to missing dependencies" " Please install the dependencies and try again")
+  message(WARNING "Skipped adding Tests due to missing dependencies." " Please install the dependencies and try again")
 endif()
 
 message(STATUS "Done with configuring BPF back end")
