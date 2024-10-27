@@ -43,6 +43,7 @@ macro(p4c_obtain_abseil)
       URL_HASH SHA256=3c743204df78366ad2eaf236d6631d83f6bc928d1705dd0000b872e53b73dc6a
       USES_TERMINAL_DOWNLOAD TRUE
       GIT_PROGRESS TRUE
+      DOWNLOAD_EXTRACT_TIMESTAMP TRUE
     )
     fetchcontent_makeavailable_but_exclude_install(abseil)
 

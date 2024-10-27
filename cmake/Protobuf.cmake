@@ -66,6 +66,7 @@ macro(p4c_obtain_protobuf)
       URL_HASH SHA256=d19643d265b978383352b3143f04c0641eea75a75235c111cc01a1350173180e
       USES_TERMINAL_DOWNLOAD TRUE
       GIT_PROGRESS TRUE
+      DOWNLOAD_EXTRACT_TIMESTAMP TRUE
     )
     fetchcontent_makeavailable(protobuf)
 
