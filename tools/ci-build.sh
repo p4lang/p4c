@@ -33,8 +33,6 @@ P4C_DIR=$(readlink -f ${THIS_DIR}/..)
 : "${INSTALL_PTF_EBPF_DEPENDENCIES:=OFF}"
 # Whether to build and run GTest unit tests.
 : "${ENABLE_GTESTS:=ON}"
-# Whether to build the P4Tools back end and platform.
-: "${ENABLE_TEST_TOOLS:=OFF}"
 # Whether to treat warnings as errors.
 : "${ENABLE_WERROR:=ON}"
 # Compile with Clang compiler
@@ -48,14 +46,28 @@ P4C_DIR=$(readlink -f ${THIS_DIR}/..)
 # Build with -ftrivial-auto-var-init=pattern to catch more bugs caused by
 # uninitialized variables.
 : "${BUILD_AUTO_VAR_INIT_PATTERN:=OFF}"
-# Install BMv2 and its dependencies.
-: "${INSTALL_BMV2:=ON}"
-# Install eBPF and its dependencies.
-: "${INSTALL_EBPF:=ON}"
-# Install DPDK and its dependencies.
-: "${INSTALL_DPDK:=OFF}"
-# Install Tofino and its dependencies.
-: "${INSTALL_TOFINO:=ON}"
+# BMv2 is enable by default.
+: "${ENABLE_BMV2:=ON}"
+# eBPF is enabled by default.
+: "${ENABLE_EBPF:=ON}"
+# This is the list of back ends that can be enabled.
+# Back ends can be enabled from the command line with "ENABLE_[backend]=TRUE/FALSE"
+ENABLE_BACKENDS=("TOFINO" "BMV2" "EBPF" "UBPF" "DPDK"
+                 "P4TC" "P4FMT" "P4TEST" "P4C_GRAPHS"
+                 "TEST_TOOLS"
+)
+function build_cmake_enabled_backend_string() {
+  CMAKE_ENABLE_BACKENDS=""
+  for backend in "${ENABLE_BACKENDS[@]}";
+  do
+    enable_var=ENABLE_${backend}
+    if [ -n "${!enable_var}" ]; then
+      echo "${enable_var}=${!enable_var} is set."
+      CMAKE_ENABLE_BACKENDS+="-D${enable_var}=${!enable_var} "
+    fi
+  done
+}
+
 
 . /etc/lsb-release
 
@@ -103,6 +115,14 @@ fi
 
 # ! ------  END CORE -----------------------------------------------
 
+  # TODO: Remove this check once 18.04 is deprecated.
+if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
+  ccache --set-config cache_dir=.ccache
+  # For Ubuntu 18.04 install the pypi-supplied version of cmake instead.
+  sudo pip3 install cmake==3.16.3
+fi
+ccache --set-config max_size=1G
+
 # ! ------  BEGIN BMV2 -----------------------------------------------
 function build_bmv2() {
   # TODO: Remove this check once 18.04 is deprecated.
@@ -136,21 +156,13 @@ function build_bmv2() {
 
   sudo apt-get update && sudo apt-get install -y --no-install-recommends ${P4C_RUNTIME_DEPS}
 
-  # TODO: Remove this check once 18.04 is deprecated.
-  if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
-    ccache --set-config cache_dir=.ccache
-    # For Ubuntu 18.04 install the pypi-supplied version of cmake instead.
-    sudo pip3 install cmake==3.16.3
-  fi
-  ccache --set-config max_size=1G
-
   if [[ "${DISTRIB_RELEASE}" != "18.04" ]] ; then
     # To run PTF nanomsg tests. Not available on 18.04.
     sudo pip3 install nnpy
   fi
 }
 
-if [[ "${INSTALL_BMV2}" == "ON" ]] ; then
+if [[ "${ENABLE_BMV2}" == "ON" ]] ; then
   build_bmv2
 fi
 # ! ------  END BMV2 -----------------------------------------------
@@ -193,7 +205,7 @@ function install_ptf_ebpf_test_deps() (
     popd
 )
 
-if [[ "${INSTALL_EBPF}" == "ON" ]] ; then
+if [[ "${ENABLE_EBPF}" == "ON" ]] ; then
   build_ebpf
   if [[ "${INSTALL_PTF_EBPF_DEPENDENCIES}" == "ON" ]] ; then
     install_ptf_ebpf_test_deps
@@ -209,7 +221,7 @@ function build_dpdk() {
   sudo pip3 install protobuf==3.20.3 netaddr==0.9.0
 }
 
-if [[ "${INSTALL_DPDK}" == "ON" ]]; then
+if [[ "${ENABLE_DPDK}" == "ON" ]]; then
   build_dpdk
 fi
 # ! ------  END DPDK -----------------------------------------------
@@ -219,9 +231,10 @@ fi
 function build_tofino() {
     P4C_TOFINO_PACKAGES="rapidjson-dev"
     sudo apt-get install -y --no-install-recommends ${P4C_TOFINO_PACKAGES}
+    sudo pip3 install jsl==0.2.4 pyinstaller==6.11.0
 }
 
-if [[ "${INSTALL_TOFINO}" == "ON" ]]; then
+if [[ "${ENABLE_TOFINO}" == "ON" ]]; then
   echo "Installing Tofino dependencies"
   build_tofino
 fi
@@ -258,8 +271,6 @@ CMAKE_FLAGS+="-DSTATIC_BUILD_WITH_DYNAMIC_GLIBC=${STATIC_BUILD_WITH_DYNAMIC_GLIB
 CMAKE_FLAGS+="-DSTATIC_BUILD_WITH_DYNAMIC_STDLIB=${STATIC_BUILD_WITH_DYNAMIC_STDLIB} "
 # Enable GTest.
 CMAKE_FLAGS+="-DENABLE_GTESTS=${ENABLE_GTESTS} "
-# Toggle the installation of the tools back end.
-CMAKE_FLAGS+="-DENABLE_TEST_TOOLS=${ENABLE_TEST_TOOLS} "
 # RELEASE should be default, but we want to make sure.
 CMAKE_FLAGS+="-DCMAKE_BUILD_TYPE=Release "
 # Treat warnings as errors.
@@ -268,35 +279,9 @@ CMAKE_FLAGS+="-DENABLE_WERROR=${ENABLE_WERROR} "
 CMAKE_FLAGS+="-DENABLE_SANITIZERS=${ENABLE_SANITIZERS} "
 # Enable auto var initialization with pattern.
 CMAKE_FLAGS+="-DBUILD_AUTO_VAR_INIT_PATTERN=${BUILD_AUTO_VAR_INIT_PATTERN} "
-# Enable Tofino.
-if [ -n "${ENABLE_TOFINO}" ]; then
-  CMAKE_FLAGS+="-DENABLE_TOFINO=${ENABLE_TOFINO} "
-fi
-if [ -n "${ENABLE_BMV2}" ]; then
-  CMAKE_FLAGS+="-DENABLE_BMV2=${ENABLE_BMV2} "
-fi
-if [ -n "${ENABLE_EBPF}" ]; then
-  CMAKE_FLAGS+="-DENABLE_EBPF=${ENABLE_EBPF} "
-fi
-if [ -n "${ENABLE_UBPF}" ]; then
-  CMAKE_FLAGS+="-DENABLE_UBPF=${ENABLE_UBPF} "
-fi
-if [ -n "${ENABLE_DPDK}" ]; then
-  CMAKE_FLAGS+="-DENABLE_DPDK=${ENABLE_DPDK} "
-fi
-if [ -n "${ENABLE_P4TC}" ]; then
-  CMAKE_FLAGS+="-DENABLE_P4TC=${ENABLE_P4TC} "
-fi
-if [ -n "${ENABLE_P4FMT}" ]; then
-  CMAKE_FLAGS+="-DENABLE_P4FMT=${ENABLE_P4FMT} "
-fi
-if [ -n "${ENABLE_P4TEST}" ]; then
-  CMAKE_FLAGS+="-DENABLE_P4TEST=${ENABLE_P4TEST} "
-fi
-if [ -n "${ENABLE_P4C_GRAPHS}" ]; then
-  CMAKE_FLAGS+="-DENABLE_P4C_GRAPHS=${ENABLE_P4C_GRAPHS} "
-fi
-
+# Assemble the enabled back ends as a single CMake variable.
+build_cmake_enabled_backend_string
+CMAKE_FLAGS+="${CMAKE_ENABLE_BACKENDS} "
 
 if [ "$ENABLE_SANITIZERS" == "ON" ]; then
   CMAKE_FLAGS+="-DENABLE_GC=OFF"
