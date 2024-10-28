@@ -346,14 +346,16 @@ Installing P4C from source</h3>
 <ol type="1">
 <li>Clone the repository. It includes submodules, so be sure to use <code>--recursive</code> to pull them in: <code> git clone --recursive <a href="https://github.com/p4lang/p4c.git">https://github.com/p4lang/p4c.git</a> </code> If you forgot <code>--recursive</code>, you can update the submodules at any time using: <code> git submodule update --init --recursive </code></li>
 <li>Install <a class="el" href="#dependencies">dependencies</a>. You can find specific instructions for Ubuntu 20.04 <a class="el" href="#ubuntu-dependencies">here</a> and for macOS 11 <a class="el" href="#macos-dependencies">here</a>. You can also look at the <a href="https://github.com/p4lang/p4c/blob/main/tools/ci-build.sh">CI installation script</a>.</li>
-<li><p class="startli">Build. Building should also take place in a subdirectory named <code>build</code>. <code> mkdir build cd build cmake .. &lt;optional arguments&gt; make -j4 make -j4 check </code> The cmake command takes the following optional arguments to further customize the build:</p><ul>
+<li><p class="startli">Build. Building should also take place in a subdirectory named <code>build</code>. <code> mkdir build cd build cmake .. &lt;optional arguments&gt; make -j4 make -j4 check </code> The cmake command takes the following optional arguments to further customize the build (see file <code>CMakeLists.txt</code> for the full list):</p><ul>
 <li><code>-DCMAKE_BUILD_TYPE=RELEASE|DEBUG</code> &ndash; set CMAKE_BUILD_TYPE to RELEASE or DEBUG to build with optimizations or with debug symbols to run in gdb. Default is RELEASE.</li>
 <li><code>-DCMAKE_INSTALL_PREFIX=&lt;path&gt;</code> &ndash; set the directory where <code>make install</code> installs the compiler. Defaults to /usr/local.</li>
 <li><code>-DENABLE_BMV2=ON|OFF</code>. Enable the bmv2 backend. Default ON.</li>
 <li><code>-DENABLE_EBPF=ON|OFF</code>. Enable the ebpf backend. Default ON.</li>
+<li><code>-DENABLE_P4TC=ON|OFF</code>. Enable the TC backend. Default ON.</li>
 <li><code>-DENABLE_UBPF=ON|OFF</code>. Enable the ubpf backend. Default ON.</li>
 <li><code>-DENABLE_DPDK=ON|OFF</code>. Enable the DPDK backend. Default ON.</li>
 <li><code>-DENABLE_P4C_GRAPHS=ON|OFF</code>. Enable the p4c-graphs backend. Default ON.</li>
+<li><code>-DENABLE_P4FMT=ON|OFF</code>. Enable the p4fmt backend. Default ON.</li>
 <li><code>-DENABLE_P4TEST=ON|OFF</code>. Enable the p4test backend. Default ON.</li>
 <li><code>-DENABLE_TEST_TOOLS=ON|OFF</code>. Enable the p4tools backend. Default OFF.</li>
 <li><code>-DENABLE_DOCS=ON|OFF</code>. Build documentation. Default is OFF.</li>

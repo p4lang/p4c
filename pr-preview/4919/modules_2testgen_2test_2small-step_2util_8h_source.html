@@ -212,13 +212,13 @@ $(function(){initNavTree('modules_2testgen_2test_2small-step_2util_8h_source.htm
 <div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>    ExecutionState esBase = <a class="code hl_function" href="class_p4_1_1_p4_tools_1_1_test_1_1_small_step_test.html#aa3103e342ad187dca7f9a1df43f69b41">SmallStepTest::mkState</a>(bodyBase);</div>
 <div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
 <div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>    <span class="comment">// Step on the value.</span></div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    Z3Solver solver;</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    Z3Solver <a class="code hl_namespace" href="namespacesolver.html">solver</a>;</div>
 <div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>    <span class="keyword">auto</span> &amp;testState = esBase.clone();</div>
 <div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    Body body({Return(value)});</div>
 <div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    testState.replaceBody(body);</div>
 <div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    testState.pushContinuation(</div>
 <div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>        *<span class="keyword">new</span> ExecutionState::StackFrame(continuationBase, esBase.getNamespaceContext()));</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    SmallStepEvaluator eval(solver, *progInfo);</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    SmallStepEvaluator eval(<a class="code hl_namespace" href="namespacesolver.html">solver</a>, *progInfo);</div>
 <div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>    <span class="keyword">auto</span> *successors = eval.step(testState);</div>
 <div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>    ASSERT_EQ(successors-&gt;size(), 1u);</div>
 <div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span> </div>
@@ -247,10 +247,10 @@ $(function(){initNavTree('modules_2testgen_2test_2small-step_2util_8h_source.htm
 <div class="line"><a id="l00127" name="l00127"></a><span class="lineno">  127</span>    ASSERT_TRUE(progInfo);</div>
 <div class="line"><a id="l00128" name="l00128"></a><span class="lineno">  128</span> </div>
 <div class="line"><a id="l00129" name="l00129"></a><span class="lineno">  129</span>    <span class="comment">// Step on the operation.</span></div>
-<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    Z3Solver solver;</div>
+<div class="line"><a id="l00130" name="l00130"></a><span class="lineno">  130</span>    Z3Solver <a class="code hl_namespace" href="namespacesolver.html">solver</a>;</div>
 <div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span>    Body body({Return(op)});</div>
 <div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>    ExecutionState es = <a class="code hl_function" href="class_p4_1_1_p4_tools_1_1_test_1_1_small_step_test.html#aa3103e342ad187dca7f9a1df43f69b41">SmallStepTest::mkState</a>(body);</div>
-<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    SmallStepEvaluator eval(solver, *progInfo);</div>
+<div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>    SmallStepEvaluator eval(<a class="code hl_namespace" href="namespacesolver.html">solver</a>, *progInfo);</div>
 <div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>    <span class="keyword">auto</span> *successors = eval.step(es);</div>
 <div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>    ASSERT_EQ(successors-&gt;size(), 1U);</div>
 <div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span> </div>
@@ -293,6 +293,7 @@ $(function(){initNavTree('modules_2testgen_2test_2small-step_2util_8h_source.htm
 <div class="ttc" id="aclass_p4_1_1_p4_tools_1_1_test_1_1_small_step_test_html"><div class="ttname"><a href="class_p4_1_1_p4_tools_1_1_test_1_1_small_step_test.html">P4::P4Tools::Test::SmallStepTest</a></div><div class="ttdef"><b>Definition</b> modules/testgen/test/small-step/util.h:40</div></div>
 <div class="ttc" id="aclass_p4_1_1_p4_tools_1_1_test_1_1_small_step_test_html_aa3103e342ad187dca7f9a1df43f69b41"><div class="ttname"><a href="class_p4_1_1_p4_tools_1_1_test_1_1_small_step_test.html#aa3103e342ad187dca7f9a1df43f69b41">P4::P4Tools::Test::SmallStepTest::mkState</a></div><div class="ttdeci">static ExecutionState mkState(Body body)</div><div class="ttdoc">Creates an execution state out of a continuation body.</div><div class="ttdef"><b>Definition</b> modules/testgen/test/small-step/util.h:43</div></div>
 <div class="ttc" id="anamespace_p4_1_1literals_html"><div class="ttname"><a href="namespace_p4_1_1literals.html">P4::literals</a></div><div class="ttdef"><b>Definition</b> cstring.h:80</div></div>
+<div class="ttc" id="anamespacesolver_html"><div class="ttname"><a href="namespacesolver.html">solver</a></div><div class="ttdef"><b>Definition</b> phv/solver/action_constraint_solver.cpp:33</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.12.0-->

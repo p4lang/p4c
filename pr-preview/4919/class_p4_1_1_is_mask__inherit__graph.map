@@ -1,5 +1,7 @@
 <map id="P4::IsMask" name="P4::IsMask">
 <area shape="rect" id="Node000001" title=" " alt="" coords="93,225,185,251"/>
+<area shape="rect" id="Node000006" href="$class_b_f_n_1_1_is_slice_mask.html" title=" " alt="" coords="72,299,207,324"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="142,264,142,299,137,299,137,264"/>
 <area shape="rect" id="Node000002" href="$class_p4_1_1_is_like_left_value.html" title=" " alt="" coords="68,152,211,177"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="142,191,142,225,137,225,137,191"/>
 <area shape="rect" id="Node000003" href="$class_p4_1_1_key_is_simple.html" title=" " alt="" coords="5,79,132,104"/>

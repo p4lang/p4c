@@ -12,6 +12,8 @@
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="343,118,343,152,337,152,337,118"/>
 <area shape="rect" id="Node000004" href="$struct_p4_1_1_r_t_t_i_1_1_base.html" title=" " alt="" coords="283,5,397,31"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="343,44,343,79,337,79,337,44"/>
-<area shape="rect" id="Node000008" href="$class_p4_1_1_t_c_1_1_e_b_p_f_internet_checksum_p_n_a.html" title=" " alt="" coords="471,372,721,397"/>
-<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="599,338,599,372,593,372,593,338"/>
+<area shape="rect" id="Node000008" href="$class_p4_1_1_t_c_1_1_e_b_p_f_hash_p_n_a.html" title=" " alt="" coords="400,372,563,397"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="568,333,501,374,499,370,565,329"/>
+<area shape="rect" id="Node000009" href="$class_p4_1_1_t_c_1_1_e_b_p_f_internet_checksum_p_n_a.html" title=" " alt="" coords="587,372,837,397"/>
+<area shape="poly" id="edge8_Node000007_Node000009" title=" " alt="" coords="628,329,694,369,692,374,625,333"/>
 </map>

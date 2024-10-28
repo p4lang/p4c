@@ -11,4 +11,6 @@
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="246,116,213,154,209,150,242,113"/>
 <area shape="rect" id="Node000004" href="$class_p4_1_1_declaration_lookup.html" title=" " alt="" coords="210,5,377,31"/>
 <area shape="poly" id="edge4_Node000003_Node000004" title=" " alt="" coords="285,44,270,80,265,77,280,42"/>
+<area shape="rect" id="Node000007" href="$group__midend.html#class_b_f_n_1_1_type_inference" title="Extended type inference pass from p4c used in barefoot&#39;s midend." alt="" coords="225,299,373,324"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="301,264,301,299,296,299,296,264"/>
 </map>

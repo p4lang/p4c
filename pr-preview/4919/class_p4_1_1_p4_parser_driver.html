@@ -182,6 +182,11 @@ static const <a class="el" href="class_p4_1_1_i_r_1_1_indexed_vector.html">IR::I
 <tr class="memitem:a3a9ba95cb0546369c836a4a33af8cb53" id="r_a3a9ba95cb0546369c836a4a33af8cb53"><td class="memItemLeft" align="right" valign="top"><a id="a3a9ba95cb0546369c836a4a33af8cb53" name="a3a9ba95cb0546369c836a4a33af8cb53"></a>
 static const <a class="el" href="class_p4_1_1_i_r_1_1_vector.html">IR::Vector</a>&lt; IR::Expression &gt; *&#160;</td><td class="memItemRight" valign="bottom"><b>parseP4rtTranslationAnnotation</b> (const <a class="el" href="class_p4_1_1_util_1_1_source_info.html">Util::SourceInfo</a> &amp;srcInfo, const <a class="el" href="class_p4_1_1_i_r_1_1_vector.html">IR::Vector</a>&lt; IR::AnnotationToken &gt; &amp;body)</td></tr>
 <tr class="separator:a3a9ba95cb0546369c836a4a33af8cb53"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:add590ca03e76f9614eb13e4d3dc6e992" id="r_add590ca03e76f9614eb13e4d3dc6e992"><td class="memItemLeft" align="right" valign="top"><a id="add590ca03e76f9614eb13e4d3dc6e992" name="add590ca03e76f9614eb13e4d3dc6e992"></a>
+static std::pair&lt; const IR::P4Program *, const <a class="el" href="class_p4_1_1_util_1_1_input_sources.html">Util::InputSources</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>parseProgramSources</b> (FILE *in, std::string_view sourceFile, unsigned sourceLine=1)</td></tr>
+<tr class="separator:add590ca03e76f9614eb13e4d3dc6e992"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a663734f2821eb76547652f90a4b8b071" id="r_a663734f2821eb76547652f90a4b8b071"><td class="memItemLeft" align="right" valign="top">static std::pair&lt; const IR::P4Program *, const <a class="el" href="class_p4_1_1_util_1_1_input_sources.html">Util::InputSources</a> * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a663734f2821eb76547652f90a4b8b071">parseProgramSources</a> (std::istream &amp;in, std::string_view sourceFile, unsigned sourceLine=1)</td></tr>
+<tr class="separator:a663734f2821eb76547652f90a4b8b071"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a20b9fd06fce72912c4106ecf0a55e365" id="r_a20b9fd06fce72912c4106ecf0a55e365"><td class="memItemLeft" align="right" valign="top"><a id="a20b9fd06fce72912c4106ecf0a55e365" name="a20b9fd06fce72912c4106ecf0a55e365"></a>
 static const IR::StringLiteral *&#160;</td><td class="memItemRight" valign="bottom"><b>parseStringLiteral</b> (const <a class="el" href="class_p4_1_1_util_1_1_source_info.html">Util::SourceInfo</a> &amp;srcInfo, const <a class="el" href="class_p4_1_1_i_r_1_1_vector.html">IR::Vector</a>&lt; IR::AnnotationToken &gt; &amp;body)</td></tr>
 <tr class="separator:a20b9fd06fce72912c4106ecf0a55e365"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -340,6 +345,41 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>P4::P4Parser</b></td
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>an AST node if parsing was successful, or null otherwise. </dd></dl>
+
+</div>
+</div>
+<a id="a663734f2821eb76547652f90a4b8b071" name="a663734f2821eb76547652f90a4b8b071"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a663734f2821eb76547652f90a4b8b071">&#9670;&#160;</a></span>parseProgramSources()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::pair&lt; const IR::P4Program *, const <a class="el" href="class_p4_1_1_util_1_1_input_sources.html">Util::InputSources</a> * &gt; P4::P4ParserDriver::parseProgramSources </td>
+          <td>(</td>
+          <td class="paramtype">std::istream &amp;</td>          <td class="paramname"><span class="paramname"><em>in</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::string_view</td>          <td class="paramname"><span class="paramname"><em>sourceFile</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">unsigned</td>          <td class="paramname"><span class="paramname"><em>sourceLine</em></span><span class="paramdefsep"> = </span><span class="paramdefval">1</span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Parses the input and returns a pair with the P4Program and InputSources. Use this when both the parsed P4Program and InputSources are required, as opposed to the <code>parse</code> method, which only returns the P4Program. </p>
 
 </div>
 </div>
