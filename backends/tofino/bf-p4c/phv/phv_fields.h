@@ -282,7 +282,7 @@ class Field : public LiftLess<Field> {
     bitvec getStartBits(PHV::Size size) const;
 
     /// @returns the header to which this field belongs.
-    cstring header() const { return name.before(strrchr(name, '.')); }
+    cstring header() const { return name.before(strrchr(name.c_str(), '.')); }
 
  private:
     /// When set, use this name rather than PHV::Field::name when generating

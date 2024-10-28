@@ -157,27 +157,27 @@ class BFN::Pipe {
     visit_children {
         if (auto *th = dynamic_cast<ThreadVisitor *>(&v)) {
             if (th->thread == GHOST) {
-                v.visit(ghost_thread.ghost_parser, "ghost_parser"_cs);
-                v.visit(ghost_thread.ghost_mau, "ghost_mau"_cs);
+                v.visit(ghost_thread.ghost_parser, "ghost_parser");
+                v.visit(ghost_thread.ghost_mau, "ghost_mau");
             } else {
                 thread[th->thread].parsers.parallel_visit_children(v);
                 ControlFlowVisitor::GuardGlobal guard_except(v, "-EXIT-"_cs);
-                v.visit(thread[th->thread].mau, "mau"_cs);
+                v.visit(thread[th->thread].mau, "mau");
                 v.flow_merge_global_from("-EXIT-"_cs);
-                v.visit(ghost_thread.ghost_parser, "ghost_parser"_cs);
-                v.visit(ghost_thread.ghost_mau, "ghost_mau"_cs);
-                v.visit(thread[th->thread].deparser, "deparser"_cs); }
+                v.visit(ghost_thread.ghost_parser, "ghost_parser");
+                v.visit(ghost_thread.ghost_mau, "ghost_mau");
+                v.visit(thread[th->thread].deparser, "deparser"); }
         } else {
             // FIXME -- doesn't do flow_clone/merge properly, but fixing will
             // break ParserGraph (at least) as it doesn't do merge properly
             for (auto &th : thread) {
                 th.parsers.parallel_visit_children(v);
                 ControlFlowVisitor::GuardGlobal guard_except(v, "-EXIT-"_cs);
-                v.visit(th.mau, "mau"_cs);
+                v.visit(th.mau, "mau");
                 v.flow_merge_global_from("-EXIT-"_cs);
-                v.visit(th.deparser, "deparser"_cs); }
-            v.visit(ghost_thread.ghost_parser, "ghost_parser"_cs);
-            v.visit(ghost_thread.ghost_mau, "ghost_mau"_cs); } }
+                v.visit(th.deparser, "deparser"); }
+            v.visit(ghost_thread.ghost_parser, "ghost_parser");
+            v.visit(ghost_thread.ghost_mau, "ghost_mau"); } }
 }
 
 // A path that may span more than two pipeline gresses, depending on how the
@@ -198,15 +198,15 @@ class BFN::BridgePath : BFN::Pipe {
         for (auto &th : threads.at(INGRESS)) {
             th.parsers.parallel_visit_children(v);
             ControlFlowVisitor::GuardGlobal guard_except(v, "-EXIT-"_cs);
-            v.visit(th.mau, "mau"_cs);
+            v.visit(th.mau, "mau");
             v.flow_merge_global_from("-EXIT-"_cs);
-            v.visit(th.deparser, "deparser"_cs); }
+            v.visit(th.deparser, "deparser"); }
         for (auto &th : threads.at(EGRESS)) {
             th.parsers.parallel_visit_children(v);
             ControlFlowVisitor::GuardGlobal guard_except(v, "-EXIT-"_cs);
-            v.visit(th.mau, "mau"_cs);
+            v.visit(th.mau, "mau");
             v.flow_merge_global_from("-EXIT-"_cs);
-            v.visit(th.deparser, "deparser"_cs); } }
+            v.visit(th.deparser, "deparser"); } }
 }
 
 // BFN::Toplevel stores the midend and backend representation of a P4Program.
