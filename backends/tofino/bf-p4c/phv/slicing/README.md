@@ -72,7 +72,7 @@ split. The algorithm is as follows:
    3. Restore the state by removing *head* from result and *tail* from header.
 
 Pseudo codes of the DFS:
-```c++
+```cpp
 // global states
 Headers = [A, B, C, D];
 Result = []
@@ -397,7 +397,7 @@ enhancing our after-split constraint. Previously, an after-split constraint can 
 the 'exact' requirement. We introduce a less restricted form of after-split constraint, which
 specifies a minimum size of the list that a metadata resides in.
 
-```c++
+```cpp
 struct AfterSplitConstraint {
     enum class ConstraintType {
         EXACT = 0,  // must be placed in container of the size.

@@ -72,7 +72,7 @@ IR tree and accumulates information about the tree but does not modify
 it, while a Transform pass visits every node, possibly modifying the
 node or replacing it with some other node
 
-``` C++
+```cpp
     /* pseudo-code for basic Transform visitor */
     visit(node, context=ROOT, visited={}) {
 	if (node in visited) {
@@ -152,7 +152,7 @@ As an example for how these are used in the IR visitor routines, the IR::If clas
 three children to visit -- a predicate and two consequents, with the value of the
 predicate deciding which consequent to execute.  The child visitor for `IR::If` is
 
-``` C++
+```cpp
     visitor.visit(predicate);
     clone = visitor.flow_clone();
     visitor.visit(ifTrue);

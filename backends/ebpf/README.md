@@ -425,7 +425,7 @@ clang -O2 -include C-EXTERN-FILE.c -target bpf -c OUTPUT.c -o OUTPUT.o
 
   * BPF maps can be defined inside the C extern function to provide statefulness. BPF map can be defined as follows:
 
-  ```C
+  ```c
   REGISTER_START()
   REGISTER_TABLE(<NAME>, BPF_MAP_TYPE_HASH, <KEY-SIZE>, <VALUE-SIZE>>, <MAX_ENTRIES>)
   REGISTER_END()

@@ -138,7 +138,7 @@ the `boost::format` for the format argument, which has some
 compatibility for `printf` arguments.  These functions handle IR and
 SourceInfo objects smartly.  Here is an example:
 
-``` C++
+```cpp
 IR::NamedRef *ref;
 error(ErrorType::ERR_INVALID,
       "%1%: No header or metadata named '%2%'", ref->srcInfo, ref->name);
