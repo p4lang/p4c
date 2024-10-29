@@ -181,37 +181,36 @@ Introduction</h2>
 <h2><a class="anchor" id="visitors-and-transforms"></a>
 Visitors and Transforms</h2>
 <p>The compiler is organized as a series of <code>Visitor</code> and <code>Transform</code> passes <a href="https://en.wikipedia.org/wiki/Visitor_pattern">Wikipedia</a>. The <code>Visitor</code> and <code>Transform</code> base classes make defining new passes easy &ndash; a new transform need only specify the IR types it is interested in, and can ignore others. A (constant) <code>Visitor</code> pass visits every node in the IR tree and accumulates information about the tree but does not modify it, while a Transform pass visits every node, possibly modifying the node or replacing it with some other node</p>
-<div class="fragment"><div class="line">C++</div>
-<div class="line">   /* pseudo-code for basic Transform visitor */</div>
-<div class="line">   visit(node, context=ROOT, visited={}) {</div>
-<div class="line">   if (node in visited) {</div>
-<div class="line">       if (visited[node] == INVALID)</div>
-<div class="line">           throw loop_detected</div>
-<div class="line">       if (VisitDagOnce)</div>
-<div class="line">           return visited[node] }</div>
-<div class="line">   visited[node] = INVALID</div>
-<div class="line">   copy = shallow_clone(node)</div>
-<div class="line">   if (VisitDagOnce)</div>
-<div class="line">       forward_children(copy, visited)</div>
-<div class="line">   copy = preorder(copy, context) // override in Transform subclass</div>
-<div class="line">   visit_children(copy, {copy, context}, visited)</div>
-<div class="line">   copy = postorder(copy, context) // override in Transform subclass</div>
-<div class="line">   if (*copy == *node) {</div>
-<div class="line">       visited[node] = node</div>
-<div class="line">       return node</div>
-<div class="line">   } else {</div>
-<div class="line">       visited[node] = copy</div>
-<div class="line">       return copy }</div>
-<div class="line">   }</div>
-<div class="line">   forward_children(node, visited) {</div>
-<div class="line">   for (child in children(node))</div>
-<div class="line">       if (child in visited)</div>
-<div class="line">           child = visited[child]</div>
-<div class="line">   }</div>
-<div class="line">   visit_children(node, context, visited) {</div>
-<div class="line">   for (child in children(node))</div>
-<div class="line">       child = visit(child, context, visited)</div>
-<div class="line">   }</div>
+<div class="fragment"><div class="line"><span class="comment">/* pseudo-code for basic Transform visitor */</span></div>
+<div class="line">visit(node, context=ROOT, visited={}) {</div>
+<div class="line"><span class="keywordflow">if</span> (node in visited) {</div>
+<div class="line">    <span class="keywordflow">if</span> (visited[node] == INVALID)</div>
+<div class="line">        <span class="keywordflow">throw</span> loop_detected</div>
+<div class="line">    <span class="keywordflow">if</span> (VisitDagOnce)</div>
+<div class="line">        <span class="keywordflow">return</span> visited[node] }</div>
+<div class="line">visited[node] = INVALID</div>
+<div class="line">copy = shallow_clone(node)</div>
+<div class="line"><span class="keywordflow">if</span> (VisitDagOnce)</div>
+<div class="line">    forward_children(copy, visited)</div>
+<div class="line">copy = preorder(copy, context) <span class="comment">// override in Transform subclass</span></div>
+<div class="line">visit_children(copy, {copy, context}, visited)</div>
+<div class="line">copy = postorder(copy, context) <span class="comment">// override in Transform subclass</span></div>
+<div class="line"><span class="keywordflow">if</span> (*copy == *node) {</div>
+<div class="line">    visited[node] = node</div>
+<div class="line">    <span class="keywordflow">return</span> node</div>
+<div class="line">} <span class="keywordflow">else</span> {</div>
+<div class="line">    visited[node] = copy</div>
+<div class="line">    <span class="keywordflow">return</span> copy }</div>
+<div class="line">}</div>
+<div class="line">forward_children(node, visited) {</div>
+<div class="line"><span class="keywordflow">for</span> (child in children(node))</div>
+<div class="line">    <span class="keywordflow">if</span> (child in visited)</div>
+<div class="line">        child = visited[child]</div>
+<div class="line">}</div>
+<div class="line">visit_children(node, context, visited) {</div>
+<div class="line"><span class="keywordflow">for</span> (child in children(node))</div>
+<div class="line">    child = visit(child, context, visited)</div>
+<div class="line">}</div>
 </div><!-- fragment --><p>A <code>Transform</code> pass is allowed to freely modify or completely replace a node in its preorder and postorder routines, and the Transform visitor will automatically rebuild the tree as needed. The transform subroutines cannot modify other nodes in the tree, however, though they may access and refer to them. These routines can be overloaded to differentiate between different IR subclasses automatically. Any given visitor need only override the routines it is interested in for the IR types it is interested in.</p>
 <p>There are several Visitor subclasses that describe different types of visitors:</p>
 <table class="markdownTable">
@@ -240,12 +239,11 @@ ControlFlowVisitor</h4>
 <p>To support control flow analysis, there is a special <code>ControlFlowVisitor</code> interface that is understood by certain IR subclasses that encapsulate control flow, and is used by them to control the order in which children are visited and the visitor state passed to the visitor preorder/postorder routines in order to implement control-flow analysis.</p>
 <p>The basic idea is that control flow IR nodes, when visiting their children, will create clones of the <code>ControlFlowVisitor</code> object to visit different children after a branch, and will then call <code>flow_merge</code> at the join point to merge the visitor state. Both the <code>Visitor</code> base class and the <code>ControlFlowVisitor</code> interface define two virtual functions: <code>flow_clone</code> and <code>flow_merge</code> to mediate this. In the <code>Visitor</code> base class (used by all visitors that do <em>not</em> inherit from the <code>ControlFlowVisitor</code> interface, these are implemented as no-ops &ndash; <code>flow_clone</code> just returns the same object, and <code>flow_merge</code> does nothing. In the <code>ControlFlowVisitor</code> interface <code>flow_clone</code> calls the <code>clone</code> function (which must be implemented by the leaf class) and <code>flow_merge</code> is an abstract virtual function that must be implemented by the leaf class.</p>
 <p>As an example for how these are used in the IR visitor routines, the IR::If class has three children to visit &ndash; a predicate and two consequents, with the value of the predicate deciding which consequent to execute. The child visitor for <code>IR::If</code> is</p>
-<div class="fragment"><div class="line">C++</div>
-<div class="line">   visitor.visit(predicate);</div>
-<div class="line">   clone = visitor.flow_clone();</div>
-<div class="line">   visitor.visit(ifTrue);</div>
-<div class="line">   clone.visit(ifFalse);</div>
-<div class="line">   visitor.flow_merge(clone);</div>
+<div class="fragment"><div class="line">visitor.visit(predicate);</div>
+<div class="line">clone = visitor.flow_clone();</div>
+<div class="line">visitor.visit(ifTrue);</div>
+<div class="line">clone.visit(ifFalse);</div>
+<div class="line">visitor.flow_merge(clone);</div>
 </div><!-- fragment --><p>So both consequents are visited with a visitor state that corresponds to the control flow immediately after evaluating the predicate, and then the control flow state after both consequents are merged back together.</p>
 <p>In order to make use of this functionality, a <code>Visitor</code> sub class need only inherit from the <code>ControlFlowVisitor</code> interface and implement the <code>clone</code> and <code>flow_merge</code> routines. Other <code>Visitor</code> classes don't need to do anything, but may want to implement <code>clone</code> for other reasons.</p>
 <p>This control flow analysis only works for branch-and-join control flow &ndash; it is not adequate for loops (which generally requires an iterate to fixed point process). As our IR does not (currently) support loops this is fine. Since P4 does not allow loops in the match-action part of the pipeline, this works well there, but may be inadequate for parsers, which can support loops.</p>

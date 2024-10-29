@@ -223,10 +223,9 @@ Handling errors</h2>
 <p>An additional goal of the P4C compiler is to provide as many error messages as possible in one go. Therefore, while there is support for <code>FATAL_ERROR</code>s, it is desirable to try to continue execution and report all possible errors, using the <code>error</code> and <code>warning</code> calls. With the free form implementation of error messages, repeated passes of the compiler will then issue the same message multiple times. This results in frustrating the programmer.</p>
 <p>To address the repeated message issue, as of Dec 2018, we introduce error/warning types. They classify the errors and impose a format that allows the compiler to automatically filter repeated messages. The filtering is based on the type of error and the source code location of the object that reports the error. Thus, it allows multiple error types per source code line, and ensures that only one error is reported even if the message is raised multiple times. We encourage compiler developers to use this method for issuing errors. The error codes and formats are defined in <code>lib/error_catalog.[h,cpp]</code>. Backends can extend the codes and formats as needed (and they are encouraged to do so).</p>
 <p>Most of the errors as of Dec 2018 are written in free form: they use the <code>boost::format</code> for the format argument, which has some compatibility for <code>printf</code> arguments. These functions handle IR and SourceInfo objects smartly. Here is an example:</p>
-<div class="fragment"><div class="line"> C++</div>
-<div class="line">IR::NamedRef *ref;</div>
+<div class="fragment"><div class="line">IR::NamedRef *ref;</div>
 <div class="line">error(ErrorType::ERR_INVALID,</div>
-<div class="line">      &quot;%1%: No header or metadata named &#39;%2%&#39;&quot;, ref-&gt;srcInfo, ref-&gt;name);</div>
+<div class="line">      <span class="stringliteral">&quot;%1%: No header or metadata named &#39;%2%&#39;&quot;</span>, ref-&gt;srcInfo, ref-&gt;name);</div>
 </div><!-- fragment --><p>output:</p>
 <div class="fragment"><div class="line">missing_decls1.p4(6): [-Werror=invalid] Error: No header or metadata named &#39;data&#39;</div>
 <div class="line">    if (data.b2 == 0) {</div>

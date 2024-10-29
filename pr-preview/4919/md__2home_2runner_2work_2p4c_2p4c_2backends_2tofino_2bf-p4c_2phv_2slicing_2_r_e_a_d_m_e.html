@@ -170,8 +170,7 @@ The basic slicing problem</h1>
 </ol>
 </li>
 </ol>
-<p>Pseudo codes of the DFS: </p><div class="fragment"><div class="line"> ++</div>
-<div class="line"><span class="comment">// global states</span></div>
+<p>Pseudo codes of the DFS: </p><div class="fragment"><div class="line"><span class="comment">// global states</span></div>
 <div class="line">Headers = [A, B, C, D];</div>
 <div class="line">Result = []</div>
 <div class="line"> </div>
@@ -371,8 +370,7 @@ Updated rotational and super-cluster slice-list size constraints</h2>
 <h2><a class="anchor" id="enhanced-after-split-constraint"></a>
 Enhanced after-split constraint</h2>
 <p>Although it seems that metadata type complicates the problem, we can handle them by simply enhancing our after-split constraint. Previously, an after-split constraint can only specify the 'exact' requirement. We introduce a less restricted form of after-split constraint, which specifies a minimum size of the list that a metadata resides in.</p>
-<div class="fragment"><div class="line"> ++</div>
-<div class="line"><span class="keyword">struct </span>AfterSplitConstraint {</div>
+<div class="fragment"><div class="line"><span class="keyword">struct </span>AfterSplitConstraint {</div>
 <div class="line">    <span class="keyword">enum class</span> ConstraintType {</div>
 <div class="line">        EXACT = 0,  <span class="comment">// must be placed in container of the size.</span></div>
 <div class="line">        MIN = 1,    <span class="comment">// must be placed in container at least the size.</span></div>
