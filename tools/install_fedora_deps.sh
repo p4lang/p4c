@@ -49,6 +49,7 @@ sudo dnf install -y -q \
     python3 \
     python3-pip \
     python3-thrift \
+    python3-devel \
     readline-devel \
     tcpdump \
     thrift-devel \
