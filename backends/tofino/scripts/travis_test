@@ -1,0 +1,37 @@
+#!/bin/sh
+
+if [ ! -r CMakeCache.txt ]; then
+    echo >&2 "Must run from the build directory"
+    echo >&2 "usage $0 1|2|3";
+    exit 1
+fi
+
+eval $(grep '^ *- [A-Z]' ../.travis.yml | sed 's/ *- //')
+
+rv=0
+
+cd p4c
+if [ "$1" = "1" ]; then
+    CTEST_ARGS="-R $TOFINO_TESTS_1 -E $TOFINO_EXCLUDE_1 -LE $TOFINO_EXCLUDE_LABEL_1"
+elif [ "$1" = "2" ]; then
+    CTEST_ARGS="-R $TOFINO_TESTS_2 -E $TOFINO_EXCLUDE_2"
+elif [ "$1" = "3" ]; then
+    CTEST_ARGS="-R $JBAY_TESTS -E $JBAY_EXCLUDE"
+elif [ "$1" = "cb" ]; then
+    CTEST_ARGS="-R ^tofino3 -E $JBAY_EXCLUDE"
+else
+    echo >&2 "usage $0 1|2|3|cb";
+    exit 1
+fi
+
+export P4TEST_CLEAN_PASSING=true
+
+if ctest -j6 $CTEST_ARGS; then
+    rm -f Travis${1}fail.log
+else
+    cp Testing/Temporary/LastTestsFailed.log Travis${1}fail.log
+    rv=1
+fi  
+cp Testing/Temporary/LastTest.log Travis$1.log
+
+exit $rv

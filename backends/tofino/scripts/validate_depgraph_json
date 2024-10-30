@@ -1,0 +1,24 @@
+#! /usr/bin/env python3
+
+# Script to validate a resources.json against the json schema
+#
+# The default behavior takes a resources.json file as a mandatory argument
+# and it validates it agains the gen_schema file in the Glass repo.
+#
+# If used from the default location, the relative path to the Glass repo
+# is automatically configured. Otherwise, please add the corresponding
+# directory to PYTHONPATH
+#
+import os, sys
+from jsonvalidator import JSONValidator
+
+MYPATH = os.path.dirname(os.path.realpath(__file__))
+GEN_SCHEMA_PATH=os.path.join(MYPATH, "../compiler_interfaces")
+sys.path.append(GEN_SCHEMA_PATH)
+
+from schemas.table_graph_schema import TableGraphsSchema, get_schema_version
+
+v = JSONValidator()
+rc = v.validate('dep.json', TableGraphsSchema, get_schema_version())
+if not rc:
+    sys.exit(1)

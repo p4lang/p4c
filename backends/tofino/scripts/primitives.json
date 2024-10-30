@@ -1,0 +1,536 @@
+{
+    "sample_e2e" :
+    {
+    "num_args" : 3,
+    "args" : ["session_id", "sample_length", "sample_header"],
+    "properties" : {
+        "session_id" : {
+        "type" : ["int", "table_entry_data", "field"],
+        "access" : "read",
+        "data_width" : "standard_metadata.clone_spec"
+        },
+        "sample_length" : {
+        "type" : ["int", "table_entry_data", "field"],
+        "access" : "read",
+        "data_width" : 7
+        },
+        "sample_header" : {
+        "type" : ["header_instance"],
+        "access" : "read",
+        "optional" : true
+        }
+    }
+    },
+    "recirculate" :
+    {
+    "num_args" : 1,
+    "args" : ["port"],
+    "properties" : {
+        "port" : {
+        "type" : ["int", "table_entry_data"],
+        "access" : "read",
+        "data_width" : 7
+        }
+    }
+    },
+    "shift_left" :
+    {
+	"num_args" : 3,
+	"args" : ["field", "value1", "value2"],
+	"properties" : {
+	    "field" : {
+		"type" : ["field"],
+		"access" : "write"
+	    },
+	    "value1" : {
+		"type" : ["field", "int"],
+		"access" : "read",
+		"data_width" : "field"
+	    },
+	    "value2" : {
+		"type" : ["int"],
+		"access" : "read",
+		"data_width" : "field"
+	    }
+	}
+    },
+    "shift_right" :
+    {
+	"num_args" : 3,
+	"args" : ["field", "value1", "value2"],
+	"properties" : {
+	    "field" : {
+		"type" : ["field"],
+		"access" : "write"
+	    },
+	    "value1" : {
+		"type" : ["field", "int"],
+		"access" : "read",
+		"data_width" : "field"
+	    },
+	    "value2" : {
+		"type" : ["int"],
+		"access" : "read",
+		"data_width" : "field"
+	    }
+	}
+    },
+    "funnel_shift_right" :
+    {
+	"num_args" : 4,
+	"args" : ["field", "msb_src", "lsb_src", "shift"],
+	"properties" : {
+	    "field" : {
+		"type" : ["field"],
+		"access" : "write"
+	    },
+	    "msb_src" : {
+		"type" : ["field"],
+		"access" : "read",
+		"data_width" : "field"
+	    },
+	    "lsb_src" : {
+		"type" : ["field"],
+		"access" : "read",
+		"data_width" : "field"
+	    },
+	    "shift" : {
+		"type" : ["int"],
+		"access" : "read",
+		"data_width" : "field"
+	    }
+	}
+    },
+    "modify_field_rng_uniform" :
+    {
+	"num_args" : 3,
+	"args" : ["dst", "lower_bound", "upper_bound"],
+	"properties" : {
+	    "dst" : {
+		"type" : ["field"],
+		"access" : "write"
+	    },
+	    "lower_bound" : {
+		"type" : ["int"],
+		"access" : "read",
+		"data_width" : 32
+	    },
+	    "upper_bound" : {
+		"type" : ["int"],
+		"access" : "read",
+		"data_width" : 32
+	    }
+	}
+    },
+    "bit_nor" :
+    {
+	"num_args" : 3,
+	"args" : ["dst", "src1", "src2"],
+	"properties" : {
+	    "dst" : {
+		"type" : ["field"],
+		"access" : "write"
+	    },
+	    "src1" : {
+		"type" : ["field", "int", "table_entry_data"],
+		"access" : "read",
+		"data_width" : "dst"
+	    },
+	    "src2" : {
+		"type" : ["field", "int", "table_entry_data"],
+		"access" : "read",
+		"data_width" : "dst"
+	    }
+	}
+    },
+    "bit_nand" :
+    {
+	"num_args" : 3,
+	"args" : ["dst", "src1", "src2"],
+	"properties" : {
+	    "dst" : {
+		"type" : ["field"],
+		"access" : "write"
+	    },
+	    "src1" : {
+		"type" : ["field", "int", "table_entry_data"],
+		"access" : "read",
+		"data_width" : "dst"
+	    },
+	    "src2" : {
+		"type" : ["field", "int", "table_entry_data"],
+		"access" : "read",
+		"data_width" : "dst"
+	    }
+	}
+    },
+    "bit_xnor" :
+    {
+	"num_args" : 3,
+	"args" : ["dst", "src1", "src2"],
+	"properties" : {
+	    "dst" : {
+		"type" : ["field"],
+		"access" : "write"
+	    },
+	    "src1" : {
+		"type" : ["field", "int", "table_entry_data"],
+		"access" : "read",
+		"data_width" : "dst"
+	    },
+	    "src2" : {
+		"type" : ["field", "int", "table_entry_data"],
+		"access" : "read",
+		"data_width" : "dst"
+	    }
+	}
+    },
+    "bit_not" :
+    {
+	"num_args" : 2,
+	"args" : ["dst", "src"],
+	"properties" : {
+	    "dst" : {
+		"type" : ["field"],
+		"access" : "write"
+	    },
+	    "src" : {
+		"type" : ["field", "int", "table_entry_data"],
+		"access" : "read",
+		"data_width" : "dst"
+	    }
+	}
+    },
+    "min" :
+    {
+	"num_args" : 3,
+	"args" : ["dst", "src1", "src2"],
+	"properties" : {
+	    "dst" : {
+		"type" : ["field"],
+		"access" : "write"
+	    },
+	    "src1" : {
+		"type" : ["field", "int", "table_entry_data"],
+		"access" : "read",
+		"data_width" : "dst"
+	    },
+	    "src2" : {
+		"type" : ["field", "int", "table_entry_data"],
+		"access" : "read",
+		"data_width" : "dst"
+	    }
+	}
+    },
+    "max" :
+    {
+	"num_args" : 3,
+	"args" : ["dst", "src1", "src2"],
+	"properties" : {
+	    "dst" : {
+		"type" : ["field"],
+		"access" : "write"
+	    },
+	    "src1" : {
+		"type" : ["field", "int", "table_entry_data"],
+		"access" : "read",
+		"data_width" : "dst"
+	    },
+	    "src2" : {
+		"type" : ["field", "int", "table_entry_data"],
+		"access" : "read",
+		"data_width" : "dst"
+	    }
+	}
+    },
+    "bit_andca" :
+    {
+	"num_args" : 3,
+	"args" : ["dst", "src1", "src2"],
+	"properties" : {
+	    "dst" : {
+		"type" : ["field"],
+		"access" : "write"
+	    },
+	    "src1" : {
+		"type" : ["field", "int", "table_entry_data"],
+		"access" : "read",
+		"data_width" : "dst"
+	    },
+	    "src2" : {
+		"type" : ["field", "int", "table_entry_data"],
+		"access" : "read",
+		"data_width" : "dst"
+	    }
+	}
+    },
+    "bit_andcb" :
+    {
+	"num_args" : 3,
+	"args" : ["dst", "src1", "src2"],
+	"properties" : {
+	    "dst" : {
+		"type" : ["field"],
+		"access" : "write"
+	    },
+	    "src1" : {
+		"type" : ["field", "int", "table_entry_data"],
+		"access" : "read",
+		"data_width" : "dst"
+	    },
+	    "src2" : {
+		"type" : ["field", "int", "table_entry_data"],
+		"access" : "read",
+		"data_width" : "dst"
+	    }
+	}
+    },
+    "bit_orca" :
+    {
+	"num_args" : 3,
+	"args" : ["dst", "src1", "src2"],
+	"properties" : {
+	    "dst" : {
+		"type" : ["field"],
+		"access" : "write"
+	    },
+	    "src1" : {
+		"type" : ["field", "int", "table_entry_data"],
+		"access" : "read",
+		"data_width" : "dst"
+	    },
+	    "src2" : {
+		"type" : ["field", "int", "table_entry_data"],
+		"access" : "read",
+		"data_width" : "dst"
+	    }
+	}
+    },
+    "bit_orcb" :
+    {
+	"num_args" : 3,
+	"args" : ["dst", "src1", "src2"],
+	"properties" : {
+	    "dst" : {
+		"type" : ["field"],
+		"access" : "write"
+	    },
+	    "src1" : {
+		"type" : ["field", "int", "table_entry_data"],
+		"access" : "read",
+		"data_width" : "dst"
+	    },
+	    "src2" : {
+		"type" : ["field", "int", "table_entry_data"],
+		"access" : "read",
+		"data_width" : "dst"
+	    }
+	}
+    },
+    "bypass_egress" :
+    {
+	"num_args" : 0,
+	"args" : [],
+	"properties" : {}
+	},
+    "mark_for_drop" :
+    {
+	"num_args" : 0,
+	"args" : [],
+	"properties" : {}
+	},
+    "exit" :
+    {
+	"num_args" : 0,
+	"args" : [],
+	"properties" : {}
+	},
+    "invalidate" :
+    {
+	"num_args" : 1,
+	"args" : ["dst"],
+	"properties" : {
+	    "dst" : {
+	    "type" : ["field", "int"],
+	    "access" : "write"
+	    }
+	}
+	},
+    "modify_field_conditionally" :
+    {
+	"num_args" : 3,
+	"args" : ["dst", "cond", "src"],
+	"properties" : {
+	    "dst" : {
+		"type" : ["field"],
+		"access" : "write"
+	    },
+	    "cond" : {
+		"type" : ["int", "table_entry_data"],
+		"access" : "read",
+		"data_width" : 1
+	    },
+	    "src" : {
+		"type" : ["int", "table_entry_data"],
+		"access" : "read",
+		"data_width" : "dst"
+	    }
+	}
+    },
+    "modify_field_with_shift" :
+    {
+	"num_args" : 4,
+	"args" : ["dst", "src", "shift", "mask"],
+	"properties" : {
+	    "dst" : {
+		"type" : ["field"],
+		"access" : "write"
+	    },
+	    "src" : {
+		"type" : ["field"],
+		"access" : "read",
+		"data_width" : "dst"
+	    },
+	    "shift" : {
+		"type" : ["int"],
+		"access" : "read",
+		"data_width" : "dst"
+	    },
+	    "mask" : {
+		"type" : ["int"],
+		"access" : "read",
+		"data_width" : "dst"
+	    }
+	}
+    },
+    "swap" :
+    {
+	"num_args" : 2,
+	"args" : ["field_1", "field_2"],
+	"properties" : {
+	    "field_1" : {
+		"type" : ["field"],
+		"access" : "write",
+		"data_width" : "field_1"
+	    },
+	    "field_2" : {
+		"type" : ["field"],
+		"access" : "write",
+		"data_width" : "field_2"
+	    }
+	}
+    },
+    "count_from_hash" :
+    {
+	"num_args" : 2,
+	"args" : ["cref", "calc"],
+	"properties" : {
+	    "cref" : {
+		"type" : ["counter"],
+		"access" : "read",
+		"data_width" : 32
+	    },
+	    "calc" : {
+		"type" : ["field_list_calculation"],
+		"access" : "read",
+		"data_width" : 32
+	    }
+	}
+    },
+    "execute_meter_from_hash" :
+    {
+	"num_args" : 4,
+	"args" : ["mref", "calc", "dst", "pre_color"],
+	"properties" : {
+	    "mref" : {
+		"type" : ["meter"],
+		"access" : "read",
+		"data_width" : "dst"
+	    },
+	    "calc" : {
+		"type" : ["field_list_calculation"],
+		"access" : "read",
+		"data_width" : "dst"
+	    },
+	    "dst" : {
+		"type" : ["field"],
+		"access" : "write",
+		"data_width" : "dst"
+	    },
+	    "pre_color" : {
+		"type" : ["field"],
+		"access" : "read",
+		"data_width" : "pre_color",
+        "optional" : true
+	    }
+	}
+    },
+    "execute_meter_with_or" :
+    {
+	"num_args" : 4,
+	"args" : ["mref", "idx", "dst", "pre_color"],
+	"properties" : {
+	    "mref" : {
+		"type" : ["meter"],
+		"access" : "read",
+		"data_width" : "dst"
+	    },
+	    "idx" : {
+		"type" : ["field", "table_entry_data", "int"],
+		"access" : "read",
+		"data_width" : "dst"
+	    },
+	    "dst" : {
+		"type" : ["field"],
+		"access" : "write",
+		"data_width" : "dst"
+	    },
+	    "pre_color" : {
+		"type" : ["field"],
+		"access" : "read",
+		"data_width" : "pre_color",
+        "optional" : true
+	    }
+	}
+    },
+    "execute_meter_from_hash_with_or" :
+    {
+	"num_args" : 4,
+	"args" : ["mref", "calc", "dst", "pre_color"],
+	"properties" : {
+	    "mref" : {
+		"type" : ["meter"],
+		"access" : "read",
+		"data_width" : "dst"
+	    },
+	    "calc" : {
+		"type" : ["field_list_calculation"],
+		"access" : "read",
+		"data_width" : "dst"
+	    },
+	    "dst" : {
+		"type" : ["field"],
+		"access" : "write",
+		"data_width" : "dst"
+	    },
+	    "pre_color" : {
+		"type" : ["field"],
+		"access" : "read",
+		"data_width" : "pre_color",
+        "optional" : true
+	    }
+	}
+    },
+    "invalidate_digest" :
+    {
+	"num_args" : 0,
+	"args" : [],
+	"properties" : {}
+	},
+    "invalidate_clone" :
+    {
+	"num_args" : 0,
+	"args" : [],
+	"properties" : {}
+	}
+}

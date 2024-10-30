@@ -1,0 +1,558 @@
+/**
+ * Copyright (C) 2024 Intel Corporation
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License.  You may obtain a copy
+ * of the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software distributed
+ * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+ * CONDITIONS OF ANY KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations under the License.
+ * 
+ * 
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+
+/* -*-C++-*- */
+
+#emit
+
+#include "lib/bitvec.h"
+#include "bf-p4c/common/debug_info.h"
+#include "bf-p4c/ir/bitrange.h"
+#include "bf-p4c/ir/gress.h"
+#include "bf-p4c/parde/clot/clot.h"
+#include "bf-p4c/phv/phv.h"
+#include "bf-p4c/lib/error_macros.h"
+
+struct StageUse {
+    static constexpr int MAX_LOGICAL_IDS = 16;
+    static constexpr int MAX_SRAMS = 80;
+    static constexpr int MAX_TCAMS = 24;
+    static constexpr int MAX_MAPRAMS = 48;
+    static constexpr int MAX_IXBAR_BYTES = 128;
+    static constexpr int MAX_TERNARY_GROUPS = 12;
+};
+
+/**
+ * @namespace IR::BFN
+ * @brief The namespace encapsulating Tofino 1/2-specific %IR nodes.
+ */
+namespace BFN {
+struct HeaderStackInfo;
+}  // namespace BFN
+#end
+
+#emit_impl
+#include "bf-p4c/ir/thread_visitor.h"
+#end
+
+// Adding this class in ingress and egress thread so that Alias can replace special hardware
+// constrained fields with AliasMember and AliasSlice. And CollectPhvInfo can use this information
+// to update Field's properly for alias fields of hardware constrained fields.
+class BFN::HardwareConstrainedField {
+    Expression expr;
+    bitvec constraint_type = {};
+#emit
+    enum {
+        // see phv_fields.cpp
+        INVALIDATE_FROM_ARCH,
+        // see phv_fields.cpp
+        DEPARSED_BOTTOM_BITS,
+        // see auto_init_metadata.cpp
+        INIT_BY_ARCH
+    };
+#end
+#nodbprint
+}
+
+class BFN::Pipe {
+    // Name specified in P4. Can hold more than one name if multiple pipelines are equivalent.
+    inline std::vector<cstring> names;
+    // Logical pipe ids in a multi-pipe architecture.
+    inline std::vector<int> ids;
+    inline NameMap<HeaderOrMetadata> metadata;  // not visited
+    inline std::vector<Annotation> global_pragmas;  // not visited
+#noconstructor
+    Pipe() {
+        ids = {0};
+        names = {cstring()};
+    }
+    Pipe(std::vector<cstring> names, std::vector<int> ids) : names(names), ids(ids) {}
+    class thread_t {
+        // not visible in IR, because some passes checks parent nodes of a IR::Member and
+        // HardwareConstrainedField is an unexpected case.
+        inline Vector<BFN::HardwareConstrainedField> hw_constrained_fields = {};
+        inline Vector<BFN::AbstractParser> parsers = {};
+
+        MAU::TableSeq mau = nullptr;
+        BFN::AbstractDeparser deparser = nullptr;
+        operator== {
+            return parsers == a.parsers && mau == a.mau && deparser == a.deparser &&
+                hw_constrained_fields == a.hw_constrained_fields;
+        }
+        toJSON {
+            json << json.indent << "\"parser\" : " << parsers << "," << std::endl
+                 << json.indent << "\"mau\" : " << mau << "," << std::endl
+                 << json.indent << "\"deparser\" : " << deparser << std::endl
+                 << json.indent << "\"hw_constrained_fields\" : " <<  hw_constrained_fields; }
+        fromJSON {
+            IR::BFN::Pipe::thread_t * thread = new IR::BFN::Pipe::thread_t();
+            json.load("parsers", thread->parsers);
+            json.load("mau", thread->mau);
+            json.load("deparser", thread->deparser);
+            json.load("hw_constrained_fields", thread->hw_constrained_fields);
+            return thread;
+        }
+    }
+    thread_t[2] thread = {};
+
+    class ghost_thread_t {
+        NullOK MAU::TableSeq ghost_mau = nullptr;
+        BFN::GhostParser ghost_parser = nullptr;  // Fake Ghost Parser
+        operator== { return ghost_mau == a.ghost_mau
+                        && ghost_parser == a.ghost_parser; }
+        dump_fields { out << "ghost_mau=" << ghost_mau;
+                      out << "ghost_parser=" << ghost_parser; }
+        dbprint { out << "ghost_mau=" << ghost_mau << " "
+                      << "ghost_parser=" << ghost_parser; }
+#emit
+        friend std::ostream &operator<<(std::ostream &out, const ghost_thread_t &gt) {
+            out << "ghost_mau=" << gt.ghost_mau << " "
+                << "ghost_parser=" << gt.ghost_parser;
+            return out;
+        }
+#end
+    }
+    ghost_thread_t ghost_thread;
+
+#emit
+    /// If non-null, information about header stack usage in this pipe.
+    ::BFN::HeaderStackInfo* headerStackInfo = nullptr;
+#end
+
+#emit
+    bool has_pragma(const char *pragma) const;
+
+    // Returns canonical pipeline id. A single backend pipeline instance can represent
+    // multiple equivalent pipelines in the P4 program, in that case this function
+    // picks consistently one selected pipeline index. Particularly useful for logging,
+    // using the same pipeline id helps to keep all logs attached to a single pipeline.
+    int canon_id() const { return ids.front(); }
+    cstring canon_name() const { return names.front(); }
+#end
+
+#apply
+    operator== { return metadata == a.metadata
+                        && global_pragmas == a.global_pragmas
+                        && headerStackInfo == a.headerStackInfo
+                        && thread[0] == a.thread[0]
+                        && thread[1] == a.thread[1]
+                        && ghost_thread.ghost_parser == a.ghost_thread.ghost_parser
+                        && ghost_thread.ghost_mau == a.ghost_thread.ghost_mau; }
+    visit_children {
+        if (auto *th = dynamic_cast<ThreadVisitor *>(&v)) {
+            if (th->thread == GHOST) {
+                v.visit(ghost_thread.ghost_parser, "ghost_parser"_cs);
+                v.visit(ghost_thread.ghost_mau, "ghost_mau"_cs);
+            } else {
+                thread[th->thread].parsers.parallel_visit_children(v);
+                ControlFlowVisitor::GuardGlobal guard_except(v, "-EXIT-"_cs);
+                v.visit(thread[th->thread].mau, "mau"_cs);
+                v.flow_merge_global_from("-EXIT-"_cs);
+                v.visit(ghost_thread.ghost_parser, "ghost_parser"_cs);
+                v.visit(ghost_thread.ghost_mau, "ghost_mau"_cs);
+                v.visit(thread[th->thread].deparser, "deparser"_cs); }
+        } else {
+            // FIXME -- doesn't do flow_clone/merge properly, but fixing will
+            // break ParserGraph (at least) as it doesn't do merge properly
+            for (auto &th : thread) {
+                th.parsers.parallel_visit_children(v);
+                ControlFlowVisitor::GuardGlobal guard_except(v, "-EXIT-"_cs);
+                v.visit(th.mau, "mau"_cs);
+                v.flow_merge_global_from("-EXIT-"_cs);
+                v.visit(th.deparser, "deparser"_cs); }
+            v.visit(ghost_thread.ghost_parser, "ghost_parser"_cs);
+            v.visit(ghost_thread.ghost_mau, "ghost_mau"_cs); } }
+}
+
+// A path that may span more than two pipeline gresses, depending on how the
+// bridged header is used. For instance, a bridged header in folded pipeline
+// program may be used in the following path:
+//
+// IA -> EB -> IB -> EA
+//
+// In a foldedn pipeline configuration, a bridged header can be used in more
+// than two threads.
+class BFN::BridgePath : BFN::Pipe {
+    ordered_map<gress_t, std::vector<thread_t>> threads;
+
+#noconstructor
+    BridgePath() = default;
+    visit_children {
+        // does not have support for ghost thread yet.
+        for (auto &th : threads.at(INGRESS)) {
+            th.parsers.parallel_visit_children(v);
+            ControlFlowVisitor::GuardGlobal guard_except(v, "-EXIT-"_cs);
+            v.visit(th.mau, "mau"_cs);
+            v.flow_merge_global_from("-EXIT-"_cs);
+            v.visit(th.deparser, "deparser"_cs); }
+        for (auto &th : threads.at(EGRESS)) {
+            th.parsers.parallel_visit_children(v);
+            ControlFlowVisitor::GuardGlobal guard_except(v, "-EXIT-"_cs);
+            v.visit(th.mau, "mau"_cs);
+            v.flow_merge_global_from("-EXIT-"_cs);
+            v.visit(th.deparser, "deparser"_cs); } }
+}
+
+// BFN::Toplevel stores the midend and backend representation of a P4Program.
+// Backend processing is applied to this node to enable backtracking into the
+// midend. Sometimes, this is beneficial and simplifies program transformation.
+// For example, when a flexible header is repacked, it would be easier to
+// transform the midend IR, instead of backend IR.
+class BFN::Toplevel {
+    // original P4Program which is used to regenerate backend IR after
+    // optimizing flexible header packing, by default, not visited.
+    IR::P4Program program;
+
+    // Pipeline implementation on a physical pipe, denoted by the 'Pipeline'
+    // keyword in TNA.
+    IR::Vector<IR::BFN::Pipe> pipes;
+
+    // Pairs of ingress & egress threads that has bridge metadata
+    // by default, not visited
+    std::vector<IR::BFN::BridgePath> bridge_pipes;
+
+#nodbprint
+
+#apply
+    visit_children {
+        v.visit(pipes);
+    }
+}
+
+abstract BFN::Unit {
+    /* Abstract base class for any of
+       - parser state
+       - mau logical table
+       - deparser
+       A packet running through a tofino pipe executes a sequence of Units in order;
+       each Unit completes before the next executes.  All accesses of PHV containers
+       are associated with a particular Unit.  */
+    virtual gress_t thread() const = 0;
+    virtual int stage() const = 0;
+}
+
+class InstanceRef : HeaderRef {
+    ID                          name;
+    NullOK HeaderOrMetadata     obj;
+    inline NameMap<InstanceRef> nested;
+#noconstructor
+    InstanceRef(cstring prefix, ID n, Type t, Annotations ann = nullptr);
+    InstanceRef(ID n, Type t, Annotations ann = nullptr)
+    : InstanceRef(cstring(), n, t, ann) {}
+    InstanceRef(Type t) : HeaderRef(t) { }
+    HeaderOrMetadata baseRef() const override { return obj; }
+    toString { return obj ? obj->name : name; }
+    dbprint { out << toString(); }
+}
+
+/** A normal InstanceRef preserves the instance structure in the name of the
+ * object it constructs, eg. struct.hdr.field becomes three nested
+ * InstanceRefs, with names "struct", "struct.hdr", and "struct.hdr.field".
+ * This preserves the name qualifications and prevents name conflicts.
+ *
+ * These fully-qualified names are also exposed to the control plane in a few
+ * places:
+ *
+ *  - In table match keys, unless a @name annotation removes the qualification.
+ *  - In PHV field names, which impacts digests as well as the snapshot
+ *    mechanism.
+ *
+ * Unfortunately, existing P4_14 control-plane code was written to assume that
+ * all of the prefix up to "hdr.field" would be removed.  For now, we use
+ * V1InstanceRef to preserve that behavior.
+ */
+class V1InstanceRef : InstanceRef {
+#noconstructor
+    V1InstanceRef(cstring prefix, ID n, Type t, Annotations ann = nullptr);
+    V1InstanceRef(ID n, Type t, Annotations ann = nullptr)
+    : V1InstanceRef(cstring(), n, t, ann) {}
+    toString { return obj ? obj->name : name; }
+    dbprint { out << toString(); }
+}
+
+class MetadataInfo {
+    bool forTM;
+    gress_t gress;
+    cstring type_name;
+    cstring instance_name;
+    cstring field_name;
+    dbprint { out << instance_name << "." << field_name; }
+}
+
+
+/** An abstract class that represents values in the back end, including header
+ * and struct fields, slices, temporary variables, literals, etc.
+ *
+ * NB: This is a work in progress, as we slowly transition from using
+ * IR::Expression (which is a v1.def IR node) to IR::BFN::Value.
+ *
+ * In the back end, all expressions are converted to values and instructions.
+ * For example,
+ *
+ *    ipv4.ttl = ipv4.ttl - 1
+ *
+ * becomes
+ *
+ *    sub(ipv4.ttl, ipv4.ttl, 1)
+ *
+ * where `sub` is an instruction, and `ipv4.ttl` and `1` are values.
+ */
+abstract BFN::Value : IR::Expression { }
+
+
+/** An abstract class that represents references to values that must be stored
+ * in PHV containers or other sundry types of memory in Barefoot hardware.
+ *
+ * This includes fields of header and metadata instances as well as temporary
+ * variables.  It also includes PHV containers themselves, as some back end
+ * transformations replace collections of references to field instances with
+ * the PHV containers in which they reside. */
+abstract BFN::Reference : BFN::Value {
+#emit
+    /// Debugging information about the object referred to by this reference.
+    ::BFN::DebugInfo debug;
+#end
+}
+
+
+/** A temporary variable introduced by the compiler, which must be assigned to
+ * a PHV container. */
+class TempVar : BFN::Reference {
+    bool        POV;
+    // if a byte-sized temporary variable is created in deparser, we can set
+    // this bit directly to use deparser_zero optimization.
+    bool        deparsed_zero;
+    cstring     name;
+    static int  uid;
+#noconstructor
+    TempVar(Type t, bool p = false, cstring n = cstring()) : BFN::Reference(t), POV(p), name(n) {
+        deparsed_zero = false;
+        if (!name) {
+            std::string n("$tmp");
+            n += std::to_string(++uid);
+            name = n; } }
+    TempVar(Type t, cstring n) : TempVar(t, false, n) {
+        deparsed_zero = false;
+    }
+    toString { return name; }
+    dbprint { out << name; }
+}
+
+/** A dummy padding to represent a "hole" in the container to enforce
+ *  alignment constraint in a container, but okay to not have an phv allocation
+ *  if unused. Note this is different from TempVar, a TempVar must be allocated
+ *  to a phv container.
+ */
+class Padding : BFN::Reference {
+    cstring     name;
+    static int  uid;
+#noconstructor
+    Padding(Type t, cstring n = cstring()) :
+        BFN::Reference(t), name(n) {
+        if (!name) {
+            std::string n("$pad");
+            n += std::to_string(++uid);
+            name = n; } }
+    toString { return name; }
+    dbprint { out << name; }
+}
+
+/**
+ * Used to represent resubmit header which is always 64 bits in size.
+ * This is used in flexible packing to pad resubmit header.
+ * TODO: we need to ensure Phase0 to use the same IR class.
+ */
+class BFN::Type_FixedSizeHeader : Type_Header {
+    int fixed_size;
+    toString { return cstring("fixed_size_header ") + externalName(); }
+#nodbprint
+}
+
+/** A reference to a PHV container.  At the hardware level, Barefoot switches
+ * operate over PHV containers, not header/metadata fields, and the back end
+ * eventually lowers operations to work on PHV containers directly.
+ *
+ * NB: This is a work in progress; not all operations are lowered to operate on
+ * containers directly.  See parde-lowered.def for examples.
+ */
+class BFN::ContainerRef : BFN::Reference {
+#emit
+    // We tag ContainerRefs with unique identifiers to structurally distinguish
+    // different references to the same container.
+    static size_t nextId;
+#end
+
+    PHV::Container container;
+
+    std::optional<nw_bitrange> range;
+
+    size_t id;
+
+#noconstructor
+    ContainerRef(PHV::Container c) : BFN::Reference(), container(c), id(nextId++) { }
+    ContainerRef(Util::SourceInfo si, PHV::Container c) :
+        BFN::Reference(si), container(c), id(nextId++) { }
+
+    validate {
+        BUG_CHECK(bool(container), "Invalid PHV container in ContainerRef");
+    }
+    toString {
+        auto rv = container.toString();
+        std::stringstream ss;
+        if (range) {
+            const le_bitrange lerange = (*range)
+                .toOrder<Endian::Little>(container.size());
+
+            if (lerange.lo != 0 || lerange.hi != (int)container.size() - 1) {
+                ss << "(" << lerange.lo << ".." << lerange.hi << ")";
+                rv += ss.str();
+            }
+        }
+        return rv;
+    }
+    dbprint { out << toString(); }
+
+    /// @return a clone of this ContainerRef which does not compare equal
+    /// to the original or to any other existing ContainerRef.
+    ContainerRef makeFresh() const {
+        auto* newRef = this->clone();
+        newRef->id = nextId++;
+        return newRef;
+    }
+}
+
+/// A reference to a single bit within a PHV container. (e.g., a POV bit)
+class BFN::ContainerBitRef : BFN::Reference {
+    toString { return container->container.toString() + "(" + std::to_string(bit) + ")"; }
+    dbprint { out << toString(); }
+
+    /// The container containing the bit.
+    BFN::ContainerRef container;
+
+    unsigned bit;
+}
+
+/** When two fields are aliased, we replace one with the other during
+ * compilation.  We call the one being removed the alias "source" and the one
+ * being inserted in its place the "destination".
+ *
+ * An AliasMember node represents such a replacement.  The IR::Member part of
+ * the node holds the alias destination, but the extra `source` field points to
+ * the original alias source.
+ */
+class BFN::AliasMember : IR::Member {
+    /// The original expression (i.e. the alias source) that has been replaced
+    /// by this AliasMember.  Not visited in IR traversals.
+    Expression source;
+
+    dbprint {
+        IR::Member::dbprint(out);
+        out << " alias: " << source;
+    }
+
+    visit_children {
+        IR::Member::visit_children(v);
+    }
+
+#noequiv
+    /// do not use the auto-generated equiv function.
+    /// do not compare the 'source' field of the AliasMember.
+    equiv { return Member::equiv(a_); }
+
+#emit
+    /// A convenience method to construct an AliasMember with source info from
+    /// the alias source.
+    AliasMember(const IR::Member* destination, const IR::Expression* source)
+    : IR::Member(source->srcInfo, destination->type, destination->expr, destination->member),
+      source(source) { }
+#end
+}
+
+/** When two fields are aliased, we replace one with the other during
+ * compilation.  We call the one being removed the alias "source" and the one
+ * being inserted in its place the "destination".
+ *
+ * An AliasSlice node represents such a replacement, in the case when an alias
+ * source is a field, but the alias destination is a slice of another field.
+ * The IR::Slice part of the node holds the alias destination, but the extra
+ * `source` field points to the original alias source.
+ */
+class BFN::AliasSlice : IR::Slice {
+    /// The original expression (i.e. the alias source) that has been replaced
+    /// by this AliasSlice.  Not visited in IR traversals.
+    Expression source;
+
+    dbprint {
+        IR::Slice::dbprint(out);
+        out << "alias: " << source;
+    }
+
+    visit_children {
+        IR::Slice::visit_children(v);
+    }
+
+#emit
+    /// A convenience method to construct an AliasSlice with source info from
+    /// the alias source.
+    AliasSlice(const IR::Slice* dest, const IR::Expression* source)
+    : IR::Slice(source->srcInfo, dest->type, dest->e0, dest->e1, dest->e2), source(source) { }
+#end
+}
+
+/** This class adds the convenience of specifying field list, field list
+ *  calculation and algorithm names specified in a p4 program to a ListExpression
+ *  which carries the field list
+ */
+class HashListExpression : IR::ListExpression {
+    cstring             fieldListCalcName;
+    int                 outputWidth;
+    NullOK IR::NameList fieldListNames  = nullptr;
+    NullOK IR::NameList algorithms      = nullptr;
+#nodbprint
+}
+
+/** This class adds the convenience of specifying field list, field list
+ *  calculation and algorithm names specified in a p4 program to a StructExpression
+ *  which carries the field list
+ */
+class HashStructExpression : IR::StructExpression {
+    cstring             fieldListCalcName;
+    int                 outputWidth;
+    NullOK IR::NameList fieldListNames  = nullptr;
+    NullOK IR::NameList algorithms      = nullptr;
+#nodbprint
+}
+
+/**
+ * We specialize the cast that only perform sign conversion to a separate
+ * reinterpret_cast class. Reinterpreset_cast is handled in the backend. Other
+ * types of cast are eliminated in the midend. */
+class BFN::ReinterpretCast : Cast {
+    stringOp = "(reinterpret_cast)";
+    toString{ return "reinterpret_cast"_cs; }
+    validate{ BUG_CHECK(!destType->is<Type_Unknown>(), "%1%: Cannot cast to unknown type", this); }
+}
+
+/** We specialize the cast that perform sign extension with a separate sign_extend_cast
+ * class. Sign_extend is handled in the backend. */
+class BFN::SignExtend : Cast {
+    stringOp = "(sign_extend)";
+    toString{ return "sign_extend"_cs; }
+    validate{ BUG_CHECK(!destType->is<Type_Unknown>(), "%1%: Cannot cast to unknown type", this); }
+}
