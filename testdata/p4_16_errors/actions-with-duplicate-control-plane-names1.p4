@@ -30,10 +30,6 @@ struct headers_t {
 }
 
 struct metadata_t {
-/*
-    bit<4>  a;
-    bit<4>  b;
-*/
 }
 
 parser parserImpl(
