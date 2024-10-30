@@ -50,9 +50,9 @@ macro(obtain_z3)
     fetchcontent_declare(
       z3
       GIT_REPOSITORY https://github.com/Z3Prover/z3.git
-      GIT_TAG 51fcb10b2ff0e4496a3c0c2ed7c32f0876c9ee49 # 4.13.0
+      GIT_TAG z3-4.13.3 # 4.13.0
       GIT_PROGRESS TRUE
-      # GIT_SHALLOW TRUE
+      GIT_SHALLOW TRUE
       # We need to patch because the Z3 CMakeLists.txt also adds an uinstall target.
       # This leads to a namespace clash.
       PATCH_COMMAND
@@ -67,7 +67,7 @@ macro(obtain_z3)
     foreach(target ${Z3_BUILD_TARGETS})
         # Do not suppress warnings for Z3 library targets that are aliased.
         get_target_property(target_type ${target} TYPE)
-        if (NOT ${target_type} STREQUAL "INTERFACE_LIBRARY")
+        if (NOT ${target_type} STREQUAL "INTERFACE_LIBRARY" AND NOT ${target_type} STREQUAL "UTILITY")
           target_compile_options(${target} PRIVATE "-Wno-error" "-w")
           # Z3 does not add its own include directories for compilation, which can lead to conflicts.
           target_include_directories(${target} BEFORE PRIVATE ${z3_SOURCE_DIR}/src)
