@@ -1,6 +1,7 @@
 var class_p4_1_1_p4_tools_1_1_mid_end =
 [
     [ "addDefaultPasses", "class_p4_1_1_p4_tools_1_1_mid_end.html#a8faa7d0e15c4818dfe84c139a293eeba", null ],
+    [ "addNonTypeCheckingPasses", "class_p4_1_1_p4_tools_1_1_mid_end.html#a61b3e20cc9d69efad8e2a6912fa9931d", null ],
     [ "getRefMap", "class_p4_1_1_p4_tools_1_1_mid_end.html#a7b1425c69918065bf59c5418559b151c", null ],
     [ "getTypeMap", "class_p4_1_1_p4_tools_1_1_mid_end.html#a00069e3248c0c2e866cf1267723bc323", null ],
     [ "localCopyPropPolicy", "class_p4_1_1_p4_tools_1_1_mid_end.html#af23061fa903414a5356b0c8ae63aa0bc", null ],

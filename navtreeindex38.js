@@ -1,5 +1,7 @@
 var NAVTREEINDEX38 =
 {
+"struct_type_comparator.html":[13,0,598],
+"struct_update_parser_write_mode.html":[13,0,601],
 "structassoc_1_1detail_1_1__is__stable.html":[12,0,1,0,0],
 "structassoc_1_1detail_1_1__is__stable.html":[13,0,1,0,0],
 "structassoc_1_1detail_1_1__is__stable_3_01_t_01_5_01_4.html":[12,0,1,0,4],

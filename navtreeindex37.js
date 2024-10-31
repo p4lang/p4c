@@ -1,5 +1,7 @@
 var NAVTREEINDEX37 =
 {
+"struct_p4_1_1hdr_field_info.html":[12,0,9,221],
+"struct_p4_1_1hdr_field_info.html":[13,0,7,236],
 "struct_p4_1_1loc__t.html":[12,0,9,275],
 "struct_p4_1_1loc__t.html":[13,0,7,290],
 "struct_p4_1_1match__t.html":[12,0,9,285],
@@ -247,7 +249,5 @@ var NAVTREEINDEX37 =
 "struct_tofino_1_1_instruction_memory.html":[12,0,17,1],
 "struct_tofino_1_1_instruction_memory.html":[13,0,14,1],
 "struct_tofino_1_1_memories.html":[12,0,17,4],
-"struct_tofino_1_1_memories.html":[13,0,14,4],
-"struct_type_comparator.html":[13,0,598],
-"struct_update_parser_write_mode.html":[13,0,601]
+"struct_tofino_1_1_memories.html":[13,0,14,4]
 };

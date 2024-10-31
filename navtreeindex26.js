@@ -1,5 +1,7 @@
 var NAVTREEINDEX26 =
 {
+"class_p_h_v_1_1_cluster_stats.html#a9f7eee9594316e17bbbd3eeafdc3aa8f":[12,0,11,12,3],
+"class_p_h_v_1_1_cluster_stats.html#a9f7eee9594316e17bbbd3eeafdc3aa8f":[13,0,10,15,3],
 "class_p_h_v_1_1_cluster_stats.html#ab604772a7b4d5d24675565100d5288a3":[12,0,11,12,0],
 "class_p_h_v_1_1_cluster_stats.html#ab604772a7b4d5d24675565100d5288a3":[13,0,10,15,0],
 "class_p_h_v_1_1_collect_table_keys.html":[12,0,11,13],
@@ -247,7 +249,5 @@ var NAVTREEINDEX26 =
 "class_p_h_v_1_1_finalize_physical_liverange.html#aa6ce51591d367fdaebbd9d86feed296a":[12,0,11,29,3],
 "class_p_h_v_1_1_finalize_physical_liverange.html#aa6ce51591d367fdaebbd9d86feed296a":[13,0,10,32,3],
 "class_p_h_v_1_1_finalize_physical_liverange.html#ac3a0becc2718de1224154c6efb59f827":[12,0,11,29,7],
-"class_p_h_v_1_1_finalize_physical_liverange.html#ac3a0becc2718de1224154c6efb59f827":[13,0,10,32,7],
-"class_p_h_v_1_1_finalize_physical_liverange.html#aca31d134eb541e2e4b3d287e3e3ac5f7":[12,0,11,29,5],
-"class_p_h_v_1_1_finalize_physical_liverange.html#aca31d134eb541e2e4b3d287e3e3ac5f7":[13,0,10,32,5]
+"class_p_h_v_1_1_finalize_physical_liverange.html#ac3a0becc2718de1224154c6efb59f827":[13,0,10,32,7]
 };

@@ -1,5 +1,7 @@
 var NAVTREEINDEX34 =
 {
+"struct_i_x_bar_1_1_field_info.html#a918df02c61943a6a7b31480e9a2fe6f5":[13,0,346,1,2],
+"struct_i_x_bar_1_1_field_info.html#adef12a816b28562271904ac0318ab941":[13,0,346,1,3],
 "struct_i_x_bar_1_1_key_info.html":[13,0,346,3],
 "struct_i_x_bar_1_1_loc.html":[13,0,346,4],
 "struct_i_x_bar_1_1_loc.html#adfa9a8f98d381ba5bc41ccb7c41cf3c8":[13,0,346,4,0],
@@ -247,7 +249,5 @@ var NAVTREEINDEX34 =
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_s_a_arch_handler_builder.html":[12,0,9,1,1,26],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_s_a_arch_handler_builder.html":[13,0,7,3,1,26],
 "struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_s_a_arch_handler_builder.html#aca6d71bc254a18a81e0ced526a9610f2":[12,0,9,1,1,26,0],
-"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_s_a_arch_handler_builder.html#aca6d71bc254a18a81e0ced526a9610f2":[13,0,7,3,1,26,0],
-"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_s_a_arch_handler_builder_for_d_p_d_k.html":[12,0,9,1,1,27],
-"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_s_a_arch_handler_builder_for_d_p_d_k.html":[13,0,7,3,1,27]
+"struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_s_a_arch_handler_builder.html#aca6d71bc254a18a81e0ced526a9610f2":[13,0,7,3,1,26,0]
 };

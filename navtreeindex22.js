@@ -1,5 +1,7 @@
 var NAVTREEINDEX22 =
 {
+"class_p4_1_1_sym_bit_matrix.html":[13,0,7,464],
+"class_p4_1_1_sym_rename_map.html":[12,0,9,468],
 "class_p4_1_1_sym_rename_map.html":[13,0,7,483],
 "class_p4_1_1_symbolic_array.html":[12,0,9,450],
 "class_p4_1_1_symbolic_array.html":[13,0,7,465],
@@ -247,7 +249,5 @@ var NAVTREEINDEX22 =
 "class_p4_1_1_test_1_1_pa_mutually_exclusive_pragma_test.html":[13,0,7,23,46],
 "class_p4_1_1_test_1_1_pa_no_overlay_pragma_test.html":[12,0,9,11,46],
 "class_p4_1_1_test_1_1_pa_no_overlay_pragma_test.html":[13,0,7,23,47],
-"class_p4_1_1_test_1_1_pa_solitary_pragma_test.html":[12,0,9,11,49],
-"class_p4_1_1_test_1_1_pa_solitary_pragma_test.html":[13,0,7,23,50],
-"class_p4_1_1_test_1_1_parser_constant_extract_test.html":[12,0,9,11,47]
+"class_p4_1_1_test_1_1_pa_solitary_pragma_test.html":[12,0,9,11,49]
 };
