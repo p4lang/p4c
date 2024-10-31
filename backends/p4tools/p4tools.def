@@ -144,6 +144,7 @@ class Extracted_Varbits : Type_Bits {
  public:
 #emit
     void *operator new(size_t size) { return ::operator new(size); }
+    void operator delete(void *p, size_t size) { return ::operator delete(p, size); }
 #end
     /// The assigned size of this varbit (assigned by extract calls).
     int assignedSize;
