@@ -1,8 +1,5 @@
 #include "backends/p4tools/common/core/z3_solver.h"
 
-#include <z3++.h>
-#include <z3_api.h>
-
 #include <algorithm>
 #include <cstdint>
 #include <exception>
