@@ -14,6 +14,7 @@ macro(p4c_obtain_googletest)
     # https://github.com/google/googletest/releases/tag/v1.14.0
     GIT_TAG        f8d7d77c06936315286eb55f8de22cd23c188571
     GIT_PROGRESS TRUE
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
   )
   FetchContent_MakeAvailable(gtest)
   set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
