@@ -4,7 +4,6 @@
 #include <map>
 #include <utility>
 
-#include "absl/container/btree_map.h"
 #include "ir/ir.h"
 #include "ir/solver.h"
 #include "ir/visitor.h"
@@ -12,7 +11,7 @@
 namespace P4::P4Tools {
 
 /// Symbolic maps map a state variable to a IR::Expression.
-using SymbolicMapType = absl::btree_map<IR::StateVariable, const IR::Expression *>;
+using SymbolicMapType = P4::flat_map<IR::StateVariable, const IR::Expression *>;
 
 /// Represents a solution found by the solver. A model is a concretized form of a symbolic
 /// environment. All the expressions in a Model must be of type IR::Literal.
