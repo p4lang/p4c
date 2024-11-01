@@ -33,10 +33,10 @@ const IR::Node *InstantiateDirectCalls::postorder(IR::MethodCallExpression *expr
 
     auto name = nameGen.newName(tname->path->name + "_inst");
     LOG3("Inserting instance " << name);
-    auto annos = new IR::Annotations();
-    annos->add(new IR::Annotation(IR::Annotation::nameAnnotation, tname->path->toString()));
-    auto inst = new IR::Declaration_Instance(expression->srcInfo, IR::ID(name), annos,
-                                             tn->typeName->clone(), new IR::Vector<IR::Argument>());
+    auto inst = new IR::Declaration_Instance(
+        expression->srcInfo, IR::ID(name),
+        {new IR::Annotation(IR::Annotation::nameAnnotation, tname->path->toString())},
+        tn->typeName->clone(), new IR::Vector<IR::Argument>());
     insert.push_back(inst);
 
     auto path = new IR::PathExpression(expression->srcInfo,

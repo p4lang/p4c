@@ -111,7 +111,9 @@ class DoStrengthReduction final : public Transform {
     const IR::Node *postorder(IR::ArrayIndex *expr) override;
 
     const IR::BlockStatement *preorder(IR::BlockStatement *bs) override {
-        if (bs->getAnnotation("disable_optimization"_cs)) prune();
+        // FIXME: Do we need to check for expression, so we'd be able to fine tune, e.g.
+        // @disable_optimization("strength_reduce")
+        if (bs->hasAnnotation(IR::Annotation::disableOptimizationAnnotation)) prune();
         return bs;
     }
 };

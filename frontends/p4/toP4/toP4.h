@@ -84,6 +84,7 @@ class ToP4 : public Inspector, ResolutionContext {
     /// dump node IR tree up to depth - in the form of a comment
     void dump(unsigned depth, const IR::Node *node = nullptr, unsigned adjDepth = 0);
     unsigned curDepth() const;
+    bool printAnnotations(const IR::IAnnotated *ann);
 
  public:
     // Output is constructed here
@@ -237,7 +238,6 @@ class ToP4 : public Inspector, ResolutionContext {
     bool preorder(const IR::Argument *arg) override;
     bool preorder(const IR::Path *p) override;
     bool preorder(const IR::Parameter *p) override;
-    bool preorder(const IR::Annotations *a) override;
     bool preorder(const IR::Annotation *a) override;
     bool preorder(const IR::P4Program *program) override;
     bool preorder(const IR::P4Control *c) override;

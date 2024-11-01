@@ -70,9 +70,8 @@ const IR::Node *DoMoveActionsToTables::postorder(IR::MethodCallStatement *statem
     // Synthesize a new table
     cstring tblName = IR::ID(refMap->newName("tbl_"_cs + ac->action->name.name), nullptr);
 
-    auto annos = new IR::Annotations();
-    annos->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
-    auto tbl = new IR::P4Table(statement->srcInfo, tblName, annos, props);
+    auto tbl = new IR::P4Table(statement->srcInfo, tblName,
+                               {new IR::Annotation(IR::Annotation::hiddenAnnotation, {})}, props);
     tables.push_back(tbl);
 
     // Table invocation statement
@@ -196,9 +195,9 @@ const IR::Statement *DoSynthesizeActions::createAction(const IR::Statement *toAd
     }
     LOG3("Adding new action " << name << body);
 
-    auto annos = new IR::Annotations();
-    annos->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
-    auto action = new IR::P4Action(toAdd->srcInfo, name, annos, new IR::ParameterList(), body);
+    auto action = new IR::P4Action(toAdd->srcInfo, name,
+                                   {new IR::Annotation(IR::Annotation::hiddenAnnotation, {})},
+                                   new IR::ParameterList(), body);
     actions.push_back(action);
     auto actpath = new IR::PathExpression(name);
     auto repl = new IR::MethodCallExpression(toAdd->srcInfo, actpath);

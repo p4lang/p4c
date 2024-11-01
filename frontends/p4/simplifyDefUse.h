@@ -53,9 +53,7 @@ class DoSimplifyDefUse : public Transform {
 class RemoveHidden : public Transform {
     const IR::Node *postorder(IR::BlockStatement *stat) override {
         if (!stat->components.empty()) return stat;
-        if (stat->annotations->size() != 1) return stat;
-        auto anno = stat->getAnnotation(IR::Annotation::hiddenAnnotation);
-        if (!anno) return stat;
+        if (!stat->hasOnlyAnnotation(IR::Annotation::hiddenAnnotation)) return stat;
         // Lose the annotation.
         return new IR::BlockStatement(stat->srcInfo);
     }
@@ -78,11 +76,10 @@ class SimplifyDefUse : public PassManager {
             // it and add an new annotation to force it to be
             // different from the original one.
             if (stat->components.empty()) {
-                auto annos = new IR::Annotations();
                 // We are losing the original annotations, but hopefully these don't
                 // matter on an empty block.
-                annos->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
-                auto result = new IR::BlockStatement(stat->srcInfo, annos);
+                auto result = new IR::BlockStatement(
+                    stat->srcInfo, {new IR::Annotation(IR::Annotation::hiddenAnnotation, {})});
                 LOG2("Cloning " << getOriginal()->id << " into " << result->id);
                 return result;
             }

@@ -614,9 +614,7 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
     cstring fieldName = field->name.name;
 
     bool noEndiannessConversion = false;
-    auto annolist = field->getAnnotations()->annotations;
-    for (auto anno : annolist) {
-        if (anno->name != ParseTCAnnotations::tcType) continue;
+    if (const auto *anno = field->getAnnotation(ParseTCAnnotations::tcType)) {
         auto annoBody = anno->body;
         for (auto annoVal : annoBody) {
             if (annoVal->text == "macaddr" || annoVal->text == "ipv4" || annoVal->text == "ipv6") {
@@ -1865,15 +1863,13 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
             cstring swap;
 
             auto tcTarget = dynamic_cast<const EBPF::P4TCTarget *>(builder->target);
-            cstring isKeyBigEndian =
-                tcTarget->getByteOrderFromAnnotation(c->getAnnotations()->annotations);
+            cstring isKeyBigEndian = tcTarget->getByteOrderFromAnnotation(c->getAnnotations());
             cstring isDefnBigEndian = "HOST"_cs;
             if (auto mem = c->expression->to<IR::Member>()) {
                 auto type = typeMap->getType(mem->expr, true);
                 if (type->is<IR::Type_StructLike>()) {
                     auto field = type->to<IR::Type_StructLike>()->getField(mem->member);
-                    isDefnBigEndian =
-                        tcTarget->getByteOrderFromAnnotation(field->getAnnotations()->annotations);
+                    isDefnBigEndian = tcTarget->getByteOrderFromAnnotation(field->getAnnotations());
                 }
             }
 
@@ -2238,9 +2234,7 @@ void DeparserHdrEmitTranslatorPNA::processMethod(const P4::ExternMethod *method)
                     return;
                 }
                 bool noEndiannessConversion = false;
-                auto annotations = f->getAnnotations()->annotations;
-                for (auto anno : annotations) {
-                    if (anno->name != ParseTCAnnotations::tcType) continue;
+                if (const auto *anno = f->getAnnotation(ParseTCAnnotations::tcType)) {
                     for (auto annoVal : anno->body) {
                         if (annoVal->text == "macaddr" || annoVal->text == "ipv4" ||
                             annoVal->text == "ipv6" || annoVal->text == "be16" ||

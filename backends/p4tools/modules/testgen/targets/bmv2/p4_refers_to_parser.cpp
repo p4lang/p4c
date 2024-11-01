@@ -78,8 +78,7 @@ const IR::SymbolicVariable *RefersToParser::lookUpKeyInTable(const IR::P4Table &
     const auto *key = srcTable.getKey();
     BUG_CHECK(key != nullptr, "Table %1% does not have any keys.", srcTable);
     for (const auto *keyElement : key->keyElements) {
-        auto annotations = keyElement->annotations->annotations;
-        const auto *nameAnnot = keyElement->getAnnotation("name"_cs);
+        const auto *nameAnnot = keyElement->getAnnotation(IR::Annotation::nameAnnotation);
         // Some hidden tables do not have any key name annotations.
         BUG_CHECK(nameAnnot != nullptr, "Refers-to table key without a name annotation");
         if (keyReference == nameAnnot->getName()) {
@@ -131,10 +130,9 @@ bool RefersToParser::preorder(const IR::P4Table *tableContext) {
     CHECK_NULL(controlContext);
 
     for (const auto *keyElement : key->keyElements) {
-        auto annotations = keyElement->annotations->annotations;
-        for (const auto *annotation : annotations) {
-            if (annotation->name.name == "refers_to" || annotation->name.name == "referenced_by") {
-                const auto *nameAnnot = keyElement->getAnnotation("name"_cs);
+        for (const auto *annotation : keyElement->getAnnotations()) {
+            if (annotation->name == "refers_to" || annotation->name == "referenced_by") {
+                const auto *nameAnnot = keyElement->getAnnotation(IR::Annotation::nameAnnotation);
                 BUG_CHECK(nameAnnot != nullptr, "%1% table key without a name annotation",
                           annotation->name.name);
                 const auto *srcKey = ControlPlaneState::getTableKey(
@@ -161,10 +159,8 @@ bool RefersToParser::preorder(const IR::P4Table *tableContext) {
             return false;
         }
         for (const auto *parameter : params->parameters) {
-            auto annotations = parameter->annotations->annotations;
-            for (const auto *annotation : annotations) {
-                if (annotation->name.name == "refers_to" ||
-                    annotation->name.name == "referenced_by") {
+            for (const auto *annotation : parameter->getAnnotations()) {
+                if (annotation->name == "refers_to" || annotation->name == "referenced_by") {
                     const auto *referredKey = getReferencedKey(*controlContext, *annotation);
                     const auto *srcKey = ControlPlaneState::getTableActionArgument(
                         tableContext->controlPlaneName(), actionCall->controlPlaneName(),

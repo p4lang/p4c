@@ -18,7 +18,7 @@ class DeclarationGenerator : public Generator {
 
     virtual IR::StatOrDecl *generateRandomStatementOrDeclaration(bool is_in_func);
 
-    virtual IR::Annotations *genAnnotation();
+    virtual IR::Vector<IR::Annotation> genAnnotation();
 
     virtual IR::P4Action *genActionDeclaration();
 

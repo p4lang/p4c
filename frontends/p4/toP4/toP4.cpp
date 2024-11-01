@@ -274,12 +274,19 @@ bool ToP4::preorder(const IR::Argument *arg) {
     return false;
 }
 
+bool ToP4::printAnnotations(const IR::IAnnotated *ann) {
+    if (!ann->hasAnnotations()) return false;
+
+    setVecSep(" ");
+    visit(&ann->getAnnotations());
+    doneVec();
+
+    return true;
+}
+
 bool ToP4::preorder(const IR::Type_Typedef *t) {
     dump(2);
-    if (!t->annotations->annotations.empty()) {
-        visit(t->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(t)) builder.spc();
     builder.append("typedef ");
     visit(t->type);
     builder.spc();
@@ -290,10 +297,7 @@ bool ToP4::preorder(const IR::Type_Typedef *t) {
 
 bool ToP4::preorder(const IR::Type_Newtype *t) {
     dump(2);
-    if (!t->annotations->annotations.empty()) {
-        visit(t->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(t)) builder.spc();
     builder.append("type ");
     visit(t->type);
     builder.spc();
@@ -319,10 +323,7 @@ bool ToP4::preorder(const IR::Type_BaseList *t) {
 
 bool ToP4::preorder(const IR::P4ValueSet *t) {
     dump(1);
-    if (!t->annotations->annotations.empty()) {
-        visit(t->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(t)) builder.spc();
     builder.append("value_set<");
     auto p4type = t->elementType->getP4Type();
     CHECK_NULL(p4type);
@@ -339,10 +340,7 @@ bool ToP4::preorder(const IR::P4ValueSet *t) {
 
 bool ToP4::preorder(const IR::Type_Enum *t) {
     dump(1);
-    if (!t->annotations->annotations.empty()) {
-        visit(t->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(t)) builder.spc();
     builder.append("enum ");
     builder.append(t->name);
     builder.spc();
@@ -362,10 +360,7 @@ bool ToP4::preorder(const IR::Type_Enum *t) {
 
 bool ToP4::preorder(const IR::Type_SerEnum *t) {
     dump(1);
-    if (!t->annotations->annotations.empty()) {
-        visit(t->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(t)) builder.spc();
     builder.append("enum ");
     visit(t->type);
     builder.spc();
@@ -406,10 +401,7 @@ bool ToP4::preorder(const IR::TypeParameters *t) {
 
 bool ToP4::preorder(const IR::Method *m) {
     dump(1);
-    if (!m->annotations->annotations.empty()) {
-        visit(m->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(m)) builder.spc();
     const Context *ctx = getContext();
     bool standaloneFunction = !ctx || !ctx->node->is<IR::Type_Extern>();
     // standalone function declaration: not in a Vector of methods
@@ -431,10 +423,7 @@ bool ToP4::preorder(const IR::Method *m) {
 
 bool ToP4::preorder(const IR::Function *function) {
     dump(1);
-    if (!function->annotations->annotations.empty()) {
-        visit(function->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(function)) builder.spc();
     auto t = function->type;
     BUG_CHECK(t != nullptr, "Function %1% has no type", function);
     if (t->returnType != nullptr) {
@@ -452,10 +441,7 @@ bool ToP4::preorder(const IR::Function *function) {
 bool ToP4::preorder(const IR::Type_Extern *t) {
     dump(2);
     if (isDeclaration) {
-        if (!t->annotations->annotations.empty()) {
-            visit(t->annotations);
-            builder.spc();
-        }
+        if (printAnnotations(t)) builder.spc();
         builder.append("extern ");
     }
     builder.append(t->name);
@@ -499,10 +485,7 @@ bool ToP4::preorder(const IR::Type_Varbits *t) {
 bool ToP4::preorder(const IR::Type_Package *package) {
     dump(2);
     builder.emitIndent();
-    if (!package->annotations->annotations.empty()) {
-        visit(package->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(package)) builder.spc();
     builder.append("package ");
     builder.append(package->name);
     visit(package->typeParameters);
@@ -515,11 +498,9 @@ bool ToP4::process(const IR::Type_StructLike *t, const char *name) {
     dump(2);
     if (isDeclaration) {
         builder.emitIndent();
-        if (!t->annotations->annotations.empty()) {
-            visit(t->annotations);
-            builder.spc();
-        }
-        builder.appendFormat("%s ", name);
+        if (printAnnotations(t)) builder.spc();
+        builder.append(name);
+        builder.spc();
     }
     builder.append(t->name);
     visit(t->typeParameters);
@@ -541,12 +522,9 @@ bool ToP4::process(const IR::Type_StructLike *t, const char *name) {
 
     for (auto f : t->fields) {
         dump(4, f, 1);  // this will dump annotations
-        if (f->annotations->size() > 0) {
+        if (f->hasAnnotations()) {
             builder.emitIndent();
-            if (!f->annotations->annotations.empty()) {
-                visit(f->annotations);
-            }
-            builder.newline();
+            if (printAnnotations(f)) builder.newline();
         }
         builder.emitIndent();
         cstring t = get(type, f);
@@ -564,10 +542,7 @@ bool ToP4::process(const IR::Type_StructLike *t, const char *name) {
 bool ToP4::preorder(const IR::Type_Parser *t) {
     dump(2);
     builder.emitIndent();
-    if (!t->annotations->annotations.empty()) {
-        visit(t->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(t)) builder.spc();
     builder.append("parser ");
     builder.append(t->name);
     visit(t->typeParameters);
@@ -579,10 +554,7 @@ bool ToP4::preorder(const IR::Type_Parser *t) {
 bool ToP4::preorder(const IR::Type_Control *t) {
     dump(2);
     builder.emitIndent();
-    if (!t->annotations->annotations.empty()) {
-        visit(t->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(t)) builder.spc();
     builder.append("control ");
     builder.append(t->name);
     visit(t->typeParameters);
@@ -621,10 +593,7 @@ bool ToP4::preorder(const IR::StringLiteral *s) {
 
 bool ToP4::preorder(const IR::Declaration_Constant *cst) {
     dump(2);
-    if (!cst->annotations->annotations.empty()) {
-        visit(cst->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(cst)) builder.spc();
     builder.append("const ");
     auto type = cst->type->getP4Type();
     CHECK_NULL(type);
@@ -643,10 +612,7 @@ bool ToP4::preorder(const IR::Declaration_Constant *cst) {
 
 bool ToP4::preorder(const IR::Declaration_Instance *i) {
     dump(3);
-    if (!i->annotations->annotations.empty()) {
-        visit(i->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(i)) builder.spc();
     auto type = i->type->getP4Type();
     CHECK_NULL(type);
     visit(type);
@@ -667,10 +633,7 @@ bool ToP4::preorder(const IR::Declaration_Instance *i) {
 
 bool ToP4::preorder(const IR::Declaration_Variable *v) {
     dump(2);
-    if (!v->annotations->annotations.empty()) {
-        visit(v->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(v)) builder.spc();
     auto type = v->type->getP4Type();
     CHECK_NULL(type);
     visit(type);
@@ -1121,10 +1084,7 @@ bool ToP4::preorder(const IR::AssignmentStatement *a) {
 
 bool ToP4::preorder(const IR::BlockStatement *s) {
     dump(1);
-    if (!s->annotations->annotations.empty()) {
-        visit(s->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(s)) builder.spc();
     builder.blockStart();
     setVecSep("\n", "\n");
     preorder(&s->components);
@@ -1210,10 +1170,7 @@ bool ToP4::preorder(const IR::IfStatement *s) {
 
 bool ToP4::preorder(const IR::ForStatement *s) {
     dump(2);
-    if (!s->annotations->annotations.empty()) {
-        visit(s->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(s)) builder.spc();
     builder.append("for (");
     bool first = true;
     for (auto *d : s->init) {
@@ -1252,10 +1209,7 @@ bool ToP4::preorder(const IR::ForStatement *s) {
 
 bool ToP4::preorder(const IR::ForInStatement *s) {
     dump(2);
-    if (!s->annotations->annotations.empty()) {
-        visit(s->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(s)) builder.spc();
     builder.append("for (");
     if (s->decl) {
         builder.supressStatementSemi();
@@ -1317,19 +1271,6 @@ bool ToP4::preorder(const IR::SwitchStatement *s) {
 
 ////////////////////////////////////
 
-bool ToP4::preorder(const IR::Annotations *a) {
-    bool first = true;
-    for (const auto *anno : a->annotations) {
-        if (!first) {
-            builder.spc();
-        } else {
-            first = false;
-        }
-        visit(anno);
-    }
-    return false;
-}
-
 bool ToP4::preorder(const IR::Annotation *a) {
     builder.append("@");
     builder.append(a->name);
@@ -1379,10 +1320,7 @@ bool ToP4::preorder(const IR::Annotation *a) {
 
 bool ToP4::preorder(const IR::Parameter *p) {
     dump(2);
-    if (!p->annotations->annotations.empty()) {
-        visit(p->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(p)) builder.spc();
     switch (p->direction) {
         case IR::Direction::None:
             break;
@@ -1448,10 +1386,7 @@ bool ToP4::preorder(const IR::ParameterList *p) {
 
 bool ToP4::preorder(const IR::P4Action *c) {
     dump(2);
-    if (!c->annotations->annotations.empty()) {
-        visit(c->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(c)) builder.spc();
     builder.append("action ");
     builder.append(c->name);
     visit(c->parameters);
@@ -1464,10 +1399,7 @@ bool ToP4::preorder(const IR::ParserState *s) {
     dump(1);
     if (s->isBuiltin()) return false;
 
-    if (!s->annotations->annotations.empty()) {
-        visit(s->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(s)) builder.spc();
     builder.append("state ");
     builder.append(s->name);
     builder.spc();
@@ -1522,10 +1454,7 @@ bool ToP4::preorder(const IR::ExpressionValue *v) {
 
 bool ToP4::preorder(const IR::ActionListElement *ale) {
     dump(3);
-    if (!ale->annotations->annotations.empty()) {
-        visit(ale->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(ale)) builder.spc();
     visit(ale->expression);
     return false;
 }
@@ -1565,9 +1494,9 @@ bool ToP4::preorder(const IR::Key *v) {
         builder.append(std::string(spaces, ' '));
         builder.append(": ");
         visit(f->matchType);
-        if (!f->annotations->annotations.empty()) {
-            builder.append(" ");
-            visit(f->annotations);
+        if (f->hasAnnotations()) {
+            builder.spc();
+            printAnnotations(f);
         }
         builder.endOfStatement(true);
     }
@@ -1577,10 +1506,7 @@ bool ToP4::preorder(const IR::Key *v) {
 
 bool ToP4::preorder(const IR::Property *p) {
     dump(1);
-    if (!p->annotations->annotations.empty()) {
-        visit(p->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(p)) builder.spc();
     if (p->isConstant) builder.append("const ");
     builder.append(p->name);
     builder.append(" = ");
@@ -1626,19 +1552,14 @@ bool ToP4::preorder(const IR::Entry *e) {
     doneList();
     builder.append(" : ");
     visit(e->action);
-    if (!e->annotations->annotations.empty()) {
-        visit(e->annotations);
-    }
+    if (printAnnotations(e)) builder.spc();
     builder.append(";");
     return false;
 }
 
 bool ToP4::preorder(const IR::P4Table *c) {
     dump(2);
-    if (!c->annotations->annotations.empty()) {
-        visit(c->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(c)) builder.spc();
     builder.append("table ");
     builder.append(c->name);
     builder.spc();

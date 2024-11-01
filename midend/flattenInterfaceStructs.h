@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/annotations.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
@@ -72,10 +73,10 @@ struct StructTypeReplacement : public IHasDbPrint {
         flatten(typeMap, cstring::empty, type, type->annotations, vec, policy);
         if (type->is<IR::Type_Struct>()) {
             replacementType =
-                new IR::Type_Struct(type->srcInfo, type->name, IR::Annotations::empty, *vec);
+                new IR::Type_Struct(type->srcInfo, type->name, IR::Vector<IR::Annotation>(), *vec);
         } else if (type->is<IR::Type_Header>()) {
             replacementType =
-                new IR::Type_Header(type->srcInfo, type->name, IR::Annotations::empty, *vec);
+                new IR::Type_Header(type->srcInfo, type->name, IR::Vector<IR::Annotation>(), *vec);
         } else {
             BUG("Unexpected type %1%", type);
         }
@@ -104,30 +105,29 @@ struct StructTypeReplacement : public IHasDbPrint {
 
     // Helper for constructor
     void flatten(const P4::TypeMap *typeMap, cstring prefix, const IR::Type *type,
-                 const IR::Annotations *annotations, IR::IndexedVector<IR::StructField> *fields,
-                 AnnotationSelectionPolicy *policy) {
+                 const IR::Vector<IR::Annotation> &annotations,
+                 IR::IndexedVector<IR::StructField> *fields, AnnotationSelectionPolicy *policy) {
         // Drop name annotations
-        annotations = annotations->where(
-            [](const IR::Annotation *a) { return a->name != IR::Annotation::nameAnnotation; });
+        auto ann = IR::Annotations::withoutNameAnnotation(annotations);
         if (auto st = type->to<T>()) {
-            auto sannotations = st->annotations->where([policy](const IR::Annotation *annot) {
-                if (!policy) return false;
-                return policy->keep(annot);
-            });
+            IR::Vector<IR::Annotation> sann =
+                st->annotations.where([policy](const IR::Annotation *annot) {
+                    if (!policy) return false;
+                    return policy->keep(annot);
+                });
             structFieldMap.emplace(prefix, st);
             for (auto f : st->fields) {
-                auto na = new IR::Annotations();
-                na->append(sannotations);
-                na->append(annotations);
-                na->append(f->annotations);
+                IR::Vector<IR::Annotation> fann(sann);
+                fann.append(ann);
+                fann.append(f->annotations);
                 auto ft = typeMap->getType(f, true);
-                flatten(typeMap, prefix + "." + f->name, ft, na, fields, policy);
+                flatten(typeMap, prefix + "." + f->name, ft, fann, fields, policy);
             }
             return;
         }
         cstring fieldName = prefix.replace('.', '_') + std::to_string(fieldNameRemap.size());
         fieldNameRemap.emplace(prefix, fieldName);
-        fields->push_back(new IR::StructField(IR::ID(fieldName), annotations, type->getP4Type()));
+        fields->push_back(new IR::StructField(IR::ID(fieldName), ann, type->getP4Type()));
         LOG3("Flatten: " << type << " | " << prefix);
     }
 

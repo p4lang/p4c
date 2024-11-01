@@ -98,13 +98,6 @@ IR::ID *RenameSymbols::getName(const IR::IDeclaration *decl) const {
     return name;
 }
 
-const IR::Annotations *RenameSymbols::addNameAnnotation(cstring name,
-                                                        const IR::Annotations *annos) {
-    if (annos == nullptr) annos = IR::Annotations::empty;
-    return annos->addAnnotationIfNew(IR::Annotation::nameAnnotation, new IR::StringLiteral(name),
-                                     false);
-}
-
 const IR::Node *RenameSymbols::postorder(IR::Declaration_Variable *decl) {
     return renameDeclWithNameAnnotation(decl);
 }

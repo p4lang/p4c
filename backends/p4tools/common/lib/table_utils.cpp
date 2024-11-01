@@ -14,7 +14,8 @@ void checkTableImmutability(const IR::P4Table &table, TableProperties &propertie
     }
     // Also check if the table is invisible to the control plane.
     // This also implies that it cannot be modified.
-    properties.tableIsImmutable = isConstant || table.getAnnotation("hidden"_cs) != nullptr;
+    properties.tableIsImmutable =
+        isConstant || table.hasAnnotation(IR::Annotation::hiddenAnnotation);
     const auto *defaultAction = table.properties->getProperty("default_action");
     CHECK_NULL(defaultAction);
     properties.defaultIsImmutable = defaultAction->isConstant;
@@ -28,7 +29,7 @@ std::vector<const IR::ActionListElement *> buildTableActionList(const IR::P4Tabl
     }
     for (size_t idx = 0; idx < actionList->size(); idx++) {
         const auto *action = actionList->actionList.at(idx);
-        if (action->getAnnotation("defaultonly"_cs) != nullptr) {
+        if (action->hasAnnotation(IR::Annotation::defaultOnlyAnnotation)) {
             continue;
         }
         tableActionList.emplace_back(action);

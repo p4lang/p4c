@@ -246,9 +246,7 @@ void ConvertToBackendIR::postorder(const IR::P4Action *action) {
                     unsigned int width = paramType->to<IR::Type_Bits>()->width_bits();
                     tcActionParam->setBitSize(width);
                 }
-                auto annoList = param->getAnnotations()->annotations;
-                for (auto anno : annoList) {
-                    if (anno->name != ParseTCAnnotations::tcType) continue;
+                if (const auto *anno = param->getAnnotation(ParseTCAnnotations::tcType)) {
                     auto expr = anno->expr[0];
                     if (auto typeLiteral = expr->to<IR::StringLiteral>()) {
                         auto val = getTcType(typeLiteral);
@@ -438,28 +436,24 @@ void ConvertToBackendIR::updateDefaultHitAction(const IR::P4Table *t, IR::TCTabl
         cstring defaultActionName = nullptr;
         bool isTcMayOverrideHitAction = false;
         for (auto action : actionlist->actionList) {
-            auto annoList = action->getAnnotations()->annotations;
             bool isTableOnly = false;
             bool isDefaultHit = false;
             bool isDefaultHitConst = false;
             bool isTcMayOverrideHit = false;
-            for (auto anno : annoList) {
+            for (const auto *anno : action->getAnnotations()) {
                 if (anno->name == IR::Annotation::tableOnlyAnnotation) {
                     isTableOnly = true;
-                }
-                if (anno->name == ParseTCAnnotations::defaultHit) {
+                } else if (anno->name == ParseTCAnnotations::defaultHit) {
                     isDefaultHit = true;
                     defaultHit++;
                     auto adecl = refMap->getDeclaration(action->getPath(), true);
                     defaultActionName = externalName(adecl);
-                }
-                if (anno->name == ParseTCAnnotations::defaultHitConst) {
+                } else if (anno->name == ParseTCAnnotations::defaultHitConst) {
                     isDefaultHitConst = true;
                     defaultHitConst++;
                     auto adecl = refMap->getDeclaration(action->getPath(), true);
                     defaultActionName = externalName(adecl);
-                }
-                if (anno->name == ParseTCAnnotations::tcMayOverride) {
+                } else if (anno->name == ParseTCAnnotations::tcMayOverride) {
                     isTcMayOverrideHit = true;
                 }
             }
@@ -767,8 +761,7 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
         }
         tableDefinition->setKeySize(keySize);
         tableKeysizeList.emplace(tId, keySize);
-        auto annoList = t->getAnnotations()->annotations;
-        for (auto anno : annoList) {
+        for (const auto *anno : t->getAnnotations()) {
             if (anno->name == ParseTCAnnotations::tc_acl) {
                 tablePermissions.emplace(t->name.originalName, GetAnnotatedAccessPath(anno));
             } else if (anno->name == ParseTCAnnotations::numMask) {
@@ -799,13 +792,11 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
                 if (actionName == P4::P4CoreLibrary::instance().noAction.name) {
                     tcAction = tcPipeline->NoAction;
                 }
-                auto annoList = action->getAnnotations()->annotations;
                 unsigned int tableFlag = TC::TABLEDEFAULT;
-                for (auto anno : annoList) {
+                for (const auto *anno : action->getAnnotations()) {
                     if (anno->name == IR::Annotation::tableOnlyAnnotation) {
                         tableFlag = TC::TABLEONLY;
-                    }
-                    if (anno->name == IR::Annotation::defaultOnlyAnnotation) {
+                    } else if (anno->name == IR::Annotation::defaultOnlyAnnotation) {
                         tableFlag = TC::DEFAULTONLY;
                     }
                 }
@@ -828,13 +819,10 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
 cstring ConvertToBackendIR::processExternPermission(const IR::Type_Extern *ext) {
     cstring control_path, data_path;
     // Check if access permissions is defined with annotation @tc_acl
-    auto annoList = ext->getAnnotations()->annotations;
-    for (auto anno : annoList) {
-        if (anno->name == ParseTCAnnotations::tc_acl) {
-            auto path = GetAnnotatedAccessPath(anno);
-            control_path = path->first;
-            data_path = path->second;
-        }
+    if (const auto *anno = ext->getAnnotation(ParseTCAnnotations::tc_acl)) {
+        auto path = GetAnnotatedAccessPath(anno);
+        control_path = path->first;
+        data_path = path->second;
     }
     // Default access value of Control_path and Data_Path
     if (control_path.isNullOrEmpty()) {
@@ -897,7 +885,7 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::processExternConstructor(
 
 cstring ConvertToBackendIR::getControlPathKeyAnnotation(const IR::StructField *field) {
     cstring annoName;
-    auto annotation = field->getAnnotations()->annotations.at(0);
+    auto annotation = field->getAnnotations().at(0);
     if (annotation->name == ParseTCAnnotations::tc_key ||
         annotation->name == ParseTCAnnotations::tc_data_scalar) {
         annoName = annotation->name;
@@ -927,7 +915,7 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::processCounterControlPathKeys
     int kId = 1;
     for (auto field : extern_control_path->fields) {
         /* If there is no annotation to control path key, ignore the key.*/
-        if (field->getAnnotations()->annotations.size() != 1) {
+        if (field->getAnnotations().size() != 1) {
             continue;
         }
         cstring annoName = getControlPathKeyAnnotation(field);
@@ -975,7 +963,7 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::processExternControlPath(
         int kId = 1;
         for (auto field : extern_control_path->fields) {
             /* If there is no annotation to control path key, ignore the key.*/
-            if (field->getAnnotations()->annotations.size() != 1) {
+            if (field->getAnnotations().size() != 1) {
                 continue;
             }
             cstring annoName = getControlPathKeyAnnotation(field);

@@ -174,7 +174,7 @@ class DoConstantFolding : public Transform, public ResolutionContext {
     const IR::Node *preorder(IR::ArrayIndex *e) override;
     const IR::Node *preorder(IR::SwitchCase *c) override;
     const IR::BlockStatement *preorder(IR::BlockStatement *bs) override {
-        if (bs->getAnnotation("disable_optimization"_cs)) prune();
+        if (bs->hasAnnotation(IR::Annotation::disableOptimizationAnnotation)) prune();
         return bs;
     }
 };

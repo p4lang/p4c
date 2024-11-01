@@ -39,28 +39,18 @@ P4Tools::P4Testgen::Bmv2::PropagateP4RuntimeTranslation::lookupP4RuntimeAnnotati
 const IR::Parameter *P4Tools::P4Testgen::Bmv2::PropagateP4RuntimeTranslation::preorder(
     IR::Parameter *parameter) {
     auto p4RuntimeAnnotations = lookupP4RuntimeAnnotations(_typeMap, parameter->type);
-    if (p4RuntimeAnnotations.empty()) {
-        return parameter;
-    }
-    auto *annotationsVector = parameter->annotations->clone();
-    for (const auto *p4runtimeAnnotation : p4RuntimeAnnotations) {
-        annotationsVector->annotations.push_back(p4runtimeAnnotation);
-    }
-    parameter->annotations = annotationsVector;
+    if (p4RuntimeAnnotations.empty()) return parameter;
+
+    parameter->annotations.append(p4RuntimeAnnotations);
     return parameter;
 }
 
 const IR::KeyElement *P4Tools::P4Testgen::Bmv2::PropagateP4RuntimeTranslation::preorder(
     IR::KeyElement *keyElement) {
     auto p4RuntimeAnnotations = lookupP4RuntimeAnnotations(_typeMap, keyElement->expression->type);
-    if (p4RuntimeAnnotations.empty()) {
-        return keyElement;
-    }
-    auto *annotationsVector = keyElement->annotations->clone();
-    for (const auto *p4runtimeAnnotation : p4RuntimeAnnotations) {
-        annotationsVector->annotations.push_back(p4runtimeAnnotation);
-    }
-    keyElement->annotations = annotationsVector;
+    if (p4RuntimeAnnotations.empty()) return keyElement;
+
+    keyElement->annotations.append(p4RuntimeAnnotations);
     return keyElement;
 }
 

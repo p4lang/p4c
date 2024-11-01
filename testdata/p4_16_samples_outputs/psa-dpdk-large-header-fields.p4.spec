@@ -75,7 +75,7 @@ table stub_0 {
 	}
 	actions {
 		macswp
-		NoAction_1
+		NoAction_1 @defaultonly
 	}
 	default_action NoAction_1 args none 
 	size 0xF4240

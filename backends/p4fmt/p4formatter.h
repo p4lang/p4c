@@ -156,6 +156,7 @@ class P4Formatter : public Inspector, ::P4::ResolutionContext {
     bool process(const IR::Type_StructLike *t, const char *name);
 
     bool preorder(const IR::Node *node) override;
+    bool printAnnotations(const IR::IAnnotated *ann);
 
     // types
     bool preorder(const IR::Type_Boolean *t) override;
@@ -265,7 +266,6 @@ class P4Formatter : public Inspector, ::P4::ResolutionContext {
     bool preorder(const IR::Argument *arg) override;
     bool preorder(const IR::Path *p) override;
     bool preorder(const IR::Parameter *p) override;
-    bool preorder(const IR::Annotations *a) override;
     bool preorder(const IR::Annotation *a) override;
     bool preorder(const IR::P4Program *program) override;
     bool preorder(const IR::P4Control *c) override;

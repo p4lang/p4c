@@ -106,7 +106,7 @@ table route {
 	actions {
 		forward
 		drop_1
-		NoAction
+		NoAction @defaultonly
 	}
 	default_action NoAction args none 
 	size 0x10000

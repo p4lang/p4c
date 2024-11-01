@@ -25,6 +25,7 @@ limitations under the License.
 #include "frontends/p4/reservedWords.h"
 #include "frontends/p4/tableKeyNames.h"
 #include "frontends/parsers/parserDriver.h"
+#include "ir/annotations.h"
 #include "lib/big_int_util.h"
 #include "lib/bitops.h"
 
@@ -81,15 +82,9 @@ ProgramStructure::ProgramStructure()
     for (auto c : P4::reservedWords) allNames.insert({c, 0});
 }
 
-const IR::Annotations *ProgramStructure::addNameAnnotation(cstring name,
-                                                           const IR::Annotations *annos) {
-    if (annos == nullptr) annos = IR::Annotations::empty;
-    return annos->addAnnotationIfNew(IR::Annotation::nameAnnotation, new IR::StringLiteral(name));
-}
-
-const IR::Annotations *ProgramStructure::addGlobalNameAnnotation(cstring name,
-                                                                 const IR::Annotations *annos) {
-    return addNameAnnotation("."_cs + name, annos);
+IR::Vector<IR::Annotation> ProgramStructure::addGlobalNameAnnotation(
+    cstring name, const IR::Vector<IR::Annotation> &annos) {
+    return IR::Annotations::addNameAnnotation(absl::StrCat(".", name), annos);
 }
 
 cstring ProgramStructure::makeUniqueName(cstring base) {
@@ -180,11 +175,13 @@ cstring ProgramStructure::createType(const IR::Type_StructLike *type, bool heade
     auto type_name = types.get(type);
     auto newType = type->apply(TypeConverter(this));
     if (newType->name.name != type_name) {
-        auto annos = addNameAnnotation(type->name.name, type->annotations);
+        auto annos = IR::Annotations::addNameAnnotation(type->name.name, type->annotations);
         if (header) {
-            newType = new IR::Type_Header(newType->srcInfo, type_name, annos, newType->fields);
+            newType =
+                new IR::Type_Header(newType->srcInfo, type_name, std::move(annos), newType->fields);
         } else {
-            newType = new IR::Type_Struct(newType->srcInfo, type_name, annos, newType->fields);
+            newType =
+                new IR::Type_Struct(newType->srcInfo, type_name, std::move(annos), newType->fields);
         }
     }
     if (header) finalHeaderType.emplace(type->externalName(), newType);
@@ -240,8 +237,9 @@ void ProgramStructure::createTypes() {
             // Must convert to a struct type
             cstring type_name = makeUniqueName(st->name.name);
             // Registers always use struct types
-            auto annos = addNameAnnotation(layoutTypeName, type->annotations);
-            auto newType = new IR::Type_Struct(type->srcInfo, type_name, annos, st->fields);
+            auto newType = new IR::Type_Struct(
+                type->srcInfo, type_name,
+                IR::Annotations::addNameAnnotation(layoutTypeName, type->annotations), st->fields);
             checkHeaderType(newType, false);
             LOG3("Added type " << dbp(newType) << " named " << type_name << " from " << dbp(type));
             declarations->push_back(newType);
@@ -278,8 +276,8 @@ const IR::Type_Struct *ProgramStructure::createFieldListType(const IR::Expressio
     }
 
     auto name = makeUniqueName(nr->path->name.name);
-    auto annos = addNameAnnotation(nr->path->name);
-    auto result = new IR::Type_Struct(expression->srcInfo, name, annos);
+    auto result = new IR::Type_Struct(expression->srcInfo, name,
+                                      IR::Annotations::addNameAnnotation(nr->path->name, {}));
     std::set<cstring> fieldNames;
     int field_id = 0;
     for (auto f : fl->fields) {
@@ -499,6 +497,8 @@ const IR::Type *ProgramStructure::explodeType(
     return new IR::Type_Tuple(*rv);
 }
 
+static const cstring parserValueSetSizeAnnotation = "parser_value_set_size"_cs;
+
 /**
  * convert a P4-14 parser to P4-16 parser state.
  * @param parser     The P4-14 parser IR node to be converted
@@ -555,9 +555,9 @@ const IR::ParserState *ProgramStructure::convertParser(
                 value_sets_implemented.emplace(first->path->name);
 
                 auto type = explodeType(fieldTypes);
-                auto sizeAnnotation = value_set->getAnnotation("parser_value_set_size"_cs);
                 const IR::Constant *sizeConstant;
-                if (sizeAnnotation) {
+                if (const auto *sizeAnnotation =
+                        value_set->getAnnotation(parserValueSetSizeAnnotation)) {
                     if (sizeAnnotation->expr.size() != 1) {
                         ::P4::error(ErrorType::ERR_INVALID,
                                     "@size should be an integer for declaration %1%", value_set);
@@ -882,6 +882,9 @@ void ProgramStructure::createDeparser() {
     createDeparserInternal(v1model.deparser.Id(), packetOut, headers);
 }
 
+static const cstring modeAnnotation = "mode"_cs;
+static const cstring typeAnnotation = "type"_cs;
+
 const IR::Declaration_Instance *ProgramStructure::convertActionProfile(
     const IR::ActionProfile *action_profile, cstring newName) {
     auto *action_selector = action_selectors.get(action_profile->selector.name);
@@ -890,7 +893,7 @@ const IR::Declaration_Instance *ProgramStructure::convertActionProfile(
                     action_profile->selector);
     const IR::Type *type = nullptr;
     auto args = new IR::Vector<IR::Argument>();
-    auto annos = addGlobalNameAnnotation(action_profile->name);
+    auto annos = addGlobalNameAnnotation(action_profile->name, {});
     if (action_selector) {
         type = new IR::Type_Name(new IR::Path(v1model.action_selector.Id()));
         auto flc = field_list_calculations.get(action_selector->key.name);
@@ -903,13 +906,11 @@ const IR::Declaration_Instance *ProgramStructure::convertActionProfile(
         auto width = new IR::Constant(v1model.action_selector.widthType, flc->output_width);
         args->push_back(new IR::Argument(width));
         if (action_selector->mode)
-            annos = annos->addAnnotation("mode"_cs, new IR::StringLiteral(action_selector->mode));
+            annos.emplace_back(modeAnnotation, new IR::StringLiteral(action_selector->mode));
         if (action_selector->type)
-            annos = annos->addAnnotation("type"_cs, new IR::StringLiteral(action_selector->type));
+            annos.emplace_back(typeAnnotation, new IR::StringLiteral(action_selector->type));
         auto fl = getFieldLists(flc);
-        for (auto annot : fl->annotations->annotations) {
-            annos = annos->add(annot);
-        }
+        annos.append(fl->annotations);
     } else {
         type = new IR::Type_Name(new IR::Path(v1model.action_profile.Id()));
         auto size = new IR::Constant(action_profile->srcInfo, v1model.action_profile.sizeType,
@@ -959,7 +960,7 @@ const IR::P4Table *ProgramStructure::convertTable(const IR::V1Table *table, cstr
     if (!table->default_action.name.isNullOrEmpty() &&
         !actionList->getDeclaration(default_action)) {
         actionList->push_back(new IR::ActionListElement(
-            new IR::Annotations({new IR::Annotation(IR::Annotation::defaultOnlyAnnotation, {})}),
+            {new IR::Annotation(IR::Annotation::defaultOnlyAnnotation, {})},
             new IR::PathExpression(default_action)));
     }
     props->push_back(
@@ -973,7 +974,7 @@ const IR::P4Table *ProgramStructure::convertTable(const IR::V1Table *table, cstr
             if (rt.name == "valid") rt.name = p4lib.exactMatch.Id();
             auto ce = conv.convert(e);
 
-            const IR::Annotations *annos = IR::Annotations::empty;
+            IR::Vector<IR::Annotation> annos;
             // Generate a name annotation for the key if it contains a mask.
             if (auto bin = e->to<IR::Mask>()) {
                 // This is a bit heuristic, but P4-14 does not allow arbitrary expressions for keys
@@ -982,11 +983,11 @@ const IR::P4Table *ProgramStructure::convertTable(const IR::V1Table *table, cstr
                     name = bin->right->toString();
                 else if (bin->right->is<IR::Constant>())
                     name = bin->left->toString();
-                if (!name.isNullOrEmpty()) annos = addNameAnnotation(name, annos);
+                if (!name.isNullOrEmpty()) annos = IR::Annotations::addNameAnnotation(name, annos);
             }
             // Here we rely on the fact that the spelling of 'rt' is
             // the same in P4-14 and core.p4/v1model.p4.
-            auto keyComp = new IR::KeyElement(annos, ce, new IR::PathExpression(rt));
+            auto keyComp = new IR::KeyElement(ce, new IR::PathExpression(rt), annos);
             key->push_back(keyComp);
         }
 
@@ -1069,7 +1070,7 @@ const IR::P4Table *ProgramStructure::convertTable(const IR::V1Table *table, cstr
         auto path = new IR::PathExpression(name);
         auto propvalue = new IR::ExpressionValue(path);
         auto prop = new IR::Property(IR::ID(v1model.tableAttributes.counters.Id()),
-                                     IR::Annotations::empty, propvalue, false);
+                                     IR::Vector<IR::Annotation>(), propvalue, false);
         props->push_back(prop);
     }
 
@@ -1080,9 +1081,8 @@ const IR::P4Table *ProgramStructure::convertTable(const IR::V1Table *table, cstr
         props->push_back(prop);
     }
 
-    auto annos = addGlobalNameAnnotation(table->name, table->annotations);
-    auto result = new IR::P4Table(table->srcInfo, newName, annos, props);
-    return result;
+    return new IR::P4Table(table->srcInfo, newName,
+                           addGlobalNameAnnotation(table->name, table->annotations), props);
 }
 
 const IR::Expression *ProgramStructure::convertHashAlgorithm(Util::SourceInfo srcInfo,
@@ -1140,13 +1140,15 @@ static bool sameBitsType(const IR::Node *errorPosition, const IR::Type *left,
     return true;  // to prevent inserting a cast
 }
 
+static const cstring saturatingAnnotation = "saturating"_cs;
+
 static bool isSaturatedField(const IR::Expression *expr) {
     auto member = expr->to<IR::Member>();
     if (!member) return false;
     auto header_type = member->expr->type->to<IR::Type_StructLike>();
     if (!header_type) return false;
     auto field = header_type->getField(member->member.name);
-    if (field && field->getAnnotation("saturating"_cs)) {
+    if (field && field->hasAnnotation(saturatingAnnotation)) {
         return true;
     }
     return false;
@@ -1977,9 +1979,9 @@ const IR::P4Action *ProgramStructure::convertAction(const IR::ActionFunction *ac
     }
 
     // Save the original action name in an annotation
-    auto annos = addGlobalNameAnnotation(action->name, action->annotations);
-    auto result = new IR::P4Action(action->srcInfo, newName, annos, params, body);
-    return result;
+    return new IR::P4Action(action->srcInfo, newName,
+                            addGlobalNameAnnotation(action->name, action->annotations), params,
+                            body);
 }
 
 const IR::Type_Control *ProgramStructure::controlType(IR::ID name) {
@@ -2072,9 +2074,8 @@ const IR::Declaration_Instance *ProgramStructure::convert(const IR::Register *re
         args->push_back(
             new IR::Argument(new IR::Constant(v1model.registers.size_type, reg->instance_count)));
     }
-    auto annos = addGlobalNameAnnotation(reg->name, reg->annotations);
-    auto decl = new IR::Declaration_Instance(newName, annos, spectype, args, nullptr);
-    return decl;
+    return new IR::Declaration_Instance(
+        newName, addGlobalNameAnnotation(reg->name, reg->annotations), spectype, args, nullptr);
 }
 
 const IR::Declaration_Instance *ProgramStructure::convert(const IR::CounterOrMeter *cm,
@@ -2096,13 +2097,10 @@ const IR::Declaration_Instance *ProgramStructure::convert(const IR::CounterOrMet
     args->push_back(new IR::Argument(kindarg));
     auto annos = addGlobalNameAnnotation(cm->name, cm->annotations);
     if (auto *c = cm->to<IR::Counter>()) {
-        if (c->min_width >= 0)
-            annos = annos->addAnnotation("min_width"_cs, new IR::Constant(c->min_width));
-        if (c->max_width >= 0)
-            annos = annos->addAnnotation("max_width"_cs, new IR::Constant(c->max_width));
+        if (c->min_width >= 0) annos.emplace_back("min_width"_cs, new IR::Constant(c->min_width));
+        if (c->max_width >= 0) annos.emplace_back("max_width"_cs, new IR::Constant(c->max_width));
     }
-    auto decl = new IR::Declaration_Instance(newName, annos, type, args, nullptr);
-    return decl;
+    return new IR::Declaration_Instance(newName, std::move(annos), type, args, nullptr);
 }
 
 const IR::Declaration_Instance *ProgramStructure::convertDirectMeter(const IR::Meter *m,
@@ -2128,10 +2126,9 @@ const IR::Declaration_Instance *ProgramStructure::convertDirectMeter(const IR::M
     auto annos = addGlobalNameAnnotation(m->name, m->annotations);
     if (m->pre_color != nullptr) {
         auto meterPreColor = ExpressionConverter(this).convert(m->pre_color);
-        if (meterPreColor != nullptr) annos = annos->addAnnotation("pre_color"_cs, meterPreColor);
+        if (meterPreColor != nullptr) annos.emplace_back("pre_color"_cs, meterPreColor);
     }
-    auto decl = new IR::Declaration_Instance(newName, annos, specType, args, nullptr);
-    return decl;
+    return new IR::Declaration_Instance(newName, std::move(annos), specType, args, nullptr);
 }
 
 const IR::Declaration_Instance *ProgramStructure::convertDirectCounter(const IR::Counter *c,
@@ -2145,12 +2142,9 @@ const IR::Declaration_Instance *ProgramStructure::convertDirectCounter(const IR:
     auto kindarg = counterType(c);
     args->push_back(new IR::Argument(kindarg));
     auto annos = addGlobalNameAnnotation(c->name, c->annotations);
-    if (c->min_width >= 0)
-        annos = annos->addAnnotation("min_width"_cs, new IR::Constant(c->min_width));
-    if (c->max_width >= 0)
-        annos = annos->addAnnotation("max_width"_cs, new IR::Constant(c->max_width));
-    auto decl = new IR::Declaration_Instance(newName, annos, type, args, nullptr);
-    return decl;
+    if (c->min_width >= 0) annos.emplace_back("min_width"_cs, new IR::Constant(c->min_width));
+    if (c->max_width >= 0) annos.emplace_back("max_width"_cs, new IR::Constant(c->max_width));
+    return new IR::Declaration_Instance(newName, std::move(annos), type, args, nullptr);
 }
 
 IR::Vector<IR::Argument> *ProgramStructure::createApplyArguments(cstring /* name unused */) {
@@ -2307,9 +2301,8 @@ const IR::P4Control *ProgramStructure::convertControl(const IR::V1Control *contr
             cstring newname = controls.get(control);
             auto typepath = new IR::Path(IR::ID(newname));
             auto type = new IR::Type_Name(typepath);
-            auto annos = addGlobalNameAnnotation(cc);
-            auto decl = new IR::Declaration_Instance(IR::ID(iname), annos, type,
-                                                     new IR::Vector<IR::Argument>(), nullptr);
+            auto decl = new IR::Declaration_Instance(IR::ID(iname), addGlobalNameAnnotation(cc, {}),
+                                                     type, new IR::Vector<IR::Argument>(), nullptr);
             locals.push_back(decl);
         }
     }
@@ -2456,9 +2449,7 @@ const IR::FieldList *ProgramStructure::getFieldLists(const IR::FieldListCalculat
         }
         result->fields.insert(result->fields.end(), fl->fields.begin(), fl->fields.end());
         result->payload = result->payload || fl->payload;
-        for (auto annot : fl->annotations->annotations) {
-            result->annotations = result->annotations->add(annot);
-        }
+        result->annotations.append(fl->annotations);
     }
     return result;
 }
@@ -2513,18 +2504,14 @@ void ProgramStructure::createChecksumVerifications() {
 
             auto mc = new IR::MethodCallStatement(new IR::MethodCallExpression(method, args));
             body->push_back(mc);
-
-            for (auto annot : cf->annotations->annotations)
-                body->annotations = body->annotations->add(annot);
-
-            for (auto annot : flc->annotations->annotations)
-                body->annotations = body->annotations->add(annot);
+            body->annotations.append(cf->annotations);
+            body->annotations.append(flc->annotations);
 
             LOG3("Converted " << flc);
         }
     }
-    verifyChecksums = new IR::P4Control(v1model.verify.Id(), type,
-                                        *new IR::IndexedVector<IR::Declaration>(), body);
+    verifyChecksums =
+        new IR::P4Control(v1model.verify.Id(), type, IR::IndexedVector<IR::Declaration>(), body);
     declarations->push_back(verifyChecksums);
     conversionContext->clear();
 }
@@ -2579,22 +2566,18 @@ void ProgramStructure::createChecksumUpdates() {
             auto methodCallExpression = new IR::MethodCallExpression(method, args);
             auto mc = new IR::MethodCallStatement(methodCallExpression);
             if (flc->algorithm->names[0] == "csum16_udp") {
-                auto zeros_as_ones_annot =
-                    new IR::Annotation(IR::ID("zeros_as_ones"), {methodCallExpression}, false);
-                body->annotations = body->annotations->add(zeros_as_ones_annot);
+                body->annotations.emplace_back("zeros_as_ones"_cs, methodCallExpression);
             }
 
-            for (auto annot : cf->annotations->annotations) {
-                auto newAnnot = new IR::Annotation(annot->name, {}, false);
-                for (auto expr : annot->expr) newAnnot->expr.push_back(expr);
+            for (auto *annot : cf->annotations) {
+                auto newAnnot = new IR::Annotation(annot->name, annot->expr, false);
                 newAnnot->expr.push_back(new IR::StringLiteral(methodCallExpression->toString()));
-                body->annotations = body->annotations->add(newAnnot);
+                body->annotations.push_back(newAnnot);
             }
-            for (auto annot : flc->annotations->annotations) {
-                auto newAnnot = new IR::Annotation(annot->name, {}, false);
-                for (auto expr : annot->expr) newAnnot->expr.push_back(expr);
+            for (auto *annot : flc->annotations) {
+                auto newAnnot = new IR::Annotation(annot->name, annot->expr, false);
                 newAnnot->expr.push_back(new IR::StringLiteral(methodCallExpression->toString()));
-                body->annotations = body->annotations->add(newAnnot);
+                body->annotations.push_back(newAnnot);
             }
 
             body->push_back(mc);

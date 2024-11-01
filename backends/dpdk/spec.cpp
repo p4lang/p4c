@@ -2,6 +2,7 @@
 #include "dpdkArch.h"
 #include "dpdkAsmOpt.h"
 #include "dpdkHelpers.h"
+#include "ir/annotations.h"
 #include "ir/dbprint.h"
 #include "printUtils.h"
 
@@ -414,8 +415,8 @@ std::ostream &IR::DpdkTable::toSpec(std::ostream &out) const {
         } else {
             out << "\t\t" << DPDK::toStr(action->expression);
         }
-        if (action->annotations->getAnnotation("tableonly"_cs)) out << " @tableonly";
-        if (action->annotations->getAnnotation("defaultonly"_cs)) out << " @defaultonly";
+        if (action->hasAnnotation(IR::Annotation::tableOnlyAnnotation)) out << " @tableonly";
+        if (action->hasAnnotation(IR::Annotation::defaultOnlyAnnotation)) out << " @defaultonly";
         out << std::endl;
     }
     out << "\t}" << std::endl;

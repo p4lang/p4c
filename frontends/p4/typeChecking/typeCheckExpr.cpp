@@ -480,11 +480,8 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Entry *entry) {
         entry = new IR::Entry(entry->srcInfo, entry->annotations, entry->isConst, entry->priority,
                               ks->to<IR::ListExpression>(), entry->action, entry->singleton);
 
-    auto actionRef = entry->getAction();
-    auto ale = validateActionInitializer(actionRef);
-    if (ale != nullptr) {
-        auto anno = ale->getAnnotation(IR::Annotation::defaultOnlyAnnotation);
-        if (anno != nullptr) {
+    if (auto ale = validateActionInitializer(entry->getAction())) {
+        if (ale->hasAnnotation(IR::Annotation::defaultOnlyAnnotation)) {
             typeError("%1%: Action marked with %2% used in table", entry,
                       IR::Annotation::defaultOnlyAnnotation);
             return entry;
@@ -2159,7 +2156,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::MethodCallExpression *exp
                 baseReturnType = sc->baseType;
             const bool factoryOrStaticAssertOrPureAnnot =
                 baseReturnType->is<IR::Type_Extern>() || ef->method->name == "static_assert" ||
-                ef->method->getAnnotation(IR::Annotation::pureAnnotation);
+                ef->method->hasAnnotation(IR::Annotation::pureAnnotation);
             if (constArgs && factoryOrStaticAssertOrPureAnnot) {
                 // factory extern function calls (those that return extern objects) with constant
                 // args are compile-time constants.

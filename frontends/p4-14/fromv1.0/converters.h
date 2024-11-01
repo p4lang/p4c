@@ -771,8 +771,8 @@ class CheckIfMultiEntryPoint : public Inspector {
         setName("CheckIfMultiEntryPoint");
     }
     bool preorder(const IR::ParserState *state) {
-        for (const auto *anno : state->getAnnotations()->annotations) {
-            if (anno->name.name == "packet_entry") {
+        for (const auto *anno : state->getAnnotations()) {
+            if (anno->name == "packet_entry") {
                 structure->parserEntryPoints.emplace(state->name, state);
             }
         }
@@ -855,10 +855,10 @@ class InsertCompilerGeneratedStartState : public Transform {
                                p.first),
                 new IR::PathExpression(new IR::Path(p.second->name))));
         }
-        auto instAnnos = new IR::Annotations();
-        instAnnos->add(new IR::Annotation(IR::Annotation::nameAnnotation, ".$InstanceType"_cs));
-        auto instEnum =
-            new IR::Type_SerEnum(newInstanceType, instAnnos, IR::Type_Bits::get(32), members);
+        auto instEnum = new IR::Type_SerEnum(
+            newInstanceType,
+            {new IR::Annotation(IR::Annotation::nameAnnotation, ".$InstanceType"_cs)},
+            IR::Type_Bits::get(32), members);
         allTypeDecls.push_back(instEnum);
 
         IR::Vector<IR::Expression> selExpr;
@@ -867,9 +867,9 @@ class InsertCompilerGeneratedStartState : public Transform {
             new IR::Member(new IR::PathExpression(new IR::Path("standard_metadata"_cs)),
                            "instance_type"_cs)));
         auto selects = new IR::SelectExpression(new IR::ListExpression(selExpr), selCases);
-        auto annos = new IR::Annotations();
-        annos->add(new IR::Annotation(IR::Annotation::nameAnnotation, ".$start"_cs));
-        auto startState = new IR::ParserState(IR::ParserState::start, annos, selects);
+        auto startState = new IR::ParserState(
+            IR::ParserState::start,
+            {new IR::Annotation(IR::Annotation::nameAnnotation, ".$start"_cs)}, selects);
         parserStates.push_back(startState);
 
         if (!parserStates.empty()) {

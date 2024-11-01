@@ -60,9 +60,10 @@ IR::DpdkExternDeclaration *DirectionToRegRead::addRegDeclInstance(cstring instan
     auto spectype = new IR::Type_Specialized(type, typeargs);
     auto args = new IR::Vector<IR::Argument>();
     args->push_back(new IR::Argument(new IR::Constant(IR::Type::Bits::get(32), 256)));
-    auto annot = IR::Annotations::empty;
-    annot->addAnnotationIfNew(IR::Annotation::nameAnnotation, new IR::StringLiteral(instanceName));
-    auto decl = new IR::DpdkExternDeclaration(instanceName, annot, spectype, args, nullptr);
+    auto decl = new IR::DpdkExternDeclaration(
+        instanceName,
+        {new IR::Annotation(IR::Annotation::nameAnnotation, new IR::StringLiteral(instanceName))},
+        spectype, args, nullptr);
     return decl;
 }
 

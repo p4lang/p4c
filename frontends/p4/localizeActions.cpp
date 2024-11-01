@@ -17,6 +17,7 @@ limitations under the License.
 #include "localizeActions.h"
 
 #include "frontends/p4/cloner.h"
+#include "ir/annotations.h"
 
 namespace P4 {
 
@@ -41,12 +42,9 @@ class ParamCloner : public CloneExpressions {
 
 const IR::Node *TagGlobalActions::preorder(IR::P4Action *action) {
     if (findContext<IR::P4Control>() == nullptr) {
-        auto annos = action->annotations;
-        if (annos == nullptr) annos = IR::Annotations::empty;
-        cstring name = "."_cs + action->name;
-        annos = annos->addAnnotationIfNew(IR::Annotation::nameAnnotation,
-                                          new IR::StringLiteral(name), false);
-        action->annotations = annos;
+        cstring name = absl::StrCat(".", action->name);
+        action->addAnnotationIfNew(IR::Annotation::nameAnnotation, new IR::StringLiteral(name),
+                                   false);
     }
     prune();
     return action;
@@ -78,13 +76,10 @@ bool FindGlobalActionUses::preorder(const IR::PathExpression *path) {
         auto replBody = cloner.clone<IR::BlockStatement>(action->body);
         auto params = cloner.clone<IR::ParameterList>(action->parameters);
 
-        auto annos = action->annotations;
-        if (annos == nullptr) annos = IR::Annotations::empty;
-        annos->addAnnotationIfNew(IR::Annotation::nameAnnotation,
-                                  new IR::StringLiteral(action->name), false);
         auto replacement = new IR::P4Action(
             action->srcInfo, IR::ID(action->name.srcInfo, newName, action->name.originalName),
-            annos, params, replBody);
+            IR::Annotations::addNameAnnotation(action->name, action->annotations), params,
+            replBody);
         repl->addReplacement(action, control, replacement);
     }
     return false;
@@ -166,15 +161,12 @@ bool FindRepeatedActionUses::preorder(const IR::PathExpression *expression) {
         auto newName = nameGen.newName(action->name.string_view());
         ParamCloner cloner;
         auto replBody = cloner.clone<IR::BlockStatement>(action->body);
-        auto annos = action->annotations;
         auto params = cloner.clone<IR::ParameterList>(action->parameters);
 
-        if (annos == nullptr) annos = IR::Annotations::empty;
-        annos->addAnnotationIfNew(IR::Annotation::nameAnnotation,
-                                  new IR::StringLiteral(action->name), false);
         replacement = new IR::P4Action(
             action->srcInfo, IR::ID(action->name.srcInfo, newName, action->name.originalName),
-            annos, params, replBody);
+            IR::Annotations::addNameAnnotation(action->name, action->annotations), params,
+            replBody);
         repl->createReplacement(action, actionUser, replacement);
     }
     repl->setRefReplacement(expression, replacement);

@@ -25,6 +25,7 @@ limitations under the License.
 #include "frontends/p4/resetHeaders.h"
 #include "frontends/p4/toP4/toP4.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/annotations.h"
 #include "lib/nullstream.h"
 
 namespace P4 {
@@ -220,12 +221,6 @@ class ComputeNewNames : public Inspector {
     void postorder(const IR::Declaration_Variable *decl) override { rename(decl); }
 };
 
-// Add a @name annotation ONLY.
-static const IR::Annotations *setNameAnnotation(cstring name, const IR::Annotations *annos) {
-    if (annos == nullptr) annos = IR::Annotations::empty;
-    return annos->addOrReplace(IR::Annotation::nameAnnotation, new IR::StringLiteral(name));
-}
-
 /**
 Perform multiple substitutions and rename global objects, such as
 tables, actions and instances.  Unfortunately these transformations
@@ -248,37 +243,35 @@ class Substitutions : public SubstituteParameters {
         cstring newName = renameMap->getName(orig);
         cstring extName = renameMap->getExtName(orig);
         LOG3("Renaming " << dbp(orig) << " to " << newName << " (" << extName << ")");
-        auto annos = setNameAnnotation(extName, table->annotations);
-        auto result = new IR::P4Table(table->srcInfo, newName, annos, table->properties);
-        return result;
+        return new IR::P4Table(table->srcInfo, newName,
+                               IR::Annotations::setNameAnnotation(extName, table->annotations),
+                               table->properties);
     }
     const IR::Node *postorder(IR::P4ValueSet *set) override {
         auto orig = getOriginal<IR::IDeclaration>();
         cstring newName = renameMap->getName(orig);
         cstring extName = renameMap->getExtName(orig);
         LOG3("Renaming " << dbp(orig) << " to " << newName << "(" << extName << ")");
-        auto annos = setNameAnnotation(extName, set->annotations);
-        auto result = new IR::P4ValueSet(set->srcInfo, newName, annos, set->elementType, set->size);
-        return result;
+        return new IR::P4ValueSet(set->srcInfo, newName,
+                                  IR::Annotations::setNameAnnotation(extName, set->annotations),
+                                  set->elementType, set->size);
     }
     const IR::Node *postorder(IR::P4Action *action) override {
         auto orig = getOriginal<IR::IDeclaration>();
         cstring newName = renameMap->getName(orig);
         cstring extName = renameMap->getExtName(orig);
         LOG3("Renaming " << dbp(orig) << " to " << newName << "(" << extName << ")");
-        auto annos = setNameAnnotation(extName, action->annotations);
-        auto result =
-            new IR::P4Action(action->srcInfo, newName, annos, action->parameters, action->body);
-        return result;
+        return new IR::P4Action(action->srcInfo, newName,
+                                IR::Annotations::setNameAnnotation(extName, action->annotations),
+                                action->parameters, action->body);
     }
     const IR::Node *postorder(IR::Declaration_Instance *instance) override {
         auto orig = getOriginal<IR::IDeclaration>();
         cstring newName = renameMap->getName(orig);
         cstring extName = renameMap->getExtName(orig);
         LOG3("Renaming " << dbp(orig) << " to " << newName << "(" << extName << ")");
-        auto annos = setNameAnnotation(extName, instance->annotations);
         instance->name = newName;
-        instance->annotations = annos;
+        instance->annotations = IR::Annotations::setNameAnnotation(extName, instance->annotations);
         return instance;
     }
     const IR::Node *postorder(IR::Declaration_Variable *decl) override {
@@ -286,9 +279,8 @@ class Substitutions : public SubstituteParameters {
         cstring newName = renameMap->getName(orig);
         cstring extName = renameMap->getExtName(orig);
         LOG3("Renaming " << dbp(orig) << " to " << newName << "(" << extName << ")");
-        auto annos = setNameAnnotation(extName, decl->annotations);
         decl->name = newName;
-        decl->annotations = annos;
+        decl->annotations = IR::Annotations::setNameAnnotation(extName, decl->annotations);
         return decl;
     }
     const IR::Node *postorder(IR::PathExpression *expression) override {
@@ -464,7 +456,7 @@ void GeneralInliner::inline_subst(P4Block *caller,
     LOG3("Analyzing " << dbp(caller));
     IR::IndexedVector<IR::Declaration> locals;
     P4BlockType *type = (caller->*blockType)->clone();
-    IR::Annotations *annos = type->annotations->clone();
+    IR::Vector<IR::Annotation> annos = type->annotations;
     for (auto s : caller->*blockLocals) {
         /* Even if we inline the block, the declaration may still be needed.
            Consider this example:
@@ -487,11 +479,9 @@ void GeneralInliner::inline_subst(P4Block *caller,
             workToDo->substitutions[inst] = substs;
 
             // Propagate annotations
-            const IR::Annotations *calleeAnnos = (callee->*blockType)->annotations;
-            for (auto *ann : calleeAnnos->annotations) {
-                if (!annos->getSingle(ann->name) && !Inline::isAnnotationNoPropagate(ann->name)) {
-                    annos->add(ann);
-                }
+            for (const auto *ann : (callee->*blockType)->annotations) {
+                if (Inline::isAnnotationNoPropagate(ann->name)) continue;
+                IR::Annotations::addIfNew(annos, ann);
             }
 
             // Substitute constructor parameters
@@ -592,7 +582,7 @@ void GeneralInliner::inline_subst(P4Block *caller,
         }
     }
     caller->*blockLocals = locals;
-    type->annotations = annos;
+    type->annotations = std::move(annos);
     caller->*blockType = type;
 }
 
@@ -678,7 +668,7 @@ const IR::Node *GeneralInliner::preorder(IR::MethodCallStatement *statement) {
         }
     }
 
-    auto annotations = callee->type->annotations->where(
+    auto annotations = callee->type->annotations.where(
         [](const IR::Annotation *a) { return a->name != IR::Annotation::nameAnnotation; });
     auto result = new IR::BlockStatement(statement->srcInfo, annotations, body);
     LOG3("Replacing " << dbp(orig) << " with " << dbp(result));
@@ -888,8 +878,8 @@ const IR::Node *GeneralInliner::preorder(IR::ParserState *state) {
         }
 
         // Prepare next state
-        annotations = IR::Annotations::empty;
         name = IR::ID(nextState, state->name);
+        annotations.clear();
         current.clear();
 
         // Copy back out and inout parameters
