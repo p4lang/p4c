@@ -55,7 +55,7 @@ while [ $# -gt 0 ]; do
     --force)
         FORCE=true
         ;;
-    debug|release|relwithdebinfo|Debug|Release|RelWithDebInfo|DEBUG|RELEASE|RELWITHDEBINFO)
+    Debug|Release|RelWithDebInfo)
         BuildType="$1"
         ;;
     build*)
