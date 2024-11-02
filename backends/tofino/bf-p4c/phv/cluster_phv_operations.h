@@ -19,9 +19,9 @@
 #ifndef BF_P4C_PHV_CLUSTER_PHV_OPERATIONS_H_
 #define BF_P4C_PHV_CLUSTER_PHV_OPERATIONS_H_
 
-#include "bf-p4c/ir/thread_visitor.h"
-#include "bf-p4c/phv/phv.h"
-#include "bf-p4c/phv/phv_parde_mau_use.h"
+#include "backends/tofino/bf-p4c/ir/thread_visitor.h"
+#include "backends/tofino/bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/phv/phv_parde_mau_use.h"
 #include "ir/ir.h"
 #include "lib/map.h"
 #include "lib/ordered_map.h"

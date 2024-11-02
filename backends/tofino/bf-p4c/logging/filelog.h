@@ -26,7 +26,7 @@
 #include <string>
 #include <utility>
 
-#include "bf-p4c/logging/manifest.h"
+#include "backends/tofino/bf-p4c/logging/manifest.h"
 #include "lib/cstring.h"
 
 namespace Logging {

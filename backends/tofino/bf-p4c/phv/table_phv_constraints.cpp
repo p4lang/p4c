@@ -16,9 +16,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/table_phv_constraints.h"
+#include "backends/tofino/bf-p4c/phv/table_phv_constraints.h"
 
-#include "bf-p4c/mau/table_layout.h"
+#include "backends/tofino/bf-p4c/mau/table_layout.h"
 
 Visitor::profile_t TernaryMatchKeyConstraints::init_apply(const IR::Node *root) {
     profile_t rv = MauModifier::init_apply(root);

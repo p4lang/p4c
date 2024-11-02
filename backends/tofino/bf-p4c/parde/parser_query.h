@@ -21,8 +21,8 @@
 
 #include <ir/ir.h>
 
-#include "bf-p4c/parde/parde_visitor.h"
-#include "bf-p4c/parde/parser_info.h"
+#include "backends/tofino/bf-p4c/parde/parde_visitor.h"
+#include "backends/tofino/bf-p4c/parde/parser_info.h"
 #include "ir/pass_manager.h"
 
 class PhvInfo;

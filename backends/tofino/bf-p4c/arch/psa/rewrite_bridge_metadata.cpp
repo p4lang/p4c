@@ -20,11 +20,11 @@
 
 #include <boost/range/adaptor/sliced.hpp>
 
-#include "bf-p4c/arch/collect_bridged_fields.h"
-#include "bf-p4c/arch/intrinsic_metadata.h"
-#include "bf-p4c/midend/path_linearizer.h"
-#include "bf-p4c/midend/type_categories.h"
-#include "bf-p4c/midend/type_checker.h"
+#include "backends/tofino/bf-p4c/arch/collect_bridged_fields.h"
+#include "backends/tofino/bf-p4c/arch/intrinsic_metadata.h"
+#include "backends/tofino/bf-p4c/midend/path_linearizer.h"
+#include "backends/tofino/bf-p4c/midend/type_categories.h"
+#include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeMap.h"

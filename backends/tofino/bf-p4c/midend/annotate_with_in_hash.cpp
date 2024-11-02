@@ -16,10 +16,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/midend/annotate_with_in_hash.h"
+#include "backends/tofino/bf-p4c/midend/annotate_with_in_hash.h"
 
-#include "bf-p4c/midend/path_linearizer.h"
-#include "bf-p4c/midend/type_categories.h"
+#include "backends/tofino/bf-p4c/midend/path_linearizer.h"
+#include "backends/tofino/bf-p4c/midend/type_categories.h"
 
 namespace BFN {
 

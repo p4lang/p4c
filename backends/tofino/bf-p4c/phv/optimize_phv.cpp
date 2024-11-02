@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/optimize_phv.h"
+#include "backends/tofino/bf-p4c/phv/optimize_phv.h"
 
 /**
  * Insert a Transaction/SuperCluster to the optimization strategy.

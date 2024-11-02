@@ -19,10 +19,10 @@
 #ifndef INITIALIZE_MIRROR_IO_SELECT_H_
 #define INITIALIZE_MIRROR_IO_SELECT_H_
 
-#include "bf-p4c/arch/arch.h"
-#include "bf-p4c/common/pragma/all_pragmas.h"
-#include "bf-p4c/common/pragma/collect_global_pragma.h"
-#include "bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/arch/arch.h"
+#include "backends/tofino/bf-p4c/common/pragma/all_pragmas.h"
+#include "backends/tofino/bf-p4c/common/pragma/collect_global_pragma.h"
+#include "backends/tofino/bf-p4c/device.h"
 #include "ir/ir.h"
 #include "type_checker.h"
 

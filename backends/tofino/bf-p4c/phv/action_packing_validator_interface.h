@@ -21,8 +21,8 @@
 
 #include <optional>
 
-#include "bf-p4c/phv/action_source_tracker.h"
-#include "bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/phv/action_source_tracker.h"
+#include "backends/tofino/bf-p4c/phv/utils/utils.h"
 #include "lib/cstring.h"
 #include "lib/ordered_set.h"
 

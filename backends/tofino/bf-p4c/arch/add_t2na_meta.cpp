@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/arch/add_t2na_meta.h"
+#include "backends/tofino/bf-p4c/arch/add_t2na_meta.h"
 
 namespace BFN {
 

@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/solver/action_constraint_solver.h"
+#include "backends/tofino/bf-p4c/phv/solver/action_constraint_solver.h"
 
 #include <exception>
 

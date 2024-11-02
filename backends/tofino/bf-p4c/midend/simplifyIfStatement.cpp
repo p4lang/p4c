@@ -18,7 +18,7 @@
 
 #include "simplifyIfStatement.h"
 
-#include "bf-p4c/midend/path_linearizer.h"
+#include "backends/tofino/bf-p4c/midend/path_linearizer.h"
 #include "ir/ir.h"
 #include "ir/pattern.h"
 #include "ir/visitor.h"

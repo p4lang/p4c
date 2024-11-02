@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/table_dependency_graph.h"
+#include "backends/tofino/bf-p4c/mau/table_dependency_graph.h"
 
 #include <assert.h>
 
@@ -29,16 +29,16 @@
 #include <boost/graph/lookup_edge.hpp>
 #include <boost/optional/optional_io.hpp>
 
-#include "bf-p4c/common/run_id.h"
-#include "bf-p4c/ir/gress.h"
-#include "bf-p4c/ir/table_tree.h"
-#include "bf-p4c/ir/tofino_write_context.h"
-#include "bf-p4c/lib/error_type.h"
-#include "bf-p4c/logging/manifest.h"
-#include "bf-p4c/mau/default_next.h"
-#include "bf-p4c/mau/table_placement.h"
-#include "bf-p4c/mau/table_summary.h"
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/common/run_id.h"
+#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/ir/table_tree.h"
+#include "backends/tofino/bf-p4c/ir/tofino_write_context.h"
+#include "backends/tofino/bf-p4c/lib/error_type.h"
+#include "backends/tofino/bf-p4c/logging/manifest.h"
+#include "backends/tofino/bf-p4c/mau/default_next.h"
+#include "backends/tofino/bf-p4c/mau/table_placement.h"
+#include "backends/tofino/bf-p4c/mau/table_summary.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/log.h"

@@ -16,9 +16,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/gen_prim_json.h"
+#include "backends/tofino/bf-p4c/mau/gen_prim_json.h"
 
-#include "bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
 
 Util::JsonObject *GeneratePrimitiveInfo::add_op_json(Util::JsonObject *prim, const std::string op,
                                                      const std::string type, cstring name) {

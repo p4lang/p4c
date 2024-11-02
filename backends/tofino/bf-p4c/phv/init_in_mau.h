@@ -19,8 +19,8 @@
 #ifndef BF_P4C_PHV_INIT_IN_MAU_H_
 #define BF_P4C_PHV_INIT_IN_MAU_H_
 
-#include "bf-p4c/phv/add_initialization.h"
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/add_initialization.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "ir/ir-generated.h"
 #include "ir/visitor.h"
 

@@ -19,11 +19,11 @@
 #ifndef BF_P4C_MAU_BUILD_POWER_GRAPH_H_
 #define BF_P4C_MAU_BUILD_POWER_GRAPH_H_
 
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/ir/control_flow_visitor.h"
-#include "bf-p4c/mau/default_next.h"
-#include "bf-p4c/mau/jbay_next_table.h"
-#include "bf-p4c/mau/simple_power_graph.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/ir/control_flow_visitor.h"
+#include "backends/tofino/bf-p4c/mau/default_next.h"
+#include "backends/tofino/bf-p4c/mau/jbay_next_table.h"
+#include "backends/tofino/bf-p4c/mau/simple_power_graph.h"
 #include "lib/ordered_set.h"
 #include "mau_visitor.h"
 

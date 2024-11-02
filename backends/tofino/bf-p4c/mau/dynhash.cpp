@@ -16,13 +16,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/dynhash.h"
+#include "backends/tofino/bf-p4c/mau/dynhash.h"
 
-#include "bf-p4c/common/asm_output.h"
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/mau/ixbar_expr.h"
-#include "bf-p4c/mau/resource.h"
-#include "bf-p4c/mau/tofino/input_xbar.h"
+#include "backends/tofino/bf-p4c/common/asm_output.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/mau/ixbar_expr.h"
+#include "backends/tofino/bf-p4c/mau/resource.h"
+#include "backends/tofino/bf-p4c/mau/tofino/input_xbar.h"
 #include "lib/stringify.h"
 
 /**

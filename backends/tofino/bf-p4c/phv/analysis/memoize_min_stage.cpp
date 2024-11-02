@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/analysis/memoize_min_stage.h"
+#include "backends/tofino/bf-p4c/phv/analysis/memoize_min_stage.h"
 
 Visitor::profile_t MemoizeStage::init_apply(const IR::Node *root) {
     PhvInfo::clearMinStageInfo();

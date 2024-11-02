@@ -21,9 +21,9 @@
 
 #include <boost/range/adaptor/reversed.hpp>
 
-#include "bf-p4c/parde/clot/clot_info.h"
-#include "bf-p4c/parde/lowered/helpers.h"
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/parde/clot/clot_info.h"
+#include "backends/tofino/bf-p4c/parde/lowered/helpers.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 
 namespace Parde::Lowered {
 

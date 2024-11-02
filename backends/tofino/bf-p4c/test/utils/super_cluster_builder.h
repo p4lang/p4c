@@ -27,9 +27,9 @@
 #include <sstream>
 #include <string>
 
-#include "bf-p4c/ir/bitrange.h"
-#include "bf-p4c/phv/allocate_phv.h"
-#include "bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/ir/bitrange.h"
+#include "backends/tofino/bf-p4c/phv/allocate_phv.h"
+#include "backends/tofino/bf-p4c/phv/utils/utils.h"
 
 /// A helpfull class for building SuperClusters
 class SuperClusterBuilder {

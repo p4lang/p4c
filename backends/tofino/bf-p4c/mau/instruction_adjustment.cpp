@@ -16,18 +16,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/instruction_adjustment.h"
+#include "backends/tofino/bf-p4c/mau/instruction_adjustment.h"
 
 #include <optional>
 #include <queue>
 
 #include <boost/range/adaptor/reversed.hpp>
 
-#include "bf-p4c/common/asm_output.h"
-#include "bf-p4c/common/slice.h"
-#include "bf-p4c/mau/ixbar_expr.h"
-#include "bf-p4c/mau/tofino/input_xbar.h"
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/common/asm_output.h"
+#include "backends/tofino/bf-p4c/common/slice.h"
+#include "backends/tofino/bf-p4c/mau/ixbar_expr.h"
+#include "backends/tofino/bf-p4c/mau/tofino/input_xbar.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "lib/indent.h"
 #include "lib/log.h"
 

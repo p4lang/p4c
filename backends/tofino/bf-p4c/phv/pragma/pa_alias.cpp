@@ -16,16 +16,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/pragma/pa_alias.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_alias.h"
 
 #include <numeric>
 #include <sstream>
 #include <string>
 
+#include "backends/tofino/bf-p4c/common/table_printer.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/phv/pragma/phv_pragmas.h"
 #include "bf-p4c-options.h"
-#include "bf-p4c/common/table_printer.h"
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/phv/pragma/phv_pragmas.h"
 #include "lib/log.h"
 
 /// BFN::Pragma interface

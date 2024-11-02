@@ -16,12 +16,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/common/alias.h"
+#include "backends/tofino/bf-p4c/common/alias.h"
 
 #include <sstream>
 
-#include "bf-p4c/arch/bridge_metadata.h"
-#include "bf-p4c/common/ir_utils.h"
+#include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
+#include "backends/tofino/bf-p4c/common/ir_utils.h"
 
 Visitor::profile_t FindExpressionsForFields::init_apply(const IR::Node *root) {
     profile_t rv = Inspector::init_apply(root);

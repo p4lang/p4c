@@ -16,20 +16,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/instruction_selection.h"
+#include "backends/tofino/bf-p4c/mau/instruction_selection.h"
 
 #include <sstream>
 
 #include <boost/algorithm/string.hpp>
 
 #include "action_analysis.h"
-#include "bf-p4c/common/elim_unused.h"
-#include "bf-p4c/common/ir_utils.h"
-#include "bf-p4c/common/slice.h"
-#include "bf-p4c/mau/stateful_alu.h"
-#include "bf-p4c/mau/static_entries_const_prop.h"
-#include "bf-p4c/mau/validate_actions.h"
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/common/elim_unused.h"
+#include "backends/tofino/bf-p4c/common/ir_utils.h"
+#include "backends/tofino/bf-p4c/common/slice.h"
+#include "backends/tofino/bf-p4c/mau/stateful_alu.h"
+#include "backends/tofino/bf-p4c/mau/static_entries_const_prop.h"
+#include "backends/tofino/bf-p4c/mau/validate_actions.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "ir/pattern.h"
 #include "ixbar_expr.h"
 #include "lib/bitops.h"

@@ -18,7 +18,7 @@
 
 #include "slice.h"
 
-#include "bf-p4c/common/ir_utils.h"
+#include "backends/tofino/bf-p4c/common/ir_utils.h"
 
 static IR::Constant *sliceConstant(const IR::Constant *k, int lo, int hi) {
     int size = hi - lo + 1;

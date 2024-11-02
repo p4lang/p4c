@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/v2/action_packing_validator.h"
+#include "backends/tofino/bf-p4c/phv/v2/action_packing_validator.h"
 
 #include <algorithm>
 #include <optional>
@@ -24,11 +24,11 @@
 #include <boost/range/adaptor/reversed.hpp>
 #include <boost/range/join.hpp>
 
-#include "bf-p4c/logging/logging.h"
-#include "bf-p4c/phv/action_source_tracker.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/solver/action_constraint_solver.h"
-#include "bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/logging/logging.h"
+#include "backends/tofino/bf-p4c/phv/action_source_tracker.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/solver/action_constraint_solver.h"
+#include "backends/tofino/bf-p4c/phv/utils/utils.h"
 #include "ir/ir.h"
 #include "lib/algorithm.h"
 #include "lib/bitvec.h"

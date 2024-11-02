@@ -26,9 +26,9 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/transitive_closure.hpp>
 
-#include "bf-p4c/ir/control_flow_visitor.h"
-#include "bf-p4c/lib/boost_graph.h"
-#include "bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/ir/control_flow_visitor.h"
+#include "backends/tofino/bf-p4c/lib/boost_graph.h"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
 
 namespace boost {
 enum vertex_table_t { vertex_table };

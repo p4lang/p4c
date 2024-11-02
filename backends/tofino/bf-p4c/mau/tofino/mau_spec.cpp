@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/mau_spec.h"
+#include "backends/tofino/bf-p4c/mau/mau_spec.h"
 
 #include "input_xbar.h"
 

@@ -21,11 +21,11 @@
  * in the BFN::AnnotateWithInHash pass.
  */
 
-#include "bf-p4c/midend/annotate_with_in_hash.h"
+#include "backends/tofino/bf-p4c/midend/annotate_with_in_hash.h"
 
-#include "bf-p4c/arch/arch.h"
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/midend/type_checker.h"
+#include "backends/tofino/bf-p4c/arch/arch.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "bf_gtest_helpers.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"

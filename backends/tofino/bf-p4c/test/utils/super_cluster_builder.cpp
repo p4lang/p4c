@@ -16,9 +16,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/test/utils/super_cluster_builder.h"
+#include "backends/tofino/bf-p4c/test/utils/super_cluster_builder.h"
 
-#include "bf-p4c/../p4c/lib/log.h"
+#include "backends/tofino/bf-p4c/../p4c/lib/log.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // Helpfull inline functions

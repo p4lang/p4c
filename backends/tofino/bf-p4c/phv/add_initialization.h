@@ -19,14 +19,14 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_PHV_ADD_INITIALIZATION_H_
 #define BACKENDS_TOFINO_BF_P4C_PHV_ADD_INITIALIZATION_H_
 
-#include "bf-p4c/common/field_defuse.h"
-#include "bf-p4c/common/map_tables_to_actions.h"
-#include "bf-p4c/mau/add_always_run.h"
-#include "bf-p4c/mau/table_dependency_graph.h"
-#include "bf-p4c/mau/table_mutex.h"
-#include "bf-p4c/phv/analysis/meta_live_range.h"
-#include "bf-p4c/phv/finalize_stage_allocation.h"
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/common/field_defuse.h"
+#include "backends/tofino/bf-p4c/common/map_tables_to_actions.h"
+#include "backends/tofino/bf-p4c/mau/add_always_run.h"
+#include "backends/tofino/bf-p4c/mau/table_dependency_graph.h"
+#include "backends/tofino/bf-p4c/mau/table_mutex.h"
+#include "backends/tofino/bf-p4c/phv/analysis/meta_live_range.h"
+#include "backends/tofino/bf-p4c/phv/finalize_stage_allocation.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 
 /** A helper class that maps PHV::Field to an IR::Expression.
  * It also provides a helper function to generate an IR::MAU::Instruction* to initialize a field to

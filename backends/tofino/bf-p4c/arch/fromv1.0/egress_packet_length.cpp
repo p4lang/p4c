@@ -18,7 +18,7 @@
 
 #include "egress_packet_length.h"
 
-#include "bf-p4c/midend/type_checker.h"
+#include "backends/tofino/bf-p4c/midend/type_checker.h"
 
 // Check whether egress parser parses mirror packets
 class MirrorEgressParseEval : public Inspector {

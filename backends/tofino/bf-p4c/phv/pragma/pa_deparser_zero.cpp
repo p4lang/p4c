@@ -16,9 +16,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/pragma/pa_deparser_zero.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_deparser_zero.h"
 
-#include "bf-p4c/phv/pragma/phv_pragmas.h"
+#include "backends/tofino/bf-p4c/phv/pragma/phv_pragmas.h"
 
 const std::vector<std::string> *PragmaDeparserZero::supported_pragmas =
     new std::vector<std::string>{PHV::pragma::NOT_PARSED, PHV::pragma::NOT_DEPARSED,

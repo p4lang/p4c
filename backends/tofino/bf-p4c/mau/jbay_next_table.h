@@ -19,9 +19,9 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_MAU_JBAY_NEXT_TABLE_H_
 #define BACKENDS_TOFINO_BF_P4C_MAU_JBAY_NEXT_TABLE_H_
 
-#include "bf-p4c/lib/dyn_vector.h"
-#include "bf-p4c/mau/memories.h"
-#include "bf-p4c/mau/table_layout.h"
+#include "backends/tofino/bf-p4c/lib/dyn_vector.h"
+#include "backends/tofino/bf-p4c/mau/memories.h"
+#include "backends/tofino/bf-p4c/mau/table_layout.h"
 #include "mau_visitor.h"
 #include "next_table.h"
 #include "table_control_deps.h"

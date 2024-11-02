@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/analysis/header_mutex.h"
+#include "backends/tofino/bf-p4c/phv/analysis/header_mutex.h"
 
 #include <optional>
 
@@ -25,8 +25,8 @@
 #include <boost/graph/graph_utility.hpp>
 #include <boost/graph/reverse_graph.hpp>
 
-#include "bf-p4c/common/table_printer.h"
-#include "bf-p4c/logging/event_logger.h"
+#include "backends/tofino/bf-p4c/common/table_printer.h"
+#include "backends/tofino/bf-p4c/logging/event_logger.h"
 
 cstring get_header_state_as_cstring(HeaderState header_state) {
     BUG_CHECK(header_state_to_cstring.count(header_state), "%d is not a valid HeaderState.",

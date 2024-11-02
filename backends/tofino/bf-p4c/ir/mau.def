@@ -24,13 +24,13 @@ struct TableResourceAlloc;
 #include <optional>
 #include "lib/bitvec.h"
 #include "lib/ltbitmatrix.h"
-#include "bf-p4c/ir/ir_enums.h"
-#include "bf-p4c/ir/unique_id.h"
-#include "bf-p4c/mau/hash_function.h"
-#include "bf-p4c/lib/error_macros.h"
+#include "backends/tofino/bf-p4c/ir/ir_enums.h"
+#include "backends/tofino/bf-p4c/ir/unique_id.h"
+#include "backends/tofino/bf-p4c/mau/hash_function.h"
+#include "backends/tofino/bf-p4c/lib/error_macros.h"
 #end
 #emit_impl
-#include "bf-p4c/mau/resource.h"
+#include "backends/tofino/bf-p4c/mau/resource.h"
 #end
 
 namespace MAU {

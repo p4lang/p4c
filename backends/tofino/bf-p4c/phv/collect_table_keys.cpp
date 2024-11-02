@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/collect_table_keys.h"
+#include "backends/tofino/bf-p4c/phv/collect_table_keys.h"
 
 namespace PHV {
 

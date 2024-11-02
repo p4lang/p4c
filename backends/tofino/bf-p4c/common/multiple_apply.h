@@ -21,10 +21,10 @@
 
 #include <set>
 
-#include "bf-p4c/ir/thread_visitor.h"
-#include "bf-p4c/lib/union_find.hpp"
-#include "bf-p4c/mau/mau_visitor.h"
-#include "bf-p4c/mau/table_mutex.h"
+#include "backends/tofino/bf-p4c/ir/thread_visitor.h"
+#include "backends/tofino/bf-p4c/lib/union_find.hpp"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/mau/table_mutex.h"
 #include "lib/ordered_map.h"
 #include "lib/ordered_set.h"
 

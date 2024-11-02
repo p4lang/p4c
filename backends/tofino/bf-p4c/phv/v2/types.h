@@ -21,8 +21,8 @@
 
 #include <functional>
 
-#include "bf-p4c/phv/utils/utils.h"
-#include "bf-p4c/phv/v2/allocator_metrics.h"
+#include "backends/tofino/bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/phv/v2/allocator_metrics.h"
 
 namespace PHV {
 namespace v2 {

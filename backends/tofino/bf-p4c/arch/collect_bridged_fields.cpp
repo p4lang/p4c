@@ -20,8 +20,8 @@
 
 #include <boost/range/adaptor/sliced.hpp>
 
-#include "bf-p4c/arch/bridge_metadata.h"
-#include "bf-p4c/midend/path_linearizer.h"
+#include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
+#include "backends/tofino/bf-p4c/midend/path_linearizer.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"

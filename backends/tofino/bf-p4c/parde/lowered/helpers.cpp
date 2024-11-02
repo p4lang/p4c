@@ -22,7 +22,7 @@
 
 #include <boost/range/adaptor/reversed.hpp>
 
-#include "bf-p4c/arch/bridge_metadata.h"
+#include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
 
 namespace Parde::Lowered {
 

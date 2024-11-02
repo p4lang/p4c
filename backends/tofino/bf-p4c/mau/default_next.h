@@ -19,9 +19,9 @@
 #ifndef BF_P4C_MAU_DEFAULT_NEXT_H_
 #define BF_P4C_MAU_DEFAULT_NEXT_H_
 
-#include "bf-p4c/ir/control_flow_visitor.h"
-#include "bf-p4c/ir/table_tree.h"
-#include "bf-p4c/phv/utils/utils.h"  // for operator<<(ordered_set)
+#include "backends/tofino/bf-p4c/ir/control_flow_visitor.h"
+#include "backends/tofino/bf-p4c/ir/table_tree.h"
+#include "backends/tofino/bf-p4c/phv/utils/utils.h"  // for operator<<(ordered_set)
 #include "lib/ordered_map.h"
 #include "lib/ordered_set.h"
 #include "mau_visitor.h"

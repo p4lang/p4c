@@ -25,13 +25,13 @@
 
 #include <boost/range/adaptor/reversed.hpp>
 
-#include "bf-p4c/common/table_printer.h"
-#include "bf-p4c/device.h"
-#include "bf-p4c/logging/logging.h"
-#include "bf-p4c/parde/parde_visitor.h"
-#include "bf-p4c/parde/parser_info.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/phv_parde_mau_use.h"
+#include "backends/tofino/bf-p4c/common/table_printer.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/logging/logging.h"
+#include "backends/tofino/bf-p4c/parde/parde_visitor.h"
+#include "backends/tofino/bf-p4c/parde/parser_info.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/phv_parde_mau_use.h"
 #include "clot_candidate.h"
 #include "field_slice_extract_info.h"
 #include "lib/bitvec.h"

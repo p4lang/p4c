@@ -25,12 +25,12 @@
 #include <sstream>
 #include <vector>
 
-#include "bf-p4c/common/asm_output.h"
-#include "bf-p4c/mau/input_xbar.h"
-#include "bf-p4c/mau/memories.h"
-#include "bf-p4c/mau/next_table.h"
-#include "bf-p4c/mau/resource.h"
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/common/asm_output.h"
+#include "backends/tofino/bf-p4c/mau/input_xbar.h"
+#include "backends/tofino/bf-p4c/mau/memories.h"
+#include "backends/tofino/bf-p4c/mau/next_table.h"
+#include "backends/tofino/bf-p4c/mau/resource.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "lib/log.h"
 #include "lib/safe_vector.h"
 

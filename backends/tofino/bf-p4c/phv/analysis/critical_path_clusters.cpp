@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/analysis/critical_path_clusters.h"
+#include "backends/tofino/bf-p4c/phv/analysis/critical_path_clusters.h"
 
 Visitor::profile_t CalcCriticalPathClusters::init_apply(const IR::Node *root) {
     auto rv = Inspector::init_apply(root);

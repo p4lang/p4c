@@ -21,9 +21,9 @@
 
 #include <optional>
 
-#include "bf-p4c/logging/pass_manager.h"
-#include "bf-p4c/mau/table_flow_graph.h"
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/logging/pass_manager.h"
+#include "backends/tofino/bf-p4c/mau/table_flow_graph.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 
 using namespace P4;
 

@@ -26,12 +26,12 @@
 #include <string>
 #include <vector>
 
-#include "bf-p4c/common/ir_utils.h"
-#include "bf-p4c/common/slice.h"
-#include "bf-p4c/ir/tofino_write_context.h"
-#include "bf-p4c/lib/error_type.h"
-#include "bf-p4c/mau/asm_output.h"
-#include "bf-p4c/phv/asm_output.h"
+#include "backends/tofino/bf-p4c/common/ir_utils.h"
+#include "backends/tofino/bf-p4c/common/slice.h"
+#include "backends/tofino/bf-p4c/ir/tofino_write_context.h"
+#include "backends/tofino/bf-p4c/lib/error_type.h"
+#include "backends/tofino/bf-p4c/mau/asm_output.h"
+#include "backends/tofino/bf-p4c/phv/asm_output.h"
 #include "boost/range/adaptor/reversed.hpp"
 #include "lib/algorithm.h"
 #include "lib/bitops.h"

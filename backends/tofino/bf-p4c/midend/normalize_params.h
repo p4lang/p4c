@@ -19,7 +19,7 @@
 #ifndef _MIDEND_NORMALIZE_PARAMS_H_
 #define _MIDEND_NORMALIZE_PARAMS_H_
 
-#include "bf-p4c/midend/type_checker.h"
+#include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"

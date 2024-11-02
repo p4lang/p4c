@@ -22,12 +22,12 @@
 #emit
 
 #include "lib/bitvec.h"
-#include "bf-p4c/common/debug_info.h"
-#include "bf-p4c/ir/bitrange.h"
-#include "bf-p4c/ir/gress.h"
-#include "bf-p4c/parde/clot/clot.h"
-#include "bf-p4c/phv/phv.h"
-#include "bf-p4c/lib/error_macros.h"
+#include "backends/tofino/bf-p4c/common/debug_info.h"
+#include "backends/tofino/bf-p4c/ir/bitrange.h"
+#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/parde/clot/clot.h"
+#include "backends/tofino/bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/lib/error_macros.h"
 
 struct StageUse {
     static constexpr int MAX_LOGICAL_IDS = 16;
@@ -48,7 +48,7 @@ struct HeaderStackInfo;
 #end
 
 #emit_impl
-#include "bf-p4c/ir/thread_visitor.h"
+#include "backends/tofino/bf-p4c/ir/thread_visitor.h"
 #end
 
 // Adding this class in ingress and egress thread so that Alias can replace special hardware

@@ -16,12 +16,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/analysis/dominator_tree.h"
+#include "backends/tofino/bf-p4c/phv/analysis/dominator_tree.h"
 
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/dominator_tree.hpp>
 
-#include "bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/device.h"
 
 using namespace boost;
 

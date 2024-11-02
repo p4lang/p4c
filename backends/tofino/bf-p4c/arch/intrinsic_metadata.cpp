@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/arch/intrinsic_metadata.h"
+#include "backends/tofino/bf-p4c/arch/intrinsic_metadata.h"
 
 #include "ir/ir.h"
 

@@ -20,10 +20,10 @@
 
 #include <optional>
 
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/parde/count_strided_header_refs.h"
-#include "bf-p4c/parde/parser_info.h"
-#include "bf-p4c/phv/pragma/pa_alias.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/parde/count_strided_header_refs.h"
+#include "backends/tofino/bf-p4c/parde/parser_info.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_alias.h"
 #include "check_clot_groups.h"
 #include "clot_candidate.h"
 #include "field_pov_analysis.h"

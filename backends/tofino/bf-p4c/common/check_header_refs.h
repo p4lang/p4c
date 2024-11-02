@@ -19,7 +19,7 @@
 #ifndef BF_P4C_COMMON_CHECK_HEADER_REFS_H_
 #define BF_P4C_COMMON_CHECK_HEADER_REFS_H_
 
-#include "bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
 #include "ir/ir.h"
 
 using namespace P4;

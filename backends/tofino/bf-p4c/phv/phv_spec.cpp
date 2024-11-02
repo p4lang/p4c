@@ -16,13 +16,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/phv_spec.h"
+#include "backends/tofino/bf-p4c/phv/phv_spec.h"
 
 #include <optional>
 #include <sstream>
 
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/common/pragma/all_pragmas.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/common/pragma/all_pragmas.h"
 #include "frontends/parsers/p4/p4parser.hpp"
 #include "lib/bitvec.h"
 #include "lib/cstring.h"

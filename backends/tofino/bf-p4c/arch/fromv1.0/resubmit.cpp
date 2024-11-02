@@ -18,9 +18,9 @@
 
 #include "resubmit.h"
 
-#include "bf-p4c/arch/intrinsic_metadata.h"
-#include "bf-p4c/device.h"
-#include "bf-p4c/parde/parde_visitor.h"
+#include "backends/tofino/bf-p4c/arch/intrinsic_metadata.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/parde/parde_visitor.h"
 #include "frontends/p4-14/fromv1.0/v1model.h"
 #include "frontends/p4/cloner.h"
 #include "frontends/p4/coreLibrary.h"

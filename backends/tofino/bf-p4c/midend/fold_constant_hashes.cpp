@@ -18,12 +18,12 @@
 
 /* clang-format off */
 
-#include "bf-p4c/midend/fold_constant_hashes.h"
+#include "backends/tofino/bf-p4c/midend/fold_constant_hashes.h"
 #include <boost/optional/optional_io.hpp>
 #include <boost/range/adaptor/reversed.hpp>
 #include "frontends/p4/externInstance.h"
 #include "frontends/p4/methodInstance.h"
-#include "bf-p4c/arch/helpers.h"
+#include "backends/tofino/bf-p4c/arch/helpers.h"
 
 namespace BFN {
 

@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/action_mutex.h"
+#include "backends/tofino/bf-p4c/mau/action_mutex.h"
 
 /**
  * The functionality of this algorithm, pretty much the exact same algorithm used right now

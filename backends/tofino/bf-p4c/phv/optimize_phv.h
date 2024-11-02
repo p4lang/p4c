@@ -21,9 +21,9 @@
 
 #include <optional>
 
-#include "bf-p4c/phv/allocate_phv.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/phv/allocate_phv.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/utils/utils.h"
 
 struct TransactData {
     // Mapping table of Transaction -> SuperCluster

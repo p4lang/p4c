@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/action_format.h"
-#include "bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/mau/action_format.h"
+#include "backends/tofino/bf-p4c/phv/phv.h"
 #include "gtest/gtest.h"
 #include "lib/log.h"
 

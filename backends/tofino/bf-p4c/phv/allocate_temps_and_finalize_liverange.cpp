@@ -16,17 +16,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/allocate_temps_and_finalize_liverange.h"
+#include "backends/tofino/bf-p4c/phv/allocate_temps_and_finalize_liverange.h"
 
 #include <sstream>
 
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/ir/gress.h"
-#include "bf-p4c/mau/table_placement.h"
-#include "bf-p4c/mau/table_summary.h"
-#include "bf-p4c/phv/finalize_physical_liverange.h"
-#include "bf-p4c/phv/phv.h"
-#include "bf-p4c/phv/utils/slice_alloc.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/mau/table_placement.h"
+#include "backends/tofino/bf-p4c/mau/table_summary.h"
+#include "backends/tofino/bf-p4c/phv/finalize_physical_liverange.h"
+#include "backends/tofino/bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/phv/utils/slice_alloc.h"
 
 namespace PHV {
 

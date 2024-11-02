@@ -19,8 +19,8 @@
 #ifndef BF_P4C_MAU_ACTION_DATA_BUS_H_
 #define BF_P4C_MAU_ACTION_DATA_BUS_H_
 
-#include "bf-p4c/mau/action_format.h"
-#include "bf-p4c/mau/table_layout.h"
+#include "backends/tofino/bf-p4c/mau/action_format.h"
+#include "backends/tofino/bf-p4c/mau/table_layout.h"
 #include "lib/safe_vector.h"
 
 using namespace P4;

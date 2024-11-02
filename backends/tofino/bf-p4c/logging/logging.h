@@ -25,7 +25,7 @@
 #include <cstdarg>
 #include <fstream>
 
-#include "bf-p4c/common/run_id.h"
+#include "backends/tofino/bf-p4c/common/run_id.h"
 #include "rapidjson_adapter.h"
 
 namespace Logging {

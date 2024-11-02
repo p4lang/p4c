@@ -21,10 +21,10 @@
 
 #include <algorithm>
 
-#include "bf-p4c/common/field_defuse.h"
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/phv/mau_backtracker.h"
-#include "bf-p4c/phv/pragma/pa_no_init.h"
+#include "backends/tofino/bf-p4c/common/field_defuse.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/phv/mau_backtracker.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_no_init.h"
 
 namespace PHV {
 

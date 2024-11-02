@@ -21,9 +21,9 @@
 
 #include <iostream>
 
-#include "bf-p4c/ir/control_flow_visitor.h"
-#include "bf-p4c/ir/tofino_write_context.h"
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/ir/control_flow_visitor.h"
+#include "backends/tofino/bf-p4c/ir/tofino_write_context.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "ir/ir.h"
 #include "lib/ltbitmatrix.h"
 #include "lib/ordered_set.h"

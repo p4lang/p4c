@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/asm.h"
+#include "backends/tofino/bf-p4c/asm.h"
 
 #include <sys/stat.h>
 
@@ -28,8 +28,8 @@
 #include <sstream>
 
 // #include "bf-asm/version.h"
-#include "bf-p4c/common/run_id.h"
-#include "bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/common/run_id.h"
+#include "backends/tofino/bf-p4c/device.h"
 
 namespace BFN {
 

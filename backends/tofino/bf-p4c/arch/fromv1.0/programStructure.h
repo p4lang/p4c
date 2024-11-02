@@ -21,14 +21,14 @@
 
 #include <boost/range/adaptor/reversed.hpp>
 
-#include "bf-p4c/arch/fromv1.0/add_metadata_parser_states.h"
-#include "bf-p4c/arch/fromv1.0/checksum.h"
-#include "bf-p4c/arch/program_structure.h"
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/lib/assoc.h"
-#include "bf-p4c/midend/parser_graph.h"
-#include "bf-p4c/midend/path_linearizer.h"
+#include "backends/tofino/bf-p4c/arch/fromv1.0/add_metadata_parser_states.h"
+#include "backends/tofino/bf-p4c/arch/fromv1.0/checksum.h"
+#include "backends/tofino/bf-p4c/arch/program_structure.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/lib/assoc.h"
+#include "backends/tofino/bf-p4c/midend/parser_graph.h"
+#include "backends/tofino/bf-p4c/midend/path_linearizer.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4-14/fromv1.0/converters.h"

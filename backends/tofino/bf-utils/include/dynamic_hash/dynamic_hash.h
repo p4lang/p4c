@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "bfn_hash_algorithm.h"
+#include "backends/tofino/bf-utils/include/dynamic_hash/bfn_hash_algorithm.h"
 
 #ifdef __cplusplus
 extern "C" {

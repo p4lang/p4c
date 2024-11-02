@@ -19,7 +19,7 @@
 #ifndef BF_P4C_MIDEND_CHECK_HEADER_ALIGNMENT_H_
 #define BF_P4C_MIDEND_CHECK_HEADER_ALIGNMENT_H_
 
-#include "bf-p4c/midend/type_checker.h"
+#include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeMap.h"

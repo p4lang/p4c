@@ -16,13 +16,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/v2/copacker.h"
+#include "backends/tofino/bf-p4c/phv/v2/copacker.h"
 
 #include <optional>
 
-#include "bf-p4c/phv/action_source_tracker.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/v2/utils_v2.h"
+#include "backends/tofino/bf-p4c/phv/action_source_tracker.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/v2/utils_v2.h"
 #include "lib/safe_vector.h"
 
 namespace PHV {

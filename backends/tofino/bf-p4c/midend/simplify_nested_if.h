@@ -25,10 +25,10 @@
  */
 #include <stack>
 
-#include "bf-p4c/device.h"
-#include "bf-p4c/midend/path_linearizer.h"
-#include "bf-p4c/midend/type_categories.h"
-#include "bf-p4c/midend/type_checker.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/midend/path_linearizer.h"
+#include "backends/tofino/bf-p4c/midend/type_categories.h"
+#include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/strengthReduction.h"

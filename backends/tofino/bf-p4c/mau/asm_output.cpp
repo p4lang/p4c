@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/asm_output.h"
+#include "backends/tofino/bf-p4c/mau/asm_output.h"
 
 #include <iterator>
 #include <map>
@@ -25,22 +25,22 @@
 #include <string>
 #include <vector>
 
-#include "bf-p4c/common/alias.h"
-#include "bf-p4c/common/ir_utils.h"
-#include "bf-p4c/common/slice.h"
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/ir/tofino_write_context.h"
-#include "bf-p4c/lib/error_type.h"
-#include "bf-p4c/mau/default_next.h"
-#include "bf-p4c/mau/finalize_mau_pred_deps_power.h"
-#include "bf-p4c/mau/gateway.h"
-#include "bf-p4c/mau/jbay_next_table.h"
-#include "bf-p4c/mau/payload_gateway.h"
-#include "bf-p4c/mau/resource.h"
-#include "bf-p4c/mau/table_format.h"
-#include "bf-p4c/parde/asm_output.h"
-#include "bf-p4c/parde/phase0.h"
-#include "bf-p4c/phv/asm_output.h"
+#include "backends/tofino/bf-p4c/common/alias.h"
+#include "backends/tofino/bf-p4c/common/ir_utils.h"
+#include "backends/tofino/bf-p4c/common/slice.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/ir/tofino_write_context.h"
+#include "backends/tofino/bf-p4c/lib/error_type.h"
+#include "backends/tofino/bf-p4c/mau/default_next.h"
+#include "backends/tofino/bf-p4c/mau/finalize_mau_pred_deps_power.h"
+#include "backends/tofino/bf-p4c/mau/gateway.h"
+#include "backends/tofino/bf-p4c/mau/jbay_next_table.h"
+#include "backends/tofino/bf-p4c/mau/payload_gateway.h"
+#include "backends/tofino/bf-p4c/mau/resource.h"
+#include "backends/tofino/bf-p4c/mau/table_format.h"
+#include "backends/tofino/bf-p4c/parde/asm_output.h"
+#include "backends/tofino/bf-p4c/parde/phase0.h"
+#include "backends/tofino/bf-p4c/phv/asm_output.h"
 #include "boost/range/adaptor/reversed.hpp"
 #include "lib/algorithm.h"
 #include "lib/bitops.h"

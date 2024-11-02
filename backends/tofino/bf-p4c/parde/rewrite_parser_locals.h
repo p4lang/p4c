@@ -18,8 +18,8 @@
 
 #ifndef BACKENDS_TOFINO_BF_P4C_PARDE_REWRITE_PARSER_LOCALS_H_
 #define BACKENDS_TOFINO_BF_P4C_PARDE_REWRITE_PARSER_LOCALS_H_
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/phv_parde_mau_use.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/phv_parde_mau_use.h"
 #include "collect_parser_usedef.h"
 
 class GetSelectFieldInfo : public Inspector {

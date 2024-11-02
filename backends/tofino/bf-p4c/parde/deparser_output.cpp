@@ -16,14 +16,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/common/alias.h"
-#include "bf-p4c/common/asm_output.h"
-#include "bf-p4c/common/autoindent.h"
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/device.h"
-#include "bf-p4c/parde/asm_output.h"
-#include "bf-p4c/parde/clot/clot_info.h"
-#include "bf-p4c/parde/field_packing.h"
+#include "backends/tofino/bf-p4c/common/alias.h"
+#include "backends/tofino/bf-p4c/common/asm_output.h"
+#include "backends/tofino/bf-p4c/common/autoindent.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/parde/asm_output.h"
+#include "backends/tofino/bf-p4c/parde/clot/clot_info.h"
+#include "backends/tofino/bf-p4c/parde/field_packing.h"
 #include "lib/hex.h"
 
 namespace {

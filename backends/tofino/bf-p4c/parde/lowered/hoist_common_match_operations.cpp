@@ -18,9 +18,9 @@
 
 #include "hoist_common_match_operations.h"
 
-#include "bf-p4c/ir/ir_enums.h"
-#include "bf-p4c/parde/common/allocators.h"
-#include "bf-p4c/parde/common/match_reducer.h"
+#include "backends/tofino/bf-p4c/ir/ir_enums.h"
+#include "backends/tofino/bf-p4c/parde/common/allocators.h"
+#include "backends/tofino/bf-p4c/parde/common/match_reducer.h"
 
 namespace Parde::Lowered {
 

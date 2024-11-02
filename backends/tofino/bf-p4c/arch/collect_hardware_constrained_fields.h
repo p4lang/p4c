@@ -19,9 +19,9 @@
 #ifndef BF_P4C_ARCH_COLLECT_HARDWARE_CONSTRAINED_FIELDS_H_
 #define BF_P4C_ARCH_COLLECT_HARDWARE_CONSTRAINED_FIELDS_H_
 
-#include "bf-p4c/common/ir_utils.h"
-#include "bf-p4c/common/pragma/all_pragmas.h"
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/common/ir_utils.h"
+#include "backends/tofino/bf-p4c/common/pragma/all_pragmas.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/ordered_map.h"

@@ -19,8 +19,8 @@
 #ifndef BF_P4C_MAU_PUSH_POP_H_
 #define BF_P4C_MAU_PUSH_POP_H_
 
-#include "bf-p4c/common/header_stack.h"
-#include "bf-p4c/common/slice.h"
+#include "backends/tofino/bf-p4c/common/header_stack.h"
+#include "backends/tofino/bf-p4c/common/slice.h"
 #include "mau_visitor.h"
 
 using namespace P4;

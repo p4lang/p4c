@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/attached_info.h"
+#include "backends/tofino/bf-p4c/mau/attached_info.h"
 
 #include "bf_gtest_helpers.h"
 #include "gtest/gtest.h"

@@ -19,10 +19,10 @@
 #ifndef BF_P4C_MAU_TABLE_LAYOUT_H_
 #define BF_P4C_MAU_TABLE_LAYOUT_H_
 
-#include "bf-p4c/mau/action_format.h"
-#include "bf-p4c/mau/attached_output.h"
-#include "bf-p4c/mau/mau_visitor.h"
-#include "bf-p4c/mau/payload_gateway.h"
+#include "backends/tofino/bf-p4c/mau/action_format.h"
+#include "backends/tofino/bf-p4c/mau/attached_output.h"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/mau/payload_gateway.h"
 #include "lib/safe_vector.h"
 
 namespace StageFlag {

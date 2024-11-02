@@ -16,10 +16,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/arch/rewrite_action_selector.h"
+#include "backends/tofino/bf-p4c/arch/rewrite_action_selector.h"
 
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/mau/resource_estimate.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/mau/resource_estimate.h"
 #include "frontends/p4/externInstance.h"
 #include "frontends/p4/methodInstance.h"
 

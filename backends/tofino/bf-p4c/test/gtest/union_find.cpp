@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/lib/union_find.hpp"
+#include "backends/tofino/bf-p4c/lib/union_find.hpp"
 
 #include "gtest/gtest.h"
 #include "lib/ordered_set.h"

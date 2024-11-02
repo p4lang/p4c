@@ -19,9 +19,9 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_ARCH_FROMV1_0_CHECKSUM_H_
 #define BACKENDS_TOFINO_BF_P4C_ARCH_FROMV1_0_CHECKSUM_H_
 
-#include "bf-p4c/arch/intrinsic_metadata.h"
-#include "bf-p4c/lib/assoc.h"
-#include "bf-p4c/midend/parser_graph.h"
+#include "backends/tofino/bf-p4c/arch/intrinsic_metadata.h"
+#include "backends/tofino/bf-p4c/lib/assoc.h"
+#include "backends/tofino/bf-p4c/midend/parser_graph.h"
 #include "frontends/p4/methodInstance.h"
 #include "v1_program_structure.h"
 

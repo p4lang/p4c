@@ -19,9 +19,9 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_COMMON_MERGE_POV_BITS_H_
 #define BACKENDS_TOFINO_BF_P4C_COMMON_MERGE_POV_BITS_H_
 
-#include "bf-p4c/parde/parde_visitor.h"
-#include "bf-p4c/parde/parser_info.h"
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/parde/parde_visitor.h"
+#include "backends/tofino/bf-p4c/parde/parser_info.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "ir/ir.h"
 #include "ir/pass_manager.h"
 #include "ir/visitor.h"

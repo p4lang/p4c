@@ -21,11 +21,11 @@
 
 #include <optional>
 
-#include "bf-p4c/common/field_defuse.h"
-#include "bf-p4c/mau/table_dependency_graph.h"
-#include "bf-p4c/phv/action_phv_constraints.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/common/field_defuse.h"
+#include "backends/tofino/bf-p4c/mau/table_dependency_graph.h"
+#include "backends/tofino/bf-p4c/phv/action_phv_constraints.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/utils/utils.h"
 #include "ir/ir.h"
 
 class JbayPhvAnalysis : public Inspector {

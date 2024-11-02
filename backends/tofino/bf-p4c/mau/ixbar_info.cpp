@@ -16,11 +16,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/ixbar_info.h"
+#include "backends/tofino/bf-p4c/mau/ixbar_info.h"
 
-#include "bf-p4c/common/table_printer.h"
-#include "bf-p4c/logging/filelog.h"
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/common/table_printer.h"
+#include "backends/tofino/bf-p4c/logging/filelog.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 
 namespace BFN {
 

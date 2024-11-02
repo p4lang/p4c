@@ -18,7 +18,7 @@
 
 #include "clot_candidate.h"
 
-#include "bf-p4c/common/table_printer.h"
+#include "backends/tofino/bf-p4c/common/table_printer.h"
 #include "field_slice_extract_info.h"
 
 unsigned ClotCandidate::max_size_in_bits() const {

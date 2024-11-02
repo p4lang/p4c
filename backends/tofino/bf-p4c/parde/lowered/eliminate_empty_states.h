@@ -19,8 +19,8 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_PARDE_LOWERED_ELIMINATE_EMPTY_STATES_H_
 #define BACKENDS_TOFINO_BF_P4C_PARDE_LOWERED_ELIMINATE_EMPTY_STATES_H_
 
-#include "bf-p4c/parde/parde_visitor.h"
-#include "bf-p4c/parde/parser_info.h"
+#include "backends/tofino/bf-p4c/parde/parde_visitor.h"
+#include "backends/tofino/bf-p4c/parde/parser_info.h"
 
 namespace Parde::Lowered {
 

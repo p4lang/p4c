@@ -20,11 +20,11 @@
 
 #include <deque>
 
-#include "bf-p4c/common/ir_utils.h"
-#include "bf-p4c/common/slice.h"
-#include "bf-p4c/lib/safe_width.h"
-#include "bf-p4c/mau/asm_output.h"
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/common/ir_utils.h"
+#include "backends/tofino/bf-p4c/common/slice.h"
+#include "backends/tofino/bf-p4c/lib/safe_width.h"
+#include "backends/tofino/bf-p4c/mau/asm_output.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "ir/pattern.h"
 #include "split_gateways.h"
 

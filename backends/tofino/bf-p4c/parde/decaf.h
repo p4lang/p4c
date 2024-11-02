@@ -19,13 +19,13 @@
 #ifndef BF_P4C_PARDE_DECAF_H_
 #define BF_P4C_PARDE_DECAF_H_
 
-#include "bf-p4c/common/field_defuse.h"
-#include "bf-p4c/lib/assoc.h"
-#include "bf-p4c/logging/pass_manager.h"
-#include "bf-p4c/mau/mau_visitor.h"
-#include "bf-p4c/mau/table_dependency_graph.h"
-#include "bf-p4c/parde/create_pov_encoder.h"
-#include "bf-p4c/parde/parde_visitor.h"
+#include "backends/tofino/bf-p4c/common/field_defuse.h"
+#include "backends/tofino/bf-p4c/lib/assoc.h"
+#include "backends/tofino/bf-p4c/logging/pass_manager.h"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/mau/table_dependency_graph.h"
+#include "backends/tofino/bf-p4c/parde/create_pov_encoder.h"
+#include "backends/tofino/bf-p4c/parde/parde_visitor.h"
 
 /**
  * \defgroup DeparserCopyOpt DeparserCopyOpt

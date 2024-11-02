@@ -16,10 +16,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/midend/copy_header.h"
+#include "backends/tofino/bf-p4c/midend/copy_header.h"
 
-#include "bf-p4c/midend/elim_cast.h"
-#include "bf-p4c/midend/type_checker.h"
+#include "backends/tofino/bf-p4c/midend/elim_cast.h"
+#include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "bf_gtest_helpers.h"
 #include "frontends/p4/simplifyParsers.h"
 #include "gtest/gtest.h"

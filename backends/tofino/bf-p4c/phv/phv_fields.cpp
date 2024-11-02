@@ -16,22 +16,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 
 #include <string>
 
 #include <boost/range/adaptor/reversed.hpp>
 
-#include "bf-p4c/arch/bridge_metadata.h"
-#include "bf-p4c/common/bridged_packing.h"
-#include "bf-p4c/common/header_stack.h"
-#include "bf-p4c/common/pragma/all_pragmas.h"
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/lib/error_type.h"
-#include "bf-p4c/lib/safe_width.h"
-#include "bf-p4c/mau/gateway.h"
-#include "bf-p4c/mau/table_summary.h"
-#include "bf-p4c/parde/parde_visitor.h"
+#include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
+#include "backends/tofino/bf-p4c/common/bridged_packing.h"
+#include "backends/tofino/bf-p4c/common/header_stack.h"
+#include "backends/tofino/bf-p4c/common/pragma/all_pragmas.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/lib/error_type.h"
+#include "backends/tofino/bf-p4c/lib/safe_width.h"
+#include "backends/tofino/bf-p4c/mau/gateway.h"
+#include "backends/tofino/bf-p4c/mau/table_summary.h"
+#include "backends/tofino/bf-p4c/parde/parde_visitor.h"
 #include "lib/stringref.h"
 
 namespace {

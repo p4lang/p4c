@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/parde/create_pov_encoder.h"
+#include "backends/tofino/bf-p4c/parde/create_pov_encoder.h"
 
 static const IR::Entry *create_static_entry(unsigned key_size, unsigned match,
                                             const IR::MAU::Action *action,

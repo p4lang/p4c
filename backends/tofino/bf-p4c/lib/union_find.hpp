@@ -23,7 +23,7 @@
 #include <initializer_list>
 #include <boost/iterator/indirect_iterator.hpp>
 
-#include "bf-p4c/lib/assoc.h"
+#include "backends/tofino/bf-p4c/lib/assoc.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/ordered_map.h"

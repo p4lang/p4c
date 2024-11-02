@@ -19,9 +19,9 @@
 #ifndef BF_P4C_PHV_PARDE_PHV_CONSTRAINTS_H_
 #define BF_P4C_PHV_PARDE_PHV_CONSTRAINTS_H_
 
-#include "bf-p4c/mau/mau_visitor.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/pragma/pa_container_size.h"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_container_size.h"
 #include "ir/ir.h"
 
 /** This class is meant to gather parser/deparser constraints related to digests. Here is a running

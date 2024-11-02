@@ -19,12 +19,12 @@
 #ifndef BF_P4C_PHV_PHV_PARDE_MAU_USE_H_
 #define BF_P4C_PHV_PHV_PARDE_MAU_USE_H_
 
-#include "bf-p4c/common/header_stack.h"
-#include "bf-p4c/ir/bitrange.h"
-#include "bf-p4c/ir/gress.h"
-#include "bf-p4c/ir/thread_visitor.h"
-#include "bf-p4c/ir/tofino_write_context.h"
-#include "bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/common/header_stack.h"
+#include "backends/tofino/bf-p4c/ir/bitrange.h"
+#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/ir/thread_visitor.h"
+#include "backends/tofino/bf-p4c/ir/tofino_write_context.h"
+#include "backends/tofino/bf-p4c/phv/phv.h"
 #include "ir/ir.h"
 
 using namespace P4;

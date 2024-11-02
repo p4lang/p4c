@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/table_placement.h"
+#include "backends/tofino/bf-p4c/mau/table_placement.h"
 
 #ifdef MULTITHREAD
 #include <pthread.h>
@@ -38,26 +38,26 @@
 
 #include <boost/range/adaptor/reversed.hpp>
 
-#include "bf-p4c/common/ir_utils.h"
-#include "bf-p4c/ir/table_tree.h"
-#include "bf-p4c/lib/error_type.h"
-#include "bf-p4c/logging/manifest.h"
-#include "bf-p4c/mau/action_data_bus.h"
-#include "bf-p4c/mau/attached_entries.h"
-#include "bf-p4c/mau/field_use.h"
-#include "bf-p4c/mau/input_xbar.h"
-#include "bf-p4c/mau/instruction_memory.h"
-#include "bf-p4c/mau/memories.h"
-#include "bf-p4c/mau/payload_gateway.h"
-#include "bf-p4c/mau/resource.h"
-#include "bf-p4c/mau/resource_estimate.h"
-#include "bf-p4c/mau/table_dependency_graph.h"
-#include "bf-p4c/mau/table_injected_deps.h"
-#include "bf-p4c/mau/table_layout.h"
-#include "bf-p4c/mau/table_mutex.h"
-#include "bf-p4c/mau/table_summary.h"
-#include "bf-p4c/phv/phv_analysis.h"
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/common/ir_utils.h"
+#include "backends/tofino/bf-p4c/ir/table_tree.h"
+#include "backends/tofino/bf-p4c/lib/error_type.h"
+#include "backends/tofino/bf-p4c/logging/manifest.h"
+#include "backends/tofino/bf-p4c/mau/action_data_bus.h"
+#include "backends/tofino/bf-p4c/mau/attached_entries.h"
+#include "backends/tofino/bf-p4c/mau/field_use.h"
+#include "backends/tofino/bf-p4c/mau/input_xbar.h"
+#include "backends/tofino/bf-p4c/mau/instruction_memory.h"
+#include "backends/tofino/bf-p4c/mau/memories.h"
+#include "backends/tofino/bf-p4c/mau/payload_gateway.h"
+#include "backends/tofino/bf-p4c/mau/resource.h"
+#include "backends/tofino/bf-p4c/mau/resource_estimate.h"
+#include "backends/tofino/bf-p4c/mau/table_dependency_graph.h"
+#include "backends/tofino/bf-p4c/mau/table_injected_deps.h"
+#include "backends/tofino/bf-p4c/mau/table_layout.h"
+#include "backends/tofino/bf-p4c/mau/table_mutex.h"
+#include "backends/tofino/bf-p4c/mau/table_summary.h"
+#include "backends/tofino/bf-p4c/phv/phv_analysis.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "ir/ir.h"
 #include "lib/bitops.h"
 #include "lib/bitvec.h"

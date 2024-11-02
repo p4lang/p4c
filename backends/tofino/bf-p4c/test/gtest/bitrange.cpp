@@ -16,13 +16,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/ir/bitrange.h"
+#include "backends/tofino/bf-p4c/ir/bitrange.h"
 
 #include <map>
 #include <utility>
 #include <vector>
 
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "backends/tofino/bf-p4c/test/gtest/tofino_gtest_utils.h"
 #include "gtest/gtest.h"
 #include "ir/ir.h"
 #include "ir/json_loader.h"
