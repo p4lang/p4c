@@ -667,18 +667,18 @@ std::set<int> PhvInfo::minStages(const IR::MAU::Table *table) {
     if (LOGGING(6)) {
         std::stringstream ss;
         ss << " Reading stage(s) for table " << table->name << " = ";
-        for (auto stg : ::get(table_to_min_stages, TableSummary::getTableName(table)))
+        for (auto stg : P4::get(table_to_min_stages, TableSummary::getTableName(table)))
             ss << stg << " ";
         LOG6(ss.str());
     }
 
-    return ::get(table_to_min_stages, TableSummary::getTableName(table));
+    return P4::get(table_to_min_stages, TableSummary::getTableName(table));
 }
 
 std::set<int> PhvInfo::physicalStages(const IR::MAU::Table *table) {
     std::set<int> rv;
     if (table_to_physical_stages.count(TableSummary::getTableIName(table)))
-        rv = ::get(table_to_physical_stages, TableSummary::getTableIName(table));
+        rv = P4::get(table_to_physical_stages, TableSummary::getTableIName(table));
     return rv;
 }
 

@@ -247,7 +247,7 @@ struct ActionProfile {
                                         // profile declaration.
 
     p4rt_id_t getId(const P4RuntimeSymbolTableIface &symbols,
-                    const cstring blockPrefix = ""_cs) const {
+                    const cstring blockPrefix = cstring::empty) const {
         auto symName = prefix(blockPrefix, name);
         return symbols.getId(SymbolType::P4RT_ACTION_PROFILE(), symName);
     }
@@ -267,7 +267,7 @@ struct ActionSelector {
     bool selSuffix;
 
     p4rt_id_t getId(const P4RuntimeSymbolTableIface &symbols,
-                    const cstring blockPrefix = ""_cs) const {
+                    const cstring blockPrefix = cstring::empty) const {
         auto symName = prefix(blockPrefix, name);
         auto symSelectorName = (selSuffix) ? symName + "_sel" : symName;
         if (actionProfileName) {
@@ -687,7 +687,7 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
     }
 
     cstring getControlPlaneName(const IR::Block *block, const IR::IDeclaration *decl) {
-        auto declName = decl ? decl->controlPlaneName() : ""_cs;
+        auto declName = decl ? decl->controlPlaneName() : cstring::empty;
         return getFullyQualifiedName(block, declName);
     }
 
@@ -708,8 +708,8 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
     // CTXT JSON : ig_pipe0.prsr0
     cstring getFullyQualifiedName(const IR::Block *block, const cstring name,
                                   bool skip_control_plane_name = false) {
-        cstring block_name = ""_cs;
-        cstring control_plane_name = ""_cs;
+        cstring block_name = cstring::empty;
+        cstring control_plane_name = cstring::empty;
         cstring full_name = getBlockNamePrefix(block);
         if (!skip_control_plane_name) {
             if (auto cont = block->getContainer()) {
@@ -846,7 +846,8 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
 
     void addTablePropertiesCommon(const P4RuntimeSymbolTableIface &symbols,
                                   p4configv1::P4Info *p4info, p4configv1::Table *table,
-                                  const IR::TableBlock *tableBlock, cstring blockPrefix = "") {
+                                  const IR::TableBlock *tableBlock,
+                                  cstring blockPrefix = cstring::empty) {
         CHECK_NULL(tableBlock);
         auto tableDeclaration = tableBlock->container;
 
@@ -952,7 +953,7 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
 
     void addExternInstanceCommon(const P4RuntimeSymbolTableIface &symbols,
                                  p4configv1::P4Info *p4info, const IR::ExternBlock *externBlock,
-                                 cstring pipeName = ""_cs) {
+                                 cstring pipeName = cstring::empty) {
         Log::TempIndent indent;
         LOG1("Adding Extern Instances for pipe " << pipeName << indent);
         auto decl = externBlock->node->to<IR::Declaration_Instance>();
@@ -1240,7 +1241,7 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
     }
 
     void addDigest(const P4RuntimeSymbolTableIface &symbols, p4configv1::P4Info *p4Info,
-                   const Digest &digestInstance, cstring pipeName = "") {
+                   const Digest &digestInstance, cstring pipeName = cstring::empty) {
         ::barefoot::Digest digest;
         digest.mutable_type_spec()->CopyFrom(*digestInstance.typeSpec);
         auto digestName = prefix(pipeName, digestInstance.name);
@@ -1250,7 +1251,7 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
     }
 
     void addDynHash(const P4RuntimeSymbolTableIface &symbols, p4configv1::P4Info *p4Info,
-                    const DynHash &dynHashInstance, cstring pipeName = "") {
+                    const DynHash &dynHashInstance, cstring pipeName = cstring::empty) {
         ::barefoot::DynHash dynHash;
         dynHash.set_hash_width(dynHashInstance.hashWidth);
         dynHash.mutable_type_spec()->CopyFrom(*dynHashInstance.typeSpec);
@@ -1268,7 +1269,7 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
     // For Registers, the table name should have the associated pipe prefix but
     // the data field names should not since they have local scope.
     void addRegister(const P4RuntimeSymbolTableIface &symbols, p4configv1::P4Info *p4Info,
-                     const Register &registerInstance, cstring pipeName = "") {
+                     const Register &registerInstance, cstring pipeName = cstring::empty) {
         auto registerName = prefix(pipeName, registerInstance.name);
         if (registerInstance.size == 0) {
             ::barefoot::DirectRegister register_;
@@ -1299,7 +1300,7 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
 
     void addCounter(const P4RuntimeSymbolTableIface &symbols, p4configv1::P4Info *p4Info,
                     const Helpers::Counterlike<ArchCounterExtern> &counterInstance,
-                    const cstring blockPrefix = "") {
+                    const cstring blockPrefix = cstring::empty) {
         if (counterInstance.table) {
             ::barefoot::DirectCounter counter;
             setCounterCommon(&counter, counterInstance);
@@ -1340,7 +1341,7 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
 
     void addMeter(const P4RuntimeSymbolTableIface &symbols, p4configv1::P4Info *p4Info,
                   const Helpers::Counterlike<ArchMeterExtern> &meterInstance,
-                  const cstring blockPrefix = "") {
+                  const cstring blockPrefix = cstring::empty) {
         auto meterName = prefix(blockPrefix, meterInstance.name);
         if (meterInstance.table) {
             ::barefoot::DirectMeter meter;
@@ -1365,7 +1366,7 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
     }
 
     void addActionProfile(const P4RuntimeSymbolTableIface &symbols, p4configv1::P4Info *p4Info,
-                          const ActionProfile &actionProfile, cstring pipeName = "") {
+                          const ActionProfile &actionProfile, cstring pipeName = cstring::empty) {
         ::barefoot::ActionProfile profile;
         profile.set_size(actionProfile.size);
         auto actionProfileName = prefix(pipeName, actionProfile.name);
@@ -1385,7 +1386,7 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
 
     virtual void addActionSelector(const P4RuntimeSymbolTableIface &symbols,
                                    p4configv1::P4Info *p4Info, const ActionSelector &actionSelector,
-                                   cstring blockPrefix = "") {
+                                   cstring blockPrefix = cstring::empty) {
         ::barefoot::ActionSelector selector;
         selector.set_max_group_size(actionSelector.maxGroupSize);
         selector.set_num_groups(actionSelector.numGroups);
@@ -1654,7 +1655,7 @@ class BFRuntimeArchHandlerTofino final : public BFN::BFRuntimeArchHandlerCommon<
 
     cstring getBlockNamePrefix(const IR::Block *blk) override {
         if (blockNamePrefixMap.count(blk) > 0) return blockNamePrefixMap[blk];
-        return ""_cs;
+        return cstring::empty;
     }
 
     void collectExternInstance(P4RuntimeSymbolTableIface *symbols,
@@ -1770,7 +1771,8 @@ class BFRuntimeArchHandlerTofino final : public BFN::BFRuntimeArchHandlerCommon<
                 BUG_CHECK(gress->is<IR::ControlBlock>(), "Expected control");
                 auto control = gress->to<IR::ControlBlock>();
                 if (blockNamePrefixMap.count(control) > 0) pipeName = blockNamePrefixMap[control];
-                snapshotInfo.emplace(control, SnapshotInfo{pipeName, gressName, 0u, ""_cs, {}});
+                snapshotInfo.emplace(control,
+                                     SnapshotInfo{pipeName, gressName, 0u, cstring::empty, {}});
                 LOG3("Adding SnapshotInfo for " << control->getName() << " " << gressName
                                                 << " on pipe " << pipeName);
             }
@@ -2332,7 +2334,8 @@ class BFRuntimeArchHandlerTofino final : public BFN::BFRuntimeArchHandlerCommon<
     // For RegisterParams, the table name should have the associated pipe prefix but
     // the data field names should not since they have local scope.
     void addRegisterParam(const P4RuntimeSymbolTableIface &symbols, p4configv1::P4Info *p4Info,
-                          const RegisterParam &registerParamInstance, cstring pipeName = ""_cs) {
+                          const RegisterParam &registerParamInstance,
+                          cstring pipeName = cstring::empty) {
         p4rt_id_t tableId = 0;
         if (registerParam2register.count(registerParamInstance.name) > 0)
             tableId =

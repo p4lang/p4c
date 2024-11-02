@@ -332,7 +332,7 @@ void Table::visit_match_table(THIS *self, Visitor &v, payload_info_t &payload_in
 
         if (action->exitAction) continue;
 
-        auto *pinfo = ::getref(payload_info.action_info, action_name);
+        auto *pinfo = P4::getref(payload_info.action_info, action_name);
         if (!action->hit_allowed && !action->default_allowed) {
             // can't be invoked from the match table
             if (pinfo)

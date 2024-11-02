@@ -376,7 +376,7 @@ const IR::Node *DoRewriteControlAndParserBlocks::postorder(IR::Declaration_Insta
     auto newArgs = new IR::Vector<IR::Argument>();
     int index = 0;
     for (auto arg : *decl->arguments) {
-        const auto newName = ::get(block_name_map, std::make_pair(decl->name, index));
+        const auto newName = P4::get(block_name_map, std::make_pair(decl->name, index));
         CHECK_NULL(newName);
         const auto *typeRef = new IR::Type_Name(IR::ID(newName, nullptr));
         const auto *cc = arg->expression->to<IR::ConstructorCallExpression>();
