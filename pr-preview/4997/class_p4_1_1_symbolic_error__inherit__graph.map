@@ -1,0 +1,15 @@
+<map id="P4::SymbolicError" name="P4::SymbolicError">
+<area shape="rect" id="Node000001" title=" " alt="" coords="121,225,258,251"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_symbolic_exception.html" title=" " alt="" coords="5,299,176,324"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="164,261,108,301,105,296,161,256"/>
+<area shape="rect" id="Node000007" href="$class_p4_1_1_symbolic_static_error.html" title=" " alt="" coords="201,299,375,324"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="218,256,273,296,270,301,214,261"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_symbolic_value.html" title=" " alt="" coords="118,152,261,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="192,191,192,225,187,225,187,191"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_i_has_db_print.html" title=" " alt="" coords="59,79,181,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="143,112,180,150,176,154,139,116"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_i_castable.html" title=" " alt="" coords="205,79,312,104"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="240,116,202,154,199,150,236,112"/>
+<area shape="rect" id="Node000005" href="$struct_p4_1_1_r_t_t_i_1_1_base.html" title=" " alt="" coords="201,5,316,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="261,44,261,79,256,79,256,44"/>
+</map>

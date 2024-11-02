@@ -1,0 +1,7 @@
+<map id="P4::DiscoverInlining" name="P4::DiscoverInlining">
+<area shape="rect" id="Node000001" title="Must be run after an evaluator; uses the blocks to discover caller/callee relationships." alt="" coords="5,152,156,177"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_inspector.html" title=" " alt="" coords="27,79,134,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="83,118,83,152,78,152,78,118"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="37,5,125,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="83,44,83,79,78,79,78,44"/>
+</map>
