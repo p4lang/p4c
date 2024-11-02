@@ -280,8 +280,20 @@ void ExpressionConverter::postorder(const IR::Member *expression) {
     auto param = enclosingParamReference(expression->expr);
     if (param != nullptr) {
         // convert architecture-dependent parameter
-        if (auto result = convertParam(param, fieldName)) {
-            mapExpression(expression, result);
+        if (auto tmpResult = convertParam(param, fieldName)) {
+            // If architecture-dependent parameter is a boolean
+            if (type->is<IR::Type_Boolean>()) {
+                auto result = new Util::JsonObject();
+                result->emplace("type", "expression");
+                auto e = new Util::JsonObject();
+                result->emplace("value", e);
+                e->emplace("op", "d2b");  // data to Boolean cast
+                e->emplace("left", Util::JsonValue::null);
+                e->emplace("right", tmpResult);
+                mapExpression(expression, result);
+            } else {
+                mapExpression(expression, tmpResult);
+            }
             return;
         }
         // convert normal parameters
