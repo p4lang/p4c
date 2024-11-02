@@ -69,6 +69,13 @@ set (IR_DEF_FILES ${IR_DEF_FILES} ${BASE_IR_DEF_FILES} PARENT_SCOPE)
 
 add_library (ir STATIC ${IR_SRCS})
 target_link_libraries(ir PRIVATE absl::flat_hash_map ${LIBGC_LIBRARIES})
+
+# We need this flag to allow delete operations with "size" parameters.
+# GCC enables this flag by default but Clang does not.
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  target_compile_options(ir PUBLIC -fsized-deallocation)
+endif()
+
 add_dependencies(ir genIR)
 
 

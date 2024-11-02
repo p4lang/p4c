@@ -250,6 +250,8 @@ add_parser(p4)
 
 add_library (frontend-parser-gen OBJECT ${p4PARSER_GEN_SRCS} ${v1PARSER_GEN_SRCS})
 target_link_libraries (frontend-parser-gen
+  # Make sure to also expose the compile flags associated with the ir library.
+  PUBLIC ir
   # These libraries are exposed by a header.
   PUBLIC p4ctoolkit
 )
