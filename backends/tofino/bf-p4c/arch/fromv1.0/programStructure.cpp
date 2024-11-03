@@ -266,7 +266,7 @@ const IR::Declaration_Instance *TnaProgramStructure::convert(const IR::Register 
     } else if (reg->width > 0) {
         regElementType = IR::Type_Bits::get(reg->width);
     } else if (reg->layout) {
-        cstring newName = ::get(registerLayoutType, reg->layout);
+        cstring newName = P4::get(registerLayoutType, reg->layout);
         if (newName.isNullOrEmpty()) newName = reg->layout;
         regElementType = new IR::Type_Name(new IR::Path(newName));
     } else {

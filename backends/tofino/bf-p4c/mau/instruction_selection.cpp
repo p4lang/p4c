@@ -1723,7 +1723,7 @@ const IR::MAU::StatefulCall *StatefulAttachmentSetup::Update::preorder(
     auto *orig_call = getOriginal()->to<IR::MAU::StatefulCall>();
 
     StatefulCallKey sck = std::make_pair(orig_call, tbl);
-    if (auto expr = ::get(self.update_calls, sck)) call->index = expr;
+    if (auto expr = P4::get(self.update_calls, sck)) call->index = expr;
 
     auto prim = call->prim;
     BUG_CHECK(prim->operands.size() >= 1, "Invalid primitive %s", prim);
@@ -1751,7 +1751,7 @@ const IR::MAU::BackendAttached *StatefulAttachmentSetup::Update::preorder(
     IR::MAU::BackendAttached *ba) {
     auto *tbl = findOrigCtxt<IR::MAU::Table>();
     HashDistKey hdk = std::make_pair(ba->attached, tbl);
-    if (auto hd = ::get(self.update_hd, hdk)) {
+    if (auto hd = P4::get(self.update_hd, hdk)) {
         ba->hash_dist = hd;
     }
     use_t use = IR::MAU::StatefulUse::NO_USE;
