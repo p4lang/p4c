@@ -77,10 +77,10 @@ class DoLocalCopyPropagation : public ControlFlowVisitor,
         bool is_first_write_insert = false;
     };
     std::map<cstring, VarInfo> available;
-    std::map<cstring, TableInfo> &tables;
-    std::map<cstring, FuncInfo> &actions;
-    std::map<cstring, FuncInfo> &methods;
-    std::map<cstring, FuncInfo> &states;
+    std::shared_ptr<std::map<cstring, TableInfo>> tables;
+    std::shared_ptr<std::map<cstring, FuncInfo>> actions;
+    std::shared_ptr<std::map<cstring, FuncInfo>> methods;
+    std::shared_ptr<std::map<cstring, FuncInfo>> states;
     TableInfo *inferForTable = nullptr;
     FuncInfo *inferForFunc = nullptr;
     bool need_key_rewrite = false;
@@ -143,7 +143,7 @@ class DoLocalCopyPropagation : public ControlFlowVisitor,
     const IR::P4Parser *postorder(IR::P4Parser *) override;
     IR::ParserState *preorder(IR::ParserState *) override;
     IR::ParserState *postorder(IR::ParserState *) override;
-    Visitor::profile_t init_apply(const IR::Node *node) override;
+    void end_apply(const IR::Node *node) override;
     class ElimDead;
     class RewriteTableKeys;
 
@@ -154,10 +154,10 @@ class DoLocalCopyPropagation : public ControlFlowVisitor,
                            std::function<bool(const Context *, const IR::Expression *)> policy,
                            bool eut)
         : typeMap(typeMap),
-          tables(*new std::map<cstring, TableInfo>),
-          actions(*new std::map<cstring, FuncInfo>),
-          methods(*new std::map<cstring, FuncInfo>),
-          states(*new std::map<cstring, FuncInfo>),
+          tables(new std::map<cstring, TableInfo>),
+          actions(new std::map<cstring, FuncInfo>),
+          methods(new std::map<cstring, FuncInfo>),
+          states(new std::map<cstring, FuncInfo>),
           policy(policy),
           elimUnusedTables(eut) {}
 };
