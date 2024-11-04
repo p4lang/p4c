@@ -14,9 +14,9 @@
 <g id="a_Node000000"><a xlink:href="class_p4_1_1ordered__set.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="131,-52 0,-52 0,0 131,0 131,-52"/>
 <text text-anchor="start" x="8" y="-40" font-family="Helvetica,sans-Serif" font-size="10.00">P4::ordered_set&lt; std</text>
-<text text-anchor="start" x="8" y="-29" font-family="Helvetica,sans-Serif" font-size="10.00">::pair&lt; const PHV::Field</text>
-<text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00"> *, SolitaryConstraint::</text>
-<text text-anchor="middle" x="65.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">SolitaryReason &gt; &gt;</text>
+<text text-anchor="start" x="8" y="-29" font-family="Helvetica,sans-Serif" font-size="10.00">::pair&lt; const IR::MAU</text>
+<text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">::Table *, const IR::MAU</text>
+<text text-anchor="middle" x="65.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::Action * &gt; &gt;</text>
 </a>
 </g>
 </g>

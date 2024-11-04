@@ -1018,6 +1018,8 @@ var hierarchy =
     [ "P4::ExternInstance", "struct_p4_1_1_extern_instance.html", null ],
     [ "P4::flat_map< K, V, Compare, Container >", "struct_p4_1_1flat__map.html", null ],
     [ "P4::flat_map< K, V, Compare, Container >::value_compare", "struct_p4_1_1flat__map_1_1value__compare.html", null ],
+    [ "P4::flat_map< const IR::SymbolicVariable *, const IR::Expression *, IR::SymbolicVariableLess >", "struct_p4_1_1flat__map.html", null ],
+    [ "P4::flat_map< IR::StateVariable, const IR::Expression * >", "struct_p4_1_1flat__map.html", null ],
     [ "P4::flat_map< P4::cstring, const P4::StorageLocation *, std::less<>, absl::InlinedVector< std::pair< P4::cstring, const P4::StorageLocation * >, 4 > >", "struct_p4_1_1flat__map.html", null ],
     [ "P4::FrontEnd", "class_p4_1_1_front_end.html", null ],
     [ "P4::FunctionSpecialization", "struct_p4_1_1_function_specialization.html", null ],
