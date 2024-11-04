@@ -165,6 +165,9 @@ class Node : public virtual INode {
 
     bool operator!=(const Node &n) const { return !operator==(n); }
 
+    /// Helper to simplify usage of nodes in Abseil functions (e.g. StrCat / StrFormat, etc.)
+    /// without explicit string_view conversion. Note that this calls Node::toString() so might
+    /// not be always appropriate for user-visible messages / strings.
     template <typename Sink>
     friend void AbslStringify(Sink &sink, const IR::Node *n) {
         sink.Append(n->toString());

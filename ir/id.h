@@ -67,6 +67,8 @@ struct ID : Util::IHasSourceInfo, public IHasDbPrint {
     Util::SourceInfo getSourceInfo() const override { return srcInfo; }
     cstring toString() const override { return originalName.isNullOrEmpty() ? name : originalName; }
 
+    /// Helper to simplify usage of ID in Abseil functions (e.g. StrCat / StrFormat, etc.) without
+    /// explicit string_view conversion.
     template <typename Sink>
     friend void AbslStringify(Sink &sink, const ID &id) {
         sink.Append(id.string_view());

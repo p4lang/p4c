@@ -309,6 +309,8 @@ class cstring {
     /// Append this many spaces after each newline (and before the first string).
     cstring indent(size_t amount) const;
 
+    /// Helper to simplify usage of cstring in Abseil functions (e.g. StrCat / StrFormat, etc.)
+    /// without explicit string_view conversion.
     template <typename Sink>
     friend void AbslStringify(Sink &sink, cstring s) {
         sink.Append(s.string_view());
