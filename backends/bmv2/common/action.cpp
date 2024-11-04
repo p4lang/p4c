@@ -142,7 +142,6 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
             primitive2->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
             continue;
         } else if (s->is<IR::AssignmentStatement>()) {
-            //std::cout << "dbg assign " << *s << "\n";
             const IR::Expression *l, *r;
             auto assign = s->to<IR::AssignmentStatement>();
             l = assign->left;
@@ -242,7 +241,6 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
             parameters->append(cond);
             (*offsetToTargetLabelId)[curOffset] = conditionalJumpLabelId;
             (*offsetToJumpParams)[curOffset] = parameters;
-            //primitive->emplace("parameters", parameters);
             primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
             // Earlier passes should guarantee that 'then' part of if
             // statements is always non-empty.
