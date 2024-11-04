@@ -37,13 +37,11 @@ cstring ActionConverter::jsonAssignment(const IR::Type *type) {
 }
 
 void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
-                                        Util::JsonArray *result,
-                                        bool inConditional,
+                                        Util::JsonArray *result, bool inConditional,
                                         int labelIdEndOfAction,
-                                        std::map<int,int> *labelIdToJumpOffset,
-                                        int *numLabels,
-                                        std::map<int,int> *offsetToTargetLabelId,
-                                        std::map<int,Util::JsonArray*> *offsetToJumpParams) {
+                                        std::map<int, int> *labelIdToJumpOffset, int *numLabels,
+                                        std::map<int, int> *offsetToTargetLabelId,
+                                        std::map<int, Util::JsonArray *> *offsetToJumpParams) {
     for (auto s : *body) {
         // TODO(jafingerhut) - add line/col at all individual cases below,
         // or perhaps it can be done as a common case above or below
@@ -274,22 +272,21 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
 
 void ActionConverter::convertActionBodyTop(const IR::Vector<IR::StatOrDecl> *body,
                                            Util::JsonArray *result) {
-    std::map<int,int> labelIdToJumpOffset;
+    std::map<int, int> labelIdToJumpOffset;
     // Let F be the set of offsets in the action that contain a
     // primitive "_jump" or _jump_if_zero".  For each offset f in F,
     // offsetToTargetLabelId[f] is the label ID to which the primitive
     // should jump.
-    std::map<int,int> offsetToTargetLabelId;
+    std::map<int, int> offsetToTargetLabelId;
     // For each offset f in F, offsetToJumpParams[f] is the array
     // of parameters that should be used as operands to the primitive,
     // except for the offset, which will only be added at the end of
     // method convertActionBodyTop.
-    std::map<int,Util::JsonArray*> offsetToJumpParams;
+    std::map<int, Util::JsonArray *> offsetToJumpParams;
     int numLabels = 0;
 
     int labelIdEndOfAction = numLabels++;
-    convertActionBody(body, result, false, labelIdEndOfAction,
-                      &labelIdToJumpOffset, &numLabels,
+    convertActionBody(body, result, false, labelIdEndOfAction, &labelIdToJumpOffset, &numLabels,
                       &offsetToTargetLabelId, &offsetToJumpParams);
     labelIdToJumpOffset[labelIdEndOfAction] = result->size();
     // Go through all _jump and _jump_if_zero primitive actions in
@@ -297,7 +294,7 @@ void ActionConverter::convertActionBodyTop(const IR::Vector<IR::StatOrDecl> *bod
     // to calculate their correct jump offsets.  Append the jump
     // offset to the partial list of parameters in offsetToJumpParams,
     // and add the now-complete parameter list to the jump primitive.
-    for (const auto& pair : offsetToTargetLabelId) {
+    for (const auto &pair : offsetToTargetLabelId) {
         unsigned int offset = pair.first;
         int targetLabelId = pair.second;
         Util::JsonArray *params = offsetToJumpParams[offset];
