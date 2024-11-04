@@ -347,7 +347,7 @@ double SimplePowerGraph::visit_node_power(Node *n, const std::map<UniqueId, Powe
         }
         double edge_power = 0.0;
         for (auto uid : edge_worst_path) {
-            if (auto pma = ::getref(tma, uid)) {
+            if (auto pma = P4::getref(tma, uid)) {
                 edge_power += pma->compute_table_power(Device::numPipes());
                 // LOG5("\tEdge Power (" << uid << ") :"
                 // << pma->compute_table_power(Device::numPipes()));
@@ -369,7 +369,7 @@ double SimplePowerGraph::visit_node_power(Node *n, const std::map<UniqueId, Powe
             }
         }
     }
-    if (auto pma = ::getref(tma, n->unique_id_))
+    if (auto pma = P4::getref(tma, n->unique_id_))
         worst_power += pma->compute_table_power(Device::numPipes());
     computed_power_.emplace(n->id_, worst_power);
     worst_path.insert(n->unique_id_);

@@ -28,7 +28,6 @@ set(BF_P4C_UNIFIED_SOURCE_CHUNK_SIZE "5" CACHE STRING
     "Target unified compilation chunk size for bf-p4c (an integer or ALL)")
 
 find_package (Boost REQUIRED COMPONENTS graph)
-add_definitions("-DBOOST_NO_ARGUMENT_DEPENDENT_LOOKUP")
 if (ENABLE_BAREFOOT_INTERNAL)
   add_definitions("-DBAREFOOT_INTERNAL=1")
 endif()
@@ -998,7 +997,6 @@ target_link_libraries (bfp4c tofinobackend bfn_p4runtime
 # XXX These compile definitions and include directories should be inherited
 # XXX from bfp4c's dependencies, but these CMake files aren't very modular.
 target_compile_definitions(bfp4c
-  INTERFACE "-DBOOST_NO_ARGUMENT_DEPENDENT_LOOKUP"
   INTERFACE "-DMAX_LOGGING_LEVEL=${MAX_LOGGING_LEVEL}"
   INTERFACE "-DEVENT_LOG_SCHEMA_VERSION=\"${EVENT_LOG_SCHEMA_VERSION}\""
   INTERFACE "-DPHV_SCHEMA_VERSION=\"${PHV_SCHEMA_VERSION}\""
