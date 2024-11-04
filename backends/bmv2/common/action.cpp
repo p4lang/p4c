@@ -37,7 +37,13 @@ cstring ActionConverter::jsonAssignment(const IR::Type *type) {
 }
 
 void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
-                                        Util::JsonArray *result) {
+                                        Util::JsonArray *result,
+                                        bool inConditional,
+                                        int labelIdEndOfAction,
+                                        std::map<int,int> *labelIdToJumpOffset,
+                                        int *numLabels,
+                                        std::map<int,int> *offsetToTargetLabelId,
+                                        std::map<int,Util::JsonArray*> *offsetToJumpParams) {
     for (auto s : *body) {
         // TODO(jafingerhut) - add line/col at all individual cases below,
         // or perhaps it can be done as a common case above or below
@@ -95,16 +101,48 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
         if (!s->is<IR::Statement>()) {
             continue;
         } else if (auto block = s->to<IR::BlockStatement>()) {
-            convertActionBody(&block->components, result);
+            convertActionBody(&block->components, result, inConditional, labelIdEndOfAction,
+                              labelIdToJumpOffset, numLabels, offsetToTargetLabelId,
+                              offsetToJumpParams);
             continue;
         } else if (s->is<IR::ReturnStatement>()) {
-            break;
+            if (!inConditional) {
+                // If we are in unconditionally executed code within
+                // the action, we can implement a return by _not_
+                // generating any more primitives, as an optimization,
+                // since any later statements in the action are
+                // unreachable code.
+                break;
+            }
+            // If we are in conditionally executed code within the
+            // action, a return statement must cause us to jump to the
+            // end of the action, so that we do not execute any more
+            // code in this action.
+            unsigned int curOffset = result->size();
+            auto parameters = new Util::JsonArray();
+            auto primitive = mkPrimitive("_jump"_cs, result);
+            (*offsetToTargetLabelId)[curOffset] = labelIdEndOfAction;
+            (*offsetToJumpParams)[curOffset] = parameters;
+            primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
+            continue;
         } else if (s->is<IR::ExitStatement>()) {
             auto primitive = mkPrimitive("exit"_cs, result);
             (void)mkParameters(primitive);
             primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
-            break;
+            if (!inConditional) {
+                // Similar to return statement optimization above.
+                break;
+            }
+            // Similar to return statement jump above.
+            unsigned int curOffset = result->size();
+            auto parameters = new Util::JsonArray();
+            auto primitive2 = mkPrimitive("_jump"_cs, result);
+            (*offsetToTargetLabelId)[curOffset] = labelIdEndOfAction;
+            (*offsetToJumpParams)[curOffset] = parameters;
+            primitive2->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
+            continue;
         } else if (s->is<IR::AssignmentStatement>()) {
+            //std::cout << "dbg assign " << *s << "\n";
             const IR::Expression *l, *r;
             auto assign = s->to<IR::AssignmentStatement>();
             l = assign->left;
@@ -180,8 +218,102 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
                 if (json) result->append(json);
                 continue;
             }
+        } else if (s->is<IR::IfStatement>()) {
+            auto i = s->to<IR::IfStatement>();
+            bool emptyElse = (i->ifFalse == nullptr);
+            int labelIdEndOfIf = *numLabels;
+            *numLabels += 1;
+            int labelIdElseOfIf;
+            int conditionalJumpLabelId;
+            if (emptyElse) {
+                labelIdElseOfIf = 0;
+                conditionalJumpLabelId = labelIdEndOfIf;
+            } else {
+                labelIdElseOfIf = *numLabels;
+                *numLabels += 1;
+                conditionalJumpLabelId = labelIdElseOfIf;
+            }
+            // Evaluate the if condition, and if it is false, jump to
+            // label conditionalJumpLabelId.
+            unsigned int curOffset = result->size();
+            auto parameters = new Util::JsonArray();
+            auto primitive = mkPrimitive("_jump_if_zero"_cs, result);
+            auto cond = ctxt->conv->convert(i->condition, true, true, true);
+            parameters->append(cond);
+            (*offsetToTargetLabelId)[curOffset] = conditionalJumpLabelId;
+            (*offsetToJumpParams)[curOffset] = parameters;
+            //primitive->emplace("parameters", parameters);
+            primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
+            // Earlier passes should guarantee that 'then' part of if
+            // statements is always non-empty.
+            auto ifTrueVec = new IR::IndexedVector<IR::StatOrDecl>();
+            ifTrueVec->push_back(i->ifTrue);
+            convertActionBody(ifTrueVec, result, true, labelIdEndOfAction, labelIdToJumpOffset,
+                              numLabels, offsetToTargetLabelId, offsetToJumpParams);
+            if (!emptyElse) {
+                // If the 'else' part is non-empty, perform an
+                // unconditional _jump to labelEndOfIf after the
+                // 'then' part.
+                unsigned int curOffset = result->size();
+                auto parameters = new Util::JsonArray();
+                auto primitive = mkPrimitive("_jump"_cs, result);
+                (*offsetToTargetLabelId)[curOffset] = labelIdEndOfIf;
+                (*offsetToJumpParams)[curOffset] = parameters;
+                primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
+
+                (*labelIdToJumpOffset)[labelIdElseOfIf] = result->size();
+                auto ifFalseVec = new IR::IndexedVector<IR::StatOrDecl>();
+                ifFalseVec->push_back(i->ifFalse);
+                convertActionBody(ifFalseVec, result, true, labelIdEndOfAction, labelIdToJumpOffset,
+                                  numLabels, offsetToTargetLabelId, offsetToJumpParams);
+            }
+            (*labelIdToJumpOffset)[labelIdEndOfIf] = result->size();
+            continue;
         }
         ::P4::error(ErrorType::ERR_UNSUPPORTED, "%1% not yet supported on this target", s);
+    }
+}
+
+void ActionConverter::convertActionBodyTop(const IR::Vector<IR::StatOrDecl> *body,
+                                           Util::JsonArray *result) {
+    std::map<int,int> labelIdToJumpOffset;
+    // Let F be the set of offsets in the action that contain a
+    // primitive "_jump" or _jump_if_zero".  For each offset f in F,
+    // offsetToTargetLabelId[f] is the label ID to which the primitive
+    // should jump.
+    std::map<int,int> offsetToTargetLabelId;
+    // For each offset f in F, offsetToJumpParams[f] is the array
+    // of parameters that should be used as operands to the primitive,
+    // except for the offset, which will only be added at the end of
+    // method convertActionBodyTop.
+    std::map<int,Util::JsonArray*> offsetToJumpParams;
+    int numLabels = 0;
+
+    int labelIdEndOfAction = numLabels++;
+    convertActionBody(body, result, false, labelIdEndOfAction,
+                      &labelIdToJumpOffset, &numLabels,
+                      &offsetToTargetLabelId, &offsetToJumpParams);
+    labelIdToJumpOffset[labelIdEndOfAction] = result->size();
+    // Go through all _jump and _jump_if_zero primitive actions in
+    // result, and use offsetToTargetLabelId and labelIdToJumpOffset
+    // to calculate their correct jump offsets.  Append the jump
+    // offset to the partial list of parameters in offsetToJumpParams,
+    // and add the now-complete parameter list to the jump primitive.
+    for (const auto& pair : offsetToTargetLabelId) {
+        unsigned int offset = pair.first;
+        int targetLabelId = pair.second;
+        Util::JsonArray *params = offsetToJumpParams[offset];
+        unsigned int targetOffset = labelIdToJumpOffset[targetLabelId];
+
+        auto jumpTarget = new Util::JsonObject();
+        jumpTarget->emplace("type", "hexstr");
+        cstring repr = stringRepr(targetOffset);
+        jumpTarget->emplace("value", repr);
+        params->append(jumpTarget);
+
+        Util::IJson *primitive = result->at(offset);
+        Util::JsonObject *prim = primitive->to<Util::JsonObject>();
+        prim->emplace("parameters", params);
     }
 }
 
@@ -209,7 +341,7 @@ void ActionConverter::postorder(const IR::P4Action *action) {
     auto params = new Util::JsonArray();
     convertActionParams(action->parameters, params);
     auto body = new Util::JsonArray();
-    convertActionBody(&action->body->components, body);
+    convertActionBodyTop(&action->body->components, body);
     auto id = ctxt->json->add_action(name, params, body);
     LOG3("add action with id " << id << " name " << name << " " << action);
     ctxt->structure->ids.emplace(action, id);

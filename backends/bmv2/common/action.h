@@ -25,7 +25,15 @@ namespace P4::BMV2 {
 class ActionConverter : public Inspector {
     ConversionContext *ctxt;
 
-    void convertActionBody(const IR::Vector<IR::StatOrDecl> *body, Util::JsonArray *result);
+    void convertActionBodyTop(const IR::Vector<IR::StatOrDecl> *body, Util::JsonArray *result);
+    void convertActionBody(const IR::Vector<IR::StatOrDecl> *body,
+                           Util::JsonArray *result,
+                           bool inConditional,
+                           int labelIdEndOfAction,
+                           std::map<int,int> *labelIdToJumpOffset,
+                           int *numLabels,
+                           std::map<int,int> *offsetToTargetLabelId,
+                           std::map<int,Util::JsonArray*> *offsetToJumpParams);
     void convertActionParams(const IR::ParameterList *parameters, Util::JsonArray *params);
     cstring jsonAssignment(const IR::Type *type);
     void postorder(const IR::P4Action *action) override;
