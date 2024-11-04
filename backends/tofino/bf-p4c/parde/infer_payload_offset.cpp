@@ -20,12 +20,12 @@
 
 #include <boost/range/adaptor/reversed.hpp>
 
-#include "bf-p4c/device.h"
-#include "bf-p4c/lib/assoc.h"
-#include "bf-p4c/parde/dump_parser.h"
-#include "bf-p4c/parde/parde_utils.h"
-#include "bf-p4c/parde/parser_info.h"
-#include "bf-p4c/phv/phv_parde_mau_use.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/lib/assoc.h"
+#include "backends/tofino/bf-p4c/parde/dump_parser.h"
+#include "backends/tofino/bf-p4c/parde/parde_utils.h"
+#include "backends/tofino/bf-p4c/parde/parser_info.h"
+#include "backends/tofino/bf-p4c/phv/phv_parde_mau_use.h"
 
 static bool is_mutable_field(const FieldDefUse &defuse, const PHV::Field *f) {
     auto all_defs = defuse.getAllDefs(f->id);

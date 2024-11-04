@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/v2/kind_size_indexed_map.h"
+#include "backends/tofino/bf-p4c/phv/v2/kind_size_indexed_map.h"
 
 namespace PHV {
 namespace v2 {

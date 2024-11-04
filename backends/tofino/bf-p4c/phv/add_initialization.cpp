@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/add_initialization.h"
+#include "backends/tofino/bf-p4c/phv/add_initialization.h"
 
 #include "boost/optional/optional_io.hpp"
 

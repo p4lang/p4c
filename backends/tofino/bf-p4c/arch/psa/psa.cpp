@@ -21,12 +21,12 @@
 #include <cmath>
 #include <fstream>
 
-#include "bf-p4c/arch/bridge_metadata.h"
-#include "bf-p4c/arch/fromv1.0/add_metadata_parser_states.h"
-#include "bf-p4c/arch/intrinsic_metadata.h"
-#include "bf-p4c/arch/rewrite_action_selector.h"
-#include "bf-p4c/device.h"
-#include "bf-p4c/midend/type_checker.h"
+#include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
+#include "backends/tofino/bf-p4c/arch/fromv1.0/add_metadata_parser_states.h"
+#include "backends/tofino/bf-p4c/arch/intrinsic_metadata.h"
+#include "backends/tofino/bf-p4c/arch/rewrite_action_selector.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "ir/ir.h"
 #include "lib/bitops.h"
 #include "midend/convertEnums.h"

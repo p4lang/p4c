@@ -16,17 +16,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/control-plane/runtime.h"
+#include "backends/tofino/bf-p4c/control-plane/runtime.h"
 
 #include <filesystem>  // If not already included
 #include <fstream>     // Ensure this header is included
 
-#include "bf-p4c/arch/arch.h"
-#include "bf-p4c/arch/rewrite_action_selector.h"
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/control-plane/bfruntime_arch_handler.h"
-#include "bf-p4c/control-plane/bfruntime_ext.h"
-#include "bf-p4c/control-plane/p4runtime_force_std.h"
+#include "backends/tofino/bf-p4c/arch/arch.h"
+#include "backends/tofino/bf-p4c/arch/rewrite_action_selector.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/control-plane/bfruntime_arch_handler.h"
+#include "backends/tofino/bf-p4c/control-plane/bfruntime_ext.h"
+#include "backends/tofino/bf-p4c/control-plane/p4runtime_force_std.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
 #include "lib/log.h"

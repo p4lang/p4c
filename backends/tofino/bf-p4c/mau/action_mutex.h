@@ -21,7 +21,7 @@
 
 #include <map>
 
-#include "bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
 #include "lib/symbitmatrix.h"
 
 using namespace P4;

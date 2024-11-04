@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/analysis/dominator_tree.h"
+#include "backends/tofino/bf-p4c/phv/analysis/dominator_tree.h"
 
 #include <initializer_list>
 #include <optional>
@@ -24,9 +24,9 @@
 
 #include <boost/algorithm/string/replace.hpp>
 
-#include "bf-p4c/common/header_stack.h"
-#include "bf-p4c/ir/gress.h"
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "backends/tofino/bf-p4c/common/header_stack.h"
+#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/test/gtest/tofino_gtest_utils.h"
 #include "gtest/gtest.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"

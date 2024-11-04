@@ -18,8 +18,8 @@
 
 #include "add_always_run.h"
 
-#include "bf-p4c/common/empty_tableseq.h"
-#include "bf-p4c/ir/table_tree.h"
+#include "backends/tofino/bf-p4c/common/empty_tableseq.h"
+#include "backends/tofino/bf-p4c/ir/table_tree.h"
 
 int AddAlwaysRun::compare(const IR::MAU::Table *t1, const IR::MAU::Table *t2) const {
     return compare(t1, t2 ? std::optional<UniqueId>(t2->get_uid()) : std::nullopt);

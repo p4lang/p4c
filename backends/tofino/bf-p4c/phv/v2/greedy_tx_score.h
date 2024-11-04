@@ -19,9 +19,9 @@
 #ifndef BF_P4C_PHV_V2_GREEDY_TX_SCORE_H_
 #define BF_P4C_PHV_V2_GREEDY_TX_SCORE_H_
 
-#include "bf-p4c/phv/v2/kind_size_indexed_map.h"
-#include "bf-p4c/phv/v2/phv_kit.h"
-#include "bf-p4c/phv/v2/tx_score.h"
+#include "backends/tofino/bf-p4c/phv/v2/kind_size_indexed_map.h"
+#include "backends/tofino/bf-p4c/phv/v2/phv_kit.h"
+#include "backends/tofino/bf-p4c/phv/v2/tx_score.h"
 
 namespace PHV {
 namespace v2 {

@@ -21,9 +21,9 @@
 
 #include <boost/algorithm/string/replace.hpp>
 
-#include "bf-p4c/common/header_stack.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "backends/tofino/bf-p4c/common/header_stack.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/test/gtest/tofino_gtest_utils.h"
 #include "gtest/gtest.h"
 #include "ir/ir.h"
 #include "ir/vector.h"

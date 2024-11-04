@@ -21,8 +21,8 @@
 
 #include <optional>
 
-#include "bf-p4c/ir/bitrange.h"
-#include "bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/ir/bitrange.h"
+#include "backends/tofino/bf-p4c/phv/phv.h"
 #include "ir/ir.h"
 #include "lib/bitvec.h"
 #include "lib/symbitmatrix.h"

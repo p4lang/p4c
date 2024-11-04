@@ -19,14 +19,14 @@
 #ifndef BF_P4C_PARDE_EXTRACT_DEPARSER_H_
 #define BF_P4C_PARDE_EXTRACT_DEPARSER_H_
 
-#include "bf-p4c/arch/bridge_metadata.h"
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/common/ir_utils.h"
-#include "bf-p4c/common/pragma/all_pragmas.h"
-#include "bf-p4c/common/pragma/collect_global_pragma.h"
-#include "bf-p4c/device.h"
-#include "bf-p4c/ir/gress.h"
-#include "bf-p4c/parde/parde_visitor.h"
+#include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/common/ir_utils.h"
+#include "backends/tofino/bf-p4c/common/pragma/all_pragmas.h"
+#include "backends/tofino/bf-p4c/common/pragma/collect_global_pragma.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/parde/parde_visitor.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"

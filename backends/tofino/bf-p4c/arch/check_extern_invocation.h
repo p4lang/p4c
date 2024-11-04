@@ -19,7 +19,7 @@
 #ifndef BF_P4C_ARCH_CHECK_EXTERN_INVOCATION_H_
 #define BF_P4C_ARCH_CHECK_EXTERN_INVOCATION_H_
 
-#include "bf-p4c/arch/arch.h"
+#include "backends/tofino/bf-p4c/arch/arch.h"
 #include "frontends/p4/methodInstance.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"

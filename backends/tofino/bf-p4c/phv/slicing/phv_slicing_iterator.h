@@ -19,12 +19,12 @@
 #ifndef BF_P4C_PHV_SLICING_PHV_SLICING_ITERATOR_H_
 #define BF_P4C_PHV_SLICING_PHV_SLICING_ITERATOR_H_
 
-#include "bf-p4c/parde/parser_info.h"
-#include "bf-p4c/phv/action_packing_validator_interface.h"
-#include "bf-p4c/phv/parser_packing_validator_interface.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/slicing/types.h"
-#include "bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/parde/parser_info.h"
+#include "backends/tofino/bf-p4c/phv/action_packing_validator_interface.h"
+#include "backends/tofino/bf-p4c/phv/parser_packing_validator_interface.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/slicing/types.h"
+#include "backends/tofino/bf-p4c/phv/utils/utils.h"
 
 namespace PHV {
 namespace Slicing {

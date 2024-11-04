@@ -18,7 +18,7 @@
 
 #include "action_data_bus.h"
 
-#include "bf-p4c/mau/resource.h"
+#include "backends/tofino/bf-p4c/mau/resource.h"
 
 // this needs to be at global scope to avoid messing up overload resolution
 static std::ostream &operator<<(std::ostream &out, const ActionData::BusInputs &bi) {

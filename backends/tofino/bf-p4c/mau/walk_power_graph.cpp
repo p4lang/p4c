@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/walk_power_graph.h"
+#include "backends/tofino/bf-p4c/mau/walk_power_graph.h"
 
 #include <ctime>
 #include <map>
@@ -24,17 +24,17 @@
 #include <set>
 #include <vector>
 
-#include "bf-p4c/common/asm_output.h"
-#include "bf-p4c/common/run_id.h"
-#include "bf-p4c/device.h"
-#include "bf-p4c/logging/manifest.h"
-#include "bf-p4c/mau/build_power_graph.h"
-#include "bf-p4c/mau/determine_power_usage.h"
-#include "bf-p4c/mau/jbay_next_table.h"
-#include "bf-p4c/mau/mau_power.h"
-#include "bf-p4c/mau/mau_visitor.h"
-#include "bf-p4c/mau/memories.h"
-#include "bf-p4c/mau/simple_power_graph.h"
+#include "backends/tofino/bf-p4c/common/asm_output.h"
+#include "backends/tofino/bf-p4c/common/run_id.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/logging/manifest.h"
+#include "backends/tofino/bf-p4c/mau/build_power_graph.h"
+#include "backends/tofino/bf-p4c/mau/determine_power_usage.h"
+#include "backends/tofino/bf-p4c/mau/jbay_next_table.h"
+#include "backends/tofino/bf-p4c/mau/mau_power.h"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/mau/memories.h"
+#include "backends/tofino/bf-p4c/mau/simple_power_graph.h"
 #include "ir/gress.h"
 #include "ir/unique_id.h"
 #include "lib/json.h"

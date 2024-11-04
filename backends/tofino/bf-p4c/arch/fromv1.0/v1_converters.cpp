@@ -20,9 +20,9 @@
 
 #include <boost/range/adaptor/reversed.hpp>
 
-#include "bf-p4c/arch/bridge_metadata.h"
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/device.h"
 #include "lib/map.h"
 #include "lib/ordered_map.h"
 #include "v1_program_structure.h"

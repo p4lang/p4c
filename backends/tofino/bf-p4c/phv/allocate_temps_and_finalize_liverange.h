@@ -19,10 +19,10 @@
 #ifndef BF_P4C_PHV_ALLOCATE_TEMPS_AND_FINALIZE_LIVERANGE_H_
 #define BF_P4C_PHV_ALLOCATE_TEMPS_AND_FINALIZE_LIVERANGE_H_
 
-#include "bf-p4c/common/field_defuse.h"
-#include "bf-p4c/mau/table_summary.h"
-#include "bf-p4c/parde/clot/clot_info.h"
-#include "bf-p4c/phv/phv_parde_mau_use.h"
+#include "backends/tofino/bf-p4c/common/field_defuse.h"
+#include "backends/tofino/bf-p4c/mau/table_summary.h"
+#include "backends/tofino/bf-p4c/parde/clot/clot_info.h"
+#include "backends/tofino/bf-p4c/phv/phv_parde_mau_use.h"
 #include "ir/ir.h"
 
 namespace PHV {

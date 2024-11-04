@@ -18,8 +18,8 @@
 
 #ifndef BACKENDS_TOFINO_BF_P4C_LOGGING_COLLECT_DIAGNOSTIC_CHECKS_H_
 #define BACKENDS_TOFINO_BF_P4C_LOGGING_COLLECT_DIAGNOSTIC_CHECKS_H_
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/logging/bf_error_reporter.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/logging/bf_error_reporter.h"
 
 namespace BFN {
 /**

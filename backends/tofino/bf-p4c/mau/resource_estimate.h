@@ -19,8 +19,8 @@
 #ifndef BF_P4C_MAU_RESOURCE_ESTIMATE_H_
 #define BF_P4C_MAU_RESOURCE_ESTIMATE_H_
 
-#include "bf-p4c/mau/attached_entries.h"
-#include "bf-p4c/mau/table_layout.h"
+#include "backends/tofino/bf-p4c/mau/attached_entries.h"
+#include "backends/tofino/bf-p4c/mau/table_layout.h"
 #include "lib/algorithm.h"
 #include "lib/safe_vector.h"
 

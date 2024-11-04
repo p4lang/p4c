@@ -19,10 +19,10 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_PARDE_LOWERED_HOIST_COMMON_MATCH_OPERATIONS_H_
 #define BACKENDS_TOFINO_BF_P4C_PARDE_LOWERED_HOIST_COMMON_MATCH_OPERATIONS_H_
 
-#include "bf-p4c/device.h"
-#include "bf-p4c/lib/assoc.h"
-#include "bf-p4c/parde/clot/clot_info.h"
-#include "bf-p4c/parde/parde_visitor.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/lib/assoc.h"
+#include "backends/tofino/bf-p4c/parde/clot/clot_info.h"
+#include "backends/tofino/bf-p4c/parde/parde_visitor.h"
 #include "compute_lowered_parser_ir.h"
 
 namespace Parde::Lowered {

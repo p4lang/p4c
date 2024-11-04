@@ -16,14 +16,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/mau_power.h"
+#include "backends/tofino/bf-p4c/mau/mau_power.h"
 
 #include <fstream>
 #include <ostream>
 #include <string>
 
-#include "bf-p4c/device.h"
-#include "bf-p4c/mau/memories.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/mau/memories.h"
 #include "lib/hex.h"
 #include "lib/map.h"
 

@@ -16,13 +16,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/logging/event_logger.h"
+#include "backends/tofino/bf-p4c/logging/event_logger.h"
 
 #include <unistd.h>
 
 #include <fstream>
 
-#include "bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
 #include "bf_gtest_helpers.h"
 #include "frontends/parsers/parserDriver.h"
 #include "gtest/gtest.h"

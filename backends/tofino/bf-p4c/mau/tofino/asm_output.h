@@ -19,7 +19,7 @@
 #ifndef BF_P4C_MAU_TOFINO_ASM_OUTPUT_H_
 #define BF_P4C_MAU_TOFINO_ASM_OUTPUT_H_
 
-#include "bf-p4c/mau/asm_output.h"
+#include "backends/tofino/bf-p4c/mau/asm_output.h"
 
 namespace Tofino {
 

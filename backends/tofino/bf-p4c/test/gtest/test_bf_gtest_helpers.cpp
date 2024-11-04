@@ -18,7 +18,7 @@
 
 #include <boost/algorithm/string/replace.hpp>
 
-#include "bf-p4c/midend/elim_cast.h"
+#include "backends/tofino/bf-p4c/midend/elim_cast.h"
 #include "bf_gtest_helpers.h"
 #include "frontends/p4/toP4/toP4.h"
 #include "gtest/gtest.h"

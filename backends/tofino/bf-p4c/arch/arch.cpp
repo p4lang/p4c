@@ -16,17 +16,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/arch/arch.h"
+#include "backends/tofino/bf-p4c/arch/arch.h"
 
 #include <utility>
 
-#include "bf-p4c/arch/psa/psa.h"
-#include "bf-p4c/arch/t2na.h"
-#include "bf-p4c/arch/tna.h"
-#include "bf-p4c/arch/v1model.h"
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/common/pragma/collect_global_pragma.h"
-#include "bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/arch/psa/psa.h"
+#include "backends/tofino/bf-p4c/arch/t2na.h"
+#include "backends/tofino/bf-p4c/arch/tna.h"
+#include "backends/tofino/bf-p4c/arch/v1model.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/common/pragma/collect_global_pragma.h"
+#include "backends/tofino/bf-p4c/device.h"
 #include "frontends/p4/methodInstance.h"
 #include "ir/declaration.h"
 #include "ir/id.h"

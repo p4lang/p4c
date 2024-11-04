@@ -18,14 +18,14 @@
 
 #include "check_parser_multi_write.h"
 
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/device.h"
-#include "bf-p4c/parde/dump_parser.h"
-#include "bf-p4c/parde/parde_utils.h"
-#include "bf-p4c/parde/parde_visitor.h"
-#include "bf-p4c/parde/parser_info.h"
-#include "bf-p4c/parde/parser_query.h"
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/parde/dump_parser.h"
+#include "backends/tofino/bf-p4c/parde/parde_utils.h"
+#include "backends/tofino/bf-p4c/parde/parde_visitor.h"
+#include "backends/tofino/bf-p4c/parde/parser_info.h"
+#include "backends/tofino/bf-p4c/parde/parser_query.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "lib/error_reporter.h"
 
 const char *CHECKSUM_VERIFY_OR_SUGGESTION =

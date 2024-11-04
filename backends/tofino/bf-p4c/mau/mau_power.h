@@ -25,7 +25,7 @@
 #include <string>
 #include <vector>
 
-#include "bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/device.h"
 #include "ir/ir.h"
 #include "ir/unique_id.h"
 #include "lib/dyn_vector.h"

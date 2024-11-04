@@ -19,7 +19,7 @@
 #ifndef BF_P4C_MIDEND_REWRITE_EGRESS_INTRINSIC_METADATA_HEADER_H_
 #define BF_P4C_MIDEND_REWRITE_EGRESS_INTRINSIC_METADATA_HEADER_H_
 
-#include "bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/device.h"
 
 namespace P4 {
 class TypeMap;

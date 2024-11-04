@@ -20,8 +20,8 @@
 
 #include <queue>
 
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/midend/path_linearizer.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/midend/path_linearizer.h"
 
 namespace BFN {
 

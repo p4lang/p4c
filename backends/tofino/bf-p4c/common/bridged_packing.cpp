@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/common/bridged_packing.h"
+#include "backends/tofino/bf-p4c/common/bridged_packing.h"
 
 #include <z3++.h>
 
@@ -29,24 +29,24 @@
 #include <sstream>
 #include <stack>
 
-#include "bf-p4c/arch/bridge_metadata.h"
-#include "bf-p4c/arch/collect_hardware_constrained_fields.h"
-#include "bf-p4c/backend.h"
-#include "bf-p4c/common/ir_utils.h"
-#include "bf-p4c/common/size_of.h"
-#include "bf-p4c/common/table_printer.h"
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/lib/pad_alignment.h"
-#include "bf-p4c/logging/event_logger.h"
-#include "bf-p4c/midend/check_header_alignment.h"
-#include "bf-p4c/midend/simplify_args.h"
-#include "bf-p4c/phv/cluster_phv_operations.h"
-#include "bf-p4c/phv/constraints/constraints.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/pragma/pa_atomic.h"
-#include "bf-p4c/phv/pragma/pa_container_size.h"
-#include "bf-p4c/phv/pragma/pa_no_pack.h"
-#include "bf-p4c/phv/pragma/pa_solitary.h"
+#include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
+#include "backends/tofino/bf-p4c/arch/collect_hardware_constrained_fields.h"
+#include "backends/tofino/bf-p4c/backend.h"
+#include "backends/tofino/bf-p4c/common/ir_utils.h"
+#include "backends/tofino/bf-p4c/common/size_of.h"
+#include "backends/tofino/bf-p4c/common/table_printer.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/lib/pad_alignment.h"
+#include "backends/tofino/bf-p4c/logging/event_logger.h"
+#include "backends/tofino/bf-p4c/midend/check_header_alignment.h"
+#include "backends/tofino/bf-p4c/midend/simplify_args.h"
+#include "backends/tofino/bf-p4c/phv/cluster_phv_operations.h"
+#include "backends/tofino/bf-p4c/phv/constraints/constraints.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_atomic.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_container_size.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_no_pack.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_solitary.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/p4/reassociation.h"
 #include "frontends/p4/strengthReduction.h"
@@ -55,19 +55,19 @@
 #include "midend/local_copyprop.h"
 
 // included by PackFlexibleHeaders
-#include "bf-p4c/common/alias.h"
-#include "bf-p4c/common/check_for_unimplemented_features.h"
-#include "bf-p4c/common/header_stack.h"
-#include "bf-p4c/common/multiple_apply.h"
-#include "bf-p4c/mau/empty_controls.h"
-#include "bf-p4c/mau/instruction_selection.h"
-#include "bf-p4c/mau/push_pop.h"
-#include "bf-p4c/mau/selector_update.h"
-#include "bf-p4c/mau/stateful_alu.h"
-#include "bf-p4c/parde/add_metadata_pov.h"
-#include "bf-p4c/parde/stack_push_shims.h"
-#include "bf-p4c/phv/create_thread_local_instances.h"
-#include "bf-p4c/phv/pragma/pa_no_overlay.h"
+#include "backends/tofino/bf-p4c/common/alias.h"
+#include "backends/tofino/bf-p4c/common/check_for_unimplemented_features.h"
+#include "backends/tofino/bf-p4c/common/header_stack.h"
+#include "backends/tofino/bf-p4c/common/multiple_apply.h"
+#include "backends/tofino/bf-p4c/mau/empty_controls.h"
+#include "backends/tofino/bf-p4c/mau/instruction_selection.h"
+#include "backends/tofino/bf-p4c/mau/push_pop.h"
+#include "backends/tofino/bf-p4c/mau/selector_update.h"
+#include "backends/tofino/bf-p4c/mau/stateful_alu.h"
+#include "backends/tofino/bf-p4c/parde/add_metadata_pov.h"
+#include "backends/tofino/bf-p4c/parde/stack_push_shims.h"
+#include "backends/tofino/bf-p4c/phv/create_thread_local_instances.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_no_overlay.h"
 
 Visitor::profile_t CollectIngressBridgedFields::init_apply(const IR::Node *root) {
     profile_t rv = Inspector::init_apply(root);

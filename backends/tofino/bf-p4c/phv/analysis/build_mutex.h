@@ -19,9 +19,9 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_PHV_ANALYSIS_BUILD_MUTEX_H_
 #define BACKENDS_TOFINO_BF_P4C_PHV_ANALYSIS_BUILD_MUTEX_H_
 
-#include "bf-p4c/ir/control_flow_visitor.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/pragma/phv_pragmas.h"
+#include "backends/tofino/bf-p4c/ir/control_flow_visitor.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/pragma/phv_pragmas.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
 #include "lib/bitvec.h"

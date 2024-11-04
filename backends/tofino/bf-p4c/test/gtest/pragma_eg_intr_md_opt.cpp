@@ -21,8 +21,8 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/make_unique.hpp>
 
-#include "bf-p4c/test/gtest/bf_gtest_helpers.h"
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "backends/tofino/bf-p4c/test/gtest/bf_gtest_helpers.h"
+#include "backends/tofino/bf-p4c/test/gtest/tofino_gtest_utils.h"
 #include "gtest/gtest.h"
 
 namespace P4::Test {

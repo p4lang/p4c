@@ -16,11 +16,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/handle_assign.h"
+#include "backends/tofino/bf-p4c/mau/handle_assign.h"
 
-#include "bf-p4c/mau/input_xbar.h"
-#include "bf-p4c/mau/resource_estimate.h"
-#include "bf-p4c/mau/tofino/input_xbar.h"
+#include "backends/tofino/bf-p4c/mau/input_xbar.h"
+#include "backends/tofino/bf-p4c/mau/resource_estimate.h"
+#include "backends/tofino/bf-p4c/mau/tofino/input_xbar.h"
 #include "lib/safe_vector.h"
 
 bool AssignActionHandle::ActionProfileImposedConstraints::preorder(const IR::MAU::ActionData *ad) {

@@ -26,7 +26,7 @@
 #include <string>
 #include <vector>
 
-#include "bf-p4c/mau/mau_power.h"
+#include "backends/tofino/bf-p4c/mau/mau_power.h"
 
 namespace MauPower {
 class Node;

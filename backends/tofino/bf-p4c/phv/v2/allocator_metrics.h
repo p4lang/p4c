@@ -21,7 +21,7 @@
 
 #include <chrono>
 
-#include "bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/phv/phv.h"
 
 namespace PHV {
 namespace v2 {

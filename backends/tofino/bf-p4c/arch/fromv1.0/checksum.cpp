@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/arch/fromv1.0/checksum.h"
+#include "backends/tofino/bf-p4c/arch/fromv1.0/checksum.h"
 
 namespace BFN {
 namespace V1 {

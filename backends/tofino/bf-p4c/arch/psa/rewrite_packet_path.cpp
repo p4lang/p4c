@@ -18,8 +18,8 @@
 
 #include "rewrite_packet_path.h"
 
-#include "bf-p4c/arch/bridge_metadata.h"
-#include "bf-p4c/midend/type_checker.h"
+#include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
+#include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"

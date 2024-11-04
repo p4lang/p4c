@@ -16,16 +16,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/tofino/memories.h"
+#include "backends/tofino/bf-p4c/mau/tofino/memories.h"
 
 #include <functional>
 
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/device.h"
-#include "bf-p4c/mau/mau_visitor.h"
-#include "bf-p4c/mau/payload_gateway.h"
-#include "bf-p4c/mau/resource.h"
-#include "bf-p4c/mau/resource_estimate.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/mau/payload_gateway.h"
+#include "backends/tofino/bf-p4c/mau/resource.h"
+#include "backends/tofino/bf-p4c/mau/resource_estimate.h"
 #include "lib/bitops.h"
 #include "lib/log.h"
 #include "lib/range.h"

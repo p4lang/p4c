@@ -20,9 +20,9 @@
 
 #include <lib/bitvec.h>
 
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/device.h"
 #include "frontends/common/constantFolding.h"
 
 namespace BFN {

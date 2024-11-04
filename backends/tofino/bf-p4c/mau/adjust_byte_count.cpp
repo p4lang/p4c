@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/adjust_byte_count.h"
+#include "backends/tofino/bf-p4c/mau/adjust_byte_count.h"
 
 namespace BFN {
 

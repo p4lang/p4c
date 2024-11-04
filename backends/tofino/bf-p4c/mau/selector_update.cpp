@@ -20,7 +20,7 @@
 
 #include <vector>
 
-#include "bf-p4c/mau/resource_estimate.h"
+#include "backends/tofino/bf-p4c/mau/resource_estimate.h"
 
 bool AddSelectorSalu::AddSaluIfNeeded::preorder(IR::MAU::Table *tbl) {
     std::vector<const IR::MAU::StatefulAlu *> toAdd;

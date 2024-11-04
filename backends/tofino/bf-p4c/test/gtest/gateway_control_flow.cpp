@@ -16,11 +16,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/ir/gateway_control_flow.h"
+#include "backends/tofino/bf-p4c/ir/gateway_control_flow.h"
 
 #include <optional>
 
-#include "bf-p4c/mau/gateway.h"
+#include "backends/tofino/bf-p4c/mau/gateway.h"
 #include "gtest/gtest.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"

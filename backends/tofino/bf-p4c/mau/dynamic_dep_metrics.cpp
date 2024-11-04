@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/dynamic_dep_metrics.h"
+#include "backends/tofino/bf-p4c/mau/dynamic_dep_metrics.h"
 
 void DynamicDependencyMetrics::score_on_seq(const IR::MAU::TableSeq *seq, const IR::MAU::Table *tbl,
                                             int &max_dep_impact, char type) const {

@@ -19,7 +19,7 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_MAU_HASH_MASK_ANNOTATIONS_H_
 #define BACKENDS_TOFINO_BF_P4C_MAU_HASH_MASK_ANNOTATIONS_H_
 
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "ir/ir.h"
 #include "lib/bitvec.h"
 

@@ -16,12 +16,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/parde/phase0.h"
+#include "backends/tofino/bf-p4c/parde/phase0.h"
 
 #include <algorithm>
 
-#include "bf-p4c/common/asm_output.h"
-#include "bf-p4c/parde/field_packing.h"
+#include "backends/tofino/bf-p4c/common/asm_output.h"
+#include "backends/tofino/bf-p4c/parde/field_packing.h"
 #include "frontends/p4-14/fromv1.0/v1model.h"
 #include "frontends/p4/coreLibrary.h"
 #include "lib/cstring.h"

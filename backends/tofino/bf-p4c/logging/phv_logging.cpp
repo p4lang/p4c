@@ -16,12 +16,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/logging/phv_logging.h"
+#include "backends/tofino/bf-p4c/logging/phv_logging.h"
 
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/logging/container_size_extractor.h"
-#include "bf-p4c/logging/manifest.h"
-#include "bf-p4c/version.h"  // for BF_P4C_VERSION
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/logging/container_size_extractor.h"
+#include "backends/tofino/bf-p4c/logging/manifest.h"
+#include "backends/tofino/bf-p4c/version.h"  // for BF_P4C_VERSION
 
 void CollectPhvLoggingInfo::collectConstraints() {
     fieldConstraints = ConstrainedFieldMapBuilder::buildMap(phv, *superclusters);

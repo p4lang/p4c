@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/parde/rewrite_parser_locals.h"
+#include "backends/tofino/bf-p4c/parde/rewrite_parser_locals.h"
 
 bool GetSelectFieldInfo::preorder(const IR::BFN::Select *select) {
     auto state = findContext<IR::BFN::ParserState>();

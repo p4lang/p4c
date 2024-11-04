@@ -18,9 +18,9 @@
 
 #include "check_uninitialized_read.h"
 
-#include "bf-p4c/common/table_printer.h"
-#include "bf-p4c/lib/error_type.h"
-#include "bf-p4c/mau/table_dependency_graph.h"
+#include "backends/tofino/bf-p4c/common/table_printer.h"
+#include "backends/tofino/bf-p4c/lib/error_type.h"
+#include "backends/tofino/bf-p4c/mau/table_dependency_graph.h"
 
 // FindUninitializedAndOverlayedReads
 bool FindUninitializedAndOverlayedReads::preorder(const IR::BFN::DeparserParameter *param) {

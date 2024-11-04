@@ -18,11 +18,11 @@
 
 #include <assert.h>
 
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/lib/error_type.h"
-#include "bf-p4c/mau/instruction_memory.h"
-#include "bf-p4c/mau/stateful_alu.h"
-#include "bf-p4c/mau/table_layout.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/lib/error_type.h"
+#include "backends/tofino/bf-p4c/mau/instruction_memory.h"
+#include "backends/tofino/bf-p4c/mau/stateful_alu.h"
+#include "backends/tofino/bf-p4c/mau/table_layout.h"
 #include "gateway_control_flow.h"
 #include "ir/ir.h"
 

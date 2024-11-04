@@ -19,14 +19,14 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_PHV_ANALYSIS_PACK_CONFLICTS_H_
 #define BACKENDS_TOFINO_BF_P4C_PHV_ANALYSIS_PACK_CONFLICTS_H_
 
-#include "bf-p4c/lib/assoc.h"
-#include "bf-p4c/mau/action_analysis.h"
-#include "bf-p4c/mau/action_mutex.h"
-#include "bf-p4c/mau/table_dependency_graph.h"
-#include "bf-p4c/mau/table_mutex.h"
-#include "bf-p4c/phv/mau_backtracker.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/pragma/pa_no_pack.h"
+#include "backends/tofino/bf-p4c/lib/assoc.h"
+#include "backends/tofino/bf-p4c/mau/action_analysis.h"
+#include "backends/tofino/bf-p4c/mau/action_mutex.h"
+#include "backends/tofino/bf-p4c/mau/table_dependency_graph.h"
+#include "backends/tofino/bf-p4c/mau/table_mutex.h"
+#include "backends/tofino/bf-p4c/phv/mau_backtracker.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_no_pack.h"
 #include "ir/ir.h"
 
 /** This class is meant to gather information about what fields cannot be packed together because of

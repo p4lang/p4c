@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/transforms/auto_alias.h"
+#include "backends/tofino/bf-p4c/phv/transforms/auto_alias.h"
 
 Visitor::profile_t DetermineCandidateHeaders::init_apply(const IR::Node *root) {
     allHeaders.clear();

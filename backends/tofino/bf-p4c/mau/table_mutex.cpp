@@ -16,9 +16,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/table_mutex.h"
+#include "backends/tofino/bf-p4c/mau/table_mutex.h"
 
-#include "bf-p4c/lib/error_type.h"
+#include "backends/tofino/bf-p4c/lib/error_type.h"
 
 bool IgnoreTableDeps::ignore_deps(const IR::MAU::Table *t1, const IR::MAU::Table *t2) const {
     auto t1_pos = ignore_dep_map.find(t1);

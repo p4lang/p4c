@@ -16,12 +16,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/analysis/live_range_shrinking.h"
+#include "backends/tofino/bf-p4c/phv/analysis/live_range_shrinking.h"
 
-#include "bf-p4c/lib/error_type.h"
-#include "bf-p4c/logging/event_logger.h"
-#include "bf-p4c/mau/table_layout.h"
-#include "bf-p4c/phv/utils/liverange_opti_utils.h"
+#include "backends/tofino/bf-p4c/lib/error_type.h"
+#include "backends/tofino/bf-p4c/logging/event_logger.h"
+#include "backends/tofino/bf-p4c/mau/table_layout.h"
+#include "backends/tofino/bf-p4c/phv/utils/liverange_opti_utils.h"
 
 Visitor::profile_t FindInitializationNode::init_apply(const IR::Node *root) {
     LOG_DEBUG3("Printing dependency graph");

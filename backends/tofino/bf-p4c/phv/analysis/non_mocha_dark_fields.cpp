@@ -16,10 +16,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/analysis/non_mocha_dark_fields.h"
+#include "backends/tofino/bf-p4c/phv/analysis/non_mocha_dark_fields.h"
 
-#include "bf-p4c/logging/event_logger.h"
-#include "bf-p4c/mau/action_analysis.h"
+#include "backends/tofino/bf-p4c/logging/event_logger.h"
+#include "backends/tofino/bf-p4c/mau/action_analysis.h"
 
 Visitor::profile_t NonMochaDarkFields::init_apply(const IR::Node *root) {
     profile_t rv = Inspector::init_apply(root);

@@ -19,12 +19,12 @@
 #ifndef BF_P4C_MAU_INSTRUCTION_SELECTION_H_
 #define BF_P4C_MAU_INSTRUCTION_SELECTION_H_
 
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/ir/tofino_write_context.h"
-#include "bf-p4c/mau/mau_visitor.h"
-#include "bf-p4c/mau/reduction_or.h"
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/ir/tofino_write_context.h"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/mau/reduction_or.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "ir/ir-generated.h"
 
 using namespace P4;

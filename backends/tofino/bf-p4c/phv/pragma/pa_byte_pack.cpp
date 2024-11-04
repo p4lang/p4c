@@ -16,15 +16,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/pragma/pa_byte_pack.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_byte_pack.h"
 
 #include <sstream>
 
 #include <boost/range/adaptor/reversed.hpp>
 
-#include "bf-p4c/ir/bitrange.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/pragma/phv_pragmas.h"
+#include "backends/tofino/bf-p4c/ir/bitrange.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/pragma/phv_pragmas.h"
 #include "lib/source_file.h"
 
 /// BFN::Pragma interface

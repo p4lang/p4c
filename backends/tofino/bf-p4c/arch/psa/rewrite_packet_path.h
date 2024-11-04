@@ -19,9 +19,9 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_ARCH_PSA_REWRITE_PACKET_PATH_H_
 #define BACKENDS_TOFINO_BF_P4C_ARCH_PSA_REWRITE_PACKET_PATH_H_
 
-#include "bf-p4c/arch/program_structure.h"
-#include "bf-p4c/arch/psa/programStructure.h"
-#include "bf-p4c/arch/psa/psa.h"
+#include "backends/tofino/bf-p4c/arch/program_structure.h"
+#include "backends/tofino/bf-p4c/arch/psa/programStructure.h"
+#include "backends/tofino/bf-p4c/arch/psa/psa.h"
 #include "ir/ir.h"
 
 namespace BFN {

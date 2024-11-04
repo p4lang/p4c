@@ -21,12 +21,12 @@
 
 #include <utility>
 
-#include "bf-p4c/lib/assoc.h"
-#include "bf-p4c/parde/check_parser_multi_write.h"
-#include "bf-p4c/phv/slicing/phv_slicing_iterator.h"
-#include "bf-p4c/phv/slicing/phv_slicing_split.h"
-#include "bf-p4c/phv/slicing/types.h"
-#include "bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/lib/assoc.h"
+#include "backends/tofino/bf-p4c/parde/check_parser_multi_write.h"
+#include "backends/tofino/bf-p4c/phv/slicing/phv_slicing_iterator.h"
+#include "backends/tofino/bf-p4c/phv/slicing/phv_slicing_split.h"
+#include "backends/tofino/bf-p4c/phv/slicing/types.h"
+#include "backends/tofino/bf-p4c/phv/utils/utils.h"
 #include "lib/ordered_set.h"
 
 namespace PHV {

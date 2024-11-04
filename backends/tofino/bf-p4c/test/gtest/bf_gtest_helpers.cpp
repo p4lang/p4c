@@ -27,17 +27,17 @@
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/algorithm/string/trim_all.hpp>
 
-#include "bf-p4c/arch/arch.h"
-#include "bf-p4c/asm.h"
-#include "bf-p4c/backend.h"
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/common/bridged_packing.h"
-#include "bf-p4c/common/front_end_policy.h"
-#include "bf-p4c/common/parse_annotations.h"
-#include "bf-p4c/logging/phv_logging.h"
-#include "bf-p4c/logging/source_info_logging.h"
-#include "bf-p4c/midend.h"
-#include "bf-p4c/phv/create_thread_local_instances.h"
+#include "backends/tofino/bf-p4c/arch/arch.h"
+#include "backends/tofino/bf-p4c/asm.h"
+#include "backends/tofino/bf-p4c/backend.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/common/bridged_packing.h"
+#include "backends/tofino/bf-p4c/common/front_end_policy.h"
+#include "backends/tofino/bf-p4c/common/parse_annotations.h"
+#include "backends/tofino/bf-p4c/logging/phv_logging.h"
+#include "backends/tofino/bf-p4c/logging/source_info_logging.h"
+#include "backends/tofino/bf-p4c/midend.h"
+#include "backends/tofino/bf-p4c/phv/create_thread_local_instances.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/frontend.h"  // Used by run_p4c_frontend_passes
 #include "frontends/p4/toP4/toP4.h"

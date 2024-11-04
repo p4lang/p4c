@@ -18,12 +18,12 @@
 
 #include <sstream>
 
-#include "bf-p4c/device.h"
-#include "bf-p4c/ir/gress.h"
-#include "bf-p4c/phv/allocate_phv.h"
-#include "bf-p4c/phv/slicing/phv_slicing_split.h"
-#include "bf-p4c/phv/utils/utils.h"
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/phv/allocate_phv.h"
+#include "backends/tofino/bf-p4c/phv/slicing/phv_slicing_split.h"
+#include "backends/tofino/bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/test/gtest/tofino_gtest_utils.h"
 #include "gtest/gtest.h"
 #include "lib/bitvec.h"
 #include "test/gtest/helpers.h"

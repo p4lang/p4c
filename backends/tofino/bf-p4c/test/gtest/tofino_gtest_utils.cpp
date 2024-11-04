@@ -16,16 +16,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "backends/tofino/bf-p4c/test/gtest/tofino_gtest_utils.h"
 
-#include "bf-p4c/arch/arch.h"
-#include "bf-p4c/common/bridged_packing.h"
-#include "bf-p4c/common/extract_maupipe.h"
-#include "bf-p4c/common/front_end_policy.h"
-#include "bf-p4c/common/header_stack.h"
-#include "bf-p4c/common/parse_annotations.h"
-#include "bf-p4c/midend.h"
-#include "bf-p4c/phv/create_thread_local_instances.h"
+#include "backends/tofino/bf-p4c/arch/arch.h"
+#include "backends/tofino/bf-p4c/common/bridged_packing.h"
+#include "backends/tofino/bf-p4c/common/extract_maupipe.h"
+#include "backends/tofino/bf-p4c/common/front_end_policy.h"
+#include "backends/tofino/bf-p4c/common/header_stack.h"
+#include "backends/tofino/bf-p4c/common/parse_annotations.h"
+#include "backends/tofino/bf-p4c/midend.h"
+#include "backends/tofino/bf-p4c/phv/create_thread_local_instances.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/p4/frontend.h"
 #include "gtest/gtest.h"

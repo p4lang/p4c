@@ -16,10 +16,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/midend/check_header_alignment.h"
+#include "backends/tofino/bf-p4c/midend/check_header_alignment.h"
 
-#include "bf-p4c/common/bridged_packing.h"
-#include "bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/common/bridged_packing.h"
+#include "backends/tofino/bf-p4c/device.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"

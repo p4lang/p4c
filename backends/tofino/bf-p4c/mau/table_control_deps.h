@@ -19,7 +19,7 @@
 #ifndef BF_P4C_MAU_TABLE_CONTROL_DEPS_H_
 #define BF_P4C_MAU_TABLE_CONTROL_DEPS_H_
 
-#include "bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
 #include "lib/ordered_map.h"
 
 using namespace P4;

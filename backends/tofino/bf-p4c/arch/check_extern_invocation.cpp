@@ -18,7 +18,7 @@
 
 #include "check_extern_invocation.h"
 
-#include "bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/device.h"
 #include "lib/bitvec.h"
 
 namespace BFN {

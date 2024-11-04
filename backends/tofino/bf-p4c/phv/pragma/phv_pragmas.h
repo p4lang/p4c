@@ -19,18 +19,18 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_PHV_PRAGMA_PHV_PRAGMAS_H_
 #define BACKENDS_TOFINO_BF_P4C_PHV_PRAGMA_PHV_PRAGMAS_H_
 
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/phv/pragma/pa_alias.h"
-#include "bf-p4c/phv/pragma/pa_atomic.h"
-#include "bf-p4c/phv/pragma/pa_byte_pack.h"
-#include "bf-p4c/phv/pragma/pa_container_size.h"
-#include "bf-p4c/phv/pragma/pa_container_type.h"
-#include "bf-p4c/phv/pragma/pa_deparser_zero.h"
-#include "bf-p4c/phv/pragma/pa_mutually_exclusive.h"
-#include "bf-p4c/phv/pragma/pa_no_init.h"
-#include "bf-p4c/phv/pragma/pa_no_overlay.h"
-#include "bf-p4c/phv/pragma/pa_no_pack.h"
-#include "bf-p4c/phv/pragma/pa_solitary.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_alias.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_atomic.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_byte_pack.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_container_size.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_container_type.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_deparser_zero.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_mutually_exclusive.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_no_init.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_no_overlay.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_no_pack.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_solitary.h"
 
 using namespace P4;
 

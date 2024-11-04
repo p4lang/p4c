@@ -21,18 +21,18 @@
 
 #include <string>
 
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/common/bridged_packing.h"
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/mau/asm_output.h"
-#include "bf-p4c/mau/jbay_next_table.h"
-#include "bf-p4c/mau/tofino/asm_output.h"
-#include "bf-p4c/parde/asm_output.h"
-#include "bf-p4c/parde/clot/clot_info.h"
-#include "bf-p4c/parde/parser_header_sequences.h"
-#include "bf-p4c/phv/asm_output.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/utils/live_range_report.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/common/bridged_packing.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/mau/asm_output.h"
+#include "backends/tofino/bf-p4c/mau/jbay_next_table.h"
+#include "backends/tofino/bf-p4c/mau/tofino/asm_output.h"
+#include "backends/tofino/bf-p4c/parde/asm_output.h"
+#include "backends/tofino/bf-p4c/parde/clot/clot_info.h"
+#include "backends/tofino/bf-p4c/parde/parser_header_sequences.h"
+#include "backends/tofino/bf-p4c/phv/asm_output.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/utils/live_range_report.h"
 
 class FieldDefUse;
 

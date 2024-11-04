@@ -22,14 +22,14 @@
 #include <map>
 #include <ostream>
 
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/ir/gress.h"
-#include "bf-p4c/mau/build_power_graph.h"
-#include "bf-p4c/mau/determine_power_usage.h"
-#include "bf-p4c/mau/jbay_next_table.h"
-#include "bf-p4c/mau/mau_power.h"
-#include "bf-p4c/mau/table_dependency_graph.h"
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/mau/build_power_graph.h"
+#include "backends/tofino/bf-p4c/mau/determine_power_usage.h"
+#include "backends/tofino/bf-p4c/mau/jbay_next_table.h"
+#include "backends/tofino/bf-p4c/mau/mau_power.h"
+#include "backends/tofino/bf-p4c/mau/table_dependency_graph.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "ir/pass_manager.h"
 
 namespace MauPower {

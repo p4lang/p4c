@@ -16,19 +16,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/finalize_physical_liverange.h"
+#include "backends/tofino/bf-p4c/phv/finalize_physical_liverange.h"
 
 #include <sstream>
 #include <utility>
 
-#include "bf-p4c/common/field_defuse.h"
-#include "bf-p4c/device.h"
-#include "bf-p4c/ir/bitrange.h"
-#include "bf-p4c/mau/table_summary.h"
-#include "bf-p4c/parde/clot/clot.h"
-#include "bf-p4c/phv/phv.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/utils/slice_alloc.h"
+#include "backends/tofino/bf-p4c/common/field_defuse.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/ir/bitrange.h"
+#include "backends/tofino/bf-p4c/mau/table_summary.h"
+#include "backends/tofino/bf-p4c/parde/clot/clot.h"
+#include "backends/tofino/bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/utils/slice_alloc.h"
 #include "lib/exceptions.h"
 #include "lib/safe_vector.h"
 

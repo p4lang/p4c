@@ -19,9 +19,9 @@
 #ifndef BF_P4C_PHV_V2_PHV_ALLOCATION_V2_H_
 #define BF_P4C_PHV_V2_PHV_ALLOCATION_V2_H_
 
-#include "bf-p4c/phv/mau_backtracker.h"
-#include "bf-p4c/phv/utils/utils.h"
-#include "bf-p4c/phv/v2/phv_kit.h"
+#include "backends/tofino/bf-p4c/phv/mau_backtracker.h"
+#include "backends/tofino/bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/phv/v2/phv_kit.h"
 #include "lib/cstring.h"
 
 namespace PHV {

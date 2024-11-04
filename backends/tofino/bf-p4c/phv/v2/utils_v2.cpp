@@ -18,7 +18,7 @@
 
 #include <bf-p4c/phv/v2/utils_v2.h>
 
-#include "bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/phv/utils/utils.h"
 #include "lib/exceptions.h"
 
 namespace PHV {

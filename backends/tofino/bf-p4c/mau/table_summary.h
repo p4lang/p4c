@@ -22,12 +22,12 @@
 #include <iostream>
 #include <map>
 
-#include "bf-p4c/device.h"
-#include "bf-p4c/mau/mau_visitor.h"
-#include "bf-p4c/mau/resource.h"
-#include "bf-p4c/mau/resource_estimate.h"
-#include "bf-p4c/mau/table_dependency_graph.h"
-#include "bf-p4c/mau/table_layout.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/mau/resource.h"
+#include "backends/tofino/bf-p4c/mau/resource_estimate.h"
+#include "backends/tofino/bf-p4c/mau/table_dependency_graph.h"
+#include "backends/tofino/bf-p4c/mau/table_layout.h"
 
 namespace Logging {
 class FileLog;

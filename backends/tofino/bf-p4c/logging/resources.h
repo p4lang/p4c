@@ -30,8 +30,8 @@
 #include "lib/cstring.h"
 #include "lib/ordered_map.h"
 #include "resources_schema.h"
-#include "bf-p4c/mau/instruction_memory.h"
-#include "bf-p4c/mau/tofino/input_xbar.h"
+#include "backends/tofino/bf-p4c/mau/instruction_memory.h"
+#include "backends/tofino/bf-p4c/mau/tofino/input_xbar.h"
 /* clang-format on */
 using Logging::Resources_Schema_Logger;
 class ClotInfo;  // Forward declaration

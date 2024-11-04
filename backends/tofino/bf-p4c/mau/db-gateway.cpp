@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "gateway.h"
 #include "ir/dbprint.h"
 #include "lib/indent.h"

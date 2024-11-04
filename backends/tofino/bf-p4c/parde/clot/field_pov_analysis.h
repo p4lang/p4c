@@ -19,8 +19,8 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_PARDE_CLOT_FIELD_POV_ANALYSIS_H_
 #define BACKENDS_TOFINO_BF_P4C_PARDE_CLOT_FIELD_POV_ANALYSIS_H_
 
-#include "bf-p4c/parde/clot/clot_info.h"
-#include "bf-p4c/parde/parser_info.h"
+#include "backends/tofino/bf-p4c/parde/clot/clot_info.h"
+#include "backends/tofino/bf-p4c/parde/parser_info.h"
 
 /* This pass is a parser data flow analysis to find if a field is extracted from
  * the packet in every path that sets the field's valid bit. If there exists a path

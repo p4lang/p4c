@@ -21,7 +21,7 @@
 
 #include <iostream>
 
-#include "bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/ir/gress.h"
 #include "lib/cstring.h"
 
 namespace P4 {

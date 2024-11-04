@@ -16,14 +16,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/payload_gateway.h"
+#include "backends/tofino/bf-p4c/mau/payload_gateway.h"
 
 #include <boost/range/combine.hpp>
 
-#include "bf-p4c/mau/gateway.h"
-#include "bf-p4c/mau/resource.h"
-#include "bf-p4c/mau/table_format.h"
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/mau/gateway.h"
+#include "backends/tofino/bf-p4c/mau/resource.h"
+#include "backends/tofino/bf-p4c/mau/table_format.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 
 /**
  * A gateway in Tofino2 and future generations can be used to implement a small match table.

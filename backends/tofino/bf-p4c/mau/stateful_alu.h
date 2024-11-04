@@ -96,7 +96,7 @@
 #include <map>
 #include <vector>
 
-#include "bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/device.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "ir/ir.h"
 #include "mau_visitor.h"

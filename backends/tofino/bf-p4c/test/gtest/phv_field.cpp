@@ -18,10 +18,10 @@
 
 #include <sstream>
 
-#include "bf-p4c/device.h"
-#include "bf-p4c/ir/bitrange.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/ir/bitrange.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/test/gtest/tofino_gtest_utils.h"
 #include "gtest/gtest.h"
 #include "lib/bitvec.h"
 #include "test/gtest/helpers.h"

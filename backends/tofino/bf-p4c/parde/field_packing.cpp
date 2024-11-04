@@ -16,9 +16,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/parde/field_packing.h"
+#include "backends/tofino/bf-p4c/parde/field_packing.h"
 
-#include "bf-p4c/parde/marshal.h"
+#include "backends/tofino/bf-p4c/parde/marshal.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 

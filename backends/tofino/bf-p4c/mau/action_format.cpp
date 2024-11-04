@@ -16,12 +16,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/action_format.h"
+#include "backends/tofino/bf-p4c/mau/action_format.h"
 
 #include <algorithm>
 
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "lib/bitrange.h"  // DANGER -- two (very) different bitrange.h source files...
 #include "lib/indent.h"
 

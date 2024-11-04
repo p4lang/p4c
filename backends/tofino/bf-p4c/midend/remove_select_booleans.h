@@ -54,7 +54,7 @@
 #ifndef BF_P4C_MIDEND_REMOVE_SELECT_BOOLEANS_H_
 #define BF_P4C_MIDEND_REMOVE_SELECT_BOOLEANS_H_
 
-#include "bf-p4c/midend/elim_cast.h"
+#include "backends/tofino/bf-p4c/midend/elim_cast.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 #include "midend/removeSelectBooleans.h"

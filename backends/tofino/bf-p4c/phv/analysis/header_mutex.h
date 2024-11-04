@@ -19,11 +19,11 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_PHV_ANALYSIS_HEADER_MUTEX_H_
 #define BACKENDS_TOFINO_BF_P4C_PHV_ANALYSIS_HEADER_MUTEX_H_
 
-#include "bf-p4c/ir/gateway_control_flow.h"
-#include "bf-p4c/mau/mau_visitor.h"
-#include "bf-p4c/parde/parser_dominator_builder.h"
-#include "bf-p4c/parde/parser_info.h"
-#include "bf-p4c/phv/analysis/build_mutex.h"
+#include "backends/tofino/bf-p4c/ir/gateway_control_flow.h"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/parde/parser_dominator_builder.h"
+#include "backends/tofino/bf-p4c/parde/parser_info.h"
+#include "backends/tofino/bf-p4c/phv/analysis/build_mutex.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
 

@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/midend/eliminate_tuples.h"
+#include "backends/tofino/bf-p4c/midend/eliminate_tuples.h"
 
 namespace BFN {
 

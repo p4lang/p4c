@@ -21,10 +21,10 @@
 
 #include <set>
 
-#include "bf-p4c/device.h"
-#include "bf-p4c/mau/input_xbar.h"
-#include "bf-p4c/mau/mau_visitor.h"
-#include "bf-p4c/mau/tofino/input_xbar.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/mau/input_xbar.h"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/mau/tofino/input_xbar.h"
 #include "lib/safe_vector.h"
 
 using namespace P4;

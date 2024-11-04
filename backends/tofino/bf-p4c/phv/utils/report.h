@@ -19,7 +19,7 @@
 #ifndef BF_P4C_PHV_UTILS_REPORT_H_
 #define BF_P4C_PHV_UTILS_REPORT_H_
 
-#include "bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/phv/utils/utils.h"
 
 namespace PHV {
 

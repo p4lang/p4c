@@ -18,13 +18,13 @@
 
 /* clang-format off */
 
-#include "bf-p4c/mau/instruction_memory.h"
-#include "bf-p4c/mau/resource.h"
-#include "bf-p4c/mau/table_format.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/mau/instruction_memory.h"
+#include "backends/tofino/bf-p4c/mau/resource.h"
+#include "backends/tofino/bf-p4c/mau/table_format.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/device.h"
 
-#include "bf-p4c/mau/tofino/instruction_memory.h"
+#include "backends/tofino/bf-p4c/mau/tofino/instruction_memory.h"
 
 GenerateVLIWInstructions::GenerateVLIWInstructions(PhvInfo &p, ActionData::FormatType_t ft,
                                                    SplitAttachedInfo &sai,

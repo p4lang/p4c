@@ -21,10 +21,10 @@
 
 #include <algorithm>
 
-#include "bf-p4c/common/alloc.h"
-#include "bf-p4c/mau/action_format.h"
-#include "bf-p4c/mau/attached_entries.h"
-#include "bf-p4c/mau/input_xbar.h"
+#include "backends/tofino/bf-p4c/common/alloc.h"
+#include "backends/tofino/bf-p4c/mau/action_format.h"
+#include "backends/tofino/bf-p4c/mau/attached_entries.h"
+#include "backends/tofino/bf-p4c/mau/input_xbar.h"
 #include "ir/ir.h"
 #include "lib/safe_vector.h"
 
