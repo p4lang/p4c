@@ -91,7 +91,7 @@ std::ostream &operator<<(std::ostream &out, const P4::IR::BFN::Phase0 *p0) {
         BUG_CHECK(phase0Range.contains(fieldRange),
                   "Phase 0 allocation %1% overflows the phase 0 region %2% for "
                   "field %3%",
-                  fieldRange, phase0Range, field.isPadding() ? "(padding)" : field.source);
+                  fieldRange, phase0Range, field.isPadding() ? "(padding)" : field.source.c_str());
 
         posBits += field.width;
         if (field.isPadding()) continue;

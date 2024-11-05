@@ -610,8 +610,8 @@ void DependencyGraph::to_json(Util::JsonObject *dgsJson, const FlowGraph &fg, cs
             BUG("Invalid dependency graph edge from %1% (gress = %2%) --> %3% (gress = %4%) ",
                 source->name, source->gress, target->name, target->gress);
         auto gress = source ? static_cast<int>(source->gress) : static_cast<int>(target->gress);
-        std::string src_name = std::string(source ? source->name : "SOURCE");
-        std::string dst_name = std::string(target ? target->name : "SINK");
+        std::string src_name = std::string(source ? source->name.c_str() : "SOURCE");
+        std::string dst_name = std::string(target ? target->name.c_str() : "SINK");
 
         edge.label = g[*edges];
         LOG5(src_name.c_str() << " --- " << dep_types(edge.label) << " --> " << dst_name.c_str());
@@ -667,8 +667,8 @@ void DependencyGraph::to_json(Util::JsonObject *dgsJson, const FlowGraph &fg, cs
             auto ftarget = boost::target(*fedges, fg.g);
             const IR::MAU::Table *source = fg.get_vertex(fsource);
             const IR::MAU::Table *target = fg.get_vertex(ftarget);
-            std::string src_name = std::string(source ? source->name : "SOURCE");
-            std::string tgt_name = std::string(target ? target->name : "SINK");
+            std::string src_name = std::string(source ? source->name.c_str() : "SOURCE");
+            std::string tgt_name = std::string(target ? target->name.c_str() : "SINK");
             if (!source && !target)
                 BUG_CHECK(source || target,
                           " Invalid dependency graph edge found with no"
@@ -849,7 +849,7 @@ class FindDataDependencyGraph::AddDependencies : public MauInspector, TofinoWrit
                 LOG5("\tAdd " << dep_types(dep) << " dependency from " << upstream_t->name << " to "
                               << table->name << " because of field " << field->name
                               << " for actions " << upstream_t_pair.second->name << " - "
-                              << (action_use_context ? action_use_context->name.toString()
+                              << (action_use_context ? action_use_context->name.toString().c_str()
                                                      : "nullptr"));
             } else {
                 LOG5("\tAdd " << dep_types(dep) << " dependency from " << upstream_t->name << " to "
@@ -1205,8 +1205,8 @@ bool FindDataDependencyGraph::preorder(const IR::MAU::TableSeq *seq) {
     visitAgain();
     const Context *ctxt = getContext();
     LOG5("\t TableSeq (" << seq->size()
-                         << ")   front: " << (seq->front() ? seq->front()->name : "null")
-                         << " back: " << (seq->back() ? seq->back()->name : "null"));
+                         << ")   front: " << (seq->front() ? seq->front()->name.c_str() : "null")
+                         << " back: " << (seq->back() ? seq->back()->name.c_str() : "null"));
 
     if (ctxt && ctxt->node->is<IR::BFN::Pipe>()) {
         LOG5("\t Hit Top of pipe - clearing access");
@@ -1261,7 +1261,7 @@ bool FindDataDependencyGraph::preorder(const IR::MAU::Table *t) {
 bool FindDataDependencyGraph::preorder(const IR::MAU::TableKey *read) {
     visitAgain();
     auto tbl = findContext<IR::MAU::Table>();
-    LOG5("\t TableKey for table " << (tbl ? tbl->name : "null"));
+    LOG5("\t TableKey for table " << (tbl ? tbl->name.c_str() : "null"));
     read->apply(UpdateAccess(*this, tbl));
     return false;
 }
@@ -1269,7 +1269,7 @@ bool FindDataDependencyGraph::preorder(const IR::MAU::TableKey *read) {
 bool FindDataDependencyGraph::preorder(const IR::MAU::Action *act) {
     visitAgain();
     auto tbl = findContext<IR::MAU::Table>();
-    LOG5("\t Action for table " << (tbl ? tbl->name : "null"));
+    LOG5("\t Action for table " << (tbl ? tbl->name.c_str() : "null"));
     act->apply(UpdateAccess(*this, tbl));
     return false;
 }
@@ -2087,8 +2087,8 @@ void FindDependencyGraph::add_logical_deps_from_control_deps(void) {
         auto target = boost::target(pair.second, dg.g);
         const IR::MAU::Table *tsource = dg.get_vertex(source);
         const IR::MAU::Table *ttarget = dg.get_vertex(target);
-        std::string src_name = std::string(tsource ? tsource->name : "SINK");
-        std::string dst_name = std::string(ttarget ? ttarget->name : "SINK");
+        std::string src_name = std::string(tsource ? tsource->name.c_str() : "SINK");
+        std::string dst_name = std::string(ttarget ? ttarget->name.c_str() : "SINK");
         LOG4("\t\tadd_dependency " << dep_types(dep) << " " << pair.first.first->name << "-"
                                    << pair.first.second->name << " due to original dependency on "
                                    << src_name << "->" << dst_name << " of type "
@@ -2430,7 +2430,7 @@ Visitor::profile_t FindDependencyGraph::init_apply(const IR::Node *node) {
     auto rv = Logging::PassManager::init_apply(node);
     if (!passContext.isNullOrEmpty())
         LOG1("FindDependencyGraph : " << passContext << " : "
-                                      << (summary ? summary->getActualStateStr() : " NA "));
+                                      << (summary ? summary->getActualStateStr().c_str() : " NA "));
     dg.clear();
     return rv;
 }

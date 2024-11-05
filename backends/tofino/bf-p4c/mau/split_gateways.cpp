@@ -82,7 +82,7 @@ namespace P4 {
 std::ostream &operator<<(std::ostream &out,
                          const std::pair<const P4::IR::Expression *, cstring> &p) {
     if (p.first) out << *p.first << " => ";
-    out << (p.second ? p.second : "_");
+    out << (p.second ? p.second.c_str() : "_");
     return out;
 }
 }  // namespace P4

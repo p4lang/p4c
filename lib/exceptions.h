@@ -103,6 +103,13 @@ class CompilerBug final : public P4CExceptionBase {
         message = absl::StrCat("In file: ", file, ":", line, "\n", cerr_colorize(ANSI_RED),
                                "Compiler Bug", cerr_clear_colors(), ": ", message);
     }
+
+    template <typename... Args>
+    CompilerBug(int line, cstring file, const char *format, Args &&...args)
+        : P4CExceptionBase(format, std::forward<Args>(args)...) {
+        message = absl::StrCat("In file: ", file, ":", line, "\n", cerr_colorize(ANSI_RED),
+                               "Compiler Bug", cerr_clear_colors(), ": ", message);
+    }
 };
 
 /// This class indicates an unimplemented feature in the compiler
@@ -118,6 +125,14 @@ class CompilerUnimplemented final : public P4CExceptionBase {
 
     template <typename... Args>
     CompilerUnimplemented(int line, const char *file, const char *format, Args &&...args)
+        : P4CExceptionBase(format, std::forward<Args>(args)...) {
+        message =
+            absl::StrCat("In file: ", file, ":", line, "\n", cerr_colorize(ANSI_BLUE),
+                         "Unimplemented compiler support", cerr_clear_colors(), ": ", message);
+    }
+
+    template <typename... Args>
+    CompilerUnimplemented(int line, cstring file, const char *format, Args &&...args)
         : P4CExceptionBase(format, std::forward<Args>(args)...) {
         message =
             absl::StrCat("In file: ", file, ":", line, "\n", cerr_colorize(ANSI_BLUE),

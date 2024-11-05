@@ -75,7 +75,7 @@ bool CollectPipelines::Pipe::operator==(const Pipe &other) const {
 }
 
 bool CollectPipelines::Pipe::operator<(const Pipe &other) const {
-    return (dec && other.dec && std::strcmp(dec->getName().name, other.dec->getName().name) < 0) ||
+    return (dec && other.dec && dec->getName().name == other.dec->getName().name) ||
            dec < other.dec;
 }
 

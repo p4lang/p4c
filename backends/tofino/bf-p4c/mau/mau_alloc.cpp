@@ -48,10 +48,10 @@ TableAllocPass::TableAllocPass(const BFN_Options &options, PhvInfo &phv, Depende
          new TableFindSeqDependencies(phv), new CheckTableNameDuplicate,
          new FindDependencyGraph(phv, deps, &options, ""_cs, "Before Table Placement"_cs, &summary),
          new DumpJsonGraph(deps, jsonGraph, "Before Table Placement"_cs, false), &ignore, &mutex,
-         &action_mutex, siaa, new DumpPipe("Before TablePlacement"_cs),
+         &action_mutex, siaa, new DumpPipe("Before TablePlacement"),
          new TablePlacement(options, deps, mutex, phv, *lc, *siaa, att_info, summary,
                             mau_backtracker),
-         new DumpPipe("After TablePlacement"_cs),
+         new DumpPipe("After TablePlacement"),
          new FindDependencyGraph(phv, deps, &options, ""_cs, "After Table Placement"_cs, &summary),
          new TableDependencyGraphSummary(deps), new CheckTableNameDuplicate,
          new TableFindSeqDependencies(phv),  // not needed?

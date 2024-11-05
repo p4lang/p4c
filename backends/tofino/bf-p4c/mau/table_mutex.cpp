@@ -92,7 +92,7 @@ bool TablesMutuallyExclusive::miss_mutex_action_chain(const IR::MAU::Table *tbl,
         if (default_act->name.originalName == n.first) {
             name = n.first;
             return true;
-        } else if (n.first[0] != '$') {
+        } else if (n.first.get(0) != '$') {
             non_def_act_chains.insert(n.first);
         }
     }

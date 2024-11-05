@@ -35,15 +35,15 @@ std::ostream &operator<<(std::ostream &out, const FlowGraph &fg) {
         auto dst = boost::target(*edges, fg.g);
         const IR::MAU::Table *target = fg.get_vertex(dst);
         auto desc = fg.get_ctrl_dependency_info(*edges);
-        out << "    " << (source ? source->name : "DEPARSER")
+        out << "    " << (source ? source->name.c_str() : "DEPARSER")
             << (src == fg.v_source ? " (PARSER)" : "") << " -- " << desc << " --> "
-            << (target ? target->name : "DEPARSER") << std::endl;
+            << (target ? target->name.c_str() : "DEPARSER") << std::endl;
     }
     return out;
 }
 
 std::string FlowGraph::viz_node_name(const IR::MAU::Table *tbl) {
-    std::string name = std::string(tbl ? tbl->name : "DEPARSER");
+    std::string name = std::string(tbl ? tbl->name.c_str() : "DEPARSER");
     std::replace(name.begin(), name.end(), '-', '_');
     std::replace(name.begin(), name.end(), '.', '_');
     return name;
@@ -252,17 +252,17 @@ bool FindFlowGraph::preorder(const IR::MAU::Table *t) {
             // This will sometimes be null, which will cause an edge to be added to v_sink
             dst = next_table;
         }
-        auto dst_name = dst ? dst->name : "DEPARSER";
+        auto dst_name = dst ? dst->name.c_str() : "DEPARSER";
         LOG1("Parent : " << t->name << " --> " << action_name << " --> " << dst_name);
         fg.add_edge(t, dst, action_name);
     }
 
     // Add edge for t -> next_table, if needed.
-    LOG3("Table: " << t->name << " Next: " << (next_table ? next_table->name : "<null>"));
+    LOG3("Table: " << t->name << " Next: " << (next_table ? next_table->name.c_str() : "<null>"));
     auto n = next_incomplete(t);
     LOG3("next - " << n.first << ":" << n.second);
     if (n.first) {
-        auto dst_name = next_table ? next_table->name : "DEPARSER";
+        auto dst_name = next_table ? next_table->name.c_str() : "DEPARSER";
         LOG1("Parent : " << t->name << " --> " << n.second << " --> " << dst_name);
         // This will sometimes be null, which will cause an edge to be added to v_sink
         fg.add_edge(t, next_table, n.second);

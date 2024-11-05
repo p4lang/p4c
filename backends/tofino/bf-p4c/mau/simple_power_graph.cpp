@@ -129,7 +129,7 @@ void SimplePowerGraph::add_connection(UniqueId parent, ordered_set<UniqueId> act
  */
 void SimplePowerGraph::to_dot(cstring filename) {
     std::ofstream myfile;
-    myfile.open(filename);
+    myfile.open(filename.c_str());
 
     std::queue<Node *> queue;
     queue.push(get_root());

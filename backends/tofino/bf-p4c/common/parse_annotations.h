@@ -49,7 +49,7 @@ namespace BFN {
 class ParseAnnotations : public P4::ParseAnnotations {
  public:
     ParseAnnotations()
-        : P4::ParseAnnotations("BFN"_cs, true,
+        : P4::ParseAnnotations("BFN", true,
                                {
                                    // Ignore p4v annotations.
                                    PARSE_SKIP("assert"_cs),

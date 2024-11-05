@@ -219,7 +219,7 @@ class ExtractPhv : Extract {
 class ExtractClot : Extract {
     dbprint {
         out << "extract " << source << " to CLOT-allocated " << dest << " from "
-            << (original_state ? original_state->name : "(nullptr)");
+            << (original_state ? original_state->name : "(nullptr)"_cs);
     }
 
     validate {

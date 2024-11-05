@@ -566,7 +566,7 @@ struct ResolveNegativeExtract : public PassManager {
                     LOG4("Adding transition { "
                          << succ_tr->value << " } shift value " << new_shift << " B from state "
                          << state_succ->name << " to state "
-                         << (succ_tr->next != nullptr ? succ_tr->next->name : "EXIT"));
+                         << (succ_tr->next != nullptr ? succ_tr->next->name.c_str() : "EXIT"));
                 }
             }
         }

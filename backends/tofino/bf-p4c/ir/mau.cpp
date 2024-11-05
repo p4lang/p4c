@@ -193,7 +193,7 @@ void Table::visit_gateway_inhibited(THIS *self, Visitor &v, payload_info_t &payl
             if (!current) current = &saved->flow_clone();
             if (auto *gwcf = dynamic_cast<::BFN::GatewayControlFlow *>(current))
                 gwcf->pre_visit_table_next(self, tag);
-            current->visit(self->next.at(tag), tag);
+            current->visit(self->next.at(tag), tag.c_str());
             if (payload_info.post_payload) {
                 if (current != payload_info.post_payload)
                     payload_info.post_payload->flow_merge(*current);
@@ -245,7 +245,7 @@ class SplitFlowVisitTableNext : public SplitFlowVisit_base {
 
             if (table->next.count(next_action_key)) {
                 if (!next_visitor) next_visitor = &saved->flow_clone();
-                next_visitor->visit(table->next.at(next_action_key), next_action_key,
+                next_visitor->visit(table->next.at(next_action_key), next_action_key.c_str(),
                                     start_index + idx);
             }
         }
@@ -625,7 +625,7 @@ bool IR::MAU::Table::hit_miss_p4() const {
 
 bool IR::MAU::Table::action_chain() const {
     for (auto &n : next) {
-        if (n.first[0] != '$') {
+        if (n.first.get(0) != '$') {
             return true;
         }
     }
@@ -683,7 +683,7 @@ bool IR::MAU::Table::has_non_exit_action() const {
 int IR::MAU::Table::action_next_paths() const {
     int action_paths = 0;
     for (auto &n : next) {
-        if (n.first == "$default" || n.first[0] != '$') action_paths++;
+        if (n.first == "$default" || n.first.get(0) != '$') action_paths++;
     }
     if (has_exit_action()) action_paths++;
     return action_paths;

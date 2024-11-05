@@ -37,7 +37,7 @@ void IR::MAU::Table::dbprint(std::ostream &out) const {
             out << gw.first;
         else
             out << "(miss)";
-        out << " => " << (gw.second ? gw.second : "run table");
+        out << " => " << (gw.second.isNullOrEmpty() ? "run table"_cs : gw.second);
     }
     for (auto &payload : gateway_payload) {
         out << endl << "payload " << payload.first << " => " << payload.second.first;
@@ -225,7 +225,7 @@ void IR::BFN::Transition::dbprint(std::ostream &out) const {
         out << endl;
     }
 
-    out << "goto " << (next ? next->name : "(end)");
+    out << "goto " << (next ? next->name : "(end)"_cs);
 }
 
 void IR::BFN::Select::dbprint(std::ostream &out) const {

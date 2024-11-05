@@ -78,8 +78,8 @@ ParserDominatorBuilder::StateImmediateDominatorMap ParserDominatorBuilder::index
             dominator = rpg.vertex_to_state.at(kv.second);
         }
         idom_state[state] = dominator;
-        LOG7(TAB1 << ((state) ? state->name : "END OF PARSER") << " --> "
-                  << ((dominator) ? dominator->name : "END OF PARSER"));
+        LOG7(TAB1 << ((state) ? state->name.c_str() : "END OF PARSER") << " --> "
+                  << ((dominator) ? dominator->name.c_str() : "END OF PARSER"));
     }
     return idom_state;
 }

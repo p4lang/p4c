@@ -88,7 +88,7 @@ bool AsmOutput::preorder(const IR::BFN::Pipe *pipe) {
         auto outputDir = BFNContext::get().getOutputDirectory(cstring::empty, pipe_id);
         if (!outputDir) return false;
         cstring outputFile = outputDir + "/"_cs + options.programName + ".bfa"_cs;
-        std::ofstream out(outputFile, std::ios_base::out);
+        std::ofstream out(outputFile.c_str(), std::ios_base::out);
 
         MauAsmOutput *mauasm = nullptr;
         if (!mauasm) mauasm = new Tofino::MauAsmOutput(phv, pipe, nxt_tbl, power_and_mpr, options);

@@ -167,8 +167,7 @@ class GenerateOutputs : public PassManager {
     /// Output a skeleton context.json in case compilation fails.
     /// It is required by all our tools. If the assembler can get far enough, it will overwrite it.
     void outputContext() {
-        cstring ctxtFileName = _outputDir + "/context.json"_cs;
-        std::ofstream ctxtFile(ctxtFileName);
+        std::ofstream ctxtFile(_outputDir + "/context.json");
         rapidjson::StringBuffer sb;
         rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(sb);
         writer.StartObject();
@@ -230,8 +229,8 @@ class GenerateOutputs : public PassManager {
     }
 
     void end_apply() override {
-        cstring outputFile = _outputDir + "/"_cs + _options.programName + ".bfa"_cs;
-        std::ofstream ctxt_stream(outputFile, std::ios_base::app);
+        std::ofstream ctxt_stream(_outputDir + "/" + _options.programName + ".bfa",
+                                  std::ios_base::app);
 
         Logging::Manifest &manifest = Logging::Manifest::getManifest();
         if (_success) {
@@ -239,7 +238,7 @@ class GenerateOutputs : public PassManager {
             cstring primitivesFile = _outputDir + "/"_cs + _options.programName + ".prim.json"_cs;
             LOG2("ASM generation for primitives: " << primitivesFile);
             ctxt_stream << "primitives: \"" << _options.programName << ".prim.json\"" << std::endl;
-            std::ofstream prim(primitivesFile);
+            std::ofstream prim(primitivesFile.c_str());
             _primitives.serialize(prim);
             prim << std::endl << std::flush;
 
@@ -247,7 +246,7 @@ class GenerateOutputs : public PassManager {
             cstring dynHashFile = _outputDir + "/"_cs + _options.programName + ".dynhash.json"_cs;
             LOG2("ASM generation for dynamic hash: " << dynHashFile);
             ctxt_stream << "dynhash: \"" << _options.programName << ".dynhash.json\"" << std::endl;
-            std::ofstream dynhash(dynHashFile);
+            std::ofstream dynhash(dynHashFile.c_str());
             dynhash << _dynhash << std::endl << std::flush;
         }
         if (_options.debugInfo) {  // Generate graphs only if invoked with -g
@@ -257,7 +256,7 @@ class GenerateOutputs : public PassManager {
                 cstring depFileName = "dep"_cs;
                 cstring depFile = graphsDir + "/"_cs + depFileName + ".json"_cs;
                 LOG2("Dependency graph json generation for P4i: " << depFile);
-                std::ofstream dep(depFile);
+                std::ofstream dep(depFile.c_str());
                 _depgraph.serialize(dep);
                 // relative path to the output directory
                 // TBD: In manifest, add an option to indicate a program graph
