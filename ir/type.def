@@ -75,7 +75,12 @@ class Type_Any : Type, ITypeVar {
  protected:
 #emit
     void *operator new(size_t size) { return ::operator new(size); }
+// FIXME: Remove this #ifdefine check once we switch to C++20
+#if defined(__cpp_sized_deallocation) && __cpp_sized_deallocation >= 201309L
     void operator delete(void *p, size_t size) { return ::operator delete(p, size); }
+#else
+    void operator delete(void *p) { return ::operator delete(p); }
+#endif
 #end
     static long nextId;
  public:
@@ -131,7 +136,12 @@ class Type_Boolean : Type_Base {
  protected:
 #emit
     void *operator new(size_t size) { return ::operator new(size); }
+// FIXME: Remove this #ifdefine check once we switch to C++20
+#if defined(__cpp_sized_deallocation) && __cpp_sized_deallocation >= 201309L
     void operator delete(void *p, size_t size) { return ::operator delete(p, size); }
+#else
+    void operator delete(void *p) { return ::operator delete(p); }
+#endif
 #end
  public:
     static Type_Boolean get();
@@ -146,7 +156,12 @@ class Type_State : Type_Base {
  protected:
 #emit
     void *operator new(size_t size) { return ::operator new(size); }
+// FIXME: Remove this #ifdefine check once we switch to C++20
+#if defined(__cpp_sized_deallocation) && __cpp_sized_deallocation >= 201309L
     void operator delete(void *p, size_t size) { return ::operator delete(p, size); }
+#else
+    void operator delete(void *p) { return ::operator delete(p); }
+#endif
 #end
  public:
     static Type_State get();
@@ -160,7 +175,12 @@ class Type_Bits : Type_Base {
  protected:
 #emit
     void *operator new(size_t size) { return ::operator new(size); }
+// FIXME: Remove this #ifdefine check once we switch to C++20
+#if defined(__cpp_sized_deallocation) && __cpp_sized_deallocation >= 201309L
     void operator delete(void *p, size_t size) { return ::operator delete(p, size); }
+#else
+    void operator delete(void *p) { return ::operator delete(p); }
+#endif
 #end
  public:
     optional int size = 0;      // zero (only) for not-yet evaluated const expression
@@ -180,7 +200,12 @@ class Type_Varbits : Type_Base {
  protected:
 #emit
     void *operator new(size_t size) { return ::operator new(size); }
+// FIXME: Remove this #ifdefine check once we switch to C++20
+#if defined(__cpp_sized_deallocation) && __cpp_sized_deallocation >= 201309L
     void operator delete(void *p, size_t size) { return ::operator delete(p, size); }
+#else
+    void operator delete(void *p) { return ::operator delete(p); }
+#endif
 #end
  public:
     optional int         size = 0;   // if zero it means "unknown"
@@ -256,7 +281,12 @@ class Type_InfInt : Type, ITypeVar {
  protected:
 #emit
     void *operator new(size_t size) { return ::operator new(size); }
+// FIXME: Remove this #ifdefine check once we switch to C++20
+#if defined(__cpp_sized_deallocation) && __cpp_sized_deallocation >= 201309L
     void operator delete(void *p, size_t size) { return ::operator delete(p, size); }
+#else
+    void operator delete(void *p) { return ::operator delete(p); }
+#endif
 #end
     long declid = nextId++;
  private:
@@ -281,7 +311,12 @@ class Type_Dontcare : Type_Base {
  protected:
 #emit
     void *operator new(size_t size) { return ::operator new(size); }
+// FIXME: Remove this #ifdefine check once we switch to C++20
+#if defined(__cpp_sized_deallocation) && __cpp_sized_deallocation >= 201309L
     void operator delete(void *p, size_t size) { return ::operator delete(p, size); }
+#else
+    void operator delete(void *p) { return ::operator delete(p); }
+#endif
 #end
  public:
     toString{ return "_"_cs; }
@@ -294,7 +329,12 @@ class Type_Void : Type_Base {
  protected:
 #emit
     void *operator new(size_t size) { return ::operator new(size); }
+// FIXME: Remove this #ifdefine check once we switch to C++20
+#if defined(__cpp_sized_deallocation) && __cpp_sized_deallocation >= 201309L
     void operator delete(void *p, size_t size) { return ::operator delete(p, size); }
+#else
+    void operator delete(void *p) { return ::operator delete(p); }
+#endif
 #end
  public:
     toString{ return "void"_cs; }
@@ -307,7 +347,12 @@ class Type_MatchKind : Type_Base {
  protected:
 #emit
     void *operator new(size_t size) { return ::operator new(size); }
+// FIXME: Remove this #ifdefine check once we switch to C++20
+#if defined(__cpp_sized_deallocation) && __cpp_sized_deallocation >= 201309L
     void operator delete(void *p, size_t size) { return ::operator delete(p, size); }
+#else
+    void operator delete(void *p) { return ::operator delete(p); }
+#endif
 #end
  public:
     toString{ return "match_kind"_cs; }
@@ -645,7 +690,12 @@ class Type_String : Type_Base {
  protected:
 #emit
     void *operator new(size_t size) { return ::operator new(size); }
+// FIXME: Remove this #ifdefine check once we switch to C++20
+#if defined(__cpp_sized_deallocation) && __cpp_sized_deallocation >= 201309L
     void operator delete(void *p, size_t size) { return ::operator delete(p, size); }
+#else
+    void operator delete(void *p) { return ::operator delete(p); }
+#endif
 #end
  public:
     static Type_String get();
