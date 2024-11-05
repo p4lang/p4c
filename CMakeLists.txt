@@ -118,7 +118,6 @@ include(CheckIncludeFile)
 include(CheckIncludeFileCXX)
 include(CheckFunctionExists)
 include(FindPythonModule)
-include(CPack)
 # TODO: Remove this deprecated include eventually.
 include(UnifiedBuild)
 
@@ -643,7 +642,7 @@ if (ENABLE_DOCS AND DOXYGEN_FOUND)
     DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}/docs)
 endif()
 
-# Packaging:
+######################################## Packaging BEGIN ########################################
 SET(CPACK_SOURCE_GENERATOR "TXZ")
 SET(CPACK_SOURCE_PACKAGE_FILE_NAME
    "p4c-${P4C_SEM_VERSION_STRING}")
@@ -651,3 +650,28 @@ SET(CPACK_SOURCE_IGNORE_FILES
    "${PROJECT_SOURCE_DIR}/${CMAKE_PROJECT_NAME}-*;${PROJECT_SOURCE_DIR}/${CMAKE_PROJECT_NAME}_*;/build/;/.git/;/config.log;/CMakeFiles/;CMakeCache.txt$;.tar.gz$;/_CPack_Packages;/Makefile$;~$;/build-deb;/clean-deb;/filter-empty-entries;/make-symbols;/make-ppa;/make-deb;/debian.conf;/make-rpm;/rpm.conf;${CPACK_SOURCE_IGNORE_FILES}")
 
 ADD_CUSTOM_TARGET(dist COMMAND ${CMAKE_MAKE_PROGRAM} clean package_source)
+
+
+set (CPACK_RESOURCE_FILE_LICENSE "${P4C_SOURCE_DIR}/LICENSE")
+# set (THIRD_PARTY_LICENSES "${P4C_SOURCE_DIR}/LICENSES.txt")
+# install (FILES ${CPACK_RESOURCE_FILE_LICENSE}
+#   ${THIRD_PARTY_LICENSES}
+#   DESTINATION share/p4c
+# )
+
+set (CPACK_GENERATOR "TBZ2")
+set (CPACK_PACKAGE_NAME "p4c")
+set (CPACK_PACKAGE_VERSION_MAJOR ${P4C_VERSION_MAJOR})
+set (CPACK_PACKAGE_VERSION_MINOR ${P4C_VERSION_MINOR})
+set (CPACK_PACKAGE_VERSION_PATCH ${P4C_VERSION_PATCH})
+set (CPACK_PACKAGE_VERSION "${P4C_VERSION}")
+set (CPACK_PACKAGE_CONTACT "P4 Language Organization <info@p4.org>")
+set (CPACK_PACKAGE_VENDOR "P4 Language Organization")
+set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "P4C compilers for P4_14 and P4_16")
+set (CPACK_PACKAGE_DESCRIPTION "P4C compilers")
+set (CPACK_PROJECT_CONFIG_FILE "${P4C_SOURCE_DIR}/CPackOptions.cmake")
+set (CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+set (CPACK_STRIP_FILES TRUE)
+
+include (CPack)
+######################################## Packaging End ########################################
