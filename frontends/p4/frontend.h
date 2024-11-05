@@ -60,18 +60,6 @@ class FrontEndPolicy : public RemoveUnusedPolicy {
         return options.optimizationLevel > 0;
     }
 
-    /// Indicates whether control plane API generation is enabled.
-    /// @returns default to false unless a command line option was
-    /// given explicitly enabling control plane API generation.
-    virtual bool controlPlaneAPIGenEnabled(const CompilerOptions &options) const {
-        if (options.p4RuntimeFile.isNullOrEmpty() && options.p4RuntimeFiles.isNullOrEmpty() &&
-            options.p4RuntimeEntriesFile.isNullOrEmpty() &&
-            options.p4RuntimeEntriesFiles.isNullOrEmpty()) {
-            return false;
-        }
-        return true;
-    }
-
     /// Get policy for the constant folding pass. @see ConstantFoldingPolicy
     /// @returns Defaults to nullptr, which causes constant folding to use the default policy, which
     /// does not modify the pass defaults in any way.
