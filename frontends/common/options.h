@@ -91,10 +91,10 @@ class CompilerOptions : public ParserOptions {
     /// Indicates whether control plane API generation is enabled.
     /// @returns default to false unless a command line option was
     /// given explicitly enabling control plane API generation.
-    virtual bool controlPlaneAPIGenEnabled(const CompilerOptions &options) const {
-        if (options.p4RuntimeFile.isNullOrEmpty() && options.p4RuntimeFiles.isNullOrEmpty() &&
-            options.p4RuntimeEntriesFile.isNullOrEmpty() &&
-            options.p4RuntimeEntriesFiles.isNullOrEmpty()) {
+    virtual bool controlPlaneAPIGenEnabled() const {
+        if (p4RuntimeFile.isNullOrEmpty() && p4RuntimeFiles.isNullOrEmpty() &&
+            p4RuntimeEntriesFile.isNullOrEmpty() &&
+            p4RuntimeEntriesFiles.isNullOrEmpty()) {
             return false;
         }
         return true;

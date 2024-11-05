@@ -237,7 +237,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             new Inline(&typeMap, *policy, options.optimizeParserInlining),
         });
     }
-    if (policy->controlPlaneAPIGenEnabled(options)) {
+    if (options.controlPlaneAPIGenEnabled()) {
         passes.addPasses({
             new DuplicateActionControlPlaneNameCheck(),
         });
