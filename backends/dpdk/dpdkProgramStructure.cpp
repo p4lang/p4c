@@ -242,14 +242,12 @@ void InspectDpdkProgram::addTypesAndInstances(const IR::Type_StructLike *type, b
 }
 
 bool InspectDpdkProgram::isStandardMetadata(cstring ptName) {
-    // FIXME: do we really need strcmp here?
-    return (!strcmp(ptName, "psa_ingress_parser_input_metadata_t") ||
-            !strcmp(ptName, "psa_egress_parser_input_metadata_t") ||
-            !strcmp(ptName, "psa_ingress_input_metadata_t") ||
-            !strcmp(ptName, "psa_ingress_output_metadata_t") ||
-            !strcmp(ptName, "psa_egress_input_metadata_t") ||
-            !strcmp(ptName, "psa_egress_deparser_input_metadata_t") ||
-            !strcmp(ptName, "psa_egress_output_metadata_t"));
+    return (ptName == "psa_ingress_parser_input_metadata_t" ||
+            ptName == "psa_egress_parser_input_metadata_t") ||
+           ptName == "psa_ingress_input_metadata_t" || ptName == "psa_ingress_output_metadata_t" ||
+           ptName == "psa_egress_input_metadata_t" ||
+           ptName == "psa_egress_deparser_input_metadata_t" ||
+           ptName == "psa_egress_output_metadata_t";
 }
 
 bool InspectDpdkProgram::preorder(const IR::Declaration_Variable *dv) {

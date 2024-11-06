@@ -1530,9 +1530,9 @@ void ConvertStatementToDpdk::add128bitwiseInstr(const IR::Expression *src1Op,
     const IR::Type_Header *Type_Header = nullptr;
     const IR::Type_Header *Type_Tmp = nullptr;
     for (auto header : structure->header_types) {
-        if (strcmp(header.first, "_p4c_sandbox_header_t") == 0) {
+        if (header.first == "_p4c_sandbox_header_t") {
             Type_Header = header.second;
-        } else if (strcmp(header.first, "_p4c_tmp128_t") == 0) {
+        } else if (header.first == "_p4c_tmp128_t") {
             Type_Tmp = header.second;
         }
     }
@@ -1637,7 +1637,7 @@ void ConvertStatementToDpdk::add128ComparisonInstr(cstring true_label, const IR:
     }
     const IR::Type_Header *Type_Header = nullptr;
     for (auto header : structure->header_types) {
-        if (strcmp(header.first, "_p4c_sandbox_header_t") == 0) {
+        if (header.first == "_p4c_sandbox_header_t") {
             Type_Header = header.second;
         }
     }
@@ -1700,9 +1700,9 @@ void ConvertStatementToDpdk::add128bitComplInstr(const IR::Expression *dst,
     const IR::Type_Header *Type_Header = nullptr;
     const IR::Type_Header *Type_Tmp = nullptr;
     for (auto header : structure->header_types) {
-        if (strcmp(header.first, "_p4c_sandbox_header_t") == 0) {
+        if (header.first == "_p4c_sandbox_header_t") {
             Type_Header = header.second;
-        } else if (strcmp(header.first, "_p4c_tmp128_t") == 0) {
+        } else if (header.first == "_p4c_tmp128_t") {
             Type_Tmp = header.second;
         }
     }

@@ -258,8 +258,7 @@ class XdpTarget : public KernelSamplesTarget {
                           cstring offsetVar) const override;
     void emitMain(Util::SourceCodeBuilder *builder, cstring functionName,
                   cstring argName) const override {
-        builder->appendFormat("int %s(%s *%s)", functionName.c_str(), packetDescriptorType(),
-                              argName.c_str());
+        builder->appendFormat("int %v(%v *%v)", functionName, packetDescriptorType(), argName);
     }
 };
 

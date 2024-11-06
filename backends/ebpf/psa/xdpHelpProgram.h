@@ -104,7 +104,7 @@ class XDPHelpProgram : public EBPFProgram {
     void emit(CodeBuilder *builder) {
         builder->target->emitCodeSection(builder, sectionName);
         builder->emitIndent();
-        builder->appendFormat("int %s(struct xdp_md *%s)", functionName, model.CPacketName.str());
+        builder->appendFormat("int %v(struct xdp_md *%s)", functionName, model.CPacketName.str());
         builder->spc();
         builder->blockStart();
         builder->emitIndent();

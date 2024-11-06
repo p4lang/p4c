@@ -26,6 +26,7 @@ limitations under the License.
 #include <string_view>
 #include <vector>
 
+#include "absl/strings/str_format.h"
 #include "cstring.h"
 #include "stringify.h"
 
@@ -102,6 +103,11 @@ class SourcePosition final {
     unsigned getLineNumber() const { return lineNumber; }
 
     unsigned getColumnNumber() const { return columnNumber; }
+
+    template <typename Sink>
+    friend void AbslStringify(Sink &sink, const SourcePosition &p) {
+        absl::Format(&sink, "%d:%d", p.lineNumber, p.columnNumber);
+    }
 
  private:
     // Input sources where this character position is interpreted.
@@ -259,7 +265,7 @@ class Comment final : IHasDbPrint, IHasSourceInfo {
     cstring toString() const override {
         std::stringstream str;
         dbprint(str);
-        return str.str();
+        return {str};
     }
     void dbprint(std::ostream &out) const override {
         if (singleLine)

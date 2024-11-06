@@ -454,7 +454,7 @@ class ReturnStatement : Statement {
     NullOK Expression expression;
     toString{ return absl::StrCat("return ",
                                   (expression ?
-                                   expression->toString().string_view() : "")); }
+                                   expression->toString() : ""_cs)); }
 }
 
 class EmptyStatement : Statement {
@@ -464,9 +464,7 @@ class EmptyStatement : Statement {
 class AssignmentStatement : Statement {
     Expression left;
     Expression right;
-    toString{ return absl::StrCat(left->toString().string_view(),
-                                  " = ",
-                                  right->toString().string_view()); }
+    toString{ return absl::StrCat(left, " = ", right); }
 }
 
 class IfStatement : Statement {

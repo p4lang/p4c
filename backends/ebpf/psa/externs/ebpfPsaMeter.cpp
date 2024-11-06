@@ -169,12 +169,12 @@ void EBPFMeterPSA::emitExecute(CodeBuilder *builder, const P4::ExternMethod *met
     }
 
     if (type == BYTES) {
-        builder->appendFormat("meter_execute_bytes%s(&%s, &%s, ", functionNameSuffix, instanceName,
-                              pipeline->lengthVar.c_str());
+        builder->appendFormat("meter_execute_bytes%v(&%v, &%v, ", functionNameSuffix, instanceName,
+                              pipeline->lengthVar);
         this->emitIndex(builder, method, translator);
         builder->appendFormat(", &%s", pipeline->timestampVar.c_str());
     } else {
-        builder->appendFormat("meter_execute_packets%s(&%s, ", functionNameSuffix, instanceName);
+        builder->appendFormat("meter_execute_packets%v(&%v, ", functionNameSuffix, instanceName);
         this->emitIndex(builder, method, translator);
         builder->appendFormat(", &%s", pipeline->timestampVar.c_str());
     }
@@ -215,12 +215,11 @@ void EBPFMeterPSA::emitDirectExecute(CodeBuilder *builder, const P4::ExternMetho
     cstring lockVar = valuePtr + "->" + spinlockField;
     cstring valueMeter = valuePtr + "->" + instanceName;
     if (type == BYTES) {
-        builder->appendFormat("meter_execute_bytes_value%s(&%s, &%s, &%s, &%s", functionNameSuffix,
-                              valueMeter, lockVar, pipeline->lengthVar.c_str(),
-                              pipeline->timestampVar.c_str());
+        builder->appendFormat("meter_execute_bytes_value%v(&%v, &%v, &%v, &%v", functionNameSuffix,
+                              valueMeter, lockVar, pipeline->lengthVar, pipeline->timestampVar);
     } else {
-        builder->appendFormat("meter_execute_packets_value%s(&%s, &%s, &%s", functionNameSuffix,
-                              valueMeter, lockVar, pipeline->timestampVar.c_str());
+        builder->appendFormat("meter_execute_packets_value%v(&%v, &%v, &%v", functionNameSuffix,
+                              valueMeter, lockVar, pipeline->timestampVar);
     }
 
     if (method->expr->arguments->size() == 1) {

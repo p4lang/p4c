@@ -309,7 +309,7 @@ void Table::visit_match_table(THIS *self, Visitor &v, payload_info_t &payload_in
         auto exit_visitor = &saved->flow_clone();
         if (payload_info.action_info.count(action_name))
             exit_visitor->flow_merge(*payload_info.action_info.at(action_name).flow_state);
-        exit_visitor->visit(action, "actions"_cs);
+        exit_visitor->visit(action, "actions");
         exit_visitor->flow_merge_global_to("-EXIT-"_cs);
     }
 
@@ -345,7 +345,7 @@ void Table::visit_match_table(THIS *self, Visitor &v, payload_info_t &payload_in
         }
 
         // Visit the action.
-        current->visit(action, "actions"_cs);
+        current->visit(action, "actions");
 
         // Figure out which keys in the next_visitors table need updating.
         if (pinfo) {

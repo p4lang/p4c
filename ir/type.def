@@ -108,7 +108,7 @@ class Type_Any : Type, ITypeVar {
 class Type_Fragment : Type {
     Type type;
     dbprint { out << "FRAGMENT(" << type << ")"; }
-    toString { return absl::StrCat("FRAGMENT(", type->toString().string_view(), ")"); }
+    toString { return absl::StrCat("FRAGMENT(", type, ")"); }
     const Type* getP4Type() const override { return nullptr; }
 }
 
@@ -121,7 +121,7 @@ class Type_Fragment : Type {
 /// by type-checking.
 class Type_Type : Type {
     Type type;
-    toString { return absl::StrCat("Type(", type->toString().string_view(), ")"); }
+    toString { return absl::StrCat("Type(", type, ")"); }
     dbprint { out << "Type(" << type << ")"; }
     const Type* getP4Type() const override { return type; }
     validate { BUG_CHECK(!type->is<IR::Type_Type>(), "%1%: nested Type_Type", type); }
@@ -172,7 +172,7 @@ class Type_Bits : Type_Base {
     cstring baseName() const { return isSigned ? "int"_cs : "bit"_cs; }
     int width_bits() const override { return size; }
 
-    toString{ return absl::StrCat(baseName().string_view(), "<", size, ">"); }
+    toString{ return absl::StrCat(baseName(), "<", size, ">"); }
     dbprint { out << toString(); }
 }
 
@@ -231,7 +231,7 @@ class ParameterList : ISimpleNamespace {
     toString {
         return absl::StrJoin(parameters, ", ",
                              [](std::string *out, const auto *p) {
-                                 absl::StrAppend(out, p->toString().string_view());
+                                 absl::StrAppend(out, p);
                              });
     }
 #emit
@@ -334,7 +334,7 @@ class TypeParameters : ISimpleNamespace {
         return absl::StrCat("<",
                             absl::StrJoin(parameters, ", ",
                                           [](std::string *out, const auto *p) {
-                                              absl::StrAppend(out, p->toString().string_view());
+                                              absl::StrAppend(out, p);
                                           }),
                             ">");
     }
@@ -439,7 +439,7 @@ class Type_Header : Type_StructLike {
 class Type_Set : Type {
     Type elementType;
     dbprint{ Node::dbprint(out); out << "<" << elementType << ">"; }
-    toString { return absl::StrCat("set<", elementType->toString().string_view(), ">"); }
+    toString { return absl::StrCat("set<", elementType, ">"); }
     const Type* getP4Type() const override { return nullptr; }
     int width_bits() const override {
         /// returning the width of the set elements, not the set itself, which doesn't
@@ -473,7 +473,7 @@ abstract Type_BaseList : Type, Type_Indexed {
                          "<",
                          absl::StrJoin(components, ", ",
                                        [](std::string *out, const auto *t) {
-                                           absl::StrAppend(out, t->toString().string_view());
+                                           absl::StrAppend(out, t);
                                        }),
                          ">");
     }
@@ -504,7 +504,7 @@ class Type_P4List : Type {
     Type elementType;
     const Type* getP4Type() const override;
     toString{
-        return absl::StrCat("list<", elementType->toString().string_view(), ">");
+        return absl::StrCat("list<", elementType, ">");
     }
 }
 
@@ -573,9 +573,9 @@ class Type_Stack : Type_Indexed, Type {
     Expression  size;
     toString{
         return
-            absl::StrCat(elementType->toString().string_view(),
+            absl::StrCat(elementType,
                          "[",
-                         sizeKnown() ? size->toString().string_view() : "?",
+                         sizeKnown() ? size->toString() : "?"_cs,
                          "]"); }
     dbprint{ out << elementType << "[" << size << "]"; }
     bool sizeKnown() const;
@@ -604,11 +604,11 @@ class Type_Specialized : Type {
     const Type* getP4Type() const override;
     toString{
         return
-            absl::StrCat(baseType->toString().string_view(),
+            absl::StrCat(baseType,
                          "<",
                          absl::StrJoin(*arguments, ", ",
                                        [](std::string *out, const auto *t) {
-                                           absl::StrAppend(out, t->toString().string_view());
+                                           absl::StrAppend(out, t);
                                        }),
                          ">");
     }

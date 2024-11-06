@@ -89,16 +89,15 @@ class PnaProgramStructure : public P4::ProgramStructure {
      * Checks if a string is of type PNA_CounterType_t returns true
      * if it is, false otherwise.
      */
-    static bool isCounterMetadata(cstring ptName) { return !strcmp(ptName, "PNA_CounterType_t"); }
+    static bool isCounterMetadata(cstring ptName) { return ptName == "PNA_CounterType_t"; }
 
     /**
      * Checks if a string is a psa metadata returns true
      * if it is, false otherwise.
      */
     static bool isStandardMetadata(cstring ptName) {
-        return (!strcmp(ptName, "pna_main_parser_input_metadata_t") ||
-                !strcmp(ptName, "pna_main_input_metadata_t") ||
-                !strcmp(ptName, "pna_main_output_metadata_t"));
+        return ptName == "pna_main_parser_input_metadata_t" ||
+               ptName == "pna_main_input_metadata_t" || ptName == "pna_main_output_metadata_t";
     }
 };
 

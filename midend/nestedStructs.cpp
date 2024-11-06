@@ -25,7 +25,7 @@ void ComplexValues::explode(std::string_view prefix, const IR::Type_Struct *type
                             IR::Vector<T> *result) {
     CHECK_NULL(type);
     for (const auto *f : type->fields) {
-        std::string fname = absl::StrCat(prefix, "_", f->name.string_view());
+        std::string fname = absl::StrCat(prefix, "_", f->name);
         auto ftype = typeMap->getType(f, true);
         if (isNestedStruct(ftype)) {
             auto submap = new FieldsMap(ftype);
