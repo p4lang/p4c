@@ -59,7 +59,7 @@ struct ID : Util::IHasSourceInfo, public IHasDbPrint {
     bool operator!=(const char *a) const { return name != a; }
     /// Defer to cstring's notion of less, which is a lexicographical and not a pointer comparison.
     bool operator<(const char *a) const { return name < a; }
-    explicit operator bool() const { return name.c_str(); }
+    explicit operator bool() const { return name.c_str() != nullptr; }
     operator cstring() const { return name; }
     std::string string() const { return name.string(); }
     std::string_view string_view() const { return name.string_view(); }
