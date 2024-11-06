@@ -358,6 +358,9 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>::P4::Transform</b><
 <tr class="memitem:aacc6bee056cf2a9f4b08882b5b27fd80" id="r_aacc6bee056cf2a9f4b08882b5b27fd80"><td class="memItemLeft" align="right" valign="top"><a id="aacc6bee056cf2a9f4b08882b5b27fd80" name="aacc6bee056cf2a9f4b08882b5b27fd80"></a>
 class&#160;</td><td class="memItemRight" valign="bottom"><b>::P4::Visitor</b></td></tr>
 <tr class="separator:aacc6bee056cf2a9f4b08882b5b27fd80"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af4f059add2ce754c953bc6787feb5063" id="r_af4f059add2ce754c953bc6787feb5063"><td class="memTemplParams" colspan="2">template&lt;typename Sink &gt; </td></tr>
+<tr class="memitem:af4f059add2ce754c953bc6787feb5063"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#af4f059add2ce754c953bc6787feb5063">AbslStringify</a> (Sink &amp;sink, const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *n)</td></tr>
+<tr class="separator:af4f059add2ce754c953bc6787feb5063"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Member Function Documentation</h2>
 <a id="a6cdc5d8b1fadeb60cc068365f90d77a4" name="a6cdc5d8b1fadeb60cc068365f90d77a4"></a>
@@ -546,6 +549,39 @@ class&#160;</td><td class="memItemRight" valign="bottom"><b>::P4::Visitor</b></t
 </div><div class="memdoc">
 
 <p>Implements <a class="el" href="class_p4_1_1_util_1_1_i_has_source_info.html">P4::Util::IHasSourceInfo</a>.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Friends And Related Symbol Documentation</h2>
+<a id="af4f059add2ce754c953bc6787feb5063" name="af4f059add2ce754c953bc6787feb5063"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af4f059add2ce754c953bc6787feb5063">&#9670;&#160;</a></span>AbslStringify</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Sink &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AbslStringify </td>
+          <td>(</td>
+          <td class="paramtype">Sink &amp;</td>          <td class="paramname"><span class="paramname"><em>sink</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *</td>          <td class="paramname"><span class="paramname"><em>n</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">friend</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Helper to simplify usage of nodes in Abseil functions (e.g. StrCat / StrFormat, etc.) without explicit string_view conversion. Note that this calls Node::toString() so might not be always appropriate for user-visible messages / strings. </p>
 
 </div>
 </div>

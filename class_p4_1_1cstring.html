@@ -200,6 +200,9 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>isNull</b> () const</
 <tr class="memitem:ac8cbf5f5d519cb055415f2c9e5317967" id="r_ac8cbf5f5d519cb055415f2c9e5317967"><td class="memItemLeft" align="right" valign="top"><a id="ac8cbf5f5d519cb055415f2c9e5317967" name="ac8cbf5f5d519cb055415f2c9e5317967"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>isNullOrEmpty</b> () const</td></tr>
 <tr class="separator:ac8cbf5f5d519cb055415f2c9e5317967"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d7af54b27e2c99a65dab9682375a3bb" id="r_a1d7af54b27e2c99a65dab9682375a3bb"><td class="memItemLeft" align="right" valign="top"><a id="a1d7af54b27e2c99a65dab9682375a3bb" name="a1d7af54b27e2c99a65dab9682375a3bb"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>operator bool</b> () const</td></tr>
+<tr class="separator:a1d7af54b27e2c99a65dab9682375a3bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1beaba673d9a8d0d4cb27857ed660ec1" id="r_a1beaba673d9a8d0d4cb27857ed660ec1"><td class="memItemLeft" align="right" valign="top"><a id="a1beaba673d9a8d0d4cb27857ed660ec1" name="a1beaba673d9a8d0d4cb27857ed660ec1"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>operator const char *</b> () const</td></tr>
 <tr class="separator:a1beaba673d9a8d0d4cb27857ed660ec1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -366,6 +369,9 @@ static <a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td c
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="friends" name="friends"></a>
 Friends</h2></td></tr>
+<tr class="memitem:a38ca33b3fcb2f1d0a444a20c9f43de2e" id="r_a38ca33b3fcb2f1d0a444a20c9f43de2e"><td class="memTemplParams" colspan="2">template&lt;typename Sink &gt; </td></tr>
+<tr class="memitem:a38ca33b3fcb2f1d0a444a20c9f43de2e"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a38ca33b3fcb2f1d0a444a20c9f43de2e">AbslStringify</a> (Sink &amp;sink, <a class="el" href="class_p4_1_1cstring.html">cstring</a> s)</td></tr>
+<tr class="separator:a38ca33b3fcb2f1d0a444a20c9f43de2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af18052e551cf36f21aff6ac0cff35a2e" id="r_af18052e551cf36f21aff6ac0cff35a2e"><td class="memItemLeft" align="right" valign="top"><a id="af18052e551cf36f21aff6ac0cff35a2e" name="af18052e551cf36f21aff6ac0cff35a2e"></a>
 <a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>P4::literals::operator&quot;&quot;_cs</b> (const char *str, std::size_t len)</td></tr>
 <tr class="separator:af18052e551cf36f21aff6ac0cff35a2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -464,6 +470,39 @@ Friends</h2></td></tr>
 </table>
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>true if a given string is interned (contained in cstring cache) </dd></dl>
+
+</div>
+</div>
+<h2 class="groupheader">Friends And Related Symbol Documentation</h2>
+<a id="a38ca33b3fcb2f1d0a444a20c9f43de2e" name="a38ca33b3fcb2f1d0a444a20c9f43de2e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a38ca33b3fcb2f1d0a444a20c9f43de2e">&#9670;&#160;</a></span>AbslStringify</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename Sink &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AbslStringify </td>
+          <td>(</td>
+          <td class="paramtype">Sink &amp;</td>          <td class="paramname"><span class="paramname"><em>sink</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="class_p4_1_1cstring.html">cstring</a></td>          <td class="paramname"><span class="paramname"><em>s</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">friend</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Helper to simplify usage of cstring in Abseil functions (e.g. StrCat / StrFormat, etc.) without explicit string_view conversion. </p>
 
 </div>
 </div>

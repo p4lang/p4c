@@ -1,5 +1,9 @@
 var NAVTREEINDEX38 =
 {
+"struct_tofino_1_1_instruction_memory.html":[12,0,17,1],
+"struct_tofino_1_1_instruction_memory.html":[13,0,14,1],
+"struct_tofino_1_1_memories.html":[12,0,17,4],
+"struct_tofino_1_1_memories.html":[13,0,14,4],
 "struct_type_comparator.html":[13,0,598],
 "struct_update_parser_write_mode.html":[13,0,601],
 "structassoc_1_1detail_1_1__is__stable.html":[12,0,1,0,0],
