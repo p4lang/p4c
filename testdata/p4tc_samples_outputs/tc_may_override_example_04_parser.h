@@ -54,7 +54,7 @@ struct p4tc_filter_fields {
     __u32 blockid;
     __be16 proto;
     __u16 prio;
-    ipv4 ipv4_tbl_1_next_hop_ipv4addr;
+    __u32 ipv4_tbl_1_next_hop_ipv4addr;
 };
 
 REGISTER_START()

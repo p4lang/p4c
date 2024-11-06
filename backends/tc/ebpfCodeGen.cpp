@@ -134,9 +134,9 @@ void PNAEbpfGenerator::emitP4TCActionParam(EBPF::CodeBuilder *builder) const {
             for (auto param : table->defaultMissActionParams) {
                 cstring paramName = param->paramDetail->getParamName();
                 cstring placeholder = tblName + "_" + defaultActionName + "_" + paramName;
-                cstring typeName = param->paramDetail->getParamType();
+                cstring paramDecl = param->paramDetail->getParamDecl(placeholder);
                 builder->emitIndent();
-                builder->appendFormat("%v %v", typeName, placeholder);
+                builder->append(paramDecl);
                 builder->endOfStatement(true);
             }
         }
@@ -149,9 +149,9 @@ void PNAEbpfGenerator::emitP4TCActionParam(EBPF::CodeBuilder *builder) const {
             for (auto param : table->defaultHitActionParams) {
                 cstring paramName = param->paramDetail->getParamName();
                 cstring placeholder = tblName + "_" + defaultActionName + "_" + paramName;
-                cstring typeName = param->paramDetail->getParamType();
+                cstring paramDecl = param->paramDetail->getParamDecl(placeholder);
                 builder->emitIndent();
-                builder->appendFormat("%v %v", typeName, placeholder);
+                builder->append(paramDecl);
                 builder->endOfStatement(true);
             }
         }
