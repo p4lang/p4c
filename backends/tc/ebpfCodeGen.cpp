@@ -1679,7 +1679,7 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
             builder->appendFormat("    .tblid = %d,", tblId);
             builder->newline();
             builder->emitIndent();
-            builder->append("    .aging_ms = ");
+            builder->append("    .profile_id = ");
             for (auto a : *function->expr->arguments) {
                 visit(a);
             }

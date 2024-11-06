@@ -114,7 +114,7 @@ if (/* hdr->ipv4.isValid() */
                                     struct p4tc_table_entry_create_bpf_params__local update_params = {
                                         .pipeid = p4tc_filter_fields.pipeid,
                                         .tblid = 1,
-                                        .aging_ms = 2
+                                        .profile_id = 2
                                     };
                                     bpf_p4tc_entry_update(skb, &update_params, sizeof(params), &key, sizeof(key));
                                 }
@@ -169,7 +169,7 @@ if (/* hdr->ipv4.isValid() */
                                     struct p4tc_table_entry_create_bpf_params__local update_params = {
                                         .pipeid = p4tc_filter_fields.pipeid,
                                         .tblid = 2,
-                                        .aging_ms = 2
+                                        .profile_id = 2
                                     };
                                     bpf_p4tc_entry_update(skb, &update_params, sizeof(params), &key, sizeof(key));
                                 }
