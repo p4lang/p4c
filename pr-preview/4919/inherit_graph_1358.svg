@@ -11,9 +11,9 @@
 <!-- Node0 -->
 <g id="Node000000" class="node">
 <title>Node0</title>
-<g id="a_Node000000"><a xlink:href="struct_u_t__hash__handle.html" target="_top" xlink:title=" ">
+<g id="a_Node000000"><a xlink:href="struct_type_comparator.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="97,-19 0,-19 0,0 97,0 97,-19"/>
-<text text-anchor="middle" x="48.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">UT_hash_handle</text>
+<text text-anchor="middle" x="48.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">TypeComparator</text>
 </a>
 </g>
 </g>

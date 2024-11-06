@@ -860,7 +860,7 @@ var annotated_dup =
         [ "IndexedVector", "class_p4_1_1_i_r_1_1_indexed_vector.html", null ],
         [ "INode", "class_p4_1_1_i_r_1_1_i_node.html", null ],
         [ "NameMap", "class_p4_1_1_i_r_1_1_name_map.html", null ],
-        [ "Node", "class_p4_1_1_i_r_1_1_node.html", null ],
+        [ "Node", "class_p4_1_1_i_r_1_1_node.html", "class_p4_1_1_i_r_1_1_node" ],
         [ "NodeMap", "class_p4_1_1_i_r_1_1_node_map.html", null ],
         [ "StateVariableEqual", "struct_p4_1_1_i_r_1_1_state_variable_equal.html", null ],
         [ "StateVariableLess", "struct_p4_1_1_i_r_1_1_state_variable_less.html", null ],

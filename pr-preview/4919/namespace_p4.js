@@ -525,7 +525,7 @@ var namespace_p4 =
     [ "nw_bitrange", "namespace_p4.html#a19f5abed1a21ad7a5703944aa5099da7", null ],
     [ "nw_byteinterval", "namespace_p4.html#a12406ed10498a3050da71866770ec13b", null ],
     [ "nw_byterange", "namespace_p4.html#a5badd9e48387f91e404be412db8a305e", null ],
-    [ "SymbolicMapping", "namespace_p4.html#a3dc0fb4392201e8b680a17890391d1ff", null ],
+    [ "SymbolicMapping", "namespace_p4.html#ac5160e39250760f7ede61c6442de2330", null ],
     [ "DiagnosticAction", "namespace_p4.html#a3f204513d8ef11b57cae0f30becb863d", [
       [ "Ignore", "namespace_p4.html#a3f204513d8ef11b57cae0f30becb863dafd038fc7f319e48f3115d92bf5bdbef9", null ],
       [ "Info", "namespace_p4.html#a3f204513d8ef11b57cae0f30becb863da4059b0251f66a18cb56f544728796875", null ],

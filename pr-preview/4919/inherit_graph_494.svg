@@ -11,10 +11,10 @@
 <!-- Node0 -->
 <g id="Node000000" class="node">
 <title>Node0</title>
-<g id="a_Node000000"><a xlink:href="struct_p4_1_1_i_r_1_1_traversal_1_1_index.html" target="_top" xlink:title="Select an index of a integer&#45;indexed sub&#45;object. This is useful e.g. to select first parameter of a m...">
+<g id="a_Node000000"><a xlink:href="struct_p4_1_1_i_r_1_1_traversal_1_1_assign.html" target="_top" xlink:title="A selector used at the end of selector chain to assign to the current sub&#45;object. e....">
 <polygon fill="white" stroke="#666666" points="101,-30 0,-30 0,0 101,0 101,-30"/>
 <text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">P4::IR::Traversal::</text>
-<text text-anchor="middle" x="50.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">Index</text>
+<text text-anchor="middle" x="50.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">Assign&lt; T &gt;</text>
 </a>
 </g>
 </g>

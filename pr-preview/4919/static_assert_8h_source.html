@@ -188,7 +188,7 @@ $(function(){initNavTree('static_assert_8h_source.html',''); initResizable(true)
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>                            <span class="keyword">auto</span> msg = subst.lookup(param);</div>
 <div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>                            CHECK_NULL(msg);</div>
 <div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>                            <span class="keywordflow">if</span> (<span class="keyword">const</span> <span class="keyword">auto</span> *sl = msg-&gt;expression-&gt;to&lt;IR::StringLiteral&gt;()) {</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>                                message = sl-&gt;value.string_view();</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>                                message = sl-&gt;value;</div>
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>                            }</div>
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>                        }</div>
 <div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>                        <a class="code hl_function" href="namespace_p4.html#a9fe6085b1cee8f21f098c9db89644b58">::P4::error</a>(ErrorType::ERR_EXPECTED, <span class="stringliteral">&quot;%1%: %2%&quot;</span>, method, message);</div>

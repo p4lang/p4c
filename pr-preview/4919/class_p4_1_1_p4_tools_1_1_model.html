@@ -145,7 +145,7 @@ Public Member Functions</h2></td></tr>
 &#160;</td><td class="memItemRight" valign="bottom"><b>Model</b> (<a class="el" href="class_p4_1_1_p4_tools_1_1_model.html">Model</a> &amp;&amp;)=default</td></tr>
 <tr class="separator:a674ca40de507176a33ad7eea649b73a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0d6fab6494ff6570538fa43cd27c688e" id="r_a0d6fab6494ff6570538fa43cd27c688e"><td class="memItemLeft" align="right" valign="top"><a id="a0d6fab6494ff6570538fa43cd27c688e" name="a0d6fab6494ff6570538fa43cd27c688e"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>Model</b> (<a class="el" href="namespace_p4.html#a3dc0fb4392201e8b680a17890391d1ff">SymbolicMapping</a> symbolicMap)</td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Model</b> (<a class="el" href="namespace_p4.html#ac5160e39250760f7ede61c6442de2330">SymbolicMapping</a> symbolicMap)</td></tr>
 <tr class="memdesc:a0d6fab6494ff6570538fa43cd27c688e"><td class="mdescLeft">&#160;</td><td class="mdescRight">A model is initialized with a symbolic map. Usually, these are derived from the solver. <br /></td></tr>
 <tr class="separator:a0d6fab6494ff6570538fa43cd27c688e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a95d4d3aadaa53f2f05540c1716540e1d" id="r_a95d4d3aadaa53f2f05540c1716540e1d"><td class="memItemLeft" align="right" valign="top">const IR::Literal *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a95d4d3aadaa53f2f05540c1716540e1d">evaluate</a> (const IR::Expression *expr, bool doComplete, ExpressionMap *resolvedExpressions=nullptr) const</td></tr>
@@ -158,10 +158,10 @@ const IR::StructExpression *&#160;</td><td class="memItemRight" valign="bottom">
 <tr class="separator:a56e774f8f1e2b002490e7ed687bc8741"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5bbf57586da3a5e90507272b7748e811" id="r_a5bbf57586da3a5e90507272b7748e811"><td class="memItemLeft" align="right" valign="top">const IR::Expression *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a5bbf57586da3a5e90507272b7748e811">get</a> (const IR::SymbolicVariable *var, bool checked) const</td></tr>
 <tr class="separator:a5bbf57586da3a5e90507272b7748e811"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a01f5cd0241829c5c7980c664241e18dc" id="r_a01f5cd0241829c5c7980c664241e18dc"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="namespace_p4.html#a3dc0fb4392201e8b680a17890391d1ff">SymbolicMapping</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a01f5cd0241829c5c7980c664241e18dc">getSymbolicMap</a> () const</td></tr>
+<tr class="memitem:a01f5cd0241829c5c7980c664241e18dc" id="r_a01f5cd0241829c5c7980c664241e18dc"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="namespace_p4.html#ac5160e39250760f7ede61c6442de2330">SymbolicMapping</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a01f5cd0241829c5c7980c664241e18dc">getSymbolicMap</a> () const</td></tr>
 <tr class="separator:a01f5cd0241829c5c7980c664241e18dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3d1d6870b3053cbef68a2802db62b086" id="r_a3d1d6870b3053cbef68a2802db62b086"><td class="memItemLeft" align="right" valign="top"><a id="a3d1d6870b3053cbef68a2802db62b086" name="a3d1d6870b3053cbef68a2802db62b086"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>mergeMap</b> (const <a class="el" href="namespace_p4.html#a3dc0fb4392201e8b680a17890391d1ff">SymbolicMapping</a> &amp;sourceMap)</td></tr>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>mergeMap</b> (const <a class="el" href="namespace_p4.html#ac5160e39250760f7ede61c6442de2330">SymbolicMapping</a> &amp;sourceMap)</td></tr>
 <tr class="memdesc:a3d1d6870b3053cbef68a2802db62b086"><td class="mdescLeft">&#160;</td><td class="mdescRight">Merge a sumbolic map into this model, do NOT override existing values. <br /></td></tr>
 <tr class="separator:a3d1d6870b3053cbef68a2802db62b086"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a77e0f1939f3f6e99421b047b0bd3d7b5" id="r_a77e0f1939f3f6e99421b047b0bd3d7b5"><td class="memItemLeft" align="right" valign="top"><a id="a77e0f1939f3f6e99421b047b0bd3d7b5" name="a77e0f1939f3f6e99421b047b0bd3d7b5"></a>
@@ -255,7 +255,7 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>mergeMap</b> (const <
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">const <a class="el" href="namespace_p4.html#a3dc0fb4392201e8b680a17890391d1ff">SymbolicMapping</a> &amp; P4::P4Tools::Model::getSymbolicMap </td>
+          <td class="memname">const <a class="el" href="namespace_p4.html#ac5160e39250760f7ede61c6442de2330">SymbolicMapping</a> &amp; P4::P4Tools::Model::getSymbolicMap </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td> const</td>

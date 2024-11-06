@@ -141,8 +141,10 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aee4bef3566d616bd6738f6f791df88af" id="r_aee4bef3566d616bd6738f6f791df88af"><td class="memItemLeft" align="right" valign="top"><a id="aee4bef3566d616bd6738f6f791df88af" name="aee4bef3566d616bd6738f6f791df88af"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>MidEnd</b> (const <a class="el" href="class_p4_1_1_compiler_options.html">CompilerOptions</a> &amp;)</td></tr>
 <tr class="separator:aee4bef3566d616bd6738f6f791df88af"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8faa7d0e15c4818dfe84c139a293eeba" id="r_a8faa7d0e15c4818dfe84c139a293eeba"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8faa7d0e15c4818dfe84c139a293eeba">addDefaultPasses</a> ()</td></tr>
+<tr class="memitem:a8faa7d0e15c4818dfe84c139a293eeba" id="r_a8faa7d0e15c4818dfe84c139a293eeba"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8faa7d0e15c4818dfe84c139a293eeba">addDefaultPasses</a> ()</td></tr>
 <tr class="separator:a8faa7d0e15c4818dfe84c139a293eeba"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a61b3e20cc9d69efad8e2a6912fa9931d" id="r_a61b3e20cc9d69efad8e2a6912fa9931d"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a61b3e20cc9d69efad8e2a6912fa9931d">addNonTypeCheckingPasses</a> ()</td></tr>
+<tr class="separator:a61b3e20cc9d69efad8e2a6912fa9931d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a7b1425c69918065bf59c5418559b151c" id="r_a7b1425c69918065bf59c5418559b151c"><td class="memItemLeft" align="right" valign="top"><a id="a7b1425c69918065bf59c5418559b151c" name="a7b1425c69918065bf59c5418559b151c"></a>
 <a class="el" href="class_p4_1_1_reference_map.html">P4::ReferenceMap</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>getRefMap</b> ()</td></tr>
 <tr class="memdesc:a7b1425c69918065bf59c5418559b151c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Retrieve the reference map used in the mid end. <br /></td></tr>
@@ -460,6 +462,9 @@ const <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *&#160;</td><td
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void P4::P4Tools::MidEnd::addDefaultPasses </td>
@@ -468,8 +473,39 @@ const <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *&#160;</td><td
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 <p>Add the list of default passes to the mid end. This is not part of the initializer because some targets may add their own passes to the beginning of the pass list. </p>
+
+</div>
+</div>
+<a id="a61b3e20cc9d69efad8e2a6912fa9931d" name="a61b3e20cc9d69efad8e2a6912fa9931d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a61b3e20cc9d69efad8e2a6912fa9931d">&#9670;&#160;</a></span>addNonTypeCheckingPasses()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void P4::P4Tools::MidEnd::addNonTypeCheckingPasses </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Add passes that break type checking. These passes may involve IR modifications the front end type checker does not recognize. </p>
 
 </div>
 </div>
