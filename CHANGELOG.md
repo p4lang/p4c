@@ -77,6 +77,39 @@ We follow a monthly release cadence. Our versioning scheme is as follows:
 - Fix Fedora build and CMake warnings for versions greater than CMake 3.24 [[view](https://github.com/p4lang/p4c/pull/4986)] (fruffy)
 - Fix case of default CMake build mode [[view](https://github.com/p4lang/p4c/pull/4993)] (fruffy)
 
+## Release v1.2.4.16 [[view](https://github.com/p4lang/p4c/pull/4935)]
+
+### Breaking Changes 🛠
+- Allow extending `ToP4`, clean its constructors [[view](https://github.com/p4lang/p4c/pull/4899)] (Vladimír Štill)
+
+### Changes to the Compiler Core
+- Reduce the number of memory allocations in `def-use` [[view](https://github.com/p4lang/p4c/pull/4904)] (asl)
+- Split the `start` state more conservatively when a parser contains `decl` initializers [[view](https://github.com/p4lang/p4c/pull/4902)] (kfcripps)
+- Add missed include [[view](https://github.com/p4lang/p4c/pull/4915)] (asl)
+- Only process `IR::Path`s inside of `IR::ParserState` contexts in `MoveInitializers` [[view](https://github.com/p4lang/p4c/pull/4910)] (kfcripps)
+- Factor common base `ExternCall` for `ExternMethod`/`ExternFunction` [[view](https://github.com/p4lang/p4c/pull/4898)] (Chris Dodd)
+- [Issue - 4883](https://github.com/p4lang/p4c/issues/4883) Remove unused actions whose name starts with `"__"` [[view](https://github.com/p4lang/p4c/pull/4900)] (kfcripps)
+- Allow `--Wdisable` to take precedence over `--Werror` for warning messages [[view](https://github.com/p4lang/p4c/pull/4894)] (kfcripps)
+- Allow keywords to be used as annotation names [[view](https://github.com/p4lang/p4c/pull/4897)] (Chris Dodd)
+- Avoid copying `out`/`inout` args when inlining functions [[view](https://github.com/p4lang/p4c/pull/4877)] (Chris Dodd)
+- Clean up the `P4-14` dependent code [[view](https://github.com/p4lang/p4c/pull/4925)] (fruffy)
+- Fix `Type_Indexed::at` [[view](https://github.com/p4lang/p4c/pull/4927)] (Chris Dodd)
+- Make `--top4` matching case-insensitive [[view](https://github.com/p4lang/p4c/pull/4924)] (fruffy)
+
+### Changes to the TC Back End
+- Add `inst_type` field in `introspection.json` [[view](https://github.com/p4lang/p4c/pull/4905)] (komaljai)
+
+### Changes to the P4Tools Back End
+- [P4Tools] Track invocations in the timer to measure per function statistics [[view](https://github.com/p4lang/p4c/pull/4929)] (fruffy)
+- [P4Testgen] Unify compiler and tool options; ensure options context is initialized correctly [[view](https://github.com/p4lang/p4c/pull/4787)] (fruffy)
+- [P4Tools] Clean up use of `::P4` prefix for errors, warnings, and logs [[view](https://github.com/p4lang/p4c/pull/4930)] (fruffy)
+
+### Other Changes
+- Bump `peter-evans/create-pull-request` from 6 to 7 [[view](https://github.com/p4lang/p4c/pull/4903)] (dependabot)
+- Docs: Update documentation instructions [[view](https://github.com/p4lang/p4c/pull/4875)] (AdarshRawat1)
+- Remove workaround required for MacOS CI installation [[view](https://github.com/p4lang/p4c/pull/4921)] (fruffy)
+- Docs: Changelog release update for v1.2.4.15 [[view](https://github.com/p4lang/p4c/pull/4934)] (AdarshRawat1)
+
 ## Release v1.2.4.15 [[view](https://github.com/p4lang/p4c/pull/4899)]
 
 ### Breaking Changes 🛠
