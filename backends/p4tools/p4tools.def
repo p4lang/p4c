@@ -144,7 +144,12 @@ class Extracted_Varbits : Type_Bits {
  public:
 #emit
     void *operator new(size_t size) { return ::operator new(size); }
+// FIXME: Remove this #ifdefine check once we switch to C++20
+#if defined(__cpp_sized_deallocation) && __cpp_sized_deallocation >= 201309L
     void operator delete(void *p, size_t size) { return ::operator delete(p, size); }
+#else
+    void operator delete(void *p) { return ::operator delete(p); }
+#endif
 #end
     /// The assigned size of this varbit (assigned by extract calls).
     int assignedSize;

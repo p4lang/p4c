@@ -530,13 +530,15 @@ add_custom_command (OUTPUT ${IR_GENERATED_SRCS}
   COMMAND ${CMAKE_COMMAND} -E copy_if_different ir/gen-tree-macro.h.fixup ir/gen-tree-macro.h
   MAIN_DEPENDENCY ${IR_GENERATOR}
   DEPENDS irgenerator ${IR_DEF_FILES}
-  COMMENT "Generating IR class files")
+  COMMENT "Generating IR class files"
+)
 
 add_custom_target(genIR DEPENDS ${IR_GENERATED_SRCS})
 set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)
 add_library(ir-generated OBJECT ${IR_GENERATED_SRCS} ${EXTENSION_IR_SOURCES})
 add_dependencies(ir-generated ir genIR)
-target_link_libraries(ir-generated ${P4C_LIB_DEPS})
+target_link_libraries(ir-generated PUBLIC ir ${P4C_LIB_DEPS})
+
 
 ######################################## IR Generation End ########################################
 
