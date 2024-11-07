@@ -19,8 +19,8 @@
 #ifndef BF_P4C_PARDE_ASM_OUTPUT_H_
 #define BF_P4C_PARDE_ASM_OUTPUT_H_
 
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
 #include "backends/tofino/bf-p4c/parde/parser_header_sequences.h"
-#include "bf-p4c-options.h"
 #include "ir/ir.h"
 
 class PhvInfo;

@@ -30,7 +30,6 @@
 #include "frontends/p4/methodInstance.h"
 #include "ir/declaration.h"
 #include "ir/id.h"
-#include "ir/ir-generated.h"
 #include "lib/cstring.h"
 
 namespace BFN {

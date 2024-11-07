@@ -19,8 +19,7 @@
 #include <iostream>
 #include <map>
 
-#include "logging.h"
-#include "phv_schema.h"
+#include "backends/tofino/bf-p4c/logging/phv_schema.h"
 
 using namespace Logging;
 

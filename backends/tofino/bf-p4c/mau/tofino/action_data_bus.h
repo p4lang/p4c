@@ -23,7 +23,7 @@
 #include "backends/tofino/bf-p4c/mau/action_data_bus.h"
 #include "backends/tofino/bf-p4c/mau/table_layout.h"
 #include "backends/tofino/bf-p4c/mau/action_format.h"
-#include "lib/autoclone.h"
+#include "backends/tofino/bf-p4c/lib/autoclone.h"
 #include "lib/safe_vector.h"
 #include "backends/tofino/bf-p4c/common/alloc.h"
 /* clang-format on */

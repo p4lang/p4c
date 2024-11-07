@@ -24,7 +24,7 @@
 #include <vector>
 #include "ir/ir.h"
 
-#include "resources_schema.h"
+#include "backends/tofino/bf-p4c/logging/resources_schema.h"
 /* clang-format on */
 
 using Logging::Resources_Schema_Logger;

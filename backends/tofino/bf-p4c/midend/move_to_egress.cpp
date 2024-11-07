@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "move_to_egress.h"
+#include "backends/tofino/bf-p4c/midend/move_to_egress.h"
 
 #include "ir/dump.h"
 

@@ -19,7 +19,7 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_PARDE_CLOT_ALLOCATE_CLOT_H_
 #define BACKENDS_TOFINO_BF_P4C_PARDE_CLOT_ALLOCATE_CLOT_H_
 
-#include "clot_info.h"
+#include "backends/tofino/bf-p4c/parde/clot/clot_info.h"
 
 class PragmaAlias;
 

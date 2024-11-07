@@ -47,7 +47,7 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_MIDEND_CHECK_DESIGN_PATTERN_H_
 #define BACKENDS_TOFINO_BF_P4C_MIDEND_CHECK_DESIGN_PATTERN_H_
 
-#include "bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeMap.h"

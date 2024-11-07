@@ -21,9 +21,9 @@
 
 #include <map>
 
+#include "backends/tofino/bf-p4c/logging/phv_schema.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "backends/tofino/bf-p4c/phv/utils/utils.h"
-#include "phv_schema.h"
 
 /**
  *  \brief Class with handle for logging constraints

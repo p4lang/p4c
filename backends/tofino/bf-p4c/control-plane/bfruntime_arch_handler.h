@@ -43,7 +43,6 @@
 #include "frontends/p4/externInstance.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeMap.h"
-#include "ir/ir-generated.h"
 #include "lib/log.h"
 #include "midend/eliminateTypedefs.h"
 

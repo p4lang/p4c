@@ -22,7 +22,7 @@
 #include <numeric>
 #include <regex>
 
-#include "bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
 #include "event_logger.h"
 
 static bool has_output_already_been_silenced = false;

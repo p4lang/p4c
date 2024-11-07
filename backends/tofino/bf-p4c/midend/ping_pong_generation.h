@@ -19,13 +19,13 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_MIDEND_PING_PONG_GENERATION_H_
 #define BACKENDS_TOFINO_BF_P4C_MIDEND_PING_PONG_GENERATION_H_
 
+#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/midend/collect_pipelines.h"
 #include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeMap.h"
-#include "ir/gress.h"
 #include "ir/ir.h"
-#include "midend/collect_pipelines.h"
 
 namespace BFN {
 

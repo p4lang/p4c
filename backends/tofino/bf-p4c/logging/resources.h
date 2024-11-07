@@ -26,10 +26,10 @@
 #include <vector>
 
 #include "ir/ir.h"
-#include "ir/gress.h"
+#include "backends/tofino/bf-p4c/ir/gress.h"
 #include "lib/cstring.h"
 #include "lib/ordered_map.h"
-#include "resources_schema.h"
+#include "backends/tofino/bf-p4c/logging/resources_schema.h"
 #include "backends/tofino/bf-p4c/mau/instruction_memory.h"
 #include "backends/tofino/bf-p4c/mau/tofino/input_xbar.h"
 /* clang-format on */

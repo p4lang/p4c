@@ -19,15 +19,15 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_DEVICE_H_
 #define BACKENDS_TOFINO_BF_P4C_DEVICE_H_
 
-#include "arch/arch_spec.h"
-#include "ir/gress.h"
+#include "backends/tofino/bf-p4c/arch/arch_spec.h"
+#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/mau/mau_spec.h"
+#include "backends/tofino/bf-p4c/mau/power_spec.h"
+#include "backends/tofino/bf-p4c/parde/parde_spec.h"
+#include "backends/tofino/bf-p4c/phv/phv_spec.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/range.h"
-#include "mau/mau_spec.h"
-#include "mau/power_spec.h"
-#include "parde/parde_spec.h"
-#include "phv/phv_spec.h"
 
 class Device {
  public:
