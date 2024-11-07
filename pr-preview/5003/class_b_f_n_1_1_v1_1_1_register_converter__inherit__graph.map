@@ -1,0 +1,9 @@
+<map id="BFN::V1::RegisterConverter" name="BFN::V1::RegisterConverter">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,225,205,251"/>
+<area shape="rect" id="Node000002" href="$class_b_f_n_1_1_v1_1_1_extern_converter.html" title=" " alt="" coords="11,152,199,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="108,191,108,225,103,225,103,191"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_transform.html" title=" " alt="" coords="50,79,161,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="108,118,108,152,103,152,103,118"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="61,5,149,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="108,44,108,79,103,79,103,44"/>
+</map>

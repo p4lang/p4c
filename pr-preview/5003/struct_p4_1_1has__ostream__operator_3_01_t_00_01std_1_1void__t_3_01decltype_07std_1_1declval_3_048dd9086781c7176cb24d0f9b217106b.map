@@ -1,0 +1,5 @@
+<map id="P4::has_ostream_operator&lt; T, std::void_t&lt; decltype(std::declval&lt; std::ostream &amp; &gt;()&lt;&lt; std::declval&lt; T &gt;())&gt; &gt;" name="P4::has_ostream_operator&lt; T, std::void_t&lt; decltype(std::declval&lt; std::ostream &amp; &gt;()&lt;&lt; std::declval&lt; T &gt;())&gt; &gt;">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,79,247,148"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="70,5,182,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="129,44,129,79,123,79,123,44"/>
+</map>

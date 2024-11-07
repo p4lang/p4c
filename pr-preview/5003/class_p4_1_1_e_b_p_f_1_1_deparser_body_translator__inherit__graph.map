@@ -1,0 +1,13 @@
+<map id="P4::EBPF::DeparserBodyTranslator" name="P4::EBPF::DeparserBodyTranslator">
+<area shape="rect" id="Node000001" title="This translator emits deparser externs." alt="" coords="18,299,261,324"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_e_b_p_f_1_1_deparser_body_translator_p_s_a.html" title=" " alt="" coords="5,372,273,397"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="142,338,142,372,137,372,137,338"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_e_b_p_f_1_1_control_body_translator.html" title=" " alt="" coords="24,225,255,251"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="142,264,142,299,137,299,137,264"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_e_b_p_f_1_1_code_gen_inspector.html" title=" " alt="" coords="37,152,242,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="142,191,142,225,137,225,137,191"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_inspector.html" title=" " alt="" coords="86,79,193,104"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="142,118,142,152,137,152,137,118"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="95,5,183,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="142,44,142,79,137,79,137,44"/>
+</map>
