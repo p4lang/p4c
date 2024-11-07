@@ -84,7 +84,7 @@ ProgramStructure::ProgramStructure()
 
 IR::Vector<IR::Annotation> ProgramStructure::addGlobalNameAnnotation(
     cstring name, const IR::Vector<IR::Annotation> &annos) {
-    return IR::Annotations::addNameAnnotation(absl::StrCat(".", name), annos);
+    return IR::Annotations::maybeAddNameAnnotation(annos, absl::StrCat(".", name));
 }
 
 cstring ProgramStructure::makeUniqueName(cstring base) {
@@ -175,7 +175,7 @@ cstring ProgramStructure::createType(const IR::Type_StructLike *type, bool heade
     auto type_name = types.get(type);
     auto newType = type->apply(TypeConverter(this));
     if (newType->name.name != type_name) {
-        auto annos = IR::Annotations::addNameAnnotation(type->name.name, type->annotations);
+        auto annos = IR::Annotations::maybeAddNameAnnotation(type->annotations, type->name.name);
         if (header) {
             newType =
                 new IR::Type_Header(newType->srcInfo, type_name, std::move(annos), newType->fields);
@@ -239,7 +239,8 @@ void ProgramStructure::createTypes() {
             // Registers always use struct types
             auto newType = new IR::Type_Struct(
                 type->srcInfo, type_name,
-                IR::Annotations::addNameAnnotation(layoutTypeName, type->annotations), st->fields);
+                IR::Annotations::maybeAddNameAnnotation(type->annotations, layoutTypeName),
+                st->fields);
             checkHeaderType(newType, false);
             LOG3("Added type " << dbp(newType) << " named " << type_name << " from " << dbp(type));
             declarations->push_back(newType);
@@ -277,7 +278,7 @@ const IR::Type_Struct *ProgramStructure::createFieldListType(const IR::Expressio
 
     auto name = makeUniqueName(nr->path->name.name);
     auto result = new IR::Type_Struct(expression->srcInfo, name,
-                                      IR::Annotations::addNameAnnotation(nr->path->name, {}));
+                                      IR::Annotations::maybeAddNameAnnotation({}, nr->path->name));
     std::set<cstring> fieldNames;
     int field_id = 0;
     for (auto f : fl->fields) {
@@ -983,7 +984,8 @@ const IR::P4Table *ProgramStructure::convertTable(const IR::V1Table *table, cstr
                     name = bin->right->toString();
                 else if (bin->right->is<IR::Constant>())
                     name = bin->left->toString();
-                if (!name.isNullOrEmpty()) annos = IR::Annotations::addNameAnnotation(name, annos);
+                if (!name.isNullOrEmpty())
+                    annos = IR::Annotations::maybeAddNameAnnotation(annos, name);
             }
             // Here we rely on the fact that the spelling of 'rt' is
             // the same in P4-14 and core.p4/v1model.p4.

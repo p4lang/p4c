@@ -78,7 +78,7 @@ bool FindGlobalActionUses::preorder(const IR::PathExpression *path) {
 
         auto replacement = new IR::P4Action(
             action->srcInfo, IR::ID(action->name.srcInfo, newName, action->name.originalName),
-            IR::Annotations::addNameAnnotation(action->name, action->annotations), params,
+            IR::Annotations::maybeAddNameAnnotation(action->annotations, action->name), params,
             replBody);
         repl->addReplacement(action, control, replacement);
     }
@@ -165,7 +165,7 @@ bool FindRepeatedActionUses::preorder(const IR::PathExpression *expression) {
 
         replacement = new IR::P4Action(
             action->srcInfo, IR::ID(action->name.srcInfo, newName, action->name.originalName),
-            IR::Annotations::addNameAnnotation(action->name, action->annotations), params,
+            IR::Annotations::maybeAddNameAnnotation(action->annotations, action->name), params,
             replBody);
         repl->createReplacement(action, actionUser, replacement);
     }

@@ -72,11 +72,9 @@ struct StructTypeReplacement : public IHasDbPrint {
         auto vec = new IR::IndexedVector<IR::StructField>();
         flatten(typeMap, cstring::empty, type, type->annotations, vec, policy);
         if (type->is<IR::Type_Struct>()) {
-            replacementType =
-                new IR::Type_Struct(type->srcInfo, type->name, IR::Vector<IR::Annotation>(), *vec);
+            replacementType = new IR::Type_Struct(type->srcInfo, type->name, *vec);
         } else if (type->is<IR::Type_Header>()) {
-            replacementType =
-                new IR::Type_Header(type->srcInfo, type->name, IR::Vector<IR::Annotation>(), *vec);
+            replacementType = new IR::Type_Header(type->srcInfo, type->name, *vec);
         } else {
             BUG("Unexpected type %1%", type);
         }

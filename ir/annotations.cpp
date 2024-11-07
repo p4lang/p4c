@@ -64,13 +64,13 @@ void addOrReplace(Vector<Annotation> &annotations, const IR::Annotation *ann) {
     annotations.push_back(ann);
 }
 
-Vector<Annotation> addNameAnnotation(cstring name, const Vector<Annotation> &annos) {
+Vector<Annotation> maybeAddNameAnnotation(const Vector<Annotation> &annos, cstring name) {
     auto result = annos;
     Annotations::addIfNew(result, IR::Annotation::nameAnnotation, new IR::StringLiteral(name));
     return result;
 }
 
-Vector<Annotation> setNameAnnotation(cstring name, const Vector<Annotation> &annos) {
+Vector<Annotation> setNameAnnotation(const Vector<Annotation> &annos, cstring name) {
     auto result = annos;
     Annotations::addOrReplace(result, IR::Annotation::nameAnnotation, new IR::StringLiteral(name));
     return result;

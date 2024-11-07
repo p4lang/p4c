@@ -244,7 +244,7 @@ class Substitutions : public SubstituteParameters {
         cstring extName = renameMap->getExtName(orig);
         LOG3("Renaming " << dbp(orig) << " to " << newName << " (" << extName << ")");
         return new IR::P4Table(table->srcInfo, newName,
-                               IR::Annotations::setNameAnnotation(extName, table->annotations),
+                               IR::Annotations::setNameAnnotation(table->annotations, extName),
                                table->properties);
     }
     const IR::Node *postorder(IR::P4ValueSet *set) override {
@@ -253,7 +253,7 @@ class Substitutions : public SubstituteParameters {
         cstring extName = renameMap->getExtName(orig);
         LOG3("Renaming " << dbp(orig) << " to " << newName << "(" << extName << ")");
         return new IR::P4ValueSet(set->srcInfo, newName,
-                                  IR::Annotations::setNameAnnotation(extName, set->annotations),
+                                  IR::Annotations::setNameAnnotation(set->annotations, extName),
                                   set->elementType, set->size);
     }
     const IR::Node *postorder(IR::P4Action *action) override {
@@ -262,7 +262,7 @@ class Substitutions : public SubstituteParameters {
         cstring extName = renameMap->getExtName(orig);
         LOG3("Renaming " << dbp(orig) << " to " << newName << "(" << extName << ")");
         return new IR::P4Action(action->srcInfo, newName,
-                                IR::Annotations::setNameAnnotation(extName, action->annotations),
+                                IR::Annotations::setNameAnnotation(action->annotations, extName),
                                 action->parameters, action->body);
     }
     const IR::Node *postorder(IR::Declaration_Instance *instance) override {
@@ -271,7 +271,8 @@ class Substitutions : public SubstituteParameters {
         cstring extName = renameMap->getExtName(orig);
         LOG3("Renaming " << dbp(orig) << " to " << newName << "(" << extName << ")");
         instance->name = newName;
-        instance->annotations = IR::Annotations::setNameAnnotation(extName, instance->annotations);
+        IR::Annotations::addOrReplace(instance->annotations, IR::Annotation::nameAnnotation,
+                                      new IR::StringLiteral(extName));
         return instance;
     }
     const IR::Node *postorder(IR::Declaration_Variable *decl) override {
@@ -280,7 +281,8 @@ class Substitutions : public SubstituteParameters {
         cstring extName = renameMap->getExtName(orig);
         LOG3("Renaming " << dbp(orig) << " to " << newName << "(" << extName << ")");
         decl->name = newName;
-        decl->annotations = IR::Annotations::setNameAnnotation(extName, decl->annotations);
+        IR::Annotations::addOrReplace(decl->annotations, IR::Annotation::nameAnnotation,
+                                      new IR::StringLiteral(extName));
         return decl;
     }
     const IR::Node *postorder(IR::PathExpression *expression) override {

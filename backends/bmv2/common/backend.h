@@ -170,7 +170,7 @@ class RenameUserMetadata : public Transform {
             cstring newName = namePrefix + suffix;
             LOG2("Renaming " << f << " to " << newName);
             auto field = new IR::StructField(
-                f->srcInfo, f->name, IR::Annotations::setNameAnnotation(newName, f->annotations),
+                f->srcInfo, f->name, IR::Annotations::setNameAnnotation(f->annotations, newName),
                 f->type);
             fields.push_back(field);
         }

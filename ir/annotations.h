@@ -23,9 +23,10 @@ class Expression;
 
 namespace Annotations {
 /// Add @name annotation if there is no annotation already set
-[[nodiscard]] Vector<Annotation> addNameAnnotation(cstring name, const Vector<Annotation> &annos);
+[[nodiscard]] Vector<Annotation> maybeAddNameAnnotation(const Vector<Annotation> &annos,
+                                                        cstring name);
 /// Replaces @name annotation, if any. Otherwise - add the name annotation
-[[nodiscard]] Vector<Annotation> setNameAnnotation(cstring name, const Vector<Annotation> &annos);
+[[nodiscard]] Vector<Annotation> setNameAnnotation(const Vector<Annotation> &annos, cstring name);
 [[nodiscard]] Vector<Annotation> withoutNameAnnotation(const Vector<Annotation> &annos);
 
 void addIfNew(Vector<Annotation> &annotations, cstring name, const Expression *expr,

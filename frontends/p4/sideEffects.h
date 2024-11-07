@@ -118,10 +118,8 @@ class SideEffects : public Inspector {
         //  * isValid()
         //  * function, extern function, or extern method with noSideEffects annotation
         auto mi = MethodInstance::resolve(mce, refMap, typeMap);
-        if (const auto *em = mi->to<P4::ExternMethod>())
-            return !em->method->hasAnnotation(IR::Annotation::noSideEffectsAnnotation);
-        if (const auto *ef = mi->to<P4::ExternFunction>())
-            return !ef->method->hasAnnotation(IR::Annotation::noSideEffectsAnnotation);
+        if (const auto *ec = mi->to<P4::ExternCall>())
+            return !ec->method->hasAnnotation(IR::Annotation::noSideEffectsAnnotation);
         if (const auto *ef = mi->to<P4::FunctionCall>())
             return !ef->function->hasAnnotation(IR::Annotation::noSideEffectsAnnotation);
         if (const auto *bim = mi->to<BuiltInMethod>()) return bim->name != IR::Type_Header::isValid;

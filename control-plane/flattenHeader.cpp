@@ -43,7 +43,7 @@ void FlattenHeader::doFlatten(const IR::Type *type) {
         auto originalName = makeName(".");
         auto annotations = mergeAnnotations();
         auto field = new IR::StructField(
-            IR::ID(newName), IR::Annotations::setNameAnnotation(originalName, annotations), type);
+            IR::ID(newName), IR::Annotations::setNameAnnotation(annotations, originalName), type);
         newFields.push_back(field);
         auto ftype = typeMap->getTypeType(type, true);
         typeMap->setType(field, ftype);
