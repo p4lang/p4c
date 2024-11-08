@@ -57,7 +57,7 @@ bool ParserResourcesLogging::preorder(const IR::BFN::LoweredParserState *state) 
     for (const auto *match : state->transitions) {
         LOG1("State Match: " << match);
         std::string nextStateName =
-            (match->next ? match->next->name.c_str() : (match->loop ? match->loop.c_str() : "END"));
+            (match->next ? match->next->name.string() : (match->loop ? match->loop.string() : "END"));
         nextStateName = stripThreadPrefix(nextStateName);
         auto states = logStateTransitionsByMatch(nextStateName, state, match);
         for (auto state : states) {

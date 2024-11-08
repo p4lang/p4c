@@ -811,8 +811,8 @@ const char *PhvLogging::getDeparserAccessType(const PHV::Field *f) const {
 
 std::string PhvLogging::stripDotPrefix(const cstring name) const {
     // Check if the name starts with a '.' and strip it
-    if (name.get(0) != '.') return name.c_str();
-    return name.substr(1).c_str();
+    if (!name.startsWith(".")) return name.string();
+    return name.substr(1).string();
 }
 
 void PhvLogging::getAllDeparserUses(const PHV::Field *f,

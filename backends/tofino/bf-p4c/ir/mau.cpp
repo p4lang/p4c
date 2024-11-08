@@ -625,7 +625,7 @@ bool IR::MAU::Table::hit_miss_p4() const {
 
 bool IR::MAU::Table::action_chain() const {
     for (auto &n : next) {
-        if (n.first.get(0) != '$') {
+        if (!n.first.startsWith("$")) {
             return true;
         }
     }
@@ -683,7 +683,7 @@ bool IR::MAU::Table::has_non_exit_action() const {
 int IR::MAU::Table::action_next_paths() const {
     int action_paths = 0;
     for (auto &n : next) {
-        if (n.first == "$default" || n.first.get(0) != '$') action_paths++;
+        if (n.first == "$default" || !n.first.startsWith("$")) action_paths++;
     }
     if (has_exit_action()) action_paths++;
     return action_paths;

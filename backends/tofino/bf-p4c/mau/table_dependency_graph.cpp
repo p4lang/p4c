@@ -610,8 +610,8 @@ void DependencyGraph::to_json(Util::JsonObject *dgsJson, const FlowGraph &fg, cs
             BUG("Invalid dependency graph edge from %1% (gress = %2%) --> %3% (gress = %4%) ",
                 source->name, source->gress, target->name, target->gress);
         auto gress = source ? static_cast<int>(source->gress) : static_cast<int>(target->gress);
-        std::string src_name = std::string(source ? source->name.c_str() : "SOURCE");
-        std::string dst_name = std::string(target ? target->name.c_str() : "SINK");
+        std::string src_name = std::string(source ? source->name.string() : "SOURCE");
+        std::string dst_name = std::string(target ? target->name.string() : "SINK");
 
         edge.label = g[*edges];
         LOG5(src_name.c_str() << " --- " << dep_types(edge.label) << " --> " << dst_name.c_str());
@@ -667,8 +667,8 @@ void DependencyGraph::to_json(Util::JsonObject *dgsJson, const FlowGraph &fg, cs
             auto ftarget = boost::target(*fedges, fg.g);
             const IR::MAU::Table *source = fg.get_vertex(fsource);
             const IR::MAU::Table *target = fg.get_vertex(ftarget);
-            std::string src_name = std::string(source ? source->name.c_str() : "SOURCE");
-            std::string tgt_name = std::string(target ? target->name.c_str() : "SINK");
+            std::string src_name = std::string(source ? source->name.string() : "SOURCE");
+            std::string tgt_name = std::string(target ? target->name.string() : "SINK");
             if (!source && !target)
                 BUG_CHECK(source || target,
                           " Invalid dependency graph edge found with no"
