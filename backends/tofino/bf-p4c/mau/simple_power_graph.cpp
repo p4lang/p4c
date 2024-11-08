@@ -127,7 +127,7 @@ void SimplePowerGraph::add_connection(UniqueId parent, ordered_set<UniqueId> act
 /**
  * Outputs the final placed table control flow graphs to a .dot file.
  */
-void SimplePowerGraph::to_dot(const std::filesystem::path& filename) {
+void SimplePowerGraph::to_dot(const std::filesystem::path &filename) {
     std::ofstream myfile;
     myfile.open(filename);
 

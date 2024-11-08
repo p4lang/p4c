@@ -249,7 +249,7 @@ class GenerateOutputs : public PassManager {
                 (_outputDir / _options.programName.string()).replace_extension("dynhash.json");
             LOG2("ASM generation for dynamic hash: " << dynHashFile);
             ctxt_stream << "dynhash: \"" << _options.programName << ".dynhash.json\"" << std::endl;
-            std::ofstream dynhash(dynHashFile.string());
+            std::ofstream dynhash(dynHashFile);
             dynhash << _dynhash << std::endl << std::flush;
         }
         if (_options.debugInfo) {  // Generate graphs only if invoked with -g
