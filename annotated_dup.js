@@ -489,6 +489,7 @@ var annotated_dup =
         [ "HeaderConverter", "class_p4_1_1_b_m_v2_1_1_header_converter.html", "class_p4_1_1_b_m_v2_1_1_header_converter" ],
         [ "InspectPnaProgram", "class_p4_1_1_b_m_v2_1_1_inspect_pna_program.html", null ],
         [ "JsonObjects", "class_p4_1_1_b_m_v2_1_1_json_objects.html", "class_p4_1_1_b_m_v2_1_1_json_objects" ],
+        [ "JumpLabelInfo", "namespace_p4_1_1_b_m_v2.html#struct_p4_1_1_b_m_v2_1_1_jump_label_info", null ],
         [ "LowerExpressions", "class_p4_1_1_b_m_v2_1_1_lower_expressions.html", null ],
         [ "MatchImplementation", "class_p4_1_1_b_m_v2_1_1_match_implementation.html", null ],
         [ "MidEnd", "class_p4_1_1_b_m_v2_1_1_mid_end.html", "class_p4_1_1_b_m_v2_1_1_mid_end" ],

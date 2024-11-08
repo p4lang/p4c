@@ -15,8 +15,8 @@
 <polygon fill="white" stroke="#666666" points="149,-52 0,-52 0,0 149,0 149,-52"/>
 <text text-anchor="start" x="8" y="-40" font-family="Helvetica,sans-Serif" font-size="10.00">P4::ordered_map&lt; const</text>
 <text text-anchor="start" x="8" y="-29" font-family="Helvetica,sans-Serif" font-size="10.00"> IR::MAU::AttachedMemory</text>
-<text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00"> *, P4::safe_vector&lt; const</text>
-<text text-anchor="middle" x="74.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00"> IR::MAU::Table * &gt; &gt;</text>
+<text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00"> *, ordered_set&lt; const IR</text>
+<text text-anchor="middle" x="74.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::MAU::Table * &gt; &gt;</text>
 </a>
 </g>
 </g>

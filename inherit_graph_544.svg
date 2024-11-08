@@ -16,7 +16,7 @@
 <text text-anchor="start" x="8" y="-40" font-family="Helvetica,sans-Serif" font-size="10.00">P4::ordered_map&lt; const</text>
 <text text-anchor="start" x="8" y="-29" font-family="Helvetica,sans-Serif" font-size="10.00"> IR::BFN::ParserState</text>
 <text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00"> *, std::vector&lt; const</text>
-<text text-anchor="middle" x="68.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00"> PHV::Field * &gt; &gt;</text>
+<text text-anchor="middle" x="68.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00"> IR::HeaderStack * &gt; &gt;</text>
 </a>
 </g>
 </g>
