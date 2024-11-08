@@ -3530,11 +3530,9 @@ bool Memories::allocate_all_swbox_users() {
     }
 
     if (!action_bus_users.empty() || !synth_bus_users.empty()) {
-        int act_unused = 0;
-        for (auto abu : action_bus_users) act_unused += abu->left_to_place();
+        for (auto abu : action_bus_users) abu->left_to_place();
 
-        int sup_unused = 0;
-        for (auto sbu : synth_bus_users) sup_unused += sbu->left_to_place();
+        for (auto sbu : synth_bus_users) sbu->left_to_place();
 
         failure_reason = "allocate_all_swbox_users failed"_cs;
         LOG4(failure_reason);
@@ -4034,10 +4032,9 @@ bool Memories::allocate_all_gw() {
         }
     }
 
-    int search_bus_free = 0;
     for (int i = 0; i < SRAM_ROWS; i++) {
         for (int j = 0; j < 2; j++) {
-            if (sram_search_bus[i][j].free()) search_bus_free++;
+            sram_search_bus[i][j].free();
         }
     }
 
@@ -4061,7 +4058,6 @@ bool Memories::allocate_all_no_match_miss() {
     // so this is essentially what I'm doing.  More discussion is needed with the driver
     // team in order to determine if this is correct, or if this has to go through ternary and
     // tind tables
-    size_t no_match_tables_allocated = 0;
     for (auto *ta : no_match_miss_tables) {
         for (auto u_id : ta->allocation_units(nullptr, false, UniqueAttachedId::TIND_PP)) {
             auto &alloc = (*ta->memuse)[u_id];
@@ -4086,8 +4082,6 @@ bool Memories::allocate_all_no_match_miss() {
                 failure_reason = "failed to place no match miss "_cs + u_id.build_name();
                 LOG4(failure_reason);
                 return false;
-            } else {
-                no_match_tables_allocated++;
             }
         }
     }

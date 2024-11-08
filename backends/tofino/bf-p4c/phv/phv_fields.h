@@ -1752,7 +1752,8 @@ class CollectExtractedTogetherFields : public Inspector {
 };
 
 /// Map field to the parser states in which they are extracted or assigned from checksums.
-struct MapFieldToParserStates : public Inspector {
+class MapFieldToParserStates : public Inspector {
+ public:
     const PhvInfo &phv_i;
 
     ordered_map<const PHV::Field *, ordered_set<const IR::BFN::ParserState *>>

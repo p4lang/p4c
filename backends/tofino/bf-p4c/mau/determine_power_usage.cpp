@@ -289,10 +289,8 @@ void DeterminePowerUsage::postorder(const IR::MAU::Table *t) {
         } else if (mem.type == Memories::Use::EXACT) {
             // One unit of depth in each way is accessed on a table read.
             // Total RAMs accessed will then be the sum of the widths of ways.
-            int num_ways = 0;
             for (auto way : t->ways) {
                 // LOG4("  exact match width = " << way.width);
-                ++num_ways;
                 match_table.ram_read += way.width;
             }
             mau_features_->has_exact_[t->gress][t->stage()] = true;

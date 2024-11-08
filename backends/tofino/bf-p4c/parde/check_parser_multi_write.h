@@ -33,9 +33,10 @@ using namespace P4;
  * @brief Checks multiple writes to the same field on non-mutually exclusive paths.
  */
 
-struct CheckParserMultiWrite : public PassManager {
+class CheckParserMultiWrite : public PassManager {
     const PhvInfo &phv;
 
+ public:
     explicit CheckParserMultiWrite(const PhvInfo &phv);
 };
 

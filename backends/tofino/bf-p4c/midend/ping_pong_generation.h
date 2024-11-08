@@ -181,7 +181,6 @@ class PingPongGeneration : public PassManager {
      */
     class CheckPingPongTables : public Inspector {
         PingPongGeneration &self;
-        unsigned pipes = 0;
 
         // Finds ghost_metadata structure presence
         bool preorder(const IR::Type_Header *) override;
