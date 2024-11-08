@@ -53,14 +53,6 @@ inline void error(const char *format, Args &&...args) {
     auto action = context.getDefaultErrorDiagnosticAction();
     context.errorReporter().diagnose(action, nullptr, format, "", std::forward<Args>(args)...);
 }
-
-template <typename... Args>
-inline void error(cstring format, Args &&...args) {
-    auto &context = BaseCompileContext::get();
-    auto action = context.getDefaultErrorDiagnosticAction();
-    context.errorReporter().diagnose(action, nullptr, format.c_str(), "",
-                                     std::forward<Args>(args)...);
-}
 #endif
 
 /// Report errors of type kind. Requires that the node argument have source info.
@@ -99,15 +91,6 @@ void error(const char *format, const T *node, Args &&...args) {
     error(ErrorType::LEGACY_ERROR, format, node, std::forward<Args>(args)...);
 }
 
-/// Convert errors that have a first argument as a node with source info to errors with kind
-/// This allows incremental migration toward minimizing the number of errors and warnings
-/// reported when passes are repeated, as typed errors are filtered.
-// LEGACY: once we transition to error types, this should be deprecated
-template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T>>, class... Args>
-void error(cstring format, const T *node, Args &&...args) {
-    error(ErrorType::LEGACY_ERROR, format.c_str(), node, std::forward<Args>(args)...);
-}
-
 /// The const ref variant of the above
 // LEGACY: once we transition to error types, this should be deprecated
 template <class T, typename = std::enable_if_t<Util::has_SourceInfo_v<T> && !std::is_pointer_v<T>>,
@@ -134,16 +117,6 @@ inline void warning(const char *format, Args &&...args) {
     auto action = context.getDefaultWarningDiagnosticAction();
     context.errorReporter().diagnose(action, nullptr, format, "", std::forward<Args>(args)...);
 }
-
-/// Report a warning with the given message.
-template <typename... Args>
-inline void warning(cstring format, Args &&...args) {
-    auto &context = BaseCompileContext::get();
-    auto action = context.getDefaultWarningDiagnosticAction();
-    context.errorReporter().diagnose(action, nullptr, format.c_str(), "",
-                                     std::forward<Args>(args)...);
-}
-
 #endif
 
 /// Report warnings of type kind. Requires that the node argument have source info.
