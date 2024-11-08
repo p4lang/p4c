@@ -228,11 +228,10 @@ class BackendConverter : public Inspector {
         : refMap(refMap),
           typeMap(typeMap),
           bindings(bindings),
+          arch(new ParseTna()),
           pipe(pipe),
           pipes(pipes),
-          sourceInfoLogging(sourceInfoLogging) {
-        arch = new ParseTna(refMap, typeMap);
-    }
+          sourceInfoLogging(sourceInfoLogging) {}
 
     ordered_map<int, const IR::BFN::Pipe *> &getPipes() { return pipes; }
     cstring getPipelineName(const IR::P4Program *program, int index);

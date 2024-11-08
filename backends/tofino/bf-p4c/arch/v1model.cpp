@@ -2524,7 +2524,7 @@ SimpleSwitchTranslation::SimpleSwitchTranslation(P4::ReferenceMap *refMap, P4::T
         new V1::InsertChecksumError(parserChecksums),
         new V1::InsertChecksumDeposit(parserChecksums),
         new AddMetadataParserStates(refMap, typeMap),
-        new BFN::AddAdjustByteCount(structure, refMap, typeMap),
+        new BFN::AddAdjustByteCount(structure),
         new P4::EliminateSerEnums(typeMap),
         new BFN::FindArchitecture(),
         new TranslationLast(),

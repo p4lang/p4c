@@ -179,7 +179,6 @@ class FieldSliceLiveRangeDB : public IFieldSliceLiveRangeDB, public PassManager 
         const ClotInfo &clot;
         const MauBacktracker *backtracker;
         const FieldDefUse *defuse;
-        const MapFieldSliceToAction *fs_action_map;
         FieldSliceLiveRangeDB &self;
         const PHV::Pragmas &pragmas;
 
@@ -214,18 +213,16 @@ class FieldSliceLiveRangeDB : public IFieldSliceLiveRangeDB, public PassManager 
 
      public:
         DBSetter(const PhvInfo &phv, const ClotInfo &clot, const MauBacktracker *backtracker,
-                 const FieldDefUse *defuse, const MapFieldSliceToAction *fs_action_map,
-                 FieldSliceLiveRangeDB &self, const PHV::Pragmas &pragmas)
+                 const FieldDefUse *defuse, FieldSliceLiveRangeDB &self,
+                 const PHV::Pragmas &pragmas)
             : phv(phv),
               clot(clot),
               backtracker(backtracker),
               defuse(defuse),
-              fs_action_map(fs_action_map),
               self(self),
               pragmas(pragmas) {}
     };
 
-    const PHV::Pragmas &pragmas;
     MapFieldSliceToAction *fs_action_map;
     DBSetter *setter;
 
@@ -237,10 +234,9 @@ class FieldSliceLiveRangeDB : public IFieldSliceLiveRangeDB, public PassManager 
  public:
     FieldSliceLiveRangeDB(const MauBacktracker *backtracker, const FieldDefUse *defuse,
                           const PhvInfo &phv, const ReductionOrInfo &red_info, const ClotInfo &clot,
-                          const PHV::Pragmas &pragmas)
-        : pragmas(pragmas) {
+                          const PHV::Pragmas &pragmas) {
         fs_action_map = new MapFieldSliceToAction(phv, red_info);
-        setter = new DBSetter(phv, clot, backtracker, defuse, fs_action_map, *this, pragmas);
+        setter = new DBSetter(phv, clot, backtracker, defuse, *this, pragmas);
         addPasses({fs_action_map, setter});
     }
     /// @returns a const pointer to live range info, nullptr if not exist.

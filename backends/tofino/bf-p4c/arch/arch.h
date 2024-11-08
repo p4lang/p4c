@@ -325,13 +325,9 @@ using DefaultPortMap = std::map<int, std::vector<int>>;
 /** \ingroup ArchTranslation */
 class ParseTna : public Inspector {
     const IR::PackageBlock *mainBlock = nullptr;
-    P4::ReferenceMap *refMap;
-    P4::TypeMap *typeMap;
 
  public:
-    ParseTna(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) : refMap(refMap), typeMap(typeMap) {
-        setName("ParseTna");
-    }
+    ParseTna() { setName("ParseTna"); }
 
     // parse tna pipeline with single parser.
     void parseSingleParserPipeline(const IR::PackageBlock *block, unsigned index);
@@ -382,7 +378,7 @@ struct DoRewriteControlAndParserBlocks : Transform {
 struct RewriteControlAndParserBlocks : public PassManager {
     RewriteControlAndParserBlocks(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
         auto *evaluator = new P4::EvaluatorPass(refMap, typeMap);
-        auto *parseTna = new ParseTna(refMap, typeMap);
+        auto *parseTna = new ParseTna();
 
         passes.push_back(evaluator);
         passes.push_back(new VisitFunctor([evaluator, parseTna](const IR::Node *root) {

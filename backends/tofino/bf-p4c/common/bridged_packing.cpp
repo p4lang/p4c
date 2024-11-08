@@ -2335,7 +2335,7 @@ bool ExtractBridgeInfo::preorder(const IR::P4Program *program) {
     BUG_CHECK(toplevel, "toplevel cannot be nullptr");
 
     auto main = toplevel->getMain();
-    auto arch = new BFN::ParseTna(refMap, typeMap);
+    auto arch = new BFN::ParseTna();
     main->apply(*arch);
 
     /// SimplifyReferences passes are fixup passes that modifies the visited IR tree.

@@ -48,14 +48,10 @@ namespace BFN {
 /** \ingroup SimpleSwitchTranslation */
 class AddAdjustByteCount : public Modifier {
     V1::ProgramStructure *structure;
-    P4::ReferenceMap *refMap;
-    P4::TypeMap *typeMap;
     bool preorder(IR::Declaration_Instance *decl) override;
 
  public:
-    AddAdjustByteCount(V1::ProgramStructure *structure, P4::ReferenceMap *refMap,
-                       P4::TypeMap *typeMap)
-        : structure(structure), refMap(refMap), typeMap(typeMap) {}
+    explicit AddAdjustByteCount(V1::ProgramStructure *structure) : structure(structure) {}
 };
 
 /**
