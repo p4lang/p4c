@@ -71,7 +71,7 @@ action macswp args none {
 	and h.Ingress_tmp_tmp.inter 0xFFFFFFFFFFFFFFFF
 	mov m.Ingress_tmp h.Ingress_tmp_tmp.inter
 	mov h.Ingress_tmp_tmp.inter h.Ingress_tmp_128.upper_half
-	and h.Ingress_tmp_tmp.inter 0xFFFFFFFFFFFFFFFF
+	and h.Ingress_tmp_tmp.inter 0x0
 	movh m.Ingress_tmp h.Ingress_tmp_tmp.inter
 	mov m.Ingress_tmp_0 m.Ingress_tmp
 	movh h.Ingress_tmp_0_128.upper_half m.Ingress_tmp_0
@@ -80,7 +80,7 @@ action macswp args none {
 	and h.Ingress_tmp_0_tmp.inter 0xFFFFFFFFFFFFFFFF
 	mov m.Ingress_tmp_0 h.Ingress_tmp_0_tmp.inter
 	mov h.Ingress_tmp_0_tmp.inter h.Ingress_tmp_0_128.upper_half
-	and h.Ingress_tmp_0_tmp.inter 0xFFFFFFFFFFFFFFFF
+	and h.Ingress_tmp_0_tmp.inter 0x0
 	movh m.Ingress_tmp_0 h.Ingress_tmp_0_tmp.inter
 	mov m.Ingress_tmp_1 m.Ingress_tmp_0
 	movh h.Ingress_tmp_1_128.upper_half m.Ingress_tmp_1
@@ -89,7 +89,7 @@ action macswp args none {
 	and h.Ingress_tmp_1_tmp.inter 0xFFFFFFFFFFFFFFFF
 	mov m.Ingress_tmp_1 h.Ingress_tmp_1_tmp.inter
 	mov h.Ingress_tmp_1_tmp.inter h.Ingress_tmp_1_128.upper_half
-	and h.Ingress_tmp_1_tmp.inter 0xFFFFFFFFFFFFFFFF
+	and h.Ingress_tmp_1_tmp.inter 0x0
 	movh m.Ingress_tmp_1 h.Ingress_tmp_1_tmp.inter
 	mov h.dpdk_pseudo_header.pseudo m.Ingress_tmp_1
 	jmpneq LABEL_END h.dpdk_pseudo_header.pseudo 0x2

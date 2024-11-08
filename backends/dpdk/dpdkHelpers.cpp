@@ -598,7 +598,7 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                             "Negate operation is only supported on BIT types");
                 return false;
             }
-            if (n->expr->type->to<IR::Type_Bits>()->width_bits() == 128) {
+            if (n->expr->type->to<IR::Type_Bits>()->width_bits() == SupportedBitWidth) {
                 add128bitComplInstr(left, n->expr);
             } else {
                 BUG_CHECK(metadataStruct, "Metadata structure missing unexpectedly!");
@@ -632,7 +632,12 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
         }
     } else if (right->is<IR::PathExpression>() || right->is<IR::Member>() ||
                right->is<IR::BoolLiteral>() || right->is<IR::Constant>()) {
-        i = new IR::DpdkMovStatement(a->left, a->right);
+        if (right->is<IR::Constant>() &&
+            right->type->to<IR::Type_Bits>()->width_bits() == SupportedBitWidth) {
+            add128bitMovInstr(left, right);
+        } else {
+            i = new IR::DpdkMovStatement(left, right);
+        }
     } else {
         std::cerr << right->node_type_name() << std::endl;
         BUG("Not implemented.");
@@ -1506,9 +1511,9 @@ bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *s) {
 bool ConvertStatementToDpdk::checkIf128bitOp(const IR::Expression *src1Op,
                                              const IR::Expression *src2Op) {
     if (auto src1Type = src1Op->type->to<IR::Type_Bits>()) {
-        if (src1Type->width_bits() == 128) {
+        if (src1Type->width_bits() == SupportedBitWidth) {
             if (auto src2Type = src2Op->type->to<IR::Type_Bits>()) {
-                if (src2Type->width_bits() == 128) return true;
+                if (src2Type->width_bits() == SupportedBitWidth) return true;
             }
         }
     }
@@ -1559,22 +1564,25 @@ void ConvertStatementToDpdk::add128bitwiseInstr(const IR::Expression *src1Op,
     add_instr(new IR::DpdkMovhStatement(src1OpUpper, src1Op));
     add_instr(new IR::DpdkMovStatement(src1OpLower, src1Op));
     if (src2Op->is<IR::Constant>()) {
+        auto ConstVal = src2Op->to<IR::Constant>()->value;
+        auto upperConst = new IR::Constant(ConstVal >> 64);
+        auto lowerConst = new IR::Constant(ConstVal & 0xFFFFFFFFFFFFFFFF);
         add_instr(new IR::DpdkMovStatement(tmp, src1OpLower));
         if (strcmp(op, "xor") == 0) {
-            add_instr(new IR::DpdkXorStatement(tmp, tmp, src2Op));
+            add_instr(new IR::DpdkXorStatement(tmp, tmp, lowerConst));
         } else if (strcmp(op, "or") == 0) {
-            add_instr(new IR::DpdkOrStatement(tmp, tmp, src2Op));
+            add_instr(new IR::DpdkOrStatement(tmp, tmp, lowerConst));
         } else if (strcmp(op, "and") == 0) {
-            add_instr(new IR::DpdkAndStatement(tmp, tmp, src2Op));
+            add_instr(new IR::DpdkAndStatement(tmp, tmp, lowerConst));
         }
         add_instr(new IR::DpdkMovStatement(src1Op, tmp));
         add_instr(new IR::DpdkMovStatement(tmp, src1OpUpper));
         if (strcmp(op, "xor") == 0) {
-            add_instr(new IR::DpdkXorStatement(tmp, tmp, src2Op));
+            add_instr(new IR::DpdkXorStatement(tmp, tmp, upperConst));
         } else if (strcmp(op, "or") == 0) {
-            add_instr(new IR::DpdkOrStatement(tmp, tmp, src2Op));
+            add_instr(new IR::DpdkOrStatement(tmp, tmp, upperConst));
         } else if (strcmp(op, "and") == 0) {
-            add_instr(new IR::DpdkAndStatement(tmp, tmp, src2Op));
+            add_instr(new IR::DpdkAndStatement(tmp, tmp, upperConst));
         }
         add_instr(new IR::DpdkMovhStatement(src1Op, tmp));
     } else {
@@ -1659,8 +1667,11 @@ void ConvertStatementToDpdk::add128ComparisonInstr(cstring true_label, const IR:
     add_instr(new IR::DpdkMovhStatement(src1OpUpper, src1Op));
     add_instr(new IR::DpdkMovStatement(src1OpLower, src1Op));
     if (src2Op->is<IR::Constant>()) {
-        add_instr(new IR::DpdkXorStatement(src1OpUpper, src1OpUpper, src2Op));
-        add_instr(new IR::DpdkXorStatement(src1OpLower, src1OpLower, src2Op));
+        auto ConstVal = src2Op->to<IR::Constant>()->value;
+        auto upperConst = new IR::Constant(ConstVal >> 64);
+        auto lowerConst = new IR::Constant(ConstVal & 0xFFFFFFFFFFFFFFFF);
+        add_instr(new IR::DpdkXorStatement(src1OpUpper, src1OpUpper, upperConst));
+        add_instr(new IR::DpdkXorStatement(src1OpLower, src1OpLower, lowerConst));
     } else {
         auto src2OpHeaderName = src2Op->toString();
         if (src2Op->is<IR::Member>()) {
@@ -1733,5 +1744,41 @@ void ConvertStatementToDpdk::add128bitComplInstr(const IR::Expression *dst,
     add_instr(new IR::DpdkXorStatement(src1OpUpper, src1OpUpper, tmp));
     add_instr(new IR::DpdkMovStatement(dst, src1OpLower));
     add_instr(new IR::DpdkMovhStatement(dst, src1OpUpper));
+}
+
+void ConvertStatementToDpdk::add128bitMovInstr(const IR::Expression *left,
+                                               const IR::Expression *right) {
+    if (!createSandboxHeaderType) {
+        createSandboxHeaderType = true;
+        createSandboxHeader();
+    }
+    const IR::Type_Header *Type_Header = nullptr;
+    for (auto header : structure->header_types) {
+        if (header.first == "_p4c_sandbox_header_t") {
+            Type_Header = header.second;
+        }
+    }
+    if (Type_Header == nullptr) {
+        BUG("Header type not found");
+    }
+    auto leftHeaderName = left->toString();
+    if (left->is<IR::Member>()) {
+        leftHeaderName = left->to<IR::Member>()->member.name;
+    }
+    leftHeaderName = leftHeaderName + "_128";
+    auto leftHeader = new IR::Declaration_Variable(leftHeaderName, Type_Header);
+    auto leftHeaderInstance = new IR::DpdkHeaderInstance(leftHeader, Type_Header);
+    structure->addHeaderInstances(leftHeaderInstance);
+    auto leftUpper =
+        new IR::Member(new IR::PathExpression("h." + leftHeader->name), IR::ID("upper_half"));
+    auto leftLower =
+        new IR::Member(new IR::PathExpression("h." + leftHeader->name), IR::ID("lower_half"));
+    auto ConstVal = right->to<IR::Constant>()->value;
+    auto upperConst = new IR::Constant(ConstVal >> 64);
+    auto lowerConst = new IR::Constant(ConstVal & 0xFFFFFFFFFFFFFFFF);
+    add_instr(new IR::DpdkMovStatement(leftUpper, upperConst));
+    add_instr(new IR::DpdkMovStatement(leftLower, lowerConst));
+    add_instr(new IR::DpdkMovStatement(left, leftLower));
+    add_instr(new IR::DpdkMovhStatement(left, leftUpper));
 }
 }  // namespace P4::DPDK
