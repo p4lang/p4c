@@ -1,0 +1,3 @@
+psa-dpdk-128bitCast_error.p4(55): [--Werror=overlimit] error: DPDK target supports up-to 64-bit immediate values, 80w0xffffbbbb12345342aaaa exceeds the limit
+            hdr.ethernet.val = 0xFFFFBBBB12345342AAAA;
+                               ^^^^^^^^^^^^^^^^^^^^^^
