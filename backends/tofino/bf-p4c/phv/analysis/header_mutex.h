@@ -85,7 +85,7 @@ class AddParserHeadersToHeaderMutexMatrix : public BuildMutex {
         return !field || field->pov || field->metadata;
     }
 
-    void mark(const PHV::Field *field);
+    void mark(const PHV::Field *field) override;
 
     profile_t init_apply(const IR::Node *root) override;
     bool preorder(const IR::MAU::TableSeq *) override { return false; }

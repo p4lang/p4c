@@ -1024,7 +1024,7 @@ void CollectConstraints::end_apply() {
 
 void ConstraintSolver::add_field_alignment_constraints(cstring hdr, const PHV::Field *f,
                                                        int upper_bound) {
-    z3::expr v = context.bv_const(f->name, 16);
+    z3::expr v = context.bv_const(f->name.c_str(), 16);
 
     // lower bound for variable
     solver.add(v >= 0);
@@ -1059,8 +1059,8 @@ void ConstraintSolver::add_non_overlap_constraints(cstring hdr,
     using const_iterator = ordered_set<const PHV::Field *>::const_iterator;
     for (const_iterator it = fields.begin(); it != fields.end(); it++) {
         for (const_iterator it2 = it; ++it2 != fields.end();) {
-            z3::expr v1 = context.bv_const((*it)->name, 16);
-            z3::expr v2 = context.bv_const((*it2)->name, 16);
+            z3::expr v1 = context.bv_const((*it)->name.c_str(), 16);
+            z3::expr v2 = context.bv_const((*it2)->name.c_str(), 16);
             solver.add((v2 - v1 >= (*it)->size) || (v1 - v2 >= (*it2)->size));
 
             std::stringstream str;
@@ -1083,8 +1083,8 @@ void ConstraintSolver::add_extract_together_constraints(cstring hdr,
     for (const_iterator it = fields.begin(); it != fields.end(); it++) {
         for (const_iterator it2 = it; ++it2 != fields.end();) {
             if (phv.are_bridged_extracted_together(*it, *it2)) {
-                z3::expr v1 = context.bv_const((*it)->name, 16);
-                z3::expr v2 = context.bv_const((*it2)->name, 16);
+                z3::expr v1 = context.bv_const((*it)->name.c_str(), 16);
+                z3::expr v2 = context.bv_const((*it2)->name.c_str(), 16);
                 LOG6("Copack constraint: " << v1 << " and " << v2);
                 z3::expr pack_same_byte = (v1 / 8 == v2 / 8);
                 solver.add(pack_same_byte);
@@ -1114,8 +1114,8 @@ void ConstraintSolver::add_mutually_aligned_constraints(ordered_set<const PHV::F
     for (const_iterator it = fields.begin(); it != fields.end(); it++) {
         for (const_iterator it2 = it; ++it2 != fields.end();) {
             if (phv.are_mutually_aligned(*it, *it2)) {
-                z3::expr v1 = context.bv_const((*it)->name, 16);
-                z3::expr v2 = context.bv_const((*it2)->name, 16);
+                z3::expr v1 = context.bv_const((*it)->name.c_str(), 16);
+                z3::expr v2 = context.bv_const((*it2)->name.c_str(), 16);
                 LOG6("Mutually aligned constraint: " << v1 << " and " << v2);
                 solver.add(v1 % 8 == v2 % 8);
 
@@ -1137,8 +1137,8 @@ void ConstraintSolver::add_solitary_constraints(cstring hdr,
         if (!f1->is_solitary()) continue;
         for (auto f2 : fields) {
             if (f1->id == f2->id) continue;
-            z3::expr v1 = context.bv_const(f1->name, 16);
-            z3::expr v2 = context.bv_const(f2->name, 16);
+            z3::expr v1 = context.bv_const(f1->name.c_str(), 16);
+            z3::expr v2 = context.bv_const(f2->name.c_str(), 16);
             //
             //   byte1     byte2    byte3
             // |......22|...111..|22.......|
@@ -1175,7 +1175,7 @@ void ConstraintSolver::add_deparsed_to_tm_constraints(cstring hdr,
         if (f->size > 8) continue;
         if (!f->deparsed_to_tm()) continue;
         if (!f->no_split()) continue;
-        z3::expr v = context.bv_const(f->name, 16);
+        z3::expr v = context.bv_const(f->name.c_str(), 16);
         z3::expr mustFitSingleByte = ((v / 8) * 8) == (((v + f->size - 1) / 8) * 8);
         LOG6("NoSplit constraint: " << f);
         solver.add(mustFitSingleByte);
@@ -1193,7 +1193,7 @@ void ConstraintSolver::add_no_split_constraints(cstring hdr,
                                                 ordered_set<const PHV::Field *> &fields) {
     for (auto f : fields) {
         if (!f->no_split()) continue;
-        z3::expr v = context.bv_const(f->name, 16);
+        z3::expr v = context.bv_const(f->name.c_str(), 16);
         if (f->size <= 8) {
             if (f->no_split_container_size() != -1) continue;
             z3::expr mustFitSingleByte = ((v / 8) * 8) == (((v + f->size - 1) / 8) * 8);
@@ -1236,8 +1236,8 @@ void ConstraintSolver::add_no_split_constraints(cstring hdr,
             if (f1->id == f2->id) continue;
             // skip if f1 and f2 has a copack constraint
             if (phv.are_bridged_extracted_together(f1, f2)) continue;
-            z3::expr v1 = context.bv_const(f1->name, 16);
-            z3::expr v2 = context.bv_const(f2->name, 16);
+            z3::expr v1 = context.bv_const(f1->name.c_str(), 16);
+            z3::expr v2 = context.bv_const(f2->name.c_str(), 16);
 
             z3::expr upperBound = (v2 >= (((v1 + f1->no_split_container_size()) / 8) * 8));
             z3::expr lowerBound = (v2 + f2->size) <= ((v1 / 8) * 8);
@@ -1263,8 +1263,8 @@ void ConstraintSolver::add_no_pack_constraints(cstring hdr,
     for (const_iterator it = fields.begin(); it != fields.end(); it++) {
         for (const_iterator it2 = it; ++it2 != fields.end();) {
             if (phv.isFieldNoPack(*it, *it2)) {
-                z3::expr v1 = context.bv_const((*it)->name, 16);
-                z3::expr v2 = context.bv_const((*it2)->name, 16);
+                z3::expr v1 = context.bv_const((*it)->name.c_str(), 16);
+                z3::expr v2 = context.bv_const((*it2)->name.c_str(), 16);
                 LOG6("NoPack constraint: " << v1 << " and " << v2);
                 z3::expr noPack = (((v1 + (*it)->size) / 8) * 8) < ((v2 / 8) * 8) ||
                                   (((v2 + (*it2)->size) / 8) * 8) < ((v1 / 8) * 8);

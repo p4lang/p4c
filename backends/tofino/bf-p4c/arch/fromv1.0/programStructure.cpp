@@ -2664,7 +2664,7 @@ const IR::P4Program *TnaProgramStructure::create(Util::SourceInfo info) {
 FixChecksum::FixChecksum(TnaProgramStructure *structure) {
     CHECK_NULL(structure);
     refMap.setIsV1(true);
-    auto parserGraphs = new P4ParserGraphs(&refMap, cstring());
+    auto parserGraphs = new P4ParserGraphs(&refMap, false);
     addPasses({
         new P4::CreateBuiltins(),
         new P4::ResolveReferences(&refMap, true),  // check shadowing

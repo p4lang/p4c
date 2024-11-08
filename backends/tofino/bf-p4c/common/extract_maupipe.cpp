@@ -1297,7 +1297,7 @@ void AttachTables::InitializeStatefulAlus ::updateAttachedSalu(const IR::Declara
     if (ext->type->toString().startsWith("LearnAction")) salu->learn_action = true;
 
     auto prim = findContext<IR::MAU::Primitive>();
-    LOG6("  - " << (prim ? prim->name : "<no primitive>"));
+    LOG6("  - " << (prim ? prim->name.c_str() : "<no primitive>"));
     if (prim && prim->name.endsWith(".address")) {
         salu->chain_vpn = true;
         return;

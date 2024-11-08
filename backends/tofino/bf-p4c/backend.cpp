@@ -151,7 +151,7 @@ class CheckUnimplementedFeatures : public Inspector {
                       source.toString());
         else
             throw Util::CompilerUnimplemented(
-                source.sourceLine, source.fileName,
+                source.sourceLine, source.fileName.c_str(),
                 "Table entries are not yet implemented in this backend");
         return false;
     }
@@ -259,7 +259,7 @@ Backend::Backend(const BFN_Options &o, int pipe_id)
         new CollectPhvInfo(phv),
         new GatherReductionOrReqs(deps.red_info),
         new InstructionSelection(options, phv, deps.red_info),
-        new DumpPipe("After InstructionSelection"_cs),
+        new DumpPipe("After InstructionSelection"),
         new FindDependencyGraph(phv, deps, &options, "program_graph"_cs,
                                 "After Instruction Selection"_cs),
         options.decaf ? &decaf : nullptr,
@@ -275,7 +275,7 @@ Backend::Backend(const BFN_Options &o, int pipe_id)
         new AutoAlias(phv, *pragmaAlias, *noOverlay),
         new Alias(phv, *pragmaAlias),
         new CollectPhvInfo(phv),
-        new DumpPipe("After Alias"_cs),
+        new DumpPipe("After Alias"),
         // This is the backtracking point from table placement to PHV allocation. Based on a
         // container conflict-free PHV allocation, we generate a number of no-pack conflicts between
         // fields (these are fields written in different nonmutually exclusive actions in the same
@@ -284,7 +284,7 @@ Backend::Backend(const BFN_Options &o, int pipe_id)
         // metadata packing.
         &mau_backtracker,
         new ResolveSizeOfOperator(),
-        new DumpPipe("After ResolveSizeOfOperator"_cs),
+        new DumpPipe("After ResolveSizeOfOperator"),
         // Run after bridged metadata packing as bridged packing updates the parser state.
         new CollectPhvInfo(phv),
         new ParserCopyProp(phv),
@@ -353,7 +353,7 @@ Backend::Backend(const BFN_Options &o, int pipe_id)
         //                                        with table info
         //     Trivial PHV alloc => table alloc ==================> PHV alloc ===> redo table.
         new AddInitsInMAU(phv, mauInitFields, false),
-        new DumpPipe("Before phv_analysis"_cs),
+        new DumpPipe("Before phv_analysis"),
         new DumpTableFlowGraph(phv),
         options.alt_phv_alloc
             ? new PassManager({
@@ -445,7 +445,7 @@ Backend::Backend(const BFN_Options &o, int pipe_id)
         // tables to be split across stages.
         new GeneratePrimitiveInfo(phv, primNode),
         &table_alloc,
-        new DumpPipe("After TableAlloc"_cs),
+        new DumpPipe("After TableAlloc"),
         &table_summary,
         // Rerun defuse analysis here so that table placements are used to correctly calculate live
         // ranges output in the assembly.
@@ -462,7 +462,7 @@ Backend::Backend(const BFN_Options &o, int pipe_id)
                                : nullptr,
         new InstructionAdjustment(phv, deps.red_info),
         &nextTblProp,  // Must be run after all modifications to the table graph have finished!
-        new DumpPipe("Final table graph"_cs),
+        new DumpPipe("Final table graph"),
         new CheckFieldCorruption(defuse, phv, PHV_Analysis->get_pragmas()),
         new AdjustExtract(phv),
         phvLoggingDefUseInfo,

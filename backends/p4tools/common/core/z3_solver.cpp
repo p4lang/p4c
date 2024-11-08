@@ -135,7 +135,7 @@ void Z3Solver::pop() {
 void Z3Solver::comment(cstring commentStr) {
     // GCC complains about an unused parameter here.
     (void)(commentStr);
-    Z3_LOG("additional comment:%s", commentStr);
+    Z3_LOG("additional comment:%v", commentStr);
 }
 
 void Z3Solver::seed(unsigned seed) {

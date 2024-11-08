@@ -158,39 +158,41 @@ struct InferWriteMode : public ParserTransform {
                   /* 1 */ first_valid(c_field->getSourceInfo(), example->curr->getSourceInfo()),
                   /* 2 */ c_field->toString(),
                   /* 3 */ field_to_states.write_to_state.at(example->curr),
-                  /* 4 */ example->prev.size() > 1 ? "s"_cs : ""_cs,
-                  /* 5 */ on_loop && example->prev.size() > 1 ? " including assignment"_cs : ""_cs,
-                  /* 6 */ on_loop ? " in the same state due to a loop"_cs : ""_cs,
+                  /* 4 */ example->prev.size() > 1 ? "s"_cs : cstring::empty,
+                  /* 5 */ on_loop && example->prev.size() > 1 ? " including assignment"_cs
+                                                              : cstring::empty,
+                  /* 6 */ on_loop ? " in the same state due to a loop"_cs : cstring::empty,
                   /* 7 */ example->prev.size() - int(on_loop) > 0
                       ? "See the following errors for the list of previous assignments. "_cs
-                      : ""_cs,
+                      : cstring::empty,
                   /* 8 */ example->is_rewritten_always
                       ? "\nThe field will either always be assigned multiple times or there "_cs +
                             "is a loopback in the parser that always reassigns the field."_cs
-                      : ""_cs,
+                      : cstring::empty,
                   /* 9 */ example->curr->is<IR::BFN::ChecksumVerify>()
                       ? CHECKSUM_VERIFY_OR_SUGGESTION
-                      : ""_cs);
+                      : "");
         } else {
-            warning(
-                ErrorType::WARN_UNSUPPORTED,
-                "%1%%2% is assigned in state %3% but has also previous assignment%4%%5%%6%. %7%"
-                "This re-assignment is not supported by Tofino.%8%%9%",
-                /* 1 */ first_valid(c_field->getSourceInfo(), example->curr->getSourceInfo()),
-                /* 2 */ c_field->toString(),
-                /* 3 */ field_to_states.write_to_state.at(example->curr),
-                /* 4 */ example->prev.size() > 1 ? "s"_cs : ""_cs,
-                /* 5 */ on_loop && example->prev.size() > 1 ? " including assignment"_cs : ""_cs,
-                /* 6 */ on_loop ? " in the same state due to a loop"_cs : ""_cs,
-                /* 7 */ example->prev.size() - int(on_loop) > 0
-                    ? "See the following errors for the list of previous assignments. "_cs
-                    : ""_cs,
-                /* 8 */ example->is_rewritten_always
-                    ? "\nThe field will either always be assigned multiple times or there "_cs +
-                          "is a loopback in the parser that always reassigns the field."_cs
-                    : ""_cs,
-                /* 9 */ example->curr->is<IR::BFN::ChecksumVerify>() ? CHECKSUM_VERIFY_OR_SUGGESTION
-                                                                     : ""_cs);
+            warning(ErrorType::WARN_UNSUPPORTED,
+                    "%1%%2% is assigned in state %3% but has also previous assignment%4%%5%%6%. %7%"
+                    "This re-assignment is not supported by Tofino.%8%%9%",
+                    /* 1 */ first_valid(c_field->getSourceInfo(), example->curr->getSourceInfo()),
+                    /* 2 */ c_field->toString(),
+                    /* 3 */ field_to_states.write_to_state.at(example->curr),
+                    /* 4 */ example->prev.size() > 1 ? "s"_cs : cstring::empty,
+                    /* 5 */ on_loop && example->prev.size() > 1 ? " including assignment"_cs
+                                                                : cstring::empty,
+                    /* 6 */ on_loop ? " in the same state due to a loop"_cs : cstring::empty,
+                    /* 7 */ example->prev.size() - int(on_loop) > 0
+                        ? "See the following errors for the list of previous assignments. "_cs
+                        : cstring::empty,
+                    /* 8 */ example->is_rewritten_always
+                        ? "\nThe field will either always be assigned multiple times or there "_cs +
+                              "is a loopback in the parser that always reassigns the field."_cs
+                        : cstring::empty,
+                    /* 9 */ example->curr->is<IR::BFN::ChecksumVerify>()
+                        ? CHECKSUM_VERIFY_OR_SUGGESTION
+                        : "");
         }
         for (auto p : example->prev) {
             if (p == example->curr) continue;  // skip printing the looped assignment again

@@ -472,9 +472,9 @@ void TableSummary::postorder(const IR::BFN::Pipe *pipe) {
     const auto print_table_placement_errors = [&]() {
         for (auto &msg : tablePlacementErrors) {
             if (msg.second)
-                error(msg.first);
+                error(msg.first.c_str());
             else
-                warning(msg.first);
+                warning(msg.first.c_str());
         }
     };
 
@@ -1097,7 +1097,7 @@ ordered_map<int, ordered_map<cstring, int>> TableSummary::collect_table_sram_all
                 // There are allocation for xxx$action xxx$tind. Here extracts the prefix, which is
                 // the table name.
                 for (; pos < tbl.size(); pos++) {
-                    if (tbl[pos] == '$') {
+                    if (tbl.get(pos) == '$') {
                         break;
                     }
                 }

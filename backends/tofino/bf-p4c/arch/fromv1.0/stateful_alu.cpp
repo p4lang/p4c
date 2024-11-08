@@ -859,7 +859,7 @@ IR::IndexedVector<IR::Node>::iterator find_in_scope(IR::Vector<IR::Node> *scope,
             }
         }
     }
-    BUG_CHECK("%s not in scope", name);
+    BUG("%v not in scope", name);
     return scope->end();
 }
 

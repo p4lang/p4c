@@ -97,7 +97,7 @@ class ReversibleParserGraph {
         if (state != nullptr && !gress) gress = state->gress;
 
         if (contains(state)) {
-            LOG1("State " << ((state) ? state->name : "END") << " already exists");
+            LOG1("State " << ((state) ? state->name.c_str() : "END") << " already exists");
             return state_to_vertex.at(state);
         }
 

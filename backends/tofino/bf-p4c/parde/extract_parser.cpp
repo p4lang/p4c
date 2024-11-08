@@ -1852,7 +1852,7 @@ void ExtractParser::end_apply() {
 /// intrinsic metadata extraction logic based on the target device (tofino/jbay).
 ProcessParde::ProcessParde(const IR::BFN::Pipe *rv, bool useV1model)
     : Logging::PassManager("parser"_cs, Logging::Mode::AUTO) {
-    setName("ProcessParde"_cs);
+    setName("ProcessParde");
     addPasses({
         new AddParserMetadata(rv, useV1model),
         new AddDeparserMetadata(rv),

@@ -229,7 +229,7 @@ std::string ClotCandidate::print() const {
             else
                 attr = "unused";
 
-            tp.addRow({std::string(first_extract_info ? parser_state->name : ""),
+            tp.addRow({first_extract_info ? parser_state->name.string() : "",
                        std::string(slice->shortString()), bits.str(), attr});
             first_extract_info = false;
 

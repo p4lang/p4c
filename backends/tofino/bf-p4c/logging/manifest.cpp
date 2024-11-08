@@ -310,7 +310,7 @@ void Manifest::OutputFiles::serialize(Writer &writer) const {
     writer.StartObject();  // Abe`s note: is this a bug?  I copied it verbatim from the legacy code.
     writer.Key("path");
     if (m_context)
-        writer.String(m_context);
+        writer.String(m_context.c_str());
     else
         writer.String("");
     writer.EndObject();
@@ -320,7 +320,7 @@ void Manifest::OutputFiles::serialize(Writer &writer) const {
         writer.Key("binary");
         writer.StartObject();
         writer.Key("path");
-        writer.String(m_context);
+        writer.String(m_context.c_str());
         writer.EndObject();
     }
 

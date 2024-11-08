@@ -16,9 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/* clang-format off */
-
 #include "backends/tofino/bf-p4c/device.h"
+// Device needs to be imported first.
 #include "resources_parser.h"
 
 namespace BFN {
@@ -31,7 +30,7 @@ bool ParserResourcesLogging::preorder(const IR::BFN::LoweredParser *parser) {
     const auto nStates = Device::pardeSpec().numTcamRows();
 
     BUG_CHECK(parsers[parser->name].phase0 == nullptr,
-            "phase0 for parser: %1% is already set unexpectedly!", parser->name);
+              "phase0 for parser: %1% is already set unexpectedly!", parser->name);
 
     if (parser->gress == INGRESS) {
         if (parser->phase0) {
@@ -56,8 +55,8 @@ bool ParserResourcesLogging::preorder(const IR::BFN::LoweredParserState *state) 
 
     for (const auto *match : state->transitions) {
         LOG1("State Match: " << match);
-        std::string nextStateName =
-            (match->next ? match->next->name : (match->loop ? match->loop : "END"));
+        std::string nextStateName = (match->next ? match->next->name.string()
+                                                 : (match->loop ? match->loop.string() : "END"));
         nextStateName = stripThreadPrefix(nextStateName);
         auto states = logStateTransitionsByMatch(nextStateName, state, match);
         for (auto state : states) {
@@ -87,13 +86,13 @@ ParserResourcesLogging::logStateTransitionsByMatch(const std::string &nextStateN
 
         CHECK_NULL(match);
         for (auto *stmt : match->extracts) {
-          CHECK_NULL(stmt);
+            CHECK_NULL(stmt);
 
             if (auto *extract = stmt->to<IR::BFN::LoweredExtractClot>()) {
                 if (extract->dest) {
                     parser_state_transition->append_clot_extracts(new ClotExtracts(
-                            extract->source->to<IR::BFN::LoweredPacketRVal>()->range.lo,
-                            extract->source->to<IR::BFN::LoweredPacketRVal>()->range.size(),
+                        extract->source->to<IR::BFN::LoweredPacketRVal>()->range.lo,
+                        extract->source->to<IR::BFN::LoweredPacketRVal>()->range.size(),
                         extract->dest->tag));
                 }
             }
@@ -151,8 +150,8 @@ void ParserResourcesLogging::logStateExtracts(const IR::BFN::LoweredParserMatch 
             BUG_CHECK(buffer || constVal, "Unknown extract primitive: %1%", prim);
 
             auto ex = new StateExtracts(bitWidth, destContainer, extractorId,
-                buffer ? new int(buffer->range.loByte()) : nullptr,
-                constVal ? new int(constVal->constant) : nullptr);
+                                        buffer ? new int(buffer->range.loByte()) : nullptr,
+                                        constVal ? new int(constVal->constant) : nullptr);
             result.push_back(ex);
         }
     }
@@ -188,8 +187,8 @@ void ParserResourcesLogging::logStateMatches(const IR::BFN::LoweredParserState *
         BUG_CHECK(constVal || pvs, "Unknown parser match value type: %1%", match->value);
 
         auto smo = new StateMatchesOn(bitWidth, hardwareId,
-            constVal ? getConstVal(constVal, bitWidth, shift) : "",
-            pvs ? pvs->name.c_str() : "");
+                                      constVal ? getConstVal(constVal, bitWidth, shift) : "",
+                                      pvs ? pvs->name.c_str() : "");
         result.push_back(smo);
     }
 }

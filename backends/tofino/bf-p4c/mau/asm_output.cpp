@@ -1078,10 +1078,11 @@ void MauAsmOutput::emit_table_format(std::ostream &out, indent_t indent,
                 for (size_t i = 0; i < bits.size(); i++) {
                     cstring name = format_name(type);
                     if (bits.size() > 1) name = name + std::to_string(i);
-                    fmt.emit(out, name, group, bits[i].first, bits[i].second - bits[i].first + 1);
+                    fmt.emit(out, name.c_str(), group, bits[i].first,
+                             bits[i].second - bits[i].first + 1);
                 }
             } else {
-                fmt.emit(out, format_name(type), group, bits);
+                fmt.emit(out, format_name(type).c_str(), group, bits);
             }
         }
 
@@ -1122,7 +1123,7 @@ void MauAsmOutput::emit_table_format(std::ostream &out, indent_t indent,
             } while (start_bit != -1);
         }
         bits.emplace_back(start, end);
-        fmt.emit(out, format_name(type), group, bits);
+        fmt.emit(out, format_name(type).c_str(), group, bits);
         group++;
     }
 

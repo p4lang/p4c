@@ -1034,9 +1034,9 @@ void PHV::Field::updateAlignment(PHV::AlignmentReason reason, const FieldAlignme
         auto alignmentSourceStr = [&](const FieldAlignment &alignment,
                                       const Util::SourceInfo &srcInfo) {
             std::stringstream ss;
-            ss << (srcInfo.isValid() ? srcInfo.toPositionString() : "Source unknown")
+            ss << (srcInfo.isValid() ? srcInfo.toPositionString() : "Source unknown"_cs)
                << ": alignment = " << alignment.align << " (little endian)" << std::endl
-               << (srcInfo.isValid() ? srcInfo.toSourceFragment() : "");
+               << (srcInfo.isValid() ? srcInfo.toSourceFragment() : cstring::empty);
             return ss.str();
         };
         std::stringstream inferredAlignments;

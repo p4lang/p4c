@@ -140,7 +140,7 @@ bool PragmaBytePack::preorder(const IR::BFN::Pipe *pipe) {
         if (!ignore) {
             auto rst = add_packing_constraint(pack);
             if (!rst.ok()) {
-                error(cstring(*rst.error + ", %1%"), *pack.src_info);
+                error("%1%, %2%", *rst.error, *pack.src_info);
             }
         }
     }
