@@ -566,7 +566,7 @@ $(function(){initNavTree('resolve__negative__extract_8h_source.html',''); initRe
 <div class="line"><a id="l00566" name="l00566"></a><span class="lineno">  566</span>                    LOG4(<span class="stringliteral">&quot;Adding transition { &quot;</span></div>
 <div class="line"><a id="l00567" name="l00567"></a><span class="lineno">  567</span>                         &lt;&lt; succ_tr-&gt;value &lt;&lt; <span class="stringliteral">&quot; } shift value &quot;</span> &lt;&lt; new_shift &lt;&lt; <span class="stringliteral">&quot; B from state &quot;</span></div>
 <div class="line"><a id="l00568" name="l00568"></a><span class="lineno">  568</span>                         &lt;&lt; state_succ-&gt;name &lt;&lt; <span class="stringliteral">&quot; to state &quot;</span></div>
-<div class="line"><a id="l00569" name="l00569"></a><span class="lineno">  569</span>                         &lt;&lt; (succ_tr-&gt;next != <span class="keyword">nullptr</span> ? succ_tr-&gt;next-&gt;name : <span class="stringliteral">&quot;EXIT&quot;</span>));</div>
+<div class="line"><a id="l00569" name="l00569"></a><span class="lineno">  569</span>                         &lt;&lt; (succ_tr-&gt;next != <span class="keyword">nullptr</span> ? succ_tr-&gt;next-&gt;name.c_str() : <span class="stringliteral">&quot;EXIT&quot;</span>));</div>
 <div class="line"><a id="l00570" name="l00570"></a><span class="lineno">  570</span>                }</div>
 <div class="line"><a id="l00571" name="l00571"></a><span class="lineno">  571</span>            }</div>
 <div class="line"><a id="l00572" name="l00572"></a><span class="lineno">  572</span>        }</div>
