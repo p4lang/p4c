@@ -46,15 +46,8 @@ const IR::Node *DuplicateActionControlPlaneNameCheck::postorder(IR::P4Action *ac
     // by the time this pass executes, so this method will handle
     // such actions.
     if (findContext<IR::P4Control>() == nullptr) {
-        auto annos = action->annotations;
-        bool hasNameAnnotation = false;
-        if (annos != nullptr) {
-            auto nameAnno = annos->getSingle(IR::Annotation::nameAnnotation);
-            if (nameAnno) {
-                hasNameAnnotation = true;
-            }
-        }
-        if (!hasNameAnnotation) {
+        auto nameAnno = action->getAnnotation(IR::Annotation::nameAnnotation);
+        if (!nameAnno) {
             // name is what this top-level action's @name annotation
             // will be, after LocalizeAllActions pass adds one.
             cstring name = "." + action->name;
