@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/v2/allocator_base.h"
+#include "backends/tofino/bf-p4c/phv/v2/allocator_base.h"
 
 #include <iomanip>
 #include <optional>
@@ -26,20 +26,20 @@
 
 #include <boost/range/join.hpp>
 
-#include "bf-p4c/common/table_printer.h"
-#include "bf-p4c/device.h"
-#include "bf-p4c/phv/action_phv_constraints.h"
-#include "bf-p4c/phv/action_source_tracker.h"
-#include "bf-p4c/phv/phv.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/utils/container_equivalence.h"
-#include "bf-p4c/phv/utils/slice_alloc.h"
-#include "bf-p4c/phv/utils/utils.h"
-#include "bf-p4c/phv/v2/copacker.h"
-#include "bf-p4c/phv/v2/greedy_tx_score.h"
-#include "bf-p4c/phv/v2/phv_kit.h"
-#include "bf-p4c/phv/v2/tx_score.h"
-#include "bf-p4c/phv/v2/utils_v2.h"
+#include "backends/tofino/bf-p4c/common/table_printer.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/phv/action_phv_constraints.h"
+#include "backends/tofino/bf-p4c/phv/action_source_tracker.h"
+#include "backends/tofino/bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/utils/container_equivalence.h"
+#include "backends/tofino/bf-p4c/phv/utils/slice_alloc.h"
+#include "backends/tofino/bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/phv/v2/copacker.h"
+#include "backends/tofino/bf-p4c/phv/v2/greedy_tx_score.h"
+#include "backends/tofino/bf-p4c/phv/v2/phv_kit.h"
+#include "backends/tofino/bf-p4c/phv/v2/tx_score.h"
+#include "backends/tofino/bf-p4c/phv/v2/utils_v2.h"
 #include "lib/exceptions.h"
 
 namespace PHV {

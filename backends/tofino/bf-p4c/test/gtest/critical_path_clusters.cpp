@@ -16,28 +16,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/analysis/critical_path_clusters.h"
+#include "backends/tofino/bf-p4c/phv/analysis/critical_path_clusters.h"
 
 #include <optional>
 
 #include <boost/algorithm/string/replace.hpp>
 
-#include "bf-p4c/common/elim_unused.h"
-#include "bf-p4c/common/field_defuse.h"
-#include "bf-p4c/common/header_stack.h"
-#include "bf-p4c/common/map_tables_to_actions.h"
-#include "bf-p4c/mau/action_mutex.h"
-#include "bf-p4c/mau/instruction_selection.h"
-#include "bf-p4c/mau/table_dependency_graph.h"
-#include "bf-p4c/mau/table_mutex.h"
-#include "bf-p4c/phv/action_phv_constraints.h"
-#include "bf-p4c/phv/analysis/mutex_overlay.h"
-#include "bf-p4c/phv/analysis/pack_conflicts.h"
-#include "bf-p4c/phv/cluster_phv_operations.h"
-#include "bf-p4c/phv/mau_backtracker.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/pragma/pa_mutually_exclusive.h"
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "backends/tofino/bf-p4c/common/elim_unused.h"
+#include "backends/tofino/bf-p4c/common/field_defuse.h"
+#include "backends/tofino/bf-p4c/common/header_stack.h"
+#include "backends/tofino/bf-p4c/common/map_tables_to_actions.h"
+#include "backends/tofino/bf-p4c/mau/action_mutex.h"
+#include "backends/tofino/bf-p4c/mau/instruction_selection.h"
+#include "backends/tofino/bf-p4c/mau/table_dependency_graph.h"
+#include "backends/tofino/bf-p4c/mau/table_mutex.h"
+#include "backends/tofino/bf-p4c/phv/action_phv_constraints.h"
+#include "backends/tofino/bf-p4c/phv/analysis/mutex_overlay.h"
+#include "backends/tofino/bf-p4c/phv/analysis/pack_conflicts.h"
+#include "backends/tofino/bf-p4c/phv/cluster_phv_operations.h"
+#include "backends/tofino/bf-p4c/phv/mau_backtracker.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_mutually_exclusive.h"
+#include "backends/tofino/bf-p4c/test/gtest/tofino_gtest_utils.h"
 #include "gtest/gtest.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"

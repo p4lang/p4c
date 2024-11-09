@@ -128,7 +128,7 @@ bool UBPFStateTranslationVisitor::preorder(const IR::ParserState *parserState) {
 bool UBPFStateTranslationVisitor::preorder(const IR::SelectCase *selectCase) {
     builder->emitIndent();
     if (auto mask = selectCase->keyset->to<IR::Mask>()) {
-        builder->appendFormat("if ((%s", selectValue);
+        builder->appendFormat("if ((%v", selectValue);
         builder->append(" & ");
         visit(mask->right);
         builder->append(") == (");
@@ -137,7 +137,7 @@ bool UBPFStateTranslationVisitor::preorder(const IR::SelectCase *selectCase) {
         visit(mask->right);
         builder->append("))");
     } else {
-        builder->appendFormat("if (%s", selectValue);
+        builder->appendFormat("if (%v", selectValue);
         builder->append(" == ");
         visit(selectCase->keyset);
         builder->append(")");
@@ -162,13 +162,13 @@ bool UBPFStateTranslationVisitor::preorder(const IR::SelectExpression *expressio
     etype->declare(builder, selectValue, false);
     builder->endOfStatement(true);
     builder->emitIndent();
-    builder->appendFormat("%s = ", selectValue);
+    builder->appendFormat("%v = ", selectValue);
     visit(expression->select);
     builder->endOfStatement(true);
     for (auto e : expression->selectCases) visit(e);
 
     builder->emitIndent();
-    builder->appendFormat("else goto %s;", IR::ParserState::reject.c_str());
+    builder->appendFormat("else goto %v;", IR::ParserState::reject);
     builder->newline();
     return false;
 }

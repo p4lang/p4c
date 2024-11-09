@@ -16,11 +16,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/fieldslice_live_range.h"
+#include "backends/tofino/bf-p4c/phv/fieldslice_live_range.h"
 
 #include <boost/algorithm/string/split.hpp>
 
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "backends/tofino/bf-p4c/test/gtest/tofino_gtest_utils.h"
 #include "gtest/gtest.h"
 #include "lib/exceptions.h"
 

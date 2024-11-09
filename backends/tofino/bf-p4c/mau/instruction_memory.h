@@ -20,9 +20,9 @@
 #define BF_P4C_MAU_INSTRUCTION_MEMORY_H_
 
 /* clang-format off */
-#include "bf-p4c/mau/table_layout.h"
-#include "bf-p4c/ir/gress.h"
-#include "bf-p4c/common/alloc.h"
+#include "backends/tofino/bf-p4c/mau/table_layout.h"
+#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/common/alloc.h"
 
 using namespace P4;
 

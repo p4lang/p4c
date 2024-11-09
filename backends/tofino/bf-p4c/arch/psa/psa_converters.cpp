@@ -18,8 +18,8 @@
 
 #include "psa_converters.h"
 
-#include "bf-p4c/arch/bridge_metadata.h"
-#include "bf-p4c/arch/program_structure.h"
+#include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
+#include "backends/tofino/bf-p4c/arch/program_structure.h"
 #include "lib/ordered_map.h"
 #include "programStructure.h"
 

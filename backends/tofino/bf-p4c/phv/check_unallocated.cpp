@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/check_unallocated.h"
+#include "backends/tofino/bf-p4c/phv/check_unallocated.h"
 
 #include <initializer_list>
 

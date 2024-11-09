@@ -16,17 +16,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/action_analysis.h"
+#include "backends/tofino/bf-p4c/mau/action_analysis.h"
 
 #include <optional>
 
 #include <boost/algorithm/string/replace.hpp>
 
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/mau/instruction_selection.h"
-#include "bf-p4c/mau/validate_actions.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/validate_allocation.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/mau/instruction_selection.h"
+#include "backends/tofino/bf-p4c/mau/validate_actions.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/validate_allocation.h"
 #include "gtest/gtest.h"
 #include "test/gtest/helpers.h"
 #include "tofino_gtest_utils.h"

@@ -19,11 +19,11 @@
 #ifndef BF_P4C_COMMON_CHECK_UNINITIALIZED_READ_H_
 #define BF_P4C_COMMON_CHECK_UNINITIALIZED_READ_H_
 
-#include "bf-p4c/arch/bridge_metadata.h"
-#include "bf-p4c/common/field_defuse.h"
-#include "bf-p4c/mau/table_dependency_graph.h"
-#include "bf-p4c/phv/phv_parde_mau_use.h"
-#include "bf-p4c/phv/pragma/phv_pragmas.h"
+#include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
+#include "backends/tofino/bf-p4c/common/field_defuse.h"
+#include "backends/tofino/bf-p4c/mau/table_dependency_graph.h"
+#include "backends/tofino/bf-p4c/phv/phv_parde_mau_use.h"
+#include "backends/tofino/bf-p4c/phv/pragma/phv_pragmas.h"
 #include "ir/ir.h"
 
 using namespace P4;

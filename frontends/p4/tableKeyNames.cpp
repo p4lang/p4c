@@ -125,20 +125,18 @@ void KeyNameGenerator::postorder(const IR::MethodCallExpression *expression) {
 
 const IR::Node *DoTableKeyNames::postorder(IR::KeyElement *keyElement) {
     LOG3("Visiting " << getOriginal());
-    if (keyElement->getAnnotation(IR::Annotation::nameAnnotation) != nullptr)
+    if (keyElement->hasAnnotation(IR::Annotation::nameAnnotation))
         // already present: no changes
         return keyElement;
     KeyNameGenerator kng(typeMap);
-    ;
     kng.setCalledBy(this);
     (void)keyElement->expression->apply(kng);
     cstring name = kng.getName(keyElement->expression);
 
     LOG3("Generated name " << name);
     if (!name) return keyElement;
-    keyElement->annotations = keyElement->annotations->addAnnotation(
-        IR::Annotation::nameAnnotation,
-        new IR::StringLiteral(keyElement->expression->srcInfo, name), false);
+    keyElement->addAnnotation(IR::Annotation::nameAnnotation,
+                              new IR::StringLiteral(keyElement->expression->srcInfo, name));
     return keyElement;
 }
 

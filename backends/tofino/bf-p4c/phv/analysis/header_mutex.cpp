@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/analysis/header_mutex.h"
+#include "backends/tofino/bf-p4c/phv/analysis/header_mutex.h"
 
 #include <optional>
 
@@ -25,8 +25,8 @@
 #include <boost/graph/graph_utility.hpp>
 #include <boost/graph/reverse_graph.hpp>
 
-#include "bf-p4c/common/table_printer.h"
-#include "bf-p4c/logging/event_logger.h"
+#include "backends/tofino/bf-p4c/common/table_printer.h"
+#include "backends/tofino/bf-p4c/logging/event_logger.h"
 
 cstring get_header_state_as_cstring(HeaderState header_state) {
     BUG_CHECK(header_state_to_cstring.count(header_state), "%d is not a valid HeaderState.",
@@ -830,7 +830,7 @@ ordered_set<std::pair<cstring, cstring>> ExcludeMAUNotMutexHeaders::process_set_
                     std::string tmp{header.c_str()};
                     auto begin = tmp.find("[");
                     auto end = tmp.find("]");
-                    if (!header.find(substring) || begin == std::string::npos ||
+                    if (!header.find(substring.c_str()) || begin == std::string::npos ||
                         end == std::string::npos)
                         return;
                     int index = std::stoi(tmp.substr(begin + 1, end - (begin + 1)));
@@ -921,7 +921,7 @@ std::string ExcludeMAUNotMutexHeaders::get_active_headers_change_table(
         TablePrinter::Align::LEFT);
     for (size_t i = 0; i < header_info.all_headers.size(); i++) {
         auto header_name = header_info.get_header_name(i);
-        if (!header_name.find(gress)) continue;
+        if (!header_name.find(gress.c_str())) continue;
 
         auto header_index = i * state_size;
         auto begin_state =

@@ -19,7 +19,7 @@
 #ifndef BF_P4C_PARDE_STACK_PUSH_SHIMS_H_
 #define BF_P4C_PARDE_STACK_PUSH_SHIMS_H_
 
-#include "bf-p4c/common/header_stack.h"
+#include "backends/tofino/bf-p4c/common/header_stack.h"
 #include "parde_visitor.h"
 
 /**

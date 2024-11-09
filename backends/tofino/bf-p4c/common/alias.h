@@ -19,11 +19,11 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_COMMON_ALIAS_H_
 #define BACKENDS_TOFINO_BF_P4C_COMMON_ALIAS_H_
 
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/logging/pass_manager.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/pragma/pa_alias.h"
-#include "bf-p4c/phv/transforms/auto_alias.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/logging/pass_manager.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_alias.h"
+#include "backends/tofino/bf-p4c/phv/transforms/auto_alias.h"
 #include "ir/ir.h"
 
 using namespace P4;

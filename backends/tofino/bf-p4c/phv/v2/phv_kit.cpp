@@ -16,9 +16,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/v2/phv_kit.h"
+#include "backends/tofino/bf-p4c/phv/v2/phv_kit.h"
 
-#include "bf-p4c/phv/slicing/phv_slicing_iterator.h"
+#include "backends/tofino/bf-p4c/phv/slicing/phv_slicing_iterator.h"
 
 namespace PHV {
 namespace v2 {

@@ -18,8 +18,8 @@
 
 #include "action_data_bus.h"
 
-#include "bf-p4c/mau/resource.h"
-#include "bf-p4c/mau/tofino/action_data_bus.h"
+#include "backends/tofino/bf-p4c/mau/resource.h"
+#include "backends/tofino/bf-p4c/mau/tofino/action_data_bus.h"
 
 void ActionDataBus::clear() {
     allocated_attached.clear();

@@ -19,10 +19,10 @@
 #ifndef BF_P4C_PHV_ADD_SPECIAL_CONSTRAINTS_H_
 #define BF_P4C_PHV_ADD_SPECIAL_CONSTRAINTS_H_
 
-#include "bf-p4c/parde/decaf.h"
-#include "bf-p4c/phv/action_phv_constraints.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/pragma/phv_pragmas.h"
+#include "backends/tofino/bf-p4c/parde/decaf.h"
+#include "backends/tofino/bf-p4c/phv/action_phv_constraints.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/pragma/phv_pragmas.h"
 #include "ir/ir.h"
 
 /** This class is for adding all special constraints (sometimes the result of workarounds to get

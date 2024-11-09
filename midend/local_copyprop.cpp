@@ -165,7 +165,7 @@ class DoLocalCopyPropagation::RewriteTableKeys : public Transform {
         if (!table) return exp;
         if (auto name = expr_name(exp)) {
             const Visitor::Context *ctxt = nullptr;
-            if (findContext<IR::KeyElement>(ctxt) && ctxt->child_index == 1) {
+            if (findContext<IR::KeyElement>(ctxt) && ctxt->child_index == 0) {
                 if (table->key_remap.count(name)) {
                     LOG4("  rewriting key " << name << " : " << table->key_remap.at(name));
                     return table->key_remap.at(name);
@@ -234,8 +234,8 @@ bool DoLocalCopyPropagation::operator==(const ControlFlowVisitor &a_) const {
 /// test to see if names denote overlapping locations
 bool DoLocalCopyPropagation::name_overlap(cstring name1, cstring name2) {
     if (name1 == name2) return true;
-    if (name1.startsWith(name2.string_view()) && strchr(".[", name1.get(name2.size()))) return true;
-    if (name2.startsWith(name1.string_view()) && strchr(".[", name2.get(name1.size()))) return true;
+    if (name1.startsWith(name2) && strchr(".[", name1.get(name2.size()))) return true;
+    if (name2.startsWith(name1) && strchr(".[", name2.get(name1.size()))) return true;
     return false;
 }
 
@@ -259,8 +259,7 @@ void DoLocalCopyPropagation::forOverlapAvail(cstring name,
         if (it != available.end()) fn(it->first, &it->second);
     }
     for (auto it = available.upper_bound(name); it != available.end(); ++it) {
-        if (!it->first.startsWith(name.string_view()) || !strchr(".[", it->first.get(name.size())))
-            break;
+        if (!it->first.startsWith(name) || !strchr(".[", it->first.get(name.size()))) break;
         fn(it->first, &it->second);
     }
 }
@@ -314,7 +313,7 @@ const IR::Expression *DoLocalCopyPropagation::copyprop_name(cstring name,
     if (!name) return nullptr;
     if (inferForTable) {
         const Visitor::Context *ctxt = nullptr;
-        if (findContext<IR::KeyElement>(ctxt) && ctxt->child_index == 1)
+        if (findContext<IR::KeyElement>(ctxt) && ctxt->child_index == 0)
             inferForTable->keyreads.insert(name);
     }
     if (!working) return nullptr;
@@ -491,7 +490,7 @@ IR::ForInStatement *DoLocalCopyPropagation::preorder(IR::ForInStatement *s) {
 }
 
 bool isAsync(const IR::Vector<IR::Method> methods, cstring callee, cstring caller) {
-    if (callee[0] == '.') callee = callee.substr(1);
+    if (callee.startsWith(".")) callee = callee.substr(1);
     for (auto *m : methods) {
         if (m->name != callee) continue;
         auto sync = m->getAnnotation(IR::Annotation::synchronousAnnotation);

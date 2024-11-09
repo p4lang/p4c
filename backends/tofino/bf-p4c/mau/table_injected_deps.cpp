@@ -21,7 +21,7 @@
 #include <algorithm>
 #include <sstream>
 
-#include "bf-p4c/common/field_defuse.h"
+#include "backends/tofino/bf-p4c/common/field_defuse.h"
 #include "ir/ir.h"
 #include "lib/log.h"
 #include "lib/ltbitmatrix.h"

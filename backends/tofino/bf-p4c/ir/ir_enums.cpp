@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/ir/ir_enums.h"
+#include "backends/tofino/bf-p4c/ir/ir_enums.h"
 
 namespace P4 {
 namespace IR {

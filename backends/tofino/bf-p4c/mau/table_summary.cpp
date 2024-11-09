@@ -62,21 +62,21 @@
  * \enddot
  */
 
-#include "bf-p4c/mau/table_summary.h"
+#include "backends/tofino/bf-p4c/mau/table_summary.h"
 
 #include <numeric>
 #include <sstream>
 
 #include <boost/optional/optional_io.hpp>
 
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/common/table_printer.h"
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/ir/gress.h"
-#include "bf-p4c/logging/filelog.h"
-#include "bf-p4c/mau/memories.h"
-#include "bf-p4c/mau/resource_estimate.h"
-#include "bf-p4c/mau/table_placement.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/common/table_printer.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/logging/filelog.h"
+#include "backends/tofino/bf-p4c/mau/memories.h"
+#include "backends/tofino/bf-p4c/mau/resource_estimate.h"
+#include "backends/tofino/bf-p4c/mau/table_placement.h"
 #include "lib/hex.h"
 #include "lib/map.h"
 using namespace State;
@@ -472,9 +472,9 @@ void TableSummary::postorder(const IR::BFN::Pipe *pipe) {
     const auto print_table_placement_errors = [&]() {
         for (auto &msg : tablePlacementErrors) {
             if (msg.second)
-                error(msg.first);
+                error(msg.first.c_str());
             else
-                warning(msg.first);
+                warning(msg.first.c_str());
         }
     };
 
@@ -1097,7 +1097,7 @@ ordered_map<int, ordered_map<cstring, int>> TableSummary::collect_table_sram_all
                 // There are allocation for xxx$action xxx$tind. Here extracts the prefix, which is
                 // the table name.
                 for (; pos < tbl.size(); pos++) {
-                    if (tbl[pos] == '$') {
+                    if (tbl.get(pos) == '$') {
                         break;
                     }
                 }

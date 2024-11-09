@@ -18,11 +18,11 @@
 
 #include <assert.h>
 
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/lib/error_type.h"
-#include "bf-p4c/mau/instruction_memory.h"
-#include "bf-p4c/mau/stateful_alu.h"
-#include "bf-p4c/mau/table_layout.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/lib/error_type.h"
+#include "backends/tofino/bf-p4c/mau/instruction_memory.h"
+#include "backends/tofino/bf-p4c/mau/stateful_alu.h"
+#include "backends/tofino/bf-p4c/mau/table_layout.h"
 #include "gateway_control_flow.h"
 #include "ir/ir.h"
 
@@ -193,7 +193,7 @@ void Table::visit_gateway_inhibited(THIS *self, Visitor &v, payload_info_t &payl
             if (!current) current = &saved->flow_clone();
             if (auto *gwcf = dynamic_cast<::BFN::GatewayControlFlow *>(current))
                 gwcf->pre_visit_table_next(self, tag);
-            current->visit(self->next.at(tag), tag);
+            current->visit(self->next.at(tag), tag.c_str());
             if (payload_info.post_payload) {
                 if (current != payload_info.post_payload)
                     payload_info.post_payload->flow_merge(*current);
@@ -245,7 +245,7 @@ class SplitFlowVisitTableNext : public SplitFlowVisit_base {
 
             if (table->next.count(next_action_key)) {
                 if (!next_visitor) next_visitor = &saved->flow_clone();
-                next_visitor->visit(table->next.at(next_action_key), next_action_key,
+                next_visitor->visit(table->next.at(next_action_key), next_action_key.c_str(),
                                     start_index + idx);
             }
         }
@@ -309,7 +309,7 @@ void Table::visit_match_table(THIS *self, Visitor &v, payload_info_t &payload_in
         auto exit_visitor = &saved->flow_clone();
         if (payload_info.action_info.count(action_name))
             exit_visitor->flow_merge(*payload_info.action_info.at(action_name).flow_state);
-        exit_visitor->visit(action, "actions"_cs);
+        exit_visitor->visit(action, "actions");
         exit_visitor->flow_merge_global_to("-EXIT-"_cs);
     }
 
@@ -332,7 +332,7 @@ void Table::visit_match_table(THIS *self, Visitor &v, payload_info_t &payload_in
 
         if (action->exitAction) continue;
 
-        auto *pinfo = ::getref(payload_info.action_info, action_name);
+        auto *pinfo = P4::getref(payload_info.action_info, action_name);
         if (!action->hit_allowed && !action->default_allowed) {
             // can't be invoked from the match table
             if (pinfo)
@@ -345,7 +345,7 @@ void Table::visit_match_table(THIS *self, Visitor &v, payload_info_t &payload_in
         }
 
         // Visit the action.
-        current->visit(action, "actions"_cs);
+        current->visit(action, "actions");
 
         // Figure out which keys in the next_visitors table need updating.
         if (pinfo) {
@@ -625,7 +625,7 @@ bool IR::MAU::Table::hit_miss_p4() const {
 
 bool IR::MAU::Table::action_chain() const {
     for (auto &n : next) {
-        if (n.first[0] != '$') {
+        if (!n.first.startsWith("$")) {
             return true;
         }
     }
@@ -683,7 +683,7 @@ bool IR::MAU::Table::has_non_exit_action() const {
 int IR::MAU::Table::action_next_paths() const {
     int action_paths = 0;
     for (auto &n : next) {
-        if (n.first == "$default" || n.first[0] != '$') action_paths++;
+        if (n.first == "$default" || !n.first.startsWith("$")) action_paths++;
     }
     if (has_exit_action()) action_paths++;
     return action_paths;

@@ -16,12 +16,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/parde/extract_deparser.h"
+#include "backends/tofino/bf-p4c/parde/extract_deparser.h"
 
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/common/ir_utils.h"
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/common/ir_utils.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/device.h"
 #include "frontends/p4/methodInstance.h"
 #include "ir/pattern.h"
 

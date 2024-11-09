@@ -106,7 +106,7 @@ class ComputeDefUse::SetupJoinPoints : public ControlFlowVisitor::SetupJoinPoint
         LOG6("SetupJoinPoints(P4Parser " << p->name << ")" << indent);
         LOG8("    " << Log::indent << Log::indent << *p << Log::unindent << Log::unindent);
         if (auto start = p->states.getDeclaration<IR::ParserState>("start"_cs))
-            visit(start, "start"_cs);
+            visit(start, "start");
         return false;
     }
     bool preorder(const IR::P4Control *) override { return false; }
@@ -220,7 +220,7 @@ bool ComputeDefUse::preorder(const IR::P4Control *c) {
         if (p->direction == IR::Direction::In || p->direction == IR::Direction::InOut)
             def_info[p].defs.insert(getLoc(p));
     state = NORMAL;
-    visit(c->body, "body"_cs);  // just visit the body; tables/actions will be visited when applied
+    visit(c->body, "body");  // just visit the body; tables/actions will be visited when applied
     for (auto *p : c->getApplyParameters()->parameters)
         if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut)
             add_uses(getLoc(p), def_info[p]);
@@ -233,7 +233,7 @@ bool ComputeDefUse::preorder(const IR::P4Table *tbl) {
     if (state == SKIPPING) return false;
     IndentCtl::TempIndent indent;
     LOG5("ComputeDefUse(P4Table " << tbl->name << ")" << indent);
-    if (auto key = tbl->getKey()) visit(key, "key"_cs);
+    if (auto key = tbl->getKey()) visit(key, "key");
     if (auto actions = tbl->getActionList()) {
         parallel_visit(actions->actionList, "actions");
     } else {
@@ -247,7 +247,7 @@ bool ComputeDefUse::preorder(const IR::P4Action *act) {
     for (auto *p : *act->parameters) def_info[p].defs.insert(getLoc(p));
     IndentCtl::TempIndent indent;
     LOG5("ComputeDefUse(P4Action " << act->name << ")" << indent);
-    visit(act->body, "body"_cs);
+    visit(act->body, "body");
     return false;
 }
 
@@ -260,7 +260,7 @@ bool ComputeDefUse::preorder(const IR::P4Parser *p) {
             def_info[a].defs.insert(getLoc(a));
     state = NORMAL;
     if (auto start = p->states.getDeclaration<IR::ParserState>("start"_cs)) {
-        visit(start, "start"_cs);
+        visit(start, "start");
     } else {
         BUG("No start state in %s", p);
     }

@@ -20,9 +20,9 @@
 
 #include <algorithm>
 
-#include "bf-p4c/common/pragma/all_pragmas.h"
-#include "bf-p4c/parde/clot/pragma/do_not_use_clot.h"
-#include "bf-p4c/phv/pragma/phv_pragmas.h"
+#include "backends/tofino/bf-p4c/common/pragma/all_pragmas.h"
+#include "backends/tofino/bf-p4c/parde/clot/pragma/do_not_use_clot.h"
+#include "backends/tofino/bf-p4c/phv/pragma/phv_pragmas.h"
 
 const std::vector<std::string> *CollectGlobalPragma::g_global_pragma_names =
     new std::vector<std::string>{PragmaAlias::name,

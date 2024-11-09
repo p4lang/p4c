@@ -38,9 +38,10 @@ struct ID : Util::IHasSourceInfo, public IHasDbPrint {
     ID(Util::SourceInfo si, cstring n) : srcInfo(si), name(n), originalName(n) {
         if (n.isNullOrEmpty()) BUG("Identifier with no name");
     }
+    // FIXME: Replace with single string_view constructor
     ID(const char *n) : ID(Util::SourceInfo(), cstring(n)) {}  // NOLINT(runtime/explicit)
     ID(cstring n) : ID(Util::SourceInfo(), n) {}               // NOLINT(runtime/explicit)
-    ID(std::string n) : ID(Util::SourceInfo(), n) {}           // NOLINT(runtime/explicit)
+    ID(const std::string &n) : ID(Util::SourceInfo(), n) {}    // NOLINT(runtime/explicit)
     ID(cstring n, cstring old) : ID(Util::SourceInfo(), n, old) {}
     void dbprint(std::ostream &out) const override {
         out << name;
@@ -58,13 +59,20 @@ struct ID : Util::IHasSourceInfo, public IHasDbPrint {
     bool operator!=(const char *a) const { return name != a; }
     /// Defer to cstring's notion of less, which is a lexicographical and not a pointer comparison.
     bool operator<(const char *a) const { return name < a; }
-    explicit operator bool() const { return name; }
+    explicit operator bool() const { return name.c_str() != nullptr; }
     operator cstring() const { return name; }
     std::string string() const { return name.string(); }
     std::string_view string_view() const { return name.string_view(); }
     bool isDontCare() const { return name == "_"; }
     Util::SourceInfo getSourceInfo() const override { return srcInfo; }
     cstring toString() const override { return originalName.isNullOrEmpty() ? name : originalName; }
+
+    /// Helper to simplify usage of ID in Abseil functions (e.g. StrCat / StrFormat, etc.) without
+    /// explicit string_view conversion.
+    template <typename Sink>
+    friend void AbslStringify(Sink &sink, const ID &id) {
+        sink.Append(id.string_view());
+    }
 };
 
 }  // namespace P4::IR

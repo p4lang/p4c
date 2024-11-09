@@ -19,7 +19,7 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_PARDE_LOWER_PARSER_H_
 #define BACKENDS_TOFINO_BF_P4C_PARDE_LOWER_PARSER_H_
 
-#include "bf-p4c/parde/parser_header_sequences.h"
+#include "backends/tofino/bf-p4c/parde/parser_header_sequences.h"
 #include "common/utils.h"
 #include "ir/ir.h"
 #include "logging/pass_manager.h"

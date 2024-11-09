@@ -19,9 +19,9 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_PARDE_ALLOCATE_PARSER_CHECKSUM_H_
 #define BACKENDS_TOFINO_BF_P4C_PARDE_ALLOCATE_PARSER_CHECKSUM_H_
 
-#include "bf-p4c/logging/pass_manager.h"
-#include "bf-p4c/parde/clot/clot_info.h"
-#include "bf-p4c/parde/parser_info.h"
+#include "backends/tofino/bf-p4c/logging/pass_manager.h"
+#include "backends/tofino/bf-p4c/parde/clot/clot_info.h"
+#include "backends/tofino/bf-p4c/parde/parser_info.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "parde_visitor.h"

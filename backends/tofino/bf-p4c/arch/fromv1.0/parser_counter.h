@@ -19,7 +19,7 @@
 #ifndef BF_P4C_ARCH_FROMV1_0_PARSER_COUNTER_H_
 #define BF_P4C_ARCH_FROMV1_0_PARSER_COUNTER_H_
 
-#include "bf-p4c/arch/fromv1.0/v1_converters.h"
+#include "backends/tofino/bf-p4c/arch/fromv1.0/v1_converters.h"
 
 namespace BFN {
 namespace V1 {

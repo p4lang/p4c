@@ -19,9 +19,9 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_PHV_TRANSFORMS_AUTO_ALIAS_H_
 #define BACKENDS_TOFINO_BF_P4C_PHV_TRANSFORMS_AUTO_ALIAS_H_
 
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/pragma/pa_alias.h"
-#include "bf-p4c/phv/pragma/pa_no_overlay.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_alias.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_no_overlay.h"
 #include "lib/bitvec.h"
 
 class DetermineCandidateHeaders : public Inspector {

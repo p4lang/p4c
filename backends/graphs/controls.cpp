@@ -254,7 +254,7 @@ bool ControlGraphs::preorder(const IR::Key *key) {
     for (auto elVec : key->keyElements) {
         sstream << elVec->matchType->path->name.name << ": ";
         bool has_name = false;
-        for (auto ann : elVec->annotations->annotations) {
+        for (auto ann : elVec->annotations) {
             if (ann->toString() == "@name") {
                 sstream << ann->getName();
                 has_name = true;

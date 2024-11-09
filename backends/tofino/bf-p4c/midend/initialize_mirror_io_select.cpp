@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/midend/initialize_mirror_io_select.h"
+#include "backends/tofino/bf-p4c/midend/initialize_mirror_io_select.h"
 
 namespace BFN {
 

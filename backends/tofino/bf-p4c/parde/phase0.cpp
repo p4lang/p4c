@@ -16,12 +16,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/parde/phase0.h"
+#include "backends/tofino/bf-p4c/parde/phase0.h"
 
 #include <algorithm>
 
-#include "bf-p4c/common/asm_output.h"
-#include "bf-p4c/parde/field_packing.h"
+#include "backends/tofino/bf-p4c/common/asm_output.h"
+#include "backends/tofino/bf-p4c/parde/field_packing.h"
 #include "frontends/p4-14/fromv1.0/v1model.h"
 #include "frontends/p4/coreLibrary.h"
 #include "lib/cstring.h"
@@ -91,7 +91,7 @@ std::ostream &operator<<(std::ostream &out, const P4::IR::BFN::Phase0 *p0) {
         BUG_CHECK(phase0Range.contains(fieldRange),
                   "Phase 0 allocation %1% overflows the phase 0 region %2% for "
                   "field %3%",
-                  fieldRange, phase0Range, field.isPadding() ? "(padding)" : field.source);
+                  fieldRange, phase0Range, field.isPadding() ? "(padding)" : field.source.c_str());
 
         posBits += field.width;
         if (field.isPadding()) continue;

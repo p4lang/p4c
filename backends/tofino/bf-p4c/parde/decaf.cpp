@@ -20,8 +20,8 @@
 
 #include <bitset>
 
-#include "bf-p4c/common/table_printer.h"
-#include "bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/common/table_printer.h"
+#include "backends/tofino/bf-p4c/device.h"
 
 template <typename T>
 static std::vector<T> to_vector(const ordered_set<T> &data) {

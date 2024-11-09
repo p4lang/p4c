@@ -20,8 +20,8 @@
 #define BF_P4C_MAU_TOFINO_INPUT_XBAR_H_
 
 /* clang-format off */
-#include "bf-p4c/mau/input_xbar.h"
-#include "bf-p4c/common/alloc.h"
+#include "backends/tofino/bf-p4c/mau/input_xbar.h"
+#include "backends/tofino/bf-p4c/common/alloc.h"
 
 namespace Tofino {
 

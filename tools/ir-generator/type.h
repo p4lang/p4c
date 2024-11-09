@@ -19,6 +19,7 @@ limitations under the License.
 
 #include <vector>
 
+#include "absl/strings/str_cat.h"
 #include "lib/cstring.h"
 #include "lib/source_file.h"
 
@@ -67,7 +68,7 @@ struct LookupScope : public Util::IHasSourceInfo {
     Util::SourceInfo getSourceInfo() const override { return srcInfo; }
     cstring toString() const override {
         if (global) return "IR::"_cs;
-        return (in ? in->toString() + name : name) + "::"_cs;
+        return absl::StrCat(in ? in->toString() : ""_cs, name, "::");
     }
     IrNamespace *resolve(const IrNamespace *) const;
     bool operator==(const LookupScope &l) const {

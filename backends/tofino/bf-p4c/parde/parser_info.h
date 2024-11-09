@@ -27,10 +27,10 @@
 #include <boost/graph/graphviz.hpp>
 #include <boost/graph/topological_sort.hpp>
 
-#include "bf-p4c/ir/control_flow_visitor.h"
-#include "bf-p4c/ir/gress.h"
-#include "bf-p4c/lib/assoc.h"
-#include "bf-p4c/parde/parde_visitor.h"
+#include "backends/tofino/bf-p4c/ir/control_flow_visitor.h"
+#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/lib/assoc.h"
+#include "backends/tofino/bf-p4c/parde/parde_visitor.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
@@ -97,7 +97,7 @@ class ReversibleParserGraph {
         if (state != nullptr && !gress) gress = state->gress;
 
         if (contains(state)) {
-            LOG1("State " << ((state) ? state->name : "END") << " already exists");
+            LOG1("State " << ((state) ? state->name.c_str() : "END") << " already exists");
             return state_to_vertex.at(state);
         }
 

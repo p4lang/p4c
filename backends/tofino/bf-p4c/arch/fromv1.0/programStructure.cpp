@@ -18,12 +18,12 @@
 
 #include "programStructure.h"
 
-#include "bf-p4c/arch/bridge_metadata.h"
-#include "bf-p4c/arch/fromv1.0/meter.h"
-#include "bf-p4c/arch/fromv1.0/phase0.h"
-#include "bf-p4c/arch/intrinsic_metadata.h"
-#include "bf-p4c/common/pragma/all_pragmas.h"
-#include "bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
+#include "backends/tofino/bf-p4c/arch/fromv1.0/meter.h"
+#include "backends/tofino/bf-p4c/arch/fromv1.0/phase0.h"
+#include "backends/tofino/bf-p4c/arch/intrinsic_metadata.h"
+#include "backends/tofino/bf-p4c/common/pragma/all_pragmas.h"
+#include "backends/tofino/bf-p4c/device.h"
 #include "frontends/p4-14/fromv1.0/converters.h"
 #include "frontends/p4-14/header_type.h"
 #include "frontends/p4-14/typecheck.h"
@@ -266,7 +266,7 @@ const IR::Declaration_Instance *TnaProgramStructure::convert(const IR::Register 
     } else if (reg->width > 0) {
         regElementType = IR::Type_Bits::get(reg->width);
     } else if (reg->layout) {
-        cstring newName = ::get(registerLayoutType, reg->layout);
+        cstring newName = P4::get(registerLayoutType, reg->layout);
         if (newName.isNullOrEmpty()) newName = reg->layout;
         regElementType = new IR::Type_Name(new IR::Path(newName));
     } else {
@@ -2664,7 +2664,7 @@ const IR::P4Program *TnaProgramStructure::create(Util::SourceInfo info) {
 FixChecksum::FixChecksum(TnaProgramStructure *structure) {
     CHECK_NULL(structure);
     refMap.setIsV1(true);
-    auto parserGraphs = new P4ParserGraphs(&refMap, cstring());
+    auto parserGraphs = new P4ParserGraphs(&refMap, false);
     addPasses({
         new P4::CreateBuiltins(),
         new P4::ResolveReferences(&refMap, true),  // check shadowing

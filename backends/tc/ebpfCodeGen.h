@@ -76,7 +76,7 @@ class PNAErrorCodesGen : public Inspector {
             }
 
             builder->emitIndent();
-            builder->appendFormat("static const ParserError_t %s = %d", decl->name.name, id);
+            builder->appendFormat("static const ParserError_t %v = %d", decl->name, id);
             builder->endOfStatement(true);
 
             // type ParserError_t is u8, which can have values from 0 to 255

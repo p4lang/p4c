@@ -16,15 +16,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/analysis/dark_live_range.h"
+#include "backends/tofino/bf-p4c/phv/analysis/dark_live_range.h"
 
 #include <sys/types.h>
 
-#include "bf-p4c/common/table_printer.h"
-#include "bf-p4c/mau/memories.h"
-#include "bf-p4c/mau/table_layout.h"
-#include "bf-p4c/phv/analysis/live_range_shrinking.h"
-#include "bf-p4c/phv/utils/liverange_opti_utils.h"
+#include "backends/tofino/bf-p4c/common/table_printer.h"
+#include "backends/tofino/bf-p4c/mau/memories.h"
+#include "backends/tofino/bf-p4c/mau/table_layout.h"
+#include "backends/tofino/bf-p4c/phv/analysis/live_range_shrinking.h"
+#include "backends/tofino/bf-p4c/phv/utils/liverange_opti_utils.h"
 
 bool DarkLiveRange::overlaps(const int num_max_min_stages, const DarkLiveRangeEntry &range1,
                              const DarkLiveRangeEntry &range2) {

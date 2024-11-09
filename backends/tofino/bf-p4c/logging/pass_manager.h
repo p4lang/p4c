@@ -19,8 +19,8 @@
 #ifndef _BACKENDS_TOFINO_BF_P4C_LOGGING_PASS_MANAGER_H_
 #define _BACKENDS_TOFINO_BF_P4C_LOGGING_PASS_MANAGER_H_
 
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/logging/filelog.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/logging/filelog.h"
 #include "ir/ir.h"
 #include "ir/pass_manager.h"
 #include "lib/cstring.h"

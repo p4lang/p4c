@@ -20,8 +20,8 @@
 
 #include <cmath>
 
-#include "bf-p4c/arch/helpers.h"
-#include "bf-p4c/common/pragma/all_pragmas.h"
+#include "backends/tofino/bf-p4c/arch/helpers.h"
+#include "backends/tofino/bf-p4c/common/pragma/all_pragmas.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeChecking/bindVariables.h"

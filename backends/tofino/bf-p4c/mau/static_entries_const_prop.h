@@ -19,7 +19,7 @@
 #ifndef BF_P4C_MAU_STATIC_ENTRIES_CONST_PROP_H_
 #define BF_P4C_MAU_STATIC_ENTRIES_CONST_PROP_H_
 
-#include "bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
 
 using namespace P4;
 

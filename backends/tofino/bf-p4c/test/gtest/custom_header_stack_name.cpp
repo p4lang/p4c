@@ -25,8 +25,8 @@
 #include <streambuf>
 #include <string>
 
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/control-plane/runtime.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/control-plane/runtime.h"
 #include "bf_gtest_helpers.h"
 #include "control-plane/p4RuntimeArchStandard.h"
 #include "control-plane/p4RuntimeSerializer.h"

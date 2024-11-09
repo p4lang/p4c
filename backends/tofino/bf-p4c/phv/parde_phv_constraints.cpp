@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/parde_phv_constraints.h"
+#include "backends/tofino/bf-p4c/phv/parde_phv_constraints.h"
 
 Visitor::profile_t PardePhvConstraints::init_apply(const IR::Node *root) {
     profile_t rv = Inspector::init_apply(root);

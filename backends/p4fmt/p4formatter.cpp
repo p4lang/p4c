@@ -172,11 +172,16 @@ bool P4Formatter::preorder(const IR::Argument *arg) {
     return false;
 }
 
+bool P4Formatter::printAnnotations(const IR::IAnnotated *ann) {
+    if (!ann->hasAnnotations()) return false;
+
+    visitCollection(ann->getAnnotations(), " ", [&](const auto *anno) { visit(anno); });
+
+    return true;
+}
+
 bool P4Formatter::preorder(const IR::Type_Typedef *t) {
-    if (!t->annotations->annotations.empty()) {
-        visit(t->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(t)) builder.spc();
     builder.append("typedef ");
     visit(t->type);
     builder.spc();
@@ -186,10 +191,7 @@ bool P4Formatter::preorder(const IR::Type_Typedef *t) {
 }
 
 bool P4Formatter::preorder(const IR::Type_Newtype *t) {
-    if (!t->annotations->annotations.empty()) {
-        visit(t->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(t)) builder.spc();
     builder.append("type ");
     visit(t->type);
     builder.spc();
@@ -210,10 +212,7 @@ bool P4Formatter::preorder(const IR::Type_BaseList *t) {
 }
 
 bool P4Formatter::preorder(const IR::P4ValueSet *t) {
-    if (!t->annotations->annotations.empty()) {
-        visit(t->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(t)) builder.spc();
     builder.append("value_set<");
     auto p4type = t->elementType->getP4Type();
     CHECK_NULL(p4type);
@@ -229,10 +228,7 @@ bool P4Formatter::preorder(const IR::P4ValueSet *t) {
 }
 
 bool P4Formatter::preorder(const IR::Type_Enum *t) {
-    if (!t->annotations->annotations.empty()) {
-        visit(t->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(t)) builder.spc();
     builder.append("enum ");
     builder.append(t->name);
     builder.spc();
@@ -247,10 +243,7 @@ bool P4Formatter::preorder(const IR::Type_Enum *t) {
 }
 
 bool P4Formatter::preorder(const IR::Type_SerEnum *t) {
-    if (!t->annotations->annotations.empty()) {
-        visit(t->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(t)) builder.spc();
     builder.append("enum ");
     visit(t->type);
     builder.spc();
@@ -281,10 +274,7 @@ bool P4Formatter::preorder(const IR::TypeParameters *t) {
 }
 
 bool P4Formatter::preorder(const IR::Method *m) {
-    if (!m->annotations->annotations.empty()) {
-        visit(m->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(m)) builder.spc();
     const Context *ctx = getContext();
     bool standaloneFunction = !ctx || !ctx->node->is<IR::Type_Extern>();
     // standalone function declaration: not in a Vector of methods
@@ -305,10 +295,7 @@ bool P4Formatter::preorder(const IR::Method *m) {
 }
 
 bool P4Formatter::preorder(const IR::Function *function) {
-    if (!function->annotations->annotations.empty()) {
-        visit(function->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(function)) builder.spc();
     auto t = function->type;
     BUG_CHECK(t != nullptr, "Function %1% has no type", function);
     if (t->returnType != nullptr) {
@@ -325,10 +312,7 @@ bool P4Formatter::preorder(const IR::Function *function) {
 
 bool P4Formatter::preorder(const IR::Type_Extern *t) {
     if (isDeclaration) {
-        if (!t->annotations->annotations.empty()) {
-            visit(t->annotations);
-            builder.spc();
-        }
+        if (printAnnotations(t)) builder.spc();
         builder.append("extern ");
     }
     builder.append(t->name);
@@ -372,10 +356,7 @@ bool P4Formatter::preorder(const IR::Type_Varbits *t) {
 
 bool P4Formatter::preorder(const IR::Type_Package *package) {
     builder.emitIndent();
-    if (!package->annotations->annotations.empty()) {
-        visit(package->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(package)) builder.spc();
     builder.append("package ");
     builder.append(package->name);
     visit(package->typeParameters);
@@ -387,10 +368,7 @@ bool P4Formatter::preorder(const IR::Type_Package *package) {
 bool P4Formatter::process(const IR::Type_StructLike *t, const char *name) {
     if (isDeclaration) {
         builder.emitIndent();
-        if (!t->annotations->annotations.empty()) {
-            visit(t->annotations);
-            builder.spc();
-        }
+        if (printAnnotations(t)) builder.spc();
         builder.appendFormat("%s ", name);
     }
     builder.append(t->name);
@@ -412,12 +390,8 @@ bool P4Formatter::process(const IR::Type_StructLike *t, const char *name) {
     }
 
     for (auto f : t->fields) {
-        if (f->annotations->size() > 0) {
-            builder.emitIndent();
-            if (!f->annotations->annotations.empty()) {
-                visit(f->annotations);
-            }
-            builder.newline();
+        if (f->hasAnnotations()) {
+            if (printAnnotations(f)) builder.newline();
         }
         builder.emitIndent();
         cstring t = get(type, f);
@@ -434,10 +408,7 @@ bool P4Formatter::process(const IR::Type_StructLike *t, const char *name) {
 
 bool P4Formatter::preorder(const IR::Type_Parser *t) {
     builder.emitIndent();
-    if (!t->annotations->annotations.empty()) {
-        visit(t->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(t)) builder.spc();
     builder.append("parser ");
     builder.append(t->name);
     visit(t->typeParameters);
@@ -448,10 +419,7 @@ bool P4Formatter::preorder(const IR::Type_Parser *t) {
 
 bool P4Formatter::preorder(const IR::Type_Control *t) {
     builder.emitIndent();
-    if (!t->annotations->annotations.empty()) {
-        visit(t->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(t)) builder.spc();
     builder.append("control ");
     builder.append(t->name);
     visit(t->typeParameters);
@@ -489,10 +457,7 @@ bool P4Formatter::preorder(const IR::StringLiteral *s) {
 }
 
 bool P4Formatter::preorder(const IR::Declaration_Constant *cst) {
-    if (!cst->annotations->annotations.empty()) {
-        visit(cst->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(cst)) builder.spc();
     builder.append("const ");
     auto type = cst->type->getP4Type();
     CHECK_NULL(type);
@@ -510,10 +475,7 @@ bool P4Formatter::preorder(const IR::Declaration_Constant *cst) {
 }
 
 bool P4Formatter::preorder(const IR::Declaration_Instance *i) {
-    if (!i->annotations->annotations.empty()) {
-        visit(i->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(i)) builder.spc();
     auto type = i->type->getP4Type();
     CHECK_NULL(type);
     visit(type);
@@ -534,10 +496,7 @@ bool P4Formatter::preorder(const IR::Declaration_Instance *i) {
 }
 
 bool P4Formatter::preorder(const IR::Declaration_Variable *v) {
-    if (!v->annotations->annotations.empty()) {
-        visit(v->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(v)) builder.spc();
     auto type = v->type->getP4Type();
     CHECK_NULL(type);
     visit(type);
@@ -962,10 +921,7 @@ bool P4Formatter::preorder(const IR::AssignmentStatement *a) {
 }
 
 bool P4Formatter::preorder(const IR::BlockStatement *s) {
-    if (!s->annotations->annotations.empty()) {
-        visit(s->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(s)) builder.spc();
     builder.blockStart();
     {
         WithSeparator newline(*this, "\n", "\n");
@@ -1045,10 +1001,7 @@ bool P4Formatter::preorder(const IR::IfStatement *s) {
 }
 
 bool P4Formatter::preorder(const IR::ForStatement *s) {
-    if (!s->annotations->annotations.empty()) {
-        visit(s->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(s)) builder.spc();
     builder.append("for (");
     visitCollection(s->init, ", ", [&](auto *d) {
         builder.supressStatementSemi();
@@ -1081,10 +1034,7 @@ bool P4Formatter::preorder(const IR::ForStatement *s) {
 }
 
 bool P4Formatter::preorder(const IR::ForInStatement *s) {
-    if (!s->annotations->annotations.empty()) {
-        visit(s->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(s)) builder.spc();
     builder.append("for (");
     if (s->decl) {
         builder.supressStatementSemi();
@@ -1145,11 +1095,6 @@ bool P4Formatter::preorder(const IR::SwitchStatement *s) {
 
 ////////////////////////////////////
 
-bool P4Formatter::preorder(const IR::Annotations *a) {
-    visitCollection(a->annotations, " ", [&](const auto *anno) { visit(anno); });
-    return false;
-}
-
 bool P4Formatter::preorder(const IR::Annotation *a) {
     builder.append("@");
     builder.append(a->name);
@@ -1193,10 +1138,7 @@ bool P4Formatter::preorder(const IR::Annotation *a) {
 }
 
 bool P4Formatter::preorder(const IR::Parameter *p) {
-    if (!p->annotations->annotations.empty()) {
-        visit(p->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(p)) builder.spc();
     switch (p->direction) {
         case IR::Direction::None:
             break;
@@ -1255,10 +1197,7 @@ bool P4Formatter::preorder(const IR::ParameterList *p) {
 }
 
 bool P4Formatter::preorder(const IR::P4Action *c) {
-    if (!c->annotations->annotations.empty()) {
-        visit(c->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(c)) builder.spc();
     builder.append("action ");
     builder.append(c->name);
     visit(c->parameters);
@@ -1270,10 +1209,7 @@ bool P4Formatter::preorder(const IR::P4Action *c) {
 bool P4Formatter::preorder(const IR::ParserState *s) {
     if (s->isBuiltin()) return false;
 
-    if (!s->annotations->annotations.empty()) {
-        visit(s->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(s)) builder.spc();
     builder.append("state ");
     builder.append(s->name);
     builder.spc();
@@ -1325,10 +1261,7 @@ bool P4Formatter::preorder(const IR::ExpressionValue *v) {
 }
 
 bool P4Formatter::preorder(const IR::ActionListElement *ale) {
-    if (!ale->annotations->annotations.empty()) {
-        visit(ale->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(ale)) builder.spc();
     visit(ale->expression);
     return false;
 }
@@ -1366,9 +1299,9 @@ bool P4Formatter::preorder(const IR::Key *v) {
         builder.append(std::string(spaces, ' '));
         builder.append(": ");
         visit(f->matchType);
-        if (!f->annotations->annotations.empty()) {
-            builder.append(" ");
-            visit(f->annotations);
+        if (f->hasAnnotations()) {
+            builder.spc();
+            printAnnotations(f);
         }
         builder.endOfStatement(true);
     }
@@ -1377,10 +1310,7 @@ bool P4Formatter::preorder(const IR::Key *v) {
 }
 
 bool P4Formatter::preorder(const IR::Property *p) {
-    if (!p->annotations->annotations.empty()) {
-        visit(p->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(p)) builder.spc();
     if (p->isConstant) builder.append("const ");
     builder.append(p->name);
     builder.append(" = ");
@@ -1424,18 +1354,13 @@ bool P4Formatter::preorder(const IR::Entry *e) {
     doneList();
     builder.append(" : ");
     visit(e->action);
-    if (!e->annotations->annotations.empty()) {
-        visit(e->annotations);
-    }
+    printAnnotations(e);
     builder.append(";");
     return false;
 }
 
 bool P4Formatter::preorder(const IR::P4Table *c) {
-    if (!c->annotations->annotations.empty()) {
-        visit(c->annotations);
-        builder.spc();
-    }
+    if (printAnnotations(c)) builder.spc();
     builder.append("table ");
     builder.append(c->name);
     builder.spc();

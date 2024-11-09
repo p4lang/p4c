@@ -1,10 +1,13 @@
-macro(p4tools_obtain_z3)
-  option(TOOLS_USE_PREINSTALLED_Z3 "Look for a preinstalled version of Z3 instead of installing a prebuilt binary using FetchContent." OFF)
+macro(obtain_z3)
+  option(USE_PREINSTALLED_Z3 "Look for a preinstalled version of Z3 instead of installing a prebuilt binary using FetchContent." OFF)
 
-  if(TOOLS_USE_PREINSTALLED_Z3)
+  if(USE_PREINSTALLED_Z3)
     # We need a fairly recent version of Z3.
     set(Z3_MIN_VERSION "4.8.14")
-    # But 4.12+ is currently broken with libGC
+    # Anything above 4.12+ does not work with libGC and causes crashes. The reason is
+    # that malloc_usable_size() does not seem to be supported in libgc.
+    # https://github.com/Z3Prover/z3/blob/b0fef6429fb29a33eb14adf9a61353b59f0f7fd0/src/util/memory_manager.cpp#L319
+    # Without being able to patch Z3 we have to limit the maximum version.
     set(Z3_MAX_VERSION_EXCL "4.12")
     find_package(Z3 ${Z3_MIN_VERSION} REQUIRED)
 
@@ -15,54 +18,71 @@ macro(p4tools_obtain_z3)
       message(FATAL_ERROR "The Z3 version has to be lower than ${Z3_MAX_VERSION_EXCL} (the latter currently does no work with libGC). Has ${Z3_VERSION_STRING}.")
     endif()
     # Set variables for later consumption.
-    set(P4TOOLS_Z3_LIB z3::z3)
-    set(P4TOOLS_Z3_INCLUDE_DIR ${Z3_INCLUDE_DIR})
+    set(Z3_LIB z3::z3)
+    set(Z3_INCLUDE_DIR ${Z3_INCLUDE_DIR})
   else()
     # Pull in a specific version of Z3 and link against it.
-    set(P4TOOLS_Z3_VERSION "4.11.2")
-    message("Fetching Z3 version ${P4TOOLS_Z3_VERSION} for P4Tools...")
+    set(Z3_VERSION "4.13.0")
+    message(STATUS "Fetching Z3 version ${Z3_VERSION}...")
 
-    # Determine platform to fetch pre-built Z3
-    if (CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "x86_64")
-      set(Z3_ARCH "x64")
-      if (APPLE)
-        set(Z3_PLATFORM_SUFFIX "osx-10.16")
-        set(Z3_ZIP_HASH "a56b6c40d9251a963aabe1f15731dd88ad1cb801d0e7b16e45f8b232175e165c")
-      elseif (UNIX)
-        set(Z3_PLATFORM_SUFFIX "glibc-2.31")
-        set(Z3_ZIP_HASH "9d0f70e61e82b321f35e6cad1343615d2dead6f2c54337a24293725de2900fb6")
-      else()
-        message(FATAL_ERROR "Unsupported system platform")
-      endif()
-    elseif(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64")
-      set(Z3_ARCH "arm64")
-      if (APPLE)
-        set(Z3_PLATFORM_SUFFIX "osx-11.0")
-        set(Z3_ZIP_HASH "c021f381fa3169b1f7fb3b4fae81a1d1caf0dd8aa4aa773f4ab9d5e28c6657a4")
-      else()
-        message(FATAL_ERROR "Unsupported system platform")
-      endif()
-    else()
-      message(FATAL_ERROR "Unsupported system processor")
-    endif()
-
+    # Unity builds do not work for Protobuf...
+    set(CMAKE_UNITY_BUILD_PREV ${CMAKE_UNITY_BUILD})
+    set(CMAKE_UNITY_BUILD OFF)
     # Print out download state while setting up Z3.
     set(FETCHCONTENT_QUIET_PREV ${FETCHCONTENT_QUIET})
     set(FETCHCONTENT_QUIET OFF)
+
+    set(Z3_BUILD_LIBZ3_SHARED OFF CACHE BOOL "Build libz3 as a shared library if true, otherwise build a static library")
+    set(Z3_INCLUDE_GIT_HASH OFF CACHE BOOL "Include git hash in version output")
+    set(Z3_INCLUDE_GIT_DESCRIBE OFF CACHE BOOL "Include git describe output in version output")
+    set(Z3_BUILD_TEST_EXECUTABLES OFF CACHE BOOL "Include git describe output in version output")
+    set(Z3_SAVE_CLANG_OPTIMIZATION_RECORDS OFF CACHE BOOL "Include git describe output in version output")
+    set(Z3_ENABLE_TRACING_FOR_NON_DEBUG OFF CACHE BOOL "Include git describe output in version output")
+    set(Z3_ENABLE_EXAMPLE_TARGETS OFF CACHE BOOL "Include git describe output in version output")
+    set(Z3_BUILD_DOTNET_BINDINGS OFF CACHE BOOL "Include git describe output in version output")
+    set(Z3_BUILD_PYTHON_BINDINGS OFF CACHE BOOL "Include git describe output in version output")
+    set(Z3_BUILD_JAVA_BINDINGS OFF CACHE BOOL "Include git describe output in version output")
+    set(Z3_BUILD_JULIA_BINDINGS OFF CACHE BOOL "Include git describe output in version output")
+    set(Z3_BUILD_DOCUMENTATION OFF CACHE BOOL "Include git describe output in version output")
+    set(Z3_ALWAYS_BUILD_DOCS OFF CACHE BOOL "Include git describe output in version output")
+    set(Z3_API_LOG_SYNC OFF CACHE BOOL "Include git describe output in version output")
+    set(Z3_BUILD_EXECUTABLE OFF CACHE BOOL "Include git describe output in version output")
     fetchcontent_declare(
       z3
-      URL https://github.com/Z3Prover/z3/releases/download/z3-${P4TOOLS_Z3_VERSION}/z3-${P4TOOLS_Z3_VERSION}-${Z3_ARCH}-${Z3_PLATFORM_SUFFIX}.zip
-      URL_HASH SHA256=${Z3_ZIP_HASH}
-      USES_TERMINAL_DOWNLOAD TRUE
+      GIT_REPOSITORY https://github.com/Z3Prover/z3.git
+      GIT_TAG z3-4.13.3 # 4.13.0
       GIT_PROGRESS TRUE
+      GIT_SHALLOW TRUE
+      # We need to patch because the Z3 CMakeLists.txt also adds an uinstall target.
+      # This leads to a namespace clash.
+      PATCH_COMMAND
+        git apply ${P4C_SOURCE_DIR}/cmake/z3.patch || git apply
+        ${P4C_SOURCE_DIR}/cmake/z3.patch -R --check && echo
+        "Patch does not apply because the patch was already applied."
     )
-    fetchcontent_makeavailable(z3)
+    fetchcontent_makeavailable_but_exclude_install(z3)
+
+    # Suppress warnings for all Z3 targets.
+    get_all_targets(Z3_BUILD_TARGETS ${z3_SOURCE_DIR})
+    foreach(target ${Z3_BUILD_TARGETS})
+        # Do not suppress warnings for Z3 library targets that are aliased.
+        get_target_property(target_type ${target} TYPE)
+        if (NOT ${target_type} STREQUAL "INTERFACE_LIBRARY" AND NOT ${target_type} STREQUAL "UTILITY")
+          target_compile_options(${target} PRIVATE "-Wno-error" "-w")
+          # Z3 does not add its own include directories for compilation, which can lead to conflicts.
+          target_include_directories(${target} BEFORE PRIVATE ${z3_SOURCE_DIR}/src)
+      endif()
+    endforeach()
+
+    # Reset temporary variable modifications.
+    set(CMAKE_UNITY_BUILD ${CMAKE_UNITY_BUILD_PREV})
     set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
-    message("Done with setting up Z3 for P4Tools.")
 
     # Other projects may also pull in Z3.
-    # We have to make sure we only include our local version with P4Tools.
-    set(P4TOOLS_Z3_LIB ${z3_SOURCE_DIR}/bin/libz3${CMAKE_STATIC_LIBRARY_SUFFIX})
-    set(P4TOOLS_Z3_INCLUDE_DIR ${z3_SOURCE_DIR}/include)
+    # We have to make sure we only include our local version.
+    set(Z3_LIB libz3)
+    set(Z3_INCLUDE_DIR ${z3_SOURCE_DIR}/src/api ${z3_SOURCE_DIR}/src/api/c++)
   endif()
-endmacro(p4tools_obtain_z3)
+
+  message(STATUS "Done with setting up Z3.")
+endmacro(obtain_z3)

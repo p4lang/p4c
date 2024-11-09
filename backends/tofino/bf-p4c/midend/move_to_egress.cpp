@@ -42,11 +42,11 @@ MoveToEgress::MoveToEgress(BFN::EvaluatorPass *ev)
               auto main = toplevel->getMain();
               for (auto &pkg : main->constantValue) {
                   LOG2(pkg.first->toString()
-                       << " : " << (pkg.second ? pkg.second->toString() : "nullptr"));
+                       << " : " << (pkg.second ? pkg.second->toString().c_str() : "nullptr"));
                   if (auto pb = pkg.second ? pkg.second->to<IR::PackageBlock>() : nullptr) {
                       for (auto &p : pb->constantValue) {
                           LOG2("  " << p.first->toString() << " : "
-                                    << (p.second ? p.second->toString() : "nullptr"));
+                                    << (p.second ? p.second->toString().c_str() : "nullptr"));
                           if (p.second) {
                               auto name = p.first->toString();
                               if (name == "ingress_parser")

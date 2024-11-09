@@ -19,7 +19,7 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_PARDE_PARSER_LOOPS_INFO_H_
 #define BACKENDS_TOFINO_BF_P4C_PARDE_PARSER_LOOPS_INFO_H_
 
-#include "bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/ir/gress.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"

@@ -19,9 +19,9 @@
 #ifndef BF_P4C_ARCH_INTRINSIC_METADATA_H_
 #define BF_P4C_ARCH_INTRINSIC_METADATA_H_
 
-#include "bf-p4c/arch/bridge_metadata.h"
-#include "bf-p4c/device.h"
-#include "bf-p4c/midend/type_checker.h"
+#include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "frontends/p4/cloner.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"

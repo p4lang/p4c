@@ -19,7 +19,7 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_COMMON_MAP_TABLES_TO_ACTIONS_H_
 #define BACKENDS_TOFINO_BF_P4C_COMMON_MAP_TABLES_TO_ACTIONS_H_
 
-#include "bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/phv/utils/utils.h"
 #include "ir/ir.h"
 
 using namespace P4;

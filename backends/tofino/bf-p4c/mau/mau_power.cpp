@@ -16,15 +16,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/mau_power.h"
+#include "backends/tofino/bf-p4c/mau/mau_power.h"
 
 #include <fstream>
 #include <ostream>
 #include <string>
 
-#include "bf-p4c/device.h"
-#include "bf-p4c/mau/memories.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/mau/memories.h"
 #include "lib/hex.h"
+#include "lib/map.h"
 
 namespace MauPower {
 
@@ -101,7 +102,7 @@ bool MauFeatures::requires_dep_asm(gress_t g, int stage) const {
 }
 
 mau_dep_t MauFeatures::get_dependency_for_gress_stage(gress_t g, int stage) const {
-    return ::get(stage_dep_to_previous_[g], stage, DEP_MATCH);
+    return P4::get(stage_dep_to_previous_[g], stage, DEP_MATCH);
 }
 void MauFeatures::set_dependency_for_gress_stage(gress_t g, int stage, mau_dep_t dep) {
     stage_dep_to_previous_[g][stage] = dep;

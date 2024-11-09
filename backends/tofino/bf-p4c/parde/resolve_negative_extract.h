@@ -23,12 +23,12 @@
 #include <sstream>
 #include <utility>
 
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/device.h"
-#include "bf-p4c/parde/dump_parser.h"
-#include "bf-p4c/parde/parde_visitor.h"
-#include "bf-p4c/parde/parser_dominator_builder.h"
-#include "bf-p4c/parde/parser_info.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/parde/dump_parser.h"
+#include "backends/tofino/bf-p4c/parde/parde_visitor.h"
+#include "backends/tofino/bf-p4c/parde/parser_dominator_builder.h"
+#include "backends/tofino/bf-p4c/parde/parser_info.h"
 #include "ir/ir-generated.h"
 #include "lib/indent.h"
 #include "lib/ordered_map.h"
@@ -566,7 +566,7 @@ struct ResolveNegativeExtract : public PassManager {
                     LOG4("Adding transition { "
                          << succ_tr->value << " } shift value " << new_shift << " B from state "
                          << state_succ->name << " to state "
-                         << (succ_tr->next != nullptr ? succ_tr->next->name : "EXIT"));
+                         << (succ_tr->next != nullptr ? succ_tr->next->name.c_str() : "EXIT"));
                 }
             }
         }

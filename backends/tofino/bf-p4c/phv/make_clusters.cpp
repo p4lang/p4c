@@ -16,18 +16,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/make_clusters.h"
+#include "backends/tofino/bf-p4c/phv/make_clusters.h"
 
 #include <sstream>
 
 #include <boost/range/adaptors.hpp>
 
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/ir/bitrange.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/utils/utils.h"
-#include "bf-p4c/phv/v2/smart_packing.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/ir/bitrange.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/phv/v2/smart_packing.h"
 #include "lib/algorithm.h"
 #include "lib/log.h"
 #include "lib/ordered_set.h"

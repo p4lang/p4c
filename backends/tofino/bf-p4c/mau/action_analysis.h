@@ -19,10 +19,10 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_MAU_ACTION_ANALYSIS_H_
 #define BACKENDS_TOFINO_BF_P4C_MAU_ACTION_ANALYSIS_H_
 
-#include "bf-p4c/ir/bitrange.h"
-#include "bf-p4c/ir/tofino_write_context.h"
-#include "bf-p4c/mau/mau_visitor.h"
-#include "bf-p4c/mau/reduction_or.h"
+#include "backends/tofino/bf-p4c/ir/bitrange.h"
+#include "backends/tofino/bf-p4c/ir/tofino_write_context.h"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/mau/reduction_or.h"
 #include "lib/safe_vector.h"
 
 using namespace P4;

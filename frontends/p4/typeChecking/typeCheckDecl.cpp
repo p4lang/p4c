@@ -213,7 +213,7 @@ bool TypeInferenceBase::checkAbstractMethods(const IR::Declaration_Instance *ins
     }
     bool rv = true;
     for (const auto &vm : virt) {
-        if (!vm.second->annotations->getSingle("optional"_cs)) {
+        if (!vm.second->hasAnnotation(IR::Annotation::optionalAnnotation)) {
             typeError("%1%: %2% abstract method not implemented", inst, vm.second);
             rv = false;
         }
@@ -379,15 +379,13 @@ static bool checkEnumValueInitializer(const IR::Type_Bits *type, const IR::Expre
             if (!type->isSigned && constant->value < low) {
                 extraMsg = absl::Substitute(
                     "the value $0 is negative, but the underlying type $1 is unsigned",
-                    P4::Util::toString(constant->value, 0, type->isSigned).string_view(),
-                    type->toString().string_view());
+                    P4::Util::toString(constant->value, 0, type->isSigned), type->toString());
             } else {
                 extraMsg = absl::Substitute(
                     "the value $0 requires $1 bits but the underlying "
                     "$2 type $3 only contains $4 bits",
-                    P4::Util::toString(constant->value, 0, type->isSigned).string_view(), required,
-                    (type->isSigned ? "signed" : "unsigned"), type->toString().string_view(),
-                    type->size);
+                    P4::Util::toString(constant->value, 0, type->isSigned), required,
+                    (type->isSigned ? "signed" : "unsigned"), type->toString(), type->size);
             }
             P4::error(ErrorType::ERR_TYPE_ERROR,
                       "%1%: Serialized enum constant value %2% is out of bounds of the underlying "

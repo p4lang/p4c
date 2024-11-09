@@ -16,13 +16,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/logging/container_size_extractor.h"
+#include "backends/tofino/bf-p4c/logging/container_size_extractor.h"
 
 #include <iostream>
 #include <list>
 #include <sstream>
 
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "backends/tofino/bf-p4c/test/gtest/tofino_gtest_utils.h"
 #include "gtest/gtest.h"
 
 namespace P4::Test {

@@ -19,13 +19,13 @@
 #ifndef BF_P4C_PHV_V2_PARSER_PACKING_VALIDATOR_H_
 #define BF_P4C_PHV_V2_PARSER_PACKING_VALIDATOR_H_
 
-#include "bf-p4c/common/field_defuse.h"
-#include "bf-p4c/lib/assoc.h"
-#include "bf-p4c/parde/parser_info.h"
-#include "bf-p4c/phv/parser_packing_validator_interface.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/pragma/phv_pragmas.h"
-#include "bf-p4c/phv/v2/utils_v2.h"
+#include "backends/tofino/bf-p4c/common/field_defuse.h"
+#include "backends/tofino/bf-p4c/lib/assoc.h"
+#include "backends/tofino/bf-p4c/parde/parser_info.h"
+#include "backends/tofino/bf-p4c/phv/parser_packing_validator_interface.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/pragma/phv_pragmas.h"
+#include "backends/tofino/bf-p4c/phv/v2/utils_v2.h"
 #include "ir/ir.h"
 
 namespace PHV {

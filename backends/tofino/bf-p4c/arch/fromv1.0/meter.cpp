@@ -117,8 +117,8 @@ const IR::Statement *P4V1::MeterConverter::convertExternCall(P4V1::ProgramStruct
         BUG("Unknown method %s in meter", prim->name);
     }
     bool direct = ext->properties.get<IR::Property>("instance_count"_cs) == nullptr;
-    bool pre_color = strstr(prim->name, "pre_color");
-    bool with_or = strstr(prim->name, "with_or");
+    bool pre_color = prim->name.find("pre_color");
+    bool with_or = prim->name.find("with_or");
     if (prim->operands.size() != 2U + pre_color + !direct)
         error("Expected %d operands for %s", 1 + pre_color + !direct, prim);
     auto dest = conv.convert(prim->operands.at(1));

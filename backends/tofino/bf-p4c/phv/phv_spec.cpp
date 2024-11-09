@@ -16,13 +16,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/phv_spec.h"
+#include "backends/tofino/bf-p4c/phv/phv_spec.h"
 
 #include <optional>
 #include <sstream>
 
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/common/pragma/all_pragmas.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/common/pragma/all_pragmas.h"
 #include "frontends/parsers/p4/p4parser.hpp"
 #include "lib/bitvec.h"
 #include "lib/cstring.h"
@@ -729,10 +729,10 @@ void PhvSpec::applyGlobalPragmas(const std::vector<const IR::Annotation *> &glob
         PHV::Container startRange, prev;
         bool negate = false;
         for (auto *tok : annot->body) {
-            PHV::Container c(tok->text, false);
+            PHV::Container c(tok->text.c_str(), false);
             if (startRange) {
                 if (tok->token_type == P4::P4Parser::token_type::TOK_INTEGER)
-                    c = PHV::Container(startRange.type(), atoi(tok->text));
+                    c = PHV::Container(startRange.type(), atoi(tok->text.c_str()));
                 if (!c || c.type() != startRange.type() || startRange.index() > c.index()) {
                     error(ErrorType::ERR_INVALID, "invalid container range %2%-%3% in %1%", annot,
                           startRange, tok->text);

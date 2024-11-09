@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/add_initialization.h"
+#include "backends/tofino/bf-p4c/phv/add_initialization.h"
 
 #include "boost/optional/optional_io.hpp"
 
@@ -548,14 +548,14 @@ class AddDarkInitialization : public Transform {
             const PHV::Field *f = phv.field(prim->operands[0], &range);
             PHV::FieldSlice slice(f, range);
             if (dests.count(slice)) {
-                LOG4("Ignoring already added initialization " << slice << " to action "
-                                                              << action->name << " and table "
-                                                              << (tbl ? tbl->name : "NO TABLE"));
+                LOG4("Ignoring already added initialization "
+                     << slice << " to action " << action->name << " and table "
+                     << (tbl ? tbl->name.c_str() : "NO TABLE"));
                 continue;
             }
             action->action.push_back(prim);
             LOG4("Adding instruction " << prim << " to action " << action->name << " and table "
-                                       << (tbl ? tbl->name : "NO TABLE"));
+                                       << (tbl ? tbl->name.c_str() : "NO TABLE"));
         }
         return action;
     }

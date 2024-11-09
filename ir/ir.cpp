@@ -213,8 +213,8 @@ void BlockStatement::append(const StatOrDecl *stmt) {
     srcInfo += stmt->srcInfo;
     if (auto bs = stmt->to<BlockStatement>()) {
         bool merge = true;
-        for (auto annot : bs->annotations->annotations) {
-            auto a = annotations->getSingle(annot->name);
+        for (const auto *annot : bs->getAnnotations()) {
+            auto a = getAnnotation(annot->name);
             if (!a || !a->equiv(*annot)) {
                 merge = false;
                 break;

@@ -16,20 +16,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/arch/v1model.h"
+#include "backends/tofino/bf-p4c/arch/v1model.h"
 
 #include <fstream>
 #include <map>
 #include <set>
 
-#include "bf-p4c/arch/bridge_metadata.h"
-#include "bf-p4c/arch/fromv1.0/add_metadata_parser_states.h"
-#include "bf-p4c/arch/fromv1.0/checksum.h"
-#include "bf-p4c/arch/fromv1.0/parser_counter.h"
-#include "bf-p4c/arch/program_structure.h"
-#include "bf-p4c/device.h"
-#include "bf-p4c/midend.h"
-#include "bf-p4c/midend/type_checker.h"
+#include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
+#include "backends/tofino/bf-p4c/arch/fromv1.0/add_metadata_parser_states.h"
+#include "backends/tofino/bf-p4c/arch/fromv1.0/checksum.h"
+#include "backends/tofino/bf-p4c/arch/fromv1.0/parser_counter.h"
+#include "backends/tofino/bf-p4c/arch/program_structure.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/midend.h"
+#include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "lib/bitops.h"
 #include "midend/eliminateSerEnums.h"
@@ -320,7 +320,7 @@ class LoadTargetArchitecture : public Inspector {
         }
 #endif  // HAVE_JBAY
         else
-            BUG("Unsupported device id %s"_cs, Device::currentDevice());
+            BUG("Unsupported device id %s", Device::currentDevice());
         filenames.push_back("tofino/stratum.p4");
         filenames.push_back("tofino/p4_14_prim.p4");
 
@@ -482,7 +482,7 @@ class NormalizeProgram : public Transform {
         } else if (auto parser = node->to<IR::P4Parser>()) {
             list = parser->type->getApplyParameters();
         } else {
-            BUG("Unknown block type %1%"_cs, node);
+            BUG("Unknown block type %1%", node);
         }
 
         for (auto p : list->parameters) {
@@ -648,7 +648,7 @@ class AnalyzeProgram : public Inspector {
     void analyzeArchBlock(const IR::ToplevelBlock *blk, cstring name, cstring type) {
         auto main = blk->getMain();
         auto ctrl = main->findParameterValue(name);
-        ERROR_CHECK(ctrl != nullptr, "%1%: could not find parameter %2%"_cs, main, name);
+        ERROR_CHECK(ctrl != nullptr, "%1%: could not find parameter %2%", main, name.c_str());
         ERROR_CHECK(ctrl->is<BlockType>(), "%1%: main package match the expected model", main);
         auto block = ctrl->to<BlockType>()->container;
         BUG_CHECK(block != nullptr, "Unable to find %1% block in V1Switch", name);

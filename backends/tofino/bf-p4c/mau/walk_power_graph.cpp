@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/walk_power_graph.h"
+#include "backends/tofino/bf-p4c/mau/walk_power_graph.h"
 
 #include <ctime>
 #include <map>
@@ -24,17 +24,17 @@
 #include <set>
 #include <vector>
 
-#include "bf-p4c/common/asm_output.h"
-#include "bf-p4c/common/run_id.h"
-#include "bf-p4c/device.h"
-#include "bf-p4c/logging/manifest.h"
-#include "bf-p4c/mau/build_power_graph.h"
-#include "bf-p4c/mau/determine_power_usage.h"
-#include "bf-p4c/mau/jbay_next_table.h"
-#include "bf-p4c/mau/mau_power.h"
-#include "bf-p4c/mau/mau_visitor.h"
-#include "bf-p4c/mau/memories.h"
-#include "bf-p4c/mau/simple_power_graph.h"
+#include "backends/tofino/bf-p4c/common/asm_output.h"
+#include "backends/tofino/bf-p4c/common/run_id.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/logging/manifest.h"
+#include "backends/tofino/bf-p4c/mau/build_power_graph.h"
+#include "backends/tofino/bf-p4c/mau/determine_power_usage.h"
+#include "backends/tofino/bf-p4c/mau/jbay_next_table.h"
+#include "backends/tofino/bf-p4c/mau/mau_power.h"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/mau/memories.h"
+#include "backends/tofino/bf-p4c/mau/simple_power_graph.h"
 #include "ir/gress.h"
 #include "ir/unique_id.h"
 #include "lib/json.h"
@@ -788,8 +788,8 @@ void WalkPowerGraph::create_mau_power_json(const IR::Node *root) {
     auto logDir =
         BFNContext::get().getOutputDirectory("logs"_cs, root->to<IR::BFN::Pipe>()->canon_id());
     if (!logDir) return;
-    cstring powerFile = logDir + "/power.json"_cs;
-    logger_ = new PowerLogging(powerFile, Logging::Logger::buildDate(), BF_P4C_VERSION,
+    cstring powerFile = logDir + "/power.json";
+    logger_ = new PowerLogging(powerFile.c_str(), Logging::Logger::buildDate(), BF_P4C_VERSION,
                                BackendOptions().programName + ".p4", RunId::getId(),
                                POWER_SCHEMA_VERSION);
 

@@ -16,10 +16,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/midend/check_unsupported.h"
+#include "backends/tofino/bf-p4c/midend/check_unsupported.h"
 
-#include "bf-p4c/device.h"
-#include "bf-p4c/lib/safe_width.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/lib/safe_width.h"
 
 namespace BFN {
 

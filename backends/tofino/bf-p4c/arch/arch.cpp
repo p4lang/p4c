@@ -16,17 +16,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/arch/arch.h"
+#include "backends/tofino/bf-p4c/arch/arch.h"
 
 #include <utility>
 
-#include "bf-p4c/arch/psa/psa.h"
-#include "bf-p4c/arch/t2na.h"
-#include "bf-p4c/arch/tna.h"
-#include "bf-p4c/arch/v1model.h"
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/common/pragma/collect_global_pragma.h"
-#include "bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/arch/psa/psa.h"
+#include "backends/tofino/bf-p4c/arch/t2na.h"
+#include "backends/tofino/bf-p4c/arch/tna.h"
+#include "backends/tofino/bf-p4c/arch/v1model.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/common/pragma/collect_global_pragma.h"
+#include "backends/tofino/bf-p4c/device.h"
 #include "frontends/p4/methodInstance.h"
 #include "ir/declaration.h"
 #include "ir/id.h"
@@ -376,7 +376,7 @@ const IR::Node *DoRewriteControlAndParserBlocks::postorder(IR::Declaration_Insta
     auto newArgs = new IR::Vector<IR::Argument>();
     int index = 0;
     for (auto arg : *decl->arguments) {
-        const auto newName = ::get(block_name_map, std::make_pair(decl->name, index));
+        const auto newName = P4::get(block_name_map, std::make_pair(decl->name, index));
         CHECK_NULL(newName);
         const auto *typeRef = new IR::Type_Name(IR::ID(newName, nullptr));
         const auto *cc = arg->expression->to<IR::ConstructorCallExpression>();

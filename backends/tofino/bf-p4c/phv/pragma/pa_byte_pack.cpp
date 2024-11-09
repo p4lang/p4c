@@ -16,15 +16,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/pragma/pa_byte_pack.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_byte_pack.h"
 
 #include <sstream>
 
 #include <boost/range/adaptor/reversed.hpp>
 
-#include "bf-p4c/ir/bitrange.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/pragma/phv_pragmas.h"
+#include "backends/tofino/bf-p4c/ir/bitrange.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/pragma/phv_pragmas.h"
 #include "lib/source_file.h"
 
 /// BFN::Pragma interface
@@ -140,7 +140,7 @@ bool PragmaBytePack::preorder(const IR::BFN::Pipe *pipe) {
         if (!ignore) {
             auto rst = add_packing_constraint(pack);
             if (!rst.ok()) {
-                error(cstring(*rst.error + ", %1%"), *pack.src_info);
+                error("%1%, %2%", *rst.error, *pack.src_info);
             }
         }
     }

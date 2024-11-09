@@ -142,13 +142,6 @@ p4tools_add_xfail_reason(
 
 p4tools_add_xfail_reason(
   "testgen-p4c-bmv2-ptf"
-  "error: exit"
-  # exit: Conditional execution in actions unsupported on this target.
-  issue2359.p4
-)
-
-p4tools_add_xfail_reason(
-  "testgen-p4c-bmv2-ptf"
   "IfStatement"
   # IfStatement: not supported within a deparser on this target.
   issue887.p4

@@ -66,7 +66,7 @@ class DoStaticAssert : public Transform, public ResolutionContext {
                             auto msg = subst.lookup(param);
                             CHECK_NULL(msg);
                             if (const auto *sl = msg->expression->to<IR::StringLiteral>()) {
-                                message = sl->value.string_view();
+                                message = sl->value;
                             }
                         }
                         ::P4::error(ErrorType::ERR_EXPECTED, "%1%: %2%", method, message);

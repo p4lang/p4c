@@ -19,7 +19,7 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_COMMON_PARSE_ANNOTATIONS_H_
 #define BACKENDS_TOFINO_BF_P4C_COMMON_PARSE_ANNOTATIONS_H_
 
-#include "bf-p4c/common/pragma/all_pragmas.h"
+#include "backends/tofino/bf-p4c/common/pragma/all_pragmas.h"
 #include "frontends/p4/parseAnnotations.h"
 #include "ir/ir.h"
 
@@ -49,7 +49,7 @@ namespace BFN {
 class ParseAnnotations : public P4::ParseAnnotations {
  public:
     ParseAnnotations()
-        : P4::ParseAnnotations("BFN"_cs, true,
+        : P4::ParseAnnotations("BFN", true,
                                {
                                    // Ignore p4v annotations.
                                    PARSE_SKIP("assert"_cs),

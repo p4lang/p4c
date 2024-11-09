@@ -181,7 +181,7 @@ const T *P4ParserDriver::parse(P4AnnotationLexer::Type type, const Util::SourceI
     LOG3("Parsing P4-16 annotation " << srcInfo);
 
     P4AnnotationLexer lexer(type, srcInfo, body);
-    if (!parse(lexer, srcInfo.getSourceFile().string_view())) {
+    if (!parse(lexer, srcInfo.getSourceFile())) {
         return nullptr;
     }
 
@@ -360,13 +360,6 @@ IR::Vector<IR::Annotation> V1ParserDriver::takePragmasAsVector() {
     IR::Vector<IR::Annotation> pragmas;
     std::swap(pragmas, currentPragmas);
     return pragmas;
-}
-
-const IR::Annotations *V1ParserDriver::takePragmasAsAnnotations() {
-    if (currentPragmas.empty()) return IR::Annotations::empty;
-    auto *rv = new IR::Annotations(currentPragmas);
-    currentPragmas.clear();
-    return rv;
 }
 
 }  // namespace P4::V1

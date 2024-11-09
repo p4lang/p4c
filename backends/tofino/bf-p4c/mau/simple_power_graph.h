@@ -26,7 +26,7 @@
 #include <string>
 #include <vector>
 
-#include "bf-p4c/mau/mau_power.h"
+#include "backends/tofino/bf-p4c/mau/mau_power.h"
 
 namespace MauPower {
 class Node;
@@ -149,7 +149,7 @@ class SimplePowerGraph : public IHasDbPrint {
     /**
      * Output this graph to the dot file, as specified by the filename.
      */
-    void to_dot(cstring filename);
+    void to_dot(const std::filesystem::path &filename);
     /**
      * Returns a vector of reachable leaf nodes in the graph from the provided
      * Node for the given UniqueId.

@@ -18,10 +18,10 @@
 
 #include "multiple_apply.h"
 
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/mau/default_next.h"
-#include "bf-p4c/mau/table_flow_graph.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/mau/default_next.h"
+#include "backends/tofino/bf-p4c/mau/table_flow_graph.h"
 
 Visitor::profile_t MultipleApply::MutuallyExclusiveApplies::init_apply(const IR::Node *root) {
     mutex_apply.clear();

@@ -187,7 +187,7 @@ JsonObject *JsonObject::emplace(std::string_view label, IJson *value) {
         throw std::logic_error(
             absl::StrCat("Attempt to add to json object a value "
                          "for a label which already exists ",
-                         label, " ", s.string_view()));
+                         label, " ", s));
     }
     base::emplace(label, value);
     return this;

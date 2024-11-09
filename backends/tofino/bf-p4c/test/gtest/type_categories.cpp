@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/midend/type_categories.h"
+#include "backends/tofino/bf-p4c/midend/type_categories.h"
 
 #include "gtest/gtest.h"
 #include "ir/ir.h"

@@ -22,8 +22,8 @@
 #include <optional>
 #include <vector>
 
-#include "bf-p4c/ir/bitrange.h"
-#include "bf-p4c/phv/solver/symbolic_bitvec.h"
+#include "backends/tofino/bf-p4c/ir/bitrange.h"
+#include "backends/tofino/bf-p4c/phv/solver/symbolic_bitvec.h"
 #include "lib/bitvec.h"
 #include "lib/cstring.h"
 #include "lib/ordered_map.h"

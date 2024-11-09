@@ -19,7 +19,7 @@
 #ifndef BF_P4C_MIDEND_H_
 #define BF_P4C_MIDEND_H_
 
-#include "bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
 #include "frontends/common/options.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "ir/ir.h"

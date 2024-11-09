@@ -64,70 +64,70 @@
 #include <fstream>
 #include <set>
 
-#include "bf-p4c/arch/collect_hardware_constrained_fields.h"
-#include "bf-p4c/common/alias.h"
-#include "bf-p4c/common/bridged_packing.h"
-#include "bf-p4c/common/check_field_corruption.h"
-#include "bf-p4c/common/check_for_unimplemented_features.h"
-#include "bf-p4c/common/check_header_refs.h"
-#include "bf-p4c/common/check_uninitialized_read.h"
-#include "bf-p4c/common/elim_unused.h"
-#include "bf-p4c/common/extract_maupipe.h"
-#include "bf-p4c/common/header_stack.h"
-#include "bf-p4c/common/ir_utils.h"
-#include "bf-p4c/common/merge_pov_bits.h"
-#include "bf-p4c/common/multiple_apply.h"
-#include "bf-p4c/common/size_of.h"
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/device.h"
-#include "bf-p4c/logging/filelog.h"
-#include "bf-p4c/logging/phv_logging.h"
-#include "bf-p4c/mau/adjust_byte_count.h"
-#include "bf-p4c/mau/check_duplicate.h"
-#include "bf-p4c/mau/dump_json_graph.h"
-#include "bf-p4c/mau/empty_controls.h"
-#include "bf-p4c/mau/finalize_mau_pred_deps_power.h"
-#include "bf-p4c/mau/gen_prim_json.h"
-#include "bf-p4c/mau/instruction_adjustment.h"
-#include "bf-p4c/mau/instruction_selection.h"
-#include "bf-p4c/mau/ixbar_info.h"
-#include "bf-p4c/mau/ixbar_realign.h"
-#include "bf-p4c/mau/jbay_next_table.h"
-#include "bf-p4c/mau/mau_alloc.h"
-#include "bf-p4c/mau/push_pop.h"
-#include "bf-p4c/mau/selector_update.h"
-#include "bf-p4c/mau/stateful_alu.h"
-#include "bf-p4c/mau/table_summary.h"
-#include "bf-p4c/mau/validate_actions.h"
-#include "bf-p4c/parde/add_metadata_pov.h"
-#include "bf-p4c/parde/adjust_extract.h"
-#include "bf-p4c/parde/check_parser_multi_write.h"
-#include "bf-p4c/parde/clot/allocate_clot.h"
-#include "bf-p4c/parde/clot/pragma/do_not_use_clot.h"
-#include "bf-p4c/parde/collect_parser_usedef.h"
-#include "bf-p4c/parde/infer_payload_offset.h"
-#include "bf-p4c/parde/lower_parser.h"
-#include "bf-p4c/parde/merge_parser_state.h"
-#include "bf-p4c/parde/mirror/const_mirror_session_opt.h"
-#include "bf-p4c/parde/reset_invalidated_checksum_headers.h"
-#include "bf-p4c/parde/resolve_negative_extract.h"
-#include "bf-p4c/parde/rewrite_parser_locals.h"
-#include "bf-p4c/parde/stack_push_shims.h"
-#include "bf-p4c/parde/update_parser_write_mode.h"
-#include "bf-p4c/phv/add_alias_allocation.h"
-#include "bf-p4c/phv/allocate_temps_and_finalize_liverange.h"
-#include "bf-p4c/phv/analysis/dark.h"
-#include "bf-p4c/phv/auto_init_metadata.h"
-#include "bf-p4c/phv/check_unallocated.h"
-#include "bf-p4c/phv/create_thread_local_instances.h"
-#include "bf-p4c/phv/dump_table_flow_graph.h"
-#include "bf-p4c/phv/finalize_stage_allocation.h"
-#include "bf-p4c/phv/init_in_mau.h"
-#include "bf-p4c/phv/phv_analysis.h"
-#include "bf-p4c/phv/pragma/pa_no_overlay.h"
-#include "bf-p4c/phv/split_padding.h"
-#include "bf-p4c/phv/utils/slice_alloc.h"
-#include "bf-p4c/phv/v2/metadata_initialization.h"
+#include "backends/tofino/bf-p4c/arch/collect_hardware_constrained_fields.h"
+#include "backends/tofino/bf-p4c/common/alias.h"
+#include "backends/tofino/bf-p4c/common/bridged_packing.h"
+#include "backends/tofino/bf-p4c/common/check_field_corruption.h"
+#include "backends/tofino/bf-p4c/common/check_for_unimplemented_features.h"
+#include "backends/tofino/bf-p4c/common/check_header_refs.h"
+#include "backends/tofino/bf-p4c/common/check_uninitialized_read.h"
+#include "backends/tofino/bf-p4c/common/elim_unused.h"
+#include "backends/tofino/bf-p4c/common/extract_maupipe.h"
+#include "backends/tofino/bf-p4c/common/header_stack.h"
+#include "backends/tofino/bf-p4c/common/ir_utils.h"
+#include "backends/tofino/bf-p4c/common/merge_pov_bits.h"
+#include "backends/tofino/bf-p4c/common/multiple_apply.h"
+#include "backends/tofino/bf-p4c/common/size_of.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/logging/filelog.h"
+#include "backends/tofino/bf-p4c/logging/phv_logging.h"
+#include "backends/tofino/bf-p4c/mau/adjust_byte_count.h"
+#include "backends/tofino/bf-p4c/mau/check_duplicate.h"
+#include "backends/tofino/bf-p4c/mau/dump_json_graph.h"
+#include "backends/tofino/bf-p4c/mau/empty_controls.h"
+#include "backends/tofino/bf-p4c/mau/finalize_mau_pred_deps_power.h"
+#include "backends/tofino/bf-p4c/mau/gen_prim_json.h"
+#include "backends/tofino/bf-p4c/mau/instruction_adjustment.h"
+#include "backends/tofino/bf-p4c/mau/instruction_selection.h"
+#include "backends/tofino/bf-p4c/mau/ixbar_info.h"
+#include "backends/tofino/bf-p4c/mau/ixbar_realign.h"
+#include "backends/tofino/bf-p4c/mau/jbay_next_table.h"
+#include "backends/tofino/bf-p4c/mau/mau_alloc.h"
+#include "backends/tofino/bf-p4c/mau/push_pop.h"
+#include "backends/tofino/bf-p4c/mau/selector_update.h"
+#include "backends/tofino/bf-p4c/mau/stateful_alu.h"
+#include "backends/tofino/bf-p4c/mau/table_summary.h"
+#include "backends/tofino/bf-p4c/mau/validate_actions.h"
+#include "backends/tofino/bf-p4c/parde/add_metadata_pov.h"
+#include "backends/tofino/bf-p4c/parde/adjust_extract.h"
+#include "backends/tofino/bf-p4c/parde/check_parser_multi_write.h"
+#include "backends/tofino/bf-p4c/parde/clot/allocate_clot.h"
+#include "backends/tofino/bf-p4c/parde/clot/pragma/do_not_use_clot.h"
+#include "backends/tofino/bf-p4c/parde/collect_parser_usedef.h"
+#include "backends/tofino/bf-p4c/parde/infer_payload_offset.h"
+#include "backends/tofino/bf-p4c/parde/lower_parser.h"
+#include "backends/tofino/bf-p4c/parde/merge_parser_state.h"
+#include "backends/tofino/bf-p4c/parde/mirror/const_mirror_session_opt.h"
+#include "backends/tofino/bf-p4c/parde/reset_invalidated_checksum_headers.h"
+#include "backends/tofino/bf-p4c/parde/resolve_negative_extract.h"
+#include "backends/tofino/bf-p4c/parde/rewrite_parser_locals.h"
+#include "backends/tofino/bf-p4c/parde/stack_push_shims.h"
+#include "backends/tofino/bf-p4c/parde/update_parser_write_mode.h"
+#include "backends/tofino/bf-p4c/phv/add_alias_allocation.h"
+#include "backends/tofino/bf-p4c/phv/allocate_temps_and_finalize_liverange.h"
+#include "backends/tofino/bf-p4c/phv/analysis/dark.h"
+#include "backends/tofino/bf-p4c/phv/auto_init_metadata.h"
+#include "backends/tofino/bf-p4c/phv/check_unallocated.h"
+#include "backends/tofino/bf-p4c/phv/create_thread_local_instances.h"
+#include "backends/tofino/bf-p4c/phv/dump_table_flow_graph.h"
+#include "backends/tofino/bf-p4c/phv/finalize_stage_allocation.h"
+#include "backends/tofino/bf-p4c/phv/init_in_mau.h"
+#include "backends/tofino/bf-p4c/phv/phv_analysis.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_no_overlay.h"
+#include "backends/tofino/bf-p4c/phv/split_padding.h"
+#include "backends/tofino/bf-p4c/phv/utils/slice_alloc.h"
+#include "backends/tofino/bf-p4c/phv/v2/metadata_initialization.h"
 #include "ir/ir-generated.h"
 #include "ir/pass_manager.h"
 #include "lib/indent.h"
@@ -151,7 +151,7 @@ class CheckUnimplementedFeatures : public Inspector {
                       source.toString());
         else
             throw Util::CompilerUnimplemented(
-                source.sourceLine, source.fileName,
+                source.sourceLine, source.fileName.c_str(),
                 "Table entries are not yet implemented in this backend");
         return false;
     }
@@ -259,7 +259,7 @@ Backend::Backend(const BFN_Options &o, int pipe_id)
         new CollectPhvInfo(phv),
         new GatherReductionOrReqs(deps.red_info),
         new InstructionSelection(options, phv, deps.red_info),
-        new DumpPipe("After InstructionSelection"_cs),
+        new DumpPipe("After InstructionSelection"),
         new FindDependencyGraph(phv, deps, &options, "program_graph"_cs,
                                 "After Instruction Selection"_cs),
         options.decaf ? &decaf : nullptr,
@@ -275,7 +275,7 @@ Backend::Backend(const BFN_Options &o, int pipe_id)
         new AutoAlias(phv, *pragmaAlias, *noOverlay),
         new Alias(phv, *pragmaAlias),
         new CollectPhvInfo(phv),
-        new DumpPipe("After Alias"_cs),
+        new DumpPipe("After Alias"),
         // This is the backtracking point from table placement to PHV allocation. Based on a
         // container conflict-free PHV allocation, we generate a number of no-pack conflicts between
         // fields (these are fields written in different nonmutually exclusive actions in the same
@@ -284,7 +284,7 @@ Backend::Backend(const BFN_Options &o, int pipe_id)
         // metadata packing.
         &mau_backtracker,
         new ResolveSizeOfOperator(),
-        new DumpPipe("After ResolveSizeOfOperator"_cs),
+        new DumpPipe("After ResolveSizeOfOperator"),
         // Run after bridged metadata packing as bridged packing updates the parser state.
         new CollectPhvInfo(phv),
         new ParserCopyProp(phv),
@@ -353,7 +353,7 @@ Backend::Backend(const BFN_Options &o, int pipe_id)
         //                                        with table info
         //     Trivial PHV alloc => table alloc ==================> PHV alloc ===> redo table.
         new AddInitsInMAU(phv, mauInitFields, false),
-        new DumpPipe("Before phv_analysis"_cs),
+        new DumpPipe("Before phv_analysis"),
         new DumpTableFlowGraph(phv),
         options.alt_phv_alloc
             ? new PassManager({
@@ -445,7 +445,7 @@ Backend::Backend(const BFN_Options &o, int pipe_id)
         // tables to be split across stages.
         new GeneratePrimitiveInfo(phv, primNode),
         &table_alloc,
-        new DumpPipe("After TableAlloc"_cs),
+        new DumpPipe("After TableAlloc"),
         &table_summary,
         // Rerun defuse analysis here so that table placements are used to correctly calculate live
         // ranges output in the assembly.
@@ -462,7 +462,7 @@ Backend::Backend(const BFN_Options &o, int pipe_id)
                                : nullptr,
         new InstructionAdjustment(phv, deps.red_info),
         &nextTblProp,  // Must be run after all modifications to the table graph have finished!
-        new DumpPipe("Final table graph"_cs),
+        new DumpPipe("Final table graph"),
         new CheckFieldCorruption(defuse, phv, PHV_Analysis->get_pragmas()),
         new AdjustExtract(phv),
         phvLoggingDefUseInfo,

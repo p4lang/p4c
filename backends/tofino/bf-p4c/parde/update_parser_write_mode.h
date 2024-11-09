@@ -21,9 +21,9 @@
 
 #include <ir/ir.h>
 
-#include "bf-p4c/parde/check_parser_multi_write.h"
-#include "bf-p4c/parde/parser_info.h"
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/parde/check_parser_multi_write.h"
+#include "backends/tofino/bf-p4c/parde/parser_info.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "ir/pass_manager.h"
 
 struct UpdateParserWriteMode : public PassManager {

@@ -19,7 +19,7 @@
 #ifndef BF_P4C_ARCH_PSA_REWRITE_BRIDGE_METADATA_H_
 #define BF_P4C_ARCH_PSA_REWRITE_BRIDGE_METADATA_H_
 
-#include "bf-p4c/arch/psa/programStructure.h"
+#include "backends/tofino/bf-p4c/arch/psa/programStructure.h"
 #include "ir/ir.h"
 
 namespace BFN {

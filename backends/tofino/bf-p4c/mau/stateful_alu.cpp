@@ -20,11 +20,11 @@
 
 #include <cmath>
 
-#include "bf-p4c/common/asm_output.h"  // for generic formatting routines
-#include "bf-p4c/common/ir_utils.h"
-#include "bf-p4c/common/slice.h"
-#include "bf-p4c/ir/ir_enums.h"
-#include "bf-p4c/lib/safe_width.h"
+#include "backends/tofino/bf-p4c/common/asm_output.h"  // for generic formatting routines
+#include "backends/tofino/bf-p4c/common/ir_utils.h"
+#include "backends/tofino/bf-p4c/common/slice.h"
+#include "backends/tofino/bf-p4c/ir/ir_enums.h"
+#include "backends/tofino/bf-p4c/lib/safe_width.h"
 #include "ir/pattern.h"
 #include "ixbar_expr.h"
 #include "lib/hex.h"
@@ -362,16 +362,16 @@ bool CreateSaluInstruction::applyArg(const IR::PathExpression *pe, cstring field
             }
             if (!opcode) opcode = "alu_a"_cs;
             if (etype == OUTPUT) {
-                const char *pfx = "mem_"_cs;
+                const char *pfx = "mem_";
                 if (local) {
                     if (local->use == LocalVar::ALUHI) {
-                        pfx = "alu_"_cs;
+                        pfx = "alu_";
                     } else if (local->use == LocalVar::NONE) {
                         e = new IR::Constant(0);
                         break;
                     }
                 } else if (alu_write[field_idx]) {
-                    pfx = "alu_"_cs;
+                    pfx = "alu_";
                 }
                 name = pfx + name;
             } else if (etype == MINMAX_SRC)

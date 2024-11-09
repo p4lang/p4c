@@ -19,9 +19,9 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_PARDE_LOWERED_HELPERS_H_
 #define BACKENDS_TOFINO_BF_P4C_PARDE_LOWERED_HELPERS_H_
 
-#include "bf-p4c/ir/bitrange.h"
-#include "bf-p4c/parde/clot/clot_info.h"
-#include "bf-p4c/phv/utils/slice_alloc.h"
+#include "backends/tofino/bf-p4c/ir/bitrange.h"
+#include "backends/tofino/bf-p4c/parde/clot/clot_info.h"
+#include "backends/tofino/bf-p4c/phv/utils/slice_alloc.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/stringref.h"

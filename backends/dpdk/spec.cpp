@@ -2,6 +2,7 @@
 #include "dpdkArch.h"
 #include "dpdkAsmOpt.h"
 #include "dpdkHelpers.h"
+#include "ir/annotations.h"
 #include "ir/dbprint.h"
 #include "printUtils.h"
 
@@ -223,7 +224,7 @@ std::ostream &IR::DpdkHeaderInstance::toSpec(std::ostream &out) const {
 }
 
 std::ostream &IR::DpdkStructType::toSpec(std::ostream &out) const {
-    if (getAnnotations()->getSingle("__packet_data__"_cs)) {
+    if (getAnnotation("__packet_data__"_cs)) {
         for (auto it = fields.begin(); it != fields.end(); ++it) {
             add_comment(out, (*it)->name.toString());
             if (auto t = (*it)->type->to<IR::Type_Name>()) {
@@ -270,7 +271,7 @@ std::ostream &IR::DpdkStructType::toSpec(std::ostream &out) const {
             out << std::endl;
         }
         out << "}" << std::endl;
-        if (getAnnotations()->getSingle("__metadata__"_cs)) {
+        if (getAnnotation("__metadata__"_cs)) {
             out << "metadata instanceof " << name << std::endl;
         }
     }
@@ -414,8 +415,8 @@ std::ostream &IR::DpdkTable::toSpec(std::ostream &out) const {
         } else {
             out << "\t\t" << DPDK::toStr(action->expression);
         }
-        if (action->annotations->getAnnotation("tableonly"_cs)) out << " @tableonly";
-        if (action->annotations->getAnnotation("defaultonly"_cs)) out << " @defaultonly";
+        if (action->hasAnnotation(IR::Annotation::tableOnlyAnnotation)) out << " @tableonly";
+        if (action->hasAnnotation(IR::Annotation::defaultOnlyAnnotation)) out << " @defaultonly";
         out << std::endl;
     }
     out << "\t}" << std::endl;

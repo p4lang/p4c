@@ -230,7 +230,7 @@ static const IR::Expression *removeRedundantValid(const IR::Expression *e);
 %type<IR::ActionFunction*>          action_function_body action_statement_list
 %type<IR::ActionProfile*>           action_profile_body
 %type<IR::ActionSelector*>          action_selector_body
-%type<IR::Annotations*>             blackbox_method
+%type<IR::Vector<IR::Annotation>*>  blackbox_method
 %type<IR::Apply*>                   apply_case_list
 %type<IR::Attribute*>               blackbox_attribute
 %type<IR::AttribLocal*>             local_var
@@ -301,9 +301,9 @@ header_type_declaration: HEADER_TYPE name "{" header_dec_body "}"
       { $4.annotations->append(driver.takePragmasAsVector());
         driver.global->add($2, new IR::v1HeaderType(@1+@5, $2,
             new IR::Type_Struct(@1+@5, IR::ID(@2, $2),
-                                new IR::Annotations(*$4.annotations), *$4.fields),
+                                *$4.annotations, *$4.fields),
             new IR::Type_Header(@1+@5, IR::ID(@2, $2),
-                                new IR::Annotations(*$4.annotations), *$4.fields))); }
+                                *$4.annotations, *$4.fields))); }
     | HEADER_TYPE name "{" header_dec_body error END
           { driver.clearPragmas(); }
 ;
@@ -321,7 +321,7 @@ field_declarations: /* epsilon */
         if ($5.signed_ && type->is<IR::Type::Bits>())
             type = IR::Type::Bits::get(type->to<IR::Type::Bits>()->size, true);
         ($$=$1).fields->push_back(new IR::StructField(@2+@4, IR::ID(@2, $2),
-                new IR::Annotations($5.annotations), type)); }
+                $5.annotations, type)); }
     | field_declarations type name ";"
       { ($$=$1).fields->push_back(new IR::StructField(@2+@4, IR::ID(@3, $3), $2)); }
 ;
@@ -387,10 +387,10 @@ type: BIT { $$ = IR::Type::Bits::get(@1, 1); }
 header_instance:
       HEADER name name ";"
       { driver.global->add($3, new IR::Header(@1+@4, IR::ID(@2, $2), IR::ID(@3, $3),
-                                              driver.takePragmasAsAnnotations())); }
+                                              driver.takePragmasAsVector())); }
     | HEADER name name "[" const_expression "]" ";"
       { driver.global->add($3, new IR::HeaderStack(@1+@7, IR::ID(@2, $2), IR::ID(@3, $3),
-                                                   driver.takePragmasAsAnnotations(),
+                                                   driver.takePragmasAsVector(),
                                                    $5 ? $5->asLong() : 0));
         $5 = nullptr; }
     ;
@@ -398,7 +398,7 @@ header_instance:
 metadata_instance:
       METADATA name name opt_metadata_initializer ";"
       { driver.global->add($3, new IR::Metadata(@1+@5, IR::ID(@2, $2), IR::ID(@3, $3),
-                                                driver.takePragmasAsAnnotations())); }
+                                                driver.takePragmasAsVector())); }
     ;
 
 opt_metadata_initializer: /* epsilon */
@@ -422,7 +422,7 @@ field_list_declaration:
 ;
 
 field_list_entries:
-      /* epsilon */ { $$ = new IR::FieldList(driver.takePragmasAsAnnotations()); }
+      /* epsilon */ { $$ = new IR::FieldList(driver.takePragmasAsVector()); }
     | field_list_entries expression ";" /* const_expression or field_ref or name */
       { ($$=$1)->fields.push_back($2); }
     | field_list_entries PAYLOAD ";"
@@ -440,7 +440,7 @@ field_list_calculation_declaration:
 ;
 
 field_list_calculation_body: /* epsilon */
-      { $$ = new IR::FieldListCalculation(driver.takePragmasAsAnnotations()); }
+      { $$ = new IR::FieldListCalculation(driver.takePragmasAsVector()); }
     | field_list_calculation_body INPUT "{" field_list_list "}"
       { if ($1->input)
            ::P4::error(ErrorType::ERR_INVALID, "%s: multiple 'input' in field_list_calculation", @2);
@@ -477,7 +477,7 @@ calculated_field_declaration:
 ;
 
 update_verify_spec_list: /* epsilon */
-      { $$ = new IR::CalculatedField(driver.takePragmasAsAnnotations()); }
+      { $$ = new IR::CalculatedField(driver.takePragmasAsVector()); }
     | update_verify_spec_list UPDATE name opt_condition ";"
       { ($$=$1)->specs.emplace_back(@1+@3, true, IR::ID(@3, $3), $4); }
     | update_verify_spec_list VERIFY name opt_condition ";"
@@ -496,7 +496,7 @@ opt_condition: /* epsilon */ { $$ = nullptr; }
 
 value_set_declaration:
     PARSER_VALUE_SET name ";"
-    { driver.global->add($2, new IR::ParserValueSet(@1, IR::ID(@2, $2), driver.takePragmasAsAnnotations())); }
+    { driver.global->add($2, new IR::ParserValueSet(@1, IR::ID(@2, $2), driver.takePragmasAsVector())); }
 
 /************************/
 /* 4.4 Parser Functions */
@@ -509,7 +509,7 @@ parser_function_declaration:
 ;
 
 parser_statement_list: /* epsilon */
-      { $$ = new IR::V1Parser(driver.takePragmasAsAnnotations()); }
+      { $$ = new IR::V1Parser(driver.takePragmasAsVector()); }
     | parser_statement_list EXTRACT "(" header_ref ")" ";"
       { ($$=$1)->stmts.push_back(new IR::Primitive(@2+@5, $2, $4)); }
     | parser_statement_list SET_METADATA "(" expression "," expression ")" ";"
@@ -575,7 +575,7 @@ counter_declaration: COUNTER name "{" counter_spec_list "}"
 
 counter_spec_list:
       TYPE ":" name ";"
-      { ($$ = new IR::Counter(driver.takePragmasAsAnnotations()))->settype($3); }
+      { ($$ = new IR::Counter(driver.takePragmasAsVector()))->settype($3); }
     | counter_spec_list DIRECT ":" name ";"
       { if (($$=$1)->table)
             ::P4::error(ErrorType::ERR_INVALID, "%s: Can't attach counter to two tables", @2+@4);
@@ -610,7 +610,7 @@ meter_declaration : METER name "{" meter_spec_list "}"
 
 meter_spec_list:
       TYPE ":" name ";"
-      { ($$ = new IR::Meter(driver.takePragmasAsAnnotations()))->settype($3); }
+      { ($$ = new IR::Meter(driver.takePragmasAsVector()))->settype($3); }
     | meter_spec_list RESULT ":" field_ref ";"
       { ($$=$1)->result = $4; }
     | meter_spec_list PRE_COLOR ":" field_ref ";"
@@ -646,11 +646,11 @@ register_declaration: REGISTER name "{" register_spec_list "}"
 
 register_spec_list:
       WIDTH ":" const_expression ";"
-      { $$ = new IR::Register(driver.takePragmasAsAnnotations());
+      { $$ = new IR::Register(driver.takePragmasAsVector());
         $$->width = $3 ? $3->asLong() : 0;
         $3 = nullptr; }
     | LAYOUT ":" name ";"
-      { $$ = new IR::Register(driver.takePragmasAsAnnotations());
+      { $$ = new IR::Register(driver.takePragmasAsVector());
         $$->layout = IR::ID(@3, $3); }
     | register_spec_list DIRECT ":" name ";"
       { if (($$=$1)->table)
@@ -709,7 +709,7 @@ action_function_body:
 ;
 
 action_statement_list: /* epsilon */
-      { $$ = new IR::ActionFunction(driver.takePragmasAsAnnotations()); }
+      { $$ = new IR::ActionFunction(driver.takePragmasAsVector()); }
     | action_statement_list name "(" opt_expression_list ")" ";"
       { ($$ = $1)->action.push_back(new IR::Primitive(@2+@5, $2, $4)); }
     | action_statement_list field_ref "=" expression ";"
@@ -731,7 +731,7 @@ action_profile_declaration: ACTION_PROFILE name "{" action_profile_body "}"
     ;
 
 action_profile_body: /* epsilon */
-      { $$ = new IR::ActionProfile(driver.takePragmasAsAnnotations()); }
+      { $$ = new IR::ActionProfile(driver.takePragmasAsVector()); }
     | action_profile_body ACTIONS "{" action_list "}"
       { ($$=$1)->actions = $4->names; $4 = nullptr; }
     | action_profile_body SIZE ":" const_expression ";"
@@ -745,7 +745,7 @@ action_selector_declaration: ACTION_SELECTOR name "{" action_selector_body "}"
     ;
 
 action_selector_body: /* epsilon */
-      { $$ = new IR::ActionSelector(driver.takePragmasAsAnnotations()); }
+      { $$ = new IR::ActionSelector(driver.takePragmasAsVector()); }
     | action_selector_body SELECTION_KEY ":" name ";" { ($$=$1)->key = IR::ID(@4, $4); }
     | action_selector_body SELECTION_MODE ":" name ";" { ($$=$1)->mode = IR::ID(@4, $4); }
     | action_selector_body SELECTION_TYPE ":" name ";" { ($$=$1)->type = IR::ID(@4, $4); }
@@ -763,7 +763,7 @@ table_declaration: TABLE name "{" table_body "}"
 ;
 
 table_body: /* epsilon */
-      { $$ = new IR::V1Table(driver.takePragmasAsAnnotations()); }
+      { $$ = new IR::V1Table(driver.takePragmasAsVector()); }
     | table_body READS "{" field_match_list "}"
       { ($$=$1)->reads = $4; }
     | table_body READS "{" field_match_list error END
@@ -837,7 +837,7 @@ action_list: /* epsilon */ { $$ = new IR::NameList(); }
 
 control_function_declaration: CONTROL name "{" control_statement_list "}"
       { driver.global->add($2, new IR::V1Control(@1+@5, IR::ID(@2, $2), $4,
-                                                 driver.takePragmasAsAnnotations())); }
+                                                 driver.takePragmasAsVector())); }
     | CONTROL name "{" control_statement_list error END
 ;
 
@@ -880,7 +880,7 @@ apply_case_list: /* epsilon */ { $$ = new IR::Apply; }
 blackbox_type_declaration: BLACKBOX_TYPE name "{" blackbox_body "}"
       { driver.global->add($2,
           new IR::Type_Extern(@1+@5, IR::ID(@2, $2), *$4.methods,
-                              *$4.attribs, driver.takePragmasAsAnnotations())); }
+                              *$4.attribs, driver.takePragmasAsVector())); }
 ;
 
 blackbox_body: /* epsilon */ {
@@ -907,11 +907,11 @@ blackbox_attribute: /* epsilon */ { $$ = new IR::Attribute($<IR::ID>-1); }
     | blackbox_attribute error { $$ = $1; }
 ;
 
-blackbox_method: { $$ = new IR::Annotations; }
+blackbox_method: { $$ = new IR::Vector<IR::Annotation>(); }
     | blackbox_method READS "{" opt_name_list "}"
-       { ($$=$1)->add(new IR::Annotation(@2, $2, driver.makeExpressionList($4))); }
+       { ($$=$1)->push_back(new IR::Annotation(@2, $2, driver.makeExpressionList($4))); }
     | blackbox_method WRITES "{" opt_name_list "}"
-       { ($$=$1)->add(new IR::Annotation(@2, $2, driver.makeExpressionList($4))); }
+       { ($$=$1)->push_back(new IR::Annotation(@2, $2, driver.makeExpressionList($4))); }
 ;
 
 opt_argument_list:
@@ -928,7 +928,7 @@ argument:
       inout type name
         { $$ = new IR::Parameter(@3, $3, $1, $2); }
     | OPTIONAL argument
-        { ($$ = $2)->annotations = $2->annotations->add(new IR::Annotation(@1, $1, {})); }
+        { ($$ = $2)->annotations.push_back(new IR::Annotation(@1, $1, {})); }
 ;
 
 inout: IN { $$ = IR::Direction::In; } | OUT { $$ = IR::Direction::Out; } ;
@@ -946,12 +946,12 @@ local_var:
 blackbox_instantiation:
       BLACKBOX name name ";"
         { driver.global->add($3,
-            new IR::Declaration_Instance(@3, $3, driver.takePragmasAsAnnotations(),
+            new IR::Declaration_Instance(@3, $3, driver.takePragmasAsVector(),
                                          new IR::Type_Name($2),
                                          new IR::Vector<IR::Argument>)); }
     | BLACKBOX name name "{" blackbox_config "}"
         { auto instance =
-            new IR::Declaration_Instance(@3, $3, driver.takePragmasAsAnnotations(),
+            new IR::Declaration_Instance(@3, $3, driver.takePragmasAsVector(),
                                          new IR::Type_Name($2),
                                          new IR::Vector<IR::Argument>);
           instance->properties = std::move(*$5);

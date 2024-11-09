@@ -938,7 +938,7 @@ class P4RuntimeAnalyzer {
         std::set<cstring> keysVisited;
 
         // @pkginfo annotation
-        for (auto *annotation : decl->getAnnotations()->annotations) {
+        for (auto *annotation : decl->getAnnotations()) {
             if (annotation->name != IR::Annotation::pkginfoAnnotation) continue;
             for (auto *kv : annotation->kv) {
                 auto name = kv->name.name;
@@ -981,7 +981,7 @@ class P4RuntimeAnalyzer {
         }
 
         // Parse `@platform_property` annotation into the PkgInfo.
-        for (auto *annotation : decl->getAnnotations()->annotations) {
+        for (auto *annotation : decl->getAnnotations()) {
             if (annotation->name != "platform_property") continue;
             auto *platform_properties = pkginfo->mutable_platform_properties();
             for (auto *kv : annotation->kv) {

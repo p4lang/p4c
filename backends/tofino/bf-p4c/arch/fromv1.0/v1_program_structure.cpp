@@ -18,7 +18,7 @@
 
 #include "v1_program_structure.h"
 
-#include "bf-p4c/common/pragma/all_pragmas.h"
+#include "backends/tofino/bf-p4c/common/pragma/all_pragmas.h"
 #include "v1_converters.h"
 
 namespace BFN {

@@ -23,6 +23,93 @@ We follow a monthly release cadence. Our versioning scheme is as follows:
 > @note
 > The commit history prior to the release [1.2.2.1](https://github.com/p4lang/p4c/pull/3085) is not included here but is available in the [commit history](https://github.com/p4lang/p4c/commits/main/).
 
+## Release v1.2.4.17 [[view](https://github.com/p4lang/p4c/pull/4990)]
+
+### Breaking Changes 🛠
+- Remove ReferenceMap from majority of midend passes [[view](https://github.com/p4lang/p4c/pull/4936)] (asl)
+- Remove ReferenceMap from another set of midend passes [[view](https://github.com/p4lang/p4c/pull/4939)] (asl)
+
+### P4 Specification Implementation
+- Support for [lsb+:width] slices [[view](https://github.com/p4lang/p4c/pull/4917)] (Chris Dodd)
+
+### Changes to the Compiler Core
+- Fix parser symbolic interpreter to evaluate `StringLiteral` [[view](https://github.com/p4lang/p4c/pull/4937)] (jhavrane)
+- Add `Vector::dbprint` [[view](https://github.com/p4lang/p4c/pull/4943)] (Vladimír Štill)
+- Extend type checking to mark extern function call that returns enum as… [[view](https://github.com/p4lang/p4c/pull/4941)] (hanw)
+- Reorder subdirectory additions in `CMakeLists.txt` [[view](https://github.com/p4lang/p4c/pull/4938)] (hanw)
+- Add `LOGGING_FEATURE` macro [[view](https://github.com/p4lang/p4c/pull/4953)] (Vladimír Štill)
+- Add utilities for running modifications inside nested IR nodes [[view](https://github.com/p4lang/p4c/pull/4940)] (Vladimír Štill)
+- Set `PathExpression` type in `ExpandLookahead` [[view](https://github.com/p4lang/p4c/pull/4959)] (grg)
+- Do not print confusing warning when a parser state contains an assignment to an l-value slice [[view](https://github.com/p4lang/p4c/pull/4948)] (kfcripps)
+- Minor code/comments cleanup in `SimplifyDefUse` [[view](https://github.com/p4lang/p4c/pull/4963)] (kfcripps)
+- Wrap `<64bit` types properly in loop unrolling [[view](https://github.com/p4lang/p4c/pull/4967)] (Chris Dodd)
+- Fix warning about `delete` not matching `new` [[view](https://github.com/p4lang/p4c/pull/4989)] (Chris Dodd)
+
+### Changes to the BMv2 Back Ends
+- Clean up BMv2's `run-stf-test` script and integrate it with `testutils` [[view](https://github.com/p4lang/p4c/pull/4981)] (fruffy)
+
+### Changes to the TC Back End
+- Change `tc` template define [[view](https://github.com/p4lang/p4c/pull/4949)] (vbnogueira)
+- Make number of masks default to 1 for exact tables [[view](https://github.com/p4lang/p4c/pull/4954)] (vbnogueira)
+- Handle `pna_main_parser_input_metadata_t` fields in the TC backend's parser [[view](https://github.com/p4lang/p4c/pull/4955)] (vbnogueira)
+- Implement Hash Extern for `P4TC` [[view](https://github.com/p4lang/p4c/pull/4980)] (komaljai)
+
+### Changes to the DPDK Back End
+- Support for 128-bit bitwise operation [[view](https://github.com/p4lang/p4c/pull/4952)] (Sosutha)
+
+### Changes to the P4Tools Back End
+- [P4Testgen] Move newline stripping from trace to `TestFramework` [[view](https://github.com/p4lang/p4c/pull/4946)] (Vladimír Štill)
+- [P4Testgen] Run typechecking after front and mid end [[view](https://github.com/p4lang/p4c/pull/4834)] (fruffy)
+- Build `Z3` from source instead of downloading precompiled binaries [[view](https://github.com/p4lang/p4c/pull/4697)] (fruffy)
+
+### Other Changes
+- Ignore `brew` dependency installation to fix breakages on MacOS CI [[view](https://github.com/p4lang/p4c/pull/4950)] (fruffy)
+- Remove `ReferenceMap` from top-level frontend passes [[view](https://github.com/p4lang/p4c/pull/4947)] (asl)
+- Add instructions on GitHub CI tests, including triggering optional ones [[view](https://github.com/p4lang/p4c/pull/4956)] (jafingerhut)
+- Fix a recently introduced typo [[view](https://github.com/p4lang/p4c/pull/4960)] (jafingerhut)
+- Fix Fedora CI build [[view](https://github.com/p4lang/p4c/pull/4957)] (fruffy)
+- Add missing `ENABLE_*` flags to README [[view](https://github.com/p4lang/p4c/pull/4968)] (jafingerhut)
+- Bump up `grpcio` version to fix Mac M1 CI issue [[view](https://github.com/p4lang/p4c/pull/4976)] (hanw)
+- Require the driver binary as a test input [[view](https://github.com/p4lang/p4c/pull/4977)] (fruffy)
+- [P4fmt]: Attach comments to IR Nodes [[view](https://github.com/p4lang/p4c/pull/4845)] (snapdgn)
+- Contribute Intel Tofino compiler backend to `p4c` [[view](https://github.com/p4lang/p4c/pull/4964)] (hanw)
+- Remove Tofino-specific Python packages from `requirements.txt` [[view](https://github.com/p4lang/p4c/pull/4984)] (fruffy)
+- Fix Fedora build and CMake warnings for versions greater than CMake 3.24 [[view](https://github.com/p4lang/p4c/pull/4986)] (fruffy)
+- Fix case of default CMake build mode [[view](https://github.com/p4lang/p4c/pull/4993)] (fruffy)
+
+## Release v1.2.4.16 [[view](https://github.com/p4lang/p4c/pull/4935)]
+
+### Breaking Changes 🛠
+- Allow extending `ToP4`, clean its constructors [[view](https://github.com/p4lang/p4c/pull/4899)] (Vladimír Štill)
+
+### Changes to the Compiler Core
+- Reduce the number of memory allocations in `def-use` [[view](https://github.com/p4lang/p4c/pull/4904)] (asl)
+- Split the `start` state more conservatively when a parser contains `decl` initializers [[view](https://github.com/p4lang/p4c/pull/4902)] (kfcripps)
+- Add missed include [[view](https://github.com/p4lang/p4c/pull/4915)] (asl)
+- Only process `IR::Path`s inside of `IR::ParserState` contexts in `MoveInitializers` [[view](https://github.com/p4lang/p4c/pull/4910)] (kfcripps)
+- Factor common base `ExternCall` for `ExternMethod`/`ExternFunction` [[view](https://github.com/p4lang/p4c/pull/4898)] (Chris Dodd)
+- [Issue - 4883](https://github.com/p4lang/p4c/issues/4883) Remove unused actions whose name starts with `"__"` [[view](https://github.com/p4lang/p4c/pull/4900)] (kfcripps)
+- Allow `--Wdisable` to take precedence over `--Werror` for warning messages [[view](https://github.com/p4lang/p4c/pull/4894)] (kfcripps)
+- Allow keywords to be used as annotation names [[view](https://github.com/p4lang/p4c/pull/4897)] (Chris Dodd)
+- Avoid copying `out`/`inout` args when inlining functions [[view](https://github.com/p4lang/p4c/pull/4877)] (Chris Dodd)
+- Clean up the `P4-14` dependent code [[view](https://github.com/p4lang/p4c/pull/4925)] (fruffy)
+- Fix `Type_Indexed::at` [[view](https://github.com/p4lang/p4c/pull/4927)] (Chris Dodd)
+- Make `--top4` matching case-insensitive [[view](https://github.com/p4lang/p4c/pull/4924)] (fruffy)
+
+### Changes to the TC Back End
+- Add `inst_type` field in `introspection.json` [[view](https://github.com/p4lang/p4c/pull/4905)] (komaljai)
+
+### Changes to the P4Tools Back End
+- [P4Tools] Track invocations in the timer to measure per function statistics [[view](https://github.com/p4lang/p4c/pull/4929)] (fruffy)
+- [P4Testgen] Unify compiler and tool options; ensure options context is initialized correctly [[view](https://github.com/p4lang/p4c/pull/4787)] (fruffy)
+- [P4Tools] Clean up use of `::P4` prefix for errors, warnings, and logs [[view](https://github.com/p4lang/p4c/pull/4930)] (fruffy)
+
+### Other Changes
+- Bump `peter-evans/create-pull-request` from 6 to 7 [[view](https://github.com/p4lang/p4c/pull/4903)] (dependabot)
+- Docs: Update documentation instructions [[view](https://github.com/p4lang/p4c/pull/4875)] (AdarshRawat1)
+- Remove workaround required for MacOS CI installation [[view](https://github.com/p4lang/p4c/pull/4921)] (fruffy)
+- Docs: Changelog release update for v1.2.4.15 [[view](https://github.com/p4lang/p4c/pull/4934)] (AdarshRawat1)
+
 ## Release v1.2.4.15 [[view](https://github.com/p4lang/p4c/pull/4899)]
 
 ### Breaking Changes 🛠

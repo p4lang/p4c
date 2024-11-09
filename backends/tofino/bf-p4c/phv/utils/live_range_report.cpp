@@ -16,10 +16,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/utils/live_range_report.h"
+#include "backends/tofino/bf-p4c/phv/utils/live_range_report.h"
 
-#include "bf-p4c/common/table_printer.h"
-#include "bf-p4c/phv/analysis/meta_live_range.h"
+#include "backends/tofino/bf-p4c/common/table_printer.h"
+#include "backends/tofino/bf-p4c/phv/analysis/meta_live_range.h"
 
 std::map<int, PHV::FieldUse> LiveRangeReport::processUseDefSet(
     const FieldDefUse::LocPairSet &defuseSet, PHV::FieldUse usedef) const {

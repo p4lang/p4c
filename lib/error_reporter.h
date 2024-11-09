@@ -114,8 +114,8 @@ class ErrorReporter {
         if (!node || error_reported(errorCode, node->getSourceInfo())) return;
 
         if (cstring name = get_error_name(errorCode))
-            diagnose(getDiagnosticAction(errorCode, name, action), name, format, suffix, node,
-                     std::forward<Args>(args)...);
+            diagnose(getDiagnosticAction(errorCode, name, action), name.c_str(), format, suffix,
+                     node, std::forward<Args>(args)...);
         else
             diagnose(action, nullptr, format, suffix, node, std::forward<Args>(args)...);
     }
@@ -124,7 +124,7 @@ class ErrorReporter {
     void diagnose(DiagnosticAction action, const int errorCode, const char *format,
                   const char *suffix, Args &&...args) {
         if (cstring name = get_error_name(errorCode))
-            diagnose(getDiagnosticAction(errorCode, name, action), name, format, suffix,
+            diagnose(getDiagnosticAction(errorCode, name, action), name.c_str(), format, suffix,
                      std::forward<Args>(args)...);
         else
             diagnose(action, nullptr, format, suffix, std::forward<Args>(args)...);

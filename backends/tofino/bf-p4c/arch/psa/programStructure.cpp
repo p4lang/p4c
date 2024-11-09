@@ -18,8 +18,8 @@
 
 #include "programStructure.h"
 
-#include "bf-p4c/arch/arch.h"
-#include "bf-p4c/common/pragma/all_pragmas.h"
+#include "backends/tofino/bf-p4c/arch/arch.h"
+#include "backends/tofino/bf-p4c/common/pragma/all_pragmas.h"
 #include "midend/validateProperties.h"
 #include "psa_converters.h"
 

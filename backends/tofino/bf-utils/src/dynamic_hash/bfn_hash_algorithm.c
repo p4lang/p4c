@@ -1,4 +1,4 @@
-#include "bf-utils/include/dynamic_hash/bfn_hash_algorithm.h"
+#include "backends/tofino/bf-utils/include/dynamic_hash/bfn_hash_algorithm.h"
 
 #include <errno.h>
 #include <limits.h>

@@ -28,8 +28,8 @@
 #include "backends/graphs/controls.h"
 #include "backends/graphs/graph_visitor.h"
 #include "backends/graphs/parsers.h"
-#include "bf-p4c/common/run_id.h"
-#include "bf-p4c/version.h"  // for BF_P4C_VERSION
+#include "backends/tofino/bf-p4c/common/run_id.h"
+#include "backends/tofino/bf-p4c/version.h"  // for BF_P4C_VERSION
 #include "ir/ir.h"
 
 using Manifest = Logging::Manifest;
@@ -310,7 +310,7 @@ void Manifest::OutputFiles::serialize(Writer &writer) const {
     writer.StartObject();  // Abe`s note: is this a bug?  I copied it verbatim from the legacy code.
     writer.Key("path");
     if (m_context)
-        writer.String(m_context);
+        writer.String(m_context.c_str());
     else
         writer.String("");
     writer.EndObject();
@@ -320,7 +320,7 @@ void Manifest::OutputFiles::serialize(Writer &writer) const {
         writer.Key("binary");
         writer.StartObject();
         writer.Key("path");
-        writer.String(m_context);
+        writer.String(m_context.c_str());
         writer.EndObject();
     }
 

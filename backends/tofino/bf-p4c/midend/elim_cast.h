@@ -45,7 +45,7 @@
 #ifndef BF_P4C_MIDEND_ELIM_CAST_H_
 #define BF_P4C_MIDEND_ELIM_CAST_H_
 
-#include "bf-p4c/midend/type_checker.h"
+#include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/strengthReduction.h"
 #include "frontends/p4/typeMap.h"

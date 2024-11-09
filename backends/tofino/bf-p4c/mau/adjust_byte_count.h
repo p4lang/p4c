@@ -19,8 +19,8 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_MAU_ADJUST_BYTE_COUNT_H_
 #define BACKENDS_TOFINO_BF_P4C_MAU_ADJUST_BYTE_COUNT_H_
 
-#include "bf-p4c/logging/pass_manager.h"
-#include "bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/logging/pass_manager.h"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
 namespace BFN {
 
 using namespace P4;

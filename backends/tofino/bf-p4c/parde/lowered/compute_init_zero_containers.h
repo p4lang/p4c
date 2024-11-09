@@ -19,8 +19,8 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_PARDE_LOWERED_COMPUTE_INIT_ZERO_CONTAINERS_H_
 #define BACKENDS_TOFINO_BF_P4C_PARDE_LOWERED_COMPUTE_INIT_ZERO_CONTAINERS_H_
 
-#include "bf-p4c/common/field_defuse.h"
-#include "bf-p4c/parde/parde_visitor.h"
+#include "backends/tofino/bf-p4c/common/field_defuse.h"
+#include "backends/tofino/bf-p4c/parde/parde_visitor.h"
 
 namespace Parde::Lowered {
 

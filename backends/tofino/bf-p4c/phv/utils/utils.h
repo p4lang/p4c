@@ -21,13 +21,13 @@
 
 #include <optional>
 
-#include "bf-p4c/ir/bitrange.h"
-#include "bf-p4c/ir/gress.h"
-#include "bf-p4c/phv/error.h"
-#include "bf-p4c/phv/phv.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/pragma/pa_no_init.h"
-#include "bf-p4c/phv/utils/slice_alloc.h"
+#include "backends/tofino/bf-p4c/ir/bitrange.h"
+#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/phv/error.h"
+#include "backends/tofino/bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_no_init.h"
+#include "backends/tofino/bf-p4c/phv/utils/slice_alloc.h"
 #include "lib/bitvec.h"
 #include "lib/symbitmatrix.h"
 

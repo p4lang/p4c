@@ -25,7 +25,7 @@ void ComplexValues::explode(std::string_view prefix, const IR::Type_Struct *type
                             IR::Vector<T> *result) {
     CHECK_NULL(type);
     for (const auto *f : type->fields) {
-        std::string fname = absl::StrCat(prefix, "_", f->name.string_view());
+        std::string fname = absl::StrCat(prefix, "_", f->name);
         auto ftype = typeMap->getType(f, true);
         if (isNestedStruct(ftype)) {
             auto submap = new FieldsMap(ftype);
@@ -47,10 +47,8 @@ const IR::Node *RemoveNestedStructs::postorder(IR::Declaration_Variable *decl) {
     if (!values.isNestedStruct(type)) return decl;
 
     BUG_CHECK(decl->initializer == nullptr, "%1%: did not expect an initializer", decl);
-    BUG_CHECK(
-        decl->annotations->size() == 0 ||
-            (decl->annotations->size() == 1 && decl->annotations->getSingle("name"_cs) != nullptr),
-        "%1%: don't know how to handle variable annotations other than @name", decl);
+    BUG_CHECK(!decl->hasAnnotations() || decl->hasOnlyAnnotation(IR::Annotation::nameAnnotation),
+              "%1%: don't know how to handle variable annotations other than @name", decl);
     auto map = new ComplexValues::FieldsMap(type);
     values.values.emplace(getOriginal<IR::Declaration_Variable>(), map);
     if (findContext<IR::Function>()) {

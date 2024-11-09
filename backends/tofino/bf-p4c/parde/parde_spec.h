@@ -22,9 +22,9 @@
 #include <map>
 #include <vector>
 
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/ir/bitrange.h"
-#include "bf-p4c/parde/match_register.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/ir/bitrange.h"
+#include "backends/tofino/bf-p4c/parde/match_register.h"
 
 using namespace P4::literals;
 

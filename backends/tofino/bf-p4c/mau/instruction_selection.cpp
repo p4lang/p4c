@@ -16,20 +16,20 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/instruction_selection.h"
+#include "backends/tofino/bf-p4c/mau/instruction_selection.h"
 
 #include <sstream>
 
 #include <boost/algorithm/string.hpp>
 
 #include "action_analysis.h"
-#include "bf-p4c/common/elim_unused.h"
-#include "bf-p4c/common/ir_utils.h"
-#include "bf-p4c/common/slice.h"
-#include "bf-p4c/mau/stateful_alu.h"
-#include "bf-p4c/mau/static_entries_const_prop.h"
-#include "bf-p4c/mau/validate_actions.h"
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/common/elim_unused.h"
+#include "backends/tofino/bf-p4c/common/ir_utils.h"
+#include "backends/tofino/bf-p4c/common/slice.h"
+#include "backends/tofino/bf-p4c/mau/stateful_alu.h"
+#include "backends/tofino/bf-p4c/mau/static_entries_const_prop.h"
+#include "backends/tofino/bf-p4c/mau/validate_actions.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "ir/pattern.h"
 #include "ixbar_expr.h"
 #include "lib/bitops.h"
@@ -1127,7 +1127,7 @@ static const IR::MAU::Instruction *fillInstDest(const IR::Expression *in,
     if (!tv) tv = sl ? sl->e0->to<IR::TempVar>() : nullptr;
     if (tv) {
         int id;
-        if (sscanf(tv->name, "$tmp%d", &id) > 0 && id == tv->uid) --tv->uid;
+        if (sscanf(tv->name.c_str(), "$tmp%d", &id) > 0 && id == tv->uid) --tv->uid;
         auto *rv = inst->clone();
         if (sl != nullptr) dest = MakeSlice(dest, 0, sl->type->width_bits() - 1);
         rv->operands[0] = dest;
@@ -1311,7 +1311,7 @@ static const IR::Type *stateful_type_for_primitive(const IR::MAU::Primitive *pri
         prim->name == "Lpf.execute" || prim->name == "DirectLpf.execute" ||
         prim->name == "Wred.execute" || prim->name == "DirectWred.execute")
         return IR::Type_Meter::get();
-    if (auto a = strstr(prim->name, "Action")) {
+    if (auto a = prim->name.find("Action")) {
         if (a[6] == '.' || (std::isdigit(a[6]) && a[7] == '.')) return IR::Type_Register::get();
     }
     if (prim->name == "Register.clear" || prim->name == "DirectRegister.clear")
@@ -1325,7 +1325,7 @@ static ssize_t index_operand(const IR::MAU::Primitive *prim) {
     else if (prim->name.startsWith("Counter") || prim->name.startsWith("Meter") ||
              prim->name.endsWith("Action.execute"))
         return 1;
-    else if (strstr(prim->name, "Action."))
+    else if (prim->name.find("Action.") != nullptr)
         return -1;
     else if (prim->name.startsWith("Lpf") || prim->name.startsWith("Wred"))
         return 2;
@@ -1723,7 +1723,7 @@ const IR::MAU::StatefulCall *StatefulAttachmentSetup::Update::preorder(
     auto *orig_call = getOriginal()->to<IR::MAU::StatefulCall>();
 
     StatefulCallKey sck = std::make_pair(orig_call, tbl);
-    if (auto expr = ::get(self.update_calls, sck)) call->index = expr;
+    if (auto expr = P4::get(self.update_calls, sck)) call->index = expr;
 
     auto prim = call->prim;
     BUG_CHECK(prim->operands.size() >= 1, "Invalid primitive %s", prim);
@@ -1751,7 +1751,7 @@ const IR::MAU::BackendAttached *StatefulAttachmentSetup::Update::preorder(
     IR::MAU::BackendAttached *ba) {
     auto *tbl = findOrigCtxt<IR::MAU::Table>();
     HashDistKey hdk = std::make_pair(ba->attached, tbl);
-    if (auto hd = ::get(self.update_hd, hdk)) {
+    if (auto hd = P4::get(self.update_hd, hdk)) {
         ba->hash_dist = hd;
     }
     use_t use = IR::MAU::StatefulUse::NO_USE;

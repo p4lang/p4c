@@ -18,9 +18,9 @@
 
 #include "jbay_phv_analysis.h"
 
-#include "bf-p4c/device.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/phv_parde_mau_use.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/phv_parde_mau_use.h"
 
 Visitor::profile_t JbayPhvAnalysis::init_apply(const IR::Node *root) {
     profile_t rv = Inspector::init_apply(root);

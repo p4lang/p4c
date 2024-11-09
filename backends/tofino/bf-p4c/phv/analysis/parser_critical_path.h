@@ -19,9 +19,9 @@
 #ifndef BF_P4C_PHV_ANALYSIS_PARSER_CRITICAL_PATH_H_
 #define BF_P4C_PHV_ANALYSIS_PARSER_CRITICAL_PATH_H_
 
-#include "bf-p4c/ir/control_flow_visitor.h"
-#include "bf-p4c/parde/parde_visitor.h"
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/ir/control_flow_visitor.h"
+#include "backends/tofino/bf-p4c/parde/parde_visitor.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 

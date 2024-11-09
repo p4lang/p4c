@@ -30,8 +30,7 @@ void DeparserBodyTranslatorPSA::processFunction(const P4::ExternFunction *functi
     auto dprs = deparser->to<EBPFDeparserPSA>();
     CHECK_NULL(dprs);
     if (function->method->name.name == "psa_resubmit") {
-        builder->appendFormat("(!%s->drop && %s->resubmit)", dprs->istd->name.name,
-                              dprs->istd->name.name);
+        builder->appendFormat("(!%v->drop && %v->resubmit)", dprs->istd->name, dprs->istd->name);
     }
 }
 
@@ -141,19 +140,19 @@ void TCIngressDeparserPSA::emitPreDeparser(CodeBuilder *builder) {
     builder->emitIndent();
 
     // clone support
-    builder->appendFormat("if (%s->clone) ", istd->name.name);
+    builder->appendFormat("if (%v->clone) ", istd->name);
     builder->blockStart();
     builder->emitIndent();
     builder->appendFormat(
-        "do_packet_clones(%s, &clone_session_tbl, %s->clone_session_id,"
+        "do_packet_clones(%s, &clone_session_tbl, %v->clone_session_id,"
         " CLONE_I2E, 1);",
-        program->model.CPacketName.str(), istd->name.name);
+        program->model.CPacketName.str(), istd->name);
     builder->newline();
     builder->blockEnd(true);
 
     // early drop
     builder->emitIndent();
-    builder->appendFormat("if (%s->drop) ", istd->name.name);
+    builder->appendFormat("if (%v->drop) ", istd->name);
     builder->blockStart();
     builder->target->emitTraceMessage(builder, "PreDeparser: dropping packet..");
     builder->emitIndent();
@@ -162,7 +161,7 @@ void TCIngressDeparserPSA::emitPreDeparser(CodeBuilder *builder) {
 
     // if packet should be resubmitted, we skip deparser
     builder->emitIndent();
-    builder->appendFormat("if (%s->resubmit) ", istd->name.name);
+    builder->appendFormat("if (%v->resubmit) ", istd->name);
     builder->blockStart();
     builder->target->emitTraceMessage(builder,
                                       "PreDeparser: resubmitting packet, "
@@ -170,7 +169,7 @@ void TCIngressDeparserPSA::emitPreDeparser(CodeBuilder *builder) {
     builder->emitIndent();
     CHECK_NULL(program);
     auto pipeline = program->checkedTo<EBPFPipeline>();
-    builder->appendFormat("%s->packet_path = RESUBMIT;", pipeline->compilerGlobalMetadata);
+    builder->appendFormat("%v->packet_path = RESUBMIT;", pipeline->compilerGlobalMetadata);
     builder->newline();
     builder->emitIndent();
     builder->appendLine("return TC_ACT_UNSPEC;");
@@ -181,13 +180,13 @@ void TCIngressDeparserPSA::emitPreDeparser(CodeBuilder *builder) {
 void TCIngressDeparserForTrafficManagerPSA::emitPreDeparser(CodeBuilder *builder) {
     // clone support
     builder->emitIndent();
-    builder->appendFormat("if (%s.clone) ", this->istd->name.name);
+    builder->appendFormat("if (%v.clone) ", this->istd->name);
     builder->blockStart();
     builder->emitIndent();
     builder->appendFormat(
-        "do_packet_clones(%s, &clone_session_tbl, %s.clone_session_id,"
+        "do_packet_clones(%s, &clone_session_tbl, %v.clone_session_id,"
         " CLONE_I2E, 1);",
-        program->model.CPacketName.str(), this->istd->name.name);
+        program->model.CPacketName.str(), this->istd->name);
     builder->newline();
     builder->blockEnd(true);
 }
@@ -202,20 +201,20 @@ void XDPIngressDeparserPSA::emitPreDeparser(CodeBuilder *builder) {
     cstring conditionSendToTC =
         "if (%s->clone || %s->multicast_group != 0 ||"
         " (!%s->drop && %s->egress_port == 0 && !%s->resubmit && %s->multicast_group == 0)) "_cs;
-    conditionSendToTC = conditionSendToTC.replace("%s", istd->name.name.string_view());
+    conditionSendToTC = conditionSendToTC.replace("%s", istd->name.name);
     builder->append(conditionSendToTC);
     builder->blockStart();
     builder->emitIndent();
     builder->appendLine("struct xdp2tc_metadata xdp2tc_md = {};");
     builder->emitIndent();
-    builder->appendFormat("xdp2tc_md.headers = *%s", this->parserHeaders->name.name);
+    builder->appendFormat("xdp2tc_md.headers = *%v", this->parserHeaders->name);
 
     builder->endOfStatement(true);
     builder->emitIndent();
-    builder->appendFormat("xdp2tc_md.ostd = *%s", this->istd->name.name);
+    builder->appendFormat("xdp2tc_md.ostd = *%v", this->istd->name);
     builder->endOfStatement(true);
     builder->emitIndent();
-    builder->appendFormat("xdp2tc_md.packetOffsetInBits = 8 * PTR_DIFF_BYTES(%s, %s)",
+    builder->appendFormat("xdp2tc_md.packetOffsetInBits = 8 * PTR_DIFF_BYTES(%v, %v)",
                           this->program->headerStartVar, this->program->packetStartVar);
     builder->endOfStatement(true);
     builder->append(
@@ -260,11 +259,11 @@ void XDPIngressDeparserPSA::emitPreDeparser(CodeBuilder *builder) {
     }
     builder->target->emitTraceMessage(builder, "Sending packet up to TC for cloning or to kernel");
     builder->emitIndent();
-    builder->appendFormat("return %s", builder->target->forwardReturnCode());
+    builder->appendFormat("return %v", builder->target->forwardReturnCode());
     builder->endOfStatement(true);
     builder->blockEnd(true);
     builder->emitIndent();
-    builder->appendFormat("if (%s->drop) ", istd->name.name);
+    builder->appendFormat("if (%v->drop) ", istd->name);
     builder->blockStart();
     builder->target->emitTraceMessage(builder, "PreDeparser: dropping packet..");
     builder->emitIndent();
@@ -273,13 +272,13 @@ void XDPIngressDeparserPSA::emitPreDeparser(CodeBuilder *builder) {
 
     // if packet should be resubmitted, we skip deparser
     builder->emitIndent();
-    builder->appendFormat("if (%s->resubmit) ", istd->name.name);
+    builder->appendFormat("if (%v->resubmit) ", istd->name);
     builder->blockStart();
     builder->target->emitTraceMessage(builder,
                                       "PreDeparser: resubmitting packet, "
                                       "skipping deparser..");
     builder->emitIndent();
-    builder->appendFormat("%s->packet_path = RESUBMIT;",
+    builder->appendFormat("%v->packet_path = RESUBMIT;",
                           program->to<EBPFPipeline>()->compilerGlobalMetadata);
     builder->newline();
     builder->emitIndent();
@@ -290,7 +289,7 @@ void XDPIngressDeparserPSA::emitPreDeparser(CodeBuilder *builder) {
 // =====================XDPEgressDeparserPSA=============================
 void XDPEgressDeparserPSA::emitPreDeparser(CodeBuilder *builder) {
     builder->emitIndent();
-    builder->appendFormat("if (%s.drop) ", istd->name.name);
+    builder->appendFormat("if (%v.drop) ", istd->name);
     builder->blockStart();
     builder->target->emitTraceMessage(builder, "PreDeparser: dropping packet..");
     builder->emitIndent();

@@ -58,14 +58,11 @@ SourceInfo::SourceInfo(const InputSources *sources, SourcePosition start, Source
 }
 
 cstring SourceInfo::toString() const {
-    return absl::StrFormat("(%s)-(%s)", start.toString().string_view(),
-                           end.toString().string_view());
+    return absl::StrFormat("(%v)-(%v)", start.toString(), end.toString());
 }
 
 std::ostream &operator<<(std::ostream &os, const SourceInfo &info) {
-    // FIXME: implement abseil stringify to skip cstring conversion here
-    os << absl::StrFormat("(%s)-(%s)", info.start.toString().string_view(),
-                          info.end.toString().string_view());
+    os << absl::StrFormat("(%v)-(%v)", info.start, info.end);
     return os;
 }
 
@@ -186,7 +183,7 @@ SourceFileLine InputSources::getSourceLine(unsigned line) const {
     // So we have to subtract one to get the real line number.
     const auto nominalLine = line - it->first + it->second.sourceLine;
     const auto realLine = nominalLine > 0 ? nominalLine - 1 : 0;
-    return SourceFileLine(it->second.fileName.string_view(), realLine);
+    return SourceFileLine(it->second.fileName, realLine);
 }
 
 unsigned InputSources::getCurrentLineNumber() const { return contents.size(); }
@@ -312,7 +309,7 @@ cstring InputSources::toDebugString() const {
     builder << "---------------" << std::endl;
     for (const auto &lf : line_file_map)
         builder << lf.first << ": " << lf.second.toString() << std::endl;
-    return builder.str();
+    return {builder};
 }
 
 ///////////////////////////////////////////////////
@@ -360,9 +357,7 @@ cstring SourceInfo::getLineNum() const {
 
 ////////////////////////////////////////////////////////
 
-cstring SourceFileLine::toString() const {
-    return absl::StrFormat("%s(%d)", fileName.string_view(), sourceLine);
-}
+cstring SourceFileLine::toString() const { return absl::StrFormat("%v(%d)", fileName, sourceLine); }
 
 }  // namespace P4::Util
 

@@ -28,14 +28,14 @@
 
 #include <map>
 
-#include "bf-p4c/backend.h"
-#include "bf-p4c/mau/dynamic_dep_metrics.h"
-#include "bf-p4c/mau/mau_visitor.h"
-#include "bf-p4c/mau/resource.h"
-#include "bf-p4c/mau/resource_estimate.h"
-#include "bf-p4c/mau/table_flow_graph.h"
-#include "bf-p4c/mau/table_mutex.h"
-#include "bf-p4c/mau/table_summary.h"
+#include "backends/tofino/bf-p4c/backend.h"
+#include "backends/tofino/bf-p4c/mau/dynamic_dep_metrics.h"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/mau/resource.h"
+#include "backends/tofino/bf-p4c/mau/resource_estimate.h"
+#include "backends/tofino/bf-p4c/mau/table_flow_graph.h"
+#include "backends/tofino/bf-p4c/mau/table_mutex.h"
+#include "backends/tofino/bf-p4c/mau/table_summary.h"
 #include "lib/ordered_set.h"
 
 using namespace P4;

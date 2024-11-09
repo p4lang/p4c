@@ -50,7 +50,7 @@ IR::StatOrDecl *DeclarationGenerator::generateRandomStatementOrDeclaration(bool 
     return stmt;
 }
 
-IR::Annotations *DeclarationGenerator::genAnnotation() {
+IR::Vector<IR::Annotation> DeclarationGenerator::genAnnotation() {
     Util::SourceInfo si;
     IR::Vector<IR::Annotation> annotations;
     IR::Vector<IR::Expression> exprs;
@@ -59,10 +59,7 @@ IR::Annotations *DeclarationGenerator::genAnnotation() {
 
     exprs.push_back(strLiteral);
 
-    auto *annotation = new IR::Annotation(si, name, exprs, false);
-    annotations.push_back(annotation);
-
-    return new IR::Annotations(annotations);
+    return {new IR::Annotation(si, name, exprs, false)};
 }
 
 IR::Declaration_Constant *DeclarationGenerator::genConstantDeclaration() {
@@ -206,19 +203,14 @@ IR::Type *DeclarationGenerator::genDerivedTypeDeclaration() { return genHeaderTy
 
 IR::IndexedVector<IR::Declaration_ID> DeclarationGenerator::genIdentifierList(size_t len) {
     IR::IndexedVector<IR::Declaration_ID> declIds;
-    std::set<cstring> declIdsName;
+    std::unordered_set<cstring> declIdsName;
 
     for (size_t i = 0; i < len; i++) {
-        cstring name = getRandomString(2);
-        auto *declId = new IR::Declaration_ID(name);
+        std::string name = getRandomString(2);
+        auto [_, inserted] = declIdsName.insert(name);
+        if (!inserted) continue;
 
-        if (declIdsName.find(name) != declIdsName.end()) {
-            delete name;
-            delete declId;
-            continue;
-        }
-
-        declIds.push_back(declId);
+        declIds.push_back(new IR::Declaration_ID(name));
     }
 
     return declIds;
@@ -226,40 +218,30 @@ IR::IndexedVector<IR::Declaration_ID> DeclarationGenerator::genIdentifierList(si
 
 IR::IndexedVector<IR::SerEnumMember> DeclarationGenerator::genSpecifiedIdentifier(size_t len) {
     IR::IndexedVector<IR::SerEnumMember> members;
-    std::set<cstring> membersName;
+    std::unordered_set<cstring> membersName;
 
     for (size_t i = 0; i < len; i++) {
         cstring name = getRandomString(2);
+        auto [_, inserted] = membersName.insert(name);
+        if (!inserted) continue;
+
         IR::Expression *ex = P4Tools::P4Smith::ExpressionGenerator::genIntLiteral();
-
-        if (membersName.find(name) != membersName.end()) {
-            delete ex;
-            continue;
-        }
-
-        auto *member = new IR::SerEnumMember(name, ex);
-
-        members.push_back(member);
+        members.push_back(new IR::SerEnumMember(name, ex));
     }
 
     return members;
 }
 IR::IndexedVector<IR::SerEnumMember> DeclarationGenerator::genSpecifiedIdentifierList(size_t len) {
     IR::IndexedVector<IR::SerEnumMember> members;
-    std::set<cstring> membersName;
+    std::unordered_set<cstring> membersName;
 
     for (size_t i = 0; i < len; i++) {
         cstring name = getRandomString(2);
+        auto [_, inserted] = membersName.insert(name);
+        if (!inserted) continue;
+
         IR::Expression *ex = target().expressionGenerator().genIntLiteral();
-
-        if (membersName.find(name) != membersName.end()) {
-            delete ex;
-            continue;
-        }
-
-        auto *member = new IR::SerEnumMember(name, ex);
-
-        members.push_back(member);
+        members.push_back(new IR::SerEnumMember(name, ex));
     }
 
     return members;

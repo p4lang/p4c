@@ -21,13 +21,13 @@
  * of the output of the read method of a Register extern.
  */
 
-#include "bf-p4c/midend/register_read_write.h"
+#include "backends/tofino/bf-p4c/midend/register_read_write.h"
 
-#include "bf-p4c/arch/arch.h"
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/midend/action_synthesis_policy.h"
-#include "bf-p4c/midend/elim_cast.h"
-#include "bf-p4c/midend/type_checker.h"
+#include "backends/tofino/bf-p4c/arch/arch.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/midend/action_synthesis_policy.h"
+#include "backends/tofino/bf-p4c/midend/elim_cast.h"
+#include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "bf_gtest_helpers.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/moveDeclarations.h"

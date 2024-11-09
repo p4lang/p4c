@@ -18,7 +18,7 @@
 
 #include "add_metadata_pov.h"
 
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "ir/ir.h"
 
 bool AddMetadataPOV::equiv(const IR::Expression *a, const IR::Expression *b) {

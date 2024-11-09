@@ -19,8 +19,8 @@
 #ifndef BF_P4C_PHV_ANALYSIS_CRITICAL_PATH_CLUSTERS_H_
 #define BF_P4C_PHV_ANALYSIS_CRITICAL_PATH_CLUSTERS_H_
 
-#include "bf-p4c/phv/analysis/parser_critical_path.h"
-#include "bf-p4c/phv/make_clusters.h"
+#include "backends/tofino/bf-p4c/phv/analysis/parser_critical_path.h"
+#include "backends/tofino/bf-p4c/phv/make_clusters.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 

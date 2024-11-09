@@ -46,7 +46,7 @@ const p4rt_id_t INVALID_ID = ::p4::config::v1::P4Ids::UNSPECIFIED;
 bool isControllerHeader(const IR::Type_Header *type);
 
 /// @return true if @node has an @hidden annotation.
-bool isHidden(const IR::Node *node);
+bool isHidden(const IR::IAnnotated *node);
 
 /// @return the id allocated to the object through the @id annotation if any, or
 /// std::nullopt.

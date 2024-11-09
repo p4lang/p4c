@@ -18,7 +18,7 @@
 
 #include "clot_candidate.h"
 
-#include "bf-p4c/common/table_printer.h"
+#include "backends/tofino/bf-p4c/common/table_printer.h"
 #include "field_slice_extract_info.h"
 
 unsigned ClotCandidate::max_size_in_bits() const {
@@ -229,7 +229,7 @@ std::string ClotCandidate::print() const {
             else
                 attr = "unused";
 
-            tp.addRow({std::string(first_extract_info ? parser_state->name : ""),
+            tp.addRow({first_extract_info ? parser_state->name.string() : "",
                        std::string(slice->shortString()), bits.str(), attr});
             first_extract_info = false;
 

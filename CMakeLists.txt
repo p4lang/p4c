@@ -78,7 +78,7 @@ set_property(CACHE MAX_LOGGING_LEVEL PROPERTY STRINGS 0 1 2 3 4 5 6 7 8 9 10)
 add_definitions(-DMAX_LOGGING_LEVEL=${MAX_LOGGING_LEVEL})
 
 if (NOT CMAKE_BUILD_TYPE)
-  set (CMAKE_BUILD_TYPE "RELEASE")
+  set (CMAKE_BUILD_TYPE "Release")
 endif()
 
 if (NOT $ENV{P4C_VERSION} STREQUAL "")
@@ -376,7 +376,6 @@ include_directories (
   ${P4C_SOURCE_DIR}
   ${P4C_BINARY_DIR}
   ${P4C_SOURCE_DIR}/extensions
-  ${P4C_SOURCE_DIR}/backends/tofino  ## FIXME
   )
 add_definitions (-DCONFIG_PREFIX="${CMAKE_INSTALL_PREFIX}")
 add_definitions (-DCONFIG_PKGDATADIR="${CMAKE_INSTALL_PREFIX}/${P4C_ARTIFACTS_OUTPUT_DIRECTORY}")
@@ -531,13 +530,15 @@ add_custom_command (OUTPUT ${IR_GENERATED_SRCS}
   COMMAND ${CMAKE_COMMAND} -E copy_if_different ir/gen-tree-macro.h.fixup ir/gen-tree-macro.h
   MAIN_DEPENDENCY ${IR_GENERATOR}
   DEPENDS irgenerator ${IR_DEF_FILES}
-  COMMENT "Generating IR class files")
+  COMMENT "Generating IR class files"
+)
 
 add_custom_target(genIR DEPENDS ${IR_GENERATED_SRCS})
 set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)
 add_library(ir-generated OBJECT ${IR_GENERATED_SRCS} ${EXTENSION_IR_SOURCES})
 add_dependencies(ir-generated ir genIR)
-target_link_libraries(ir-generated ${P4C_LIB_DEPS})
+target_link_libraries(ir-generated PUBLIC ir ${P4C_LIB_DEPS})
+
 
 ######################################## IR Generation End ########################################
 

@@ -19,10 +19,10 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_PHV_ANALYSIS_MEMOIZE_MIN_STAGE_H_
 #define BACKENDS_TOFINO_BF_P4C_PHV_ANALYSIS_MEMOIZE_MIN_STAGE_H_
 
-#include "bf-p4c/mau/table_dependency_graph.h"
-#include "bf-p4c/mau/table_summary.h"
-#include "bf-p4c/phv/mau_backtracker.h"
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/mau/table_dependency_graph.h"
+#include "backends/tofino/bf-p4c/mau/table_summary.h"
+#include "backends/tofino/bf-p4c/phv/mau_backtracker.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 
 // MemoizeStage save table stage mapping to static vairables of PhvInfo object,
 // both physical stage and min stage.

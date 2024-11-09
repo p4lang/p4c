@@ -23,8 +23,8 @@
 #include <set>
 #include <vector>
 
-#include "bf-p4c/ir/gress.h"
-#include "bf-p4c/lib/cmp.h"
+#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/lib/cmp.h"
 #include "lib/exceptions.h"
 #include "lib/ordered_map.h"
 

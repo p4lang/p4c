@@ -16,13 +16,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/parde/merge_parser_state.h"
+#include "backends/tofino/bf-p4c/parde/merge_parser_state.h"
 
 #include <map>
 #include <vector>
 
-#include "bf-p4c/parde/dump_parser.h"
-#include "bf-p4c/parde/parde_visitor.h"
+#include "backends/tofino/bf-p4c/parde/dump_parser.h"
+#include "backends/tofino/bf-p4c/parde/parde_visitor.h"
 #include "lib/ordered_map.h"
 
 namespace {

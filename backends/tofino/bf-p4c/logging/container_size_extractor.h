@@ -19,8 +19,8 @@
 #ifndef BF_P4C_LOGGING_CONTAINER_SIZE_EXTRACTOR_H_
 #define BF_P4C_LOGGING_CONTAINER_SIZE_EXTRACTOR_H_
 
-#include "bf-p4c/logging/constrained_fields.h"
-#include "bf-p4c/phv/pragma/pa_container_size.h"
+#include "backends/tofino/bf-p4c/logging/constrained_fields.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_container_size.h"
 
 /**
  *  Class for extracting information about container sizes from Container Size pragma

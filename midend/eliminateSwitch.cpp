@@ -61,9 +61,6 @@ const IR::Node *DoEliminateSwitch::postorder(IR::SwitchStatement *statement) {
         new IR::AssignmentStatement(src, new IR::PathExpression(key), statement->expression);
     contents.push_back(assign);
 
-    auto hidden = new IR::Annotations();
-    hidden->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
-
     auto tableKeyEl =
         new IR::KeyElement(src, new IR::PathExpression(key),
                            new IR::PathExpression(P4CoreLibrary::instance().exactMatch.Id()));
@@ -94,8 +91,9 @@ const IR::Node *DoEliminateSwitch::postorder(IR::SwitchStatement *statement) {
         pendingLabels.push_back(sc->label);
         if (sc->statement != nullptr) {
             cstring actionName = nameGen.newName(prefix + "_case");
-            auto action = new IR::P4Action(src, actionName, hidden, new IR::ParameterList(),
-                                           new IR::BlockStatement());
+            auto action = new IR::P4Action(
+                src, actionName, {new IR::Annotation(IR::Annotation::hiddenAnnotation, {})},
+                new IR::ParameterList(), new IR::BlockStatement());
             auto actionCall =
                 new IR::MethodCallExpression(scSrc, new IR::PathExpression(actionName));
             toInsert.push_back(action);
@@ -127,7 +125,9 @@ const IR::Node *DoEliminateSwitch::postorder(IR::SwitchStatement *statement) {
         true));
     properties.push_back(new IR::Property(src, "entries", new IR::EntriesList(entries), true));
     cstring tableName = nameGen.newName(prefix + "_table");
-    auto table = new IR::P4Table(src, tableName, hidden, new IR::TableProperties(properties));
+    auto table =
+        new IR::P4Table(src, tableName, {new IR::Annotation(IR::Annotation::hiddenAnnotation, {})},
+                        new IR::TableProperties(properties));
     toInsert.push_back(table);
 
     auto apply = new IR::Member(

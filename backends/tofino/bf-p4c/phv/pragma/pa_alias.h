@@ -22,10 +22,10 @@
 #include <map>
 #include <optional>
 
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/pragma/pa_no_overlay.h"
-#include "bf-p4c/phv/pragma/pretty_print.h"
-#include "bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_no_overlay.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pretty_print.h"
+#include "backends/tofino/bf-p4c/phv/utils/utils.h"
 #include "ir/ir.h"
 
 using namespace P4;

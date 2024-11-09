@@ -19,13 +19,13 @@
 #ifndef BF_P4C_PHV_V2_ALLOCATOR_BASE_H_
 #define BF_P4C_PHV_V2_ALLOCATOR_BASE_H_
 
-#include "bf-p4c/phv/phv.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/utils/utils.h"
-#include "bf-p4c/phv/v2/allocator_metrics.h"
-#include "bf-p4c/phv/v2/copacker.h"
-#include "bf-p4c/phv/v2/phv_kit.h"
-#include "bf-p4c/phv/v2/utils_v2.h"
+#include "backends/tofino/bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/phv/v2/allocator_metrics.h"
+#include "backends/tofino/bf-p4c/phv/v2/copacker.h"
+#include "backends/tofino/bf-p4c/phv/v2/phv_kit.h"
+#include "backends/tofino/bf-p4c/phv/v2/utils_v2.h"
 
 namespace PHV {
 namespace v2 {
