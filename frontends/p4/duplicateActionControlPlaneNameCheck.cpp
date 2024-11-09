@@ -40,53 +40,40 @@ void DuplicateActionControlPlaneNameCheck::checkForDuplicateName(cstring name,
 }
 
 const IR::Node *DuplicateActionControlPlaneNameCheck::postorder(IR::P4Action *action) {
-    // Actions declared at the top level that the developer did not
-    // write a @name annotation for it, should be included in the
-    // duplicate name check.  They do not yet have a @name annotation
-    // by the time this pass executes, so this method will handle
-    // such actions.
-    if (findContext<IR::P4Control>() == nullptr) {
-        auto nameAnno = action->getAnnotation(IR::Annotation::nameAnnotation);
-        if (!nameAnno) {
-            // name is what this top-level action's @name annotation
-            // will be, after LocalizeAllActions pass adds one.
-            cstring name = "." + action->name;
-            checkForDuplicateName(name, action);
+    bool topLevel = findContext<IR::P4Control>() == nullptr;
+    auto nameAnno = action->getAnnotation(IR::Annotation::nameAnnotation);
+    if (!nameAnno && topLevel) {
+        // Actions declared at the top level that the developer did not
+        // write a @name annotation for it, should be included in the
+        // duplicate name check.  They do not yet have a @name annotation
+        // by the time this pass executes, so this method will handle
+        // such actions.
+
+        // name is what this top-level action's @name annotation
+        // will be, after LocalizeAllActions pass adds one.
+        cstring name = "." + action->name;
+        checkForDuplicateName(name, action);
+    } else {
+        const auto *e0 = nameAnno->expr.at(0);
+        cstring name = e0->to<IR::StringLiteral>()->value;
+        if (!name.startsWith(".")) {
+            // Create a fully hierarchical name beginning with ".", so we
+            // can compare it against any other @name annotation value
+            // that begins with "." and is equal.
+            if (stack.empty()) {
+                name = absl::StrCat(".", name.string_view());
+            } else {
+                name = absl::StrCat(".",
+                                    absl::StrJoin(stack, ".",
+                                                  [](std::string *out, cstring s) {
+                                                      absl::StrAppend(out, s.string_view());
+                                                  }),
+                                    ".", name.string_view());
+            }
         }
+        checkForDuplicateName(name, action);
     }
     return action;
-}
-
-const IR::Node *DuplicateActionControlPlaneNameCheck::postorder(IR::Annotation *annotation) {
-    if (annotation->name != IR::Annotation::nameAnnotation) return annotation;
-    // The node the annotation belongs to
-    CHECK_NULL(getContext()->parent);
-    auto *annotatedNode = getContext()->parent->node;
-    CHECK_NULL(annotatedNode);
-    // We are only interested in name annotations on actions here, as
-    // the P4Runtime API control plane generation code already checks
-    // for duplicate control plane names for other kinds of objects.
-    if (!annotatedNode->is<IR::P4Action>()) {
-        return annotation;
-    }
-    cstring name = annotation->getName();
-    if (!name.startsWith(".")) {
-        // Create a fully hierarchical name beginning with ".", so we
-        // can compare it against any other @name annotation value
-        // that begins with "." and is equal.
-        if (stack.empty()) {
-            name = absl::StrCat(".", name.string_view());
-        } else {
-            name = absl::StrCat(".",
-                                absl::StrJoin(stack, ".",
-                                              [](std::string *out, cstring s) {
-                                                  absl::StrAppend(out, s.string_view());
-                                              }),
-                                ".", name.string_view());
-        }
-    }
-    checkForDuplicateName(name, annotatedNode);
-    return annotation;
 }
 
 }  // namespace P4

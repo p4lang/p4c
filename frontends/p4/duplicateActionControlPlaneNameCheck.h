@@ -24,7 +24,7 @@ namespace P4 {
 
 /**
  * This pass does not change anything in the IR.  It only gives an
- * error if it finds two objects with the same hierarchical name.  I
+ * error if it finds two actions with the same hierarchical name.  I
  * am not certain, but it might be that at this point in the front
  * end, the only way such a duplicate can happen is due to @name
  * annotations.  @name annotations are definitely taken into account
@@ -77,13 +77,6 @@ class DuplicateActionControlPlaneNameCheck : public Transform {
     void checkForDuplicateName(cstring name, const IR::Node *node);
 
     const IR::Node *postorder(IR::P4Action *action) override;
-
-    const IR::Node *postorder(IR::Annotation *annotation) override;
-    // Do not change name annotations on parameters
-    const IR::Node *preorder(IR::Parameter *parameter) override {
-        prune();
-        return parameter;
-    }
 };
 
 }  // namespace P4
