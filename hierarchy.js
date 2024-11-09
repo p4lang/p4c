@@ -1129,6 +1129,7 @@ var hierarchy =
             [ "P4::IR::Vector< IR::MAU::Table >", "class_p4_1_1_i_r_1_1_vector.html", null ],
             [ "P4::IR::Vector< IR::Type >", "class_p4_1_1_i_r_1_1_vector.html", null ],
             [ "P4::IR::Vector< IR::Argument >", "class_p4_1_1_i_r_1_1_vector.html", null ],
+            [ "P4::IR::Vector< IR::Annotation >", "class_p4_1_1_i_r_1_1_vector.html", null ],
             [ "P4::IR::Vector< IR::Declaration >", "class_p4_1_1_i_r_1_1_vector.html", [
               [ "P4::IR::IndexedVector< IR::Declaration >", "class_p4_1_1_i_r_1_1_indexed_vector.html", null ]
             ] ],
@@ -1161,7 +1162,6 @@ var hierarchy =
             ] ],
             [ "P4::IR::Vector< IR::SelectCase >", "class_p4_1_1_i_r_1_1_vector.html", null ],
             [ "P4::IR::Vector< N >", "class_p4_1_1_i_r_1_1_vector.html", null ],
-            [ "P4::IR::Vector< IR::Annotation >", "class_p4_1_1_i_r_1_1_vector.html", null ],
             [ "P4::IR::Vector< T >", "class_p4_1_1_i_r_1_1_vector.html", [
               [ "P4::IR::IndexedVector< T >", "class_p4_1_1_i_r_1_1_indexed_vector.html", null ]
             ] ]
@@ -4121,6 +4121,7 @@ var hierarchy =
       [ "P4::safe_vector< P4::UniqueId >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::Type * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::Argument * >", "class_p4_1_1safe__vector.html", null ],
+      [ "P4::safe_vector< const IR::Annotation * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::Declaration * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::StatOrDecl * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::DpdkAsmStatement * >", "class_p4_1_1safe__vector.html", null ],
@@ -4146,7 +4147,6 @@ var hierarchy =
       [ "P4::safe_vector< struct P4::TC::ExternAttributes * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< struct P4::TC::TableAttributes * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< struct P4::TC::ActionAttributes * >", "class_p4_1_1safe__vector.html", null ],
-      [ "P4::safe_vector< const IR::Annotation * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const P4::graphs::ParserGraphs::TransitionEdge * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< PHV::FieldOperation >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< PHV::AllocSlice >", "class_p4_1_1safe__vector.html", null ],

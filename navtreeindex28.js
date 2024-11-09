@@ -1,6 +1,5 @@
 var NAVTREEINDEX28 =
 {
-"class_p_h_v_1_1v2_1_1_greedy_allocator.html":[13,0,10,2,11],
 "class_p_h_v_1_1v2_1_1_greedy_allocator.html#a381d7485f52adc6c8c75c58403f0cc76":[13,0,10,2,11,0],
 "class_p_h_v_1_1v2_1_1_greedy_tx_score.html":[13,0,10,2,12],
 "class_p_h_v_1_1v2_1_1_greedy_tx_score.html#ab292eee881ca9a82bf7f881366764048":[13,0,10,2,12,2],
@@ -249,5 +248,6 @@ var NAVTREEINDEX28 =
 "class_remove_unnecessary_action_arg_slice.html":[13,0,514],
 "class_rename_param.html":[13,0,516],
 "class_replace_all_aliases.html":[13,0,517],
-"class_replace_flexible_type.html":[13,0,518]
+"class_replace_flexible_type.html":[13,0,518],
+"class_replace_member.html":[13,0,519]
 };

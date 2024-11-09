@@ -136,10 +136,12 @@ Inheritance diagram for P4::ValidateParsedProgram:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a150d3ccd0824410ee89a71f7686b1f44" id="r_a150d3ccd0824410ee89a71f7686b1f44"><td class="memItemLeft" align="right" valign="top"><a id="a150d3ccd0824410ee89a71f7686b1f44" name="a150d3ccd0824410ee89a71f7686b1f44"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::Annotations *annotations) override</td></tr>
-<tr class="memdesc:a150d3ccd0824410ee89a71f7686b1f44"><td class="mdescLeft">&#160;</td><td class="mdescRight">Structured annotations cannot reuse names. <br /></td></tr>
-<tr class="separator:a150d3ccd0824410ee89a71f7686b1f44"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aaa3ff2ed39b7910d74595d525eddf0ac" id="r_aaa3ff2ed39b7910d74595d525eddf0ac"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aaa3ff2ed39b7910d74595d525eddf0ac">end_apply</a> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *) override</td></tr>
+<tr class="separator:aaa3ff2ed39b7910d74595d525eddf0ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac19e7cbb6c2bedc748b73e9e2c8af64a" id="r_ac19e7cbb6c2bedc748b73e9e2c8af64a"><td class="memItemLeft" align="right" valign="top"><a id="ac19e7cbb6c2bedc748b73e9e2c8af64a" name="ac19e7cbb6c2bedc748b73e9e2c8af64a"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::Annotation *annotations) override</td></tr>
+<tr class="memdesc:ac19e7cbb6c2bedc748b73e9e2c8af64a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Structured annotations cannot reuse names. <br /></td></tr>
+<tr class="separator:ac19e7cbb6c2bedc748b73e9e2c8af64a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a18821d387bb3246dcdf3ba2a600c6162" id="r_a18821d387bb3246dcdf3ba2a600c6162"><td class="memItemLeft" align="right" valign="top"><a id="a18821d387bb3246dcdf3ba2a600c6162" name="a18821d387bb3246dcdf3ba2a600c6162"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::BreakStatement *s) override</td></tr>
 <tr class="memdesc:a18821d387bb3246dcdf3ba2a600c6162"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check that continue and break statements are only used in the context of a for statement. <br /></td></tr>
@@ -257,8 +259,6 @@ virtual <a class="el" href="class_p4_1_1_control_flow_visitor.html">ControlFlowV
 <tr class="separator:ac6a5e2e28ca2bb741588ec144bd152c2 inherit pub_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac996ab6a36e91852205737c6a0c31b07 inherit pub_methods_class_p4_1_1_visitor" id="r_ac996ab6a36e91852205737c6a0c31b07"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_visitor.html#ac996ab6a36e91852205737c6a0c31b07">end_apply</a> ()</td></tr>
 <tr class="separator:ac996ab6a36e91852205737c6a0c31b07 inherit pub_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a404f3e8285e6275b774e83544ff04360 inherit pub_methods_class_p4_1_1_visitor" id="r_a404f3e8285e6275b774e83544ff04360"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_visitor.html#a404f3e8285e6275b774e83544ff04360">end_apply</a> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *root)</td></tr>
-<tr class="separator:a404f3e8285e6275b774e83544ff04360 inherit pub_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab72909367b71899602dbf19732bb15d8 inherit pub_methods_class_p4_1_1_visitor" id="r_ab72909367b71899602dbf19732bb15d8"><td class="memItemLeft" align="right" valign="top">
 virtual void&#160;</td><td class="memItemRight" valign="bottom"><b>erase_global</b> (<a class="el" href="class_p4_1_1cstring.html">cstring</a>)</td></tr>
 <tr class="separator:ab72909367b71899602dbf19732bb15d8 inherit pub_methods_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -467,6 +467,33 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 <li>continue and break statements are only used in the context of a for statement </li>
 </ul>
 </div><h2 class="groupheader">Member Function Documentation</h2>
+<a id="aaa3ff2ed39b7910d74595d525eddf0ac" name="aaa3ff2ed39b7910d74595d525eddf0ac"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aaa3ff2ed39b7910d74595d525eddf0ac">&#9670;&#160;</a></span>end_apply()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void P4::ValidateParsedProgram::end_apply </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *</td>          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span><span class="mlabel">override</span><span class="mlabel">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Reimplemented from <a class="el" href="class_p4_1_1_visitor.html">P4::Visitor</a>.</p>
+
+</div>
+</div>
 <a id="ab2f9cf3d60c745bd9d832ba87d8f986e" name="ab2f9cf3d60c745bd9d832ba87d8f986e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ab2f9cf3d60c745bd9d832ba87d8f986e">&#9670;&#160;</a></span>postorder() <span class="overload">[1/2]</span></h2>
 
