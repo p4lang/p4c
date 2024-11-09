@@ -220,11 +220,12 @@ class Type_Varbits : Type_Base {
 }
 
 class Parameter : Declaration, IAnnotated {
-    optional Annotations annotations = Annotations::empty;
+    optional inline Vector<Annotation> annotations;
     Direction           direction;
     Type                type;
     optional NullOK Expression defaultValue;
-    Annotations getAnnotations() const override { return annotations; }
+    const Vector<Annotation> &getAnnotations() const override { return annotations; }
+    Vector<Annotation> &getAnnotations() override { return annotations; }
     bool hasOut() const
     { return direction == IR::Direction::Out || direction == IR::Direction::InOut; }
     bool isOptional() const {
@@ -386,18 +387,20 @@ class TypeParameters : ISimpleNamespace {
 }
 
 class StructField : Declaration, IAnnotated {
-    optional Annotations annotations = Annotations::empty;
+    optional inline Vector<Annotation> annotations;
     Type        type;
-    Annotations getAnnotations() const override { return annotations; }
+    const Vector<Annotation> &getAnnotations() const override { return annotations; }
+    Vector<Annotation> &getAnnotations() override { return annotations; }
 }
 
 abstract Type_StructLike : Type_Declaration, INestedNamespace, ISimpleNamespace, IAnnotated, IMayBeGenericType {
-    optional Annotations annotations = Annotations::empty;
+    optional inline Vector<Annotation> annotations;
     optional TypeParameters typeParameters = new TypeParameters();
     optional inline IndexedVector<StructField>  fields;
     TypeParameters getTypeParameters() const override { return typeParameters; }
     std::vector<INamespace> getNestedNamespaces() const override { return { typeParameters }; }
-    Annotations getAnnotations() const override { return annotations; }
+    const Vector<Annotation> &getAnnotations() const override { return annotations; }
+    Vector<Annotation> &getAnnotations() override { return annotations; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return fields.getDeclarations(); }
     StructField getField(cstring name) const {
@@ -556,9 +559,10 @@ class Type_P4List : Type {
 /// The type of an architectural block.
 /// Abstract base for Type_Control, Type_Parser and Type_Package
 abstract Type_ArchBlock : Type_Declaration, IMayBeGenericType, IAnnotated, ISimpleNamespace {
-    optional Annotations annotations = Annotations::empty;
+    optional inline Vector<Annotation> annotations;
     optional TypeParameters typeParameters = new TypeParameters;
-    Annotations getAnnotations() const override { return annotations; }
+    const Vector<Annotation> &getAnnotations() const override { return annotations; }
+    Vector<Annotation> &getAnnotations() override { return annotations; }
     TypeParameters getTypeParameters() const override { return typeParameters; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return typeParameters->getDeclarations(); }
@@ -704,9 +708,10 @@ class Type_String : Type_Base {
 }
 
 class Type_Enum : Type_Declaration, ISimpleNamespace, IAnnotated {
-    optional Annotations annotations = Annotations::empty;
+    optional inline Vector<Annotation> annotations;
     inline IndexedVector<Declaration_ID> members;
-    Annotations getAnnotations() const override { return annotations; }
+    const Vector<Annotation> &getAnnotations() const override { return annotations; }
+    Vector<Annotation> &getAnnotations() override { return annotations; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return members.getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {
@@ -726,10 +731,11 @@ class SerEnumMember : Declaration, CompileTimeValue {
 
 /** A serializable enumeration with a backing type */
 class Type_SerEnum : Type_Declaration, ISimpleNamespace, IAnnotated {
-    optional Annotations annotations = Annotations::empty;
+    optional inline Vector<Annotation> annotations;
     Type type;
     inline IndexedVector<SerEnumMember> members;
-    Annotations getAnnotations() const override { return annotations; }
+    const Vector<Annotation> &getAnnotations() const override { return annotations; }
+    Vector<Annotation> &getAnnotations() override { return annotations; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return members.getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {
@@ -829,11 +835,12 @@ class Type_Action : Type_MethodBase {
 class Method : Declaration, IAnnotated, IFunctional, ISimpleNamespace {
     Type_Method type;
     optional bool isAbstract = false;
-    optional Annotations annotations = Annotations::empty;
+    optional inline Vector<Annotation> annotations;
     size_t maxParameterCount() const { return type->maxParameterCount(); }
     size_t minParameterCount() const { return type->minParameterCount(); }
     void setAbstract() { isAbstract = true; }
-    Annotations getAnnotations() const override { return annotations; }
+    const Vector<Annotation> &getAnnotations() const override { return annotations; }
+    Vector<Annotation> &getAnnotations() override { return annotations; }
     ParameterList getParameters() const override { return type->parameters; }
     // annotations can refer to parameters, so need to look them up in scope
     IDeclaration getDeclByName(cstring name) const override {
@@ -845,10 +852,11 @@ class Method : Declaration, IAnnotated, IFunctional, ISimpleNamespace {
 }
 
 class Type_Typedef : Type_Declaration, IAnnotated {
-    optional Annotations annotations = Annotations::empty;
+    optional inline Vector<Annotation> annotations;
     Type                 type;
     int width_bits() const override { return type->width_bits(); }
-    Annotations getAnnotations() const override { return annotations; }
+    const Vector<Annotation> &getAnnotations() const override { return annotations; }
+    Vector<Annotation> &getAnnotations() override { return annotations; }
 #nodbprint
 }
 
@@ -858,10 +866,11 @@ class Type_Typedef : Type_Declaration, IAnnotated {
 /// assignment, equality, and casts to/from the original type.
 /// The keyword for newtype is actually `type'.
 class Type_Newtype : Type_Declaration, IAnnotated {
-    optional Annotations annotations = Annotations::empty;
+    optional inline Vector<Annotation> annotations;
     Type                 type;
     int width_bits() const override { return type->width_bits(); }
-    Annotations getAnnotations() const override { return annotations; }
+    const Vector<Annotation> &getAnnotations() const override { return annotations; }
+    Vector<Annotation> &getAnnotations() override { return annotations; }
 #nodbprint
 }
 
@@ -871,15 +880,16 @@ class Type_Extern : Type_Declaration, INestedNamespace, IGeneralNamespace,
     optional TypeParameters typeParameters = new TypeParameters;
     optional inline Vector<Method> methods;  // methods can be overloaded, so this is not NameMap
     optional inline NameMap<Attribute, ordered_map> attributes;  // P4_14 only, currently
-    optional Annotations annotations = Annotations::empty;
+    optional inline Vector<Annotation> annotations;
 
     std::vector<INamespace> getNestedNamespaces() const override { return { typeParameters }; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return attributes.valueEnumerator()->as<const IDeclaration*>()
             ->concat(methods.getEnumerator()->as<const IDeclaration*>()); }
-    virtual TypeParameters getTypeParameters() const override { return typeParameters; }
+    TypeParameters getTypeParameters() const override { return typeParameters; }
     validate{ methods.check_null(); }
-    Annotations getAnnotations() const override { return annotations; }
+    const Vector<Annotation> &getAnnotations() const override { return annotations; }
+    Vector<Annotation> &getAnnotations() override { return annotations; }
     /// Returns the method that matches the specified arguments.
     /// Returns nullptr if no method or more than one method match.
     /// In the latter case it also reports an error.

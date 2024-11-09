@@ -50,16 +50,12 @@ void ValidateParsedProgram::postorder(const IR::Method *m) {
 }
 
 /// Structured annotations cannot reuse names
-void ValidateParsedProgram::postorder(const IR::Annotations *annotations) {
-    std::multiset<cstring> namesUsed;
-    for (auto a : annotations->annotations) namesUsed.emplace(a->name);
-
-    for (auto a : annotations->annotations) {
-        if (!a->structured) continue;
-        if (namesUsed.count(a->name) > 1)
-            ::P4::error(ErrorType::ERR_DUPLICATE, "%1%: duplicate name for structured annotation",
-                        a);
-    }
+void ValidateParsedProgram::postorder(const IR::Annotation *annotation) {
+    auto [it, inserted] =
+        annNames.emplace(std::pair(getContext()->node, annotation->name), annotation->structured);
+    if (!inserted && (it->second || annotation->structured))
+        ::P4::error(ErrorType::ERR_DUPLICATE, "%1%: duplicate name for structured annotation",
+                    annotation);
 }
 
 /// Struct field names cannot be underscore

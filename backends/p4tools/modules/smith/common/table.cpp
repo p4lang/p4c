@@ -48,7 +48,7 @@ IR::Key *TableGenerator::genKeyElementList(size_t len) {
         }
         // @name
         // Tao: actually, this may never happen
-        const auto *keyAnno = key->annotations->annotations.at(0);
+        const auto *keyAnno = key->getAnnotations().at(0);
         const auto *annotExpr = keyAnno->expr.at(0);
         cstring keyAnnotatName;
         if (annotExpr->is<IR::StringLiteral>()) {
@@ -66,7 +66,7 @@ IR::Key *TableGenerator::genKeyElementList(size_t len) {
 
 IR::KeyElement *TableGenerator::genKeyElement(IR::ID match_kind) {
     auto *match = new IR::PathExpression(std::move(match_kind));
-    auto *annotations = target().declarationGenerator().genAnnotation();
+    auto annotations = target().declarationGenerator().genAnnotation();
     auto *bitType = P4Scope::pickDeclaredBitType(false);
 
     // Ideally this should have a fallback option
@@ -78,7 +78,7 @@ IR::KeyElement *TableGenerator::genKeyElement(IR::ID match_kind) {
     P4Scope::req.require_scalar = true;
     auto *expr = target().expressionGenerator().genExpression(bitType);
     P4Scope::req.require_scalar = false;
-    auto *key = new IR::KeyElement(annotations, expr, match);
+    auto *key = new IR::KeyElement(expr, match, annotations);
 
     return key;
 }

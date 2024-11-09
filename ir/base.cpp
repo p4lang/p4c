@@ -48,11 +48,12 @@ cstring Annotation::getSingleString() const {
 }
 
 cstring IDeclaration::externalName(cstring replace /* = cstring() */) const {
-    if (!is<IAnnotated>()) return getName().toString();
+    if (const auto *annotated = to<IAnnotated>()) {
+        if (const auto *anno = annotated->getAnnotation(IR::Annotation::nameAnnotation))
+            return anno->getName();
+        if (replace) return replace;
+    }
 
-    auto anno = getAnnotation(IR::Annotation::nameAnnotation);
-    if (anno != nullptr) return anno->getName();
-    if (replace) return replace;
     return getName().toString();
 }
 

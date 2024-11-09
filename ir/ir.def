@@ -55,12 +55,13 @@
  */
 
 class ParserState : ISimpleNamespace, Declaration, IAnnotated {
-    optional Annotations                        annotations = Annotations::empty;
+    optional inline Vector<Annotation> annotations;
     optional inline IndexedVector<StatOrDecl>   components;
     // selectExpression can be a SelectExpression, or a PathExpression representing a state
     NullOK Expression                   selectExpression;
 
-    Annotations getAnnotations() const override { return annotations; }
+    const Vector<Annotation> &getAnnotations() const override { return annotations; }
+    Vector<Annotation> &getAnnotations() override { return annotations; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return components.getDeclarations(); }
     const IDeclaration* getDeclByName(cstring name) const override {
@@ -88,7 +89,8 @@ class P4Parser : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, I
     optional inline IndexedVector<Declaration>  parserLocals;
     optional inline IndexedVector<ParserState>  states;
 
-    Annotations getAnnotations() const override { return type->getAnnotations(); }
+    const Vector<Annotation> &getAnnotations() const override { return type->getAnnotations(); }
+    Vector<Annotation> &getAnnotations() override { BUG("cannot modify annotations"); return *new Vector<Annotation>(); }
     TypeParameters getTypeParameters() const override { return type->getTypeParameters(); }
     std::vector<INamespace> getNestedNamespaces() const override {
         return { type->typeParameters, type->applyParams, constructorParams }; }
@@ -128,7 +130,8 @@ class P4Control : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, 
     optional inline IndexedVector<Declaration>  controlLocals;
     BlockStatement                              body;
 
-    Annotations getAnnotations() const override { return type->getAnnotations(); }
+    const Vector<Annotation> &getAnnotations() const override { return type->getAnnotations(); }
+    Vector<Annotation> &getAnnotations() override { BUG("cannot modify annotations"); return *new Vector<Annotation>(); }
     TypeParameters getTypeParameters() const override { return type->getTypeParameters(); }
     std::vector<INamespace> getNestedNamespaces() const override {
         return { type->typeParameters, type->applyParams, constructorParams }; }
@@ -154,7 +157,7 @@ class P4Control : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, 
 
 /// A P4-16 action
 class P4Action : Declaration, ISimpleNamespace, IAnnotated, IFunctional {
-    optional Annotations        annotations = Annotations::empty;
+    optional inline Vector<Annotation> annotations;
     ParameterList               parameters;
     BlockStatement              body;
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
@@ -163,7 +166,8 @@ class P4Action : Declaration, ISimpleNamespace, IAnnotated, IFunctional {
         return parameters->getDeclByName(name); }
     IDeclaration getDeclByName(std::string_view name) const override {
         return parameters->getDeclByName(name); }
-    Annotations getAnnotations() const override { return annotations; }
+    const Vector<Annotation> &getAnnotations() const override { return annotations; }
+    Vector<Annotation> &getAnnotations() override { return annotations; }
     ParameterList getParameters() const override { return parameters; }
 }
 
@@ -207,12 +211,13 @@ class ExpressionListValue : PropertyValue {
 
 // An element in a table actions list
 class ActionListElement : IAnnotated, IDeclaration {
-    optional Annotations annotations = Annotations::empty;
+    optional inline Vector<Annotation> annotations;
     Expression           expression;  // This can be a PathExpression or a MethodCallExpression
     dbprint { out << annotations << expression; }
     ID getName() const override { return getPath()->name; }
     Path getPath() const;
-    Annotations getAnnotations() const override { return annotations; }
+    const Vector<Annotation> &getAnnotations() const override { return annotations; }
+    Vector<Annotation> &getAnnotations() override { return annotations; }
     validate {
         BUG_CHECK(expression->is<IR::PathExpression>() ||
                   expression->is<IR::MethodCallExpression>(),
@@ -232,11 +237,12 @@ class ActionList : PropertyValue {
 }
 
 class KeyElement : IAnnotated {
-    optional Annotations annotations = Annotations::empty;
     Expression           expression;
     PathExpression       matchType;
+    optional inline Vector<Annotation> annotations;
 
-    Annotations     getAnnotations() const override { return annotations; }
+    const Vector<Annotation> &getAnnotations() const override { return annotations; }
+    Vector<Annotation> &getAnnotations() override { return annotations; }
     const IR::Node *transform_visit(Transform &v) {
         // call this from Transform::preorder(KeyElement) if the transform might split
         // the expression into a Vector<Expression>
@@ -267,7 +273,7 @@ class Key : PropertyValue {
 /// Pre-defined entry in a table
 class Entry : IAnnotated {
     /// annotations are optional (supported annotations: @priority(value))
-    optional Annotations annotations = Annotations::empty;
+    optional inline Vector<Annotation> annotations;
     bool                isConst;      /// optional const annotation
     NullOK Expression   priority;     /// optional entry priority
     ListExpression      keys;         /// must be a tuple expression
@@ -275,7 +281,8 @@ class Entry : IAnnotated {
                                       /// The action must be defined in action list
     bool                singleton;    /// True if the entry is not a list.
 
-    Annotations     getAnnotations() const override { return annotations; }
+    const Vector<Annotation> &getAnnotations() const override { return annotations; }
+    Vector<Annotation> &getAnnotations() override { return annotations; }
     ListExpression  getKeys() const { return keys; }
     Expression      getAction() const { return action; }
     dbprint { out << annotations << keys << action; }
@@ -289,10 +296,11 @@ class EntriesList : PropertyValue {
 }
 
 class Property : Declaration, IAnnotated {
-    optional Annotations   annotations = Annotations::empty;
+    optional inline Vector<Annotation> annotations;
     PropertyValue value;
     bool          isConstant;
-    Annotations getAnnotations() const override { return annotations; }
+    const Vector<Annotation> &getAnnotations() const override { return annotations; }
+    Vector<Annotation> &getAnnotations() override { return annotations; }
     dbprint { out << annotations << (isConstant ? "const " : "") << name << " = " << value; }
 }
 
@@ -321,10 +329,11 @@ class TableProperties : ISimpleNamespace {
 }
 
 class P4Table : Declaration, IAnnotated, IApply {
-    optional Annotations        annotations = Annotations::empty;
+    optional inline Vector<Annotation> annotations;
     TableProperties             properties;
 
-    Annotations getAnnotations() const override { return annotations; }
+    const Vector<Annotation> &getAnnotations() const override { return annotations; }
+    Vector<Annotation> &getAnnotations() override { return annotations; }
     Type_Method getApplyMethodType() const override;
     ParameterList getApplyParameters() const override { return new ParameterList(); }
     ActionList getActionList() const {
@@ -381,29 +390,32 @@ class P4Table : Declaration, IAnnotated, IApply {
 }
 
 class P4ValueSet : Declaration, IAnnotated {
-    optional Annotations        annotations = Annotations::empty;
+    optional inline Vector<Annotation> annotations;
     Type                        elementType;
     Expression                  size; // number of elements in set.
-    Annotations getAnnotations() const override { return annotations; }
+    const Vector<Annotation> &getAnnotations() const override { return annotations; }
+    Vector<Annotation> &getAnnotations() override { return annotations; }
 }
 
 class Declaration_Variable : Declaration, IAnnotated {
-    optional Annotations        annotations = Annotations::empty;
+    optional inline Vector<Annotation> annotations;
     Type                        type;
     optional NullOK Expression  initializer = nullptr;
 
-    Annotations getAnnotations() const override { return annotations; }
+    const Vector<Annotation> &getAnnotations() const override { return annotations; }
+    Vector<Annotation> &getAnnotations() override { return annotations; }
     dbprint {
         out << annotations << type << ' ' << name;
         if (initializer) out << " = " << *initializer; }
 }
 
 class Declaration_Constant : Declaration, IAnnotated {
-    optional Annotations        annotations = Annotations::empty;
+    optional inline Vector<Annotation> annotations;
     Type                        type;
     Expression                  initializer;
 
-    Annotations getAnnotations() const override { return annotations; }
+    const Vector<Annotation> &getAnnotations() const override { return annotations; }
+    Vector<Annotation> &getAnnotations() override { return annotations; }
     toString { return Declaration::toString(); }
     dbprint { out << annotations << type << ' ' << name << " = " << *initializer; }
 }
@@ -413,14 +425,15 @@ class Declaration_Constant : Declaration, IAnnotated {
 /// Initializers are an experimental features, used for externs with
 /// abstract methods.
 class Declaration_Instance : Declaration, IAnnotated, IInstance {
-    optional Annotations  annotations = Annotations::empty;
+    optional inline Vector<Annotation> annotations;
     Type                  type;  // Either Type_Name or Type_Specialized or Type_Extern
     Vector<Argument>      arguments;
     inline NameMap<Property> properties = {};  // P4_14 externs only, at the moment
     optional NullOK BlockStatement initializer = nullptr;
         // experimental only; contains just declarations, no code
 
-    Annotations getAnnotations() const override { return annotations; }
+    const Vector<Annotation> &getAnnotations() const override { return annotations; }
+    Vector<Annotation> &getAnnotations() override { return annotations; }
     Type getType() const override { return type; }
     ID Name() const override { return name; }
     validate{ arguments->check_null(); }
@@ -489,7 +502,7 @@ class ContinueStatement : Statement {
 }
 
 class BlockStatement : Statement, ISimpleNamespace, IAnnotated {
-    optional Annotations                        annotations = Annotations::empty;
+    optional inline Vector<Annotation> annotations;
     optional inline IndexedVector<StatOrDecl>   components;
     IDeclaration getDeclByName(cstring name) const override {
         return components.getDeclaration(name); }
@@ -498,7 +511,8 @@ class BlockStatement : Statement, ISimpleNamespace, IAnnotated {
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return components.getDeclarations(); }
     void push_back(StatOrDecl st) { components.push_back(st); }
-    Annotations getAnnotations() const override { return annotations; }
+    const Vector<Annotation> &getAnnotations() const override { return annotations; }
+    Vector<Annotation> &getAnnotations() override { return annotations; }
     bool empty() const { return components.empty(); }
     void append(StatOrDecl stmt);
     BlockStatement(std::initializer_list<StatOrDecl> il) { for (auto el : il) append(el); }
@@ -540,8 +554,9 @@ class SwitchStatement : Statement {
 
 /* abstract base class for all loops */
 abstract LoopStatement : Statement, ISimpleNamespace, IAnnotated {
-    optional Annotations                annotations = Annotations::empty;
-    Annotations getAnnotations() const override { return annotations; }
+    optional inline Vector<Annotation> annotations;
+    const Vector<Annotation> &getAnnotations() const override { return annotations; }
+    Vector<Annotation> &getAnnotations() override { return annotations; }
 }
 
 class ForStatement : LoopStatement {
@@ -571,8 +586,8 @@ class ForInStatement : LoopStatement {
     Expression                          collection;
     Statement                           body;
     ForInStatement { ref = new PathExpression(decl->name); }
-    ForInStatement(Util::SourceInfo si, Annotations a, PathExpression pe, Expression c, Statement b)
-        : LoopStatement(si, a), decl(nullptr), ref(pe), collection(c), body(b) {}
+    ForInStatement(Util::SourceInfo si, Vector<Annotation> a, PathExpression pe, Expression c, Statement b)
+        : LoopStatement(si, *a), decl(nullptr), ref(pe), collection(c), body(b) {}
     IDeclaration getDeclByName(cstring name) const override {
         return decl && decl->name == name ? decl : nullptr; }
     IDeclaration getDeclByName(std::string_view name) const override {
@@ -590,7 +605,7 @@ class ForInStatement : LoopStatement {
 /////////////////////////////////////////////////////////////
 
 class Function : Declaration, IFunctional, IAnnotated, ISimpleNamespace, INestedNamespace {
-    optional Annotations        annotations = Annotations::empty;
+    optional inline Vector<Annotation> annotations;
     Type_Method    type;
     BlockStatement body;
     ParameterList getParameters() const override {
@@ -604,7 +619,8 @@ class Function : Declaration, IFunctional, IAnnotated, ISimpleNamespace, INested
         return type->parameters->getDeclByName(name); }
     std::vector<INamespace> getNestedNamespaces() const override {
         return { type->typeParameters }; }
-    Annotations getAnnotations() const override { return annotations; }
+    const Vector<Annotation> &getAnnotations() const override { return annotations; }
+    Vector<Annotation> &getAnnotations() override { return annotations; }
 }
 
 /////////////////////////////////////////////////////////////

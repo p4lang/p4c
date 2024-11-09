@@ -203,10 +203,10 @@ class KernelSamplesTarget : public Target {
 class P4TCTarget : public KernelSamplesTarget {
  public:
     explicit P4TCTarget(bool emitTrace) : KernelSamplesTarget(emitTrace, "P4TC"_cs) {}
-    cstring getByteOrderFromAnnotation(const IR::Vector<IR::Annotation> annotations) const {
-        for (auto anno : annotations) {
+    cstring getByteOrderFromAnnotation(const IR::Vector<IR::Annotation> &annotations) const {
+        for (const auto *anno : annotations) {
             if (anno->name != "tc_type") continue;
-            for (auto annoVal : anno->body) {
+            for (const auto *annoVal : anno->body) {
                 if (annoVal->text == "macaddr" || annoVal->text == "ipv4" ||
                     annoVal->text == "ipv6" || annoVal->text == "be16" || annoVal->text == "be32" ||
                     annoVal->text == "be64") {
@@ -223,14 +223,14 @@ class P4TCTarget : public KernelSamplesTarget {
             auto type = typeMap->getType(mem->expr, true);
             if (type->is<IR::Type_StructLike>()) {
                 auto field = type->to<IR::Type_StructLike>()->getField(mem->member);
-                return getByteOrderFromAnnotation(field->getAnnotations()->annotations);
+                return getByteOrderFromAnnotation(field->getAnnotations());
             }
         } else if (action) {
             auto paramList = action->getParameters();
             if (paramList != nullptr && !paramList->empty()) {
                 for (auto param : paramList->parameters) {
                     if (param->name.originalName == exp->toString()) {
-                        return getByteOrderFromAnnotation(param->getAnnotations()->annotations);
+                        return getByteOrderFromAnnotation(param->getAnnotations());
                     }
                 }
             }

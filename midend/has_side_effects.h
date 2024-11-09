@@ -40,10 +40,9 @@ class hasSideEffects : public Inspector, public ResolutionContext {
         if (typeMap) {
             auto *mi = P4::MethodInstance::resolve(mc, this, typeMap, true);
             if (auto *bm = mi->to<P4::BuiltInMethod>()) {
-                if (bm->name == "isValid") return true;
-            }
-            if (auto *em = mi->to<P4::ExternMethod>()) {
-                if (em->method->getAnnotation(IR::Annotation::noSideEffectsAnnotation)) return true;
+                if (bm->name == IR::Type_Header::isValid) return true;
+            } else if (auto *em = mi->to<P4::ExternMethod>()) {
+                if (em->method->hasAnnotation(IR::Annotation::noSideEffectsAnnotation)) return true;
             }
         }
         result = true;

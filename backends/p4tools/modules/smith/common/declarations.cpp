@@ -50,7 +50,7 @@ IR::StatOrDecl *DeclarationGenerator::generateRandomStatementOrDeclaration(bool 
     return stmt;
 }
 
-IR::Annotations *DeclarationGenerator::genAnnotation() {
+IR::Vector<IR::Annotation> DeclarationGenerator::genAnnotation() {
     Util::SourceInfo si;
     IR::Vector<IR::Annotation> annotations;
     IR::Vector<IR::Expression> exprs;
@@ -59,10 +59,7 @@ IR::Annotations *DeclarationGenerator::genAnnotation() {
 
     exprs.push_back(strLiteral);
 
-    auto *annotation = new IR::Annotation(si, name, exprs, false);
-    annotations.push_back(annotation);
-
-    return new IR::Annotations(annotations);
+    return {new IR::Annotation(si, name, exprs, false)};
 }
 
 IR::Declaration_Constant *DeclarationGenerator::genConstantDeclaration() {

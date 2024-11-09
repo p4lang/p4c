@@ -215,32 +215,12 @@ class ProgramStructure {
     virtual void checkHeaderType(const IR::Type_StructLike *hrd, bool toStruct);
 
     /**
-     * Extend the provided set of annotations with an '@name' annotation for the
-     * given name. This is used to preserve the original, P4-14 object names.
-     *
-     * In general, because P4-14 names do not have the hierarchical structure
-     * that P4-16 names do, you should use addGlobalNameAnnotation() rather than
-     * this method. The exception is type names; these are already global in
-     * P4-16, so there isn't much to be gained, and there is currently some code
-     * that doesn't handling "." prefixes in type names well.
-     *
-     * XXX(seth): For uniformity, we should probably fix the issues with "." in
-     * type names and get rid of this method.
-     *
-     * @param annos  The set of annotations to extend. If null, a new set of
-     *               annotations is created.
-     * @return the extended set of annotations.
-     */
-    static const IR::Annotations *addNameAnnotation(cstring name,
-                                                    const IR::Annotations *annos = nullptr);
-
-    /**
      * Like addNameAnnotation(), but prefixes a "." to make the name global. You
      * should generally prefer this method; @see addNameAnnotation() for more
      * discussion.
      */
-    static const IR::Annotations *addGlobalNameAnnotation(cstring name,
-                                                          const IR::Annotations *annos = nullptr);
+    static IR::Vector<IR::Annotation> addGlobalNameAnnotation(
+        cstring name, const IR::Vector<IR::Annotation> &annos);
 
     virtual const IR::ParserState *convertParser(const IR::V1Parser *,
                                                  IR::IndexedVector<IR::Declaration> *);

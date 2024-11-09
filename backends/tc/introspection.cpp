@@ -66,8 +66,7 @@ void IntrospectionGenerator::collectKeyInfo(const IR::Key *key, struct TableAttr
         auto keyExpType = typeMap->getType(keyExp);
         auto widthBits = keyExpType->width_bits();
         keyField->type = "bit" + Util::toString(widthBits);
-        auto keyAnno = k->getAnnotations()->annotations;
-        for (auto anno : keyAnno) {
+        for (auto anno : k->getAnnotations()) {
             if (anno->name == ParseTCAnnotations::tcType) {
                 auto expr = anno->expr[0];
                 if (auto typeLiteral = expr->to<IR::StringLiteral>()) {
@@ -107,10 +106,9 @@ void IntrospectionGenerator::collectActionInfo(const IR::ActionList *actionlist,
             auto actionInfo = new struct ActionAttributes();
             actionInfo->id = actionDef->actId;
             actionInfo->name = actionDef->actionName;
-            auto annoList = action->getAnnotations()->annotations;
             bool isTableOnly = false;
             bool isDefaultOnly = false;
-            for (auto anno : annoList) {
+            for (auto anno : action->getAnnotations()) {
                 if (anno->name == IR::Annotation::tableOnlyAnnotation) {
                     isTableOnly = true;
                 }
