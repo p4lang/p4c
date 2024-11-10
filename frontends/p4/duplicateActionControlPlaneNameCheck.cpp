@@ -63,8 +63,7 @@ const IR::Node *DuplicateActionControlPlaneNameCheck::postorder(IR::P4Action *ac
             if (stack.empty()) {
                 name = absl::StrCat(".", name);
             } else {
-                name = absl::StrCat(".", absl::StrJoin(stack, "."),
-                                    ".", name);
+                name = absl::StrCat(".", absl::StrJoin(stack, "."), ".", name);
             }
         }
         checkForDuplicateName(name, action);
