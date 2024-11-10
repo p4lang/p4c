@@ -566,7 +566,7 @@ $(function(){initNavTree('resolve__negative__extract_8h_source.html',''); initRe
 <div class="line"><a id="l00566" name="l00566"></a><span class="lineno">  566</span>                    LOG4(<span class="stringliteral">&quot;Adding transition { &quot;</span></div>
 <div class="line"><a id="l00567" name="l00567"></a><span class="lineno">  567</span>                         &lt;&lt; succ_tr-&gt;value &lt;&lt; <span class="stringliteral">&quot; } shift value &quot;</span> &lt;&lt; new_shift &lt;&lt; <span class="stringliteral">&quot; B from state &quot;</span></div>
 <div class="line"><a id="l00568" name="l00568"></a><span class="lineno">  568</span>                         &lt;&lt; state_succ-&gt;name &lt;&lt; <span class="stringliteral">&quot; to state &quot;</span></div>
-<div class="line"><a id="l00569" name="l00569"></a><span class="lineno">  569</span>                         &lt;&lt; (succ_tr-&gt;next != <span class="keyword">nullptr</span> ? succ_tr-&gt;next-&gt;name : <span class="stringliteral">&quot;EXIT&quot;</span>));</div>
+<div class="line"><a id="l00569" name="l00569"></a><span class="lineno">  569</span>                         &lt;&lt; (succ_tr-&gt;next != <span class="keyword">nullptr</span> ? succ_tr-&gt;next-&gt;name.c_str() : <span class="stringliteral">&quot;EXIT&quot;</span>));</div>
 <div class="line"><a id="l00570" name="l00570"></a><span class="lineno">  570</span>                }</div>
 <div class="line"><a id="l00571" name="l00571"></a><span class="lineno">  571</span>            }</div>
 <div class="line"><a id="l00572" name="l00572"></a><span class="lineno">  572</span>        }</div>
@@ -770,7 +770,7 @@ $(function(){initNavTree('resolve__negative__extract_8h_source.html',''); initRe
 </div>
 <div class="line"><a id="l00775" name="l00775"></a><span class="lineno">  775</span> </div>
 <div class="line"><a id="l00776" name="l00776"></a><span class="lineno">  776</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_TOFINO_BF_P4C_PARDE_RESOLVE_NEGATIVE_EXTRACT_H_ */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="aclass_p4_1_1_i_r_1_1_node_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_node.html">P4::IR::Node</a></div><div class="ttdef"><b>Definition</b> node.h:95</div></div>
+<div class="ttc" id="aclass_p4_1_1_i_r_1_1_node_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_node.html">P4::IR::Node</a></div><div class="ttdef"><b>Definition</b> node.h:94</div></div>
 <div class="ttc" id="aclass_p4_1_1_i_r_1_1_vector_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_vector.html">P4::IR::Vector</a></div><div class="ttdef"><b>Definition</b> vector.h:59</div></div>
 <div class="ttc" id="aclass_p4_1_1_pass_manager_html"><div class="ttname"><a href="class_p4_1_1_pass_manager.html">P4::PassManager</a></div><div class="ttdef"><b>Definition</b> ir/pass_manager.h:40</div></div>
 <div class="ttc" id="aclass_p4_1_1_visitor_1_1profile__t_html"><div class="ttname"><a href="class_p4_1_1_visitor_1_1profile__t.html">P4::Visitor::profile_t</a></div><div class="ttdef"><b>Definition</b> visitor.h:78</div></div>

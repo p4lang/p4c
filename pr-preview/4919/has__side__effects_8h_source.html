@@ -166,40 +166,39 @@ $(function(){initNavTree('has__side__effects_8h_source.html',''); initResizable(
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>        <span class="keywordflow">if</span> (typeMap) {</div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>            <span class="keyword">auto</span> *mi = <a class="code hl_function" href="class_p4_1_1_method_instance.html#acd1cceb81c46a876c6c7b63a7a69fce4">P4::MethodInstance::resolve</a>(mc, <span class="keyword">this</span>, typeMap, <span class="keyword">true</span>);</div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>            <span class="keywordflow">if</span> (<span class="keyword">auto</span> *bm = mi-&gt;to&lt;<a class="code hl_class" href="class_p4_1_1_built_in_method.html">P4::BuiltInMethod</a>&gt;()) {</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>                <span class="keywordflow">if</span> (bm-&gt;name == <span class="stringliteral">&quot;isValid&quot;</span>) <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>            }</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>            <span class="keywordflow">if</span> (<span class="keyword">auto</span> *em = mi-&gt;to&lt;<a class="code hl_class" href="class_p4_1_1_extern_method.html">P4::ExternMethod</a>&gt;()) {</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>                <span class="keywordflow">if</span> (em-&gt;method-&gt;getAnnotation(IR::Annotation::noSideEffectsAnnotation)) <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>            }</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        }</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        result = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>    }</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>    <span class="keywordtype">bool</span> preorder(<span class="keyword">const</span> IR::Primitive *)<span class="keyword"> override </span>{</div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>        result = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    }</div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span>    <span class="keywordtype">bool</span> preorder(<span class="keyword">const</span> IR::Expression *)<span class="keyword"> override </span>{ <span class="keywordflow">return</span> !result; }</div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> </div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <span class="keyword">explicit</span> <a class="code hl_class" href="class_p4_1_1has_side_effects.html">hasSideEffects</a>(<span class="keyword">const</span> IR::Expression *e) { e-&gt;apply(*<span class="keyword">this</span>); }</div>
-<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>    <a class="code hl_class" href="class_p4_1_1has_side_effects.html">hasSideEffects</a>(<a class="code hl_class" href="class_p4_1_1_type_map.html">P4::TypeMap</a> *tm, <span class="keyword">const</span> IR::Expression *e, <span class="keyword">const</span> <a class="code hl_struct" href="struct_p4_1_1_visitor___context.html">Visitor::Context</a> *ctxt)</div>
-<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>        : typeMap(tm) {</div>
-<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>        e-&gt;apply(*<span class="keyword">this</span>, ctxt);</div>
-<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    }</div>
-<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="keywordtype">bool</span> operator()(<span class="keyword">const</span> IR::Expression *e) {</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        result = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        e-&gt;apply(*<span class="keyword">this</span>);</div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>        <span class="keywordflow">return</span> result;</div>
-<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    }</div>
-<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    <span class="keyword">explicit</span> <span class="keyword">operator</span> bool() { <span class="keywordflow">return</span> result; }</div>
-<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>};</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>                <span class="keywordflow">if</span> (bm-&gt;name == IR::Type_Header::isValid) <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>            } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<span class="keyword">auto</span> *em = mi-&gt;to&lt;<a class="code hl_class" href="class_p4_1_1_extern_method.html">P4::ExternMethod</a>&gt;()) {</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>                <span class="keywordflow">if</span> (em-&gt;method-&gt;hasAnnotation(IR::Annotation::noSideEffectsAnnotation)) <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>            }</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>        }</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>        result = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    }</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span> </div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>    <span class="keywordtype">bool</span> preorder(<span class="keyword">const</span> IR::Primitive *)<span class="keyword"> override </span>{</div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>        result = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>    }</div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span>    <span class="keywordtype">bool</span> preorder(<span class="keyword">const</span> IR::Expression *)<span class="keyword"> override </span>{ <span class="keywordflow">return</span> !result; }</div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span> </div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span> <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span>    <span class="keyword">explicit</span> <a class="code hl_class" href="class_p4_1_1has_side_effects.html">hasSideEffects</a>(<span class="keyword">const</span> IR::Expression *e) { e-&gt;apply(*<span class="keyword">this</span>); }</div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span>    <a class="code hl_class" href="class_p4_1_1has_side_effects.html">hasSideEffects</a>(<a class="code hl_class" href="class_p4_1_1_type_map.html">P4::TypeMap</a> *tm, <span class="keyword">const</span> IR::Expression *e, <span class="keyword">const</span> <a class="code hl_struct" href="struct_p4_1_1_visitor___context.html">Visitor::Context</a> *ctxt)</div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span>        : typeMap(tm) {</div>
+<div class="line"><a id="l00062" name="l00062"></a><span class="lineno">   62</span>        e-&gt;apply(*<span class="keyword">this</span>, ctxt);</div>
+<div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>    }</div>
+<div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>    <span class="keywordtype">bool</span> operator()(<span class="keyword">const</span> IR::Expression *e) {</div>
+<div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>        result = <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        e-&gt;apply(*<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        <span class="keywordflow">return</span> result;</div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    }</div>
+<div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>    <span class="keyword">explicit</span> <span class="keyword">operator</span> bool() { <span class="keywordflow">return</span> result; }</div>
+<div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>};</div>
 </div>
-<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span> </div>
-<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>}  <span class="comment">// namespace P4</span></div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span> </div>
-<div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span><span class="preprocessor">#endif </span><span class="comment">/* MIDEND_HAS_SIDE_EFFECTS_H_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span> </div>
+<div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>}  <span class="comment">// namespace P4</span></div>
+<div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span> </div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span><span class="preprocessor">#endif </span><span class="comment">/* MIDEND_HAS_SIDE_EFFECTS_H_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="aclass_p4_1_1_built_in_method_html"><div class="ttname"><a href="class_p4_1_1_built_in_method.html">P4::BuiltInMethod</a></div><div class="ttdef"><b>Definition</b> methodInstance.h:260</div></div>
 <div class="ttc" id="aclass_p4_1_1_extern_method_html"><div class="ttname"><a href="class_p4_1_1_extern_method.html">P4::ExternMethod</a></div><div class="ttdef"><b>Definition</b> methodInstance.h:168</div></div>
 <div class="ttc" id="aclass_p4_1_1_inspector_html"><div class="ttname"><a href="class_p4_1_1_inspector.html">P4::Inspector</a></div><div class="ttdef"><b>Definition</b> visitor.h:400</div></div>

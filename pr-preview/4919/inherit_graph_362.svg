@@ -14,7 +14,7 @@
 <g id="a_Node000000"><a xlink:href="struct_p4_1_1_closed_range.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="161,-30 0,-30 0,0 161,0 161,-30"/>
 <text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">P4::ClosedRange&lt; RangeUnit</text>
-<text text-anchor="middle" x="80.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::Bit, Endian::Network &gt;</text>
+<text text-anchor="middle" x="80.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">::Bit, Endian::Little &gt;</text>
 </a>
 </g>
 </g>

@@ -225,7 +225,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>isPipeName</b> (const
 </div><div class="memdoc">
 <dl class="section return"><dt>Returns</dt><dd>a string that represents a path to an output directory: options.outputDir + pipename + suffix If <code>pipe_id</code> is not set (-1) return just options.outputDir. No other files except for the manifest should be stored in the root. If <code>suffix</code> is empty, return options.outputDir + pipename.</dd></dl>
 <p>The structure of the output directory is: options.outputDir / manifest.json for each pipe / pipeName/context.json / pipeName/tofino[x].bin / pipeName/program.bfa / pipeName/program.res.json / pipeName/logs/ / pipeName/graphs/</p>
-<p>If the directory does not exists, it is created. If the creation fails print an error message and return an empty string. </p>
+<p>If the directory does not exists, it is created. If the creation fails print an error message and return an empty string. FIXME: Make this return std::filesystem::path. There are quite a few invocations of this function. </p>
 
 </div>
 </div>

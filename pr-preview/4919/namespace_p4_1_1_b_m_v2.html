@@ -172,6 +172,8 @@ Classes</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_b_m_v2_1_1_json_objects.html">JsonObjects</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:struct_p4_1_1_b_m_v2_1_1_jump_label_info" id="r_struct_p4_1_1_b_m_v2_1_1_jump_label_info"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#struct_p4_1_1_b_m_v2_1_1_jump_label_info">JumpLabelInfo</a></td></tr>
+<tr class="separator:struct_p4_1_1_b_m_v2_1_1_jump_label_info"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_b_m_v2_1_1_lower_expressions.html">LowerExpressions</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">This pass rewrites expressions which are not supported natively on BMv2.  <a href="class_p4_1_1_b_m_v2_1_1_lower_expressions.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -343,7 +345,56 @@ const int&#160;</td><td class="memItemRight" valign="bottom"><b>JSON_MINOR_VERSI
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>TODO: this is not really specific to BMV2, it should reside somewhere else. </p>
-</div><h2 class="groupheader">Typedef Documentation</h2>
+</div><hr/><h2 class="groupheader">Class Documentation</h2>
+<a name="struct_p4_1_1_b_m_v2_1_1_jump_label_info" id="struct_p4_1_1_b_m_v2_1_1_jump_label_info"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#struct_p4_1_1_b_m_v2_1_1_jump_label_info">&#9670;&#160;</a></span>P4::BMV2::JumpLabelInfo</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct P4::BMV2::JumpLabelInfo</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<div class="textblock"><p>JumpLabelInfo holds information about jump instruction labels (i.e. destinations of jump primitives) during the construction of the primitives for one action in the BMv2 JSON data. </p>
+</div><table class="fieldtable">
+<tr><th colspan="3">Class Members</th></tr>
+<tr><td class="fieldtype">
+<a id="a2729e10862a220759aceece10fee0c70" name="a2729e10862a220759aceece10fee0c70"></a>int</td>
+<td class="fieldname">
+labelIdEndOfAction</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="a9463f3ef9c0a4b3b934af206d10bffce" name="a9463f3ef9c0a4b3b934af206d10bffce"></a>map&lt; unsigned int, unsigned int &gt;</td>
+<td class="fieldname">
+labelIdToJumpOffset</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="ae027c64047e7001fa3f06f82a8b78fd0" name="ae027c64047e7001fa3f06f82a8b78fd0"></a>int</td>
+<td class="fieldname">
+numLabels</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="a7fcbdfaf4fefa92dd3f21858a5f7d1c8" name="a7fcbdfaf4fefa92dd3f21858a5f7d1c8"></a>map&lt; unsigned int, JsonArray * &gt;</td>
+<td class="fieldname">
+offsetToJumpParams</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="af60ca433c45216ba35e6d92cc8fbb98c" name="af60ca433c45216ba35e6d92cc8fbb98c"></a>map&lt; unsigned int, unsigned int &gt;</td>
+<td class="fieldname">
+offsetToTargetLabelId</td>
+<td class="fielddoc">
+</td></tr>
+</table>
+
+</div>
+</div>
+<h2 class="groupheader">Typedef Documentation</h2>
 <a id="af21b22f8dbe7e58d8f7e1711f61f310a" name="af21b22f8dbe7e58d8f7e1711f61f310a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#af21b22f8dbe7e58d8f7e1711f61f310a">&#9670;&#160;</a></span>SelectorInput</h2>
 

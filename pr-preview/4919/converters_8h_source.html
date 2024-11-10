@@ -855,8 +855,8 @@ $(function(){initNavTree('converters_8h_source.html',''); initResizable(true); }
 <div class="line"><a id="l00771" name="l00771"></a><span class="lineno">  771</span>        setName(<span class="stringliteral">&quot;CheckIfMultiEntryPoint&quot;</span>);</div>
 <div class="line"><a id="l00772" name="l00772"></a><span class="lineno">  772</span>    }</div>
 <div class="line"><a id="l00773" name="l00773"></a><span class="lineno">  773</span>    <span class="keywordtype">bool</span> preorder(<span class="keyword">const</span> IR::ParserState *state) {</div>
-<div class="line"><a id="l00774" name="l00774"></a><span class="lineno">  774</span>        <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span> *anno : state-&gt;getAnnotations()-&gt;annotations) {</div>
-<div class="line"><a id="l00775" name="l00775"></a><span class="lineno">  775</span>            <span class="keywordflow">if</span> (anno-&gt;name.name == <span class="stringliteral">&quot;packet_entry&quot;</span>) {</div>
+<div class="line"><a id="l00774" name="l00774"></a><span class="lineno">  774</span>        <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span> *anno : state-&gt;getAnnotations()) {</div>
+<div class="line"><a id="l00775" name="l00775"></a><span class="lineno">  775</span>            <span class="keywordflow">if</span> (anno-&gt;name == <span class="stringliteral">&quot;packet_entry&quot;</span>) {</div>
 <div class="line"><a id="l00776" name="l00776"></a><span class="lineno">  776</span>                structure-&gt;parserEntryPoints.emplace(state-&gt;name, state);</div>
 <div class="line"><a id="l00777" name="l00777"></a><span class="lineno">  777</span>            }</div>
 <div class="line"><a id="l00778" name="l00778"></a><span class="lineno">  778</span>        }</div>
@@ -941,10 +941,10 @@ $(function(){initNavTree('converters_8h_source.html',''); initResizable(true); }
 <div class="line"><a id="l00855" name="l00855"></a><span class="lineno">  855</span>                               p.first),</div>
 <div class="line"><a id="l00856" name="l00856"></a><span class="lineno">  856</span>                <span class="keyword">new</span> IR::PathExpression(<span class="keyword">new</span> IR::Path(p.second-&gt;name))));</div>
 <div class="line"><a id="l00857" name="l00857"></a><span class="lineno">  857</span>        }</div>
-<div class="line"><a id="l00858" name="l00858"></a><span class="lineno">  858</span>        <span class="keyword">auto</span> instAnnos = <span class="keyword">new</span> IR::Annotations();</div>
-<div class="line"><a id="l00859" name="l00859"></a><span class="lineno">  859</span>        instAnnos-&gt;add(<span class="keyword">new</span> IR::Annotation(IR::Annotation::nameAnnotation, <span class="stringliteral">&quot;.$InstanceType&quot;</span>_cs));</div>
-<div class="line"><a id="l00860" name="l00860"></a><span class="lineno">  860</span>        <span class="keyword">auto</span> instEnum =</div>
-<div class="line"><a id="l00861" name="l00861"></a><span class="lineno">  861</span>            <span class="keyword">new</span> IR::Type_SerEnum(newInstanceType, instAnnos, IR::Type_Bits::get(32), members);</div>
+<div class="line"><a id="l00858" name="l00858"></a><span class="lineno">  858</span>        <span class="keyword">auto</span> instEnum = <span class="keyword">new</span> IR::Type_SerEnum(</div>
+<div class="line"><a id="l00859" name="l00859"></a><span class="lineno">  859</span>            newInstanceType,</div>
+<div class="line"><a id="l00860" name="l00860"></a><span class="lineno">  860</span>            {<span class="keyword">new</span> IR::Annotation(IR::Annotation::nameAnnotation, <span class="stringliteral">&quot;.$InstanceType&quot;</span>_cs)},</div>
+<div class="line"><a id="l00861" name="l00861"></a><span class="lineno">  861</span>            IR::Type_Bits::get(32), members);</div>
 <div class="line"><a id="l00862" name="l00862"></a><span class="lineno">  862</span>        allTypeDecls.push_back(instEnum);</div>
 <div class="line"><a id="l00863" name="l00863"></a><span class="lineno">  863</span> </div>
 <div class="line"><a id="l00864" name="l00864"></a><span class="lineno">  864</span>        <a class="code hl_class" href="class_p4_1_1_i_r_1_1_vector.html">IR::Vector&lt;IR::Expression&gt;</a> selExpr;</div>
@@ -953,9 +953,9 @@ $(function(){initNavTree('converters_8h_source.html',''); initResizable(true); }
 <div class="line"><a id="l00867" name="l00867"></a><span class="lineno">  867</span>            <span class="keyword">new</span> IR::Member(<span class="keyword">new</span> IR::PathExpression(<span class="keyword">new</span> IR::Path(<span class="stringliteral">&quot;standard_metadata&quot;</span>_cs)),</div>
 <div class="line"><a id="l00868" name="l00868"></a><span class="lineno">  868</span>                           <span class="stringliteral">&quot;instance_type&quot;</span>_cs)));</div>
 <div class="line"><a id="l00869" name="l00869"></a><span class="lineno">  869</span>        <span class="keyword">auto</span> selects = <span class="keyword">new</span> IR::SelectExpression(<span class="keyword">new</span> IR::ListExpression(selExpr), selCases);</div>
-<div class="line"><a id="l00870" name="l00870"></a><span class="lineno">  870</span>        <span class="keyword">auto</span> annos = <span class="keyword">new</span> IR::Annotations();</div>
-<div class="line"><a id="l00871" name="l00871"></a><span class="lineno">  871</span>        annos-&gt;add(<span class="keyword">new</span> IR::Annotation(IR::Annotation::nameAnnotation, <span class="stringliteral">&quot;.$start&quot;</span>_cs));</div>
-<div class="line"><a id="l00872" name="l00872"></a><span class="lineno">  872</span>        <span class="keyword">auto</span> startState = <span class="keyword">new</span> IR::ParserState(IR::ParserState::start, annos, selects);</div>
+<div class="line"><a id="l00870" name="l00870"></a><span class="lineno">  870</span>        <span class="keyword">auto</span> startState = <span class="keyword">new</span> IR::ParserState(</div>
+<div class="line"><a id="l00871" name="l00871"></a><span class="lineno">  871</span>            IR::ParserState::start,</div>
+<div class="line"><a id="l00872" name="l00872"></a><span class="lineno">  872</span>            {<span class="keyword">new</span> IR::Annotation(IR::Annotation::nameAnnotation, <span class="stringliteral">&quot;.$start&quot;</span>_cs)}, selects);</div>
 <div class="line"><a id="l00873" name="l00873"></a><span class="lineno">  873</span>        parserStates.push_back(startState);</div>
 <div class="line"><a id="l00874" name="l00874"></a><span class="lineno">  874</span> </div>
 <div class="line"><a id="l00875" name="l00875"></a><span class="lineno">  875</span>        <span class="keywordflow">if</span> (!parserStates.empty()) {</div>
@@ -1142,7 +1142,7 @@ $(function(){initNavTree('converters_8h_source.html',''); initResizable(true); }
 <div class="line"><a id="l01061" name="l01061"></a><span class="lineno"> 1061</span> </div>
 <div class="line"><a id="l01062" name="l01062"></a><span class="lineno"> 1062</span><span class="preprocessor">#endif </span><span class="comment">/* FRONTENDS_P4_14_FROMV1_0_CONVERTERS_H_ */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="aclass_p4_1_1_i_r_1_1_indexed_vector_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_indexed_vector.html">P4::IR::IndexedVector</a></div><div class="ttdef"><b>Definition</b> node.h:52</div></div>
-<div class="ttc" id="aclass_p4_1_1_i_r_1_1_node_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_node.html">P4::IR::Node</a></div><div class="ttdef"><b>Definition</b> node.h:95</div></div>
+<div class="ttc" id="aclass_p4_1_1_i_r_1_1_node_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_node.html">P4::IR::Node</a></div><div class="ttdef"><b>Definition</b> node.h:94</div></div>
 <div class="ttc" id="aclass_p4_1_1_i_r_1_1_vector_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_vector.html">P4::IR::Vector</a></div><div class="ttdef"><b>Definition</b> vector.h:59</div></div>
 <div class="ttc" id="aclass_p4_1_1_inspector_html"><div class="ttname"><a href="class_p4_1_1_inspector.html">P4::Inspector</a></div><div class="ttdef"><b>Definition</b> visitor.h:400</div></div>
 <div class="ttc" id="aclass_p4_1_1_p4_core_library_html"><div class="ttname"><a href="class_p4_1_1_p4_core_library.html">P4::P4CoreLibrary</a></div><div class="ttdef"><b>Definition</b> coreLibrary.h:103</div></div>
@@ -1156,7 +1156,7 @@ $(function(){initNavTree('converters_8h_source.html',''); initResizable(true); }
 <div class="ttc" id="aclass_p4_1_1_p4_v1_1_1_discover_structure_html"><div class="ttname"><a href="class_p4_1_1_p4_v1_1_1_discover_structure.html">P4::P4V1::DiscoverStructure</a></div><div class="ttdef"><b>Definition</b> converters.h:177</div></div>
 <div class="ttc" id="aclass_p4_1_1_p4_v1_1_1_expression_converter_html"><div class="ttname"><a href="class_p4_1_1_p4_v1_1_1_expression_converter.html">P4::P4V1::ExpressionConverter</a></div><div class="ttdef"><b>Definition</b> converters.h:34</div></div>
 <div class="ttc" id="aclass_p4_1_1_p4_v1_1_1_extern_converter_html"><div class="ttname"><a href="class_p4_1_1_p4_v1_1_1_extern_converter.html">P4::P4V1::ExternConverter</a></div><div class="ttdef"><b>Definition</b> converters.h:97</div></div>
-<div class="ttc" id="aclass_p4_1_1_p4_v1_1_1_extern_converter_html_a9f11cf0df406593b149a458c7a4e0d20"><div class="ttname"><a href="class_p4_1_1_p4_v1_1_1_extern_converter.html#a9f11cf0df406593b149a458c7a4e0d20">P4::P4V1::ExternConverter::addConverter</a></div><div class="ttdeci">static void addConverter(cstring type, ExternConverter *)</div><div class="ttdef"><b>Definition</b> converters.cpp:581</div></div>
+<div class="ttc" id="aclass_p4_1_1_p4_v1_1_1_extern_converter_html_a9f11cf0df406593b149a458c7a4e0d20"><div class="ttname"><a href="class_p4_1_1_p4_v1_1_1_extern_converter.html#a9f11cf0df406593b149a458c7a4e0d20">P4::P4V1::ExternConverter::addConverter</a></div><div class="ttdeci">static void addConverter(cstring type, ExternConverter *)</div><div class="ttdef"><b>Definition</b> converters.cpp:582</div></div>
 <div class="ttc" id="aclass_p4_1_1_p4_v1_1_1_find_recirculated_html"><div class="ttname"><a href="class_p4_1_1_p4_v1_1_1_find_recirculated.html">P4::P4V1::FindRecirculated</a></div><div class="ttdef"><b>Definition</b> converters.h:1008</div></div>
 <div class="ttc" id="aclass_p4_1_1_p4_v1_1_1_fix_extracts_html"><div class="ttname"><a href="class_p4_1_1_p4_v1_1_1_fix_extracts.html">P4::P4V1::FixExtracts</a></div><div class="ttdef"><b>Definition</b> converters.h:507</div></div>
 <div class="ttc" id="aclass_p4_1_1_p4_v1_1_1_fix_multi_entry_point_html"><div class="ttname"><a href="class_p4_1_1_p4_v1_1_1_fix_multi_entry_point.html">P4::P4V1::FixMultiEntryPoint</a></div><div class="ttdef"><b>Definition</b> converters.h:886</div></div>
