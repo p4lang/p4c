@@ -51,7 +51,7 @@ const IR::Node *DuplicateActionControlPlaneNameCheck::postorder(IR::P4Action *ac
 
         // name is what this top-level action's @name annotation
         // will be, after LocalizeAllActions pass adds one.
-        cstring name = "." + action->name;
+        cstring name = absl::StrCat(".", action->name);
         checkForDuplicateName(name, action);
     } else {
         const auto *e0 = nameAnno->expr.at(0);
@@ -61,14 +61,10 @@ const IR::Node *DuplicateActionControlPlaneNameCheck::postorder(IR::P4Action *ac
             // can compare it against any other @name annotation value
             // that begins with "." and is equal.
             if (stack.empty()) {
-                name = absl::StrCat(".", name.string_view());
+                name = absl::StrCat(".", name);
             } else {
-                name = absl::StrCat(".",
-                                    absl::StrJoin(stack, ".",
-                                                  [](std::string *out, cstring s) {
-                                                      absl::StrAppend(out, s.string_view());
-                                                  }),
-                                    ".", name.string_view());
+                name = absl::StrCat(".", absl::StrJoin(stack, "."),
+                                    ".", name);
             }
         }
         checkForDuplicateName(name, action);
