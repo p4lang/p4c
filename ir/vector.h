@@ -29,6 +29,13 @@ class JSONLoader;
 
 namespace P4::IR {
 
+// some useful templates for visiting Vectors, in ir-inline.h, due to order of include issues
+template <class T>
+safe_vector<const T *> visit_safe_vector(const safe_vector<const T *> &vec, const char *clss,
+                                         Visitor &v, const char *name);
+template <class T>
+void merge_into_safe_vector(safe_vector<const T *> &rv, const Node *n, const char *clss);
+
 // Specialization of vector which
 // - only stores const IR::Node* objects inside (T should derive from Node)
 // - inherits from IR::Node itself
@@ -156,6 +163,8 @@ class Vector : public VectorBase {
     void check_null() const {
         for (auto e : vec) CHECK_NULL(e);
     }
+    const safe_vector<const T *> &get_contents() const { return vec; }
+    void replace_contents(safe_vector<const T *> &&n) { vec = std::move(n); }
 
     IRNODE_SUBCLASS(Vector)
     IRNODE_DECLARE_APPLY_OVERLOAD(Vector)
@@ -187,8 +196,10 @@ class Vector : public VectorBase {
     }
     cstring node_type_name() const override { return "Vector<" + T::static_type_name() + ">"; }
     static cstring static_type_name() { return "Vector<" + T::static_type_name() + ">"; }
+
     void visit_children(Visitor &v, const char *name) override;
     void visit_children(Visitor &v, const char *name) const override;
+    void COWref_visit_children(COWNode_info *, Visitor &, const char *) const;
     virtual void parallel_visit_children(Visitor &v, const char *name = nullptr);
     virtual void parallel_visit_children(Visitor &v, const char *name = nullptr) const;
     void toJSON(JSONGenerator &json) const override;
