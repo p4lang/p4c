@@ -50,7 +50,7 @@ class DoSetHeaders final : public Transform {
 
     bool containsHeaderType(const IR::Type *type);
     void generateSetValid(const IR::Expression *dest, const IR::Expression *src,
-                          const IR::Type *destType, IR::Vector<IR::StatOrDecl> *insert);
+                          const IR::Type *destType, IR::Vector<IR::StatOrDecl> &insert);
 
  public:
     explicit DoSetHeaders(TypeMap *typeMap) : typeMap(typeMap) {

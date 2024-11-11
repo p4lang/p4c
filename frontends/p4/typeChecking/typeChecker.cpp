@@ -189,14 +189,14 @@ template <class Ctor>
 const IR::Type *TypeInferenceBase::canonicalizeFields(const IR::Type_StructLike *type,
                                                       Ctor constructor) {
     bool changes = false;
-    auto fields = new IR::IndexedVector<IR::StructField>();
+    IR::IndexedVector<IR::StructField> fields;
     for (auto field : type->fields) {
         auto ftype = canonicalize(field->type);
         if (ftype == nullptr) return nullptr;
         if (ftype != field->type) changes = true;
         BUG_CHECK(!ftype->is<IR::Type_Type>(), "%1%: TypeType in field type", ftype);
         auto newField = new IR::StructField(field->srcInfo, field->name, field->annotations, ftype);
-        fields->push_back(newField);
+        fields.push_back(newField);
     }
     if (changes)
         return constructor(fields);
@@ -407,23 +407,24 @@ const IR::Type *TypeInferenceBase::canonicalize(const IR::Type *type) {
         if (changes) resultType = new IR::Type_Method(mt->getSourceInfo(), tps, res, pl, mt->name);
         return resultType;
     } else if (auto hdr = type->to<IR::Type_Header>()) {
-        return canonicalizeFields(hdr, [hdr](const IR::IndexedVector<IR::StructField> *fields) {
+        return canonicalizeFields(hdr, [hdr](IR::IndexedVector<IR::StructField> &fields) {
             return new IR::Type_Header(hdr->srcInfo, hdr->name, hdr->annotations,
-                                       hdr->typeParameters, *fields);
+                                       hdr->typeParameters, std::move(fields));
         });
     } else if (auto str = type->to<IR::Type_Struct>()) {
-        return canonicalizeFields(str, [str](const IR::IndexedVector<IR::StructField> *fields) {
+        return canonicalizeFields(str, [str](IR::IndexedVector<IR::StructField> &fields) {
             return new IR::Type_Struct(str->srcInfo, str->name, str->annotations,
-                                       str->typeParameters, *fields);
+                                       str->typeParameters, std::move(fields));
         });
     } else if (auto hu = type->to<IR::Type_HeaderUnion>()) {
-        return canonicalizeFields(hu, [hu](const IR::IndexedVector<IR::StructField> *fields) {
+        return canonicalizeFields(hu, [hu](IR::IndexedVector<IR::StructField> &fields) {
             return new IR::Type_HeaderUnion(hu->srcInfo, hu->name, hu->annotations,
-                                            hu->typeParameters, *fields);
+                                            hu->typeParameters, std::move(fields));
         });
     } else if (auto su = type->to<IR::Type_UnknownStruct>()) {
-        return canonicalizeFields(su, [su](const IR::IndexedVector<IR::StructField> *fields) {
-            return new IR::Type_UnknownStruct(su->srcInfo, su->name, su->annotations, *fields);
+        return canonicalizeFields(su, [su](IR::IndexedVector<IR::StructField> &fields) {
+            return new IR::Type_UnknownStruct(su->srcInfo, su->name, su->annotations,
+                                              std::move(fields));
         });
     } else if (auto st = type->to<IR::Type_Specialized>()) {
         auto baseCanon = canonicalize(st->baseType);

@@ -28,7 +28,7 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Type_Declaration *SpecializationInfo::synthesize(const Visitor::Context *ctxt) const {
+const IR::Type_Declaration *SpecializationInfo::synthesize(const Visitor::Context *ctxt) {
     TypeVariableSubstitution tvs;
     ParameterSubstitution subst;
 
@@ -46,16 +46,16 @@ const IR::Type_Declaration *SpecializationInfo::synthesize(const Visitor::Contex
     if (auto parser = clone->to<IR::P4Parser>()) {
         auto newtype = new IR::Type_Parser(name, parser->type->annotations,
                                            new IR::TypeParameters(), parser->getApplyParameters());
-        declarations->append(parser->parserLocals);
+        declarations.append(parser->parserLocals);
         result =
-            new IR::P4Parser(name, newtype, new IR::ParameterList(), *declarations, parser->states);
+            new IR::P4Parser(name, newtype, new IR::ParameterList(), declarations, parser->states);
     } else if (auto control = clone->to<IR::P4Control>()) {
         auto newtype =
             new IR::Type_Control(name, control->type->annotations, new IR::TypeParameters(),
                                  control->getApplyParameters());
-        declarations->append(control->controlLocals);
+        declarations.append(control->controlLocals);
         result =
-            new IR::P4Control(name, newtype, new IR::ParameterList(), *declarations, control->body);
+            new IR::P4Control(name, newtype, new IR::ParameterList(), declarations, control->body);
 
     } else {
         BUG("%1%: unexpected type", specialized);
@@ -72,7 +72,7 @@ static const IR::Argument *convertArgument(const IR::Argument *arg, Specializati
         IR::ID id(param->srcInfo, nName, param->name);
         auto decl =
             new IR::Declaration_Instance(param->srcInfo, id, cce->constructedType, cce->arguments);
-        spec->declarations->push_back(decl);
+        spec->declarations.push_back(decl);
         auto path = new IR::PathExpression(param->srcInfo, new IR::Path(param->srcInfo, id));
         return new IR::Argument(arg->srcInfo, arg->name, path);
     } else {

@@ -38,7 +38,7 @@ struct SpecializationInfo {
     /// Values to substitute for constructor arguments.
     IR::Vector<IR::Argument> *constructorArguments;
     /// Declarations to insert in the list of locals.
-    IR::IndexedVector<IR::Declaration> *declarations;
+    IR::IndexedVector<IR::Declaration> declarations;
     /// Invocation which causes this specialization.
     const IR::Node *invocation;
     /// Where in the program should the specialization be inserted.
@@ -49,14 +49,13 @@ struct SpecializationInfo {
         : specialized(cont),
           typeArguments(nullptr),
           constructorArguments(new IR::Vector<IR::Argument>()),
-          declarations(new IR::IndexedVector<IR::Declaration>()),
           invocation(invocation),
           insertBefore(insertion) {
         CHECK_NULL(cont);
         CHECK_NULL(invocation);
         CHECK_NULL(insertion);
     }
-    const IR::Type_Declaration *synthesize(const Visitor::Context *ctxt) const;
+    const IR::Type_Declaration *synthesize(const Visitor::Context *ctxt);
 };
 
 /// Maintains a map from invocation to a SpecializationInfo object.

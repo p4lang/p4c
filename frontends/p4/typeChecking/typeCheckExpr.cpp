@@ -641,17 +641,17 @@ const IR::Node *TypeInferenceBase::postorder(const IR::HeaderStackExpression *ex
 const IR::Node *TypeInferenceBase::postorder(const IR::StructExpression *expression) {
     if (done()) return expression;
     bool constant = true;
-    auto components = new IR::IndexedVector<IR::StructField>();
+    IR::IndexedVector<IR::StructField> components;
     for (auto c : expression->components) {
         if (!isCompileTimeConstant(c->expression)) constant = false;
         auto type = getType(c->expression);
         if (type == nullptr) return expression;
-        components->push_back(new IR::StructField(c->name, type));
+        components.push_back(new IR::StructField(c->name, type));
     }
 
     // This is the type inferred by looking at the fields.
     const IR::Type *structType =
-        new IR::Type_UnknownStruct(expression->srcInfo, "unknown struct", *components);
+        new IR::Type_UnknownStruct(expression->srcInfo, "unknown struct", std::move(components));
     structType = canonicalize(structType);
 
     const IR::Expression *result = expression;
@@ -1735,15 +1735,15 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Member *expression) {
                           IR::Type_Stack::push_front, IR::Type_Stack::pop_front);
             if (!isLeftValue(expression->expr))
                 typeError("%1%: must be applied to a left-value", expression);
-            auto params = new IR::IndexedVector<IR::Parameter>();
+            IR::IndexedVector<IR::Parameter> params;
             auto param = new IR::Parameter(IR::ID("count"_cs, nullptr), IR::Direction::None,
                                            IR::Type_InfInt::get());
             auto tt = new IR::Type_Type(param->type);
             setType(param->type, tt);
             setType(param, param->type);
-            params->push_back(param);
-            auto type =
-                new IR::Type_Method(IR::Type_Void::get(), new IR::ParameterList(*params), member);
+            params.push_back(param);
+            auto type = new IR::Type_Method(IR::Type_Void::get(),
+                                            new IR::ParameterList(std::move(params)), member);
             auto canon = canonicalize(type);
             if (canon == nullptr) return expression;
             setType(getOriginal(), canon);
