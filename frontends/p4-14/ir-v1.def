@@ -159,7 +159,7 @@ class If :  Expression {
     NullOK Vector<Expression>    ifFalse;
     visit_children {
         v.visit(pred, "pred");
-        SplitFlowVisit<Vector<Expression>>(v, ifTrue, ifFalse).run_visit();
+        SplitFlowVisit<If, Vector<Expression>>(v, ifTrue, ifFalse).run_visit();
         Expression::visit_children(v, n);
     }
 }
@@ -249,6 +249,10 @@ class CalculatedField : IAnnotated {
         ID                      name;
         Expression              cond;
         update_or_verify() { }  // FIXME -- needed by umpack_json(safe_vector) -- should not be
+        visit_children {
+            (void)n;
+            v.visit(cond, name.name.c_str());
+        }
     }
     safe_vector<update_or_verify> specs = {};
     optional inline Vector<Annotation> annotations;
@@ -257,7 +261,7 @@ class CalculatedField : IAnnotated {
     visit_children {
         (void)n;
         v.visit(field, "field");
-        for (auto &s : specs) v.visit(s.cond, s.name.name.c_str());
+        for (auto &s : specs) s.visit_children(v, "specs");
         v.visit(annotations, "annotations"); }
 }
 

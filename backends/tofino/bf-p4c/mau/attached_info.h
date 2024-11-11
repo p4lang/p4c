@@ -200,7 +200,7 @@ class HasAttachedMemory : public MauInspector {
     bool preorder(const IR::MAU::AttachedMemory *am) {
         unsigned mask = 1U;
         const Visitor::Context *ctxt = nullptr;
-        if (findContext<IR::MAU::Primitive>(ctxt)) {
+        if (findContext<IR::MAU::MauPrimitive>(ctxt)) {
             BUG_CHECK(ctxt->child_index >= 0 && ctxt->child_index < 32, "mask overflow");
             mask <<= ctxt->child_index;
         }
