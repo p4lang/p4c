@@ -44,6 +44,25 @@ namespace P4 {
         Node::traceVisit("Mod loop_revisit");                                                     \
         v.loop_revisit(this);                                                                     \
     }                                                                                             \
+    TEMPLATE INLINE bool IR::CLASS TT::apply_visitor_preorder(COWNode_info *info,                 \
+                                                              COWModifier &v) const {             \
+        Node::traceVisit("Mod pre (COW)");                                                        \
+        return v.preorder(IR::COWptr<IR::CLASS TT>(info));                                        \
+    }                                                                                             \
+    TEMPLATE INLINE void IR::CLASS TT::apply_visitor_postorder(COWNode_info *info,                \
+                                                               COWModifier &v) const {            \
+        Node::traceVisit("Mod post (COW)");                                                       \
+        v.postorder(IR::COWptr<IR::CLASS TT>(info));                                              \
+    }                                                                                             \
+    TEMPLATE INLINE void IR::CLASS TT::apply_visitor_revisit(COWModifier &v,                      \
+                                                             const Node *n) const {               \
+        Node::traceVisit("Mod revisit (COW)");                                                    \
+        v.revisit(this, n);                                                                       \
+    }                                                                                             \
+    TEMPLATE INLINE void IR::CLASS TT::apply_visitor_loop_revisit(COWModifier &v) const {         \
+        Node::traceVisit("Mod loop_revisit (COW)");                                               \
+        v.loop_revisit(this);                                                                     \
+    }                                                                                             \
     TEMPLATE INLINE bool IR::CLASS TT::apply_visitor_preorder(Inspector &v) const {               \
         Node::traceVisit("Insp pre");                                                             \
         return v.preorder(this);                                                                  \

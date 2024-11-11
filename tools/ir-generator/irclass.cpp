@@ -125,6 +125,7 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
         << "#include <map>\n\n"
         << "#include \"lib/big_int.h\"        // IWYU pragma: keep\n"
         << "// Special IR classes and types\n"
+        << "#include \"ir/copy_on_write_ptr.h\"  // IWYU pragma: keep\n"
         << "#include \"ir/dbprint.h\"         // IWYU pragma: keep\n"
         << "#include \"ir/id.h\"              // IWYU pragma: keep\n"
         << "#include \"ir/indexed_vector.h\"  // IWYU pragma: keep\n"
@@ -132,6 +133,8 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
         << "#include \"ir/node.h\"            // IWYU pragma: keep\n"
         << "#include \"ir/nodemap.h\"         // IWYU pragma: keep\n"
         << "#include \"ir/vector.h\"          // IWYU pragma: keep\n"
+        << "// copy_on_write_inl.h must be after vector.h and indexed_vector.h\n"
+        << "#include \"ir/copy_on_write_inl.h\"  // IWYU pragma: keep\n"
         << "#include \"lib/ordered_map.h\"    // IWYU pragma: keep\n"
         << std::endl
         << "namespace P4 {\n"
@@ -184,6 +187,9 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
         e->generate_hdr(out);
         e->generate_impl(impl);
     }
+
+    for (auto cls : *getClasses())
+        cls->outputCOWref(out);
 
     out << "#endif /* " << macroname << " */" << std::endl;
 
@@ -357,8 +363,29 @@ void IrMethod::generate_impl(std::ostream &out) const {
         out << LineDirective(srcInfo);
         generate_proto(out, true, false);
         out << " const " << body << std::endl;
+        if (clss->kind == NodeKind::Concrete || clss->kind == NodeKind::Template)
+            outputCOWref_visit_children(out);
     }
     if (srcInfo.isValid()) out << LineDirective();
+}
+
+void IrMethod::outputCOWref_visit_children(std::ostream &out) const {
+    out << LineDirective(srcInfo);
+    out << "void IR::" << clss->containedIn << clss->name
+        << "::COWref::visit_children(Visitor &v) ";
+    // Since we can't call the base class visit_children directly (as COWrefs are unions
+    // and C++ does not support inheritance for unions), we need to insert a `reinterpret_cast`
+    // into the body code where that happens.  This is safe as the base class COWref has
+    // a subset of the fields of the derived class COWref and is compatible
+    const char *p = body.c_str();
+    while (const char *vccall = std::strstr(p, "::visit_children(")) {
+        const char *t = vccall;
+        while (t > p && (std::isalnum(t[-1]) || t[-1] == '_' || t[-1] == ':')) t--;
+        out.write(p, t - p) << "reinterpret_cast<";
+        out.write(t, vccall - t) << "::COWref *>(this)->";
+        p = vccall + 2;
+    }
+    out << p << std::endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -408,6 +435,43 @@ cstring IrClass::qualified_name(const IrNamespace *in) const {
     return rv;
 }
 
+IrElement::access_t IrClass::outputCOWfieldrefs(std::ostream &out) const {
+    auto access = IrElement::Private;
+    if (concreteParent) {
+        access = concreteParent->outputCOWfieldrefs(out);
+    } else {
+        out << (access = IrElement::Public);
+        out << indent << "COWfieldref<Node, Util::SourceInfo, &Node::srcInfo> srcInfo;\n";
+    }
+    for (auto e : elements) {
+        if (auto *fld = e->to<IrField>()) {
+            if (fld->isStatic) continue;
+            if (e->access != access) out << indent << (access = e->access);
+            out << indent << "COWfieldref<" << name << ", ";
+            const IrClass *cls = fld->type->resolve(fld->clss ? fld->clss->containedIn : nullptr);
+            if (cls != nullptr && !fld->isInline) out << "const ";
+            out << fld->type->toString();
+            if (cls != nullptr && !fld->isInline) out << "*";
+            out << fld->type->declSuffix() << ", &" << name << "::" << fld->name << "> "
+                << fld->name << ";\n";
+        }
+    }
+    return access;
+}
+
+void IrClass::outputCOWref(std::ostream &out) const {
+    if (kind != NodeKind::Concrete && kind != NodeKind::Template) return;
+    out << "union P4::IR::" << name << "::COWref {\n";
+    out << IrElement::Private;
+    out << indent << "COWNode_info *_info;\n";
+    if (outputCOWfieldrefs(out) != IrElement::Public)
+        out << IrElement::Public;
+    out << indent << "COWref(COWNode_info *i) { _info = i; }\n";
+    out << indent << "COWref *operator->() { return this; }\n";
+    out << indent << "void visit_children(Visitor &);\n";
+    out << "};\n";
+}
+
 void IrClass::generate_hdr(std::ostream &out) const {
     if (kind != NodeKind::Nested) {
         out << "namespace P4::IR {" << std::endl;
@@ -418,7 +482,10 @@ void IrClass::generate_hdr(std::ostream &out) const {
 
     bool concreteParent = false;
     for (auto p : parentClasses) {
-        if (p->kind != NodeKind::Interface) concreteParent = true;
+        if (p->kind != NodeKind::Interface) {
+            BUG_CHECK(!concreteParent && p == this->concreteParent, "inconsisten concreteParent");
+            concreteParent = true;
+        }
     }
 
     const char *sep = " : ";
@@ -447,6 +514,10 @@ void IrClass::generate_hdr(std::ostream &out) const {
     if (kind != NodeKind::Interface && kind != NodeKind::Nested)
         out << indent << "IRNODE" << (kind == NodeKind::Abstract ? "_ABSTRACT" : "") << "_SUBCLASS("
             << name << ")" << std::endl;
+
+    if (kind == NodeKind::Concrete || kind == NodeKind::Template) {
+        out << indent << "union COWref;\n";
+    }
 
     auto *irNamespace = IrNamespace::get(nullptr, "IR"_cs);
     if (kind != NodeKind::Nested) {
