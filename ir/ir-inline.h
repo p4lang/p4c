@@ -44,6 +44,25 @@ namespace P4 {
         Node::traceVisit("Mod loop_revisit");                                                     \
         v.loop_revisit(this);                                                                     \
     }                                                                                             \
+    TEMPLATE INLINE bool IR::CLASS TT::apply_visitor_preorder(COWNode_info *info,                 \
+                                                              COWModifier &v) const {             \
+        Node::traceVisit("Mod pre (COW)");                                                        \
+        return v.preorder(IR::COWptr<IR::CLASS TT>(info));                                        \
+    }                                                                                             \
+    TEMPLATE INLINE void IR::CLASS TT::apply_visitor_postorder(COWNode_info *info,                \
+                                                               COWModifier &v) const {            \
+        Node::traceVisit("Mod post (COW)");                                                       \
+        v.postorder(IR::COWptr<IR::CLASS TT>(info));                                              \
+    }                                                                                             \
+    TEMPLATE INLINE void IR::CLASS TT::apply_visitor_revisit(COWModifier &v,                      \
+                                                             const Node *n) const {               \
+        Node::traceVisit("Mod revisit (COW)");                                                    \
+        v.revisit(this, n);                                                                       \
+    }                                                                                             \
+    TEMPLATE INLINE void IR::CLASS TT::apply_visitor_loop_revisit(COWModifier &v) const {         \
+        Node::traceVisit("Mod loop_revisit (COW)");                                               \
+        v.loop_revisit(this);                                                                     \
+    }                                                                                             \
     TEMPLATE INLINE bool IR::CLASS TT::apply_visitor_preorder(Inspector &v) const {               \
         Node::traceVisit("Insp pre");                                                             \
         return v.preorder(this);                                                                  \
@@ -74,6 +93,25 @@ namespace P4 {
     }                                                                                             \
     TEMPLATE INLINE void IR::CLASS TT::apply_visitor_loop_revisit(Transform &v) const {           \
         Node::traceVisit("Trans loop_revisit");                                                   \
+        v.loop_revisit(this);                                                                     \
+    }                                                                                             \
+    TEMPLATE INLINE const IR::Node *IR::CLASS TT::apply_visitor_preorder(COWNode_info *info,      \
+                                                                         COWTransform &v) const { \
+        Node::traceVisit("Trans pre (COW)");                                                      \
+        return v.preorder(IR::COWptr<IR::CLASS TT>(info));                                        \
+    }                                                                                             \
+    TEMPLATE INLINE const IR::Node *IR::CLASS TT::apply_visitor_postorder(COWNode_info *info,     \
+                                                                          COWTransform &v) const {\
+        Node::traceVisit("Trans post (COW)");                                                     \
+        return v.postorder(IR::COWptr<IR::CLASS TT>(info));                                       \
+    }                                                                                             \
+    TEMPLATE INLINE void IR::CLASS TT::apply_visitor_revisit(COWTransform &v,                     \
+                                                             const Node *n) const {               \
+        Node::traceVisit("Trans revisit (COW)");                                                  \
+        v.revisit(this, n);                                                                       \
+    }                                                                                             \
+    TEMPLATE INLINE void IR::CLASS TT::apply_visitor_loop_revisit(COWTransform &v) const {        \
+        Node::traceVisit("Trans loop_revisit (COW)");                                             \
         v.loop_revisit(this);                                                                     \
     }
 
