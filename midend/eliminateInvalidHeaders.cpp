@@ -20,12 +20,12 @@ namespace P4 {
 
 const IR::Node *DoEliminateInvalidHeaders::postorder(IR::P4Control *control) {
     control->controlLocals.prepend(variables);
-    auto vec = new IR::IndexedVector<IR::StatOrDecl>();
-    vec->srcInfo = control->body->srcInfo;
-    vec->append(statements);
-    vec->append(control->body->components);
+    IR::IndexedVector<IR::StatOrDecl> vec;
+    vec.srcInfo = control->body->srcInfo;
+    vec.append(statements);
+    vec.append(control->body->components);
     control->body =
-        new IR::BlockStatement(control->body->srcInfo, control->body->annotations, *vec);
+        new IR::BlockStatement(control->body->srcInfo, control->body->annotations, std::move(vec));
     statements.clear();
     variables.clear();
     return control;
@@ -40,11 +40,12 @@ const IR::Node *DoEliminateInvalidHeaders::postorder(IR::ParserState *state) {
 }
 
 const IR::Node *DoEliminateInvalidHeaders::postorder(IR::P4Action *action) {
-    auto vec = new IR::IndexedVector<IR::StatOrDecl>();
-    vec->append(variables);
-    vec->append(statements);
-    vec->append(action->body->components);
-    action->body = new IR::BlockStatement(action->body->srcInfo, action->body->annotations, *vec);
+    IR::IndexedVector<IR::StatOrDecl> vec;
+    vec.append(variables);
+    vec.append(statements);
+    vec.append(action->body->components);
+    action->body =
+        new IR::BlockStatement(action->body->srcInfo, action->body->annotations, std::move(vec));
     variables.clear();
     statements.clear();
     return action;

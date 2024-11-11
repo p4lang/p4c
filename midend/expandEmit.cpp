@@ -76,7 +76,7 @@ const IR::Node *DoExpandEmit::postorder(IR::MethodCallStatement *statement) {
             std::vector<const IR::Argument *> expansion;
             std::vector<const IR::Type *> expansionTypes;
             if (expandArg(type, arg0, &expansion, &expansionTypes)) {
-                auto vec = new IR::IndexedVector<IR::StatOrDecl>();
+                IR::IndexedVector<IR::StatOrDecl> vec;
                 auto it = expansionTypes.begin();
                 for (auto e : expansion) {
                     auto method = statement->methodCall->method->clone();
@@ -88,10 +88,10 @@ const IR::Node *DoExpandEmit::postorder(IR::MethodCallStatement *statement) {
                     auto mce = new IR::MethodCallExpression(statement->methodCall->srcInfo, method,
                                                             typeArgs, args);
                     auto stat = new IR::MethodCallStatement(mce);
-                    vec->push_back(stat);
+                    vec.push_back(stat);
                     ++it;
                 }
-                return new IR::BlockStatement(*vec);
+                return new IR::BlockStatement(std::move(vec));
             }
         }
     }
