@@ -578,7 +578,7 @@ class ForStatement : LoopStatement {
         return init.getDeclarations(); }
     visit_children;
 #emit
-    // template single implementation of const vs non-const ForStatement
+    // template single implementation of const vs non-const vs COWref ForStatement
     template<class THIS> static void visit_children(THIS *, Visitor &v);
 #end
 }
@@ -603,7 +603,7 @@ class ForInStatement : LoopStatement {
         return new Util::EmptyEnumerator<const IDeclaration *>(); }
     visit_children;
 #emit
-    // template single implementation of const vs non-const ForInStatement
+    // template single implementation of const vs non-const vs COWref ForInStatement
     template<class THIS> static void visit_children(THIS *, Visitor &v);
 #end
 }
