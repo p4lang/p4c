@@ -57,17 +57,12 @@ const IR::Node *DoRemoveParserControlFlow::postorder(IR::ParserState *state) {
             }
 
             // left-over
-            auto vec = new IR::Vector<IR::Expression>();
-            vec->push_back(ifstat->condition);
             auto trueCase = new IR::SelectCase(new IR::BoolLiteral(true),
                                                new IR::PathExpression(IR::ID(trueName, nullptr)));
             auto falseCase = new IR::SelectCase(new IR::BoolLiteral(false),
                                                 new IR::PathExpression(IR::ID(falseName, nullptr)));
-            auto cases = new IR::Vector<IR::SelectCase>();
-            cases->push_back(trueCase);
-            cases->push_back(falseCase);
-            currentState->selectExpression =
-                new IR::SelectExpression(new IR::ListExpression(*vec), std::move(*cases));
+            currentState->selectExpression = new IR::SelectExpression(
+                new IR::ListExpression({ifstat->condition}), {trueCase, falseCase});
 
             currentState->components = currentComponents;
             currentComponents.clear();

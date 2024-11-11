@@ -493,15 +493,15 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Entry *entry) {
 const IR::Node *TypeInferenceBase::postorder(const IR::ListExpression *expression) {
     if (done()) return expression;
     bool constant = true;
-    auto components = new IR::Vector<IR::Type>();
+    IR::Vector<IR::Type> components;
     for (auto c : expression->components) {
         if (!isCompileTimeConstant(c)) constant = false;
         auto type = getType(c);
         if (type == nullptr) return expression;
-        components->push_back(type);
+        components.push_back(type);
     }
 
-    auto tupleType = new IR::Type_List(expression->srcInfo, *components);
+    auto tupleType = new IR::Type_List(expression->srcInfo, std::move(components));
     auto type = canonicalize(tupleType);
     if (type == nullptr) return expression;
     setType(getOriginal(), type);
@@ -559,7 +559,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::P4ListExpression *express
     if (done()) return expression;
     bool constant = true;
     auto elementType = getTypeType(expression->elementType);
-    auto vec = new IR::Vector<IR::Expression>();
+    IR::Vector<IR::Expression> vec;
     bool changed = false;
     for (auto c : expression->components) {
         if (!isCompileTimeConstant(c)) constant = false;
@@ -572,15 +572,16 @@ const IR::Node *TypeInferenceBase::postorder(const IR::P4ListExpression *express
         if (!tvs->isIdentity()) {
             ConstantTypeSubstitution cts(tvs, typeMap, this);
             auto converted = cts.convert(c, getChildContext());
-            vec->push_back(converted);
+            vec.push_back(converted);
             changed = changed || converted != c;
         } else {
-            vec->push_back(c);
+            vec.push_back(c);
         }
     }
 
     if (changed)
-        expression = new IR::P4ListExpression(expression->srcInfo, *vec, elementType->getP4Type());
+        expression =
+            new IR::P4ListExpression(expression->srcInfo, std::move(vec), elementType->getP4Type());
     auto type = new IR::Type_P4List(expression->srcInfo, elementType);
     setType(getOriginal(), type);
     setType(expression, type);
@@ -597,7 +598,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::HeaderStackExpression *ex
     auto stackType = getTypeType(expression->headerStackType);
     if (auto st = stackType->to<IR::Type_Stack>()) {
         auto elementType = st->elementType;
-        auto vec = new IR::Vector<IR::Expression>();
+        IR::Vector<IR::Expression> vec;
         bool changed = false;
         if (expression->size() != st->getSize()) {
             typeError("%1%: number of initializers %2% has to match stack size %3%", expression,
@@ -615,13 +616,14 @@ const IR::Node *TypeInferenceBase::postorder(const IR::HeaderStackExpression *ex
             if (!tvs->isIdentity()) {
                 ConstantTypeSubstitution cts(tvs, typeMap, this);
                 auto converted = cts.convert(c, getChildContext());
-                vec->push_back(converted);
+                vec.push_back(converted);
                 changed = true;
             } else {
-                vec->push_back(c);
+                vec.push_back(c);
             }
             if (changed)
-                expression = new IR::HeaderStackExpression(expression->srcInfo, *vec, stackType);
+                expression =
+                    new IR::HeaderStackExpression(expression->srcInfo, std::move(vec), stackType);
         }
     } else {
         typeError("%1%: header stack expression has an incorrect type `%2%`", expression,

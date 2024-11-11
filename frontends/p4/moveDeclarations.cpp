@@ -22,8 +22,8 @@ const IR::Node *MoveDeclarations::postorder(IR::P4Action *action) {
     if (findContext<IR::P4Control>() == nullptr) {
         // Else let the parent control get these
         IR::IndexedVector<IR::StatOrDecl> body;
-        auto m = getMoves();
-        body.insert(body.end(), m->begin(), m->end());
+        const auto &m = getMoves();
+        body.insert(body.end(), m.begin(), m.end());
         body.append(action->body->components);
         action->body = new IR::BlockStatement(action->body->srcInfo, action->body->annotations,
                                               std::move(body));
@@ -35,7 +35,7 @@ const IR::Node *MoveDeclarations::postorder(IR::P4Action *action) {
 const IR::Node *MoveDeclarations::postorder(IR::P4Control *control) {
     LOG1("Visiting " << control << " toMove " << toMove.size());
     IR::IndexedVector<IR::Declaration> decls;
-    for (auto decl : *getMoves()) {
+    for (auto decl : getMoves()) {
         LOG1("Moved " << decl);
         decls.push_back(decl);
     }
@@ -47,7 +47,7 @@ const IR::Node *MoveDeclarations::postorder(IR::P4Control *control) {
 
 const IR::Node *MoveDeclarations::postorder(IR::P4Parser *parser) {
     IR::IndexedVector<IR::Declaration> newStateful;
-    newStateful.append(*getMoves());
+    newStateful.append(getMoves());
     newStateful.append(parser->parserLocals);
     parser->parserLocals = std::move(newStateful);
     pop();
@@ -56,8 +56,8 @@ const IR::Node *MoveDeclarations::postorder(IR::P4Parser *parser) {
 
 const IR::Node *MoveDeclarations::postorder(IR::Function *function) {
     IR::IndexedVector<IR::StatOrDecl> body;
-    auto m = getMoves();
-    body.insert(body.end(), m->begin(), m->end());
+    const auto &m = getMoves();
+    body.insert(body.end(), m.begin(), m.end());
     body.append(function->body->components);
     function->body = new IR::BlockStatement(function->body->srcInfo, function->body->annotations,
                                             std::move(body));

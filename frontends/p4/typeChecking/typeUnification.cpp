@@ -319,12 +319,12 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
             return constraint->reportError(constraints->getCurrentSubstitution(),
                                            "Tuples with different sizes %1% vs %2%",
                                            td->components.size(), ts->components.size());
-        auto missingFields = new IR::Vector<IR::Type>();
+        IR::Vector<IR::Type> missingFields;
         size_t sourceSize = ts->components.size();
         for (size_t i = 0; i < td->components.size(); i++) {
             auto di = td->components.at(i);
             if (hasDots && (i >= sourceSize - 1)) {
-                missingFields->push_back(di);
+                missingFields.push_back(di);
             } else {
                 // Last field is the ... field
                 auto si = ts->components.at(i);
@@ -332,7 +332,7 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
             }
         }
         if (hasDots) {
-            auto dotsType = new IR::Type_List(*missingFields);
+            auto dotsType = new IR::Type_List(std::move(missingFields));
             auto dotsField = ts->components.at(sourceSize - 1);
             auto partial = new IR::Type_Fragment(dotsType);
             constraints->add(new EqualityConstraint(dotsField, partial, constraint));
