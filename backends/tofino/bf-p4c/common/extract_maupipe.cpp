@@ -242,10 +242,10 @@ class ConvertMethodCalls : public MauTransform {
         return prim;
     }
 
-    const IR::MAU::Primitive *postorder(IR::MAU::Primitive *prim) {
+    const IR::MAU::MauPrimitive *postorder(IR::MAU::MauPrimitive *prim) {
         if (prim->name == "method_call_init") {
             BUG_CHECK(prim->operands.size() == 1, "method call initialization failed");
-            if (auto *p = prim->operands.at(0)->to<IR::MAU::Primitive>())
+            if (auto *p = prim->operands.at(0)->to<IR::MAU::MauPrimitive>())
                 return p;
             else if (prim->operands.at(0)->is<IR::Member>())
                 // comes from a bare "isValid" call -- is a noop
@@ -379,7 +379,8 @@ class ActionBodySetup : public Inspector {
         if (!af->exitAction) {
             cstring pname = "modify_field"_cs;
             if (assign->left->type->is<IR::Type_Header>()) pname = "copy_header"_cs;
-            auto prim = new IR::MAU::Primitive(assign->srcInfo, pname, assign->left, assign->right);
+            auto prim =
+                new IR::MAU::MauPrimitive(assign->srcInfo, pname, assign->left, assign->right);
             prim->in_hash = InHashAnnot();
             af->action.push_back(prim);
         }
@@ -388,7 +389,7 @@ class ActionBodySetup : public Inspector {
     bool preorder(const IR::MethodCallStatement *mc) override {
         if (!af->exitAction) {
             auto mc_init =
-                new IR::MAU::Primitive(mc->srcInfo, "method_call_init"_cs, mc->methodCall);
+                new IR::MAU::MauPrimitive(mc->srcInfo, "method_call_init"_cs, mc->methodCall);
             af->action.push_back(mc_init);
         }
         return false;
@@ -1293,7 +1294,7 @@ void AttachTables::InitializeStatefulAlus ::updateAttachedSalu(const IR::Declara
     }
     if (ext->type->toString().startsWith("LearnAction")) salu->learn_action = true;
 
-    auto prim = findContext<IR::MAU::Primitive>();
+    auto prim = findContext<IR::MAU::MauPrimitive>();
     LOG6("  - " << (prim ? prim->name.c_str() : "<no primitive>"));
     if (prim && prim->name.endsWith(".address")) {
         salu->chain_vpn = true;
@@ -1340,7 +1341,7 @@ void AttachTables::InitializeStatefulAlus::postorder(const IR::GlobalRef *gref) 
  * Gathers information about register params and checks
  * that they are used in a single stateful ALU.
  */
-bool AttachTables::InitializeRegisterParams::preorder(const IR::MAU::Primitive *prim) {
+bool AttachTables::InitializeRegisterParams::preorder(const IR::MAU::MauPrimitive *prim) {
     if (prim->name != "RegisterParam.read") return true;
     const IR::Declaration_Instance *reg_param_decl = nullptr;
     if (auto *gr = prim->operands.at(0)->to<IR::GlobalRef>())
