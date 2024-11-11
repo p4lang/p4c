@@ -56,6 +56,9 @@ class GatewayControlFlow : public virtual ControlFlowVisitor {
 
  public:
     virtual void pre_visit_table_next(const IR::MAU::Table *tbl, cstring tags) = 0;
+    void pre_visit_table_next(IR::COWptr<IR::MAU::Table> tbl, cstring tags) {
+        pre_visit_table_next(tbl.get(), tags);
+    }
 };
 
 }  // end namespace BFN

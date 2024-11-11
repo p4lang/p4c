@@ -65,7 +65,7 @@ introduce a boolean flag and extra tests to remove those branches.
 precondition:
     switchAddDefault pass has run to ensure switch statements cover all cases
 */
-class MoveToElseAfterBranch : public Modifier {
+class MoveToElseAfterBranch : public COWModifier {
     /* This pass does not use (inherit from) ControlFlowVisitor, even though it is doing
      * control flow analysis, as it turns out to be more efficient to do it directly here
      * by overloading the branching constructs (if/switch/loops) and not cloning the visitor,
@@ -80,22 +80,23 @@ class MoveToElseAfterBranch : public Modifier {
      * indicating that it needs to be removed from the BlockStatment */
     bool movedToIfBranch = false;
 
-    bool preorder(IR::BlockStatement *) override;
-    bool moveFromParentTo(const IR::Statement *&child);
-    bool preorder(IR::IfStatement *) override;
-    bool preorder(IR::SwitchStatement *) override;
-    void postorder(IR::LoopStatement *) override;
+    bool preorder(IR::COWptr<IR::BlockStatement>) override;
+    template <class T>
+    bool moveFromParentTo(T &child);
+    bool preorder(IR::COWptr<IR::IfStatement>) override;
+    bool preorder(IR::COWptr<IR::SwitchStatement>) override;
+    void postorder(IR::COWptr<IR::LoopStatement>) override;
     bool branch() {
         hasJumped = true;
         // no need to visit children
         return false;
     }
-    bool preorder(IR::BreakStatement *) override { return branch(); }
-    bool preorder(IR::ContinueStatement *) override { return branch(); }
-    bool preorder(IR::ExitStatement *) override { return branch(); }
-    bool preorder(IR::ReturnStatement *) override { return branch(); }
+    bool preorder(IR::COWptr<IR::BreakStatement>) override { return branch(); }
+    bool preorder(IR::COWptr<IR::ContinueStatement>) override { return branch(); }
+    bool preorder(IR::COWptr<IR::ExitStatement>) override { return branch(); }
+    bool preorder(IR::COWptr<IR::ReturnStatement>) override { return branch(); }
     // Only visit statements, skip all expressions
-    bool preorder(IR::Expression *) override { return false; }
+    bool preorder(IR::COWptr<IR::Expression>) override { return false; }
 
  public:
     MoveToElseAfterBranch() {}

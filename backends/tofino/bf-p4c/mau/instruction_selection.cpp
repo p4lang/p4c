@@ -35,7 +35,7 @@
 #include "lib/bitops.h"
 #include "lib/safe_vector.h"
 
-bool UnimplementedRegisterMethodCalls::preorder(const IR::MAU::Primitive *prim) {
+bool UnimplementedRegisterMethodCalls::preorder(const IR::MAU::MauPrimitive *prim) {
     auto dot = prim->name.find('.');
     auto objType = dot ? prim->name.before(dot) : cstring();
     cstring method = dot ? cstring(dot + 1) : prim->name;
@@ -112,7 +112,7 @@ bool HashGenSetup::CreateHashGenExprs::preorder(const IR::BFN::SignExtend *se) {
 
 bool HashGenSetup::CreateHashGenExprs::preorder(const IR::Concat *c) {
     if (!findContext<IR::MAU::Action>()) return false;
-    auto *prim = findContext<IR::MAU::Primitive>();
+    auto *prim = findContext<IR::MAU::MauPrimitive>();
     auto k = c->left->to<IR::Constant>();
     if ((!prim || !prim->in_hash) && k && k->value == 0 && self.phv.field(c->right)) {
         // HACK -- avoid dealing with 0-prefix concats (zero extension) as the midend
@@ -131,7 +131,7 @@ bool HashGenSetup::CreateHashGenExprs::preorder(const IR::Concat *c) {
 
 bool HashGenSetup::CreateHashGenExprs::preorder(const IR::Expression *expr) {
     if (!findContext<IR::MAU::Action>()) return false;
-    auto *prim = findContext<IR::MAU::Primitive>();
+    auto *prim = findContext<IR::MAU::MauPrimitive>();
     if (prim && prim->in_hash && !isWrite() && CanBeIXBarExpr(expr)) {
         per_prim_hge.push_back(expr);
         auto hge = new IR::MAU::HashGenExpression(expr->srcInfo, expr->type, expr,
@@ -228,7 +228,7 @@ void load_hash_details(const BFN_Options &options, const IR::Expression *orig_ha
  * 3.  P4-14 can allow only certain algorithms, the one that come through names, p4-16 can allow
  *     any hash algorithm necessary.  Everything is rotateable and permutable.
  */
-bool HashGenSetup::CreateHashGenExprs::preorder(const IR::MAU::Primitive *prim) {
+bool HashGenSetup::CreateHashGenExprs::preorder(const IR::MAU::MauPrimitive *prim) {
     per_prim_hge.clear();
     if (prim->name != "Hash.get") return true;
 
@@ -325,7 +325,7 @@ bool HashGenSetup::CreateHashGenExprs::isBetter(const IR::Expression *dest, cons
     return a->is<IR::Member>() || a->is<IR::TempVar>();
 }
 
-void HashGenSetup::CreateHashGenExprs::postorder(const IR::MAU::Primitive *prim) {
+void HashGenSetup::CreateHashGenExprs::postorder(const IR::MAU::MauPrimitive *prim) {
     if (per_prim_hge.size() > 1) {
         /* can only have one hash_gen expression per primitive, so we need to decide which
          * one is "best" and get rid of the rest. */
@@ -396,7 +396,7 @@ const IR::MAU::Action *Synth2PortSetup::preorder(IR::MAU::Action *act) {
 /** Converts any method calls relating to Synth2Port tables to the associated AttachedOutput
  *  if necessary, and once converted, saves this value to the primitive
  */
-const IR::Node *Synth2PortSetup::postorder(IR::MAU::Primitive *prim) {
+const IR::Node *Synth2PortSetup::postorder(IR::MAU::MauPrimitive *prim) {
     if (findContext<IR::MAU::SaluAction>()) return prim;
 
     auto act = findContext<IR::MAU::Action>();
@@ -556,7 +556,7 @@ const IR::Node *Synth2PortSetup::postorder(IR::MAU::Primitive *prim) {
         if (meter_type != IR::MAU::MeterType::UNUSED) meter_types[u_id] = meter_type;
     }
 
-    if (findContext<IR::MAU::Primitive>() != nullptr) return rv;
+    if (findContext<IR::MAU::MauPrimitive>() != nullptr) return rv;
     // If instructions are at the top level of the instruction, then push these instructions
     // in after
     if (!created_instrs.empty()) {
@@ -619,7 +619,7 @@ const IR::GlobalRef *DoInstructionSelection::preorder(IR::GlobalRef *gr) {
 }
 
 class DoInstructionSelection::SplitInstructions : public Transform {
-    IR::Vector<IR::MAU::Primitive> &split;
+    IR::Vector<IR::MAU::MauPrimitive> &split;
     const IR::Expression *postorder(IR::MAU::Instruction *inst) override {
         if (inst->operands.empty()) return inst;
         if (auto *tv = inst->operands[0]->to<IR::TempVar>()) {
@@ -638,7 +638,7 @@ class DoInstructionSelection::SplitInstructions : public Transform {
     }
 
  public:
-    explicit SplitInstructions(IR::Vector<IR::MAU::Primitive> &s) : split(s) {}
+    explicit SplitInstructions(IR::Vector<IR::MAU::MauPrimitive> &s) : split(s) {}
 };
 
 // Create a compiler generated table per lowest common table sequence having saturated subtract
@@ -732,7 +732,7 @@ const IR::MAU::TableSeq *DoInstructionSelection::postorder(IR::MAU::TableSeq *ts
 }
 
 const IR::MAU::Action *DoInstructionSelection::postorder(IR::MAU::Action *af) {
-    IR::Vector<IR::MAU::Primitive> split;
+    IR::Vector<IR::MAU::MauPrimitive> split;
     // FIXME: This should be pulled out as a different pass
     for (auto *p : af->action) split.push_back(p->apply(SplitInstructions(split)));
     if (split.size() > af->action.size()) af->action = std::move(split);
@@ -1149,12 +1149,12 @@ static bool isDepositMask(long) {
     /* TODO */
     return false;
 }
-static const IR::MAU::Primitive *makeDepositField(IR::MAU::Primitive *prim, long) {
+static const IR::MAU::MauPrimitive *makeDepositField(IR::MAU::MauPrimitive *prim, long) {
     /* TODO */
     return prim;
 }
 
-const IR::Node *DoInstructionSelection::postorder(IR::MAU::Primitive *prim) {
+const IR::Node *DoInstructionSelection::postorder(IR::MAU::MauPrimitive *prim) {
     if (!af) return prim;
 
     /*
@@ -1199,7 +1199,7 @@ const IR::Node *DoInstructionSelection::postorder(IR::MAU::Primitive *prim) {
             auto *inst_const = new IR::MAU::Instruction(
                 prim->srcInfo, "set"_cs,
                 MakeSlice(dest, cc->right->type->width_bits(), dest->type->width_bits() - 1), k);
-            return new IR::Vector<IR::MAU::Primitive>({inst_const, inst_phv});
+            return new IR::Vector<IR::MAU::MauPrimitive>({inst_const, inst_phv});
         } else if (!checkSrc1(prim->operands[1])) {
             /**
              * Converting ternary operands into conditionally-set format:
@@ -1304,7 +1304,7 @@ const IR::Node *DoInstructionSelection::postorder(IR::MAU::Primitive *prim) {
     return prim;
 }
 
-static const IR::Type *stateful_type_for_primitive(const IR::MAU::Primitive *prim) {
+static const IR::Type *stateful_type_for_primitive(const IR::MAU::MauPrimitive *prim) {
     if (prim->name == "Counter.count" || prim->name == "DirectCounter.count")
         return IR::Type_Counter::get();
     if (prim->name == "Meter.execute" || prim->name == "DirectMeter.execute" ||
@@ -1319,7 +1319,7 @@ static const IR::Type *stateful_type_for_primitive(const IR::MAU::Primitive *pri
     BUG("Not a stateful primitive %s", prim);
 }
 
-static ssize_t index_operand(const IR::MAU::Primitive *prim) {
+static ssize_t index_operand(const IR::MAU::MauPrimitive *prim) {
     if (prim->name.startsWith("Direct") || prim->name.endsWith(".clear"))
         return -1;
     else if (prim->name.startsWith("Counter") || prim->name.startsWith("Meter") ||
@@ -1332,7 +1332,7 @@ static ssize_t index_operand(const IR::MAU::Primitive *prim) {
     return 1;
 }
 
-static size_t input_operand(const IR::MAU::Primitive *prim) {
+static size_t input_operand(const IR::MAU::MauPrimitive *prim) {
     if (prim->name.startsWith("Lpf") || prim->name.startsWith("Wred") ||
         prim->name.startsWith("DirectLpf") || prim->name.startsWith("DirectWred"))
         return 1;
@@ -1340,7 +1340,7 @@ static size_t input_operand(const IR::MAU::Primitive *prim) {
         return -1;
 }
 
-static size_t precolor_operand(const IR::MAU::Primitive *prim) {
+static size_t precolor_operand(const IR::MAU::MauPrimitive *prim) {
     if (prim->name.startsWith("DirectMeter") || prim->name.startsWith("Meter")) {
         if (auto tprim = prim->to<IR::MAU::TypedPrimitive>()) {
             for (auto o : tprim->op_names) {
@@ -1421,7 +1421,7 @@ void StatefulAttachmentSetup::Scan::postorder(const IR::MAU::Instruction *instr)
     }
 }
 
-void StatefulAttachmentSetup::Scan::postorder(const IR::MAU::Primitive *prim) {
+void StatefulAttachmentSetup::Scan::postorder(const IR::MAU::MauPrimitive *prim) {
     const IR::MAU::AttachedMemory *obj = nullptr;
     use_t use = IR::MAU::StatefulUse::NO_USE;
     auto dot = prim->name.find('.');
@@ -1519,7 +1519,7 @@ void StatefulAttachmentSetup::Scan::postorder(const IR::MAU::Primitive *prim) {
 }
 
 IR::MAU::HashDist *StatefulAttachmentSetup::create_hash_dist(const IR::Expression *expr,
-                                                             const IR::MAU::Primitive *prim) {
+                                                             const IR::MAU::MauPrimitive *prim) {
     auto hash_field = expr;
     if (auto c = expr->to<IR::BFN::ReinterpretCast>()) hash_field = c->expr;
 
@@ -1534,8 +1534,8 @@ IR::MAU::HashDist *StatefulAttachmentSetup::create_hash_dist(const IR::Expressio
 /**
  * Find or generate a Hash Distribution unit, given what IR::Node is in the primitive
  */
-const IR::MAU::HashDist *StatefulAttachmentSetup::find_hash_dist(const IR::Expression *expr,
-                                                                 const IR::MAU::Primitive *prim) {
+const IR::MAU::HashDist *StatefulAttachmentSetup::find_hash_dist(
+    const IR::Expression *expr, const IR::MAU::MauPrimitive *prim) {
     const IR::MAU::HashDist *hd = expr->to<IR::MAU::HashDist>();
     if (!hd) {
         auto tv = expr->to<IR::TempVar>();
@@ -1800,7 +1800,7 @@ Visitor::profile_t MeterSetup::Scan::init_apply(const IR::Node *root) {
 
 bool MeterSetup::Scan::preorder(const IR::MAU::Instruction *) { return false; }
 
-void MeterSetup::Scan::find_input(const IR::MAU::Primitive *prim) {
+void MeterSetup::Scan::find_input(const IR::MAU::MauPrimitive *prim) {
     int input_index = input_operand(prim);
     if (input_index == -1) return;
 
@@ -1837,7 +1837,7 @@ void MeterSetup::Scan::find_input(const IR::MAU::Primitive *prim) {
 /** This determines the field to be used for the pre-cplor.  It will also mark a meter as
  *  color-aware or color-blind.
  */
-void MeterSetup::Scan::find_pre_color(const IR::MAU::Primitive *prim) {
+void MeterSetup::Scan::find_pre_color(const IR::MAU::MauPrimitive *prim) {
     auto act = findContext<IR::MAU::Action>();
     if (act == nullptr) return;
     auto gref = prim->operands[0]->to<IR::GlobalRef>();
@@ -1889,7 +1889,7 @@ void MeterSetup::Scan::find_pre_color(const IR::MAU::Primitive *prim) {
 /** Linking the input for an LPF found in the action call with the IR node.  The Scan pass finds
  *  the PHV field, and the Update pass updates the AttachedMemory object
  */
-bool MeterSetup::Scan::preorder(const IR::MAU::Primitive *prim) {
+bool MeterSetup::Scan::preorder(const IR::MAU::MauPrimitive *prim) {
     find_input(prim);
     find_pre_color(prim);
     return false;
@@ -1946,7 +1946,7 @@ bool MeterSetup::Update::preorder(IR::MAU::Action *act) {
 struct CheckInvalidate : public Inspector {
     explicit CheckInvalidate(const PhvInfo &phv) : phv(phv) {}
 
-    void postorder(const IR::MAU::Primitive *prim) override {
+    void postorder(const IR::MAU::MauPrimitive *prim) override {
         if (prim->name == "invalidate") {
             auto *f = phv.field(prim->operands[0]);
             if (!f) {
@@ -2447,7 +2447,7 @@ const IR::Expression *BackendCopyPropagation::propagate(const IR::MAU::Instructi
         } else if (replacement.dest_bits.intersectWith(bits).empty()) {
             continue;
         } else if (instr->name == "set") {
-            if (!split_set) split_set = new IR::Vector<IR::MAU::Primitive>;
+            if (!split_set) split_set = new IR::Vector<IR::MAU::MauPrimitive>;
             le_bitrange range = replacement.dest_bits.intersectWith(bits);
             split_set->push_back(new IR::MAU::Instruction(
                 instr->srcInfo, "set"_cs,
@@ -2770,7 +2770,7 @@ const IR::Node *EliminateAllButLastWrite::Update::preorder(IR::MAU::Instruction 
 
     // handle overlapping set instr if has_overlp_set is true in current action
     if ((instr->name == "set") && (self.has_overlap_set[field] == true)) {
-        IR::Vector<IR::MAU::Primitive> *split_overlap_set = nullptr;
+        IR::Vector<IR::MAU::MauPrimitive> *split_overlap_set = nullptr;
         bitvec mask_bits(bits.lo, bits.size());
         mask_bits.setrange(bits.lo, bits.size());
 
@@ -2793,7 +2793,7 @@ const IR::Node *EliminateAllButLastWrite::Update::preorder(IR::MAU::Instruction 
             int lo = mask_bits.ffs();
             le_bitrange range(lo, mask_bits.ffz(lo) - 1);
 
-            if (!split_overlap_set) split_overlap_set = new IR::Vector<IR::MAU::Primitive>;
+            if (!split_overlap_set) split_overlap_set = new IR::Vector<IR::MAU::MauPrimitive>;
             split_overlap_set->push_back(new IR::MAU::Instruction(
                 instr->srcInfo, "set"_cs,
                 MakeSlice(instr->operands.at(0), range.shiftedByBits(-bits.lo)),
