@@ -56,6 +56,9 @@ void IR::ForStatement::visit_children(THIS *self, Visitor &v) {
 
 void IR::ForStatement::visit_children(Visitor &v, const char *) { visit_children(this, v); }
 void IR::ForStatement::visit_children(Visitor &v, const char *) const { visit_children(this, v); }
+void IR::ForStatement::COWref::visit_children(Visitor &v, const char *) {
+    IR::ForStatement::visit_children(this, v);
+}
 
 template <class THIS>
 void IR::ForInStatement::visit_children(THIS *self, Visitor &v) {
@@ -82,6 +85,9 @@ void IR::ForInStatement::visit_children(THIS *self, Visitor &v) {
 }
 void IR::ForInStatement::visit_children(Visitor &v, const char *) { visit_children(this, v); }
 void IR::ForInStatement::visit_children(Visitor &v, const char *) const { visit_children(this, v); }
+void IR::ForInStatement::COWref::visit_children(Visitor &v, const char *) {
+    IR::ForInStatement::visit_children(this, v);
+}
 
 void IR::BreakStatement::visit_children(Visitor &v, const char *) const {
     if (auto *cfv = v.controlFlowVisitor()) {

@@ -30,6 +30,7 @@ limitations under the License.
 #include <utility>
 
 #include "absl/time/time.h"
+#include "ir/copy_on_write_ptr.h"
 #include "ir/gen-tree-macro.h"
 #include "ir/ir-tree-macros.h"
 #include "ir/node.h"
@@ -127,11 +128,11 @@ class Visitor {
         if (t != n) visitor_const_error();
     }
     void visit(const IR::Node *&n, const char *name, int cidx) {
-        ctxt->child_index = cidx;
+        if (ctxt) ctxt->child_index = cidx;
         n = apply_visitor(n, name);
     }
     void visit(const IR::Node *const &n, const char *name, int cidx) {
-        ctxt->child_index = cidx;
+        if (ctxt) ctxt->child_index = cidx;
         auto t = apply_visitor(n, name);
         if (t != n) visitor_const_error();
     }
@@ -166,6 +167,40 @@ class Visitor {
         }
         n.visit_children(*this, name);
     }
+    template <class COW>
+    requires IR::COWref<COW>
+    void visit(COW ref, const char *name = 0, int cidx = -1) {
+        auto o = ref.get();
+        if (cidx >= 0 && ctxt) ctxt->child_index = cidx;
+        const IR::Node *n = apply_visitor(o, name);
+        if (n != o) {
+            if (!n)
+                ref.set(nullptr);
+            else if (auto c = n->to<std::decay_t<decltype(*o)>>())
+                ref.set(c);
+            else
+                BUG("visitor returned invalid type %s for %s", n->node_type_name(),
+                    o->static_type_name());
+        }
+    }
+    template <class T, class N>
+    void visit(std::pair<IR::COWinfo<T> *, const N * T::*> &ref, const char *name = 0,
+               int cidx = -1) {
+        auto o = ref.first->get()->*ref.second;
+        if (cidx >= 0 && ctxt) ctxt->child_index = cidx;
+        const IR::Node *n = apply_visitor(o, name);
+        if (n != o) {
+            auto &dest = ref.first->mkClone()->*ref.second;
+            if (!n)
+                dest = nullptr;
+            else if (auto c = n->to<N>())
+                dest = c;
+            else
+                BUG("visitor returned invalid type %s for %s", n->node_type_name(),
+                    N::static_type_name());
+        }
+    }
+
     template <class T>
     void parallel_visit(IR::Vector<T> &v, const char *name = 0) {
         if (name && ctxt) ctxt->child_name = name;
@@ -378,7 +413,9 @@ class Visitor {
     const Context *ctxt = nullptr;  // should be readonly to subclasses
     friend class Inspector;
     friend class Modifier;
+    friend class COWModifier;
     friend class Transform;
+    friend class COWTransform;
     friend class ControlFlowVisitor;
 };
 
@@ -397,6 +434,34 @@ class Modifier : public virtual Visitor {
 #define DECLARE_VISIT_FUNCTIONS(CLASS, BASE)                    \
     virtual bool preorder(IR::CLASS *);                         \
     virtual void postorder(IR::CLASS *);                        \
+    virtual void revisit(const IR::CLASS *, const IR::CLASS *); \
+    virtual void loop_revisit(const IR::CLASS *);
+    IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
+#undef DECLARE_VISIT_FUNCTIONS
+    void revisit_visited();
+    bool visit_in_progress(const IR::Node *) const;
+    void visitOnce() const override;
+    void visitAgain() const override;
+
+ protected:
+    bool forceClone = false;  // force clone whole tree even if unchanged
+};
+
+class COWModifier : public virtual Visitor {
+    std::shared_ptr<ChangeTracker> visited;
+    void visitor_const_error() override;
+    bool check_clone(const Visitor *) override;
+
+ public:
+    profile_t init_apply(const IR::Node *root) override;
+    const IR::Node *apply_visitor(const IR::Node *n, const char *name = 0) override;
+    virtual bool preorder(IR::COWptr<IR::Node>) { return true; }
+    virtual void postorder(IR::COWptr<IR::Node>) {}
+    virtual void revisit(const IR::Node *, const IR::Node *) {}
+    virtual void loop_revisit(const IR::Node *) { BUG("IR loop detected"); }
+#define DECLARE_VISIT_FUNCTIONS(CLASS, BASE)                    \
+    virtual bool preorder(IR::COWptr<IR::CLASS>);               \
+    virtual void postorder(IR::COWptr<IR::CLASS>);              \
     virtual void revisit(const IR::CLASS *, const IR::CLASS *); \
     virtual void loop_revisit(const IR::CLASS *);
     IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
@@ -450,6 +515,42 @@ class Transform : public virtual Visitor {
 #define DECLARE_VISIT_FUNCTIONS(CLASS, BASE)                   \
     virtual const IR::Node *preorder(IR::CLASS *);             \
     virtual const IR::Node *postorder(IR::CLASS *);            \
+    virtual void revisit(const IR::CLASS *, const IR::Node *); \
+    virtual void loop_revisit(const IR::CLASS *);
+    IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
+#undef DECLARE_VISIT_FUNCTIONS
+    void revisit_visited();
+    bool visit_in_progress(const IR::Node *) const;
+    void visitOnce() const override;
+    void visitAgain() const override;
+    // can only be called usefully from a 'preorder' function (directly or indirectly)
+    void prune() { prune_flag = true; }
+
+ protected:
+    const IR::Node *transform_child(const IR::Node *child) {
+        auto *rv = apply_visitor(child);
+        prune_flag = true;
+        return rv;
+    }
+    bool forceClone = false;  // force clone whole tree even if unchanged
+};
+
+class COWTransform : public virtual Visitor {
+    std::shared_ptr<ChangeTracker> visited;
+    bool prune_flag = false;
+    void visitor_const_error() override;
+    bool check_clone(const Visitor *) override;
+
+ public:
+    profile_t init_apply(const IR::Node *root) override;
+    const IR::Node *apply_visitor(const IR::Node *, const char *name = 0) override;
+    virtual const IR::Node *preorder(IR::COWptr<IR::Node> n) { return n; }
+    virtual const IR::Node *postorder(IR::COWptr<IR::Node> n) { return n; }
+    virtual void revisit(const IR::Node *, const IR::Node *) {}
+    virtual void loop_revisit(const IR::Node *) { BUG("IR loop detected"); }
+#define DECLARE_VISIT_FUNCTIONS(CLASS, BASE)                   \
+    virtual const IR::Node *preorder(IR::COWptr<IR::CLASS>);   \
+    virtual const IR::Node *postorder(IR::COWptr<IR::CLASS>);  \
     virtual void revisit(const IR::CLASS *, const IR::Node *); \
     virtual void loop_revisit(const IR::CLASS *);
     IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
@@ -660,15 +761,17 @@ class SplitFlowVisit_base {
     friend void dump(const SplitFlowVisit_base *);
 };
 
-template <class N>
+template <class T, class N>
 class SplitFlowVisit : public SplitFlowVisit_base {
     std::vector<const N **> nodes;
     std::vector<const N *const *> const_nodes;
+    std::vector<std::pair<IR::COWinfo<T> *, const N * T::*>> cow_nodes;
 
  public:
     explicit SplitFlowVisit(Visitor &v) : SplitFlowVisit_base(v) {}
     void addNode(const N *&node) {
         BUG_CHECK(const_nodes.empty(), "Mixing const and non-const in SplitFlowVisit");
+        BUG_CHECK(cow_nodes.empty(), "Mixing COW and non-const in SplitFlowVisit");
         BUG_CHECK(visitors.size() == nodes.size(), "size mismatch in SplitFlowVisit");
         BUG_CHECK(visit_next == 0, "Can't addNode to SplitFlowVisit after visiting started");
         visitors.push_back(visitors.empty() ? &v : &v.flow_clone());
@@ -676,10 +779,20 @@ class SplitFlowVisit : public SplitFlowVisit_base {
     }
     void addNode(const N *const &node) {
         BUG_CHECK(nodes.empty(), "Mixing const and non-const in SplitFlowVisit");
+        BUG_CHECK(cow_nodes.empty(), "Mixing COW and const in SplitFlowVisit");
         BUG_CHECK(visitors.size() == const_nodes.size(), "size mismatch in SplitFlowVisit");
         BUG_CHECK(visit_next == 0, "Can't addNode to SplitFlowVisit after visiting started");
         visitors.push_back(visitors.empty() ? &v : &v.flow_clone());
         const_nodes.emplace_back(&node);
+    }
+    template <const N *T::*field>
+    void addNode(IR::COWfieldref<T, const N *, field> &f) {
+        BUG_CHECK(const_nodes.empty(), "Mixing COW and const in SplitFlowVisit");
+        BUG_CHECK(nodes.empty(), "Mixing COW and non-const in SplitFlowVisit");
+        BUG_CHECK(visitors.size() == cow_nodes.size(), "size mismatch in SplitFlowVisit");
+        BUG_CHECK(visit_next == 0, "Can't addNode to SplitFlowVisit after visiting started");
+        visitors.push_back(visitors.empty() ? &v : &v.flow_clone());
+        cow_nodes.emplace_back(std::make_pair(f.info, field));
     }
     template <class T1, class T2, class... Args>
     void addNode(T1 &&t1, T2 &&t2, Args &&...args) {
@@ -694,10 +807,12 @@ class SplitFlowVisit : public SplitFlowVisit_base {
         if (!finished()) {
             BUG_CHECK(!paused, "trying to visit paused split_flow_visitor");
             int idx = visit_next++;
-            if (nodes.empty())
+            if (!const_nodes.empty())
                 visitors.at(idx)->visit(*const_nodes.at(idx), nullptr, start_index + idx);
-            else
+            else if (!nodes.empty())
                 visitors.at(idx)->visit(*nodes.at(idx), nullptr, start_index + idx);
+            else if (!cow_nodes.empty())
+                visitors.at(idx)->visit(cow_nodes.at(idx), nullptr, start_index + idx);
         }
     }
     void dbprint(std::ostream &out) const override {
@@ -705,70 +820,64 @@ class SplitFlowVisit : public SplitFlowVisit_base {
     }
 };
 
-template <class N>
+template <class T, class N>
 class SplitFlowVisitVector : public SplitFlowVisit_base {
+    const char *name = nullptr;
     IR::Vector<N> *vec = nullptr;
     const IR::Vector<N> *const_vec = nullptr;
-    std::vector<const IR::Node *> result;
+    IR::COWinfo<T> *cow_vec_info = nullptr;
+    IR::Vector<N> T::*cow_vec;
+
+    safe_vector<const N *> result;
     void init_visit(size_t size) {
         if (size > 0) visitors.push_back(&v);
         while (visitors.size() < size) visitors.push_back(&v.flow_clone());
     }
 
  public:
-    SplitFlowVisitVector(Visitor &v, IR::Vector<N> &vec) : SplitFlowVisit_base(v), vec(&vec) {
-        result.resize(vec.size());
+    SplitFlowVisitVector(Visitor &v, IR::Vector<N> &vec, const char *name = nullptr)
+        : SplitFlowVisit_base(v), name(name), vec(&vec) {
         init_visit(vec.size());
     }
-    SplitFlowVisitVector(Visitor &v, const IR::Vector<N> &vec)
-        : SplitFlowVisit_base(v), const_vec(&vec) {
+    SplitFlowVisitVector(Visitor &v, const IR::Vector<N> &vec, const char *name = nullptr)
+        : SplitFlowVisit_base(v), name(name), const_vec(&vec) {
         init_visit(vec.size());
     }
+    template <IR::Vector<N> T::*field>
+    SplitFlowVisitVector(Visitor &v, IR::COWfieldref<T, IR::Vector<N>, field> &vec,
+                         const char *name = nullptr)
+        : SplitFlowVisit_base(v), name(name), cow_vec_info(vec.info), cow_vec(field) {
+        init_visit(vec.get().size());
+    }
+
     void do_visit() override {
         if (!finished()) {
             BUG_CHECK(!paused, "trying to visit paused split_flow_visitor");
             int idx = visit_next++;
-            if (vec)
-                result[idx] = visitors.at(idx)->apply_visitor(vec->at(idx));
-            else
-                visitors.at(idx)->visit(const_vec->at(idx), nullptr, start_index + idx);
+            if (const_vec)
+                visitors.at(idx)->visit(const_vec->at(idx), name, start_index + idx);
+            else {
+                const IR::Node *n;
+                if (vec) {
+                    n = visitors.at(idx)->apply_visitor(vec->at(idx), name);
+                } else if (cow_vec_info) {
+                    n = visitors.at(idx)->apply_visitor((cow_vec_info->get()->*cow_vec).at(idx),
+                                                        name);
+                } else {
+                    BUG("no vector to visit");
+                }
+                IR::merge_into_safe_vector(result, n, "Vector");
+            }
         }
     }
     void run_visit() override {
         SplitFlowVisit_base::run_visit();
-        if (vec) {
-            int idx = 0;
-            for (auto i = vec->begin(); i != vec->end(); ++idx) {
-                if (!result[idx] && *i) {
-                    i = vec->erase(i);
-                } else if (result[idx] == *i) {
-                    ++i;
-                } else if (auto l = result[idx]->template to<IR::Vector<N>>()) {
-                    i = vec->erase(i);
-                    i = vec->insert(i, l->begin(), l->end());
-                    i += l->size();
-                } else if (auto v = result[idx]->template to<IR::VectorBase>()) {
-                    if (v->empty()) {
-                        i = vec->erase(i);
-                    } else {
-                        i = vec->insert(i, v->size() - 1, nullptr);
-                        for (auto el : *v) {
-                            CHECK_NULL(el);
-                            if (auto e = el->template to<N>())
-                                *i++ = e;
-                            else
-                                BUG("visitor returned invalid type %s for Vector<%s>",
-                                    el->node_type_name(), N::static_type_name());
-                        }
-                    }
-                } else if (auto e = result[idx]->template to<N>()) {
-                    *i++ = e;
-                } else {
-                    CHECK_NULL(result[idx]);
-                    BUG("visitor returned invalid type %s for Vector<%s>",
-                        result[idx]->node_type_name(), N::static_type_name());
-                }
-            }
+        if (cow_vec_info) {
+            auto old = (cow_vec_info->get()->*cow_vec).get_contents();
+            if (result != old)
+                (cow_vec_info->mkClone()->*cow_vec).replace_contents(std::move(result));
+        } else if (vec) {
+            if (result != vec->get_contents()) vec->replace_contents(std::move(result));
         }
     }
     void dbprint(std::ostream &out) const override {

@@ -37,6 +37,7 @@ namespace MAU {
 // function templates to be in the same compilation unit.
 void Table::visit_children(Visitor &v, const char *n) { visit_children(this, v, n); }
 void Table::visit_children(Visitor &v, const char *n) const { visit_children(this, v, n); }
+void Table::COWref::visit_children(Visitor &v, const char *n) { Table::visit_children(this, v, n); }
 
 /**
  * The potential control flow(s) through an IR::MAU::Table object are quite complex, which

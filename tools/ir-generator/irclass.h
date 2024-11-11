@@ -130,6 +130,7 @@ class IrMethod : public IrElement {
     cstring body;
     bool inImpl = false, isConst = false, isOverride = false, isStatic = false, isVirtual = false,
          isUser = false, isFriend = false;
+    bool constAndNonconst = false, COWrefMethod = false;
     IrMethod(Util::SourceInfo info, cstring name, cstring body)
         : IrElement(info), name(name), body(body) {}
     IrMethod(Util::SourceInfo info, cstring name) : IrElement(info), name(name) {}
@@ -180,6 +181,7 @@ class IrField : public IrElement {
     void generate_hdr(std::ostream &out) const override { generate(out, true); }
     void generate_impl(std::ostream &) const override;
     cstring toString() const override { return name; }
+    virtual cstring typeName() const;
 
  protected:
     void resolveType(const Type *type);
@@ -194,6 +196,7 @@ class IrVariantField : public IrField {
 
     void resolve() override;
     void generate(std::ostream &out, bool asField) const override;
+    cstring typeName() const override;
 };
 
 class ConstFieldInitializer : public IrElement {
@@ -345,6 +348,8 @@ class IrClass : public IrElement {
     void generate_hdr(std::ostream &out) const override;
     void generate_impl(std::ostream &out) const override;
     void generateTreeMacro(std::ostream &out) const;
+    access_t outputCOWfieldrefs(std::ostream &out) const;
+    void outputCOWref(std::ostream &out) const;
     void resolve() override;
     cstring toString() const override { return name; }
     std::string fullName() const;

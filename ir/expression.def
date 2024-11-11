@@ -499,7 +499,7 @@ class Mux : Operation_Ternary {
     visit_children {
         (void)n;
         v.visit(e0, "e0");
-        SplitFlowVisit<Expression>(v, e1, e2).run_visit(); }
+        SplitFlowVisit<Mux, Expression>(v, e1, e2).run_visit(); }
     inline Mux { if (type->is<Type::Unknown>() && e1 && e2 && e1->type == e2->type) type = e1->type; }
 }
 
@@ -538,7 +538,7 @@ class SelectExpression : Expression {
     visit_children {
         (void)n;
         v.visit(select, "select");
-        SplitFlowVisitVector<SelectCase>(v, selectCases).run_visit(); }
+        SplitFlowVisitVector<SelectExpression, SelectCase>(v, selectCases).run_visit(); }
 }
 
 class MethodCallExpression : Expression {
