@@ -112,6 +112,7 @@ class NamedType : public Type {
     static NamedType &JSONLoader();
     static NamedType &JSONObject();
     static NamedType &SourceInfo();
+    static NamedType &COWNode_info();
 };
 
 class TemplateInstantiation : public Type {
