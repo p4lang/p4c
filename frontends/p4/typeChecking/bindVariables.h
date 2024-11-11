@@ -9,7 +9,6 @@ namespace P4 {
 
 // Insert explicit type specializations where they are missing
 class DoBindTypeVariables : public Transform {
-    IR::IndexedVector<IR::Node> *newTypes;
     TypeMap *typeMap;
     const IR::Type *getVarValue(const IR::Type_Var *var, const IR::Node *errorPosition) const;
     const IR::Node *insertTypes(const IR::Node *node);
@@ -18,7 +17,6 @@ class DoBindTypeVariables : public Transform {
     explicit DoBindTypeVariables(TypeMap *typeMap) : typeMap(typeMap) {
         CHECK_NULL(typeMap);
         setName("DoBindTypeVariables");
-        newTypes = new IR::IndexedVector<IR::Node>();
     }
 
     /// Don't descend to unstructured annotations, they are not type checked, so we can't process
@@ -29,8 +27,6 @@ class DoBindTypeVariables : public Transform {
     const IR::Node *postorder(IR::Declaration_Instance *decl) override;
     const IR::Node *postorder(IR::MethodCallExpression *expression) override;
     const IR::Node *postorder(IR::ConstructorCallExpression *expression) override;
-    const IR::Node *postorder(IR::P4Parser *parser) override { return insertTypes(parser); }
-    const IR::Node *postorder(IR::P4Control *control) override { return insertTypes(control); }
 };
 
 class BindTypeVariables : public PassManager {
