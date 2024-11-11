@@ -615,22 +615,16 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
 
     bool noEndiannessConversion = false;
     if (const auto *anno = field->getAnnotation(ParseTCAnnotations::tcType)) {
-        auto annoBody = anno->body;
-        for (auto annoVal : annoBody) {
-            if (annoVal->text == "macaddr" || annoVal->text == "ipv4" || annoVal->text == "ipv6") {
-                noEndiannessConversion = true;
-                break;
-            } else if (annoVal->text == "be16" || annoVal->text == "be32" ||
-                       annoVal->text == "be64") {
-                std::string sInt = annoVal->text.substr(2).c_str();
-                unsigned int width = std::stoi(sInt);
-                if (widthToExtract != width) {
-                    ::P4::error("Width of the field doesnt match the annotation width. '%1%'",
-                                field);
-                }
-                noEndiannessConversion = true;
-                break;
+        cstring value = anno->getExpr().at(0)->checkedTo<IR::StringLiteral>()->value;
+        if (value == "macaddr" || value == "ipv4" || value == "ipv6") {
+            noEndiannessConversion = true;
+        } else if (value == "be16" || value == "be32" || value == "be64") {
+            std::string sInt = value.substr(2).c_str();
+            unsigned int width = std::stoi(sInt);
+            if (widthToExtract != width) {
+                ::P4::error("Width of the field doesnt match the annotation width. '%1%'", field);
             }
+            noEndiannessConversion = true;
         }
     }
 
@@ -1863,13 +1857,13 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
             cstring swap;
 
             auto tcTarget = dynamic_cast<const EBPF::P4TCTarget *>(builder->target);
-            cstring isKeyBigEndian = tcTarget->getByteOrderFromAnnotation(c->getAnnotations());
+            cstring isKeyBigEndian = tcTarget->getByteOrderFromAnnotation(c);
             cstring isDefnBigEndian = "HOST"_cs;
             if (auto mem = c->expression->to<IR::Member>()) {
                 auto type = typeMap->getType(mem->expr, true);
                 if (type->is<IR::Type_StructLike>()) {
                     auto field = type->to<IR::Type_StructLike>()->getField(mem->member);
-                    isDefnBigEndian = tcTarget->getByteOrderFromAnnotation(field->getAnnotations());
+                    isDefnBigEndian = tcTarget->getByteOrderFromAnnotation(field);
                 }
             }
 
@@ -2235,14 +2229,10 @@ void DeparserHdrEmitTranslatorPNA::processMethod(const P4::ExternMethod *method)
                 }
                 bool noEndiannessConversion = false;
                 if (const auto *anno = f->getAnnotation(ParseTCAnnotations::tcType)) {
-                    for (auto annoVal : anno->body) {
-                        if (annoVal->text == "macaddr" || annoVal->text == "ipv4" ||
-                            annoVal->text == "ipv6" || annoVal->text == "be16" ||
-                            annoVal->text == "be32" || annoVal->text == "be64") {
-                            noEndiannessConversion = true;
-                            break;
-                        }
-                    }
+                    cstring value = anno->getExpr().at(0)->checkedTo<IR::StringLiteral>()->value;
+                    noEndiannessConversion = value == "macaddr" || value == "ipv4" ||
+                                             value == "ipv6" || value == "be16" ||
+                                             value == "be32" || value == "be64";
                 }
                 emitField(builder, f->name, expr, alignment, etype, noEndiannessConversion);
                 alignment += et->widthInBits();

@@ -203,15 +203,16 @@ class KernelSamplesTarget : public Target {
 class P4TCTarget : public KernelSamplesTarget {
  public:
     explicit P4TCTarget(bool emitTrace) : KernelSamplesTarget(emitTrace, "P4TC"_cs) {}
-    cstring getByteOrderFromAnnotation(const IR::Vector<IR::Annotation> &annotations) const {
-        for (const auto *anno : annotations) {
-            if (anno->name != "tc_type") continue;
-            for (const auto *annoVal : anno->body) {
-                if (annoVal->text == "macaddr" || annoVal->text == "ipv4" ||
-                    annoVal->text == "ipv6" || annoVal->text == "be16" || annoVal->text == "be32" ||
-                    annoVal->text == "be64") {
-                    return "NETWORK"_cs;
-                }
+    // FIXME: The code is terrible broken: the function is called on both
+    // *parsed* and *unparsed* annotations (!!!!)
+    static cstring getByteOrderFromAnnotation(const IR::IAnnotated *node) {
+        if (const auto *anno = node->getAnnotation("tc_type"_cs)) {
+            cstring value = anno->needsParsing()
+                                ? anno->getUnparsed().at(0)->text
+                                : anno->getExpr().at(0)->checkedTo<IR::StringLiteral>()->value;
+            if (value == "macaddr" || value == "ipv4" || value == "ipv6" || value == "be16" ||
+                value == "be32" || value == "be64") {
+                return "NETWORK"_cs;
             }
         }
         return "HOST"_cs;
@@ -223,14 +224,14 @@ class P4TCTarget : public KernelSamplesTarget {
             auto type = typeMap->getType(mem->expr, true);
             if (type->is<IR::Type_StructLike>()) {
                 auto field = type->to<IR::Type_StructLike>()->getField(mem->member);
-                return getByteOrderFromAnnotation(field->getAnnotations());
+                return getByteOrderFromAnnotation(field);
             }
         } else if (action) {
             auto paramList = action->getParameters();
             if (paramList != nullptr && !paramList->empty()) {
                 for (auto param : paramList->parameters) {
                     if (param->name.originalName == exp->toString()) {
-                        return getByteOrderFromAnnotation(param->getAnnotations());
+                        return getByteOrderFromAnnotation(param);
                     }
                 }
             }

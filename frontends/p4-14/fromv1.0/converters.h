@@ -549,8 +549,9 @@ class FixExtracts final : public Transform {
                 // extract length from annotation
                 auto anno = f->getAnnotation(IR::Annotation::lengthAnnotation);
                 BUG_CHECK(anno != nullptr, "No length annotation on varbit field", f);
-                BUG_CHECK(anno->expr.size() == 1, "Expected exactly 1 argument", anno->expr);
-                headerLength = anno->expr.at(0);
+                BUG_CHECK(anno->getExpr().size() == 1, "Expected exactly 1 argument",
+                          anno->getExpr());
+                headerLength = anno->getExpr().at(0);
                 // We keep going through the loop just to check whether there is another
                 // varbit field in the header.
             } else if (fixedHeaderType == nullptr) {

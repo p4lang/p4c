@@ -207,7 +207,7 @@ std::vector<const IR::IDeclaration *> ExternMethod::mayCall() const {
         for (auto meth : originalExternType->methods) {
             auto sync = meth->getAnnotation(IR::Annotation::synchronousAnnotation);
             if (!sync) continue;
-            for (auto m : sync->expr) {
+            for (auto m : sync->getExpr()) {
                 auto mname = m->to<IR::PathExpression>();
                 if (!mname || method->name != mname->path->name) continue;
                 if (auto *am =

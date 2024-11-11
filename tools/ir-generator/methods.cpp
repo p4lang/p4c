@@ -54,15 +54,21 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
               first = false;
           }
           for (auto f : *cl->getFields()) {
-              if (*f->type == NamedType::SourceInfo()) continue;  // FIXME -- deal with SourcInfo
+              if (f->type && *f->type == NamedType::SourceInfo())
+                  continue;  // FIXME -- deal with SourcInfo
               if (!first) buf << std::endl << cl->indent << cl->indent << "&& ";
               first = false;
-              if (auto *arr = dynamic_cast<const ArrayType *>(f->type)) {
-                  for (int i = 0; i < arr->size; ++i) {
-                      if (i != 0) buf << std::endl << cl->indent << cl->indent << "&& ";
-                      buf << f->name << "[" << i << "] == a." << f->name << "[" << i << "]";
+              if (f->type) {
+                  if (auto *arr = dynamic_cast<const ArrayType *>(f->type)) {
+                      for (int i = 0; i < arr->size; ++i) {
+                          if (i != 0) buf << std::endl << cl->indent << cl->indent << "&& ";
+                          buf << f->name << "[" << i << "] == a." << f->name << "[" << i << "]";
+                      }
+                  } else {
+                      buf << f->name << " == a." << f->name;
                   }
               } else {
+                  // operator== for variant just delegates to generic operator==
                   buf << f->name << " == a." << f->name;
               }
           }
@@ -99,25 +105,59 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
           } else {
               bool first = true;
               for (auto f : *cl->getFields()) {
-                  if (*f->type == NamedType::SourceInfo())
+                  if (f->type && *f->type == NamedType::SourceInfo())
                       continue;  // FIXME -- deal with SourcInfo
                   if (first) {
                       buf << cl->indent << cl->indent << "auto &a = static_cast<const " << cl->name
                           << " &>(a_);\n";
+                      // See, if we are having any variant fields and therefore need to generate
+                      // equiv visitors
+                      for (const auto *f : *cl->getFields()) {
+                          if (f->type) continue;
+                          const auto *varF = f->to<IrVariantField>();
+                          buf << cl->indent << cl->indent << "auto " << f->name
+                              << "_equivVisitor = [&](auto &&variant) -> bool {\n"
+                              << cl->indent << cl->indent << cl->indent
+                              << "using T = std::decay_t<decltype(variant)>;\n";
+                          bool first = true;
+                          for (const auto *type : *varF->types) {
+                              buf << cl->indent << cl->indent << cl->indent
+                                  << (first ? "if constexpr (std::is_same_v<T, "
+                                            : "else if constexpr (std::is_same_v<T,")
+                                  << type->toString() << ">) {";
+                              if (type->resolve(cl->containedIn)) {
+                                  buf << "return variant.equiv(std::get<" << type->toString()
+                                      << ">(a." << f->name << ")); ";
+                              } else {
+                                  buf << "return variant.equiv(std::get<" << type->toString()
+                                      << ">(a." << f->name << ")); ";
+                              }
+                              buf << "}\n";
+                              first = false;
+                          }
+                          buf << cl->indent << cl->indent << cl->indent
+                              << R"(else { BUG("Unexpected variant field"); } };)" << std::endl;
+                      }
+
                       buf << cl->indent << cl->indent << "return ";
                       first = false;
                   } else {
                       buf << std::endl << cl->indent << cl->indent << "&& ";
                   }
-                  if (f->type->resolve(cl->containedIn) == nullptr) {
-                      // This is not an IR pointer
-                      buf << f->name << " == a." << f->name;
-                  } else if (f->isInline) {
-                      buf << f->name << ".equiv(a." << f->name << ")";
+                  if (f->type) {
+                      if (f->type->resolve(cl->containedIn) == nullptr) {
+                          // This is not an IR pointer
+                          buf << f->name << " == a." << f->name;
+                      } else if (f->isInline) {
+                          buf << f->name << ".equiv(a." << f->name << ")";
+                      } else {
+                          buf << "(" << f->name << " ? a." << f->name << " ? " << f->name
+                              << "->equiv(*a." << f->name << ")" << " : false : a." << f->name
+                              << " == nullptr)";
+                      }
                   } else {
-                      buf << "(" << f->name << " ? a." << f->name << " ? " << f->name
-                          << "->equiv(*a." << f->name << ")" << " : false : a." << f->name
-                          << " == nullptr)";
+                      buf << f->name << ".index() == a." << f->name << ".index() && "
+                          << "std::visit(" << f->name << "_equivVisitor, " << f->name << ")";
                   }
               }
               if (first) {  // no fields?
@@ -151,15 +191,38 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
               buf << cl->indent << parent->qualified_name(cl->containedIn) << "::visit_children(v);"
                   << std::endl;
           for (auto f : *cl->getFields()) {
-              if (f->type->resolve(cl->containedIn) == nullptr)
-                  // This is not an IR pointer
-                  continue;
-              if (f->isInline)
-                  buf << cl->indent << f->name << ".visit_children(v);" << std::endl;
-              else
-                  buf << cl->indent << "v.visit(" << f->name << ", \"" << f->name << "\");"
+              if (f->type) {
+                  if (f->type->resolve(cl->containedIn) == nullptr)
+                      // This is not an IR pointer
+                      continue;
+                  if (f->isInline)
+                      buf << cl->indent << f->name << ".visit_children(v);" << std::endl;
+                  else
+                      buf << cl->indent << "v.visit(" << f->name << ", \"" << f->name << "\");"
+                          << std::endl;
+                  needed = true;
+              } else {
+                  const auto *varF = f->to<IrVariantField>();
+                  buf << cl->indent << "std::visit([&](auto &&variant) {\n"
+                      << cl->indent << cl->indent << "using T = std::decay_t<decltype(variant)>;\n";
+                  bool first = true;
+                  for (const auto *type : *varF->types) {
+                      needed = true;
+                      buf << cl->indent << cl->indent
+                          << (first ? "if constexpr (std::is_same_v<T, "
+                                    : "else if constexpr (std::is_same_v<T,")
+                          << type->toString() << ">) {";
+                      if (type->resolve(cl->containedIn)) {
+                          buf << " v.visit(variant, \"" << f->name << "::" << type->toString()
+                              << "\"); ";
+                      }
+                      buf << "}\n";
+                      first = false;
+                  }
+                  buf << cl->indent << cl->indent
+                      << R"(else { BUG("Unexpected variant field"); } }, )" << f->name << ");"
                       << std::endl;
-              needed = true;
+              }
           }
           buf << "}";
           return needed ? buf : cstring();
@@ -173,16 +236,39 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
           std::stringstream buf;
           buf << "{" << LineDirective(true);
           for (auto f : *cl->getFields()) {
-              if (f->type->resolve(cl->containedIn) == nullptr)
-                  // This is not an IR pointer
-                  continue;
-              if (f->isInline)
-                  buf << std::endl << cl->indent << cl->indent << f->name << ".validate();";
-              else if (!f->nullOK)
-                  buf << std::endl << cl->indent << cl->indent << "CHECK_NULL(" << f->name << ");";
-              else
-                  continue;
-              needed = true;
+              if (f->type) {
+                  if (f->type->resolve(cl->containedIn) == nullptr)
+                      // This is not an IR pointer
+                      continue;
+                  if (f->isInline)
+                      buf << std::endl << cl->indent << cl->indent << f->name << ".validate();";
+                  else if (!f->nullOK)
+                      buf << std::endl
+                          << cl->indent << cl->indent << "CHECK_NULL(" << f->name << ");";
+                  else
+                      continue;
+                  needed = true;
+              } else {
+                  const auto *varF = f->to<IrVariantField>();
+                  buf << cl->indent << "std::visit([&](auto &&variant) {\n"
+                      << cl->indent << cl->indent << "using T = std::decay_t<decltype(variant)>;\n";
+                  bool first = true;
+                  for (const auto *type : *varF->types) {
+                      needed = true;
+                      buf << cl->indent << cl->indent
+                          << (first ? "if constexpr (std::is_same_v<T, "
+                                    : "else if constexpr (std::is_same_v<T,")
+                          << type->toString() << ">) {";
+                      if (type->resolve(cl->containedIn)) {
+                          buf << " variant.validate(); ";
+                      }
+                      buf << "}\n";
+                      first = false;
+                  }
+                  buf << cl->indent << cl->indent
+                      << R"(else { BUG("Unexpected variant field"); } }, )" << f->name << ");"
+                      << std::endl;
+              }
           }
           if (body) {
               buf << LineDirective(srcInfo, true) << body;
@@ -216,14 +302,39 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
               buf << cl->indent << parent->qualified_name(cl->containedIn) << "::dump_fields(out);"
                   << std::endl;
           bool needed = false;
-          for (auto f : *cl->getFields()) {
-              if (*f->type == NamedType::SourceInfo()) continue;  // FIXME -- deal with SourcInfo
-              if (f->type->resolve(cl->containedIn) == nullptr &&
-                  !dynamic_cast<const TemplateInstantiation *>(f->type)) {
+          auto printField = [&](const Type *type, cstring name, cstring val) {
+              if (type->resolve(cl->containedIn) == nullptr &&
+                  !dynamic_cast<const TemplateInstantiation *>(type)) {
                   // not an IR pointer
-                  buf << cl->indent << cl->indent << "out << \" " << f->name << "=\" << " << f->name
-                      << ";" << std::endl;
+                  buf << cl->indent << cl->indent << "out << \" " << name << "=\" << " << val << ";"
+                      << std::endl;
                   needed = true;
+              }
+          };
+
+          for (auto f : *cl->getFields()) {
+              if (f->type && *f->type == NamedType::SourceInfo())
+                  continue;  // FIXME -- deal with SourcInfo
+              if (f->type) {
+                  printField(f->type, f->name, f->name);
+              } else {
+                  const auto *varF = f->to<IrVariantField>();
+                  buf << cl->indent << "std::visit([&](auto &&variant) {\n"
+                      << cl->indent << cl->indent << "using T = std::decay_t<decltype(variant)>;\n";
+                  bool first = true;
+                  for (const auto *type : *varF->types) {
+                      needed = true;
+                      buf << cl->indent << cl->indent
+                          << (first ? "if constexpr (std::is_same_v<T, "
+                                    : "else if constexpr (std::is_same_v<T,")
+                          << type->toString() << ">) {\n";
+                      printField(type, type->toString(), "variant"_cs);
+                      buf << "} ";
+                      first = false;
+                  }
+                  buf << cl->indent << cl->indent
+                      << R"(else { BUG("Unexpected variant field"); } }, )" << f->name << ");"
+                      << std::endl;
               }
           }
           buf << "}";
@@ -240,7 +351,8 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
               buf << cl->indent << parent->qualified_name(cl->containedIn) << "::toJSON(json);"
                   << std::endl;
           for (auto f : *cl->getFields()) {
-              if (*f->type == NamedType::SourceInfo()) continue;  // FIXME -- deal with SourcInfo
+              if (f->type && *f->type == NamedType::SourceInfo())
+                  continue;  // FIXME -- deal with SourcInfo
               if (!f->isInline && f->nullOK)
                   buf << cl->indent << "if (" << f->name << " != nullptr) ";
               buf << cl->indent << "json << \",\" << std::endl << json.indent << \"\\\"" << f->name
@@ -259,7 +371,8 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
               buf << ": " << parent->qualified_name(cl->containedIn) << "(json)";
           buf << " {" << std::endl;
           for (auto f : *cl->getFields()) {
-              if (*f->type == NamedType::SourceInfo()) continue;  // FIXME -- deal with SourcInfo
+              if (f->type && *f->type == NamedType::SourceInfo())
+                  continue;  // FIXME -- deal with SourcInfo
               buf << cl->indent << "json.load(\"" << f->name << "\", " << f->name << ");"
                   << std::endl;
           }

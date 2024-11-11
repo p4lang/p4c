@@ -89,7 +89,15 @@ class IrElement : public Util::IHasSourceInfo {
     virtual void generate_impl(std::ostream &out) const = 0;
 
     enum access_t { Public, Protected, Private } access = Public;
-    enum modifier_t { NullOK = 1, Optional = 2, Inline = 4, Virtual = 8, Static = 16, Const = 32 };
+    enum modifier_t {
+        NullOK = 1 << 0,
+        Optional = 1 << 1,
+        Inline = 1 << 2,
+        Virtual = 1 << 3,
+        Static = 1 << 4,
+        Const = 1 << 5,
+        Variant = 1 << 6
+    };
     static inline const char *modifier(int m) {
         if (m & IrElement::NullOK) return "NullOK";
         if (m & IrElement::Optional) return "optional";
@@ -97,6 +105,7 @@ class IrElement : public Util::IHasSourceInfo {
         if (m & IrElement::Static) return "static";
         if (m & IrElement::Inline) return "inline";
         if (m & IrElement::Const) return "const";
+        if (m & IrElement::Variant) return "variant";
         return "";
     }
 };
@@ -169,10 +178,24 @@ class IrField : public IrElement {
     IrField(const Type *type, cstring name, int flags)
         : IrField(Util::SourceInfo(), type, name, cstring(), flags) {}
     void resolve() override;
-    void generate(std::ostream &out, bool asField) const;
+    virtual void generate(std::ostream &out, bool asField) const;
     void generate_hdr(std::ostream &out) const override { generate(out, true); }
     void generate_impl(std::ostream &) const override;
     cstring toString() const override { return name; }
+
+ protected:
+    void resolveType(const Type *type);
+};
+
+class IrVariantField : public IrField {
+ public:
+    std::vector<const Type *> *types;
+    IrVariantField(Util::SourceInfo info, std::vector<const Type *> *types, cstring name,
+                   cstring init, int flags = 0)
+        : IrField(info, nullptr, name, init, flags), types(types) {}
+
+    void resolve() override;
+    void generate(std::ostream &out, bool asField) const override;
 };
 
 class ConstFieldInitializer : public IrElement {

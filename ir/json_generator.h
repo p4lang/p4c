@@ -54,6 +54,20 @@ class JSONGenerator {
         static const bool value = sizeof(test<T>(0)) == sizeof(char);
     };
 
+    struct variant_generator {
+        std::ostream &out;
+        JSONGenerator &generator;
+
+        variant_generator(std::ostream &out, JSONGenerator &generator)
+            : out(out), generator(generator) {}
+
+        template <class T>
+        void operator()(const T &value) const {
+            out << R"("value" : )";
+            generator.generate(value);
+        }
+    };
+
  public:
     indent_t indent;
 
@@ -183,14 +197,23 @@ class JSONGenerator {
         out << "]";
     }
 
+    template <class... Types>
+    void generate(const std::variant<Types...> &v) {
+        out << "{" << std::endl << ++indent;
+        out << R"("variant_index" : )" << v.index() << "," << std::endl << indent;
+        variant_generator generator(out, *this);
+        std::visit(generator, v);
+        out << std::endl << --indent << "}";
+    }
+
     void generate(bool v) { out << (v ? "true" : "false"); }
     template <typename T>
-    typename std::enable_if<std::is_integral<T>::value>::type generate(T v) {
+    std::enable_if_t<std::is_integral_v<T>> generate(T v) {
         out << std::to_string(v);
     }
     void generate(double v) { out << std::to_string(v); }
     template <typename T>
-    typename std::enable_if<std::is_same<T, big_int>::value>::type generate(const T &v) {
+    std::enable_if_t<std::is_same_v<T, big_int>> generate(const T &v) {
         out << v;
     }
 
@@ -202,8 +225,7 @@ class JSONGenerator {
         }
     }
     template <typename T>
-    typename std::enable_if<std::is_same<T, LTBitMatrix>::value || std::is_enum<T>::value>::type
-    generate(T v) {
+    std::enable_if_t<std::is_same_v<T, LTBitMatrix> || std::is_enum_v<T>> generate(T v) {
         out << "\"" << v << "\"";
     }
 
@@ -217,8 +239,7 @@ class JSONGenerator {
     }
 
     template <typename T>
-    typename std::enable_if<has_toJSON<T>::value && !std::is_base_of<IR::Node, T>::value>::type
-    generate(const T &v) {
+    std::enable_if_t<has_toJSON<T>::value && !std::is_base_of_v<IR::Node, T>> generate(const T &v) {
         ++indent;
         out << "{" << std::endl;
         v.toJSON(*this);
@@ -241,9 +262,8 @@ class JSONGenerator {
     }
 
     template <typename T>
-    typename std::enable_if<std::is_pointer<T>::value &&
-                            has_toJSON<typename std::remove_pointer<T>::type>::value>::type
-    generate(T v) {
+    std::enable_if_t<std::is_pointer_v<T> && has_toJSON<std::remove_pointer_t<T>>::value> generate(
+        T v) {
         if (v)
             generate(*v);
         else

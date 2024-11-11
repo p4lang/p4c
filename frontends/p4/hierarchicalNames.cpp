@@ -20,19 +20,18 @@ limitations under the License.
 
 namespace P4 {
 
-cstring HierarchicalNames::getName(const IR::IDeclaration *decl) { return decl->getName(); }
-
-const IR::Node *HierarchicalNames::postorder(IR::Annotation *annotation) {
-    if (annotation->name != IR::Annotation::nameAnnotation) return annotation;
+void HierarchicalNames::postorder(IR::Annotation *annotation) {
+    if (annotation->name != IR::Annotation::nameAnnotation) return;
 
     cstring name = annotation->getName();
-    if (name.startsWith(".")) return annotation;
-    std::string newName = "";
-    for (cstring s : stack) newName += s + ".";
-    newName += name;
+    if (name.startsWith(".")) return;
+
+    if (stack.empty()) return;
+
+    std::string newName = absl::StrCat(absl::StrJoin(stack, "."), ".", name);
     LOG2("Changing " << name << " to " << newName);
-    annotation = new IR::Annotation(annotation->name, newName);
-    return annotation;
+
+    annotation->body = IR::Vector<IR::Expression>(new IR::StringLiteral(cstring(newName)));
 }
 
 }  // namespace P4

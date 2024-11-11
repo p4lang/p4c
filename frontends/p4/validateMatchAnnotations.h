@@ -36,10 +36,12 @@ class ValidateMatchAnnotations final : public Inspector {
     void postorder(const IR::Annotation *annotation) override {
         if (annotation->name != IR::Annotation::matchAnnotation) return;
         if (!findContext<IR::StructField>()) return;
-        if (annotation->expr.size() != 1)
+        // FIXME: Check annotation kind
+        const auto &expr = annotation->getExpr();
+        if (expr.size() != 1)
             ::P4::error(ErrorType::ERR_INVALID, "%1%: annotation must have exactly 1 argument",
                         annotation);
-        auto e0 = annotation->expr.at(0);
+        auto e0 = expr.at(0);
         auto type = typeMap->getType(e0, true);
         if (type == nullptr) return;
         if (!type->is<IR::Type_MatchKind>())

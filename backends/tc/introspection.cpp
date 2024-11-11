@@ -68,7 +68,7 @@ void IntrospectionGenerator::collectKeyInfo(const IR::Key *key, struct TableAttr
         keyField->type = "bit" + Util::toString(widthBits);
         for (auto anno : k->getAnnotations()) {
             if (anno->name == ParseTCAnnotations::tcType) {
-                auto expr = anno->expr[0];
+                auto expr = anno->getExpr()[0];
                 if (auto typeLiteral = expr->to<IR::StringLiteral>()) {
                     if (auto tcVal = checkValidTcType(typeLiteral)) {
                         auto val = std::move(*tcVal);
@@ -83,7 +83,7 @@ void IntrospectionGenerator::collectKeyInfo(const IR::Key *key, struct TableAttr
                 }
             }
             if (anno->name == IR::Annotation::nameAnnotation) {
-                auto expr = anno->expr[0];
+                auto expr = anno->getExpr()[0];
                 if (auto name = expr->to<IR::StringLiteral>()) {
                     keyField->name = name->value;
                 }

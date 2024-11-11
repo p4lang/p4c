@@ -223,10 +223,35 @@ class JSONLoader {
         load(::P4::get(obj, "value"), value), v = std::move(value);
     }
 
+    template <int N, class Variant>
+    std::enable_if_t<N == std::variant_size_v<Variant>, void> unpack_variant(
+        const JsonObject *, int /*target*/, Variant & /*variant*/) {
+        BUG("Error traversing variant during load");
+    }
+
+    template <int N, class Variant>
+        std::enable_if_t <
+        N<std::variant_size_v<Variant>, void> unpack_variant(const JsonObject *obj, int target,
+                                                             Variant &variant) {
+        if (N == target) {
+            variant.template emplace<N>();
+            load(P4::get(obj, "value"), std::get<N>(variant));
+        } else
+            unpack_variant<N + 1>(obj, target, variant);
+    }
+
+    template <class... Types>
+    void unpack_json(std::variant<Types...> &v) {
+        const JsonObject *obj = json->checkedTo<JsonObject>();
+        int index = -1;
+        load(P4::get(obj, "variant_index"), index);
+        unpack_variant<0>(obj, index, v);
+    }
+
     void unpack_json(bool &v) { v = json->as<JsonBoolean>(); }
 
     template <typename T>
-    typename std::enable_if<std::is_integral<T>::value>::type unpack_json(T &v) {
+    std::enable_if_t<std::is_integral_v<T>> unpack_json(T &v) {
         v = json->as<JsonNumber>();
     }
     void unpack_json(big_int &v) { v = json->as<JsonNumber>().val; }
@@ -263,7 +288,7 @@ class JSONLoader {
     }
 
     template <typename T>
-    typename std::enable_if<std::is_enum<T>::value>::type unpack_json(T &v) {
+    std::enable_if_t<std::is_enum_v<T>> unpack_json(T &v) {
         if (auto *s = json->to<JsonString>()) *s >> v;
     }
 
@@ -286,35 +311,32 @@ class JSONLoader {
     }
 
     template <typename T>
-    typename std::enable_if<
-        has_fromJSON<T>::value && !std::is_base_of<IR::Node, T>::value &&
-        std::is_pointer<decltype(T::fromJSON(std::declval<JSONLoader &>()))>::value>::type
+    std::enable_if_t<has_fromJSON<T>::value && !std::is_base_of_v<IR::Node, T> &&
+                     std::is_pointer_v<decltype(T::fromJSON(std::declval<JSONLoader &>()))>>
     unpack_json(T *&v) {
         v = T::fromJSON(*this);
     }
 
     template <typename T>
-    typename std::enable_if<
-        has_fromJSON<T>::value && !std::is_base_of<IR::Node, T>::value &&
-        std::is_pointer<decltype(T::fromJSON(std::declval<JSONLoader &>()))>::value>::type
+    std::enable_if_t<has_fromJSON<T>::value && !std::is_base_of_v<IR::Node, T> &&
+                     std::is_pointer_v<decltype(T::fromJSON(std::declval<JSONLoader &>()))>>
     unpack_json(T &v) {
         v = *(T::fromJSON(*this));
     }
 
     template <typename T>
-    typename std::enable_if<
-        has_fromJSON<T>::value && !std::is_base_of<IR::Node, T>::value &&
-        !std::is_pointer<decltype(T::fromJSON(std::declval<JSONLoader &>()))>::value>::type
+    std::enable_if_t<has_fromJSON<T>::value && !std::is_base_of<IR::Node, T>::value &&
+                     !std::is_pointer_v<decltype(T::fromJSON(std::declval<JSONLoader &>()))>>
     unpack_json(T &v) {
         v = T::fromJSON(*this);
     }
 
     template <typename T>
-    typename std::enable_if<std::is_base_of<IR::INode, T>::value>::type unpack_json(T &v) {
+    std::enable_if_t<std::is_base_of_v<IR::INode, T>> unpack_json(T &v) {
         v = get_node()->as<T>();
     }
     template <typename T>
-    typename std::enable_if<std::is_base_of<IR::INode, T>::value>::type unpack_json(const T *&v) {
+    std::enable_if_t<std::is_base_of_v<IR::INode, T>> unpack_json(const T *&v) {
         v = get_node()->checkedTo<T>();
     }
 

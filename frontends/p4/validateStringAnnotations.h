@@ -36,11 +36,13 @@ class ValidateStringAnnotations final : public Inspector {
             name != IR::Annotation::noWarnAnnotation) {
             return;
         }
-        if (annotation->expr.size() != 1) {
+        // FIXME: Validate annotation type
+        const auto &expr = annotation->getExpr();
+        if (expr.size() != 1) {
             error(ErrorType::ERR_INVALID, "%1%: annotation must have exactly 1 argument",
                   annotation);
         }
-        const auto *e0 = annotation->expr.at(0);
+        const auto *e0 = expr.at(0);
         if (!e0->is<IR::StringLiteral>()) {
             error(ErrorType::ERR_TYPE_ERROR, "%1%: @%2% annotation's value must be a string", e0,
                   annotation->name.originalName);

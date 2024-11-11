@@ -1041,7 +1041,7 @@ void SimpleSwitchBackend::createRecirculateFieldsList(ConversionContext *ctxt,
         auto anno = f->getAnnotation("field_list"_cs);
         if (anno == nullptr) continue;
 
-        for (auto e : anno->expr) {
+        for (auto e : anno->getExpr()) {
             auto cst = e->to<IR::Constant>();
             if (cst == nullptr) {
                 ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
