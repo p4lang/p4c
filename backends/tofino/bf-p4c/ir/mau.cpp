@@ -714,7 +714,7 @@ const IR::Vector<IR::Annotation> &IR::MAU::Table::getAnnotations() const {
 
 IR::Vector<IR::Annotation> &IR::MAU::Table::getAnnotations() {
     static IR::Vector<IR::Annotation> empty;
-    BUG("cannot change annotations here");
+    BUG("Changing the list of annotations for a MAU::Table class is unsupported");
     return empty;
 }
 
