@@ -64,14 +64,14 @@ const IR::Node *DoRemoveParserControlFlow::postorder(IR::ParserState *state) {
             currentState->selectExpression = new IR::SelectExpression(
                 new IR::ListExpression({ifstat->condition}), {trueCase, falseCase});
 
-            currentState->components = currentComponents;
+            currentState->components = std::move(currentComponents);
             currentComponents.clear();
             currentState = new IR::ParserState(joinName, origSelect);  // may be overriten
         } else {
             currentComponents.push_back(c);
         }
     }
-    currentState->components = currentComponents;
+    currentState->components = std::move(currentComponents);
 
     if (states->empty()) return state;
     states->push_back(currentState);

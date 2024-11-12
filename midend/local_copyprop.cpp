@@ -286,7 +286,7 @@ void DoLocalCopyPropagation::dropValuesUsing(cstring name) {
 void DoLocalCopyPropagation::visit_local_decl(const IR::Declaration_Variable *var) {
     LOG4("Visiting " << var);
     auto [it, inserted] = available.emplace(var->name, VarInfo());
-    if (!inserted) BUG("duplicate var declaration for %s", var->name);
+    BUG_CHECK(inserted, "duplicate var declaration for %s", var->name);
     auto &local = it->second;
     local.local = true;
     if (var->initializer) {
@@ -634,7 +634,7 @@ void DoLocalCopyPropagation::LoopPrepass::postorder(const IR::MethodCallExpressi
                     // to provide per-extern flow info to this (and other) frontend passes.
                     LOG3("loop prepass extern method call " << name);
                     for (auto *n : em->mayCall()) {
-                        if (auto *method = ::P4::getref(*self.methods, obj + '.' + n->getName())) {
+                        if (auto *method = P4::getref(*self.methods, obj + '.' + n->getName())) {
                             LOG4("  might call " << obj << '.' << n->getName());
                             apply_function(method);
                         }

@@ -549,8 +549,7 @@ class ControlFlowVisitor : public virtual Visitor {
             other->second.flow_merge(*this);
     }
     void flow_merge_global_from(cstring key) override {
-        auto other = globals->find(key);
-        if (other != globals->end()) flow_merge(other->second);
+        if (auto other = globals->find(key); other != globals->end()) flow_merge(other->second);
     }
     void erase_global(cstring key) override { globals->erase(key); }
     bool check_global(cstring key) override { return globals->count(key) != 0; }
