@@ -677,10 +677,10 @@ struct RewritePhase0IfPresent : public Transform {
         }
 
         LOG4("Add phase0 annotation: " << phase0->table->name);
-        IR::Annotations::addOrReplace(state->annotations, "override_phase0_table_name"_cs,
+        state->addOrReplaceAnnotation("override_phase0_table_name"_cs,
                                       new IR::StringLiteral(phase0->table->name));
 
-        IR::Annotations::addOrReplace(state->annotations, "override_phase0_action_name"_cs,
+        state->addOrReplaceAnnotation("override_phase0_action_name"_cs,
                                       new IR::StringLiteral(phase0->actionName));
 
         return state;

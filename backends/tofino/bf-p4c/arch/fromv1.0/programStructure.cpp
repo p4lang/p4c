@@ -1425,8 +1425,8 @@ const IR::ParserState *TnaProgramStructure::createMirrorState(gress_t gress, uns
     auto select = new IR::PathExpression(IR::ID(nextState));
     auto newStateName = IR::ID(cstring("__") + name);
     auto *newState = new IR::ParserState(newStateName, *statements, select);
-    newState->annotations =
-        IR::Annotations::maybeAddNameAnnotation(newState->annotations, "$" + name);
+    newState->addAnnotationIfNew(IR::Annotation::nameAnnotation,
+                                 new IR::StringLiteral(cstring("$" + name)));
     return newState;
 }
 
@@ -1519,8 +1519,8 @@ const IR::ParserState *TnaProgramStructure::createResubmitState(gress_t gress, u
     auto select = new IR::PathExpression(IR::ID(nextState));
     auto newStateName = IR::ID(cstring("__") + name);
     auto *newState = new IR::ParserState(newStateName, *statements, select);
-    newState->annotations =
-        IR::Annotations::maybeAddNameAnnotation(newState->annotations, "$" + name);
+    newState->addAnnotationIfNew(IR::Annotation::nameAnnotation,
+                                 new IR::StringLiteral(cstring("$" + name)));
     return newState;
 }
 

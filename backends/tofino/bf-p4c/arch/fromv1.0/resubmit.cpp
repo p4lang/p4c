@@ -230,8 +230,8 @@ class AddResubmitParser : public Transform {
         auto select = new IR::PathExpression(IR::ID("__skip_to_packet"));
         auto newStateName = IR::ID(cstring("__") + name);
         auto *newState = new IR::ParserState(newStateName, *statements, select);
-        newState->annotations =
-            IR::Annotations::maybeAddNameAnnotation(newState->annotations, "$" + name);
+        newState->addAnnotationIfNew(IR::Annotation::nameAnnotation,
+                                     new IR::StringLiteral(cstring("$" + name)));
         return newState;
     }
 

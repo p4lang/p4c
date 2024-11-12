@@ -2470,8 +2470,7 @@ bool AddAdjustByteCount::preorder(IR::Declaration_Instance *decl) {
                     new IR::Vector<IR::Type>(
                         {new IR::Type_Name("__bfp4c_bridged_metadata_header")}),
                     new IR::Vector<IR::Argument>({new IR::Argument(new_abc_member)}));
-                IR::Annotations::addOrReplace(decl->annotations, "adjust_byte_count"_cs,
-                                              new_abc_expr);
+                decl->addOrReplaceAnnotation("adjust_byte_count"_cs, new_abc_expr);
                 LOG3(
                     "Adding annotation "
                     "'@adjust_byte_count(sizeInBytes(meta.__bfp4c_bridge_metadata))' to decl: "

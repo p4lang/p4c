@@ -63,8 +63,8 @@ const IR::ParserState *convertStartStateToNormalState(IR::P4Parser *parser, cstr
 const IR::ParserState *addNewStartState(cstring name, cstring nextState) {
     auto *startState =
         new IR::ParserState(IR::ParserState::start, new IR::PathExpression(nextState));
-    startState->annotations =
-        IR::Annotations::maybeAddNameAnnotation(startState->annotations, cstring("$" + name));
+    startState->addAnnotationIfNew(IR::Annotation::nameAnnotation,
+                                   new IR::StringLiteral(cstring("$" + name)));
     return startState;
 }
 
@@ -84,8 +84,8 @@ const IR::ParserState *createGeneratedParserState(cstring name,
                                                   const IR::Expression *selectExpression) {
     auto newStateName = IR::ID(cstring("__") + name);
     auto *newState = new IR::ParserState(newStateName, statements, selectExpression);
-    newState->annotations =
-        IR::Annotations::maybeAddNameAnnotation(newState->annotations, cstring("$" + name));
+    newState->addAnnotationIfNew(IR::Annotation::nameAnnotation,
+                                 new IR::StringLiteral(cstring("$" + name)));
     return newState;
 }
 
