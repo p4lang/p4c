@@ -389,8 +389,7 @@ void PhvKit::sort_and_merge_alloc_slices(PhvInfo &phv) {
 }
 
 bool PhvKit::is_ternary(const IR::MAU::Table *tbl) {
-    auto annot = tbl->match_table->getAnnotations();
-    if (auto s = annot->getSingle("ternary"_cs)) {
+    if (auto s = tbl->match_table->getAnnotation("ternary"_cs)) {
         if (s->expr.size() <= 0) {
             return false;
         } else {

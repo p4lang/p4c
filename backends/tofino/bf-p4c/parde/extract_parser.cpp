@@ -598,7 +598,7 @@ void GetBackendParser::addTransition(IR::BFN::ParserState *state, match_t matchV
         // supports this feature in TNA with the 'pd_pvs_name' annotation by
         // overriding the pvs name with the name in the annotation.
         cstring valueSetName;
-        if (auto anno = valueSet->annotations->getSingle("pd_pvs_name"_cs)) {
+        if (auto anno = valueSet->getAnnotation("pd_pvs_name"_cs)) {
             auto name = anno->expr.at(0)->to<IR::StringLiteral>();
             valueSetName = name->value;
         } else {
@@ -1168,7 +1168,7 @@ struct RewriteParserChecksums : public Transform {
  private:
     // check if member is header/payload checksum field itself
     // (annotated with @header_checksum/@payload_checksum)
-    bool isChecksumField(const IR::Member *member, const cstring &which) const {
+    bool isChecksumField(const IR::Member *member, cstring which) const {
         const IR::HeaderOrMetadata *header = nullptr;
         if (auto headerRef = member->expr->to<IR::ConcreteHeaderRef>()) {
             header = headerRef->baseRef();
@@ -1179,8 +1179,7 @@ struct RewriteParserChecksums : public Transform {
         }
         for (auto field : header->type->fields) {
             if (field->name == member->member) {
-                auto annot = field->annotations->getSingle(which);
-                if (annot) return true;
+                if (field->hasAnnotation(which)) return true;
             }
         }
         return false;

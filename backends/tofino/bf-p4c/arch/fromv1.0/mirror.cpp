@@ -27,6 +27,7 @@
 #include "frontends/p4/cloner.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
+#include "ir/annotations.h"
 
 namespace BFN {
 namespace {
@@ -250,8 +251,8 @@ class AddMirroredFieldListParser : public Transform {
         auto select = new IR::PathExpression(IR::ID(nextState));
         auto newStateName = IR::ID(cstring("__") + name);
         auto *newState = new IR::ParserState(newStateName, *statements, select);
-        newState->annotations = newState->annotations->addAnnotationIfNew(
-            IR::Annotation::nameAnnotation, new IR::StringLiteral(cstring(cstring("$") + name)));
+        newState->annotations =
+            IR::Annotations::maybeAddNameAnnotation(newState->annotations, "$" + name);
         return newState;
     }
 

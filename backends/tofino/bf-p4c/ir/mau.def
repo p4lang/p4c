@@ -960,12 +960,14 @@ class Action : VLIWInstruction, IAnnotated {
 /// A stateful ALU VLIW instruction -- multiple instructions that all run together
 /// "simultaneously" in different ALUs (certain ALUs are actually later in the pipeline)
 /// in the stateful ALU block (there are 2 comparison, 4 "normal" and 1 output alus)
-class SaluAction : VLIWInstruction {
+class SaluAction : VLIWInstruction, IAnnotated {
     IR::ID                              name;
     int                                 inst_code = -1;
     inline Vector<SaluInstruction>      action = {};
     safe_vector<ActionArg>              args = {};
     optional inline Vector<Annotation> annotations;
+    const Vector<Annotation> &getAnnotations() const override { return annotations; }
+    Vector<Annotation> &getAnnotations() override { return annotations; }
     NullOK Expression  output_dst = nullptr;  // implicit write of output to this lvalue
     bool                        learn_action = false;  // comes from LearnAction
         // FIXME -- the flag is needed to get ixbar alloc right when an SALU is shared

@@ -168,9 +168,8 @@ void FlattenHeader::flattenType(const IR::Type *type) {
             fieldNameMap.emplace(origName, newName);
         }
         // preserve the original name using an annotation
-        auto annotations = mergeAnnotations();
         newFields.push_back(
-            new IR::StructField(srcInfos.back(), IR::ID(newName), annotations, type));
+            new IR::StructField(srcInfos.back(), IR::ID(newName), mergeAnnotations(), type));
     }
 }
 
@@ -190,13 +189,13 @@ cstring FlattenHeader::makeName(std::string_view sep) const {
  * one. Duplicates are resolved, with preference given to the ones towards the
  * end of allAnnotations, which correspond to the most "nested" ones.
  */
-const IR::Annotations *FlattenHeader::mergeAnnotations() const {
-    auto mergedAnnotations = new IR::Annotations();
+IR::Vector<IR::Annotation> FlattenHeader::mergeAnnotations() const {
+    IR::Vector<IR::Annotation> mergedAnnotations;
     for (auto annosIt = allAnnotations.rbegin(); annosIt != allAnnotations.rend(); annosIt++) {
-        for (auto anno : (*annosIt)->annotations) {
+        for (const auto *anno : *annosIt) {
             // if an annotation with the same name was added previously, skip
-            if (mergedAnnotations->getSingle(anno->name)) continue;
-            mergedAnnotations->add(anno);
+            if (get(mergedAnnotations, anno->name)) continue;
+            mergedAnnotations.push_back(anno);
         }
     }
     return mergedAnnotations;

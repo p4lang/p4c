@@ -225,11 +225,11 @@ class FlattenHeader : public Modifier {
     const P4::TypeMap *typeMap;
     IR::Type_Header *flattenedHeader = nullptr;
     std::vector<cstring> nameSegments{};
-    std::vector<const IR::Annotations *> allAnnotations{};
+    std::vector<IR::Vector<IR::Annotation>> allAnnotations{};
     std::vector<Util::SourceInfo> srcInfos{};
     cstring makeName(std::string_view sep) const;
     void flattenType(const IR::Type *type);
-    const IR::Annotations *mergeAnnotations() const;
+    IR::Vector<IR::Annotation> mergeAnnotations() const;
 
     const IR::Member *flattenedMember;
     std::vector<cstring> memberSegments{};

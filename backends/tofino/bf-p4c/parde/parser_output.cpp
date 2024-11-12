@@ -166,7 +166,7 @@ struct ParserAsmSerializer : public ParserInspector {
         auto pps_load = BackendOptions().traffic_limit;
         if (pps_load > 0 && pps_load < 100) {
             int bubble_load = 100 - pps_load;
-            int bubble_gcd = std::__gcd(100, bubble_load);
+            int bubble_gcd = std::gcd(100, bubble_load);
             int bubble_dec = bubble_load / bubble_gcd;
             int bubble_max = (100 / bubble_gcd) - bubble_dec;
             int bubble_inc = bubble_max;

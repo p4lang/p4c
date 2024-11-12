@@ -141,11 +141,10 @@ void PhvInfo::add_struct(cstring name, const IR::Type_StructLike *type, gress_t 
         // path-expression can also point to an error field, which is invalid on Tofino
         if (size == 0) continue;
         // "hidden" annotation indicates padding introduced with bridged metadata fields
-        bool isPad = f->getAnnotations()->getSingle("hidden"_cs) != nullptr ||
-                     f->getAnnotations()->getSingle("padding"_cs) != nullptr;
-        bool isOverlayable = f->getAnnotations()->getSingle("overlayable"_cs) != nullptr;
+        bool isPad = f->hasAnnotation("hidden"_cs) || f->hasAnnotation("padding"_cs);
+        bool isOverlayable = f->hasAnnotation("overlayable"_cs);
         // "flexible" annotation indicates flexible fields
-        bool isFlexible = f->getAnnotations()->getSingle("flexible"_cs) != nullptr;
+        bool isFlexible = f->hasAnnotation("flexible"_cs);
         bool isFixedSizeHeader = type->is<IR::BFN::Type_FixedSizeHeader>();
         std::optional<Util::SourceInfo> srcInfo = std::nullopt;
         if (f->srcInfo.isValid()) srcInfo = f->srcInfo;

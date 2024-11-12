@@ -1740,8 +1740,7 @@ void IXBar::getHashDistGroups(unsigned hash_table_input, int hash_group_opt[HASH
 void IXBar::determine_proxy_hash_alg(const PhvInfo &phv, const IR::MAU::Table *tbl, Use &alloc,
                                      int group) {
     bool hash_function_found = false;
-    auto annot = tbl->match_table->getAnnotations();
-    if (auto s = annot->getSingle("proxy_hash_algorithm"_cs)) {
+    if (auto s = tbl->match_table->getAnnotation("proxy_hash_algorithm"_cs)) {
         auto pragma_val = s->expr.at(0)->to<IR::StringLiteral>();
         if (pragma_val == nullptr) {
             error(ErrorType::ERR_INVALID,

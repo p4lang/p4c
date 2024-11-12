@@ -2413,9 +2413,8 @@ bool CheckStatefulAlu::preorder(IR::MAU::StatefulAlu *salu) {
     }
 
     const IR::MAU::SaluAction *first = nullptr;
-    ;
     for (auto salu_action : Values(salu->instruction)) {
-        auto chain = salu_action->annotations->getSingle("chain_address"_cs);
+        auto chain = salu_action->getAnnotation("chain_address"_cs);
         if (first) {
             if (salu->chain_vpn != (chain != nullptr))
                 error(ErrorType::ERR_UNSUPPORTED, "Inconsistent chaining for %s and %s", first,

@@ -285,8 +285,7 @@ int SelectorLengthBits(const IR::MAU::Selector *sel) {
 }
 
 static int ways_pragma(const IR::MAU::Table *tbl, int min, int max) {
-    auto annot = tbl->match_table->getAnnotations();
-    if (auto s = annot->getSingle("ways"_cs)) {
+    if (auto s = tbl->match_table->getAnnotation("ways"_cs)) {
         ERROR_CHECK(s->expr.size() >= 1,
                     "%s: The ways pragma on table %s does not have a "
                     "value",
@@ -311,8 +310,7 @@ static int ways_pragma(const IR::MAU::Table *tbl, int min, int max) {
 }
 
 static int simul_lookups_pragma(const IR::MAU::Table *tbl, int min, int max) {
-    auto annot = tbl->match_table->getAnnotations();
-    if (auto s = annot->getSingle("simul_lookups"_cs)) {
+    if (auto s = tbl->match_table->getAnnotation("simul_lookups"_cs)) {
         ERROR_CHECK(s->expr.size() >= 1,
                     "%s: The simul_lookups pragma on table %s does not "
                     "have a value",
@@ -1661,9 +1659,8 @@ bool RangeEntries::preorder(const IR::MAU::TableKey *ixbar_read) {
  *  to limit the number of rows.
  */
 void RangeEntries::postorder(const IR::MAU::Table *tbl) {
-    auto annot = tbl->match_table->getAnnotations();
     int range_entries = -1;
-    if (auto s = annot->getSingle("entries_with_ranges"_cs)) {
+    if (auto s = tbl->match_table->getAnnotation("entries_with_ranges"_cs)) {
         const IR::Constant *pragma_val = nullptr;
         if (s->expr.size() == 0) {
             error("%s: entries_with_ranges pragma on table %s has no value", s->srcInfo, tbl->name);

@@ -213,23 +213,25 @@ void ParseTna::parseSingleParserPipeline(const IR::PackageBlock *block, unsigned
 }
 
 void ParseTna::parsePortMapAnnotation(const IR::PackageBlock *block, DefaultPortMap &map) {
-    if (auto anno = block->node->getAnnotation("default_portmap"_cs)) {
-        int index = 0;
-        for (auto expr : anno->expr) {
-            std::vector<int> ports;
-            if (auto cst = expr->to<IR::Constant>()) {
-                ports.push_back(cst->asInt());
-            } else if (auto list = expr->to<IR::ListExpression>()) {
-                for (auto expr : list->components) {
-                    ports.push_back(expr->to<IR::Constant>()->asInt());
+    if (auto annot = block->node->to<IR::IAnnotated>()) {
+        if (auto anno = annot->getAnnotation("default_portmap"_cs)) {
+            int index = 0;
+            for (auto expr : anno->expr) {
+                std::vector<int> ports;
+                if (auto cst = expr->to<IR::Constant>()) {
+                    ports.push_back(cst->asInt());
+                } else if (auto list = expr->to<IR::ListExpression>()) {
+                    for (auto expr : list->components) {
+                        ports.push_back(expr->to<IR::Constant>()->asInt());
+                    }
+                } else if (auto list = expr->to<IR::StructExpression>()) {
+                    for (auto expr : list->components) {
+                        ports.push_back(expr->expression->to<IR::Constant>()->asInt());
+                    }
                 }
-            } else if (auto list = expr->to<IR::StructExpression>()) {
-                for (auto expr : list->components) {
-                    ports.push_back(expr->expression->to<IR::Constant>()->asInt());
-                }
+                map[index] = ports;
+                index++;
             }
-            map[index] = ports;
-            index++;
         }
     }
 }
@@ -397,10 +399,8 @@ void add_param(ordered_map<cstring, cstring> &tnaParams, const IR::ParameterList
         tnaParams.emplace(hdr, param->name);
     } else {
         // add optional parameter to parser and control type
-        auto *annotations = new IR::Annotations();
-        annotations->annotations.push_back(new IR::Annotation("optional"_cs, {}));
-        newParams->push_back(
-            new IR::Parameter(IR::ID(hdr), annotations, dir, new IR::Type_Name(IR::ID(hdr_type))));
+        newParams->push_back(new IR::Parameter(IR::ID(hdr), {new IR::Annotation("optional"_cs, {})},
+                                               dir, new IR::Type_Name(IR::ID(hdr_type))));
         tnaParams.emplace(hdr, hdr);
     }
 }
