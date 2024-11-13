@@ -19,8 +19,8 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_MIDEND_REGISTER_READ_WRITE_H_
 #define BACKENDS_TOFINO_BF_P4C_MIDEND_REGISTER_READ_WRITE_H_
 
-#include "bf-p4c/midend/copy_header.h"
-#include "bf-p4c/midend/type_checker.h"
+#include "backends/tofino/bf-p4c/midend/copy_header.h"
+#include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"

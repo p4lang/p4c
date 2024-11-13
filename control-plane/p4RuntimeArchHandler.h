@@ -274,7 +274,7 @@ void addAnnotations(Message *message, const IR::IAnnotated *annotated, UnaryPred
     // Synthesized resources may have no annotations.
     if (annotated == nullptr) return;
 
-    for (const IR::Annotation *annotation : annotated->getAnnotations()->annotations) {
+    for (const IR::Annotation *annotation : annotated->getAnnotations()) {
         // Always add all structured annotations.
         if (annotation->annotationKind() != IR::Annotation::Kind::Unstructured) {
             serializeOneStructuredAnnotation(annotation, message->add_structured_annotations());
@@ -316,7 +316,7 @@ void addDocumentation(Message *message, const IR::IAnnotated *annotated) {
     // we iterate over all annotations looking for '@brief' and / or
     // '@description'. As per the P4Runtime spec, we only set the 'doc' field in
     // the message if at least one of them is present.
-    for (const IR::Annotation *annotation : annotated->getAnnotations()->annotations) {
+    for (const IR::Annotation *annotation : annotated->getAnnotations()) {
         if (annotation->name == "brief") {
             auto brief = annotation->expr[0]->to<IR::StringLiteral>();
             // guaranteed by ParseAnnotations pass

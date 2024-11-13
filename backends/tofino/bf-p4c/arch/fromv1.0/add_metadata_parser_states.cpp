@@ -18,13 +18,13 @@
 
 #include "add_metadata_parser_states.h"
 
-#include "bf-p4c/arch/bridge_metadata.h"
-#include "bf-p4c/arch/fromv1.0/egress_packet_length.h"
-#include "bf-p4c/arch/fromv1.0/mirror.h"
-#include "bf-p4c/arch/fromv1.0/phase0.h"
-#include "bf-p4c/arch/fromv1.0/resubmit.h"
-#include "bf-p4c/arch/intrinsic_metadata.h"
-#include "bf-p4c/arch/remove_set_metadata.h"
+#include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
+#include "backends/tofino/bf-p4c/arch/fromv1.0/egress_packet_length.h"
+#include "backends/tofino/bf-p4c/arch/fromv1.0/mirror.h"
+#include "backends/tofino/bf-p4c/arch/fromv1.0/phase0.h"
+#include "backends/tofino/bf-p4c/arch/fromv1.0/resubmit.h"
+#include "backends/tofino/bf-p4c/arch/intrinsic_metadata.h"
+#include "backends/tofino/bf-p4c/arch/remove_set_metadata.h"
 
 namespace BFN {
 

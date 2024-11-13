@@ -109,7 +109,7 @@ void JsonObjects::add_meta_info() {
 /// @param fields a JsonArray for the fields in the header
 unsigned JsonObjects::add_header_type(const cstring &name, Util::JsonArray *&fields,
                                       unsigned max_length) {
-    std::string sname(name, name.size());
+    std::string sname = name.string();
     auto header_type_id_it = header_type_id.find(sname);
     if (header_type_id_it != header_type_id.end()) {
         return header_type_id_it->second;
@@ -131,7 +131,7 @@ unsigned JsonObjects::add_header_type(const cstring &name, Util::JsonArray *&fie
 }
 
 unsigned JsonObjects::add_union_type(const cstring &name, Util::JsonArray *&fields) {
-    std::string sname(name, name.size());
+    std::string sname = name.string();
     auto it = union_type_id.find(sname);
     if (it != union_type_id.end()) return it->second;
     auto union_type = new Util::JsonObject();
@@ -150,7 +150,7 @@ unsigned JsonObjects::add_union_type(const cstring &name, Util::JsonArray *&fiel
 }
 
 unsigned JsonObjects::add_header_type(const cstring &name) {
-    std::string sname(name, name.size());
+    std::string sname = name.string();
     auto header_type_id_it = header_type_id.find(sname);
     if (header_type_id_it != header_type_id.end()) {
         return header_type_id_it->second;

@@ -26,7 +26,7 @@ P4ProgramDCGCreator::P4ProgramDCGCreator(NodesCallGraph *dcg) : dcg(dcg), p4prog
 }
 
 bool P4ProgramDCGCreator::preorder(const IR::Annotation *annotation) {
-    if (annotation->name.name != IR::Annotation::nameAnnotation) {
+    if (annotation->name != IR::Annotation::nameAnnotation) {
         return true;
     }
     IR::ID name;
@@ -140,7 +140,7 @@ bool P4ProgramDCGCreator::preorder(const IR::MethodCallStatement *method) {
 
 bool P4ProgramDCGCreator::preorder(const IR::P4Action *action) {
     addEdge(action, action->name);
-    for (const auto *annotation : action->annotations->annotations) {
+    for (const auto *annotation : action->getAnnotations()) {
         visit(annotation);
     }
     visit(action->body);
@@ -155,16 +155,12 @@ bool P4ProgramDCGCreator::preorder(const IR::P4Parser *parser) {
 
 bool P4ProgramDCGCreator::preorder(const IR::P4Table *table) {
     addEdge(table, table->name);
-    if (table->annotations != nullptr) {
-        for (const auto *annotation : table->annotations->annotations) {
-            visit(annotation);
-        }
-    }
+    for (const auto *annotation : table->getAnnotations()) visit(annotation);
     bool wasImplementations = false;
     if (table->properties != nullptr) {
         for (const auto *property : table->properties->properties) {
             if (property->name.name == "implementation") {
-                visit(property->annotations->annotations);
+                visit(property->annotations);
                 wasImplementations = true;
             }
         }
@@ -210,10 +206,8 @@ bool P4ProgramDCGCreator::preorder(const IR::P4Table *table) {
 bool P4ProgramDCGCreator::preorder(const IR::ParserState *parserState) {
     addEdge(parserState, parserState->name);
     visited.insert(parserState);
-    if (parserState->annotations != nullptr) {
-        for (const auto *annotation : parserState->annotations->annotations) {
-            visit(annotation);
-        }
+    for (const auto *annotation : parserState->annotations) {
+        visit(annotation);
     }
     for (const auto *component : parserState->components) {
         visit(component);
@@ -345,14 +339,8 @@ bool P4ProgramDCGCreator::preorder(const IR::SwitchStatement *switchStatement) {
 
 bool P4ProgramDCGCreator::preorder(const IR::StatOrDecl *statOrDecl) {
     if (const auto *block = statOrDecl->to<IR::BlockStatement>()) {
-        if (block->annotations != nullptr) {
-            for (const auto *a : block->annotations->annotations) {
-                visit(a);
-            }
-        }
-        for (const auto *c : block->components) {
-            visit(c);
-        }
+        for (const auto *a : block->annotations) visit(a);
+        for (const auto *c : block->components) visit(c);
         return false;
     }
     IR::ID name;

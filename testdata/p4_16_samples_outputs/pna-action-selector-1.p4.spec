@@ -98,7 +98,7 @@ table as {
 	actions {
 		a1
 		a2
-		set_exception
+		set_exception @defaultonly
 	}
 	default_action set_exception args vport 0x0 
 	size 0x10000

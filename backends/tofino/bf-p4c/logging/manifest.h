@@ -29,9 +29,9 @@
 #include <string>
 #include <utility>
 
-#include "bf-p4c/arch/arch.h"
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/arch/arch.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/ir/gress.h"
 #include "lib/cstring.h"
 
 namespace Logging {

@@ -50,28 +50,9 @@ const IR::ID IR::Type_Table::hit = ID("hit");
 const IR::ID IR::Type_Table::miss = ID("miss");
 const IR::ID IR::Type_Table::action_run = ID("action_run");
 
-const cstring IR::Annotation::nameAnnotation = "name"_cs;
-const cstring IR::Annotation::tableOnlyAnnotation = "tableonly"_cs;
-const cstring IR::Annotation::defaultOnlyAnnotation = "defaultonly"_cs;
-const cstring IR::Annotation::atomicAnnotation = "atomic"_cs;
-const cstring IR::Annotation::hiddenAnnotation = "hidden"_cs;
-const cstring IR::Annotation::lengthAnnotation = "length"_cs;
-const cstring IR::Annotation::optionalAnnotation = "optional"_cs;
-const cstring IR::Annotation::pkginfoAnnotation = "pkginfo"_cs;
-const cstring IR::Annotation::deprecatedAnnotation = "deprecated"_cs;
-const cstring IR::Annotation::synchronousAnnotation = "synchronous"_cs;
-const cstring IR::Annotation::pureAnnotation = "pure"_cs;
-const cstring IR::Annotation::noSideEffectsAnnotation = "noSideEffects"_cs;
-const cstring IR::Annotation::noWarnAnnotation = "noWarn"_cs;
-const cstring IR::Annotation::matchAnnotation = "match"_cs;
-const cstring IR::Annotation::fieldListAnnotation = "field_list"_cs;
-const cstring IR::Annotation::debugLoggingAnnotation = "__debug"_cs;
-
 long Type_Declaration::nextId = 0;
 long Type_InfInt::nextId = 0;
 long Type_Any::nextId = 0;
-
-Annotations *Annotations::empty = new Annotations(Vector<Annotation>());
 
 const Type *Type_Stack::at(size_t) const { return elementType; }
 

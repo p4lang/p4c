@@ -19,7 +19,7 @@
 #ifndef BF_P4C_MIDEND_REWRITE_EGRESS_INTRINSIC_METADATA_HEADER_H_
 #define BF_P4C_MIDEND_REWRITE_EGRESS_INTRINSIC_METADATA_HEADER_H_
 
-#include "bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/device.h"
 
 namespace P4 {
 class TypeMap;
@@ -120,10 +120,9 @@ class RewriteEgressIntrinsicMetadataHeader : public PassManager {
                 if (tofino2_pad) {
                     LOG4("tofino2 needs " << tofino2_pad << " bytes of padding");
 
-                    auto *annots = new IR::Annotations({new IR::Annotation(IR::ID("padding"), {})});
-
                     const IR::StructField *tofino2_pad_field = new IR::StructField(
-                        "__tofino2_pad_", annots, IR::Type::Bits::get(tofino2_pad * 8));
+                        "__tofino2_pad_", {new IR::Annotation(IR::ID("padding"), {})},
+                        IR::Type::Bits::get(tofino2_pad * 8));
 
                     new_fields.push_back(tofino2_pad_field);
                 }

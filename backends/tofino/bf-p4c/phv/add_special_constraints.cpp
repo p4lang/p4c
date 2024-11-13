@@ -16,10 +16,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/add_special_constraints.h"
+#include "backends/tofino/bf-p4c/phv/add_special_constraints.h"
 
-#include "bf-p4c/arch/bridge_metadata.h"
-#include "bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
 
 Visitor::profile_t AddSpecialConstraints::init_apply(const IR::Node *root) {
     profile_t rv = Inspector::init_apply(root);

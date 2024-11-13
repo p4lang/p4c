@@ -16,11 +16,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/create_thread_local_instances.h"
+#include "backends/tofino/bf-p4c/phv/create_thread_local_instances.h"
 
-#include "bf-p4c/ir/gress.h"
-#include "bf-p4c/ir/thread_visitor.h"
-#include "bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/ir/thread_visitor.h"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
 
 namespace {
 
@@ -103,7 +103,7 @@ struct CreateLocalInstances : public Transform {
         auto *orig = getOriginal<IR::HeaderOrMetadata>();
         visitAgain();
         gress_t thread;
-        if (header->type->annotations->getSingle("__ghost_metadata"_cs)) {
+        if (header->type->getAnnotation("__ghost_metadata"_cs)) {
             // ghost intrinsic metadata is declared separately as arguments to both
             // ingress and ghost, but both need to refer to the same thing (same PHV)
             thread = GHOST;

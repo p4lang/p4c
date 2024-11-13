@@ -21,12 +21,12 @@
 
 #include <fstream>
 
-#include "bf-p4c/ir/tofino_write_context.h"
-#include "bf-p4c/mau/action_analysis.h"
-#include "bf-p4c/mau/mau_visitor.h"
-#include "bf-p4c/mau/resource.h"
-#include "bf-p4c/mau/tofino/input_xbar.h"
-#include "bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/ir/tofino_write_context.h"
+#include "backends/tofino/bf-p4c/mau/action_analysis.h"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/mau/resource.h"
+#include "backends/tofino/bf-p4c/mau/tofino/input_xbar.h"
+#include "backends/tofino/bf-p4c/phv/phv.h"
 #include "lib/safe_vector.h"
 
 using namespace P4;
@@ -299,7 +299,7 @@ class AdjustStatefulInstructions : public MauTransform {
  private:
     const PhvInfo &phv;
     const IR::Expression *preorder(IR::Expression *expr) override;
-    const IR::Annotations *preorder(IR::Annotations *) override;
+    const IR::Annotation *preorder(IR::Annotation *) override;
     const IR::MAU::IXBarExpression *preorder(IR::MAU::IXBarExpression *) override;
 
     bool check_bit_positions(std::map<int, le_bitrange> &salu_inputs, le_bitrange field_bits,

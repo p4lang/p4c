@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/common/map_tables_to_actions.h"
+#include "backends/tofino/bf-p4c/common/map_tables_to_actions.h"
 
 Visitor::profile_t MapTablesToActions::init_apply(const IR::Node *root) {
     tableToActionsMap.clear();

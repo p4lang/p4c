@@ -16,9 +16,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/utils/liverange_opti_utils.h"
+#include "backends/tofino/bf-p4c/phv/utils/liverange_opti_utils.h"
 
-#include "bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/phv/utils/utils.h"
 #include "ir/ir.h"
 
 /// @returns true if any of the dominator units in @doms is a parser node.

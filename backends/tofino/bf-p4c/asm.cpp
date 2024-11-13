@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/asm.h"
+#include "backends/tofino/bf-p4c/asm.h"
 
 #include <sys/stat.h>
 
@@ -28,8 +28,8 @@
 #include <sstream>
 
 // #include "bf-asm/version.h"
-#include "bf-p4c/common/run_id.h"
-#include "bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/common/run_id.h"
+#include "backends/tofino/bf-p4c/device.h"
 
 namespace BFN {
 
@@ -85,9 +85,10 @@ bool AsmOutput::preorder(const IR::BFN::Pipe *pipe) {
     LOG1("ASM generation for successful compile? " << (_successfulCompile ? "true" : "false"));
 
     if (_successfulCompile) {
-        auto outputDir = BFNContext::get().getOutputDirectory(cstring::empty, pipe_id);
-        if (!outputDir) return false;
-        cstring outputFile = outputDir + "/"_cs + options.programName + ".bfa"_cs;
+        std::filesystem::path outputDir =
+            BFNContext::get().getOutputDirectory(cstring::empty, pipe_id).c_str();
+        if (outputDir.empty()) return false;
+        auto outputFile = (outputDir / options.programName.c_str()).replace_extension("bfa");
         std::ofstream out(outputFile, std::ios_base::out);
 
         MauAsmOutput *mauasm = nullptr;

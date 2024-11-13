@@ -18,7 +18,7 @@
 
 #include <optional>
 
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "backends/tofino/bf-p4c/test/gtest/tofino_gtest_utils.h"
 #include "bf_gtest_helpers.h"
 #include "gtest/gtest.h"
 #include "ir/ir.h"

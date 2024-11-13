@@ -18,7 +18,7 @@
 
 #include "v1_program_structure.h"
 
-#include "bf-p4c/common/pragma/all_pragmas.h"
+#include "backends/tofino/bf-p4c/common/pragma/all_pragmas.h"
 #include "v1_converters.h"
 
 namespace BFN {
@@ -138,11 +138,9 @@ void ProgramStructure::createMain() {
     auto expr = new IR::PathExpression(pipe0);
     args->push_back(new IR::Argument(expr));
 
-    auto *annotations = new IR::Annotations();
-    annotations->annotations.push_back(
-        new IR::Annotation(IR::ID(PragmaAutoInitMetadata::name), {}));
-
-    auto result = new IR::Declaration_Instance(name, annotations, typeSpecialized, args, nullptr);
+    auto result = new IR::Declaration_Instance(
+        name, {new IR::Annotation(IR::ID(PragmaAutoInitMetadata::name), {})}, typeSpecialized, args,
+        nullptr);
     declarations.push_back(result);
 }
 

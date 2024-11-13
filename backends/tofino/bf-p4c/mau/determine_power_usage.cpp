@@ -16,15 +16,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/determine_power_usage.h"
+#include "backends/tofino/bf-p4c/mau/determine_power_usage.h"
 
 #include <algorithm>
 #include <map>
 #include <vector>
 
-#include "bf-p4c/mau/mau_power.h"
-#include "bf-p4c/mau/resource_estimate.h"
-#include "bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/mau/mau_power.h"
+#include "backends/tofino/bf-p4c/mau/resource_estimate.h"
+#include "backends/tofino/bf-p4c/phv/phv.h"
 
 namespace MauPower {
 

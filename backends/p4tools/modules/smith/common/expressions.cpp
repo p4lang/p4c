@@ -1203,7 +1203,7 @@ IR::Expression *ExpressionGenerator::editHdrStack(cstring lval) {
         auto subStr = *sIter;
         const auto *hdrBrkt = subStr.find('[');
         if (hdrBrkt != nullptr) {
-            auto stackStr = subStr.substr(static_cast<size_t>(hdrBrkt - subStr + 1));
+            auto stackStr = subStr.substr(static_cast<size_t>(hdrBrkt - subStr.c_str() + 1));
             const auto *stackSzEnd = stackStr.find(']');
             if (stackSzEnd == nullptr) {
                 BUG("There should be a closing bracket.");

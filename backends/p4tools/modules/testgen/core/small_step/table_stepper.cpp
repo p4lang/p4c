@@ -466,7 +466,7 @@ bool TableStepper::resolveTableKeys() {
             return true;
         }
 
-        const auto *nameAnnot = keyElement->getAnnotation("name"_cs);
+        const auto *nameAnnot = keyElement->getAnnotation(IR::Annotation::nameAnnotation);
         // Some hidden tables do not have any key name annotations.
         BUG_CHECK(nameAnnot != nullptr || properties.tableIsImmutable,
                   "Non-constant table key without an annotation");

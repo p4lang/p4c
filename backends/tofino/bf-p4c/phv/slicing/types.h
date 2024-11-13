@@ -21,8 +21,8 @@
 
 #include <functional>
 
-#include "bf-p4c/ir/bitrange.h"
-#include "bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/ir/bitrange.h"
+#include "backends/tofino/bf-p4c/phv/utils/utils.h"
 #include "lib/bitvec.h"
 #include "lib/ordered_map.h"
 

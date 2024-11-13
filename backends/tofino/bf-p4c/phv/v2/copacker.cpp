@@ -16,13 +16,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/v2/copacker.h"
+#include "backends/tofino/bf-p4c/phv/v2/copacker.h"
 
 #include <optional>
 
-#include "bf-p4c/phv/action_source_tracker.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/v2/utils_v2.h"
+#include "backends/tofino/bf-p4c/phv/action_source_tracker.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/v2/utils_v2.h"
 #include "lib/safe_vector.h"
 
 namespace PHV {
@@ -333,8 +333,8 @@ CoPacker::CoPackHintOrErr CoPacker::gen_move_copack(const Allocation &allocated_
         }
         LOG5("Found move (dest, src) pair: "
              << dest << " = " << src_fs.shortString() << "@"
-             << (src_container != std::nullopt ? cstring::to_cstring(*src_container) : "*") << "["
-             << src_start_idx << ":" << src_start_idx + src_fs.size() - 1 << "]");
+             << (src_container != std::nullopt ? cstring::to_cstring(*src_container).c_str() : "*")
+             << "[" << src_start_idx << ":" << src_start_idx + src_fs.size() - 1 << "]");
         // compute number of bits that source will be right shifted, wrap-around considered.
         const int this_src_right_shift_bits =
             n_wrap_around_right_shift_bits(src_start_idx, dest.container_slice().lo, c.size());

@@ -20,8 +20,8 @@
 #define BF_P4C_MAU_TOFINO_INPUT_XBAR_H_
 
 /* clang-format off */
-#include "bf-p4c/mau/input_xbar.h"
-#include "bf-p4c/common/alloc.h"
+#include "backends/tofino/bf-p4c/mau/input_xbar.h"
+#include "backends/tofino/bf-p4c/common/alloc.h"
 
 namespace Tofino {
 
@@ -309,8 +309,8 @@ struct IXBar : public ::IXBar {
 
         void add(const Use &alloc);
         safe_vector<Byte> atcam_partition(int *hash_group = nullptr) const override;
-        safe_vector<TotalInfo> bits_per_search_bus() const;
-        unsigned compute_hash_tables();
+        safe_vector<TotalInfo> bits_per_search_bus() const override;
+        unsigned compute_hash_tables() override;
         bool emit_gateway_asm(const MauAsmOutput &, std::ostream &, indent_t,
                               const IR::MAU::Table *) const override { return false; }
         void emit_ixbar_asm(const PhvInfo &phv, std::ostream& out, indent_t indent,

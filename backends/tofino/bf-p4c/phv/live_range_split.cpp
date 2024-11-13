@@ -18,10 +18,10 @@
 
 #include "live_range_split.h"
 
-#include "bf-p4c/device.h"
-#include "bf-p4c/phv/allocate_phv.h"
-#include "bf-p4c/phv/fieldslice_live_range.h"
-#include "bf-p4c/phv/utils/report.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/phv/allocate_phv.h"
+#include "backends/tofino/bf-p4c/phv/fieldslice_live_range.h"
+#include "backends/tofino/bf-p4c/phv/utils/report.h"
 
 namespace PHV {
 

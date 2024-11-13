@@ -21,11 +21,11 @@
 
 #include <iosfwd>
 
-#include "bf-p4c/common/field_defuse.h"
-#include "bf-p4c/mau/table_summary.h"
-#include "bf-p4c/phv/phv.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/utils/live_range_report.h"
+#include "backends/tofino/bf-p4c/common/field_defuse.h"
+#include "backends/tofino/bf-p4c/mau/table_summary.h"
+#include "backends/tofino/bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/utils/live_range_report.h"
 #include "lib/ordered_set.h"
 
 class PhvAsmOutput {

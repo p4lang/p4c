@@ -19,17 +19,17 @@
 #ifndef SMART_PACKING_H_
 #define SMART_PACKING_H_
 
-#include "bf-p4c/common/field_defuse.h"
-#include "bf-p4c/ir/bitrange.h"
-#include "bf-p4c/mau/table_dependency_graph.h"
-#include "bf-p4c/mau/table_mutex.h"
-#include "bf-p4c/phv/collect_table_keys.h"
-#include "bf-p4c/phv/mau_backtracker.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/utils/utils.h"
-#include "bf-p4c/phv/v2/allocator_metrics.h"
-#include "bf-p4c/phv/v2/parser_packing_validator.h"
-#include "bf-p4c/phv/v2/types.h"
+#include "backends/tofino/bf-p4c/common/field_defuse.h"
+#include "backends/tofino/bf-p4c/ir/bitrange.h"
+#include "backends/tofino/bf-p4c/mau/table_dependency_graph.h"
+#include "backends/tofino/bf-p4c/mau/table_mutex.h"
+#include "backends/tofino/bf-p4c/phv/collect_table_keys.h"
+#include "backends/tofino/bf-p4c/phv/mau_backtracker.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/phv/v2/allocator_metrics.h"
+#include "backends/tofino/bf-p4c/phv/v2/parser_packing_validator.h"
+#include "backends/tofino/bf-p4c/phv/v2/types.h"
 #include "ir/ir.h"
 
 namespace PHV {

@@ -21,7 +21,7 @@
 
 #include <iostream>
 
-#include "bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/ir/gress.h"
 #include "lib/cstring.h"
 
 namespace P4 {
@@ -65,7 +65,10 @@ inline std::ostream &operator<<(std::ostream &s, const MarshaledFrom &m) {
     return s;
 }
 
-inline JSONGenerator &operator<<(JSONGenerator &out, const MarshaledFrom &c) { return out << c; }
+inline JSONGenerator &operator<<(JSONGenerator &out, const MarshaledFrom &c) {
+    c.toJSON(out);
+    return out;
+}
 
 }  // namespace P4
 

@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/asm_output.h"
+#include "backends/tofino/bf-p4c/mau/asm_output.h"
 
 #include <iterator>
 #include <map>
@@ -25,22 +25,22 @@
 #include <string>
 #include <vector>
 
-#include "bf-p4c/common/alias.h"
-#include "bf-p4c/common/ir_utils.h"
-#include "bf-p4c/common/slice.h"
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/ir/tofino_write_context.h"
-#include "bf-p4c/lib/error_type.h"
-#include "bf-p4c/mau/default_next.h"
-#include "bf-p4c/mau/finalize_mau_pred_deps_power.h"
-#include "bf-p4c/mau/gateway.h"
-#include "bf-p4c/mau/jbay_next_table.h"
-#include "bf-p4c/mau/payload_gateway.h"
-#include "bf-p4c/mau/resource.h"
-#include "bf-p4c/mau/table_format.h"
-#include "bf-p4c/parde/asm_output.h"
-#include "bf-p4c/parde/phase0.h"
-#include "bf-p4c/phv/asm_output.h"
+#include "backends/tofino/bf-p4c/common/alias.h"
+#include "backends/tofino/bf-p4c/common/ir_utils.h"
+#include "backends/tofino/bf-p4c/common/slice.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/ir/tofino_write_context.h"
+#include "backends/tofino/bf-p4c/lib/error_type.h"
+#include "backends/tofino/bf-p4c/mau/default_next.h"
+#include "backends/tofino/bf-p4c/mau/finalize_mau_pred_deps_power.h"
+#include "backends/tofino/bf-p4c/mau/gateway.h"
+#include "backends/tofino/bf-p4c/mau/jbay_next_table.h"
+#include "backends/tofino/bf-p4c/mau/payload_gateway.h"
+#include "backends/tofino/bf-p4c/mau/resource.h"
+#include "backends/tofino/bf-p4c/mau/table_format.h"
+#include "backends/tofino/bf-p4c/parde/asm_output.h"
+#include "backends/tofino/bf-p4c/parde/phase0.h"
+#include "backends/tofino/bf-p4c/phv/asm_output.h"
 #include "boost/range/adaptor/reversed.hpp"
 #include "lib/algorithm.h"
 #include "lib/bitops.h"
@@ -1078,10 +1078,11 @@ void MauAsmOutput::emit_table_format(std::ostream &out, indent_t indent,
                 for (size_t i = 0; i < bits.size(); i++) {
                     cstring name = format_name(type);
                     if (bits.size() > 1) name = name + std::to_string(i);
-                    fmt.emit(out, name, group, bits[i].first, bits[i].second - bits[i].first + 1);
+                    fmt.emit(out, name.c_str(), group, bits[i].first,
+                             bits[i].second - bits[i].first + 1);
                 }
             } else {
-                fmt.emit(out, format_name(type), group, bits);
+                fmt.emit(out, format_name(type).c_str(), group, bits);
             }
         }
 
@@ -1122,7 +1123,7 @@ void MauAsmOutput::emit_table_format(std::ostream &out, indent_t indent,
             } while (start_bit != -1);
         }
         bits.emplace_back(start, end);
-        fmt.emit(out, format_name(type), group, bits);
+        fmt.emit(out, format_name(type).c_str(), group, bits);
         group++;
     }
 
@@ -1454,7 +1455,7 @@ class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
     void postorder(const IR::MAU::Action *) override {
         if (is_empty) out << indent << "- 0" << std::endl;
     }
-    bool preorder(const IR::Annotations *) override { return false; }
+    bool preorder(const IR::Annotation *) override { return false; }
 
     bool preorder(const IR::MAU::Instruction *inst) override {
         LOG5("  EmitAction preorder Instruction : " << inst->name);
@@ -2444,7 +2445,7 @@ void MauAsmOutput::emit_indirect_res_context_json(std::ostream &, indent_t inden
     ordered_set<cstring> bind_res;
     for (auto back_at : tbl->attached) {
         auto at = back_at->attached;
-        for (auto annot : at->annotations->annotations) {
+        for (auto annot : at->annotations) {
             if (annot->name != "bind_indirect_res_to_match") continue;
             BUG_CHECK((at->is<IR::MAU::ActionData>() && at->direct == false) ||
                           at->is<IR::MAU::Selector>(),

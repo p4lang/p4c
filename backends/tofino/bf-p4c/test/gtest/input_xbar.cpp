@@ -16,13 +16,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/tofino/input_xbar.h"
+#include "backends/tofino/bf-p4c/mau/tofino/input_xbar.h"
 
 #include <sstream>
 
-#include "bf-p4c/ir/gress.h"
-#include "bf-p4c/phv/utils/utils.h"
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/test/gtest/tofino_gtest_utils.h"
 #include "gtest/gtest.h"
 
 namespace P4::Test {

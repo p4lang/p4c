@@ -16,9 +16,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/midend/check_register_actions.h"
+#include "backends/tofino/bf-p4c/midend/check_register_actions.h"
 
-#include "bf-p4c/lib/safe_width.h"
+#include "backends/tofino/bf-p4c/lib/safe_width.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
 

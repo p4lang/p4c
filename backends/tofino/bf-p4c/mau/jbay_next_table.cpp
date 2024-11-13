@@ -21,10 +21,10 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "bf-p4c/common/table_printer.h"
-#include "bf-p4c/mau/memories.h"
-#include "bf-p4c/mau/resource.h"
-#include "bf-p4c/mau/table_layout.h"
+#include "backends/tofino/bf-p4c/common/table_printer.h"
+#include "backends/tofino/bf-p4c/mau/memories.h"
+#include "backends/tofino/bf-p4c/mau/resource.h"
+#include "backends/tofino/bf-p4c/mau/table_layout.h"
 #include "device.h"
 #include "lib/error.h"
 

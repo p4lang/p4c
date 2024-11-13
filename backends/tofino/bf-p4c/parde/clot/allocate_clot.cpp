@@ -20,10 +20,10 @@
 
 #include <optional>
 
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/parde/count_strided_header_refs.h"
-#include "bf-p4c/parde/parser_info.h"
-#include "bf-p4c/phv/pragma/pa_alias.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/parde/count_strided_header_refs.h"
+#include "backends/tofino/bf-p4c/parde/parser_info.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_alias.h"
 #include "check_clot_groups.h"
 #include "clot_candidate.h"
 #include "field_pov_analysis.h"
@@ -90,7 +90,7 @@ class GreedyClotAllocator : public Visitor {
                     cstring name = field->name;
                     cstring field_name = cstring(name.findlast('.') + 1);
                     cstring header_name = field->header();
-                    header_name = header_name.before(strrchr(header_name, '['));
+                    header_name = header_name.before(strrchr(header_name.c_str(), '['));
                     cstring new_field_name = header_name + "["_cs +
                                              cstring::to_cstring(*stack_index + stack_offset) +
                                              "]." + field_name;
@@ -828,7 +828,7 @@ class GreedyClotAllocator : public Visitor {
     /// Get the element index for a field
     std::optional<unsigned> get_element_index(const PHV::Field *field) {
         cstring header_name = field->header();
-        const char *index_pos = strrchr(header_name, '[');
+        const char *index_pos = strrchr(header_name.c_str(), '[');
         if (index_pos) {
             size_t idx_start = index_pos - header_name.c_str() + 1;
             size_t idx_len = header_name.size() - idx_start - 1;
@@ -1201,7 +1201,7 @@ class GreedyClotAllocator : public Visitor {
             for (const auto *field : Keys(extracts)) {
                 if (auto stack_index = get_element_index(field)) {
                     cstring header_name = field->header();
-                    header_name = header_name.before(strrchr(header_name, '['));
+                    header_name = header_name.before(strrchr(header_name.c_str(), '['));
                     pseudoheader_stacks[header_name].emplace(*stack_index, pseudoheader);
                     LOG5("Pseudoheader " << pseudoheader->id << " extracts " << header_name << "["
                                          << *stack_index << "]");

@@ -77,7 +77,7 @@ std::vector<const char *> *Util::Options::process(int argc, char *const argv[]) 
 
             // If there's no such option, try single-character options.
             if (option == nullptr && opt.size() > 2) {
-                arg = opt.substr(2);
+                arg = opt.substr(2).c_str();
                 opt = opt.substr(0, 2);
                 option = get(options, opt);
             }
@@ -91,7 +91,7 @@ std::vector<const char *> *Util::Options::process(int argc, char *const argv[]) 
         }
 
         if (option == nullptr) {
-            remainingOptions.push_back(opt);
+            remainingOptions.push_back(opt.c_str());
         } else {
             if (option->argName != nullptr && arg == nullptr &&
                 !(option->flags & OptionFlags::OptionalArgument)) {
@@ -137,7 +137,7 @@ void Util::Options::usage() {
     for (const auto &o : optionOrder) {
         auto option = get(options, o);
         CHECK_NULL(option);
-        size_t len = strlen(o);
+        size_t len = o.size();
         if (option->flags & OptionFlags::Hide) continue;
         *outStream << option->option;
         if (option->argName != nullptr) {

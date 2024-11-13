@@ -141,9 +141,9 @@ void UBPFDeparserTranslationVisitor::compileEmitField(const IR::Expression *expr
     if (!swap.isNullOrEmpty()) {
         builder->emitIndent();
         visit(expr);
-        builder->appendFormat(".%s = %s(", field.c_str(), swap);
+        builder->appendFormat(".%v = %v(", field, swap);
         visit(expr);
-        builder->appendFormat(".%s", field.c_str());
+        builder->appendFormat(".%v", field);
         if (shift != 0) builder->appendFormat(" << %d", shift);
         builder->append(")");
         builder->endOfStatement(true);

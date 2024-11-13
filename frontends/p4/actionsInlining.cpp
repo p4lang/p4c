@@ -20,6 +20,7 @@ limitations under the License.
 #include "frontends/p4/evaluator/substituteParameters.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/parameterSubstitution.h"
+#include "ir/vector.h"
 
 namespace P4 {
 
@@ -141,11 +142,12 @@ const IR::Node *ActionsInliner::preorder(IR::MethodCallStatement *statement) {
         }
     }
 
-    auto annotations = callee->annotations->where([&](const IR::Annotation *a) {
+    auto annotations = callee->annotations.where([&](const IR::Annotation *a) {
         return !(a->name == IR::Annotation::nameAnnotation ||
                  (a->name == IR::Annotation::noWarnAnnotation && a->getSingleString() == "unused"));
     });
-    auto result = new IR::BlockStatement(statement->srcInfo, annotations, body);
+    auto result = new IR::BlockStatement(statement->srcInfo,
+                                         {annotations->begin(), annotations->end()}, body);
     LOG2("Replacing " << orig << " with " << result);
     return result;
 }

@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/phv/phv.h"
 
 #include <cstring>
 #include <iostream>

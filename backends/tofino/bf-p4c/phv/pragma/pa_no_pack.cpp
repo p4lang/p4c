@@ -16,9 +16,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/pragma/pa_no_pack.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_no_pack.h"
 
-#include "bf-p4c/phv/pragma/phv_pragmas.h"
+#include "backends/tofino/bf-p4c/phv/pragma/phv_pragmas.h"
 
 /// BFN::Pragma interface
 const char *PragmaNoPack::name = "pa_no_pack";

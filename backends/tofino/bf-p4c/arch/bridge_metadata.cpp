@@ -20,10 +20,10 @@
 
 #include <boost/range/adaptor/sliced.hpp>
 
-#include "bf-p4c/arch/collect_bridged_fields.h"
-#include "bf-p4c/arch/intrinsic_metadata.h"
-#include "bf-p4c/midend/path_linearizer.h"
-#include "bf-p4c/midend/type_checker.h"
+#include "backends/tofino/bf-p4c/arch/collect_bridged_fields.h"
+#include "backends/tofino/bf-p4c/arch/intrinsic_metadata.h"
+#include "backends/tofino/bf-p4c/midend/path_linearizer.h"
+#include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeMap.h"
@@ -114,16 +114,16 @@ struct BridgeIngressToEgress : public Transform {
                 LOG3("\tNumber of fields to bridge: " << fieldsToBridge.size());
                 for (auto *f : structFields) LOG3("\t  Bridged field: " << f->name);
             }
-            auto annot = new IR::Annotations({new IR::Annotation(IR::ID("flexible"), {})});
-            auto bridgedMetaType = new IR::Type_Struct("fields", annot, structFields);
+            auto bridgedMetaType = new IR::Type_Struct(
+                "fields", {new IR::Annotation(IR::ID("flexible"), {})}, structFields);
 
-            fields.push_back(new IR::StructField(BRIDGED_MD_FIELD, annot, bridgedMetaType));
+            fields.push_back(new IR::StructField(
+                BRIDGED_MD_FIELD, {new IR::Annotation(IR::ID("flexible"), {})}, bridgedMetaType));
         }
 
         auto *layoutKind = new IR::StringLiteral(IR::ID("BRIDGED"));
         bridgedHeaderType = new IR::Type_Header(
-            BRIDGED_MD_HEADER,
-            new IR::Annotations({new IR::Annotation(IR::ID("layout"), {layoutKind})}), fields);
+            BRIDGED_MD_HEADER, {new IR::Annotation(IR::ID("layout"), {layoutKind})}, fields);
         LOG1("Bridged header type: " << bridgedHeaderType);
 
         // We'll inject a field containing the new header into the user metadata

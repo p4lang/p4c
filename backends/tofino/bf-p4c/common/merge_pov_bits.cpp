@@ -16,10 +16,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/common/merge_pov_bits.h"
+#include "backends/tofino/bf-p4c/common/merge_pov_bits.h"
 
-#include "bf-p4c/parde/clot/header_validity_analysis.h"
-#include "bf-p4c/parde/parde_visitor.h"
+#include "backends/tofino/bf-p4c/parde/clot/header_validity_analysis.h"
+#include "backends/tofino/bf-p4c/parde/parde_visitor.h"
 
 namespace BFN {
 

@@ -21,8 +21,8 @@
 
 #include <array>
 
-#include "bf-p4c/mau/mau_visitor.h"
-#include "bf-p4c/mau/resource.h"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/mau/resource.h"
 #include "lib/safe_vector.h"
 
 using namespace P4;

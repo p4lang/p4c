@@ -58,18 +58,19 @@ const IR::Declaration_Instance *P4V1::LpfConverter::convertExternInstance(
     if (direct && instance_count) error("lpf %s specifies both 'direct' and 'instance_count'", ext);
 
     auto *externalName = new IR::StringLiteral(IR::ID("." + name));
-    auto *annotations = new IR::Annotations({new IR::Annotation(IR::ID("name"), {externalName})});
     auto args = new IR::Vector<IR::Argument>();
     if (instance_count) {
         args->push_back(new IR::Argument(instance_count));
         auto type = new IR::Type_Specialized(
             new IR::Type_Name("Lpf"),
             new IR::Vector<IR::Type>({filt_type, IR::Type::Bits::get(32)}));
-        return new IR::Declaration_Instance(ext->srcInfo, name, annotations, type, args);
+        return new IR::Declaration_Instance(
+            ext->srcInfo, name, {new IR::Annotation(IR::ID("name"), {externalName})}, type, args);
     } else {
         auto type = new IR::Type_Specialized(new IR::Type_Name("DirectLpf"),
                                              new IR::Vector<IR::Type>({filt_type}));
-        return new IR::Declaration_Instance(ext->srcInfo, name, annotations, type, args);
+        return new IR::Declaration_Instance(
+            ext->srcInfo, name, {new IR::Annotation(IR::ID("name"), {externalName})}, type, args);
     }
 }
 

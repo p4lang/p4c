@@ -19,7 +19,7 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_ARCH_FROMV1_0_FIELD_LIST_H_
 #define BACKENDS_TOFINO_BF_P4C_ARCH_FROMV1_0_FIELD_LIST_H_
 
-#include "bf-p4c/midend/path_linearizer.h"
+#include "backends/tofino/bf-p4c/midend/path_linearizer.h"
 #include "frontends/p4-14/fromv1.0/converters.h"
 #include "ir/ir.h"
 

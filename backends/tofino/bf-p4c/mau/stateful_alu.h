@@ -96,7 +96,7 @@
 #include <map>
 #include <vector>
 
-#include "bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/device.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "ir/ir.h"
 #include "mau_visitor.h"
@@ -265,7 +265,7 @@ class CreateSaluInstruction : public Inspector {
     void postorder(const IR::Property *) override { BUG("unconverted p4_14"); }
     bool preorder(const IR::Function *) override;
     void postorder(const IR::Function *) override;
-    bool preorder(const IR::Annotations *) override { return false; }
+    bool preorder(const IR::Annotation *) override { return false; }
     void doAssignment(const Util::SourceInfo &srcInfo);
     bool preorder(const IR::AssignmentStatement *) override;
     bool preorder(const IR::IfStatement *) override;

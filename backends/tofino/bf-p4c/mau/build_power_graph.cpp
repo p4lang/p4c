@@ -16,14 +16,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/build_power_graph.h"
+#include "backends/tofino/bf-p4c/mau/build_power_graph.h"
 
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/mau/default_next.h"
-#include "bf-p4c/mau/jbay_next_table.h"
-#include "bf-p4c/mau/mau_power.h"
-#include "bf-p4c/mau/mau_visitor.h"
-#include "bf-p4c/mau/simple_power_graph.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/mau/default_next.h"
+#include "backends/tofino/bf-p4c/mau/jbay_next_table.h"
+#include "backends/tofino/bf-p4c/mau/mau_power.h"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/mau/simple_power_graph.h"
 #include "ir/gress.h"
 #include "lib/ordered_set.h"
 

@@ -19,7 +19,7 @@
 #ifndef BF_P4C_PHV_MAU_BACKTRACKER_H_
 #define BF_P4C_PHV_MAU_BACKTRACKER_H_
 
-#include "bf-p4c/mau/table_summary.h"
+#include "backends/tofino/bf-p4c/mau/table_summary.h"
 #include "ir/ir.h"
 #include "lib/ordered_map.h"
 

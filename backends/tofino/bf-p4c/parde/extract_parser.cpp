@@ -23,14 +23,14 @@
 #include <utility>
 #include <vector>
 
-#include "bf-p4c/arch/arch.h"
-#include "bf-p4c/common/asm_output.h"
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/device.h"
-#include "bf-p4c/midend/parser_graph.h"
-#include "bf-p4c/parde/add_parde_metadata.h"
-#include "bf-p4c/parde/dump_parser.h"
-#include "bf-p4c/parde/parser_loops_info.h"
+#include "backends/tofino/bf-p4c/arch/arch.h"
+#include "backends/tofino/bf-p4c/common/asm_output.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/midend/parser_graph.h"
+#include "backends/tofino/bf-p4c/parde/add_parde_metadata.h"
+#include "backends/tofino/bf-p4c/parde/dump_parser.h"
+#include "backends/tofino/bf-p4c/parde/parser_loops_info.h"
 #include "ir/ir.h"
 #include "lib/log.h"
 
@@ -598,7 +598,7 @@ void GetBackendParser::addTransition(IR::BFN::ParserState *state, match_t matchV
         // supports this feature in TNA with the 'pd_pvs_name' annotation by
         // overriding the pvs name with the name in the annotation.
         cstring valueSetName;
-        if (auto anno = valueSet->annotations->getSingle("pd_pvs_name"_cs)) {
+        if (auto anno = valueSet->getAnnotation("pd_pvs_name"_cs)) {
             auto name = anno->expr.at(0)->to<IR::StringLiteral>();
             valueSetName = name->value;
         } else {
@@ -1168,7 +1168,7 @@ struct RewriteParserChecksums : public Transform {
  private:
     // check if member is header/payload checksum field itself
     // (annotated with @header_checksum/@payload_checksum)
-    bool isChecksumField(const IR::Member *member, const cstring &which) const {
+    bool isChecksumField(const IR::Member *member, cstring which) const {
         const IR::HeaderOrMetadata *header = nullptr;
         if (auto headerRef = member->expr->to<IR::ConcreteHeaderRef>()) {
             header = headerRef->baseRef();
@@ -1179,8 +1179,7 @@ struct RewriteParserChecksums : public Transform {
         }
         for (auto field : header->type->fields) {
             if (field->name == member->member) {
-                auto annot = field->annotations->getSingle(which);
-                if (annot) return true;
+                if (field->hasAnnotation(which)) return true;
             }
         }
         return false;
@@ -1852,7 +1851,7 @@ void ExtractParser::end_apply() {
 /// intrinsic metadata extraction logic based on the target device (tofino/jbay).
 ProcessParde::ProcessParde(const IR::BFN::Pipe *rv, bool useV1model)
     : Logging::PassManager("parser"_cs, Logging::Mode::AUTO) {
-    setName("ProcessParde"_cs);
+    setName("ProcessParde");
     addPasses({
         new AddParserMetadata(rv, useV1model),
         new AddDeparserMetadata(rv),

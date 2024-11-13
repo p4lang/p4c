@@ -16,12 +16,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/arch/rewrite_action_selector.h"
+#include "backends/tofino/bf-p4c/arch/rewrite_action_selector.h"
 
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/mau/resource_estimate.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/mau/resource_estimate.h"
 #include "frontends/p4/externInstance.h"
 #include "frontends/p4/methodInstance.h"
+#include "ir/annotations.h"
 
 namespace BFN {
 
@@ -53,14 +54,14 @@ const IR::Node *RewriteActionSelector::postorder(IR::Declaration_Instance *di) {
                     IR::Type_Bits::get(32), StageUseEstimate::SINGLE_RAMLINE_POOL_SIZE)));
                 args->push_back(new IR::Argument(new IR::Constant(
                     IR::Type_Bits::get(32), StageUseEstimate::COMPILER_DEFAULT_SELECTOR_POOLS)));
-                const IR::Annotations *annot = nullptr;
+                IR::Vector<IR::Annotation> annot;
                 if (auto ann = di->getAnnotation(IR::Annotation::nameAnnotation)) {
                     auto annName = ann->getName();
                     cstring name = annName + "_sel"_cs;
-                    annot = di->annotations->addOrReplace(IR::Annotation::nameAnnotation,
-                                                          new IR::StringLiteral(name));
+                    annot = IR::Annotations::setNameAnnotation(di->annotations, name);
                 }
-                auto as = new IR::Declaration_Instance(di->srcInfo, IR::ID(sel), annot, type, args);
+                auto as = new IR::Declaration_Instance(di->srcInfo, IR::ID(sel), std::move(annot),
+                                                       type, args);
                 instances->push_back(as);
                 return instances;
             }

@@ -34,12 +34,14 @@ abstract DpdkAsmStatement : IDPDKNode {
     std::ostream& toSpec(std::ostream& out) const override;
 }
 
-class DpdkAction {
-    optional Annotations        annotations = Annotations::empty;
+class DpdkAction : IAnnotated {
+    optional inline Vector<Annotation>        annotations;
     inline IndexedVector<DpdkAsmStatement> statements;
     inline ID name;
     inline ParameterList para;
     std::ostream& toSpec(std::ostream& out) const;
+    const Vector<Annotation> &getAnnotations() const override { return annotations; }
+    Vector<Annotation> &getAnnotations() override { return annotations; }
 #nodbprint
 }
 

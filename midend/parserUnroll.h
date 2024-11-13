@@ -151,7 +151,7 @@ class ParserStructure {
     std::map<cstring, size_t> callsIndexes;  // map for curent calls of state insite current one
     void setParser(const IR::P4Parser *parser) {
         CHECK_NULL(parser);
-        callGraph = new StateCallGraph(parser->name.name.string_view());
+        callGraph = new StateCallGraph(parser->name.name);
         this->parser = parser;
         start = nullptr;
     }

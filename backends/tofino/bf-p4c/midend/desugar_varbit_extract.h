@@ -100,10 +100,11 @@
 #ifndef BF_P4C_MIDEND_DESUGAR_VARBIT_EXTRACT_H_
 #define BF_P4C_MIDEND_DESUGAR_VARBIT_EXTRACT_H_
 
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/midend/type_checker.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/cloner.h"
+#include "ir/annotations.h"
 #include "ir/ir.h"
 
 namespace BFN {
@@ -122,9 +123,7 @@ class AnnotateVarbitExtractStates : public Transform {
             if (!method) continue;
 
             if (method->member == "extract" && call->arguments->size() == 2) {
-                IR::Annotations *annotations = state->annotations->clone();
-                annotations->add(new IR::Annotation(IR::ID("dontmerge"), {}));
-                state->annotations = annotations;
+                state->addOrReplaceAnnotation("dontmerge"_cs, {});
                 break;
             }
         }

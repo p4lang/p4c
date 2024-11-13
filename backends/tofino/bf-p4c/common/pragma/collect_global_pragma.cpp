@@ -20,9 +20,9 @@
 
 #include <algorithm>
 
-#include "bf-p4c/common/pragma/all_pragmas.h"
-#include "bf-p4c/parde/clot/pragma/do_not_use_clot.h"
-#include "bf-p4c/phv/pragma/phv_pragmas.h"
+#include "backends/tofino/bf-p4c/common/pragma/all_pragmas.h"
+#include "backends/tofino/bf-p4c/parde/clot/pragma/do_not_use_clot.h"
+#include "backends/tofino/bf-p4c/phv/pragma/phv_pragmas.h"
 
 const std::vector<std::string> *CollectGlobalPragma::g_global_pragma_names =
     new std::vector<std::string>{PragmaAlias::name,
@@ -51,7 +51,7 @@ const std::vector<std::string> *CollectGlobalPragma::g_global_pragma_names =
                                  PHV::pragma::DISABLE_DEPARSE_ZERO};
 
 cstring CollectGlobalPragma::getStructFieldName(const IR::StructField *s) const {
-    const auto nameAnnotation = s->annotations->getSingle("name"_cs);
+    const auto nameAnnotation = s->getAnnotation(IR::Annotation::nameAnnotation);
     if (!nameAnnotation || nameAnnotation->expr.size() != 1) return cstring();
     auto structName = nameAnnotation->expr.at(0)->to<IR::StringLiteral>();
     if (!structName) return cstring();
@@ -59,13 +59,12 @@ cstring CollectGlobalPragma::getStructFieldName(const IR::StructField *s) const 
 }
 
 bool CollectGlobalPragma::preorder(const IR::StructField *s) {
-    if (!s->annotations) return true;
     cstring structFieldName = getStructFieldName(s);
     // The header names are prefixed with a '.'. For the purposes of PHV allocation, we do not need
     // the period.
     cstring structFieldNameWithoutDot =
         (structFieldName != cstring()) ? structFieldName.substr(1) : structFieldName;
-    for (auto ann : s->annotations->annotations) {
+    for (auto ann : s->annotations) {
         // Ignore annotations that are not NOT_PARSED or NOT_DEPARSED
         bool notParsedDeparsedAnnotation = (ann->name.name == PHV::pragma::NOT_PARSED ||
                                             ann->name.name == PHV::pragma::NOT_DEPARSED);

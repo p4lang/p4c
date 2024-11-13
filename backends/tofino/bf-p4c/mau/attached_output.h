@@ -19,7 +19,7 @@
 #ifndef BF_P4C_MAU_ATTACHED_OUTPUT_H_
 #define BF_P4C_MAU_ATTACHED_OUTPUT_H_
 
-#include "bf-p4c/mau/action_format.h"
+#include "backends/tofino/bf-p4c/mau/action_format.h"
 
 class LayoutChoices;
 

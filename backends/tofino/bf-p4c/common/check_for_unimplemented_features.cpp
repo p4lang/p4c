@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/common/check_for_unimplemented_features.h"
+#include "backends/tofino/bf-p4c/common/check_for_unimplemented_features.h"
 
 #include "lib/error_reporter.h"
 

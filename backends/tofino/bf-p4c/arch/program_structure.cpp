@@ -26,7 +26,7 @@
 
 #include "ir/ir.h"
 // #include "lib/path.h"
-#include "bf-p4c/common/parse_annotations.h"
+#include "backends/tofino/bf-p4c/common/parse_annotations.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/options.h"
 #include "frontends/common/parseInput.h"

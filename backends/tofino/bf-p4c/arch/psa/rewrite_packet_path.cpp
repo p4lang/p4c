@@ -18,11 +18,13 @@
 
 #include "rewrite_packet_path.h"
 
-#include "bf-p4c/arch/bridge_metadata.h"
-#include "bf-p4c/midend/type_checker.h"
+#include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
+#include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
+#include "ir/annotations.h"
+#include "ir/ir-generated.h"
 #include "ir/ir.h"
 #include "lib/ordered_set.h"
 
@@ -198,8 +200,7 @@ struct PacketPath : public Transform {
 
     void updateFields(IR::Type_StructLike *type) {
         IR::IndexedVector<IR::StructField> fields;
-        auto *fieldAnnotations = new IR::Annotations();
-        fieldAnnotations->annotations.push_back(new IR::Annotation(IR::ID("flexible"), {}));
+        IR::Vector<IR::Annotation> fieldAnnotations{new IR::Annotation(IR::ID("flexible"), {})};
         if ((structure->clone_i2e.exists &&
              structure->clone_i2e.structType->to<IR::Type_StructLike>()->name) ||
             (structure->clone_e2e.exists &&
@@ -276,8 +277,8 @@ struct PacketPath : public Transform {
                                       IR::ID("__recirculate_data"));
         addExtract(newState, member, tnaContext);
         copyToMetadata(newState, structure->recirculate, member);
-        newState->annotations = newState->annotations->addAnnotationIfNew(
-            IR::Annotation::nameAnnotation, new IR::StringLiteral(cstring("$__recirculate")));
+        newState->addAnnotationIfNew(IR::Annotation::nameAnnotation,
+                                     new IR::StringLiteral("$__recirculate"_cs));
         return newState;
     }
 
@@ -437,9 +438,8 @@ struct PacketPath : public Transform {
         auto select = new IR::PathExpression(IR::ID("__egress_p4_entry_point"));
         auto newStateName = IR::ID(cstring("__mirror_" + gress_str));
         auto *newState = new IR::ParserState(newStateName, *statements, select);
-        newState->annotations = newState->annotations->addAnnotationIfNew(
-            IR::Annotation::nameAnnotation,
-            new IR::StringLiteral(cstring("$__mirror_" + gress_str)));
+        newState->addAnnotationIfNew(IR::Annotation::nameAnnotation,
+                                     new IR::StringLiteral(cstring("$__mirror_" + gress_str)));
         addExtract(newState, member, tnaContext);
         // Add assignment statement for packet path
         auto cloneType = gress ? structure->clone_e2e : structure->clone_i2e;

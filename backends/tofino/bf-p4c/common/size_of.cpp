@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/common/size_of.h"
+#include "backends/tofino/bf-p4c/common/size_of.h"
 
 namespace BFN {
 

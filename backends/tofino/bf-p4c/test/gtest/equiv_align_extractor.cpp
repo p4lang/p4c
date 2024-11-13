@@ -20,10 +20,10 @@
 #include <list>
 #include <sstream>
 
-#include "bf-p4c/logging/constrained_fields.h"
-#include "bf-p4c/logging/group_constraint_extractor.h"
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
-#include "bf-p4c/test/utils/super_cluster_builder.h"
+#include "backends/tofino/bf-p4c/logging/constrained_fields.h"
+#include "backends/tofino/bf-p4c/logging/group_constraint_extractor.h"
+#include "backends/tofino/bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "backends/tofino/bf-p4c/test/utils/super_cluster_builder.h"
 #include "gtest/gtest.h"
 
 namespace P4::Test {

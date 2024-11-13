@@ -19,7 +19,7 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_MAU_HASH_MASK_ANNOTATIONS_H_
 #define BACKENDS_TOFINO_BF_P4C_MAU_HASH_MASK_ANNOTATIONS_H_
 
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "ir/ir.h"
 #include "lib/bitvec.h"
 
@@ -31,7 +31,7 @@ class HashMaskAnnotations {
     HashMaskAnnotations(const IR::MAU::Table *tbl, const PhvInfo &phv) {
         key_hash_bits_masked = 0;
         for (auto &table_key : tbl->match_key) {
-            for (auto &a : table_key->annotations->annotations) {
+            for (auto &a : table_key->annotations) {
                 if (a->name == "hash_mask") {
                     bitvec hash_mask = getBitvec(a);
 

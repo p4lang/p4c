@@ -16,22 +16,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 
 #include <string>
 
 #include <boost/range/adaptor/reversed.hpp>
 
-#include "bf-p4c/arch/bridge_metadata.h"
-#include "bf-p4c/common/bridged_packing.h"
-#include "bf-p4c/common/header_stack.h"
-#include "bf-p4c/common/pragma/all_pragmas.h"
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/lib/error_type.h"
-#include "bf-p4c/lib/safe_width.h"
-#include "bf-p4c/mau/gateway.h"
-#include "bf-p4c/mau/table_summary.h"
-#include "bf-p4c/parde/parde_visitor.h"
+#include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
+#include "backends/tofino/bf-p4c/common/bridged_packing.h"
+#include "backends/tofino/bf-p4c/common/header_stack.h"
+#include "backends/tofino/bf-p4c/common/pragma/all_pragmas.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/lib/error_type.h"
+#include "backends/tofino/bf-p4c/lib/safe_width.h"
+#include "backends/tofino/bf-p4c/mau/gateway.h"
+#include "backends/tofino/bf-p4c/mau/table_summary.h"
+#include "backends/tofino/bf-p4c/parde/parde_visitor.h"
 #include "lib/stringref.h"
 
 namespace {
@@ -141,11 +141,10 @@ void PhvInfo::add_struct(cstring name, const IR::Type_StructLike *type, gress_t 
         // path-expression can also point to an error field, which is invalid on Tofino
         if (size == 0) continue;
         // "hidden" annotation indicates padding introduced with bridged metadata fields
-        bool isPad = f->getAnnotations()->getSingle("hidden"_cs) != nullptr ||
-                     f->getAnnotations()->getSingle("padding"_cs) != nullptr;
-        bool isOverlayable = f->getAnnotations()->getSingle("overlayable"_cs) != nullptr;
+        bool isPad = f->hasAnnotation("hidden"_cs) || f->hasAnnotation("padding"_cs);
+        bool isOverlayable = f->hasAnnotation("overlayable"_cs);
         // "flexible" annotation indicates flexible fields
-        bool isFlexible = f->getAnnotations()->getSingle("flexible"_cs) != nullptr;
+        bool isFlexible = f->hasAnnotation("flexible"_cs);
         bool isFixedSizeHeader = type->is<IR::BFN::Type_FixedSizeHeader>();
         std::optional<Util::SourceInfo> srcInfo = std::nullopt;
         if (f->srcInfo.isValid()) srcInfo = f->srcInfo;
@@ -667,18 +666,18 @@ std::set<int> PhvInfo::minStages(const IR::MAU::Table *table) {
     if (LOGGING(6)) {
         std::stringstream ss;
         ss << " Reading stage(s) for table " << table->name << " = ";
-        for (auto stg : ::get(table_to_min_stages, TableSummary::getTableName(table)))
+        for (auto stg : P4::get(table_to_min_stages, TableSummary::getTableName(table)))
             ss << stg << " ";
         LOG6(ss.str());
     }
 
-    return ::get(table_to_min_stages, TableSummary::getTableName(table));
+    return P4::get(table_to_min_stages, TableSummary::getTableName(table));
 }
 
 std::set<int> PhvInfo::physicalStages(const IR::MAU::Table *table) {
     std::set<int> rv;
     if (table_to_physical_stages.count(TableSummary::getTableIName(table)))
-        rv = ::get(table_to_physical_stages, TableSummary::getTableIName(table));
+        rv = P4::get(table_to_physical_stages, TableSummary::getTableIName(table));
     return rv;
 }
 
@@ -1034,9 +1033,9 @@ void PHV::Field::updateAlignment(PHV::AlignmentReason reason, const FieldAlignme
         auto alignmentSourceStr = [&](const FieldAlignment &alignment,
                                       const Util::SourceInfo &srcInfo) {
             std::stringstream ss;
-            ss << (srcInfo.isValid() ? srcInfo.toPositionString() : "Source unknown")
+            ss << (srcInfo.isValid() ? srcInfo.toPositionString() : "Source unknown"_cs)
                << ": alignment = " << alignment.align << " (little endian)" << std::endl
-               << (srcInfo.isValid() ? srcInfo.toSourceFragment() : "");
+               << (srcInfo.isValid() ? srcInfo.toSourceFragment() : cstring::empty);
             return ss.str();
         };
         std::stringstream inferredAlignments;

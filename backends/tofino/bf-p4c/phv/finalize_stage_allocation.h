@@ -19,9 +19,9 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_PHV_FINALIZE_STAGE_ALLOCATION_H_
 #define BACKENDS_TOFINO_BF_P4C_PHV_FINALIZE_STAGE_ALLOCATION_H_
 
-#include "bf-p4c/common/field_defuse.h"
-#include "bf-p4c/mau/table_dependency_graph.h"
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/common/field_defuse.h"
+#include "backends/tofino/bf-p4c/mau/table_dependency_graph.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 
 /** Calculate the maximum number of physical stages after table allocation.
  */

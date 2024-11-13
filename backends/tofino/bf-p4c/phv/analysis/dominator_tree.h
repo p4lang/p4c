@@ -19,8 +19,8 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_PHV_ANALYSIS_DOMINATOR_TREE_H_
 #define BACKENDS_TOFINO_BF_P4C_PHV_ANALYSIS_DOMINATOR_TREE_H_
 
-#include "bf-p4c/mau/mau_visitor.h"
-#include "bf-p4c/mau/table_flow_graph.h"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/mau/table_flow_graph.h"
 #include "ir/ir.h"
 
 /** This class builds an immediate dominator tree using separate table flow graphs for ingress and

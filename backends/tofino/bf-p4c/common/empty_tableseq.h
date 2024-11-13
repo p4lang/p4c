@@ -19,7 +19,7 @@
 #ifndef BF_P4C_COMMON_EMPTY_TABLESEQ_H_
 #define BF_P4C_COMMON_EMPTY_TABLESEQ_H_
 
-#include "bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
 
 using namespace P4;
 

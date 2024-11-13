@@ -235,7 +235,7 @@ template <class T, template <class K, class V, class COMP, class ALLOC> class MA
 void IR::NameMap<T, MAP, COMP, ALLOC>::visit_children(Visitor &v) {
     map_t new_symbols;
     for (auto i = symbols.begin(); i != symbols.end();) {
-        const IR::Node *n = v.apply_visitor(i->second, i->first);
+        const IR::Node *n = v.apply_visitor(i->second, i->first.c_str());
         if (!n && i->second) {
             i = symbols.erase(i);
             continue;
@@ -270,7 +270,7 @@ template <class T, template <class K, class V, class COMP, class ALLOC> class MA
           class ALLOC /*= std::allocator<std::pair<cstring, const T*>>*/>
 void IR::NameMap<T, MAP, COMP, ALLOC>::visit_children(Visitor &v) const {
     for (auto &k : symbols) {
-        v.visit(k.second, k.first);
+        v.visit(k.second, k.first.c_str());
     }
 }
 template <class T, template <class K, class V, class COMP, class ALLOC> class MAP /*= std::map */,

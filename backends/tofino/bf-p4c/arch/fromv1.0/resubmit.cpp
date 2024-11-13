@@ -18,13 +18,14 @@
 
 #include "resubmit.h"
 
-#include "bf-p4c/arch/intrinsic_metadata.h"
-#include "bf-p4c/device.h"
-#include "bf-p4c/parde/parde_visitor.h"
+#include "backends/tofino/bf-p4c/arch/intrinsic_metadata.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/parde/parde_visitor.h"
 #include "frontends/p4-14/fromv1.0/v1model.h"
 #include "frontends/p4/cloner.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
+#include "ir/annotations.h"
 
 namespace BFN {
 namespace {
@@ -229,8 +230,8 @@ class AddResubmitParser : public Transform {
         auto select = new IR::PathExpression(IR::ID("__skip_to_packet"));
         auto newStateName = IR::ID(cstring("__") + name);
         auto *newState = new IR::ParserState(newStateName, *statements, select);
-        newState->annotations = newState->annotations->addAnnotationIfNew(
-            IR::Annotation::nameAnnotation, new IR::StringLiteral(cstring(cstring("$") + name)));
+        newState->addAnnotationIfNew(IR::Annotation::nameAnnotation,
+                                     new IR::StringLiteral(cstring("$" + name)));
         return newState;
     }
 

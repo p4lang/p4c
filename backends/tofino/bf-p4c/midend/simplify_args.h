@@ -70,9 +70,9 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_MIDEND_SIMPLIFY_ARGS_H_
 #define BACKENDS_TOFINO_BF_P4C_MIDEND_SIMPLIFY_ARGS_H_
 
-#include "bf-p4c/midend/check_header_alignment.h"
-#include "bf-p4c/midend/copy_header.h"
-#include "bf-p4c/midend/type_checker.h"
+#include "backends/tofino/bf-p4c/midend/check_header_alignment.h"
+#include "backends/tofino/bf-p4c/midend/copy_header.h"
+#include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/cloner.h"
 #include "frontends/p4/moveDeclarations.h"
@@ -225,11 +225,11 @@ class FlattenHeader : public Modifier {
     const P4::TypeMap *typeMap;
     IR::Type_Header *flattenedHeader = nullptr;
     std::vector<cstring> nameSegments{};
-    std::vector<const IR::Annotations *> allAnnotations{};
+    std::vector<IR::Vector<IR::Annotation>> allAnnotations{};
     std::vector<Util::SourceInfo> srcInfos{};
     cstring makeName(std::string_view sep) const;
     void flattenType(const IR::Type *type);
-    const IR::Annotations *mergeAnnotations() const;
+    IR::Vector<IR::Annotation> mergeAnnotations() const;
 
     const IR::Member *flattenedMember;
     std::vector<cstring> memberSegments{};

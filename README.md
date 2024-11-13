@@ -213,9 +213,9 @@ sudo dpkg -i /path/to/package.deb
     ```
     The cmake command takes the following optional arguments to
     further customize the build (see file `CMakeLists.txt` for the full list):
-     - `-DCMAKE_BUILD_TYPE=RELEASE|DEBUG` -- set CMAKE_BUILD_TYPE to
-      RELEASE or DEBUG to build with optimizations or with debug
-      symbols to run in gdb. Default is RELEASE.
+     - `-DCMAKE_BUILD_TYPE=Release|Debug` -- set CMAKE_BUILD_TYPE to
+      Release or Debug to build with optimizations or with debug
+      symbols to run in gdb. Default is Release.
      - `-DCMAKE_INSTALL_PREFIX=<path>` -- set the directory where
        `make install` installs the compiler. Defaults to /usr/local.
      - `-DENABLE_BMV2=ON|OFF`. Enable [the bmv2 backend](backends/bmv2/README.md). Default ON.

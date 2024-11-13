@@ -71,7 +71,6 @@ class INode : public Util::IHasSourceInfo, public IHasDbPrint, public ICastable 
     virtual void toJSON(JSONGenerator &) const = 0;
     virtual cstring node_type_name() const = 0;
     virtual void validate() const {}
-    virtual const Annotation *getAnnotation(cstring) const { return nullptr; }
 
     // default checkedTo implementation for nodes: just fallback to generic ICastable method
     template <typename T>
@@ -164,6 +163,14 @@ class Node : public virtual INode {
     virtual void visit_children(Visitor &) const {}
 
     bool operator!=(const Node &n) const { return !operator==(n); }
+
+    /// Helper to simplify usage of nodes in Abseil functions (e.g. StrCat / StrFormat, etc.)
+    /// without explicit string_view conversion. Note that this calls Node::toString() so might
+    /// not be always appropriate for user-visible messages / strings.
+    template <typename Sink>
+    friend void AbslStringify(Sink &sink, const IR::Node *n) {
+        sink.Append(n->toString());
+    }
 
     DECLARE_TYPEINFO_WITH_TYPEID(Node, NodeKind::Node, INode);
 };

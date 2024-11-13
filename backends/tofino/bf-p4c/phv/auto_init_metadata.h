@@ -22,8 +22,8 @@
 #include <set>
 #include <utility>
 
-#include "bf-p4c/common/elim_unused.h"
-#include "bf-p4c/common/field_defuse.h"
+#include "backends/tofino/bf-p4c/common/elim_unused.h"
+#include "backends/tofino/bf-p4c/common/field_defuse.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
 #include "lib/cstring.h"

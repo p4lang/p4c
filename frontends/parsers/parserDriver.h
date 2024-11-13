@@ -281,10 +281,6 @@ class V1ParserDriver final : public P4::AbstractParserDriver {
     /// @return a IR::Vector containing the active pragmas, and clear the list.
     IR::Vector<IR::Annotation> takePragmasAsVector();
 
-    /// @return an IR::Annotations object containing the active pragmas, and
-    /// clear the list.
-    const IR::Annotations *takePragmasAsAnnotations();
-
     ////////////////////////////////////////////////////////////////////////////
     // Shared state manipulated directly by the lexer and parser.
     ////////////////////////////////////////////////////////////////////////////

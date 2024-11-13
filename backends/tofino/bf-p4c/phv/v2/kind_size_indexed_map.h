@@ -22,7 +22,7 @@
 #include <map>
 #include <optional>
 
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 
 namespace PHV {
 namespace v2 {

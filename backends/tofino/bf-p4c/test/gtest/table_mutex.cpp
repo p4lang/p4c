@@ -16,17 +16,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/table_mutex.h"
+#include "backends/tofino/bf-p4c/mau/table_mutex.h"
 
 #include <optional>
 
 #include <boost/algorithm/string/replace.hpp>
 
-#include "bf-p4c/common/header_stack.h"
-#include "bf-p4c/common/multiple_apply.h"
-#include "bf-p4c/mau/instruction_selection.h"
-#include "bf-p4c/phv/action_phv_constraints.h"
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "backends/tofino/bf-p4c/common/header_stack.h"
+#include "backends/tofino/bf-p4c/common/multiple_apply.h"
+#include "backends/tofino/bf-p4c/mau/instruction_selection.h"
+#include "backends/tofino/bf-p4c/phv/action_phv_constraints.h"
+#include "backends/tofino/bf-p4c/test/gtest/tofino_gtest_utils.h"
 #include "gtest/gtest.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"

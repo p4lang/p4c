@@ -28,7 +28,6 @@ set(BF_P4C_UNIFIED_SOURCE_CHUNK_SIZE "5" CACHE STRING
     "Target unified compilation chunk size for bf-p4c (an integer or ALL)")
 
 find_package (Boost REQUIRED COMPONENTS graph)
-add_definitions("-DBOOST_NO_ARGUMENT_DEPENDENT_LOOKUP")
 if (ENABLE_BAREFOOT_INTERNAL)
   add_definitions("-DBAREFOOT_INTERNAL=1")
 endif()
@@ -90,14 +89,14 @@ add_definitions("-DRESOURCES_SCHEMA_VERSION=\"${RESOURCES_SCHEMA_VERSION}\"")
 
 include_directories(${BFN_P4C_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}
-  ${Boost_INCLUDE_DIRS} ${LIBDYNHASH_INCLUDE_DIR} ${P4TOOLS_Z3_INCLUDE_DIR} )
+  ${Boost_INCLUDE_DIRS} ${LIBDYNHASH_INCLUDE_DIR} ${Z3_INCLUDE_DIR} )
 # The generated code for protobuf has an excessive number of warnings so we
 # include the build directory as a system directory
 include_directories(SYSTEM ${P4C_BINARY_DIR}/control-plane)
 set (HAVE_LIBBOOST_GRAPH 1)
-message(STATUS "Z3_LIBRARY value: ${P4TOOLS_Z3_LIB}")
+message(STATUS "Z3_LIBRARY value: ${Z3_LIB}")
 
-set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${Boost_GRAPH_LIBRARY};${LIBDYNHASH_LIBRARY};${P4TOOLS_Z3_LIB}")
+set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${Boost_GRAPH_LIBRARY};${LIBDYNHASH_LIBRARY};${Z3_LIB}")
 set (P4C_LIB_DEPS ${P4C_LIB_DEPS} PARENT_SCOPE)
 
 add_subdirectory(logging)
@@ -978,7 +977,7 @@ if(BUILD_STATIC_BFP4C_LIBS)
 else()
     add_library(tofinobackend OBJECT ${BF_P4C_SOURCES})
 endif()
-target_link_libraries(tofinobackend PRIVATE absl::prefetch ${P4C_LIB_DEPS})
+target_link_libraries(tofinobackend PRIVATE absl::prefetch ${P4C_LIB_DEPS} ir)
 add_dependencies(tofinobackend ir-generated frontend genLogging bfn_p4runtime)
 target_include_directories(tofinobackend PRIVATE "${BFN_P4C_SOURCE_DIR}/third_party/spdlog/include")
 foreach(dir ${Protobuf_INCLUDE_DIRS})
@@ -998,7 +997,6 @@ target_link_libraries (bfp4c tofinobackend bfn_p4runtime
 # XXX These compile definitions and include directories should be inherited
 # XXX from bfp4c's dependencies, but these CMake files aren't very modular.
 target_compile_definitions(bfp4c
-  INTERFACE "-DBOOST_NO_ARGUMENT_DEPENDENT_LOOKUP"
   INTERFACE "-DMAX_LOGGING_LEVEL=${MAX_LOGGING_LEVEL}"
   INTERFACE "-DEVENT_LOG_SCHEMA_VERSION=\"${EVENT_LOG_SCHEMA_VERSION}\""
   INTERFACE "-DPHV_SCHEMA_VERSION=\"${PHV_SCHEMA_VERSION}\""
@@ -1378,7 +1376,7 @@ if (ENABLE_GTESTS)
                                 "${CMAKE_CURRENT_SOURCE_DIR}/test/gtest/tofino_gtest_utils.cpp")
                                 # test_bf_gtest_helpers should be in its own testlib - & requies 'whole_archive' hack!
                                 # Leave it in GTEST_BF_P4C_SOURCES for now.
-  target_link_libraries (bf_gtest_support PRIVATE absl::flat_hash_map PRIVATE absl::flat_hash_set ${P4C_LIB_DEPS})
+  target_link_libraries (bf_gtest_support PRIVATE absl::flat_hash_map PRIVATE absl::flat_hash_set PRIVATE ir ${P4C_LIB_DEPS})
   target_include_directories (bf_gtest_support PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/test/gtest}" PRIVATE "${P4C_BINARY_DIR}")
   add_dependencies (bf_gtest_support p4headers_h p4headers_cpp ir-generated gtest frontend-parser-gen)  # Indirectly we #include "ir/gen-tree-macro.h" and "p4parser.hpp"
 

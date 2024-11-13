@@ -42,33 +42,32 @@ void KernelSamplesTarget::emitIncludes(Util::SourceCodeBuilder *builder) const {
 
 void KernelSamplesTarget::emitResizeBuffer(Util::SourceCodeBuilder *builder, cstring buffer,
                                            cstring offsetVar) const {
-    builder->appendFormat("bpf_skb_adjust_room(%s, %s, 1, 0)", buffer, offsetVar);
+    builder->appendFormat("bpf_skb_adjust_room(%v, %v, 1, 0)", buffer, offsetVar);
 }
 
 void KernelSamplesTarget::emitTableLookup(Util::SourceCodeBuilder *builder, cstring tblName,
                                           cstring key, cstring value) const {
     if (!value.isNullOrEmpty()) builder->appendFormat("%s = ", value.c_str());
-    builder->appendFormat("BPF_MAP_LOOKUP_ELEM(%s, &%s)", tblName.c_str(), key.c_str());
+    builder->appendFormat("BPF_MAP_LOOKUP_ELEM(%v, &%v)", tblName, key);
 }
 
 void KernelSamplesTarget::emitTableUpdate(Util::SourceCodeBuilder *builder, cstring tblName,
                                           cstring key, cstring value) const {
-    builder->appendFormat("BPF_MAP_UPDATE_ELEM(%s, &%s, &%s, BPF_ANY);", tblName.c_str(),
-                          key.c_str(), value.c_str());
+    builder->appendFormat("BPF_MAP_UPDATE_ELEM(%v, &%v, &%v, BPF_ANY);", tblName, key, value);
 }
 
 void KernelSamplesTarget::emitUserTableUpdate(Util::SourceCodeBuilder *builder, cstring tblName,
                                               cstring key, cstring value) const {
-    builder->appendFormat("BPF_USER_MAP_UPDATE_ELEM(%s, &%s, &%s, BPF_ANY);", tblName.c_str(),
-                          key.c_str(), value.c_str());
+    builder->appendFormat("BPF_USER_MAP_UPDATE_ELEM(%v, &%v, &%v, BPF_ANY);", tblName, key, value);
 }
 
 void KernelSamplesTarget::emitTableDecl(Util::SourceCodeBuilder *builder, cstring tblName,
                                         TableKind tableKind, cstring keyType, cstring valueType,
                                         unsigned size) const {
     cstring kind, flags;
-    static constexpr char registerTable[] = "REGISTER_TABLE(%s, %s, %s, %s, %d)";
-    static constexpr char registerTableWithFlags[] = "REGISTER_TABLE_FLAGS(%s, %s, %s, %s, %d, %s)";
+    static constexpr std::string_view registerTable = "REGISTER_TABLE(%v, %v, %v, %v, %d)";
+    static constexpr std::string_view registerTableWithFlags =
+        "REGISTER_TABLE_FLAGS(%v, %v, %v, %v, %d, %v)";
 
     kind = getBPFMapType(tableKind);
 
@@ -93,11 +92,10 @@ void KernelSamplesTarget::emitTableDecl(Util::SourceCodeBuilder *builder, cstrin
     }
 
     if (flags.isNullOrEmpty()) {
-        builder->appendFormat(registerTable, tblName.c_str(), kind.c_str(), keyType.c_str(),
-                              valueType.c_str(), size);
+        builder->appendFormat(registerTable, tblName, kind, keyType, valueType, size);
     } else {
-        builder->appendFormat(registerTableWithFlags, tblName.c_str(), kind.c_str(),
-                              keyType.c_str(), valueType.c_str(), size, flags);
+        builder->appendFormat(registerTableWithFlags, tblName, kind, keyType, valueType, size,
+                              flags);
     }
     builder->newline();
     annotateTableWithBTF(builder, tblName, keyType, valueType);
@@ -122,9 +120,10 @@ void KernelSamplesTarget::emitMapInMapDecl(Util::SourceCodeBuilder *builder, cst
         BUG("Unsupported type of outer map for map-in-map");
     }
 
-    static constexpr char registerOuterTable[] =
-        "REGISTER_TABLE_OUTER(%s, %s_OF_MAPS, %s, %s, %d, %d, %s)";
-    static constexpr char registerInnerTable[] = "REGISTER_TABLE_INNER(%s, %s, %s, %s, %d, %d, %d)";
+    static constexpr std::string_view registerOuterTable =
+        "REGISTER_TABLE_OUTER(%v, %v_OF_MAPS, %v, %s, %d, %d, %v)";
+    static constexpr std::string_view registerInnerTable =
+        "REGISTER_TABLE_INNER(%v, %v, %v, %v, %d, %d, %d)";
 
     innerMapIndex++;
 
@@ -144,18 +143,18 @@ void KernelSamplesTarget::emitMapInMapDecl(Util::SourceCodeBuilder *builder, cst
 
 void KernelSamplesTarget::emitLicense(Util::SourceCodeBuilder *builder, cstring license) const {
     builder->emitIndent();
-    builder->appendFormat("char _license[] SEC(\"license\") = \"%s\";", license.c_str());
+    builder->appendFormat(R"(char _license[] SEC("license") = "%v";)", license);
     builder->newline();
 }
 
 void KernelSamplesTarget::emitCodeSection(Util::SourceCodeBuilder *builder,
                                           cstring sectionName) const {
-    builder->appendFormat("SEC(\"%s\")\n", sectionName.c_str());
+    builder->appendFormat("SEC(\"%v\")\n", sectionName);
 }
 
 void KernelSamplesTarget::emitMain(Util::SourceCodeBuilder *builder, cstring functionName,
                                    cstring argName) const {
-    builder->appendFormat("int %s(SK_BUFF *%s)", functionName.c_str(), argName.c_str());
+    builder->appendFormat("int %v(SK_BUFF *%v)", functionName, argName);
 }
 
 void KernelSamplesTarget::emitPreamble(Util::SourceCodeBuilder *builder) const {
@@ -199,21 +198,20 @@ void KernelSamplesTarget::emitTraceMessage(Util::SourceCodeBuilder *builder, con
     va_end(ap);
 
     builder->emitIndent();
-    builder->appendFormat("bpf_trace_message(%s);", msg);
+    builder->appendFormat("bpf_trace_message(%v);", msg);
     builder->newline();
 }
 
 void KernelSamplesTarget::annotateTableWithBTF(Util::SourceCodeBuilder *builder, cstring name,
                                                cstring keyType, cstring valueType) const {
-    builder->appendFormat("BPF_ANNOTATE_KV_PAIR(%s, %s, %s)", name.c_str(), keyType.c_str(),
-                          valueType.c_str());
+    builder->appendFormat("BPF_ANNOTATE_KV_PAIR(%v, %v, %v)", name, keyType, valueType);
     builder->newline();
 }
 
 //////////////////////////////////////////////////////////////
 void XdpTarget::emitResizeBuffer(Util::SourceCodeBuilder *builder, cstring buffer,
                                  cstring offsetVar) const {
-    builder->appendFormat("bpf_xdp_adjust_head(%s, -%s)", buffer, offsetVar);
+    builder->appendFormat("bpf_xdp_adjust_head(%v, -%v)", buffer, offsetVar);
 }
 
 //////////////////////////////////////////////////////////////
@@ -225,8 +223,8 @@ void TestTarget::emitIncludes(Util::SourceCodeBuilder *builder) const {
 
 void TestTarget::emitTableDecl(Util::SourceCodeBuilder *builder, cstring tblName, TableKind,
                                cstring keyType, cstring valueType, unsigned size) const {
-    builder->appendFormat("REGISTER_TABLE(%s, 0 /* unused */,", tblName.c_str());
-    builder->appendFormat("sizeof(%s), sizeof(%s), %d)", keyType.c_str(), valueType.c_str(), size);
+    builder->appendFormat("REGISTER_TABLE(%v, 0 /* unused */,", tblName);
+    builder->appendFormat("sizeof(%v), sizeof(%v), %d)", keyType, valueType, size);
     builder->newline();
 }
 

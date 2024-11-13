@@ -18,7 +18,7 @@
 
 #include "validate_actions.h"
 
-#include "bf-p4c/mau/action_analysis.h"
+#include "backends/tofino/bf-p4c/mau/action_analysis.h"
 #include "ir/ir.h"
 #include "lib/log.h"
 
@@ -53,14 +53,10 @@ Visitor::profile_t ValidateActions::init_apply(const IR::Node *root) {
 }
 
 void ValidateActions::end_apply() {
-    cstring error_message;
-    if (phv_alloc)
-        error_message =
-            cstring("PHV allocation creates an invalid container action within a Tofino ALU");
-    else
-        error_message = cstring(
-            "Instruction selection creates an instruction that the rest of the compiler cannot "
-            "correctly interpret");
+    const char *error_message =
+        phv_alloc ? "PHV allocation creates an invalid container action within a Tofino ALU"
+                  : "Instruction selection creates an instruction that the rest of the compiler "
+                    "cannot correctly interpret";
     if (error_found) {
         error(error_message);
     } else if (warning_found) {

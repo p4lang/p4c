@@ -16,11 +16,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/utils/report.h"
+#include "backends/tofino/bf-p4c/phv/utils/report.h"
 
 #include <numeric>
 
-#include "bf-p4c/common/table_printer.h"
+#include "backends/tofino/bf-p4c/common/table_printer.h"
 
 using ContainerAllocStatus = PHV::Allocation::ContainerAllocStatus;
 

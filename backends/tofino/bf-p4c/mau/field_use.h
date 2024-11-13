@@ -21,8 +21,8 @@
 
 #include <iostream>
 
-#include "bf-p4c/ir/tofino_write_context.h"
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/ir/tofino_write_context.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "lib/bitvec.h"
 #include "lib/safe_vector.h"
 #include "mau_visitor.h"

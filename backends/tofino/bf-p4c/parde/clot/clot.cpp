@@ -22,7 +22,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "ir/ir.h"
 #include "ir/json_generator.h"
 #include "ir/json_loader.h"

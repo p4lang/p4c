@@ -21,15 +21,15 @@
 
 #include <optional>
 
-#include "bf-p4c/common/map_tables_to_actions.h"
-#include "bf-p4c/ir/bitrange.h"
-#include "bf-p4c/lib/union_find.hpp"
-#include "bf-p4c/mau/action_analysis.h"
-#include "bf-p4c/mau/table_dependency_graph.h"
-#include "bf-p4c/phv/analysis/pack_conflicts.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/phv_parde_mau_use.h"
-#include "bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/common/map_tables_to_actions.h"
+#include "backends/tofino/bf-p4c/ir/bitrange.h"
+#include "backends/tofino/bf-p4c/lib/union_find.hpp"
+#include "backends/tofino/bf-p4c/mau/action_analysis.h"
+#include "backends/tofino/bf-p4c/mau/table_dependency_graph.h"
+#include "backends/tofino/bf-p4c/phv/analysis/pack_conflicts.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/phv_parde_mau_use.h"
+#include "backends/tofino/bf-p4c/phv/utils/utils.h"
 #include "ir/ir.h"
 #include "lib/safe_vector.h"
 

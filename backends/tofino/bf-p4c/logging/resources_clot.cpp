@@ -20,9 +20,9 @@
 
 #include <numeric>
 #include <initializer_list>
-#include "bf-p4c/common/asm_output.h"  // canon_name
-#include "bf-p4c/parde/clot/clot_info.h"  // ClotInfo
-#include "bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/common/asm_output.h"  // canon_name
+#include "backends/tofino/bf-p4c/parde/clot/clot_info.h"  // ClotInfo
+#include "backends/tofino/bf-p4c/device.h"
 #include "resources_clot.h"
 
 namespace BFN {

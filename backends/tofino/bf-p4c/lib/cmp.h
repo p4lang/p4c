@@ -96,9 +96,7 @@ class LiftCompare : public LiftEqual<T>, public LiftLess<T> {
 template <class T>
 class ByNameLess {
  public:
-    bool operator()(const T &a, const T &b) const {
-        return std::strcmp(a.getName().name, b.getName().name) < 0;
-    }
+    bool operator()(const T &a, const T &b) const { return a.getName().name < b.getName().name; }
 
     bool operator()(const T *a, const T *b) const {
         // note: std::less is guaranteed to be defined for pointers, operator < is not

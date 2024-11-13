@@ -23,9 +23,9 @@
  * passes.
  */
 
-#include "bf-p4c/midend/elim_cast.h"
-#include "bf-p4c/midend/simplify_key_policy.h"
-#include "bf-p4c/midend/type_checker.h"
+#include "backends/tofino/bf-p4c/midend/elim_cast.h"
+#include "backends/tofino/bf-p4c/midend/simplify_key_policy.h"
+#include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "bf_gtest_helpers.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/referenceMap.h"

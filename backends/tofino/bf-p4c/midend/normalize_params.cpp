@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/midend/normalize_params.h"
+#include "backends/tofino/bf-p4c/midend/normalize_params.h"
 
 /** Checks whether any path expression name has @name as its root.  This is
  * useful for determining whether adding/changing a name in a given scope will

@@ -167,7 +167,7 @@ class ComputeDefUse : public Inspector,
     void loop_revisit(const IR::ParserState *) override;
     void postorder(const IR::ParserState *) override;
     bool preorder(const IR::Type *) override { return false; }
-    bool preorder(const IR::Annotations *) override { return false; }
+    bool preorder(const IR::Vector<IR::Annotation> *) override { return false; }
     bool preorder(const IR::KeyElement *) override;
     bool preorder(const IR::AssignmentStatement *) override;
     const IR::Expression *do_read(def_info_t &, const IR::Expression *, const Context *);

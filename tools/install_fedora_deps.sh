@@ -5,6 +5,9 @@
 set -e  # Exit on error.
 set -x  # Make command execution verbose
 
+THIS_DIR=$( cd -- "$( dirname -- "${0}" )" &> /dev/null && pwd )
+P4C_DIR=$(readlink -f ${THIS_DIR}/..)
+
 # In Docker builds, sudo is not available. So make it a noop.
 if [ "$IN_DOCKER" == "TRUE" ]; then
   echo "Executing within docker container."
@@ -56,12 +59,8 @@ sudo dnf install -y -q \
     zlib-devel \
     ninja-build
 
-pip3 install --user ply ptf scapy==2.5.0 wheel
-
-# Install dependencies for the BMv2 PTF runner and P4Runtime.
-pip3 install --user --upgrade protobuf==3.20.3
-pip3 install --user --upgrade googleapis-common-protos==1.61.0
-pip3 install --user --upgrade grpcio==1.59.2
+pip3 install --upgrade pip
+pip3 install -r ${P4C_DIR}/requirements.txt
 
 MAKEFLAGS="-j$(nproc)"
 export MAKEFLAGS

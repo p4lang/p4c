@@ -21,12 +21,12 @@
 #include <cmath>
 #include <fstream>
 
-#include "bf-p4c/arch/bridge_metadata.h"
-#include "bf-p4c/arch/fromv1.0/add_metadata_parser_states.h"
-#include "bf-p4c/arch/intrinsic_metadata.h"
-#include "bf-p4c/arch/rewrite_action_selector.h"
-#include "bf-p4c/device.h"
-#include "bf-p4c/midend/type_checker.h"
+#include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
+#include "backends/tofino/bf-p4c/arch/fromv1.0/add_metadata_parser_states.h"
+#include "backends/tofino/bf-p4c/arch/intrinsic_metadata.h"
+#include "backends/tofino/bf-p4c/arch/rewrite_action_selector.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "ir/ir.h"
 #include "lib/bitops.h"
 #include "midend/convertEnums.h"
@@ -158,10 +158,8 @@ class AnalyzeProgram : public Inspector {
 
     // 'compiler_generated_metadata_t' is the last struct in the program.
     void end_apply() override {
-        auto *cgAnnotation =
-            new IR::Annotations({new IR::Annotation(IR::ID("__compiler_generated"), {})});
-
-        auto cgm = new IR::Type_Struct("compiler_generated_metadata_t", cgAnnotation);
+        auto cgm = new IR::Type_Struct("compiler_generated_metadata_t",
+                                       {new IR::Annotation(IR::ID("__compiler_generated"), {})});
         cgm->fields.push_back(new IR::StructField("mirror_id", IR::Type::Bits::get(10)));
         cgm->fields.push_back(new IR::StructField("packet_path", IR::Type::Bits::get(8)));
         // TODO: Map clone_src + clone_digest_id to packet_path
@@ -711,7 +709,7 @@ class TranslateProgram : public Inspector {
         args->push_back(new IR::Argument(new IR::PathExpression(hashName)));
         // selector_mode
         auto sel_mode = new IR::Member(new IR::TypeNameExpression("SelectorMode_t"), "FAIR");
-        if (auto anno = node->annotations->getSingle("mode"_cs)) {
+        if (auto anno = node->getAnnotation("mode"_cs)) {
             auto mode = anno->expr.at(0)->to<IR::StringLiteral>();
             if (mode->value == "resilient")
                 sel_mode->member = IR::ID("RESILIENT");

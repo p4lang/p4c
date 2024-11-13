@@ -18,11 +18,11 @@
 
 #include <assert.h>
 
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/lib/error_type.h"
-#include "bf-p4c/mau/instruction_memory.h"
-#include "bf-p4c/mau/stateful_alu.h"
-#include "bf-p4c/mau/table_layout.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/lib/error_type.h"
+#include "backends/tofino/bf-p4c/mau/instruction_memory.h"
+#include "backends/tofino/bf-p4c/mau/stateful_alu.h"
+#include "backends/tofino/bf-p4c/mau/table_layout.h"
 #include "gateway_control_flow.h"
 #include "ir/ir.h"
 
@@ -193,7 +193,7 @@ void Table::visit_gateway_inhibited(THIS *self, Visitor &v, payload_info_t &payl
             if (!current) current = &saved->flow_clone();
             if (auto *gwcf = dynamic_cast<::BFN::GatewayControlFlow *>(current))
                 gwcf->pre_visit_table_next(self, tag);
-            current->visit(self->next.at(tag), tag);
+            current->visit(self->next.at(tag), tag.c_str());
             if (payload_info.post_payload) {
                 if (current != payload_info.post_payload)
                     payload_info.post_payload->flow_merge(*current);
@@ -245,7 +245,7 @@ class SplitFlowVisitTableNext : public SplitFlowVisit_base {
 
             if (table->next.count(next_action_key)) {
                 if (!next_visitor) next_visitor = &saved->flow_clone();
-                next_visitor->visit(table->next.at(next_action_key), next_action_key,
+                next_visitor->visit(table->next.at(next_action_key), next_action_key.c_str(),
                                     start_index + idx);
             }
         }
@@ -309,7 +309,7 @@ void Table::visit_match_table(THIS *self, Visitor &v, payload_info_t &payload_in
         auto exit_visitor = &saved->flow_clone();
         if (payload_info.action_info.count(action_name))
             exit_visitor->flow_merge(*payload_info.action_info.at(action_name).flow_state);
-        exit_visitor->visit(action, "actions"_cs);
+        exit_visitor->visit(action, "actions");
         exit_visitor->flow_merge_global_to("-EXIT-"_cs);
     }
 
@@ -332,7 +332,7 @@ void Table::visit_match_table(THIS *self, Visitor &v, payload_info_t &payload_in
 
         if (action->exitAction) continue;
 
-        auto *pinfo = ::getref(payload_info.action_info, action_name);
+        auto *pinfo = P4::getref(payload_info.action_info, action_name);
         if (!action->hit_allowed && !action->default_allowed) {
             // can't be invoked from the match table
             if (pinfo)
@@ -345,7 +345,7 @@ void Table::visit_match_table(THIS *self, Visitor &v, payload_info_t &payload_in
         }
 
         // Visit the action.
-        current->visit(action, "actions"_cs);
+        current->visit(action, "actions");
 
         // Figure out which keys in the next_visitors table need updating.
         if (pinfo) {
@@ -625,7 +625,7 @@ bool IR::MAU::Table::hit_miss_p4() const {
 
 bool IR::MAU::Table::action_chain() const {
     for (auto &n : next) {
-        if (n.first[0] != '$') {
+        if (!n.first.startsWith("$")) {
             return true;
         }
     }
@@ -683,7 +683,7 @@ bool IR::MAU::Table::has_non_exit_action() const {
 int IR::MAU::Table::action_next_paths() const {
     int action_paths = 0;
     for (auto &n : next) {
-        if (n.first == "$default" || n.first[0] != '$') action_paths++;
+        if (n.first == "$default" || !n.first.startsWith("$")) action_paths++;
     }
     if (has_exit_action()) action_paths++;
     return action_paths;
@@ -707,12 +707,15 @@ bool IR::MAU::Table::is_a_gateway_table_only() const {
     return false;
 }
 
-const IR::Annotations *IR::MAU::Table::getAnnotations() const {
-    return match_table ? match_table->getAnnotations() : IR::Annotations::empty;
+const IR::Vector<IR::Annotation> &IR::MAU::Table::getAnnotations() const {
+    static IR::Vector<IR::Annotation> empty;
+    return match_table ? match_table->getAnnotations() : empty;
 }
 
-const IR::Annotation *IR::MAU::Table::getAnnotation(cstring name) const {
-    return match_table ? match_table->getAnnotation(name) : nullptr;
+IR::Vector<IR::Annotation> &IR::MAU::Table::getAnnotations() {
+    static IR::Vector<IR::Annotation> empty;
+    BUG("Changing the list of annotations for a MAU::Table class is unsupported");
+    return empty;
 }
 
 const IR::Expression *IR::MAU::Table::getExprAnnotation(cstring name) const {
@@ -776,7 +779,7 @@ bool IR::MAU::Table::getAnnotation(cstring name, IR::ID &val) const {
 bool IR::MAU::Table::getAnnotation(cstring name, std::vector<IR::ID> &val) const {
     if (!match_table) return false;
     bool rv = false;
-    for (auto *annot : match_table->getAnnotations()->annotations) {
+    for (auto *annot : match_table->getAnnotations()) {
         if (annot->name != name) continue;
         rv = true;  // found at least 1
         for (auto *expr : annot->expr) {
@@ -796,7 +799,7 @@ int IR::MAU::Table::get_placement_priority_int() const {
     int val = 0;
     if (!match_table) return val;
     bool val_set = false;
-    for (auto &annot : match_table->getAnnotations()->annotations) {
+    for (auto &annot : match_table->getAnnotations()) {
         if (annot->name != "placement_priority") continue;
         for (auto *expr : annot->expr) {
             if (auto constant = expr->to<IR::Constant>()) {
@@ -816,7 +819,7 @@ int IR::MAU::Table::get_placement_priority_int() const {
 std::set<cstring> IR::MAU::Table::get_placement_priority_string() const {
     std::set<cstring> rv;
     if (!match_table) return rv;
-    for (auto &annot : match_table->getAnnotations()->annotations) {
+    for (auto &annot : match_table->getAnnotations()) {
         if (annot->name != "placement_priority") continue;
         for (auto *expr : annot->expr) {
             if (auto sl = expr->to<IR::StringLiteral>()) {
@@ -868,20 +871,22 @@ int IR::MAU::Table::get_provided_stage(int geq_stage, int *req_entries, int *fla
     };
 
     const IR::Annotation *stage_annot = nullptr;
-    auto stage_annotations = match_table->annotations->where(
-        [](const IR::Annotation *annot) { return annot->name == "stage"; });
-    if (!stage_annotations) return -1;
+    {
+        auto *stage_annotations = match_table->getAnnotations().where(
+            [](const IR::Annotation *annot) { return annot->name == "stage"; });
+        if (!stage_annotations) return -1;
 
-    for (auto *annot : stage_annotations->annotations) {
-        if (!checkPragma(annot)) return -1;
+        for (auto *annot : *stage_annotations) {
+            if (!checkPragma(annot)) return -1;
 
-        int curr_stage = annot->expr.at(0)->to<IR::Constant>()->asInt();
-        if (curr_stage >= geq_stage) {
-            if (stage_annot == nullptr) {
-                stage_annot = annot;
-            } else {
-                int min_stage = stage_annot->expr.at(0)->to<IR::Constant>()->asInt();
-                stage_annot = curr_stage < min_stage ? annot : stage_annot;
+            int curr_stage = annot->expr.at(0)->to<IR::Constant>()->asInt();
+            if (curr_stage >= geq_stage) {
+                if (stage_annot == nullptr) {
+                    stage_annot = annot;
+                } else {
+                    int min_stage = stage_annot->expr.at(0)->to<IR::Constant>()->asInt();
+                    stage_annot = curr_stage < min_stage ? annot : stage_annot;
+                }
             }
         }
     }
@@ -1022,7 +1027,8 @@ void IR::MAU::Table::remove_gateway() {
 int IR::MAU::TableSeq::uid_ctr = 0;
 
 cstring IR::MAU::Action::externalName() const {
-    if (auto *name_annot = annotations->getSingle("name"_cs)) return name_annot->getName();
+    if (auto *name_annot = getAnnotation(IR::Annotation::nameAnnotation))
+        return name_annot->getName();
     return name.toString();
 }
 

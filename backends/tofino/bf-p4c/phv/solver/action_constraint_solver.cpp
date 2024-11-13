@@ -24,7 +24,7 @@
 
 #include <boost/format/format_fwd.hpp>
 
-#include "bf-p4c/ir/bitrange.h"
+#include "backends/tofino/bf-p4c/ir/bitrange.h"
 #include "lib/bitvec.h"
 #include "lib/exceptions.h"
 #include "lib/log.h"

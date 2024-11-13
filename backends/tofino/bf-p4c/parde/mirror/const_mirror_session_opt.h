@@ -19,7 +19,7 @@
 #ifndef BF_P4C_PARDE_MIRROR_CONST_MIRROR_SESSION_OPT_H_
 #define BF_P4C_PARDE_MIRROR_CONST_MIRROR_SESSION_OPT_H_
 
-#include "bf-p4c/parde/parde_visitor.h"
+#include "backends/tofino/bf-p4c/parde/parde_visitor.h"
 
 /**
  * This pass optimizes the following code pattern:

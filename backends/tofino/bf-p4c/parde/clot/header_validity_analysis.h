@@ -19,8 +19,8 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_PARDE_CLOT_HEADER_VALIDITY_ANALYSIS_H_
 #define BACKENDS_TOFINO_BF_P4C_PARDE_CLOT_HEADER_VALIDITY_ANALYSIS_H_
 
-#include "bf-p4c/mau/mau_visitor.h"
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "field_slice_set.h"
 
 /// @brief Identify headers marked as valid/invalid in MAU pipeline and find correlations between

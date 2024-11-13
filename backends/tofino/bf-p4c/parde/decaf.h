@@ -19,13 +19,13 @@
 #ifndef BF_P4C_PARDE_DECAF_H_
 #define BF_P4C_PARDE_DECAF_H_
 
-#include "bf-p4c/common/field_defuse.h"
-#include "bf-p4c/lib/assoc.h"
-#include "bf-p4c/logging/pass_manager.h"
-#include "bf-p4c/mau/mau_visitor.h"
-#include "bf-p4c/mau/table_dependency_graph.h"
-#include "bf-p4c/parde/create_pov_encoder.h"
-#include "bf-p4c/parde/parde_visitor.h"
+#include "backends/tofino/bf-p4c/common/field_defuse.h"
+#include "backends/tofino/bf-p4c/lib/assoc.h"
+#include "backends/tofino/bf-p4c/logging/pass_manager.h"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/mau/table_dependency_graph.h"
+#include "backends/tofino/bf-p4c/parde/create_pov_encoder.h"
+#include "backends/tofino/bf-p4c/parde/parde_visitor.h"
 
 /**
  * \defgroup DeparserCopyOpt DeparserCopyOpt
@@ -286,7 +286,7 @@ struct CollectHeaderValidity : public Inspector, IHasDbPrint {
         LOG1("=== DONE collecting header validity bits ===");
     }
 
-    void dbprint(std::ostream &out) const {
+    void dbprint(std::ostream &out) const override {
         for (auto &kv : field_to_valid_bit)
             out << kv.first->name << " : " << kv.second->name << std::endl;
     }
@@ -360,7 +360,7 @@ class CollectWeakFields : public MauInspector, BFN::ControlFlowVisitor, IHasDbPr
         // TODO remove constants for field
     }
 
-    void dbprint(std::ostream &out) const;
+    void dbprint(std::ostream &out) const override;
 
  private:
     bool filter_join_point(const IR::Node *) override { return true; }
@@ -553,7 +553,7 @@ class SynthesizePovEncoder : public MauTransform, IHasDbPrint {
           weak_fields(values_at_deparser.weak_fields),
           values_at_deparser(values_at_deparser) {}
 
-    void dbprint(std::ostream &out) const;
+    void dbprint(std::ostream &out) const override;
 
  private:
     gress_t get_gress(const FieldGroup &group) {
@@ -639,7 +639,7 @@ class CreateConstants : public PardeTransform, IHasDbPrint {
     explicit CreateConstants(const ComputeValuesAtDeparser &values_at_deparser)
         : values_at_deparser(values_at_deparser) {}
 
-    void dbprint(std::ostream &out) const;
+    void dbprint(std::ostream &out) const override;
 
     bool is_inserted(const IR::TempVar *constant) const {
         for (auto &kv : byte_to_temp_var) {

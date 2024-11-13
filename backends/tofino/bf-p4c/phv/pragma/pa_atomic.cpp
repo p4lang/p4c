@@ -16,13 +16,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/pragma/pa_atomic.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_atomic.h"
 
 #include <numeric>
 #include <string>
 
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/phv/pragma/phv_pragmas.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/phv/pragma/phv_pragmas.h"
 #include "lib/log.h"
 
 /// BFN::Pragma interface

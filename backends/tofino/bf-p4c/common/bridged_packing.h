@@ -19,20 +19,20 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_COMMON_BRIDGED_PACKING_H_
 #define BACKENDS_TOFINO_BF_P4C_COMMON_BRIDGED_PACKING_H_
 
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/common/extract_maupipe.h"
-#include "bf-p4c/common/field_defuse.h"
-#include "bf-p4c/common/pragma/collect_global_pragma.h"
-#include "bf-p4c/logging/source_info_logging.h"
-#include "bf-p4c/midend/blockmap.h"
-#include "bf-p4c/midend/normalize_params.h"
-#include "bf-p4c/midend/param_binding.h"
-#include "bf-p4c/midend/simplify_references.h"
-#include "bf-p4c/midend/type_checker.h"
-#include "bf-p4c/phv/action_phv_constraints.h"
-#include "bf-p4c/phv/constraints/constraints.h"
-#include "bf-p4c/phv/phv.h"
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/common/extract_maupipe.h"
+#include "backends/tofino/bf-p4c/common/field_defuse.h"
+#include "backends/tofino/bf-p4c/common/pragma/collect_global_pragma.h"
+#include "backends/tofino/bf-p4c/logging/source_info_logging.h"
+#include "backends/tofino/bf-p4c/midend/blockmap.h"
+#include "backends/tofino/bf-p4c/midend/normalize_params.h"
+#include "backends/tofino/bf-p4c/midend/param_binding.h"
+#include "backends/tofino/bf-p4c/midend/simplify_references.h"
+#include "backends/tofino/bf-p4c/midend/type_checker.h"
+#include "backends/tofino/bf-p4c/phv/action_phv_constraints.h"
+#include "backends/tofino/bf-p4c/phv/constraints/constraints.h"
+#include "backends/tofino/bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/methodInstance.h"
@@ -602,19 +602,19 @@ class PadFixedSizeHeaders : public Inspector {
 
         auto countPadding = [&](const IR::IndexedVector<IR::StructField> &fields) -> int {
             int count = 0;
-            for (auto f = fields.begin(); f != fields.end(); f++) {
-                if ((*f)->getAnnotation("padding"_cs)) count++;
-            }
+            for (auto f : fields)
+                if (f->hasAnnotation("padding"_cs)) count++;
+
             return count;
         };
 
         auto genPadding = [&](int size, int id) {
             cstring padFieldName = "__pad_" + cstring::to_cstring(id);
-            auto *fieldAnnotations =
-                new IR::Annotations({new IR::Annotation(IR::ID("padding"), {}),
-                                     new IR::Annotation(IR::ID("overlayable"), {})});
             const IR::StructField *padField =
-                new IR::StructField(padFieldName, fieldAnnotations, IR::Type::Bits::get(size));
+                new IR::StructField(padFieldName,
+                                    {new IR::Annotation(IR::ID("padding"), {}),
+                                     new IR::Annotation(IR::ID("overlayable"), {})},
+                                    IR::Type::Bits::get(size));
             return padField;
         };
 

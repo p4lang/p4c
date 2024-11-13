@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/logging/container_size_extractor.h"
+#include "backends/tofino/bf-p4c/logging/container_size_extractor.h"
 
 #include <algorithm>
 #include <numeric>

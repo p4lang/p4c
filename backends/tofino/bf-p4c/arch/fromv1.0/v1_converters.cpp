@@ -20,9 +20,10 @@
 
 #include <boost/range/adaptor/reversed.hpp>
 
-#include "bf-p4c/arch/bridge_metadata.h"
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "lib/map.h"
 #include "lib/ordered_map.h"
 #include "v1_program_structure.h"
 
@@ -544,7 +545,7 @@ const IR::Node *EgressParserConverter::postorder(IR::P4Parser *node) {
 
 const IR::Node *TypeNameExpressionConverter::postorder(IR::Type_Name *node) {
     auto path = node->path->to<IR::Path>();
-    if (auto newName = ::get(enumsToTranslate, path->name)) {
+    if (auto newName = P4::get(enumsToTranslate, path->name)) {
         if (!structure->enums.count(newName)) {
             BUG("Cannot translation for type ", node);
             return node;
@@ -557,7 +558,7 @@ const IR::Node *TypeNameExpressionConverter::postorder(IR::Type_Name *node) {
 const IR::Node *TypeNameExpressionConverter::postorder(IR::TypeNameExpression *node) {
     auto typeName = node->typeName->to<IR::Type_Name>();
     auto path = typeName->path->to<IR::Path>();
-    if (auto newType = ::get(structure->enums, path->name)) {
+    if (auto newType = P4::get(structure->enums, path->name)) {
         node->type = newType;
     }
     return node;
@@ -566,7 +567,7 @@ const IR::Node *TypeNameExpressionConverter::postorder(IR::TypeNameExpression *n
 const IR::Node *TypeNameExpressionConverter::postorder(IR::Member *node) {
     if (!node->expr->is<IR::TypeNameExpression>()) return node;
     auto name = node->member;
-    if (auto newName = ::get(fieldsToTranslate, name))
+    if (auto newName = P4::get(fieldsToTranslate, name))
         return new IR::Member(node->srcInfo, node->expr, newName);
     return node;
 }
@@ -694,8 +695,8 @@ const IR::Node *MeterConverter::postorder(IR::MethodCallStatement *node) {
     BUG_CHECK(meter_pe != nullptr, "Cannot find meter %1%", member->expr);
 
     auto args = new IR::Vector<IR::Argument>();
-    auto inst = refMap->getDeclaration(meter_pe->path);
-    auto annot = inst->getAnnotation("pre_color"_cs);
+    auto inst = refMap->getDeclaration(meter_pe->path)->to<IR::IAnnotated>();
+    auto annot = inst ? inst->getAnnotation("pre_color"_cs) : nullptr;
     if (annot != nullptr) {
         auto size = annot->expr.at(0)->type->width_bits();
         auto expr = annot->expr.at(0);

@@ -19,9 +19,9 @@
 #ifndef BF_P4C_MAU_GEN_PRIM_JSON_H_
 #define BF_P4C_MAU_GEN_PRIM_JSON_H_
 
-#include "bf-p4c/common/asm_output.h"
-#include "bf-p4c/mau/ixbar_expr.h"
-#include "bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/common/asm_output.h"
+#include "backends/tofino/bf-p4c/mau/ixbar_expr.h"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
 #include "lib/json.h"
 
 // Generate Primitive Info for actions before instruction adjustment. Once

@@ -20,16 +20,16 @@
 
 #include <boost/algorithm/string/replace.hpp>
 
-#include "bf-p4c/mau/instruction_selection.h"
-#include "bf-p4c/parde/clot/allocate_clot.h"
-#include "bf-p4c/parde/clot/clot_info.h"
-#include "bf-p4c/parde/clot/field_pov_analysis.h"
-#include "bf-p4c/parde/clot/pragma/do_not_use_clot.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/phv_parde_mau_use.h"
-#include "bf-p4c/phv/pragma/pa_alias.h"
-#include "bf-p4c/phv/pragma/pa_no_overlay.h"
-#include "bf-p4c/test/gtest/tofino_gtest_utils.h"
+#include "backends/tofino/bf-p4c/mau/instruction_selection.h"
+#include "backends/tofino/bf-p4c/parde/clot/allocate_clot.h"
+#include "backends/tofino/bf-p4c/parde/clot/clot_info.h"
+#include "backends/tofino/bf-p4c/parde/clot/field_pov_analysis.h"
+#include "backends/tofino/bf-p4c/parde/clot/pragma/do_not_use_clot.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/phv_parde_mau_use.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_alias.h"
+#include "backends/tofino/bf-p4c/phv/pragma/pa_no_overlay.h"
+#include "backends/tofino/bf-p4c/test/gtest/tofino_gtest_utils.h"
 #include "test/gtest/helpers.h"
 
 namespace P4::Test {

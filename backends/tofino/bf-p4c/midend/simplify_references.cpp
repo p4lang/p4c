@@ -18,9 +18,9 @@
 
 #include "simplify_references.h"
 
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/midend/copy_header.h"  // ENABLE_P4C3251
-#include "bf-p4c/midend/param_binding.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/midend/copy_header.h"  // ENABLE_P4C3251
+#include "backends/tofino/bf-p4c/midend/param_binding.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/typeMap.h"

@@ -16,9 +16,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/gen_prim_json.h"
+#include "backends/tofino/bf-p4c/mau/gen_prim_json.h"
 
-#include "bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
 
 Util::JsonObject *GeneratePrimitiveInfo::add_op_json(Util::JsonObject *prim, const std::string op,
                                                      const std::string type, cstring name) {
@@ -186,7 +186,7 @@ void GeneratePrimitiveInfo::gen_action_json(const IR::MAU::Table *tbl, const IR:
                                 sact_update->emplace("operand_1_type"_cs, "memory");
                                 auto dst_name = (dst->name == "alu_lo")   ? "memory_lo"
                                                 : (dst->name == "alu_hi") ? "memory_hi"
-                                                                          : dst->name;
+                                                                          : dst->name.c_str();
                                 sact_update->emplace("operand_1_value"_cs, dst_name);
                                 salu_details->emplace("output_value"_cs, sact_update);
                             }

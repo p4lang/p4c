@@ -32,8 +32,8 @@ class FlattenHeader {
  private:
     P4::TypeMap *typeMap;
     IR::Type_Header *flattenedHeader;
-    std::vector<cstring> nameSegments{};
-    std::vector<const IR::Annotations *> allAnnotations{};
+    std::vector<cstring> nameSegments;
+    std::vector<const IR::Vector<IR::Annotation> *> allAnnotations;
     bool needsFlattening{false};
 
     FlattenHeader(P4::TypeMap *typeMap, IR::Type_Header *flattenedHeader);
@@ -41,7 +41,7 @@ class FlattenHeader {
     void doFlatten(const IR::Type *type);
 
     cstring makeName(std::string_view sep) const;
-    const IR::Annotations *mergeAnnotations() const;
+    IR::Vector<IR::Annotation> mergeAnnotations() const;
 
  public:
     /// If the @headerType needs flattening, creates a clone of the IR node with

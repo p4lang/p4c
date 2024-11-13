@@ -16,18 +16,18 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/v2/greedy_allocator.h"
+#include "backends/tofino/bf-p4c/phv/v2/greedy_allocator.h"
 
-#include "bf-p4c/device.h"
-#include "bf-p4c/parde/clot/clot.h"
-#include "bf-p4c/phv/utils/utils.h"
-#include "bf-p4c/phv/v2/allocator_base.h"
-#include "bf-p4c/phv/v2/greedy_tx_score.h"
-#include "bf-p4c/phv/v2/kind_size_indexed_map.h"
-#include "bf-p4c/phv/v2/phv_kit.h"
-#include "bf-p4c/phv/v2/sort_macros.h"
-#include "bf-p4c/phv/v2/trivial_allocator.h"
-#include "bf-p4c/phv/v2/utils_v2.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/parde/clot/clot.h"
+#include "backends/tofino/bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/phv/v2/allocator_base.h"
+#include "backends/tofino/bf-p4c/phv/v2/greedy_tx_score.h"
+#include "backends/tofino/bf-p4c/phv/v2/kind_size_indexed_map.h"
+#include "backends/tofino/bf-p4c/phv/v2/phv_kit.h"
+#include "backends/tofino/bf-p4c/phv/v2/sort_macros.h"
+#include "backends/tofino/bf-p4c/phv/v2/trivial_allocator.h"
+#include "backends/tofino/bf-p4c/phv/v2/utils_v2.h"
 
 namespace PHV {
 namespace v2 {

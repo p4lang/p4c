@@ -84,6 +84,8 @@ class Token {
     Token(Kind kind, const char *beg, std::size_t len) noexcept
         : m_kind{kind}, m_lexeme(beg, len) {}
 
+    Token(Kind kind, std::string_view lexeme) noexcept : m_kind{kind}, m_lexeme(lexeme) {}
+
     Token(Kind kind, const char *beg, const char *end) noexcept
         : m_kind{kind}, m_lexeme(beg, std::distance(beg, end)) {}
 

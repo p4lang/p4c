@@ -18,8 +18,8 @@
 
 #include "add_always_run.h"
 
-#include "bf-p4c/common/empty_tableseq.h"
-#include "bf-p4c/ir/table_tree.h"
+#include "backends/tofino/bf-p4c/common/empty_tableseq.h"
+#include "backends/tofino/bf-p4c/ir/table_tree.h"
 
 int AddAlwaysRun::compare(const IR::MAU::Table *t1, const IR::MAU::Table *t2) const {
     return compare(t1, t2 ? std::optional<UniqueId>(t2->get_uid()) : std::nullopt);
@@ -140,7 +140,7 @@ bool AddAlwaysRun::PrepareToAdd::preorder(const IR::MAU::Table *table) {
     // Ensure we re-visit this table if we encounter it again elsewhere in the IR.
     visitAgain();
 
-    auto *curMin = ::get(minSubsequentTables, table);
+    auto *curMin = P4::get(minSubsequentTables, table);
     if (self.compare(subsequentTable, curMin) < 0) curMin = subsequentTable;
     minSubsequentTables[table] = curMin;
 

@@ -16,16 +16,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/utils/slice_alloc.h"
+#include "backends/tofino/bf-p4c/phv/utils/slice_alloc.h"
 
 #include <iostream>
 #include <sstream>
 
 #include <boost/optional/optional_io.hpp>
 
-#include "bf-p4c/mau/table_summary.h"
-#include "bf-p4c/phv/phv.h"
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/mau/table_summary.h"
+#include "backends/tofino/bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 
 namespace PHV {
 

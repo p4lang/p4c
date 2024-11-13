@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/slicing/phv_slicing_dfs_iterator.h"
+#include "backends/tofino/bf-p4c/phv/slicing/phv_slicing_dfs_iterator.h"
 
 #include <algorithm>
 #include <climits>
@@ -27,11 +27,11 @@
 
 #include <boost/range/adaptor/reversed.hpp>
 
-#include "bf-p4c/ir/bitrange.h"
-#include "bf-p4c/logging/logging.h"
-#include "bf-p4c/phv/error.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/ir/bitrange.h"
+#include "backends/tofino/bf-p4c/logging/logging.h"
+#include "backends/tofino/bf-p4c/phv/error.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/utils/utils.h"
 #include "lib/algorithm.h"
 #include "lib/bitvec.h"
 #include "lib/error.h"

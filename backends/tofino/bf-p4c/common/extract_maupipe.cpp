@@ -25,21 +25,21 @@
 #include <boost/none.hpp>
 #include <boost/optional/optional.hpp>
 
-#include "bf-p4c/arch/bridge_metadata.h"
-#include "bf-p4c/arch/helpers.h"
-#include "bf-p4c/common/bridged_packing.h"
-#include "bf-p4c/common/pragma/collect_global_pragma.h"
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/lib/safe_width.h"
-#include "bf-p4c/mau/mau_visitor.h"
-#include "bf-p4c/mau/resource_estimate.h"
-#include "bf-p4c/mau/stateful_alu.h"
-#include "bf-p4c/mau/table_dependency_graph.h"
-#include "bf-p4c/midend/copy_header.h"  // ENABLE_P4C3251
-#include "bf-p4c/midend/simplify_references.h"
-#include "bf-p4c/parde/deparser_checksum_update.h"
-#include "bf-p4c/parde/extract_deparser.h"
-#include "bf-p4c/parde/extract_parser.h"
+#include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
+#include "backends/tofino/bf-p4c/arch/helpers.h"
+#include "backends/tofino/bf-p4c/common/bridged_packing.h"
+#include "backends/tofino/bf-p4c/common/pragma/collect_global_pragma.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/lib/safe_width.h"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
+#include "backends/tofino/bf-p4c/mau/resource_estimate.h"
+#include "backends/tofino/bf-p4c/mau/stateful_alu.h"
+#include "backends/tofino/bf-p4c/mau/table_dependency_graph.h"
+#include "backends/tofino/bf-p4c/midend/copy_header.h"  // ENABLE_P4C3251
+#include "backends/tofino/bf-p4c/midend/simplify_references.h"
+#include "backends/tofino/bf-p4c/parde/deparser_checksum_update.h"
+#include "backends/tofino/bf-p4c/parde/extract_deparser.h"
+#include "backends/tofino/bf-p4c/parde/extract_parser.h"
 #include "frontends/common/name_gateways.h"
 #include "frontends/p4-14/inline_control_flow.h"
 #include "frontends/p4/externInstance.h"
@@ -298,8 +298,8 @@ class SetupActionProperties : public MauModifier {
         cstring default_disallowed_reason = ""_cs;
 
         // First, check for action annotations
-        auto table_only_annot = elem->annotations->getSingle("tableonly"_cs);
-        auto default_only_annot = elem->annotations->getSingle("defaultonly"_cs);
+        auto table_only_annot = elem->getAnnotation("tableonly"_cs);
+        auto default_only_annot = elem->getAnnotation("defaultonly"_cs);
         if (has_constant_default_action) default_disallowed_reason = "has_const_default_action"_cs;
         if (table_only_annot) {
             can_be_default_action = false;
@@ -402,7 +402,7 @@ class ActionBodySetup : public Inspector {
         // FIXME -- for now, ignoring local variables?  Need copy prop + dead code elim
         return false;
     }
-    bool preorder(const IR::Annotations *) override {
+    bool preorder(const IR::Annotation *) override {
         // FIXME -- for now, ignoring annotations.
         return false;
     }
@@ -442,10 +442,11 @@ static const IR::MAU::Action *createActionFunction(const IR::P4Action *ac,
     return rv->apply(afs)->to<IR::MAU::Action>();
 }
 
-static IR::MAU::AttachedMemory *createIdleTime(cstring name, const IR::Annotations *annot) {
+static IR::MAU::AttachedMemory *createIdleTime(cstring name,
+                                               const IR::Vector<IR::Annotation> &annot) {
     auto idletime = new IR::MAU::IdleTime(name);
 
-    if (auto s = annot->getSingle("idletime_precision"_cs)) {
+    if (auto s = get(annot, "idletime_precision")) {
         idletime->precision = getConstant(s);
         /* Default is 3 */
         if (idletime->precision != 1 && idletime->precision != 2 && idletime->precision != 3 &&
@@ -453,12 +454,12 @@ static IR::MAU::AttachedMemory *createIdleTime(cstring name, const IR::Annotatio
             idletime->precision = 3;
     }
 
-    if (auto s = annot->getSingle("idletime_interval"_cs)) {
+    if (auto s = get(annot, "idletime_interval")) {
         idletime->interval = getConstant(s);
         if (idletime->interval < 0 || idletime->interval > 12) idletime->interval = 7;
     }
 
-    if (auto s = annot->getSingle("idletime_two_way_notification"_cs)) {
+    if (auto s = get(annot, "idletime_two_way_notification")) {
         int two_way_notification = getConstant(s);
         if (two_way_notification == 1)
             idletime->two_way_notification = "two_way"_cs;
@@ -466,7 +467,7 @@ static IR::MAU::AttachedMemory *createIdleTime(cstring name, const IR::Annotatio
             idletime->two_way_notification = "disable"_cs;
     }
 
-    if (auto s = annot->getSingle("idletime_per_flow_idletime"_cs)) {
+    if (auto s = get(annot, "idletime_per_flow_idletime")) {
         int per_flow_enable = getConstant(s);
         idletime->per_flow_idletime = (per_flow_enable == 1) ? true : false;
     }
@@ -519,8 +520,7 @@ cstring getTypeName(const IR::Type *type) {
  */
 static int getSingleAnnotationValue(const cstring name, const IR::MAU::Table *table) {
     if (table->match_table) {
-        auto annot = table->match_table->getAnnotations();
-        if (auto s = annot->getSingle(name)) {
+        if (auto s = table->match_table->getAnnotation(name)) {
             ERROR_CHECK(s->expr.size() >= 1,
                         "%s: The %s pragma on table %s "
                         "does not have a value",
@@ -612,7 +612,7 @@ static int get_meter_color(const IR::Argument *arg) {
 static IR::MAU::AttachedMemory *createAttached(
     Util::SourceInfo srcInfo, cstring name, const IR::Type *type,
     const P4::ParameterSubstitution *substitution, const IR::Vector<IR::Type> *typeArgs,
-    const IR::Annotations *annot, P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+    const IR::Vector<IR::Annotation> &annot, P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
     StatefulSelectors &stateful_selectors, const IR::MAU::AttachedMemory **created_ap = nullptr,
     const IR::MAU::Table *match_table = nullptr) {
     auto baseType = getBaseType(type);
@@ -783,7 +783,7 @@ static IR::MAU::AttachedMemory *createAttached(
             ctr->min_width = -1;
         }
         /* min_width comes via Type_Specialized */
-        for (auto anno : annot->annotations) {
+        for (auto anno : annot) {
             if (anno->name == "max_width")
                 ctr->max_width = getConstant(anno);
             else if (anno->name == "threshold")
@@ -834,7 +834,7 @@ static IR::MAU::AttachedMemory *createAttached(
             }
         }
         // annotations are supported for p4-14.
-        for (auto anno : annot->annotations) {
+        for (auto anno : annot) {
             if (anno->name == "result")
                 mtr->result = anno->expr.at(0);
             else if (anno->name == "implementation")
@@ -991,8 +991,7 @@ class FixP4Table : public Inspector {
         if (timeout != std::nullopt) {
             auto bool_lit = (*timeout)->expression->to<IR::BoolLiteral>();
             if (bool_lit == nullptr || bool_lit->value == false) return false;
-            auto annot = tc->getAnnotations();
-            auto it = createIdleTime(tc->name, annot);
+            auto it = createIdleTime(tc->name, tc->getAnnotations());
             tt->attached.push_back(new IR::MAU::BackendAttached(it->srcInfo, it));
         }
 
@@ -1184,13 +1183,13 @@ void AttachTables::InitializeStatefulAlus ::updateAttachedSalu(const IR::Declara
              << (regtype ? regtype->toString() : seltype->toString()) << " " << reg->name);
         auto regName = reg->externalName();
         // @reg annotation is used in p4-14 to generate PD API for action selector.
-        auto anno = ext->annotations->getSingle("reg"_cs);
+        auto anno = ext->getAnnotation("reg"_cs);
         if (anno) regName = getString(anno);
         salu = new IR::MAU::StatefulAlu(reg->srcInfo, regName, reg->annotations, reg);
         // Reg initialization values for lo/hi are passed as annotations. In
         // p4_14 conversion, they cannot be set directly on the register. For
         // p4_16 programs, these are passed in as optional stateful params
-        for (auto annot : ext->annotations->annotations) {
+        for (auto annot : ext->annotations) {
             if (annot->name == "initial_register_lo_value") {
                 salu->init_reg_lo = getBigConstant(annot);
                 warning(ErrorType::WARN_DEPRECATED,
@@ -1253,7 +1252,7 @@ void AttachTables::InitializeStatefulAlus ::updateAttachedSalu(const IR::Declara
         } else {
             salu->width = 1;
         }
-        if (auto cts = reg->annotations->getSingle("chain_total_size"_cs))
+        if (auto cts = reg->getAnnotation("chain_total_size"_cs))
             salu->chain_total_size = getConstant(cts);
         self.salu_inits[reg] = salu;
     }
@@ -1264,20 +1263,19 @@ void AttachTables::InitializeStatefulAlus ::updateAttachedSalu(const IR::Declara
     }
 
     // copy annotations from register action
-    IR::Annotations *new_annot = nullptr;
-    for (auto annot : ext->annotations->annotations) {
+    IR::Vector<IR::Annotation> new_annot(salu->getAnnotations());
+    for (auto annot : ext->annotations) {
         if (annot->name == "name") continue;
-        if (auto old = salu->annotations->getSingle(annot->name)) {
+        if (auto old = salu->getAnnotation(annot->name)) {
             if (old->expr.equiv(annot->expr)) continue;
             warning("Conflicting annotations %s and %s related to stateful alu %s", annot, old,
                     salu);
         }
-        if (!new_annot) new_annot = salu->annotations->clone();
-        new_annot->add(annot);
+        new_annot.push_back(annot);
     }
-    if (new_annot) salu->annotations = new_annot;
+    salu->annotations = std::move(new_annot);
 
-    if (auto red_or = ext->annotations->getSingle("reduction_or_group"_cs)) {
+    if (auto red_or = ext->getAnnotation("reduction_or_group"_cs)) {
         auto pragma_val = red_or->expr.at(0)->to<IR::StringLiteral>();
         ERROR_CHECK(pragma_val,
                     "%s: Please provide a valid reduction_or_group for, which should "
@@ -1297,7 +1295,7 @@ void AttachTables::InitializeStatefulAlus ::updateAttachedSalu(const IR::Declara
     if (ext->type->toString().startsWith("LearnAction")) salu->learn_action = true;
 
     auto prim = findContext<IR::MAU::Primitive>();
-    LOG6("  - " << (prim ? prim->name : "<no primitive>"));
+    LOG6("  - " << (prim ? prim->name.c_str() : "<no primitive>"));
     if (prim && prim->name.endsWith(".address")) {
         salu->chain_vpn = true;
         return;
@@ -1592,17 +1590,18 @@ class GetBackendTables : public MauInspector {
           sourceInfoLogging(sourceInfoLogging) {}
 
  private:
-    void handle_pragma_ixbar_group_num(const IR::Annotations *annotations, IR::MAU::TableKey *key) {
-        if (auto ixbar_num = annotations->getSingle("ixbar_group_num"_cs)) {
+    void handle_pragma_ixbar_group_num(const IR::Vector<IR::Annotation> &annotations,
+                                       IR::MAU::TableKey *key) {
+        if (auto ixbar_num = get(annotations, "ixbar_group_num")) {
             key->ixbar_group_num = getConstant(ixbar_num, 0, 7);
         }
     }
 
     void setup_match_mask(IR::MAU::Table *tt, const IR::Mask *mask, IR::ID match_id,
-                          int p4_param_order, const IR::Annotations *annotations,
+                          int p4_param_order, const IR::Vector<IR::Annotation> &annotations,
                           std::optional<cstring> partition_index) {
         std::optional<cstring> name_annotation = std::nullopt;
-        if (auto nameAnn = annotations->getSingle(IR::Annotation::nameAnnotation))
+        if (auto nameAnn = get(annotations, IR::Annotation::nameAnnotation))
             name_annotation = nameAnn->getName();
 
         auto slices = convertMaskToSlices(mask);
@@ -1635,10 +1634,9 @@ class GetBackendTables : public MauInspector {
     }
 
     void setup_tt_match(IR::MAU::Table *tt, const IR::P4Table *table) {
-        auto annot = table->getAnnotations();
         // Set compiler generated flag if hidden annotation present
         // Can be on a keyless table, hence we check this at the beginning
-        auto h = annot->getSingle("hidden"_cs);
+        auto h = table->getAnnotation("hidden"_cs);
         if (h) tt->is_compiler_generated = true;
 
         auto *key = table->getKey();
@@ -1647,7 +1645,7 @@ class GetBackendTables : public MauInspector {
 
         std::optional<cstring> partition_index = std::nullopt;
         // Fold 'atcam_partition_index' annotation into InputXbarRead IR node.
-        auto s = annot->getSingle("atcam_partition_index"_cs);
+        auto s = table->getAnnotation("atcam_partition_index"_cs);
         if (s) partition_index = s->expr.at(0)->to<IR::StringLiteral>()->value;
 
         for (auto key_elem : key->keyElements) {
@@ -1728,7 +1726,7 @@ class GetBackendTables : public MauInspector {
                 decl, mce->arguments,
                 // if this is a @hidden table it was probably created from statements in
                 // the apply, so include that context when looking for @in_hash annotations
-                table->getAnnotations()->getSingle("hidden"_cs) ? getContext() : nullptr);
+                table->getAnnotation("hidden"_cs) ? getContext() : nullptr);
             SetupActionProperties sap(table, act, refMap);
             auto newaction_props = newaction->apply(sap)->to<IR::MAU::Action>();
             if (!tt->actions.count(newaction_props->name.originalName))

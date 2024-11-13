@@ -1,8 +1,5 @@
 #include "backends/p4tools/common/core/z3_solver.h"
 
-#include <z3++.h>
-#include <z3_api.h>
-
 #include <algorithm>
 #include <cstdint>
 #include <exception>
@@ -138,7 +135,7 @@ void Z3Solver::pop() {
 void Z3Solver::comment(cstring commentStr) {
     // GCC complains about an unused parameter here.
     (void)(commentStr);
-    Z3_LOG("additional comment:%s", commentStr);
+    Z3_LOG("additional comment:%v", commentStr);
 }
 
 void Z3Solver::seed(unsigned seed) {
@@ -450,7 +447,7 @@ bool Z3Translator::preorder(const IR::BoolLiteral *boolLiteral) {
 }
 
 bool Z3Translator::preorder(const IR::StringLiteral *stringLiteral) {
-    result = solver.get().ctx().string_val(stringLiteral->value);
+    result = solver.get().ctx().string_val(stringLiteral->value.c_str());
     return false;
 }
 

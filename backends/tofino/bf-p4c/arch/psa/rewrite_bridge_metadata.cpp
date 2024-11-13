@@ -20,11 +20,11 @@
 
 #include <boost/range/adaptor/sliced.hpp>
 
-#include "bf-p4c/arch/collect_bridged_fields.h"
-#include "bf-p4c/arch/intrinsic_metadata.h"
-#include "bf-p4c/midend/path_linearizer.h"
-#include "bf-p4c/midend/type_categories.h"
-#include "bf-p4c/midend/type_checker.h"
+#include "backends/tofino/bf-p4c/arch/collect_bridged_fields.h"
+#include "backends/tofino/bf-p4c/arch/intrinsic_metadata.h"
+#include "backends/tofino/bf-p4c/midend/path_linearizer.h"
+#include "backends/tofino/bf-p4c/midend/type_categories.h"
+#include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeMap.h"
@@ -50,10 +50,9 @@ struct PsaBridgeIngressToEgress : public Transform {
 
         // The rest of the fields come from CollectBridgedFields.
         for (auto &bridgedField : structure->bridge.structType->to<IR::Type_StructLike>()->fields) {
-            auto *fieldAnnotations = new IR::Annotations();
-            fieldAnnotations->annotations.push_back(new IR::Annotation(IR::ID("flexible"), {}));
-            fields.push_back(
-                new IR::StructField(bridgedField->name, fieldAnnotations, bridgedField->type));
+            fields.push_back(new IR::StructField(bridgedField->name,
+                                                 {new IR::Annotation(IR::ID("flexible"), {})},
+                                                 bridgedField->type));
         }
         return Transform::init_apply(root);
     }

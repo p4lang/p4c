@@ -19,9 +19,9 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_PARDE_COMMON_ALLOCATORS_H_
 #define BACKENDS_TOFINO_BF_P4C_PARDE_COMMON_ALLOCATORS_H_
 
-#include "bf-p4c/common/ir_utils.h"
-#include "bf-p4c/parde/clot/clot_info.h"
-#include "bf-p4c/parde/parde_visitor.h"
+#include "backends/tofino/bf-p4c/common/ir_utils.h"
+#include "backends/tofino/bf-p4c/parde/clot/clot_info.h"
+#include "backends/tofino/bf-p4c/parde/parde_visitor.h"
 #include "ir/ir.h"
 
 /**

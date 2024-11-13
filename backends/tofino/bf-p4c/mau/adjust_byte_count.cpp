@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/adjust_byte_count.h"
+#include "backends/tofino/bf-p4c/mau/adjust_byte_count.h"
 
 namespace BFN {
 
@@ -75,7 +75,7 @@ bool AdjustByteCountSetup::Scan::preorder(const IR::MAU::Primitive *prim) {
     const IR::MAU::AttachedMemory *obj = nullptr;
     auto dot = prim->name.find('.');
     cstring method = dot ? cstring(dot + 1) : prim->name;
-    while (dot && dot > prim->name && std::isdigit(dot[-1])) --dot;
+    while (dot && dot > prim->name.c_str() && std::isdigit(dot[-1])) --dot;
     auto objType = dot ? prim->name.before(dot) : cstring();
 
     if ((((objType == "DirectCounter") || (objType == "Counter")) && (method == "count")) ||

@@ -16,10 +16,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/analysis/non_mocha_dark_fields.h"
+#include "backends/tofino/bf-p4c/phv/analysis/non_mocha_dark_fields.h"
 
-#include "bf-p4c/logging/event_logger.h"
-#include "bf-p4c/mau/action_analysis.h"
+#include "backends/tofino/bf-p4c/logging/event_logger.h"
+#include "backends/tofino/bf-p4c/mau/action_analysis.h"
 
 Visitor::profile_t NonMochaDarkFields::init_apply(const IR::Node *root) {
     profile_t rv = Inspector::init_apply(root);
@@ -60,8 +60,7 @@ bool NonMochaDarkFields::preorder(const IR::MAU::Action *act) {
                 LOG5("\t  Field written by action data/constant: " << write);
                 nonDark[write->id][tbl] = WRITE;
 
-                auto annot = tbl->match_table->getAnnotations();
-                if (auto s = annot->getSingle("use_hash_action"_cs)) {
+                if (auto s = tbl->match_table->getAnnotation("use_hash_action"_cs)) {
                     auto pragma_val = s->expr.at(0)->to<IR::Constant>()->asInt();
                     if (pragma_val == 1) {
                         LOG5("\t  Field written by action data/constant through hash_action: "

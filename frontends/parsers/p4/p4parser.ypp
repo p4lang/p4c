@@ -267,8 +267,7 @@ using namespace P4;
 %type<IR::Vector<IR::Argument>*>  argumentList nonEmptyArgList
 %type<IR::Parameter*>       parameter
 %type<OptionalConst>        optCONST
-%type<IR::Annotations*>     optAnnotations
-%type<IR::Vector<IR::Annotation>*>  annotations
+%type<IR::Vector<IR::Annotation>*>  optAnnotations annotations
 %type<IR::Annotation*>      annotation
 %type<IR::Vector<IR::AnnotationToken>*> annotationBody
 %type<Token>                annotationToken
@@ -513,8 +512,8 @@ optCONST
     ;
 
 optAnnotations
-    : %empty      { $$ = IR::Annotations::empty; }
-    | annotations { $$ = new IR::Annotations(@1, *$1); }
+    : %empty      { $$ = new IR::Vector<IR::Annotation>(); }
+    | annotations { $$ = $1; }
     ;
 
 annotations
@@ -746,8 +745,8 @@ nonEmptyParameterList
     ;
 
 parameter
-    : optAnnotations direction typeRef name { $$ = new IR::Parameter(@4, *$4, $1, $2, $3, nullptr); }
-    | optAnnotations direction typeRef name "=" expression { $$ = new IR::Parameter(@4, *$4, $1, $2, $3, $6); }
+    : optAnnotations direction typeRef name { $$ = new IR::Parameter(@4, *$4, *$1, $2, $3, nullptr); }
+    | optAnnotations direction typeRef name "=" expression { $$ = new IR::Parameter(@4, *$4, *$1, $2, $3, $6); }
     ;
 
 direction
@@ -765,19 +764,19 @@ packageTypeDeclaration
       "(" parameterList ")"        {
           driver.structure->declareParameters($8);
           auto pl = new IR::ParameterList(@8, *$8);
-          $$ = new IR::Type_Package(@3, *$3, $1, $5, pl); }
+          $$ = new IR::Type_Package(@3, *$3, *$1, $5, pl); }
     ;
 
 instantiation
       : annotations typeRef "(" argumentList ")" name ";"
-                     { $$ = new IR::Declaration_Instance(@6, *$6, new IR::Annotations(*$1),
+                     { $$ = new IR::Declaration_Instance(@6, *$6, *$1,
                                                          $2, $4);
                        driver.structure->declareObject(*$6, $2->toString()); }
       | typeRef "(" argumentList ")" name ";"
                      { $$ = new IR::Declaration_Instance(@5, *$5, $1, $3);
                        driver.structure->declareObject(*$5, $1->toString()); }
       | annotations typeRef "(" argumentList ")" name "=" objInitializer ";"
-                     { $$ = new IR::Declaration_Instance(@6, *$6, new IR::Annotations(*$1),
+                     { $$ = new IR::Declaration_Instance(@6, *$6, *$1,
                                                          $2, $4, $8);
                        driver.structure->declareObject(*$6, $2->toString()); }
       | typeRef "(" argumentList ")" name "=" objInitializer ";"
@@ -840,7 +839,7 @@ parserTypeDeclaration
                             driver.structure->declareTypes(&$5->parameters); }
         "(" parameterList ")" { driver.structure->declareParameters($8);
                                 auto pl = new IR::ParameterList(@8, *$8);
-                                $$ = new IR::Type_Parser(@3, *$3, $1, $5, pl); }
+                                $$ = new IR::Type_Parser(@3, *$3, *$1, $5, pl); }
     ;
 
 parserStates
@@ -853,7 +852,7 @@ parserState
     : optAnnotations STATE name { driver.structure->pushContainerType(*$3, false); }
       "{" parserStatements transitionStatement "}"
                                       { driver.structure->pop();
-                                        $$ = new IR::ParserState(@3, *$3, $1, *$6, $7); }
+                                        $$ = new IR::ParserState(@3, *$3, *$1, *$6, $7); }
     ;
 
 parserStatements
@@ -873,7 +872,7 @@ parserStatement
 
 parserBlockStatement
     : optAnnotations "{" { driver.structure->pushNamespace(@2, false); }
-      parserStatements "}" { driver.structure->pop(); $$ = new IR::BlockStatement(@1+@5, $1, *$4); }
+      parserStatements "}" { driver.structure->pop(); $$ = new IR::BlockStatement(@1+@5, *$1, *$4); }
     ;
 
 transitionStatement
@@ -943,13 +942,13 @@ simpleKeysetExpression
 valueSetDeclaration
     : optAnnotations
         VALUESET l_angle baseType r_angle "(" expression ")" name ";"
-        { $$ = new IR::P4ValueSet(@9, *$9, $1, $4, $7); }
+        { $$ = new IR::P4ValueSet(@9, *$9, *$1, $4, $7); }
     | optAnnotations
         VALUESET l_angle tupleType r_angle "(" expression ")" name ";"
-        { $$ = new IR::P4ValueSet(@9, *$9, $1, $4, $7); }
+        { $$ = new IR::P4ValueSet(@9, *$9, *$1, $4, $7); }
     | optAnnotations
         VALUESET l_angle typeName r_angle "(" expression ")" name ";"
-        { $$ = new IR::P4ValueSet(@9, *$9, $1, $4, $7); }
+        { $$ = new IR::P4ValueSet(@9, *$9, *$1, $4, $7); }
     ;
 
 /*************************** CONTROL ************************/
@@ -969,7 +968,7 @@ controlTypeDeclaration
                             driver.structure->declareTypes(&$5->parameters); }
         "(" parameterList ")" { driver.structure->declareParameters($8);
                                 auto pl = new IR::ParameterList(@8, *$8);
-                                $$ = new IR::Type_Control(@3, *$3, $1, $5, pl); }
+                                $$ = new IR::Type_Control(@3, *$3, *$1, $5, pl); }
     ;
 
 controlLocalDeclarations
@@ -997,11 +996,11 @@ externDeclaration
         optTypeParameters { if (!$5->empty()) driver.structure->markAsTemplate(*$3);
                             driver.structure->declareTypes(&$5->parameters); }
         "{" methodPrototypes "}" { driver.structure->pop();
-                                   $$ = new IR::Type_Extern(@3, *$3, $5, *$8, $1); }
+                                   $$ = new IR::Type_Extern(@3, *$3, $5, *$8, *$1); }
     | optAnnotations EXTERN functionPrototype ";" {
             driver.structure->pop();
             $$ = $3;
-            $3->annotations = $1; }
+            $3->annotations = *$1; }
     | optAnnotations EXTERN name ";" {
             // forward declaration;
             driver.structure->pushContainerType(*$3, true);
@@ -1030,15 +1029,15 @@ functionPrototype
 methodPrototype
     : optAnnotations functionPrototype ";" {
             driver.structure->pop();
-            $$ = $2; $2->annotations = $1; }
+            $$ = $2; $2->annotations = *$1; }
     | optAnnotations ABSTRACT functionPrototype ";" {
             driver.structure->pop();
             $$ = $3; $$->setAbstract();
-            $3->annotations = $1; }
+            $3->annotations = *$1; }
     | optAnnotations TYPE_IDENTIFIER "(" parameterList ")" ";"  // constructor
                                         { auto par = new IR::ParameterList(@4, *$4);
                                           auto mt = new IR::Type_Method(@2, par, $2);
-                                          $$ = new IR::Method(@2, IR::ID(@2, $2), mt, $1); }
+                                          $$ = new IR::Method(@2, IR::ID(@2, $2), mt, *$1); }
     ;
 
 /************************** TYPES ****************************/
@@ -1174,7 +1173,7 @@ headerTypeDeclaration
     : optAnnotations HEADER name { driver.structure->pushContainerType(*$3, true); } optTypeParameters {
         driver.structure->markAsTemplate(*$3);
         driver.structure->declareTypes(&$5->parameters); }
-      "{" structFieldList "}" { $$ = new IR::Type_Header(@3, *$3, $1, $5, *$8);
+      "{" structFieldList "}" { $$ = new IR::Type_Header(@3, *$3, *$1, $5, *$8);
                                 driver.structure->pop(); }
     ;
 
@@ -1182,7 +1181,7 @@ structTypeDeclaration
     : optAnnotations STRUCT name  { driver.structure->pushContainerType(*$3, true); } optTypeParameters {
         driver.structure->markAsTemplate(*$3);
         driver.structure->declareTypes(&$5->parameters); }
-      "{" structFieldList "}" { $$ = new IR::Type_Struct(@3, *$3, $1, $5, *$8);
+      "{" structFieldList "}" { $$ = new IR::Type_Struct(@3, *$3, *$1, $5, *$8);
                                 driver.structure->pop(); }
     ;
 
@@ -1190,7 +1189,7 @@ headerUnionDeclaration
     : optAnnotations HEADER_UNION name { driver.structure->pushContainerType(*$3, true); } optTypeParameters {
         driver.structure->markAsTemplate(*$3);
         driver.structure->declareTypes(&$5->parameters); }
-      "{" structFieldList "}" { $$ = new IR::Type_HeaderUnion(@3, *$3, $1, $5, *$8);
+      "{" structFieldList "}" { $$ = new IR::Type_HeaderUnion(@3, *$3, *$1, $5, *$8);
                                 driver.structure->pop(); }
     ;
 
@@ -1200,17 +1199,17 @@ structFieldList
     ;
 
 structField
-    : optAnnotations typeRef name ";"  { $$ = new IR::StructField(@3, *$3, $1, $2); }
+    : optAnnotations typeRef name ";"  { $$ = new IR::StructField(@3, *$3, *$1, $2); }
     ;
 
 enumDeclaration
     : optAnnotations
         ENUM name { driver.structure->declareType(*$3); }
-        "{" identifierList optTrailingComma "}" { $$ = new IR::Type_Enum(@3, *$3, *$6); }
+        "{" identifierList optTrailingComma "}" { $$ = new IR::Type_Enum(@3, *$3, *$1, *$6); }
     | optAnnotations ENUM typeRef name { driver.structure->declareType(*$4); }
          "{" specifiedIdentifierList optTrailingComma "}" {
               auto type = $typeRef;
-              $$ = new IR::Type_SerEnum(@4, *$4, type, *$7);
+              $$ = new IR::Type_SerEnum(@4, *$4, *$1, type, *$7);
           }
     ;
 
@@ -1243,11 +1242,11 @@ identifierList
 
 typedefDeclaration
     : optAnnotations TYPEDEF typeRef name   { driver.structure->declareType(*$4);
-          $$ = new IR::Type_Typedef(@4, *$4, new IR::Annotations(*$1), $3); }
+          $$ = new IR::Type_Typedef(@4, *$4, *$1, $3); }
     | optAnnotations TYPEDEF derivedTypeDeclaration name   { driver.structure->declareType(*$4);
-                        $$ = new IR::Type_Typedef(@4, *$4, new IR::Annotations(*$1), $3); }
+                        $$ = new IR::Type_Typedef(@4, *$4, *$1, $3); }
     | optAnnotations TYPE typeRef name   { driver.structure->declareType(*$4);
-          $$ = new IR::Type_Newtype(@4, *$4, new IR::Annotations(*$1), $3); }
+          $$ = new IR::Type_Newtype(@4, *$4, *$1, $3); }
     ;
 
 /*************************** STATEMENTS *************************/
@@ -1332,7 +1331,7 @@ statement
 blockStatement
     : optAnnotations "{" { driver.structure->pushNamespace(@2, false); }
       statOrDeclList "}" { driver.structure->pop();
-                           $$ = new IR::BlockStatement(@1 + @5, $1, *$4); }
+                           $$ = new IR::BlockStatement(@1 + @5, *$1, *$4); }
     ;
 
 statOrDeclList
@@ -1376,13 +1375,13 @@ forStatement
               expression ";"
 	      forUpdateStatements ")"
       statement
-    { $$ = new IR::ForStatement(@2+@9, $1, *$4, $6, *$8, $10); }
+    { $$ = new IR::ForStatement(@2+@9, *$1, *$4, $6, *$8, $10); }
     | optAnnotations FOR "(" typeRef name IN forCollectionExpr ")" statement
     { auto decl = new IR::Declaration_Variable(@4+@5, *$5, $4);
-      $$ = new IR::ForInStatement(@2+@7, $1, decl, $7, $9); }
+      $$ = new IR::ForInStatement(@2+@7, *$1, decl, $7, $9); }
     | optAnnotations FOR "(" annotations typeRef name IN forCollectionExpr ")" statement
-    { auto decl = new IR::Declaration_Variable(@5+@6, *$6, new IR::Annotations(@4, *$4), $5);
-      $$ = new IR::ForInStatement(@2+@8, $1, decl, $8, $10); }
+    { auto decl = new IR::Declaration_Variable(@5+@6, *$6, *$4, $5);
+      $$ = new IR::ForInStatement(@2+@8, *$1, decl, $8, $10); }
     ;
 
 forInitStatements
@@ -1424,7 +1423,7 @@ forCollectionExpr
 tableDeclaration
     : optAnnotations
         TABLE name "{" tablePropertyList "}"
-          { $$ = new IR::P4Table(@3, *$3, $1, new IR::TableProperties(@5, *$5)); }
+          { $$ = new IR::P4Table(@3, *$3, *$1, new IR::TableProperties(@5, *$5)); }
     ;
 
 tablePropertyList
@@ -1445,11 +1444,11 @@ tableProperty
     | optAnnotations optCONST ENTRIES "=" "{" entriesList "}"
         { auto l = new IR::EntriesList(@3, *$6);
           auto id = IR::ID(@3+@7, "entries"_cs);
-          $$ = new IR::Property(@3, id, $1, l, $2.isConst); }
+          $$ = new IR::Property(@3, id, *$1, l, $2.isConst); }
     | optAnnotations optCONST nonTableKwName "=" initializer ";"
         { auto v = new IR::ExpressionValue(@5, $5);
           auto id = *$3;
-          $$ = new IR::Property($3->srcInfo, id, $1, v, $2.isConst); }
+          $$ = new IR::Property($3->srcInfo, id, *$1, v, $2.isConst); }
     ;
 
 keyElementList
@@ -1460,13 +1459,13 @@ keyElementList
 keyElement
     : expression ":" name optAnnotations ";"
                                          { auto expr = new IR::PathExpression(*$3);
-                                           $$ = new IR::KeyElement(@1, $4, $1, expr); }
+                                           $$ = new IR::KeyElement(@1, $1, expr, *$4); }
     ;
 
 actionList
     : %empty { $$ = new IR::IndexedVector<IR::ActionListElement>(); }
     | actionList optAnnotations actionRef ";"
-             { $$ = $1; $$->push_back(new IR::ActionListElement(@3, $2, $3)); $$->srcInfo = @1 + @3; }
+             { $$ = $1; $$->push_back(new IR::ActionListElement(@3, *$2, $3)); $$->srcInfo = @1 + @3; }
     ;
 
 actionRef
@@ -1481,10 +1480,10 @@ entry
         // below we set the position starting at @3 because optional
         // fields generate weird position information.
         { if (auto l = $3->to<IR::ListExpression>())
-            $$ = new IR::Entry(@3+@6, $6, $1.isConst, $2, l, $5, false);
+            $$ = new IR::Entry(@3+@6, *$6, $1.isConst, $2, l, $5, false);
           else {  // if not a tuple, make it a list of 1
             IR::Vector<IR::Expression> le($3);
-            $$ = new IR::Entry(@3+@6, $6, $1.isConst, $2,
+            $$ = new IR::Entry(@3+@6, *$6, $1.isConst, $2,
                    new IR::ListExpression(@3, le), $5, true);
           }
         }
@@ -1492,10 +1491,10 @@ entry
         // below we set the position starting at @2 because optional
         // fields generate weird position information.
         { if (auto l = $2->to<IR::ListExpression>())
-            $$ = new IR::Entry(@2+@5, $5, $1.isConst, nullptr, l, $4, false);
+            $$ = new IR::Entry(@2+@5, *$5, $1.isConst, nullptr, l, $4, false);
           else {  // if not a tuple, make it a list of 1
             IR::Vector<IR::Expression> le($2);
-            $$ = new IR::Entry(@2+@5, $5, $1.isConst, nullptr,
+            $$ = new IR::Entry(@2+@5, *$5, $1.isConst, nullptr,
                    new IR::ListExpression(@2, le), $4, true);
           }
         }
@@ -1516,7 +1515,7 @@ entriesList
 actionDeclaration
     : optAnnotations ACTION name "(" parameterList ")" blockStatement
         { auto pl = new IR::ParameterList(@5, *$5);
-          $$ = new IR::P4Action(@3, *$3, $1, pl, $7); }
+          $$ = new IR::P4Action(@3, *$3, *$1, pl, $7); }
     ;
 
 /************************* VARIABLES *****************************/
@@ -1527,8 +1526,7 @@ variableDeclaration
 
 variableDeclarationWithoutSemicolon
     : annotations typeRef name optInitializer
-                                     { auto ann = new IR::Annotations(@1, *$1);
-                                       $$ = new IR::Declaration_Variable(@1+@4, *$3, ann, $2, $4);
+                                     { $$ = new IR::Declaration_Variable(@1+@4, *$3, *$1, $2, $4);
                                        driver.structure->declareObject(*$3, $2->toString()); }
     | typeRef name optInitializer
                                      { $$ = new IR::Declaration_Variable(@1+@3, *$2, $1, $3);
@@ -1537,7 +1535,7 @@ variableDeclarationWithoutSemicolon
 
 constantDeclaration
     : optAnnotations CONST typeRef name "=" initializer ";"
-                                     { $$ = new IR::Declaration_Constant(@4, *$4, $1, $3, $6);
+                                     { $$ = new IR::Declaration_Constant(@4, *$4, *$1, $3, $6);
                                        driver.structure->declareObject(*$4, $3->toString()); }
     ;
 
@@ -1554,9 +1552,8 @@ initializer
 
 functionDeclaration
     : annotations functionPrototype blockStatement   {
-            auto ann = new IR::Annotations(@1, *$1);
             driver.structure->pop();
-            $$ = new IR::Function($2->srcInfo, $2->name, ann, $2->type, $3); }
+            $$ = new IR::Function($2->srcInfo, $2->name, *$1, $2->type, $3); }
     | functionPrototype blockStatement   {
             driver.structure->pop();
             $$ = new IR::Function($1->srcInfo, $1->name, $1->type, $2); }

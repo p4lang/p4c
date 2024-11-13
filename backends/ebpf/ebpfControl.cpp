@@ -142,8 +142,7 @@ bool ControlBodyTranslator::preorder(const IR::MethodCallExpression *expression)
         // Action arguments have been eliminated by the mid-end.
         BUG_CHECK(expression->arguments->size() == 0, "%1%: unexpected arguments for action call",
                   expression);
-        cstring msg =
-            absl::StrFormat("Control: explicit calling action %s()", ac->action->name.name);
+        cstring msg = absl::StrFormat("Control: explicit calling action %v()", ac->action->name);
         builder->target->emitTraceMessage(builder, msg.c_str());
         visit(ac->action->body);
         return false;
@@ -165,9 +164,9 @@ void ControlBodyTranslator::compileEmitField(const IR::Expression *expr, cstring
     if (!swap.isNullOrEmpty()) {
         builder->emitIndent();
         visit(expr);
-        builder->appendFormat(".%s = %s(", field.c_str(), swap);
+        builder->appendFormat(".%v = %v(", field, swap);
         visit(expr);
-        builder->appendFormat(".%s)", field.c_str());
+        builder->appendFormat(".%v)", field);
         builder->endOfStatement(true);
     }
 
@@ -304,7 +303,7 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod *method) {
     auto table = control->getTable(method->object->getName().name);
     BUG_CHECK(table != nullptr, "No table for %1%", method->expr);
 
-    msgStr = absl::StrFormat("Control: applying %s", method->object->getName().name);
+    msgStr = absl::StrFormat("Control: applying %v", method->object->getName());
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 
     builder->emitIndent();
@@ -393,7 +392,7 @@ void ControlBodyTranslator::processApply(const P4::ApplyMethod *method) {
     builder->blockEnd(true);
     builder->blockEnd(true);
 
-    msgStr = absl::StrFormat("Control: %s applied", method->object->getName().name);
+    msgStr = absl::StrFormat("Control: %v applied", method->object->getName());
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 }
 
@@ -595,8 +594,7 @@ void EBPFControl::emitDeclaration(CodeBuilder *builder, const IR::Declaration *d
                     // Therefore, this piece of code zero-initialize structures
                     // that might be used as keys.
                     builder->emitIndent();
-                    builder->appendFormat("__builtin_memset((void *) &%s, 0, sizeof(",
-                                          vd->name.name);
+                    builder->appendFormat("__builtin_memset((void *) &%v, 0, sizeof(", vd->name);
                     etype->declare(builder, cstring::empty, false);
                     builder->append("))");
                     builder->endOfStatement(true);

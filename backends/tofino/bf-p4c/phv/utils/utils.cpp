@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/phv/utils/utils.h"
 
 #include <deque>
 #include <iostream>
@@ -25,14 +25,14 @@
 
 #include <boost/optional/optional_io.hpp>
 
-#include "bf-p4c/common/table_printer.h"
-#include "bf-p4c/device.h"
-#include "bf-p4c/ir/bitrange.h"
-#include "bf-p4c/phv/phv.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/phv_parde_mau_use.h"
-#include "bf-p4c/phv/utils/live_range_report.h"
-#include "bf-p4c/phv/utils/report.h"
+#include "backends/tofino/bf-p4c/common/table_printer.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/ir/bitrange.h"
+#include "backends/tofino/bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/phv_parde_mau_use.h"
+#include "backends/tofino/bf-p4c/phv/utils/live_range_report.h"
+#include "backends/tofino/bf-p4c/phv/utils/report.h"
 #include "lib/algorithm.h"
 
 static int cluster_id_g = 0;  // global counter for assigning cluster ids
@@ -97,7 +97,7 @@ static const char *fieldName(const PHV::AllocSlice &slice) {
     if (!slice.field()) return "no_name";
     if (auto *t = slice.field()->name.findlast('.')) return t + 1;
     if (auto *t = slice.field()->name.findlast(':')) return t + 1;
-    return slice.field()->name;
+    return slice.field()->name.c_str();
 }
 
 std::ostream &operator<<(std::ostream &out, const PHV::ActionSet &actions) {
@@ -1312,7 +1312,7 @@ std::optional<le_bitrange> PHV::AlignedCluster::validContainerStartRange(
     LOG5("\tField slice " << slice << " to be placed in container size " << container_size
                           << " slices has "
                           << (slice.validContainerRange() == ZeroToMax()
-                                  ? "no"
+                                  ? "no"_cs
                                   : cstring::to_cstring(slice.validContainerRange()))
                           << " alignment requirement.");
 
@@ -1730,7 +1730,7 @@ PHV::SuperCluster::SliceList *PHV::SuperCluster::findLinkedWideArithSliceList(
                     LOG7("   Looking for slice list " << list);
                     LOG7("      slice_lsb2 = " << slice_lsb2);
                     if (fs2.field()->bit_used_in_wide_arith(slice_lsb2)) {
-                        if (0 == std::strcmp(fs.field()->name, fs2.field()->name)) {
+                        if (fs.field()->name == fs2.field()->name) {
                             if (lo_slice && (slice_lsb + 32) == slice_lsb2)
                                 return list;
                             else if (!lo_slice && (slice_lsb - 32) == slice_lsb2)

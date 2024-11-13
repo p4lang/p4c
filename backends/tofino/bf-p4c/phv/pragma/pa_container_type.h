@@ -21,8 +21,8 @@
 
 #include <optional>
 
-#include "bf-p4c/phv/phv.h"
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "ir/ir.h"
 
 using namespace P4;

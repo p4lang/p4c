@@ -18,18 +18,19 @@
 
 #include "programStructure.h"
 
-#include "bf-p4c/arch/bridge_metadata.h"
-#include "bf-p4c/arch/fromv1.0/meter.h"
-#include "bf-p4c/arch/fromv1.0/phase0.h"
-#include "bf-p4c/arch/intrinsic_metadata.h"
-#include "bf-p4c/common/pragma/all_pragmas.h"
-#include "bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
+#include "backends/tofino/bf-p4c/arch/fromv1.0/meter.h"
+#include "backends/tofino/bf-p4c/arch/fromv1.0/phase0.h"
+#include "backends/tofino/bf-p4c/arch/intrinsic_metadata.h"
+#include "backends/tofino/bf-p4c/common/pragma/all_pragmas.h"
+#include "backends/tofino/bf-p4c/device.h"
 #include "frontends/p4-14/fromv1.0/converters.h"
 #include "frontends/p4-14/header_type.h"
 #include "frontends/p4-14/typecheck.h"
 #include "frontends/p4/cloner.h"
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/unusedDeclarations.h"
+#include "ir/annotations.h"
 #include "lib/error.h"
 
 namespace P4 {
@@ -68,17 +69,17 @@ const IR::P4Table *P4V1::TNA_ProgramStructure::convertTable(
         auto flc = field_list_calculations.get(action_selector->key.name);
         if (flc) {
             auto annos = p4Table->getAnnotations();
-            annos = annos->addAnnotation("action_selector_hash_field_calc_name"_cs,
-                                         new IR::StringLiteral(flc->name));
-            annos = annos->addAnnotation("action_selector_hash_field_list_name"_cs,
-                                         new IR::StringLiteral(flc->input->names[0]));
+            IR::Annotations::addOrReplace(annos, "action_selector_hash_field_calc_name"_cs,
+                                          new IR::StringLiteral(flc->name));
+            IR::Annotations::addOrReplace(annos, "action_selector_hash_field_list_name"_cs,
+                                          new IR::StringLiteral(flc->input->names[0]));
             for (auto a : flc->algorithm->names) {
-                annos = annos->addAnnotation("algorithm"_cs, new IR::StringLiteral(a));
+                IR::Annotations::addOrReplace(annos, "algorithm"_cs, new IR::StringLiteral(a));
             }
-            annos = annos->addAnnotation("action_selector_hash_field_calc_output_width"_cs,
-                                         new IR::Constant(flc->output_width));
+            IR::Annotations::addOrReplace(annos, "action_selector_hash_field_calc_output_width"_cs,
+                                          new IR::Constant(flc->output_width));
             auto newP4Table =
-                new IR::P4Table(p4Table->srcInfo, newName, annos, p4Table->properties);
+                new IR::P4Table(p4Table->srcInfo, newName, std::move(annos), p4Table->properties);
             LOG4("Adding dynamic hash annotations: " << annos << " to table " << table->name);
             return newP4Table;
         }
@@ -92,11 +93,10 @@ const IR::Declaration_Instance *P4V1::TNA_ProgramStructure::convertActionProfile
     auto decl = ProgramStructure::convertActionProfile(action_profile, newName);
 
     auto mergedAnnotations = action_profile->annotations;
-    for (auto annotation : decl->annotations->annotations)
-        mergedAnnotations = mergedAnnotations->add(annotation);
+    mergedAnnotations.append(decl->annotations);
     // Add annotations from action profile to the declaration
-    auto newDecl = new IR::Declaration_Instance(decl->name, mergedAnnotations, decl->type,
-                                                decl->arguments, nullptr);
+    auto newDecl = new IR::Declaration_Instance(decl->name, std::move(mergedAnnotations),
+                                                decl->type, decl->arguments, nullptr);
     return newDecl;
 }
 
@@ -206,7 +206,7 @@ const IR::Declaration_Instance *TnaProgramStructure::convertDirectCounter(const 
 
     // keep max_width as annotation
     if (c->max_width >= 0) {
-        annos = annos->addAnnotation("max_width"_cs, new IR::Constant(c->max_width));
+        IR::Annotations::addOrReplace(annos, "max_width"_cs, new IR::Constant(c->max_width));
     }
 
     auto args = new IR::Vector<IR::Argument>();
@@ -266,7 +266,7 @@ const IR::Declaration_Instance *TnaProgramStructure::convert(const IR::Register 
     } else if (reg->width > 0) {
         regElementType = IR::Type_Bits::get(reg->width);
     } else if (reg->layout) {
-        cstring newName = ::get(registerLayoutType, reg->layout);
+        cstring newName = P4::get(registerLayoutType, reg->layout);
         if (newName.isNullOrEmpty()) newName = reg->layout;
         regElementType = new IR::Type_Name(new IR::Path(newName));
     } else {
@@ -419,13 +419,13 @@ IR::BlockStatement *generate_tna_hash_block_statement(P4V1::TnaProgramStructure 
     declArgs->push_back(new IR::Argument(algo));
     auto declType =
         new IR::Type_Specialized(new IR::Type_Name("Hash"), new IR::Vector<IR::Type>({ttype}));
-    const IR::Annotations *annos = IR::Annotations::empty;
-    auto symmetricAnnotation = fl->annotations->getSingle("symmetric"_cs);
-    if (symmetricAnnotation) {
+    IR::Vector<IR::Annotation> annos;
+    if (auto symmetricAnnotation = fl->getAnnotation("symmetric"_cs)) {
         if (symmetricAnnotation->expr.size() == 2) {
             // auto name1 = symmetricAnnotation->expr[0];
             // auto name2 = symmetricAnnotation->expr[1];
-            annos->addAnnotation("symmetric"_cs, new IR::ListExpression(symmetricAnnotation->expr));
+            IR::Annotations::addOrReplace(annos, "symmetric"_cs,
+                                          new IR::ListExpression(symmetricAnnotation->expr));
         } else {
             error("Invalid pragma usage: symmetric");
         }
@@ -489,17 +489,17 @@ const IR::P4Table *TnaProgramStructure::convertTable(const IR::V1Table *table, c
         auto flc = field_list_calculations.get(action_selector->key.name);
         if (flc) {
             auto annos = p4Table->getAnnotations();
-            annos = annos->addAnnotation("action_selector_hash_field_calc_name"_cs,
-                                         new IR::StringLiteral(flc->name));
-            annos = annos->addAnnotation("action_selector_hash_field_list_name"_cs,
-                                         new IR::StringLiteral(flc->input->names[0]));
+            IR::Annotations::addOrReplace(annos, "action_selector_hash_field_calc_name"_cs,
+                                          new IR::StringLiteral(flc->name));
+            IR::Annotations::addOrReplace(annos, "action_selector_hash_field_list_name"_cs,
+                                          new IR::StringLiteral(flc->input->names[0]));
             for (auto a : flc->algorithm->names) {
-                annos = annos->addAnnotation("algorithm"_cs, new IR::StringLiteral(a));
+                IR::Annotations::addOrReplace(annos, "algorithm"_cs, new IR::StringLiteral(a));
             }
-            annos = annos->addAnnotation("action_selector_hash_field_calc_output_width"_cs,
-                                         new IR::Constant(flc->output_width));
+            IR::Annotations::addOrReplace(annos, "action_selector_hash_field_calc_output_width"_cs,
+                                          new IR::Constant(flc->output_width));
             auto newP4Table =
-                new IR::P4Table(p4Table->srcInfo, newName, annos, p4Table->properties);
+                new IR::P4Table(p4Table->srcInfo, newName, std::move(annos), p4Table->properties);
             LOG4("Adding dynamic hash annotations: " << annos << " to table " << table->name);
             return newP4Table;
         }
@@ -539,7 +539,7 @@ const IR::Declaration_Instance *TnaProgramStructure::convertActionProfile(
         error("Cannot locate action selector %1%", action_profile->selector);
     const IR::Type *type = nullptr;
     auto args = new IR::Vector<IR::Argument>();
-    auto annos = addGlobalNameAnnotation(action_profile->name);
+    auto annos = addGlobalNameAnnotation(action_profile->name, {});
     if (action_selector) {
         type = new IR::Type_Name(new IR::Path("ActionSelector"));
         if (action_profile->size == 0)
@@ -564,9 +564,7 @@ const IR::Declaration_Instance *TnaProgramStructure::convertActionProfile(
                 new IR::Member(new IR::TypeNameExpression("SelectorMode_t"), "FAIR")));
         }
         auto fl = getFieldLists(flc);
-        for (auto annot : fl->annotations->annotations) {
-            annos = annos->add(annot);
-        }
+        annos.append(fl->annotations);
     } else {
         type = new IR::Type_Name(new IR::Path("ActionProfile"));
         if (action_profile->size == 0)
@@ -581,8 +579,7 @@ const IR::Declaration_Instance *TnaProgramStructure::convertActionProfile(
     auto decl = new IR::Declaration_Instance(newName, annos, type, args);
 
     auto mergedAnnotations = action_profile->annotations;
-    for (auto annotation : decl->annotations->annotations)
-        mergedAnnotations = mergedAnnotations->add(annotation);
+    mergedAnnotations.append(decl->annotations);
     // Add annotations from action profile to the declaration
     auto newDecl = new IR::Declaration_Instance(decl->name, mergedAnnotations, decl->type,
                                                 decl->arguments, nullptr);
@@ -739,13 +736,13 @@ const IR::Declaration_Instance *TnaProgramStructure::convert(const IR::CounterOr
     auto annos = addGlobalNameAnnotation(cm->name, cm->annotations);
     if (auto *c = cm->to<IR::Counter>()) {
         if (c->min_width >= 0) {
-            annos = annos->addAnnotation("min_width"_cs, new IR::Constant(c->min_width));
+            IR::Annotations::addOrReplace(annos, "min_width"_cs, new IR::Constant(c->min_width));
             type_args->push_back(IR::Type_Bits::get(c->min_width));
         } else {
             type_args->push_back(IR::Type_Bits::get(64));  // by default, use 64
         }
         if (c->max_width >= 0)
-            annos = annos->addAnnotation("max_width"_cs, new IR::Constant(c->max_width));
+            IR::Annotations::addOrReplace(annos, "max_width"_cs, new IR::Constant(c->max_width));
     }
     type_args->push_back(IR::Type_Bits::get(cm->index_width()));
     auto type = new IR::Type_Specialized(type_name, type_args);
@@ -1066,7 +1063,7 @@ const IR::ParserState *TnaProgramStructure::convertParser(
                 }
 
                 auto type = ProgramStructure::explodeType(fieldTypes);
-                auto sizeAnnotation = value_set->annotations->getSingle("parser_value_set_size"_cs);
+                auto sizeAnnotation = value_set->getAnnotation("parser_value_set_size"_cs);
                 const IR::Constant *sizeConstant;
                 if (sizeAnnotation) {
                     if (sizeAnnotation->expr.size() != 1) {
@@ -1085,7 +1082,8 @@ const IR::ParserState *TnaProgramStructure::convertParser(
                               c);
                     sizeConstant = new IR::Constant(4);
                 }
-                auto annos = addNameAnnotation(value_set->name, value_set->annotations);
+                auto annos = IR::Annotations::maybeAddNameAnnotation(value_set->annotations,
+                                                                     value_set->name);
                 // TODO: work around for the semantic difference bwteen
                 // P4-14 value_set and P4-16 value_set. In p4-14, a value_set
                 // can be global and share the same name in ingress add egress
@@ -1095,8 +1093,8 @@ const IR::ParserState *TnaProgramStructure::convertParser(
                 // parser to have the same name in context json to generate the
                 // correct pd.h api to be consistent with existing p4-14 pd
                 // tests.
-                annos =
-                    annos->addAnnotation("pd_pvs_name"_cs, new IR::StringLiteral(value_set->name));
+                IR::Annotations::addOrReplace(annos, "pd_pvs_name"_cs,
+                                              new IR::StringLiteral(value_set->name));
                 auto decl = new IR::P4ValueSet(value_set->name, annos, type, sizeConstant);
                 stateful->push_back(decl);
             }
@@ -1120,8 +1118,10 @@ const IR::ParserState *TnaProgramStructure::convertParser(
         BUG("No select or default_return %1%", parser);
     }
     latest = nullptr;
-    auto annos = addNameAnnotation(parser->name, parser->annotations);
-    auto result = new IR::ParserState(parser->srcInfo, parser->name, annos, components, select);
+    auto result = new IR::ParserState(
+        parser->srcInfo, parser->name,
+        IR::Annotations::maybeAddNameAnnotation(parser->annotations, parser->name), components,
+        select);
     return result;
 }
 
@@ -1425,8 +1425,8 @@ const IR::ParserState *TnaProgramStructure::createMirrorState(gress_t gress, uns
     auto select = new IR::PathExpression(IR::ID(nextState));
     auto newStateName = IR::ID(cstring("__") + name);
     auto *newState = new IR::ParserState(newStateName, *statements, select);
-    newState->annotations = newState->annotations->addAnnotationIfNew(
-        IR::Annotation::nameAnnotation, new IR::StringLiteral(cstring(cstring("$") + name)));
+    newState->addAnnotationIfNew(IR::Annotation::nameAnnotation,
+                                 new IR::StringLiteral(cstring("$" + name)));
     return newState;
 }
 
@@ -1519,8 +1519,8 @@ const IR::ParserState *TnaProgramStructure::createResubmitState(gress_t gress, u
     auto select = new IR::PathExpression(IR::ID(nextState));
     auto newStateName = IR::ID(cstring("__") + name);
     auto *newState = new IR::ParserState(newStateName, *statements, select);
-    newState->annotations = newState->annotations->addAnnotationIfNew(
-        IR::Annotation::nameAnnotation, new IR::StringLiteral(cstring(cstring("$") + name)));
+    newState->addAnnotationIfNew(IR::Annotation::nameAnnotation,
+                                 new IR::StringLiteral(cstring("$" + name)));
     return newState;
 }
 
@@ -1723,8 +1723,7 @@ void TnaProgramStructure::createIngressDeparser() {
         auto declType = new IR::Type_Specialized(new IR::Type_Name("Digest"), typeArgs);
         BUG_CHECK(digest.second.first != std::nullopt, "digest field list name cannot be empty");
         auto fl_name = *digest.second.first;
-        auto annot = new IR::Annotations();
-        auto annos = addGlobalNameAnnotation(fl_name, annot);
+        auto annos = addGlobalNameAnnotation(fl_name, {});
         auto decl = new IR::Declaration_Instance(fl_name, annos, declType, declArgs);
         controlLocals.push_back(decl);
     }
@@ -1827,14 +1826,14 @@ void TnaProgramStructure::createChecksumUpdateStatements(
         cinfo.deparserUpdateLocations.insert(EGRESS);
 
         // annotation may override the default updateLocations
-        for (auto annot : cf->annotations->annotations) {
+        for (auto annot : cf->annotations) {
             parseUpdateLocationAnnotation(cinfo.parserUpdateLocations, annot,
                                           "residual_checksum_parser_update_location"_cs);
             parseUpdateLocationAnnotation(cinfo.deparserUpdateLocations, annot,
                                           "calculated_field_update_location"_cs);
         }
 
-        for (auto annot : flc->annotations->annotations) {
+        for (auto annot : flc->annotations) {
             parseUpdateLocationAnnotation(cinfo.parserUpdateLocations, annot,
                                           "residual_checksum_parser_update_location"_cs);
             parseUpdateLocationAnnotation(cinfo.deparserUpdateLocations, annot,
@@ -1882,14 +1881,14 @@ void TnaProgramStructure::createChecksumVerifyStatements(gress_t) {
             cinfo.deparserUpdateLocations.insert(EGRESS);
 
             // annotation may override the default updateLocations
-            for (auto annot : cf->annotations->annotations) {
+            for (auto annot : cf->annotations) {
                 parseUpdateLocationAnnotation(cinfo.parserUpdateLocations, annot,
                                               "residual_checksum_parser_update_location"_cs);
                 parseUpdateLocationAnnotation(cinfo.deparserUpdateLocations, annot,
                                               "calculated_field_update_location"_cs);
             }
 
-            for (auto annot : flc->annotations->annotations) {
+            for (auto annot : flc->annotations) {
                 parseUpdateLocationAnnotation(cinfo.parserUpdateLocations, annot,
                                               "residual_checksum_parser_update_location"_cs);
                 parseUpdateLocationAnnotation(cinfo.deparserUpdateLocations, annot,
@@ -2129,8 +2128,8 @@ void TnaProgramStructure::addBridgedFieldsFromChecksumUpdate(
                 auto type = expr->type;
                 if (!bridgedFields.count(fn)) {
                     bridgedFields.insert(fn);
-                    auto annot = new IR::Annotations({new IR::Annotation(IR::ID("flexible"), {})});
-                    fields->push_back(new IR::StructField(IR::ID(fn), annot, type));
+                    fields->push_back(new IR::StructField(
+                        IR::ID(fn), {new IR::Annotation(IR::ID("flexible"), {})}, type));
                     bridgedFieldInfo.emplace(fn, path);
                 }
             }
@@ -2147,7 +2146,7 @@ void TnaProgramStructure::collectBridgedFields() {
 
     // handle pa_do_not_bridge
     for (auto it : headers) {
-        auto do_not_bridge = it.first->type->annotations->getSingle("pa_do_not_bridge"_cs);
+        auto do_not_bridge = it.first->type->getAnnotation("pa_do_not_bridge"_cs);
         if (do_not_bridge) {
             if (do_not_bridge->expr.size() != 2) continue;
             if (auto expr = do_not_bridge->expr.at(1)->to<IR::StringLiteral>()) {
@@ -2173,13 +2172,13 @@ void TnaProgramStructure::collectBridgedFields() {
         residualChecksumNames.emplace(fl, residualFieldName);
     });
 
-    auto annot = new IR::Annotations({new IR::Annotation(IR::ID("flexible"), {})});
+    auto annot = new IR::Annotation(IR::ID("flexible"), {});
     for (auto f : bridgedFields) {
         if (bridgedFieldInfo.count(f)) {
             auto info = bridgedFieldInfo.at(f);
             auto fn = convertLinearPathToStructFieldName(&info);
             auto field = info.components.back()->to<IR::Member>();
-            fields->push_back(new IR::StructField(fn, annot, field->type));
+            fields->push_back(new IR::StructField(fn, {annot}, field->type));
         }
     }
 
@@ -2203,8 +2202,8 @@ void TnaProgramStructure::getStructFieldsFromFieldList(IR::IndexedVector<IR::Str
             auto type = f->type;
             if (type->is<IR::Type_StructLike>())
                 type = new IR::Type_Name(type->to<IR::Type_StructLike>()->name);
-            auto annot = new IR::Annotations({new IR::Annotation(IR::ID("flexible"), {})});
-            fields->push_back(new IR::StructField(fn, annot, type));
+            fields->push_back(
+                new IR::StructField(fn, {new IR::Annotation(IR::ID("flexible"), {})}, type));
         }
     }
 }
@@ -2339,11 +2338,8 @@ void TnaProgramStructure::createMain() {
     auto expr = new IR::PathExpression(pipe0);
     args->push_back(new IR::Argument(expr));
 
-    auto *annotations = new IR::Annotations();
-    annotations->annotations.push_back(
-        new IR::Annotation(IR::ID(PragmaAutoInitMetadata::name), {}));
-
-    auto result = new IR::Declaration_Instance(name, annotations, type, args, nullptr);
+    auto result = new IR::Declaration_Instance(
+        name, {new IR::Annotation(IR::ID(PragmaAutoInitMetadata::name), {})}, type, args, nullptr);
     declarations->push_back(result);
 }
 
@@ -2458,7 +2454,8 @@ void TnaProgramStructure::loadModel() {
 
     // iterate over tna declarations, find the type for intrinsic metadata
     for (auto decl : *declarations) {
-        if (decl->getAnnotation("__intrinsic_metadata"_cs)) {
+        auto *ann = decl->to<IR::IAnnotated>();
+        if (ann && ann->getAnnotation("__intrinsic_metadata"_cs)) {
             auto st = decl->to<IR::Type_StructLike>();
             tna_intr_md_types.emplace(st->name.toString(), st);
         }
@@ -2664,7 +2661,7 @@ const IR::P4Program *TnaProgramStructure::create(Util::SourceInfo info) {
 FixChecksum::FixChecksum(TnaProgramStructure *structure) {
     CHECK_NULL(structure);
     refMap.setIsV1(true);
-    auto parserGraphs = new P4ParserGraphs(&refMap, cstring());
+    auto parserGraphs = new P4ParserGraphs(&refMap, false);
     addPasses({
         new P4::CreateBuiltins(),
         new P4::ResolveReferences(&refMap, true),  // check shadowing

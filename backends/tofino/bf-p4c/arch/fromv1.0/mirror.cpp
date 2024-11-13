@@ -18,15 +18,16 @@
 
 #include "mirror.h"
 
-#include "bf-p4c/arch/bridge_metadata.h"
-#include "bf-p4c/arch/intrinsic_metadata.h"
-#include "bf-p4c/common/ir_utils.h"
-#include "bf-p4c/device.h"
-#include "bf-p4c/lib/pad_alignment.h"
+#include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
+#include "backends/tofino/bf-p4c/arch/intrinsic_metadata.h"
+#include "backends/tofino/bf-p4c/common/ir_utils.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/lib/pad_alignment.h"
 #include "frontends/p4-14/fromv1.0/v1model.h"
 #include "frontends/p4/cloner.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
+#include "ir/annotations.h"
 
 namespace BFN {
 namespace {
@@ -250,8 +251,8 @@ class AddMirroredFieldListParser : public Transform {
         auto select = new IR::PathExpression(IR::ID(nextState));
         auto newStateName = IR::ID(cstring("__") + name);
         auto *newState = new IR::ParserState(newStateName, *statements, select);
-        newState->annotations = newState->annotations->addAnnotationIfNew(
-            IR::Annotation::nameAnnotation, new IR::StringLiteral(cstring(cstring("$") + name)));
+        newState->addAnnotationIfNew(IR::Annotation::nameAnnotation,
+                                     new IR::StringLiteral(cstring("$" + name)));
         return newState;
     }
 

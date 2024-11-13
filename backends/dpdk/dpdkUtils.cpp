@@ -57,14 +57,7 @@ bool isHeadersStruct(const IR::Type_Struct *st) {
     if (annon) return true;
     return false;
 }
-bool isMetadataStruct(const IR::Type_Struct *st) {
-    for (auto anno : st->annotations->annotations) {
-        if (anno->name == "__metadata__"_cs) {
-            return true;
-        }
-    }
-    return false;
-}
+bool isMetadataStruct(const IR::Type_Struct *st) { return st->hasAnnotation("__metadata__"_cs); }
 
 bool isMetadataField(const IR::Expression *e) {
     if (!e->is<IR::Member>()) return false;
@@ -139,9 +132,10 @@ IR::Declaration_Instance *createRegDeclarationInstance(cstring instanceName, int
     auto spectype = new IR::Type_Specialized(type, typeargs);
     auto args = new IR::Vector<IR::Argument>();
     args->push_back(new IR::Argument(new IR::Constant(IR::Type::Bits::get(32), regSize)));
-    auto annot = IR::Annotations::empty;
-    annot->addAnnotationIfNew(IR::Annotation::nameAnnotation, new IR::StringLiteral(instanceName));
-    auto decl = new IR::Declaration_Instance(instanceName, annot, spectype, args, nullptr);
+    auto decl = new IR::Declaration_Instance(
+        instanceName,
+        {new IR::Annotation(IR::Annotation::nameAnnotation, new IR::StringLiteral(instanceName))},
+        spectype, args, nullptr);
     return decl;
 }
 

@@ -31,14 +31,14 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include "bf-p4c/arch/arch.h"
-#include "bf-p4c/common/parse_annotations.h"
-#include "bf-p4c/common/pragma/all_pragmas.h"
-#include "bf-p4c/common/pragma/collect_global_pragma.h"
-#include "bf-p4c/common/pragma/pragma.h"
-#include "bf-p4c/lib/error_type.h"
-#include "bf-p4c/logging/manifest.h"
-#include "bf-p4c/midend/type_checker.h"
+#include "backends/tofino/bf-p4c/arch/arch.h"
+#include "backends/tofino/bf-p4c/common/parse_annotations.h"
+#include "backends/tofino/bf-p4c/common/pragma/all_pragmas.h"
+#include "backends/tofino/bf-p4c/common/pragma/collect_global_pragma.h"
+#include "backends/tofino/bf-p4c/common/pragma/pragma.h"
+#include "backends/tofino/bf-p4c/lib/error_type.h"
+#include "backends/tofino/bf-p4c/logging/manifest.h"
+#include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/parsers/parserDriver.h"
 #include "ir/ir.h"

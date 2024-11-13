@@ -26,8 +26,8 @@
 #include <boost/graph/graph_utility.hpp>
 #include <boost/graph/reverse_graph.hpp>
 
-#include "bf-p4c/logging/event_logger.h"
-#include "bf-p4c/parde/parser_info.h"
+#include "backends/tofino/bf-p4c/logging/event_logger.h"
+#include "backends/tofino/bf-p4c/parde/parser_info.h"
 #include "ir/ir.h"
 #include "ir/visitor.h"
 

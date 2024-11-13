@@ -25,11 +25,11 @@
 #include <sstream>
 #include <vector>
 
-#include "bf-p4c/phv/phv.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/phv/utils/utils.h"
-#include "bf-p4c/phv/v2/tx_score.h"
-#include "bf-p4c/phv/v2/types.h"
+#include "backends/tofino/bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/phv/v2/tx_score.h"
+#include "backends/tofino/bf-p4c/phv/v2/types.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 

@@ -16,14 +16,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/arch/fromv1.0/checksum.h"
+#include "backends/tofino/bf-p4c/arch/fromv1.0/checksum.h"
 
 namespace BFN {
 namespace V1 {
 
 TranslateParserChecksums::TranslateParserChecksums(ProgramStructure *structure,
                                                    P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
-    : parserGraphs(refMap, cstring()) {
+    : parserGraphs(refMap, false) {
     auto collectParserChecksums = new BFN::V1::CollectParserChecksums(refMap, typeMap);
     auto insertParserChecksums =
         new BFN::V1::InsertParserChecksums(this, collectParserChecksums, &parserGraphs, structure);

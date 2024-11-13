@@ -21,13 +21,13 @@
 #include <string>
 #include <boost/range/adaptors.hpp>
 
-#include "bf-p4c/common/asm_output.h"
-#include "bf-p4c/common/utils.h"
-#include "bf-p4c/phv/phv_fields.h"
-#include "bf-p4c/parde/allocate_parser_match_register.h"
-#include "bf-p4c/parde/collect_parser_usedef.h"
-#include "bf-p4c/parde/dump_parser.h"
-#include "bf-p4c/parde/parser_info.h"
+#include "backends/tofino/bf-p4c/common/asm_output.h"
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/parde/allocate_parser_match_register.h"
+#include "backends/tofino/bf-p4c/parde/collect_parser_usedef.h"
+#include "backends/tofino/bf-p4c/parde/dump_parser.h"
+#include "backends/tofino/bf-p4c/parde/parser_info.h"
 #include "clot/clot.h"
 #include "device.h"
 #include "match_register.h"
@@ -348,8 +348,8 @@ struct DelayDefs : public ParserModifier {
             auto orig_shift = trans->shift;
             trans->shift = static_cast<unsigned>(static_cast<int>(trans->shift) + adj);
             LOG3("Adjust shift on transition from "
-                 << state->name << " to " << (trans->next ? trans->next->name : "DONE") << " by "
-                 << adj << ": orig=" << orig_shift << " new=" << trans->shift);
+                 << state->name << " to " << (trans->next ? trans->next->name.c_str() : "DONE")
+                 << " by " << adj << ": orig=" << orig_shift << " new=" << trans->shift);
         }
 
         return true;
@@ -702,7 +702,7 @@ class MatcherAllocator : public Visitor {
             for (auto &[def, next_states] : delay_def_info)
                 for (auto *ns : next_states)
                     prev_delay_defs[std::make_pair(def->state->name, def->rval->range)].emplace(
-                        ns ? ns->name : "NULL");
+                        ns ? ns->name.c_str() : "NULL");
 
         result.transition_saves.clear();
         result.transition_scratches.clear();

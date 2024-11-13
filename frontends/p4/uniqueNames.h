@@ -97,7 +97,7 @@ class FindSymbols : public Inspector {
     }
 
     void doDecl(const IR::Declaration *decl) {
-        cstring newName = nameGen.newName(decl->getName().name.string_view());
+        cstring newName = nameGen.newName(decl->getName().string_view());
         renameMap->setNewName(decl, newName);
     }
     void postorder(const IR::Declaration_Variable *decl) override { doDecl(decl); }
@@ -130,17 +130,14 @@ class RenameSymbols : public Transform, public ResolutionContext {
     /// @param decl Declaration *in the original/non-transformed* P4 IR.
     IR::ID *getName(const IR::IDeclaration *decl) const;
 
-    /// Add a @name annotation ONLY if it does not already exist.
-    /// Otherwise do nothing.
-    static const IR::Annotations *addNameAnnotation(cstring name, const IR::Annotations *annos);
-
     /// Rename any declaration where we want to add @name annotation with the original name.
     /// Has to be a template as there is no common base for declarations with annotations member.
     template <typename D>
     const IR::Node *renameDeclWithNameAnnotation(D *decl) {
         auto name = getName();
         if (name != nullptr && *name != decl->name) {
-            decl->annotations = addNameAnnotation(decl->name, decl->annotations);
+            decl->addAnnotationIfNew(IR::Annotation::nameAnnotation,
+                                     new IR::StringLiteral(decl->name));
             decl->name = *name;
         }
         return decl;
@@ -170,7 +167,7 @@ class FindParameters : public Inspector {
 
     void doParameters(const IR::ParameterList *pl) {
         for (auto p : pl->parameters) {
-            cstring newName = nameGen.newName(p->name.name.string_view());
+            cstring newName = nameGen.newName(p->name.string_view());
             renameMap->setNewName(p, newName);
         }
     }

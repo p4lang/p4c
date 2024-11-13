@@ -18,9 +18,9 @@
 
 #include <cmath>
 
-#include "bf-p4c/arch/fromv1.0/programStructure.h"
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/arch/fromv1.0/programStructure.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/device.h"
 #include "frontends/p4-14/fromv1.0/converters.h"
 
 namespace P4 {
@@ -317,9 +317,7 @@ CONVERT_PRIMITIVE(modify_field_with_hash_based_offset, 1) {
     auto mc = new IR::MethodCallExpression(primitive->srcInfo, hash, args);
     auto result = new IR::MethodCallStatement(primitive->srcInfo, mc);
 
-    auto annotations = new IR::Annotations();
-    for (auto annot : fl->annotations->annotations) annotations->annotations.push_back(annot);
-    auto block = new IR::BlockStatement(annotations);
+    auto block = new IR::BlockStatement(fl->annotations);
     block->components.push_back(result);
 
     return block;

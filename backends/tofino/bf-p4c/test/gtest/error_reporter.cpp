@@ -18,8 +18,8 @@
 
 #include <fstream>
 
-#include "bf-p4c/arch/arch.h"
-#include "bf-p4c/logging/collect_diagnostic_checks.h"
+#include "backends/tofino/bf-p4c/arch/arch.h"
+#include "backends/tofino/bf-p4c/logging/collect_diagnostic_checks.h"
 #include "bf_gtest_helpers.h"
 #include "frontends/parsers/parserDriver.h"
 #include "gtest/gtest.h"

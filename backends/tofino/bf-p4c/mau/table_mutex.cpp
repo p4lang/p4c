@@ -16,9 +16,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/mau/table_mutex.h"
+#include "backends/tofino/bf-p4c/mau/table_mutex.h"
 
-#include "bf-p4c/lib/error_type.h"
+#include "backends/tofino/bf-p4c/lib/error_type.h"
 
 bool IgnoreTableDeps::ignore_deps(const IR::MAU::Table *t1, const IR::MAU::Table *t2) const {
     auto t1_pos = ignore_dep_map.find(t1);
@@ -92,7 +92,7 @@ bool TablesMutuallyExclusive::miss_mutex_action_chain(const IR::MAU::Table *tbl,
         if (default_act->name.originalName == n.first) {
             name = n.first;
             return true;
-        } else if (n.first[0] != '$') {
+        } else if (!n.first.startsWith("$")) {
             non_def_act_chains.insert(n.first);
         }
     }

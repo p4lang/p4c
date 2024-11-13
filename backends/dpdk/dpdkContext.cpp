@@ -52,7 +52,7 @@ void DpdkContextGenerator::CollectTablesAndSetAttributes() {
                 auto size = tbl->getSizeProperty();
                 tblAttr.size = dpdk_default_table_size;
                 if (size) tblAttr.size = size->asUnsigned();
-                auto hidden = tbl->annotations->getSingle(IR::Annotation::hiddenAnnotation);
+                auto hidden = tbl->getAnnotation(IR::Annotation::hiddenAnnotation);
                 auto selector = tbl->properties->getProperty("selector");
                 tblAttr.is_add_on_miss = false;
                 tblAttr.idle_timeout_with_auto_delete = false;
@@ -247,10 +247,9 @@ void DpdkContextGenerator::setActionAttributes(const IR::P4Table *tbl) {
         bool can_be_default_action = !has_constant_default_action;
 
         // First, check for action annotations
-        auto actAnnot = action_decl->annotations;
-        auto table_only_annot = actAnnot->getSingle(IR::Annotation::tableOnlyAnnotation);
-        auto default_only_annot = actAnnot->getSingle(IR::Annotation::defaultOnlyAnnotation);
-        auto hidden = actAnnot->getSingle(IR::Annotation::hiddenAnnotation);
+        auto table_only_annot = action_decl->getAnnotation(IR::Annotation::tableOnlyAnnotation);
+        auto default_only_annot = action_decl->getAnnotation(IR::Annotation::defaultOnlyAnnotation);
+        auto hidden = action_decl->getAnnotation(IR::Annotation::hiddenAnnotation);
 
         if (table_only_annot) {
             can_be_default_action = false;

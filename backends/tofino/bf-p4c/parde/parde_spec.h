@@ -22,9 +22,9 @@
 #include <map>
 #include <vector>
 
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/ir/bitrange.h"
-#include "bf-p4c/parde/match_register.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/ir/bitrange.h"
+#include "backends/tofino/bf-p4c/parde/match_register.h"
 
 using namespace P4::literals;
 
@@ -553,10 +553,10 @@ class TofinoPardeSpec : public PardeSpec {
     unsigned numDeparserConstantBytes() const override { return 0; }
     unsigned numDeparserChecksumUnits() const override { return 6; }
     unsigned numDeparserInvertChecksumUnits() const override { return 0; }
-    unsigned deparserChunkSize() const { return 0; }
-    unsigned deparserChunkGroupSize() const { return 0; }
-    unsigned numDeparserChunkGroups() const { return 0; }
-    unsigned numClotsPerDeparserGroup() const { return 0; }
+    unsigned deparserChunkSize() const override { return 0; }
+    unsigned deparserChunkGroupSize() const override { return 0; }
+    unsigned numDeparserChunkGroups() const override { return 0; }
+    unsigned numClotsPerDeparserGroup() const override { return 0; }
 
     double clkFreq() const override { return 1.22; }
     unsigned lineRate() const override { return 100; }
@@ -647,10 +647,10 @@ class JBayPardeSpec : public PardeSpec {
     unsigned numDeparserConstantBytes() const override { return 8; }
     unsigned numDeparserChecksumUnits() const override { return 8; }
     unsigned numDeparserInvertChecksumUnits() const override { return 4; }
-    unsigned deparserChunkSize() const { return 8; }
-    unsigned deparserChunkGroupSize() const { return 8; }
-    unsigned numDeparserChunkGroups() const { return 16; }
-    unsigned numClotsPerDeparserGroup() const { return 4; }
+    unsigned deparserChunkSize() const override { return 8; }
+    unsigned deparserChunkGroupSize() const override { return 8; }
+    unsigned numDeparserChunkGroups() const override { return 16; }
+    unsigned numClotsPerDeparserGroup() const override { return 4; }
 
     // FIXME: adjust to true clock rate
     double clkFreq() const override { return 1.35; }

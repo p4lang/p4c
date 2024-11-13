@@ -21,7 +21,7 @@
 
 #include <functional>
 
-#include "bf-p4c/mau/table_dependency_graph.h"
+#include "backends/tofino/bf-p4c/mau/table_dependency_graph.h"
 
 using namespace P4;
 

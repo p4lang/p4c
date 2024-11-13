@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/midend/elim_cast.h"
+#include "backends/tofino/bf-p4c/midend/elim_cast.h"
 
 #include "bf_gtest_helpers.h"
 #include "gtest/gtest.h"

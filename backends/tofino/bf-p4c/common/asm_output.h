@@ -21,9 +21,9 @@
 
 #include <map>
 
-#include "bf-p4c/bf-p4c-options.h"
-#include "bf-p4c/ir/bitrange.h"
-#include "bf-p4c/phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/ir/bitrange.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "lib/ordered_map.h"
 #include "lib/safe_vector.h"
 #include "lib/stringref.h"

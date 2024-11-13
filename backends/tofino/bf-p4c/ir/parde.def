@@ -22,10 +22,10 @@
 #emit
 #include "lib/match.h"
 #include <optional>
-#include "bf-p4c/common/debug_info.h"
-#include "bf-p4c/ir/bitrange.h"
-#include "bf-p4c/parde/marshal.h"
-#include "bf-p4c/parde/match_register.h"
+#include "backends/tofino/bf-p4c/common/debug_info.h"
+#include "backends/tofino/bf-p4c/ir/bitrange.h"
+#include "backends/tofino/bf-p4c/parde/marshal.h"
+#include "backends/tofino/bf-p4c/parde/match_register.h"
 #end
 
 namespace BFN {
@@ -219,7 +219,7 @@ class ExtractPhv : Extract {
 class ExtractClot : Extract {
     dbprint {
         out << "extract " << source << " to CLOT-allocated " << dest << " from "
-            << (original_state ? original_state->name : "(nullptr)");
+            << (original_state ? original_state->name : "(nullptr)"_cs);
     }
 
     validate {
@@ -336,7 +336,7 @@ class ChecksumVerify : ParserChecksumWritePrimitive {
 class ChecksumResidualDeposit : ParserChecksumWritePrimitive {
     dbprint { out << "subtract and deposit checksum " << declName; }
 
-    FieldLVal getWriteDest() const { return dest; }
+    FieldLVal getWriteDest() const override { return dest; }
 
     FieldLVal dest;
     // header end position relative to current state's input buffer

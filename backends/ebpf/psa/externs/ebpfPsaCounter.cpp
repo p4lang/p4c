@@ -260,7 +260,7 @@ void EBPFCounterPSA::emitCounterUpdate(CodeBuilder *builder, const cstring targe
 
     if (type == CounterType::BYTES || type == CounterType::PACKETS_AND_BYTES) {
         builder->emitIndent();
-        builder->appendFormat("__sync_fetch_and_add(&(%sbytes), %s)", targetWAccess.c_str(),
+        builder->appendFormat("__sync_fetch_and_add(&(%vbytes), %v)", targetWAccess,
                               program->lengthVar);
         builder->endOfStatement(true);
 

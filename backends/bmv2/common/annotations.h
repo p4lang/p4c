@@ -28,7 +28,7 @@ using namespace P4::literals;
 class ParseAnnotations : public P4::ParseAnnotations {
  public:
     ParseAnnotations()
-        : P4::ParseAnnotations("BMV2"_cs, false,
+        : P4::ParseAnnotations("BMV2", false,
                                {
                                    PARSE_EMPTY("metadata"_cs),
                                    PARSE_EXPRESSION_LIST("field_list"_cs),

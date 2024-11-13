@@ -15,6 +15,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "frontends/common/constantParsing.h"
+#include "ir/annotations.h"
 
 /// a value that can be evaluated at compile-time
 interface CompileTimeValue {
@@ -67,7 +68,7 @@ interface INamespace {
 /// Does not allow two declarations with the same name
 interface ISimpleNamespace : INamespace {
     virtual IDeclaration getDeclByName(cstring name) const = 0;
-    virtual IDeclaration getDeclByName(std::string_view name) const = 0;    
+    virtual IDeclaration getDeclByName(std::string_view name) const = 0;
 }
 
 /// A general namespace can have multiple declarations with the same name
@@ -193,11 +194,11 @@ class Path {
     bool isDontCare() const { return name.isDontCare(); }
     toString{
         // This is the ORIGINAL name the user used
-        return absl::StrCat(absolute ? "." : "", name.toString().string_view());
+        return absl::StrCat(absolute ? "." : "", name.toString());
     }
     cstring asString() const {
         // The CURRENT internal name
-        return absl::StrCat(absolute ? "." : "", name.string_view());
+        return absl::StrCat(absolute ? "." : "", name);
     }
     dbprint { out << name; }
     validate { BUG_CHECK(!name.name.isNullOrEmpty(), "Empty path"); }
@@ -223,54 +224,44 @@ class AnnotationToken {
 class Annotation {
     ID name;
 
-    /// An unparsed annotation body
-    inline Vector<AnnotationToken> body;
-
-    /// Whether the annotation body needs to be parsed.
-    /// Invariant: if this is true, then expr and kv must both be empty. If the
-    /// annotation is compiler-generated (e.g., derived from a P4₁₄ pragma),
-    /// then needsParsing will be false and the body will be empty, but expr or
-    /// kv may be populated.
-    bool needsParsing;
-
-    /// Annotations that are simple expressions
-    inline Vector<Expression> expr;
-
-    /// Annotations described as key-value pairs
-    inline IndexedVector<NamedExpression> kv;
-
-    /// If this is true this is a structured annotation, and there are some
-    /// constraints on its contents.
-    bool structured;
-
     Annotation { if (!srcInfo) srcInfo = name.srcInfo; }
 
     /// For annotations parsed from P4-16 source.
     Annotation(Util::SourceInfo si, ID n, const Vector<AnnotationToken> &a)
-    : Node(si), name(n), body(a), needsParsing(true), structured(false) {}
+        : Node(si), name(n), body(a), needsParsing(true), structured(false) {}
     // Used by JSON loader
     Annotation(Util::SourceInfo si, ID n, const Vector<AnnotationToken> &a, bool structured)
-    : Node(si), name(n), body(a), needsParsing(true), structured(structured) {}
+        : Node(si), name(n), body(a), needsParsing(true), structured(structured) {}
 
     // The remaining constructors are for compiler-generated annotations.
     Annotation(Util::SourceInfo si, ID n,
-               const std::initializer_list<const Expression *> &a, bool structured = false)
-    : Node(si), name(n), needsParsing(false), expr(a), structured(structured) {}
+               std::initializer_list<const Expression *> a, bool structured = false)
+        : Node(si), name(n), expr(a), needsParsing(false), structured(structured) {}
+    Annotation(Util::SourceInfo si, ID n,
+               const Expression *a, bool structured = false)
+        : Node(si), name(n), expr(a), needsParsing(false), structured(structured) {}
     Annotation(Util::SourceInfo si, ID n, const IR::Vector<Expression> &a, bool structured = false)
-    : Node(si), name(n), needsParsing(false), expr(a), structured(structured) {}
+        : Node(si), name(n), expr(a), needsParsing(false), structured(structured) {}
     Annotation(Util::SourceInfo si, ID n, const IndexedVector<NamedExpression> &kv,
                bool structured = false)
-    : Node(si), name(n), needsParsing(false), kv(kv), structured(structured) {}
-    Annotation(ID n, const std::initializer_list<const Expression *> &a, bool structured = false)
-    : name(n), needsParsing(false), expr(a), structured(structured) {}
+        : Node(si), name(n), kv(kv), needsParsing(false), structured(structured) {}
+    Annotation(ID n, const Expression *a, bool structured = false)
+        : name(n), expr(a), needsParsing(false), structured(structured) {}
+    Annotation(ID n, std::initializer_list<const Expression *> a, bool structured = false)
+        : name(n), expr(a), needsParsing(false), structured(structured) {}
     Annotation(ID n, const IR::Vector<Expression> &a, bool structured = false)
-    : name(n), needsParsing(false), expr(a), structured(structured) {}
+        : name(n), expr(a), needsParsing(false), structured(structured) {}
     Annotation(ID n, intmax_t v, bool structured = false)
-    : name(n), needsParsing(false), structured(structured) {
-        expr.push_back(new Constant(v)); }
+        : name(n), needsParsing(false), structured(structured) {
+        expr.push_back(new Constant(v));
+    }
+    // Cannot use delegating ctors are ir-generator does not support initializer lists
+    //  : Annotation(n, { new Constant(v) }, structured) { }
     Annotation(ID n, cstring v, bool structured = false)
-    : name(n), needsParsing(false), structured(structured) {
-        expr.push_back(new StringLiteral(v)); }
+        : name(n), needsParsing(false), structured(structured) {
+        expr.push_back(new StringLiteral(v));
+    }
+    //  : Annotation(n, { new StringLiteral(v) }, structured) { }
 
     static const cstring nameAnnotation;  /// Indicates the control-plane name.
     static const cstring tableOnlyAnnotation;  /// Action cannot be a default_action.
@@ -278,6 +269,7 @@ class Annotation {
     static const cstring atomicAnnotation;  /// Code should be executed atomically.
     static const cstring hiddenAnnotation;  /// Object should not be exposed to the control-plane.
     static const cstring lengthAnnotation;  /// P4-14 annotation for varbit fields.
+    static const cstring maxLengthAnnotation;  /// P4-14 annotation for varbit fields.
     static const cstring optionalAnnotation;  /// Optional parameter annotation
     static const cstring pkginfoAnnotation;  /// Package documentation annotation.
     static const cstring deprecatedAnnotation;  /// Deprecation annotation.
@@ -288,7 +280,8 @@ class Annotation {
     static const cstring matchAnnotation;  /// Match annotation (for value sets).
     static const cstring fieldListAnnotation;  /// Used for recirculate, etc.
     static const cstring debugLoggingAnnotation;  /// Used by compiler implementer to limit debug log to the annotated IR context.
-    toString{ return absl::StrCat("@", name.string_view()); }
+    static const cstring disableOptimizationAnnotation; /// annotation to disable certain optimization
+    toString{ return absl::StrCat("@", name); }
     validate{
         BUG_CHECK(!name.name.isNullOrEmpty(), "empty annotation name");
         BUG_CHECK(!(needsParsing && !expr.empty()),
@@ -318,64 +311,83 @@ class Annotation {
             return Kind::StructuredKVList;
         return Kind::StructuredEmpty;
     }
-}
 
-/// There can be several annotations with the same "name", so this is a vector.
-// FIXME -- get rid of this class -- classes with annotations should have an
-// inline Vector<Annotation> instead (remove useless indirection)
-class Annotations {
-    optional inline Vector<Annotation> annotations;
-    Annotations { if (!srcInfo && !annotations.empty()) srcInfo = annotations[0]->srcInfo; }
-    static Annotations *empty;  // FIXME -- should be const
-    size_t size() const { return annotations.size(); }
-    // Get the annotation with the specified name or nullptr.
-    // There should be at most one annotation with this name.
-    Annotation getSingle(cstring name) const { return get(annotations, name); }
-    Annotations add(Annotation annot) {
-        if (annot->srcInfo) srcInfo += annot->srcInfo;
-        annotations.push_back(annot);
-        return this; }
-    Annotations add(Annotation annot) const { return clone()->add(annot); }
-    Annotations addAnnotation(cstring name, Expression expr, bool structured = false) {
-        return add(new Annotation(name, Vector<Expression>(expr), structured)); }
-    Annotations addAnnotation(cstring name, Expression expr, bool structured = false) const {
-        return add(new Annotation(name, Vector<Expression>(expr), structured)); }
-    // Add annotation if another annotation with the same name is not
-    // already present.
-    Annotations addAnnotationIfNew(cstring name, Expression expr, bool structured = false) const {
-        return getSingle(name) ? this : addAnnotation(name, expr, structured); }
-    Annotations append(Annotations other) {
-        if (other == nullptr)
-            return this;
-        for (auto a : other->annotations)
-            add(a);
-        return this;
-    }
-    // If annotations with the same name are already present, remove them.
-    // Add this annotation.
-    Annotations addOrReplace(cstring name, Expression expr, bool structured = false) const {
-        auto rv = clone();
-        remove_if(rv->annotations, [name](const Annotation *a)->bool { return a->name == name; });
-        rv->annotations.push_back(new Annotation(name, Vector<Expression>(expr), structured));
-        return rv; }
+    /// An unparsed annotation body
+    inline Vector<AnnotationToken> body;
+
+    /// Annotations that are simple expressions
+    inline Vector<Expression> expr;
+
+    /// Annotations described as key-value pairs
+    inline IndexedVector<NamedExpression> kv;
+
 #emit
-    typedef std::function<bool(const IR::Annotation*)> Filter;
+    /// Whether the annotation body needs to be parsed.
+    /// Invariant: if this is true, then expr and kv must both be empty. If the
+    /// annotation is compiler-generated (e.g., derived from a P4₁₄ pragma),
+    /// then needsParsing will be false and the body will be empty, but expr or
+    /// kv may be populated.
+    bool needsParsing : 1;
+
+    /// If this is true this is a structured annotation, and there are some
+    /// constraints on its contents.
+    bool structured : 1;
 #end
-    Annotations where(Filter func) const {
-        auto rv = empty->clone();
-        std::copy_if(annotations.begin(), annotations.end(),
-                     std::back_insert_iterator<Vector<Annotation>>(rv->annotations), func);
-        if (rv->annotations.size() == annotations.size()) return this;
-        return rv; }
-    validate{ annotations.check_null(); }
-    dbprint { for (auto a : annotations) out << a << ' '; }
 }
 
 /// Implemented by all objects that can have annotations
+// FIXME: Use CRTP to get access to the fields directly
 interface IAnnotated {
-    virtual Annotations getAnnotations() const = 0;
-    Annotation getAnnotation(cstring name) const override {
-        return getAnnotations()->getSingle(name); }
+    virtual const Vector<Annotation> &getAnnotations() const = 0;
+    virtual Vector<Annotation> &getAnnotations() = 0;
+
+    inline Annotation getAnnotation(cstring name) const {
+        const auto &annotations = getAnnotations();
+        return get(annotations, name);
+    }
+    /// Checks if there is annotation @name
+    inline bool hasAnnotation(cstring name) const {
+        const auto &annotations = getAnnotations();
+        return get(annotations, name) != nullptr;
+    }
+    /// Checks if there is annotation @name and it is the only annotation on the
+    /// node
+    inline bool hasOnlyAnnotation(cstring name) const {
+        const auto &annotations = getAnnotations();
+        return annotations.size() == 1 && get(annotations, name) != nullptr;
+    }
+    /// Check if there are any annotations
+    inline bool hasAnnotations() const {
+        const auto &annotations = getAnnotations();
+        return !annotations.empty();
+    }
+    inline void addAnnotation(Annotation annot) {
+        auto &annotations = getAnnotations();
+        annotations.push_back(annot);
+    }
+    inline void addAnnotation(cstring name, Expression expr, bool structured = false) {
+        addAnnotation(new Annotation(name, { expr }, structured));
+    }
+
+    /// Add annotation if another annotation with the same name is not
+    /// already present.
+    inline void addAnnotationIfNew(cstring name, Expression expr, bool structured = false) {
+        Annotations::addIfNew(getAnnotations(), name, expr, structured);
+    }
+
+    inline void addAnnotationIfNew(Annotation ann) {
+        Annotations::addIfNew(getAnnotations(), ann);
+    }
+
+    /// If annotations with the same name are already present, remove them;
+    /// add this annotation.
+    inline void addOrReplaceAnnotation(cstring name, Expression expr, bool structured = false) {
+        Annotations::addOrReplace(getAnnotations(), name, expr, structured);
+    }
+
+    inline void addOrReplaceAnnotation(Annotation ann) {
+        Annotations::addOrReplace(getAnnotations(), ann);
+    }
 }
 
 interface IInstance {
@@ -395,8 +407,8 @@ class Argument {
     toString{
         std::string result = "";
         if (!name.name.isNullOrEmpty())
-            absl::StrAppend(&result, name.toString().string_view(), " = ");
-        return absl::StrCat(result, expression->toString().string_view());
+            absl::StrAppend(&result, name, " = ");
+        return absl::StrCat(result, expression);
     }
 }
 

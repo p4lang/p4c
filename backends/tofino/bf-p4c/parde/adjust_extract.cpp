@@ -16,12 +16,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c/parde/adjust_extract.h"
+#include "backends/tofino/bf-p4c/parde/adjust_extract.h"
 
 #include <map>
 #include <vector>
 
-#include "bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/device.h"
 
 void AdjustExtract::postorder(IR::BFN::ParserState *state) {
     if (!hasMarshaled(state)) return;

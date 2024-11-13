@@ -22,8 +22,8 @@
 #include <map>
 #include <ostream>
 
-#include "bf-p4c/mau/input_xbar.h"
-#include "bf-p4c/mau/resource_estimate.h"
+#include "backends/tofino/bf-p4c/mau/input_xbar.h"
+#include "backends/tofino/bf-p4c/mau/resource_estimate.h"
 #include "ir/ir.h"
 #include "lib/bitops.h"
 #include "lib/bitvec.h"

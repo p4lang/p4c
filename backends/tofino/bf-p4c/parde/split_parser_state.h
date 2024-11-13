@@ -19,8 +19,8 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_PARDE_SPLIT_PARSER_STATE_H_
 #define BACKENDS_TOFINO_BF_P4C_PARDE_SPLIT_PARSER_STATE_H_
 
-#include "bf-p4c/ir/bitrange.h"
-#include "bf-p4c/parde/clot/clot_info.h"
+#include "backends/tofino/bf-p4c/ir/bitrange.h"
+#include "backends/tofino/bf-p4c/parde/clot/clot_info.h"
 #include "parde_visitor.h"
 
 /**
