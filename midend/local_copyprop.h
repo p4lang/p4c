@@ -154,10 +154,10 @@ class DoLocalCopyPropagation : public ControlFlowVisitor,
                            std::function<bool(const Context *, const IR::Expression *)> policy,
                            bool eut)
         : typeMap(typeMap),
-          tables(new std::map<cstring, TableInfo>),
-          actions(new std::map<cstring, FuncInfo>),
-          methods(new std::map<cstring, FuncInfo>),
-          states(new std::map<cstring, FuncInfo>),
+          tables(std::make_shared<std::map<cstring, TableInfo>>()),
+          actions(std::make_shared<std::map<cstring, FuncInfo>>()),
+          methods(std::make_shared<std::map<cstring, FuncInfo>>()),
+          states(std::make_shared<std::map<cstring, FuncInfo>>()),
           policy(policy),
           elimUnusedTables(eut) {}
 };

@@ -528,7 +528,7 @@ class ControlFlowVisitor : public virtual Visitor {
      * edge are never join points.
      */
     virtual bool filter_join_point(const IR::Node *) { return false; }
-    ControlFlowVisitor() : globals(new std::map<cstring, ControlFlowVisitor &>) {}
+    ControlFlowVisitor() : globals(std::make_shared<std::map<cstring, ControlFlowVisitor &>>()) {}
 
  public:
     ControlFlowVisitor *controlFlowVisitor() override { return this; }
@@ -542,11 +542,10 @@ class ControlFlowVisitor : public virtual Visitor {
     void setUnreachable() { unreachable = true; }
     bool isUnreachable() { return unreachable; }
     void flow_merge_global_to(cstring key) override {
-        auto other = globals->find(key);
-        if (other == globals->end())
-            globals->emplace(key, flow_clone());
-        else
+        if (auto other = globals->find(key); other != globals->end())
             other->second.flow_merge(*this);
+        else
+            globals->emplace(key, flow_clone());
     }
     void flow_merge_global_from(cstring key) override {
         if (auto other = globals->find(key); other != globals->end()) flow_merge(other->second);
