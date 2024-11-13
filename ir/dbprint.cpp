@@ -131,6 +131,11 @@ std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Expression> &v)
     return out;
 }
 
+std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Annotation> &v) {
+    for (const auto &a : v) out << a << ' ';
+    return out;
+}
+
 void dbprint(const IR::Node *n) { std::cout << n << std::endl; }
 void dbprint(const IR::Node &n) { std::cout << n << std::endl; }
 void dbprint(const std::set<const IR::Expression *> s) {
