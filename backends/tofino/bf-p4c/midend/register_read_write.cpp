@@ -439,15 +439,13 @@ void RegisterReadWrite::AnalyzeActionWithRegisterCalls::createRegisterAction(
 
     auto apply_name = reg_path->name + "_" + act->name;
     auto *externalName = new IR::StringLiteral(IR::ID("." + apply_name));
-    auto *annots = new IR::Annotations();
-    annots->addAnnotation(IR::ID("name"), externalName);
-
     if (!info.reg_action) {
         auto apply_type = new IR::Type_Method(IR::Type_Void::get(), info.apply_params, "apply"_cs);
         auto apply = new IR::Function("apply", apply_type, info.apply_body);
         auto *apply_block = new IR::BlockStatement({apply});
-        info.reg_action = new IR::Declaration_Instance(IR::ID(apply_name), annots, ratype,
-                                                       ctor_args, apply_block);
+        info.reg_action = new IR::Declaration_Instance(
+            IR::ID(apply_name), {new IR::Annotation(IR::ID("name"), externalName)}, ratype,
+            ctor_args, apply_block);
     }
     LOG5("  " << info.reg_action);
 }

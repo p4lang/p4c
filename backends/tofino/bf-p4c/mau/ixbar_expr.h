@@ -248,7 +248,7 @@ struct P4HashFunction : public IHasDbPrint {
  * within the tna/t2na files.
  */
 bool verifySymmetricHashPairs(const PhvInfo &phv, safe_vector<const IR::Expression *> &field_list,
-                              const IR::Annotations *annotations, gress_t gress,
+                              const IR::Vector<IR::Annotation> &annotations, gress_t gress,
                               const IR::MAU::HashFunction &hf, LTBitMatrix *sym_pairs);
 
 /**

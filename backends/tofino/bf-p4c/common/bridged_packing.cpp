@@ -1704,11 +1704,11 @@ void PackWithConstraintSolver::solve() {
                 LOG6("Pushing field " << field);
             } else {
                 cstring padFieldName = "__pad_"_cs + cstring::to_cstring(padFieldId++);
-                auto *fieldAnnotations =
-                    new IR::Annotations({new IR::Annotation(IR::ID("padding"), {}),
-                                         new IR::Annotation(IR::ID("overlayable"), {})});
-                const IR::StructField *padField = new IR::StructField(
-                    padFieldName, fieldAnnotations, IR::Type::Bits::get(f->size));
+                const IR::StructField *padField =
+                    new IR::StructField(padFieldName,
+                                        {new IR::Annotation(IR::ID("padding"), {}),
+                                         new IR::Annotation(IR::ID("overlayable"), {})},
+                                        IR::Type::Bits::get(f->size));
 
                 fields.push_back(padField);
                 LOG6("Pushing field " << padField << ", overlayable: " << f->overlayable);

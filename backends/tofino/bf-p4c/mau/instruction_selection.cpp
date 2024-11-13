@@ -408,7 +408,7 @@ const IR::Node *Synth2PortSetup::postorder(IR::MAU::Primitive *prim) {
     auto dot = prim->name.find('.');
     auto objType = dot ? prim->name.before(dot) : cstring();
     const char *tail = objType.c_str() + objType.size();
-    while (tail > objType && std::isdigit(tail[-1])) --tail;
+    while (tail > objType.c_str() && std::isdigit(tail[-1])) --tail;
     objType = objType.before(tail);
     IR::Node *rv = prim;
 
@@ -1426,7 +1426,7 @@ void StatefulAttachmentSetup::Scan::postorder(const IR::MAU::Primitive *prim) {
     use_t use = IR::MAU::StatefulUse::NO_USE;
     auto dot = prim->name.find('.');
     cstring method = dot ? cstring(dot + 1) : prim->name;
-    while (dot && dot > prim->name && std::isdigit(dot[-1])) --dot;
+    while (dot && dot > prim->name.c_str() && std::isdigit(dot[-1])) --dot;
     auto objType = dot ? prim->name.before(dot) : cstring();
     if (objType.endsWith("Action")) {
         obj = prim->operands.at(0)->to<IR::GlobalRef>()->obj->to<IR::MAU::StatefulAlu>();

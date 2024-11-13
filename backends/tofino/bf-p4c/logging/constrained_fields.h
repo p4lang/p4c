@@ -57,6 +57,7 @@ class ConstrainedSlice : public LoggableEntity, public LiftCompare<ConstrainedSl
 
  public:
     ConstrainedSlice(const ConstrainedField &parent, le_bitrange range);
+    virtual ~ConstrainedSlice() = default;
 
     const le_bitrange &getRange() const { return range; }
     const ConstrainedField &getParent() const { return *parent; }

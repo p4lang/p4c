@@ -29,7 +29,7 @@ class CopyBlockPragmas::FindPragmasFromApply : public Inspector {
             if (auto *table = mi->object->to<IR::P4Table>()) {
                 const Visitor::Context *ctxt = nullptr;
                 while (auto blk = findContext<IR::BlockStatement>(ctxt))
-                    for (auto *annot : blk->annotations->annotations)
+                    for (auto *annot : blk->annotations)
                         if (self.pragmas.count(annot->name) &&
                             !self.toAdd[table].count(annot->name))
                             self.toAdd[table][annot->name] = annot;
@@ -47,8 +47,7 @@ class CopyBlockPragmas::CopyToTables : public Modifier {
 
     bool preorder(IR::P4Table *table) {
         for (auto *annot : Values(self.toAdd[getOriginal<IR::P4Table>()]))
-            if (!table->annotations->getSingle(annot->name))
-                table->annotations = table->annotations->add(annot);
+            if (!table->hasAnnotation(annot->name)) table->annotations.push_back(annot);
         return false;
     }
 

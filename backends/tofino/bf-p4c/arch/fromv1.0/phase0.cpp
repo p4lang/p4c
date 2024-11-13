@@ -36,6 +36,7 @@
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
+#include "ir/annotations.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/indent.h"
@@ -162,8 +163,7 @@ struct FindPhase0Table : public Inspector {
         // Pragma value = 1 => Table must be implemented only in parser
         // Pragma value = 0 => Table must be implemented only in MAU
         bool phase0PragmaSet = false;
-        auto annot = table->getAnnotations();
-        if (auto s = annot->getSingle("phase0"_cs)) {
+        if (auto s = table->getAnnotation("phase0"_cs)) {
             auto pragma_val = s->expr.at(0)->to<IR::Constant>();
             ERROR_CHECK(
                 (pragma_val != nullptr),
@@ -520,8 +520,7 @@ struct FindPhase0Table : public Inspector {
                 padFieldName += cstring::to_cstring(padFieldId++);
                 auto *padFieldType = IR::Type::Bits::get(packedField.width);
                 fields.push_back(new IR::StructField(
-                    padFieldName, new IR::Annotations({new IR::Annotation(IR::ID("padding"), {})}),
-                    padFieldType));
+                    padFieldName, {new IR::Annotation(IR::ID("padding"), {})}, padFieldType));
                 continue;
             }
 
@@ -678,11 +677,11 @@ struct RewritePhase0IfPresent : public Transform {
         }
 
         LOG4("Add phase0 annotation: " << phase0->table->name);
-        state->annotations = state->annotations->addAnnotation(
-            "override_phase0_table_name"_cs, new IR::StringLiteral(phase0->table->name));
+        state->addOrReplaceAnnotation("override_phase0_table_name"_cs,
+                                      new IR::StringLiteral(phase0->table->name));
 
-        state->annotations = state->annotations->addAnnotation(
-            "override_phase0_action_name"_cs, new IR::StringLiteral(phase0->actionName));
+        state->addOrReplaceAnnotation("override_phase0_action_name"_cs,
+                                      new IR::StringLiteral(phase0->actionName));
 
         return state;
     }
@@ -732,8 +731,7 @@ bool CheckPhaseZeroExtern::preorder(const IR::MethodCallExpression *expr) {
 }
 
 bool CollectPhase0Annotation::preorder(const IR::ParserState *state) {
-    auto annot = state->getAnnotations();
-    if (auto ann = annot->getSingle("override_phase0_table_name"_cs)) {
+    if (auto ann = state->getAnnotation("override_phase0_table_name"_cs)) {
         if (auto phase0 = ann->expr.at(0)->to<IR::StringLiteral>()) {
             auto parser = findOrigCtxt<IR::P4Parser>();
             if (!parser) return false;
@@ -741,7 +739,7 @@ bool CollectPhase0Annotation::preorder(const IR::ParserState *state) {
             phase0_name_annot->emplace(name, phase0->value);
         }
     }
-    if (auto ann = annot->getSingle("override_phase0_action_name"_cs)) {
+    if (auto ann = state->getAnnotation("override_phase0_action_name"_cs)) {
         if (auto phase0 = ann->expr.at(0)->to<IR::StringLiteral>()) {
             auto parser = findOrigCtxt<IR::P4Parser>();
             if (!parser) return false;
@@ -767,7 +765,7 @@ IR::IndexedVector<IR::StructField> *UpdatePhase0NodeInParser::canPackDataIntoPha
         // TODO: Once phase0 node is properly supported in the
         // backend, we won't need this (or any padding), so we should remove
         // it at that point.
-        if (param->annotations->getSingle("padding"_cs)) continue;
+        if (param->getAnnotation("padding"_cs)) continue;
         const int fieldSize = param->type->width_bits();
         const int alignment = getAlignment(fieldSize);
         bool is_pad_field = param->getAnnotation("padding"_cs);
@@ -807,8 +805,7 @@ IR::IndexedVector<IR::StructField> *UpdatePhase0NodeInParser::canPackDataIntoPha
             padFieldName += cstring::to_cstring(padFieldId++);
             auto *padFieldType = IR::Type::Bits::get(packedField.width);
             packFields->push_back(new IR::StructField(
-                padFieldName, new IR::Annotations({new IR::Annotation(IR::ID("padding"), {})}),
-                padFieldType));
+                padFieldName, {new IR::Annotation(IR::ID("padding"), {})}, padFieldType));
             continue;
         }
 

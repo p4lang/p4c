@@ -201,8 +201,8 @@ void SplitAlpm::apply_pragma_exclude_msbs(const IR::P4Table *tbl,
             auto key_width = k->expression->type->width_bits();
             if (msb < key_width) {
                 keys.push_back(new IR::KeyElement(
-                    k->srcInfo, k->annotations,
-                    new IR::Slice(k->expression, key_width - msb - 1, 0), k->matchType));
+                    k->srcInfo, new IR::Slice(k->expression, key_width - msb - 1, 0), k->matchType,
+                    k->annotations));
             }
         } else {
             keys.push_back(k);
@@ -263,37 +263,32 @@ const IR::P4Table *SplitAlpm::create_atcam_table(const IR::P4Table *tbl, unsigne
         properties->push_back(prop);
     }
 
-    properties->push_back(new IR::Property(
-        "as_atcam"_cs,
-        new IR::Annotations({new IR::Annotation(IR::Annotation::hiddenAnnotation, {})}),
-        new IR::ExpressionValue(new IR::BoolLiteral(true)), false));
+    properties->push_back(
+        new IR::Property("as_atcam"_cs, {new IR::Annotation(IR::Annotation::hiddenAnnotation, {})},
+                         new IR::ExpressionValue(new IR::BoolLiteral(true)), false));
+
+    properties->push_back(
+        new IR::Property("as_alpm"_cs, {new IR::Annotation(IR::Annotation::hiddenAnnotation, {})},
+                         new IR::ExpressionValue(new IR::BoolLiteral(true)), false));
 
     properties->push_back(new IR::Property(
-        "as_alpm"_cs,
-        new IR::Annotations({new IR::Annotation(IR::Annotation::hiddenAnnotation, {})}),
-        new IR::ExpressionValue(new IR::BoolLiteral(true)), false));
-
-    properties->push_back(new IR::Property(
-        "atcam_partition_count"_cs,
-        new IR::Annotations({new IR::Annotation(IR::Annotation::hiddenAnnotation, {})}),
+        "atcam_partition_count"_cs, {new IR::Annotation(IR::Annotation::hiddenAnnotation, {})},
         new IR::ExpressionValue(new IR::Constant(partition_count)), false));
 
-    properties->push_back(new IR::Property(
-        "atcam_subtrees_per_partition"_cs,
-        new IR::Annotations({new IR::Annotation(IR::Annotation::hiddenAnnotation, {})}),
-        new IR::ExpressionValue(new IR::Constant(subtrees_per_partition)), false));
+    properties->push_back(
+        new IR::Property("atcam_subtrees_per_partition"_cs,
+                         {new IR::Annotation(IR::Annotation::hiddenAnnotation, {})},
+                         new IR::ExpressionValue(new IR::Constant(subtrees_per_partition)), false));
 
     if (atcam_subset_width != -1) {
         properties->push_back(new IR::Property(
-            "atcam_subset_width"_cs,
-            new IR::Annotations({new IR::Annotation(IR::Annotation::hiddenAnnotation, {})}),
+            "atcam_subset_width"_cs, {new IR::Annotation(IR::Annotation::hiddenAnnotation, {})},
             new IR::ExpressionValue(new IR::Constant(atcam_subset_width)), false));
     }
 
     if (shift_granularity != -1) {
         properties->push_back(new IR::Property(
-            "shift_granularity"_cs,
-            new IR::Annotations({new IR::Annotation(IR::Annotation::hiddenAnnotation, {})}),
+            "shift_granularity"_cs, {new IR::Annotation(IR::Annotation::hiddenAnnotation, {})},
             new IR::ExpressionValue(new IR::Constant(shift_granularity)), false));
     }
 
@@ -309,8 +304,7 @@ const IR::P4Table *SplitAlpm::create_atcam_table(const IR::P4Table *tbl, unsigne
             property.push_back(elem);
         }
         properties->push_back(new IR::Property(
-            "excluded_field_msb_bits",
-            new IR::Annotations({new IR::Annotation(IR::Annotation::hiddenAnnotation, {})}),
+            "excluded_field_msb_bits", {new IR::Annotation(IR::Annotation::hiddenAnnotation, {})},
             new IR::ExpressionValue(new IR::ListExpression(property)), false));
     }
 
@@ -334,7 +328,7 @@ const IR::P4Table *SplitAlpm::create_preclassifier_table(const IR::P4Table *tbl,
                   f->expression, tbl->name);
         if (f->matchType->path->name == "lpm") {
             auto k =
-                new IR::KeyElement(f->annotations, f->expression, new IR::PathExpression("lpm"));
+                new IR::KeyElement(f->expression, new IR::PathExpression("lpm"), f->annotations);
             keys.push_back(k);
         } else {
             keys.push_back(f);
@@ -376,14 +370,13 @@ const IR::P4Table *SplitAlpm::create_preclassifier_table(const IR::P4Table *tbl,
         new IR::Property("size", new IR::ExpressionValue(tbl->getSizeProperty()), false));
 
     properties->push_back(new IR::Property(
-        "alpm_preclassifier",
-        new IR::Annotations({new IR::Annotation(IR::Annotation::hiddenAnnotation, {})}),
+        "alpm_preclassifier", {new IR::Annotation(IR::Annotation::hiddenAnnotation, {})},
         new IR::ExpressionValue(new IR::BoolLiteral(true)), false));
 
-    properties->push_back(new IR::Property(
-        "alpm_preclassifier_number_entries",
-        new IR::Annotations({new IR::Annotation(IR::Annotation::hiddenAnnotation, {})}),
-        new IR::ExpressionValue(new IR::Constant(number_entries)), false));
+    properties->push_back(
+        new IR::Property("alpm_preclassifier_number_entries",
+                         {new IR::Annotation(IR::Annotation::hiddenAnnotation, {})},
+                         new IR::ExpressionValue(new IR::Constant(number_entries)), false));
 
     if (auto prop = tbl->properties->getProperty("requires_versioning"_cs)) {
         properties->push_back(prop);
@@ -400,8 +393,7 @@ const IR::P4Table *SplitAlpm::create_preclassifier_table(const IR::P4Table *tbl,
 
 bool SplitAlpm::values_through_pragmas(const IR::P4Table *tbl, int &number_partitions,
                                        int &number_subtrees_per_partition) {
-    auto annot = tbl->getAnnotations();
-    if (auto s = annot->getSingle(ALGORITHMIC_LPM_PARTITIONS)) {
+    if (auto s = tbl->getAnnotation(ALGORITHMIC_LPM_PARTITIONS)) {
         ERROR_CHECK(s->expr.size() > 0,
                     "%s: Please provide a valid %s "
                     "for table %s",
@@ -423,7 +415,7 @@ bool SplitAlpm::values_through_pragmas(const IR::P4Table *tbl, int &number_parti
         }
     }
 
-    if (auto s = annot->getSingle(ALGORITHMIC_LPM_SUBTREES_PER_PARTITION)) {
+    if (auto s = tbl->getAnnotation(ALGORITHMIC_LPM_SUBTREES_PER_PARTITION)) {
         ERROR_CHECK(s->expr.size() > 0,
                     "%s: Please provide a valid %s "
                     "for table %s",
@@ -546,8 +538,7 @@ bool SplitAlpm::pragma_exclude_msbs(const IR::P4Table *tbl,
             }
         }
     }
-    auto annot = tbl->getAnnotations();
-    for (auto an : annot->annotations) {
+    for (auto an : tbl->getAnnotations()) {
         if (an->name != ALGORITHMIC_LPM_ATCAM_EXCLUDE_FIELD_MSBS) continue;
         if (an->expr.size() != 1 && an->expr.size() != 2) {
             error(
@@ -785,8 +776,7 @@ void CollectAlpmInfo::postorder(const IR::P4Table *tbl) {
     }
 
     // support @alpm(1) or @alpm(true)
-    auto annot = tbl->getAnnotations();
-    if (auto s = annot->getSingle(cstring(PragmaAlpm::name))) {
+    if (auto s = tbl->getAnnotation(cstring(PragmaAlpm::name))) {
         ERROR_CHECK(s->expr.size() > 0,
                     "%s: Please provide a valid alpm "
                     "for table %s",

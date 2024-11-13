@@ -31,7 +31,7 @@ class HashMaskAnnotations {
     HashMaskAnnotations(const IR::MAU::Table *tbl, const PhvInfo &phv) {
         key_hash_bits_masked = 0;
         for (auto &table_key : tbl->match_key) {
-            for (auto &a : table_key->annotations->annotations) {
+            for (auto &a : table_key->annotations) {
                 if (a->name == "hash_mask") {
                     bitvec hash_mask = getBitvec(a);
 

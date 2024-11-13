@@ -18,6 +18,7 @@
 
 #include "backends/tofino/bf-p4c/arch/intrinsic_metadata.h"
 
+#include "ir/annotations.h"
 #include "ir/ir.h"
 
 namespace BFN {
@@ -25,10 +26,10 @@ namespace BFN {
 const IR::ParserState *convertStartStateToNormalState(const IR::ParserState *state,
                                                       cstring newName) {
     auto name = IR::ID(cstring("__") + newName);
-    auto annotations = state->annotations->addAnnotationIfNew(
-        IR::Annotation::nameAnnotation, new IR::StringLiteral(IR::ParserState::start));
-    auto newState = new IR::ParserState(state->srcInfo, name, annotations, state->components,
-                                        state->selectExpression);
+    auto newState = new IR::ParserState(
+        state->srcInfo, name,
+        IR::Annotations::maybeAddNameAnnotation(state->annotations, IR::ParserState::start),
+        state->components, state->selectExpression);
     return newState;
 }
 
@@ -62,8 +63,8 @@ const IR::ParserState *convertStartStateToNormalState(IR::P4Parser *parser, cstr
 const IR::ParserState *addNewStartState(cstring name, cstring nextState) {
     auto *startState =
         new IR::ParserState(IR::ParserState::start, new IR::PathExpression(nextState));
-    startState->annotations = startState->annotations->addAnnotationIfNew(
-        IR::Annotation::nameAnnotation, new IR::StringLiteral(cstring(cstring("$") + name)));
+    startState->addAnnotationIfNew(IR::Annotation::nameAnnotation,
+                                   new IR::StringLiteral(cstring("$" + name)));
     return startState;
 }
 
@@ -83,8 +84,8 @@ const IR::ParserState *createGeneratedParserState(cstring name,
                                                   const IR::Expression *selectExpression) {
     auto newStateName = IR::ID(cstring("__") + name);
     auto *newState = new IR::ParserState(newStateName, statements, selectExpression);
-    newState->annotations = newState->annotations->addAnnotationIfNew(
-        IR::Annotation::nameAnnotation, new IR::StringLiteral(cstring(cstring("$") + name)));
+    newState->addAnnotationIfNew(IR::Annotation::nameAnnotation,
+                                 new IR::StringLiteral(cstring("$" + name)));
     return newState;
 }
 

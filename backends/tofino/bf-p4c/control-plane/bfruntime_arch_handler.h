@@ -1445,8 +1445,8 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
         forAllMatching<IR::MethodCallExpression>(
             evaluatedProgram->getProgram(), [&](const IR::MethodCallExpression *call) {
                 auto instance = P4::MethodInstance::resolve(call, refMap, typeMap);
-                if (instance->is<P4::ExternMethod>() && instance->object == object) {
-                    function(instance->to<P4::ExternMethod>());
+                if (instance->template is<P4::ExternMethod>() && instance->object == object) {
+                    function(instance->template to<P4::ExternMethod>());
                 }
             });
     }
