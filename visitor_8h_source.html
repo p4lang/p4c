@@ -566,7 +566,7 @@ $(function(){initNavTree('visitor_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00462" name="l00462"></a><span class="lineno">  462</span> </div>
 <div class="foldopen" id="foldopen00463" data-start="{" data-end="};">
 <div class="line"><a id="l00463" name="l00463"></a><span class="lineno"><a class="line" href="class_p4_1_1_control_flow_visitor.html">  463</a></span><span class="keyword">class </span><a class="code hl_class" href="class_p4_1_1_control_flow_visitor.html">ControlFlowVisitor</a> : <span class="keyword">public</span> <span class="keyword">virtual</span> <a class="code hl_class" href="class_p4_1_1_visitor.html">Visitor</a> {</div>
-<div class="line"><a id="l00464" name="l00464"></a><span class="lineno">  464</span>    std::map&lt;cstring, ControlFlowVisitor &amp;&gt; &amp;globals;</div>
+<div class="line"><a id="l00464" name="l00464"></a><span class="lineno">  464</span>    std::shared_ptr&lt;std::map&lt;cstring, ControlFlowVisitor &amp;&gt;&gt; globals;</div>
 <div class="line"><a id="l00465" name="l00465"></a><span class="lineno">  465</span> </div>
 <div class="line"><a id="l00466" name="l00466"></a><span class="lineno">  466</span> <span class="keyword">protected</span>:</div>
 <div class="line"><a id="l00467" name="l00467"></a><span class="lineno">  467</span>    <a class="code hl_class" href="class_p4_1_1_control_flow_visitor.html">ControlFlowVisitor</a> *clone() <span class="keyword">const override</span> = 0;</div>
@@ -632,7 +632,7 @@ $(function(){initNavTree('visitor_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00523" name="l00523"></a><span class="lineno">  523</span>    <span class="keywordtype">void</span> <a class="code hl_function" href="class_p4_1_1_control_flow_visitor.html#ab778f695b048fd6ac5477f69670ece95">post_join_flows</a>(<span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *, <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *) <span class="keyword">override</span>;</div>
 <div class="line"><a id="l00524" name="l00524"></a><span class="lineno">  524</span> </div>
 <div class="line"><a id="l00530" name="l00530"></a><span class="lineno"><a class="line" href="class_p4_1_1_control_flow_visitor.html#af8e1431e5e5c93332a12b15defdfb9d6">  530</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="class_p4_1_1_control_flow_visitor.html#af8e1431e5e5c93332a12b15defdfb9d6">filter_join_point</a>(<span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *) { <span class="keywordflow">return</span> <span class="keyword">false</span>; }</div>
-<div class="line"><a id="l00531" name="l00531"></a><span class="lineno">  531</span>    <a class="code hl_class" href="class_p4_1_1_control_flow_visitor.html">ControlFlowVisitor</a>() : globals(*new <a class="code hl_namespace" href="namespacestd.html">std</a>::map&lt;<a class="code hl_class" href="class_p4_1_1cstring.html">cstring</a>, <a class="code hl_class" href="class_p4_1_1_control_flow_visitor.html">ControlFlowVisitor</a> &amp;&gt;) {}</div>
+<div class="line"><a id="l00531" name="l00531"></a><span class="lineno">  531</span>    <a class="code hl_class" href="class_p4_1_1_control_flow_visitor.html">ControlFlowVisitor</a>() : globals(<a class="code hl_namespace" href="namespacestd.html">std</a>::make_shared&lt;<a class="code hl_namespace" href="namespacestd.html">std</a>::map&lt;<a class="code hl_class" href="class_p4_1_1cstring.html">cstring</a>, <a class="code hl_class" href="class_p4_1_1_control_flow_visitor.html">ControlFlowVisitor</a> &amp;&gt;&gt;()) {}</div>
 <div class="line"><a id="l00532" name="l00532"></a><span class="lineno">  532</span> </div>
 <div class="line"><a id="l00533" name="l00533"></a><span class="lineno">  533</span> <span class="keyword">public</span>:</div>
 <div class="line"><a id="l00534" name="l00534"></a><span class="lineno">  534</span>    ControlFlowVisitor *controlFlowVisitor()<span class="keyword"> override </span>{ <span class="keywordflow">return</span> <span class="keyword">this</span>; }</div>
@@ -647,29 +647,29 @@ $(function(){initNavTree('visitor_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00543" name="l00543"></a><span class="lineno">  543</span>    <span class="keywordtype">bool</span> isUnreachable() { <span class="keywordflow">return</span> unreachable; }</div>
 <div class="foldopen" id="foldopen00544" data-start="{" data-end="}">
 <div class="line"><a id="l00544" name="l00544"></a><span class="lineno"><a class="line" href="class_p4_1_1_control_flow_visitor.html#a559b148154720e681c3533782c461c3b">  544</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="class_p4_1_1_control_flow_visitor.html#a559b148154720e681c3533782c461c3b">flow_merge_global_to</a>(<a class="code hl_class" href="class_p4_1_1cstring.html">cstring</a> key)<span class="keyword"> override </span>{</div>
-<div class="line"><a id="l00545" name="l00545"></a><span class="lineno">  545</span>        <span class="keywordflow">if</span> (globals.count(key))</div>
-<div class="line"><a id="l00546" name="l00546"></a><span class="lineno">  546</span>            globals.at(key).flow_merge(*<span class="keyword">this</span>);</div>
+<div class="line"><a id="l00545" name="l00545"></a><span class="lineno">  545</span>        <span class="keywordflow">if</span> (<span class="keyword">auto</span> other = globals-&gt;find(key); other != globals-&gt;end())</div>
+<div class="line"><a id="l00546" name="l00546"></a><span class="lineno">  546</span>            other-&gt;second.flow_merge(*<span class="keyword">this</span>);</div>
 <div class="line"><a id="l00547" name="l00547"></a><span class="lineno">  547</span>        <span class="keywordflow">else</span></div>
-<div class="line"><a id="l00548" name="l00548"></a><span class="lineno">  548</span>            globals.emplace(key, flow_clone());</div>
+<div class="line"><a id="l00548" name="l00548"></a><span class="lineno">  548</span>            globals-&gt;emplace(key, flow_clone());</div>
 <div class="line"><a id="l00549" name="l00549"></a><span class="lineno">  549</span>    }</div>
 </div>
 <div class="line"><a id="l00550" name="l00550"></a><span class="lineno">  550</span>    <span class="keywordtype">void</span> flow_merge_global_from(<a class="code hl_class" href="class_p4_1_1cstring.html">cstring</a> key)<span class="keyword"> override </span>{</div>
-<div class="line"><a id="l00551" name="l00551"></a><span class="lineno">  551</span>        <span class="keywordflow">if</span> (globals.count(key)) <a class="code hl_function" href="class_p4_1_1_control_flow_visitor.html#a951cff6167cb3b7d3481a820005e7473">flow_merge</a>(globals.at(key));</div>
+<div class="line"><a id="l00551" name="l00551"></a><span class="lineno">  551</span>        <span class="keywordflow">if</span> (<span class="keyword">auto</span> other = globals-&gt;find(key); other != globals-&gt;end()) <a class="code hl_function" href="class_p4_1_1_control_flow_visitor.html#a951cff6167cb3b7d3481a820005e7473">flow_merge</a>(other-&gt;second);</div>
 <div class="line"><a id="l00552" name="l00552"></a><span class="lineno">  552</span>    }</div>
-<div class="line"><a id="l00553" name="l00553"></a><span class="lineno">  553</span>    <span class="keywordtype">void</span> erase_global(cstring key)<span class="keyword"> override </span>{ globals.erase(key); }</div>
-<div class="line"><a id="l00554" name="l00554"></a><span class="lineno">  554</span>    <span class="keywordtype">bool</span> check_global(cstring key)<span class="keyword"> override </span>{ <span class="keywordflow">return</span> globals.count(key) != 0; }</div>
-<div class="line"><a id="l00555" name="l00555"></a><span class="lineno">  555</span>    <span class="keywordtype">void</span> clear_globals()<span class="keyword"> override </span>{ globals.clear(); }</div>
+<div class="line"><a id="l00553" name="l00553"></a><span class="lineno">  553</span>    <span class="keywordtype">void</span> erase_global(cstring key)<span class="keyword"> override </span>{ globals-&gt;erase(key); }</div>
+<div class="line"><a id="l00554" name="l00554"></a><span class="lineno">  554</span>    <span class="keywordtype">bool</span> check_global(cstring key)<span class="keyword"> override </span>{ <span class="keywordflow">return</span> globals-&gt;count(key) != 0; }</div>
+<div class="line"><a id="l00555" name="l00555"></a><span class="lineno">  555</span>    <span class="keywordtype">void</span> clear_globals()<span class="keyword"> override </span>{ globals-&gt;clear(); }</div>
 <div class="line"><a id="l00556" name="l00556"></a><span class="lineno">  556</span>    std::pair&lt;cstring, ControlFlowVisitor *&gt; save_global(cstring key) {</div>
 <div class="line"><a id="l00557" name="l00557"></a><span class="lineno">  557</span>        ControlFlowVisitor *cfv = <span class="keyword">nullptr</span>;</div>
-<div class="line"><a id="l00558" name="l00558"></a><span class="lineno">  558</span>        <span class="keywordflow">if</span> (<span class="keyword">auto</span> i = globals.find(key); i != globals.end()) {</div>
+<div class="line"><a id="l00558" name="l00558"></a><span class="lineno">  558</span>        <span class="keywordflow">if</span> (<span class="keyword">auto</span> i = globals-&gt;find(key); i != globals-&gt;end()) {</div>
 <div class="line"><a id="l00559" name="l00559"></a><span class="lineno">  559</span>            cfv = &amp;i-&gt;second;</div>
-<div class="line"><a id="l00560" name="l00560"></a><span class="lineno">  560</span>            globals.erase(i);</div>
+<div class="line"><a id="l00560" name="l00560"></a><span class="lineno">  560</span>            globals-&gt;erase(i);</div>
 <div class="line"><a id="l00561" name="l00561"></a><span class="lineno">  561</span>        }</div>
 <div class="line"><a id="l00562" name="l00562"></a><span class="lineno">  562</span>        <span class="keywordflow">return</span> std::make_pair(key, cfv);</div>
 <div class="line"><a id="l00563" name="l00563"></a><span class="lineno">  563</span>    }</div>
 <div class="line"><a id="l00564" name="l00564"></a><span class="lineno">  564</span>    <span class="keywordtype">void</span> restore_global(std::pair&lt;cstring, ControlFlowVisitor *&gt; saved) {</div>
-<div class="line"><a id="l00565" name="l00565"></a><span class="lineno">  565</span>        globals.erase(saved.first);</div>
-<div class="line"><a id="l00566" name="l00566"></a><span class="lineno">  566</span>        <span class="keywordflow">if</span> (saved.second) globals.emplace(saved.first, *saved.second);</div>
+<div class="line"><a id="l00565" name="l00565"></a><span class="lineno">  565</span>        globals-&gt;erase(saved.first);</div>
+<div class="line"><a id="l00566" name="l00566"></a><span class="lineno">  566</span>        <span class="keywordflow">if</span> (saved.second) globals-&gt;emplace(saved.first, *saved.second);</div>
 <div class="line"><a id="l00567" name="l00567"></a><span class="lineno">  567</span>    }</div>
 <div class="line"><a id="l00568" name="l00568"></a><span class="lineno">  568</span> </div>
 <div class="foldopen" id="foldopen00570" data-start="{" data-end="};">

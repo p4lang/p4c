@@ -2392,6 +2392,7 @@ var hierarchy =
     [ "P4::Util::Hasher< cstring >", "struct_p4_1_1_util_1_1_hasher_3_01cstring_01_4.html", null ],
     [ "P4::Util::Hasher< HalfOpenRange< Unit, Order > >", "struct_p4_1_1_util_1_1_hasher_3_01_half_open_range_3_01_unit_00_01_order_01_4_01_4.html", null ],
     [ "P4::Util::Hasher< IR::ID >", "struct_p4_1_1_util_1_1_hasher_3_01_i_r_1_1_i_d_01_4.html", null ],
+    [ "P4::Util::Hasher< P4::loc_t >", "struct_p4_1_1_util_1_1_hasher_3_01_p4_1_1loc__t_01_4.html", null ],
     [ "P4::Util::Hasher< P4::ProgramPoint >", "struct_p4_1_1_util_1_1_hasher_3_01_p4_1_1_program_point_01_4.html", null ],
     [ "P4::Util::Hasher< std::pair< T1, T2 > >", "struct_p4_1_1_util_1_1_hasher_3_01std_1_1pair_3_01_t1_00_01_t2_01_4_01_4.html", null ],
     [ "P4::Util::Hasher< std::shared_ptr< T > >", "struct_p4_1_1_util_1_1_hasher_3_01std_1_1shared__ptr_3_01_t_01_4_01_4.html", null ],

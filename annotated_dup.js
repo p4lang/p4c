@@ -1456,6 +1456,7 @@ var annotated_dup =
         [ "Hasher< float >", "struct_p4_1_1_util_1_1_hasher_3_01float_01_4.html", null ],
         [ "Hasher< HalfOpenRange< Unit, Order > >", "struct_p4_1_1_util_1_1_hasher_3_01_half_open_range_3_01_unit_00_01_order_01_4_01_4.html", null ],
         [ "Hasher< IR::ID >", "struct_p4_1_1_util_1_1_hasher_3_01_i_r_1_1_i_d_01_4.html", null ],
+        [ "Hasher< P4::loc_t >", "struct_p4_1_1_util_1_1_hasher_3_01_p4_1_1loc__t_01_4.html", null ],
         [ "Hasher< P4::ProgramPoint >", "struct_p4_1_1_util_1_1_hasher_3_01_p4_1_1_program_point_01_4.html", null ],
         [ "Hasher< signed char >", "struct_p4_1_1_util_1_1_hasher_3_01signed_01char_01_4.html", null ],
         [ "Hasher< signed int >", "struct_p4_1_1_util_1_1_hasher_3_01signed_01int_01_4.html", null ],

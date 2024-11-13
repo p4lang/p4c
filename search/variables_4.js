@@ -3,7 +3,7 @@ var searchData=
   ['dark_5fcontainers_5fwrite_5fallocated_5fi_0',['dark_containers_write_allocated_i',['../class_p_h_v_1_1_allocation.html#a485fa3f7938ef2e52fcb96a666c83c4c',1,'PHV::Allocation']]],
   ['dcg_1',['dcg',['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#aee1eb0f0bad99011c09427a7f13d01d4',1,'P4::P4Tools::P4Testgen::TestgenOptions']]],
   ['declaration_2',['declaration',['../struct_p4_1_1_type_specialization.html#a9048f2a01577432158410009998aab6d',1,'P4::TypeSpecialization']]],
-  ['declarations_3',['declarations',['../struct_p4_1_1_specialization_info.html#a42eb56dce3bd0c0f9630c3e003526b89',1,'P4::SpecializationInfo']]],
+  ['declarations_3',['declarations',['../struct_p4_1_1_specialization_info.html#a793ca534528571407010973e0945b1a2',1,'P4::SpecializationInfo']]],
   ['decltocallee_4',['declToCallee',['../struct_p4_1_1_inline_summary_1_1_per_caller.html#a389ebb63e1408de17c1a32de48a6cc00',1,'P4::InlineSummary::PerCaller']]],
   ['default_5flearner_5ftable_5ftimeout_5',['default_learner_table_timeout',['../namespace_p4.html#a8dc4e88c9f1cd7362f0d6a96a1c45324',1,'P4']]],
   ['defaultisimmutable_6',['defaultIsImmutable',['../struct_p4_1_1_p4_tools_1_1_table_utils_1_1_table_properties.html#a36afd54ee72025275e1bf33e9d8b7f20',1,'P4::P4Tools::TableUtils::TableProperties']]],
