@@ -1560,8 +1560,8 @@ $(function(){initNavTree('tofino_2bf-p4c_2control-plane_2bfruntime__arch__handle
 <div class="line"><a id="l01445" name="l01445"></a><span class="lineno"> 1445</span>        <a class="code hl_function" href="namespace_p4.html#a6f7b1d81666bc0ec203e656c9888cac5">forAllMatching&lt;IR::MethodCallExpression&gt;</a>(</div>
 <div class="line"><a id="l01446" name="l01446"></a><span class="lineno"> 1446</span>            evaluatedProgram-&gt;getProgram(), [&amp;](<span class="keyword">const</span> IR::MethodCallExpression *call) {</div>
 <div class="line"><a id="l01447" name="l01447"></a><span class="lineno"> 1447</span>                auto instance = P4::MethodInstance::resolve(call, refMap, typeMap);</div>
-<div class="line"><a id="l01448" name="l01448"></a><span class="lineno"> 1448</span>                if (instance-&gt;is&lt;P4::ExternMethod&gt;() &amp;&amp; instance-&gt;object == object) {</div>
-<div class="line"><a id="l01449" name="l01449"></a><span class="lineno"> 1449</span>                    function(instance-&gt;to&lt;P4::ExternMethod&gt;());</div>
+<div class="line"><a id="l01448" name="l01448"></a><span class="lineno"> 1448</span>                if (instance-&gt;template is&lt;P4::ExternMethod&gt;() &amp;&amp; instance-&gt;object == object) {</div>
+<div class="line"><a id="l01449" name="l01449"></a><span class="lineno"> 1449</span>                    function(instance-&gt;template to&lt;P4::ExternMethod&gt;());</div>
 <div class="line"><a id="l01450" name="l01450"></a><span class="lineno"> 1450</span>                }</div>
 <div class="line"><a id="l01451" name="l01451"></a><span class="lineno"> 1451</span>            });</div>
 <div class="line"><a id="l01452" name="l01452"></a><span class="lineno"> 1452</span>    }</div>

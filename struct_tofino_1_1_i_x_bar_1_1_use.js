@@ -6,6 +6,6 @@ var struct_tofino_1_1_i_x_bar_1_1_use =
     [ "ProxyHashKey", "struct_tofino_1_1_i_x_bar_1_1_use_1_1_proxy_hash_key.html", null ],
     [ "SaluInputSource", "struct_tofino_1_1_i_x_bar_1_1_use_1_1_salu_input_source.html", null ],
     [ "atcam_partition", "struct_tofino_1_1_i_x_bar_1_1_use.html#af8873a4c0714d759e92614d39fbda13c", null ],
-    [ "bits_per_search_bus", "struct_tofino_1_1_i_x_bar_1_1_use.html#a797cdfae4adb03cf2f8a2bf76f761e03", null ],
+    [ "bits_per_search_bus", "struct_tofino_1_1_i_x_bar_1_1_use.html#a93417933e6ec69155575241044875890", null ],
     [ "match_hash", "struct_tofino_1_1_i_x_bar_1_1_use.html#a5eec372781ead3b3dfd00fd9b049c84a", null ]
 ];

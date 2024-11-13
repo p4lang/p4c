@@ -177,11 +177,11 @@ $(function(){initNavTree('simplify__args_8h_source.html',''); initResizable(true
 <div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>    <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_type_map.html">P4::TypeMap</a> *typeMap;</div>
 <div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>    IR::Type_Header *flattenedHeader = <span class="keyword">nullptr</span>;</div>
 <div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>    std::vector&lt;cstring&gt; nameSegments{};</div>
-<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>    std::vector&lt;const IR::Annotations *&gt; allAnnotations{};</div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>    std::vector&lt;IR::Vector&lt;IR::Annotation&gt;&gt; allAnnotations{};</div>
 <div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>    std::vector&lt;Util::SourceInfo&gt; srcInfos{};</div>
 <div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>    <a class="code hl_class" href="class_p4_1_1cstring.html">cstring</a> makeName(std::string_view sep) <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>    <span class="keywordtype">void</span> flattenType(<span class="keyword">const</span> IR::Type *type);</div>
-<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>    <span class="keyword">const</span> IR::Annotations *mergeAnnotations() <span class="keyword">const</span>;</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>    <a class="code hl_class" href="class_p4_1_1_i_r_1_1_vector.html">IR::Vector&lt;IR::Annotation&gt;</a> mergeAnnotations() <span class="keyword">const</span>;</div>
 <div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span> </div>
 <div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>    <span class="keyword">const</span> IR::Member *flattenedMember;</div>
 <div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>    std::vector&lt;cstring&gt; memberSegments{};</div>

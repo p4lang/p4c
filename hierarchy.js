@@ -1119,6 +1119,7 @@ var hierarchy =
             [ "P4::IR::Vector< IR::NamedExpression >", "class_p4_1_1_i_r_1_1_vector.html", [
               [ "P4::IR::IndexedVector< IR::NamedExpression >", "class_p4_1_1_i_r_1_1_indexed_vector.html", null ]
             ] ],
+            [ "P4::IR::Vector< IR::Annotation >", "class_p4_1_1_i_r_1_1_vector.html", null ],
             [ "P4::IR::Vector< IR::Expression >", "class_p4_1_1_i_r_1_1_vector.html", null ],
             [ "P4::IR::Vector< P4::IR::Node >", "class_p4_1_1_i_r_1_1_vector.html", [
               [ "P4::IR::IndexedVector< P4::IR::Node >", "class_p4_1_1_i_r_1_1_indexed_vector.html", null ]
@@ -1129,7 +1130,6 @@ var hierarchy =
             [ "P4::IR::Vector< IR::MAU::Table >", "class_p4_1_1_i_r_1_1_vector.html", null ],
             [ "P4::IR::Vector< IR::Type >", "class_p4_1_1_i_r_1_1_vector.html", null ],
             [ "P4::IR::Vector< IR::Argument >", "class_p4_1_1_i_r_1_1_vector.html", null ],
-            [ "P4::IR::Vector< IR::Annotation >", "class_p4_1_1_i_r_1_1_vector.html", null ],
             [ "P4::IR::Vector< IR::Declaration >", "class_p4_1_1_i_r_1_1_vector.html", [
               [ "P4::IR::IndexedVector< IR::Declaration >", "class_p4_1_1_i_r_1_1_indexed_vector.html", null ]
             ] ],
@@ -4106,6 +4106,7 @@ var hierarchy =
       [ "P4::safe_vector< const IR::BFN::Pipe * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< IXBar::Use::Byte >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::NamedExpression * >", "class_p4_1_1safe__vector.html", null ],
+      [ "P4::safe_vector< const IR::Annotation * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::Expression * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const P4::IR::Node * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::StructField * >", "class_p4_1_1safe__vector.html", null ],
@@ -4121,7 +4122,6 @@ var hierarchy =
       [ "P4::safe_vector< P4::UniqueId >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::Type * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::Argument * >", "class_p4_1_1safe__vector.html", null ],
-      [ "P4::safe_vector< const IR::Annotation * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::Declaration * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::StatOrDecl * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::DpdkAsmStatement * >", "class_p4_1_1safe__vector.html", null ],
