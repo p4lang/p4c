@@ -27,19 +27,18 @@ const IR::Expression *convert(const IR::Expression *expression, const IR::Type *
     bool modified = false;
     CHECK_NULL(type);
     if (auto st = type->to<IR::Type_StructLike>()) {
-        auto si = new IR::IndexedVector<IR::NamedExpression>();
+        IR::IndexedVector<IR::NamedExpression> si;
         if (auto le = expression->to<IR::ListExpression>()) {
             size_t index = 0;
             for (auto f : st->fields) {
                 auto expr = le->components.at(index);
                 auto conv = convert(expr, f->type);
                 auto ne = new IR::NamedExpression(conv->srcInfo, f->name, conv);
-                si->push_back(ne);
+                si.push_back(ne);
                 index++;
             }
             auto type = st->getP4Type()->to<IR::Type_Name>();
-            auto result = new IR::StructExpression(expression->srcInfo, type, type, *si);
-            return result;
+            return new IR::StructExpression(expression->srcInfo, type, type, std::move(si));
         } else if (auto sli = expression->to<IR::StructExpression>()) {
             for (auto f : st->fields) {
                 auto ne = sli->components.getDeclaration<IR::NamedExpression>(f->name.name);
@@ -47,12 +46,11 @@ const IR::Expression *convert(const IR::Expression *expression, const IR::Type *
                 auto convNe = convert(ne->expression, f->type);
                 if (convNe != ne->expression) modified = true;
                 ne = new IR::NamedExpression(ne->srcInfo, f->name, convNe);
-                si->push_back(ne);
+                si.push_back(ne);
             }
             if (modified || sli->type->is<IR::Type_Unknown>()) {
                 auto type = st->getP4Type()->to<IR::Type_Name>();
-                auto result = new IR::StructExpression(expression->srcInfo, type, type, *si);
-                return result;
+                return new IR::StructExpression(expression->srcInfo, type, type, std::move(si));
             }
         } else if (auto mux = expression->to<IR::Mux>()) {
             auto e1 = convert(mux->e1, type);
@@ -63,17 +61,16 @@ const IR::Expression *convert(const IR::Expression *expression, const IR::Type *
         auto le = expression->to<IR::ListExpression>();
         if (le == nullptr) return expression;
 
-        auto vec = new IR::Vector<IR::Expression>();
+        IR::Vector<IR::Expression> vec;
         for (size_t i = 0; i < le->size(); i++) {
             auto expr = le->components.at(i);
             auto type = tup->components.at(i);
             auto conv = convert(expr, type);
-            vec->push_back(conv);
+            vec.push_back(conv);
             modified |= (conv != expr);
         }
         if (modified) {
-            auto result = new IR::ListExpression(expression->srcInfo, *vec);
-            return result;
+            return new IR::ListExpression(expression->srcInfo, std::move(vec));
         }
     }
     return expression;

@@ -189,14 +189,14 @@ template <class Ctor>
 const IR::Type *TypeInferenceBase::canonicalizeFields(const IR::Type_StructLike *type,
                                                       Ctor constructor) {
     bool changes = false;
-    auto fields = new IR::IndexedVector<IR::StructField>();
+    IR::IndexedVector<IR::StructField> fields;
     for (auto field : type->fields) {
         auto ftype = canonicalize(field->type);
         if (ftype == nullptr) return nullptr;
         if (ftype != field->type) changes = true;
         BUG_CHECK(!ftype->is<IR::Type_Type>(), "%1%: TypeType in field type", ftype);
         auto newField = new IR::StructField(field->srcInfo, field->name, field->annotations, ftype);
-        fields->push_back(newField);
+        fields.push_back(newField);
     }
     if (changes)
         return constructor(fields);
@@ -285,7 +285,7 @@ const IR::Type *TypeInferenceBase::canonicalize(const IR::Type *type) {
         canon = typeMap->getCanonical(canon);
         return canon;
     } else if (auto list = type->to<IR::Type_List>()) {
-        auto fields = new IR::Vector<IR::Type>();
+        IR::Vector<IR::Type> fields;
         // list<set<a>, b> = set<tuple<a, b>>
         // TODO: this should not be done here.
         bool anySet = false;
@@ -298,30 +298,30 @@ const IR::Type *TypeInferenceBase::canonicalize(const IR::Type *type) {
             auto t1 = canonicalize(t);
             anyChange = anyChange || t != t1;
             if (t1 == nullptr) return nullptr;
-            fields->push_back(t1);
+            fields.push_back(t1);
         }
         const IR::Type *canon;
         if (anySet)
-            canon = new IR::Type_Tuple(type->srcInfo, *fields);
+            canon = new IR::Type_Tuple(type->srcInfo, std::move(fields));
         else if (anyChange)
-            canon = new IR::Type_List(type->srcInfo, *fields);
+            canon = new IR::Type_List(type->srcInfo, std::move(fields));
         else
             canon = type;
         canon = typeMap->getCanonical(canon);
         if (anySet) canon = new IR::Type_Set(type->srcInfo, canon);
         return canon;
     } else if (auto tuple = type->to<IR::Type_Tuple>()) {
-        auto fields = new IR::Vector<IR::Type>();
+        IR::Vector<IR::Type> fields;
         bool anyChange = false;
         for (auto t : tuple->components) {
             auto t1 = canonicalize(t);
             anyChange = anyChange || t != t1;
             if (t1 == nullptr) return nullptr;
-            fields->push_back(t1);
+            fields.push_back(t1);
         }
         const IR::Type *canon;
         if (anyChange)
-            canon = new IR::Type_Tuple(type->srcInfo, *fields);
+            canon = new IR::Type_Tuple(type->srcInfo, std::move(fields));
         else
             canon = type;
         canon = typeMap->getCanonical(canon);
@@ -370,7 +370,7 @@ const IR::Type *TypeInferenceBase::canonicalize(const IR::Type *type) {
         return type;
     } else if (auto te = type->to<IR::Type_Extern>()) {
         bool changes = false;
-        auto methods = new IR::Vector<IR::Method>();
+        IR::Vector<IR::Method> methods;
         for (auto method : te->methods) {
             auto fpType = canonicalize(method->type);
             if (fpType == nullptr) return nullptr;
@@ -383,13 +383,14 @@ const IR::Type *TypeInferenceBase::canonicalize(const IR::Type *type) {
                 setType(method, fpType);
             }
 
-            methods->push_back(method);
+            methods.push_back(method);
         }
         auto tps = te->typeParameters;
         if (tps == nullptr) return nullptr;
         const IR::Type *resultType = type;
         if (changes || tps != te->typeParameters)
-            resultType = new IR::Type_Extern(te->srcInfo, te->name, tps, *methods, te->annotations);
+            resultType = new IR::Type_Extern(te->srcInfo, te->name, tps, std::move(methods),
+                                             te->annotations);
         return resultType;
     } else if (auto mt = type->to<IR::Type_Method>()) {
         const IR::Type *res = nullptr;
@@ -407,23 +408,24 @@ const IR::Type *TypeInferenceBase::canonicalize(const IR::Type *type) {
         if (changes) resultType = new IR::Type_Method(mt->getSourceInfo(), tps, res, pl, mt->name);
         return resultType;
     } else if (auto hdr = type->to<IR::Type_Header>()) {
-        return canonicalizeFields(hdr, [hdr](const IR::IndexedVector<IR::StructField> *fields) {
+        return canonicalizeFields(hdr, [hdr](IR::IndexedVector<IR::StructField> &fields) {
             return new IR::Type_Header(hdr->srcInfo, hdr->name, hdr->annotations,
-                                       hdr->typeParameters, *fields);
+                                       hdr->typeParameters, std::move(fields));
         });
     } else if (auto str = type->to<IR::Type_Struct>()) {
-        return canonicalizeFields(str, [str](const IR::IndexedVector<IR::StructField> *fields) {
+        return canonicalizeFields(str, [str](IR::IndexedVector<IR::StructField> &fields) {
             return new IR::Type_Struct(str->srcInfo, str->name, str->annotations,
-                                       str->typeParameters, *fields);
+                                       str->typeParameters, std::move(fields));
         });
     } else if (auto hu = type->to<IR::Type_HeaderUnion>()) {
-        return canonicalizeFields(hu, [hu](const IR::IndexedVector<IR::StructField> *fields) {
+        return canonicalizeFields(hu, [hu](IR::IndexedVector<IR::StructField> &fields) {
             return new IR::Type_HeaderUnion(hu->srcInfo, hu->name, hu->annotations,
-                                            hu->typeParameters, *fields);
+                                            hu->typeParameters, std::move(fields));
         });
     } else if (auto su = type->to<IR::Type_UnknownStruct>()) {
-        return canonicalizeFields(su, [su](const IR::IndexedVector<IR::StructField> *fields) {
-            return new IR::Type_UnknownStruct(su->srcInfo, su->name, su->annotations, *fields);
+        return canonicalizeFields(su, [su](IR::IndexedVector<IR::StructField> &fields) {
+            return new IR::Type_UnknownStruct(su->srcInfo, su->name, su->annotations,
+                                              std::move(fields));
         });
     } else if (auto st = type->to<IR::Type_Specialized>()) {
         auto baseCanon = canonicalize(st->baseType);

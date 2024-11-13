@@ -177,7 +177,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::StructExpression *expression
         // We cannot directly mutate v, because of https://github.com/p4lang/p4c/issues/43
         vec.push_back(new IR::NamedExpression(v->name, path));
     }
-    expression->components = vec;
+    expression->components = std::move(vec);
     prune();
     return expression;
 }
@@ -395,7 +395,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
         return mce;
     }
 
-    auto copyBack = new IR::IndexedVector<IR::StatOrDecl>();
+    IR::IndexedVector<IR::StatOrDecl> copyBack;
     auto args = new IR::Vector<IR::Argument>();
     auto mi = MethodInstance::resolve(orig, this, typeMap);
 
@@ -527,7 +527,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
         if (p->direction != IR::Direction::In && useTemp) {
             auto assign = new IR::AssignmentStatement(cloner.clone<IR::Expression>(argex),
                                                       cloner.clone<IR::Expression>(argValue));
-            copyBack->push_back(assign);
+            copyBack.push_back(assign);
             LOG3("Will copy out value " << dbp(assign));
         }
         args->push_back(new IR::Argument(arg->name, argValue));
@@ -551,14 +551,14 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
     // See whether we assign the result of the call to a temporary
     if (type->is<IR::Type_Void>() ||             // no return type
         getParent<IR::MethodCallStatement>()) {  // result of call is not used
-        if (!copyBack->empty()) {
+        if (!copyBack.empty()) {
             statements.push_back(new IR::MethodCallStatement(mce->srcInfo, mce));
             rv = nullptr;
         }  // else just return mce
     } else if (tbl_apply) {
         typeMap->setType(mce, type);
         rv = mce;
-    } else if (getParent<IR::AssignmentStatement>() && copyBack->empty()) {
+    } else if (getParent<IR::AssignmentStatement>() && copyBack.empty()) {
         /* no need for an extra copy as there's no out args to copy back afterwards */
         typeMap->setType(mce, type);
         rv = mce;
@@ -573,7 +573,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
         typeMap->setType(rv, type);
         LOG3(orig << " replaced with " << left << " = " << mce);
     }
-    statements.append(*copyBack);
+    statements.append(copyBack);
     prune();
     return rv;
 }
@@ -808,14 +808,12 @@ const IR::Node *KeySideEffect::doStatement(const IR::Statement *statement,
     auto insertions = get(toInsert, hta.table);
     if (insertions == nullptr) return statement;
 
-    auto result = new IR::IndexedVector<IR::StatOrDecl>();
+    IR::IndexedVector<IR::StatOrDecl> result;
     for (auto assign : insertions->statements) {
-        auto cloneAssign = assign->clone();
-        result->push_back(cloneAssign);
+        result.push_back(assign->clone());
     }
-    result->push_back(statement);
-    auto block = new IR::BlockStatement(*result);
-    return block;
+    result.push_back(statement);
+    return new IR::BlockStatement(std::move(result));
 }
 
 }  // namespace P4

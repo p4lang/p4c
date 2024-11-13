@@ -154,28 +154,29 @@ class CollapseChains : public Transform {
 
         // Collapse the states in each chain into a new state with the name and
         // annotations of the chain's head state.
-        auto states = new IR::IndexedVector<IR::ParserState>();
+        IR::IndexedVector<IR::ParserState> states;
         for (auto s : parser->states) {
             if (pred.find(s) != pred.end()) continue;
             if (chainStart.find(s) != chainStart.end()) {
                 // collapse chain
-                auto components = new IR::IndexedVector<IR::StatOrDecl>();
+                IR::IndexedVector<IR::StatOrDecl> components;
                 auto crt = s;
                 LOG1("Chaining states into " << dbp(crt));
                 const IR::Expression *select = nullptr;
                 while (true) {
-                    components->append(crt->components);
+                    components.append(crt->components);
                     select = crt->selectExpression;
                     crt = ::P4::get(chain, crt);
                     if (crt == nullptr) break;
                     LOG1("Adding " << dbp(crt) << " to chain");
                 }
-                s = new IR::ParserState(s->srcInfo, s->name, s->annotations, *components, select);
+                s = new IR::ParserState(s->srcInfo, s->name, s->annotations, std::move(components),
+                                        select);
             }
-            states->push_back(s);
+            states.push_back(s);
         }
 
-        parser->states = *states;
+        parser->states = std::move(states);
         prune();
         return parser;
     }

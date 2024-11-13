@@ -30,20 +30,20 @@ const IR::Node *HandleValidityHeaderUnion::setInvalidforRest(const IR::Statement
                                                              const IR::Type_HeaderUnion *hu,
                                                              cstring exclude,
                                                              bool setValidforCurrMem) {
-    auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
+    IR::IndexedVector<IR::StatOrDecl> code_block;
     if (setValidforCurrMem) {
-        code_block->push_back(processValidityForStr(s, m, exclude, IR::Type_Header::setValid));
+        code_block.push_back(processValidityForStr(s, m, exclude, IR::Type_Header::setValid));
     }
 
-    code_block->push_back(s);
+    code_block.push_back(s);
 
     for (auto sfu : hu->fields) {
         if (exclude != sfu->name.name) {  // setInvalid for rest of the fields
-            code_block->push_back(
+            code_block.push_back(
                 processValidityForStr(s, m, sfu->name, IR::Type_Header::setInvalid));
         }
     }
-    return new IR::BlockStatement(*code_block);
+    return new IR::BlockStatement(std::move(code_block));
 }
 
 const IR::Node *HandleValidityHeaderUnion::expandIsValid(

@@ -19,7 +19,7 @@ limitations under the License.
 namespace P4 {
 
 void DoSetHeaders::generateSetValid(const IR::Expression *dest, const IR::Expression *src,
-                                    const IR::Type *destType, IR::Vector<IR::StatOrDecl> *insert) {
+                                    const IR::Type *destType, IR::Vector<IR::StatOrDecl> &insert) {
     auto structType = destType->to<IR::Type_StructLike>();
     if (structType == nullptr) return;
 
@@ -34,7 +34,7 @@ void DoSetHeaders::generateSetValid(const IR::Expression *dest, const IR::Expres
         auto mc =
             new IR::MethodCallExpression(dest->srcInfo, method, new IR::Vector<IR::Argument>());
         auto stat = new IR::MethodCallStatement(mc->srcInfo, mc);
-        insert->push_back(stat);
+        insert.push_back(stat);
         return;
     }
 
@@ -63,12 +63,12 @@ void DoSetHeaders::generateSetValid(const IR::Expression *dest, const IR::Expres
 }
 
 const IR::Node *DoSetHeaders::postorder(IR::AssignmentStatement *statement) {
-    auto vec = new IR::IndexedVector<IR::StatOrDecl>();
+    IR::IndexedVector<IR::StatOrDecl> vec;
     auto destType = typeMap->getType(statement->left, true);
     generateSetValid(statement->left, statement->right, destType, vec);
-    if (vec->empty()) return statement;
-    vec->push_back(statement);
-    return new IR::BlockStatement(statement->srcInfo, *vec);
+    if (vec.empty()) return statement;
+    vec.push_back(statement);
+    return new IR::BlockStatement(statement->srcInfo, vec);
 }
 
 }  // namespace P4

@@ -779,7 +779,7 @@ std::size_t P4::loc_t::hash() const {
 // In this case parentLoc is the loc of n's direct parent.
 const P4::loc_t *ComputeWriteSet::getLoc(const IR::Node *n, const loc_t *parentLoc) {
     loc_t tmp{n, parentLoc};
-    return &*cached_locs.insert(tmp).first;
+    return &*cached_locs->insert(tmp).first;
 }
 
 // Returns program location given the context of the currently being visited node.
@@ -787,7 +787,7 @@ const P4::loc_t *ComputeWriteSet::getLoc(const IR::Node *n, const loc_t *parentL
 const P4::loc_t *ComputeWriteSet::getLoc(const Visitor::Context *ctxt) {
     if (!ctxt) return nullptr;
     loc_t tmp{ctxt->node, getLoc(ctxt->parent)};
-    return &*cached_locs.insert(tmp).first;
+    return &*cached_locs->insert(tmp).first;
 }
 
 // Returns program location of a child node n, given the context of the
@@ -798,7 +798,7 @@ const P4::loc_t *ComputeWriteSet::getLoc(const IR::Node *n, const Visitor::Conte
         if (p->node == n) return getLoc(p);
     auto rv = getLoc(ctxt);
     loc_t tmp{n, rv};
-    return &*cached_locs.insert(tmp).first;
+    return &*cached_locs->insert(tmp).first;
 }
 
 // Symbolic execution of the parser
@@ -1032,39 +1032,37 @@ bool ComputeWriteSet::preorder(const IR::P4Action *action) {
     auto saveReturned = returnedDefinitions;
     returnedDefinitions = new Definitions();
 
-    auto decls = new IR::IndexedVector<IR::Declaration>();
+    IR::IndexedVector<IR::Declaration> decls;
     // We assume that there are no declarations in inner scopes
     // inside the action body.
     for (auto s : action->body->components) {
-        if (s->is<IR::Declaration>()) decls->push_back(s->to<IR::Declaration>());
+        if (s->is<IR::Declaration>()) decls.push_back(s->to<IR::Declaration>());
     }
     ProgramPoint pt(callingContext, action);
-    enterScope(action->parameters, decls, pt, false);
+    enterScope(action->parameters, &decls, pt, false);
     visit(action->body);
     currentDefinitions = currentDefinitions->joinDefinitions(returnedDefinitions);
     setDefinitions(currentDefinitions, action->body, true);  // overwrite
-    exitScope(action->parameters, decls, pt);
+    exitScope(action->parameters, &decls, pt);
     returnedDefinitions = saveReturned;
     return false;
 }
 
 namespace {
 class GetDeclarations : public Inspector {
-    IR::IndexedVector<IR::Declaration> *declarations;
+    IR::IndexedVector<IR::Declaration> declarations;
     bool preorder(const IR::Declaration_Variable *declaration) override {
-        declarations->push_back(declaration);
+        declarations.push_back(declaration);
         return true;
     }
     bool preorder(const IR::Declaration_Instance *declaration) override {
-        declarations->push_back(declaration);
+        declarations.push_back(declaration);
         return true;
     }
 
  public:
-    GetDeclarations() : declarations(new IR::IndexedVector<IR::Declaration>()) {
-        setName("GetDeclarations");
-    }
-    static IR::IndexedVector<IR::Declaration> *get(const IR::Node *node, const Visitor *calledBy) {
+    GetDeclarations() { setName("GetDeclarations"); }
+    static IR::IndexedVector<IR::Declaration> get(const IR::Node *node, const Visitor *calledBy) {
         GetDeclarations gd;
         gd.setCalledBy(calledBy);
         (void)node->apply(gd);
@@ -1085,7 +1083,7 @@ bool ComputeWriteSet::preorder(const IR::Function *function) {
     auto point = ProgramPoint(callingContext, function);
     auto locals = GetDeclarations::get(function->body, this);
     auto saveReturned = returnedDefinitions;
-    enterScope(function->type->parameters, locals, point, false);
+    enterScope(function->type->parameters, &locals, point, false);
 
     returnedDefinitions = new Definitions();
     visit(function->body);
@@ -1095,7 +1093,7 @@ bool ComputeWriteSet::preorder(const IR::Function *function) {
     else
         LOG3("CWS @" << point.after() << " with " << currentDefinitions->size() << " defs");
     allDefinitions->setDefinitionsAt(point.after(), currentDefinitions, false);
-    exitScope(function->type->parameters, locals, point);
+    exitScope(function->type->parameters, &locals, point);
 
     returnedDefinitions = saveReturned;
     LOG3("Done " << dbp(function));

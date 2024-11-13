@@ -197,18 +197,16 @@ const IR::Node *DoRemoveReturns::preorder(IR::P4Control *control) {
 
 const IR::Node *DoRemoveReturns::preorder(IR::ReturnStatement *statement) {
     set(TernaryBool::Yes);
-    auto vec = new IR::IndexedVector<IR::StatOrDecl>();
+    IR::IndexedVector<IR::StatOrDecl> vec;
 
     auto left = new IR::PathExpression(IR::Type::Boolean::get(), returnVar);
-    vec->push_back(
-        new IR::AssignmentStatement(statement->srcInfo, left, new IR::BoolLiteral(true)));
+    vec.push_back(new IR::AssignmentStatement(statement->srcInfo, left, new IR::BoolLiteral(true)));
     if (statement->expression != nullptr) {
         left = new IR::PathExpression(statement->expression->type, returnedValue);
-        vec->push_back(
-            new IR::AssignmentStatement(statement->srcInfo, left, statement->expression));
+        vec.push_back(new IR::AssignmentStatement(statement->srcInfo, left, statement->expression));
     }
-    if (findContext<IR::LoopStatement>()) vec->push_back(new IR::BreakStatement);
-    return new IR::BlockStatement(*vec);
+    if (findContext<IR::LoopStatement>()) vec.push_back(new IR::BreakStatement);
+    return new IR::BlockStatement(std::move(vec));
 }
 
 const IR::Node *DoRemoveReturns::preorder(IR::ExitStatement *statement) {
