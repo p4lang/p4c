@@ -13,9 +13,6 @@ tables {
   action_refs {
     id: 28773984
   }
-  initial_default_action {
-    action_id: 28773984
-  }
   size: 8
 }
 tables {
@@ -35,9 +32,6 @@ tables {
   }
   action_refs {
     id: 21257015
-  }
-  initial_default_action {
-    action_id: 21257015
   }
   size: 2
 }
