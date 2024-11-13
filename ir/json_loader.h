@@ -22,6 +22,7 @@ limitations under the License.
 #include <string>
 #include <unordered_map>
 #include <utility>
+#include <variant>
 
 #include "ir.h"
 #include "json_parser.h"

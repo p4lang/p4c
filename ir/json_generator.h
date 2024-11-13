@@ -20,6 +20,7 @@ limitations under the License.
 #include <optional>
 #include <string>
 #include <unordered_set>
+#include <variant>
 
 #include "ir/node.h"
 #include "lib/bitvec.h"
