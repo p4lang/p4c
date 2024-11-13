@@ -80,7 +80,7 @@ bool PragmaAtomic::preorder(const IR::BFN::Pipe *pipe) {
     for (const auto *annotation : global_pragmas) {
         if (annotation->name.name != PragmaAtomic::name) continue;
 
-        auto &exprs = annotation->expr;
+        auto &exprs = annotation->getExpr();
 
         if (!PHV::Pragmas::checkStringLiteralArgs(exprs)) {
             continue;

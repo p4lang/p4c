@@ -905,10 +905,10 @@ BFNOptionPragmaParser::parseCompilerOption(const IR::Annotation *annotation) {
     // Parsing of option pragmas is done early in the compiler, before P4₁₆
     // annotations are parsed, so we are responsible for doing our own parsing
     // here.
-    auto args = &annotation->expr;
+    auto args = &annotation->getExpr();
     if (args->empty()) {
         auto parseResult =
-            P4::P4ParserDriver::parseExpressionList(annotation->srcInfo, annotation->body);
+            P4::P4ParserDriver::parseExpressionList(annotation->srcInfo, annotation->getUnparsed());
         if (parseResult != nullptr) {
             args = parseResult;
         }

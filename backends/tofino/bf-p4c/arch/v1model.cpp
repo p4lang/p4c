@@ -1808,7 +1808,7 @@ class ConstructSymbolTable : public Inspector {
         for (auto annot : block->annotations) {
             if (annot->name.name == "zeros_as_ones") {
                 auto mc = call->methodCall->to<IR::MethodCallExpression>();
-                if (annot->expr[0]->equiv(*mc)) return true;
+                if (annot->getExpr()[0]->equiv(*mc)) return true;
             }
         }
         return false;
@@ -2012,7 +2012,7 @@ class ConstructSymbolTable : public Inspector {
         // selector_mode
         auto sel_mode = new IR::Member(new IR::TypeNameExpression("SelectorMode_t"), "FAIR");
         if (auto anno = node->getAnnotation("mode"_cs)) {
-            auto mode = anno->expr.at(0)->to<IR::StringLiteral>();
+            auto mode = anno->getExpr().at(0)->to<IR::StringLiteral>();
             if (mode->value == "resilient")
                 sel_mode->member = IR::ID("RESILIENT");
             else if (mode->value != "fair" && mode->value != "non_resilient")
@@ -2032,7 +2032,7 @@ class ConstructSymbolTable : public Inspector {
         auto typeArgs = new IR::Vector<IR::Type>();
         // type<W>
         if (auto anno = node->getAnnotation("min_width"_cs)) {
-            auto min_width = anno->expr.at(0)->as<IR::Constant>().asInt();
+            auto min_width = anno->getExpr().at(0)->as<IR::Constant>().asInt();
             typeArgs->push_back(IR::Type::Bits::get(min_width));
         } else {
             auto min_width = IR::Type::Bits::get(64);  // Do not impose LRT
@@ -2074,7 +2074,7 @@ class ConstructSymbolTable : public Inspector {
     void cvtDirectCounterDecl(const IR::Declaration_Instance *node) {
         auto typeArgs = new IR::Vector<IR::Type>();
         if (auto anno = node->getAnnotation("min_width"_cs)) {
-            auto min_width = anno->expr.at(0)->as<IR::Constant>().asInt();
+            auto min_width = anno->getExpr().at(0)->as<IR::Constant>().asInt();
             typeArgs->push_back(IR::Type::Bits::get(min_width));
         } else {
             // Do not impose LRT
@@ -2238,7 +2238,7 @@ class ConstructSymbolTable : public Inspector {
                 // Check the field_list annotation
                 auto anno = f->getAnnotation("field_list"_cs);
                 if (anno == nullptr) continue;
-                for (auto e : anno->expr) {
+                for (auto e : anno->getExpr()) {
                     auto cst = e->to<IR::Constant>();
                     if (cst == nullptr) {
                         error("%1%: Annotation must be a constant integer", e);

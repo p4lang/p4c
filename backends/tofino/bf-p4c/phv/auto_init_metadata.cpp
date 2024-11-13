@@ -177,16 +177,16 @@ const IR::BFN::Pipe *RemoveMetadataInits::preorder(IR::BFN::Pipe *pipe) {
     for (auto anno : pipe->global_pragmas) {
         if (anno->name != PragmaNoInit::name) continue;
 
-        BUG_CHECK(anno->expr.size() == 2, "%1% pragma expects two arguments, but got %2%: %3%",
-                  PragmaNoInit::name, anno->expr.size(), anno);
+        BUG_CHECK(anno->getExpr().size() == 2, "%1% pragma expects two arguments, but got %2%: %3%",
+                  PragmaNoInit::name, anno->getExpr().size(), anno);
 
-        auto gress = anno->expr.at(0)->to<IR::StringLiteral>();
+        auto gress = anno->getExpr().at(0)->to<IR::StringLiteral>();
         BUG_CHECK(gress, "First argument to %1% is not a string: %2%", PragmaNoInit::name,
-                  anno->expr.at(0));
+                  anno->getExpr().at(0));
 
-        auto field = anno->expr.at(1)->to<IR::StringLiteral>();
+        auto field = anno->getExpr().at(1)->to<IR::StringLiteral>();
         BUG_CHECK(field, "Second argument to %1% is not a string: %2%", PragmaNoInit::name,
-                  anno->expr.at(1));
+                  anno->getExpr().at(1));
 
         pa_no_inits.insert(gress->value + "::" + field->value);
     }

@@ -221,7 +221,7 @@ void PragmaAlias::postorder(const IR::BFN::Pipe *pipe) {
         if (annotation->name.name != PragmaAlias::name) continue;
         LOG3("Annotation: " << annotation);
 
-        auto &exprs = annotation->expr;
+        auto &exprs = annotation->getExpr();
 
         if (!PHV::Pragmas::checkStringLiteralArgs(exprs)) {
             continue;

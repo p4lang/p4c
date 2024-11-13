@@ -65,11 +65,11 @@ bool Pipeline::equiv(const Pipeline &other) const {
 
 void Pipeline::insertPragmas(const std::vector<const IR::Annotation *> &all_pragmas) {
     auto applies = [this](const IR::Annotation *p) {
-        if (p->expr.empty() || p->expr.at(0) == nullptr) {
+        if (p->getExpr().empty() || p->getExpr().at(0) == nullptr) {
             return true;
         }
 
-        auto arg0 = p->expr.at(0)->to<IR::StringLiteral>();
+        auto arg0 = p->getExpr().at(0)->to<IR::StringLiteral>();
 
         // Determine whether the name of a pipe is present as the first argument.
         // If the pipe name doesn't match, the pragma is to be applied for a different pipe.
@@ -118,7 +118,7 @@ bool Architecture::preorder(const IR::PackageBlock *pkg) {
         found = true;
     } else if (pkg->type->name == "Switch" || pkg->type->name == "MultiParserSwitch") {
         if (auto annot = pkg->type->getAnnotation(IR::Annotation::pkginfoAnnotation)) {
-            for (auto kv : annot->kv) {
+            for (auto kv : annot->getKV()) {
                 if (kv->name == "arch") {
                     architecture = toArchEnum(kv->expression->to<IR::StringLiteral>()->value);
                 } else if (kv->name == "version") {
@@ -216,7 +216,7 @@ void ParseTna::parsePortMapAnnotation(const IR::PackageBlock *block, DefaultPort
     if (auto annot = block->node->to<IR::IAnnotated>()) {
         if (auto anno = annot->getAnnotation("default_portmap"_cs)) {
             int index = 0;
-            for (auto expr : anno->expr) {
+            for (auto expr : anno->getExpr()) {
                 std::vector<int> ports;
                 if (auto cst = expr->to<IR::Constant>()) {
                     ports.push_back(cst->asInt());

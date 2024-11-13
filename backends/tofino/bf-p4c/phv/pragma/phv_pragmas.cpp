@@ -97,7 +97,7 @@ bool PHV::Pragmas::checkStringLiteralArgs(const IR::Vector<IR::Expression> &expr
 bool PHV::Pragmas::checkNumberArgs(const IR::Annotation *annotation, unsigned required_args,
                                    const unsigned min_required_args, bool exact_number_of_args,
                                    cstring pragma_name, cstring pragma_args_wo_pipe) {
-    auto &exprs = annotation->expr;
+    auto &exprs = annotation->getExpr();
     if ((exact_number_of_args && exprs.size() != required_args) || exprs.size() < required_args) {
         warning(ErrorType::WARN_INVALID,
                 "%1%: Invalid number of arguments. "

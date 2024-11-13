@@ -286,11 +286,11 @@ int SelectorLengthBits(const IR::MAU::Selector *sel) {
 
 static int ways_pragma(const IR::MAU::Table *tbl, int min, int max) {
     if (auto s = tbl->match_table->getAnnotation("ways"_cs)) {
-        ERROR_CHECK(s->expr.size() >= 1,
+        ERROR_CHECK(s->getExpr().size() >= 1,
                     "%s: The ways pragma on table %s does not have a "
                     "value",
                     tbl->srcInfo, tbl->name);
-        auto pragma_val = s->expr.at(0)->to<IR::Constant>();
+        auto pragma_val = s->getExpr().at(0)->to<IR::Constant>();
         if (pragma_val == nullptr) {
             error("%s: The ways pragma value on table %s is not a constant", tbl->srcInfo,
                   tbl->name);
@@ -311,11 +311,11 @@ static int ways_pragma(const IR::MAU::Table *tbl, int min, int max) {
 
 static int simul_lookups_pragma(const IR::MAU::Table *tbl, int min, int max) {
     if (auto s = tbl->match_table->getAnnotation("simul_lookups"_cs)) {
-        ERROR_CHECK(s->expr.size() >= 1,
+        ERROR_CHECK(s->getExpr().size() >= 1,
                     "%s: The simul_lookups pragma on table %s does not "
                     "have a value",
                     tbl->srcInfo, tbl->name);
-        auto pragma_val = s->expr.at(0)->to<IR::Constant>();
+        auto pragma_val = s->getExpr().at(0)->to<IR::Constant>();
         if (pragma_val == nullptr) {
             error("%s: The simul_lookups pragma value on table %s is not a constant", tbl->srcInfo,
                   tbl->name);
@@ -1662,10 +1662,10 @@ void RangeEntries::postorder(const IR::MAU::Table *tbl) {
     int range_entries = -1;
     if (auto s = tbl->match_table->getAnnotation("entries_with_ranges"_cs)) {
         const IR::Constant *pragma_val = nullptr;
-        if (s->expr.size() == 0) {
+        if (s->getExpr().size() == 0) {
             error("%s: entries_with_ranges pragma on table %s has no value", s->srcInfo, tbl->name);
         } else {
-            pragma_val = s->expr.at(0)->to<IR::Constant>();
+            pragma_val = s->getExpr().at(0)->to<IR::Constant>();
             ERROR_CHECK(pragma_val != nullptr,
                         "%s: the value for the entries_with_ranges "
                         "pragma on table %s is not a constant",

@@ -196,7 +196,7 @@ void emit_user_annotation_context_json(indent_t indent, const IR::IAnnotated *no
         }
 
         bool emitted_elts = false;
-        for (auto *expr : annotation->expr) {
+        for (auto *expr : annotation->getExpr()) {
             auto str = expr->to<IR::StringLiteral>();
             BUG_CHECK(str, "User annotation not a string literal: %1%", expr);
 

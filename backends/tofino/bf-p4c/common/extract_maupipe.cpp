@@ -63,11 +63,11 @@ static int getConstant(const IR::Argument *arg) {
 }
 
 static big_int getBigConstant(const IR::Annotation *annotation) {
-    if (annotation->expr.size() != 1) {
+    if (annotation->getExpr().size() != 1) {
         error("%1% should contain a constant", annotation);
         return 0;
     }
-    auto constant = annotation->expr[0]->to<IR::Constant>();
+    auto constant = annotation->getExpr()[0]->to<IR::Constant>();
     if (constant == nullptr) {
         error("%1% should contain a constant", annotation);
         return 0;
@@ -77,11 +77,11 @@ static big_int getBigConstant(const IR::Annotation *annotation) {
 
 static int64_t getConstant(const IR::Annotation *annotation, int64_t min = INT_MIN,
                            uint64_t max = INT_MAX) {
-    if (annotation->expr.size() != 1) {
+    if (annotation->getExpr().size() != 1) {
         error("%1% should contain a constant", annotation);
         return 0;
     }
-    auto constant = annotation->expr[0]->to<IR::Constant>();
+    auto constant = annotation->getExpr()[0]->to<IR::Constant>();
     if (constant == nullptr) {
         error("%1% should contain a constant", annotation);
         return 0;
@@ -97,11 +97,11 @@ static int64_t getConstant(const IR::Annotation *annotation, int64_t min = INT_M
 }
 
 static cstring getString(const IR::Annotation *annotation) {
-    if (annotation->expr.size() != 1) {
+    if (annotation->getExpr().size() != 1) {
         error("%1% should contain a string", annotation);
         return ""_cs;
     }
-    auto str = annotation->expr[0]->to<IR::StringLiteral>();
+    auto str = annotation->getExpr()[0]->to<IR::StringLiteral>();
     if (str == nullptr) {
         error("%1% should contain a string", annotation);
         return ""_cs;
@@ -521,11 +521,11 @@ cstring getTypeName(const IR::Type *type) {
 static int getSingleAnnotationValue(const cstring name, const IR::MAU::Table *table) {
     if (table->match_table) {
         if (auto s = table->match_table->getAnnotation(name)) {
-            ERROR_CHECK(s->expr.size() >= 1,
+            ERROR_CHECK(s->getExpr().size() >= 1,
                         "%s: The %s pragma on table %s "
                         "does not have a value",
                         name, table->srcInfo, table->name);
-            auto pragma_val = s->expr.at(0)->to<IR::Constant>();
+            auto pragma_val = s->getExpr().at(0)->to<IR::Constant>();
             if (pragma_val == nullptr) {
                 error("%s: The %s pragma value on table %s is not a constant", name, table->srcInfo,
                       table->name);
@@ -792,8 +792,8 @@ static IR::MAU::AttachedMemory *createAttached(
                 ctr->interval = getConstant(anno);
             else if (anno->name == "true_egress_accounting")
                 ctr->true_egress_accounting = true;
-            else if ((anno->name == "adjust_byte_count") && anno->expr.size() == 1 &&
-                     anno->expr[0]->to<IR::Constant>())
+            else if ((anno->name == "adjust_byte_count") && anno->getExpr().size() == 1 &&
+                     anno->getExpr()[0]->to<IR::Constant>())
                 // Byte count adjustment is always subtracted
                 ctr->bytecount_adjust -= getConstant(anno);
         }
@@ -836,7 +836,7 @@ static IR::MAU::AttachedMemory *createAttached(
         // annotations are supported for p4-14.
         for (auto anno : annot) {
             if (anno->name == "result")
-                mtr->result = anno->expr.at(0);
+                mtr->result = anno->getExpr().at(0);
             else if (anno->name == "implementation")
                 mtr->implementation = getString(anno);
             else if (anno->name == "green")
@@ -851,8 +851,8 @@ static IR::MAU::AttachedMemory *createAttached(
                 mtr->sweep_interval = getConstant(anno);
             else if (anno->name == "true_egress_accounting")
                 mtr->true_egress_accounting = true;
-            else if ((anno->name == "adjust_byte_count") && anno->expr.size() == 1 &&
-                     anno->expr[0]->to<IR::Constant>())
+            else if ((anno->name == "adjust_byte_count") && anno->getExpr().size() == 1 &&
+                     anno->getExpr()[0]->to<IR::Constant>())
                 // Byte count adjustment is always subtracted
                 mtr->bytecount_adjust -= getConstant(anno);
             else
@@ -1267,7 +1267,7 @@ void AttachTables::InitializeStatefulAlus ::updateAttachedSalu(const IR::Declara
     for (auto annot : ext->annotations) {
         if (annot->name == "name") continue;
         if (auto old = salu->getAnnotation(annot->name)) {
-            if (old->expr.equiv(annot->expr)) continue;
+            if (old->getExpr().equiv(annot->getExpr())) continue;
             warning("Conflicting annotations %s and %s related to stateful alu %s", annot, old,
                     salu);
         }
@@ -1276,7 +1276,7 @@ void AttachTables::InitializeStatefulAlus ::updateAttachedSalu(const IR::Declara
     salu->annotations = std::move(new_annot);
 
     if (auto red_or = ext->getAnnotation("reduction_or_group"_cs)) {
-        auto pragma_val = red_or->expr.at(0)->to<IR::StringLiteral>();
+        auto pragma_val = red_or->getExpr().at(0)->to<IR::StringLiteral>();
         ERROR_CHECK(pragma_val,
                     "%s: Please provide a valid reduction_or_group for, which should "
                     "be a string %s",
@@ -1646,7 +1646,7 @@ class GetBackendTables : public MauInspector {
         std::optional<cstring> partition_index = std::nullopt;
         // Fold 'atcam_partition_index' annotation into InputXbarRead IR node.
         auto s = table->getAnnotation("atcam_partition_index"_cs);
-        if (s) partition_index = s->expr.at(0)->to<IR::StringLiteral>()->value;
+        if (s) partition_index = s->getExpr().at(0)->to<IR::StringLiteral>()->value;
 
         for (auto key_elem : key->keyElements) {
             auto key_expr = key_elem->expression;

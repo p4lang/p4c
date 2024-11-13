@@ -295,7 +295,7 @@ bool CollectBridgedFields::preorder(const IR::Annotation *annot) {
     if (pragmaName != "pa_do_not_bridge") return true;
 
     LOG4("[CollectBridgedFields] Do Not Bridge pragma: " << annot);
-    auto &exprs = annot->expr;
+    auto &exprs = annot->getExpr();
     // Check pragma arguments
     if (exprs.size() != 2) {
         ::warning(
