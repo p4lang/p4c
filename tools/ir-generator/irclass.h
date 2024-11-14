@@ -96,7 +96,6 @@ class IrElement : public Util::IHasSourceInfo {
         Virtual = 1 << 3,
         Static = 1 << 4,
         Const = 1 << 5,
-        Variant = 1 << 6
     };
     static inline const char *modifier(int m) {
         if (m & IrElement::NullOK) return "NullOK";
@@ -105,7 +104,6 @@ class IrElement : public Util::IHasSourceInfo {
         if (m & IrElement::Static) return "static";
         if (m & IrElement::Inline) return "inline";
         if (m & IrElement::Const) return "const";
-        if (m & IrElement::Variant) return "variant";
         return "";
     }
 };

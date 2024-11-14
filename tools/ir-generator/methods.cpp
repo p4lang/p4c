@@ -58,17 +58,12 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
                   continue;  // FIXME -- deal with SourcInfo
               if (!first) buf << std::endl << cl->indent << cl->indent << "&& ";
               first = false;
-              if (f->type) {
-                  if (auto *arr = dynamic_cast<const ArrayType *>(f->type)) {
-                      for (int i = 0; i < arr->size; ++i) {
-                          if (i != 0) buf << std::endl << cl->indent << cl->indent << "&& ";
-                          buf << f->name << "[" << i << "] == a." << f->name << "[" << i << "]";
-                      }
-                  } else {
-                      buf << f->name << " == a." << f->name;
+              if (auto *arr = dynamic_cast<const ArrayType *>(f->type)) {
+                  for (int i = 0; i < arr->size; ++i) {
+                      if (i != 0) buf << std::endl << cl->indent << cl->indent << "&& ";
+                      buf << f->name << "[" << i << "] == a." << f->name << "[" << i << "]";
                   }
               } else {
-                  // operator== for variant just delegates to generic operator==
                   buf << f->name << " == a." << f->name;
               }
           }
@@ -144,20 +139,18 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
                   } else {
                       buf << std::endl << cl->indent << cl->indent << "&& ";
                   }
-                  if (f->type) {
-                      if (f->type->resolve(cl->containedIn) == nullptr) {
-                          // This is not an IR pointer
-                          buf << f->name << " == a." << f->name;
-                      } else if (f->isInline) {
-                          buf << f->name << ".equiv(a." << f->name << ")";
-                      } else {
-                          buf << "(" << f->name << " ? a." << f->name << " ? " << f->name
-                              << "->equiv(*a." << f->name << ")" << " : false : a." << f->name
-                              << " == nullptr)";
-                      }
-                  } else {
+                  if (!f->type) {  // variant field
                       buf << f->name << ".index() == a." << f->name << ".index() && "
                           << "std::visit(" << f->name << "_equivVisitor, " << f->name << ")";
+                  } else if (f->type->resolve(cl->containedIn) == nullptr) {
+                      // This is not an IR pointer
+                      buf << f->name << " == a." << f->name;
+                  } else if (f->isInline) {
+                      buf << f->name << ".equiv(a." << f->name << ")";
+                  } else {
+                      buf << "(" << f->name << " ? a." << f->name << " ? " << f->name
+                          << "->equiv(*a." << f->name << ")" << " : false : a." << f->name
+                          << " == nullptr)";
                   }
               }
               if (first) {  // no fields?

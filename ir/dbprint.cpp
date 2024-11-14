@@ -79,7 +79,7 @@ void IR::Annotation::dbprint(std::ostream &out) const {
             if constexpr (std::is_same_v<T, IR::Vector<IR::AnnotationToken>>) {
                 for (auto e : body) {
                     out << sep << e;
-                    sep = ", ";
+                    sep = " ";
                 }
             } else if constexpr (std::is_same_v<T, IR::Vector<IR::Expression>>) {
                 for (auto e : body) {

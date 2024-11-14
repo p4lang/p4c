@@ -332,7 +332,7 @@ irField
             if ($1 & IrElement::Virtual)
                 yyerror("virtual invalid on field %s", $4); }
     | modifiers VARIANT '<' type_args '>' fieldName optInitializer ';'
-          { $$ = new IrVariantField(@6, $4, $6, $7, $1 | IrElement::Variant);
+          { $$ = new IrVariantField(@6, $4, $6, $7, $1);
             if ($1 & IrElement::Virtual)
                 yyerror("virtual invalid on field %s", $6); }
     ;
