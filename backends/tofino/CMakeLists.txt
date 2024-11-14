@@ -203,7 +203,7 @@ set (CPACK_PACKAGE_DESCRIPTION "P4C compilers for the Barefoot Networks Tofino a
 set (CPACK_PROJECT_CONFIG_FILE "${BFN_P4C_SOURCE_DIR}/CPackOptions.cmake")
 set (CPACK_STRIP_FILES TRUE)
 
-include (CPack)
+# include (CPack)
 
 set (BF_P4C_IR_DEF_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/bf-p4c/ir/tofino.def
