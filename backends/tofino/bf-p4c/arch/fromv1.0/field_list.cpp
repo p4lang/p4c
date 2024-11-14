@@ -39,10 +39,10 @@ const IR::Node *P4V1::FieldListConverter::convertFieldList(const IR::Node *node)
             if (anno->getExpr().size() != 3)
                 error("Invalid pragma specification -- ", pragma_string);
 
-            if (!anno->getExpr()[0]->is<IR::StringLiteral>())
-                error("Invalid field in pragma specification -- ", anno->getExpr()[0]);
+            if (!anno->getExpr(0)->is<IR::StringLiteral>())
+                error("Invalid field in pragma specification -- ", anno->getExpr(0));
 
-            auto field = anno->getExpr()[0]->to<IR::StringLiteral>()->value;
+            auto field = anno->getExpr(0)->to<IR::StringLiteral>()->value;
             if (!anno->getExpr()[1]->is<IR::Constant>() || !anno->getExpr()[2]->is<IR::Constant>())
                 error("Invalid slice bit position(s) in pragma specification -- ", pragma_string);
 

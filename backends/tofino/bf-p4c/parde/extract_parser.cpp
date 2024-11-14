@@ -472,7 +472,7 @@ const IR::BFN::Parser *GetBackendParser::createBackendParser() {
         }
         if (auto dontmerge = state->getAnnotation("dontmerge"_cs)) {
             if (dontmerge->getExpr().size()) {
-                auto gress = dontmerge->getExpr()[0]->to<IR::StringLiteral>();
+                auto gress = dontmerge->getExpr(0)->to<IR::StringLiteral>();
                 if (gress->value == toString(parser->thread)) {
                     backendState->dontMerge = true;
                 }
@@ -599,7 +599,7 @@ void GetBackendParser::addTransition(IR::BFN::ParserState *state, match_t matchV
         // overriding the pvs name with the name in the annotation.
         cstring valueSetName;
         if (auto anno = valueSet->getAnnotation("pd_pvs_name"_cs)) {
-            auto name = anno->getExpr().at(0)->to<IR::StringLiteral>();
+            auto name = anno->getExpr(0)->to<IR::StringLiteral>();
             valueSetName = name->value;
         } else {
             valueSetName = valueSet->controlPlaneName();

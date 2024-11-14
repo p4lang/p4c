@@ -1741,7 +1741,7 @@ void IXBar::determine_proxy_hash_alg(const PhvInfo &phv, const IR::MAU::Table *t
                                      int group) {
     bool hash_function_found = false;
     if (auto s = tbl->match_table->getAnnotation("proxy_hash_algorithm"_cs)) {
-        auto pragma_val = s->getExpr().at(0)->to<IR::StringLiteral>();
+        auto pragma_val = s->getExpr(0)->to<IR::StringLiteral>();
         if (pragma_val == nullptr) {
             error(ErrorType::ERR_INVALID,
                   "proxy_hash_algorithm pragma on table %1% must be a string", tbl);

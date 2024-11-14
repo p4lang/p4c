@@ -121,7 +121,7 @@ class ControlConverter : public Inspector {
                 }
                 if (auto na = ke->getAnnotation(IR::Annotation::nameAnnotation)) {
                     BUG_CHECK(na->getExpr().size() == 1, "%1%: expected 1 name", na);
-                    auto name = na->getExpr()[0]->to<IR::StringLiteral>();
+                    auto name = na->getExpr(0)->to<IR::StringLiteral>();
                     BUG_CHECK(name != nullptr, "%1%: expected a string", na);
                     // This is a BMv2 JSON extension: specify a
                     // control-plane name for this key

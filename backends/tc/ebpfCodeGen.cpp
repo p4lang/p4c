@@ -615,7 +615,7 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
 
     bool noEndiannessConversion = false;
     if (const auto *anno = field->getAnnotation(ParseTCAnnotations::tcType)) {
-        cstring value = anno->getExpr().at(0)->checkedTo<IR::StringLiteral>()->value;
+        cstring value = anno->getExpr(0)->checkedTo<IR::StringLiteral>()->value;
         if (value == "macaddr" || value == "ipv4" || value == "ipv6") {
             noEndiannessConversion = true;
         } else if (value == "be16" || value == "be32" || value == "be64") {
@@ -2229,7 +2229,7 @@ void DeparserHdrEmitTranslatorPNA::processMethod(const P4::ExternMethod *method)
                 }
                 bool noEndiannessConversion = false;
                 if (const auto *anno = f->getAnnotation(ParseTCAnnotations::tcType)) {
-                    cstring value = anno->getExpr().at(0)->checkedTo<IR::StringLiteral>()->value;
+                    cstring value = anno->getExpr(0)->checkedTo<IR::StringLiteral>()->value;
                     noEndiannessConversion = value == "macaddr" || value == "ipv4" ||
                                              value == "ipv6" || value == "be16" ||
                                              value == "be32" || value == "be64";

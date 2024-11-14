@@ -53,7 +53,7 @@ const std::vector<std::string> *CollectGlobalPragma::g_global_pragma_names =
 cstring CollectGlobalPragma::getStructFieldName(const IR::StructField *s) const {
     const auto nameAnnotation = s->getAnnotation(IR::Annotation::nameAnnotation);
     if (!nameAnnotation || nameAnnotation->getExpr().size() != 1) return cstring();
-    auto structName = nameAnnotation->getExpr().at(0)->to<IR::StringLiteral>();
+    auto structName = nameAnnotation->getExpr(0)->to<IR::StringLiteral>();
     if (!structName) return cstring();
     return structName->value;
 }

@@ -1070,7 +1070,7 @@ const IR::ParserState *TnaProgramStructure::convertParser(
                         error("@size should be an integer for declaration %1%", value_set);
                         return nullptr;
                     }
-                    sizeConstant = sizeAnnotation->getExpr()[0]->to<IR::Constant>();
+                    sizeConstant = sizeAnnotation->getExpr(0)->to<IR::Constant>();
                     if (sizeConstant == nullptr || !sizeConstant->fitsInt()) {
                         error("@size should be an integer for declaration %1%", value_set);
                         return nullptr;
@@ -2149,7 +2149,7 @@ void TnaProgramStructure::collectBridgedFields() {
         auto do_not_bridge = it.first->type->getAnnotation("pa_do_not_bridge"_cs);
         if (do_not_bridge) {
             if (do_not_bridge->getExpr().size() != 2) continue;
-            if (auto expr = do_not_bridge->getExpr().at(1)->to<IR::StringLiteral>()) {
+            if (auto expr = do_not_bridge->getExpr(1)->to<IR::StringLiteral>()) {
                 auto meta = "meta." + expr->value;
                 if (bridgedFields.count(meta)) {
                     bridgedFields.erase(meta);

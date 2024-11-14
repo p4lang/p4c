@@ -780,7 +780,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         if (maxGroupSizeAnnotation) {
             if (actionProfile.type == ActionProfileType::INDIRECT_WITH_SELECTOR) {
                 auto maxGroupSizeConstant =
-                    maxGroupSizeAnnotation->getExpr()[0]->checkedTo<IR::Constant>();
+                    maxGroupSizeAnnotation->getExpr(0)->checkedTo<IR::Constant>();
                 CHECK_NULL(maxGroupSizeConstant);
                 profile->set_max_group_size(maxGroupSizeConstant->asInt());
             } else {
@@ -797,7 +797,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         if (selectorSizeSemanticsAnnotation) {
             if (actionProfile.type == ActionProfileType::INDIRECT_WITH_SELECTOR) {
                 auto selectorSizeSemantics =
-                    selectorSizeSemanticsAnnotation->getExpr()[0]->checkedTo<IR::StringLiteral>();
+                    selectorSizeSemanticsAnnotation->getExpr(0)->checkedTo<IR::StringLiteral>();
                 CHECK_NULL(selectorSizeSemantics);
                 // The expression may only contain 'sum_of_weights' or 'sum_of_members'
                 // in any case.
@@ -826,7 +826,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
             if (actionProfile.type == ActionProfileType::INDIRECT_WITH_SELECTOR &&
                 profile->has_sum_of_members()) {
                 auto maxMemberWeightConstant =
-                    maxMemberWeightAnnotation->getExpr()[0]->checkedTo<IR::Constant>();
+                    maxMemberWeightAnnotation->getExpr(0)->checkedTo<IR::Constant>();
                 CHECK_NULL(maxMemberWeightConstant);
                 profile->mutable_sum_of_members()->set_max_member_weight(
                     maxMemberWeightConstant->asInt());

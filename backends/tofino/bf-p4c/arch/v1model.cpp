@@ -2012,7 +2012,7 @@ class ConstructSymbolTable : public Inspector {
         // selector_mode
         auto sel_mode = new IR::Member(new IR::TypeNameExpression("SelectorMode_t"), "FAIR");
         if (auto anno = node->getAnnotation("mode"_cs)) {
-            auto mode = anno->getExpr().at(0)->to<IR::StringLiteral>();
+            auto mode = anno->getExpr(0)->to<IR::StringLiteral>();
             if (mode->value == "resilient")
                 sel_mode->member = IR::ID("RESILIENT");
             else if (mode->value != "fair" && mode->value != "non_resilient")
@@ -2032,7 +2032,7 @@ class ConstructSymbolTable : public Inspector {
         auto typeArgs = new IR::Vector<IR::Type>();
         // type<W>
         if (auto anno = node->getAnnotation("min_width"_cs)) {
-            auto min_width = anno->getExpr().at(0)->as<IR::Constant>().asInt();
+            auto min_width = anno->getExpr(0)->as<IR::Constant>().asInt();
             typeArgs->push_back(IR::Type::Bits::get(min_width));
         } else {
             auto min_width = IR::Type::Bits::get(64);  // Do not impose LRT
@@ -2074,7 +2074,7 @@ class ConstructSymbolTable : public Inspector {
     void cvtDirectCounterDecl(const IR::Declaration_Instance *node) {
         auto typeArgs = new IR::Vector<IR::Type>();
         if (auto anno = node->getAnnotation("min_width"_cs)) {
-            auto min_width = anno->getExpr().at(0)->as<IR::Constant>().asInt();
+            auto min_width = anno->getExpr(0)->as<IR::Constant>().asInt();
             typeArgs->push_back(IR::Type::Bits::get(min_width));
         } else {
             // Do not impose LRT

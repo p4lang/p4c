@@ -66,7 +66,7 @@ class HashMaskAnnotations {
             error("%1% should contain a constant", annotation);
             return rv;
         }
-        auto constant = annotation->getExpr()[0]->to<IR::Constant>();
+        auto constant = annotation->getExpr(0)->to<IR::Constant>();
         if (constant == nullptr) {
             error("%1% should contain a constant", annotation);
             return rv;

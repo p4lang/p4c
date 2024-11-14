@@ -319,7 +319,7 @@ void addDocumentation(Message *message, const IR::IAnnotated *annotated) {
     // the message if at least one of them is present.
     for (const IR::Annotation *annotation : annotated->getAnnotations()) {
         if (annotation->name == "brief") {
-            auto brief = annotation->getExpr()[0]->to<IR::StringLiteral>();
+            auto brief = annotation->getExpr(0)->to<IR::StringLiteral>();
             // guaranteed by ParseAnnotations pass
             CHECK_NULL(brief);
             doc.set_brief(brief->value);
@@ -327,7 +327,7 @@ void addDocumentation(Message *message, const IR::IAnnotated *annotated) {
             continue;
         }
         if (annotation->name == "description") {
-            auto description = annotation->getExpr()[0]->to<IR::StringLiteral>();
+            auto description = annotation->getExpr(0)->to<IR::StringLiteral>();
             // guaranteed by ParseAnnotations pass
             CHECK_NULL(description);
             doc.set_description(description->value);

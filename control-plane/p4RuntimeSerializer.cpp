@@ -606,7 +606,7 @@ class P4RuntimeAnalyzer {
         auto controllerAnnotation = type->getAnnotation("controller_header"_cs);
         CHECK_NULL(controllerAnnotation);
 
-        auto nameConstant = controllerAnnotation->getExpr()[0]->to<IR::StringLiteral>();
+        auto nameConstant = controllerAnnotation->getExpr(0)->to<IR::StringLiteral>();
         CHECK_NULL(nameConstant);
         auto controllerName = nameConstant->value;
 
@@ -697,7 +697,7 @@ class P4RuntimeAnalyzer {
                 defaultAction->action->parameters->parameters.at(parameterIndex++);
             if (const auto *idAnnotation = parameter->getAnnotation("id"_cs)) {
                 protoParam->set_param_id(
-                    idAnnotation->getExpr()[0]->checkedTo<IR::Constant>()->asInt());
+                    idAnnotation->getExpr(0)->checkedTo<IR::Constant>()->asInt());
             } else {
                 protoParam->set_param_id(parameterId);
             }
@@ -830,7 +830,7 @@ class P4RuntimeAnalyzer {
                 match->set_match_type(MatchField::MatchTypes::EXACT);  // default match type
                 return;
             }
-            auto matchPathExpr = matchAnnotation->getExpr()[0]->to<IR::PathExpression>();
+            auto matchPathExpr = matchAnnotation->getExpr(0)->to<IR::PathExpression>();
             CHECK_NULL(matchPathExpr);
             auto matchTypeName = getMatchTypeName(matchPathExpr, refMap);
             auto matchType = getMatchType(matchTypeName);

@@ -65,11 +65,11 @@ bool Pipeline::equiv(const Pipeline &other) const {
 
 void Pipeline::insertPragmas(const std::vector<const IR::Annotation *> &all_pragmas) {
     auto applies = [this](const IR::Annotation *p) {
-        if (p->getExpr().empty() || p->getExpr().at(0) == nullptr) {
+        if (p->getExpr().empty() || p->getExpr(0) == nullptr) {
             return true;
         }
 
-        auto arg0 = p->getExpr().at(0)->to<IR::StringLiteral>();
+        auto arg0 = p->getExpr(0)->to<IR::StringLiteral>();
 
         // Determine whether the name of a pipe is present as the first argument.
         // If the pipe name doesn't match, the pragma is to be applied for a different pipe.

@@ -336,6 +336,11 @@ class Annotation {
     inline const auto &getUnparsed() const { return std::get<UnparsedAnnotation>(body); }
     inline auto &getExpr() { return std::get<ExpressionAnnotation>(body); }
     inline const auto &getExpr() const { return std::get<ExpressionAnnotation>(body); }
+    inline Expression getExpr(size_t idx) const {
+        const auto &expr = getExpr();
+        BUG_CHECK(idx < expr.size(), "invalid annotation expression index");
+        return expr[idx];
+    }
     inline auto &getKV() { return std::get<KVAnnotation>(body); }
     inline const auto &getKV() const { return std::get<KVAnnotation>(body); }
 

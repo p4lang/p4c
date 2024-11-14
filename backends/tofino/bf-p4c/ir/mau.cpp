@@ -720,7 +720,7 @@ IR::Vector<IR::Annotation> &IR::MAU::Table::getAnnotations() {
 
 const IR::Expression *IR::MAU::Table::getExprAnnotation(cstring name) const {
     if (auto annot = getAnnotation(name)) {
-        if (annot->getExpr().size() == 1) return annot->getExpr().at(0);
+        if (annot->getExpr().size() == 1) return annot->getExpr(0);
         error(ErrorType::ERR_UNEXPECTED,
               "%1%: %2% pragma provided to table %3% has multiple "
               "parameters, while only one is expected",
@@ -879,12 +879,12 @@ int IR::MAU::Table::get_provided_stage(int geq_stage, int *req_entries, int *fla
         for (auto *annot : *stage_annotations) {
             if (!checkPragma(annot)) return -1;
 
-            int curr_stage = annot->getExpr().at(0)->to<IR::Constant>()->asInt();
+            int curr_stage = annot->getExpr(0)->to<IR::Constant>()->asInt();
             if (curr_stage >= geq_stage) {
                 if (stage_annot == nullptr) {
                     stage_annot = annot;
                 } else {
-                    int min_stage = stage_annot->getExpr().at(0)->to<IR::Constant>()->asInt();
+                    int min_stage = stage_annot->getExpr(0)->to<IR::Constant>()->asInt();
                     stage_annot = curr_stage < min_stage ? annot : stage_annot;
                 }
             }
@@ -914,7 +914,7 @@ int IR::MAU::Table::get_provided_stage(int geq_stage, int *req_entries, int *fla
         }
     }
 
-    return stage_annot->getExpr().at(0)->to<IR::Constant>()->asInt();
+    return stage_annot->getExpr(0)->to<IR::Constant>()->asInt();
 }
 
 int IR::MAU::Table::get_random_seed() const {

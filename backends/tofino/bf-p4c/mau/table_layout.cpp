@@ -250,7 +250,7 @@ void TableLayout::check_for_ternary(IR::MAU::Table::Layout &layout, const IR::MA
             warning(BFN::ErrorType::WARN_PRAGMA_USE,
                     "Pragma ternary ignored for table %1% because value is undefined", tbl);
         } else {
-            auto *pragma_val = s->getExpr().at(0)->to<IR::Constant>();
+            auto *pragma_val = s->getExpr(0)->to<IR::Constant>();
             ERROR_CHECK(pragma_val != nullptr, ErrorType::ERR_UNKNOWN,
                         "unknown ternary pragma %1% on table %2%.", s, tbl->externalName());
             if (pragma_val->asInt() == 1)
@@ -287,7 +287,7 @@ void DoTableLayout::check_for_proxy_hash(IR::MAU::Table::Layout &layout,
             warning(BFN::ErrorType::WARN_PRAGMA_USE,
                     "Proxy hash pragma ignored for table %1% because value is undefined.", tbl);
         } else {
-            auto *pragma_val = s->getExpr().at(0)->to<IR::Constant>();
+            auto *pragma_val = s->getExpr(0)->to<IR::Constant>();
             ERROR_CHECK(pragma_val != nullptr, ErrorType::ERR_INVALID,
                         "%1%: proxy hash pragma on table %2%. It is not a constant.", s,
                         tbl->externalName());
@@ -323,7 +323,7 @@ bool DoTableLayout::check_for_versioning(const IR::MAU::Table *tbl) {
 
     if (auto s = tbl->match_table->getAnnotation("no_versioning"_cs)) {
         if (s->getExpr().size() > 0) {
-            auto pragma_val = s->getExpr().at(0)->to<IR::Constant>();
+            auto pragma_val = s->getExpr(0)->to<IR::Constant>();
             if (pragma_val && (pragma_val->asInt() == 1 || pragma_val->asInt() == 0)) {
                 rv = pragma_val->asInt() == 0;
             } else {
@@ -663,7 +663,7 @@ int LayoutChoices::get_pack_pragma_val(const IR::MAU::Table *tbl,
     if (auto s = tbl->match_table->getAnnotation("pack"_cs)) {
         ERROR_CHECK(s->getExpr().size() > 0, ErrorType::ERR_INVALID,
                     "pack pragma. It has no value for table %1%.", tbl);
-        auto pragma_val = s->getExpr().at(0)->to<IR::Constant>();
+        auto pragma_val = s->getExpr(0)->to<IR::Constant>();
         ERROR_CHECK(pragma_val != nullptr, ErrorType::ERR_INVALID,
                     "pack pragma value for table %1%. Must be a constant.", tbl);
         if (pragma_val) {
@@ -949,7 +949,7 @@ void LayoutChoices::add_hash_action_option(const IR::MAU::Table *tbl,
     if (!tbl->match_table) return;
 
     if (auto s = tbl->match_table->getAnnotation("use_hash_action"_cs)) {
-        auto pragma_val = s->getExpr().at(0)->to<IR::Constant>()->asInt();
+        auto pragma_val = s->getExpr(0)->to<IR::Constant>()->asInt();
         ERROR_CHECK(pragma_val == 1 || pragma_val == 0, ErrorType::ERR_INVALID,
                     "%1%: value %3%. Please provide a 1 to enable the use of the hash action "
                     "path, or a 0 to disable the hash action path for for table %2%.",
@@ -1058,7 +1058,7 @@ bool DoTableLayout::preorder(IR::MAU::Table *tbl) {
         if (auto s = tbl->match_table->getAnnotation("dynamic_table_key_masks"_cs)) {
             ERROR_CHECK(s->getExpr().size() > 0, ErrorType::ERR_INVALID,
                         "dynamic_table_key_masks pragma. Has no value for table %1%.", tbl);
-            auto pragma_val = s->getExpr().at(0)->to<IR::Constant>();
+            auto pragma_val = s->getExpr(0)->to<IR::Constant>();
             ERROR_CHECK(pragma_val != nullptr, ErrorType::ERR_INVALID,
                         "pack pragma value for table %1%. Must be a constant.", tbl);
             if (pragma_val) {
@@ -1292,7 +1292,7 @@ void AssignCounterLRTValues::ComputeLRT::calculate_lrt_threshold_and_interval(
     if (auto s = cntr->getAnnotation("lrt_enable"_cs)) {
         ERROR_CHECK(s->getExpr().size() >= 1, ErrorType::ERR_INVALID,
                     "lrt_enable pragma on counter %1%. Does not have a value.", cntr);
-        auto pragma_val = s->getExpr().at(0)->to<IR::Constant>();
+        auto pragma_val = s->getExpr(0)->to<IR::Constant>();
         if (pragma_val == nullptr) {
             error(ErrorType::ERR_INVALID, "lrt_enable value on counter %1%. It is not a constant.",
                   cntr);
@@ -1315,7 +1315,7 @@ void AssignCounterLRTValues::ComputeLRT::calculate_lrt_threshold_and_interval(
     if (lrt_enabled) {
         auto s = cntr->getAnnotation("lrt_scale"_cs);
         if (s) {
-            auto lrt_val = s->getExpr().at(0)->to<IR::Constant>();
+            auto lrt_val = s->getExpr(0)->to<IR::Constant>();
             if (lrt_val == nullptr) {
                 error(ErrorType::ERR_INVALID,
                       "lrt_scale value on counter %1%. It is not a constant.", cntr);

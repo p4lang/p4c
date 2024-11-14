@@ -30,7 +30,7 @@ bool P4ProgramDCGCreator::preorder(const IR::Annotation *annotation) {
 
     IR::ID name;
     if (!annotation->getExpr().empty()) {
-        if (const auto *strLit = annotation->getExpr()[0]->to<IR::StringLiteral>()) {
+        if (const auto *strLit = annotation->getExpr(0)->to<IR::StringLiteral>()) {
             if (strLit->value == ".NoAction") {
                 // Ignore NoAction annotations, because they aren't unique.
                 return true;

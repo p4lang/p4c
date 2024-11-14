@@ -398,7 +398,7 @@ bool SplitAlpm::values_through_pragmas(const IR::P4Table *tbl, int &number_parti
                     "%s: Please provide a valid %s "
                     "for table %s",
                     tbl->srcInfo, ALGORITHMIC_LPM_PARTITIONS, tbl->name);
-        auto pragma_val = s->getExpr().at(0)->to<IR::Constant>();
+        auto pragma_val = s->getExpr(0)->to<IR::Constant>();
         ERROR_CHECK(pragma_val != nullptr,
                     "%s: Please provide a valid %s "
                     "for table %s",
@@ -420,7 +420,7 @@ bool SplitAlpm::values_through_pragmas(const IR::P4Table *tbl, int &number_parti
                     "%s: Please provide a valid %s "
                     "for table %s",
                     tbl->srcInfo, ALGORITHMIC_LPM_SUBTREES_PER_PARTITION, tbl->name);
-        auto pragma_val = s->getExpr().at(0)->to<IR::Constant>();
+        auto pragma_val = s->getExpr(0)->to<IR::Constant>();
         ERROR_CHECK(pragma_val != nullptr,
                     "%s: Please provide a valid %s "
                     "for table %s",
@@ -531,7 +531,7 @@ bool SplitAlpm::pragma_exclude_msbs(const IR::P4Table *tbl,
         // that also works. This is needed for programs translated from p4-14.
         auto fname_annot = k->getAnnotation("name"_cs);
         if (fname_annot != nullptr) {
-            auto fname = fname_annot->getExpr().at(0)->to<IR::StringLiteral>()->value;
+            auto fname = fname_annot->getExpr(0)->to<IR::StringLiteral>()->value;
             // if annotation use a different name than the original field.
             if (field_name_to_width.count(fname) == 0) {
                 analyze_key_name_and_type(k, fname);
@@ -547,10 +547,10 @@ bool SplitAlpm::pragma_exclude_msbs(const IR::P4Table *tbl,
                 ALGORITHMIC_LPM_ATCAM_EXCLUDE_FIELD_MSBS, tbl->name, an->getExpr());
         }
         cstring fname;
-        if (auto annot = an->getExpr().at(0)->to<IR::StringLiteral>()) {
+        if (auto annot = an->getExpr(0)->to<IR::StringLiteral>()) {
             fname = annot->value;
         } else {
-            fname = an->getExpr().at(0)->toString();
+            fname = an->getExpr(0)->toString();
         }
         if (field_name_to_width.find(fname) == field_name_to_width.end()) {
             error("Invalid %s pragma on table %s.\n Field %s is not part of the table key.",
@@ -594,7 +594,7 @@ bool SplitAlpm::pragma_exclude_msbs(const IR::P4Table *tbl,
                 "Invalid %s pragma on table %s.\n "
                 "  Invalid most significant bits to exclude value of '%s'.\n"
                 "%s",
-                ALGORITHMIC_LPM_ATCAM_EXCLUDE_FIELD_MSBS, tbl->name, an->getExpr()[0],
+                ALGORITHMIC_LPM_ATCAM_EXCLUDE_FIELD_MSBS, tbl->name, an->getExpr(0),
                 additional.str());
         }
     }
@@ -782,9 +782,9 @@ void CollectAlpmInfo::postorder(const IR::P4Table *tbl) {
                     "%s: Please provide a valid alpm "
                     "for table %s",
                     tbl->srcInfo, tbl->name);
-        if (auto pragma_val = s->getExpr().at(0)->to<IR::Constant>()) {
+        if (auto pragma_val = s->getExpr(0)->to<IR::Constant>()) {
             if (pragma_val->asInt()) alpm_table.insert(tbl->name);
-        } else if (auto pragma_val = s->getExpr().at(0)->to<IR::BoolLiteral>()) {
+        } else if (auto pragma_val = s->getExpr(0)->to<IR::BoolLiteral>()) {
             if (pragma_val->value) alpm_table.insert(tbl->name);
         } else {
             error("%s: Please provide a valid alpm for table %s", tbl->srcInfo, tbl->name);

@@ -247,7 +247,7 @@ void ConvertToBackendIR::postorder(const IR::P4Action *action) {
                     tcActionParam->setBitSize(width);
                 }
                 if (const auto *anno = param->getAnnotation(ParseTCAnnotations::tcType)) {
-                    auto expr = anno->getExpr()[0];
+                    auto expr = anno->getExpr(0);
                     if (auto typeLiteral = expr->to<IR::StringLiteral>()) {
                         auto val = getTcType(typeLiteral);
                         if (val != TC::BIT_TYPE) {
@@ -303,7 +303,7 @@ void ConvertToBackendIR::updateConstEntries(const IR::P4Table *t, IR::TCTable *t
             auto keyElement = keys->keyElements.at(itr);
             auto keyString = keyElement->expression->toString();
             if (auto anno = keyElement->getAnnotation(IR::Annotation::nameAnnotation)) {
-                keyString = anno->getExpr().at(0)->to<IR::StringLiteral>()->value;
+                keyString = anno->getExpr(0)->to<IR::StringLiteral>()->value;
             }
             auto keySetElement = keyset->components.at(itr);
             auto key = keySetElement->toString();
@@ -714,7 +714,7 @@ std::pair<cstring, cstring> *ConvertToBackendIR::GetAnnotatedAccessPath(
     const IR::Annotation *anno) {
     cstring control_path, data_path;
     if (anno) {
-        auto expr = anno->getExpr()[0];
+        auto expr = anno->getExpr(0);
         if (auto typeLiteral = expr->to<IR::StringLiteral>()) {
             auto permisson_str = typeLiteral->value;
             auto char_pos = permisson_str.find(":");
@@ -765,7 +765,7 @@ void ConvertToBackendIR::postorder(const IR::P4Table *t) {
             if (anno->name == ParseTCAnnotations::tc_acl) {
                 tablePermissions.emplace(t->name.originalName, GetAnnotatedAccessPath(anno));
             } else if (anno->name == ParseTCAnnotations::numMask) {
-                auto expr = anno->getExpr()[0];
+                auto expr = anno->getExpr(0);
                 if (auto val = expr->to<IR::Constant>()) {
                     tableDefinition->setNumMask(val->asUint64());
                 } else {
@@ -1007,7 +1007,7 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::HandleTypeNameStructField(
                 for (auto f : param_struct->fields) {
                     cstring ptype = absl::StrCat("bit", f->type->width_bits());
                     if (auto anno = f->getAnnotation(ParseTCAnnotations::tcType)) {
-                        auto expr = anno->getExpr()[0];
+                        auto expr = anno->getExpr(0);
                         if (auto typeLiteral = expr->to<IR::StringLiteral>()) {
                             ptype = typeLiteral->value;
                         }
@@ -1019,7 +1019,7 @@ safe_vector<const IR::TCKey *> ConvertToBackendIR::HandleTypeNameStructField(
             } else {
                 cstring ptype = absl::StrCat("bit", param_val->width_bits());
                 if (auto anno = field->getAnnotation(ParseTCAnnotations::tcType)) {
-                    auto expr = anno->getExpr()[0];
+                    auto expr = anno->getExpr(0);
                     if (auto typeLiteral = expr->to<IR::StringLiteral>()) {
                         ptype = typeLiteral->value;
                     }

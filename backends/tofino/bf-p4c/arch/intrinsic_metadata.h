@@ -198,7 +198,7 @@ class RenameP4StartState : public Transform {
     IR::ParserState *preorder(IR::ParserState *state) override {
         auto anno = state->getAnnotation("name"_cs);
         if (!anno) return state;
-        auto name = anno->getExpr().at(0)->to<IR::StringLiteral>();
+        auto name = anno->getExpr(0)->to<IR::StringLiteral>();
         // We want to check if the .start was found, which indicates that
         // the p4c indeed added start_0 and .$start and we should
         // therefore rename the generated start state
@@ -238,7 +238,7 @@ class AddMetadataFields : public Transform {
         auto anno = state->getAnnotation("packet_entry"_cs);
         if (!anno) return state;
         anno = state->getAnnotation("name"_cs);
-        auto name = anno->getExpr().at(0)->to<IR::StringLiteral>();
+        auto name = anno->getExpr(0)->to<IR::StringLiteral>();
         if (name->value == ".start_i2e_mirrored") {
             start_i2e_mirrored = state;
         } else if (name->value == ".start_e2e_mirrored") {
@@ -255,7 +255,7 @@ class AddMetadataFields : public Transform {
     IR::ParserState *postorder(IR::ParserState *state) override {
         auto anno = state->getAnnotation("name"_cs);
         if (!anno) return state;
-        auto name = anno->getExpr().at(0)->to<IR::StringLiteral>();
+        auto name = anno->getExpr(0)->to<IR::StringLiteral>();
         if (name->value == ".start") {
             LOG1("found start state ");
             // Frontend renames 'start' to 'start_0' if the '@packet_entry' pragma is used.
