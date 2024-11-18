@@ -222,10 +222,10 @@ else()
 endif()
 
 # List of executable dependencies
-set(TEST_DEPENDENCY_PROGRAMS tcpdump)
+set(TEST_DEPENDENCY_PROGRAMS gcc-multilib)
 
 # List of library dependencies
-set(TEST_DEPENDENCY_LIBRARIES libpcap-dev gcc-multilib scapy)
+set(TEST_DEPENDENCY_LIBRARIES python3-six libgmp-dev libjansson-dev)
 
 CHECK_DEPENDENCIES(TEST_DEPENDENCY_PRESENT "${TEST_DEPENDENCY_PROGRAMS}" "${TEST_DEPENDENCY_LIBRARIES}")
 
