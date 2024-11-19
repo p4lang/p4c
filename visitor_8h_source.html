@@ -926,7 +926,7 @@ $(function(){initNavTree('visitor_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00820" name="l00820"></a><span class="lineno">  820</span>        Func function;</div>
 <div class="line"><a id="l00821" name="l00821"></a><span class="lineno">  821</span>        <span class="keywordtype">void</span> postorder(NodeType *node)<span class="keyword"> override </span>{ function(node); }</div>
 <div class="line"><a id="l00822" name="l00822"></a><span class="lineno">  822</span>    };</div>
-<div class="line"><a id="l00823" name="l00823"></a><span class="lineno">  823</span>    <span class="keywordflow">return</span> root-&gt;apply(NodeVisitor(std::forward&lt;Func&gt;(function)));</div>
+<div class="line"><a id="l00823" name="l00823"></a><span class="lineno">  823</span>    <span class="keywordflow">return</span> root-&gt;apply(NodeVisitor(std::forward&lt;Func&gt;(function)))-&gt;template checkedTo&lt;RootType&gt;();</div>
 <div class="line"><a id="l00824" name="l00824"></a><span class="lineno">  824</span>}</div>
 </div>
 <div class="line"><a id="l00825" name="l00825"></a><span class="lineno">  825</span> </div>
