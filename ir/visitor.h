@@ -820,7 +820,7 @@ const RootType *modifyAllMatching(const RootType *root, Func &&function) {
         Func function;
         void postorder(NodeType *node) override { function(node); }
     };
-    return root->apply(NodeVisitor(std::forward<Func>(function)));
+    return root->apply(NodeVisitor(std::forward<Func>(function)))->template checkedTo<RootType>();
 }
 
 /**
