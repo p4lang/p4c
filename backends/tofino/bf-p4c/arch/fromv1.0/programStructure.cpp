@@ -421,11 +421,11 @@ IR::BlockStatement *generate_tna_hash_block_statement(P4V1::TnaProgramStructure 
         new IR::Type_Specialized(new IR::Type_Name("Hash"), new IR::Vector<IR::Type>({ttype}));
     IR::Vector<IR::Annotation> annos;
     if (auto symmetricAnnotation = fl->getAnnotation("symmetric"_cs)) {
-        if (symmetricAnnotation->expr.size() == 2) {
+        if (symmetricAnnotation->getExpr().size() == 2) {
             // auto name1 = symmetricAnnotation->expr[0];
             // auto name2 = symmetricAnnotation->expr[1];
             IR::Annotations::addOrReplace(annos, "symmetric"_cs,
-                                          new IR::ListExpression(symmetricAnnotation->expr));
+                                          new IR::ListExpression(symmetricAnnotation->getExpr()));
         } else {
             error("Invalid pragma usage: symmetric");
         }
@@ -1066,11 +1066,11 @@ const IR::ParserState *TnaProgramStructure::convertParser(
                 auto sizeAnnotation = value_set->getAnnotation("parser_value_set_size"_cs);
                 const IR::Constant *sizeConstant;
                 if (sizeAnnotation) {
-                    if (sizeAnnotation->expr.size() != 1) {
+                    if (sizeAnnotation->getExpr().size() != 1) {
                         error("@size should be an integer for declaration %1%", value_set);
                         return nullptr;
                     }
-                    sizeConstant = sizeAnnotation->expr[0]->to<IR::Constant>();
+                    sizeConstant = sizeAnnotation->getExpr(0)->to<IR::Constant>();
                     if (sizeConstant == nullptr || !sizeConstant->fitsInt()) {
                         error("@size should be an integer for declaration %1%", value_set);
                         return nullptr;
@@ -1772,7 +1772,7 @@ void TnaProgramStructure::parseUpdateLocationAnnotation(std::set<gress_t> &updat
                                                         const IR::Annotation *annot,
                                                         cstring pragma) {
     if (annot->name.name == pragma) {
-        auto &exprs = annot->expr;
+        auto &exprs = annot->getExpr();
         auto gress = exprs[0]->to<IR::StringLiteral>();
 
         if (gress->value == "ingress")
@@ -2148,8 +2148,8 @@ void TnaProgramStructure::collectBridgedFields() {
     for (auto it : headers) {
         auto do_not_bridge = it.first->type->getAnnotation("pa_do_not_bridge"_cs);
         if (do_not_bridge) {
-            if (do_not_bridge->expr.size() != 2) continue;
-            if (auto expr = do_not_bridge->expr.at(1)->to<IR::StringLiteral>()) {
+            if (do_not_bridge->getExpr().size() != 2) continue;
+            if (auto expr = do_not_bridge->getExpr(1)->to<IR::StringLiteral>()) {
                 auto meta = "meta." + expr->value;
                 if (bridgedFields.count(meta)) {
                     bridgedFields.erase(meta);

@@ -31,7 +31,7 @@ bool ExtractDeparser::preorder(const IR::Annotation *annot) {
     if (annot->name == "header_ordering") {
         auto ordering = new ordered_set<cstring>;
 
-        for (auto expr : annot->expr) {
+        for (auto expr : annot->getExpr()) {
             if (auto str = expr->to<IR::StringLiteral>()) {
                 for (auto &o : userEnforcedHeaderOrdering) {
                     if (o->count(str->value))

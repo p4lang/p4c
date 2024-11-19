@@ -710,7 +710,7 @@ class TranslateProgram : public Inspector {
         // selector_mode
         auto sel_mode = new IR::Member(new IR::TypeNameExpression("SelectorMode_t"), "FAIR");
         if (auto anno = node->getAnnotation("mode"_cs)) {
-            auto mode = anno->expr.at(0)->to<IR::StringLiteral>();
+            auto mode = anno->getExpr(0)->to<IR::StringLiteral>();
             if (mode->value == "resilient")
                 sel_mode->member = IR::ID("RESILIENT");
             else if (mode->value != "fair" && mode->value != "non_resilient")

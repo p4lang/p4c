@@ -62,6 +62,7 @@ struct metadata {
 }
 
 struct headers {
+    @name("foo")
     ethernet_t   ethernet;
     ipv4_t       ipv4;
 }

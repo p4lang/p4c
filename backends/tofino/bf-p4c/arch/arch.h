@@ -131,7 +131,7 @@ struct RemoveExternMethodCallsExcludedByAnnotation : public Transform {
 
         auto *dontTranslate = action->getAnnotation("dont_translate_extern_method"_cs);
         if (!dontTranslate) return call;
-        for (auto *excluded : dontTranslate->expr) {
+        for (auto *excluded : dontTranslate->getExpr()) {
             auto *excludedMethod = excluded->to<IR::StringLiteral>();
             if (!excludedMethod) {
                 error(

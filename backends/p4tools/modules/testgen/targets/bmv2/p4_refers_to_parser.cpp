@@ -91,7 +91,7 @@ const IR::SymbolicVariable *RefersToParser::lookUpKeyInTable(const IR::P4Table &
 
 const IR::SymbolicVariable *RefersToParser::getReferencedKey(const IR::P4Control &ctrlContext,
                                                              const IR::Annotation &refersAnno) {
-    const auto &annotationList = refersAnno.body;
+    const auto &annotationList = refersAnno.getUnparsed();
     BUG_CHECK(annotationList.size() > 2,
               "'@refers_to' annotation %1% does not have the correct format.", refersAnno);
 

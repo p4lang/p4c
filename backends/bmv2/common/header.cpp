@@ -292,10 +292,10 @@ void HeaderConverter::addHeaderType(const IR::Type_StructLike *st) {
             auto alias = new Util::JsonArray();
             cstring target_name;
             if (BMV2Context::get().options().loadIRFromJson == false) {
-                target_name = aliasAnnotation->expr.front()->to<IR::StringLiteral>()->value;
+                target_name = aliasAnnotation->getExpr().front()->to<IR::StringLiteral>()->value;
             } else {
-                if (aliasAnnotation->body.size() != 0) {
-                    target_name = aliasAnnotation->body.at(0)->text;
+                if (aliasAnnotation->getUnparsed().size() != 0) {
+                    target_name = aliasAnnotation->getUnparsed().at(0)->text;
                 } else {
                     // aliasAnnotation->body is empty or not saved correctly
                     ::P4::error(ErrorType::ERR_INVALID,

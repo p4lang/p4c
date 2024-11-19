@@ -62,7 +62,7 @@ bool ParserPragmas::preorder(const IR::Annotation *annot) {
     if (!p || !ps) return false;
 
     if (pragma_name == "terminate_parsing") {
-        auto &exprs = annot->expr;
+        auto &exprs = annot->getExpr();
         if (!checkNumArgs(pragma_name, exprs, 1)) return false;
 
         auto gress = exprs[0]->to<IR::StringLiteral>();
@@ -72,7 +72,7 @@ bool ParserPragmas::preorder(const IR::Annotation *annot) {
             terminate_parsing.insert(ps);
         }
     } else if (pragma_name == "force_shift") {
-        auto &exprs = annot->expr;
+        auto &exprs = annot->getExpr();
         if (!checkNumArgs(pragma_name, exprs, 2)) return false;
 
         auto gress = exprs[0]->to<IR::StringLiteral>();
@@ -88,7 +88,7 @@ bool ParserPragmas::preorder(const IR::Annotation *annot) {
             force_shift[ps] = shift_amt->asInt();
         }
     } else if (pragma_name == "max_loop_depth") {
-        auto &exprs = annot->expr;
+        auto &exprs = annot->getExpr();
         if (!checkNumArgs(pragma_name, exprs, 1)) return false;
 
         auto max_loop = exprs[0]->to<IR::Constant>();

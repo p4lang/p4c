@@ -30,7 +30,7 @@ bool HeaderTypeMaxLengthCalculator::preorder(IR::Type_StructLike *hdr_type) {
     }
     if (!hdr_type->hasAnnotation(IR::Annotation::lengthAnnotation))
         hdr_type->addAnnotation(
-            new IR::Annotation(IR::Annotation::lengthAnnotation, max_length->expr));
+            new IR::Annotation(IR::Annotation::lengthAnnotation, max_length->getExpr()));
     return false;
 }
 

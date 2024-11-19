@@ -720,7 +720,7 @@ IR::Vector<IR::Annotation> &IR::MAU::Table::getAnnotations() {
 
 const IR::Expression *IR::MAU::Table::getExprAnnotation(cstring name) const {
     if (auto annot = getAnnotation(name)) {
-        if (annot->expr.size() == 1) return annot->expr.at(0);
+        if (annot->getExpr().size() == 1) return annot->getExpr(0);
         error(ErrorType::ERR_UNEXPECTED,
               "%1%: %2% pragma provided to table %3% has multiple "
               "parameters, while only one is expected",
@@ -782,7 +782,7 @@ bool IR::MAU::Table::getAnnotation(cstring name, std::vector<IR::ID> &val) const
     for (auto *annot : match_table->getAnnotations()) {
         if (annot->name != name) continue;
         rv = true;  // found at least 1
-        for (auto *expr : annot->expr) {
+        for (auto *expr : annot->getExpr()) {
             if (auto v = expr->to<IR::StringLiteral>())
                 val.push_back(*v);
             else
@@ -801,7 +801,7 @@ int IR::MAU::Table::get_placement_priority_int() const {
     bool val_set = false;
     for (auto &annot : match_table->getAnnotations()) {
         if (annot->name != "placement_priority") continue;
-        for (auto *expr : annot->expr) {
+        for (auto *expr : annot->getExpr()) {
             if (auto constant = expr->to<IR::Constant>()) {
                 if (val_set)
                     error(ErrorType::ERR_INVALID,
@@ -821,7 +821,7 @@ std::set<cstring> IR::MAU::Table::get_placement_priority_string() const {
     if (!match_table) return rv;
     for (auto &annot : match_table->getAnnotations()) {
         if (annot->name != "placement_priority") continue;
-        for (auto *expr : annot->expr) {
+        for (auto *expr : annot->getExpr()) {
             if (auto sl = expr->to<IR::StringLiteral>()) {
                 rv.insert(sl->value);
             }
@@ -850,7 +850,7 @@ int IR::MAU::Table::get_provided_stage(int geq_stage, int *req_entries, int *fla
         bool valid_pragma = true;
         int intvals = 0;
         int idx = -1;
-        for (auto *e : annot->expr) {
+        for (auto *e : annot->getExpr()) {
             ++idx;
             if (auto *k = e->to<IR::Constant>()) {
                 if (k->asInt() < 0) valid_pragma = false;
@@ -879,12 +879,12 @@ int IR::MAU::Table::get_provided_stage(int geq_stage, int *req_entries, int *fla
         for (auto *annot : *stage_annotations) {
             if (!checkPragma(annot)) return -1;
 
-            int curr_stage = annot->expr.at(0)->to<IR::Constant>()->asInt();
+            int curr_stage = annot->getExpr(0)->to<IR::Constant>()->asInt();
             if (curr_stage >= geq_stage) {
                 if (stage_annot == nullptr) {
                     stage_annot = annot;
                 } else {
-                    int min_stage = stage_annot->expr.at(0)->to<IR::Constant>()->asInt();
+                    int min_stage = stage_annot->getExpr(0)->to<IR::Constant>()->asInt();
                     stage_annot = curr_stage < min_stage ? annot : stage_annot;
                 }
             }
@@ -895,13 +895,14 @@ int IR::MAU::Table::get_provided_stage(int geq_stage, int *req_entries, int *fla
 
     if (req_entries) {
         *req_entries = -1;
-        for (size_t i = 1; i < stage_annot->expr.size(); ++i) {
-            if (auto *k = stage_annot->expr.at(i)->to<IR::Constant>()) *req_entries = k->asInt();
+        for (size_t i = 1; i < stage_annot->getExpr().size(); ++i) {
+            if (auto *k = stage_annot->getExpr().at(i)->to<IR::Constant>())
+                *req_entries = k->asInt();
         }
     }
     if (flags) {
         *flags = 0;
-        for (auto *e : stage_annot->expr) {
+        for (auto *e : stage_annot->getExpr()) {
             if (auto *l = e->to<IR::StringLiteral>()) {
                 if (l->value == "immediate")
                     *flags |= StageFlag::Immediate;
@@ -913,7 +914,7 @@ int IR::MAU::Table::get_provided_stage(int geq_stage, int *req_entries, int *fla
         }
     }
 
-    return stage_annot->expr.at(0)->to<IR::Constant>()->asInt();
+    return stage_annot->getExpr(0)->to<IR::Constant>()->asInt();
 }
 
 int IR::MAU::Table::get_random_seed() const {

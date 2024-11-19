@@ -27,7 +27,7 @@ namespace P4::IR {
 
 cstring Annotation::getName() const {
     BUG_CHECK(name == IR::Annotation::nameAnnotation, "%1%: Only works on name annotations", this);
-    if (needsParsing)
+    if (needsParsing())
         // This can happen if this method is invoked before we have parsed
         // annotation bodies.
         return name;
@@ -35,6 +35,7 @@ cstring Annotation::getName() const {
 }
 
 cstring Annotation::getSingleString() const {
+    const auto &expr = getExpr();
     if (expr.size() != 1) {
         ::P4::error(ErrorType::ERR_INVALID, "%1%: should contain a string", this);
         return cstring::empty;

@@ -52,8 +52,8 @@ const std::vector<std::string> *CollectGlobalPragma::g_global_pragma_names =
 
 cstring CollectGlobalPragma::getStructFieldName(const IR::StructField *s) const {
     const auto nameAnnotation = s->getAnnotation(IR::Annotation::nameAnnotation);
-    if (!nameAnnotation || nameAnnotation->expr.size() != 1) return cstring();
-    auto structName = nameAnnotation->expr.at(0)->to<IR::StringLiteral>();
+    if (!nameAnnotation || nameAnnotation->getExpr().size() != 1) return cstring();
+    auto structName = nameAnnotation->getExpr(0)->to<IR::StringLiteral>();
     if (!structName) return cstring();
     return structName->value;
 }
@@ -73,9 +73,9 @@ bool CollectGlobalPragma::preorder(const IR::StructField *s) {
             BUG("Pragma %1% on Struct Field %2% without a name", ann->name.name, s);
         // For the notParsedDeparsedAnnotation, create a new annotation that includes
         // structFieldName.
-        if (!ann->expr.size()) continue;
+        if (!ann->getExpr().size()) continue;
 
-        auto &exprs = ann->expr;
+        auto &exprs = ann->getExpr();
 
         const unsigned min_required_arguments = 1;  // gress
         unsigned required_arguments = min_required_arguments;

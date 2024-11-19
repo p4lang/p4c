@@ -38,7 +38,7 @@ bool isHidden(const IR::IAnnotated *node) {
 
 std::optional<p4rt_id_t> getIdAnnotation(const IR::IAnnotated *node) {
     if (const auto *idAnn = node->getAnnotation(idAnnotation)) {
-        const auto *idConstant = idAnn->expr.at(0)->to<IR::Constant>();
+        const auto *idConstant = idAnn->getExpr(0)->to<IR::Constant>();
         CHECK_NULL(idConstant);
         if (!idConstant->fitsUint()) {
             ::P4::error(ErrorType::ERR_INVALID, "%1%: @id should be an unsigned integer", node);

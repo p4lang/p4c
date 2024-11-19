@@ -30,7 +30,7 @@ std::optional<std::string> ProtobufIr::checkForP4RuntimeTranslationAnnotation(
     if (p4RuntimeTranslationAnnotation == nullptr) {
         return std::nullopt;
     }
-    auto annotationVector = p4RuntimeTranslationAnnotation->expr;
+    auto annotationVector = p4RuntimeTranslationAnnotation->getExpr();
     BUG_CHECK(annotationVector.size() == 2, "Expected size of %1% to be 2. ", annotationVector);
     const auto *targetValue = annotationVector.at(1);
     if (targetValue->is<IR::StringLiteral>()) {
@@ -50,9 +50,9 @@ std::map<cstring, cstring> ProtobufIr::getP4RuntimeTranslationMappings(const IR:
     if (p4RuntimeTranslationMappingAnnotation == nullptr) {
         return p4RuntimeTranslationMappings;
     }
-    BUG_CHECK(!p4RuntimeTranslationMappingAnnotation->needsParsing,
+    BUG_CHECK(!p4RuntimeTranslationMappingAnnotation->needsParsing(),
               "The @p4runtime_translation_mappings annotation should have been parsed already.");
-    auto annotationExpr = p4RuntimeTranslationMappingAnnotation->expr;
+    auto annotationExpr = p4RuntimeTranslationMappingAnnotation->getExpr();
     BUG_CHECK(annotationExpr.size() == 1, "Expected size of %1% to be 1. ", annotationExpr);
     const auto *exprList = annotationExpr.at(0)->checkedTo<IR::ListExpression>();
     for (const auto *expr : exprList->components) {
@@ -76,8 +76,9 @@ std::string ProtobufIr::getFormatOfNode(const IR::IAnnotated *node) {
     if (formatAnnotation == nullptr) {
         return "hex_str";
     }
-    BUG_CHECK(formatAnnotation->body.size() == 1, "@format annotation can only have one member.");
-    auto annotationFormatString = formatAnnotation->body.at(0)->text;
+    BUG_CHECK(formatAnnotation->getUnparsed().size() == 1,
+              "@format annotation can only have one member.");
+    auto annotationFormatString = formatAnnotation->getUnparsed().at(0)->text;
     if (annotationFormatString == "IPV4_ADDRESS") {
         return "ipv4";
     }

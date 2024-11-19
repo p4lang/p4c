@@ -390,10 +390,10 @@ void PhvKit::sort_and_merge_alloc_slices(PhvInfo &phv) {
 
 bool PhvKit::is_ternary(const IR::MAU::Table *tbl) {
     if (auto s = tbl->match_table->getAnnotation("ternary"_cs)) {
-        if (s->expr.size() <= 0) {
+        if (s->getExpr().size() <= 0) {
             return false;
         } else {
-            auto *pragma_val = s->expr.at(0)->to<IR::Constant>();
+            auto *pragma_val = s->getExpr(0)->to<IR::Constant>();
             ERROR_CHECK(pragma_val != nullptr, ErrorType::ERR_UNKNOWN,
                         "unknown ternary pragma %1% on table %2%.", s, tbl->externalName());
             if (pragma_val->asInt() == 1) {

@@ -410,12 +410,12 @@ const IR::Statement *StatementConverter::convert(const IR::Vector<IR::Expression
 const IR::Type_Varbits *TypeConverter::postorder(IR::Type_Varbits *vbtype) {
     if (vbtype->size == 0) {
         if (auto type = findContext<IR::Type_StructLike>()) {
-            if (auto max = type->getAnnotation(IR::Annotation::maxLengthAnnotation)) {
-                if (max->expr.size() != 1 || !max->expr[0]->is<IR::Constant>())
+            if (const auto *max = type->getAnnotation(IR::Annotation::maxLengthAnnotation)) {
+                const auto &expr = max->getExpr();
+                if (expr.size() != 1 || !expr[0]->is<IR::Constant>())
                     error(ErrorType::ERR_UNSUPPORTED, "%s: max_length must be a constant", max);
                 else
-                    vbtype->size =
-                        8 * max->expr[0]->to<IR::Constant>()->asInt() - type->width_bits();
+                    vbtype->size = 8 * expr[0]->to<IR::Constant>()->asInt() - type->width_bits();
             }
         }
     }
@@ -460,9 +460,10 @@ const IR::StructField *TypeConverter::postorder(IR::StructField *field) {
     // given a struct with length and max_length, the
     // varbit field size is max_length * 8 - struct_size
     if (field->type->is<IR::Type_Varbits>()) {
-        if (auto len = type->getAnnotation(IR::Annotation::lengthAnnotation)) {
-            if (len->expr.size() == 1) {
-                auto lenexpr = len->expr[0];
+        if (const auto *len = type->getAnnotation(IR::Annotation::lengthAnnotation)) {
+            const auto &expr = len->getExpr();
+            if (expr.size() == 1) {
+                auto lenexpr = expr[0];
                 ValidateLenExpr vle(type, field);
                 vle.setCalledBy(this);
                 lenexpr->apply(vle);

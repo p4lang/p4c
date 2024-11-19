@@ -164,12 +164,12 @@ struct FindPhase0Table : public Inspector {
         // Pragma value = 0 => Table must be implemented only in MAU
         bool phase0PragmaSet = false;
         if (auto s = table->getAnnotation("phase0"_cs)) {
-            auto pragma_val = s->expr.at(0)->to<IR::Constant>();
+            auto pragma_val = s->getExpr(0)->to<IR::Constant>();
             ERROR_CHECK(
                 (pragma_val != nullptr),
                 "Invalid Phase0 pragma value. Must be a constant (either 0 or 1) on table - %s",
                 table->name);
-            if (auto pragma_val = s->expr.at(0)->to<IR::Constant>()) {
+            if (auto pragma_val = s->getExpr(0)->to<IR::Constant>()) {
                 ERROR_CHECK((pragma_val->value == 0) || (pragma_val->value == 1),
                             "Invalid Phase0 pragma value. Must be either 0 or 1 on table - %s",
                             table->name);
@@ -732,7 +732,7 @@ bool CheckPhaseZeroExtern::preorder(const IR::MethodCallExpression *expr) {
 
 bool CollectPhase0Annotation::preorder(const IR::ParserState *state) {
     if (auto ann = state->getAnnotation("override_phase0_table_name"_cs)) {
-        if (auto phase0 = ann->expr.at(0)->to<IR::StringLiteral>()) {
+        if (auto phase0 = ann->getExpr(0)->to<IR::StringLiteral>()) {
             auto parser = findOrigCtxt<IR::P4Parser>();
             if (!parser) return false;
             auto name = parser->externalName();
@@ -740,7 +740,7 @@ bool CollectPhase0Annotation::preorder(const IR::ParserState *state) {
         }
     }
     if (auto ann = state->getAnnotation("override_phase0_action_name"_cs)) {
-        if (auto phase0 = ann->expr.at(0)->to<IR::StringLiteral>()) {
+        if (auto phase0 = ann->getExpr(0)->to<IR::StringLiteral>()) {
             auto parser = findOrigCtxt<IR::P4Parser>();
             if (!parser) return false;
             auto name = parser->externalName();

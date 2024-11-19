@@ -89,13 +89,13 @@ bool GenerateDynamicHashJson::preorder(const IR::MAU::Table *tbl) {
             LOG5("Annotations : " << match_table->annotations);
             for (auto annot : match_table->annotations) {
                 if (annot->name == "action_selector_hash_field_calc_name")
-                    fieldListCalcName = annot->expr[0]->to<IR::StringLiteral>()->value;
+                    fieldListCalcName = annot->getExpr(0)->to<IR::StringLiteral>()->value;
                 else if (annot->name == "action_selector_hash_field_list_name")
-                    fieldListName = annot->expr[0]->to<IR::StringLiteral>()->value;
+                    fieldListName = annot->getExpr(0)->to<IR::StringLiteral>()->value;
                 else if (annot->name == "action_selector_hash_field_calc_output_width")
-                    hash_bit_width = annot->expr[0]->to<IR::Constant>()->asInt();
+                    hash_bit_width = annot->getExpr(0)->to<IR::Constant>()->asInt();
                 else if (annot->name == "algorithm")
-                    algorithms.names.push_back(annot->expr[0]->to<IR::StringLiteral>()->value);
+                    algorithms.names.push_back(annot->getExpr(0)->to<IR::StringLiteral>()->value);
             }
             // If none of the above values are populated dont proceed.
             LOG5("fieldListCalcName: " << fieldListCalcName << " fieldListName: " << fieldListName

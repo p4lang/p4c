@@ -55,46 +55,36 @@ This pass should be run after inlining.  It assumes that all
 externally-visible objects already have @name annotations -- this is
 done by the UniqueNames front-end pass.
 */
-class HierarchicalNames : public Transform {
+class HierarchicalNames : public Modifier {
     std::vector<cstring> stack;
 
- public:
-    cstring getName(const IR::IDeclaration *decl);
+    cstring getName(const IR::IDeclaration *decl) const { return decl->getName(); }
 
+ public:
     HierarchicalNames() {
         setName("HierarchicalNames");
         visitDagOnce = false;
     }
-    const IR::Node *preorder(IR::P4Parser *parser) override {
+    bool preorder(IR::P4Parser *parser) override {
         stack.push_back(getName(parser));
-        return parser;
+        return true;
     }
-    const IR::Node *postorder(IR::P4Parser *parser) override {
-        stack.pop_back();
-        return parser;
-    }
+    void postorder(IR::P4Parser *) override { stack.pop_back(); }
 
-    const IR::Node *preorder(IR::P4Control *control) override {
+    bool preorder(IR::P4Control *control) override {
         stack.push_back(getName(control));
-        return control;
+        return true;
     }
-    const IR::Node *postorder(IR::P4Control *control) override {
-        stack.pop_back();
-        return control;
-    }
+    void postorder(IR::P4Control *) override { stack.pop_back(); }
 
-    const IR::Node *preorder(IR::P4Table *table) override {
+    bool preorder(IR::P4Table *table) override {
         visit(table->annotations);
-        prune();
-        return table;
+        return false;
     }
 
-    const IR::Node *postorder(IR::Annotation *annotation) override;
+    void postorder(IR::Annotation *annotation) override;
     // Do not change name annotations on parameters
-    const IR::Node *preorder(IR::Parameter *parameter) override {
-        prune();
-        return parameter;
-    }
+    bool preorder(IR::Parameter *) override { return false; }
 };
 
 }  // namespace P4

@@ -709,12 +709,18 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Annotation *annotation) {
     };
 
     if (annotation->structured) {
-        // If it happens here it was created in the compiler, so it's a bug, not an error.
-        BUG_CHECK(annotation->expr.empty() || annotation->kv.empty(),
-                  "%1%: structured annotations cannot contain expressions and kv-pairs",
-                  annotation);
-        for (auto e : annotation->expr) checkAnnotation(e);
-        for (auto e : annotation->kv) checkAnnotation(e->expression);
+        std::visit(
+            [&](const auto &body) {
+                using T = std::decay_t<decltype(body)>;
+                if constexpr (std::is_same_v<T, IR::Vector<IR::Expression>>) {
+                    for (const auto *e : body) checkAnnotation(e);
+                } else if constexpr (std::is_same_v<T, IR::IndexedVector<IR::NamedExpression>>) {
+                    for (const auto *e : body) checkAnnotation(e->expression);
+                } else {
+                    BUG("Unexpected variant field");
+                }
+            },
+            annotation->body);
     }
     return annotation;
 }

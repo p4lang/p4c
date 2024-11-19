@@ -1276,45 +1276,55 @@ bool ToP4::preorder(const IR::Annotation *a) {
     builder.append(a->name);
     const char *open = a->structured ? "[" : "(";
     const char *close = a->structured ? "]" : ")";
-    if (!a->expr.empty()) {
-        builder.append(open);
-        setVecSep(", ");
-        preorder(&a->expr);
-        doneVec();
-        builder.append(close);
-    }
-    if (!a->kv.empty()) {
-        builder.append(open);
-        bool first = true;
-        for (auto kvp : a->kv) {
-            if (!first) builder.append(", ");
-            first = false;
-            builder.append(kvp->name);
-            builder.append("=");
-            visit(kvp->expression);
-        }
-        builder.append(close);
-    }
-    if (a->expr.empty() && a->kv.empty() && a->structured) {
-        builder.append("[]");
-    }
-    if (!a->body.empty() && a->expr.empty() && a->kv.empty()) {
-        // Have an unparsed annotation.
-        // We could be prettier here with smarter logic, but let's do the easy
-        // thing by separating every token with a space.
-        builder.append(open);
-        bool first = true;
-        for (auto tok : a->body) {
-            if (!first) builder.append(" ");
-            first = false;
 
-            bool haveStringLiteral = tok->token_type == P4Parser::token_type::TOK_STRING_LITERAL;
-            if (haveStringLiteral) builder.append("\"");
-            builder.append(tok->text);
-            if (haveStringLiteral) builder.append("\"");
-        }
-        builder.append(close);
-    }
+    std::visit(
+        [&](const auto &body) {
+            using T = std::decay_t<decltype(body)>;
+            if constexpr (std::is_same_v<T, IR::Vector<IR::AnnotationToken>>) {
+                // Do not print () for empty unstructured annotations
+                if (body.empty()) return;
+                // Have an unparsed annotation.
+                // We could be prettier here with smarter logic, but let's do the easy
+                // thing by separating every token with a space.
+                builder.append(open);
+                const char *sep = "";
+                for (auto tok : body) {
+                    builder.append(sep);
+                    sep = " ";
+
+                    bool haveStringLiteral =
+                        tok->token_type == P4Parser::token_type::TOK_STRING_LITERAL;
+                    if (haveStringLiteral) builder.append("\"");
+                    builder.append(tok->text);
+                    if (haveStringLiteral) builder.append("\"");
+                }
+                builder.append(close);
+            } else if constexpr (std::is_same_v<T, IR::Vector<IR::Expression>>) {
+                // Do not print () for empty unstructured annotations
+                if (body.empty() && !a->structured) return;
+                builder.append(open);
+                setVecSep(", ");
+                preorder(&body);
+                doneVec();
+                builder.append(close);
+            } else if constexpr (std::is_same_v<T, IR::IndexedVector<IR::NamedExpression>>) {
+                if (body.empty() && !a->structured) return;
+                builder.append(open);
+                bool first = true;
+                for (auto kvp : body) {
+                    if (!first) builder.append(", ");
+                    first = false;
+                    builder.append(kvp->name);
+                    builder.append("=");
+                    visit(kvp->expression);
+                }
+                builder.append(close);
+            } else {
+                BUG("Unexpected variant field");
+            }
+        },
+        a->body);
+
     return false;
 }
 

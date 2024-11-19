@@ -276,7 +276,8 @@ void addAnnotations(Message *message, const IR::IAnnotated *annotated, UnaryPred
 
     for (const IR::Annotation *annotation : annotated->getAnnotations()) {
         // Always add all structured annotations.
-        if (annotation->annotationKind() != IR::Annotation::Kind::Unstructured) {
+        if (annotation->annotationKind() != IR::Annotation::Kind::Unstructured &&
+            annotation->annotationKind() != IR::Annotation::Kind::Unparsed) {
             serializeOneStructuredAnnotation(annotation, message->add_structured_annotations());
             continue;
         }
@@ -318,7 +319,7 @@ void addDocumentation(Message *message, const IR::IAnnotated *annotated) {
     // the message if at least one of them is present.
     for (const IR::Annotation *annotation : annotated->getAnnotations()) {
         if (annotation->name == "brief") {
-            auto brief = annotation->expr[0]->to<IR::StringLiteral>();
+            auto brief = annotation->getExpr(0)->to<IR::StringLiteral>();
             // guaranteed by ParseAnnotations pass
             CHECK_NULL(brief);
             doc.set_brief(brief->value);
@@ -326,7 +327,7 @@ void addDocumentation(Message *message, const IR::IAnnotated *annotated) {
             continue;
         }
         if (annotation->name == "description") {
-            auto description = annotation->expr[0]->to<IR::StringLiteral>();
+            auto description = annotation->getExpr(0)->to<IR::StringLiteral>();
             // guaranteed by ParseAnnotations pass
             CHECK_NULL(description);
             doc.set_description(description->value);

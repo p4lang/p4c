@@ -698,8 +698,8 @@ const IR::Node *MeterConverter::postorder(IR::MethodCallStatement *node) {
     auto inst = refMap->getDeclaration(meter_pe->path)->to<IR::IAnnotated>();
     auto annot = inst ? inst->getAnnotation("pre_color"_cs) : nullptr;
     if (annot != nullptr) {
-        auto size = annot->expr.at(0)->type->width_bits();
-        auto expr = annot->expr.at(0);
+        auto size = annot->getExpr(0)->type->width_bits();
+        auto expr = annot->getExpr(0);
         auto castedExpr = cast_if_needed(expr, size, 8);
         args->push_back(
             new IR::Argument("color", new IR::Cast(new IR::Type_Name("MeterColor_t"), castedExpr)));

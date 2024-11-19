@@ -499,7 +499,7 @@ bool isAsync(const IR::Vector<IR::Method> methods, cstring callee, cstring calle
         if (m->name != callee) continue;
         auto sync = m->getAnnotation(IR::Annotation::synchronousAnnotation);
         if (!sync) return true;
-        for (auto m : sync->expr) {
+        for (auto m : sync->getExpr()) {
             auto mname = m->to<IR::PathExpression>();
             if (mname && mname->path->name == caller) return false;
         }

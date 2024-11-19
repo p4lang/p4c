@@ -559,12 +559,13 @@ const IR::ParserState *ProgramStructure::convertParser(
                 const IR::Constant *sizeConstant;
                 if (const auto *sizeAnnotation =
                         value_set->getAnnotation(parserValueSetSizeAnnotation)) {
-                    if (sizeAnnotation->expr.size() != 1) {
+                    const auto &expr = sizeAnnotation->getExpr();
+                    if (expr.size() != 1) {
                         ::P4::error(ErrorType::ERR_INVALID,
                                     "@size should be an integer for declaration %1%", value_set);
                         return nullptr;
                     }
-                    sizeConstant = sizeAnnotation->expr[0]->to<IR::Constant>();
+                    sizeConstant = expr[0]->to<IR::Constant>();
                     if (sizeConstant == nullptr || !sizeConstant->fitsInt()) {
                         ::P4::error(ErrorType::ERR_INVALID,
                                     "@size should be an integer for declaration %1%", value_set);
@@ -2572,13 +2573,15 @@ void ProgramStructure::createChecksumUpdates() {
             }
 
             for (auto *annot : cf->annotations) {
-                auto newAnnot = new IR::Annotation(annot->name, annot->expr, false);
-                newAnnot->expr.push_back(new IR::StringLiteral(methodCallExpression->toString()));
+                auto newAnnot = new IR::Annotation(annot->name, annot->getExpr(), false);
+                newAnnot->getExpr().push_back(
+                    new IR::StringLiteral(methodCallExpression->toString()));
                 body->annotations.push_back(newAnnot);
             }
             for (auto *annot : flc->annotations) {
-                auto newAnnot = new IR::Annotation(annot->name, annot->expr, false);
-                newAnnot->expr.push_back(new IR::StringLiteral(methodCallExpression->toString()));
+                auto newAnnot = new IR::Annotation(annot->name, annot->getExpr(), false);
+                newAnnot->getExpr().push_back(
+                    new IR::StringLiteral(methodCallExpression->toString()));
                 body->annotations.push_back(newAnnot);
             }
 

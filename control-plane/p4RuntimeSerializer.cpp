@@ -83,11 +83,12 @@ using Helpers::setPreamble;
 static std::optional<cstring> explicitNameAnnotation(const IR::IAnnotated *item) {
     auto *anno = item->getAnnotation(IR::Annotation::nameAnnotation);
     if (!anno) return std::nullopt;
-    if (anno->expr.size() != 1) {
+    const auto &expr = anno->getExpr();
+    if (expr.size() != 1) {
         ::P4::error(ErrorType::ERR_INVALID, "A %1% annotation must have one argument", anno);
         return std::nullopt;
     }
-    auto *str = anno->expr[0]->to<IR::StringLiteral>();
+    auto *str = expr[0]->to<IR::StringLiteral>();
     if (!str) {
         ::P4::error(ErrorType::ERR_INVALID, "An %1% annotation's argument must be a string", anno);
         return std::nullopt;
@@ -605,7 +606,7 @@ class P4RuntimeAnalyzer {
         auto controllerAnnotation = type->getAnnotation("controller_header"_cs);
         CHECK_NULL(controllerAnnotation);
 
-        auto nameConstant = controllerAnnotation->expr[0]->to<IR::StringLiteral>();
+        auto nameConstant = controllerAnnotation->getExpr(0)->to<IR::StringLiteral>();
         CHECK_NULL(nameConstant);
         auto controllerName = nameConstant->value;
 
@@ -694,9 +695,9 @@ class P4RuntimeAnalyzer {
             auto *protoParam = table->mutable_initial_default_action()->mutable_arguments()->Add();
             const auto *parameter =
                 defaultAction->action->parameters->parameters.at(parameterIndex++);
-            const auto *idAnnotation = parameter->getAnnotation("id"_cs);
-            if (idAnnotation != nullptr) {
-                protoParam->set_param_id(idAnnotation->expr[0]->checkedTo<IR::Constant>()->asInt());
+            if (const auto *idAnnotation = parameter->getAnnotation("id"_cs)) {
+                protoParam->set_param_id(
+                    idAnnotation->getExpr(0)->checkedTo<IR::Constant>()->asInt());
             } else {
                 protoParam->set_param_id(parameterId);
             }
@@ -710,8 +711,10 @@ class P4RuntimeAnalyzer {
             action_ref->set_id(id);
             addAnnotations(action_ref, action.annotations);
             // set action ref scope
-            auto isTableOnly = (action.annotations->getAnnotation("tableonly"_cs) != nullptr);
-            auto isDefaultOnly = (action.annotations->getAnnotation("defaultonly"_cs) != nullptr);
+            auto isTableOnly =
+                action.annotations->hasAnnotation(IR::Annotation::tableOnlyAnnotation);
+            auto isDefaultOnly =
+                action.annotations->hasAnnotation(IR::Annotation::defaultOnlyAnnotation);
             if (isTableOnly && isDefaultOnly) {
                 ::P4::error(ErrorType::ERR_INVALID,
                             "Table '%1%' has an action reference ('%2%') which is annotated "
@@ -827,7 +830,7 @@ class P4RuntimeAnalyzer {
                 match->set_match_type(MatchField::MatchTypes::EXACT);  // default match type
                 return;
             }
-            auto matchPathExpr = matchAnnotation->expr[0]->to<IR::PathExpression>();
+            auto matchPathExpr = matchAnnotation->getExpr(0)->to<IR::PathExpression>();
             CHECK_NULL(matchPathExpr);
             auto matchTypeName = getMatchTypeName(matchPathExpr, refMap);
             auto matchType = getMatchType(matchTypeName);
@@ -938,9 +941,8 @@ class P4RuntimeAnalyzer {
         std::set<cstring> keysVisited;
 
         // @pkginfo annotation
-        for (auto *annotation : decl->getAnnotations()) {
-            if (annotation->name != IR::Annotation::pkginfoAnnotation) continue;
-            for (auto *kv : annotation->kv) {
+        if (const auto *annotation = decl->getAnnotation(IR::Annotation::pkginfoAnnotation)) {
+            for (auto *kv : annotation->getKV()) {
                 auto name = kv->name.name;
                 auto setStringField = [kv, pkginfo, &keysVisited](cstring fName) {
                     auto *v = kv->expression->to<IR::StringLiteral>();
@@ -981,10 +983,9 @@ class P4RuntimeAnalyzer {
         }
 
         // Parse `@platform_property` annotation into the PkgInfo.
-        for (auto *annotation : decl->getAnnotations()) {
-            if (annotation->name != "platform_property") continue;
+        if (const auto *annotation = decl->getAnnotation("platform_property"_cs)) {
             auto *platform_properties = pkginfo->mutable_platform_properties();
-            for (auto *kv : annotation->kv) {
+            for (auto *kv : annotation->getKV()) {
                 auto name = kv->name.name;
                 auto setInt32Field = [kv, &platform_properties](cstring fName) {
                     auto *v = kv->expression->to<IR::Constant>();

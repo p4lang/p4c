@@ -148,7 +148,7 @@ static std::vector<gress_t> getChecksumUpdateLocations(const IR::MethodCallExpre
 
     for (auto annot : block->annotations) {
         if (annot->name.name == pragma) {
-            auto &exprs = annot->expr;
+            auto &exprs = annot->getExpr();
             auto gress = exprs[0]->to<IR::StringLiteral>();
             auto pCall = exprs[1]->to<IR::MethodCallExpression>();
             if (pCall && !pCall->equiv(*call)) continue;

@@ -61,7 +61,7 @@ bool NonMochaDarkFields::preorder(const IR::MAU::Action *act) {
                 nonDark[write->id][tbl] = WRITE;
 
                 if (auto s = tbl->match_table->getAnnotation("use_hash_action"_cs)) {
-                    auto pragma_val = s->expr.at(0)->to<IR::Constant>()->asInt();
+                    auto pragma_val = s->getExpr(0)->to<IR::Constant>()->asInt();
                     if (pragma_val == 1) {
                         LOG5("\t  Field written by action data/constant through hash_action: "
                              << write);

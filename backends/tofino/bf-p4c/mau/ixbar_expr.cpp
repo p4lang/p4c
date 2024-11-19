@@ -109,14 +109,14 @@ bool verifySymmetricHashPairs(const PhvInfo &phv, safe_vector<const IR::Expressi
     for (auto annot : annotations) {
         if (annot->name != "symmetric") continue;
 
-        if (!(annot->expr.size() == 2 && annot->expr.at(0)->is<IR::StringLiteral>() &&
-              annot->expr.at(1)->is<IR::StringLiteral>())) {
+        if (!(annot->getExpr().size() == 2 && annot->getExpr().at(0)->is<IR::StringLiteral>() &&
+              annot->getExpr().at(1)->is<IR::StringLiteral>())) {
             error("%1%: The symmetric annotation requires two string inputs", annot->srcInfo);
             continue;
         }
 
-        const auto *sl0 = annot->expr.at(0)->to<IR::StringLiteral>();
-        const auto *sl1 = annot->expr.at(1)->to<IR::StringLiteral>();
+        const auto *sl0 = annot->getExpr().at(0)->to<IR::StringLiteral>();
+        const auto *sl1 = annot->getExpr().at(1)->to<IR::StringLiteral>();
 
         cstring gress_str = (gress == INGRESS ? "ingress::"_cs : "egress::"_cs);
         auto field0 = phv.field(gress_str + sl0->value);

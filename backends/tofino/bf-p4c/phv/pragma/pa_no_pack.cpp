@@ -40,7 +40,7 @@ bool PragmaNoPack::preorder(const IR::BFN::Pipe *pipe) {
     for (const auto *annotation : global_pragmas) {
         if (annotation->name.name != PragmaNoPack::name) continue;
 
-        auto &exprs = annotation->expr;
+        auto &exprs = annotation->getExpr();
 
         const unsigned min_required_arguments = 3;  // gress, field1, field2....
         unsigned required_arguments = min_required_arguments;

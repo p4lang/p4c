@@ -42,7 +42,7 @@ bool PragmaDeparserZero::preorder(const IR::BFN::Pipe *pipe) {
             supported_pragmas->end())
             continue;
 
-        auto &exprs = annotation->expr;
+        auto &exprs = annotation->getExpr();
 
         const IR::StringLiteral *pipe_arg = nullptr;
         if (exprs.at(0)) {

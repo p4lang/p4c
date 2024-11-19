@@ -524,7 +524,7 @@ const IR::Node *AssertsParser::postorder(IR::P4Action *actionContext) {
         typeMap[arg->controlPlaneName()] = arg->type;
     }
 
-    for (const auto *restrStr : annotation->body) {
+    for (const auto *restrStr : annotation->getUnparsed()) {
         auto restrictions =
             genIRStructs(actionContext->controlPlaneName(), restrStr->text, typeMap);
         // Using Z3Solver, we check the feasibility of restrictions, if they are not
@@ -551,7 +551,7 @@ const IR::Node *AssertsParser::postorder(IR::P4Table *tableContext) {
     }
 
     Z3Solver solver;
-    for (const auto *restrStr : annotation->body) {
+    for (const auto *restrStr : annotation->getUnparsed()) {
         auto restrictions = genIRStructs(tableContext->controlPlaneName(), restrStr->text, typeMap);
         // Using Z3Solver, we check the feasibility of restrictions, if they are not
         // feasible, we delete keys and entries from the table to execute

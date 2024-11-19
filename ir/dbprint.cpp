@@ -68,12 +68,36 @@ void IR::InstantiatedBlock::dbprint(std::ostream &out) const {
 
 void IR::Annotation::dbprint(std::ostream &out) const {
     out << '@' << name;
-    const char *sep = "(";
-    for (auto e : expr) {
-        out << sep << e;
-        sep = ", ";
-    }
-    if (*sep != '(') out << ')';
+    if (needsParsing()) out << "<unparsed>";
+    const char *open = structured ? "[" : "(";
+    const char *close = structured ? "]" : ")";
+
+    const char *sep = open;
+    std::visit(
+        [&](const auto &body) {
+            using T = std::decay_t<decltype(body)>;
+            if constexpr (std::is_same_v<T, IR::Vector<IR::AnnotationToken>>) {
+                for (auto e : body) {
+                    out << sep << e;
+                    sep = " ";
+                }
+            } else if constexpr (std::is_same_v<T, IR::Vector<IR::Expression>>) {
+                for (auto e : body) {
+                    out << sep << e;
+                    sep = ", ";
+                }
+            } else if constexpr (std::is_same_v<T, IR::IndexedVector<IR::NamedExpression>>) {
+                for (auto kvp : body) {
+                    out << sep << kvp->name << " = " << kvp->expression;
+                    sep = ", ";
+                }
+            } else {
+                BUG("Unexpected variant field");
+            }
+        },
+        body);
+
+    if (*sep != *open) out << close;
 }
 
 void IR::Block::dbprint_recursive(std::ostream &out) const {
@@ -104,6 +128,11 @@ std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Expression> &v)
     }
     for (auto e : v) out << Log::endl << setprec(0) << e << setprec(prec);
     if (prec) out << " }";
+    return out;
+}
+
+std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Annotation> &v) {
+    for (const auto &a : v) out << a << ' ';
     return out;
 }
 
