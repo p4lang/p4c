@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "ir/annotations.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 
@@ -68,14 +69,12 @@ template <typename T>
 struct StructTypeReplacement : public IHasDbPrint {
     StructTypeReplacement(const P4::TypeMap *typeMap, const IR::Type_StructLike *type,
                           AnnotationSelectionPolicy *policy) {
-        auto vec = new IR::IndexedVector<IR::StructField>();
+        IR::IndexedVector<IR::StructField> vec;
         flatten(typeMap, cstring::empty, type, type->annotations, vec, policy);
         if (type->is<IR::Type_Struct>()) {
-            replacementType =
-                new IR::Type_Struct(type->srcInfo, type->name, IR::Annotations::empty, *vec);
+            replacementType = new IR::Type_Struct(type->srcInfo, type->name, std::move(vec));
         } else if (type->is<IR::Type_Header>()) {
-            replacementType =
-                new IR::Type_Header(type->srcInfo, type->name, IR::Annotations::empty, *vec);
+            replacementType = new IR::Type_Header(type->srcInfo, type->name, std::move(vec));
         } else {
             BUG("Unexpected type %1%", type);
         }
@@ -104,30 +103,29 @@ struct StructTypeReplacement : public IHasDbPrint {
 
     // Helper for constructor
     void flatten(const P4::TypeMap *typeMap, cstring prefix, const IR::Type *type,
-                 const IR::Annotations *annotations, IR::IndexedVector<IR::StructField> *fields,
-                 AnnotationSelectionPolicy *policy) {
+                 const IR::Vector<IR::Annotation> &annotations,
+                 IR::IndexedVector<IR::StructField> &fields, AnnotationSelectionPolicy *policy) {
         // Drop name annotations
-        annotations = annotations->where(
-            [](const IR::Annotation *a) { return a->name != IR::Annotation::nameAnnotation; });
+        auto ann = IR::Annotations::withoutNameAnnotation(annotations);
         if (auto st = type->to<T>()) {
-            auto sannotations = st->annotations->where([policy](const IR::Annotation *annot) {
-                if (!policy) return false;
-                return policy->keep(annot);
-            });
+            IR::Vector<IR::Annotation> sann =
+                st->annotations.where([policy](const IR::Annotation *annot) {
+                    if (!policy) return false;
+                    return policy->keep(annot);
+                });
             structFieldMap.emplace(prefix, st);
             for (auto f : st->fields) {
-                auto na = new IR::Annotations();
-                na->append(sannotations);
-                na->append(annotations);
-                na->append(f->annotations);
+                IR::Vector<IR::Annotation> fann(sann);
+                fann.append(ann);
+                fann.append(f->annotations);
                 auto ft = typeMap->getType(f, true);
-                flatten(typeMap, prefix + "." + f->name, ft, na, fields, policy);
+                flatten(typeMap, prefix + "." + f->name, ft, fann, fields, policy);
             }
             return;
         }
         cstring fieldName = prefix.replace('.', '_') + std::to_string(fieldNameRemap.size());
         fieldNameRemap.emplace(prefix, fieldName);
-        fields->push_back(new IR::StructField(IR::ID(fieldName), annotations, type->getP4Type()));
+        fields.push_back(new IR::StructField(IR::ID(fieldName), ann, type->getP4Type()));
         LOG3("Flatten: " << type << " | " << prefix);
     }
 
@@ -136,7 +134,7 @@ struct StructTypeReplacement : public IHasDbPrint {
     /// given prefix.  For example, for prefix .t and root R this returns
     /// { .s = { .a = R._t_s_a0, .b = R._t_s_b1 }, .y = R._t_y2 }
     const IR::StructExpression *explode(const IR::Expression *root, cstring prefix) {
-        auto vec = new IR::IndexedVector<IR::NamedExpression>();
+        IR::IndexedVector<IR::NamedExpression> vec;
         auto fieldType = ::P4::get(structFieldMap, prefix);
         BUG_CHECK(fieldType, "No field for %1%", prefix);
         for (auto f : fieldType->fields) {
@@ -148,10 +146,10 @@ struct StructTypeReplacement : public IHasDbPrint {
             } else {
                 expr = explode(root, fieldName);
             }
-            vec->push_back(new IR::NamedExpression(f->name, expr));
+            vec.push_back(new IR::NamedExpression(f->name, expr));
         }
         auto type = fieldType->getP4Type()->template to<IR::Type_Name>();
-        return new IR::StructExpression(root->srcInfo, type, type, *vec);
+        return new IR::StructExpression(root->srcInfo, type, type, std::move(vec));
     }
 };
 

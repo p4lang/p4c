@@ -245,8 +245,7 @@ void TableLayout::check_for_alpm(IR::MAU::Table::Layout &, const IR::MAU::Table 
 }
 
 void TableLayout::check_for_ternary(IR::MAU::Table::Layout &layout, const IR::MAU::Table *tbl) {
-    auto annot = tbl->match_table->getAnnotations();
-    if (auto s = annot->getSingle("ternary"_cs)) {
+    if (auto s = tbl->match_table->getAnnotation("ternary"_cs)) {
         if (s->expr.size() <= 0) {
             warning(BFN::ErrorType::WARN_PRAGMA_USE,
                     "Pragma ternary ignored for table %1% because value is undefined", tbl);
@@ -283,8 +282,7 @@ void TableLayout::check_for_ternary(IR::MAU::Table::Layout &layout, const IR::MA
  */
 void DoTableLayout::check_for_proxy_hash(IR::MAU::Table::Layout &layout,
                                          const IR::MAU::Table *tbl) {
-    auto annot = tbl->match_table->getAnnotations();
-    if (auto s = annot->getSingle("proxy_hash_width"_cs)) {
+    if (auto s = tbl->match_table->getAnnotation("proxy_hash_width"_cs)) {
         if (s->expr.size() <= 0) {
             warning(BFN::ErrorType::WARN_PRAGMA_USE,
                     "Proxy hash pragma ignored for table %1% because value is undefined.", tbl);
@@ -323,8 +321,7 @@ bool DoTableLayout::check_for_versioning(const IR::MAU::Table *tbl) {
         }
     }
 
-    auto annot = tbl->match_table->getAnnotations();
-    if (auto s = annot->getSingle("no_versioning"_cs)) {
+    if (auto s = tbl->match_table->getAnnotation("no_versioning"_cs)) {
         if (s->expr.size() > 0) {
             auto pragma_val = s->expr.at(0)->to<IR::Constant>();
             if (pragma_val && (pragma_val->asInt() == 1 || pragma_val->asInt() == 0)) {
@@ -480,8 +477,7 @@ void DoTableLayout::setup_match_layout(IR::MAU::Table::Layout &layout, const IR:
     if (!layout.alpm && !layout.atcam && !layout.ternary && !layout.proxy_hash) layout.exact = true;
 
     if (!layout.exact && tbl->match_table) {
-        auto annot = tbl->match_table->getAnnotations();
-        auto s = annot->getSingle("dynamic_table_key_masks"_cs);
+        auto s = tbl->match_table->getAnnotation("dynamic_table_key_masks"_cs);
         ERROR_CHECK(!s || s->expr.size() <= 0, ErrorType::ERR_INVALID,
                     "Table %1%. @dynamic_table_key_masks annotation only permissible with "
                     "exact matches",
@@ -663,9 +659,8 @@ int LayoutChoices::get_pack_pragma_val(const IR::MAU::Table *tbl,
     auto MIN_PACK = Device::sramMinPackEntries();
     auto MAX_PACK = Device::sramMaxPackEntries();
 
-    auto annot = tbl->match_table->getAnnotations();
     int pack_val = 0;
-    if (auto s = annot->getSingle("pack"_cs)) {
+    if (auto s = tbl->match_table->getAnnotation("pack"_cs)) {
         ERROR_CHECK(s->expr.size() > 0, ErrorType::ERR_INVALID,
                     "pack pragma. It has no value for table %1%.", tbl);
         auto pragma_val = s->expr.at(0)->to<IR::Constant>();
@@ -953,8 +948,7 @@ void LayoutChoices::add_hash_action_option(const IR::MAU::Table *tbl,
     hash_action_only = false;
     if (!tbl->match_table) return;
 
-    auto annot = tbl->match_table->getAnnotations();
-    if (auto s = annot->getSingle("use_hash_action"_cs)) {
+    if (auto s = tbl->match_table->getAnnotation("use_hash_action"_cs)) {
         auto pragma_val = s->expr.at(0)->to<IR::Constant>()->asInt();
         ERROR_CHECK(pragma_val == 1 || pragma_val == 0, ErrorType::ERR_INVALID,
                     "%1%: value %3%. Please provide a 1 to enable the use of the hash action "
@@ -1061,8 +1055,7 @@ bool DoTableLayout::preorder(IR::MAU::Table *tbl) {
     }
     if (!not_hash_action) tbl->layout.hash_action = true;
     if (tbl->match_table) {
-        auto annot = tbl->match_table->getAnnotations();
-        if (auto s = annot->getSingle("dynamic_table_key_masks"_cs)) {
+        if (auto s = tbl->match_table->getAnnotation("dynamic_table_key_masks"_cs)) {
             ERROR_CHECK(s->expr.size() > 0, ErrorType::ERR_INVALID,
                         "dynamic_table_key_masks pragma. Has no value for table %1%.", tbl);
             auto pragma_val = s->expr.at(0)->to<IR::Constant>();
@@ -1295,9 +1288,8 @@ static bool tol(double b, double maxVal, int num_counters) {
 void AssignCounterLRTValues::ComputeLRT::calculate_lrt_threshold_and_interval(
     const IR::MAU::Table *tbl, IR::MAU::Counter *cntr) {
     if (cntr->threshold != -1) return; /* calculated already? */
-    auto annot = cntr->annotations;
     bool lrt_enabled = CounterWidth(cntr) < 64;
-    if (auto s = annot->getSingle("lrt_enable"_cs)) {
+    if (auto s = cntr->getAnnotation("lrt_enable"_cs)) {
         ERROR_CHECK(s->expr.size() >= 1, ErrorType::ERR_INVALID,
                     "lrt_enable pragma on counter %1%. Does not have a value.", cntr);
         auto pragma_val = s->expr.at(0)->to<IR::Constant>();
@@ -1321,7 +1313,7 @@ void AssignCounterLRTValues::ComputeLRT::calculate_lrt_threshold_and_interval(
 
     int lrt_scale = 1;
     if (lrt_enabled) {
-        auto s = annot->getSingle("lrt_scale"_cs);
+        auto s = cntr->getAnnotation("lrt_scale"_cs);
         if (s) {
             auto lrt_val = s->expr.at(0)->to<IR::Constant>();
             if (lrt_val == nullptr) {

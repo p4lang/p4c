@@ -210,7 +210,7 @@ class ShortenTokenLength : public Transform {
     }
 
     const IR::Node *preorder(IR::DpdkStructType *s) override {
-        if (s->getAnnotations()->getSingle("__packet_data__"_cs)) {
+        if (s->getAnnotation("__packet_data__"_cs)) {
             s->name = shortenString(s->name);
             IR::IndexedVector<IR::StructField> changedFields;
             for (auto field : s->fields) {

@@ -330,10 +330,8 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Property *prop) {
         // Check that the default action appears in the list of actions.
         BUG_CHECK(prop->value->is<IR::ExpressionValue>(), "%1% not an expression", prop);
         auto def = prop->value->to<IR::ExpressionValue>()->expression;
-        auto ale = validateActionInitializer(def);
-        if (ale != nullptr) {
-            auto anno = ale->getAnnotation(IR::Annotation::tableOnlyAnnotation);
-            if (anno != nullptr) {
+        if (auto ale = validateActionInitializer(def)) {
+            if (ale->hasAnnotation(IR::Annotation::tableOnlyAnnotation)) {
                 typeError("%1%: Action marked with %2% used as default action", prop,
                           IR::Annotation::tableOnlyAnnotation);
                 return prop;

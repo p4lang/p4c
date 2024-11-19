@@ -13,6 +13,7 @@
 # limitations under the License.
 
 set (IR_SRCS
+  annotations.cpp
   base.cpp
   bitrange.cpp
   dbprint.cpp
@@ -35,6 +36,7 @@ set (IR_SRCS
 )
 
 set (IR_HDRS
+  annotations.h
   configuration.h
   dbprint.h
   dump.h

@@ -34,7 +34,7 @@ const IR::Node *P4V1::FieldListConverter::convertFieldList(const IR::Node *node)
 
     std::set<cstring> sliced_fields;
     std::map<cstring, std::pair<int, int>> field_slices;
-    for (auto anno : fl->annotations->annotations) {
+    for (auto anno : fl->annotations) {
         if (anno->name == pragma_string) {
             if (anno->expr.size() != 3) error("Invalid pragma specification -- ", pragma_string);
 

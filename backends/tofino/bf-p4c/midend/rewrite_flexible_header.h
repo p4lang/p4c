@@ -45,9 +45,8 @@ struct RewriteHeader : public Transform {
 
         IR::IndexedVector<IR::StructField> fields;
         for (auto f : st->fields) {
-            auto *fieldAnnotations = new IR::Annotations();
-            fieldAnnotations->annotations.push_back(new IR::Annotation(IR::ID("flexible"), {}));
-            fields.push_back(new IR::StructField(f->name, fieldAnnotations, f->type));
+            fields.push_back(new IR::StructField(
+                f->name, {new IR::Annotation(IR::ID("flexible"), {})}, f->type));
         }
 
         return new IR::Type_Struct(st->name, st->annotations, fields);

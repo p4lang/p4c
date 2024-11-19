@@ -1078,10 +1078,11 @@ void MauAsmOutput::emit_table_format(std::ostream &out, indent_t indent,
                 for (size_t i = 0; i < bits.size(); i++) {
                     cstring name = format_name(type);
                     if (bits.size() > 1) name = name + std::to_string(i);
-                    fmt.emit(out, name, group, bits[i].first, bits[i].second - bits[i].first + 1);
+                    fmt.emit(out, name.c_str(), group, bits[i].first,
+                             bits[i].second - bits[i].first + 1);
                 }
             } else {
-                fmt.emit(out, format_name(type), group, bits);
+                fmt.emit(out, format_name(type).c_str(), group, bits);
             }
         }
 
@@ -1122,7 +1123,7 @@ void MauAsmOutput::emit_table_format(std::ostream &out, indent_t indent,
             } while (start_bit != -1);
         }
         bits.emplace_back(start, end);
-        fmt.emit(out, format_name(type), group, bits);
+        fmt.emit(out, format_name(type).c_str(), group, bits);
         group++;
     }
 
@@ -1454,7 +1455,7 @@ class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
     void postorder(const IR::MAU::Action *) override {
         if (is_empty) out << indent << "- 0" << std::endl;
     }
-    bool preorder(const IR::Annotations *) override { return false; }
+    bool preorder(const IR::Annotation *) override { return false; }
 
     bool preorder(const IR::MAU::Instruction *inst) override {
         LOG5("  EmitAction preorder Instruction : " << inst->name);
@@ -2444,7 +2445,7 @@ void MauAsmOutput::emit_indirect_res_context_json(std::ostream &, indent_t inden
     ordered_set<cstring> bind_res;
     for (auto back_at : tbl->attached) {
         auto at = back_at->attached;
-        for (auto annot : at->annotations->annotations) {
+        for (auto annot : at->annotations) {
             if (annot->name != "bind_indirect_res_to_match") continue;
             BUG_CHECK((at->is<IR::MAU::ActionData>() && at->direct == false) ||
                           at->is<IR::MAU::Selector>(),

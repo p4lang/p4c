@@ -362,11 +362,4 @@ IR::Vector<IR::Annotation> V1ParserDriver::takePragmasAsVector() {
     return pragmas;
 }
 
-const IR::Annotations *V1ParserDriver::takePragmasAsAnnotations() {
-    if (currentPragmas.empty()) return IR::Annotations::empty;
-    auto *rv = new IR::Annotations(currentPragmas);
-    currentPragmas.clear();
-    return rv;
-}
-
 }  // namespace P4::V1

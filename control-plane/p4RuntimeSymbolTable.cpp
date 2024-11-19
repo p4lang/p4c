@@ -25,24 +25,29 @@ namespace P4 {
 
 namespace ControlPlaneAPI {
 
+static const cstring controllerHeaderAnnotation = "controller_header"_cs;
+static const cstring idAnnotation = "id"_cs;
+
 bool isControllerHeader(const IR::Type_Header *type) {
-    return type->getAnnotation("controller_header"_cs) != nullptr;
+    return type->getAnnotation(controllerHeaderAnnotation) != nullptr;
 }
 
-bool isHidden(const IR::Node *node) { return node->getAnnotation("hidden"_cs) != nullptr; }
+bool isHidden(const IR::IAnnotated *node) {
+    return node->hasAnnotation(IR::Annotation::hiddenAnnotation);
+}
 
 std::optional<p4rt_id_t> getIdAnnotation(const IR::IAnnotated *node) {
-    const auto *idAnnotation = node->getAnnotation("id"_cs);
-    if (idAnnotation == nullptr) {
-        return std::nullopt;
+    if (const auto *idAnn = node->getAnnotation(idAnnotation)) {
+        const auto *idConstant = idAnn->expr.at(0)->to<IR::Constant>();
+        CHECK_NULL(idConstant);
+        if (!idConstant->fitsUint()) {
+            ::P4::error(ErrorType::ERR_INVALID, "%1%: @id should be an unsigned integer", node);
+            return std::nullopt;
+        }
+        return static_cast<p4rt_id_t>(idConstant->value);
     }
-    const auto *idConstant = idAnnotation->expr[0]->to<IR::Constant>();
-    CHECK_NULL(idConstant);
-    if (!idConstant->fitsUint()) {
-        ::P4::error(ErrorType::ERR_INVALID, "%1%: @id should be an unsigned integer", node);
-        return std::nullopt;
-    }
-    return static_cast<p4rt_id_t>(idConstant->value);
+
+    return std::nullopt;
 }
 
 /// @return the value of any P4 '@id' annotation @declaration may have, and

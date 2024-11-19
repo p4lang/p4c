@@ -1477,7 +1477,7 @@ IR::MAU::Instruction *MergeInstructions::build_merge_instruction(
  *  Simple `set` instructions should be used instead of `or` for those SALUs in the first
  *  stage (if split across stages, SALUs in later stages still need to `or`)
  */
-const IR::Annotations *AdjustStatefulInstructions::preorder(IR::Annotations *annot) {
+const IR::Annotation *AdjustStatefulInstructions::preorder(IR::Annotation *annot) {
     prune();
     return annot;
 }

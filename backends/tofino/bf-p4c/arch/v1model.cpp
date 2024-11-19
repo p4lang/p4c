@@ -31,6 +31,7 @@
 #include "backends/tofino/bf-p4c/midend.h"
 #include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "ir/annotations.h"
 #include "lib/bitops.h"
 #include "midend/eliminateSerEnums.h"
 #include "midend/local_copyprop.h"
@@ -320,7 +321,7 @@ class LoadTargetArchitecture : public Inspector {
         }
 #endif  // HAVE_JBAY
         else
-            BUG("Unsupported device id %s"_cs, Device::currentDevice());
+            BUG("Unsupported device id %s", Device::currentDevice());
         filenames.push_back("tofino/stratum.p4");
         filenames.push_back("tofino/p4_14_prim.p4");
 
@@ -482,7 +483,7 @@ class NormalizeProgram : public Transform {
         } else if (auto parser = node->to<IR::P4Parser>()) {
             list = parser->type->getApplyParameters();
         } else {
-            BUG("Unknown block type %1%"_cs, node);
+            BUG("Unknown block type %1%", node);
         }
 
         for (auto p : list->parameters) {
@@ -648,7 +649,7 @@ class AnalyzeProgram : public Inspector {
     void analyzeArchBlock(const IR::ToplevelBlock *blk, cstring name, cstring type) {
         auto main = blk->getMain();
         auto ctrl = main->findParameterValue(name);
-        ERROR_CHECK(ctrl != nullptr, "%1%: could not find parameter %2%"_cs, main, name);
+        ERROR_CHECK(ctrl != nullptr, "%1%: could not find parameter %2%", main, name.c_str());
         ERROR_CHECK(ctrl->is<BlockType>(), "%1%: main package match the expected model", main);
         auto block = ctrl->to<BlockType>()->container;
         BUG_CHECK(block != nullptr, "Unable to find %1% block in V1Switch", name);
@@ -871,10 +872,9 @@ class ConstructSymbolTable : public Inspector {
             int index = 0;
             for (auto t : *components) {
                 cstring fname = "__field_"_cs + std::to_string(index);
-                auto *fieldAnnotations = new IR::Annotations();
+                IR::Vector<IR::Annotation> fieldAnnotations;
                 if (index != 0)
-                    fieldAnnotations->annotations.push_back(
-                        new IR::Annotation(IR::ID("flexible"), {}));
+                    fieldAnnotations.push_back(new IR::Annotation(IR::ID("flexible"), {}));
                 if (auto nestedTuple = t->to<IR::Type_BaseList>()) {
                     convertTupleTypeToHeaderType(prefix + fname, &nestedTuple->components, false);
                     cstring stName = prefix + fname + "_struct_t"_cs;
@@ -899,15 +899,13 @@ class ConstructSymbolTable : public Inspector {
                 if (auto nestedTuple = t->to<IR::Type_BaseList>()) {
                     convertTupleTypeToHeaderType(prefix + fname, &nestedTuple->components, false);
                     cstring stName = prefix + fname + "_struct_t"_cs;
-                    auto *fieldAnnotations =
-                        new IR::Annotations({new IR::Annotation(IR::ID("flexible"), {})});
-                    fields->push_back(new IR::StructField(IR::ID(fname), fieldAnnotations,
-                                                          new IR::Type_Name(stName)));
+                    fields->push_back(new IR::StructField(
+                        IR::ID(fname), {new IR::Annotation(IR::ID("flexible"), {})},
+                        new IR::Type_Name(stName)));
                 } else {
-                    auto *fieldAnnotations =
-                        new IR::Annotations({new IR::Annotation(IR::ID("flexible"), {})});
-                    fields->push_back(new IR::StructField(IR::ID(fname), fieldAnnotations,
-                                                          IR::Type::Bits::get(t->width_bits())));
+                    fields->push_back(new IR::StructField(
+                        IR::ID(fname), {new IR::Annotation(IR::ID("flexible"), {})},
+                        IR::Type::Bits::get(t->width_bits())));
                 }
                 index++;
             }
@@ -926,9 +924,8 @@ class ConstructSymbolTable : public Inspector {
         for (auto t : fixedPositionTypes->components) {
             cstring fname = "__field_"_cs + std::to_string(index);
             auto ttype = IR::Type::Bits::get(t->width_bits());
-            auto *fieldAnnotations =
-                new IR::Annotations({new IR::Annotation(IR::ID("flexible"), {})});
-            fields->push_back(new IR::StructField(IR::ID(fname), fieldAnnotations, ttype));
+            fields->push_back(new IR::StructField(
+                IR::ID(fname), {new IR::Annotation(IR::ID("flexible"), {})}, ttype));
             index++;
         }
         cstring fname = "__field_"_cs + std::to_string(index);
@@ -1023,7 +1020,9 @@ class ConstructSymbolTable : public Inspector {
         auto *typeName = typeArg->to<IR::Type_Name>();
         ERROR_CHECK(typeName != nullptr, "Expected type T in digest to be a typeName %1%", typeArg);
         auto fieldList = refMap->getDeclaration(typeName->path);
-        auto declAnno = fieldList->getAnnotation("name"_cs);
+        const IR::Annotation *declAnno = nullptr;
+        if (const auto *annotated = fieldList->to<IR::IAnnotated>())
+            declAnno = annotated->getAnnotation(IR::Annotation::nameAnnotation);
 
         ERROR_CHECK(typeName != nullptr, "Wrong argument type for %1%", typeArg);
         /*
@@ -1073,9 +1072,10 @@ class ConstructSymbolTable : public Inspector {
             auto declTypeArgs = new IR::Vector<IR::Type>();
             declTypeArgs->push_back(new IR::Type_Name(IR::ID(uniqName + "_header_t")));
             auto declType = new IR::Type_Specialized(new IR::Type_Name("Digest"), declTypeArgs);
-            auto annotations = declAnno ? new IR::Annotations({declAnno}) : new IR::Annotations();
-            auto decl =
-                new IR::Declaration_Instance(typeName->path->name, annotations, declType, declArgs);
+            IR::Vector<IR::Annotation> annotations;
+            if (declAnno) annotations.push_back(declAnno);
+            auto decl = new IR::Declaration_Instance(typeName->path->name, std::move(annotations),
+                                                     declType, declArgs);
             structure->ingressDeparserDeclarations.push_back(decl);
         } else if (auto st = field_list->expression->to<IR::StructExpression>()) {
             auto args = new IR::Vector<IR::Argument>(new IR::Argument(st));
@@ -1095,9 +1095,10 @@ class ConstructSymbolTable : public Inspector {
             auto declTypeArgs = new IR::Vector<IR::Type>();
             declTypeArgs->push_back(st->type);
             auto declType = new IR::Type_Specialized(new IR::Type_Name("Digest"), declTypeArgs);
-            auto annotations = declAnno ? new IR::Annotations({declAnno}) : new IR::Annotations();
-            auto decl =
-                new IR::Declaration_Instance(typeName->path->name, annotations, declType, declArgs);
+            IR::Vector<IR::Annotation> annotations;
+            if (declAnno) annotations.push_back(declAnno);
+            auto decl = new IR::Declaration_Instance(typeName->path->name, std::move(annotations),
+                                                     declType, declArgs);
             structure->ingressDeparserDeclarations.push_back(decl);
         }
     }
@@ -1497,10 +1498,8 @@ class ConstructSymbolTable : public Inspector {
         int hashWidth = mce->typeArguments->at(0)->width_bits();
 
         auto block = findContext<IR::BlockStatement>();
-        auto annotations = new IR::Annotations();
-        if (block) {
-            for (auto annot : block->annotations->annotations) annotations->add(annot);
-        }
+        IR::Vector<IR::Annotation> annotations;
+        if (block) annotations.append(block->annotations);
 
         auto hashType = new IR::Type_Specialized(new IR::Type_Name("Hash"), typeArgs);
         auto hashName = cstring::make_unique(structure->unique_names, "hash"_cs, '_');
@@ -1806,7 +1805,7 @@ class ConstructSymbolTable : public Inspector {
     }
 
     bool getZerosAsOnes(const IR::BlockStatement *block, const IR::MethodCallStatement *call) {
-        for (auto annot : block->annotations->annotations) {
+        for (auto annot : block->annotations) {
             if (annot->name.name == "zeros_as_ones") {
                 auto mc = call->methodCall->to<IR::MethodCallExpression>();
                 if (annot->expr[0]->equiv(*mc)) return true;
@@ -2012,7 +2011,7 @@ class ConstructSymbolTable : public Inspector {
         args->push_back(new IR::Argument(new IR::PathExpression(hashName)));
         // selector_mode
         auto sel_mode = new IR::Member(new IR::TypeNameExpression("SelectorMode_t"), "FAIR");
-        if (auto anno = node->annotations->getSingle("mode"_cs)) {
+        if (auto anno = node->getAnnotation("mode"_cs)) {
             auto mode = anno->expr.at(0)->to<IR::StringLiteral>();
             if (mode->value == "resilient")
                 sel_mode->member = IR::ID("RESILIENT");
@@ -2032,7 +2031,7 @@ class ConstructSymbolTable : public Inspector {
     void cvtCounterDecl(const IR::Declaration_Instance *node) {
         auto typeArgs = new IR::Vector<IR::Type>();
         // type<W>
-        if (auto anno = node->annotations->getSingle("min_width"_cs)) {
+        if (auto anno = node->getAnnotation("min_width"_cs)) {
             auto min_width = anno->expr.at(0)->as<IR::Constant>().asInt();
             typeArgs->push_back(IR::Type::Bits::get(min_width));
         } else {
@@ -2074,7 +2073,7 @@ class ConstructSymbolTable : public Inspector {
 
     void cvtDirectCounterDecl(const IR::Declaration_Instance *node) {
         auto typeArgs = new IR::Vector<IR::Type>();
-        if (auto anno = node->annotations->getSingle("min_width"_cs)) {
+        if (auto anno = node->getAnnotation("min_width"_cs)) {
             auto min_width = anno->expr.at(0)->as<IR::Constant>().asInt();
             typeArgs->push_back(IR::Type::Bits::get(min_width));
         } else {
@@ -2237,7 +2236,7 @@ class ConstructSymbolTable : public Inspector {
                 findFieldList(nestedSt, index, fl, nexp);
             } else {
                 // Check the field_list annotation
-                auto anno = f->getAnnotations()->getSingle("field_list"_cs);
+                auto anno = f->getAnnotation("field_list"_cs);
                 if (anno == nullptr) continue;
                 for (auto e : anno->expr) {
                     auto cst = e->to<IR::Constant>();
@@ -2388,7 +2387,7 @@ class LoweringType : public Transform {
     const IR::Node *postorder(IR::StructField *node) override {
         auto ctxt = findOrigCtxt<IR::Type_StructLike>();
         if (!ctxt) return node;
-        if (!ctxt->annotations->getSingle("__intrinsic_metadata"_cs)) return node;
+        if (!ctxt->hasAnnotation("__intrinsic_metadata"_cs)) return node;
         if (!node->type->is<IR::Type_Boolean>()) return node;
         return new IR::StructField(node->srcInfo, node->name, node->annotations,
                                    IR::Type_Bits::get(1));
@@ -2471,8 +2470,7 @@ bool AddAdjustByteCount::preorder(IR::Declaration_Instance *decl) {
                     new IR::Vector<IR::Type>(
                         {new IR::Type_Name("__bfp4c_bridged_metadata_header")}),
                     new IR::Vector<IR::Argument>({new IR::Argument(new_abc_member)}));
-                decl->annotations =
-                    decl->annotations->addAnnotation("adjust_byte_count"_cs, new_abc_expr);
+                decl->addOrReplaceAnnotation("adjust_byte_count"_cs, new_abc_expr);
                 LOG3(
                     "Adding annotation "
                     "'@adjust_byte_count(sizeInBytes(meta.__bfp4c_bridge_metadata))' to decl: "

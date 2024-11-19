@@ -173,8 +173,8 @@ table header_mod {
 		h.mac.da exact
 	}
 	actions {
-		encap_one_tunnel_layer_ipv4
-		decap_one_tunnel_layer_just_before_eth
+		encap_one_tunnel_layer_ipv4 @tableonly
+		decap_one_tunnel_layer_just_before_eth @tableonly
 		NoAction
 	}
 	default_action NoAction args none const

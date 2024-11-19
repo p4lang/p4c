@@ -213,7 +213,7 @@ std::vector<const IR::IDeclaration *> ExternMethod::mayCall() const {
                 if (auto *am =
                         di->initializer->components.getDeclaration<IR::IDeclaration>(meth->name)) {
                     rv.push_back(am);
-                } else if (!meth->getAnnotation(IR::Annotation::optionalAnnotation)) {
+                } else if (!meth->hasAnnotation(IR::Annotation::optionalAnnotation)) {
                     error(ErrorType::ERR_INVALID,
                           "No implementation for abstract %s in %s called via %s", meth, di,
                           method);

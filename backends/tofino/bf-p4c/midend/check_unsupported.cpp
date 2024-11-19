@@ -36,7 +36,7 @@ bool CheckUnsupported::preorder(const IR::PathExpression *path_expression) {
 }
 
 bool CheckUnsupported::preorder(const IR::Declaration_Instance *instance) {
-    if (instance->annotations->getSingle("symmetric"_cs) != nullptr) {
+    if (instance->hasAnnotation("symmetric"_cs)) {
         cstring type_name;
         if (auto type = instance->type->to<IR::Type_Specialized>()) {
             type_name = type->baseType->path->name;
@@ -55,7 +55,7 @@ bool CheckUnsupported::preorder(const IR::Declaration_Instance *instance) {
 }
 
 bool hasAtcamPragma(const IR::P4Table *const table_ptr) {
-    for (const auto *annotation : table_ptr->annotations->annotations) {
+    for (const auto *annotation : table_ptr->annotations) {
         if (annotation->name.name.startsWith("atcam") ||
             annotation->name.originalName.startsWith("atcam"))
             return true;

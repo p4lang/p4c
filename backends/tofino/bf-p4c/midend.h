@@ -24,7 +24,7 @@
 #include "frontends/p4/evaluator/evaluator.h"
 #include "ir/ir.h"
 
-struct CollectSourceInfoLogging;
+class CollectSourceInfoLogging;
 
 namespace BFN {
 

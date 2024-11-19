@@ -480,11 +480,8 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Entry *entry) {
         entry = new IR::Entry(entry->srcInfo, entry->annotations, entry->isConst, entry->priority,
                               ks->to<IR::ListExpression>(), entry->action, entry->singleton);
 
-    auto actionRef = entry->getAction();
-    auto ale = validateActionInitializer(actionRef);
-    if (ale != nullptr) {
-        auto anno = ale->getAnnotation(IR::Annotation::defaultOnlyAnnotation);
-        if (anno != nullptr) {
+    if (auto ale = validateActionInitializer(entry->getAction())) {
+        if (ale->hasAnnotation(IR::Annotation::defaultOnlyAnnotation)) {
             typeError("%1%: Action marked with %2% used in table", entry,
                       IR::Annotation::defaultOnlyAnnotation);
             return entry;
@@ -496,15 +493,15 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Entry *entry) {
 const IR::Node *TypeInferenceBase::postorder(const IR::ListExpression *expression) {
     if (done()) return expression;
     bool constant = true;
-    auto components = new IR::Vector<IR::Type>();
+    IR::Vector<IR::Type> components;
     for (auto c : expression->components) {
         if (!isCompileTimeConstant(c)) constant = false;
         auto type = getType(c);
         if (type == nullptr) return expression;
-        components->push_back(type);
+        components.push_back(type);
     }
 
-    auto tupleType = new IR::Type_List(expression->srcInfo, *components);
+    auto tupleType = new IR::Type_List(expression->srcInfo, std::move(components));
     auto type = canonicalize(tupleType);
     if (type == nullptr) return expression;
     setType(getOriginal(), type);
@@ -562,7 +559,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::P4ListExpression *express
     if (done()) return expression;
     bool constant = true;
     auto elementType = getTypeType(expression->elementType);
-    auto vec = new IR::Vector<IR::Expression>();
+    IR::Vector<IR::Expression> vec;
     bool changed = false;
     for (auto c : expression->components) {
         if (!isCompileTimeConstant(c)) constant = false;
@@ -575,15 +572,16 @@ const IR::Node *TypeInferenceBase::postorder(const IR::P4ListExpression *express
         if (!tvs->isIdentity()) {
             ConstantTypeSubstitution cts(tvs, typeMap, this);
             auto converted = cts.convert(c, getChildContext());
-            vec->push_back(converted);
+            vec.push_back(converted);
             changed = changed || converted != c;
         } else {
-            vec->push_back(c);
+            vec.push_back(c);
         }
     }
 
     if (changed)
-        expression = new IR::P4ListExpression(expression->srcInfo, *vec, elementType->getP4Type());
+        expression =
+            new IR::P4ListExpression(expression->srcInfo, std::move(vec), elementType->getP4Type());
     auto type = new IR::Type_P4List(expression->srcInfo, elementType);
     setType(getOriginal(), type);
     setType(expression, type);
@@ -600,7 +598,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::HeaderStackExpression *ex
     auto stackType = getTypeType(expression->headerStackType);
     if (auto st = stackType->to<IR::Type_Stack>()) {
         auto elementType = st->elementType;
-        auto vec = new IR::Vector<IR::Expression>();
+        IR::Vector<IR::Expression> vec;
         bool changed = false;
         if (expression->size() != st->getSize()) {
             typeError("%1%: number of initializers %2% has to match stack size %3%", expression,
@@ -618,13 +616,14 @@ const IR::Node *TypeInferenceBase::postorder(const IR::HeaderStackExpression *ex
             if (!tvs->isIdentity()) {
                 ConstantTypeSubstitution cts(tvs, typeMap, this);
                 auto converted = cts.convert(c, getChildContext());
-                vec->push_back(converted);
+                vec.push_back(converted);
                 changed = true;
             } else {
-                vec->push_back(c);
+                vec.push_back(c);
             }
             if (changed)
-                expression = new IR::HeaderStackExpression(expression->srcInfo, *vec, stackType);
+                expression =
+                    new IR::HeaderStackExpression(expression->srcInfo, std::move(vec), stackType);
         }
     } else {
         typeError("%1%: header stack expression has an incorrect type `%2%`", expression,
@@ -644,17 +643,17 @@ const IR::Node *TypeInferenceBase::postorder(const IR::HeaderStackExpression *ex
 const IR::Node *TypeInferenceBase::postorder(const IR::StructExpression *expression) {
     if (done()) return expression;
     bool constant = true;
-    auto components = new IR::IndexedVector<IR::StructField>();
+    IR::IndexedVector<IR::StructField> components;
     for (auto c : expression->components) {
         if (!isCompileTimeConstant(c->expression)) constant = false;
         auto type = getType(c->expression);
         if (type == nullptr) return expression;
-        components->push_back(new IR::StructField(c->name, type));
+        components.push_back(new IR::StructField(c->name, type));
     }
 
     // This is the type inferred by looking at the fields.
     const IR::Type *structType =
-        new IR::Type_UnknownStruct(expression->srcInfo, "unknown struct", *components);
+        new IR::Type_UnknownStruct(expression->srcInfo, "unknown struct", std::move(components));
     structType = canonicalize(structType);
 
     const IR::Expression *result = expression;
@@ -1738,15 +1737,15 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Member *expression) {
                           IR::Type_Stack::push_front, IR::Type_Stack::pop_front);
             if (!isLeftValue(expression->expr))
                 typeError("%1%: must be applied to a left-value", expression);
-            auto params = new IR::IndexedVector<IR::Parameter>();
+            IR::IndexedVector<IR::Parameter> params;
             auto param = new IR::Parameter(IR::ID("count"_cs, nullptr), IR::Direction::None,
                                            IR::Type_InfInt::get());
             auto tt = new IR::Type_Type(param->type);
             setType(param->type, tt);
             setType(param, param->type);
-            params->push_back(param);
-            auto type =
-                new IR::Type_Method(IR::Type_Void::get(), new IR::ParameterList(*params), member);
+            params.push_back(param);
+            auto type = new IR::Type_Method(IR::Type_Void::get(),
+                                            new IR::ParameterList(std::move(params)), member);
             auto canon = canonicalize(type);
             if (canon == nullptr) return expression;
             setType(getOriginal(), canon);
@@ -2159,7 +2158,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::MethodCallExpression *exp
                 baseReturnType = sc->baseType;
             const bool factoryOrStaticAssertOrPureAnnot =
                 baseReturnType->is<IR::Type_Extern>() || ef->method->name == "static_assert" ||
-                ef->method->getAnnotation(IR::Annotation::pureAnnotation);
+                ef->method->hasAnnotation(IR::Annotation::pureAnnotation);
             if (constArgs && factoryOrStaticAssertOrPureAnnot) {
                 // factory extern function calls (those that return extern objects) with constant
                 // args are compile-time constants.

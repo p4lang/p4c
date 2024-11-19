@@ -956,9 +956,7 @@ class AddParserPad : public Modifier {
         // Loop state that decrements and extracts (accept only)
         // We only need to loop when we need more than 1 state extracts
         auto *stateLoop = new IR::ParserState(
-            prsrCheckLoopState[dst],
-            new IR::Annotations(
-                IR::Vector<IR::Annotation>({new IR::Annotation("max_loop_depth", loopStates)})),
+            prsrCheckLoopState[dst], {new IR::Annotation("max_loop_depth", loopStates)},
             IR::IndexedVector<IR::StatOrDecl>({decOp}), (prsrNumPadStates > 1) ? se : se_no_loop);
         if (dst == IR::ParserState::accept) stateLoop->components.push_back(extOp);
 
@@ -1221,7 +1219,7 @@ ParserEnforceDepthReq::ParserEnforceDepthReq(P4::ReferenceMap *rm, BFN::Evaluato
             auto main = toplevel->getMain();
             for (auto &pkg : main->constantValue) {
                 LOG2(pkg.first->toString()
-                     << " : " << (pkg.second ? pkg.second->toString() : "nullptr"));
+                     << " : " << (pkg.second ? pkg.second->toString().c_str() : "nullptr"));
                 if (auto pb = pkg.second ? pkg.second->to<IR::PackageBlock>() : nullptr) {
                     const IR::P4Parser *ip = nullptr;
                     const IR::P4Parser *ep = nullptr;
@@ -1231,7 +1229,7 @@ ParserEnforceDepthReq::ParserEnforceDepthReq(P4::ReferenceMap *rm, BFN::Evaluato
                     const IR::P4Control *ed = nullptr;
                     for (auto &p : pb->constantValue) {
                         LOG2("  " << p.first->toString() << " : "
-                                  << (p.second ? p.second->toString() : "nullptr"));
+                                  << (p.second ? p.second->toString().c_str() : "nullptr"));
                         if (p.second) {
                             auto name = p.first->toString();
                             if (name == "ingress_parser") {

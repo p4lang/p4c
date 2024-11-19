@@ -23,6 +23,7 @@ limitations under the License.
 #include "frontends/common/model.h"
 #include "frontends/p4/coreLibrary.h"
 #include "helpers.h"
+#include "ir/annotations.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/error.h"
@@ -167,10 +168,10 @@ class RenameUserMetadata : public Transform {
             else
                 suffix = "."_cs + f->name;
             cstring newName = namePrefix + suffix;
-            auto stringLit = new IR::StringLiteral(newName);
             LOG2("Renaming " << f << " to " << newName);
-            auto annos = f->annotations->addOrReplace(IR::Annotation::nameAnnotation, stringLit);
-            auto field = new IR::StructField(f->srcInfo, f->name, annos, f->type);
+            auto field = new IR::StructField(
+                f->srcInfo, f->name, IR::Annotations::setNameAnnotation(f->annotations, newName),
+                f->type);
             fields.push_back(field);
         }
 

@@ -1038,7 +1038,7 @@ void SimpleSwitchBackend::createRecirculateFieldsList(ConversionContext *ctxt,
     LOG2("Scanning user metadata fields for annotations");
     for (auto f : userMetaType->fields) {
         LOG3("Scanning field " << f);
-        auto anno = f->getAnnotations()->getSingle("field_list"_cs);
+        auto anno = f->getAnnotation("field_list"_cs);
         if (anno == nullptr) continue;
 
         for (auto e : anno->expr) {

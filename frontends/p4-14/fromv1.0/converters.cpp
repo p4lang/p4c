@@ -410,7 +410,7 @@ const IR::Statement *StatementConverter::convert(const IR::Vector<IR::Expression
 const IR::Type_Varbits *TypeConverter::postorder(IR::Type_Varbits *vbtype) {
     if (vbtype->size == 0) {
         if (auto type = findContext<IR::Type_StructLike>()) {
-            if (auto max = type->getAnnotation("max_length"_cs)) {
+            if (auto max = type->getAnnotation(IR::Annotation::maxLengthAnnotation)) {
                 if (max->expr.size() != 1 || !max->expr[0]->is<IR::Constant>())
                     error(ErrorType::ERR_UNSUPPORTED, "%s: max_length must be a constant", max);
                 else
@@ -460,7 +460,7 @@ const IR::StructField *TypeConverter::postorder(IR::StructField *field) {
     // given a struct with length and max_length, the
     // varbit field size is max_length * 8 - struct_size
     if (field->type->is<IR::Type_Varbits>()) {
-        if (auto len = type->getAnnotation("length"_cs)) {
+        if (auto len = type->getAnnotation(IR::Annotation::lengthAnnotation)) {
             if (len->expr.size() == 1) {
                 auto lenexpr = len->expr[0];
                 ValidateLenExpr vle(type, field);
@@ -469,19 +469,20 @@ const IR::StructField *TypeConverter::postorder(IR::StructField *field) {
                 auto scale = new IR::Mul(lenexpr->srcInfo, lenexpr, new IR::Constant(8));
                 auto fieldlen =
                     new IR::Sub(scale->srcInfo, scale, new IR::Constant(type->width_bits()));
-                field->annotations =
-                    field->annotations->add(new IR::Annotation("length"_cs, {fieldlen}));
+                field->addAnnotation(
+                    new IR::Annotation(IR::Annotation::lengthAnnotation, {fieldlen}));
             }
         }
     }
     if (auto vec = structure->listIndexes(type->name.name, field->name.name))
-        field->annotations = field->annotations->add(new IR::Annotation("field_list"_cs, *vec));
+        field->addAnnotation(new IR::Annotation("field_list"_cs, *vec));
     return field;
 }
 
 const IR::Type_StructLike *TypeConverter::postorder(IR::Type_StructLike *str) {
-    str->annotations = str->annotations->where([](const IR::Annotation *a) -> bool {
-        return a->name != "length" && a->name != "max_length";
+    str->annotations = str->annotations.where([](const IR::Annotation *a) -> bool {
+        return a->name != IR::Annotation::lengthAnnotation &&
+               a->name != IR::Annotation::maxLengthAnnotation;
     });
     return str;
 }
@@ -501,8 +502,8 @@ class FixupExtern : public Modifier {
     }
     void postorder(IR::Type_Extern *type) override {
         if (extname != type->name) {
-            type->annotations = type->annotations->addAnnotationIfNew(
-                IR::Annotation::nameAnnotation, new IR::StringLiteral(type->name.name), false);
+            type->addAnnotationIfNew(IR::Annotation::nameAnnotation,
+                                     new IR::StringLiteral(type->name.name), false);
             type->name = extname;
         }
         // FIXME -- should create ctors based on attributes?  For now just create a

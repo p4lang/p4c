@@ -299,7 +299,7 @@ class AdjustStatefulInstructions : public MauTransform {
  private:
     const PhvInfo &phv;
     const IR::Expression *preorder(IR::Expression *expr) override;
-    const IR::Annotations *preorder(IR::Annotations *) override;
+    const IR::Annotation *preorder(IR::Annotation *) override;
     const IR::MAU::IXBarExpression *preorder(IR::MAU::IXBarExpression *) override;
 
     bool check_bit_positions(std::map<int, le_bitrange> &salu_inputs, le_bitrange field_bits,

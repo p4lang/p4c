@@ -788,8 +788,8 @@ void WalkPowerGraph::create_mau_power_json(const IR::Node *root) {
     auto logDir =
         BFNContext::get().getOutputDirectory("logs"_cs, root->to<IR::BFN::Pipe>()->canon_id());
     if (!logDir) return;
-    cstring powerFile = logDir + "/power.json"_cs;
-    logger_ = new PowerLogging(powerFile, Logging::Logger::buildDate(), BF_P4C_VERSION,
+    cstring powerFile = logDir + "/power.json";
+    logger_ = new PowerLogging(powerFile.c_str(), Logging::Logger::buildDate(), BF_P4C_VERSION,
                                BackendOptions().programName + ".p4", RunId::getId(),
                                POWER_SCHEMA_VERSION);
 

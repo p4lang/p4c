@@ -69,7 +69,11 @@ class Vector : public VectorBase {
     Vector &operator=(Vector &&) = default;
     explicit Vector(const T *a) { vec.emplace_back(std::move(a)); }
     explicit Vector(const safe_vector<const T *> &a) { vec.insert(vec.end(), a.begin(), a.end()); }
-    Vector(const std::initializer_list<const T *> &a) : vec(a) {}
+    Vector(std::initializer_list<const T *> a) : vec(a) {}
+    template <class InputIt>
+    Vector(InputIt first, InputIt last) : vec(first, last) {}
+    Vector(Util::Enumerator<const T *> *e)  // NOLINT(runtime/explicit)
+        : vec(e->begin(), e->end()) {}
     static Vector<T> *fromJSON(JSONLoader &json);
     typedef typename safe_vector<const T *>::iterator iterator;
     typedef typename safe_vector<const T *>::const_iterator const_iterator;
@@ -207,6 +211,10 @@ class Vector : public VectorBase {
     Util::Enumerator<const S *> *only() const {
         return getEnumerator()->template as<const S *>()->where(
             [](const T *d) { return d != nullptr; });
+    }
+    template <class Filter>
+    auto where(Filter f) const {
+        return getEnumerator()->where(std::move(f));
     }
 
     void dbprint(std::ostream &out) const override {

@@ -53,7 +53,6 @@ limitations under the License.
 #include "midend/nestedStructs.h"
 #include "midend/orderArguments.h"
 #include "midend/parserUnroll.h"
-#include "midend/predication.h"
 #include "midend/removeAssertAssume.h"
 #include "midend/removeLeftSlices.h"
 #include "midend/removeMiss.h"
@@ -105,7 +104,6 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *o
              new P4::FlattenHeaders(&typeMap),
              new P4::FlattenInterfaceStructs(&typeMap),
              new P4::ReplaceSelectRange(),
-             new P4::Predication(),
              new P4::MoveDeclarations(),  // more may have been introduced
              new P4::ConstantFolding(&typeMap),
              new P4::LocalCopyPropagation(&typeMap),

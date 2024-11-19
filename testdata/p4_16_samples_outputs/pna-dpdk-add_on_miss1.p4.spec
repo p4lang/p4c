@@ -127,7 +127,7 @@ table ipv4_host {
 	actions {
 		send
 		drop
-		NoAction
+		NoAction @defaultonly
 	}
 	default_action drop args none const
 	size 0x10000

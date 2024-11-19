@@ -87,7 +87,7 @@ bool GenerateDynamicHashJson::preorder(const IR::MAU::Table *tbl) {
             IR::NameList algorithms;
             int hash_bit_width = -1;
             LOG5("Annotations : " << match_table->annotations);
-            for (auto annot : match_table->annotations->annotations) {
+            for (auto annot : match_table->annotations) {
                 if (annot->name == "action_selector_hash_field_calc_name")
                     fieldListCalcName = annot->expr[0]->to<IR::StringLiteral>()->value;
                 else if (annot->name == "action_selector_hash_field_list_name")

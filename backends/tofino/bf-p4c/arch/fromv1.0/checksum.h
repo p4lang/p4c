@@ -146,7 +146,7 @@ static std::vector<gress_t> getChecksumUpdateLocations(const IR::MethodCallExpre
     else
         BUG("Invalid use of function getChecksumUpdateLocation");
 
-    for (auto annot : block->annotations->annotations) {
+    for (auto annot : block->annotations) {
         if (annot->name.name == pragma) {
             auto &exprs = annot->expr;
             auto gress = exprs[0]->to<IR::StringLiteral>();
@@ -452,13 +452,11 @@ class InsertParserChecksums : public Inspector {
 
         if (!translate->residualChecksums.count(destfield)) {
             auto *compilerMetadataPath = new IR::PathExpression(COMPILER_META);
-            auto *cgAnnotation =
-                new IR::Annotations({new IR::Annotation(IR::ID("__compiler_generated"), {})});
-
             auto *compilerMetadataDecl = const_cast<IR::Type_Struct *>(
                 structure->type_declarations.at("compiler_generated_metadata_t"_cs)
                     ->to<IR::Type_Struct>());
-            compilerMetadataDecl->annotations = cgAnnotation;
+            compilerMetadataDecl->annotations = {
+                new IR::Annotation(IR::ID("__compiler_generated"), {})};
 
             std::stringstream residualFieldName;
             residualFieldName << "residual_checksum_";

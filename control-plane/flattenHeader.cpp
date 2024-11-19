@@ -17,6 +17,7 @@ limitations under the License.
 #include "flattenHeader.h"
 
 #include "frontends/p4/typeMap.h"
+#include "ir/annotations.h"
 
 namespace P4 {
 
@@ -30,7 +31,7 @@ void FlattenHeader::doFlatten(const IR::Type *type) {
     if (auto st = type->to<IR::Type_StructLike>()) {
         for (auto f : st->fields) {
             nameSegments.push_back(f->name);
-            allAnnotations.push_back(f->annotations);
+            allAnnotations.push_back(&f->annotations);
             doFlatten(typeMap->getType(f, true));
             allAnnotations.pop_back();
             nameSegments.pop_back();
@@ -41,9 +42,8 @@ void FlattenHeader::doFlatten(const IR::Type *type) {
         // preserve the original name using an annotation
         auto originalName = makeName(".");
         auto annotations = mergeAnnotations();
-        annotations = annotations->addOrReplace(IR::Annotation::nameAnnotation,
-                                                new IR::StringLiteral(originalName));
-        auto field = new IR::StructField(IR::ID(newName), annotations, type);
+        auto field = new IR::StructField(
+            IR::ID(newName), IR::Annotations::setNameAnnotation(annotations, originalName), type);
         newFields.push_back(field);
         auto ftype = typeMap->getTypeType(type, true);
         typeMap->setType(field, ftype);
@@ -62,13 +62,13 @@ cstring FlattenHeader::makeName(std::string_view sep) const {
 /// Merge all the annotation vectors in allAnnotations into a single
 /// one. Duplicates are resolved, with preference given to the ones towards the
 /// end of allAnnotations, which correspond to the most "nested" ones.
-const IR::Annotations *FlattenHeader::mergeAnnotations() const {
-    auto mergedAnnotations = new IR::Annotations();
+IR::Vector<IR::Annotation> FlattenHeader::mergeAnnotations() const {
+    IR::Vector<IR::Annotation> mergedAnnotations;
     for (auto annosIt = allAnnotations.rbegin(); annosIt != allAnnotations.rend(); annosIt++) {
-        for (auto anno : (*annosIt)->annotations) {
+        for (auto anno : **annosIt) {
             // if an annotation with the same name was added previously, skip
-            if (mergedAnnotations->getSingle(anno->name)) continue;
-            mergedAnnotations->add(anno);
+            if (get(mergedAnnotations, anno->name)) continue;
+            mergedAnnotations.push_back(anno);
         }
     }
     return mergedAnnotations;

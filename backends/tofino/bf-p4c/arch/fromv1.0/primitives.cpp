@@ -317,9 +317,7 @@ CONVERT_PRIMITIVE(modify_field_with_hash_based_offset, 1) {
     auto mc = new IR::MethodCallExpression(primitive->srcInfo, hash, args);
     auto result = new IR::MethodCallStatement(primitive->srcInfo, mc);
 
-    auto annotations = new IR::Annotations();
-    for (auto annot : fl->annotations->annotations) annotations->annotations.push_back(annot);
-    auto block = new IR::BlockStatement(annotations);
+    auto block = new IR::BlockStatement(fl->annotations);
     block->components.push_back(result);
 
     return block;

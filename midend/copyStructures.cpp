@@ -35,13 +35,13 @@ const IR::Node *RemoveAliases::postorder(IR::AssignmentStatement *statement) {
     auto tmp = nameGen.newName("tmp");
     auto *decl = new IR::Declaration_Variable(IR::ID(tmp), type->getP4Type(), nullptr);
     declarations.push_back(decl);
-    auto *result = new IR::IndexedVector<IR::StatOrDecl>();
-    result->push_back(new IR::AssignmentStatement(statement->srcInfo, new IR::PathExpression(tmp),
-                                                  statement->right));
-    result->push_back(new IR::AssignmentStatement(statement->srcInfo, statement->left,
-                                                  new IR::PathExpression(tmp)));
+    IR::IndexedVector<IR::StatOrDecl> result;
+    result.push_back(new IR::AssignmentStatement(statement->srcInfo, new IR::PathExpression(tmp),
+                                                 statement->right));
+    result.push_back(new IR::AssignmentStatement(statement->srcInfo, statement->left,
+                                                 new IR::PathExpression(tmp)));
     LOG3("Inserted temporary " << decl << " for " << statement);
-    return new IR::BlockStatement(statement->srcInfo, *result);
+    return new IR::BlockStatement(statement->srcInfo, std::move(result));
 }
 
 const IR::Node *RemoveAliases::postorder(IR::P4Parser *parser) {
@@ -89,13 +89,13 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
     }
 
     const auto &srcInfo = statement->srcInfo;
-    auto *retval = new IR::IndexedVector<IR::StatOrDecl>();
+    IR::IndexedVector<IR::StatOrDecl> retval;
     if (const auto *si = statement->right->to<IR::StructExpression>()) {
         const auto *strct = ltype->checkedTo<IR::Type_StructLike>();
         for (const auto *f : strct->fields) {
             const auto *right = si->components.getDeclaration<IR::NamedExpression>(f->name);
             const auto *left = new IR::Member(statement->left, f->name);
-            retval->push_back(
+            retval.push_back(
                 new IR::AssignmentStatement(statement->srcInfo, left, right->expression));
         }
     } else if (copyHeaders && ltype->is<IR::Type_Header>()) {
@@ -151,7 +151,7 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
                 new IR::ArrayIndex(stack->elementType, statement->left, new IR::Constant(i));
             const auto *right =
                 new IR::ArrayIndex(stack->elementType, statement->right, new IR::Constant(i));
-            retval->push_back(new IR::AssignmentStatement(srcInfo, left, right));
+            retval.push_back(new IR::AssignmentStatement(srcInfo, left, right));
         }
     } else {
         if (ltype->is<IR::Type_Header>() || ltype->is<IR::Type_Stack>()) {
@@ -165,10 +165,10 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
         for (const auto *f : strct->fields) {
             const auto *right = new IR::Member(statement->right, f->name);
             const auto *left = new IR::Member(statement->left, f->name);
-            retval->push_back(new IR::AssignmentStatement(statement->srcInfo, left, right));
+            retval.push_back(new IR::AssignmentStatement(statement->srcInfo, left, right));
         }
     }
-    return new IR::BlockStatement(statement->srcInfo, *retval);
+    return new IR::BlockStatement(statement->srcInfo, std::move(retval));
 }
 
 }  // namespace P4

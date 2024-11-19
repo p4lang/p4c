@@ -77,35 +77,41 @@ class TCActionParam {
     unsigned getDirection() const {
         return direction;
     }
-    cstring getParamType() const {
-        std::string paramType = "";
+    cstring getParamDecl(cstring placeholderName) const {
+        std::string paramDecl = "";
         switch(dataType) {
             case TC::BIT_TYPE :
-                paramType = absl::StrCat("__u", bitSize);
+                if (bitSize == 8 || bitSize == 16 || bitSize == 32 || bitSize == 64) {
+                    paramDecl = absl::StrCat("__u", bitSize, " ", placeholderName);
+                } else {
+                    unsigned byteSize = bitSize / 8 + (bitSize % 8 != 0);
+
+                    paramDecl = absl::StrCat("__u8 ", placeholderName, "[", byteSize, "]");
+                }
                 break;
             case TC::DEV_TYPE :
-                paramType = "dev";
+                paramDecl = absl::StrCat("__u32 ", placeholderName);
                 break;
             case TC::MACADDR_TYPE :
-                paramType = "macaddr";
+                paramDecl = absl::StrCat("__u8 ", placeholderName, "[6]");
                 break;
             case TC::IPV4_TYPE :
-                paramType = "ipv4";
+                paramDecl = absl::StrCat("__u32 ", placeholderName);
                 break;
             case TC::IPV6_TYPE :
-                paramType = "ipv6";
+                paramDecl = absl::StrCat("__u8 ", placeholderName, "[16]");
                 break;
             case TC::BE16_TYPE :
-                paramType = "__be16";
+                paramDecl = absl::StrCat("__be16 ", placeholderName);
                 break;
             case TC::BE32_TYPE :
-                paramType = "__be32";
+                paramDecl = absl::StrCat("__be32 ", placeholderName);
                 break;
             case TC::BE64_TYPE :
-                paramType = "__be64";
+                paramDecl = absl::StrCat("__be64 ", placeholderName);
                 break;
-        } 
-        return paramType;
+        }
+        return paramDecl;
     }
     toString {
         std::string tcActionParam = absl::StrCat("\n\tparam ", paramName, " type ");

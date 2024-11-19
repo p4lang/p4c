@@ -167,6 +167,8 @@ class BFNContext : public virtual P4CContext {
     /// If the directory does not exists, it is created. If the
     /// creation fails print an error message and return an empty
     /// string.
+    /// FIXME: Make this return std::filesystem::path. There are quite a few invocations of this
+    /// function.
     cstring getOutputDirectory(const cstring &suffix = cstring(), int pipe_id = -1);
 
     /// identify the pipelines in the program and setup the _pipes map

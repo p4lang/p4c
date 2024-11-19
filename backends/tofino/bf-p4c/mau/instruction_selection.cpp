@@ -408,7 +408,7 @@ const IR::Node *Synth2PortSetup::postorder(IR::MAU::Primitive *prim) {
     auto dot = prim->name.find('.');
     auto objType = dot ? prim->name.before(dot) : cstring();
     const char *tail = objType.c_str() + objType.size();
-    while (tail > objType && std::isdigit(tail[-1])) --tail;
+    while (tail > objType.c_str() && std::isdigit(tail[-1])) --tail;
     objType = objType.before(tail);
     IR::Node *rv = prim;
 
@@ -1127,7 +1127,7 @@ static const IR::MAU::Instruction *fillInstDest(const IR::Expression *in,
     if (!tv) tv = sl ? sl->e0->to<IR::TempVar>() : nullptr;
     if (tv) {
         int id;
-        if (sscanf(tv->name, "$tmp%d", &id) > 0 && id == tv->uid) --tv->uid;
+        if (sscanf(tv->name.c_str(), "$tmp%d", &id) > 0 && id == tv->uid) --tv->uid;
         auto *rv = inst->clone();
         if (sl != nullptr) dest = MakeSlice(dest, 0, sl->type->width_bits() - 1);
         rv->operands[0] = dest;
@@ -1311,7 +1311,7 @@ static const IR::Type *stateful_type_for_primitive(const IR::MAU::Primitive *pri
         prim->name == "Lpf.execute" || prim->name == "DirectLpf.execute" ||
         prim->name == "Wred.execute" || prim->name == "DirectWred.execute")
         return IR::Type_Meter::get();
-    if (auto a = strstr(prim->name, "Action")) {
+    if (auto a = prim->name.find("Action")) {
         if (a[6] == '.' || (std::isdigit(a[6]) && a[7] == '.')) return IR::Type_Register::get();
     }
     if (prim->name == "Register.clear" || prim->name == "DirectRegister.clear")
@@ -1325,7 +1325,7 @@ static ssize_t index_operand(const IR::MAU::Primitive *prim) {
     else if (prim->name.startsWith("Counter") || prim->name.startsWith("Meter") ||
              prim->name.endsWith("Action.execute"))
         return 1;
-    else if (strstr(prim->name, "Action."))
+    else if (prim->name.find("Action.") != nullptr)
         return -1;
     else if (prim->name.startsWith("Lpf") || prim->name.startsWith("Wred"))
         return 2;
@@ -1426,7 +1426,7 @@ void StatefulAttachmentSetup::Scan::postorder(const IR::MAU::Primitive *prim) {
     use_t use = IR::MAU::StatefulUse::NO_USE;
     auto dot = prim->name.find('.');
     cstring method = dot ? cstring(dot + 1) : prim->name;
-    while (dot && dot > prim->name && std::isdigit(dot[-1])) --dot;
+    while (dot && dot > prim->name.c_str() && std::isdigit(dot[-1])) --dot;
     auto objType = dot ? prim->name.before(dot) : cstring();
     if (objType.endsWith("Action")) {
         obj = prim->operands.at(0)->to<IR::GlobalRef>()->obj->to<IR::MAU::StatefulAlu>();

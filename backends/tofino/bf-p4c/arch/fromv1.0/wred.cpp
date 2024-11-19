@@ -76,17 +76,18 @@ const IR::Declaration_Instance *P4V1::WREDConverter::convertExternInstance(
     args->push_back(new IR::Argument(no_drop_value));
 
     auto *externalName = new IR::StringLiteral(IR::ID("." + name));
-    auto *annotations = new IR::Annotations({new IR::Annotation(IR::ID("name"), {externalName})});
 
     if (instance_count) {
         auto type = new IR::Type_Specialized(
             new IR::Type_Name("Wred"),
             new IR::Vector<IR::Type>({input_type, IR::Type::Bits::get(32)}));
-        return new IR::Declaration_Instance(ext->srcInfo, name, annotations, type, args);
+        return new IR::Declaration_Instance(
+            ext->srcInfo, name, {new IR::Annotation(IR::ID("name"), {externalName})}, type, args);
     } else {
         auto type = new IR::Type_Specialized(new IR::Type_Name("DirectWred"),
                                              new IR::Vector<IR::Type>({input_type}));
-        return new IR::Declaration_Instance(ext->srcInfo, name, annotations, type, args);
+        return new IR::Declaration_Instance(
+            ext->srcInfo, name, {new IR::Annotation(IR::ID("name"), {externalName})}, type, args);
     }
 }
 

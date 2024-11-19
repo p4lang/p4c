@@ -213,7 +213,7 @@ struct RemoveNegativeDeposits : public ParserTransform {
         new_tr->shift = tr->shift - 1;
         auto ps = findContext<IR::BFN::ParserState>();
         LOG4("RemoveNegativeDeposits: Transition from "
-             << (ps ? ps->name : "--unknown--") << " to " << tr->next->name
+             << (ps ? ps->name.c_str() : "--unknown--") << " to " << tr->next->name.c_str()
              << " changed shift: " << tr->shift << "->" << new_tr->shift);
         return new_tr;
     }
@@ -238,7 +238,7 @@ struct RemoveNegativeDeposits : public ParserTransform {
             if (!tr->next || !found.states_to_shift.count(tr->next->name)) {
                 new_tr->shift = tr->shift - shift_amt / 8;
                 LOG4("RemoveNegativeDeposits: Transition from "
-                     << ps->name << " to " << (tr->next ? tr->next->name : "--END--")
+                     << ps->name << " to " << (tr->next ? tr->next->name.c_str() : "--END--")
                      << " changed: " << tr->shift << "->" << new_tr->shift);
             }
             new_tr->saves = *(new_tr->saves.apply(ShiftPacketRVal(shift_amt)));

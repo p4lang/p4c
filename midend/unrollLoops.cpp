@@ -299,13 +299,16 @@ const IR::Statement *UnrollLoops::preorder(IR::ForInStatement *fstmt) {
 UnrollLoops::Policy UnrollLoops::default_unroll(true);
 UnrollLoops::Policy UnrollLoops::default_nounroll(false);
 
+static const cstring unrollAnnotation = "unroll"_cs;
+static const cstring noUnrollAnnotation = "no_unroll"_cs;
+
 bool UnrollLoops::Policy::operator()(const IR::LoopStatement *loop, bool canUnroll,
                                      const loop_bounds_t &) {
-    if (loop->getAnnotation("unroll"_cs)) {
+    if (loop->hasAnnotation(unrollAnnotation)) {
         if (!canUnroll) warning(ErrorType::WARN_UNSUPPORTED, "Can't unroll loop: %1%", loop);
         return true;
     }
-    if (loop->getAnnotation("nounroll"_cs)) return false;
+    if (loop->hasAnnotation(noUnrollAnnotation)) return false;
     return unroll_default;
 }
 

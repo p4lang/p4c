@@ -88,11 +88,10 @@ const IR::Node *DoSimplifyKey::doStatement(const IR::Statement *statement,
     auto insertions = get(toInsert, hta.table);
     if (insertions == nullptr) return statement;
 
-    auto result = new IR::IndexedVector<IR::StatOrDecl>();
-    for (auto assign : insertions->statements) result->push_back(assign);
-    result->push_back(statement);
-    auto block = new IR::BlockStatement(*result);
-    return block;
+    IR::IndexedVector<IR::StatOrDecl> result;
+    for (auto assign : insertions->statements) result.push_back(assign);
+    result.push_back(statement);
+    return new IR::BlockStatement(std::move(result));
 }
 
 }  // namespace P4

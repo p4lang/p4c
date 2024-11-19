@@ -92,7 +92,7 @@ class CollectUserSpecifiedCriticalStates : public Inspector {
         if (state->gress != gress) return false;
 
         for (const auto *p4State : state->p4States) {
-            for (auto annot : p4State->annotations->annotations) {
+            for (auto annot : p4State->annotations) {
                 if (annot->name.name == "critical") {
                     auto &exprs = annot->expr;
                     if (exprs.size() == 1) {

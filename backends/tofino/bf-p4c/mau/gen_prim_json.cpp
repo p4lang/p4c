@@ -186,7 +186,7 @@ void GeneratePrimitiveInfo::gen_action_json(const IR::MAU::Table *tbl, const IR:
                                 sact_update->emplace("operand_1_type"_cs, "memory");
                                 auto dst_name = (dst->name == "alu_lo")   ? "memory_lo"
                                                 : (dst->name == "alu_hi") ? "memory_hi"
-                                                                          : dst->name;
+                                                                          : dst->name.c_str();
                                 sact_update->emplace("operand_1_value"_cs, dst_name);
                                 salu_details->emplace("output_value"_cs, sact_update);
                             }

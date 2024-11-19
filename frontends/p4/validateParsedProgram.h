@@ -52,6 +52,8 @@ using namespace literals;
    - continue and break statements are only used in the context of a for statement
  */
 class ValidateParsedProgram final : public Inspector {
+    std::unordered_map<std::pair<const IR::Node *, cstring>, bool> annNames;
+
     void container(const IR::IContainer *type);
     // Make sure that type, apply and constructor parameters are distinct
     void distinctParameters(const IR::TypeParameters *typeParams, const IR::ParameterList *apply,
@@ -59,7 +61,8 @@ class ValidateParsedProgram final : public Inspector {
 
  public:
     ValidateParsedProgram() { setName("ValidateParsedProgram"); }
-    void postorder(const IR::Annotations *annotations) override;
+    void end_apply(const IR::Node *) override { annNames.clear(); }
+    void postorder(const IR::Annotation *annotations) override;
     void postorder(const IR::P4Program *program) override;
     void postorder(const IR::Constant *c) override;
     void postorder(const IR::SwitchStatement *statement) override;

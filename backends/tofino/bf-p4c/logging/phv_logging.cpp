@@ -547,7 +547,7 @@ void PhvLogging::logNoSplitConstraint(ConstrainedField &field, const SourceLocat
 }
 
 void PhvLogging::logContainerSizeConstraint(ConstrainedField &field, const SourceLocation *srcLoc) {
-    auto &c = field.getContainerSize();
+    auto c = field.getContainerSize();
     if (c.hasConstraint()) {
         auto csc = new IntConstraint(c.getContainerSize(), int(ConstraintReason::ContainerSize),
                                      "ContainerSize", srcLoc);
@@ -811,8 +811,8 @@ const char *PhvLogging::getDeparserAccessType(const PHV::Field *f) const {
 
 std::string PhvLogging::stripDotPrefix(const cstring name) const {
     // Check if the name starts with a '.' and strip it
-    if (name[0] != '.') return name.c_str();
-    return name.substr(1).c_str();
+    if (!name.startsWith(".")) return name.string();
+    return name.substr(1).string();
 }
 
 void PhvLogging::getAllDeparserUses(const PHV::Field *f,

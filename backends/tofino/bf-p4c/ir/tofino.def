@@ -252,8 +252,8 @@ class InstanceRef : HeaderRef {
     NullOK HeaderOrMetadata     obj;
     inline NameMap<InstanceRef> nested;
 #noconstructor
-    InstanceRef(cstring prefix, ID n, Type t, Annotations ann = nullptr);
-    InstanceRef(ID n, Type t, Annotations ann = nullptr)
+    InstanceRef(cstring prefix, ID n, Type t, Vector<Annotation> ann = nullptr);
+    InstanceRef(ID n, Type t, Vector<Annotation> ann = nullptr)
     : InstanceRef(cstring(), n, t, ann) {}
     InstanceRef(Type t) : HeaderRef(t) { }
     HeaderOrMetadata baseRef() const override { return obj; }
@@ -279,8 +279,8 @@ class InstanceRef : HeaderRef {
  */
 class V1InstanceRef : InstanceRef {
 #noconstructor
-    V1InstanceRef(cstring prefix, ID n, Type t, Annotations ann = nullptr);
-    V1InstanceRef(ID n, Type t, Annotations ann = nullptr)
+    V1InstanceRef(cstring prefix, ID n, Type t, Vector<Annotation> ann = nullptr);
+    V1InstanceRef(ID n, Type t, Vector<Annotation> ann = nullptr)
     : V1InstanceRef(cstring(), n, t, ann) {}
     toString { return obj ? obj->name : name; }
     dbprint { out << toString(); }

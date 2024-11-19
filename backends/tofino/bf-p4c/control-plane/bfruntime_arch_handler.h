@@ -1445,8 +1445,8 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
         forAllMatching<IR::MethodCallExpression>(
             evaluatedProgram->getProgram(), [&](const IR::MethodCallExpression *call) {
                 auto instance = P4::MethodInstance::resolve(call, refMap, typeMap);
-                if (instance->is<P4::ExternMethod>() && instance->object == object) {
-                    function(instance->to<P4::ExternMethod>());
+                if (instance->template is<P4::ExternMethod>() && instance->object == object) {
+                    function(instance->template to<P4::ExternMethod>());
                 }
             });
     }
@@ -1735,11 +1735,10 @@ class BFRuntimeArchHandlerTofino final : public BFN::BFRuntimeArchHandlerCommon<
         auto *params = parser->getApplyParameters();
         for (auto p : *params) {
             if (p->type->toString() == "ingress_intrinsic_metadata_t") {
-                BUG_CHECK(
-                    ingressIntrinsicMdParamName.count(parserBlock) == 0 ||
-                        strcmp(ingressIntrinsicMdParamName[parserBlock], p->name.toString()) == 0,
-                    "%1%: Multiple names of intrinsic metadata found in this parser block",
-                    parser->getName());
+                BUG_CHECK(ingressIntrinsicMdParamName.count(parserBlock) == 0 ||
+                              ingressIntrinsicMdParamName[parserBlock] == p->name.toString(),
+                          "%1%: Multiple names of intrinsic metadata found in this parser block",
+                          parser->getName());
                 ingressIntrinsicMdParamName[parserBlock] = p->name;
                 break;
             }
@@ -1861,7 +1860,7 @@ class BFRuntimeArchHandlerTofino final : public BFN::BFRuntimeArchHandlerCommon<
                     BUG_CHECK(parser->is<IR::ParserBlock>(), "Expected ParserBlock");
                     auto parserBlock = parser->to<IR::ParserBlock>();
                     auto decl = parserBlock->node->to<IR::Declaration_Instance>();
-                    auto userName = (decl == nullptr) ? "" : decl->controlPlaneName();
+                    auto userName = (decl == nullptr) ? cstring::empty : decl->controlPlaneName();
 
                     auto choice = parserChoices.add_choices();
                     auto parserFullName = prefix(parsersName, parserName);
@@ -2431,7 +2430,7 @@ class BFRuntimeArchHandlerPSA final : public BFRuntimeArchHandlerCommon<Arch::PS
     }
 
     void addTableProperties(const P4RuntimeSymbolTableIface &symbols, p4configv1::P4Info *p4info,
-                            p4configv1::Table *table, const IR::TableBlock *tableBlock) {
+                            p4configv1::Table *table, const IR::TableBlock *tableBlock) override {
         CHECK_NULL(tableBlock);
         addTablePropertiesCommon(symbols, p4info, table, tableBlock, defaultPipeName);
     }

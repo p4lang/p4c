@@ -134,9 +134,9 @@ void PNAEbpfGenerator::emitP4TCActionParam(EBPF::CodeBuilder *builder) const {
             for (auto param : table->defaultMissActionParams) {
                 cstring paramName = param->paramDetail->getParamName();
                 cstring placeholder = tblName + "_" + defaultActionName + "_" + paramName;
-                cstring typeName = param->paramDetail->getParamType();
+                cstring paramDecl = param->paramDetail->getParamDecl(placeholder);
                 builder->emitIndent();
-                builder->appendFormat("%v %v", typeName, placeholder);
+                builder->append(paramDecl);
                 builder->endOfStatement(true);
             }
         }
@@ -149,9 +149,9 @@ void PNAEbpfGenerator::emitP4TCActionParam(EBPF::CodeBuilder *builder) const {
             for (auto param : table->defaultHitActionParams) {
                 cstring paramName = param->paramDetail->getParamName();
                 cstring placeholder = tblName + "_" + defaultActionName + "_" + paramName;
-                cstring typeName = param->paramDetail->getParamType();
+                cstring paramDecl = param->paramDetail->getParamDecl(placeholder);
                 builder->emitIndent();
-                builder->appendFormat("%v %v", typeName, placeholder);
+                builder->append(paramDecl);
                 builder->endOfStatement(true);
             }
         }
@@ -614,9 +614,7 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
     cstring fieldName = field->name.name;
 
     bool noEndiannessConversion = false;
-    auto annolist = field->getAnnotations()->annotations;
-    for (auto anno : annolist) {
-        if (anno->name != ParseTCAnnotations::tcType) continue;
+    if (const auto *anno = field->getAnnotation(ParseTCAnnotations::tcType)) {
         auto annoBody = anno->body;
         for (auto annoVal : annoBody) {
             if (annoVal->text == "macaddr" || annoVal->text == "ipv4" || annoVal->text == "ipv6") {
@@ -1607,8 +1605,7 @@ const IR::P4Action *ControlBodyTranslatorPNA::GetAddOnMissHitAction(cstring acti
         auto adecl = control->program->refMap->getDeclaration(a->getPath(), true);
         auto action = adecl->getNode()->to<IR::P4Action>();
         if (action->name.originalName == actionName) {
-            auto annotations = a->getAnnotations();
-            if (annotations && annotations->getSingle("defaultonly"_cs)) {
+            if (a->getAnnotation("defaultonly"_cs)) {
                 ::P4::error(ErrorType::ERR_UNEXPECTED,
                             "add_entry hit action %1% cannot be annotated with defaultonly.",
                             actionName);
@@ -1682,7 +1679,7 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
             builder->appendFormat("    .tblid = %d,", tblId);
             builder->newline();
             builder->emitIndent();
-            builder->append("    .aging_ms = ");
+            builder->append("    .profile_id = ");
             for (auto a : *function->expr->arguments) {
                 visit(a);
             }
@@ -1866,15 +1863,13 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
             cstring swap;
 
             auto tcTarget = dynamic_cast<const EBPF::P4TCTarget *>(builder->target);
-            cstring isKeyBigEndian =
-                tcTarget->getByteOrderFromAnnotation(c->getAnnotations()->annotations);
+            cstring isKeyBigEndian = tcTarget->getByteOrderFromAnnotation(c->getAnnotations());
             cstring isDefnBigEndian = "HOST"_cs;
             if (auto mem = c->expression->to<IR::Member>()) {
                 auto type = typeMap->getType(mem->expr, true);
                 if (type->is<IR::Type_StructLike>()) {
                     auto field = type->to<IR::Type_StructLike>()->getField(mem->member);
-                    isDefnBigEndian =
-                        tcTarget->getByteOrderFromAnnotation(field->getAnnotations()->annotations);
+                    isDefnBigEndian = tcTarget->getByteOrderFromAnnotation(field->getAnnotations());
                 }
             }
 
@@ -2239,9 +2234,7 @@ void DeparserHdrEmitTranslatorPNA::processMethod(const P4::ExternMethod *method)
                     return;
                 }
                 bool noEndiannessConversion = false;
-                auto annotations = f->getAnnotations()->annotations;
-                for (auto anno : annotations) {
-                    if (anno->name != ParseTCAnnotations::tcType) continue;
+                if (const auto *anno = f->getAnnotation(ParseTCAnnotations::tcType)) {
                     for (auto annoVal : anno->body) {
                         if (annoVal->text == "macaddr" || annoVal->text == "ipv4" ||
                             annoVal->text == "ipv6" || annoVal->text == "be16" ||

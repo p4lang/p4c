@@ -81,7 +81,7 @@ std::optional<std::pair<const PHV::Field *, const PHV::Field *>> PragmaAlias::ma
                    "@pragma pa_alias for fields %1% and %2% ignored because "
                    "field %1% already aliases with a different field %3%",
                    field1->name, field2->name,
-                   (aliasMap.count(field1->name) ? aliasMap[field1->name].field : ""));
+                   (aliasMap.count(field1->name) ? aliasMap[field1->name].field : cstring::empty));
         return std::nullopt;
     }
 
@@ -90,7 +90,7 @@ std::optional<std::pair<const PHV::Field *, const PHV::Field *>> PragmaAlias::ma
                    "@pragma pa_alias for fields %1% and %2% ignored because "
                    "field %2% already aliases with a different field %3%",
                    field1->name, field2->name,
-                   (aliasMap.count(field2->name) ? aliasMap[field2->name].field : ""));
+                   (aliasMap.count(field2->name) ? aliasMap[field2->name].field : cstring::empty));
         return std::nullopt;
     }
 
@@ -164,11 +164,12 @@ std::optional<std::pair<const PHV::Field *, const PHV::Field *>> PragmaAlias::ma
               "aliasSrc");
 
     if (fieldsWithAliasingDst[aliasSrc->id]) {
-        WARN_CHECK(suppressWarning,
-                   "@pragma pa_alias for fields %1% and %2% ignored because "
-                   "field %2% already aliases with a different field %3%",
-                   aliasDest->name, aliasSrc->name,
-                   (aliasMap.count(aliasSrc->name) ? aliasMap[aliasSrc->name].field : ""));
+        WARN_CHECK(
+            suppressWarning,
+            "@pragma pa_alias for fields %1% and %2% ignored because "
+            "field %2% already aliases with a different field %3%",
+            aliasDest->name, aliasSrc->name,
+            (aliasMap.count(aliasSrc->name) ? aliasMap[aliasSrc->name].field : cstring::empty));
         return std::nullopt;
     }
 

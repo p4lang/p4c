@@ -142,14 +142,4 @@ const IR::Node *DoBindTypeVariables::preorder(IR::Annotation *annotation) {
     return annotation;
 }
 
-const IR::Node *DoBindTypeVariables::insertTypes(const IR::Node *node) {
-    CHECK_NULL(node);
-    CHECK_NULL(newTypes);
-    if (newTypes->empty()) return node;
-    newTypes->push_back(node);
-    auto result = newTypes;
-    newTypes = new IR::IndexedVector<IR::Node>();
-    return result;
-}
-
 }  // namespace P4

@@ -4390,7 +4390,7 @@ void Memories::update(cstring name, const Use &alloc) {
             // for result_buses
             if (u_type == UPDATE_RESULT_BUS && name == use) collision = false;
 
-            if (collision) BUG_CHECK("conflicting memory use between %s and %s", use, name);
+            if (collision) BUG_CHECK("conflicting memory use between %s and %s", use.c_str(), name);
         }
         use = name;
     });

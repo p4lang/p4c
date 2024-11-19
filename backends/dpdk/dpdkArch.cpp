@@ -673,12 +673,11 @@ bool CollectTableInfo::preorder(const IR::Key *keys) {
 
 const IR::Node *InjectJumboStruct::preorder(IR::Type_Struct *s) {
     if (s->name == structure->local_metadata_type) {
-        auto *annotations = new IR::Annotations({new IR::Annotation(IR::ID("__metadata__"), {})});
-        return new IR::Type_Struct(s->name, annotations, structure->compiler_added_fields);
+        return new IR::Type_Struct(s->name, {new IR::Annotation(IR::ID("__metadata__"), {})},
+                                   structure->compiler_added_fields);
     } else if (s->name == structure->header_type) {
-        auto *annotations =
-            new IR::Annotations({new IR::Annotation(IR::ID("__packet_data__"), {})});
-        return new IR::Type_Struct(s->name, annotations, s->fields);
+        return new IR::Type_Struct(s->name, {new IR::Annotation(IR::ID("__packet_data__"), {})},
+                                   s->fields);
     }
     return s;
 }
@@ -1835,13 +1834,12 @@ std::tuple<const IR::P4Table *, cstring, cstring> SplitP4TableCommon::create_mat
 
 const IR::P4Action *SplitP4TableCommon::create_action(cstring actionName, cstring group_id,
                                                       cstring param) {
-    auto hidden = new IR::Annotations();
-    hidden->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
     auto set_id = new IR::AssignmentStatement(new IR::PathExpression(group_id),
                                               new IR::PathExpression(param));
     auto parameter = new IR::Parameter(param, IR::Direction::None, IR::Type_Bits::get(32));
-    auto action = new IR::P4Action(actionName, hidden, new IR::ParameterList({parameter}),
-                                   new IR::BlockStatement({set_id}));
+    auto action =
+        new IR::P4Action(actionName, {new IR::Annotation(IR::Annotation::hiddenAnnotation, {})},
+                         new IR::ParameterList({parameter}), new IR::BlockStatement({set_id}));
     return action;
 }
 
@@ -1856,12 +1854,11 @@ const IR::P4Table *SplitP4TableCommon::create_member_table(const IR::P4Table *tb
     IR::IndexedVector<IR::Property> member_properties;
     member_properties.push_back(new IR::Property("key", new IR::Key(member_keys), false));
 
-    auto hidden = new IR::Annotations();
-    hidden->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
+    IR::Vector<IR::Annotation> hidden(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
     auto nameAnnon = tbl->getAnnotation(IR::Annotation::nameAnnotation);
     cstring nameA = nameAnnon->getSingleString();
     cstring memName = nameA.replace(nameA.findlast('.'), "." + memberTableName);
-    hidden->addAnnotation(IR::Annotation::nameAnnotation, new IR::StringLiteral(memName), false);
+    hidden.emplace_back(IR::Annotation::nameAnnotation, memName);
 
     IR::IndexedVector<IR::ActionListElement> memberActionList;
     for (auto action : tbl->getActionList()->actionList) memberActionList.push_back(action);
@@ -1874,10 +1871,8 @@ const IR::P4Table *SplitP4TableCommon::create_member_table(const IR::P4Table *tb
     member_properties.push_back(new IR::Property(
         "default_action", new IR::ExpressionValue(tbl->getDefaultAction()), false));
 
-    auto member_table =
-        new IR::P4Table(memberTableName, hidden, new IR::TableProperties(member_properties));
-
-    return member_table;
+    return new IR::P4Table(memberTableName, std::move(hidden),
+                           new IR::TableProperties(member_properties));
 }
 
 const IR::P4Table *SplitP4TableCommon::create_group_table(const IR::P4Table *tbl,
@@ -1891,12 +1886,11 @@ const IR::P4Table *SplitP4TableCommon::create_group_table(const IR::P4Table *tbl
             selector_keys.push_back(key);
         }
     }
-    auto hidden = new IR::Annotations();
-    hidden->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
+    IR::Vector<IR::Annotation> hidden(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
     auto nameAnnon = tbl->getAnnotation(IR::Annotation::nameAnnotation);
     cstring nameA = nameAnnon->getSingleString();
     cstring selName = nameA.replace(nameA.findlast('.'), "." + selectorTableName);
-    hidden->addAnnotation(IR::Annotation::nameAnnotation, new IR::StringLiteral(selName), false);
+    hidden.emplace_back(IR::Annotation::nameAnnotation, selName);
     IR::IndexedVector<IR::Property> selector_properties;
     selector_properties.push_back(new IR::Property("selector", new IR::Key(selector_keys), false));
     selector_properties.push_back(new IR::Property(
@@ -2908,8 +2902,8 @@ const IR::Node *ElimHeaderCopy::postorder(IR::Member *m) {
 
 const IR::Node *DpdkAddPseudoHeaderDecl::preorder(IR::P4Program *program) {
     if (is_all_args_header) return program;
-    auto *annotations = new IR::Annotations({new IR::Annotation(IR::ID("__pseudo_header__"), {})});
-    const IR::Type_Header *pseudo_hdr = new IR::Type_Header(pseudoHeaderTypeName, annotations);
+    const IR::Type_Header *pseudo_hdr = new IR::Type_Header(
+        pseudoHeaderTypeName, {new IR::Annotation(IR::ID("__pseudo_header__"), {})});
     allTypeDecls.push_back(pseudo_hdr);
     allTypeDecls.append(program->objects);
     program->objects = allTypeDecls;
@@ -2922,11 +2916,9 @@ const IR::Node *DpdkAddPseudoHeaderDecl::preorder(IR::Type_Struct *st) {
     bool header_found = isHeadersStruct(st);
     if (header_found) {
         IR::IndexedVector<IR::StructField> fields;
-        auto *annotations =
-            new IR::Annotations({new IR::Annotation(IR::ID("__pseudo_header__"), {})});
         auto *type = new IR::Type_Name(new IR::Path(pseudoHeaderTypeName));
-        const IR::StructField *new_field1 =
-            new IR::StructField(pseudoHeaderInstanceName, annotations, type);
+        const IR::StructField *new_field1 = new IR::StructField(
+            pseudoHeaderInstanceName, {new IR::Annotation(IR::ID("__pseudo_header__"), {})}, type);
         fields = st->fields;
         fields.push_back(new_field1);
         auto *st1 =

@@ -169,6 +169,7 @@ std::vector<const IR::IDeclaration *> ResolutionContext::lookup(const IR::INames
 }
 
 std::vector<const IR::IDeclaration *> ResolutionContext::lookupMatchKind(const IR::ID &name) const {
+    LOG2("Resolving " << name << " as match kind");
     if (const auto *global = findOrigCtxt<IR::P4Program>()) {
         for (const auto *obj : global->objects) {
             if (const auto *match_kind = obj->to<IR::Declaration_MatchKind>()) {
@@ -260,7 +261,7 @@ const IR::IDeclaration *ResolutionContext::getDeclaration(const IR::Path *path,
                                                           bool notNull) const {
     const IR::IDeclaration *result = nullptr;
     const Context *ctxt = nullptr;
-    if (findOrigCtxt<IR::KeyElement>(ctxt) && ctxt->child_index == 2) {
+    if (findOrigCtxt<IR::KeyElement>(ctxt) && ctxt->child_index == 1) {
         // looking up a matchType in a key, so need to do a special lookup
         auto decls = lookupMatchKind(path->name);
         if (decls.empty()) {
