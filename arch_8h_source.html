@@ -231,7 +231,7 @@ $(function(){initNavTree('arch_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00131" name="l00131"></a><span class="lineno">  131</span> </div>
 <div class="line"><a id="l00132" name="l00132"></a><span class="lineno">  132</span>        <span class="keyword">auto</span> *dontTranslate = action-&gt;getAnnotation(<span class="stringliteral">&quot;dont_translate_extern_method&quot;</span>_cs);</div>
 <div class="line"><a id="l00133" name="l00133"></a><span class="lineno">  133</span>        <span class="keywordflow">if</span> (!dontTranslate) <span class="keywordflow">return</span> call;</div>
-<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span> *excluded : dontTranslate-&gt;expr) {</div>
+<div class="line"><a id="l00134" name="l00134"></a><span class="lineno">  134</span>        <span class="keywordflow">for</span> (<span class="keyword">auto</span> *excluded : dontTranslate-&gt;getExpr()) {</div>
 <div class="line"><a id="l00135" name="l00135"></a><span class="lineno">  135</span>            <span class="keyword">auto</span> *excludedMethod = excluded-&gt;to&lt;IR::StringLiteral&gt;();</div>
 <div class="line"><a id="l00136" name="l00136"></a><span class="lineno">  136</span>            <span class="keywordflow">if</span> (!excludedMethod) {</div>
 <div class="line"><a id="l00137" name="l00137"></a><span class="lineno">  137</span>                <a class="code hl_function" href="namespace_p4.html#a9fe6085b1cee8f21f098c9db89644b58">error</a>(</div>

@@ -169,20 +169,19 @@ $(function(){initNavTree('tc_annotations_8h_source.html',''); initResizable(true
 <div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>    <a class="code hl_class" href="class_p4_1_1_t_c_1_1_parse_t_c_annotations.html">ParseTCAnnotations</a>()</div>
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>        : <a class="code hl_class" href="class_p4_1_1_parse_annotations.html">P4::ParseAnnotations</a>(</div>
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>              <span class="stringliteral">&quot;TC&quot;</span>, <span class="keyword">true</span>,</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>              {PARSE_EMPTY(defaultHit), PARSE_EMPTY(defaultHitConst),</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>               PARSE_CONSTANT_OR_STRING_LITERAL(tcType), PARSE_CONSTANT_OR_STRING_LITERAL(numMask),</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>               PARSE_EMPTY(tcMayOverride), PARSE_CONSTANT_OR_STRING_LITERAL(tc_acl),</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>               PARSE_EMPTY(tc_md_write), PARSE_EMPTY(tc_md_read), PARSE_EMPTY(tc_md_write),</div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>               PARSE_EMPTY(tc_md_exec), PARSE_EMPTY(tc_ControlPath), PARSE_EMPTY(tc_key),</div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>               PARSE_EMPTY(tc_data), PARSE_EMPTY(tc_data_scalar), PARSE_EMPTY(tc_init_val),</div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>               PARSE_EMPTY(tc_numel)}) {}</div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>};</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>              {PARSE_EMPTY(defaultHit), PARSE_EMPTY(defaultHitConst), PARSE_STRING_LITERAL(tcType),</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>               PARSE_CONSTANT_OR_STRING_LITERAL(numMask), PARSE_EMPTY(tcMayOverride),</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>               PARSE_STRING_LITERAL(tc_acl), PARSE_EMPTY(tc_md_write), PARSE_EMPTY(tc_md_read),</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>               PARSE_EMPTY(tc_md_write), PARSE_EMPTY(tc_md_exec), PARSE_EMPTY(tc_ControlPath),</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>               PARSE_EMPTY(tc_key), PARSE_EMPTY(tc_data), PARSE_EMPTY(tc_data_scalar),</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>               PARSE_EMPTY(tc_init_val), PARSE_EMPTY(tc_numel)}) {}</div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span>};</div>
 </div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span>}  <span class="comment">// namespace P4::TC</span></div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span> </div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_TC_TCANNOTATIONS_H_ */</span><span class="preprocessor"></span></div>
-<div class="ttc" id="aclass_p4_1_1_parse_annotations_html"><div class="ttname"><a href="class_p4_1_1_parse_annotations.html">P4::ParseAnnotations</a></div><div class="ttdef"><b>Definition</b> parseAnnotations.h:114</div></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span> </div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span>}  <span class="comment">// namespace P4::TC</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_TC_TCANNOTATIONS_H_ */</span><span class="preprocessor"></span></div>
+<div class="ttc" id="aclass_p4_1_1_parse_annotations_html"><div class="ttname"><a href="class_p4_1_1_parse_annotations.html">P4::ParseAnnotations</a></div><div class="ttdef"><b>Definition</b> parseAnnotations.h:138</div></div>
 <div class="ttc" id="aclass_p4_1_1_t_c_1_1_parse_t_c_annotations_html"><div class="ttname"><a href="class_p4_1_1_t_c_1_1_parse_t_c_annotations.html">P4::TC::ParseTCAnnotations</a></div><div class="ttdef"><b>Definition</b> tcAnnotations.h:25</div></div>
 <div class="ttc" id="aclass_p4_1_1cstring_html"><div class="ttname"><a href="class_p4_1_1cstring.html">P4::cstring</a></div><div class="ttdef"><b>Definition</b> cstring.h:85</div></div>
 <div class="ttc" id="anamespace_p4_1_1_t_c_html"><div class="ttname"><a href="namespace_p4_1_1_t_c.html">P4::TC</a></div><div class="ttdoc">This file defines functions for the pass to generate the introspection file.</div><div class="ttdef"><b>Definition</b> tc/backend.cpp:24</div></div>

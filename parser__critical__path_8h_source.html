@@ -196,7 +196,7 @@ $(function(){initNavTree('parser__critical__path_8h_source.html',''); initResiza
 <div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>        <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span> *p4State : state-&gt;p4States) {</div>
 <div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>            <span class="keywordflow">for</span> (<span class="keyword">auto</span> annot : p4State-&gt;annotations) {</div>
 <div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>                <span class="keywordflow">if</span> (annot-&gt;name.name == <span class="stringliteral">&quot;critical&quot;</span>) {</div>
-<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>                    <span class="keyword">auto</span> &amp;exprs = annot-&gt;expr;</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>                    <span class="keyword">auto</span> &amp;exprs = annot-&gt;getExpr();</div>
 <div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>                    <span class="keywordflow">if</span> (exprs.size() == 1) {</div>
 <div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>                        <span class="keyword">auto</span> gress = exprs[0]-&gt;to&lt;IR::StringLiteral&gt;();</div>
 <div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>                        <span class="keywordflow">if</span> (!gress) {</div>

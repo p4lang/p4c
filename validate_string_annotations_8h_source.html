@@ -158,22 +158,24 @@ $(function(){initNavTree('validate_string_annotations_8h_source.html',''); initR
 <div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span>            name != IR::Annotation::noWarnAnnotation) {</div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span>            <span class="keywordflow">return</span>;</div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>        }</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>        <span class="keywordflow">if</span> (annotation-&gt;expr.size() != 1) {</div>
-<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>            <a class="code hl_function" href="namespace_p4.html#a9fe6085b1cee8f21f098c9db89644b58">error</a>(ErrorType::ERR_INVALID, <span class="stringliteral">&quot;%1%: annotation must have exactly 1 argument&quot;</span>,</div>
-<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>                  annotation);</div>
-<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>        }</div>
-<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>        <span class="keyword">const</span> <span class="keyword">auto</span> *e0 = annotation-&gt;expr.at(0);</div>
-<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>        <span class="keywordflow">if</span> (!e0-&gt;is&lt;IR::StringLiteral&gt;()) {</div>
-<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>            <a class="code hl_function" href="namespace_p4.html#a9fe6085b1cee8f21f098c9db89644b58">error</a>(ErrorType::ERR_TYPE_ERROR, <span class="stringliteral">&quot;%1%: @%2% annotation&#39;s value must be a string&quot;</span>, e0,</div>
-<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>                  annotation-&gt;name.originalName);</div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>        }</div>
-<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>    }</div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>};</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>        <span class="comment">// FIXME: Validate annotation type</span></div>
+<div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>        <span class="keyword">const</span> <span class="keyword">auto</span> &amp;expr = annotation-&gt;getExpr();</div>
+<div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>        <span class="keywordflow">if</span> (expr.size() != 1) {</div>
+<div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>            <a class="code hl_function" href="namespace_p4.html#a9fe6085b1cee8f21f098c9db89644b58">error</a>(ErrorType::ERR_INVALID, <span class="stringliteral">&quot;%1%: annotation must have exactly 1 argument&quot;</span>,</div>
+<div class="line"><a id="l00043" name="l00043"></a><span class="lineno">   43</span>                  annotation);</div>
+<div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span>        }</div>
+<div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span>        <span class="keyword">const</span> <span class="keyword">auto</span> *e0 = expr.at(0);</div>
+<div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span>        <span class="keywordflow">if</span> (!e0-&gt;is&lt;IR::StringLiteral&gt;()) {</div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span>            <a class="code hl_function" href="namespace_p4.html#a9fe6085b1cee8f21f098c9db89644b58">error</a>(ErrorType::ERR_TYPE_ERROR, <span class="stringliteral">&quot;%1%: @%2% annotation&#39;s value must be a string&quot;</span>, e0,</div>
+<div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span>                  annotation-&gt;name.originalName);</div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span>        }</div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span>    }</div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>};</div>
 </div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span> </div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span>}  <span class="comment">// namespace P4</span></div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="preprocessor">#endif </span><span class="comment">/* FRONTENDS_P4_VALIDATESTRINGANNOTATIONS_H_  */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span>}  <span class="comment">// namespace P4</span></div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span> </div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="preprocessor">#endif </span><span class="comment">/* FRONTENDS_P4_VALIDATESTRINGANNOTATIONS_H_  */</span><span class="preprocessor"></span></div>
 <div class="ttc" id="aclass_p4_1_1_inspector_html"><div class="ttname"><a href="class_p4_1_1_inspector.html">P4::Inspector</a></div><div class="ttdef"><b>Definition</b> visitor.h:400</div></div>
 <div class="ttc" id="aclass_p4_1_1_validate_string_annotations_html"><div class="ttname"><a href="class_p4_1_1_validate_string_annotations.html">P4::ValidateStringAnnotations</a></div><div class="ttdef"><b>Definition</b> validateStringAnnotations.h:28</div></div>
 <div class="ttc" id="anamespace_p4_html"><div class="ttname"><a href="namespace_p4.html">P4</a></div><div class="ttdoc">TODO: this is not really specific to BMV2, it should reside somewhere else.</div><div class="ttdef"><b>Definition</b> applyOptionsPragmas.cpp:24</div></div>

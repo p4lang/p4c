@@ -173,18 +173,22 @@ template&lt;typename T , typename U &gt; </td></tr>
 template&lt;typename T &gt; </td></tr>
 <tr class="memitem:aca3c95e92eb92a36cf819a5112303681"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>generate</b> (const std::set&lt; T &gt; &amp;v)</td></tr>
 <tr class="separator:aca3c95e92eb92a36cf819a5112303681"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a668d40ca2b41e3b4c75256e0dfd84cf2" id="r_a668d40ca2b41e3b4c75256e0dfd84cf2"><td class="memTemplParams" colspan="2"><a id="a668d40ca2b41e3b4c75256e0dfd84cf2" name="a668d40ca2b41e3b4c75256e0dfd84cf2"></a>
+template&lt;class... Types&gt; </td></tr>
+<tr class="memitem:a668d40ca2b41e3b4c75256e0dfd84cf2"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>generate</b> (const std::variant&lt; Types... &gt; &amp;v)</td></tr>
+<tr class="separator:a668d40ca2b41e3b4c75256e0dfd84cf2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a90d5dcead88ad5a326687aebbb53d6f6" id="r_a90d5dcead88ad5a326687aebbb53d6f6"><td class="memTemplParams" colspan="2"><a id="a90d5dcead88ad5a326687aebbb53d6f6" name="a90d5dcead88ad5a326687aebbb53d6f6"></a>
 template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a90d5dcead88ad5a326687aebbb53d6f6"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>generate</b> (const std::vector&lt; T &gt; &amp;v)</td></tr>
 <tr class="separator:a90d5dcead88ad5a326687aebbb53d6f6"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a5d07baaa3f5aba20617916d84799e337" id="r_a5d07baaa3f5aba20617916d84799e337"><td class="memTemplParams" colspan="2"><a id="a5d07baaa3f5aba20617916d84799e337" name="a5d07baaa3f5aba20617916d84799e337"></a>
+<tr class="memitem:a1254ecc8fdcfe8eb1054c5710a253477" id="r_a1254ecc8fdcfe8eb1054c5710a253477"><td class="memTemplParams" colspan="2"><a id="a1254ecc8fdcfe8eb1054c5710a253477" name="a1254ecc8fdcfe8eb1054c5710a253477"></a>
 template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a5d07baaa3f5aba20617916d84799e337"><td class="memTemplItemLeft" align="right" valign="top">std::enable_if&lt; std::is_same&lt; T, big_int &gt;::value &gt;::type&#160;</td><td class="memTemplItemRight" valign="bottom"><b>generate</b> (const T &amp;v)</td></tr>
-<tr class="separator:a5d07baaa3f5aba20617916d84799e337"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7fe384f32e928bf6236622e19e99f125" id="r_a7fe384f32e928bf6236622e19e99f125"><td class="memTemplParams" colspan="2"><a id="a7fe384f32e928bf6236622e19e99f125" name="a7fe384f32e928bf6236622e19e99f125"></a>
+<tr class="memitem:a1254ecc8fdcfe8eb1054c5710a253477"><td class="memTemplItemLeft" align="right" valign="top">std::enable_if_t&lt; std::is_same_v&lt; T, big_int &gt; &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><b>generate</b> (const T &amp;v)</td></tr>
+<tr class="separator:a1254ecc8fdcfe8eb1054c5710a253477"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af352770c61cd5c556851f8598e4a5771" id="r_af352770c61cd5c556851f8598e4a5771"><td class="memTemplParams" colspan="2"><a id="af352770c61cd5c556851f8598e4a5771" name="af352770c61cd5c556851f8598e4a5771"></a>
 template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a7fe384f32e928bf6236622e19e99f125"><td class="memTemplItemLeft" align="right" valign="top">std::enable_if&lt; has_toJSON&lt; T &gt;::value &amp;&amp;!std::is_base_of&lt; <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a>, T &gt;::value &gt;::type&#160;</td><td class="memTemplItemRight" valign="bottom"><b>generate</b> (const T &amp;v)</td></tr>
-<tr class="separator:a7fe384f32e928bf6236622e19e99f125"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af352770c61cd5c556851f8598e4a5771"><td class="memTemplItemLeft" align="right" valign="top">std::enable_if_t&lt; has_toJSON&lt; T &gt;::value &amp;&amp;!std::is_base_of_v&lt; <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a>, T &gt; &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><b>generate</b> (const T &amp;v)</td></tr>
+<tr class="separator:af352770c61cd5c556851f8598e4a5771"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a90e735bf9ed23dec9226a19bd7f734d5" id="r_a90e735bf9ed23dec9226a19bd7f734d5"><td class="memTemplParams" colspan="2"><a id="a90e735bf9ed23dec9226a19bd7f734d5" name="a90e735bf9ed23dec9226a19bd7f734d5"></a>
 template&lt;typename T , size_t N&gt; </td></tr>
 <tr class="memitem:a90e735bf9ed23dec9226a19bd7f734d5"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>generate</b> (const T(&amp;v)[N])</td></tr>
@@ -195,18 +199,18 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>generate</b> (<a clas
 <tr class="memitem:a9c9e71621222d42cb20b72c349e3e45d" id="r_a9c9e71621222d42cb20b72c349e3e45d"><td class="memItemLeft" align="right" valign="top"><a id="a9c9e71621222d42cb20b72c349e3e45d" name="a9c9e71621222d42cb20b72c349e3e45d"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>generate</b> (double v)</td></tr>
 <tr class="separator:a9c9e71621222d42cb20b72c349e3e45d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a65637f0162e061d6f6b3527818ff79bb" id="r_a65637f0162e061d6f6b3527818ff79bb"><td class="memTemplParams" colspan="2"><a id="a65637f0162e061d6f6b3527818ff79bb" name="a65637f0162e061d6f6b3527818ff79bb"></a>
+<tr class="memitem:a89150686400dc0482bd40c92e362cba0" id="r_a89150686400dc0482bd40c92e362cba0"><td class="memTemplParams" colspan="2"><a id="a89150686400dc0482bd40c92e362cba0" name="a89150686400dc0482bd40c92e362cba0"></a>
 template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a65637f0162e061d6f6b3527818ff79bb"><td class="memTemplItemLeft" align="right" valign="top">std::enable_if&lt; std::is_integral&lt; T &gt;::value &gt;::type&#160;</td><td class="memTemplItemRight" valign="bottom"><b>generate</b> (T v)</td></tr>
-<tr class="separator:a65637f0162e061d6f6b3527818ff79bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a66e6230133337ea72c36e20b7e93f772" id="r_a66e6230133337ea72c36e20b7e93f772"><td class="memTemplParams" colspan="2"><a id="a66e6230133337ea72c36e20b7e93f772" name="a66e6230133337ea72c36e20b7e93f772"></a>
+<tr class="memitem:a89150686400dc0482bd40c92e362cba0"><td class="memTemplItemLeft" align="right" valign="top">std::enable_if_t&lt; std::is_integral_v&lt; T &gt; &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><b>generate</b> (T v)</td></tr>
+<tr class="separator:a89150686400dc0482bd40c92e362cba0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9e6d527c6575a33e35ef93ca1aaf9caa" id="r_a9e6d527c6575a33e35ef93ca1aaf9caa"><td class="memTemplParams" colspan="2"><a id="a9e6d527c6575a33e35ef93ca1aaf9caa" name="a9e6d527c6575a33e35ef93ca1aaf9caa"></a>
 template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a66e6230133337ea72c36e20b7e93f772"><td class="memTemplItemLeft" align="right" valign="top">std::enable_if&lt; std::is_same&lt; T, <a class="el" href="class_p4_1_1_l_t_bit_matrix.html">LTBitMatrix</a> &gt;::value||std::is_enum&lt; T &gt;::value &gt;::type&#160;</td><td class="memTemplItemRight" valign="bottom"><b>generate</b> (T v)</td></tr>
-<tr class="separator:a66e6230133337ea72c36e20b7e93f772"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6ac4d65ee8c081b4a507367db8094234" id="r_a6ac4d65ee8c081b4a507367db8094234"><td class="memTemplParams" colspan="2"><a id="a6ac4d65ee8c081b4a507367db8094234" name="a6ac4d65ee8c081b4a507367db8094234"></a>
+<tr class="memitem:a9e6d527c6575a33e35ef93ca1aaf9caa"><td class="memTemplItemLeft" align="right" valign="top">std::enable_if_t&lt; std::is_same_v&lt; T, <a class="el" href="class_p4_1_1_l_t_bit_matrix.html">LTBitMatrix</a> &gt;||std::is_enum_v&lt; T &gt; &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><b>generate</b> (T v)</td></tr>
+<tr class="separator:a9e6d527c6575a33e35ef93ca1aaf9caa"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a45374aacedb4d37ee6cf73bb24d1d759" id="r_a45374aacedb4d37ee6cf73bb24d1d759"><td class="memTemplParams" colspan="2"><a id="a45374aacedb4d37ee6cf73bb24d1d759" name="a45374aacedb4d37ee6cf73bb24d1d759"></a>
 template&lt;typename T &gt; </td></tr>
-<tr class="memitem:a6ac4d65ee8c081b4a507367db8094234"><td class="memTemplItemLeft" align="right" valign="top">std::enable_if&lt; std::is_pointer&lt; T &gt;::value &amp;&amp;has_toJSON&lt; typenamestd::remove_pointer&lt; T &gt;::type &gt;::value &gt;::type&#160;</td><td class="memTemplItemRight" valign="bottom"><b>generate</b> (T v)</td></tr>
-<tr class="separator:a6ac4d65ee8c081b4a507367db8094234"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a45374aacedb4d37ee6cf73bb24d1d759"><td class="memTemplItemLeft" align="right" valign="top">std::enable_if_t&lt; std::is_pointer_v&lt; T &gt; &amp;&amp;has_toJSON&lt; std::remove_pointer_t&lt; T &gt; &gt;::value &gt;&#160;</td><td class="memTemplItemRight" valign="bottom"><b>generate</b> (T v)</td></tr>
+<tr class="separator:a45374aacedb4d37ee6cf73bb24d1d759"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaedae71d0df6d5179ba1385babdf95b0" id="r_aaedae71d0df6d5179ba1385babdf95b0"><td class="memItemLeft" align="right" valign="top"><a id="aaedae71d0df6d5179ba1385babdf95b0" name="aaedae71d0df6d5179ba1385babdf95b0"></a>
 <a class="el" href="class_p4_1_1_j_s_o_n_generator.html">JSONGenerator</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>operator&lt;&lt;</b> (char ch)</td></tr>
 <tr class="separator:aaedae71d0df6d5179ba1385babdf95b0"><td class="memSeparator" colspan="2">&#160;</td></tr>
