@@ -1287,10 +1287,10 @@ bool ToP4::preorder(const IR::Annotation *a) {
                 // We could be prettier here with smarter logic, but let's do the easy
                 // thing by separating every token with a space.
                 builder.append(open);
-                bool first = true;
+                const char *sep = "";
                 for (auto tok : body) {
-                    if (!first) builder.append(" ");
-                    first = false;
+                    builder.append(sep);
+                    sep = " ";
 
                     bool haveStringLiteral =
                         tok->token_type == P4Parser::token_type::TOK_STRING_LITERAL;

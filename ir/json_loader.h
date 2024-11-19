@@ -225,15 +225,16 @@ class JSONLoader {
     }
 
     template <int N, class Variant>
-    std::enable_if_t<N == std::variant_size_v<Variant>, void> unpack_variant(
-        const JsonObject *, int /*target*/, Variant & /*variant*/) {
+    std::enable_if_t<N == std::variant_size_v<Variant>> unpack_variant(const JsonObject *,
+                                                                       int /*target*/,
+                                                                       Variant & /*variant*/) {
         BUG("Error traversing variant during load");
     }
 
     template <int N, class Variant>
-        std::enable_if_t <
-        N<std::variant_size_v<Variant>, void> unpack_variant(const JsonObject *obj, int target,
-                                                             Variant &variant) {
+    std::enable_if_t<(N < std::variant_size_v<Variant>)> unpack_variant(const JsonObject *obj,
+                                                                        int target,
+                                                                        Variant &variant) {
         if (N == target) {
             variant.template emplace<N>();
             load(P4::get(obj, "value"), std::get<N>(variant));
