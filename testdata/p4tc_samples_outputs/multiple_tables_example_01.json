@@ -236,7 +236,8 @@
           "match_type" : "exact",
           "bitwidth" : 13
         }
-      ]
+      ],
+      "actions" : []
     },
     {
       "name" : "MainControlImpl/set_ct_options",
