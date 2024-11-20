@@ -83,7 +83,8 @@
           "match_type" : "exact",
           "bitwidth" : 8
         }
-      ]
+      ],
+      "actions" : []
     }
   ]
 }
