@@ -9,7 +9,7 @@ check and generate instruction based on the PHV allocation.
 ## Example of using Z3
 an example of using z3 to validate deposit field. Unfortunately it's about 20ms per invocation,
 which is too slow for us.
-``` c++
+```cpp
 boost::optional<Error> ActionMoveSolver::run_deposit_field_z3_solver(
     const ContainerID dest, const std::vector<Assign>& src1,
     const std::vector<Assign>& src2) const {
