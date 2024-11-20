@@ -970,6 +970,11 @@ target_include_directories(
   # FIXME: This should be pulled with FetchContent.
   PRIVATE "${BFN_P4C_SOURCE_DIR}/third_party/spdlog/include"
 )
+target_compile_options(tofinobackend PUBLIC
+  # Currently generates a lot of noise and the identified fields are hard to reason about.
+  # FIXME: Reenable at some point?
+  -Wno-unused-private-field
+)
 add_dependencies(tofinobackend ir-generated frontend genLogging bfn_p4runtime)
 
 if(BUILD_STATIC_BFP4C_LIBS)
