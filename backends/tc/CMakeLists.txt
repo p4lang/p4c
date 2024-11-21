@@ -63,6 +63,7 @@ set(P4TC_BACKEND_HEADERS
    pnaProgramStructure.h
    tcAnnotations.h
    tcExterns.h
+   handleBitAlignment.h
    version.h
    ../ebpf/codeGen.h
    ../ebpf/ebpfBackend.h
