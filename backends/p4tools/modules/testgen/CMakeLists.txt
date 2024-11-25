@@ -77,6 +77,12 @@ set(
 )
 set(TESTGEN_INCLUDES)
 
+# Only enable Tofino tests if the Tofino backend is enabled.
+# FIXME: Can we make this part of the extension?
+if (NOT ENABLE_TOFINO)
+  set (ENABLE_TOOLS_TARGET_TOFINO OFF)
+endif()
+
 file(GLOB testgen_targets RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}/targets ${CMAKE_CURRENT_SOURCE_DIR}/targets/*)
 foreach(ext ${testgen_targets})
   set(testgen_targets_dir ${CMAKE_CURRENT_SOURCE_DIR}/targets/${ext}/)
