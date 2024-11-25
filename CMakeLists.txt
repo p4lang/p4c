@@ -136,9 +136,11 @@ if(ENABLE_UNIFIED_COMPILATION)
   set(CMAKE_UNITY_BUILD ON)
 endif()
 
-# If unity builds are enabled, choose an aggressive batch size.
 if (CMAKE_UNITY_BUILD)
+  # If unity builds are enabled, choose an aggressive batch size.
   set(CMAKE_UNITY_BUILD_BATCH_SIZE 10 CACHE UNINITIALIZED "Set the unity build batch size.")
+  # Disable PCHs as they conflict with PIC settings above
+  set(ENABLE_PCH OFF)
 endif ()
 
 # Set the required options for a (mostly) static release build.
