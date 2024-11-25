@@ -123,7 +123,7 @@ std::vector<const IR::Expression *> AbstractExecutionState::flattenComplexExpres
             auto subList = flattenComplexExpression(listElem->expression, flatValids);
             exprList.insert(exprList.end(), subList.begin(), subList.end());
         }
-        if (auto headerExpr = structExpr->to<IR::HeaderExpression>()) {
+        if (const auto *headerExpr = structExpr->to<IR::HeaderExpression>()) {
             flatValids.emplace_back(headerExpr->validity);
         }
     } else if (const auto *headerStackExpr = inputExpression->to<IR::HeaderStackExpression>()) {

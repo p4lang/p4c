@@ -110,7 +110,7 @@ Continuation::Body Continuation::apply(std::optional<const IR::Node *> value_opt
         // TODO: Resolve this in a cleaner fashion. Maybe we should not step at all?
         if (paramType->is<IR::Type_ActionEnum>()) {
             argType = paramType;
-            auto clone = valueExpr->clone();
+            auto *clone = valueExpr->clone();
             clone->type = paramType;
             value_opt = clone;
         }
@@ -121,10 +121,11 @@ Continuation::Body Continuation::apply(std::optional<const IR::Node *> value_opt
         BUG("Unexpected node passed to continuation: %1%", *value_opt);
     }
 
-    BUG_CHECK(
-        paramType->equiv(*argType),
-        "Continuation %1% has parameter of type %2%, but was given an argument %3% of type %4%",
-        (*parameterOpt), paramType, *value_opt, argType);
+    BUG_CHECK(paramType->equiv(*argType),
+              "Continuation %1% has parameter of type %2% (%3%), but was given an argument %4% of "
+              "type %5% (%6%).",
+              (*parameterOpt), paramType, paramType->node_type_name(), *value_opt, argType,
+              argType->node_type_name());
 
     // Create a copy of this continuation's body, with the value substituted for the continuation's
     // parameter.
