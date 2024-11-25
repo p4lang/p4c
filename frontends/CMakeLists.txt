@@ -281,3 +281,6 @@ target_link_libraries (frontend
   PUBLIC absl::flat_hash_set
   PUBLIC absl::flat_hash_map
 )
+if (ENABLE_PCH)
+  target_precompile_headers(frontend REUSE_FROM ir)
+endif()

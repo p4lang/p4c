@@ -105,6 +105,9 @@ target_link_libraries(bmv2backend ir-generated frontend backends-common)
 
 add_executable(p4c-bm2-ss ${BMV2_SIMPLE_SWITCH_SRCS})
 target_link_libraries (p4c-bm2-ss bmv2backend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
+if (ENABLE_PCH)
+  target_precompile_headers(p4c-bm2-ss REUSE_FROM ir)
+endif()
 
 install(TARGETS p4c-bm2-ss RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
 
@@ -113,10 +116,16 @@ target_link_libraries(portable-common bmv2backend)
 
 add_executable(p4c-bm2-psa ${BMV2_PSA_SWITCH_SRCS})
 target_link_libraries (p4c-bm2-psa portable-common ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
+if (ENABLE_PCH)
+  target_precompile_headers(p4c-bm2-psa REUSE_FROM ir)
+endif()
 install(TARGETS p4c-bm2-psa RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
 
 add_executable(p4c-bm2-pna ${BMV2_PNA_NIC_SRCS})
 target_link_libraries (p4c-bm2-pna portable-common ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
+if (ENABLE_PCH)
+  target_precompile_headers(p4c-bm2-pna REUSE_FROM ir)
+endif()
 install(TARGETS p4c-bm2-pna RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
 
 file(RELATIVE_PATH

@@ -68,11 +68,18 @@ set (BASE_IR_DEF_FILES
 )
 
 set (IR_DEF_FILES ${IR_DEF_FILES} ${BASE_IR_DEF_FILES} PARENT_SCOPE)
+set (PCH_IR_HDRS ${IR_HDRS})
+list(REMOVE_ITEM PCH_IR_HDRS ir-inline.h)
 
-add_library (ir STATIC ${IR_SRCS})
+add_library(ir STATIC ${IR_SRCS})
 target_link_libraries(ir PRIVATE absl::flat_hash_map ${LIBGC_LIBRARIES})
-
-
+if (ENABLE_PCH)
+  # We use PRIVATE here not to populate PRECOMPILED_HEADERS of anything that
+  # links to IR (as this would re-build PCH for every such target). Instead,
+  # we rely on consumer to manage PCH usage explicitly
+  # (e.g. via target_precompile_headers(<user> REUSE_FROM ir)
+  target_precompile_headers(ir PRIVATE ${PCH_IR_HDRS})
+endif()
 add_dependencies(ir genIR)
 
 
