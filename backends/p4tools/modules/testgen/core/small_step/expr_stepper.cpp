@@ -510,10 +510,10 @@ bool ExprStepper::preorder(const IR::AbstractSlice *slice) {
 }
 
 void ExprStepper::stepNoMatch(std::string traceLog, const IR::Expression *condition) {
-    auto &noMatchState = condition ? state.clone() : state;
+    auto &noMatchState = (condition != nullptr) ? state.clone() : state;
     noMatchState.add(*new TraceEvents::GenericDescription("NoMatch"_cs, traceLog));
     noMatchState.replaceTopBody(Continuation::Exception::NoMatch);
-    if (condition) {
+    if (condition != nullptr) {
         result->emplace_back(condition, state, noMatchState);
     } else {
         result->emplace_back(state);
