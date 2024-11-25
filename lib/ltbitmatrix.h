@@ -85,6 +85,7 @@ class LTBitMatrix : private bitvec {
 
     bool operator==(const LTBitMatrix &a) const { return bitvec::operator==(a); }
     bool operator!=(const LTBitMatrix &a) const { return bitvec::operator!=(a); }
+    bool operator<(const LTBitMatrix &a) const { return bitvec::operator<(a); }
     friend bool operator>>(const char *p, LTBitMatrix &bm);
 };
 

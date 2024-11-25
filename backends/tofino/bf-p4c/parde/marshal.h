@@ -58,6 +58,11 @@ struct MarshaledFrom {
     MarshaledFrom(gress_t gress, cstring name) : gress(gress), field_name(name), pre_padding(0) {}
     MarshaledFrom(gress_t gress, cstring name, size_t pre_padding)
         : gress(gress), field_name(name), pre_padding(pre_padding) {}
+
+    bool operator<(const MarshaledFrom &other) const {
+        return std::tie(gress, field_name, pre_padding) <
+               std::tie(other.gress, other.field_name, other.pre_padding);
+    }
 };
 
 inline std::ostream &operator<<(std::ostream &s, const MarshaledFrom &m) {

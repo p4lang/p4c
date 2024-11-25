@@ -2584,6 +2584,17 @@ bool CheckStatefulAlu::preorder(IR::MAU::SaluFunction *fn) {
     return false;
 }
 
+bool IR::MAU::SaluAction::ReturnEnumEncoding::operator<(
+    const IR::MAU::SaluAction::ReturnEnumEncoding &a) const {
+    if (return_type != a.return_type) return false;
+    for (auto &tag : tag_used) {
+        if (tag.second == 0) continue;
+        if (!a.tag_used.count(tag.first)) return false;
+        if ((tag.second & ~a.tag_used.at(tag.first)) != 0) return false;
+    }
+    return (cmp_used & ~a.cmp_used) == 0;
+}
+
 bool IR::MAU::SaluAction::ReturnEnumEncoding::operator<=(
     const IR::MAU::SaluAction::ReturnEnumEncoding &a) const {
     if (return_type != a.return_type) return false;
