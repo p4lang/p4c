@@ -16,13 +16,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BACKENDS_TOFINO_BF_P4C_MAU_MAU_SPEC_H_
-#define BACKENDS_TOFINO_BF_P4C_MAU_MAU_SPEC_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_SPECS_MAU_SPEC_H_
+#define BACKENDS_TOFINO_BF_P4C_SPECS_MAU_SPEC_H_
 
-#include "ir/ir.h"
+#include "lib/bitrange.h"
+
+namespace P4::IR {
+namespace MAU {
+class Table;
+}  // namespace MAU
+class Node;
+}  // namespace P4::IR
 
 // device-specific parameters for MAU/PPU.
-using namespace P4;
+
+struct StageUse {
+    static constexpr int MAX_LOGICAL_IDS = 16;
+    static constexpr int MAX_SRAMS = 80;
+    static constexpr int MAX_TCAMS = 24;
+    static constexpr int MAX_MAPRAMS = 48;
+    static constexpr int MAX_IXBAR_BYTES = 128;
+    static constexpr int MAX_TERNARY_GROUPS = 12;
+};
 
 class IMemSpec {
  public:
@@ -97,10 +112,6 @@ class MauSpec {
     virtual const IXBarSpec &getIXBarSpec() const = 0;  //  pure virtual
     virtual const IMemSpec &getIMemSpec() const = 0;    //  pure virtual
 
-    // Called at the end of table rewriting in TablePlacement::TransformTables to do
-    // any target-specific fixups needed
-    virtual IR::Node *postTransformTables(IR::MAU::Table *const table) const;
-
     // The next 4 lines: correct data for Tof.1 + Tof.2 + Tof.3; must override elsewhere for Tof.5
     virtual int tcam_rows() const;
     virtual int tcam_columns() const;
@@ -110,6 +121,44 @@ class MauSpec {
 
 class TofinoIXBarSpec : public IXBarSpec {
  public:
+    static constexpr int EXACT_GROUPS = 8;
+    static constexpr int EXACT_BYTES_PER_GROUP = 16;
+    static constexpr int HASH_TABLES = 16;
+    static constexpr int HASH_GROUPS = 8;
+    static constexpr int HASH_INDEX_GROUPS = 4; /* groups of 10 bits for indexing */
+    static constexpr int HASH_SINGLE_BITS = 12; /* top 12 bits of hash table individually */
+    static constexpr int HASH_PARITY_BIT = 51;  /* If enabled reserved parity bit position */
+    static constexpr int RAM_SELECT_BIT_START = 40;
+    static constexpr int RAM_LINE_SELECT_BITS = 10;
+    static constexpr int HASH_MATRIX_SIZE = RAM_SELECT_BIT_START + HASH_SINGLE_BITS;
+    static constexpr int HASH_DIST_SLICES = 3;
+    static constexpr int HASH_DIST_BITS = 16;
+    static constexpr int HASH_DIST_EXPAND_BITS = 7;
+    static constexpr int HASH_DIST_MAX_MASK_BITS = HASH_DIST_BITS + HASH_DIST_EXPAND_BITS;
+    static constexpr int HASH_DIST_UNITS = 2;
+    static constexpr int TOFINO_METER_ALU_BYTE_OFFSET = 8;
+    static constexpr int LPF_INPUT_BYTES = 4;
+    static constexpr int TERNARY_GROUPS = StageUse::MAX_TERNARY_GROUPS;
+    static constexpr int BYTE_GROUPS = StageUse::MAX_TERNARY_GROUPS / 2;
+    static constexpr int TERNARY_BYTES_PER_GROUP = 5;
+    static constexpr int TERNARY_BYTES_PER_BIG_GROUP = 11;
+    static constexpr int GATEWAY_SEARCH_BYTES = 4;
+    static constexpr int RESILIENT_MODE_HASH_BITS = 51;
+    static constexpr int FAIR_MODE_HASH_BITS = 14;
+    static constexpr int METER_ALU_HASH_BITS = 52;
+    static constexpr int METER_ALU_HASH_PARITY_BYTE_START = 48;
+    static constexpr int METER_PRECOLOR_SIZE = 2;
+    static constexpr int REPEATING_CONSTRAINT_SECT = 4;
+    static constexpr int MAX_HASH_BITS = 52;
+    static constexpr P4::le_bitrange SELECT_BIT_RANGE =
+        P4::le_bitrange(RAM_SELECT_BIT_START, METER_ALU_HASH_BITS - 1);
+    static constexpr P4::le_bitrange INDEX_BIT_RANGE(int group) {
+        return {group * RAM_LINE_SELECT_BITS, (group + 1) * RAM_LINE_SELECT_BITS - 1};
+    }
+    static constexpr int INDEX_RANGE_SUBGROUP(P4::le_bitrange r) {
+        return r.lo / RAM_LINE_SELECT_BITS;
+    }
+
     TofinoIXBarSpec();
 
     int byteGroups() const override;
@@ -185,4 +234,4 @@ class JBayMauSpec : public MauSpec {
     const IMemSpec &getIMemSpec() const override;
 };
 
-#endif /* BACKENDS_TOFINO_BF_P4C_MAU_MAU_SPEC_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_SPECS_MAU_SPEC_H_ */
