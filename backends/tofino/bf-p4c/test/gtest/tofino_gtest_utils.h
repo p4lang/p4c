@@ -24,7 +24,7 @@
 
 #include "backends/tofino/bf-p4c/arch/arch.h"
 #include "backends/tofino/bf-p4c/bf-p4c-options.h"
-#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "gtest/gtest.h"
 #include "lib/compile_context.h"
 
@@ -80,13 +80,21 @@ class BackendTest : public ::testing::Test {
 /// A GTest fixture for Tofino tests.
 class TofinoBackendTest : public BackendTest {
  public:
-    TofinoBackendTest() { Device::init("Tofino"_cs); }
+    TofinoBackendTest() {
+        auto &options = BackendOptions();
+        Device::init("Tofino"_cs,
+                     {options.phv_scale_factor, options.no_tagalong, options.tof2lab44_workaround});
+    }
 };
 
 /// A GTest fixture for JBay tests.
 class JBayBackendTest : public BackendTest {
  public:
-    JBayBackendTest() { Device::init("Tofino2"_cs); }
+    JBayBackendTest() {
+        auto &options = BackendOptions();
+        Device::init("Tofino2"_cs,
+                     {options.phv_scale_factor, options.no_tagalong, options.tof2lab44_workaround});
+    }
 };
 
 }  // namespace P4::Test

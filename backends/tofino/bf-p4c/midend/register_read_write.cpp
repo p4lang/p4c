@@ -20,8 +20,8 @@
 
 #include "backends/tofino/bf-p4c/arch/helpers.h"
 #include "backends/tofino/bf-p4c/common/utils.h"
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/mau/stateful_alu.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "frontends/p4/methodInstance.h"
 
 namespace BFN {
