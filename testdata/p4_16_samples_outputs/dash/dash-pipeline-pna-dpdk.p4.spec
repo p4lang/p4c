@@ -101,40 +101,40 @@ struct outbound_outbound_mapping_stage_set_vnet_attrs_0_arg_t {
 }
 
 struct route_direct_0_arg_t {
-	bit<32> meter_policy_en
+	bit<8> meter_policy_en
 	bit<16> meter_class
 }
 
 struct route_service_tunnel_0_arg_t {
-	bit<32> overlay_dip_is_v6
+	bit<8> overlay_dip_is_v6
 	bit<128> overlay_dip
-	bit<32> overlay_dip_mask_is_v6
+	bit<8> overlay_dip_mask_is_v6
 	bit<128> overlay_dip_mask
-	bit<32> overlay_sip_is_v6
+	bit<8> overlay_sip_is_v6
 	bit<128> overlay_sip
-	bit<32> overlay_sip_mask_is_v6
+	bit<8> overlay_sip_mask_is_v6
 	bit<128> overlay_sip_mask
-	bit<32> underlay_dip_is_v6
+	bit<8> underlay_dip_is_v6
 	bit<128> underlay_dip
-	bit<32> underlay_sip_is_v6
+	bit<8> underlay_sip_is_v6
 	bit<128> underlay_sip
 	bit<16> dash_encapsulation
 	bit<24> tunnel_key
-	bit<32> meter_policy_en
+	bit<8> meter_policy_en
 	bit<16> meter_class
 }
 
 struct route_vnet_0_arg_t {
 	bit<16> dst_vnet_id
-	bit<32> meter_policy_en
+	bit<8> meter_policy_en
 	bit<16> meter_class
 }
 
 struct route_vnet_direct_0_arg_t {
 	bit<16> dst_vnet_id
-	bit<32> overlay_ip_is_v6
+	bit<8> overlay_ip_is_v6
 	bit<128> overlay_ip
-	bit<32> meter_policy_en
+	bit<8> meter_policy_en
 	bit<16> meter_class
 }
 
@@ -151,7 +151,7 @@ struct set_eni_attrs_arg_t {
 	bit<32> cps
 	bit<32> pps
 	bit<32> flows
-	bit<32> admin_state
+	bit<8> admin_state
 	bit<32> vm_underlay_dip
 	bit<24> vm_vni
 	bit<16> vnet_id
@@ -161,7 +161,7 @@ struct set_eni_attrs_arg_t {
 	bit<16> v4_meter_policy_id
 	bit<16> v6_meter_policy_id
 	bit<16> dash_tunnel_dscp_mode
-	bit<32> dscp
+	bit<8> dscp
 	bit<16> inbound_v4_stage1_dash_acl_group_id
 	bit<16> inbound_v4_stage2_dash_acl_group_id
 	bit<16> inbound_v4_stage3_dash_acl_group_id
@@ -182,7 +182,7 @@ struct set_eni_attrs_arg_t {
 	bit<16> outbound_v6_stage3_dash_acl_group_id
 	bit<16> outbound_v6_stage4_dash_acl_group_id
 	bit<16> outbound_v6_stage5_dash_acl_group_id
-	bit<32> disable_fast_path_icmp_flow_redirection
+	bit<8> disable_fast_path_icmp_flow_redirection
 }
 
 struct set_private_link_mapping_0_arg_t {
@@ -192,15 +192,15 @@ struct set_private_link_mapping_0_arg_t {
 	bit<16> dash_encapsulation
 	bit<24> tunnel_key
 	bit<16> meter_class
-	bit<32> meter_class_override
+	bit<8> meter_class_override
 }
 
 struct set_tunnel_mapping_0_arg_t {
 	bit<32> underlay_dip
 	bit<48> overlay_dmac
-	bit<32> use_dst_vnet_vni
+	bit<8> use_dst_vnet_vni
 	bit<16> meter_class
-	bit<32> meter_class_override
+	bit<8> meter_class_override
 }
 
 struct tunnel_decap_pa_validate_arg_t {
@@ -208,8 +208,8 @@ struct tunnel_decap_pa_validate_arg_t {
 }
 
 struct underlay_pkt_act_0_arg_t {
-	bit<32> packet_action
-	bit<32> next_hop_id
+	bit<16> packet_action
+	bit<16> next_hop_id
 }
 
 header u1_ethernet instanceof ethernet_t
@@ -246,15 +246,15 @@ struct metadata_t {
 	bit<32> local_metadata___eni_data_cps55
 	bit<32> local_metadata___eni_data_pps66
 	bit<32> local_metadata___eni_data_flows77
-	bit<32> local_metadata___eni_data_admin_state88
+	bit<8> local_metadata___eni_data_admin_state88
 	bit<128> local_metadata___eni_data_pl_sip99
 	bit<128> local_metadata___eni_data_pl_sip_mask1010
 	bit<32> local_metadata___eni_data_pl_underlay_sip1111
-	bit<32> local_metadata___eni_data_dscp1212
+	bit<8> local_metadata___eni_data_dscp1212
 	bit<16> local_metadata___eni_data_dscp_mode1313
 	bit<8> local_metadata___appliance_id1515
-	bit<32> local_metadata___is_overlay_ip_v61616
-	bit<32> local_metadata___is_lkup_dst_ip_v61717
+	bit<8> local_metadata___is_overlay_ip_v61616
+	bit<8> local_metadata___is_lkup_dst_ip_v61717
 	bit<8> local_metadata___ip_protocol1818
 	bit<128> local_metadata___dst_ip_addr1919
 	bit<128> local_metadata___src_ip_addr2020
@@ -268,8 +268,8 @@ struct metadata_t {
 	bit<16> local_metadata___stage3_dash_acl_group_id2828
 	bit<16> local_metadata___stage4_dash_acl_group_id2929
 	bit<16> local_metadata___stage5_dash_acl_group_id3030
-	bit<32> local_metadata___meter_policy_en3131
-	bit<32> local_metadata___mapping_meter_class_override3232
+	bit<8> local_metadata___meter_policy_en3131
+	bit<8> local_metadata___mapping_meter_class_override3232
 	bit<16> local_metadata___meter_policy_id3333
 	bit<16> local_metadata___policy_meter_class3434
 	bit<16> local_metadata___route_meter_class3535
@@ -278,7 +278,7 @@ struct metadata_t {
 	bit<32> local_metadata___meter_bucket_index3838
 	bit<16> local_metadata___tunnel_pointer3939
 	;oldname:local_metadata___fast_path_icmp_flow_redirection_disabled4141
-	bit<32> local_metadata___fast_path_icmp_flow_redirection_disabled411
+	bit<8> local_metadata___fast_path_icmp_flow_redirection_disabled411
 	bit<16> local_metadata___target_stage4242
 	bit<32> local_metadata___routing_actions4343
 	bit<8> local_metadata___dropped4444
@@ -308,7 +308,7 @@ struct metadata_t {
 	;oldname:dash_ingress_outbound_outbound_mapping_stage_ca_to_pa_local_metadata___dst_vnet_id33
 	bit<16> dash_ingress_outbound_outbound_mapping_stage_ca_to_pa_local2
 	;oldname:dash_ingress_outbound_outbound_mapping_stage_ca_to_pa_local_metadata___is_lkup_dst_ip_v61717
-	bit<32> dash_ingress_outbound_outbound_mapping_stage_ca_to_pa_local3
+	bit<8> dash_ingress_outbound_outbound_mapping_stage_ca_to_pa_local3
 	;oldname:dash_ingress_outbound_outbound_mapping_stage_ca_to_pa_local_metadata___lkup_dst_ip_addr2121
 	bit<128> dash_ingress_outbound_outbound_mapping_stage_ca_to_pa_local4
 	;oldname:dash_ingress_metering_update_stage_meter_rule_u0_ipv4_dst_addr

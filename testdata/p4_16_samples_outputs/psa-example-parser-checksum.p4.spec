@@ -98,13 +98,13 @@ struct metadata {
 	bit<16> IngressParser_parser_tmp_11
 	bit<16> IngressParser_parser_tmp_12
 	bit<8> IngressParser_parser_tmp_13
-	bit<32> IngressParser_parser_tmp_14
-	bit<32> IngressParser_parser_tmp_15
+	bit<8> IngressParser_parser_tmp_14
+	bit<8> IngressParser_parser_tmp_15
 	bit<8> IngressParser_parser_tmp_16
 	bit<16> IngressParser_parser_tmp_17
 	bit<16> IngressParser_parser_tmp_18
-	bit<32> IngressParser_parser_tmp_19
-	bit<32> IngressParser_parser_tmp_20
+	bit<8> IngressParser_parser_tmp_19
+	bit<16> IngressParser_parser_tmp_20
 	bit<8> IngressParser_parser_tmp_21
 	bit<8> IngressParser_parser_tmp_22
 	bit<32> IngressParser_parser_tmp_23

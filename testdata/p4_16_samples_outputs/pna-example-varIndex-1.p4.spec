@@ -18,14 +18,14 @@ header vlan_tag_1 instanceof vlan_tag_h
 struct main_metadata_t {
 	bit<16> pna_pre_input_metadata_parser_error
 	bit<32> pna_main_input_metadata_input_port
-	bit<32> local_metadata_depth
+	bit<8> local_metadata_depth
 	bit<32> pna_main_output_metadata_output_port
-	bit<32> MainControlT_tmp
-	bit<32> MainControlT_tmp_0
-	bit<32> MainControlT_tmp_1
-	bit<32> MainControlT_tmp_2
-	bit<32> MainControlT_tmp_3
-	bit<32> MainControlT_tmp_4
+	bit<8> MainControlT_tmp
+	bit<8> MainControlT_tmp_0
+	bit<8> MainControlT_tmp_1
+	bit<8> MainControlT_tmp_2
+	bit<8> MainControlT_tmp_3
+	bit<8> MainControlT_tmp_4
 	bit<16> MainControlT_tmp_5
 	bit<16> MainControlT_tmp_6
 	bit<16> MainControlT_tmp_7
@@ -42,8 +42,8 @@ struct main_metadata_t {
 	bit<16> MainControlT_tmp_24
 	bit<16> MainControlT_tmp_25
 	bit<16> MainControlT_tmp_26
-	bit<32> MainControlT_hsVar
-	bit<32> MainControlT_key
+	bit<16> MainControlT_hsVar
+	bit<16> MainControlT_key
 }
 metadata instanceof main_metadata_t
 
