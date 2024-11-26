@@ -24,7 +24,6 @@
 
 #include "backends/tofino/bf-p4c/common/field_defuse.h"
 #include "backends/tofino/bf-p4c/ir/bitrange.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
 #include "backends/tofino/bf-p4c/parde/clot/clot_info.h"
 #include "backends/tofino/bf-p4c/phv/action_phv_constraints.h"
 #include "backends/tofino/bf-p4c/phv/action_source_tracker.h"
@@ -36,7 +35,6 @@
 #include "backends/tofino/bf-p4c/phv/fieldslice_live_range.h"
 #include "backends/tofino/bf-p4c/phv/make_clusters.h"
 #include "backends/tofino/bf-p4c/phv/mau_backtracker.h"
-#include "backends/tofino/bf-p4c/phv/phv.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "backends/tofino/bf-p4c/phv/phv_parde_mau_use.h"
 #include "backends/tofino/bf-p4c/phv/pragma/phv_pragmas.h"
@@ -45,6 +43,8 @@
 #include "backends/tofino/bf-p4c/phv/utils/slice_alloc.h"
 #include "backends/tofino/bf-p4c/phv/utils/tables_to_ids.h"
 #include "backends/tofino/bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 #include "lib/bitvec.h"
 #include "lib/symbitmatrix.h"
 

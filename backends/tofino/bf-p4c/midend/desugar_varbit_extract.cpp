@@ -22,7 +22,7 @@
 
 #include "backends/tofino/bf-p4c/bf-p4c-options.h"
 #include "backends/tofino/bf-p4c/common/utils.h"
-#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "frontends/common/constantFolding.h"
 
 namespace BFN {

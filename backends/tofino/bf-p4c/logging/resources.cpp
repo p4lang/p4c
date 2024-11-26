@@ -438,8 +438,8 @@ ResourcesLogging::HashBitsResourceUsage *ResourcesLogging::logHashBits(unsigned 
     using HashBitUsage = Resources_Schema_Logger::HashBitUsage;
     using ElementUsageHash = Resources_Schema_Logger::ElementUsageHash;
 
-    const auto nBits = 10 * Tofino::IXBar::HASH_INDEX_GROUPS + Tofino::IXBar::HASH_SINGLE_BITS;
-    const auto nFunctions = Tofino::IXBar::HASH_GROUPS;
+    const auto nBits = 10 * TofinoIXBarSpec::HASH_INDEX_GROUPS + TofinoIXBarSpec::HASH_SINGLE_BITS;
+    const auto nFunctions = TofinoIXBarSpec::HASH_GROUPS;
 
     auto hbru = new HashBitsResourceUsage(nBits, nFunctions);
 
@@ -465,8 +465,8 @@ ResourcesLogging::HashDistResourceUsage *ResourcesLogging::logHashDist(unsigned 
     using HashDistUnitUsage = Resources_Schema_Logger::HashDistributionUnitUsage;
     using ElementUsageHashDistribution = Resources_Schema_Logger::ElementUsageHashDistribution;
 
-    const auto nHashIds = Tofino::IXBar::HASH_DIST_UNITS;
-    const auto nUnitIds = Tofino::IXBar::HASH_DIST_SLICES;
+    const auto nHashIds = TofinoIXBarSpec::HASH_DIST_UNITS;
+    const auto nUnitIds = TofinoIXBarSpec::HASH_DIST_SLICES;
 
     auto hdru = new HashDistResourceUsage(nHashIds, nUnitIds);
 

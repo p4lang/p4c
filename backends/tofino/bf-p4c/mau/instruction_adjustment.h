@@ -26,7 +26,7 @@
 #include "backends/tofino/bf-p4c/mau/mau_visitor.h"
 #include "backends/tofino/bf-p4c/mau/resource.h"
 #include "backends/tofino/bf-p4c/mau/tofino/input_xbar.h"
-#include "backends/tofino/bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 #include "lib/safe_vector.h"
 
 using namespace P4;

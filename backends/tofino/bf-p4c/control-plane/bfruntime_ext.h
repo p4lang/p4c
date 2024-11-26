@@ -24,7 +24,7 @@
 #pragma GCC diagnostic ignored "-Wpedantic"
 #include "barefoot/p4info.pb.h"
 #pragma GCC diagnostic pop
-#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "backends/tofino/bf-utils/dynamic_hash/bfn_hash_algorithm.h"
 #include "bfruntime.h"
 
