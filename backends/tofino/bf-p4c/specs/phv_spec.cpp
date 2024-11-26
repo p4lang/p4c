@@ -16,24 +16,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "backends/tofino/bf-p4c/phv/phv_spec.h"
+#include "backends/tofino/bf-p4c/specs/phv_spec.h"
 
 #include <optional>
 #include <sstream>
 
-#include "backends/tofino/bf-p4c/bf-p4c-options.h"
-#include "backends/tofino/bf-p4c/common/pragma/all_pragmas.h"
-#include "frontends/parsers/p4/p4parser.hpp"
 #include "lib/bitvec.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
+#include "lib/log.h"
 
 void PhvSpec::addType(PHV::Type t) {
     const size_t typeId = definedTypes.size();
     definedTypes.push_back(t);
     definedSizes.insert(t.size());
     definedKinds.insert(t.kind());
-    typeIdMap[t] = typeId;
+    typeIdMap_[t] = typeId;
 }
 
 const std::vector<PHV::Type> &PhvSpec::containerTypes() const { return definedTypes; }
@@ -55,7 +53,7 @@ PHV::Type PhvSpec::idToContainerType(unsigned id) const {
     return definedTypes[id];
 }
 
-unsigned PhvSpec::containerTypeToId(PHV::Type type) const { return typeIdMap.at(type); }
+unsigned PhvSpec::containerTypeToId(PHV::Type type) const { return typeIdMap_.at(type); }
 
 PHV::Container PhvSpec::idToContainer(unsigned id) const {
     // Ids are assigned to containers in ascending order by index, with the
@@ -148,13 +146,13 @@ bitvec PhvSpec::range(PHV::Type t, unsigned start, unsigned length) const {
 }
 
 const bitvec &PhvSpec::physicalContainers() const {
-    if (physical_containers_i) return physical_containers_i;
+    if (cache_.physical_containers_i) return cache_.physical_containers_i;
     bitvec containers;
     for (auto sg : mauGroups())
         for (auto g : sg.second) containers |= g;
     for (auto g : tagalongCollections()) containers |= g;
-    physical_containers_i = std::move(containers);
-    return physical_containers_i;
+    cache_.physical_containers_i = std::move(containers);
+    return cache_.physical_containers_i;
 }
 
 bitvec PhvSpec::mauGroup(unsigned container_id) const {
@@ -177,7 +175,7 @@ bitvec PhvSpec::mauGroup(unsigned container_id) const {
 }
 
 const std::map<PHV::Size, std::vector<bitvec>> &PhvSpec::mauGroups() const {
-    if (!mau_groups_i.empty()) return mau_groups_i;
+    if (!cache_.mau_groups_i.empty()) return cache_.mau_groups_i;
 
     std::map<PHV::Size, std::vector<bitvec>> mau_groups;
     for (auto sizeSpec : mauGroupSpec) {
@@ -204,8 +202,8 @@ const std::map<PHV::Size, std::vector<bitvec>> &PhvSpec::mauGroups() const {
             mau_groups[groupSize].push_back(sizeRange);
         }
     }
-    mau_groups_i = std::move(mau_groups);
-    return mau_groups_i;
+    cache_.mau_groups_i = std::move(mau_groups);
+    return cache_.mau_groups_i;
 }
 
 bitvec PhvSpec::ingressOrEgressOnlyContainers(
@@ -225,15 +223,15 @@ bitvec PhvSpec::ingressOrEgressOnlyContainers(
 }
 
 const bitvec &PhvSpec::ingressOnly() const {
-    if (ingress_only_containers_i) return ingress_only_containers_i;
-    ingress_only_containers_i = ingressOrEgressOnlyContainers(ingressOnlyMauGroupIds);
-    return ingress_only_containers_i;
+    if (cache_.ingress_only_containers_i) return cache_.ingress_only_containers_i;
+    cache_.ingress_only_containers_i = ingressOrEgressOnlyContainers(ingressOnlyMauGroupIds);
+    return cache_.ingress_only_containers_i;
 }
 
 const bitvec &PhvSpec::egressOnly() const {
-    if (egress_only_containers_i) return egress_only_containers_i;
-    egress_only_containers_i = ingressOrEgressOnlyContainers(egressOnlyMauGroupIds);
-    return egress_only_containers_i;
+    if (cache_.egress_only_containers_i) return cache_.egress_only_containers_i;
+    cache_.egress_only_containers_i = ingressOrEgressOnlyContainers(egressOnlyMauGroupIds);
+    return cache_.egress_only_containers_i;
 }
 
 unsigned PhvSpec::getTagalongCollectionId(PHV::Container c) const {
@@ -246,7 +244,7 @@ unsigned PhvSpec::getTagalongCollectionId(PHV::Container c) const {
 }
 
 const std::vector<bitvec> &PhvSpec::tagalongCollections() const {
-    if (!tagalong_collections_i.empty()) return tagalong_collections_i;
+    if (!cache_.tagalong_collections_i.empty()) return cache_.tagalong_collections_i;
     std::vector<bitvec> tagalong_collections;
 
     for (unsigned coll_num = 0; coll_num < numTagalongCollections; ++coll_num) {
@@ -259,8 +257,8 @@ const std::vector<bitvec> &PhvSpec::tagalongCollections() const {
         tagalong_collections.push_back(collection);
     }
 
-    tagalong_collections_i = std::move(tagalong_collections);
-    return tagalong_collections_i;
+    cache_.tagalong_collections_i = std::move(tagalong_collections);
+    return cache_.tagalong_collections_i;
 }
 
 bitvec PhvSpec::tagalongCollection(unsigned container_id) const {
@@ -366,15 +364,13 @@ PhvSpec::AddressSpec TofinoPhvSpec::_physicalAddresses = {
     {PHV::Type::H, {128, 1, 128, 0, 0, 0}}, {PHV::Type::TW, {256, 1, 32, 0, 0, 0}},
     {PHV::Type::TB, {288, 1, 32, 0, 0, 0}}, {PHV::Type::TH, {320, 1, 48, 0, 0, 0}}};
 
-TofinoPhvSpec::TofinoPhvSpec() {
+TofinoPhvSpec::TofinoPhvSpec(float phv_scale_factor, bool no_tagalong) {
     addType(PHV::Type::B);
     addType(PHV::Type::H);
     addType(PHV::Type::W);
     addType(PHV::Type::TB);
     addType(PHV::Type::TH);
     addType(PHV::Type::TW);
-
-    auto phv_scale_factor = BackendOptions().phv_scale_factor;
 
     BUG_CHECK(unsigned(phv_scale_factor * 4) >= 1, "PHV scale factor %1% too small",
               phv_scale_factor);
@@ -434,7 +430,7 @@ TofinoPhvSpec::TofinoPhvSpec() {
 
     numTagalongCollections = 8 * phv_scale_factor;
 
-    if (BackendOptions().no_tagalong) numTagalongCollections = 0;
+    if (no_tagalong) numTagalongCollections = 0;
 
     deparserGroupSize = {{PHV::Type::B, 8 * phv_scale_factor},
                          {PHV::Type::H, 8 * phv_scale_factor},
@@ -484,11 +480,11 @@ unsigned TofinoPhvSpec::deparserGroupId(const PHV::Container &c) const {
 }
 
 const bitvec &TofinoPhvSpec::individuallyAssignedContainers() const {
-    if (individually_assigned_containers_i) return individually_assigned_containers_i;
+    if (cache_.individually_assigned_containers_i) return cache_.individually_assigned_containers_i;
     bitvec containers =
         range(PHV::Type::B, 56, 8) | range(PHV::Type::H, 88, 8) | range(PHV::Type::W, 60, 4);
-    individually_assigned_containers_i = std::move(containers);
-    return individually_assigned_containers_i;
+    cache_.individually_assigned_containers_i = std::move(containers);
+    return cache_.individually_assigned_containers_i;
 }
 
 unsigned TofinoPhvSpec::physicalAddress(unsigned id, ArchBlockType_t /* interface */) const {
@@ -526,7 +522,7 @@ PhvSpec::AddressSpec JBayPhvSpec::_physicalDeparserAddresses = {
     {PHV::Type::H, {128, 6, 12, 16, 0, 0}}, {PHV::Type::MH, {140, 6, 4, 16, 0, 0}},
 };
 
-JBayPhvSpec::JBayPhvSpec() {
+JBayPhvSpec::JBayPhvSpec(float phv_scale_factor) {
     addType(PHV::Type::W);
     addType(PHV::Type::MW);
     addType(PHV::Type::DW);
@@ -537,7 +533,6 @@ JBayPhvSpec::JBayPhvSpec() {
     addType(PHV::Type::MH);
     addType(PHV::Type::DH);
 
-    auto phv_scale_factor = BackendOptions().phv_scale_factor;
     if (phv_scale_factor != 1.0)
         P4C_UNIMPLEMENTED("phv_scale_factor not yet implemented for Tofino2");
 
@@ -680,13 +675,13 @@ unsigned JBayPhvSpec::deparserGroupId(const PHV::Container &c) const {
 }
 
 const bitvec &JBayPhvSpec::individuallyAssignedContainers() const {
-    return individually_assigned_containers_i;
+    return cache_.individually_assigned_containers_i;
 }
 
 unsigned JBayPhvSpec::physicalAddress(unsigned id, ArchBlockType_t interface) const {
     const PHV::Type containerType = idToContainerType(id % numContainerTypes());
     const unsigned index = id / numContainerTypes();
-    RangeSpec physicalRange;
+    RangeSpec physicalRange{};
     if (interface == MAU) {
         BUG_CHECK(_physicalMauAddresses.find(containerType) != _physicalMauAddresses.end(),
                   "PHV container %1% has unrecognized type %2%", idToContainer(id), containerType);
@@ -712,82 +707,4 @@ unsigned JBayPhvSpec::physicalAddress(unsigned id, ArchBlockType_t interface) co
 
     return physicalRange.start + block * physicalRange.incr +
            ((blockOffset << physicalRange.shl) >> physicalRange.shr);
-}
-
-void PhvSpec::applyGlobalPragmas(const std::vector<const IR::Annotation *> &global_pragmas) const {
-    // clear all the cached values
-    physical_containers_i.clear();
-    mau_groups_i.clear();
-    ingress_only_containers_i.clear();
-    egress_only_containers_i.clear();
-    tagalong_collections_i.clear();
-    individually_assigned_containers_i.clear();
-    std::set<PHV::Type> typesSeen;
-    for (auto *annot : global_pragmas) {
-        if (annot->name != PragmaPhvLimit::name) continue;
-        physicalContainers();  // create the cache if needed
-        PHV::Container startRange, prev;
-        bool negate = false;
-        for (auto *tok : annot->getUnparsed()) {
-            PHV::Container c(tok->text.c_str(), false);
-            if (startRange) {
-                if (tok->token_type == P4::P4Parser::token_type::TOK_INTEGER)
-                    c = PHV::Container(startRange.type(), atoi(tok->text.c_str()));
-                if (!c || c.type() != startRange.type() || startRange.index() > c.index()) {
-                    error(ErrorType::ERR_INVALID, "invalid container range %2%-%3% in %1%", annot,
-                          startRange, tok->text);
-                } else if (!typeIdMap.count(c.type())) {
-                    // container type not present on this target -- ignore;
-                } else {
-                    bitvec r =
-                        range(c.type(), startRange.index(), c.index() - startRange.index() + 1);
-                    if (negate)
-                        physical_containers_i -= r;
-                    else
-                        physical_containers_i |= r;
-                }
-                startRange = PHV::Container();
-            } else if (tok->text == ",") {
-                negate = false;
-            } else if (tok->text == "-") {
-                if (!(startRange = prev)) negate = true;
-            } else if (c) {
-                if (typeIdMap.count(c.type())) {
-                    if (!typesSeen.count(c.type())) {
-                        typesSeen.insert(c.type());
-                        if (!negate) {
-                            physical_containers_i -=
-                                filterContainerSet(physical_containers_i, c.type());
-                        }
-                        physical_containers_i[containerToId(c)] = !negate;
-                    }
-                }
-            } else if (negate && tok->text == "D") {
-                physical_containers_i -= filterContainerSet(physical_containers_i, PHV::Kind::dark);
-            } else if (negate && tok->text == "M") {
-                physical_containers_i -=
-                    filterContainerSet(physical_containers_i, PHV::Kind::mocha);
-            } else if (negate && tok->text == "T") {
-                physical_containers_i -=
-                    filterContainerSet(physical_containers_i, PHV::Kind::tagalong);
-            } else {
-                error(ErrorType::ERR_INVALID, "invalid container %2% in %1%", annot, tok->text);
-            }
-            prev = c;
-        }
-    }
-    if (physical_containers_i) {
-        // propagate assignment restrictions to other sets;
-        mauGroups();
-        for (auto &v : Values(mau_groups_i))
-            for (auto &bv : v) bv &= physical_containers_i;
-        ingressOnly();
-        ingress_only_containers_i &= physical_containers_i;
-        egressOnly();
-        egress_only_containers_i &= physical_containers_i;
-        tagalongCollections();
-        for (auto &bv : tagalong_collections_i) bv &= physical_containers_i;
-        individuallyAssignedContainers();
-        individually_assigned_containers_i &= physical_containers_i;
-    }
 }

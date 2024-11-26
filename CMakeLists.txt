@@ -414,6 +414,8 @@ add_subdirectory (ir)
 
 # add extensions - before the frontends as they produce IR and extra frontend sources
 set(EXTENSION_IR_SOURCES)
+# extra libraries that need to be linked with the generated IR.
+set(EXTENSION_IR_LIBS)
 # extra sources that need to be linked directly into p4test so that
 # extensions can provide specific conversions (e.g., for externs)
 set(EXTENSION_P4_14_CONV_SOURCES)
@@ -544,7 +546,7 @@ add_custom_target(genIR DEPENDS ${IR_GENERATED_SRCS})
 set_source_files_properties(${IR_GENERATOR} PROPERTIES GENERATED TRUE)
 add_library(ir-generated OBJECT ${IR_GENERATED_SRCS} ${EXTENSION_IR_SOURCES})
 add_dependencies(ir-generated ir genIR)
-target_link_libraries(ir-generated PUBLIC ir ${P4C_LIB_DEPS})
+target_link_libraries(ir-generated PUBLIC ir ${P4C_LIB_DEPS} ${EXTENSION_IR_LIBS})
 
 
 ######################################## IR Generation End ########################################

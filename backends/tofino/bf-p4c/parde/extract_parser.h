@@ -20,9 +20,9 @@
 #define BACKENDS_TOFINO_BF_P4C_PARDE_EXTRACT_PARSER_H_
 
 #include "backends/tofino/bf-p4c/bf-p4c-options.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
 #include "backends/tofino/bf-p4c/logging/pass_manager.h"
 #include "backends/tofino/bf-p4c/parde/parde_visitor.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"

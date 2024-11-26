@@ -453,7 +453,7 @@ TestCode::TestCode(Hdr header, std::string code,
     for (const auto &arg : options) argv.push_back(const_cast<char *>(arg.data()));
     argv.push_back(nullptr);
     o.process(argv.size() - 1, argv.data());
-    Device::init(o.target);
+    Device::init(o.target, {o.phv_scale_factor, o.no_tagalong, o.tof2lab44_workaround});
     BFN::Architecture::init(o.arch);
 
     std::stringstream source;

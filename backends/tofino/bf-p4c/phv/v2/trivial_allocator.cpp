@@ -20,13 +20,13 @@
 
 #include <sstream>
 
-#include "backends/tofino/bf-p4c/device.h"
-#include "backends/tofino/bf-p4c/phv/phv.h"
 #include "backends/tofino/bf-p4c/phv/slicing/types.h"
 #include "backends/tofino/bf-p4c/phv/utils/utils.h"
 #include "backends/tofino/bf-p4c/phv/v2/allocator_base.h"
 #include "backends/tofino/bf-p4c/phv/v2/tx_score.h"
 #include "backends/tofino/bf-p4c/phv/v2/utils_v2.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 
 namespace PHV {
 namespace v2 {

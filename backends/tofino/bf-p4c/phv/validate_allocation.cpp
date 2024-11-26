@@ -25,14 +25,14 @@
 #include <boost/range/adaptors.hpp>
 
 #include "backends/tofino/bf-p4c/arch/bridge_metadata.h"
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/ir/bitrange.h"
 #include "backends/tofino/bf-p4c/mau/action_analysis.h"
 #include "backends/tofino/bf-p4c/parde/clot/clot_info.h"
 #include "backends/tofino/bf-p4c/parde/lower_parser.h"
-#include "backends/tofino/bf-p4c/phv/phv.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "backends/tofino/bf-p4c/phv/phv_parde_mau_use.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"

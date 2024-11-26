@@ -18,7 +18,6 @@
 
 #include "backends/tofino/bf-p4c/phv/v2/greedy_allocator.h"
 
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/parde/clot/clot.h"
 #include "backends/tofino/bf-p4c/phv/utils/utils.h"
 #include "backends/tofino/bf-p4c/phv/v2/allocator_base.h"
@@ -28,6 +27,7 @@
 #include "backends/tofino/bf-p4c/phv/v2/sort_macros.h"
 #include "backends/tofino/bf-p4c/phv/v2/trivial_allocator.h"
 #include "backends/tofino/bf-p4c/phv/v2/utils_v2.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 
 namespace PHV {
 namespace v2 {

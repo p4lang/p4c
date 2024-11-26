@@ -59,6 +59,9 @@
 #include "backends/tofino/bf-p4c/phv/v2/phv_kit.h"
 #include "backends/tofino/bf-p4c/phv/v2/table_replay_friendly_constraints.h"
 
+void applyGlobalPragmas(const PhvSpec &phvspec,
+                        const std::vector<const IR::Annotation *> &global_pragmas);
+
 /** This is the main PHV allocation pass manager.
  */
 class PHV_AnalysisPass : public Logging::PassManager {

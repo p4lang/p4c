@@ -72,11 +72,11 @@
 #include "backends/tofino/bf-p4c/bf-p4c-options.h"
 #include "backends/tofino/bf-p4c/common/table_printer.h"
 #include "backends/tofino/bf-p4c/common/utils.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
 #include "backends/tofino/bf-p4c/logging/filelog.h"
 #include "backends/tofino/bf-p4c/mau/memories.h"
 #include "backends/tofino/bf-p4c/mau/resource_estimate.h"
 #include "backends/tofino/bf-p4c/mau/table_placement.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
 #include "lib/hex.h"
 #include "lib/map.h"
 using namespace State;

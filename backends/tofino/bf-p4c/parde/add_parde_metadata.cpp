@@ -23,7 +23,7 @@
 #include "backends/tofino/bf-p4c/common/pragma/all_pragmas.h"
 #include "backends/tofino/bf-p4c/common/pragma/collect_global_pragma.h"
 #include "backends/tofino/bf-p4c/common/pragma/pragma.h"
-#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "lib/exceptions.h"
 
 bool AddParserMetadata::preorder(IR::BFN::Parser *parser) {
