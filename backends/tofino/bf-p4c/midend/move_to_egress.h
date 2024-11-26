@@ -19,9 +19,9 @@
 #ifndef BF_P4C_MIDEND_MOVE_TO_EGRESS_H_
 #define BF_P4C_MIDEND_MOVE_TO_EGRESS_H_
 
-#include "defuse.h"
+#include "backends/tofino/bf-p4c/midend/defuse.h"
+#include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "ir/ir.h"
-#include "midend/type_checker.h"
 
 class MoveToEgress : public PassManager {
     BFN::EvaluatorPass *evaluator;

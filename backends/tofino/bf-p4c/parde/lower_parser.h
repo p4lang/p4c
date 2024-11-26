@@ -19,11 +19,11 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_PARDE_LOWER_PARSER_H_
 #define BACKENDS_TOFINO_BF_P4C_PARDE_LOWER_PARSER_H_
 
+#include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/logging/pass_manager.h"
+#include "backends/tofino/bf-p4c/logging/phv_logging.h"
 #include "backends/tofino/bf-p4c/parde/parser_header_sequences.h"
-#include "common/utils.h"
 #include "ir/ir.h"
-#include "logging/pass_manager.h"
-#include "logging/phv_logging.h"
 
 class ClotInfo;
 class PhvInfo;

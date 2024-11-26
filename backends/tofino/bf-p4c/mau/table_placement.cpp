@@ -41,6 +41,7 @@
 #include "backends/tofino/bf-p4c/common/ir_utils.h"
 #include "backends/tofino/bf-p4c/ir/table_tree.h"
 #include "backends/tofino/bf-p4c/lib/error_type.h"
+#include "backends/tofino/bf-p4c/lib/pointer_wrapper.h"
 #include "backends/tofino/bf-p4c/logging/manifest.h"
 #include "backends/tofino/bf-p4c/mau/action_data_bus.h"
 #include "backends/tofino/bf-p4c/mau/attached_entries.h"
@@ -62,7 +63,6 @@
 #include "lib/bitops.h"
 #include "lib/bitvec.h"
 #include "lib/log.h"
-#include "lib/pointer_wrapper.h"
 #include "lib/safe_vector.h"
 #include "lib/set.h"
 

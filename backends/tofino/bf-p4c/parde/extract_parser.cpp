@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "extract_parser.h"
+#include "backends/tofino/bf-p4c/parde/extract_parser.h"
 
 #include <algorithm>
 #include <map>

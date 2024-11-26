@@ -18,9 +18,9 @@
 
 #include "backends/tofino/bf-p4c/phv/cluster_phv_operations.h"
 
+#include "backends/tofino/bf-p4c/common/utils.h"
 #include "backends/tofino/bf-p4c/ir/bitrange.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
-#include "common/utils.h"
 #include "lib/log.h"
 
 const ordered_set<cstring> PHV_Field_Operations::BITWISE_OPS = {"set"_cs,   "conditionally-set"_cs,

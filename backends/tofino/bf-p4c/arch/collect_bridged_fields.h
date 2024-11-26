@@ -22,7 +22,7 @@
 #include <optional>
 #include <utility>
 
-#include "ir/control_flow_visitor.h"
+#include "backends/tofino/bf-p4c/ir/control_flow_visitor.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/ordered_map.h"

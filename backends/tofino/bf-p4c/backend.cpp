@@ -59,7 +59,7 @@
  *   - BFN::CollectIXBarInfo
  */
 
-#include "backend.h"
+#include "backends/tofino/bf-p4c/backend.h"
 
 #include <fstream>
 #include <set>
@@ -128,7 +128,6 @@
 #include "backends/tofino/bf-p4c/phv/split_padding.h"
 #include "backends/tofino/bf-p4c/phv/utils/slice_alloc.h"
 #include "backends/tofino/bf-p4c/phv/v2/metadata_initialization.h"
-#include "ir/ir-generated.h"
 #include "ir/pass_manager.h"
 #include "lib/indent.h"
 

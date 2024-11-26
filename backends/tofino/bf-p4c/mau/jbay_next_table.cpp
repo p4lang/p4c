@@ -22,10 +22,10 @@
 #include <unordered_set>
 
 #include "backends/tofino/bf-p4c/common/table_printer.h"
+#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/mau/memories.h"
 #include "backends/tofino/bf-p4c/mau/resource.h"
 #include "backends/tofino/bf-p4c/mau/table_layout.h"
-#include "device.h"
 #include "lib/error.h"
 
 /* This pass calculates 2 data structures used during assembly generation:

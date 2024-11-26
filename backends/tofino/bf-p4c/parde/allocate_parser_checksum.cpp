@@ -21,9 +21,9 @@
 #include <map>
 
 #include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/parde/clot/clot_info.h"
 #include "backends/tofino/bf-p4c/parde/dump_parser.h"
-#include "device.h"
 #include "lib/bitrange.h"
 #include "lib/cstring.h"
 

@@ -44,7 +44,6 @@
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/uniqueNames.h"
-#include "ir/ir-generated.h"
 #include "ir/ir.h"
 #include "ir/namemap.h"
 #include "ir/pass_manager.h"

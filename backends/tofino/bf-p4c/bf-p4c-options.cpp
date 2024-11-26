@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bf-p4c-options.h"
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
 
 #include <libgen.h>
 
