@@ -24,19 +24,10 @@
 #include "lib/bitvec.h"
 #include "backends/tofino/bf-p4c/common/debug_info.h"
 #include "backends/tofino/bf-p4c/ir/bitrange.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
 #include "backends/tofino/bf-p4c/parde/clot/clot.h"
-#include "backends/tofino/bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 #include "backends/tofino/bf-p4c/lib/error_macros.h"
-
-struct StageUse {
-    static constexpr int MAX_LOGICAL_IDS = 16;
-    static constexpr int MAX_SRAMS = 80;
-    static constexpr int MAX_TCAMS = 24;
-    static constexpr int MAX_MAPRAMS = 48;
-    static constexpr int MAX_IXBAR_BYTES = 128;
-    static constexpr int MAX_TERNARY_GROUPS = 12;
-};
 
 /**
  * @namespace IR::BFN

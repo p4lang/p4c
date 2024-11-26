@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_MATCH_REGISTER_H_
-#define BACKENDS_TOFINO_BF_P4C_PARDE_MATCH_REGISTER_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_SPECS_MATCH_REGISTER_H_
+#define BACKENDS_TOFINO_BF_P4C_SPECS_MATCH_REGISTER_H_
 
 #include <iostream>
 
@@ -62,4 +62,4 @@ inline std::ostream &operator<<(std::ostream &out, const MatchRegister &c) { ret
 
 }  // namespace P4
 
-#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_MATCH_REGISTER_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_SPECS_MATCH_REGISTER_H_ */

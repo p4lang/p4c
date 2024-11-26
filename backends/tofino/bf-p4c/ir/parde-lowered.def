@@ -25,8 +25,8 @@
 #include "backends/tofino/bf-p4c/ir/bitrange.h"
 #include "backends/tofino/bf-p4c/ir/ir_enums.h"
 #include "backends/tofino/bf-p4c/parde/clot/clot.h"
-#include "backends/tofino/bf-p4c/parde/match_register.h"
-#include "backends/tofino/bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/specs/match_register.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 
 namespace BFN {
 struct FieldPacking;

@@ -33,7 +33,7 @@
 #include "backends/tofino/bf-p4c/control-plane/bfruntime.h"
 #include "backends/tofino/bf-p4c/control-plane/p4runtime_force_std.h"
 #include "backends/tofino/bf-p4c/control-plane/runtime.h"
-#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "barefoot/p4info.pb.h"
 #include "control-plane/flattenHeader.h"
 #include "control-plane/p4RuntimeArchHandler.h"

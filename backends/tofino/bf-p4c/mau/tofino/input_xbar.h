@@ -28,67 +28,32 @@ namespace Tofino {
 using namespace P4;
 
 struct IXBar : public ::IXBar {
-    // FIXME -- make these per-device params
-    static constexpr int EXACT_GROUPS = 8;
-    static constexpr int EXACT_BYTES_PER_GROUP = 16;
-    static constexpr int HASH_TABLES = 16;
-    static constexpr int HASH_GROUPS = 8;
-    static constexpr int HASH_INDEX_GROUPS = 4;  /* groups of 10 bits for indexing */
-    static constexpr int HASH_SINGLE_BITS = 12;  /* top 12 bits of hash table individually */
-    static constexpr int HASH_PARITY_BIT = 51;  /* If enabled reserved parity bit position */
-    static constexpr int RAM_SELECT_BIT_START = 40;
-    static constexpr int RAM_LINE_SELECT_BITS = 10;
-    static constexpr int HASH_MATRIX_SIZE = RAM_SELECT_BIT_START + HASH_SINGLE_BITS;
-    static constexpr int HASH_DIST_SLICES = 3;
-    static constexpr int HASH_DIST_BITS = 16;
-    static constexpr int HASH_DIST_EXPAND_BITS = 7;
-    static constexpr int HASH_DIST_MAX_MASK_BITS = HASH_DIST_BITS + HASH_DIST_EXPAND_BITS;
-    static constexpr int HASH_DIST_UNITS = 2;
-    static constexpr int TOFINO_METER_ALU_BYTE_OFFSET = 8;
-    static constexpr int LPF_INPUT_BYTES = 4;
-    static constexpr int TERNARY_GROUPS = StageUse::MAX_TERNARY_GROUPS;
-    static constexpr int BYTE_GROUPS = StageUse::MAX_TERNARY_GROUPS/2;
-    static constexpr int TERNARY_BYTES_PER_GROUP = 5;
-    static constexpr int TERNARY_BYTES_PER_BIG_GROUP = 11;
-    static constexpr int GATEWAY_SEARCH_BYTES = 4;
-    static constexpr int RESILIENT_MODE_HASH_BITS = 51;
-    static constexpr int FAIR_MODE_HASH_BITS = 14;
-    static constexpr int METER_ALU_HASH_BITS = 52;
-    static constexpr int METER_ALU_HASH_PARITY_BYTE_START = 48;
-    static constexpr int METER_PRECOLOR_SIZE = 2;
-    static constexpr int REPEATING_CONSTRAINT_SECT = 4;
-    static constexpr int MAX_HASH_BITS = 52;
-    static constexpr le_bitrange SELECT_BIT_RANGE =
-            le_bitrange(RAM_SELECT_BIT_START, METER_ALU_HASH_BITS-1);
-    static constexpr le_bitrange INDEX_BIT_RANGE(int group) {
-            return le_bitrange(group*RAM_LINE_SELECT_BITS, (group+1)*RAM_LINE_SELECT_BITS - 1); }
-    static constexpr int INDEX_RANGE_SUBGROUP(le_bitrange r) { return r.lo / RAM_LINE_SELECT_BITS; }
 
     static int get_meter_alu_hash_bits() {
         // If hash parity is enabled reserve a bit for parity
         if (!BackendOptions().disable_gfm_parity)
-            return METER_ALU_HASH_BITS - 1;
-        return METER_ALU_HASH_BITS;
+            return TofinoIXBarSpec::METER_ALU_HASH_BITS - 1;
+        return TofinoIXBarSpec::METER_ALU_HASH_BITS;
     }
 
     static int get_hash_single_bits() {
         static bool disable_gfm_parity = BackendOptions().disable_gfm_parity;
         // If hash parity is enabled reserve a bit for parity
         if (!disable_gfm_parity)
-            return HASH_SINGLE_BITS - 1;
-        return HASH_SINGLE_BITS;
+            return TofinoIXBarSpec::HASH_SINGLE_BITS - 1;
+        return TofinoIXBarSpec::HASH_SINGLE_BITS;
     }
 
  private:
     static int get_hash_matrix_size() {
-        return RAM_SELECT_BIT_START + get_hash_single_bits();
+        return TofinoIXBarSpec::RAM_SELECT_BIT_START + get_hash_single_bits();
     }
 
     static int get_max_hash_bits() {
         // If hash parity is enabled reserve a bit for parity
         if (!BackendOptions().disable_gfm_parity)
-            return MAX_HASH_BITS - 1;
-        return MAX_HASH_BITS;
+            return TofinoIXBarSpec::MAX_HASH_BITS - 1;
+        return TofinoIXBarSpec::MAX_HASH_BITS;
     }
 
     using Loc = ::IXBar::Loc;
@@ -111,11 +76,11 @@ struct IXBar : public ::IXBar {
     /** IXBar tracks the use of all the input xbar bytes in a single stage.  Each byte use is set
      * to record the container it will be getting and the bit offset within the container.
      * NOTE: Changes here require changes to .gdbinit pretty printer */
-    BFN::Alloc2D<std::pair<PHV::Container, int>, EXACT_GROUPS, EXACT_BYTES_PER_GROUP>
+    BFN::Alloc2D<std::pair<PHV::Container, int>, TofinoIXBarSpec::EXACT_GROUPS, TofinoIXBarSpec::EXACT_BYTES_PER_GROUP>
                                                                                     exact_use;
-    BFN::Alloc2D<std::pair<PHV::Container, int>, TERNARY_GROUPS, TERNARY_BYTES_PER_GROUP>
+    BFN::Alloc2D<std::pair<PHV::Container, int>, TofinoIXBarSpec::TERNARY_GROUPS, TofinoIXBarSpec::TERNARY_BYTES_PER_GROUP>
                                                                                     ternary_use;
-    BFN::Alloc1D<std::pair<PHV::Container, int>, BYTE_GROUPS>                       byte_group_use;
+    BFN::Alloc1D<std::pair<PHV::Container, int>, TofinoIXBarSpec::BYTE_GROUPS>                       byte_group_use;
     BFN::Alloc2Dbase<std::pair<PHV::Container, int>> &use(bool ternary) {
         if (ternary) return ternary_use;
         return exact_use; }
@@ -131,29 +96,29 @@ struct IXBar : public ::IXBar {
     /* Track the use of hashtables/groups too -- FIXME -- should it be a separate data structure?
      * strings here are table names
      * NOTE: Changes here require changes to .gdbinit pretty printer */
-    unsigned                                    hash_index_inuse[HASH_INDEX_GROUPS] = { 0 };
-    BFN::Alloc2D<cstring, HASH_TABLES, HASH_INDEX_GROUPS>    hash_index_use;
-    BFN::Alloc2D<cstring, HASH_TABLES, HASH_SINGLE_BITS>     hash_single_bit_use;
-    unsigned                                    hash_single_bit_inuse[HASH_SINGLE_BITS] = { 0 };
-    BFN::Alloc1D<cstring, HASH_GROUPS>                      hash_group_print_use;
-    unsigned                                    hash_group_use[HASH_GROUPS] = { 0 };
-    BFN::Alloc2D<cstring, HASH_TABLES, HASH_DIST_SLICES>     hash_dist_use;
-    bitvec                                      hash_dist_inuse[HASH_TABLES] = { bitvec() };
-    BFN::Alloc2D<cstring, HASH_TABLES, HASH_DIST_SLICES * HASH_DIST_BITS>   hash_dist_bit_use;
-    bitvec                                      hash_dist_bit_inuse[HASH_TABLES] = { bitvec() };
-    parity_status_t  hash_group_parity_use[HASH_GROUPS] = { PARITY_NONE };
+    unsigned                                    hash_index_inuse[TofinoIXBarSpec::HASH_INDEX_GROUPS] = { 0 };
+    BFN::Alloc2D<cstring, TofinoIXBarSpec::HASH_TABLES, TofinoIXBarSpec::HASH_INDEX_GROUPS>    hash_index_use;
+    BFN::Alloc2D<cstring, TofinoIXBarSpec::HASH_TABLES, TofinoIXBarSpec::HASH_SINGLE_BITS>     hash_single_bit_use;
+    unsigned                                    hash_single_bit_inuse[TofinoIXBarSpec::HASH_SINGLE_BITS] = { 0 };
+    BFN::Alloc1D<cstring, TofinoIXBarSpec::HASH_GROUPS>                      hash_group_print_use;
+    unsigned                                    hash_group_use[TofinoIXBarSpec::HASH_GROUPS] = { 0 };
+    BFN::Alloc2D<cstring, TofinoIXBarSpec::HASH_TABLES, TofinoIXBarSpec::HASH_DIST_SLICES>     hash_dist_use;
+    bitvec                                      hash_dist_inuse[TofinoIXBarSpec::HASH_TABLES] = { bitvec() };
+    BFN::Alloc2D<cstring, TofinoIXBarSpec::HASH_TABLES, TofinoIXBarSpec::HASH_DIST_SLICES * TofinoIXBarSpec::HASH_DIST_BITS>   hash_dist_bit_use;
+    bitvec                                      hash_dist_bit_inuse[TofinoIXBarSpec::HASH_TABLES] = { bitvec() };
+    parity_status_t  hash_group_parity_use[TofinoIXBarSpec::HASH_GROUPS] = { PARITY_NONE };
 
     // Added on update to be verified
-    bitvec hash_used_per_function[HASH_GROUPS] = { bitvec() };
+    bitvec hash_used_per_function[TofinoIXBarSpec::HASH_GROUPS] = { bitvec() };
 
-    int hash_dist_groups[HASH_DIST_UNITS] = {-1, -1};
+    int hash_dist_groups[TofinoIXBarSpec::HASH_DIST_UNITS] = {-1, -1};
     friend class IXBarRealign;
 
     /* API for unit tests */
  public:
     BFN::Alloc2Dbase<std::pair<PHV::Container, int>> &get_exact_use() { return exact_use; }
     BFN::Alloc2Dbase<std::pair<PHV::Container, int>> &get_ternary_use() { return ternary_use; }
-    BFN::Alloc1D<std::pair<PHV::Container, int>, BYTE_GROUPS> &get_byte_group_use() {
+    BFN::Alloc1D<std::pair<PHV::Container, int>, TofinoIXBarSpec::BYTE_GROUPS> &get_byte_group_use() {
         return byte_group_use; }
 
     // map (type, group, byte) coordinate to linear xbar output space
@@ -203,9 +168,9 @@ struct IXBar : public ::IXBar {
             return IXBar::hash_dist_name(hash_dist_type); }
 
         /* which of the 16 hash tables we are using (bitvec) */
-        unsigned        hash_table_inputs[HASH_GROUPS] = { 0 };
+        unsigned        hash_table_inputs[TofinoIXBarSpec::HASH_GROUPS] = { 0 };
         /* hash seed for different hash groups */
-        bitvec          hash_seed[HASH_GROUPS];
+        bitvec          hash_seed[TofinoIXBarSpec::HASH_GROUPS];
 
         /* tracking bits that are placed into the upper 12 bits of a hash group
          * (with an identity hash) for use by a gateway */
@@ -469,7 +434,7 @@ struct IXBar : public ::IXBar {
          *
          * @sa is_better_group in input_xbar.cpp
          */
-        std::array<bitvec, REPEATING_CONSTRAINT_SECT> _free = { { bitvec() } };
+        std::array<bitvec, TofinoIXBarSpec::REPEATING_CONSTRAINT_SECT> _free = { { bitvec() } };
         bitvec free(bitvec can_use) const {
             bitvec rv;
             for (auto bit : can_use)
@@ -477,7 +442,7 @@ struct IXBar : public ::IXBar {
             return rv;
         }
 
-        bitvec max_free() const { return free(bitvec(0, REPEATING_CONSTRAINT_SECT)); }
+        bitvec max_free() const { return free(bitvec(0, TofinoIXBarSpec::REPEATING_CONSTRAINT_SECT)); }
         bool attempted = false;
         bool hash_open[2] = { true, true };
         type_t hash_table_type[2] = { FREE, FREE };
@@ -521,9 +486,9 @@ struct IXBar : public ::IXBar {
                 return rv;
             rv.hash_dist = hd;
             if (rv.hash_dist) {
-                rv.index_groups = HASH_DIST_SLICES;
+                rv.index_groups = TofinoIXBarSpec::HASH_DIST_SLICES;
             } else {
-                rv.index_groups = HASH_INDEX_GROUPS;
+                rv.index_groups = TofinoIXBarSpec::HASH_INDEX_GROUPS;
                 rv.select_bits = IXBar::get_hash_single_bits();
             }
             return rv;
@@ -578,7 +543,7 @@ struct IXBar : public ::IXBar {
     bool allocPartition(const IR::MAU::Table *tbl, const PhvInfo &phv, Use &alloc,
                         bool second_try);
     int getHashGroup(unsigned hash_table_input, const hash_matrix_reqs *hm_reqs = nullptr);
-    void getHashDistGroups(unsigned hash_table_input, int hash_group_opt[HASH_DIST_UNITS]);
+    void getHashDistGroups(unsigned hash_table_input, int hash_group_opt[TofinoIXBarSpec::HASH_DIST_UNITS]);
     bool allocProxyHash(const IR::MAU::Table *tbl, const PhvInfo &phv,
         const LayoutOption *lo, Use &alloc, Use &proxy_hash_alloc);
     bool allocProxyHashKey(const IR::MAU::Table *tbl, const PhvInfo &phv, const LayoutOption *lo,

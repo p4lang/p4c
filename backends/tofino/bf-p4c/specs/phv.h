@@ -16,8 +16,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_P4C_PHV_PHV_H_
-#define BF_P4C_PHV_PHV_H_
+#ifndef BF_P4C_SPECS_PHV_H_
+#define BF_P4C_SPECS_PHV_H_
 
 #include <iosfwd>
 #include <limits>
@@ -336,4 +336,4 @@ std::ostream &operator<<(std::ostream &out, const LiveRange &s);
 P4::JSONGenerator &operator<<(P4::JSONGenerator &out, const PHV::Container c);
 }  // namespace PHV
 
-#endif /* BF_P4C_PHV_PHV_H_ */
+#endif /* BF_P4C_SPECS_PHV_H_ */

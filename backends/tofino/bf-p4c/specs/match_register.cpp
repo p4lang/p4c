@@ -20,10 +20,11 @@
 
 #include <sstream>
 
-#include "ir/ir.h"
 #include "ir/json_generator.h"
 #include "ir/json_loader.h"
+#include "ir/json_parser.h"
 
+namespace P4 {
 int MatchRegister::s_id = 0;
 
 cstring MatchRegister::toString() const {
@@ -55,3 +56,5 @@ MatchRegister MatchRegister::fromJSON(JSONLoader &json) {
 P4::JSONGenerator &operator<<(P4::JSONGenerator &out, const MatchRegister &c) {
     return out << c.toString();
 }
+
+}  // namespace P4

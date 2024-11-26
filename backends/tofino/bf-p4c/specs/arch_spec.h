@@ -16,11 +16,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BACKENDS_TOFINO_BF_P4C_ARCH_ARCH_SPEC_H_
-#define BACKENDS_TOFINO_BF_P4C_ARCH_ARCH_SPEC_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_SPECS_ARCH_SPEC_H_
+#define BACKENDS_TOFINO_BF_P4C_SPECS_ARCH_SPEC_H_
 
-#include "backends/tofino/bf-p4c/ir/gress.h"
-#include "ir/ir.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
 
 struct IntrinsicField {
  public:
@@ -157,4 +156,4 @@ class JBayArchSpec : public ArchSpec {
     JBayArchSpec();
 };
 
-#endif /* BACKENDS_TOFINO_BF_P4C_ARCH_ARCH_SPEC_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_SPECS_ARCH_SPEC_H_ */

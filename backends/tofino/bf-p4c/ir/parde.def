@@ -25,7 +25,7 @@
 #include "backends/tofino/bf-p4c/common/debug_info.h"
 #include "backends/tofino/bf-p4c/ir/bitrange.h"
 #include "backends/tofino/bf-p4c/parde/marshal.h"
-#include "backends/tofino/bf-p4c/parde/match_register.h"
+#include "backends/tofino/bf-p4c/specs/match_register.h"
 #end
 
 namespace BFN {

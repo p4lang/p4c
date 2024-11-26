@@ -5,7 +5,7 @@
  * use this file except in compliance with the License.  You may obtain a copy
  * of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/ilcenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software distributed
  * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
@@ -16,15 +16,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BACKENDS_TOFINO_BF_P4C_PARDE_PARDE_SPEC_H_
-#define BACKENDS_TOFINO_BF_P4C_PARDE_PARDE_SPEC_H_
+#ifndef BACKENDS_TOFINO_BF_P4C_SPECS_PARDE_SPEC_H_
+#define BACKENDS_TOFINO_BF_P4C_SPECS_PARDE_SPEC_H_
 
 #include <map>
+#include <unordered_set>
 #include <vector>
 
-#include "backends/tofino/bf-p4c/bf-p4c-options.h"
 #include "backends/tofino/bf-p4c/ir/bitrange.h"
-#include "backends/tofino/bf-p4c/parde/match_register.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
+#include "backends/tofino/bf-p4c/specs/match_register.h"
 
 using namespace P4::literals;
 
@@ -573,7 +574,11 @@ class TofinoPardeSpec : public PardeSpec {
 };
 
 class JBayPardeSpec : public PardeSpec {
+    bool tof2lab44_workaround_;
+
  public:
+    explicit JBayPardeSpec(bool tof2lab44_workaround)
+        : tof2lab44_workaround_(tof2lab44_workaround) {}
     size_t bytePhase0Size() const override { return 16; }
     size_t byteIngressPrePacketPaddingSize() const override { return 8; }
 
@@ -631,9 +636,7 @@ class JBayPardeSpec : public PardeSpec {
     unsigned maxClotsPerState() const override { return 2; }
 
     // Cap max size to 56 as a workaround of TF2LAB-44
-    unsigned byteMaxClotSize() const override {
-        return BackendOptions().tof2lab44_workaround ? 56 : 64;
-    }
+    unsigned byteMaxClotSize() const override { return tof2lab44_workaround_ ? 56 : 64; }
 
     unsigned numClotsPerGress() const override { return 64; }
     unsigned maxClotsLivePerGress() const override { return 16; }
@@ -669,7 +672,9 @@ class JBayPardeSpec : public PardeSpec {
 
 class JBayA0PardeSpec : public JBayPardeSpec {
  public:
+    explicit JBayA0PardeSpec(bool tof2lab44_workaround) : JBayPardeSpec(tof2lab44_workaround) {}
+
     unsigned numDeparserInvertChecksumUnits() const override { return 0; }
 };
 
-#endif /* BACKENDS_TOFINO_BF_P4C_PARDE_PARDE_SPEC_H_ */
+#endif /* BACKENDS_TOFINO_BF_P4C_SPECS_PARDE_SPEC_H_ */

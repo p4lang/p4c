@@ -223,7 +223,6 @@ set (BF_P4C_IR_SRCS
   bf-p4c/ir/control_flow_visitor.cpp
   bf-p4c/ir/ir_enums.cpp
   bf-p4c/ir/gateway_control_flow.cpp
-  bf-p4c/ir/gress.cpp
   bf-p4c/ir/mau.cpp
   bf-p4c/ir/thread_visitor.cpp
   bf-p4c/ir/tofino.cpp
@@ -231,9 +230,7 @@ set (BF_P4C_IR_SRCS
   bf-p4c/ir/unique_id.cpp
   bf-p4c/mau/hash_function.cpp
   bf-p4c/parde/marshal.cpp
-  bf-p4c/parde/match_register.cpp
   bf-p4c/parde/clot/clot.cpp
-  bf-p4c/phv/phv.cpp
   bf-utils/src/dynamic_hash/dynamic_hash.cpp
   bf-utils/src/dynamic_hash/bfn_hash_algorithm.cpp
   )
@@ -244,16 +241,13 @@ set (BF_P4C_IR_HDRS
   bf-p4c/ir/bitrange.h
   bf-p4c/ir/control_flow_visitor.h
   bf-p4c/ir/gateway_control_flow.h
-  bf-p4c/ir/gress.h
   bf-p4c/ir/ir_enums.h
   bf-p4c/ir/thread_visitor.h
   bf-p4c/ir/tofino_write_context.h
   bf-p4c/ir/unique_id.h
   bf-p4c/mau/hash_function.h
   bf-p4c/parde/marshal.h
-  bf-p4c/parde/match_register.h
   bf-p4c/parde/clot/clot.h
-  bf-p4c/phv/phv.h
   bf-utils/include/dynamic_hash/dynamic_hash.h
   bf-utils/include/dynamic_hash/bfn_hash_algorithm.h
   )
@@ -264,5 +258,6 @@ foreach(src IN LISTS BF_P4C_IR_SRCS)
   set(QUAL_BF_P4C_IR_SRCS ${QUAL_BF_P4C_IR_SRCS} ${CMAKE_CURRENT_SOURCE_DIR}/${src})
 endforeach()
 set(EXTENSION_IR_SOURCES ${EXTENSION_IR_SOURCES} ${QUAL_BF_P4C_IR_SRCS} PARENT_SCOPE)
+set(EXTENSION_IR_LIBS ${EXTENSION_IR_LIBS} tofinospecs PARENT_SCOPE)
 
 add_subdirectory(bf-p4c)

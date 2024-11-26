@@ -1,18 +1,18 @@
 # Copyright (C) 2024 Intel Corporation
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License.  You may obtain a copy
 # of the License at
-# 
+#
 # http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software distributed
 # under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 # CONDITIONS OF ANY KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations under the License.
-# 
+#
 # SPDX-License-Identifier: Apache-2.0
-####### Barefoot back-end
+# # ##### Barefoot back-end
 
 MESSAGE("-- Adding p4c-barefoot")
 
@@ -44,8 +44,8 @@ endif()
 # interfaces tools.
 set (INTERFACES_DIR ${BFN_P4C_SOURCE_DIR}/compiler_interfaces)
 set(COMPILER_SCHEMA_TARGETS "${INTERFACES_DIR}/schemas/targets.py")
-  set(DEFAULT_SCHEMA_TARGETS "['tofino', 'tofino2', 'tofino2m', 'tofino2u', 'tofino2a0']")
-  set(DEFAULT_SCHEMA_P4ARCH "['tna', 't2na', 'psa', 'PISA', 'v1model']")
+set(DEFAULT_SCHEMA_TARGETS "['tofino', 'tofino2', 'tofino2m', 'tofino2u', 'tofino2a0']")
+set(DEFAULT_SCHEMA_P4ARCH "['tna', 't2na', 'psa', 'PISA', 'v1model']")
 file(WRITE ${COMPILER_SCHEMA_TARGETS} "TARGETS=${DEFAULT_SCHEMA_TARGETS}\n")
 file(APPEND ${COMPILER_SCHEMA_TARGETS} "P4ARCHITECTURES=${DEFAULT_SCHEMA_P4ARCH}\n")
 
@@ -89,6 +89,31 @@ set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${Boost_GRAPH_LIBRARY};${LIBDYNHASH_LIBRARY};
 set (P4C_LIB_DEPS ${P4C_LIB_DEPS} PARENT_SCOPE)
 
 add_subdirectory(logging)
+
+set (BF_P4C_SPEC_SRCS
+  specs/arch_spec.cpp
+  specs/device.cpp
+  specs/gress.cpp
+  specs/mau_spec.cpp
+  specs/match_register.cpp
+  specs/phv.cpp
+  specs/phv_spec.cpp
+)
+add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_SPEC_SRCS}")
+
+set (BF_P4C_SPEC_HDRS
+  specs/arch_spec.h
+  specs/device.h
+  specs/gress.h
+  specs/mau_spec.h
+  specs/parde_spec.h
+  specs/phv.h
+  specs/phv_spec.h
+  specs/power_spec
+)
+add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_SPEC_HDRS}")
+add_library(tofinospecs STATIC ${BF_P4C_SPEC_SRCS})
+target_link_libraries(tofinospecs PUBLIC p4ctoolkit ir_lib)
 
 set (BF_P4C_MIDEND_SRCS
   midend/annotate_with_in_hash.cpp
@@ -323,7 +348,6 @@ set (BF_P4C_BACKEND_MAU_SRCS
   mau/jbay_next_table.cpp
   mau/mau_alloc.cpp
   mau/mau_power.cpp
-  mau/mau_spec.cpp
   mau/memories.cpp
   mau/payload_gateway.cpp
   mau/reduction_or.cpp
@@ -352,7 +376,6 @@ set (BF_P4C_BACKEND_MAU_TOFINO_SRCS
   mau/tofino/action_data_bus.cpp
   mau/tofino/asm_output.cpp
   mau/tofino/input_xbar.cpp
-  mau/tofino/mau_spec.cpp
   mau/tofino/memories.cpp
   )
 add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_BACKEND_MAU_TOFINO_SRCS}")
@@ -577,7 +600,6 @@ set (BF_P4C_BACKEND_PHV_SRCS
   phv/phv_analysis.cpp
   phv/phv_fields.cpp
   phv/phv_parde_mau_use.cpp
-  phv/phv_spec.cpp
   phv/split_padding.cpp
   phv/table_phv_constraints.cpp
   phv/validate_allocation.cpp
@@ -747,7 +769,6 @@ add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_BACKEND_PHV_HDRS}")
 
 set (BF_P4C_BACKEND_ARCH_SRCS
   arch/arch.cpp
-  arch/arch_spec.cpp
   arch/add_t2na_meta.cpp
   arch/intrinsic_metadata.cpp
   arch/bridge_metadata.cpp
@@ -857,7 +878,6 @@ set (BF_P4C_BACKEND_MAIN_SRCS
   asm.cpp
   backend.cpp
   bf-p4c-options.cpp
-  device.cpp
   midend.cpp
   )
 add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_BACKEND_MAIN_SRCS}")
@@ -866,7 +886,6 @@ set (BF_P4C_BACKEND_MAIN_HDRS
   asm.h
   backend.h
   bf-p4c-options.h
-  device.h
   midend.h
   )
 add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_BACKEND_MAIN_HDRS}")
@@ -957,9 +976,9 @@ set (P4C_BAREFOOT_SRCS
 add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${P4C_BAREFOOT_SRCS}")
 
 if(BUILD_STATIC_BFP4C_LIBS)
-    add_library(tofinobackend STATIC ${BF_P4C_SOURCES})
+  add_library(tofinobackend STATIC ${BF_P4C_SOURCES})
 else()
-    add_library(tofinobackend OBJECT ${BF_P4C_SOURCES})
+  add_library(tofinobackend OBJECT ${BF_P4C_SOURCES})
 endif()
 target_link_libraries(tofinobackend PRIVATE absl::prefetch ${P4C_LIB_DEPS} controlplane-gen ir)
 target_include_directories(
@@ -973,11 +992,11 @@ target_include_directories(
 add_dependencies(tofinobackend frontend genLogging bfn_p4runtime)
 
 if(BUILD_STATIC_BFP4C_LIBS)
-    add_library(bfp4c STATIC ${P4C_BAREFOOT_SRCS})
+  add_library(bfp4c STATIC ${P4C_BAREFOOT_SRCS})
 else()
-    # For objlib there is no way (as far as I know) to encompass smaller libraries (namely adding
-    # $<TARGET_OBJECTS:tofinobackend> $<TARGET_OBJECTS:bfn_p4runtime> to sources does not work)
-    add_library(bfp4c OBJECT ${P4C_BAREFOOT_SRCS})
+  # For objlib there is no way (as far as I know) to encompass smaller libraries (namely adding
+  # $<TARGET_OBJECTS:tofinobackend> $<TARGET_OBJECTS:bfn_p4runtime> to sources does not work)
+  add_library(bfp4c OBJECT ${P4C_BAREFOOT_SRCS})
 endif()
 target_link_libraries (bfp4c tofinobackend bfn_p4runtime
   ${P4C_LIBRARIES} ${P4C_LIB_DEPS} ${CMAKE_THREAD_LIBS_INIT})
@@ -1000,31 +1019,31 @@ if (ENABLE_BAREFOOT_INTERNAL)
 endif()
 
 if(BUILD_STATIC_BFP4C_LIBS)
-    add_executable(p4c-barefoot p4c-barefoot.cpp)
-    # --whole-archive prevents the linker from removing unused symbols
-    #
-    # This prevents an issue with non-unified builds and P4 primitives being
-    # undefined. The file "bf-p4c/arch/fromv1.0/primitives.cpp" defines a number
-    # of primitives (e.g., bypass_egress). This is done by subclassing
-    # PrimitiveConverter and creating a singleton instance, which registers
-    # itself with the PrimitiveConverter base class. These singleton instances are
-    # omitted during linking of the non-unified builds, and so the primitives are
-    # not registered.
-    #
-    # FIXME: Understand why the symbols are present in unified builds but not
-    # non-unified builds and remove the --whole-archive flag if possible.
-    target_link_libraries(p4c-barefoot
+  add_executable(p4c-barefoot p4c-barefoot.cpp)
+  # --whole-archive prevents the linker from removing unused symbols
+  #
+  # This prevents an issue with non-unified builds and P4 primitives being
+  # undefined. The file "bf-p4c/arch/fromv1.0/primitives.cpp" defines a number
+  # of primitives (e.g., bypass_egress). This is done by subclassing
+  # PrimitiveConverter and creating a singleton instance, which registers
+  # itself with the PrimitiveConverter base class. These singleton instances are
+  # omitted during linking of the non-unified builds, and so the primitives are
+  # not registered.
+  #
+  # FIXME: Understand why the symbols are present in unified builds but not
+  # non-unified builds and remove the --whole-archive flag if possible.
+  target_link_libraries(p4c-barefoot
             -Wl,--whole-archive
             bfp4c
             -Wl,--no-whole-archive)
 else()
-    # No transitive library dependencies for objlibs :-/, bring tofinobackend & bfn_p4runtime
-    # here explictly as well as their dependencies
-    add_executable(p4c-barefoot p4c-barefoot.cpp $<TARGET_OBJECTS:bfp4c>
+  # No transitive library dependencies for objlibs :-/, bring tofinobackend & bfn_p4runtime
+  # here explictly as well as their dependencies
+  add_executable(p4c-barefoot p4c-barefoot.cpp $<TARGET_OBJECTS:bfp4c>
                                 $<TARGET_OBJECTS:tofinobackend> $<TARGET_OBJECTS:bfn_p4runtime>)
-    target_link_libraries(p4c-barefoot ${P4C_LIBRARIES} ${P4C_LIB_DEPS} ${CMAKE_THREAD_LIBS_INIT})
-    # FIXME: These includes should be exported by earlier libraries.
-    target_include_directories(
+  target_link_libraries(p4c-barefoot ${P4C_LIBRARIES} ${P4C_LIB_DEPS} ${CMAKE_THREAD_LIBS_INIT})
+  # FIXME: These includes should be exported by earlier libraries.
+  target_include_directories(
       p4c-barefoot
       # We also export Z3's includes with the common library.
       # This is necessary because the z3 target itself does not export its includes.
@@ -1238,7 +1257,7 @@ endif()
 install (FILES ${P4C_BINARY_DIR}/p4c_src/main.py
   DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}/p4c_src)
 
-################ Proto
+# # ############## Proto
 set (BFN_P4RUNTIME_DIR ${CMAKE_CURRENT_SOURCE_DIR}/control-plane/proto)
 set (BFN_P4RUNTIME_INFO_PROTO ${BFN_P4RUNTIME_DIR}/barefoot/p4info.proto)
 set (BFN_P4RUNTIME_INFO_GEN_SRCS ${P4C_BINARY_DIR}/control-plane/barefoot/p4info.pb.cc)
@@ -1264,15 +1283,15 @@ add_custom_command(
   COMMENT "Generating protobuf files for p4info."
   )
 if(BUILD_STATIC_BFP4C_LIBS)
-    add_library(bfn_p4runtime STATIC ${BFN_P4RUNTIME_INFO_GEN_SRCS})
+  add_library(bfn_p4runtime STATIC ${BFN_P4RUNTIME_INFO_GEN_SRCS})
 else()
-    add_library(bfn_p4runtime OBJECT ${BFN_P4RUNTIME_INFO_GEN_SRCS})
+  add_library(bfn_p4runtime OBJECT ${BFN_P4RUNTIME_INFO_GEN_SRCS})
 endif()
 target_link_libraries(bfn_p4runtime PUBLIC controlplane-gen PRIVATE absl::prefetch)
 set_source_files_properties(${BFN_P4RUNTIME_INFO_GEN_SRCS} PROPERTIES GENERATED TRUE)
 add_dependencies(bfn_p4runtime barefootdir controlplane)
 
-################ Testing
+# # ############## Testing
 
 if (ENABLE_GTESTS)
   # # Tofino-specific GTests.
@@ -1348,8 +1367,8 @@ if (ENABLE_GTESTS)
   add_library (bf_gtest_support "${P4HEADERS_CPP}"
                                 "${CMAKE_CURRENT_SOURCE_DIR}/test/gtest/bf_gtest_helpers.cpp"
                                 "${CMAKE_CURRENT_SOURCE_DIR}/test/gtest/tofino_gtest_utils.cpp")
-                                # test_bf_gtest_helpers should be in its own testlib - & requies 'whole_archive' hack!
-                                # Leave it in GTEST_BF_P4C_SOURCES for now.
+  # test_bf_gtest_helpers should be in its own testlib - & requies 'whole_archive' hack!
+  # Leave it in GTEST_BF_P4C_SOURCES for now.
   target_link_libraries (bf_gtest_support PRIVATE absl::flat_hash_map PRIVATE absl::flat_hash_set PRIVATE ir ${P4C_LIB_DEPS})
   target_include_directories(
     bf_gtest_support
@@ -1460,8 +1479,8 @@ if (ENABLE_GTESTS)
     ${BF_P4C_GRAPHS_SRCS}
     )
   if (NOT BUILD_STATIC_BFP4C_LIBS)
-      # objlibs cannot be linked, need to add objects here explicitly
-      set (GTEST_BF_P4C_SOURCES ${GTEST_BF_P4C_SOURCES}
+    # objlibs cannot be linked, need to add objects here explicitly
+    set (GTEST_BF_P4C_SOURCES ${GTEST_BF_P4C_SOURCES}
                                 $<TARGET_OBJECTS:tofinobackend> $<TARGET_OBJECTS:bfn_p4runtime>)
   endif()
 
