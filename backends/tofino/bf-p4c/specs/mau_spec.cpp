@@ -16,7 +16,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "backends/tofino/bf-p4c/mau/mau_spec.h"
+#include "backends/tofino/bf-p4c/specs/mau_spec.h"
+
+#include "backends/tofino/bf-p4c/specs/device.h"
+#include "lib/exceptions.h"
 
 #define MAU_SPEC_UNSUPPORTED                                     \
     BUG("Unsupported: a base class was used in a context/place " \
@@ -84,11 +87,7 @@ int IXBarSpec::resilientModeHashBits() const { MAU_SPEC_UNSUPPORTED }
 
 int IXBarSpec::ternaryBytesPerBigGroup() const { MAU_SPEC_UNSUPPORTED }
 
-int IXBarSpec::tofinoMeterAluByteOffset() const {MAU_SPEC_UNSUPPORTED}
-
-IR::Node *MauSpec::postTransformTables(IR::MAU::Table *const table) const {
-    return table;
-}
+int IXBarSpec::tofinoMeterAluByteOffset() const { MAU_SPEC_UNSUPPORTED }
 
 int MauSpec::tcam_rows() const { return Tofino_tcam_rows; }
 
@@ -175,3 +174,10 @@ const IMemSpec &TofinoMauSpec::getIMemSpec() const { return imem_; }
 const IMemSpec &JBayMauSpec::getIMemSpec() const { return imem_; }
 
 const IXBarSpec &JBayMauSpec::getIXBarSpec() const { return ixbar_; }
+
+int TofinoIXBarSpec::getExactOrdBase(int group) const { return group * EXACT_BYTES_PER_GROUP; }
+
+int TofinoIXBarSpec::getTernaryOrdBase(int group) const {
+    return EXACT_GROUPS * EXACT_BYTES_PER_GROUP + (group / 2) * TERNARY_BYTES_PER_BIG_GROUP +
+           (group % 2) * (TERNARY_BYTES_PER_GROUP + 1 /* mid byte */);
+}
