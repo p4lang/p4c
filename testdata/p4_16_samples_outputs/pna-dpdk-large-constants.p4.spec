@@ -47,7 +47,7 @@ struct ipv6_modify_dstAddr_arg_t {
 }
 
 struct set_flowlabel_arg_t {
-	bit<32> label
+	bit<24> label
 }
 
 struct set_hop_limit_arg_t {
@@ -55,7 +55,7 @@ struct set_hop_limit_arg_t {
 }
 
 struct set_ipv6_version_arg_t {
-	bit<32> version
+	bit<8> version
 }
 
 struct set_next_hdr_arg_t {
@@ -64,7 +64,7 @@ struct set_next_hdr_arg_t {
 
 struct set_traffic_class_flow_label_arg_t {
 	bit<8> trafficClass
-	bit<32> label
+	bit<24> label
 }
 
 header ethernet instanceof Ethernet_h

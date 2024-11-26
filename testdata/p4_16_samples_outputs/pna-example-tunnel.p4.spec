@@ -37,14 +37,14 @@ struct local_metadata_t {
 	bit<32> pna_main_input_metadata_input_port
 	bit<32> local_metadata__outer_ipv4_dst0
 	bit<24> local_metadata__tunnel_id1
-	bit<32> local_metadata__tunnel_tun_type3
+	bit<8> local_metadata__tunnel_tun_type3
 	bit<32> pna_main_output_metadata_output_port
 	;oldname:main_control_tunnel_decap_ipv4_tunnel_term_table_outer_ipv4_src_addr
 	bit<32> main_control_tunnel_decap_ipv4_tunnel_term_table_outer_ipv41
 	;oldname:main_control_tunnel_decap_ipv4_tunnel_term_table_outer_ipv4_dst_addr
 	bit<32> main_control_tunnel_decap_ipv4_tunnel_term_table_outer_ipv42
 	;oldname:main_control_tunnel_decap_ipv4_tunnel_term_table_local_metadata__tunnel_tun_type3
-	bit<32> main_control_tunnel_decap_ipv4_tunnel_term_table_local_meta3
+	bit<8> main_control_tunnel_decap_ipv4_tunnel_term_table_local_meta3
 }
 metadata instanceof local_metadata_t
 

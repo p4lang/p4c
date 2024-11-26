@@ -28,7 +28,7 @@ struct psa_egress_deparser_input_metadata_t {
 }
 
 struct a_with_control_params_arg_t {
-	bit<32> x
+	bit<16> x
 }
 
 header h instanceof hdr

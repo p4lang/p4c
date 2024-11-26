@@ -35,7 +35,7 @@ struct EMPTY_M {
 	bit<16> psa_ingress_input_metadata_parser_error
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
-	bit<32> local_metadata_depth
+	bit<8> local_metadata_depth
 	bit<16> local_metadata_ret
 	bit<16> Ingress_tmp
 	bit<16> Ingress_tmp_0
@@ -46,8 +46,8 @@ struct EMPTY_M {
 	bit<16> Ingress_tmp_7
 	bit<16> Ingress_tmp_8
 	bit<16> Ingress_hsVar
-	bit<32> Ingress_hsVar_0
-	bit<32> Ingress_vid
+	bit<16> Ingress_hsVar_0
+	bit<16> Ingress_vid
 }
 metadata instanceof EMPTY_M
 

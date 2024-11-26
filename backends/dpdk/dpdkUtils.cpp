@@ -151,15 +151,13 @@ bool reservedNames(P4::ReferenceMap *refMap, const std::vector<cstring> &names, 
     return true;
 }
 
-/// Update bitwidth of Metadata fields to 32 or 64 bits if it 8-bit aligned.
+/// The DPDK pipeline requirement is all header/metadata fields to be multiple of 8bits.
+/// There is no limitation on total bit width. This function allows any bit width but
+/// if the width is odd size, then nearest multiple of 8bit value is returned.
 int getMetadataFieldWidth(int width) {
-    if (width % 8 != 0) {
-        BUG_CHECK(width <= 64, "Metadata bit-width expected to be within 64-bits, found %1%",
-                  width);
-        if (width < 32)
-            return 32;
-        else
-            return 64;
+    if ((width & 0x7) != 0) {
+        auto resize = (width + 7) & 0xFFFFFFF8;
+        return resize;
     }
     return width;
 }
