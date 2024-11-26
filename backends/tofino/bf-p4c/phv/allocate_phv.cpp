@@ -28,9 +28,7 @@
 
 #include "backends/tofino/bf-p4c/bf-p4c-options.h"
 #include "backends/tofino/bf-p4c/common/pragma/all_pragmas.h"
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/ir/bitrange.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
 #include "backends/tofino/bf-p4c/logging/event_logger.h"
 #include "backends/tofino/bf-p4c/parde/clot/clot_info.h"
 #include "backends/tofino/bf-p4c/parde/parser_query.h"
@@ -40,7 +38,6 @@
 #include "backends/tofino/bf-p4c/phv/live_range_split.h"
 #include "backends/tofino/bf-p4c/phv/optimize_phv.h"
 #include "backends/tofino/bf-p4c/phv/parser_extract_balance_score.h"
-#include "backends/tofino/bf-p4c/phv/phv.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "backends/tofino/bf-p4c/phv/slicing/phv_slicing_iterator.h"
 #include "backends/tofino/bf-p4c/phv/slicing/phv_slicing_split.h"
@@ -48,6 +45,9 @@
 #include "backends/tofino/bf-p4c/phv/utils/report.h"
 #include "backends/tofino/bf-p4c/phv/utils/slice_alloc.h"
 #include "backends/tofino/bf-p4c/phv/utils/utils.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 #include "ir/ir.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
@@ -56,7 +56,6 @@
 
 const std::vector<PHV::Size> StateExtractUsage::extractor_sizes = {PHV::Size::b8, PHV::Size::b16,
                                                                    PHV::Size::b32};
-
 // AllocScore metrics.
 namespace {
 

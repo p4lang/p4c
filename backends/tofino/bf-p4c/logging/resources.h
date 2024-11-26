@@ -26,7 +26,7 @@
 #include <vector>
 
 #include "ir/ir.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
 #include "lib/cstring.h"
 #include "lib/ordered_map.h"
 #include "backends/tofino/bf-p4c/logging/resources_schema.h"

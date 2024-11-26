@@ -25,7 +25,7 @@
 #include <boost/algorithm/string/replace.hpp>
 
 #include "backends/tofino/bf-p4c/common/header_stack.h"
-#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/specs/gress.h"
 #include "backends/tofino/bf-p4c/test/gtest/tofino_gtest_utils.h"
 #include "gtest/gtest.h"
 #include "ir/ir.h"

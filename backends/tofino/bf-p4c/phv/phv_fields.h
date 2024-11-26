@@ -26,7 +26,6 @@
 #include <boost/range/irange.hpp>
 
 #include "backends/tofino/bf-p4c/bf-p4c-options.h"
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/ir/bitrange.h"
 #include "backends/tofino/bf-p4c/ir/thread_visitor.h"
 #include "backends/tofino/bf-p4c/ir/tofino_write_context.h"
@@ -34,9 +33,10 @@
 #include "backends/tofino/bf-p4c/lib/cmp.h"
 #include "backends/tofino/bf-p4c/lib/union_find.hpp"
 #include "backends/tofino/bf-p4c/phv/constraints/constraints.h"
-#include "backends/tofino/bf-p4c/phv/phv.h"
 #include "backends/tofino/bf-p4c/phv/phv_parde_mau_use.h"
 #include "backends/tofino/bf-p4c/phv/utils/slice_alloc.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 #include "ir/ir.h"
 #include "lib/algorithm.h"
 #include "lib/map.h"

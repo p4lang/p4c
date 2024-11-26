@@ -19,6 +19,8 @@
 #include "backends/tofino/bf-p4c/phv/analysis/mocha.h"
 
 #include "backends/tofino/bf-p4c/common/pragma/all_pragmas.h"
+#include "backends/tofino/bf-p4c/phv/phv_analysis.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 
 Visitor::profile_t CollectMochaCandidates::init_apply(const IR::Node *root) {
     profile_t rv = Inspector::init_apply(root);
@@ -28,7 +30,7 @@ Visitor::profile_t CollectMochaCandidates::init_apply(const IR::Node *root) {
 
     BUG_CHECK(root->is<IR::BFN::Pipe>(), "IR root is not a BFN::Pipe: %s", root);
     const auto *root_ = root->to<IR::BFN::Pipe>();
-    Device::phvSpec().applyGlobalPragmas(root_->global_pragmas);
+    applyGlobalPragmas(Device::phvSpec(), root_->global_pragmas);
 
     for (auto *anno : root_->global_pragmas) {
         if (anno->name.name == PragmaAllowPOVonMocha::name) {

@@ -29,7 +29,7 @@
 
 // #include "bf-asm/version.h"
 #include "backends/tofino/bf-p4c/common/run_id.h"
-#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 
 namespace BFN {
 

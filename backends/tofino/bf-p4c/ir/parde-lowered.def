@@ -26,7 +26,7 @@
 #include "backends/tofino/bf-p4c/ir/ir_enums.h"
 #include "backends/tofino/bf-p4c/parde/clot/clot.h"
 #include "backends/tofino/bf-p4c/parde/match_register.h"
-#include "backends/tofino/bf-p4c/phv/phv.h"
+#include "backends/tofino/bf-p4c/specs/phv.h"
 
 namespace BFN {
 struct FieldPacking;
@@ -83,7 +83,12 @@ abstract LoweredParserPrimitive { }
 /// into a PHV container.
 class LoweredExtractPhv : LoweredParserPrimitive {
 #emit
-    /// Convenience constructors for accepting a raw PHV::Container.
+    /// Convenience constructors for accepting a raw PHV::SerializableContainer.
+    LoweredExtractPhv(PHV::SerializableContainer dest, const LoweredParserRVal* source)
+      : source(source), dest(new BFN::ContainerRef(dest)) { }
+    LoweredExtractPhv(Util::SourceInfo si, PHV::SerializableContainer dest,
+                   const LoweredParserRVal* source)
+      : LoweredParserPrimitive(si), source(source), dest(new BFN::ContainerRef(dest)) { }
     LoweredExtractPhv(PHV::Container dest, const LoweredParserRVal* source)
       : source(source), dest(new BFN::ContainerRef(dest)) { }
     LoweredExtractPhv(Util::SourceInfo si, PHV::Container dest,

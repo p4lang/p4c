@@ -18,6 +18,7 @@
 
 #include "resource_estimate.h"
 
+#include "backends/tofino/bf-p4c/mau/tofino/input_xbar.h"
 #include "hash_mask_annotations.h"
 #include "lib/bitops.h"
 #include "lib/log.h"
@@ -1644,7 +1645,7 @@ bool RangeEntries::preorder(const IR::MAU::TableKey *ixbar_read) {
     // individual TCAM.  After looking at the hardware requirements and talking to the driver
     // team, I'm not sure if this constraint actually exists.  Will have to be verified by
     // packet testing.  Currently the input xbar algorithm ignores this constraint
-    ERROR_CHECK(range_nibbles <= Tofino::IXBar::TERNARY_BYTES_PER_GROUP,
+    ERROR_CHECK(range_nibbles <= TofinoIXBarSpec::TERNARY_BYTES_PER_GROUP,
                 "%s: Currently in p4c, the table %s cannot perform a range match on key %s "
                 "as the key does not fit in under 5 PHV nibbles",
                 ixbar_read->srcInfo, tbl->name, field->name);

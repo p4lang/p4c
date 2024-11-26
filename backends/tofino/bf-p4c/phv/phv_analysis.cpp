@@ -22,13 +22,11 @@
 
 #include "backends/tofino/bf-p4c/common/pragma/all_pragmas.h"
 #include "backends/tofino/bf-p4c/logging/event_logger.h"
-#include "backends/tofino/bf-p4c/mau/action_mutex.h"
 #include "backends/tofino/bf-p4c/phv/add_initialization.h"
 #include "backends/tofino/bf-p4c/phv/add_special_constraints.h"
 #include "backends/tofino/bf-p4c/phv/allocate_phv.h"
 #include "backends/tofino/bf-p4c/phv/analysis/dark.h"
 #include "backends/tofino/bf-p4c/phv/analysis/deparser_zero.h"
-#include "backends/tofino/bf-p4c/phv/analysis/jbay_phv_analysis.h"
 #include "backends/tofino/bf-p4c/phv/analysis/memoize_min_stage.h"
 #include "backends/tofino/bf-p4c/phv/analysis/mocha.h"
 #include "backends/tofino/bf-p4c/phv/analysis/mutex_overlay.h"
@@ -40,9 +38,91 @@
 #include "backends/tofino/bf-p4c/phv/table_phv_constraints.h"
 #include "backends/tofino/bf-p4c/phv/v2/phv_allocation_v2.h"
 #include "backends/tofino/bf-p4c/phv/validate_allocation.h"
+#include "frontends/parsers/p4/p4parser.hpp"
 #include "ir/visitor.h"
 
 class PhvInfo;
+
+void applyGlobalPragmas(const PhvSpec &phvspec,
+                        const std::vector<const IR::Annotation *> &global_pragmas) {
+    // clear all the cached values
+    auto phvCache = phvspec.mutablePhvCache();
+    phvCache.physical_containers_i.clear();
+    phvCache.mau_groups_i.clear();
+    phvCache.ingress_only_containers_i.clear();
+    phvCache.egress_only_containers_i.clear();
+    phvCache.tagalong_collections_i.clear();
+    phvCache.individually_assigned_containers_i.clear();
+    std::set<PHV::Type> typesSeen;
+    for (auto *annot : global_pragmas) {
+        if (annot->name != PragmaPhvLimit::name) continue;
+        phvspec.physicalContainers();  // create the cache if needed
+        PHV::Container startRange, prev;
+        bool negate = false;
+        for (auto *tok : annot->getUnparsed()) {
+            PHV::Container c(tok->text.c_str(), false);
+            if (startRange) {
+                if (tok->token_type == P4::P4Parser::token_type::TOK_INTEGER)
+                    c = PHV::Container(startRange.type(), atoi(tok->text.c_str()));
+                if (!c || c.type() != startRange.type() || startRange.index() > c.index()) {
+                    error(ErrorType::ERR_INVALID, "invalid container range %2%-%3% in %1%", annot,
+                          startRange, tok->text);
+                } else if (!phvspec.typeIdMap().count(c.type())) {
+                    // container type not present on this target -- ignore;
+                } else {
+                    bitvec r = phvspec.range(c.type(), startRange.index(),
+                                             c.index() - startRange.index() + 1);
+                    if (negate)
+                        phvCache.physical_containers_i -= r;
+                    else
+                        phvCache.physical_containers_i |= r;
+                }
+                startRange = PHV::Container();
+            } else if (tok->text == ",") {
+                negate = false;
+            } else if (tok->text == "-") {
+                if (!(startRange = prev)) negate = true;
+            } else if (c) {
+                if (phvspec.typeIdMap().count(c.type())) {
+                    if (!typesSeen.count(c.type())) {
+                        typesSeen.insert(c.type());
+                        if (!negate) {
+                            phvCache.physical_containers_i -= phvspec.filterContainerSet(
+                                phvCache.physical_containers_i, c.type());
+                        }
+                        phvCache.physical_containers_i[phvspec.containerToId(c)] = !negate;
+                    }
+                }
+            } else if (negate && tok->text == "D") {
+                phvCache.physical_containers_i -=
+                    phvspec.filterContainerSet(phvCache.physical_containers_i, PHV::Kind::dark);
+            } else if (negate && tok->text == "M") {
+                phvCache.physical_containers_i -=
+                    phvspec.filterContainerSet(phvCache.physical_containers_i, PHV::Kind::mocha);
+            } else if (negate && tok->text == "T") {
+                phvCache.physical_containers_i -=
+                    phvspec.filterContainerSet(phvCache.physical_containers_i, PHV::Kind::tagalong);
+            } else {
+                error(ErrorType::ERR_INVALID, "invalid container %2% in %1%", annot, tok->text);
+            }
+            prev = c;
+        }
+    }
+    if (phvCache.physical_containers_i) {
+        // propagate assignment restrictions to other sets;
+        phvspec.mauGroups();
+        for (auto &v : Values(phvCache.mau_groups_i))
+            for (auto &bv : v) bv &= phvCache.physical_containers_i;
+        phvspec.ingressOnly();
+        phvCache.ingress_only_containers_i &= phvCache.physical_containers_i;
+        phvspec.egressOnly();
+        phvCache.egress_only_containers_i &= phvCache.physical_containers_i;
+        phvspec.tagalongCollections();
+        for (auto &bv : phvCache.tagalong_collections_i) bv &= phvCache.physical_containers_i;
+        phvspec.individuallyAssignedContainers();
+        phvCache.individually_assigned_containers_i &= phvCache.physical_containers_i;
+    }
+}
 
 /// collect and apply PHV-related global pragmas.
 class ApplyGlobalPragmas : public Visitor {
@@ -54,7 +134,7 @@ class ApplyGlobalPragmas : public Visitor {
         BUG_CHECK(root_->is<IR::BFN::Pipe>(), "IR root is not a BFN::Pipe: %s", root_);
         const auto *root = root_->to<IR::BFN::Pipe>();
         // phv container pragma
-        Device::phvSpec().applyGlobalPragmas(root->global_pragmas);
+        applyGlobalPragmas(Device::phvSpec(), root->global_pragmas);
         // single parser gress pragma
         // Check if pragma pa_parser_group_monogress is contained in the p4 program
         for (auto *anno : root->global_pragmas) {
