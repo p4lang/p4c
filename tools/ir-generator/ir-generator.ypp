@@ -274,7 +274,7 @@ method
           { ($$ = $<irMethod>5)->body = $10;
             if (!$10 || $10.startsWith("=")) {
                 if (!$$->inImpl)
-                    yyerror("inline method %s with no body", $3);
+                    yyerror("inline method %v with no body", $3);
                 $$->inImpl = false; }
             $$->isUser = true;
             $$->isConst = $8;

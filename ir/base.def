@@ -191,12 +191,12 @@ class Path {
     ID   name;
     optional bool absolute = false;
     Path { if (!srcInfo) srcInfo = name.srcInfo; }
-    bool isDontCare() const { return name.isDontCare(); }
+    inline bool isDontCare() const { return name.isDontCare(); }
     toString{
         // This is the ORIGINAL name the user used
         return absl::StrCat(absolute ? "." : "", name.toString());
     }
-    cstring asString() const {
+    inline cstring asString() const {
         // The CURRENT internal name
         return absl::StrCat(absolute ? "." : "", name);
     }

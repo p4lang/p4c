@@ -73,7 +73,7 @@ class ParserState : ISimpleNamespace, Declaration, IAnnotated {
     static const cstring reject;
     static const cstring start;
     static const cstring verify;
-    bool isBuiltin() const { return name == ParserState::accept || name == ParserState::reject; }
+    inline bool isBuiltin() const { return name == ParserState::accept || name == ParserState::reject; }
     validate{
         if (selectExpression != nullptr)
             BUG_CHECK(selectExpression->is<IR::PathExpression>() ||
@@ -230,9 +230,9 @@ class ActionListElement : IAnnotated, IDeclaration {
 class ActionList : PropertyValue {
     inline IndexedVector<ActionListElement> actionList;
     validate{ actionList.check_null(); }
-    size_t size() const { return actionList.size(); }
-    void push_back(ActionListElement e) { actionList.push_back(e); }
-    ActionListElement getDeclaration(cstring n) const {
+    inline size_t size() const { return actionList.size(); }
+    inline void push_back(ActionListElement e) { actionList.push_back(e); }
+    inline ActionListElement getDeclaration(cstring n) const {
         return actionList.getDeclaration<ActionListElement>(n); }
 }
 
@@ -267,7 +267,7 @@ class KeyElement : IAnnotated {
 class Key : PropertyValue {
     inline Vector<KeyElement> keyElements;
     validate { keyElements.check_null(); }
-    void push_back(KeyElement ke) { keyElements.push_back(ke); }
+    inline void push_back(KeyElement ke) { keyElements.push_back(ke); }
 }
 
 /// Pre-defined entry in a table
@@ -283,15 +283,15 @@ class Entry : IAnnotated {
 
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
-    ListExpression  getKeys() const { return keys; }
-    Expression      getAction() const { return action; }
+    inline ListExpression  getKeys() const { return keys; }
+    inline Expression      getAction() const { return action; }
     dbprint { out << annotations << keys << action; }
 }
 
 /// List of predefined entries. Part of table properties
 class EntriesList : PropertyValue {
     inline Vector<Entry> entries;
-    size_t size() const { return entries.size(); }
+    inline size_t size() const { return entries.size(); }
     dbprint { out << "{ " << entries << "}"; }
 }
 
@@ -309,15 +309,15 @@ class TableProperties : ISimpleNamespace {
     toString{ return absl::StrCat("TableProperties(", properties.size(), ")"); }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return properties.getDeclarations(); }
-    Property getProperty(cstring name) const {
+    inline Property getProperty(cstring name) const {
         return properties.getDeclaration<Property>(name); }
     IDeclaration getDeclByName(cstring name) const override {
         return properties.getDeclaration(name); }
-    Property getProperty(std::string_view name) const {
+    inline Property getProperty(std::string_view name) const {
         return properties.getDeclaration<Property>(name); }
     IDeclaration getDeclByName(std::string_view name) const override {
         return properties.getDeclaration(name); }
-    void push_back(Property prop) { properties.push_back(prop); }
+    inline void push_back(Property prop) { properties.push_back(prop); }
 
     static const cstring actionsPropertyName;
     static const cstring keyPropertyName;
@@ -336,56 +336,50 @@ class P4Table : Declaration, IAnnotated, IApply {
     Vector<Annotation> &getAnnotations() override { return annotations; }
     Type_Method getApplyMethodType() const override;
     ParameterList getApplyParameters() const override { return new ParameterList(); }
-    ActionList getActionList() const {
-        auto ap = properties->getProperty(TableProperties::actionsPropertyName);
-        if (ap == nullptr)
-            return nullptr;
-        if (!ap->value->is<IR::ActionList>()) {
+    inline ActionList getActionList() const {
+        if (auto ap = properties->getProperty(TableProperties::actionsPropertyName)) {
+            if (auto al = ap->value->to<IR::ActionList>()) return al;
             ::P4::error(ErrorType::ERR_INVALID, "%1%: must be an action list", ap);
-            return nullptr; }
-        return ap->value->to<IR::ActionList>(); }
-    Key getKey() const {
-        auto kp = properties->getProperty(TableProperties::keyPropertyName);
-        if (kp == nullptr)
-            return nullptr;
-        if (!kp->value->is<IR::Key>()) {
+        }
+        return nullptr;
+    }
+    inline Key getKey() const {
+        if (auto kp = properties->getProperty(TableProperties::keyPropertyName)) {
+            if (auto k = kp->value->to<IR::Key>()) return k;
             ::P4::error(ErrorType::ERR_INVALID, "%1%: must be a key", kp);
-            return nullptr; }
-        return kp->value->to<IR::Key>(); }
-    Expression getDefaultAction() const {
-        auto d = properties->getProperty(TableProperties::defaultActionPropertyName);
-        if (d == nullptr)
-            return nullptr;
-        if (!d->value->is<IR::ExpressionValue>()) {
+        }
+        return nullptr;
+    }
+    inline Expression getDefaultAction() const {
+        if (auto d = properties->getProperty(TableProperties::defaultActionPropertyName)) {
+            if (auto ev = d->value->to<IR::ExpressionValue>()) return ev->expression;
             ::P4::error(ErrorType::ERR_INVALID, "%1%: must be an expression", d);
-            return nullptr; }
-        return d->value->to<IR::ExpressionValue>()->expression; }
-    Constant getConstantProperty(cstring name) const {
+        }
+        return nullptr;
+    }
+    inline Constant getConstantProperty(cstring name) const {
         if (auto d = properties->getProperty(name)) {
             if (auto ev = d->value->to<IR::ExpressionValue>()) {
                 if (auto k = ev->expression->to<IR::Constant>()) {
                     return k; } }
             error(ErrorType::ERR_INVALID, "%1% must be a constant numeric expression", d); }
         return nullptr; }
-    BoolLiteral getBooleanProperty(cstring name) const {
+    inline BoolLiteral getBooleanProperty(cstring name) const {
         if (auto d = properties->getProperty(name)) {
             if (auto ev = d->value->to<IR::ExpressionValue>()) {
                 if (auto k = ev->expression->to<IR::BoolLiteral>()) {
                     return k; } }
             error(ErrorType::ERR_INVALID, "%1% must be a boolean expression", d); }
         return nullptr; }
-    Constant getSizeProperty() const {
+    inline Constant getSizeProperty() const {
         return getConstantProperty(TableProperties::sizePropertyName);
     }
-    EntriesList getEntries() const {
-        auto ep = properties->getProperty(TableProperties::entriesPropertyName);
-        if (ep == nullptr)
-            return nullptr;
-        if (!ep->value->is<IR::EntriesList>()) {
+    inline EntriesList getEntries() const {
+        if (auto ep = properties->getProperty(TableProperties::entriesPropertyName)) {
+            if (auto el = ep->value->to<IR::EntriesList>()) return el;
             ::P4::error(ErrorType::ERR_INVALID, "%1%: must be a list of entries", ep);
-            return nullptr;
         }
-        return ep->value->to<IR::EntriesList>();
+        return nullptr;
     }
 }
 
@@ -513,17 +507,17 @@ class BlockStatement : Statement, ISimpleNamespace, IAnnotated {
     void push_back(StatOrDecl st) { components.push_back(st); }
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
-    bool empty() const { return components.empty(); }
+    inline bool empty() const { return components.empty(); }
     void append(StatOrDecl stmt);
-    BlockStatement(std::initializer_list<StatOrDecl> il) { for (auto el : il) append(el); }
+    inline BlockStatement(std::initializer_list<StatOrDecl> il) { for (auto el : il) append(el); }
 }
 
 class MethodCallStatement : Statement {
     MethodCallExpression methodCall;
-    MethodCallStatement { if (!srcInfo) srcInfo = methodCall->srcInfo; }
-    MethodCallStatement(Util::SourceInfo si, IR::ID m, const std::initializer_list<Argument> &a)
+    inline MethodCallStatement { if (!srcInfo) srcInfo = methodCall->srcInfo; }
+    inline MethodCallStatement(Util::SourceInfo si, IR::ID m, const std::initializer_list<Argument> &a)
     : Statement(si), methodCall(new MethodCallExpression(si, m, a)) {}
-    MethodCallStatement(Util::SourceInfo si, Expression m,
+    inline MethodCallStatement(Util::SourceInfo si, Expression m,
                         const std::initializer_list<Argument> &a)
     : Statement(si), methodCall(new MethodCallExpression(si, m, a)) {}
     toString{ return methodCall->toString(); }
@@ -644,10 +638,10 @@ abstract Block : CompileTimeValue {
     virtual void dbprint_recursive(std::ostream& out) const;
     /// value can be null for parameters which are optional
     void setValue(Node node, CompileTimeValue value);
-    bool hasValue(Node node) const {
+    inline bool hasValue(Node node) const {
         return constantValue.find(node) != constantValue.end();
     }
-    CompileTimeValue getValue(Node node) const {
+    inline CompileTimeValue getValue(Node node) const {
         CHECK_NULL(node);
         auto it = constantValue.find(node);
         BUG_CHECK(it != constantValue.end(), "%1%: No such node %2%", this, node);
