@@ -1,5 +1,6 @@
 var NAVTREEINDEX25 =
 {
+"class_p4_1_1cstring.html#ac1adaaa1ccae3c143527f96fd95913a5":[12,0,9,83,3],
 "class_p4_1_1cstring.html#ac1adaaa1ccae3c143527f96fd95913a5":[13,0,7,98,3],
 "class_p4_1_1cstring.html#afba6983cc0cbd18285e022cdabcd7510":[12,0,9,83,0],
 "class_p4_1_1cstring.html#afba6983cc0cbd18285e022cdabcd7510":[13,0,7,98,0],
@@ -140,6 +141,10 @@ var NAVTREEINDEX25 =
 "class_p_h_v_1_1_alloc_slice.html":[13,0,10,13],
 "class_p_h_v_1_1_alloc_slice.html#ae0b3198c47f516e74fc73d0639f4cd93":[12,0,11,10,0],
 "class_p_h_v_1_1_alloc_slice.html#ae0b3198c47f516e74fc73d0639f4cd93":[13,0,10,13,0],
+"class_p_h_v_1_1_alloc_utils.html":[12,0,11,11],
+"class_p_h_v_1_1_alloc_utils.html":[13,0,10,14],
+"class_p_h_v_1_1_alloc_utils.html#ac57f1e9811927deb540da92ba4e8d212":[12,0,11,11,0],
+"class_p_h_v_1_1_alloc_utils.html#ac57f1e9811927deb540da92ba4e8d212":[13,0,10,14,0],
 "class_p_h_v_1_1_allocate_temps_and_finalize_liverange.html":[12,0,11,5],
 "class_p_h_v_1_1_allocate_temps_and_finalize_liverange.html":[13,0,10,8],
 "class_p_h_v_1_1_allocation.html":[12,0,11,6],
@@ -244,10 +249,5 @@ var NAVTREEINDEX25 =
 "class_p_h_v_1_1_cluster_stats.html#a4097671344908914defecd629df5f445":[13,0,10,15,4],
 "class_p_h_v_1_1_cluster_stats.html#a464adc74cac2d9fab80b0cf04942c647":[12,0,11,12,8],
 "class_p_h_v_1_1_cluster_stats.html#a464adc74cac2d9fab80b0cf04942c647":[13,0,10,15,8],
-"class_p_h_v_1_1_cluster_stats.html#a62f64ddc4f95187c95dbb7c1919d7ff5":[12,0,11,12,2],
-"class_p_h_v_1_1_cluster_stats.html#a62f64ddc4f95187c95dbb7c1919d7ff5":[13,0,10,15,2],
-"class_p_h_v_1_1_cluster_stats.html#a7d506e0ed10c0b13292adf08a460037a":[12,0,11,12,7],
-"class_p_h_v_1_1_cluster_stats.html#a7d506e0ed10c0b13292adf08a460037a":[13,0,10,15,7],
-"class_p_h_v_1_1_cluster_stats.html#a7e547f9460949b091d1a2864cd711fd6":[12,0,11,12,5],
-"class_p_h_v_1_1_cluster_stats.html#a7e547f9460949b091d1a2864cd711fd6":[13,0,10,15,5]
+"class_p_h_v_1_1_cluster_stats.html#a62f64ddc4f95187c95dbb7c1919d7ff5":[12,0,11,12,2]
 };

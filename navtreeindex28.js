@@ -1,5 +1,10 @@
 var NAVTREEINDEX28 =
 {
+"class_p_h_v_1_1v2_1_1_allocator_metrics.html":[13,0,10,2,2],
+"class_p_h_v_1_1v2_1_1_co_packer.html":[13,0,10,2,7],
+"class_p_h_v_1_1v2_1_1_co_packer.html#af02a6a98a7eeead988ea5ea2b85c5369":[13,0,10,2,7,0],
+"class_p_h_v_1_1v2_1_1_collect_p_h_v_allocation_result.html":[13,0,10,2,5],
+"class_p_h_v_1_1v2_1_1_greedy_allocator.html":[13,0,10,2,11],
 "class_p_h_v_1_1v2_1_1_greedy_allocator.html#a381d7485f52adc6c8c75c58403f0cc76":[13,0,10,2,11,0],
 "class_p_h_v_1_1v2_1_1_greedy_tx_score.html":[13,0,10,2,12],
 "class_p_h_v_1_1v2_1_1_greedy_tx_score.html#ab292eee881ca9a82bf7f881366764048":[13,0,10,2,12,2],
@@ -244,10 +249,5 @@ var NAVTREEINDEX28 =
 "class_remove_metadata_inits.html":[13,0,511],
 "class_remove_metadata_inits.html#a665d8d12328c0b5178513c92a985e7f2":[13,0,511,0],
 "class_remove_noop_gateway.html":[13,0,512],
-"class_remove_push_initialization.html":[13,0,513],
-"class_remove_unnecessary_action_arg_slice.html":[13,0,514],
-"class_rename_param.html":[13,0,516],
-"class_replace_all_aliases.html":[13,0,517],
-"class_replace_flexible_type.html":[13,0,518],
-"class_replace_member.html":[13,0,519]
+"class_remove_push_initialization.html":[13,0,513]
 };

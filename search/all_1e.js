@@ -60,7 +60,7 @@ var searchData=
   ['update_57',['update',['../struct_action_data_bus.html#afd1daec7a9e012c038d6ded6ba492f53',1,'ActionDataBus::update()'],['../class_field_slice_extract_info.html#a1214bfac850d16ba5406618129e32761',1,'FieldSliceExtractInfo::update()']]],
   ['update_5fattached_58',['update_attached',['../struct_table_placement_1_1_placed.html#a6b0058bef470954645a934931f2e38b4',1,'TablePlacement::Placed']]],
   ['update_5fdeps_5ffor_5fdevice_59',['update_deps_for_device',['../class_mau_power_1_1_mau_features.html#a83d0f24ab343ee3312c1185b221ad8f9',1,'MauPower::MauFeatures']]],
-  ['update_5frefs_60',['update_refs',['../struct_p_h_v_1_1_alloc_utils.html#ae6c267907b9b0bb8d270738a972a2e2c',1,'PHV::AllocUtils']]],
+  ['update_5frefs_60',['update_refs',['../class_p_h_v_1_1_alloc_utils.html#ae6c267907b9b0bb8d270738a972a2e2c',1,'PHV::AllocUtils']]],
   ['updateaccess_61',['UpdateAccess',['../class_find_data_dependency_graph_1_1_update_access.html',1,'FindDataDependencyGraph']]],
   ['updateactionforswitch_62',['UpdateActionForSwitch',['../class_p4_1_1_d_p_d_k_1_1_update_action_for_switch.html',1,'P4::DPDK']]],
   ['updatealignment_63',['updateAlignment',['../class_p_h_v_1_1_field.html#ae7bb5db7971bcbe3b337b76583a5130e',1,'PHV::Field']]],

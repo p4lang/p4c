@@ -395,7 +395,7 @@ var searchData=
   ['allocsetting_392',['AllocSetting',['../namespace_p_h_v.html#struct_p_h_v_1_1_alloc_setting',1,'PHV']]],
   ['allocslice_393',['AllocSlice',['../class_p_h_v_1_1_alloc_slice.html',1,'PHV']]],
   ['alloctrace_394',['AllocTrace',['../class_p4_1_1_alloc_trace.html',1,'P4']]],
-  ['allocutils_395',['AllocUtils',['../struct_p_h_v_1_1_alloc_utils.html',1,'PHV']]],
+  ['allocutils_395',['AllocUtils',['../class_p_h_v_1_1_alloc_utils.html',1,'PHV']]],
   ['alpmimplementation_396',['AlpmImplementation',['../group__alpm.html#class_b_f_n_1_1_alpm_implementation',1,'BFN']]],
   ['alternative_20phv_20allocation_20compilation_20mode_397',['Alternative PHV Allocation compilation mode',['../table__placement_8cpp.html#alternative-phv-allocation-compilation-mode',1,'']]],
   ['alu_20overview_398',['Stateful ALU Overview',['../group__stateful__alu.html',1,'']]],

@@ -10515,7 +10515,7 @@
 <!-- Node256 -->
 <g id="Node000256" class="node">
 <title>Node256</title>
-<g id="a_Node000256"><a xlink:href="group__parde.html#struct_check_parser_multi_write" target="_top" xlink:title="Checks multiple writes to the same field on non&#45;mutually exclusive paths.">
+<g id="a_Node000256"><a xlink:href="group__parde.html#class_check_parser_multi_write" target="_top" xlink:title="Checks multiple writes to the same field on non&#45;mutually exclusive paths.">
 <polygon fill="white" stroke="#666666" points="804,-23888 676,-23888 676,-23869 804,-23869 804,-23888"/>
 <text text-anchor="middle" x="740" y="-23876" font-family="Helvetica,sans-Serif" font-size="10.00">CheckParserMultiWrite</text>
 </a>
@@ -16771,7 +16771,7 @@
 <!-- Node1444 -->
 <g id="Node001444" class="node">
 <title>Node1444</title>
-<g id="a_Node001444"><a xlink:href="struct_map_field_to_parser_states.html" target="_top" xlink:title="Map field to the parser states in which they are extracted or assigned from checksums.">
+<g id="a_Node001444"><a xlink:href="class_map_field_to_parser_states.html" target="_top" xlink:title="Map field to the parser states in which they are extracted or assigned from checksums.">
 <polygon fill="white" stroke="#666666" points="553.5,-21060 421.5,-21060 421.5,-21041 553.5,-21041 553.5,-21060"/>
 <text text-anchor="middle" x="487.5" y="-21048" font-family="Helvetica,sans-Serif" font-size="10.00">MapFieldToParserStates</text>
 </a>

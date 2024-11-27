@@ -192,7 +192,7 @@ var searchData=
   ['allocsetting_189',['AllocSetting',['../namespace_p_h_v.html#struct_p_h_v_1_1_alloc_setting',1,'PHV']]],
   ['allocslice_190',['AllocSlice',['../class_p_h_v_1_1_alloc_slice.html',1,'PHV']]],
   ['alloctrace_191',['AllocTrace',['../class_p4_1_1_alloc_trace.html',1,'P4']]],
-  ['allocutils_192',['AllocUtils',['../struct_p_h_v_1_1_alloc_utils.html',1,'PHV']]],
+  ['allocutils_192',['AllocUtils',['../class_p_h_v_1_1_alloc_utils.html',1,'PHV']]],
   ['alpmimplementation_193',['AlpmImplementation',['../group__alpm.html#class_b_f_n_1_1_alpm_implementation',1,'BFN']]],
   ['aluoperation_194',['ALUOperation',['../class_action_data_1_1_a_l_u_operation.html',1,'ActionData']]],
   ['aluparameter_195',['ALUParameter',['../struct_action_data_1_1_a_l_u_parameter.html',1,'ActionData']]],

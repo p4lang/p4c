@@ -1,5 +1,6 @@
 var NAVTREEINDEX22 =
 {
+"class_p4_1_1_switch_add_default.html":[13,0,7,463],
 "class_p4_1_1_sym_bit_matrix.html":[12,0,9,449],
 "class_p4_1_1_sym_bit_matrix.html":[13,0,7,464],
 "class_p4_1_1_sym_rename_map.html":[12,0,9,468],
@@ -248,6 +249,5 @@ var NAVTREEINDEX22 =
 "class_p4_1_1_test_1_1_pa_container_type_pragma_test.html":[13,0,7,23,45],
 "class_p4_1_1_test_1_1_pa_mutually_exclusive_pragma_test.html":[12,0,9,11,45],
 "class_p4_1_1_test_1_1_pa_mutually_exclusive_pragma_test.html":[13,0,7,23,46],
-"class_p4_1_1_test_1_1_pa_no_overlay_pragma_test.html":[12,0,9,11,46],
-"class_p4_1_1_test_1_1_pa_no_overlay_pragma_test.html":[13,0,7,23,47]
+"class_p4_1_1_test_1_1_pa_no_overlay_pragma_test.html":[12,0,9,11,46]
 };

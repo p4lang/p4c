@@ -6,7 +6,7 @@ var searchData=
   ['better_5fthan_3',['better_than',['../class_p_h_v_1_1v2_1_1_greedy_tx_score.html#aeebd93c5f84313fbdf6c3db9dc9fecc0',1,'PHV::v2::GreedyTxScore']]],
   ['binary_4',['binary',['../class_p4_1_1_do_constant_folding.html#a5c8ac09d49d814a82da9ef7e1d706c91',1,'P4::DoConstantFolding']]],
   ['bind_5',['bind',['../class_param_binding.html#a2f5f6010003b71966fab8aee65f77d73',1,'ParamBinding::bind(const IR::Parameter *param)'],['../class_param_binding.html#a03c96d54899b7dd35e564e22f7837588',1,'ParamBinding::bind(const IR::Declaration_Variable *var)']]],
-  ['bind_5fslices_6',['bind_slices',['../struct_p_h_v_1_1_alloc_utils.html#a18eeaa9f33788ad637ea453a4915a999',1,'PHV::AllocUtils::bind_slices()'],['../struct_p_h_v_1_1v2_1_1_phv_kit.html#ab48b1b07e9aee622fc70a720041d6ec7',1,'PHV::v2::PhvKit::bind_slices()']]],
+  ['bind_5fslices_6',['bind_slices',['../class_p_h_v_1_1_alloc_utils.html#a18eeaa9f33788ad637ea453a4915a999',1,'PHV::AllocUtils::bind_slices()'],['../struct_p_h_v_1_1v2_1_1_phv_kit.html#ab48b1b07e9aee622fc70a720041d6ec7',1,'PHV::v2::PhvKit::bind_slices()']]],
   ['bit_5fgaps_7',['bit_gaps',['../class_field_slice_extract_info.html#a83ec158da3eeec9c5c3e182bf6e837ea',1,'FieldSliceExtractInfo']]],
   ['bit_5fin_5fbyte_5foffset_8',['bit_in_byte_offset',['../class_clot_candidate.html#adcdf99684395e40bb52dbefa14dde76a',1,'ClotCandidate::bit_in_byte_offset()'],['../class_field_slice_extract_info.html#ac024f01e5fb7255cc16602321653094d',1,'FieldSliceExtractInfo::bit_in_byte_offset()']]],
   ['bit_5foffset_9',['bit_offset',['../class_clot.html#add7c5ae2fd777aa77764cb85bc88ecbd',1,'Clot']]],

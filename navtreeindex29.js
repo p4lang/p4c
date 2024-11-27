@@ -1,5 +1,10 @@
 var NAVTREEINDEX29 =
 {
+"class_remove_unnecessary_action_arg_slice.html":[13,0,514],
+"class_rename_param.html":[13,0,516],
+"class_replace_all_aliases.html":[13,0,517],
+"class_replace_flexible_type.html":[13,0,518],
+"class_replace_member.html":[13,0,519],
 "class_rewrite_parde.html":[13,0,527],
 "class_rewrite_reduction_or.html":[13,0,529],
 "class_run_id.html":[13,0,531],
@@ -244,10 +249,5 @@ var NAVTREEINDEX29 =
 "functions_func_z.html":[13,3,1,22],
 "functions_func_~.html":[13,3,1,23],
 "functions_g.html":[13,3,0,7],
-"functions_h.html":[13,3,0,8],
-"functions_i.html":[13,3,0,9],
-"functions_j.html":[13,3,0,10],
-"functions_k.html":[13,3,0,11],
-"functions_l.html":[13,3,0,12],
-"functions_m.html":[13,3,0,13]
+"functions_h.html":[13,3,0,8]
 };

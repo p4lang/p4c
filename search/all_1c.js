@@ -384,7 +384,7 @@ var searchData=
   ['somecontscopeallocresult_381',['SomeContScopeAllocResult',['../struct_p_h_v_1_1v2_1_1_some_cont_scope_alloc_result.html',1,'PHV::v2']]],
   ['sort_382',['sort',['../class_action_phv_constraints.html#a7144e43db7ba7c5f39b85eba2abdc415',1,'ActionPhvConstraints::sort(std::list&lt; const PHV::SuperCluster::SliceList * &gt; &amp;slice_list) const'],['../class_action_phv_constraints.html#ac288efc74364f32f062edd803adee649',1,'ActionPhvConstraints::sort(std::vector&lt; PHV::FieldSlice &gt; &amp;slice_list) const']]],
   ['sort_5falloc_383',['sort_alloc',['../class_p_h_v_1_1_field.html#a3d9e51f4d992dcdf9d55f7826428ffc5',1,'PHV::Field']]],
-  ['sort_5fand_5fmerge_5falloc_5fslices_384',['sort_and_merge_alloc_slices',['../struct_p_h_v_1_1_alloc_utils.html#a9751048c2c99a7f0453ad195f8412652',1,'PHV::AllocUtils::sort_and_merge_alloc_slices()'],['../struct_p_h_v_1_1v2_1_1_phv_kit.html#a24c44dd56c54011f43e71386f02a0186',1,'PHV::v2::PhvKit::sort_and_merge_alloc_slices()']]],
+  ['sort_5fand_5fmerge_5falloc_5fslices_384',['sort_and_merge_alloc_slices',['../class_p_h_v_1_1_alloc_utils.html#a9751048c2c99a7f0453ad195f8412652',1,'PHV::AllocUtils::sort_and_merge_alloc_slices()'],['../struct_p_h_v_1_1v2_1_1_phv_kit.html#a24c44dd56c54011f43e71386f02a0186',1,'PHV::v2::PhvKit::sort_and_merge_alloc_slices()']]],
   ['sortclusters_385',['sortClusters',['../class_brute_force_allocation_strategy.html#a460c5ba97819acd26635298c90db332f',1,'BruteForceAllocationStrategy']]],
   ['sorted_5fiterator_386',['sorted_iterator',['../class_p4_1_1ordered__set_1_1sorted__iterator.html',1,'P4::ordered_set']]],
   ['sortextracts_387',['SortExtracts',['../struct_sort_extracts.html',1,'']]],

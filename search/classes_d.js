@@ -44,7 +44,7 @@ var searchData=
   ['mapdirectexterns_41',['MapDirectExterns',['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_map_direct_externs.html',1,'P4::P4Tools::P4Testgen::Bmv2']]],
   ['mapenumerator_42',['MapEnumerator',['../class_p4_1_1_util_1_1_map_enumerator.html',1,'P4::Util']]],
   ['mapfieldtoexpr_43',['MapFieldToExpr',['../class_map_field_to_expr.html',1,'']]],
-  ['mapfieldtoparserstates_44',['MapFieldToParserStates',['../struct_map_field_to_parser_states.html',1,'']]],
+  ['mapfieldtoparserstates_44',['MapFieldToParserStates',['../class_map_field_to_parser_states.html',1,'']]],
   ['mapforkey_45',['MapForKey',['../class_p4_1_1_map_for_key.html',1,'P4']]],
   ['maptablestoactions_46',['MapTablesToActions',['../class_map_tables_to_actions.html',1,'']]],
   ['maptablestoids_47',['MapTablesToIDs',['../class_map_tables_to_i_ds.html',1,'']]],

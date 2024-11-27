@@ -11,7 +11,7 @@ var namespace_p_h_v =
     [ "AllocContext", "class_p_h_v_1_1_alloc_context.html", "class_p_h_v_1_1_alloc_context" ],
     [ "AllocSetting", "namespace_p_h_v.html#struct_p_h_v_1_1_alloc_setting", "namespace_p_h_v_struct_p_h_v_1_1_alloc_setting_dup" ],
     [ "AllocSlice", "class_p_h_v_1_1_alloc_slice.html", "class_p_h_v_1_1_alloc_slice" ],
-    [ "AllocUtils", "struct_p_h_v_1_1_alloc_utils.html", "struct_p_h_v_1_1_alloc_utils" ],
+    [ "AllocUtils", "class_p_h_v_1_1_alloc_utils.html", "class_p_h_v_1_1_alloc_utils" ],
     [ "ClusterStats", "class_p_h_v_1_1_cluster_stats.html", "class_p_h_v_1_1_cluster_stats" ],
     [ "CollectTableKeys", "class_p_h_v_1_1_collect_table_keys.html", "class_p_h_v_1_1_collect_table_keys" ],
     [ "ConcreteAllocation", "class_p_h_v_1_1_concrete_allocation.html", "class_p_h_v_1_1_concrete_allocation" ],

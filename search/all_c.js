@@ -91,7 +91,7 @@ var searchData=
   ['binary_20distribution_20support_88',['Binary distribution support',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2tofino_2scripts_2_r_e_a_d_m_e.html#binary-distribution-support',1,'']]],
   ['binaryconstraint_89',['BinaryConstraint',['../class_p4_1_1_binary_constraint.html',1,'P4']]],
   ['bind_90',['bind',['../class_param_binding.html#a2f5f6010003b71966fab8aee65f77d73',1,'ParamBinding::bind(const IR::Parameter *param)'],['../class_param_binding.html#a03c96d54899b7dd35e564e22f7837588',1,'ParamBinding::bind(const IR::Declaration_Variable *var)']]],
-  ['bind_5fslices_91',['bind_slices',['../struct_p_h_v_1_1_alloc_utils.html#a18eeaa9f33788ad637ea453a4915a999',1,'PHV::AllocUtils::bind_slices()'],['../struct_p_h_v_1_1v2_1_1_phv_kit.html#ab48b1b07e9aee622fc70a720041d6ec7',1,'PHV::v2::PhvKit::bind_slices()']]],
+  ['bind_5fslices_91',['bind_slices',['../class_p_h_v_1_1_alloc_utils.html#a18eeaa9f33788ad637ea453a4915a999',1,'PHV::AllocUtils::bind_slices()'],['../struct_p_h_v_1_1v2_1_1_phv_kit.html#ab48b1b07e9aee622fc70a720041d6ec7',1,'PHV::v2::PhvKit::bind_slices()']]],
   ['bindtypevariables_92',['BindTypeVariables',['../class_p4_1_1_bind_type_variables.html',1,'P4']]],
   ['bit_20in_20byte_20alignment_93',['Bit-in-byte alignment',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2tofino_2bf-p4c_2phv_2v2_2_r_e_a_d_m_e.html#bit-in-byte-alignment',1,'']]],
   ['bit_5fgaps_94',['bit_gaps',['../class_field_slice_extract_info.html#a83ec158da3eeec9c5c3e182bf6e837ea',1,'FieldSliceExtractInfo']]],

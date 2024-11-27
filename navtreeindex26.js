@@ -1,5 +1,10 @@
 var NAVTREEINDEX26 =
 {
+"class_p_h_v_1_1_cluster_stats.html#a62f64ddc4f95187c95dbb7c1919d7ff5":[13,0,10,15,2],
+"class_p_h_v_1_1_cluster_stats.html#a7d506e0ed10c0b13292adf08a460037a":[12,0,11,12,7],
+"class_p_h_v_1_1_cluster_stats.html#a7d506e0ed10c0b13292adf08a460037a":[13,0,10,15,7],
+"class_p_h_v_1_1_cluster_stats.html#a7e547f9460949b091d1a2864cd711fd6":[12,0,11,12,5],
+"class_p_h_v_1_1_cluster_stats.html#a7e547f9460949b091d1a2864cd711fd6":[13,0,10,15,5],
 "class_p_h_v_1_1_cluster_stats.html#a81fa817e199890105109af86507a9363":[12,0,11,12,1],
 "class_p_h_v_1_1_cluster_stats.html#a81fa817e199890105109af86507a9363":[13,0,10,15,1],
 "class_p_h_v_1_1_cluster_stats.html#a9f7eee9594316e17bbbd3eeafdc3aa8f":[12,0,11,12,3],
@@ -244,10 +249,5 @@ var NAVTREEINDEX26 =
 "class_p_h_v_1_1_finalize_physical_liverange.html#a142e3cd838ac778d27b3ac0ad0431e3c":[13,0,10,32,4],
 "class_p_h_v_1_1_finalize_physical_liverange.html#a48f30bf0e1d37d4554ac7f965ff512a6":[12,0,11,29,0],
 "class_p_h_v_1_1_finalize_physical_liverange.html#a48f30bf0e1d37d4554ac7f965ff512a6":[13,0,10,32,0],
-"class_p_h_v_1_1_finalize_physical_liverange.html#a49d9f144e8d665fcd947fe3acd49016f":[12,0,11,29,1],
-"class_p_h_v_1_1_finalize_physical_liverange.html#a49d9f144e8d665fcd947fe3acd49016f":[13,0,10,32,1],
-"class_p_h_v_1_1_finalize_physical_liverange.html#a99b0ccf43a28abf0eb6fda003bd39711":[12,0,11,29,2],
-"class_p_h_v_1_1_finalize_physical_liverange.html#a99b0ccf43a28abf0eb6fda003bd39711":[13,0,10,32,2],
-"class_p_h_v_1_1_finalize_physical_liverange.html#aa6ce51591d367fdaebbd9d86feed296a":[12,0,11,29,3],
-"class_p_h_v_1_1_finalize_physical_liverange.html#aa6ce51591d367fdaebbd9d86feed296a":[13,0,10,32,3]
+"class_p_h_v_1_1_finalize_physical_liverange.html#a49d9f144e8d665fcd947fe3acd49016f":[12,0,11,29,1]
 };
