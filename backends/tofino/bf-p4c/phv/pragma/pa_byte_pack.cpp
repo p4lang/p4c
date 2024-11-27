@@ -90,7 +90,6 @@ bool PragmaBytePack::preorder(const IR::BFN::Pipe *pipe) {
 
         // Extract the rest of the arguments
         bool ignore = false;
-        int n_bits = 0;
         PackConstraint pack;
         pack.compiler_added = false;
         pack.src_info = annotation->getSourceInfo();
@@ -134,7 +133,6 @@ bool PragmaBytePack::preorder(const IR::BFN::Pipe *pipe) {
                 ignore = true;
                 break;
             }
-            n_bits += pack.packing.layout.back().size();
         }
 
         if (!ignore) {

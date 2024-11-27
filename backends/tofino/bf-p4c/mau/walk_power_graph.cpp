@@ -940,7 +940,6 @@ void WalkPowerGraph::print_worst_power(std::ofstream &out) const {
 
 #ifdef BAREFOOT_INTERNAL
         int itot_sramr = 0, itot_sramw = 0, itot_tcams = 0;
-        double itot_power = 0.0;
 #endif
 
         for (int stage = 0; stage < Device::numStages(); ++stage) {
@@ -982,7 +981,6 @@ void WalkPowerGraph::print_worst_power(std::ofstream &out) const {
                 itot_sramr += pma.ram_read;
                 itot_sramw += pma.ram_write;
                 itot_tcams += pma.tcam_read;
-                itot_power += tpwr;
 #endif
 
                 std::stringstream line;

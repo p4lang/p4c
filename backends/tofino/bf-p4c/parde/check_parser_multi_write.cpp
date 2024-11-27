@@ -472,7 +472,7 @@ struct InferWriteMode : public ParserTransform {
         // granularity
         // FIXME: this can be done if all extracts to the given byte are eliminated
         bool partial =
-            std::any_of(writes.begin(), writes.end(), [this](const IR::BFN::ParserPrimitive *pr) {
+            std::any_of(writes.begin(), writes.end(), [](const IR::BFN::ParserPrimitive *pr) {
                 auto range = get_extract_range(pr);
                 return range && (!range->isLoAligned() || !range->isHiAligned());
             });
@@ -611,7 +611,6 @@ bool CheckWriteModeConsistency::check(const std::vector<const IR::BFN::Extract *
 
     // not consistent, let's look if this can be fixed
     // * padding fields don't matter, calculate what mode can be used without them
-    bool bitwise_or = false;
     bool clear_on_write = false;
     bool has_non_padding = false;
     consistent = true;
@@ -628,7 +627,6 @@ bool CheckWriteModeConsistency::check(const std::vector<const IR::BFN::Extract *
         if (consistent && e->write_mode != first_mode) {
             consistent = false;
         }
-        bitwise_or |= e->write_mode == WrMode::BITWISE_OR;
         clear_on_write |= e->write_mode == WrMode::CLEAR_ON_WRITE;
     }
 

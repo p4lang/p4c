@@ -231,7 +231,6 @@ class CreateSaluApplyFunction : public Inspector {
     int expr_idx[NUM_EXPR_INDEX_T] = {0};
     Util::SourceInfo expr_src_info[NUM_EXPR_INDEX_T];
     Util::SourceInfo expr_pred_src_info[NUM_EXPR_INDEX_T];
-    const IR::Statement *output = nullptr;
     const Util::SourceInfo *applyLoc = nullptr;
     enum expr_index_t { LO1, LO2, HI1, HI2, OUT, UNUSED } expr_index = UNUSED;
     bool saturating = false;

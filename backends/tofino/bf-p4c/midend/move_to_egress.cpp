@@ -68,7 +68,7 @@ MoveToEgress::MoveToEgress(BFN::EvaluatorPass *ev)
                   }
               }
           },
-          [this](const IR::Node *root) {
+          [](const IR::Node *root) {
               if (LOGGING(5))
                   dump(::Log::Detail::fileLogOutput(__FILE__), root);
               else

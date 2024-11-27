@@ -92,7 +92,7 @@ struct ShiftPacketRVal : Shift {
         return rval;
     }
 
-    IR::Node *postorder(IR::BFN::ChecksumSubtract *csum) {
+    IR::Node *postorder(IR::BFN::ChecksumSubtract *csum) override {
         auto *orig = getOriginal<IR::BFN::ChecksumSubtract>();
         if (csum->source->range.loByte() % 2 != orig->source->range.loByte() % 2) {
             return new IR::BFN::ChecksumSubtract(csum->declName, csum->source, !csum->swap,
@@ -101,7 +101,7 @@ struct ShiftPacketRVal : Shift {
         return csum;
     }
 
-    IR::Node *postorder(IR::BFN::ChecksumAdd *csum) {
+    IR::Node *postorder(IR::BFN::ChecksumAdd *csum) override {
         auto *orig = getOriginal<IR::BFN::ChecksumAdd>();
         if (csum->source->range.loByte() % 2 != orig->source->range.loByte() % 2) {
             return new IR::BFN::ChecksumAdd(csum->declName, csum->source, !csum->swap,

@@ -4881,7 +4881,7 @@ std::ostream &operator<<(std::ostream &out, TablePlacement::choice_t choice) {
         "control dom set has more placeable tables",
         "average chain length of control dom set",
         "default choice"};
-    if (choice < sizeof(choice_names) / sizeof(choice_names[0])) {
+    if (static_cast<uint64_t>(choice) < sizeof(choice_names) / sizeof(choice_names[0])) {
         out << choice_names[choice];
     } else {
         out << "unknown choice <0x" << hex(choice) << ">";
@@ -5476,7 +5476,6 @@ IR::Node *TransformTables::preorder(IR::MAU::Table *tbl) {
         return tbl;
     }
     int stage_table = 0;
-    int prev_entries = 0;
     IR::Vector<IR::MAU::Table> *rv = new IR::Vector<IR::MAU::Table>;
     IR::MAU::Table *prev = 0;
     IR::MAU::Table *atcam_last = nullptr;
@@ -5679,7 +5678,6 @@ IR::Node *TransformTables::preorder(IR::MAU::Table *tbl) {
         stage_table++;
         prev = table_part;
         if (atcam_last) prev = atcam_last;
-        prev_entries += pl->entries;
     }
     BUG_CHECK(!rv->empty(), "Failed to place any stage tables for %s", tbl->name);
     return rv;

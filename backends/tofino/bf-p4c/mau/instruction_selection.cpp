@@ -3197,12 +3197,12 @@ class ExpandInstructions : public MauTransform {
         }
     }
 
-    IR::Node *preorder(IR::MAU::Action *act) {
+    IR::Node *preorder(IR::MAU::Action *act) override {
         check_action_data_bus_params(act);
         return act;
     }
 
-    IR::Node *postorder(IR::Expression *expr) {
+    IR::Node *postorder(IR::Expression *expr) override {
         auto orig_expr = getOriginal<IR::Expression>();
         BUG_CHECK(orig_expr, "Couldn't find original IR node");
 
