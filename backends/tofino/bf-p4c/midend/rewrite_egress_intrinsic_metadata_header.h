@@ -19,12 +19,13 @@
 #ifndef BF_P4C_MIDEND_REWRITE_EGRESS_INTRINSIC_METADATA_HEADER_H_
 #define BF_P4C_MIDEND_REWRITE_EGRESS_INTRINSIC_METADATA_HEADER_H_
 
-#include "backends/tofino/bf-p4c/device.h"
-
-namespace P4 {
-class TypeMap;
-class ReferenceMap;
-}  // namespace P4
+#include "backends/tofino/bf-p4c/midend/type_checker.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/typeMap.h"
+#include "ir/ir.h"
+#include "ir/pass_manager.h"
+#include "ir/visitor.h"
 
 namespace BFN {
 
@@ -33,6 +34,11 @@ namespace BFN {
  * \brief Pass that updates egress intrinsic metadata.
  */
 class RewriteEgressIntrinsicMetadataHeader : public PassManager {
+    enum DeviceType {
+        TOFINO,
+        JBAY,
+    };
+
     struct CollectUsedFields : public Inspector {
         std::set<cstring> used_fields;
         const IR::Type_Header *eg_intr_md = nullptr;
@@ -58,6 +64,8 @@ class RewriteEgressIntrinsicMetadataHeader : public PassManager {
     };
 
     struct RewriteHeader : public Transform {
+        DeviceType currentDevice;
+        int egressIntrinsicMetadataMinLen;
         const CollectUsedFields &used_fields;
         P4::TypeMap *typeMap;
 
@@ -110,12 +118,12 @@ class RewriteEgressIntrinsicMetadataHeader : public PassManager {
 
             // JBay requires the egress intrinsic metadata to be padded to 4-byte aligned
             // Minimum metadata lengh is 8B (JBay EPB uarch sec 6.1).
-            if (Device::currentDevice() == Device::JBAY) {
+            if (currentDevice == DeviceType::JBAY) {
                 unsigned total_size_in_byte = total_size_in_bits / 8;
                 unsigned tofino2_pad = ((total_size_in_byte + 3) / 4) * 4 - total_size_in_byte;
-                if (total_size_in_byte + tofino2_pad < Device::egressIntrinsicMetadataMinLen())
-                    tofino2_pad += Device::egressIntrinsicMetadataMinLen() -
-                                   (total_size_in_byte + tofino2_pad);
+                if (total_size_in_byte + tofino2_pad < egressIntrinsicMetadataMinLen)
+                    tofino2_pad +=
+                        egressIntrinsicMetadataMinLen - (total_size_in_byte + tofino2_pad);
 
                 if (tofino2_pad) {
                     LOG4("tofino2 needs " << tofino2_pad << " bytes of padding");
@@ -143,17 +151,24 @@ class RewriteEgressIntrinsicMetadataHeader : public PassManager {
             return type;
         }
 
-        explicit RewriteHeader(const CollectUsedFields &used, P4::TypeMap *typeMap)
-            : used_fields(used), typeMap(typeMap) {}
+        explicit RewriteHeader(const CollectUsedFields &used, P4::TypeMap *typeMap,
+                               DeviceType currentDevice, int egressIntrinsicMetadataMinLen)
+            : used_fields(used),
+              typeMap(typeMap),
+              currentDevice(currentDevice),
+              egressIntrinsicMetadataMinLen(egressIntrinsicMetadataMinLen) {}
     };
 
  public:
-    explicit RewriteEgressIntrinsicMetadataHeader(P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
-        auto collectUsedFields = new CollectUsedFields;
+    explicit RewriteEgressIntrinsicMetadataHeader(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+                                                  DeviceType currentDevice,
+                                                  int egressIntrinsicMetadataMinLen) {
+        auto *collectUsedFields = new CollectUsedFields;
 
         addPasses({
             collectUsedFields,
-            new RewriteHeader(*collectUsedFields, typeMap),
+            new RewriteHeader(*collectUsedFields, typeMap, currentDevice,
+                              egressIntrinsicMetadataMinLen),
             new P4::ClearTypeMap(typeMap),
             new BFN::TypeChecking(refMap, typeMap, true),
         });
