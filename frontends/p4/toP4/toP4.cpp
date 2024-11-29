@@ -692,8 +692,7 @@ bool ToP4::preorder(const IR::Type_Error *d) {
 
     bool first = true;
     for (auto a : *d->getDeclarations()) {
-        if (isDeclaration
-            && ifSystemFile(a->getNode()).has_value())
+        if (isDeclaration && ifSystemFile(a->getNode()).has_value())
             // only print if not from a system file
             continue;
         if (!first) {
