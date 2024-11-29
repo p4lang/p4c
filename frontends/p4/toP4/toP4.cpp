@@ -532,6 +532,7 @@ bool ToP4::process(const IR::Type_StructLike *t, const char *name) {
     for (auto f : t->fields) {
         Util::SourceCodeBuilder builder;
         ToP4 rec(builder, showIR);
+        rec.isDeclaration = false;
 
         f->type->apply(rec);
         cstring t = builder.toString();
@@ -688,15 +689,19 @@ bool ToP4::preorder(const IR::Declaration_Variable *v) {
 
 bool ToP4::preorder(const IR::Type_Error *d) {
     dump(1);
+
     bool first = true;
     for (auto a : *d->getDeclarations()) {
-        if (ifSystemFile(a->getNode()).has_value())
+        if (isDeclaration
+            && ifSystemFile(a->getNode()).has_value())
             // only print if not from a system file
             continue;
         if (!first) {
             builder.append(",\n");
         } else {
-            builder.append("error ");
+            builder.append("error");
+            if (!isDeclaration) return false;
+            builder.append(" ");
             builder.blockStart();
         }
         dump(1, a->getNode(), 1);
