@@ -61,12 +61,13 @@ bool CodeGenInspector::preorder(const IR::Declaration_Variable *decl) {
     return false;
 }
 
+// We count on the optimizer to get rid of 64-bit arithmetic when it's unnecessary
 static cstring getMask(P4::TypeMap *typeMap, const IR::Node *node) {
     auto type = typeMap->getType(node, true);
     cstring mask = cstring::empty;
     if (auto tb = type->to<IR::Type_Bits>()) {
         if (tb->size != 8 && tb->size != 16 && tb->size != 32 && tb->size != 64)
-            mask = " & ((1 << " + Util::toString(tb->size) + ") - 1)";
+            mask = " & ((1ULL << " + Util::toString(tb->size) + ") - 1)";
     }
     return mask;
 }
