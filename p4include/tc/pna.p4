@@ -444,6 +444,23 @@ extern Counter<W, S> {
 }
 // END:Counter_extern
 
+extern void skb_get_meta();
+extern bit<64> skb_get_tstamp();
+extern bit<32> skb_get_mark();
+extern bit<16> skb_get_tc_classid();
+extern bit<16> skb_get_tc_index();
+extern bit<16> skb_get_queue_mapping();
+extern bit<16> skb_get_protocol();
+extern bit<1> skb_get_tc_at_ingress();
+extern bit<1> skb_get_from_ingress();
+extern void skb_set_tstamp(in bit<64> dummy);
+extern void skb_set_mark(in bit<32> dummy);
+extern void skb_set_tc_classid(in bit<16> dummy);
+extern void skb_set_tc_index(in bit<16> dummy);
+extern void skb_set_queue_mapping(in bit<16> dummy);
+extern void skb_set_protocol(in bit<16> dummy);
+extern void skb_set_meta();
+
 struct tc_ControlPath_Counter<W, S> {
   @tc_key S index;
   @tc_data W pkts;
