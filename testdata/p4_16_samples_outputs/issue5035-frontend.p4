@@ -1,7 +1,5 @@
-#include <core.p4>
-#define V1MODEL_VERSION 20180101
-#include <v1model.p4>
-
+extern void log_msg(string msg);
+extern void log_msg<T>(string msg, in T data);
 header h0_t {
     bit<32> f0;
     bit<32> f1;

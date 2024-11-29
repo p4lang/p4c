@@ -14,7 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <v1model.p4>
+extern void log_msg(string msg);
+extern void log_msg<T>(string msg, in T data);
 
 header h0_t {
     bit<32> f0;
