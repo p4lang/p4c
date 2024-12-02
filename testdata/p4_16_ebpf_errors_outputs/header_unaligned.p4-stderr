@@ -1,7 +1,6 @@
-/home/msubram1/dpdk/p4c/testdata/p4_16_ebpf_errors/header_unaligned.p4(15): [--Werror=target-error] error: Header headers.foo size 3 is not a multiple of 8 bits.
+header_unaligned.p4(15): [--Werror=target-error] error: Header headers.foo size 3 is not a multiple of 8 bits.
         p.extract(headers.foo);
                   ^^^^^^^^^^^
-/home/msubram1/dpdk/p4c/testdata/p4_16_ebpf_errors/header_unaligned.p4(16): [--Werror=target-error] error: Header headers.bar size 3 is not a multiple of 8 bits.
+header_unaligned.p4(16): [--Werror=target-error] error: Header headers.bar size 3 is not a multiple of 8 bits.
         p.extract(headers.bar);
                   ^^^^^^^^^^^
-make[4]: *** [runtime.mk:73: /home/msubram1/dpdk/p4c/build/tmpaks7lw0z/test.c] Error 1
