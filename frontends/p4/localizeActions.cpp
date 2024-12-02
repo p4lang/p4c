@@ -47,7 +47,7 @@ const IR::Node *TagGlobalActions::preorder(IR::P4Action *action) {
             // If the value of the existing name annotation does not
             // begin with ".", prepend "." so that the name remains
             // global if control plane APIs are generated later.
-            const auto *e0 = nameAnno->expr.at(0);
+            const auto *e0 = nameAnno->getExpr(0);
             auto nameString = e0->to<IR::StringLiteral>()->value;
             if (!nameString.startsWith(".")) {
                 nameString = "."_cs + nameString;

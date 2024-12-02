@@ -54,7 +54,7 @@ const IR::Node *DuplicateActionControlPlaneNameCheck::postorder(IR::P4Action *ac
         cstring name = absl::StrCat(".", action->name);
         checkForDuplicateName(name, action);
     } else {
-        const auto *e0 = nameAnno->expr.at(0);
+        const auto *e0 = nameAnno->getExpr(0);
         cstring name = e0->to<IR::StringLiteral>()->value;
         if (!name.startsWith(".")) {
             // Create a fully hierarchical name beginning with ".", so we
