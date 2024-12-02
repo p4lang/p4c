@@ -530,7 +530,7 @@ int IrClass::generateConstructor(const ctor_args_t &arglist, const IrMethod *use
     }
 
     if (kind == NodeKind::Abstract) ctor->access = IrElement::Protected;
-    ctor->inImpl = true;
+    ctor->inImpl = false;
     elements.push_back(ctor);
     return optargs;
 }
@@ -598,7 +598,9 @@ void IrEnumType::generate_hdr(std::ostream &out) const {
 
 ////////////////////////////////////////////////////////////////////////////////////
 
-void IrField::resolve() {
+void IrField::resolve() { resolveType(type); }
+
+void IrField::resolveType(const Type *type) {
     auto tmpl = dynamic_cast<const TemplateInstantiation *>(type);
     const IrClass *cls = type->resolve(clss ? clss->containedIn : nullptr);
     if (cls) {
@@ -658,6 +660,42 @@ void IrField::generate(std::ostream &out, bool asField) const {
 void IrField::generate_impl(std::ostream &) const {
     if (!isStatic) return;
     // FIXME -- for now statics are manually generated elsewhere
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+
+void IrVariantField::resolve() {
+    for (const Type *type : *types) resolveType(type);
+}
+
+void IrVariantField::generate(std::ostream &out, bool asField) const {
+    if (asField) {
+        out << IrClass::indent << "using " << name << "_variant = std::variant<";
+        bool first = true;
+        for (const Type *type : *types) {
+            if (!first) out << ", ";
+
+            // FIXME: Support variant of IR node pointers
+            // const IrClass *cls = type->resolve(clss ? clss->containedIn : nullptr);
+            // if (cls != nullptr) out << "const ";
+            out << type->toString();
+            // if (cls != nullptr) out << "*";
+            first = false;
+        }
+        out << ">;" << std::endl << IrClass::indent;
+
+        if (isStatic) out << "static ";
+        if (isConst) out << "const ";
+    }
+
+    out << name << "_variant " << name;
+
+    if (asField) {
+        if (!isStatic && !initializer.isNullOrEmpty()) out << " = " << initializer;
+
+        out << ";";
+        out << std::endl;
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////////

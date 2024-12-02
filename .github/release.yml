@@ -36,6 +36,9 @@ changelog:
     - title: Changes to the P4Tools Back End
       labels:
         - p4tools
+    - title: Changes to the Tofino Back End
+      labels:
+        - tofino
     - title: Other Changes
       labels:
         - "*"

@@ -23,6 +23,7 @@
 #include "backends/tofino/bf-p4c/common/asm_output.h"
 #include "backends/tofino/bf-p4c/common/autoindent.h"
 #include "backends/tofino/bf-p4c/common/debug_info.h"
+#include "backends/tofino/bf-p4c/midend/parser_enforce_depth_req.h"
 #include "backends/tofino/bf-p4c/parde/asm_output.h"
 #include "backends/tofino/bf-p4c/parde/clot/clot_info.h"
 #include "backends/tofino/bf-p4c/parde/parde_visitor.h"
@@ -30,7 +31,6 @@
 #include "lib/log.h"
 #include "lib/match.h"
 #include "lib/range.h"
-#include "midend/parser_enforce_depth_req.h"
 
 namespace {
 
@@ -166,7 +166,7 @@ struct ParserAsmSerializer : public ParserInspector {
         auto pps_load = BackendOptions().traffic_limit;
         if (pps_load > 0 && pps_load < 100) {
             int bubble_load = 100 - pps_load;
-            int bubble_gcd = std::__gcd(100, bubble_load);
+            int bubble_gcd = std::gcd(100, bubble_load);
             int bubble_dec = bubble_load / bubble_gcd;
             int bubble_max = (100 / bubble_gcd) - bubble_dec;
             int bubble_inc = bubble_max;

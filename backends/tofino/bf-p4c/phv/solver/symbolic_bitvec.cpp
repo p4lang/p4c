@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "phv/solver/symbolic_bitvec.h"
+#include "backends/tofino/bf-p4c/phv/solver/symbolic_bitvec.h"
 
 #include "lib/exceptions.h"
 

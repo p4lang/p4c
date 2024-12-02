@@ -65,7 +65,7 @@ bool PragmaBytePack::preorder(const IR::BFN::Pipe *pipe) {
     for (const auto *annotation : global_pragmas) {
         if (annotation->name.name != PragmaBytePack::name) continue;
 
-        auto &exprs = annotation->expr;
+        auto &exprs = annotation->getExpr();
 
         const unsigned min_required_arguments = 2;  // gress, field1....
         unsigned required_arguments = min_required_arguments;
@@ -90,7 +90,6 @@ bool PragmaBytePack::preorder(const IR::BFN::Pipe *pipe) {
 
         // Extract the rest of the arguments
         bool ignore = false;
-        int n_bits = 0;
         PackConstraint pack;
         pack.compiler_added = false;
         pack.src_info = annotation->getSourceInfo();
@@ -134,7 +133,6 @@ bool PragmaBytePack::preorder(const IR::BFN::Pipe *pipe) {
                 ignore = true;
                 break;
             }
-            n_bits += pack.packing.layout.back().size();
         }
 
         if (!ignore) {

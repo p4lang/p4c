@@ -145,8 +145,7 @@ bool BFN::CheckDirectExternsOnTables::preorder(IR::P4Table *table) {
                     // generate API
                     auto newPath = new IR::PathExpression(externObjName);
                     auto newPropValue = new IR::ExpressionValue(newPath);
-                    auto newProp =
-                        new IR::Property(propToCheck, IR::Annotations::empty, newPropValue, false);
+                    auto newProp = new IR::Property(propToCheck, {}, newPropValue, false);
                     auto properties = table->properties->clone();
                     properties->push_back(newProp);
                     table->properties = properties;

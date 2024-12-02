@@ -16,11 +16,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "ixbar_expr.h"
+#include "backends/tofino/bf-p4c/mau/ixbar_expr.h"
 
-#include "common/slice.h"
-#include "input_xbar.h"
-#include "resource.h"
+#include "backends/tofino/bf-p4c/common/slice.h"
+#include "backends/tofino/bf-p4c/mau/input_xbar.h"
+#include "backends/tofino/bf-p4c/mau/resource.h"
 
 void P4HashFunction::slice(le_bitrange hash_slice) {
     le_bitrange shifted_hash_bits = hash_slice.shiftedByBits(hash_bits.lo);
@@ -101,22 +101,22 @@ void P4HashFunction::dbprint(std::ostream &out) const {
 }
 
 bool verifySymmetricHashPairs(const PhvInfo &phv, safe_vector<const IR::Expression *> &field_list,
-                              const IR::Annotations *annotations, gress_t gress,
+                              const IR::Vector<IR::Annotation> &annotations, gress_t gress,
                               const IR::MAU::HashFunction &hf, LTBitMatrix *sym_pairs) {
     bool contains_symmetric = false;
     ordered_set<PHV::FieldSlice> symmetric_fields;
 
-    for (auto annot : annotations->annotations) {
+    for (auto annot : annotations) {
         if (annot->name != "symmetric") continue;
 
-        if (!(annot->expr.size() == 2 && annot->expr.at(0)->is<IR::StringLiteral>() &&
-              annot->expr.at(1)->is<IR::StringLiteral>())) {
+        if (!(annot->getExpr().size() == 2 && annot->getExpr().at(0)->is<IR::StringLiteral>() &&
+              annot->getExpr().at(1)->is<IR::StringLiteral>())) {
             error("%1%: The symmetric annotation requires two string inputs", annot->srcInfo);
             continue;
         }
 
-        const auto *sl0 = annot->expr.at(0)->to<IR::StringLiteral>();
-        const auto *sl1 = annot->expr.at(1)->to<IR::StringLiteral>();
+        const auto *sl0 = annot->getExpr().at(0)->to<IR::StringLiteral>();
+        const auto *sl1 = annot->getExpr().at(1)->to<IR::StringLiteral>();
 
         cstring gress_str = (gress == INGRESS ? "ingress::"_cs : "egress::"_cs);
         auto field0 = phv.field(gress_str + sl0->value);
@@ -196,7 +196,7 @@ bool verifySymmetricHashPairs(const PhvInfo &phv, safe_vector<const IR::Expressi
             error(
                 "%1%: Currently in p4c, symmetric hash is only supported to work with CRC "
                 "algorithms",
-                annotations->srcInfo);
+                annotations.srcInfo);
             return false;
         }
     }

@@ -34,22 +34,23 @@ const IR::Node *P4V1::FieldListConverter::convertFieldList(const IR::Node *node)
 
     std::set<cstring> sliced_fields;
     std::map<cstring, std::pair<int, int>> field_slices;
-    for (auto anno : fl->annotations->annotations) {
+    for (auto anno : fl->annotations) {
         if (anno->name == pragma_string) {
-            if (anno->expr.size() != 3) error("Invalid pragma specification -- ", pragma_string);
+            if (anno->getExpr().size() != 3)
+                error("Invalid pragma specification -- ", pragma_string);
 
-            if (!anno->expr[0]->is<IR::StringLiteral>())
-                error("Invalid field in pragma specification -- ", anno->expr[0]);
+            if (!anno->getExpr(0)->is<IR::StringLiteral>())
+                error("Invalid field in pragma specification -- ", anno->getExpr(0));
 
-            auto field = anno->expr[0]->to<IR::StringLiteral>()->value;
-            if (!anno->expr[1]->is<IR::Constant>() || !anno->expr[2]->is<IR::Constant>())
+            auto field = anno->getExpr(0)->to<IR::StringLiteral>()->value;
+            if (!anno->getExpr()[1]->is<IR::Constant>() || !anno->getExpr()[2]->is<IR::Constant>())
                 error("Invalid slice bit position(s) in pragma specification -- ", pragma_string);
 
             if (sliced_fields.count(field)) error("Duplicate slice definition for field ", field);
             sliced_fields.insert(field);
 
-            auto msb = anno->expr[1]->to<IR::Constant>()->asInt();
-            auto lsb = anno->expr[2]->to<IR::Constant>()->asInt();
+            auto msb = anno->getExpr()[1]->to<IR::Constant>()->asInt();
+            auto lsb = anno->getExpr()[2]->to<IR::Constant>()->asInt();
 
             field_slices.emplace(field, std::make_pair(msb, lsb));
         }

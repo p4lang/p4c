@@ -59,7 +59,7 @@ const IR::ParameterList *TypeInferenceBase::canonicalizeParameters(
     if (params == nullptr) return params;
 
     bool changes = false;
-    auto vec = new IR::IndexedVector<IR::Parameter>();
+    IR::IndexedVector<IR::Parameter> vec;
     for (auto p : *params->getEnumerator()) {
         auto paramType = getTypeType(p->type);
         if (paramType == nullptr) return nullptr;
@@ -70,10 +70,10 @@ const IR::ParameterList *TypeInferenceBase::canonicalizeParameters(
             changes = true;
         }
         setType(p, paramType);
-        vec->push_back(p);
+        vec.push_back(p);
     }
 
-    if (changes) params = new IR::ParameterList(params->srcInfo, *vec);
+    if (changes) params = new IR::ParameterList(params->srcInfo, std::move(vec));
 
     return params;
 }

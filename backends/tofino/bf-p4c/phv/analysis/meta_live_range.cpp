@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "phv/analysis/meta_live_range.h"
+#include "backends/tofino/bf-p4c/phv/analysis/meta_live_range.h"
 
 cstring MetadataLiveRange::printAccess(int access) {
     switch (access) {

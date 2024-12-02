@@ -31,7 +31,7 @@ class HashMaskAnnotations {
     HashMaskAnnotations(const IR::MAU::Table *tbl, const PhvInfo &phv) {
         key_hash_bits_masked = 0;
         for (auto &table_key : tbl->match_key) {
-            for (auto &a : table_key->annotations->annotations) {
+            for (auto &a : table_key->annotations) {
                 if (a->name == "hash_mask") {
                     bitvec hash_mask = getBitvec(a);
 
@@ -62,11 +62,11 @@ class HashMaskAnnotations {
  private:
     bitvec getBitvec(const IR::Annotation *annotation) {
         bitvec rv;
-        if (annotation->expr.size() != 1) {
+        if (annotation->getExpr().size() != 1) {
             error("%1% should contain a constant", annotation);
             return rv;
         }
-        auto constant = annotation->expr[0]->to<IR::Constant>();
+        auto constant = annotation->getExpr(0)->to<IR::Constant>();
         if (constant == nullptr) {
             error("%1% should contain a constant", annotation);
             return rv;

@@ -27,7 +27,7 @@ const IR::Node *DoRemoveParserControlFlow::postorder(IR::ParserState *state) {
     auto states = new IR::IndexedVector<IR::ParserState>();
     IR::ParserState *currentState = state;
     // components of the currentState
-    auto currentComponents = new IR::IndexedVector<IR::StatOrDecl>();
+    IR::IndexedVector<IR::StatOrDecl> currentComponents;
     auto origComponents = state->components;
     auto origSelect = state->selectExpression;
 
@@ -42,9 +42,7 @@ const IR::Node *DoRemoveParserControlFlow::postorder(IR::ParserState *state) {
 
             // s_true
             cstring trueName = nameGen.newName(state->name.name + "_true");
-            auto trueComponents = new IR::IndexedVector<IR::StatOrDecl>();
-            trueComponents->push_back(ifstat->ifTrue);
-            auto trueState = new IR::ParserState(trueName, *trueComponents,
+            auto trueState = new IR::ParserState(trueName, {ifstat->ifTrue},
                                                  new IR::PathExpression(IR::ID(joinName, nullptr)));
             states->push_back(trueState);
 
@@ -52,34 +50,28 @@ const IR::Node *DoRemoveParserControlFlow::postorder(IR::ParserState *state) {
             cstring falseName = joinName;
             if (ifstat->ifFalse != nullptr) {
                 falseName = nameGen.newName(state->name.name + "_false");
-                auto falseComponents = new IR::IndexedVector<IR::StatOrDecl>();
-                falseComponents->push_back(ifstat->ifFalse);
-                auto falseState = new IR::ParserState(
-                    falseName, *falseComponents, new IR::PathExpression(IR::ID(joinName, nullptr)));
+                auto falseState =
+                    new IR::ParserState(falseName, {ifstat->ifFalse},
+                                        new IR::PathExpression(IR::ID(joinName, nullptr)));
                 states->push_back(falseState);
             }
 
             // left-over
-            auto vec = new IR::Vector<IR::Expression>();
-            vec->push_back(ifstat->condition);
             auto trueCase = new IR::SelectCase(new IR::BoolLiteral(true),
                                                new IR::PathExpression(IR::ID(trueName, nullptr)));
             auto falseCase = new IR::SelectCase(new IR::BoolLiteral(false),
                                                 new IR::PathExpression(IR::ID(falseName, nullptr)));
-            auto cases = new IR::Vector<IR::SelectCase>();
-            cases->push_back(trueCase);
-            cases->push_back(falseCase);
-            currentState->selectExpression =
-                new IR::SelectExpression(new IR::ListExpression(*vec), std::move(*cases));
+            currentState->selectExpression = new IR::SelectExpression(
+                new IR::ListExpression({ifstat->condition}), {trueCase, falseCase});
 
-            currentState->components = *currentComponents;
-            currentComponents = new IR::IndexedVector<IR::StatOrDecl>();
+            currentState->components = std::move(currentComponents);
+            currentComponents.clear();
             currentState = new IR::ParserState(joinName, origSelect);  // may be overriten
         } else {
-            currentComponents->push_back(c);
+            currentComponents.push_back(c);
         }
     }
-    currentState->components = *currentComponents;
+    currentState->components = std::move(currentComponents);
 
     if (states->empty()) return state;
     states->push_back(currentState);

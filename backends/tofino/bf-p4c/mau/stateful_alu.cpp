@@ -1581,12 +1581,12 @@ bool CreateSaluInstruction::isComplexInstruction(const IR::Operation_Binary *op)
     // IR::L* operators (LAnd, LOr, etc.) are working with predicates
 
     bool ret = false;
-    for (auto oper : {op->left, op->right}) {
-        ret |= oper->is<IR::Add>() | oper->is<IR::AddSat>();
-        ret |= oper->is<IR::Sub>() | oper->is<IR::SubSat>();
-        ret |= oper->is<IR::BAnd>() | oper->is<IR::BOr>() | oper->is<IR::BXor>();
-        ret |= oper->is<IR::Div>() | oper->is<IR::Mod>();
-        ret |= oper->is<IR::Neg>();
+    for (const auto *oper : {op->left, op->right}) {
+        ret = ret || oper->is<IR::Add>() || oper->is<IR::AddSat>();
+        ret = ret || oper->is<IR::Sub>() || oper->is<IR::SubSat>();
+        ret = ret || oper->is<IR::BAnd>() || oper->is<IR::BOr>() || oper->is<IR::BXor>();
+        ret = ret || oper->is<IR::Div>() || oper->is<IR::Mod>();
+        ret = ret || oper->is<IR::Neg>();
     }
 
     return ret;
@@ -2413,9 +2413,8 @@ bool CheckStatefulAlu::preorder(IR::MAU::StatefulAlu *salu) {
     }
 
     const IR::MAU::SaluAction *first = nullptr;
-    ;
     for (auto salu_action : Values(salu->instruction)) {
-        auto chain = salu_action->annotations->getSingle("chain_address"_cs);
+        auto chain = salu_action->getAnnotation("chain_address"_cs);
         if (first) {
             if (salu->chain_vpn != (chain != nullptr))
                 error(ErrorType::ERR_UNSUPPORTED, "Inconsistent chaining for %s and %s", first,

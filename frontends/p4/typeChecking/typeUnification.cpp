@@ -319,12 +319,12 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
             return constraint->reportError(constraints->getCurrentSubstitution(),
                                            "Tuples with different sizes %1% vs %2%",
                                            td->components.size(), ts->components.size());
-        auto missingFields = new IR::Vector<IR::Type>();
+        IR::Vector<IR::Type> missingFields;
         size_t sourceSize = ts->components.size();
         for (size_t i = 0; i < td->components.size(); i++) {
             auto di = td->components.at(i);
             if (hasDots && (i >= sourceSize - 1)) {
-                missingFields->push_back(di);
+                missingFields.push_back(di);
             } else {
                 // Last field is the ... field
                 auto si = ts->components.at(i);
@@ -332,7 +332,7 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
             }
         }
         if (hasDots) {
-            auto dotsType = new IR::Type_List(*missingFields);
+            auto dotsType = new IR::Type_List(std::move(missingFields));
             auto dotsField = ts->components.at(sourceSize - 1);
             auto partial = new IR::Type_Fragment(dotsType);
             constraints->add(new EqualityConstraint(dotsField, partial, constraint));
@@ -350,7 +350,7 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
                     "than number of fields %3% in '%4%'",
                     tpl->components.size(), tpl, strct->fields.size(), strct);
             size_t index = 0;
-            auto missingFields = new IR::IndexedVector<IR::StructField>();
+            IR::IndexedVector<IR::StructField> missingFields;
             for (const IR::StructField *f : strct->fields) {
                 if (!hasDots || listSize > index + 1) {
                     // Last field is the ... field
@@ -358,12 +358,12 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
                     const IR::Type *destt = f->type;
                     constraints->add(constraint->create(destt, tplField));
                 } else {
-                    missingFields->push_back(f);
+                    missingFields.push_back(f);
                 }
                 index++;
             }
             if (hasDots) {
-                auto dotsType = new IR::Type_UnknownStruct(strct->name, *missingFields);
+                auto dotsType = new IR::Type_UnknownStruct(strct->name, std::move(missingFields));
                 auto dotsField = tpl->components.at(listSize - 1);
                 auto partial = new IR::Type_Fragment(dotsType);
                 constraints->add(new EqualityConstraint(dotsField, partial, constraint));
@@ -390,12 +390,12 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
                                                "than number of fields in structure %2%: %3% to %4%",
                                                st->fields.size(), strct->fields.size(), st, strct);
 
-            auto missingFields = new IR::IndexedVector<IR::StructField>();
+            IR::IndexedVector<IR::StructField> missingFields;
             for (const IR::StructField *f : strct->fields) {
                 auto stField = st->getField(f->name);
                 if (stField == nullptr) {
                     if (stHasDots) {
-                        missingFields->push_back(f);
+                        missingFields.push_back(f);
                         continue;
                     } else {
                         return constraint->reportError(constraints->getCurrentSubstitution(),
@@ -409,7 +409,7 @@ bool TypeUnification::unify(const BinaryConstraint *constraint) {
                 constraints->add(c);
             }
             if (stHasDots) {
-                auto dotsType = new IR::Type_UnknownStruct(st->name, *missingFields);
+                auto dotsType = new IR::Type_UnknownStruct(st->name, std::move(missingFields));
                 auto dotsField = st->getField("..."_cs);
                 CHECK_NULL(dotsField);
                 auto partial = new IR::Type_Fragment(dotsType);

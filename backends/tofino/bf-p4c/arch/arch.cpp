@@ -30,7 +30,6 @@
 #include "frontends/p4/methodInstance.h"
 #include "ir/declaration.h"
 #include "ir/id.h"
-#include "ir/ir-generated.h"
 #include "lib/cstring.h"
 
 namespace BFN {
@@ -65,11 +64,11 @@ bool Pipeline::equiv(const Pipeline &other) const {
 
 void Pipeline::insertPragmas(const std::vector<const IR::Annotation *> &all_pragmas) {
     auto applies = [this](const IR::Annotation *p) {
-        if (p->expr.empty() || p->expr.at(0) == nullptr) {
+        if (p->getExpr().empty() || p->getExpr(0) == nullptr) {
             return true;
         }
 
-        auto arg0 = p->expr.at(0)->to<IR::StringLiteral>();
+        auto arg0 = p->getExpr(0)->to<IR::StringLiteral>();
 
         // Determine whether the name of a pipe is present as the first argument.
         // If the pipe name doesn't match, the pragma is to be applied for a different pipe.
@@ -118,7 +117,7 @@ bool Architecture::preorder(const IR::PackageBlock *pkg) {
         found = true;
     } else if (pkg->type->name == "Switch" || pkg->type->name == "MultiParserSwitch") {
         if (auto annot = pkg->type->getAnnotation(IR::Annotation::pkginfoAnnotation)) {
-            for (auto kv : annot->kv) {
+            for (auto kv : annot->getKV()) {
                 if (kv->name == "arch") {
                     architecture = toArchEnum(kv->expression->to<IR::StringLiteral>()->value);
                 } else if (kv->name == "version") {
@@ -213,23 +212,25 @@ void ParseTna::parseSingleParserPipeline(const IR::PackageBlock *block, unsigned
 }
 
 void ParseTna::parsePortMapAnnotation(const IR::PackageBlock *block, DefaultPortMap &map) {
-    if (auto anno = block->node->getAnnotation("default_portmap"_cs)) {
-        int index = 0;
-        for (auto expr : anno->expr) {
-            std::vector<int> ports;
-            if (auto cst = expr->to<IR::Constant>()) {
-                ports.push_back(cst->asInt());
-            } else if (auto list = expr->to<IR::ListExpression>()) {
-                for (auto expr : list->components) {
-                    ports.push_back(expr->to<IR::Constant>()->asInt());
+    if (auto annot = block->node->to<IR::IAnnotated>()) {
+        if (auto anno = annot->getAnnotation("default_portmap"_cs)) {
+            int index = 0;
+            for (auto expr : anno->getExpr()) {
+                std::vector<int> ports;
+                if (auto cst = expr->to<IR::Constant>()) {
+                    ports.push_back(cst->asInt());
+                } else if (auto list = expr->to<IR::ListExpression>()) {
+                    for (auto expr : list->components) {
+                        ports.push_back(expr->to<IR::Constant>()->asInt());
+                    }
+                } else if (auto list = expr->to<IR::StructExpression>()) {
+                    for (auto expr : list->components) {
+                        ports.push_back(expr->expression->to<IR::Constant>()->asInt());
+                    }
                 }
-            } else if (auto list = expr->to<IR::StructExpression>()) {
-                for (auto expr : list->components) {
-                    ports.push_back(expr->expression->to<IR::Constant>()->asInt());
-                }
+                map[index] = ports;
+                index++;
             }
-            map[index] = ports;
-            index++;
         }
     }
 }
@@ -397,10 +398,8 @@ void add_param(ordered_map<cstring, cstring> &tnaParams, const IR::ParameterList
         tnaParams.emplace(hdr, param->name);
     } else {
         // add optional parameter to parser and control type
-        auto *annotations = new IR::Annotations();
-        annotations->annotations.push_back(new IR::Annotation("optional"_cs, {}));
-        newParams->push_back(
-            new IR::Parameter(IR::ID(hdr), annotations, dir, new IR::Type_Name(IR::ID(hdr_type))));
+        newParams->push_back(new IR::Parameter(IR::ID(hdr), {new IR::Annotation("optional"_cs, {})},
+                                               dir, new IR::Type_Name(IR::ID(hdr_type))));
         tnaParams.emplace(hdr, hdr);
     }
 }

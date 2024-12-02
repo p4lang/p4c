@@ -636,7 +636,7 @@ static inline auto getParserRangeDefMatcher(const PhvInfo &phv, const PHV::Field
     le_bitrange range = bits ? *bits : StartLen(0, f->size);
     // note that we need to capture f (pointer) and range by value to avoid dangling reference,
     // but phv by reference (it is large and we got it by reference)
-    return [&phv, range, f](const FieldDefUse::locpair &lp) {
+    return [&phv, range](const FieldDefUse::locpair &lp) {
         le_bitrange rng;
         if (!(lp.first->is<IR::BFN::ParserState>() || lp.first->is<IR::BFN::Parser>()))
             return false;

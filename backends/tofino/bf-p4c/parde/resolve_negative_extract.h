@@ -29,7 +29,6 @@
 #include "backends/tofino/bf-p4c/parde/parde_visitor.h"
 #include "backends/tofino/bf-p4c/parde/parser_dominator_builder.h"
 #include "backends/tofino/bf-p4c/parde/parser_info.h"
-#include "ir/ir-generated.h"
 #include "lib/indent.h"
 #include "lib/ordered_map.h"
 

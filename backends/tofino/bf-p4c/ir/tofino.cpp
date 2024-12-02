@@ -21,7 +21,7 @@
 /* static */ size_t IR::BFN::ContainerRef::nextId = 0;
 
 IR::InstanceRef::InstanceRef(cstring prefix, IR::ID n, const IR::Type *t,
-                             const IR::Annotations *ann)
+                             const IR::Vector<IR::Annotation> *ann)
     : HeaderRef(t), name(n), nested() {
     if (n.srcInfo.isValid()) srcInfo = n.srcInfo;
     if (prefix) name.name = prefix + "." + n.name;
@@ -46,14 +46,14 @@ IR::InstanceRef::InstanceRef(cstring prefix, IR::ID n, const IR::Type *t,
     } else {
         P4C_UNIMPLEMENTED("Unsupported type %s %s", t, n);
     }
-    if (obj && ann) obj->annotations = ann;
+    if (obj && ann) obj->annotations = *ann;
     this->obj = obj;
 }
 
 /* a V1InstanceRef is the same as an InstanceRef except we ignore the prefix -- see tofino.def
  * we also don't handle StructFlexible as that never occurs in V1 */
 IR::V1InstanceRef::V1InstanceRef(cstring /* prefix */, IR::ID n, const IR::Type *t,
-                                 const IR::Annotations *ann)
+                                 const IR::Vector<IR::Annotation> *ann)
     : InstanceRef(t) {
     name = n;
     if (n.srcInfo.isValid()) srcInfo = n.srcInfo;
@@ -72,7 +72,7 @@ IR::V1InstanceRef::V1InstanceRef(cstring /* prefix */, IR::ID n, const IR::Type 
     } else {
         P4C_UNIMPLEMENTED("Unsupported P4_14 type %s %s", t, n);
     }
-    if (obj && ann) obj->annotations = ann;
+    if (obj && ann) obj->annotations = *ann;
     this->obj = obj;
 }
 

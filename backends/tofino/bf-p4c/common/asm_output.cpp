@@ -164,7 +164,7 @@ safe_vector<Slice> Slice::split(const safe_vector<Slice> &vec, safe_vector<Slice
 
 bool has_user_annotation(const IR::IAnnotated *node) {
     if (!node) return false;
-    for (auto *annotation : node->getAnnotations()->annotations) {
+    for (auto *annotation : node->getAnnotations()) {
         if (annotation->name == PragmaUserAnnotation::name) return true;
     }
 
@@ -186,7 +186,7 @@ void emit_user_annotation_context_json(indent_t indent, const IR::IAnnotated *no
     if (!node) return;
 
     bool emitted_header = false;
-    for (auto *annotation : node->getAnnotations()->annotations) {
+    for (auto *annotation : node->getAnnotations()) {
         if (annotation->name != PragmaUserAnnotation::name) continue;
 
         if (!emitted_header) {
@@ -196,7 +196,7 @@ void emit_user_annotation_context_json(indent_t indent, const IR::IAnnotated *no
         }
 
         bool emitted_elts = false;
-        for (auto *expr : annotation->expr) {
+        for (auto *expr : annotation->getExpr()) {
             auto str = expr->to<IR::StringLiteral>();
             BUG_CHECK(str, "User annotation not a string literal: %1%", expr);
 

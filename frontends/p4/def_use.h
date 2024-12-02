@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "absl/container/flat_hash_set.h"
 #include "absl/container/inlined_vector.h"
+#include "absl/container/node_hash_set.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "ir/ir.h"
 #include "lib/alloc_trace.h"
@@ -463,6 +464,11 @@ template <>
 struct Hasher<P4::ProgramPoint> {
     size_t operator()(const P4::ProgramPoint &p) const { return p.hash(); }
 };
+
+template <>
+struct Hasher<P4::loc_t> {
+    size_t operator()(const P4::loc_t &loc) const { return loc.hash(); }
+};
 }  // namespace P4::Util
 
 namespace P4 {
@@ -605,6 +611,9 @@ class AllDefinitions : public IHasDbPrint {
  */
 
 class ComputeWriteSet : public Inspector, public IHasDbPrint {
+    // We are using node_hash_set here as we need pointers to entries (loc_t) to be stable
+    using CachedLocs = absl::node_hash_set<loc_t, Util::Hash>;
+
  public:
     explicit ComputeWriteSet(AllDefinitions *allDefinitions, ReferenceMap *refMap, TypeMap *typeMap)
         : refMap(refMap),
@@ -615,7 +624,7 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
           exitDefinitions(new Definitions()),
           lhs(false),
           virtualMethod(false),
-          cached_locs(*new std::unordered_set<loc_t>) {
+          cached_locs(new CachedLocs) {
         CHECK_NULL(allDefinitions);
         CHECK_NULL(refMap);
         CHECK_NULL(typeMap);
@@ -689,7 +698,7 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
     /// Creates new visitor, but with same underlying data structures.
     /// Needed to visit some program fragments repeatedly.
     ComputeWriteSet(const ComputeWriteSet *source, ProgramPoint context, Definitions *definitions,
-                    std::unordered_set<loc_t> &cached_locs)
+                    std::shared_ptr<CachedLocs> cached_locs)
         : refMap(source->refMap),
           typeMap(source->typeMap),
 
@@ -769,8 +778,7 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
     }
 
  private:
-    // TODO: Make absl::node_hash_set instead?
-    std::unordered_set<loc_t> &cached_locs;
+    std::shared_ptr<CachedLocs> cached_locs;
 };
 
 }  // namespace P4

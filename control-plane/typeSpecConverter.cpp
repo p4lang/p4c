@@ -47,12 +47,13 @@ bool hasTranslationAnnotation(const IR::Type *type, TranslationAnnotation *paylo
     if (!ann) return false;
 
     // Syntax: @pruntime_translation(<uri>, <basic_type>).
-    BUG_CHECK(ann->expr.size() == 2,
+    const auto &expr = ann->getExpr();
+    BUG_CHECK(expr.size() == 2,
               "%1%: expected @p4runtime_translation annotation with 2 "
               "arguments, but found %2% arguments",
-              type, ann->expr.size());
-    const IR::Expression *first_arg = ann->expr[0];
-    const IR::Expression *second_arg = ann->expr[1];
+              type, expr.size());
+    const IR::Expression *first_arg = expr[0];
+    const IR::Expression *second_arg = expr[1];
 
     auto uri = first_arg->to<IR::StringLiteral>();
     BUG_CHECK(uri != nullptr,

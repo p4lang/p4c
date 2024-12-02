@@ -58,17 +58,18 @@ std::optional<IOptionPragmaParser::CommandLineOptions> P4COptionPragmaParser::pa
     const IR::Annotation *annotation) {
     CommandLineOptions newOptions;
 
-    auto pragmaArgs = &annotation->expr;
-
     // Parsing of option pragmas is done early in the compiler, before P4₁₆
     // annotations are parsed, so we are responsible for doing our own parsing
     // here.
-    if (pragmaArgs->empty()) {
-        auto parseResult =
-            P4ParserDriver::parseExpressionList(annotation->srcInfo, annotation->body);
-        if (parseResult != nullptr) {
+    const IR::Vector<IR::Expression> *pragmaArgs = nullptr;
+    if (annotation->needsParsing()) {
+        // FIXME: Do we need to error?
+        if (auto *parseResult = P4ParserDriver::parseExpressionList(annotation->srcInfo,
+                                                                    annotation->getUnparsed())) {
             pragmaArgs = parseResult;
         }
+    } else {
+        pragmaArgs = &annotation->getExpr();
     }
 
     if (pragmaArgs->size() != 2) {

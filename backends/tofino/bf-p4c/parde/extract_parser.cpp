@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "extract_parser.h"
+#include "backends/tofino/bf-p4c/parde/extract_parser.h"
 
 #include <algorithm>
 #include <map>
@@ -471,8 +471,8 @@ const IR::BFN::Parser *GetBackendParser::createBackendParser() {
             LOG3("mark " << state->name << " as strided");
         }
         if (auto dontmerge = state->getAnnotation("dontmerge"_cs)) {
-            if (dontmerge->expr.size()) {
-                auto gress = dontmerge->expr[0]->to<IR::StringLiteral>();
+            if (dontmerge->getExpr().size()) {
+                auto gress = dontmerge->getExpr(0)->to<IR::StringLiteral>();
                 if (gress->value == toString(parser->thread)) {
                     backendState->dontMerge = true;
                 }
@@ -598,8 +598,8 @@ void GetBackendParser::addTransition(IR::BFN::ParserState *state, match_t matchV
         // supports this feature in TNA with the 'pd_pvs_name' annotation by
         // overriding the pvs name with the name in the annotation.
         cstring valueSetName;
-        if (auto anno = valueSet->annotations->getSingle("pd_pvs_name"_cs)) {
-            auto name = anno->expr.at(0)->to<IR::StringLiteral>();
+        if (auto anno = valueSet->getAnnotation("pd_pvs_name"_cs)) {
+            auto name = anno->getExpr(0)->to<IR::StringLiteral>();
             valueSetName = name->value;
         } else {
             valueSetName = valueSet->controlPlaneName();
@@ -1168,7 +1168,7 @@ struct RewriteParserChecksums : public Transform {
  private:
     // check if member is header/payload checksum field itself
     // (annotated with @header_checksum/@payload_checksum)
-    bool isChecksumField(const IR::Member *member, const cstring &which) const {
+    bool isChecksumField(const IR::Member *member, cstring which) const {
         const IR::HeaderOrMetadata *header = nullptr;
         if (auto headerRef = member->expr->to<IR::ConcreteHeaderRef>()) {
             header = headerRef->baseRef();
@@ -1179,8 +1179,7 @@ struct RewriteParserChecksums : public Transform {
         }
         for (auto field : header->type->fields) {
             if (field->name == member->member) {
-                auto annot = field->annotations->getSingle(which);
-                if (annot) return true;
+                if (field->hasAnnotation(which)) return true;
             }
         }
         return false;

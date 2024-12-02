@@ -19,13 +19,11 @@
 #ifndef _BACKENDS_TOFINO_BF_P4C_LOGGING_RESOURCES_CLOT_H_
 #define _BACKENDS_TOFINO_BF_P4C_LOGGING_RESOURCES_CLOT_H_
 
-/* clang-format off */
 #include <map>
 #include <vector>
-#include "ir/ir.h"
 
-#include "resources_schema.h"
-/* clang-format on */
+#include "backends/tofino/bf-p4c/logging/resources_schema.h"
+#include "ir/ir.h"
 
 using Logging::Resources_Schema_Logger;
 class ClotInfo;  // Forward declaration
@@ -50,7 +48,7 @@ class ClotResourcesLogging : public ParserInspector {
 
     std::vector<ClotUsage *> &getUsageData(gress_t gress, unsigned tag);
 
-    bool preorder(const IR::BFN::LoweredParserState *state);
+    bool preorder(const IR::BFN::LoweredParserState *state) override;
     void end_apply() override;
 
     void collectClotUsages(const IR::BFN::LoweredParserMatch *match,

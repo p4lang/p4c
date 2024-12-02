@@ -2233,11 +2233,9 @@ bool CoreAllocation::try_pack_slice_list(
                 LOG_DEBUG5(TAB3 "Found field in another slice list.");
                 int offset = 0;
                 bool absolute = false;
-                int size = 0;
                 std::optional<PHV::Container> requiredContainer = std::nullopt;
                 std::map<PHV::FieldSlice, int> bitPositions;
                 for (auto &slice : **slice_list) {
-                    size += slice.range().size();
                     if (kv_source.second.find(slice) == kv_source.second.end()) {
                         bitPositions[slice] = offset;
                         offset += slice.range().size();

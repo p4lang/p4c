@@ -59,7 +59,7 @@ std::ostream &operator<<(std::ostream &out, const P4::IR::BFN::Phase0 *p0) {
     // v1model code to TNA.
     auto *packing = new BFN::FieldPacking;
     for (auto *field : *p0->fields) {
-        auto isPadding = bool(field->annotations->getSingle("padding"_cs));
+        auto isPadding = field->hasAnnotation("padding"_cs);
 
         LOG4("  - " << field->name << " (" << field->type->width_bits() << "b)"
                     << (isPadding ? " (padding)" : ""));

@@ -49,7 +49,7 @@ IR::Key *TableGenerator::genKeyElementList(size_t len) {
         // @name
         // Tao: actually, this may never happen
         const auto *keyAnno = key->getAnnotations().at(0);
-        const auto *annotExpr = keyAnno->expr.at(0);
+        const auto *annotExpr = keyAnno->getExpr(0);
         cstring keyAnnotatName;
         if (annotExpr->is<IR::StringLiteral>()) {
             const auto *strExpr = annotExpr->to<IR::StringLiteral>();

@@ -16,10 +16,6 @@
 
 MESSAGE("-- Adding p4c-barefoot")
 
-# Set dynamic hash include directory
-set(LIBDYNHASH_INCLUDE_DIR "${BFN_P4C_SOURCE_DIR}/bf-utils/include")
-include_directories(${LIBDYNHASH_INCLUDE_DIR})
-
 # An option to configure the chunk size we use for unified builds in bf-p4c. By
 # default, this is tuned to use smaller chunks than the p4c repo uses. The goal
 # is to gain most of the benefit of unified builds when many files change, while
@@ -87,24 +83,12 @@ get_schema_version(resources_schema RESOURCES_SCHEMA_VERSION)
 MESSAGE(STATUS "Found source info schema version ${RESOURCES_SCHEMA_VERSION}")
 add_definitions("-DRESOURCES_SCHEMA_VERSION=\"${RESOURCES_SCHEMA_VERSION}\"")
 
-include_directories(${BFN_P4C_SOURCE_DIR}
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ${Boost_INCLUDE_DIRS} ${LIBDYNHASH_INCLUDE_DIR} ${Z3_INCLUDE_DIR} )
-# The generated code for protobuf has an excessive number of warnings so we
-# include the build directory as a system directory
-include_directories(SYSTEM ${P4C_BINARY_DIR}/control-plane)
 set (HAVE_LIBBOOST_GRAPH 1)
-message(STATUS "Z3_LIBRARY value: ${Z3_LIB}")
 
 set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${Boost_GRAPH_LIBRARY};${LIBDYNHASH_LIBRARY};${Z3_LIB}")
 set (P4C_LIB_DEPS ${P4C_LIB_DEPS} PARENT_SCOPE)
 
 add_subdirectory(logging)
-include_directories(logging)
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/logging)
-
-set_source_files_properties(${BF_P4C_IR_SRCS} PROPERTIES
-  COMPILE_FLAGS "-I${Z3_INCLUDE_DIR}")
 
 set (BF_P4C_MIDEND_SRCS
   midend/annotate_with_in_hash.cpp
@@ -977,12 +961,16 @@ if(BUILD_STATIC_BFP4C_LIBS)
 else()
     add_library(tofinobackend OBJECT ${BF_P4C_SOURCES})
 endif()
-target_link_libraries(tofinobackend PRIVATE absl::prefetch ${P4C_LIB_DEPS} ir)
+target_link_libraries(tofinobackend PRIVATE absl::prefetch ${P4C_LIB_DEPS} controlplane-gen ir)
+target_include_directories(
+  tofinobackend
+  # We also export Z3's includes with the common library.
+  # This is necessary because the z3 target itself does not export its includes.
+  SYSTEM BEFORE PUBLIC ${Z3_INCLUDE_DIR}
+  # FIXME: This should be pulled with FetchContent.
+  PRIVATE "${BFN_P4C_SOURCE_DIR}/third_party/spdlog/include"
+)
 add_dependencies(tofinobackend ir-generated frontend genLogging bfn_p4runtime)
-target_include_directories(tofinobackend PRIVATE "${BFN_P4C_SOURCE_DIR}/third_party/spdlog/include")
-foreach(dir ${Protobuf_INCLUDE_DIRS})
-    target_include_directories(tofinobackend SYSTEM BEFORE PUBLIC ${dir})
-endforeach()
 
 if(BUILD_STATIC_BFP4C_LIBS)
     add_library(bfp4c STATIC ${P4C_BAREFOOT_SRCS})
@@ -993,7 +981,6 @@ else()
 endif()
 target_link_libraries (bfp4c tofinobackend bfn_p4runtime
   ${P4C_LIBRARIES} ${P4C_LIB_DEPS} ${CMAKE_THREAD_LIBS_INIT})
-
 # XXX These compile definitions and include directories should be inherited
 # XXX from bfp4c's dependencies, but these CMake files aren't very modular.
 target_compile_definitions(bfp4c
@@ -1011,25 +998,6 @@ if (ENABLE_BAREFOOT_INTERNAL)
     INTERFACE "-DBAREFOOT_INTERNAL=1"
   )
 endif()
-target_include_directories(bfp4c
-  INTERFACE ${LIBDYNHASH_INCLUDE_DIR}
-  INTERFACE ${PROTOBUF_INCLUDE_DIRS}
-  INTERFACE ${P4C_SOURCE_DIR}/frontends
-  INTERFACE ${P4C_SOURCE_DIR}/backends
-  INTERFACE ${P4C_SOURCE_DIR}/extensions
-  INTERFACE ${P4C_SOURCE_DIR}
-  INTERFACE ${P4C_BINARY_DIR}
-  INTERFACE ${BFN_P4C_SOURCE_DIR}
-  INTERFACE ${CMAKE_CURRENT_SOURCE_DIR}
-)
-target_include_directories(bfp4c
-  SYSTEM INTERFACE ${P4C_BINARY_DIR}/control-plane
-)
-target_include_directories(bfp4c
-  INTERFACE logging
-  INTERFACE ${CMAKE_CURRENT_BINARY_DIR}/logging
-  INTERFACE ${CMAKE_SOURCE_DIR}/third_party/spdlog/include
-)
 
 if(BUILD_STATIC_BFP4C_LIBS)
     add_executable(p4c-barefoot p4c-barefoot.cpp)
@@ -1055,6 +1023,15 @@ else()
     add_executable(p4c-barefoot p4c-barefoot.cpp $<TARGET_OBJECTS:bfp4c>
                                 $<TARGET_OBJECTS:tofinobackend> $<TARGET_OBJECTS:bfn_p4runtime>)
     target_link_libraries(p4c-barefoot ${P4C_LIBRARIES} ${P4C_LIB_DEPS} ${CMAKE_THREAD_LIBS_INIT})
+    # FIXME: These includes should be exported by earlier libraries.
+    target_include_directories(
+      p4c-barefoot
+      # We also export Z3's includes with the common library.
+      # This is necessary because the z3 target itself does not export its includes.
+      SYSTEM BEFORE PUBLIC ${Z3_INCLUDE_DIR}
+      # FIXME: This should be pulled with FetchContent.
+      PRIVATE "${BFN_P4C_SOURCE_DIR}/third_party/spdlog/include"
+    )
 endif()
 
 
@@ -1202,16 +1179,16 @@ add_dependencies(p4c_driver p4c-build-logs)
 install (PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/dist/p4c-build-logs
   DESTINATION bin)
 
-add_custom_command(OUTPUT ${CMAKE_BINARY_DIR}/p4c_src/schema_versions
-  COMMAND ${BFN_P4C_SOURCE_DIR}/scripts/extract_schema_versions.sh ${CMAKE_BINARY_DIR}/p4c_src/schema_versions
+add_custom_command(OUTPUT ${P4C_BINARY_DIR}/p4c_src/schema_versions
+  COMMAND ${BFN_P4C_SOURCE_DIR}/scripts/extract_schema_versions.sh ${P4C_BINARY_DIR}/p4c_src/schema_versions
   DEPENDS ${SCHEMA_FILES}
   COMMENT "Extract all used schema versions")
 
 add_custom_target(schema-versions
-  DEPENDS ${CMAKE_BINARY_DIR}/p4c_src/schema_versions)
+  DEPENDS ${P4C_BINARY_DIR}/p4c_src/schema_versions)
 add_dependencies(p4c_driver schema-versions)
 
-install (FILES ${CMAKE_BINARY_DIR}/p4c_src/schema_versions
+install (FILES ${P4C_BINARY_DIR}/p4c_src/schema_versions
   DESTINATION share/p4c/p4c_src)
 
 set(SED_RELEASE_FILTERS "-e ''")
@@ -1291,12 +1268,9 @@ if(BUILD_STATIC_BFP4C_LIBS)
 else()
     add_library(bfn_p4runtime OBJECT ${BFN_P4RUNTIME_INFO_GEN_SRCS})
 endif()
-target_link_libraries(bfn_p4runtime PRIVATE absl::prefetch)
+target_link_libraries(bfn_p4runtime PUBLIC controlplane-gen PRIVATE absl::prefetch)
 set_source_files_properties(${BFN_P4RUNTIME_INFO_GEN_SRCS} PROPERTIES GENERATED TRUE)
 add_dependencies(bfn_p4runtime barefootdir controlplane)
-foreach(dir ${Protobuf_INCLUDE_DIRS})
-    target_include_directories(bfn_p4runtime SYSTEM BEFORE PUBLIC ${dir})
-endforeach()
 
 ################ Testing
 
@@ -1377,7 +1351,12 @@ if (ENABLE_GTESTS)
                                 # test_bf_gtest_helpers should be in its own testlib - & requies 'whole_archive' hack!
                                 # Leave it in GTEST_BF_P4C_SOURCES for now.
   target_link_libraries (bf_gtest_support PRIVATE absl::flat_hash_map PRIVATE absl::flat_hash_set PRIVATE ir ${P4C_LIB_DEPS})
-  target_include_directories (bf_gtest_support PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/test/gtest}" PRIVATE "${P4C_BINARY_DIR}")
+  target_include_directories(
+    bf_gtest_support
+    # We also export Z3's includes with the common library.
+    # This is necessary because the z3 target itself does not export its includes.
+    SYSTEM BEFORE PUBLIC ${Z3_INCLUDE_DIR}
+  )
   add_dependencies (bf_gtest_support p4headers_h p4headers_cpp ir-generated gtest frontend-parser-gen)  # Indirectly we #include "ir/gen-tree-macro.h" and "p4parser.hpp"
 
   set (GTEST_BF_P4C_SOURCES
@@ -1502,7 +1481,5 @@ if (ENABLE_GTESTS)
 endif(ENABLE_GTESTS)
 
 
-set (EVEN_MORE_FILES_TO_LINT
-  p4c-barefoot.cpp
-  )
+set(EVEN_MORE_FILES_TO_LINT p4c-barefoot.cpp)
 add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${EVEN_MORE_FILES_TO_LINT}")

@@ -515,7 +515,7 @@ void ParserConverter::addValueSets(const IR::P4Parser *parser) {
     auto isExactMatch = [this](const IR::StructField *sf) {
         auto matchAnnotation = sf->getAnnotation(IR::Annotation::matchAnnotation);
         if (!matchAnnotation) return true;  // default (missing annotation) is exact
-        auto matchPathExpr = matchAnnotation->expr[0]->to<IR::PathExpression>();
+        auto matchPathExpr = matchAnnotation->getExpr(0)->to<IR::PathExpression>();
         CHECK_NULL(matchPathExpr);
         auto matchTypeDecl =
             ctxt->refMap->getDeclaration(matchPathExpr->path, true)->to<IR::Declaration_ID>();

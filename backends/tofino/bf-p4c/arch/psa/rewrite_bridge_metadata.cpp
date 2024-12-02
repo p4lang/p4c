@@ -50,10 +50,9 @@ struct PsaBridgeIngressToEgress : public Transform {
 
         // The rest of the fields come from CollectBridgedFields.
         for (auto &bridgedField : structure->bridge.structType->to<IR::Type_StructLike>()->fields) {
-            auto *fieldAnnotations = new IR::Annotations();
-            fieldAnnotations->annotations.push_back(new IR::Annotation(IR::ID("flexible"), {}));
-            fields.push_back(
-                new IR::StructField(bridgedField->name, fieldAnnotations, bridgedField->type));
+            fields.push_back(new IR::StructField(bridgedField->name,
+                                                 {new IR::Annotation(IR::ID("flexible"), {})},
+                                                 bridgedField->type));
         }
         return Transform::init_apply(root);
     }

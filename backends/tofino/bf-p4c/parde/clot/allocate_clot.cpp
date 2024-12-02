@@ -16,21 +16,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "allocate_clot.h"
+#include "backends/tofino/bf-p4c/parde/clot/allocate_clot.h"
 
 #include <optional>
 
 #include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/lib/log_fixup.h"
+#include "backends/tofino/bf-p4c/parde/clot/check_clot_groups.h"
+#include "backends/tofino/bf-p4c/parde/clot/clot_candidate.h"
+#include "backends/tofino/bf-p4c/parde/clot/field_pov_analysis.h"
+#include "backends/tofino/bf-p4c/parde/clot/field_slice_extract_info.h"
+#include "backends/tofino/bf-p4c/parde/clot/header_validity_analysis.h"
+#include "backends/tofino/bf-p4c/parde/clot/merge_desugared_varbit_valids.h"
 #include "backends/tofino/bf-p4c/parde/count_strided_header_refs.h"
 #include "backends/tofino/bf-p4c/parde/parser_info.h"
 #include "backends/tofino/bf-p4c/phv/pragma/pa_alias.h"
-#include "check_clot_groups.h"
-#include "clot_candidate.h"
-#include "field_pov_analysis.h"
-#include "field_slice_extract_info.h"
-#include "header_validity_analysis.h"
-#include "lib/log_fixup.h"
-#include "merge_desugared_varbit_valids.h"
 
 /**
  * \ingroup parde

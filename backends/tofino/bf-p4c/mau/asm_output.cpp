@@ -1455,7 +1455,7 @@ class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
     void postorder(const IR::MAU::Action *) override {
         if (is_empty) out << indent << "- 0" << std::endl;
     }
-    bool preorder(const IR::Annotations *) override { return false; }
+    bool preorder(const IR::Annotation *) override { return false; }
 
     bool preorder(const IR::MAU::Instruction *inst) override {
         LOG5("  EmitAction preorder Instruction : " << inst->name);
@@ -2445,12 +2445,12 @@ void MauAsmOutput::emit_indirect_res_context_json(std::ostream &, indent_t inden
     ordered_set<cstring> bind_res;
     for (auto back_at : tbl->attached) {
         auto at = back_at->attached;
-        for (auto annot : at->annotations->annotations) {
+        for (auto annot : at->annotations) {
             if (annot->name != "bind_indirect_res_to_match") continue;
             BUG_CHECK((at->is<IR::MAU::ActionData>() && at->direct == false) ||
                           at->is<IR::MAU::Selector>(),
                       "bind_indirect_res_to_match only allowed on action profiles");
-            auto res_name = annot->expr[0]->to<IR::StringLiteral>()->value;
+            auto res_name = annot->getExpr(0)->to<IR::StringLiteral>()->value;
             // Ignore multiple pragmas for same resource name
             if (bind_res.count(res_name)) continue;
             for (auto act : Values(tbl->actions)) {

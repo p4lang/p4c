@@ -68,7 +68,7 @@ void IntrospectionGenerator::collectKeyInfo(const IR::Key *key, struct TableAttr
         keyField->type = "bit" + Util::toString(widthBits);
         for (auto anno : k->getAnnotations()) {
             if (anno->name == ParseTCAnnotations::tcType) {
-                auto expr = anno->expr[0];
+                auto expr = anno->getExpr(0);
                 if (auto typeLiteral = expr->to<IR::StringLiteral>()) {
                     if (auto tcVal = checkValidTcType(typeLiteral)) {
                         auto val = std::move(*tcVal);
@@ -83,7 +83,7 @@ void IntrospectionGenerator::collectKeyInfo(const IR::Key *key, struct TableAttr
                 }
             }
             if (anno->name == IR::Annotation::nameAnnotation) {
-                auto expr = anno->expr[0];
+                auto expr = anno->getExpr(0);
                 if (auto name = expr->to<IR::StringLiteral>()) {
                     keyField->name = name->value;
                 }
@@ -307,25 +307,22 @@ Util::JsonObject *IntrospectionGenerator::genTableInfo(struct TableAttributes *t
     tableJson->emplace("tentries", tbl->tentries);
     tableJson->emplace("permissions", tbl->permissions);
     tableJson->emplace("nummask", tbl->numMask);
-    if (tbl->keysize != 0) {
-        tableJson->emplace("keysize", tbl->keysize);
-    }
+    tableJson->emplace("keysize", tbl->keysize);
+
     auto keysJson = new Util::JsonArray();
     for (auto keyField : tbl->keyFields) {
         auto keyJson = genKeyInfo(keyField);
         keysJson->append(keyJson);
     }
-    if (keysJson->size() != 0) {
-        tableJson->emplace("keyfields", keysJson);
-    }
+    tableJson->emplace("keyfields", keysJson);
+
     auto actionsJson = new Util::JsonArray();
     for (auto action : tbl->actions) {
         auto actionJson = genActionInfo(action);
         actionsJson->append(actionJson);
     }
-    if (actionsJson->size() != 0) {
-        tableJson->emplace("actions", actionsJson);
-    }
+    tableJson->emplace("actions", actionsJson);
+
     return tableJson;
 }
 

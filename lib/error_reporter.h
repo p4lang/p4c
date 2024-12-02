@@ -217,7 +217,7 @@ class ErrorReporter {
         std::string message;
         if (!absl::FormatUntyped(&message, absl::UntypedFormatSpec(fmt),
                                  {absl::FormatArg(args)...})) {
-            BUG("Failed to format string");
+            BUG("Failed to format string %s", fmt);
         }
 
         emit_message(ParserErrorMessage(Util::SourceInfo(sources, position), std::move(message)));

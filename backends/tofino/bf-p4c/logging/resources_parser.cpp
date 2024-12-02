@@ -16,9 +16,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include "backends/tofino/bf-p4c/logging/resources_parser.h"
+
 #include "backends/tofino/bf-p4c/device.h"
-// Device needs to be imported first.
-#include "resources_parser.h"
 
 namespace BFN {
 

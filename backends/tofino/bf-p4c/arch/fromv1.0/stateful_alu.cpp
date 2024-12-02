@@ -210,7 +210,7 @@ class ConstantLogicValue : public Inspector {
 class CreateSaluApplyFunction : public Inspector {
     // These annotations will be put on the RegisterAction instance that will be
     // created to contain the apply function being created by this inspector
-    IR::Annotations *annots = nullptr;
+    IR::Vector<IR::Annotation> annots;
     P4V1::ProgramStructure *structure;
     const IR::Type *rtype;
     const IR::Type::Bits *utype;
@@ -231,7 +231,6 @@ class CreateSaluApplyFunction : public Inspector {
     int expr_idx[NUM_EXPR_INDEX_T] = {0};
     Util::SourceInfo expr_src_info[NUM_EXPR_INDEX_T];
     Util::SourceInfo expr_pred_src_info[NUM_EXPR_INDEX_T];
-    const IR::Statement *output = nullptr;
     const Util::SourceInfo *applyLoc = nullptr;
     enum expr_index_t { LO1, LO2, HI1, HI2, OUT, UNUSED } expr_index = UNUSED;
     bool saturating = false;
@@ -426,7 +425,7 @@ class CreateSaluApplyFunction : public Inspector {
                    (prop->name == "initial_register_hi_value")) {
             if (auto ev = prop->value->to<IR::ExpressionValue>()) {
                 if (auto k = ev->expression->to<IR::Constant>()) {
-                    annots->addAnnotation(prop->name.toString(), ev->expression);
+                    annots.emplace_back(prop->name.toString(), ev->expression);
                     LOG5("adding annotation '" << prop->name << "' with value " << k->asInt());
                     return false;
                 }
@@ -699,10 +698,10 @@ class CreateSaluApplyFunction : public Inspector {
     }
 
  public:
-    CreateSaluApplyFunction(IR::Annotations *annots, P4V1::ProgramStructure *s,
+    CreateSaluApplyFunction(IR::Vector<IR::Annotation> annots, P4V1::ProgramStructure *s,
                             const IR::Type *rtype, const IR::Type::Bits *utype, cstring mu,
                             bool saturating)
-        : annots(annots),
+        : annots(std::move(annots)),
           structure(s),
           rtype(rtype),
           utype(utype),
@@ -734,12 +733,13 @@ class CreateSaluApplyFunction : public Inspector {
         apply = new IR::Function(
             "apply", new IR::Type_Method(IR::Type_Void::get(), apply_params, "apply"_cs), body);
     }
-    static const IR::Function *create(IR::Annotations *annots, P4V1::ProgramStructure *structure,
+    static const IR::Function *create(IR::Vector<IR::Annotation> annots,
+                                      P4V1::ProgramStructure *structure,
                                       const IR::Declaration_Instance *ext, const IR::Type *rtype,
                                       const IR::Type::Bits *utype,
                                       cstring math_unit_name = cstring(), bool saturating = false) {
-        CreateSaluApplyFunction create_apply(annots, structure, rtype, utype, math_unit_name,
-                                             saturating);
+        CreateSaluApplyFunction create_apply(std::move(annots), structure, rtype, utype,
+                                             math_unit_name, saturating);
         // need a separate traversal here as "update" will be visited after "output"
         forAllMatching<IR::AttribLocal>(&ext->properties, [&](const IR::AttribLocal *attr) {
             if (attr->name.name.endsWith("_bitc")) {
@@ -828,9 +828,8 @@ class CreateMathUnit : public Inspector {
              new IR::Argument(output_scale),
              new IR::Argument(new IR::ListExpression(table->expressions))});
         auto *externalName = new IR::StringLiteral(IR::ID("." + name));
-        auto *annotations =
-            new IR::Annotations({new IR::Annotation(IR::ID("name"), {externalName})});
-        unit = new IR::Declaration_Instance(name, annotations, mutype, ctor_args);
+        unit = new IR::Declaration_Instance(
+            name, {new IR::Annotation(IR::ID("name"), {externalName})}, mutype, ctor_args);
     }
     static const IR::Declaration_Instance *create(P4V1::ProgramStructure *structure,
                                                   const IR::Declaration_Instance *ext,
@@ -899,7 +898,8 @@ P4V1::StatefulAluConverter::reg_info P4V1::StatefulAluConverter::getRegInfo(
                     cstring rtype_name = structure->makeUniqueName(ext->name + "_layout"_cs);
                     rv.rtype = new IR::Type_Struct(
                         IR::ID(rtype_name),
-                        {new IR::StructField("lo", rv.utype), new IR::StructField("hi", rv.utype)});
+                        IR::IndexedVector<IR::StructField>{new IR::StructField("lo", rv.utype),
+                                                           new IR::StructField("hi", rv.utype)});
                     auto iter = find_in_scope(scope, structure->registers.get(rv.reg));
                     if (iter != scope->end()) iter = scope->erase(iter);
                     scope->insert(iter, structure->convert(rv.reg, structure->registers.get(rv.reg),
@@ -949,13 +949,12 @@ const IR::Declaration_Instance *P4V1::StatefulAluConverter::convertExternInstanc
     BUG_CHECK(et && et->name == "stateful_alu", "Extern %s is not stateful_alu type, but %s", ext,
               ext->type);
 
-    auto *annots = new IR::Annotations();
+    IR::Vector<IR::Annotation> annots;
     if (auto prop = ext->properties.get<IR::Property>("reduction_or_group"_cs)) {
         bool understood = false;
         if (auto ev = prop->value->to<IR::ExpressionValue>()) {
             if (auto pe = ev->expression->to<IR::PathExpression>()) {
-                annots->addAnnotation("reduction_or_group"_cs,
-                                      new IR::StringLiteral(pe->path->name));
+                annots.emplace_back("reduction_or_group"_cs, new IR::StringLiteral(pe->path->name));
                 understood = true;
             }
         }
@@ -973,17 +972,17 @@ const IR::Declaration_Instance *P4V1::StatefulAluConverter::convertExternInstanc
         auto *block = new IR::BlockStatement(
             {CreateSaluApplyFunction::create(annots, structure, ext, bit1, bit1)});
         auto *externalName = new IR::StringLiteral(IR::ID("." + name));
-        annots->addAnnotation(IR::ID("name"), externalName);
+        annots.emplace_back(IR::ID("name"), externalName);
         // 1-bit selector alu may not need a 'fake' reg property
         // see sful_sel1.p4
         if (ext->properties.get<IR::Property>("reg"_cs)) {
             auto info = getRegInfo(structure, ext, structure->declarations);
             if (info.utype) {
                 auto *regName = new IR::StringLiteral(IR::ID(info.reg->name));
-                annots->addAnnotation(IR::ID("reg"), regName);
+                annots.emplace_back(IR::ID("reg"), regName);
             }
         }
-        auto *rv = new IR::Declaration_Instance(name, annots, satype, ctor_args, block);
+        auto *rv = new IR::Declaration_Instance(name, std::move(annots), satype, ctor_args, block);
         return rv->apply(TypeConverter(structure))->to<IR::Declaration_Instance>();
     }
     auto info = getRegInfo(structure, ext, structure->declarations);
@@ -1010,8 +1009,8 @@ const IR::Declaration_Instance *P4V1::StatefulAluConverter::convertExternInstanc
             annots, structure, ext, info.rtype, info.utype, math ? math->name.name : cstring(),
             info.reg->saturating)});
         auto *externalName = new IR::StringLiteral(IR::ID("." + name));
-        annots->addAnnotation(IR::ID("name"), externalName);
-        auto *rv = new IR::Declaration_Instance(name, annots, ratype, ctor_args, block);
+        annots.emplace_back(IR::ID("name"), externalName);
+        auto *rv = new IR::Declaration_Instance(name, std::move(annots), ratype, ctor_args, block);
         LOG3("Created apply function: " << *rv);
         return rv->apply(TypeConverter(structure))->to<IR::Declaration_Instance>();
     }

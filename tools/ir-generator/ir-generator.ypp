@@ -80,7 +80,7 @@ static IrNamespace *current_namespace = LookupScope().resolve(0);
 }
 
 %token          ABSTRACT APPLY CLASS CONST DBLCOL DEFAULT DELETE ENUM INLINE INTERFACE NAMESPACE
-                NEW NULLOK OPERATOR OPTIONAL PRIVATE PROTECTED PUBLIC STATIC VIRTUAL
+                NEW NULLOK OPERATOR OPTIONAL PRIVATE PROTECTED PUBLIC STATIC VARIANT VIRTUAL
 %token<str>     BLOCK COMMENTBLOCK IDENTIFIER INCLUDE INTEGER NO STRING ZERO
 %token<emit>    EMITBLOCK
 
@@ -274,7 +274,7 @@ method
           { ($$ = $<irMethod>5)->body = $10;
             if (!$10 || $10.startsWith("=")) {
                 if (!$$->inImpl)
-                    yyerror("inline method %s with no body", $3);
+                    yyerror("inline method %v with no body", $3);
                 $$->inImpl = false; }
             $$->isUser = true;
             $$->isConst = $8;
@@ -331,6 +331,10 @@ irField
           { $$ = new IrField(@4, $3, $4, $5, $1 | IrElement::Const);
             if ($1 & IrElement::Virtual)
                 yyerror("virtual invalid on field %s", $4); }
+    | modifiers VARIANT '<' type_args '>' fieldName optInitializer ';'
+          { $$ = new IrVariantField(@6, $4, $6, $7, $1);
+            if ($1 & IrElement::Virtual)
+                yyerror("virtual invalid on field %s", $6); }
     ;
 
 modifier

@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <common/scc_toposort.h>
+#include "backends/tofino/bf-p4c/common/scc_toposort.h"
 
 #include <functional>
 #include <queue>

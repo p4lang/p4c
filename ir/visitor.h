@@ -461,7 +461,7 @@ class Transform : public virtual Visitor {
 #define DEBUG_FLOW_JOIN 0
 
 class ControlFlowVisitor : public virtual Visitor {
-    std::map<cstring, ControlFlowVisitor &> &globals;
+    std::shared_ptr<std::map<cstring, ControlFlowVisitor &>> globals;
 
  protected:
     ControlFlowVisitor *clone() const override = 0;
@@ -528,7 +528,7 @@ class ControlFlowVisitor : public virtual Visitor {
      * edge are never join points.
      */
     virtual bool filter_join_point(const IR::Node *) { return false; }
-    ControlFlowVisitor() : globals(*new std::map<cstring, ControlFlowVisitor &>) {}
+    ControlFlowVisitor() : globals(std::make_shared<std::map<cstring, ControlFlowVisitor &>>()) {}
 
  public:
     ControlFlowVisitor *controlFlowVisitor() override { return this; }
@@ -542,28 +542,28 @@ class ControlFlowVisitor : public virtual Visitor {
     void setUnreachable() { unreachable = true; }
     bool isUnreachable() { return unreachable; }
     void flow_merge_global_to(cstring key) override {
-        if (globals.count(key))
-            globals.at(key).flow_merge(*this);
+        if (auto other = globals->find(key); other != globals->end())
+            other->second.flow_merge(*this);
         else
-            globals.emplace(key, flow_clone());
+            globals->emplace(key, flow_clone());
     }
     void flow_merge_global_from(cstring key) override {
-        if (globals.count(key)) flow_merge(globals.at(key));
+        if (auto other = globals->find(key); other != globals->end()) flow_merge(other->second);
     }
-    void erase_global(cstring key) override { globals.erase(key); }
-    bool check_global(cstring key) override { return globals.count(key) != 0; }
-    void clear_globals() override { globals.clear(); }
+    void erase_global(cstring key) override { globals->erase(key); }
+    bool check_global(cstring key) override { return globals->count(key) != 0; }
+    void clear_globals() override { globals->clear(); }
     std::pair<cstring, ControlFlowVisitor *> save_global(cstring key) {
         ControlFlowVisitor *cfv = nullptr;
-        if (auto i = globals.find(key); i != globals.end()) {
+        if (auto i = globals->find(key); i != globals->end()) {
             cfv = &i->second;
-            globals.erase(i);
+            globals->erase(i);
         }
         return std::make_pair(key, cfv);
     }
     void restore_global(std::pair<cstring, ControlFlowVisitor *> saved) {
-        globals.erase(saved.first);
-        if (saved.second) globals.emplace(saved.first, *saved.second);
+        globals->erase(saved.first);
+        if (saved.second) globals->emplace(saved.first, *saved.second);
     }
 
     /// RAII class to ensure global key is only used in one place
@@ -820,7 +820,7 @@ const RootType *modifyAllMatching(const RootType *root, Func &&function) {
         Func function;
         void postorder(NodeType *node) override { function(node); }
     };
-    return root->apply(NodeVisitor(std::forward<Func>(function)));
+    return root->apply(NodeVisitor(std::forward<Func>(function)))->template checkedTo<RootType>();
 }
 
 /**

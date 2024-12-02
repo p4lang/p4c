@@ -54,8 +54,8 @@ struct p4tc_filter_fields {
     __u32 blockid;
     __be16 proto;
     __u16 prio;
-    dev ipv4_tbl_1_next_hop_vport;
-    dev ipv4_tbl_2_next_hop_vport;
+    __u32 ipv4_tbl_1_next_hop_vport;
+    __u32 ipv4_tbl_2_next_hop_vport;
 };
 
 REGISTER_START()

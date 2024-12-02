@@ -16,13 +16,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "table_format.h"
+#include "backends/tofino/bf-p4c/mau/table_format.h"
 
-#include "gateway.h"
-#include "hash_mask_annotations.h"
-#include "lib/dyn_vector.h"
-#include "memories.h"
-#include "tofino/input_xbar.h"
+#include "backends/tofino/bf-p4c/lib/dyn_vector.h"
+#include "backends/tofino/bf-p4c/mau/gateway.h"
+#include "backends/tofino/bf-p4c/mau/hash_mask_annotations.h"
+#include "backends/tofino/bf-p4c/mau/memories.h"
+#include "backends/tofino/bf-p4c/mau/tofino/input_xbar.h"
 
 void ByteInfo::InterleaveInfo::dbprint(std::ostream &out) const {
     if (!interleaved) return;

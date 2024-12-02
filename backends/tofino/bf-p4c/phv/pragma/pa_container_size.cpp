@@ -115,7 +115,7 @@ bool PragmaContainerSize::preorder(const IR::BFN::Pipe *pipe) {
     for (const auto *annotation : global_pragmas) {
         if (annotation->name.name != PragmaContainerSize::name) continue;
 
-        auto &exprs = annotation->expr;
+        auto &exprs = annotation->getExpr();
 
         const unsigned min_required_arguments = 3;  // gress, field, size1, ...
         unsigned required_arguments = min_required_arguments;

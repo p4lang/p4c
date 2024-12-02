@@ -27,7 +27,10 @@
 #include "backends/tofino/bf-p4c/common/asm_output.h"
 #include "backends/tofino/bf-p4c/common/run_id.h"
 #include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/ir/gress.h"
+#include "backends/tofino/bf-p4c/ir/unique_id.h"
 #include "backends/tofino/bf-p4c/logging/manifest.h"
+#include "backends/tofino/bf-p4c/logging/power_schema.h"
 #include "backends/tofino/bf-p4c/mau/build_power_graph.h"
 #include "backends/tofino/bf-p4c/mau/determine_power_usage.h"
 #include "backends/tofino/bf-p4c/mau/jbay_next_table.h"
@@ -35,12 +38,9 @@
 #include "backends/tofino/bf-p4c/mau/mau_visitor.h"
 #include "backends/tofino/bf-p4c/mau/memories.h"
 #include "backends/tofino/bf-p4c/mau/simple_power_graph.h"
-#include "ir/gress.h"
-#include "ir/unique_id.h"
+#include "backends/tofino/bf-p4c/version.h"
 #include "lib/json.h"
 #include "lib/set.h"
-#include "power_schema.h"
-#include "version.h"
 
 namespace MauPower {
 
@@ -940,7 +940,6 @@ void WalkPowerGraph::print_worst_power(std::ofstream &out) const {
 
 #ifdef BAREFOOT_INTERNAL
         int itot_sramr = 0, itot_sramw = 0, itot_tcams = 0;
-        double itot_power = 0.0;
 #endif
 
         for (int stage = 0; stage < Device::numStages(); ++stage) {
@@ -982,7 +981,6 @@ void WalkPowerGraph::print_worst_power(std::ofstream &out) const {
                 itot_sramr += pma.ram_read;
                 itot_sramw += pma.ram_write;
                 itot_tcams += pma.tcam_read;
-                itot_power += tpwr;
 #endif
 
                 std::stringstream line;

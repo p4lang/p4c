@@ -156,26 +156,25 @@ void serializeStructuredKVPair(const IR::NamedExpression *kv, p4configv1::KeyVal
 
 void serializeOneStructuredAnnotation(const IR::Annotation *annotation,
                                       p4configv1::StructuredAnnotation *structuredAnnotation) {
+    BUG_CHECK(annotation->structured, "%1%: not a structured annotation", annotation);
     structuredAnnotation->set_name(annotation->name.name);
-    switch (annotation->annotationKind()) {
-        case IR::Annotation::Kind::StructuredEmpty:
-            // nothing to do, body oneof should be empty.
-            return;
-        case IR::Annotation::Kind::StructuredExpressionList:
-            for (auto *expr : annotation->expr) {
-                serializeStructuredExpression(
-                    expr, structuredAnnotation->mutable_expression_list()->add_expressions());
+
+    std::visit(
+        [&](const auto &body) {
+            using T = std::decay_t<decltype(body)>;
+            if constexpr (std::is_same_v<T, IR::Vector<IR::Expression>>) {
+                for (auto *expr : body)
+                    serializeStructuredExpression(
+                        expr, structuredAnnotation->mutable_expression_list()->add_expressions());
+            } else if constexpr (std::is_same_v<T, IR::IndexedVector<IR::NamedExpression>>) {
+                for (auto *kv : body)
+                    serializeStructuredKVPair(
+                        kv, structuredAnnotation->mutable_kv_pair_list()->add_kv_pairs());
+            } else {
+                BUG("Unexpected variant field");
             }
-            return;
-        case IR::Annotation::Kind::StructuredKVList:
-            for (auto *kv : annotation->kv) {
-                serializeStructuredKVPair(
-                    kv, structuredAnnotation->mutable_kv_pair_list()->add_kv_pairs());
-            }
-            return;
-        default:
-            BUG("%1%: not a structured annotation", annotation);
-    }
+        },
+        annotation->body);
 }
 
 }  // namespace Helpers

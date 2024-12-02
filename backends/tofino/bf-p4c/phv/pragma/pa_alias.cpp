@@ -22,10 +22,10 @@
 #include <sstream>
 #include <string>
 
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
 #include "backends/tofino/bf-p4c/common/table_printer.h"
 #include "backends/tofino/bf-p4c/common/utils.h"
 #include "backends/tofino/bf-p4c/phv/pragma/phv_pragmas.h"
-#include "bf-p4c-options.h"
 #include "lib/log.h"
 
 /// BFN::Pragma interface
@@ -221,7 +221,7 @@ void PragmaAlias::postorder(const IR::BFN::Pipe *pipe) {
         if (annotation->name.name != PragmaAlias::name) continue;
         LOG3("Annotation: " << annotation);
 
-        auto &exprs = annotation->expr;
+        auto &exprs = annotation->getExpr();
 
         if (!PHV::Pragmas::checkStringLiteralArgs(exprs)) {
             continue;

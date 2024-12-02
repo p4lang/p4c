@@ -43,7 +43,6 @@
 #include "frontends/p4/externInstance.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeMap.h"
-#include "ir/ir-generated.h"
 #include "lib/log.h"
 #include "midend/eliminateTypedefs.h"
 
@@ -101,11 +100,11 @@ struct CounterlikeTraits<::BFN::CounterExtern<BFN::Arch::TNA>> {
 /// CounterlikeTraits specialization for BFN::CounterExtern for PSA
 template <>
 struct CounterlikeTraits<::BFN::CounterExtern<BFN::Arch::PSA>> {
-    static const cstring name() { return "counter"_cs; }
-    static const cstring directPropertyName() { return "psa_direct_counter"_cs; }
-    static const cstring typeName() { return "Counter"_cs; }
-    static const cstring directTypeName() { return "DirectCounter"_cs; }
-    static const cstring sizeParamName() { return "n_counters"_cs; }
+    static cstring name() { return "counter"_cs; }
+    static cstring directPropertyName() { return "psa_direct_counter"_cs; }
+    static cstring typeName() { return "Counter"_cs; }
+    static cstring directTypeName() { return "DirectCounter"_cs; }
+    static cstring sizeParamName() { return "n_counters"_cs; }
     static ::barefoot::CounterSpec::Unit mapUnitName(const cstring name) {
         using ::barefoot::CounterSpec;
         if (name == "PACKETS")
@@ -520,8 +519,7 @@ struct SnapshotFieldInfo {
     uint32_t id;
     int32_t bitwidth;
     bool operator==(const SnapshotFieldInfo &s) const {
-        if (s.name == name && s.id == id && s.bitwidth == bitwidth) return true;
-        return false;
+        return s.name == name && s.id == id && s.bitwidth == bitwidth;
     }
     bool operator<(const SnapshotFieldInfo &s) const { return (id < s.id); }
 };
@@ -1445,8 +1443,8 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
         forAllMatching<IR::MethodCallExpression>(
             evaluatedProgram->getProgram(), [&](const IR::MethodCallExpression *call) {
                 auto instance = P4::MethodInstance::resolve(call, refMap, typeMap);
-                if (instance->is<P4::ExternMethod>() && instance->object == object) {
-                    function(instance->to<P4::ExternMethod>());
+                if (instance->template is<P4::ExternMethod>() && instance->object == object) {
+                    function(instance->template to<P4::ExternMethod>());
                 }
             });
     }
@@ -2393,7 +2391,7 @@ class BFRuntimeArchHandlerPSA final : public BFRuntimeArchHandlerCommon<Arch::PS
         implementationString = "psa_implementation"_cs;
     }
 
-    void postCollect(const P4RuntimeSymbolTableIface &symbols) {
+    void postCollect(const P4RuntimeSymbolTableIface &symbols) override {
         (void)symbols;
         // analyze action profiles / selectors and build a mapping from action
         // profile / selector name to the set of tables referencing them
@@ -2440,15 +2438,15 @@ class BFRuntimeArchHandlerPSA final : public BFRuntimeArchHandlerCommon<Arch::PS
         collectExternInstanceCommon(symbols, externBlock);
     }
 
-    void collectExternFunction(P4RuntimeSymbolTableIface *, const P4::ExternFunction *) {}
+    void collectExternFunction(P4RuntimeSymbolTableIface *, const P4::ExternFunction *) override {}
 
     void addExternInstance(const P4RuntimeSymbolTableIface &symbols, p4configv1::P4Info *p4info,
-                           const IR::ExternBlock *externBlock) {
+                           const IR::ExternBlock *externBlock) override {
         addExternInstanceCommon(symbols, p4info, externBlock, defaultPipeName);
     }
 
     void addExternFunction(const P4RuntimeSymbolTableIface &, p4configv1::P4Info *,
-                           const P4::ExternFunction *) {}
+                           const P4::ExternFunction *) override {}
 };
 
 /// The architecture handler builder implementation for Tofino.

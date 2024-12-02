@@ -1108,7 +1108,7 @@ baseType
 typeOrVoid
     : typeRef     { $$ = $1; }
     | VOID        { $$ = IR::Type_Void::get(@1); }
-    | IDENTIFIER  { $$ = new IR::Type_Name(@1, new IR::Path(*(new IR::ID(@1, $1)))); }
+    | IDENTIFIER  { $$ = new IR::Type_Name(@1, new IR::Path(IR::ID(@1, $1))); }
         // This is necessary because template arguments may introduce the return type
     ;
 

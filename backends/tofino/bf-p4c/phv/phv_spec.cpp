@@ -728,7 +728,7 @@ void PhvSpec::applyGlobalPragmas(const std::vector<const IR::Annotation *> &glob
         physicalContainers();  // create the cache if needed
         PHV::Container startRange, prev;
         bool negate = false;
-        for (auto *tok : annot->body) {
+        for (auto *tok : annot->getUnparsed()) {
             PHV::Container c(tok->text.c_str(), false);
             if (startRange) {
                 if (tok->token_type == P4::P4Parser::token_type::TOK_INTEGER)

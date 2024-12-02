@@ -47,10 +47,9 @@ std::string Bmv2V1ModelExprStepper::getClassName() { return "Bmv2V1ModelExprStep
 bool Bmv2V1ModelExprStepper::isPartOfFieldList(const IR::StructField *field,
                                                uint64_t recirculateIndex) {
     // Check whether the field has a "field_list" annotation associated with it.
-    const auto *annotation = field->getAnnotation("field_list"_cs);
-    if (annotation != nullptr) {
+    if (const auto *annotation = field->getAnnotation("field_list"_cs)) {
         // Grab the index of the annotation.
-        auto annoExprs = annotation->expr;
+        auto annoExprs = annotation->getExpr();
         auto annoExprSize = annoExprs.size();
         BUG_CHECK(annoExprSize == 1,
                   "The field list annotation should only have one member. Has %1%.", annoExprSize);

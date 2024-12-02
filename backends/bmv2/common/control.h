@@ -120,8 +120,8 @@ class ControlConverter : public Inspector {
                     keyelement->emplace("match_type", match_type);
                 }
                 if (auto na = ke->getAnnotation(IR::Annotation::nameAnnotation)) {
-                    BUG_CHECK(na->expr.size() == 1, "%1%: expected 1 name", na);
-                    auto name = na->expr[0]->to<IR::StringLiteral>();
+                    BUG_CHECK(na->getExpr().size() == 1, "%1%: expected 1 name", na);
+                    auto name = na->getExpr(0)->to<IR::StringLiteral>();
                     BUG_CHECK(name != nullptr, "%1%: expected a string", na);
                     // This is a BMv2 JSON extension: specify a
                     // control-plane name for this key
@@ -578,16 +578,14 @@ class ControlConverter : public Inspector {
             }
             entry->emplace("action_entry", action);
 
-            auto priorityAnnotation = e->getAnnotation("priority"_cs);
-            if (priorityAnnotation != nullptr) {
-                if (priorityAnnotation->expr.size() > 1)
-                    ::P4::error(ErrorType::ERR_INVALID, "Invalid priority value %1%",
-                                priorityAnnotation->expr);
-                auto priValue = priorityAnnotation->expr.front();
+            if (auto priorityAnnotation = e->getAnnotation("priority"_cs)) {
+                const auto &expr = priorityAnnotation->getExpr();
+                if (expr.size() > 1)
+                    ::P4::error(ErrorType::ERR_INVALID, "Invalid priority value %1%", expr);
+                auto priValue = expr.front();
                 if (!priValue->is<IR::Constant>())
                     ::P4::error(ErrorType::ERR_INVALID,
-                                "Invalid priority value %1%; must be constant.",
-                                priorityAnnotation->expr);
+                                "Invalid priority value %1%; must be constant.", expr);
                 entry->emplace("priority", priValue->to<IR::Constant>()->value);
             } else {
                 entry->emplace("priority", entryPriority);

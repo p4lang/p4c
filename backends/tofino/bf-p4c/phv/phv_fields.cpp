@@ -141,11 +141,10 @@ void PhvInfo::add_struct(cstring name, const IR::Type_StructLike *type, gress_t 
         // path-expression can also point to an error field, which is invalid on Tofino
         if (size == 0) continue;
         // "hidden" annotation indicates padding introduced with bridged metadata fields
-        bool isPad = f->getAnnotations()->getSingle("hidden"_cs) != nullptr ||
-                     f->getAnnotations()->getSingle("padding"_cs) != nullptr;
-        bool isOverlayable = f->getAnnotations()->getSingle("overlayable"_cs) != nullptr;
+        bool isPad = f->hasAnnotation("hidden"_cs) || f->hasAnnotation("padding"_cs);
+        bool isOverlayable = f->hasAnnotation("overlayable"_cs);
         // "flexible" annotation indicates flexible fields
-        bool isFlexible = f->getAnnotations()->getSingle("flexible"_cs) != nullptr;
+        bool isFlexible = f->hasAnnotation("flexible"_cs);
         bool isFixedSizeHeader = type->is<IR::BFN::Type_FixedSizeHeader>();
         std::optional<Util::SourceInfo> srcInfo = std::nullopt;
         if (f->srcInfo.isValid()) srcInfo = f->srcInfo;
@@ -437,14 +436,12 @@ void PhvInfo::allocatePOV(const BFN::HeaderStackInfo &stacks) {
     pov_alloc_done = true;
 
     int size[GRESS_T_COUNT] = {0, 0, 0};
-    int stacks_num = 0;
     for (auto &stack : stacks) {
         StructInfo info = struct_info(stack.name);
         LOG3("    ...preanalyzing header stack " << stack.name << " (" << info.gress << ")");
         BUG_CHECK(!info.metadata, "metadata stack?");
         size[info.gress] += stack.size + stack.maxpush + stack.maxpop;  // size for $stkvalid
         size[info.gress] += stack.size;                                 // size for $valid
-        stacks_num++;
     }
 
     for (auto &hdr : simple_headers) {
@@ -1564,7 +1561,7 @@ struct ComputeFieldAlignments : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::MAU::Instruction *instr) {
+    bool preorder(const IR::MAU::Instruction *instr) override {
         Log::TempIndent indent;
         LOG5("Preorder Instruction: " << *instr << "  name: " << instr->name << indent);
         PHV::Field *dst_f;

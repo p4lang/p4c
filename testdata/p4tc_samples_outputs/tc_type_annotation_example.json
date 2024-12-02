@@ -69,7 +69,8 @@
           "match_type" : "exact",
           "bitwidth" : 3
         }
-      ]
+      ],
+      "actions" : []
     }
   ]
 }

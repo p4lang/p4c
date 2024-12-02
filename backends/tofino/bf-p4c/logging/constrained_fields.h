@@ -21,9 +21,9 @@
 
 #include <map>
 
+#include "backends/tofino/bf-p4c/logging/phv_schema.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "backends/tofino/bf-p4c/phv/utils/utils.h"
-#include "phv_schema.h"
 
 /**
  *  \brief Class with handle for logging constraints
@@ -57,6 +57,7 @@ class ConstrainedSlice : public LoggableEntity, public LiftCompare<ConstrainedSl
 
  public:
     ConstrainedSlice(const ConstrainedField &parent, le_bitrange range);
+    virtual ~ConstrainedSlice() = default;
 
     const le_bitrange &getRange() const { return range; }
     const ConstrainedField &getParent() const { return *parent; }
@@ -95,7 +96,7 @@ class ConstrainedField : public LoggableEntity {
     bool sameContainerGroup = false;
 
  public:
-    ConstrainedField() {}
+    ConstrainedField() = default;
     explicit ConstrainedField(const cstring &name);
 
     const cstring &getName() const { return name; }
@@ -115,7 +116,7 @@ class ConstrainedField : public LoggableEntity {
     const Constraints::DigestConstraint &getDigest() const { return digest; }
 
     void setContainerSize(const Constraints::ContainerSizeConstraint &containerSize);
-    const Constraints::ContainerSizeConstraint getContainerSize() const { return containerSize; }
+    Constraints::ContainerSizeConstraint getContainerSize() const { return containerSize; }
 
     void setBottomBits(bool b);
     bool hasBottomBits() const { return deparsedBottomBits; }
@@ -133,7 +134,7 @@ class ConstrainedField : public LoggableEntity {
     bool hasNoHoles() const { return noHoles; }
 
     void setSameContainerGroup(bool b);
-    bool hasSameContainerGroup() { return sameContainerGroup; }
+    bool hasSameContainerGroup() const { return sameContainerGroup; }
 };
 
 typedef std::map<cstring, ConstrainedField> ConstrainedFieldMap;

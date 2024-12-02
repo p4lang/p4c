@@ -1740,9 +1740,8 @@ void IXBar::getHashDistGroups(unsigned hash_table_input, int hash_group_opt[HASH
 void IXBar::determine_proxy_hash_alg(const PhvInfo &phv, const IR::MAU::Table *tbl, Use &alloc,
                                      int group) {
     bool hash_function_found = false;
-    auto annot = tbl->match_table->getAnnotations();
-    if (auto s = annot->getSingle("proxy_hash_algorithm"_cs)) {
-        auto pragma_val = s->expr.at(0)->to<IR::StringLiteral>();
+    if (auto s = tbl->match_table->getAnnotation("proxy_hash_algorithm"_cs)) {
+        auto pragma_val = s->getExpr(0)->to<IR::StringLiteral>();
         if (pragma_val == nullptr) {
             error(ErrorType::ERR_INVALID,
                   "proxy_hash_algorithm pragma on table %1% must be a string", tbl);
@@ -2099,7 +2098,6 @@ bool IXBar::allocHashWay(const IR::MAU::Table *tbl, const LayoutOption *layout_o
     }
     // Calculation of the separate select bits among many stages
     unsigned free_bits = 0;
-    unsigned used_bits = 0;
 
     for (int bit = 0; bit < IXBar::get_hash_single_bits(); bit++) {
         if (!(hash_single_bit_inuse[bit] & hf_hash_table_input)) {
@@ -2108,7 +2106,6 @@ bool IXBar::allocHashWay(const IR::MAU::Table *tbl, const LayoutOption *layout_o
     }
     for (auto &way_use : alloc.way_use) {
         BUG_CHECK(way_use.select.lo == RAM_SELECT_BIT_START, "invalid select range for tofino");
-        used_bits |= way_use.select_mask;
     }
 
     if (way_bits == 0) {
@@ -3797,7 +3794,6 @@ void IXBar::XBarHashDist::immediate_inputs() {
         auto hash = pos.second->to<ActionData::Hash>();
         if (hash == nullptr) continue;
         le_bitrange immed_range = {pos.first, pos.first + hash->size() - 1};
-        int bits_seen = 0;
         for (int i = 0; i < 2; i++) {
             le_bitrange immed_impact = {i * HASH_DIST_BITS, (i + 1) * HASH_DIST_BITS - 1};
             auto boost_sl = toClosedRange<RangeUnit::Bit, Endian::Little>(
@@ -3811,7 +3807,6 @@ void IXBar::XBarHashDist::immediate_inputs() {
             func->slice(hash_range);
             HashDistDest_t dest = static_cast<HashDistDest_t>(i);
             alloc_reqs.emplace_back(func, hash_dist_range, dest, 0);
-            bits_seen += overlap.size();
         }
     }
 }

@@ -28,7 +28,7 @@
  * after running this pass, the operator() method can be used to query iff
  * two tables arte mutalluy exclusive */
 class TableMutex : public Inspector, public ControlFlowVisitor, public P4::ResolutionContext {
-    TableMutex *clone() const { return new TableMutex(*this); }
+    TableMutex *clone() const override { return new TableMutex(*this); }
     void flow_merge(Visitor &) override;
     void flow_copy(ControlFlowVisitor &) override;
     struct Shared;

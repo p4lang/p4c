@@ -22,10 +22,10 @@
 #include <unordered_set>
 
 #include "backends/tofino/bf-p4c/common/table_printer.h"
+#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/mau/memories.h"
 #include "backends/tofino/bf-p4c/mau/resource.h"
 #include "backends/tofino/bf-p4c/mau/table_layout.h"
-#include "device.h"
 #include "lib/error.h"
 
 /* This pass calculates 2 data structures used during assembly generation:
@@ -349,7 +349,7 @@ class JbayNextTable::FindNextTableUse : public MauTableInspector {
         return r1.second > r2.first && r2.second > r1.first;
     }
 
-    profile_t init_apply(const IR::Node *root) {
+    profile_t init_apply(const IR::Node *root) override {
         self.use_next_table.clear();
         tables.clear();
         return MauTableInspector::init_apply(root);
@@ -360,7 +360,7 @@ class JbayNextTable::FindNextTableUse : public MauTableInspector {
         // containing seq, if that was useful.  Probably almost never useful?
         if (!t->next.empty()) tables.push_back(t);
     }
-    void postorder(const IR::BFN::Pipe *) {
+    void postorder(const IR::BFN::Pipe *) override {
         std::stable_sort(tables.begin(), tables.end(),
                          [this](const IR::MAU::Table *a, const IR::MAU::Table *b) {
                              return self.control_dep.paths(a) > self.control_dep.paths(b);

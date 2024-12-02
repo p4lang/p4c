@@ -64,14 +64,13 @@ void AddT2naMeta::postorder(IR::Type_StructLike *typeStructLike) {
         for (const auto *structField : typeStructLike->fields) {
             lastStructField = structField;
         };
-        if (lastStructField && lastStructField->annotations->getSingle("padding"_cs)) {
+        if (lastStructField && lastStructField->getAnnotation("padding"_cs)) {
             LOG3("AddT2naMeta : " << typeStructLikeName << " already complete");
             return;
         }
         LOG3("AddT2naMeta : Adding missing fields to " << typeStructLikeName);
         typeStructLike->fields.push_back(new IR::StructField(
-            "_pad_eg_int_md", new IR::Annotations({new IR::Annotation("padding", {})}),
-            IR::Type::Bits::get(8)));
+            "_pad_eg_int_md", {new IR::Annotation("padding", {})}, IR::Type::Bits::get(8)));
     }
 }
 

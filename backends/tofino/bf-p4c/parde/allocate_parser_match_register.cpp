@@ -23,13 +23,13 @@
 
 #include "backends/tofino/bf-p4c/common/asm_output.h"
 #include "backends/tofino/bf-p4c/common/utils.h"
+#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "backends/tofino/bf-p4c/parde/allocate_parser_match_register.h"
+#include "backends/tofino/bf-p4c/parde/clot/clot.h"
 #include "backends/tofino/bf-p4c/parde/collect_parser_usedef.h"
 #include "backends/tofino/bf-p4c/parde/dump_parser.h"
 #include "backends/tofino/bf-p4c/parde/parser_info.h"
-#include "clot/clot.h"
-#include "device.h"
 #include "match_register.h"
 
 using namespace Parser;

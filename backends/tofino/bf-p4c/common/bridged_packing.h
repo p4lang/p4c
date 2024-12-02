@@ -19,6 +19,8 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_COMMON_BRIDGED_PACKING_H_
 #define BACKENDS_TOFINO_BF_P4C_COMMON_BRIDGED_PACKING_H_
 
+#include <z3++.h>
+
 #include "backends/tofino/bf-p4c/bf-p4c-options.h"
 #include "backends/tofino/bf-p4c/common/extract_maupipe.h"
 #include "backends/tofino/bf-p4c/common/field_defuse.h"
@@ -37,7 +39,6 @@
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeMap.h"
-#include "z3++.h"
 
 using namespace P4;
 
@@ -602,19 +603,19 @@ class PadFixedSizeHeaders : public Inspector {
 
         auto countPadding = [&](const IR::IndexedVector<IR::StructField> &fields) -> int {
             int count = 0;
-            for (auto f = fields.begin(); f != fields.end(); f++) {
-                if ((*f)->getAnnotation("padding"_cs)) count++;
-            }
+            for (auto f : fields)
+                if (f->hasAnnotation("padding"_cs)) count++;
+
             return count;
         };
 
         auto genPadding = [&](int size, int id) {
             cstring padFieldName = "__pad_" + cstring::to_cstring(id);
-            auto *fieldAnnotations =
-                new IR::Annotations({new IR::Annotation(IR::ID("padding"), {}),
-                                     new IR::Annotation(IR::ID("overlayable"), {})});
             const IR::StructField *padField =
-                new IR::StructField(padFieldName, fieldAnnotations, IR::Type::Bits::get(size));
+                new IR::StructField(padFieldName,
+                                    {new IR::Annotation(IR::ID("padding"), {}),
+                                     new IR::Annotation(IR::ID("overlayable"), {})},
+                                    IR::Type::Bits::get(size));
             return padField;
         };
 

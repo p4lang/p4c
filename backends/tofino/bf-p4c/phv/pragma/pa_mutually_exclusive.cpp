@@ -51,7 +51,7 @@ bool PragmaMutuallyExclusive::preorder(const IR::BFN::Pipe *pipe) {
     for (const auto &annotation : global_pragmas) {
         if (annotation->name.name != PragmaMutuallyExclusive::name) continue;
 
-        const IR::Vector<IR::Expression> &exprs = annotation->expr;
+        const IR::Vector<IR::Expression> &exprs = annotation->getExpr();
 
         if (!PHV::Pragmas::checkStringLiteralArgs(exprs)) {
             continue;

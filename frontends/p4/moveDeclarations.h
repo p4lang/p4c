@@ -36,17 +36,22 @@ class MoveDeclarations : public Transform {
 
     /// List of lists of declarations to move, one list per
     /// control/parser/action.
-    std::vector<IR::Vector<IR::Declaration> *> toMove;
-    void push() { toMove.push_back(new IR::Vector<IR::Declaration>()); }
+    // FIXME: Do we really need IR::Vector here?
+    std::vector<IR::Vector<IR::Declaration>> toMove;
+    void push() { toMove.emplace_back(); }
     void pop() {
         BUG_CHECK(!toMove.empty(), "Empty move stack");
         toMove.pop_back();
     }
-    IR::Vector<IR::Declaration> *getMoves() const {
+    const IR::Vector<IR::Declaration> &getMoves() const {
         BUG_CHECK(!toMove.empty(), "Empty move stack");
         return toMove.back();
     }
-    void addMove(const IR::Declaration *decl) { getMoves()->push_back(decl); }
+    IR::Vector<IR::Declaration> &getMoves() {
+        BUG_CHECK(!toMove.empty(), "Empty move stack");
+        return toMove.back();
+    }
+    void addMove(const IR::Declaration *decl) { getMoves().push_back(decl); }
 
  public:
     explicit MoveDeclarations(bool parsersOnly = false) : parsersOnly(parsersOnly) {

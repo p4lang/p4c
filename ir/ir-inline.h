@@ -153,6 +153,7 @@ void IR::Vector<T>::toJSON(JSONGenerator &json) const {
 }
 
 std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Expression> &v);
+std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Annotation> &v);
 
 template <class T>
 void IR::IndexedVector<T>::visit_children(Visitor &v) {

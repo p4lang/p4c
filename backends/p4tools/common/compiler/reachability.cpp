@@ -26,12 +26,11 @@ P4ProgramDCGCreator::P4ProgramDCGCreator(NodesCallGraph *dcg) : dcg(dcg), p4prog
 }
 
 bool P4ProgramDCGCreator::preorder(const IR::Annotation *annotation) {
-    if (annotation->name != IR::Annotation::nameAnnotation) {
-        return true;
-    }
+    if (annotation->name != IR::Annotation::nameAnnotation) return true;
+
     IR::ID name;
-    if (!annotation->expr.empty()) {
-        if (const auto *strLit = annotation->expr[0]->to<IR::StringLiteral>()) {
+    if (!annotation->getExpr().empty()) {
+        if (const auto *strLit = annotation->getExpr(0)->to<IR::StringLiteral>()) {
             if (strLit->value == ".NoAction") {
                 // Ignore NoAction annotations, because they aren't unique.
                 return true;

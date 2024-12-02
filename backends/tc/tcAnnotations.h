@@ -43,13 +43,12 @@ class ParseTCAnnotations : public P4::ParseAnnotations {
     ParseTCAnnotations()
         : P4::ParseAnnotations(
               "TC", true,
-              {PARSE_EMPTY(defaultHit), PARSE_EMPTY(defaultHitConst),
-               PARSE_CONSTANT_OR_STRING_LITERAL(tcType), PARSE_CONSTANT_OR_STRING_LITERAL(numMask),
-               PARSE_EMPTY(tcMayOverride), PARSE_CONSTANT_OR_STRING_LITERAL(tc_acl),
-               PARSE_EMPTY(tc_md_write), PARSE_EMPTY(tc_md_read), PARSE_EMPTY(tc_md_write),
-               PARSE_EMPTY(tc_md_exec), PARSE_EMPTY(tc_ControlPath), PARSE_EMPTY(tc_key),
-               PARSE_EMPTY(tc_data), PARSE_EMPTY(tc_data_scalar), PARSE_EMPTY(tc_init_val),
-               PARSE_EMPTY(tc_numel)}) {}
+              {PARSE_EMPTY(defaultHit), PARSE_EMPTY(defaultHitConst), PARSE_STRING_LITERAL(tcType),
+               PARSE_CONSTANT_OR_STRING_LITERAL(numMask), PARSE_EMPTY(tcMayOverride),
+               PARSE_STRING_LITERAL(tc_acl), PARSE_EMPTY(tc_md_write), PARSE_EMPTY(tc_md_read),
+               PARSE_EMPTY(tc_md_write), PARSE_EMPTY(tc_md_exec), PARSE_EMPTY(tc_ControlPath),
+               PARSE_EMPTY(tc_key), PARSE_EMPTY(tc_data), PARSE_EMPTY(tc_data_scalar),
+               PARSE_EMPTY(tc_init_val), PARSE_EMPTY(tc_numel)}) {}
 };
 
 }  // namespace P4::TC

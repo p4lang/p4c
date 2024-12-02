@@ -21,7 +21,7 @@ P4Tools::P4Testgen::Bmv2::PropagateP4RuntimeTranslation::lookupP4RuntimeAnnotati
     }
     const auto *p4runtimeAnnotation = annotatedType->getAnnotation("p4runtime_translation"_cs);
     if (p4runtimeAnnotation != nullptr) {
-        BUG_CHECK(!p4runtimeAnnotation->needsParsing,
+        BUG_CHECK(!p4runtimeAnnotation->needsParsing(),
                   "The @p4runtime_translation annotation should have been parsed already.");
         p4RuntimeAnnotations.push_back(p4runtimeAnnotation);
     }
@@ -29,7 +29,7 @@ P4Tools::P4Testgen::Bmv2::PropagateP4RuntimeTranslation::lookupP4RuntimeAnnotati
         annotatedType->getAnnotation("p4runtime_translation_mappings"_cs);
     if (p4runtimeTranslationMappings != nullptr) {
         BUG_CHECK(
-            !p4runtimeTranslationMappings->needsParsing,
+            !p4runtimeTranslationMappings->needsParsing(),
             "The @p4runtime_translation_mappings annotation should have been parsed already.");
         p4RuntimeAnnotations.push_back(p4runtimeTranslationMappings);
     }

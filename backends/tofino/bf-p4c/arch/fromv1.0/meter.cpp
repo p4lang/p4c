@@ -18,6 +18,7 @@
 
 #include "meter.h"
 
+#include "ir/annotations.h"
 #include "programStructure.h"
 
 P4V1::MeterConverter::MeterConverter() { addConverter("meter"_cs, this); }
@@ -38,7 +39,7 @@ const IR::Declaration_Instance *P4V1::MeterConverter::convertExternInstance(
     const IR::Expression *instance_count = nullptr;
     const IR::Expression *table = nullptr;
     auto *externalName = new IR::StringLiteral(IR::ID("." + name));
-    auto *annotations = new IR::Annotations({new IR::Annotation(IR::ID("name"), {externalName})});
+    IR::Vector<IR::Annotation> annotations{new IR::Annotation(IR::ID("name"), {externalName})};
     bool direct = false;
     LOG1("ext : " << ext);
     for (auto prop : Values(ext->properties)) {
@@ -65,22 +66,22 @@ const IR::Declaration_Instance *P4V1::MeterConverter::convertExternInstance(
         } else if (prop->name == "instance_count") {
             instance_count = val;
         } else if (prop->name == "green_value") {
-            annotations->addAnnotation("green"_cs, val);
+            IR::Annotations::addOrReplace(annotations, "green"_cs, val);
         } else if (prop->name == "yellow_value") {
-            annotations->addAnnotation("yellow"_cs, val);
+            IR::Annotations::addOrReplace(annotations, "yellow"_cs, val);
         } else if (prop->name == "red_value") {
-            annotations->addAnnotation("red"_cs, val);
+            IR::Annotations::addOrReplace(annotations, "red"_cs, val);
         } else if (prop->name == "meter_sweep_interval") {
             auto ival = val->to<IR::Constant>()->asInt();
             BUG_CHECK(ival >= 0 || ival <= 4,
                       "Meter sweep interval value is %d must be in the range [0:4] - %s", ival,
                       ext);
-            annotations->addAnnotation("meter_sweep_interval"_cs, val);
+            IR::Annotations::addOrReplace(annotations, "meter_sweep_interval"_cs, val);
         } else if (prop->name == "meter_profile") {
             auto pval = val->to<IR::Constant>()->asInt();
             BUG_CHECK(pval >= 0 || pval <= 15,
                       "Meter profile value is %d must be in the range [0:15] - %s", pval, ext);
-            annotations->addAnnotation("meter_profile"_cs, val);
+            IR::Annotations::addOrReplace(annotations, "meter_profile"_cs, val);
         } else {
             error("Unknown property %s on meter", prop);
             continue;
@@ -96,11 +97,11 @@ const IR::Declaration_Instance *P4V1::MeterConverter::convertExternInstance(
         args->push_back(new IR::Argument(meter_type));
         auto type = new IR::Type_Specialized(new IR::Type_Name("Meter"),
                                              new IR::Vector<IR::Type>({IR::Type::Bits::get(32)}));
-        return new IR::Declaration_Instance(ext->srcInfo, name, annotations, type, args);
+        return new IR::Declaration_Instance(ext->srcInfo, name, std::move(annotations), type, args);
     } else {
         args->push_back(new IR::Argument(meter_type));
         auto type = new IR::Type_Name("DirectMeter");
-        return new IR::Declaration_Instance(ext->srcInfo, name, annotations, type, args);
+        return new IR::Declaration_Instance(ext->srcInfo, name, std::move(annotations), type, args);
     }
 }
 

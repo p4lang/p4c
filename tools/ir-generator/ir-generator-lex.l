@@ -81,6 +81,7 @@ static std::string      comment_block;
 "protected"     { return PROTECTED; }
 "public"        { return PUBLIC; }
 "static"        { return STATIC; }
+"variant"       { return VARIANT; }
 "virtual"       { return VIRTUAL; }
 "NullOK"        { return NULLOK; }
 "#apply"        { return APPLY; }
