@@ -18,6 +18,7 @@ limitations under the License.
 #define FRONTENDS_P4_DUPLICATEACTIONCONTROLPLANENAMECHECK_H_
 
 #include <vector>
+
 #include "ir/ir.h"
 #include "ir/visitor.h"
 
