@@ -70,7 +70,7 @@ OPTION (BUILD_AUTO_VAR_INIT_PATTERN "Initialize variables with pattern during bu
 OPTION (ENABLE_IWYU "Enable checking includes with IWYU" OFF)
 # Support a legacy option. TODO: Remove?
 OPTION (ENABLE_UNIFIED_COMPILATION "Enable CMAKE_UNITY_BUILD" OFF)
-OPTION (ENABLE_PCH "Enable PCH for IR headers" ON)
+OPTION (ENABLE_PCH "Enable PCH for IR headers" OFF)
 
 set (P4C_DRIVER_NAME "p4c" CACHE STRING "Customize the name of the driver script")
 
