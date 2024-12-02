@@ -26,21 +26,18 @@ cstring DuplicateActionControlPlaneNameCheck::getName(const IR::IDeclaration *de
 
 void DuplicateActionControlPlaneNameCheck::checkForDuplicateName(cstring name,
                                                                  const IR::Node *node) {
-    bool foundDuplicate = false;
     auto *otherNode = node;
-    auto [it, inserted] = actions.insert(std::pair(name, node));
+    //auto [it, inserted] = actions.insert(std::pair(name, node));
+    auto [it, inserted] = actions.emplace(name, node);
     if (!inserted) {
-        foundDuplicate = true;
-        otherNode = (*it).second;
-    }
-    if (foundDuplicate) {
+        otherNode = it->second;
         error(ErrorType::ERR_DUPLICATE, "%1%: conflicting control plane name: %2%", node,
               otherNode);
     }
 }
 
 const IR::Node *DuplicateActionControlPlaneNameCheck::postorder(IR::P4Action *action) {
-    bool topLevel = findContext<IR::P4Control>() == nullptr;
+    bool topLevel = stack.empty();
     auto nameAnno = action->getAnnotation(IR::Annotation::nameAnnotation);
     if (!nameAnno && topLevel) {
         // Actions declared at the top level that the developer did not

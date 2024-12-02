@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef FRONTENDS_P4_DUPLICATEACTIONCONTROLPLANENAMECHECK_H_
 #define FRONTENDS_P4_DUPLICATEACTIONCONTROLPLANENAMECHECK_H_
 
+#include <vector>
 #include "ir/ir.h"
 #include "ir/visitor.h"
 
@@ -41,7 +42,7 @@ namespace P4 {
 class DuplicateActionControlPlaneNameCheck : public Transform {
     std::vector<cstring> stack;
     /// Used for detection of conflicting control plane names among actions.
-    string_map<const IR::Node *> actions;
+    absl::flat_hash_map<cstring, const IR::Node *> actions;
 
  public:
     cstring getName(const IR::IDeclaration *decl);
@@ -51,11 +52,9 @@ class DuplicateActionControlPlaneNameCheck : public Transform {
         visitDagOnce = false;
     }
     const IR::Node *preorder(IR::P4Parser *parser) override {
-        stack.push_back(getName(parser));
-        return parser;
-    }
-    const IR::Node *postorder(IR::P4Parser *parser) override {
-        stack.pop_back();
+        // There cannot be any action definitions inside a parser, so
+        // do not traverse through its nodes.
+        prune();
         return parser;
     }
 
@@ -69,7 +68,8 @@ class DuplicateActionControlPlaneNameCheck : public Transform {
     }
 
     const IR::Node *preorder(IR::P4Table *table) override {
-        visit(table->annotations);
+        // There cannot be any action definitions inside a table, so
+        // do not traverse through its nodes.
         prune();
         return table;
     }

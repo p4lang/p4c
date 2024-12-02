@@ -42,8 +42,7 @@ class ParamCloner : public CloneExpressions {
 
 const IR::Node *TagGlobalActions::preorder(IR::P4Action *action) {
     if (findContext<IR::P4Control>() == nullptr) {
-        auto nameAnno = action->getAnnotation(IR::Annotation::nameAnnotation);
-        if (nameAnno) {
+        if (const auto *nameAnno = action->getAnnotation(IR::Annotation::nameAnnotation)) {
             // If the value of the existing name annotation does not
             // begin with ".", prepend "." so that the name remains
             // global if control plane APIs are generated later.
@@ -56,8 +55,7 @@ const IR::Node *TagGlobalActions::preorder(IR::P4Action *action) {
             }
         } else {
             cstring name = absl::StrCat(".", action->name);
-            action->addAnnotationIfNew(IR::Annotation::nameAnnotation, new IR::StringLiteral(name),
-                                       false);
+            action->addAnnotationIfNew(IR::Annotation::nameAnnotation, new IR::StringLiteral(name));
         }
     }
     prune();
