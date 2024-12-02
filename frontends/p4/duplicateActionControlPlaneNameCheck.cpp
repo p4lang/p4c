@@ -42,9 +42,9 @@ const IR::Node *DuplicateActionControlPlaneNameCheck::postorder(IR::P4Action *ac
         // Actions declared at the top level that the developer did not
         // write a @name annotation for it, should be included in the
         // duplicate name check.  They do not yet have a @name annotation
-        // by the time this pass executes, so this method will handle
+        // by the time this pass executes, so this case will handle
         // such actions.
-
+        //
         // name is what this top-level action's @name annotation
         // will be, after LocalizeAllActions pass adds one.
         cstring name = absl::StrCat(".", action->name);
@@ -53,9 +53,10 @@ const IR::Node *DuplicateActionControlPlaneNameCheck::postorder(IR::P4Action *ac
         const auto *e0 = nameAnno->getExpr(0);
         cstring name = e0->to<IR::StringLiteral>()->value;
         if (!name.startsWith(".")) {
-            // Create a fully hierarchical name beginning with ".", so we
-            // can compare it against any other @name annotation value
-            // that begins with "." and is equal.
+            // Create an absolute hierarchical name (one beginning
+            // with a "."), so we can compare it against any other
+            // @name annotation value that begins with "." and is
+            // equal.
             if (stack.empty()) {
                 name = absl::StrCat(".", name);
             } else {
