@@ -970,7 +970,7 @@ target_include_directories(
   # FIXME: This should be pulled with FetchContent.
   PRIVATE "${BFN_P4C_SOURCE_DIR}/third_party/spdlog/include"
 )
-add_dependencies(tofinobackend ir-generated frontend genLogging bfn_p4runtime)
+add_dependencies(tofinobackend frontend genLogging bfn_p4runtime)
 
 if(BUILD_STATIC_BFP4C_LIBS)
     add_library(bfp4c STATIC ${P4C_BAREFOOT_SRCS})

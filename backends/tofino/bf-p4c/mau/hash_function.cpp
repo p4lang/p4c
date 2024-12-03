@@ -253,7 +253,7 @@ const IR::Expression *IR::MAU::HashFunction::convertHashAlgorithmInner(
         detected_algorithm = OTHER;
         mc_name = alg_name + "_hash";
     } else if (direct_crc_string_conversion(&hash_alg, alg_name, srcInfo)) {
-        char *error_message;
+        const char *error_message;
         if (!verify_algorithm(&hash_alg, &error_message)) {
             error("%s: Crc algorithm %s incorrect for the following reason : %s", srcInfo,
                   algorithm.name, error_message);
