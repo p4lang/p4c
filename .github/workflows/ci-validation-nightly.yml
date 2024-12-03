@@ -38,5 +38,5 @@ jobs:
 
       - name: Validate
         run: |
-          ctest  -R toz3-validate-p4c --output-on-failure --schedule-random
+          poetry run ctest  -R toz3-validate-p4c --output-on-failure --schedule-random
         working-directory: ./build
