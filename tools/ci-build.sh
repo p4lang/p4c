@@ -104,8 +104,9 @@ fi
 
 sudo apt-get update
 sudo apt-get install -y --no-install-recommends ${P4C_DEPS}
-sudo pip3 install --upgrade pip
-sudo pip3 install -r ${P4C_DIR}/requirements.txt
+sudo apt-get install -y python3-venv
+curl -sSL https://install.python-poetry.org | python3 -
+poetry install
 
 if [ "${BUILD_GENERATOR,,}" == "ninja" ] && [ ! $(command -v ninja) ]
 then
@@ -155,11 +156,6 @@ function build_bmv2() {
   fi
 
   sudo apt-get update && sudo apt-get install -y --no-install-recommends ${P4C_RUNTIME_DEPS}
-
-  if [[ "${DISTRIB_RELEASE}" != "18.04" ]] ; then
-    # To run PTF nanomsg tests. Not available on 18.04.
-    sudo pip3 install nnpy
-  fi
 }
 
 if [[ "${ENABLE_BMV2}" == "ON" ]] ; then
