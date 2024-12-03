@@ -627,6 +627,7 @@ struct pna_main_input_metadata_t {
     // common fields initialized for all packets that are input to main
     // parser, regardless of direction.
     bool                     recirculated;
+    bool                     recirculate;
     Timestamp_t              timestamp;
     ParserError_t            parser_error;
     ClassOfService_t         class_of_service;
