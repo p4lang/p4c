@@ -152,10 +152,10 @@ const IR::Node *RemoveUnusedDeclarations::process(const IR::IDeclaration *decl) 
 
 const IR::Node *RemoveUnusedDeclarations::preorder(IR::Parameter *param) {
     // Skip all things that just declare "prototypes"
-    if (findContext<IR::Type_Parser>() && !findContext<IR::P4Parser>()) return param;
-    if (findContext<IR::Type_Control>() && !findContext<IR::P4Control>()) return param;
-    if (findContext<IR::Type_Package>()) return param;
-    if (findContext<IR::Type_Method>() && !findContext<IR::Function>()) return param;
+    if (isInContext<IR::Type_Parser>() && !isInContext<IR::P4Parser>()) return param;
+    if (isInContext<IR::Type_Control>() && !isInContext<IR::P4Control>()) return param;
+    if (isInContext<IR::Type_Package>()) return param;
+    if (isInContext<IR::Type_Method>() && !isInContext<IR::Function>()) return param;
     return warnIfUnused(param);
 }
 

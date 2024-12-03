@@ -167,7 +167,7 @@ class DoLocalCopyPropagation::RewriteTableKeys : public Transform {
         if (!table) return exp;
         if (auto name = expr_name(exp)) {
             const Visitor::Context *ctxt = nullptr;
-            if (findContext<IR::KeyElement>(ctxt) && ctxt->child_index == 0) {
+            if (isInContext<IR::KeyElement>(ctxt) && ctxt->child_index == 0) {
                 auto key = table->key_remap.find(name);
                 if (key != table->key_remap.end()) {
                     LOG4("  rewriting key " << name << " : " << key->second);
@@ -317,7 +317,7 @@ const IR::Expression *DoLocalCopyPropagation::copyprop_name(cstring name,
     if (!name) return nullptr;
     if (inferForTable) {
         const Visitor::Context *ctxt = nullptr;
-        if (findContext<IR::KeyElement>(ctxt) && ctxt->child_index == 0)
+        if (isInContext<IR::KeyElement>(ctxt) && ctxt->child_index == 0)
             inferForTable->keyreads.insert(name);
     }
     if (!working) return nullptr;
@@ -327,7 +327,7 @@ const IR::Expression *DoLocalCopyPropagation::copyprop_name(cstring name,
         if (inferForFunc) {
             inferForFunc->is_first_write_insert = inferForFunc->writes.insert(name).second;
         }
-        if (isRead() || findContext<IR::MethodCallExpression>()) {
+        if (isRead() || isInContext<IR::MethodCallExpression>()) {
             /* If this is being used as an 'out' param of a method call, its not really
              * read, but we can't dead-code eliminate it without eliminating the entire
              * call, so we mark it as live.  Unfortunate as we then won't dead-code

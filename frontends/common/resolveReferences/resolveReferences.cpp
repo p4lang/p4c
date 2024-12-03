@@ -337,7 +337,7 @@ void ResolveReferences::checkShadowing(const IR::INamespace *ns) const {
         const IR::Node *node = decl->getNode();
         if (node->is<IR::StructField>()) continue;
 
-        if (node->is<IR::Parameter>() && findContext<IR::Method>() != nullptr)
+        if (node->is<IR::Parameter>() && isInContext<IR::Method>())
             // do not give shadowing warnings for parameters of extern methods
             continue;
 
@@ -397,7 +397,7 @@ void ResolveReferences::postorder(const IR::P4Program *) { LOG2("Reference map "
 
 bool ResolveReferences::preorder(const IR::This *pointer) {
     auto decl = findContext<IR::Declaration_Instance>();
-    if (findContext<IR::Function>() == nullptr || decl == nullptr) {
+    if (!isInContext<IR::Function>() || decl == nullptr) {
         ::P4::error(ErrorType::ERR_INVALID,
                     "'%1%' can only be used in the definition of an abstract method", pointer);
         return false;

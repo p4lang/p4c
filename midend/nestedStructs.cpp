@@ -51,7 +51,7 @@ const IR::Node *RemoveNestedStructs::postorder(IR::Declaration_Variable *decl) {
               "%1%: don't know how to handle variable annotations other than @name", decl);
     auto map = new ComplexValues::FieldsMap(type);
     values.values.emplace(getOriginal<IR::Declaration_Variable>(), map);
-    if (findContext<IR::Function>()) {
+    if (isInContext<IR::Function>()) {
         auto result = new IR::IndexedVector<IR::StatOrDecl>();
         values.explode(decl->getName().string_view(), type->to<IR::Type_Struct>(), map, result);
         return result;

@@ -84,7 +84,7 @@ class FindSymbols : public Inspector {
 
  public:
     bool isTopLevel() const {
-        return findContext<IR::P4Parser>() == nullptr && findContext<IR::P4Control>() == nullptr;
+        return !isInContext<IR::P4Parser>() && !isInContext<IR::P4Control>();
     }
     explicit FindSymbols(RenameMap *renameMap) : renameMap(renameMap) {
         CHECK_NULL(renameMap);
