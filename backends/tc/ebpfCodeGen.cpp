@@ -478,14 +478,12 @@ void TCIngressPipelinePNA::emitGlobalMetadataInitializer(EBPF::CodeBuilder *buil
         compilerGlobalMetadata);
     builder->newline();
 
-    // if Traffic Manager decided to pass packet to the kernel stack earlier, send it up immediately
-    builder->emitIndent();
-    builder->append("if (compiler_meta__->pass_to_kernel == true) return TC_ACT_OK;");
-    builder->newline();
-
-    // Make sure drop starts out false
+    // Make sure drop and recirculate start out false
     builder->emitIndent();
     builder->append("compiler_meta__->drop = false;");
+    builder->newline();
+    builder->emitIndent();
+    builder->append("compiler_meta__->recirculate = false;");
     builder->newline();
 
     // workaround to make TC protocol-independent, DO NOT REMOVE
@@ -514,24 +512,24 @@ void TCIngressPipelinePNA::emitGlobalMetadataInitializer(EBPF::CodeBuilder *buil
 
 void TCIngressPipelinePNA::emitTrafficManager(EBPF::CodeBuilder *builder) {
     builder->emitIndent();
-    builder->appendFormat("if (!%v->drop && %v->egress_port == 0) ", compilerGlobalMetadata,
+    builder->appendFormat("if (!%v->drop && %v->recirculate) ", compilerGlobalMetadata,
                           compilerGlobalMetadata);
     builder->blockStart();
-    builder->target->emitTraceMessage(builder, "IngressTM: Sending packet up to the kernel stack");
-
-    // Since XDP helper re-writes EtherType for packets other than IPv4 (e.g., ARP)
-    // we cannot simply return TC_ACT_OK to pass the packet up to the kernel stack,
-    // because the kernel stack would receive a malformed packet (with invalid skb->protocol).
-    // The workaround is to send the packet back to the same interface. If we redirect,
-    // the packet will be re-written back to the original format.
-    // At the beginning of the pipeline we check if pass_to_kernel is true and,
-    // if so, the program returns TC_ACT_OK.
     builder->emitIndent();
-    builder->appendLine("compiler_meta__->pass_to_kernel = true;");
+    builder->appendFormat("%v->recirculated = true;", compilerGlobalMetadata);
+    builder->newline();
     builder->emitIndent();
-    builder->append("return bpf_redirect(skb->ifindex, BPF_F_INGRESS)");
-    builder->endOfStatement(true);
+    builder->appendFormat("return TC_ACT_UNSPEC;");
+    builder->newline();
     builder->blockEnd(true);
+    builder->emitIndent();
+    builder->appendFormat("if (!%v->drop && %v->egress_port == 0)", compilerGlobalMetadata,
+                          compilerGlobalMetadata);
+    builder->newline();
+    builder->increaseIndent();
+    builder->emitIndent();
+    builder->appendLine("return TC_ACT_OK;");
+    builder->decreaseIndent();
 
     cstring eg_port = absl::StrFormat("%v->egress_port", compilerGlobalMetadata);
     cstring cos =

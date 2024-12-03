@@ -75,6 +75,7 @@ struct pna_main_output_metadata_t {
  */
 struct pna_global_metadata {
     bool             recirculated;
+    bool             recirculate;
     bool             drop; // NOTE : no drop field in PNA metadata, so we keep drop state as internal metadata.
     PortId_t         egress_port;
     enum MirrorType  mirror_type;
