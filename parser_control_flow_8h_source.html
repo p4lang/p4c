@@ -181,7 +181,7 @@ $(function(){initNavTree('parser_control_flow_8h_source.html',''); initResizable
 <div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span>        setName(<span class="stringliteral">&quot;IfInParser&quot;</span>);</div>
 <div class="line"><a id="l00106" name="l00106"></a><span class="lineno">  106</span>    }</div>
 <div class="line"><a id="l00107" name="l00107"></a><span class="lineno">  107</span>    <span class="keywordtype">void</span> postorder(<span class="keyword">const</span> IR::IfStatement *)<span class="keyword"> override </span>{</div>
-<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>        <span class="keywordflow">if</span> (findContext&lt;IR::P4Parser&gt;()) *found = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00108" name="l00108"></a><span class="lineno">  108</span>        <span class="keywordflow">if</span> (isInContext&lt;IR::P4Parser&gt;()) *found = <span class="keyword">true</span>;</div>
 <div class="line"><a id="l00109" name="l00109"></a><span class="lineno">  109</span>    }</div>
 <div class="line"><a id="l00110" name="l00110"></a><span class="lineno">  110</span>};</div>
 </div>
@@ -209,7 +209,7 @@ $(function(){initNavTree('parser_control_flow_8h_source.html',''); initResizable
 <div class="ttc" id="aclass_p4_1_1_do_remove_parser_control_flow_html"><div class="ttname"><a href="class_p4_1_1_do_remove_parser_control_flow.html">P4::DoRemoveParserControlFlow</a></div><div class="ttdoc">Converts if statements in parsers into transitions.</div><div class="ttdef"><b>Definition</b> parserControlFlow.h:78</div></div>
 <div class="ttc" id="aclass_p4_1_1_i_r_1_1_node_html"><div class="ttname"><a href="class_p4_1_1_i_r_1_1_node.html">P4::IR::Node</a></div><div class="ttdef"><b>Definition</b> node.h:94</div></div>
 <div class="ttc" id="aclass_p4_1_1_if_in_parser_html"><div class="ttname"><a href="class_p4_1_1_if_in_parser.html">P4::IfInParser</a></div><div class="ttdoc">Detect whether the program contains an 'if' statement in a parser.</div><div class="ttdef"><b>Definition</b> parserControlFlow.h:99</div></div>
-<div class="ttc" id="aclass_p4_1_1_inspector_html"><div class="ttname"><a href="class_p4_1_1_inspector.html">P4::Inspector</a></div><div class="ttdef"><b>Definition</b> visitor.h:400</div></div>
+<div class="ttc" id="aclass_p4_1_1_inspector_html"><div class="ttname"><a href="class_p4_1_1_inspector.html">P4::Inspector</a></div><div class="ttdef"><b>Definition</b> visitor.h:413</div></div>
 <div class="ttc" id="aclass_p4_1_1_minimal_name_generator_html"><div class="ttname"><a href="class_p4_1_1_minimal_name_generator.html">P4::MinimalNameGenerator</a></div><div class="ttdef"><b>Definition</b> referenceMap.h:36</div></div>
 <div class="ttc" id="aclass_p4_1_1_move_declarations_html"><div class="ttname"><a href="class_p4_1_1_move_declarations.html">P4::MoveDeclarations</a></div><div class="ttdef"><b>Definition</b> moveDeclarations.h:34</div></div>
 <div class="ttc" id="aclass_p4_1_1_pass_if_html"><div class="ttname"><a href="class_p4_1_1_pass_if.html">P4::PassIf</a></div><div class="ttdef"><b>Definition</b> ir/pass_manager.h:172</div></div>
@@ -218,7 +218,7 @@ $(function(){initNavTree('parser_control_flow_8h_source.html',''); initResizable
 <div class="ttc" id="aclass_p4_1_1_remove_parser_control_flow_html"><div class="ttname"><a href="class_p4_1_1_remove_parser_control_flow.html">P4::RemoveParserControlFlow</a></div><div class="ttdef"><b>Definition</b> parserControlFlow.h:89</div></div>
 <div class="ttc" id="aclass_p4_1_1_remove_parser_ifs_html"><div class="ttname"><a href="class_p4_1_1_remove_parser_ifs.html">P4::RemoveParserIfs</a></div><div class="ttdef"><b>Definition</b> parserControlFlow.h:114</div></div>
 <div class="ttc" id="aclass_p4_1_1_simplify_control_flow_html"><div class="ttname"><a href="class_p4_1_1_simplify_control_flow.html">P4::SimplifyControlFlow</a></div><div class="ttdef"><b>Definition</b> simplify.h:70</div></div>
-<div class="ttc" id="aclass_p4_1_1_transform_html"><div class="ttname"><a href="class_p4_1_1_transform.html">P4::Transform</a></div><div class="ttdef"><b>Definition</b> visitor.h:424</div></div>
+<div class="ttc" id="aclass_p4_1_1_transform_html"><div class="ttname"><a href="class_p4_1_1_transform.html">P4::Transform</a></div><div class="ttdef"><b>Definition</b> visitor.h:437</div></div>
 <div class="ttc" id="aclass_p4_1_1_type_map_html"><div class="ttname"><a href="class_p4_1_1_type_map.html">P4::TypeMap</a></div><div class="ttdef"><b>Definition</b> typeMap.h:41</div></div>
 <div class="ttc" id="aclass_p4_1_1_unique_names_html"><div class="ttname"><a href="class_p4_1_1_unique_names.html">P4::UniqueNames</a></div><div class="ttdef"><b>Definition</b> uniqueNames.h:70</div></div>
 <div class="ttc" id="aclass_p4_1_1_visitor_1_1profile__t_html"><div class="ttname"><a href="class_p4_1_1_visitor_1_1profile__t.html">P4::Visitor::profile_t</a></div><div class="ttdef"><b>Definition</b> visitor.h:78</div></div>

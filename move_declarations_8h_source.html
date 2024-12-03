@@ -180,7 +180,7 @@ $(function(){initNavTree('move_declarations_8h_source.html',''); initResizable(t
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>            prune();</div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>            <span class="keywordflow">return</span> action;</div>
 <div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>        }</div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        <span class="keywordflow">if</span> (findContext&lt;IR::P4Control&gt;() == <span class="keyword">nullptr</span>)</div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>        <span class="keywordflow">if</span> (!isInContext&lt;IR::P4Control&gt;())</div>
 <div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>            <span class="comment">// If we are not in a control, move to the beginning of the action.</span></div>
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>            <span class="comment">// Otherwise move to the control&#39;s beginning.</span></div>
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>            push();</div>
@@ -245,7 +245,7 @@ $(function(){initNavTree('move_declarations_8h_source.html',''); initResizable(t
 <div class="ttc" id="aclass_p4_1_1_move_declarations_html"><div class="ttname"><a href="class_p4_1_1_move_declarations.html">P4::MoveDeclarations</a></div><div class="ttdef"><b>Definition</b> moveDeclarations.h:34</div></div>
 <div class="ttc" id="aclass_p4_1_1_move_initializers_html"><div class="ttname"><a href="class_p4_1_1_move_initializers.html">P4::MoveInitializers</a></div><div class="ttdef"><b>Definition</b> moveDeclarations.h:107</div></div>
 <div class="ttc" id="aclass_p4_1_1_resolution_context_html"><div class="ttname"><a href="class_p4_1_1_resolution_context.html">P4::ResolutionContext</a></div><div class="ttdoc">Visitor mixin for looking up names in enclosing scopes from the Visitor::Context.</div><div class="ttdef"><b>Definition</b> resolveReferences.h:35</div></div>
-<div class="ttc" id="aclass_p4_1_1_transform_html"><div class="ttname"><a href="class_p4_1_1_transform.html">P4::Transform</a></div><div class="ttdef"><b>Definition</b> visitor.h:424</div></div>
+<div class="ttc" id="aclass_p4_1_1_transform_html"><div class="ttname"><a href="class_p4_1_1_transform.html">P4::Transform</a></div><div class="ttdef"><b>Definition</b> visitor.h:437</div></div>
 <div class="ttc" id="aclass_p4_1_1_visitor_1_1profile__t_html"><div class="ttname"><a href="class_p4_1_1_visitor_1_1profile__t.html">P4::Visitor::profile_t</a></div><div class="ttdef"><b>Definition</b> visitor.h:78</div></div>
 <div class="ttc" id="aclass_p4_1_1cstring_html"><div class="ttname"><a href="class_p4_1_1cstring.html">P4::cstring</a></div><div class="ttdef"><b>Definition</b> cstring.h:85</div></div>
 <div class="ttc" id="anamespace_p4_html"><div class="ttname"><a href="namespace_p4.html">P4</a></div><div class="ttdoc">TODO: this is not really specific to BMV2, it should reside somewhere else.</div><div class="ttdef"><b>Definition</b> applyOptionsPragmas.cpp:24</div></div>
