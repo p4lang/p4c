@@ -2974,7 +2974,8 @@ const IR::Node *MoveNonHeaderFieldsToPseudoHeader::postorder(IR::AssignmentState
             if (!cst->fitsUint64()) {
                 ::P4::error(
                     ErrorType::ERR_OVERLIMIT,
-                    "DPDK target supports up-to 64-bit immediate values, %1% exceeds the limit",
+                    "DPDK target supports constant values that are up to 64-bits, and also "
+                    "exactly 128-bits, but no other sizes. %1% is not a supported size",
                     cst);
                 return assn;
             }
