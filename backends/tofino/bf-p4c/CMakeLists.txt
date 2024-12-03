@@ -743,6 +743,7 @@ add_dependencies(p4c_driver p4c-build-logs)
 install (PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/dist/p4c-build-logs
   DESTINATION bin)
 
+# FIXME: Why are we extracting schema versions twice?
 add_custom_command(OUTPUT ${P4C_BINARY_DIR}/p4c_src/schema_versions
   COMMAND ${BFN_P4C_SOURCE_DIR}/scripts/extract_schema_versions.sh ${P4C_BINARY_DIR}/p4c_src/schema_versions
   DEPENDS ${SCHEMA_FILES}
