@@ -690,17 +690,20 @@ bool ToP4::preorder(const IR::Declaration_Variable *v) {
 bool ToP4::preorder(const IR::Type_Error *d) {
     dump(1);
 
+    if (!isDeclaration) {
+        builder.append("error");
+        return false;
+    }
+
     bool first = true;
     for (auto a : *d->getDeclarations()) {
-        if (isDeclaration && ifSystemFile(a->getNode()).has_value())
+        if (ifSystemFile(a->getNode()).has_value())
             // only print if not from a system file
             continue;
         if (!first) {
             builder.append(",\n");
         } else {
-            builder.append("error");
-            if (!isDeclaration) return false;
-            builder.append(" ");
+            builder.append("error ");
             builder.blockStart();
         }
         dump(1, a->getNode(), 1);
