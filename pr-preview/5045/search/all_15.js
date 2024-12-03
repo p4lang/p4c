@@ -1,0 +1,26 @@
+var searchData=
+[
+  ['keep_0',['keep',['../class_p4_1_1_annotation_selection_policy.html#adbb93f90ad02b2c8f3e5887ce7bb99c2',1,'P4::AnnotationSelectionPolicy']]],
+  ['kernel_1',['NTK (Normal Packet To Kernel)',['../ebpf_backend.html#ntk-normal-packet-to-kernel',1,'']]],
+  ['kernel_20hooks_2',['Kernel hooks',['../ebpf_backend.html#kernel-hooks',1,'']]],
+  ['kernel_20target_3',['ebpf_model.p4 on the eBPF kernel target',['../p4testgen.html#ebpf_modelp4-on-the-ebpf-kernel-target',1,'']]],
+  ['kernelsamplestarget_4',['KernelSamplesTarget',['../class_p4_1_1_e_b_p_f_1_1_kernel_samples_target.html',1,'P4::EBPF']]],
+  ['key_5',['key',['../struct_p4_1_1_p4_tools_1_1_table_utils_1_1_key_properties.html#ab2d2ead29d11c7313b68f4d809f60006',1,'P4::P4Tools::TableUtils::KeyProperties']]],
+  ['key_5fequal_6',['key_equal',['../struct_p4_1_1_inline_summary_1_1_per_caller_1_1key__equal.html',1,'P4::InlineSummary::PerCaller']]],
+  ['key_5fhash_7',['key_hash',['../struct_p4_1_1_inline_summary_1_1_per_caller_1_1key__hash.html',1,'P4::InlineSummary::PerCaller']]],
+  ['keyelementinfo_8',['keyElementInfo',['../namespace_p4_1_1_d_p_d_k.html#struct_p4_1_1_d_p_d_k_1_1key_element_info',1,'P4::DPDK']]],
+  ['keyfieldattributes_9',['KeyFieldAttributes',['../struct_p4_1_1_t_c_1_1_key_field_attributes.html',1,'P4::TC']]],
+  ['keyinfo_10',['KeyInfo',['../struct_i_x_bar_1_1_key_info.html',1,'IXBar']]],
+  ['keyinfo_11',['keyInfo',['../namespace_p4_1_1_d_p_d_k.html#struct_p4_1_1_d_p_d_k_1_1key_info',1,'P4::DPDK']]],
+  ['keyissimple_12',['KeyIsSimple',['../class_b_f_n_1_1_key_is_simple.html',1,'BFN::KeyIsSimple'],['../class_p4_1_1_key_is_simple.html',1,'P4::KeyIsSimple']]],
+  ['keynamegenerator_13',['KeyNameGenerator',['../class_p4_1_1_key_name_generator.html',1,'P4']]],
+  ['keyproperties_14',['KeyProperties',['../struct_p4_1_1_p4_tools_1_1_table_utils_1_1_key_properties.html',1,'P4::P4Tools::TableUtils']]],
+  ['keysideeffect_15',['KeySideEffect',['../class_p4_1_1_key_side_effect.html',1,'P4']]],
+  ['kind_16',['Kind',['../namespace_p_h_v.html#aba5418d9e37657e37eb63ee0aa0a435f',1,'PHV']]],
+  ['kind_17',['kind',['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_token.html#a0589cee4a4ce7be0cc003eff60d30953',1,'P4::P4Tools::P4Testgen::Bmv2::Token::kind() const noexcept'],['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_token.html#a519b9785610d0879025fcb2ed47c34c9',1,'P4::P4Tools::P4Testgen::Bmv2::Token::kind(Kind kind) noexcept'],['../class_p_h_v_1_1_field_slice.html#a66cc6c6a0ff3025a97a558cfc5e9f3ca',1,'PHV::FieldSlice::kind()'],['../class_p_h_v_1_1_aligned_cluster.html#a21da3568a92f160e37eeb6d378e43029',1,'PHV::AlignedCluster::kind()']]],
+  ['kinds_18',['P4 match kinds',['../ebpf_backend.html#p4-match-kinds',1,'']]],
+  ['kindsizeindexedmap_19',['KindSizeIndexedMap',['../struct_p_h_v_1_1v2_1_1_kind_size_indexed_map.html',1,'PHV::v2']]],
+  ['known_20issue_20s_20',['Known issue(s)',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2tofino_2bf-p4c_2phv_2v2_2_r_e_a_d_m_e.html#known-issues-2',1,'']]],
+  ['known_20issues_21',['Known issues',['../getting_started.html#known-issues',1,'Known issues'],['../dpdk_backend.html#known-issues-1',1,'Known issues']]],
+  ['known_20limitations_22',['Known limitations',['../ubpf_backend.html#known-limitations',1,'']]]
+];

@@ -1,0 +1,11 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" href="$class_mau_power_spec.html" title=" " alt="" coords="5,55,127,80"/>
+<area shape="rect" id="Node000001" href="$class_j_bay_mau_power_spec.html" title=" " alt="" coords="179,29,329,55"/>
+<area shape="poly" id="edge2073_Node000000_Node000001" title=" " alt="" coords="140,55,178,50,179,55,141,60"/>
+<area shape="rect" id="Node000004" href="$class_tofino_mau_power_spec.html" title=" " alt="" coords="175,79,333,104"/>
+<area shape="poly" id="edge2076_Node000000_Node000004" title=" " alt="" coords="141,74,175,79,174,84,140,79"/>
+<area shape="rect" id="Node000002" href="$class_j_bay_m_mau_power_spec.html" title=" " alt="" coords="381,5,544,31"/>
+<area shape="poly" id="edge2074_Node000001_Node000002" title=" " alt="" coords="343,29,381,25,381,30,344,34"/>
+<area shape="rect" id="Node000003" href="$class_j_bay_u_mau_power_spec.html" title=" " alt="" coords="383,55,543,80"/>
+<area shape="poly" id="edge2075_Node000001_Node000003" title=" " alt="" coords="344,50,383,55,382,60,343,55"/>
+</map>
