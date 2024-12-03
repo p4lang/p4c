@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e  # exit on error
+
 BRIDGE_IP=$1
 
 brctl addbr br1 

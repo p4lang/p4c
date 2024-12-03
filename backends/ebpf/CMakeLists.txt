@@ -218,7 +218,7 @@ else()
 endif()
 
 # check for the libbpf library
-find_library(LIBBPF NAMES bpf HINTS "${CMAKE_CURRENT_SOURCE_DIR}/runtime/usr/lib64/")
+find_library(LIBBPF NAMES bpf HINTS "${CMAKE_CURRENT_SOURCE_DIR}/runtime/install/libbpf/")
 if (LIBBPF)
   message(STATUS "Found libbpf library at ${LIBBPF}")
 else()

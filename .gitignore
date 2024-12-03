@@ -52,3 +52,6 @@ docs/doxygen/awesome_css/
 
 # thirdparty
 backends/tofino/third_party/
+
+# Poetry
+uv.lock
