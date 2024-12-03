@@ -57,7 +57,7 @@ const IR::Node *DuplicateActionControlPlaneNameCheck::postorder(IR::P4Action *ac
             // with a "."), so we can compare it against any other
             // @name annotation value that begins with "." and is
             // equal.
-            if (stack.empty()) {
+            if (topLevel) {
                 name = absl::StrCat(".", name);
             } else {
                 name = absl::StrCat(".", absl::StrJoin(stack, "."), ".", name);
