@@ -72,7 +72,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::ArrayIndex *expression) {
     auto type = typeMap->getType(getOriginal(), true);
     if (SideEffects::check(getOriginal<IR::Expression>(), this, this, typeMap) ||
         // if the expression appears as part of an argument also use a temporary for the index
-        findContext<IR::Argument>() != nullptr) {
+        isInContext<IR::Argument>()) {
         visit(expression->left);
         CHECK_NULL(expression->left);
         visit(expression->right);
@@ -106,7 +106,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::Member *expression) {
     const IR::Expression *rv = expression;
     if (SideEffects::check(getOriginal<IR::Expression>(), this, this, typeMap) ||
         // This may be part of a left-value that is passed as an out argument
-        findContext<IR::Argument>() != nullptr) {
+        isInContext<IR::Argument>()) {
         visit(expression->expr);
         CHECK_NULL(expression->expr);
 

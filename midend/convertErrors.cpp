@@ -37,7 +37,7 @@ const IR::Node *DoConvertErrors::postorder(IR::Type_Name *type) {
     if (!canontype->is<IR::Type_Error>()) {
         return type;
     }
-    if (findContext<IR::TypeNameExpression>() != nullptr) {
+    if (isInContext<IR::TypeNameExpression>()) {
         // This will be resolved by the caller.
         return type;
     }

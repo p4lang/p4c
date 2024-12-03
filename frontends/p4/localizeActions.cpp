@@ -41,7 +41,7 @@ class ParamCloner : public CloneExpressions {
 }  // namespace
 
 const IR::Node *TagGlobalActions::preorder(IR::P4Action *action) {
-    if (findContext<IR::P4Control>() == nullptr) {
+    if (!isInContext<IR::P4Control>()) {
         cstring name = absl::StrCat(".", action->name);
         action->addAnnotationIfNew(IR::Annotation::nameAnnotation, new IR::StringLiteral(name),
                                    false);
@@ -58,7 +58,7 @@ Visitor::profile_t FindGlobalActionUses::init_apply(const IR::Node *node) {
 }
 
 bool FindGlobalActionUses::preorder(const IR::P4Action *action) {
-    if (findContext<IR::P4Control>() == nullptr) globalActions.emplace(action);
+    if (!isInContext<IR::P4Control>()) globalActions.emplace(action);
     return false;
 }
 
@@ -126,8 +126,7 @@ bool FindRepeatedActionUses::preorder(const IR::PathExpression *expression) {
     auto decl = getDeclaration(expression->path, true);
     if (!decl->is<IR::P4Action>()) return false;
     auto action = decl->to<IR::P4Action>();
-    auto control = findContext<IR::P4Control>();
-    if (control == nullptr)
+    if (!isInContext<IR::P4Control>())
         // not within a control; ignore.
         return false;
 

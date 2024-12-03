@@ -52,8 +52,8 @@ const IR::Node *DoEliminateInvalidHeaders::postorder(IR::P4Action *action) {
 }
 
 const IR::Node *DoEliminateInvalidHeaders::postorder(IR::InvalidHeader *expression) {
-    if (!findContext<IR::BlockStatement>() && !findContext<IR::P4Action>() &&
-        !findContext<IR::ParserState>()) {
+    if (!isInContext<IR::BlockStatement>() && !isInContext<IR::P4Action>() &&
+        !isInContext<IR::ParserState>()) {
         // We need some place to insert the setInvalid call.
         ::P4::error("%1%: Cannot eliminate invalid header", expression);
         return expression;
@@ -72,8 +72,8 @@ const IR::Node *DoEliminateInvalidHeaders::postorder(IR::InvalidHeader *expressi
 }
 
 const IR::Node *DoEliminateInvalidHeaders::postorder(IR::InvalidHeaderUnion *expression) {
-    if (!findContext<IR::BlockStatement>() && !findContext<IR::P4Action>() &&
-        !findContext<IR::ParserState>()) {
+    if (!isInContext<IR::BlockStatement>() && !isInContext<IR::P4Action>() &&
+        !isInContext<IR::ParserState>()) {
         // We need some place to insert the setInvalid call.
         ::P4::error("%1%: Cannot eliminate invalid header union", expression);
         return expression;

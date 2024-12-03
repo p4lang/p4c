@@ -156,7 +156,7 @@ const IR::Node *Predication::clone(const IR::AssignmentStatement *statement) {
 
 /// expressionReplacer is applied here and the assignment is stored in liveAssigns vector
 const IR::Node *Predication::preorder(IR::AssignmentStatement *statement) {
-    if (findContext<IR::P4Action>() == nullptr || ifNestingLevel == 0) {
+    if (!isInContext<IR::P4Action>() || ifNestingLevel == 0) {
         return statement;
     }
     LOG1("In preorder for statement: " << *statement);
@@ -282,9 +282,8 @@ const IR::Node *Predication::preorder(IR::ArrayIndex *arrInd) {
 }
 
 const IR::Node *Predication::preorder(IR::IfStatement *statement) {
-    if (findContext<IR::P4Action>() == nullptr) {
-        return statement;
-    }
+    if (!isInContext<IR::P4Action>()) return statement;
+
     ++ifNestingLevel;
     LOG1("Preorder of IfStatement, level: " << ifNestingLevel);
     LOG2(*statement);
