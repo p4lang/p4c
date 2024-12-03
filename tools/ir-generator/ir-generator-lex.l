@@ -87,6 +87,7 @@ static std::string      comment_block;
 "#apply"        { return APPLY; }
 "#no"[a-zA-Z_]*    { yylval.str = cstring(yytext+3); return NO; }
 "#nooperator==" { yylval.str = cstring(yytext+3); return NO; }
+"#nooperator<"  { yylval.str = cstring(yytext+3); return NO; }
 "0"             { yylval.str = cstring(yytext); return ZERO; }
 -?[0-9]+        { yylval.str = cstring(yytext); return INTEGER; }
 

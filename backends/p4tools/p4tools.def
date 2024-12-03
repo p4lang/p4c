@@ -44,6 +44,13 @@ class StateVariable : Expression {
         return compare(ref, other.ref) < 0;
     }
 
+    isSemanticallyLess {
+        if (static_cast<const Node *>(this) == &a_) return false;
+        if (typeId() != a_.typeId()) return typeId() < a_.typeId();
+        auto &a = static_cast<const StateVariable &>(a_);
+        return compare(ref, a.ref) < 0;
+    }
+
     int compare(const Expression *e1, const Expression *e2) const {
         // e1 is a Member.
         if (const auto *m1 = e1->to<Member>()) {
@@ -217,6 +224,13 @@ public:
 
     dbprint {
         out << "Concolic_" << label << "(" << arguments << ")";
+    }
+
+    isSemanticallyLess {
+        if (static_cast<const Node *>(this) == &a_) return false;
+        if (typeId() !=  a_.typeId()) return typeId() <  a_.typeId();
+        auto &a = static_cast<const ConcolicVariable &>(a_);
+        return label < a.label; /* ignore type */
     }
 
     visit_children { v.visit(type, "type"); }
