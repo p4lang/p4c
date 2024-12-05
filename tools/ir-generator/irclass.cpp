@@ -448,12 +448,17 @@ IrElement::access_t IrClass::outputCOWfieldrefs(std::ostream &out) const {
             if (fld->isStatic) continue;
             if (e->access != access) out << indent << (access = e->access);
             out << indent << "COWfieldref<" << name << ", ";
-            const IrClass *cls = fld->type->resolve(fld->clss ? fld->clss->containedIn : nullptr);
-            if (cls != nullptr && !fld->isInline) out << "const ";
-            out << fld->type->toString();
-            if (cls != nullptr && !fld->isInline) out << "*";
-            out << fld->type->declSuffix() << ", &" << name << "::" << fld->name << "> "
-                << fld->name << ";\n";
+            if (fld->is<IrVariantField>()) {
+                out << fld->name << "_variant";
+            } else {
+                const IrClass *cls = fld->type->resolve(fld->clss ? fld->clss->containedIn
+                                                                  : nullptr);
+                if (cls != nullptr && !fld->isInline) out << "const ";
+                out << fld->type->toString();
+                if (cls != nullptr && !fld->isInline) out << "*";
+                out << fld->type->declSuffix();
+            }
+            out << ", &" << name << "::" << fld->name << "> " << fld->name << ";\n";
         }
     }
     return access;
