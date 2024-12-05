@@ -7,10 +7,6 @@
 #include <string.h>
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define BF_UTILS_ALGO_NAME_LEN 30
 
 typedef enum {
@@ -375,7 +371,7 @@ static inline bfn_hash_alg_type_t hash_alg_str_to_type(const char *alg_name) {
  * algorithms
  */
 typedef struct crc_alg_info_ {
-    char *crc_name;
+    const char *crc_name;
     uint64_t poly;
     bool reverse;
     uint64_t init;
@@ -403,7 +399,7 @@ typedef struct bfn_hash_algorithm_ {
  * ensures that the polynomial is odd, and that the sizes of the init and
  * final_xor values correctly fit within the size of the polynomial
  */
-bool verify_algorithm(bfn_hash_algorithm_t *alg, char **error_message);
+bool verify_algorithm(bfn_hash_algorithm_t *alg, const char **error_message);
 
 /**
  * Given a list of parameters, this will build an algorithm to be used in a
@@ -422,9 +418,5 @@ void initialize_crc_matrix(bfn_hash_algorithm_t *alg);
 
 void calculate_crc(bfn_hash_algorithm_t *alg, uint32_t hash_output_bits, uint8_t *stream,
                    uint32_t stream_len, uint8_t *crc);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* BACKENDS_TOFINO_BF_UTILS_INCLUDE_DYNAMIC_HASH_BFN_HASH_ALGORITHM_H_ */

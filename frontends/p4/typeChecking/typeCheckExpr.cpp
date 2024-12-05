@@ -40,7 +40,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Parameter *param) {
             typeError("%1%: parameters with type %2% must be directionless", param, paramType);
             return param;
         }
-        if (findContext<IR::P4Action>()) {
+        if (isInContext<IR::P4Action>()) {
             typeError("%1%: actions cannot have parameters with type %2%", param, paramType);
             return param;
         }
@@ -1791,7 +1791,7 @@ const IR::Expression *TypeInferenceBase::actionCall(bool inActionList,
     // action, with signature _(arg3)
     LOG2("Processing action " << dbp(actionCall));
 
-    if (findContext<IR::P4Parser>()) {
+    if (isInContext<IR::P4Parser>()) {
         typeError("%1%: Action calls are not allowed within parsers", actionCall);
         return actionCall;
     }
@@ -1817,7 +1817,7 @@ const IR::Expression *TypeInferenceBase::actionCall(bool inActionList,
         return actionCall;
     }
 
-    bool inTable = findContext<IR::P4Table>() != nullptr;
+    bool inTable = isInContext<IR::P4Table>();
 
     TypeConstraints constraints(typeMap->getSubstitutions(), typeMap);
     auto params = new IR::ParameterList;
@@ -1955,7 +1955,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::MethodCallExpression *exp
     // Handle differently methods and actions: action invocations return actions
     // with different signatures
     if (methodType->is<IR::Type_Action>()) {
-        if (findContext<IR::Function>()) {
+        if (isInContext<IR::Function>()) {
             typeError("%1%: Functions cannot call actions", expression);
             return expression;
         }
@@ -2147,7 +2147,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::MethodCallExpression *exp
         setType(result, returnType);
 
         auto mi = MethodInstance::resolve(result, this, typeMap, getChildContext(), true);
-        if (mi->isApply() && findContext<IR::P4Action>()) {
+        if (mi->isApply() && isInContext<IR::P4Action>()) {
             typeError("%1%: apply cannot be called from actions", expression);
             return expression;
         }
@@ -2170,8 +2170,8 @@ const IR::Node *TypeInferenceBase::postorder(const IR::MethodCallExpression *exp
         }
 
         auto bi = mi->to<BuiltInMethod>();
-        if ((findContext<IR::SelectCase>()) && (!bi || (bi->name == IR::Type_Stack::pop_front ||
-                                                        bi->name == IR::Type_Stack::push_front))) {
+        if (isInContext<IR::SelectCase>() && (!bi || (bi->name == IR::Type_Stack::pop_front ||
+                                                      bi->name == IR::Type_Stack::push_front))) {
             typeError("%1%: no function calls allowed in this context", expression);
             return expression;
         }
@@ -2280,7 +2280,7 @@ const IR::SelectCase *TypeInferenceBase::matchCase(const IR::SelectExpression *s
 const IR::Node *TypeInferenceBase::postorder(const IR::This *expression) {
     if (done()) return expression;
     auto decl = findContext<IR::Declaration_Instance>();
-    if (findContext<IR::Function>() == nullptr || decl == nullptr)
+    if (!isInContext<IR::Function>() || decl == nullptr)
         typeError("%1%: can only be used in the definition of an abstract method", expression);
     auto type = getType(decl);
     setType(expression, type);

@@ -132,7 +132,7 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
         return new IR::IfStatement(srcInfo, isSrcValidCall,
                                    new IR::BlockStatement(srcInfo, thenStmts), elseStmt);
     } else if (ltype->is<IR::Type_Stack>() &&
-               ((!findContext<IR::P4Parser>()) ||
+               ((!isInContext<IR::P4Parser>()) ||
                 (statement->right->is<IR::HeaderStackExpression>()))) {
         // no copies in parsers -- copying stacks looses the .next field
         const auto *stack = ltype->checkedTo<IR::Type_Stack>();

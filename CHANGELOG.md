@@ -23,6 +23,40 @@ We follow a monthly release cadence. Our versioning scheme is as follows:
 > @note
 > The commit history prior to the release [1.2.2.1](https://github.com/p4lang/p4c/pull/3085) is not included here but is available in the [commit history](https://github.com/p4lang/p4c/commits/main/).
 
+## Release v1.2.5.0 [[view](https://github.com/p4lang/p4c/releases/tag/v1.2.5.1)]
+
+### What's Changed 🎉
+- The Tofino compiler is now open-source and available as a P4C back end 🎉 [[view](https://github.com/p4lang/p4c/pull/4964)] (Han Wang).
+
+### Breaking Changes 🛠
+- Add Abseil string helpers [[view](https://github.com/p4lang/p4c/pull/4971)] (Anton Korobeynikov).
+- Remove `IR::Annotations` and make `IAnnotated` carry annotations inline [[view](https://github.com/p4lang/p4c/pull/4992)] (Anton Korobeynikov).
+
+### P4 Specification Implementation
+- Bump compiler version to 1.2.5.0 [[view](https://github.com/p4lang/p4c/pull/5005)] (Fabian Ruffy).
+
+### Changes to the Compiler Core
+- Fix broken Tofino build [[view](https://github.com/p4lang/p4c/pull/5004)] (Fabian Ruffy).
+
+### Changes to the BMv2 Back Ends
+- Enable handling of arbitrary `if` statements within actions for BMv2 back end [[view](https://github.com/p4lang/p4c/pull/4999)] (Andy Fingerhut).
+
+### Changes to the TC Back End
+- Small TC fixes [[view](https://github.com/p4lang/p4c/pull/5002)] (vbnogueira).
+
+### Changes to the P4Tools Back End
+- Replace `absl::btree_map` with the `P4::flat_map` implementation in P4Testgen [[view](https://github.com/p4lang/p4c/pull/4713)] (Fabian Ruffy).
+
+### Changes to the Tofino Back End
+- Miscellaneous small Tofino fixes for compilation [[view](https://github.com/p4lang/p4c/pull/4996)] (Fabian Ruffy).
+- Remove superfluous Tofino includes and make include paths fully qualified [[view](https://github.com/p4lang/p4c/pull/4998)] (Fabian Ruffy).
+- Fix Tofino backend issues due to recent annotations changes [[view](https://github.com/p4lang/p4c/pull/5015)] (Anton Korobeynikov).
+
+### Other Changes
+- Remove `CMAKE_BUILD_TYPE` values that do not work when building Z3 [[view](https://github.com/p4lang/p4c/pull/4997)] (Andy Fingerhut).
+- Fix Clang compilation failures with `-fsized-deallocation` option [[view](https://github.com/p4lang/p4c/pull/4995)] (Fabian Ruffy).
+- Update changelogs for v1.2.4.16 and v1.2.4.17 [[view](https://github.com/p4lang/p4c/pull/5003)] (Adarsh Rawat).
+
 ## Release v1.2.4.17 [[view](https://github.com/p4lang/p4c/pull/4990)]
 
 ### Breaking Changes 🛠

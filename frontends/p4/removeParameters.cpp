@@ -63,9 +63,8 @@ void FindActionParameters::postorder(const IR::MethodCallExpression *expression)
     if (!mi->is<P4::ActionCall>()) return;
     auto ac = mi->to<P4::ActionCall>();
 
-    auto table = findContext<IR::P4Table>();
-    if (table != nullptr) {
-        if (findContext<IR::ActionListElement>() != nullptr)
+    if (isInContext<IR::P4Table>()) {
+        if (isInContext<IR::ActionListElement>())
             // These are processed elsewhere
             return;
         // This is probably the default_action; we must remove some parameters

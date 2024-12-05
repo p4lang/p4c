@@ -127,8 +127,7 @@ void ValidateParsedProgram::distinctParameters(const IR::TypeParameters *typePar
 
 /// Cannot invoke constructors in actions
 void ValidateParsedProgram::postorder(const IR::ConstructorCallExpression *expression) {
-    auto inAction = findContext<IR::P4Action>();
-    if (inAction != nullptr)
+    if (isInContext<IR::P4Action>())
         ::P4::error(ErrorType::ERR_INVALID,
                     "%1%: invalid call. Constructor calls not allowed in actions.", expression);
 }
@@ -147,22 +146,21 @@ void ValidateParsedProgram::postorder(const IR::Declaration_Instance *decl) {
         ::P4::error(ErrorType::ERR_INVALID, "%1%: invalid type for declaration", decl->type);
     if (decl->name.isDontCare())
         ::P4::error(ErrorType::ERR_INVALID, "%1%: invalid instance name.", decl);
-    if (findContext<IR::BlockStatement>() &&         // we're looking for the apply block
-        findContext<IR::P4Control>() &&              // of a control
-        !findContext<IR::Declaration_Instance>()) {  // but not in an instance initializer
+    if (isInContext<IR::BlockStatement>() &&         // we're looking for the apply block
+        isInContext<IR::P4Control>() &&              // of a control
+        !isInContext<IR::Declaration_Instance>()) {  // but not in an instance initializer
         ::P4::error(
             ErrorType::ERR_INVALID,
             "%1%: invalid declaration. Instantiations cannot be in a control 'apply' block.", decl);
     }
-    if (findContext<IR::ParserState>())
+    if (isInContext<IR::ParserState>())
         ::P4::error(ErrorType::ERR_INVALID,
                     "%1%: invalid declaration. Instantiations cannot be in a parser state.", decl);
-    if (findContext<IR::Function>() || findContext<IR::Method>())
+    if (isInContext<IR::Function>() || isInContext<IR::Method>())
         ::P4::error(ErrorType::ERR_INVALID,
                     "%1%: invalid declaration. Instantiations cannot be in a function or method.",
                     decl);
-    auto inAction = findContext<IR::P4Action>();
-    if (inAction != nullptr)
+    if (isInContext<IR::P4Action>())
         ::P4::error(ErrorType::ERR_INVALID,
                     "%1%: declaration. Instantiations not allowed in actions.", decl);
 }
@@ -174,8 +172,7 @@ void ValidateParsedProgram::postorder(const IR::Declaration_Constant *decl) {
 }
 
 void ValidateParsedProgram::postorder(const IR::EntriesList *l) {
-    auto table = findContext<IR::P4Table>();
-    if (table == nullptr) {
+    if (!isInContext<IR::P4Table>()) {
         ::P4::error(ErrorType::ERR_INVALID,
                     "%1%: invalid entries list. Table entries must belong to a table.", l);
         return;
@@ -203,22 +200,18 @@ void ValidateParsedProgram::postorder(const IR::SwitchStatement *statement) {
 
 /// Return statements are not allowed in parsers
 void ValidateParsedProgram::postorder(const IR::ReturnStatement *statement) {
-    if (!findContext<IR::Function>()) {
-        auto inParser = findContext<IR::P4Parser>();
-        if (inParser != nullptr)
-            ::P4::error(ErrorType::ERR_INVALID,
-                        "%1%: invalid statement. 'return' statements not allowed in parsers.",
-                        statement);
-    }
+    if (!isInContext<IR::Function>() && isInContext<IR::P4Parser>())
+        ::P4::error(ErrorType::ERR_INVALID,
+                    "%1%: invalid statement. 'return' statements not allowed in parsers.",
+                    statement);
 }
 
 /// Exit statements are not allowed in parsers or functions
 void ValidateParsedProgram::postorder(const IR::ExitStatement *statement) {
-    auto inParser = findContext<IR::P4Parser>();
-    if (inParser != nullptr)
+    if (isInContext<IR::P4Parser>())
         ::P4::error(ErrorType::ERR_INVALID,
                     "%1%: invalid statement. 'exit' statements not allowed in parsers.", statement);
-    if (findContext<IR::Function>())
+    if (isInContext<IR::Function>())
         ::P4::error(ErrorType::ERR_INVALID,
                     "%1% invalid statement. 'exit' statements not allowed in functions.",
                     statement);
@@ -253,13 +246,13 @@ void ValidateParsedProgram::postorder(const IR::Dots *dots) {
 
 /// Check that continue and break statements are only used in the context of a for statement.
 void ValidateParsedProgram::postorder(const IR::BreakStatement *s) {
-    if (!findContext<IR::ForStatement>() && !findContext<IR::ForInStatement>())
+    if (!isInContext<IR::ForStatement>() && !isInContext<IR::ForInStatement>())
         ::P4::error(ErrorType::ERR_INVALID,
                     "%1%: break statement must be used in the context of a for statement.", s);
 }
 
 void ValidateParsedProgram::postorder(const IR::ContinueStatement *s) {
-    if (!findContext<IR::ForStatement>() && !findContext<IR::ForInStatement>())
+    if (!isInContext<IR::ForStatement>() && !isInContext<IR::ForInStatement>())
         ::P4::error(ErrorType::ERR_INVALID,
                     "%1%: continue statement must be used in the context of a for statement.", s);
 }

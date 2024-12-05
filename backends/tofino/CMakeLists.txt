@@ -234,8 +234,8 @@ set (BF_P4C_IR_SRCS
   bf-p4c/parde/match_register.cpp
   bf-p4c/parde/clot/clot.cpp
   bf-p4c/phv/phv.cpp
-  bf-utils/src/dynamic_hash/dynamic_hash.c
-  bf-utils/src/dynamic_hash/bfn_hash_algorithm.c
+  bf-utils/src/dynamic_hash/dynamic_hash.cpp
+  bf-utils/src/dynamic_hash/bfn_hash_algorithm.cpp
   )
 add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_IR_SRCS}")
 
