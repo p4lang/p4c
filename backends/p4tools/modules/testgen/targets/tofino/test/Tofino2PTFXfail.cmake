@@ -7,37 +7,37 @@
 p4tools_add_xfail_reason(
   "testgen-tofino2-ptf"
   "Unknown or unimplemented extern method:"
-  mirror.p4
+  # mirror.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-tofino2-ptf"
   "Unknown or unimplemented extern method: emit"
   # Resubmit.emit
-  tna_resubmit.p4
-  empty_header_stack.p4
+  # tna_resubmit.p4
+  # empty_header_stack.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-tofino2-ptf"
   "Unknown or unimplemented extern method: set"
-  parser_counter_10.p4
-  parser_counter_7.p4
-  parser_counter_stack_1.p4
+  # parser_counter_10.p4
+  # parser_counter_7.p4
+  # parser_counter_stack_1.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-tofino2-ptf"
   "Unknown or unimplemented extern method: enqueue"
   # RegisterAction.enqueue
-  t2na_fifo.p4
+  # t2na_fifo.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-tofino2-ptf"
   "Unknown or unimplemented extern method: execute"
   # MinMaxAction.execute
-  t2na_ghost.p4
+  # t2na_ghost.p4
 )
 
 p4tools_add_xfail_reason(
@@ -64,7 +64,7 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-tofino2-ptf"
   "is trying to match on a tainted key set"
-  parser_multi_write_checksum_verify_5.p4
+  # parser_multi_write_checksum_verify_5.p4
 )
 
 p4tools_add_xfail_reason(
@@ -73,22 +73,22 @@ p4tools_add_xfail_reason(
   # Our packet model is incomplete.
   # We do not model the case where we append metadata but do not parse it.
   # tna_register.p4
-  tna_alpmV2.p4
+  # tna_alpmV2.p4
   # Most likely a compiler bug
-  tna_extract_emit_3.p4
-  tna_action_profile_1.p4
+  # tna_extract_emit_3.p4
+  # tna_action_profile_1.p4
   # Meter is not fully implemented.
-  large_counter_meter.p4
+  # large_counter_meter.p4
   # TODO:
-  tna_multicast.p4
+  # tna_multicast.p4
   tna_simple_switch.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-tofino2-ptf"
   "exceeded the maximum number of permitted guard violations for this run"
-  t2na_emulation.p4
-  too_many_pov_bits.p4
+  # t2na_emulation.p4
+  # too_many_pov_bits.p4
 )
 
 p4tools_add_xfail_reason(
@@ -110,7 +110,7 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-tofino2-ptf"
   "Match type dleft_hash not implemented for table keys"
-  hwlrn.p4
+  # hwlrn.p4
 )
 
 # This is out of our control.
@@ -122,7 +122,7 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-tofino2-ptf"
   "Failed to subscribe to server at %s"
-  varbit_four_options.p4
+  # varbit_four_options.p4
 )
 
 # These are compilation bugs we have no control over.
