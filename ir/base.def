@@ -355,11 +355,11 @@ class Annotation {
         return expr[idx];
     }
     inline auto &getKV() {
-        BUG_CHECK(annotationKind() == Kind::StructuredKVList, "Annotation does not contain a key-value list.");
+        BUG_CHECK(std::holds_alternative<KVAnnotation>(body), "Annotation does not contain a key-value list.");
         return std::get<KVAnnotation>(body);
     }
     inline const auto &getKV() const {
-        BUG_CHECK(annotationKind() == Kind::StructuredKVList, "Annotation does not contain a key-value list.");
+        BUG_CHECK(std::holds_alternative<KVAnnotation>(body), "Annotation does not contain a key-value list.");
         return std::get<KVAnnotation>(body);
     }
 
