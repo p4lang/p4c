@@ -7,39 +7,39 @@
 p4tools_add_xfail_reason(
   "testgen-tofino2"
   "Match type range not implemented"
-  tna_range_match.p4
-  tna_field_slice.p4
-  t2na_uni_dim_scale_base.p4
-  varbit_four_options.p4
+  # tna_range_match.p4
+  # tna_field_slice.p4
+  # t2na_uni_dim_scale_base.p4
+  # varbit_four_options.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-tofino2"
   "Match type dleft_hash not implemented"
-  hwlrn.p4
+  # hwlrn.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-tofino2"
   "Unknown or unimplemented extern method:"
-  mirror.p4
-  t2na_ghost.p4
+  # mirror.p4
+  # t2na_ghost.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-tofino2"
   "Unknown or unimplemented extern method: emit"
   # Resubmit.emit
-  tna_resubmit.p4
-  empty_header_stack.p4
+  # tna_resubmit.p4
+  # empty_header_stack.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-tofino2"
   "Unknown or unimplemented extern method: set"
-  parser_counter_10.p4
-  parser_counter_7.p4
-  parser_counter_stack_1.p4
+  # parser_counter_10.p4
+  # parser_counter_7.p4
+  # parser_counter_stack_1.p4
 )
 
 p4tools_add_xfail_reason(
@@ -62,7 +62,7 @@ p4tools_add_xfail_reason(
   "testgen-tofino2"
   "Unknown or unimplemented extern method: enqueue"
   # RegisterAction.enqueue
-  t2na_fifo.p4
+  # t2na_fifo.p4
 )
 
 p4tools_add_xfail_reason(
@@ -83,26 +83,26 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-tofino2"
   "unhandled stage table type"
-  tna_proxy_hash.p4
+  # tna_proxy_hash.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-tofino2"
   "Table .* has no stage tables"
-  bfrt_alpm_perf.p4
-  tna_lpm_match.p4
-  tna_alpm.p4
-  tna_alpmV2.p4
-  tna_ipv4_alpm.p4
-  tna_ipv6_alpm.p4
-  tna_ternary_match.p4
+  # bfrt_alpm_perf.p4
+  # tna_lpm_match.p4
+  # tna_alpm.p4
+  # tna_alpmV2.p4
+  # tna_ipv4_alpm.p4
+  # tna_ipv6_alpm.p4
+  # tna_ternary_match.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-tofino2"
   "error -2 thrown"
-  tna_meter_bytecount_adjust.p4
-  tna_meter_lpf_wred.p4
+  # tna_meter_bytecount_adjust.p4
+  # tna_meter_lpf_wred.p4
 )
 
 p4tools_add_xfail_reason(
@@ -114,14 +114,14 @@ p4tools_add_xfail_reason(
   "testgen-tofino2"
   "is trying to match on a tainted key set"
   switch_tofino2_y1_mod.p4
-  parser_multi_write_checksum_verify_5.p4
+  # parser_multi_write_checksum_verify_5.p4
 )
 
 # Looks like a compiler/test_harness bug
 p4tools_add_xfail_reason(
   "testgen-tofino2"
   "Clot slices must be used in order"
-  tna_extract_emit_3.p4
+  # tna_extract_emit_3.p4
 )
 
 p4tools_add_xfail_reason(
@@ -132,14 +132,14 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-tofino2"
   "must specify match fields before action"
-  tna_checksum.p4
+  # tna_checksum.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-tofino2"
   "exceeded the maximum number of permitted guard violations for this run"
-  t2na_emulation.p4
-  too_many_pov_bits.p4
+  # t2na_emulation.p4
+  # too_many_pov_bits.p4
 )
 
 p4tools_add_xfail_reason(
@@ -152,7 +152,7 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-tofino2"
   "1 expected packet on port .* not seen"
-  tna_multicast.p4
+  # tna_multicast.p4
 )
 
 p4tools_add_xfail_reason(
@@ -172,7 +172,7 @@ p4tools_add_xfail_reason(
   # We do not model the case where we append metadata but do not parse it.
   # tna_register.p4
   # Meter is not fully implemented.
-  large_counter_meter.p4
+  # large_counter_meter.p4
   # TODO
 )
 
@@ -185,7 +185,7 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-tofino2"
   "duplicate value for .*"
-  misc1.p4
+  # misc1.p4
 )
 
 # These are tests that currently fail.

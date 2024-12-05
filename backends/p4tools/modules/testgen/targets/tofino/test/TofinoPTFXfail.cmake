@@ -17,7 +17,7 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-tofino-ptf"
   "Unable to resolve extraction source"
-  simple_l3_mcast.p4
+  # simple_l3_mcast.p4
 )
 
 p4tools_add_xfail_reason(
@@ -35,7 +35,7 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-tofino-ptf"
   "Table key name not supported"
-  static_entries2.p4
+  # static_entries2.p4
 )
 
 p4tools_add_xfail_reason(
@@ -48,17 +48,17 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-tofino-ptf"
   "Program not supported by target device and architecture"
-  test_config_2_multiple_parsers.p4
-  test_config_3_unused_parsers.p4
-  test_config_11_multi_pipe_multi_parsers.p4
-  tna_multi_prsr_programs_multi_pipes.p4
+  # test_config_2_multiple_parsers.p4
+  # test_config_3_unused_parsers.p4
+  # test_config_11_multi_pipe_multi_parsers.p4
+  # tna_multi_prsr_programs_multi_pipes.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-tofino-ptf"
   "StackOutOfBounds will be triggered"
-  parser_loop_3.p4
-  parser_loop_4.p4
+  # parser_loop_3.p4
+  # parser_loop_4.p4
 )
 
 p4tools_add_xfail_reason(
@@ -74,7 +74,7 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-tofino-ptf"
   "Unknown or unimplemented extern method: is_zero"
-  tcp_option_mss.p4
+  # tcp_option_mss.p4
 )
 
 p4tools_add_xfail_reason(
@@ -90,8 +90,8 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-tofino-ptf"
   "Unknown or unimplemented extern method: emit"
-  tna_resubmit.p4
-  mirror.p4
+  # tna_resubmit.p4
+  # mirror.p4
 )
 
 p4tools_add_xfail_reason(
@@ -102,31 +102,31 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-tofino-ptf"
   "Unknown or unimplemented extern method: set"
-  parser_counter_6.p4
-  parser_counter_7.p4
-  parser_counter_8.p4
-  parser_counter_9.p4
-  parser_counter_10.p4
-  parser_match_17.p4
-  parser_counter_12.p4
-  parser_counter_11.p4
-  ipv6_tlv.p4
-  parser_loop_1.p4
-  parser_loop_2.p4
-  tcp_option_mss_4_byte_chunks.p4
+  # parser_counter_6.p4
+  # parser_counter_7.p4
+  # parser_counter_8.p4
+  # parser_counter_9.p4
+  # parser_counter_10.p4
+  # parser_match_17.p4
+  # parser_counter_12.p4
+  # parser_counter_11.p4
+  # ipv6_tlv.p4
+  # parser_loop_1.p4
+  # parser_loop_2.p4
+  # tcp_option_mss_4_byte_chunks.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-tofino-ptf"
   "Found 2 duplicate name"
-  multiple_apply2.p4
+  # multiple_apply2.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-tofino-ptf"
   "A packet was received on device"
   # Potentially a bug in bf-p4c.
-  tna_action_profile_1.p4
+  # tna_action_profile_1.p4
   # We are not modelling short packets correctly.
   # TODO
 )
@@ -137,25 +137,25 @@ p4tools_add_xfail_reason(
   # Our packet model is incomplete.
   # We do not model the case where we append metadata but do not parse it.
   # tna_register.p4
-  parse_srv6_fast.p4
+  # parse_srv6_fast.p4
   # This is likely a bug in bf-p4c
-  header_stack_strided_alloc2.p4
-  action_profile.p4
-  multithread_pipe_lock.p4
-  snapshot.p4
+  # header_stack_strided_alloc2.p4
+  # action_profile.p4
+  # multithread_pipe_lock.p4
+  # snapshot.p4
   # Multicast is not implemented
-  tna_multicast.p4
+  # tna_multicast.p4
   # These tests currently fail because of a bug in bf-p4c.
   # symmetric_hash.p4
   # This looks like a problem with the @flexible annotation.
-  meter_dest_16_32_flexible.p4
+  # meter_dest_16_32_flexible.p4
   # Missing implementation for pa_alias
   # mau-meter.cpp:233 (calculate_output): error -2 thrown.
-  large_counter_meter.p4
+  # large_counter_meter.p4
   # TODO
   tna_simple_switch.p4
-  tna_alpmV2.p4
-  varbit_four_options.p4
+  # tna_alpmV2.p4
+  # varbit_four_options.p4
 
 )
 
@@ -174,26 +174,26 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-tofino-ptf"
   "Compiler failed"
-  mirror_5.p4
+  # mirror_5.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-tofino-ptf"
   "failed command verifier"
-  simple_l3_nexthop_ipv6_options.p4
+  # simple_l3_nexthop_ipv6_options.p4
 )
 
 # Trying to compile a t2na program.
 p4tools_add_xfail_reason(
   "testgen-tofino-ptf"
   "error: AssignmentStatement"
-  t2na_tm_stress.p4
+  # t2na_tm_stress.p4
 )
 
 p4tools_add_xfail_reason(
   "testgen-tofino-ptf"
   "Compiler Bug: : Operand .* of instruction .* operating on container .* must be a PHV."
-  deparse-zero-clustering.p4
+  # deparse-zero-clustering.p4
 )
 
 p4tools_add_xfail_reason(
@@ -229,9 +229,9 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-tofino-ptf"
   "is trying to match on a tainted key set"
-  lookahead1.p4
+  # lookahead1.p4
   switchml.p4
-  parser_multi_write_checksum_verify_5.p4
+  # parser_multi_write_checksum_verify_5.p4
 )
 
 p4tools_add_xfail_reason(
@@ -247,7 +247,7 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-tofino-ptf"
   "Tofino requires byte-aligned headers"
-  tagalong_mdinit_switch.p4
+  # tagalong_mdinit_switch.p4
 )
 
 p4tools_add_xfail_reason(
@@ -275,7 +275,7 @@ p4tools_add_xfail_reason(
   "testgen-tofino-ptf"
   "PTF runner:Error when starting model & switchd"
   # Switchd fails to start with context json processing error.
-  forensics.p4
+  # forensics.p4
 )
 
 # Most likely a model bug
@@ -297,8 +297,8 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-tofino-ptf"
   "We can not predict how much this call will advance the parser cursor"
-  varbit_in_middle.p4
-  simple_l3_csum_varbit_v2.p4
+  # varbit_in_middle.p4
+  # simple_l3_csum_varbit_v2.p4
 )
 
 p4tools_add_xfail_reason(
