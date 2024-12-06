@@ -33,6 +33,7 @@ limitations under the License.
 #include "midend/complexComparison.h"
 #include "midend/copyStructures.h"
 #include "midend/def_use.h"
+#include "midend/eliminateActionRun.h"
 #include "midend/eliminateInvalidHeaders.h"
 #include "midend/eliminateNewtype.h"
 #include "midend/eliminateSerEnums.h"
@@ -126,6 +127,7 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          new P4::CompileTimeOperations(),
          new P4::TableHit(&typeMap),
          new P4::EliminateSwitch(&typeMap),
+         // new P4::ElimActionRun(),  optional pass, undoes EliminateSwitch
          new P4::ResolveReferences(&refMap),
          new P4::TypeChecking(&refMap, &typeMap, true),  // update types before ComputeDefUse
          new PassRepeated({
