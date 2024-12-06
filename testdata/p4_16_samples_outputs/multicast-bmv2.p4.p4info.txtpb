@@ -39,7 +39,7 @@ tables {
     id: 25234447
   }
   action_refs {
-    id: 19143480
+    id: 19344232
   }
   action_refs {
     id: 21257015
@@ -67,7 +67,7 @@ tables {
     id: 23300268
   }
   action_refs {
-    id: 19143480
+    id: 19344232
   }
   action_refs {
     id: 21257015
@@ -95,7 +95,7 @@ tables {
     id: 31165400
   }
   action_refs {
-    id: 19143480
+    id: 25850727
   }
   action_refs {
     id: 21257015
@@ -136,9 +136,9 @@ actions {
 }
 actions {
   preamble {
-    id: 19143480
-    name: "_drop"
-    alias: "_drop"
+    id: 19344232
+    name: "ingress._drop"
+    alias: "ingress._drop"
   }
 }
 actions {
@@ -168,6 +168,13 @@ actions {
     id: 1
     name: "smac"
     bitwidth: 48
+  }
+}
+actions {
+  preamble {
+    id: 25850727
+    name: "egress._drop"
+    alias: "egress._drop"
   }
 }
 type_info {
