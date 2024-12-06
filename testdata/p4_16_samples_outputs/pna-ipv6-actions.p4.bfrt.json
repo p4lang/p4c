@@ -79,6 +79,13 @@
           "data" : []
         },
         {
+          "id" : 19435700,
+          "name" : "MainControlImpl.ipv6_addr_or2",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        },
+        {
           "id" : 26319412,
           "name" : "MainControlImpl.ipv6_addr_xor",
           "action_scope" : "TableAndDefault",
@@ -88,6 +95,13 @@
         {
           "id" : 22390528,
           "name" : "MainControlImpl.ipv6_addr_and",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        },
+        {
+          "id" : 19138111,
+          "name" : "MainControlImpl.ipv6_addr_and2",
           "action_scope" : "TableAndDefault",
           "annotations" : [],
           "data" : []

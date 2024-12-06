@@ -100,6 +100,12 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
     @name("MainControlImpl.ipv6_addr_and") action ipv6_addr_and() {
         headers.ipv6.dstAddr = tmp & headers.ipv6.srcAddr;
     }
+    @name("MainControlImpl.ipv6_addr_and2") action ipv6_addr_and2() {
+        headers.ipv6.dstAddr = headers.ipv6.srcAddr & 128w0x123456789abcdef12345678;
+    }
+    @name("MainControlImpl.ipv6_addr_or2") action ipv6_addr_or2() {
+        headers.ipv6.dstAddr = headers.ipv6.srcAddr | 128w0x123456789abcdef;
+    }
     @name("MainControlImpl.ipv6_addr_xor") action ipv6_addr_xor() {
         headers.ipv6.dstAddr = headers.ipv6.dstAddr ^ tmp;
     }
@@ -152,8 +158,10 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
             ipv6_swap_addr();
             set_flowlabel();
             ipv6_addr_or();
+            ipv6_addr_or2();
             ipv6_addr_xor();
             ipv6_addr_and();
+            ipv6_addr_and2();
             ipv6_addr_comp1();
             ipv6_addr_comp2();
             ipv6_addr_cmpl();

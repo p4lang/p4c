@@ -27,7 +27,7 @@ struct psa_egress_deparser_input_metadata_t {
 }
 
 struct execute_register_arg_t {
-	bit<32> idx
+	bit<16> idx
 }
 
 struct user_meta_t {

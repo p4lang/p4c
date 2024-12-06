@@ -52,7 +52,7 @@ struct ipv6_modify_dstAddr_arg_t {
 }
 
 struct set_flowlabel_arg_t {
-	bit<32> label
+	bit<24> label
 }
 
 struct set_hop_limit_arg_t {
@@ -60,7 +60,7 @@ struct set_hop_limit_arg_t {
 }
 
 struct set_ipv6_version_arg_t {
-	bit<32> version
+	bit<8> version
 }
 
 struct set_next_hdr_arg_t {
@@ -69,7 +69,7 @@ struct set_next_hdr_arg_t {
 
 struct set_traffic_class_flow_label_arg_t {
 	bit<8> trafficClass
-	bit<32> label
+	bit<24> label
 }
 
 header ethernet instanceof Ethernet_h
@@ -144,6 +144,32 @@ action ipv6_addr_and args none {
 	mov h.ipv6.dstAddr h.dstAddr_tmp.inter
 	mov h.dstAddr_tmp.inter h.dstAddr_128.upper_half
 	and h.dstAddr_tmp.inter h.srcAddr_128.upper_half
+	movh h.ipv6.dstAddr h.dstAddr_tmp.inter
+	return
+}
+
+action ipv6_addr_and2 args none {
+	mov h.ipv6.dstAddr h.ipv6.srcAddr
+	movh h.dstAddr_128.upper_half h.ipv6.dstAddr
+	mov h.dstAddr_128.lower_half h.ipv6.dstAddr
+	mov h.dstAddr_tmp.inter h.dstAddr_128.lower_half
+	and h.dstAddr_tmp.inter 0x89ABCDEF12345678
+	mov h.ipv6.dstAddr h.dstAddr_tmp.inter
+	mov h.dstAddr_tmp.inter h.dstAddr_128.upper_half
+	and h.dstAddr_tmp.inter 0x1234567
+	movh h.ipv6.dstAddr h.dstAddr_tmp.inter
+	return
+}
+
+action ipv6_addr_or2 args none {
+	mov h.ipv6.dstAddr h.ipv6.srcAddr
+	movh h.dstAddr_128.upper_half h.ipv6.dstAddr
+	mov h.dstAddr_128.lower_half h.ipv6.dstAddr
+	mov h.dstAddr_tmp.inter h.dstAddr_128.lower_half
+	or h.dstAddr_tmp.inter 0x123456789ABCDEF
+	mov h.ipv6.dstAddr h.dstAddr_tmp.inter
+	mov h.dstAddr_tmp.inter h.dstAddr_128.upper_half
+	or h.dstAddr_tmp.inter 0x0
 	movh h.ipv6.dstAddr h.dstAddr_tmp.inter
 	return
 }
@@ -272,8 +298,10 @@ table filter_tbl {
 		ipv6_swap_addr
 		set_flowlabel
 		ipv6_addr_or
+		ipv6_addr_or2
 		ipv6_addr_xor
 		ipv6_addr_and
+		ipv6_addr_and2
 		ipv6_addr_comp1
 		ipv6_addr_comp2
 		ipv6_addr_cmpl
