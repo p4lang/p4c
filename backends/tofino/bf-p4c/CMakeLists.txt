@@ -1,18 +1,18 @@
 # Copyright (C) 2024 Intel Corporation
-# 
+#
 # Licensed under the Apache License, Version 2.0 (the "License"); you may not
 # use this file except in compliance with the License.  You may obtain a copy
 # of the License at
-# 
+#
 # http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing, software distributed
 # under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
 # CONDITIONS OF ANY KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations under the License.
-# 
+#
 # SPDX-License-Identifier: Apache-2.0
-####### Barefoot back-end
+# # # #### Barefoot back-end
 
 MESSAGE("-- Adding p4c-barefoot")
 
@@ -44,10 +44,10 @@ endif()
 # interfaces tools.
 set (INTERFACES_DIR ${BFN_P4C_SOURCE_DIR}/compiler_interfaces)
 set(COMPILER_SCHEMA_TARGETS "${INTERFACES_DIR}/schemas/targets.py")
-  set(DEFAULT_SCHEMA_TARGETS "['tofino', 'tofino2', 'tofino2m', 'tofino2u', 'tofino2a0']")
-  set(DEFAULT_SCHEMA_P4ARCH "['tna', 't2na', 'psa', 'PISA', 'v1model']")
-file(WRITE ${COMPILER_SCHEMA_TARGETS} "TARGETS=${DEFAULT_SCHEMA_TARGETS}\n")
-file(APPEND ${COMPILER_SCHEMA_TARGETS} "P4ARCHITECTURES=${DEFAULT_SCHEMA_P4ARCH}\n")
+set(DEFAULT_SCHEMA_TARGETS "['tofino', 'tofino2', 'tofino2m', 'tofino2u', 'tofino2a0']")
+set(DEFAULT_SCHEMA_P4ARCH "['tna', 't2na', 'psa', 'PISA', 'v1model']")
+file(WRITE ${COMPILER_SCHEMA_TARGETS} "TARGETS = ${DEFAULT_SCHEMA_TARGETS}\n")
+file(APPEND ${COMPILER_SCHEMA_TARGETS} "P4ARCHITECTURES = ${DEFAULT_SCHEMA_P4ARCH}\n")
 
 get_schema_version(manifest_schema MANIFEST_SCHEMA_VERSION)
 MESSAGE(STATUS "Found manifest schema version ${MANIFEST_SCHEMA_VERSION}")
@@ -124,46 +124,7 @@ set (BF_P4C_MIDEND_SRCS
   midend/type_categories.cpp
   midend/type_checker.cpp
   )
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_MIDEND_SRCS}")
 
-set (BF_P4C_MIDEND_HDRS
-  midend/action_synthesis_policy.h
-  midend/annotate_with_in_hash.h
-  midend/blockmap.h
-  midend/check_design_pattern.h
-  midend/check_header_alignment.h
-  midend/check_register_actions.h
-  midend/check_unsupported.h
-  midend/copy_block_pragmas.h
-  midend/copy_header.h
-  midend/defuse.h
-  midend/drop_packet_with_mirror_engine.h
-  midend/elim_cast.h
-  midend/eliminate_tuples.h
-  midend/fold_constant_hashes.h
-  midend/desugar_varbit_extract.h
-  midend/initialize_mirror_io_select.h
-  midend/move_to_egress.h
-  midend/normalize_hash_list.h
-  midend/normalize_params.h
-  midend/param_binding.h
-  midend/parser_enforce_depth_req.h
-  midend/parser_graph.h
-  midend/register_read_write.h
-  midend/detect_multiple_pipelines.h
-  midend/ping_pong_generation.h
-  midend/rewrite_egress_intrinsic_metadata_header.h
-  midend/simplify_args.h
-  midend/simplifyIfStatement.h
-  midend/simplify_key_policy.h
-  midend/simplify_nested_if.h
-  midend/simplify_references.h
-  midend/alpm.h
-  midend/table_mutex.h
-  midend/type_categories.h
-  midend/type_checker.h
-  )
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_MIDEND_HDRS}")
 
 set (BF_P4C_BACKEND_CONV_SRCS
   arch/fromv1.0/field_list.cpp
@@ -175,17 +136,6 @@ set (BF_P4C_BACKEND_CONV_SRCS
   arch/fromv1.0/wred.cpp
   arch/tna/primitives.cpp
   )
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_BACKEND_CONV_SRCS}")
-
-set (BF_P4C_BACKEND_CONV_HDRS
-  arch/fromv1.0/field_list.h
-  arch/fromv1.0/lpf.h
-  arch/fromv1.0/meter.h
-  arch/fromv1.0/programStructure.h
-  arch/fromv1.0/stateful_alu.h
-  arch/fromv1.0/wred.h
-  )
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_BACKEND_CONV_HDRS}")
 
 # IR sources that need to go into the frontend library
 set(QUAL_BF_P4C_IR_SRCS)
@@ -220,39 +170,6 @@ set (BF_P4C_BACKEND_COMMON_SRCS
   common/size_of.cpp
   common/utils.cpp
   )
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_BACKEND_COMMON_SRCS}")
-
-set (BF_P4C_BACKEND_COMMON_HDRS
-  common/alias.h
-  common/autoindent.h
-  common/check_field_corruption.h
-  common/check_for_unimplemented_features.h
-  common/check_header_refs.h
-  common/check_uninitialized_read.h
-  common/pragma/collect_global_pragma.h
-  common/debug_info.h
-  common/elim_unused.h
-  common/empty_tableseq.h
-  common/extract_maupipe.h
-  common/field_defuse.h
-
-  common/front_end_policy.h
-  common/bridged_packing.h
-  common/header_stack.h
-  common/ir_utils.h
-  common/map_tables_to_actions.h
-  common/merge_pov_bits.h
-  common/multiple_apply.h
-  common/parse_annotations.h
-  common/pragma/all_pragmas.h
-  common/run_id.h
-  common/scc_toposort.h
-  common/slice.h
-  common/size_of.h
-  common/table_printer.h
-  common/utils.h
-  )
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_BACKEND_COMMON_HDRS}")
 
 set (BF_P4C_BACKEND_CONTROL_PLANE_SRCS
   control-plane/bfruntime_ext.cpp
@@ -260,36 +177,10 @@ set (BF_P4C_BACKEND_CONTROL_PLANE_SRCS
   control-plane/bfruntime.cpp
   control-plane/runtime.cpp
   )
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_BACKEND_CONTROL_PLANE_SRCS}")
-
-set (BF_P4C_BACKEND_CONTROL_PLANE_HDRS
-  control-plane/bfruntime_arch_handler.h
-  control-plane/bfruntime_ext.h
-  control-plane/bfruntime.h
-  control-plane/p4runtime_force_std.h
-  control-plane/runtime.h
-  )
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_BACKEND_CONTROL_PLANE_HDRS}")
 
 set (BF_P4C_BACKEND_LIB_SRCS
   lib/error_type.cpp
 )
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_BACKEND_LIB_SRCS}")
-
-set (BF_P4C_BACKEND_LIB_HDRS
-  lib/autoclone.h
-  lib/boost_graph.h
-  lib/cmp.h
-  lib/dyn_vector.h
-  lib/error_macros.h
-  lib/error_type.h
-  lib/log_fixup.h
-  lib/pad_alignment.h
-  lib/pointer_wrapper.h
-  lib/safe_width.h
-  lib/union_find.hpp
-  )
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_BACKEND_LIB_HDRS}")
 
 set (BF_P4C_BACKEND_MAU_SRCS
   mau/action_analysis.cpp
@@ -346,7 +237,6 @@ set (BF_P4C_BACKEND_MAU_SRCS
   mau/validate_actions.cpp
   mau/walk_power_graph.cpp
   )
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_BACKEND_MAU_SRCS}")
 
 set (BF_P4C_BACKEND_MAU_TOFINO_SRCS
   mau/tofino/action_data_bus.cpp
@@ -355,78 +245,6 @@ set (BF_P4C_BACKEND_MAU_TOFINO_SRCS
   mau/tofino/mau_spec.cpp
   mau/tofino/memories.cpp
   )
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_BACKEND_MAU_TOFINO_SRCS}")
-
-
-set (BF_P4C_BACKEND_MAU_HDRS
-  mau/action_analysis.h
-  mau/action_data_bus.h
-  mau/action_format.h
-  mau/action_mutex.h
-  mau/adjust_byte_count.h
-  mau/add_always_run.h
-  mau/asm_output.h
-  mau/asm_hash_output.h
-  mau/attached_entries.h
-  mau/attached_info.h
-  mau/attached_output.h
-  mau/build_power_graph.h
-  mau/default_next.h
-  mau/determine_power_usage.h
-  mau/dump_json_graph.h
-  mau/dynamic_dep_metrics.h
-  mau/dynhash.h
-  mau/field_use.h
-  mau/finalize_mau_pred_deps_power.h
-  mau/gateway.h
-  mau/gen_prim_json.h
-  mau/handle_assign.h
-  mau/input_xbar.h
-  mau/instruction_adjustment.h
-  mau/instruction_memory.h
-  mau/instruction_selection.h
-  mau/ixbar_expr.h
-  mau/ixbar_info.h
-  mau/ixbar_realign.h
-  mau/jbay_next_table.h
-  mau/mau_alloc.h
-  mau/mau_power.h
-  mau/memories.h
-  mau/next_table.h
-  mau/payload_gateway.h
-  mau/push_pop.h
-  mau/reduction_or.h
-  mau/remove_noop_gateway.h
-  mau/resource_estimate.h
-  mau/resource.h
-  mau/selector_update.h
-  mau/simple_power_graph.h
-  mau/split_gateways.h
-  mau/stateful_alu.h
-  mau/static_entries_const_prop.h
-  mau/table_control_deps.h
-  mau/table_dependency_graph.h
-  mau/table_flow_graph.h
-  mau/table_format.h
-  mau/table_layout.h
-  mau/table_mutex.h
-  mau/table_placement.h
-  mau/table_seqdeps.h
-  mau/table_summary.h
-  mau/table_injected_deps.h
-  mau/validate_actions.h
-  mau/walk_power_graph.h
-  )
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_BACKEND_MAU_HDRS}")
-
-set (BF_P4C_BACKEND_MAU_TOFINO_HDRS
-  mau/tofino/action_data_bus.h
-  mau/tofino/asm_output.h
-  mau/tofino/input_xbar.h
-  mau/tofino/memories.h
-  )
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_BACKEND_MAU_TOFINO_HDRS}")
-
 
 set (BF_P4C_BACKEND_PARDE_SRCS
   parde/add_metadata_pov.cpp
@@ -481,76 +299,6 @@ set (BF_P4C_BACKEND_PARDE_SRCS
   parde/lowered/split_greedy_parser_states.cpp
   parde/mirror/const_mirror_session_opt.cpp
   )
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_BACKEND_PARDE_SRCS}")
-
-set (BF_P4C_BACKEND_PARDE_HDRS
-  parde/add_metadata_pov.h
-  parde/add_parde_metadata.h
-  parde/allocate_parser_checksum.h
-  parde/allocate_parser_match_register.h
-  parde/adjust_extract.h
-  parde/asm_output.h
-  parde/characterize_parser.h
-  parde/check_parser_multi_write.h
-  parde/coalesce_learning.h
-  parde/collect_parser_usedef.h
-  parde/count_strided_header_refs.h
-  parde/create_pov_encoder.h
-  parde/decaf.h
-  parde/deparser_checksum_update.h
-  parde/dump_parser.h
-  parde/extract_parser.h
-  parde/extract_deparser.h
-  parde/field_packing.h
-
-  parde/infer_payload_offset.h
-  parde/lower_parser.h
-  parde/marshal.h
-  parde/match_register.h
-  parde/merge_parser_state.h
-  parde/parde_spec.h
-  parde/parser_dominator_builder.h
-  parde/parser_header_sequences.h
-  parde/parser_loops_info.h
-  parde/phase0.h
-  parde/parde_utils.h
-  parde/parser_info.h
-  parde/parser_query.h
-  parde/reset_invalidated_checksum_headers.h
-  parde/resolve_negative_extract.h
-  parde/rewrite_parser_locals.h
-  parde/split_parser_state.h
-  parde/update_parser_write_mode.h
-  parde/clot/allocate_clot.h
-  parde/clot/check_clot_groups.h
-  parde/clot/clot_candidate.h
-  parde/clot/clot_info.h
-  parde/clot/deparse_graph.h
-  parde/clot/field_slice_extract_info.h
-  parde/clot/field_slice_set.h
-  parde/clot/field_pov_analysis.h
-  parde/clot/header_validity_analysis.h
-  parde/clot/merge_desugared_varbit_valids.h
-  parde/clot/pseudoheader.h
-  parde/clot/pragma/do_not_use_clot.h
-  parde/common/allocators.h
-  parde/common/match_reducer.h
-  parde/lowered/compute_buffer_requirements.h
-  parde/lowered/compute_init_zero_containers.h
-  parde/lowered/compute_lowered_deparser_ir.h
-  parde/lowered/compute_lowered_parser_ir.h
-  parde/lowered/compute_multi_write_containers.h
-  parde/lowered/eliminate_empty_states.h
-  parde/lowered/extract_simplifier.h
-  parde/lowered/helpers.h
-  parde/lowered/hoist_common_match_operations.h
-
-  parde/lowered/merge_lowered_parser_states.h
-  parde/lowered/rewrite_emit_clot.h
-  parde/lowered/split_greedy_parser_states.h
-  parde/mirror/const_mirror_session_opt.h
-  )
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_BACKEND_PARDE_HDRS}")
 
 set (BF_P4C_BACKEND_PHV_SRCS
   phv/check_unallocated.cpp
@@ -641,110 +389,6 @@ set (BF_P4C_BACKEND_PHV_SRCS
   phv/v2/types.cpp
   )
 
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_BACKEND_PHV_SRCS}")
-
-set (BF_P4C_BACKEND_PHV_HDRS
-  phv/dump_table_flow_graph.h
-  phv/constraints/constraints.h
-  phv/action_phv_constraints.h
-  phv/add_initialization.h
-  phv/add_special_constraints.h
-  phv/init_in_mau.h
-  phv/allocate_phv.h
-  phv/allocate_temps_and_finalize_liverange.h
-  phv/error.h
-  phv/asm_output.h
-  phv/auto_init_metadata.h
-  phv/check_unallocated.h
-  phv/cluster_phv_operations.h
-  phv/collect_strided_headers.h
-  phv/collect_table_keys.h
-  phv/create_thread_local_instances.h
-  phv/parser_extract_balance_score.h
-  phv/finalize_physical_liverange.h
-  phv/finalize_stage_allocation.h
-  phv/live_range_split.h
-  phv/make_clusters.h
-  phv/mau_backtracker.h
-  phv/optimize_phv.h
-  phv/action_packing_validator_interface.h
-  phv/parser_packing_validator_interface.h
-  phv/legacy_action_packing_validator.h
-  phv/parde_phv_constraints.h
-  phv/add_alias_allocation.h
-  phv/phv_analysis.h
-  phv/phv_fields.h
-  phv/phv_parde_mau_use.h
-  phv/phv_spec.h
-  phv/split_padding.h
-  phv/table_phv_constraints.h
-  phv/validate_allocation.h
-  phv/analysis/build_mutex.h
-  phv/analysis/critical_path_clusters.h
-  phv/analysis/dark_live_range.h
-  phv/analysis/deparser_zero.h
-  phv/analysis/dominator_tree.h
-  phv/analysis/header_mutex.h
-  phv/analysis/memoize_min_stage.h
-  phv/analysis/meta_live_range.h
-  phv/analysis/mutex_overlay.h
-  phv/analysis/non_mocha_dark_fields.h
-  phv/analysis/live_range_shrinking.h
-  phv/analysis/pack_conflicts.h
-  phv/analysis/parser_critical_path.h
-  phv/analysis/dark.h
-  phv/analysis/jbay_phv_analysis.h
-  phv/analysis/mocha.h
-  phv/pragma/pa_alias.h
-  phv/pragma/pa_atomic.h
-  phv/pragma/pa_byte_pack.h
-  phv/pragma/pa_container_size.h
-  phv/pragma/pa_container_type.h
-  phv/pragma/pa_deparser_zero.h
-  phv/pragma/pa_mutually_exclusive.h
-  phv/pragma/pa_no_init.h
-  phv/pragma/pa_no_overlay.h
-  phv/pragma/pa_no_pack.h
-  phv/pragma/pa_solitary.h
-  phv/pragma/phv_pragmas.h
-  phv/pragma/pretty_print.h
-  phv/action_source_tracker.h
-  phv/slicing/types.h
-  phv/slicing/phv_slicing_split.h
-  phv/slicing/phv_slicing_iterator.h
-  phv/slicing/phv_slicing_dfs_iterator.h
-  phv/solver/symbolic_bitvec.h
-  phv/solver/action_constraint_solver.h
-  phv/transforms/auto_alias.h
-  phv/utils/live_range_report.h
-  phv/utils/report.h
-  phv/utils/slice_alloc.h
-  phv/utils/tables_to_ids.h
-  phv/utils/utils.h
-  phv/utils/liverange_opti_utils.h
-  phv/fieldslice_live_range.h
-  phv/alloc_setting.h
-  phv/v2/phv_kit.h
-  phv/v2/allocator_base.h
-  phv/v2/allocator_metrics.h
-  phv/v2/copacker.h
-  phv/v2/phv_allocation_v2.h
-  phv/v2/parser_packing_validator.h
-  phv/v2/action_packing_validator.h
-  phv/v2/greedy_allocator.h
-  phv/v2/kind_size_indexed_map.h
-  phv/v2/table_replay_friendly_constraints.cpp
-  phv/v2/trivial_allocator.h
-  phv/v2/tx_score.h
-  phv/v2/greedy_tx_score.h
-  phv/v2/utils_v2.h
-  phv/v2/sort_macros.h
-  phv/v2/metadata_initialization.h
-  phv/v2/smart_packing.h
-  phv/v2/types.h
-  )
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_BACKEND_PHV_HDRS}")
-
 set (BF_P4C_BACKEND_ARCH_SRCS
   arch/arch.cpp
   arch/arch_spec.cpp
@@ -777,64 +421,7 @@ set (BF_P4C_BACKEND_ARCH_SRCS
   arch/fromv1.0/v1_converters.cpp
   arch/fromv1.0/v1_program_structure.cpp
   )
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_BACKEND_ARCH_SRCS}")
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "arch/t2na.cpp")
 
-
-set (BF_P4C_BACKEND_ARCH_HDRS
-  arch/arch.h
-  arch/arch_spec.h
-  arch/add_t2na_meta.h
-  arch/intrinsic_metadata.h
-  arch/bridge_metadata.h
-  arch/check_extern_invocation.h
-  arch/collect_bridged_fields.h
-  arch/collect_hardware_constrained_fields.h
-  arch/helpers.h
-  arch/program_structure.h
-  arch/psa/psa.h
-  arch/psa/psa_converters.h
-  arch/psa/psa_model.h
-  arch/psa/programStructure.h
-  arch/psa/rewrite_packet_path.h
-  arch/psa/rewrite_bridge_metadata.h
-  arch/remove_set_metadata.h
-  arch/rewrite_action_selector.h
-  arch/tna.h
-  arch/t2na.h
-
-
-  arch/v1model.h
-  arch/fromv1.0/add_metadata_parser_states.h
-  arch/fromv1.0/egress_packet_length.h
-  arch/fromv1.0/checksum.h
-  arch/fromv1.0/mirror.h
-  arch/fromv1.0/parser_counter.h
-  arch/fromv1.0/phase0.h
-  arch/fromv1.0/resubmit.h
-  arch/fromv1.0/v1_converters.h
-  arch/fromv1.0/v1_program_structure.h
-  )
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_BACKEND_ARCH_HDRS}")
-
-set (BF_P4C_BACKEND_LOGGING_HDRS
-  logging/bf_error_reporter.h
-  logging/collect_diagnostic_checks.h
-  logging/constrained_fields.h
-  logging/container_size_extractor.h
-  logging/event_logger.h
-  logging/filelog.h
-  logging/logging.h
-  logging/manifest.h
-  logging/group_constraint_extractor.h
-  logging/pass_manager.h
-  logging/phv_logging.h
-  logging/resources.h
-  logging/resources_parser.h
-  logging/resources_clot.h
-  logging/source_info_logging.h
-  )
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_BACKEND_LOGGING_HDRS}")
 set (BF_P4C_BACKEND_LOGGING_SRCS
   logging/bf_error_reporter.cpp
   logging/collect_diagnostic_checks.cpp
@@ -850,8 +437,7 @@ set (BF_P4C_BACKEND_LOGGING_SRCS
   logging/resources_parser.cpp
   logging/resources_clot.cpp
   logging/source_info_logging.cpp
-  )
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_BACKEND_LOGGING_SRCS}")
+)
 
 set (BF_P4C_BACKEND_MAIN_SRCS
   asm.cpp
@@ -860,16 +446,6 @@ set (BF_P4C_BACKEND_MAIN_SRCS
   device.cpp
   midend.cpp
   )
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_BACKEND_MAIN_SRCS}")
-
-set (BF_P4C_BACKEND_MAIN_HDRS
-  asm.h
-  backend.h
-  bf-p4c-options.h
-  device.h
-  midend.h
-  )
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_BACKEND_MAIN_HDRS}")
 
 set (BF_P4C_IR_DEF_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/bf-p4c/ir/tofino.def
@@ -882,13 +458,6 @@ set (BF_P4C_IR_DEF_FILES
 # publish IR_DEF_FILES upstream
 set (IR_DEF_FILES ${IR_DEF_FILES} ${BF_P4C_IR_DEF_FILES} PARENT_SCOPE)
 
-# do not add to cpp lint. They are added as part of the p4c-graphs backend
-set (BF_P4C_GRAPHS_HDRS
-  ${P4C_SOURCE_DIR}/backends/graphs/controls.h
-  ${P4C_SOURCE_DIR}/backends/graphs/graphs.h
-  ${P4C_SOURCE_DIR}/backends/graphs/parsers.h
-  ${P4C_SOURCE_DIR}/backends/graphs/graph_visitor.h
-  )
 set (BF_P4C_GRAPHS_SRCS
   ${P4C_SOURCE_DIR}/backends/graphs/controls.cpp
   ${P4C_SOURCE_DIR}/backends/graphs/graphs.cpp
@@ -954,12 +523,11 @@ set (P4C_BAREFOOT_SRCS
   ${BF_P4C_BACKEND_CONV_SRCS}
   ${BF_P4C_GRAPHS_SRCS}
   )
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${P4C_BAREFOOT_SRCS}")
 
 if(BUILD_STATIC_BFP4C_LIBS)
-    add_library(tofinobackend STATIC ${BF_P4C_SOURCES})
+  add_library(tofinobackend STATIC ${BF_P4C_SOURCES})
 else()
-    add_library(tofinobackend OBJECT ${BF_P4C_SOURCES})
+  add_library(tofinobackend OBJECT ${BF_P4C_SOURCES})
 endif()
 target_link_libraries(tofinobackend PRIVATE absl::prefetch ${P4C_LIB_DEPS} controlplane-gen ir)
 target_include_directories(
@@ -973,11 +541,11 @@ target_include_directories(
 add_dependencies(tofinobackend frontend genLogging bfn_p4runtime)
 
 if(BUILD_STATIC_BFP4C_LIBS)
-    add_library(bfp4c STATIC ${P4C_BAREFOOT_SRCS})
+  add_library(bfp4c STATIC ${P4C_BAREFOOT_SRCS})
 else()
-    # For objlib there is no way (as far as I know) to encompass smaller libraries (namely adding
-    # $<TARGET_OBJECTS:tofinobackend> $<TARGET_OBJECTS:bfn_p4runtime> to sources does not work)
-    add_library(bfp4c OBJECT ${P4C_BAREFOOT_SRCS})
+  # For objlib there is no way (as far as I know) to encompass smaller libraries (namely adding
+  # $<TARGET_OBJECTS:tofinobackend> $<TARGET_OBJECTS:bfn_p4runtime> to sources does not work)
+  add_library(bfp4c OBJECT ${P4C_BAREFOOT_SRCS})
 endif()
 target_link_libraries (bfp4c tofinobackend bfn_p4runtime
   ${P4C_LIBRARIES} ${P4C_LIB_DEPS} ${CMAKE_THREAD_LIBS_INIT})
@@ -1000,31 +568,31 @@ if (ENABLE_BAREFOOT_INTERNAL)
 endif()
 
 if(BUILD_STATIC_BFP4C_LIBS)
-    add_executable(p4c-barefoot p4c-barefoot.cpp)
-    # --whole-archive prevents the linker from removing unused symbols
-    #
-    # This prevents an issue with non-unified builds and P4 primitives being
-    # undefined. The file "bf-p4c/arch/fromv1.0/primitives.cpp" defines a number
-    # of primitives (e.g., bypass_egress). This is done by subclassing
-    # PrimitiveConverter and creating a singleton instance, which registers
-    # itself with the PrimitiveConverter base class. These singleton instances are
-    # omitted during linking of the non-unified builds, and so the primitives are
-    # not registered.
-    #
-    # FIXME: Understand why the symbols are present in unified builds but not
-    # non-unified builds and remove the --whole-archive flag if possible.
-    target_link_libraries(p4c-barefoot
+  add_executable(p4c-barefoot p4c-barefoot.cpp)
+  # --whole-archive prevents the linker from removing unused symbols
+  #
+  # This prevents an issue with non-unified builds and P4 primitives being
+  # undefined. The file "bf-p4c/arch/fromv1.0/primitives.cpp" defines a number
+  # of primitives (e.g., bypass_egress). This is done by subclassing
+  # PrimitiveConverter and creating a singleton instance, which registers
+  # itself with the PrimitiveConverter base class. These singleton instances are
+  # omitted during linking of the non-unified builds, and so the primitives are
+  # not registered.
+  #
+  # FIXME: Understand why the symbols are present in unified builds but not
+  # non-unified builds and remove the --whole-archive flag if possible.
+  target_link_libraries(p4c-barefoot
             -Wl,--whole-archive
             bfp4c
             -Wl,--no-whole-archive)
 else()
-    # No transitive library dependencies for objlibs :-/, bring tofinobackend & bfn_p4runtime
-    # here explictly as well as their dependencies
-    add_executable(p4c-barefoot p4c-barefoot.cpp $<TARGET_OBJECTS:bfp4c>
+  # No transitive library dependencies for objlibs :-/, bring tofinobackend & bfn_p4runtime
+  # here explictly as well as their dependencies
+  add_executable(p4c-barefoot p4c-barefoot.cpp $<TARGET_OBJECTS:bfp4c>
                                 $<TARGET_OBJECTS:tofinobackend> $<TARGET_OBJECTS:bfn_p4runtime>)
-    target_link_libraries(p4c-barefoot ${P4C_LIBRARIES} ${P4C_LIB_DEPS} ${CMAKE_THREAD_LIBS_INIT})
-    # FIXME: These includes should be exported by earlier libraries.
-    target_include_directories(
+  target_link_libraries(p4c-barefoot ${P4C_LIBRARIES} ${P4C_LIB_DEPS} ${CMAKE_THREAD_LIBS_INIT})
+  # FIXME: These includes should be exported by earlier libraries.
+  target_include_directories(
       p4c-barefoot
       # We also export Z3's includes with the common library.
       # This is necessary because the z3 target itself does not export its includes.
@@ -1238,7 +806,7 @@ endif()
 install (FILES ${P4C_BINARY_DIR}/p4c_src/main.py
   DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}/p4c_src)
 
-################ Proto
+# # # ############# Proto
 set (BFN_P4RUNTIME_DIR ${CMAKE_CURRENT_SOURCE_DIR}/control-plane/proto)
 set (BFN_P4RUNTIME_INFO_PROTO ${BFN_P4RUNTIME_DIR}/barefoot/p4info.proto)
 set (BFN_P4RUNTIME_INFO_GEN_SRCS ${P4C_BINARY_DIR}/control-plane/barefoot/p4info.pb.cc)
@@ -1264,15 +832,15 @@ add_custom_command(
   COMMENT "Generating protobuf files for p4info."
   )
 if(BUILD_STATIC_BFP4C_LIBS)
-    add_library(bfn_p4runtime STATIC ${BFN_P4RUNTIME_INFO_GEN_SRCS})
+  add_library(bfn_p4runtime STATIC ${BFN_P4RUNTIME_INFO_GEN_SRCS})
 else()
-    add_library(bfn_p4runtime OBJECT ${BFN_P4RUNTIME_INFO_GEN_SRCS})
+  add_library(bfn_p4runtime OBJECT ${BFN_P4RUNTIME_INFO_GEN_SRCS})
 endif()
 target_link_libraries(bfn_p4runtime PUBLIC controlplane-gen PRIVATE absl::prefetch)
 set_source_files_properties(${BFN_P4RUNTIME_INFO_GEN_SRCS} PROPERTIES GENERATED TRUE)
 add_dependencies(bfn_p4runtime barefootdir controlplane)
 
-################ Testing
+# # # ############# Testing
 
 if (ENABLE_GTESTS)
   # # Tofino-specific GTests.
@@ -1348,8 +916,8 @@ if (ENABLE_GTESTS)
   add_library (bf_gtest_support "${P4HEADERS_CPP}"
                                 "${CMAKE_CURRENT_SOURCE_DIR}/test/gtest/bf_gtest_helpers.cpp"
                                 "${CMAKE_CURRENT_SOURCE_DIR}/test/gtest/tofino_gtest_utils.cpp")
-                                # test_bf_gtest_helpers should be in its own testlib - & requies 'whole_archive' hack!
-                                # Leave it in GTEST_BF_P4C_SOURCES for now.
+  # test_bf_gtest_helpers should be in its own testlib - & requies 'whole_archive' hack!
+  # Leave it in GTEST_BF_P4C_SOURCES for now.
   target_link_libraries (bf_gtest_support PRIVATE absl::flat_hash_map PRIVATE absl::flat_hash_set PRIVATE ir ${P4C_LIB_DEPS})
   target_include_directories(
     bf_gtest_support
@@ -1460,8 +1028,8 @@ if (ENABLE_GTESTS)
     ${BF_P4C_GRAPHS_SRCS}
     )
   if (NOT BUILD_STATIC_BFP4C_LIBS)
-      # objlibs cannot be linked, need to add objects here explicitly
-      set (GTEST_BF_P4C_SOURCES ${GTEST_BF_P4C_SOURCES}
+    # objlibs cannot be linked, need to add objects here explicitly
+    set (GTEST_BF_P4C_SOURCES ${GTEST_BF_P4C_SOURCES}
                                 $<TARGET_OBJECTS:tofinobackend> $<TARGET_OBJECTS:bfn_p4runtime>)
   endif()
 
@@ -1481,5 +1049,3 @@ if (ENABLE_GTESTS)
 endif(ENABLE_GTESTS)
 
 
-set(EVEN_MORE_FILES_TO_LINT p4c-barefoot.cpp)
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${EVEN_MORE_FILES_TO_LINT}")
