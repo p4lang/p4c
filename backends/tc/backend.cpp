@@ -101,7 +101,7 @@ bool Backend::ebpfCodeGen(P4::ReferenceMap *refMapEBPF, P4::TypeMap *typeMapEBPF
     main->apply(*parsePnaArch);
     program = top->getProgram();
 
-    EBPF::EBPFTypeFactory::createFactory(typeMapEBPF);
+    EBPF::EBPFTypeFactory::createFactory(typeMapEBPF, true);
     auto convertToEbpf = new ConvertToEbpfPNA(ebpfOption, refMapEBPF, typeMapEBPF, tcIR);
     PassManager toEBPF = {
         new P4::DiscoverStructure(&structure),
