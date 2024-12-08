@@ -17,7 +17,7 @@ limitations under the License.
 #ifndef FRONTENDS_COMMON_CONSTANTPARSING_H_
 #define FRONTENDS_COMMON_CONSTANTPARSING_H_
 
-#include "lib/cstring.h"
+#include "ir/unparsed_constant.h"
 
 namespace P4::IR {
 class Constant;
@@ -28,50 +28,6 @@ class SourceInfo;
 }  // namespace P4::Util
 
 namespace P4 {
-
-/**
- * An unparsed numeric constant. We produce these as token values during
- * lexing. The parser is responsible for actually interpreting the raw text as a
- * numeric value and transforming it into an IR::Constant using parseConstant().
- *
- * To illustrate how a numeric constant is represented using this struct,
- * here is a breakdown of '16w0x12':
- *
- *          ___
- *         /                                    ___
- *         |                                   /
- *         |   bitwidth (if @hasWidth)        |       16
- *         |                                   \___
- *         |
- *         |                                    ___
- *         |                                   /
- *         |   separator (if @hasWidth)       |       w
- *         |                                   \___
- *  @text  |
- *         |                                    ___
- *         |                                   /
- *         |   ignored prefix of length @skip |       0x
- *         |                                   \___
- *         |
- *         |                                    ___
- *         |                                   /
- *         |   numeric value in base @base    |       w
- *         |                                   \___
- *         \___
- *
- * Simple numeric constants like '5' are specified by setting @hasWidth to
- * false and providing a @skip length of 0.
- */
-struct UnparsedConstant {
-    cstring text;   /// Raw P4 text which was recognized as a numeric constant.
-    unsigned skip;  /// An ignored prefix of the numeric constant (e.g. '0x').
-    unsigned base;  /// The base in which the constant is expressed.
-    bool hasWidth;  /// If true, a bitwidth and separator are present.
-};
-
-std::ostream &operator<<(std::ostream &out, const UnparsedConstant &constant);
-
-bool operator<(const UnparsedConstant &a, const UnparsedConstant &b);
 
 /**
  * Parses an UnparsedConstant @constant into an IR::Constant object, with

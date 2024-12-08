@@ -31,6 +31,7 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/ltbitmatrix.h"
 #include "lib/match.h"
+#include "lib/null.h"
 #include "lib/ordered_map.h"
 #include "lib/ordered_set.h"
 #include "lib/safe_vector.h"
@@ -104,7 +105,9 @@ class JSONLoader {
                     return nullptr;
                 }
                 if (auto fn = get(IR::unpacker_table, type)) {
-                    node_refs[id] = fn(*this);
+                    auto *node = fn(*this)->to<IR::Node>();
+                    CHECK_NULL(node);
+                    node_refs[id] = node;
                     // Creating JsonObject from source_info read from jsonFile
                     // and setting SourceInfo for each node
                     // when "--fromJSON" flag is used
