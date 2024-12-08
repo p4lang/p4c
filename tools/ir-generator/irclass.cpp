@@ -162,16 +162,16 @@ void IrDefinitions::generate(std::ostream &t, std::ostream &out, std::ostream &i
         << "#include \"ir/namemap.h\"         // IWYU pragma: keep\n"
         << "#include \"ir/node.h\"            // IWYU pragma: keep\n"
         << "#include \"ir/nodemap.h\"         // IWYU pragma: keep\n"
+        << "#include \"ir/unpacker_table.h\"  // IWYU pragma: keep\n"
         << "#include \"ir/vector.h\"          // IWYU pragma: keep\n"
         << "#include \"lib/ordered_map.h\"    // IWYU pragma: keep\n"
         << std::endl
         << "namespace P4 {\n"
         << std::endl
         << "class JSONLoader;\n"
-        << "using NodeFactoryFn = IR::Node*(*)(JSONLoader&);\n"
+        << "using NodeFactoryFn = IR::INode*(*)(JSONLoader&);\n"
         << std::endl
         << "namespace IR {\n"
-        << "extern std::map<cstring, NodeFactoryFn> unpacker_table;\n"
         << "using namespace P4::literals;\n"
         << "}\n";
 
