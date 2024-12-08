@@ -24,7 +24,14 @@ limitations under the License.
 #include <utility>
 #include <variant>
 
-#include "ir.h"
+#include "ir/id.h"
+#include "ir/indexed_vector.h"
+#include "ir/inode.h"
+#include "ir/json_parser.h"
+#include "ir/namemap.h"
+#include "ir/unpacker_table.h"
+#include "ir/unparsed_constant.h"
+#include "ir/vector.h"
 #include "json_parser.h"
 #include "lib/bitvec.h"
 #include "lib/cstring.h"
@@ -33,6 +40,7 @@ limitations under the License.
 #include "lib/ordered_map.h"
 #include "lib/ordered_set.h"
 #include "lib/safe_vector.h"
+#include "lib/string_map.h"
 
 namespace P4 {
 
@@ -54,18 +62,18 @@ class JSONLoader {
     };
 
  public:
-    std::unordered_map<int, IR::Node *> &node_refs;
+    std::unordered_map<int, IR::INode *> &node_refs;
     JsonData *json = nullptr;
 
     explicit JSONLoader(std::istream &in)
-        : node_refs(*(new std::unordered_map<int, IR::Node *>())) {
+        : node_refs(*(new std::unordered_map<int, IR::INode *>())) {
         in >> json;
     }
 
     explicit JSONLoader(JsonData *json)
-        : node_refs(*(new std::unordered_map<int, IR::Node *>())), json(json) {}
+        : node_refs(*(new std::unordered_map<int, IR::INode *>())), json(json) {}
 
-    JSONLoader(JsonData *json, std::unordered_map<int, IR::Node *> &refs)
+    JSONLoader(JsonData *json, std::unordered_map<int, IR::INode *> &refs)
         : node_refs(refs), json(json) {}
 
     JSONLoader(const JSONLoader &unpacker, const std::string &field)
@@ -74,7 +82,7 @@ class JSONLoader {
     }
 
  private:
-    const IR::Node *get_node() {
+    const IR::INode *get_node() {
         if (!json || !json->is<JsonObject>()) return nullptr;  // invalid json exception?
         int id = json->as<JsonObject>().get_id();
         if (id >= 0) {
@@ -86,7 +94,7 @@ class JSONLoader {
                     // when "--fromJSON" flag is used
                     JsonObject *obj = new JsonObject(json->as<JsonObject>().get_sourceJson());
                     if (obj->hasSrcInfo() == true) {
-                        node_refs[id]->srcInfo =
+                        node_refs[id]->getSourceInfo() =
                             Util::SourceInfo(obj->get_filename(), obj->get_line(),
                                              obj->get_column(), obj->get_sourceFragment());
                     }
@@ -313,21 +321,21 @@ class JSONLoader {
     }
 
     template <typename T>
-    std::enable_if_t<has_fromJSON<T>::value && !std::is_base_of_v<IR::Node, T> &&
+    std::enable_if_t<has_fromJSON<T>::value && !std::is_base_of_v<IR::INode, T> &&
                      std::is_pointer_v<decltype(T::fromJSON(std::declval<JSONLoader &>()))>>
     unpack_json(T *&v) {
         v = T::fromJSON(*this);
     }
 
     template <typename T>
-    std::enable_if_t<has_fromJSON<T>::value && !std::is_base_of_v<IR::Node, T> &&
+    std::enable_if_t<has_fromJSON<T>::value && !std::is_base_of_v<IR::INode, T> &&
                      std::is_pointer_v<decltype(T::fromJSON(std::declval<JSONLoader &>()))>>
     unpack_json(T &v) {
         v = *(T::fromJSON(*this));
     }
 
     template <typename T>
-    std::enable_if_t<has_fromJSON<T>::value && !std::is_base_of<IR::Node, T>::value &&
+    std::enable_if_t<has_fromJSON<T>::value && !std::is_base_of<IR::INode, T>::value &&
                      !std::is_pointer_v<decltype(T::fromJSON(std::declval<JSONLoader &>()))>>
     unpack_json(T &v) {
         v = T::fromJSON(*this);

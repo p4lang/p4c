@@ -19,18 +19,15 @@ limitations under the License.
 
 #include <cassert>
 #include <cstddef>
-#include <cstdint>
 #include <functional>
 #include <iosfwd>
 #include <map>
 #include <memory>
 #include <type_traits>
 #include <typeinfo>
-#include <unordered_map>
 #include <utility>
 
 #include "absl/time/time.h"
-#include "ir/gen-tree-macro.h"
 #include "ir/ir-tree-macros.h"
 #include "ir/node.h"
 #include "ir/vector.h"
