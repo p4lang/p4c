@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <pna.p4>
+#include <dpdk/pna.p4>
 
 typedef bit<48> EthernetAddress;
 typedef bit<32> IPv4Address;
@@ -82,10 +82,8 @@ parser MainParserImpl(packet_in p, out headers_t headers, inout main_metadata_t 
 }
 
 control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    @name("MainControlImpl.tmp") bit<128> tmp;
-    @name("MainControlImpl.tmp1") bit<32> tmp1_0;
     @name("MainControlImpl.tmp") bit<128> tmp_0;
-    @name("MainControlImpl.tmp_1") bit<128> tmp_1;
+    @name("MainControlImpl.tmp1") bit<32> tmp1_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MainControlImpl.Reject") action Reject() {
@@ -94,43 +92,9 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
     @name("MainControlImpl.ipv6_modify_dstAddr") action ipv6_modify_dstAddr(@name("dstAddr") bit<32> dstAddr_1) {
         headers.ipv6.dstAddr = (bit<128>)dstAddr_1;
     }
-    @name("MainControlImpl.ipv6_addr_or") action ipv6_addr_or() {
-        headers.ipv6.dstAddr = headers.ipv6.dstAddr | headers.ipv6.srcAddr;
-    }
-    @name("MainControlImpl.ipv6_addr_and") action ipv6_addr_and() {
-        headers.ipv6.dstAddr = tmp & headers.ipv6.srcAddr;
-    }
-    @name("MainControlImpl.ipv6_addr_and2") action ipv6_addr_and2() {
-        headers.ipv6.dstAddr = headers.ipv6.srcAddr & 128w0x123456789abcdef12345678;
-    }
-    @name("MainControlImpl.ipv6_addr_or2") action ipv6_addr_or2() {
-        headers.ipv6.dstAddr = headers.ipv6.srcAddr | 128w0x123456789abcdef;
-    }
-    @name("MainControlImpl.ipv6_addr_xor") action ipv6_addr_xor() {
-        headers.ipv6.dstAddr = headers.ipv6.dstAddr ^ tmp;
-    }
-    @name("MainControlImpl.ipv6_addr_comp1") action ipv6_addr_comp1() {
-        if (headers.ipv6.dstAddr == headers.ipv6.srcAddr) {
-            tmp_0 = headers.ipv6.dstAddr;
-        } else {
-            tmp_0 = headers.ipv6.srcAddr;
-        }
-        headers.ipv6.dstAddr = tmp_0;
-    }
-    @name("MainControlImpl.ipv6_addr_comp2") action ipv6_addr_comp2() {
-        if (headers.ipv6.dstAddr != headers.ipv6.srcAddr) {
-            tmp_1 = headers.ipv6.dstAddr;
-        } else {
-            tmp_1 = headers.ipv6.srcAddr;
-        }
-        headers.ipv6.dstAddr = tmp_1;
-    }
-    @name("MainControlImpl.ipv6_addr_cmpl") action ipv6_addr_cmpl() {
-        headers.ipv6.dstAddr = ~headers.ipv6.srcAddr;
-    }
     @name("MainControlImpl.ipv6_swap_addr") action ipv6_swap_addr() {
         headers.ipv6.dstAddr = headers.ipv6.srcAddr;
-        headers.ipv6.srcAddr = tmp;
+        headers.ipv6.srcAddr = tmp_0;
     }
     @name("MainControlImpl.set_flowlabel") action set_flowlabel(@name("label") bit<20> label_2) {
         headers.ipv6.flowLabel = label_2;
@@ -157,14 +121,6 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
             ipv6_modify_dstAddr();
             ipv6_swap_addr();
             set_flowlabel();
-            ipv6_addr_or();
-            ipv6_addr_or2();
-            ipv6_addr_xor();
-            ipv6_addr_and();
-            ipv6_addr_and2();
-            ipv6_addr_comp1();
-            ipv6_addr_comp2();
-            ipv6_addr_cmpl();
             set_traffic_class_flow_label();
             set_ipv6_version();
             set_next_hdr();
@@ -175,7 +131,7 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
         default_action = NoAction_1();
     }
     apply {
-        tmp = 128w0x76;
+        tmp_0 = 128w0x123456789abcdef12345678;
         filter_tbl_0.apply();
     }
 }

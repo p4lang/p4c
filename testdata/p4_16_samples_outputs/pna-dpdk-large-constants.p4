@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <pna.p4>
+#include <dpdk/pna.p4>
 
 typedef bit<48> EthernetAddress;
 typedef bit<32> IPv4Address;
@@ -82,7 +82,7 @@ parser MainParserImpl(packet_in p, out headers_t headers, inout main_metadata_t 
 }
 
 control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    bit<128> tmp = 0x76;
+    bit<128> tmp = 128w0x123456789abcdef12345678;
     bit<32> tmp1;
     action Reject() {
         drop_packet();
@@ -90,30 +90,6 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
     action ipv6_modify_dstAddr(bit<32> dstAddr) {
         headers.ipv6.dstAddr = (bit<128>)dstAddr;
         tmp1 = (bit<32>)headers.ipv6.srcAddr;
-    }
-    action ipv6_addr_or() {
-        headers.ipv6.dstAddr = headers.ipv6.dstAddr | headers.ipv6.srcAddr;
-    }
-    action ipv6_addr_and() {
-        headers.ipv6.dstAddr = tmp & headers.ipv6.srcAddr;
-    }
-    action ipv6_addr_and2() {
-        headers.ipv6.dstAddr = headers.ipv6.srcAddr & 128w0x123456789abcdef12345678;
-    }
-    action ipv6_addr_or2() {
-        headers.ipv6.dstAddr = headers.ipv6.srcAddr | 128w0x123456789abcdef;
-    }
-    action ipv6_addr_xor() {
-        headers.ipv6.dstAddr = headers.ipv6.dstAddr ^ tmp;
-    }
-    action ipv6_addr_comp1() {
-        headers.ipv6.dstAddr = (headers.ipv6.dstAddr == headers.ipv6.srcAddr ? headers.ipv6.dstAddr : headers.ipv6.srcAddr);
-    }
-    action ipv6_addr_comp2() {
-        headers.ipv6.dstAddr = (headers.ipv6.dstAddr != headers.ipv6.srcAddr ? headers.ipv6.dstAddr : headers.ipv6.srcAddr);
-    }
-    action ipv6_addr_cmpl() {
-        headers.ipv6.dstAddr = ~headers.ipv6.srcAddr;
     }
     action ipv6_swap_addr() {
         headers.ipv6.dstAddr = headers.ipv6.srcAddr;
@@ -147,14 +123,6 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
             ipv6_modify_dstAddr;
             ipv6_swap_addr;
             set_flowlabel;
-            ipv6_addr_or;
-            ipv6_addr_or2;
-            ipv6_addr_xor;
-            ipv6_addr_and;
-            ipv6_addr_and2;
-            ipv6_addr_comp1;
-            ipv6_addr_comp2;
-            ipv6_addr_cmpl;
             set_traffic_class_flow_label;
             set_ipv6_version;
             set_next_hdr;
