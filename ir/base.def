@@ -355,7 +355,7 @@ interface IAnnotated {
     virtual const Vector<Annotation> &getAnnotations() const = 0;
     virtual Vector<Annotation> &getAnnotations() = 0;
 
-    inline Annotation getAnnotation(cstring name) const {
+    inline Annotation getAnnotation(cstring name) const override final {
         const auto &annotations = getAnnotations();
         return get(annotations, name);
     }

@@ -55,6 +55,8 @@ static int yylex();
 static Util::InputSources *sources = new Util::InputSources;
 static IrNamespace *current_namespace = LookupScope().resolve(0);
 
+enum methodModifiers { modConst = 1, modOverride = 2, modFinal = 4 };
+
 %}
 
 %union {
@@ -88,7 +90,7 @@ static IrNamespace *current_namespace = LookupScope().resolve(0);
 %type<irClass>                  irclass partList
 %type<irElement>                part
 %type<irField>                  irField
-%type<i>                        modifier modifiers optConst optOverride
+%type<i>                        modifier modifiers methodModifiers
 %type<irMethod>                 method
 %type<irNamespace>              scope
 %type<constFieldInit>           constFieldInit
@@ -270,15 +272,16 @@ method
             $<irMethod>$->clss = $<irClass>0;
             if (auto mod = $1 & ~(IrMethod::Inline | IrMethod::Static | IrMethod::Virtual))
                 yyerror("'%s' invalid on method", IrMethod::modifier(mod)); }
-      optArgList ')' optConst optOverride body
-          { ($$ = $<irMethod>5)->body = $10;
-            if (!$10 || $10.startsWith("=")) {
+      optArgList ')' methodModifiers body
+          { ($$ = $<irMethod>5)->body = $9;
+            if (!$9 || $9.startsWith("=")) {
                 if (!$$->inImpl)
                     yyerror("inline method %v with no body", $3);
                 $$->inImpl = false; }
             $$->isUser = true;
-            $$->isConst = $8;
-            $$->isOverride = $9; }
+            $$->isConst = 0 != ($8 & modConst);
+            $$->isOverride = 0 != ($8 & modOverride);
+            $$->isFinal = 0 != ($8 & modFinal); }
     ;
 
 methodName
@@ -308,12 +311,17 @@ argList
               $<irMethod>0->args.push_back(field); }
     ;
 
-optConst : { $$ = false; } | CONST { $$ = true; }
-
-optOverride
-    : { $$ = false; }
-    | IDENTIFIER      { if (!($$ = $1 == "override"))
-                            yyerror("syntax error, expecting override or method body"); }
+methodModifiers
+    : { $$ = 0; }
+    | methodModifiers CONST { $$ = $1 | modConst; }
+    | methodModifiers IDENTIFIER
+            { $$ = $1;
+              if ($2 == "override")
+                $$ |= modOverride;
+              else if ($2 == "final")
+                $$ |= modFinal;
+              else
+                yyerror("syntax error, expecting override or final or method body"); }
 
 body: BLOCK
     | '=' ZERO ';'    { $$ = "= 0;"_cs; }

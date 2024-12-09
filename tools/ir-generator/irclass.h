@@ -129,7 +129,7 @@ class IrMethod : public IrElement {
     std::vector<const IrField *> args;
     cstring body;
     bool inImpl = false, isConst = false, isOverride = false, isStatic = false, isVirtual = false,
-         isUser = false, isFriend = false;
+         isUser = false, isFriend = false, isFinal = false;
     IrMethod(Util::SourceInfo info, cstring name, cstring body)
         : IrElement(info), name(name), body(body) {}
     IrMethod(Util::SourceInfo info, cstring name) : IrElement(info), name(name) {}
