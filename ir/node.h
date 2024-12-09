@@ -71,6 +71,7 @@ class INode : public Util::IHasSourceInfo, public IHasDbPrint, public ICastable 
     virtual void toJSON(JSONGenerator &) const = 0;
     virtual cstring node_type_name() const = 0;
     virtual void validate() const {}
+    virtual const Annotation *getAnnotation(cstring) const { return nullptr; }
 
     // default checkedTo implementation for nodes: just fallback to generic ICastable method
     template <typename T>
