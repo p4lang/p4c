@@ -75,6 +75,7 @@ struct pna_main_output_metadata_t {
  */
 struct pna_global_metadata {
     bool             recirculated;
+    bool             recirculate;
     bool             drop; // NOTE : no drop field in PNA metadata, so we keep drop state as internal metadata.
     PortId_t         egress_port;
     enum MirrorType  mirror_type;
@@ -460,4 +461,152 @@ static inline u32 bpf_p4tc_extern_random(u32 min, u32 max) {
 
 	return (min + bpf_get_prandom_u32()) % (max + 1);
 }
+
+#define BIT(x) (1 << x)
+
+#define P4TC_SKB_META_SET_TSTAMP BIT(0)
+#define P4TC_SKB_META_SET_MARK BIT(1)
+#define P4TC_SKB_META_SET_CLASSID BIT(2)
+#define P4TC_SKB_META_SET_TC_INDEX BIT(3)
+#define P4TC_SKB_META_SET_QMAP BIT(4)
+#define P4TC_SKB_META_SET_PROTO BIT(5)
+
+struct p4tc_skb_meta_set {
+        __u64 tstamp;
+        __u32 mark;
+        __u16 tc_classid;
+        __u16 tc_index;
+        __u16 queue_mapping;
+        __be16 protocol;
+        __u32 bitmask;
+};
+
+static inline void
+bpf_p4tc_skb_set_tstamp(struct __sk_buff *skb,
+                       struct p4tc_skb_meta_set *meta_set, __u64 tstamp)
+{
+       meta_set->tstamp = tstamp;
+       meta_set->bitmask |= P4TC_SKB_META_SET_TSTAMP;
+}
+
+static inline void
+bpf_p4tc_skb_set_mark(struct __sk_buff *skb,
+                     struct p4tc_skb_meta_set *meta_set, __u32 mark)
+{
+       meta_set->mark = mark;
+       meta_set->bitmask |= P4TC_SKB_META_SET_MARK;
+}
+
+static inline void
+bpf_p4tc_skb_set_tc_classid(struct __sk_buff *skb,
+                            struct p4tc_skb_meta_set *meta_set, __u32 tc_classid)
+{
+       meta_set->tc_classid = tc_classid;
+       meta_set->bitmask |= P4TC_SKB_META_SET_CLASSID;
+}
+
+static inline void
+bpf_p4tc_skb_set_tc_index(struct __sk_buff *skb,
+                          struct p4tc_skb_meta_set *meta_set, __u16 tc_index)
+{
+       meta_set->tc_index = tc_index;
+       meta_set->bitmask |= P4TC_SKB_META_SET_TC_INDEX;
+}
+
+static inline void
+bpf_p4tc_skb_set_queue_mapping(struct __sk_buff *skb,
+                               struct p4tc_skb_meta_set *meta_set,
+                               __u16 queue_mapping)
+{
+       meta_set->queue_mapping = queue_mapping;
+       meta_set->bitmask |= P4TC_SKB_META_SET_QMAP;
+}
+
+static inline void
+bpf_p4tc_skb_set_protocol(struct __sk_buff *skb,
+                          struct p4tc_skb_meta_set *meta_set, __be16 protocol)
+{
+       meta_set->protocol = protocol;
+       meta_set->bitmask |= P4TC_SKB_META_SET_PROTO;
+}
+
+int bpf_p4tc_skb_meta_set(struct __sk_buff *skb,
+                          struct p4tc_skb_meta_set *skb_meta_set,
+                          u32 skb_meta_set__sz) __ksym;
+
+#define P4TC_SKB_META_GET_AT_INGRESS_BIT BIT(0)
+#define P4TC_SKB_META_GET_FROM_INGRESS_BIT BIT(1)
+
+struct p4tc_skb_meta_get {
+       u8 tc_at_ingress:1,
+          from_ingress:1;
+       u8 bitmask;
+};
+
+static inline __u64
+bpf_p4tc_skb_get_tstamp(struct __sk_buff *skb,
+                        struct p4tc_skb_meta_get *meta_get)
+{
+       return skb->tstamp;
+}
+
+static inline __u16
+bpf_p4tc_skb_get_tc_classid(struct __sk_buff *skb,
+                            struct p4tc_skb_meta_get *meta_get)
+{
+       return skb->tc_classid;
+}
+
+static inline __u16
+bpf_p4tc_skb_get_tc_index(struct __sk_buff *skb,
+                          struct p4tc_skb_meta_get *meta_get)
+{
+       return skb->tc_index;
+}
+
+static inline __u16
+bpf_p4tc_skb_get_queue_mapping(struct __sk_buff *skb,
+                               struct p4tc_skb_meta_get *meta_get)
+{
+       return skb->queue_mapping;
+}
+
+static inline __be16
+bpf_p4tc_skb_get_protocol(struct __sk_buff *skb,
+                          struct p4tc_skb_meta_get *meta_get)
+{
+       return skb->protocol;
+}
+
+static inline int
+bpf_p4tc_skb_get_tc_at_ingress(struct __sk_buff *skb,
+                               struct p4tc_skb_meta_get *meta_get)
+{
+       if (meta_get->bitmask & P4TC_SKB_META_GET_AT_INGRESS_BIT)
+               return meta_get->tc_at_ingress;
+
+       return -1;
+}
+
+static inline int
+bpf_p4tc_skb_get_from_ingress(struct __sk_buff *skb,
+                              struct p4tc_skb_meta_get *meta_get)
+{
+       if (meta_get->bitmask & P4TC_SKB_META_GET_FROM_INGRESS_BIT)
+               return meta_get->from_ingress;
+
+       return -1;
+}
+
+static inline __u32
+bpf_p4tc_skb_get_mark(struct __sk_buff *skb,
+                      struct p4tc_skb_meta_get *meta_get)
+{
+       return skb->mark;
+}
+
+int bpf_p4tc_skb_meta_get(struct __sk_buff *skb,
+                          struct p4tc_skb_meta_get *skb_meta_get,
+                          u32 skb_meta_get__sz) __ksym;
+
 #endif /* P4C_PNA_H */

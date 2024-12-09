@@ -5,6 +5,11 @@ struct internal_metadata {
     __u16 pkt_ether_type;
 } __attribute__((aligned(4)));
 
+struct skb_aggregate {
+    struct p4tc_skb_meta_get get;
+    struct p4tc_skb_meta_set set;
+};
+
 struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_key {
     u32 keysz;
     u32 maskid;
@@ -106,7 +111,7 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_4_value {
     } u;
 };
 
-static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr, struct pna_global_metadata *compiler_meta__)
+static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr, struct pna_global_metadata *compiler_meta__, struct skb_aggregate *sa)
 {
     struct hdr_md *hdrMd;
 
@@ -349,6 +354,18 @@ if (/* hdr->ipv4.isValid() */
             outHeaderLength += 160;
         }
 ;
+        __u16 saved_proto = 0;
+        bool have_saved_proto = false;
+        // bpf_skb_adjust_room works only when protocol is IPv4 or IPv6
+        // 0x0800 = IPv4, 0x86dd = IPv6
+        if ((skb->protocol != 0x0800) && (skb->protocol != 0x86dd)) {
+            saved_proto = skb->protocol;
+            have_saved_proto = true;
+            bpf_p4tc_skb_set_protocol(skb, &sa->set, 0x0800);
+            bpf_p4tc_skb_meta_set(skb, &sa->set, sizeof(sa->set));
+        }
+        ;
+
         int outHeaderOffset = BYTES(outHeaderLength) - (hdr_start - (u8*)pkt);
         if (outHeaderOffset != 0) {
             int returnCode = 0;
@@ -357,6 +374,12 @@ if (/* hdr->ipv4.isValid() */
                 return TC_ACT_SHOT;
             }
         }
+
+        if (have_saved_proto) {
+            bpf_p4tc_skb_set_protocol(skb, &sa->set, saved_proto);
+            bpf_p4tc_skb_meta_set(skb, &sa->set, sizeof(sa->set));
+        }
+
         pkt = ((void*)(long)skb->data);
         ebpf_packetEnd = ((void*)(long)skb->data_end);
         ebpf_packetOffsetInBits = 0;
@@ -488,9 +511,10 @@ if (/* hdr->ipv4.isValid() */
 }
 SEC("p4tc/main")
 int tc_ingress_func(struct __sk_buff *skb) {
+    struct skb_aggregate skbstuff;
     struct pna_global_metadata *compiler_meta__ = (struct pna_global_metadata *) skb->cb;
-    if (compiler_meta__->pass_to_kernel == true) return TC_ACT_OK;
     compiler_meta__->drop = false;
+    compiler_meta__->recirculate = false;
     if (!compiler_meta__->recirculated) {
         compiler_meta__->mark = 153;
         struct internal_metadata *md = (struct internal_metadata *)(unsigned long)skb->data_meta;
@@ -505,14 +529,16 @@ int tc_ingress_func(struct __sk_buff *skb) {
     struct hdr_md *hdrMd;
     struct headers_t *hdr;
     int ret = -1;
-    ret = process(skb, (struct headers_t *) hdr, compiler_meta__);
+    ret = process(skb, (struct headers_t *) hdr, compiler_meta__, &skbstuff);
     if (ret != -1) {
         return ret;
     }
-    if (!compiler_meta__->drop && compiler_meta__->egress_port == 0) {
-        compiler_meta__->pass_to_kernel = true;
-        return bpf_redirect(skb->ifindex, BPF_F_INGRESS);
+    if (!compiler_meta__->drop && compiler_meta__->recirculate) {
+        compiler_meta__->recirculated = true;
+        return TC_ACT_UNSPEC;
     }
+    if (!compiler_meta__->drop && compiler_meta__->egress_port == 0)
+        return TC_ACT_OK;
     return bpf_redirect(compiler_meta__->egress_port, 0);
 }
 char _license[] SEC("license") = "GPL";
