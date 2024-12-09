@@ -220,6 +220,14 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
           buf << "}";
           return needed ? buf : cstring();
       }}},
+    {"COW_visit_children"_cs,
+     {&NamedType::Void(),
+      {new IrField(new PointerType(&NamedType::COWNode_info()), "info"_cs),
+       new IrField(&ReferenceType::VisitorRef, "v"_cs)},
+      CONST + IN_IMPL + OVERRIDE + CONCRETE_ONLY,
+      [](IrClass *, Util::SourceInfo, cstring) -> cstring {
+          return ""_cs;
+      }}},
     {"validate"_cs,
      {&NamedType::Void(),
       {},

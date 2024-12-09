@@ -203,6 +203,7 @@ class Vector : public VectorBase {
     static cstring static_type_name() { return "Vector<" + T::static_type_name() + ">"; }
     void visit_children(Visitor &v) override;
     void visit_children(Visitor &v) const override;
+    void COW_visit_children(COWNode_info *, Visitor &v) const override;
     virtual void parallel_visit_children(Visitor &v);
     virtual void parallel_visit_children(Visitor &v) const;
     void toJSON(JSONGenerator &json) const override;

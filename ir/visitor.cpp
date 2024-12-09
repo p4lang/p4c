@@ -365,12 +365,22 @@ Visitor::profile_t Modifier::init_apply(const IR::Node *root) {
     visited = std::make_shared<ChangeTracker>(forceClone);
     return rv;
 }
+Visitor::profile_t COWModifier::init_apply(const IR::Node *root) {
+    auto rv = Visitor::init_apply(root);
+    visited = std::make_shared<ChangeTracker>(forceClone);
+    return rv;
+}
 Visitor::profile_t Inspector::init_apply(const IR::Node *root) {
     auto rv = Visitor::init_apply(root);
     visited = std::make_shared<Tracker>();
     return rv;
 }
 Visitor::profile_t Transform::init_apply(const IR::Node *root) {
+    auto rv = Visitor::init_apply(root);
+    visited = std::make_shared<ChangeTracker>(forceClone);
+    return rv;
+}
+Visitor::profile_t COWTransform::init_apply(const IR::Node *root) {
     auto rv = Visitor::init_apply(root);
     visited = std::make_shared<ChangeTracker>(forceClone);
     return rv;
@@ -402,11 +412,15 @@ Visitor::profile_t::~profile_t() {
 
 void Inspector::visitOnce() const { visited->visitOnce(getOriginal()); }
 void Modifier::visitOnce() const { visited->visitOnce(getOriginal()); }
+void COWModifier::visitOnce() const { visited->visitOnce(getOriginal()); }
 void Transform::visitOnce() const { visited->visitOnce(getOriginal()); }
+void COWTransform::visitOnce() const { visited->visitOnce(getOriginal()); }
 
 void Inspector::visitAgain() const { visited->visitAgain(getOriginal()); }
 void Modifier::visitAgain() const { visited->visitAgain(getOriginal()); }
+void COWModifier::visitAgain() const { visited->visitAgain(getOriginal()); }
 void Transform::visitAgain() const { visited->visitAgain(getOriginal()); }
+void COWTransform::visitAgain() const { visited->visitAgain(getOriginal()); }
 
 void Visitor::print_context() const {
     std::ostream &out = std::cout;
@@ -428,7 +442,15 @@ void Modifier::visitor_const_error() {
     BUG("Modifier called const visit function -- missing template "
         "instantiation in gen-tree-macro.h?");
 }
+void COWModifier::visitor_const_error() {
+    BUG("Modifier called const visit function -- missing template "
+        "instantiation in gen-tree-macro.h?");
+}
 void Transform::visitor_const_error() {
+    BUG("Transform called const visit function -- missing template "
+        "instantiation in gen-tree-macro.h?");
+}
+void COWTransform::visitor_const_error() {
     BUG("Transform called const visit function -- missing template "
         "instantiation in gen-tree-macro.h?");
 }
@@ -496,6 +518,43 @@ const IR::Node *Modifier::apply_visitor(const IR::Node *n, const char *name) {
                     copy->apply_visitor_postorder(*this);
                 }
                 if (visited->finish(n, copy)) (n = copy)->validate();
+                break;
+            }
+        }
+    }
+    if (ctxt)
+        ctxt->child_index++;
+    else
+        visited.reset();
+    return n;
+}
+
+const IR::Node *COWModifier::apply_visitor(const IR::Node *n, const char *name) {
+    if (ctxt && name) ctxt->child_name = name;
+    if (n) {
+        PushContext local(ctxt, n);
+        switch (visited->try_start(n, visitDagOnce)) {
+            case VisitStatus::Busy:
+                n->apply_visitor_loop_revisit(*this);
+                // FIXME -- should have a way of updating the node?  Needs to be decided
+                // by the visitor somehow, but it is tough
+                break;
+            case VisitStatus::Done:
+                n->apply_visitor_revisit(*this, visited->result(n));
+                n = visited->result(n);
+                break;
+            default: {  // New or Revisit
+                IR::COWinfo<IR::Node> clone_info(n, &local.current);
+                IR::COWptr<IR::Node> cloner(&clone_info);
+                if (!dontForwardChildrenBeforePreorder) {
+                    ForwardChildren forward_children(*visited);
+                    cloner.visit_children(forward_children);
+                }
+                if (cloner.apply_visitor_preorder(*this)) {
+                    cloner.visit_children(*this);
+                    cloner.apply_visitor_postorder(*this);
+                }
+                if (visited->finish(n, cloner)) (n = cloner)->validate();
                 break;
             }
         }
@@ -606,8 +665,12 @@ void Inspector::revisit_visited() { visited->revisit_visited(); }
 bool Inspector::visit_in_progress(const IR::Node *n) const { return visited->busy(n); }
 void Modifier::revisit_visited() { visited->revisit_visited(); }
 bool Modifier::visit_in_progress(const IR::Node *n) const { return visited->busy(n); }
+void COWModifier::revisit_visited() { visited->revisit_visited(); }
+bool COWModifier::visit_in_progress(const IR::Node *n) const { return visited->busy(n); }
 void Transform::revisit_visited() { visited->revisit_visited(); }
 bool Transform::visit_in_progress(const IR::Node *n) const { return visited->busy(n); }
+void COWTransform::revisit_visited() { visited->revisit_visited(); }
+bool COWTransform::visit_in_progress(const IR::Node *n) const { return visited->busy(n); }
 
 #define DEFINE_VISIT_FUNCTIONS(CLASS, BASE)                                                        \
     bool Modifier::preorder(IR::CLASS *n) { return preorder(static_cast<IR::BASE *>(n)); }         \
@@ -616,6 +679,16 @@ bool Transform::visit_in_progress(const IR::Node *n) const { return visited->bus
         revisit(static_cast<const IR::BASE *>(o), static_cast<const IR::BASE *>(n));               \
     }                                                                                              \
     void Modifier::loop_revisit(const IR::CLASS *o) {                                              \
+        loop_revisit(static_cast<const IR::BASE *>(o));                                            \
+    }                                                                                              \
+    bool COWModifier::preorder(IR::COWptr<IR::CLASS> n) {                                          \
+        return preorder(IR::COWptr<IR::BASE>(n));                                                  \
+    }                                                                                              \
+    void COWModifier::postorder(IR::COWptr<IR::CLASS> n) { postorder(IR::COWptr<IR::BASE>(n)); }   \
+    void COWModifier::revisit(const IR::CLASS *o, const IR::CLASS *n) {                            \
+        revisit(static_cast<const IR::BASE *>(o), static_cast<const IR::BASE *>(n));               \
+    }                                                                                              \
+    void COWModifier::loop_revisit(const IR::CLASS *o) {                                           \
         loop_revisit(static_cast<const IR::BASE *>(o));                                            \
     }                                                                                              \
     bool Inspector::preorder(const IR::CLASS *n) {                                                 \
@@ -636,6 +709,18 @@ bool Transform::visit_in_progress(const IR::Node *n) const { return visited->bus
         return revisit(static_cast<const IR::BASE *>(o), n);                                       \
     }                                                                                              \
     void Transform::loop_revisit(const IR::CLASS *o) {                                             \
+        return loop_revisit(static_cast<const IR::BASE *>(o));                                     \
+    }                                                                                              \
+    const IR::Node *COWTransform::preorder(IR::COWptr<IR::CLASS> n) {                              \
+        return preorder(IR::COWptr<IR::BASE>(n));                                                  \
+    }                                                                                              \
+    const IR::Node *COWTransform::postorder(IR::COWptr<IR::CLASS> n) {                             \
+        return postorder(IR::COWptr<IR::BASE>(n));                                                 \
+    }                                                                                              \
+    void COWTransform::revisit(const IR::CLASS *o, const IR::Node *n) {                            \
+        return revisit(static_cast<const IR::BASE *>(o), n);                                       \
+    }                                                                                              \
+    void COWTransform::loop_revisit(const IR::CLASS *o) {                                          \
         return loop_revisit(static_cast<const IR::BASE *>(o));                                     \
     }
 
@@ -736,8 +821,18 @@ bool Modifier::check_clone(const Visitor *v) {
     BUG_CHECK(t && t->visited == visited, "Clone failed to copy base object");
     return Visitor::check_clone(v);
 }
+bool COWModifier::check_clone(const Visitor *v) {
+    auto *t = dynamic_cast<const COWModifier *>(v);
+    BUG_CHECK(t && t->visited == visited, "Clone failed to copy base object");
+    return Visitor::check_clone(v);
+}
 bool Transform::check_clone(const Visitor *v) {
     auto *t = dynamic_cast<const Transform *>(v);
+    BUG_CHECK(t && t->visited == visited, "Clone failed to copy base object");
+    return Visitor::check_clone(v);
+}
+bool COWTransform::check_clone(const Visitor *v) {
+    auto *t = dynamic_cast<const COWTransform *>(v);
     BUG_CHECK(t && t->visited == visited, "Clone failed to copy base object");
     return Visitor::check_clone(v);
 }
