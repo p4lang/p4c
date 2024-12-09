@@ -351,7 +351,6 @@ void CodeGenInspector::emitAssignStatement(const IR::Type *ltype, const IR::Expr
         width = scalar->implementationWidthInBits();
         memcpy = !EBPFScalarType::generatesScalar(width);
     }
-
     builder->emitIndent();
     if (memcpy) {
         builder->append("__builtin_memcpy(&");
@@ -367,15 +366,15 @@ void CodeGenInspector::emitAssignStatement(const IR::Type *ltype, const IR::Expr
         visit(rexpr);
         builder->appendFormat(", %d)", scalar->bytesRequired());
     } else {
-        if (lexpr != nullptr) {
-            visit(lexpr);
-        } else {
-            builder->append(lpath);
-        }
-        builder->append(" = ");
         if (builder->target->name == "P4TC") {
-            emitTCAssignmentEndianessConversion(lexpr, rexpr);
+            emitTCAssignmentEndianessConversion(ltype, lexpr, rexpr, lpath);
         } else {
+            if (lexpr != nullptr) {
+                visit(lexpr);
+            } else {
+                builder->append(lpath);
+            }
+            builder->append(" = ");
             visit(rexpr);
         }
     }
@@ -492,7 +491,7 @@ void CodeGenInspector::emitAndConvertByteOrder(const IR::Expression *expr, cstri
     }
     unsigned shift = loadSize - widthToEmit;
     builder->appendFormat("%v(", emit);
-    visit(expr);
+    getBitAlignment(expr);
     if (shift != 0 && byte_order == "HOST") builder->appendFormat(" << %d", shift);
     builder->append(")");
 }
@@ -512,7 +511,7 @@ void CodeGenInspector::emitTCBinaryOperation(const IR::Operation_Binary *b, bool
         rByteOrder = tcTarget->getByteOrder(typeMap, action, rexpr);
     }
     if (lByteOrder == rByteOrder) {
-        visit(lexpr);
+        getBitAlignment(lexpr);
         if (isScalar) {
             builder->spc();
             builder->append(stringop);
@@ -521,7 +520,7 @@ void CodeGenInspector::emitTCBinaryOperation(const IR::Operation_Binary *b, bool
             builder->append(", &");
         }
         if (!b->is<IR::Operation_Relation>()) expressionPrecedence = b->getPrecedence() + 1;
-        visit(rexpr);
+        getBitAlignment(rexpr);
         return;
     }
     if (lByteOrder == "NETWORK") {
@@ -542,14 +541,14 @@ void CodeGenInspector::emitTCBinaryOperation(const IR::Operation_Binary *b, bool
             builder->append(", &");
         }
         if (!b->is<IR::Operation_Relation>()) expressionPrecedence = b->getPrecedence() + 1;
-        visit(rexpr);
+        getBitAlignment(rexpr);
         return;
     } else if (rByteOrder == "NETWORK") {
         // ConvertRight
         auto ftype = typeMap->getType(rexpr);
         auto et = EBPFTypeFactory::instance->create(ftype);
         unsigned width = dynamic_cast<IHasWidth *>(et)->widthInBits();
-        visit(lexpr);
+        getBitAlignment(rexpr);
         if (isScalar) {
             builder->spc();
             builder->append(stringop);
@@ -567,8 +566,19 @@ void CodeGenInspector::emitTCBinaryOperation(const IR::Operation_Binary *b, bool
     return;
 }
 
-void CodeGenInspector::emitTCAssignmentEndianessConversion(const IR::Expression *lexpr,
-                                                           const IR::Expression *rexpr) {
+void CodeGenInspector::emitTCAssignmentEndianessConversion(const IR::Type *ltype,
+                                                           const IR::Expression *lexpr,
+                                                           const IR::Expression *rexpr,
+                                                           cstring lpath) {
+    bool needsBitAlignment = storeBitAlignment(ltype, lexpr, lpath);
+    if (!needsBitAlignment) {
+        if (lexpr != nullptr) {
+            visit(lexpr);
+        } else {
+            builder->append(lpath);
+        }
+        builder->append(" = ");
+    }
     auto action = findContext<IR::P4Action>();
     auto b = dynamic_cast<const P4TCTarget *>(builder->target);
     cstring lByteOrder = "HOST"_cs, rByteOrder = "HOST"_cs;
@@ -578,18 +588,14 @@ void CodeGenInspector::emitTCAssignmentEndianessConversion(const IR::Expression 
     if (rexpr) {
         rByteOrder = b->getByteOrder(typeMap, action, rexpr);
     }
-    if (lByteOrder == rByteOrder) {
-        visit(rexpr);
-        return;
-    }
     auto ftype = typeMap->getType(rexpr);
     auto et = EBPFTypeFactory::instance->create(ftype);
     unsigned width = dynamic_cast<IHasWidth *>(et)->widthInBits();
     if (width <= 8) {
         visit(rexpr);
-        return;
-    }
-    if (rByteOrder == "NETWORK") {
+    } else if (lByteOrder == rByteOrder) {
+        getBitAlignment(rexpr);
+    } else if (rByteOrder == "NETWORK") {
         // If left side of assignment is not annotated field i.e host endian and right expression
         // is annotated field i.e network endian, we need to convert rexp to host order.
         // Example -
@@ -597,8 +603,7 @@ void CodeGenInspector::emitTCAssignmentEndianessConversion(const IR::Expression 
         //     select_0 = bntoh(hdr.ipv4.diffserv)
         //
         emitAndConvertByteOrder(rexpr, "HOST"_cs);
-    }
-    if (lByteOrder == "NETWORK") {
+    } else if (lByteOrder == "NETWORK") {
         // If left side of assignment is annotated field i.e network endian, we need to convert
         // right expression to network order.
         // Example -
@@ -607,8 +612,73 @@ void CodeGenInspector::emitTCAssignmentEndianessConversion(const IR::Expression 
         //
         emitAndConvertByteOrder(rexpr, "NETWORK"_cs);
     }
+    if (needsBitAlignment) {
+        builder->append("))");
+    }
+}
 
-    return;
+bool CodeGenInspector::storeBitAlignment(const IR::Type *ltype, const IR::Expression *lexpr,
+                                         cstring lpath) {
+    auto tcTarget = dynamic_cast<const P4TCTarget *>(builder->target);
+    if (lexpr != nullptr) {
+        if (!(lexpr->is<IR::Member>() || lexpr->is<IR::PathExpression>())) {
+            return false;
+        }
+    }
+    auto ebpfType = EBPFTypeFactory::instance->create(ltype);
+    EBPFScalarType *scalar = nullptr;
+    if (ebpfType->is<EBPFScalarType>()) {
+        scalar = ebpfType->to<EBPFScalarType>();
+        bool primitive = tcTarget->isPrimitiveByteAligned(scalar->implementationWidthInBits());
+        if (primitive) {
+            return false;
+        } else {
+            cstring storePrimitive = scalar->implementationWidthInBits() < 32
+                                         ? "storePrimitive32"_cs
+                                         : "storePrimitive64"_cs;
+            builder->appendFormat("%v((u8 *)&", storePrimitive);
+            if (lexpr != nullptr) {
+                visit(lexpr);
+            } else {
+                builder->append(lpath);
+            }
+            builder->appendFormat(", %d, (", scalar->implementationWidthInBits());
+            return true;
+        }
+    }
+    return false;
+}
+
+void CodeGenInspector::getBitAlignment(const IR::Expression *expression) {
+    if (expression->is<IR::Member>() || expression->is<IR::PathExpression>()) {
+        auto ftype = typeMap->getType(expression);
+        if (!ftype) {
+            visit(expression);
+            return;
+        }
+        auto tcTarget = dynamic_cast<const P4TCTarget *>(builder->target);
+        auto ebpfType = EBPFTypeFactory::instance->create(ftype);
+        EBPFScalarType *scalar = nullptr;
+        if (ebpfType->is<EBPFScalarType>()) {
+            scalar = ebpfType->to<EBPFScalarType>();
+            bool isPrimitive =
+                tcTarget->isPrimitiveByteAligned(scalar->implementationWidthInBits());
+            if (!isPrimitive) {
+                cstring getPrimitive = scalar->implementationWidthInBits() < 32
+                                           ? "getPrimitive32"_cs
+                                           : "getPrimitive64"_cs;
+                builder->appendFormat("%v((u8 *)", getPrimitive);
+                visit(expression);
+                builder->appendFormat(", %d)", scalar->implementationWidthInBits());
+            } else {
+                visit(expression);
+            }
+        } else {
+            visit(expression);
+        }
+    } else {
+        visit(expression);
+    }
 }
 
 unsigned EBPFInitializerUtils::ebpfTypeWidth(P4::TypeMap *typeMap, const IR::Expression *expr) {

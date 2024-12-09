@@ -177,7 +177,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0 + 1, 4, 4, (ebpf_byte));
             ebpf_packetOffsetInBits += 8;
 
-            hdr->ipv6.flowLabel = htonl(hdr->ipv6.flowLabel << 12);
+            storePrimitive32((u8 *)&hdr->ipv6.flowLabel, 20, (htonl(getPrimitive32(hdr->ipv6.flowLabel, 20) << 12)));
             ebpf_byte = ((char*)(&hdr->ipv6.flowLabel))[0];
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 0, (ebpf_byte >> 4));
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0 + 1, 4, 4, (ebpf_byte));
