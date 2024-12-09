@@ -39,7 +39,8 @@ jobs:
 
       - name: Run tests (Ubuntu 22.04)
         # Need to use sudo for the eBPF kernel tests.
-        run: sudo -E ctest --output-on-failure --schedule-random
+        run: |
+          sudo -E env PATH="$PATH" poetry run ctest --output-on-failure --schedule-random
         working-directory: ./build
 
   # Build with GCC and test Tofino backend on Ubuntu 22.04.
@@ -112,6 +113,7 @@ jobs:
 
       - name: Run tests (Ubuntu 20.04)
         # Need to use sudo for the eBPF kernel tests.
-        run: sudo -E ctest --output-on-failure --schedule-random
+        run: |
+          sudo -E env PATH="$PATH" poetry run ctest --output-on-failure --schedule-random
         working-directory: ./build
         if: matrix.unity == 'ON' && matrix.gtest == 'ON'
