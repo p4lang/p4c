@@ -26,7 +26,7 @@
 #include "backends/tofino/bf-p4c/mau/resource_estimate.h"
 #include "backends/tofino/bf-p4c/mau/tofino/input_xbar.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
-#include "backends/tofino/bf-utils/include/dynamic_hash/dynamic_hash.h"
+#include "backends/tofino/bf-utils/dynamic_hash/dynamic_hash.h"
 #include "lib/algorithm.h"
 #include "lib/bitops.h"
 #include "lib/bitrange.h"
