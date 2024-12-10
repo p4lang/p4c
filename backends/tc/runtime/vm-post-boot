@@ -1,0 +1,27 @@
+#!/bin/bash
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+HOST_IP=$1
+
+mkdir -p /home/ci/.ssh
+sudo bash -c "cat /mnt/id_rsa.pub > /home/ci/.ssh/authorized_keys"
+
+sudo ip l set dev ens2 up
+sudo ip a add $HOST_IP/24 dev ens2
+
+sudo mkdir /var/run/sshd
+sudo chmod 0755 /var/run/sshd
+sudo rm -f /run/nologin
+sudo /usr/sbin/sshd -h /mnt/id_rsa
+
+sleep infinity
