@@ -332,17 +332,58 @@ class Annotation {
             Vector<Expression>,
             IndexedVector<NamedExpression>> body;
 
-    inline auto &getUnparsed() { return std::get<UnparsedAnnotation>(body); }
-    inline const auto &getUnparsed() const { return std::get<UnparsedAnnotation>(body); }
-    inline auto &getExpr() { return std::get<ExpressionAnnotation>(body); }
-    inline const auto &getExpr() const { return std::get<ExpressionAnnotation>(body); }
-    inline Expression getExpr(size_t idx) const {
-        const auto &expr = getExpr();
-        BUG_CHECK(idx < expr.size(), "invalid annotation expression index");
-        return expr[idx];
+    inline auto &getUnparsed() {
+        try {
+            return std::get<UnparsedAnnotation>(body);
+        } catch (const std::bad_variant_access &) {
+            BUG("Annotation has been parsed already.");
+        }
     }
-    inline auto &getKV() { return std::get<KVAnnotation>(body); }
-    inline const auto &getKV() const { return std::get<KVAnnotation>(body); }
+    inline const auto &getUnparsed() const {
+        try {
+            return std::get<UnparsedAnnotation>(body);
+        } catch (const std::bad_variant_access &) {
+            BUG("Annotation has been parsed already.");
+        }
+    }
+    inline auto &getExpr() {
+        try {
+            return std::get<ExpressionAnnotation>(body);
+        } catch (const std::bad_variant_access &) {
+            BUG("Annotation does not contain an expression list.");
+        }
+     }
+    inline const auto &getExpr() const {
+        try {
+            return std::get<ExpressionAnnotation>(body);
+        } catch (const std::bad_variant_access &) {
+            BUG("Annotation does not contain an expression list.");
+        }
+    }
+    inline Expression getExpr(size_t idx) const {
+        try {
+            const auto &expr = getExpr();
+            return expr[idx];
+        } catch (const std::out_of_range &) {
+            BUG("invalid annotation expression index");
+        } catch (const std::bad_variant_access &) {
+            BUG("Annotation does not contain an expression list.");
+        }
+    }
+    inline auto &getKV() {
+        try {
+            return std::get<KVAnnotation>(body);
+        } catch (const std::bad_variant_access &) {
+            BUG("Annotation does not contain a key-value list.");
+        }
+    }
+    inline const auto &getKV() const {
+        try {
+            return std::get<KVAnnotation>(body);
+        } catch (const std::bad_variant_access &) {
+            BUG("Annotation does not contain a key-value list.");
+        }
+    }
 
     /// If this is true this is a structured annotation, and there are some
     /// constraints on its contents.
