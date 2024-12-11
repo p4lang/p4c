@@ -1,4 +1,4 @@
-#include "backends/tofino/bf-utils/include/dynamic_hash/dynamic_hash.h"
+#include "backends/tofino/bf-utils/dynamic_hash/dynamic_hash.h"
 
 #include <assert.h>
 #include <inttypes.h>
