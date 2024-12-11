@@ -296,18 +296,20 @@ struct Base {
     };                                                                                     \
     DECLARE_TYPEINFO_COMMON(T, ##__VA_ARGS__)
 
-#define DECLARE_TYPEINFO_COMMON(T, ...)                                                        \
- public:                                                                                       \
-    static constexpr T *rttiEnabledMarker(T *);                                                \
-    using TypeInfo = P4::RTTI::TypeInfo<T, ##__VA_ARGS__>;                                     \
-    [[nodiscard]] P4::RTTI::TypeId typeId() const noexcept override { return TypeInfo::id(); } \
-    [[nodiscard]] bool isA(P4::RTTI::TypeId typeId) const noexcept override {                  \
-        return TypeInfo::isA(typeId);                                                          \
-    }                                                                                          \
-                                                                                               \
- protected:                                                                                    \
-    [[nodiscard]] const void *toImpl(P4::RTTI::TypeId typeId) const noexcept override {        \
-        return TypeInfo::isA(typeId) ? TypeInfo::dyn_cast(typeId, this) : nullptr;             \
+#define DECLARE_TYPEINFO_COMMON(T, ...)                                                            \
+ public:                                                                                           \
+    static constexpr T *rttiEnabledMarker(T *);                                                    \
+    using TypeInfo = P4::RTTI::TypeInfo<T, ##__VA_ARGS__>;                                         \
+    [[nodiscard, gnu::const]] P4::RTTI::TypeId typeId() const noexcept override {                  \
+        return TypeInfo::id();                                                                     \
+    }                                                                                              \
+    [[nodiscard, gnu::const]] bool isA(P4::RTTI::TypeId typeId) const noexcept override {          \
+        return TypeInfo::isA(typeId);                                                              \
+    }                                                                                              \
+                                                                                                   \
+ protected:                                                                                        \
+    [[nodiscard, gnu::pure]] const void *toImpl(P4::RTTI::TypeId typeId) const noexcept override { \
+        return TypeInfo::isA(typeId) ? TypeInfo::dyn_cast(typeId, this) : nullptr;                 \
     }
 
 #endif /* LIB_RTTI_H_ */
