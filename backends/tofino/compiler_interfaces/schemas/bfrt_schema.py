@@ -8,7 +8,7 @@ import argparse
 import json
 import sys
 
-import jsl
+import jsl.jsl as jsl
 import jsonschema
 
 ########################################################

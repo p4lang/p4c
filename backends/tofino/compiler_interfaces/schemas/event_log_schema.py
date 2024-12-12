@@ -4,7 +4,7 @@ event_log_schema.py: Used to emit messages for Event Log
 
 import json
 
-import jsl
+import jsl.jsl as jsl
 
 ########################################################
 #   Schema Version

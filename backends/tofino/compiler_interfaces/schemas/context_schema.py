@@ -11,7 +11,7 @@ import json
 import os.path
 import sys
 
-import jsl
+import jsl.jsl as jsl
 
 MYPATH = os.path.dirname(__file__)
 if not getattr(sys, 'frozen', False):
