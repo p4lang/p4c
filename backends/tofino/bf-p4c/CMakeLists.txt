@@ -818,24 +818,36 @@ set_source_files_properties(${BFN_P4RUNTIME_INFO_GEN_SRCS} PROPERTIES
 
 add_custom_target (barefootdir
   ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/control-plane/barefoot)
-# Generate source code from .proto using protoc. The output is
-# placed in the build directory inside `control-plane` directory
-add_custom_command(
-  OUTPUT ${BFN_P4RUNTIME_INFO_GEN_SRCS} ${BFN_P4RUNTIME_INFO_GEN_HDRS}
-  COMMAND ${Protobuf_PROTOC_EXECUTABLE}
-          --proto_path ${BFN_P4RUNTIME_DIR}
-          --proto_path ${P4RUNTIME_STD_DIR}
-          --cpp_out ${P4C_BINARY_DIR}/control-plane
-          --python_out ${P4C_BINARY_DIR}/control-plane
-          ${BFN_P4RUNTIME_INFO_PROTO}
-  DEPENDS ${BFN_P4RUNTIME_INFO_PROTO}
-  COMMENT "Generating protobuf files for p4info."
-  )
-if(BUILD_STATIC_BFP4C_LIBS)
-  add_library(bfn_p4runtime STATIC ${BFN_P4RUNTIME_INFO_GEN_SRCS})
-else()
-  add_library(bfn_p4runtime OBJECT ${BFN_P4RUNTIME_INFO_GEN_SRCS})
-endif()
+
+add_library(bfn_p4runtime OBJECT ${BFN_P4RUNTIME_INFO_PROTO})
+target_include_directories(bfn_p4runtime PUBLIC ${CMAKE_CURRENT_BINARY_DIR})
+target_link_libraries(bfn_p4runtime PUBLIC protobuf::libprotobuf PRIVATE absl::log)
+# Ideally we use DEPENDENCIES, but it only works in later versions (3.28).
+add_dependencies(bfn_p4runtime mkP4configdir)
+
+protobuf_generate(
+  TARGET bfn_p4runtime
+  LANGUAGE cpp
+  IMPORT_DIRS ${P4RUNTIME_STD_DIR} ${CMAKE_CURRENT_LIST_DIR} ${Protobuf_INCLUDE_DIRS}
+  PROTOC_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR}
+  OUT_VAR BFRUNTIME_GEN_CPP_SRCS
+  DEPENDENCIES ${BFN_P4RUNTIME_INFO_PROTO} bfn_p4runtime mkP4configdir
+)
+protobuf_generate(
+  TARGET bfn_p4runtime
+  LANGUAGE python
+  IMPORT_DIRS ${P4RUNTIME_STD_DIR} ${CMAKE_CURRENT_LIST_DIR} ${Protobuf_INCLUDE_DIRS}
+  PROTOC_OUT_DIR ${CMAKE_CURRENT_BINARY_DIR}
+  OUT_VAR BFRUNTIME_GEN_PY_SRCS
+  DEPENDENCIES ${BFN_P4RUNTIME_INFO_PROTO} bfn_p4runtime mkP4configdir
+)
+
+# Silence various warnings as the root issue is out of our control, example
+# https://github.com/protocolbuffers/protobuf/issues/7140
+set_source_files_properties(${BFRUNTIME_GEN_CPP_SRCS} PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter -Wno-array-bounds -Wno-error"
+)
+
+
 target_link_libraries(bfn_p4runtime PUBLIC controlplane-gen PRIVATE absl::prefetch)
 set_source_files_properties(${BFN_P4RUNTIME_INFO_GEN_SRCS} PROPERTIES GENERATED TRUE)
 add_dependencies(bfn_p4runtime barefootdir controlplane)
