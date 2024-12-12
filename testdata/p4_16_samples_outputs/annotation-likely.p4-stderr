@@ -1,0 +1,3 @@
+annotation-likely.p4(13): [--Wwarn=ignore] warning: ignoring @unlikely on always taken statement
+        if (true) @unlikely {
+                  ^

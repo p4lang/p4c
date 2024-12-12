@@ -1108,15 +1108,36 @@ const IR::Node *DoConstantFolding::postorder(IR::SelectExpression *expression) {
     return result;
 }
 
+class FilterLikelyAnnot : public Transform {
+    IR::Statement *preorder(IR::Statement *stmt) {
+        prune();
+        return stmt;
+    }
+    IR::BlockStatement *preorder(IR::BlockStatement *stmt) {
+        prune();
+        visit(stmt->annotations, "annotations");
+        return stmt;
+    }
+    IR::Annotation *preorder(IR::Annotation *annot) {
+        prune();
+        if (annot->name == IR::Annotation::likelyAnnotation) return nullptr;
+        if (annot->name == IR::Annotation::unlikelyAnnotation) {
+            warning(ErrorType::WARN_IGNORE, "ignoring %1% on always taken statement", annot);
+            return nullptr;
+        }
+        return annot;
+    }
+};
+
 const IR::Node *DoConstantFolding::postorder(IR::IfStatement *ifstmt) {
     if (auto cond = ifstmt->condition->to<IR::BoolLiteral>()) {
         if (cond->value) {
-            return ifstmt->ifTrue;
+            return ifstmt->ifTrue->apply(FilterLikelyAnnot());
         } else {
             if (ifstmt->ifFalse == nullptr) {
                 return new IR::EmptyStatement(ifstmt->srcInfo);
             } else {
-                return ifstmt->ifFalse;
+                return ifstmt->ifFalse->apply(FilterLikelyAnnot());
             }
         }
     }
