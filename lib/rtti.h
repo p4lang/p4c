@@ -296,6 +296,12 @@ struct Base {
     };                                                                                     \
     DECLARE_TYPEINFO_COMMON(T, ##__VA_ARGS__)
 
+// Common typeinfo boilerplate methods. Note that they are marked pure / const, so consecutive
+// calls to is<> / to<> on the same pointer could be eliminated by a compiler.
+//   - typeId() / isA are const as they do not access any global state, they
+//     always return the same value (for same input arguments)
+//   - toImpl() is pure. It only access global state via its arguments (this pointer). So for
+//     the same `this` the result is also the same.
 #define DECLARE_TYPEINFO_COMMON(T, ...)                                                            \
  public:                                                                                           \
     static constexpr T *rttiEnabledMarker(T *);                                                    \
