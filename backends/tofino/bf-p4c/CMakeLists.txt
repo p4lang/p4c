@@ -102,6 +102,8 @@ set (BF_P4C_SPEC_SRCS
 
 add_library(tofinospecs STATIC ${BF_P4C_SPEC_SRCS})
 target_link_libraries(tofinospecs PUBLIC p4ctoolkit)
+# We depend on the gen-tree-macro.h file, which is generated.
+add_dependencies(tofinospecs genIR)
 
 set (BF_P4C_MIDEND_SRCS
   midend/annotate_with_in_hash.cpp
