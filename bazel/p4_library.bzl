@@ -170,7 +170,6 @@ p4_library = rule(
             default = Label("@com_github_p4lang_p4c//:p4include"),
             allow_files = [".p4", ".h"],
         ),
-        "_cc_toolchain": attr.label(default = Label("@bazel_tools//tools/cpp:current_cc_toolchain")),
     },
     toolchains = use_cpp_toolchain(),
 )
@@ -250,7 +249,6 @@ p4_graphs = rule(
             default = Label("@com_github_p4lang_p4c//:p4include"),
             allow_files = [".p4", ".h"],
         ),
-        "_cc_toolchain": attr.label(default = Label("@bazel_tools//tools/cpp:current_cc_toolchain")),
     },
     toolchains = use_cpp_toolchain(),
 )
