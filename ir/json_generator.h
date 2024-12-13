@@ -18,11 +18,12 @@ limitations under the License.
 #define IR_JSON_GENERATOR_H_
 
 #include <optional>
+#include <set>
 #include <string>
 #include <unordered_set>
 #include <variant>
 
-#include "ir/node.h"
+#include "ir/inode.h"
 #include "lib/bitvec.h"
 #include "lib/cstring.h"
 #include "lib/indent.h"
@@ -247,19 +248,19 @@ class JSONGenerator {
         out << std::endl << --indent << "}";
     }
 
-    void generate(const IR::Node &v) {
-        out << "{" << std::endl;
-        ++indent;
-        if (node_refs.find(v.id) != node_refs.end()) {
-            out << indent << "\"Node_ID\" : " << v.id;
-        } else {
-            node_refs.insert(v.id);
-            v.toJSON(*this);
-            if (dumpSourceInfo) {
-                v.sourceInfoToJSON(*this);
-            }
-        }
-        out << std::endl << --indent << "}";
+    void generate(const IR::INode &v) {
+        // out << "{" << std::endl;
+        // ++indent;
+        // if (node_refs.find(v.id) != node_refs.end()) {
+        //     out << indent << "\"Node_ID\" : " << v.id;
+        // } else {
+        //     node_refs.insert(v.id);
+        //     v.toJSON(*this);
+        //     if (dumpSourceInfo) {
+        //         v.sourceInfoToJSON(*this);
+        //     }
+        // }
+        // out << std::endl << --indent << "}";
     }
 
     template <typename T>

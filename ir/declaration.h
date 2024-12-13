@@ -18,7 +18,7 @@ limitations under the License.
 #define IR_DECLARATION_H_
 
 #include "ir/id.h"
-#include "ir/node.h"
+#include "ir/inode.h"
 
 namespace P4::IR {
 

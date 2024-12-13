@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 
-#include "lib/big_int_util.h"
 #include "lib/castable.h"
 #include "lib/cstring.h"
 #include "lib/ordered_map.h"
