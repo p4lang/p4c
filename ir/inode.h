@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef IR_INODE_H_
 #define IR_INODE_H_
 
+#include "ir/gen-tree-macro.h"
 #include "lib/castable.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
@@ -69,7 +70,7 @@ class INode : public Util::IHasSourceInfo, public IHasDbPrint, public ICastable 
         return result;
     }
 
-    DECLARE_TYPEINFO(INode);
+    DECLARE_TYPEINFO_WITH_TYPEID(INode, NodeKind::INode);
 };
 
 }  // namespace P4::IR
