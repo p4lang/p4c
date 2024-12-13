@@ -123,3 +123,6 @@ target_link_libraries(midend
   PRIVATE frontend
 )
 add_dependencies(midend genIR ir-generated)
+if (ENABLE_PCH)
+  target_precompile_headers(midend REUSE_FROM ir)
+endif()
