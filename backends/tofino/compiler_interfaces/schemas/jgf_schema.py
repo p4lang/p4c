@@ -8,7 +8,7 @@ http://jsongraphformat.info/
 
 import json
 
-import jsl
+import jsl.jsl as jsl
 
 ########################################################
 #   Schema Version

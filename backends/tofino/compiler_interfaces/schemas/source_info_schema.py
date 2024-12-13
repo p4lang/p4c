@@ -6,7 +6,7 @@ source_schema.py: Generates JSON schema for source info
 
 import json
 
-import jsl
+import jsl.jsl as jsl
 
 ########################################################
 #   Schema Version

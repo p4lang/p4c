@@ -88,6 +88,23 @@ endif()
 set (ENV{P4C_VERSION} "${BFN_P4C_VERSION} (SHA: ${BFN_P4C_GIT_SHA})")
 MESSAGE(STATUS "p4c-barefoot version: $ENV{P4C_VERSION}")
 
+
+# Fetch and declare the jsl for schemas.
+set(FETCHCONTENT_QUIET_PREV ${FETCHCONTENT_QUIET})
+set(FETCHCONTENT_QUIET OFF)
+fetchcontent_declare(
+  tofino_jsl
+  URL https://github.com/aromanovich/jsl/archive/refs/tags/0.2.4.tar.gz
+  # URL_HASH SHA256=cc01a3a05d25e5978c20be7656f14eb8b6fcb120bb1c7e8041e497814fc273cb
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/compiler_interfaces/schemas/jsl
+  USES_TERMINAL_DOWNLOAD TRUE
+  GIT_PROGRESS TRUE
+  DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+)
+fetchcontent_makeavailable(tofino_jsl)
+set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
+message("Done with setting up Python JSL for P4C.")
+
 # Generate the sha specific version file. It includes the GIT SHA.
 # Because this version changes frequently, we include it separately from the normal version files.
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/git_sha_version.h.in"
