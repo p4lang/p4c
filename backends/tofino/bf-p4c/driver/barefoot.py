@@ -117,8 +117,8 @@ class BarefootBackend(BackendDriver):
         self.add_command('compiler', os.path.join(os.environ['P4C_BIN_DIR'], 'p4c-barefoot'))
         if enable_bf_asm:
             self.add_command('assembler', bfas)
-        self.add_command('bf-rt-verifier', bfrt_schema)
-        self.add_command('p4c-gen-conf', p4c_gen_conf)
+            self.add_command('bf-rt-verifier', bfrt_schema)
+            self.add_command('p4c-gen-conf', p4c_gen_conf)
         self.add_command('cleaner', 'rm')
 
         self.runVerifiers = False
