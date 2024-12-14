@@ -18,19 +18,48 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Node *Reassociation::reassociate(IR::Operation_Binary *root) {
-    const auto *right = root->right->to<IR::Constant>();
-    if (!right) return root;
-    auto leftBin = root->left->to<IR::Operation_Binary>();
-    if (!leftBin) return root;
-    if (leftBin->getStringOp() != root->getStringOp()) return root;
-    if (!leftBin->right->is<IR::Constant>()) return root;
-    auto *c = root->clone();
-    c->left = leftBin->right;
-    c->right = root->right;
+void Reassociation::reassociate(IR::Operation_Binary *root) {
+    LOG3("Trying to reassociate " << root);
+    // Canonicalize constant to rhs
+    if (root->left->is<IR::Constant>()) {
+        std::swap(root->left, root->right);
+        LOG3("Canonicalized constant to rhs: " << root);
+    }
+
+    // Match the following tree
+    //       op
+    //      /  \
+    //     /    \
+    //    op    c2
+    //   / \
+    //  /   \
+    // n    c1
+    //
+    // (note that we're doing postorder visit and we already canonicalized
+    // constants to rhs)
+    // Rewrite to:
+    //       op
+    //      /  \
+    //     /    \
+    //    n     op
+    //         /  \
+    //        c1  c2
+    // FIXME: Fix Pattern class to support matching in this scenario.
+
+    const auto *c2 = root->right->to<IR::Constant>();
+    if (!c2) return;
+    auto *leftBin = root->left->to<IR::Operation_Binary>();
+    if (!leftBin) return;
+    if (leftBin->getStringOp() != root->getStringOp()) return;
+    const auto *c1 = leftBin->right->to<IR::Constant>();
+    if (!c1) return;
+
+    auto *newRight = root->clone();
+    newRight->left = c1;
+    newRight->right = c2;
     root->left = leftBin->left;
-    root->right = c;
-    return root;
+    root->right = newRight;
+    LOG3("Reassociate constants together: " << root);
 }
 
 }  // namespace P4

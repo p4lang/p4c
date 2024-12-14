@@ -797,7 +797,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         hdr_24.u0_ethernet.src_addr = underlay_smac_12;
         hdr_24.u0_ethernet.ether_type = 16w0x800;
         hdr_24.u0_ipv4.setValid();
-        hdr_24.u0_ipv4.total_len = hdr_24.customer_ipv4.total_len * (bit<16>)(bit<1>)hdr_24.customer_ipv4.isValid() + hdr_24.customer_ipv6.payload_length * (bit<16>)(bit<1>)hdr_24.customer_ipv6.isValid() + 16w40 * (bit<16>)(bit<1>)hdr_24.customer_ipv6.isValid() + 16w50;
+        hdr_24.u0_ipv4.total_len = hdr_24.customer_ipv4.total_len * (bit<16>)(bit<1>)hdr_24.customer_ipv4.isValid() + hdr_24.customer_ipv6.payload_length * (bit<16>)(bit<1>)hdr_24.customer_ipv6.isValid() + (bit<16>)(bit<1>)hdr_24.customer_ipv6.isValid() * 16w40 + 16w50;
         hdr_24.u0_ipv4.version = 4w4;
         hdr_24.u0_ipv4.ihl = 4w5;
         hdr_24.u0_ipv4.diffserv = 8w0;
@@ -812,7 +812,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         hdr_24.u0_udp.setValid();
         hdr_24.u0_udp.src_port = 16w0;
         hdr_24.u0_udp.dst_port = 16w4789;
-        hdr_24.u0_udp.length = hdr_24.customer_ipv4.total_len * (bit<16>)(bit<1>)hdr_24.customer_ipv4.isValid() + hdr_24.customer_ipv6.payload_length * (bit<16>)(bit<1>)hdr_24.customer_ipv6.isValid() + 16w40 * (bit<16>)(bit<1>)hdr_24.customer_ipv6.isValid() + 16w30;
+        hdr_24.u0_udp.length = hdr_24.customer_ipv4.total_len * (bit<16>)(bit<1>)hdr_24.customer_ipv4.isValid() + hdr_24.customer_ipv6.payload_length * (bit<16>)(bit<1>)hdr_24.customer_ipv6.isValid() + (bit<16>)(bit<1>)hdr_24.customer_ipv6.isValid() * 16w40 + 16w30;
         hdr_24.u0_udp.checksum = 16w0;
         hdr_24.u0_vxlan.setValid();
         hdr_24.u0_vxlan.reserved = 24w0;
@@ -840,7 +840,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         hdr_25.u0_ethernet.src_addr = underlay_smac_13;
         hdr_25.u0_ethernet.ether_type = 16w0x800;
         hdr_25.u0_ipv4.setValid();
-        hdr_25.u0_ipv4.total_len = hdr_25.customer_ipv4.total_len * (bit<16>)(bit<1>)hdr_25.customer_ipv4.isValid() + hdr_25.customer_ipv6.payload_length * (bit<16>)(bit<1>)hdr_25.customer_ipv6.isValid() + 16w40 * (bit<16>)(bit<1>)hdr_25.customer_ipv6.isValid() + 16w50;
+        hdr_25.u0_ipv4.total_len = hdr_25.customer_ipv4.total_len * (bit<16>)(bit<1>)hdr_25.customer_ipv4.isValid() + hdr_25.customer_ipv6.payload_length * (bit<16>)(bit<1>)hdr_25.customer_ipv6.isValid() + (bit<16>)(bit<1>)hdr_25.customer_ipv6.isValid() * 16w40 + 16w50;
         hdr_25.u0_ipv4.version = 4w4;
         hdr_25.u0_ipv4.ihl = 4w5;
         hdr_25.u0_ipv4.diffserv = 8w0;
@@ -855,7 +855,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         hdr_25.u0_udp.setValid();
         hdr_25.u0_udp.src_port = 16w0;
         hdr_25.u0_udp.dst_port = 16w4789;
-        hdr_25.u0_udp.length = hdr_25.customer_ipv4.total_len * (bit<16>)(bit<1>)hdr_25.customer_ipv4.isValid() + hdr_25.customer_ipv6.payload_length * (bit<16>)(bit<1>)hdr_25.customer_ipv6.isValid() + 16w40 * (bit<16>)(bit<1>)hdr_25.customer_ipv6.isValid() + 16w30;
+        hdr_25.u0_udp.length = hdr_25.customer_ipv4.total_len * (bit<16>)(bit<1>)hdr_25.customer_ipv4.isValid() + hdr_25.customer_ipv6.payload_length * (bit<16>)(bit<1>)hdr_25.customer_ipv6.isValid() + (bit<16>)(bit<1>)hdr_25.customer_ipv6.isValid() * 16w40 + 16w30;
         hdr_25.u0_udp.checksum = 16w0;
         hdr_25.u0_vxlan.setValid();
         hdr_25.u0_vxlan.reserved = 24w0;
@@ -883,7 +883,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         hdr_26.u0_ethernet.src_addr = underlay_smac_14;
         hdr_26.u0_ethernet.ether_type = 16w0x800;
         hdr_26.u0_ipv4.setValid();
-        hdr_26.u0_ipv4.total_len = hdr_26.customer_ipv4.total_len * (bit<16>)(bit<1>)hdr_26.customer_ipv4.isValid() + hdr_26.customer_ipv6.payload_length * (bit<16>)(bit<1>)hdr_26.customer_ipv6.isValid() + 16w40 * (bit<16>)(bit<1>)hdr_26.customer_ipv6.isValid() + 16w50;
+        hdr_26.u0_ipv4.total_len = hdr_26.customer_ipv4.total_len * (bit<16>)(bit<1>)hdr_26.customer_ipv4.isValid() + hdr_26.customer_ipv6.payload_length * (bit<16>)(bit<1>)hdr_26.customer_ipv6.isValid() + (bit<16>)(bit<1>)hdr_26.customer_ipv6.isValid() * 16w40 + 16w50;
         hdr_26.u0_ipv4.version = 4w4;
         hdr_26.u0_ipv4.ihl = 4w5;
         hdr_26.u0_ipv4.diffserv = 8w0;
@@ -898,7 +898,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         hdr_26.u0_udp.setValid();
         hdr_26.u0_udp.src_port = 16w0;
         hdr_26.u0_udp.dst_port = 16w4789;
-        hdr_26.u0_udp.length = hdr_26.customer_ipv4.total_len * (bit<16>)(bit<1>)hdr_26.customer_ipv4.isValid() + hdr_26.customer_ipv6.payload_length * (bit<16>)(bit<1>)hdr_26.customer_ipv6.isValid() + 16w40 * (bit<16>)(bit<1>)hdr_26.customer_ipv6.isValid() + 16w30;
+        hdr_26.u0_udp.length = hdr_26.customer_ipv4.total_len * (bit<16>)(bit<1>)hdr_26.customer_ipv4.isValid() + hdr_26.customer_ipv6.payload_length * (bit<16>)(bit<1>)hdr_26.customer_ipv6.isValid() + (bit<16>)(bit<1>)hdr_26.customer_ipv6.isValid() * 16w40 + 16w30;
         hdr_26.u0_udp.checksum = 16w0;
         hdr_26.u0_vxlan.setValid();
         hdr_26.u0_vxlan.reserved = 24w0;
@@ -926,7 +926,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         hdr_27.u1_ethernet.src_addr = underlay_smac_15;
         hdr_27.u1_ethernet.ether_type = 16w0x800;
         hdr_27.u1_ipv4.setValid();
-        hdr_27.u1_ipv4.total_len = hdr_27.u0_ipv4.total_len * (bit<16>)(bit<1>)hdr_27.u0_ipv4.isValid() + hdr_27.u0_ipv6.payload_length * (bit<16>)(bit<1>)hdr_27.u0_ipv6.isValid() + 16w40 * (bit<16>)(bit<1>)hdr_27.u0_ipv6.isValid() + 16w50;
+        hdr_27.u1_ipv4.total_len = hdr_27.u0_ipv4.total_len * (bit<16>)(bit<1>)hdr_27.u0_ipv4.isValid() + hdr_27.u0_ipv6.payload_length * (bit<16>)(bit<1>)hdr_27.u0_ipv6.isValid() + (bit<16>)(bit<1>)hdr_27.u0_ipv6.isValid() * 16w40 + 16w50;
         hdr_27.u1_ipv4.version = 4w4;
         hdr_27.u1_ipv4.ihl = 4w5;
         hdr_27.u1_ipv4.diffserv = 8w0;
@@ -941,7 +941,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         hdr_27.u1_udp.setValid();
         hdr_27.u1_udp.src_port = 16w0;
         hdr_27.u1_udp.dst_port = 16w4789;
-        hdr_27.u1_udp.length = hdr_27.u0_ipv4.total_len * (bit<16>)(bit<1>)hdr_27.u0_ipv4.isValid() + hdr_27.u0_ipv6.payload_length * (bit<16>)(bit<1>)hdr_27.u0_ipv6.isValid() + 16w40 * (bit<16>)(bit<1>)hdr_27.u0_ipv6.isValid() + 16w30;
+        hdr_27.u1_udp.length = hdr_27.u0_ipv4.total_len * (bit<16>)(bit<1>)hdr_27.u0_ipv4.isValid() + hdr_27.u0_ipv6.payload_length * (bit<16>)(bit<1>)hdr_27.u0_ipv6.isValid() + (bit<16>)(bit<1>)hdr_27.u0_ipv6.isValid() * 16w40 + 16w30;
         hdr_27.u1_udp.checksum = 16w0;
         hdr_27.u1_vxlan.setValid();
         hdr_27.u1_vxlan.reserved = 24w0;
@@ -969,7 +969,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         hdr_28.u1_ethernet.src_addr = underlay_smac_16;
         hdr_28.u1_ethernet.ether_type = 16w0x800;
         hdr_28.u1_ipv4.setValid();
-        hdr_28.u1_ipv4.total_len = hdr_28.u0_ipv4.total_len * (bit<16>)(bit<1>)hdr_28.u0_ipv4.isValid() + hdr_28.u0_ipv6.payload_length * (bit<16>)(bit<1>)hdr_28.u0_ipv6.isValid() + 16w40 * (bit<16>)(bit<1>)hdr_28.u0_ipv6.isValid() + 16w50;
+        hdr_28.u1_ipv4.total_len = hdr_28.u0_ipv4.total_len * (bit<16>)(bit<1>)hdr_28.u0_ipv4.isValid() + hdr_28.u0_ipv6.payload_length * (bit<16>)(bit<1>)hdr_28.u0_ipv6.isValid() + (bit<16>)(bit<1>)hdr_28.u0_ipv6.isValid() * 16w40 + 16w50;
         hdr_28.u1_ipv4.version = 4w4;
         hdr_28.u1_ipv4.ihl = 4w5;
         hdr_28.u1_ipv4.diffserv = 8w0;
@@ -984,7 +984,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         hdr_28.u1_udp.setValid();
         hdr_28.u1_udp.src_port = 16w0;
         hdr_28.u1_udp.dst_port = 16w4789;
-        hdr_28.u1_udp.length = hdr_28.u0_ipv4.total_len * (bit<16>)(bit<1>)hdr_28.u0_ipv4.isValid() + hdr_28.u0_ipv6.payload_length * (bit<16>)(bit<1>)hdr_28.u0_ipv6.isValid() + 16w40 * (bit<16>)(bit<1>)hdr_28.u0_ipv6.isValid() + 16w30;
+        hdr_28.u1_udp.length = hdr_28.u0_ipv4.total_len * (bit<16>)(bit<1>)hdr_28.u0_ipv4.isValid() + hdr_28.u0_ipv6.payload_length * (bit<16>)(bit<1>)hdr_28.u0_ipv6.isValid() + (bit<16>)(bit<1>)hdr_28.u0_ipv6.isValid() * 16w40 + 16w30;
         hdr_28.u1_udp.checksum = 16w0;
         hdr_28.u1_vxlan.setValid();
         hdr_28.u1_vxlan.reserved = 24w0;
@@ -1012,7 +1012,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         hdr_29.u1_ethernet.src_addr = underlay_smac_17;
         hdr_29.u1_ethernet.ether_type = 16w0x800;
         hdr_29.u1_ipv4.setValid();
-        hdr_29.u1_ipv4.total_len = hdr_29.u0_ipv4.total_len * (bit<16>)(bit<1>)hdr_29.u0_ipv4.isValid() + hdr_29.u0_ipv6.payload_length * (bit<16>)(bit<1>)hdr_29.u0_ipv6.isValid() + 16w40 * (bit<16>)(bit<1>)hdr_29.u0_ipv6.isValid() + 16w50;
+        hdr_29.u1_ipv4.total_len = hdr_29.u0_ipv4.total_len * (bit<16>)(bit<1>)hdr_29.u0_ipv4.isValid() + hdr_29.u0_ipv6.payload_length * (bit<16>)(bit<1>)hdr_29.u0_ipv6.isValid() + (bit<16>)(bit<1>)hdr_29.u0_ipv6.isValid() * 16w40 + 16w50;
         hdr_29.u1_ipv4.version = 4w4;
         hdr_29.u1_ipv4.ihl = 4w5;
         hdr_29.u1_ipv4.diffserv = 8w0;
@@ -1027,7 +1027,7 @@ control dash_ingress(inout headers_t hdr, inout metadata_t meta, inout standard_
         hdr_29.u1_udp.setValid();
         hdr_29.u1_udp.src_port = 16w0;
         hdr_29.u1_udp.dst_port = 16w4789;
-        hdr_29.u1_udp.length = hdr_29.u0_ipv4.total_len * (bit<16>)(bit<1>)hdr_29.u0_ipv4.isValid() + hdr_29.u0_ipv6.payload_length * (bit<16>)(bit<1>)hdr_29.u0_ipv6.isValid() + 16w40 * (bit<16>)(bit<1>)hdr_29.u0_ipv6.isValid() + 16w30;
+        hdr_29.u1_udp.length = hdr_29.u0_ipv4.total_len * (bit<16>)(bit<1>)hdr_29.u0_ipv4.isValid() + hdr_29.u0_ipv6.payload_length * (bit<16>)(bit<1>)hdr_29.u0_ipv6.isValid() + (bit<16>)(bit<1>)hdr_29.u0_ipv6.isValid() * 16w40 + 16w30;
         hdr_29.u1_udp.checksum = 16w0;
         hdr_29.u1_vxlan.setValid();
         hdr_29.u1_vxlan.reserved = 24w0;
