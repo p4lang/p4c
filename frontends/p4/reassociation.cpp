@@ -16,6 +16,8 @@ limitations under the License.
 
 #include "reassociation.h"
 
+#include "ir/pattern.h"
+
 namespace P4 {
 
 void Reassociation::reassociate(IR::Operation_Binary *root) {
@@ -33,7 +35,7 @@ void Reassociation::reassociate(IR::Operation_Binary *root) {
     //    op    c2
     //   / \
     //  /   \
-    // n    c1
+    // e    c1
     //
     // (note that we're doing postorder visit and we already canonicalized
     // constants to rhs)
@@ -41,25 +43,22 @@ void Reassociation::reassociate(IR::Operation_Binary *root) {
     //       op
     //      /  \
     //     /    \
-    //    n     op
+    //    e     op
     //         /  \
     //        c1  c2
-    // FIXME: Fix Pattern class to support matching in this scenario.
-
-    const auto *c2 = root->right->to<IR::Constant>();
-    if (!c2) return;
-    auto *leftBin = root->left->to<IR::Operation_Binary>();
-    if (!leftBin) return;
-    if (leftBin->getStringOp() != root->getStringOp()) return;
-    const auto *c1 = leftBin->right->to<IR::Constant>();
-    if (!c1) return;
-
-    auto *newRight = root->clone();
-    newRight->left = c1;
-    newRight->right = c2;
-    root->left = leftBin->left;
-    root->right = newRight;
-    LOG3("Reassociate constants together: " << root);
+    const IR::Operation_Binary *lhs;
+    const IR::Constant *c1, *c2;
+    const IR::Expression *e;
+    if (match(root, m_BinOp(m_CombineAnd(m_BinOp(lhs), m_BinOp(m_Expr(e), m_Constant(c1))),
+                            m_Constant(c2))) &&
+        lhs->getStringOp() == root->getStringOp()) {
+        auto *newRight = root->clone();
+        newRight->left = c1;
+        newRight->right = c2;
+        root->left = e;
+        root->right = newRight;
+        LOG3("Reassociated constants together: " << root);
+    }
 }
 
 }  // namespace P4
