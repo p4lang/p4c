@@ -195,9 +195,9 @@ long UnrollLoops::evalLoop(const IR::BaseAssignmentStatement *assign, long val,
 }
 
 bool UnrollLoops::findLoopBounds(IR::ForStatement *fstmt, loop_bounds_t &bounds) {
-    Pattern::Match<IR::PathExpression> v;
-    Pattern::Match<IR::Constant> k;
-    if (v.Relation(k).match(fstmt->condition)) {
+    const IR::PathExpression *v;
+    const IR::Constant *k;
+    if (match(fstmt->condition, m_RelOp(m_PathExpr(v), m_Constant(k)))) {
         auto d = resolveUnique(v->path->name, P4::ResolutionType::Any);
         bounds.index = d ? d->to<IR::Declaration_Variable>() : nullptr;
         if (!bounds.index) return false;

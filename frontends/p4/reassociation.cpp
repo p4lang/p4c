@@ -49,8 +49,8 @@ void Reassociation::reassociate(IR::Operation_Binary *root) {
     const IR::Operation_Binary *lhs;
     const IR::Constant *c1, *c2;
     const IR::Expression *e;
-    if (match(root, m_BinOp(m_CombineAnd(m_BinOp(lhs), m_BinOp(m_Expr(e), m_Constant(c1))),
-                            m_Constant(c2))) &&
+    if (match(root,
+              m_BinOp(m_AllOf(m_BinOp(lhs), m_BinOp(m_Expr(e), m_Constant(c1))), m_Constant(c2))) &&
         lhs->getStringOp() == root->getStringOp()) {
         auto *newRight = root->clone();
         newRight->left = c1;

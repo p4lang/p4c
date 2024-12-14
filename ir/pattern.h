@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef IR_PATTERN_H_
 #define IR_PATTERN_H_
 
+#include "ir/ir-generated.h"
 #include "ir/ir.h"
 
 namespace P4 {
@@ -214,19 +215,30 @@ bool match(const Node *n, const Pattern &P) {
 namespace detail {
 
 template <typename Node>
-struct node_match {
+struct Node_match {
     template <typename ITy>
     bool match(const ITy *n) {
         return n->template is<Node>();
     }
 };
 
+template <typename Type>
+struct Type_match {
+    template <typename ITy>
+    bool match(const ITy *n) {
+        if (const auto *e = n->template to<IR::Expression>()) {
+            return e->type->template is<Type>();
+        }
+        return false;
+    }
+};
+
 /// Inverting matcher
 template <typename M>
-struct match_unless {
+struct Unless_match {
     M matcher;
 
-    match_unless(const M &matcher) : matcher(matcher) {}  // NOLINT(runtime/explicit)
+    Unless_match(const M &matcher) : matcher(matcher) {}  // NOLINT(runtime/explicit)
 
     template <typename ITy>
     bool match(ITy *n) {
@@ -236,11 +248,11 @@ struct match_unless {
 
 /// Matching combinators
 template <typename LM, typename RM>
-struct match_combine_or {
+struct AnyOf_match {
     LM lm;
     RM rm;
 
-    match_combine_or(const LM &left, const RM &right) : lm(left), rm(right) {}
+    AnyOf_match(const LM &left, const RM &right) : lm(left), rm(right) {}
 
     template <typename ITy>
     bool match(ITy *n) {
@@ -251,11 +263,11 @@ struct match_combine_or {
 };
 
 template <typename LM, typename RM>
-struct match_combine_and {
+struct AllOf_match {
     LM lm;
     RM rm;
 
-    match_combine_and(const LM &left, const RM &right) : lm(left), rm(right) {}
+    AllOf_match(const LM &left, const RM &right) : lm(left), rm(right) {}
 
     template <typename ITy>
     bool match(const ITy *n) {
@@ -265,10 +277,10 @@ struct match_combine_and {
     }
 };
 
-struct bigint_match {
+struct BigInt_match {
     const big_int *&res;
 
-    bigint_match(const big_int *&res) : res(res) {}  // NOLINT(runtime/explicit)
+    BigInt_match(const big_int *&res) : res(res) {}  // NOLINT(runtime/explicit)
 
     template <typename Node>
     bool match(const Node *n) {
@@ -281,7 +293,7 @@ struct bigint_match {
 };
 
 template <int64_t val>
-struct constantint_match {
+struct ConstantInt_match {
     template <typename ITy>
     bool match(const ITy *n) {
         if (const auto *c = n->template to<IR::Constant>()) {
@@ -299,10 +311,10 @@ struct constantint_match {
 };
 
 template <typename Node>
-struct bind_node {
+struct BindNode {
     const Node *&nr;
 
-    bind_node(const Node *&n) : nr(n) {}  // NOLINT(runtime/explicit)
+    BindNode(const Node *&n) : nr(n) {}  // NOLINT(runtime/explicit)
 
     template <typename ITy>
     bool match(const ITy *n) {
@@ -314,10 +326,29 @@ struct bind_node {
     }
 };
 
-struct specificnode_ty {
+template <typename Type>
+struct BindType {
+    const Type *&tr;
+
+    BindType(const Type *&t) : tr(t) {}  // NOLINT(runtime/explicit)
+
+    template <typename ITy>
+    bool match(const ITy *n) {
+        if (auto *e = n->template to<IR::Expression>()) {
+            if (auto *ct = e->type->template to<Type>()) {
+                tr = ct;
+                return true;
+            }
+        }
+
+        return false;
+    }
+};
+
+struct SpecificNode_match {
     const IR::Node *node;
 
-    specificnode_ty(const IR::Node *n) : node(n) {}  // NOLINT(runtime/explicit)
+    SpecificNode_match(const IR::Node *n) : node(n) {}  // NOLINT(runtime/explicit)
 
     template <typename ITy>
     bool match(ITy *n) {
@@ -325,32 +356,46 @@ struct specificnode_ty {
     }
 };
 
-template <typename LHS, typename RHS, bool Commutable = false>
-struct AnyBinaryOp_match {
-    LHS l;
-    RHS r;
+template <typename Node>
+struct DeferredNode_match {
+    Node *const &node;
 
-    AnyBinaryOp_match(const LHS &l, const RHS &r) : l(l), r(r) {}
+    DeferredNode_match(Node *const &node) : node(node) {}  // NOLINT(runtime/explicit)
+
+    template <typename ITy>
+    bool match(ITy *const n) {
+        return n == node;
+    }
+};
+
+// Matcher for specific unary operators.
+template <typename OP, typename NodeType>
+struct UnaryOp_match {
+    OP x;
+
+    UnaryOp_match(const OP &x) : x(x) {}  // NOLINT(runtime/explicit)
 
     template <typename OpTy>
     bool match(OpTy *n) {
-        if (auto *bo = n->template to<IR::Operation_Binary>())
-            return (l.match(bo->left) && r.match(bo->right)) ||
-                   (Commutable && l.match(bo->right) && r.match(bo->left));
-
+        if (auto *uo = n->template to<NodeType>()) return x.match(uo->expr);
         return false;
     }
 };
 
-template <typename OP>
-struct AnyUnaryOp_match {
-    OP x;
+// Matcher for specific binary operators.
+template <typename LHS, typename RHS, typename NodeType, bool Commutable = false>
+struct BinaryOp_match {
+    LHS l;
+    RHS r;
 
-    AnyUnaryOp_match(const OP &x) : x(x) {}  // NOLINT(runtime/explicit)
+    BinaryOp_match(const LHS &lhs, const RHS &rhs) : l(lhs), r(rhs) {}
 
     template <typename OpTy>
     bool match(OpTy *n) {
-        if (auto *uo = n->template to<IR::Operation_Unary>()) return x.match(uo->expr);
+        if (auto *bo = n->template to<NodeType>()) {
+            return (l.match(bo->left) && r.match(bo->right)) ||
+                   (Commutable && l.match(bo->right) && l.match(bo->left));
+        }
         return false;
     }
 };
@@ -358,79 +403,149 @@ struct AnyUnaryOp_match {
 }  // namespace detail
 
 /// Match an arbitrary node and ignore it.
-inline auto m_Node() { return detail::node_match<IR::Node>(); }
+inline auto m_Node() { return detail::Node_match<IR::Node>(); }
 
 /// Match an arbitrary unary operation and ignore it.
-inline auto m_UnOp() { return detail::node_match<IR::Operation_Unary>(); }
+inline auto m_UnOp() { return detail::Node_match<IR::Operation_Unary>(); }
 
 /// Match an arbitrary binary operation and ignore it.
-inline auto m_BinOp() { return detail::node_match<IR::Operation_Binary>(); }
+inline auto m_BinOp() { return detail::Node_match<IR::Operation_Binary>(); }
 
 /// Match an arbitrary relation operation and ignore it.
-inline auto m_RelOp() { return detail::node_match<IR::Operation_Relation>(); }
+inline auto m_RelOp() { return detail::Node_match<IR::Operation_Relation>(); }
 
 /// Match an arbitrary Constant and ignore it.
-inline auto m_Constant() { return detail::node_match<IR::Constant>(); }
+inline auto m_Constant() { return detail::Node_match<IR::Constant>(); }
 
 /// Match an arbitrary Expression and ignore it.
-inline auto m_Expr() { return detail::node_match<IR::Expression>(); }
+inline auto m_Expr() { return detail::Node_match<IR::Expression>(); }
+
+/// Match an arbitrary Type and ignore it.
+inline auto m_Type() { return detail::Node_match<IR::Type>(); }
+
+/// Match an arbitrary PathExpression and ignore it.
+inline auto m_PathExpr() { return detail::Node_match<IR::PathExpression>(); }
+
+/// Match a specific Type of a node (expression) and ignore it.
+template <class Type>
+inline auto m_Type() {
+    return detail::Type_match<Type>();
+}
 
 /// Match if the inner matcher does *NOT* match.
 template <typename Matcher>
 inline auto m_Unless(const Matcher &m) {
-    return detail::match_unless<Matcher>(m);
+    return detail::Unless_match<Matcher>(m);
 }
 
 /// Combine two pattern matchers matching L || R
 template <typename LM, typename RM>
-inline auto m_CombineOr(const LM &l, const RM &r) {
-    return detail::match_combine_or<LM, RM>(l, r);
+inline auto m_AnyOf(const LM &l, const RM &r) {
+    return detail::AnyOf_match<LM, RM>(l, r);
 }
 
 /// Combine two pattern matchers matching L && R
 template <typename LM, typename RM>
-inline auto m_CombineAnd(const LM &l, const RM &r) {
-    return detail::match_combine_and<LM, RM>(l, r);
+inline auto m_AllOf(const LM &l, const RM &r) {
+    return detail::AllOf_match<LM, RM>(l, r);
 }
 
 /// Match a Constant, binding the specified pointer to the contained big_int.
-inline auto m_BigInt(const big_int *&res) { return detail::bigint_match(res); }
+inline auto m_BigInt(const big_int *&res) { return detail::BigInt_match(res); }
 
 /// Match a Constant with int of a specific value.
 template <int64_t val>
 inline auto m_ConstantInt() {
-    return detail::constantint_match<val>();
+    return detail::ConstantInt_match<val>();
 }
 
 /// Match a node, capturing it if we match.
-inline detail::bind_node<const IR::Node> m_Node(const IR::Node *&n) { return n; }
+inline detail::BindNode<const IR::Node> m_Node(const IR::Node *&n) { return n; }
 /// Match a Constant, capturing the value if we match.
-inline detail::bind_node<IR::Constant> m_Constant(const IR::Constant *&c) { return c; }
+inline detail::BindNode<IR::Constant> m_Constant(const IR::Constant *&c) { return c; }
 /// Match an Expression, capturing the value if we match.
-inline detail::bind_node<IR::Expression> m_Expr(const IR::Expression *&e) { return e; }
+inline detail::BindNode<IR::Expression> m_Expr(const IR::Expression *&e) { return e; }
+/// Match a PathExpression, capturing the value if we match.
+inline detail::BindNode<IR::PathExpression> m_PathExpr(const IR::PathExpression *&e) { return e; }
 /// Match if we have a specific specified node.
-inline detail::specificnode_ty m_Specific(const IR::Node *n) { return n; }
+inline detail::SpecificNode_match m_Specific(const IR::Node *n) { return n; }
+/// Like m_Specific(), but works if the specific value to match is determined as
+/// part of the same match() expression.
+/// For example: m_Add(m_Node(X), m_Specific(X)) is incorrect, because m_Specific()
+/// will bind X before the pattern match starts.  m_Add(m_Node(X), m_Deferred(X)) is correct,
+/// and will check against whichever value m_Node(X) populated.
+inline detail::DeferredNode_match<IR::Node> m_Deferred(IR::Node *const &n) { return n; }
+inline detail::DeferredNode_match<const IR::Node> m_Deferred(const IR::Node *const &n) { return n; }
 
 /// Match a unary operator, capturing it if we match.
-inline detail::bind_node<IR::Operation_Unary> m_UnOp(const IR::Operation_Unary *&uo) { return uo; }
+inline detail::BindNode<IR::Operation_Unary> m_UnOp(const IR::Operation_Unary *&uo) { return uo; }
 /// Match a binary operator, capturing it if we match.
-inline detail::bind_node<IR::Operation_Binary> m_BinOp(const IR::Operation_Binary *&bo) {
+inline detail::BindNode<IR::Operation_Binary> m_BinOp(const IR::Operation_Binary *&bo) {
     return bo;
 }
 /// Match a relation operator, capturing it if we match.
-inline detail::bind_node<IR::Operation_Relation> m_RelOp(const IR::Operation_Relation *&ro) {
+inline detail::BindNode<IR::Operation_Relation> m_RelOp(const IR::Operation_Relation *&ro) {
     return ro;
+}
+/// Match an Cmpl, capturing the value if we match.
+inline detail::BindNode<IR::Cmpl> m_Cmpl(const IR::Cmpl *&c) { return c; }
+
+/// Match a type, capturing it if we match.
+template <typename Type>
+inline auto m_Type(Type *&t) {
+    return detail::BindType<Type>(t);
+}
+
+template <typename Type>
+inline auto m_Type(const Type *&t) {
+    return detail::BindType<const Type>(t);
 }
 
 template <typename LHS, typename RHS>
 inline auto m_BinOp(const LHS &l, const RHS &r) {
-    return detail::AnyBinaryOp_match<LHS, RHS>(l, r);
+    return detail::BinaryOp_match<LHS, RHS, IR::Operation_Binary>(l, r);
 }
 
-template <typename OP>
-inline auto m_UnOp(const OP &x) {
-    return detail::AnyUnaryOp_match<OP>(x);
+template <typename LHS, typename RHS>
+inline auto m_RelOp(const LHS &l, const RHS &r) {
+    return detail::BinaryOp_match<LHS, RHS, IR::Operation_Relation>(l, r);
 }
+
+template <typename OP, typename NodeType = IR::Operation_Unary>
+inline auto m_UnOp(const OP &x) {
+    return detail::UnaryOp_match<OP, NodeType>(x);
+}
+
+template <typename LHS, typename RHS>
+inline auto m_Add(const LHS &l, const RHS &r) {
+    return detail::BinaryOp_match<LHS, RHS, IR::Add>(l, r);
+}
+
+template <typename LHS, typename RHS>
+inline auto m_BAnd(const LHS &l, const RHS &r) {
+    return detail::BinaryOp_match<LHS, RHS, IR::BAnd>(l, r);
+}
+
+template <typename LHS, typename RHS>
+inline auto m_BOr(const LHS &l, const RHS &r) {
+    return detail::BinaryOp_match<LHS, RHS, IR::BOr>(l, r);
+}
+
+template <typename LHS, typename RHS>
+inline auto m_Mul(const LHS &l, const RHS &r) {
+    return detail::BinaryOp_match<LHS, RHS, IR::Mul>(l, r);
+}
+
+template <typename LHS, typename RHS>
+inline auto m_Shl(const LHS &l, const RHS &r) {
+    return detail::BinaryOp_match<LHS, RHS, IR::Shl>(l, r);
+}
+
+template <typename LHS, typename RHS>
+inline auto m_Shr(const LHS &l, const RHS &r) {
+    return detail::BinaryOp_match<LHS, RHS, IR::Shr>(l, r);
+}
+
 }  // namespace P4
 
 #endif /* IR_PATTERN_H_ */
