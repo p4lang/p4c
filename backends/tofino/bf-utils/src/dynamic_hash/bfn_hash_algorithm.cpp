@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <vector>
+
 /**
  * These values are based on the crc calculations provided at this url:
  *     http://reveng.sourceforge.net/crc-catalogue/all.htm

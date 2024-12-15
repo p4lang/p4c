@@ -98,7 +98,6 @@
 #include "backends/tofino/bf-p4c/common/pragma/collect_global_pragma.h"
 #include "backends/tofino/bf-p4c/common/run_id.h"
 #include "backends/tofino/bf-p4c/control-plane/runtime.h"
-#include "backends/tofino/bf-p4c/device.h"
 #include "backends/tofino/bf-p4c/frontend.h"
 #include "backends/tofino/bf-p4c/lib/error_type.h"
 #include "backends/tofino/bf-p4c/logging/collect_diagnostic_checks.h"
@@ -112,6 +111,7 @@
 #include "backends/tofino/bf-p4c/mau/table_flow_graph.h"
 #include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "backends/tofino/bf-p4c/parde/parser_header_sequences.h"
+#include "backends/tofino/bf-p4c/specs/device.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/p4-14/header_type.h"
 #include "frontends/p4-14/typecheck.h"
@@ -427,7 +427,8 @@ int main(int ac, char **av) {
         return handle_return(INVOCATION_ERROR, options);
 
     options.setInputFile();
-    Device::init(options.target);
+    Device::init(options.target,
+                 {options.phv_scale_factor, options.no_tagalong, options.tof2lab44_workaround});
 
     // Initialize EventLogger
     if (BackendOptions().debugInfo) {
