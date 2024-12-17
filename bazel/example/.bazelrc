@@ -1,1 +1,6 @@
+# Remove once #5066 is resolved.
+common --enable_workspace
+# Enable once #5066 is resolved.
+common --noenable_bzlmod
+
 build --action_env=BAZEL_CXXOPTS="-std=c++17"
