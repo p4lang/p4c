@@ -24,8 +24,10 @@ namespace P4 {
 
 using namespace literals;
 
-/** Implements a pass that reorders associative operations when beneficial.
- * For example, (a + c0) + c1 is rewritten as a + (c0 + c1) when cs are constants.
+/** Implements a pass that reorders associative operations when beneficial.  For
+ * example, (a + c0) + c1 is rewritten as a + (c0 + c1) when cs are constants.
+ * The pass performs only local reassociation transformation, it does not (yet)
+ * implement "push to leaves" optimization.
  */
 class Reassociation final : public Modifier {
  public:
