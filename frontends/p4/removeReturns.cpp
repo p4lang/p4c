@@ -122,7 +122,7 @@ const IR::Node *DoRemoveReturns::preorder(IR::P4Action *action) {
 
 const IR::Node *DoRemoveReturns::preorder(IR::Function *function) {
     // We leave returns in abstract functions alone
-    if (findContext<IR::Declaration_Instance>()) {
+    if (isInContext<IR::Declaration_Instance>()) {
         prune();
         return function;
     }
@@ -205,7 +205,7 @@ const IR::Node *DoRemoveReturns::preorder(IR::ReturnStatement *statement) {
         left = new IR::PathExpression(statement->expression->type, returnedValue);
         vec.push_back(new IR::AssignmentStatement(statement->srcInfo, left, statement->expression));
     }
-    if (findContext<IR::LoopStatement>()) vec.push_back(new IR::BreakStatement);
+    if (isInContext<IR::LoopStatement>()) vec.push_back(new IR::BreakStatement);
     return new IR::BlockStatement(std::move(vec));
 }
 
@@ -287,7 +287,7 @@ const IR::Node *DoRemoveReturns::postorder(IR::LoopStatement *loop) {
     if (hasReturned() == TernaryBool::Yes) set(TernaryBool::Maybe);
 
     // only need to add an extra check for nested loops
-    if (!findContext<IR::LoopStatement>()) return loop;
+    if (!isInContext<IR::LoopStatement>()) return loop;
     // only if the inner loop may have returned
     if (hasReturned() == TernaryBool::No) return loop;
 

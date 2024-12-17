@@ -21,7 +21,6 @@
 
 #include "backends/tofino/bf-p4c/phv/add_initialization.h"
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
-#include "ir/ir-generated.h"
 #include "ir/visitor.h"
 
 // *****************************************************************************************

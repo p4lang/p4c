@@ -1,4 +1,4 @@
-#include "backends/tofino/bf-utils/include/dynamic_hash/dynamic_hash.h"
+#include "backends/tofino/bf-utils/dynamic_hash/dynamic_hash.h"
 
 #include <assert.h>
 #include <inttypes.h>
@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <vector>
 
 #define assert_macro assert
 #define calloc_macro calloc
@@ -243,38 +245,39 @@ bool determine_crc_gfm(const bfn_hash_algorithm_t *alg, uint64_t *init_data, uin
     }
 
     // This is the data stream, and is saved as a bit vector
-    uint64_t val[bitvec_sz];
-    memset(val, 0, sizeof(val));
+    std::vector<uint64_t> val(bitvec_sz);
     for (uint32_t i = 0; i < bitvec_sz; i++) val[i] = init_data[i];
 
     if (use_input_bit) {
         int val_bit_pos = val_bit + alg->hash_bit_width;
-        set_into_bitvec(val, bitvec_sz, 1ULL, val_bit_pos, 1);
+        set_into_bitvec(val.data(), bitvec_sz, 1ULL, val_bit_pos, 1);
     }
 
     ///> XOR the initial value into the data stream
     if (alg->init != 0ULL) {
         int init_lsb = total_msb - (alg->hash_bit_width - 1);
-        uint64_t current_value = get_from_bitvec(val, bitvec_sz, init_lsb, alg->hash_bit_width);
+        uint64_t current_value =
+            get_from_bitvec(val.data(), bitvec_sz, init_lsb, alg->hash_bit_width);
         current_value ^= alg->init;
-        set_into_bitvec(val, bitvec_sz, current_value, init_lsb, alg->hash_bit_width);
+        set_into_bitvec(val.data(), bitvec_sz, current_value, init_lsb, alg->hash_bit_width);
     }
 
     ///> Calculate crc at each bit position
     for (int i = total_msb - alg->hash_bit_width; i >= 0; i--) {
         int upper_bit_position = (i + alg->hash_bit_width);
-        uint64_t upper_value = get_from_bitvec(val, bitvec_sz, upper_bit_position, 1);
+        uint64_t upper_value = get_from_bitvec(val.data(), bitvec_sz, upper_bit_position, 1);
         upper_value &= 1ULL;
         if (upper_value == 1ULL) {
-            set_into_bitvec(val, bitvec_sz, 0ULL, upper_bit_position, 1);
-            uint64_t current_value = get_from_bitvec(val, bitvec_sz, i, alg->hash_bit_width);
+            set_into_bitvec(val.data(), bitvec_sz, 0ULL, upper_bit_position, 1);
+            uint64_t current_value = get_from_bitvec(val.data(), bitvec_sz, i, alg->hash_bit_width);
             current_value ^= alg->poly;
-            set_into_bitvec(val, bitvec_sz, current_value, i, alg->hash_bit_width);
+            set_into_bitvec(val.data(), bitvec_sz, current_value, i, alg->hash_bit_width);
         }
     }
 
     ///> Xor the final xor
-    uint64_t hash_calc = get_from_bitvec(val, bitvec_sz, 0, alg->hash_bit_width) ^ alg->final_xor;
+    uint64_t hash_calc =
+        get_from_bitvec(val.data(), bitvec_sz, 0, alg->hash_bit_width) ^ alg->final_xor;
 
     ///> Reverse the output bits
     uint64_t mask = (1ULL << p4_hash_output_bit);
@@ -346,13 +349,12 @@ void determine_matrix_bit(hash_column_t hash_matrix[PARITY_GROUPS_DYN][HASH_MATR
                                     total_input_bits);
     } else if (alg->hash_alg == CRC_DYN) {
         uint32_t bitvec_sz = compute_bitvec_sz(alg, total_input_bits);
-        uint64_t val[bitvec_sz];
-        memset(val, 0, sizeof(val));
-        initialize_input_data_stream(alg, val, bitvec_sz, inputs, inputs_sz);
+        std::vector<uint64_t> val(bitvec_sz, 0);
+        initialize_input_data_stream(alg, val.data(), bitvec_sz, inputs, inputs_sz);
         // See comments above the dete
-        set_bit = determine_crc_gfm(alg, val, bitvec_sz, input_bit, true,
+        set_bit = determine_crc_gfm(alg, val.data(), bitvec_sz, input_bit, true,
                                     virtual_p4_hash_output_bit, total_input_bits) ^
-                  determine_crc_gfm(alg, val, bitvec_sz, 0, /* input_bit */
+                  determine_crc_gfm(alg, val.data(), bitvec_sz, 0, /* input_bit */
                                     false, virtual_p4_hash_output_bit, total_input_bits);
     }
 
@@ -554,10 +556,10 @@ void update_symmetric_bits(const ixbar_init_t *ixbar_init, const ixbar_input_t *
     memcpy(hash_matrix_old, hash_matrix,
            sizeof(hash_column_t) * PARITY_GROUPS_DYN * HASH_MATRIX_WIDTH_DYN);
 
-    groups = calloc_macro(inputs_sz, sizeof(uint32_t));
+    groups = (uint32_t *)calloc_macro(inputs_sz, sizeof(uint32_t));
     ALLOC_CHECK(groups, "failed to allocate groups");
 
-    sibling_groups = calloc_macro(inputs_sz, sizeof(uint32_t));
+    sibling_groups = (uint32_t *)calloc_macro(inputs_sz, sizeof(uint32_t));
     ALLOC_CHECK(sibling_groups, "failed to allocate sibling_groups");
 
     // preprocess the input and record all the groups and sibling groups
@@ -696,17 +698,16 @@ void determine_seed(const hash_matrix_output_t *hash_matrix_outputs, uint32_t ou
     ///> Initialize the input bitvec with the constant inputs
     uint32_t bitvec_sz = compute_bitvec_sz(alg, total_input_bits);
     // This is the data stream, and is saved as a bit vector
-    uint64_t val[bitvec_sz];
-    memset(val, 0, sizeof(val));
-    initialize_input_data_stream(alg, val, bitvec_sz, inputs, inputs_sz);
+    std::vector<uint64_t> val(bitvec_sz, 0);
+    initialize_input_data_stream(alg, val.data(), bitvec_sz, inputs, inputs_sz);
 
     for (uint32_t i = 0; i < outputs_sz; i++) {
         const hash_matrix_output_t *output = hash_matrix_outputs + i;
         for (uint32_t j = 0; j < output->bit_size; j++) {
             uint32_t p4_hash_output_bit = output->p4_hash_output_bit + j;
             uint32_t galois_bit = output->gfm_start_bit + j;
-            determine_seed_bit(hash_seed, val, bitvec_sz, alg, p4_hash_output_bit, total_input_bits,
-                               galois_bit);
+            determine_seed_bit(hash_seed, val.data(), bitvec_sz, alg, p4_hash_output_bit,
+                               total_input_bits, galois_bit);
         }
     }
 }
@@ -730,8 +731,8 @@ void determine_tofino_gfm_delta(hash_column_t hash_matrix[PARITY_GROUPS_DYN][HAS
         }
     }
 
-    regs->galois_field_matrix_regs =
-        calloc_macro(galois_delta_count, sizeof(galois_field_matrix_delta_t));
+    regs->galois_field_matrix_regs = (galois_field_matrix_delta_t *)calloc_macro(
+        galois_delta_count, sizeof(galois_field_matrix_delta_t));
     if (!regs->galois_field_matrix_regs) {
         assert_macro(0);
         return;
@@ -774,7 +775,8 @@ void determine_seed_delta(const hash_seed_t *hash_seed, hash_regs_t *regs, uint3
     }
 
     // NOTE: Must be freed after use outside of this
-    regs->hash_seed_regs = calloc_macro(seed_delta_count, sizeof(hash_seed_delta_t));
+    regs->hash_seed_regs =
+        (hash_seed_delta_t *)calloc_macro(seed_delta_count, sizeof(hash_seed_delta_t));
     if (!regs->hash_seed_regs) {
         assert_macro(0);
         return;

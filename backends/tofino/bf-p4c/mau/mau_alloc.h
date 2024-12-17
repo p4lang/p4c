@@ -19,13 +19,13 @@
 #ifndef BACKENDS_TOFINO_BF_P4C_MAU_MAU_ALLOC_H_
 #define BACKENDS_TOFINO_BF_P4C_MAU_MAU_ALLOC_H_
 
+#include "backends/tofino/bf-p4c/bf-p4c-options.h"
 #include "backends/tofino/bf-p4c/logging/pass_manager.h"
 #include "backends/tofino/bf-p4c/mau/payload_gateway.h"
 #include "backends/tofino/bf-p4c/mau/table_dependency_graph.h"
 #include "backends/tofino/bf-p4c/mau/table_layout.h"
 #include "backends/tofino/bf-p4c/mau/table_mutex.h"
 #include "backends/tofino/bf-p4c/phv/mau_backtracker.h"
-#include "bf-p4c-options.h"
 #include "ir/ir.h"
 #include "lib/json.h"
 

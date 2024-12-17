@@ -121,7 +121,7 @@ void DoCheckCoreMethods::postorder(const IR::MethodCallExpression *expression) {
 
     // Check that verify is only invoked from parsers.
     if (auto ef = mi->to<ExternFunction>()) {
-        if (ef->method->name == IR::ParserState::verify && !findContext<IR::P4Parser>()) {
+        if (ef->method->name == IR::ParserState::verify && !isInContext<IR::P4Parser>()) {
             typeError("%1%: may only be invoked in parsers", ef->expr);
         }
     }

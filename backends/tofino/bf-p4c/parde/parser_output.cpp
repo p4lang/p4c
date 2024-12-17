@@ -23,6 +23,7 @@
 #include "backends/tofino/bf-p4c/common/asm_output.h"
 #include "backends/tofino/bf-p4c/common/autoindent.h"
 #include "backends/tofino/bf-p4c/common/debug_info.h"
+#include "backends/tofino/bf-p4c/midend/parser_enforce_depth_req.h"
 #include "backends/tofino/bf-p4c/parde/asm_output.h"
 #include "backends/tofino/bf-p4c/parde/clot/clot_info.h"
 #include "backends/tofino/bf-p4c/parde/parde_visitor.h"
@@ -30,7 +31,6 @@
 #include "lib/log.h"
 #include "lib/match.h"
 #include "lib/range.h"
-#include "midend/parser_enforce_depth_req.h"
 
 namespace {
 

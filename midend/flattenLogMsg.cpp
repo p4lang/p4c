@@ -99,6 +99,7 @@ TypeLogMsgParams FindTypesInLogMsgInvocationToReplace::unfoldStruct(const IR::Ex
             for (auto field : structType->fields) {
                 std::string nm = field->name.name + std::string(":");
                 auto *newMember = new IR::Member(field->type, expr, field->name);
+                typeMap->setType(newMember, field->type);
                 if (field->type->is<IR::Type_StructLike>()) {
                     auto curResult = unfoldStruct(newMember, strParam, field->name.name.c_str());
                     nm += curResult.second;

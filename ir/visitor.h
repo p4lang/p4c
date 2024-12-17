@@ -274,6 +274,19 @@ class Visitor {
         const Context *c = ctxt;
         return findOrigCtxt<T>(c);
     }
+    template <class T>
+    inline bool isInContext(const Context *&c) const {
+        if (!c) c = ctxt;
+        if (!c) return false;
+        while ((c = c->parent))
+            if (c->node->is<T>()) return true;
+        return false;
+    }
+    template <class T>
+    inline bool isInContext() const {
+        const Context *c = ctxt;
+        return isInContext<T>(c);
+    }
     inline bool isInContext(const IR::Node *n) const {
         for (auto *c = ctxt; c; c = c->parent) {
             if (c->node == n || c->original == n) return true;

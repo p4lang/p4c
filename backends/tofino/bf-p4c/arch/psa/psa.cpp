@@ -450,7 +450,7 @@ class TranslateProgram : public Inspector {
         return;
     }
 
-    void postorder(const IR::ParserState *state) {
+    void postorder(const IR::ParserState *state) override {
         auto ctxt = findContext<IR::P4Parser>();
         CHECK_NULL(ctxt);
         for (auto stmt : state->components) {

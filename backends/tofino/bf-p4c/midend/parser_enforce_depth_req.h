@@ -19,8 +19,8 @@
 #ifndef BF_P4C_MIDEND_PARSER_ENFORCE_DEPTH_REQ_H_
 #define BF_P4C_MIDEND_PARSER_ENFORCE_DEPTH_REQ_H_
 
+#include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "ir/ir.h"
-#include "midend/type_checker.h"
 
 namespace BFN {
 

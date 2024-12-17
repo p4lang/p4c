@@ -3036,7 +3036,8 @@ bool ActionPhvConstraints::is_aligned(const PHV::Allocation::MutuallyLiveSlices 
         auto reads = constraint_tracker.sources(slice, action);
         BUG_CHECK(reads.size() > 0, "Slice %1% must be written in action %2%", slice, action->name);
         for (auto operand : reads) {
-            BUG_CHECK(operand.phv_used->field(), "There must be a field read for slice %1%", slice);
+            BUG_CHECK(operand.phv_used.has_value() && operand.phv_used->field() != nullptr,
+                      "There must be a field read for slice %1%", slice);
             for (const int stage : stages(action, slice.isPhysicalStageBased())) {
                 ordered_set<PHV::AllocSlice> per_source_slices =
                     alloc.slices(operand.phv_used->field(), operand.phv_used->range(), stage,

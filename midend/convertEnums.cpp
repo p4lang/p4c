@@ -23,7 +23,7 @@ const IR::Node *DoConvertEnums::preorder(IR::Type_Enum *type) {
 const IR::Node *DoConvertEnums::postorder(IR::Type_Name *type) {
     auto canontype = typeMap->getTypeType(getOriginal(), true);
     if (!canontype->is<IR::Type_Enum>()) return type;
-    if (findContext<IR::TypeNameExpression>() != nullptr)
+    if (isInContext<IR::TypeNameExpression>())
         // This will be resolved by the caller.
         return type;
     auto enumType = canontype->to<IR::Type_Enum>();

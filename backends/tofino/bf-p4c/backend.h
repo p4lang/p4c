@@ -35,7 +35,6 @@
 #include "backends/tofino/bf-p4c/phv/phv_fields.h"
 #include "backends/tofino/bf-p4c/phv/phv_parde_mau_use.h"
 #include "backends/tofino/bf-p4c/phv/utils/live_range_report.h"
-#include "bf-p4c-options.h"
 #include "ir/ir.h"
 
 class FieldDefUse;

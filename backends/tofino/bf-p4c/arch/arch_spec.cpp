@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "arch/arch_spec.h"
+#include "backends/tofino/bf-p4c/arch/arch_spec.h"
 
 ArchSpec::ArchSpec() {
     // ingress_intrinsic_metadata_for_tm

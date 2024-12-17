@@ -23,7 +23,7 @@
 #include "ir/ir.h"
 #include "backends/tofino/bf-p4c/midend/type_checker.h"
 #include "backends/tofino/bf-p4c/mau/hash_function.h"
-#include "backends/tofino/bf-utils/include/dynamic_hash/dynamic_hash.h"
+#include "backends/tofino/bf-utils/dynamic_hash/dynamic_hash.h"
 
 namespace BFN {
 

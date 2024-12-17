@@ -115,8 +115,8 @@ const IR::Node *DropPacketWithMirrorEngine_::postorder(IR::BFN::TnaDeparser *dp)
                     new IR::Member(new IR::PathExpression(igIntrMdForDprsrName), "mirror_type"),
                     new IR::Constant(IR::Type::Bits::get(Device::mirrorTypeWidth()), 0)),
         new IR::MethodCallStatement(
-            {new IR::MethodCallExpression(new IR::Member(new IR::PathExpression(name), "emit"),
-                                          emit_invalid_mirror_session_args)}),
+            new IR::MethodCallExpression(new IR::Member(new IR::PathExpression(name), "emit"),
+                                         emit_invalid_mirror_session_args)),
         nullptr);
 
     // prepend Mirror() mirror to deparser statements;

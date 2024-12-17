@@ -19,11 +19,10 @@
 #ifndef _BACKENDS_TOFINO_BF_P4C_LOGGING_RESOURCES_PARSER_H_
 #define _BACKENDS_TOFINO_BF_P4C_LOGGING_RESOURCES_PARSER_H_
 
-/* clang-format off */
-#include "ir/ir.h"
+#include "backends/tofino/bf-p4c/device.h"
+#include "backends/tofino/bf-p4c/logging/resources_schema.h"
 #include "backends/tofino/bf-p4c/parde/parde_visitor.h"
-#include "resources_schema.h"
-/* clang-format on */
+#include "ir/ir.h"
 
 using Logging::Resources_Schema_Logger;
 

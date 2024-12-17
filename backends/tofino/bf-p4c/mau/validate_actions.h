@@ -24,7 +24,7 @@
 #include "ir/visitor.h"
 
 class PhvInfo;
-class ReductionOrInfo;
+struct ReductionOrInfo;
 
 class ValidateActions final : public MauInspector {
  private:

@@ -1287,7 +1287,7 @@ bool BuildGatewayMatch::preorder(const IR::Expression *e) {
         const IR::Expression *tmp;
         BUG_CHECK(orig_mask == donemask, "failed to match all bits of %s",
                   (tmp = findContext<IR::Operation::Relation>()) ? tmp : e);
-        BUG_CHECK((mask ^ upper_bit_mask) << shift == 0, "Didn't cover all bytes");
+        BUG_CHECK(((mask ^ upper_bit_mask) << shift) == 0, "Didn't cover all bytes");
         match_field = {};
     }
     return false;
@@ -1375,7 +1375,7 @@ void BuildGatewayMatch::constant(big_int c) {
             }
             LOG6("    match now " << match);
         }
-        BUG_CHECK((mask ^ upper_bits_mask) << shift == 0, "Didn't cover all bytes");
+        BUG_CHECK(((mask ^ upper_bits_mask) << shift) == 0, "Didn't cover all bytes");
         match_field = {};
     } else {
         BUG("Invalid context for constant in BuildGatewayMatch");

@@ -8,7 +8,7 @@
 
 abstract Operation_Unary : Operation {
     Expression expr;
-    Operation_Unary {
+    inline Operation_Unary {
         if (!srcInfo && expr) srcInfo = expr->srcInfo;
         if (type->is<Type::Unknown>() && expr) type = expr->type; }
     precedence = DBPrint::Prec_Prefix;
@@ -40,7 +40,7 @@ class LNot : Operation_Unary {
 abstract Operation_Binary : Operation {
     Expression left;
     Expression right;
-    Operation_Binary {
+    inline Operation_Binary {
         if (!srcInfo && left && right) srcInfo = left->srcInfo + right->srcInfo;
         if (type->is<Type::Unknown>() && left && right && left->type == right->type)
             type = left->type; }
@@ -57,11 +57,11 @@ abstract Operation_Ternary : Operation {
     Expression e0;
     Expression e1;
     Expression e2;
-    Operation_Ternary { if (!srcInfo && e0 && e2) srcInfo = e0->srcInfo + e2->srcInfo; }
+    inline Operation_Ternary { if (!srcInfo && e0 && e2) srcInfo = e0->srcInfo + e2->srcInfo; }
 }
 
 abstract Operation_Relation : Operation_Binary {
-    Operation_Relation {
+    inline Operation_Relation {
         // This sets the type only when no type is explicitly provided in the constructor.
         // If a type is provided in the constructor this assignment has no effect
         // because the type member is shadowed by the type parameter.
@@ -101,12 +101,12 @@ class SubSat : Operation_Binary {
 class Shl : Operation_Binary {
     stringOp = "<<";
     precedence = DBPrint::Prec_Shl;
-    Shl { if (type->is<Type::Unknown>() && left) type = left->type; }
+    inline Shl { if (type->is<Type::Unknown>() && left) type = left->type; }
 }
 class Shr : Operation_Binary {
     stringOp = ">>";
     precedence = DBPrint::Prec_Shr;
-    Shr { if (type->is<Type::Unknown>() && left) type = left->type; }
+    inline Shr { if (type->is<Type::Unknown>() && left) type = left->type; }
 }
 class Equ : Operation_Relation {
     stringOp = "==";
@@ -147,7 +147,7 @@ class BXor : Operation_Binary {
 class LAnd : Operation_Binary {
     stringOp = "&&";
     precedence = DBPrint::Prec_LAnd;
-    LAnd {
+    inline LAnd {
         // This sets the type only when no type is explicitly provided in the constructor.
         // If a type is provided in the constructor this assignment has no effect
         // because the type member is shadowed by the type parameter.
@@ -157,7 +157,7 @@ class LAnd : Operation_Binary {
 class LOr : Operation_Binary {
     stringOp = "||";
     precedence = DBPrint::Prec_LOr;
-    LOr {
+    inline LOr {
         // This sets the type only when no type is explicitly provided in the constructor.
         // If a type is provided in the constructor this assignment has no effect
         // because the type member is shadowed by the type parameter.
@@ -173,9 +173,9 @@ class Dots : Expression {
 /// Represents the ... default initializer expression
 /// when used in a StructExpression.
 class NamedDots : NamedExpression {
-    NamedDots() : NamedExpression("...", new Dots()) {}
-    NamedDots(Util::SourceInfo srcInfo, Dots dots) : NamedExpression(srcInfo, "..."_cs, dots) { CHECK_NULL(dots); }
-    NamedDots(Util::SourceInfo srcInfo) : NamedExpression(srcInfo, "...", new Dots()) {}
+    inline NamedDots() : NamedExpression("...", new Dots()) {}
+    inline NamedDots(Util::SourceInfo srcInfo, Dots dots) : NamedExpression(srcInfo, "..."_cs, dots) { CHECK_NULL(dots); }
+    inline NamedDots(Util::SourceInfo srcInfo) : NamedExpression(srcInfo, "...", new Dots()) {}
     dbprint { out << "..."; }
     toString { return "..."_cs; }
 }
@@ -192,9 +192,9 @@ class Constant : Literal {
     // We need to enumerate all the integer types because we need proper 64-bit handling on
     // 32-bit systems (which ain't long!) and mpz_import is too big a hammer because and it loses
     // the signess of the value.
-    Constant(int v, unsigned base = 10) :
+    inline Constant(int v, unsigned base = 10) :
         Literal(Type_InfInt::get()), value(v), base(base) {}
-    Constant(unsigned v, unsigned base = 10) :
+    inline Constant(unsigned v, unsigned base = 10) :
         Literal(Type_InfInt::get()), value(v), base(base) {}
 #emit
 #if __WORDSIZE == 64
@@ -209,15 +209,15 @@ class Constant : Literal {
         Literal(Type_InfInt::get()), value(v), base(base) {}
 #endif
 #end
-    Constant(uint64_t v, unsigned base = 10) :
+    inline Constant(uint64_t v, unsigned base = 10) :
         Literal(Type_InfInt::get()), value(v), base(base) {}
-    Constant(big_int v, unsigned base = 10) :
+    inline Constant(big_int v, unsigned base = 10) :
         Literal(Type_InfInt::get()), value(v), base(base) {}
-    Constant(Util::SourceInfo si, big_int v, unsigned base = 10) :
+    inline Constant(Util::SourceInfo si, big_int v, unsigned base = 10) :
         Literal(si, Type_InfInt::get()), value(v), base(base) {}
-    Constant(const Type *t, big_int v, unsigned base = 10, bool noWarning = false) :
+    inline Constant(const Type *t, big_int v, unsigned base = 10, bool noWarning = false) :
         Literal(t), value(v), base(base) { CHECK_NULL(t); handleOverflow(noWarning); }
-    Constant(Util::SourceInfo si, const Type *t, big_int v,
+    inline Constant(Util::SourceInfo si, const Type *t, big_int v,
              unsigned base = 10, bool noWarning = false) :
         Literal(si, t), value(v), base(base) { CHECK_NULL(t); handleOverflow(noWarning); }
 #emit
@@ -227,30 +227,30 @@ class Constant : Literal {
     /// @return a constant. Any constant returned here is interned. Base is always 10.
     static const Constant *get(const Type *t, big_int v, Util::SourceInfo si = {});
 
-    bool fitsInt() const { return value >= INT_MIN && value <= INT_MAX; }
-    bool fitsLong() const { return value >= LONG_MIN && value <= LONG_MAX; }
-    bool fitsUint() const { return value >= 0 && value <= UINT_MAX; }
-    bool fitsUint64() const { return value >= 0 && value <= UINT64_MAX; }
-    bool fitsInt64() const { return value >= INT64_MIN && value <= INT64_MAX; }
-    long asLong() const {
+    inline bool fitsInt() const { return value >= INT_MIN && value <= INT_MAX; }
+    inline bool fitsLong() const { return value >= LONG_MIN && value <= LONG_MAX; }
+    inline bool fitsUint() const { return value >= 0 && value <= UINT_MAX; }
+    inline bool fitsUint64() const { return value >= 0 && value <= UINT64_MAX; }
+    inline bool fitsInt64() const { return value >= INT64_MIN && value <= INT64_MAX; }
+    inline long asLong() const {
         if (!fitsLong())
             ::P4::error(ErrorType::ERR_OVERLIMIT, "%1$x: Value too large for long", this);
         return static_cast<long>(value); }
-    int asInt() const {
+    inline int asInt() const {
         if (!fitsInt())
             ::P4::error(ErrorType::ERR_OVERLIMIT, "%1$x: Value too large for int", this);
         return static_cast<int>(value); }
-    unsigned asUnsigned() const {
+    inline unsigned asUnsigned() const {
         if (!fitsUint())
             ::P4::error(ErrorType::ERR_OVERLIMIT, "%1$x: Value too large for unsigned int", this);
         return static_cast<unsigned>(value);
     }
-    uint64_t asUint64() const {
+    inline uint64_t asUint64() const {
         if (!fitsUint64())
             ::P4::error(ErrorType::ERR_OVERLIMIT, "%1$x: Value too large for uint64", this);
         return static_cast<uint64_t>(value);
     }
-    int64_t asInt64() const {
+    inline int64_t asInt64() const {
         if (!fitsInt64())
             ::P4::error(ErrorType::ERR_OVERLIMIT, "%1$x: Value too large for int64", this);
         return static_cast<int64_t>(value);
@@ -294,7 +294,7 @@ class StringLiteral : Literal {
     cstring value;
     validate{ if (value.isNull()) BUG("null StringLiteral"); }
     toString{ return absl::StrCat("\"", value.escapeJson(), "\""); }
-    StringLiteral(ID v) : Literal(v.srcInfo), value(v.name) {}
+    inline StringLiteral(ID v) : Literal(v.srcInfo), value(v.name) {}
 #emit
     operator IR::ID() const { return IR::ID(srcInfo, value); }
 #end
@@ -305,9 +305,9 @@ class StringLiteral : Literal {
 
 class PathExpression : Expression {
     Path path;
-    PathExpression { if (!srcInfo && path) srcInfo = path->srcInfo; }
-    PathExpression(Type t, IR::ID id) : Expression(id.srcInfo, t), path(new IR::Path(id)) {}
-    PathExpression(IR::ID id) : Expression(id.srcInfo), path(new IR::Path(id)) {}
+    inline PathExpression { if (!srcInfo && path) srcInfo = path->srcInfo; }
+    inline PathExpression(Type t, IR::ID id) : Expression(id.srcInfo, t), path(new IR::Path(id)) {}
+    inline PathExpression(IR::ID id) : Expression(id.srcInfo), path(new IR::Path(id)) {}
     toString{ return path->toString(); }
 }
 
@@ -316,8 +316,8 @@ class PathExpression : Expression {
 // The 'X' portion is a TypeNameExpression
 class TypeNameExpression : Expression {
     Type typeName;
-    TypeNameExpression { if (!srcInfo && typeName) srcInfo = typeName->srcInfo; }
-    TypeNameExpression(ID id) : Expression(id.srcInfo),
+    inline TypeNameExpression { if (!srcInfo && typeName) srcInfo = typeName->srcInfo; }
+    inline TypeNameExpression(ID id) : Expression(id.srcInfo),
                                 typeName(new IR::Type_Name(new IR::Path(id))) {}
     dbprint{ out << typeName; }
     toString { return typeName->toString(); }
@@ -337,11 +337,11 @@ class Slice : AbstractSlice {
     // After type checking e1 and e2 will be constants
     unsigned getH() const override { return e1->checkedTo<IR::Constant>()->asUnsigned(); }
     unsigned getL() const override { return e2->checkedTo<IR::Constant>()->asUnsigned(); }
-    Slice(Expression a, int hi, int lo)
+    inline Slice(Expression a, int hi, int lo)
     : AbstractSlice(IR::Type::Bits::get(hi-lo+1), a, new Constant(hi), new Constant(lo)) {}
-    Slice(Util::SourceInfo si, Expression a, int hi, int lo)
+    inline Slice(Util::SourceInfo si, Expression a, int hi, int lo)
     : AbstractSlice(si, IR::Type::Bits::get(hi-lo+1), a, new Constant(hi), new Constant(lo)) {}
-    Slice {
+    inline Slice {
         if (type->is<Type::Unknown>() && e1 && e1->is<Constant>() && e2 && e2->is<Constant>())
             type = IR::Type::Bits::get(getH() - getL() + 1); }
     // make a slice, folding slices on slices and slices on constants automatically
@@ -358,9 +358,9 @@ class PlusSlice : AbstractSlice {
     unsigned getL() const override {
         BUG_CHECK(e1->is<IR::Constant>(), "non-const PlusSlice not handled");
         return e1->to<IR::Constant>()->asUnsigned(); }
-    PlusSlice(Expression a, Expression lo, int width)
+    inline PlusSlice(Expression a, Expression lo, int width)
     : AbstractSlice(IR::Type::Bits::get(width), a, lo, new Constant(width)) {}
-    PlusSlice {
+    inline PlusSlice {
         if (type->is<Type::Unknown>() && e2 && e2->is<Constant>())
             type = IR::Type::Bits::get(e2->to<IR::Constant>()->asUnsigned()); }
 }
@@ -378,7 +378,7 @@ class Member : Operation_Unary {
 class Concat : Operation_Binary {
     stringOp = "++";
     precedence = DBPrint::Prec_Add;
-    Concat {
+    inline Concat {
         if (left && right) {
             auto lt = left->type->to<IR::Type::Bits>();
             auto rt = right->type->to<IR::Type::Bits>();
@@ -389,7 +389,7 @@ class Concat : Operation_Binary {
 class ArrayIndex : Operation_Binary {
     stringOp = "[]";
     precedence = DBPrint::Prec_Postfix;
-    ArrayIndex {
+    inline ArrayIndex {
         if (auto st = left ? left->type->to<IR::Type_Stack>() : nullptr)
             type = st->elementType; }
     toString{ return absl::StrCat(left, "[", right, "]"); }
@@ -398,14 +398,14 @@ class ArrayIndex : Operation_Binary {
 class Range : Operation_Binary {
     stringOp = "..";
     precedence = DBPrint::Prec_Low;
-    Range { if (left && type == left->type && !left->type->is<Type::Unknown>())
+    inline Range { if (left && type == left->type && !left->type->is<Type::Unknown>())
                 type = new Type_Set(left->type); }
 }
 
 class Mask : Operation_Binary {
     stringOp = "&&&";
     precedence = DBPrint::Prec_Low;
-    Mask { if (left && type == left->type && !left->type->is<Type::Unknown>())
+    inline Mask { if (left && type == left->type && !left->type->is<Type::Unknown>())
                 type = new Type_Set(left->type); }
 }
 
@@ -415,7 +415,7 @@ class Mux : Operation_Ternary {
     visit_children {
         v.visit(e0, "e0");
         SplitFlowVisit<Expression>(v, e1, e2).run_visit(); }
-    Mux { if (type->is<Type::Unknown>() && e1 && e2 && e1->type == e2->type) type = e1->type; }
+    inline Mux { if (type->is<Type::Unknown>() && e1 && e2 && e1->type == e2->type) type = e1->type; }
 }
 
 class DefaultExpression : Expression {}
@@ -468,11 +468,11 @@ class MethodCallExpression : Expression {
                          ")");
     }
     validate{ typeArguments->check_null(); arguments->check_null(); }
-    MethodCallExpression(Util::SourceInfo si, IR::ID m, const std::initializer_list<Argument> &a)
-            : Expression(si), method(new PathExpression(m)), arguments(new Vector<Argument>(a)) {}
-    MethodCallExpression(Util::SourceInfo si, Expression m,
+    inline MethodCallExpression(Util::SourceInfo si, IR::ID m, std::initializer_list<Argument> a)
+        : Expression(si), method(new PathExpression(m)), arguments(new Vector<Argument>(a)) {}
+    inline MethodCallExpression(Util::SourceInfo si, Expression m,
                          const std::initializer_list<Argument> &a)
-    : Expression(si), method(m), arguments(new Vector<Argument>(a)) {}
+        : Expression(si), method(m), arguments(new Vector<Argument>(a)) {}
     MethodCallExpression(Expression m, const std::initializer_list<const Expression *> &a)
     : method(m), arguments(nullptr)  {
         auto arguments = new Vector<Argument>;
@@ -493,9 +493,9 @@ class ConstructorCallExpression : Expression {
 class BaseListExpression : Expression {
     inline Vector<Expression> components;
     validate { components.check_null(); }
-    size_t size() const { return components.size(); }
-    void push_back(Expression e) { components.push_back(e); }
-    bool containsDots() const {
+    inline size_t size() const { return components.size(); }
+    inline void push_back(Expression e) { components.push_back(e); }
+    inline bool containsDots() const {
         if (components.empty())
             return false;
         size_t size = components.size();
@@ -515,7 +515,7 @@ class BaseListExpression : Expression {
 
 /// Represents a list of expressions separated by commas
 class ListExpression : BaseListExpression {
-    ListExpression {
+    inline ListExpression {
         validate();
         if (type->is<Type::Unknown>()) {
             Vector<Type> tuple;
@@ -528,7 +528,7 @@ class ListExpression : BaseListExpression {
 /// ListExpression from above.
 class P4ListExpression : BaseListExpression {
     Type elementType;
-    P4ListExpression {
+    inline P4ListExpression {
         validate();
         if (type->is<Type::Unknown>()) {
             type = new Type_P4List(elementType); } }
@@ -546,10 +546,10 @@ class StructExpression : Expression {
                   structType->is<IR::Type_Specialized>(),
                   "%1%: unexpected struct type", this);
     }
-    size_t size() const { return components.size(); }
-    NamedExpression getField(cstring name) const {
+    inline size_t size() const { return components.size(); }
+    inline NamedExpression getField(cstring name) const {
         return components.getDeclaration<NamedExpression>(name); }
-    bool containsDots() const {
+    inline bool containsDots() const {
         if (components.empty())
             return false;
         size_t size = components.size();
@@ -622,7 +622,7 @@ class StructCompileTimeValue : CompileTimeValue {
 /// Experimental: an extern methond/function call with constant arguments to be
 /// evaluated at compile time
 class CompileTimeMethodCall : MethodCallExpression, CompileTimeValue {
-    CompileTimeMethodCall(MethodCallExpression e) : MethodCallExpression(*e) {}
+    inline CompileTimeMethodCall(MethodCallExpression e) : MethodCallExpression(*e) {}
     validate {
         for (auto v : *arguments)
             BUG_CHECK(v->is<CompileTimeValue>(), "%1%: not a compile-time value", v); }
@@ -638,10 +638,10 @@ class SymbolicVariable : Expression {
     cstring label;
 
     /// A symbolic variable always has a type and no source info.
-    SymbolicVariable(Type type, cstring label) : Expression(type), label(label) {}
+    inline SymbolicVariable(Type type, cstring label) : Expression(type), label(label) {}
 
     /// Implements comparisons so that SymbolicVariables can be used as map keys.
-    bool operator<(const SymbolicVariable &other) const {
+    inline bool operator<(const SymbolicVariable &other) const {
         return label < other.label;
     }
 

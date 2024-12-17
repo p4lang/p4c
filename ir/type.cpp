@@ -21,7 +21,6 @@ limitations under the License.
 #include "frontends/common/parser_options.h"
 #include "ir/configuration.h"
 #include "ir/id.h"
-#include "ir/ir-generated.h"
 #include "ir/ir.h"
 #include "ir/vector.h"
 #include "lib/cstring.h"
@@ -172,7 +171,7 @@ const Type_State *Type_State::get(const Util::SourceInfo &si) {
 }
 
 const Type_Void *Type_Void::get() {
-    static const Type_Void *singleton;
+    static const Type_Void *singleton = nullptr;
     if (!singleton) singleton = (new Type_Void());
     return singleton;
 }
@@ -183,7 +182,7 @@ const Type_Void *Type_Void::get(const Util::SourceInfo &si) {
 }
 
 const Type_MatchKind *Type_MatchKind::get() {
-    static const Type_MatchKind *singleton;
+    static const Type_MatchKind *singleton = nullptr;
     if (!singleton) singleton = (new Type_MatchKind());
     return singleton;
 }
@@ -208,13 +207,6 @@ bool Type_ActionEnum::contains(cstring name) const {
         if (a->getName() == name) return true;
     }
     return false;
-}
-
-size_t Type_MethodBase::minParameterCount() const {
-    size_t rv = 0;
-    for (auto p : *parameters)
-        if (!p->isOptional()) ++rv;
-    return rv;
 }
 
 const Type *Type_List::getP4Type() const {

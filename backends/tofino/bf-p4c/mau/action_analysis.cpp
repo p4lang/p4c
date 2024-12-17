@@ -1154,7 +1154,6 @@ bool ActionAnalysis::init_simple_alignment(const ActionParam &read, ContainerAct
 
     if (read.type == ActionParam::ACTIONDATA) {
         le_bitrange read_bits;
-        cstring key;
         if (cont_action.is_deposit_field_variant || cont_action.convert_instr_to_deposit_field ||
             cont_action.convert_instr_to_byte_rotate_merge || cont_action.name == "set") {
             // if the instruction is or could be a deposit field or byte rotate, then we don't

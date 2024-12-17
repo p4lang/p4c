@@ -127,7 +127,7 @@ class WriteTableInfo : public BFN::ControlFlowVisitor, public MauInspector, Tofi
         return Inspector::init_apply(root);
     }
 
-    void end_apply() {
+    void end_apply() override {
         if (LOGGING(5)) {
             LOG5("After Write Table List:");
             for (const auto &f : phv) {
@@ -541,12 +541,12 @@ class CollectPOVProtectedField : public Inspector {
  public:
     ordered_set<const PHV::Field *> pov_protected_fields;
     const PhvInfo &phv;
-    bool preorder(const IR::BFN::DeparserParameter *param) {
+    bool preorder(const IR::BFN::DeparserParameter *param) override {
         if (param->source) pov_protected_fields.insert(phv.field(param->source->field));
         return false;
     }
 
-    bool preorder(const IR::BFN::Digest *digest) {
+    bool preorder(const IR::BFN::Digest *digest) override {
         pov_protected_fields.insert(phv.field(digest->selector->field));
         return false;
     }
@@ -738,7 +738,7 @@ class TableFlowGraphBuilder : public Inspector {
         LOG4("Table Flow Graph:");
         LOG4(graph);
     }
-    Visitor::profile_t init_apply(const IR::Node *root) {
+    Visitor::profile_t init_apply(const IR::Node *root) override {
         profile_t rv = Inspector::init_apply(root);
         graph.clear();
         placement_stages = Device::numStages();

@@ -28,7 +28,7 @@ const IR::Node *DoEliminateSerEnums::preorder(IR::Type_SerEnum *serEnum) {
 const IR::Node *DoEliminateSerEnums::postorder(IR::Type_Name *type) {
     auto canontype = typeMap->getTypeType(getOriginal(), true);
     if (!canontype->is<IR::Type_SerEnum>()) return type;
-    if (findContext<IR::TypeNameExpression>() != nullptr)
+    if (isInContext<IR::TypeNameExpression>())
         // This will be resolved by the caller.
         return type;
     auto enumType = canontype->to<IR::Type_SerEnum>();

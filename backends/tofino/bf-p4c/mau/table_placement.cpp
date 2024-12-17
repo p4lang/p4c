@@ -41,6 +41,7 @@
 #include "backends/tofino/bf-p4c/common/ir_utils.h"
 #include "backends/tofino/bf-p4c/ir/table_tree.h"
 #include "backends/tofino/bf-p4c/lib/error_type.h"
+#include "backends/tofino/bf-p4c/lib/pointer_wrapper.h"
 #include "backends/tofino/bf-p4c/logging/manifest.h"
 #include "backends/tofino/bf-p4c/mau/action_data_bus.h"
 #include "backends/tofino/bf-p4c/mau/attached_entries.h"
@@ -62,7 +63,6 @@
 #include "lib/bitops.h"
 #include "lib/bitvec.h"
 #include "lib/log.h"
-#include "lib/pointer_wrapper.h"
 #include "lib/safe_vector.h"
 #include "lib/set.h"
 
@@ -4881,7 +4881,7 @@ std::ostream &operator<<(std::ostream &out, TablePlacement::choice_t choice) {
         "control dom set has more placeable tables",
         "average chain length of control dom set",
         "default choice"};
-    if (choice < sizeof(choice_names) / sizeof(choice_names[0])) {
+    if (static_cast<uint64_t>(choice) < sizeof(choice_names) / sizeof(choice_names[0])) {
         out << choice_names[choice];
     } else {
         out << "unknown choice <0x" << hex(choice) << ">";
@@ -5476,7 +5476,6 @@ IR::Node *TransformTables::preorder(IR::MAU::Table *tbl) {
         return tbl;
     }
     int stage_table = 0;
-    int prev_entries = 0;
     IR::Vector<IR::MAU::Table> *rv = new IR::Vector<IR::MAU::Table>;
     IR::MAU::Table *prev = 0;
     IR::MAU::Table *atcam_last = nullptr;
@@ -5679,7 +5678,6 @@ IR::Node *TransformTables::preorder(IR::MAU::Table *tbl) {
         stage_table++;
         prev = table_part;
         if (atcam_last) prev = atcam_last;
-        prev_entries += pl->entries;
     }
     BUG_CHECK(!rv->empty(), "Failed to place any stage tables for %s", tbl->name);
     return rv;

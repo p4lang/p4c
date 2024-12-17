@@ -29,6 +29,7 @@
 #include "backends/tofino/bf-p4c/arch/helpers.h"
 #include "backends/tofino/bf-p4c/common/bridged_packing.h"
 #include "backends/tofino/bf-p4c/common/pragma/collect_global_pragma.h"
+#include "backends/tofino/bf-p4c/common/slice.h"
 #include "backends/tofino/bf-p4c/common/utils.h"
 #include "backends/tofino/bf-p4c/lib/safe_width.h"
 #include "backends/tofino/bf-p4c/mau/mau_visitor.h"
@@ -45,12 +46,10 @@
 #include "frontends/p4/externInstance.h"
 #include "frontends/p4/methodInstance.h"
 #include "ir/dbprint.h"
-#include "ir/ir-generated.h"
 #include "ir/ir.h"
 #include "lib/algorithm.h"
 #include "lib/error.h"
 #include "lib/safe_vector.h"
-#include "slice.h"
 
 namespace BFN {
 

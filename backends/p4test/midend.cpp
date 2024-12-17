@@ -43,6 +43,7 @@ limitations under the License.
 #include "midend/expandLookahead.h"
 #include "midend/flattenHeaders.h"
 #include "midend/flattenInterfaceStructs.h"
+#include "midend/flattenLogMsg.h"
 #include "midend/flattenUnions.h"
 #include "midend/global_copyprop.h"
 #include "midend/hsIndexSimplify.h"
@@ -101,6 +102,7 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          new P4::SimplifyParsers(),
          new P4::StrengthReduction(&typeMap),
          new P4::EliminateTuples(&typeMap),
+         new P4::FlattenLogMsg(&typeMap),
          new P4::SimplifyComparisons(&typeMap),
          new P4::CopyStructures(&typeMap, false),
          new P4::NestedStructs(&typeMap),

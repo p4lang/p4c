@@ -1,10 +1,10 @@
-#ifndef BACKENDS_TOFINO_BF_UTILS_INCLUDE_DYNAMIC_HASH_DYNAMIC_HASH_H_
-#define BACKENDS_TOFINO_BF_UTILS_INCLUDE_DYNAMIC_HASH_DYNAMIC_HASH_H_
+#ifndef BACKENDS_TOFINO_BF_UTILS_DYNAMIC_HASH_DYNAMIC_HASH_H_
+#define BACKENDS_TOFINO_BF_UTILS_DYNAMIC_HASH_DYNAMIC_HASH_H_
 
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "backends/tofino/bf-utils/include/dynamic_hash/bfn_hash_algorithm.h"
+#include "backends/tofino/bf-utils/dynamic_hash/bfn_hash_algorithm.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -213,4 +213,4 @@ void determine_tofino_regs(const ixbar_init_t *ixbar_init, const ixbar_input_t *
 }
 #endif
 
-#endif /* BACKENDS_TOFINO_BF_UTILS_INCLUDE_DYNAMIC_HASH_DYNAMIC_HASH_H_ */
+#endif /* BACKENDS_TOFINO_BF_UTILS_DYNAMIC_HASH_DYNAMIC_HASH_H_ */

@@ -22,20 +22,20 @@
 #include <algorithm>
 #include <boost/range/irange.hpp>
 
-#include "common/asm_output.h"
-#include "common/run_id.h"
-#include "logging/manifest.h"
-#include "mau/resource.h"
-#include "mau/action_data_bus.h"
-#include "mau/input_xbar.h"
-#include "mau/instruction_memory.h"
-#include "mau/memories.h"
-#include "mau/tofino/memories.h"
-#include "version.h"
+#include "backends/tofino/bf-p4c/common/asm_output.h"
+#include "backends/tofino/bf-p4c/common/run_id.h"
+#include "backends/tofino/bf-p4c/logging/manifest.h"
+#include "backends/tofino/bf-p4c/mau/resource.h"
+#include "backends/tofino/bf-p4c/mau/action_data_bus.h"
+#include "backends/tofino/bf-p4c/mau/input_xbar.h"
+#include "backends/tofino/bf-p4c/mau/instruction_memory.h"
+#include "backends/tofino/bf-p4c/mau/memories.h"
+#include "backends/tofino/bf-p4c/mau/tofino/memories.h"
+#include "backends/tofino/bf-p4c/version.h"
 
-#include "resources.h"
-#include "resources_parser.h"
-#include "resources_clot.h"
+#include "backends/tofino/bf-p4c/logging/resources.h"
+#include "backends/tofino/bf-p4c/logging/resources_parser.h"
+#include "backends/tofino/bf-p4c/logging/resources_clot.h"
 
 
 namespace std {

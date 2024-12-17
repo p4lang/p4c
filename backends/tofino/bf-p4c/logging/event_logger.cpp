@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "event_logger.h"
+#include "backends/tofino/bf-p4c/logging/event_logger.h"
 
 #include <rapidjson/prettywriter.h>
 #include <spdlog/sinks/basic_file_sink.h>
@@ -25,8 +25,8 @@
 
 #include <ctime>
 
-#include "event_log_schema.h"
-#include "rapidjson_adapter.h"
+#include "backends/tofino/bf-p4c/logging/event_log_schema.h"
+#include "backends/tofino/bf-p4c/logging/rapidjson_adapter.h"
 
 #ifndef EVENT_LOG_SCHEMA_VERSION
 #error "event_logger.cpp: EVENT_LOG_SCHEMA_VERSION is not defined!"

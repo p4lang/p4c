@@ -24,12 +24,12 @@
 #include <filesystem>
 #include <string>
 
-#include "../git_sha_version.h"  // for BF_P4C_GIT_SHA
 #include "backends/graphs/controls.h"
 #include "backends/graphs/graph_visitor.h"
 #include "backends/graphs/parsers.h"
 #include "backends/tofino/bf-p4c/common/run_id.h"
-#include "backends/tofino/bf-p4c/version.h"  // for BF_P4C_VERSION
+#include "backends/tofino/bf-p4c/git_sha_version.h"  // for BF_P4C_GIT_SHA
+#include "backends/tofino/bf-p4c/version.h"          // for BF_P4C_VERSION
 #include "ir/ir.h"
 
 using Manifest = Logging::Manifest;

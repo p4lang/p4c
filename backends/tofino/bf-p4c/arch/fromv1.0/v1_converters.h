@@ -78,15 +78,17 @@ class ControlConverter : public Transform {
         CHECK_NULL(structure);
     }
 
-    const IR::Node *postorder(IR::Declaration_Instance *node) {
+    const IR::Node *postorder(IR::Declaration_Instance *node) override {
         return substitute<IR::Declaration_Instance>(node);
     }
 
-    const IR::Node *postorder(IR::MethodCallStatement *node) {
+    const IR::Node *postorder(IR::MethodCallStatement *node) override {
         return substitute<IR::MethodCallStatement>(node);
     }
 
-    const IR::Node *postorder(IR::Property *node) { return substitute<IR::Property>(node); }
+    const IR::Node *postorder(IR::Property *node) override {
+        return substitute<IR::Property>(node);
+    }
 
     const IR::Node *postorder(IR::BFN::TnaControl *node) override;
 

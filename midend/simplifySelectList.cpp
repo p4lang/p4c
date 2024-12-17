@@ -37,7 +37,7 @@ void SubstituteStructures::explode(const IR::Expression *expression, const IR::T
 }
 
 const IR::Node *SubstituteStructures::postorder(IR::PathExpression *expression) {
-    if (findContext<IR::SelectExpression>() == nullptr) return expression;
+    if (!isInContext<IR::SelectExpression>()) return expression;
     if (getParent<IR::Member>() != nullptr) return expression;
     auto type = typeMap->getType(getOriginal(), true);
     if (!type->is<IR::Type_Struct>()) return expression;

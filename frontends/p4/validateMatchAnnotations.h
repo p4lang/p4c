@@ -35,7 +35,7 @@ class ValidateMatchAnnotations final : public Inspector {
     }
     void postorder(const IR::Annotation *annotation) override {
         if (annotation->name != IR::Annotation::matchAnnotation) return;
-        if (!findContext<IR::StructField>()) return;
+        if (!isInContext<IR::StructField>()) return;
         // FIXME: Check annotation kind
         const auto &expr = annotation->getExpr();
         if (expr.size() != 1)

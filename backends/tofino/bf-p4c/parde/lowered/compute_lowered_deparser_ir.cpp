@@ -96,7 +96,6 @@ ComputeLoweredDeparserIR::getPartialUnit(const IR::BFN::EmitChecksum *emitChecks
             }
         }
         if (newGroup) groups[newGroup] = lastPov;
-        int groupidx = 0;
         for (auto &group : groups) {
             phvSources.clear();
             clotSources.clear();
@@ -116,7 +115,6 @@ ComputeLoweredDeparserIR::getPartialUnit(const IR::BFN::EmitChecksum *emitChecks
                     clots.push_back(input);
                 }
             }
-            groupidx++;
         }
         unitConfig->povBit = lowerSingleBit(phv, emitChecksum->povBit, PHV::AllocContext::DEPARSER);
     }

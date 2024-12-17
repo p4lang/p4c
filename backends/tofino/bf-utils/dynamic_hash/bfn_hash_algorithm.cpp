@@ -1,10 +1,12 @@
-#include "backends/tofino/bf-utils/include/dynamic_hash/bfn_hash_algorithm.h"
+#include "backends/tofino/bf-utils/dynamic_hash/bfn_hash_algorithm.h"
 
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <vector>
 
 /**
  * These values are based on the crc calculations provided at this url:
@@ -75,13 +77,13 @@ int determine_msb(uint64_t value) {
 
 #define BUILD_CRC_ERRORS
 
-static char *bfn_crc_errors[BUILD_CRC_ERRORS] = {
+static const char *bfn_crc_errors[BUILD_CRC_ERRORS] = {
     "Polynomial is not odd",
     "Init value is larger than the polynomial",
     "Final xor value is larger than the polynomial",
 };
 
-bool verify_algorithm(bfn_hash_algorithm_t *alg, char **error_message) {
+bool verify_algorithm(bfn_hash_algorithm_t *alg, const char **error_message) {
     if ((alg->poly & 1) == 0) {
         if (error_message) *error_message = bfn_crc_errors[0];
         return false;
@@ -170,38 +172,36 @@ void initialize_crc_matrix(bfn_hash_algorithm_t *alg) {
     }
 
     uint32_t width = (alg->hash_bit_width + 7) / 8, i = 0;
-    uint8_t poly[width], rem[width];
-    memset(poly, 0, width * sizeof(uint8_t));
-    memset(rem, 0, width * sizeof(uint8_t));
+    std::vector<uint8_t> poly(width, 0), rem(width, 0);
 
     uint64_t poly_val = alg->poly;
     if (alg->reverse) {
         poly_val = invert_poly(poly_val, alg->hash_bit_width);
     }
-    construct_stream(alg, poly_val, poly);
+    construct_stream(alg, poly_val, poly.data());
     uint32_t byte = 0, bit = 0;
-    bool xor = false;
+    bool need_xor = false;
     if (alg->reverse) {
         for (byte = 0; byte < 256; byte++) {
-            memset(rem, 0, width * sizeof(uint8_t));
+            memset(rem.data(), 0, width * sizeof(uint8_t));
             rem[width - 1] = byte;
             for (bit = 0; bit < 8; bit++) {
-                xor = rem[width - 1] & 0x1;
-                shift_right(rem, alg->hash_bit_width);
-                if (xor) {
+                need_xor = rem[width - 1] & 0x1;
+                shift_right(rem.data(), alg->hash_bit_width);
+                if (need_xor) {
                     for (i = 0; i < width; i++) {
                         rem[i] ^= poly[i];
                     }
                 }
             }
-            memcpy(alg->crc_matrix[byte], rem, width);
+            memcpy(alg->crc_matrix[byte], rem.data(), width);
         }
     } else {
         uint8_t offset = alg->hash_bit_width % 8;
         uint8_t top_bit = offset == 0 ? 0x80 : 1 << ((offset - 1) % 8);
         uint8_t top_mask = top_bit == 0x80 ? 0xff : (top_bit << 1) - 1;
         for (byte = 0; byte < 256; byte++) {
-            memset(rem, 0, width * sizeof(uint8_t));
+            memset(rem.data(), 0, width * sizeof(uint8_t));
             if (offset == 0) {
                 rem[0] = byte;
             } else {
@@ -209,16 +209,16 @@ void initialize_crc_matrix(bfn_hash_algorithm_t *alg) {
                 rem[1] = byte << offset;
             }
             for (bit = 0; bit < 8; bit++) {
-                xor = rem[0] & top_bit;
-                shift_left(rem, alg->hash_bit_width);
-                if (xor) {
+                need_xor = rem[0] & top_bit;
+                shift_left(rem.data(), alg->hash_bit_width);
+                if (need_xor) {
                     for (i = 0; i < width; i++) {
                         rem[i] ^= poly[i];
                     }
                 }
                 rem[0] &= top_mask;
             }
-            memcpy(alg->crc_matrix[byte], rem, width);
+            memcpy(alg->crc_matrix[byte], rem.data(), width);
         }
     }
 
@@ -238,11 +238,10 @@ void calculate_crc(bfn_hash_algorithm_t *alg, uint32_t hash_output_bits, uint8_t
     uint8_t idx = 0;
     uint8_t width = (alg->hash_bit_width + 7) / 8;
     uint8_t hash_output_bytes = (hash_output_bits + 7) / 8;
-    uint8_t final_xor[width];
+    std::vector<uint8_t> final_xor(width, 0);
     memset(crc, 0, hash_output_bytes * sizeof(uint8_t));
-    memset(final_xor, 0, width * sizeof(uint8_t));
     construct_stream(alg, alg->init, crc);
-    construct_stream(alg, alg->final_xor, final_xor);
+    construct_stream(alg, alg->final_xor, final_xor.data());
     uint8_t *crc_str = crc + hash_output_bytes - width;
 
     for (i = 0; i < stream_len; i++) {

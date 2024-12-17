@@ -1581,12 +1581,12 @@ bool CreateSaluInstruction::isComplexInstruction(const IR::Operation_Binary *op)
     // IR::L* operators (LAnd, LOr, etc.) are working with predicates
 
     bool ret = false;
-    for (auto oper : {op->left, op->right}) {
-        ret |= oper->is<IR::Add>() | oper->is<IR::AddSat>();
-        ret |= oper->is<IR::Sub>() | oper->is<IR::SubSat>();
-        ret |= oper->is<IR::BAnd>() | oper->is<IR::BOr>() | oper->is<IR::BXor>();
-        ret |= oper->is<IR::Div>() | oper->is<IR::Mod>();
-        ret |= oper->is<IR::Neg>();
+    for (const auto *oper : {op->left, op->right}) {
+        ret = ret || oper->is<IR::Add>() || oper->is<IR::AddSat>();
+        ret = ret || oper->is<IR::Sub>() || oper->is<IR::SubSat>();
+        ret = ret || oper->is<IR::BAnd>() || oper->is<IR::BOr>() || oper->is<IR::BXor>();
+        ret = ret || oper->is<IR::Div>() || oper->is<IR::Mod>();
+        ret = ret || oper->is<IR::Neg>();
     }
 
     return ret;

@@ -273,8 +273,7 @@ TypeInferenceBase::PreorderResult TypeInferenceBase::preorderDeclarationInstance
             typeError("%1%: initializers only allowed for extern instances", decl->initializer);
             return {decl, true};
         }
-        if (!simpleType->template is<IR::Type_Package>() &&
-            (findContext<IR::IContainer>() == nullptr)) {
+        if (!simpleType->template is<IR::Type_Package>() && !isInContext<IR::IContainer>()) {
             P4::error(ErrorType::ERR_INVALID, "%1%: cannot instantiate at top-level", decl);
             return {decl, false};
         }

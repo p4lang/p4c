@@ -2101,7 +2101,6 @@ const ALUParameter *Format::Use::find_param_alloc(UniqueLocationKey &key,
     Log::TempIndent indent;
     LOG3("  Finding ALU Param with container " << indent << indent << key.container
                                                << " for action " << key.action_name);
-    bool container_match = false;
     for (auto alu_position : action_alu_positions) {
         LOG3(alu_position);
         if (alu_position.alu_op->container() != key.container) continue;
@@ -2113,7 +2112,6 @@ const ALUParameter *Format::Use::find_param_alloc(UniqueLocationKey &key,
                   "in container %s in action %s",
                   key.container, key.action_name);
         rv = loc;
-        container_match |= alu_position.alu_op->container() == key.container;
         if (alu_pos_p) *alu_pos_p = new ALUPosition(alu_position);
     }
     if (!rv) {

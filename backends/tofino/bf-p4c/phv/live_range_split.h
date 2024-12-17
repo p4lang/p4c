@@ -22,9 +22,9 @@
 #include <set>
 #include <vector>
 
-#include "phv/analysis/dark_live_range.h"
-#include "phv/fieldslice_live_range.h"
-#include "phv/phv_fields.h"
+#include "backends/tofino/bf-p4c/phv/analysis/dark_live_range.h"
+#include "backends/tofino/bf-p4c/phv/fieldslice_live_range.h"
+#include "backends/tofino/bf-p4c/phv/phv_fields.h"
 
 namespace PHV {
 

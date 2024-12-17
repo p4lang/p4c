@@ -146,26 +146,28 @@ AllocateTempsAndFinalizeLiverange::AllocateTempsAndFinalizeLiverange(PhvInfo &ph
     const auto get_temp_vars = [finalize_lr]() {
         return finalize_lr->unallocated_temp_var_live_ranges();
     };
-    addPasses({pragma_no_init, tb_mutex,
-               new PassIf([this] { return ts_i.getActualState() == State::FAILURE; },
-                          {new UpdateDeparserStage(phv_i)}),
-               finalize_lr,
-               new PassIf([get_temp_vars]() { return !get_temp_vars().empty(); },
-                          {
-                              new VisitFunctor([get_temp_vars, &phv]() {
-                                  auto rst = allocate_temp_vars(phv, get_temp_vars());
-                                  if (!rst.ok) {
-                                      error("Failed to allocated temp vars: %1%", rst.err.str());
-                                  }
-                              }),
-                              // TODO: even if temp var allocation does not introduce
-                              // a container conflict, the table layout does not have the
-                              // correct action data as this temp var was not allocated during last
-                              // TP. So we need to redo table placement.
-                              new VisitFunctor([]() {
-                                  throw TablePlacement::FinalRerunTablePlacementTrigger(false);
-                              }),
-                          })});
+    addPasses({
+        pragma_no_init,
+        tb_mutex,
+        new PassIf([this] { return ts_i.getActualState() == State::FAILURE; },
+                   {new UpdateDeparserStage(phv_i)}),
+        finalize_lr,
+        new PassIf([get_temp_vars]() { return !get_temp_vars().empty(); },
+                   {
+                       new VisitFunctor([get_temp_vars, &phv]() {
+                           auto rst = allocate_temp_vars(phv, get_temp_vars());
+                           if (!rst.ok) {
+                               error("Failed to allocated temp vars: %1%", rst.err.str());
+                           }
+                       }),
+                       // TODO: even if temp var allocation does not introduce
+                       // a container conflict, the table layout does not have the
+                       // correct action data as this temp var was not allocated during last
+                       // TP. So we need to redo table placement.
+                       new VisitFunctor(
+                           []() { throw TablePlacement::FinalRerunTablePlacementTrigger(false); }),
+                   }),
+    });
 }
 
 }  // namespace PHV

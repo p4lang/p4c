@@ -21,8 +21,8 @@
 
 #include <iostream>
 
-#include "clot_info.h"
-#include "parde/parde_visitor.h"
+#include "backends/tofino/bf-p4c/parde/clot/clot_info.h"
+#include "backends/tofino/bf-p4c/parde/parde_visitor.h"
 
 class CheckClotGroups : public DeparserInspector {
     const PhvInfo &phv;

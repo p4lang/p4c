@@ -28,6 +28,7 @@
 #include "backends/tofino/bf-p4c/logging/constrained_fields.h"
 #include "backends/tofino/bf-p4c/logging/group_constraint_extractor.h"
 #include "backends/tofino/bf-p4c/logging/logging.h"
+#include "backends/tofino/bf-p4c/logging/phv_schema.h"
 #include "backends/tofino/bf-p4c/mau/action_analysis.h"
 #include "backends/tofino/bf-p4c/mau/table_summary.h"
 #include "backends/tofino/bf-p4c/parde/clot/clot_info.h"
@@ -39,7 +40,6 @@
 #include "backends/tofino/bf-p4c/phv/pragma/phv_pragmas.h"
 #include "backends/tofino/bf-p4c/phv/utils/utils.h"
 #include "ir/ir.h"
-#include "phv_schema.h"
 
 using Logging::Phv_Schema_Logger;
 using namespace P4;

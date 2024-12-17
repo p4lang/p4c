@@ -16,11 +16,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "ixbar_expr.h"
+#include "backends/tofino/bf-p4c/mau/ixbar_expr.h"
 
-#include "common/slice.h"
-#include "input_xbar.h"
-#include "resource.h"
+#include "backends/tofino/bf-p4c/common/slice.h"
+#include "backends/tofino/bf-p4c/mau/input_xbar.h"
+#include "backends/tofino/bf-p4c/mau/resource.h"
 
 void P4HashFunction::slice(le_bitrange hash_slice) {
     le_bitrange shifted_hash_bits = hash_slice.shiftedByBits(hash_bits.lo);

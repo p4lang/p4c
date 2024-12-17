@@ -263,8 +263,8 @@ class FieldLevelOptimisation : public Inspector {
     ordered_map<const IR::MAU::Table *, int> table_to_index;
     ordered_map<int, const IR::MAU::Table *> index_to_table;
 
-    bool preorder(const IR::MAU::Table *table);
-    bool preorder(const IR::Expression *expression);
+    bool preorder(const IR::MAU::Table *table) override;
+    bool preorder(const IR::Expression *expression) override;
 
     ordered_set<const IR::MAU::Table *> get_tables(bitvec tables_bv);
     ordered_set<const PHV::Field *> get_fields(bitvec fields_bv);

@@ -23,9 +23,9 @@
 #include "backends/tofino/bf-p4c/ir/control_flow_visitor.h"
 #include "backends/tofino/bf-p4c/mau/default_next.h"
 #include "backends/tofino/bf-p4c/mau/jbay_next_table.h"
+#include "backends/tofino/bf-p4c/mau/mau_visitor.h"
 #include "backends/tofino/bf-p4c/mau/simple_power_graph.h"
 #include "lib/ordered_set.h"
-#include "mau_visitor.h"
 
 namespace MauPower {
 

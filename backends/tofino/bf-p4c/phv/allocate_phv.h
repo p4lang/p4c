@@ -52,7 +52,8 @@ namespace PHV {
 
 /// AllocUtils is a collection of const references to misc passes that PHV allocation depends on.
 /// It also provides some helper methods that are used by different allocation strategies.
-struct AllocUtils {
+class AllocUtils {
+ public:
     // PHV fields and clot info.
     const PhvInfo &phv;
     const ClotInfo &clot;

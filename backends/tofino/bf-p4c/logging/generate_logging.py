@@ -1185,7 +1185,7 @@ class Generator:
         self.write('#include <memory>\n')
         self.write('#include <string>\n')
         self.write('#include <vector>\n')
-        self.write('#include <logging.h>\n')
+        self.write('\n#include \"backends/tofino/bf-p4c/logging/logging.h\"\n\n')
         self.write('namespace Logging {\n')
         self.write('\n')
 

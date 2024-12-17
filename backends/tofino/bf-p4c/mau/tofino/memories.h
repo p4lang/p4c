@@ -112,7 +112,7 @@ struct Memories : public ::Memories {
         int hash_group = 0;     // Each hash function requires a different hash function
         bool init = false;
 
-        search_bus_info() {}
+        search_bus_info() = default;
         search_bus_info(cstring n, int ws, int hg)
             : name(n), width_section(ws), hash_group(hg), init(true) {}
 
@@ -392,7 +392,7 @@ struct Memories : public ::Memories {
             : ta(t), depth(d), number(n), type(ty) {}
         SRAM_group(table_alloc *t, int d, int w, int n, int h, type_t ty)
             : ta(t), depth(d), width(w), number(n), hash_group(h), type(ty) {}
-        void dbprint(std::ostream &out) const;
+        void dbprint(std::ostream &out) const override;
         search_bus_info build_search_bus(int width_sect) const {
             return search_bus_info(ta->table->name, width_sect, hash_group);
         }
@@ -413,11 +413,8 @@ struct Memories : public ::Memories {
             return type == STATS || type == METER || type == REGISTER || type == SELECTOR;
         }
         bool sel_act_placed(SRAM_group *corr) {
-            if (type == ACTION && sel.sel_linked() && sel.is_sel_corr_group(corr) &&
-                corr->sel.action_all_placed())
-                return true;
-            else
-                return false;
+            return type == ACTION && sel.sel_linked() && sel.is_sel_corr_group(corr) &&
+                   corr->sel.action_all_placed();
         }
         int RAMs_required() const {
             if (type == SELECTOR) {
@@ -689,23 +686,23 @@ struct Memories : public ::Memories {
     friend std::ostream &operator<<(std::ostream &, const safe_vector<Memories::table_alloc *> &);
 
  public:
-    bool allocate_all();
-    bool allocate_all_dummies();
-    void update(cstring name, const Use &alloc);
-    void update(const std::map<UniqueId, Use> &alloc);
-    void remove(cstring name, const Use &alloc);
-    void remove(const std::map<UniqueId, Use> &alloc);
-    void clear();
+    bool allocate_all() override;
+    bool allocate_all_dummies() override;
+    void update(cstring name, const Use &alloc) override;
+    void update(const std::map<UniqueId, Use> &alloc) override;
+    void remove(cstring name, const Use &alloc) override;
+    void remove(const std::map<UniqueId, Use> &alloc) override;
+    void clear() override;
     void add_table(const IR::MAU::Table *t, const IR::MAU::Table *gw, TableResourceAlloc *resources,
                    const LayoutOption *lo, const ActionData::Format::Use *af,
                    ActionData::FormatType_t ft, int entries, int stage_table,
-                   attached_entries_t attached_entries);
-    void shrink_allowed_lts() { logical_tables_allowed--; }
-    void fill_placed_scm_table(const IR::MAU::Table *, const TableResourceAlloc *) {
+                   attached_entries_t attached_entries) override;
+    void shrink_allowed_lts() override { logical_tables_allowed--; }
+    void fill_placed_scm_table(const IR::MAU::Table *, const TableResourceAlloc *) override {
         BUG("SCM Not supported on this device");
     }
-    void printOn(std::ostream &) const;
-    void visitUse(const Use &, std::function<void(cstring &, update_type_t)> fn);
+    void printOn(std::ostream &) const override;
+    void visitUse(const Use &, std::function<void(cstring &, update_type_t)> fn) override;
     const ordered_map<cstring, int> collect_sram_block_alloc_info() override {
         const BFN::Alloc2Dbase<cstring> *arrays[] = {&tcam_use,
                                                      &sram_print_search_bus,

@@ -58,7 +58,7 @@ const IR::Node *DoRemoveExits::preorder(IR::ExitStatement *statement) {
     auto left = new IR::PathExpression(IR::Type::Boolean::get(), returnVar);
     auto trueVal = new IR::BoolLiteral(true);
     IR::Statement *rv = new IR::AssignmentStatement(statement->srcInfo, left, trueVal);
-    if (findContext<IR::LoopStatement>()) rv = new IR::BlockStatement({rv, new IR::BreakStatement});
+    if (isInContext<IR::LoopStatement>()) rv = new IR::BlockStatement({rv, new IR::BreakStatement});
     return rv;
 }
 

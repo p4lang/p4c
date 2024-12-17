@@ -32,7 +32,7 @@ struct CollectStridedHeaders : public Inspector {
 
     explicit CollectStridedHeaders(PhvInfo &p) : phv(p) {}
 
-    bool preorder(const IR::HeaderStack *hs) {
+    bool preorder(const IR::HeaderStack *hs) override {
         auto state = findContext<IR::BFN::ParserState>();
 
         if (state && state->stride) {

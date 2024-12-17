@@ -336,7 +336,7 @@ class TablesInKeys : public Inspector {
         return Inspector::init_apply(node);
     }
     void postorder(const IR::MethodCallExpression *mce) override {
-        if (!findContext<IR::Key>()) return;
+        if (!isInContext<IR::Key>()) return;
         HasTableApply hta(typeMap);
         hta.setCalledBy(this);
         (void)mce->apply(hta, getContext());
@@ -358,7 +358,7 @@ class TablesInActions : public Inspector {
  public:
     explicit TablesInActions(TypeMap *typeMap) : typeMap(typeMap) {}
     void postorder(const IR::MethodCallExpression *expression) override {
-        if (findContext<IR::ActionList>()) {
+        if (isInContext<IR::ActionList>()) {
             HasTableApply hta(typeMap);
             hta.setCalledBy(this);
             (void)expression->apply(hta, getContext());

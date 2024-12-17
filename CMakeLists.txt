@@ -140,9 +140,6 @@ if (CMAKE_UNITY_BUILD)
   set(CMAKE_UNITY_BUILD_BATCH_SIZE 10 CACHE UNINITIALIZED "Set the unity build batch size.")
 endif ()
 
-# Always build position-independent code. This is important when linking with Protobuf.
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
 # Set the required options for a (mostly) static release build.
 if(STATIC_BUILD_WITH_DYNAMIC_GLIBC OR STATIC_BUILD_WITH_DYNAMIC_STDLIB)
   if (STATIC_BUILD_WITH_DYNAMIC_GLIBC AND STATIC_BUILD_WITH_DYNAMIC_STDLIB)

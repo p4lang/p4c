@@ -190,7 +190,6 @@ genrule(
             $(location ir/type.def) \
             $(location ir/expression.def) \
             $(location ir/ir.def) \
-            $(location ir/v1.def) \
             $(locations :ir_extra_defs)
     """,
     tools = [":ir_generator"],

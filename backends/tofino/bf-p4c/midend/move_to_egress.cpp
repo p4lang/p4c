@@ -16,7 +16,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "move_to_egress.h"
+#include "backends/tofino/bf-p4c/midend/move_to_egress.h"
 
 #include "ir/dump.h"
 
@@ -68,7 +68,7 @@ MoveToEgress::MoveToEgress(BFN::EvaluatorPass *ev)
                   }
               }
           },
-          [this](const IR::Node *root) {
+          [](const IR::Node *root) {
               if (LOGGING(5))
                   dump(::Log::Detail::fileLogOutput(__FILE__), root);
               else

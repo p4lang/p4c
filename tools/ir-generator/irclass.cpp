@@ -530,7 +530,7 @@ int IrClass::generateConstructor(const ctor_args_t &arglist, const IrMethod *use
     }
 
     if (kind == NodeKind::Abstract) ctor->access = IrElement::Protected;
-    ctor->inImpl = true;
+    ctor->inImpl = false;
     elements.push_back(ctor);
     return optargs;
 }

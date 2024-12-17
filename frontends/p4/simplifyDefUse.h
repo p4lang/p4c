@@ -38,7 +38,7 @@ class DoSimplifyDefUse : public Transform {
     }
 
     const IR::Node *postorder(IR::Function *function) override {
-        if (findContext<IR::Declaration_Instance>() == nullptr)
+        if (!isInContext<IR::Declaration_Instance>())
             // not an abstract function implementation: these
             // are processed as part of the control body
             return process(function);

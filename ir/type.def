@@ -189,7 +189,7 @@ class Type_Bits : Type_Base {
     static Type_Bits get(const Util::SourceInfo &si, Expression expression, bool isSigned = false);
     static Type_Bits get(const Util::SourceInfo &si, int sz, bool isSigned = false);
     static Type_Bits get(int sz, bool isSigned = false);
-    cstring baseName() const { return isSigned ? "int"_cs : "bit"_cs; }
+    inline cstring baseName() const { return isSigned ? "int"_cs : "bit"_cs; }
     int width_bits() const override { return size; }
 
     toString{ return absl::StrCat(baseName(), "<", size, ">"); }
@@ -226,9 +226,9 @@ class Parameter : Declaration, IAnnotated {
     optional NullOK Expression defaultValue;
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
-    bool hasOut() const
+    inline bool hasOut() const
     { return direction == IR::Direction::Out || direction == IR::Direction::InOut; }
-    bool isOptional() const {
+    inline bool isOptional() const {
         return getAnnotation(Annotation::optionalAnnotation) != nullptr; }
     dbprint { out << annotations << direction << (direction != IR::Direction::None ? " " : "")
                   << type << ' ' << name; }
@@ -237,23 +237,23 @@ class Parameter : Declaration, IAnnotated {
 class ParameterList : ISimpleNamespace {
     optional inline IndexedVector<Parameter> parameters;
     validate{ parameters.check_null(); }
-    Util::Enumerator<Parameter>* getEnumerator() const {
+    inline Util::Enumerator<Parameter>* getEnumerator() const {
         return parameters.getEnumerator(); }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return parameters.getDeclarations(); }
-    size_t size() const { return parameters.size(); }
-    bool empty() const { return size() == 0; }
-    IR::Parameter getParameter(cstring name) const {
+    inline size_t size() const { return parameters.size(); }
+    inline bool empty() const { return size() == 0; }
+    inline IR::Parameter getParameter(cstring name) const {
         return parameters.getDeclaration<Parameter>(name); }
-    IR::Parameter getParameter(std::string_view name) const {
+    inline IR::Parameter getParameter(std::string_view name) const {
         return parameters.getDeclaration<Parameter>(name); }
-    IR::Parameter getParameter(unsigned index) const {
+    inline IR::Parameter getParameter(unsigned index) const {
         for (auto &param : parameters)
             if (0 == index--) return param;
         BUG("Only %1% parameters; index #%2% requested", size(), size()+index); }
     IR::IDeclaration getDeclByName(cstring name) const override { return getParameter(name); }
     IR::IDeclaration getDeclByName(std::string_view name) const override { return getParameter(name); }
-    void push_back(const Parameter *p) { parameters.push_back(p); }
+    inline void push_back(const Parameter *p) { parameters.push_back(p); }
     toString {
         return absl::StrJoin(parameters, ", ",
                              [](std::string *out, const auto *p) {
@@ -366,13 +366,13 @@ class TypeParameters : ISimpleNamespace {
     optional inline IndexedVector<Type_Var> parameters;
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return parameters.getDeclarations(); }
-    bool empty() const { return parameters.empty(); }
-    size_t size() const { return parameters.size(); }
+    inline bool empty() const { return parameters.empty(); }
+    inline size_t size() const { return parameters.size(); }
     IR::IDeclaration getDeclByName(cstring name) const override {
         return parameters.getDeclaration(name); }
     IR::IDeclaration getDeclByName(std::string_view name) const override {
         return parameters.getDeclaration(name); }
-    void push_back(Type_Var tv) { parameters.push_back(tv); }
+    inline void push_back(Type_Var tv) { parameters.push_back(tv); }
     validate{ parameters.check_null(); }
     toString {
         if (parameters.size() == 0)
@@ -403,9 +403,9 @@ abstract Type_StructLike : Type_Declaration, INestedNamespace, ISimpleNamespace,
     Vector<Annotation> &getAnnotations() override { return annotations; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return fields.getDeclarations(); }
-    StructField getField(cstring name) const {
+    inline StructField getField(cstring name) const {
         return fields.getDeclaration<StructField>(name); }
-    int getFieldIndex(cstring name) const {
+    inline int getFieldIndex(cstring name) const {
         int index_pos = 0;
         for (auto f : fields) {
             if (f->name == name)
@@ -420,7 +420,7 @@ abstract Type_StructLike : Type_Declaration, INestedNamespace, ISimpleNamespace,
     /// Offset for all fields will be correct if:
     ///  - the type has only fixed width fields
     ///  - the type has fixed width fields with only one varbit field as a last member.
-    int getFieldBitOffset(cstring name) const {
+    inline int getFieldBitOffset(cstring name) const {
         int offset = 0;
         for (auto f : fields) {
             if (f->name == name) {
@@ -467,7 +467,7 @@ class Type_HeaderUnion : Type_StructLike {
             rv = std::max(rv, f->type->width_bits());
         return rv; }
     /// start offset of any field in a union is 0
-    int getFieldBitOffset(cstring name) const {
+    inline int getFieldBitOffset(cstring name) const {
         for (auto f : fields) {
             if (f->name == name) {
                 return 0;
@@ -776,9 +776,14 @@ abstract Type_MethodBase : Type, IMayBeGenericType, ISimpleNamespace {
     // nullptr for constructors or functors; nullptr is not void
     ParameterList parameters;
 
-    size_t maxParameterCount() const { return parameters->size(); }
-    size_t minParameterCount() const;
-    virtual TypeParameters getTypeParameters() const override { return typeParameters; }
+    inline size_t maxParameterCount() const { return parameters->size(); }
+    inline size_t minParameterCount() const {
+        size_t rv = 0;
+        for (auto p : *parameters)
+            if (!p->isOptional()) ++rv;
+        return rv;
+    }
+    TypeParameters getTypeParameters() const override { return typeParameters; }
     void dbprint(std::ostream& out) const override;
     toString { return "<Method>"_cs; }
     const IR::Type* getP4Type() const override { return nullptr; }
@@ -836,9 +841,9 @@ class Method : Declaration, IAnnotated, IFunctional, ISimpleNamespace {
     Type_Method type;
     optional bool isAbstract = false;
     optional inline Vector<Annotation> annotations;
-    size_t maxParameterCount() const { return type->maxParameterCount(); }
-    size_t minParameterCount() const { return type->minParameterCount(); }
-    void setAbstract() { isAbstract = true; }
+    inline size_t maxParameterCount() const { return type->maxParameterCount(); }
+    inline size_t minParameterCount() const { return type->minParameterCount(); }
+    inline void setAbstract() { isAbstract = true; }
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
     ParameterList getParameters() const override { return type->parameters; }

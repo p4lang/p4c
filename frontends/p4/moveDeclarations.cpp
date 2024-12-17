@@ -19,7 +19,7 @@ limitations under the License.
 namespace P4 {
 
 const IR::Node *MoveDeclarations::postorder(IR::P4Action *action) {
-    if (findContext<IR::P4Control>() == nullptr) {
+    if (!isInContext<IR::P4Control>()) {
         // Else let the parent control get these
         IR::IndexedVector<IR::StatOrDecl> body;
         const auto &m = getMoves();
@@ -87,8 +87,8 @@ const IR::Node *MoveDeclarations::postorder(IR::Declaration_Variable *decl) {
 }
 
 const IR::Node *MoveDeclarations::postorder(IR::Declaration_Constant *decl) {
-    if (findContext<IR::P4Control>() == nullptr && findContext<IR::P4Action>() == nullptr &&
-        findContext<IR::P4Parser>() == nullptr)
+    if (!isInContext<IR::P4Control>() && !isInContext<IR::P4Action>() &&
+        !isInContext<IR::P4Parser>())
         // This is a global declaration
         return decl;
     addMove(decl);
@@ -180,7 +180,7 @@ const IR::Node *MoveInitializers::postorder(IR::ParserState *state) {
 }
 
 const IR::Node *MoveInitializers::postorder(IR::Path *path) {
-    if (!findContext<IR::ParserState>()) return path;
+    if (!isInContext<IR::ParserState>()) return path;
 
     if (!oldStart || !loopsBackToStart || path->name != IR::ParserState::start) return path;
 

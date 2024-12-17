@@ -1130,7 +1130,7 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::P4Action *action) override {
-        BUG_CHECK(findContext<IR::P4Program>() == nullptr, "Unexpected action");
+        BUG_CHECK(!isInContext<IR::P4Program>(), "Unexpected action");
         LOG3("FU Visiting action " << action);
         unreachable = false;
         currentPoint.assign(context, action);

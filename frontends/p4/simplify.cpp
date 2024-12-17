@@ -31,8 +31,8 @@ const IR::Node *DoSimplifyControlFlow::postorder(IR::BlockStatement *statement) 
         // Cannot remove these blocks
         return statement;
     }
-    bool inBlock = findContext<IR::Statement>() != nullptr;
-    bool inState = findContext<IR::ParserState>() != nullptr;
+    bool inBlock = isInContext<IR::Statement>();
+    bool inState = isInContext<IR::ParserState>();
     if (!(inBlock || inState)) return statement;
 
     if (parent->is<IR::BlockStatement>() || parent->is<IR::ParserState>()) {
