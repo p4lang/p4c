@@ -85,7 +85,7 @@ add_definitions("-DRESOURCES_SCHEMA_VERSION=\"${RESOURCES_SCHEMA_VERSION}\"")
 
 set (HAVE_LIBBOOST_GRAPH 1)
 
-set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${Boost_GRAPH_LIBRARY};${LIBDYNHASH_LIBRARY};${Z3_LIB}")
+set (P4C_LIB_DEPS "${P4C_LIB_DEPS};${Boost_GRAPH_LIBRARY};${Z3_LIB}")
 set (P4C_LIB_DEPS ${P4C_LIB_DEPS} PARENT_SCOPE)
 
 add_subdirectory(logging)
@@ -1038,7 +1038,7 @@ if (ENABLE_GTESTS)
 
   set (GTEST_SOURCES ${GTEST_SOURCES} ${GTEST_BF_P4C_SOURCES} PARENT_SCOPE)
   set (GTEST_LDADD ${GTEST_LDADD}
-      "bf_gtest_support;tofinobackend;${LIBDYNHASH_LIBRARY};bfn_p4runtime" PARENT_SCOPE)
+      "bf_gtest_support;tofinobackend;bfn_p4runtime" PARENT_SCOPE)
 
   # TODO: re-enable this test once p4-test is added to the build system
   # add_test(NAME test_p4c_driver
