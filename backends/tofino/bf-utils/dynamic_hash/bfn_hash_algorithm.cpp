@@ -1,10 +1,12 @@
-#include "backends/tofino/bf-utils/include/dynamic_hash/bfn_hash_algorithm.h"
+#include "backends/tofino/bf-utils/dynamic_hash/bfn_hash_algorithm.h"
 
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <vector>
 
 /**
  * These values are based on the crc calculations provided at this url:
