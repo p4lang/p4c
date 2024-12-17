@@ -10,3 +10,4 @@ add_library(dynhash SHARED EXCLUDE_FROM_ALL $<TARGET_OBJECTS:dynhash_o>)
 add_library(tofino_dynhash STATIC dynamic_hash.cpp bfn_hash_algorithm.cpp)
 set_target_properties(tofino_dynhash PROPERTIES OUTPUT_NAME dynhash)
 target_compile_definitions(tofino_dynhash PUBLIC NO_BFSYSLIBS)
+
