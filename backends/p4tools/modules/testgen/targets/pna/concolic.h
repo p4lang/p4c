@@ -15,6 +15,16 @@ class PnaDpdkConcolic : public Concolic {
     static const ConcolicMethodImpls::ImplList *getPnaDpdkConcolicMethodImpls();
 };
 
+class PnaP4TCConcolic : public Concolic {
+ private:
+    /// This is the list of concolic functions that are implemented in this class.
+    static const ConcolicMethodImpls::ImplList PNA_P4TC_CONCOLIC_METHOD_IMPLS;
+
+ public:
+    /// @returns the concolic  functions that are implemented for this particular target.
+    static const ConcolicMethodImpls::ImplList *getPnaP4TCConcolicMethodImpls();
+};
+
 }  // namespace P4::P4Tools::P4Testgen::Pna
 
 #endif /* BACKENDS_P4TOOLS_MODULES_TESTGEN_TARGETS_PNA_CONCOLIC_H_ */
