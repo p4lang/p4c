@@ -419,5 +419,4 @@ void initialize_crc_matrix(bfn_hash_algorithm_t *alg);
 void calculate_crc(bfn_hash_algorithm_t *alg, uint32_t hash_output_bits, uint8_t *stream,
                    uint32_t stream_len, uint8_t *crc);
 
-
 #endif /* BACKENDS_TOFINO_BF_UTILS_DYNAMIC_HASH_BFN_HASH_ALGORITHM_H_ */
