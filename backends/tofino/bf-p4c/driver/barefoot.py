@@ -76,19 +76,6 @@ def checkEnv():
     return None
 
 
-# Search the environment for assets
-enable_bf_asm = os.getenv("ENABLE_BF_ASM")
-
-if enable_bf_asm:
-    if os.environ['P4C_BUILD_TYPE'] == "DEVELOPER":
-        bfas = find_file('bf-asm', 'bfas')
-    else:
-        bfas = find_file(os.environ['P4C_BIN_DIR'], 'bfas')
-
-    bfrt_schema = find_file(os.environ['P4C_BIN_DIR'], 'bfrt_schema.py')
-    p4c_gen_conf = find_file(os.environ['P4C_BIN_DIR'], 'p4c-gen-conf')
-
-
 class BarefootBackend(BackendDriver):
     """!
     Customized version of public driver to specify our options,
@@ -115,10 +102,6 @@ class BarefootBackend(BackendDriver):
         self.add_command('preclean-runtime', 'rm')
         self.add_command('preprocessor', 'cc')
         self.add_command('compiler', os.path.join(os.environ['P4C_BIN_DIR'], 'p4c-barefoot'))
-        if enable_bf_asm:
-            self.add_command('assembler', bfas)
-            self.add_command('bf-rt-verifier', bfrt_schema)
-            self.add_command('p4c-gen-conf', p4c_gen_conf)
         self.add_command('cleaner', 'rm')
 
         self.runVerifiers = False
@@ -195,6 +178,12 @@ class BarefootBackend(BackendDriver):
             action="store_true",
             default=False,
             help="Add source outputs to the archive.",
+        )
+        self._argGroup.add_argument(
+            "--enable-bf-asm",
+            action="store_true",
+            default=False,
+            help="Use the assembler to generate a binary.",
         )
         self._argGroup.add_argument(
             "--bf-rt-schema",
@@ -498,6 +487,20 @@ class BarefootBackend(BackendDriver):
         """! Main parsing or command line options
         @param opts Object holding set arguments
         """
+        # Add assembler options if they are available.
+        if opts.enable_bf_asm or os.getenv("ENABLE_BF_ASM"):
+            if os.environ['P4C_BUILD_TYPE'] == "DEVELOPER":
+                bfas = find_file('bf-asm', 'bfas')
+            else:
+                bfas = find_file(os.environ['P4C_BIN_DIR'], 'bfas')
+
+            bfrt_schema = find_file(os.environ['P4C_BIN_DIR'], 'bfrt_schema.py')
+            p4c_gen_conf = find_file(os.environ['P4C_BIN_DIR'], 'p4c-gen-conf')
+            self.add_command('assembler', bfas)
+            self.add_command('bf-rt-verifier', bfrt_schema)
+            self.add_command('p4c-gen-conf', p4c_gen_conf)
+            self._commandsEnabled.append('assembler')
+
         BackendDriver.process_command_line_options(self, opts)
 
         # P4 program name is by default derived from the source file name,
