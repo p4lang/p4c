@@ -61,7 +61,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name(".rewrite_mac") action rewrite_mac(@name("smac") bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
     }
-    @name("._drop") action _drop() {
+    @name("egress._drop") action _drop() {
         mark_to_drop(standard_metadata);
     }
     @name("egress.send_frame") table send_frame_0 {
@@ -94,10 +94,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".set_dmac") action set_dmac(@name("dmac") bit<48> dmac) {
         hdr.ethernet.dstAddr = dmac;
     }
-    @name("._drop") action _drop_2() {
+    @name("ingress._drop") action _drop_2() {
         mark_to_drop(standard_metadata);
     }
-    @name("._drop") action _drop_3() {
+    @name("ingress._drop") action _drop_3() {
         mark_to_drop(standard_metadata);
     }
     @name(".set_nhop") action set_nhop(@name("nhop_ipv4") bit<32> nhop_ipv4_1, @name("port") bit<9> port) {
