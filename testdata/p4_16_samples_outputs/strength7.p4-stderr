@@ -1,0 +1,18 @@
+strength7.p4(27): [--Wwarn=overflow] warning: x >> 9: shifting value with 8 bits by 9
+        bit<8> z = (x >> 9) << 9;
+                    ^^^^^^
+strength7.p4(27): [--Wwarn=overflow] warning: x >> 9 << 9: shifting value with 8 bits by 9
+        bit<8> z = (x >> 9) << 9;
+                   ^^^^^^^^^^^^^
+strength7.p4(42): [--Wwarn=overflow] warning: x << 9: shifting value with 8 bits by 9
+        bit<8> z = (x << 9) >> 9;
+                    ^^^^^^
+strength7.p4(42): [--Wwarn=overflow] warning: x << 9 >> 9: shifting value with 8 bits by 9
+        bit<8> z = (x << 9) >> 9;
+                   ^^^^^^^^^^^^^
+strength7.p4(26): [--Wwarn=unused] warning: 'x' is unused
+    action shrl3(bit<8> x) {
+                        ^
+strength7.p4(41): [--Wwarn=unused] warning: 'x' is unused
+    action shlr3(bit<8> x) {
+                        ^

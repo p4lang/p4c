@@ -17,7 +17,6 @@ limitations under the License.
 #ifndef IR_PATTERN_H_
 #define IR_PATTERN_H_
 
-#include "ir/ir-generated.h"
 #include "ir/ir.h"
 
 namespace P4 {
@@ -312,14 +311,16 @@ struct ConstantInt_match {
 
 template <typename Node>
 struct BindNode {
-    const Node *&nr;
+    const Node *&nodeRef;
 
-    BindNode(const Node *&n) : nr(n) {}  // NOLINT(runtime/explicit)
+    BindNode(const Node *&n) : nodeRef(n) {  // NOLINT(runtime/explicit)
+        nodeRef = nullptr;
+    }
 
     template <typename ITy>
     bool match(const ITy *n) {
         if (auto *cn = n->template to<Node>()) {
-            nr = cn;
+            nodeRef = cn;
             return true;
         }
         return false;
@@ -328,15 +329,17 @@ struct BindNode {
 
 template <typename Type>
 struct BindType {
-    const Type *&tr;
+    const Type *&typeRef;
 
-    BindType(const Type *&t) : tr(t) {}  // NOLINT(runtime/explicit)
+    BindType(const Type *&t) : typeRef(t) {  // NOLINT(runtime/explicit)
+        typeRef = nullptr;
+    }
 
     template <typename ITy>
     bool match(const ITy *n) {
         if (auto *e = n->template to<IR::Expression>()) {
             if (auto *ct = e->type->template to<Type>()) {
-                tr = ct;
+                typeRef = ct;
                 return true;
             }
         }
@@ -356,6 +359,17 @@ struct SpecificNode_match {
     }
 };
 
+struct SpecificNodeEq_match {
+    const IR::Node *node;
+
+    SpecificNodeEq_match(const IR::Node *n) : node(n) {}  // NOLINT(runtime/explicit)
+
+    template <typename ITy>
+    bool match(ITy *n) {
+        return node->equiv(*n);
+    }
+};
+
 template <typename Node>
 struct DeferredNode_match {
     Node *const &node;
@@ -364,7 +378,21 @@ struct DeferredNode_match {
 
     template <typename ITy>
     bool match(ITy *const n) {
-        return n == node;
+        BUG_CHECK(node, "expected matched node");
+        return node == n;
+    }
+};
+
+template <typename Node>
+struct DeferredNodeEq_match {
+    Node *const &node;
+
+    DeferredNodeEq_match(Node *const &node) : node(node) {}  // NOLINT(runtime/explicit)
+
+    template <typename ITy>
+    bool match(ITy *const n) {
+        BUG_CHECK(node, "expected matched node");
+        return node->equiv(*n);
     }
 };
 
@@ -431,6 +459,10 @@ template <class Type>
 inline auto m_Type() {
     return detail::Type_match<Type>();
 }
+/// Match IR::Type_InfInt
+inline auto m_TypeInfInt() { return m_Type<IR::Type_InfInt>(); }
+/// Match IR::Type_Bits
+inline auto m_TypeBits() { return m_Type<IR::Type_Bits>(); }
 
 /// Match if the inner matcher does *NOT* match.
 template <typename Matcher>
@@ -467,15 +499,32 @@ inline detail::BindNode<IR::Constant> m_Constant(const IR::Constant *&c) { retur
 inline detail::BindNode<IR::Expression> m_Expr(const IR::Expression *&e) { return e; }
 /// Match a PathExpression, capturing the value if we match.
 inline detail::BindNode<IR::PathExpression> m_PathExpr(const IR::PathExpression *&e) { return e; }
-/// Match if we have a specific specified node.
+/// Match if we have a specific specified node. Uses `operator==` for checking node equivalence
 inline detail::SpecificNode_match m_Specific(const IR::Node *n) { return n; }
+// Same as m_Specific, but calls `equiv` for deep comparison
+inline detail::SpecificNodeEq_match m_SpecificEq(const IR::Node *n) { return n; }
 /// Like m_Specific(), but works if the specific value to match is determined as
 /// part of the same match() expression.
 /// For example: m_Add(m_Node(X), m_Specific(X)) is incorrect, because m_Specific()
 /// will bind X before the pattern match starts.  m_Add(m_Node(X), m_Deferred(X)) is correct,
 /// and will check against whichever value m_Node(X) populated.
-inline detail::DeferredNode_match<IR::Node> m_Deferred(IR::Node *const &n) { return n; }
-inline detail::DeferredNode_match<const IR::Node> m_Deferred(const IR::Node *const &n) { return n; }
+template <class Node>
+inline detail::DeferredNode_match<Node> m_Deferred(Node *const &n) {
+    return n;
+}
+template <class Node>
+inline detail::DeferredNode_match<Node> m_Deferred(const Node *const &n) {
+    return n;
+}
+// Same as m_Deferred, but calls `equiv` for deep comparison
+template <class Node>
+inline detail::DeferredNodeEq_match<IR::Node> m_DeferredEq(Node *const &n) {
+    return n;
+}
+template <class Node>
+inline detail::DeferredNodeEq_match<const Node> m_DeferredEq(const Node *const &n) {
+    return n;
+}
 
 /// Match a unary operator, capturing it if we match.
 inline detail::BindNode<IR::Operation_Unary> m_UnOp(const IR::Operation_Unary *&uo) { return uo; }
@@ -500,6 +549,8 @@ template <typename Type>
 inline auto m_Type(const Type *&t) {
     return detail::BindType<const Type>(t);
 }
+/// Match IR::Type_Bits, capturing it if we match
+inline auto m_TypeBits(const IR::Type_Bits *&t) { return m_Type<IR::Type_Bits>(t); }
 
 template <typename LHS, typename RHS>
 inline auto m_BinOp(const LHS &l, const RHS &r) {

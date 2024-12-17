@@ -205,14 +205,41 @@ const IR::Node *DoStrengthReduction::postorder(IR::Add *expr) {
 
 const IR::Node *DoStrengthReduction::postorder(IR::Shl *expr) {
     if (isZero(expr->right)) return expr->left;
-    const IR::Expression *a, *b, *c;
-    // (a << b) << c is a << (b + c)
-    if (match(expr, m_BinOp(m_Shl(m_Expr(a), m_AllOf(m_Expr(b), m_Type<IR::Type_InfInt>())),
-                            m_AllOf(m_Expr(c), m_Type<IR::Type_InfInt>())))) {
-        auto *result =
-            new IR::Shl(expr->srcInfo, a->type, a, new IR::Add(expr->srcInfo, b->type, b, c));
-        LOG3("Replace " << expr << " with " << result);
-        return result;
+
+    {
+        // (a << b) << c is a << (b + c)
+        const IR::Expression *a, *b, *c;
+        if (match(expr, m_BinOp(m_Shl(m_Expr(a), m_AllOf(m_Expr(b), m_TypeInfInt())),
+                                m_AllOf(m_Expr(c), m_TypeInfInt())))) {
+            auto *result =
+                new IR::Shl(expr->srcInfo, a->type, a, new IR::Add(expr->srcInfo, b->type, b, c));
+            LOG3("Replace " << expr << " with " << result);
+            return result;
+        }
+    }
+
+    {
+        // (a >> b) << b could be transformed into a & (-1 << b)
+        const IR::Expression *a, *b;
+        const IR::Type_Bits *type;
+        if (match(expr, m_AllOf(m_BinOp(m_Shr(m_Expr(a), m_Expr(b)), m_DeferredEq(b)),
+                                m_TypeBits(type)))) {
+            big_int mask;
+            if (const auto *constRhs = b->to<IR::Constant>()) {
+                // Explicitly calculate mask to silence `value does not fit` warning
+                int maskBits = type->width_bits() - constRhs->asInt();
+                mask = Util::mask(maskBits > 0 ? maskBits : 0);
+            } else {
+                mask = Util::mask(type->width_bits());
+            }
+
+            auto *result =
+                new IR::BAnd(expr->srcInfo, a->type, a,
+                             new IR::Shl(expr->srcInfo, a->type,
+                                         new IR::Constant(expr->srcInfo, a->type, mask), b));
+            LOG3("Replace " << expr << " with " << result);
+            return result;
+        }
     }
 
     if (!hasSideEffects(expr->right) && isZero(expr->left)) return expr->left;
@@ -221,16 +248,35 @@ const IR::Node *DoStrengthReduction::postorder(IR::Shl *expr) {
 
 const IR::Node *DoStrengthReduction::postorder(IR::Shr *expr) {
     if (isZero(expr->right)) return expr->left;
-    const IR::Expression *a, *b, *c;
-    // (a << b) << c is a << (b + c)
-    if (match(expr, m_BinOp(m_Shr(m_Expr(a), m_AllOf(m_Expr(b), m_Type<IR::Type_InfInt>())),
-                            m_AllOf(m_Expr(c), m_Type<IR::Type_InfInt>())))) {
-        // (a >> b) >> c is a >> (b + c)
-        auto *result =
-            new IR::Shr(expr->srcInfo, a->type, a, new IR::Add(expr->srcInfo, b->type, b, c));
-        LOG3("Replace " << expr << " with " << result);
-        return result;
+
+    {  // (a << b) << c is a << (b + c)
+        const IR::Expression *a, *b, *c;
+        if (match(expr, m_BinOp(m_Shr(m_Expr(a), m_AllOf(m_Expr(b), m_TypeInfInt())),
+                                m_AllOf(m_Expr(c), m_TypeInfInt())))) {
+            auto *result =
+                new IR::Shr(expr->srcInfo, a->type, a, new IR::Add(expr->srcInfo, b->type, b, c));
+            LOG3("Replace " << expr << " with " << result);
+            return result;
+        }
     }
+
+    {
+        // (a << b) >> b could be transformed into a & (-1 >> b) if the shift is logical
+        const IR::Expression *a, *b;
+        const IR::Type_Bits *type;
+        if (match(expr, m_AllOf(m_BinOp(m_Shl(m_Expr(a), m_Expr(b)), m_DeferredEq(b)),
+                                m_TypeBits(type))) &&
+            !type->isSigned) {
+            auto *result = new IR::BAnd(
+                expr->srcInfo, a->type, a,
+                new IR::Shr(
+                    expr->srcInfo, a->type,
+                    new IR::Constant(expr->srcInfo, a->type, Util::mask(type->width_bits())), b));
+            LOG3("Replace " << expr << " with " << result);
+            return result;
+        }
+    }
+
     if (!hasSideEffects(expr->right) && isZero(expr->left)) return expr->left;
     return expr;
 }
