@@ -213,5 +213,4 @@ void determine_tofino_regs(const ixbar_init_t *ixbar_init, const ixbar_input_t *
 }
 #endif
 
-
 #endif /* BACKENDS_TOFINO_BF_UTILS_DYNAMIC_HASH_DYNAMIC_HASH_H_ */
