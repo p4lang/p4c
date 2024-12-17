@@ -39,7 +39,7 @@ struct dpdk_pseudo_header_t {
 }
 
 struct _p4c_tmp128_t {
-	bit<64> tmp
+	bit<64> inter
 }
 
 struct _p4c_sandbox_header_t {
@@ -98,11 +98,11 @@ struct main_metadata_t {
 }
 metadata instanceof main_metadata_t
 
-header dstAddr_128 instanceof header _p4c_sandbox_header_t
-header dstAddr_tmp instanceof header _p4c_tmp128_t
-header srcAddr_128 instanceof header _p4c_sandbox_header_t
-header MainControlT_tmp_13_128 instanceof header _p4c_sandbox_header_t
-header srcAddr_tmp instanceof header _p4c_tmp128_t
+header dstAddr_128 instanceof _p4c_sandbox_header_t
+header dstAddr_tmp instanceof _p4c_tmp128_t
+header srcAddr_128 instanceof _p4c_sandbox_header_t
+header MainControlT_tmp_13_128 instanceof _p4c_sandbox_header_t
+header srcAddr_tmp instanceof _p4c_tmp128_t
 regarray direction size 0x100 initval 0
 action NoAction args none {
 	return

@@ -91,7 +91,7 @@ struct main_metadata_t {
 }
 metadata instanceof main_metadata_t
 
-header MainControlT_tmp_13_128 instanceof header _p4c_sandbox_header_t
+header MainControlT_tmp_13_128 instanceof _p4c_sandbox_header_t
 regarray direction size 0x100 initval 0
 action NoAction args none {
 	return

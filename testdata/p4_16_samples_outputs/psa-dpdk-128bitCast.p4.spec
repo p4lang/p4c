@@ -10,7 +10,7 @@ struct dpdk_pseudo_header_t {
 }
 
 struct _p4c_tmp128_t {
-	bit<64> tmp
+	bit<64> inter
 }
 
 struct _p4c_sandbox_header_t {
@@ -53,12 +53,12 @@ struct user_meta_data_t {
 }
 metadata instanceof user_meta_data_t
 
-header Ingress_tmp_128 instanceof header _p4c_sandbox_header_t
-header Ingress_tmp_tmp instanceof header _p4c_tmp128_t
-header Ingress_tmp_0_128 instanceof header _p4c_sandbox_header_t
-header Ingress_tmp_0_tmp instanceof header _p4c_tmp128_t
-header Ingress_tmp_1_128 instanceof header _p4c_sandbox_header_t
-header Ingress_tmp_1_tmp instanceof header _p4c_tmp128_t
+header Ingress_tmp_128 instanceof _p4c_sandbox_header_t
+header Ingress_tmp_tmp instanceof _p4c_tmp128_t
+header Ingress_tmp_0_128 instanceof _p4c_sandbox_header_t
+header Ingress_tmp_0_tmp instanceof _p4c_tmp128_t
+header Ingress_tmp_1_128 instanceof _p4c_sandbox_header_t
+header Ingress_tmp_1_tmp instanceof _p4c_tmp128_t
 action NoAction args none {
 	return
 }

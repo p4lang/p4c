@@ -1632,7 +1632,7 @@ void ConvertStatementToDpdk::createSandboxHeader() {
 
 void ConvertStatementToDpdk::createTmpVarForSandbox() {
     auto fields = new IR::IndexedVector<IR::StructField>;
-    fields->push_back(new IR::StructField("tmp", IR::Type_Bits::get(64)));
+    fields->push_back(new IR::StructField("inter", IR::Type_Bits::get(64)));
     const IR::Type_Header *headerStruct = new IR::Type_Header(IR::ID("_p4c_tmp128_t"), *fields);
     structure->header_types.emplace(cstring("_p4c_tmp128_t"), headerStruct);
 }
