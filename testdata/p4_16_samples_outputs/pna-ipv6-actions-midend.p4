@@ -89,8 +89,8 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
     @name("MainControlImpl.Reject") action Reject() {
         drop_packet();
     }
-    @name("MainControlImpl.ipv6_modify_dstAddr") action ipv6_modify_dstAddr(@name("dstAddr") bit<32> dstAddr_1) {
-        headers.ipv6.dstAddr = (bit<128>)dstAddr_1;
+    @name("MainControlImpl.ipv6_modify_dstAddr") action ipv6_modify_dstAddr(@name("dstAddr") bit<32> dstAddr_2) {
+        headers.ipv6.dstAddr = (bit<128>)dstAddr_2;
     }
     @name("MainControlImpl.ipv6_addr_or") action ipv6_addr_or() {
         headers.ipv6.dstAddr = headers.ipv6.dstAddr | headers.ipv6.srcAddr;
@@ -106,6 +106,16 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
     }
     @name("MainControlImpl.ipv6_addr_xor") action ipv6_addr_xor() {
         headers.ipv6.dstAddr = headers.ipv6.dstAddr ^ tmp;
+    }
+    @name("MainControlImpl.ipv6_addr_xor2") action ipv6_addr_xor2(@name("arg") bit<128> arg) {
+        headers.ipv6.dstAddr = arg;
+    }
+    @name("MainControlImpl.ipv6_modify_dstAddr2") action ipv6_modify_dstAddr2(@name("dstAddr") bit<32> dstAddr_3) {
+        headers.ipv6.dstAddr = (bit<128>)dstAddr_3;
+    }
+    @name("MainControlImpl.ipv6_swap_addr2") action ipv6_swap_addr2() {
+        headers.ipv6.dstAddr = headers.ipv6.srcAddr;
+        headers.ipv6.srcAddr = 128w0x123456789abcdef0aabbccddeeff0011;
     }
     @name("MainControlImpl.ipv6_addr_comp1") action ipv6_addr_comp1() {
         if (headers.ipv6.dstAddr == headers.ipv6.srcAddr) {
@@ -158,8 +168,11 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
             ipv6_addr_or();
             ipv6_addr_or2();
             ipv6_addr_xor();
+            ipv6_addr_xor2();
             ipv6_addr_and();
             ipv6_addr_and2();
+            ipv6_modify_dstAddr2();
+            ipv6_swap_addr2();
             ipv6_addr_comp1();
             ipv6_addr_comp2();
             ipv6_addr_cmpl();
@@ -188,20 +201,20 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
 }
 
 control MainDeparserImpl(packet_out packet, in headers_t headers, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaipv6actions220() {
+    @hidden action pnaipv6actions233() {
         packet.emit<Ethernet_h>(headers.ethernet);
         packet.emit<mpls_h>(headers.mpls);
         packet.emit<IPv6_h>(headers.ipv6);
         packet.emit<IPv4_h>(headers.ipv4);
     }
-    @hidden table tbl_pnaipv6actions220 {
+    @hidden table tbl_pnaipv6actions233 {
         actions = {
-            pnaipv6actions220();
+            pnaipv6actions233();
         }
-        const default_action = pnaipv6actions220();
+        const default_action = pnaipv6actions233();
     }
     apply {
-        tbl_pnaipv6actions220.apply();
+        tbl_pnaipv6actions233.apply();
     }
 }
 

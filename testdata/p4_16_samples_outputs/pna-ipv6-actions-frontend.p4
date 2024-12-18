@@ -91,8 +91,8 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
     @name("MainControlImpl.Reject") action Reject() {
         drop_packet();
     }
-    @name("MainControlImpl.ipv6_modify_dstAddr") action ipv6_modify_dstAddr(@name("dstAddr") bit<32> dstAddr_1) {
-        headers.ipv6.dstAddr = (bit<128>)dstAddr_1;
+    @name("MainControlImpl.ipv6_modify_dstAddr") action ipv6_modify_dstAddr(@name("dstAddr") bit<32> dstAddr_2) {
+        headers.ipv6.dstAddr = (bit<128>)dstAddr_2;
     }
     @name("MainControlImpl.ipv6_addr_or") action ipv6_addr_or() {
         headers.ipv6.dstAddr = headers.ipv6.dstAddr | headers.ipv6.srcAddr;
@@ -108,6 +108,16 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
     }
     @name("MainControlImpl.ipv6_addr_xor") action ipv6_addr_xor() {
         headers.ipv6.dstAddr = headers.ipv6.dstAddr ^ tmp;
+    }
+    @name("MainControlImpl.ipv6_addr_xor2") action ipv6_addr_xor2(@name("arg") bit<128> arg) {
+        headers.ipv6.dstAddr = arg;
+    }
+    @name("MainControlImpl.ipv6_modify_dstAddr2") action ipv6_modify_dstAddr2(@name("dstAddr") bit<32> dstAddr_3) {
+        headers.ipv6.dstAddr = (bit<128>)dstAddr_3;
+    }
+    @name("MainControlImpl.ipv6_swap_addr2") action ipv6_swap_addr2() {
+        headers.ipv6.dstAddr = headers.ipv6.srcAddr;
+        headers.ipv6.srcAddr = 128w0x123456789abcdef0aabbccddeeff0011;
     }
     @name("MainControlImpl.ipv6_addr_comp1") action ipv6_addr_comp1() {
         if (headers.ipv6.dstAddr == headers.ipv6.srcAddr) {
@@ -160,8 +170,11 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
             ipv6_addr_or();
             ipv6_addr_or2();
             ipv6_addr_xor();
+            ipv6_addr_xor2();
             ipv6_addr_and();
             ipv6_addr_and2();
+            ipv6_modify_dstAddr2();
+            ipv6_swap_addr2();
             ipv6_addr_comp1();
             ipv6_addr_comp2();
             ipv6_addr_cmpl();

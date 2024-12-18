@@ -93,6 +93,26 @@
           "data" : []
         },
         {
+          "id" : 32253890,
+          "name" : "MainControlImpl.ipv6_addr_xor2",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : [
+            {
+              "id" : 1,
+              "name" : "arg",
+              "repeated" : false,
+              "mandatory" : true,
+              "read_only" : false,
+              "annotations" : [],
+              "type" : {
+                "type" : "bytes",
+                "width" : 128
+              }
+            }
+          ]
+        },
+        {
           "id" : 22390528,
           "name" : "MainControlImpl.ipv6_addr_and",
           "action_scope" : "TableAndDefault",
@@ -102,6 +122,33 @@
         {
           "id" : 19138111,
           "name" : "MainControlImpl.ipv6_addr_and2",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : []
+        },
+        {
+          "id" : 26143176,
+          "name" : "MainControlImpl.ipv6_modify_dstAddr2",
+          "action_scope" : "TableAndDefault",
+          "annotations" : [],
+          "data" : [
+            {
+              "id" : 1,
+              "name" : "dstAddr",
+              "repeated" : false,
+              "mandatory" : true,
+              "read_only" : false,
+              "annotations" : [],
+              "type" : {
+                "type" : "bytes",
+                "width" : 32
+              }
+            }
+          ]
+        },
+        {
+          "id" : 25482724,
+          "name" : "MainControlImpl.ipv6_swap_addr2",
           "action_scope" : "TableAndDefault",
           "annotations" : [],
           "data" : []

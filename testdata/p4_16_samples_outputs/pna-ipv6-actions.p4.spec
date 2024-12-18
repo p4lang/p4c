@@ -35,7 +35,8 @@ struct IPv6_h {
 struct dpdk_pseudo_header_t {
 	bit<32> pseudo
 	bit<32> pseudo_0
-	bit<64> pseudo_1
+	bit<32> pseudo_1
+	bit<64> pseudo_2
 }
 
 struct _p4c_tmp128_t {
@@ -45,6 +46,14 @@ struct _p4c_tmp128_t {
 struct _p4c_sandbox_header_t {
 	bit<64> upper_half
 	bit<64> lower_half
+}
+
+struct ipv6_addr_xor2_arg_t {
+	bit<128> arg
+}
+
+struct ipv6_modify_dstAddr2_arg_t {
+	bit<32> dstAddr
 }
 
 struct ipv6_modify_dstAddr_arg_t {
@@ -188,6 +197,26 @@ action ipv6_addr_xor args none {
 	return
 }
 
+action ipv6_addr_xor2 args instanceof ipv6_addr_xor2_arg_t {
+	mov h.ipv6.dstAddr t.arg
+	return
+}
+
+action ipv6_modify_dstAddr2 args instanceof ipv6_modify_dstAddr2_arg_t {
+	mov h.dpdk_pseudo_header.pseudo_0 t.dstAddr
+	mov h.ipv6.dstAddr h.dpdk_pseudo_header.pseudo_0
+	return
+}
+
+action ipv6_swap_addr2 args none {
+	mov h.ipv6.dstAddr h.ipv6.srcAddr
+	mov h.srcAddr_128.upper_half 0x123456789ABCDEF0
+	mov h.srcAddr_128.lower_half 0xAABBCCDDEEFF0011
+	mov h.ipv6.srcAddr h.srcAddr_128.lower_half
+	movh h.ipv6.srcAddr h.srcAddr_128.upper_half
+	return
+}
+
 action ipv6_addr_comp1 args none {
 	movh h.dstAddr_128.upper_half h.ipv6.dstAddr
 	mov h.dstAddr_128.lower_half h.ipv6.dstAddr
@@ -262,8 +291,8 @@ action set_traffic_class_flow_label args instanceof set_traffic_class_flow_label
 	and m.MainControlT_tmp_8 0xFFFFF
 	mov h.ipv6.version_trafficClass_flowLabel m.MainControlT_tmp_6
 	or h.ipv6.version_trafficClass_flowLabel m.MainControlT_tmp_8
-	mov h.dpdk_pseudo_header.pseudo_0 m.MainControlT_tmp1
-	mov h.ipv6.srcAddr h.dpdk_pseudo_header.pseudo_0
+	mov h.dpdk_pseudo_header.pseudo_1 m.MainControlT_tmp1
+	mov h.ipv6.srcAddr h.dpdk_pseudo_header.pseudo_1
 	return
 }
 
@@ -300,8 +329,11 @@ table filter_tbl {
 		ipv6_addr_or
 		ipv6_addr_or2
 		ipv6_addr_xor
+		ipv6_addr_xor2
 		ipv6_addr_and
 		ipv6_addr_and2
+		ipv6_modify_dstAddr2
+		ipv6_swap_addr2
 		ipv6_addr_comp1
 		ipv6_addr_comp2
 		ipv6_addr_cmpl
@@ -328,8 +360,8 @@ apply {
 	MAINPARSERIMPL_IPV4 :	extract h.ipv4
 	jmp MAINPARSERIMPL_ACCEPT
 	MAINPARSERIMPL_IPV6 :	extract h.ipv6
-	MAINPARSERIMPL_ACCEPT :	mov h.dpdk_pseudo_header.pseudo_1 0x76
-	mov m.MainControlT_tmp_13 h.dpdk_pseudo_header.pseudo_1
+	MAINPARSERIMPL_ACCEPT :	mov h.dpdk_pseudo_header.pseudo_2 0x76
+	mov m.MainControlT_tmp_13 h.dpdk_pseudo_header.pseudo_2
 	table filter_tbl
 	emit h.ethernet
 	emit h.mpls
