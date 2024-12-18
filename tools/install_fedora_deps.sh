@@ -26,7 +26,7 @@ sudo dnf install -y -q \
     boost-test \
     boost-thread \
     ccache \
-    clang \
+    clang-15 \
     cmake \
     cpp \
     elfutils-libelf-devel \
@@ -57,6 +57,7 @@ sudo dnf install -y -q \
     thrift-devel \
     valgrind \
     zlib-devel \
+    glibc-devel.i686 \
     ninja-build
 
 pip3 install --upgrade pip
@@ -86,5 +87,6 @@ cd behavioral-model
 make -j$((`nproc`+1))
 make -j$((`nproc`+1)) install-strip
 popd
+
 
 rm -rf "${tmp_dir}"
