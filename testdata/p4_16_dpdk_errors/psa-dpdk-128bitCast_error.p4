@@ -2,7 +2,7 @@
 #include <core.p4>
 #include <dpdk/psa.p4>
 
-/************ H E A D E R S ******************************/
+/************ H E A D E R S *******************************/
 struct EMPTY {};
 
 header ethernet_t {
