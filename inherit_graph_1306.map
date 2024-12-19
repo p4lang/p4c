@@ -1,21 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" title=" " alt="" coords="5,319,117,344"/>
-<area shape="rect" id="Node000001" href="$structassoc_1_1detail_1_1__is__stable.html" title=" " alt="" coords="233,5,383,60"/>
-<area shape="poly" id="edge2487_Node000000_Node000001" title=" " alt="" coords="63,304,72,255,89,192,119,127,139,97,164,71,196,50,232,38,233,43,198,55,167,75,143,100,124,130,94,194,77,256,68,305"/>
-<area shape="rect" id="Node000003" href="$struct_p4_1_1_i_r_1_1has__static__type__name_3_01_t_00_01std_1_1void__t_3_01decltype_07_t_1_1static__type__name_07_08_08_4_01_4.html" title=" " alt="" coords="213,85,403,154"/>
-<area shape="poly" id="edge2489_Node000000_Node000003" title=" " alt="" coords="70,305,104,235,131,197,164,164,187,149,212,138,214,142,189,154,167,168,135,200,109,238,74,307"/>
-<area shape="rect" id="Node000004" href="$struct_p4_1_1_util_1_1has___source_info_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declvaleceb1e5b41b0ceab45c2091dafb42308.html" title=" " alt="" coords="165,179,451,233"/>
-<area shape="poly" id="edge2490_Node000000_Node000004" title=" " alt="" coords="82,306,119,273,164,242,189,231,191,236,167,247,122,277,86,310"/>
-<area shape="rect" id="Node000005" href="$struct_p4_1_1_util_1_1has__to_string_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_acb3d703214236ac0dfb06e6517d195f.html" title=" " alt="" coords="185,257,431,312"/>
-<area shape="poly" id="edge2491_Node000000_Node000005" title=" " alt="" coords="130,316,184,305,185,311,131,321"/>
-<area shape="rect" id="Node000006" href="$struct_p4_1_1has__dbprint_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_01_t_01_4_012206707ff62b52b5f3b6b59b578fd59.html" title=" " alt="" coords="208,336,408,420"/>
-<area shape="poly" id="edge2492_Node000000_Node000006" title=" " alt="" coords="131,342,208,356,207,362,130,347"/>
-<area shape="rect" id="Node000007" href="$struct_p4_1_1has__ostream__operator_3_01_t_00_01std_1_1void__t_3_01decltype_07std_1_1declval_3_0b23eeecb7e72d387dfbaa930aade2e05.html" title=" " alt="" coords="187,445,429,514"/>
-<area shape="poly" id="edge2493_Node000000_Node000007" title=" " alt="" coords="83,353,120,392,167,429,191,442,189,447,164,434,116,396,79,357"/>
-<area shape="rect" id="Node000008" href="$structassoc_1_1detail_1_1__is__stable.html" title=" " alt="" coords="243,538,373,578"/>
-<area shape="poly" id="edge2494_Node000000_Node000008" title=" " alt="" coords="71,356,83,394,103,440,130,486,167,524,203,543,243,552,242,558,201,548,164,528,126,489,98,442,78,396,66,358"/>
-<area shape="rect" id="Node000009" href="$structassoc_1_1detail_1_1__is__stable_3_01std_1_1tuple_3_4_01_4.html" title=" " alt="" coords="217,602,399,642"/>
-<area shape="poly" id="edge2495_Node000000_Node000009" title=" " alt="" coords="68,357,76,407,93,470,123,534,143,563,167,588,191,603,217,613,216,618,188,608,164,592,139,566,118,537,88,472,71,408,63,358"/>
-<area shape="rect" id="Node000002" href="$structassoc_1_1detail_1_1is__stable.html" title=" " alt="" coords="499,20,707,45"/>
-<area shape="poly" id="edge2488_Node000001_Node000002" title=" " alt="" coords="397,30,498,30,498,35,397,35"/>
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,5,140,31"/>
+<area shape="rect" id="Node000001" href="$group___parser_copy_prop.html#struct_parser_use_def" title=" " alt="" coords="188,5,299,31"/>
+<area shape="poly" id="edge2476_Node000000_Node000001" title=" " alt="" coords="154,15,188,15,188,21,154,21"/>
 </map>

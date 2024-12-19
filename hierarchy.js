@@ -3080,7 +3080,9 @@ var hierarchy =
               [ "P4::EBPF::ActionTranslationVisitorPSA", "class_p4_1_1_e_b_p_f_1_1_action_translation_visitor_p_s_a.html", null ]
             ] ],
             [ "P4::EBPF::DeparserBodyTranslator", "class_p4_1_1_e_b_p_f_1_1_deparser_body_translator.html", [
-              [ "P4::EBPF::DeparserBodyTranslatorPSA", "class_p4_1_1_e_b_p_f_1_1_deparser_body_translator_p_s_a.html", null ]
+              [ "P4::EBPF::DeparserBodyTranslatorPSA", "class_p4_1_1_e_b_p_f_1_1_deparser_body_translator_p_s_a.html", [
+                [ "P4::TC::DeparserBodyTranslatorPNA", "class_p4_1_1_t_c_1_1_deparser_body_translator_p_n_a.html", null ]
+              ] ]
             ] ],
             [ "P4::EBPF::DeparserPrepareBufferTranslator", "class_p4_1_1_e_b_p_f_1_1_deparser_prepare_buffer_translator.html", [
               [ "P4::EBPF::DeparserHdrEmitTranslator", "class_p4_1_1_e_b_p_f_1_1_deparser_hdr_emit_translator.html", null ],
@@ -3724,6 +3726,8 @@ var hierarchy =
     [ "p4tc_ext_bpf_params", "structp4tc__ext__bpf__params.html", null ],
     [ "p4tc_ext_bpf_val", "structp4tc__ext__bpf__val.html", null ],
     [ "p4tc_ext_csum_params", "structp4tc__ext__csum__params.html", null ],
+    [ "p4tc_skb_meta_get", "structp4tc__skb__meta__get.html", null ],
+    [ "p4tc_skb_meta_set", "structp4tc__skb__meta__set.html", null ],
     [ "p4tc_table_entry_act_bpf_params__local", "structp4tc__table__entry__act__bpf__params____local.html", null ],
     [ "p4tc_table_entry_create_bpf_params__local", "structp4tc__table__entry__create__bpf__params____local.html", null ],
     [ "P4WriteContext", null, [

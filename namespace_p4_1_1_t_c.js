@@ -13,6 +13,7 @@ var namespace_p4_1_1_t_c =
     [ "ConvertToEbpfPipelineTC", "class_p4_1_1_t_c_1_1_convert_to_ebpf_pipeline_t_c.html", null ],
     [ "ConvertToEbpfPNA", "class_p4_1_1_t_c_1_1_convert_to_ebpf_p_n_a.html", null ],
     [ "CRCChecksumAlgorithmPNA", "class_p4_1_1_t_c_1_1_c_r_c_checksum_algorithm_p_n_a.html", null ],
+    [ "DeparserBodyTranslatorPNA", "class_p4_1_1_t_c_1_1_deparser_body_translator_p_n_a.html", null ],
     [ "DeparserHdrEmitTranslatorPNA", "class_p4_1_1_t_c_1_1_deparser_hdr_emit_translator_p_n_a.html", null ],
     [ "EBPFChecksumPNA", "class_p4_1_1_t_c_1_1_e_b_p_f_checksum_p_n_a.html", null ],
     [ "EBPFControlPNA", "class_p4_1_1_t_c_1_1_e_b_p_f_control_p_n_a.html", null ],
