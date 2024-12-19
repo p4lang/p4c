@@ -86,6 +86,7 @@ class FunctionsInliner : public AbstractInliner<FunctionsInlineList, FunctionsIn
     const IR::Node *preorder(IR::MethodCallStatement *statement) override;
     const IR::Node *preorder(IR::MethodCallExpression *expr) override;
     const IR::Node *preorder(IR::AssignmentStatement *statement) override;
+    const IR::Node *preorder(IR::IfStatement *statement) override;
 };
 
 typedef InlineDriver<FunctionsInlineList, FunctionsInlineWorkList> InlineFunctionsDriver;

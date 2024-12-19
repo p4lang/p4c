@@ -37,8 +37,14 @@ void DiscoverFunctionsInlining::postorder(const IR::MethodCallExpression *mce) {
     auto stat = findContext<IR::Statement>();
     CHECK_NULL(stat);
 
-    BUG_CHECK(bool(RTTI::isAny<IR::MethodCallStatement, IR::AssignmentStatement>(stat)),
-              "%1%: unexpected statement with call", stat);
+    BUG_CHECK(
+        bool(RTTI::isAny<IR::MethodCallStatement, IR::AssignmentStatement, IR::IfStatement>(stat)),
+        "%1%: unexpected statement with call", stat);
+
+    if (const auto *ifStat = stat->to<IR::IfStatement>()) {
+        // Check that we're inside condition of IfStatement
+        BUG_CHECK(isInContext(ifStat->condition), "%1%: unexpected statement with call", stat);
+    }
 
     auto aci = new FunctionCallInfo(caller, ac->function, stat, mce);
     toInline->add(aci);
@@ -180,6 +186,18 @@ const IR::Node *FunctionsInliner::preorder(IR::AssignmentStatement *statement) {
     return inlineBefore(callee, callExpr, statement);
 }
 
+const IR::Node *FunctionsInliner::preorder(IR::IfStatement *statement) {
+    auto orig = getOriginal<IR::IfStatement>();
+    LOG2("Visiting " << dbp(orig));
+    auto replMap = getReplacementMap();
+    if (replMap == nullptr) return statement;
+
+    auto [callee, callExpr] = get(*replMap, orig);
+    if (callee == nullptr) return statement;
+    BUG_CHECK(callExpr != nullptr, "%1%: expected a method call", statement->condition);
+    return inlineBefore(callee, callExpr, statement);
+}
+
 const IR::Node *FunctionsInliner::preorder(IR::P4Parser *parser) {
     if (preCaller()) {
         parser->visit_children(*this);
@@ -312,6 +330,13 @@ const IR::Statement *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
             auto [it, inserted] = pendingReplacements.emplace(mce, retExpr);
             BUG_CHECK(inserted, "%1%: duplicate value for pending replacements", it->first);
         }
+    } else if (const auto *ifStatement = statement->to<IR::IfStatement>()) {
+        // We already checked that we are inside condition of if statement. Add
+        // return value to pending list to be replaced afterwards
+        CHECK_NULL(retExpr);
+        body.push_back(ifStatement->clone());
+        auto [it, inserted] = pendingReplacements.emplace(mce, retExpr);
+        BUG_CHECK(inserted, "%1%: duplicate value for pending replacements", it->first);
     } else {
         BUG_CHECK(statement->is<IR::MethodCallStatement>(), "%1%: expected a method call",
                   statement);
