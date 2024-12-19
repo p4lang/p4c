@@ -167,6 +167,9 @@ const IR::Node *ReplaceTypeUses::postorder(IR::Type_Specialized *type) {
 }
 
 const IR::Node *ReplaceTypeUses::postorder(IR::StructExpression *expression) {
+    const IR::Annotation *anNode = findContext<IR::Annotation>();
+    if (anNode != nullptr && !anNode->structured) return expression;
+
     auto st = getOriginal<IR::StructExpression>()->structType;
     if (!st) {
         ::P4::error(ErrorType::ERR_TYPE_ERROR,
