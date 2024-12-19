@@ -126,7 +126,7 @@ IncludeCategories:
     Priority: 6000
   - Regex: '.*'
     Priority: 5000
-IncludeIsMainRegex: '(Test)?$'
+IncludeIsMainRegex: '(_test)?$'
 IncludeIsMainSourceRegex: ''
 IndentAccessModifiers: false
 IndentCaseBlocks: false
