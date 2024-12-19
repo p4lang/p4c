@@ -21,11 +21,11 @@ struct ipv4_t {
 
 struct user_metadata_t {
 	bit<32> pna_main_input_metadata_input_port
-	bit<32> local_metadata_ipv4_hdr_truncated
+	bit<8> local_metadata_ipv4_hdr_truncated
 	bit<32> pna_main_output_metadata_output_port
 	bit<8> MainParserT_parser_tmp
 	bit<8> MainParserT_parser_tmp_0
-	bit<32> MainParserT_parser_tmp_1
+	bit<8> MainParserT_parser_tmp_1
 	bit<8> MainControlT_tmp
 	bit<8> MainControlT_tmp_1
 	bit<8> MainControlT_tmp_2
@@ -34,7 +34,7 @@ struct user_metadata_t {
 	bit<48> MainControlT_tmp_6
 	bit<48> MainControlT_tmp_8
 	bit<8> MainControlT_tmp_9
-	bit<32> MainControlT_tmp_10
+	bit<8> MainControlT_tmp_10
 	bit<8> tmpMask
 }
 metadata instanceof user_metadata_t

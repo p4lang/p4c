@@ -62,7 +62,7 @@ struct metadata_t {
 	bit<32> MainControlImpl_inbound_table_esp_spi
 	bit<8> MainParserT_parser_from_ipsec
 	bit<32> MainParserT_parser_status
-	bit<32> MainParserT_parser_tmp_0
+	bit<8> MainParserT_parser_tmp_0
 	bit<32> MainControlT_status
 	bit<32> MainControlT_status_0
 	bit<8> MainControlT_tmp

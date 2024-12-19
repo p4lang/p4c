@@ -2957,6 +2957,14 @@ MoveNonHeaderFieldsToPseudoHeader::addAssignmentStmt(const IR::Expression *e) {
 const IR::Node *MoveNonHeaderFieldsToPseudoHeader::postorder(IR::AssignmentStatement *assn) {
     if (is_all_args_header) return assn;
     auto result = new IR::IndexedVector<IR::StatOrDecl>();
+    if (isLargeFieldOperand(assn->left) && assn->right->is<IR::Constant>()) {
+        auto leftType = assn->left->type->to<IR::Type_Bits>()->width_bits();
+        auto rightType = assn->right->type->to<IR::Type_Bits>()->width_bits();
+        if (leftType == SupportedBitWidth && rightType == leftType) {
+            auto cst = assn->right->to<IR::Constant>();
+            if (!cst->fitsUint64()) return assn;
+        }
+    }
     if ((isLargeFieldOperand(assn->left) && !isLargeFieldOperand(assn->right) &&
          !isInsideHeader(assn->right)) ||
         (isLargeFieldOperand(assn->left) && assn->right->is<IR::Constant>())) {
@@ -2964,10 +2972,11 @@ const IR::Node *MoveNonHeaderFieldsToPseudoHeader::postorder(IR::AssignmentState
         if (auto base = assn->right->to<IR::Cast>()) expr = base->expr;
         if (auto cst = assn->right->to<IR::Constant>()) {
             if (!cst->fitsUint64()) {
-                ::P4::error(
-                    ErrorType::ERR_OVERLIMIT,
-                    "DPDK target supports up-to 64-bit immediate values, %1% exceeds the limit",
-                    cst);
+                ::P4::error(ErrorType::ERR_OVERLIMIT,
+                            "DPDK target supports constant values "
+                            "that are up to 64-bits, and also exactly 128-bits, but no other "
+                            "sizes. %1% is not a supported size",
+                            cst);
                 return assn;
             }
         }
