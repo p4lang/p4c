@@ -170,12 +170,10 @@ function build_ebpf() {
   P4C_EBPF_DEPS="libpcap-dev \
                  libelf-dev \
                  zlib1g-dev \
-                 llvm \
-                 clang \
                  iproute2 \
                  iptables \
                  net-tools"
-
+  P4C_EBPF_DEPS+=" llvm clang "
   sudo apt-get install -y --no-install-recommends ${P4C_EBPF_DEPS}
 }
 
