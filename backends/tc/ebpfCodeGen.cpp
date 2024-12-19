@@ -18,6 +18,12 @@ and limitations under the License.
 
 namespace P4::TC {
 
+DeparserBodyTranslatorPNA::DeparserBodyTranslatorPNA(const IngressDeparserPNA *deparser)
+    : CodeGenInspector(deparser->program->refMap, deparser->program->typeMap),
+      DeparserBodyTranslatorPSA(deparser) {
+    setName("DeparserBodyTranslatorPNA");
+}
+
 // =====================PNAEbpfGenerator=============================
 void PNAEbpfGenerator::emitPNAIncludes(EBPF::CodeBuilder *builder) const {
     builder->appendLine("#include <stdbool.h>");
@@ -49,10 +55,14 @@ void PNAEbpfGenerator::emitCommonPreamble(EBPF::CodeBuilder *builder) const {
 void PNAEbpfGenerator::emitInternalStructures(EBPF::CodeBuilder *builder) const {
     builder->appendLine("struct p4tc_filter_fields p4tc_filter_fields;");
     builder->newline();
-    builder->appendLine(
+    builder->append(
         "struct internal_metadata {\n"
         "    __u16 pkt_ether_type;\n"
-        "} __attribute__((aligned(4)));");
+        "} __attribute__((aligned(4)));\n\n"
+        "struct skb_aggregate {\n"
+        "    struct p4tc_skb_meta_get get;\n"
+        "    struct p4tc_skb_meta_set set;\n"
+        "};\n");
     builder->newline();
 }
 
@@ -266,9 +276,10 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
         parser->headerType->as<EBPF::EBPFStructType>().kind,
         parser->headerType->as<EBPF::EBPFStructType>().name, parser->headers->name,
         compilerGlobalMetadata);
-
+    if (func_name == "process") builder->append(", struct skb_aggregate *sa");
     builder->append(")");
     builder->newline();
+
     builder->blockStart();
 
     emitCPUMAPHeadersInitializers(builder);
@@ -365,6 +376,27 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
 
         builder->blockStart();
 
+        builder->emitIndent();
+
+        if ((dynamic_cast<EBPFControlPNA *>(control))->touched_skb_metadata ||
+            (dynamic_cast<IngressDeparserPNA *>(deparser))->touched_skb_metadata) {
+            builder->append("struct skb_aggregate skbstuff = {\n");
+            builder->newline();
+            builder->increaseIndent();
+            builder->emitIndent();
+            builder->appendFormat(
+                ".get = { .bitmask = P4TC_SKB_META_GET_AT_INGRESS_BIT | "
+                "P4TC_SKB_META_GET_FROM_INGRESS_BIT },");
+            builder->newline();
+            builder->emitIndent();
+            builder->appendFormat(".set = { },");
+            builder->newline();
+            builder->decreaseIndent();
+            builder->append("};\n");
+        } else {
+            builder->append("struct skb_aggregate skbstuff;\n");
+        }
+
         emitGlobalMetadataInitializer(builder);
 
         emitHeaderInstances(builder);
@@ -376,7 +408,7 @@ void TCIngressPipelinePNA::emit(EBPF::CodeBuilder *builder) {
         builder->emitIndent();
         builder->appendFormat("ret = %v(skb, ", func_name);
 
-        builder->appendFormat("(%v %v *) %v, %v);",
+        builder->appendFormat("(%v %v *) %v, %v, &skbstuff);",
                               parser->headerType->as<EBPF::EBPFStructType>().kind,
                               parser->headerType->as<EBPF::EBPFStructType>().name,
                               parser->headers->name, compilerGlobalMetadata);
@@ -446,14 +478,12 @@ void TCIngressPipelinePNA::emitGlobalMetadataInitializer(EBPF::CodeBuilder *buil
         compilerGlobalMetadata);
     builder->newline();
 
-    // if Traffic Manager decided to pass packet to the kernel stack earlier, send it up immediately
-    builder->emitIndent();
-    builder->append("if (compiler_meta__->pass_to_kernel == true) return TC_ACT_OK;");
-    builder->newline();
-
-    // Make sure drop starts out false
+    // Make sure drop and recirculate start out false
     builder->emitIndent();
     builder->append("compiler_meta__->drop = false;");
+    builder->newline();
+    builder->emitIndent();
+    builder->append("compiler_meta__->recirculate = false;");
     builder->newline();
 
     // workaround to make TC protocol-independent, DO NOT REMOVE
@@ -482,24 +512,24 @@ void TCIngressPipelinePNA::emitGlobalMetadataInitializer(EBPF::CodeBuilder *buil
 
 void TCIngressPipelinePNA::emitTrafficManager(EBPF::CodeBuilder *builder) {
     builder->emitIndent();
-    builder->appendFormat("if (!%v->drop && %v->egress_port == 0) ", compilerGlobalMetadata,
+    builder->appendFormat("if (!%v->drop && %v->recirculate) ", compilerGlobalMetadata,
                           compilerGlobalMetadata);
     builder->blockStart();
-    builder->target->emitTraceMessage(builder, "IngressTM: Sending packet up to the kernel stack");
-
-    // Since XDP helper re-writes EtherType for packets other than IPv4 (e.g., ARP)
-    // we cannot simply return TC_ACT_OK to pass the packet up to the kernel stack,
-    // because the kernel stack would receive a malformed packet (with invalid skb->protocol).
-    // The workaround is to send the packet back to the same interface. If we redirect,
-    // the packet will be re-written back to the original format.
-    // At the beginning of the pipeline we check if pass_to_kernel is true and,
-    // if so, the program returns TC_ACT_OK.
     builder->emitIndent();
-    builder->appendLine("compiler_meta__->pass_to_kernel = true;");
+    builder->appendFormat("%v->recirculated = true;", compilerGlobalMetadata);
+    builder->newline();
     builder->emitIndent();
-    builder->append("return bpf_redirect(skb->ifindex, BPF_F_INGRESS)");
-    builder->endOfStatement(true);
+    builder->appendFormat("return TC_ACT_UNSPEC;");
+    builder->newline();
     builder->blockEnd(true);
+    builder->emitIndent();
+    builder->appendFormat("if (!%v->drop && %v->egress_port == 0)", compilerGlobalMetadata,
+                          compilerGlobalMetadata);
+    builder->newline();
+    builder->increaseIndent();
+    builder->emitIndent();
+    builder->appendLine("return TC_ACT_OK;");
+    builder->decreaseIndent();
 
     cstring eg_port = absl::StrFormat("%v->egress_port", compilerGlobalMetadata);
     cstring cos =
@@ -622,7 +652,7 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
             std::string sInt = value.substr(2).c_str();
             unsigned int width = std::stoi(sInt);
             if (widthToExtract != width) {
-                ::P4::error("Width of the field doesnt match the annotation width. '%1%'", field);
+                ::P4::error("Width of the field doesn't match the annotation width. '%1%'", field);
             }
             noEndiannessConversion = true;
         }
@@ -1218,7 +1248,51 @@ void IngressDeparserPNA::emit(EBPF::CodeBuilder *builder) {
     prepareBufferTranslator->substitute(this->headers, this->parserHeaders);
     controlBlock->container->body->apply(*prepareBufferTranslator);
 
+    builder->newline();
+    builder->emitIndent();
+    builder->appendFormat("__u16 saved_proto = 0");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("bool have_saved_proto = false");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendLine("// bpf_skb_adjust_room works only when protocol is IPv4 or IPv6");
+    builder->emitIndent();
+    builder->appendLine("// 0x0800 = IPv4, 0x86dd = IPv6");
+    builder->emitIndent();
+    builder->append("if ((skb->protocol != 0x0800) && (skb->protocol != 0x86dd)) ");
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendFormat("saved_proto = skb->protocol");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("have_saved_proto = true");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("bpf_p4tc_skb_set_protocol(skb, &sa->set, 0x0800)");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("bpf_p4tc_skb_meta_set(skb, &sa->set, sizeof(sa->set))");
+    builder->endOfStatement(true);
+    builder->blockEnd(true);
+    builder->emitIndent();
+    builder->endOfStatement(true);
+
     emitBufferAdjusts(builder);
+
+    builder->newline();
+    builder->emitIndent();
+    builder->append("if (have_saved_proto) ");
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendFormat("bpf_p4tc_skb_set_protocol(skb, &sa->set, saved_proto)");
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("bpf_p4tc_skb_meta_set(skb, &sa->set, sizeof(sa->set))");
+    builder->endOfStatement(true);
+    builder->blockEnd(true);
+    builder->newline();
+
     builder->emitIndent();
     builder->appendFormat("%v = %v;", program->packetStartVar,
                           builder->target->dataOffset(program->model.CPacketName.toString()));
@@ -1255,6 +1329,65 @@ void IngressDeparserPNA::emitDeclaration(EBPF::CodeBuilder *builder, const IR::D
     }
 
     EBPFDeparser::emitDeclaration(builder, decl);
+}
+
+static void gen_skb_call(EBPF::CodeBuilder *b, const P4::ExternMethod *m,
+                         EBPF::CodeGenInspector *xlat) {
+    b->appendFormat("/* SKB metadata: call %s */", m->method->name.name.c_str());
+    if (m->method->name.name == "get") {
+        if (!m->expr->arguments->empty()) {
+            ::P4::error("%1%: takes no arguments", m->method->name.name);
+        }
+        b->appendFormat("bpf_p4tc_skb_meta_get(skb,&sa->get,sizeof(sa->get))");
+    } else if (m->method->name.name == "set") {
+        if (!m->expr->arguments->empty()) {
+            ::P4::error("%1%: takes no arguments", m->method->name.name);
+        }
+        b->appendFormat("bpf_p4tc_skb_meta_set(skb,&sa->set,sizeof(sa->set))");
+    }
+#define GETSET(n)                                                                  \
+    else if (m->method->name.name == ("get_" #n)) {                                \
+        if (!m->expr->arguments->empty()) {                                        \
+            P4::error("%1%: takes no arguments", m->method->name.name);            \
+        }                                                                          \
+        b->append("bpf_p4tc_skb_get_" #n "(skb,&sa->get)");                        \
+    }                                                                              \
+    else if (m->method->name.name == ("set_" #n)) {                                \
+        if (m->expr->arguments->size() != 1) {                                     \
+            P4::error("%1%: requires exactly one argument", m->method->name.name); \
+        }                                                                          \
+        b->append("bpf_p4tc_skb_set_" #n "(skb,&sa->set,");                        \
+        xlat->visit(m->expr->arguments->at(0)->expression);                        \
+        b->append(")");                                                            \
+    }
+    GETSET(tstamp)
+    GETSET(mark)
+    GETSET(tc_classid)
+    GETSET(tc_index)
+    GETSET(queue_mapping)
+    GETSET(protocol)
+    GETSET(tc_at_ingress)
+    GETSET(from_ingress)
+#undef GETSET
+    else {
+        P4::error("Unsupported SKB metadata method call %1%", m->method->name.name);
+    }
+}
+
+static bool is_skb_meta_func(const P4::cstring fname) {
+    return (fname == "skb_get_meta") || (fname == "skb_set_tstamp") || (fname == "skb_set_mark") ||
+           (fname == "skb_set_queue_mapping") || (fname == "skb_set_protocol") ||
+           (fname == "skb_set_tc_classid") || (fname == "skb_set_tc_index") ||
+           (fname == "skb_set_meta");
+}
+
+void DeparserBodyTranslatorPNA::processFunction(const P4::ExternFunction *function) {
+    auto fname = function->expr->method->toString();
+
+    if (is_skb_meta_func(fname)) {
+        ::P4::error(ErrorType::ERR_UNEXPECTED,
+                    "Unexpected call to extern function %s in the deparser", fname);
+    }
 }
 
 // =====================ConvertToEbpfPNA=============================
@@ -1408,6 +1541,8 @@ bool ConvertToEBPFControlPNA::preorder(const IR::ControlBlock *ctrl) {
     control->inputStandardMetadata = *it;
     ++it;
     control->outputStandardMetadata = *it;
+
+    control->touched_skb_metadata = false;
 
     auto codegen = new ControlBodyTranslatorPNA(control, tcIR);
     codegen->substitute(control->headers, parserHeaders);
@@ -1797,6 +1932,42 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
             "sizeof(key))");
         return;
     }
+
+    auto fname = function->expr->method->toString();
+
+    if (is_skb_meta_func(fname)) {
+        if (fname == "skb_get_meta") {
+            if (function->expr->arguments->size() != 0) {
+                ::P4::error("skb_get_meta takes no arguments");
+                return;
+            }
+            builder->emitIndent();
+            builder->append("bpf_p4tc_skb_meta_get(skb,&sa->get,sizeof(sa->get))");
+        } else if ((fname == "skb_set_tstamp") || (fname == "skb_set_mark") ||
+                   (fname == "skb_set_tc_classid") || (fname == "skb_set_tc_index") ||
+                   (fname == "skb_set_queue_mapping") || (fname == "skb_set_protocol")) {
+            if (function->expr->arguments->size() != 1) {
+                ::P4::error("%1% takes exactly one argument", fname);
+                return;
+            }
+            builder->emitIndent();
+            builder->appendFormat("bpf_p4tc_%s(skb,&sa->set,", fname.c_str());
+            visit(function->expr->arguments->at(0));
+            builder->append(")");
+        } else if (fname == "skb_set_meta") {
+            if (function->expr->arguments->size() != 0) {
+                ::P4::error("skb_set_meta takes no arguments");
+                return;
+            }
+            builder->emitIndent();
+            builder->append("bpf_p4tc_skb_meta_set(skb,&sa->set,sizeof(sa->set))");
+        } else {
+            BUG_CHECK(0, "impossible method name in %1%", &__func__[0]);
+            return;
+        }
+        (dynamic_cast<const EBPFControlPNA *>(control))->touched_skb_metadata = true;
+        return;
+    }
     processCustomExternFunction(function, EBPF::EBPFTypeFactory::instance);
 }
 
@@ -1971,6 +2142,14 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
     builder->target->emitTraceMessage(builder, msgStr.c_str());
 }
 
+static void gen_skb_call_ctrl(const EBPFControlPNA *c, EBPF::CodeBuilder *b,
+                              const P4::ExternMethod *m, ControlBodyTranslatorPNA *xlat) {
+    EBPF::CodeGenInspector *inspector = xlat;
+
+    c->touched_skb_metadata = true;
+    gen_skb_call(b, m, inspector);
+}
+
 void ControlBodyTranslatorPNA::processMethod(const P4::ExternMethod *method) {
     auto decl = method->object;
     auto declType = method->originalExternType;
@@ -2002,16 +2181,19 @@ void ControlBodyTranslatorPNA::processMethod(const P4::ExternMethod *method) {
         auto hash = pnaControl->getHash(name);
         hash->processMethod(builder, method->method->name.name, method->expr, this);
         return;
+    } else if (declType->name.name == "tc_skb_metadata") {
+        gen_skb_call_ctrl(pnaControl, builder, method, this);
+        return;
     } else {
-        ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: Unexpected method call",
-                    method->expr);
+        ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: [C] [%2%] Unexpected method call",
+                    method->expr, declType->name.name);
     }
 }
 
 bool ControlBodyTranslatorPNA::preorder(const IR::AssignmentStatement *a) {
     if (auto methodCallExpr = a->right->to<IR::MethodCallExpression>()) {
-        if (methodCallExpr->method->toString() == "is_net_port" ||
-            methodCallExpr->method->toString() == "is_host_port") {
+        auto mname = methodCallExpr->method->toString();
+        if (mname == "is_net_port" || mname == "is_host_port") {
             builder->emitIndent();
             visit(a->left);
             builder->append(" = ");
@@ -2023,6 +2205,17 @@ bool ControlBodyTranslatorPNA::preorder(const IR::AssignmentStatement *a) {
             assert(methodCallExpr->arguments->size() == 1);
             visit(methodCallExpr->arguments->at(0));
             builder->append(");");
+        } else if ((mname == "skb_get_tstamp") || (mname == "skb_get_mark") ||
+                   (mname == "skb_get_tc_classid") || (mname == "skb_get_tc_index") ||
+                   (mname == "skb_get_queue_mapping") || (mname == "skb_get_protocol") ||
+                   (mname == "skb_get_tc_at_ingress") || (mname == "skb_get_from_ingress")) {
+            if (methodCallExpr->arguments->size() != 0) {
+                ::P4::error("%1% takes no arguments", mname);
+                return (false);
+            }
+            visit(a->left);
+            builder->appendFormat(" = bpf_p4tc_%s(skb, &sa->get);", mname.c_str());
+            return (false);
         }
         auto mi = P4::MethodInstance::resolve(methodCallExpr, control->program->refMap,
                                               control->program->typeMap);
@@ -2055,6 +2248,8 @@ bool ControlBodyTranslatorPNA::preorder(const IR::AssignmentStatement *a) {
             auto pna_meter = dynamic_cast<EBPFMeterPNA *>(meter);
             pna_meter->emitDirectMeterExecute(builder, ext, this, a->left);
             return false;
+        } else {
+            return (false);
         }
     }
 
@@ -2114,9 +2309,9 @@ cstring ActionTranslationVisitorPNA::getParamName(const IR::PathExpression *expr
 void ActionTranslationVisitorPNA::processMethod(const P4::ExternMethod *method) {
     auto declType = method->originalExternType;
     auto decl = method->object;
-    BUG_CHECK(decl->is<IR::Declaration_Instance>(), "Extern has not been declared: %1%", decl);
-    auto di = decl->to<IR::Declaration_Instance>();
-    auto instanceName = EBPF::EBPFObject::externalName(di);
+    BUG_CHECK(decl->is<IR::Declaration>(), "Extern has not been declared [A]: %1% (is a %2%)", decl,
+              decl->node_type_name());
+    auto instanceName = EBPF::EBPFObject::externalName(decl->to<IR::Declaration>());
     cstring name = EBPF::EBPFObject::externalName(decl);
 
     if (declType->name.name == "DirectCounter") {
