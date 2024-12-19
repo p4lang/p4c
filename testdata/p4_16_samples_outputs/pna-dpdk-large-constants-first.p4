@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <pna.p4>
+#include <dpdk/pna.p4>
 
 typedef bit<48> EthernetAddress;
 typedef bit<32> IPv4Address;
@@ -59,30 +59,30 @@ control PreControlImpl(in headers_t hdr, inout main_metadata_t meta, in pna_pre_
 
 parser MainParserImpl(packet_in p, out headers_t headers, inout main_metadata_t meta, in pna_main_parser_input_metadata_t istd) {
     state start {
-        p.extract(headers.ethernet);
+        p.extract<Ethernet_h>(headers.ethernet);
         transition select(headers.ethernet.etherType) {
             16w0x800: ipv4;
-            0x86dd: ipv6;
-            0x8847: mpls;
+            16w0x86dd: ipv6;
+            16w0x8847: mpls;
             default: reject;
         }
     }
     state mpls {
-        p.extract(headers.mpls);
+        p.extract<mpls_h>(headers.mpls);
         transition ipv4;
     }
     state ipv4 {
-        p.extract(headers.ipv4);
+        p.extract<IPv4_h>(headers.ipv4);
         transition accept;
     }
     state ipv6 {
-        p.extract(headers.ipv6);
+        p.extract<IPv6_h>(headers.ipv6);
         transition accept;
     }
 }
 
 control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    bit<128> tmp = 0x76;
+    bit<128> tmp = 128w0x123456789abcdef12345678;
     bit<32> tmp1;
     action Reject() {
         drop_packet();
@@ -90,30 +90,6 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
     action ipv6_modify_dstAddr(bit<32> dstAddr) {
         headers.ipv6.dstAddr = (bit<128>)dstAddr;
         tmp1 = (bit<32>)headers.ipv6.srcAddr;
-    }
-    action ipv6_addr_or() {
-        headers.ipv6.dstAddr = headers.ipv6.dstAddr | headers.ipv6.srcAddr;
-    }
-    action ipv6_addr_and() {
-        headers.ipv6.dstAddr = tmp & headers.ipv6.srcAddr;
-    }
-    action ipv6_addr_and2() {
-        headers.ipv6.dstAddr = headers.ipv6.srcAddr & 128w0x123456789abcdef12345678;
-    }
-    action ipv6_addr_or2() {
-        headers.ipv6.dstAddr = headers.ipv6.srcAddr | 128w0x123456789abcdef;
-    }
-    action ipv6_addr_xor() {
-        headers.ipv6.dstAddr = headers.ipv6.dstAddr ^ tmp;
-    }
-    action ipv6_addr_comp1() {
-        headers.ipv6.dstAddr = (headers.ipv6.dstAddr == headers.ipv6.srcAddr ? headers.ipv6.dstAddr : headers.ipv6.srcAddr);
-    }
-    action ipv6_addr_comp2() {
-        headers.ipv6.dstAddr = (headers.ipv6.dstAddr != headers.ipv6.srcAddr ? headers.ipv6.dstAddr : headers.ipv6.srcAddr);
-    }
-    action ipv6_addr_cmpl() {
-        headers.ipv6.dstAddr = ~headers.ipv6.srcAddr;
     }
     action ipv6_swap_addr() {
         headers.ipv6.dstAddr = headers.ipv6.srcAddr;
@@ -141,27 +117,20 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
     }
     table filter_tbl {
         key = {
-            headers.ipv6.srcAddr: exact;
+            headers.ipv6.srcAddr: exact @name("headers.ipv6.srcAddr");
         }
         actions = {
-            ipv6_modify_dstAddr;
-            ipv6_swap_addr;
-            set_flowlabel;
-            ipv6_addr_or;
-            ipv6_addr_or2;
-            ipv6_addr_xor;
-            ipv6_addr_and;
-            ipv6_addr_and2;
-            ipv6_addr_comp1;
-            ipv6_addr_comp2;
-            ipv6_addr_cmpl;
-            set_traffic_class_flow_label;
-            set_ipv6_version;
-            set_next_hdr;
-            set_hop_limit;
-            Reject;
-            NoAction;
+            ipv6_modify_dstAddr();
+            ipv6_swap_addr();
+            set_flowlabel();
+            set_traffic_class_flow_label();
+            set_ipv6_version();
+            set_next_hdr();
+            set_hop_limit();
+            Reject();
+            NoAction();
         }
+        default_action = NoAction();
     }
     apply {
         filter_tbl.apply();
@@ -170,11 +139,11 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
 
 control MainDeparserImpl(packet_out packet, in headers_t headers, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
     apply {
-        packet.emit(headers.ethernet);
-        packet.emit(headers.mpls);
-        packet.emit(headers.ipv6);
-        packet.emit(headers.ipv4);
+        packet.emit<Ethernet_h>(headers.ethernet);
+        packet.emit<mpls_h>(headers.mpls);
+        packet.emit<IPv6_h>(headers.ipv6);
+        packet.emit<IPv4_h>(headers.ipv4);
     }
 }
 
-PNA_NIC(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;
+PNA_NIC<headers_t, main_metadata_t, headers_t, main_metadata_t>(MainParserImpl(), PreControlImpl(), MainControlImpl(), MainDeparserImpl()) main;

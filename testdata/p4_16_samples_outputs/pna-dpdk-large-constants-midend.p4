@@ -1,27 +1,25 @@
 #include <core.p4>
-#include <pna.p4>
+#include <dpdk/pna.p4>
 
-typedef bit<48> EthernetAddress;
-typedef bit<32> IPv4Address;
 header Ethernet_h {
-    EthernetAddress dstAddr;
-    EthernetAddress srcAddr;
-    bit<16>         etherType;
+    bit<48> dstAddr;
+    bit<48> srcAddr;
+    bit<16> etherType;
 }
 
 header IPv4_h {
-    bit<4>      version;
-    bit<4>      ihl;
-    bit<8>      diffserv;
-    bit<16>     totalLen;
-    bit<16>     identification;
-    bit<3>      flags;
-    bit<13>     fragOffset;
-    bit<8>      ttl;
-    bit<8>      protocol;
-    bit<16>     hdrChecksum;
-    IPv4Address srcAddr;
-    IPv4Address dstAddr;
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<8>  diffserv;
+    bit<16> totalLen;
+    bit<16> identification;
+    bit<3>  flags;
+    bit<13> fragOffset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> hdrChecksum;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
 }
 
 header IPv6_h {
@@ -82,10 +80,8 @@ parser MainParserImpl(packet_in p, out headers_t headers, inout main_metadata_t 
 }
 
 control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    @name("MainControlImpl.tmp") bit<128> tmp;
-    @name("MainControlImpl.tmp1") bit<32> tmp1_0;
     @name("MainControlImpl.tmp") bit<128> tmp_0;
-    @name("MainControlImpl.tmp_1") bit<128> tmp_1;
+    @name("MainControlImpl.tmp1") bit<32> tmp1_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MainControlImpl.Reject") action Reject() {
@@ -94,43 +90,9 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
     @name("MainControlImpl.ipv6_modify_dstAddr") action ipv6_modify_dstAddr(@name("dstAddr") bit<32> dstAddr_1) {
         headers.ipv6.dstAddr = (bit<128>)dstAddr_1;
     }
-    @name("MainControlImpl.ipv6_addr_or") action ipv6_addr_or() {
-        headers.ipv6.dstAddr = headers.ipv6.dstAddr | headers.ipv6.srcAddr;
-    }
-    @name("MainControlImpl.ipv6_addr_and") action ipv6_addr_and() {
-        headers.ipv6.dstAddr = tmp & headers.ipv6.srcAddr;
-    }
-    @name("MainControlImpl.ipv6_addr_and2") action ipv6_addr_and2() {
-        headers.ipv6.dstAddr = headers.ipv6.srcAddr & 128w0x123456789abcdef12345678;
-    }
-    @name("MainControlImpl.ipv6_addr_or2") action ipv6_addr_or2() {
-        headers.ipv6.dstAddr = headers.ipv6.srcAddr | 128w0x123456789abcdef;
-    }
-    @name("MainControlImpl.ipv6_addr_xor") action ipv6_addr_xor() {
-        headers.ipv6.dstAddr = headers.ipv6.dstAddr ^ tmp;
-    }
-    @name("MainControlImpl.ipv6_addr_comp1") action ipv6_addr_comp1() {
-        if (headers.ipv6.dstAddr == headers.ipv6.srcAddr) {
-            tmp_0 = headers.ipv6.dstAddr;
-        } else {
-            tmp_0 = headers.ipv6.srcAddr;
-        }
-        headers.ipv6.dstAddr = tmp_0;
-    }
-    @name("MainControlImpl.ipv6_addr_comp2") action ipv6_addr_comp2() {
-        if (headers.ipv6.dstAddr != headers.ipv6.srcAddr) {
-            tmp_1 = headers.ipv6.dstAddr;
-        } else {
-            tmp_1 = headers.ipv6.srcAddr;
-        }
-        headers.ipv6.dstAddr = tmp_1;
-    }
-    @name("MainControlImpl.ipv6_addr_cmpl") action ipv6_addr_cmpl() {
-        headers.ipv6.dstAddr = ~headers.ipv6.srcAddr;
-    }
     @name("MainControlImpl.ipv6_swap_addr") action ipv6_swap_addr() {
         headers.ipv6.dstAddr = headers.ipv6.srcAddr;
-        headers.ipv6.srcAddr = tmp;
+        headers.ipv6.srcAddr = tmp_0;
     }
     @name("MainControlImpl.set_flowlabel") action set_flowlabel(@name("label") bit<20> label_2) {
         headers.ipv6.flowLabel = label_2;
@@ -157,14 +119,6 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
             ipv6_modify_dstAddr();
             ipv6_swap_addr();
             set_flowlabel();
-            ipv6_addr_or();
-            ipv6_addr_or2();
-            ipv6_addr_xor();
-            ipv6_addr_and();
-            ipv6_addr_and2();
-            ipv6_addr_comp1();
-            ipv6_addr_comp2();
-            ipv6_addr_cmpl();
             set_traffic_class_flow_label();
             set_ipv6_version();
             set_next_hdr();
@@ -174,18 +128,36 @@ control MainControlImpl(inout headers_t headers, inout main_metadata_t meta, in 
         }
         default_action = NoAction_1();
     }
+    @hidden action pnadpdklargeconstants109() {
+        tmp_0 = 128w0x123456789abcdef12345678;
+    }
+    @hidden table tbl_pnadpdklargeconstants109 {
+        actions = {
+            pnadpdklargeconstants109();
+        }
+        const default_action = pnadpdklargeconstants109();
+    }
     apply {
-        tmp = 128w0x76;
+        tbl_pnadpdklargeconstants109.apply();
         filter_tbl_0.apply();
     }
 }
 
 control MainDeparserImpl(packet_out packet, in headers_t headers, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    apply {
+    @hidden action pnadpdklargeconstants180() {
         packet.emit<Ethernet_h>(headers.ethernet);
         packet.emit<mpls_h>(headers.mpls);
         packet.emit<IPv6_h>(headers.ipv6);
         packet.emit<IPv4_h>(headers.ipv4);
+    }
+    @hidden table tbl_pnadpdklargeconstants180 {
+        actions = {
+            pnadpdklargeconstants180();
+        }
+        const default_action = pnadpdklargeconstants180();
+    }
+    apply {
+        tbl_pnadpdklargeconstants180.apply();
     }
 }
 

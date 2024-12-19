@@ -37,6 +37,8 @@ limitations under the License.
 
 namespace P4::DPDK {
 
+static const int SupportedBitWidth = 128;
+
 class ConvertStatementToDpdk;
 
 /// @brief Name of the metadata used as output port.
@@ -199,6 +201,7 @@ class ConvertStatementToDpdk : public Inspector {
     void add128ComparisonInstr(cstring true_label, const IR::Expression *src1Op,
                                const IR::Expression *src2Op, const char *op);
     void add128bitComplInstr(const IR::Expression *, const IR::Expression *);
+    void add128bitMovInstr(const IR::Expression *left, const IR::Expression *right);
 };
 /// Only simplify complex expression in ingress/egress.
 class ProcessControls : public P4::RemoveComplexExpressionsPolicy {
