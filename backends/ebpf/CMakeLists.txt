@@ -27,9 +27,9 @@ if(NOT APPLE)
   set(FETCHCONTENT_QUIET OFF)
   fetchcontent_declare(
     bpfrepo
-    URL https://github.com/libbpf/libbpf/archive/refs/tags/v1.4.1.tar.gz
-    URL_HASH SHA256=cc01a3a05d25e5978c20be7656f14eb8b6fcb120bb1c7e8041e497814fc273cb
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/runtime/contrib/libbpf
+    URL https://github.com/libbpf/bpftool/releases/download/v7.5.0/bpftool-libbpf-v7.5.0-sources.tar.gz
+    # URL_HASH SHA256=cc01a3a05d25e5978c20be7656f14eb8b6fcb120bb1c7e8041e497814fc273cb
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/runtime/contrib/bpftool
     USES_TERMINAL_DOWNLOAD TRUE
     GIT_PROGRESS TRUE
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE
@@ -37,7 +37,7 @@ if(NOT APPLE)
   fetchcontent_makeavailable(bpfrepo)
   set(FETCHCONTENT_QUIET ${FETCHCONTENT_QUIET_PREV})
   # Check if we have already built the libbpf library.
-  find_library(LIBBPF NAMES bpf HINTS "${CMAKE_CURRENT_SOURCE_DIR}/runtime/usr/lib64/")
+  find_library(LIBBPF NAMES bpf HINTS "${CMAKE_CURRENT_SOURCE_DIR}/runtime/install/libbpf/")
   if (NOT LIBBPF)
     message("Building libbpf...")
     execute_process(
@@ -220,7 +220,7 @@ else()
 endif()
 
 # check for the libbpf library
-find_library(LIBBPF NAMES bpf HINTS "${CMAKE_CURRENT_SOURCE_DIR}/runtime/usr/lib64/")
+find_library(LIBBPF NAMES bpf HINTS "${CMAKE_CURRENT_SOURCE_DIR}/runtime/install/libbpf/")
 if (LIBBPF)
   message(STATUS "Found libbpf library at ${LIBBPF}")
 else()
