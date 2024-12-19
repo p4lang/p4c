@@ -72,9 +72,12 @@ function build_cmake_enabled_backend_string() {
 . /etc/lsb-release
 
 # In Docker builds, sudo is not available. So make it a noop.
-if [ "$IN_DOCKER" == "TRUE" ]; then
+if [ "$IN_DOCKER" = "TRUE" ]; then
   echo "Executing within docker container."
-  function sudo() { command "$@"; }
+  sudo() { "$@"; }  # No-op function; just execute the command
+else
+  # Preserve PATH and environment variables when using sudo
+  sudo() { command sudo -E env PATH="$PATH" "$@"; }
 fi
 
 
@@ -104,8 +107,10 @@ fi
 
 sudo apt-get update
 sudo apt-get install -y --no-install-recommends ${P4C_DEPS}
-sudo pip3 install --upgrade pip
-sudo pip3 install -r ${P4C_DIR}/requirements.txt
+# Set up poetry.
+sudo apt-get install -y python3-venv curl
+curl -sSL https://install.python-poetry.org | python3 -
+poetry install -C ${P4C_DIR}
 
 if [ "${BUILD_GENERATOR,,}" == "ninja" ] && [ ! $(command -v ninja) ]
 then
@@ -128,8 +133,6 @@ function build_bmv2() {
   # TODO: Remove this check once 18.04 is deprecated.
   if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
     P4C_RUNTIME_DEPS_BOOST="libboost-graph1.65.1 libboost-iostreams1.65.1"
-  else
-    P4C_RUNTIME_DEPS_BOOST="libboost-graph1.7* libboost-iostreams1.7*"
   fi
 
   P4C_RUNTIME_DEPS="cpp \
@@ -146,7 +149,7 @@ function build_bmv2() {
     P4C_RUNTIME_DEPS+=" gcc-9 g++-9"
     export CC=gcc-9
     export CXX=g++-9
-  else
+  elif [[ "${DISTRIB_RELEASE}" != "24.04" ]] ; then
    sudo apt-get install -y wget ca-certificates
     # Add the p4lang opensuse repository.
     echo "deb http://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/ /" | sudo tee /etc/apt/sources.list.d/home:p4lang.list
@@ -155,11 +158,6 @@ function build_bmv2() {
   fi
 
   sudo apt-get update && sudo apt-get install -y --no-install-recommends ${P4C_RUNTIME_DEPS}
-
-  if [[ "${DISTRIB_RELEASE}" != "18.04" ]] ; then
-    # To run PTF nanomsg tests. Not available on 18.04.
-    sudo pip3 install nnpy
-  fi
 }
 
 if [[ "${ENABLE_BMV2}" == "ON" ]] ; then
@@ -292,12 +290,12 @@ fi
 if [ -e build ]; then /bin/rm -rf build; fi
 mkdir -p ${P4C_DIR}/build
 cd ${P4C_DIR}/build
-cmake ${CMAKE_FLAGS} -G "${BUILD_GENERATOR}" ..
+poetry run cmake ${CMAKE_FLAGS} -G "${BUILD_GENERATOR}" ..
 
 # If CMAKE_ONLY is active, only run CMake. Do not build.
 if [ "$CMAKE_ONLY" == "OFF" ]; then
-  cmake --build . -- -j $(nproc)
-  sudo cmake --install .
+  poetry run cmake --build . -- -j $(nproc)
+  sudo poetry run cmake --install .
   # Print ccache statistics after building
   ccache -p -s
 fi

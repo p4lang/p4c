@@ -23,6 +23,7 @@ limitations under the License.
 
 #include "ebpf_common.h"
 
+#include <iproute2/bpf_elf.h> // Exports BPF_ANNOTATE_KV_PAIR in newer versions.
 #include <bpf/bpf_endian.h> // definitions for bpf_ntohs etc...
 
 #undef htonl
@@ -61,24 +62,12 @@ limitations under the License.
 // This file contains the definitions of all the kernel bpf essentials
 #include <bpf/bpf_helpers.h>
 
-/// A helper structure used by an eBPF C program
-/// to describe map attributes for the elf_bpf loader
-/// FIXME: We only need this because we are loading with iproute2
-struct bpf_elf_map {
-    __u32 type;
-    __u32 size_key;
-    __u32 size_value;
-    __u32 max_elem;
-    __u32 flags;
-    __u32 id;
-    __u32 pinning;
-    __u32 inner_id;
-    __u32 inner_idx;
-};
-
 /// Simple descriptor which replaces the kernel sk_buff structure.
 #define SK_BUFF struct __sk_buff
 
+
+#define REGISTER_START()
+#ifndef BPF_ANNOTATE_KV_PAIR
 /// From iproute2, annotate table with BTF which allows to read types at runtime.
 #define BPF_ANNOTATE_KV_PAIR(name, type_key, type_val)  \
     struct ____btf_map_##name {                         \
@@ -89,8 +78,6 @@ struct bpf_elf_map {
         __attribute__ ((section(".maps." #name), used)) \
         ____btf_map_##name = {};
 
-#define REGISTER_START()
-#ifndef BTF
 /// Note: pinning exports the table name globally, do not remove.
 #define REGISTER_TABLE(NAME, TYPE, KEY_TYPE, VALUE_TYPE, MAX_ENTRIES) \
 struct bpf_elf_map SEC("maps") NAME = {          \
