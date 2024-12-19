@@ -44,7 +44,7 @@ struct psa_egress_deparser_input_metadata_t {
 }
 
 struct execute_1_arg_t {
-	bit<32> index
+	bit<16> index
 }
 
 struct metadata_t {
@@ -54,11 +54,11 @@ struct metadata_t {
 	bit<32> local_metadata_port_out
 	bit<48> ingress_tbl_ethernet_srcAddr
 	bit<16> ingress_tbl_ipv4_hdrChecksum
-	bit<32> ingress_tbl_key
+	bit<8> ingress_tbl_key
 	bit<8> IngressParser_parser_tmp
 	bit<8> IngressParser_parser_tmp_0
 	bit<8> IngressParser_parser_tmp_1
-	bit<32> IngressParser_parser_tmp_2
+	bit<8> IngressParser_parser_tmp_2
 	bit<16> Ingress_tmp
 	bit<16> Ingress_tmp_0
 	bit<8> Ingress_tmp_2
@@ -74,7 +74,7 @@ struct metadata_t {
 	bit<8> Ingress_tmp_14
 	bit<8> Ingress_tmp_15
 	bit<8> Ingress_tmp_16
-	bit<32> Ingress_tmp_18
+	bit<8> Ingress_tmp_18
 	bit<16> Ingress_tmp_20
 	bit<8> Ingress_tmp_21
 	bit<8> Ingress_tmp_22

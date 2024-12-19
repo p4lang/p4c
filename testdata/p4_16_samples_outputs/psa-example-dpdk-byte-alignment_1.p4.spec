@@ -44,7 +44,7 @@ struct psa_egress_deparser_input_metadata_t {
 }
 
 struct execute_1_arg_t {
-	bit<32> index
+	bit<16> index
 }
 
 struct metadata_t {
@@ -59,7 +59,7 @@ struct metadata_t {
 	bit<8> IngressParser_parser_tmp_3
 	bit<8> IngressParser_parser_tmp_4
 	bit<8> IngressParser_parser_tmp_5
-	bit<32> IngressParser_parser_tmp_6
+	bit<8> IngressParser_parser_tmp_6
 	bit<16> Ingress_tmp
 	bit<16> Ingress_tmp_0
 	bit<8> Ingress_tmp_2
@@ -75,7 +75,7 @@ struct metadata_t {
 	bit<8> Ingress_tmp_14
 	bit<8> Ingress_tmp_15
 	bit<8> Ingress_tmp_16
-	bit<32> Ingress_tmp_18
+	bit<8> Ingress_tmp_18
 	bit<16> Ingress_tmp_20
 	bit<32> Ingress_color_out
 	bit<32> Ingress_color_in
