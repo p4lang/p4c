@@ -195,9 +195,6 @@ class KernelSamplesTarget : public Target {
     cstring sysMapPath() const override { return "/sys/fs/bpf/tc/globals"_cs; }
 
     cstring packetDescriptorType() const override { return "struct __sk_buff"_cs; }
-
-    void annotateTableWithBTF(Util::SourceCodeBuilder *builder, cstring name, cstring keyType,
-                              cstring valueType) const;
 };
 
 class P4TCTarget : public KernelSamplesTarget {
