@@ -98,7 +98,6 @@ void KernelSamplesTarget::emitTableDecl(Util::SourceCodeBuilder *builder, cstrin
                               flags);
     }
     builder->newline();
-    annotateTableWithBTF(builder, tblName, keyType, valueType);
 }
 
 void KernelSamplesTarget::emitTableDeclSpinlock(Util::SourceCodeBuilder *builder, cstring tblName,
@@ -131,14 +130,12 @@ void KernelSamplesTarget::emitMapInMapDecl(Util::SourceCodeBuilder *builder, cst
     builder->appendFormat(registerInnerTable, innerName, kind, innerKeyType, innerValueType,
                           innerSize, innerMapIndex, innerMapIndex);
     builder->newline();
-    annotateTableWithBTF(builder, innerName, innerKeyType, innerValueType);
 
     kind = getBPFMapType(outerTableKind);
     cstring keyType = outerTableKind == TableArray ? "__u32"_cs : outerKeyType;
     builder->appendFormat(registerOuterTable, outerName, kind, keyType, "__u32", outerSize,
                           innerMapIndex, innerName);
     builder->newline();
-    annotateTableWithBTF(builder, outerName, keyType, "__u32"_cs);
 }
 
 void KernelSamplesTarget::emitLicense(Util::SourceCodeBuilder *builder, cstring license) const {
@@ -199,12 +196,6 @@ void KernelSamplesTarget::emitTraceMessage(Util::SourceCodeBuilder *builder, con
 
     builder->emitIndent();
     builder->appendFormat("bpf_trace_message(%v);", msg);
-    builder->newline();
-}
-
-void KernelSamplesTarget::annotateTableWithBTF(Util::SourceCodeBuilder *builder, cstring name,
-                                               cstring keyType, cstring valueType) const {
-    builder->appendFormat("BPF_ANNOTATE_KV_PAIR(%v, %v, %v)", name, keyType, valueType);
     builder->newline();
 }
 

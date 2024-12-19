@@ -176,12 +176,15 @@ function build_ebpf() {
   P4C_EBPF_DEPS="libpcap-dev \
                  libelf-dev \
                  zlib1g-dev \
-                 llvm \
-                 clang \
                  iproute2 \
                  iptables \
                  net-tools"
 
+  if [[ "${DISTRIB_RELEASE}" == "18.04" || "${DISTRIB_RELEASE}" == "20.04" ]] ; then
+    P4C_EBPF_DEPS+=" llvm-12 llvm-12-tools llvm-toolchain-12 clang-12 "
+  else
+    P4C_EBPF_DEPS+=" llvm clang "
+  fi
   sudo apt-get install -y --no-install-recommends ${P4C_EBPF_DEPS}
 }
 
