@@ -50,17 +50,17 @@ struct next_hop_arg_t {
 
 struct main_metadata_t {
 	bit<32> pna_main_input_metadata_input_port
-	bit<32> local_metadata_rng_result1
+	bit<8> local_metadata_rng_result1
 	bit<16> local_metadata_min1
 	bit<16> local_metadata_max1
 	bit<8> local_metadata_timeout
 	bit<32> pna_main_output_metadata_output_port
-	bit<32> MainParserT_parser_tmp
+	bit<8> MainParserT_parser_tmp
 	bit<32> MainControlT_tmp
 	bit<32> MainControlT_tmp_0
-	bit<32> MainControlT_tmp_1
-	bit<32> MainControlT_tmp_2
-	bit<32> MainControlT_tmp_3
+	bit<8> MainControlT_tmp_1
+	bit<8> MainControlT_tmp_2
+	bit<8> MainControlT_tmp_3
 	bit<32> learnArg
 }
 metadata instanceof main_metadata_t
