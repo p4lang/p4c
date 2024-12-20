@@ -26,7 +26,7 @@ struct udp_t {
 }
 
 struct main_metadata_t {
-	bit<32> pna_main_input_metadata_pass
+	bit<8> pna_main_input_metadata_pass
 	bit<32> pna_main_input_metadata_input_port
 	bit<32> pna_main_output_metadata_output_port
 }

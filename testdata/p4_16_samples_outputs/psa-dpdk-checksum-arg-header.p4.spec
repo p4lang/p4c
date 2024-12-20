@@ -113,7 +113,7 @@ struct local_metadata_t {
 	bit<8> Ingress_tmp_1
 	bit<16> Ingress_tmp_2
 	bit<16> Ingress_tmp_3
-	bit<32> Ingress_tmp_4
+	bit<8> Ingress_tmp_4
 	bit<32> Ingress_tmp_5
 	bit<32> Ingress_tmp_6
 }
