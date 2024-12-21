@@ -22,8 +22,38 @@ limitations under the License.
 #include "frontends/p4-14/fromv1.0/v1model.h"
 #include "frontends/p4/coreLibrary.h"
 #include "lib/algorithm.h"
+#include "lib/json.h"
 
 namespace P4::BMV2 {
+
+namespace {
+/// Invalidates all other headers in a header union except the provided source header.
+/// Has no effect if the parent structure is not a header union.
+void invalidateOtherHeaderUnionHeaders(const IR::Member *sourceHeader,
+                                       const ConversionContext &ctxt, Util::JsonArray *result) {
+    const auto *type = ctxt.typeMap->getType(sourceHeader->expr, true);
+    if (const auto *headerUnionType = type->to<IR::Type_HeaderUnion>()) {
+        for (const auto *field : headerUnionType->fields) {
+            // Do not set the source member invalid.
+            if (sourceHeader->member == field->name) {
+                continue;
+            }
+            auto *member = new IR::Member(field->type, sourceHeader->expr, field->name);
+            ctxt.typeMap->setType(member, field->type);
+            auto *obj = new Util::JsonObject();
+            obj->emplace("op", "primitive");
+            auto *params = mkArrayField(obj, "parameters"_cs);
+            auto *paramsValue = new Util::JsonObject();
+            params->append(paramsValue);
+            auto *pp = mkArrayField(paramsValue, "parameters"_cs);
+            auto *biObj = ctxt.conv->convert(member);
+            pp->append(biObj);
+            paramsValue->emplace("op", "remove_header");
+            result->append(obj);
+        }
+    }
+}
+}  // namespace
 
 cstring ParserConverter::jsonAssignment(const IR::Type *type) {
     if (type->is<IR::Type_HeaderUnion>()) return "assign_union"_cs;
@@ -40,9 +70,10 @@ cstring ParserConverter::jsonAssignment(const IR::Type *type) {
     return "set"_cs;
 }
 
-Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat) {
-    auto result = new Util::JsonObject();
-    auto params = mkArrayField(result, "parameters"_cs);
+Util::JsonArray *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat) {
+    auto *result = new Util::JsonArray();
+    auto *obj = new Util::JsonObject();
+    auto *params = mkArrayField(obj, "parameters"_cs);
     auto isR = false;
     IR::MethodCallExpression *mce2 = nullptr;
     if (stat->is<IR::AssignmentStatement>()) {
@@ -104,7 +135,7 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
         auto assign = stat->to<IR::AssignmentStatement>();
         auto type = ctxt->typeMap->getType(assign->left, true);
         cstring operation = jsonAssignment(type);
-        result->emplace("op", operation);
+        obj->emplace("op", operation);
         auto l = ctxt->conv->convertLeftValue(assign->left);
         bool convertBool = type->is<IR::Type_Boolean>();
         auto r = ctxt->conv->convert(assign->right, true, true, convertBool);
@@ -116,10 +147,11 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
             auto wrap = new Util::JsonObject();
             wrap->emplace("op", "primitive");
             auto params = mkParameters(wrap);
-            params->append(result);
-            result = wrap;
+            params->append(obj);
+            obj = wrap;
         }
 
+        result->push_back(obj);
         return result;
     } else if (stat->is<IR::MethodCallStatement>()) {
         auto mce = stat->to<IR::MethodCallStatement>()->methodCall;
@@ -135,7 +167,7 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
                 }
 
                 cstring ename = argCount == 1 ? "extract"_cs : "extract_VL"_cs;
-                result->emplace("op", ename);
+                obj->emplace("op", ename);
                 auto arg = mce->arguments->at(0);
                 auto argtype = ctxt->typeMap->getType(arg->expression, true);
                 if (!argtype->is<IR::Type_Header>()) {
@@ -206,6 +238,7 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
                     rwrap->emplace("value", jexpr);
                     params->append(rwrap);
                 }
+                result->push_back(obj);
                 return result;
             } else if (extmeth->method->name.name == corelib.packetIn.lookahead.name) {
                 // bare lookahead call -- should flag an error if there's not enough
@@ -218,8 +251,9 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
                 }
                 auto arg = mce->arguments->at(0);
                 auto jexpr = ctxt->conv->convert(arg->expression, true, false);
-                result->emplace("op", "advance");
+                obj->emplace("op", "advance");
                 params->append(jexpr);
+                result->push_back(obj);
                 return result;
             } else if ((extmeth->originalExternType->name == "InternetChecksum" &&
                         (extmeth->method->name.name == "clear" ||
@@ -236,16 +270,17 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
                     json = ExternConverter::cvtExternObject(ctxt, extmeth, mce, stat, true);
                 }
                 if (json) {
-                    result->emplace("op", "primitive");
+                    obj->emplace("op", "primitive");
                     params->append(json);
                 }
+                result->push_back(obj);
                 return result;
             }
         } else if (minst->is<P4::ExternFunction>()) {
             auto extfn = minst->to<P4::ExternFunction>();
             auto extFuncName = extfn->method->name.name;
             if (extFuncName == IR::ParserState::verify) {
-                result->emplace("op", "verify");
+                obj->emplace("op", "verify");
                 BUG_CHECK(mce->arguments->size() == 2, "%1%: Expected 2 arguments", mce);
                 {
                     auto cond = mce->arguments->at(0);
@@ -261,10 +296,9 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
                     auto jexpr = ctxt->conv->convert(error->expression, true, false);
                     params->append(jexpr);
                 }
-                return result;
             } else if (extFuncName == "assert" || extFuncName == "assume") {
                 BUG_CHECK(mce->arguments->size() == 1, "%1%: Expected 1 argument ", mce);
-                result->emplace("op", "primitive");
+                obj->emplace("op", "primitive");
                 auto paramValue = new Util::JsonObject();
                 params->append(paramValue);
                 auto paramsArray = mkArrayField(paramValue, "parameters"_cs);
@@ -276,12 +310,13 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
             } else if (extFuncName == P4V1::V1Model::instance.log_msg.name) {
                 BUG_CHECK(mce->arguments->size() == 2 || mce->arguments->size() == 1,
                           "%1%: Expected 1 or 2 arguments", mce);
-                result->emplace("op", "primitive");
+                obj->emplace("op", "primitive");
                 auto ef = minst->to<P4::ExternFunction>();
                 auto ijson = ExternConverter::cvtExternFunction(ctxt, ef, mce, stat, false);
                 params->append(ijson);
-                return result;
             }
+            result->push_back(obj);
+            return result;
         } else if (minst->is<P4::BuiltInMethod>()) {
             /* example result:
              {
@@ -293,7 +328,7 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
               ],
               "op" : "primitive"
             } */
-            result->emplace("op", "primitive");
+            obj->emplace("op", "primitive");
 
             auto bi = minst->to<P4::BuiltInMethod>();
             cstring primitive;
@@ -301,13 +336,18 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
             params->append(paramsValue);
 
             auto pp = mkArrayField(paramsValue, "parameters"_cs);
-            auto obj = ctxt->conv->convert(bi->appliedTo);
-            pp->append(obj);
+            auto biObj = ctxt->conv->convert(bi->appliedTo);
+            pp->append(biObj);
 
             if (bi->name == IR::Type_Header::setValid) {
                 primitive = "add_header"_cs;
             } else if (bi->name == IR::Type_Header::setInvalid) {
                 primitive = "remove_header"_cs;
+                // If setInvalid is called on any header in a header union, we need to
+                // invalidate all other headers in the union.
+                if (const auto *parentStructure = bi->appliedTo->to<IR::Member>()) {
+                    invalidateOtherHeaderUnionHeaders(parentStructure, *ctxt, result);
+                }
             } else if (bi->name == IR::Type_Stack::push_front ||
                        bi->name == IR::Type_Stack::pop_front) {
                 if (bi->name == IR::Type_Stack::push_front)
@@ -323,6 +363,7 @@ Util::IJson *ParserConverter::convertParserStatement(const IR::StatOrDecl *stat)
             }
 
             paramsValue->emplace("op", primitive);
+            result->push_back(obj);
             return result;
         }
     }
@@ -560,9 +601,11 @@ bool ParserConverter::preorder(const IR::P4Parser *parser) {
         // For the state we use the internal name, not the control-plane name
         auto state_id = ctxt->json->add_parser_state(parser_id, state->name);
         // convert statements
-        for (auto s : state->components) {
-            auto op = convertParserStatement(s);
-            if (op) ctxt->json->add_parser_op(state_id, op);
+        for (const auto *s : state->components) {
+            auto *op = convertParserStatement(s);
+            for (auto *o : *op) {
+                ctxt->json->add_parser_op(state_id, o);
+            }
         }
         // convert transitions
         if (state->selectExpression != nullptr) {
