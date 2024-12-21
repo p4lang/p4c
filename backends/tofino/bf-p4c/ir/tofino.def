@@ -95,6 +95,10 @@ class BFN::Pipe {
             return parsers == a.parsers && mau == a.mau && deparser == a.deparser &&
                 hw_constrained_fields == a.hw_constrained_fields;
         }
+#emit
+    bool isSemanticallyLess(const thread_t &a) const;
+#end
+
         toJSON {
             json << json.indent << "\"parser\" : " << parsers << "," << std::endl
                  << json.indent << "\"mau\" : " << mau << "," << std::endl
@@ -121,11 +125,12 @@ class BFN::Pipe {
         dbprint { out << "ghost_mau=" << ghost_mau << " "
                       << "ghost_parser=" << ghost_parser; }
 #emit
-        friend std::ostream &operator<<(std::ostream &out, const ghost_thread_t &gt) {
-            out << "ghost_mau=" << gt.ghost_mau << " "
-                << "ghost_parser=" << gt.ghost_parser;
-            return out;
-        }
+    friend std::ostream &operator<<(std::ostream &out, const ghost_thread_t &gt) {
+        out << "ghost_mau=" << gt.ghost_mau << " "
+            << "ghost_parser=" << gt.ghost_parser;
+        return out;
+    }
+    bool isSemanticallyLess(const ghost_thread_t &a) const;
 #end
     }
     ghost_thread_t ghost_thread;

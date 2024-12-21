@@ -280,6 +280,13 @@ class Constant : Literal {
         return Util::toString(value, width, sign, base);
     }
     visit_children { v.visit(type, "type"); }
+    isSemanticallyLess {
+        if (static_cast<const Node *>(this) == &a_) return false;
+        if (typeId() != a_.typeId()) return typeId() < a_.typeId();
+        if (Literal::isSemanticallyLess(a_)) return true;
+        auto &a = static_cast<const Constant &>(a_);
+        return value < a.value; /* ignore base */
+    }
 }
 
 class BoolLiteral : Literal {
@@ -643,6 +650,13 @@ class SymbolicVariable : Expression {
     /// Implements comparisons so that SymbolicVariables can be used as map keys.
     inline bool operator<(const SymbolicVariable &other) const {
         return label < other.label;
+    }
+
+    isSemanticallyLess {
+        if (static_cast<const Node *>(this) == &a_) return false;
+        if (typeId() !=  a_.typeId()) return typeId() <  a_.typeId();
+        auto &a = static_cast<const SymbolicVariable &>(a_);
+        return label < a.label; /* ignore type */
     }
 
     toString { return absl::StrCat("|", label, "(", type, ")|"); }

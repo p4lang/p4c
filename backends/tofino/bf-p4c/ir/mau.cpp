@@ -25,6 +25,7 @@
 #include "backends/tofino/bf-p4c/mau/table_layout.h"
 #include "gateway_control_flow.h"
 #include "ir/ir.h"
+#include "ir/semantic_less.h"
 
 // FIXME -- This is gcc specific, but allows p4test to link without breaking p4c-barefoot
 Device *Device::instance_ __attribute__((weak)) = nullptr;
@@ -469,6 +470,99 @@ IR::MAU::Table::Layout &IR::MAU::Table::Layout::operator+=(const IR::MAU::Table:
     sets_per_word += a.sets_per_word;
     return *this;
 }
+
+bool IR::MAU::Table::Layout::operator<(const IR::MAU::Table::Layout &a) const {
+    return std::tie(gateway, ternary, gateway_match, hash_action, atcam, has_range, proxy_hash,
+                    requires_versioning, is_lamb, is_direct, is_local_tind, action_data_bytes,
+                    action_data_bytes_in_table, total_actions, entries, ixbar_bytes,
+                    ixbar_width_bits, match_width_bits, overhead_bits, immediate_bits, meter_addr,
+                    stats_addr, action_addr, ghost_bytes, partition_bits, partition_count,
+                    entries_per_set, sets_per_word) <
+           std::tie(a.gateway, a.ternary, a.gateway_match, a.hash_action, a.atcam, a.has_range,
+                    a.proxy_hash, a.requires_versioning, a.is_lamb, a.is_direct, a.is_local_tind,
+                    a.action_data_bytes, a.action_data_bytes_in_table, a.total_actions, a.entries,
+                    a.ixbar_bytes, a.ixbar_width_bits, a.match_width_bits, a.overhead_bits,
+                    a.immediate_bits, a.meter_addr, a.stats_addr, a.action_addr, a.ghost_bytes,
+                    a.partition_bits, a.partition_count, a.entries_per_set, a.sets_per_word);
+}
+
+bool IR::MAU::Table::isSemanticallyLess(IR::Node const &a_) const {
+    if (static_cast<const Node *>(this) == &a_) return false;
+    if (typeId() != a_.typeId()) return typeId() < a_.typeId();
+    if (BFN::Unit::isSemanticallyLess(a_)) return true;
+    auto &a = static_cast<const Table &>(a_);
+    return ::P4::IR::isSemanticallyLess(name, a.name) ||
+           (!::P4::IR::isSemanticallyLess(a.name, name) &&
+            ::P4::IR::isSemanticallyLess(gress, a.gress)) ||
+           (!::P4::IR::isSemanticallyLess(a.gress, gress) &&
+            ::P4::IR::isSemanticallyLess(gateway_name, a.gateway_name)) ||
+           (!::P4::IR::isSemanticallyLess(a.gateway_name, gateway_name) &&
+            ::P4::IR::isSemanticallyLess(gateway_cond, a.gateway_cond)) ||
+           (!::P4::IR::isSemanticallyLess(a.gateway_cond, gateway_cond) &&
+            ::P4::IR::isSemanticallyLess(gateway_result_tag, a.gateway_result_tag)) ||
+           (!::P4::IR::isSemanticallyLess(a.gateway_result_tag, gateway_result_tag) &&
+            ::P4::IR::isSemanticallyLess(stage_, a.stage_)) ||
+           (!::P4::IR::isSemanticallyLess(a.stage_, stage_) &&
+            ::P4::IR::isSemanticallyLess(logical_id, a.logical_id)) ||
+           (!::P4::IR::isSemanticallyLess(a.logical_id, logical_id) &&
+            ::P4::IR::isSemanticallyLess(stage_split, a.stage_split)) ||
+           (!::P4::IR::isSemanticallyLess(a.stage_split, stage_split) &&
+            ::P4::IR::isSemanticallyLess(logical_split, a.logical_split)) ||
+           (!::P4::IR::isSemanticallyLess(a.logical_split, logical_split) &&
+            ::P4::IR::isSemanticallyLess(logical_tables_in_stage, a.logical_tables_in_stage)) ||
+           (!::P4::IR::isSemanticallyLess(a.logical_tables_in_stage, logical_tables_in_stage) &&
+            ::P4::IR::isSemanticallyLess(atcam_entries_in_stage, a.atcam_entries_in_stage)) ||
+           (!::P4::IR::isSemanticallyLess(a.atcam_entries_in_stage, atcam_entries_in_stage) &&
+            ::P4::IR::isSemanticallyLess(gateway_rows, a.gateway_rows)) ||
+           (!::P4::IR::isSemanticallyLess(a.gateway_rows, gateway_rows) &&
+            ::P4::IR::isSemanticallyLess(gateway_payload, a.gateway_payload)) ||
+           (!::P4::IR::isSemanticallyLess(a.gateway_payload, gateway_payload) &&
+            ::P4::IR::isSemanticallyLess(gateway_constant_entries_key,
+                                         a.gateway_constant_entries_key)) ||
+           (!::P4::IR::isSemanticallyLess(a.gateway_constant_entries_key,
+                                          gateway_constant_entries_key) &&
+            ::P4::IR::isSemanticallyLess(match_table, a.match_table)) ||
+           (!::P4::IR::isSemanticallyLess(a.match_table, match_table) &&
+            ::P4::IR::isSemanticallyLess(attached, a.attached)) ||
+           (!::P4::IR::isSemanticallyLess(a.attached, attached) &&
+            ::P4::IR::isSemanticallyLess(actions, a.actions)) ||
+           (!::P4::IR::isSemanticallyLess(a.actions, actions) &&
+            ::P4::IR::isSemanticallyLess(next, a.next)) ||
+           (!::P4::IR::isSemanticallyLess(a.next, next) &&
+            ::P4::IR::isSemanticallyLess(match_key, a.match_key)) ||
+           (!::P4::IR::isSemanticallyLess(a.match_key, match_key) &&
+            ::P4::IR::isSemanticallyLess(sel_symmetric_keys, a.sel_symmetric_keys)) ||
+           (!::P4::IR::isSemanticallyLess(a.sel_symmetric_keys, sel_symmetric_keys) &&
+            ::P4::IR::isSemanticallyLess(random_seed, a.random_seed)) ||
+           (!::P4::IR::isSemanticallyLess(a.random_seed, random_seed) &&
+            ::P4::IR::isSemanticallyLess(dynamic_key_masks, a.dynamic_key_masks)) ||
+           (!::P4::IR::isSemanticallyLess(a.dynamic_key_masks, dynamic_key_masks) &&
+            ::P4::IR::isSemanticallyLess(entries_list, a.entries_list)) ||
+           (!::P4::IR::isSemanticallyLess(a.entries_list, entries_list) &&
+            ::P4::IR::isSemanticallyLess(first_entry_list_priority, a.first_entry_list_priority)) ||
+           (!::P4::IR::isSemanticallyLess(a.first_entry_list_priority, first_entry_list_priority) &&
+            ::P4::IR::isSemanticallyLess(created_during_tp, a.created_during_tp)) ||
+           (!::P4::IR::isSemanticallyLess(a.created_during_tp, created_during_tp) &&
+            ::P4::IR::isSemanticallyLess(is_compiler_generated, a.is_compiler_generated)) ||
+           (!::P4::IR::isSemanticallyLess(a.is_compiler_generated, is_compiler_generated) &&
+            ::P4::IR::isSemanticallyLess(has_dark_init, a.has_dark_init)) ||
+           (!::P4::IR::isSemanticallyLess(a.has_dark_init, has_dark_init) &&
+            ::P4::IR::isSemanticallyLess(always_run, a.always_run)) ||
+           (!::P4::IR::isSemanticallyLess(a.always_run, always_run) &&
+            ::P4::IR::isSemanticallyLess(suppress_context_json, a.suppress_context_json)) ||
+           (!::P4::IR::isSemanticallyLess(a.suppress_context_json, suppress_context_json) &&
+            ::P4::IR::isSemanticallyLess(run_before_exit, a.run_before_exit)) ||
+           (!::P4::IR::isSemanticallyLess(a.run_before_exit, run_before_exit) &&
+            ::P4::IR::isSemanticallyLess(is_detached_attached_tbl, a.is_detached_attached_tbl)) ||
+           (!::P4::IR::isSemanticallyLess(a.is_detached_attached_tbl, is_detached_attached_tbl) &&
+            ::P4::IR::isSemanticallyLess(layout, a.layout)) ||
+           (!::P4::IR::isSemanticallyLess(a.layout, layout) &&
+            ::P4::IR::isSemanticallyLess(ways, a.ways)) ||
+           (!::P4::IR::isSemanticallyLess(a.ways, ways) &&
+            // FIXME: use isSemanticallyLess here? Equiv also compares pointers.
+            resources < a.resources);
+}
+
 /*
 std::ostream &operator<<(std::ostream &out, IR::MAU::Table::Layout &layout) {
     Log::TempIndent indent;
