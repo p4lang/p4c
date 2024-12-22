@@ -63,7 +63,6 @@ struct p4tc_filter_fields {
 
 REGISTER_START()
 REGISTER_TABLE(hdr_md_cpumap, BPF_MAP_TYPE_PERCPU_ARRAY, u32, struct hdr_md, 2)
-BPF_ANNOTATE_KV_PAIR(hdr_md_cpumap, u32, struct hdr_md)
 REGISTER_END()
 
 static inline u32 getPrimitive32(u8 *a, int size) {
