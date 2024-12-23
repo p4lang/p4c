@@ -1,0 +1,3 @@
+psa-dpdk-128bitCast_error.p4(55): [--Werror=overlimit] error: DPDK target supports constant values that are up to 64-bits, and also exactly 128-bits, but no other sizes. 80w0xffffbbbb12345342aaaa is not a supported size
+            hdr.ethernet.val = 0xFFFFBBBB12345342AAAA;
+                               ^^^^^^^^^^^^^^^^^^^^^^

@@ -97,10 +97,3 @@ dash-pipeline-pna-dpdk.p4(936): [--Wwarn=invalid_header] warning: accessing a fi
 [--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table metering_update_stage_meter_rule. Copying all match fields to metadata
 [--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table metering_update_stage_meter_bucket. Copying all match fields to metadata
 [--Wwarn=mismatch] warning: Mismatched header/metadata struct for key elements in table metering_update_stage_eni_meter. Copying all match fields to metadata
-[--Werror=overlimit] error: DPDK target supports up-to 64-bit immediate values, 128w0xffffffffffffffffffffffff exceeds the limit
-[--Werror=overlimit] error: DPDK target supports up-to 64-bit immediate values, 128w0xffffffffffffffffffffffff exceeds the limit
-[--Werror=overlimit] error: DPDK target supports up-to 64-bit immediate values, 128w0xffffffffffffffffffffffff exceeds the limit
-[--Werror=overlimit] error: DPDK target supports up-to 64-bit immediate values, 128w0xffffffffffffffffffffffff exceeds the limit
-dash-pipeline-pna-dpdk.p4(719): [--Werror=overlimit] error: DPDK target supports up-to 64-bit immediate values, 128w0xffffffffffffffffffffffff exceeds the limit
-...apping(inout headers_t hdr, inout metadata_t meta, @SaiVal[type="sai_ip_address_t"] IPv4Addres...
-                                                ^^^^

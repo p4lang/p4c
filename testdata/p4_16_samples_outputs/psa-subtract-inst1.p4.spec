@@ -41,19 +41,19 @@ struct user_meta_data_t {
 	bit<32> psa_ingress_input_metadata_ingress_port
 	bit<8> psa_ingress_output_metadata_drop
 	bit<32> psa_ingress_output_metadata_egress_port
-	bit<32> local_metadata_depth1
-	bit<32> local_metadata_depth2
-	bit<32> local_metadata_depth3
-	bit<32> local_metadata_depth4
-	bit<32> local_metadata_depth5
-	bit<32> local_metadata_depth6
-	bit<32> local_metadata_depth7
-	bit<64> Ingress_tmp
-	bit<32> Ingress_var1
-	bit<32> Ingress_var2
-	bit<64> Ingress_var3
-	bit<64> Ingress_var4
-	bit<64> Ingress_var5
+	bit<8> local_metadata_depth1
+	bit<8> local_metadata_depth2
+	bit<8> local_metadata_depth3
+	bit<8> local_metadata_depth4
+	bit<8> local_metadata_depth5
+	bit<8> local_metadata_depth6
+	bit<8> local_metadata_depth7
+	bit<40> Ingress_tmp
+	bit<8> Ingress_var1
+	bit<8> Ingress_var2
+	bit<40> Ingress_var3
+	bit<40> Ingress_var4
+	bit<40> Ingress_var5
 }
 metadata instanceof user_meta_data_t
 

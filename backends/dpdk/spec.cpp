@@ -219,7 +219,7 @@ std::ostream &IR::DpdkHeaderType::toSpec(std::ostream &out) const {
 }
 
 std::ostream &IR::DpdkHeaderInstance::toSpec(std::ostream &out) const {
-    out << "header " << name->toString() << " instanceof " << headerType->toString();
+    out << "header " << name->toString() << " instanceof " << headerType->name.name;
     return out;
 }
 
