@@ -363,9 +363,7 @@ IR::Declaration_Instance *&#160;</td><td class="memItemRight" valign="bottom"><b
 <tr class="memitem:ab10154a4d94fe9bd3588dafc20341dff" id="r_ab10154a4d94fe9bd3588dafc20341dff"><td class="memItemLeft" align="right" valign="top"><a id="ab10154a4d94fe9bd3588dafc20341dff" name="ab10154a4d94fe9bd3588dafc20341dff"></a>
 const IR::Type_Bits *&#160;</td><td class="memItemRight" valign="bottom"><b>getEightBitAlignedType</b> (const IR::Type_Bits *tb)</td></tr>
 <tr class="separator:ab10154a4d94fe9bd3588dafc20341dff"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a34c29402170a83d174e5933d8149779a" id="r_a34c29402170a83d174e5933d8149779a"><td class="memItemLeft" align="right" valign="top"><a id="a34c29402170a83d174e5933d8149779a" name="a34c29402170a83d174e5933d8149779a"></a>
-int&#160;</td><td class="memItemRight" valign="bottom"><b>getMetadataFieldWidth</b> (int width)</td></tr>
-<tr class="memdesc:a34c29402170a83d174e5933d8149779a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Update bitwidth of Metadata fields to 32 or 64 bits if it 8-bit aligned. <br /></td></tr>
+<tr class="memitem:a34c29402170a83d174e5933d8149779a" id="r_a34c29402170a83d174e5933d8149779a"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a34c29402170a83d174e5933d8149779a">getMetadataFieldWidth</a> (int width)</td></tr>
 <tr class="separator:a34c29402170a83d174e5933d8149779a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac3d98fca8e6ecc2cf071085113a36dfc" id="r_ac3d98fca8e6ecc2cf071085113a36dfc"><td class="memItemLeft" align="right" valign="top"><a id="ac3d98fca8e6ecc2cf071085113a36dfc" name="ac3d98fca8e6ecc2cf071085113a36dfc"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>isCommutativeBinaryOperation</b> (const IR::Operation_Binary *bin)</td></tr>
@@ -717,6 +715,24 @@ tableType</td>
       </table>
 </div><div class="memdoc">
 <p>This function is a sanity to check whether the component of a Expression falls into following classes, if not, it means we haven't implemented a handle for that class. </p>
+
+</div>
+</div>
+<a id="a34c29402170a83d174e5933d8149779a" name="a34c29402170a83d174e5933d8149779a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a34c29402170a83d174e5933d8149779a">&#9670;&#160;</a></span>getMetadataFieldWidth()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int P4::DPDK::getMetadataFieldWidth </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>width</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>The DPDK pipeline requirement is all header/metadata fields to be multiple of 8bits. There is no limitation on total bit width. This function allows any bit width but if the width is odd size, then nearest multiple of 8bit value is returned. </p>
 
 </div>
 </div>
