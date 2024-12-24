@@ -35,16 +35,20 @@ jobs:
           tools/ci-build.sh
 
       - name: Run cpplint on C/C++ files.
-        run: poetry run cmake --build build --target cpplint
+        run: |
+          source venv/bin/activate
+          cmake --build build --target cpplint
 
       - name: Run clang-format on C/C++ files.
         run: |
-          poetry run clang-format --version
-          poetry run cmake --build build --target clang-format
+          source venv/bin/activate
+          clang-format --version
+          cmake --build build --target clang-format
 
       - name: Run black and isort on Python files.
         run: |
-          poetry run black --version
-          poetry run cmake --build build --target black
-          poetry run isort --version
-          poetry run cmake --build build --target isort
+          source venv/bin/activate
+          black --version
+          cmake --build build --target black
+          isort --version
+          cmake --build build --target isort

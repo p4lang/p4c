@@ -97,6 +97,7 @@ P4C_DEPS="bison \
           pkg-config \
           python3 \
           python3-pip \
+          python3-venv \
           python3-setuptools \
           tcpdump"
 
@@ -107,10 +108,7 @@ fi
 
 sudo apt-get update
 sudo apt-get install -y --no-install-recommends ${P4C_DEPS}
-# Set up poetry.
-sudo apt-get install -y python3-venv curl
-curl -sSL https://install.python-poetry.org | python3 -
-poetry install -C ${P4C_DIR}
+
 
 if [ "${BUILD_GENERATOR,,}" == "ninja" ] && [ ! $(command -v ninja) ]
 then
@@ -288,12 +286,15 @@ fi
 if [ -e build ]; then /bin/rm -rf build; fi
 mkdir -p ${P4C_DIR}/build
 cd ${P4C_DIR}/build
-poetry run cmake ${CMAKE_FLAGS} -G "${BUILD_GENERATOR}" ..
+virtualenv venv
+source venv/bin/activate
+pip3 install -r ${P4C_DIR}/requirements.txt
+cmake ${CMAKE_FLAGS} -G "${BUILD_GENERATOR}" ..
 
 # If CMAKE_ONLY is active, only run CMake. Do not build.
 if [ "$CMAKE_ONLY" == "OFF" ]; then
-  poetry run cmake --build . -- -j $(nproc)
-  sudo poetry run cmake --install .
+  cmake --build . -- -j $(nproc)
+  sudo -E env PATH="$PATH" cmake --install .
   # Print ccache statistics after building
   ccache -p -s
 fi

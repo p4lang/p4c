@@ -1,0 +1,32 @@
+# General testing utilities.
+pyroute2==0.7.3
+ply==3.11
+scapy==2.5.0
+
+# Utilities for BMv2 and PTF tests.
+ptf==0.10.0
+googleapis-common-protos==1.53.0
+
+# gRPC and protobuf dependencies.
+grpcio==1.67.0; python_version > "3.6"
+grpcio==1.48.2; python_version <= "3.6"
+thrift==0.21.0
+protobuf==3.20.2; python_version > "3.6"
+protobuf==3.19.2; python_version <= "3.6"
+
+# Linters and formatters.
+clang-format==18.1.0
+black==24.3.0; python_version > "3.6"
+black==22.8.0; python_version <= "3.6"
+isort==5.13.2; python_version > "3.6"
+isort==5.10.1; python_version <= "3.6"
+
+# P4Runtime from Git
+# FIXME: We should figure out a way to synchronize P4Runtime versions across CMake and Poetry. This is the same commit hash as defined in the top-level CMakelists.txt
+git+https://github.com/p4lang/p4runtime.git@ec4eb5ef70dbcbcbf2f8357a4b2b8c2f218845a5#subdirectory=py
+
+# Tools for the Tofino back end.
+# FIXME: The Tofino back end should vendor these tools or use them locally.
+jsl==0.2.4
+pyinstaller==6.11.0
+jsonschema==4.23.0

@@ -61,10 +61,6 @@ sudo dnf install -y -q \
     zlib-devel \
     ninja-build
 
-# Set up poetry.
-curl -sSL https://install.python-poetry.org | python3 -
-poetry install
-
 MAKEFLAGS="-j$(nproc)"
 export MAKEFLAGS
 
@@ -91,3 +87,10 @@ make -j$((`nproc`+1)) install-strip
 popd
 
 rm -rf "${tmp_dir}"
+
+mkdir -p ${P4C_DIR}/build
+pushd ${P4C_DIR}/build
+virtualenv venv
+source venv/bin/activate
+pip3 install -r ${P4C_DIR}/requirements.txt
+popd

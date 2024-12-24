@@ -5,6 +5,9 @@
 set -e  # Exit on error.
 set -x  # Make command execution verbose
 
+THIS_DIR=$( cd -- "$( dirname -- "${0}" )" &> /dev/null && pwd )
+P4C_DIR=$(readlink -f ${THIS_DIR}/..)
+
 # Installation helper.
 brew_install() {
     echo "\nInstalling $1"
@@ -63,6 +66,9 @@ fi
 echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bash_profile
 source ~/.bash_profile
 
-# Set up poetry.
-curl -sSL https://install.python-poetry.org | python3 -
-poetry install
+mkdir -p ${P4C_DIR}/build
+pushd ${P4C_DIR}/build
+virtualenv venv
+source venv/bin/activate
+pip3 install -r ${P4C_DIR}/requirements.txt
+popd

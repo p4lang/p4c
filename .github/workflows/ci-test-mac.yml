@@ -59,7 +59,8 @@ jobs:
       - name: Run tests (MacOS)
         run: |
           source ~/.bash_profile
-          poetry run ctest --output-on-failure --schedule-random -E "bpf|ubpf|testgen|smith"
+          source venv/bin/activate
+          ctest --output-on-failure --schedule-random -E "bpf|ubpf|testgen|smith"
         working-directory: ./build
 
   # Build and test p4c on MacOS 13 on x86.
@@ -107,5 +108,6 @@ jobs:
       - name: Run tests (MacOS)
         run: |
           source ~/.bash_profile
-          poetry run ctest --output-on-failure --schedule-random -E "bpf|ubpf|testgen|smith"
+          source venv/bin/activate
+          ctest --output-on-failure --schedule-random -E "bpf|ubpf|testgen|smith"
         working-directory: ./build
