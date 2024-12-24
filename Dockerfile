@@ -46,6 +46,7 @@ ARG BUILD_AUTO_VAR_INIT_PATTERN=OFF
 # - Disable leaks detector as p4c uses GC.
 ENV UBSAN_OPTIONS=print_stacktrace=1
 ENV ASAN_OPTIONS=print_stacktrace=1:detect_leaks=0
+ENV PATH="/root/.local/bin:$PATH"
 
 # Delegate the build to tools/ci-build.
 COPY . /p4c/

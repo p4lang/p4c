@@ -5,6 +5,9 @@
 set -e  # Exit on error.
 set -x  # Make command execution verbose
 
+THIS_DIR=$( cd -- "$( dirname -- "${0}" )" &> /dev/null && pwd )
+P4C_DIR=$(readlink -f ${THIS_DIR}/..)
+
 # Installation helper.
 brew_install() {
     echo "\nInstalling $1"
@@ -41,7 +44,7 @@ brew update
 BOOST_LIB="boost@1.85"
 REQUIRED_PACKAGES=(
     autoconf automake ccache cmake libtool
-    openssl coreutils bison grep ninja
+    openssl coreutils bison grep ninja virtualenv curl
     ${BOOST_LIB}
 )
 for package in "${REQUIRED_PACKAGES[@]}"; do
@@ -60,8 +63,12 @@ fi
 if ! grep -q "$HOMEBREW_PREFIX/opt/grep/libexec/gnubin" ~/.bash_profile; then
   echo 'export PATH="$HOMEBREW_PREFIX/opt/grep/libexec/gnubin:$PATH"' >> ~/.bash_profile
 fi
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bash_profile
 source ~/.bash_profile
 
-# Install required pip packages
-# TODO: Should we use --break-system-packages or should we set up a venv?
-pip3 install --user --break-system-packages -r requirements.txt
+mkdir -p ${P4C_DIR}/build
+pushd ${P4C_DIR}/build
+virtualenv venv
+source venv/bin/activate
+pip3 install -r ${P4C_DIR}/requirements.txt
+popd

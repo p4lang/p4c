@@ -46,6 +46,7 @@ jobs:
 
       - name: Install dependencies (MacOS)
         run: |
+          source ~/.bash_profile
           tools/install_mac_deps.sh
 
       - name: Build (MacOS)
@@ -58,6 +59,7 @@ jobs:
       - name: Run tests (MacOS)
         run: |
           source ~/.bash_profile
+          source venv/bin/activate
           ctest --output-on-failure --schedule-random -E "bpf|ubpf|testgen|smith"
         working-directory: ./build
 
@@ -93,6 +95,7 @@ jobs:
 
       - name: Install dependencies (MacOS)
         run: |
+          source ~/.bash_profile
           tools/install_mac_deps.sh
 
       - name: Build (MacOS)
@@ -105,5 +108,6 @@ jobs:
       - name: Run tests (MacOS)
         run: |
           source ~/.bash_profile
+          source venv/bin/activate
           ctest --output-on-failure --schedule-random -E "bpf|ubpf|testgen|smith"
         working-directory: ./build

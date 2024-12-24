@@ -51,6 +51,8 @@ sudo dnf install -y -q \
     procps-ng \
     python3 \
     python3-pip \
+    python3-virtualenv \
+    curl \
     python3-thrift \
     readline-devel \
     tcpdump \
@@ -58,9 +60,6 @@ sudo dnf install -y -q \
     valgrind \
     zlib-devel \
     ninja-build
-
-pip3 install --upgrade pip
-pip3 install -r ${P4C_DIR}/requirements.txt
 
 MAKEFLAGS="-j$(nproc)"
 export MAKEFLAGS
@@ -88,3 +87,10 @@ make -j$((`nproc`+1)) install-strip
 popd
 
 rm -rf "${tmp_dir}"
+
+mkdir -p ${P4C_DIR}/build
+pushd ${P4C_DIR}/build
+virtualenv venv
+source venv/bin/activate
+pip3 install -r ${P4C_DIR}/requirements.txt
+popd
