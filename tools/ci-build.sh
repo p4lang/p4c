@@ -68,13 +68,17 @@ function build_cmake_enabled_backend_string() {
   done
 }
 
+pushd ${P4C_DIR}
 
 . /etc/lsb-release
 
 # In Docker builds, sudo is not available. So make it a noop.
-if [ "$IN_DOCKER" == "TRUE" ]; then
+if [ "$IN_DOCKER" = "TRUE" ]; then
   echo "Executing within docker container."
-  function sudo() { command "$@"; }
+  sudo() { "$@"; }  # No-op function; just execute the command
+else
+  # Preserve PATH and environment variables when using sudo
+  sudo() { command sudo -E env PATH="$PATH" "$@"; }
 fi
 
 
@@ -104,8 +108,10 @@ fi
 
 sudo apt-get update
 sudo apt-get install -y --no-install-recommends ${P4C_DEPS}
-sudo pip3 install --upgrade pip
-sudo pip3 install -r ${P4C_DIR}/requirements.txt
+# Set up poetry.
+sudo apt-get install -y python3-venv curl
+curl -sSL https://install.python-poetry.org | python3 -
+poetry install
 
 if [ "${BUILD_GENERATOR,,}" == "ninja" ] && [ ! $(command -v ninja) ]
 then
@@ -119,24 +125,24 @@ fi
 if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
   ccache --set-config cache_dir=.ccache
   # For Ubuntu 18.04 install the pypi-supplied version of cmake instead.
-  sudo pip3 install cmake==3.16.3
+  poetry update cmake=3.16.3
 fi
 ccache --set-config max_size=1G
 
 # ! ------  BEGIN BMV2 -----------------------------------------------
 function build_bmv2() {
-  # TODO: Remove this check once 18.04 is deprecated.
-  if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
-    P4C_RUNTIME_DEPS_BOOST="libboost-graph1.65.1 libboost-iostreams1.65.1"
-  else
-    P4C_RUNTIME_DEPS_BOOST="libboost-graph1.7* libboost-iostreams1.7*"
-  fi
 
   P4C_RUNTIME_DEPS="cpp \
                     ${P4C_RUNTIME_DEPS_BOOST} \
                     libgc1* \
                     libgmp-dev \
+                    python3-dev \
                     libnanomsg-dev"
+
+  # TODO: Remove this check once 18.04 is deprecated.
+  if [[ "${DISTRIB_RELEASE}" == "18.04" ]] ; then
+    P4C_RUNTIME_DEPS+=" libboost-graph1.65.1 libboost-iostreams1.65.1 "
+  fi
 
   # TODO: Remove this check once 18.04 is deprecated.
   if [[ "${DISTRIB_RELEASE}" == "18.04" ]] || [[ "$(which simple_switch 2> /dev/null)" != "" ]] ; then
@@ -146,7 +152,7 @@ function build_bmv2() {
     P4C_RUNTIME_DEPS+=" gcc-9 g++-9"
     export CC=gcc-9
     export CXX=g++-9
-  else
+  elif [[ "${DISTRIB_RELEASE}" != "24.04" ]] ; then
    sudo apt-get install -y wget ca-certificates
     # Add the p4lang opensuse repository.
     echo "deb http://download.opensuse.org/repositories/home:/p4lang/xUbuntu_${DISTRIB_RELEASE}/ /" | sudo tee /etc/apt/sources.list.d/home:p4lang.list
@@ -158,7 +164,7 @@ function build_bmv2() {
 
   if [[ "${DISTRIB_RELEASE}" != "18.04" ]] ; then
     # To run PTF nanomsg tests. Not available on 18.04.
-    sudo pip3 install nnpy
+    poetry run pip install nnpy==1.4.2
   fi
 }
 
@@ -172,12 +178,10 @@ function build_ebpf() {
   P4C_EBPF_DEPS="libpcap-dev \
                  libelf-dev \
                  zlib1g-dev \
-                 llvm \
-                 clang \
                  iproute2 \
                  iptables \
                  net-tools"
-
+  P4C_EBPF_DEPS+=" llvm clang "
   sudo apt-get install -y --no-install-recommends ${P4C_EBPF_DEPS}
 }
 
@@ -217,8 +221,7 @@ fi
 function build_dpdk() {
   # Replace existing Protobuf with one that works.
   # TODO: Debug protobuf mismatch.
-  sudo -E pip3 uninstall -y protobuf
-  sudo pip3 install protobuf==3.20.3 netaddr==0.9.0
+  poetry run pip install protobuf==3.20.3 netaddr==0.9.0
 }
 
 if [[ "${ENABLE_DPDK}" == "ON" ]]; then
@@ -231,7 +234,7 @@ fi
 function build_tofino() {
     P4C_TOFINO_PACKAGES="rapidjson-dev"
     sudo apt-get install -y --no-install-recommends ${P4C_TOFINO_PACKAGES}
-    sudo pip3 install jsl==0.2.4 pyinstaller==6.11.0
+    poetry run pip install jsl=="0.2.4" pyinstaller=="6.11.0" jsonschema=="4.23.0"
 }
 
 if [[ "${ENABLE_TOFINO}" == "ON" ]]; then
@@ -288,16 +291,17 @@ if [ "$ENABLE_SANITIZERS" == "ON" ]; then
   echo "Warning: building with ASAN and UBSAN sanitizers, GC must be disabled."
 fi
 
+
 # Run CMake in the build folder.
 if [ -e build ]; then /bin/rm -rf build; fi
 mkdir -p ${P4C_DIR}/build
 cd ${P4C_DIR}/build
-cmake ${CMAKE_FLAGS} -G "${BUILD_GENERATOR}" ..
+poetry run cmake ${CMAKE_FLAGS} -G "${BUILD_GENERATOR}" ..
 
 # If CMAKE_ONLY is active, only run CMake. Do not build.
 if [ "$CMAKE_ONLY" == "OFF" ]; then
-  cmake --build . -- -j $(nproc)
-  sudo cmake --install .
+  poetry run cmake --build . -- -j $(nproc)
+  sudo poetry run cmake --install .
   # Print ccache statistics after building
   ccache -p -s
 fi
@@ -313,3 +317,5 @@ elif [[ "${IMAGE_TYPE}" == "test" ]] ; then
   echo 'Test image ready'
 
 fi
+
+popd
