@@ -7,7 +7,7 @@ resources_schema.py: Generates a JSON Schema model for structured resource alloc
 import inspect
 import json
 
-import jsl
+import jsl.jsl as jsl
 
 ########################################################
 #   Schema Version

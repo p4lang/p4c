@@ -6,7 +6,7 @@ table_graph_schema.py: Generates a JSON schema for table graph data
 
 import json
 
-import jsl
+import jsl.jsl as jsl
 from schemas.jgf_schema import Graph, GraphEdge, GraphNode, JsonGraphFormatSchema
 
 ########################################################
