@@ -16,16 +16,14 @@ limitations under the License.
 #include "crash.h"
 
 #include <config.h>
-#include <errno.h>
-#if HAVE_EXECINFO_H
-#include <execinfo.h>
-#endif
 #include <fcntl.h>
-#include <limits.h>
-#include <signal.h>
-#include <string.h>
 
 #include <sys/wait.h>
+
+#include <cerrno>
+#include <climits>
+#include <csignal>
+#include <cstring>
 #if HAVE_UCONTEXT_H
 #include <ucontext.h>
 #endif
@@ -33,11 +31,6 @@ limitations under the License.
 #if HAVE_LIBBACKTRACE
 #include <backtrace.h>
 #endif
-#if HAVE_CXXABI_H
-#include <cxxabi.h>
-#endif
-
-#include <iostream>
 
 #ifdef MULTITHREAD
 #include <pthread.h>
@@ -45,6 +38,8 @@ limitations under the License.
 #include <mutex>
 #endif
 
+#include "absl/debugging/stacktrace.h"
+#include "absl/debugging/symbolize.h"
 #include "exceptions.h"
 #include "exename.h"
 #include "hex.h"
@@ -87,20 +82,17 @@ static void sigint_shutdown(int sig, siginfo_t *, void *) {
 #if HAVE_LIBBACKTRACE
 static int backtrace_log(void *, uintptr_t pc, const char *fname, int lineno, const char *func) {
     char *demangled = nullptr;
-#if HAVE_CXXABI_H
-    int status;
-    demangled = func ? abi::__cxa_demangle(func, 0, 0, &status) : nullptr;
-#endif
+    char tmp[1024];
+    if (func && absl::Symbolize((void *)pc, tmp, sizeof(tmp))) demangled = tmp;
     LOG1("  0x" << hex(pc) << " " << (demangled ? demangled : func ? func : "??"));
-    free(demangled);
     if (fname) {
         LOG1("    " << fname << ":" << lineno);
     }
     return 0;
 }
 static void backtrace_error(void *, const char *msg, int) { perror(msg); }
+#endif
 
-#elif HAVE_EXECINFO_H
 /*
  * call external program addr2line WITHOUT using malloc or stdio or anything
  * else that might be problematic if there's memory corruption or exhaustion
@@ -170,7 +162,8 @@ const char *addr2line(void *addr, const char *text) {
         close(pfd2[0]);
         to_child = pfd2[1];
     }
-    if (child == -1) return 0;
+    if (child == -1) return nullptr;
+
     char *p = buffer;
     uintptr_t a = (uintptr_t)addr;
     int shift = (CHAR_BIT * sizeof(uintptr_t) - 1) & ~3;
@@ -180,8 +173,8 @@ const char *addr2line(void *addr, const char *text) {
         shift -= 4;
     }
     *p++ = '\n';
-    auto _unused = write(to_child, buffer, p - buffer);
-    (void)_unused;
+    auto written = write(to_child, buffer, p - buffer);
+    if (written != p - buffer) return nullptr;
     p = buffer;
     int len;
     while (p < buffer + sizeof(buffer) - 1 &&
@@ -190,10 +183,9 @@ const char *addr2line(void *addr, const char *text) {
     }
     *p = 0;
     if ((p = strchr(buffer, '\n'))) *p = 0;
-    if (buffer[0] == 0 || buffer[0] == '?') return 0;
+    if (buffer[0] == 0 || buffer[0] == '?') return nullptr;
     return buffer;
 }
-#endif /* HAVE_EXECINFO_H */
 
 #if HAVE_UCONTEXT_H
 
@@ -278,24 +270,25 @@ static void crash_shutdown(int sig, siginfo_t *info, void *uctxt) {
     (void)uctxt;  // Suppress unused parameter warning.
 #endif
 
+    if (LOGGING(1)) {
 #if HAVE_LIBBACKTRACE
-    if (LOGGING(1)) {
         backtrace_full(global_backtrace_state, 1, backtrace_log, backtrace_error, nullptr);
-    }
-#elif HAVE_EXECINFO_H
-    if (LOGGING(1)) {
+#else
         static void *buffer[64];
-        int size = backtrace(buffer, 64);
-        char **strings = backtrace_symbols(buffer, size);
-        for (int i = 1; i < size; i++) {
-            if (strings) LOG1("  " << strings[i]);
-            if (const char *line = addr2line(buffer[i], strings ? strings[i] : 0))
-                LOG1("    " << line);
+        static char tmp[1024];
+        int size = absl::GetStackTrace(buffer, 64, 1);
+        for (int i = 0; i < size; i++) {
+            void *pc = buffer[i];
+            const char *symbol = "(unknown)";
+            if (absl::Symbolize(pc, tmp, sizeof(tmp))) {
+                symbol = tmp;
+            }
+            const char *alt = addr2line(pc, nullptr);
+            LOG1("  0x" << hex(pc) << " " << (alt ? alt : symbol));
         }
         if (size < 1) LOG1("backtrace failed");
-        free(strings);
-    }
 #endif
+    }
     MTONLY(
         if (++threads_dumped < int(thread_ids.size())) {
             lock.unlock();
@@ -314,6 +307,7 @@ void setup_signals() {
     sigaction(SIGINT, &sigact, 0);
     sigaction(SIGQUIT, &sigact, 0);
     sigaction(SIGTERM, &sigact, 0);
+
     sigact.sa_sigaction = crash_shutdown;
     sigaction(SIGILL, &sigact, 0);
     sigaction(SIGABRT, &sigact, 0);
@@ -322,9 +316,12 @@ void setup_signals() {
     sigaction(SIGBUS, &sigact, 0);
     sigaction(SIGTRAP, &sigact, 0);
     signal(SIGPIPE, SIG_IGN);
+
 #if HAVE_LIBBACKTRACE
     if (LOGGING(1)) global_backtrace_state = backtrace_create_state(exename(), 1, nullptr, nullptr);
 #endif
+
+    absl::InitializeSymbolizer(exename());
 }
 
 }  // namespace P4
