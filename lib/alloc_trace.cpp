@@ -1,12 +1,10 @@
 #include "alloc_trace.h"
 
+#include "absl/debugging/symbolize.h"
 #include "hex.h"
 #include "log.h"
 #include "n4.h"
 
-#if HAVE_EXECINFO_H
-#include <execinfo.h>
-#endif
 #if HAVE_LIBBACKTRACE
 #include <backtrace.h>
 
@@ -45,15 +43,11 @@ int bt_print_callback(void *out_, uintptr_t pc, const char *file, int line, cons
         file = "??";
     }
     out << Log::endl << file << ":" << line;
+
     if (func) {
-#if HAVE_CXXABI_H
-        int status;
-        if (char *fn = abi::__cxa_demangle(func, 0, 0, &status)) {
-            if (strlen(fn) < 100) out << " (" << fn << ")";
-            free(fn);
-        } else
-#endif
-            out << " (" << func << ")";
+        char tmp[1024];
+        if (absl::Symbolize((void *)pc, tmp, sizeof(tmp))) func = tmp;
+        out << " (" << func << ")";
     }
     out << " [" << hex(pc) << "]";
     return 0;
@@ -69,7 +63,7 @@ std::ostream &operator<<(std::ostream &out, const AllocTrace &at) {
 #if HAVE_LIBGC
     PauseTrace temp_pause;
 #endif
-    typedef decltype(at.data)::value_type data_t;
+    using data_t = decltype(at.data)::value_type;
     std::vector<std::pair<size_t, const data_t *>> sorted;
     size_t total_total = 0;
     for (auto &e : at.data) {
@@ -83,14 +77,15 @@ std::ostream &operator<<(std::ostream &out, const AllocTrace &at) {
     if (!global_backtrace_state)
         global_backtrace_state = backtrace_create_state(exename(), 1, bt_error, &out);
 #endif
+
     out << "Allocated a total of " << n4(total_total) << "B memory";
     for (auto &s : sorted) {
-        if (s.first < 1000000) break;  // ignore little  stuff
+        if (s.first < 1000000) break;  // ignore little stuff
         size_t count = 0;
         for (auto &al : s.second->second) count += al.second;
         out << Log::endl << "allocated " << n4(s.first) << "B in " << count << " calls";
-#if HAVE_EXECINFO_H
         out << " from:" << Log::indent;
+
 #if HAVE_LIBBACKTRACE
         for (int i = 1; i < ALLOC_TRACE_DEPTH; ++i) {
             /* due to calling the callback multiple times for inlined functions, we need to
@@ -100,15 +95,18 @@ std::ostream &operator<<(std::ostream &out, const AllocTrace &at) {
                              bt_print_callback, bt_error, &out);
         }
 #else
-        char **syms = backtrace_symbols(s.second->first.trace, ALLOC_TRACE_DEPTH);
+        char tmp[1024];
         for (int i = ALLOC_TRACE_DEPTH - 1; i >= 1; --i) {
-            const char *alt = addr2line(s.second->first.trace[i], syms[i]);
-            out << Log::endl << (alt ? alt : syms[i]) << ' ' << s.second->first.trace[i];
+            void *pc = s.second->first.trace[i];
+            const char *symbol = "(unknown)";
+            if (absl::Symbolize(pc, tmp, sizeof(tmp))) {
+                symbol = tmp;
+            }
+            const char *alt = addr2line(pc, nullptr);
+            out << "\n " << (alt ? alt : "??: ") << symbol << " [" << hex(pc) << "]";
         }
-        free(syms);
 #endif
         out << Log::unindent;
-#endif
     }
     return out;
 }

@@ -20,11 +20,8 @@ limitations under the License.
 #include <exception>
 #include <string>
 
+#include "absl/debugging/stacktrace.h"
 #include "config.h"
-
-#if HAVE_EXECINFO_H
-#include <execinfo.h>
-#endif
 
 namespace P4 {
 
@@ -40,11 +37,7 @@ class backtrace_exception : public E {
  public:
     template <class... Args>
     explicit backtrace_exception(Args &&...args) : E(std::forward<Args>(args)...) {
-#if HAVE_EXECINFO_H
-        backtrace_size = backtrace(backtrace_buffer, buffer_size);
-#else
-        backtrace_size = 0;
-#endif
+        backtrace_size = absl::GetStackTrace(backtrace_buffer, buffer_size, 1);
     }
 
     const char *what() const noexcept {

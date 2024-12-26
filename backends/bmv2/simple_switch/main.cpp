@@ -32,6 +32,7 @@ limitations under the License.
 #include "ir/json_generator.h"
 #include "ir/json_loader.h"
 #include "lib/algorithm.h"
+#include "lib/crash.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/gc.h"
@@ -42,6 +43,7 @@ using namespace P4;
 
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
+    setup_signals();
 
     AutoCompileContext autoBMV2Context(new BMV2::SimpleSwitchContext);
     auto &options = BMV2::SimpleSwitchContext::get().options();

@@ -4,9 +4,6 @@
 /* Define to 1 if you have the boost graph headers */
 #cmakedefine HAVE_LIBBOOST_GRAPH 1
 
-/* Define to 1 if you have the execinfo.h header */
-#cmakedefine HAVE_EXECINFO_H 1
-
 /* Define to 1 if you have libbacktrace */
 #cmakedefine HAVE_LIBBACKTRACE 1
 

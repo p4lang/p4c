@@ -94,6 +94,8 @@ add_library(p4ctoolkit STATIC ${LIBP4CTOOLKIT_SRCS})
 # Disable libcall (realloc, malloc) optimizations which may cause infinite loops.
 set_target_properties(p4ctoolkit PROPERTIES COMPILE_FLAGS -fno-builtin)
 target_link_libraries(p4ctoolkit
+  PRIVATE absl::stacktrace
+  PRIVATE absl::symbolize
   # These libraries are exposed by a header.
   PUBLIC absl::bits
   PUBLIC absl::strings
