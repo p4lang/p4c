@@ -34,14 +34,12 @@ limitations under the License.
 #include <gc/gc_mark.h>
 #endif /* HAVE_LIBGC */
 #include <sys/mman.h>
-#if HAVE_EXECINFO_H
-#include <execinfo.h>
-#endif
 
 #include <cstddef>
 #include <cstring>
 #include <new>
 
+#include "absl/debugging/stacktrace.h"
 #include "backtrace_exception.h"
 #include "cstring.h"
 #include "log.h"
@@ -61,16 +59,13 @@ static char *emergency_ptr;
 
 static alloc_trace_cb_t trace_cb;
 static bool tracing = false;
-#if !HAVE_EXECINFO_H
-#define backtrace(BUFFER, SIZE) memset(BUFFER, 0, (SIZE) * sizeof(void *))
-#endif
-#define TRACE_ALLOC(size)                        \
-    if (trace_cb.fn && !tracing) {               \
-        void *buffer[ALLOC_TRACE_DEPTH];         \
-        tracing = true;                          \
-        backtrace(buffer, ALLOC_TRACE_DEPTH);    \
-        trace_cb.fn(trace_cb.arg, buffer, size); \
-        tracing = false;                         \
+#define TRACE_ALLOC(size)                                  \
+    if (trace_cb.fn && !tracing) {                         \
+        void *buffer[ALLOC_TRACE_DEPTH];                   \
+        tracing = true;                                    \
+        absl::GetStackTrace(buffer, ALLOC_TRACE_DEPTH, 1); \
+        trace_cb.fn(trace_cb.arg, buffer, size);           \
+        tracing = false;                                   \
     }
 
 static void maybe_initialize_gc() {

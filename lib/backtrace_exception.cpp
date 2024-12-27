@@ -21,12 +21,12 @@ limitations under the License.
 #include <backtrace.h>
 #endif
 
-#include <functional>
 #include <regex>
+#include <sstream>
 #include <stdexcept>
 #include <system_error>
-#include <typeinfo>
 
+#include "absl/debugging/symbolize.h"
 #include "crash.h"
 #include "exename.h"
 #include "hex.h"
@@ -38,40 +38,39 @@ extern struct backtrace_state *global_backtrace_state;
 
 int append_message(void *msg_, uintptr_t pc, const char *file, int line, const char *func) {
     std::string &msg = *static_cast<std::string *>(msg_);
-    std::stringstream tmp;
-    tmp << "\n  0x" << hex(pc) << "  " << (func ? func : "??");
-    if (file) tmp << "\n    " << file << ":" << line;
-    msg += tmp.str();
+    std::stringstream str;
+    char *demangled = nullptr;
+    char tmp[1024];
+    if (func && absl::Symbolize((void *)pc, tmp, sizeof(tmp))) demangled = tmp;
+    str << "\n  0x" << hex(pc) << " " << (demangled ? demangled : func ? func : "??");
+    if (file) str << "\n    " << file << ":" << line;
+    msg += str.str();
     return 0;
 }
 #endif
 
 void backtrace_fill_stacktrace(std::string &msg, void *const *backtrace, int size) {
-    // backtrace_symbols is only available with libexecinfo
 #if HAVE_LIBBACKTRACE
     if (!global_backtrace_state)
         global_backtrace_state = backtrace_create_state(exename(), 1, nullptr, nullptr);
     backtrace_full(global_backtrace_state, 1, append_message, nullptr, &msg);
     (void)backtrace;
     (void)size;
-#elif HAVE_EXECINFO_H
-    char **strings = backtrace_symbols(backtrace, size);
-    for (int i = 0; i < size; i++) {
-        if (strings) {
-            msg += "\n  ";
-            msg += strings[i];
-        }
-        if (const char *line = addr2line(backtrace[i], strings ? strings[i] : 0)) {
-            msg += "\n    ";
-            msg += line;
-        }
-    }
-    free(strings);
 #else
-    // unused
-    (void)msg;
-    (void)backtrace;
-    (void)size;
+    char tmp[1024];
+    std::stringstream str;
+    for (int i = 0; i < size; i++) {
+        void *pc = backtrace[i];
+        const char *symbol = "??";
+        if (absl::Symbolize(pc, tmp, sizeof(tmp))) {
+            symbol = tmp;
+        }
+        str << "\n  0x" << hex(pc) << " " << symbol;
+        if (const char *line = addr2line(pc, nullptr)) {
+            str << "\n    " << line;
+        }
+        msg += str.str();
+    }
 #endif
 }
 
