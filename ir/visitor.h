@@ -33,6 +33,7 @@ limitations under the License.
 #include "ir/gen-tree-macro.h"
 #include "ir/ir-tree-macros.h"
 #include "ir/node.h"
+#include "ir/copy_on_write_ptr.h"
 #include "ir/vector.h"
 #include "lib/castable.h"
 #include "lib/cstring.h"
@@ -166,6 +167,13 @@ class Visitor {
         }
         n.visit_children(*this);
     }
+    template <class COW> requires IR::COWref<COW>
+    void visit(COW ref, const char *name = 0) {
+        auto o = ref.get();
+        auto n = apply_visitor(o, name);
+        if (n != o) ref.set(n);
+    }
+
     template <class T>
     void parallel_visit(IR::Vector<T> &v, const char *name = 0) {
         if (name && ctxt) ctxt->child_name = name;
@@ -378,7 +386,9 @@ class Visitor {
     const Context *ctxt = nullptr;  // should be readonly to subclasses
     friend class Inspector;
     friend class Modifier;
+    friend class COWModifier;
     friend class Transform;
+    friend class COWTransform;
     friend class ControlFlowVisitor;
 };
 
@@ -397,6 +407,34 @@ class Modifier : public virtual Visitor {
 #define DECLARE_VISIT_FUNCTIONS(CLASS, BASE)                    \
     virtual bool preorder(IR::CLASS *);                         \
     virtual void postorder(IR::CLASS *);                        \
+    virtual void revisit(const IR::CLASS *, const IR::CLASS *); \
+    virtual void loop_revisit(const IR::CLASS *);
+    IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
+#undef DECLARE_VISIT_FUNCTIONS
+    void revisit_visited();
+    bool visit_in_progress(const IR::Node *) const;
+    void visitOnce() const override;
+    void visitAgain() const override;
+
+ protected:
+    bool forceClone = false;  // force clone whole tree even if unchanged
+};
+
+class COWModifier : public virtual Visitor {
+    std::shared_ptr<ChangeTracker> visited;
+    void visitor_const_error() override;
+    bool check_clone(const Visitor *) override;
+
+ public:
+    profile_t init_apply(const IR::Node *root) override;
+    const IR::Node *apply_visitor(const IR::Node *n, const char *name = 0) override;
+    virtual bool preorder(IR::COWptr<IR::Node>) { return true; }
+    virtual void postorder(IR::COWptr<IR::Node>) {}
+    virtual void revisit(const IR::Node *, const IR::Node *) {}
+    virtual void loop_revisit(const IR::Node *) { BUG("IR loop detected"); }
+#define DECLARE_VISIT_FUNCTIONS(CLASS, BASE)                    \
+    virtual bool preorder(IR::COWptr<IR::CLASS>);               \
+    virtual void postorder(IR::COWptr<IR::CLASS>);              \
     virtual void revisit(const IR::CLASS *, const IR::CLASS *); \
     virtual void loop_revisit(const IR::CLASS *);
     IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
@@ -451,6 +489,42 @@ class Transform : public virtual Visitor {
     virtual const IR::Node *preorder(IR::CLASS *);             \
     virtual const IR::Node *postorder(IR::CLASS *);            \
     virtual void revisit(const IR::CLASS *, const IR::Node *); \
+    virtual void loop_revisit(const IR::CLASS *);
+    IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
+#undef DECLARE_VISIT_FUNCTIONS
+    void revisit_visited();
+    bool visit_in_progress(const IR::Node *) const;
+    void visitOnce() const override;
+    void visitAgain() const override;
+    // can only be called usefully from a 'preorder' function (directly or indirectly)
+    void prune() { prune_flag = true; }
+
+ protected:
+    const IR::Node *transform_child(const IR::Node *child) {
+        auto *rv = apply_visitor(child);
+        prune_flag = true;
+        return rv;
+    }
+    bool forceClone = false;  // force clone whole tree even if unchanged
+};
+
+class COWTransform : public virtual Visitor {
+    std::shared_ptr<ChangeTracker> visited;
+    bool prune_flag = false;
+    void visitor_const_error() override;
+    bool check_clone(const Visitor *) override;
+
+ public:
+    profile_t init_apply(const IR::Node *root) override;
+    const IR::Node *apply_visitor(const IR::Node *, const char *name = 0) override;
+    virtual const IR::Node *preorder(IR::COWptr<IR::Node> n) { return n; }
+    virtual const IR::Node *postorder(IR::COWptr<IR::Node> n) { return n; }
+    virtual void revisit(const IR::Node *, const IR::Node *) {}
+    virtual void loop_revisit(const IR::Node *) { BUG("IR loop detected"); }
+#define DECLARE_VISIT_FUNCTIONS(CLASS, BASE)                    \
+    virtual const IR::Node *preorder(IR::COWptr<IR::CLASS>);    \
+    virtual const IR::Node *postorder(IR::COWptr<IR::CLASS>);   \
+    virtual void revisit(const IR::CLASS *, const IR::Node *);  \
     virtual void loop_revisit(const IR::CLASS *);
     IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
 #undef DECLARE_VISIT_FUNCTIONS

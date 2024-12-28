@@ -139,6 +139,7 @@ class IrMethod : public IrElement {
     void generate_proto(std::ostream &, bool, bool) const;
     void generate_hdr(std::ostream &) const override;
     void generate_impl(std::ostream &) const override;
+    void outputCOWref_visit_children(std::ostream &out) const;
     struct info_t {
         const Type *rtype;
         std::vector<const IrField *> args;
@@ -343,6 +344,8 @@ class IrClass : public IrElement {
     void generate_hdr(std::ostream &out) const override;
     void generate_impl(std::ostream &out) const override;
     void generateTreeMacro(std::ostream &out) const;
+    access_t outputCOWfieldrefs(std::ostream &out) const;
+    void outputCOWref(std::ostream &out) const;
     void resolve() override;
     cstring toString() const override { return name; }
     std::string fullName() const;
