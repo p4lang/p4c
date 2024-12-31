@@ -1,0 +1,15 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,173,124,198"/>
+<area shape="rect" id="Node000001" href="$struct_p4_1_1_i_r_1_1has__static__type__name.html" title=" " alt="" coords="172,5,379,45"/>
+<area shape="poly" id="edge2457_Node000000_Node000001" title=" " alt="" coords="78,159,115,107,141,79,171,55,193,43,195,48,173,60,145,83,120,110,82,162"/>
+<area shape="rect" id="Node000002" href="$struct_p4_1_1_util_1_1has___source_info.html" title="SFINAE helper to check if given class has a getSourceInfo method." alt="" coords="187,69,363,109"/>
+<area shape="poly" id="edge2458_Node000000_Node000002" title=" " alt="" coords="94,163,130,140,171,119,201,107,203,112,173,124,133,145,97,167"/>
+<area shape="rect" id="Node000003" href="$struct_p4_1_1_util_1_1has__to_string.html" title="SFINAE helper to check if given class has a toString method." alt="" coords="196,133,355,173"/>
+<area shape="poly" id="edge2459_Node000000_Node000003" title=" " alt="" coords="137,172,195,163,196,168,138,177"/>
+<area shape="rect" id="Node000004" href="$struct_p4_1_1has__dbprint.html" title=" " alt="" coords="188,197,363,237"/>
+<area shape="poly" id="edge2460_Node000000_Node000004" title=" " alt="" coords="138,194,188,201,188,207,137,199"/>
+<area shape="rect" id="Node000005" href="$struct_p4_1_1has__ostream__operator.html" title=" " alt="" coords="179,261,371,301"/>
+<area shape="poly" id="edge2461_Node000000_Node000005" title=" " alt="" coords="97,203,133,226,173,247,203,259,201,264,171,252,130,230,94,208"/>
+<area shape="rect" id="Node000006" href="$structassoc_1_1detail_1_1__is__stable_3_01_t_01_5_01_4.html" title=" " alt="" coords="210,325,341,365"/>
+<area shape="poly" id="edge2462_Node000000_Node000006" title=" " alt="" coords="82,208,120,260,145,288,173,311,211,329,209,334,171,316,141,292,115,264,78,211"/>
+</map>

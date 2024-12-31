@@ -1,0 +1,33 @@
+<map id="P4::P4Tools::CompilerTarget" name="P4::P4Tools::CompilerTarget">
+<area shape="rect" id="Node000001" title="Encapsulates the details of invoking the P4 compiler for a target device and architecture." alt="" coords="196,325,399,350"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_p4_tools_1_1_p4_smith_1_1_smith_target.html" title=" " alt="" coords="453,213,610,253"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="338,317,484,251,486,256,341,321"/>
+<area shape="rect" id="Node000013" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_testgen_target.html" title=" " alt="" coords="447,389,616,429"/>
+<area shape="poly" id="edge12_Node000001_Node000013" title=" " alt="" coords="353,352,466,387,465,392,352,357"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_p4_tools_1_1_target.html" title=" " alt="" coords="5,325,148,350"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="162,335,196,335,196,340,162,340"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_p4_tools_1_1_p4_smith_1_1_b_mv2_1_1_abstract_b_mv2_smith_target.html" title=" " alt="" coords="673,69,917,109"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="558,201,604,158,633,137,663,119,691,107,693,112,665,124,636,142,608,163,562,205"/>
+<area shape="rect" id="Node000007" href="$class_p4_1_1_p4_tools_1_1_p4_smith_1_1_generic_1_1_abstract_generic_smith_target.html" title=" " alt="" coords="679,134,910,189"/>
+<area shape="poly" id="edge6_Node000003_Node000007" title=" " alt="" coords="617,207,694,186,695,191,619,212"/>
+<area shape="rect" id="Node000009" href="$class_p4_1_1_p4_tools_1_1_p4_smith_1_1_nic_1_1_abstract_nic_smith_target.html" title=" " alt="" coords="689,213,901,253"/>
+<area shape="poly" id="edge8_Node000003_Node000009" title=" " alt="" coords="624,231,689,231,689,236,624,236"/>
+<area shape="rect" id="Node000011" href="$class_p4_1_1_p4_tools_1_1_p4_smith_1_1_tofino_1_1_abstract_tofino_smith_target.html" title=" " alt="" coords="691,278,898,333"/>
+<area shape="poly" id="edge10_Node000003_Node000011" title=" " alt="" coords="619,254,695,275,694,281,617,260"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_p4_tools_1_1_p4_smith_1_1_b_mv2_1_1_bmv2_psa_smith_target.html" title=" " alt="" coords="991,5,1205,45"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="903,64,1002,43,1003,48,904,69"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_p4_tools_1_1_p4_smith_1_1_b_mv2_1_1_bmv2_v1model_smith_target.html" title=" " alt="" coords="973,69,1223,109"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="930,87,973,87,973,92,930,92"/>
+<area shape="rect" id="Node000008" href="$class_p4_1_1_p4_tools_1_1_p4_smith_1_1_generic_1_1_generic_core_smith_target.html" title=" " alt="" coords="995,134,1201,189"/>
+<area shape="poly" id="edge7_Node000007_Node000008" title=" " alt="" coords="924,159,994,159,994,164,924,164"/>
+<area shape="rect" id="Node000010" href="$class_p4_1_1_p4_tools_1_1_p4_smith_1_1_nic_1_1_dpdk_pna_smith_target.html" title=" " alt="" coords="1001,213,1195,253"/>
+<area shape="poly" id="edge9_Node000009_Node000010" title=" " alt="" coords="914,231,1000,231,1000,236,914,236"/>
+<area shape="rect" id="Node000012" href="$class_p4_1_1_p4_tools_1_1_p4_smith_1_1_tofino_1_1_tofino_tna_smith_target.html" title=" " alt="" coords="990,285,1206,325"/>
+<area shape="poly" id="edge11_Node000011_Node000012" title=" " alt="" coords="912,303,990,303,990,308,912,308"/>
+<area shape="rect" id="Node000014" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_testgen_target.html" title=" " alt="" coords="664,357,925,397"/>
+<area shape="poly" id="edge13_Node000013_Node000014" title=" " alt="" coords="629,395,663,391,664,396,630,400"/>
+<area shape="rect" id="Node000015" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_e_b_p_f_1_1_e_b_p_f_testgen_target.html" title=" " alt="" coords="699,421,891,461"/>
+<area shape="poly" id="edge14_Node000013_Node000015" title=" " alt="" coords="630,419,699,427,698,432,630,424"/>
+<area shape="rect" id="Node000016" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_dpdk_testgen_target.html" title=" " alt="" coords="689,485,900,525"/>
+<area shape="poly" id="edge15_Node000013_Node000016" title=" " alt="" coords="581,433,665,471,703,483,701,488,663,476,579,438"/>
+</map>

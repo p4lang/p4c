@@ -1,0 +1,19 @@
+<map id="P4::EBPF::EgressDeparserPSA" name="P4::EBPF::EgressDeparserPSA">
+<area shape="rect" id="Node000001" title=" " alt="" coords="143,445,357,471"/>
+<area shape="rect" id="Node000008" href="$class_p4_1_1_e_b_p_f_1_1_t_c_egress_deparser_p_s_a.html" title=" " alt="" coords="5,519,236,544"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="218,480,143,521,141,516,216,475"/>
+<area shape="rect" id="Node000009" href="$class_p4_1_1_e_b_p_f_1_1_x_d_p_egress_deparser_p_s_a.html" title=" " alt="" coords="260,519,501,544"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="285,475,361,516,358,521,282,480"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_deparser_p_s_a.html" title=" " alt="" coords="148,372,352,397"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="253,411,253,445,247,445,247,411"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_deparser.html" title=" " alt="" coords="161,299,339,324"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="253,338,253,372,247,372,247,338"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_control.html" title=" " alt="" coords="167,225,333,251"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="253,264,253,299,247,299,247,264"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_e_b_p_f_1_1_e_b_p_f_object.html" title="Base class for EBPF objects." alt="" coords="169,152,331,177"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="253,191,253,225,247,225,247,191"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_i_castable.html" title=" " alt="" coords="197,79,303,104"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="253,118,253,152,247,152,247,118"/>
+<area shape="rect" id="Node000007" href="$struct_p4_1_1_r_t_t_i_1_1_base.html" title=" " alt="" coords="193,5,307,31"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="253,44,253,79,247,79,247,44"/>
+</map>
