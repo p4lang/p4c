@@ -175,7 +175,7 @@ overview of the compiler goals and architecture.
 ### Doxygen Comments Style Guide
 - Comment Markup and Documentation Commands
   -  `<!-- ... -->` is used for adding documentation inclusion notes. This content is hidden from both the rendered Markdown and Doxygen, but visible in the raw view on GitHub.
-  - ```<!--! ... -->``` hides commands from GitHub’s Markdown rendering but provides instructions to Doxygen. For example:
+  - Use HTML comments with an exclamation mark to add instructions for Doxygen. These comments are hidden in GitHub's Markdown but processed by Doxygen. For example:
 ``` 
 <!--!
 \page changelog Releases

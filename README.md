@@ -287,7 +287,7 @@ use them, but YMMV.
 
 - Python 3 for scripting and running tests
 
-- Optional: Documentation generation requires Doxygen (1.12.0) and Graphviz (2.38.0 or higher).
+- Optional: Documentation generation requires Doxygen (1.13.0) and Graphviz (2.38.0 or higher).
 
 Backends may have additional dependencies. The dependencies for the backends
 included with `P4C` are documented here:
@@ -311,14 +311,14 @@ pip3 install --user -r requirements.txt
 **For documentation building:**
 
 **Tools**
-- Download the Doxygen 1.12.0 binary 
+- Download the Doxygen 1.13.0 binary 
 ```bash
-wget https://github.com/doxygen/doxygen/releases/download/Release_1_12_0/doxygen-1.12.0.linux.bin.tar.gz
+wget https://github.com/doxygen/doxygen/releases/download/Release_1_13_0/doxygen-1.13.0.linux.bin.tar.gz
 ```
 - Extract and install Doxygen 
 ```bash
-tar xzvf doxygen-1.12.0.linux.bin.tar.gz
-cd doxygen-1.12.0
+tar xzvf doxygen-1.13.0.linux.bin.tar.gz
+cd doxygen-1.13.0
 sudo make install
 cd .. 
 ```
@@ -328,7 +328,7 @@ sudo apt-get install -y graphviz
 ```
 **Theme** 
 ```bash
-git clone --depth 1 -b v2.3.3 https://github.com/jothepro/doxygen-awesome-css ./docs/doxygen/awesome_css
+git clone --depth 1 -b v2.3.4 https://github.com/jothepro/doxygen-awesome-css ./docs/doxygen/awesome_css
 ```
 
 `P4C` also depends on Google Protocol Buffers (Protobuf). `P4C` requires version
@@ -362,14 +362,14 @@ sudo pip3 install -r requirements.txt
 **For documentation building:**
 
 **Tools**
-- Download the Doxygen 1.12.0 binary
+- Download the Doxygen 1.13.0 binary
 ```bash 
-wget https://github.com/doxygen/doxygen/releases/download/Release_1_12_0/doxygen-1.12.0.linux.bin.tar.gz
+wget https://github.com/doxygen/doxygen/releases/download/Release_1_13_0/doxygen-1.13.0.linux.bin.tar.gz
 ```
 - Extract and install Doxygen
 ```bash
-tar xzvf doxygen-1.12.0.linux.bin.tar.gz
-cd doxygen-1.12.0
+tar xzvf doxygen-1.13.0.linux.bin.tar.gz
+cd doxygen-1.13.0
 sudo make install
 cd ..
 ```
@@ -379,7 +379,7 @@ sudo dnf install -y graphviz
 ```
 **Theme**
 ```bash
-git clone --depth 1 -b v2.3.3 https://github.com/jothepro/doxygen-awesome-css ./docs/doxygen/awesome_css
+git clone --depth 1 -b v2.3.4 https://github.com/jothepro/doxygen-awesome-css ./docs/doxygen/awesome_css
 ```
 
 You can also look at the [dependencies installation script](https://github.com/p4lang/p4c/blob/main/tools/install_fedora_deps.sh)
@@ -421,14 +421,14 @@ Installing on macOS:
   ```
 
   **Optional documentation building tools:**
-  -  Download and install the Doxygen 1.12.0 DMG file from [here](https://github.com/doxygen/doxygen/releases/download/Release_1_12_0/Doxygen-1.12.0.dmg).
+  -  Download and install the Doxygen 1.13.0 DMG file from [here](https://github.com/doxygen/doxygen/releases/download/Release_1_13_0/Doxygen-1.13.0.dmg).
   - Install Graphviz
   ```
   brew install graphviz
   ```
   **Optional Documentation theme:** 
   ```
-  git clone --depth 1 -b v2.3.3 https://github.com/jothepro/doxygen-awesome-css ./docs/doxygen/awesome_css
+  git clone --depth 1 -b v2.3.4 https://github.com/jothepro/doxygen-awesome-css ./docs/doxygen/awesome_css
   ```
 
   Homebrew offers a `protobuf` formula. It installs version 3.2, which should
