@@ -416,7 +416,7 @@ Ubuntu dependencies</h3>
 <div class="line">cd .. </div>
 </div><!-- fragment --></li>
 <li>Install Graphviz <div class="fragment"><div class="line">sudo apt-get install -y graphviz</div>
-</div><!-- fragment --> <b>Theme</b> <div class="fragment"><div class="line">git clone --depth 1 -b v2.3.3 https://github.com/jothepro/doxygen-awesome-css ./docs/doxygen/awesome_css</div>
+</div><!-- fragment --> <b>Theme</b> <div class="fragment"><div class="line">git clone --depth 1 -b v2.3.4 https://github.com/jothepro/doxygen-awesome-css ./docs/doxygen/awesome_css</div>
 </div><!-- fragment --></li>
 </ul>
 <p><code>P4C</code> also depends on Google Protocol Buffers (Protobuf). <code>P4C</code> requires version 3.0 or higher, so the packaged version provided in Ubuntu 20.04 <b>should</b> work. However, P4C typically installs its own version of Protobuf using CMake's <code>FetchContent</code> module (at the moment, 3.25.3). If you are experiencing issues with the Protobuf version shipped with your OS distribution, we recommend that to install Protobuf 3.25.3 from source. You can find instructions <a href="https://github.com/protocolbuffers/protobuf/blob/v3.25.3/src/README.md">here</a>. After cloning Protobuf and before you build, check-out version 3.25.3:</p>
@@ -443,7 +443,7 @@ Fedora dependencies</h3>
 <div class="line">cd ..</div>
 </div><!-- fragment --></li>
 <li>Install Graphviz <div class="fragment"><div class="line">sudo dnf install -y graphviz</div>
-</div><!-- fragment --> <b>Theme</b> <div class="fragment"><div class="line">git clone --depth 1 -b v2.3.3 https://github.com/jothepro/doxygen-awesome-css ./docs/doxygen/awesome_css</div>
+</div><!-- fragment --> <b>Theme</b> <div class="fragment"><div class="line">git clone --depth 1 -b v2.3.4 https://github.com/jothepro/doxygen-awesome-css ./docs/doxygen/awesome_css</div>
 </div><!-- fragment --></li>
 </ul>
 <p>You can also look at the <a href="https://github.com/p4lang/p4c/blob/main/tools/install_fedora_deps.sh">dependencies installation script</a> for a fresh Fedora instance.</p>
@@ -461,7 +461,7 @@ macOS dependencies</h3>
 </div><!-- fragment --><p class="startli"><b>Optional documentation building tools:</b></p><ul>
 <li>Download and install the Doxygen 1.13.0 DMG file from <a href="https://github.com/doxygen/doxygen/releases/download/Release_1_13_0/Doxygen-1.13.0.dmg">here</a>.</li>
 <li>Install Graphviz <div class="fragment"><div class="line">brew install graphviz</div>
-</div><!-- fragment --> <b>Optional Documentation theme:</b> <div class="fragment"><div class="line">git clone --depth 1 -b v2.3.3 https://github.com/jothepro/doxygen-awesome-css ./docs/doxygen/awesome_css</div>
+</div><!-- fragment --> <b>Optional Documentation theme:</b> <div class="fragment"><div class="line">git clone --depth 1 -b v2.3.4 https://github.com/jothepro/doxygen-awesome-css ./docs/doxygen/awesome_css</div>
 </div><!-- fragment --></li>
 </ul>
 <p class="startli">Homebrew offers a <code>protobuf</code> formula. It installs version 3.2, which should work for P4C itself but may cause problems with some extensions. It's preferable to use the version of Protobuf which is supplied with CMake's fetchcontent (3.25.3).</p>
