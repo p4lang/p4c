@@ -96,14 +96,15 @@ TEST(IndexedVector, Vector_ctor) {
 }
 
 TEST(IndexedVector, erase) {
-    TestVector vec(Vector<StructField>{testItem("a"_cs),
-                                       testItem("b"_cs),
-                                       testItem("c"_cs),
-                                       testItem("d"_cs),
-                                       testItem("e"_cs),
-                                       testItem("f"_cs),
-                                       testItem("g"_cs),
-                                      });
+    TestVector vec(Vector<StructField>{
+        testItem("a"_cs),
+        testItem("b"_cs),
+        testItem("c"_cs),
+        testItem("d"_cs),
+        testItem("e"_cs),
+        testItem("f"_cs),
+        testItem("g"_cs),
+    });
     EXPECT_EQ(vec.size(), 7);
     vec.erase(std::next(vec.begin(), 1));  // a c d e f g
     EXPECT_EQ(vec.size(), 6);
