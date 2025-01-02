@@ -105,11 +105,11 @@ TEST(IndexedVector, erase) {
                                        testItem("g"_cs),
                                       });
     EXPECT_EQ(vec.size(), 7);
-    vec.erase(std::next(vec.begin(), 1)); // a c d e f g
+    vec.erase(std::next(vec.begin(), 1));  // a c d e f g
     EXPECT_EQ(vec.size(), 6);
     EXPECT_FALSE(vec.getDeclaration("b"));
 
-    vec.erase(std::next(vec.begin(), 2), std::next(vec.begin(), 4)); // a c f g
+    vec.erase(std::next(vec.begin(), 2), std::next(vec.begin(), 4));  // a c f g
     EXPECT_EQ(vec.size(), 4);
     EXPECT_EQ(vec[0]->name.name, "a");
     EXPECT_EQ(vec[1]->name.name, "c");
@@ -125,7 +125,7 @@ TEST(IndexedVector, erase) {
     EXPECT_EQ(vec[3]->name.name, "g");
     EXPECT_FALSE(vec.getDeclaration("e"));
 
-    vec.erase(std::next(vec.begin(), 2), vec.end()); // a c
+    vec.erase(std::next(vec.begin(), 2), vec.end());  // a c
     EXPECT_EQ(vec.size(), 2);
     EXPECT_EQ(vec[0]->name.name, "a");
     EXPECT_EQ(vec[1]->name.name, "c");
