@@ -328,7 +328,7 @@ sudo apt-get install -y graphviz
 ```
 **Theme** 
 ```bash
-git clone --depth 1 -b v2.3.3 https://github.com/jothepro/doxygen-awesome-css ./docs/doxygen/awesome_css
+git clone --depth 1 -b v2.3.4 https://github.com/jothepro/doxygen-awesome-css ./docs/doxygen/awesome_css
 ```
 
 `P4C` also depends on Google Protocol Buffers (Protobuf). `P4C` requires version
@@ -379,7 +379,7 @@ sudo dnf install -y graphviz
 ```
 **Theme**
 ```bash
-git clone --depth 1 -b v2.3.3 https://github.com/jothepro/doxygen-awesome-css ./docs/doxygen/awesome_css
+git clone --depth 1 -b v2.3.4 https://github.com/jothepro/doxygen-awesome-css ./docs/doxygen/awesome_css
 ```
 
 You can also look at the [dependencies installation script](https://github.com/p4lang/p4c/blob/main/tools/install_fedora_deps.sh)
@@ -428,7 +428,7 @@ Installing on macOS:
   ```
   **Optional Documentation theme:** 
   ```
-  git clone --depth 1 -b v2.3.3 https://github.com/jothepro/doxygen-awesome-css ./docs/doxygen/awesome_css
+  git clone --depth 1 -b v2.3.4 https://github.com/jothepro/doxygen-awesome-css ./docs/doxygen/awesome_css
   ```
 
   Homebrew offers a `protobuf` formula. It installs version 3.2, which should

@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DOXYGEN_VERSION: 1.13.0
-      DOXYGEN_AWESOME_VERSION: 2.3.3
+      DOXYGEN_AWESOME_VERSION: 2.3.4
       PR_PATH: pr-preview/${{ github.event.number }}
       DOMAIN: p4lang.github.io
       DEPLOYMENT: '<img src="https://github.com/user-attachments/assets/f94fada5-45ca-4271-9106-180728235ad2" alt="Rocket" width="25"/>'
