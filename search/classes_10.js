@@ -38,7 +38,7 @@ var searchData=
   ['p4runtimeserializer_35',['P4RuntimeSerializer',['../class_p4_1_1_p4_runtime_serializer.html',1,'P4']]],
   ['p4runtimestdconverter_36',['P4RuntimeStdConverter',['../class_b_f_n_1_1_p4_runtime_std_converter.html',1,'BFN']]],
   ['p4runtimesymboltable_37',['P4RuntimeSymbolTable',['../class_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_symbol_table.html',1,'P4::ControlPlaneAPI']]],
-  ['p4runtimesymboltableiface_38',['P4RuntimeSymbolTableIface',['../class_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_symbol_table_iface.html',1,'P4::ControlPlaneAPI']]],
+  ['p4runtimesymboltableiface_38',['P4RuntimeSymbolTableIface',['../class_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_symbol_table_iface.html',1,'P4::ControlPlaneAPI::P4RuntimeSymbolTableIface'],['../class_p4_runtime_symbol_table_iface.html',1,'P4RuntimeSymbolTableIface']]],
   ['p4runtimesymboltype_39',['P4RuntimeSymbolType',['../class_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_symbol_type.html',1,'P4::ControlPlaneAPI']]],
   ['p4scope_40',['P4Scope',['../class_p4_1_1_p4_tools_1_1_p4_smith_1_1_p4_scope.html',1,'P4::P4Tools::P4Smith']]],
   ['p4smithforinlooptest_41',['P4SmithForInLoopTest',['../class_p4_1_1_p4_tools_1_1_test_1_1_p4_smith_for_in_loop_test.html',1,'P4::P4Tools::Test']]],

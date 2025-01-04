@@ -122,7 +122,7 @@ var searchData=
   ['formattest_119',['FormatTest',['../class_p4_1_1_p4_tools_1_1_test_1_1_format_test.html',1,'P4::P4Tools::Test']]],
   ['formattype_5ft_120',['FormatType_t',['../class_action_data_1_1_format_type__t.html',1,'ActionData']]],
   ['freeslice_121',['FreeSlice',['../struct_p_h_v_1_1_free_slice.html',1,'PHV']]],
-  ['fromto_122',['FromTo',['../struct_p4_1_1_bit_range_1_1_from_to.html',1,'P4::BitRange']]],
+  ['fromto_122',['FromTo',['../struct_from_to.html',1,'FromTo'],['../struct_p4_1_1_bit_range_1_1_from_to.html',1,'P4::BitRange::FromTo']]],
   ['frontend_123',['FrontEnd',['../class_p4_1_1_front_end.html',1,'P4']]],
   ['frontendpolicy_124',['FrontEndPolicy',['../struct_b_f_n_1_1_front_end_policy.html',1,'BFN::FrontEndPolicy'],['../class_p4_1_1_front_end_policy.html',1,'P4::FrontEndPolicy']]],
   ['frontier_125',['Frontier',['../struct_find_parsing_frontier_1_1_frontier.html',1,'FindParsingFrontier']]],

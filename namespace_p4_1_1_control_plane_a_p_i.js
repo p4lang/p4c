@@ -20,6 +20,7 @@ var namespace_p4_1_1_control_plane_a_p_i =
     [ "ParseP4RuntimeAnnotations", "class_p4_1_1_control_plane_a_p_i_1_1_parse_p4_runtime_annotations.html", null ],
     [ "TranslationAnnotation", "namespace_p4_1_1_control_plane_a_p_i.html#struct_p4_1_1_control_plane_a_p_i_1_1_translation_annotation", null ],
     [ "TypeSpecConverter", "class_p4_1_1_control_plane_a_p_i_1_1_type_spec_converter.html", null ],
+    [ "addDocumentation", "namespace_p4_1_1_control_plane_a_p_i.html#ac52750ca46f514712fea550c90e0d70b", null ],
     [ "findP4InfoObject", "namespace_p4_1_1_control_plane_a_p_i.html#aa30fd45e2865ba5160bb9b25def995ac", null ],
     [ "findP4RuntimeAction", "namespace_p4_1_1_control_plane_a_p_i.html#ab3ae2745752995c0866ecf3979a03775", null ],
     [ "findP4RuntimeAction", "namespace_p4_1_1_control_plane_a_p_i.html#a04e7eb56b2dd0e30834ceb42550de9ae", null ],

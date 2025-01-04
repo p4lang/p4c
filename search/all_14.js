@@ -19,7 +19,7 @@ var searchData=
   ['jbayudevice_16',['JBayUDevice',['../class_j_bay_u_device.html',1,'']]],
   ['jbayumaupowerspec_17',['JBayUMauPowerSpec',['../class_j_bay_u_mau_power_spec.html',1,'']]],
   ['join_5fflows_18',['join_flows',['../class_p4_1_1_visitor.html#ae7dead1386c1bd5727307f5ae131aad7',1,'P4::Visitor::join_flows()'],['../class_p4_1_1_control_flow_visitor.html#a73cdd2949d6ab9b0321a16ed47484751',1,'P4::ControlFlowVisitor::join_flows()']]],
-  ['joining_20two_20exact_20containers_20slicelists_20with_20different_20sizes_19',['Pruning strategy: metadata list joining two exact containers slicelists with different sizes',['../md__2home_2runner_2work_2p4c_2p4c_2backends_2tofino_2bf-p4c_2phv_2slicing_2_r_e_a_d_m_e.html#pruning-strategy-metadata-list-joining-two-exact-containers-slicelists-with-different-sizes',1,'']]],
+  ['joining_20two_20exact_20containers_20slicelists_20with_20different_20sizes_19',['Pruning strategy: metadata list joining two exact containers slicelists with different sizes',['..//home/runner/work/p4c/p4c/backends/tofino/bf-p4c/phv/slicing/README.md#pruning-strategy-metadata-list-joining-two-exact-containers-slicelists-with-different-sizes',1,'']]],
   ['json_20',['json',['../struct_p4_1_1_b_m_v2_1_1_conversion_context.html#a9e91c9d34e8b00e6e4730d582eb56982',1,'P4::BMV2::ConversionContext']]],
   ['json_20output_21',['Format of json output',['../graphs_backend.html#format-of-json-output',1,'']]],
   ['jsonarray_22',['JsonArray',['../class_p4_1_1_util_1_1_json_array.html',1,'P4::Util']]],

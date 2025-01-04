@@ -51,7 +51,7 @@ var searchData=
   ['stf_5fmin_5fpkt_5fsize_48',['STF_MIN_PKT_SIZE',['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_b_mv2_constants.html#a3a6d4771429b5d1919cb6f14b85ff6bb',1,'P4::P4Tools::P4Testgen::Bmv2::BMv2Constants']]],
   ['stop_5ffirst_5fsucc_5fempty_5fnormal_5fcontainer_49',['stop_first_succ_empty_normal_container',['../struct_p_h_v_1_1v2_1_1_search_config.html#a1f91b38b8564faf07c77b2eff585c76f',1,'PHV::v2::SearchConfig']]],
   ['strict_50',['strict',['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_testgen_options.html#aee153e750221c729a3c23c0cfdd942bc',1,'P4::P4Tools::P4Testgen::TestgenOptions']]],
-  ['strictstruct_51',['strictStruct',['../class_p4_1_1_type_map.html#af4acc926aaca8de78a3ec1edc90626f4',1,'P4::TypeMap']]],
+  ['strictstruct_51',['strictStruct',['../class_p4_1_1_type_map.html#af4acc926aaca8de78a3ec1edc90626f4',1,'P4::TypeMap::strictStruct'],['../class_type_map.html#af4acc926aaca8de78a3ec1edc90626f4',1,'TypeMap::strictStruct']]],
   ['stringliteral_52',['stringLiteral',['../class_p4_1_1_p4_parser_driver.html#aeb57bc5fea47bdb995b029d3f8ef13ad',1,'P4::P4ParserDriver']]],
   ['structure_53',['structure',['../class_p4_1_1_p4_parser_driver.html#a04d165c66c91d9096b61203f104084fe',1,'P4::P4ParserDriver::structure'],['../struct_p4_1_1_b_m_v2_1_1_conversion_context.html#a2d3244e2319127cec256f58c44c82bfd',1,'P4::BMV2::ConversionContext::structure']]],
   ['substitution_54',['substitution',['../class_p4_1_1_instance_base.html#a399ebaf2c85626454ff290e7da5d2ed3',1,'P4::InstanceBase']]],

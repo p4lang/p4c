@@ -58,6 +58,6 @@ var searchData=
   ['tryallocslicelist_55',['tryAllocSliceList',['../class_core_allocation.html#a081298cbf693a150115abc87f14529d4',1,'CoreAllocation::tryAllocSliceList(const PHV::Allocation &amp;alloc, const PHV::ContainerGroup &amp;group, const PHV::SuperCluster &amp;super_cluster, const PHV::Allocation::ConditionalConstraint &amp;start_positions, const ScoreContext &amp;score_ctx) const'],['../class_core_allocation.html#a0c11dbd774ed881ac465a4e65a9ae1c9',1,'CoreAllocation::tryAllocSliceList(const PHV::Allocation &amp;alloc, const PHV::ContainerGroup &amp;group, const PHV::SuperCluster &amp;super_cluster, const PHV::SuperCluster::SliceList &amp;slice_list, const ordered_map&lt; PHV::FieldSlice, int &gt; &amp;start_positions, const ScoreContext &amp;score_ctx) const']]],
   ['tryvariousslicing_56',['tryVariousSlicing',['../class_brute_force_allocation_strategy.html#a67315906a29ae56eed893a1901cf0e98',1,'BruteForceAllocationStrategy']]],
   ['typeid_57',['typeId',['../struct_p4_1_1_r_t_t_i_1_1_base.html#a4115d7f39d312eac35d583797deabb83',1,'P4::RTTI::Base']]],
-  ['typeisempty_58',['typeIsEmpty',['../class_p4_1_1_type_map.html#a9029f57640cee4c92cc7a4e3edb7c29c',1,'P4::TypeMap']]],
+  ['typeisempty_58',['typeIsEmpty',['../class_p4_1_1_type_map.html#a9029f57640cee4c92cc7a4e3edb7c29c',1,'P4::TypeMap::typeIsEmpty()'],['../class_type_map.html#a9029f57640cee4c92cc7a4e3edb7c29c',1,'TypeMap::typeIsEmpty()']]],
   ['types_59',['types',['../class_p_h_v_1_1_container_group.html#a7e54f8c7d785d7d18aa08fc3107b4b5c',1,'PHV::ContainerGroup']]]
 ];

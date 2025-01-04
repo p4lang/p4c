@@ -15,7 +15,7 @@
 <polygon fill="white" stroke="#666666" points="160,-41 0,-41 0,0 160,0 160,-41"/>
 <text text-anchor="start" x="8" y="-29" font-family="Helvetica,sans-Serif" font-size="10.00">P4::ordered_map&lt; typename</text>
 <text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00"> Graph::edge_descriptor,</text>
-<text text-anchor="middle" x="80" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00"> std::string &gt;</text>
+<text text-anchor="middle" x="80" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00"> const PHV::FieldSlice * &gt;</text>
 </a>
 </g>
 </g>

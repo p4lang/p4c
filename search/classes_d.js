@@ -115,7 +115,7 @@ var searchData=
   ['minimalnamegenerator_112',['MinimalNameGenerator',['../class_p4_1_1_minimal_name_generator.html',1,'P4']]],
   ['minpacktxscore_113',['MinPackTxScore',['../class_p_h_v_1_1v2_1_1_min_pack_tx_score.html',1,'PHV::v2']]],
   ['minpacktxscoremaker_114',['MinPackTxScoreMaker',['../class_p_h_v_1_1v2_1_1_min_pack_tx_score_maker.html',1,'PHV::v2']]],
-  ['mintomax_115',['MinToMax',['../struct_p4_1_1_bit_range_1_1_min_to_max.html',1,'P4::BitRange']]],
+  ['mintomax_115',['MinToMax',['../struct_min_to_max.html',1,'MinToMax'],['../struct_p4_1_1_bit_range_1_1_min_to_max.html',1,'P4::BitRange::MinToMax']]],
   ['mirror_5ffield_5flist_5ft_116',['mirror_field_list_t',['../struct_p_h_v_1_1_field_1_1mirror__field__list__t.html',1,'PHV::Field']]],
   ['mirroregressparseeval_117',['MirrorEgressParseEval',['../class_mirror_egress_parse_eval.html',1,'']]],
   ['missingidassigner_118',['MissingIdAssigner',['../class_p4_1_1_missing_id_assigner.html',1,'P4']]],

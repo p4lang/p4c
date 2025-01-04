@@ -12,8 +12,8 @@
 <g id="Node000000" class="node">
 <title>Node0</title>
 <g id="a_Node000000"><a xlink:title=" ">
-<polygon fill="#e0e0e0" stroke="#999999" points="41,-82.5 0,-82.5 0,-63.5 41,-63.5 41,-82.5"/>
-<text text-anchor="middle" x="20.5" y="-70.5" font-family="Helvetica,sans-Serif" font-size="10.00">Base</text>
+<polygon fill="#e0e0e0" stroke="#999999" points="41,-147.5 0,-147.5 0,-128.5 41,-128.5 41,-147.5"/>
+<text text-anchor="middle" x="20.5" y="-135.5" font-family="Helvetica,sans-Serif" font-size="10.00">Base</text>
 </a>
 </g>
 </g>
@@ -21,10 +21,11 @@
 <g id="Node000001" class="node">
 <title>Node1</title>
 <g id="a_Node000001"><a xlink:href="classassoc_1_1detail_1_1_cond_iterable_assoc_base.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="232.5,-126.5 86.5,-126.5 86.5,-85.5 232.5,-85.5 232.5,-126.5"/>
-<text text-anchor="start" x="94.5" y="-114.5" font-family="Helvetica,sans-Serif" font-size="10.00">assoc::detail::CondIterable</text>
-<text text-anchor="start" x="94.5" y="-103.5" font-family="Helvetica,sans-Serif" font-size="10.00">AssocBase&lt; Base, Itble,</text>
-<text text-anchor="middle" x="159.5" y="-92.5" font-family="Helvetica,sans-Serif" font-size="10.00"> typename &gt;</text>
+<polygon fill="white" stroke="#666666" points="242,-197 77,-197 77,-145 242,-145 242,-197"/>
+<text text-anchor="start" x="85" y="-185" font-family="Helvetica,sans-Serif" font-size="10.00">assoc::detail::CondIterable</text>
+<text text-anchor="start" x="85" y="-174" font-family="Helvetica,sans-Serif" font-size="10.00">AssocBase&lt; Base, Itble,</text>
+<text text-anchor="start" x="85" y="-163" font-family="Helvetica,sans-Serif" font-size="10.00"> typename _void&lt; typename</text>
+<text text-anchor="middle" x="159.5" y="-152" font-family="Helvetica,sans-Serif" font-size="10.00"> Base::key_compare &gt;::type &gt;</text>
 </a>
 </g>
 </g>
@@ -32,58 +33,38 @@
 <g id="edge6_Node000000_Node000001" class="edge">
 <title>Node0&#45;&gt;Node1</title>
 <g id="a_edge6_Node000000_Node000001"><a xlink:title=" ">
-<path fill="none" stroke="darkgreen" d="M50.97,-80.1C61.48,-82.63 73.84,-85.61 86.36,-88.62"/>
-<polygon fill="darkgreen" stroke="darkgreen" points="51.67,-76.67 41.13,-77.73 50.03,-83.47 51.67,-76.67"/>
-</a>
-</g>
-</g>
-<!-- Node8 -->
-<g id="Node000008" class="node">
-<title>Node8</title>
-<g id="a_Node000008"><a xlink:href="classassoc_1_1detail_1_1_cond_iterable_assoc_base_3_01_base_00_01_itble_00_01typename_01__void_301be9afc473011af99b0061f318d14aa.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="242,-67 77,-67 77,-15 242,-15 242,-67"/>
-<text text-anchor="start" x="85" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">assoc::detail::CondIterable</text>
-<text text-anchor="start" x="85" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">AssocBase&lt; Base, Itble,</text>
-<text text-anchor="start" x="85" y="-33" font-family="Helvetica,sans-Serif" font-size="10.00"> typename _void&lt; typename</text>
-<text text-anchor="middle" x="159.5" y="-22" font-family="Helvetica,sans-Serif" font-size="10.00"> Base::key_compare &gt;::type &gt;</text>
-</a>
-</g>
-</g>
-<!-- Node0&#45;&gt;Node8 -->
-<g id="edge13_Node000000_Node000008" class="edge">
-<title>Node0&#45;&gt;Node8</title>
-<g id="a_edge13_Node000000_Node000008"><a xlink:title=" ">
-<path fill="none" stroke="darkgreen" d="M51.11,-66.08C58.94,-64.25 67.78,-62.19 76.95,-60.05"/>
-<polygon fill="darkgreen" stroke="darkgreen" points="50.07,-62.73 41.13,-68.42 51.66,-69.55 50.07,-62.73"/>
+<path fill="none" stroke="darkgreen" d="M51.11,-145.13C58.94,-147.02 67.78,-149.15 76.95,-151.36"/>
+<polygon fill="darkgreen" stroke="darkgreen" points="51.67,-141.67 41.13,-142.73 50.03,-148.47 51.67,-141.67"/>
 </a>
 </g>
 </g>
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="classassoc_1_1detail_1_1_cond_iterable_assoc.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="424,-121 278,-121 278,-91 424,-91 424,-121"/>
-<text text-anchor="start" x="286" y="-109" font-family="Helvetica,sans-Serif" font-size="10.00">assoc::detail::CondIterable</text>
-<text text-anchor="middle" x="351" y="-98" font-family="Helvetica,sans-Serif" font-size="10.00">Assoc&lt; Base, Itble &gt;</text>
+<g id="a_Node000002"><a xlink:href="classassoc_1_1detail_1_1_cond_iterable_assoc_base.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="232.5,-126.5 86.5,-126.5 86.5,-85.5 232.5,-85.5 232.5,-126.5"/>
+<text text-anchor="start" x="94.5" y="-114.5" font-family="Helvetica,sans-Serif" font-size="10.00">assoc::detail::CondIterable</text>
+<text text-anchor="start" x="94.5" y="-103.5" font-family="Helvetica,sans-Serif" font-size="10.00">AssocBase&lt; Base, Itble,</text>
+<text text-anchor="middle" x="159.5" y="-92.5" font-family="Helvetica,sans-Serif" font-size="10.00"> typename &gt;</text>
 </a>
 </g>
 </g>
-<!-- Node1&#45;&gt;Node2 -->
-<g id="edge7_Node000001_Node000002" class="edge">
-<title>Node1&#45;&gt;Node2</title>
-<g id="a_edge7_Node000001_Node000002"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M242.81,-106C254.42,-106 266.29,-106 277.7,-106"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="242.68,-102.5 232.68,-106 242.68,-109.5 242.68,-102.5"/>
+<!-- Node0&#45;&gt;Node2 -->
+<g id="edge7_Node000000_Node000002" class="edge">
+<title>Node0&#45;&gt;Node2</title>
+<g id="a_edge7_Node000000_Node000002"><a xlink:title=" ">
+<path fill="none" stroke="darkgreen" d="M50.97,-131.12C61.48,-128.66 73.84,-125.77 86.36,-122.85"/>
+<polygon fill="darkgreen" stroke="darkgreen" points="50.07,-127.73 41.13,-133.42 51.66,-134.55 50.07,-127.73"/>
 </a>
 </g>
 </g>
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="classassoc_1_1set.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="606.5,-212 461.5,-212 461.5,-182 606.5,-182 606.5,-212"/>
-<text text-anchor="start" x="469.5" y="-200" font-family="Helvetica,sans-Serif" font-size="10.00">assoc::set&lt; const IR</text>
-<text text-anchor="middle" x="534" y="-189" font-family="Helvetica,sans-Serif" font-size="10.00">::Declaration_Instance * &gt;</text>
+<g id="a_Node000003"><a xlink:href="classassoc_1_1detail_1_1_cond_iterable_assoc.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="424,-121 278,-121 278,-91 424,-91 424,-121"/>
+<text text-anchor="start" x="286" y="-109" font-family="Helvetica,sans-Serif" font-size="10.00">assoc::detail::CondIterable</text>
+<text text-anchor="middle" x="351" y="-98" font-family="Helvetica,sans-Serif" font-size="10.00">Assoc&lt; Base, Itble &gt;</text>
 </a>
 </g>
 </g>
@@ -91,8 +72,8 @@
 <g id="edge8_Node000002_Node000003" class="edge">
 <title>Node2&#45;&gt;Node3</title>
 <g id="a_edge8_Node000002_Node000003"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M381.58,-127.03C402.7,-141.36 432.18,-160.02 460,-173 466.89,-176.21 474.33,-179.19 481.74,-181.87"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="383.3,-123.96 373.07,-121.18 379.33,-129.73 383.3,-123.96"/>
+<path fill="none" stroke="#63b8ff" d="M242.81,-106C254.42,-106 266.29,-106 277.7,-106"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="242.68,-102.5 232.68,-106 242.68,-109.5 242.68,-102.5"/>
 </a>
 </g>
 </g>
@@ -100,18 +81,18 @@
 <g id="Node000004" class="node">
 <title>Node4</title>
 <g id="a_Node000004"><a xlink:href="classassoc_1_1set.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="592,-164 476,-164 476,-134 592,-134 592,-164"/>
-<text text-anchor="start" x="484" y="-152" font-family="Helvetica,sans-Serif" font-size="10.00">assoc::set&lt; const IR</text>
-<text text-anchor="middle" x="534" y="-141" font-family="Helvetica,sans-Serif" font-size="10.00">::Expression * &gt;</text>
+<polygon fill="white" stroke="#666666" points="606.5,-212 461.5,-212 461.5,-182 606.5,-182 606.5,-212"/>
+<text text-anchor="start" x="469.5" y="-200" font-family="Helvetica,sans-Serif" font-size="10.00">assoc::set&lt; const IR</text>
+<text text-anchor="middle" x="534" y="-189" font-family="Helvetica,sans-Serif" font-size="10.00">::Declaration_Instance * &gt;</text>
 </a>
 </g>
 </g>
-<!-- Node2&#45;&gt;Node4 -->
-<g id="edge9_Node000002_Node000004" class="edge">
-<title>Node2&#45;&gt;Node4</title>
-<g id="a_edge9_Node000002_Node000004"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M425.12,-123.37C441.99,-127.38 459.7,-131.59 475.78,-135.41"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="425.84,-119.95 415.31,-121.04 424.23,-126.76 425.84,-119.95"/>
+<!-- Node3&#45;&gt;Node4 -->
+<g id="edge9_Node000003_Node000004" class="edge">
+<title>Node3&#45;&gt;Node4</title>
+<g id="a_edge9_Node000003_Node000004"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M381.58,-127.03C402.7,-141.36 432.18,-160.02 460,-173 466.89,-176.21 474.33,-179.19 481.74,-181.87"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="383.3,-123.96 373.07,-121.18 379.33,-129.73 383.3,-123.96"/>
 </a>
 </g>
 </g>
@@ -119,17 +100,18 @@
 <g id="Node000005" class="node">
 <title>Node5</title>
 <g id="a_Node000005"><a xlink:href="classassoc_1_1set.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="592.5,-115.5 475.5,-115.5 475.5,-96.5 592.5,-96.5 592.5,-115.5"/>
-<text text-anchor="middle" x="534" y="-103.5" font-family="Helvetica,sans-Serif" font-size="10.00">assoc::set&lt; void * &gt;</text>
+<polygon fill="white" stroke="#666666" points="592,-164 476,-164 476,-134 592,-134 592,-164"/>
+<text text-anchor="start" x="484" y="-152" font-family="Helvetica,sans-Serif" font-size="10.00">assoc::set&lt; const IR</text>
+<text text-anchor="middle" x="534" y="-141" font-family="Helvetica,sans-Serif" font-size="10.00">::Expression * &gt;</text>
 </a>
 </g>
 </g>
-<!-- Node2&#45;&gt;Node5 -->
-<g id="edge10_Node000002_Node000005" class="edge">
-<title>Node2&#45;&gt;Node5</title>
-<g id="a_edge10_Node000002_Node000005"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M434.13,-106C448.07,-106 462.27,-106 475.4,-106"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="434.06,-102.5 424.06,-106 434.06,-109.5 434.06,-102.5"/>
+<!-- Node3&#45;&gt;Node5 -->
+<g id="edge10_Node000003_Node000005" class="edge">
+<title>Node3&#45;&gt;Node5</title>
+<g id="a_edge10_Node000003_Node000005"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M425.12,-123.37C441.99,-127.38 459.7,-131.59 475.78,-135.41"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="425.84,-119.95 415.31,-121.04 424.23,-126.76 425.84,-119.95"/>
 </a>
 </g>
 </g>
@@ -137,18 +119,17 @@
 <g id="Node000006" class="node">
 <title>Node6</title>
 <g id="a_Node000006"><a xlink:href="classassoc_1_1set.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="597,-78 471,-78 471,-48 597,-48 597,-78"/>
-<text text-anchor="start" x="479" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">assoc::set&lt; const PHV</text>
-<text text-anchor="middle" x="534" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">::Field * &gt;</text>
+<polygon fill="white" stroke="#666666" points="592.5,-115.5 475.5,-115.5 475.5,-96.5 592.5,-96.5 592.5,-115.5"/>
+<text text-anchor="middle" x="534" y="-103.5" font-family="Helvetica,sans-Serif" font-size="10.00">assoc::set&lt; void * &gt;</text>
 </a>
 </g>
 </g>
-<!-- Node2&#45;&gt;Node6 -->
-<g id="edge11_Node000002_Node000006" class="edge">
-<title>Node2&#45;&gt;Node6</title>
-<g id="a_edge11_Node000002_Node000006"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M425.17,-88.62C440.35,-85.01 456.21,-81.24 470.95,-77.74"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="424.23,-85.24 415.31,-90.96 425.84,-92.05 424.23,-85.24"/>
+<!-- Node3&#45;&gt;Node6 -->
+<g id="edge11_Node000003_Node000006" class="edge">
+<title>Node3&#45;&gt;Node6</title>
+<g id="a_edge11_Node000003_Node000006"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M434.13,-106C448.07,-106 462.27,-106 475.4,-106"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="434.06,-102.5 424.06,-106 434.06,-109.5 434.06,-102.5"/>
 </a>
 </g>
 </g>
@@ -156,16 +137,35 @@
 <g id="Node000007" class="node">
 <title>Node7</title>
 <g id="a_Node000007"><a xlink:href="classassoc_1_1set.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="597,-78 471,-78 471,-48 597,-48 597,-78"/>
+<text text-anchor="start" x="479" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">assoc::set&lt; const PHV</text>
+<text text-anchor="middle" x="534" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">::Field * &gt;</text>
+</a>
+</g>
+</g>
+<!-- Node3&#45;&gt;Node7 -->
+<g id="edge12_Node000003_Node000007" class="edge">
+<title>Node3&#45;&gt;Node7</title>
+<g id="a_edge12_Node000003_Node000007"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M425.17,-88.62C440.35,-85.01 456.21,-81.24 470.95,-77.74"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="424.23,-85.24 415.31,-90.96 425.84,-92.05 424.23,-85.24"/>
+</a>
+</g>
+</g>
+<!-- Node8 -->
+<g id="Node000008" class="node">
+<title>Node8</title>
+<g id="a_Node000008"><a xlink:href="classassoc_1_1set.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="608,-30 460,-30 460,0 608,0 608,-30"/>
 <text text-anchor="start" x="468" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">assoc::set&lt; Key, Compare,</text>
 <text text-anchor="middle" x="534" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00"> Allocator, Itble &gt;</text>
 </a>
 </g>
 </g>
-<!-- Node2&#45;&gt;Node7 -->
-<g id="edge12_Node000002_Node000007" class="edge">
-<title>Node2&#45;&gt;Node7</title>
-<g id="a_edge12_Node000002_Node000007"><a xlink:title=" ">
+<!-- Node3&#45;&gt;Node8 -->
+<g id="edge13_Node000003_Node000008" class="edge">
+<title>Node3&#45;&gt;Node8</title>
+<g id="a_edge13_Node000003_Node000008"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M381.58,-84.97C402.7,-70.64 432.18,-51.98 460,-39 466.89,-35.79 474.33,-32.81 481.74,-30.13"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="379.33,-82.27 373.07,-90.82 383.3,-88.04 379.33,-82.27"/>
 </a>

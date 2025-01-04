@@ -37,5 +37,5 @@ var searchData=
   ['z3solvertests_34',['Z3SolverTests',['../class_p4_1_1_p4_tools_1_1_test_1_1_z3_solver_tests.html',1,'P4::P4Tools::Test']]],
   ['z3translator_35',['Z3Translator',['../class_p4_1_1_p4_tools_1_1_z3_translator.html',1,'P4::P4Tools']]],
   ['zerohash_36',['ZeroHash',['../class_format_hash_1_1_zero_hash.html',1,'FormatHash']]],
-  ['zerotomax_37',['ZeroToMax',['../struct_p4_1_1_bit_range_1_1_zero_to_max.html',1,'P4::BitRange']]]
+  ['zerotomax_37',['ZeroToMax',['../struct_p4_1_1_bit_range_1_1_zero_to_max.html',1,'P4::BitRange::ZeroToMax'],['../struct_zero_to_max.html',1,'ZeroToMax']]]
 ];

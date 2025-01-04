@@ -1,9 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" title=" " alt="" coords="5,77,163,102"/>
-<area shape="rect" id="Node000001" href="$classautoclone__ptr.html" title=" " alt="" coords="229,5,391,45"/>
-<area shape="poly" id="edge2497_Node000000_Node000001" title=" " alt="" coords="142,70,238,43,239,48,144,75"/>
-<area shape="rect" id="Node000002" href="$classautoclone__ptr.html" title=" " alt="" coords="211,69,409,109"/>
-<area shape="poly" id="edge2498_Node000000_Node000002" title=" " alt="" coords="176,87,210,87,210,92,176,92"/>
-<area shape="rect" id="Node000003" href="$classautoclone__ptr.html" title=" " alt="" coords="227,134,393,159"/>
-<area shape="poly" id="edge2499_Node000000_Node000003" title=" " alt="" coords="149,103,260,131,259,137,147,108"/>
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,5,124,31"/>
+<area shape="rect" id="Node000001" href="$struct_p4_1_1_r_t_t_i_1_1has__rtti.html" title=" " alt="" coords="172,5,341,31"/>
+<area shape="poly" id="edge2492_Node000000_Node000001" title=" " alt="" coords="138,15,172,15,172,21,138,21"/>
 </map>

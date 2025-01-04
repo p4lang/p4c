@@ -19,5 +19,5 @@ var searchData=
   ['updatevalidcontainerrange_16',['updateValidContainerRange',['../class_p_h_v_1_1_field.html#a0a39a8e5fb79e8b4989634dbc2396a21',1,'PHV::Field']]],
   ['updatevisitednodes_17',['updateVisitedNodes',['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_symbolic_executor.html#a5ab6d6aad25d8892f4e1d9fbb93d7ab8',1,'P4::P4Tools::P4Testgen::SymbolicExecutor']]],
   ['used_5ffor_18',['used_for',['../struct_i_x_bar_1_1_use.html#a448f460e921d255560d6d8c8e1f60362',1,'IXBar::Use']]],
-  ['usedname_19',['usedName',['../class_p4_1_1_reference_map.html#a79c9be4e360d6d7094cfb34a428f4aba',1,'P4::ReferenceMap']]]
+  ['usedname_19',['usedName',['../class_p4_1_1_reference_map.html#a79c9be4e360d6d7094cfb34a428f4aba',1,'P4::ReferenceMap::usedName()'],['../class_reference_map.html#a79c9be4e360d6d7094cfb34a428f4aba',1,'ReferenceMap::usedName()']]]
 ];
