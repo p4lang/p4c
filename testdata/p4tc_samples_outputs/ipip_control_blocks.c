@@ -33,7 +33,7 @@ struct __attribute__((__packed__)) Main_fwd_table_value {
             u32 port;
         } Main_set_ipip;
         struct __attribute__((__packed__)) {
-            u64 dmac;
+            u8 dmac[6];
             u32 port;
         } Main_set_nh;
         struct {
@@ -106,7 +106,7 @@ if (/* hdr->outer.isValid() */
                                 break;
                             case MAIN_FWD_TABLE_ACT_MAIN_SET_NH: 
                                 {
-                                    hdr->ethernet.dstAddr = value->u.Main_set_nh.dmac;
+                                    storePrimitive64((u8 *)&hdr->ethernet.dstAddr, 48, (getPrimitive64((u8 *)value->u.Main_set_nh.dmac, 48)));
                                     /* send_to_port(value->u.Main_set_nh.port) */
                                     compiler_meta__->drop = false;
                                     send_to_port(value->u.Main_set_nh.port);

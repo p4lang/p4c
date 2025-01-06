@@ -28,8 +28,8 @@ struct __attribute__((__packed__)) ingress_nh_table_value {
         } _NoAction;
         struct __attribute__((__packed__)) {
             u32 port_id;
-            u64 dmac;
-            u64 smac;
+            u8 dmac[6];
+            u8 smac[6];
         } ingress_send_nh;
         struct {
         } ingress_drop;
@@ -95,8 +95,8 @@ static __always_inline int process(struct __sk_buff *skb, struct my_ingress_head
                     switch (value->action) {
                         case INGRESS_NH_TABLE_ACT_INGRESS_SEND_NH: 
                             {
-                                hdr->ethernet.srcAddr = value->u.ingress_send_nh.smac;
-                                                                hdr->ethernet.dstAddr = value->u.ingress_send_nh.dmac;
+                                storePrimitive64((u8 *)&hdr->ethernet.srcAddr, 48, (getPrimitive64((u8 *)value->u.ingress_send_nh.smac, 48)));
+                                                                storePrimitive64((u8 *)&hdr->ethernet.dstAddr, 48, (getPrimitive64((u8 *)value->u.ingress_send_nh.dmac, 48)));
                                 /* send_to_port(value->u.ingress_send_nh.port_id) */
                                 compiler_meta__->drop = false;
                                 send_to_port(value->u.ingress_send_nh.port_id);
