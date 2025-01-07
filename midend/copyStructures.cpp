@@ -74,13 +74,13 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
        The fix bellow, commented-out, causes problems elsewhere.
        https://github.com/p4lang/p4c/issues/3842
     */
-    if (!_config.expandUnions && ltype->is<IR::Type_HeaderUnion>()) {
+    if (!config.expandUnions && ltype->is<IR::Type_HeaderUnion>()) {
         return statement;
     }
 
     // Do not copy structures for method calls.
     if (statement->right->is<IR::MethodCallExpression>()) {
-        if (_config.errorOnMethodCall) {
+        if (config.errorOnMethodCall) {
             ::P4::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                         "%1%: functions or methods returning structures "
                         "are not supported on this target",
@@ -99,7 +99,7 @@ const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) 
             retval.push_back(
                 new IR::AssignmentStatement(statement->srcInfo, left, right->expression));
         }
-    } else if (_config.copyHeaders && ltype->is<IR::Type_Header>()) {
+    } else if (config.copyHeaders && ltype->is<IR::Type_Header>()) {
         const auto *header = ltype->checkedTo<IR::Type_Header>();
         // Build a "src.isValid()" call.
         const auto *isSrcValidCall = new IR::MethodCallExpression(

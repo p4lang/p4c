@@ -32,9 +32,11 @@ struct CopyStructuresConfig {
     /// Do not only copy normal structures but also perform copy assignments for headers.
     bool copyHeaders = false;
     /// Also expand header union assignments.
-    /// TODO: This is only necessary because the copy structure pass does not correctly expand
-    /// header unions for some back ends.
-    bool expandUnions = true;
+    /// TODO: This is currently disabled by default because validity of header unions is not
+    /// correctly preserved. Only the validity of the last member in the union is preserved in the
+    /// assignment.
+    /// Some passes, such as FlattenHeaderUnion requires this expansion.
+    bool expandUnions = false;
 };
 
 /**
@@ -72,11 +74,11 @@ class DoCopyStructures : public Transform {
     TypeMap *typeMap;
 
     /// Configuration options.
-    CopyStructuresConfig _config;
+    CopyStructuresConfig config;
 
  public:
-    explicit DoCopyStructures(TypeMap *typeMap, CopyStructuresConfig config)
-        : typeMap(typeMap), _config(config) {
+    explicit DoCopyStructures(TypeMap *typeMap, CopyStructuresConfig configuration)
+        : typeMap(typeMap), config(configuration) {
         CHECK_NULL(typeMap);
         setName("DoCopyStructures");
     }
