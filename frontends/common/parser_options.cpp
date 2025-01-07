@@ -395,10 +395,13 @@ bool ParserOptions::searchForIncludePath(const char *&includePathOut,
 }
 
 std::vector<const char *> *ParserOptions::process(int argc, char *const argv[]) {
-    searchForIncludePath(p4includePath, {"p4include"_cs, "../p4include"_cs, "../../p4include"_cs},
+    searchForIncludePath(p4includePath,
+                         {"p4include"_cs, "../p4include"_cs, "../../p4include"_cs,
+                          "../share/p4c/p4include"_cs},
                          exename(argv[0]));
     searchForIncludePath(p4_14includePath,
-                         {"p4_14include"_cs, "../p4_14include"_cs, "../../p4_14include"_cs},
+                         {"p4_14include"_cs, "../p4_14include"_cs, "../../p4_14include"_cs,
+                          "../share/p4c/p4_14include"_cs},
                          exename(argv[0]));
 
     auto remainingOptions = Util::Options::process(argc, argv);
