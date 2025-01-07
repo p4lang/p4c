@@ -85,30 +85,7 @@ control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, in
         hdr.u[0].h2.setValid();
         hdr.u[0].h1.setInvalid();
         hdr.u[0].h3.setInvalid();
-        if (hdr.u[0].h1.isValid()) {
-            hdr.u[1].h1.setValid();
-            hdr.u[1].h1 = hdr.u[0].h1;
-            hdr.u[1].h2.setInvalid();
-            hdr.u[1].h3.setInvalid();
-        } else {
-            hdr.u[1].h1.setInvalid();
-        }
-        if (hdr.u[0].h2.isValid()) {
-            hdr.u[1].h2.setValid();
-            hdr.u[1].h2 = hdr.u[0].h2;
-            hdr.u[1].h1.setInvalid();
-            hdr.u[1].h3.setInvalid();
-        } else {
-            hdr.u[1].h2.setInvalid();
-        }
-        if (hdr.u[0].h3.isValid()) {
-            hdr.u[1].h3.setValid();
-            hdr.u[1].h3 = hdr.u[0].h3;
-            hdr.u[1].h1.setInvalid();
-            hdr.u[1].h2.setInvalid();
-        } else {
-            hdr.u[1].h3.setInvalid();
-        }
+        hdr.u[1] = hdr.u[0];
         hdr.u[1].h1.setValid();
         hdr.u[1].h1.data = 32w1;
         hdr.u[1].h2.setInvalid();
