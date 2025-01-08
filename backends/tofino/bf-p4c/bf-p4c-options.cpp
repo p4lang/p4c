@@ -905,24 +905,24 @@ BFNOptionPragmaParser::parseCompilerOption(const IR::Annotation *annotation) {
     // Parsing of option pragmas is done early in the compiler, before P4₁₆
     // annotations are parsed, so we are responsible for doing our own parsing
     // here.
-    auto args = &annotation->getExpr();
-    if (args->empty()) {
-        auto parseResult =
+    const IR::Vector<IR::Expression> *args = nullptr;
+    if (annotation->needsParsing()) {
+        args =
             P4::P4ParserDriver::parseExpressionList(annotation->srcInfo, annotation->getUnparsed());
-        if (parseResult != nullptr) {
-            args = parseResult;
-        }
+    } else {
+        args = &annotation->getExpr();
     }
+    CHECK_NULL(args);
 
     bool first = true;
-    for (auto *arg : *args) {
+    for (const auto *arg : *args) {
         // Try to convert the parsed expression to a valid option string
         cstring optionString = ""_cs;
-        if (auto *argString = arg->to<IR::StringLiteral>()) {
+        if (const auto *argString = arg->to<IR::StringLiteral>()) {
             optionString = argString->value;
         } else {
             // The expression is not a IR::StringLiteral, but it can still be a valid integer
-            if (auto *argConstant = arg->to<IR::Constant>()) {
+            if (const auto *argConstant = arg->to<IR::Constant>()) {
                 optionString = std::to_string(argConstant->asInt());
             } else {
                 // The expression is neither a IR::StringLiteral or IR::Constant and so is invalid
@@ -932,7 +932,7 @@ BFNOptionPragmaParser::parseCompilerOption(const IR::Annotation *annotation) {
             }
         }
 
-        if (first && !cmdLinePragmas.count(optionString)) {
+        if (first && (cmdLinePragmas.count(optionString) == 0U)) {
             ::warning("Unknown @pragma command_line %1%", annotation);
             return std::nullopt;
         }

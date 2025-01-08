@@ -95,4 +95,49 @@ TEST(IndexedVector, Vector_ctor) {
     EXPECT_EQ(vec[1]->name.name, "bar");
 }
 
+TEST(IndexedVector, erase) {
+    TestVector vec(Vector<StructField>{
+        testItem("a"_cs),
+        testItem("b"_cs),
+        testItem("c"_cs),
+        testItem("d"_cs),
+        testItem("e"_cs),
+        testItem("f"_cs),
+        testItem("g"_cs),
+    });
+    EXPECT_EQ(vec.size(), 7);
+    vec.erase(std::next(vec.begin(), 1));  // a c d e f g
+    EXPECT_EQ(vec.size(), 6);
+    EXPECT_FALSE(vec.getDeclaration("b"));
+    vec.validate();
+
+    vec.erase(std::next(vec.begin(), 2), std::next(vec.begin(), 4));  // a c f g
+    EXPECT_EQ(vec.size(), 4);
+    EXPECT_EQ(vec[0]->name.name, "a");
+    EXPECT_EQ(vec[1]->name.name, "c");
+    EXPECT_EQ(vec[2]->name.name, "f");
+    EXPECT_EQ(vec[3]->name.name, "g");
+    EXPECT_FALSE(vec.getDeclaration("d"));
+    vec.validate();
+
+    vec.erase(vec.end(), vec.end());
+    EXPECT_EQ(vec.size(), 4);
+    EXPECT_EQ(vec[0]->name.name, "a");
+    EXPECT_EQ(vec[1]->name.name, "c");
+    EXPECT_EQ(vec[2]->name.name, "f");
+    EXPECT_EQ(vec[3]->name.name, "g");
+    EXPECT_FALSE(vec.getDeclaration("e"));
+    vec.validate();
+
+    vec.erase(std::next(vec.begin(), 2), vec.end());  // a c
+    EXPECT_EQ(vec.size(), 2);
+    EXPECT_EQ(vec[0]->name.name, "a");
+    EXPECT_EQ(vec[1]->name.name, "c");
+
+    EXPECT_TRUE(vec.getDeclaration("a"));
+    EXPECT_TRUE(vec.getDeclaration("c"));
+    EXPECT_FALSE(vec.getDeclaration("f"));
+    vec.validate();
+}
+
 }  // namespace P4::Test

@@ -513,6 +513,7 @@ bool ToP4::process(const IR::Type_StructLike *t, const char *name) {
     for (auto f : t->fields) {
         Util::SourceCodeBuilder builder;
         ToP4 rec(builder, showIR);
+        rec.isDeclaration = false;
 
         f->type->apply(rec);
         cstring t = builder.toString();
@@ -651,23 +652,31 @@ bool ToP4::preorder(const IR::Declaration_Variable *v) {
 
 bool ToP4::preorder(const IR::Type_Error *d) {
     dump(1);
-    bool first = true;
-    for (auto a : *d->getDeclarations()) {
-        if (ifSystemFile(a->getNode()).has_value())
-            // only print if not from a system file
-            continue;
-        if (!first) {
-            builder.append(",\n");
-        } else {
-            builder.append("error ");
-            builder.blockStart();
+
+    const auto userErrors = d->getDeclarations()
+                                ->where([this](const IR::IDeclaration *e) {
+                                    // only print if not from a system file
+                                    return !ifSystemFile(e->getNode()).has_value();
+                                })
+                                ->toVector();
+    if (!isDeclaration || !userErrors.empty()) {
+        builder.append("error");
+
+        if (!isDeclaration) {
+            return false;
         }
-        dump(1, a->getNode(), 1);
-        first = false;
-        builder.emitIndent();
-        builder.append(a->getName());
-    }
-    if (!first) {
+
+        bool first = true;
+        builder.blockStart();
+        for (auto a : userErrors) {
+            if (!first) {
+                builder.append(",\n");
+            }
+            dump(1, a->getNode(), 1);
+            first = false;
+            builder.emitIndent();
+            builder.append(a->getName());
+        }
         builder.newline();
         builder.blockEnd(true);
     }

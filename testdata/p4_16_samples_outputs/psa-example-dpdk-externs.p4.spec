@@ -44,7 +44,7 @@ struct psa_egress_deparser_input_metadata_t {
 }
 
 struct execute_1_arg_t {
-	bit<32> index
+	bit<16> index
 }
 
 struct metadata_t {

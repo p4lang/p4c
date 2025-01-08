@@ -7,7 +7,8 @@ local_repository(
     # This part is optional: only needed for custom backends with IR extensions.
     repo_mapping = {
         # Tells p4c where to look for `:ir_extension` target: in this project.
-        "@com_github_p4lang_p4c_extension": "@example_p4_project",
+        # The main repo has no name, so a bare `@` means this repository.
+        "@com_github_p4lang_p4c_extension": "@",
     },
 )
 

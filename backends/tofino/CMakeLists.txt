@@ -1,4 +1,4 @@
-####### Barefoot Compilers Toolchain
+# ###### Barefoot Compilers Toolchain
 MESSAGE("-- Adding p4c-barefoot")
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/spdlog.cmake)
@@ -148,11 +148,6 @@ add_custom_target(ctags-all
   DEPENDS ctags-asm ctags
   COMMENT "Building ctags")
 
-add_custom_target(cpplint-all
-  DEPENDS cpplint-asm cpplint
-  COMMENT "cpplint everything"
-  )
-
 if (ENABLE_DOXYGEN)
   find_package(Doxygen QUIET COMPONENTS dot)
   if(DOXYGEN_FOUND)
@@ -212,7 +207,7 @@ set (BF_P4C_IR_DEF_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/bf-p4c/ir/parde.def
   ${CMAKE_CURRENT_SOURCE_DIR}/bf-p4c/ir/parde-lowered.def
   )
-  
+
 # publish IR_DEF_FILES upstream
 set (IR_DEF_FILES ${IR_DEF_FILES} ${BF_P4C_IR_DEF_FILES} PARENT_SCOPE)
 
@@ -234,30 +229,9 @@ set (BF_P4C_IR_SRCS
   bf-p4c/parde/match_register.cpp
   bf-p4c/parde/clot/clot.cpp
   bf-p4c/phv/phv.cpp
-  bf-utils/src/dynamic_hash/dynamic_hash.cpp
-  bf-utils/src/dynamic_hash/bfn_hash_algorithm.cpp
+  bf-utils/dynamic_hash/dynamic_hash.cpp
+  bf-utils/dynamic_hash/bfn_hash_algorithm.cpp
   )
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_IR_SRCS}")
-
-set (BF_P4C_IR_HDRS
-  bf-p4c/midend/path_linearizer.h
-  bf-p4c/ir/bitrange.h
-  bf-p4c/ir/control_flow_visitor.h
-  bf-p4c/ir/gateway_control_flow.h
-  bf-p4c/ir/gress.h
-  bf-p4c/ir/ir_enums.h
-  bf-p4c/ir/thread_visitor.h
-  bf-p4c/ir/tofino_write_context.h
-  bf-p4c/ir/unique_id.h
-  bf-p4c/mau/hash_function.h
-  bf-p4c/parde/marshal.h
-  bf-p4c/parde/match_register.h
-  bf-p4c/parde/clot/clot.h
-  bf-p4c/phv/phv.h
-  bf-utils/include/dynamic_hash/dynamic_hash.h
-  bf-utils/include/dynamic_hash/bfn_hash_algorithm.h
-  )
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${BF_P4C_IR_HDRS}")
 
 set(QUAL_BF_P4C_IR_SRCS)
 foreach(src IN LISTS BF_P4C_IR_SRCS)

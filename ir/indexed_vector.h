@@ -115,6 +115,12 @@ class IndexedVector : public Vector<T> {
     Util::Enumerator<const IDeclaration *> *getDeclarations() const {
         return Util::enumerate(Values(declarations));
     }
+    iterator erase(iterator from, iterator to) {
+        for (auto it = from; it != to; ++it) {
+            removeFromMap(*it);
+        }
+        return Vector<T>::erase(from, to);
+    }
     iterator erase(iterator i) {
         removeFromMap(*i);
         return Vector<T>::erase(i);
