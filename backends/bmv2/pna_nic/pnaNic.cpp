@@ -149,24 +149,24 @@ Util::IJson *ExternConverter_Hash::convertExternObject(UNUSED ConversionContext 
     auto parameters = mkParameters(primitive);
     primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
     auto hash = new Util::JsonObject();
-    hash->emplace("type"_cs, "extern");
-    hash->emplace("value"_cs, em->object->controlPlaneName());
+    hash->emplace("type", "extern");
+    hash->emplace("value", em->object->controlPlaneName());
     parameters->append(hash);
     if (mc->arguments->size() == 2) {  // get_hash
         auto dst = ctxt->conv->convertLeftValue(mc->arguments->at(0)->expression);
         auto fieldList = new Util::JsonObject();
-        fieldList->emplace("type"_cs, "field_list");
+        fieldList->emplace("type", "field_list");
         auto fieldsJson = ctxt->conv->convert(mc->arguments->at(1)->expression, true, false);
-        fieldList->emplace("value"_cs, fieldsJson);
+        fieldList->emplace("value", fieldsJson);
         parameters->append(dst);
         parameters->append(fieldList);
     } else {  // get_hash with base and mod
         auto dst = ctxt->conv->convertLeftValue(mc->arguments->at(0)->expression);
         auto base = ctxt->conv->convert(mc->arguments->at(1)->expression);
         auto fieldList = new Util::JsonObject();
-        fieldList->emplace("type"_cs, "field_list");
+        fieldList->emplace("type", "field_list");
         auto fieldsJson = ctxt->conv->convert(mc->arguments->at(2)->expression, true, false);
-        fieldList->emplace("value"_cs, fieldsJson);
+        fieldList->emplace("value", fieldsJson);
         auto max = ctxt->conv->convert(mc->arguments->at(3)->expression);
         parameters->append(dst);
         parameters->append(base);
@@ -207,14 +207,14 @@ Util::IJson *ExternConverter_InternetChecksum::convertExternObject(
     auto parameters = mkParameters(primitive);
     primitive->emplace_non_null("source_info"_cs, s->sourceInfoJsonObj());
     auto cksum = new Util::JsonObject();
-    cksum->emplace("type"_cs, "extern");
-    cksum->emplace("value"_cs, em->object->controlPlaneName());
+    cksum->emplace("type", "extern");
+    cksum->emplace("value", em->object->controlPlaneName());
     parameters->append(cksum);
     if (em->method->name == "add" || em->method->name == "subtract") {
         auto fieldList = new Util::JsonObject();
-        fieldList->emplace("type"_cs, "field_list");
+        fieldList->emplace("type", "field_list");
         auto fieldsJson = ctxt->conv->convert(mc->arguments->at(0)->expression, true, false);
-        fieldList->emplace("value"_cs, fieldsJson);
+        fieldList->emplace("value", fieldsJson);
         parameters->append(fieldList);
     } else if (em->method->name != "clear") {
         if (mc->arguments->size() == 2) {  // get_verify
@@ -245,9 +245,9 @@ Util::IJson *ExternConverter_Register::convertExternObject(
         return nullptr;
     }
     auto reg = new Util::JsonObject();
-    reg->emplace("type"_cs, "register_array");
+    reg->emplace("type", "register_array");
     cstring name = em->object->controlPlaneName();
-    reg->emplace("value"_cs, name);
+    reg->emplace("value", name);
     if (em->method->name == "read") {
         auto primitive = mkPrimitive("register_read"_cs);
         auto parameters = mkParameters(primitive);
@@ -277,14 +277,13 @@ void ExternConverter_Hash::convertExternInstance(ConversionContext *ctxt, const 
                                                  UNUSED const bool &emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
-    // auto pnaStructure = static_cast<PnaCodeGenerator *>(ctxt->structure);
     auto pnaStructure = new PnaCodeGenerator();
 
     // add hash instance
     auto jhash = new Util::JsonObject();
-    jhash->emplace("name"_cs, name);
-    jhash->emplace("id"_cs, nextId("extern_instances"_cs));
-    jhash->emplace("type"_cs, eb->getName());
+    jhash->emplace("name", name);
+    jhash->emplace("id", nextId("extern_instances"_cs));
+    jhash->emplace("type", eb->getName());
     jhash->emplace_non_null("source_info"_cs, inst->sourceInfoJsonObj());
     ctxt->json->externs->append(jhash);
 
@@ -305,9 +304,9 @@ void ExternConverter_Hash::convertExternInstance(ConversionContext *ctxt, const 
     cstring algo_name = algo->to<IR::Declaration_ID>()->name;
     algo_name = pnaStructure->convertHashAlgorithm(algo_name);
     auto k = new Util::JsonObject();
-    k->emplace("name"_cs, "algo");
-    k->emplace("type"_cs, "string");
-    k->emplace("value"_cs, algo_name);
+    k->emplace("name", "algo");
+    k->emplace("type", "string");
+    k->emplace("value", algo_name);
     arr->append(k);
 }
 
@@ -328,9 +327,9 @@ void ExternConverter_InternetChecksum::convertExternInstance(UNUSED ConversionCo
     }
     // add checksum instance
     auto jcksum = new Util::JsonObject();
-    jcksum->emplace("name"_cs, name);
-    jcksum->emplace("id"_cs, nextId("extern_instances"_cs));
-    jcksum->emplace("type"_cs, eb->getName());
+    jcksum->emplace("name", name);
+    jcksum->emplace("id", nextId("extern_instances"_cs));
+    jcksum->emplace("type", eb->getName());
     jcksum->emplace_non_null("source_info"_cs, inst->sourceInfoJsonObj());
     ctxt->json->externs->append(jcksum);
 }
@@ -346,8 +345,8 @@ void ExternConverter_Register::convertExternInstance(UNUSED ConversionContext *c
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto jreg = new Util::JsonObject();
-    jreg->emplace("name"_cs, name);
-    jreg->emplace("id"_cs, nextId("register_arrays"_cs));
+    jreg->emplace("name", name);
+    jreg->emplace("id", nextId("register_arrays"_cs));
     jreg->emplace_non_null("source_info"_cs, eb->sourceInfoJsonObj());
     auto sz = eb->findParameterValue("size"_cs);
     CHECK_NULL(sz);
@@ -357,7 +356,7 @@ void ExternConverter_Register::convertExternInstance(UNUSED ConversionContext *c
     }
     if (sz->to<IR::Constant>()->value == 0)
         error(ErrorType::ERR_UNSUPPORTED, "%1%: direct registers are not supported", inst);
-    jreg->emplace("size"_cs, sz->to<IR::Constant>()->value);
+    jreg->emplace("size", sz->to<IR::Constant>()->value);
     if (!eb->instanceType->is<IR::Type_SpecializedCanonical>()) {
         modelError("%1%: Expected a generic specialized type", eb->instanceType);
         return;
@@ -378,7 +377,7 @@ void ExternConverter_Register::convertExternInstance(UNUSED ConversionContext *c
         ::P4::error(ErrorType::ERR_UNKNOWN, "%1%: unknown width", st->arguments->at(0));
         return;
     }
-    jreg->emplace("bitwidth"_cs, width);
+    jreg->emplace("bitwidth", width);
     ctxt->json->register_arrays->append(jreg);
 }
 
