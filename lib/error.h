@@ -45,7 +45,7 @@ inline unsigned diagnosticCount() {
     return BaseCompileContext::get().errorReporter().getDiagnosticCount();
 }
 
-// Errors (and warnings and info) are specified using boost::format format strings, i.e.,
+// Errors, warnings, and info are specified using boost::format format strings, i.e.,
 // %1%, %2%, etc (starting at 1, not at 0).
 // Some compatibility for printf-style arguments is also supported.
 
