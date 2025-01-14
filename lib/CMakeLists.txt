@@ -100,4 +100,5 @@ target_link_libraries(p4ctoolkit
   PUBLIC absl::bits
   PUBLIC absl::strings
   PUBLIC ${LIBGC_LIBRARIES}
+  PUBLIC ${P4C_BOOST_LIBRARIES}
 )
