@@ -51,6 +51,8 @@ sudo dnf install -y -q \
     procps-ng \
     python3 \
     python3-pip \
+    python3-virtualenv \
+    curl \
     python3-thrift \
     readline-devel \
     tcpdump \
@@ -59,8 +61,9 @@ sudo dnf install -y -q \
     zlib-devel \
     ninja-build
 
-pip3 install --upgrade pip
-pip3 install -r ${P4C_DIR}/requirements.txt
+# Set up poetry.
+curl -sSL https://install.python-poetry.org | python3 -
+poetry install
 
 MAKEFLAGS="-j$(nproc)"
 export MAKEFLAGS
