@@ -30,17 +30,22 @@ limitations under the License.
 
 namespace P4 {
 
-/// @return the number of errors encountered so far in the current compilation
-/// context.
+/// @return the number of errors encountered so far in the current compilation context.
 inline unsigned errorCount() { return BaseCompileContext::get().errorReporter().getErrorCount(); }
 
-/// @return the number of diagnostics (either errors or warnings) encountered so
-/// far in the current compilation context.
+/// @return the number of warnings encountered so far in the current compilation context.
+inline unsigned warningCount() { return BaseCompileContext::get().errorReporter().getWarningCount(); }
+
+/// @return the number of infos encountered so far in the current compilation context.
+inline unsigned infoCount() { return BaseCompileContext::get().errorReporter().getInfoCount(); }
+
+/// @return the number of diagnostics (either errors, warnings or infos) encountered so far in the
+/// current compilation context.
 inline unsigned diagnosticCount() {
     return BaseCompileContext::get().errorReporter().getDiagnosticCount();
 }
 
-// Errors (and warnings) are specified using boost::format format strings, i.e.,
+// Errors (and warnings and info) are specified using boost::format format strings, i.e.,
 // %1%, %2%, etc (starting at 1, not at 0).
 // Some compatibility for printf-style arguments is also supported.
 
