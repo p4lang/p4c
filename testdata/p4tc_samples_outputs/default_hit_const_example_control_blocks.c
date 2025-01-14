@@ -213,6 +213,7 @@ int tc_ingress_func(struct __sk_buff *skb) {
     struct pna_global_metadata *compiler_meta__ = (struct pna_global_metadata *) skb->cb;
     compiler_meta__->drop = false;
     compiler_meta__->recirculate = false;
+    compiler_meta__->egress_port = 0;
     if (!compiler_meta__->recirculated) {
         compiler_meta__->mark = 153;
         struct internal_metadata *md = (struct internal_metadata *)(unsigned long)skb->data_meta;

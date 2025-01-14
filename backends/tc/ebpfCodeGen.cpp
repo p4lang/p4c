@@ -485,6 +485,9 @@ void TCIngressPipelinePNA::emitGlobalMetadataInitializer(EBPF::CodeBuilder *buil
     builder->emitIndent();
     builder->append("compiler_meta__->recirculate = false;");
     builder->newline();
+    builder->emitIndent();
+    builder->append("compiler_meta__->egress_port = 0;");
+    builder->newline();
 
     // workaround to make TC protocol-independent, DO NOT REMOVE
     builder->emitIndent();
