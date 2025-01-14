@@ -237,10 +237,10 @@ if (/* hdr->ipv4.isValid() */
         bool have_saved_proto = false;
         // bpf_skb_adjust_room works only when protocol is IPv4 or IPv6
         // 0x0800 = IPv4, 0x86dd = IPv6
-        if ((skb->protocol != 0x0800) && (skb->protocol != 0x86dd)) {
+        if ((skb->protocol != bpf_htons(0x0800)) && (skb->protocol != bpf_htons(0x86dd))) {
             saved_proto = skb->protocol;
             have_saved_proto = true;
-            bpf_p4tc_skb_set_protocol(skb, &sa->set, 0x0800);
+            bpf_p4tc_skb_set_protocol(skb, &sa->set, bpf_htons(0x0800));
             bpf_p4tc_skb_meta_set(skb, &sa->set, sizeof(sa->set));
         }
         ;
