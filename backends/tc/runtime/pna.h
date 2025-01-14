@@ -114,12 +114,12 @@ struct __attribute__((__packed__)) p4tc_table_entry_act_bpf {
 
 struct p4tc_table_entry_create_bpf_params__local {
         struct p4tc_table_entry_act_bpf act_bpf;
+        u32 profile_id;
         u32 pipeid;
         u32 tblid;
-        u32 profile_id;
-        u32 handle;                                                                     
-        u32 classid;                                                                               
-        u32 chain;                     
+        u32 handle;
+        u32 chain;
+        u32 classid;
         u16 proto;
         u16 prio;
 };
