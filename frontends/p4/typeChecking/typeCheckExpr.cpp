@@ -949,8 +949,10 @@ const IR::Node *TypeInferenceBase::shift(const IR::Operation_Binary *expression)
         typeError("%1%: Shift amount must be an unsigned number", expression->right);
         return expression;
     } else if (!rbits && !rtype->is<IR::Type_InfInt>()) {
-        typeError("%1%: The right operand of shifts must be either an expression of type bit<S> "
-                  "or int, but is %2%", expression->right, rtype);
+        typeError(
+            "%1%: The right operand of shifts must be either an expression of type bit<S> or int, "
+            "but is %2%",
+            expression->right, rtype);
     }
 
     if (!lt && !ltype->is<IR::Type_InfInt>()) {
