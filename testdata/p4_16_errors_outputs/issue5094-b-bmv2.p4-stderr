@@ -1,0 +1,6 @@
+issue5094-b-bmv2.p4(30): [--Werror=type-error] error: m: The right operand of shifts must be either an expression of type bit<S> or int, but is struct Meta
+    { h.h.c = (int<64>)(h.h.a << m); sm.egress_spec = 0; }
+                                 ^
+arith-skeleton.p4(26)
+struct Meta {}
+       ^^^^
