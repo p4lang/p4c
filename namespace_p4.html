@@ -1785,6 +1785,8 @@ template&lt;class T, typename = std::enable_if_t&lt;Util::has_SourceInfo_v&lt;T&
 <tr class="memitem:ac88f69b11f3155bdc0cabc0b2d684eb9"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>info</b> (const int kind, const char *format, const T *node, Args &amp;&amp;...args)</td></tr>
 <tr class="memdesc:ac88f69b11f3155bdc0cabc0b2d684eb9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Report info messages of type kind. Requires that the node argument have source info. <br /></td></tr>
 <tr class="separator:ac88f69b11f3155bdc0cabc0b2d684eb9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3d4fd91a3967a6c709304c8101a6f1b7" id="r_a3d4fd91a3967a6c709304c8101a6f1b7"><td class="memItemLeft" align="right" valign="top">unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3d4fd91a3967a6c709304c8101a6f1b7">infoCount</a> ()</td></tr>
+<tr class="separator:a3d4fd91a3967a6c709304c8101a6f1b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a90ee330fc550ab6ec0dd81712b2d2604" id="r_a90ee330fc550ab6ec0dd81712b2d2604"><td class="memTemplParams" colspan="2"><a id="a90ee330fc550ab6ec0dd81712b2d2604" name="a90ee330fc550ab6ec0dd81712b2d2604"></a>
 template&lt;class T, class C1, class A1, class U&gt; </td></tr>
 <tr class="memitem:a90ee330fc550ab6ec0dd81712b2d2604"><td class="memTemplItemLeft" align="right" valign="top">auto&#160;</td><td class="memTemplItemRight" valign="bottom"><b>intersects</b> (const <a class="el" href="class_p4_1_1ordered__set.html">ordered_set</a>&lt; T, C1, A1 &gt; &amp;a, const U &amp;b) -&gt; decltype(b.begin(), true)</td></tr>
@@ -2259,6 +2261,8 @@ template&lt;class T, typename = std::enable_if_t&lt;Util::has_SourceInfo_v&lt;T&
 <tr class="memitem:a2692fbe788231b09ac4bc47a62c3d7e5"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>warning</b> (const int kind, const char *format, const T *node, Args &amp;&amp;...args)</td></tr>
 <tr class="memdesc:a2692fbe788231b09ac4bc47a62c3d7e5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Report warnings of type kind. Requires that the node argument have source info. <br /></td></tr>
 <tr class="separator:a2692fbe788231b09ac4bc47a62c3d7e5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6c27da8e4103fd3737eda1a1fe82c365" id="r_a6c27da8e4103fd3737eda1a1fe82c365"><td class="memItemLeft" align="right" valign="top">unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6c27da8e4103fd3737eda1a1fe82c365">warningCount</a> ()</td></tr>
+<tr class="separator:a6c27da8e4103fd3737eda1a1fe82c365"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
@@ -2661,7 +2665,7 @@ text</td>
   </tr>
 </table>
 </div><div class="memdoc">
-<dl class="section return"><dt>Returns</dt><dd>the number of diagnostics (either errors or warnings) encountered so far in the current compilation context. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the number of diagnostics (either errors, warnings or infos) encountered so far in the current compilation context. </dd></dl>
 
 </div>
 </div>
@@ -2961,6 +2965,32 @@ template&lt;typename... Args&gt; </div>
       </table>
 </div><div class="memdoc">
 <p>Report info messages of type kind, for messages that do not have a node. These will not be filtered </p>
+
+</div>
+</div>
+<a id="a3d4fd91a3967a6c709304c8101a6f1b7" name="a3d4fd91a3967a6c709304c8101a6f1b7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3d4fd91a3967a6c709304c8101a6f1b7">&#9670;&#160;</a></span>infoCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned P4::infoCount </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the number of infos encountered so far in the current compilation context. </dd></dl>
 
 </div>
 </div>
@@ -3279,6 +3309,32 @@ template&lt;typename... Args&gt; </div>
       </table>
 </div><div class="memdoc">
 <p>Report warnings of type kind, for messages that do not have a node. These will not be filtered </p>
+
+</div>
+</div>
+<a id="a6c27da8e4103fd3737eda1a1fe82c365" name="a6c27da8e4103fd3737eda1a1fe82c365"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6c27da8e4103fd3737eda1a1fe82c365">&#9670;&#160;</a></span>warningCount()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned P4::warningCount </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<dl class="section return"><dt>Returns</dt><dd>the number of warnings encountered so far in the current compilation context. </dd></dl>
 
 </div>
 </div>

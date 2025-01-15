@@ -1,5 +1,7 @@
 var NAVTREEINDEX32 =
 {
+"namespacemembers.html":[12,1,0,0],
+"namespacemembers_b.html":[12,1,0,1],
 "namespacemembers_c.html":[12,1,0,2],
 "namespacemembers_d.html":[12,1,0,3],
 "namespacemembers_e.html":[12,1,0,4],
@@ -247,7 +249,5 @@ var NAVTREEINDEX32 =
 "struct_b_f_n_1_1_collect_bridged_fields.html":[13,0,2,66],
 "struct_b_f_n_1_1_collect_variables.html":[12,0,2,68],
 "struct_b_f_n_1_1_collect_variables.html":[13,0,2,72],
-"struct_b_f_n_1_1_debug_info.html":[12,0,2,77],
-"struct_b_f_n_1_1_debug_info.html":[13,0,2,81],
-"struct_b_f_n_1_1_debug_info.html#a5013e3451eec5da73eda374e32c688c6":[12,0,2,77,0]
+"struct_b_f_n_1_1_debug_info.html":[12,0,2,77]
 };
