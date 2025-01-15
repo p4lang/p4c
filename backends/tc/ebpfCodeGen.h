@@ -105,6 +105,7 @@ class PNAArchTC : public PNAEbpfGenerator {
     void emitParser(EBPF::CodeBuilder *builder) const override;
     void emitHeader(EBPF::CodeBuilder *builder) const override;
     void emitInstances(EBPF::CodeBuilder *builder) const override;
+    void emitGlobalFunctions(EBPF::CodeBuilder *builder) const;
 };
 
 class TCIngressPipelinePNA : public EBPF::TCIngressPipeline {
@@ -133,6 +134,7 @@ class PnaStateTranslationVisitor : public EBPF::PsaStateTranslationVisitor {
     void compileExtractField(const IR::Expression *expr, const IR::StructField *field,
                              unsigned hdrOffsetBits, EBPF::EBPFType *type) override;
     void compileLookahead(const IR::Expression *destination) override;
+    bool preorder(const IR::SelectCase *selectCase) override;
 };
 
 class EBPFPnaParser : public EBPF::EBPFPsaParser {

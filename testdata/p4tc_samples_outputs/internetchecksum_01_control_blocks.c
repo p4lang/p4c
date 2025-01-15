@@ -33,7 +33,7 @@ struct __attribute__((__packed__)) ingress_fwd_table_value {
             u32 port;
         } ingress_set_ipip_csum;
         struct __attribute__((__packed__)) {
-            u64 dmac;
+            u8 dmac[6];
             u32 port;
         } ingress_set_nh;
         struct {
@@ -106,7 +106,7 @@ if (/* hdr->outer.isValid() */
                                 break;
                             case INGRESS_FWD_TABLE_ACT_INGRESS_SET_NH: 
                                 {
-                                    hdr->ethernet.dstAddr = value->u.ingress_set_nh.dmac;
+                                    storePrimitive64((u8 *)&hdr->ethernet.dstAddr, 48, (getPrimitive64((u8 *)value->u.ingress_set_nh.dmac, 48)));
                                     /* send_to_port(value->u.ingress_set_nh.port) */
                                     compiler_meta__->drop = false;
                                     send_to_port(value->u.ingress_set_nh.port);
