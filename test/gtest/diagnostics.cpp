@@ -158,6 +158,7 @@ TEST_F(Diagnostics, NestedCompileContexts) {
     auto test = createP4_16DiagnosticsTestCase(P4_SOURCE(R"()"));
     EXPECT_TRUE(test);
     EXPECT_EQ(1u, diagnosticCount());
+    EXPECT_EQ(1u, warningCount());
     EXPECT_EQ(0u, errorCount());
 }
 
@@ -269,6 +270,5 @@ TEST_F(Diagnostics, BasicInfo) {
     EXPECT_EQ(0u, warningCount());
     EXPECT_EQ(0u, errorCount());
 }
-
 
 }  // namespace P4::Test
