@@ -34,7 +34,9 @@ namespace P4 {
 inline unsigned errorCount() { return BaseCompileContext::get().errorReporter().getErrorCount(); }
 
 /// @return the number of warnings encountered so far in the current compilation context.
-inline unsigned warningCount() { return BaseCompileContext::get().errorReporter().getWarningCount(); }
+inline unsigned warningCount() {
+    return BaseCompileContext::get().errorReporter().getWarningCount();
+}
 
 /// @return the number of infos encountered so far in the current compilation context.
 inline unsigned infoCount() { return BaseCompileContext::get().errorReporter().getInfoCount(); }
