@@ -1,0 +1,6 @@
+issue1949-bmv2.p4(50): [--Werror=duplicate] error: .foo: conflicting control plane name: .foo
+    @name(".foo") action act2() {
+                         ^^^^
+issue1949-bmv2.p4(47)
+    @name(".foo") action act1() {
+                         ^^^^
