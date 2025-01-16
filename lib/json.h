@@ -22,6 +22,7 @@ limitations under the License.
 #include <type_traits>
 #include <vector>
 
+#include "config.h"
 #ifdef P4C_GTEST_ENABLED
 #include "gtest/gtest_prod.h"
 #endif
