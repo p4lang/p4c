@@ -28,11 +28,17 @@ genrule(
     outs = ["config.h"],
     # TODO: We should actually check these properly instead of just #undefing them.
     # Maybe select() can help here?
+    # CONFIG_PKGDATADIR is where p4c should look for p4include at runtime.
+    # This will work only if the binary is executed by Bazel. For a general
+    # solution, we would need to make p4c aware of Bazel, specifically:
+    # https://github.com/bazelbuild/bazel/blob/master/tools/cpp/runfiles/runfiles_src.h
     cmd = "sed -e 's|cmakedefine|define|g' \
              -e 's|define HAVE_LIBGC 1|undef HAVE_LIBGC|g' \
              -e 's|define HAVE_LIBBACKTRACE 1|undef HAVE_LIBBACKTRACE|g' \
              -e 's|define HAVE_MM_MALLOC_H 1|undef HAVE_MM_MALLOC_H|g' \
-             < $(SRCS) > $(OUTS)",
+             -e 's|@MAX_LOGGING_LEVEL@|10|g' \
+             -e 's|@CONFIG_PKGDATADIR@|external/%s|g' \
+             < $(SRCS) > $(OUTS)" % repository_name(),
     visibility = ["//visibility:private"],
 )
 
@@ -214,13 +220,6 @@ cc_library(
         "backends/dpdk/spec.cpp",
         "backends/dpdk/dbprint-dpdk.cpp",
         "backends/dpdk/printUtils.cpp",
-    ],
-    copts = [
-        # Where p4c should look for p4include at runtime.
-        ("-DCONFIG_PKGDATADIR=\\\"external/%s\\\"" % repository_name()),
-        # This will work only if the binary is executed by Bazel. For a general
-        # solution, we would need to make p4c aware of Bazel, specifically:
-        # https://github.com/bazelbuild/bazel/blob/master/tools/cpp/runfiles/runfiles_src.h
     ],
     textual_hdrs = glob([
         "ir/**/*.h",
