@@ -28,8 +28,8 @@ struct __attribute__((__packed__)) ingress_nh_table_value {
         } _NoAction;
         struct __attribute__((__packed__)) {
             u32 port;
-            u64 srcMac;
-            u64 dstMac;
+            u8 srcMac[6];
+            u8 dstMac[6];
         } ingress_send_nh;
         struct {
         } ingress_drop;
@@ -105,8 +105,8 @@ if (/* hdr->ipv4.isValid() */
                                     /* skb_set_meta() */
                                     bpf_p4tc_skb_meta_set(skb,&sa->set,sizeof(sa->set));
                                     tmp_5 = bpf_p4tc_skb_get_tstamp(skb, &sa->get);
-                                                                        hdr->ethernet.srcAddr = (((u64)tmp_5 ^ bpf_cpu_to_be64(value->u.ingress_send_nh.srcMac)) & ((1ULL << 48) - 1));
-                                                                        hdr->ethernet.dstAddr = ntohll(value->u.ingress_send_nh.dstMac << 16);
+                                                                        storePrimitive64((u8 *)&hdr->ethernet.srcAddr, 48, (((getPrimitive64((u8 *)value->u.ingress_send_nh.srcMac, 48) ^ bpf_cpu_to_be64(getPrimitive64((u8 *)value->u.ingress_send_nh.srcMac, 48))) & ((1ULL << 48) - 1))));
+                                                                        storePrimitive64((u8 *)&hdr->ethernet.dstAddr, 48, (ntohll(getPrimitive64((u8 *)value->u.ingress_send_nh.dstMac, 48) << 16)));
                                     /* send_to_port(value->u.ingress_send_nh.port) */
                                     compiler_meta__->drop = false;
                                     send_to_port(value->u.ingress_send_nh.port);
@@ -181,7 +181,7 @@ if (/* hdr->ipv4.isValid() */
                 return TC_ACT_SHOT;
             }
             
-            hdr->ethernet.dstAddr = htonll(hdr->ethernet.dstAddr << 16);
+            storePrimitive64((u8 *)&hdr->ethernet.dstAddr, 48, (htonll(getPrimitive64(hdr->ethernet.dstAddr, 48) << 16)));
             ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[1];
@@ -196,7 +196,7 @@ if (/* hdr->ipv4.isValid() */
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
             ebpf_packetOffsetInBits += 48;
 
-            hdr->ethernet.srcAddr = htonll(hdr->ethernet.srcAddr << 16);
+            storePrimitive64((u8 *)&hdr->ethernet.srcAddr, 48, (htonll(getPrimitive64(hdr->ethernet.srcAddr, 48) << 16)));
             ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.srcAddr))[1];

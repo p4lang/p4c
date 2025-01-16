@@ -238,6 +238,11 @@ class P4TCTarget : public KernelSamplesTarget {
         }
         return "HOST"_cs;
     }
+
+    bool isPrimitiveByteAligned(int width) const {
+        return (width <= 8 || width <= 16 || (width > 24 && width <= 32) ||
+                (width > 56 && width <= 64));
+    }
 };
 
 /// Target XDP.
