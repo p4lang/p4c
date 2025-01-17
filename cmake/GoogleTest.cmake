@@ -1,7 +1,4 @@
 macro(p4c_obtain_googletest)
-  # Some P4C source files include gtest files.
-  # We need this definition to guard against compilation errors.
-  add_definitions(-DP4C_GTEST_ENABLED)
   # Print download state while setting up GTest.
   set(FETCHCONTENT_QUIET_PREV ${FETCHCONTENT_QUIET})
   set(FETCHCONTENT_QUIET OFF)

@@ -33,3 +33,12 @@
 
 /* Define to 1 if you have the mm_malloc.h header */
 #cmakedefine HAVE_MM_MALLOC_H 1
+
+#cmakedefine CONFIG_PKGDATADIR "@CONFIG_PKGDATADIR@"
+
+#cmakedefine CONFIG_PREFIX "@CONFIG_PREFIX@"
+
+/* The maximum logging level for -T logs */
+#cmakedefine MAX_LOGGING_LEVEL @MAX_LOGGING_LEVEL@
+
+#cmakedefine P4C_GTEST_ENABLED 1
