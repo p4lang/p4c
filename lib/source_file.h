@@ -27,6 +27,7 @@ limitations under the License.
 #include <vector>
 
 #include "absl/strings/str_format.h"
+#include "config.h"
 #include "cstring.h"
 #include "stringify.h"
 

@@ -75,7 +75,6 @@ set (P4C_DRIVER_NAME "p4c" CACHE STRING "Customize the name of the driver script
 
 set(MAX_LOGGING_LEVEL 10 CACHE STRING "Control the maximum logging level for -T logs")
 set_property(CACHE MAX_LOGGING_LEVEL PROPERTY STRINGS 0 1 2 3 4 5 6 7 8 9 10)
-add_definitions(-DMAX_LOGGING_LEVEL=${MAX_LOGGING_LEVEL})
 
 if (NOT CMAKE_BUILD_TYPE)
   set (CMAKE_BUILD_TYPE "Release")
@@ -198,6 +197,10 @@ find_package (BISON 3.0 REQUIRED)
 if (ENABLE_GTESTS)
   include(GoogleTest)
   p4c_obtain_googletest()
+  # Some P4C source files include gtest files. This will be propagated to the
+  # definition in config.h We need this definition to guard against compilation
+  # errors.
+  set(P4C_GTEST_ENABLED ON)
 endif ()
 include(Abseil)
 p4c_obtain_abseil()
@@ -373,8 +376,8 @@ include_directories (
   ${P4C_BINARY_DIR}
   ${P4C_SOURCE_DIR}/extensions
   )
-add_definitions (-DCONFIG_PREFIX="${CMAKE_INSTALL_PREFIX}")
-add_definitions (-DCONFIG_PKGDATADIR="${CMAKE_INSTALL_PREFIX}/${P4C_ARTIFACTS_OUTPUT_DIRECTORY}")
+set(CONFIG_PREFIX ${CMAKE_INSTALL_PREFIX})
+set(CONFIG_PKGDATADIR ${CMAKE_INSTALL_PREFIX}/${P4C_ARTIFACTS_OUTPUT_DIRECTORY})
 
 set (CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} ${P4C_CXX_FLAGS}")
 set (CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG} ${P4C_CXX_FLAGS}")
