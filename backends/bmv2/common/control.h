@@ -144,7 +144,6 @@ class ControlConverter : public Inspector {
 
         auto propertyName = Standard::ActionProfileTraits<arch>::propertyName();
         auto impl = table->properties->getProperty(propertyName);
-        bool simple = handleTableImplementation(impl, key, result, action_profiles, selector_check);
 
         unsigned size = 0;
         auto sz = table->properties->getProperty("size");
