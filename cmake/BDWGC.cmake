@@ -37,7 +37,7 @@ macro(p4c_obtain_bdwgc)
     fetchcontent_declare(
       bdwgc
       GIT_REPOSITORY https://github.com/ivmai/bdwgc.git
-      GIT_TAG 7f1503dbfe254e77678666a0e09b735add064b57 # 8.2.6, 2024-08-03
+      GIT_TAG ee59af3722e56de8404de6cd0c21c2493cc4d855 # 8.2.8, 2024-08-03
       GIT_PROGRESS TRUE
     )
     fetchcontent_makeavailable_but_exclude_install(bdwgc)
