@@ -378,14 +378,6 @@ class ControlConverter : public Inspector {
         auto defact =
             table->properties->getProperty(IR::TableProperties::defaultActionPropertyName);
         if (defact != nullptr) {
-            if (!simple) {
-                ::P4::warning(
-                    ErrorType::WARN_UNSUPPORTED,
-                    "Target does not support default_action for %1% (due to action profiles)",
-                    table);
-                return result;
-            }
-
             if (!defact->value->is<IR::ExpressionValue>()) {
                 ::P4::error(ErrorType::ERR_EXPECTED, "%1%: expected an action", defact);
                 return result;
