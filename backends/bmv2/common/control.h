@@ -42,7 +42,8 @@ class ControlConverter : public Inspector {
     P4::P4CoreLibrary &corelib;
 
  protected:
-    Util::IJson *convertTable(const CFG::TableNode *node) {
+    Util::IJson *convertTable(const CFG::TableNode *node, Util::JsonArray *action_profiles,
+                              BMV2::SharedActionSelectorCheck<arch> *selector_check) {
         auto table = node->table;
         LOG3("Processing " << dbp(table));
         auto result = new Util::JsonObject();
@@ -140,6 +141,10 @@ class ControlConverter : public Inspector {
         LOG3("table_match_type: " << table_match_type);
         result->emplace("match_type", table_match_type);
         ctxt->conv->simpleExpressionsOnly = false;
+
+        auto propertyName = Standard::ActionProfileTraits<arch>::propertyName();
+        auto impl = table->properties->getProperty(propertyName);
+        (void) handleTableImplementation(impl, key, result, action_profiles, selector_check);
 
         unsigned size = 0;
         auto sz = table->properties->getProperty("size");
@@ -789,7 +794,7 @@ class ControlConverter : public Inspector {
                     // the CFG is implementable.
                     continue;
                 done.emplace(tn->table);
-                auto j = convertTable(tn);
+                auto j = convertTable(tn, action_profiles, selector_check);
                 if (::P4::errorCount() > 0) return false;
                 tables->append(j);
             } else if (node->is<CFG::IfNode>()) {
