@@ -79,9 +79,6 @@ class PsaSwitchExpressionConverter : public ExpressionConverter {
 
 class PsaCodeGenerator : public PortableCodeGenerator {
  public:
-    // PsaCodeGenerator(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
-    //     : PortableCodeGenerator(refMap, typeMap) {}
-
     void create(ConversionContext *ctxt, P4::PortableProgramStructure *structure);
     void createParsers(ConversionContext *ctxt, P4::PortableProgramStructure *structure);
     void createControls(ConversionContext *ctxt, P4::PortableProgramStructure *structure);
