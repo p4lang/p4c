@@ -485,6 +485,9 @@ void TCIngressPipelinePNA::emitGlobalMetadataInitializer(EBPF::CodeBuilder *buil
     builder->emitIndent();
     builder->append("compiler_meta__->recirculate = false;");
     builder->newline();
+    builder->emitIndent();
+    builder->append("compiler_meta__->egress_port = 0;");
+    builder->newline();
 
     // workaround to make TC protocol-independent, DO NOT REMOVE
     builder->emitIndent();
@@ -1260,7 +1263,8 @@ void IngressDeparserPNA::emit(EBPF::CodeBuilder *builder) {
     builder->emitIndent();
     builder->appendLine("// 0x0800 = IPv4, 0x86dd = IPv6");
     builder->emitIndent();
-    builder->append("if ((skb->protocol != 0x0800) && (skb->protocol != 0x86dd)) ");
+    builder->append(
+        "if ((skb->protocol != bpf_htons(0x0800)) && (skb->protocol != bpf_htons(0x86dd))) ");
     builder->blockStart();
     builder->emitIndent();
     builder->appendFormat("saved_proto = skb->protocol");
@@ -1269,7 +1273,7 @@ void IngressDeparserPNA::emit(EBPF::CodeBuilder *builder) {
     builder->appendFormat("have_saved_proto = true");
     builder->endOfStatement(true);
     builder->emitIndent();
-    builder->appendFormat("bpf_p4tc_skb_set_protocol(skb, &sa->set, 0x0800)");
+    builder->appendFormat("bpf_p4tc_skb_set_protocol(skb, &sa->set, bpf_htons(0x0800))");
     builder->endOfStatement(true);
     builder->emitIndent();
     builder->appendFormat("bpf_p4tc_skb_meta_set(skb, &sa->set, sizeof(sa->set))");
