@@ -87,6 +87,17 @@ class CompilerOptions : public ParserOptions {
     bool optimizeSize = false;   // optimize favoring size
 
     virtual bool enable_intrinsic_metadata_fix();
+
+    /// Indicates whether control plane API generation is enabled.
+    /// @returns default to false unless a command line option was
+    /// given explicitly enabling control plane API generation.
+    virtual bool controlPlaneAPIGenEnabled() const {
+        if (p4RuntimeFile.isNullOrEmpty() && p4RuntimeFiles.isNullOrEmpty() &&
+            p4RuntimeEntriesFile.isNullOrEmpty() && p4RuntimeEntriesFiles.isNullOrEmpty()) {
+            return false;
+        }
+        return true;
+    }
 };
 
 }  // namespace P4

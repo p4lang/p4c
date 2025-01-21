@@ -1,0 +1,6 @@
+multicast-bmv2.p4(87): [--Werror=duplicate] error: ._drop: conflicting control plane name: ._drop
+    @name("._drop") action _drop() {
+                           ^^^^^
+multicast-bmv2.p4(62)
+    @name("._drop") action _drop() {
+                           ^^^^^

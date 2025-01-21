@@ -1,5 +1,4 @@
 #include <core.p4>
-#define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
 struct routing_metadata_t {
@@ -29,7 +28,7 @@ header ipv4_t {
 
 struct metadata {
     @name("routing_metadata")
-    routing_metadata_t routing_metadata;
+    routing_metadata_t   routing_metadata;
 }
 
 struct headers {
@@ -41,14 +40,14 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("parse_ethernet") state parse_ethernet {
-        packet.extract<ethernet_t>(hdr.ethernet);
+        packet.extract(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             16w0x800: parse_ipv4;
             default: accept;
         }
     }
     @name("parse_ipv4") state parse_ipv4 {
-        packet.extract<ipv4_t>(hdr.ipv4);
+        packet.extract(hdr.ipv4);
         transition accept;
     }
     @name("start") state start {
@@ -60,20 +59,18 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name(".rewrite_mac") action rewrite_mac(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
     }
-    @name("_drop") action _drop() {
+    @name("._drop") action _drop() {
         mark_to_drop(standard_metadata);
     }
     @name("send_frame") table send_frame {
         actions = {
-            rewrite_mac();
-            _drop();
-            @defaultonly NoAction();
+            rewrite_mac;
+            _drop;
         }
         key = {
-            standard_metadata.egress_port: exact @name("standard_metadata.egress_port");
+            standard_metadata.egress_port: exact;
         }
         size = 256;
-        default_action = NoAction();
     }
     apply {
         send_frame.apply();
@@ -82,12 +79,12 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".bcast") action bcast() {
-        standard_metadata.mcast_grp = 16w1;
+        standard_metadata.mcast_grp = 1;
     }
     @name(".set_dmac") action set_dmac(bit<48> dmac) {
         hdr.ethernet.dstAddr = dmac;
     }
-    @name("_drop") action _drop() {
+    @name("._drop") action _drop() {
         mark_to_drop(standard_metadata);
     }
     @name(".set_nhop") action set_nhop(bit<32> nhop_ipv4, bit<9> port) {
@@ -102,41 +99,36 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("broadcast") table broadcast {
         actions = {
-            bcast();
-            @defaultonly NoAction();
+            bcast;
         }
         size = 1;
-        default_action = NoAction();
     }
     @name("forward") table forward {
         actions = {
-            set_dmac();
-            _drop();
-            @defaultonly NoAction();
+            set_dmac;
+            _drop;
         }
         key = {
-            meta.routing_metadata.nhop_ipv4: exact @name("meta.routing_metadata.nhop_ipv4");
+            meta.routing_metadata.nhop_ipv4: exact;
         }
         size = 512;
-        default_action = NoAction();
     }
     @name("ipv4_lpm") table ipv4_lpm {
         actions = {
-            set_nhop();
-            _drop();
-            @defaultonly NoAction();
+            set_nhop;
+            _drop;
         }
         key = {
-            hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr");
+            hdr.ipv4.dstAddr: lpm;
         }
         size = 1024;
-        default_action = NoAction();
     }
     apply {
         if (hdr.ipv4.isValid()) {
             ipv4_lpm.apply();
             forward.apply();
-        } else {
+        }
+        else {
             broadcast.apply();
         }
     }
@@ -144,19 +136,17 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
-        packet.emit<ipv4_t>(hdr.ipv4);
+        packet.emit(hdr.ethernet);
+        packet.emit(hdr.ipv4);
     }
 }
 
 control verifyChecksum(inout headers hdr, inout metadata meta) {
-    apply {
-    }
+    apply {  }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
-    apply {
-    }
+    apply {  }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;

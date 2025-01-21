@@ -1,0 +1,56 @@
+# proto-file: p4/config/v1/p4info.proto
+# proto-message: p4.config.v1.P4Info
+
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 49173205
+    name: "ingressImpl.t1"
+    alias: "t1"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.etherType"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 21257015
+  }
+  action_refs {
+    id: 25646030
+  }
+  action_refs {
+    id: 21008649
+  }
+  initial_default_action {
+    action_id: 21257015
+  }
+  size: 512
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
+}
+actions {
+  preamble {
+    id: 25646030
+    name: "foo1"
+    alias: "foo1"
+  }
+}
+actions {
+  preamble {
+    id: 21008649
+    name: "bar"
+    alias: "bar"
+  }
+}
+type_info {
+}
