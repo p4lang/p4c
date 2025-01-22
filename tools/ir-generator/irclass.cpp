@@ -111,15 +111,13 @@ void IrDefinitions::toposort() {
             auto *cl = it->second;
             classes.erase(it);
             visit(cl->concreteParent);
-            for (auto *p : cl->parentClasses)
-                visit(p);
+            for (auto *p : cl->parentClasses) visit(p);
             sorted.push_back(cl);
         }
     };
 
     for (auto *el : elements)
-        if (auto *cl = el->to<IrClass>())
-            classes.emplace(cl, cl);
+        if (auto *cl = el->to<IrClass>()) classes.emplace(cl, cl);
 
     for (auto *el : elements) {
         if (auto *cl = el->to<IrClass>())
