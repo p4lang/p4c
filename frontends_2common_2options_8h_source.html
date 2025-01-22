@@ -219,12 +219,23 @@ $(function(){initNavTree('frontends_2common_2options_8h_source.html',''); initRe
 <div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span>    <span class="keywordtype">bool</span> optimizeSize = <span class="keyword">false</span>;   <span class="comment">// optimize favoring size</span></div>
 <div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span> </div>
 <div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> enable_intrinsic_metadata_fix();</div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>};</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span></div>
+<div class="foldopen" id="foldopen00094" data-start="{" data-end="}">
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno"><a class="line" href="class_p4_1_1_compiler_options.html#add8086eac77990f06aba37c120f1c61f">   94</a></span>    <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code hl_function" href="class_p4_1_1_compiler_options.html#add8086eac77990f06aba37c120f1c61f">controlPlaneAPIGenEnabled</a>()<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>        <span class="keywordflow">if</span> (p4RuntimeFile.isNullOrEmpty() &amp;&amp; p4RuntimeFiles.isNullOrEmpty() &amp;&amp;</div>
+<div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span>            p4RuntimeEntriesFile.isNullOrEmpty() &amp;&amp; p4RuntimeEntriesFiles.isNullOrEmpty()) {</div>
+<div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>        }</div>
+<div class="line"><a id="l00099" name="l00099"></a><span class="lineno">   99</span>        <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00100" name="l00100"></a><span class="lineno">  100</span>    }</div>
 </div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span> </div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>}  <span class="comment">// namespace P4</span></div>
-<div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span><span class="preprocessor">#endif </span><span class="comment">/* FRONTENDS_COMMON_OPTIONS_H_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a id="l00101" name="l00101"></a><span class="lineno">  101</span>};</div>
+</div>
+<div class="line"><a id="l00102" name="l00102"></a><span class="lineno">  102</span> </div>
+<div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span>}  <span class="comment">// namespace P4</span></div>
+<div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span> </div>
+<div class="line"><a id="l00105" name="l00105"></a><span class="lineno">  105</span><span class="preprocessor">#endif </span><span class="comment">/* FRONTENDS_COMMON_OPTIONS_H_ */</span><span class="preprocessor"></span></div>
+<div class="ttc" id="aclass_p4_1_1_compiler_options_html_add8086eac77990f06aba37c120f1c61f"><div class="ttname"><a href="class_p4_1_1_compiler_options.html#add8086eac77990f06aba37c120f1c61f">P4::CompilerOptions::controlPlaneAPIGenEnabled</a></div><div class="ttdeci">virtual bool controlPlaneAPIGenEnabled() const</div><div class="ttdef"><b>Definition</b> frontends/common/options.h:94</div></div>
 <div class="ttc" id="aclass_p4_1_1_compiler_options_html_afebdc5c1c2f7c6485ee5ceb738f328f1"><div class="ttname"><a href="class_p4_1_1_compiler_options.html#afebdc5c1c2f7c6485ee5ceb738f328f1">P4::CompilerOptions::validateOptions</a></div><div class="ttdeci">bool validateOptions() const override</div><div class="ttdef"><b>Definition</b> frontends/common/options.cpp:181</div></div>
 <div class="ttc" id="aclass_p4_1_1cstring_html"><div class="ttname"><a href="class_p4_1_1cstring.html">P4::cstring</a></div><div class="ttdef"><b>Definition</b> cstring.h:85</div></div>
 <div class="ttc" id="anamespace_p4_html"><div class="ttname"><a href="namespace_p4.html">P4</a></div><div class="ttdoc">TODO: this is not really specific to BMV2, it should reside somewhere else.</div><div class="ttdef"><b>Definition</b> applyOptionsPragmas.cpp:24</div></div>

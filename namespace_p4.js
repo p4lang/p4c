@@ -150,6 +150,7 @@ var namespace_p4 =
     [ "DoTableKeyNames", "class_p4_1_1_do_table_key_names.html", null ],
     [ "DpdkProgramStructure", "struct_p4_1_1_dpdk_program_structure.html", "struct_p4_1_1_dpdk_program_structure" ],
     [ "Dump", "class_p4_1_1_dump.html", null ],
+    [ "DuplicateActionControlPlaneNameCheck", "class_p4_1_1_duplicate_action_control_plane_name_check.html", null ],
     [ "DuplicateActions", "class_p4_1_1_duplicate_actions.html", null ],
     [ "DynamicVisitor", "class_p4_1_1_dynamic_visitor.html", null ],
     [ "EbpfOptions", "class_p4_1_1_ebpf_options.html", "class_p4_1_1_ebpf_options" ],

@@ -462,109 +462,109 @@ var sectionId = 'dynsection-0';
 </a>
 </g>
 </g>
-<!-- Node1177 -->
-<g id="Node001177" class="node">
-<title>Node1177</title>
-<g id="a_Node001177"><a xlink:href="class_p4_1_1_visit_functor.html" target="_top" xlink:title=" ">
+<!-- Node1178 -->
+<g id="Node001178" class="node">
+<title>Node1178</title>
+<g id="a_Node001178"><a xlink:href="class_p4_1_1_visit_functor.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#bfbfbf" points="231.5,-204 139.5,-204 139.5,-185 231.5,-185 231.5,-204"/>
 <text text-anchor="middle" x="185.5" y="-192" font-family="Helvetica,sans-Serif" font-size="10.00">P4::VisitFunctor</text>
 </a>
 </g>
 </g>
-<!-- Node1&#45;&gt;Node1177 -->
-<g id="edge60_Node000001_Node001177" class="edge">
-<title>Node1&#45;&gt;Node1177</title>
-<g id="a_edge60_Node000001_Node001177"><a xlink:title=" ">
+<!-- Node1&#45;&gt;Node1178 -->
+<g id="edge60_Node000001_Node001178" class="edge">
+<title>Node1&#45;&gt;Node1178</title>
+<g id="a_edge60_Node000001_Node001178"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M35.82,-503.56C41.78,-442.63 62.59,-260.5 102,-218.5 111.7,-208.17 125.56,-202.2 139.16,-198.78"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="32.31,-503.47 34.85,-513.76 39.28,-504.13 32.31,-503.47"/>
-</a>
-</g>
-</g>
-<!-- Node1178 -->
-<g id="Node001178" class="node">
-<title>Node1178</title>
-<g id="a_Node001178"><a xlink:href="class_p_h_v_1_1_live_range_split_or_fail.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="257,-167 114,-167 114,-148 257,-148 257,-167"/>
-<text text-anchor="middle" x="185.5" y="-155" font-family="Helvetica,sans-Serif" font-size="10.00">PHV::LiveRangeSplitOrFail</text>
-</a>
-</g>
-</g>
-<!-- Node1&#45;&gt;Node1178 -->
-<g id="edge61_Node000001_Node001178" class="edge">
-<title>Node1&#45;&gt;Node1178</title>
-<g id="a_edge61_Node000001_Node001178"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M35.08,-503.72C39.13,-437.16 55.61,-222.92 102,-175.5 105.49,-171.94 109.5,-169 113.84,-166.59"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="31.59,-503.54 34.5,-513.72 38.58,-503.94 31.59,-503.54"/>
 </a>
 </g>
 </g>
 <!-- Node1179 -->
 <g id="Node001179" class="node">
 <title>Node1179</title>
-<g id="a_Node001179"><a xlink:href="class_p_h_v_1_1v2_1_1_phv_allocation.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#bfbfbf" points="249,-130 122,-130 122,-111 249,-111 249,-130"/>
-<text text-anchor="middle" x="185.5" y="-118" font-family="Helvetica,sans-Serif" font-size="10.00">PHV::v2::PhvAllocation</text>
+<g id="a_Node001179"><a xlink:href="class_p_h_v_1_1_live_range_split_or_fail.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="257,-167 114,-167 114,-148 257,-148 257,-167"/>
+<text text-anchor="middle" x="185.5" y="-155" font-family="Helvetica,sans-Serif" font-size="10.00">PHV::LiveRangeSplitOrFail</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node1179 -->
-<g id="edge62_Node000001_Node001179" class="edge">
+<g id="edge61_Node000001_Node001179" class="edge">
 <title>Node1&#45;&gt;Node1179</title>
-<g id="a_edge62_Node000001_Node001179"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M34.69,-503.51C37.55,-432.19 50.88,-191.7 102,-138.5 107.48,-132.79 114.33,-128.69 121.71,-125.77"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="31.18,-503.66 34.3,-513.78 38.17,-503.92 31.18,-503.66"/>
+<g id="a_edge61_Node000001_Node001179"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M35.08,-503.72C39.13,-437.16 55.61,-222.92 102,-175.5 105.49,-171.94 109.5,-169 113.84,-166.59"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="31.59,-503.54 34.5,-513.72 38.58,-503.94 31.59,-503.54"/>
 </a>
 </g>
 </g>
 <!-- Node1180 -->
 <g id="Node001180" class="node">
 <title>Node1180</title>
-<g id="a_Node001180"><a xlink:href="group___allocate_parser_checksums.html#struct_parser_checksum_allocator" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#bfbfbf" points="256,-93 115,-93 115,-74 256,-74 256,-93"/>
-<text text-anchor="middle" x="185.5" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">ParserChecksumAllocator</text>
+<g id="a_Node001180"><a xlink:href="class_p_h_v_1_1v2_1_1_phv_allocation.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#bfbfbf" points="249,-130 122,-130 122,-111 249,-111 249,-130"/>
+<text text-anchor="middle" x="185.5" y="-118" font-family="Helvetica,sans-Serif" font-size="10.00">PHV::v2::PhvAllocation</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node1180 -->
-<g id="edge63_Node000001_Node001180" class="edge">
+<g id="edge62_Node000001_Node001180" class="edge">
 <title>Node1&#45;&gt;Node1180</title>
-<g id="a_edge63_Node000001_Node001180"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M34.34,-503.58C36.07,-428.05 46.08,-160.59 102,-101.5 105.73,-97.56 110.1,-94.38 114.86,-91.83"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="30.84,-503.92 34.13,-513.99 37.84,-504.07 30.84,-503.92"/>
+<g id="a_edge62_Node000001_Node001180"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M34.69,-503.51C37.55,-432.19 50.88,-191.7 102,-138.5 107.48,-132.79 114.33,-128.69 121.71,-125.77"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="31.18,-503.66 34.3,-513.78 38.17,-503.92 31.18,-503.66"/>
 </a>
 </g>
 </g>
 <!-- Node1181 -->
 <g id="Node001181" class="node">
 <title>Node1181</title>
-<g id="a_Node001181"><a xlink:href="struct_phv_info_1_1_dump_phv_fields.html" target="_top" xlink:title="Pretty&#45;print all fields.">
-<polygon fill="white" stroke="#666666" points="253,-56 118,-56 118,-37 253,-37 253,-56"/>
-<text text-anchor="middle" x="185.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">PhvInfo::DumpPhvFields</text>
+<g id="a_Node001181"><a xlink:href="group___allocate_parser_checksums.html#struct_parser_checksum_allocator" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#bfbfbf" points="256,-93 115,-93 115,-74 256,-74 256,-93"/>
+<text text-anchor="middle" x="185.5" y="-81" font-family="Helvetica,sans-Serif" font-size="10.00">ParserChecksumAllocator</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node1181 -->
-<g id="edge64_Node000001_Node001181" class="edge">
+<g id="edge63_Node000001_Node001181" class="edge">
 <title>Node1&#45;&gt;Node1181</title>
-<g id="a_edge64_Node000001_Node001181"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M34.06,-503.89C34.7,-424.69 41.19,-129.58 102,-64.5 106.5,-59.68 111.97,-56 117.93,-53.2"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="30.56,-503.93 34,-513.95 37.56,-503.97 30.56,-503.93"/>
+<g id="a_edge63_Node000001_Node001181"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M34.34,-503.58C36.07,-428.05 46.08,-160.59 102,-101.5 105.73,-97.56 110.1,-94.38 114.86,-91.83"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="30.84,-503.92 34.13,-513.99 37.84,-504.07 30.84,-503.92"/>
 </a>
 </g>
 </g>
 <!-- Node1182 -->
 <g id="Node001182" class="node">
 <title>Node1182</title>
-<g id="a_Node001182"><a xlink:href="class_phv_logging_1_1_collect_def_use_info.html" target="_top" xlink:title=" ">
+<g id="a_Node001182"><a xlink:href="struct_phv_info_1_1_dump_phv_fields.html" target="_top" xlink:title="Pretty&#45;print all fields.">
+<polygon fill="white" stroke="#666666" points="253,-56 118,-56 118,-37 253,-37 253,-56"/>
+<text text-anchor="middle" x="185.5" y="-44" font-family="Helvetica,sans-Serif" font-size="10.00">PhvInfo::DumpPhvFields</text>
+</a>
+</g>
+</g>
+<!-- Node1&#45;&gt;Node1182 -->
+<g id="edge64_Node000001_Node001182" class="edge">
+<title>Node1&#45;&gt;Node1182</title>
+<g id="a_edge64_Node000001_Node001182"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M34.06,-503.89C34.7,-424.69 41.19,-129.58 102,-64.5 106.5,-59.68 111.97,-56 117.93,-53.2"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="30.56,-503.93 34,-513.95 37.56,-503.97 30.56,-503.93"/>
+</a>
+</g>
+</g>
+<!-- Node1183 -->
+<g id="Node001183" class="node">
+<title>Node1183</title>
+<g id="a_Node001183"><a xlink:href="class_phv_logging_1_1_collect_def_use_info.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="269,-19 102,-19 102,0 269,0 269,-19"/>
 <text text-anchor="middle" x="185.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">PhvLogging::CollectDefUseInfo</text>
 </a>
 </g>
 </g>
-<!-- Node1&#45;&gt;Node1182 -->
-<g id="edge65_Node000001_Node001182" class="edge">
-<title>Node1&#45;&gt;Node1182</title>
-<g id="a_edge65_Node000001_Node001182"><a xlink:title=" ">
+<!-- Node1&#45;&gt;Node1183 -->
+<g id="edge65_Node000001_Node001183" class="edge">
+<title>Node1&#45;&gt;Node1183</title>
+<g id="a_edge65_Node000001_Node001183"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M33.81,-503.39C33.47,-419.48 36.5,-98.36 102,-27.5 105.08,-24.16 108.63,-21.37 112.49,-19.04"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="30.32,-503.63 33.88,-513.6 37.32,-503.58 30.32,-503.63"/>
 </a>

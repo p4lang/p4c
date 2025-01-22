@@ -3602,6 +3602,7 @@ var hierarchy =
         [ "P4::DoTableHit", "class_p4_1_1_do_table_hit.html", null ],
         [ "P4::DoTableKeyNames", "class_p4_1_1_do_table_key_names.html", null ],
         [ "P4::DontcareArgs", "class_p4_1_1_dontcare_args.html", null ],
+        [ "P4::DuplicateActionControlPlaneNameCheck", "class_p4_1_1_duplicate_action_control_plane_name_check.html", null ],
         [ "P4::DuplicateActions", "class_p4_1_1_duplicate_actions.html", null ],
         [ "P4::EBPF::ConvertToEbpfPSA", "class_p4_1_1_e_b_p_f_1_1_convert_to_ebpf_p_s_a.html", null ],
         [ "P4::EBPF::LowerExpressions", "class_p4_1_1_e_b_p_f_1_1_lower_expressions.html", null ],
