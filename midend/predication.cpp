@@ -237,6 +237,17 @@ const IR::Node *Predication::preorder(IR::AssignmentStatement *statement) {
     return new IR::EmptyStatement();
 }
 
+const IR::Node *Predication::preorder(IR::OpAssignmentStatement *statement) {
+    if (!isInContext<IR::P4Action>() || ifNestingLevel == 0) {
+        return statement;
+    }
+    ::P4::error(
+        ErrorType::ERR_EXPRESSION,
+        "%1%: Op-Assignment inside if statement can't be transformed to condition expression",
+        statement);
+    return statement;
+}
+
 const IR::Node *Predication::preorder(IR::PathExpression *pathExpr) {
     dependencies.push_back(Pred::lvalueName(pathExpr));
     return pathExpr;

@@ -142,6 +142,17 @@ const IR::Node *TypeInferenceBase::postorder(const IR::AssignmentStatement *assi
     return assign;
 }
 
+const IR::Node *TypeInferenceBase::postorder(const IR::OpAssignmentStatement *assign) {
+    auto ltype = getType(assign->left);
+    if (ltype == nullptr) return assign;
+    if (!ltype->is<IR::Type_Bits>()) {
+        typeError("%1%=: cannot be applied to '%2%' with type '%3%'", assign->getStringOp(),
+                  assign->left, ltype->toString());
+        return assign;
+    }
+    return TypeInferenceBase::postorder(static_cast<const IR::AssignmentStatement *>(assign));
+}
+
 const IR::Node *TypeInferenceBase::postorder(const IR::ForInStatement *forin) {
     LOG3("TI Visiting " << dbp(getOriginal()));
     auto ltype = getType(forin->ref);
