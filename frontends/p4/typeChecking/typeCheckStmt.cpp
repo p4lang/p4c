@@ -137,8 +137,11 @@ const IR::Node *TypeInferenceBase::postorder(const IR::AssignmentStatement *assi
     }
 
     auto newInit = assignment(assign, ltype, assign->right);
-    if (newInit != assign->right)
-        assign = new IR::AssignmentStatement(assign->srcInfo, assign->left, newInit);
+    if (newInit != assign->right) {
+        auto *clone = assign->clone();
+        clone->right = newInit;
+        assign = clone;
+    }
     return assign;
 }
 
