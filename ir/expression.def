@@ -73,40 +73,76 @@ class Mul : Operation_Binary {
     stringOp = "*";
     precedence = DBPrint::Prec_Mul;
 }
+class MulAssign : OpAssignmentStatement {
+    stringOp = "*";
+#nodbprint
+}
 
 class Div : Operation_Binary {
     stringOp = "/";
     precedence = DBPrint::Prec_Div;
 }
+class DivAssign : OpAssignmentStatement {
+    stringOp = "/";
+#nodbprint
+}
 class Mod : Operation_Binary {
     stringOp = "%";
     precedence = DBPrint::Prec_Mod;
+}
+class ModAssign : OpAssignmentStatement {
+    stringOp = "%";
+#nodbprint
 }
 class Add : Operation_Binary {
     stringOp = "+";
     precedence = DBPrint::Prec_Add;
 }
+class AddAssign : OpAssignmentStatement {
+    stringOp = "+";
+#nodbprint
+}
 class Sub : Operation_Binary {
     stringOp = "-";
     precedence = DBPrint::Prec_Sub;
+}
+class SubAssign : OpAssignmentStatement {
+    stringOp = "-";
+#nodbprint
 }
 class AddSat : Operation_Binary {
     stringOp = "|+|";
     precedence = DBPrint::Prec_AddSat;
 }
+class AddSatAssign : OpAssignmentStatement {
+    stringOp = "|+|";
+#nodbprint
+}
 class SubSat : Operation_Binary {
     stringOp = "|-|";
     precedence = DBPrint::Prec_SubSat;
+}
+class SubSatAssign : OpAssignmentStatement {
+    stringOp = "|-|";
+#nodbprint
 }
 class Shl : Operation_Binary {
     stringOp = "<<";
     precedence = DBPrint::Prec_Shl;
     inline Shl { if (type->is<Type::Unknown>() && left) type = left->type; }
 }
+class ShlAssign : OpAssignmentStatement {
+    stringOp = "<<";
+#nodbprint
+}
 class Shr : Operation_Binary {
     stringOp = ">>";
     precedence = DBPrint::Prec_Shr;
     inline Shr { if (type->is<Type::Unknown>() && left) type = left->type; }
+}
+class ShrAssign : OpAssignmentStatement {
+    stringOp = ">>";
+#nodbprint
 }
 class Equ : Operation_Relation {
     stringOp = "==";
@@ -136,13 +172,25 @@ class BAnd : Operation_Binary {
     stringOp = "&";
     precedence = DBPrint::Prec_BAnd;
 }
+class BAndAssign : OpAssignmentStatement {
+    stringOp = "&";
+#nodbprint
+}
 class BOr : Operation_Binary {
     stringOp = "|";
     precedence = DBPrint::Prec_BOr;
 }
+class BOrAssign : OpAssignmentStatement {
+    stringOp = "|";
+#nodbprint
+}
 class BXor : Operation_Binary {
     stringOp = "^";
     precedence = DBPrint::Prec_BXor;
+}
+class BXorAssign : OpAssignmentStatement {
+    stringOp = "^";
+#nodbprint
 }
 class LAnd : Operation_Binary {
     stringOp = "&&";

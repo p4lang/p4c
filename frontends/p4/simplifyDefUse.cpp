@@ -794,6 +794,7 @@ class FindUninitialized : public Inspector {
         Log::TempIndent indent;
         LOG3("FU Visiting " << dbp(statement) << " " << statement << indent);
         if (!unreachable) {
+            if (statement->is<IR::OpAssignmentStatement>()) visit(statement->left);
             lhs = true;
             visit(statement->left);
             checkHeaderFieldWrite(statement->left, statement->left);

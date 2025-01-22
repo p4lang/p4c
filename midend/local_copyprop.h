@@ -127,6 +127,7 @@ class DoLocalCopyPropagation : public ControlFlowVisitor,
     IR::Statement *preorder(IR::Statement *) override;
     IR::AssignmentStatement *preorder(IR::AssignmentStatement *) override;
     IR::AssignmentStatement *postorder(IR::AssignmentStatement *) override;
+    IR::OpAssignmentStatement *postorder(IR::OpAssignmentStatement *) override;
     IR::IfStatement *postorder(IR::IfStatement *) override;
     IR::ForStatement *preorder(IR::ForStatement *) override;
     IR::ForInStatement *preorder(IR::ForInStatement *) override;

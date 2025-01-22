@@ -443,6 +443,10 @@ IR::AssignmentStatement *DoLocalCopyPropagation::postorder(IR::AssignmentStateme
     return as;
 }
 
+IR::OpAssignmentStatement *DoLocalCopyPropagation::postorder(IR::OpAssignmentStatement *as) {
+    return as;
+}
+
 void DoLocalCopyPropagation::LoopPrepass::postorder(const IR::AssignmentStatement *as) {
     if (auto dest = expr_name(as->left)) self.dropValuesUsing(dest);
 }

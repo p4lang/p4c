@@ -85,6 +85,7 @@ class FindVariableValues final : public Inspector {
     bool preorder(const IR::P4Table *) override;
     bool preorder(const IR::P4Action *) override;
     bool preorder(const IR::AssignmentStatement *) override;
+    bool preorder(const IR::OpAssignmentStatement *) override;
     void postorder(const IR::MethodCallExpression *) override;
 
  public:

@@ -20,7 +20,7 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Node *DoTableHit::postorder(IR::AssignmentStatement *statement) {
+const IR::Node *DoTableHit::process(IR::AssignmentStatement *statement, DoTableHit::op_t op) {
     LOG3("Visiting " << getOriginal());
     auto right = statement->right;
     bool negated = false;
@@ -32,8 +32,28 @@ const IR::Node *DoTableHit::postorder(IR::AssignmentStatement *statement) {
 
     if (!TableApplySolver::isHit(right, this, typeMap)) return statement;
 
-    auto tstat = new IR::AssignmentStatement(statement->left->clone(), new IR::BoolLiteral(true));
-    auto fstat = new IR::AssignmentStatement(statement->left->clone(), new IR::BoolLiteral(false));
+    const IR::Statement *tstat, *fstat;
+    switch (op) {
+        case None:
+            tstat =
+                new IR::AssignmentStatement(statement->left->clone(), new IR::BoolLiteral(true));
+            fstat = new IR::AssignmentStatement(statement->left, new IR::BoolLiteral(false));
+            break;
+        case And:
+            tstat = new IR::EmptyStatement;
+            fstat = new IR::AssignmentStatement(statement->left, new IR::BoolLiteral(false));
+            break;
+        case Or:
+            tstat = new IR::AssignmentStatement(statement->left, new IR::BoolLiteral(true));
+            fstat = new IR::EmptyStatement;
+            break;
+        case Xor:
+            tstat = new IR::BXorAssign(statement->left, new IR::BoolLiteral(true));
+            fstat = new IR::EmptyStatement;
+            break;
+        default:
+            BUG("invalid op_t in DoTableHit");
+    }
     if (negated)
         return new IR::IfStatement(right, fstat, tstat);
     else

@@ -172,6 +172,18 @@ bool FindVariableValues::preorder(const IR::AssignmentStatement *stat) {
     return false;
 }
 
+// Update the value for the 'stat->left' variable.
+bool FindVariableValues::preorder(const IR::OpAssignmentStatement *stat) {
+    if (!working || GlobalCopyProp::lValueName(stat->left).isNullOrEmpty()) return false;
+
+    LOG5("Working on statement: " << stat);
+    // Remove old values
+    if (vars[GlobalCopyProp::lValueName(stat->left)] == nullptr ||
+        !(stat->right->equiv(*(vars[GlobalCopyProp::lValueName(stat->left)]))))
+        removeVarsContaining(&vars, GlobalCopyProp::lValueName(stat->left));
+    return false;
+}
+
 // The core idea of this pass is represented here, it works on 'ActionCall' nodes by accessing
 // the body of the action using the pointer acquired by resolving the 'MethodCallExpression'.
 // An entry in the 'actions' map is set for the action node that was acquired by resolving

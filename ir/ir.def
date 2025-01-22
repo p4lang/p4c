@@ -474,6 +474,12 @@ class AssignmentStatement : Statement {
     toString{ return absl::StrCat(left, " = ", right); }
 }
 
+abstract OpAssignmentStatement : AssignmentStatement {
+    virtual cstring getStringOp() const = 0;
+    toString{ return absl::StrCat(left, " ", getStringOp(), "= ", right); }
+    dbprint;
+}
+
 class IfStatement : Statement {
     Expression       condition;
     Statement        ifTrue;
