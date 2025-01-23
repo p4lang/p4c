@@ -63,7 +63,7 @@ allowed.
 
 # Source files that cannot be released under the Apache 2.0 license
 
-## Python source files that import the Scapy library
+## Python source files that import the Scapy package
 
 The Python library Scapy is released under the GNU General Public
 License v2.0 [2].
@@ -77,11 +77,12 @@ While the LGPL explicitly allows releasing proprietary binaries that
 dynamically link with LGPL libraries, the GPL has no such provisions.
 
 Unless someone can provide a legal ruling from an intellectual
-property lawyer to the contrary, we believe we are required release
+property lawyer to the contrary, we believe we are required to release
 all Python source files meeting the following conditions under the GPL
 v2.0 license:
 
-(a) files that directly import the Scapy package
+(a) files that directly import the `scapy` or `ptf` packages (the
+    `ptf` package imports `scapy`).
 (b) files that indirectly import the Scapy package, by importing a
     package that imports Scapy
 
