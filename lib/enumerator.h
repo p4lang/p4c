@@ -60,6 +60,7 @@ class EnumeratorHandle {
 
     reference operator*() const;
     const EnumeratorHandle<T> &operator++();
+    bool operator==(const EnumeratorHandle<T> &other) const;
     bool operator!=(const EnumeratorHandle<T> &other) const;
 };
 
@@ -628,6 +629,11 @@ template <typename T>
 const EnumeratorHandle<T> &EnumeratorHandle<T>::operator++() {
     enumerator->moveNext();
     return *this;
+}
+
+template <typename T>
+bool EnumeratorHandle<T>::operator==(const EnumeratorHandle<T> &other) const {
+    return !(*this != other);
 }
 
 template <typename T>
