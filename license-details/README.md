@@ -2,8 +2,8 @@
 
 The P4 compiler `p4c` is a leading project of the P4 Consortium, and
 used by several companies as the front end of P4 compilers for a
-variety of hardware targets.  Most of these companies have significant
-proprietary back end code added to them, and the resulting binary
+variety of hardware targets.  Most of these companies develop
+significant proprietary back end code, and the resulting binary
 executables are released, with no copyleft obligation for those
 companies to release their back end source code.
 
