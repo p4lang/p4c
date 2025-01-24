@@ -129,8 +129,8 @@ under the GPL v2.0 license, the same as the Linux kernel:
     via EBPF.
 (b) header files included from files in category (a).
 
-If any subtle questions arise as to whether any P4 compiler
-executable, e.g. `p4c-ebpf`, must thus be released under GPL v2.0, we
+If any subtle questions arise as to whether a particular P4 compiler
+back end, e.g. `p4c-ebpf`, must thus be released under GPL v2.0, we
 will raise these questions to the P4 Technical Steering Team for their
 advice.
 
