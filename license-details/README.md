@@ -62,7 +62,11 @@ https://github.com/p4lang projects, unless this is not legally
 allowed.
 
 
-# Source files that cannot be released under the Apache 2.0 license
+# Source files that should not be released under the Apache 2.0 license
+
+See [this article](apache-and-gpl-v2-licenses.md) for background on
+questions of compatibility of the Apache 2.0 and GPL v2 licenses.
+
 
 ## Python source files that import the Scapy package
 
