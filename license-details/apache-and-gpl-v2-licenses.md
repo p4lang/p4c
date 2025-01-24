@@ -14,7 +14,7 @@ them.
 
 
 There is no publicly available advice on the last two rows of the
-table above that makes the answer obviously "compatible or obviously
+table above that makes the answer obviously "compatible", or obviously
 "incompatible", hence the "very questionable" statement on whether it
 is allowed.  See later sections for examples arguing both ways.
 

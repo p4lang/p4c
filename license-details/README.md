@@ -7,7 +7,7 @@ significant proprietary back end code, and the resulting binary
 executables are released, with no copyleft obligation for those
 companies to release their back end source code.
 
-This is allowed,, because p4c source files published in the
+This is allowed, because p4c source files published in the
 https://github.com/p4lang/p4c repository are licensed under the Apache
 2.0 license.  This license was chosen for multiple reasons, but in
 part to enable companies to do this.  It is the P4 Consortium's intent
@@ -44,8 +44,9 @@ follow it on the line.
 
 # Why is the top level LICENSE file insufficient?
 
-One short answer is that not all files in this repository can legally
-be released under the Apache 2.0 license.  Source files that are an
+One short answer is that for a few files in this repository, releasing
+them under an Apache 2.0 license puts P4.org on [questionable legal
+ground](apache-and-gpl-v2-licenses.md).  Source files that are an
 exception are described below.  We expect them to be a fairly small
 set of files, and that these exceptions are _not_ among the source
 files that are compiled to create a P4 compiler executable binary.
@@ -58,8 +59,8 @@ are copied into other open source software projects.
 # Most source files will be released with Apache 2.0 license
 
 The Apache 2.0 license is the default choice for all source files in
-https://github.com/p4lang projects, unless this is not legally
-allowed.
+https://github.com/p4lang projects, unless this would put P4.org on
+[questionable legal grounds](apache-and-gpl-v2-licenses.md).
 
 
 # Source files that should not be released under the Apache 2.0 license
@@ -85,9 +86,10 @@ While the LGPL explicitly allows releasing proprietary binaries that
 dynamically link with LGPL libraries, the GPL has no such provisions.
 
 Unless someone can provide a legal ruling from an intellectual
-property lawyer to the contrary, we believe we are required to release
-all Python source files meeting the following conditions under the GPL
-v2.0 license:
+property lawyer to the contrary, we prefer to avoid [questionable
+legal ground](apache-and-gpl-v2-licenses.md) by releasing all Python
+source files meeting the following conditions under the GPL v2.0
+license:
 
 (a) files that directly import the `scapy` or `ptf` packages (the
     `ptf` package imports `scapy`).
@@ -102,10 +104,10 @@ use Scapy are not part of P4 compiler executables.
 
 If a company wishes to distribute Python programs that import the
 Scapy package, they will have to decide how to comply with Scapy's
-license themselves.  P4.org can inform them of what we believe the
-software license of Scapy requires, and make all efforts to keep Scapy
-out of P4 compiler executables, or other programs that we expect that
-companies will want to add proprietary extensions to.
+license themselves.  P4.org can inform them of the reasons we made the
+licensing choices related to Scapy that we did, and make all efforts
+to keep Scapy out of P4 compiler executables, or other programs that
+we expect that companies will want to add proprietary extensions to.
 
 
 ## C files intended to be compiled and executed in the Linux kernel, e.g. EBPF
