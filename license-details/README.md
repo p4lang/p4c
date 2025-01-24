@@ -110,9 +110,6 @@ we will take special care to ensure that they are not files used to
 build a P4 compiler executable, and update this note when that task is
 complete with our findings.
 
-All of the source files in this section are _only_ for running
-tests, and are _not_ part of a compiled `p4c` executable.
-
 One or more published P4C back ends produce C source files that are
 intended to be compiled and loaded into the kernel via the EBPF
 feature, at least [3], [4] and perhaps others.
