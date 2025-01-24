@@ -17,8 +17,8 @@ to continue enabling this.
 # Linux Foundation review of P4.org software licenses in published code
 
 In early 2024 P4.org became part of The Linux Foundation.  In November
-2024 the Linux Foundation appointed someone to do a quick review of
-software licenses in the public repositories in the
+2024 the Linux Foundation designated a licensing specialist to do a
+quick review of software licenses in the public repositories in the
 https://github.com/p4lang organization.
 
 They recommended a fairly light-weight mechanism to make the software
