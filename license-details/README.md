@@ -47,9 +47,10 @@ follow it on the line.
 One short answer is that for a few files in this repository, releasing
 them under an Apache 2.0 license puts P4.org on [questionable legal
 ground](apache-and-gpl-v2-licenses.md).  Source files that are an
-exception are described below.  We expect them to be a fairly small
-set of files, and that these exceptions are _not_ among the source
-files that are compiled to create a P4 compiler executable binary.
+exception to the Apache 2.0 license are described below.  We expect
+them to be a fairly small set of files, and that these exceptions are
+_not_ among the source files that are compiled to create a P4 compiler
+executable binary.
 
 Given that, a per-file software license tracking mechanism becomes
 useful.  It is also useful when individual files or subsets of files
