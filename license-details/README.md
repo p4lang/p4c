@@ -7,10 +7,11 @@ significant proprietary back end code, and the resulting binary
 executables are released, with no copyleft obligation for those
 companies to release their back end source code.
 
-This is allowed, because the `p4c` front source files are licensed
-under the Apache 2.0 license.  This license was chosen for multiple
-reasons, but in part to enable companies to do this.  It is the P4
-Consortium's intent to continue enabling this.
+This is allowed,, because p4c source files published in the
+https://github.com/p4lang/p4c repository are licensed under the Apache
+2.0 license.  This license was chosen for multiple reasons, but in
+part to enable companies to do this.  It is the P4 Consortium's intent
+to continue enabling this.
 
 
 # Linux Foundation review of P4.org software licenses in published code
