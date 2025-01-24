@@ -65,6 +65,9 @@ allowed.
 
 ## Python source files that import the Scapy package
 
+Note: All of the source files in this section are _only_ for running
+tests, and are _not_ part of a compiled `p4c` executable.
+
 The Python library Scapy is released under the GNU General Public
 License v2.0 [2].
 
@@ -101,6 +104,14 @@ companies will want to add proprietary extensions to.
 
 
 ## C files intended to be compiled and executed in the Linux kernel, e.g. EBPF
+
+Note: When analyzing the source files in this section more carefully,
+we will take special care to ensure that they are not files used to
+build a P4 compiler executable, and update this note when that task is
+complete with our findings.
+
+All of the source files in this section are _only_ for running
+tests, and are _not_ part of a compiled `p4c` executable.
 
 One or more published P4C back ends produce C source files that are
 intended to be compiled and loaded into the kernel via the EBPF
