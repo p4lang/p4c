@@ -1,17 +1,7 @@
 #!/usr/bin/env python3
 # Copyright 2013-present Barefoot Networks, Inc.
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# SPDX-License-Identifier: GPL-2.0-only
+# Reason-GPL: import-scapy
 
 # Runs the BMv2 behavioral model simulator with input from an stf file
 
@@ -907,7 +897,7 @@ class RunBMV2(object):
                 # We only care that the packet was received on this particular port.
                 if not expected_pkt:
                     continue
-                cmp_result = testutils.compare_pkt(expected_pkt, packets[idx])
+                cmp_result = testutils.compare_pkt(expected_pkt, packets[idx].build())
                 if cmp_result != testutils.SUCCESS:
                     testutils.log.error("Packet %s on port %s differs", idx, interface)
                     return cmp_result

@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: GPL-2.0-only
+# Reason-GPL: import-scapy
+
 import random
 
 from common import *

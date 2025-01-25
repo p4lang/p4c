@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: GPL-2.0-only
+# Reason-GPL: import-scapy via target
 import sys
 from glob import glob
 from pathlib import Path
