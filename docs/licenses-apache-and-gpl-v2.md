@@ -6,6 +6,11 @@ need not _settle_ the question authoritatively.  The point of this
 article as of 2025 is that the question of their compatibilty seems
 not to be settled yet.
 
+Reference for what the SPDX-License-Identifer possible string values
+are, including Apache-2.0 and GPL-2.0-only:
+
++ https://spdx.org/licenses
+
 | Python program A  |  ... imports Python     |          |
 | with license      |  package B with license | Allowed? |
 | ----------------- | ----------------------- | -------- |
@@ -100,7 +105,6 @@ might have useful links that lead to more authoritiatve information.
 
 [2] "OASDL license compatibility matrix with explanations",
     https://www.osadl.org/html/CompatMatrix.html
-
 
 [3] https://opensource.stackexchange.com/questions/1357/can-i-link-a-apache-2-0-library-into-software-under-gplv2
 
