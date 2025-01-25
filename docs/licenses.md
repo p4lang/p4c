@@ -3,9 +3,11 @@
 The P4 compiler `p4c` is a leading project of the P4 Consortium, and
 used by several companies as the front end of P4 compilers for a
 variety of hardware targets.  Most of these companies develop
-significant proprietary back end code, and the resulting binary
-executables are released, with no copyleft obligation for those
-companies to release their back end source code.
+significant proprietary back end code, combine it with some of the
+code published in https://github.com/p4lang/p4c, and the resulting
+binary executables are released.  These companies have no obligation
+due to copyleft licenses to release their compiler back end source
+code.
 
 This is allowed, because p4c source files published in the
 https://github.com/p4lang/p4c repository are licensed under the Apache
@@ -46,7 +48,7 @@ follow it on the line.
 
 One short answer is that for a few files in this repository, releasing
 them under an Apache 2.0 license puts P4.org on [questionable legal
-ground](apache-and-gpl-v2-licenses.md).  Source files that are an
+ground](licenses-apache-and-gpl-v2.md).  Source files that are an
 exception to the Apache 2.0 license are described below.  We expect
 them to be a fairly small set of files, and that these exceptions are
 _not_ among the source files that are compiled to create a P4 compiler
@@ -61,12 +63,12 @@ are copied into other open source software projects.
 
 The Apache 2.0 license is the default choice for all source files in
 https://github.com/p4lang projects, unless this would put P4.org on
-[questionable legal grounds](apache-and-gpl-v2-licenses.md).
+[questionable legal grounds](licenses-apache-and-gpl-v2.md).
 
 
 # Source files that should not be released under the Apache 2.0 license
 
-See [this article](apache-and-gpl-v2-licenses.md) for background on
+See [this article](licenses-apache-and-gpl-v2.md) for background on
 questions of compatibility of the Apache 2.0 and GPL v2 licenses.
 
 
@@ -88,37 +90,38 @@ dynamically link with LGPL libraries, the GPL has no such provisions.
 
 Unless someone can provide a legal ruling from an intellectual
 property lawyer to the contrary, we prefer to avoid [questionable
-legal ground](apache-and-gpl-v2-licenses.md) by releasing all Python
+legal ground](licenses-apache-and-gpl-v2.md) by releasing all Python
 source files meeting the following conditions under the GPL v2.0
 license:
 
-(a) files that directly import the `scapy` or `ptf` packages (the
-    `ptf` package imports `scapy`).
+(a) files that directly import the `scapy` package
 (b) files that indirectly import the Scapy package, by importing a
     package that imports Scapy
 
-We believe that this should not be a significant hindrance to
-commercial users of this code, because all such Python source files
-are test programs, run either during CI for testing p4c executables,
-or during testing by P4 developers.  These Python source files that
-use Scapy are not part of P4 compiler executables.
+We believe that this should not be a significant hindrance to those
+who wish to distribute proprietary P4 compiler executables, because
+all such Python source files are test programs, run either during CI
+for testing p4c executables, or during testing by those making
+modifications to p4c code.  These Python source files that use Scapy
+are not part of P4 compiler executables.
 
 If a company wishes to distribute Python programs that import the
 Scapy package, they will have to decide how to comply with Scapy's
 license themselves.  P4.org can inform them of the reasons we made the
-licensing choices related to Scapy that we did, and make all efforts
-to keep Scapy out of P4 compiler executables, or other programs that
-we expect that companies will want to add proprietary extensions to.
+licensing choices related to Scapy that we did, and continue to avoid
+using Scapy or any other copylefted libraries in P4 compiler
+executables.  Similarly for any other programs besides the P4 compiler
+that we expect companies will want to add proprietary extensions to.
 
 
 ## C files intended to be compiled and executed in the Linux kernel, e.g. EBPF
 
-Note: When analyzing the source files in this section more carefully,
-we will take special care to ensure that they are not files used to
-build a P4 compiler executable, and update this note when that task is
-complete with our findings.
+Note: When analyzing the source files described in this section more
+carefully, we will take special care to ensure that they are not files
+used to build a P4 compiler executable, and update this note when that
+task is complete with our findings.
 
-One or more published P4C back ends produce C source files that are
+One or more published p4c back ends produce C source files that are
 intended to be compiled and loaded into the kernel via the EBPF
 feature, at least [3], [4] and perhaps others.
 

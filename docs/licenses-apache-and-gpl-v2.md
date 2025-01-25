@@ -1,8 +1,10 @@
 # Compatibility of GPL v2.0 and Apache 2.0 licenses
 
-The claims of incompatibility in this section could use some good
-references to back them up.  Please suggest references if you know of
-them.
+Please suggest additional references, whether they argue for
+compatibility or incompatbility of these two software licenses.  They
+need not _settle_ the question authoritatively.  The point of this
+article as of 2025 is that the question of their compatibilty seems
+not to be settled yet.
 
 | Python program A  |  ... imports Python     |          |
 | with license      |  package B with license | Allowed? |
@@ -12,11 +14,11 @@ them.
 | Apache-2.0        | GPL-2.0-only            | very questionable |
 | GPL-2.0-only      | Apache-2.0              | very questionable |
 
-
-There is no publicly available advice on the last two rows of the
-table above that makes the answer obviously "compatible", or obviously
-"incompatible", hence the "very questionable" statement on whether it
-is allowed.  See later sections for examples arguing both ways.
+There is no publicly available advice we have found so far on the last
+two rows of the table above that makes the answer obviously
+"compatible", or obviously "incompatible", hence the "very
+questionable" statement on whether it is allowed.  See later sections
+for examples arguing both ways.
 
 Given that lack of clarity on whether it is allowed, it seems prudent
 that the P4 Consortium should not risk its limited funds and available
@@ -25,9 +27,9 @@ licenses.  We have a way to avoid that risk: use combinations of
 licenses that are well known to be compatible.
 
 If someone proposes using other approaches, it seems wise that they
-should be able to provide advice backed by an organization with at
-least one intellectual property lawyer, and willing to defend the
-approach in court.
+should provide advice backed by an organization with at least one
+intellectual property lawyer, and willing to defend the approach in
+court.
 
 
 # Article published in a law journal
@@ -47,8 +49,8 @@ Here is the text of the abstract of this 29-page article:
     either under a copyright infringement theory or a breach of contract
     theory.
 
-I have not read this article in full.  I have no idea whether this
-author's ideas would hold up in a court case.
+The P4 Consortium has no legal advice to say whether the arguments
+presented in that article would hold up in a court case.
 
 
 # Open Source Automation Development Lab (OSADL)
