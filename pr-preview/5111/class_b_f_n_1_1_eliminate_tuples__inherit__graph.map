@@ -1,0 +1,10 @@
+<map id="BFN::EliminateTuples" name="BFN::EliminateTuples">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,225,165,251"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_pass_manager.html" title=" " alt="" coords="19,152,151,177"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="88,191,88,225,83,225,83,191"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="41,5,129,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="76,44,68,73,67,104,82,151,77,153,61,104,62,72,71,42"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_backtrack.html" title=" " alt="" coords="77,79,187,104"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="103,41,127,77,122,80,98,44"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="119,117,95,153,91,150,115,114"/>
+</map>

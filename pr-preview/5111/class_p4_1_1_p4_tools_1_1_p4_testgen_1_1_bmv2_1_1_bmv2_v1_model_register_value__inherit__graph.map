@@ -1,0 +1,11 @@
+<map id="P4::P4Tools::P4Testgen::Bmv2::Bmv2V1ModelRegisterValue" name="P4::P4Tools::P4Testgen::Bmv2::Bmv2V1ModelRegisterValue">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,328,267,368"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_index_map.html" title="Readable and writable symbolic map, which maps indices to particular values." alt="" coords="51,240,221,280"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="139,294,139,328,133,328,133,294"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_test_object.html" title=" " alt="" coords="51,152,221,192"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="139,206,139,240,133,240,133,206"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_i_castable.html" title=" " alt="" coords="83,79,189,104"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="139,118,139,152,133,152,133,118"/>
+<area shape="rect" id="Node000005" href="$struct_p4_1_1_r_t_t_i_1_1_base.html" title=" " alt="" coords="79,5,193,31"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="139,44,139,79,133,79,133,44"/>
+</map>
