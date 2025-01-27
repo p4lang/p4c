@@ -1,0 +1,12 @@
+<map id="P4::RemoveAllUnusedDeclarations" name="P4::RemoveAllUnusedDeclarations">
+<area shape="rect" id="Node000001" title="Iterates RemoveUnusedDeclarations until convergence." alt="" coords="5,299,253,324"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_pass_repeated.html" title=" " alt="" coords="61,225,198,251"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="132,264,132,299,127,299,127,264"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_pass_manager.html" title=" " alt="" coords="63,152,195,177"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="132,191,132,225,127,225,127,191"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="85,5,173,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="121,44,111,79,110,99,114,119,126,151,121,153,108,120,105,99,105,78,116,43"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_backtrack.html" title=" " alt="" coords="121,79,231,104"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="147,41,171,77,166,80,142,44"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="163,117,139,153,135,150,159,114"/>
+</map>
