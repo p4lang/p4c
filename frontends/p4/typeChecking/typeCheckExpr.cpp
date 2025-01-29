@@ -1706,7 +1706,12 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Member *expression) {
 
     if (auto *stack = type->to<IR::Type_Stack>()) {
         auto parser = findContext<IR::P4Parser>();
-        if (member == IR::Type_Stack::next || member == IR::Type_Stack::last) {
+        auto eltype = stack->elementType;
+        if (!eltype->is<IR::Type_Header>() && !eltype->is<IR::Type_HeaderUnion>() /* &&
+            !eltype->is<IR::Type_SpecializedCanonical>() */) {
+            typeError("%1%: '%2%' can only be used on header stacks", expression, member);
+            return expression;
+        } else if (member == IR::Type_Stack::next || member == IR::Type_Stack::last) {
             if (parser == nullptr) {
                 typeError("%1%: 'last', and 'next' for stacks can only be used in a parser",
                           expression);
