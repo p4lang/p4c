@@ -4,6 +4,10 @@
 
 ---
 
+
+
+
+
 ## **1. Adding "Positive" Tests**
 
 Positive tests are those where the P4 compiler should process the input without any errors.
@@ -12,15 +16,28 @@ Positive tests are those where the P4 compiler should process the input without 
 
 1. **Source File Location**:
 
-   - Positive tests are located in multiple directories based on the purpose and the backend/tool being tested:
+   - Positive tests are located in multiple directories based on the purpose and the backend/tool being tested. Below is a description of the primary directories under `p4c/testdata` and their purposes:
 
-     - `p4c/testdata/p4_16_samples`: General positive tests for the P4\_16 language.
-     - `p4c/testdata/p4_16_samples_outputs`: Expected outputs for these tests.
-     - Other directories may contain tests for specific backends or scenarios (e.g., BMv2 backend or PSA architecture).
-     - For BMv2-specific tests with packets, the source file name must match the pattern `*-bmv2.p4`.
+     - **`p4_16_samples`**: Contains general positive tests for the P4\_16 language.
+     - **`p4_16_samples_outputs`**: Stores the expected outputs for the tests in `p4_16_samples`.
+     - **`p4_14_samples`**: Contains tests specific to the older P4\_14 language version.
+     - **`p4_14_samples_outputs`**: Stores the expected outputs for tests in `p4_14_samples`.
+     - **`bmv2`**: Holds tests targeting the BMv2 backend, including packet-processing logic and examples.
+     - **`psa`**: Includes tests for the PSA (Portable Switch Architecture) target.
+     - **`ebpf`**: Contains tests designed for the eBPF backend.
+     - **`xdp`**: Stores tests related to XDP programs using eBPF.
+     - **`arch`**: Contains architecture-specific tests, covering various P4 architectures.
+     - **`tools`**: Includes tests for tools provided in the P4C repository, such as `p4test` and `p4c-bm2-ss`.
+     - **`error_samples`**: Contains tests that verify the compiler's behavior when encountering erroneous P4 programs.
+     - **`stf_samples`**: Stores `.stf` (Switch Test Framework) files associated with P4 programs, defining packet inputs/outputs for testing.
+     - **`stress_tests`**: Contains larger or more computationally intensive tests to stress-test the compiler.
 
-   - Review the structure of the `testdata` directory to understand the organization and differences.
+   - Make sure the file you are adding is placed in the appropriate directory based on the purpose and backend/tool it is testing.
    - Ensure the file is named descriptively to reflect its purpose (e.g., `example_positive_test.p4`).
+
+---
+
+
 
 2. **Expected Output Files**:
 
