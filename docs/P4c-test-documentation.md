@@ -118,6 +118,9 @@ Refer to the repository documentation and existing test examples to understand t
 
 An Xfail test is one that is expected to fail due to a known issue or limitation in the P4 compiler. The CI system handles these tests differently based on their type (positive or negative).
 
+
+
+
 ### Marking a Test as Xfail
 
 1. **Adding the Xfail Mark**:
@@ -134,10 +137,16 @@ An Xfail test is one that is expected to fail due to a known issue or limitation
 
 3. **Maintaining Consistency**:
 
-   - Note that not all CI systems may treat Xfail tests the same way. For now, document the current behavior in the repository's CI documentation.
-   - Add a TODO comment or issue to make the handling of Xfail tests consistent across all CI workflows in the future.
+   - Note that different p4c backends may treat Xfail tests differently. **TODO**: Investigate and document how each p4c backend handles Xfail tests to ensure consistency across the project.
+   
+   - **TODO**: Document which p4c backend tests treat Xfail as described above versus those that treat Xfail differently.
+
+
+
+
 
 ---
+
 
 ## **5. Running Tests**
 
