@@ -9,7 +9,6 @@ be included from a file licensed under GPL-2.0-only.
 When it is included from a source file intended to be compiled and run
 as a user space program, it can be included from a file licensed as
 Apache-2.0.
-
 */
 
 
