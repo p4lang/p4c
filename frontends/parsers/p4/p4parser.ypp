@@ -1087,8 +1087,7 @@ tupleType
     ;
 
 headerStackType
-    : typeName "[" expression "]"         { $$ = new IR::Type_Stack(@1+@4, $1, $3); }
-    | specializedType "[" expression "]"  { $$ = new IR::Type_Stack(@1+@4, $1, $3); }
+    : typeRef "[" expression "]"         { $$ = new IR::Type_Stack(@1+@4, $1, $3); }
     ;
 
 specializedType
