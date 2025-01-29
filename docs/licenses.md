@@ -133,12 +133,36 @@ Linux driver code for their hardware and not releasing the source
 code, we leave it to their legal teams to navigate any of the
 intricacies that may be involved in that endeavor.
 
-Our plan is to release all of the following kinds of source files
+[5] is a good introduction to software licensing questions related to
+using EBPF.
+
+[5] https://ebpf.io/blog/ebpf-licensing-guide/
+
+While it is _possible_ to write restricted EBPF programs that are
+loaded into the Linux kernel that can be distributed under a non-GPL
+license, these are the exception, not the rule.
+
+Do companies using EBPF distribute these programs under GPL 2.0?  Yes,
+they commonly do.  The EBPF code loaded and run in the Linux kernel is
+the "data plane" part of the system.  The "control plane" part of the
+system runs in user space applications on Linux, and these can be
+distributed under other licenses, including proprietary licenses.  98%
+or more of the code of these systems is in the control plane code.
+The data plane code by itself is unlikely to cause any significant
+loss of competitive advantage to publicize it.
+
+Thus our plan is to release all of the following kinds of source files
 under the GPL v2.0 license, the same as the Linux kernel:
 
 (a) files that are intended to be compiled and loaded into the kernel
     via EBPF.
 (b) header files included from files in category (a).
+
+Note that this list of files appear to consist of _only_ 2 source
+files in the entire p4c repository.  Most of the source files related
+to EBPF are part of a p4c back end that uses EBPF, which can be
+Apache-2.0 licensed, or they are control plane source files used for
+testing the EBPF programs loaded into the kernel.
 
 If any subtle questions arise as to whether a particular P4 compiler
 back end, e.g. `p4c-ebpf`, must thus be released under GPL v2.0, we
