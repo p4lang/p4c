@@ -35,6 +35,11 @@ Positive tests are those where the P4 compiler should process the input without 
    - Make sure the file you are adding is placed in the appropriate directory based on the purpose and backend/tool it is testing.
    - Ensure the file is named descriptively to reflect its purpose (e.g., `example_positive_test.p4`).
 
+---
+
+
+
+2. **Expected Output Files**:
 
 2. **File Naming Conventions**:
 
