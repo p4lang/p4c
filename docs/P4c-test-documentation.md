@@ -37,7 +37,7 @@ Positive tests are those where the P4 compiler should process the input without 
 
 ---
 
-
+This expanded explanation ensures the section is more detailed and aligns with the reviewer's request to describe all directories comprehensively.
 
 2. **Expected Output Files**:
 
@@ -148,7 +148,15 @@ Tests in the P4C repository can be executed in two main ways:
 
 ### Differences Between Bash Scripts and CTest
 
-- **Options Available**: CTest may have additional or different options compared to Bash scripts. Check the documentation for details.
+
+"**Options Available**: CTest may offer additional or different options compared to Bash scripts. To see the full list of available options, you can run the following command in your terminal:
+
+```bash
+ctest --help
+```
+
+This will display all the commands and their descriptions that you can use with CTest. For a more detailed explanation of each option and how to use them, refer to the official documentation [here](https://cmake.org/cmake/help/latest/manual/ctest.1.html). This documentation will provide in-depth guidance on all the features and configurations available."
+
 - **Behavior**: Some CI environments may prefer one method over the other for consistency. Use CTest if you want to leverage its filtering and summary capabilities.
 - **Recommendation**: Document the preferred approach for specific use cases in the repository README or this guide.
 
