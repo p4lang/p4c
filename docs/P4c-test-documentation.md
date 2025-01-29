@@ -35,11 +35,24 @@ Positive tests are those where the P4 compiler should process the input without 
    - Make sure the file you are adding is placed in the appropriate directory based on the purpose and backend/tool it is testing.
    - Ensure the file is named descriptively to reflect its purpose (e.g., `example_positive_test.p4`).
 
----
 
-This expanded explanation ensures the section is more detailed and aligns with the reviewer's request to describe all directories comprehensively.
+2. **File Naming Conventions**:
 
-2. **Expected Output Files**:
+   - For BMv2-specific tests with packets, the source file name must match the pattern `*-bmv2.p4`.
+   - Additional file name patterns:
+     - For eBPF-specific tests: `*_ebpf.p4` or `*_ebpf-kernel.p4`.
+     - For graph backend tests: `*graph*.p4`.
+     - For UBPF-specific tests: `*_ubpf.p4`.
+     - For PSA tests targeting BMv2: `*-bmv2.p4`.
+     - Other specialized tests under subdirectories such as:
+       - `p4tc_samples/` for TC tests.
+       - `fabric_*/` and `omec/` for Fabric and OMEC tests.
+       - `switch_*/` for specific switch samples.
+
+   These naming conventions ensure the CMake configuration files correctly associate test programs with their respective backends or features.
+
+
+3. **Expected Output Files**:
 
    - Run the P4 compiler on the source file using the command:
      ```bash
@@ -48,7 +61,7 @@ This expanded explanation ensures the section is more detailed and aligns with t
    - This generates expected output files.
    - Place the generated expected output files in the appropriate directory, such as `p4c/testdata/p4_16_samples_outputs`.
 
-3. **Updating Expected Outputs**:
+4. **Updating Expected Outputs**:
 
    - If a change to the P4 compiler modifies the expected outputs, you can regenerate them by rerunning the tests with:
      ```bash
