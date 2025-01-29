@@ -384,9 +384,11 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Type_Stack *type) {
     auto etype = canon->to<IR::Type_Stack>()->elementType;
     if (etype == nullptr) return type;
 
+#if 0
     if (!etype->is<IR::Type_Header>() && !etype->is<IR::Type_HeaderUnion>() &&
         !etype->is<IR::Type_SpecializedCanonical>())
         typeError("Header stack %1% used with non-header type %2%", type, etype->toString());
+#endif
     return type;
 }
 
@@ -424,7 +426,11 @@ const IR::Node *TypeInferenceBase::postorder(const IR::StructField *field) {
 const IR::Node *TypeInferenceBase::postorder(const IR::Type_Header *type) {
     auto canon = setTypeType(type);
     auto validator = [this](const IR::Type *t) {
-        while (t->is<IR::Type_Newtype>()) t = getTypeType(t->to<IR::Type_Newtype>()->type);
+        while (1) {
+            if (t->is<IR::Type_Newtype>()) t = getTypeType(t->to<IR::Type_Newtype>()->type);
+            else if (auto *st = t->to<IR::Type_Stack>()) t = st->elementType;
+            else break;
+        }
         return t->is<IR::Type_Bits>() || t->is<IR::Type_Varbits>() ||
                (t->is<IR::Type_Struct>() && onlyBitsOrBitStructs(t)) || t->is<IR::Type_SerEnum>() ||
                t->is<IR::Type_Boolean>() || t->is<IR::Type_Var>() ||
