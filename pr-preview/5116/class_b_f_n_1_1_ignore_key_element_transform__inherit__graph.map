@@ -1,0 +1,19 @@
+<map id="BFN::IgnoreKeyElementTransform" name="BFN::IgnoreKeyElementTransform">
+<area shape="rect" id="Node000001" title="Auxiliary transformer to avoid processing IR::KeyElement nodes." alt="" coords="300,129,541,155"/>
+<area shape="rect" id="Node000004" href="$group___elim_casts.html#class_b_f_n_1_1_eliminate_width_casts" title=" " alt="" coords="619,5,812,31"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="449,119,511,78,549,57,588,39,626,28,628,33,590,45,551,62,513,83,452,123"/>
+<area shape="rect" id="Node000005" href="$group___elim_casts.html#class_b_f_n_1_1_rewrite_cast_to_reinterpret_cast" title="Pass that converts some of the IR::Casts to ReinterpretCasts." alt="" coords="589,55,841,80"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="472,122,589,89,641,77,642,83,590,94,474,128"/>
+<area shape="rect" id="Node000006" href="$group___elim_casts.html#class_b_f_n_1_1_rewrite_concat_to_slices" title="Pass that replaces concat ++ operations with multiple operations on slices in the contexts." alt="" coords="613,104,817,129"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="555,128,613,123,613,128,555,133"/>
+<area shape="rect" id="Node000007" href="$group___elim_casts.html#class_b_f_n_1_1_simplify_nested_casts" title="Pass that removes nested casts when applicable." alt="" coords="619,153,811,179"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="555,150,619,156,619,161,555,156"/>
+<area shape="rect" id="Node000008" href="$group___elim_casts.html#class_b_f_n_1_1_simplify_operation_binary" title="Pass that moves the cast on binary operation to each operand." alt="" coords="607,203,823,228"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="475,156,590,189,642,200,641,205,589,194,473,161"/>
+<area shape="rect" id="Node000009" href="$group___elim_casts.html#class_b_f_n_1_1_simplify_redundant_casts" title="Pass that removes some of the redundant casts." alt="" coords="607,252,823,277"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="452,161,513,200,590,238,628,249,626,254,588,243,511,205,449,165"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_transform.html" title=" " alt="" coords="141,129,252,155"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="266,139,300,139,300,145,266,145"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="5,129,93,155"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="107,139,141,139,141,145,107,145"/>
+</map>
