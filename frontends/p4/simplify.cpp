@@ -26,11 +26,8 @@ const IR::Node *DoSimplifyControlFlow::postorder(IR::BlockStatement *statement) 
     if (statement->hasAnnotations()) {
         if (auto *pblk = getParent<IR::BlockStatement>()) {
             for (auto *annot : statement->annotations) {
-                if (auto *p = pblk->getAnnotation(annot->name)) {
-                    if (!p->equiv(*annot)) return statement;
-                } else {
+                if (auto *p = pblk->getAnnotation(annot->name); !p || !p->equiv(*annot))
                     return statement;
-                }
             }
         } else {
             return statement;

@@ -13,6 +13,9 @@ control ingress(inout Headers h) {
         if (true) @unlikely {
             h.b = 0;
         }
+        if (h.a != h.a) @likely {
+            h.b = 1;
+        }
     }
 }
 
