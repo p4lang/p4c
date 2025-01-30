@@ -1132,8 +1132,16 @@ class FilterLikelyAnnot : public Transform {
 const IR::Node *DoConstantFolding::postorder(IR::IfStatement *ifstmt) {
     if (auto cond = ifstmt->condition->to<IR::BoolLiteral>()) {
         if (cond->value) {
+            if (auto blk = ifstmt->ifFalse ? ifstmt->ifFalse->to<IR::BlockStatement>() : nullptr) {
+                if (auto annot = blk->getAnnotation(IR::Annotation::likelyAnnotation))
+                    warning(ErrorType::WARN_IGNORE, "ignoring %1% on never taken statement", annot);
+            }
             return ifstmt->ifTrue->apply(FilterLikelyAnnot());
         } else {
+            if (auto blk = ifstmt->ifTrue->to<IR::BlockStatement>()) {
+                if (auto annot = blk->getAnnotation(IR::Annotation::likelyAnnotation))
+                    warning(ErrorType::WARN_IGNORE, "ignoring %1% on never taken statement", annot);
+            }
             if (ifstmt->ifFalse == nullptr) {
                 return new IR::EmptyStatement(ifstmt->srcInfo);
             } else {
