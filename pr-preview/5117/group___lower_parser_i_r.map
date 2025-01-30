@@ -1,0 +1,6 @@
+<map id="LowerParserIR" name="LowerParserIR">
+<area shape="rect" id="Node000003" href="$group___allocate_parser_checksums.html" title="Allocates parser checksums." alt="" coords="317,5,508,31"/>
+<area shape="rect" id="Node000002" href="$group___lower_parser.html" title="Replace field&#45;based parser and deparser IR with container&#45;based parser and deparser IR." alt="" coords="5,31,107,56"/>
+<area shape="rect" id="Node000001" title="Generates a lowered version of the parser IR in this program and swaps it in for the existing represe..." alt="" coords="155,31,269,56"/>
+<area shape="rect" id="Node000004" href="$group___parser_copy_prop.html" title="PassManager that governs parser copy propagation." alt="" coords="351,55,475,80"/>
+</map>
