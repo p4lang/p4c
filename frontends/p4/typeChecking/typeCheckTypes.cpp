@@ -427,9 +427,12 @@ const IR::Node *TypeInferenceBase::postorder(const IR::Type_Header *type) {
     auto canon = setTypeType(type);
     auto validator = [this](const IR::Type *t) {
         while (1) {
-            if (t->is<IR::Type_Newtype>()) t = getTypeType(t->to<IR::Type_Newtype>()->type);
-            else if (auto *st = t->to<IR::Type_Stack>()) t = st->elementType;
-            else break;
+            if (t->is<IR::Type_Newtype>())
+                t = getTypeType(t->to<IR::Type_Newtype>()->type);
+            else if (auto *st = t->to<IR::Type_Stack>())
+                t = st->elementType;
+            else
+                break;
         }
         return t->is<IR::Type_Bits>() || t->is<IR::Type_Varbits>() ||
                (t->is<IR::Type_Struct>() && onlyBitsOrBitStructs(t)) || t->is<IR::Type_SerEnum>() ||
