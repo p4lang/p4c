@@ -54,20 +54,35 @@ Positive tests are those where the P4 compiler should process the input without 
 
 3. **Expected Output Files**:
 
-   - Run the P4 compiler on the source file using the command:
+   - Run the P4 compiler on the source file to verify the output:
      ```bash
      ./build/p4test path/to/source_file.p4
      ```
-   - This generates expected output files.
+   - To generate or update the expected output file for a single test case, use:
+     ```bash
+     P4TEST_REPLACE=1 ./build/p4test path/to/source_file.p4
+     ```
+   - This will regenerate the expected output file for the specific test case.
    - Place the generated expected output files in the appropriate directory, such as `p4c/testdata/p4_16_samples_outputs`.
+
+   - If you need to regenerate expected output files for all test cases, use:
+     ```bash
+     P4TEST_REPLACE=1 make check
+     ```
+   - However, this updates outputs for all tests, so use it with caution.
 
 4. **Updating Expected Outputs**:
 
-   - If a change to the P4 compiler modifies the expected outputs, you can regenerate them by rerunning the tests with:
+   - If a change to the P4 compiler modifies the expected outputs, you can regenerate them by running:
      ```bash
-     ./build/p4test path/to/source_file.p4 --update-outputs
+     P4TEST_REPLACE=1 ./build/p4test path/to/source_file.p4
      ```
-   - Replace the old expected output files with the newly generated ones.
+   - This will update the expected output file for the specified test.
+   - If you need to regenerate expected outputs for all test cases, use:
+     ```bash
+     P4TEST_REPLACE=1 make check
+     ```
+   - Be cautious when using this command, as it updates outputs for all tests.
 
 ### Verifying the Test
 
@@ -116,7 +131,7 @@ Refer to the repository documentation and existing test examples to understand t
 
 ## **4. Marking Tests as "Expected to Fail" (Xfail)**
 
-An Xfail test is one that is expected to fail due to a known issue or limitation in the P4 compiler. The CI system handles these tests differently based on their type (positive or negative).
+An XFail is a test that should pass (by the language spec and architecture), but currently fails due to known problems in the compiler.
 
 
 
