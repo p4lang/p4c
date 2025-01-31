@@ -1,0 +1,18 @@
+<map id="P4::DoLocalCopyPropagation" name="P4::DoLocalCopyPropagation">
+<area shape="rect" id="Node000001" title=" " alt="" coords="223,152,432,177"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_control_flow_visitor.html" title=" " alt="" coords="5,79,172,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="141,105,289,149,288,154,139,110"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="285,5,373,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="278,37,128,81,127,76,276,32"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_transform.html" title=" " alt="" coords="196,79,307,104"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="308,42,266,80,262,76,304,38"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_p4_write_context.html" title=" " alt="" coords="331,79,479,104"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="353,38,394,76,390,80,349,42"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_resolution_context.html" title="Visitor mixin for looking up names in enclosing scopes from the Visitor::Context." alt="" coords="503,79,669,104"/>
+<area shape="poly" id="edge8_Node000006_Node000003" title=" " alt="" coords="384,32,545,76,544,81,382,37"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="275,111,317,150,313,154,272,115"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="384,115,342,154,338,150,380,111"/>
+<area shape="poly" id="edge7_Node000001_Node000006" title=" " alt="" coords="532,110,370,154,369,149,531,105"/>
+<area shape="rect" id="Node000007" href="$class_p4_1_1_declaration_lookup.html" title=" " alt="" coords="503,5,669,31"/>
+<area shape="poly" id="edge9_Node000006_Node000007" title=" " alt="" coords="589,44,589,79,583,79,583,44"/>
+</map>

@@ -1,0 +1,14 @@
+<map id="P4::GeneralInliner" name="P4::GeneralInliner">
+<area shape="rect" id="Node000001" title="Performs actual inlining work." alt="" coords="73,240,211,265"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_abstract_inliner.html" title=" " alt="" coords="33,152,251,192"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="145,206,145,240,139,240,139,206"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_transform.html" title=" " alt="" coords="5,79,116,104"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="84,112,124,150,121,154,81,116"/>
+<area shape="rect" id="Node000004" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="22,5,110,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="67,45,64,79,59,78,61,44"/>
+<area shape="rect" id="Node000005" href="$class_p4_1_1_resolution_context.html" title="Visitor mixin for looking up names in enclosing scopes from the Visitor::Context." alt="" coords="140,79,307,104"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="105,34,199,76,197,81,103,39"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="203,116,163,154,160,150,200,112"/>
+<area shape="rect" id="Node000006" href="$class_p4_1_1_declaration_lookup.html" title=" " alt="" coords="140,5,307,31"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="226,44,226,79,221,79,221,44"/>
+</map>
