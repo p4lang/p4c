@@ -109,7 +109,7 @@ var searchData=
   ['alignment_5fcounts_106',['alignment_counts',['../struct_action_analysis_1_1_container_action.html#a3769a985e6364f60ba084a22e3de9a08',1,'ActionAnalysis::ContainerAction']]],
   ['all_5ffield_5fslices_5fwritten_5ftogether_107',['all_field_slices_written_together',['../class_action_phv_constraints.html#a52c191e51dfba637d945c2e8ad305e9b',1,'ActionPhvConstraints']]],
   ['all_5fof_5ffieldslices_108',['all_of_fieldslices',['../class_p_h_v_1_1_super_cluster.html#ab992252cdbd653a20312c2cc9f5a285d',1,'PHV::SuperCluster']]],
-  ['alloc_5faction_5fdata_5fbus_109',['alloc_action_data_bus',['../struct_tofino_1_1_action_data_bus.html#af6167764f3c400d796710124cb1c837f',1,'Tofino::ActionDataBus::alloc_action_data_bus(const IR::MAU::Table *tbl, const ActionData::Format::Use *use, TableResourceAlloc &amp;alloc) override'],['../struct_tofino_1_1_action_data_bus.html#ad03e7115af7dfb60ce6802a4817f98ef',1,'Tofino::ActionDataBus::alloc_action_data_bus(const IR::MAU::Table *tbl, const MeterALU::Format::Use *use, TableResourceAlloc &amp;alloc) override']]],
+  ['alloc_5faction_5fdata_5fbus_109',['alloc_action_data_bus',['../struct_tofino_1_1_action_data_bus.html#a1769acc1beaacd9d630274df9c52455a',1,'Tofino::ActionDataBus::alloc_action_data_bus(const IR::MAU::Table *tbl, const ActionData::Format::Use *use, TableResourceAlloc &amp;alloc) override'],['../struct_tofino_1_1_action_data_bus.html#a1938a12a39a0824d348dc63c5ec94f11',1,'Tofino::ActionDataBus::alloc_action_data_bus(const IR::MAU::Table *tbl, const MeterALU::Format::Use *use, TableResourceAlloc &amp;alloc) override']]],
   ['alloc_5fdeparser_5fzero_5fcluster_110',['alloc_deparser_zero_cluster',['../class_p_h_v_1_1v2_1_1_allocator_base.html#aa5745d0e64c03b0fe67871fb211d65ab',1,'PHV::v2::AllocatorBase']]],
   ['alloc_5fsize_111',['alloc_size',['../class_p_h_v_1_1_field.html#a080e2f543188692029705871c9d70803',1,'PHV::Field']]],
   ['alloc_5fstatus_112',['alloc_status',['../class_p_h_v_1_1_allocation.html#aa30133c25b09e144d6bfc679f44ea017',1,'PHV::Allocation']]],
@@ -150,7 +150,7 @@ var searchData=
   ['assignstructlike_147',['assignStructLike',['../class_p4_1_1_p4_tools_1_1_abstract_execution_state.html#a62c647e35c1e932a8625974273ca1a73',1,'P4::P4Tools::AbstractExecutionState']]],
   ['assignvalues_148',['assignValues',['../class_p4_1_1_choose_error_representation.html#aa20a4fa1cbeb9a32f4f956cbf8bbd545',1,'P4::ChooseErrorRepresentation']]],
   ['atcam_5fmatch_149',['atcam_match',['../struct_i_x_bar_1_1_use.html#aa78f014f7fed83f797442e2a2645aecd',1,'IXBar::Use']]],
-  ['atcam_5fpartition_150',['atcam_partition',['../struct_i_x_bar_1_1_use.html#a07e4813aa52e95458b921904a05758e6',1,'IXBar::Use::atcam_partition()'],['../struct_tofino_1_1_i_x_bar_1_1_use.html#af8873a4c0714d759e92614d39fbda13c',1,'Tofino::IXBar::Use::atcam_partition()']]],
+  ['atcam_5fpartition_150',['atcam_partition',['../struct_i_x_bar_1_1_use.html#a07e4813aa52e95458b921904a05758e6',1,'IXBar::Use::atcam_partition()'],['../struct_tofino_1_1_i_x_bar_1_1_use.html#ab39e901ab1936202c593179036dc0225',1,'Tofino::IXBar::Use::atcam_partition()']]],
   ['available_5fspots_151',['available_spots',['../class_p_h_v_1_1_allocation.html#a629d9dae7262a33cfdf3a50eec9bd784',1,'PHV::Allocation']]],
   ['availbitsat_152',['availBitsAt',['../class_p_h_v_1_1_container_occupancy.html#afdc7a89f76793d2b95c19b7e745826c7',1,'PHV::ContainerOccupancy']]],
   ['average_5fcds_5fchain_5flength_153',['average_cds_chain_length',['../class_dynamic_dependency_metrics.html#ae25bb0da194fd21c9f8c1f587aefa68b',1,'DynamicDependencyMetrics']]]

@@ -1,4 +1,4 @@
-/* The standard CSS for doxygen 1.13.0*/
+/* The standard CSS for doxygen 1.13.2*/
 
 body {
     background-color: white;
@@ -338,8 +338,7 @@ pre.fragment {
         opacity: 0;
         position: absolute;
         display: inline;
-        overflow: auto;
-        fill: black;
+        overflow: hidden;
         justify-content: center;
         align-items: center;
         cursor: pointer;
@@ -351,7 +350,7 @@ pre.fragment {
 }
 
 .fragment:hover .clipboard, .clipboard.success {
-        opacity: .28;
+        opacity: .4;
 }
 
 .clipboard:hover, .clipboard.success {
