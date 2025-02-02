@@ -1,0 +1,9 @@
+<map id="BFN::GatewayControlFlow" name="BFN::GatewayControlFlow">
+<area shape="rect" id="Node000001" title=" " alt="" coords="20,152,213,177"/>
+<area shape="rect" id="Node000004" href="$class_exclude_m_a_u_not_mutex_headers.html" title="Walk through MAU in control flow order and find header level mutually exclusivity in the parser that ..." alt="" coords="5,225,228,251"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="119,191,119,225,114,225,114,191"/>
+<area shape="rect" id="Node000002" href="$class_p4_1_1_control_flow_visitor.html" title=" " alt="" coords="33,79,200,104"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="119,118,119,152,114,152,114,118"/>
+<area shape="rect" id="Node000003" href="$class_p4_1_1_visitor.html" title=" " alt="" coords="73,5,161,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="119,44,119,79,114,79,114,44"/>
+</map>

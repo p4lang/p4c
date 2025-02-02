@@ -1,0 +1,25 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,325,115,350"/>
+<area shape="rect" id="Node000001" href="$classassoc_1_1detail_1_1_cond_iterable_assoc_base.html" title=" " alt="" coords="188,11,415,80"/>
+<area shape="poly" id="edge2528_Node000000_Node000001" title=" " alt="" coords="63,311,73,265,91,208,120,148,139,120,161,95,186,76,189,81,164,99,143,123,125,151,96,210,78,266,68,312"/>
+<area shape="rect" id="Node000003" href="$classassoc_1_1detail_1_1_cond_iterable_assoc_base.html" title=" " alt="" coords="163,109,440,208"/>
+<area shape="poly" id="edge2530_Node000000_Node000003" title=" " alt="" coords="75,312,112,266,161,219,181,206,184,210,164,223,116,269,80,315"/>
+<area shape="rect" id="Node000005" href="$classassoc_1_1detail_1_1_cond_iterable_assoc_base.html" title=" " alt="" coords="173,233,430,332"/>
+<area shape="poly" id="edge2532_Node000000_Node000005" title=" " alt="" coords="127,319,172,309,173,314,129,325"/>
+<area shape="rect" id="Node000007" href="$classassoc_1_1detail_1_1_cond_iterable_assoc_base.html" title=" " alt="" coords="190,356,413,425"/>
+<area shape="poly" id="edge2534_Node000000_Node000007" title=" " alt="" coords="129,350,191,363,189,369,128,355"/>
+<area shape="rect" id="Node000009" href="$classassoc_1_1detail_1_1_cond_iterable_assoc_base.html" title=" " alt="" coords="198,449,405,548"/>
+<area shape="poly" id="edge2536_Node000000_Node000009" title=" " alt="" coords="83,359,119,397,164,435,199,456,197,460,161,440,115,401,79,363"/>
+<area shape="rect" id="Node000011" href="$class_field_slice_set.html" title="Implements comparisons correctly." alt="" coords="249,573,354,598"/>
+<area shape="poly" id="edge2538_Node000000_Node000011" title=" " alt="" coords="68,363,78,407,96,460,124,514,143,537,164,558,183,569,205,577,249,584,248,590,203,582,181,574,161,562,139,541,120,516,91,462,73,408,63,364"/>
+<area shape="rect" id="Node000002" href="$classassoc_1_1detail_1_1_cond_iterable_assoc.html" title=" " alt="" coords="533,5,736,75"/>
+<area shape="poly" id="edge2529_Node000001_Node000002" title=" " alt="" coords="429,41,533,39,533,44,429,46"/>
+<area shape="rect" id="Node000004" href="$classassoc_1_1detail_1_1_cond_iterable_assoc.html" title=" " alt="" coords="519,99,750,213"/>
+<area shape="poly" id="edge2531_Node000003_Node000004" title=" " alt="" coords="454,155,519,154,519,160,454,160"/>
+<area shape="rect" id="Node000006" href="$classassoc_1_1detail_1_1_cond_iterable_assoc.html" title=" " alt="" coords="506,237,763,336"/>
+<area shape="poly" id="edge2533_Node000005_Node000006" title=" " alt="" coords="444,282,506,282,505,288,443,287"/>
+<area shape="rect" id="Node000008" href="$classassoc_1_1detail_1_1_cond_iterable_assoc.html" title=" " alt="" coords="493,360,776,429"/>
+<area shape="poly" id="edge2535_Node000007_Node000008" title=" " alt="" coords="426,389,493,390,493,396,426,395"/>
+<area shape="rect" id="Node000010" href="$classassoc_1_1detail_1_1_cond_iterable_assoc.html" title=" " alt="" coords="488,457,781,541"/>
+<area shape="poly" id="edge2537_Node000009_Node000010" title=" " alt="" coords="419,496,488,496,488,501,419,501"/>
+</map>
