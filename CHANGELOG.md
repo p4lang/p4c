@@ -23,6 +23,29 @@ We follow a monthly release cadence. Our versioning scheme is as follows:
 > @note
 > The commit history prior to the release [1.2.2.1](https://github.com/p4lang/p4c/pull/3085) is not included here but is available in the [commit history](https://github.com/p4lang/p4c/commits/main/).
 
+## Release v1.2.5.3 [[view](https://github.com/p4lang/p4c/releases/tag/v1.2.5.3)]
+
+### What's Changed 🎉
+
+### Changes to the Compiler Core
+- Switch to Abseil symbolization / stack tracing routines [[view](https://github.com/p4lang/p4c/pull/5077)] (Anton Korobeynikov).
+- Add `P4::warningCount()` and `P4::infoCount()` [[view](https://github.com/p4lang/p4c/pull/5098)] (Vladimír Štill).
+- Move all config handling into a single `config.h` file [[view](https://github.com/p4lang/p4c/pull/5102)] (Anton Korobeynikov).
+- Fix duplication action name check and `LocalizeAllActions` [[view](https://github.com/p4lang/p4c/pull/4975)] (Andy Fingerhut).
+- Fix `EnumeratorHandle` compilation [[view](https://github.com/p4lang/p4c/pull/5109)] (Bili Dong).
+
+### Changes to the TC Back End
+- Small fixes for P4TC [[view](https://github.com/p4lang/p4c/pull/5097)] (vbnogueira).
+
+### Changes to the Tofino Back End
+- Fix class reference in Tofino 2 driver [[view](https://github.com/p4lang/p4c/pull/5103)] (Fabian Ruffy).
+
+### Other Changes
+- Remove occurrences of "confidential" and "proprietary" [[view](https://github.com/p4lang/p4c/pull/5112)] (Andy Fingerhut).
+- Update changelogs for v1.2.5.1 & v1.2.5.2 [[view](https://github.com/p4lang/p4c/pull/5117)] (Adarsh Rawat).
+- Bump Doxygen v1.13.0 -> v1.13.2 [[view](https://github.com/p4lang/p4c/pull/5116)] (Adarsh Rawat).
+- Automated Release v1.2.5.3 [[view](https://github.com/p4lang/p4c/pull/5118)] (GitHub Actions).
+
 ## Release v1.2.5.2 [[view](https://github.com/p4lang/p4c/releases/tag/v1.2.5.2)]
 
 ### Changes to the Compiler Core
