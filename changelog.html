@@ -138,9 +138,40 @@ Semantic Versioning</h2>
 <blockquote class="doxtable">
 <dl class="section note"><dt>Note</dt><dd>The commit history prior to the release <a href="https://github.com/p4lang/p4c/pull/3085">1.2.2.1</a> is not included here but is available in the <a href="https://github.com/p4lang/p4c/commits/main/">commit history</a>. </dd></dl>
 </blockquote>
+<h2><a class="anchor" id="release-v1253-viewhttpsgithubcomp4langp4creleasestagv1253"></a>
+Release v1.2.5.3 [<a href="https://github.com/p4lang/p4c/releases/tag/v1.2.5.3">view</a>]</h2>
+<h3><a class="anchor" id="whats-changed-"></a>
+What's Changed 🎉</h3>
+<h3><a class="anchor" id="changes-to-the-compiler-core"></a>
+Changes to the Compiler Core</h3>
+<ul>
+<li>Switch to Abseil symbolization / stack tracing routines [<a href="https://github.com/p4lang/p4c/pull/5077">view</a>] (Anton Korobeynikov).</li>
+<li>Add <code>P4::warningCount()</code> and <code>P4::infoCount()</code> [<a href="https://github.com/p4lang/p4c/pull/5098">view</a>] (Vladimír Štill).</li>
+<li>Move all config handling into a single <code>config.h</code> file [<a href="https://github.com/p4lang/p4c/pull/5102">view</a>] (Anton Korobeynikov).</li>
+<li>Fix duplication action name check and <code>LocalizeAllActions</code> [<a href="https://github.com/p4lang/p4c/pull/4975">view</a>] (Andy Fingerhut).</li>
+<li>Fix <code>EnumeratorHandle</code> compilation [<a href="https://github.com/p4lang/p4c/pull/5109">view</a>] (Bili Dong).</li>
+</ul>
+<h3><a class="anchor" id="changes-to-the-tc-back-end"></a>
+Changes to the TC Back End</h3>
+<ul>
+<li>Small fixes for P4TC [<a href="https://github.com/p4lang/p4c/pull/5097">view</a>] (vbnogueira).</li>
+</ul>
+<h3><a class="anchor" id="changes-to-the-tofino-back-end"></a>
+Changes to the Tofino Back End</h3>
+<ul>
+<li>Fix class reference in Tofino 2 driver [<a href="https://github.com/p4lang/p4c/pull/5103">view</a>] (Fabian Ruffy).</li>
+</ul>
+<h3><a class="anchor" id="other-changes"></a>
+Other Changes</h3>
+<ul>
+<li>Remove occurrences of "confidential" and "proprietary" [<a href="https://github.com/p4lang/p4c/pull/5112">view</a>] (Andy Fingerhut).</li>
+<li>Update changelogs for v1.2.5.1 &amp; v1.2.5.2 [<a href="https://github.com/p4lang/p4c/pull/5117">view</a>] (Adarsh Rawat).</li>
+<li>Bump Doxygen v1.13.0 -&gt; v1.13.2 [<a href="https://github.com/p4lang/p4c/pull/5116">view</a>] (Adarsh Rawat).</li>
+<li>Automated Release v1.2.5.3 [<a href="https://github.com/p4lang/p4c/pull/5118">view</a>] (GitHub Actions).</li>
+</ul>
 <h2><a class="anchor" id="release-v1252-viewhttpsgithubcomp4langp4creleasestagv1252"></a>
 Release v1.2.5.2 [<a href="https://github.com/p4lang/p4c/releases/tag/v1.2.5.2">view</a>]</h2>
-<h3><a class="anchor" id="changes-to-the-compiler-core"></a>
+<h3><a class="anchor" id="changes-to-the-compiler-core-1"></a>
 Changes to the Compiler Core</h3>
 <ul>
 <li>Fix <code>FlattenLogMsg</code> not properly working on nested structures [<a href="https://github.com/p4lang/p4c/pull/5036">view</a>] (Jiri Havranek).</li>
@@ -149,7 +180,7 @@ Changes to the Compiler Core</h3>
 <li>Ignore typeless structs in unstructured annotations [<a href="https://github.com/p4lang/p4c/pull/5058">view</a>] (Chris Dodd).</li>
 <li>Teach function inliner to inline into <code>if</code> conditions [<a href="https://github.com/p4lang/p4c/pull/5073">view</a>] (Anton Korobeynikov).</li>
 </ul>
-<h3><a class="anchor" id="changes-to-the-tc-back-end"></a>
+<h3><a class="anchor" id="changes-to-the-tc-back-end-1"></a>
 Changes to the TC Back End</h3>
 <ul>
 <li>Introduce the SKB metadata extern [<a href="https://github.com/p4lang/p4c/pull/4916">view</a>] (vbnogueira).</li>
@@ -159,7 +190,7 @@ Changes to the DPDK Back End</h3>
 <ul>
 <li>Added support for 128-bit constants usage in DPDK backend [<a href="https://github.com/p4lang/p4c/pull/5074">view</a>] (Maheswari Subramanian).</li>
 </ul>
-<h3><a class="anchor" id="changes-to-the-tofino-back-end"></a>
+<h3><a class="anchor" id="changes-to-the-tofino-back-end-1"></a>
 Changes to the Tofino Back End</h3>
 <ul>
 <li>Fix incorrect annotation parsing in Tofino [<a href="https://github.com/p4lang/p4c/pull/5051">view</a>] (Fabian Ruffy).</li>
@@ -170,7 +201,7 @@ Changes to the Tofino Back End</h3>
 <li>Remove <code>dynhash</code> library variable from Tofino library dependencies [<a href="https://github.com/p4lang/p4c/pull/5072">view</a>] (Fabian Ruffy).</li>
 <li>Add a <code>bf-asm</code> command line option alongside environment variables [<a href="https://github.com/p4lang/p4c/pull/5070">view</a>] (Fabian Ruffy).</li>
 </ul>
-<h3><a class="anchor" id="other-changes"></a>
+<h3><a class="anchor" id="other-changes-1"></a>
 Other Changes</h3>
 <ul>
 <li>Remove empty <code>v1.def</code> [<a href="https://github.com/p4lang/p4c/pull/5029">view</a>] (Fabian Ruffy).</li>
@@ -189,7 +220,7 @@ Breaking Changes 🛠</h3>
 <ul>
 <li>Use type-safe discriminated union for <code>Annotation</code> [<a href="https://github.com/p4lang/p4c/pull/5018">view</a>] (Anton Korobeynikov).</li>
 </ul>
-<h3><a class="anchor" id="changes-to-the-compiler-core-1"></a>
+<h3><a class="anchor" id="changes-to-the-compiler-core-2"></a>
 Changes to the Compiler Core</h3>
 <ul>
 <li>Remove some trivial memory leaks in codebase [<a href="https://github.com/p4lang/p4c/pull/5012">view</a>] (Anton Korobeynikov).</li>
@@ -198,12 +229,12 @@ Changes to the Compiler Core</h3>
 <li>Remove unnecessary PIE workaround [<a href="https://github.com/p4lang/p4c/pull/5044">view</a>] (Anton Korobeynikov).</li>
 <li>Add typed version of <code>isInContext()</code> and use it instead of <code>findContext()</code> [<a href="https://github.com/p4lang/p4c/pull/5048">view</a>] (Anton Korobeynikov).</li>
 </ul>
-<h3><a class="anchor" id="changes-to-the-tc-back-end-1"></a>
+<h3><a class="anchor" id="changes-to-the-tc-back-end-2"></a>
 Changes to the TC Back End</h3>
 <ul>
 <li>Generate JSON actions and keys fields array even when empty [<a href="https://github.com/p4lang/p4c/pull/5022">view</a>] (vbnogueira).</li>
 </ul>
-<h3><a class="anchor" id="changes-to-the-tofino-back-end-1"></a>
+<h3><a class="anchor" id="changes-to-the-tofino-back-end-2"></a>
 Changes to the Tofino Back End</h3>
 <ul>
 <li>Minor fix to Tofino CMake file [<a href="https://github.com/p4lang/p4c/pull/5016">view</a>] (Han Wang).</li>
@@ -211,7 +242,7 @@ Changes to the Tofino Back End</h3>
 <li>Fix multiple Tofino warnings [<a href="https://github.com/p4lang/p4c/pull/5007">view</a>] (Fabian Ruffy).</li>
 <li>Port Tofino dynamic hash to C++ [<a href="https://github.com/p4lang/p4c/pull/5043">view</a>] (Anton Korobeynikov).</li>
 </ul>
-<h3><a class="anchor" id="other-changes-1"></a>
+<h3><a class="anchor" id="other-changes-2"></a>
 Other Changes</h3>
 <ul>
 <li>Add Tofino to release workflow [<a href="https://github.com/p4lang/p4c/pull/5017">view</a>] (Fabian Ruffy).</li>
@@ -220,7 +251,7 @@ Other Changes</h3>
 </ul>
 <h2><a class="anchor" id="release-v1250-viewhttpsgithubcomp4langp4creleasestagv1251"></a>
 Release v1.2.5.0 [<a href="https://github.com/p4lang/p4c/releases/tag/v1.2.5.1">view</a>]</h2>
-<h3><a class="anchor" id="whats-changed-"></a>
+<h3><a class="anchor" id="whats-changed--1"></a>
 What's Changed 🎉</h3>
 <ul>
 <li>The Tofino compiler is now open-source and available as a P4C back end 🎉 [<a href="https://github.com/p4lang/p4c/pull/4964">view</a>] (Han Wang).</li>
@@ -236,7 +267,7 @@ P4 Specification Implementation</h3>
 <ul>
 <li>Bump compiler version to 1.2.5.0 [<a href="https://github.com/p4lang/p4c/pull/5005">view</a>] (Fabian Ruffy).</li>
 </ul>
-<h3><a class="anchor" id="changes-to-the-compiler-core-2"></a>
+<h3><a class="anchor" id="changes-to-the-compiler-core-3"></a>
 Changes to the Compiler Core</h3>
 <ul>
 <li>Fix broken Tofino build [<a href="https://github.com/p4lang/p4c/pull/5004">view</a>] (Fabian Ruffy).</li>
@@ -246,7 +277,7 @@ Changes to the BMv2 Back Ends</h3>
 <ul>
 <li>Enable handling of arbitrary <code>if</code> statements within actions for BMv2 back end [<a href="https://github.com/p4lang/p4c/pull/4999">view</a>] (Andy Fingerhut).</li>
 </ul>
-<h3><a class="anchor" id="changes-to-the-tc-back-end-2"></a>
+<h3><a class="anchor" id="changes-to-the-tc-back-end-3"></a>
 Changes to the TC Back End</h3>
 <ul>
 <li>Small TC fixes [<a href="https://github.com/p4lang/p4c/pull/5002">view</a>] (vbnogueira).</li>
@@ -256,14 +287,14 @@ Changes to the P4Tools Back End</h3>
 <ul>
 <li>Replace <code>absl::btree_map</code> with the <code>P4::flat_map</code> implementation in P4Testgen [<a href="https://github.com/p4lang/p4c/pull/4713">view</a>] (Fabian Ruffy).</li>
 </ul>
-<h3><a class="anchor" id="changes-to-the-tofino-back-end-2"></a>
+<h3><a class="anchor" id="changes-to-the-tofino-back-end-3"></a>
 Changes to the Tofino Back End</h3>
 <ul>
 <li>Miscellaneous small Tofino fixes for compilation [<a href="https://github.com/p4lang/p4c/pull/4996">view</a>] (Fabian Ruffy).</li>
 <li>Remove superfluous Tofino includes and make include paths fully qualified [<a href="https://github.com/p4lang/p4c/pull/4998">view</a>] (Fabian Ruffy).</li>
 <li>Fix Tofino backend issues due to recent annotations changes [<a href="https://github.com/p4lang/p4c/pull/5015">view</a>] (Anton Korobeynikov).</li>
 </ul>
-<h3><a class="anchor" id="other-changes-2"></a>
+<h3><a class="anchor" id="other-changes-3"></a>
 Other Changes</h3>
 <ul>
 <li>Remove <code>CMAKE_BUILD_TYPE</code> values that do not work when building Z3 [<a href="https://github.com/p4lang/p4c/pull/4997">view</a>] (Andy Fingerhut).</li>
@@ -283,7 +314,7 @@ P4 Specification Implementation</h3>
 <ul>
 <li>Support for [lsb+:width] slices [<a href="https://github.com/p4lang/p4c/pull/4917">view</a>] (Chris Dodd)</li>
 </ul>
-<h3><a class="anchor" id="changes-to-the-compiler-core-3"></a>
+<h3><a class="anchor" id="changes-to-the-compiler-core-4"></a>
 Changes to the Compiler Core</h3>
 <ul>
 <li>Fix parser symbolic interpreter to evaluate <code>StringLiteral</code> [<a href="https://github.com/p4lang/p4c/pull/4937">view</a>] (jhavrane)</li>
@@ -303,7 +334,7 @@ Changes to the BMv2 Back Ends</h3>
 <ul>
 <li>Clean up BMv2's <code>run-stf-test</code> script and integrate it with <code>testutils</code> [<a href="https://github.com/p4lang/p4c/pull/4981">view</a>] (fruffy)</li>
 </ul>
-<h3><a class="anchor" id="changes-to-the-tc-back-end-3"></a>
+<h3><a class="anchor" id="changes-to-the-tc-back-end-4"></a>
 Changes to the TC Back End</h3>
 <ul>
 <li>Change <code>tc</code> template define [<a href="https://github.com/p4lang/p4c/pull/4949">view</a>] (vbnogueira)</li>
@@ -323,7 +354,7 @@ Changes to the P4Tools Back End</h3>
 <li>[P4Testgen] Run typechecking after front and mid end [<a href="https://github.com/p4lang/p4c/pull/4834">view</a>] (fruffy)</li>
 <li>Build <code>Z3</code> from source instead of downloading precompiled binaries [<a href="https://github.com/p4lang/p4c/pull/4697">view</a>] (fruffy)</li>
 </ul>
-<h3><a class="anchor" id="other-changes-3"></a>
+<h3><a class="anchor" id="other-changes-4"></a>
 Other Changes</h3>
 <ul>
 <li>Ignore <code>brew</code> dependency installation to fix breakages on MacOS CI [<a href="https://github.com/p4lang/p4c/pull/4950">view</a>] (fruffy)</li>
@@ -347,7 +378,7 @@ Breaking Changes 🛠</h3>
 <ul>
 <li>Allow extending <code>ToP4</code>, clean its constructors [<a href="https://github.com/p4lang/p4c/pull/4899">view</a>] (Vladimír Štill)</li>
 </ul>
-<h3><a class="anchor" id="changes-to-the-compiler-core-4"></a>
+<h3><a class="anchor" id="changes-to-the-compiler-core-5"></a>
 Changes to the Compiler Core</h3>
 <ul>
 <li>Reduce the number of memory allocations in <code>def-use</code> [<a href="https://github.com/p4lang/p4c/pull/4904">view</a>] (asl)</li>
@@ -363,7 +394,7 @@ Changes to the Compiler Core</h3>
 <li>Fix <code>Type_Indexed::at</code> [<a href="https://github.com/p4lang/p4c/pull/4927">view</a>] (Chris Dodd)</li>
 <li>Make <code>--top4</code> matching case-insensitive [<a href="https://github.com/p4lang/p4c/pull/4924">view</a>] (fruffy)</li>
 </ul>
-<h3><a class="anchor" id="changes-to-the-tc-back-end-4"></a>
+<h3><a class="anchor" id="changes-to-the-tc-back-end-5"></a>
 Changes to the TC Back End</h3>
 <ul>
 <li>Add <code>inst_type</code> field in <code>introspection.json</code> [<a href="https://github.com/p4lang/p4c/pull/4905">view</a>] (komaljai)</li>
@@ -375,7 +406,7 @@ Changes to the P4Tools Back End</h3>
 <li>[P4Testgen] Unify compiler and tool options; ensure options context is initialized correctly [<a href="https://github.com/p4lang/p4c/pull/4787">view</a>] (fruffy)</li>
 <li>[P4Tools] Clean up use of <code>P4</code> prefix for errors, warnings, and logs [<a href="https://github.com/p4lang/p4c/pull/4930">view</a>] (fruffy)</li>
 </ul>
-<h3><a class="anchor" id="other-changes-4"></a>
+<h3><a class="anchor" id="other-changes-5"></a>
 Other Changes</h3>
 <ul>
 <li>Bump <code>peter-evans/create-pull-request</code> from 6 to 7 [<a href="https://github.com/p4lang/p4c/pull/4903">view</a>] (dependabot)</li>
@@ -396,7 +427,7 @@ P4 Specification Implementation</h3>
 <ul>
 <li>Allow concatenation of string literals at compile time [<a href="https://github.com/p4lang/p4c/pull/4856">view</a>] (Vladimír Štill)</li>
 </ul>
-<h3><a class="anchor" id="changes-to-the-compiler-core-5"></a>
+<h3><a class="anchor" id="changes-to-the-compiler-core-6"></a>
 Changes to the Compiler Core</h3>
 <ul>
 <li>Ensure correct overload for <code>diagnose()</code> is called even in <code>Transform</code> context [<a href="https://github.com/p4lang/p4c/pull/4830">view</a>] (asl)</li>
@@ -422,7 +453,7 @@ Changes to the BMv2 Back Ends</h3>
 <ul>
 <li>Fix incorrect BMv2 include [<a href="https://github.com/p4lang/p4c/pull/4843">view</a>] (fruffy)</li>
 </ul>
-<h3><a class="anchor" id="changes-to-the-tc-back-end-5"></a>
+<h3><a class="anchor" id="changes-to-the-tc-back-end-6"></a>
 Changes to the TC Back End</h3>
 <ul>
 <li>Support of <code>Digest</code> extern in P4TC [<a href="https://github.com/p4lang/p4c/pull/4842">view</a>] (Komal Jain)</li>
@@ -439,7 +470,7 @@ Changes to the P4Tools Back End</h3>
 <li>[P4Tools] Clean up the P4Tools GTest infrastructure [<a href="https://github.com/p4lang/p4c/pull/4841">view</a>] (fruffy)</li>
 <li>[P4Smith] Remove stray print in the smith code [<a href="https://github.com/p4lang/p4c/pull/4891">view</a>] (fruffy)</li>
 </ul>
-<h3><a class="anchor" id="other-changes-5"></a>
+<h3><a class="anchor" id="other-changes-6"></a>
 Other Changes</h3>
 <ul>
 <li>Docs: Changelog release update for v1.2.4.14 [<a href="https://github.com/p4lang/p4c/pull/4849">view</a>] (Adarsh Rawat)</li>
@@ -468,7 +499,7 @@ P4 Specification Implementation</h3>
 <ul>
 <li>Forbid case-after-default, tweak error messages [<a href="https://github.com/p4lang/p4c/pull/4831">view</a>] (Vladimír Štill)</li>
 </ul>
-<h3><a class="anchor" id="changes-to-the-compiler-core-6"></a>
+<h3><a class="anchor" id="changes-to-the-compiler-core-7"></a>
 Changes to the Compiler Core</h3>
 <ul>
 <li>Improve cstring cache internals [<a href="https://github.com/p4lang/p4c/pull/4780">view</a>] (Anton Korobeynikov)</li>
@@ -497,7 +528,7 @@ Changes to the BMv2 Back Ends</h3>
 <li>Move ProgramStructure out the BMv2 folder such that it can be used in other back ends. [<a href="https://github.com/p4lang/p4c/pull/4770">view</a>] (Fabian Ruffy)</li>
 <li>Add skeleton implementation for BMv2 PNA Backend [<a href="https://github.com/p4lang/p4c/pull/4729">view</a>] (rupesh-chiluka-marvell)</li>
 </ul>
-<h3><a class="anchor" id="changes-to-the-tc-back-end-6"></a>
+<h3><a class="anchor" id="changes-to-the-tc-back-end-7"></a>
 Changes to the TC Back End</h3>
 <ul>
 <li>Support of InternetChecksum in P4TC [<a href="https://github.com/p4lang/p4c/pull/4782">view</a>] (Komal Jain)</li>
@@ -515,7 +546,7 @@ Changes to the P4Tools Back End</h3>
 <li>[P4Testgen] Fix problems with the reachability pass. [<a href="https://github.com/p4lang/p4c/pull/4789">view</a>] (Fabian Ruffy)</li>
 <li>Replace boost::container::flat_map with absl::btree_map in P4Tools. [<a href="https://github.com/p4lang/p4c/pull/4768">view</a>] (Fabian Ruffy)</li>
 </ul>
-<h3><a class="anchor" id="other-changes-6"></a>
+<h3><a class="anchor" id="other-changes-7"></a>
 Other Changes</h3>
 <ul>
 <li>Docs : Changelogs release update for v1.2.4.13 [<a href="https://github.com/p4lang/p4c/pull/4788">view</a>] (Adarsh Rawat)</li>
@@ -542,7 +573,7 @@ Breaking Changes 🛠</h3>
 <li>cstring-related cleanup, switch to std::string_view for some cstring API [<a href="https://github.com/p4lang/p4c/pull/4716">view</a>].</li>
 <li>Remove ReferenceMap recalculation (almost) everywhere and switch to more fine-grained solutions [<a href="https://github.com/p4lang/p4c/pull/4757">view</a>].</li>
 </ul>
-<h3><a class="anchor" id="changes-to-the-compiler-core-7"></a>
+<h3><a class="anchor" id="changes-to-the-compiler-core-8"></a>
 Changes to the Compiler Core</h3>
 <ul>
 <li>Refactor error_helper and around [<a href="https://github.com/p4lang/p4c/pull/4686">view</a>].</li>
@@ -554,7 +585,7 @@ Changes to the Compiler Core</h3>
 <li>[#4760] Create empty SetOfLocations for don't care arguments passed as action out args [<a href="https://github.com/p4lang/p4c/pull/4762">view</a>].</li>
 <li>Delete unused RemoveComplexExpressions pass. [<a href="https://github.com/p4lang/p4c/pull/4771">view</a>].</li>
 </ul>
-<h3><a class="anchor" id="changes-to-the-tc-back-end-7"></a>
+<h3><a class="anchor" id="changes-to-the-tc-back-end-8"></a>
 Changes to the TC Back End</h3>
 <ul>
 <li>P4TC - Support for DirectCounter extern [<a href="https://github.com/p4lang/p4c/pull/4711">view</a>].</li>
@@ -573,7 +604,7 @@ Changes to the P4Tools Back End</h3>
 <li>Add P4Smith, a random program generator to the P4Tools framework [<a href="https://github.com/p4lang/p4c/pull/4182">view</a>].</li>
 <li>[P4Smith] Fix broken links in Smith README [<a href="https://github.com/p4lang/p4c/pull/4754">view</a>].</li>
 </ul>
-<h3><a class="anchor" id="other-changes-7"></a>
+<h3><a class="anchor" id="other-changes-8"></a>
 Other Changes</h3>
 <ul>
 <li>Configure: DOXYGEN for documentation generation [<a href="https://github.com/p4lang/p4c/pull/4701">view</a>].</li>
@@ -616,7 +647,7 @@ P4 Specification Implementation</h3>
 <li>[#4656] Explicitly delay constant folding of only action enum <code>IR::SwitchCase</code> <code>label</code> expressions, instead of delaying constant folding of all <code>IR::Mux</code> expressions [<a href="https://github.com/p4lang/p4c/pull/4657">view</a>]</li>
 <li>Changes for for loops [<a href="https://github.com/p4lang/p4c/pull/4562">view</a>]</li>
 </ul>
-<h3><a class="anchor" id="changes-to-the-compiler-core-8"></a>
+<h3><a class="anchor" id="changes-to-the-compiler-core-9"></a>
 Changes to the Compiler Core</h3>
 <ul>
 <li>Use check_include_file_cxx instead of check_include_file to find mm_malloc.h [<a href="https://github.com/p4lang/p4c/pull/4649">view</a>]</li>
@@ -644,7 +675,7 @@ Changes to the eBPF Back Ends</h3>
 <ul>
 <li>Fix missing declaration of custom externs in the generated eBPF/uBPF header file. [<a href="https://github.com/p4lang/p4c/pull/4644">view</a>]</li>
 </ul>
-<h3><a class="anchor" id="changes-to-the-tc-back-end-8"></a>
+<h3><a class="anchor" id="changes-to-the-tc-back-end-9"></a>
 Changes to the TC Back End</h3>
 <ul>
 <li>Support for Register Extern in P4TC [<a href="https://github.com/p4lang/p4c/pull/4671">view</a>]</li>
@@ -656,7 +687,7 @@ Changes to the P4Tools Back End</h3>
 <ul>
 <li>Merge TestgenCompilerTarget into TestgenTarget. [<a href="https://github.com/p4lang/p4c/pull/4650">view</a>]</li>
 </ul>
-<h3><a class="anchor" id="other-changes-8"></a>
+<h3><a class="anchor" id="other-changes-9"></a>
 Other Changes</h3>
 <ul>
 <li>Change parameter for kfunc 'bpf_p4tc_entry_create_on_miss' [<a href="https://github.com/p4lang/p4c/pull/4637">view</a>]</li>
@@ -669,7 +700,7 @@ Other Changes</h3>
 <p><a href="https://github.com/p4lang/p4c/compare/v1.2.4.11...v1.2.4.12">Click here to find Full Changelog</a></p>
 <h2><a class="anchor" id="release-v12411-viewhttpsgithubcomp4langp4cpull4646"></a>
 Release v1.2.4.11 [<a href="https://github.com/p4lang/p4c/pull/4646">view</a>]</h2>
-<h3><a class="anchor" id="changes-to-the-compiler-core-9"></a>
+<h3><a class="anchor" id="changes-to-the-compiler-core-10"></a>
 Changes to the Compiler Core</h3>
 <ul>
 <li>Introduce guard for aarch64 GCC compilation. [<a href="https://github.com/p4lang/p4c/pull/4647">view</a>]</li>
@@ -692,7 +723,7 @@ Changes to the eBPF Back Ends</h3>
 <ul>
 <li>Do not swallow the test output when checking for the static binary functionality. [<a href="https://github.com/p4lang/p4c/pull/4601">view</a>]</li>
 </ul>
-<h3><a class="anchor" id="changes-to-the-tc-back-end-9"></a>
+<h3><a class="anchor" id="changes-to-the-tc-back-end-10"></a>
 Changes to the TC Back End</h3>
 <ul>
 <li>Handle Arithmetic operations for fields which are in network order [<a href="https://github.com/p4lang/p4c/pull/4566">view</a>]</li>
@@ -705,7 +736,7 @@ Changes to the P4Tools Back End</h3>
 <ul>
 <li>Miscellaneous cleanups for P4Testgen. [<a href="https://github.com/p4lang/p4c/pull/4613">view</a>]</li>
 </ul>
-<h3><a class="anchor" id="other-changes-9"></a>
+<h3><a class="anchor" id="other-changes-10"></a>
 Other Changes</h3>
 <ul>
 <li>Add -mbmi flag to Abseil for GCC versions greater than 14. [<a href="https://github.com/p4lang/p4c/pull/4638">view</a>]</li>

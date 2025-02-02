@@ -1,7 +1,7 @@
 var searchData=
 [
   ['s_0',['Known issue(s)',['..//home/runner/work/p4c/p4c/backends/tofino/bf-p4c/phv/v2/README.md#known-issues-2',1,'']]],
-  ['s_20changed_20🎉_1',['What&apos;s Changed 🎉',['../changelog.html#whats-changed-',1,'']]],
+  ['s_20changed_20🎉_1',['s Changed 🎉',['../changelog.html#whats-changed-',1,'What&apos;s Changed 🎉'],['../changelog.html#whats-changed--1',1,'What&apos;s Changed 🎉']]],
   ['s_20output_2',['Compiler&apos;s output',['..//home/runner/work/p4c/p4c/backends/tofino/bf-p4c/README.md#compilers-output',1,'']]],
   ['s_5fid_3',['s_id',['../class_p4_1_1_match_register.html#a812670be5b5770b879bcfcaf7612be08',1,'P4::MatchRegister']]],
   ['safe_20code_4',['Safe code',['../ebpf_backend.html#safe-code',1,'']]],

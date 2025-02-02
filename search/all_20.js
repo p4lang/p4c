@@ -13,7 +13,7 @@ var searchData=
   ['way_10',['Way',['../struct_i_x_bar_1_1_use_1_1_way.html',1,'IXBar::Use::Way'],['../struct_memories_1_1_use_1_1_way.html',1,'Memories::Use::Way']]],
   ['ways_5fprovided_11',['ways_provided',['../struct_stage_use_estimate.html#ab5b59e0358d2ad32bba859c49466a95f',1,'StageUseEstimate']]],
   ['weight_20percentage_12',['|   Stage  |  Table Name  |   Always Run   |     Weight     |   Percentage   |',['../class_mau_power_1_1_walk_power_graph.html#autotoc_md---stage----table-name-----always-run--------weight--------percentage---',1,'']]],
-  ['what_20s_20changed_20🎉_13',['What&apos;s Changed 🎉',['../changelog.html#whats-changed-',1,'']]],
+  ['what_20s_20changed_20🎉_13',['What s Changed 🎉',['../changelog.html#whats-changed-',1,'What&apos;s Changed 🎉'],['../changelog.html#whats-changed--1',1,'What&apos;s Changed 🎉']]],
   ['when_20there_20are_20no_20other_20bar_20suffixes_14',['&quot;ingress::foo.bar&quot; when there are no other &quot;bar&quot; suffixes.',['../class_phv_info.html#ingressfoobar-when-there-are-no-other-bar-suffixes',1,'']]],
   ['where_15',['where',['../class_p4_1_1_util_1_1_enumerator.html#aee029cc96a5ce334991e5c24092e7335',1,'P4::Util::Enumerator']]],
   ['who_16',['who',['../class_pragma_alias.html#a6d3ccbc1bca578ee4bacf1b10c94895e',1,'PragmaAlias::AliasDestination']]],
