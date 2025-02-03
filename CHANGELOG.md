@@ -23,6 +23,89 @@ We follow a monthly release cadence. Our versioning scheme is as follows:
 > @note
 > The commit history prior to the release [1.2.2.1](https://github.com/p4lang/p4c/pull/3085) is not included here but is available in the [commit history](https://github.com/p4lang/p4c/commits/main/).
 
+## Release v1.2.5.3 [[view](https://github.com/p4lang/p4c/releases/tag/v1.2.5.3)]
+
+### What's Changed 🎉
+
+### Changes to the Compiler Core
+- Switch to Abseil symbolization / stack tracing routines [[view](https://github.com/p4lang/p4c/pull/5077)] (Anton Korobeynikov).
+- Add `P4::warningCount()` and `P4::infoCount()` [[view](https://github.com/p4lang/p4c/pull/5098)] (Vladimír Štill).
+- Move all config handling into a single `config.h` file [[view](https://github.com/p4lang/p4c/pull/5102)] (Anton Korobeynikov).
+- Fix duplication action name check and `LocalizeAllActions` [[view](https://github.com/p4lang/p4c/pull/4975)] (Andy Fingerhut).
+- Fix `EnumeratorHandle` compilation [[view](https://github.com/p4lang/p4c/pull/5109)] (Bili Dong).
+
+### Changes to the TC Back End
+- Small fixes for P4TC [[view](https://github.com/p4lang/p4c/pull/5097)] (vbnogueira).
+
+### Changes to the Tofino Back End
+- Fix class reference in Tofino 2 driver [[view](https://github.com/p4lang/p4c/pull/5103)] (Fabian Ruffy).
+
+### Other Changes
+- Remove occurrences of "confidential" and "proprietary" [[view](https://github.com/p4lang/p4c/pull/5112)] (Andy Fingerhut).
+- Update changelogs for v1.2.5.1 & v1.2.5.2 [[view](https://github.com/p4lang/p4c/pull/5117)] (Adarsh Rawat).
+- Bump Doxygen v1.13.0 -> v1.13.2 [[view](https://github.com/p4lang/p4c/pull/5116)] (Adarsh Rawat).
+- Automated Release v1.2.5.3 [[view](https://github.com/p4lang/p4c/pull/5118)] (GitHub Actions).
+
+## Release v1.2.5.2 [[view](https://github.com/p4lang/p4c/releases/tag/v1.2.5.2)]
+
+### Changes to the Compiler Core
+- Fix `FlattenLogMsg` not properly working on nested structures [[view](https://github.com/p4lang/p4c/pull/5036)] (Jiri Havranek).
+- Add checks to annotation getters [[view](https://github.com/p4lang/p4c/pull/5052)] (Fabian Ruffy).
+- Mark RTTI methods as `const` / `pure` to enable compiler optimizations [[view](https://github.com/p4lang/p4c/pull/5049)] (Anton Korobeynikov).
+- Ignore typeless structs in unstructured annotations [[view](https://github.com/p4lang/p4c/pull/5058)] (Chris Dodd).
+- Teach function inliner to inline into `if` conditions [[view](https://github.com/p4lang/p4c/pull/5073)] (Anton Korobeynikov).
+
+### Changes to the TC Back End
+- Introduce the SKB metadata extern [[view](https://github.com/p4lang/p4c/pull/4916)] (vbnogueira).
+
+### Changes to the DPDK Back End
+- Added support for 128-bit constants usage in DPDK backend [[view](https://github.com/p4lang/p4c/pull/5074)] (Maheswari Subramanian).
+
+### Changes to the Tofino Back End
+- Fix incorrect annotation parsing in Tofino [[view](https://github.com/p4lang/p4c/pull/5051)] (Fabian Ruffy).
+- Remove unnecessary file lists from Tofino CMake [[view](https://github.com/p4lang/p4c/pull/5039)] (Fabian Ruffy).
+- Add a flag to enable `bf-asm` for Open P4Studio [[view](https://github.com/p4lang/p4c/pull/5056)] (Prathima Kotikalapudi).
+- Clean up Tofino dynamic hash library [[view](https://github.com/p4lang/p4c/pull/5059)] (Fabian Ruffy).
+- Fix missing indentation in `bfasm`-related commands [[view](https://github.com/p4lang/p4c/pull/5069)] (Fabian Ruffy).
+- Remove `dynhash` library variable from Tofino library dependencies [[view](https://github.com/p4lang/p4c/pull/5072)] (Fabian Ruffy).
+- Add a `bf-asm` command line option alongside environment variables [[view](https://github.com/p4lang/p4c/pull/5070)] (Fabian Ruffy).
+
+### Other Changes
+- Remove empty `v1.def` [[view](https://github.com/p4lang/p4c/pull/5029)] (Fabian Ruffy).
+- Update documentation: Changelogs for v1.2.5.0 [[view](https://github.com/p4lang/p4c/pull/5045)] (Adarsh Rawat).
+- Upgrade to Bazel 7.4.1 [[view](https://github.com/p4lang/p4c/pull/5071)] (John Cater).
+- Remove obsolete implicit attribute `_cc_toolchain` [[view](https://github.com/p4lang/p4c/pull/5062)] (John Cater).
+- Clean up `clang-format` and add a `.clangd` configuration [[view](https://github.com/p4lang/p4c/pull/5075)] (Fabian Ruffy).
+- Remove unused test files from `testdata` [[view](https://github.com/p4lang/p4c/pull/5079)] (Andy Fingerhut).
+- Bump Doxygen v1.12.0 -> v1.13.0 [[view](https://github.com/p4lang/p4c/pull/5080)] (Adarsh Rawat).
+- Automated Release v1.2.5.2 [[view](https://github.com/p4lang/p4c/pull/5081)] (GitHub Actions).
+
+## Release v1.2.5.1 [[view](https://github.com/p4lang/p4c/releases/tag/v1.2.5.1)]
+
+### Breaking Changes 🛠
+- Use type-safe discriminated union for `Annotation` [[view](https://github.com/p4lang/p4c/pull/5018)] (Anton Korobeynikov).
+
+### Changes to the Compiler Core
+- Remove some trivial memory leaks in codebase [[view](https://github.com/p4lang/p4c/pull/5012)] (Anton Korobeynikov).
+- Fix `modifyAllMatching` visitor helper [[view](https://github.com/p4lang/p4c/pull/5020)] (Vladimír Štill).
+- Inline some IR methods and constructors [[view](https://github.com/p4lang/p4c/pull/5030)] (Anton Korobeynikov).
+- Remove unnecessary PIE workaround [[view](https://github.com/p4lang/p4c/pull/5044)] (Anton Korobeynikov).
+- Add typed version of `isInContext()` and use it instead of `findContext()` [[view](https://github.com/p4lang/p4c/pull/5048)] (Anton Korobeynikov).
+
+### Changes to the TC Back End
+- Generate JSON actions and keys fields array even when empty [[view](https://github.com/p4lang/p4c/pull/5022)] (vbnogueira).
+
+### Changes to the Tofino Back End
+- Minor fix to Tofino CMake file [[view](https://github.com/p4lang/p4c/pull/5016)] (Han Wang).
+- More Tofino include fixes [[view](https://github.com/p4lang/p4c/pull/5006)] (Fabian Ruffy).
+- Fix multiple Tofino warnings [[view](https://github.com/p4lang/p4c/pull/5007)] (Fabian Ruffy).
+- Port Tofino dynamic hash to C++ [[view](https://github.com/p4lang/p4c/pull/5043)] (Anton Korobeynikov).
+
+### Other Changes
+- Add Tofino to release workflow [[view](https://github.com/p4lang/p4c/pull/5017)] (Fabian Ruffy).
+- Fix Mac dependency installation [[view](https://github.com/p4lang/p4c/pull/5028)] (Fabian Ruffy).
+- Automated Release v1.2.5.1 [[view](https://github.com/p4lang/p4c/pull/5040)] (GitHub Actions).
+
 ## Release v1.2.5.0 [[view](https://github.com/p4lang/p4c/releases/tag/v1.2.5.1)]
 
 ### What's Changed 🎉
