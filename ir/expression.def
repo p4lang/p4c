@@ -74,6 +74,9 @@ class Mul : Operation_Binary {
     precedence = DBPrint::Prec_Mul;
 }
 class MulAssign : OpAssignmentStatement {
+#emit
+    typedef Mul binop_t;
+#end
     stringOp = "*";
 #nodbprint
 }
@@ -83,6 +86,9 @@ class Div : Operation_Binary {
     precedence = DBPrint::Prec_Div;
 }
 class DivAssign : OpAssignmentStatement {
+#emit
+    typedef Div binop_t;
+#end
     stringOp = "/";
 #nodbprint
 }
@@ -91,6 +97,9 @@ class Mod : Operation_Binary {
     precedence = DBPrint::Prec_Mod;
 }
 class ModAssign : OpAssignmentStatement {
+#emit
+    typedef Mod binop_t;
+#end
     stringOp = "%";
 #nodbprint
 }
@@ -99,6 +108,9 @@ class Add : Operation_Binary {
     precedence = DBPrint::Prec_Add;
 }
 class AddAssign : OpAssignmentStatement {
+#emit
+    typedef Add binop_t;
+#end
     stringOp = "+";
 #nodbprint
 }
@@ -107,6 +119,9 @@ class Sub : Operation_Binary {
     precedence = DBPrint::Prec_Sub;
 }
 class SubAssign : OpAssignmentStatement {
+#emit
+    typedef Sub binop_t;
+#end
     stringOp = "-";
 #nodbprint
 }
@@ -115,6 +130,9 @@ class AddSat : Operation_Binary {
     precedence = DBPrint::Prec_AddSat;
 }
 class AddSatAssign : OpAssignmentStatement {
+#emit
+    typedef AddSat binop_t;
+#end
     stringOp = "|+|";
 #nodbprint
 }
@@ -123,6 +141,9 @@ class SubSat : Operation_Binary {
     precedence = DBPrint::Prec_SubSat;
 }
 class SubSatAssign : OpAssignmentStatement {
+#emit
+    typedef SubSat binop_t;
+#end
     stringOp = "|-|";
 #nodbprint
 }
@@ -132,6 +153,9 @@ class Shl : Operation_Binary {
     inline Shl { if (type->is<Type::Unknown>() && left) type = left->type; }
 }
 class ShlAssign : OpAssignmentStatement {
+#emit
+    typedef Shl binop_t;
+#end
     stringOp = "<<";
 #nodbprint
 }
@@ -141,6 +165,9 @@ class Shr : Operation_Binary {
     inline Shr { if (type->is<Type::Unknown>() && left) type = left->type; }
 }
 class ShrAssign : OpAssignmentStatement {
+#emit
+    typedef Shr binop_t;
+#end
     stringOp = ">>";
 #nodbprint
 }
@@ -173,6 +200,9 @@ class BAnd : Operation_Binary {
     precedence = DBPrint::Prec_BAnd;
 }
 class BAndAssign : OpAssignmentStatement {
+#emit
+    typedef BAnd binop_t;
+#end
     stringOp = "&";
 #nodbprint
 }
@@ -181,6 +211,9 @@ class BOr : Operation_Binary {
     precedence = DBPrint::Prec_BOr;
 }
 class BOrAssign : OpAssignmentStatement {
+#emit
+    typedef BOr binop_t;
+#end
     stringOp = "|";
 #nodbprint
 }
@@ -189,6 +222,9 @@ class BXor : Operation_Binary {
     precedence = DBPrint::Prec_BXor;
 }
 class BXorAssign : OpAssignmentStatement {
+#emit
+    typedef BXor binop_t;
+#end
     stringOp = "^";
 #nodbprint
 }

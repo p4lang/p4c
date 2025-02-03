@@ -45,7 +45,6 @@ set (P4_FRONTEND_SRCS
   p4/parserControlFlow.cpp
   p4/reassociation.cpp
   p4/redundantParsers.cpp
-  p4/removeOpAssign.cpp
   p4/removeParameters.cpp
   p4/removeReturns.cpp
   p4/reservedWords.cpp
