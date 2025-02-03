@@ -117,6 +117,10 @@ Negative tests are those where the P4 compiler is expected to catch a syntax or 
 
 ## **3. Handling Different Backends and Tools**
 
+ 
+
+
+
 - **Different Backends**: The P4C repository supports multiple backends like BMv2, PSA, etc. Each backend may require tests to be placed in specific directories and may generate backend-specific outputs. 
 
 - **Tools**: Tools like `p4testgen` may introduce additional test workflows and configurations.
@@ -198,6 +202,34 @@ This will display all the commands and their descriptions that you can use with 
 - **Recommendation**: Document the preferred approach for specific use cases in the repository README or this guide.
 
 ---
+
+
+## P4 Architecture Support Across Backends
+
+### PSA is an Architecture, Not a Target
+The PSA (Portable Switch Architecture) is a P4 architecture, not a target. Different backends implement different architectures depending on their intended use cases.
+
+### Backend Support for P4 Architectures
+The table below summarizes which architectures are supported by different P4 backends:
+
+| Backend  | v1model | PSA | PNA |
+|----------|--------|-----|-----|
+| BMv2     | ✅ (full) | ⚠️ (partial) | ⚠️ (partial) |
+| DPDK     | ❌ | ✅ | ✅ |
+| eBPF     | ❌ | ✅ | ❌ |
+| UBPF     | ❌ | ✅ | ❌ |
+| P4Tools  | ✅ | ✅ | ❌ |
+
+**Legend:**
+- ✅ = Fully supported  
+- ⚠️ = Partially supported  
+- ❌ = Not supported  
+
+### Notes on Backend Implementations
+- **BMv2**: Primarily supports v1model but has partial implementations for PSA and PNA.  
+- **DPDK**: Implements PSA and PNA but does not support v1model.  
+- **eBPF & UBPF**: Only implement PSA.  
+- **P4Tools**: Has support for both v1model and PSA, as indicated by test files. 
 
 ## **Conclusion**
 
