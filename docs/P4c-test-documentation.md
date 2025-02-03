@@ -38,12 +38,16 @@ Positive tests are those where the P4 compiler should process the input without 
 
 2. **File Naming Conventions**:
 
-   - For BMv2-specific tests with packets, the source file name must match the pattern `*-bmv2.p4`.
+   - For **BMv2-specific tests** with packets, the source file name must match the pattern `*-bmv2.p4`.
+  - For **v1model architecture** tests: `*-bmv2-v1model.p4`.
+
+  - For **PSA architecture** tests: `*-bmv2-psa.p4`.
+  
    - Additional file name patterns:
      - For eBPF-specific tests: `*_ebpf.p4` or `*_ebpf-kernel.p4`.
      - For graph backend tests: `*graph*.p4`.
      - For UBPF-specific tests: `*_ubpf.p4`.
-     - For PSA tests targeting BMv2: `*-bmv2.p4`.
+
      - Other specialized tests under subdirectories such as:
        - `p4tc_samples/` for TC tests.
        - `fabric_*/` and `omec/` for Fabric and OMEC tests.
@@ -58,12 +62,6 @@ Positive tests are those where the P4 compiler should process the input without 
      ```bash
      ./build/p4test path/to/source_file.p4
      ```
-   - To generate or update the expected output file for a single test case, use:
-     ```bash
-     P4TEST_REPLACE=1 ./build/p4test path/to/source_file.p4
-     ```
-   - This will regenerate the expected output file for the specific test case.
-   - Place the generated expected output files in the appropriate directory, such as `p4c/testdata/p4_16_samples_outputs`.
 
    - If you need to regenerate expected output files for all test cases, use:
      ```bash
