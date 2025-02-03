@@ -47,6 +47,7 @@ bool hasVarbitsOrUnions(const TypeMap *typeMap, const IR::Type *type) {
 
 bool TypeInferenceBase::onlyBitsOrBitStructs(const IR::Type *type) const {
     // called for a canonical type
+    while (auto *st = type->to<IR::Type_Stack>()) type = st->elementType;
     if (type->is<IR::Type_Bits>() || type->is<IR::Type_Boolean>() || type->is<IR::Type_SerEnum>()) {
         return true;
     } else if (auto ht = type->to<IR::Type_Struct>()) {
@@ -426,17 +427,8 @@ const IR::Node *TypeInferenceBase::postorder(const IR::StructField *field) {
 const IR::Node *TypeInferenceBase::postorder(const IR::Type_Header *type) {
     auto canon = setTypeType(type);
     auto validator = [this](const IR::Type *t) {
-        while (1) {
-            if (t->is<IR::Type_Newtype>())
-                t = getTypeType(t->to<IR::Type_Newtype>()->type);
-            else if (auto *st = t->to<IR::Type_Stack>())
-                t = st->elementType;
-            else
-                break;
-        }
-        return t->is<IR::Type_Bits>() || t->is<IR::Type_Varbits>() ||
-               (t->is<IR::Type_Struct>() && onlyBitsOrBitStructs(t)) || t->is<IR::Type_SerEnum>() ||
-               t->is<IR::Type_Boolean>() || t->is<IR::Type_Var>() ||
+        while (t->is<IR::Type_Newtype>()) t = getTypeType(t->to<IR::Type_Newtype>()->type);
+        return onlyBitsOrBitStructs(t) || t->is<IR::Type_Varbits>() || t->is<IR::Type_Var>() ||
                t->is<IR::Type_SpecializedCanonical>();
     };
     validateFields(canon, validator);
