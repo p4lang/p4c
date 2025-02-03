@@ -249,7 +249,7 @@ var searchData=
   ['doxygen_20comments_20style_20guide_246',['Doxygen Comments Style Guide',['../repository_structure.html#doxygen-comments-style-guide',1,'']]],
   ['doxygen_20documentation_247',['Building the Doxygen documentation',['../repository_structure.html#building-the-doxygen-documentation',1,'']]],
   ['dp_5fpacket_248',['dp_packet',['../structdp__packet.html',1,'']]],
-  ['dpdk_20back_20end_249',['DPDK Back End',['../changelog.html#changes-to-the-dpdk-back-end',1,'Changes to the DPDK Back End'],['../changelog.html#changes-to-the-dpdk-back-end-1',1,'Changes to the DPDK Back End']]],
+  ['dpdk_20back_20end_249',['DPDK Back End',['../changelog.html#changes-to-the-dpdk-back-end',1,'Changes to the DPDK Back End'],['../changelog.html#changes-to-the-dpdk-back-end-1',1,'Changes to the DPDK Back End'],['../changelog.html#changes-to-the-dpdk-back-end-2',1,'Changes to the DPDK Back End']]],
   ['dpdk_20backend_250',['DPDK Backend',['../dpdk_backend.html',1,'']]],
   ['dpdk_20softnic_251',['DPDK SoftNIC',['../p4smith.html#pnap4-on-the-dpdk-softnic',1,'pna.p4 on the DPDK SoftNIC'],['../p4testgen.html#pnap4-on-the-dpdk-softnic-1',1,'pna.p4 on the DPDK SoftNIC']]],
   ['dpdk_20target_20limitations_252',['DPDK target limitations',['../dpdk_backend.html#dpdk-target-limitations',1,'']]],
