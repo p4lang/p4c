@@ -153,10 +153,8 @@ p4tools_add_xfail_reason(
   # mau-meter.cpp:233 (calculate_output): error -2 thrown.
   # large_counter_meter.p4
   # TODO
-  tna_simple_switch.p4
   # tna_alpmV2.p4
   # varbit_four_options.p4
-
 )
 
 # New tests added
@@ -287,6 +285,7 @@ p4tools_add_xfail_reason(
 p4tools_add_xfail_reason(
   "testgen-tofino-ptf"
   "The validity bit of .* is tainted"
+  tna_simple_switch.p4
 )
 
 p4tools_add_xfail_reason(

@@ -146,7 +146,7 @@ p4tools_add_xfail_reason(
   "testgen-tofino2"
   "shorter than expected"
   # Strange behavior with packets that are too short when using the STF model.
-  tna_extract_emit_8.p4
+  # tna_extract_emit_8.p4
 )
 
 p4tools_add_xfail_reason(
