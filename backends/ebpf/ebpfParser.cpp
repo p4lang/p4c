@@ -185,17 +185,17 @@ bool StateTranslationVisitor::preorder(const IR::SelectExpression *expression) {
     BUG_CHECK(expression->select->components.size() == 1, "%1%: tuple not eliminated in select",
               expression->select);
     selectValue = state->parser->program->refMap->newName("select");
-    auto type = state->parser->program->typeMap->getType(expression->select, true);
-    if (auto list = type->to<IR::Type_List>()) {
+    selectType = state->parser->program->typeMap->getType(expression->select, true);
+    if (auto list = selectType->to<IR::Type_List>()) {
         BUG_CHECK(list->components.size() == 1, "%1% list type with more than 1 element", list);
-        type = list->components.at(0);
+        selectType = list->components.at(0);
     }
-    auto etype = EBPFTypeFactory::instance->create(type);
+    auto etype = EBPFTypeFactory::instance->create(selectType);
     builder->emitIndent();
     etype->declare(builder, selectValue, false);
     builder->endOfStatement(true);
 
-    emitAssignStatement(type, nullptr, selectValue, expression->select->components.at(0));
+    emitAssignStatement(selectType, nullptr, selectValue, expression->select->components.at(0));
     builder->newline();
 
     // Init value_sets

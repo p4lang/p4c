@@ -133,10 +133,10 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
                 goto reject;
             }
 
-            hdr->eth.dstAddr = (u64)((load_dword(pkt, BYTES(ebpf_packetOffsetInBits)) >> 16) & EBPF_MASK(u64, 48));
+            storePrimitive64((u8 *)&hdr->eth.dstAddr, 48, (u64)((load_dword(pkt, BYTES(ebpf_packetOffsetInBits)) >> 16) & EBPF_MASK(u64, 48)));
             ebpf_packetOffsetInBits += 48;
 
-            hdr->eth.srcAddr = (u64)((load_dword(pkt, BYTES(ebpf_packetOffsetInBits)) >> 16) & EBPF_MASK(u64, 48));
+            storePrimitive64((u8 *)&hdr->eth.srcAddr, 48, (u64)((load_dword(pkt, BYTES(ebpf_packetOffsetInBits)) >> 16) & EBPF_MASK(u64, 48)));
             ebpf_packetOffsetInBits += 48;
 
             hdr->eth.etherType = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));
