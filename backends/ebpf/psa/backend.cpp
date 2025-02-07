@@ -61,7 +61,7 @@ void PSASwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     main->apply(*parsePsaArch);
     program = toplevel->getProgram();
 
-    EBPFTypeFactory::createFactory(typeMap);
+    EBPFTypeFactory::createFactory(typeMap, false);
     auto *convertToEbpfPSA = new ConvertToEbpfPSA(options, refMap, typeMap);
     PassManager toEBPF = {
         new P4::DiscoverStructure(&structure),

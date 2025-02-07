@@ -32,7 +32,7 @@ void emitFilterModel(const EbpfOptions &options, Target *target, const IR::Tople
     CodeBuilder c(target);
     CodeBuilder h(target);
 
-    EBPFTypeFactory::createFactory(typeMap);
+    EBPFTypeFactory::createFactory(typeMap, false);
     auto ebpfprog = new EBPFProgram(options, toplevel->getProgram(), refMap, typeMap, toplevel);
     if (!ebpfprog->build()) return;
 
