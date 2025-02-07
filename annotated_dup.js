@@ -772,6 +772,7 @@ var annotated_dup =
         [ "EBPFRandomPSA", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_random_p_s_a.html", null ],
         [ "EBPFRegisterPSA", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_register_p_s_a.html", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_register_p_s_a" ],
         [ "EBPFScalarType", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_scalar_type.html", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_scalar_type" ],
+        [ "EBPFScalarTypePNA", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_scalar_type_p_n_a.html", null ],
         [ "EBPFStackType", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_stack_type.html", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_stack_type" ],
         [ "EBPFStructType", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_struct_type.html", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_struct_type" ],
         [ "EBPFTable", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_table.html", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_table" ],

@@ -1718,6 +1718,7 @@ var hierarchy =
               [ "P4::UBPF::UBPFErrorType", "class_p4_1_1_u_b_p_f_1_1_u_b_p_f_error_type.html", null ]
             ] ],
             [ "P4::EBPF::EBPFScalarType", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_scalar_type.html", [
+              [ "P4::EBPF::EBPFScalarTypePNA", "class_p4_1_1_e_b_p_f_1_1_e_b_p_f_scalar_type_p_n_a.html", null ],
               [ "P4::UBPF::UBPFExternType", "class_p4_1_1_u_b_p_f_1_1_u_b_p_f_extern_type.html", null ],
               [ "P4::UBPF::UBPFScalarType", "class_p4_1_1_u_b_p_f_1_1_u_b_p_f_scalar_type.html", null ]
             ] ],
