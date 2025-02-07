@@ -2,10 +2,6 @@
 
 ## Documentation
 
-Documentation on using the assembler, notes on file formats, and internals are
-in [Google Drive > Barefoot shared > documents > Software > Assembler]
-(https://drive.google.com/drive/folders/0Byf8esgFy8YacmNzMmZiSkN4OFU)
-
 ## Setup
 
 The repository contains code for the Barefoot assembler (bfas) and linker (walle).

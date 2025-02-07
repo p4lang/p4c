@@ -15,14 +15,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_P4_TABLE_H_
-#define BF_ASM_P4_TABLE_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_P4_TABLE_H_
+#define BACKENDS_TOFINO_BF_ASM_P4_TABLE_H_
 
 #include <map>
 #include <string>
 
 #include "asm-types.h"
-#include "json.h"
+#include "backends/tofino/bf-asm/json.h"
 
 class Table;
 class P4Table;
@@ -91,4 +91,4 @@ class P4Table {
     static std::string direction_name(gress_t);
 };
 
-#endif /* BF_ASM_P4_TABLE_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_P4_TABLE_H_ */

@@ -15,10 +15,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_HASHEXPR_H_
-#define BF_ASM_HASHEXPR_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_HASHEXPR_H_
+#define BACKENDS_TOFINO_BF_ASM_HASHEXPR_H_
 
-#include "dynamic_hash/dynamic_hash.h"
+#include "backends/tofino/bf-utils/dynamic_hash/dynamic_hash.h"
 #include "input_xbar.h"
 #include "phv.h"
 
@@ -74,4 +74,4 @@ class HashExpr : public IHasDbPrint {
 extern void dump(const HashExpr *);
 extern void dump(const HashExpr &);
 
-#endif /* BF_ASM_HASHEXPR_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_HASHEXPR_H_ */

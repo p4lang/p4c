@@ -15,13 +15,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_TOFINO_INPUT_XBAR_H_
-#define BF_ASM_TOFINO_INPUT_XBAR_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_TOFINO_INPUT_XBAR_H_
+#define BACKENDS_TOFINO_BF_ASM_TOFINO_INPUT_XBAR_H_
 
-#include <input_xbar.h>
+#include "backends/tofino/bf-asm/input_xbar.h"
 
 template <>
 void InputXbar::write_galois_matrix(Target::Tofino::mau_regs &regs, HashTable id,
                                     const std::map<int, HashCol> &mat);
 
-#endif /* BF_ASM_TOFINO_INPUT_XBAR_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_TOFINO_INPUT_XBAR_H_ */

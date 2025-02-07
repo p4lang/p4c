@@ -15,13 +15,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_ESCAPE_H_
-#define BF_ASM_ESCAPE_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_ESCAPE_H_
+#define BACKENDS_TOFINO_BF_ASM_ESCAPE_H_
 
 #include <iomanip>
 #include <iostream>
 
-#include "hex.h"
+#include "lib/hex.h"
 
 class escape {
     std::string str;
@@ -53,4 +53,4 @@ inline std::ostream &operator<<(std::ostream &os, escape e) {
     return os;
 }
 
-#endif /* BF_ASM_ESCAPE_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_ESCAPE_H_ */

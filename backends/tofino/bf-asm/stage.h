@@ -15,17 +15,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_STAGE_H_
-#define BF_ASM_STAGE_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_STAGE_H_
+#define BACKENDS_TOFINO_BF_ASM_STAGE_H_
 
 #include <fstream>
 #include <vector>
 
 #include "alloc.h"
-#include "bitvec.h"
+#include "lib/bitvec.h"
 #include "error_mode.h"
 #include "input_xbar.h"
-#include "tables.h"
+#include "backends/tofino/bf-asm/tables.h"
 
 class Stage_data {
     /* we encapsulate all the Stage non-static fields in a base class to automate the
@@ -224,4 +224,4 @@ class AsmStage : public Section {
     }
 };
 
-#endif /* BF_ASM_STAGE_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_STAGE_H_ */

@@ -16,8 +16,8 @@
  */
 
 #include "parser-tofino-jbay.h"
-#include "stage.h"
-#include "tables.h"
+#include "backends/tofino/bf-asm/stage.h"
+#include "backends/tofino/bf-asm/tables.h"
 
 DEFINE_TABLE_TYPE(Phase0MatchTable)
 

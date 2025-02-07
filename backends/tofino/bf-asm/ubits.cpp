@@ -20,8 +20,8 @@
 #include <map>
 #include <sstream>
 
-#include "hex.h"
-#include "log.h"
+#include "lib/hex.h"
+#include "lib/log.h"
 
 struct regrange {
     const char *base;

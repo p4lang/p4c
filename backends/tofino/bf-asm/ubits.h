@@ -15,8 +15,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_UBITS_H_  //  NOLINT(build/header_guard)
-#define BF_ASM_UBITS_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_UBITS_H_  //  NOLINT(build/header_guard)
+#define BACKENDS_TOFINO_BF_ASM_UBITS_H_
 
 #include <inttypes.h>
 #include <limits.h>
@@ -26,8 +26,8 @@
 #include <iostream>
 #include <sstream>
 
-#include "bitvec.h"
-#include "log.h"
+#include "lib/bitvec.h"
+#include "lib/log.h"
 
 using namespace P4;
 
@@ -175,4 +175,4 @@ struct ubits : ubits_base {
     }
 };
 
-#endif /* BF_ASM_UBITS_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_UBITS_H_ */

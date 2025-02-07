@@ -247,17 +247,17 @@ class Target {
     static int numMauStagesOverride;
 };
 
-#include "gen/tofino/memories.pipe_addrmap.h"
-#include "gen/tofino/memories.pipe_top_level.h"
-#include "gen/tofino/memories.prsr_mem_main_rspec.h"
-#include "gen/tofino/regs.dprsr_hdr.h"
-#include "gen/tofino/regs.dprsr_inp.h"
-#include "gen/tofino/regs.ebp_rspec.h"
-#include "gen/tofino/regs.ibp_rspec.h"
-#include "gen/tofino/regs.mau_addrmap.h"
-#include "gen/tofino/regs.pipe_addrmap.h"
-#include "gen/tofino/regs.prsr_reg_merge_rspec.h"
-#include "gen/tofino/regs.tofino.h"
+#include "backends/tofino/bf-asm/gen/tofino/memories.pipe_addrmap.h"
+#include "backends/tofino/bf-asm/gen/tofino/memories.pipe_top_level.h"
+#include "backends/tofino/bf-asm/gen/tofino/memories.prsr_mem_main_rspec.h"
+#include "backends/tofino/bf-asm/gen/tofino/regs.dprsr_hdr.h"
+#include "backends/tofino/bf-asm/gen/tofino/regs.dprsr_inp.h"
+#include "backends/tofino/bf-asm/gen/tofino/regs.ebp_rspec.h"
+#include "backends/tofino/bf-asm/gen/tofino/regs.ibp_rspec.h"
+#include "backends/tofino/bf-asm/gen/tofino/regs.mau_addrmap.h"
+#include "backends/tofino/bf-asm/gen/tofino/regs.pipe_addrmap.h"
+#include "backends/tofino/bf-asm/gen/tofino/regs.prsr_reg_merge_rspec.h"
+#include "backends/tofino/bf-asm/gen/tofino/regs.tofino.h"
 
 class Target::Tofino : public Target {
  public:
@@ -423,17 +423,17 @@ void undeclare_registers(const Target::Tofino::deparser_regs *regs);
 void emit_parser_registers(const Target::Tofino::top_level_regs *regs, std::ostream &);
 
 #if HAVE_JBAY
-#include "gen/jbay/memories.jbay_mem.h"
-#include "gen/jbay/memories.pipe_addrmap.h"
-#include "gen/jbay/memories.prsr_mem_main_rspec.h"
-#include "gen/jbay/regs.dprsr_reg.h"
-#include "gen/jbay/regs.epb_prsr4_reg.h"
-#include "gen/jbay/regs.ipb_prsr4_reg.h"
-#include "gen/jbay/regs.jbay_reg.h"
-#include "gen/jbay/regs.mau_addrmap.h"
-#include "gen/jbay/regs.pipe_addrmap.h"
-#include "gen/jbay/regs.pmerge_reg.h"
-#include "gen/jbay/regs.prsr_reg_main_rspec.h"
+#include "backends/tofino/bf-asm/gen/jbay/memories.jbay_mem.h"
+#include "backends/tofino/bf-asm/gen/jbay/memories.pipe_addrmap.h"
+#include "backends/tofino/bf-asm/gen/jbay/memories.prsr_mem_main_rspec.h"
+#include "backends/tofino/bf-asm/gen/jbay/regs.dprsr_reg.h"
+#include "backends/tofino/bf-asm/gen/jbay/regs.epb_prsr4_reg.h"
+#include "backends/tofino/bf-asm/gen/jbay/regs.ipb_prsr4_reg.h"
+#include "backends/tofino/bf-asm/gen/jbay/regs.jbay_reg.h"
+#include "backends/tofino/bf-asm/gen/jbay/regs.mau_addrmap.h"
+#include "backends/tofino/bf-asm/gen/jbay/regs.pipe_addrmap.h"
+#include "backends/tofino/bf-asm/gen/jbay/regs.pmerge_reg.h"
+#include "backends/tofino/bf-asm/gen/jbay/regs.prsr_reg_main_rspec.h"
 
 class Target::JBay : public Target {
  public:

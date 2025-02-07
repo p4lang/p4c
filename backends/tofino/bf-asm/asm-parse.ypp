@@ -17,10 +17,10 @@
 
 %{
 #define YYDEBUG 1
-#include "asm-types.h"
+#include "backends/tofino/bf-asm/asm-types.h"
 #include <cinttypes>
 #include <string.h>
-#include "sections.h"
+#include "backends/tofino/bf-asm/sections.h"
 #include <map>
 #include <string>
 static int yylex();
@@ -370,7 +370,7 @@ error_resync: /* epsilon */ | error_resync indent_elements { free_value(&$2); }
 #pragma GCC diagnostic ignored "-Wpragmas"
 #pragma GCC diagnostic ignored "-Wdeprecated-register"
 #pragma GCC diagnostic ignored "-Wsign-compare"
-#include "lex-yaml.c"
+#include "backends/tofino/bf-asm/lex-yaml.c"
 #pragma GCC diagnostic pop
 
 int error_count = 0;

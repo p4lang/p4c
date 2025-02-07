@@ -15,7 +15,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "stateful.h"
+#include "backends/tofino/bf-asm/tofino/stateful.h"
 
 int StatefulTable::parse_counter_mode(Target::Tofino target, const value_t &v) {
     if (v != "counter") return -1;

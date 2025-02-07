@@ -22,10 +22,10 @@
 #include <string>
 #include <vector>
 
-#include "misc.h"
-#include "parser-tofino-jbay.h"
-#include "target.h"
-#include "top_level.h"
+#include "backends/tofino/bf-asm/misc.h"
+#include "backends/tofino/bf-asm/parser-tofino-jbay.h"
+#include "backends/tofino/bf-asm/target.h"
+#include "backends/tofino/bf-asm/top_level.h"
 
 // ----------------------------------------------------------------------------
 // Slots & Useful constants

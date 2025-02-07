@@ -17,7 +17,7 @@
 
 #include "error_mode.h"
 
-#include "stage.h"
+#include "backends/tofino/bf-asm/stage.h"
 
 DefaultErrorMode DefaultErrorMode::singleton;
 

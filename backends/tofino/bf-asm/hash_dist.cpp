@@ -19,8 +19,8 @@
 
 #include <config.h>
 
-#include "range.h"
-#include "stage.h"
+#include "lib/range.h"
+#include "backends/tofino/bf-asm/stage.h"
 
 static void set_output_bit(unsigned &xbar_use, value_t &v) {
     if (CHECKTYPE(v, tSTR)) {

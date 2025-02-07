@@ -15,7 +15,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "tables.h"
+#include "backends/tofino/bf-asm/tables.h"
 
 #include <config.h>
 
@@ -23,11 +23,11 @@
 #include <string>
 
 #include "action_bus.h"
-#include "algorithm.h"
+#include "lib/algorithm.h"
 #include "input_xbar.h"
 #include "instruction.h"
 #include "misc.h"
-#include "stage.h"
+#include "backends/tofino/bf-asm/stage.h"
 
 // template specialization declarations
 

@@ -16,13 +16,13 @@
  */
 
 #include "action_bus.h"
-#include "algorithm.h"
-#include "hex.h"
+#include "lib/algorithm.h"
+#include "lib/hex.h"
 #include "input_xbar.h"
 #include "instruction.h"
 #include "misc.h"
-#include "stage.h"
-#include "tables.h"
+#include "backends/tofino/bf-asm/stage.h"
+#include "backends/tofino/bf-asm/tables.h"
 
 void AlgTcamMatchTable::setup(VECTOR(pair_t) & data) {
     common_init_setup(data, false, P4Table::MatchEntry);

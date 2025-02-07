@@ -15,8 +15,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_MAP_H_
-#define BF_ASM_MAP_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_MAP_H_
+#define BACKENDS_TOFINO_BF_ASM_MAP_H_
 
 #include <map>
 
@@ -252,4 +252,4 @@ MapForKey<M> ValuesForKey(M &m, typename M::key_type k) {
     return MapForKey<M>(m, k);
 }
 
-#endif /* BF_ASM_MAP_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_MAP_H_ */

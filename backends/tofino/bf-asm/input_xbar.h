@@ -15,14 +15,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_INPUT_XBAR_H_
-#define BF_ASM_INPUT_XBAR_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_INPUT_XBAR_H_
+#define BACKENDS_TOFINO_BF_ASM_INPUT_XBAR_H_
 
 #include <fstream>
 
+#include "backends/tofino/bf-utils/dynamic_hash/dynamic_hash.h"
 #include "constants.h"
-#include "dynamic_hash/dynamic_hash.h"
-#include "ordered_map.h"
+#include "lib/ordered_map.h"
 #include "phv.h"
 
 class Table;
@@ -364,4 +364,4 @@ inline std::ostream &operator<<(std::ostream &out, InputXbar::HashTable ht) {
     return out << " hashtable " << ht.index;
 }
 
-#endif /* BF_ASM_INPUT_XBAR_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_INPUT_XBAR_H_ */

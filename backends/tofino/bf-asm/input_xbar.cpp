@@ -23,16 +23,16 @@
 #include <fstream>
 
 #include "hashexpr.h"
-#include "log.h"
+#include "lib/log.h"
 #include "misc.h"
 #include "power_ctl.h"
-#include "range.h"
-#include "stage.h"
-#include "tables.h"
+#include "lib/range.h"
+#include "backends/tofino/bf-asm/stage.h"
+#include "backends/tofino/bf-asm/tables.h"
 
 // template specialization declarations
-#include "jbay/input_xbar.h"
-#include "tofino/input_xbar.h"
+#include "backends/tofino/bf-asm/jbay/input_xbar.h"
+#include "backends/tofino/bf-asm/tofino/input_xbar.h"
 
 void HashCol::dbprint(std::ostream &out) const {
     out << "HashCol: " << " lineno: " << lineno << " bit: " << bit << " data: " << data

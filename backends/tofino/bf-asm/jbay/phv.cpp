@@ -15,7 +15,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "phv.h"
+#include "backends/tofino/bf-asm/jbay/phv.h"
 
 void Target::JBay::Phv::init_regs(::Phv &phv) {
     // Allocating JBay regs so the uids map to mau register encodings

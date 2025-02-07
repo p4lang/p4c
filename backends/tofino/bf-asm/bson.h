@@ -20,7 +20,7 @@
 
 #include <type_traits>
 
-#include "json.h"
+#include "backends/tofino/bf-asm/json.h"
 
 namespace json {
 

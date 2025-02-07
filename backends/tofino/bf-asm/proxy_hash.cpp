@@ -16,8 +16,8 @@
  */
 
 #include "input_xbar.h"
-#include "stage.h"
-#include "tables.h"
+#include "backends/tofino/bf-asm/stage.h"
+#include "backends/tofino/bf-asm/tables.h"
 
 void ProxyHashMatchTable::setup(VECTOR(pair_t) & data) {
     common_init_setup(data, false, P4Table::MatchEntry);

@@ -20,8 +20,8 @@
 #include <string>
 
 #include "bfas.h"
-#include "json.h"
-#include "log.h"
+#include "backends/tofino/bf-asm/json.h"
+#include "lib/log.h"
 #include "sections.h"
 
 class Primitives : public Section {

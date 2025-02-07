@@ -19,14 +19,14 @@
 
 #include <config.h>
 
-#include "algorithm.h"
+#include "lib/algorithm.h"
 #include "constants.h"
 #include "misc.h"
-#include "ordered_set.h"
+#include "lib/ordered_set.h"
 #include "phv.h"
-#include "range.h"
-#include "stage.h"
-#include "target.h"
+#include "lib/range.h"
+#include "backends/tofino/bf-asm/stage.h"
+#include "backends/tofino/bf-asm/target.h"
 #include "top_level.h"
 #include "vector.h"
 

@@ -15,14 +15,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_INSTRUCTION_H_
-#define BF_ASM_INSTRUCTION_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_INSTRUCTION_H_
+#define BACKENDS_TOFINO_BF_ASM_INSTRUCTION_H_
 
 #include <config.h>
 
 #include <functional>
 
-#include "tables.h"
+#include "backends/tofino/bf-asm/tables.h"
 
 struct Instruction : public IHasDbPrint {
     int lineno;
@@ -72,4 +72,4 @@ std::unique_ptr<Instruction> genNoopFill(Table *tbl, Table::Actions::Action *act
                                          int slot);
 }
 
-#endif /* BF_ASM_INSTRUCTION_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_INSTRUCTION_H_ */

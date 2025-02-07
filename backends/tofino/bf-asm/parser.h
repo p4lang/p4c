@@ -15,13 +15,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_PARSER_H_
-#define BF_ASM_PARSER_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_PARSER_H_
+#define BACKENDS_TOFINO_BF_ASM_PARSER_H_
 
 #include "asm-types.h"
-#include "json.h"
+#include "backends/tofino/bf-asm/json.h"
 #include "sections.h"
-#include "target.h"
+#include "backends/tofino/bf-asm/target.h"
 #include "vector.h"
 
 /**
@@ -42,4 +42,4 @@ class BaseAsmParser : public Section {
     explicit BaseAsmParser(const char *name_) : Section(name_) {}
 };
 
-#endif /* BF_ASM_PARSER_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_PARSER_H_ */

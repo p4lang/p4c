@@ -15,8 +15,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_JBAY_COUNTER_H_
-#define BF_ASM_JBAY_COUNTER_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_JBAY_COUNTER_H_
+#define BACKENDS_TOFINO_BF_ASM_JBAY_COUNTER_H_
 
 template <typename REGS>
 void CounterTable::setup_teop_regs_2(REGS &regs, int stats_group_index) {
@@ -118,4 +118,4 @@ void CounterTable::write_alu_vpn_range(Target::JBay::mau_regs &regs) {
     write_alu_vpn_range_2(regs);
 }
 
-#endif /* BF_ASM_JBAY_COUNTER_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_JBAY_COUNTER_H_ */

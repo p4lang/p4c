@@ -15,8 +15,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_ALIAS_ARRAY_H_
-#define BF_ASM_ALIAS_ARRAY_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_ALIAS_ARRAY_H_
+#define BACKENDS_TOFINO_BF_ASM_ALIAS_ARRAY_H_
 
 #include <stdlib.h>
 
@@ -139,4 +139,4 @@ class alias_array : public alias_array_base<T> {
     }
 };
 
-#endif /* BF_ASM_ALIAS_ARRAY_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_ALIAS_ARRAY_H_ */

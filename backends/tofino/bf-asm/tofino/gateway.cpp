@@ -15,12 +15,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "gateway.h"
+#include "backends/tofino/bf-asm/tofino/gateway.h"
 
-#include "hashexpr.h"
-#include "hex.h"
-#include "stage.h"
-#include "ternary_match.h"
+#include "backends/tofino/bf-asm/hashexpr.h"
+#include "backends/tofino/bf-asm/stage.h"
+#include "backends/tofino/bf-asm/tofino/ternary_match.h"
+#include "lib/hex.h"
 
 /* Tofino1/2 Gateway table support
  * GatewayTable uses the Table::Layout in a somewhat hacky way to track the gateway match

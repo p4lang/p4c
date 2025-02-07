@@ -390,19 +390,19 @@ def generate_cPlusPlus_file(outfile, top_level, args, schema, file_basename):
     for incl in args.include:
         outfile.write('#include "%s"\n' % incl)
     if args.emit_json or args.emit_fieldname or args.dump_unread:
-        outfile.write('#include "indent.h"\n')
+        outfile.write('#include "lib/indent.h"\n')
     if args.unpack_json:
-        outfile.write('#include "json.h"\n')
+        outfile.write('#include "backends/tofino/bf-asm/json.h"\n')
     if args.alias_array:
-        outfile.write('#include "alias_array.h"\n')
+        outfile.write('#include "backends/tofino/bf-asm/alias_array.h"\n')
     if args.checked_array:
-        outfile.write('#include "checked_array.h"\n')
+        outfile.write('#include "backends/tofino/bf-asm/checked_array.h"\n')
     if args.emit_binary:
-        outfile.write('#include "binary_output.h"\n')
-    outfile.write('#include "ubits.h"\n')
-    outfile.write('#include "register_reference.h"\n')
+        outfile.write('#include "backends/tofino/bf-asm/binary_output.h"\n')
+    outfile.write('#include "backends/tofino/bf-asm/ubits.h"\n')
+    outfile.write('#include "backends/tofino/bf-asm/register_reference.h"\n')
     if args.widereg:
-        outfile.write('#include "widereg.h"\n')
+        outfile.write('#include "backends/tofino/bf-asm/widereg.h"\n')
     outfile.write('\n')
     outfile.write("using namespace P4;")
     if len(args.global_types) > 0:

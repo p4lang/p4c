@@ -15,8 +15,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_SECTIONS_H_
-#define BF_ASM_SECTIONS_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_SECTIONS_H_
+#define BACKENDS_TOFINO_BF_ASM_SECTIONS_H_
 
 #include <stdarg.h>
 
@@ -24,7 +24,7 @@
 
 #include "asm-types.h"
 #include "bfas.h"
-#include "json.h"
+#include "backends/tofino/bf-asm/json.h"
 #include "map.h"
 
 /// A Section represents a top level section in assembly
@@ -101,4 +101,4 @@ class Section : virtual public Parsable, virtual public Contextable {
     static Section *test_get(const char *name) { return get(name); }
 };
 
-#endif /* BF_ASM_SECTIONS_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_SECTIONS_H_ */

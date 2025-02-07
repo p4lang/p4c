@@ -15,8 +15,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_GTEST_REGISTER_MATCHER_H_
-#define BF_ASM_GTEST_REGISTER_MATCHER_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_GTEST_REGISTER_MATCHER_H_
+#define BACKENDS_TOFINO_BF_ASM_GTEST_REGISTER_MATCHER_H_
 
 #include <cstdint>
 #include <iosfwd>
@@ -64,4 +64,4 @@ class RegisterMatcher {
         }                                                                                       \
     } while (false)
 
-#endif /* BF_ASM_GTEST_REGISTER_MATCHER_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_GTEST_REGISTER_MATCHER_H_ */

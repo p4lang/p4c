@@ -15,8 +15,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_FDSTREAM_H_
-#define BF_ASM_FDSTREAM_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_FDSTREAM_H_
+#define BACKENDS_TOFINO_BF_ASM_FDSTREAM_H_
 
 #include <sys/socket.h>
 #include <sys/types.h>
@@ -58,4 +58,4 @@ class fdstream : public std::iostream {
     void setclose(std::function<void()> fn) { closefn = fn; }
 };
 
-#endif /* BF_ASM_FDSTREAM_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_FDSTREAM_H_ */

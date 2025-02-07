@@ -19,9 +19,9 @@
 
 #include <config.h>
 
-#include "hex.h"
+#include "lib/hex.h"
 #include "misc.h"
-#include "stage.h"
+#include "backends/tofino/bf-asm/stage.h"
 
 static MeterBus_t MeterBus;
 

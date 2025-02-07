@@ -15,10 +15,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_JBAY_PHV_H_
-#define BF_ASM_JBAY_PHV_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_JBAY_PHV_H_
+#define BACKENDS_TOFINO_BF_ASM_JBAY_PHV_H_
 
-#include "../phv.h"
+#include "backends/tofino/bf-asm/phv.h"
 
 class Target::JBay::Phv : public Target::Phv {
     friend class ::Phv;
@@ -53,4 +53,4 @@ class Target::Tofino2A0::Phv : public Target::JBay::Phv {
     target_t type() const override { return TOFINO2A0; }
 };
 
-#endif /* BF_ASM_JBAY_PHV_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_JBAY_PHV_H_ */

@@ -17,14 +17,14 @@
 
 #include "tofino/stateful.h"
 
-#include "algorithm.h"
+#include "lib/algorithm.h"
 #include "data_switchbox.h"
 #include "input_xbar.h"
 #include "instruction.h"
 #include "jbay/stateful.h"
 #include "misc.h"
-#include "stage.h"
-#include "tables.h"
+#include "backends/tofino/bf-asm/stage.h"
+#include "backends/tofino/bf-asm/tables.h"
 
 void StatefulTable::parse_register_params(int idx, const value_t &val) {
     if (idx < 0 || idx > Target::STATEFUL_REGFILE_ROWS())

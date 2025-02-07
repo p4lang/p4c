@@ -23,8 +23,8 @@
 #include "misc.h"
 #include "parser-tofino-jbay.h"
 #include "phv.h"
-#include "range.h"
-#include "target.h"
+#include "lib/range.h"
+#include "backends/tofino/bf-asm/target.h"
 #include "top_level.h"
 #include "ubits.h"
 

@@ -15,8 +15,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_VECTOR_H_
-#define BF_ASM_VECTOR_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_VECTOR_H_
+#define BACKENDS_TOFINO_BF_ASM_VECTOR_H_
 
 /* C code and macros for VECTOR objects similar to C++ std::vector */
 #include <stddef.h>
@@ -226,4 +226,4 @@ extern int shrink_raw_vector(void *vec, size_t elsize);
 }
 #endif
 
-#endif /* BF_ASM_VECTOR_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_VECTOR_H_ */

@@ -15,8 +15,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_HASH_DIST_H_
-#define BF_ASM_HASH_DIST_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_HASH_DIST_H_
+#define BACKENDS_TOFINO_BF_ASM_HASH_DIST_H_
 
 #include <vector>
 
@@ -58,4 +58,4 @@ struct HashDistribution {
     void write_regs(REGS &regs, Table *);
 };
 
-#endif /* BF_ASM_HASH_DIST_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_HASH_DIST_H_ */

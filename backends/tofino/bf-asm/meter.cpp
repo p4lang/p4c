@@ -18,8 +18,8 @@
 #include "data_switchbox.h"
 #include "input_xbar.h"
 #include "misc.h"
-#include "stage.h"
-#include "tables.h"
+#include "backends/tofino/bf-asm/stage.h"
+#include "backends/tofino/bf-asm/tables.h"
 
 // target specific template specializations
 #include "tofino/meter.h"
