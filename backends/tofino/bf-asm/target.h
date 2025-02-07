@@ -18,9 +18,8 @@
 #ifndef TARGET_H_
 #define TARGET_H_
 
-#include <config.h>
-
 #include "asm-types.h"
+#include "backends/tofino/bf-asm/config.h"
 #include "bfas.h"
 #include "map.h"
 

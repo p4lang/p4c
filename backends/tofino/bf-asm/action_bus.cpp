@@ -17,8 +17,7 @@
 
 #include "action_bus.h"
 
-#include <config.h>
-
+#include "backends/tofino/bf-asm/config.h"
 #include "backends/tofino/bf-asm/stage.h"
 #include "lib/hex.h"
 #include "misc.h"

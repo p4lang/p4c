@@ -131,7 +131,7 @@ int indent_depth(const char *pfx) {
     return rv;
 }
 
-#include "gen/uptr_sizes.h"
+#include "backends/tofino/bf-asm/gen/uptr_sizes.h"
 
 void bigint_mul(VECTOR(uintptr_t) &val, unsigned f) {
     unsigned carry = 0;

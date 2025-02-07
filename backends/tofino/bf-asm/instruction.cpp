@@ -17,9 +17,8 @@
 
 #include "instruction.h"
 
-#include <config.h>
-
 #include "action_bus.h"
+#include "backends/tofino/bf-asm/config.h"
 #include "backends/tofino/bf-asm/stage.h"
 #include "backends/tofino/bf-asm/tables.h"
 #include "depositfield.h"

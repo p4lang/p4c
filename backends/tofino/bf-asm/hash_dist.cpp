@@ -17,8 +17,7 @@
 
 #include "hash_dist.h"
 
-#include <config.h>
-
+#include "backends/tofino/bf-asm/config.h"
 #include "backends/tofino/bf-asm/stage.h"
 #include "lib/range.h"
 

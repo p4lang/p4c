@@ -17,9 +17,8 @@
 
 #include "backends/tofino/bf-asm/target.h"
 
-#include <config.h>
-
 #include "asm-types.h"
+#include "backends/tofino/bf-asm/config.h"
 #include "backends/tofino/bf-asm/tables.h"
 #include "bson.h"
 #include "parser.h"
