@@ -1,0 +1,112 @@
+version: 1.0.0
+phv ingress:
+  standard_metadata.egress_spec: H0(0..8)
+  data.b1: B3
+  data.b2: B2
+  data.b3: B1
+  data.b4: B0
+  data.$valid: B15(7)
+phv egress:
+  standard_metadata.egress_port: H16(0..8)
+  data.$valid: B31(7)
+parser ingress:
+  start: $ingress_metadata_shim
+  $ingress_metadata_shim:
+    0x*:
+      shift: 16
+      next: start$
+  start$:
+    0x*:
+      0: data.b1
+      1: data.b2
+      2: data.b3
+      3: data.b4
+      shift: 4
+      next: start$.0
+  start$.0:
+    0x*:
+      data.$valid: 1
+      next: end
+deparser ingress:
+  dictionary:
+    data.b1: data.$valid
+    data.b2: data.$valid
+    data.b3: data.$valid
+    data.b4: data.$valid
+  egress_unicast_port: standard_metadata.egress_spec
+parser egress:
+  start: $egress_metadata_shim
+  $egress_metadata_shim:
+    0x*:
+      0..1: H16
+      shift: 2
+      next: end
+deparser egress:
+  dictionary: {}
+  egress_unicast_port: standard_metadata.egress_port
+stage 0 ingress:
+  exact_match first 0:
+    p4: { name: first }
+    row: 1
+    bus: 1
+    column: [  ]
+    next: second
+    actions:
+      b1_act:
+      - { b1: immediate(0..7)  }
+      - set data.b1, b1
+    default_action: b1_act
+    default_action_parameters:
+      b1: 1
+  exact_match second 1:
+    p4: { name: second }
+    row: 1
+    bus: 0
+    column: [  ]
+    next: third
+    actions:
+      b2_act:
+      - { b2: immediate(0..7)  }
+      - set data.b2, b2
+    default_action: b2_act
+    default_action_parameters:
+      b2: 2
+  exact_match third 2:
+    p4: { name: third }
+    row: 0
+    bus: 1
+    column: [  ]
+    next: fourth
+    actions:
+      b3_act:
+      - { b3: immediate(0..7)  }
+      - set data.b3, b3
+    default_action: b3_act
+    default_action_parameters:
+      b3: 3
+  exact_match fourth 3:
+    p4: { name: fourth }
+    row: 0
+    bus: 0
+    column: [  ]
+    next: port_set
+    actions:
+      b4_act:
+      - { b4: immediate(0..7)  }
+      - set data.b4, b4
+    default_action: b4_act
+    default_action_parameters:
+      b4: 4
+  exact_match port_set 4:
+    p4: { name: port_set }
+    row: 2
+    bus: 0
+    column: [  ]
+    next: END
+    actions:
+      set_port:
+      - { port: immediate(0..8)  }
+      - set standard_metadata.egress_spec, port
+    default_action: set_port
+    default_action_parameters:
+      port: 5

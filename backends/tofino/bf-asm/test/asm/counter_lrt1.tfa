@@ -1,0 +1,10 @@
+stage 0 ingress:
+  counter a:
+    row: 15
+    column: [ 0, 1, 2, 3 ]
+    count: bytes
+    format: { bytes(0): 32, bytes(1): 32, bytes(2): 32, bytes(3): 32 }
+    lrt:
+      - { threshold: 0x1000, interval: 0x1000000 }
+      - { threshold: 0x10000, interval: 0x100000 }
+      - { threshold: 0x100000, interval: 0x10000 }

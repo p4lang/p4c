@@ -1,0 +1,422 @@
+version: 1.0.0
+phv ingress:
+  $always_deparse: B34(0)
+  $bridged_metadata_indicator: B32
+  data.f1: W37
+  data.f2: W36
+  data.f3: W38
+  data.h1: W35(16..31)
+  data.h2: W35(0..15)
+  data.h3: W34(16..31)
+  data.h4: W34(0..15)
+  data.h5: W33(16..31)
+  data.h6: W33(0..15)
+  data.b1: B33
+  data.b2: H32(8..15)
+  data.b3: H32(0..7)
+  data.b4: W32(24..31)
+  data.b5: W32(16..23)
+  data.b6: W32(8..15)
+  data.b7: W32(0..7)
+  data.$valid: B35(0)
+phv egress:
+  eg_intr_md.egress_port: H40(0..8)
+  data.f1: TW5
+  data.f2: TW4
+  data.f3: TW6
+  data.h1: TW3(16..31)
+  data.h2: TW3(0..15)
+  data.h3: TW2(16..31)
+  data.h4: TW2(0..15)
+  data.h5: TW1(16..31)
+  data.h6: TW1(0..15)
+  data.b1: TB0
+  data.b2: TH0(8..15)
+  data.b3: TH0(0..7)
+  data.b4: TW0(24..31)
+  data.b5: TW0(16..23)
+  data.b6: TW0(8..15)
+  data.b7: TW0(0..7)
+  data.$valid: B40(0)
+parser ingress:
+  start: $entry_point
+  hdr_len_adj: 16
+  states:
+    $entry_point:  # from state ingress::$entry_point
+      0x*:
+        B32: 0  # value 0 -> B32 L[0..7]b: ingress::$bridged_metadata_indicator
+        B34: 1  # value 1 -> B34 L[0]b: ingress::$always_deparse
+        buf_req: 0
+        next: $ingress_tna_entry_point
+    $ingress_tna_entry_point:  # from state ingress::$ingress_tna_entry_point
+      0x*:
+        buf_req: 0
+        next: $ingress_metadata
+    $ingress_metadata:  # from state ingress::$ingress_metadata
+      0x*:
+        buf_req: 1
+        next: $check_resubmit
+    $check_resubmit:  # from state ingress::$check_resubmit
+      match: [ 0 ]
+      # - match N[0]B: cast
+      0b0*******:
+        shift: 8
+        buf_req: 8
+        next: $phase0
+      0b1*******:
+        shift: 8
+        buf_req: 8
+        next: end
+    $phase0:  # from state ingress::$phase0
+      0x*:
+        shift: 8
+        buf_req: 8
+        next: $skip_to_packet
+    $skip_to_packet:  # from state ingress::$skip_to_packet
+      0x*:
+        buf_req: 0
+        next: start
+    start:  # from state ingress::start
+      0x*:
+        0..3: W37  # ingress::data.f1
+        4..7: W36  # ingress::data.f2
+        8..11: W38  # ingress::data.f3
+        12..15: W35
+            # - N[96..111]b -> W35 L[16..31]b: ingress::data.h1
+            # - N[112..127]b -> W35 L[0..15]b: ingress::data.h2
+        24: B33  # ingress::data.b1
+        25..26: H32
+            # - N[200..207]b -> H32 L[8..15]b: ingress::data.b2
+            # - N[208..215]b -> H32 L[0..7]b: ingress::data.b3
+        B35: 1  # value 1 -> B35 L[0]b: ingress::data.$valid
+        shift: 16
+        buf_req: 27
+        next: start.$split
+    start.$split:  # from state ingress::start
+      0x*:
+        0..3: W34
+            # - N[128..143]b -> W34 L[16..31]b: ingress::data.h3
+            # - N[144..159]b -> W34 L[0..15]b: ingress::data.h4
+        4..7: W33
+            # - N[160..175]b -> W33 L[16..31]b: ingress::data.h5
+            # - N[176..191]b -> W33 L[0..15]b: ingress::data.h6
+        11..14: W32
+            # - N[216..223]b -> W32 L[24..31]b: ingress::data.b4
+            # - N[224..231]b -> W32 L[16..23]b: ingress::data.b5
+            # - N[232..239]b -> W32 L[8..15]b: ingress::data.b6
+            # - N[240..247]b -> W32 L[0..7]b: ingress::data.b7
+        shift: 15
+        buf_req: 15
+        next: end
+deparser ingress:
+  dictionary:
+    B32: B34(0)  # ingress::$bridged_metadata_indicator if ingress::$always_deparse
+    W37: B35(0)  # ingress::data.f1 if ingress::data.$valid
+    W36: B35(0)  # ingress::data.f2 if ingress::data.$valid
+    W38: B35(0)  # ingress::data.f3 if ingress::data.$valid
+    W35: B35(0)
+        # - L[16..31]b: ingress::data.h1 if ingress::data.$valid
+        # - L[0..15]b: ingress::data.h2 if ingress::data.$valid
+    W34: B35(0)
+        # - L[16..31]b: ingress::data.h3 if ingress::data.$valid
+        # - L[0..15]b: ingress::data.h4 if ingress::data.$valid
+    W33: B35(0)
+        # - L[16..31]b: ingress::data.h5 if ingress::data.$valid
+        # - L[0..15]b: ingress::data.h6 if ingress::data.$valid
+    B33: B35(0)  # ingress::data.b1 if ingress::data.$valid
+    H32: B35(0)
+        # - L[8..15]b: ingress::data.b2 if ingress::data.$valid
+        # - L[0..7]b: ingress::data.b3 if ingress::data.$valid
+    W32: B35(0)
+        # - L[24..31]b: ingress::data.b4 if ingress::data.$valid
+        # - L[16..23]b: ingress::data.b5 if ingress::data.$valid
+        # - L[8..15]b: ingress::data.b6 if ingress::data.$valid
+        # - L[0..7]b: ingress::data.b7 if ingress::data.$valid
+parser egress:
+  start: $entry_point
+  hdr_len_adj: 27
+  meta_opt: 8191
+  states:
+    $entry_point:  # from state egress::$entry_point
+      0x*:
+        buf_req: 0
+        next: $egress_tna_entry_point
+    $egress_tna_entry_point:  # from state egress::$egress_tna_entry_point
+      0x*:
+        buf_req: 0
+        next: $egress_metadata
+    $egress_metadata:  # from state egress::$egress_metadata
+      0x*:
+        0..1: H40  # N[7..15]b -> H40 L[0..8]b: egress::eg_intr_md.egress_port
+        shift: 27
+        buf_req: 28
+        next: $check_mirrored
+    $check_mirrored:  # from state egress::$check_mirrored
+      match: [ 0 ]
+      # - match N[0]B: BFN::LookaheadExpression
+      0b****0***:
+        buf_req: 0
+        next: $bridge_metadata_extract
+      0b****1***:
+        buf_req: 0
+        next: end
+    $bridge_metadata_extract:  # from state egress::$bridge_metadata_extract
+      0x*:
+        shift: 1
+        buf_req: 1
+        next: start
+    start:  # from state egress::start
+      0x*:
+        0..3: TW5  # egress::data.f1
+        4..7: TW4  # egress::data.f2
+        8..11: TW6  # egress::data.f3
+        12..15: TW3
+            # - N[96..111]b -> TW3 L[16..31]b: egress::data.h1
+            # - N[112..127]b -> TW3 L[0..15]b: egress::data.h2
+        24: TB0  # egress::data.b1
+        25..26: TH0
+            # - N[200..207]b -> TH0 L[8..15]b: egress::data.b2
+            # - N[208..215]b -> TH0 L[0..7]b: egress::data.b3
+        B40: 1  # value 1 -> B40 L[0]b: egress::data.$valid
+        shift: 16
+        buf_req: 27
+        next: start.$split.0
+    start.$split.0:  # from state egress::start
+      0x*:
+        0..3: TW2
+            # - N[128..143]b -> TW2 L[16..31]b: egress::data.h3
+            # - N[144..159]b -> TW2 L[0..15]b: egress::data.h4
+        4..7: TW1
+            # - N[160..175]b -> TW1 L[16..31]b: egress::data.h5
+            # - N[176..191]b -> TW1 L[0..15]b: egress::data.h6
+        11..14: TW0
+            # - N[216..223]b -> TW0 L[24..31]b: egress::data.b4
+            # - N[224..231]b -> TW0 L[16..23]b: egress::data.b5
+            # - N[232..239]b -> TW0 L[8..15]b: egress::data.b6
+            # - N[240..247]b -> TW0 L[0..7]b: egress::data.b7
+        shift: 15
+        buf_req: 15
+        next: end
+deparser egress:
+  dictionary:
+    TW5: B40(0)  # egress::data.f1 if egress::data.$valid
+    TW4: B40(0)  # egress::data.f2 if egress::data.$valid
+    TW6: B40(0)  # egress::data.f3 if egress::data.$valid
+    TW3: B40(0)
+        # - L[16..31]b: egress::data.h1 if egress::data.$valid
+        # - L[0..15]b: egress::data.h2 if egress::data.$valid
+    TW2: B40(0)
+        # - L[16..31]b: egress::data.h3 if egress::data.$valid
+        # - L[0..15]b: egress::data.h4 if egress::data.$valid
+    TW1: B40(0)
+        # - L[16..31]b: egress::data.h5 if egress::data.$valid
+        # - L[0..15]b: egress::data.h6 if egress::data.$valid
+    TB0: B40(0)  # egress::data.b1 if egress::data.$valid
+    TH0: B40(0)
+        # - L[8..15]b: egress::data.b2 if egress::data.$valid
+        # - L[0..7]b: egress::data.b3 if egress::data.$valid
+    TW0: B40(0)
+        # - L[24..31]b: egress::data.b4 if egress::data.$valid
+        # - L[16..23]b: egress::data.b5 if egress::data.$valid
+        # - L[8..15]b: egress::data.b6 if egress::data.$valid
+        # - L[0..7]b: egress::data.b7 if egress::data.$valid
+  egress_unicast_port: H40  # L[0..8]b: egress::eg_intr_md.egress_port
+stage 0 ingress:
+  exact_match test3_0 0:
+    p4: { name: test3, size: 1024 }
+    p4_param_order: 
+      data.f3: { type: exact, size: 32 }
+    row: 7
+    bus: 0
+    column: [ 2, 3, 4 ]
+    ways:
+      - [0, 0, 0x0, [7, 2]]
+      - [0, 1, 0x0, [7, 3]]
+      - [0, 2, 0x0, [7, 4]]
+    input_xbar:
+      exact group 0: { 0: data.f3 }
+      hash 0:
+        0..7: random(data.f3(10..31)) ^ data.f3(0..7)
+        10..17: random(data.f3(10..31)) ^ data.f3(0..7)
+        20..27: random(data.f3(10..31)) ^ data.f3(0..7)
+        8..9: random(data.f3(10..31)) ^ data.f3(8..9)
+        18..19: random(data.f3(10..31)) ^ data.f3(8..9)
+        28..29: random(data.f3(10..31)) ^ data.f3(8..9)
+      hash group 0:
+        table: [0]
+    format: { action(0): 0..0, version(0): 112..115, counter_addr(0): 1..12, counter_pfe(0): 13..13, match(0): [34..39, 16..31 ] }
+    match: [ data.f3(10..31) ]
+    next: test2_0
+    stats: test3_0$counter..test3_counter(counter_addr)
+    actions:
+      my_count:
+      - p4_param_order: {idx: 32 }
+      - default_action: {  allowed: true }
+      - { idx: counter_addr }
+      - test3_0$counter..test3_counter(idx)
+      NoAction:
+      - default_action: {  allowed: true }
+      - 0
+    default_action: NoAction
+  counter test3_0$counter..test3_counter:
+    p4: { name: test3_counter, size: 4000 }
+    row: 13
+    column: [ 0, 1 ]
+    maprams: [ 0, 1 ]
+    count: packets
+    format: {packets(0): 96..127, packets(1): 64..95, packets(2): 32..63, packets(3): 0..31}
+    per_flow_enable: counter_pfe
+  exact_match test2_0 1:
+    p4: { name: test2, size: 5000, action_profile: set_b4_6 }
+    p4_param_order: 
+      data.f2: { type: exact, size: 32 }
+    row: [ 6, 7 ]
+    bus: [ 0, 1 ]
+    column:
+    - 2
+    - [ 5, 6, 7 ]
+    ways:
+      - [1, 0, 0x0, [7, 5]]
+      - [1, 1, 0x0, [7, 6]]
+      - [1, 2, 0x0, [7, 7]]
+      - [1, 3, 0x0, [6, 2]]
+    input_xbar:
+      exact group 0: { 64: data.f2 }
+      hash 1:
+        0..7: random(data.f2(10..31)) ^ data.f2(0..7)
+        10..17: random(data.f2(10..31)) ^ data.f2(0..7)
+        20..27: random(data.f2(10..31)) ^ data.f2(0..7)
+        30..37: random(data.f2(10..31)) ^ data.f2(0..7)
+        8..9: random(data.f2(10..31)) ^ data.f2(8..9)
+        18..19: random(data.f2(10..31)) ^ data.f2(8..9)
+        28..29: random(data.f2(10..31)) ^ data.f2(8..9)
+        38..39: random(data.f2(10..31)) ^ data.f2(8..9)
+      hash group 1:
+        table: [1]
+    format: { action(0): 0..1, version(0): 112..115, meter_addr(0): 4..13, meter_pfe(0): 14..14, action_addr(0): 15..25, match(0): [66..71, 48..63 ], action(1): 2..3, version(1): 116..119, meter_addr(1): 26..35, meter_pfe(1): 36..36, action_addr(1): 37..47, match(1): [90..95, 72..87 ] }
+    match: [ data.f2(10..31) ]
+    next: test1_0
+    action: test2_0$action(action, action_addr)
+    selector: test2_0$act_sel..set_b4_6(meter_addr)
+    default_action: NoAction
+  action test2_0$action:
+    p4: { name: set_b4_6, size: 1024 }
+    row: 15
+    column: 4
+    home_row: 15
+    format setb4: { $adf_f0: 0..31 }
+    format setb5: { $adf_f0: 0..31 }
+    format setb6: { $adf_f0: 0..31 }
+    action_bus: { 96..99 : $adf_f0 }
+    actions:
+      setb4:
+      - p4_param_order: {val4: 8 }
+      - default_action: {  allowed: true }
+      - { val4: $adf_f0(24..31) }
+      - set data.b4, val4
+      setb5:
+      - p4_param_order: {val5: 8 }
+      - default_action: {  allowed: true }
+      - { val5: $adf_f0(16..23) }
+      - set data.b5, val5
+      setb6:
+      - p4_param_order: {val6: 8 }
+      - default_action: {  allowed: true }
+      - { val6: $adf_f0(8..15) }
+      - set data.b6, val6
+      NoAction:
+      - default_action: {  allowed: true }
+      - {  }
+  selection test2_0$act_sel..set_b4_6:
+    p4: { name: set_b4_6 }
+    row: 15
+    column: [ 2, 3 ]
+    maprams: [ 2, 3 ]
+    input_xbar:
+      exact group 1: { 0: data.h4, 16: data.h5, 32: data.h6 }
+      hash 2:
+        0..13: random(data.h4, data.h5, data.h6)
+      hash group 2:
+        table: [2]
+    mode: fair 0
+    per_flow_enable: meter_pfe
+    non_linear: true
+    pool_sizes: [120]
+stage 1 ingress:
+  exact_match test1_0 0:
+    p4: { name: test1, size: 10000, action_profile: set_b1_3 }
+    p4_param_order: 
+      data.f1: { type: exact, size: 32 }
+    row: 7
+    bus: 0
+    column: [ 2, 3, 4, 5, 6 ]
+    ways:
+      - [0, 0, 0x1, [7, 2], [7, 3]]
+      - [0, 1, 0x0, [7, 4]]
+      - [0, 2, 0x0, [7, 5]]
+      - [0, 3, 0x0, [7, 6]]
+    input_xbar:
+      exact group 0: { 0: data.f1 }
+      hash 0:
+        0..7: random(data.f1(10..31)) ^ data.f1(0..7)
+        10..17: random(data.f1(10..31)) ^ data.f1(0..7)
+        20..27: random(data.f1(10..31)) ^ data.f1(0..7)
+        30..37: random(data.f1(10..31)) ^ data.f1(0..7)
+        8..9: random(data.f1(10..31)) ^ data.f1(8..9)
+        18..19: random(data.f1(10..31)) ^ data.f1(8..9)
+        28..29: random(data.f1(10..31)) ^ data.f1(8..9)
+        38..39: random(data.f1(10..31)) ^ data.f1(8..9)
+        40: random(data.f1(10..31))
+      hash group 0:
+        table: [0]
+    format: { action(0): 0..1, version(0): 112..115, meter_addr(0): 4..13, meter_pfe(0): 14..14, action_addr(0): 15..32, match(0): [82..87, 64..79 ], action(1): 2..3, version(1): 116..119, meter_addr(1): 33..42, meter_pfe(1): 43..43, action_addr(1): 44..61, match(1): [106..111, 88..103 ] }
+    match: [ data.f1(10..31) ]
+    next: END
+    action: test1_0$action(action, action_addr)
+    selector: test1_0$act_sel..set_b1_3(meter_addr)
+    default_action: NoAction
+  action test1_0$action:
+    p4: { name: set_b1_3, size: 80000 }
+    row: [ 15, 13 ]
+    column:
+    - [ 3, 4, 5 ]
+    - [ 0, 1 ]
+    home_row: 15
+    format setb1: { $adf_b0: 0..7 }
+    format setb2: { $adf_h0: 0..15 }
+    format setb3: { $adf_h0: 0..15 }
+    action_bus: { 0 : $adf_b0, 32..33 : $adf_h0 }
+    actions:
+      setb1:
+      - p4_param_order: {val1: 8 }
+      - default_action: {  allowed: true }
+      - { val1: $adf_b0 }
+      - set data.b1, val1
+      setb2:
+      - p4_param_order: {val2: 8 }
+      - default_action: {  allowed: true }
+      - { val2: $adf_h0(8..15) }
+      - set data.b2, val2
+      setb3:
+      - p4_param_order: {val3: 8 }
+      - default_action: {  allowed: true }
+      - { val3: $adf_h0(0..7) }
+      - set data.b3, val3
+      NoAction:
+      - default_action: {  allowed: true }
+      - {  }
+  selection test1_0$act_sel..set_b1_3:
+    p4: { name: set_b1_3 }
+    row: 15
+    column: [ 1, 2 ]
+    maprams: [ 1, 2 ]
+    input_xbar:
+      exact group 0: { 64: data.h2, 80: data.h1, 112: data.h3 }
+      hash 1:
+        0..13: stripe(crc(0x8fdb, data.h2, data.h1, data.h3))
+      hash group 1:
+        table: [1]
+    mode: fair 0
+    per_flow_enable: meter_pfe
+    non_linear: true
+    pool_sizes: [120]

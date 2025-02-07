@@ -1,0 +1,41 @@
+- current compiler failures on some tests.
+
+parser1.p4 compile
+parser2.p4 compile
+parser_dc_full.p4 compile
+port_vlan_mapping.p4 compile
+- glass fails to unroll parser loop properly (new problem with 3.3?)
+
+action_chain1.p4 bfas
+- asm gen fails to include 'next' field in ternary indirect
+
+counter4.p4 mismatch
+- compiler duplicates data on ixbar and programs byteswizzle to inconsistently
+  pull from either copy; assembler always pulls from first.
+
+counter5.p4 mismatch
+- synth2port fabric is different -- not clear if it is a bug or where
+
+hash_index5.p4 mismatch
+- control of stats table is different
+
+exact_match3.p4 mismatch
+- vpn lsb encoding swapped (not a bug -- either way is fine)
+- asm chooses different home rows for action table that needs multiple
+  (compiler should specify in asm output)
+
+exact_match5.p4 mismatch
+- compiler duplicates data across ixbar groups and programs vh_xbar_select to
+  pull from either copy; assembler always pulls from first.
+
+hash_index2.p4 mismatch
+hash_index3.p4 mismatch
+- compiler fails to produce asm code for default action
+
+meter_test1.p4 mismatch
+- vpn lsb encoding swapped (not a bug -- either way is fine)
+- synth2port fabric is different -- not clear if it is a bug or where
+- idletime missing from asm?
+
+mac_rewrite.p4 bfas
+- glass generates invalid slice of immediate for action_bus.

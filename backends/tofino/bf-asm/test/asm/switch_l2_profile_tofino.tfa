@@ -1,0 +1,5453 @@
+version: 1.0.0
+phv ingress:
+  standard_metadata.ingress_port: H14(0..8)
+  standard_metadata.egress_spec: H5(0..8)
+  standard_metadata.resubmit_flag: TW11(31)
+  $always_deparse: B9(7)
+  ingress_metadata.ingress_port: H15(0..8)
+  ingress_metadata.ifindex: H0
+  ingress_metadata.egress_ifindex: H79
+  ingress_metadata.port_type: H72(14..15)
+  ingress_metadata.bd: H3(0..13)
+  ingress_metadata.drop_flag: B61(6)
+  ingress_metadata.drop_reason: B8
+  ingress_metadata.control_frame: B61(5)
+  ingress_metadata.bypass_lookups: H70
+  ethernet.dstAddr.32-47: H10
+  ethernet.dstAddr.16-31: H9
+  ethernet.dstAddr.0-15: H8
+  ethernet.srcAddr.32-47: H82
+  ethernet.srcAddr.16-31: H81
+  ethernet.srcAddr.0-15: H80
+  ethernet.etherType: H86
+  llc_header.dsap: TB10
+  llc_header.ssap: TB9
+  llc_header.control_: TB8
+  snap_header.oui.16-23: TB2
+  snap_header.oui.8-15: TB1
+  snap_header.oui.0-7: TB0
+  snap_header.type_: TH15
+  vlan_tag_$0.pcp: H42(13..15)
+  vlan_tag_$0.cfi: H42(12)
+  vlan_tag_$0.vid: H42(0..11)
+  vlan_tag_$0.etherType: H87
+  vlan_tag_$1.pcp: H32(13..15)
+  vlan_tag_$1.cfi: H32(12)
+  vlan_tag_$1.vid: H32(0..11)
+  vlan_tag_$1.etherType: H88
+  ipv4.version: B49(4..7)
+  ipv4.ihl: B49(0..3)
+  ipv4.diffserv: B48
+  ipv4.totalLen: H41
+  ipv4.identification: H40
+  ipv4.flags: H39(13..15)
+  ipv4.fragOffset: H39(0..12)
+  ipv4.ttl: B2
+  ipv4.protocol: B4
+  ipv4.hdrChecksum: H38
+  ipv4.srcAddr: W10
+  ipv4.dstAddr: W8
+  icmp.typeCode: H67
+  icmp.hdrChecksum: TH14
+  l3_metadata.lkp_ip_type: H15(9..10)
+  l3_metadata.lkp_ip_version: B1(2..5)
+  l3_metadata.lkp_ip_proto: B5
+  l3_metadata.lkp_ip_ttl: B3
+  l3_metadata.lkp_l4_sport: H68
+  l3_metadata.lkp_l4_dport: H64
+  l3_metadata.lkp_outer_l4_sport: H69
+  l3_metadata.lkp_outer_l4_dport: H65
+  l3_metadata.rmac_group: H73(0..9)
+  l3_metadata.rmac_hit: B61(4)
+  l3_metadata.urpf_check_fail: B60(6)
+  l3_metadata.fib_hit: B60(5)
+  l3_metadata.same_bd_check: H4(0..13)
+  l3_metadata.nexthop_index: H91
+  l3_metadata.routed: B60(4)
+  l3_metadata.l3_copy: B59(6)
+  ig_prsr_ctrl.priority: TW7(29..31)
+  tcp.srcPort: H67
+  tcp.dstPort: H66
+  tcp.seqNo: TW3
+  tcp.ackNo: TW2
+  tcp.dataOffset: TB6(4..7)
+  tcp.res: TB6(0..3)
+  tcp.flags: B15
+  tcp.window: TH13
+  tcp.checksum: TH12
+  tcp.urgentPtr: TH11
+  udp.srcPort: H67
+  udp.dstPort: H66
+  udp.length_: TH10
+  udp.checksum: TH9
+  ipv6.version: W12(28..31)
+  ipv6.trafficClass: W12(20..27)
+  ipv6.flowLabel: W12(0..19)
+  ipv6.payloadLen: H37
+  ipv6.nextHdr: B14
+  ipv6.hopLimit: B13
+  ipv6.srcAddr.96-127: W7
+  ipv6.srcAddr.64-95: W6
+  ipv6.srcAddr.32-63: W5
+  ipv6.srcAddr.0-31: W4
+  ipv6.dstAddr.96-127: W3
+  ipv6.dstAddr.64-95: W2
+  ipv6.dstAddr.32-63: W1
+  ipv6.dstAddr.0-31: W0
+  tunnel_metadata.ingress_tunnel_type: B9(2..6)
+  tunnel_metadata.tunnel_terminate: B9(1)
+  tunnel_metadata.tunnel_if_check: B9(0)
+  inner_ipv4.version: B12(4..7)
+  inner_ipv4.ihl: B12(0..3)
+  inner_ipv4.diffserv: B11
+  inner_ipv4.totalLen: H36
+  inner_ipv4.identification: H35
+  inner_ipv4.flags: H34(13..15)
+  inner_ipv4.fragOffset: H34(0..12)
+  inner_ipv4.ttl: B2
+  inner_ipv4.protocol: B4
+  inner_ipv4.hdrChecksum: H33
+  inner_ipv4.srcAddr: W10
+  inner_ipv4.dstAddr: W8
+  ipv4_metadata.lkp_ipv4_sa: W11
+  ipv4_metadata.lkp_ipv4_da: W9
+  ipv4_metadata.ipv4_unicast_enabled: B59(5)
+  inner_icmp.typeCode: H67
+  inner_icmp.hdrChecksum: TH8
+  inner_tcp.srcPort: H67
+  inner_tcp.dstPort: H66
+  inner_tcp.seqNo: TW1
+  inner_tcp.ackNo: TW0
+  inner_tcp.dataOffset: TB5(4..7)
+  inner_tcp.res: TB5(0..3)
+  inner_tcp.flags: TB7
+  inner_tcp.window: TH7
+  inner_tcp.checksum: TH6
+  inner_tcp.urgentPtr: TH5
+  inner_udp.srcPort: H67
+  inner_udp.dstPort: H66
+  inner_udp.length_: TH4
+  inner_udp.checksum: TH3
+  fabric_header.packetType: TB4(5..7)
+  fabric_header.headerVersion: TB4(3..4)
+  fabric_header.packetVersion: TB4(1..2)
+  fabric_header.pad1: TB4(0)
+  fabric_header.fabricColor: TB3(5..7)
+  fabric_header.fabricQos: TB3(0..4)
+  fabric_header.dstDevice: B10
+  fabric_header.dstPortOrGroup: H6
+  fabric_header_cpu.egressQueue: B0(3..7)
+  fabric_header_cpu.txBypass: B0(2)
+  fabric_header_cpu.reserved: B0(0..1)
+  fabric_header_cpu.ingressPort: TH2
+  fabric_header_cpu.ingressIfindex: TH1
+  fabric_header_cpu.ingressBd: TH0
+  fabric_header_cpu.reasonCode: H71
+  fabric_payload_header.etherType: H89
+  acl_metadata.acl_deny: B59(4)
+  acl_metadata.racl_deny: B58(6)
+  acl_metadata.acl_nexthop: H92
+  acl_metadata.acl_nexthop_type: H73(14..15)
+  acl_metadata.acl_redirect: B58(5)
+  acl_metadata.racl_redirect: B58(4)
+  acl_metadata.if_label: H78
+  acl_metadata.bd_label: H77
+  acl_metadata.acl_stats_index: H75(0..13)
+  acl_metadata.ingress_src_port_range_id: B7
+  acl_metadata.ingress_dst_port_range_id: B6
+  l2_metadata.lkp_mac_sa.32-47: H85
+  l2_metadata.lkp_mac_sa.16-31: H84
+  l2_metadata.lkp_mac_sa.0-15: H83
+  l2_metadata.lkp_mac_da.32-47: H13
+  l2_metadata.lkp_mac_da.16-31: H12
+  l2_metadata.lkp_mac_da.0-15: H11
+  l2_metadata.lkp_pkt_type: H15(11..13)
+  l2_metadata.lkp_mac_type: H90
+  l2_metadata.l2_nexthop: H93
+  l2_metadata.l2_nexthop_type: H74(14..15)
+  l2_metadata.l2_redirect: B57(6)
+  l2_metadata.l2_src_miss: B57(5)
+  l2_metadata.l2_src_move: H1
+  l2_metadata.stp_group: H72(0..9)
+  l2_metadata.stp_state: B63(4..6)
+  l2_metadata.bd_stats_idx: H7
+  l2_metadata.learning_enabled: B57(4)
+  l2_metadata.port_vlan_mapping_miss: B56(6)
+  l2_metadata.same_if_check: H2
+  ipv6_metadata.ipv6_unicast_enabled: H14(15)
+  ipv6_metadata.ipv6_src_is_link_local: H14(14)
+  multicast_metadata.mcast_route_hit: B56(5)
+  multicast_metadata.mcast_bridge_hit: B56(4)
+  multicast_metadata.igmp_snooping_enabled: B55(6)
+  multicast_metadata.mld_snooping_enabled: B55(5)
+  multicast_metadata.mcast_rpf_group: H74(0..13)
+  multicast_metadata.mcast_mode: H14(12..13)
+  egress_metadata.bypass: B1(0)
+  fabric_metadata.reason_code: H76
+  nat_metadata.nat_hit: B55(4)
+  hash_metadata.hash1: H94
+  hash_metadata.hash2: H95
+  nexthop_metadata.nexthop_type: H75(14..15)
+  $learning: B62(0..2)
+  security_metadata.ipsg_check_fail: B54(6)
+  ethernet.$valid: B1(7)
+  fabric_header.$valid: B1(6)
+  fabric_header_cpu.$valid: B63(7)
+  fabric_payload_header.$valid: B62(7)
+  icmp.$valid: B61(7)
+  ig_prsr_ctrl.$valid: B60(7)
+  inner_icmp.$valid: B59(7)
+  inner_ipv4.$valid: B58(7)
+  inner_tcp.$valid: B57(7)
+  inner_udp.$valid: B56(7)
+  ipv4.$valid: B55(7)
+  ipv6.$valid: B54(7)
+  llc_header.$valid: B53(7)
+  snap_header.$valid: B52(7)
+  tcp.$valid: B51(7)
+  udp.$valid: B50(7)
+  vlan_tag_$0.$valid: H15(15)
+  vlan_tag_$1.$valid: H15(14)
+phv egress:
+  standard_metadata.egress_port: H16(0..8)
+  ingress_metadata.ingress_port: H25(0..8)
+  ingress_metadata.ifindex: H26
+  ingress_metadata.bd: H22(0..13)
+  l2_metadata.lkp_pkt_type: B22(2..4)
+  egress_metadata.bypass: B36(4)
+  egress_metadata.port_type: B21(3..4)
+  egress_metadata.bd: H23(0..13)
+  egress_metadata.routed: B18(6)
+  egress_metadata.ifindex: H48
+  acl_metadata.acl_deny: H49(15)
+  fabric_metadata.fabric_header_present: B22(1)
+  fabric_metadata.reason_code: H28
+  l3_metadata.nexthop_index: H31
+  l3_metadata.l3_mtu_check: H30
+  ethernet.dstAddr.32-47: TH29
+  ethernet.dstAddr.16-31: TH28
+  ethernet.dstAddr.0-15: TH27
+  ethernet.srcAddr.32-47: TH26
+  ethernet.srcAddr.16-31: TH25
+  ethernet.srcAddr.0-15: TH24
+  ethernet.etherType: H17
+  llc_header.dsap: B31
+  llc_header.ssap: B47
+  llc_header.control_: B30
+  snap_header.oui.16-23: TB18
+  snap_header.oui.8-15: TB17
+  snap_header.oui.0-7: TB16
+  snap_header.type_: H63
+  vlan_tag_$0.pcp: H51(13..15)
+  vlan_tag_$0.cfi: H51(12)
+  vlan_tag_$0.vid: H51(0..11)
+  vlan_tag_$0.etherType: H18
+  vlan_tag_$1.pcp: H50(13..15)
+  vlan_tag_$1.cfi: H50(12)
+  vlan_tag_$1.vid: H50(0..11)
+  vlan_tag_$1.etherType: H19
+  ipv4.version: B46(4..7)
+  ipv4.ihl: B46(0..3)
+  ipv4.diffserv: B45
+  ipv4.totalLen: H62
+  ipv4.identification: H61
+  ipv4.flags: TH33(13..15)
+  ipv4.fragOffset: TH33(0..12)
+  ipv4.ttl: B29
+  ipv4.protocol: B44
+  ipv4.hdrChecksum: H60
+  ipv4.srcAddr.16-31: TH31
+  ipv4.srcAddr.0-15: TH30
+  ipv4.dstAddr: TW31
+  icmp.typeCode: H59
+  icmp.hdrChecksum: H58
+  tcp.srcPort: H57
+  tcp.dstPort: H56
+  tcp.seqNo: TW30
+  tcp.ackNo: TW29
+  tcp.dataOffset: B28(4..7)
+  tcp.res: B28(0..3)
+  tcp.flags: B43
+  tcp.window: H55
+  tcp.checksum: H54
+  tcp.urgentPtr: H53
+  udp.srcPort.8-15: TB31
+  udp.srcPort.0-7: TB30
+  udp.dstPort.8-15: TB29
+  udp.dstPort.0-7: TB28
+  udp.length_.8-15: TB27
+  udp.length_.0-7: TB26
+  udp.checksum.8-15: TB25
+  udp.checksum.0-7: TB24
+  ipv6.version: TW24(28..31)
+  ipv6.trafficClass: TW24(20..27)
+  ipv6.flowLabel: TW24(0..19)
+  ipv6.payloadLen.8-15: TB23
+  ipv6.payloadLen.0-7: TB22
+  ipv6.nextHdr: B27
+  ipv6.hopLimit: B42
+  ipv6.srcAddr.96-127: TW23
+  ipv6.srcAddr.64-95: TW22
+  ipv6.srcAddr.32-63: TW21
+  ipv6.srcAddr.0-31: TW20
+  ipv6.dstAddr.96-127: TW19
+  ipv6.dstAddr.64-95: TW18
+  ipv6.dstAddr.32-63: TW17
+  ipv6.dstAddr.0-31: TW16
+  inner_ipv4.version: B26(4..7)
+  inner_ipv4.ihl: B26(0..3)
+  inner_ipv4.diffserv: B41
+  inner_ipv4.totalLen.8-15: TB21
+  inner_ipv4.totalLen.0-7: TB20
+  inner_ipv4.identification: TH47
+  inner_ipv4.flags: TH32(13..15)
+  inner_ipv4.fragOffset: TH32(0..12)
+  inner_ipv4.ttl: B25
+  inner_ipv4.protocol: B40
+  inner_ipv4.hdrChecksum: TH46
+  inner_ipv4.srcAddr: TW28
+  inner_ipv4.dstAddr: TW27
+  inner_icmp.typeCode: TH45
+  inner_icmp.hdrChecksum: TH44
+  inner_tcp.srcPort: TH43
+  inner_tcp.dstPort: TH42
+  inner_tcp.seqNo: TW26
+  inner_tcp.ackNo: TW25
+  inner_tcp.dataOffset: B24(4..7)
+  inner_tcp.res: B24(0..3)
+  inner_tcp.flags: B39
+  inner_tcp.window: TH41
+  inner_tcp.checksum: TH40
+  inner_tcp.urgentPtr: TH39
+  inner_udp.srcPort: TH38
+  inner_udp.dstPort: TH37
+  inner_udp.length_: TH36
+  inner_udp.checksum: TH35
+  fabric_header.packetType: B19(5..7)
+  fabric_header.headerVersion: B19(3..4)
+  fabric_header.packetVersion: B19(1..2)
+  fabric_header.pad1: B19(0)
+  fabric_header.fabricColor: TB19(5..7)
+  fabric_header.fabricQos: TB19(0..4)
+  fabric_header.dstDevice: B23
+  fabric_header.dstPortOrGroup: TH34
+  fabric_header_cpu.egressQueue: B38(3..7)
+  fabric_header_cpu.txBypass: B38(2)
+  fabric_header_cpu.reserved: B38(0..1)
+  fabric_header_cpu.ingressPort: H24
+  fabric_header_cpu.ingressIfindex: H27
+  fabric_header_cpu.ingressBd: H21
+  fabric_header_cpu.reasonCode: H29
+  fabric_payload_header.etherType: H20
+  eg_intr_md.deflection_flag: B37(1)
+  eg_intr_md_from_parser_aux.clone_src: B17
+  tunnel_metadata.egress_tunnel_type: B18(0..4)
+  tunnel_metadata.tunnel_index: H49(0..13)
+  tunnel_metadata.egress_header_count: H25(10..13)
+  multicast_metadata.replica: H25(15)
+  $mirror_id: B16
+  $mirror: B37(2..4)
+  eg_intr_md.$valid: B18(7)
+  eg_intr_md_from_parser_aux.$valid: B22(7)
+  ethernet.$valid: B37(7)
+  fabric_header.$valid: B21(7)
+  fabric_header_cpu.$valid: B36(7)
+  fabric_payload_header.$valid: B20(7)
+  icmp.$valid: B35(7)
+  inner_icmp.$valid: B34(7)
+  inner_ipv4.$valid: B33(7)
+  inner_tcp.$valid: B32(7)
+  inner_udp.$valid: B22(6)
+  ipv4.$valid: B22(5)
+  ipv6.$valid: B37(6)
+  llc_header.$valid: B37(5)
+  snap_header.$valid: B21(6)
+  tcp.$valid: B21(5)
+  udp.$valid: B36(6)
+  vlan_tag_$0.$valid: B36(5)
+  vlan_tag_$1.$valid: B20(6)
+parser ingress:
+  start: $ingress_metadata_shim
+  $ingress_metadata_shim:
+    match: [ 0 ]
+    0b0*******:
+      $always_deparse: 1
+      0..3: TW11
+      next: $ingress_metadata
+    0b1*******:
+      $always_deparse: 1
+      0..3: TW11
+      shift: 16
+      next: start$
+  $ingress_metadata:
+    0x*:
+      0..1: H14
+      shift: 8
+      next: $phase0
+  $phase0:
+    0x*:
+      next: $phase0_extract
+  $phase0_extract:
+    0x*:
+      0..1: ingress_metadata.ifindex
+      2..3: H72
+      shift: 8
+      next: start$
+  start$:
+    match: [ /* packet.lookahead<bit<112>>()[15:0]; */ ]
+    0x*:
+      next: parse_ethernet
+  parse_ethernet:
+    match: [ 12..13 ]
+    0o000***:
+      0..1: ethernet.dstAddr.32-47
+      2..3: ethernet.dstAddr.16-31
+      4..5: ethernet.dstAddr.0-15
+      6..7: ethernet.srcAddr.32-47
+      shift: 8
+      next: parse_ethernet.0
+    0b00000*0*********:
+      0..1: ethernet.dstAddr.32-47
+      2..3: ethernet.dstAddr.16-31
+      4..5: ethernet.dstAddr.0-15
+      6..7: ethernet.srcAddr.32-47
+      shift: 8
+      next: parse_ethernet.1
+    0x9000:
+      0..1: ethernet.dstAddr.32-47
+      2..3: ethernet.dstAddr.16-31
+      4..5: ethernet.dstAddr.0-15
+      6..7: ethernet.srcAddr.32-47
+      shift: 8
+      next: parse_ethernet.2
+    0x8100:
+      0..1: ethernet.dstAddr.32-47
+      2..3: ethernet.dstAddr.16-31
+      4..5: ethernet.dstAddr.0-15
+      6..7: ethernet.srcAddr.32-47
+      shift: 8
+      next: parse_ethernet.3
+    0x9100:
+      0..1: ethernet.dstAddr.32-47
+      2..3: ethernet.dstAddr.16-31
+      4..5: ethernet.dstAddr.0-15
+      6..7: ethernet.srcAddr.32-47
+      shift: 8
+      next: parse_ethernet.4
+    0x8847:
+      0..1: ethernet.dstAddr.32-47
+      2..3: ethernet.dstAddr.16-31
+      4..5: ethernet.dstAddr.0-15
+      6..7: ethernet.srcAddr.32-47
+      shift: 8
+      next: parse_ethernet.5
+    0x0800:
+      0..1: ethernet.dstAddr.32-47
+      2..3: ethernet.dstAddr.16-31
+      4..5: ethernet.dstAddr.0-15
+      6..7: ethernet.srcAddr.32-47
+      shift: 8
+      next: parse_ethernet.6
+    0x86dd:
+      0..1: ethernet.dstAddr.32-47
+      2..3: ethernet.dstAddr.16-31
+      4..5: ethernet.dstAddr.0-15
+      6..7: ethernet.srcAddr.32-47
+      shift: 8
+      next: parse_ethernet.7
+    0x0806:
+      0..1: ethernet.dstAddr.32-47
+      2..3: ethernet.dstAddr.16-31
+      4..5: ethernet.dstAddr.0-15
+      6..7: ethernet.srcAddr.32-47
+      shift: 8
+      next: parse_ethernet.8
+    0x88cc:
+      0..1: ethernet.dstAddr.32-47
+      2..3: ethernet.dstAddr.16-31
+      4..5: ethernet.dstAddr.0-15
+      6..7: ethernet.srcAddr.32-47
+      shift: 8
+      next: parse_ethernet.9
+    0x8809:
+      0..1: ethernet.dstAddr.32-47
+      2..3: ethernet.dstAddr.16-31
+      4..5: ethernet.dstAddr.0-15
+      6..7: ethernet.srcAddr.32-47
+      shift: 8
+      next: parse_ethernet.10
+    0x*:
+      0..1: ethernet.dstAddr.32-47
+      2..3: ethernet.dstAddr.16-31
+      4..5: ethernet.dstAddr.0-15
+      6..7: ethernet.srcAddr.32-47
+      shift: 8
+      next: parse_ethernet.11
+  parse_ethernet.0:
+    0x*:
+      0..1: ethernet.srcAddr.16-31
+      2..3: ethernet.srcAddr.0-15
+      4..5: ethernet.etherType
+      ethernet.$valid: 1
+      shift: 6
+      next: parse_llc_header
+  parse_llc_header:
+    match: [ 0, 1 ]
+    0xaaaa:
+      0: llc_header.dsap
+      1: llc_header.ssap
+      2: llc_header.control_
+      llc_header.$valid: 1
+      shift: 3
+      next: parse_snap_header
+    0xfefe:
+      0: llc_header.dsap
+      1: llc_header.ssap
+      2: llc_header.control_
+      llc_header.$valid: 1
+      shift: 3
+      next: parse_set_prio_med
+    0x*:
+      0: llc_header.dsap
+      1: llc_header.ssap
+      2: llc_header.control_
+      llc_header.$valid: 1
+      shift: 3
+      next: end
+  parse_snap_header:
+    match: [ 3..4 ]
+    0x8100:
+      0: snap_header.oui.16-23
+      1: snap_header.oui.8-15
+      2: snap_header.oui.0-7
+      3..4: snap_header.type_
+      snap_header.$valid: 1
+      shift: 5
+      next: parse_vlan
+    0x9100:
+      0: snap_header.oui.16-23
+      1: snap_header.oui.8-15
+      2: snap_header.oui.0-7
+      3..4: snap_header.type_
+      snap_header.$valid: 1
+      shift: 5
+      next: parse_qinq
+    0x8847:
+      0: snap_header.oui.16-23
+      1: snap_header.oui.8-15
+      2: snap_header.oui.0-7
+      3..4: snap_header.type_
+      snap_header.$valid: 1
+      shift: 5
+      next: end
+    0x0800:
+      0: snap_header.oui.16-23
+      1: snap_header.oui.8-15
+      2: snap_header.oui.0-7
+      3..4: snap_header.type_
+      snap_header.$valid: 1
+      shift: 5
+      next: parse_ipv4
+    0x86dd:
+      0: snap_header.oui.16-23
+      1: snap_header.oui.8-15
+      2: snap_header.oui.0-7
+      3..4: snap_header.type_
+      snap_header.$valid: 1
+      shift: 5
+      next: parse_ipv6
+    0x0806:
+      0: snap_header.oui.16-23
+      1: snap_header.oui.8-15
+      2: snap_header.oui.0-7
+      3..4: snap_header.type_
+      snap_header.$valid: 1
+      shift: 5
+      next: parse_arp_rarp
+    0x88cc:
+      0: snap_header.oui.16-23
+      1: snap_header.oui.8-15
+      2: snap_header.oui.0-7
+      3..4: snap_header.type_
+      snap_header.$valid: 1
+      shift: 5
+      next: parse_set_prio_high
+    0x8809:
+      0: snap_header.oui.16-23
+      1: snap_header.oui.8-15
+      2: snap_header.oui.0-7
+      3..4: snap_header.type_
+      snap_header.$valid: 1
+      shift: 5
+      next: parse_set_prio_high
+    0x*:
+      0: snap_header.oui.16-23
+      1: snap_header.oui.8-15
+      2: snap_header.oui.0-7
+      3..4: snap_header.type_
+      snap_header.$valid: 1
+      shift: 5
+      next: end
+  parse_vlan:
+    match: [ 2..3 ]
+    0x8847:
+      0..1: H42
+      2..3: vlan_tag_$0.etherType
+      vlan_tag_$0.$valid: 1
+      shift: 4
+      next: end
+    0x0800:
+      0..1: H42
+      2..3: vlan_tag_$0.etherType
+      vlan_tag_$0.$valid: 1
+      shift: 4
+      next: parse_ipv4
+    0x86dd:
+      0..1: H42
+      2..3: vlan_tag_$0.etherType
+      vlan_tag_$0.$valid: 1
+      shift: 4
+      next: parse_ipv6
+    0x0806:
+      0..1: H42
+      2..3: vlan_tag_$0.etherType
+      vlan_tag_$0.$valid: 1
+      shift: 4
+      next: parse_arp_rarp
+    0x88cc:
+      0..1: H42
+      2..3: vlan_tag_$0.etherType
+      vlan_tag_$0.$valid: 1
+      shift: 4
+      next: parse_set_prio_high
+    0x8809:
+      0..1: H42
+      2..3: vlan_tag_$0.etherType
+      vlan_tag_$0.$valid: 1
+      shift: 4
+      next: parse_set_prio_high
+    0x*:
+      0..1: H42
+      2..3: vlan_tag_$0.etherType
+      vlan_tag_$0.$valid: 1
+      shift: 4
+      next: end
+  parse_ipv4:
+    match: [ 6..7, 0, 9 ]
+    0x0000501:
+      0: B49
+      1: ipv4.diffserv
+      2..3: ipv4.totalLen
+      4..5: ipv4.identification
+      6..7: H39
+      8: ipv4.ttl
+      9: ipv4.protocol
+      10..11: ipv4.hdrChecksum
+      12..15: ipv4.srcAddr
+      16..19: ipv4.dstAddr
+      shift: 20
+      next: parse_ipv4.0
+    0x0000506:
+      0: B49
+      1: ipv4.diffserv
+      2..3: ipv4.totalLen
+      4..5: ipv4.identification
+      6..7: H39
+      8: ipv4.ttl
+      9: ipv4.protocol
+      10..11: ipv4.hdrChecksum
+      12..15: ipv4.srcAddr
+      16..19: ipv4.dstAddr
+      shift: 20
+      next: parse_ipv4.1
+    0x0000511:
+      0: B49
+      1: ipv4.diffserv
+      2..3: ipv4.totalLen
+      4..5: ipv4.identification
+      6..7: H39
+      8: ipv4.ttl
+      9: ipv4.protocol
+      10..11: ipv4.hdrChecksum
+      12..15: ipv4.srcAddr
+      16..19: ipv4.dstAddr
+      shift: 20
+      next: parse_ipv4.2
+    0x0000002:
+      0: B49
+      1: ipv4.diffserv
+      2..3: ipv4.totalLen
+      4..5: ipv4.identification
+      6..7: H39
+      8: ipv4.ttl
+      9: ipv4.protocol
+      10..11: ipv4.hdrChecksum
+      12..15: ipv4.srcAddr
+      16..19: ipv4.dstAddr
+      shift: 20
+      next: parse_ipv4.3
+    0x0000058:
+      0: B49
+      1: ipv4.diffserv
+      2..3: ipv4.totalLen
+      4..5: ipv4.identification
+      6..7: H39
+      8: ipv4.ttl
+      9: ipv4.protocol
+      10..11: ipv4.hdrChecksum
+      12..15: ipv4.srcAddr
+      16..19: ipv4.dstAddr
+      shift: 20
+      next: parse_ipv4.4
+    0x0000059:
+      0: B49
+      1: ipv4.diffserv
+      2..3: ipv4.totalLen
+      4..5: ipv4.identification
+      6..7: H39
+      8: ipv4.ttl
+      9: ipv4.protocol
+      10..11: ipv4.hdrChecksum
+      12..15: ipv4.srcAddr
+      16..19: ipv4.dstAddr
+      shift: 20
+      next: parse_ipv4.5
+    0x0000067:
+      0: B49
+      1: ipv4.diffserv
+      2..3: ipv4.totalLen
+      4..5: ipv4.identification
+      6..7: H39
+      8: ipv4.ttl
+      9: ipv4.protocol
+      10..11: ipv4.hdrChecksum
+      12..15: ipv4.srcAddr
+      16..19: ipv4.dstAddr
+      shift: 20
+      next: parse_ipv4.6
+    0x0000070:
+      0: B49
+      1: ipv4.diffserv
+      2..3: ipv4.totalLen
+      4..5: ipv4.identification
+      6..7: H39
+      8: ipv4.ttl
+      9: ipv4.protocol
+      10..11: ipv4.hdrChecksum
+      12..15: ipv4.srcAddr
+      16..19: ipv4.dstAddr
+      shift: 20
+      next: parse_ipv4.7
+    0x*:
+      0: B49
+      1: ipv4.diffserv
+      2..3: ipv4.totalLen
+      4..5: ipv4.identification
+      6..7: H39
+      8: ipv4.ttl
+      9: ipv4.protocol
+      10..11: ipv4.hdrChecksum
+      12..15: ipv4.srcAddr
+      16..19: ipv4.dstAddr
+      shift: 20
+      next: parse_ipv4.8
+  parse_ipv4.0:
+    0x*:
+      ipv4.$valid: 1
+      next: parse_icmp
+  parse_icmp:
+    match: [ 0..1 ]
+    0o101***:
+      0..1: icmp.typeCode
+      2..3: icmp.hdrChecksum
+      icmp.$valid: 1
+      l3_metadata.lkp_outer_l4_sport: 0 /* ingress::icmp.typeCode; */
+      shift: 4
+      next: parse_set_prio_med
+    0b100001**********:
+      0..1: icmp.typeCode
+      2..3: icmp.hdrChecksum
+      icmp.$valid: 1
+      l3_metadata.lkp_outer_l4_sport: 0 /* ingress::icmp.typeCode; */
+      shift: 4
+      next: parse_set_prio_med
+    0x88**:
+      0..1: icmp.typeCode
+      2..3: icmp.hdrChecksum
+      icmp.$valid: 1
+      l3_metadata.lkp_outer_l4_sport: 0 /* ingress::icmp.typeCode; */
+      shift: 4
+      next: parse_set_prio_med
+    0x*:
+      0..1: icmp.typeCode
+      2..3: icmp.hdrChecksum
+      icmp.$valid: 1
+      l3_metadata.lkp_outer_l4_sport: 0 /* ingress::icmp.typeCode; */
+      shift: 4
+      next: end
+  parse_set_prio_med:
+    0x*:
+      ig_prsr_ctrl.priority: 3
+      next: end
+  parse_ipv4.1:
+    0x*:
+      ipv4.$valid: 1
+      next: parse_tcp
+  parse_tcp:
+    match: [ 2..3 ]
+    0x00b3:
+      0..1: tcp.srcPort
+      2..3: tcp.dstPort
+      4..7: tcp.seqNo
+      8..11: tcp.ackNo
+      12: TB6
+      13: tcp.flags
+      14..15: tcp.window
+      16..17: tcp.checksum
+      shift: 18
+      next: parse_tcp.0
+    0x027f:
+      0..1: tcp.srcPort
+      2..3: tcp.dstPort
+      4..7: tcp.seqNo
+      8..11: tcp.ackNo
+      12: TB6
+      13: tcp.flags
+      14..15: tcp.window
+      16..17: tcp.checksum
+      shift: 18
+      next: parse_tcp.1
+    0x*:
+      0..1: tcp.srcPort
+      2..3: tcp.dstPort
+      4..7: tcp.seqNo
+      8..11: tcp.ackNo
+      12: TB6
+      13: tcp.flags
+      14..15: tcp.window
+      16..17: tcp.checksum
+      shift: 18
+      next: parse_tcp.2
+  parse_tcp.0:
+    0x*:
+      0..1: tcp.urgentPtr
+      tcp.$valid: 1
+      l3_metadata.lkp_outer_l4_sport: 0 /* ingress::tcp.srcPort; */
+      l3_metadata.lkp_outer_l4_dport: 0 /* ingress::tcp.dstPort; */
+      shift: 2
+      next: parse_set_prio_med
+  parse_tcp.1:
+    0x*:
+      0..1: tcp.urgentPtr
+      tcp.$valid: 1
+      l3_metadata.lkp_outer_l4_sport: 0 /* ingress::tcp.srcPort; */
+      l3_metadata.lkp_outer_l4_dport: 0 /* ingress::tcp.dstPort; */
+      shift: 2
+      next: parse_set_prio_med
+  parse_tcp.2:
+    0x*:
+      0..1: tcp.urgentPtr
+      tcp.$valid: 1
+      l3_metadata.lkp_outer_l4_sport: 0 /* ingress::tcp.srcPort; */
+      l3_metadata.lkp_outer_l4_dport: 0 /* ingress::tcp.dstPort; */
+      shift: 2
+      next: end
+  parse_ipv4.2:
+    0x*:
+      ipv4.$valid: 1
+      next: parse_udp
+  parse_udp:
+    match: [ 2..3 ]
+    0x0043:
+      0..1: udp.srcPort
+      2..3: udp.dstPort
+      4..5: udp.length_
+      6..7: udp.checksum
+      udp.$valid: 1
+      shift: 9
+      next: parse_udp.0
+    0x0044:
+      0..1: udp.srcPort
+      2..3: udp.dstPort
+      4..5: udp.length_
+      6..7: udp.checksum
+      udp.$valid: 1
+      shift: 9
+      next: parse_udp.1
+    0x0222:
+      0..1: udp.srcPort
+      2..3: udp.dstPort
+      4..5: udp.length_
+      6..7: udp.checksum
+      udp.$valid: 1
+      shift: 9
+      next: parse_udp.2
+    0x0223:
+      0..1: udp.srcPort
+      2..3: udp.dstPort
+      4..5: udp.length_
+      6..7: udp.checksum
+      udp.$valid: 1
+      shift: 9
+      next: parse_udp.3
+    0x0208:
+      0..1: udp.srcPort
+      2..3: udp.dstPort
+      4..5: udp.length_
+      6..7: udp.checksum
+      udp.$valid: 1
+      shift: 9
+      next: parse_udp.4
+    0x0209:
+      0..1: udp.srcPort
+      2..3: udp.dstPort
+      4..5: udp.length_
+      6..7: udp.checksum
+      udp.$valid: 1
+      shift: 9
+      next: parse_udp.5
+    0x07c1:
+      0..1: udp.srcPort
+      2..3: udp.dstPort
+      4..5: udp.length_
+      6..7: udp.checksum
+      udp.$valid: 1
+      shift: 9
+      next: parse_udp.6
+    0x18c7:
+      0..1: udp.srcPort
+      2..3: udp.dstPort
+      4..5: udp.length_
+      6..7: udp.checksum
+      udp.$valid: 1
+      shift: 9
+      next: parse_udp.7
+    0x*:
+      0..1: udp.srcPort
+      2..3: udp.dstPort
+      4..5: udp.length_
+      6..7: udp.checksum
+      udp.$valid: 1
+      shift: 9
+      next: parse_udp.8
+  parse_udp.0:
+    0x*:
+      l3_metadata.lkp_outer_l4_sport: 0 /* ingress::udp.srcPort; */
+      l3_metadata.lkp_outer_l4_dport: 0 /* ingress::udp.dstPort; */
+      # shift: -1
+      next: parse_set_prio_med
+  parse_udp.1:
+    0x*:
+      l3_metadata.lkp_outer_l4_sport: 0 /* ingress::udp.srcPort; */
+      l3_metadata.lkp_outer_l4_dport: 0 /* ingress::udp.dstPort; */
+      # shift: -1
+      next: parse_set_prio_med
+  parse_udp.2:
+    0x*:
+      l3_metadata.lkp_outer_l4_sport: 0 /* ingress::udp.srcPort; */
+      l3_metadata.lkp_outer_l4_dport: 0 /* ingress::udp.dstPort; */
+      # shift: -1
+      next: parse_set_prio_med
+  parse_udp.3:
+    0x*:
+      l3_metadata.lkp_outer_l4_sport: 0 /* ingress::udp.srcPort; */
+      l3_metadata.lkp_outer_l4_dport: 0 /* ingress::udp.dstPort; */
+      # shift: -1
+      next: parse_set_prio_med
+  parse_udp.4:
+    0x*:
+      l3_metadata.lkp_outer_l4_sport: 0 /* ingress::udp.srcPort; */
+      l3_metadata.lkp_outer_l4_dport: 0 /* ingress::udp.dstPort; */
+      # shift: -1
+      next: parse_set_prio_med
+  parse_udp.5:
+    0x*:
+      l3_metadata.lkp_outer_l4_sport: 0 /* ingress::udp.srcPort; */
+      l3_metadata.lkp_outer_l4_dport: 0 /* ingress::udp.dstPort; */
+      # shift: -1
+      next: parse_set_prio_med
+  parse_udp.6:
+    0x*:
+      l3_metadata.lkp_outer_l4_sport: 0 /* ingress::udp.srcPort; */
+      l3_metadata.lkp_outer_l4_dport: 0 /* ingress::udp.dstPort; */
+      # shift: -1
+      next: parse_set_prio_med
+  parse_udp.7:
+    0x*:
+      l3_metadata.lkp_outer_l4_sport: 0 /* ingress::udp.srcPort; */
+      l3_metadata.lkp_outer_l4_dport: 0 /* ingress::udp.dstPort; */
+      # shift: -1
+      next: end
+  parse_udp.8:
+    0x*:
+      l3_metadata.lkp_outer_l4_sport: 0 /* ingress::udp.srcPort; */
+      l3_metadata.lkp_outer_l4_dport: 0 /* ingress::udp.dstPort; */
+      # shift: -1
+      next: end
+  parse_ipv4.3:
+    0x*:
+      ipv4.$valid: 1
+      next: parse_set_prio_med
+  parse_ipv4.4:
+    0x*:
+      ipv4.$valid: 1
+      next: parse_set_prio_med
+  parse_ipv4.5:
+    0x*:
+      ipv4.$valid: 1
+      next: parse_set_prio_med
+  parse_ipv4.6:
+    0x*:
+      ipv4.$valid: 1
+      next: parse_set_prio_med
+  parse_ipv4.7:
+    0x*:
+      ipv4.$valid: 1
+      next: parse_set_prio_med
+  parse_ipv4.8:
+    0x*:
+      ipv4.$valid: 1
+      next: end
+  parse_ipv6:
+    match: [ 6 ]
+    0x3a:
+      0..3: W12
+      4..5: ipv6.payloadLen
+      6: ipv6.nextHdr
+      7: ipv6.hopLimit
+      8..11: ipv6.srcAddr.96-127
+      12..15: ipv6.srcAddr.64-95
+      16..19: ipv6.srcAddr.32-63
+      shift: 20
+      next: parse_ipv6.0
+    0x06:
+      0..3: W12
+      4..5: ipv6.payloadLen
+      6: ipv6.nextHdr
+      7: ipv6.hopLimit
+      8..11: ipv6.srcAddr.96-127
+      12..15: ipv6.srcAddr.64-95
+      16..19: ipv6.srcAddr.32-63
+      shift: 20
+      next: parse_ipv6.1
+    0x04:
+      0..3: W12
+      4..5: ipv6.payloadLen
+      6: ipv6.nextHdr
+      7: ipv6.hopLimit
+      8..11: ipv6.srcAddr.96-127
+      12..15: ipv6.srcAddr.64-95
+      16..19: ipv6.srcAddr.32-63
+      shift: 20
+      next: parse_ipv6.2
+    0x58:
+      0..3: W12
+      4..5: ipv6.payloadLen
+      6: ipv6.nextHdr
+      7: ipv6.hopLimit
+      8..11: ipv6.srcAddr.96-127
+      12..15: ipv6.srcAddr.64-95
+      16..19: ipv6.srcAddr.32-63
+      shift: 20
+      next: parse_ipv6.3
+    0x59:
+      0..3: W12
+      4..5: ipv6.payloadLen
+      6: ipv6.nextHdr
+      7: ipv6.hopLimit
+      8..11: ipv6.srcAddr.96-127
+      12..15: ipv6.srcAddr.64-95
+      16..19: ipv6.srcAddr.32-63
+      shift: 20
+      next: parse_ipv6.4
+    0x67:
+      0..3: W12
+      4..5: ipv6.payloadLen
+      6: ipv6.nextHdr
+      7: ipv6.hopLimit
+      8..11: ipv6.srcAddr.96-127
+      12..15: ipv6.srcAddr.64-95
+      16..19: ipv6.srcAddr.32-63
+      shift: 20
+      next: parse_ipv6.5
+    0x70:
+      0..3: W12
+      4..5: ipv6.payloadLen
+      6: ipv6.nextHdr
+      7: ipv6.hopLimit
+      8..11: ipv6.srcAddr.96-127
+      12..15: ipv6.srcAddr.64-95
+      16..19: ipv6.srcAddr.32-63
+      shift: 20
+      next: parse_ipv6.6
+    0x*:
+      0..3: W12
+      4..5: ipv6.payloadLen
+      6: ipv6.nextHdr
+      7: ipv6.hopLimit
+      8..11: ipv6.srcAddr.96-127
+      12..15: ipv6.srcAddr.64-95
+      16..19: ipv6.srcAddr.32-63
+      shift: 20
+      next: parse_ipv6.7
+  parse_ipv6.0:
+    0x*:
+      0..3: ipv6.srcAddr.0-31
+      4..7: ipv6.dstAddr.96-127
+      8..11: ipv6.dstAddr.64-95
+      12..15: ipv6.dstAddr.32-63
+      shift: 16
+      next: parse_ipv6.0.0
+  parse_ipv6.0.0:
+    0x*:
+      0..3: ipv6.dstAddr.0-31
+      ipv6.$valid: 1
+      shift: 4
+      next: parse_icmp
+  parse_ipv6.1:
+    0x*:
+      0..3: ipv6.srcAddr.0-31
+      4..7: ipv6.dstAddr.96-127
+      8..11: ipv6.dstAddr.64-95
+      12..15: ipv6.dstAddr.32-63
+      shift: 16
+      next: parse_ipv6.1.0
+  parse_ipv6.1.0:
+    0x*:
+      0..3: ipv6.dstAddr.0-31
+      ipv6.$valid: 1
+      shift: 4
+      next: parse_tcp
+  parse_ipv6.2:
+    0x*:
+      0..3: ipv6.srcAddr.0-31
+      4..7: ipv6.dstAddr.96-127
+      8..11: ipv6.dstAddr.64-95
+      12..15: ipv6.dstAddr.32-63
+      shift: 16
+      next: parse_ipv6.2.0
+  parse_ipv6.2.0:
+    0x*:
+      0..3: ipv6.dstAddr.0-31
+      ipv6.$valid: 1
+      shift: 4
+      next: parse_ipv4_in_ip
+  parse_ipv4_in_ip:
+    0x*:
+      tunnel_metadata.ingress_tunnel_type: 3
+      next: parse_inner_ipv4
+  parse_inner_ipv4:
+    match: [ 6..7, 0, 9 ]
+    0x0000501:
+      0: B12
+      1: inner_ipv4.diffserv
+      2..3: inner_ipv4.totalLen
+      4..5: inner_ipv4.identification
+      6..7: H34
+      8: inner_ipv4.ttl
+      9: inner_ipv4.protocol
+      10..11: inner_ipv4.hdrChecksum
+      12..15: inner_ipv4.srcAddr
+      16..19: inner_ipv4.dstAddr
+      shift: 20
+      next: parse_inner_ipv4.0
+    0x0000506:
+      0: B12
+      1: inner_ipv4.diffserv
+      2..3: inner_ipv4.totalLen
+      4..5: inner_ipv4.identification
+      6..7: H34
+      8: inner_ipv4.ttl
+      9: inner_ipv4.protocol
+      10..11: inner_ipv4.hdrChecksum
+      12..15: inner_ipv4.srcAddr
+      16..19: inner_ipv4.dstAddr
+      shift: 20
+      next: parse_inner_ipv4.1
+    0x0000511:
+      0: B12
+      1: inner_ipv4.diffserv
+      2..3: inner_ipv4.totalLen
+      4..5: inner_ipv4.identification
+      6..7: H34
+      8: inner_ipv4.ttl
+      9: inner_ipv4.protocol
+      10..11: inner_ipv4.hdrChecksum
+      12..15: inner_ipv4.srcAddr
+      16..19: inner_ipv4.dstAddr
+      shift: 20
+      next: parse_inner_ipv4.2
+    0x*:
+      0: B12
+      1: inner_ipv4.diffserv
+      2..3: inner_ipv4.totalLen
+      4..5: inner_ipv4.identification
+      6..7: H34
+      8: inner_ipv4.ttl
+      9: inner_ipv4.protocol
+      10..11: inner_ipv4.hdrChecksum
+      12..15: inner_ipv4.srcAddr
+      16..19: inner_ipv4.dstAddr
+      shift: 20
+      next: parse_inner_ipv4.3
+  parse_inner_ipv4.0:
+    0x*:
+      inner_ipv4.$valid: 1
+      ipv4_metadata.lkp_ipv4_sa: 0 /* ingress::inner_ipv4.srcAddr; */
+      ipv4_metadata.lkp_ipv4_da: 0 /* ingress::inner_ipv4.dstAddr; */
+      l3_metadata.lkp_ip_proto: 0 /* ingress::inner_ipv4.protocol; */
+      l3_metadata.lkp_ip_ttl: 0 /* ingress::inner_ipv4.ttl; */
+      next: parse_inner_icmp
+  parse_inner_icmp:
+    0x*:
+      0..1: inner_icmp.typeCode
+      2..3: inner_icmp.hdrChecksum
+      inner_icmp.$valid: 1
+      l3_metadata.lkp_l4_sport: 0 /* ingress::inner_icmp.typeCode; */
+      shift: 4
+      next: end
+  parse_inner_ipv4.1:
+    0x*:
+      inner_ipv4.$valid: 1
+      ipv4_metadata.lkp_ipv4_sa: 0 /* ingress::inner_ipv4.srcAddr; */
+      ipv4_metadata.lkp_ipv4_da: 0 /* ingress::inner_ipv4.dstAddr; */
+      l3_metadata.lkp_ip_proto: 0 /* ingress::inner_ipv4.protocol; */
+      l3_metadata.lkp_ip_ttl: 0 /* ingress::inner_ipv4.ttl; */
+      next: parse_inner_tcp
+  parse_inner_tcp:
+    0x*:
+      0..1: inner_tcp.srcPort
+      2..3: inner_tcp.dstPort
+      4..7: inner_tcp.seqNo
+      8..11: inner_tcp.ackNo
+      12: TB5
+      13: inner_tcp.flags
+      14..15: inner_tcp.window
+      16..17: inner_tcp.checksum
+      shift: 18
+      next: parse_inner_tcp.0
+  parse_inner_tcp.0:
+    0x*:
+      0..1: inner_tcp.urgentPtr
+      inner_tcp.$valid: 1
+      l3_metadata.lkp_l4_sport: 0 /* ingress::inner_tcp.srcPort; */
+      l3_metadata.lkp_l4_dport: 0 /* ingress::inner_tcp.dstPort; */
+      shift: 2
+      next: end
+  parse_inner_ipv4.2:
+    0x*:
+      inner_ipv4.$valid: 1
+      ipv4_metadata.lkp_ipv4_sa: 0 /* ingress::inner_ipv4.srcAddr; */
+      ipv4_metadata.lkp_ipv4_da: 0 /* ingress::inner_ipv4.dstAddr; */
+      l3_metadata.lkp_ip_proto: 0 /* ingress::inner_ipv4.protocol; */
+      l3_metadata.lkp_ip_ttl: 0 /* ingress::inner_ipv4.ttl; */
+      next: parse_inner_udp
+  parse_inner_udp:
+    0x*:
+      0..1: inner_udp.srcPort
+      2..3: inner_udp.dstPort
+      4..5: inner_udp.length_
+      6..7: inner_udp.checksum
+      inner_udp.$valid: 1
+      shift: 9
+      next: parse_inner_udp.0
+  parse_inner_udp.0:
+    0x*:
+      l3_metadata.lkp_l4_sport: 0 /* ingress::inner_udp.srcPort; */
+      l3_metadata.lkp_l4_dport: 0 /* ingress::inner_udp.dstPort; */
+      # shift: -1
+      next: end
+  parse_inner_ipv4.3:
+    0x*:
+      inner_ipv4.$valid: 1
+      ipv4_metadata.lkp_ipv4_sa: 0 /* ingress::inner_ipv4.srcAddr; */
+      ipv4_metadata.lkp_ipv4_da: 0 /* ingress::inner_ipv4.dstAddr; */
+      l3_metadata.lkp_ip_proto: 0 /* ingress::inner_ipv4.protocol; */
+      l3_metadata.lkp_ip_ttl: 0 /* ingress::inner_ipv4.ttl; */
+      next: end
+  parse_ipv6.3:
+    0x*:
+      0..3: ipv6.srcAddr.0-31
+      4..7: ipv6.dstAddr.96-127
+      8..11: ipv6.dstAddr.64-95
+      12..15: ipv6.dstAddr.32-63
+      shift: 16
+      next: parse_ipv6.3.0
+  parse_ipv6.3.0:
+    0x*:
+      0..3: ipv6.dstAddr.0-31
+      ipv6.$valid: 1
+      shift: 4
+      next: parse_set_prio_med
+  parse_ipv6.4:
+    0x*:
+      0..3: ipv6.srcAddr.0-31
+      4..7: ipv6.dstAddr.96-127
+      8..11: ipv6.dstAddr.64-95
+      12..15: ipv6.dstAddr.32-63
+      shift: 16
+      next: parse_ipv6.4.0
+  parse_ipv6.4.0:
+    0x*:
+      0..3: ipv6.dstAddr.0-31
+      ipv6.$valid: 1
+      shift: 4
+      next: parse_set_prio_med
+  parse_ipv6.5:
+    0x*:
+      0..3: ipv6.srcAddr.0-31
+      4..7: ipv6.dstAddr.96-127
+      8..11: ipv6.dstAddr.64-95
+      12..15: ipv6.dstAddr.32-63
+      shift: 16
+      next: parse_ipv6.5.0
+  parse_ipv6.5.0:
+    0x*:
+      0..3: ipv6.dstAddr.0-31
+      ipv6.$valid: 1
+      shift: 4
+      next: parse_set_prio_med
+  parse_ipv6.6:
+    0x*:
+      0..3: ipv6.srcAddr.0-31
+      4..7: ipv6.dstAddr.96-127
+      8..11: ipv6.dstAddr.64-95
+      12..15: ipv6.dstAddr.32-63
+      shift: 16
+      next: parse_ipv6.6.0
+  parse_ipv6.6.0:
+    0x*:
+      0..3: ipv6.dstAddr.0-31
+      ipv6.$valid: 1
+      shift: 4
+      next: parse_set_prio_med
+  parse_ipv6.7:
+    0x*:
+      0..3: ipv6.srcAddr.0-31
+      4..7: ipv6.dstAddr.96-127
+      8..11: ipv6.dstAddr.64-95
+      12..15: ipv6.dstAddr.32-63
+      shift: 16
+      next: parse_ipv6.7.0
+  parse_ipv6.7.0:
+    0x*:
+      0..3: ipv6.dstAddr.0-31
+      ipv6.$valid: 1
+      shift: 4
+      next: end
+  parse_arp_rarp:
+    0x*:
+      next: parse_set_prio_med
+  parse_set_prio_high:
+    0x*:
+      ig_prsr_ctrl.priority: 5
+      next: end
+  parse_qinq:
+    match: [ 2..3 ]
+    0x8100:
+      0..1: H42
+      2..3: vlan_tag_$0.etherType
+      vlan_tag_$0.$valid: 1
+      shift: 4
+      next: parse_qinq_vlan
+    0x*:
+      0..1: H42
+      2..3: vlan_tag_$0.etherType
+      vlan_tag_$0.$valid: 1
+      shift: 4
+      next: end
+  parse_qinq_vlan:
+    match: [ 2..3 ]
+    0x8847:
+      0..1: H32
+      2..3: vlan_tag_$1.etherType
+      vlan_tag_$1.$valid: 1
+      shift: 4
+      next: end
+    0x0800:
+      0..1: H32
+      2..3: vlan_tag_$1.etherType
+      vlan_tag_$1.$valid: 1
+      shift: 4
+      next: parse_ipv4
+    0x86dd:
+      0..1: H32
+      2..3: vlan_tag_$1.etherType
+      vlan_tag_$1.$valid: 1
+      shift: 4
+      next: parse_ipv6
+    0x0806:
+      0..1: H32
+      2..3: vlan_tag_$1.etherType
+      vlan_tag_$1.$valid: 1
+      shift: 4
+      next: parse_arp_rarp
+    0x88cc:
+      0..1: H32
+      2..3: vlan_tag_$1.etherType
+      vlan_tag_$1.$valid: 1
+      shift: 4
+      next: parse_set_prio_high
+    0x8809:
+      0..1: H32
+      2..3: vlan_tag_$1.etherType
+      vlan_tag_$1.$valid: 1
+      shift: 4
+      next: parse_set_prio_high
+    0x*:
+      0..1: H32
+      2..3: vlan_tag_$1.etherType
+      vlan_tag_$1.$valid: 1
+      shift: 4
+      next: end
+  parse_ethernet.1:
+    0x*:
+      0..1: ethernet.srcAddr.16-31
+      2..3: ethernet.srcAddr.0-15
+      4..5: ethernet.etherType
+      ethernet.$valid: 1
+      shift: 6
+      next: parse_llc_header
+  parse_ethernet.2:
+    0x*:
+      0..1: ethernet.srcAddr.16-31
+      2..3: ethernet.srcAddr.0-15
+      4..5: ethernet.etherType
+      ethernet.$valid: 1
+      shift: 6
+      next: parse_fabric_header
+  parse_fabric_header:
+    match: [ 0 ]
+    0x5:
+      0: TB4
+      1: TB3
+      2: fabric_header.dstDevice
+      3..4: fabric_header.dstPortOrGroup
+      fabric_header.$valid: 1
+      shift: 5
+      next: parse_fabric_header_cpu
+    0x*:
+      0: TB4
+      1: TB3
+      2: fabric_header.dstDevice
+      3..4: fabric_header.dstPortOrGroup
+      fabric_header.$valid: 1
+      shift: 5
+      next: end
+  parse_fabric_header_cpu:
+    match: [ 7..8 ]
+    0x*:
+      0: B0
+      1..2: fabric_header_cpu.ingressPort
+      3..4: fabric_header_cpu.ingressIfindex
+      5..6: fabric_header_cpu.ingressBd
+      7..8: fabric_header_cpu.reasonCode
+      fabric_header_cpu.$valid: 1
+      shift: 10
+      next: parse_fabric_header_cpu.0
+  parse_fabric_header_cpu.0:
+    0x*:
+      ingress_metadata.bypass_lookups: 0 /* ingress::fabric_header_cpu.reasonCode; */
+      # shift: -1
+      next: parse_fabric_payload_header
+  parse_fabric_payload_header:
+    match: [ 0..1 ]
+    0o000***:
+      0..1: fabric_payload_header.etherType
+      fabric_payload_header.$valid: 1
+      shift: 2
+      next: parse_llc_header
+    0b00000*0*********:
+      0..1: fabric_payload_header.etherType
+      fabric_payload_header.$valid: 1
+      shift: 2
+      next: parse_llc_header
+    0x8100:
+      0..1: fabric_payload_header.etherType
+      fabric_payload_header.$valid: 1
+      shift: 2
+      next: parse_vlan
+    0x9100:
+      0..1: fabric_payload_header.etherType
+      fabric_payload_header.$valid: 1
+      shift: 2
+      next: parse_qinq
+    0x8847:
+      0..1: fabric_payload_header.etherType
+      fabric_payload_header.$valid: 1
+      shift: 2
+      next: end
+    0x0800:
+      0..1: fabric_payload_header.etherType
+      fabric_payload_header.$valid: 1
+      shift: 2
+      next: parse_ipv4
+    0x86dd:
+      0..1: fabric_payload_header.etherType
+      fabric_payload_header.$valid: 1
+      shift: 2
+      next: parse_ipv6
+    0x0806:
+      0..1: fabric_payload_header.etherType
+      fabric_payload_header.$valid: 1
+      shift: 2
+      next: parse_arp_rarp
+    0x88cc:
+      0..1: fabric_payload_header.etherType
+      fabric_payload_header.$valid: 1
+      shift: 2
+      next: parse_set_prio_high
+    0x8809:
+      0..1: fabric_payload_header.etherType
+      fabric_payload_header.$valid: 1
+      shift: 2
+      next: parse_set_prio_high
+    0x*:
+      0..1: fabric_payload_header.etherType
+      fabric_payload_header.$valid: 1
+      shift: 2
+      next: end
+  parse_ethernet.3:
+    0x*:
+      0..1: ethernet.srcAddr.16-31
+      2..3: ethernet.srcAddr.0-15
+      4..5: ethernet.etherType
+      ethernet.$valid: 1
+      shift: 6
+      next: parse_vlan
+  parse_ethernet.4:
+    0x*:
+      0..1: ethernet.srcAddr.16-31
+      2..3: ethernet.srcAddr.0-15
+      4..5: ethernet.etherType
+      ethernet.$valid: 1
+      shift: 6
+      next: parse_qinq
+  parse_ethernet.5:
+    0x*:
+      0..1: ethernet.srcAddr.16-31
+      2..3: ethernet.srcAddr.0-15
+      4..5: ethernet.etherType
+      ethernet.$valid: 1
+      shift: 6
+      next: end
+  parse_ethernet.6:
+    0x*:
+      0..1: ethernet.srcAddr.16-31
+      2..3: ethernet.srcAddr.0-15
+      4..5: ethernet.etherType
+      ethernet.$valid: 1
+      shift: 6
+      next: parse_ipv4
+  parse_ethernet.7:
+    0x*:
+      0..1: ethernet.srcAddr.16-31
+      2..3: ethernet.srcAddr.0-15
+      4..5: ethernet.etherType
+      ethernet.$valid: 1
+      shift: 6
+      next: parse_ipv6
+  parse_ethernet.8:
+    0x*:
+      0..1: ethernet.srcAddr.16-31
+      2..3: ethernet.srcAddr.0-15
+      4..5: ethernet.etherType
+      ethernet.$valid: 1
+      shift: 6
+      next: parse_arp_rarp
+  parse_ethernet.9:
+    0x*:
+      0..1: ethernet.srcAddr.16-31
+      2..3: ethernet.srcAddr.0-15
+      4..5: ethernet.etherType
+      ethernet.$valid: 1
+      shift: 6
+      next: parse_set_prio_high
+  parse_ethernet.10:
+    0x*:
+      0..1: ethernet.srcAddr.16-31
+      2..3: ethernet.srcAddr.0-15
+      4..5: ethernet.etherType
+      ethernet.$valid: 1
+      shift: 6
+      next: parse_set_prio_high
+  parse_ethernet.11:
+    0x*:
+      0..1: ethernet.srcAddr.16-31
+      2..3: ethernet.srcAddr.0-15
+      4..5: ethernet.etherType
+      ethernet.$valid: 1
+      shift: 6
+      next: end
+deparser ingress:
+  dictionary:
+    ingress_metadata.ifindex: $always_deparse
+    H15: $always_deparse
+    H3: $always_deparse
+    B1: $always_deparse
+    B59: $always_deparse
+    fabric_metadata.reason_code: $always_deparse
+    l3_metadata.nexthop_index: $always_deparse
+    ethernet.dstAddr.32-47: ethernet.$valid
+    ethernet.dstAddr.16-31: ethernet.$valid
+    ethernet.dstAddr.0-15: ethernet.$valid
+    ethernet.srcAddr.32-47: ethernet.$valid
+    ethernet.srcAddr.16-31: ethernet.$valid
+    ethernet.srcAddr.0-15: ethernet.$valid
+    ethernet.etherType: ethernet.$valid
+    TB4: fabric_header.$valid
+    TB3: fabric_header.$valid
+    fabric_header.dstDevice: fabric_header.$valid
+    fabric_header.dstPortOrGroup: fabric_header.$valid
+    B0: fabric_header_cpu.$valid
+    fabric_header_cpu.ingressPort: fabric_header_cpu.$valid
+    fabric_header_cpu.ingressIfindex: fabric_header_cpu.$valid
+    fabric_header_cpu.ingressBd: fabric_header_cpu.$valid
+    fabric_header_cpu.reasonCode: fabric_header_cpu.$valid
+    fabric_payload_header.etherType: fabric_payload_header.$valid
+    llc_header.dsap: llc_header.$valid
+    llc_header.ssap: llc_header.$valid
+    llc_header.control_: llc_header.$valid
+    snap_header.oui.16-23: snap_header.$valid
+    snap_header.oui.8-15: snap_header.$valid
+    snap_header.oui.0-7: snap_header.$valid
+    snap_header.type_: snap_header.$valid
+    H42: vlan_tag_$0.$valid
+    vlan_tag_$0.etherType: vlan_tag_$0.$valid
+    H32: vlan_tag_$1.$valid
+    vlan_tag_$1.etherType: vlan_tag_$1.$valid
+    W12: ipv6.$valid
+    ipv6.payloadLen: ipv6.$valid
+    ipv6.nextHdr: ipv6.$valid
+    ipv6.hopLimit: ipv6.$valid
+    ipv6.srcAddr.96-127: ipv6.$valid
+    ipv6.srcAddr.64-95: ipv6.$valid
+    ipv6.srcAddr.32-63: ipv6.$valid
+    ipv6.srcAddr.0-31: ipv6.$valid
+    ipv6.dstAddr.96-127: ipv6.$valid
+    ipv6.dstAddr.64-95: ipv6.$valid
+    ipv6.dstAddr.32-63: ipv6.$valid
+    ipv6.dstAddr.0-31: ipv6.$valid
+    B12: inner_ipv4.$valid
+    inner_ipv4.diffserv: inner_ipv4.$valid
+    inner_ipv4.totalLen: inner_ipv4.$valid
+    inner_ipv4.identification: inner_ipv4.$valid
+    H34: inner_ipv4.$valid
+    inner_ipv4.ttl: inner_ipv4.$valid
+    inner_ipv4.protocol: inner_ipv4.$valid
+    inner_ipv4.hdrChecksum: inner_ipv4.$valid
+    inner_ipv4.srcAddr: inner_ipv4.$valid
+    inner_ipv4.dstAddr: inner_ipv4.$valid
+    inner_udp.srcPort: inner_udp.$valid
+    inner_udp.dstPort: inner_udp.$valid
+    inner_udp.length_: inner_udp.$valid
+    inner_udp.checksum: inner_udp.$valid
+    inner_tcp.srcPort: inner_tcp.$valid
+    inner_tcp.dstPort: inner_tcp.$valid
+    inner_tcp.seqNo: inner_tcp.$valid
+    inner_tcp.ackNo: inner_tcp.$valid
+    TB5: inner_tcp.$valid
+    inner_tcp.flags: inner_tcp.$valid
+    inner_tcp.window: inner_tcp.$valid
+    inner_tcp.checksum: inner_tcp.$valid
+    inner_tcp.urgentPtr: inner_tcp.$valid
+    inner_icmp.typeCode: inner_icmp.$valid
+    inner_icmp.hdrChecksum: inner_icmp.$valid
+    B49: ipv4.$valid
+    ipv4.diffserv: ipv4.$valid
+    ipv4.totalLen: ipv4.$valid
+    ipv4.identification: ipv4.$valid
+    H39: ipv4.$valid
+    ipv4.ttl: ipv4.$valid
+    ipv4.protocol: ipv4.$valid
+    ipv4.hdrChecksum: ipv4.$valid
+    ipv4.srcAddr: ipv4.$valid
+    ipv4.dstAddr: ipv4.$valid
+    udp.srcPort: udp.$valid
+    udp.dstPort: udp.$valid
+    udp.length_: udp.$valid
+    udp.checksum: udp.$valid
+    tcp.srcPort: tcp.$valid
+    tcp.dstPort: tcp.$valid
+    tcp.seqNo: tcp.$valid
+    tcp.ackNo: tcp.$valid
+    TB6: tcp.$valid
+    tcp.flags: tcp.$valid
+    tcp.window: tcp.$valid
+    tcp.checksum: tcp.$valid
+    tcp.urgentPtr: tcp.$valid
+    icmp.typeCode: icmp.$valid
+    icmp.hdrChecksum: icmp.$valid
+  egress_unicast_port: standard_metadata.egress_spec
+  learning:
+    0: [ $learning, H3, l2_metadata.lkp_mac_sa.32-47, l2_metadata.lkp_mac_sa.16-31, l2_metadata.lkp_mac_sa.0-15, ingress_metadata.ifindex ]
+    select: $learning
+parser egress:
+  start: $egress_metadata_shim
+  $egress_metadata_shim:
+    0x*:
+      0..1: H16
+      shift: 2
+      next: $bridge_metadata_extract
+  $bridge_metadata_extract:
+    0x*:
+      0..1: ingress_metadata.ifindex
+      2..3: H25
+      shift: 4
+      next: $bridge_metadata_extract.0
+  $bridge_metadata_extract.0:
+    0x*:
+      0: B22
+      shift: 1
+      next: $bridge_metadata_extract.1
+  $bridge_metadata_extract.1:
+    0x*:
+      0..1: H22
+      shift: 2
+      next: $bridge_metadata_extract.2
+  $bridge_metadata_extract.2:
+    0x*:
+      0: B36
+      shift: 1
+      next: $bridge_metadata_extract.3
+  $bridge_metadata_extract.3:
+    0x*:
+      0..1: H49
+      shift: 1
+      next: $bridge_metadata_extract.4
+  $bridge_metadata_extract.4:
+    0x*:
+      0..1: fabric_metadata.reason_code
+      2..3: l3_metadata.nexthop_index
+      shift: 4
+      next: start$
+  start$:
+    match: [ /* packet.lookahead<bit<112>>()[15:0]; */ ]
+    0x*:
+      next: parse_ethernet
+  parse_ethernet:
+    match: [ 12..13 ]
+    0o000***:
+      0..1: ethernet.dstAddr.32-47
+      2..3: ethernet.dstAddr.16-31
+      4..5: ethernet.dstAddr.0-15
+      6..7: ethernet.srcAddr.32-47
+      shift: 8
+      next: parse_ethernet.0
+    0b00000*0*********:
+      0..1: ethernet.dstAddr.32-47
+      2..3: ethernet.dstAddr.16-31
+      4..5: ethernet.dstAddr.0-15
+      6..7: ethernet.srcAddr.32-47
+      shift: 8
+      next: parse_ethernet.1
+    0x9000:
+      0..1: ethernet.dstAddr.32-47
+      2..3: ethernet.dstAddr.16-31
+      4..5: ethernet.dstAddr.0-15
+      6..7: ethernet.srcAddr.32-47
+      shift: 8
+      next: parse_ethernet.2
+    0x8100:
+      0..1: ethernet.dstAddr.32-47
+      2..3: ethernet.dstAddr.16-31
+      4..5: ethernet.dstAddr.0-15
+      6..7: ethernet.srcAddr.32-47
+      shift: 8
+      next: parse_ethernet.3
+    0x9100:
+      0..1: ethernet.dstAddr.32-47
+      2..3: ethernet.dstAddr.16-31
+      4..5: ethernet.dstAddr.0-15
+      6..7: ethernet.srcAddr.32-47
+      shift: 8
+      next: parse_ethernet.4
+    0x8847:
+      0..1: ethernet.dstAddr.32-47
+      2..3: ethernet.dstAddr.16-31
+      4..5: ethernet.dstAddr.0-15
+      6..7: ethernet.srcAddr.32-47
+      shift: 8
+      next: parse_ethernet.5
+    0x0800:
+      0..1: ethernet.dstAddr.32-47
+      2..3: ethernet.dstAddr.16-31
+      4..5: ethernet.dstAddr.0-15
+      6..7: ethernet.srcAddr.32-47
+      shift: 8
+      next: parse_ethernet.6
+    0x86dd:
+      0..1: ethernet.dstAddr.32-47
+      2..3: ethernet.dstAddr.16-31
+      4..5: ethernet.dstAddr.0-15
+      6..7: ethernet.srcAddr.32-47
+      shift: 8
+      next: parse_ethernet.7
+    0x0806:
+      0..1: ethernet.dstAddr.32-47
+      2..3: ethernet.dstAddr.16-31
+      4..5: ethernet.dstAddr.0-15
+      6..7: ethernet.srcAddr.32-47
+      shift: 8
+      next: parse_ethernet.8
+    0x88cc:
+      0..1: ethernet.dstAddr.32-47
+      2..3: ethernet.dstAddr.16-31
+      4..5: ethernet.dstAddr.0-15
+      6..7: ethernet.srcAddr.32-47
+      shift: 8
+      next: parse_ethernet.9
+    0x8809:
+      0..1: ethernet.dstAddr.32-47
+      2..3: ethernet.dstAddr.16-31
+      4..5: ethernet.dstAddr.0-15
+      6..7: ethernet.srcAddr.32-47
+      shift: 8
+      next: parse_ethernet.10
+    0x*:
+      0..1: ethernet.dstAddr.32-47
+      2..3: ethernet.dstAddr.16-31
+      4..5: ethernet.dstAddr.0-15
+      6..7: ethernet.srcAddr.32-47
+      shift: 8
+      next: parse_ethernet.11
+  parse_ethernet.0:
+    0x*:
+      0..1: ethernet.srcAddr.16-31
+      2..3: ethernet.srcAddr.0-15
+      4..5: ethernet.etherType
+      ethernet.$valid: 1
+      shift: 6
+      next: parse_llc_header
+  parse_llc_header:
+    match: [ 0, 1 ]
+    0xaaaa:
+      0: llc_header.dsap
+      1: llc_header.ssap
+      2: llc_header.control_
+      llc_header.$valid: 1
+      shift: 3
+      next: parse_snap_header
+    0xfefe:
+      0: llc_header.dsap
+      1: llc_header.ssap
+      2: llc_header.control_
+      llc_header.$valid: 1
+      shift: 3
+      next: end
+    0x*:
+      0: llc_header.dsap
+      1: llc_header.ssap
+      2: llc_header.control_
+      llc_header.$valid: 1
+      shift: 3
+      next: end
+  parse_snap_header:
+    match: [ 3..4 ]
+    0x8100:
+      0: snap_header.oui.16-23
+      1: snap_header.oui.8-15
+      2: snap_header.oui.0-7
+      3..4: snap_header.type_
+      snap_header.$valid: 1
+      shift: 5
+      next: parse_vlan
+    0x9100:
+      0: snap_header.oui.16-23
+      1: snap_header.oui.8-15
+      2: snap_header.oui.0-7
+      3..4: snap_header.type_
+      snap_header.$valid: 1
+      shift: 5
+      next: parse_qinq
+    0x8847:
+      0: snap_header.oui.16-23
+      1: snap_header.oui.8-15
+      2: snap_header.oui.0-7
+      3..4: snap_header.type_
+      snap_header.$valid: 1
+      shift: 5
+      next: end
+    0x0800:
+      0: snap_header.oui.16-23
+      1: snap_header.oui.8-15
+      2: snap_header.oui.0-7
+      3..4: snap_header.type_
+      snap_header.$valid: 1
+      shift: 5
+      next: parse_ipv4
+    0x86dd:
+      0: snap_header.oui.16-23
+      1: snap_header.oui.8-15
+      2: snap_header.oui.0-7
+      3..4: snap_header.type_
+      snap_header.$valid: 1
+      shift: 5
+      next: parse_ipv6
+    0x0806:
+      0: snap_header.oui.16-23
+      1: snap_header.oui.8-15
+      2: snap_header.oui.0-7
+      3..4: snap_header.type_
+      snap_header.$valid: 1
+      shift: 5
+      next: end
+    0x88cc:
+      0: snap_header.oui.16-23
+      1: snap_header.oui.8-15
+      2: snap_header.oui.0-7
+      3..4: snap_header.type_
+      snap_header.$valid: 1
+      shift: 5
+      next: end
+    0x8809:
+      0: snap_header.oui.16-23
+      1: snap_header.oui.8-15
+      2: snap_header.oui.0-7
+      3..4: snap_header.type_
+      snap_header.$valid: 1
+      shift: 5
+      next: end
+    0x*:
+      0: snap_header.oui.16-23
+      1: snap_header.oui.8-15
+      2: snap_header.oui.0-7
+      3..4: snap_header.type_
+      snap_header.$valid: 1
+      shift: 5
+      next: end
+  parse_vlan:
+    match: [ 2..3 ]
+    0x8847:
+      0..1: H51
+      2..3: vlan_tag_$0.etherType
+      vlan_tag_$0.$valid: 1
+      shift: 4
+      next: end
+    0x0800:
+      0..1: H51
+      2..3: vlan_tag_$0.etherType
+      vlan_tag_$0.$valid: 1
+      shift: 4
+      next: parse_ipv4
+    0x86dd:
+      0..1: H51
+      2..3: vlan_tag_$0.etherType
+      vlan_tag_$0.$valid: 1
+      shift: 4
+      next: parse_ipv6
+    0x0806:
+      0..1: H51
+      2..3: vlan_tag_$0.etherType
+      vlan_tag_$0.$valid: 1
+      shift: 4
+      next: end
+    0x88cc:
+      0..1: H51
+      2..3: vlan_tag_$0.etherType
+      vlan_tag_$0.$valid: 1
+      shift: 4
+      next: end
+    0x8809:
+      0..1: H51
+      2..3: vlan_tag_$0.etherType
+      vlan_tag_$0.$valid: 1
+      shift: 4
+      next: end
+    0x*:
+      0..1: H51
+      2..3: vlan_tag_$0.etherType
+      vlan_tag_$0.$valid: 1
+      shift: 4
+      next: end
+  parse_ipv4:
+    match: [ 6..7, 0, 9 ]
+    0x0000501:
+      0: B46
+      1: ipv4.diffserv
+      2..3: ipv4.totalLen
+      4..5: ipv4.identification
+      6..7: TH33
+      8: ipv4.ttl
+      9: ipv4.protocol
+      10..11: ipv4.hdrChecksum
+      shift: 12
+      next: parse_ipv4.0
+    0x0000506:
+      0: B46
+      1: ipv4.diffserv
+      2..3: ipv4.totalLen
+      4..5: ipv4.identification
+      6..7: TH33
+      8: ipv4.ttl
+      9: ipv4.protocol
+      10..11: ipv4.hdrChecksum
+      shift: 12
+      next: parse_ipv4.1
+    0x0000511:
+      0: B46
+      1: ipv4.diffserv
+      2..3: ipv4.totalLen
+      4..5: ipv4.identification
+      6..7: TH33
+      8: ipv4.ttl
+      9: ipv4.protocol
+      10..11: ipv4.hdrChecksum
+      shift: 12
+      next: parse_ipv4.2
+    0x0000002:
+      0: B46
+      1: ipv4.diffserv
+      2..3: ipv4.totalLen
+      4..5: ipv4.identification
+      6..7: TH33
+      8: ipv4.ttl
+      9: ipv4.protocol
+      10..11: ipv4.hdrChecksum
+      shift: 12
+      next: parse_ipv4.3
+    0x0000058:
+      0: B46
+      1: ipv4.diffserv
+      2..3: ipv4.totalLen
+      4..5: ipv4.identification
+      6..7: TH33
+      8: ipv4.ttl
+      9: ipv4.protocol
+      10..11: ipv4.hdrChecksum
+      shift: 12
+      next: parse_ipv4.4
+    0x0000059:
+      0: B46
+      1: ipv4.diffserv
+      2..3: ipv4.totalLen
+      4..5: ipv4.identification
+      6..7: TH33
+      8: ipv4.ttl
+      9: ipv4.protocol
+      10..11: ipv4.hdrChecksum
+      shift: 12
+      next: parse_ipv4.5
+    0x0000067:
+      0: B46
+      1: ipv4.diffserv
+      2..3: ipv4.totalLen
+      4..5: ipv4.identification
+      6..7: TH33
+      8: ipv4.ttl
+      9: ipv4.protocol
+      10..11: ipv4.hdrChecksum
+      shift: 12
+      next: parse_ipv4.6
+    0x0000070:
+      0: B46
+      1: ipv4.diffserv
+      2..3: ipv4.totalLen
+      4..5: ipv4.identification
+      6..7: TH33
+      8: ipv4.ttl
+      9: ipv4.protocol
+      10..11: ipv4.hdrChecksum
+      shift: 12
+      next: parse_ipv4.7
+    0x*:
+      0: B46
+      1: ipv4.diffserv
+      2..3: ipv4.totalLen
+      4..5: ipv4.identification
+      6..7: TH33
+      8: ipv4.ttl
+      9: ipv4.protocol
+      10..11: ipv4.hdrChecksum
+      shift: 12
+      next: parse_ipv4.8
+  parse_ipv4.0:
+    0x*:
+      0..1: ipv4.srcAddr.16-31
+      2..3: ipv4.srcAddr.0-15
+      4..7: ipv4.dstAddr
+      ipv4.$valid: 1
+      shift: 8
+      next: parse_icmp
+  parse_icmp:
+    match: [ 0..1 ]
+    0o101***:
+      0..1: icmp.typeCode
+      2..3: icmp.hdrChecksum
+      icmp.$valid: 1
+      shift: 4
+      next: end
+    0b100001**********:
+      0..1: icmp.typeCode
+      2..3: icmp.hdrChecksum
+      icmp.$valid: 1
+      shift: 4
+      next: end
+    0x88**:
+      0..1: icmp.typeCode
+      2..3: icmp.hdrChecksum
+      icmp.$valid: 1
+      shift: 4
+      next: end
+    0x*:
+      0..1: icmp.typeCode
+      2..3: icmp.hdrChecksum
+      icmp.$valid: 1
+      shift: 4
+      next: end
+  parse_ipv4.1:
+    0x*:
+      0..1: ipv4.srcAddr.16-31
+      2..3: ipv4.srcAddr.0-15
+      4..7: ipv4.dstAddr
+      ipv4.$valid: 1
+      shift: 8
+      next: parse_tcp
+  parse_tcp:
+    match: [ 2..3 ]
+    0x00b3:
+      0..1: tcp.srcPort
+      2..3: tcp.dstPort
+      4..7: tcp.seqNo
+      8..11: tcp.ackNo
+      12: B28
+      13: tcp.flags
+      14..15: tcp.window
+      16..17: tcp.checksum
+      shift: 18
+      next: parse_tcp.0
+    0x027f:
+      0..1: tcp.srcPort
+      2..3: tcp.dstPort
+      4..7: tcp.seqNo
+      8..11: tcp.ackNo
+      12: B28
+      13: tcp.flags
+      14..15: tcp.window
+      16..17: tcp.checksum
+      shift: 18
+      next: parse_tcp.1
+    0x*:
+      0..1: tcp.srcPort
+      2..3: tcp.dstPort
+      4..7: tcp.seqNo
+      8..11: tcp.ackNo
+      12: B28
+      13: tcp.flags
+      14..15: tcp.window
+      16..17: tcp.checksum
+      shift: 18
+      next: parse_tcp.2
+  parse_tcp.0:
+    0x*:
+      0..1: tcp.urgentPtr
+      tcp.$valid: 1
+      shift: 2
+      next: end
+  parse_tcp.1:
+    0x*:
+      0..1: tcp.urgentPtr
+      tcp.$valid: 1
+      shift: 2
+      next: end
+  parse_tcp.2:
+    0x*:
+      0..1: tcp.urgentPtr
+      tcp.$valid: 1
+      shift: 2
+      next: end
+  parse_ipv4.2:
+    0x*:
+      0..1: ipv4.srcAddr.16-31
+      2..3: ipv4.srcAddr.0-15
+      4..7: ipv4.dstAddr
+      ipv4.$valid: 1
+      shift: 8
+      next: parse_udp
+  parse_udp:
+    match: [ 2..3 ]
+    0x0043:
+      0: udp.srcPort.8-15
+      1: udp.srcPort.0-7
+      2: udp.dstPort.8-15
+      3: udp.dstPort.0-7
+      shift: 4
+      next: parse_udp.0
+    0x0044:
+      0: udp.srcPort.8-15
+      1: udp.srcPort.0-7
+      2: udp.dstPort.8-15
+      3: udp.dstPort.0-7
+      shift: 4
+      next: parse_udp.1
+    0x0222:
+      0: udp.srcPort.8-15
+      1: udp.srcPort.0-7
+      2: udp.dstPort.8-15
+      3: udp.dstPort.0-7
+      shift: 4
+      next: parse_udp.2
+    0x0223:
+      0: udp.srcPort.8-15
+      1: udp.srcPort.0-7
+      2: udp.dstPort.8-15
+      3: udp.dstPort.0-7
+      shift: 4
+      next: parse_udp.3
+    0x0208:
+      0: udp.srcPort.8-15
+      1: udp.srcPort.0-7
+      2: udp.dstPort.8-15
+      3: udp.dstPort.0-7
+      shift: 4
+      next: parse_udp.4
+    0x0209:
+      0: udp.srcPort.8-15
+      1: udp.srcPort.0-7
+      2: udp.dstPort.8-15
+      3: udp.dstPort.0-7
+      shift: 4
+      next: parse_udp.5
+    0x07c1:
+      0: udp.srcPort.8-15
+      1: udp.srcPort.0-7
+      2: udp.dstPort.8-15
+      3: udp.dstPort.0-7
+      shift: 4
+      next: parse_udp.6
+    0x18c7:
+      0: udp.srcPort.8-15
+      1: udp.srcPort.0-7
+      2: udp.dstPort.8-15
+      3: udp.dstPort.0-7
+      shift: 4
+      next: parse_udp.7
+    0x*:
+      0: udp.srcPort.8-15
+      1: udp.srcPort.0-7
+      2: udp.dstPort.8-15
+      3: udp.dstPort.0-7
+      shift: 4
+      next: parse_udp.8
+  parse_udp.0:
+    0x*:
+      0: udp.length_.8-15
+      1: udp.length_.0-7
+      2: udp.checksum.8-15
+      3: udp.checksum.0-7
+      shift: 4
+      next: parse_udp.0.0
+  parse_udp.0.0:
+    0x*:
+      udp.$valid: 1
+      next: end
+  parse_udp.1:
+    0x*:
+      0: udp.length_.8-15
+      1: udp.length_.0-7
+      2: udp.checksum.8-15
+      3: udp.checksum.0-7
+      shift: 4
+      next: parse_udp.1.0
+  parse_udp.1.0:
+    0x*:
+      udp.$valid: 1
+      next: end
+  parse_udp.2:
+    0x*:
+      0: udp.length_.8-15
+      1: udp.length_.0-7
+      2: udp.checksum.8-15
+      3: udp.checksum.0-7
+      shift: 4
+      next: parse_udp.2.0
+  parse_udp.2.0:
+    0x*:
+      udp.$valid: 1
+      next: end
+  parse_udp.3:
+    0x*:
+      0: udp.length_.8-15
+      1: udp.length_.0-7
+      2: udp.checksum.8-15
+      3: udp.checksum.0-7
+      shift: 4
+      next: parse_udp.3.0
+  parse_udp.3.0:
+    0x*:
+      udp.$valid: 1
+      next: end
+  parse_udp.4:
+    0x*:
+      0: udp.length_.8-15
+      1: udp.length_.0-7
+      2: udp.checksum.8-15
+      3: udp.checksum.0-7
+      shift: 4
+      next: parse_udp.4.0
+  parse_udp.4.0:
+    0x*:
+      udp.$valid: 1
+      next: end
+  parse_udp.5:
+    0x*:
+      0: udp.length_.8-15
+      1: udp.length_.0-7
+      2: udp.checksum.8-15
+      3: udp.checksum.0-7
+      shift: 4
+      next: parse_udp.5.0
+  parse_udp.5.0:
+    0x*:
+      udp.$valid: 1
+      next: end
+  parse_udp.6:
+    0x*:
+      0: udp.length_.8-15
+      1: udp.length_.0-7
+      2: udp.checksum.8-15
+      3: udp.checksum.0-7
+      shift: 4
+      next: parse_udp.6.0
+  parse_udp.6.0:
+    0x*:
+      udp.$valid: 1
+      next: end
+  parse_udp.7:
+    0x*:
+      0: udp.length_.8-15
+      1: udp.length_.0-7
+      2: udp.checksum.8-15
+      3: udp.checksum.0-7
+      shift: 4
+      next: parse_udp.7.0
+  parse_udp.7.0:
+    0x*:
+      udp.$valid: 1
+      next: end
+  parse_udp.8:
+    0x*:
+      0: udp.length_.8-15
+      1: udp.length_.0-7
+      2: udp.checksum.8-15
+      3: udp.checksum.0-7
+      shift: 4
+      next: parse_udp.8.0
+  parse_udp.8.0:
+    0x*:
+      udp.$valid: 1
+      next: end
+  parse_ipv4.3:
+    0x*:
+      0..1: ipv4.srcAddr.16-31
+      2..3: ipv4.srcAddr.0-15
+      4..7: ipv4.dstAddr
+      ipv4.$valid: 1
+      shift: 8
+      next: end
+  parse_ipv4.4:
+    0x*:
+      0..1: ipv4.srcAddr.16-31
+      2..3: ipv4.srcAddr.0-15
+      4..7: ipv4.dstAddr
+      ipv4.$valid: 1
+      shift: 8
+      next: end
+  parse_ipv4.5:
+    0x*:
+      0..1: ipv4.srcAddr.16-31
+      2..3: ipv4.srcAddr.0-15
+      4..7: ipv4.dstAddr
+      ipv4.$valid: 1
+      shift: 8
+      next: end
+  parse_ipv4.6:
+    0x*:
+      0..1: ipv4.srcAddr.16-31
+      2..3: ipv4.srcAddr.0-15
+      4..7: ipv4.dstAddr
+      ipv4.$valid: 1
+      shift: 8
+      next: end
+  parse_ipv4.7:
+    0x*:
+      0..1: ipv4.srcAddr.16-31
+      2..3: ipv4.srcAddr.0-15
+      4..7: ipv4.dstAddr
+      ipv4.$valid: 1
+      shift: 8
+      next: end
+  parse_ipv4.8:
+    0x*:
+      0..1: ipv4.srcAddr.16-31
+      2..3: ipv4.srcAddr.0-15
+      4..7: ipv4.dstAddr
+      ipv4.$valid: 1
+      shift: 8
+      next: end
+  parse_ipv6:
+    match: [ 6 ]
+    0x3a:
+      0..3: TW24
+      4: ipv6.payloadLen.8-15
+      5: ipv6.payloadLen.0-7
+      6: ipv6.nextHdr
+      7: ipv6.hopLimit
+      8..11: ipv6.srcAddr.96-127
+      12..15: ipv6.srcAddr.64-95
+      16..19: ipv6.srcAddr.32-63
+      shift: 20
+      next: parse_ipv6.0
+    0x06:
+      0..3: TW24
+      4: ipv6.payloadLen.8-15
+      5: ipv6.payloadLen.0-7
+      6: ipv6.nextHdr
+      7: ipv6.hopLimit
+      8..11: ipv6.srcAddr.96-127
+      12..15: ipv6.srcAddr.64-95
+      16..19: ipv6.srcAddr.32-63
+      shift: 20
+      next: parse_ipv6.1
+    0x04:
+      0..3: TW24
+      4: ipv6.payloadLen.8-15
+      5: ipv6.payloadLen.0-7
+      6: ipv6.nextHdr
+      7: ipv6.hopLimit
+      8..11: ipv6.srcAddr.96-127
+      12..15: ipv6.srcAddr.64-95
+      16..19: ipv6.srcAddr.32-63
+      shift: 20
+      next: parse_ipv6.2
+    0x58:
+      0..3: TW24
+      4: ipv6.payloadLen.8-15
+      5: ipv6.payloadLen.0-7
+      6: ipv6.nextHdr
+      7: ipv6.hopLimit
+      8..11: ipv6.srcAddr.96-127
+      12..15: ipv6.srcAddr.64-95
+      16..19: ipv6.srcAddr.32-63
+      shift: 20
+      next: parse_ipv6.3
+    0x59:
+      0..3: TW24
+      4: ipv6.payloadLen.8-15
+      5: ipv6.payloadLen.0-7
+      6: ipv6.nextHdr
+      7: ipv6.hopLimit
+      8..11: ipv6.srcAddr.96-127
+      12..15: ipv6.srcAddr.64-95
+      16..19: ipv6.srcAddr.32-63
+      shift: 20
+      next: parse_ipv6.4
+    0x67:
+      0..3: TW24
+      4: ipv6.payloadLen.8-15
+      5: ipv6.payloadLen.0-7
+      6: ipv6.nextHdr
+      7: ipv6.hopLimit
+      8..11: ipv6.srcAddr.96-127
+      12..15: ipv6.srcAddr.64-95
+      16..19: ipv6.srcAddr.32-63
+      shift: 20
+      next: parse_ipv6.5
+    0x70:
+      0..3: TW24
+      4: ipv6.payloadLen.8-15
+      5: ipv6.payloadLen.0-7
+      6: ipv6.nextHdr
+      7: ipv6.hopLimit
+      8..11: ipv6.srcAddr.96-127
+      12..15: ipv6.srcAddr.64-95
+      16..19: ipv6.srcAddr.32-63
+      shift: 20
+      next: parse_ipv6.6
+    0x*:
+      0..3: TW24
+      4: ipv6.payloadLen.8-15
+      5: ipv6.payloadLen.0-7
+      6: ipv6.nextHdr
+      7: ipv6.hopLimit
+      8..11: ipv6.srcAddr.96-127
+      12..15: ipv6.srcAddr.64-95
+      16..19: ipv6.srcAddr.32-63
+      shift: 20
+      next: parse_ipv6.7
+  parse_ipv6.0:
+    0x*:
+      0..3: ipv6.srcAddr.0-31
+      4..7: ipv6.dstAddr.96-127
+      8..11: ipv6.dstAddr.64-95
+      12..15: ipv6.dstAddr.32-63
+      shift: 16
+      next: parse_ipv6.0.0
+  parse_ipv6.0.0:
+    0x*:
+      0..3: ipv6.dstAddr.0-31
+      ipv6.$valid: 1
+      shift: 4
+      next: parse_icmp
+  parse_ipv6.1:
+    0x*:
+      0..3: ipv6.srcAddr.0-31
+      4..7: ipv6.dstAddr.96-127
+      8..11: ipv6.dstAddr.64-95
+      12..15: ipv6.dstAddr.32-63
+      shift: 16
+      next: parse_ipv6.1.0
+  parse_ipv6.1.0:
+    0x*:
+      0..3: ipv6.dstAddr.0-31
+      ipv6.$valid: 1
+      shift: 4
+      next: parse_tcp
+  parse_ipv6.2:
+    0x*:
+      0..3: ipv6.srcAddr.0-31
+      4..7: ipv6.dstAddr.96-127
+      8..11: ipv6.dstAddr.64-95
+      12..15: ipv6.dstAddr.32-63
+      shift: 16
+      next: parse_ipv6.2.0
+  parse_ipv6.2.0:
+    0x*:
+      0..3: ipv6.dstAddr.0-31
+      ipv6.$valid: 1
+      shift: 4
+      next: parse_ipv4_in_ip
+  parse_ipv4_in_ip:
+    0x*:
+      next: parse_inner_ipv4
+  parse_inner_ipv4:
+    match: [ 6..7, 0, 9 ]
+    0x0000501:
+      0: B26
+      1: inner_ipv4.diffserv
+      2: inner_ipv4.totalLen.8-15
+      3: inner_ipv4.totalLen.0-7
+      4..5: inner_ipv4.identification
+      6..7: TH32
+      shift: 8
+      next: parse_inner_ipv4.0
+    0x0000506:
+      0: B26
+      1: inner_ipv4.diffserv
+      2: inner_ipv4.totalLen.8-15
+      3: inner_ipv4.totalLen.0-7
+      4..5: inner_ipv4.identification
+      6..7: TH32
+      shift: 8
+      next: parse_inner_ipv4.1
+    0x0000511:
+      0: B26
+      1: inner_ipv4.diffserv
+      2: inner_ipv4.totalLen.8-15
+      3: inner_ipv4.totalLen.0-7
+      4..5: inner_ipv4.identification
+      6..7: TH32
+      shift: 8
+      next: parse_inner_ipv4.2
+    0x*:
+      0: B26
+      1: inner_ipv4.diffserv
+      2: inner_ipv4.totalLen.8-15
+      3: inner_ipv4.totalLen.0-7
+      4..5: inner_ipv4.identification
+      6..7: TH32
+      shift: 8
+      next: parse_inner_ipv4.3
+  parse_inner_ipv4.0:
+    0x*:
+      0: inner_ipv4.ttl
+      1: inner_ipv4.protocol
+      2..3: inner_ipv4.hdrChecksum
+      4..7: inner_ipv4.srcAddr
+      8..11: inner_ipv4.dstAddr
+      inner_ipv4.$valid: 1
+      shift: 12
+      next: parse_inner_icmp
+  parse_inner_icmp:
+    0x*:
+      0..1: inner_icmp.typeCode
+      2..3: inner_icmp.hdrChecksum
+      inner_icmp.$valid: 1
+      shift: 4
+      next: end
+  parse_inner_ipv4.1:
+    0x*:
+      0: inner_ipv4.ttl
+      1: inner_ipv4.protocol
+      2..3: inner_ipv4.hdrChecksum
+      4..7: inner_ipv4.srcAddr
+      8..11: inner_ipv4.dstAddr
+      inner_ipv4.$valid: 1
+      shift: 12
+      next: parse_inner_tcp
+  parse_inner_tcp:
+    0x*:
+      0..1: inner_tcp.srcPort
+      2..3: inner_tcp.dstPort
+      4..7: inner_tcp.seqNo
+      8..11: inner_tcp.ackNo
+      12: B24
+      13: inner_tcp.flags
+      14..15: inner_tcp.window
+      16..17: inner_tcp.checksum
+      shift: 18
+      next: parse_inner_tcp.0
+  parse_inner_tcp.0:
+    0x*:
+      0..1: inner_tcp.urgentPtr
+      inner_tcp.$valid: 1
+      shift: 2
+      next: end
+  parse_inner_ipv4.2:
+    0x*:
+      0: inner_ipv4.ttl
+      1: inner_ipv4.protocol
+      2..3: inner_ipv4.hdrChecksum
+      4..7: inner_ipv4.srcAddr
+      8..11: inner_ipv4.dstAddr
+      inner_ipv4.$valid: 1
+      shift: 12
+      next: parse_inner_udp
+  parse_inner_udp:
+    0x*:
+      0..1: inner_udp.srcPort
+      2..3: inner_udp.dstPort
+      4..5: inner_udp.length_
+      6..7: inner_udp.checksum
+      inner_udp.$valid: 1
+      shift: 8
+      next: end
+  parse_inner_ipv4.3:
+    0x*:
+      0: inner_ipv4.ttl
+      1: inner_ipv4.protocol
+      2..3: inner_ipv4.hdrChecksum
+      4..7: inner_ipv4.srcAddr
+      8..11: inner_ipv4.dstAddr
+      inner_ipv4.$valid: 1
+      shift: 12
+      next: end
+  parse_ipv6.3:
+    0x*:
+      0..3: ipv6.srcAddr.0-31
+      4..7: ipv6.dstAddr.96-127
+      8..11: ipv6.dstAddr.64-95
+      12..15: ipv6.dstAddr.32-63
+      shift: 16
+      next: parse_ipv6.3.0
+  parse_ipv6.3.0:
+    0x*:
+      0..3: ipv6.dstAddr.0-31
+      ipv6.$valid: 1
+      shift: 4
+      next: end
+  parse_ipv6.4:
+    0x*:
+      0..3: ipv6.srcAddr.0-31
+      4..7: ipv6.dstAddr.96-127
+      8..11: ipv6.dstAddr.64-95
+      12..15: ipv6.dstAddr.32-63
+      shift: 16
+      next: parse_ipv6.4.0
+  parse_ipv6.4.0:
+    0x*:
+      0..3: ipv6.dstAddr.0-31
+      ipv6.$valid: 1
+      shift: 4
+      next: end
+  parse_ipv6.5:
+    0x*:
+      0..3: ipv6.srcAddr.0-31
+      4..7: ipv6.dstAddr.96-127
+      8..11: ipv6.dstAddr.64-95
+      12..15: ipv6.dstAddr.32-63
+      shift: 16
+      next: parse_ipv6.5.0
+  parse_ipv6.5.0:
+    0x*:
+      0..3: ipv6.dstAddr.0-31
+      ipv6.$valid: 1
+      shift: 4
+      next: end
+  parse_ipv6.6:
+    0x*:
+      0..3: ipv6.srcAddr.0-31
+      4..7: ipv6.dstAddr.96-127
+      8..11: ipv6.dstAddr.64-95
+      12..15: ipv6.dstAddr.32-63
+      shift: 16
+      next: parse_ipv6.6.0
+  parse_ipv6.6.0:
+    0x*:
+      0..3: ipv6.dstAddr.0-31
+      ipv6.$valid: 1
+      shift: 4
+      next: end
+  parse_ipv6.7:
+    0x*:
+      0..3: ipv6.srcAddr.0-31
+      4..7: ipv6.dstAddr.96-127
+      8..11: ipv6.dstAddr.64-95
+      12..15: ipv6.dstAddr.32-63
+      shift: 16
+      next: parse_ipv6.7.0
+  parse_ipv6.7.0:
+    0x*:
+      0..3: ipv6.dstAddr.0-31
+      ipv6.$valid: 1
+      shift: 4
+      next: end
+  parse_qinq:
+    match: [ 2..3 ]
+    0x8100:
+      0..1: H51
+      2..3: vlan_tag_$0.etherType
+      vlan_tag_$0.$valid: 1
+      shift: 4
+      next: parse_qinq_vlan
+    0x*:
+      0..1: H51
+      2..3: vlan_tag_$0.etherType
+      vlan_tag_$0.$valid: 1
+      shift: 4
+      next: end
+  parse_qinq_vlan:
+    match: [ 2..3 ]
+    0x8847:
+      0..1: H50
+      2..3: vlan_tag_$1.etherType
+      vlan_tag_$1.$valid: 1
+      shift: 4
+      next: end
+    0x0800:
+      0..1: H50
+      2..3: vlan_tag_$1.etherType
+      vlan_tag_$1.$valid: 1
+      shift: 4
+      next: parse_ipv4
+    0x86dd:
+      0..1: H50
+      2..3: vlan_tag_$1.etherType
+      vlan_tag_$1.$valid: 1
+      shift: 4
+      next: parse_ipv6
+    0x0806:
+      0..1: H50
+      2..3: vlan_tag_$1.etherType
+      vlan_tag_$1.$valid: 1
+      shift: 4
+      next: end
+    0x88cc:
+      0..1: H50
+      2..3: vlan_tag_$1.etherType
+      vlan_tag_$1.$valid: 1
+      shift: 4
+      next: end
+    0x8809:
+      0..1: H50
+      2..3: vlan_tag_$1.etherType
+      vlan_tag_$1.$valid: 1
+      shift: 4
+      next: end
+    0x*:
+      0..1: H50
+      2..3: vlan_tag_$1.etherType
+      vlan_tag_$1.$valid: 1
+      shift: 4
+      next: end
+  parse_ethernet.1:
+    0x*:
+      0..1: ethernet.srcAddr.16-31
+      2..3: ethernet.srcAddr.0-15
+      4..5: ethernet.etherType
+      ethernet.$valid: 1
+      shift: 6
+      next: parse_llc_header
+  parse_ethernet.2:
+    0x*:
+      0..1: ethernet.srcAddr.16-31
+      2..3: ethernet.srcAddr.0-15
+      4..5: ethernet.etherType
+      ethernet.$valid: 1
+      shift: 6
+      next: parse_fabric_header
+  parse_fabric_header:
+    match: [ 0 ]
+    0x5:
+      0: B19
+      1: TB19
+      2: fabric_header.dstDevice
+      3..4: fabric_header.dstPortOrGroup
+      fabric_header.$valid: 1
+      shift: 5
+      next: parse_fabric_header_cpu
+    0x*:
+      0: B19
+      1: TB19
+      2: fabric_header.dstDevice
+      3..4: fabric_header.dstPortOrGroup
+      fabric_header.$valid: 1
+      shift: 5
+      next: end
+  parse_fabric_header_cpu:
+    match: [ 7..8 ]
+    0x*:
+      0: B38
+      1..2: fabric_header_cpu.ingressPort
+      3..4: fabric_header_cpu.ingressIfindex
+      5..6: fabric_header_cpu.ingressBd
+      7..8: fabric_header_cpu.reasonCode
+      fabric_header_cpu.$valid: 1
+      shift: 9
+      next: parse_fabric_payload_header
+  parse_fabric_payload_header:
+    match: [ 0..1 ]
+    0o000***:
+      0..1: fabric_payload_header.etherType
+      fabric_payload_header.$valid: 1
+      shift: 2
+      next: parse_llc_header
+    0b00000*0*********:
+      0..1: fabric_payload_header.etherType
+      fabric_payload_header.$valid: 1
+      shift: 2
+      next: parse_llc_header
+    0x8100:
+      0..1: fabric_payload_header.etherType
+      fabric_payload_header.$valid: 1
+      shift: 2
+      next: parse_vlan
+    0x9100:
+      0..1: fabric_payload_header.etherType
+      fabric_payload_header.$valid: 1
+      shift: 2
+      next: parse_qinq
+    0x8847:
+      0..1: fabric_payload_header.etherType
+      fabric_payload_header.$valid: 1
+      shift: 2
+      next: end
+    0x0800:
+      0..1: fabric_payload_header.etherType
+      fabric_payload_header.$valid: 1
+      shift: 2
+      next: parse_ipv4
+    0x86dd:
+      0..1: fabric_payload_header.etherType
+      fabric_payload_header.$valid: 1
+      shift: 2
+      next: parse_ipv6
+    0x0806:
+      0..1: fabric_payload_header.etherType
+      fabric_payload_header.$valid: 1
+      shift: 2
+      next: end
+    0x88cc:
+      0..1: fabric_payload_header.etherType
+      fabric_payload_header.$valid: 1
+      shift: 2
+      next: end
+    0x8809:
+      0..1: fabric_payload_header.etherType
+      fabric_payload_header.$valid: 1
+      shift: 2
+      next: end
+    0x*:
+      0..1: fabric_payload_header.etherType
+      fabric_payload_header.$valid: 1
+      shift: 2
+      next: end
+  parse_ethernet.3:
+    0x*:
+      0..1: ethernet.srcAddr.16-31
+      2..3: ethernet.srcAddr.0-15
+      4..5: ethernet.etherType
+      ethernet.$valid: 1
+      shift: 6
+      next: parse_vlan
+  parse_ethernet.4:
+    0x*:
+      0..1: ethernet.srcAddr.16-31
+      2..3: ethernet.srcAddr.0-15
+      4..5: ethernet.etherType
+      ethernet.$valid: 1
+      shift: 6
+      next: parse_qinq
+  parse_ethernet.5:
+    0x*:
+      0..1: ethernet.srcAddr.16-31
+      2..3: ethernet.srcAddr.0-15
+      4..5: ethernet.etherType
+      ethernet.$valid: 1
+      shift: 6
+      next: end
+  parse_ethernet.6:
+    0x*:
+      0..1: ethernet.srcAddr.16-31
+      2..3: ethernet.srcAddr.0-15
+      4..5: ethernet.etherType
+      ethernet.$valid: 1
+      shift: 6
+      next: parse_ipv4
+  parse_ethernet.7:
+    0x*:
+      0..1: ethernet.srcAddr.16-31
+      2..3: ethernet.srcAddr.0-15
+      4..5: ethernet.etherType
+      ethernet.$valid: 1
+      shift: 6
+      next: parse_ipv6
+  parse_ethernet.8:
+    0x*:
+      0..1: ethernet.srcAddr.16-31
+      2..3: ethernet.srcAddr.0-15
+      4..5: ethernet.etherType
+      ethernet.$valid: 1
+      shift: 6
+      next: end
+  parse_ethernet.9:
+    0x*:
+      0..1: ethernet.srcAddr.16-31
+      2..3: ethernet.srcAddr.0-15
+      4..5: ethernet.etherType
+      ethernet.$valid: 1
+      shift: 6
+      next: end
+  parse_ethernet.10:
+    0x*:
+      0..1: ethernet.srcAddr.16-31
+      2..3: ethernet.srcAddr.0-15
+      4..5: ethernet.etherType
+      ethernet.$valid: 1
+      shift: 6
+      next: end
+  parse_ethernet.11:
+    0x*:
+      0..1: ethernet.srcAddr.16-31
+      2..3: ethernet.srcAddr.0-15
+      4..5: ethernet.etherType
+      ethernet.$valid: 1
+      shift: 6
+      next: end
+deparser egress:
+  dictionary:
+    ethernet.dstAddr.32-47: ethernet.$valid
+    ethernet.dstAddr.16-31: ethernet.$valid
+    ethernet.dstAddr.0-15: ethernet.$valid
+    ethernet.srcAddr.32-47: ethernet.$valid
+    ethernet.srcAddr.16-31: ethernet.$valid
+    ethernet.srcAddr.0-15: ethernet.$valid
+    ethernet.etherType: ethernet.$valid
+    B19: fabric_header.$valid
+    TB19: fabric_header.$valid
+    fabric_header.dstDevice: fabric_header.$valid
+    fabric_header.dstPortOrGroup: fabric_header.$valid
+    B38: fabric_header_cpu.$valid
+    fabric_header_cpu.ingressPort: fabric_header_cpu.$valid
+    fabric_header_cpu.ingressIfindex: fabric_header_cpu.$valid
+    fabric_header_cpu.ingressBd: fabric_header_cpu.$valid
+    fabric_header_cpu.reasonCode: fabric_header_cpu.$valid
+    fabric_payload_header.etherType: fabric_payload_header.$valid
+    llc_header.dsap: llc_header.$valid
+    llc_header.ssap: llc_header.$valid
+    llc_header.control_: llc_header.$valid
+    snap_header.oui.16-23: snap_header.$valid
+    snap_header.oui.8-15: snap_header.$valid
+    snap_header.oui.0-7: snap_header.$valid
+    snap_header.type_: snap_header.$valid
+    H51: vlan_tag_$0.$valid
+    vlan_tag_$0.etherType: vlan_tag_$0.$valid
+    H51: vlan_tag_$0.$valid
+    vlan_tag_$0.etherType: vlan_tag_$0.$valid
+    H50: vlan_tag_$1.$valid
+    vlan_tag_$1.etherType: vlan_tag_$1.$valid
+    B46: ipv4.$valid
+    ipv4.diffserv: ipv4.$valid
+    ipv4.totalLen: ipv4.$valid
+    ipv4.identification: ipv4.$valid
+    TH33: ipv4.$valid
+    ipv4.ttl: ipv4.$valid
+    ipv4.protocol: ipv4.$valid
+    ipv4.hdrChecksum: ipv4.$valid
+    ipv4.srcAddr.16-31: ipv4.$valid
+    ipv4.srcAddr.0-15: ipv4.$valid
+    ipv4.dstAddr: ipv4.$valid
+    udp.srcPort.8-15: udp.$valid
+    udp.srcPort.0-7: udp.$valid
+    udp.dstPort.8-15: udp.$valid
+    udp.dstPort.0-7: udp.$valid
+    udp.length_.8-15: udp.$valid
+    udp.length_.0-7: udp.$valid
+    udp.checksum.8-15: udp.$valid
+    udp.checksum.0-7: udp.$valid
+    TW24: ipv6.$valid
+    ipv6.payloadLen.8-15: ipv6.$valid
+    ipv6.payloadLen.0-7: ipv6.$valid
+    ipv6.nextHdr: ipv6.$valid
+    ipv6.hopLimit: ipv6.$valid
+    ipv6.srcAddr.96-127: ipv6.$valid
+    ipv6.srcAddr.64-95: ipv6.$valid
+    ipv6.srcAddr.32-63: ipv6.$valid
+    ipv6.srcAddr.0-31: ipv6.$valid
+    ipv6.dstAddr.96-127: ipv6.$valid
+    ipv6.dstAddr.64-95: ipv6.$valid
+    ipv6.dstAddr.32-63: ipv6.$valid
+    ipv6.dstAddr.0-31: ipv6.$valid
+    tcp.srcPort: tcp.$valid
+    tcp.dstPort: tcp.$valid
+    tcp.seqNo: tcp.$valid
+    tcp.ackNo: tcp.$valid
+    B28: tcp.$valid
+    tcp.flags: tcp.$valid
+    tcp.window: tcp.$valid
+    tcp.checksum: tcp.$valid
+    tcp.urgentPtr: tcp.$valid
+    icmp.typeCode: icmp.$valid
+    icmp.hdrChecksum: icmp.$valid
+    B26: inner_ipv4.$valid
+    inner_ipv4.diffserv: inner_ipv4.$valid
+    inner_ipv4.totalLen.8-15: inner_ipv4.$valid
+    inner_ipv4.totalLen.0-7: inner_ipv4.$valid
+    inner_ipv4.identification: inner_ipv4.$valid
+    TH32: inner_ipv4.$valid
+    inner_ipv4.ttl: inner_ipv4.$valid
+    inner_ipv4.protocol: inner_ipv4.$valid
+    inner_ipv4.hdrChecksum: inner_ipv4.$valid
+    inner_ipv4.srcAddr: inner_ipv4.$valid
+    inner_ipv4.dstAddr: inner_ipv4.$valid
+    inner_icmp.typeCode: inner_icmp.$valid
+    inner_icmp.hdrChecksum: inner_icmp.$valid
+    inner_tcp.srcPort: inner_tcp.$valid
+    inner_tcp.dstPort: inner_tcp.$valid
+    inner_tcp.seqNo: inner_tcp.$valid
+    inner_tcp.ackNo: inner_tcp.$valid
+    B24: inner_tcp.$valid
+    inner_tcp.flags: inner_tcp.$valid
+    inner_tcp.window: inner_tcp.$valid
+    inner_tcp.checksum: inner_tcp.$valid
+    inner_tcp.urgentPtr: inner_tcp.$valid
+    inner_udp.srcPort: inner_udp.$valid
+    inner_udp.dstPort: inner_udp.$valid
+    inner_udp.length_: inner_udp.$valid
+    inner_udp.checksum: inner_udp.$valid
+  egress_unicast_port: standard_metadata.egress_port
+  mirror:
+    0: [ $mirror, $mirror_id, H22, ingress_metadata.ifindex, fabric_metadata.reason_code, H25 ]
+    1: [ $mirror, $mirror_id, H22, ingress_metadata.ifindex, fabric_metadata.reason_code, H25 ]
+    2: [ $mirror, $mirror_id, H22, ingress_metadata.ifindex, fabric_metadata.reason_code, H25 ]
+    3: [ $mirror, $mirror_id, H22, ingress_metadata.ifindex, fabric_metadata.reason_code, H25 ]
+    select: $mirror
+stage 0 ingress:
+  phase0_match ingress_port_mapping:
+    p4:
+      name: ingress_port_mapping
+      size: 288
+      preferred_match_type: exact
+      match_type: exact
+    size: 288
+    width: 1
+    format: {ifindex: 48..63, port_type: 46..47}
+    constant_value: 0
+  exact_match _switch_config_params_0 0:
+    p4: { name: switch_config_params, size: 1 }
+    row: 0
+    bus: 0
+    column: [  ]
+    next: _validate_outer_ethernet_0
+    action_bus: { }
+    actions:
+      set_config_parameters:
+      - p4_param_order: {enable_dod: 1, enable_flowlet: 8, switch_id: 32 }
+      - { $constant0: immediate(0..8), $constant0: 511 }
+      - set ingress_metadata.ingress_port, standard_metadata.ingress_port
+      - set l2_metadata.same_if_check, ingress_metadata.ifindex
+      - set standard_metadata.egress_spec, $constant0
+      NoAction:
+      - {  }
+    default_action: NoAction
+  ternary_match _validate_outer_ethernet_0 1:
+    p4: { name: validate_outer_ethernet, size: 64 }
+    p4_param_order: 
+      ethernet.srcAddr: { type: ternary, size: 48}
+      ethernet.dstAddr: { type: ternary, size: 48}
+      vlan_tag_$0.$valid: { type: exact, size: 1}
+      vlan_tag_$1.$valid: { type: exact, size: 1}
+    row: [ 0, 1, 2 ]
+    bus: [ 0, 0, 0 ]
+    column:
+    - 0
+    - 0
+    - 0
+    input_xbar:
+      group 0: { 0: ethernet.dstAddr.0-15, 16: ethernet.dstAddr.16-31, 32: ethernet.dstAddr.32-47(0..7) }
+      group 1: { 0: ethernet.srcAddr.0-15(0..7), 8: ethernet.dstAddr.32-47(8..15), 16: ethernet.srcAddr.16-31(0..7), 24: ethernet.srcAddr.0-15(8..15), 32: ethernet.srcAddr.32-47(0..7), 43: vlan_tag_$0.$valid }
+      group 2: { 0: ethernet.srcAddr.16-31(8..15), 16: ethernet.srcAddr.32-47(8..15), 38: vlan_tag_$1.$valid }
+    next: _adjust_lkp_fields_0
+    action_bus: { }
+    indirect: _validate_outer_ethernet_0$tind
+  ternary_indirect _validate_outer_ethernet_0$tind:
+    row: 0
+    bus: 0
+    column: 2
+    format: { action: 8..13, immediate: 0..7}
+    actions:
+      malformed_outer_ethernet_packet:
+      - p4_param_order: {drop_reason: 8 }
+      - { drop_reason: immediate(0..7) }
+      - set ingress_metadata.drop_flag, 1
+      - set ingress_metadata.drop_reason, drop_reason
+      set_valid_outer_unicast_packet_untagged:
+      - {  }
+      - set l2_metadata.lkp_pkt_type, 1
+      - set l2_metadata.lkp_mac_type, ethernet.etherType
+      set_valid_outer_unicast_packet_single_tagged:
+      - {  }
+      - set l2_metadata.lkp_pkt_type, 1
+      - set l2_metadata.lkp_mac_type, vlan_tag_$0.etherType
+      set_valid_outer_unicast_packet_double_tagged:
+      - {  }
+      - set l2_metadata.lkp_pkt_type, 1
+      - set l2_metadata.lkp_mac_type, vlan_tag_$1.etherType
+      set_valid_outer_unicast_packet_qinq_tagged:
+      - {  }
+      - set l2_metadata.lkp_pkt_type, 1
+      - set l2_metadata.lkp_mac_type, ethernet.etherType
+      set_valid_outer_multicast_packet_untagged:
+      - {  }
+      - set l2_metadata.lkp_pkt_type, 2
+      - set l2_metadata.lkp_mac_type, ethernet.etherType
+      set_valid_outer_multicast_packet_single_tagged:
+      - {  }
+      - set l2_metadata.lkp_pkt_type, 2
+      - set l2_metadata.lkp_mac_type, vlan_tag_$0.etherType
+      set_valid_outer_multicast_packet_double_tagged:
+      - {  }
+      - set l2_metadata.lkp_pkt_type, 2
+      - set l2_metadata.lkp_mac_type, vlan_tag_$1.etherType
+      set_valid_outer_multicast_packet_qinq_tagged:
+      - {  }
+      - set l2_metadata.lkp_pkt_type, 2
+      - set l2_metadata.lkp_mac_type, ethernet.etherType
+      set_valid_outer_broadcast_packet_untagged:
+      - {  }
+      - set l2_metadata.lkp_pkt_type, 4
+      - set l2_metadata.lkp_mac_type, ethernet.etherType
+      set_valid_outer_broadcast_packet_single_tagged:
+      - {  }
+      - set l2_metadata.lkp_pkt_type, 4
+      - set l2_metadata.lkp_mac_type, vlan_tag_$0.etherType
+      set_valid_outer_broadcast_packet_double_tagged:
+      - {  }
+      - set l2_metadata.lkp_pkt_type, 4
+      - set l2_metadata.lkp_mac_type, vlan_tag_$1.etherType
+      set_valid_outer_broadcast_packet_qinq_tagged:
+      - {  }
+      - set l2_metadata.lkp_pkt_type, 4
+      - set l2_metadata.lkp_mac_type, ethernet.etherType
+      NoAction:
+      - {  }
+    default_action: NoAction
+  exact_match _adjust_lkp_fields_0 2:
+    p4: { name: adjust_lkp_fields }
+    p4_param_order: 
+      ipv4.$valid: { type: exact, size: 1}
+      ipv6.$valid: { type: exact, size: 1}
+    row: 2
+    bus: 0
+    column: [ 2, 3, 4 ]
+    ways:
+    - [0, 0, 0x0, [2, 2]]
+    - [0, 1, 0x0, [2, 3]]
+    - [0, 2, 0x0, [2, 4]]
+    input_xbar:
+      group 0: { 7: ipv4.$valid, 15: ipv6.$valid }
+      hash 0:
+        0..9: stripe(ipv4.$valid, ipv6.$valid)
+        10..19: stripe(ipv4.$valid, ipv6.$valid)
+        20..29: stripe(ipv4.$valid, ipv6.$valid)
+      hash group 0:
+        table: [0]
+    format: { action(0): 0..1, version(0): 112..115 }
+    next: _port_vlan_mapping_0
+    actions:
+      non_ip_lkp:
+      - set l2_metadata.lkp_mac_da.0-15, ethernet.dstAddr.0-15
+      - set l2_metadata.lkp_mac_da.16-31, ethernet.dstAddr.16-31
+      - set l2_metadata.lkp_mac_da.32-47, ethernet.dstAddr.32-47
+      - set l2_metadata.lkp_mac_sa.0-15, ethernet.srcAddr.0-15
+      - set l2_metadata.lkp_mac_sa.16-31, ethernet.srcAddr.16-31
+      - set l2_metadata.lkp_mac_sa.32-47, ethernet.srcAddr.32-47
+      ipv4_lkp:
+      - set ipv4_metadata.lkp_ipv4_sa, ipv4.srcAddr
+      - set ipv4_metadata.lkp_ipv4_da, ipv4.dstAddr
+      - set l3_metadata.lkp_ip_proto, ipv4.protocol
+      - set l3_metadata.lkp_ip_ttl, ipv4.ttl
+      - set l3_metadata.lkp_l4_sport, l3_metadata.lkp_outer_l4_sport
+      - set l3_metadata.lkp_l4_dport, l3_metadata.lkp_outer_l4_dport
+      - set l2_metadata.lkp_mac_da.0-15, ethernet.dstAddr.0-15
+      - set l2_metadata.lkp_mac_da.16-31, ethernet.dstAddr.16-31
+      - set l2_metadata.lkp_mac_da.32-47, ethernet.dstAddr.32-47
+      - set l2_metadata.lkp_mac_sa.0-15, ethernet.srcAddr.0-15
+      - set l2_metadata.lkp_mac_sa.16-31, ethernet.srcAddr.16-31
+      - set l2_metadata.lkp_mac_sa.32-47, ethernet.srcAddr.32-47
+      NoAction:
+      - 0
+    default_action: NoAction
+  exact_match _port_vlan_mapping_0 4:
+    p4: { name: port_vlan_mapping, size: 32768, action_profile: bd_action_profile }
+    p4_param_order: 
+      ingress_metadata.ifindex: { type: exact, size: 16}
+      vlan_tag_$0.$valid: { type: exact, size: 1}
+      vlan_tag_$0.vid: { type: exact, size: 12}
+      vlan_tag_$1.$valid: { type: exact, size: 1}
+      vlan_tag_$1.vid: { type: exact, size: 12}
+    row: [ 4, 5, 6, 7 ]
+    bus: [ 0, 0, 0, 0 ]
+    column:
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    ways:
+    - [2, 0, 0x7, [7, 2], [7, 3], [7, 4], [7, 6], [7, 7], [7, 8], [7, 9], [7, 10]]
+    - [2, 1, 0x38, [6, 2], [6, 3], [6, 4], [6, 6], [6, 7], [6, 8], [6, 9], [6, 10]]
+    - [2, 2, 0x1c0, [5, 2], [5, 3], [5, 4], [5, 6], [5, 7], [5, 8], [5, 9], [5, 10]]
+    - [2, 3, 0xe00, [4, 2], [4, 3], [4, 4], [4, 6], [4, 7], [4, 8], [4, 9], [4, 10]]
+    input_xbar:
+      group 1: { 0: ingress_metadata.ifindex, 16: vlan_tag_$0.vid(0..7), 31: vlan_tag_$0.$valid, 32: vlan_tag_$1.vid(0..7), 40: vlan_tag_$0.vid(8..11), 62: vlan_tag_$1.$valid, 72: vlan_tag_$1.vid(8..11) }
+      hash 2:
+        0..9: random(ingress_metadata.ifindex, vlan_tag_$0.vid(0..7), vlan_tag_$1.vid(3..7)) ^ stripe(vlan_tag_$0.$valid, vlan_tag_$1.vid(0..2), vlan_tag_$0.vid(8..11), vlan_tag_$1.$valid)
+        10..19: random(ingress_metadata.ifindex, vlan_tag_$0.vid(0..7), vlan_tag_$1.vid(3..7)) ^ stripe(vlan_tag_$0.$valid, vlan_tag_$1.vid(0..2), vlan_tag_$0.vid(8..11), vlan_tag_$1.$valid)
+        20..29: random(ingress_metadata.ifindex, vlan_tag_$0.vid(0..7), vlan_tag_$1.vid(3..7)) ^ stripe(vlan_tag_$0.$valid, vlan_tag_$1.vid(0..2), vlan_tag_$0.vid(8..11), vlan_tag_$1.$valid)
+        30..39: random(ingress_metadata.ifindex, vlan_tag_$0.vid(0..7), vlan_tag_$1.vid(3..7)) ^ stripe(vlan_tag_$0.$valid, vlan_tag_$1.vid(0..2), vlan_tag_$0.vid(8..11), vlan_tag_$1.$valid)
+        40..51: random(ingress_metadata.ifindex, vlan_tag_$0.vid(0..7), vlan_tag_$1.vid(3..7)) ^ stripe(vlan_tag_$0.$valid, vlan_tag_$1.vid(0..2), vlan_tag_$0.vid(8..11), vlan_tag_$1.$valid)
+      hash 3:
+        0..9: stripe(vlan_tag_$1.vid(8..11))
+        10..19: stripe(vlan_tag_$1.vid(8..11))
+        20..29: stripe(vlan_tag_$1.vid(8..11))
+        30..39: stripe(vlan_tag_$1.vid(8..11))
+        40..51: stripe(vlan_tag_$1.vid(8..11))
+      hash group 2:
+        table: [2, 3]
+    format: { action(0): 15..16, version(0): 112..115, action_addr(0): 0..14, match(0): [40..47, 32..39, 48..55, 59..63 ] }
+    match: [ ingress_metadata.ifindex, vlan_tag_$0.vid(0..7), vlan_tag_$1.vid(3..7) ]
+    next: _ingress_port_properties_0
+    action: _port_vlan_mapping_0$act_prof..bd_action_profile(action, action_addr)
+    default_action: NoAction
+  action _port_vlan_mapping_0$act_prof..bd_action_profile:
+    row: [ 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4 ]
+    column:
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - [ 3, 4, 5 ]
+    - 5
+    - [ 3, 4, 5 ]
+    - 5
+    home_row: [ 15, 5 ]
+    format set_bd_properties: { $adf_b0: 0..7, $adf_b1: 8..15, $adf_b2: 16..23, $adf_h0: 32..47, $adf_h1: 48..63, $adf_h2: 64..79, $adf_h3: 80..95, $adf_h4: 96..111, $adf_h5: 112..127 }
+    action_bus: { 16 : $adf_b0, 17 : $adf_b1, 18 : $adf_b2, 64..65 : $adf_h2, 66..67 : $adf_h3, 68..69 : $adf_h4, 70..71 : $adf_h5, 40..41 : $adf_h0, 42..43 : $adf_h1 }
+    actions:
+      set_bd_properties:
+      - p4_param_order: {bd: 14, vrf: 14, stp_group: 10, learning_enabled: 1, bd_label: 16, stats_idx: 16, rmac_group: 10, ipv4_unicast_enabled: 1, ipv6_unicast_enabled: 1, ipv4_urpf_mode: 2, ipv6_urpf_mode: 2, igmp_snooping_enabled: 1, mld_snooping_enabled: 1, ipv4_multicast_enabled: 1, ipv6_multicast_enabled: 1, mrpf_group: 14, ipv4_mcast_key: 14, ipv4_mcast_key_type: 1, ipv6_mcast_key: 14, ipv6_mcast_key_type: 1, ingress_rid: 16 }
+      - { $data0: $adf_b0, igmp_snooping_enabled: $data0(6..6), mld_snooping_enabled: $data0(5..5), learning_enabled: $adf_b1, ipv4_unicast_enabled: $adf_b2, bd: $adf_h0, stats_idx: $adf_h1, ipv6_unicast_enabled: $adf_h2, stp_group: $adf_h3, rmac_group: $adf_h4, bd_label: $adf_h5 }
+      - set ingress_metadata.bd, bd
+      - set acl_metadata.bd_label, bd_label
+      - set l2_metadata.stp_group, stp_group
+      - set l2_metadata.bd_stats_idx, stats_idx
+      - set l2_metadata.learning_enabled, learning_enabled
+      - set ipv4_metadata.ipv4_unicast_enabled, ipv4_unicast_enabled
+      - set ipv6_metadata.ipv6_unicast_enabled, ipv6_unicast_enabled
+      - set l3_metadata.rmac_group, rmac_group
+      - set B55(5..6), $data0(5..6)
+      port_vlan_mapping_miss:
+      - {  }
+      - set l2_metadata.port_vlan_mapping_miss, 1
+      NoAction:
+      - {  }
+  exact_match _ingress_port_properties_0 6:
+    p4: { name: ingress_port_properties, size: 288 }
+    p4_param_order: 
+      standard_metadata.ingress_port: { type: exact, size: 9}
+    row: 3
+    bus: 0
+    column: [ 2, 3, 4 ]
+    ways:
+    - [4, 0, 0x0, [3, 2]]
+    - [4, 1, 0x0, [3, 3]]
+    - [4, 2, 0x0, [3, 4]]
+    input_xbar:
+      group 2: { 64: standard_metadata.ingress_port }
+      hash 5:
+        0..9: random(standard_metadata.ingress_port(1..7)) ^ stripe(standard_metadata.ingress_port(0), standard_metadata.ingress_port(8))
+        10..19: random(standard_metadata.ingress_port(1..7)) ^ stripe(standard_metadata.ingress_port(0), standard_metadata.ingress_port(8))
+        20..29: random(standard_metadata.ingress_port(1..7)) ^ stripe(standard_metadata.ingress_port(0), standard_metadata.ingress_port(8))
+      hash group 4:
+        table: [5]
+    format: { action(0): 16..16, immediate(0): 0..15, version(0): 112..115, match(0): 33..39 }
+    match: [ standard_metadata.ingress_port(1..7) ]
+    next: _compute_ipv4_hashes_0
+    action_bus: { }
+    actions:
+      set_ingress_port_properties:
+      - p4_param_order: {if_label: 16, exclusion_id: 9, qos_group: 5, tc_qos_group: 5, tc: 8, color: 2, trust_dscp: 1, trust_pcp: 1 }
+      - { if_label: immediate(0..15) }
+      - set acl_metadata.if_label, if_label
+      NoAction:
+      - {  }
+    default_action: NoAction
+stage 1 ingress:
+  exact_match _compute_ipv4_hashes_0 0:
+    p4: { name: compute_ipv4_hashes }
+    p4_param_order: 
+      ethernet.$valid: { type: exact, size: 1}
+    row: 0
+    bus: 0
+    column: [ 2, 3, 4 ]
+    ways:
+    - [0, 0, 0x0, [0, 2]]
+    - [0, 1, 0x0, [0, 3]]
+    - [0, 2, 0x0, [0, 4]]
+    hash_dist:
+      2: {hash: 1, mask: 0xffff, shift: 0}
+      1: {hash: 1, mask: 0xffff, shift: 0}
+    input_xbar:
+      group 0: { 7: ethernet.$valid }
+      hash 0:
+        0..9: stripe(ethernet.$valid)
+        10..19: stripe(ethernet.$valid)
+        20..29: stripe(ethernet.$valid)
+      hash group 0:
+        table: [0]
+      exact group 1: { 0: ipv4_metadata.lkp_ipv4_da, 32: ipv4_metadata.lkp_ipv4_sa, 64: l3_metadata.lkp_l4_dport, 80: l3_metadata.lkp_l4_sport, 96: l3_metadata.lkp_ip_proto }
+      hash 2:
+        32..47: stripe(crc(0x8fdb, ipv4_metadata.lkp_ipv4_da, ipv4_metadata.lkp_ipv4_sa))
+      hash 3:
+        32..47: stripe(crc(0x8fdb, l3_metadata.lkp_l4_dport, l3_metadata.lkp_l4_sport, l3_metadata.lkp_ip_proto))
+      hash group 1:
+        table: [2, 3]
+      exact group 2: { 0: ipv4_metadata.lkp_ipv4_da, 32: ipv4_metadata.lkp_ipv4_sa, 64: l2_metadata.lkp_mac_da.0-15, 80: l2_metadata.lkp_mac_da.16-31, 96: l2_metadata.lkp_mac_da.32-47, 112: l2_metadata.lkp_mac_sa.0-15 }
+      exact group 3: { 0: l2_metadata.lkp_mac_sa.16-31, 16: l2_metadata.lkp_mac_sa.32-47, 32: l3_metadata.lkp_l4_dport, 48: l3_metadata.lkp_l4_sport, 64: l3_metadata.lkp_ip_proto }
+      hash 4:
+        16..31: stripe(crc(0x8fdb, ipv4_metadata.lkp_ipv4_da, ipv4_metadata.lkp_ipv4_sa))
+      hash 5:
+        16..31: stripe(crc(0x8fdb, l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31, l2_metadata.lkp_mac_da.32-47, l2_metadata.lkp_mac_sa.0-15))
+      hash 6:
+        16..31: stripe(crc(0x8fdb, l2_metadata.lkp_mac_sa.16-31, l2_metadata.lkp_mac_sa.32-47, l3_metadata.lkp_l4_dport, l3_metadata.lkp_l4_sport))
+      hash 7:
+        16..31: stripe(crc(0x8fdb, l3_metadata.lkp_ip_proto))
+      hash group 1:
+        table: [4, 5, 6, 7]
+    format: { action(0): 0..0, version(0): 112..115 }
+    gateway:
+      input_xbar:
+        group 0: { 15: inner_ipv4.$valid, 23: ipv4.$valid, 25: tunnel_metadata.tunnel_terminate }
+        hash 0:
+          40: inner_ipv4.$valid
+          41: ipv4.$valid
+        hash group 0:
+          table: [0]
+      row: 1
+      bus: 1
+      match: { 1: tunnel_metadata.tunnel_terminate, 32: inner_ipv4.$valid, 33: ipv4.$valid }
+      0b1*******************************0: run_table
+      0b*1******************************1: run_table
+      miss: _compute_non_ip_hashes_0
+    next: _fabric_ingress_dst_lkp
+    actions:
+      compute_lkp_ipv4_hash:
+      - set hash_metadata.hash1, hash_dist(2, 1)
+      - set hash_metadata.hash2, hash_dist(2, 1)
+      NoAction:
+      - 0
+    default_action: NoAction
+  exact_match _compute_non_ip_hashes_0 1:
+    p4: { name: compute_non_ip_hashes }
+    p4_param_order: 
+      ethernet.$valid: { type: exact, size: 1}
+    row: 1
+    bus: 1
+    column: [ 6, 7, 8 ]
+    ways:
+    - [2, 0, 0x0, [1, 6]]
+    - [2, 1, 0x0, [1, 7]]
+    - [2, 2, 0x0, [1, 8]]
+    hash_dist:
+      0: {hash: 1, mask: 0xffff, shift: 0}
+    input_xbar:
+      group 0: { 71: ethernet.$valid }
+      hash 1:
+        0..9: stripe(ethernet.$valid)
+        10..19: stripe(ethernet.$valid)
+        20..29: stripe(ethernet.$valid)
+      hash group 2:
+        table: [1]
+      exact group 4: { 0: ingress_metadata.ifindex, 16: l2_metadata.lkp_mac_da.0-15, 32: l2_metadata.lkp_mac_da.16-31, 48: l2_metadata.lkp_mac_da.32-47, 64: l2_metadata.lkp_mac_sa.0-15, 80: l2_metadata.lkp_mac_sa.16-31, 96: l2_metadata.lkp_mac_sa.32-47, 112: l2_metadata.lkp_mac_type }
+      hash 8:
+        0..15: stripe(crc(0x8fdb, ingress_metadata.ifindex, l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31, l2_metadata.lkp_mac_da.32-47))
+      hash 9:
+        0..15: stripe(crc(0x8fdb, l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31, l2_metadata.lkp_mac_sa.32-47, l2_metadata.lkp_mac_type))
+      hash group 1:
+        table: [8, 9]
+    format: { action(0): 0..0, version(0): 112..115 }
+    next: _fabric_ingress_dst_lkp
+    actions:
+      compute_lkp_non_ip_hash:
+      - set hash_metadata.hash2, hash_dist(0)
+      NoAction:
+      - 0
+    default_action: NoAction
+  exact_match _fabric_ingress_dst_lkp 2:
+    p4: { name: fabric_ingress_dst_lkp }
+    p4_param_order: 
+      fabric_header.dstDevice: { type: exact, size: 8}
+    row: 1
+    bus: 0
+    column: [ 2, 3, 4 ]
+    ways:
+    - [3, 0, 0x0, [1, 2]]
+    - [3, 1, 0x0, [1, 3]]
+    - [3, 2, 0x0, [1, 4]]
+    input_xbar:
+      group 5: { 0: fabric_header.dstDevice }
+      hash 10:
+        0..9: random(fabric_header.dstDevice(2..7)) ^ stripe(fabric_header.dstDevice(0..1))
+        10..19: random(fabric_header.dstDevice(2..7)) ^ stripe(fabric_header.dstDevice(0..1))
+        20..29: random(fabric_header.dstDevice(2..7)) ^ stripe(fabric_header.dstDevice(0..1))
+      hash group 3:
+        table: [10]
+    format: { action(0): 0..1, version(0): 112..115, match(0): 34..39 }
+    match: [ fabric_header.dstDevice(2..7) ]
+    gateway:
+      input_xbar:
+        group 0: { 46: ingress_metadata.port_type }
+      row: 1
+      bus: 0
+      match: { 6: ingress_metadata.port_type }
+      0x0: rmac
+      miss: run_table
+    next: rmac
+    actions:
+      nop:
+      - 0
+      terminate_cpu_packet:
+      - set standard_metadata.egress_spec, fabric_header.dstPortOrGroup
+      - set egress_metadata.bypass, fabric_header_cpu.txBypass
+      - set ethernet.etherType, fabric_payload_header.etherType
+      NoAction:
+      - 0
+    default_action: NoAction
+  exact_match rmac 3:
+    p4: { name: rmac, size: 512 }
+    p4_param_order: 
+      l3_metadata.rmac_group: { type: exact, size: 10}
+      l2_metadata.lkp_mac_da: { type: exact, size: 48}
+    row: [ 0, 2 ]
+    bus: [ 1, 1 ]
+    column:
+    - [ 6, 7 ]
+    - 11
+    ways:
+    - [4, 0, 0x0, [2, 11]]
+    - [4, 1, 0x0, [0, 6]]
+    - [4, 2, 0x0, [0, 7]]
+    input_xbar:
+      group 5: { 64: l2_metadata.lkp_mac_da.0-15, 80: l2_metadata.lkp_mac_da.16-31, 96: l2_metadata.lkp_mac_da.32-47, 112: l3_metadata.rmac_group }
+      hash 11:
+        0..9: random(l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31, l2_metadata.lkp_mac_da.32-47, l3_metadata.rmac_group(1..7)) ^ stripe(l3_metadata.rmac_group(0), l3_metadata.rmac_group(8..9))
+        10..19: random(l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31, l2_metadata.lkp_mac_da.32-47, l3_metadata.rmac_group(1..7)) ^ stripe(l3_metadata.rmac_group(0), l3_metadata.rmac_group(8..9))
+        20..29: random(l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31, l2_metadata.lkp_mac_da.32-47, l3_metadata.rmac_group(1..7)) ^ stripe(l3_metadata.rmac_group(0), l3_metadata.rmac_group(8..9))
+      hash group 4:
+        table: [11]
+    format: { action(0): 0..1, version(0): 112..115, match(0): [56..63, 32..39, 64..71, 40..47, 72..79, 48..55, 80..87 ] }
+    match: [ l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31, l2_metadata.lkp_mac_da.32-47, l3_metadata.rmac_group(0..7) ]
+    gateway:
+      input_xbar:
+        group 0: { 46: ingress_metadata.port_type }
+      row: 0
+      bus: 1
+      match: { 6: ingress_metadata.port_type }
+      0x1: _compute_other_hashes_0
+      miss: run_table
+    next: _validate_packet_0
+    actions:
+      rmac_hit:
+      - set l3_metadata.rmac_hit, 1
+      rmac_miss:
+      - set l3_metadata.rmac_hit, 0
+      NoAction:
+      - 0
+    default_action: NoAction
+  ternary_match _validate_packet_0 4:
+    p4: { name: validate_packet, size: 64 }
+    p4_param_order: 
+      l2_metadata.lkp_mac_sa: { type: ternary, size: 48}
+      l2_metadata.lkp_mac_da: { type: ternary, size: 48}
+      l3_metadata.lkp_ip_type: { type: ternary, size: 2}
+      l3_metadata.lkp_ip_ttl: { type: ternary, size: 8}
+      l3_metadata.lkp_ip_version: { type: ternary, size: 4}
+      ipv4_metadata.lkp_ipv4_sa: { type: ternary, size: 8}
+    row: [ 0, 1, 2, 3 ]
+    bus: [ 0, 0, 0, 0 ]
+    column:
+    - 0
+    - 0
+    - 0
+    - 0
+    input_xbar:
+      group 0: { 0: ipv4_metadata.lkp_ipv4_sa, 32: l2_metadata.lkp_mac_da.0-15(0..7), 41: l3_metadata.lkp_ip_type }
+      group 1: { 0: l2_metadata.lkp_mac_da.16-31(0..7), 8: l2_metadata.lkp_mac_da.0-15(8..15), 16: l2_metadata.lkp_mac_da.32-47(0..7), 24: l2_metadata.lkp_mac_da.16-31(8..15), 32: l2_metadata.lkp_mac_sa.0-15(0..7) }
+      group 2: { 0: l2_metadata.lkp_mac_da.32-47(8..15), 8: l2_metadata.lkp_mac_sa.16-31(0..7), 16: l2_metadata.lkp_mac_sa.0-15(8..15), 24: l2_metadata.lkp_mac_sa.32-47(0..7), 32: l2_metadata.lkp_mac_sa.16-31(8..15) }
+      group 3: { 0: l2_metadata.lkp_mac_sa.32-47(8..15), 8: l3_metadata.lkp_ip_ttl, 18: l3_metadata.lkp_ip_version }
+    gateway:
+      input_xbar:
+        group 5: { 8: ingress_metadata.bypass_lookups(8..15), 16: ingress_metadata.bypass_lookups(0..7), 30: ingress_metadata.drop_flag }
+      row: 0
+      bus: 0
+      match: { 0: ingress_metadata.bypass_lookups(0..7), 8: ingress_metadata.bypass_lookups(8..15), 22: ingress_metadata.drop_flag }
+      0b*0***************0******: run_table
+      miss: _smac_0.1
+    next: _smac_0.1
+    action_bus: { }
+    indirect: _validate_packet_0$tind
+  ternary_indirect _validate_packet_0$tind:
+    row: 0
+    bus: 0
+    column: 5
+    format: { action: 8..10, immediate: 0..7}
+    actions:
+      nop:
+      - {  }
+      set_unicast:
+      - {  }
+      - set l2_metadata.lkp_pkt_type, 1
+      set_unicast_and_ipv6_src_is_link_local:
+      - {  }
+      - set l2_metadata.lkp_pkt_type, 1
+      - set ipv6_metadata.ipv6_src_is_link_local, 1
+      set_multicast:
+      - {  }
+      - set l2_metadata.lkp_pkt_type, 2
+      - add l2_metadata.bd_stats_idx, l2_metadata.bd_stats_idx, 1
+      set_multicast_and_ipv6_src_is_link_local:
+      - {  }
+      - set l2_metadata.lkp_pkt_type, 2
+      - set ipv6_metadata.ipv6_src_is_link_local, 1
+      - add l2_metadata.bd_stats_idx, l2_metadata.bd_stats_idx, 1
+      set_broadcast:
+      - {  }
+      - set l2_metadata.lkp_pkt_type, 4
+      - add l2_metadata.bd_stats_idx, l2_metadata.bd_stats_idx, 2
+      set_malformed_packet:
+      - p4_param_order: {drop_reason: 8 }
+      - { drop_reason: immediate(0..7) }
+      - set ingress_metadata.drop_flag, 1
+      - set ingress_metadata.drop_reason, drop_reason
+      NoAction:
+      - {  }
+    default_action: NoAction
+  exact_match _smac_0.1 5:
+    p4: { name: smac, size: 440000 }
+    p4_param_order: 
+      ingress_metadata.bd: { type: exact, size: 14}
+      l2_metadata.lkp_mac_sa: { type: exact, size: 48}
+    row: [ 2, 3, 4, 5, 6, 7 ]
+    bus: [ 0, 0, 0, 0, 0, 0 ]
+    column:
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10, 11 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10, 11 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10, 11 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10, 11 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10, 11 ]
+    ways:
+    - [5, 0, 0x7, [7, 2], [7, 3], [7, 4], [7, 6], [7, 7], [7, 8], [7, 9], [7, 10]]
+    - [5, 1, 0x38, [7, 11], [6, 2], [6, 3], [6, 4], [6, 6], [6, 7], [6, 8], [6, 9]]
+    - [5, 2, 0x1c0, [6, 10], [6, 11], [5, 2], [5, 3], [5, 4], [5, 6], [5, 7], [5, 8]]
+    - [5, 3, 0xe00, [5, 9], [5, 10], [5, 11], [4, 2], [4, 3], [4, 4], [4, 6], [4, 7]]
+    - [5, 0, 0x7, [4, 8], [4, 9], [4, 10], [4, 11], [3, 2], [3, 3], [3, 4], [3, 6]]
+    - [5, 1, 0x38, [3, 7], [3, 8], [3, 9], [3, 10], [3, 11], [2, 2], [2, 3], [2, 4]]
+    - [5, 2, 0xc0, [2, 6], [2, 7], [2, 8], [2, 9]]
+    - [5, 3, 0x0, [2, 10]]
+    input_xbar:
+      group 6: { 0: ingress_metadata.bd, 16: l2_metadata.lkp_mac_sa.0-15, 32: l2_metadata.lkp_mac_sa.16-31, 48: l2_metadata.lkp_mac_sa.32-47 }
+      hash 12:
+        0..9: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31, l2_metadata.lkp_mac_sa.32-47(4..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_sa.32-47(0..3))
+        10..19: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31, l2_metadata.lkp_mac_sa.32-47(4..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_sa.32-47(0..3))
+        20..29: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31, l2_metadata.lkp_mac_sa.32-47(4..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_sa.32-47(0..3))
+        30..39: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31, l2_metadata.lkp_mac_sa.32-47(4..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_sa.32-47(0..3))
+        40..51: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31, l2_metadata.lkp_mac_sa.32-47(4..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_sa.32-47(0..3))
+      hash group 5:
+        table: [12]
+    format: { action(0): 0..1, version(0): 112..115, match(0): [56..71, 32..39, 72..79, 40..47, 4..7, 48..55 ], action(1): 2..3, version(1): 116..119, match(1): [104..111, 8..15, 80..87, 16..23, 88..95, 28..31, 96..103 ] }
+    match: [ ingress_metadata.bd(0..7), l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31, l2_metadata.lkp_mac_sa.32-47(4..15) ]
+    gateway:
+      input_xbar:
+        group 0: { 32: ingress_metadata.bypass_lookups(0..7), 46: ingress_metadata.port_type, 56: ingress_metadata.bypass_lookups(8..15) }
+      row: 2
+      bus: 0
+      match: { 0: ingress_metadata.bypass_lookups(0..7), 8: ingress_metadata.bypass_lookups(8..15), 22: ingress_metadata.port_type }
+      0b00**************0*******: run_table
+      miss: _dmac_0.1
+    hit: _dmac_0.1
+    miss: _smac_0.2
+    action: _smac_0.1$action
+    default_action: NoAction
+  action _smac_0.1$action:
+    p4: { name: _smac_0$action }
+    row: [ 14, 12, 10, 8, 6, 4, 3, 2, 1 ]
+    column:
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - [ 3, 4, 5 ]
+    - 5
+    - [ 2, 3, 4, 5 ]
+    home_row: [ 14, 4 ]
+    format smac_hit: { $adf_h0: 0..15 }
+    action_bus: { 32..33 : $adf_h0 }
+    actions:
+      nop:
+      - {  }
+      smac_miss:
+      - {  }
+      - set l2_metadata.l2_src_miss, 1
+      smac_hit:
+      - p4_param_order: {ifindex: 16 }
+      - { ifindex: $adf_h0 }
+      - xor l2_metadata.l2_src_move, ingress_metadata.ifindex, ifindex
+      NoAction:
+      - {  }
+stage 2 ingress:
+  exact_match _smac_0.2 0:
+    p4: { name: smac, size: 440000 }
+    p4_param_order: 
+      ingress_metadata.bd: { type: exact, size: 14}
+      l2_metadata.lkp_mac_sa: { type: exact, size: 48}
+    row: [ 0, 1, 2, 3, 4, 5, 6, 7 ]
+    bus: [ 0, 0, 0, 0, 0, 0, 0, 0 ]
+    column:
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    ways:
+    - [0, 0, 0xf, [7, 2], [7, 3], [7, 4], [7, 6], [7, 7], [7, 8], [7, 9], [7, 10], [6, 2], [6, 3], [6, 4], [6, 6], [6, 7], [6, 8], [6, 9], [6, 10]]
+    - [0, 1, 0xf0, [5, 2], [5, 3], [5, 4], [5, 6], [5, 7], [5, 8], [5, 9], [5, 10], [4, 2], [4, 3], [4, 4], [4, 6], [4, 7], [4, 8], [4, 9], [4, 10]]
+    - [0, 2, 0xf00, [3, 2], [3, 3], [3, 4], [3, 6], [3, 7], [3, 8], [3, 9], [3, 10], [2, 2], [2, 3], [2, 4], [2, 6], [2, 7], [2, 8], [2, 9], [2, 10]]
+    - [1, 0, 0xf, [1, 2], [1, 3], [1, 4], [1, 6], [1, 7], [1, 8], [1, 9], [1, 10], [0, 2], [0, 3], [0, 4], [0, 6], [0, 7], [0, 8], [0, 9], [0, 10]]
+    input_xbar:
+      group 0: { 0: ingress_metadata.bd, 16: l2_metadata.lkp_mac_sa.0-15, 32: l2_metadata.lkp_mac_sa.16-31, 48: l2_metadata.lkp_mac_sa.32-47 }
+      group 1: { 0: ingress_metadata.bd, 16: l2_metadata.lkp_mac_sa.0-15, 32: l2_metadata.lkp_mac_sa.16-31, 48: l2_metadata.lkp_mac_sa.32-47 }
+      hash 0:
+        0..9: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31(0..14), l2_metadata.lkp_mac_sa.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_sa.16-31(15..16), l2_metadata.lkp_mac_sa.16-31(15..16))
+        10..19: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31(0..14), l2_metadata.lkp_mac_sa.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_sa.16-31(15..16), l2_metadata.lkp_mac_sa.16-31(15..16))
+        20..29: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31(0..14), l2_metadata.lkp_mac_sa.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_sa.16-31(15..16), l2_metadata.lkp_mac_sa.16-31(15..16))
+        40..51: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31(0..14), l2_metadata.lkp_mac_sa.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_sa.16-31(15..16), l2_metadata.lkp_mac_sa.16-31(15..16))
+      hash group 0:
+        table: [0]
+      hash 2:
+        0..9: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31(0..14), l2_metadata.lkp_mac_sa.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_sa.16-31(15..16), l2_metadata.lkp_mac_sa.16-31(15..16))
+        10..19: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31(0..14), l2_metadata.lkp_mac_sa.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_sa.16-31(15..16), l2_metadata.lkp_mac_sa.16-31(15..16))
+        20..29: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31(0..14), l2_metadata.lkp_mac_sa.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_sa.16-31(15..16), l2_metadata.lkp_mac_sa.16-31(15..16))
+        40..51: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31(0..14), l2_metadata.lkp_mac_sa.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_sa.16-31(15..16), l2_metadata.lkp_mac_sa.16-31(15..16))
+      hash group 1:
+        table: [2]
+    format: { action(0): 0..1, version(0): 120..123, match(0): [56..71, 32..39, 72..79, 40..47, 24..31, 48..55 ], action(1): 2..3, version(1): 124..127, match(1): [104..111, 8..15, 80..87, 16..23, 88..95, 112..119, 96..103 ] }
+    match: [ ingress_metadata.bd(0..7), l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31, l2_metadata.lkp_mac_sa.32-47 ]
+    hit: _dmac_0.1
+    miss: _smac_0.3
+    action: _smac_0.2$action
+    default_action: NoAction
+  action _smac_0.2$action:
+    p4: { name: _smac_0$action }
+    row: [ 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 ]
+    column:
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    home_row: [ 15, 5 ]
+    format smac_hit: { $adf_h0: 0..15 }
+    action_bus: { 32..33 : $adf_h0 }
+    actions:
+      nop:
+      - {  }
+      smac_miss:
+      - {  }
+      - set l2_metadata.l2_src_miss, 1
+      smac_hit:
+      - p4_param_order: {ifindex: 16 }
+      - { ifindex: $adf_h0 }
+      - xor l2_metadata.l2_src_move, ingress_metadata.ifindex, ifindex
+      NoAction:
+      - {  }
+stage 3 ingress:
+  exact_match _smac_0.3 0:
+    p4: { name: smac, size: 440000 }
+    p4_param_order: 
+      ingress_metadata.bd: { type: exact, size: 14}
+      l2_metadata.lkp_mac_sa: { type: exact, size: 48}
+    row: [ 0, 1, 2, 3, 4, 5, 6, 7 ]
+    bus: [ 0, 0, 0, 0, 0, 0, 0, 0 ]
+    column:
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    ways:
+    - [0, 0, 0xf, [7, 2], [7, 3], [7, 4], [7, 6], [7, 7], [7, 8], [7, 9], [7, 10], [6, 2], [6, 3], [6, 4], [6, 6], [6, 7], [6, 8], [6, 9], [6, 10]]
+    - [0, 1, 0xf0, [5, 2], [5, 3], [5, 4], [5, 6], [5, 7], [5, 8], [5, 9], [5, 10], [4, 2], [4, 3], [4, 4], [4, 6], [4, 7], [4, 8], [4, 9], [4, 10]]
+    - [0, 2, 0xf00, [3, 2], [3, 3], [3, 4], [3, 6], [3, 7], [3, 8], [3, 9], [3, 10], [2, 2], [2, 3], [2, 4], [2, 6], [2, 7], [2, 8], [2, 9], [2, 10]]
+    - [1, 0, 0xf, [1, 2], [1, 3], [1, 4], [1, 6], [1, 7], [1, 8], [1, 9], [1, 10], [0, 2], [0, 3], [0, 4], [0, 6], [0, 7], [0, 8], [0, 9], [0, 10]]
+    input_xbar:
+      group 0: { 0: ingress_metadata.bd, 16: l2_metadata.lkp_mac_sa.0-15, 32: l2_metadata.lkp_mac_sa.16-31, 48: l2_metadata.lkp_mac_sa.32-47 }
+      group 1: { 0: ingress_metadata.bd, 16: l2_metadata.lkp_mac_sa.0-15, 32: l2_metadata.lkp_mac_sa.16-31, 48: l2_metadata.lkp_mac_sa.32-47 }
+      hash 0:
+        0..9: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31(0..14), l2_metadata.lkp_mac_sa.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_sa.16-31(15..16), l2_metadata.lkp_mac_sa.16-31(15..16))
+        10..19: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31(0..14), l2_metadata.lkp_mac_sa.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_sa.16-31(15..16), l2_metadata.lkp_mac_sa.16-31(15..16))
+        20..29: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31(0..14), l2_metadata.lkp_mac_sa.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_sa.16-31(15..16), l2_metadata.lkp_mac_sa.16-31(15..16))
+        40..51: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31(0..14), l2_metadata.lkp_mac_sa.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_sa.16-31(15..16), l2_metadata.lkp_mac_sa.16-31(15..16))
+      hash group 0:
+        table: [0]
+      hash 2:
+        0..9: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31(0..14), l2_metadata.lkp_mac_sa.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_sa.16-31(15..16), l2_metadata.lkp_mac_sa.16-31(15..16))
+        10..19: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31(0..14), l2_metadata.lkp_mac_sa.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_sa.16-31(15..16), l2_metadata.lkp_mac_sa.16-31(15..16))
+        20..29: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31(0..14), l2_metadata.lkp_mac_sa.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_sa.16-31(15..16), l2_metadata.lkp_mac_sa.16-31(15..16))
+        40..51: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31(0..14), l2_metadata.lkp_mac_sa.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_sa.16-31(15..16), l2_metadata.lkp_mac_sa.16-31(15..16))
+      hash group 1:
+        table: [2]
+    format: { action(0): 0..1, version(0): 120..123, match(0): [56..71, 32..39, 72..79, 40..47, 24..31, 48..55 ], action(1): 2..3, version(1): 124..127, match(1): [104..111, 8..15, 80..87, 16..23, 88..95, 112..119, 96..103 ] }
+    match: [ ingress_metadata.bd(0..7), l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31, l2_metadata.lkp_mac_sa.32-47 ]
+    hit: _dmac_0.1
+    miss: _smac_0.4
+    action: _smac_0.3$action
+    default_action: NoAction
+  action _smac_0.3$action:
+    p4: { name: _smac_0$action }
+    row: [ 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 ]
+    column:
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    home_row: [ 15, 5 ]
+    format smac_hit: { $adf_h0: 0..15 }
+    action_bus: { 32..33 : $adf_h0 }
+    actions:
+      nop:
+      - {  }
+      smac_miss:
+      - {  }
+      - set l2_metadata.l2_src_miss, 1
+      smac_hit:
+      - p4_param_order: {ifindex: 16 }
+      - { ifindex: $adf_h0 }
+      - xor l2_metadata.l2_src_move, ingress_metadata.ifindex, ifindex
+      NoAction:
+      - {  }
+stage 4 ingress:
+  exact_match _smac_0.4 0:
+    p4: { name: smac, size: 440000 }
+    p4_param_order: 
+      ingress_metadata.bd: { type: exact, size: 14}
+      l2_metadata.lkp_mac_sa: { type: exact, size: 48}
+    row: [ 0, 4, 5, 6, 7 ]
+    bus: [ 1, 0, 0, 0, 0 ]
+    column:
+    - [ 8, 9 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    ways:
+    - [0, 0, 0x7, [7, 2], [7, 3], [7, 4], [7, 6], [7, 7], [7, 8], [7, 9], [7, 10]]
+    - [0, 1, 0x38, [6, 2], [6, 3], [6, 4], [6, 6], [6, 7], [6, 8], [6, 9], [6, 10]]
+    - [0, 2, 0x1c0, [5, 2], [5, 3], [5, 4], [5, 6], [5, 7], [5, 8], [5, 9], [5, 10]]
+    - [0, 3, 0xe00, [4, 2], [4, 3], [4, 4], [4, 6], [4, 7], [4, 8], [4, 9], [4, 10]]
+    - [0, 0, 0x1, [0, 8], [0, 9]]
+    input_xbar:
+      group 0: { 0: ingress_metadata.bd, 16: l2_metadata.lkp_mac_sa.0-15, 32: l2_metadata.lkp_mac_sa.16-31, 48: l2_metadata.lkp_mac_sa.32-47 }
+      hash 0:
+        0..9: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31, l2_metadata.lkp_mac_sa.32-47(5..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_sa.32-47(0..4))
+        10..19: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31, l2_metadata.lkp_mac_sa.32-47(5..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_sa.32-47(0..4))
+        20..29: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31, l2_metadata.lkp_mac_sa.32-47(5..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_sa.32-47(0..4))
+        30..39: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31, l2_metadata.lkp_mac_sa.32-47(5..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_sa.32-47(0..4))
+        40..51: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31, l2_metadata.lkp_mac_sa.32-47(5..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_sa.32-47(0..4))
+      hash group 0:
+        table: [0]
+    format: { action(0): 0..1, version(0): 112..115, match(0): [56..71, 32..39, 72..79, 40..47, 5..7, 48..55 ], action(1): 2..3, version(1): 116..119, match(1): [104..111, 8..15, 80..87, 16..23, 88..95, 29..31, 96..103 ] }
+    match: [ ingress_metadata.bd(0..7), l2_metadata.lkp_mac_sa.0-15, l2_metadata.lkp_mac_sa.16-31, l2_metadata.lkp_mac_sa.32-47(5..15) ]
+    next: _dmac_0.1
+    action: _smac_0.4$action
+    default_action: NoAction
+  action _smac_0.4$action:
+    p4: { name: _smac_0$action }
+    row: [ 15, 14, 13, 12, 11, 10, 9, 8, 7 ]
+    column:
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    home_row: 15
+    format smac_hit: { $adf_h0: 0..15 }
+    action_bus: { 32..33 : $adf_h0 }
+    actions:
+      nop:
+      - {  }
+      smac_miss:
+      - {  }
+      - set l2_metadata.l2_src_miss, 1
+      smac_hit:
+      - p4_param_order: {ifindex: 16 }
+      - { ifindex: $adf_h0 }
+      - xor l2_metadata.l2_src_move, ingress_metadata.ifindex, ifindex
+      NoAction:
+      - {  }
+  exact_match _dmac_0.1 1:
+    p4: { name: dmac, size: 440000 }
+    p4_param_order: 
+      ingress_metadata.bd: { type: exact, size: 14}
+      l2_metadata.lkp_mac_da: { type: exact, size: 48}
+    row: [ 0, 1, 2, 3 ]
+    bus: [ 0, 0, 0, 0 ]
+    column:
+    - [ 2, 3, 4, 6, 7 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    ways:
+    - [1, 0, 0x3, [3, 2], [3, 3], [3, 4], [3, 6]]
+    - [1, 1, 0xc, [3, 7], [3, 8], [3, 9], [3, 10]]
+    - [1, 2, 0x30, [2, 2], [2, 3], [2, 4], [2, 6]]
+    - [1, 3, 0xc0, [2, 7], [2, 8], [2, 9], [2, 10]]
+    - [1, 0, 0x3, [1, 2], [1, 3], [1, 4], [1, 6]]
+    - [1, 1, 0xc, [1, 7], [1, 8], [1, 9], [1, 10]]
+    - [1, 2, 0x30, [0, 2], [0, 3], [0, 4], [0, 6]]
+    - [1, 3, 0x0, [0, 7]]
+    input_xbar:
+      group 1: { 0: ingress_metadata.bd, 16: l2_metadata.lkp_mac_da.0-15, 32: l2_metadata.lkp_mac_da.16-31, 48: l2_metadata.lkp_mac_da.32-47 }
+      hash 2:
+        0..9: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31, l2_metadata.lkp_mac_da.32-47(4..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_da.32-47(0..3))
+        10..19: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31, l2_metadata.lkp_mac_da.32-47(4..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_da.32-47(0..3))
+        20..29: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31, l2_metadata.lkp_mac_da.32-47(4..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_da.32-47(0..3))
+        30..39: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31, l2_metadata.lkp_mac_da.32-47(4..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_da.32-47(0..3))
+        40..47: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31, l2_metadata.lkp_mac_da.32-47(4..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_da.32-47(0..3))
+      hash group 1:
+        table: [2]
+    format: { action(0): 0..2, version(0): 112..115, match(0): [56..71, 32..39, 72..79, 40..47, 28..31, 48..55 ], action(1): 3..5, version(1): 120..123, match(1): [104..111, 8..15, 80..87, 16..23, 88..95, 116..119, 96..103 ] }
+    match: [ ingress_metadata.bd(0..7), l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31, l2_metadata.lkp_mac_da.32-47(4..15) ]
+    gateway:
+      input_xbar:
+        group 0: { 64: ingress_metadata.bypass_lookups }
+      row: 0
+      bus: 1
+      match: { 0: ingress_metadata.bypass_lookups(0..7), 8: ingress_metadata.bypass_lookups(8..15) }
+      0b***************0: run_table
+      miss: cond-8
+    hit: cond-8
+    miss: _dmac_0.2
+    action: _dmac_0.1$action
+    default_action: NoAction
+  action _dmac_0.1$action:
+    p4: { name: _dmac_0$action }
+    row: [ 6, 5, 4, 3, 2, 1, 0 ]
+    column:
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - [ 4, 5 ]
+    - 5
+    home_row: 6
+    format dmac_hit: { $adf_h0: 0..15 }
+    format dmac_redirect_nexthop: { $adf_h0: 0..15 }
+    format dmac_redirect_ecmp: { $adf_h0: 0..15 }
+    action_bus: { 36..37 : $adf_h0 }
+    actions:
+      nop:
+      - {  }
+      dmac_hit:
+      - p4_param_order: {ifindex: 16 }
+      - { ifindex: $adf_h0 }
+      - set ingress_metadata.egress_ifindex, ifindex
+      - xor l2_metadata.same_if_check, l2_metadata.same_if_check, ifindex
+      dmac_multicast_hit:
+      - p4_param_order: {mc_index: 16 }
+      - {  }
+      dmac_miss:
+      - {  }
+      - set ingress_metadata.egress_ifindex, 65535
+      dmac_redirect_nexthop:
+      - p4_param_order: {nexthop_index: 16 }
+      - { nexthop_index: $adf_h0 }
+      - set l2_metadata.l2_redirect, 1
+      - set l2_metadata.l2_nexthop, nexthop_index
+      - set l2_metadata.l2_nexthop_type, 0
+      dmac_redirect_ecmp:
+      - p4_param_order: {ecmp_index: 16 }
+      - { ecmp_index: $adf_h0 }
+      - set l2_metadata.l2_redirect, 1
+      - set l2_metadata.l2_nexthop, ecmp_index
+      - set l2_metadata.l2_nexthop_type, 1
+      dmac_drop:
+      - {  }
+      - invalidate standard_metadata.egress_spec
+      NoAction:
+      - {  }
+stage 5 ingress:
+  exact_match _dmac_0.2 0:
+    p4: { name: dmac, size: 440000 }
+    p4_param_order: 
+      ingress_metadata.bd: { type: exact, size: 14}
+      l2_metadata.lkp_mac_da: { type: exact, size: 48}
+    row: [ 0, 1, 2, 3, 4, 5, 6, 7 ]
+    bus: [ 0, 0, 0, 0, 0, 0, 0, 0 ]
+    column:
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    ways:
+    - [0, 0, 0xf, [7, 2], [7, 3], [7, 4], [7, 6], [7, 7], [7, 8], [7, 9], [7, 10], [6, 2], [6, 3], [6, 4], [6, 6], [6, 7], [6, 8], [6, 9], [6, 10]]
+    - [0, 1, 0xf0, [5, 2], [5, 3], [5, 4], [5, 6], [5, 7], [5, 8], [5, 9], [5, 10], [4, 2], [4, 3], [4, 4], [4, 6], [4, 7], [4, 8], [4, 9], [4, 10]]
+    - [0, 2, 0xf00, [3, 2], [3, 3], [3, 4], [3, 6], [3, 7], [3, 8], [3, 9], [3, 10], [2, 2], [2, 3], [2, 4], [2, 6], [2, 7], [2, 8], [2, 9], [2, 10]]
+    - [1, 0, 0xf, [1, 2], [1, 3], [1, 4], [1, 6], [1, 7], [1, 8], [1, 9], [1, 10], [0, 2], [0, 3], [0, 4], [0, 6], [0, 7], [0, 8], [0, 9], [0, 10]]
+    input_xbar:
+      group 0: { 0: ingress_metadata.bd, 16: l2_metadata.lkp_mac_da.0-15, 32: l2_metadata.lkp_mac_da.16-31, 48: l2_metadata.lkp_mac_da.32-47 }
+      group 1: { 0: ingress_metadata.bd, 16: l2_metadata.lkp_mac_da.0-15, 32: l2_metadata.lkp_mac_da.16-31, 48: l2_metadata.lkp_mac_da.32-47 }
+      hash 0:
+        0..9: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31(0..14), l2_metadata.lkp_mac_da.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_da.16-31(15..16), l2_metadata.lkp_mac_da.16-31(15..16))
+        10..19: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31(0..14), l2_metadata.lkp_mac_da.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_da.16-31(15..16), l2_metadata.lkp_mac_da.16-31(15..16))
+        20..29: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31(0..14), l2_metadata.lkp_mac_da.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_da.16-31(15..16), l2_metadata.lkp_mac_da.16-31(15..16))
+        40..51: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31(0..14), l2_metadata.lkp_mac_da.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_da.16-31(15..16), l2_metadata.lkp_mac_da.16-31(15..16))
+      hash group 0:
+        table: [0]
+      hash 2:
+        0..9: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31(0..14), l2_metadata.lkp_mac_da.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_da.16-31(15..16), l2_metadata.lkp_mac_da.16-31(15..16))
+        10..19: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31(0..14), l2_metadata.lkp_mac_da.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_da.16-31(15..16), l2_metadata.lkp_mac_da.16-31(15..16))
+        20..29: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31(0..14), l2_metadata.lkp_mac_da.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_da.16-31(15..16), l2_metadata.lkp_mac_da.16-31(15..16))
+        40..51: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31(0..14), l2_metadata.lkp_mac_da.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_da.16-31(15..16), l2_metadata.lkp_mac_da.16-31(15..16))
+      hash group 1:
+        table: [2]
+    format: { action(0): 0..2, version(0): 120..123, match(0): [56..71, 32..39, 72..79, 40..47, 24..31, 48..55 ], action(1): 3..5, version(1): 124..127, match(1): [104..111, 8..15, 80..87, 16..23, 88..95, 112..119, 96..103 ] }
+    match: [ ingress_metadata.bd(0..7), l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31, l2_metadata.lkp_mac_da.32-47 ]
+    hit: cond-8
+    miss: _dmac_0.3
+    action: _dmac_0.2$action
+    default_action: NoAction
+  action _dmac_0.2$action:
+    p4: { name: _dmac_0$action }
+    row: [ 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 ]
+    column:
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    home_row: [ 15, 5 ]
+    format dmac_hit: { $adf_h0: 0..15 }
+    format dmac_redirect_nexthop: { $adf_h0: 0..15 }
+    format dmac_redirect_ecmp: { $adf_h0: 0..15 }
+    action_bus: { 32..33 : $adf_h0 }
+    actions:
+      nop:
+      - {  }
+      dmac_hit:
+      - p4_param_order: {ifindex: 16 }
+      - { ifindex: $adf_h0 }
+      - set ingress_metadata.egress_ifindex, ifindex
+      - xor l2_metadata.same_if_check, l2_metadata.same_if_check, ifindex
+      dmac_multicast_hit:
+      - p4_param_order: {mc_index: 16 }
+      - {  }
+      dmac_miss:
+      - {  }
+      - set ingress_metadata.egress_ifindex, 65535
+      dmac_redirect_nexthop:
+      - p4_param_order: {nexthop_index: 16 }
+      - { nexthop_index: $adf_h0 }
+      - set l2_metadata.l2_redirect, 1
+      - set l2_metadata.l2_nexthop, nexthop_index
+      - set l2_metadata.l2_nexthop_type, 0
+      dmac_redirect_ecmp:
+      - p4_param_order: {ecmp_index: 16 }
+      - { ecmp_index: $adf_h0 }
+      - set l2_metadata.l2_redirect, 1
+      - set l2_metadata.l2_nexthop, ecmp_index
+      - set l2_metadata.l2_nexthop_type, 1
+      dmac_drop:
+      - {  }
+      - invalidate standard_metadata.egress_spec
+      NoAction:
+      - {  }
+stage 6 ingress:
+  exact_match _dmac_0.3 0:
+    p4: { name: dmac, size: 440000 }
+    p4_param_order: 
+      ingress_metadata.bd: { type: exact, size: 14}
+      l2_metadata.lkp_mac_da: { type: exact, size: 48}
+    row: [ 0, 1, 2, 3, 4, 5, 6, 7 ]
+    bus: [ 0, 0, 0, 0, 0, 0, 0, 0 ]
+    column:
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    - [ 2, 3, 4, 6, 7, 8, 9, 10 ]
+    ways:
+    - [0, 0, 0xf, [7, 2], [7, 3], [7, 4], [7, 6], [7, 7], [7, 8], [7, 9], [7, 10], [6, 2], [6, 3], [6, 4], [6, 6], [6, 7], [6, 8], [6, 9], [6, 10]]
+    - [0, 1, 0xf0, [5, 2], [5, 3], [5, 4], [5, 6], [5, 7], [5, 8], [5, 9], [5, 10], [4, 2], [4, 3], [4, 4], [4, 6], [4, 7], [4, 8], [4, 9], [4, 10]]
+    - [0, 2, 0xf00, [3, 2], [3, 3], [3, 4], [3, 6], [3, 7], [3, 8], [3, 9], [3, 10], [2, 2], [2, 3], [2, 4], [2, 6], [2, 7], [2, 8], [2, 9], [2, 10]]
+    - [1, 0, 0xf, [1, 2], [1, 3], [1, 4], [1, 6], [1, 7], [1, 8], [1, 9], [1, 10], [0, 2], [0, 3], [0, 4], [0, 6], [0, 7], [0, 8], [0, 9], [0, 10]]
+    input_xbar:
+      group 0: { 0: ingress_metadata.bd, 16: l2_metadata.lkp_mac_da.0-15, 32: l2_metadata.lkp_mac_da.16-31, 48: l2_metadata.lkp_mac_da.32-47 }
+      group 1: { 0: ingress_metadata.bd, 16: l2_metadata.lkp_mac_da.0-15, 32: l2_metadata.lkp_mac_da.16-31, 48: l2_metadata.lkp_mac_da.32-47 }
+      hash 0:
+        0..9: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31(0..14), l2_metadata.lkp_mac_da.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_da.16-31(15..16), l2_metadata.lkp_mac_da.16-31(15..16))
+        10..19: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31(0..14), l2_metadata.lkp_mac_da.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_da.16-31(15..16), l2_metadata.lkp_mac_da.16-31(15..16))
+        20..29: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31(0..14), l2_metadata.lkp_mac_da.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_da.16-31(15..16), l2_metadata.lkp_mac_da.16-31(15..16))
+        40..51: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31(0..14), l2_metadata.lkp_mac_da.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_da.16-31(15..16), l2_metadata.lkp_mac_da.16-31(15..16))
+      hash group 0:
+        table: [0]
+      hash 2:
+        0..9: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31(0..14), l2_metadata.lkp_mac_da.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_da.16-31(15..16), l2_metadata.lkp_mac_da.16-31(15..16))
+        10..19: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31(0..14), l2_metadata.lkp_mac_da.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_da.16-31(15..16), l2_metadata.lkp_mac_da.16-31(15..16))
+        20..29: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31(0..14), l2_metadata.lkp_mac_da.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_da.16-31(15..16), l2_metadata.lkp_mac_da.16-31(15..16))
+        40..51: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31(0..14), l2_metadata.lkp_mac_da.32-47(1..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_da.16-31(15..16), l2_metadata.lkp_mac_da.16-31(15..16))
+      hash group 1:
+        table: [2]
+    format: { action(0): 0..2, version(0): 120..123, match(0): [56..71, 32..39, 72..79, 40..47, 24..31, 48..55 ], action(1): 3..5, version(1): 124..127, match(1): [104..111, 8..15, 80..87, 16..23, 88..95, 112..119, 96..103 ] }
+    match: [ ingress_metadata.bd(0..7), l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31, l2_metadata.lkp_mac_da.32-47 ]
+    hit: cond-8
+    miss: _dmac_0.4
+    action: _dmac_0.3$action
+    default_action: NoAction
+  action _dmac_0.3$action:
+    p4: { name: _dmac_0$action }
+    row: [ 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0 ]
+    column:
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    - 5
+    home_row: [ 15, 5 ]
+    format dmac_hit: { $adf_h0: 0..15 }
+    format dmac_redirect_nexthop: { $adf_h0: 0..15 }
+    format dmac_redirect_ecmp: { $adf_h0: 0..15 }
+    action_bus: { 32..33 : $adf_h0 }
+    actions:
+      nop:
+      - {  }
+      dmac_hit:
+      - p4_param_order: {ifindex: 16 }
+      - { ifindex: $adf_h0 }
+      - set ingress_metadata.egress_ifindex, ifindex
+      - xor l2_metadata.same_if_check, l2_metadata.same_if_check, ifindex
+      dmac_multicast_hit:
+      - p4_param_order: {mc_index: 16 }
+      - {  }
+      dmac_miss:
+      - {  }
+      - set ingress_metadata.egress_ifindex, 65535
+      dmac_redirect_nexthop:
+      - p4_param_order: {nexthop_index: 16 }
+      - { nexthop_index: $adf_h0 }
+      - set l2_metadata.l2_redirect, 1
+      - set l2_metadata.l2_nexthop, nexthop_index
+      - set l2_metadata.l2_nexthop_type, 0
+      dmac_redirect_ecmp:
+      - p4_param_order: {ecmp_index: 16 }
+      - { ecmp_index: $adf_h0 }
+      - set l2_metadata.l2_redirect, 1
+      - set l2_metadata.l2_nexthop, ecmp_index
+      - set l2_metadata.l2_nexthop_type, 1
+      dmac_drop:
+      - {  }
+      - invalidate standard_metadata.egress_spec
+      NoAction:
+      - {  }
+stage 7 ingress:
+  exact_match _dmac_0.4 0:
+    p4: { name: dmac, size: 440000 }
+    p4_param_order: 
+      ingress_metadata.bd: { type: exact, size: 14}
+      l2_metadata.lkp_mac_da: { type: exact, size: 48}
+    row: [ 0, 1, 2, 3, 4, 5, 6, 7 ]
+    bus: [ 0, 0, 0, 0, 0, 0, 0, 0 ]
+    column:
+    - [ 2, 3 ]
+    - [ 2, 3, 6, 7, 8, 9, 10, 11 ]
+    - [ 2, 3, 6, 7, 8, 9, 10, 11 ]
+    - [ 2, 3, 6, 7, 8, 9, 10, 11 ]
+    - [ 2, 3, 6, 7, 8, 9, 10, 11 ]
+    - [ 2, 3, 6, 7, 8, 9, 10, 11 ]
+    - [ 2, 3, 6, 7, 8, 9, 10, 11 ]
+    - [ 2, 3, 6, 7, 8, 9, 10, 11 ]
+    ways:
+    - [0, 0, 0x7, [7, 2], [7, 3], [7, 6], [7, 7], [7, 8], [7, 9], [7, 10], [7, 11]]
+    - [0, 1, 0x38, [6, 2], [6, 3], [6, 6], [6, 7], [6, 8], [6, 9], [6, 10], [6, 11]]
+    - [0, 2, 0x1c0, [5, 2], [5, 3], [5, 6], [5, 7], [5, 8], [5, 9], [5, 10], [5, 11]]
+    - [0, 3, 0xe00, [4, 2], [4, 3], [4, 6], [4, 7], [4, 8], [4, 9], [4, 10], [4, 11]]
+    - [0, 0, 0x7, [3, 2], [3, 3], [3, 6], [3, 7], [3, 8], [3, 9], [3, 10], [3, 11]]
+    - [0, 1, 0x38, [2, 2], [2, 3], [2, 6], [2, 7], [2, 8], [2, 9], [2, 10], [2, 11]]
+    - [0, 2, 0x1c0, [1, 2], [1, 3], [1, 6], [1, 7], [1, 8], [1, 9], [1, 10], [1, 11]]
+    - [0, 3, 0x200, [0, 2], [0, 3]]
+    input_xbar:
+      group 0: { 0: ingress_metadata.bd, 16: l2_metadata.lkp_mac_da.0-15, 32: l2_metadata.lkp_mac_da.16-31, 48: l2_metadata.lkp_mac_da.32-47 }
+      hash 0:
+        0..9: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31, l2_metadata.lkp_mac_da.32-47(5..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_da.32-47(0..4))
+        10..19: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31, l2_metadata.lkp_mac_da.32-47(5..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_da.32-47(0..4))
+        20..29: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31, l2_metadata.lkp_mac_da.32-47(5..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_da.32-47(0..4))
+        30..39: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31, l2_metadata.lkp_mac_da.32-47(5..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_da.32-47(0..4))
+        40..51: random(ingress_metadata.bd(0..7), l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31, l2_metadata.lkp_mac_da.32-47(5..15)) ^ stripe(ingress_metadata.bd(8..13), l2_metadata.lkp_mac_da.32-47(0..4))
+      hash group 0:
+        table: [0]
+    format: { action(0): 0..2, version(0): 112..115, match(0): [56..71, 32..39, 72..79, 40..47, 29..31, 48..55 ], action(1): 3..5, version(1): 120..123, match(1): [104..111, 8..15, 80..87, 16..23, 88..95, 117..119, 96..103 ] }
+    match: [ ingress_metadata.bd(0..7), l2_metadata.lkp_mac_da.0-15, l2_metadata.lkp_mac_da.16-31, l2_metadata.lkp_mac_da.32-47(5..15) ]
+    next: cond-8
+    action: _dmac_0.4$action
+    default_action: NoAction
+  action _dmac_0.4$action:
+    p4: { name: _dmac_0$action }
+    row: [ 14, 12, 10, 8, 6, 4, 2, 1, 0 ]
+    column:
+    - [ 4, 5 ]
+    - 5
+    - 5
+    - [ 4, 5 ]
+    - [ 4, 5 ]
+    - [ 4, 5 ]
+    - 5
+    - [ 3, 4, 5 ]
+    - 5
+    home_row: [ 14, 4 ]
+    format dmac_hit: { $adf_h0: 0..15 }
+    format dmac_redirect_nexthop: { $adf_h0: 0..15 }
+    format dmac_redirect_ecmp: { $adf_h0: 0..15 }
+    action_bus: { 32..33 : $adf_h0 }
+    actions:
+      nop:
+      - {  }
+      dmac_hit:
+      - p4_param_order: {ifindex: 16 }
+      - { ifindex: $adf_h0 }
+      - set ingress_metadata.egress_ifindex, ifindex
+      - xor l2_metadata.same_if_check, l2_metadata.same_if_check, ifindex
+      dmac_multicast_hit:
+      - p4_param_order: {mc_index: 16 }
+      - {  }
+      dmac_miss:
+      - {  }
+      - set ingress_metadata.egress_ifindex, 65535
+      dmac_redirect_nexthop:
+      - p4_param_order: {nexthop_index: 16 }
+      - { nexthop_index: $adf_h0 }
+      - set l2_metadata.l2_redirect, 1
+      - set l2_metadata.l2_nexthop, nexthop_index
+      - set l2_metadata.l2_nexthop_type, 0
+      dmac_redirect_ecmp:
+      - p4_param_order: {ecmp_index: 16 }
+      - { ecmp_index: $adf_h0 }
+      - set l2_metadata.l2_redirect, 1
+      - set l2_metadata.l2_nexthop, ecmp_index
+      - set l2_metadata.l2_nexthop_type, 1
+      dmac_drop:
+      - {  }
+      - invalidate standard_metadata.egress_spec
+      NoAction:
+      - {  }
+  gateway cond-8 1:
+    input_xbar:
+      group 0: { 89: l3_metadata.lkp_ip_type }
+    row: 1
+    bus: 1
+    match: { 1: l3_metadata.lkp_ip_type }
+    0b*****00: _mac_acl_0
+    miss: cond-10
+  ternary_match _mac_acl_0 2:
+    p4: { name: mac_acl, size: 128 }
+    p4_param_order: 
+      acl_metadata.if_label: { type: ternary, size: 16}
+      acl_metadata.bd_label: { type: ternary, size: 16}
+      l2_metadata.lkp_mac_sa: { type: ternary, size: 48}
+      l2_metadata.lkp_mac_da: { type: ternary, size: 48}
+      l2_metadata.lkp_mac_type: { type: ternary, size: 16}
+    row: [ 0, 1, 2, 3 ]
+    bus: [ 0, 0, 0, 0 ]
+    column:
+    - 0
+    - 0
+    - 0
+    - 0
+    input_xbar:
+      group 0: { 0: acl_metadata.bd_label, 16: acl_metadata.if_label, 32: l2_metadata.lkp_mac_da.0-15(0..7), 40: l2_metadata.lkp_mac_da.32-47(8..15) }
+      group 1: { 0: l2_metadata.lkp_mac_da.16-31(0..7), 8: l2_metadata.lkp_mac_da.0-15(8..15), 16: l2_metadata.lkp_mac_da.32-47(0..7), 24: l2_metadata.lkp_mac_da.16-31(8..15), 32: l2_metadata.lkp_mac_sa.0-15(0..7) }
+      group 2: { 0: l2_metadata.lkp_mac_sa.0-15(8..15), 8: l2_metadata.lkp_mac_sa.16-31, 24: l2_metadata.lkp_mac_sa.32-47 }
+      group 3: { 0: l2_metadata.lkp_mac_type(8..15), 8: l2_metadata.lkp_mac_type(0..7) }
+    gateway:
+      input_xbar:
+        group 0: { 64: ingress_metadata.bypass_lookups }
+      row: 1
+      bus: 0
+      match: { 0: ingress_metadata.bypass_lookups(0..7), 8: ingress_metadata.bypass_lookups(8..15) }
+      0b*************0**: run_table
+      miss: _compute_other_hashes_0
+    next: _compute_other_hashes_0
+    indirect: _mac_acl_0$tind
+  ternary_indirect _mac_acl_0$tind:
+    row: 0
+    bus: 0
+    column: 4
+    format: { action: 0..2}
+    action: _mac_acl_0$action
+    default_action: NoAction
+  action _mac_acl_0$action:
+    p4: { name: _mac_acl_0$action }
+    row: 10
+    column: 4
+    home_row: 10
+    format acl_deny: { $adf_h1: 32..47, $adf_h2: 48..63 }
+    format acl_permit: { $adf_h1: 32..47, $adf_h2: 48..63 }
+    format acl_redirect_nexthop: { $adf_h0: 16..31, $adf_h1: 32..47, $adf_h2: 48..63 }
+    format acl_redirect_ecmp: { $adf_h0: 16..31, $adf_h1: 32..47, $adf_h2: 48..63 }
+    action_bus: { 66..67 : $adf_h0, 68..69 : $adf_h1, 70..71 : $adf_h2 }
+    actions:
+      nop:
+      - {  }
+      acl_deny:
+      - p4_param_order: {acl_stats_index: 14, acl_meter_index: 16, acl_copy_reason: 16, nat_mode: 2, ingress_cos: 8, tc: 8, color: 8 }
+      - { acl_stats_index: $adf_h1, acl_copy_reason: $adf_h2 }
+      - set acl_metadata.acl_deny, 1
+      - set acl_metadata.acl_stats_index, acl_stats_index
+      - set fabric_metadata.reason_code, acl_copy_reason
+      acl_permit:
+      - p4_param_order: {acl_stats_index: 14, acl_meter_index: 16, acl_copy_reason: 16, nat_mode: 2, ingress_cos: 8, tc: 8, color: 8 }
+      - { acl_stats_index: $adf_h1, acl_copy_reason: $adf_h2 }
+      - set acl_metadata.acl_stats_index, acl_stats_index
+      - set fabric_metadata.reason_code, acl_copy_reason
+      acl_redirect_nexthop:
+      - p4_param_order: {nexthop_index: 16, acl_stats_index: 14, acl_meter_index: 16, acl_copy_reason: 16, nat_mode: 2, ingress_cos: 8, tc: 8, color: 8 }
+      - { acl_stats_index: $adf_h0, acl_copy_reason: $adf_h1, nexthop_index: $adf_h2 }
+      - set acl_metadata.acl_redirect, 1
+      - set acl_metadata.acl_nexthop, nexthop_index
+      - set acl_metadata.acl_nexthop_type, 0
+      - set acl_metadata.acl_stats_index, acl_stats_index
+      - set fabric_metadata.reason_code, acl_copy_reason
+      acl_redirect_ecmp:
+      - p4_param_order: {ecmp_index: 16, acl_stats_index: 14, acl_meter_index: 16, acl_copy_reason: 16, nat_mode: 2, ingress_cos: 8, tc: 8, color: 8 }
+      - { acl_stats_index: $adf_h0, acl_copy_reason: $adf_h1, ecmp_index: $adf_h2 }
+      - set acl_metadata.acl_redirect, 1
+      - set acl_metadata.acl_nexthop, ecmp_index
+      - set acl_metadata.acl_nexthop_type, 1
+      - set acl_metadata.acl_stats_index, acl_stats_index
+      - set fabric_metadata.reason_code, acl_copy_reason
+      NoAction:
+      - {  }
+  gateway cond-10 3:
+    input_xbar:
+      group 0: { 64: ingress_metadata.bypass_lookups }
+    row: 0
+    bus: 1
+    match: { 0: ingress_metadata.bypass_lookups(0..7), 8: ingress_metadata.bypass_lookups(8..15) }
+    0b*************0**: _ip_acl_0
+    miss: _compute_other_hashes_0
+  ternary_match _ip_acl_0 4:
+    p4: { name: ip_acl, size: 128 }
+    p4_param_order: 
+      acl_metadata.if_label: { type: ternary, size: 16}
+      acl_metadata.bd_label: { type: ternary, size: 16}
+      ipv4_metadata.lkp_ipv4_sa: { type: ternary, size: 32}
+      ipv4_metadata.lkp_ipv4_da: { type: ternary, size: 32}
+      l3_metadata.lkp_ip_proto: { type: ternary, size: 8}
+      acl_metadata.ingress_src_port_range_id: { type: exact, size: 8}
+      acl_metadata.ingress_dst_port_range_id: { type: exact, size: 8}
+      tcp.flags: { type: ternary, size: 8}
+      l3_metadata.lkp_ip_ttl: { type: ternary, size: 8}
+    row: [ 4, 5, 6, 7 ]
+    bus: [ 0, 0, 0, 0 ]
+    column:
+    - 0
+    - 0
+    - 0
+    - 0
+    input_xbar:
+      group 3: { 16: acl_metadata.if_label(8..15), 24: acl_metadata.ingress_dst_port_range_id, 32: acl_metadata.ingress_src_port_range_id }
+      group 4: { 0: ipv4_metadata.lkp_ipv4_da(16..31), 16: ipv4_metadata.lkp_ipv4_da(0..15), 32: ipv4_metadata.lkp_ipv4_sa(16..23), 40: acl_metadata.bd_label(8..15) }
+      group 5: { 0: ipv4_metadata.lkp_ipv4_sa(0..15), 16: acl_metadata.bd_label(0..7), 24: ipv4_metadata.lkp_ipv4_sa(24..31), 32: acl_metadata.if_label(0..7) }
+      group 6: { 0: l3_metadata.lkp_ip_proto, 8: l3_metadata.lkp_ip_ttl, 16: tcp.flags }
+    gateway:
+      input_xbar:
+        group 0: { 89: l3_metadata.lkp_ip_type }
+      row: 0
+      bus: 0
+      match: { 1: l3_metadata.lkp_ip_type }
+      0b*****01: run_table
+      miss: _compute_other_hashes_0
+    next: _compute_other_hashes_0
+    indirect: _ip_acl_0$tind
+  ternary_indirect _ip_acl_0$tind:
+    row: 1
+    bus: 0
+    column: 4
+    format: { action: 0..2}
+    action: _ip_acl_0$action
+    default_action: NoAction
+  action _ip_acl_0$action:
+    p4: { name: _ip_acl_0$action }
+    row: 12
+    column: 4
+    home_row: 12
+    format acl_deny: { $adf_h1: 32..47, $adf_h2: 48..63 }
+    format acl_permit: { $adf_h1: 32..47, $adf_h2: 48..63 }
+    format acl_redirect_nexthop: { $adf_h0: 16..31, $adf_h1: 32..47, $adf_h2: 48..63 }
+    format acl_redirect_ecmp: { $adf_h0: 16..31, $adf_h1: 32..47, $adf_h2: 48..63 }
+    action_bus: { 74..75 : $adf_h0, 76..77 : $adf_h1, 78..79 : $adf_h2 }
+    actions:
+      nop:
+      - {  }
+      acl_deny:
+      - p4_param_order: {acl_stats_index: 14, acl_meter_index: 16, acl_copy_reason: 16, nat_mode: 2, ingress_cos: 8, tc: 8, color: 8 }
+      - { acl_stats_index: $adf_h1, acl_copy_reason: $adf_h2 }
+      - set acl_metadata.acl_deny, 1
+      - set acl_metadata.acl_stats_index, acl_stats_index
+      - set fabric_metadata.reason_code, acl_copy_reason
+      acl_permit:
+      - p4_param_order: {acl_stats_index: 14, acl_meter_index: 16, acl_copy_reason: 16, nat_mode: 2, ingress_cos: 8, tc: 8, color: 8 }
+      - { acl_stats_index: $adf_h1, acl_copy_reason: $adf_h2 }
+      - set acl_metadata.acl_stats_index, acl_stats_index
+      - set fabric_metadata.reason_code, acl_copy_reason
+      acl_redirect_nexthop:
+      - p4_param_order: {nexthop_index: 16, acl_stats_index: 14, acl_meter_index: 16, acl_copy_reason: 16, nat_mode: 2, ingress_cos: 8, tc: 8, color: 8 }
+      - { acl_stats_index: $adf_h0, acl_copy_reason: $adf_h1, nexthop_index: $adf_h2 }
+      - set acl_metadata.acl_redirect, 1
+      - set acl_metadata.acl_nexthop, nexthop_index
+      - set acl_metadata.acl_nexthop_type, 0
+      - set acl_metadata.acl_stats_index, acl_stats_index
+      - set fabric_metadata.reason_code, acl_copy_reason
+      acl_redirect_ecmp:
+      - p4_param_order: {ecmp_index: 16, acl_stats_index: 14, acl_meter_index: 16, acl_copy_reason: 16, nat_mode: 2, ingress_cos: 8, tc: 8, color: 8 }
+      - { acl_stats_index: $adf_h0, acl_copy_reason: $adf_h1, ecmp_index: $adf_h2 }
+      - set acl_metadata.acl_redirect, 1
+      - set acl_metadata.acl_nexthop, ecmp_index
+      - set acl_metadata.acl_nexthop_type, 1
+      - set acl_metadata.acl_stats_index, acl_stats_index
+      - set fabric_metadata.reason_code, acl_copy_reason
+      NoAction:
+      - {  }
+  exact_match _compute_other_hashes_0 5:
+    p4: { name: compute_other_hashes }
+    p4_param_order: 
+      hash_metadata.hash1: { type: exact, size: 16}
+    row: 0
+    bus: 1
+    column: [ 6, 7, 8 ]
+    ways:
+    - [1, 0, 0x0, [0, 6]]
+    - [1, 1, 0x0, [0, 7]]
+    - [1, 2, 0x0, [0, 8]]
+    input_xbar:
+      group 0: { 80: hash_metadata.hash1(0..7), 104: hash_metadata.hash1(8..15) }
+      hash 1:
+        0..9: random(hash_metadata.hash1(10..15)) ^ stripe(hash_metadata.hash1(0..7), hash_metadata.hash1(8..9))
+        10..19: random(hash_metadata.hash1(10..15)) ^ stripe(hash_metadata.hash1(0..7), hash_metadata.hash1(8..9))
+        20..29: random(hash_metadata.hash1(10..15)) ^ stripe(hash_metadata.hash1(0..7), hash_metadata.hash1(8..9))
+      hash group 1:
+        table: [1]
+    format: { action(0): 0..1, version(0): 112..115, match(0): 34..39 }
+    match: [ hash_metadata.hash1(10..15) ]
+    next: _spanning_tree_0
+    actions:
+      computed_two_hashes:
+      - 0
+      computed_one_hash:
+      - set hash_metadata.hash1, hash_metadata.hash2
+      NoAction:
+      - 0
+    default_action: NoAction
+stage 8 ingress:
+  exact_match _spanning_tree_0 0:
+    p4: { name: spanning_tree, size: 4096 }
+    p4_param_order: 
+      ingress_metadata.ifindex: { type: exact, size: 16}
+      l2_metadata.stp_group: { type: exact, size: 10}
+    row: [ 5, 6 ]
+    bus: [ 0, 0 ]
+    column:
+    - 2
+    - [ 2, 3, 4 ]
+    ways:
+    - [0, 0, 0x0, [6, 2]]
+    - [0, 1, 0x0, [6, 3]]
+    - [0, 2, 0x0, [6, 4]]
+    - [0, 3, 0x0, [5, 2]]
+    input_xbar:
+      group 0: { 0: ingress_metadata.ifindex, 16: l2_metadata.stp_group }
+      hash 0:
+        0..9: random(ingress_metadata.ifindex, l2_metadata.stp_group(1..7)) ^ stripe(l2_metadata.stp_group(0), l2_metadata.stp_group(8..9))
+        10..19: random(ingress_metadata.ifindex, l2_metadata.stp_group(1..7)) ^ stripe(l2_metadata.stp_group(0), l2_metadata.stp_group(8..9))
+        20..29: random(ingress_metadata.ifindex, l2_metadata.stp_group(1..7)) ^ stripe(l2_metadata.stp_group(0), l2_metadata.stp_group(8..9))
+        30..39: random(ingress_metadata.ifindex, l2_metadata.stp_group(1..7)) ^ stripe(l2_metadata.stp_group(0), l2_metadata.stp_group(8..9))
+      hash group 0:
+        table: [0]
+    format: { action(0): 7..7, immediate(0): 0..6, version(0): 112..115, match(0): [40..47, 32..39, 48..55 ] }
+    match: [ ingress_metadata.ifindex, l2_metadata.stp_group(0..7) ]
+    gateway:
+      input_xbar:
+        group 0: { 16: l2_metadata.stp_group, 46: ingress_metadata.port_type }
+      row: 1
+      bus: 0
+      match: { 0: l2_metadata.stp_group(0..7), 8: l2_metadata.stp_group(8..9), 22: ingress_metadata.port_type }
+      0b******00********00000000: _ingress_bd_stats_2
+      0b00**********************: run_table
+      miss: _ingress_bd_stats_2
+    next: _ingress_bd_stats_2
+    action_bus: { }
+    actions:
+      set_stp_state:
+      - p4_param_order: {stp_state: 3 }
+      - { stp_state: immediate(0..6) }
+      - set l2_metadata.stp_state, stp_state
+      NoAction:
+      - {  }
+    default_action: NoAction
+  hash_action _ingress_bd_stats_2 1:
+    p4: { name: ingress_bd_stats, size: 16384 }
+    row: 0
+    bus: 0
+    column: [  ]
+    hash_dist:
+      0: {hash: 1, mask: 0xffff, shift: 3}
+    input_xbar:
+      exact group 0: { 64: l2_metadata.bd_stats_idx }
+      hash 1:
+        0..15: l2_metadata.bd_stats_idx
+      hash group 1:
+        table: [1]
+    gateway:
+      input_xbar:
+        group 0: { 46: ingress_metadata.port_type }
+      row: 0
+      bus: 1
+      payload: 1
+      match: { 6: ingress_metadata.port_type }
+      0x1: run_table
+      miss: _fwd_result_0
+    next: cond-18
+    stats: _ingress_bd_stats_2$counter..ingress_bd_stats(hash_dist 0)
+    actions:
+      update_ingress_bd_stats:
+      - 0
+      NoAction:
+      - 0
+    default_action: NoAction
+  counter _ingress_bd_stats_2$counter..ingress_bd_stats:
+    p4: { name: ingress_bd_stats }
+    row: [ 9, 7 ]
+    column:
+    - [ 0, 1, 2, 3, 4, 5 ]
+    - 0
+    maprams: 
+    - [ 0, 1, 2, 3, 4, 5 ]
+    - 0
+    count: packets_and_bytes
+    format: {packets(0): 85..101, bytes(0): 102..126, packets(1): 42..58, bytes(1): 59..83, packets(2): 0..16, bytes(2): 17..41}
+  ternary_match _fwd_result_0 2:
+    p4: { name: fwd_result, size: 512 }
+    p4_param_order: 
+      l2_metadata.l2_redirect: { type: ternary, size: 1}
+      acl_metadata.acl_redirect: { type: ternary, size: 1}
+      acl_metadata.racl_redirect: { type: ternary, size: 1}
+      l3_metadata.rmac_hit: { type: ternary, size: 1}
+      l3_metadata.fib_hit: { type: ternary, size: 1}
+      nat_metadata.nat_hit: { type: ternary, size: 1}
+      l2_metadata.lkp_pkt_type: { type: ternary, size: 3}
+      l3_metadata.lkp_ip_type: { type: ternary, size: 2}
+      multicast_metadata.igmp_snooping_enabled: { type: ternary, size: 1}
+      multicast_metadata.mld_snooping_enabled: { type: ternary, size: 1}
+      multicast_metadata.mcast_route_hit: { type: ternary, size: 1}
+      multicast_metadata.mcast_bridge_hit: { type: ternary, size: 1}
+      multicast_metadata.mcast_rpf_group: { type: ternary, size: 14}
+      multicast_metadata.mcast_mode: { type: ternary, size: 2}
+    row: [ 0, 1, 2 ]
+    bus: [ 0, 0, 0 ]
+    column:
+    - 0
+    - 0
+    - 0
+    input_xbar:
+      group 0: { 0: multicast_metadata.mcast_rpf_group(0..7), 9: l3_metadata.lkp_ip_type, 21: acl_metadata.acl_redirect, 28: multicast_metadata.mcast_mode, 36: acl_metadata.racl_redirect, 43: l2_metadata.lkp_pkt_type }
+      group 1: { 6: l2_metadata.l2_redirect, 8: multicast_metadata.mcast_rpf_group(8..13), 21: l3_metadata.fib_hit, 28: l3_metadata.rmac_hit, 38: multicast_metadata.igmp_snooping_enabled }
+      group 2: { 4: multicast_metadata.mcast_bridge_hit, 13: multicast_metadata.mcast_route_hit, 21: multicast_metadata.mld_snooping_enabled, 28: nat_metadata.nat_hit }
+    gateway:
+      input_xbar:
+        group 0: { 32: ingress_metadata.bypass_lookups(0..7), 56: ingress_metadata.bypass_lookups(8..15) }
+      row: 0
+      bus: 0
+      match: { 0: ingress_metadata.bypass_lookups(0..7), 8: ingress_metadata.bypass_lookups(8..15) }
+      0x**ff: _acl_stats_2
+      miss: run_table
+    next: _acl_stats_2
+    action_bus: { }
+    indirect: _fwd_result_0$tind
+  ternary_indirect _fwd_result_0$tind:
+    row: 0
+    bus: 0
+    column: 2
+    format: { action: 9..11, immediate: 0..8}
+    actions:
+      nop:
+      - {  }
+      set_l2_redirect_action:
+      - {  }
+      - set l3_metadata.nexthop_index, l2_metadata.l2_nexthop
+      - set nexthop_metadata.nexthop_type, l2_metadata.l2_nexthop_type
+      - set ingress_metadata.egress_ifindex, 0
+      set_fib_redirect_action:
+      - {  }
+      - set l3_metadata.nexthop_index, 0
+      - set nexthop_metadata.nexthop_type, 0
+      - set l3_metadata.routed, 1
+      - set fabric_metadata.reason_code, 535
+      set_cpu_redirect_action:
+      - { $constant0: immediate(0..8), $constant0: 64 }
+      - set l3_metadata.routed, 0
+      - set standard_metadata.egress_spec, $constant0
+      - set ingress_metadata.egress_ifindex, 0
+      set_acl_redirect_action:
+      - {  }
+      - set l3_metadata.nexthop_index, acl_metadata.acl_nexthop
+      - set nexthop_metadata.nexthop_type, acl_metadata.acl_nexthop_type
+      - set ingress_metadata.egress_ifindex, 0
+      set_racl_redirect_action:
+      - {  }
+      - set l3_metadata.nexthop_index, 0
+      - set nexthop_metadata.nexthop_type, 0
+      - set l3_metadata.routed, 1
+      - set ingress_metadata.egress_ifindex, 0
+      NoAction:
+      - {  }
+    default_action: NoAction
+  hash_action _acl_stats_2 3:
+    p4: { name: acl_stats, size: 128 }
+    row: 1
+    bus: 0
+    column: [  ]
+    hash_dist:
+      1: {hash: 1, mask: 0x3fff, shift: 3}
+    input_xbar:
+      exact group 0: { 80: acl_metadata.acl_stats_index }
+      hash 1:
+        16..29: acl_metadata.acl_stats_index
+      hash group 1:
+        table: [1]
+    gateway:
+      row: 2
+      bus: 0
+      0x0: _ecmp_group_0
+      miss: _ecmp_group_0
+    next: _ecmp_group_0
+    stats: _acl_stats_2$counter..acl_stats(hash_dist 1)
+    actions:
+      acl_stats_update:
+      - 0
+      NoAction:
+      - 0
+    default_action: NoAction
+  counter _acl_stats_2$counter..acl_stats:
+    p4: { name: acl_stats }
+    row: 5
+    column: [ 0, 1 ]
+    maprams: [ 0, 1 ]
+    count: packets_and_bytes
+    format: {packets(0): 85..101, bytes(0): 102..126, packets(1): 42..58, bytes(1): 59..83, packets(2): 0..16, bytes(2): 17..41}
+stage 9 ingress:
+  exact_match _ecmp_group_0 0:
+    p4: { name: ecmp_group, size: 1024, action_profile: ecmp_action_profile }
+    p4_param_order: 
+      l3_metadata.nexthop_index: { type: exact, size: 16}
+    row: 7
+    bus: 0
+    column: [ 2, 3, 4 ]
+    ways:
+    - [0, 0, 0x0, [7, 2]]
+    - [0, 1, 0x0, [7, 3]]
+    - [0, 2, 0x0, [7, 4]]
+    input_xbar:
+      group 0: { 0: l3_metadata.nexthop_index }
+      hash 0:
+        0..9: random(l3_metadata.nexthop_index(10..15)) ^ stripe(l3_metadata.nexthop_index(0..7), l3_metadata.nexthop_index(8..9))
+        10..19: random(l3_metadata.nexthop_index(10..15)) ^ stripe(l3_metadata.nexthop_index(0..7), l3_metadata.nexthop_index(8..9))
+        20..29: random(l3_metadata.nexthop_index(10..15)) ^ stripe(l3_metadata.nexthop_index(0..7), l3_metadata.nexthop_index(8..9))
+      hash group 0:
+        table: [0]
+    format: { action(0): 26..27, version(0): 112..115, meter_addr(0): 0..9, meter_pfe(0): 10..10, action_addr(0): 11..25, match(0): 34..39 }
+    match: [ l3_metadata.nexthop_index(10..15) ]
+    gateway:
+      input_xbar:
+        group 0: { 30: nexthop_metadata.nexthop_type }
+      row: 0
+      bus: 0
+      match: { 6: nexthop_metadata.nexthop_type }
+      0x1: run_table
+      miss: _nexthop_0
+    next: _learn_notify_0
+    action: _ecmp_group_0$act_prof..ecmp_action_profile(action, action_addr)
+    selector: _ecmp_group_0$act_sel..ecmp_action_profile(meter_addr)
+    default_action: NoAction
+  action _ecmp_group_0$act_prof..ecmp_action_profile:
+    row: [ 11, 10 ]
+    column:
+    - [ 1, 2, 3, 4, 5 ]
+    - [ 2, 3, 4 ]
+    home_row: 11
+    format set_ecmp_nexthop_details: { $adf_b0: 0..7, $adf_h0: 16..31, $adf_h1: 32..47, $adf_h2: 48..63 }
+    format set_ecmp_nexthop_details_for_post_routed_flood: { $adf_h1: 32..47, $adf_h2: 48..63 }
+    action_bus: { 0 : $adf_b0, 66..67 : $adf_h0, 68..69 : $adf_h1, 70..71 : $adf_h2 }
+    actions:
+      nop:
+      - {  }
+      set_ecmp_nexthop_details:
+      - p4_param_order: {ifindex: 16, bd: 14, nhop_index: 16, tunnel: 1 }
+      - { $data0: $adf_b0, $constant0: $data0(0..0), $constant0: 0, tunnel: $data0(0..0), bd: $adf_h0, ifindex: $adf_h1, nhop_index: $adf_h2 }
+      - set ingress_metadata.egress_ifindex, ifindex
+      - set l3_metadata.nexthop_index, nhop_index
+      - xor l3_metadata.same_bd_check, ingress_metadata.bd, bd
+      - xor l2_metadata.same_if_check, l2_metadata.same_if_check, ifindex
+      - xor tunnel_metadata.tunnel_if_check, $constant0, tunnel
+      set_ecmp_nexthop_details_for_post_routed_flood:
+      - p4_param_order: {bd: 14, uuc_mc_index: 16, nhop_index: 16 }
+      - { bd: $adf_h1, nhop_index: $adf_h2 }
+      - set l3_metadata.nexthop_index, nhop_index
+      - set ingress_metadata.egress_ifindex, 0
+      - xor l3_metadata.same_bd_check, ingress_metadata.bd, bd
+      NoAction:
+      - {  }
+  selection _ecmp_group_0$act_sel..ecmp_action_profile:
+    p4: { name: ecmp_action_profile }
+    row: 15
+    column: [ 4, 5 ]
+    maprams: [ 4, 5 ]
+    input_xbar:
+      group 0: { 64: hash_metadata.hash1 }
+      hash 1:
+        0..13: random(hash_metadata.hash1)
+      hash group 1:
+        table: [1]
+    mode: fair 0
+    per_flow_enable: meter_pfe
+    non_linear: true
+    pool_sizes: [4, 120]
+  exact_match _nexthop_0 1:
+    p4: { name: nexthop, size: 16384 }
+    p4_param_order: 
+      l3_metadata.nexthop_index: { type: exact, size: 16}
+    row: 6
+    bus: 0
+    column: [ 2, 3, 4, 6 ]
+    ways:
+    - [2, 0, 0x0, [6, 2]]
+    - [2, 1, 0x0, [6, 3]]
+    - [2, 2, 0x0, [6, 4]]
+    - [2, 3, 0x0, [6, 6]]
+    input_xbar:
+      group 1: { 0: l3_metadata.nexthop_index }
+      hash 2:
+        0..9: random(l3_metadata.nexthop_index(10..15)) ^ stripe(l3_metadata.nexthop_index(0..7), l3_metadata.nexthop_index(8..9))
+        10..19: random(l3_metadata.nexthop_index(10..15)) ^ stripe(l3_metadata.nexthop_index(0..7), l3_metadata.nexthop_index(8..9))
+        20..29: random(l3_metadata.nexthop_index(10..15)) ^ stripe(l3_metadata.nexthop_index(0..7), l3_metadata.nexthop_index(8..9))
+        30..39: random(l3_metadata.nexthop_index(10..15)) ^ stripe(l3_metadata.nexthop_index(0..7), l3_metadata.nexthop_index(8..9))
+      hash group 2:
+        table: [2]
+    format: { action(0): 0..1, version(0): 112..115, match(0): 34..39, action(1): 2..3, version(1): 116..119, match(1): 42..47, action(2): 4..5, version(2): 120..123, match(2): 50..55, action(3): 6..7, version(3): 124..127, match(3): 58..63 }
+    match: [ l3_metadata.nexthop_index(10..15) ]
+    next: _learn_notify_0
+    action: _nexthop_0$action
+    default_action: NoAction
+  action _nexthop_0$action:
+    p4: { name: _nexthop_0$action }
+    row: [ 14, 13, 12, 11 ]
+    column:
+    - 5
+    - [ 1, 2, 3, 4, 5 ]
+    - 5
+    - 0
+    home_row: 14
+    format set_nexthop_details: { $adf_b0: 0..7, $adf_h0: 32..47, $adf_h1: 48..63 }
+    format set_nexthop_details_for_post_routed_flood: { $adf_h1: 48..63 }
+    action_bus: { 2 : $adf_b0, 32..33 : $adf_h0, 34..35 : $adf_h1 }
+    actions:
+      nop:
+      - {  }
+      set_nexthop_details:
+      - p4_param_order: {ifindex: 16, bd: 14, tunnel: 1 }
+      - { $data0: $adf_b0, $constant0: $data0(0..0), $constant0: 0, tunnel: $data0(0..0), bd: $adf_h0, ifindex: $adf_h1 }
+      - set ingress_metadata.egress_ifindex, ifindex
+      - xor l3_metadata.same_bd_check, ingress_metadata.bd, bd
+      - xor l2_metadata.same_if_check, l2_metadata.same_if_check, ifindex
+      - xor tunnel_metadata.tunnel_if_check, $constant0, tunnel
+      set_nexthop_details_for_post_routed_flood:
+      - p4_param_order: {bd: 14, uuc_mc_index: 16 }
+      - { bd: $adf_h1 }
+      - set ingress_metadata.egress_ifindex, 0
+      - xor l3_metadata.same_bd_check, ingress_metadata.bd, bd
+      NoAction:
+      - {  }
+  ternary_match _learn_notify_0 3:
+    p4: { name: learn_notify, size: 512 }
+    p4_param_order: 
+      l2_metadata.l2_src_miss: { type: ternary, size: 1}
+      l2_metadata.l2_src_move: { type: ternary, size: 16}
+      l2_metadata.stp_state: { type: ternary, size: 3}
+    row: 0
+    bus: 0
+    column: 0
+    input_xbar:
+      group 0: { 0: l2_metadata.l2_src_move, 21: l2_metadata.l2_src_miss, 28: l2_metadata.stp_state }
+    gateway:
+      input_xbar:
+        group 0: { 20: l2_metadata.learning_enabled }
+      row: 0
+      bus: 1
+      match: { 4: l2_metadata.learning_enabled }
+      0b***1: run_table
+      miss: _lag_group_0
+    next: _lag_group_0
+    indirect: _learn_notify_0$tind
+  ternary_indirect _learn_notify_0$tind:
+    row: 0
+    bus: 0
+    column: 2
+    format: { action: 0..1}
+    actions:
+      nop:
+      - 0
+      generate_learn_notify:
+      - set $learning, 1
+      NoAction:
+      - 0
+    default_action: NoAction
+stage 10 ingress:
+  exact_match _lag_group_0 0:
+    p4: { name: lag_group, size: 1024, action_profile: lag_action_profile }
+    p4_param_order: 
+      ingress_metadata.egress_ifindex: { type: exact, size: 16}
+    row: 6
+    bus: 1
+    column: [ 3, 4, 6 ]
+    ways:
+    - [0, 0, 0x0, [6, 3]]
+    - [0, 1, 0x0, [6, 4]]
+    - [0, 2, 0x0, [6, 6]]
+    input_xbar:
+      group 0: { 0: ingress_metadata.egress_ifindex }
+      hash 0:
+        0..9: random(ingress_metadata.egress_ifindex(10..15)) ^ stripe(ingress_metadata.egress_ifindex(0..7), ingress_metadata.egress_ifindex(8..9))
+        10..19: random(ingress_metadata.egress_ifindex(10..15)) ^ stripe(ingress_metadata.egress_ifindex(0..7), ingress_metadata.egress_ifindex(8..9))
+        20..29: random(ingress_metadata.egress_ifindex(10..15)) ^ stripe(ingress_metadata.egress_ifindex(0..7), ingress_metadata.egress_ifindex(8..9))
+      hash group 0:
+        table: [0]
+    format: { action(0): 22..23, version(0): 112..115, meter_addr(0): 0..9, meter_pfe(0): 10..10, action_addr(0): 11..21, match(0): 34..39 }
+    match: [ ingress_metadata.egress_ifindex(10..15) ]
+    gateway:
+      input_xbar:
+        group 0: { 0: ingress_metadata.egress_ifindex }
+      row: 1
+      bus: 0
+      match: { 0: ingress_metadata.egress_ifindex(0..7), 8: ingress_metadata.egress_ifindex(8..15) }
+      0x**ff: cond-18
+      miss: run_table
+    next: cond-18
+    action: _lag_group_0$act_prof..lag_action_profile(action, action_addr)
+    selector: _lag_group_0$act_sel..lag_action_profile(meter_addr)
+    default_action: NoAction
+  action _lag_group_0$act_prof..lag_action_profile:
+    row: 14
+    column: 5
+    home_row: 14
+    format set_lag_port: { $adf_h0: 0..15 }
+    action_bus: { 32..33 : $adf_h0 }
+    actions:
+      set_lag_miss:
+      - {  }
+      set_lag_port:
+      - p4_param_order: {port: 9 }
+      - { port: $adf_h0 }
+      - set standard_metadata.egress_spec, port
+      NoAction:
+      - {  }
+  selection _lag_group_0$act_sel..lag_action_profile:
+    p4: { name: lag_action_profile }
+    row: 15
+    column: [ 4, 5 ]
+    maprams: [ 4, 5 ]
+    input_xbar:
+      group 0: { 64: hash_metadata.hash2 }
+      hash 1:
+        0..13: random(hash_metadata.hash2)
+      hash group 1:
+        table: [1]
+    mode: fair 0
+    per_flow_enable: meter_pfe
+    non_linear: true
+    pool_sizes: [4, 120]
+  gateway cond-18 1:
+    input_xbar:
+      group 0: { 30: ingress_metadata.port_type }
+    row: 0
+    bus: 1
+    match: { 6: ingress_metadata.port_type }
+    0x1: END
+    miss: _system_acl_0
+stage 11 ingress:
+  ternary_match _system_acl_0 0:
+    p4: { name: system_acl, size: 512 }
+    p4_param_order: 
+      acl_metadata.if_label: { type: ternary, size: 16}
+      acl_metadata.bd_label: { type: ternary, size: 16}
+      ingress_metadata.ifindex: { type: ternary, size: 16}
+      l2_metadata.lkp_mac_type: { type: ternary, size: 16}
+      l2_metadata.port_vlan_mapping_miss: { type: ternary, size: 1}
+      security_metadata.ipsg_check_fail: { type: ternary, size: 1}
+      acl_metadata.acl_deny: { type: ternary, size: 1}
+      acl_metadata.racl_deny: { type: ternary, size: 1}
+      l3_metadata.urpf_check_fail: { type: ternary, size: 1}
+      ingress_metadata.drop_flag: { type: ternary, size: 1}
+      l3_metadata.l3_copy: { type: ternary, size: 1}
+      l3_metadata.rmac_hit: { type: ternary, size: 1}
+      l3_metadata.routed: { type: ternary, size: 1}
+      ipv6_metadata.ipv6_src_is_link_local: { type: ternary, size: 1}
+      l2_metadata.same_if_check: { type: ternary, size: 16}
+      tunnel_metadata.tunnel_if_check: { type: ternary, size: 1}
+      l3_metadata.same_bd_check: { type: ternary, size: 14}
+      l3_metadata.lkp_ip_ttl: { type: ternary, size: 8}
+      l2_metadata.stp_state: { type: ternary, size: 3}
+      ingress_metadata.control_frame: { type: ternary, size: 1}
+      ipv4_metadata.ipv4_unicast_enabled: { type: ternary, size: 1}
+      ipv6_metadata.ipv6_unicast_enabled: { type: ternary, size: 1}
+      ingress_metadata.egress_ifindex: { type: ternary, size: 16}
+      fabric_metadata.reason_code: { type: ternary, size: 16}
+    row: [ 0, 1, 2, 3, 4, 5 ]
+    bus: [ 0, 0, 0, 0, 0, 0 ]
+    column:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    input_xbar:
+      group 0: { 0: acl_metadata.bd_label, 16: acl_metadata.if_label, 32: fabric_metadata.reason_code(0..7) }
+      group 1: { 0: ingress_metadata.egress_ifindex(0..7), 8: fabric_metadata.reason_code(8..15), 16: ingress_metadata.ifindex(0..7), 24: ingress_metadata.egress_ifindex(8..15), 32: l2_metadata.lkp_mac_type(0..7), 42: ipv6_metadata.ipv6_src_is_link_local }
+      group 2: { 0: ingress_metadata.ifindex(8..15), 8: l2_metadata.same_if_check(0..7), 23: ipv6_metadata.ipv6_unicast_enabled, 24: l3_metadata.same_bd_check(0..7), 32: l2_metadata.lkp_mac_type(8..15) }
+      group 3: { 0: l2_metadata.same_if_check(8..15), 12: acl_metadata.acl_deny, 16: l3_metadata.same_bd_check(8..13), 30: acl_metadata.racl_deny, 37: ingress_metadata.control_frame, 42: ingress_metadata.drop_flag }
+      group 4: { 5: ipv4_metadata.ipv4_unicast_enabled, 14: l2_metadata.port_vlan_mapping_miss, 20: l2_metadata.stp_state, 30: l3_metadata.l3_copy, 32: l3_metadata.lkp_ip_ttl }
+      group 5: { 4: l3_metadata.rmac_hit, 12: l3_metadata.routed, 22: l3_metadata.urpf_check_fail, 30: security_metadata.ipsg_check_fail, 32: tunnel_metadata.tunnel_if_check }
+    gateway:
+      input_xbar:
+        group 0: { 0: ingress_metadata.bypass_lookups }
+      row: 0
+      bus: 0
+      match: { 0: ingress_metadata.bypass_lookups(0..7), 8: ingress_metadata.bypass_lookups(8..15) }
+      0b**********0*****: run_table
+      miss: END
+    next: _drop_stats_4
+    action_bus: { }
+    indirect: _system_acl_0$tind
+  counter _system_acl_0$counter..drop_stats:
+    p4: { name: drop_stats }
+    row: 13
+    column: [ 0, 1 ]
+    maprams: [ 0, 1 ]
+    count: packets
+    format: {packets(0): 106..126, packets(1): 85..105, packets(2): 64..84, packets(3): 42..62, packets(4): 21..41, packets(5): 0..20}
+    per_flow_enable: counter_pfe
+  ternary_indirect _system_acl_0$tind:
+    row: 0
+    bus: 0
+    column: 2
+    format: { action: 27..29, immediate: 11..26, counter_addr: 0..9, counter_pfe: 10..10}
+    stats: _system_acl_0$counter..drop_stats(counter_addr)
+    actions:
+      nop:
+      - {  }
+      redirect_to_cpu:
+      - p4_param_order: {qid: 5, meter_id: 8, icos: 3 }
+      - {  }
+      - invalidate standard_metadata.egress_spec
+      redirect_to_cpu_with_reason:
+      - p4_param_order: {reason_code: 16, qid: 5, meter_id: 8, icos: 3 }
+      - { reason_code: immediate(0..15) }
+      - set fabric_metadata.reason_code, reason_code
+      - invalidate standard_metadata.egress_spec
+      copy_to_cpu:
+      - p4_param_order: {qid: 5, meter_id: 8, icos: 3 }
+      - {  }
+      copy_to_cpu_with_reason:
+      - p4_param_order: {reason_code: 16, qid: 5, meter_id: 8, icos: 3 }
+      - { reason_code: immediate(0..15) }
+      - set fabric_metadata.reason_code, reason_code
+      drop_packet:
+      - {  }
+      - invalidate standard_metadata.egress_spec
+      drop_packet_with_reason:
+      - p4_param_order: {drop_reason: 32 }
+      - {  }
+      - { drop_reason: counter_addr }
+      - invalidate standard_metadata.egress_spec
+      NoAction:
+      - {  }
+    default_action: NoAction
+  hash_action _drop_stats_4 1:
+    p4: { name: drop_stats, size: 256 }
+    row: 0
+    bus: 0
+    column: [  ]
+    hash_dist:
+      0: {hash: 0, mask: 0xff, shift: 3}
+    input_xbar:
+      exact group 0: { 16: ingress_metadata.drop_reason }
+      hash 0:
+        0..7: ingress_metadata.drop_reason
+      hash group 0:
+        table: [0]
+    gateway:
+      input_xbar:
+        group 0: { 70: ingress_metadata.drop_flag }
+      row: 0
+      bus: 1
+      payload: 1
+      match: { 6: ingress_metadata.drop_flag }
+      0b*1: END
+      miss: run_table
+    next: END
+    stats: _drop_stats_4$counter..drop_stats_2(hash_dist 0)
+    actions:
+      drop_stats_update:
+      - 0
+      NoAction:
+      - 0
+    default_action: NoAction
+  counter _drop_stats_4$counter..drop_stats_2:
+    p4: { name: drop_stats_2 }
+    row: 9
+    column: [ 0, 1 ]
+    maprams: [ 0, 1 ]
+    count: packets
+    format: {packets(0): 106..126, packets(1): 85..105, packets(2): 64..84, packets(3): 42..62, packets(4): 21..41, packets(5): 0..20}
+stage 0 egress:
+  exact_match egress_port_mapping 3:
+    p4: { name: egress_port_mapping, size: 288 }
+    p4_param_order: 
+      standard_metadata.egress_port: { type: exact, size: 9}
+    row: 2
+    bus: 1
+    column: [ 6, 7, 8 ]
+    ways:
+    - [1, 0, 0x0, [2, 6]]
+    - [1, 1, 0x0, [2, 7]]
+    - [1, 2, 0x0, [2, 8]]
+    input_xbar:
+      group 0: { 64: standard_metadata.egress_port }
+      hash 1:
+        0..9: random(standard_metadata.egress_port(1..7)) ^ stripe(standard_metadata.egress_port(0), standard_metadata.egress_port(8))
+        10..19: random(standard_metadata.egress_port(1..7)) ^ stripe(standard_metadata.egress_port(0), standard_metadata.egress_port(8))
+        20..29: random(standard_metadata.egress_port(1..7)) ^ stripe(standard_metadata.egress_port(0), standard_metadata.egress_port(8))
+      hash group 1:
+        table: [1]
+    format: { action(0): 0..1, immediate(0): 2..22, version(0): 112..115, match(0): 33..39 }
+    match: [ standard_metadata.egress_port(1..7) ]
+    gateway:
+      input_xbar:
+        group 0: { 17: eg_intr_md.deflection_flag, 28: egress_metadata.bypass }
+      row: 0
+      bus: 1
+      match: { 1: eg_intr_md.deflection_flag, 12: egress_metadata.bypass }
+      0b***0**********0: run_table
+      miss: _egress_system_acl_0
+    hit: [ _vlan_decap_0, _tunnel_encap_process_outer_0, _tunnel_encap_process_outer_0, _tunnel_encap_process_outer_0 ]
+    miss: _tunnel_encap_process_outer_0
+    action_bus: { }
+    actions:
+      egress_port_type_normal:
+      - p4_param_order: {ifindex: 16, qos_group: 5, if_label: 16 }
+      - { ifindex: immediate(0..15) }
+      - set egress_metadata.port_type, 0
+      - set egress_metadata.ifindex, ifindex
+      egress_port_type_fabric:
+      - p4_param_order: {ifindex: 16 }
+      - { ifindex: immediate(0..15), $constant0: immediate(16..20), $constant0: 15 }
+      - set egress_metadata.port_type, 1
+      - set egress_metadata.ifindex, ifindex
+      - set tunnel_metadata.egress_tunnel_type, $constant0
+      egress_port_type_cpu:
+      - p4_param_order: {ifindex: 16 }
+      - { ifindex: immediate(0..15), $constant0: immediate(16..20), $constant0: 16 }
+      - set egress_metadata.port_type, 2
+      - set egress_metadata.ifindex, ifindex
+      - set tunnel_metadata.egress_tunnel_type, $constant0
+      NoAction:
+      - {  }
+    default_action: NoAction
+  exact_match _vlan_decap_0 5:
+    p4: { name: vlan_decap, size: 256 }
+    p4_param_order: 
+      vlan_tag_$0.$valid: { type: exact, size: 1}
+      vlan_tag_$1.$valid: { type: exact, size: 1}
+    row: 3
+    bus: 1
+    column: [ 6, 7, 8 ]
+    ways:
+    - [3, 0, 0x0, [3, 6]]
+    - [3, 1, 0x0, [3, 7]]
+    - [3, 2, 0x0, [3, 8]]
+    input_xbar:
+      group 2: { 5: vlan_tag_$0.$valid, 14: vlan_tag_$1.$valid }
+      hash 4:
+        0..9: stripe(vlan_tag_$0.$valid, vlan_tag_$1.$valid)
+        10..19: stripe(vlan_tag_$0.$valid, vlan_tag_$1.$valid)
+        20..29: stripe(vlan_tag_$0.$valid, vlan_tag_$1.$valid)
+      hash group 3:
+        table: [4]
+    format: { action(0): 0..1, version(0): 112..115 }
+    gateway:
+      input_xbar:
+        group 1: { 48: eg_intr_md_from_parser_aux.clone_src }
+      row: 0
+      bus: 0
+      match: { 0: eg_intr_md_from_parser_aux.clone_src }
+      0x00: run_table
+      miss: _rewrite_0
+    next: _rewrite_0
+    actions:
+      nop:
+      - 0
+      remove_vlan_single_tagged:
+      - set ethernet.etherType, vlan_tag_$0.etherType
+      remove_vlan_double_tagged:
+      - set ethernet.etherType, vlan_tag_$1.etherType
+      NoAction:
+      - 0
+    default_action: NoAction
+  exact_match _rewrite_0 7:
+    p4: { name: rewrite, size: 16384 }
+    p4_param_order: 
+      l3_metadata.nexthop_index: { type: exact, size: 16}
+    row: 1
+    bus: 0
+    column: [ 2, 3, 4, 6 ]
+    ways:
+    - [5, 0, 0x0, [1, 2]]
+    - [5, 1, 0x0, [1, 3]]
+    - [5, 2, 0x0, [1, 4]]
+    - [5, 3, 0x0, [1, 6]]
+    input_xbar:
+      group 3: { 0: l3_metadata.nexthop_index }
+      hash 6:
+        0..9: random(l3_metadata.nexthop_index(10..15)) ^ stripe(l3_metadata.nexthop_index(0..7), l3_metadata.nexthop_index(8..9))
+        10..19: random(l3_metadata.nexthop_index(10..15)) ^ stripe(l3_metadata.nexthop_index(0..7), l3_metadata.nexthop_index(8..9))
+        20..29: random(l3_metadata.nexthop_index(10..15)) ^ stripe(l3_metadata.nexthop_index(0..7), l3_metadata.nexthop_index(8..9))
+        30..39: random(l3_metadata.nexthop_index(10..15)) ^ stripe(l3_metadata.nexthop_index(0..7), l3_metadata.nexthop_index(8..9))
+      hash group 5:
+        table: [6]
+    format: { action(0): 0..1, version(0): 112..115, match(0): 34..39, action(1): 2..3, version(1): 116..119, match(1): 42..47, action(2): 4..5, version(2): 120..123, match(2): 50..55, action(3): 6..7, version(3): 124..127, match(3): 58..63 }
+    match: [ l3_metadata.nexthop_index(10..15) ]
+    gateway:
+      input_xbar:
+        group 1: { 64: l3_metadata.nexthop_index(0..7), 86: egress_metadata.routed, 88: l3_metadata.nexthop_index(8..15) }
+      row: 1
+      bus: 0
+      match: { 22: egress_metadata.routed, 0: l3_metadata.nexthop_index(0..7), 8: l3_metadata.nexthop_index(8..15) }
+      0b*0**********************: run_table
+      0x00**00: _egress_bd_stats_2
+      miss: run_table
+    next: _egress_bd_stats_2
+    actions:
+      nop:
+      - 0
+      set_l2_rewrite:
+      - set egress_metadata.bd, ingress_metadata.bd
+      NoAction:
+      - 0
+    default_action: NoAction
+stage 8 egress:
+  exact_match _egress_bd_stats_2 4:
+    p4: { name: egress_bd_stats, size: 16384 }
+    p4_param_order: 
+      egress_metadata.bd: { type: exact, size: 14}
+      l2_metadata.lkp_pkt_type: { type: exact, size: 3}
+    row: [ 3, 4 ]
+    bus: [ 1, 0 ]
+    column:
+    - 4
+    - [ 2, 3, 4 ]
+    ways:
+    - [2, 0, 0x0, [4, 2]]
+    - [2, 1, 0x0, [4, 3]]
+    - [2, 2, 0x0, [4, 4]]
+    - [2, 3, 0x0, [3, 4]]
+    input_xbar:
+      group 1: { 0: egress_metadata.bd, 18: l2_metadata.lkp_pkt_type }
+      hash 2:
+        0..9: random(egress_metadata.bd(1..7)) ^ stripe(egress_metadata.bd(0), egress_metadata.bd(8..13), l2_metadata.lkp_pkt_type)
+        10..19: random(egress_metadata.bd(1..7)) ^ stripe(egress_metadata.bd(0), egress_metadata.bd(8..13), l2_metadata.lkp_pkt_type)
+        20..29: random(egress_metadata.bd(1..7)) ^ stripe(egress_metadata.bd(0), egress_metadata.bd(8..13), l2_metadata.lkp_pkt_type)
+        30..39: random(egress_metadata.bd(1..7)) ^ stripe(egress_metadata.bd(0), egress_metadata.bd(8..13), l2_metadata.lkp_pkt_type)
+      hash group 2:
+        table: [2]
+    format: { action(0): 0..0, version(0): 112..115, match(0): 33..39, action(1): 1..1, version(1): 116..119, match(1): 41..47, action(2): 2..2, version(2): 120..123, match(2): 49..55, action(3): 3..3, version(3): 124..127, match(3): 57..63 }
+    match: [ egress_metadata.bd(1..7) ]
+    next: _egress_bd_map_0
+    stats: _egress_bd_stats_2$counter..egress_bd_stats
+    actions:
+      nop:
+      - 0
+      NoAction:
+      - 0
+    default_action: NoAction
+  counter _egress_bd_stats_2$counter..egress_bd_stats:
+    p4: { name: egress_bd_stats }
+    row: [ 13, 11 ]
+    column:
+    - [ 0, 1, 2, 3, 4, 5 ]
+    - 0
+    maprams: 
+    - [ 0, 1, 2, 3, 4, 5 ]
+    - 0
+    count: packets_and_bytes
+    format: {packets(0): 85..101, bytes(0): 102..126, packets(1): 42..58, bytes(1): 59..83, packets(2): 0..16, bytes(2): 17..41}
+  exact_match _egress_bd_map_0 5:
+    p4: { name: egress_bd_map, size: 16384 }
+    p4_param_order: 
+      egress_metadata.bd: { type: exact, size: 14}
+    row: [ 3, 5 ]
+    bus: [ 0, 1 ]
+    column:
+    - [ 2, 3 ]
+    - [ 3, 4 ]
+    ways:
+    - [3, 0, 0x0, [5, 3]]
+    - [3, 1, 0x0, [5, 4]]
+    - [3, 2, 0x0, [3, 2]]
+    - [3, 3, 0x0, [3, 3]]
+    input_xbar:
+      group 1: { 64: egress_metadata.bd }
+      hash 3:
+        0..9: random(egress_metadata.bd(4..7)) ^ stripe(egress_metadata.bd(0..3), egress_metadata.bd(8..13))
+        10..19: random(egress_metadata.bd(4..7)) ^ stripe(egress_metadata.bd(0..3), egress_metadata.bd(8..13))
+        20..29: random(egress_metadata.bd(4..7)) ^ stripe(egress_metadata.bd(0..3), egress_metadata.bd(8..13))
+        30..39: random(egress_metadata.bd(4..7)) ^ stripe(egress_metadata.bd(0..3), egress_metadata.bd(8..13))
+      hash group 3:
+        table: [3]
+    format: { action(0): 0..1, version(0): 112..115, match(0): 36..39, action(1): 2..3, version(1): 116..119, match(1): 44..47, action(2): 4..5, version(2): 120..123, match(2): 52..55, action(3): 6..7, version(3): 124..127, match(3): 60..63 }
+    match: [ egress_metadata.bd(4..7) ]
+    next: _tunnel_encap_process_outer_0
+    actions:
+      nop:
+      - 0
+      set_egress_bd_properties:
+      - p4_param_order: {smac_idx: 9, nat_mode: 2, bd_label: 16 }
+      - 0
+      NoAction:
+      - 0
+    default_action: NoAction
+  exact_match _tunnel_encap_process_outer_0 6:
+    p4: { name: tunnel_encap_process_outer, size: 256 }
+    p4_param_order: 
+      tunnel_metadata.egress_tunnel_type: { type: exact, size: 5}
+      tunnel_metadata.egress_header_count: { type: exact, size: 4}
+      multicast_metadata.replica: { type: exact, size: 1}
+    row: 7
+    bus: 0
+    column: [ 2, 3, 4 ]
+    ways:
+    - [4, 0, 0x0, [7, 2]]
+    - [4, 1, 0x0, [7, 3]]
+    - [4, 2, 0x0, [7, 4]]
+    input_xbar:
+      group 2: { 0: tunnel_metadata.egress_tunnel_type, 15: multicast_metadata.replica, 26: tunnel_metadata.egress_header_count }
+      hash 4:
+        0..9: stripe(tunnel_metadata.egress_tunnel_type, multicast_metadata.replica, tunnel_metadata.egress_header_count)
+        10..19: stripe(tunnel_metadata.egress_tunnel_type, multicast_metadata.replica, tunnel_metadata.egress_header_count)
+        20..29: stripe(tunnel_metadata.egress_tunnel_type, multicast_metadata.replica, tunnel_metadata.egress_header_count)
+      hash group 4:
+        table: [4]
+    format: { action(0): 14..15, immediate(0): 0..13, version(0): 112..115 }
+    gateway:
+      input_xbar:
+        group 1: { 25: fabric_metadata.fabric_header_present, 32: tunnel_metadata.egress_tunnel_type }
+      row: 1
+      bus: 1
+      match: { 0: tunnel_metadata.egress_tunnel_type, 9: fabric_metadata.fabric_header_present }
+      0b***********00000: _egress_vlan_xlate_0
+      0b******0*********: run_table
+      miss: _egress_vlan_xlate_0
+    next: _tunnel_rewrite_0
+    action_bus: { }
+    actions:
+      nop:
+      - {  }
+      fabric_rewrite:
+      - p4_param_order: {tunnel_index: 14 }
+      - { tunnel_index: immediate(0..13) }
+      - set tunnel_metadata.tunnel_index, tunnel_index
+      NoAction:
+      - {  }
+    default_action: NoAction
+stage 9 egress:
+  exact_match _tunnel_rewrite_0 2:
+    p4: { name: tunnel_rewrite, size: 16384 }
+    p4_param_order: 
+      tunnel_metadata.tunnel_index: { type: exact, size: 14}
+    row: 7
+    bus: 1
+    column: [ 6, 7, 8, 9 ]
+    ways:
+    - [3, 0, 0x0, [7, 6]]
+    - [3, 1, 0x0, [7, 7]]
+    - [3, 2, 0x0, [7, 8]]
+    - [3, 3, 0x0, [7, 9]]
+    input_xbar:
+      group 1: { 64: tunnel_metadata.tunnel_index }
+      hash 3:
+        0..9: random(tunnel_metadata.tunnel_index(4..7)) ^ stripe(tunnel_metadata.tunnel_index(0..3), tunnel_metadata.tunnel_index(8..13))
+        10..19: random(tunnel_metadata.tunnel_index(4..7)) ^ stripe(tunnel_metadata.tunnel_index(0..3), tunnel_metadata.tunnel_index(8..13))
+        20..29: random(tunnel_metadata.tunnel_index(4..7)) ^ stripe(tunnel_metadata.tunnel_index(0..3), tunnel_metadata.tunnel_index(8..13))
+        30..39: random(tunnel_metadata.tunnel_index(4..7)) ^ stripe(tunnel_metadata.tunnel_index(0..3), tunnel_metadata.tunnel_index(8..13))
+      hash group 3:
+        table: [3]
+    format: { action(0): 32..33, immediate(0): 0..7, version(0): 112..115, match(0): 44..47, action(1): 34..35, immediate(1): 8..15, version(1): 116..119, match(1): 52..55, action(2): 36..37, immediate(2): 16..23, version(2): 120..123, match(2): 60..63, action(3): 38..39, immediate(3): 24..31, version(3): 124..127, match(3): 68..71 }
+    match: [ tunnel_metadata.tunnel_index(4..7) ]
+    next: _egress_vlan_xlate_0
+    action_bus: { }
+    actions:
+      nop:
+      - {  }
+      cpu_rx_rewrite:
+      - { $data0: immediate(0..7), $constant0: $data0(3..4), $constant0: 0, $constant1: $data0(1..2), $constant1: 0, $constant2: $data0(0..0), $constant2: 0, $constant3: $data0(5..7), $constant3: 5 }
+      - set fabric_header_cpu.ingressPort, ingress_metadata.ingress_port
+      - set fabric_header_cpu.ingressIfindex, ingress_metadata.ifindex
+      - set fabric_header_cpu.ingressBd, ingress_metadata.bd
+      - set fabric_header_cpu.reasonCode, fabric_metadata.reason_code
+      - set fabric_payload_header.etherType, ethernet.etherType
+      - set ethernet.etherType, 36864
+      - set B19, $data0
+      NoAction:
+      - {  }
+    default_action: NoAction
+stage 10 egress:
+  exact_match _egress_vlan_xlate_0 2:
+    p4: { name: egress_vlan_xlate, size: 32768 }
+    p4_param_order: 
+      egress_metadata.ifindex: { type: exact, size: 16}
+      egress_metadata.bd: { type: exact, size: 14}
+    row: [ 6, 7 ]
+    bus: [ 0, 0 ]
+    column:
+    - 2
+    - [ 2, 3, 4, 6, 7, 8, 9 ]
+    ways:
+    - [2, 0, 0x1, [7, 2], [7, 3]]
+    - [2, 1, 0x2, [7, 4], [7, 6]]
+    - [2, 2, 0x4, [7, 7], [7, 8]]
+    - [2, 3, 0x8, [7, 9], [6, 2]]
+    input_xbar:
+      group 1: { 0: egress_metadata.bd, 16: egress_metadata.ifindex }
+      hash 2:
+        0..9: random(egress_metadata.bd(0..7), egress_metadata.ifindex(5..15)) ^ stripe(egress_metadata.bd(8..13), egress_metadata.ifindex(0..4))
+        10..19: random(egress_metadata.bd(0..7), egress_metadata.ifindex(5..15)) ^ stripe(egress_metadata.bd(8..13), egress_metadata.ifindex(0..4))
+        20..29: random(egress_metadata.bd(0..7), egress_metadata.ifindex(5..15)) ^ stripe(egress_metadata.bd(8..13), egress_metadata.ifindex(0..4))
+        30..39: random(egress_metadata.bd(0..7), egress_metadata.ifindex(5..15)) ^ stripe(egress_metadata.bd(8..13), egress_metadata.ifindex(0..4))
+        40..43: random(egress_metadata.bd(0..7), egress_metadata.ifindex(5..15)) ^ stripe(egress_metadata.bd(8..13), egress_metadata.ifindex(0..4))
+      hash group 2:
+        table: [2]
+    format: { action(0): 0..1, version(0): 112..115, match(0): [40..47, 101..103, 32..39 ], action(1): 2..3, version(1): 116..119, match(1): [56..63, 109..111, 48..55 ], action(2): 4..5, version(2): 120..123, match(2): [72..79, 13..15, 64..71 ], action(3): 6..7, version(3): 124..127, match(3): [88..95, 21..23, 80..87 ] }
+    match: [ egress_metadata.bd(0..7), egress_metadata.ifindex(5..15) ]
+    gateway:
+      input_xbar:
+        group 0: { 19: egress_metadata.port_type }
+      row: 0
+      bus: 0
+      match: { 3: egress_metadata.port_type }
+      0b***00: run_table
+      miss: _egress_system_acl_0
+    next: _egress_system_acl_0
+    action: _egress_vlan_xlate_0$action
+    default_action: NoAction
+  action _egress_vlan_xlate_0$action:
+    p4: { name: _egress_vlan_xlate_0$action }
+    row: [ 13, 12, 11 ]
+    column:
+    - [ 1, 2, 3, 4, 5 ]
+    - 5
+    - [ 0, 1 ]
+    home_row: 13
+    format set_egress_packet_vlan_tagged: { $adf_h1: 16..31 }
+    format set_egress_packet_vlan_double_tagged: { $adf_h0: 0..15, $adf_h1: 16..31 }
+    action_bus: { 36..37 : $adf_h0, 38..39 : $adf_h1 }
+    actions:
+      set_egress_packet_vlan_untagged:
+      - {  }
+      set_egress_packet_vlan_tagged:
+      - p4_param_order: {vlan_id: 12 }
+      - { vlan_id: $adf_h1 }
+      - set vlan_tag_$0.etherType, ethernet.etherType
+      - set vlan_tag_$0.vid, vlan_id
+      - set ethernet.etherType, 33024
+      set_egress_packet_vlan_double_tagged:
+      - p4_param_order: {s_tag: 12, c_tag: 12 }
+      - { c_tag: $adf_h0, s_tag: $adf_h1 }
+      - set vlan_tag_$1.etherType, ethernet.etherType
+      - set vlan_tag_$1.vid, c_tag
+      - set vlan_tag_$0.etherType, 33024
+      - set vlan_tag_$0.vid, s_tag
+      - set ethernet.etherType, 37120
+      NoAction:
+      - {  }
+  ternary_match _egress_system_acl_0 3:
+    p4: { name: egress_system_acl, size: 128 }
+    p4_param_order: 
+      fabric_metadata.reason_code: { type: ternary, size: 16}
+      standard_metadata.egress_port: { type: ternary, size: 9}
+      eg_intr_md.deflection_flag: { type: ternary, size: 1}
+      l3_metadata.l3_mtu_check: { type: ternary, size: 16}
+      acl_metadata.acl_deny: { type: ternary, size: 1}
+    row: [ 0, 1 ]
+    bus: [ 0, 0 ]
+    column:
+    - 0
+    - 0
+    input_xbar:
+      group 0: { 0: fabric_metadata.reason_code(0..7), 15: acl_metadata.acl_deny, 16: l3_metadata.l3_mtu_check(0..7), 24: fabric_metadata.reason_code(8..15), 32: standard_metadata.egress_port(0..7) }
+      group 1: { 1: eg_intr_md.deflection_flag, 8: l3_metadata.l3_mtu_check(8..15), 24: standard_metadata.egress_port(8) }
+    gateway:
+      input_xbar:
+        group 0: { 36: egress_metadata.bypass }
+      row: 1
+      bus: 1
+      match: { 4: egress_metadata.bypass }
+      0b***0: run_table
+      miss: END
+    next: END
+    action_bus: { }
+    indirect: _egress_system_acl_0$tind
+  ternary_indirect _egress_system_acl_0$tind:
+    row: 0
+    bus: 0
+    column: 2
+    format: { action: 16..18, immediate: 0..15}
+    actions:
+      nop:
+      - {  }
+      drop_packet:
+      - {  }
+      - invalidate standard_metadata.egress_port
+      egress_copy_to_cpu:
+      - {  }
+      - set $mirror_id, 250
+      - set $mirror, 1
+      egress_redirect_to_cpu:
+      - {  }
+      - set $mirror_id, 250
+      - set $mirror, 2
+      - invalidate standard_metadata.egress_port
+      egress_copy_to_cpu_with_reason:
+      - p4_param_order: {reason_code: 16 }
+      - { reason_code: immediate(0..15) }
+      - set fabric_metadata.reason_code, reason_code
+      - set $mirror_id, 250
+      - set $mirror, 3
+      egress_redirect_to_cpu_with_reason:
+      - p4_param_order: {reason_code: 16 }
+      - { reason_code: immediate(0..15) }
+      - set fabric_metadata.reason_code, reason_code
+      - set $mirror_id, 250
+      - set $mirror, 4
+      - invalidate standard_metadata.egress_port
+      egress_mirror_coal_hdr:
+      - p4_param_order: {session_id: 8, id: 8 }
+      - {  }
+      NoAction:
+      - {  }
+    default_action: NoAction

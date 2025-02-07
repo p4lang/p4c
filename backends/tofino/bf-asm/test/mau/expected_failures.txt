@@ -1,0 +1,111 @@
+test_config_96_hash_data.p4 bfas
+ - incorrect asm code for hash_action+counter
+test_config_101_switch_msdc.p4 compile
+ - compiler uses tcam byte swizzler to duplicate 8-bit phv, rather than just loading it directly
+test_config_120_tcam_range_4.p4 mismatch
+ - compiler uses tcam byte swizzler to duplicate 8-bit phv, rather than just loading it directly
+test_config_132_meter_pre_color_4.p4 bfas
+ - compiler uses tcam byte swizzler to duplicate 8-bit phv, rather than just loading it directly
+test_config_136_tcam_error_detection.p4 mismatch
+test_config_137_tcam_error_detection_2.p4 mismatch
+test_config_138_tcam_error_detection_3.p4 mismatch
+test_config_139_tcam_error_detection_4.p4 mismatch
+
+14-Counter.p4 bfas
+- invalid asm refers to stat_ptr but doesn't define it.
+
+test_config_91_gateway_with_split_table.p4 mismatch
+- action table split at 8 rows instead of 10?
+
+debug_issue_3_7_way_table.p4 mismatch
+dileep.p4 mismatch
+dileep2.p4 mismatch
+dileep4.p4 mismatch
+test_config_85_table_ordering.p4 mismatch
+test_config_97_unrelated_tables.p4 mismatch
+test_config_103_first_phase_0.p4 mismatch
+- data duplicated on ixbar; assembler always uses first copy in byteswizzle
+
+12-SmallToBigFieldWithMask8.p4 mismatch
+22-BigToSmallFieldWithMask8.p4 mismatch
+action_params.p4 mismatch
+test_config_114_simple_drop.p4 mismatch
+test_config_130_test_default_action.p4 mismatch
+test_config_140_table_counter.p4 mismatch
+test_config_182_warp_primitive.p4 mismatch
+test_config_208_table_no_key.p4 mismatch
+test_config_25_no_reads_for_table.p4 mismatch
+- missing default_action.allowed_to_be_default_action in context.json
+
+- uncharacterized failures (FIXME)
+01-FlexCounter.p4 compile
+02-FlexCounterActionProfile.p4 compile
+07-MacAddrCheck.p4 compile
+08-MacAddrCheck1.p4 compile
+12-Counters.p4 compile
+19-SimpleTrill.p4 compile
+22-SimpleTrillThreeStep.p4 compile
+
+dileep10.p4 mismatch
+dileep11.p4 mismatch
+dileep12.p4 mismatch
+dileep8.p4 mismatch
+test_config_10_new_crossbar_allocation.p4 compile
+test_config_13_first_selection.p4 compile
+test_config_78_tcam_with_220_bits_high_nibble_and_version.p4 mismatch
+test_config_93_push_and_pop.p4 compile
+test_config_100_hash_action.p4 bfas
+test_config_123_meter_2.p4 bfas
+test_config_124_meter_3.p4 bfas
+test_config_125_meter_pre_color.p4 bfas
+test_config_126_meter_pre_color_2.p4 bfas
+test_config_127_meter_pre_color_3.p4 bfas
+test_config_142_stateful_bfd.p4 compile
+test_config_148_action_profile.p4 mismatch
+test_config_152_stateful_simple_cntr.p4 mismatch
+test_config_153_stateful_simple_cntr_with_output.p4 mismatch
+test_config_154_stateful_sampling.p4 mismatch
+test_config_155_stateful_3_alus.p4 mismatch
+test_config_156_indirect_stateful_cntr.p4 mismatch
+test_config_157_random_number_generator.p4 bfas
+test_config_159_stateful_using_phv_field.p4 mismatch
+test_config_160_stateful_single_bit_mode.p4 mismatch
+test_config_161_new_primitives.p4 mismatch
+test_config_163_stateful_table_math_unit.p4 mismatch
+test_config_164_stateful_deterministic_sampling.p4 mismatch
+test_config_165_stateful_bfd_failure_detection.p4 mismatch
+test_config_166_stateful_generic_counter.p4 mismatch
+test_config_167_stateful_flowlet_switching.p4 compile
+test_config_168_meter_bug.p4 mismatch
+test_config_169_stateful_sflow_sequence.p4 bfas
+test_config_170_stateful_selection_table_update.p4 mismatch
+test_config_171_stateful_conga.p4 compile
+test_config_172_stateful_heavy_hitter.p4 bfas
+test_config_173_stateful_bloom_filter.p4 compile
+test_config_175_match_table_with_no_key.p4 mismatch
+test_config_177_meter_test.p4 bfas
+test_config_180_first_proxy_hash.p4 mismatch
+test_config_181_first_alg_tcam.p4 bfas
+test_config_183_sample_e2e.p4 compile
+test_config_184_stateful_bug1.p4 bfas
+test_config_185_first_lpf.p4 mismatch
+test_config_187_proxy_hash_2.p4 mismatch
+test_config_189_stat_with_lrt.p4 mismatch
+test_config_190_modify_with_expr.p4 compile
+test_config_191_invalidate.p4 mismatch
+test_config_192_stateful_driven_by_hash.p4 bfas
+test_config_193_indirect_stats_no_reads.p4 bfas
+test_config_195_stateful_predicate_output.p4 mismatch
+test_config_196_hit_miss.p4 mismatch
+test_config_197_default_next_table.p4 mismatch
+test_config_198_shared_action_profile.p4 mismatch
+test_config_199_stateful_constant_index.p4 bfas
+test_config_200_counter_constant_index.p4 mismatch
+test_config_201_meter_constant_index.p4 bfas
+test_config_203_first_reduction_or.p4 mismatch
+test_config_204_no_tables_in_stage0.p4 mismatch
+test_config_205_modify_field_from_hash.p4 compile
+test_config_206_stateful_logging.p4 bfas
+test_config_209_pack_hash_dist.p4 mismatch
+vk_basic_ipv4_20150706.p4 mismatch
+vk_basic_ipv4_subset.p4 mismatch

@@ -1,0 +1,348 @@
+version: 1.0.0
+phv ingress:
+  ipv4.version: R288(4..7)
+  ipv4.ihl: R288(0..3)
+  ipv4.diffserv: R289
+  ipv4.totalLen: R320
+  ipv4.identification: R321
+  ipv4.flags: R322(13..15)
+  ipv4.fragOffset: R322(0..12)
+  ipv4.ttl: R256(24..31)
+  ipv4.protocol: R256(16..23)
+  ipv4.hdrChecksum: R256(0..15)
+  ipv4.srcAddr: R257
+  ipv4.dstAddr: R258
+  ethernet.dstAddr.40-47: R290
+  ethernet.dstAddr.8-39: R259
+  ethernet.dstAddr.0-7: R323(8..15)
+  ethernet.srcAddr.40-47: R323(0..7)
+  ethernet.srcAddr.32-39: R291
+  ethernet.srcAddr.0-31: R264
+  ethernet.etherType: R324
+  ig_intr_md.resubmit_flag: R128(15)
+  ig_intr_md._pad1: R128(14)
+  ig_intr_md._pad2: R128(12..13)
+  ig_intr_md._pad3: R128(9..11)
+  ig_intr_md.ingress_port: R128(0..8)
+  meta.bfd_discriminator: R129
+  meta.bfd_timeout_detected: R128(8..15)
+  meta.bfd_tx_or_rx: R65
+  ig_intr_md_for_tm.drop_ctl: R66(5..7)
+  __md_ingress.__init_0: R128(8..15)
+  POV-ethernet: R64(0)
+  POV-ipv4: R64(1)
+  POV-metadata_bridge: R64(2)
+phv egress:
+  ipv4.version: R292(4..7)
+  ipv4.ihl: R292(0..3)
+  ipv4.diffserv: R293
+  ipv4.totalLen: R326
+  ipv4.identification: R327
+  ipv4.flags: R328(13..15)
+  ipv4.fragOffset: R328(0..12)
+  ipv4.ttl: R260(24..31)
+  ipv4.protocol: R260(16..23)
+  ipv4.hdrChecksum: R260(0..15)
+  ipv4.srcAddr: R261
+  ipv4.dstAddr: R262
+  ethernet.dstAddr.40-47: R294
+  ethernet.dstAddr.8-39: R263
+  ethernet.dstAddr.0-7: R329(8..15)
+  ethernet.srcAddr.40-47: R329(0..7)
+  ethernet.srcAddr.32-39: R295
+  ethernet.srcAddr.0-31: R268
+  ethernet.etherType: R330
+  eg_intr_md._pad0: R144(9..15)
+  eg_intr_md.egress_port: R144(0..8)
+  eg_intr_md._pad7: R80(3..7)
+  eg_intr_md.egress_cos: R80(0..2)
+  POV-ethernet: R81(0)
+  POV-ipv4: R81(1)
+parser ingress:
+  start: [Shim_start_state, Shim_start_state, Shim_start_state, Shim_start_state]
+  Shim_start_state 0:
+    0x0:
+      next: POV_initialization
+      offset: 0
+      buf_req: 0
+  parse_ethernet 1:
+    match: half
+    0x800:
+      next: END
+      shift: 20
+      offset: 0
+      buf_req: 20
+      R64: 2
+      8..11: R256
+      12..15: ipv4.srcAddr
+      16..19: ipv4.dstAddr
+      0: R288
+      1: ipv4.diffserv
+      2..3: ipv4.totalLen
+      4..5: ipv4.identification
+      6..7: R322
+    0x****:
+      next: END
+      offset: 0
+      buf_req: 0
+  Ingress_intrinsic_metadata 3:
+    match: byte0
+    0b0*******:
+      next: Phase_0
+      save: {byte0: 0}
+      shift: 8
+      offset: 0
+      buf_req: 8
+  Phase_0 4:
+    match: byte0
+    0x**:
+      next: start$
+      offset: 0
+      buf_req: 0
+      R64: 4
+  POV_initialization 5:
+    0x0:
+      next: Ingress_intrinsic_metadata
+      save: {byte0: 0}
+      shift: 8
+      offset: 0
+      buf_req: 8
+      0..1: R128
+  start$ 6:
+    0x0:
+      next: parse_ethernet
+      save: {half: 12..13}
+      shift: 14
+      offset: 0
+      buf_req: 14
+      R64: 1
+      1..4: ethernet.dstAddr.8-39
+      8..11: ethernet.srcAddr.0-31
+      0: ethernet.dstAddr.40-47
+      7: ethernet.srcAddr.32-39
+      5..6: R323
+      12..13: ethernet.etherType
+  multi_write: [R64, meta.bfd_tx_or_rx, R128, meta.bfd_discriminator]
+  init_zero: [R64, meta.bfd_tx_or_rx, R128, meta.bfd_discriminator]
+  hdr_len_adj: 16
+deparser ingress:
+  pov: [R64]
+  dictionary:
+  - R64: POV-metadata_bridge
+  - ethernet.dstAddr.40-47: POV-ethernet
+  - ethernet.dstAddr.8-39: POV-ethernet
+  - R323: POV-ethernet
+  - ethernet.srcAddr.32-39: POV-ethernet
+  - ethernet.srcAddr.0-31: POV-ethernet
+  - ethernet.etherType: POV-ethernet
+  - R288: POV-ipv4
+  - ipv4.diffserv: POV-ipv4
+  - ipv4.totalLen: POV-ipv4
+  - ipv4.identification: POV-ipv4
+  - R322: POV-ipv4
+  - R256: POV-ipv4
+  - ipv4.srcAddr: POV-ipv4
+  - ipv4.dstAddr: POV-ipv4
+  drop_ctl: ig_intr_md_for_tm.drop_ctl
+parser egress:
+  start: [Shim_start_state, Shim_start_state, Shim_start_state, Shim_start_state]
+  Shim_start_state 0:
+    0x0:
+      next: POV_initialization
+      offset: 0
+      buf_req: 0
+  parse_ethernet 1:
+    match: half
+    0x800:
+      next: END
+      shift: 20
+      offset: 0
+      buf_req: 20
+      R81: 2
+      8..11: R260
+      12..15: ipv4.srcAddr
+      16..19: ipv4.dstAddr
+      0: R292
+      1: ipv4.diffserv
+      2..3: ipv4.totalLen
+      4..5: ipv4.identification
+      6..7: R328
+    0x****:
+      next: END
+      offset: 0
+      buf_req: 0
+  POV_skip 3:
+    0x0:
+      next: start$
+      offset: 0
+      buf_req: 0
+  Egress_intrinsic_metadata 4:
+    match: byte0
+    0x**:
+      next: POV_skip
+      shift: 1
+      offset: 0
+      buf_req: 1
+  POV_initialization 5:
+    0x0:
+      next: Egress_intrinsic_metadata
+      save: {byte0: 3}
+      shift: 3
+      offset: 0
+      buf_req: 4
+      2: R80
+      0..1: R144
+  start$ 6:
+    0x0:
+      next: parse_ethernet
+      save: {half: 12..13}
+      shift: 14
+      offset: 0
+      buf_req: 14
+      R81: 1
+      1..4: ethernet.dstAddr.8-39
+      8..11: ethernet.srcAddr.0-31
+      0: ethernet.dstAddr.40-47
+      7: ethernet.srcAddr.32-39
+      5..6: R329
+      12..13: ethernet.etherType
+  multi_write: [R81]
+  init_zero: [R81]
+  hdr_len_adj: 3
+  meta_opt: 1024
+deparser egress:
+  pov: [R81]
+  dictionary:
+  - ethernet.dstAddr.40-47: POV-ethernet
+  - ethernet.dstAddr.8-39: POV-ethernet
+  - R329: POV-ethernet
+  - ethernet.srcAddr.32-39: POV-ethernet
+  - ethernet.srcAddr.0-31: POV-ethernet
+  - ethernet.etherType: POV-ethernet
+  - R292: POV-ipv4
+  - ipv4.diffserv: POV-ipv4
+  - ipv4.totalLen: POV-ipv4
+  - ipv4.identification: POV-ipv4
+  - R328: POV-ipv4
+  - R260: POV-ipv4
+  - ipv4.srcAddr: POV-ipv4
+  - ipv4.dstAddr: POV-ipv4
+  egress_unicast_port: eg_intr_md.egress_port
+  ecos: eg_intr_md.egress_cos
+stage 0 ingress:
+  exact_match bfd 0:
+    p4:
+      name: bfd
+      handle: 16777217
+      size: 1024
+      match_type: exact
+    row: 7
+    bus: 0
+    column: [2, 3, 4]
+    ways:
+    - [0, 0, 0, [7, 2]]
+    - [0, 1, 0, [7, 3]]
+    - [0, 2, 0, [7, 4]]
+    input_xbar:
+      group 0: {0: meta.bfd_discriminator, 16: meta.bfd_tx_or_rx}
+      hash 0:
+        0: 0xa98401
+        1: 0xd3a002
+        2: 0xdcd404
+        3: 0xd03808
+        4: 0xdc0810
+        5: 0xe2420
+        6: 0x3ef440
+        7: 0x7d8c80
+        8: 0x127900
+        9: 0x30ee00
+        10: 0xf07a00
+        11: 0x545c01
+        12: 0x629402
+        13: 0x47b404
+        14: 0xa5fc08
+        15: 0xee4810
+        16: 0xf1b420
+        17: 0xd7b440
+        18: 0x62ec80
+        19: 0x122900
+        20: 0xe04500
+        21: 0xd10600
+        22: 0x338401
+        23: 0x7c0c02
+        24: 0x8d4c04
+        25: 0xc22c08
+        26: 0x17d010
+        27: 0x6c0820
+        28: 0xdc7440
+        29: 0x5cf880
+      hash group 0:
+        table: 0
+        seed: 0x17b88dac
+    table_counter: table_hit
+    stateful: bfd_cnt(state_ptr)
+    format: {action(0): 1, state_ptr(0): 23, match(0): [24..31, 34..39], version(0): 120..123}
+    match: [meta.bfd_tx_or_rx, meta.bfd_discriminator(10..15)]
+    next: check_needs
+    actions:
+      bfd_tx 0:
+      - 1
+      - deposit-field meta.bfd_timeout_detected, A0(0..7), R128
+      bfd_rx 1:
+      - 2
+      - deposit-field meta.bfd_timeout_detected, 0, R128
+  stateful bfd_cnt:
+    p4:
+      name: bfd_cnt
+      handle: 100663297
+      size: 1024
+    row: 15
+    bus: 0
+    column: [0, 1]
+    maprams: [0, 1]
+    global_binding: true
+    format: {lo: 8}
+    actions:
+      0:
+      - grt.u   lo, lo, -3
+      - equ     hi, 1
+      - add     lo, lo, 1
+      - a       hi, 1
+      - output  cmplo, alu_hi
+      - output  !cmplo, alu_lo
+      1:
+      - equ     lo, 1
+      - equ     hi, 1
+      - a       lo, 0
+stage 1 ingress:
+  dependency: match
+  exact_match check_needs 0:
+    p4:
+      name: check_needs
+      handle: 16777218
+      size: 256
+      match_type: exact
+    row: 7
+    bus: 0
+    column: 2
+    ways:
+    - [0, 0, 0, [7, 2]]
+    input_xbar:
+      group 0: {8: meta.bfd_timeout_detected}
+      hash 0:
+        0..7: meta.bfd_timeout_detected
+      hash group 0: 0
+    table_counter: table_hit
+    format: {action(0): 1, match(0): 8..15, version(0): 120..123}
+    match: [meta.bfd_timeout_detected]
+    next: END
+    actions:
+      drop_me 0:
+      - 1
+      - deposit-field ig_intr_md_for_tm.drop_ctl, 1, R66
+      on_miss 1:
+      - 0
+stage 6 ingress:
+  dependency: match
+stage 6 egress:
+  dependency: match

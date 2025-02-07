@@ -1,0 +1,66 @@
+version: 1.0.0
+phv ingress:
+  standard_metadata.egress_spec: H0(0..8)
+  data.f1: W0
+  data.n1: B0(4..7)
+  data.n2: B0(0..3)
+  data.$valid: B47(7)
+phv egress:
+  standard_metadata.egress_port: H16(0..8)
+parser ingress:
+  start: $ingress_metadata_shim
+  $ingress_metadata_shim:
+    0x*:
+      shift: 16
+      next: start$
+  start$:
+    0x*:
+      0..3: data.f1
+      4: B0
+      data.$valid: 1
+      shift: 5
+      next: end
+deparser ingress:
+  dictionary:
+    data.f1: data.$valid
+    B0: data.$valid
+  egress_unicast_port: standard_metadata.egress_spec
+parser egress:
+  start: $egress_metadata_shim
+  $egress_metadata_shim:
+    0x*:
+      0..1: H16
+      shift: 2
+      next: end
+deparser egress:
+  dictionary: {}
+  egress_unicast_port: standard_metadata.egress_port
+stage 0 ingress:
+  exact_match test1 0:
+    p4: { name: test1 }
+    row: 7
+    bus: 0
+    column: [ 2, 3, 4 ]
+    ways:
+    - [0, 0, 0x0, [7, 2]]
+    - [0, 1, 0x0, [7, 3]]
+    - [0, 2, 0x0, [7, 4]]
+    input_xbar:
+      group 0: { 0: data.f1 }
+      hash 0:
+        0..9: random(data.f1(0..15), data.f1(18..23)) ^ stripe(data.f1(16..17), data.f1(24..31))
+        10..19: random(data.f1(0..15), data.f1(18..23)) ^ stripe(data.f1(16..17), data.f1(24..31))
+        20..29: random(data.f1(0..15), data.f1(18..23)) ^ stripe(data.f1(16..17), data.f1(24..31))
+      hash group 0:
+        table: [0]
+    format: { action(0): 8..8, immediate(0): 0..7, version(0): 112..115, match(0): [32..47, 50..55 ] }
+    match: [ data.f1(0..15), data.f1(18..23) ]
+    next: END
+    actions:
+      set_nibbles:
+      - { $data0: immediate(0..7)  }
+      - set B0, $data0
+      - { param1.0-3: $data0(4..7), param2.0-3: $data0(0..3) }
+      NoAction:
+      - {  }
+    default_action: NoAction

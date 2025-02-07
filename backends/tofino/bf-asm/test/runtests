@@ -1,0 +1,703 @@
+#!/bin/bash
+
+fast=false
+brig=false
+glass=false
+outdir=false
+verbose=false
+diff=false
+link=false
+clean=false
+skip_ctxtjson=false
+TIME=false
+# parallel make arguments
+PARALLEL=1
+TOKEN_READ=0
+TOKEN_WRITE=0
+
+shopt -s nullglob
+set -o pipefail
+
+TESTDIR=$(cd $(dirname $0); pwd -P)
+
+prev_mflag=""
+for mflag in $MAKEFLAGS; do
+    case $mflag in
+    n)  exit 0
+        ;;
+    -j[1-9]|-j[1-9][0-9])
+        PARALLEL=${mflag#-j}
+        ;;
+    [1-9]|[1-9][0-9])
+        if [ "$prev_mflag" = "-j" ]; then
+            PARALLEL=${mflag}
+        fi
+        ;;
+    --jobserver-*=*)
+        fds=${mflag/*=/}
+        vec=(${fds/,/ })
+        if eval "command >&${vec[1]}" 2>/dev/null; then
+            TOKEN_READ=${vec[0]}
+            TOKEN_WRITE=${vec[1]}
+        else
+            echo >&2 "invalid --jobserver, assuming -j1 -- must use '+' in Makefile rule"
+        fi
+        ;;
+    esac
+    prev_mflag=$mflag
+done
+
+while expr "$1" : - >/dev/null; do
+    case $1 in
+    -f) fast=true
+        ;;
+    -c) clean=true
+        ;;
+    -b) brig=true
+        ;;
+    -g) glass=true
+        ;;
+    -l) link=true
+        ;;
+    -t)
+        TIME=true
+        ;;
+    -d)
+        diff=true
+        ;;
+    -j)
+        shift
+        if [[ $1 =~ ^[0-9]+$ ]]; then
+            PARALLEL=$1
+        else
+            echo >&2 "invalid number -j $1"
+        fi
+        ;;
+    -j[1-9]|-j[1-9][0-9])
+        PARALLEL=${1#-j}
+        ;;
+    -o)
+        shift
+        outdir=true
+        odir=$1
+        ;;
+    -v)
+        verbose=true
+        ;;
+    --skip_ctxtjson)
+        skip_ctxtjson=true
+        ;;
+    -*)
+        echo >&2 "unknown argument $1"
+        ;;
+    esac
+    shift
+done
+
+# If neither '-b' or '-g' specified run for both brig and glass as default case
+# unless just -d specified -- then just run glass to do json_diff comparisons
+if ! $brig && ! $glass; then
+    glass=true;
+    if ! $diff; then
+        brig=true;
+    fi
+fi
+
+#glsc_args="--placement-order ingress_before_egress --libpd --placement secret"
+#glsc_args="--verbose 2 -vl 2 -S -G --placement-order ingress_before_egress --no-bin --new_ctx_json"
+glsc_args="--verbose 2 -vl 2 --gen_asm --gen_json --placement-order ingress_before_egress"
+
+trap 'release_all_tokens; exit' 2
+
+if [ $# -eq 0 ]; then
+    set *.p4
+fi
+
+count=$#
+
+rm -rf faillog.txt
+FAILLOG=$(pwd -P)/faillog.txt
+
+echo -n "Test run started at " >$FAILLOG
+date >> $FAILLOG
+
+TRY_BINDIRS="
+"
+
+function searchdir () {
+    found=""
+    if [ -x "$BUILDDIR/$1" ]; then
+        echo $BUILDDIR/$1
+        return
+    fi
+    for d in $TRY_BINDIRS; do
+        if [[ $2 ]]; then
+            if [ -d "$d/$2" ]; then
+                for f in $(find -L $d/$2 -executable -type f -name $1); do
+                    if [ "$f" -nt "$found" ]; then
+                        found="$f"
+                    fi
+                done
+                if [ -n "$found" ]; then
+                    break;
+                fi
+            fi
+        else
+            for f in $(find -L $d -executable -type f -name $1); do
+                if [ "$f" -nt "$found" ]; then
+                    found="$f"
+                fi
+            done
+            if [ -n "$found" ]; then
+                break;
+            fi
+        fi
+    done
+    if [ -z "$found" ]; then
+        found=$(which $1)
+    fi
+    if [ -z "$found" ]; then
+        echo >&2 "Can't find $1 executable"
+        echo false
+    else
+        echo $found
+    fi
+}
+
+function findexec () {
+    evarref=\$"$1"
+    evalue=`eval "expr \"$evarref\" "`
+    if [ ! -x "$evalue" ]; then
+        e=$(searchdir $2 $4)
+        eval "${1}=${e}"
+        evalue=`eval "expr \"$evarref\" "`
+        if [ -x "$evalue" ]; then
+            echo "Using $evalue"
+        else
+            #echo >&2 "Can't find $3 executable"
+            eval "${1}=false"
+        fi
+    fi
+}
+
+#FINDFUNC  PARAM        EXECUTABLE              NAME                    OPTIONAL SEARCH DIR PREFIX
+findexec GLSC           "shell.py"              "glass"                 ""
+findexec BRIG           "p4c-barefoot"          "brig"                  ""
+findexec STF1           "tofino_test_harness"   "tofino_test_harness"   "model"
+findexec STF2           "jbay_test_harness"     "jbay_test_harness"   "model"
+findexec BFAS           "bfas"                  "bfas"                  ""
+findexec BFLINK         "bflink"                "bflink"                ""
+findexec REFLOW         "reflow"                "reflow"                ""
+findexec JSON_DIFF      "json_diff"             "json_diff"             ""
+findexec SCHEMA         "gen_schema.py"         "gen_schema.py"         "ctx_json"
+findexec SCHEMA_VAL     "validate.py"           "validate.py"           ""
+findexec WALLE          "walle"                 "walle"                 ""
+
+function not() { if "$@"; then return 1; else return 0; fi }
+
+ctxt_json_ignore=$TESTDIR/ctxt_json_ignore_new
+echo "Using context json ignore file - $ctxt_json_ignore"
+
+# -l specifies the key 'field' the vector will be sorted before comparison
+if [ -r $ctxt_json_ignore ]; then
+    CTXT_DIFFARGS="-l start_offset -l entry_number -l name -l field_name -i @$ctxt_json_ignore"
+else
+    CTXT_DIFFARGS="-al handle -i table_type"
+fi
+
+TIMEOUT_COMMAND=$(which gtimeout || which timeout)
+run() {
+    if $verbose; then
+        echo "$@" >/dev/tty
+    fi
+    if [ -z "$TIMEOUT" ]; then
+        $TIME_COMMAND "$@"
+    else
+        $TIME_COMMAND $TIMEOUT_COMMAND --foreground $TIMEOUT "$@"
+    fi
+    status=$?
+    if [ $status -eq 124 ]; then
+        echo >&2 $1 TIMEOUT
+    elif [ $status -gt 128 ]; then
+        echo >&2 $1 CRASH with signal $(expr $status - 128)
+    elif [ $status -gt 0 ]; then
+        echo >&2 $1 FAILED
+    fi
+    return $status
+}
+
+function link_json() {
+    p4file=$1
+    pushd $(dirname $p4file) >/dev/null
+    name=$(basename $p4file .p4)
+    ok=true
+    if [ -d $name.out ];then
+        cd $name.out
+        bindir=$PWD/glass
+        jsondir=$PWD/glass/cfg
+        if $brig;then
+            if [ -d brig ];then
+                bindir=$PWD/brig
+                jsondir=$PWD/brig
+            else
+                msg="$msg no $jsondir/brig found"
+                ok=false
+                rv=1
+            fi
+        fi
+        if $ok && run $BFLINK --walle $WALLE --target tofino -o $bindir/tofino.bin $jsondir/*.cfg.json* >/dev/null 2>&1; then
+            msg="$msg link pass"
+        else
+            msg="$msg link failed"
+            flock $FAILLOG -c "echo '$1:' >>$FAILLOG; sed -e 's/^/  /'$name.out/link.txt >>$FAILLOG"
+            rv=1
+        fi
+    fi
+    return $rv
+}
+
+function test_p4() {
+    p4file="$1"
+    pushd $(dirname $p4file) >/dev/null
+    name=$(basename $p4file .p4)
+    if $clean; then
+        if [ -d $name.out ]; then
+            rm -rf $name.out
+        fi
+    fi
+    mkdir -p $name.out
+    expect_fail=$(sed -n "/^$name.p4/s/[^ ]* *//p" expected_failures.txt 2>/dev/null | head -1)
+    cd $name.out
+    ok=true
+    rv=0
+    fail_type=""
+    #echo "about to run $name.p4, expecting ${expect_fail:-no} failure"
+    msg="$p4file"
+    start=`date +%s`
+    tfafile=brig/$name.tfa
+    if $diff; then
+        tfafile=glass/$name.tfa
+    fi
+    if $fast && [ -r $tfafile ]; then
+        true
+    else
+        mkdir -p brig
+        mkdir -p glass
+        # Remove old assembly files
+        if [ -d glass ]; then
+            rm -f glass/$name.tfa
+            rm -f glass/out.tfa
+        fi
+        if [ -d brig ]; then
+            rm -f brig/$name.tfa
+            rm -f brig/out.tfa
+        fi
+        # Run both glass and brig if '-b' and '-g' not specified
+        if $brig; then
+            clog='brig.log'
+            if $ok && not run $BRIG -D__TARGET_TOFINO__ ../$name.p4 -o brig/out.tfa </dev/null >brig.log 2>&1; then
+                ok=false
+            fi
+            if not $ok; then
+                msg="$msg p4 brig compile failed"
+            fi
+        fi
+        if $glass; then
+            clog='glsc.log'
+            if not run $GLSC -o glass $glsc_args ../$name.p4 </dev/null >glsc.log 2>&1; then
+                ok=false
+            fi
+            if not $ok; then
+                msg="$msg p4 glass compile failed"
+            fi
+        fi
+        if not $ok; then
+            fail_type="compile"
+            rv=1
+        fi
+        if [ -d glass ]; then
+            cd glass
+            if [ out.tfa -nt $name.tfa ]; then
+                rm -f $name.tfa
+                ln -s out.tfa $name.tfa
+            fi
+            cd ..
+        fi
+        if [ -d brig ]; then
+            cd brig
+            if [ out.tfa -nt $name.tfa ]; then
+                rm -f $name.tfa
+                ln -s out.tfa $name.tfa
+            fi
+            cd ..
+        fi
+        if $glass && [ ! -r glass/$name.tfa ] && $ok; then
+            msg="$msg p4 glass compile failed to produce asm"
+            fail_type="compile"
+            rv=1
+            ok=false
+        fi
+        if $brig && [ ! -r brig/$name.tfa ] && $ok; then
+            msg="$msg p4 brig compile failed to produce asm"
+            fail_type="compile"
+            rv=1
+            ok=false
+        fi
+        if not $ok && ( [ $count -eq 1 ] || [ "$expect_fail" != "compile" ] ); then
+            flock $FAILLOG -c "echo '$p4file:' >>$FAILLOG; sed 's/^/ /' $clog >>$FAILLOG"
+        fi
+    fi
+    glsc_cfg=.
+    if $ok; then
+        rm -f $brig/*.json
+        if [ -d glass/cfg ]; then
+            glsc_cfg=glass/cfg
+        fi
+    fi
+    for f in $glsc_cfg/*.json; do
+        if $REFLOW $f | gzip -9 > $f.gz; then
+            rm $f
+        fi
+    done
+    if $diff; then
+        BFAS_OPTS="--gen_json -M"
+    else
+        BFAS_OPTS=""
+    fi
+    if $ok && run $BFAS -g -o brig $BFAS_OPTS -vvvvl brig/bfas.config.log $tfafile >brig/bfas.log 2>&1; then
+        # Validate context json output from assembler
+        $SCHEMA > schema.json
+        python $SCHEMA_VAL brig/context.json schema.json > context_json_schema_validate.log
+        for f in brig/*.cfg.json; do
+            if $REFLOW $f | gzip -9 > $f.gz; then
+                rm $f
+            fi
+        done
+        if $diff; then
+            for f in brig/*.cfg.json.gz; do
+                if zcmp -s $f $glsc_cfg/$(basename $f); then
+                    continue
+                elif [ "$f" = "$name.out/regs.pipe.cfg.json.gz" ]; then
+                    $JSON_DIFF -i mau $f $glsc_cfg/$(basename $f)
+                    if [ $? -gt 128 ]; then
+                        echo "***json_diff crashed"
+                    fi
+                    continue
+                fi
+                $JSON_DIFF $f $glsc_cfg/$(basename $f)
+            done > json_diff.txt
+            glsc_ctxt=glass/${name}_context_llir.json
+            if [ -d glass/context ]; then
+                glsc_ctxt=glass/context/context.json
+            fi
+            brig_ctxt=brig/context.json
+            if ! $skip_ctxtjson && [ -r $brig_ctxt ]; then
+                { $JSON_DIFF $CTXT_DIFFARGS $brig_ctxt $glsc_ctxt;
+                  if [ $? -gt 128 ]; then echo "***json_diff crashed"; fi; } >> json_diff.txt
+                #echo $JSON_DIFF $CTXT_DIFFARGS $brig_ctxt $glsc_ctxt;
+            fi
+            cnt=$(grep -Ev '^\+\+\+|^---|"int_inj"' json_diff.txt | grep -Ec '^\+|^-')
+            if [ $cnt -gt 0 ]; then
+                msg="$msg mismatch"
+                fail_type="mismatch"
+                rv=1
+                if [ $count -eq 1 ] || [ "$expect_fail" != "mismatch" ]; then
+                    flock $FAILLOG -c "echo '$p4file:' >>$FAILLOG; cat json_diff.txt >>$FAILLOG"
+                fi
+                ok=false
+            else
+                msg="$msg pass"
+                let pass++
+            fi
+        fi
+    elif $ok; then
+        msg="$msg bfas failed"
+        fail_type="bfas"
+        rv=1
+        if [ $count -eq 1 ] || [ "$expect_fail" != "bfas" ]; then
+            flock $FAILLOG -c "echo '$p4file:' >>$FAILLOG; sed -e 's/^/ /' -e'/\n/!a\' brig/bfas.log >>$FAILLOG"
+        fi
+        ok=false
+    fi
+    if [ "$expect_fail" != "" ] && $diff; then
+        if $ok; then
+            msg="$msg (UNEXPECTED PASS -- expected $expect_fail failure)"
+            rv=3
+        elif [ "$expect_fail" != "$fail_type" ]; then
+            msg="$msg (expected $expect_fail failure)"
+            if [ "$fail_type" = "mismatch" -o "$expect_fail" = "compile" ]; then
+                rv=2
+            fi
+        else
+            msg="$msg (expected)"
+            rv=2
+        fi
+    fi
+    if $TIME; then
+        let elapsed=`date +%s`-start
+        let min=elapsed/60
+        let sec=elapsed%60
+        if [ $sec -lt 10 ]; then
+            sec=0$sec
+        fi
+        msg="$msg ($min:$sec)"
+    fi
+    echo "$msg"
+    popd >/dev/null
+    return $rv
+}
+
+function test_bfa() {
+    if [ -z "$2" ]; then
+        target=""
+    else
+        target="-t $2"
+    fi
+    msg="$1"
+    pushd $(dirname $1) >/dev/null
+    srcfile=$(basename $1)
+    name=${srcfile%.*}
+    mkdir -p $name.out
+    rm -f $name.out/*.json $name.out/*.json.gz $name.out/*.bin
+    expect_fail=$(sed -n "/^$srcfile/s/[^ ]* *//p" expected_failures.txt 2>/dev/null | head -1)
+    ok=true
+    rv=0
+    start=`date +%s`
+    # added -Tcrash:0 to disable stack trace on crash as it seems unreasonably slow
+    if not run $BFAS --partial -g $target -Tcrash:0 -Mvvvvl $name.out/bfas.config.log $srcfile -o $name.out >$name.out/bfas.log 2>&1; then
+        msg="$msg bfas failed"
+        fail_type="bfas"
+        if [ $count -eq 1 ] || [ "$expect_fail" != "bfas" ]; then
+            flock $FAILLOG -c "echo '$1:' >>$FAILLOG; sed -e 's/^/ /' -e '/\n/!a\' $name.out/bfas.log >>$FAILLOG"
+        fi
+        rv=1
+        ok=false
+    else
+        msg="$msg pass"
+        for f in $name.out/*.cfg.json; do
+            if $REFLOW $f | gzip -9 > $f.gz; then
+                rm $f
+            fi
+        done
+        for f in $name.out/*.bin; do
+            rm -f $f.gz
+            gzip -9 $f
+        done
+    fi
+    if [ "$expect_fail" != "" ]; then
+        if $ok; then
+            msg="$msg (UNEXPECTED PASS -- expected $expect_fail failure)"
+            rv=3
+        elif [ "$expect_fail" != "$fail_type" ]; then
+            msg="$msg (expected $expect_fail failure)"
+            if [ "$fail_type" = "mismatch" -o "$expect_fail" = "compile" ]; then
+                rv=2
+            fi
+        else
+            msg="$msg (expected)"
+            rv=2
+        fi
+    fi
+    if $TIME; then
+        let elapsed=`date +%s`-start
+        let min=elapsed/60
+        let sec=elapsed%60
+        if [ $sec -lt 10 ]; then
+            sec=0$sec
+        fi
+        msg="$msg ($min:$sec)"
+    fi
+    echo "$msg"
+    popd >/dev/null
+    return $rv
+}
+
+function test_stf() {
+    msg="$1"
+    pushd $(dirname $1) >/dev/null
+    name=$(basename $1 .stf)
+    rv=0
+    if [[ $rv == 0 && -d $name.out ]]; then
+        bindir=$name.out
+        rm -f $name.out/stf.txt
+        if [ -d "$bindir/$name.out" ]; then
+            bindir="$bindir/$name.out"
+        fi
+        if [ -d $outdir ]; then
+            bindir=$outdir
+        fi
+        if [ -r $bindir/tofino.bin -o -r $bindir/tofino.bin.gz ]; then
+            STF=$STF1
+        elif [ -r $bindir/tofino2.bin -o -r $bindir/tofino2.bin.gz ]; then
+            STF=$STF2
+        else
+            STF=
+            echo "$msg not built"
+            popd >/dev/null
+            return 4
+        fi
+        if [ ! -x $STF ]; then
+            echo "$msg simple_test_framework not available"
+            popd >/dev/null
+            return 4
+        fi
+        start=`date +%s`
+        if run "$STF" -l $bindir $name.stf >$name.out/stf.txt 2>&1; then
+            msg="$msg pass"
+        else
+            msg="$msg fail"
+            rv=1
+            flock $FAILLOG -c "echo '$1:' >>$FAILLOG; sed -e 's/^/  /' $name.out/stf.txt >>$FAILLOG"
+        fi
+        if $TIME; then
+            let elapsed=`date +%s`-start
+            let min=elapsed/60
+            let sec=elapsed%60
+            if [ $sec -lt 10 ]; then
+                sec=0$sec
+            fi
+            msg="$msg ($min:$sec)"
+        fi
+        echo "$msg"
+    else
+        echo "$msg not built"
+        rv=4
+    fi
+    popd >/dev/null
+    return $rv
+}
+
+pass=0
+fail=0
+skip=0
+expected_fail=0
+unexpected_pass=0
+running=0
+tokens=0
+token_request=0
+
+function get_token() {
+    eval "dd bs=1 count=1 of=/dev/null <&$TOKEN_READ" 2>/dev/null
+    exit 99
+}
+
+function release_one_token() {
+    eval "dd if=/dev/zero bs=1 count=1 >&$TOKEN_WRITE" 2>/dev/null
+    let tokens--
+    let token_request--
+}
+
+function release_all_tokens() {
+    if (( token_request > 0 )); then
+        eval "dd if=/dev/zero bs=1 count=$token_request >&$TOKEN_WRITE" 2>/dev/null
+        token_request=0
+    fi
+}
+
+function wait_1() {
+    if [[ ${BASH_VERSINFO[0]} -lt 4 ]]; then
+        wait %1
+        rv=$?
+    else
+        wait -n
+        rv=$?
+    fi
+    case $rv in
+    0)  let pass++
+        ;;
+    1)  let fail++
+        ;;
+    2)  let fail++
+        let expected_fail++
+        ;;
+    3)  let pass++
+        let unexpected_pass++
+        ;;
+    4)  let skip++
+        ;;
+    99) let tokens++
+        return
+        ;;
+    esac
+    let running--
+}
+
+if $verbose; then echo "running $PARALLEL threads"; fi
+
+for file in "$@"; do
+    if (( running >= PARALLEL + tokens )); then
+        if (( TOKEN_READ && tokens == token_request )); then
+            let token_request++
+            get_token &
+        fi
+        wait_1
+    fi
+    if $outdir; then
+        if [ "${file##*.}" == "stf" ]; then
+            let running++
+            test_stf $file &
+        else
+            echo "-o option can only be passed for stf file"
+            echo "Input file : $file"
+            exit 1
+        fi
+    elif [ "${file##*.}" == "p4" ]; then
+        let running++
+        test_p4 $file &
+    elif [ "${file##*.}" == "bfa" ]; then
+        let running++
+        test_bfa $file &
+    elif [ "${file##*.}" == "tfa" ]; then
+        let running++
+        test_bfa $file tofino &
+    elif [ "${file##*.}" == "jba" ]; then
+        let running++
+        test_bfa $file tofino2 &
+    elif [ "${file##*.}" == "stf" ]; then
+        let running++
+        test_stf $file &
+    else
+        echo "unrecognized file type $file"
+    fi
+    if [[ ${BASH_VERSINFO[0]} -lt 4 ]]; then
+        wait_1
+    fi
+    if $link; then
+        link_json $file
+    fi
+done
+
+while (( running > 0 )); do
+    while (( running < PARALLEL + tokens  && tokens > 0)); do
+        release_one_token
+    done
+    wait_1
+done
+
+release_all_tokens
+
+if [ $pass -ne 1 ]; then
+    pmsg="$pass tests passed"
+else
+    pmsg="1 test passed"
+fi
+if [ $fail -ne 1 ]; then
+    fmsg="$fail tests failed"
+else
+    fmsg="1 test failed"
+fi
+
+if [ $unexpected_pass -gt 1 ]; then
+    uxp=" ($unexpected_pass tests unexpectedly pass)"
+elif [ $unexpected_pass -gt 0 ]; then
+    uxp=" ($unexpected_pass test unexpectedly passes)"
+else
+    uxp=""
+fi
+
+echo "$pmsg, $fmsg ($expected_fail expected)$uxp"
+echo "$pmsg, $fmsg ($expected_fail expected)$uxp" >>$FAILLOG
+
+if [ $fail -ne $expected_fail ]; then
+    exit 1
+fi

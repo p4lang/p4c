@@ -1,0 +1,2381 @@
+version:
+  version: 1.0.1
+  run_id: "1c65bbeecfecdbc9"
+  target: Tofino
+phv ingress:
+  ig_intr_md.ingress_port: {  stage 0..1: W1(16..24) }
+  ig_intr_md.ingress_mac_tstamp.0-31: {  stage 0..1: W3 }
+  ig_intr_md.ingress_mac_tstamp.32-39: {  stage 0..1: B5 }
+  ig_intr_md.ingress_mac_tstamp.40-47: {  stage 0..1: W1(8..15) }
+  meta.mirror_session: H2(0..9)
+  meta.mac_timestamp: W2
+  meta.pkt_type: B2
+  hdr.bridge.rich_register: TB0
+  hdr.bridge.pkt_type: TB9
+  hdr.bridge.__pad_0: {  stage 12: B3(4..7) }
+  hdr.bridge.rich_register_v: B3(3)
+  hdr.bridge.l23_rxtstmp_insert: B3(2)
+  hdr.bridge.l23_txtstmp_insert: B3(1)
+  hdr.bridge.l47_timestamp_insert: B3(0)
+  hdr.capture.seq_no: W0(8..31)
+  hdr.capture.reserved: W0(0..7)
+  hdr.capture.timestamp: TW0
+  hdr.ethernet.dst_addr.0-31: TW9
+  hdr.ethernet.dst_addr.32-47: TH20
+  hdr.ethernet.src_addr.0-31: TW8
+  hdr.ethernet.src_addr.32-47: TH19
+  hdr.ethernet.ether_type: TH18
+  hdr.vlan_tag.pcp: TW0(29..31)
+  hdr.vlan_tag.cfi: TW0(28)
+  hdr.vlan_tag.vid: TW0(16..27)
+  hdr.vlan_tag.ether_type: TW0(0..15)
+  hdr.ipv4.version: TW1(28..31)
+  hdr.ipv4.ihl: TW1(24..27)
+  hdr.ipv4.diffserv: TW1(16..23)
+  hdr.ipv4.total_len: TW1(0..15)
+  hdr.ipv4.identification: TH1
+  hdr.ipv4.flags: TH0(13..15)
+  hdr.ipv4.frag_offset: TH0(0..12)
+  hdr.ipv4.ttl: TW3(24..31)
+  hdr.ipv4.protocol: TW3(16..23)
+  hdr.ipv4.hdr_checksum: TW3(0..15)
+  hdr.ipv4.src_addr: TW11
+  hdr.ipv4.dst_addr: TW10
+  hdr.tcp.src_port: TH5
+  hdr.tcp.dst_port: TH4
+  hdr.tcp.seq_no.0-15: TH14
+  hdr.tcp.seq_no.16-31: TH15
+  hdr.tcp.ack_no.0-15: TH12
+  hdr.tcp.ack_no.16-31: TH13
+  hdr.tcp.data_offset: TW2(28..31)
+  hdr.tcp.res: TW2(24..27)
+  hdr.tcp.flags: TW2(16..23)
+  hdr.tcp.window: TW2(0..15)
+  hdr.tcp.checksum: TH3
+  hdr.tcp.urgent_ptr: TH2
+  hdr.first_payload.signature_top: TW15
+  hdr.first_payload.signature_bot: TW14
+  hdr.first_payload.rx_timestamp: TW13
+  hdr.first_payload.pgid: TW12
+  hdr.first_payload.sequence.0-7: TB1
+  hdr.first_payload.sequence.8-15: TB2
+  hdr.first_payload.sequence.16-23: TB3
+  hdr.first_payload.sequence.24-31: TB8
+  hdr.first_payload.txtstamp.0-15: TH16
+  hdr.first_payload.txtstamp.16-31: TH17
+  hdr.udp.src_port: TH3
+  hdr.udp.dst_port: TH2
+  hdr.udp.hdr_length: TW2(16..31)
+  hdr.udp.checksum: TW2(0..15)
+  capture_port_1: {  stage 1: W1(0..7) }
+  seq_no_0: {  stage 1: H3 }
+  ig_intr_md_for_tm.ucast_egress_port: H0(0..8)
+  ig_intr_md_for_tm.mcast_grp_a: H1
+  ig_intr_md_for_dprsr.drop_ctl: {  stage 1..12: B1(0..2) }
+  ig_intr_md_for_dprsr.mirror_type: B0(0..2)
+  hdr.bridge.$valid: B4(0)
+  hdr.capture.$valid: B4(1)
+  hdr.ethernet.$valid: B4(2)
+  hdr.vlan_tag.$valid: B4(3)
+  hdr.ipv4.$valid: B4(4)
+  hdr.tcp.$valid: B4(5)
+  hdr.first_payload.$valid: B4(6)
+  hdr.udp.$valid: B4(7)
+phv egress:
+  eg_intr_md_from_prsr.global_tstamp.0-31: {  stage 0..10: W16 }
+  eg_intr_md_from_prsr.global_tstamp.32-47: {  stage 0..10: TH33 }
+  eg_intr_md.egress_port: H24(0..8)
+  eg_intr_md.pkt_length: {  stage 0..1: H16 }
+  meta.ing_port_mirror.pkt_type: {  stage 0..10: B23 }
+  meta.ing_port_mirror.mac_timestamp: W17
+  hdr.ethernet.dst_addr.0-31: TW16
+  hdr.ethernet.dst_addr.32-47: TH32
+  hdr.ethernet.src_addr.0-15: TH11
+  hdr.ethernet.src_addr.16-23: TB6
+  hdr.ethernet.src_addr.24-31: TB7
+  hdr.ethernet.src_addr.32-47: TH31
+  hdr.ethernet.ether_type: TH30
+  meta.mirror_session: {  stage 11..12: H16(0..9) }
+  meta.pkt_type: B17
+  hdr.vlan_tag.pcp: TB4(5..7)
+  hdr.vlan_tag.cfi: TB4(4)
+  hdr.vlan_tag.vid.0-7: TB5
+  hdr.vlan_tag.vid.8-11: TB4(0..3)
+  hdr.vlan_tag.ether_type: TH6
+  hdr.ipv4.version: TW4(28..31)
+  hdr.ipv4.ihl: TW4(24..27)
+  hdr.ipv4.diffserv: TW4(16..23)
+  hdr.ipv4.total_len: TW4(0..15)
+  hdr.ipv4.identification: TW7(16..31)
+  hdr.ipv4.flags: TW7(13..15)
+  hdr.ipv4.frag_offset: TW7(0..12)
+  hdr.ipv4.ttl: TW6(24..31)
+  hdr.ipv4.protocol: TW6(16..23)
+  hdr.ipv4.hdr_checksum: TW6(0..15)
+  hdr.ipv4.src_addr: TW18
+  hdr.ipv4.dst_addr: TW17
+  hdr.tcp.src_port: TH10
+  hdr.tcp.dst_port: TH9
+  hdr.tcp.seq_no.0-15: TH24
+  hdr.tcp.seq_no.16-31: TH25
+  hdr.tcp.ack_no: TW19
+  hdr.tcp.data_offset: TW5(28..31)
+  hdr.tcp.res: TW5(24..27)
+  hdr.tcp.flags: TW5(16..23)
+  hdr.tcp.window: TW5(0..15)
+  hdr.tcp.checksum: TH8
+  hdr.tcp.urgent_ptr: TH7
+  hdr.first_payload.signature_top: TW22
+  hdr.first_payload.signature_bot: TW21
+  hdr.first_payload.rx_timestamp: TW20
+  hdr.first_payload.pgid.0-7: TB16
+  hdr.first_payload.pgid.8-15: TB17
+  hdr.first_payload.pgid.16-23: TB18
+  hdr.first_payload.pgid.24-31: TB19
+  hdr.first_payload.sequence.0-15: TH28
+  hdr.first_payload.sequence.16-31: TH29
+  hdr.first_payload.txtstamp.0-15: TH26
+  hdr.first_payload.txtstamp.16-31: TH27
+  hdr.udp.src_port: TH8
+  hdr.udp.dst_port: TH7
+  hdr.udp.hdr_length: TW5(16..31)
+  hdr.udp.checksum: TW5(0..15)
+  hdr.capture.seq_no.0-15: TH6
+  hdr.capture.seq_no.16-23: TB4
+  hdr.capture.reserved: B18
+  hdr.capture.timestamp: W18
+  update_register_portion: {  stage 1: H17 }
+  update_register_capture_port: {  stage 2..9: B20 }
+  update_register_padded_length: {  stage 2..3: H16 }
+  update_register_negated_length: {  stage 3: H18 }
+  update_register_load_length: {  stage 3: H17 }
+  update_register_cap_length: {  stage 0..4: H23 }
+  update_register_cap_length_0: {  stage 0..5: H19 }
+  update_register_cap_length_1: {  stage 0..6: H20 }
+  update_register_cap_length_2: {  stage 0..7: H21 }
+  update_register_cap_length_3: {  stage 0..8: H22 }
+  update_register_debt0: {  stage 5..6: H16 }
+  update_register_debt1: {  stage 6..7: H17 }
+  update_register_debt2: {  stage 7..8: H16 }
+  update_register_debt3: {  stage 8..9: H17 }
+  update_register_debt4: {  stage 9: H16 }
+  update_register_reg0.0-3: {  stage 0..7: B19(4..7) }
+  update_register_reg0.4-7: {  stage 0..7: B21(4..7) }
+  update_register_reg1.0-3: {  stage 8: B19(4..7) }
+  update_register_reg1.4-7: {  stage 8: B21(4..7) }
+  update_register_reg2.0-3: {  stage 9: B19(4..7) }
+  update_register_reg2.4-7: {  stage 9: B21(4..7) }
+  rich_register_0.0-3: {  stage 0..10: B19(0..3) }
+  rich_register_0.4-7: {  stage 0..10: B21(0..3) }
+  eg_intr_md_for_dprsr.mirror_type: B16(0..2)
+  hdr.ethernet.$valid: B22(0)
+  hdr.vlan_tag.$valid: B22(1)
+  hdr.ipv4.$valid: B22(2)
+  hdr.tcp.$valid: B22(3)
+  hdr.first_payload.$valid: B22(4)
+  hdr.udp.$valid: B22(5)
+  hdr.capture.$valid: B22(6)
+parser ingress:
+  start: $entry_point
+  init_zero: [ H2, W2, B2, TB0, B3, B4 ]
+  bitwise_or: [ TB9, B2, B4 ]
+  hdr_len_adj: 16
+  states:
+    $entry_point:
+      *:
+        load: { byte1 : 12 }
+        buf_req: 13
+        next: start
+    start:
+      match: [ byte1 ]
+      0x*4:
+        0..3: W1
+            # - bit[7..15] -> W1 bit[24..16]: ingress::ig_intr_md.ingress_port
+            # - bit[16..23] -> W1 bit[15..8]: ingress::ig_intr_md.ingress_mac_tstamp[47:40].40-47
+        3: B5  # ingress::ig_intr_md.ingress_mac_tstamp[39:32].32-39
+        4..7: W3  # ingress::ig_intr_md.ingress_mac_tstamp[31:0].0-31
+        B2: 1  # value 1 -> B2 bit[7..0]: ingress::meta.pkt_type
+        B4: 1  # value 1 -> B4 bit[0]: ingress::hdr.bridge.$valid
+        TB9: 1  # value 1 -> TB9 bit[7..0]: ingress::hdr.bridge.pkt_type
+        shift: 16
+        buf_req: 16
+        next: parse_capture_depth
+      0x*5:
+        0..3: W1
+            # - bit[7..15] -> W1 bit[24..16]: ingress::ig_intr_md.ingress_port
+            # - bit[16..23] -> W1 bit[15..8]: ingress::ig_intr_md.ingress_mac_tstamp[47:40].40-47
+        3: B5  # ingress::ig_intr_md.ingress_mac_tstamp[39:32].32-39
+        4..7: W3  # ingress::ig_intr_md.ingress_mac_tstamp[31:0].0-31
+        B2: 1  # value 1 -> B2 bit[7..0]: ingress::meta.pkt_type
+        B4: 1  # value 1 -> B4 bit[0]: ingress::hdr.bridge.$valid
+        TB9: 1  # value 1 -> TB9 bit[7..0]: ingress::hdr.bridge.pkt_type
+        shift: 16
+        buf_req: 16
+        next: parse_capture
+      0x**:
+        0..3: W1
+            # - bit[7..15] -> W1 bit[24..16]: ingress::ig_intr_md.ingress_port
+            # - bit[16..23] -> W1 bit[15..8]: ingress::ig_intr_md.ingress_mac_tstamp[47:40].40-47
+        3: B5  # ingress::ig_intr_md.ingress_mac_tstamp[39:32].32-39
+        4..7: W3  # ingress::ig_intr_md.ingress_mac_tstamp[31:0].0-31
+        B2: 1  # value 1 -> B2 bit[7..0]: ingress::meta.pkt_type
+        B4: 1  # value 1 -> B4 bit[0]: ingress::hdr.bridge.$valid
+        TB9: 1  # value 1 -> TB9 bit[7..0]: ingress::hdr.bridge.pkt_type
+        load: { half : 28..29 }
+        shift: 16
+        buf_req: 30
+        next: parse_ethernet
+    parse_capture_depth:
+      *:
+        0..3: W0
+            # - bit[0..23] -> W0 bit[31..8]: ingress::hdr.capture.seq_no
+            # - bit[24..31] -> W0 bit[7..0]: ingress::hdr.capture.reserved
+        4..7: TW0  # ingress::hdr.capture.timestamp
+        B4: 2  # value 1 -> B4 bit[1]: ingress::hdr.capture.$valid
+        shift: 8
+        buf_req: 8
+        next: end
+    parse_capture:
+      *:
+        0..3: W0
+            # - bit[0..23] -> W0 bit[31..8]: ingress::hdr.capture.seq_no
+            # - bit[24..31] -> W0 bit[7..0]: ingress::hdr.capture.reserved
+        4..7: TW0  # ingress::hdr.capture.timestamp
+        B4: 2  # value 1 -> B4 bit[1]: ingress::hdr.capture.$valid
+        B2: 3  # value 3 -> B2 bit[7..0]: ingress::meta.pkt_type
+        TB9: 5  # value 5 -> TB9 bit[7..0]: ingress::hdr.bridge.pkt_type
+        shift: 8
+        buf_req: 8
+        next: end
+    parse_ethernet:
+      match: [ half ]
+      0x8100:
+        0..1: TH20  # ingress::hdr.ethernet.dst_addr[47:32].32-47
+        2..5: TW9  # ingress::hdr.ethernet.dst_addr[31:0].0-31
+        6..7: TH19  # ingress::hdr.ethernet.src_addr[47:32].32-47
+        8..11: TW8  # ingress::hdr.ethernet.src_addr[31:0].0-31
+        12..13: TH18  # ingress::hdr.ethernet.ether_type
+        B4: 4  # value 1 -> B4 bit[2]: ingress::hdr.ethernet.$valid
+        load: { half : 16..17 }
+        shift: 14
+        buf_req: 18
+        next: parse_vlan_tag
+      0x0800:
+        0..1: TH20  # ingress::hdr.ethernet.dst_addr[47:32].32-47
+        2..5: TW9  # ingress::hdr.ethernet.dst_addr[31:0].0-31
+        6..7: TH19  # ingress::hdr.ethernet.src_addr[47:32].32-47
+        8..11: TW8  # ingress::hdr.ethernet.src_addr[31:0].0-31
+        12..13: TH18  # ingress::hdr.ethernet.ether_type
+        B4: 4  # value 1 -> B4 bit[2]: ingress::hdr.ethernet.$valid
+        load: { byte1 : 23 }
+        shift: 14
+        buf_req: 24
+        next: parse_ipv4
+      0x****:
+        0..1: TH20  # ingress::hdr.ethernet.dst_addr[47:32].32-47
+        2..5: TW9  # ingress::hdr.ethernet.dst_addr[31:0].0-31
+        6..7: TH19  # ingress::hdr.ethernet.src_addr[47:32].32-47
+        8..11: TW8  # ingress::hdr.ethernet.src_addr[31:0].0-31
+        12..13: TH18  # ingress::hdr.ethernet.ether_type
+        B4: 4  # value 1 -> B4 bit[2]: ingress::hdr.ethernet.$valid
+        shift: 14
+        buf_req: 14
+        next: end
+    parse_vlan_tag:
+      match: [ half ]
+      0x0800:
+        0..3: TW0
+            # - bit[0..2] -> TW0 bit[31..29]: ingress::hdr.vlan_tag.pcp
+            # - bit[3] -> TW0 bit[28]: ingress::hdr.vlan_tag.cfi
+            # - bit[4..15] -> TW0 bit[27..16]: ingress::hdr.vlan_tag.vid
+            # - bit[16..31] -> TW0 bit[15..0]: ingress::hdr.vlan_tag.ether_type
+        B4: 8  # value 1 -> B4 bit[3]: ingress::hdr.vlan_tag.$valid
+        load: { byte1 : 13 }
+        shift: 4
+        buf_req: 14
+        next: parse_ipv4
+      0x****:
+        0..3: TW0
+            # - bit[0..2] -> TW0 bit[31..29]: ingress::hdr.vlan_tag.pcp
+            # - bit[3] -> TW0 bit[28]: ingress::hdr.vlan_tag.cfi
+            # - bit[4..15] -> TW0 bit[27..16]: ingress::hdr.vlan_tag.vid
+            # - bit[16..31] -> TW0 bit[15..0]: ingress::hdr.vlan_tag.ether_type
+        B4: 8  # value 1 -> B4 bit[3]: ingress::hdr.vlan_tag.$valid
+        shift: 4
+        buf_req: 4
+        next: end
+    parse_ipv4:
+      match: [ byte1 ]
+      0x06:
+        0..3: TW1
+            # - bit[0..3] -> TW1 bit[31..28]: ingress::hdr.ipv4.version
+            # - bit[4..7] -> TW1 bit[27..24]: ingress::hdr.ipv4.ihl
+            # - bit[8..15] -> TW1 bit[23..16]: ingress::hdr.ipv4.diffserv
+            # - bit[16..31] -> TW1 bit[15..0]: ingress::hdr.ipv4.total_len
+        4..5: TH1  # ingress::hdr.ipv4.identification
+        6..7: TH0
+            # - bit[48..50] -> TH0 bit[15..13]: ingress::hdr.ipv4.flags
+            # - bit[51..63] -> TH0 bit[12..0]: ingress::hdr.ipv4.frag_offset
+        8..11: TW3
+            # - bit[64..71] -> TW3 bit[31..24]: ingress::hdr.ipv4.ttl
+            # - bit[72..79] -> TW3 bit[23..16]: ingress::hdr.ipv4.protocol
+            # - bit[80..95] -> TW3 bit[15..0]: ingress::hdr.ipv4.hdr_checksum
+        12..15: TW11  # ingress::hdr.ipv4.src_addr
+        16..19: TW10  # ingress::hdr.ipv4.dst_addr
+        B4: 16  # value 1 -> B4 bit[4]: ingress::hdr.ipv4.$valid
+        shift: 20
+        buf_req: 20
+        next: parseTcp
+      0x11:
+        0..3: TW1
+            # - bit[0..3] -> TW1 bit[31..28]: ingress::hdr.ipv4.version
+            # - bit[4..7] -> TW1 bit[27..24]: ingress::hdr.ipv4.ihl
+            # - bit[8..15] -> TW1 bit[23..16]: ingress::hdr.ipv4.diffserv
+            # - bit[16..31] -> TW1 bit[15..0]: ingress::hdr.ipv4.total_len
+        4..5: TH1  # ingress::hdr.ipv4.identification
+        6..7: TH0
+            # - bit[48..50] -> TH0 bit[15..13]: ingress::hdr.ipv4.flags
+            # - bit[51..63] -> TH0 bit[12..0]: ingress::hdr.ipv4.frag_offset
+        8..11: TW3
+            # - bit[64..71] -> TW3 bit[31..24]: ingress::hdr.ipv4.ttl
+            # - bit[72..79] -> TW3 bit[23..16]: ingress::hdr.ipv4.protocol
+            # - bit[80..95] -> TW3 bit[15..0]: ingress::hdr.ipv4.hdr_checksum
+        12..15: TW11  # ingress::hdr.ipv4.src_addr
+        16..19: TW10  # ingress::hdr.ipv4.dst_addr
+        B4: 16  # value 1 -> B4 bit[4]: ingress::hdr.ipv4.$valid
+        shift: 20
+        buf_req: 20
+        next: parseUdp
+      0x**:
+        0..3: TW1
+            # - bit[0..3] -> TW1 bit[31..28]: ingress::hdr.ipv4.version
+            # - bit[4..7] -> TW1 bit[27..24]: ingress::hdr.ipv4.ihl
+            # - bit[8..15] -> TW1 bit[23..16]: ingress::hdr.ipv4.diffserv
+            # - bit[16..31] -> TW1 bit[15..0]: ingress::hdr.ipv4.total_len
+        4..5: TH1  # ingress::hdr.ipv4.identification
+        6..7: TH0
+            # - bit[48..50] -> TH0 bit[15..13]: ingress::hdr.ipv4.flags
+            # - bit[51..63] -> TH0 bit[12..0]: ingress::hdr.ipv4.frag_offset
+        8..11: TW3
+            # - bit[64..71] -> TW3 bit[31..24]: ingress::hdr.ipv4.ttl
+            # - bit[72..79] -> TW3 bit[23..16]: ingress::hdr.ipv4.protocol
+            # - bit[80..95] -> TW3 bit[15..0]: ingress::hdr.ipv4.hdr_checksum
+        12..15: TW11  # ingress::hdr.ipv4.src_addr
+        16..19: TW10  # ingress::hdr.ipv4.dst_addr
+        B4: 16  # value 1 -> B4 bit[4]: ingress::hdr.ipv4.$valid
+        shift: 20
+        buf_req: 20
+        next: parseL23
+    parseTcp:
+      *:
+        0..1: TH5  # ingress::hdr.tcp.src_port
+        2..3: TH4  # ingress::hdr.tcp.dst_port
+        4..5: TH15  # ingress::hdr.tcp.seq_no[31:16].16-31
+        6..7: TH14  # ingress::hdr.tcp.seq_no[15:0].0-15
+        12..15: TW2
+            # - bit[96..99] -> TW2 bit[31..28]: ingress::hdr.tcp.data_offset
+            # - bit[100..103] -> TW2 bit[27..24]: ingress::hdr.tcp.res
+            # - bit[104..111] -> TW2 bit[23..16]: ingress::hdr.tcp.flags
+            # - bit[112..127] -> TW2 bit[15..0]: ingress::hdr.tcp.window
+        20..23: TW15  # ingress::hdr.first_payload.signature_top
+        24..27: TW14  # ingress::hdr.first_payload.signature_bot
+        28..31: TW13  # ingress::hdr.first_payload.rx_timestamp
+        B4: 96
+            # - value 1 -> B4 bit[5]: ingress::hdr.tcp.$valid
+            # - value 1 -> B4 bit[6]: ingress::hdr.first_payload.$valid
+        shift: 8
+        buf_req: 32
+        next: parseTcp.$split_0
+    parseTcp.$split_0:
+      *:
+        0..1: TH13  # ingress::hdr.tcp.ack_no[31:16].16-31
+        2..3: TH12  # ingress::hdr.tcp.ack_no[15:0].0-15
+        8..9: TH3  # ingress::hdr.tcp.checksum
+        10..11: TH2  # ingress::hdr.tcp.urgent_ptr
+        24..27: TW12  # ingress::hdr.first_payload.pgid
+        28: TB8  # ingress::hdr.first_payload.sequence[31:24].24-31
+        29: TB3  # ingress::hdr.first_payload.sequence[23:16].16-23
+        30: TB2  # ingress::hdr.first_payload.sequence[15:8].8-15
+        31: TB1  # ingress::hdr.first_payload.sequence[7:0].0-7
+        shift: 32
+        buf_req: 32
+        next: parseTcp.$split_1
+    parseTcp.$split_1:
+      *:
+        0..1: TH17  # ingress::hdr.first_payload.txtstamp[31:16].16-31
+        2..3: TH16  # ingress::hdr.first_payload.txtstamp[15:0].0-15
+        shift: 4
+        buf_req: 4
+        next: end
+    parseUdp:
+      *:
+        0..1: TH3  # ingress::hdr.udp.src_port
+        2..3: TH2  # ingress::hdr.udp.dst_port
+        4..7: TW2
+            # - bit[32..47] -> TW2 bit[31..16]: ingress::hdr.udp.hdr_length
+            # - bit[48..63] -> TW2 bit[15..0]: ingress::hdr.udp.checksum
+        8..11: TW15  # ingress::hdr.first_payload.signature_top
+        12..15: TW14  # ingress::hdr.first_payload.signature_bot
+        16..19: TW13  # ingress::hdr.first_payload.rx_timestamp
+        24: TB8  # ingress::hdr.first_payload.sequence[31:24].24-31
+        25: TB3  # ingress::hdr.first_payload.sequence[23:16].16-23
+        26: TB2  # ingress::hdr.first_payload.sequence[15:8].8-15
+        27: TB1  # ingress::hdr.first_payload.sequence[7:0].0-7
+        28..29: TH17  # ingress::hdr.first_payload.txtstamp[31:16].16-31
+        30..31: TH16  # ingress::hdr.first_payload.txtstamp[15:0].0-15
+        shift: 20
+        buf_req: 32
+        next: parseUdp.$split_0
+    parseUdp.$split_0:
+      *:
+        0..3: TW12  # ingress::hdr.first_payload.pgid
+        B4: 192
+            # - value 1 -> B4 bit[7]: ingress::hdr.udp.$valid
+            # - value 1 -> B4 bit[6]: ingress::hdr.first_payload.$valid
+        shift: 12
+        buf_req: 12
+        next: end
+    parseL23:
+      *:
+        0..3: TW15  # ingress::hdr.first_payload.signature_top
+        4..7: TW14  # ingress::hdr.first_payload.signature_bot
+        8..11: TW13  # ingress::hdr.first_payload.rx_timestamp
+        12..15: TW12  # ingress::hdr.first_payload.pgid
+        16: TB8  # ingress::hdr.first_payload.sequence[31:24].24-31
+        17: TB3  # ingress::hdr.first_payload.sequence[23:16].16-23
+        18: TB2  # ingress::hdr.first_payload.sequence[15:8].8-15
+        19: TB1  # ingress::hdr.first_payload.sequence[7:0].0-7
+        20..21: TH17  # ingress::hdr.first_payload.txtstamp[31:16].16-31
+        22..23: TH16  # ingress::hdr.first_payload.txtstamp[15:0].0-15
+        shift: 24
+        buf_req: 24
+        next: parseL23.$split_0
+    parseL23.$split_0:
+      *:
+        B4: 64  # value 1 -> B4 bit[6]: ingress::hdr.first_payload.$valid
+        buf_req: 0
+        next: end
+deparser ingress:
+  dictionary:
+    TB0: B4(0)  # ingress::hdr.bridge.rich_register if ingress::hdr.bridge.$valid
+    TB9: B4(0)  # ingress::hdr.bridge.pkt_type if ingress::hdr.bridge.$valid
+    B3: B4(0)
+        # - bit[7..4]: ingress::hdr.bridge.__pad_0 if ingress::hdr.bridge.$valid
+        # - bit[3]: ingress::hdr.bridge.rich_register_v if ingress::hdr.bridge.$valid
+        # - bit[2]: ingress::hdr.bridge.l23_rxtstmp_insert if ingress::hdr.bridge.$valid
+        # - bit[1]: ingress::hdr.bridge.l23_txtstmp_insert if ingress::hdr.bridge.$valid
+        # - bit[0]: ingress::hdr.bridge.l47_timestamp_insert if ingress::hdr.bridge.$valid
+    W0: B4(1)
+        # - bit[31..8]: ingress::hdr.capture.seq_no if ingress::hdr.capture.$valid
+        # - bit[7..0]: ingress::hdr.capture.reserved if ingress::hdr.capture.$valid
+    TW0: B4(1)  # ingress::hdr.capture.timestamp if ingress::hdr.capture.$valid
+    TH20: B4(2)  # ingress::hdr.ethernet.dst_addr.32-47 if ingress::hdr.ethernet.$valid
+    TW9: B4(2)  # ingress::hdr.ethernet.dst_addr.0-31 if ingress::hdr.ethernet.$valid
+    TH19: B4(2)  # ingress::hdr.ethernet.src_addr.32-47 if ingress::hdr.ethernet.$valid
+    TW8: B4(2)  # ingress::hdr.ethernet.src_addr.0-31 if ingress::hdr.ethernet.$valid
+    TH18: B4(2)  # ingress::hdr.ethernet.ether_type if ingress::hdr.ethernet.$valid
+    TW0: B4(3)
+        # - bit[31..29]: ingress::hdr.vlan_tag.pcp if ingress::hdr.vlan_tag.$valid
+        # - bit[28]: ingress::hdr.vlan_tag.cfi if ingress::hdr.vlan_tag.$valid
+        # - bit[27..16]: ingress::hdr.vlan_tag.vid if ingress::hdr.vlan_tag.$valid
+        # - bit[15..0]: ingress::hdr.vlan_tag.ether_type if ingress::hdr.vlan_tag.$valid
+    TW1: B4(4)
+        # - bit[31..28]: ingress::hdr.ipv4.version if ingress::hdr.ipv4.$valid
+        # - bit[27..24]: ingress::hdr.ipv4.ihl if ingress::hdr.ipv4.$valid
+        # - bit[23..16]: ingress::hdr.ipv4.diffserv if ingress::hdr.ipv4.$valid
+        # - bit[15..0]: ingress::hdr.ipv4.total_len if ingress::hdr.ipv4.$valid
+    TH1: B4(4)  # ingress::hdr.ipv4.identification if ingress::hdr.ipv4.$valid
+    TH0: B4(4)
+        # - bit[15..13]: ingress::hdr.ipv4.flags if ingress::hdr.ipv4.$valid
+        # - bit[12..0]: ingress::hdr.ipv4.frag_offset if ingress::hdr.ipv4.$valid
+    TW3: B4(4)
+        # - bit[31..24]: ingress::hdr.ipv4.ttl if ingress::hdr.ipv4.$valid
+        # - bit[23..16]: ingress::hdr.ipv4.protocol if ingress::hdr.ipv4.$valid
+        # - bit[15..0]: ingress::hdr.ipv4.hdr_checksum if ingress::hdr.ipv4.$valid
+    TW11: B4(4)  # ingress::hdr.ipv4.src_addr if ingress::hdr.ipv4.$valid
+    TW10: B4(4)  # ingress::hdr.ipv4.dst_addr if ingress::hdr.ipv4.$valid
+    TH5: B4(5)  # ingress::hdr.tcp.src_port if ingress::hdr.tcp.$valid
+    TH4: B4(5)  # ingress::hdr.tcp.dst_port if ingress::hdr.tcp.$valid
+    TH15: B4(5)  # ingress::hdr.tcp.seq_no.16-31 if ingress::hdr.tcp.$valid
+    TH14: B4(5)  # ingress::hdr.tcp.seq_no.0-15 if ingress::hdr.tcp.$valid
+    TH13: B4(5)  # ingress::hdr.tcp.ack_no.16-31 if ingress::hdr.tcp.$valid
+    TH12: B4(5)  # ingress::hdr.tcp.ack_no.0-15 if ingress::hdr.tcp.$valid
+    TW2: B4(5)
+        # - bit[31..28]: ingress::hdr.tcp.data_offset if ingress::hdr.tcp.$valid
+        # - bit[27..24]: ingress::hdr.tcp.res if ingress::hdr.tcp.$valid
+        # - bit[23..16]: ingress::hdr.tcp.flags if ingress::hdr.tcp.$valid
+        # - bit[15..0]: ingress::hdr.tcp.window if ingress::hdr.tcp.$valid
+    TH3: B4(5)  # ingress::hdr.tcp.checksum if ingress::hdr.tcp.$valid
+    TH2: B4(5)  # ingress::hdr.tcp.urgent_ptr if ingress::hdr.tcp.$valid
+    TH3: B4(7)  # ingress::hdr.udp.src_port if ingress::hdr.udp.$valid
+    TH2: B4(7)  # ingress::hdr.udp.dst_port if ingress::hdr.udp.$valid
+    TW2: B4(7)
+        # - bit[31..16]: ingress::hdr.udp.hdr_length if ingress::hdr.udp.$valid
+        # - bit[15..0]: ingress::hdr.udp.checksum if ingress::hdr.udp.$valid
+    TW15: B4(6)  # ingress::hdr.first_payload.signature_top if ingress::hdr.first_payload.$valid
+    TW14: B4(6)  # ingress::hdr.first_payload.signature_bot if ingress::hdr.first_payload.$valid
+    TW13: B4(6)  # ingress::hdr.first_payload.rx_timestamp if ingress::hdr.first_payload.$valid
+    TW12: B4(6)  # ingress::hdr.first_payload.pgid if ingress::hdr.first_payload.$valid
+    TB8: B4(6)  # ingress::hdr.first_payload.sequence.24-31 if ingress::hdr.first_payload.$valid
+    TB3: B4(6)  # ingress::hdr.first_payload.sequence.16-23 if ingress::hdr.first_payload.$valid
+    TB2: B4(6)  # ingress::hdr.first_payload.sequence.8-15 if ingress::hdr.first_payload.$valid
+    TB1: B4(6)  # ingress::hdr.first_payload.sequence.0-7 if ingress::hdr.first_payload.$valid
+    TH17: B4(6)  # ingress::hdr.first_payload.txtstamp.16-31 if ingress::hdr.first_payload.$valid
+    TH16: B4(6)  # ingress::hdr.first_payload.txtstamp.0-15 if ingress::hdr.first_payload.$valid
+  egress_unicast_port: H0(0..8)  # bit[8..0]: ingress::ig_intr_md_for_tm.ucast_egress_port
+  drop_ctl: B1(0..2)  # bit[2..0]: ingress::ig_intr_md_for_dprsr.drop_ctl
+  egress_multicast_group_0:
+    - H1  # ingress::ig_intr_md_for_tm.mcast_grp_a
+  mirror:
+    select: B0(0..2)  # bit[2..0]: ingress::ig_intr_md_for_dprsr.mirror_type
+    1:
+      - H2(0..9)  # bit[9..0]: ingress::meta.mirror_session
+      - B2  # ingress::meta.pkt_type
+      - W2  # ingress::meta.mac_timestamp
+parser egress:
+  start: $entry_point
+  init_zero: [ W16, TH33, B17, H23, H19, H20, H21, H22, B19, B21, B22 ]
+  bitwise_or: [ B22 ]
+  hdr_len_adj: 27
+  meta_opt: 8191
+  states:
+    $entry_point:
+      *:
+        56..59: W16  # buffer mapped I/O: bit[448..479] -> W16 bit[31..0]: egress::eg_intr_md_from_prsr.global_tstamp[31:0].0-31
+        54..55: TH33  # buffer mapped I/O: bit[432..447] -> TH33 bit[15..0]: egress::eg_intr_md_from_prsr.global_tstamp[47:32].32-47
+        intr_md: 48
+        load: { byte1 : 27 }
+        buf_req: 28
+        next: start
+    start:
+      match: [ byte1 ]
+      0x02:
+        0..1: H24  # bit[7..15] -> H24 bit[8..0]: egress::eg_intr_md.egress_port
+        25..26: H16  # egress::eg_intr_md.pkt_length
+        intr_md: 25
+        shift: 27
+        buf_req: 27
+        next: parse_mirror
+      0x01:
+        0..1: H24  # bit[7..15] -> H24 bit[8..0]: egress::eg_intr_md.egress_port
+        25..26: H16  # egress::eg_intr_md.pkt_length
+        intr_md: 25
+        shift: 27
+        buf_req: 27
+        next: parse_bridge
+      0x03:
+        0..1: H24  # bit[7..15] -> H24 bit[8..0]: egress::eg_intr_md.egress_port
+        25..26: H16  # egress::eg_intr_md.pkt_length
+        intr_md: 25
+        shift: 27
+        buf_req: 27
+        next: parse_capture
+      0x05:
+        0..1: H24  # bit[7..15] -> H24 bit[8..0]: egress::eg_intr_md.egress_port
+        25..26: H16  # egress::eg_intr_md.pkt_length
+        intr_md: 25
+        shift: 27
+        buf_req: 27
+        next: parse_capture_final
+      0x**:
+        0..1: H24  # bit[7..15] -> H24 bit[8..0]: egress::eg_intr_md.egress_port
+        25..26: H16  # egress::eg_intr_md.pkt_length
+        intr_md: 25
+        shift: 27
+        buf_req: 27
+        next: end
+    parse_mirror:
+      *:
+        0: B23  # egress::meta.ing_port_mirror.pkt_type
+        1..4: W17  # egress::meta.ing_port_mirror.mac_timestamp
+        5..6: TH32  # egress::hdr.ethernet.dst_addr[47:32].32-47
+        7..10: TW16  # egress::hdr.ethernet.dst_addr[31:0].0-31
+        11..12: TH31  # egress::hdr.ethernet.src_addr[47:32].32-47
+        13: TB7  # egress::hdr.ethernet.src_addr[31:24].24-31
+        14: TB6  # egress::hdr.ethernet.src_addr[23:16].16-23
+        15..16: TH11  # egress::hdr.ethernet.src_addr[15:0].0-15
+        17..18: TH30  # egress::hdr.ethernet.ether_type
+        B22: 1  # value 1 -> B22 bit[0]: egress::hdr.ethernet.$valid
+        load: { half : 17..18 }
+        shift: 19
+        buf_req: 19
+        next: parse_mirror.$split_0
+    parse_mirror.$split_0:
+      match: [ half ]
+      0x8100:
+        B17: 1  # value 1 -> B17 bit[7..0]: egress::meta.pkt_type
+        load: { half : 2..3 }
+        buf_req: 4
+        next: parse_vlan_tag
+      0x0800:
+        B17: 1  # value 1 -> B17 bit[7..0]: egress::meta.pkt_type
+        buf_req: 0
+        next: parse_ipv4
+      0x****:
+        B17: 1  # value 1 -> B17 bit[7..0]: egress::meta.pkt_type
+        buf_req: 0
+        next: end
+    parse_vlan_tag:
+      match: [ half ]
+      0x0800:
+        0: TB4
+            # - bit[0..2] -> TB4 bit[7..5]: egress::hdr.vlan_tag.pcp
+            # - bit[3] -> TB4 bit[4]: egress::hdr.vlan_tag.cfi
+            # - bit[4..7] -> TB4 bit[3..0]: egress::hdr.vlan_tag.vid[11:8].8-11
+        1: TB5  # egress::hdr.vlan_tag.vid[7:0].0-7
+        2..3: TH6  # egress::hdr.vlan_tag.ether_type
+        B22: 2  # value 1 -> B22 bit[1]: egress::hdr.vlan_tag.$valid
+        shift: 4
+        buf_req: 4
+        next: parse_ipv4
+      0x****:
+        0: TB4
+            # - bit[0..2] -> TB4 bit[7..5]: egress::hdr.vlan_tag.pcp
+            # - bit[3] -> TB4 bit[4]: egress::hdr.vlan_tag.cfi
+            # - bit[4..7] -> TB4 bit[3..0]: egress::hdr.vlan_tag.vid[11:8].8-11
+        1: TB5  # egress::hdr.vlan_tag.vid[7:0].0-7
+        2..3: TH6  # egress::hdr.vlan_tag.ether_type
+        B22: 2  # value 1 -> B22 bit[1]: egress::hdr.vlan_tag.$valid
+        shift: 4
+        buf_req: 4
+        next: end
+    parse_ipv4:
+      *:
+        0..3: TW4
+            # - bit[0..3] -> TW4 bit[31..28]: egress::hdr.ipv4.version
+            # - bit[4..7] -> TW4 bit[27..24]: egress::hdr.ipv4.ihl
+            # - bit[8..15] -> TW4 bit[23..16]: egress::hdr.ipv4.diffserv
+            # - bit[16..31] -> TW4 bit[15..0]: egress::hdr.ipv4.total_len
+        4..7: TW7
+            # - bit[32..47] -> TW7 bit[31..16]: egress::hdr.ipv4.identification
+            # - bit[48..50] -> TW7 bit[15..13]: egress::hdr.ipv4.flags
+            # - bit[51..63] -> TW7 bit[12..0]: egress::hdr.ipv4.frag_offset
+        8..11: TW6
+            # - bit[64..71] -> TW6 bit[31..24]: egress::hdr.ipv4.ttl
+            # - bit[72..79] -> TW6 bit[23..16]: egress::hdr.ipv4.protocol
+            # - bit[80..95] -> TW6 bit[15..0]: egress::hdr.ipv4.hdr_checksum
+        12..15: TW18  # egress::hdr.ipv4.src_addr
+        B22: 4  # value 1 -> B22 bit[2]: egress::hdr.ipv4.$valid
+        load: { byte1 : 9 }
+        shift: 16
+        buf_req: 16
+        next: parse_ipv4.$split_0
+    parse_ipv4.$split_0:
+      match: [ byte1 ]
+      0x06:
+        0..3: TW17  # egress::hdr.ipv4.dst_addr
+        shift: 4
+        buf_req: 4
+        next: parseTcp
+      0x11:
+        0..3: TW17  # egress::hdr.ipv4.dst_addr
+        shift: 4
+        buf_req: 4
+        next: parseUdp
+      0x**:
+        0..3: TW17  # egress::hdr.ipv4.dst_addr
+        shift: 4
+        buf_req: 4
+        next: parseL23
+    parseTcp:
+      *:
+        0..1: TH10  # egress::hdr.tcp.src_port
+        2..3: TH9  # egress::hdr.tcp.dst_port
+        4..5: TH25  # egress::hdr.tcp.seq_no[31:16].16-31
+        6..7: TH24  # egress::hdr.tcp.seq_no[15:0].0-15
+        8..11: TW19  # egress::hdr.tcp.ack_no
+        12..15: TW5
+            # - bit[96..99] -> TW5 bit[31..28]: egress::hdr.tcp.data_offset
+            # - bit[100..103] -> TW5 bit[27..24]: egress::hdr.tcp.res
+            # - bit[104..111] -> TW5 bit[23..16]: egress::hdr.tcp.flags
+            # - bit[112..127] -> TW5 bit[15..0]: egress::hdr.tcp.window
+        20..23: TW22  # egress::hdr.first_payload.signature_top
+        24..27: TW21  # egress::hdr.first_payload.signature_bot
+        B22: 24
+            # - value 1 -> B22 bit[3]: egress::hdr.tcp.$valid
+            # - value 1 -> B22 bit[4]: egress::hdr.first_payload.$valid
+        shift: 16
+        buf_req: 28
+        next: parseTcp.$split_0
+    parseTcp.$split_0:
+      *:
+        0..1: TH8  # egress::hdr.tcp.checksum
+        2..3: TH7  # egress::hdr.tcp.urgent_ptr
+        12..15: TW20  # egress::hdr.first_payload.rx_timestamp
+        16: TB19  # egress::hdr.first_payload.pgid[31:24].24-31
+        17: TB18  # egress::hdr.first_payload.pgid[23:16].16-23
+        18: TB17  # egress::hdr.first_payload.pgid[15:8].8-15
+        19: TB16  # egress::hdr.first_payload.pgid[7:0].0-7
+        20..21: TH29  # egress::hdr.first_payload.sequence[31:16].16-31
+        22..23: TH28  # egress::hdr.first_payload.sequence[15:0].0-15
+        shift: 24
+        buf_req: 24
+        next: parseTcp.$split_1
+    parseTcp.$split_1:
+      *:
+        0..1: TH27  # egress::hdr.first_payload.txtstamp[31:16].16-31
+        2..3: TH26  # egress::hdr.first_payload.txtstamp[15:0].0-15
+        shift: 4
+        buf_req: 4
+        next: end
+    parseUdp:
+      *:
+        0..1: TH8  # egress::hdr.udp.src_port
+        2..3: TH7  # egress::hdr.udp.dst_port
+        4..7: TW5
+            # - bit[32..47] -> TW5 bit[31..16]: egress::hdr.udp.hdr_length
+            # - bit[48..63] -> TW5 bit[15..0]: egress::hdr.udp.checksum
+        8..11: TW22  # egress::hdr.first_payload.signature_top
+        12..15: TW21  # egress::hdr.first_payload.signature_bot
+        16..19: TW20  # egress::hdr.first_payload.rx_timestamp
+        20: TB19  # egress::hdr.first_payload.pgid[31:24].24-31
+        21: TB18  # egress::hdr.first_payload.pgid[23:16].16-23
+        22: TB17  # egress::hdr.first_payload.pgid[15:8].8-15
+        23: TB16  # egress::hdr.first_payload.pgid[7:0].0-7
+        24..25: TH29  # egress::hdr.first_payload.sequence[31:16].16-31
+        26..27: TH28  # egress::hdr.first_payload.sequence[15:0].0-15
+        shift: 28
+        buf_req: 28
+        next: parseUdp.$split_0
+    parseUdp.$split_0:
+      *:
+        0..1: TH27  # egress::hdr.first_payload.txtstamp[31:16].16-31
+        2..3: TH26  # egress::hdr.first_payload.txtstamp[15:0].0-15
+        B22: 48
+            # - value 1 -> B22 bit[5]: egress::hdr.udp.$valid
+            # - value 1 -> B22 bit[4]: egress::hdr.first_payload.$valid
+        shift: 4
+        buf_req: 4
+        next: end
+    parseL23:
+      *:
+        0..3: TW22  # egress::hdr.first_payload.signature_top
+        4..7: TW21  # egress::hdr.first_payload.signature_bot
+        8..11: TW20  # egress::hdr.first_payload.rx_timestamp
+        12: TB19  # egress::hdr.first_payload.pgid[31:24].24-31
+        13: TB18  # egress::hdr.first_payload.pgid[23:16].16-23
+        14: TB17  # egress::hdr.first_payload.pgid[15:8].8-15
+        15: TB16  # egress::hdr.first_payload.pgid[7:0].0-7
+        16..17: TH29  # egress::hdr.first_payload.sequence[31:16].16-31
+        18..19: TH28  # egress::hdr.first_payload.sequence[15:0].0-15
+        20..21: TH27  # egress::hdr.first_payload.txtstamp[31:16].16-31
+        22..23: TH26  # egress::hdr.first_payload.txtstamp[15:0].0-15
+        shift: 24
+        buf_req: 24
+        next: parseL23.$split_0
+    parseL23.$split_0:
+      *:
+        B22: 16  # value 1 -> B22 bit[4]: egress::hdr.first_payload.$valid
+        buf_req: 0
+        next: end
+    parse_bridge:
+      *:
+        3..4: TH32  # egress::hdr.ethernet.dst_addr[47:32].32-47
+        5..8: TW16  # egress::hdr.ethernet.dst_addr[31:0].0-31
+        9..10: TH31  # egress::hdr.ethernet.src_addr[47:32].32-47
+        11: TB7  # egress::hdr.ethernet.src_addr[31:24].24-31
+        12: TB6  # egress::hdr.ethernet.src_addr[23:16].16-23
+        13..14: TH11  # egress::hdr.ethernet.src_addr[15:0].0-15
+        15..16: TH30  # egress::hdr.ethernet.ether_type
+        B23: 1  # value 1 -> B23 bit[7..0]: egress::meta.ing_port_mirror.pkt_type
+        B17: 1  # value 1 -> B17 bit[7..0]: egress::meta.pkt_type
+        load: { half : 15..16 }
+        shift: 17
+        buf_req: 17
+        next: parse_bridge.$split_0
+    parse_bridge.$split_0:
+      match: [ half ]
+      0x8100:
+        B22: 1  # value 1 -> B22 bit[0]: egress::hdr.ethernet.$valid
+        load: { half : 2..3 }
+        buf_req: 4
+        next: parse_vlan_tag
+      0x0800:
+        B22: 1  # value 1 -> B22 bit[0]: egress::hdr.ethernet.$valid
+        buf_req: 0
+        next: parse_ipv4
+      0x****:
+        B22: 1  # value 1 -> B22 bit[0]: egress::hdr.ethernet.$valid
+        buf_req: 0
+        next: end
+    parse_capture:
+      *:
+        0: B23  # egress::meta.ing_port_mirror.pkt_type
+        1..4: W17  # egress::meta.ing_port_mirror.mac_timestamp
+        B22: 64  # value 1 -> B22 bit[6]: egress::hdr.capture.$valid
+        B17: 3  # value 3 -> B17 bit[7..0]: egress::meta.pkt_type
+        shift: 5
+        buf_req: 5
+        next: end
+    parse_capture_final:
+      *:
+        3: TB4  # egress::hdr.capture.seq_no[23:16].16-23
+        4..5: TH6  # egress::hdr.capture.seq_no[15:0].0-15
+        6: B18  # egress::hdr.capture.reserved
+        7..10: W18  # egress::hdr.capture.timestamp
+        B22: 64  # value 1 -> B22 bit[6]: egress::hdr.capture.$valid
+        B17: 5  # value 5 -> B17 bit[7..0]: egress::meta.pkt_type
+        shift: 11
+        buf_req: 11
+        next: end
+deparser egress:
+  dictionary:
+    TB4: B22(6)  # egress::hdr.capture.seq_no.16-23 if egress::hdr.capture.$valid
+    TH6: B22(6)  # egress::hdr.capture.seq_no.0-15 if egress::hdr.capture.$valid
+    B18: B22(6)  # egress::hdr.capture.reserved if egress::hdr.capture.$valid
+    W18: B22(6)  # egress::hdr.capture.timestamp if egress::hdr.capture.$valid
+    TH32: B22(0)  # egress::hdr.ethernet.dst_addr.32-47 if egress::hdr.ethernet.$valid
+    TW16: B22(0)  # egress::hdr.ethernet.dst_addr.0-31 if egress::hdr.ethernet.$valid
+    TH31: B22(0)  # egress::hdr.ethernet.src_addr.32-47 if egress::hdr.ethernet.$valid
+    TB7: B22(0)  # egress::hdr.ethernet.src_addr.24-31 if egress::hdr.ethernet.$valid
+    TB6: B22(0)  # egress::hdr.ethernet.src_addr.16-23 if egress::hdr.ethernet.$valid
+    TH11: B22(0)  # egress::hdr.ethernet.src_addr.0-15 if egress::hdr.ethernet.$valid
+    TH30: B22(0)  # egress::hdr.ethernet.ether_type if egress::hdr.ethernet.$valid
+    TB4: B22(1)
+        # - bit[7..5]: egress::hdr.vlan_tag.pcp if egress::hdr.vlan_tag.$valid
+        # - bit[4]: egress::hdr.vlan_tag.cfi if egress::hdr.vlan_tag.$valid
+        # - bit[3..0]: egress::hdr.vlan_tag.vid.8-11 if egress::hdr.vlan_tag.$valid
+    TB5: B22(1)  # egress::hdr.vlan_tag.vid.0-7 if egress::hdr.vlan_tag.$valid
+    TH6: B22(1)  # egress::hdr.vlan_tag.ether_type if egress::hdr.vlan_tag.$valid
+    TW4: B22(2)
+        # - bit[31..28]: egress::hdr.ipv4.version if egress::hdr.ipv4.$valid
+        # - bit[27..24]: egress::hdr.ipv4.ihl if egress::hdr.ipv4.$valid
+        # - bit[23..16]: egress::hdr.ipv4.diffserv if egress::hdr.ipv4.$valid
+        # - bit[15..0]: egress::hdr.ipv4.total_len if egress::hdr.ipv4.$valid
+    TW7: B22(2)
+        # - bit[31..16]: egress::hdr.ipv4.identification if egress::hdr.ipv4.$valid
+        # - bit[15..13]: egress::hdr.ipv4.flags if egress::hdr.ipv4.$valid
+        # - bit[12..0]: egress::hdr.ipv4.frag_offset if egress::hdr.ipv4.$valid
+    TW6: B22(2)
+        # - bit[31..24]: egress::hdr.ipv4.ttl if egress::hdr.ipv4.$valid
+        # - bit[23..16]: egress::hdr.ipv4.protocol if egress::hdr.ipv4.$valid
+        # - bit[15..0]: egress::hdr.ipv4.hdr_checksum if egress::hdr.ipv4.$valid
+    TW18: B22(2)  # egress::hdr.ipv4.src_addr if egress::hdr.ipv4.$valid
+    TW17: B22(2)  # egress::hdr.ipv4.dst_addr if egress::hdr.ipv4.$valid
+    TH10: B22(3)  # egress::hdr.tcp.src_port if egress::hdr.tcp.$valid
+    TH9: B22(3)  # egress::hdr.tcp.dst_port if egress::hdr.tcp.$valid
+    TH25: B22(3)  # egress::hdr.tcp.seq_no.16-31 if egress::hdr.tcp.$valid
+    TH24: B22(3)  # egress::hdr.tcp.seq_no.0-15 if egress::hdr.tcp.$valid
+    TW19: B22(3)  # egress::hdr.tcp.ack_no if egress::hdr.tcp.$valid
+    TW5: B22(3)
+        # - bit[31..28]: egress::hdr.tcp.data_offset if egress::hdr.tcp.$valid
+        # - bit[27..24]: egress::hdr.tcp.res if egress::hdr.tcp.$valid
+        # - bit[23..16]: egress::hdr.tcp.flags if egress::hdr.tcp.$valid
+        # - bit[15..0]: egress::hdr.tcp.window if egress::hdr.tcp.$valid
+    TH8: B22(3)  # egress::hdr.tcp.checksum if egress::hdr.tcp.$valid
+    TH7: B22(3)  # egress::hdr.tcp.urgent_ptr if egress::hdr.tcp.$valid
+    TH8: B22(5)  # egress::hdr.udp.src_port if egress::hdr.udp.$valid
+    TH7: B22(5)  # egress::hdr.udp.dst_port if egress::hdr.udp.$valid
+    TW5: B22(5)
+        # - bit[31..16]: egress::hdr.udp.hdr_length if egress::hdr.udp.$valid
+        # - bit[15..0]: egress::hdr.udp.checksum if egress::hdr.udp.$valid
+    TW22: B22(4)  # egress::hdr.first_payload.signature_top if egress::hdr.first_payload.$valid
+    TW21: B22(4)  # egress::hdr.first_payload.signature_bot if egress::hdr.first_payload.$valid
+    TW20: B22(4)  # egress::hdr.first_payload.rx_timestamp if egress::hdr.first_payload.$valid
+    TB19: B22(4)  # egress::hdr.first_payload.pgid.24-31 if egress::hdr.first_payload.$valid
+    TB18: B22(4)  # egress::hdr.first_payload.pgid.16-23 if egress::hdr.first_payload.$valid
+    TB17: B22(4)  # egress::hdr.first_payload.pgid.8-15 if egress::hdr.first_payload.$valid
+    TB16: B22(4)  # egress::hdr.first_payload.pgid.0-7 if egress::hdr.first_payload.$valid
+    TH29: B22(4)  # egress::hdr.first_payload.sequence.16-31 if egress::hdr.first_payload.$valid
+    TH28: B22(4)  # egress::hdr.first_payload.sequence.0-15 if egress::hdr.first_payload.$valid
+    TH27: B22(4)  # egress::hdr.first_payload.txtstamp.16-31 if egress::hdr.first_payload.$valid
+    TH26: B22(4)  # egress::hdr.first_payload.txtstamp.0-15 if egress::hdr.first_payload.$valid
+  egress_unicast_port: H24(0..8)  # bit[8..0]: egress::eg_intr_md.egress_port
+  mirror:
+    select: B16(0..2)  # bit[2..0]: egress::eg_intr_md_for_dprsr.mirror_type
+    2:
+      - H16(0..9)  # bit[9..0]: egress::meta.mirror_session
+      - B17  # egress::meta.pkt_type
+      - W17  # egress::meta.ing_port_mirror.mac_timestamp
+stage 0 ingress:
+  phase0_match IngressParser.$PORT_METADATA:
+    p4:
+      name: IngressParser.$PORT_METADATA
+      size: 288
+      preferred_match_type: exact
+      match_type: exact
+    size: 288
+    p4_param_order:
+      ig_intr_md.ingress_port: { type: exact, size: 9 }
+    format: {port_signature: 32..63, port_type: 24..27, capture_port: 16..23}
+    constant_value: 0
+    actions:
+      set_port_metadata:
+      - handle: 0x20000000
+      - p4_param_order: { port_signature: 32, port_type: 4, capture_port: 8 }
+  exact_match setEgPortTbl_0 1:
+    p4: { name: Ingress.setEgPortTbl, size: 8 }
+    p4_param_order:
+      ig_intr_md.ingress_port: { type: exact, size: 9, full_size: 9 }
+    row: 7
+    bus: 0
+    column: 2
+    stash:
+      row: [ 7 ]
+      col: [ 2 ]
+      unit: [ 0 ]
+    ways:
+      - [0, 0, 0x0, [7, 2]]
+    input_xbar:
+      exact group 0: { 16: ig_intr_md.ingress_port }
+      hash 0:
+        0..7: ig_intr_md.ingress_port(0..7)
+        8: ig_intr_md.ingress_port(8)
+      hash group 0:
+        table: [0]
+        seed: 0x0
+    format: { action(0): 0..1, immediate(0): 2..10, version(0): 112..115 }
+    match_group_map: [ [ 0 ] ]
+    gateway:
+      name: cond-9
+      input_xbar:
+        exact group 0: { 9: hdr.capture.$valid }
+      row: 0
+      bus: 0
+      unit: 0
+      match: { 1: hdr.capture.$valid }
+      0b******1:  tbl_p4c2719l881
+      miss: run_table
+      condition:
+        expression: "(hdr.capture.$valid == 1)"
+        true:  tbl_p4c2719l881
+        false:  setEgPortTbl_0
+    hit: [  ingressMirrorTbl_0 ]
+    miss:  ingressMirrorTbl_0
+    action_bus: { 32..33 : immediate(0..8) }
+    instruction: setEgPortTbl_0(action, $DEFAULT)
+    actions:
+      Ingress.setEgPort(1, 1):
+      - p4_param_order: { egress_port: 9 }
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x20000008
+      - next_table: 0
+      - { egress_port_2: immediate(0..8), egress_port: egress_port_2 }
+      - set ig_intr_md_for_tm.ucast_egress_port, egress_port
+      NoAction(2, 0):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x20000009
+      - next_table: 0
+      - {  }
+    default_action: NoAction
+  ternary_match tbl_p4c2719l881 2:
+    p4: { name: tbl_p4c2719l881, hidden: true }
+    gateway:
+      name: cond-10
+      input_xbar:
+        exact group 0: { 32: meta.pkt_type }
+      row: 7
+      bus: 0
+      unit: 0
+      match: { 0: meta.pkt_type }
+      0x03: run_table
+      miss:  tbl_p4c2719l886
+      condition:
+        expression: "(meta.pkt_type == 3)"
+        true:  tbl_p4c2719l881
+        false:  tbl_p4c2719l886
+    hit: [  tbl_lookupCapturePort ]
+    miss:  tbl_lookupCapturePort
+    indirect: tbl_p4c2719l881$tind
+  stateful tbl_p4c2719l881$salu.Ingress.sequence_no:
+    p4: { name: Ingress.sequence_no, size: 1 }
+    row: 15
+    logical_bus: S
+    column: [ 0, 1 ]
+    maprams: [ 0, 1 ]
+    home_row: 15
+    format: { lo: 16 }
+    actions:
+      update_seq_no_0:
+      - equ lo, lo, -2047
+      - alu_a cmplo, lo, 0
+      - add !cmplo, lo, lo, 1
+      - output mem_lo
+  ternary_indirect tbl_p4c2719l881$tind:
+    row: 0
+    bus: 1
+    format: { action: 0..0, meter_addr: 1..10, meter_pfe: 11..11, meter_type: 12..14 }
+    action_bus: { 36..37 : tbl_p4c2719l881$salu.Ingress.sequence_no(0..15) }
+    stateful: tbl_p4c2719l881$salu.Ingress.sequence_no(meter_addr, meter_pfe, meter_type)
+    instruction: tbl_p4c2719l881$tind(action, $DEFAULT)
+    actions:
+      p4c2719l881(1, 2):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true, is_constant: true }
+      - handle: 0x20000002
+      - next_table: 0
+      - set seq_no_0, tbl_p4c2719l881$salu.Ingress.sequence_no
+      - tbl_p4c2719l881$salu.Ingress.sequence_no(update_seq_no_0, 0)
+    default_action: p4c2719l881
+  ternary_match tbl_p4c2719l886 4:
+    p4: { name: tbl_p4c2719l886, hidden: true }
+    hit: [  ingressMirrorTbl_0 ]
+    miss:  ingressMirrorTbl_0
+    indirect: tbl_p4c2719l886$tind
+  ternary_indirect tbl_p4c2719l886$tind:
+    row: 1
+    bus: 1
+    format: { action: 0..0 }
+    instruction: tbl_p4c2719l886$tind(action, $DEFAULT)
+    actions:
+      p4c2719l886(0, 4):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true, is_constant: true }
+      - handle: 0x20000007
+      - next_table: 0
+      - set ig_intr_md_for_dprsr.drop_ctl, 1
+    default_action: p4c2719l886
+  ternary_match tbl_lookupCapturePort 3:
+    p4: { name: tbl_lookupCapturePort, hidden: true }
+    hit: [  setCaptureTbl_0 ]
+    miss:  setCaptureTbl_0
+    indirect: tbl_lookupCapturePort$tind
+  ternary_indirect tbl_lookupCapturePort$tind:
+    row: 0
+    bus: 0
+    format: { action: 0..0 }
+    instruction: tbl_lookupCapturePort$tind(action, $DEFAULT)
+    actions:
+      Ingress.lookupCapturePort(0, 3):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true, is_constant: true }
+      - handle: 0x20000001
+      - next_table: 0
+      - set capture_port_1, hdr.capture.reserved
+    default_action: Ingress.lookupCapturePort
+stage 1 ingress:
+  dependency: match
+  ternary_match setCaptureTbl_0 1:
+    p4: { name: Ingress.setCaptureTbl, size: 8 }
+    p4_param_order:
+      capture_port_1: { type: ternary, size: 8, full_size: 8, key_name: "capture_port" }
+    row: 0
+    bus: 0
+    column: 0
+    input_xbar:
+      ternary group 0: { 0: capture_port_1 }
+    match:
+    - { group: 0, byte_config: 3, dirtcam: 0x1 }
+    hit: [  insertOverheadTbl_0 ]
+    miss:  insertOverheadTbl_0
+    indirect: setCaptureTbl_0$tind
+  ternary_indirect setCaptureTbl_0$tind:
+    row: 0
+    bus: 0
+    column: 2
+    input_xbar:
+      ternary group 0: { 0: capture_port_1 }
+    format: { action: 0..0, immediate: 1..9 }
+    action_bus: { 32..33 : immediate(0..8) }
+    instruction: setCaptureTbl_0$tind(action, $DEFAULT)
+    actions:
+      Ingress.setCaptureEgPort(0, 1):
+      - p4_param_order: { egress_port: 9 }
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x20000005
+      - next_table: 0
+      - { egress_port_3: immediate(0..8), egress_port: egress_port_3 }
+      - set ig_intr_md_for_tm.ucast_egress_port, egress_port
+      NoAction(1, 0):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x20000006
+      - next_table: 0
+      - {  }
+    default_action: NoAction
+  exact_match insertOverheadTbl_0 2:
+    p4: { name: Ingress.insertOverheadTbl, size: 2048 }
+    p4_param_order:
+      seq_no_0: { type: exact, size: 16, full_size: 16, key_name: "seq_no" }
+    row: 7
+    bus: 0
+    column: [ 2, 3, 4, 6 ]
+    stash:
+      row: [ 7 ]
+      col: [ 2 ]
+      unit: [ 0 ]
+    ways:
+      - [1, 0, 0x0, [7, 2]]
+      - [1, 1, 0x0, [7, 3]]
+      - [1, 2, 0x0, [7, 4]]
+      - [1, 3, 0x0, [7, 6]]
+    input_xbar:
+      exact group 0: { 64: seq_no_0 }
+      hash 1:
+        0..7: random(seq_no_0(10..15)) ^ seq_no_0(0..7)
+        8..9: random(seq_no_0(10..15)) ^ seq_no_0(8..9)
+        11..18: random(seq_no_0(10..15)) ^ seq_no_0(0..7)
+        19: random(seq_no_0(10..15)) ^ seq_no_0(8)
+        10: random(seq_no_0(10..15)) ^ seq_no_0(9)
+        22..29: random(seq_no_0(10..15)) ^ seq_no_0(0..7)
+        20..21: random(seq_no_0(10..15)) ^ seq_no_0(8..9)
+        33..39: random(seq_no_0(10..15)) ^ seq_no_0(0..6)
+        30: random(seq_no_0(10..15)) ^ seq_no_0(7)
+        31..32: random(seq_no_0(10..15)) ^ seq_no_0(8..9)
+      hash group 1:
+        table: [1]
+        seed: 0xc92687df45
+    format: { immediate(0): 0..23, version(0): 112..115, match(0): 34..39 }
+    match: [ seq_no_0(10..15) ]
+    match_group_map: [ [ 0 ] ]
+    hit: [  ingressMirrorTbl_0 ]
+    miss:  ingressMirrorTbl_0
+    action_bus: { 96..99 : immediate(0..23) }
+    instruction: insertOverheadTbl_0($DEFAULT, $DEFAULT)
+    actions:
+      Ingress.insert_seq_no(0, 2):
+      - p4_param_order: { calculated_ov: 24 }
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x20000003
+      - next_table: 0
+      - { calculated_ov: immediate(0..23) }
+      - set hdr.capture.seq_no, calculated_ov
+      NoAction(-1, 0):
+      - hit_allowed: { allowed: false, reason: user_indicated_default_only }
+      - default_only_action: { allowed: true }
+      - handle: 0x20000004
+      - next_table: 0
+      - {  }
+    default_only_action: NoAction
+  exact_match ingressMirrorTbl_0 3:
+    p4: { name: Ingress.ingressMirrorTbl, size: 1 }
+    p4_param_order:
+      ig_intr_md.ingress_port: { type: exact, size: 9, full_size: 9 }
+    row: 6
+    bus: 0
+    column: 2
+    stash:
+      row: [ 6 ]
+      col: [ 2 ]
+      unit: [ 0 ]
+    ways:
+      - [0, 1, 0x0, [6, 2]]
+    hash_dist:
+      0: { hash: 2, mask: 0xffff, shift: 0 }
+      1: { hash: 2, mask: 0xffff, shift: 0 }
+    input_xbar:
+      exact group 0: { 16: ig_intr_md.ingress_port }
+      hash 0:
+        10..17: ig_intr_md.ingress_port(0..7)
+        18: ig_intr_md.ingress_port(8)
+      hash group 0:
+        table: [0]
+        seed: 0x0
+      exact group 1: { 0: ig_intr_md.ingress_mac_tstamp.0-31(0..7), 8: ig_intr_md.ingress_mac_tstamp.40-47, 16: ig_intr_md.ingress_mac_tstamp.0-31(16..31), 32: ig_intr_md.ingress_mac_tstamp.32-39, 40: ig_intr_md.ingress_mac_tstamp.0-31(8..15) }
+      hash 2:
+        0..7: ig_intr_md.ingress_mac_tstamp.0-31(0..7)
+        8..15: ig_intr_md.ingress_mac_tstamp.0-31(8..15)
+      hash group 2:
+        table: [2]
+        seed: 0x0
+      exact group 1: { 0: ig_intr_md.ingress_mac_tstamp.0-31(0..7), 8: ig_intr_md.ingress_mac_tstamp.40-47, 16: ig_intr_md.ingress_mac_tstamp.0-31(16..31), 32: ig_intr_md.ingress_mac_tstamp.32-39, 40: ig_intr_md.ingress_mac_tstamp.0-31(8..15) }
+      hash 2:
+        16..31: ig_intr_md.ingress_mac_tstamp.0-31(16..31)
+      hash group 2:
+        table: [2]
+        seed: 0x0
+    format: { action(0): 0..0, version(0): 112..115 }
+    match_group_map: [ [ 0 ] ]
+    hit: [  END ]
+    miss:  END
+    action_bus: { 100..103 : hash_dist(0, 1) }
+    action: ingressMirrorTbl_0$action_data($DIRECT, $DEFAULT)
+    instruction: ingressMirrorTbl_0(action, $DEFAULT)
+    actions:
+      Ingress.set_mirror_session_capture(0, 3):
+      - p4_param_order: { mirror_session: 10 }
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x2000000a
+      - next_table: 0
+      - { mirror_session_2: $adf_h0(0..9), mirror_session: mirror_session_2 }
+      - set ig_intr_md_for_dprsr.mirror_type, 1
+      - set ig_intr_md_for_tm.mcast_grp_a, 0
+      - set meta.mirror_session, mirror_session
+      - set meta.pkt_type, 3
+      - set W2, hash_dist(0, 1, 0..31)
+      NoAction(1, 0):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x2000000b
+      - next_table: 0
+      - {  }
+    default_action: NoAction
+  action ingressMirrorTbl_0$action_data:
+    p4: { name: Ingress.ingressMirrorTbl$action }
+    row: 14
+    logical_bus: A
+    column: 5
+    vpns: [ 0 ]
+    home_row:
+    - 14
+    format Ingress.set_mirror_session_capture: { $adf_h0: 0..15 }
+    action_bus: { 36..37 : $adf_h0 }
+stage 0 egress:
+  ternary_match tbl_update_register_partial_length 0:
+    p4: { name: tbl_update_register_partial_length, hidden: true }
+    gateway:
+      name: cond-11
+      input_xbar:
+        exact group 0: { 6: hdr.capture.$valid }
+      row: 0
+      bus: 1
+      unit: 1
+      match: { 6: hdr.capture.$valid }
+      0b*1: run_table
+      miss:  tbl_insert_capture
+      condition:
+        expression: "(hdr.capture.$valid == 1)"
+        true:  tbl_update_register_partial_length
+        false:  tbl_insert_capture
+    hit: [  update_register_captureLookupTbl ]
+    miss:  update_register_captureLookupTbl
+    indirect: tbl_update_register_partial_length$tind
+  ternary_indirect tbl_update_register_partial_length$tind:
+    row: 1
+    bus: 0
+    format: { action: 0..0 }
+    instruction: tbl_update_register_partial_length$tind(action, $DEFAULT)
+    actions:
+      Egress.update_register.partial_length(1, 1):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true, is_constant: true }
+      - handle: 0x2000000c
+      - next_table: 0
+      - shru update_register_portion, eg_intr_md.pkt_length, 2
+    default_action: Egress.update_register.partial_length
+stage 1 egress:
+  dependency: action
+  exact_match update_register_captureLookupTbl 0:
+    p4: { name: Egress.update_register.captureLookupTbl, size: 32 }
+    p4_param_order:
+      eg_intr_md.egress_port: { type: exact, size: 9, full_size: 9, key_name: "inport" }
+    row: 7
+    bus: 1
+    column: 7
+    stash:
+      row: [ 7 ]
+      col: [ 7 ]
+      unit: [ 1 ]
+    ways:
+      - [0, 0, 0x0, [7, 7]]
+    input_xbar:
+      exact group 0: { 0: eg_intr_md.egress_port }
+      hash 0:
+        0..7: eg_intr_md.egress_port(0..7)
+        8: eg_intr_md.egress_port(8)
+      hash group 0:
+        table: [0]
+        seed: 0x0
+    format: { action(0): 0..0, version(0): 112..115, counter_addr(0): 1..10, counter_pfe(0): 11..11, meter_addr(0): 12..21, meter_pfe(0): 22..22 }
+    match_group_map: [ [ 0 ] ]
+    hit: [  tbl_update_register_negate_pad ]
+    miss:  tbl_update_register_negate_pad
+    action_bus: { 0 : update_register_captureLookupTbl$salu.Egress.update_register.random_assign(0..7) }
+    stats: update_register_captureLookupTbl$stats.Egress.update_register.debug_stats(counter_addr, counter_pfe)
+    stateful: update_register_captureLookupTbl$salu.Egress.update_register.random_assign(meter_addr, meter_pfe, $DEFAULT)
+    instruction: update_register_captureLookupTbl(action, $DEFAULT)
+    actions:
+      Egress.update_register.lookupIndex(0, 1):
+      - p4_param_order: { port: 8 }
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x2000000d
+      - next_table: 0
+      - { port: counter_addr }
+      - set update_register_capture_port, hdr.capture.reserved
+      - add update_register_padded_length, eg_intr_md.pkt_length, update_register_portion
+      - update_register_captureLookupTbl$stats.Egress.update_register.debug_stats(port)
+      Egress.update_register.lookupCapturePort(1, 2):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x2000000e
+      - next_table: 0
+      - set update_register_capture_port, update_register_captureLookupTbl$salu.Egress.update_register.random_assign
+      - set update_register_padded_length, update_register_portion
+      - update_register_captureLookupTbl$salu.Egress.update_register.random_assign(update_register_random_assign_reg, 0)
+    default_action: Egress.update_register.lookupCapturePort
+  counter update_register_captureLookupTbl$stats.Egress.update_register.debug_stats:
+    p4: { name: Egress.update_register.debug_stats, size: 8 }
+    row: 13
+    logical_bus: S
+    column: [ 0, 1 ]
+    maprams: [ 0, 1 ]
+    vpns: [ 0, 1 ]
+    home_row: 13
+    count: packets
+    format: {packets(0): 64..127, packets(1): 0..63}
+    per_flow_enable: counter_pfe
+  stateful update_register_captureLookupTbl$salu.Egress.update_register.random_assign:
+    p4: { name: Egress.update_register.random_assign, size: 1 }
+    row: 15
+    logical_bus: S
+    column: [ 2, 3 ]
+    maprams: [ 2, 3 ]
+    home_row: 15
+    format: { lo: 8 }
+    actions:
+      update_register_random_assign_reg:
+      - equ lo, lo, -4
+      - alu_a cmplo, lo, 0
+      - add !cmplo, lo, lo, 1
+      - output mem_lo
+stage 2 egress:
+  dependency: action
+  ternary_match tbl_update_register_negate_pad 0:
+    p4: { name: tbl_update_register_negate_pad, hidden: true }
+    hit: [  update_register_LengthLookupTbl ]
+    miss:  update_register_LengthLookupTbl
+    indirect: tbl_update_register_negate_pad$tind
+  ternary_indirect tbl_update_register_negate_pad$tind:
+    row: 0
+    bus: 0
+    format: { action: 0..0 }
+    instruction: tbl_update_register_negate_pad$tind(action, $DEFAULT)
+    actions:
+      Egress.update_register.negate_pad(0, 1):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true, is_constant: true }
+      - handle: 0x2000000f
+      - next_table: 0
+      - not update_register_negated_length, update_register_padded_length
+      - shl update_register_load_length, update_register_padded_length, 2
+    default_action: Egress.update_register.negate_pad
+stage 3 egress:
+  dependency: match
+  ternary_match update_register_LengthLookupTbl 0:
+    p4: { name: Egress.update_register.LengthLookupTbl, size: 32 }
+    p4_param_order:
+      meta.pkt_type: { type: exact, size: 8, full_size: 8, key_name: "pkt_type" }
+      update_register_capture_port: { type: ternary, size: 8, full_size: 8, key_name: "capture_port" }
+    row: 0
+    bus: 0
+    column: 0
+    input_xbar:
+      ternary group 0: { 0: meta.pkt_type, 8: update_register_capture_port }
+    match:
+    - { group: 0, byte_config: 3, dirtcam: 0x5 }
+    hit: [  tbl_p4c2719l720 ]
+    miss:  tbl_p4c2719l720
+    context_json:
+      static_entries:
+      - priority: 0
+        match_key_fields_values:
+        - field_name: pkt_type
+          value: "0x3"
+        - field_name: capture_port
+          value: "0x0"
+          mask: "0x7"
+        action_handle: 0x20000010
+        is_default_entry: false
+        action_parameters_values: []
+      - priority: 1
+        match_key_fields_values:
+        - field_name: pkt_type
+          value: "0x3"
+        - field_name: capture_port
+          value: "0x1"
+          mask: "0x7"
+        action_handle: 0x20000011
+        is_default_entry: false
+        action_parameters_values: []
+      - priority: 2
+        match_key_fields_values:
+        - field_name: pkt_type
+          value: "0x3"
+        - field_name: capture_port
+          value: "0x2"
+          mask: "0x7"
+        action_handle: 0x20000012
+        is_default_entry: false
+        action_parameters_values: []
+      - priority: 3
+        match_key_fields_values:
+        - field_name: pkt_type
+          value: "0x3"
+        - field_name: capture_port
+          value: "0x3"
+          mask: "0x7"
+        action_handle: 0x20000013
+        is_default_entry: false
+        action_parameters_values: []
+      - priority: 4
+        match_key_fields_values:
+        - field_name: pkt_type
+          value: "0x3"
+        - field_name: capture_port
+          value: "0x4"
+          mask: "0x7"
+        action_handle: 0x20000014
+        is_default_entry: false
+        action_parameters_values: []
+      - priority: 5
+        match_key_fields_values:
+        - field_name: pkt_type
+          value: "0x5"
+        - field_name: capture_port
+          value: "0x4"
+          mask: "0xFF"
+        action_handle: 0x20000018
+        is_default_entry: false
+        action_parameters_values: []
+      - priority: 6
+        match_key_fields_values:
+        - field_name: pkt_type
+          value: "0x5"
+        - field_name: capture_port
+          value: "0x3"
+          mask: "0xFF"
+        action_handle: 0x20000017
+        is_default_entry: false
+        action_parameters_values: []
+      - priority: 7
+        match_key_fields_values:
+        - field_name: pkt_type
+          value: "0x5"
+        - field_name: capture_port
+          value: "0x2"
+          mask: "0xFF"
+        action_handle: 0x20000016
+        is_default_entry: false
+        action_parameters_values: []
+      - priority: 8
+        match_key_fields_values:
+        - field_name: pkt_type
+          value: "0x5"
+        - field_name: capture_port
+          value: "0x1"
+          mask: "0xFF"
+        action_handle: 0x20000015
+        is_default_entry: false
+        action_parameters_values: []
+      - priority: 9
+        match_key_fields_values:
+        - field_name: pkt_type
+          value: "0x5"
+        - field_name: capture_port
+          value: "0x14"
+          mask: "0xFF"
+        action_handle: 0x2000001c
+        is_default_entry: false
+        action_parameters_values: []
+      - priority: 10
+        match_key_fields_values:
+        - field_name: pkt_type
+          value: "0x5"
+        - field_name: capture_port
+          value: "0x13"
+          mask: "0xFF"
+        action_handle: 0x2000001b
+        is_default_entry: false
+        action_parameters_values: []
+      - priority: 11
+        match_key_fields_values:
+        - field_name: pkt_type
+          value: "0x5"
+        - field_name: capture_port
+          value: "0x12"
+          mask: "0xFF"
+        action_handle: 0x2000001a
+        is_default_entry: false
+        action_parameters_values: []
+      - priority: 12
+        match_key_fields_values:
+        - field_name: pkt_type
+          value: "0x5"
+        - field_name: capture_port
+          value: "0x10"
+          mask: "0xFF"
+        action_handle: 0x20000019
+        is_default_entry: false
+        action_parameters_values: []
+      - priority: 13
+        match_key_fields_values:
+        - field_name: pkt_type
+          value: "0x5"
+        - field_name: capture_port
+          value: "0x24"
+          mask: "0xFF"
+        action_handle: 0x20000020
+        is_default_entry: false
+        action_parameters_values: []
+      - priority: 14
+        match_key_fields_values:
+        - field_name: pkt_type
+          value: "0x5"
+        - field_name: capture_port
+          value: "0x23"
+          mask: "0xFF"
+        action_handle: 0x2000001f
+        is_default_entry: false
+        action_parameters_values: []
+      - priority: 15
+        match_key_fields_values:
+        - field_name: pkt_type
+          value: "0x5"
+        - field_name: capture_port
+          value: "0x21"
+          mask: "0xFF"
+        action_handle: 0x2000001e
+        is_default_entry: false
+        action_parameters_values: []
+      - priority: 16
+        match_key_fields_values:
+        - field_name: pkt_type
+          value: "0x5"
+        - field_name: capture_port
+          value: "0x20"
+          mask: "0xFF"
+        action_handle: 0x2000001d
+        is_default_entry: false
+        action_parameters_values: []
+      - priority: 17
+        match_key_fields_values:
+        - field_name: pkt_type
+          value: "0x5"
+        - field_name: capture_port
+          value: "0x34"
+          mask: "0xFF"
+        action_handle: 0x20000024
+        is_default_entry: false
+        action_parameters_values: []
+      - priority: 18
+        match_key_fields_values:
+        - field_name: pkt_type
+          value: "0x5"
+        - field_name: capture_port
+          value: "0x32"
+          mask: "0xFF"
+        action_handle: 0x20000023
+        is_default_entry: false
+        action_parameters_values: []
+      - priority: 19
+        match_key_fields_values:
+        - field_name: pkt_type
+          value: "0x5"
+        - field_name: capture_port
+          value: "0x31"
+          mask: "0xFF"
+        action_handle: 0x20000022
+        is_default_entry: false
+        action_parameters_values: []
+      - priority: 20
+        match_key_fields_values:
+        - field_name: pkt_type
+          value: "0x5"
+        - field_name: capture_port
+          value: "0x30"
+          mask: "0xFF"
+        action_handle: 0x20000021
+        is_default_entry: false
+        action_parameters_values: []
+      - priority: 21
+        match_key_fields_values:
+        - field_name: pkt_type
+          value: "0x5"
+        - field_name: capture_port
+          value: "0x43"
+          mask: "0xFF"
+        action_handle: 0x20000028
+        is_default_entry: false
+        action_parameters_values: []
+      - priority: 22
+        match_key_fields_values:
+        - field_name: pkt_type
+          value: "0x5"
+        - field_name: capture_port
+          value: "0x42"
+          mask: "0xFF"
+        action_handle: 0x20000027
+        is_default_entry: false
+        action_parameters_values: []
+      - priority: 23
+        match_key_fields_values:
+        - field_name: pkt_type
+          value: "0x5"
+        - field_name: capture_port
+          value: "0x41"
+          mask: "0xFF"
+        action_handle: 0x20000026
+        is_default_entry: false
+        action_parameters_values: []
+      - priority: 24
+        match_key_fields_values:
+        - field_name: pkt_type
+          value: "0x5"
+        - field_name: capture_port
+          value: "0x40"
+          mask: "0xFF"
+        action_handle: 0x20000025
+        is_default_entry: false
+        action_parameters_values: []
+    indirect: update_register_LengthLookupTbl$tind
+  ternary_indirect update_register_LengthLookupTbl$tind:
+    row: 0
+    bus: 0
+    column: 2
+    input_xbar:
+      ternary group 0: { 0: meta.pkt_type, 8: update_register_capture_port }
+    format: { action: 0..5 }
+    instruction: update_register_LengthLookupTbl$tind(action, $DEFAULT)
+    actions:
+      Egress.update_register.capture_port_1(1, 1):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x20000010
+      - next_table: 0
+      - set update_register_cap_length, update_register_load_length
+      - add update_register_cap_length_0, update_register_negated_length, 1
+      - add update_register_cap_length_1, update_register_negated_length, 1
+      - add update_register_cap_length_2, update_register_negated_length, 1
+      - add update_register_cap_length_3, update_register_negated_length, 1
+      Egress.update_register.capture_port_2(2, 2):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x20000011
+      - next_table: 0
+      - set update_register_cap_length_0, update_register_load_length
+      - add update_register_cap_length, update_register_negated_length, 1
+      - add update_register_cap_length_1, update_register_negated_length, 1
+      - add update_register_cap_length_2, update_register_negated_length, 1
+      - add update_register_cap_length_3, update_register_negated_length, 1
+      Egress.update_register.capture_port_3(4, 4):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x20000012
+      - next_table: 0
+      - set update_register_cap_length_1, update_register_load_length
+      - add update_register_cap_length_0, update_register_negated_length, 1
+      - add update_register_cap_length, update_register_negated_length, 1
+      - add update_register_cap_length_2, update_register_negated_length, 1
+      - add update_register_cap_length_3, update_register_negated_length, 1
+      Egress.update_register.capture_port_4(6, 6):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x20000013
+      - next_table: 0
+      - set update_register_cap_length_2, update_register_load_length
+      - add update_register_cap_length_0, update_register_negated_length, 1
+      - add update_register_cap_length_1, update_register_negated_length, 1
+      - add update_register_cap_length, update_register_negated_length, 1
+      - add update_register_cap_length_3, update_register_negated_length, 1
+      Egress.update_register.capture_port_5(8, 8):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x20000014
+      - next_table: 0
+      - set update_register_cap_length_3, update_register_load_length
+      - add update_register_cap_length_0, update_register_negated_length, 1
+      - add update_register_cap_length_1, update_register_negated_length, 1
+      - add update_register_cap_length_2, update_register_negated_length, 1
+      - add update_register_cap_length, update_register_negated_length, 1
+      Egress.update_register.comp_port_1_2(10, 10):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x20000015
+      - next_table: 0
+      - add update_register_cap_length, update_register_negated_length, 1
+      - set update_register_cap_length_0, update_register_padded_length
+      - set update_register_cap_length_1, 0
+      - set update_register_cap_length_2, 0
+      - set update_register_cap_length_3, 0
+      Egress.update_register.comp_port_1_3(12, 12):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x20000016
+      - next_table: 0
+      - add update_register_cap_length, update_register_negated_length, 1
+      - set update_register_cap_length_0, 0
+      - set update_register_cap_length_1, update_register_padded_length
+      - set update_register_cap_length_2, 0
+      - set update_register_cap_length_3, 0
+      Egress.update_register.comp_port_1_4(14, 14):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x20000017
+      - next_table: 0
+      - add update_register_cap_length, update_register_negated_length, 1
+      - set update_register_cap_length_0, 0
+      - set update_register_cap_length_1, 0
+      - set update_register_cap_length_2, update_register_padded_length
+      - set update_register_cap_length_3, 0
+      Egress.update_register.comp_port_1_5(16, 16):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x20000018
+      - next_table: 0
+      - add update_register_cap_length, update_register_negated_length, 1
+      - set update_register_cap_length_0, 0
+      - set update_register_cap_length_1, 0
+      - set update_register_cap_length_2, 0
+      - set update_register_cap_length_3, update_register_padded_length
+      Egress.update_register.comp_port_2_1(18, 18):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x20000019
+      - next_table: 0
+      - set update_register_cap_length, update_register_padded_length
+      - add update_register_cap_length_0, update_register_negated_length, 1
+      - set update_register_cap_length_1, 0
+      - set update_register_cap_length_2, 0
+      - set update_register_cap_length_3, 0
+      Egress.update_register.comp_port_2_3(20, 20):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x2000001a
+      - next_table: 0
+      - set update_register_cap_length, 0
+      - add update_register_cap_length_0, update_register_negated_length, 1
+      - set update_register_cap_length_1, update_register_padded_length
+      - set update_register_cap_length_2, 0
+      - set update_register_cap_length_3, 0
+      Egress.update_register.comp_port_2_4(22, 22):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x2000001b
+      - next_table: 0
+      - set update_register_cap_length, 0
+      - add update_register_cap_length_0, update_register_negated_length, 1
+      - set update_register_cap_length_1, 0
+      - set update_register_cap_length_2, update_register_padded_length
+      - set update_register_cap_length_3, 0
+      Egress.update_register.comp_port_2_5(24, 24):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x2000001c
+      - next_table: 0
+      - set update_register_cap_length, 0
+      - add update_register_cap_length_0, update_register_negated_length, 1
+      - set update_register_cap_length_1, 0
+      - set update_register_cap_length_2, 0
+      - set update_register_cap_length_3, update_register_padded_length
+      Egress.update_register.comp_port_3_1(26, 26):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x2000001d
+      - next_table: 0
+      - set update_register_cap_length, update_register_padded_length
+      - set update_register_cap_length_0, 0
+      - add update_register_cap_length_1, update_register_negated_length, 1
+      - set update_register_cap_length_2, 0
+      - set update_register_cap_length_3, 0
+      Egress.update_register.comp_port_3_2(28, 28):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x2000001e
+      - next_table: 0
+      - set update_register_cap_length, 0
+      - set update_register_cap_length_0, update_register_padded_length
+      - add update_register_cap_length_1, update_register_negated_length, 1
+      - set update_register_cap_length_2, 0
+      - set update_register_cap_length_3, 0
+      Egress.update_register.comp_port_3_4(30, 30):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x2000001f
+      - next_table: 0
+      - set update_register_cap_length, 0
+      - set update_register_cap_length_0, 0
+      - add update_register_cap_length_1, update_register_negated_length, 1
+      - set update_register_cap_length_2, update_register_padded_length
+      - set update_register_cap_length_3, 0
+      Egress.update_register.comp_port_3_5(32, 32):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x20000020
+      - next_table: 0
+      - set update_register_cap_length, 0
+      - set update_register_cap_length_0, 0
+      - add update_register_cap_length_1, update_register_negated_length, 1
+      - set update_register_cap_length_2, 0
+      - set update_register_cap_length_3, update_register_padded_length
+      Egress.update_register.comp_port_4_1(34, 34):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x20000021
+      - next_table: 0
+      - set update_register_cap_length, update_register_padded_length
+      - set update_register_cap_length_0, 0
+      - set update_register_cap_length_1, 0
+      - add update_register_cap_length_2, update_register_negated_length, 1
+      - set update_register_cap_length_3, 0
+      Egress.update_register.comp_port_4_2(36, 36):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x20000022
+      - next_table: 0
+      - set update_register_cap_length, 0
+      - set update_register_cap_length_0, update_register_padded_length
+      - set update_register_cap_length_1, 0
+      - add update_register_cap_length_2, update_register_negated_length, 1
+      - set update_register_cap_length_3, 0
+      Egress.update_register.comp_port_4_3(38, 38):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x20000023
+      - next_table: 0
+      - set update_register_cap_length, 0
+      - set update_register_cap_length_0, 0
+      - set update_register_cap_length_1, update_register_padded_length
+      - add update_register_cap_length_2, update_register_negated_length, 1
+      - set update_register_cap_length_3, 0
+      Egress.update_register.comp_port_4_5(40, 40):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x20000024
+      - next_table: 0
+      - set update_register_cap_length, 0
+      - set update_register_cap_length_0, 0
+      - set update_register_cap_length_1, 0
+      - add update_register_cap_length_2, update_register_negated_length, 1
+      - set update_register_cap_length_3, update_register_padded_length
+      Egress.update_register.comp_port_5_1(42, 42):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x20000025
+      - next_table: 0
+      - set update_register_cap_length, update_register_padded_length
+      - set update_register_cap_length_0, 0
+      - set update_register_cap_length_1, 0
+      - set update_register_cap_length_2, 0
+      - add update_register_cap_length_3, update_register_negated_length, 1
+      Egress.update_register.comp_port_5_2(44, 44):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x20000026
+      - next_table: 0
+      - set update_register_cap_length, 0
+      - set update_register_cap_length_0, update_register_padded_length
+      - set update_register_cap_length_1, 0
+      - set update_register_cap_length_2, 0
+      - add update_register_cap_length_3, update_register_negated_length, 1
+      Egress.update_register.comp_port_5_3(46, 46):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x20000027
+      - next_table: 0
+      - set update_register_cap_length, 0
+      - set update_register_cap_length_0, 0
+      - set update_register_cap_length_1, update_register_padded_length
+      - set update_register_cap_length_2, 0
+      - add update_register_cap_length_3, update_register_negated_length, 1
+      Egress.update_register.comp_port_5_4(48, 48):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x20000028
+      - next_table: 0
+      - set update_register_cap_length, 0
+      - set update_register_cap_length_0, 0
+      - set update_register_cap_length_1, 0
+      - set update_register_cap_length_2, update_register_padded_length
+      - add update_register_cap_length_3, update_register_negated_length, 1
+      NoAction(0, 0):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x20000029
+      - next_table: 0
+    default_action: NoAction
+stage 4 egress:
+  dependency: match
+  ternary_match tbl_p4c2719l720 0:
+    p4: { name: tbl_p4c2719l720, hidden: true }
+    hit: [  tbl_p4c2719l721 ]
+    miss:  tbl_p4c2719l721
+    indirect: tbl_p4c2719l720$tind
+  stateful tbl_p4c2719l720$salu.Egress.update_register.active_debt_reg0:
+    p4: { name: Egress.update_register.active_debt_reg0, size: 1 }
+    row: 15
+    logical_bus: S
+    column: [ 0, 1 ]
+    maprams: [ 0, 1 ]
+    home_row: 15
+    input_xbar:
+      exact group 0: { 64: update_register_cap_length }
+    data_bytemask: 3
+    format: { lo: 16 }
+    initial_value: { lo: 4095 , hi: 0 }
+    actions:
+      update_register_increase_reg0:
+      - add lo, phv_lo, lo
+      - output mem_lo
+  ternary_indirect tbl_p4c2719l720$tind:
+    row: 0
+    bus: 0
+    format: { action: 0..0, meter_addr: 1..10 }
+    action_bus: { 32..33 : tbl_p4c2719l720$salu.Egress.update_register.active_debt_reg0(0..15) }
+    stateful: tbl_p4c2719l720$salu.Egress.update_register.active_debt_reg0(meter_addr, $DEFAULT, $DEFAULT)
+    instruction: tbl_p4c2719l720$tind(action, $DEFAULT)
+    actions:
+      p4c2719l720(0, 1):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true, is_constant: true }
+      - handle: 0x2000002a
+      - next_table: 0
+      - set update_register_debt0, tbl_p4c2719l720$salu.Egress.update_register.active_debt_reg0
+      - tbl_p4c2719l720$salu.Egress.update_register.active_debt_reg0(update_register_increase_reg0, 0)
+    default_action: p4c2719l720
+stage 5 egress:
+  dependency: match
+  ternary_match tbl_p4c2719l721 0:
+    p4: { name: tbl_p4c2719l721, hidden: true }
+    hit: [  tbl_p4c2719l722 ]
+    miss:  tbl_p4c2719l722
+    indirect: tbl_p4c2719l721$tind
+  stateful tbl_p4c2719l721$salu.Egress.update_register.active_debt_reg1:
+    p4: { name: Egress.update_register.active_debt_reg1, size: 1 }
+    row: 15
+    logical_bus: S
+    column: [ 0, 1 ]
+    maprams: [ 0, 1 ]
+    home_row: 15
+    input_xbar:
+      exact group 0: { 64: update_register_debt0, 80: update_register_cap_length_0 }
+    data_bytemask: 15
+    format: { lo: 16 }
+    initial_value: { lo: 4095 , hi: 0 }
+    actions:
+      update_register_increase_reg1:
+      - minu hi, phv_lo, lo
+      - add lo, phv_hi, lo
+      - output alu_hi
+  ternary_indirect tbl_p4c2719l721$tind:
+    row: 0
+    bus: 0
+    format: { action: 0..0, meter_addr: 1..10 }
+    action_bus: { 32..33 : tbl_p4c2719l721$salu.Egress.update_register.active_debt_reg1(0..15) }
+    stateful: tbl_p4c2719l721$salu.Egress.update_register.active_debt_reg1(meter_addr, $DEFAULT, $DEFAULT)
+    instruction: tbl_p4c2719l721$tind(action, $DEFAULT)
+    actions:
+      p4c2719l721(0, 1):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true, is_constant: true }
+      - handle: 0x2000002b
+      - next_table: 0
+      - set update_register_debt1, tbl_p4c2719l721$salu.Egress.update_register.active_debt_reg1
+      - tbl_p4c2719l721$salu.Egress.update_register.active_debt_reg1(update_register_increase_reg1, 0)
+    default_action: p4c2719l721
+stage 6 egress:
+  dependency: match
+  ternary_match tbl_p4c2719l722 0:
+    p4: { name: tbl_p4c2719l722, hidden: true }
+    hit: [  tbl_p4c2719l732 ]
+    miss:  tbl_p4c2719l732
+    indirect: tbl_p4c2719l722$tind
+  stateful tbl_p4c2719l722$salu.Egress.update_register.active_debt_reg2:
+    p4: { name: Egress.update_register.active_debt_reg2, size: 1 }
+    row: 15
+    logical_bus: S
+    column: [ 0, 1 ]
+    maprams: [ 0, 1 ]
+    home_row: 15
+    input_xbar:
+      exact group 0: { 64: update_register_debt1, 80: update_register_cap_length_1 }
+    data_bytemask: 15
+    format: { lo: 16 }
+    initial_value: { lo: 4095 , hi: 0 }
+    actions:
+      update_register_increase_reg2:
+      - minu hi, phv_lo, lo
+      - add lo, phv_hi, lo
+      - output alu_hi
+  ternary_indirect tbl_p4c2719l722$tind:
+    row: 0
+    bus: 0
+    format: { action: 0..0, meter_addr: 1..10 }
+    action_bus: { 32..33 : tbl_p4c2719l722$salu.Egress.update_register.active_debt_reg2(0..15) }
+    stateful: tbl_p4c2719l722$salu.Egress.update_register.active_debt_reg2(meter_addr, $DEFAULT, $DEFAULT)
+    instruction: tbl_p4c2719l722$tind(action, $DEFAULT)
+    actions:
+      p4c2719l722(0, 1):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true, is_constant: true }
+      - handle: 0x2000002c
+      - next_table: 0
+      - set update_register_debt2, tbl_p4c2719l722$salu.Egress.update_register.active_debt_reg2
+      - tbl_p4c2719l722$salu.Egress.update_register.active_debt_reg2(update_register_increase_reg2, 0)
+    default_action: p4c2719l722
+  ternary_match tbl_p4c2719l732 1:
+    p4: { name: tbl_p4c2719l732, hidden: true }
+    gateway:
+      name: cond-12
+      input_xbar:
+        exact group 0: { 0: update_register_debt0, 64: update_register_debt1 }
+      row: 0
+      bus: 0
+      unit: 0
+      match: { 0: update_register_debt1(0..7), 8: update_register_debt1(8..15) }
+      xor: { 0: update_register_debt0(0..7), 8: update_register_debt0(8..15) }
+      0x0000:  tbl_p4c2719l723
+      miss: run_table
+      condition:
+        expression: "(update_register_debt1 == update_register_debt0)"
+        true:  tbl_p4c2719l723
+        false:  tbl_p4c2719l732
+    hit: [  tbl_p4c2719l723 ]
+    miss:  tbl_p4c2719l723
+    indirect: tbl_p4c2719l732$tind
+  ternary_indirect tbl_p4c2719l732$tind:
+    row: 0
+    bus: 1
+    format: { action: 0..0 }
+    instruction: tbl_p4c2719l732$tind(action, $DEFAULT)
+    actions:
+      p4c2719l732(1, 2):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true, is_constant: true }
+      - handle: 0x2000002f
+      - next_table: 0
+      - set update_register_reg0.0-3, 1
+      - set update_register_reg0.4-7, 0
+    default_action: p4c2719l732
+stage 7 egress:
+  dependency: match
+  ternary_match tbl_p4c2719l723 0:
+    p4: { name: tbl_p4c2719l723, hidden: true }
+    hit: [  tbl_p4c2719l737 ]
+    miss:  tbl_p4c2719l737
+    indirect: tbl_p4c2719l723$tind
+  stateful tbl_p4c2719l723$salu.Egress.update_register.active_debt_reg3:
+    p4: { name: Egress.update_register.active_debt_reg3, size: 1 }
+    row: 15
+    logical_bus: S
+    column: [ 0, 1 ]
+    maprams: [ 0, 1 ]
+    home_row: 15
+    input_xbar:
+      exact group 0: { 64: update_register_debt2, 80: update_register_cap_length_2 }
+    data_bytemask: 15
+    format: { lo: 16 }
+    initial_value: { lo: 4095 , hi: 0 }
+    actions:
+      update_register_increase_reg3:
+      - minu hi, phv_lo, lo
+      - add lo, phv_hi, lo
+      - output alu_hi
+  ternary_indirect tbl_p4c2719l723$tind:
+    row: 0
+    bus: 1
+    format: { action: 0..0, meter_addr: 1..10 }
+    action_bus: { 32..33 : tbl_p4c2719l723$salu.Egress.update_register.active_debt_reg3(0..15) }
+    stateful: tbl_p4c2719l723$salu.Egress.update_register.active_debt_reg3(meter_addr, $DEFAULT, $DEFAULT)
+    instruction: tbl_p4c2719l723$tind(action, $DEFAULT)
+    actions:
+      p4c2719l723(0, 1):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true, is_constant: true }
+      - handle: 0x2000002d
+      - next_table: 0
+      - set update_register_debt3, tbl_p4c2719l723$salu.Egress.update_register.active_debt_reg3
+      - tbl_p4c2719l723$salu.Egress.update_register.active_debt_reg3(update_register_increase_reg3, 0)
+    default_action: p4c2719l723
+  ternary_match tbl_p4c2719l737 1:
+    p4: { name: tbl_p4c2719l737, hidden: true }
+    gateway:
+      name: cond-13
+      input_xbar:
+        exact group 0: { 0: update_register_debt1, 64: update_register_debt2 }
+      row: 0
+      bus: 0
+      unit: 0
+      match: { 0: update_register_debt2(0..7), 8: update_register_debt2(8..15) }
+      xor: { 0: update_register_debt1(0..7), 8: update_register_debt1(8..15) }
+      0x0000: run_table
+      miss:  tbl_p4c2719l741
+      condition:
+        expression: "(update_register_debt2 == update_register_debt1)"
+        true:  tbl_p4c2719l737
+        false:  tbl_p4c2719l741
+    hit: [  tbl_p4c2719l724 ]
+    miss:  tbl_p4c2719l724
+    indirect: tbl_p4c2719l737$tind
+  ternary_indirect tbl_p4c2719l737$tind:
+    row: 0
+    bus: 0
+    format: { action: 0..0 }
+    instruction: tbl_p4c2719l737$tind(action, $DEFAULT)
+    actions:
+      p4c2719l737(1, 2):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true, is_constant: true }
+      - handle: 0x20000030
+      - next_table: 0
+      - set update_register_reg1.0-3, update_register_reg0.0-3
+      - set update_register_reg1.4-7, update_register_reg0.4-7
+    default_action: p4c2719l737
+  ternary_match tbl_p4c2719l741 2:
+    p4: { name: tbl_p4c2719l741, hidden: true }
+    hit: [  tbl_p4c2719l724 ]
+    miss:  tbl_p4c2719l724
+    indirect: tbl_p4c2719l741$tind
+  ternary_indirect tbl_p4c2719l741$tind:
+    row: 1
+    bus: 0
+    format: { action: 0..0 }
+    instruction: tbl_p4c2719l741$tind(action, $DEFAULT)
+    actions:
+      p4c2719l741(0, 4):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true, is_constant: true }
+      - handle: 0x20000031
+      - next_table: 0
+      - set update_register_reg1.0-3, 2
+      - set update_register_reg1.4-7, 0
+    default_action: p4c2719l741
+stage 8 egress:
+  dependency: match
+  ternary_match tbl_p4c2719l724 0:
+    p4: { name: tbl_p4c2719l724, hidden: true }
+    hit: [  tbl_p4c2719l746 ]
+    miss:  tbl_p4c2719l746
+    indirect: tbl_p4c2719l724$tind
+  stateful tbl_p4c2719l724$salu.Egress.update_register.active_debt_reg4:
+    p4: { name: Egress.update_register.active_debt_reg4, size: 1 }
+    row: 15
+    logical_bus: S
+    column: [ 0, 1 ]
+    maprams: [ 0, 1 ]
+    home_row: 15
+    input_xbar:
+      exact group 0: { 64: update_register_debt3, 80: update_register_cap_length_3 }
+    data_bytemask: 15
+    format: { lo: 16 }
+    initial_value: { lo: 4095 , hi: 0 }
+    actions:
+      update_register_increase_reg4:
+      - minu hi, phv_lo, lo
+      - add lo, phv_hi, lo
+      - output alu_hi
+  ternary_indirect tbl_p4c2719l724$tind:
+    row: 0
+    bus: 1
+    format: { action: 0..0, meter_addr: 1..10 }
+    action_bus: { 32..33 : tbl_p4c2719l724$salu.Egress.update_register.active_debt_reg4(0..15) }
+    stateful: tbl_p4c2719l724$salu.Egress.update_register.active_debt_reg4(meter_addr, $DEFAULT, $DEFAULT)
+    instruction: tbl_p4c2719l724$tind(action, $DEFAULT)
+    actions:
+      p4c2719l724(0, 1):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true, is_constant: true }
+      - handle: 0x2000002e
+      - next_table: 0
+      - set update_register_debt4, tbl_p4c2719l724$salu.Egress.update_register.active_debt_reg4
+      - tbl_p4c2719l724$salu.Egress.update_register.active_debt_reg4(update_register_increase_reg4, 0)
+    default_action: p4c2719l724
+  ternary_match tbl_p4c2719l746 1:
+    p4: { name: tbl_p4c2719l746, hidden: true }
+    gateway:
+      name: cond-14
+      input_xbar:
+        exact group 0: { 0: update_register_debt2, 64: update_register_debt3 }
+      row: 0
+      bus: 0
+      unit: 0
+      match: { 0: update_register_debt3(0..7), 8: update_register_debt3(8..15) }
+      xor: { 0: update_register_debt2(0..7), 8: update_register_debt2(8..15) }
+      0x0000: run_table
+      miss:  tbl_p4c2719l750
+      condition:
+        expression: "(update_register_debt3 == update_register_debt2)"
+        true:  tbl_p4c2719l746
+        false:  tbl_p4c2719l750
+    hit: [  tbl_update_register_map_last ]
+    miss:  tbl_update_register_map_last
+    indirect: tbl_p4c2719l746$tind
+  ternary_indirect tbl_p4c2719l746$tind:
+    row: 0
+    bus: 0
+    format: { action: 0..0 }
+    instruction: tbl_p4c2719l746$tind(action, $DEFAULT)
+    actions:
+      p4c2719l746(1, 2):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true, is_constant: true }
+      - handle: 0x20000032
+      - next_table: 0
+      - set update_register_reg2.0-3, update_register_reg1.0-3
+      - set update_register_reg2.4-7, update_register_reg1.4-7
+    default_action: p4c2719l746
+  ternary_match tbl_p4c2719l750 2:
+    p4: { name: tbl_p4c2719l750, hidden: true }
+    hit: [  tbl_update_register_map_last ]
+    miss:  tbl_update_register_map_last
+    indirect: tbl_p4c2719l750$tind
+  ternary_indirect tbl_p4c2719l750$tind:
+    row: 1
+    bus: 0
+    format: { action: 0..0 }
+    instruction: tbl_p4c2719l750$tind(action, $DEFAULT)
+    actions:
+      p4c2719l750(0, 4):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true, is_constant: true }
+      - handle: 0x20000033
+      - next_table: 0
+      - set update_register_reg2.0-3, 3
+      - set update_register_reg2.4-7, 0
+    default_action: p4c2719l750
+stage 9 egress:
+  dependency: match
+  ternary_match tbl_update_register_map_last 0:
+    p4: { name: tbl_update_register_map_last, hidden: true }
+    gateway:
+      name: cond-15
+      input_xbar:
+        exact group 0: { 0: update_register_debt3, 16: update_register_debt4 }
+      row: 0
+      bus: 0
+      unit: 0
+      match: { 0: update_register_debt4(0..7), 8: update_register_debt4(8..15) }
+      xor: { 0: update_register_debt3(0..7), 8: update_register_debt3(8..15) }
+      0x0000: run_table
+      miss:  tbl_update_register_map_last_0
+      condition:
+        expression: "(update_register_debt4 == update_register_debt3)"
+        true:  tbl_update_register_map_last
+        false:  tbl_update_register_map_last_0
+    hit: [  tbl_insert_capture ]
+    miss:  tbl_insert_capture
+    indirect: tbl_update_register_map_last$tind
+  ternary_indirect tbl_update_register_map_last$tind:
+    row: 0
+    bus: 0
+    format: { action: 0..0 }
+    instruction: tbl_update_register_map_last$tind(action, $DEFAULT)
+    actions:
+      Egress.update_register.map_last_2(1, 1):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true, is_constant: true }
+      - handle: 0x20000034
+      - next_table: 0
+      - set rich_register_0.4-7, update_register_capture_port(0..3)
+      - set rich_register_0.0-3, update_register_reg2.0-3
+    default_action: Egress.update_register.map_last_2
+  ternary_match tbl_update_register_map_last_0 1:
+    p4: { name: tbl_update_register_map_last_0, hidden: true }
+    hit: [  tbl_insert_capture ]
+    miss:  tbl_insert_capture
+    indirect: tbl_update_register_map_last_0$tind
+  ternary_indirect tbl_update_register_map_last_0$tind:
+    row: 0
+    bus: 1
+    format: { action: 0..0 }
+    instruction: tbl_update_register_map_last_0$tind(action, $DEFAULT)
+    actions:
+      Egress.update_register.map_last_4(0, 2):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true, is_constant: true }
+      - handle: 0x20000035
+      - next_table: 0
+      - set rich_register_0.4-7, update_register_capture_port(0..3)
+      - set rich_register_0.0-3, 4
+    default_action: Egress.update_register.map_last_4
+stage 10 egress:
+  dependency: action
+  ternary_match tbl_insert_capture 0:
+    p4: { name: tbl_insert_capture, hidden: true }
+    gateway:
+      name: cond-16
+      input_xbar:
+        exact group 0: { 0: meta.ing_port_mirror.pkt_type }
+      row: 7
+      bus: 0
+      unit: 0
+      match: { 0: meta.ing_port_mirror.pkt_type }
+      0x03: run_table
+      miss:  egressCaptureTbl_0
+      condition:
+        expression: "(meta.ing_port_mirror.pkt_type == 3)"
+        true:  tbl_insert_capture
+        false:  egressCaptureTbl_0
+    hit: [  egressCaptureTbl_0 ]
+    miss:  egressCaptureTbl_0
+    indirect: tbl_insert_capture$tind
+  ternary_indirect tbl_insert_capture$tind:
+    row: 0
+    bus: 0
+    format: { action: 0..0 }
+    instruction: tbl_insert_capture$tind(action, $DEFAULT)
+    actions:
+      Egress.insert_capture(1, 1):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true, is_constant: true }
+      - handle: 0x20000036
+      - next_table: 0
+      - set hdr.capture.timestamp, meta.ing_port_mirror.mac_timestamp
+      - deposit-field B18(4..7), B21(0..3), B19
+    default_action: Egress.insert_capture
+  exact_match egressCaptureTbl_0 1:
+    p4: { name: Egress.egressCaptureTbl, size: 64 }
+    p4_param_order:
+      eg_intr_md.egress_port: { type: exact, size: 9, full_size: 9 }
+    row: 7
+    bus: 0
+    column: 2
+    stash:
+      row: [ 7 ]
+      col: [ 2 ]
+      unit: [ 0 ]
+    ways:
+      - [0, 0, 0x0, [7, 2]]
+    input_xbar:
+      exact group 0: { 8: eg_intr_md.egress_port(8), 16: eg_intr_md.egress_port(0..7) }
+      hash 0:
+        0: eg_intr_md.egress_port(8)
+        1..8: eg_intr_md.egress_port(0..7)
+      hash group 0:
+        table: [0]
+        seed: 0x0
+    format: { action(0): 0..0, immediate(0): 1..10, version(0): 112..115 }
+    match_group_map: [ [ 0 ] ]
+    hit: [  END ]
+    miss:  END
+    action_bus: { 32..33 : immediate(0..9) }
+    instruction: egressCaptureTbl_0(action, $DEFAULT)
+    actions:
+      Egress.set_mirror_session_capture(0, 2):
+      - p4_param_order: { mirror_session: 10 }
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x20000037
+      - next_table: 0
+      - { mirror_session_3: immediate(0..9), mirror_session: mirror_session_3 }
+      - set eg_intr_md_for_dprsr.mirror_type, 2
+      - set meta.mirror_session, mirror_session
+      - set meta.pkt_type, 3
+      - set meta.ing_port_mirror.mac_timestamp, eg_intr_md_from_prsr.global_tstamp.0-31
+      NoAction(1, 0):
+      - hit_allowed: { allowed: true }
+      - default_action: { allowed: true }
+      - handle: 0x20000038
+      - next_table: 0
+      - {  }
+    default_action: NoAction
+
+flexible_headers: [
+
+  { name: "hdr.bridge",
+    fields: [
+
+      { name: "rich_register", slice: { start_bit: 0, bit_width: 8 } },
+      { name: "pkt_type", slice: { start_bit: 0, bit_width: 8 } },
+      { name: "__pad_0", slice: { start_bit: 0, bit_width: 4 } },
+      { name: "rich_register_v", slice: { start_bit: 0, bit_width: 1 } },
+      { name: "l23_rxtstmp_insert", slice: { start_bit: 0, bit_width: 1 } },
+      { name: "l23_txtstmp_insert", slice: { start_bit: 0, bit_width: 1 } },
+      { name: "l47_timestamp_insert", slice: { start_bit: 0, bit_width: 1 } }    ]
+  },
+  { name: "meta.bridge",
+    fields: [
+
+      { name: "rich_register", slice: { start_bit: 0, bit_width: 8 } },
+      { name: "pkt_type", slice: { start_bit: 0, bit_width: 8 } },
+      { name: "__pad_0", slice: { start_bit: 0, bit_width: 4 } },
+      { name: "rich_register_v", slice: { start_bit: 0, bit_width: 1 } },
+      { name: "l23_rxtstmp_insert", slice: { start_bit: 0, bit_width: 1 } },
+      { name: "l23_txtstmp_insert", slice: { start_bit: 0, bit_width: 1 } },
+      { name: "l47_timestamp_insert", slice: { start_bit: 0, bit_width: 1 } }    ]
+  }]
