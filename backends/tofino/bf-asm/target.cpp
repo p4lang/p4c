@@ -15,14 +15,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "target.h"
+#include "backends/tofino/bf-asm/target.h"
 
 #include <config.h>
 
 #include "asm-types.h"
 #include "bson.h"
 #include "parser.h"
-#include "tables.h"
+#include "backends/tofino/bf-asm/tables.h"
 #include "ubits.h"
 
 void declare_registers(const Target::Tofino::top_level_regs *regs) {

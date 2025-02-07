@@ -15,11 +15,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_TOP_LEVEL_H_
-#define BF_ASM_TOP_LEVEL_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_TOP_LEVEL_H_
+#define BACKENDS_TOFINO_BF_ASM_TOP_LEVEL_H_
 
-#include "json.h"
-#include "target.h"
+#include "backends/tofino/bf-asm/json.h"
+#include "backends/tofino/bf-asm/target.h"
 
 template <class REGSET>
 class TopLevelRegs;
@@ -58,4 +58,4 @@ TopLevelRegs<typename T::register_type> *TopLevel::regs() {
     return dynamic_cast<TopLevelRegs<typename T::register_type> *>(all);
 }
 
-#endif /* BF_ASM_TOP_LEVEL_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_TOP_LEVEL_H_ */

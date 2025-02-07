@@ -15,12 +15,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "algorithm.h"
+#include "lib/algorithm.h"
 #include "data_switchbox.h"
 #include "input_xbar.h"
 #include "misc.h"
-#include "stage.h"
-#include "tables.h"
+#include "backends/tofino/bf-asm/stage.h"
+#include "backends/tofino/bf-asm/tables.h"
 
 // target specific template specializations
 #include "tofino/counter.h"

@@ -19,7 +19,7 @@
 
 #include <inttypes.h>
 
-#include "hex.h"
+#include "lib/hex.h"
 
 namespace {
 uint8_t get8(std::istream &in) {

@@ -15,7 +15,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "phv.h"
+#include "backends/tofino/bf-asm/tofino/phv.h"
 
 void Target::Tofino::Phv::init_regs(::Phv &phv) {
     // Allocating Tofino registers so the uids map to register encodings

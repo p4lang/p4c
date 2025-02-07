@@ -15,9 +15,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "parser-tofino-jbay.h"
-#include "stage.h"
-#include "top_level.h"
+#include "backends/tofino/bf-asm/parser-tofino-jbay.h"
+#include "backends/tofino/bf-asm/stage.h"
+#include "backends/tofino/bf-asm/top_level.h"
 
 template <>
 void Parser::Checksum::write_config(Target::JBay::parser_regs &regs, Parser *parser) {

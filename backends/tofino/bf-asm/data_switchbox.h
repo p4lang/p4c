@@ -15,11 +15,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_DATA_SWITCHBOX_H_
-#define BF_ASM_DATA_SWITCHBOX_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_DATA_SWITCHBOX_H_
+#define BACKENDS_TOFINO_BF_ASM_DATA_SWITCHBOX_H_
 
-#include "stage.h"
-#include "tables.h"
+#include "backends/tofino/bf-asm/stage.h"
+#include "backends/tofino/bf-asm/tables.h"
 
 /*
  * Code to handle programming of the Ram Data Bus Horizontal/Vertical Switchbox
@@ -165,4 +165,4 @@ class DataSwitchboxSetup {
     }
 };
 
-#endif /* BF_ASM_DATA_SWITCHBOX_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_DATA_SWITCHBOX_H_ */

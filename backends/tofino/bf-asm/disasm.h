@@ -18,7 +18,7 @@
 #ifndef DISASM_H_
 #define DISASM_H_
 
-#include "target.h"
+#include "backends/tofino/bf-asm/target.h"
 
 class Disasm {
  public:

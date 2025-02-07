@@ -15,12 +15,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_MASK_COUNTER_H_
-#define BF_ASM_MASK_COUNTER_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_MASK_COUNTER_H_
+#define BACKENDS_TOFINO_BF_ASM_MASK_COUNTER_H_
 
 #include <limits.h>
 
-#include "bitvec.h"
+#include "lib/bitvec.h"
 
 class MaskCounter {
     unsigned mask, val;
@@ -62,4 +62,4 @@ class MaskCounter {
     }
 };
 
-#endif /* BF_ASM_MASK_COUNTER_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_MASK_COUNTER_H_ */

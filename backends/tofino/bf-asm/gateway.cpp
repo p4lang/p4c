@@ -15,14 +15,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "algorithm.h"
+#include "lib/algorithm.h"
 #include "hashexpr.h"
-#include "hex.h"
+#include "lib/hex.h"
 #include "input_xbar.h"
 #include "instruction.h"
 #include "misc.h"
-#include "stage.h"
-#include "tables.h"
+#include "backends/tofino/bf-asm/stage.h"
+#include "backends/tofino/bf-asm/tables.h"
 
 // template specialization declarations
 #include "jbay/gateway.h"

@@ -15,7 +15,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "exact_match.h"
+#include "backends/tofino/bf-asm/tofino/exact_match.h"
 
 void Target::Tofino::ExactMatchTable::setup_ways() {
     ::ExactMatchTable::setup_ways();

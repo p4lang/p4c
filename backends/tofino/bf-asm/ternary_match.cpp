@@ -18,13 +18,13 @@
 #include "tofino/ternary_match.h"
 
 #include "action_bus.h"
-#include "algorithm.h"
+#include "lib/algorithm.h"
 #include "input_xbar.h"
 #include "instruction.h"
 #include "misc.h"
-#include "range.h"
-#include "stage.h"
-#include "tables.h"
+#include "lib/range.h"
+#include "backends/tofino/bf-asm/stage.h"
+#include "backends/tofino/bf-asm/tables.h"
 
 Table::Format::Field *TernaryMatchTable::lookup_field(const std::string &n,
                                                       const std::string &act) const {

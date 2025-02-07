@@ -15,11 +15,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_JBAY_STATEFUL_H_
-#define BF_ASM_JBAY_STATEFUL_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_JBAY_STATEFUL_H_
+#define BACKENDS_TOFINO_BF_ASM_JBAY_STATEFUL_H_
 
-#include <tables.h>
-#include <target.h>
+#include "backends/tofino/bf-asm/tables.h"
+#include "backends/tofino/bf-asm/target.h"
 
 #if HAVE_JBAY
 
@@ -57,4 +57,4 @@ template <>
 void StatefulTable::write_logging_regs(Target::JBay::mau_regs &regs);
 
 #endif /* HAVE_JBAY ||  ||  */
-#endif /* BF_ASM_JBAY_STATEFUL_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_JBAY_STATEFUL_H_ */

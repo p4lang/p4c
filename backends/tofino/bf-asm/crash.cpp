@@ -35,8 +35,8 @@
 
 #include "bfas.h"
 #include "exename.h"
-#include "hex.h"
-#include "log.h"
+#include "lib/hex.h"
+#include "lib/log.h"
 
 using namespace P4;
 

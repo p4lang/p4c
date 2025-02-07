@@ -229,6 +229,7 @@ set (BF_P4C_IR_SRCS
   bf-p4c/parde/match_register.cpp
   bf-p4c/parde/clot/clot.cpp
   bf-p4c/phv/phv.cpp
+  # FIXME: This should be a library.
   bf-utils/dynamic_hash/dynamic_hash.cpp
   bf-utils/dynamic_hash/bfn_hash_algorithm.cpp
   )
@@ -240,3 +241,6 @@ endforeach()
 set(EXTENSION_IR_SOURCES ${EXTENSION_IR_SOURCES} ${QUAL_BF_P4C_IR_SRCS} PARENT_SCOPE)
 
 add_subdirectory(bf-p4c)
+
+# Initialize bf-asm after bf-p4c.
+add_subdirectory(bf-asm)

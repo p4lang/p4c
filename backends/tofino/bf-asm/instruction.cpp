@@ -23,8 +23,8 @@
 #include "depositfield.h"
 #include "phv.h"
 #include "power_ctl.h"
-#include "stage.h"
-#include "tables.h"
+#include "backends/tofino/bf-asm/stage.h"
+#include "backends/tofino/bf-asm/tables.h"
 
 namespace {
 constexpr int RotationBits = 16;

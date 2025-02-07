@@ -20,7 +20,7 @@
 #include <map>
 #include <sstream>
 
-#include "log.h"
+#include "lib/log.h"
 
 void widereg_base::log(const char *op, bitvec v) const {
     std::ostringstream tmp;

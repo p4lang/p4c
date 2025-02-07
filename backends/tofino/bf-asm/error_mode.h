@@ -15,8 +15,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_ERROR_MODE_H_
-#define BF_ASM_ERROR_MODE_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_ERROR_MODE_H_
+#define BACKENDS_TOFINO_BF_ASM_ERROR_MODE_H_
 
 #include "sections.h"
 
@@ -70,4 +70,4 @@ class DefaultErrorMode : public Section, public ErrorMode {
     static ErrorMode get() { return singleton; }
 };
 
-#endif /* BF_ASM_ERROR_MODE_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_ERROR_MODE_H_ */

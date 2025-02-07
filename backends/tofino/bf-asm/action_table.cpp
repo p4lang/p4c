@@ -16,11 +16,11 @@
  */
 
 #include "action_bus.h"
-#include "algorithm.h"
+#include "lib/algorithm.h"
 #include "input_xbar.h"
 #include "instruction.h"
-#include "stage.h"
-#include "tables.h"
+#include "backends/tofino/bf-asm/stage.h"
+#include "backends/tofino/bf-asm/tables.h"
 
 // template specialization declarations
 #include "tofino/action_table.h"

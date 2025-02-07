@@ -15,8 +15,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_POWER_CTL_H_
-#define BF_ASM_POWER_CTL_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_POWER_CTL_H_
+#define BACKENDS_TOFINO_BF_ASM_POWER_CTL_H_
 
 #include "misc.h"
 
@@ -62,4 +62,4 @@ void set_power_ctl_reg(checked_array<2, checked_array<16, ubits<I>>> &power_ctl,
     power_ctl[side][reg / I] |= 1U << reg % I;
 }
 
-#endif /* BF_ASM_POWER_CTL_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_POWER_CTL_H_ */

@@ -15,12 +15,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_ASM_TYPES_H_
-#define BF_ASM_ASM_TYPES_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_ASM_TYPES_H_
+#define BACKENDS_TOFINO_BF_ASM_ASM_TYPES_H_
 
 #include <assert.h>
-#include <bitops.h>
-#include <bitvec.h>
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -32,9 +30,11 @@
 #include <set>
 #include <sstream>
 
+#include "backends/tofino/bf-asm/map.h"
+#include "backends/tofino/bf-asm/json.h"
 #include "bfas.h"
-#include "json.h"
-#include "map.h"
+#include "lib/bitops.h"
+#include "lib/bitvec.h"
 #include "mask_counter.h"
 #include "vector.h"
 
@@ -491,4 +491,4 @@ class Contextable {
 
 #endif /* __cplusplus */
 
-#endif /* BF_ASM_ASM_TYPES_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_ASM_TYPES_H_ */

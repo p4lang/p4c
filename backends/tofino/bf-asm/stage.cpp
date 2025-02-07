@@ -15,7 +15,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "stage.h"
+#include "backends/tofino/bf-asm/stage.h"
 
 #include <config.h>
 #include <time.h>
@@ -27,9 +27,9 @@
 #include "misc.h"
 #include "parser.h"
 #include "phv.h"
-#include "range.h"
+#include "lib/range.h"
 #include "sections.h"
-#include "target.h"
+#include "backends/tofino/bf-asm/target.h"
 #include "top_level.h"
 
 extern std::string asmfile_name;

@@ -15,8 +15,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_WIDEREG_H_
-#define BF_ASM_WIDEREG_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_WIDEREG_H_
+#define BACKENDS_TOFINO_BF_ASM_WIDEREG_H_
 
 #include <limits.h>
 
@@ -24,8 +24,8 @@
 #include <iostream>
 #include <sstream>
 
-#include "bitvec.h"
-#include "log.h"
+#include "lib/bitvec.h"
+#include "lib/log.h"
 
 using namespace P4;
 
@@ -167,4 +167,4 @@ struct widereg : widereg_base {
     }
 };
 
-#endif /* BF_ASM_WIDEREG_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_WIDEREG_H_ */

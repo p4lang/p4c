@@ -19,7 +19,7 @@
 
 #include "bfas.h"
 #include "gtest/gtest.h"
-#include "stage.h"
+#include "backends/tofino/bf-asm/stage.h"
 
 namespace {
 

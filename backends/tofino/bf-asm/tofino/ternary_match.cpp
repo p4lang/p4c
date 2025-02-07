@@ -15,9 +15,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "ternary_match.h"
+#include "backends/tofino/bf-asm/tofino/ternary_match.h"
 
-#include "stage.h"
+#include "backends/tofino/bf-asm/stage.h"
 
 void Target::Tofino::TernaryMatchTable::pass1() {
     ::TernaryMatchTable::pass1();

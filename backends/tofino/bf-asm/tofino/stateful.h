@@ -15,11 +15,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_TOFINO_STATEFUL_H_
-#define BF_ASM_TOFINO_STATEFUL_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_TOFINO_STATEFUL_H_
+#define BACKENDS_TOFINO_BF_ASM_TOFINO_STATEFUL_H_
 
-#include <tables.h>
-#include <target.h>
+#include "backends/tofino/bf-asm/tables.h"
+#include "backends/tofino/bf-asm/target.h"
 
 class Target::Tofino::StatefulTable : public ::StatefulTable {
     friend class ::StatefulTable;
@@ -30,4 +30,4 @@ class Target::Tofino::StatefulTable : public ::StatefulTable {
 template <>
 void StatefulTable::write_logging_regs(Target::Tofino::mau_regs &regs);
 
-#endif /* BF_ASM_TOFINO_STATEFUL_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_TOFINO_STATEFUL_H_ */

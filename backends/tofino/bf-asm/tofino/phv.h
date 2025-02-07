@@ -15,10 +15,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_TOFINO_PHV_H_
-#define BF_ASM_TOFINO_PHV_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_TOFINO_PHV_H_
+#define BACKENDS_TOFINO_BF_ASM_TOFINO_PHV_H_
 
-#include "../phv.h"
+#include "backends/tofino/bf-asm/phv.h"
 
 class Target::Tofino::Phv : public Target::Phv {
     friend class ::Phv;
@@ -52,4 +52,4 @@ class Target::Tofino::Phv : public Target::Phv {
     static const bitvec tagalong_groups[8];
 };
 
-#endif /* BF_ASM_TOFINO_PHV_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_TOFINO_PHV_H_ */

@@ -15,9 +15,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "gateway.h"
+#include "backends/tofino/bf-asm/jbay/gateway.h"
 
-#include <stage.h>
+#include "backends/tofino/bf-asm/stage.h"
 
 void Target::Tofino::GatewayTable::write_next_table_regs(Target::JBay::mau_regs &regs) {
     auto &merge = regs.rams.match.merge;

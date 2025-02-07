@@ -15,15 +15,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "action_bus.h"
-#include "algorithm.h"
-#include "hex.h"
-#include "input_xbar.h"
-#include "instruction.h"
-#include "mask_counter.h"
-#include "misc.h"
-#include "stage.h"
-#include "tables.h"
+#include "backends/tofino/bf-asm/action_bus.h"
+#include "backends/tofino/bf-asm/input_xbar.h"
+#include "backends/tofino/bf-asm/instruction.h"
+#include "backends/tofino/bf-asm/mask_counter.h"
+#include "backends/tofino/bf-asm/misc.h"
+#include "backends/tofino/bf-asm/stage.h"
+#include "backends/tofino/bf-asm/tables.h"
+#include "lib/algorithm.h"
+#include "lib/hex.h"
 
 Table::Format::Field *SRamMatchTable::lookup_field(const std::string &n,
                                                    const std::string &act) const {

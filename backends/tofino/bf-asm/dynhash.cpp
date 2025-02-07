@@ -20,7 +20,7 @@
 #include <string>
 
 #include "bfas.h"
-#include "json.h"
+#include "backends/tofino/bf-asm/json.h"
 #include "sections.h"
 
 class DynHash : public Section {

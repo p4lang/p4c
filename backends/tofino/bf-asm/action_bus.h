@@ -15,12 +15,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_ACTION_BUS_H_
-#define BF_ASM_ACTION_BUS_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_ACTION_BUS_H_
+#define BACKENDS_TOFINO_BF_ASM_ACTION_BUS_H_
 
 #include <array>
 
-#include "tables.h"
+#include "backends/tofino/bf-asm/tables.h"
 
 // static struct MeterBus_t {} MeterBus;
 struct MeterBus_t {};
@@ -241,4 +241,4 @@ class ActionBus {
     auto slots() const { return Values(by_byte); }
 };
 
-#endif /* BF_ASM_ACTION_BUS_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_ACTION_BUS_H_ */

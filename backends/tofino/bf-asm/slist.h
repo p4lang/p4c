@@ -15,8 +15,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_SLIST_H_
-#define BF_ASM_SLIST_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_SLIST_H_
+#define BACKENDS_TOFINO_BF_ASM_SLIST_H_
 
 template <class T>
 class slist {
@@ -49,4 +49,4 @@ class slist {
     iterator end() const { return iterator(); }
 };
 
-#endif /* BF_ASM_SLIST_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_SLIST_H_ */

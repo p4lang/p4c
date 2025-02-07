@@ -16,8 +16,8 @@
  */
 
 #include "misc.h"
-#include "stage.h"
-#include "tables.h"
+#include "backends/tofino/bf-asm/stage.h"
+#include "backends/tofino/bf-asm/tables.h"
 
 void IdletimeTable::setup(VECTOR(pair_t) & data) {
     setup_layout(layout, data);

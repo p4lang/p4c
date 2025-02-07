@@ -15,11 +15,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#ifndef BACKENDS_TOFINO_BF_ASM_MATCH_SOURCE_H_
+#define BACKENDS_TOFINO_BF_ASM_MATCH_SOURCE_H_
+
 #include <sstream>
 #include <string>
 
-#ifndef BF_ASM_MATCH_SOURCE_H_
-#define BF_ASM_MATCH_SOURCE_H_
+#include "backends/tofino/bf-asm/asm-types.h"
+#include "lib/stringify.h"
 
 /**
  * A source for a match key of a table.  The source can either be from the input xbar, or from the
@@ -78,4 +81,4 @@ class HashMatchSource : public MatchSource {
     void dbprint(std::ostream &out) const { out << name() << "(" << lo << ".." << hi << ")"; }
 };
 
-#endif /* BF_ASM_MATCH_SOURCE_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_MATCH_SOURCE_H_ */

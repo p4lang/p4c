@@ -15,10 +15,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_TOFINO_COUNTER_H_
-#define BF_ASM_TOFINO_COUNTER_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_TOFINO_COUNTER_H_
+#define BACKENDS_TOFINO_BF_ASM_TOFINO_COUNTER_H_
 
-#include "tables.h"
+#include "backends/tofino/bf-asm/tables.h"
 
 class Target::Tofino::CounterTable : public ::CounterTable {
     friend class ::CounterTable;
@@ -36,4 +36,4 @@ void CounterTable::write_alu_vpn_range(Target::Tofino::mau_regs &) {
     BUG();  // not available on tofino
 }
 
-#endif /* BF_ASM_TOFINO_COUNTER_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_TOFINO_COUNTER_H_ */

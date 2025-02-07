@@ -15,7 +15,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "stateful.h"
+#include "backends/tofino/bf-asm/jbay/stateful.h"
 
 static const char *function_names[] = {"none", "log", "fifo", "stack", "clear"};
 

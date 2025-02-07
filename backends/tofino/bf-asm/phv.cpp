@@ -20,7 +20,7 @@
 #include <algorithm>
 #include <iostream>
 
-#include "log.h"
+#include "lib/log.h"
 #include "misc.h"
 
 Phv Phv::phv;

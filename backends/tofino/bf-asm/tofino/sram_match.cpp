@@ -15,8 +15,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "stage.h"
-#include "tables.h"
+#include "backends/tofino/bf-asm/stage.h"
+#include "backends/tofino/bf-asm/tables.h"
+#include "lib/log.h"
 
 static int find_in_ixbar(Table *table, std::vector<Phv::Ref> &match) {
     // It would seem like it would be possible to simplify this code by refactoring it

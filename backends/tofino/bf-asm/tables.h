@@ -15,10 +15,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_TABLES_H_  // NOLINT(build/header_guard)
-#define BF_ASM_TABLES_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_TABLES_H_  // NOLINT(build/header_guard)
+#define BACKENDS_TOFINO_BF_ASM_TABLES_H_
 
-#include <bitops.h>
 #include <config.h>
 
 #include <iostream>
@@ -27,20 +26,21 @@
 #include <unordered_map>
 #include <vector>
 
-#include "algorithm.h"
+#include "lib/algorithm.h"
 #include "alloc.h"
 #include "asm-types.h"
-#include "bitvec.h"
 #include "constants.h"
 #include "hash_dist.h"
 #include "input_xbar.h"
-#include "json.h"
+#include "backends/tofino/bf-asm/json.h"
+#include "lib/bitops.h"
+#include "lib/bitvec.h"
+#include "lib/ordered_map.h"
 #include "map.h"
-#include "ordered_map.h"
 #include "p4_table.h"
 #include "phv.h"
 #include "slist.h"
-#include "target.h"
+#include "backends/tofino/bf-asm/target.h"
 
 class ActionBus;
 struct ActionBusSource;
@@ -2193,4 +2193,4 @@ DECLARE_TABLE_TYPE(StatefulTable, Synth2Port, "stateful",
     bool p4c_5192_workaround(const Actions::Action *) const;
 )
 
-#endif /* BF_ASM_TABLES_H_ */  // NOLINT(build/header_guard)
+#endif /* BACKENDS_TOFINO_BF_ASM_TABLES_H_ */  // NOLINT(build/header_guard)

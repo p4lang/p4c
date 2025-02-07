@@ -15,12 +15,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "json.h"
+#include "backends/tofino/bf-asm/json.h"
 
 #include <iomanip>
 #include <sstream>
 
-#include "hex.h"
+#include "lib/hex.h"
 
 namespace json {
 

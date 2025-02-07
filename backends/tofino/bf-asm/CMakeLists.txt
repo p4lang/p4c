@@ -15,22 +15,13 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-####### Tofino assembler
-cmake_minimum_required (VERSION 3.16.3 FATAL_ERROR)
-
-find_program(CCACHE_PROGRAM ccache)
-if(CCACHE_PROGRAM)
-    MESSAGE(STATUS "Enabling ccache")
-    set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
-endif()
-
-project (BFASM)
-
+# # ##### Tofino assembler
 MESSAGE("-- Adding bf-asm")
 
 OPTION(ASAN_ENABLED "Enable ASAN checks" OFF)
 
-set (BFASM_LIB_DEPS dynhashStatic)
+set (BFASM_LIB_DEPS p4ctoolkit ${P4C_LIB_DEPS})
+set (BFASM_GEN_DIR ${CMAKE_CURRENT_BINARY_DIR}/gen)
 
 find_package (BISON REQUIRED)
 find_package (FLEX REQUIRED)
@@ -68,7 +59,7 @@ macro(get_schema_version schema_file schema_var)
     OUTPUT_VARIABLE __schema_version
     RESULT_VARIABLE __schema_errcode
     ERROR_VARIABLE __schema_errstr
-    WORKING_DIRECTORY ${P4C_SOURCE_DIR}/backends/tofino/compiler_interfaces/schemas)
+    WORKING_DIRECTORY ${BFN_P4C_SOURCE_DIR}/compiler_interfaces/schemas)
   if (${__schema_errcode})
     MESSAGE(FATAL_ERROR "Error retrieving ${schema_file} version ${__schema_errstr}")
   endif()
@@ -78,11 +69,11 @@ endmacro(get_schema_version)
 # change: context and manifest for now
 # We generate a pair of dummy dependency files will be ignored
 set(SCHEMA_FILES
-  ${P4C_SOURCE_DIR}/backends/tofino/compiler_interfaces/schemas/context_schema.py
-  ${P4C_SOURCE_DIR}/backends/tofino/compiler_interfaces/schemas/manifest_schema.py
-  ${P4C_SOURCE_DIR}/backends/tofino/compiler_interfaces/schemas/phv_schema.py
-  ${P4C_SOURCE_DIR}/backends/tofino/compiler_interfaces/schemas/power_schema.py
-  ${P4C_SOURCE_DIR}/backends/tofino/compiler_interfaces/schemas/resources_schema.py
+  ${BFN_P4C_SOURCE_DIR}/compiler_interfaces/schemas/context_schema.py
+  ${BFN_P4C_SOURCE_DIR}/compiler_interfaces/schemas/manifest_schema.py
+  ${BFN_P4C_SOURCE_DIR}/compiler_interfaces/schemas/phv_schema.py
+  ${BFN_P4C_SOURCE_DIR}/compiler_interfaces/schemas/power_schema.py
+  ${BFN_P4C_SOURCE_DIR}/compiler_interfaces/schemas/resources_schema.py
   )
 foreach (f ${SCHEMA_FILES})
   configure_file(${f} ${CMAKE_BINARY_DIR}/${f}.dep)
@@ -91,8 +82,6 @@ endforeach()
 get_schema_version(context_schema CONTEXT_SCHEMA_VERSION)
 MESSAGE(STATUS "Found context schema version ${CONTEXT_SCHEMA_VERSION}")
 add_definitions("-DCONTEXT_SCHEMA_VERSION=\"${CONTEXT_SCHEMA_VERSION}\"")
-set (BFN_P4C_LIB_DIR ${P4C_SOURCE_DIR}/lib)
-include_directories(${BFASM_SOURCE_DIR} ${BFASM_BINARY_DIR} ${BFN_P4C_LIB_DIR} ${P4C_SOURCE_DIR})
 
 # ASAN CHECKS
 if (ASAN_ENABLED)
@@ -168,64 +157,17 @@ set (BFAS_COMMON_SOURCES
   ubits.cpp
   vector.c
   widereg.cpp
-  ${BFN_P4C_LIB_DIR}/bitvec.cpp
-  ${BFN_P4C_LIB_DIR}/hex.cpp
-  ${BFN_P4C_LIB_DIR}/indent.cpp
-  ${BFN_P4C_LIB_DIR}/log.cpp
-  ${BFN_P4C_LIB_DIR}/cstring.cpp
-  ${BFN_P4C_LIB_DIR}/hash.cpp
-  )
-
-SET (BFAS_COMMON_HEADERS
-  action_bus.h
-  asm-types.h
-  bfas.h
-  checked_array.h
-  constants.h
-  data_switchbox.h
-  deparser.h
-  depositfield.h
-  error_mode.h
-  escape.h
-  exename.h
-  fdstream.h
-  hash_dist.h
-  hashexpr.h
-  input_xbar.h
-  instruction.h
-  json.h
-  mask_counter.h
-  match_source.h
-  misc.h
-  p4_table.h
-  parser.h
-  parser-tofino-jbay.h
-  phv.h
-  power_ctl.h
-  register_reference.h
-  rvalue_reference_wrapper.h
-  sections.h
-  slist.h
-  stage.h
-  tables.h
-  target.h
-  top_level.h
-  ubits.h
-  widereg.h
-  alloc.h
-  )
-
-# \TODO: use the headers from p4c/lib for utilities
-set (BFAS_UTIL_HEADERS
-  map.h
-  vector.h
+  # FIXME: This should be a library.
+  ${BFN_P4C_SOURCE_DIR}/bf-utils/dynamic_hash/dynamic_hash.cpp
+  ${BFN_P4C_SOURCE_DIR}/bf-utils/dynamic_hash/bfn_hash_algorithm.cpp
   )
 
 set (BFAS_GEN_SOURCES
-  ${BFASM_BINARY_DIR}/asm-parse.cpp
-  ${BFASM_BINARY_DIR}/gen/uptr_sizes.h)
+  ${BFASM_GEN_DIR}/asm-parse.cpp
+  ${BFASM_GEN_DIR}/gen/uptr_sizes.h
+)
 
-BISON_TARGET (asm-parse asm-parse.ypp ${CMAKE_CURRENT_BINARY_DIR}/asm-parse.cpp VERBOSE)
+BISON_TARGET (asm-parse asm-parse.ypp ${BFASM_GEN_DIR}/asm-parse.cpp VERBOSE)
 
 add_custom_command(OUTPUT lex-yaml.c
   COMMAND ${FLEX_EXECUTABLE} -t ${CMAKE_CURRENT_SOURCE_DIR}/lex-yaml.l > lex-yaml.c
@@ -233,7 +175,7 @@ add_custom_command(OUTPUT lex-yaml.c
   COMMENT "Generating lex-yaml.cpp")
 
 add_custom_command(OUTPUT gen/uptr_sizes.h
-  COMMAND ${CMAKE_COMMAND} -E make_directory ${BFASM_BINARY_DIR}/gen
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${BFASM_GEN_DIR}/gen
   COMMAND mksizes > gen/uptr_sizes.h
   DEPENDS lex-yaml.c mksizes)
 
@@ -251,33 +193,15 @@ set (HAVE_JBAY 1)
 set (BFASM_LIBS ${BFASM_LIBS} regs_jbay)
 
 # Other configuration files that need to be generated
-configure_file ("${BFASM_SOURCE_DIR}/cmake/config.h.in" "${BFASM_BINARY_DIR}/config.h")
+configure_file ("${BFASM_SOURCE_DIR}/cmake/config.h.in" "${BFASM_GEN_DIR}/config.h")
 
-set_source_files_properties (${BFAS_GEN_SOURCES} ${BFASM_BINARY_DIR}/lex-yaml.c
+set_source_files_properties (${BFAS_GEN_SOURCES} ${BFASM_GEN_DIR}/lex-yaml.c
   PROPERTIES GENERATED TRUE)
 
 set (BFAS_SOURCES ${BFAS_COMMON_SOURCES} ${BFAS_GEN_SOURCES}
   ${BFAS_TOFINO_SRCS}
   ${BFAS_JBAY_SRCS}
 )
-
-set (CPPLINT_FILES
-  ${JSONDIFF_SOURCES}
-  ${BFDUMPBIN_SOURCES}
-  ${REFLOW_SOURCES}
-  ${B2J_SOURCES}
-  ${J2B_SOURCES}
-  ${MKSIZE_SOURCES}
-  ${BFAS_COMMON_SOURCES}
-  ${BFAS_TOFINO_SRCS}
-  ${BFAS_JBAY_SRCS}
-  ${BFAS_UTIL_HEADERS}
-  ${BFAS_COMMON_HEADERS}
-  ${BFAS_TOFINO_HEADERS}
-  ${BFAS_JBAY_HEADERS}
-  )
-list(REMOVE_ITEM CPPLINT_FILES vector.c)
-list(REMOVE_DUPLICATES CPPLINT_FILES)
 
 # json_diff
 add_executable (json_diff ${JSONDIFF_SOURCES})
@@ -306,12 +230,13 @@ add_executable (j2b ${J2B_SOURCES})
 # mksizes
 add_executable (mksizes ${MKSIZES_SOURCES})
 
-set_source_files_properties(${BFAS_SOURCES} PROPERTIES COMPILE_FLAGS ${BFASM_CXX_FLAGS})
+# set_source_files_properties(${BFAS_SOURCES} PROPERTIES COMPILE_FLAGS ${BFASM_CXX_FLAGS})
 # Remove compiler flag that is C++ only for vector.c
-string(REPLACE "-Wno-overloaded-virtual" "" vector_c_flags ${BFASM_CXX_FLAGS})
-set_source_files_properties(vector.c PROPERTIES COMPILE_FLAGS ${vector_c_flags})
+# string(REPLACE "-Wno-overloaded-virtual" "" vector_c_flags ${BFASM_CXX_FLAGS})
+# set_source_files_properties(vector.c PROPERTIES COMPILE_FLAGS ${vector_c_flags})
 add_executable (bfas ${BFAS_SOURCES})
-target_link_libraries (bfas ${BFASM_LIBS} ${BFASM_LIB_DEPS} absl::strings absl::str_format absl::base absl::flags absl::flags_parse absl::status absl::hash)
+target_compile_options(bfas PRIVATE -std=gnu++17)  # Enable extensions for bfas.
+target_link_libraries (bfas ${BFASM_LIBS} ${BFASM_LIB_DEPS})
 
 install (TARGETS bfas
   RUNTIME DESTINATION bin)
@@ -324,30 +249,19 @@ add_dependencies(p4c_driver linkbfas)
 
 
 add_custom_target(check-asm
-  COMMAND export BUILDDIR=${BFASM_BINARY_DIR} && cd ${BFASM_SOURCE_DIR}/test &&
+  COMMAND export BUILDDIR=${BFASM_GEN_DIR} && cd ${BFASM_SOURCE_DIR}/test &&
           ./runtests asm/*.tfa asm/*.jba asm/*.bfa asm/*.stf)
 
 # This is broken and it doesn't make sense to use p4 tests here anyways
 # add_custom_target(check-all-asm
-#   COMMAND export BUILDDIR=${BFASM_BINARY_DIR} && cd ${BFASM_SOURCE_DIR}/test &&
+#   COMMAND export BUILDDIR=${BFASM_GEN_DIR} && cd ${BFASM_SOURCE_DIR}/test &&
 #           ./runtests -f asm/*.tfa *.p4 mau/*.p4
-#   COMMAND export BUILDDIR=${BFASM_BINARY_DIR} && cd ${BFASM_SOURCE_DIR}/test &&
+#   COMMAND export BUILDDIR=${BFASM_GEN_DIR} && cd ${BFASM_SOURCE_DIR}/test &&
 #           ./runtests -f -b stf/*.stf brig/*.p4)
 
 add_custom_target(check-sanity
-  COMMAND export BUILDDIR=${BFASM_BINARY_DIR} && cd ${BFASM_SOURCE_DIR}/test &&
+  COMMAND export BUILDDIR=${BFASM_GEN_DIR} && cd ${BFASM_SOURCE_DIR}/test &&
   ./runtests *.p4)
-
-set (CPPLINT_CMD ${BFN_P4C_SOURCE_DIR}/p4c/tools/cpplint.py)
-set (CPPLINT_ARGS --root=${BFASM_SOURCE_DIR}/.. --extensions=h,hpp,cpp,ypp,l)
-add_custom_target(cpplint-asm
-  COMMAND ${CPPLINT_CMD} ${CPPLINT_ARGS} ${CPPLINT_FILES}
-  WORKING_DIRECTORY ${BFASM_SOURCE_DIR}
-  COMMENT "cpplint")
-add_custom_target(cpplint-asm-quiet
-  COMMAND ${CPPLINT_CMD} --quiet ${CPPLINT_ARGS} ${CPPLINT_FILES}
-  WORKING_DIRECTORY ${BFASM_SOURCE_DIR}
-  COMMENT "cpplint quietly")
 
 string(CONFIGURE "/^DECLARE_(ABSTRACT_)?TABLE_TYPE\(([a-zA-Z0-9_]+)/2/c/" CTAGS_CXX_REGEXP @ONLY)
 add_custom_target(ctags-asm
@@ -370,7 +284,7 @@ if (ENABLE_GTESTS)
 
   add_library (bfas_lib ${BFAS_SOURCES})
   target_compile_definitions(bfas_lib PRIVATE BUILDING_FOR_GTEST)  # removes main()
-  target_link_libraries (bfas_lib PRIVATE ${BFASM_LIBS} ${BFASM_LIB_DEPS} absl::strings absl::str_format absl::base absl::flags absl::flags_parse absl::status absl::hash)
+  target_link_libraries (bfas_lib PRIVATE ${BFASM_LIBS} ${BFASM_LIB_DEPS})
 
   set(BFAS_GTEST_SOURCES
     gtest/gtestasm.cpp
@@ -384,27 +298,11 @@ if (ENABLE_GTESTS)
     gtest/register-matcher.cpp
     )
 
-  set(BFP4C_SOURCES
-  ${BFN_P4C_LIB_DIR}/bitvec.cpp
-  ${BFN_P4C_LIB_DIR}/compile_context.cpp
-  ${BFN_P4C_LIB_DIR}/cstring.cpp
-  ${BFN_P4C_LIB_DIR}/error_catalog.cpp
-  ${BFN_P4C_LIB_DIR}/error_message.cpp
-  ${BFN_P4C_LIB_DIR}/error_reporter.h
-  ${BFN_P4C_LIB_DIR}/hash.cpp
-  ${BFN_P4C_LIB_DIR}/options.cpp
-  ${BFN_P4C_LIB_DIR}/source_file.cpp
-  ${BFN_P4C_LIB_DIR}/stringify.cpp
-)
-
   # Do not use a unity build for gtestasm (for now).
   set_source_files_properties (${BFAS_GTEST_SOURCES} PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
 
   add_executable (gtestasm ${BFAS_GTEST_SOURCES} ${BFP4C_SOURCES})
-  include_directories(
-    ${BFN_P4C_SOURCE_DIR}/p4c
-  )
-  target_link_libraries (gtestasm PRIVATE bfas_lib gtest absl::strings absl::str_format absl::base absl::flags absl::flags_parse absl::status absl::hash)
+  target_link_libraries (gtestasm PRIVATE bfas_lib gtest)
   target_compile_options (gtestasm PRIVATE -Wall -Wextra -ggdb -O3
                           -Wno-unused-parameter -Wno-sign-compare)
 

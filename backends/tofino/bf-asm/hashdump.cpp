@@ -19,8 +19,8 @@
 #include <iostream>
 
 #include "gen/tofino/disas.regs.mau_addrmap.h"
-#include "hex.h"
-#include "json.h"
+#include "lib/hex.h"
+#include "backends/tofino/bf-asm/json.h"
 
 static Tofino::regs_mau_addrmap regs;
 

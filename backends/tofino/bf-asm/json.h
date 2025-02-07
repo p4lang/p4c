@@ -15,8 +15,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_JSON_H_  //  NOLINT(build/header_guard)
-#define BF_ASM_JSON_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_JSON_H_  //  NOLINT(build/header_guard)
+#define BACKENDS_TOFINO_BF_ASM_JSON_H_
 
 #include <assert.h>
 
@@ -29,7 +29,7 @@
 #include <typeindex>
 #include <vector>
 
-#include "ordered_map.h"
+#include "lib/ordered_map.h"
 #include "rvalue_reference_wrapper.h"
 
 using namespace P4;
@@ -636,4 +636,4 @@ inline std::ostream &operator<<(std::ostream &out, const map::element_ref &el) {
 extern void dump(const json::obj *);
 extern void dump(const json::obj &);
 
-#endif /* BF_ASM_JSON_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_JSON_H_ */

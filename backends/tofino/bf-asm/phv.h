@@ -15,19 +15,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_PHV_H_
-#define BF_ASM_PHV_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_PHV_H_
+#define BACKENDS_TOFINO_BF_ASM_PHV_H_
 
 #include <set>
 #include <vector>
 
 #include "bfas.h"
-#include "bitvec.h"
-#include "json.h"
+#include "lib/bitvec.h"
+#include "backends/tofino/bf-asm/json.h"
 #include "match_source.h"
 #include "misc.h"
 #include "sections.h"
-#include "target.h"
+#include "backends/tofino/bf-asm/target.h"
 
 class Phv : public Section {
     void start(int lineno, VECTOR(value_t) args) override;
@@ -326,4 +326,4 @@ inline unsigned Phv::mau_groupsize() { return phv.target->mau_groupsize(); }
 #include "jbay/phv.h"
 #endif /* HAVE_JBAY */
 
-#endif /* BF_ASM_PHV_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_PHV_H_ */

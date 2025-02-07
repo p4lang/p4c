@@ -15,13 +15,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_CHECKED_ARRAY_H_
-#define BF_ASM_CHECKED_ARRAY_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_CHECKED_ARRAY_H_
+#define BACKENDS_TOFINO_BF_ASM_CHECKED_ARRAY_H_
 
 #include <stdlib.h>
 
 #include "bfas.h"  // to get at the options
-#include "log.h"
+#include "lib/log.h"
 
 void print_regname(std::ostream &out, const void *addr, const void *end);
 
@@ -143,4 +143,4 @@ inline std::ostream &operator<<(std::ostream &out, checked_array<S, T> *arr) {
     return out;
 }
 
-#endif /* BF_ASM_CHECKED_ARRAY_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_CHECKED_ARRAY_H_ */

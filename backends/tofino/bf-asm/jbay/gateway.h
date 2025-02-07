@@ -15,16 +15,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_JBAY_GATEWAY_H_
-#define BF_ASM_JBAY_GATEWAY_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_JBAY_GATEWAY_H_
+#define BACKENDS_TOFINO_BF_ASM_JBAY_GATEWAY_H_
 
-#include <tables.h>
-
-#include <tofino/gateway.h>
+#include "backends/tofino/bf-asm/tofino/gateway.h"
+#include "backends/tofino/bf-asm/tables.h"
 
 #if HAVE_JBAY
 template <>
 void GatewayTable::standalone_write_regs(Target::JBay::mau_regs &regs);
 #endif /* HAVE_JBAY */
 
-#endif /* BF_ASM_JBAY_GATEWAY_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_JBAY_GATEWAY_H_ */

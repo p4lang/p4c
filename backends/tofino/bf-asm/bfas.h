@@ -15,8 +15,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_BFAS_H_
-#define BF_ASM_BFAS_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_BFAS_H_
+#define BACKENDS_TOFINO_BF_ASM_BFAS_H_
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -179,4 +179,4 @@ class VersionIter {
 
 extern unsigned unique_table_offset;
 
-#endif /* BF_ASM_BFAS_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_BFAS_H_ */

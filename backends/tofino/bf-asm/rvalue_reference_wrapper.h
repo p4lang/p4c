@@ -15,8 +15,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_RVALUE_REFERENCE_WRAPPER_H_
-#define BF_ASM_RVALUE_REFERENCE_WRAPPER_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_RVALUE_REFERENCE_WRAPPER_H_
+#define BACKENDS_TOFINO_BF_ASM_RVALUE_REFERENCE_WRAPPER_H_
 
 template <class T>
 class rvalue_reference_wrapper {
@@ -30,4 +30,4 @@ class rvalue_reference_wrapper {
     T &&get() { return std::move(*ref); }
 };
 
-#endif /* BF_ASM_RVALUE_REFERENCE_WRAPPER_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_RVALUE_REFERENCE_WRAPPER_H_ */

@@ -17,7 +17,7 @@
 
 #include "p4_table.h"
 
-#include "tables.h"
+#include "backends/tofino/bf-asm/tables.h"
 
 static std::map<const P4Table *, alpm_t> alpms;
 

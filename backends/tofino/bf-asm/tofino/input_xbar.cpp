@@ -15,7 +15,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "input_xbar.h"
+#include "backends/tofino/bf-asm/tofino/input_xbar.h"
 
 template <>
 void InputXbar::write_galois_matrix(Target::Tofino::mau_regs &regs, HashTable id,

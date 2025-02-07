@@ -15,13 +15,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_REGISTER_REFERENCE_H_
-#define BF_ASM_REGISTER_REFERENCE_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_REGISTER_REFERENCE_H_
+#define BACKENDS_TOFINO_BF_ASM_REGISTER_REFERENCE_H_
 
 #include <functional>
 #include <iostream>
 
-#include "log.h"
+#include "lib/log.h"
 
 /* used by `dump_unread` methods to hold a concatenation of string literals for printing.
  * Allocated on the stack, the `pfx` chain prints the calling context */
@@ -108,4 +108,4 @@ inline std::ostream &operator<<(std::ostream &out, const register_reference<REG>
     return out;
 }
 
-#endif /* BF_ASM_REGISTER_REFERENCE_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_REGISTER_REFERENCE_H_ */

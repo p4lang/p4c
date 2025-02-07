@@ -15,8 +15,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef BF_ASM_MISC_H_
-#define BF_ASM_MISC_H_
+#ifndef BACKENDS_TOFINO_BF_ASM_MISC_H_
+#define BACKENDS_TOFINO_BF_ASM_MISC_H_
 
 #include <iomanip>
 #include <limits>
@@ -29,7 +29,7 @@
 #include <boost/numeric/conversion/converter.hpp>
 
 #include "asm-types.h"
-#include "json.h"
+#include "backends/tofino/bf-asm/json.h"
 
 template <class T>
 auto setup_muxctl(T &reg, int val) -> decltype((void)reg.enabled_2bit_muxctl_enable) {
@@ -215,4 +215,4 @@ bool input_int_match(const value_t value, match_t &match, int width);
 /// @return True if the given keys are a subset of the map's keys
 bool require_keys(const value_t &data, std::set<const char *> keys);
 
-#endif /* BF_ASM_MISC_H_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_MISC_H_ */
