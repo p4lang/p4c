@@ -41,7 +41,7 @@ var searchData=
   ['map_3c_20p4_3a_3acstring_2c_20ir_3a_3avector_3c_20ir_3a_3abfn_3a_3aparserprimitive_20_3e_20_3e_38',['map&lt; P4::cstring, IR::Vector&lt; IR::BFN::ParserPrimitive &gt; &gt;',['../classassoc_1_1map.html',1,'assoc']]],
   ['map_3c_20p4_3a_3acstring_2c_20p4_3a_3asafe_5fvector_3c_20const_20ir_3a_3amau_3a_3abackendattached_20_2a_20_3e_20_3e_39',['map&lt; P4::cstring, P4::safe_vector&lt; const IR::MAU::BackendAttached * &gt; &gt;',['../classassoc_1_1map.html',1,'assoc']]],
   ['mapdesttoinstruction_40',['MapDestToInstruction',['../struct_map_dest_to_instruction.html',1,'']]],
-  ['mapdirectexterns_41',['MapDirectExterns',['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_map_direct_externs.html',1,'P4::P4Tools::P4Testgen::Bmv2']]],
+  ['mapdirectexterns_41',['MapDirectExterns',['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_map_direct_externs.html',1,'P4::P4Tools::P4Testgen::Bmv2::MapDirectExterns'],['../class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_map_direct_externs.html',1,'P4::P4Tools::P4Testgen::Tofino::MapDirectExterns']]],
   ['mapenumerator_42',['MapEnumerator',['../class_p4_1_1_util_1_1_map_enumerator.html',1,'P4::Util']]],
   ['mapfieldtoexpr_43',['MapFieldToExpr',['../class_map_field_to_expr.html',1,'']]],
   ['mapfieldtoparserstates_44',['MapFieldToParserStates',['../class_map_field_to_parser_states.html',1,'']]],

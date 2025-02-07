@@ -1451,7 +1451,8 @@ var hierarchy =
     [ "P4::P4Tools::P4Testgen::Concolic", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_concolic.html", [
       [ "P4::P4Tools::P4Testgen::Bmv2::Bmv2Concolic", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_concolic.html", null ],
       [ "P4::P4Tools::P4Testgen::EBPF::EBPFConcolic", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_e_b_p_f_1_1_e_b_p_f_concolic.html", null ],
-      [ "P4::P4Tools::P4Testgen::Pna::PnaDpdkConcolic", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_dpdk_concolic.html", null ]
+      [ "P4::P4Tools::P4Testgen::Pna::PnaDpdkConcolic", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_dpdk_concolic.html", null ],
+      [ "P4::P4Tools::P4Testgen::Tofino::SharedTofinoConcolic", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_shared_tofino_concolic.html", null ]
     ] ],
     [ "P4::P4Tools::P4Testgen::ConcolicMethodImpls", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_concolic_method_impls.html", null ],
     [ "P4::P4Tools::P4Testgen::Continuation", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_continuation.html", null ],
@@ -1483,12 +1484,14 @@ var hierarchy =
       [ "P4::P4Tools::P4Testgen::EBPF::EBPFTableStepper", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_e_b_p_f_1_1_e_b_p_f_table_stepper.html", null ],
       [ "P4::P4Tools::P4Testgen::Pna::SharedPnaTableStepper", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_table_stepper.html", [
         [ "P4::P4Tools::P4Testgen::Pna::PnaDpdkTableStepper", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_dpdk_table_stepper.html", null ]
-      ] ]
+      ] ],
+      [ "P4::P4Tools::P4Testgen::Tofino::TofinoTableStepper", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino_table_stepper.html", null ]
     ] ],
     [ "P4::P4Tools::P4Testgen::TestBackEnd", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_test_back_end.html", [
       [ "P4::P4Tools::P4Testgen::Bmv2::Bmv2TestBackend", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_test_backend.html", null ],
       [ "P4::P4Tools::P4Testgen::EBPF::EBPFTestBackend", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_e_b_p_f_1_1_e_b_p_f_test_backend.html", null ],
-      [ "P4::P4Tools::P4Testgen::Pna::PnaTestBackend", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_test_backend.html", null ]
+      [ "P4::P4Tools::P4Testgen::Pna::PnaTestBackend", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_test_backend.html", null ],
+      [ "P4::P4Tools::P4Testgen::Tofino::TofinoTestBackend", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino_test_backend.html", null ]
     ] ],
     [ "P4::P4Tools::P4Testgen::TestBackEnd::TestInfo", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_test_back_end.html#struct_p4_1_1_p4_tools_1_1_p4_testgen_1_1_test_back_end_1_1_test_info", null ],
     [ "P4::P4Tools::P4Testgen::TestBackendConfiguration", "struct_p4_1_1_p4_tools_1_1_p4_testgen_1_1_test_backend_configuration.html", null ],
@@ -1502,9 +1505,15 @@ var hierarchy =
       ] ],
       [ "P4::P4Tools::P4Testgen::EBPF::STF", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_e_b_p_f_1_1_s_t_f.html", null ],
       [ "P4::P4Tools::P4Testgen::Pna::Metadata", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_metadata.html", null ],
-      [ "P4::P4Tools::P4Testgen::Pna::PTF", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_p_t_f.html", null ]
+      [ "P4::P4Tools::P4Testgen::Pna::PTF", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_p_t_f.html", null ],
+      [ "P4::P4Tools::P4Testgen::Tofino::PTF", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_p_t_f.html", null ],
+      [ "P4::P4Tools::P4Testgen::Tofino::STF", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_s_t_f.html", null ]
     ] ],
     [ "P4::P4Tools::P4Testgen::TestSpec", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_test_spec.html", null ],
+    [ "P4::P4Tools::P4Testgen::Tofino::HashCompute", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_hash_compute.html", null ],
+    [ "P4::P4Tools::P4Testgen::Tofino::JBayConstants", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_j_bay_constants.html", null ],
+    [ "P4::P4Tools::P4Testgen::Tofino::SharedTofinoConstants", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_shared_tofino_constants.html", null ],
+    [ "P4::P4Tools::P4Testgen::Tofino::TofinoConstants", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino_constants.html", null ],
     [ "P4::P4Tools::ReachabilityEngine", "class_p4_1_1_p4_tools_1_1_reachability_engine.html", null ],
     [ "P4::P4Tools::ReachabilityEngineState", "class_p4_1_1_p4_tools_1_1_reachability_engine_state.html", null ],
     [ "P4::P4Tools::SymbolicEnv", "class_p4_1_1_p4_tools_1_1_symbolic_env.html", null ],
@@ -1531,7 +1540,11 @@ var hierarchy =
         [ "P4::P4Tools::P4Testgen::TestgenTarget", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_testgen_target.html", [
           [ "P4::P4Tools::P4Testgen::Bmv2::Bmv2V1ModelTestgenTarget", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_testgen_target.html", null ],
           [ "P4::P4Tools::P4Testgen::EBPF::EBPFTestgenTarget", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_e_b_p_f_1_1_e_b_p_f_testgen_target.html", null ],
-          [ "P4::P4Tools::P4Testgen::Pna::PnaDpdkTestgenTarget", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_dpdk_testgen_target.html", null ]
+          [ "P4::P4Tools::P4Testgen::Pna::PnaDpdkTestgenTarget", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_dpdk_testgen_target.html", null ],
+          [ "P4::P4Tools::P4Testgen::Tofino::AbstractTofinoTestgenTarget", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_abstract_tofino_testgen_target.html", [
+            [ "P4::P4Tools::P4Testgen::Tofino::JBay_T2naTestgenTarget", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_j_bay___t2na_testgen_target.html", null ],
+            [ "P4::P4Tools::P4Testgen::Tofino::Tofino_TnaTestgenTarget", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino___tna_testgen_target.html", null ]
+          ] ]
         ] ]
       ] ]
     ] ],
@@ -1769,7 +1782,8 @@ var hierarchy =
         [ "P4::P4Tools::AbstractRepCheckedNode< Self, Node >", "class_p4_1_1_p4_tools_1_1_abstract_rep_checked_node.html", null ],
         [ "P4::P4Tools::CompilerResult", "class_p4_1_1_p4_tools_1_1_compiler_result.html", [
           [ "P4::P4Tools::P4Testgen::TestgenCompilerResult", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_testgen_compiler_result.html", [
-            [ "P4::P4Tools::P4Testgen::Bmv2::BMv2V1ModelCompilerResult", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_b_mv2_v1_model_compiler_result.html", null ]
+            [ "P4::P4Tools::P4Testgen::Bmv2::BMv2V1ModelCompilerResult", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_b_mv2_v1_model_compiler_result.html", null ],
+            [ "P4::P4Tools::P4Testgen::Tofino::TofinoCompilerResult", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino_compiler_result.html", null ]
           ] ]
         ] ],
         [ "P4::P4Tools::P4Testgen::AbstractTest", "struct_p4_1_1_p4_tools_1_1_p4_testgen_1_1_abstract_test.html", [
@@ -1781,6 +1795,11 @@ var hierarchy =
           [ "P4::P4Tools::P4Testgen::EBPF::EBPFProgramInfo", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_e_b_p_f_1_1_e_b_p_f_program_info.html", null ],
           [ "P4::P4Tools::P4Testgen::Pna::SharedPnaProgramInfo", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_program_info.html", [
             [ "P4::P4Tools::P4Testgen::Pna::PnaDpdkProgramInfo", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_dpdk_program_info.html", null ]
+          ] ],
+          [ "P4::P4Tools::P4Testgen::Tofino::AbstractTofinoProgramInfo", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_abstract_tofino_program_info.html", null ],
+          [ "P4::P4Tools::P4Testgen::Tofino::TofinoSharedProgramInfo", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino_shared_program_info.html", [
+            [ "P4::P4Tools::P4Testgen::Tofino::JBayProgramInfo", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_j_bay_program_info.html", null ],
+            [ "P4::P4Tools::P4Testgen::Tofino::TofinoProgramInfo", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino_program_info.html", null ]
           ] ]
         ] ],
         [ "P4::P4Tools::P4Testgen::TestObject", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_test_object.html", [
@@ -1810,9 +1829,18 @@ var hierarchy =
             [ "P4::P4Tools::P4Testgen::LPM", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_l_p_m.html", null ],
             [ "P4::P4Tools::P4Testgen::Pna::Optional", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_optional.html", null ],
             [ "P4::P4Tools::P4Testgen::Pna::Range", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_range.html", null ],
-            [ "P4::P4Tools::P4Testgen::Ternary", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_ternary.html", null ]
+            [ "P4::P4Tools::P4Testgen::Ternary", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_ternary.html", null ],
+            [ "P4::P4Tools::P4Testgen::Tofino::Range", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_range.html", null ]
           ] ],
-          [ "P4::P4Tools::P4Testgen::TableRule", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_table_rule.html", null ]
+          [ "P4::P4Tools::P4Testgen::TableRule", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_table_rule.html", null ],
+          [ "P4::P4Tools::P4Testgen::Tofino::IndexExpression", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_index_expression.html", null ],
+          [ "P4::P4Tools::P4Testgen::Tofino::IndexMap", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_index_map.html", [
+            [ "P4::P4Tools::P4Testgen::Tofino::TofinoRegisterValue", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino_register_value.html", null ]
+          ] ],
+          [ "P4::P4Tools::P4Testgen::Tofino::TofinoActionProfile", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino_action_profile.html", null ],
+          [ "P4::P4Tools::P4Testgen::Tofino::TofinoActionSelector", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino_action_selector.html", null ],
+          [ "P4::P4Tools::P4Testgen::Tofino::TofinoDirectRegisterValue", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino_direct_register_value.html", null ],
+          [ "P4::P4Tools::P4Testgen::Tofino::TofinoRegisterParam", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino_register_param.html", null ]
         ] ],
         [ "P4::P4Tools::TraceEvent", "class_p4_1_1_p4_tools_1_1_trace_event.html", [
           [ "P4::P4Tools::TraceEvents::AssignmentStatement", "class_p4_1_1_p4_tools_1_1_trace_events_1_1_assignment_statement.html", null ],
@@ -2232,6 +2260,7 @@ var hierarchy =
           [ "P4::OrderArguments", "class_p4_1_1_order_arguments.html", null ],
           [ "P4::P4Test::MidEnd", "class_p4_1_1_p4_test_1_1_mid_end.html", null ],
           [ "P4::P4Tools::MidEnd", "class_p4_1_1_p4_tools_1_1_mid_end.html", null ],
+          [ "P4::P4Tools::P4Testgen::Tofino::RenameKeys", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_rename_keys.html", null ],
           [ "P4::P4V1::Converter", "class_p4_1_1_p4_v1_1_1_converter.html", [
             [ "ConverterAllowingRecirculate", "class_converter_allowing_recirculate.html", null ]
           ] ],
@@ -2744,13 +2773,19 @@ var hierarchy =
             [ "P4::P4Tools::P4Testgen::EBPF::EBPFCmdStepper", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_e_b_p_f_1_1_e_b_p_f_cmd_stepper.html", null ],
             [ "P4::P4Tools::P4Testgen::Pna::SharedPnaCmdStepper", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_cmd_stepper.html", [
               [ "P4::P4Tools::P4Testgen::Pna::PnaDpdkCmdStepper", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_dpdk_cmd_stepper.html", null ]
-            ] ]
+            ] ],
+            [ "P4::P4Tools::P4Testgen::Tofino::JBayCmdStepper", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_j_bay_cmd_stepper.html", null ],
+            [ "P4::P4Tools::P4Testgen::Tofino::TofinoCmdStepper", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino_cmd_stepper.html", null ]
           ] ],
           [ "P4::P4Tools::P4Testgen::ExprStepper", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_expr_stepper.html", [
             [ "P4::P4Tools::P4Testgen::Bmv2::Bmv2V1ModelExprStepper", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_bmv2_v1_model_expr_stepper.html", null ],
             [ "P4::P4Tools::P4Testgen::EBPF::EBPFExprStepper", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_e_b_p_f_1_1_e_b_p_f_expr_stepper.html", null ],
             [ "P4::P4Tools::P4Testgen::Pna::SharedPnaExprStepper", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_shared_pna_expr_stepper.html", [
               [ "P4::P4Tools::P4Testgen::Pna::PnaDpdkExprStepper", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_pna_1_1_pna_dpdk_expr_stepper.html", null ]
+            ] ],
+            [ "P4::P4Tools::P4Testgen::Tofino::SharedTofinoExprStepper", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_shared_tofino_expr_stepper.html", [
+              [ "P4::P4Tools::P4Testgen::Tofino::JBayExprStepper", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_j_bay_expr_stepper.html", null ],
+              [ "P4::P4Tools::P4Testgen::Tofino::Tofino1ExprStepper", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino1_expr_stepper.html", null ]
             ] ]
           ] ]
         ] ],
@@ -2758,6 +2793,8 @@ var hierarchy =
         [ "P4::P4Tools::P4Testgen::Bmv2::RefersToParser", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_refers_to_parser.html", null ],
         [ "P4::P4Tools::P4Testgen::ConcolicResolver", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_concolic_resolver.html", null ],
         [ "P4::P4Tools::P4Testgen::CoverableNodesScanner", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_coverable_nodes_scanner.html", null ],
+        [ "P4::P4Tools::P4Testgen::Tofino::CheckParserError", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_check_parser_error.html", null ],
+        [ "P4::P4Tools::P4Testgen::Tofino::MapDirectExterns", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_map_direct_externs.html", null ],
         [ "P4::P4Tools::Test::NodeFinder< T >", "class_p4_1_1_p4_tools_1_1_test_1_1_node_finder.html", null ],
         [ "P4::P4Tools::Z3Translator", "class_p4_1_1_p4_tools_1_1_z3_translator.html", null ],
         [ "P4::P4V1::CheckIfMultiEntryPoint", "class_p4_1_1_p4_v1_1_1_check_if_multi_entry_point.html", null ],
@@ -3208,6 +3245,8 @@ var hierarchy =
         [ "P4::P4Tools::MaskBuilder", "class_p4_1_1_p4_tools_1_1_mask_builder.html", null ],
         [ "P4::P4Tools::P4Testgen::Bmv2::AssertsParser", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_asserts_parser.html", null ],
         [ "P4::P4Tools::P4Testgen::Bmv2::PropagateP4RuntimeTranslation", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_bmv2_1_1_propagate_p4_runtime_translation.html", null ],
+        [ "P4::P4Tools::P4Testgen::Tofino::ProcessAnnotatedTables", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_process_annotated_tables.html", null ],
+        [ "P4::P4Tools::P4Testgen::Tofino::ProcessKeyElems", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_process_key_elems.html", null ],
         [ "P4::P4Tools::P4Testgen::VariableSubstitution", "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_variable_substitution.html", null ],
         [ "P4::P4Tools::TaintPropagator", "class_p4_1_1_p4_tools_1_1_taint_propagator.html", null ],
         [ "P4::P4Tools::Test::ArithmTest::SaturationTransform", "class_p4_1_1_p4_tools_1_1_test_1_1_arithm_test_1_1_saturation_transform.html", null ],

@@ -1,3 +1,5 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$structp4tc__skb__meta__get.html" title=" " alt="" coords="5,5,155,31"/>
+<area shape="rect" id="Node000000" title=" " alt="" coords="5,5,104,31"/>
+<area shape="rect" id="Node000001" href="$class_b_f_n_context.html" title="A CompileContext for bf&#45;p4c." alt="" coords="152,5,252,31"/>
+<area shape="poly" id="edge2470_Node000000_Node000001" title=" " alt="" coords="118,15,152,15,152,21,118,21"/>
 </map>
