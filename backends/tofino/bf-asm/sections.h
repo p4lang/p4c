@@ -23,8 +23,8 @@
 #include <string>
 
 #include "asm-types.h"
-#include "bfas.h"
 #include "backends/tofino/bf-asm/json.h"
+#include "bfas.h"
 #include "map.h"
 
 /// A Section represents a top level section in assembly

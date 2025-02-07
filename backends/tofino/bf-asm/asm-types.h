@@ -30,8 +30,8 @@
 #include <set>
 #include <sstream>
 
-#include "backends/tofino/bf-asm/map.h"
 #include "backends/tofino/bf-asm/json.h"
+#include "backends/tofino/bf-asm/map.h"
 #include "bfas.h"
 #include "lib/bitops.h"
 #include "lib/bitvec.h"

@@ -19,12 +19,12 @@
 
 #include <config.h>
 
+#include "backends/tofino/bf-asm/target.h"
 #include "constants.h"
+#include "lib/range.h"
 #include "misc.h"
 #include "parser-tofino-jbay.h"
 #include "phv.h"
-#include "lib/range.h"
-#include "backends/tofino/bf-asm/target.h"
 #include "top_level.h"
 #include "ubits.h"
 

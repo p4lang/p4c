@@ -766,9 +766,12 @@ def log_match_and_action_formats(all_match_and_action_formats):
     for table_name, stage in keys:
         if table_name not in tbl_to_info:
             tbl_to_info[table_name] = OrderedDict()
-        match_format_json, actual_match_entries, action_formats_json, actual_action_entries = (
-            all_match_and_action_formats[(table_name, stage)]
-        )
+        (
+            match_format_json,
+            actual_match_entries,
+            action_formats_json,
+            actual_action_entries,
+        ) = all_match_and_action_formats[(table_name, stage)]
         tbl_to_info[table_name][stage] = (
             match_format_json,
             actual_match_entries,
@@ -789,9 +792,12 @@ def log_match_and_action_formats(all_match_and_action_formats):
         all_match_formats = []
         all_action_formats = []
         for stage in tbl_to_info[table_name]:
-            match_format_json, actual_match_entries, action_formats_json, actual_action_entries = (
-                tbl_to_info[table_name][stage]
-            )
+            (
+                match_format_json,
+                actual_match_entries,
+                action_formats_json,
+                actual_action_entries,
+            ) = tbl_to_info[table_name][stage]
             all_match_formats.append((stage, match_format_json, actual_match_entries))
             all_action_formats.append((stage, action_formats_json, actual_action_entries))
 
@@ -844,9 +850,12 @@ def produce_mau_characterize(source, output):
     log.info("%s\n" % box)
 
     # Populate table summary information
-    table_info, sram_summary, all_overhead_structures, all_match_and_action_formats = (
-        _parse_mau_json(context)
-    )
+    (
+        table_info,
+        sram_summary,
+        all_overhead_structures,
+        all_match_and_action_formats,
+    ) = _parse_mau_json(context)
 
     # Output summary table in log file
 

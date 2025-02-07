@@ -15,9 +15,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "misc.h"
 #include "backends/tofino/bf-asm/stage.h"
 #include "backends/tofino/bf-asm/tables.h"
+#include "misc.h"
 
 void IdletimeTable::setup(VECTOR(pair_t) & data) {
     setup_layout(layout, data);

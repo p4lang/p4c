@@ -22,8 +22,8 @@
 
 #include <boost/optional.hpp>
 
-#include "lib/bitops.h"
 #include "constants.h"
+#include "lib/bitops.h"
 #include "lib/ordered_set.h"
 #include "phv.h"
 #include "sections.h"

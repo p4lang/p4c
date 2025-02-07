@@ -18,10 +18,10 @@
 #include <string_view>
 
 #include "action_bus.h"
-#include "input_xbar.h"
-#include "misc.h"
 #include "backends/tofino/bf-asm/stage.h"
 #include "backends/tofino/bf-asm/tables.h"
+#include "input_xbar.h"
+#include "misc.h"
 
 // target specific instantiatitions
 

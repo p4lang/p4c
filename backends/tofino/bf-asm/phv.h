@@ -21,13 +21,13 @@
 #include <set>
 #include <vector>
 
+#include "backends/tofino/bf-asm/json.h"
+#include "backends/tofino/bf-asm/target.h"
 #include "bfas.h"
 #include "lib/bitvec.h"
-#include "backends/tofino/bf-asm/json.h"
 #include "match_source.h"
 #include "misc.h"
 #include "sections.h"
-#include "backends/tofino/bf-asm/target.h"
 
 class Phv : public Section {
     void start(int lineno, VECTOR(value_t) args) override;

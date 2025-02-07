@@ -22,13 +22,13 @@
 
 #include <fstream>
 
-#include "hashexpr.h"
-#include "lib/log.h"
-#include "misc.h"
-#include "power_ctl.h"
-#include "lib/range.h"
 #include "backends/tofino/bf-asm/stage.h"
 #include "backends/tofino/bf-asm/tables.h"
+#include "hashexpr.h"
+#include "lib/log.h"
+#include "lib/range.h"
+#include "misc.h"
+#include "power_ctl.h"
 
 // template specialization declarations
 #include "backends/tofino/bf-asm/jbay/input_xbar.h"

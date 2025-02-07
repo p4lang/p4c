@@ -20,11 +20,11 @@
 #include <config.h>
 
 #include "action_bus.h"
+#include "backends/tofino/bf-asm/stage.h"
+#include "backends/tofino/bf-asm/tables.h"
 #include "depositfield.h"
 #include "phv.h"
 #include "power_ctl.h"
-#include "backends/tofino/bf-asm/stage.h"
-#include "backends/tofino/bf-asm/tables.h"
 
 namespace {
 constexpr int RotationBits = 16;

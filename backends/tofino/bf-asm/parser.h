@@ -20,8 +20,8 @@
 
 #include "asm-types.h"
 #include "backends/tofino/bf-asm/json.h"
-#include "sections.h"
 #include "backends/tofino/bf-asm/target.h"
+#include "sections.h"
 #include "vector.h"
 
 /**

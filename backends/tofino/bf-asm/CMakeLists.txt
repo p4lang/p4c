@@ -23,10 +23,6 @@ OPTION(ASAN_ENABLED "Enable ASAN checks" OFF)
 set (BFASM_LIB_DEPS p4ctoolkit ${P4C_LIB_DEPS})
 set (BFASM_GEN_DIR ${CMAKE_CURRENT_BINARY_DIR}/gen)
 
-find_package (BISON REQUIRED)
-find_package (FLEX REQUIRED)
-find_package(absl REQUIRED)
-
 # other required libraries
 include (CheckLibraryExists)
 # check includes

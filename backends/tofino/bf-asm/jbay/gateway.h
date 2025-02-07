@@ -18,8 +18,8 @@
 #ifndef BACKENDS_TOFINO_BF_ASM_JBAY_GATEWAY_H_
 #define BACKENDS_TOFINO_BF_ASM_JBAY_GATEWAY_H_
 
-#include "backends/tofino/bf-asm/tofino/gateway.h"
 #include "backends/tofino/bf-asm/tables.h"
+#include "backends/tofino/bf-asm/tofino/gateway.h"
 
 #if HAVE_JBAY
 template <>

@@ -22,10 +22,10 @@
 #include <vector>
 
 #include "alloc.h"
-#include "lib/bitvec.h"
+#include "backends/tofino/bf-asm/tables.h"
 #include "error_mode.h"
 #include "input_xbar.h"
-#include "backends/tofino/bf-asm/tables.h"
+#include "lib/bitvec.h"
 
 class Stage_data {
     /* we encapsulate all the Stage non-static fields in a base class to automate the

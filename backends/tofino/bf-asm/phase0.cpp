@@ -15,9 +15,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "parser-tofino-jbay.h"
 #include "backends/tofino/bf-asm/stage.h"
 #include "backends/tofino/bf-asm/tables.h"
+#include "parser-tofino-jbay.h"
 
 DEFINE_TABLE_TYPE(Phase0MatchTable)
 

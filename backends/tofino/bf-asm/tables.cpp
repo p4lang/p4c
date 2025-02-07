@@ -23,11 +23,11 @@
 #include <string>
 
 #include "action_bus.h"
-#include "lib/algorithm.h"
+#include "backends/tofino/bf-asm/stage.h"
 #include "input_xbar.h"
 #include "instruction.h"
+#include "lib/algorithm.h"
 #include "misc.h"
-#include "backends/tofino/bf-asm/stage.h"
 
 // template specialization declarations
 

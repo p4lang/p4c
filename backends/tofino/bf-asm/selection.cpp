@@ -15,12 +15,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "lib/algorithm.h"
-#include "data_switchbox.h"
-#include "input_xbar.h"
-#include "misc.h"
 #include "backends/tofino/bf-asm/stage.h"
 #include "backends/tofino/bf-asm/tables.h"
+#include "data_switchbox.h"
+#include "input_xbar.h"
+#include "lib/algorithm.h"
+#include "misc.h"
 
 void SelectionTable::setup(VECTOR(pair_t) & data) {
     setup_layout(layout, data);

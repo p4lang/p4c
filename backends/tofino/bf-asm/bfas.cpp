@@ -25,6 +25,7 @@
 #include <string>
 #include <vector>
 
+#include "backends/tofino/bf-asm/target.h"
 #include "backends/tofino/bf-p4c/git_sha_version.h"  // for BF_P4C_GIT_SHA
 #include "backends/tofino/bf-p4c/version.h"
 #include "constants.h"
@@ -32,7 +33,6 @@
 #include "misc.h"
 #include "parser-tofino-jbay.h"
 #include "sections.h"
-#include "backends/tofino/bf-asm/target.h"
 #include "top_level.h"
 
 #define MAJOR_VERSION 1

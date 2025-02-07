@@ -21,11 +21,11 @@
 
 #include <boost/optional.hpp>
 
-#include "lib/hex.h"
-#include "instruction.h"
-#include "phv.h"
 #include "backends/tofino/bf-asm/stage.h"
 #include "backends/tofino/bf-asm/tables.h"
+#include "instruction.h"
+#include "lib/hex.h"
+#include "phv.h"
 
 namespace StatefulAlu {
 

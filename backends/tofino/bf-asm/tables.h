@@ -26,13 +26,14 @@
 #include <unordered_map>
 #include <vector>
 
-#include "lib/algorithm.h"
 #include "alloc.h"
 #include "asm-types.h"
+#include "backends/tofino/bf-asm/json.h"
+#include "backends/tofino/bf-asm/target.h"
 #include "constants.h"
 #include "hash_dist.h"
 #include "input_xbar.h"
-#include "backends/tofino/bf-asm/json.h"
+#include "lib/algorithm.h"
 #include "lib/bitops.h"
 #include "lib/bitvec.h"
 #include "lib/ordered_map.h"
@@ -40,7 +41,6 @@
 #include "p4_table.h"
 #include "phv.h"
 #include "slist.h"
-#include "backends/tofino/bf-asm/target.h"
 
 class ActionBus;
 struct ActionBusSource;

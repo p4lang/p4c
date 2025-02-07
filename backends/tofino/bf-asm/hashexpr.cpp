@@ -17,9 +17,9 @@
 
 #include "hashexpr.h"
 
+#include "input_xbar.h"
 #include "lib/bitops.h"
 #include "lib/bitvec.h"
-#include "input_xbar.h"
 
 static bitvec crc(bitvec poly, bitvec val) {
     int poly_size = poly.max().index() + 1;
