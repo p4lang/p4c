@@ -1,0 +1,6 @@
+parser ingress:
+  start:
+    B0: 0
+    H0: 0
+    W0: 0
+    next: end

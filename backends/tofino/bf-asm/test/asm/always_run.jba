@@ -1,0 +1,16 @@
+parser ingress:
+  start:
+    0x*:
+      shift: 32
+      next: end
+stage 0 ingress:
+  always_run_action:
+  - set H0, 3
+  - set B1, 1
+deparser ingress:
+  egress_unicast_port: { H0: B1(0) }
+parser egress:
+  start:
+    0x*:
+      shift: 4
+      next: end

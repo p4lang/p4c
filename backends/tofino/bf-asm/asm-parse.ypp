@@ -1,0 +1,446 @@
+/**
+ * Copyright (C) 2024 Intel Corporation
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND,
+ * either express or implied.  See the License for the specific language governing permissions
+ * and limitations under the License.
+ *
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+%{
+#define YYDEBUG 1
+#include "asm-types.h"
+#include <cinttypes>
+#include <string.h>
+#include "sections.h"
+#include <map>
+#include <string>
+static int yylex();
+static void yyerror(const char *, ...);
+static int lineno;
+static std::map<int, std::pair<std::string, int>> line_file_map;
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+/* DANGER -- The value/command functions take non-const references to
+ * value_t and MOVE them, so the source should not be used or cleaned
+ * up afterwards.  This matches up with how bison  actions work -- in
+ * the normal case it does NOT try to destroy stuff on the value stack,
+ * but rather just pops it and lets it go.  Do not try to use them
+ * outside of bison action code */
+static value_t value(int64_t v, int lineno_adj) {
+    value_t rv = {tINT, lineno - lineno_adj};
+    rv.i = v;
+    return rv; }
+static value_t value(VECTOR(uintptr_t) &v, int lineno_adj) {
+    value_t rv{tBIGINT, lineno - lineno_adj};
+    rv.bigi = v;
+    return rv; }
+static value_t value(int lo, int hi, int lineno_adj) {
+    value_t rv{tRANGE, lineno - lineno_adj};
+    rv.lo = lo;
+    rv.hi = hi;
+    return rv; }
+static value_t value(char *v, int lineno_adj) {
+    value_t rv{tSTR, lineno - lineno_adj};
+    rv.s = v;
+    return rv; }
+static value_t value(match_t v, int lineno_adj) {
+    value_t rv{tMATCH, lineno - lineno_adj};
+    rv.m = v;
+    return rv; }
+static value_t value(VECTOR(match_t) v, int lineno_adj) {
+    value_t rv{tBIGMATCH, lineno - lineno_adj};
+    rv.bigm = v;
+    return rv; }
+static value_t value(VECTOR(value_t) &v, int lineno_adj) {
+    value_t rv{tVEC, lineno - lineno_adj};
+    if (v.size > 0) rv.lineno = v.data[0].lineno;
+    rv.vec = v;
+    return rv; }
+static value_t value(VECTOR(pair_t) &v, int lineno_adj) {
+    value_t rv{tMAP, lineno - lineno_adj};
+    if (v.size > 0) rv.lineno = v.data[0].key.lineno;
+    rv.map = v;
+    return rv; }
+static value_t empty_vector(int lineno_adj) {
+    value_t rv{tVEC, lineno - lineno_adj};
+    memset(&rv.vec, 0, sizeof(rv.vec));
+    return rv; }
+static value_t empty_map(int lineno_adj) {
+    value_t rv{tMAP, lineno - lineno_adj};
+    memset(&rv.vec, 0, sizeof(rv.vec));
+    return rv; }
+static value_t singleton_map(const value_t &k, const value_t &v) {
+    value_t rv{tMAP, k.lineno};
+    VECTOR_init1(rv.map, pair_t(k, v));
+    return rv; }
+static value_t command(char *cmd, const VECTOR(value_t) &args, int lineno_adj) {
+    value_t rv{tCMD, lineno - lineno_adj};
+    if (args.size && args.data[0].lineno < rv.lineno)
+        rv.lineno = args.data[0].lineno;
+    rv.vec = args;
+    VECTOR_insert(rv.vec, 0, 1);
+    rv[0] = value(cmd, 0);
+    rv[0].lineno = rv.lineno;
+    return rv; }
+static value_t command(char *cmd, value_t &arg, int lineno_adj) {
+    value_t rv{tCMD, lineno - lineno_adj};
+    if (arg.lineno < rv.lineno)
+        rv.lineno = arg.lineno;
+    VECTOR_init2(rv.vec, value(cmd, 0), arg);
+    rv[0].lineno = rv.lineno;
+    return rv; }
+static value_t command(char *cmd, value_t &&arg, int lineno_adj) {
+    return command(cmd, arg, lineno_adj); }
+static value_t command(char *cmd, bool merge, value_t &a1, value_t &a2, int lineno_adj) {
+    if (merge && a1.type == tCMD && a1 == cmd && a1.vec.size > 2) {
+        free(cmd);
+        VECTOR_add(a1.vec, a2);
+        return a1; }
+    if (merge && a2.type == tCMD && a2 == cmd && a2.vec.size > 2) {
+        free(cmd);
+        VECTOR_insert(a2.vec, 1);
+        a2.vec[1] = a1;
+        return a2; }
+    value_t rv{tCMD, lineno - lineno_adj};
+    if (a1.lineno < rv.lineno)
+        rv.lineno = a1.lineno;
+    VECTOR_init3(rv.vec, value(cmd, 0), a1, a2);
+    rv[0].lineno = rv.lineno;
+    return rv; }
+
+#define VAL(...)  value(__VA_ARGS__, yychar == '\n' ? 1 : 0)
+#define CMD(...)  command(__VA_ARGS__, yychar == '\n' ? 1 : 0)
+
+#pragma GCC diagnostic pop
+%}
+
+%define parse.error verbose
+%define lr.default-reduction accepting
+
+%nonassoc LOW_PREC
+%left '|' '^'
+%left '&'
+%left '<' '>'
+%nonassoc UNARY
+
+%union {
+    int64_t             i;
+    VECTOR(uintptr_t)   bigi;
+    char                *str;
+    match_t             match;
+    VECTOR(match_t)     bigm;
+    value_t             value;
+    VECTOR(value_t)     vec;
+    pair_t              pair;
+    VECTOR(pair_t)      map;
+}
+
+%token          INDENT UNINDENT DOTDOT
+%token<i>       INT
+%token<bigi>    BIGINT
+%token<str>     ID
+%token<str>     STR
+%token<match>   MATCH
+%token<bigm>    BIGMATCH
+
+%type<value>    param param_expr list_element key value elements opt_indent_elements
+                indent_elements flow_value
+%type<vec>      opt_params params comma_params linewrapped_value_list list_elements value_list dotvals
+%type<pair>     map_element pair
+%type<map>      map_elements pair_list
+
+%destructor   { free($$); } <str>
+%destructor   { VECTOR_fini($$); } <bigi>
+%destructor   { free_value(&$$); } <value>
+%destructor   { VECTOR_foreach($$, free_value); VECTOR_fini($$); } <vec>
+%destructor   { free_pair(&$$); } <pair>
+%destructor   { VECTOR_foreach($$, free_pair); VECTOR_fini($$); } <map>
+
+%printer  { fprintf(yyoutput, "%" PRId64, $$); } <i>
+%printer  { fprintf(yyoutput, "0x%" PRIuPTR, $$.data[$$.size-1]);
+            for (int i = $$.size-2; i >= 0; i--)
+                fprintf(yyoutput, "%016" PRIuPTR, $$.data[i]); } <bigi>
+%printer  { if ($$) fprintf(yyoutput, "'%s'", $$); else fprintf(yyoutput, "null"); } <str>
+%printer  { print_match(yyoutput, $$); } <match>
+%printer  { fprintf(yyoutput, "%s", value_desc(&$$)); } <value>
+%printer  { fprintf(yyoutput, "vec of size %d", $$.size); } <vec>
+%printer  { fprintf(yyoutput, "map of size %d", $$.size); } <map>
+
+%%
+
+start: INDENT sections UNINDENT | sections | /* epsilon */;
+
+sections: sections section | section ;
+
+section : ID opt_params ':'
+            { $<i>$ = Section::start_section(lineno, $1, $2); }
+          '\n' opt_indent_elements
+            { if (!$<i>4) Section::asm_section($1, $2, $6);
+              VECTOR_foreach($2, free_value);
+              VECTOR_fini($2);
+              free_value(&$6);
+              free($1); }
+        | ID opt_params ':'
+            { $<i>$ = Section::start_section(lineno, $1, $2); }
+          value '\n'
+            { if (!$<i>4) Section::asm_section($1, $2, $5);
+              VECTOR_foreach($2, free_value);
+              VECTOR_fini($2);
+              free_value(&$5);
+              free($1); }
+;
+
+opt_params: /* empty */ { memset(&$$, 0, sizeof($$)); }
+        | params
+        ;
+params  : param %prec LOW_PREC { VECTOR_init1($$, $1); }
+        | params param  { $$ = $1; VECTOR_add($$, $2); }
+        ;
+comma_params
+        : param ',' value { VECTOR_init2($$, $1, $3); }
+        | comma_params ',' value { $$ = $1; VECTOR_add($$, $3); }
+        | param_expr ',' value { VECTOR_init2($$, $1, $3); }
+        | '(' value ')' ',' value { VECTOR_init2($$, $2, $5); }
+        ;
+param   : INT { $$ = VAL($1); }
+        | ID { $$ = VAL($1); }
+        | '-' INT { $$ = VAL(-$2); }
+        | '!' ID { $$ = CMD(strdup("!"), VAL($2)); }
+        | INT DOTDOT INT { $$ = VAL($1, $3); }
+        | ID '(' value ')' { $$ = CMD($1, $3); }
+        | ID '(' value_list ')' { $$ = CMD($1, $3); }
+        | flow_value { $$ = $1; }
+        ;
+param_expr
+        : param '^' value { $$ = CMD(strdup("^"), true, $1, $3); }
+        | param '|' value { $$ = CMD(strdup("|"), true, $1, $3); }
+        | param '&' value { $$ = CMD(strdup("&"), true, $1, $3); }
+        /* rule duplication to get precedence correct */
+        | param_expr '^' value { $$ = CMD(strdup("^"), true, $1, $3); }
+        | param_expr '|' value { $$ = CMD(strdup("|"), true, $1, $3); }
+        | param_expr '&' value { $$ = CMD(strdup("&"), true, $1, $3); }
+        ;
+
+opt_indent_elements: { $$ = empty_map(1); }
+        | indent_elements
+        ;
+
+indent_elements
+        : INDENT elements UNINDENT { $$ = $2; }
+        | INDENT error { $<i>$ = lineno; } error_resync UNINDENT { $$ = empty_map(lineno-$<i>3); }
+        ;
+elements: list_elements { $$ = VAL($1); }
+        | list_elements error error_resync { $$ = VAL($1); }
+        | map_elements { $$ = VAL($1); }
+        | map_elements error error_resync { $$ = VAL($1); }
+        ;
+map_elements: map_elements map_element { $$ = $1; VECTOR_add($$, $2); }
+        | map_element { VECTOR_init1($$, $1); }
+        ;
+list_elements: list_elements list_element { $$ = $1; VECTOR_add($$, $2); }
+        | list_element { VECTOR_init1($$, $1); }
+        ;
+
+map_element
+        : key ':' value '\n' { $$ = pair_t($1, $3); }
+        | key ':' '\n' indent_elements { $$ = pair_t($1, $4); }
+        | key ':' '\n' list_elements { $$ = pair_t($1, VAL($4)); }
+        | key ':' '\n' { $$ = pair_t($1, empty_map(1)); }
+        | '?' value ':' value '\n' { $$ = pair_t($2, $4); }
+        | '?' value ':' '\n' indent_elements { $$ = pair_t($2, $5); }
+        | '?' value ':' '\n' list_elements { $$ = pair_t($2, VAL($5)); }
+        | '?' value '\n' ':' value '\n' { $$ = pair_t($2, $5); }
+        ;
+
+list_element
+        : '-' key ':' value '\n' { $$ = singleton_map($2, $4); }
+        | '-' key ':' value '\n' INDENT map_elements UNINDENT {
+            VECTOR_insert($7, 0);
+            $7.data[0] = pair_t($2, $4);
+            $$ = VAL($7); }
+        | '-' '?' value ':' value '\n' { $$ = singleton_map($3, $5); }
+        | '-' '?' value ':' value '\n' INDENT map_elements UNINDENT {
+            VECTOR_insert($8, 0);
+            $8.data[0] = pair_t($3, $5);
+            $$ = VAL($8); }
+        | '-' value '\n' { $$ = $2; }
+        | '-' ID comma_params '\n' { $$ = command($2, $3, yychar == '\n' ? 2 : 1); }
+        | '-' ID comma_params ',' '\n' linewrapped_value_list
+              { VECTOR_addcopy($3, $6.data, $6.size);
+                $$ = command($2, $3, yychar == '\n' ? 2 : 1);
+                VECTOR_fini($6); }
+        | '-' ID param ',' '\n' linewrapped_value_list
+              { VECTOR_insert($6, 0); $6.data[0] = $3;
+                $$ = command($2, $6, yychar == '\n' ? 2 : 1); }
+        | '-' key ':' '\n' indent_elements { $$ = singleton_map($2, $5); }
+        | '-' '?' value ':' '\n' indent_elements { $$ = singleton_map($3, $6); }
+        | '-' '\n' { $$ = value(strdup(""), yychar == '\n' ? 2 : 1); }
+        ;
+
+key : ID { $$ = VAL($1); }
+    | ID params { $$ = CMD($1, $2); }
+    | INT { $$ = VAL($1); }
+    | BIGINT { $$ = VAL($1); }
+    | MATCH { $$ = VAL($1); }
+    | BIGMATCH { $$ = VAL($1); }
+    | INT DOTDOT INT { $$ = VAL($1, $3); }
+    | ID '(' value_list ')' { $$ = CMD($1, $3); }
+    | ID '(' value ')' { $$ = CMD($1, $3); }
+    | ID '(' ')' { $$ = VAL($1); }
+    | flow_value
+    ;
+
+value: key
+    | '-' value %prec UNARY { if (($$=$2).type == tINT) $$.i = -$$.i; else $$ = CMD(strdup("-"), $2); }
+    | '!' value %prec UNARY { $$ = CMD(strdup("!"), $2); }
+    | dotvals INT { VECTOR_add($1, VAL($2)); $$ = VAL($1); }
+    | value '^' value { $$ = CMD(strdup("^"), true, $1, $3); }
+    | value '|' value { $$ = CMD(strdup("|"), true, $1, $3); }
+    | value '&' value { $$ = CMD(strdup("&"), true, $1, $3); }
+    | value '<' '<' value { $$ = CMD(strdup("<<"), false, $1, $4); }
+    | value '>' '>' value { $$ = CMD(strdup(">>"), false, $1, $4); }
+    | '(' value ')' { $$ = $2; }
+    | STR { $$ = VAL($1); }
+    ;
+
+flow_value
+    : '[' value_list ']' { $$ = VAL($2); }
+    | '[' value ']' { VECTOR(value_t) tmp; VECTOR_init1(tmp, $2); $$ = VAL(tmp); }
+    | '[' value_list error error_resync ']' { $$ = VAL($2); }
+    | '[' value error error_resync ']' {
+            VECTOR(value_t) tmp; VECTOR_init1(tmp, $2); $$ = VAL(tmp); }
+    | '{' pair_list '}' { $$ = VAL($2); }
+    | '{' pair_list error error_resync '}' { $$ = VAL($2); }
+    | '[' ']' { $$ = empty_vector(yychar == '\n' ? 1 : 0); }
+    | '[' error error_resync ']' { $$ = empty_vector(yychar == '\n' ? 1 : 0); }
+    | '{' '}' { $$ = empty_map(yychar == '\n' ? 1 : 0); }
+    | '{' error error_resync '}' { $$ = empty_map(yychar == '\n' ? 1 : 0); }
+    ;
+
+value_list
+    : value_list ',' value { $$ = $1; VECTOR_add($$, $3); }
+    | value ',' value { VECTOR_init2($$, $1, $3); }
+    ;
+linewrapped_value_list
+    : value_list '\n' { $$ = $1; }
+    | value '\n' { VECTOR_init1($$, $1); }
+    | value_list ',' '\n' linewrapped_value_list
+          { $$ = $1; VECTOR_addcopy($$, $4.data, $4.size); VECTOR_fini($4); }
+    | value ',' '\n' linewrapped_value_list
+          { VECTOR_init1($$, $1); VECTOR_addcopy($$, $4.data, $4.size); VECTOR_fini($4); }
+    | INDENT value_list '\n' UNINDENT { $$ = $2; }
+    | INDENT value '\n' UNINDENT { VECTOR_init1($$, $2); }
+    | INDENT value_list ',' '\n' linewrapped_value_list UNINDENT
+          { $$ = $2; VECTOR_addcopy($$, $5.data, $5.size); VECTOR_fini($5); }
+    | INDENT value ',' '\n' linewrapped_value_list UNINDENT
+          { VECTOR_init1($$, $2); VECTOR_addcopy($$, $5.data, $5.size); VECTOR_fini($5); }
+    ;
+
+pair_list
+    : pair_list ',' pair { $$ = $1; VECTOR_add($$, $3); }
+    | pair { VECTOR_init1($$, $1); }
+    ;
+pair: value ':' value { $$ = pair_t($1, $3); }
+    ;
+
+dotvals : dotvals INT '.' { $$ = $1; VECTOR_add($$, VAL($2)); }
+        | INT '.' { VECTOR_init1($$, VAL($1)); }
+
+error_resync: /* epsilon */ | error_resync indent_elements { free_value(&$2); }
+    | error_resync INT | error_resync ID { free($2); } | error_resync MATCH
+    | error_resync BIGMATCH { VECTOR_fini($2); }
+    | error_resync BIGINT { VECTOR_fini($2); } | error_resync ':' | error_resync '-'
+    | error_resync ',' | error_resync '(' | error_resync ')' | error_resync DOTDOT
+    | error_resync '\n' | error_resync flow_value { free_value(&$2); }
+    ;
+
+%%
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas"
+#pragma GCC diagnostic ignored "-Wdeprecated-register"
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#include "lex-yaml.c"
+#pragma GCC diagnostic pop
+
+int error_count = 0;
+int warn_count = 0;
+
+std::ostream &operator<<(std::ostream &out, const SrcInfo &s) {
+    auto it = line_file_map.upper_bound(s.lineno);
+    it--;
+    out << it->second.first << ':' << (s.lineno - it->first + it->second.second);
+    return out;
+}
+
+void warning(int lineno, const char *fmt, va_list args) {
+    auto it = line_file_map.upper_bound(lineno);
+    if (it == line_file_map.begin()) {
+        fprintf(stderr, "<unknown location>: warning: ");
+    } else {
+        --it;
+        fprintf(stderr, "%s:%d: warning: ", it->second.first.c_str(),
+                lineno - it->first + it->second.second); }
+    vfprintf(stderr, fmt, args);
+    fprintf(stderr, "\n");
+    fflush(stderr);
+    warn_count++; }
+
+void error(int lineno, const char *fmt, va_list args) {
+    auto it = line_file_map.upper_bound(lineno);
+    if (it == line_file_map.begin()) {
+        fprintf(stderr, "<unknown location>: error: ");
+    } else {
+        --it;
+        fprintf(stderr, "%s:%d: error: ", it->second.first.c_str(),
+                lineno - it->first + it->second.second); }
+    vfprintf(stderr, fmt, args);
+    fprintf(stderr, "\n");
+    fflush(stderr);
+    error_count++; }
+
+static void yyerror(const char *fmt, ...) {
+    va_list     args;
+    va_start(args, fmt);
+    error(lineno, fmt, args);
+    va_end(args);
+}
+
+int asm_parse_file(const char *name, FILE *in) {
+#ifdef YYDEBUG
+    if (const char *p = getenv("YYDEBUG"))
+        yydebug = atoi(p);
+#endif /* YYDEBUG */
+    yyrestart(in);
+    line_file_map[lineno++] = std::make_pair(name, 0);
+    if (yyparse())
+        error_count++;
+    return error_count;
+}
+
+int asm_parse_string(const char* in) {
+    YY_BUFFER_STATE buf;
+#ifdef YYDEBUG
+    if (const char *p = getenv("YYDEBUG"))
+        yydebug = atoi(p);
+#endif /* YYDEBUG */
+    // Reset state in case func is called multiple times
+    BEGIN(INITIAL);
+    buf = yy_scan_string(in);
+    if (yyparse())
+        error_count++;
+    yy_delete_buffer(buf);
+    return error_count;
+}
+
+std::map<std::string, Section *> *Section::sections = 0;

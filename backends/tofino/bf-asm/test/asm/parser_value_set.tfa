@@ -1,0 +1,23 @@
+parser ingress:
+  start: state1
+  multi_write: [ B0 ]
+  state1:
+    save: { byte0: 0, byte1: 1 }
+    shift: 2
+    next: state2
+  state2:
+    match: [ byte0 ]
+    value_set set1 5:
+      0..3: W0
+      B0: 1
+      shift: 4
+      next: end
+    0x**:
+      next: state3
+  state3:
+    match: [ byte1 ]
+    value_set set2 10:
+      0..3: W1
+      4..7: W2
+      B0: 2
+      shift: 8

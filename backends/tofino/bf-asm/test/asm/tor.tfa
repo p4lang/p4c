@@ -1,0 +1,1587 @@
+version: 1.0.0
+phv ingress:
+  standard_metadata.ingress_port: H13(0..8)
+  standard_metadata.egress_spec: H0(0..8)
+  $bridge-metadata: B63(6)
+  packet_out.egress_physical_port: H1(0..8)
+  packet_out.submit_to_ingress: H13(15)
+  ethernet.dst_addr.32-47: H5
+  ethernet.dst_addr.16-31: H4
+  ethernet.dst_addr.0-15: H3
+  ethernet.src_addr.32-47: H8
+  ethernet.src_addr.16-31: H7
+  ethernet.src_addr.0-15: H6
+  ethernet.ether_type: H82
+  vlan_tag$0.pcp: H15(13..15)
+  vlan_tag$0.cfi: H15(12)
+  vlan_tag$0.vid: H15(0..11)
+  vlan_tag$0.ether_type: H81
+  vlan_tag$1.pcp: TH3(13..15)
+  vlan_tag$1.cfi: TH3(12)
+  vlan_tag$1.vid: TH3(0..11)
+  vlan_tag$1.ether_type: H80
+  ipv4_base.version: TB1(4..7)
+  ipv4_base.ihl: TB1(0..3)
+  ipv4_base.diffserv: B5
+  ipv4_base.total_len: TH18
+  ipv4_base.identification: TH17
+  ipv4_base.flags: H14(13..15)
+  ipv4_base.frag_offset: H14(0..12)
+  ipv4_base.ttl: B0
+  ipv4_base.protocol: B7
+  ipv4_base.hdr_checksum: TH16
+  ipv4_base.src_addr: W10
+  ipv4_base.dst_addr: W12
+  tcp.src_port: H11
+  tcp.dst_port: H9
+  tcp.seq_no: TW2
+  tcp.ack_no: TW1
+  tcp.data_offset: TB0(4..7)
+  tcp.res: TB0(0..3)
+  tcp.flags: TB4
+  tcp.window: TH15
+  tcp.checksum: TH14
+  tcp.urgent_ptr: TH13
+  local_metadata.vrf_id: W11
+  local_metadata.class_id: B3
+  local_metadata.skip_egress: B63(6)
+  local_metadata.egress_spec_at_punt_match: H2(0..8)
+  local_metadata.color: B47(5..6)
+  local_metadata.l4_src_port: H12
+  local_metadata.l4_dst_port: H10
+  local_metadata.icmp_code: B2
+  udp.src_port: H11
+  udp.dst_port: H9
+  udp.hdr_length: TH12
+  udp.checksum: TH11
+  ipv6_base.version: W8(28..31)
+  ipv6_base.traffic_class: W8(20..27)
+  ipv6_base.flow_label: W8(0..19)
+  ipv6_base.payload_length: TH10
+  ipv6_base.next_header: B6
+  ipv6_base.hop_limit: B4
+  ipv6_base.src_addr.96-127: W3
+  ipv6_base.src_addr.64-95: W2
+  ipv6_base.src_addr.32-63: W1
+  ipv6_base.src_addr.0-31: W0
+  ipv6_base.dst_addr.96-127: W7
+  ipv6_base.dst_addr.64-95: W6
+  ipv6_base.dst_addr.32-63: W5
+  ipv6_base.dst_addr.0-31: W4
+  arp.hw_type: TH9
+  arp.proto_type: TH8
+  arp.hw_addr_len: TB3
+  arp.proto_addr_len: TB2
+  arp.opcode: TH7
+  arp.sender_hw_addr.32-47: TH6
+  arp.sender_hw_addr.16-31: TH5
+  arp.sender_hw_addr.0-15: TH4
+  arp.sender_proto_addr: TW0
+  arp.target_hw_addr.32-47: TH2
+  arp.target_hw_addr.16-31: TH1
+  arp.target_hw_addr.0-15: TH0
+  arp.target_proto_addr: W9
+  hasExited: B63(6)
+  $mirror_id: B1
+  $mirror: B15(4..6)
+  arp.$valid: B15(7)
+  ethernet.$valid: B47(7)
+  ipv4_base.$valid: B63(7)
+  ipv6_base.$valid: B14(7)
+  packet_out.$valid: B46(7)
+  tcp.$valid: B45(7)
+  udp.$valid: B62(7)
+  vlan_tag$0.$valid: B61(7)
+  vlan_tag$1.$valid: B13(7)
+phv egress:
+  standard_metadata.ingress_port: H19(0..8)
+  standard_metadata.egress_spec: H22(0..8)
+  standard_metadata.egress_port: H16(0..8)
+  local_metadata.skip_egress: B31(6)
+  local_metadata.egress_spec_at_punt_match: H17(0..8)
+  local_metadata.l4_dst_port: H21
+  packet_out.egress_physical_port: TH27(0..8)
+  packet_out.submit_to_ingress: TW27(31)
+  ethernet.dst_addr.32-47: TH30
+  ethernet.dst_addr.16-31: TH29
+  ethernet.dst_addr.0-15: TH28
+  ethernet.src_addr.32-47: TH26
+  ethernet.src_addr.16-31: TH25
+  ethernet.src_addr.0-15: TH24
+  ethernet.ether_type: H26
+  vlan_tag$0.pcp: TH32(13..15)
+  vlan_tag$0.cfi: TH32(12)
+  vlan_tag$0.vid: TH32(0..11)
+  vlan_tag$0.ether_type: H25
+  vlan_tag$1.pcp: TH31(13..15)
+  vlan_tag$1.cfi: TH31(12)
+  vlan_tag$1.vid: TH31(0..11)
+  vlan_tag$1.ether_type: H24
+  ipv4_base.version: TB16(4..7)
+  ipv4_base.ihl: TB16(0..3)
+  ipv4_base.diffserv: TB19
+  ipv4_base.total_len: TH40
+  ipv4_base.identification: TH39
+  ipv4_base.flags: H23(13..15)
+  ipv4_base.frag_offset: H23(0..12)
+  ipv4_base.ttl: TB18
+  ipv4_base.protocol: B17
+  ipv4_base.hdr_checksum: TH38
+  ipv4_base.src_addr: TW26
+  ipv4_base.dst_addr: TW25
+  udp.src_port: TH37
+  udp.dst_port: TH36
+  udp.hdr_length: TH35
+  udp.checksum: TH34
+  ipv6_base.version: TW24(28..31)
+  ipv6_base.traffic_class: TW24(20..27)
+  ipv6_base.flow_label: TW24(0..19)
+  ipv6_base.payload_length: TH33
+  ipv6_base.next_header: B16
+  ipv6_base.hop_limit: TB17
+  ipv6_base.src_addr.96-127: TW23
+  ipv6_base.src_addr.64-95: TW22
+  ipv6_base.src_addr.32-63: TW21
+  ipv6_base.src_addr.0-31: TW20
+  ipv6_base.dst_addr.96-127: TW19
+  ipv6_base.dst_addr.64-95: TW18
+  ipv6_base.dst_addr.32-63: TW17
+  ipv6_base.dst_addr.0-31: TW16
+  hasExited_0: H22(15)
+  ethernet.$valid: B31(7)
+  ipv4_base.$valid: B30(7)
+  ipv6_base.$valid: B29(7)
+  packet_out.$valid: B28(7)
+  udp.$valid: B27(7)
+  vlan_tag$0.$valid: B26(7)
+  vlan_tag$1.$valid: B25(7)
+parser ingress:
+  start: $ingress_metadata_shim
+  $ingress_metadata_shim:
+    0x*:
+      0..1: H13
+      shift: 16
+      next: $bridge-metadata
+      save: { half:0..1 }
+  $bridge-metadata:
+    0x*:
+      $bridge-metadata: 1
+      next: start$
+  start$:
+    match: [ half ]
+    0x0fd:
+      next: parse_cpu_header
+    0x*:
+      next: parse_ethernet
+  parse_cpu_header:
+    0x*:
+      0..1: H1
+      2..3: H13
+      packet_out.$valid: 1
+      shift: 2
+      next: parse_ethernet
+  parse_ethernet:
+    match: [ 12..13 ]
+    0x8100:
+      0..1: ethernet.dst_addr.32-47
+      2..3: ethernet.dst_addr.16-31
+      4..5: ethernet.dst_addr.0-15
+      6..7: ethernet.src_addr.32-47
+      shift: 8
+      next: parse_ethernet.0
+    0x9100:
+      0..1: ethernet.dst_addr.32-47
+      2..3: ethernet.dst_addr.16-31
+      4..5: ethernet.dst_addr.0-15
+      6..7: ethernet.src_addr.32-47
+      shift: 8
+      next: parse_ethernet.1
+    0x9200:
+      0..1: ethernet.dst_addr.32-47
+      2..3: ethernet.dst_addr.16-31
+      4..5: ethernet.dst_addr.0-15
+      6..7: ethernet.src_addr.32-47
+      shift: 8
+      next: parse_ethernet.2
+    0x9300:
+      0..1: ethernet.dst_addr.32-47
+      2..3: ethernet.dst_addr.16-31
+      4..5: ethernet.dst_addr.0-15
+      6..7: ethernet.src_addr.32-47
+      shift: 8
+      next: parse_ethernet.3
+    0x0800:
+      0..1: ethernet.dst_addr.32-47
+      2..3: ethernet.dst_addr.16-31
+      4..5: ethernet.dst_addr.0-15
+      6..7: ethernet.src_addr.32-47
+      shift: 8
+      next: parse_ethernet.4
+    0x86dd:
+      0..1: ethernet.dst_addr.32-47
+      2..3: ethernet.dst_addr.16-31
+      4..5: ethernet.dst_addr.0-15
+      6..7: ethernet.src_addr.32-47
+      shift: 8
+      next: parse_ethernet.5
+    0x0806:
+      0..1: ethernet.dst_addr.32-47
+      2..3: ethernet.dst_addr.16-31
+      4..5: ethernet.dst_addr.0-15
+      6..7: ethernet.src_addr.32-47
+      shift: 8
+      next: parse_ethernet.6
+    0x*:
+      0..1: ethernet.dst_addr.32-47
+      2..3: ethernet.dst_addr.16-31
+      4..5: ethernet.dst_addr.0-15
+      6..7: ethernet.src_addr.32-47
+      shift: 8
+      next: parse_ethernet.7
+  parse_ethernet.0:
+    0x*:
+      0..1: ethernet.src_addr.16-31
+      2..3: ethernet.src_addr.0-15
+      4..5: ethernet.ether_type
+      ethernet.$valid: 1
+      shift: 6
+      next: parse_vlan
+  parse_vlan:
+    match: [ 2..3 ]
+    0x8100:
+      0..1: H15
+      2..3: vlan_tag$0.ether_type
+      vlan_tag$0.$valid: 1
+      shift: 4
+      next: parse_vlan.0
+    0x9100:
+      0..1: H15
+      2..3: vlan_tag$0.ether_type
+      vlan_tag$0.$valid: 1
+      shift: 4
+      next: parse_vlan.5
+    0x9200:
+      0..1: H15
+      2..3: vlan_tag$0.ether_type
+      vlan_tag$0.$valid: 1
+      shift: 4
+      next: parse_vlan.10
+    0x9300:
+      0..1: H15
+      2..3: vlan_tag$0.ether_type
+      vlan_tag$0.$valid: 1
+      shift: 4
+      next: parse_vlan.15
+    0x0800:
+      0..1: H15
+      2..3: vlan_tag$0.ether_type
+      vlan_tag$0.$valid: 1
+      shift: 4
+      next: parse_ipv4
+    0x86dd:
+      0..1: H15
+      2..3: vlan_tag$0.ether_type
+      vlan_tag$0.$valid: 1
+      shift: 4
+      next: parse_ipv6
+    0x*:
+      0..1: H15
+      2..3: vlan_tag$0.ether_type
+      vlan_tag$0.$valid: 1
+      shift: 4
+      next: end
+  parse_vlan.0:
+    match: [ 2..3 ]
+    0x8100:
+      next: end
+    0x9100:
+      next: end
+    0x9200:
+      next: end
+    0x9300:
+      next: end
+    0x0800:
+      0..1: TH3
+      2..3: vlan_tag$1.ether_type
+      vlan_tag$1.$valid: 1
+      shift: 4
+      next: parse_ipv4
+    0x86dd:
+      0..1: TH3
+      2..3: vlan_tag$1.ether_type
+      vlan_tag$1.$valid: 1
+      shift: 4
+      next: parse_ipv6
+    0x*:
+      next: end
+  parse_ipv4:
+    match: [ /* ingress::ipv4_base.frag_offset ++ ingress::ipv4_base.protocol; */ ]
+    0x000001:
+      0: TB1
+      1: ipv4_base.diffserv
+      2..3: ipv4_base.total_len
+      4..5: ipv4_base.identification
+      6..7: H14
+      8: ipv4_base.ttl
+      9: ipv4_base.protocol
+      10..11: ipv4_base.hdr_checksum
+      12..15: ipv4_base.src_addr
+      16..19: ipv4_base.dst_addr
+      shift: 20
+      next: parse_ipv4.0
+    0x000006:
+      0: TB1
+      1: ipv4_base.diffserv
+      2..3: ipv4_base.total_len
+      4..5: ipv4_base.identification
+      6..7: H14
+      8: ipv4_base.ttl
+      9: ipv4_base.protocol
+      10..11: ipv4_base.hdr_checksum
+      12..15: ipv4_base.src_addr
+      16..19: ipv4_base.dst_addr
+      shift: 20
+      next: parse_ipv4.1
+    0x000011:
+      0: TB1
+      1: ipv4_base.diffserv
+      2..3: ipv4_base.total_len
+      4..5: ipv4_base.identification
+      6..7: H14
+      8: ipv4_base.ttl
+      9: ipv4_base.protocol
+      10..11: ipv4_base.hdr_checksum
+      12..15: ipv4_base.src_addr
+      16..19: ipv4_base.dst_addr
+      shift: 20
+      next: parse_ipv4.2
+    0x*:
+      0: TB1
+      1: ipv4_base.diffserv
+      2..3: ipv4_base.total_len
+      4..5: ipv4_base.identification
+      6..7: H14
+      8: ipv4_base.ttl
+      9: ipv4_base.protocol
+      10..11: ipv4_base.hdr_checksum
+      12..15: ipv4_base.src_addr
+      16..19: ipv4_base.dst_addr
+      shift: 20
+      next: parse_ipv4.3
+  parse_ipv4.0:
+    0x*:
+      ipv4_base.$valid: 1
+      next: end
+  parse_ipv4.1:
+    0x*:
+      ipv4_base.$valid: 1
+      next: parse_tcp
+  parse_tcp:
+    0x*:
+      0..1: tcp.src_port
+      2..3: tcp.dst_port
+      4..7: tcp.seq_no
+      8..11: tcp.ack_no
+      12: TB0
+      13: tcp.flags
+      14..15: tcp.window
+      16..17: tcp.checksum
+      shift: 18
+      next: parse_tcp.0
+  parse_tcp.0:
+    0x*:
+      0..1: tcp.urgent_ptr
+      tcp.$valid: 1
+      local_metadata.l4_src_port: 0 /* ingress::tcp.src_port; */
+      local_metadata.l4_dst_port: 0 /* ingress::tcp.dst_port; */
+      shift: 2
+      next: end
+  parse_ipv4.2:
+    0x*:
+      ipv4_base.$valid: 1
+      next: parse_udp
+  parse_udp:
+    0x*:
+      0..1: udp.src_port
+      2..3: udp.dst_port
+      4..5: udp.hdr_length
+      6..7: udp.checksum
+      udp.$valid: 1
+      shift: 9
+      next: parse_udp.0
+  parse_udp.0:
+    0x*:
+      local_metadata.l4_src_port: 0 /* ingress::udp.src_port; */
+      local_metadata.l4_dst_port: 0 /* ingress::udp.dst_port; */
+      # shift: -1
+      next: end
+  parse_ipv4.3:
+    0x*:
+      ipv4_base.$valid: 1
+      next: end
+  parse_ipv6:
+    match: [ 6 ]
+    0x3a:
+      0..3: W8
+      4..5: ipv6_base.payload_length
+      6: ipv6_base.next_header
+      7: ipv6_base.hop_limit
+      8..11: ipv6_base.src_addr.96-127
+      12..15: ipv6_base.src_addr.64-95
+      16..19: ipv6_base.src_addr.32-63
+      shift: 20
+      next: parse_ipv6.0
+    0x06:
+      0..3: W8
+      4..5: ipv6_base.payload_length
+      6: ipv6_base.next_header
+      7: ipv6_base.hop_limit
+      8..11: ipv6_base.src_addr.96-127
+      12..15: ipv6_base.src_addr.64-95
+      16..19: ipv6_base.src_addr.32-63
+      shift: 20
+      next: parse_ipv6.1
+    0x11:
+      0..3: W8
+      4..5: ipv6_base.payload_length
+      6: ipv6_base.next_header
+      7: ipv6_base.hop_limit
+      8..11: ipv6_base.src_addr.96-127
+      12..15: ipv6_base.src_addr.64-95
+      16..19: ipv6_base.src_addr.32-63
+      shift: 20
+      next: parse_ipv6.2
+    0x*:
+      0..3: W8
+      4..5: ipv6_base.payload_length
+      6: ipv6_base.next_header
+      7: ipv6_base.hop_limit
+      8..11: ipv6_base.src_addr.96-127
+      12..15: ipv6_base.src_addr.64-95
+      16..19: ipv6_base.src_addr.32-63
+      shift: 20
+      next: parse_ipv6.3
+  parse_ipv6.0:
+    0x*:
+      0..3: ipv6_base.src_addr.0-31
+      4..7: ipv6_base.dst_addr.96-127
+      8..11: ipv6_base.dst_addr.64-95
+      12..15: ipv6_base.dst_addr.32-63
+      shift: 16
+      next: parse_ipv6.0.0
+  parse_ipv6.0.0:
+    0x*:
+      0..3: ipv6_base.dst_addr.0-31
+      ipv6_base.$valid: 1
+      shift: 4
+      next: end
+  parse_ipv6.1:
+    0x*:
+      0..3: ipv6_base.src_addr.0-31
+      4..7: ipv6_base.dst_addr.96-127
+      8..11: ipv6_base.dst_addr.64-95
+      12..15: ipv6_base.dst_addr.32-63
+      shift: 16
+      next: parse_ipv6.1.0
+  parse_ipv6.1.0:
+    0x*:
+      0..3: ipv6_base.dst_addr.0-31
+      ipv6_base.$valid: 1
+      shift: 4
+      next: parse_tcp
+  parse_ipv6.2:
+    0x*:
+      0..3: ipv6_base.src_addr.0-31
+      4..7: ipv6_base.dst_addr.96-127
+      8..11: ipv6_base.dst_addr.64-95
+      12..15: ipv6_base.dst_addr.32-63
+      shift: 16
+      next: parse_ipv6.2.0
+  parse_ipv6.2.0:
+    0x*:
+      0..3: ipv6_base.dst_addr.0-31
+      ipv6_base.$valid: 1
+      shift: 4
+      next: parse_udp
+  parse_ipv6.3:
+    0x*:
+      0..3: ipv6_base.src_addr.0-31
+      4..7: ipv6_base.dst_addr.96-127
+      8..11: ipv6_base.dst_addr.64-95
+      12..15: ipv6_base.dst_addr.32-63
+      shift: 16
+      next: parse_ipv6.3.0
+  parse_ipv6.3.0:
+    0x*:
+      0..3: ipv6_base.dst_addr.0-31
+      ipv6_base.$valid: 1
+      shift: 4
+      next: end
+  parse_vlan.5:
+    match: [ 2..3 ]
+    0x8100:
+      next: end
+    0x9100:
+      next: end
+    0x9200:
+      next: end
+    0x9300:
+      next: end
+    0x0800:
+      0..1: TH3
+      2..3: vlan_tag$1.ether_type
+      vlan_tag$1.$valid: 1
+      shift: 4
+      next: parse_ipv4
+    0x86dd:
+      0..1: TH3
+      2..3: vlan_tag$1.ether_type
+      vlan_tag$1.$valid: 1
+      shift: 4
+      next: parse_ipv6
+    0x*:
+      next: end
+  parse_vlan.10:
+    match: [ 2..3 ]
+    0x8100:
+      next: end
+    0x9100:
+      next: end
+    0x9200:
+      next: end
+    0x9300:
+      next: end
+    0x0800:
+      0..1: TH3
+      2..3: vlan_tag$1.ether_type
+      vlan_tag$1.$valid: 1
+      shift: 4
+      next: parse_ipv4
+    0x86dd:
+      0..1: TH3
+      2..3: vlan_tag$1.ether_type
+      vlan_tag$1.$valid: 1
+      shift: 4
+      next: parse_ipv6
+    0x*:
+      next: end
+  parse_vlan.15:
+    match: [ 2..3 ]
+    0x8100:
+      next: end
+    0x9100:
+      next: end
+    0x9200:
+      next: end
+    0x9300:
+      next: end
+    0x0800:
+      0..1: TH3
+      2..3: vlan_tag$1.ether_type
+      vlan_tag$1.$valid: 1
+      shift: 4
+      next: parse_ipv4
+    0x86dd:
+      0..1: TH3
+      2..3: vlan_tag$1.ether_type
+      vlan_tag$1.$valid: 1
+      shift: 4
+      next: parse_ipv6
+    0x*:
+      next: end
+  parse_ethernet.1:
+    0x*:
+      0..1: ethernet.src_addr.16-31
+      2..3: ethernet.src_addr.0-15
+      4..5: ethernet.ether_type
+      ethernet.$valid: 1
+      shift: 6
+      next: parse_vlan
+  parse_ethernet.2:
+    0x*:
+      0..1: ethernet.src_addr.16-31
+      2..3: ethernet.src_addr.0-15
+      4..5: ethernet.ether_type
+      ethernet.$valid: 1
+      shift: 6
+      next: parse_vlan
+  parse_ethernet.3:
+    0x*:
+      0..1: ethernet.src_addr.16-31
+      2..3: ethernet.src_addr.0-15
+      4..5: ethernet.ether_type
+      ethernet.$valid: 1
+      shift: 6
+      next: parse_vlan
+  parse_ethernet.4:
+    0x*:
+      0..1: ethernet.src_addr.16-31
+      2..3: ethernet.src_addr.0-15
+      4..5: ethernet.ether_type
+      ethernet.$valid: 1
+      shift: 6
+      next: parse_ipv4
+  parse_ethernet.5:
+    0x*:
+      0..1: ethernet.src_addr.16-31
+      2..3: ethernet.src_addr.0-15
+      4..5: ethernet.ether_type
+      ethernet.$valid: 1
+      shift: 6
+      next: parse_ipv6
+  parse_ethernet.6:
+    0x*:
+      0..1: ethernet.src_addr.16-31
+      2..3: ethernet.src_addr.0-15
+      4..5: ethernet.ether_type
+      ethernet.$valid: 1
+      shift: 6
+      next: parse_arp
+  parse_arp:
+    0x*:
+      0..1: arp.hw_type
+      2..3: arp.proto_type
+      4: arp.hw_addr_len
+      5: arp.proto_addr_len
+      6..7: arp.opcode
+      8..9: arp.sender_hw_addr.32-47
+      shift: 10
+      next: parse_arp.0
+  parse_arp.0:
+    0x*:
+      0..1: arp.sender_hw_addr.16-31
+      2..3: arp.sender_hw_addr.0-15
+      4..7: arp.sender_proto_addr
+      8..9: arp.target_hw_addr.32-47
+      10..11: arp.target_hw_addr.16-31
+      shift: 12
+      next: parse_arp.0.0
+  parse_arp.0.0:
+    0x*:
+      0..1: arp.target_hw_addr.0-15
+      2..5: arp.target_proto_addr
+      arp.$valid: 1
+      shift: 6
+      next: end
+  parse_ethernet.7:
+    0x*:
+      0..1: ethernet.src_addr.16-31
+      2..3: ethernet.src_addr.0-15
+      4..5: ethernet.ether_type
+      ethernet.$valid: 1
+      shift: 6
+      next: end
+deparser ingress:
+  dictionary:
+    H0: $bridge-metadata
+    B63: $bridge-metadata
+    H2: $bridge-metadata
+    local_metadata.l4_dst_port: $bridge-metadata
+    ethernet.dst_addr.32-47: ethernet.$valid
+    ethernet.dst_addr.16-31: ethernet.$valid
+    ethernet.dst_addr.0-15: ethernet.$valid
+    ethernet.src_addr.32-47: ethernet.$valid
+    ethernet.src_addr.16-31: ethernet.$valid
+    ethernet.src_addr.0-15: ethernet.$valid
+    ethernet.ether_type: ethernet.$valid
+    H15: vlan_tag$0.$valid
+    vlan_tag$0.ether_type: vlan_tag$0.$valid
+    TH3: vlan_tag$1.$valid
+    vlan_tag$1.ether_type: vlan_tag$1.$valid
+    TB1: ipv4_base.$valid
+    ipv4_base.diffserv: ipv4_base.$valid
+    ipv4_base.total_len: ipv4_base.$valid
+    ipv4_base.identification: ipv4_base.$valid
+    H14: ipv4_base.$valid
+    ipv4_base.ttl: ipv4_base.$valid
+    ipv4_base.protocol: ipv4_base.$valid
+    ipv4_base.hdr_checksum: ipv4_base.$valid
+    ipv4_base.src_addr: ipv4_base.$valid
+    ipv4_base.dst_addr: ipv4_base.$valid
+    W8: ipv6_base.$valid
+    ipv6_base.payload_length: ipv6_base.$valid
+    ipv6_base.next_header: ipv6_base.$valid
+    ipv6_base.hop_limit: ipv6_base.$valid
+    ipv6_base.src_addr.96-127: ipv6_base.$valid
+    ipv6_base.src_addr.64-95: ipv6_base.$valid
+    ipv6_base.src_addr.32-63: ipv6_base.$valid
+    ipv6_base.src_addr.0-31: ipv6_base.$valid
+    ipv6_base.dst_addr.96-127: ipv6_base.$valid
+    ipv6_base.dst_addr.64-95: ipv6_base.$valid
+    ipv6_base.dst_addr.32-63: ipv6_base.$valid
+    ipv6_base.dst_addr.0-31: ipv6_base.$valid
+    arp.hw_type: arp.$valid
+    arp.proto_type: arp.$valid
+    arp.hw_addr_len: arp.$valid
+    arp.proto_addr_len: arp.$valid
+    arp.opcode: arp.$valid
+    arp.sender_hw_addr.32-47: arp.$valid
+    arp.sender_hw_addr.16-31: arp.$valid
+    arp.sender_hw_addr.0-15: arp.$valid
+    arp.sender_proto_addr: arp.$valid
+    arp.target_hw_addr.32-47: arp.$valid
+    arp.target_hw_addr.16-31: arp.$valid
+    arp.target_hw_addr.0-15: arp.$valid
+    arp.target_proto_addr: arp.$valid
+    tcp.src_port: tcp.$valid
+    tcp.dst_port: tcp.$valid
+    tcp.seq_no: tcp.$valid
+    tcp.ack_no: tcp.$valid
+    TB0: tcp.$valid
+    tcp.flags: tcp.$valid
+    tcp.window: tcp.$valid
+    tcp.checksum: tcp.$valid
+    tcp.urgent_ptr: tcp.$valid
+    udp.src_port: udp.$valid
+    udp.dst_port: udp.$valid
+    udp.hdr_length: udp.$valid
+    udp.checksum: udp.$valid
+  egress_unicast_port: standard_metadata.egress_spec
+  mirror:
+    0: [ $mirror, $mirror_id, H13 ]
+    select: $mirror
+parser egress:
+  start: $egress_metadata_shim
+  $egress_metadata_shim:
+    0x*:
+      0..1: H16
+      shift: 2
+      next: $bridge-metadata
+      save: { half:0..1 }
+  $bridge-metadata:
+    0x*:
+      0..1: H22
+      2: B31
+      3..4: H17
+      5..6: local_metadata.l4_dst_port
+      shift: 7
+      next: start$
+  start$:
+    match: [ half ]
+    0x0fd:
+      next: parse_cpu_header
+    0x*:
+      next: parse_ethernet
+  parse_cpu_header:
+    0x*:
+      0..1: TH27
+      2..5: TW27
+      packet_out.$valid: 1
+      shift: 2
+      next: parse_ethernet
+  parse_ethernet:
+    match: [ 12..13 ]
+    0x8100:
+      0..1: ethernet.dst_addr.32-47
+      2..3: ethernet.dst_addr.16-31
+      4..5: ethernet.dst_addr.0-15
+      6..7: ethernet.src_addr.32-47
+      shift: 8
+      next: parse_ethernet.0
+    0x9100:
+      0..1: ethernet.dst_addr.32-47
+      2..3: ethernet.dst_addr.16-31
+      4..5: ethernet.dst_addr.0-15
+      6..7: ethernet.src_addr.32-47
+      shift: 8
+      next: parse_ethernet.1
+    0x9200:
+      0..1: ethernet.dst_addr.32-47
+      2..3: ethernet.dst_addr.16-31
+      4..5: ethernet.dst_addr.0-15
+      6..7: ethernet.src_addr.32-47
+      shift: 8
+      next: parse_ethernet.2
+    0x9300:
+      0..1: ethernet.dst_addr.32-47
+      2..3: ethernet.dst_addr.16-31
+      4..5: ethernet.dst_addr.0-15
+      6..7: ethernet.src_addr.32-47
+      shift: 8
+      next: parse_ethernet.3
+    0x0800:
+      0..1: ethernet.dst_addr.32-47
+      2..3: ethernet.dst_addr.16-31
+      4..5: ethernet.dst_addr.0-15
+      6..7: ethernet.src_addr.32-47
+      shift: 8
+      next: parse_ethernet.4
+    0x86dd:
+      0..1: ethernet.dst_addr.32-47
+      2..3: ethernet.dst_addr.16-31
+      4..5: ethernet.dst_addr.0-15
+      6..7: ethernet.src_addr.32-47
+      shift: 8
+      next: parse_ethernet.5
+    0x0806:
+      next: end
+    0x*:
+      next: end
+  parse_ethernet.0:
+    0x*:
+      0..1: ethernet.src_addr.16-31
+      2..3: ethernet.src_addr.0-15
+      4..5: ethernet.ether_type
+      ethernet.$valid: 1
+      shift: 6
+      next: parse_vlan
+  parse_vlan:
+    match: [ 2..3 ]
+    0x8100:
+      0..1: TH32
+      2..3: vlan_tag$0.ether_type
+      vlan_tag$0.$valid: 1
+      shift: 4
+      next: parse_vlan.0
+    0x9100:
+      0..1: TH32
+      2..3: vlan_tag$0.ether_type
+      vlan_tag$0.$valid: 1
+      shift: 4
+      next: parse_vlan.5
+    0x9200:
+      0..1: TH32
+      2..3: vlan_tag$0.ether_type
+      vlan_tag$0.$valid: 1
+      shift: 4
+      next: parse_vlan.10
+    0x9300:
+      0..1: TH32
+      2..3: vlan_tag$0.ether_type
+      vlan_tag$0.$valid: 1
+      shift: 4
+      next: parse_vlan.15
+    0x0800:
+      0..1: TH32
+      2..3: vlan_tag$0.ether_type
+      vlan_tag$0.$valid: 1
+      shift: 4
+      next: parse_ipv4
+    0x86dd:
+      0..1: TH32
+      2..3: vlan_tag$0.ether_type
+      vlan_tag$0.$valid: 1
+      shift: 4
+      next: parse_ipv6
+    0x*:
+      next: end
+  parse_vlan.0:
+    match: [ 2..3 ]
+    0x8100:
+      next: end
+    0x9100:
+      next: end
+    0x9200:
+      next: end
+    0x9300:
+      next: end
+    0x0800:
+      0..1: TH31
+      2..3: vlan_tag$1.ether_type
+      vlan_tag$1.$valid: 1
+      shift: 4
+      next: parse_ipv4
+    0x86dd:
+      0..1: TH31
+      2..3: vlan_tag$1.ether_type
+      vlan_tag$1.$valid: 1
+      shift: 4
+      next: parse_ipv6
+    0x*:
+      next: end
+  parse_ipv4:
+    match: [ /* egress::ipv4_base.frag_offset ++ egress::ipv4_base.protocol; */ ]
+    0x000001:
+      next: end
+    0x000006:
+      next: end
+    0x000011:
+      0: TB16
+      1: ipv4_base.diffserv
+      2..3: ipv4_base.total_len
+      4..5: ipv4_base.identification
+      6..7: H23
+      8: ipv4_base.ttl
+      9: ipv4_base.protocol
+      10..11: ipv4_base.hdr_checksum
+      12..15: ipv4_base.src_addr
+      16..19: ipv4_base.dst_addr
+      shift: 20
+      next: parse_ipv4.0
+    0x*:
+      next: end
+  parse_ipv4.0:
+    0x*:
+      ipv4_base.$valid: 1
+      next: parse_udp
+  parse_udp:
+    0x*:
+      0..1: udp.src_port
+      2..3: udp.dst_port
+      4..5: udp.hdr_length
+      6..7: udp.checksum
+      udp.$valid: 1
+      shift: 8
+      next: end
+  parse_ipv6:
+    match: [ 6 ]
+    0x3a:
+      next: end
+    0x06:
+      next: end
+    0x11:
+      0..3: TW24
+      4..5: ipv6_base.payload_length
+      6: ipv6_base.next_header
+      7: ipv6_base.hop_limit
+      8..11: ipv6_base.src_addr.96-127
+      12..15: ipv6_base.src_addr.64-95
+      16..19: ipv6_base.src_addr.32-63
+      shift: 20
+      next: parse_ipv6.0
+    0x*:
+      next: end
+  parse_ipv6.0:
+    0x*:
+      0..3: ipv6_base.src_addr.0-31
+      4..7: ipv6_base.dst_addr.96-127
+      8..11: ipv6_base.dst_addr.64-95
+      12..15: ipv6_base.dst_addr.32-63
+      shift: 16
+      next: parse_ipv6.0.0
+  parse_ipv6.0.0:
+    0x*:
+      0..3: ipv6_base.dst_addr.0-31
+      ipv6_base.$valid: 1
+      shift: 4
+      next: parse_udp
+  parse_vlan.5:
+    match: [ 2..3 ]
+    0x8100:
+      next: end
+    0x9100:
+      next: end
+    0x9200:
+      next: end
+    0x9300:
+      next: end
+    0x0800:
+      0..1: TH31
+      2..3: vlan_tag$1.ether_type
+      vlan_tag$1.$valid: 1
+      shift: 4
+      next: parse_ipv4
+    0x86dd:
+      0..1: TH31
+      2..3: vlan_tag$1.ether_type
+      vlan_tag$1.$valid: 1
+      shift: 4
+      next: parse_ipv6
+    0x*:
+      next: end
+  parse_vlan.10:
+    match: [ 2..3 ]
+    0x8100:
+      next: end
+    0x9100:
+      next: end
+    0x9200:
+      next: end
+    0x9300:
+      next: end
+    0x0800:
+      0..1: TH31
+      2..3: vlan_tag$1.ether_type
+      vlan_tag$1.$valid: 1
+      shift: 4
+      next: parse_ipv4
+    0x86dd:
+      0..1: TH31
+      2..3: vlan_tag$1.ether_type
+      vlan_tag$1.$valid: 1
+      shift: 4
+      next: parse_ipv6
+    0x*:
+      next: end
+  parse_vlan.15:
+    match: [ 2..3 ]
+    0x8100:
+      next: end
+    0x9100:
+      next: end
+    0x9200:
+      next: end
+    0x9300:
+      next: end
+    0x0800:
+      0..1: TH31
+      2..3: vlan_tag$1.ether_type
+      vlan_tag$1.$valid: 1
+      shift: 4
+      next: parse_ipv4
+    0x86dd:
+      0..1: TH31
+      2..3: vlan_tag$1.ether_type
+      vlan_tag$1.$valid: 1
+      shift: 4
+      next: parse_ipv6
+    0x*:
+      next: end
+  parse_ethernet.1:
+    0x*:
+      0..1: ethernet.src_addr.16-31
+      2..3: ethernet.src_addr.0-15
+      4..5: ethernet.ether_type
+      ethernet.$valid: 1
+      shift: 6
+      next: parse_vlan
+  parse_ethernet.2:
+    0x*:
+      0..1: ethernet.src_addr.16-31
+      2..3: ethernet.src_addr.0-15
+      4..5: ethernet.ether_type
+      ethernet.$valid: 1
+      shift: 6
+      next: parse_vlan
+  parse_ethernet.3:
+    0x*:
+      0..1: ethernet.src_addr.16-31
+      2..3: ethernet.src_addr.0-15
+      4..5: ethernet.ether_type
+      ethernet.$valid: 1
+      shift: 6
+      next: parse_vlan
+  parse_ethernet.4:
+    0x*:
+      0..1: ethernet.src_addr.16-31
+      2..3: ethernet.src_addr.0-15
+      4..5: ethernet.ether_type
+      ethernet.$valid: 1
+      shift: 6
+      next: parse_ipv4
+  parse_ethernet.5:
+    0x*:
+      0..1: ethernet.src_addr.16-31
+      2..3: ethernet.src_addr.0-15
+      4..5: ethernet.ether_type
+      ethernet.$valid: 1
+      shift: 6
+      next: parse_ipv6
+deparser egress:
+  dictionary:
+    ethernet.dst_addr.32-47: ethernet.$valid
+    ethernet.dst_addr.16-31: ethernet.$valid
+    ethernet.dst_addr.0-15: ethernet.$valid
+    ethernet.src_addr.32-47: ethernet.$valid
+    ethernet.src_addr.16-31: ethernet.$valid
+    ethernet.src_addr.0-15: ethernet.$valid
+    ethernet.ether_type: ethernet.$valid
+    TH32: vlan_tag$0.$valid
+    vlan_tag$0.ether_type: vlan_tag$0.$valid
+    TH31: vlan_tag$1.$valid
+    vlan_tag$1.ether_type: vlan_tag$1.$valid
+    TB16: ipv4_base.$valid
+    ipv4_base.diffserv: ipv4_base.$valid
+    ipv4_base.total_len: ipv4_base.$valid
+    ipv4_base.identification: ipv4_base.$valid
+    H23: ipv4_base.$valid
+    ipv4_base.ttl: ipv4_base.$valid
+    ipv4_base.protocol: ipv4_base.$valid
+    ipv4_base.hdr_checksum: ipv4_base.$valid
+    ipv4_base.src_addr: ipv4_base.$valid
+    ipv4_base.dst_addr: ipv4_base.$valid
+    TW24: ipv6_base.$valid
+    ipv6_base.payload_length: ipv6_base.$valid
+    ipv6_base.next_header: ipv6_base.$valid
+    ipv6_base.hop_limit: ipv6_base.$valid
+    ipv6_base.src_addr.96-127: ipv6_base.$valid
+    ipv6_base.src_addr.64-95: ipv6_base.$valid
+    ipv6_base.src_addr.32-63: ipv6_base.$valid
+    ipv6_base.src_addr.0-31: ipv6_base.$valid
+    ipv6_base.dst_addr.96-127: ipv6_base.$valid
+    ipv6_base.dst_addr.64-95: ipv6_base.$valid
+    ipv6_base.dst_addr.32-63: ipv6_base.$valid
+    ipv6_base.dst_addr.0-31: ipv6_base.$valid
+    udp.src_port: udp.$valid
+    udp.dst_port: udp.$valid
+    udp.hdr_length: udp.$valid
+    udp.checksum: udp.$valid
+  egress_unicast_port: standard_metadata.egress_port
+stage 0 ingress:
+  exact_match tbl_act 0:
+    p4: { name: tbl_act }
+    row: 0
+    bus: 1
+    column: [  ]
+    next: cond-1
+    actions:
+      act_1:
+      - set hasExited, 0
+    default_action: act_1
+  gateway cond-1 2:
+    input_xbar:
+      group 0: { 7: packet_out.$valid }
+      hash 0:
+        40: packet_out.$valid
+      hash group 0:
+        table: [0]
+    row: 0
+    bus: 0
+    match: { 32: packet_out.$valid }
+    0x1: tbl_act_0
+    miss: vrf_vrf_classifier_table_0
+stage 1 ingress:
+  exact_match tbl_act_0 0:
+    p4: { name: tbl_act_0 }
+    row: 1
+    bus: 0
+    column: [  ]
+    gateway:
+      input_xbar:
+        group 0: { 15: packet_out.submit_to_ingress }
+      row: 1
+      bus: 1
+      match: { 7: packet_out.submit_to_ingress }
+      0x0: run_table
+      miss: tbl_act_1
+    next: tbl_act_1
+    action_bus: { }
+    actions:
+      act:
+      - { $data0: immediate(0..6), $constant0: $data0(6..6), $constant0: 1, $constant1: $data0(6..6), $constant1: 1 }
+      - set standard_metadata.egress_spec, packet_out.egress_physical_port
+      - set B63(6..6), $data0(6..6)
+    default_action: act
+  exact_match tbl_act_1 2:
+    p4: { name: tbl_act_1 }
+    row: 0
+    bus: 0
+    column: [  ]
+    gateway:
+      input_xbar:
+        group 0: { 22: hasExited }
+      row: 0
+      bus: 1
+      match: { 6: hasExited }
+      0b*0: run_table
+      miss: vrf_vrf_classifier_table_0
+    next: vrf_vrf_classifier_table_0
+    actions:
+      act_0:
+      - 0
+    default_action: act_0
+  ternary_match vrf_vrf_classifier_table_0 3:
+    p4: { name: vrf.vrf_classifier_table }
+    row: [ 0, 1, 2, 3, 4, 5 ]
+    bus: [ 0, 0, 0, 0, 0, 0 ]
+    column:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    input_xbar:
+      group 0: { 0: ipv4_base.dst_addr, 32: ipv6_base.dst_addr.0-31(0..7), 40: standard_metadata.ingress_port(8) }
+      group 1: { 0: ipv6_base.dst_addr.0-31(16..31), 16: ipv6_base.dst_addr.32-63(0..7), 24: ipv6_base.dst_addr.0-31(8..15), 32: ipv6_base.dst_addr.32-63(16..23) }
+      group 2: { 0: ipv6_base.dst_addr.32-63(24..31), 8: ipv6_base.dst_addr.64-95(0..7), 16: ipv6_base.dst_addr.32-63(8..15), 24: ipv6_base.dst_addr.64-95(16..31), 40: ethernet.ether_type(0..7) }
+      group 3: { 0: ipv6_base.dst_addr.64-95(8..15), 8: ipv6_base.dst_addr.96-127(16..31), 24: ipv6_base.dst_addr.96-127(0..15) }
+      group 4: { 4: ipv6_base.traffic_class, 16: ethernet.src_addr.0-15(0..7), 24: ethernet.ether_type(8..15), 32: ethernet.src_addr.16-31(0..7), 40: ethernet.src_addr.32-47(8..15) }
+      group 5: { 0: ethernet.src_addr.32-47(0..7), 8: ethernet.src_addr.0-15(8..15), 16: standard_metadata.ingress_port(0..7), 24: ethernet.src_addr.16-31(8..15), 32: ipv4_base.diffserv }
+    gateway:
+      input_xbar:
+        group 0: { 22: hasExited }
+      row: 0
+      bus: 0
+      match: { 6: hasExited }
+      0b*0: run_table
+      miss: END
+    next: class_id_class_id_assignment_table_0
+    action: vrf_vrf_classifier_table_0$action
+    default_action: vrf.set_vrf
+    default_action_parameters:
+      vrf_id: 0
+  action vrf_vrf_classifier_table_0$action:
+    p4: { name: vrf_vrf_classifier_table_0$action }
+    row: 14
+    column: 5
+    home_row: 14
+    format vrf.set_vrf: { $adf_f0: 0..31 }
+    action_bus: { 96..99 : $adf_f0 }
+    actions:
+      vrf.set_vrf:
+      - { vrf_id: $adf_f0 }
+      - set local_metadata.vrf_id, vrf_id
+  ternary_match class_id_class_id_assignment_table_0 4:
+    p4: { name: class_id.class_id_assignment_table }
+    row: [ 6, 7, 8, 9, 10, 11 ]
+    bus: [ 0, 0, 0, 0, 0, 0 ]
+    column:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    input_xbar:
+      group 2: { 0: ipv6_base.dst_addr.32-63(24..31), 8: ipv6_base.dst_addr.64-95(0..7), 16: ipv6_base.dst_addr.32-63(8..15), 24: ipv6_base.dst_addr.64-95(16..31), 40: ethernet.ether_type(0..7) }
+      group 3: { 0: ipv6_base.dst_addr.64-95(8..15), 8: ipv6_base.dst_addr.96-127(16..31), 24: ipv6_base.dst_addr.96-127(0..15) }
+      group 8: { 0: ipv4_base.dst_addr, 32: ipv6_base.dst_addr.0-31(0..7) }
+      group 9: { 0: ipv6_base.dst_addr.0-31(16..31), 16: ipv6_base.dst_addr.32-63(0..7), 24: ipv6_base.dst_addr.0-31(8..15), 32: ipv6_base.dst_addr.32-63(16..23), 41: vlan_tag$0.pcp }
+      group 10: { 0: ethernet.ether_type(8..15), 8: local_metadata.l4_dst_port, 24: local_metadata.l4_src_port, 40: ipv6_base.next_header }
+      group 11: { 0: vlan_tag$0.vid(8..11), 8: vlan_tag$0.vid(0..7), 16: ipv4_base.protocol, 24: ipv4_base.ttl, 32: ipv6_base.hop_limit }
+    next: l3_fwd_l3_routing_classifier_table_0
+    action: class_id_class_id_assignment_table_0$action
+    default_action: class_id.set_class_id
+    default_action_parameters:
+      class_id_value: 0
+  action class_id_class_id_assignment_table_0$action:
+    p4: { name: class_id_class_id_assignment_table_0$action }
+    row: 15
+    column: 0
+    home_row: 15
+    format class_id.set_class_id: { $adf_b0: 0..7 }
+    action_bus: { 2 : $adf_b0 }
+    actions:
+      class_id.set_class_id:
+      - { class_id_value: $adf_b0 }
+      - set local_metadata.class_id, class_id_value
+  exact_match l3_fwd_l3_routing_classifier_table_0 5:
+    p4: { name: l3_fwd.l3_routing_classifier_table }
+    row: 7
+    bus: 0
+    column: [ 2, 3, 4 ]
+    ways:
+    - [0, 0, 0x0, [7, 2]]
+    - [0, 1, 0x0, [7, 3]]
+    - [0, 2, 0x0, [7, 4]]
+    input_xbar:
+      group 0: { 24: ethernet.dst_addr.0-15(8..15), 32: ethernet.dst_addr.0-15(0..7), 40: ethernet.dst_addr.16-31(8..15), 48: ethernet.dst_addr.16-31(0..7), 56: ethernet.dst_addr.32-47(8..15), 64: ethernet.dst_addr.32-47(0..7) }
+      hash 0:
+        0..9: random(ethernet.dst_addr.0-15(8..15), ethernet.dst_addr.0-15(0..7), ethernet.dst_addr.16-31(8..15), ethernet.dst_addr.16-31(2..7), ethernet.dst_addr.32-47(8..15)) ^ stripe(ethernet.dst_addr.16-31(0..1))
+        10..19: random(ethernet.dst_addr.0-15(8..15), ethernet.dst_addr.0-15(0..7), ethernet.dst_addr.16-31(8..15), ethernet.dst_addr.16-31(2..7), ethernet.dst_addr.32-47(8..15)) ^ stripe(ethernet.dst_addr.16-31(0..1))
+        20..29: random(ethernet.dst_addr.0-15(8..15), ethernet.dst_addr.0-15(0..7), ethernet.dst_addr.16-31(8..15), ethernet.dst_addr.16-31(2..7), ethernet.dst_addr.32-47(8..15)) ^ stripe(ethernet.dst_addr.16-31(0..1))
+      hash 1:
+        0..9: stripe(ethernet.dst_addr.32-47(0..7))
+        10..19: stripe(ethernet.dst_addr.32-47(0..7))
+        20..29: stripe(ethernet.dst_addr.32-47(0..7))
+      hash group 0:
+        table: [0, 1]
+    format: { version(0): 112..115, match(0): [56..63, 32..39, 66..71, 40..55 ] }
+    match: [ ethernet.dst_addr.0-15, ethernet.dst_addr.16-31(2..15), ethernet.dst_addr.32-47(8..15) ]
+    hit: l3_fwd_l3_ipv4_override_table_0
+    miss: punt_punt_table_0
+    actions:
+      NoAction:
+      - 0
+    default_action: NoAction
+stage 2 ingress:
+  ternary_match l3_fwd_l3_ipv4_override_table_0 0:
+    p4: { name: l3_fwd.l3_ipv4_override_table, action_profile: l3_fwd.wcmp_action_profile }
+    row: 2
+    bus: 0
+    column: 0
+    input_xbar:
+      group 0: { 0: ipv4_base.dst_addr }
+    gateway:
+      input_xbar:
+        group 1: { 7: ipv4_base.$valid }
+        hash 2:
+          40: ipv4_base.$valid
+        hash group 1:
+          table: [2]
+      row: 5
+      bus: 0
+      match: { 32: ipv4_base.$valid }
+      0x1: run_table
+      miss: punt_punt_table_0
+    hit: tbl_act_2
+    miss: l3_fwd_l3_ipv4_vrf_table_0
+    indirect: l3_fwd_l3_ipv4_override_table_0$tind
+  ternary_indirect l3_fwd_l3_ipv4_override_table_0$tind:
+    row: 0
+    bus: 0
+    column: 2
+    format: { action: 27..27, action_ptr: 0..9, select_ptr: 17}
+    action: l3_fwd_l3_ipv4_fallback_table_0$act_prof.l3_fwd.wcmp_action_profile(action, action_ptr)
+    selector: l3_fwd_l3_ipv4_fallback_table_0$act_sel.l3_fwd.wcmp_action_profile(select_ptr)
+    default_action: NoAction
+  ternary_match l3_fwd_l3_ipv4_vrf_table_0 1:
+    p4: { name: l3_fwd.l3_ipv4_vrf_table, action_profile: l3_fwd.wcmp_action_profile }
+    row: [ 0, 1 ]
+    bus: [ 0, 0 ]
+    column:
+    - 0
+    - 0
+    input_xbar:
+      group 0: { 0: ipv4_base.dst_addr, 32: local_metadata.vrf_id(0..7) }
+      group 1: { 0: local_metadata.vrf_id(16..31), 24: local_metadata.vrf_id(8..15) }
+    hit: tbl_act_2
+    miss: l3_fwd_l3_ipv4_fallback_table_0
+    indirect: l3_fwd_l3_ipv4_vrf_table_0$tind
+  ternary_indirect l3_fwd_l3_ipv4_vrf_table_0$tind:
+    row: 1
+    bus: 0
+    column: 2
+    format: { action: 27..27, action_ptr: 0..9, select_ptr: 17}
+    action: l3_fwd_l3_ipv4_fallback_table_0$act_prof.l3_fwd.wcmp_action_profile(action, action_ptr)
+    selector: l3_fwd_l3_ipv4_fallback_table_0$act_sel.l3_fwd.wcmp_action_profile(select_ptr)
+    default_action: NoAction
+  ternary_match l3_fwd_l3_ipv4_fallback_table_0 2:
+    p4: { name: l3_fwd.l3_ipv4_fallback_table, action_profile: l3_fwd.wcmp_action_profile }
+    row: 3
+    bus: 0
+    column: 0
+    input_xbar:
+      group 0: { 0: ipv4_base.dst_addr }
+    next: tbl_act_2
+    indirect: l3_fwd_l3_ipv4_fallback_table_0$tind
+  action l3_fwd_l3_ipv4_fallback_table_0$act_prof.l3_fwd.wcmp_action_profile:
+    row: 15
+    column: 2
+    home_row: 15
+    format l3_fwd.set_nexthop: { $adf_h0: 16..31, $adf_h1: 32..47, $adf_h2: 48..63, $adf_h3: 64..79, $adf_h4: 80..95, $adf_h5: 96..111, $adf_h6: 112..127 }
+    action_bus: { 32..33 : $adf_h3, 34..35 : $adf_h4, 36..37 : $adf_h5, 38..39 : $adf_h6, 42..43 : $adf_h0, 44..45 : $adf_h1, 46..47 : $adf_h2 }
+    actions:
+      l3_fwd.set_nexthop:
+      - { port: $adf_h0, dmac.0-15: $adf_h1, dmac.16-31: $adf_h2, dmac.32-47: $adf_h3, smac.0-15: $adf_h4, smac.16-31: $adf_h5, smac.32-47: $adf_h6 }
+      - set standard_metadata.egress_spec, port
+      - add ipv4_base.ttl, ipv4_base.ttl, 255
+      - set ethernet.dst_addr.0-15, dmac.0-15
+      - set ethernet.dst_addr.16-31, dmac.16-31
+      - set ethernet.dst_addr.32-47, dmac.32-47
+      - set ethernet.src_addr.0-15, smac.0-15
+      - set ethernet.src_addr.16-31, smac.16-31
+      - set ethernet.src_addr.32-47, smac.32-47
+      NoAction:
+      - {  }
+  selection l3_fwd_l3_ipv4_fallback_table_0$act_sel.l3_fwd.wcmp_action_profile:
+    p4: { name: l3_fwd.wcmp_action_profile }
+    row: 15
+    column: [ 0, 1 ]
+    maprams: [ 0, 1 ]
+    input_xbar:
+      group 0: { 0: ipv4_base.dst_addr, 32: ipv4_base.src_addr, 64: local_metadata.l4_dst_port, 80: local_metadata.l4_src_port, 96: ipv4_base.protocol }
+      hash 0:
+        0..50: random(ipv4_base.dst_addr, ipv4_base.src_addr)
+      hash 1:
+        0..50: random(local_metadata.l4_dst_port, local_metadata.l4_src_port, ipv4_base.protocol)
+      hash group 0:
+        table: [0, 1]
+    mode: fair 0
+  ternary_indirect l3_fwd_l3_ipv4_fallback_table_0$tind:
+    row: 2
+    bus: 0
+    column: 2
+    format: { action: 27..27, action_ptr: 0..9, select_ptr: 17}
+    action: l3_fwd_l3_ipv4_fallback_table_0$act_prof.l3_fwd.wcmp_action_profile(action, action_ptr)
+    selector: l3_fwd_l3_ipv4_fallback_table_0$act_sel.l3_fwd.wcmp_action_profile(select_ptr)
+    default_action: NoAction
+stage 3 ingress:
+  exact_match tbl_act_2 0:
+    p4: { name: tbl_act_2 }
+    row: 0
+    bus: 0
+    column: [  ]
+    gateway:
+      input_xbar:
+        group 0: { 0: ipv4_base.ttl }
+      row: 0
+      bus: 0
+      match: { 0: ipv4_base.ttl }
+      0x00: run_table
+      miss: punt_punt_table_0
+    next: punt_punt_table_0
+    actions:
+      act_2:
+      - invalidate standard_metadata.egress_spec
+    default_action: act_2
+stage 4 ingress:
+  ternary_match punt_punt_table_0 0:
+    p4: { name: punt.punt_table }
+    row: [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 ]
+    bus: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+    column:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    input_xbar:
+      group 0: { 0: arp.target_proto_addr, 32: ipv4_base.dst_addr(0..7), 40: standard_metadata.egress_spec(8) }
+      group 1: { 0: ipv4_base.dst_addr(16..31), 16: ipv4_base.src_addr(0..7), 24: ipv4_base.dst_addr(8..15), 32: ipv4_base.src_addr(16..23) }
+      group 2: { 0: ipv4_base.src_addr(24..31), 8: ipv6_base.dst_addr.0-31(0..7), 16: ipv4_base.src_addr(8..15), 24: ipv6_base.dst_addr.0-31(16..31), 40: ipv6_base.dst_addr.64-95(0..7) }
+      group 3: { 0: ipv6_base.dst_addr.0-31(8..15), 8: ipv6_base.dst_addr.32-63(16..31), 24: ipv6_base.dst_addr.32-63(0..15) }
+      group 4: { 0: ipv6_base.dst_addr.64-95(16..31), 16: ipv6_base.dst_addr.96-127(0..7), 24: ipv6_base.dst_addr.64-95(8..15), 32: ipv6_base.dst_addr.96-127(16..23), 40: ipv6_base.src_addr.0-31(24..31) }
+      group 5: { 0: ipv6_base.src_addr.0-31(0..7), 8: ipv6_base.dst_addr.96-127(8..15), 16: ipv6_base.src_addr.0-31(16..23), 24: ipv6_base.dst_addr.96-127(24..31), 32: ipv6_base.src_addr.32-63(0..7) }
+      group 6: { 0: ipv6_base.src_addr.0-31(8..15), 8: ipv6_base.src_addr.32-63(16..31), 24: ipv6_base.src_addr.64-95(0..7), 32: ipv6_base.src_addr.32-63(8..15), 40: ipv6_base.src_addr.96-127(16..23) }
+      group 7: { 0: ipv6_base.src_addr.64-95(24..31), 8: ipv6_base.src_addr.96-127(0..7), 16: ipv6_base.src_addr.64-95(8..23), 32: ipv6_base.src_addr.96-127(24..31) }
+      group 8: { 0: local_metadata.vrf_id(0..7), 8: ipv6_base.src_addr.96-127(8..15), 20: ipv6_base.traffic_class, 32: ethernet.ether_type }
+      group 9: { 0: local_metadata.vrf_id(16..31), 16: standard_metadata.egress_spec(0..7), 24: local_metadata.vrf_id(8..15), 32: standard_metadata.ingress_port(0..7) }
+      group 10: { 0: standard_metadata.ingress_port(8), 8: vlan_tag$0.vid(0..7), 21: vlan_tag$0.pcp, 24: ipv4_base.diffserv, 32: vlan_tag$0.vid(8..11), 40: local_metadata.icmp_code }
+      group 11: { 0: ipv4_base.protocol, 8: ipv4_base.ttl, 16: ipv6_base.hop_limit, 24: ipv6_base.next_header, 32: local_metadata.class_id }
+    next: tbl_act_3
+    action_bus: { }
+    indirect: punt_punt_table_0$tind
+  meter punt_punt_table_0$meter.punt.ingress_port_meter:
+    p4: { name: punt.ingress_port_meter }
+    row: 15
+    column: [ 0, 1 ]
+    maprams: [ 0, 1 ]
+    color_maprams:
+      row: 7
+      bus: 0
+      column: 2
+    type: standard
+    count: bytes
+  counter punt_punt_table_0$counter.punt.punt_packet_counter:
+    p4: { name: punt.punt_packet_counter }
+    row: 13
+    column: [ 0, 1 ]
+    maprams: [ 0, 1 ]
+    count: packets
+    format: {packets(0): 106..126, packets(1): 85..105, packets(2): 64..84, packets(3): 42..62, packets(4): 21..41, packets(5): 0..20}
+  ternary_indirect punt_punt_table_0$tind:
+    row: 0
+    bus: 0
+    column: 2
+    format: { action: 9..10, immediate: 0..8}
+    meter: punt_punt_table_0$meter.punt.ingress_port_meter
+    stats: punt_punt_table_0$counter.punt.punt_packet_counter
+    actions:
+      punt.set_queue_and_clone_to_cpu:
+      - {  }
+      - set local_metadata.egress_spec_at_punt_match, standard_metadata.egress_spec
+      # - set $mirror_id, 1024
+      - set $mirror, 1
+      punt.set_queue_and_send_to_cpu:
+      - { $constant0: immediate(0..8), $constant0: 253 }
+      - set local_metadata.egress_spec_at_punt_match, standard_metadata.egress_spec
+      - set standard_metadata.egress_spec, $constant0
+      NoAction:
+      - {  }
+    default_action: NoAction
+stage 5 ingress:
+  exact_match tbl_act_3 0:
+    p4: { name: tbl_act_3 }
+    row: 0
+    bus: 0
+    column: [  ]
+    gateway:
+      input_xbar:
+        group 0: { 5: local_metadata.color }
+      row: 0
+      bus: 0
+      match: { 5: local_metadata.color }
+      0b*00: END
+      miss: run_table
+    next: END
+    actions:
+      act_3:
+      - invalidate standard_metadata.egress_spec
+    default_action: act_3
+stage 0 egress:
+  exact_match tbl_act_4 1:
+    p4: { name: tbl_act_4 }
+    row: 0
+    bus: 0
+    column: [  ]
+    next: tbl_packetio_egress_encap_packet_in_header
+    actions:
+      act_4:
+      - set hasExited_0, 0
+    default_action: act_4
+  exact_match tbl_packetio_egress_encap_packet_in_header 3:
+    p4: { name: tbl_packetio_egress_encap_packet_in_header }
+    row: 1
+    bus: 0
+    column: [  ]
+    gateway:
+      input_xbar:
+        group 0: { 8: standard_metadata.egress_port(8), 16: standard_metadata.egress_port(0..7) }
+      row: 0
+      bus: 1
+      match: { 0: standard_metadata.egress_port(0..7), 8: standard_metadata.egress_port(8) }
+      0x**fd: run_table
+      miss: tbl_act_5
+    next: tbl_act_5
+    actions:
+      packetio_egress.encap_packet_in_header:
+      - 0
+    default_action: packetio_egress.encap_packet_in_header
+stage 1 egress:
+  exact_match tbl_act_5 1:
+    p4: { name: tbl_act_5 }
+    row: 0
+    bus: 1
+    column: [  ]
+    gateway:
+      input_xbar:
+        group 0: { 6: local_metadata.skip_egress }
+      row: 1
+      bus: 0
+      match: { 6: local_metadata.skip_egress }
+      0b*1: run_table
+      miss: cond-10
+    next: cond-10
+    actions:
+      act_5:
+      - set hasExited_0, 1
+    default_action: act_5
+stage 2 egress:
+  gateway cond-10 3:
+    input_xbar:
+      group 0: { 111: hasExited_0 }
+    row: 0
+    bus: 0
+    match: { 7: hasExited_0 }
+    0x0: spoof_protection_dhcp_spoof_protection_table_0
+    miss: END
+  exact_match spoof_protection_dhcp_spoof_protection_table_0 4:
+    p4: { name: spoof_protection.dhcp_spoof_protection_table }
+    row: [ 5, 6, 7 ]
+    bus: [ 0, 0, 0 ]
+    column:
+    - 2
+    - 2
+    - 2
+    ways:
+    - [1, 0, 0x0, [7, 2]]
+    - [1, 1, 0x0, [6, 2]]
+    - [1, 2, 0x0, [5, 2]]
+    input_xbar:
+      group 1: { 8: local_metadata.l4_dst_port(8..15), 16: local_metadata.l4_dst_port(0..7), 24: standard_metadata.egress_spec(8), 32: standard_metadata.egress_spec(0..7) }
+      hash 2:
+        0..9: random(local_metadata.l4_dst_port(8..15), local_metadata.l4_dst_port(1..7)) ^ stripe(local_metadata.l4_dst_port(0), standard_metadata.egress_spec(8), standard_metadata.egress_spec(0..7))
+        10..19: random(local_metadata.l4_dst_port(8..15), local_metadata.l4_dst_port(1..7)) ^ stripe(local_metadata.l4_dst_port(0), standard_metadata.egress_spec(8), standard_metadata.egress_spec(0..7))
+        20..29: random(local_metadata.l4_dst_port(8..15), local_metadata.l4_dst_port(1..7)) ^ stripe(local_metadata.l4_dst_port(0), standard_metadata.egress_spec(8), standard_metadata.egress_spec(0..7))
+      hash group 1:
+        table: [2]
+    format: { action(0): 1, version(0): 112..115, match(0): [41..47, 32..39 ] }
+    match: [ local_metadata.l4_dst_port(1..15) ]
+    gateway:
+      input_xbar:
+        group 2: { 7: udp.$valid }
+        hash 4:
+          40: udp.$valid
+        hash group 2:
+          table: [4]
+      row: 0
+      bus: 1
+      match: { 32: udp.$valid }
+      0x1: run_table
+      miss: END
+    next: END
+    actions:
+      spoof_protection.drop_packet:
+      - invalidate standard_metadata.egress_port
+      NoAction:
+      - 0
+    default_action: NoAction

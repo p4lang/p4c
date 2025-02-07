@@ -1,0 +1,144 @@
+#!/bin/bash
+
+shopt -s nullglob
+set -o pipefail
+
+TESTDIR=$(cd $(dirname $0); pwd -P)
+LOG=faillog.txt
+
+function findbin() {
+    for d in \
+        $PWD \
+        $PWD/.. \
+        $PWD/../.. \
+        $PWD/../../.. \
+        $PWD/../../../.. \
+        $TESTDIR/.. \
+        $TESTDIR/../.. \
+    ; do
+        for f in $(find $d -name '*test*' -prune -o -executable -type f -name $1); do
+            if [ "$f" -nt "$found" ]; then
+                found="$f"
+            fi
+        done
+        if [ -n "$found" ]; then
+            break;
+        fi
+    done
+    if [ -z "$found" ]; then
+        found=$(which $1)
+    fi
+    if [ -z "$found" ]; then
+        echo >&2 "Can't find $1 executable"
+        echo false
+    else
+        echo $found
+    fi
+}
+
+BFAS=bfas #$(findbin bfas)
+echo "BFAS=$BFAS"
+BFLINK=bflink #$(findbin bflink)
+echo "BFLINK=$BFLINK"
+BFDUMPBIN=bfdumpbin #$(findbin bfdumpbin)
+echo "BFDUMPBIN=$BFDUMPBIN"
+
+filter_zero="cat"
+do_sort="cat"
+target="tofino"
+remove_temps=true
+
+while expr "$1" : - >/dev/null; do
+    case $1 in
+    --tofino)
+        target=tofino
+        ;;
+    --jbay)
+        target=tofino2
+        ;;
+    --sort)
+        do_sort="sort"
+        ;;
+    --filter_zero)
+        filter_zero="grep -v '^R.*: 00000000$'"
+        ;;
+    --preserve)
+        remove_temps=false
+        ;;
+    -*)
+        echo >&2 "unknown argument $1"
+        ;;
+    esac
+    shift
+done
+
+function test_bfa() {
+    local targ
+    targ=$target
+    dir=$(dirname $1)
+    name=$(basename $1)
+    if expr $name : '.*\.tfa' >/dev/null; then
+        targ=tofino
+    fi
+    if expr $name : '.*\.jba' >/dev/null; then
+        targ=tofino2
+    fi
+    echo -n $1
+    echo $1: >&2
+    pushd $dir >/dev/null
+    rm -rf tmp-$name.out
+    rv=0
+    mkdir tmp-$name.out
+    if $BFAS -t $targ --gen_json --singlepipe -vvvvl tmp-$name.out/bfas.config.log $name -o tmp-$name.out; then
+        pushd tmp-$name.out >/dev/null
+        if [ -r tofino.bin ]; then
+            $BFDUMPBIN -H -L tofino.bin | $filter_zero | $do_sort >bfas.dump
+        elif [ -r tofino2.bin ]; then
+            $BFDUMPBIN -H -L tofino2.bin | $filter_zero | $do_sort >bfas.dump
+        else
+            echo " no binary?"
+            rv=1
+        fi
+        if (( rv == 0 )); then
+            $BFLINK -s -o walle.bin *.cfg.json >&2
+            $BFDUMPBIN -H -L walle.bin | $filter_zero | $do_sort >walle.dump
+            if diff -u bfas.dump walle.dump >&2; then
+                echo " PASS"
+            else
+                echo " mismatch"
+                rv=1;
+            fi
+        fi
+        popd >/dev/null
+    else
+        echo " bfas failed"
+        rv=2
+    fi
+    if $remove_temps; then
+        rm -rf tmp-$name.out
+    fi
+    popd >/dev/null
+    return $rv
+}
+
+echo -n "started at " > $LOG
+date >> $LOG
+
+if [ $# -eq 0 ]; then
+    set $(find . -name '*.bfa')
+fi
+pass=0
+fail=0
+for file in "$@"; do
+    if test_bfa $file 2>stdout.txt; then
+        let pass++
+    else
+        if [[ $? -eq 1 ]]; then
+            let fail++
+        fi
+        cat stdout.txt >>$LOG
+    fi
+    rm stdout.txt
+done
+
+echo "$pass pass, $fail fail"

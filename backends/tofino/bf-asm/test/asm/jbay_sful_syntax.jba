@@ -1,0 +1,51 @@
+version: 1.0.0
+phv ingress:
+  $always_deparse: B1(0)
+  $bridged_metadata_indicator: B0
+  data.f1: W7
+  data.f2: W0
+  data.f3: W1
+  data.f4: W10
+  data.h1: W3(16..31)
+  data.h2: W3(0..15)
+  data.h3: W6(16..31)
+  data.h4: W6(0..15)
+  data.b1: W2(24..31)
+  data.b2: W2(16..23)
+  data.b3: W2(8..15)
+  data.b4: W2(0..7)
+  ig_intr_md_for_tm.ucast_egress_port: H4(0..8)
+  $tmp1: B1(1)
+  data.$valid: B1(2)
+stage 0 ingress:
+  stateful test1_0$salu..accum:
+    p4: { name: accum }
+    row: 15
+    column: [ 0, 1 ]
+    maprams: [ 0, 1 ]
+    input_xbar:
+      exact group 1: { 0: data.f2, 32: data.f3 }
+    format: { lo: 32, hi:32 }
+    actions:
+      sful_0:
+      - add hi, hi, 1
+      - grt.u p2, data.f2, -1000
+      - lss.u p1, data.f2, -2000
+      - add cmp2 & cmp1, lo, lo, data.f3
+      - sub !cmp2 & cmp1, lo, lo, data.f3
+      - output word0, mem_lo
+      - output word1, alu_hi
+    per_flow_enable: meter_pfe
+  stateful test2:
+    row: 11
+    column: [ 0, 1, 2, 3, 4, 5 ]
+    maprams: [ 0, 1, 2, 3, 4, 5 ]
+    input_xbar:
+      exact group 2: { 0: data.h2, 16: data.h1 }
+    sbus and not:
+      match: test1_0$salu..accum
+    format: { lo: 16, hi: 16 }
+    actions:
+      a0:
+      - lss.s p3, data.h1, lo
+      - grt.s p2, data.h2, lo, -100

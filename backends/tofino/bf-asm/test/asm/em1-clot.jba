@@ -1,0 +1,98 @@
+version: 1.0.0
+phv ingress:
+  standard_metadata.egress_spec: H0(0..8)
+  data.f1: W0
+  data.b1: B0
+  data.$valid: B11(7)
+phv egress:
+  standard_metadata.egress_port: H16(0..8)
+  data.$valid: B31(7)
+parser ingress:
+  start: $ingress_metadata_shim
+  $ingress_metadata_shim:
+    match: [ 0 ]
+          # - [0] (buffer)
+    0b0*******:
+      next: $ingress_metadata
+    0b1*******:
+      next: $ingress_metadata
+  $ingress_metadata:
+    0x*:
+      shift: 8
+      next: $phase0
+  $phase0:
+    0x*:
+      shift: 24
+      next: start
+  start:
+    0x*:
+      clot 1: 0..11
+      0..3: data.f1
+      10: data.b1
+      data.$valid: 1
+      shift: 12
+      next: end
+deparser ingress:
+  dictionary:
+    clot 1:
+      pov: data.$valid
+      10: data.b1
+  egress_unicast_port: { standard_metadata.egress_spec: data.$valid }
+parser egress:
+  start: $egress_metadata_shim
+  $egress_metadata_shim:
+    0x*:
+      0..1: H16
+          # - L[0..8]b standard_metadata.egress_port
+      shift: 2
+      next: $bridged_metadata
+  $bridged_metadata:
+    0x*:
+      next: start
+  start:
+    0x*:
+      clot X:
+        start: 0
+        length: 12
+      data.$valid: 1
+      shift: 12
+      next: end
+deparser egress:
+  dictionary:
+    clot X: data.$valid
+  egress_unicast_port: { standard_metadata.egress_port: data.$valid }
+stage 0 ingress:
+  exact_match test1 0:
+    p4: { name: test1 }
+    p4_param_order: 
+      data.f1: { type: exact, size: 32 }
+    row: 7
+    bus: 0
+    column: [ 2, 3, 4 ]
+    ways:
+    - [0, 0, 0x0, [7, 2]]
+    - [0, 1, 0x0, [7, 3]]
+    - [0, 2, 0x0, [7, 4]]
+    input_xbar:
+      exact group 0: { 0: data.f1 }
+      hash 0:
+        0..9: random(data.f1(10..31)) ^ stripe(data.f1(0..7), data.f1(8..9))
+        10..19: random(data.f1(10..31)) ^ stripe(data.f1(0..7), data.f1(8..9))
+        20..29: random(data.f1(10..31)) ^ stripe(data.f1(0..7), data.f1(8..9))
+      hash group 0:
+        table: [0]
+    format: { action(0): 0..1, immediate(0): 2..25, version(0): 112..115, match(0): [50..55, 40..47, 32..39 ] }
+    match: [ data.f1(10..31) ]
+    next: END
+    action_bus: { 2 : immediate(16..23), 32..33 : immediate(0..15) }
+    actions:
+      setb1:
+      - p4_param_order: {val: 8, port: 9 }
+      - { port: immediate(0..8), val: immediate(16..23) }
+      - set data.b1, val
+      - set standard_metadata.egress_spec, port
+      noop:
+      - {  }
+      NoAction:
+      - {  }
+    default_action: NoAction

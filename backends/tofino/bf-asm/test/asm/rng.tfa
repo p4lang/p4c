@@ -1,0 +1,22 @@
+stage 0 ingress:
+  ternary_match test:
+    row: 11
+    column: 0
+    input_xbar:
+      group 0: { 0: W0 }
+    indirect: tind
+  ternary_indirect tind:
+    row: 0
+    column: 2
+    format: { action: 2, data: 8..15 }
+    action: atab(action)
+  action atab:
+    row: 15
+    column: 0
+    format: { misc : 8 }
+    actions:
+      act0:
+      - add B0, B0, rng(0, 0..7)
+      - add B1, B1, rng(0, 16..23)
+      act1:
+      - add H0, H0, rng(0, 0..15)
