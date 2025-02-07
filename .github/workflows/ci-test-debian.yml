@@ -51,6 +51,7 @@ jobs:
       BUILD_GENERATOR: Ninja
       ENABLE_GTESTS: ON
       ENABLE_TOFINO: ON
+      ENABLE_TEST_TOOLS: ON
       ENABLE_BMV2: OFF
       ENABLE_EBPF: OFF
       ENABLE_UBPF: OFF
@@ -74,6 +75,10 @@ jobs:
       - name: Build (Ubuntu 22.04, GCC)
         run: |
           tools/ci-build.sh
+
+      - name: Run tests (Ubuntu 22.04)
+        run: ctest --output-on-failure --schedule-random -R tofino
+        working-directory: ./build
 
   # Build with GCC and test P4C on Ubuntu 20.04.
   test-ubuntu20:

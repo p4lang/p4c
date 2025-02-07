@@ -1,0 +1,11 @@
+/// An extension of TaintExpression. This class is used for variables that exhibit special behavior
+/// when not initialized. For example, in Tofino, if the port variable has not been written to, the
+/// packet will be dropped. However, reading from this uninitialized variable will still produce
+/// taint. This behavior must be modeled. So we use this uninitialized IR class, which acts like
+/// taint, but is its own type that can be checked for.
+class UninitializedTaintExpression : TaintExpression {
+    toString { return "UninitializedTaintExpression(" + type->toString() + ")"; }
+
+    dbprint { out << "UninitializedTaintExpression(" << type << ")"; }
+}
+
