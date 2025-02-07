@@ -34,9 +34,7 @@ foreach(f IN LISTS GEN_TOFINO)
   list (APPEND GEN_TOFINO_HDRS ${BFASM_BINARY_DIR}/gen/tofino/${f}.h)
 endforeach()
 
-set_source_files_properties(
-  ${GEN_TOFINO_SRCS} ${GEN_TOFINO_HDRS}
-  PROPERTIES GENERATED TRUE)
+set_source_files_properties(${GEN_TOFINO_SRCS} ${GEN_TOFINO_HDRS} PROPERTIES GENERATED TRUE)
 
 add_custom_command(OUTPUT ${GEN_TOFINO_HDRS} ${GEN_TOFINO_SRCS}
   COMMAND ${BFASM_WALLE} --schema chip.schema --generate-cpp template_objects.yaml -o ${BFASM_BINARY_DIR}/gen/tofino
@@ -55,18 +53,8 @@ set (BFAS_TOFINO_SRCS
   PARENT_SCOPE
   )
 
-set (BFAS_TOFINO_HEADERS
-  tofino/action_table.h
-  tofino/counter.h
-  tofino/exact_match.h
-  tofino/gateway.h
-  tofino/input_xbar.h
-  tofino/meter.h
-  tofino/phv.h
-  tofino/stateful.h
-  tofino/ternary_match.h
-  PARENT_SCOPE
-  )
 
-include_directories (${BFASM_BINARY_DIR}/gen/tofino)
-add_library (regs_tofino ${GEN_TOFINO_SRCS} ${GEN_TOFINO_HDRS})
+add_library (regs_tofino ${GEN_TOFINO_SRCS})
+target_link_libraries (regs_tofino p4ctoolkit)
+# Disable errors for warnings. FIXME: Get rid of this.
+target_compile_options(regs_tofino PUBLIC "-Wno-error")

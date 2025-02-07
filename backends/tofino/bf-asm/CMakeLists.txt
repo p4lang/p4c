@@ -110,21 +110,33 @@ set (MKSIZES_SOURCES mksizes.cpp)
 
 # json_diff
 add_executable (json_diff ${JSONDIFF_SOURCES})
+# Disable errors for warnings. FIXME: Get rid of this.
+target_compile_options(json_diff PUBLIC "-Wno-error")
 
 # bfdumpbin
 add_executable (bfdumpbin ${BFDUMPBIN_SOURCES})
+# Disable errors for warnings. FIXME: Get rid of this.
+target_compile_options(bfdumpbin PUBLIC "-Wno-error")
 
 # reflow
 add_executable (reflow ${REFLOW_SOURCES})
+# Disable errors for warnings. FIXME: Get rid of this.
+target_compile_options(reflow PUBLIC "-Wno-error")
 
 # b2j
 add_executable (b2j ${B2J_SOURCES})
+# Disable errors for warnings. FIXME: Get rid of this.
+target_compile_options(b2j PUBLIC "-Wno-error")
 
 # j2b
 add_executable (j2b ${J2B_SOURCES})
+# Disable errors for warnings. FIXME: Get rid of this.
+target_compile_options(j2b PUBLIC "-Wno-error")
 
 # mksizes
 add_executable (mksizes ${MKSIZES_SOURCES})
+# Disable errors for warnings. FIXME: Get rid of this.
+target_compile_options(mksizes PUBLIC "-Wno-error")
 
 set (BFAS_COMMON_SOURCES
   action_bus.cpp
@@ -236,7 +248,10 @@ endif()
 # string(REPLACE "-Wno-overloaded-virtual" "" vector_c_flags ${BFASM_CXX_FLAGS})
 # set_source_files_properties(vector.c PROPERTIES COMPILE_FLAGS ${vector_c_flags})
 add_executable (bfas ${BFAS_SOURCES})
-target_compile_options(bfas PRIVATE -std=gnu++17)  # Enable extensions for bfas.
+# Enable extensions for bfas. FIXME: Do we need this?
+target_compile_options(bfas PRIVATE -std=gnu++17)
+# Disable errors for warnings. FIXME: Get rid of this.
+target_compile_options(bfas PUBLIC "-Wno-error")
 target_link_libraries (bfas ${BFASM_LIBS} ${BFASM_LIB_DEPS})
 add_dependencies(bfas bfasm_yaml)
 
