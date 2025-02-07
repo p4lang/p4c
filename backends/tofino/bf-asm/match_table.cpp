@@ -15,11 +15,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <config.h>
-
 #include <unordered_map>
 
 #include "action_bus.h"
+#include "backends/tofino/bf-asm/config.h"
 #include "backends/tofino/bf-asm/stage.h"
 #include "backends/tofino/bf-asm/tables.h"
 #include "input_xbar.h"

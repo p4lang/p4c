@@ -18,10 +18,9 @@
 #ifndef BACKENDS_TOFINO_BF_ASM_INSTRUCTION_H_
 #define BACKENDS_TOFINO_BF_ASM_INSTRUCTION_H_
 
-#include <config.h>
-
 #include <functional>
 
+#include "backends/tofino/bf-asm/config.h"
 #include "backends/tofino/bf-asm/tables.h"
 
 struct Instruction : public IHasDbPrint {

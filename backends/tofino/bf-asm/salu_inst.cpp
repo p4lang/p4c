@@ -15,12 +15,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <config.h>
-
 #include <cstring>
 
 #include <boost/optional.hpp>
 
+#include "backends/tofino/bf-asm/config.h"
 #include "backends/tofino/bf-asm/stage.h"
 #include "backends/tofino/bf-asm/tables.h"
 #include "instruction.h"

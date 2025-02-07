@@ -17,12 +17,11 @@
 
 #include "backends/tofino/bf-asm/tables.h"
 
-#include <config.h>
-
 #include <sstream>
 #include <string>
 
 #include "action_bus.h"
+#include "backends/tofino/bf-asm/config.h"
 #include "backends/tofino/bf-asm/stage.h"
 #include "input_xbar.h"
 #include "instruction.h"

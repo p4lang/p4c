@@ -17,8 +17,7 @@
 
 #include "deparser.h"
 
-#include <config.h>
-
+#include "backends/tofino/bf-asm/config.h"
 #include "backends/tofino/bf-asm/target.h"
 #include "constants.h"
 #include "lib/range.h"

@@ -85,8 +85,7 @@ else()
     set (BFN_P4C_GIT_SHA $ENV{BFN_P4C_GIT_SHA})
   endif()
 endif()
-set (ENV{P4C_VERSION} "${BFN_P4C_VERSION} (SHA: ${BFN_P4C_GIT_SHA})")
-MESSAGE(STATUS "p4c-barefoot version: $ENV{P4C_VERSION}")
+MESSAGE(STATUS "p4c-barefoot version: ${BFN_P4C_VERSION}")
 
 # Generate the sha specific version file. It includes the GIT SHA.
 # Because this version changes frequently, we include it separately from the normal version files.

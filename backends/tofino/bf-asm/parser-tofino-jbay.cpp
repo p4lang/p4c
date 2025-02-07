@@ -17,8 +17,7 @@
 
 #include "parser-tofino-jbay.h"
 
-#include <config.h>
-
+#include "backends/tofino/bf-asm/config.h"
 #include "backends/tofino/bf-asm/stage.h"
 #include "backends/tofino/bf-asm/target.h"
 #include "constants.h"

@@ -18,8 +18,6 @@
 #ifndef BACKENDS_TOFINO_BF_ASM_TABLES_H_  // NOLINT(build/header_guard)
 #define BACKENDS_TOFINO_BF_ASM_TABLES_H_
 
-#include <config.h>
-
 #include <iostream>
 #include <set>
 #include <string>
@@ -28,6 +26,7 @@
 
 #include "alloc.h"
 #include "asm-types.h"
+#include "backends/tofino/bf-asm/config.h"
 #include "backends/tofino/bf-asm/json.h"
 #include "backends/tofino/bf-asm/target.h"
 #include "constants.h"

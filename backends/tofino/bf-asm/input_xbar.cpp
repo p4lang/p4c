@@ -17,11 +17,11 @@
 
 #include "input_xbar.h"
 
-#include <config.h>
 #include <stdlib.h>
 
 #include <fstream>
 
+#include "backends/tofino/bf-asm/config.h"
 #include "backends/tofino/bf-asm/stage.h"
 #include "backends/tofino/bf-asm/tables.h"
 #include "hashexpr.h"

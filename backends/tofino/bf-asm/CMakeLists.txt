@@ -15,13 +15,15 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-# # ##### Tofino assembler
+# # # #### Tofino assembler
+project(BFASM)
+
 MESSAGE("-- Adding bf-asm")
 
 OPTION(ASAN_ENABLED "Enable ASAN checks" OFF)
 
 set (BFASM_LIB_DEPS p4ctoolkit ${P4C_LIB_DEPS})
-set (BFASM_GEN_DIR ${CMAKE_CURRENT_BINARY_DIR}/gen)
+set (BFASM_GEN_DIR ${BFASM_BINARY_DIR}/gen)
 
 # other required libraries
 include (CheckLibraryExists)
@@ -106,6 +108,24 @@ set (J2B_SOURCES j2b.cpp json.cpp bson.cpp)
 # mksizes
 set (MKSIZES_SOURCES mksizes.cpp)
 
+# json_diff
+add_executable (json_diff ${JSONDIFF_SOURCES})
+
+# bfdumpbin
+add_executable (bfdumpbin ${BFDUMPBIN_SOURCES})
+
+# reflow
+add_executable (reflow ${REFLOW_SOURCES})
+
+# b2j
+add_executable (b2j ${B2J_SOURCES})
+
+# j2b
+add_executable (j2b ${J2B_SOURCES})
+
+# mksizes
+add_executable (mksizes ${MKSIZES_SOURCES})
+
 set (BFAS_COMMON_SOURCES
   action_bus.cpp
   action_table.cpp
@@ -158,22 +178,25 @@ set (BFAS_COMMON_SOURCES
   ${BFN_P4C_SOURCE_DIR}/bf-utils/dynamic_hash/bfn_hash_algorithm.cpp
   )
 
-set (BFAS_GEN_SOURCES
-  ${BFASM_GEN_DIR}/asm-parse.cpp
-  ${BFASM_GEN_DIR}/gen/uptr_sizes.h
-)
 
 BISON_TARGET (asm-parse asm-parse.ypp ${BFASM_GEN_DIR}/asm-parse.cpp VERBOSE)
 
-add_custom_command(OUTPUT lex-yaml.c
-  COMMAND ${FLEX_EXECUTABLE} -t ${CMAKE_CURRENT_SOURCE_DIR}/lex-yaml.l > lex-yaml.c
+add_custom_command(OUTPUT ${BFASM_GEN_DIR}/uptr_sizes.h
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${BFASM_GEN_DIR}
+  COMMAND ${BFASM_BINARY_DIR}/mksizes > ${BFASM_GEN_DIR}/uptr_sizes.h)
+add_custom_target(bfasm_uptr DEPENDS mksizes ${BFASM_GEN_DIR}/uptr_sizes.h)
+
+add_custom_command(OUTPUT ${BFASM_GEN_DIR}/lex-yaml.c
+  COMMAND ${FLEX_EXECUTABLE} -t ${BFASM_SOURCE_DIR}/lex-yaml.l > ${BFASM_GEN_DIR}/lex-yaml.c
   DEPENDS ${BFASM_SOURCE_DIR}/lex-yaml.l
   COMMENT "Generating lex-yaml.cpp")
+add_custom_target(bfasm_yaml DEPENDS ${BFASM_GEN_DIR}/lex-yaml.c)
+add_dependencies(bfasm_yaml bfasm_uptr)
 
-add_custom_command(OUTPUT gen/uptr_sizes.h
-  COMMAND ${CMAKE_COMMAND} -E make_directory ${BFASM_GEN_DIR}/gen
-  COMMAND mksizes > gen/uptr_sizes.h
-  DEPENDS lex-yaml.c mksizes)
+set (BFAS_GEN_SOURCES
+  ${BFASM_GEN_DIR}/asm-parse.cpp
+  ${BFASM_GEN_DIR}/uptr_sizes.h
+)
 
 set (BFASM_WALLE ${BFASM_SOURCE_DIR}/walle/walle.py)
 set (WALLE_SOURCES
@@ -189,21 +212,14 @@ set (HAVE_JBAY 1)
 set (BFASM_LIBS ${BFASM_LIBS} regs_jbay)
 
 # Other configuration files that need to be generated
-configure_file ("${BFASM_SOURCE_DIR}/cmake/config.h.in" "${BFASM_GEN_DIR}/config.h")
+configure_file ("${BFASM_SOURCE_DIR}/cmake/config.h.cmake" "${BFASM_BINARY_DIR}/config.h")
 
-set_source_files_properties (${BFAS_GEN_SOURCES} ${BFASM_GEN_DIR}/lex-yaml.c
-  PROPERTIES GENERATED TRUE)
+set_source_files_properties (${BFAS_GEN_SOURCES} ${BFASM_GEN_DIR}/lex-yaml.c PROPERTIES GENERATED TRUE)
 
 set (BFAS_SOURCES ${BFAS_COMMON_SOURCES} ${BFAS_GEN_SOURCES}
   ${BFAS_TOFINO_SRCS}
   ${BFAS_JBAY_SRCS}
 )
-
-# json_diff
-add_executable (json_diff ${JSONDIFF_SOURCES})
-
-# bfdumpbin
-add_executable (bfdumpbin ${BFDUMPBIN_SOURCES})
 
 # bfdis
 if (ENABLE_GTESTS)
@@ -214,17 +230,6 @@ if (ENABLE_GTESTS)
   target_link_libraries (bfdis bfas_lib ${BFASM_LIBS} ${BFASM_LIB_DEPS})
 endif()
 
-# reflow
-add_executable (reflow ${REFLOW_SOURCES})
-
-# b2j
-add_executable (b2j ${B2J_SOURCES})
-
-# j2b
-add_executable (j2b ${J2B_SOURCES})
-
-# mksizes
-add_executable (mksizes ${MKSIZES_SOURCES})
 
 # set_source_files_properties(${BFAS_SOURCES} PROPERTIES COMPILE_FLAGS ${BFASM_CXX_FLAGS})
 # Remove compiler flag that is C++ only for vector.c
@@ -233,12 +238,13 @@ add_executable (mksizes ${MKSIZES_SOURCES})
 add_executable (bfas ${BFAS_SOURCES})
 target_compile_options(bfas PRIVATE -std=gnu++17)  # Enable extensions for bfas.
 target_link_libraries (bfas ${BFASM_LIBS} ${BFASM_LIB_DEPS})
+add_dependencies(bfas bfasm_yaml)
 
 install (TARGETS bfas
   RUNTIME DESTINATION bin)
 # Link bfas into the p4c binary folder.
 add_custom_target(linkbfas
-  COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/bfas ${P4C_BINARY_DIR}/bfas
+  COMMAND ${CMAKE_COMMAND} -E create_symlink ${BFASM_BINARY_DIR}/bfas ${P4C_BINARY_DIR}/bfas
   )
 add_dependencies(linkbfas bfas)
 add_dependencies(p4c_driver linkbfas)

@@ -17,11 +17,11 @@
 
 #include "backends/tofino/bf-asm/stage.h"
 
-#include <config.h>
 #include <time.h>
 
 #include <fstream>
 
+#include "backends/tofino/bf-asm/config.h"
 #include "backends/tofino/bf-asm/target.h"
 #include "deparser.h"
 #include "input_xbar.h"

@@ -15,8 +15,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include <config.h>
 #include <errno.h>
+
+#include "backends/tofino/bf-asm/config.h"
 #if HAVE_EXECINFO_H
 #include <execinfo.h>
 #endif
