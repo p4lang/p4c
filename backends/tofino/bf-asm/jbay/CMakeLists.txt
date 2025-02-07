@@ -40,9 +40,7 @@ add_custom_command(OUTPUT ${GEN_JBAY_HDRS} ${GEN_JBAY_SRCS}
   DEPENDS template_objects.yaml chip.schema ${WALLE_SOURCES}
   COMMENT "Generating cpp code for jbay from jbay/chip.schema")
 
-set_source_files_properties(
-  ${GEN_JBAY_SRCS} ${GEN_JBAY_HDRS}
-  PROPERTIES GENERATED TRUE)
+set_source_files_properties(${GEN_JBAY_SRCS} ${GEN_JBAY_HDRS} PROPERTIES GENERATED TRUE)
 
 set (BFAS_JBAY_SRCS
   jbay/gateway.cpp
@@ -52,14 +50,7 @@ set (BFAS_JBAY_SRCS
   PARENT_SCOPE
   )
 
-set (BFAS_JBAY_HEADERS
-  jbay/counter.h
-  jbay/gateway.h
-  jbay/input_xbar.h
-  jbay/meter.h
-  jbay/stateful.h
-  PARENT_SCOPE
-  )
-
-include_directories (${BFASM_BINARY_DIR}/gen/jbay)
-add_library (regs_jbay ${GEN_JBAY_SRCS} ${GEN_JBAY_HDRS})
+add_library (regs_jbay ${GEN_JBAY_SRCS})
+target_link_libraries (regs_jbay p4ctoolkit)
+# Disable errors for warnings. FIXME: Get rid of this.
+target_compile_options(regs_jbay PUBLIC "-Wno-error")
