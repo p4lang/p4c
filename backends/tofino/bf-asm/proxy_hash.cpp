@@ -15,9 +15,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "input_xbar.h"
 #include "backends/tofino/bf-asm/stage.h"
 #include "backends/tofino/bf-asm/tables.h"
+#include "input_xbar.h"
 
 void ProxyHashMatchTable::setup(VECTOR(pair_t) & data) {
     common_init_setup(data, false, P4Table::MatchEntry);

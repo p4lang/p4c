@@ -21,8 +21,8 @@
 #include <sstream>
 #include <string>
 
-#include "bfas.h"
 #include "backends/tofino/bf-asm/target.h"
+#include "bfas.h"
 
 int remove_name_tail_range(std::string &name, int *size) {
     auto tail = name.rfind('.');

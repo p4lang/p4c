@@ -16,24 +16,20 @@
 #
 
 import argparse
+import struct
 from time import sleep
 
+import google.protobuf.text_format
 import grpc
 from p4 import p4runtime_pb2
 from p4.config import p4info_pb2
 from p4.tmp import p4config_pb2
-import google.protobuf.text_format
-import struct
 
 parser = argparse.ArgumentParser(description='Mininet demo')
-parser.add_argument('--dev-id', help='Device id of switch',
-                    type=int, action="store", default=0)
-parser.add_argument('--p4info', help='text p4info proto',
-                    type=str, action="store", required=True)
-parser.add_argument('--tofino-bin', help='tofino bin',
-                    type=str, action="store", required=True)
-parser.add_argument('--cxt-json', help='context json',
-                    type=str, action="store", required=True)
+parser.add_argument('--dev-id', help='Device id of switch', type=int, action="store", default=0)
+parser.add_argument('--p4info', help='text p4info proto', type=str, action="store", required=True)
+parser.add_argument('--tofino-bin', help='tofino bin', type=str, action="store", required=True)
+parser.add_argument('--cxt-json', help='context json', type=str, action="store", required=True)
 
 args = parser.parse_args()
 
@@ -65,6 +61,7 @@ def main():
     request.action = p4runtime_pb2.SetForwardingPipelineConfigRequest.VERIFY_AND_COMMIT
     # print request
     response = stub.SetForwardingPipelineConfig(request)
+
 
 if __name__ == '__main__':
     main()

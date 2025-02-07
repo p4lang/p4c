@@ -22,14 +22,14 @@
 
 #include <fstream>
 
+#include "backends/tofino/bf-asm/target.h"
 #include "deparser.h"
 #include "input_xbar.h"
+#include "lib/range.h"
 #include "misc.h"
 #include "parser.h"
 #include "phv.h"
-#include "lib/range.h"
 #include "sections.h"
-#include "backends/tofino/bf-asm/target.h"
 #include "top_level.h"
 
 extern std::string asmfile_name;

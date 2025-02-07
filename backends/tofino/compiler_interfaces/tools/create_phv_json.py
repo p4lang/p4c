@@ -318,9 +318,9 @@ def produce_containers_node(context):
 
                     rec = OrderedDict()
                     rec["field_name"] = field_name
-                    rec["field_class"] = (
-                        "pkt"  # FIXME: Don't know how to get the value from context.json.
-                    )
+                    rec[
+                        "field_class"
+                    ] = "pkt"  # FIXME: Don't know how to get the value from context.json.
                     rec["field_msb"] = field_msb
                     rec["field_lsb"] = field_lsb
                     rec["phv_msb"] = phv_msb

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 
 import os
-import shlex
-import subprocess
 import pdb
 import pprint
+import re
+import shlex
+import subprocess
 import sys
 import traceback
-import re
 
 import bfas_lookup_cases
 
@@ -41,7 +41,9 @@ def run_bfas_translation(bfa_file, bfa_options, log_file):
         * log_file - file we want to log into
     """
     try:
-        bfa_command = [BFAS_TOOL_ABS, "-v", "-v", "-v", "-v", "-l", log_file] + bfa_options + [bfa_file]
+        bfa_command = (
+            [BFAS_TOOL_ABS, "-v", "-v", "-v", "-v", "-l", log_file] + bfa_options + [bfa_file]
+        )
         cmd_concat = ' '.join(bfa_command)
         p = subprocess.Popen(cmd_concat, shell=True)
         p.wait()
@@ -100,8 +102,11 @@ def run_test():
             # Check that both dictionaries contains same keys
             same_key_set = set(expected_results.keys()) == set(translation_results.keys())
             if not same_key_set:
-                raise RuntimeError("Key sets are not same:\n\tExpected: {}\n\tReceived{}".format(
-                    expected_results.keys(), translation_results.keys()))
+                raise RuntimeError(
+                    "Key sets are not same:\n\tExpected: {}\n\tReceived{}".format(
+                        expected_results.keys(), translation_results.keys()
+                    )
+                )
 
             # Iterate over the dictionary and check results
             for match, values in expected_results.items():

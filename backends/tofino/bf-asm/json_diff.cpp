@@ -20,8 +20,8 @@
 #include <iomanip>
 #include <set>
 
-#include "fdstream.h"
 #include "backends/tofino/bf-asm/json.h"
+#include "fdstream.h"
 #include "lib/ordered_map.h"
 
 static bool show_deletion = true;

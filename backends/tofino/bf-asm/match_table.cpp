@@ -20,12 +20,12 @@
 #include <unordered_map>
 
 #include "action_bus.h"
-#include "lib/algorithm.h"
-#include "input_xbar.h"
-#include "instruction.h"
-#include "misc.h"
 #include "backends/tofino/bf-asm/stage.h"
 #include "backends/tofino/bf-asm/tables.h"
+#include "input_xbar.h"
+#include "instruction.h"
+#include "lib/algorithm.h"
+#include "misc.h"
 
 Table::Format *MatchTable::get_format() const {
     if (!format && gateway) return gateway->get_format();

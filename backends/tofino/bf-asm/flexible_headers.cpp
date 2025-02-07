@@ -15,9 +15,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "backends/tofino/bf-asm/sections.h"
-
 #include <string>
+
+#include "backends/tofino/bf-asm/sections.h"
 
 namespace BFASM {
 

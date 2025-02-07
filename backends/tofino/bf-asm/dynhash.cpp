@@ -19,8 +19,8 @@
 #include <iostream>
 #include <string>
 
-#include "bfas.h"
 #include "backends/tofino/bf-asm/json.h"
+#include "bfas.h"
 #include "sections.h"
 
 class DynHash : public Section {

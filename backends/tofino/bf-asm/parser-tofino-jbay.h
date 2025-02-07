@@ -22,11 +22,11 @@
 #include <set>
 #include <vector>
 
+#include "backends/tofino/bf-asm/target.h"
 #include "lib/bitvec.h"
 #include "parser.h"
 #include "phv.h"
 #include "sections.h"
-#include "backends/tofino/bf-asm/target.h"
 #include "ubits.h"
 
 enum {

@@ -18,9 +18,9 @@
 #include <fstream>
 #include <iostream>
 
+#include "backends/tofino/bf-asm/json.h"
 #include "gen/tofino/disas.regs.mau_addrmap.h"
 #include "lib/hex.h"
-#include "backends/tofino/bf-asm/json.h"
 
 static Tofino::regs_mau_addrmap regs;
 

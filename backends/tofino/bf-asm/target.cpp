@@ -20,9 +20,9 @@
 #include <config.h>
 
 #include "asm-types.h"
+#include "backends/tofino/bf-asm/tables.h"
 #include "bson.h"
 #include "parser.h"
-#include "backends/tofino/bf-asm/tables.h"
 #include "ubits.h"
 
 void declare_registers(const Target::Tofino::top_level_regs *regs) {
