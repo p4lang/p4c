@@ -107,13 +107,13 @@ var NAVTREEINDEX =
 "class_reachability.html#a1fcb0c7b6117af47e3d2ed9aeef12da7",
 "functions_enum.html",
 "namespace_p4_1_1_control_plane_a_p_i.html#adc881ccac5169c0850b2a1b2eb7104ac",
-"namespaceassoc.html#ad5bb5065b018805af02ed74b6af3c657abafd7322c6e97d25b6299b5d6fe8920b",
-"struct_b_f_n_1_1_collect_bridged_fields.html",
-"struct_collect_phv_logging_info.html#a20ec1649847fc0f26f776f2aa9420ea3",
-"struct_p4_1_1_complex_values_1_1_component.html",
+"namespaces.html",
+"struct_b_f_n_1_1_field_packing_1_1_packed_item.html#ae7e3c919f91d970e0c10f4fed77e9a4b",
+"struct_fixup_mirrored_intrinsic_metadata_1_1_find_mirrored_intrinsic_metadata.html",
+"struct_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_arch_handler_builder_iface.html",
 "struct_p4_1_1_model_1_1_param___model.html",
-"struct_p4_1_1_util_1_1_hasher.html",
-"struct_tofino_1_1_action_data_bus.html#af6167764f3c400d796710124cb1c837f"
+"struct_p4_1_1_util_1_1_hasher_3_01signed_01long_01long_01_4.html",
+"struct_tofino_1_1_action_data_bus.html#acd6fa93206197edc94a21e7162276160"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronization';
