@@ -7,12 +7,6 @@
 /* Define to 1 if you have the ucontext.h header */
 #cmakedefine HAVE_UCONTEXT_H @HAVE_UCONTEXT_H@
 
-/* Define to 1 if we include JBay */
-#cmakedefine HAVE_JBAY @HAVE_JBAY@
-
-/* Define to 1 if we include Tofino */
-#cmakedefine HAVE_TOFINO @HAVE_TOFINO@
-
 /* Schema version */
 #cmakedefine CONTEXT_SCHEMA_VERSION "@CONTEXT_SCHEMA_VERSION@"
 

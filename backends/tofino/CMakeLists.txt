@@ -23,9 +23,6 @@ if (CMAKE_BUILD_TYPE STREQUAL Release OR CMAKE_BUILD_TYPE STREQUAL RelWithDebInf
   add_definitions("-DRELEASE_BUILD=1")
 endif()
 
-# JBay is always enabled, the preprocessor guard is deprecated
-add_definitions("-DHAVE_JBAY=1")
-
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 if (ENABLE_STATIC_LIBS)

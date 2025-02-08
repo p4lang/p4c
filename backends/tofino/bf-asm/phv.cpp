@@ -493,6 +493,4 @@ void Phv::output(json::map &ctxt_json) {
 }
 
 #include "tofino/phv.cpp"  // NOLINT(build/include)
-#if HAVE_JBAY
 #include "jbay/phv.cpp"  // NOLINT(build/include)
-#endif                   /* HAVE_JBAY */

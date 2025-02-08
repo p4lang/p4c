@@ -272,14 +272,12 @@ void SelectionTable::setup_physical_alu_map(Target::Tofino::mau_regs &regs, int 
     merge.mau_physical_to_meter_alu_ixbar_map[type][bus / 8U].set_subfield(4 | alu, 3 * (bus % 8U),
                                                                            3);
 }
-#if HAVE_JBAY
 template <>
 void SelectionTable::setup_physical_alu_map(Target::JBay::mau_regs &regs, int type, int bus,
                                             int alu) {
     auto &merge = regs.rams.match.merge;
     merge.mau_physical_to_meter_alu_icxbar_map[type][bus / 8U] |= (1U << alu) << (4 * (bus % 8U));
 }
-#endif /* HAVE_JBAY */
 
 template <class REGS>
 void SelectionTable::write_regs_vt(REGS &regs) {
@@ -401,7 +399,6 @@ void SelectionTable::setup_logical_alu_map(Target::Tofino::mau_regs &regs, int l
     merge.mau_meter_alu_to_logical_map[logical_id / 8U].set_subfield(4 | alu, 3 * (logical_id % 8U),
                                                                      3);
 }
-#if HAVE_JBAY
 template <>
 void SelectionTable::setup_logical_alu_map(Target::JBay::mau_regs &regs, int logical_id, int alu) {
     auto &merge = regs.rams.match.merge;
@@ -409,7 +406,6 @@ void SelectionTable::setup_logical_alu_map(Target::JBay::mau_regs &regs, int log
     merge.mau_meter_alu_to_logical_map[logical_id / 8U].set_subfield(4 | alu, 3 * (logical_id % 8U),
                                                                      3);
 }
-#endif /* HAVE_JBAY */
 
 std::vector<int> SelectionTable::determine_spare_bank_memory_units() const {
     if (bound_stateful) return bound_stateful->determine_spare_bank_memory_units();

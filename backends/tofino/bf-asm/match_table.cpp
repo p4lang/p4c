@@ -287,9 +287,7 @@ void MatchTable::gen_idletime_tbl_cfg(json::map &stage_tbl) const {
 }
 
 #include "tofino/match_table.cpp"  // NOLINT(build/include)
-#if HAVE_JBAY
 #include "jbay/match_table.cpp"  // NOLINT(build/include)
-#endif                           /* HAVE_JBAY */
 
 template <class TARGET>
 void MatchTable::write_common_regs(typename TARGET::mau_regs &regs, int type, Table *result) {

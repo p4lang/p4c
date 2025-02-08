@@ -147,7 +147,6 @@ void emit_parser_registers(const Target::Tofino::top_level_regs *regs, std::ostr
     }
 }
 
-#if HAVE_JBAY
 void declare_registers(const Target::JBay::top_level_regs *regs) {
     declare_registers(&regs->mem_top, sizeof(regs->mem_top),
                       [=](std::ostream &out, const char *addr, const void *end) {
@@ -276,7 +275,6 @@ void emit_parser_registers(const Target::JBay::top_level_regs *regs, std::ostrea
         eg.second->emit_binary(out, 0);
     }
 }
-#endif /* HAVE_JBAY */
 
 int Target::numMauStagesOverride = 0;
 

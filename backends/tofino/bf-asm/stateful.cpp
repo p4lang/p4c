@@ -112,11 +112,9 @@ void StatefulTable::setup(VECTOR(pair_t) & data) {
                     error(v.key.lineno, "Unknow item %s in math_table", value_desc(kv.key));
                 }
             }
-#if HAVE_JBAY
         } else if (options.target >= JBAY && setup_jbay(kv)) {
             /* jbay specific extensions done in setup_jbay */
             // FIXME -- these should probably be based on individual Target::FEATURE() queries
-#endif /* HAVE_JBAY */
         } else if (kv.key == "log_vpn") {
             logvpn_lineno = kv.value.lineno;
             if (CHECKTYPE2(kv.value, tINT, tRANGE)) {

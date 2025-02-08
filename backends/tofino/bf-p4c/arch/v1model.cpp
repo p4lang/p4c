@@ -170,7 +170,6 @@ class LoadTargetArchitecture : public Inspector {
 
         structure->addMetadata(EGRESS, MetadataField{"standard_metadata"_cs, "egress_rid"_cs, 16},
                                MetadataField{"eg_intr_md"_cs, "egress_rid"_cs, 16});
-#ifdef HAVE_JBAY
         structure->addMetadata(INGRESS,
                                MetadataField{"ig_intr_md_for_mb"_cs, "mirror_io_select"_cs, 1},
                                MetadataField{"ig_intr_md_for_dprsr"_cs, "mirror_io_select"_cs, 1});
@@ -225,7 +224,6 @@ class LoadTargetArchitecture : public Inspector {
         structure->addMetadata(
             EGRESS, MetadataField{"eg_intr_md_for_mb"_cs, "mirror_coalesce_length"_cs, 8},
             MetadataField{"eg_intr_md_for_dprsr"_cs, "mirror_coalesce_length"_cs, 8});
-#endif
     }
 
     void analyzeTofinoModel() {
@@ -314,12 +312,10 @@ class LoadTargetArchitecture : public Inspector {
             filenames.push_back("tofino1_specs.p4");
             filenames.push_back("tofino1_base.p4");
         }
-#if HAVE_JBAY
         else if (Device::currentDevice() == Device::JBAY) {
             filenames.push_back("tofino2_specs.p4");
             filenames.push_back("tofino2_base.p4");
         }
-#endif  // HAVE_JBAY
         else
             BUG("Unsupported device id %s", Device::currentDevice());
         filenames.push_back("tofino/stratum.p4");

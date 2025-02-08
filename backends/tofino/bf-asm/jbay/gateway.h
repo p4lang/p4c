@@ -21,9 +21,7 @@
 #include "backends/tofino/bf-asm/tables.h"
 #include "backends/tofino/bf-asm/tofino/gateway.h"
 
-#if HAVE_JBAY
 template <>
 void GatewayTable::standalone_write_regs(Target::JBay::mau_regs &regs);
-#endif /* HAVE_JBAY */
 
 #endif /* BACKENDS_TOFINO_BF_ASM_JBAY_GATEWAY_H_ */

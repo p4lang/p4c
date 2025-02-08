@@ -31,7 +31,6 @@ struct MemUnit;
  *  FOR_ALL_TARGET_CLASSES -- metamacro that expands for each distinct target class
  *              a subset of the register sets
  */
-#if HAVE_JBAY
 #define FOR_ALL_TARGETS(M, ...) \
     M(Tofino, ##__VA_ARGS__)    \
     M(JBay, ##__VA_ARGS__)      \
@@ -43,17 +42,12 @@ struct MemUnit;
     M(Tofino, ##__VA_ARGS__)          \
     M(JBay, ##__VA_ARGS__)
 #define FOR_ALL_TARGET_CLASSES(M, ...) M(Tofino, ##__VA_ARGS__)
-#else
-#define FOR_ALL_TARGETS(M, ...) M(Tofino, ##__VA_ARGS__)
-#define FOR_ALL_REGISTER_SETS(M, ...) M(Tofino, ##__VA_ARGS__)
-#define FOR_ALL_TARGET_CLASSES(M, ...) M(Tofino, ##__VA_ARGS__)
-#endif /* ! && !HAVE_CLOUBREAK && !HAVE_JBAY */
+
 // alias FOR_ALL -> FOR_EACH so the the group name does need to be plural
 #define FOR_EACH_TARGET FOR_ALL_TARGETS
 #define FOR_EACH_REGISTER_SET FOR_ALL_REGISTER_SETS
 #define FOR_EACH_TARGET_CLASS FOR_ALL_TARGET_CLASSES
 
-#if HAVE_JBAY
 #define TARGETS_IN_CLASS_Tofino(M, ...) \
     M(Tofino, ##__VA_ARGS__)            \
     M(JBay, ##__VA_ARGS__)              \
@@ -64,19 +58,13 @@ struct MemUnit;
 #define REGSETS_IN_CLASS_Tofino(M, ...) \
     M(Tofino, ##__VA_ARGS__)            \
     M(JBay, ##__VA_ARGS__)
-#else
-#define TARGETS_IN_CLASS_Tofino(M, ...) M(Tofino, ##__VA_ARGS__)
-#define REGSETS_IN_CLASS_Tofino(M, ...) M(Tofino, ##__VA_ARGS__)
-#endif
 
-#if HAVE_JBAY
 #define TARGETS_USING_REGS_JBay(M, ...) \
     M(JBay, ##__VA_ARGS__)              \
     M(Tofino2H, ##__VA_ARGS__)          \
     M(Tofino2M, ##__VA_ARGS__)          \
     M(Tofino2U, ##__VA_ARGS__)          \
     M(Tofino2A0, ##__VA_ARGS__)
-#endif
 #define TARGETS_USING_REGS_Tofino(M, ...) M(Tofino, ##__VA_ARGS__)
 
 #define TARGETS_IN_CLASS(CL, ...) TARGETS_IN_CLASS_##CL(__VA_ARGS__)
@@ -421,7 +409,6 @@ void declare_registers(const Target::Tofino::deparser_regs *regs);
 void undeclare_registers(const Target::Tofino::deparser_regs *regs);
 void emit_parser_registers(const Target::Tofino::top_level_regs *regs, std::ostream &);
 
-#if HAVE_JBAY
 #include "backends/tofino/bf-asm/gen/jbay/memories.jbay_mem.h"
 #include "backends/tofino/bf-asm/gen/jbay/memories.pipe_addrmap.h"
 #include "backends/tofino/bf-asm/gen/jbay/memories.prsr_mem_main_rspec.h"
@@ -653,8 +640,6 @@ class Target::Tofino2A0 : public Target::JBay {
 };
 
 void emit_parser_registers(const Target::JBay::top_level_regs *regs, std::ostream &);
-
-#endif /* HAVE_JBAY */
 
 /** Macro to buid a switch table switching on a target_t, expanding to the same
  *  code for each target, with TARGET being a typedef for the target type */

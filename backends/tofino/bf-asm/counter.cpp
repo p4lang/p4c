@@ -24,9 +24,7 @@
 
 // target specific template specializations
 #include "tofino/counter.h"
-#if HAVE_JBAY
 #include "jbay/counter.h"
-#endif /* HAVE_JBAY */
 
 void CounterTable::setup(VECTOR(pair_t) & data) {
     common_init_setup(data, false, P4Table::Statistics);

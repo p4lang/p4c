@@ -217,11 +217,8 @@ set (WALLE_SOURCES
       ${BFASM_SOURCE_DIR}/walle/walle.py)
 
 add_subdirectory (tofino)
-set (HAVE_TOFINO 1)
-set (BFASM_LIBS regs_tofino)
 add_subdirectory (jbay)
-set (HAVE_JBAY 1)
-set (BFASM_LIBS ${BFASM_LIBS} regs_jbay)
+set (BFASM_LIBS ${BFASM_LIBS} regs_jbay regs_tofino)
 
 # Other configuration files that need to be generated
 configure_file ("${BFASM_SOURCE_DIR}/cmake/config.h.cmake" "${BFASM_BINARY_DIR}/config.h")
