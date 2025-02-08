@@ -15,9 +15,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "asm-types.h"
+#include "backends/tofino/bf-asm/asm-types.h"
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 namespace {
 

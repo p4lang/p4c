@@ -17,7 +17,8 @@
 
 #include <stdio.h>
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
+
 #include "lib/compile_context.h"
 #include "lib/log.h"
 #include "lib/options.h"

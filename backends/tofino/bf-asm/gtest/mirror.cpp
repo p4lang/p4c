@@ -15,9 +15,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "deparser.h"
-#include "gtest/gtest.h"
-#include "sections.h"
+#include <gtest/gtest.h>
+
+#include "backends/tofino/bf-asm/deparser.h"
+#include "backends/tofino/bf-asm/sections.h"
 
 namespace {
 

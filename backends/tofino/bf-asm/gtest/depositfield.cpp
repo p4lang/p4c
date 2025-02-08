@@ -15,9 +15,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "depositfield.h"
+#include "backends/tofino/bf-asm/depositfield.h"
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 #if __cplusplus < 201402L && __cpp_binary_literals < 201304
 #error "Binary literals are required"

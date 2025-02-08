@@ -316,7 +316,7 @@ if (ENABLE_GTESTS)
   set_source_files_properties (${BFAS_GTEST_SOURCES} PROPERTIES SKIP_UNITY_BUILD_INCLUSION TRUE)
 
   add_executable (gtestasm ${BFAS_GTEST_SOURCES} ${BFP4C_SOURCES})
-  target_link_libraries (gtestasm PRIVATE bfas_lib gtest)
+  target_link_libraries (gtestasm PRIVATE bfas_lib gtest ${BFASM_LIB_DEPS})
   target_compile_options (gtestasm PRIVATE -Wall -Wextra -ggdb -O3
                           -Wno-unused-parameter -Wno-sign-compare)
 
