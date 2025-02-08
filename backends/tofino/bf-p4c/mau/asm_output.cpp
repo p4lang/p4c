@@ -1053,9 +1053,7 @@ void MauAsmOutput::emit_table_format(std::ostream &out, indent_t indent,
     fmt_state fmt;
     out << indent << "format: {";
     int group = (ternary || gateway) ? -1 : 0;
-#ifdef HAVE_JBAY
     if (Device::currentDevice() == Device::JBAY && gateway) group = 0;
-#endif
 
     for (auto match_group : use.match_groups) {
         int type;

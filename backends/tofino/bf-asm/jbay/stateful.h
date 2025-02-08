@@ -21,8 +21,6 @@
 #include "backends/tofino/bf-asm/tables.h"
 #include "backends/tofino/bf-asm/target.h"
 
-#if HAVE_JBAY
-
 // FIXME -- should be a namespace somwhere?  Or in class StatefulTable
 /* for jbay counter mode, we may need both a push and a pop mode, as well as counter_function,
  * so we pack them all into an int with some shifts and masks */
@@ -56,5 +54,4 @@ int parse_jbay_counter_mode(const value_t &v);
 template <>
 void StatefulTable::write_logging_regs(Target::JBay::mau_regs &regs);
 
-#endif /* HAVE_JBAY ||  ||  */
 #endif /* BACKENDS_TOFINO_BF_ASM_JBAY_STATEFUL_H_ */

@@ -46,7 +46,6 @@ const Device::StatefulAluSpec &TofinoDevice::getStatefulAluSpec() const {
     return spec;
 }
 
-#if HAVE_JBAY
 const Device::StatefulAluSpec &JBayDevice::getStatefulAluSpec() const {
     static const Device::StatefulAluSpec spec = {
         /* .CmpMask = */ true,
@@ -64,7 +63,6 @@ const Device::StatefulAluSpec &JBayDevice::getStatefulAluSpec() const {
         /* .MaxRegfileRows = */ 4};
     return spec;
 }
-#endif
 
 /**
  * @brief This class detects a following pattern:
@@ -2283,13 +2281,11 @@ std::map<std::pair<cstring, cstring>, std::vector<CreateSaluInstruction::param_t
          {param_t::VALUE, param_t::OUTPUT, param_t::OUTPUT, param_t::OUTPUT, param_t::OUTPUT}},
         {{"RegisterAction"_cs, "underflow"_cs},
          {param_t::VALUE, param_t::OUTPUT, param_t::OUTPUT, param_t::OUTPUT, param_t::OUTPUT}},
-#ifdef HAVE_JBAY
         {{"LearnAction"_cs, "apply"_cs},
          {param_t::VALUE, param_t::HASH, param_t::LEARN, param_t::OUTPUT, param_t::OUTPUT,
           param_t::OUTPUT, param_t::OUTPUT}},
         {{"MinMaxAction"_cs, "apply"_cs},
          {param_t::VALUE, param_t::OUTPUT, param_t::OUTPUT, param_t::OUTPUT, param_t::OUTPUT}},
-#endif
         {{"SelectorAction"_cs, "apply"_cs},
          {param_t::VALUE, param_t::OUTPUT, param_t::OUTPUT, param_t::OUTPUT, param_t::OUTPUT}}};
 

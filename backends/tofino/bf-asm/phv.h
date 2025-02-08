@@ -322,8 +322,6 @@ class Target::Phv {
 inline unsigned Phv::mau_groupsize() { return phv.target->mau_groupsize(); }
 
 #include "tofino/phv.h"
-#if HAVE_JBAY
 #include "jbay/phv.h"
-#endif /* HAVE_JBAY */
 
 #endif /* BACKENDS_TOFINO_BF_ASM_PHV_H_ */

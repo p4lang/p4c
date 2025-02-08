@@ -23,9 +23,7 @@
 
 // target specific template specializations
 #include "tofino/meter.h"
-#if HAVE_JBAY
 #include "jbay/meter.h"
-#endif /* HAVE_JBAY */
 
 Table::Layout::bus_type_t MeterTable::default_bus_type() const {
     // FIXME -- this is a bit of a hack -- if color_mapram_addr has been set, we want the
@@ -946,7 +944,6 @@ void MeterTable::meter_color_logical_to_phys(Target::Tofino::mau_regs &regs, int
     }
 }
 
-#if HAVE_JBAY
 template <>
 void MeterTable::meter_color_logical_to_phys(Target::JBay::mau_regs &regs, int logical_id,
                                              int alu) {
@@ -977,7 +974,6 @@ void MeterTable::meter_color_logical_to_phys(Target::JBay::mau_regs &regs, int l
     }
     adrdist.meter_color_logical_to_phys_icxbar_ctl[logical_id] |= 1 << alu;
 }
-#endif /* HAVE_JBAY */
 
 void MeterTable::gen_tbl_cfg(json::vector &out) const {
     // FIXME -- factor common Synth2Port stuff

@@ -558,9 +558,6 @@ target_compile_definitions(bfp4c
   INTERFACE "-DCONFIG_PREFIX=\"${CMAKE_INSTALL_PREFIX}\""
   INTERFACE "-DCONFIG_PKGDATADIR=\"${CMAKE_INSTALL_PREFIX}/${P4C_ARTIFACTS_OUTPUT_DIRECTORY}\""
 )
-target_compile_definitions(bfp4c
-  INTERFACE "-DHAVE_JBAY=1"
-)
 if (ENABLE_BAREFOOT_INTERNAL)
   target_compile_definitions(bfp4c
     INTERFACE "-DBAREFOOT_INTERNAL=1"

@@ -148,11 +148,9 @@ void CmpOP::write_regs(Target::Tofino::mau_regs &regs, Table *tbl, Table::Action
     write_regs<Target::Tofino::mau_regs>(regs, tbl, act);
 }
 
-#if HAVE_JBAY
 void TMatchOP::write_regs(Target::Tofino::mau_regs &regs, Table *tbl, Table::Actions::Action *act) {
     BUG();  // should never be called
 }
-#endif /* HAVE_JBAY */
 
 void OutOP::decode_output_mux(Target::Tofino, Table *tbl, value_t &op) {
     static const std::map<std::string, int> ops_mux_lookup = {

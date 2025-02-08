@@ -952,9 +952,7 @@ void InputXbar::write_regs(REGS &regs) {
 }
 
 template void InputXbar::write_regs(Target::Tofino::mau_regs &);
-#if HAVE_JBAY
 template void InputXbar::write_regs(Target::JBay::mau_regs &);
-#endif /* HAVE_JBAY */
 
 template <class REGS>
 void InputXbar::write_xmu_regs(REGS &regs) {

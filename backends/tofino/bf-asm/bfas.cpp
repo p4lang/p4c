@@ -53,11 +53,7 @@ option_t options = {
     .match_compiler = false,
     .multi_parsers = true,  // TODO Remove option after testing
     .partial_input = false,
-#if HAVE_JBAY
     .singlewrite = true,
-#else
-    .singlewrite = false,
-#endif /* !HAVE_JBAY && ! */
     .stage_dependency_pattern = "",
     .target = NO_TARGET,
     .tof2lab44_workaround = false,

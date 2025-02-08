@@ -603,10 +603,8 @@ std::map<std::string, unsigned> Parser::parser_handles;
 void Parser::write_config(RegisterSetBase &regs, json::map &json, bool legacy) {
     if (auto *tofino_regs = dynamic_cast<Target::Tofino::parser_regs *>(&regs))
         write_config(*tofino_regs, json, legacy);
-#ifdef HAVE_JBAY
     else if (auto *jbay_regs = dynamic_cast<Target::JBay::parser_regs *>(&regs))
         write_config(*jbay_regs, json, legacy);
-#endif /* HAVE_JBAY */
 }
 
 // output context.json format with multiple parser support

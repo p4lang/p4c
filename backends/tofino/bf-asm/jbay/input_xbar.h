@@ -20,10 +20,8 @@
 
 #include "backends/tofino/bf-asm/input_xbar.h"
 
-#if HAVE_JBAY
 template <>
 void InputXbar::write_galois_matrix(Target::JBay::mau_regs &regs, HashTable id,
                                     const std::map<int, HashCol> &mat);
-#endif /* HAVE_JBAY */
 
 #endif /* BACKENDS_TOFINO_BF_ASM_JBAY_INPUT_XBAR_H_ */

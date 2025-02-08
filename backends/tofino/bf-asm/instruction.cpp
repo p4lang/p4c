@@ -681,18 +681,14 @@ auto Operand::Named::lookup(Base *&ref) -> Base * {
 struct VLIWInstruction : Instruction {
     explicit VLIWInstruction(int l) : Instruction(l) {}
     virtual int encode() = 0;
-#if HAVE_JBAY
     template <class REGS>
     void write_regs_2(REGS &regs, Table *tbl, Table::Actions::Action *act);
-#endif /* HAVE_JBAY ||  */
     FOR_ALL_REGISTER_SETS(DECLARE_FORWARD_VIRTUAL_INSTRUCTION_WRITE_REGS)
 };
 
 // target specific template specializations
 #include "tofino/instruction.cpp"  // NOLINT(build/include)
-#if HAVE_JBAY
 #include "jbay/instruction.cpp"  // NOLINT(build/include)
-#endif                           /* HAVE_JBAY */
 
 struct AluOP : VLIWInstruction {
     enum special_flags {
@@ -1652,9 +1648,7 @@ bool ShiftOP::equiv(Instruction *a_) {
 
 static std::set<target_t> tofino12 = std::set<target_t>({
     TOFINO,
-#if HAVE_JBAY
     JBAY,
-#endif
 });
 
 // lifted from MAU uArch 15.1.6
@@ -1707,7 +1701,6 @@ static CondMoveMux::Decode tf_opCondMux("cmux", TOFINO, 0x6, false, 2,
                                         "conditional-mux");          // NOLINT
 static NulOP::Decode tf_opInvalidate("invalidate", TOFINO, 0x3800);  // NOLINT
 
-#if HAVE_JBAY
 static std::set<target_t> jb_targets = std::set<target_t>({
     JBAY,
 });
@@ -1727,7 +1720,6 @@ static AluOP::Decode jb_opGTEQU("gtequ", jb_targets, 0x02e),     // NOLINT
     jb_opNEQ("neq", jb_targets, 0x2ae, AluOP::Commutative),      // NOLINT
     jb_opEQ64("eq64", jb_targets, 0x26e, AluOP::Commutative),    // NOLINT
     jb_opNEQ64("neq64", jb_targets, 0x2ee, AluOP::Commutative);  // NOLINT
-#endif                                                           /* HAVE_JBAY ||  */
 
 std::unique_ptr<Instruction> genNoopFill(Table *tbl, Table::Actions::Action *act, const char *op,
                                          int slot) {

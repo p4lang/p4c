@@ -779,8 +779,6 @@ Instruction *CmpOP::pass1(Table *tbl_, Table::Actions::Action *act) {
     return this;
 }
 
-#if HAVE_JBAY
-
 struct TMatchOP : public SaluInstruction {
     const struct Decode : public Instruction::Decode {
         std::string name;
@@ -817,9 +815,7 @@ struct TMatchOP : public SaluInstruction {
 };
 
 static TMatchOP::Decode opTMatch("tmatch", {
-#if HAVE_JBAY
                                                JBAY,
-#endif
                                            });
 
 Instruction *TMatchOP::Decode::decode(Table *tbl, const Table::Actions::Action *act,
@@ -901,7 +897,6 @@ Instruction *TMatchOP::pass1(Table *tbl_, Table::Actions::Action *act) {
     }
     return this;
 }
-#endif /* HAVE_JBAY ||  */
 
 // Output ALU instruction
 struct OutOP : public SaluInstruction {
@@ -913,10 +908,8 @@ struct OutOP : public SaluInstruction {
     int predication_encode = STATEFUL_PREDICATION_ENCODE_UNCOND;
     operand src;
     int output_mux = -1;
-#if HAVE_JBAY
     bool lmatch = false;
     int lmatch_pred = 0;
-#endif /* HAVE_JBAY */
     FOR_ALL_REGISTER_SETS(TARGET_OVERLOAD, void decode_output_mux,
                           (register_type, Table *tbl, value_t &op))
     void decode_output_mux(Table *tbl, value_t &op) {
@@ -937,9 +930,7 @@ struct OutOP : public SaluInstruction {
     }
     void dbprint(std::ostream &out) const override {
         out << "INSTR: output " << "pred=0x" << hex(predication_encode)
-#if HAVE_JBAY
             << " word" << (slot - ALUOUT0)
-#endif /* HAVE_JBAY */
             << " mux=" << output_mux;
     }
     template <class REGS>
@@ -976,7 +967,6 @@ Instruction *OutOP::Decode::decode(Table *tbl, const Table::Actions::Action *act
         }
     }
     rv->slot = ALUOUT;
-#if HAVE_JBAY
     // Check for destination
     if (idx < op.size && op[idx].startsWith("word")) {
         int unit = -1;
@@ -995,7 +985,6 @@ Instruction *OutOP::Decode::decode(Table *tbl, const Table::Actions::Action *act
             rv->slot = unit + ALUOUT0;
         idx++;
     }
-#endif /* HAVE_JBAY */
     // Check mux operand
     if (idx < op.size) {
         rv->src = operand(tbl, act, op[idx], false);
@@ -1029,7 +1018,6 @@ Instruction *OutOP::pass1(Table *tbl_, Table::Actions::Action *act) {
             error(lineno, "Only one output of predication allowed");
         act->pred_comb_sel = predication_encode;
     }
-#if HAVE_JBAY
     if (lmatch) {
         if (tbl->output_lmatch) {
             auto *other = dynamic_cast<OutOP *>(tbl->output_lmatch);
@@ -1041,14 +1029,11 @@ Instruction *OutOP::pass1(Table *tbl_, Table::Actions::Action *act) {
         }
         tbl->output_lmatch = this;
     }
-#endif /* HAVE_JBAY */
     return this;
 }
 
+#include "jbay/salu_inst.cpp"    // NOLINT(build/include)
 #include "tofino/salu_inst.cpp"  // NOLINT(build/include)
-#if HAVE_JBAY
-#include "jbay/salu_inst.cpp"  // NOLINT(build/include)
-#endif                         /* HAVE_JBAY */
 
 }  // end namespace StatefulAlu
 
