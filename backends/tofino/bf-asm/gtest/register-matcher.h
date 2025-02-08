@@ -18,12 +18,13 @@
 #ifndef BACKENDS_TOFINO_BF_ASM_GTEST_REGISTER_MATCHER_H_
 #define BACKENDS_TOFINO_BF_ASM_GTEST_REGISTER_MATCHER_H_
 
+#include <gtest/gtest.h>
+
 #include <cstdint>
 #include <iosfwd>
 #include <sstream>
 
-#include "bf-asm/ubits.h"
-#include "gtest/gtest.h"
+#include "backends/tofino/bf-asm/ubits.h"
 #include "lib/bitvec.h"
 
 namespace BfAsm {

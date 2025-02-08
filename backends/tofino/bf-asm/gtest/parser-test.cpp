@@ -15,9 +15,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "bfas.h"
-#include "gtest/gtest.h"
-#include "parser-tofino-jbay.h"
+#include <gtest/gtest.h>
+
+#include "backends/tofino/bf-asm/bfas.h"
+#include "backends/tofino/bf-asm/jbay/parser-tofino-jbay.h"
 
 namespace {
 

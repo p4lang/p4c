@@ -15,11 +15,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "hashexpr.h"
+#include "backends/tofino/bf-asm/hashexpr.h"
 
+#include <gtest/gtest.h>
+
+#include "backends/tofino/bf-asm/bfas.h"
 #include "backends/tofino/bf-asm/stage.h"
-#include "bfas.h"
-#include "gtest/gtest.h"
 
 namespace {
 
