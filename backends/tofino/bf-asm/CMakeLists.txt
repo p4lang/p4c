@@ -240,10 +240,10 @@ if (ENABLE_GTESTS)
 endif()
 
 
-# set_source_files_properties(${BFAS_SOURCES} PROPERTIES COMPILE_FLAGS ${BFASM_CXX_FLAGS})
+set_source_files_properties(${BFAS_SOURCES} PROPERTIES COMPILE_FLAGS ${BFASM_CXX_FLAGS})
 # Remove compiler flag that is C++ only for vector.c
-# string(REPLACE "-Wno-overloaded-virtual" "" vector_c_flags ${BFASM_CXX_FLAGS})
-# set_source_files_properties(vector.c PROPERTIES COMPILE_FLAGS ${vector_c_flags})
+string(REPLACE "-Wno-overloaded-virtual" "" vector_c_flags ${BFASM_CXX_FLAGS})
+set_source_files_properties(vector.c PROPERTIES COMPILE_FLAGS ${vector_c_flags})
 add_executable (bfas ${BFAS_SOURCES})
 # Enable extensions for bfas. FIXME: Do we need this?
 target_compile_options(bfas PRIVATE -std=gnu++17)

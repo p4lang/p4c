@@ -687,8 +687,8 @@ struct VLIWInstruction : Instruction {
 };
 
 // target specific template specializations
+#include "jbay/instruction.cpp"    // NOLINT(build/include)
 #include "tofino/instruction.cpp"  // NOLINT(build/include)
-#include "jbay/instruction.cpp"  // NOLINT(build/include)
 
 struct AluOP : VLIWInstruction {
     enum special_flags {
