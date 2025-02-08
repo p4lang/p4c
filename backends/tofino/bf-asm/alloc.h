@@ -5,6 +5,7 @@
 
 #include <stdexcept>
 #include <utility>
+#include <tuple>
 
 namespace BFN {
 

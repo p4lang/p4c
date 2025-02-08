@@ -29,8 +29,8 @@
 #include <typeindex>
 #include <vector>
 
+#include "backends/tofino/bf-asm/rvalue_reference_wrapper.h"
 #include "lib/ordered_map.h"
-#include "rvalue_reference_wrapper.h"
 
 using namespace P4;
 

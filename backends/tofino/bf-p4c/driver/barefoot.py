@@ -483,7 +483,7 @@ class BarefootBackend(BackendDriver):
         """
         # Add assembler options.
         if os.environ['P4C_BUILD_TYPE'] == "DEVELOPER":
-            bfas = find_file('bf-asm', 'bfas')
+            bfas = find_file('.', 'bfas')
         else:
             bfas = find_file(os.environ['P4C_BIN_DIR'], 'bfas')
 

@@ -311,12 +311,10 @@ class LoadTargetArchitecture : public Inspector {
         if (Device::currentDevice() == Device::TOFINO) {
             filenames.push_back("tofino1_specs.p4");
             filenames.push_back("tofino1_base.p4");
-        }
-        else if (Device::currentDevice() == Device::JBAY) {
+        } else if (Device::currentDevice() == Device::JBAY) {
             filenames.push_back("tofino2_specs.p4");
             filenames.push_back("tofino2_base.p4");
-        }
-        else
+        } else
             BUG("Unsupported device id %s", Device::currentDevice());
         filenames.push_back("tofino/stratum.p4");
         filenames.push_back("tofino/p4_14_prim.p4");

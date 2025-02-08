@@ -24,7 +24,7 @@
 
 #include "bf-asm/ubits.h"
 #include "gtest/gtest.h"
-#include "p4c/lib/bitvec.h"
+#include "lib/bitvec.h"
 
 namespace BfAsm {
 
