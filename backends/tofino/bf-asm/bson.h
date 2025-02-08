@@ -15,8 +15,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef _bson_h_
-#define _bson_h_
+#ifndef BACKENDS_TOFINO_BF_ASM_BSON_H_
+#define BACKENDS_TOFINO_BF_ASM_BSON_H_
 
 #include <type_traits>
 
@@ -27,9 +27,9 @@ namespace json {
 template <class T>
 struct bson_wrap {
     T &o;
-    bson_wrap(T &o) : o(o) {}
+    bson_wrap(T &o) : o(o) {}  // NOLINT(runtime/explicit)
     template <class U>
-    bson_wrap(U &o) : o(o) {}
+    bson_wrap(U &o) : o(o) {}  // NOLINT(runtime/explicit)
 };
 
 template <class T>
@@ -71,4 +71,4 @@ inline std::ostream &operator<<(std::ostream &out, bson_wrap<const std::unique_p
 
 }  // end namespace json
 
-#endif /* _bson_h_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_BSON_H_ */

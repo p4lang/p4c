@@ -99,7 +99,7 @@ struct IterKeys {
     } b, e;
 
     template <class U>
-    IterKeys(U &map) : b(map.begin()), e(map.end()) {}
+    IterKeys(U &map) : b(map.begin()), e(map.end()) {}  // NOLINT(runtime/explicit)
     IterKeys(PairIter b, PairIter e) : b(b), e(e) {}
     iterator begin() const { return b; }
     iterator end() const { return e; }
@@ -181,7 +181,7 @@ struct IterValues {
     } b, e;
 
     template <class U>
-    IterValues(U &map) : b(map.begin()), e(map.end()) {}
+    IterValues(U &map) : b(map.begin()), e(map.end()) {}  // NOLINT(runtime/explicit)
     IterValues(PairIter b, PairIter e) : b(b), e(e) {}
     iterator begin() const { return b; }
     iterator end() const { return e; }

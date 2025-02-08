@@ -15,8 +15,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef _binary_output_h_
-#define _binary_output_h_
+#ifndef BACKENDS_TOFINO_BF_ASM_BINARY_OUTPUT_H_
+#define BACKENDS_TOFINO_BF_ASM_BINARY_OUTPUT_H_
 
 #include <iomanip>
 #include <iostream>
@@ -27,7 +27,7 @@ class tag {
     char data[4] = {0, 0, 0, 0};
 
  public:
-    tag(char ch) { data[3] = ch; }
+    tag(char ch) { data[3] = ch; }  // NOLINT(runtime/explicit)
     friend std::ostream &operator<<(std::ostream &out, const tag &e) {
         return out.write(e.data, 4);
     }
@@ -37,7 +37,7 @@ class byte4 {
     char data[4];
 
  public:
-    byte4(uint32_t v) {
+    byte4(uint32_t v) {  // NOLINT(runtime/explicit)
         data[0] = v & 0xff;
         data[1] = (v >> 8) & 0xff;
         data[2] = (v >> 16) & 0xff;
@@ -52,7 +52,7 @@ class byte8 {
     char data[8];
 
  public:
-    byte8(uint64_t v) {
+    byte8(uint64_t v) {  // NOLINT(runtime/explicit)
         data[0] = v & 0xff;
         data[1] = (v >> 8) & 0xff;
         data[2] = (v >> 16) & 0xff;
@@ -69,4 +69,4 @@ class byte8 {
 
 }  // end namespace binout
 
-#endif /* _binary_output_h_ */
+#endif /* BACKENDS_TOFINO_BF_ASM_BINARY_OUTPUT_H_ */
