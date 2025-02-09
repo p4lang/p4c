@@ -1,3 +1,9 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$struct_phv_info_1_1_same_container_alloc_constraint.html" title=" " alt="" coords="5,5,216,45"/>
+<area shape="rect" id="Node000000" href="$class_p_h_v_1_1v2_1_1_tx_score_maker.html" title="TxScoreMaker is the interface of the factory class of TxScore." alt="" coords="5,55,177,80"/>
+<area shape="rect" id="Node000001" href="$class_p_h_v_1_1v2_1_1_greedy_tx_score_maker.html" title=" " alt="" coords="229,5,448,31"/>
+<area shape="poly" id="edge2501_Node000000_Node000001" title=" " alt="" coords="168,49,274,28,275,33,169,55"/>
+<area shape="rect" id="Node000002" href="$class_p_h_v_1_1v2_1_1_min_pack_tx_score_maker.html" title="factory class for MinPackTxScore." alt="" coords="225,55,452,80"/>
+<area shape="poly" id="edge2502_Node000000_Node000002" title=" " alt="" coords="191,65,225,65,225,70,191,70"/>
+<area shape="rect" id="Node000003" href="$class_p_h_v_1_1v2_1_1_nil_tx_score_maker.html" title="NilTxScoreMaker is a factory class to make nil score." alt="" coords="243,104,434,129"/>
+<area shape="poly" id="edge2503_Node000000_Node000003" title=" " alt="" coords="169,80,275,101,274,107,168,85"/>
 </map>
