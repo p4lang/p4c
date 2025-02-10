@@ -135,7 +135,7 @@ int main(int argc, char *const argv[]) {
         info.emitInfo("PARSER");
 
         if (program != nullptr && ::P4::errorCount() == 0) {
-            P4::P4COptionPragmaParser optionsPragmaParser;
+            P4::P4COptionPragmaParser optionsPragmaParser(true);
             program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
             info.emitInfo("PASS P4COptionPragmaParser");
 
