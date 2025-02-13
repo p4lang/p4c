@@ -79,8 +79,10 @@ class IndexedVector : public Vector<T> {
         insert(Vector<T>::end(), a.begin(), a.end());
     }
     explicit IndexedVector(const Vector<T> &a) { insert(Vector<T>::end(), a.begin(), a.end()); }
-    template<typename It>
-    explicit IndexedVector(It start, It end) { insert(Vector<T>::end(), start, end); }
+    template <typename It>
+    explicit IndexedVector(It start, It end) {
+        insert(Vector<T>::end(), start, end);
+    }
     explicit IndexedVector(JSONLoader &json);
 
     void clear() {
