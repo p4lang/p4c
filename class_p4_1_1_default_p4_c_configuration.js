@@ -1,5 +1,5 @@
 var class_p4_1_1_default_p4_c_configuration =
 [
-    [ "maximumArraySize", "class_p4_1_1_default_p4_c_configuration.html#a122089f1c37c108d0161b7c3ae7320ab", null ],
-    [ "maximumWidthSupported", "class_p4_1_1_default_p4_c_configuration.html#ac71ccbdcfdc8bb41ff0820cdb14dbb7e", null ]
+    [ "maximumArraySize", "class_p4_1_1_default_p4_c_configuration.html#ac7efd99b07e7f09fbea8e6f9b3427140", null ],
+    [ "maximumWidthSupported", "class_p4_1_1_default_p4_c_configuration.html#ae66238af4df2b09d35e27aed07925146", null ]
 ];

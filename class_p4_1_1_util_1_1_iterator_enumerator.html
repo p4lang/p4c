@@ -150,11 +150,11 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ab4c0725b013e7efac27749abce4e2d3f" id="r_ab4c0725b013e7efac27749abce4e2d3f"><td class="memItemLeft" align="right" valign="top"><a id="ab4c0725b013e7efac27749abce4e2d3f" name="ab4c0725b013e7efac27749abce4e2d3f"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>IteratorEnumerator</b> (Iter begin, Iter end, const char *name)</td></tr>
 <tr class="separator:ab4c0725b013e7efac27749abce4e2d3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a81b13a682358fd1f0c173e1ee7f8d73d" id="r_a81b13a682358fd1f0c173e1ee7f8d73d"><td class="memItemLeft" align="right" valign="top">std::iterator_traits&lt; Iter &gt;::value_type&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a81b13a682358fd1f0c173e1ee7f8d73d">getCurrent</a> () const</td></tr>
-<tr class="memdesc:a81b13a682358fd1f0c173e1ee7f8d73d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get current element in the collection.  <br /></td></tr>
-<tr class="separator:a81b13a682358fd1f0c173e1ee7f8d73d"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0a40f3c4c26c327a731008aca45a6b8b" id="r_a0a40f3c4c26c327a731008aca45a6b8b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0a40f3c4c26c327a731008aca45a6b8b">moveNext</a> ()</td></tr>
-<tr class="separator:a0a40f3c4c26c327a731008aca45a6b8b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af5741895ff6e97e0498add6531f01165" id="r_af5741895ff6e97e0498add6531f01165"><td class="memItemLeft" align="right" valign="top">std::iterator_traits&lt; Iter &gt;::value_type&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af5741895ff6e97e0498add6531f01165">getCurrent</a> () const override</td></tr>
+<tr class="memdesc:af5741895ff6e97e0498add6531f01165"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get current element in the collection.  <br /></td></tr>
+<tr class="separator:af5741895ff6e97e0498add6531f01165"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac60bfa92838aa80feae70113d6db35c8" id="r_ac60bfa92838aa80feae70113d6db35c8"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac60bfa92838aa80feae70113d6db35c8">moveNext</a> () override</td></tr>
+<tr class="separator:ac60bfa92838aa80feae70113d6db35c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a22cc395044146d4bcb3d3f72ee0007d4" id="r_a22cc395044146d4bcb3d3f72ee0007d4"><td class="memItemLeft" align="right" valign="top"><a id="a22cc395044146d4bcb3d3f72ee0007d4" name="a22cc395044146d4bcb3d3f72ee0007d4"></a>
 std::string&#160;</td><td class="memItemRight" valign="bottom"><b>toString</b> () const</td></tr>
 <tr class="separator:a22cc395044146d4bcb3d3f72ee0007d4"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -272,8 +272,8 @@ static std::vector&lt; std::iterator_traits&lt; Iter &gt;::value_type &gt;&#160;
 class P4::Util::IteratorEnumerator&lt; Iter &gt;</div><p>A generic iterator returning elements of type T. </p>
 <p>We have to be careful never to invoke getCurrent more than once on each element of the input iterators, since it could have side-effects </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="a81b13a682358fd1f0c173e1ee7f8d73d" name="a81b13a682358fd1f0c173e1ee7f8d73d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a81b13a682358fd1f0c173e1ee7f8d73d">&#9670;&#160;</a></span>getCurrent()</h2>
+<a id="af5741895ff6e97e0498add6531f01165" name="af5741895ff6e97e0498add6531f01165"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af5741895ff6e97e0498add6531f01165">&#9670;&#160;</a></span>getCurrent()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -292,7 +292,7 @@ template&lt;typename Iter&gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel virtual">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel override">override</span><span class="mlabel virtual">virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -303,8 +303,8 @@ template&lt;typename Iter&gt; </div>
 
 </div>
 </div>
-<a id="a0a40f3c4c26c327a731008aca45a6b8b" name="a0a40f3c4c26c327a731008aca45a6b8b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0a40f3c4c26c327a731008aca45a6b8b">&#9670;&#160;</a></span>moveNext()</h2>
+<a id="ac60bfa92838aa80feae70113d6db35c8" name="ac60bfa92838aa80feae70113d6db35c8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac60bfa92838aa80feae70113d6db35c8">&#9670;&#160;</a></span>moveNext()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -323,7 +323,7 @@ template&lt;typename Iter&gt; </div>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel virtual">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel override">override</span><span class="mlabel virtual">virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
