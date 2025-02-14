@@ -217,7 +217,7 @@ class IteratorEnumerator : public Enumerator<typename std::iterator_traits<Iter>
         return std::string(this->name) + ":" + this->stateName();
     }
 
-    bool moveNext() {
+    bool moveNext() override {
         switch (this->state) {
             case EnumeratorState::NotStarted:
                 this->current = this->begin;
@@ -242,7 +242,7 @@ class IteratorEnumerator : public Enumerator<typename std::iterator_traits<Iter>
         throw std::runtime_error("Unexpected enumerator state");
     }
 
-    typename std::iterator_traits<Iter>::value_type getCurrent() const {
+    typename std::iterator_traits<Iter>::value_type getCurrent() const override {
         switch (this->state) {
             case EnumeratorState::NotStarted:
                 throw std::logic_error("You cannot call 'getCurrent' before 'moveNext'");
@@ -254,6 +254,9 @@ class IteratorEnumerator : public Enumerator<typename std::iterator_traits<Iter>
         throw std::runtime_error("Unexpected enumerator state");
     }
 };
+
+template <typename Iter>
+IteratorEnumerator(Iter begin, Iter end, const char *name) -> IteratorEnumerator<Iter>;
 
 /////////////////////////////////////////////////////////////////////
 
@@ -297,8 +300,8 @@ class EmptyEnumerator : public Enumerator<T> {
  public:
     [[nodiscard]] std::string toString() const { return "EmptyEnumerator"; }
     /// Always returns false
-    bool moveNext() { return false; }
-    T getCurrent() const {
+    bool moveNext() override { return false; }
+    T getCurrent() const override {
         throw std::logic_error("You cannot call 'getCurrent' on an EmptyEnumerator");
     }
 };

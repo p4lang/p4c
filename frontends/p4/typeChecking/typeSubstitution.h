@@ -57,7 +57,7 @@ class TypeSubstitution : public IHasDbPrint {
         return true;
     }
 
-    void dbprint(std::ostream &out) const {
+    void dbprint(std::ostream &out) const override {
         if (isIdentity()) out << "Empty substitution";
         bool first = true;
         for (auto it : binding) {

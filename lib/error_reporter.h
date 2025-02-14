@@ -92,6 +92,7 @@ class ErrorReporter {
           defaultWarningDiagnosticAction(DiagnosticAction::Warn) {
         outputstream = &std::cerr;
     }
+    virtual ~ErrorReporter() = default;
 
     // error message for a bug
     template <typename... Args>
