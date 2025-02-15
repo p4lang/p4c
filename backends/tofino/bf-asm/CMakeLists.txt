@@ -319,6 +319,8 @@ if (ENABLE_GTESTS)
   target_link_libraries (gtestasm PRIVATE bfas_lib gtest ${BFASM_LIB_DEPS})
   target_compile_options (gtestasm PRIVATE -Wall -Wextra -ggdb -O3
                           -Wno-unused-parameter -Wno-sign-compare)
+    # Disable errors for warnings. FIXME: Get rid of this.
+  target_compile_options(gtestasm PUBLIC "-Wno-error")
 
   # Add to CTests - but this is in the BFASM project viz build/bf-asm, not build/p4c
   add_test (NAME gtestasm COMMAND gtestasm WORKING_DIRECTORY ${P4C_BINARY_DIR})
