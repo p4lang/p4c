@@ -630,7 +630,7 @@ def dump_binary(args, binary_cache, out_file):
         # Memories are ram-word addressed, not byte addressed
         "memories": lambda addr: addr >> 4,
         # TODO: use actual func once model+indirect writes are fixed
-        "regs": lambda addr: addr
+        "regs": lambda addr: addr,
         # # Regs are give in 32-bit PCIe address space and need to be
         # # converted to 42-bit chip address space
         # "regs": lambda addr: ((addr&0x0FF80000)<<14)|(addr&0x0007FFFF)

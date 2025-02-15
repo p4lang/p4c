@@ -18,7 +18,7 @@
 #include <gtest/gtest.h>
 
 #include "backends/tofino/bf-asm/bfas.h"
-#include "backends/tofino/bf-asm/jbay/parser-tofino-jbay.h"
+#include "backends/tofino/bf-asm/parser-tofino-jbay.h"
 
 namespace {
 
