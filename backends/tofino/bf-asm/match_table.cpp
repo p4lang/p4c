@@ -286,8 +286,8 @@ void MatchTable::gen_idletime_tbl_cfg(json::map &stage_tbl) const {
     if (idletime) idletime->gen_stage_tbl_cfg(stage_tbl);
 }
 
+#include "jbay/match_table.cpp"    // NOLINT(build/include)
 #include "tofino/match_table.cpp"  // NOLINT(build/include)
-#include "jbay/match_table.cpp"  // NOLINT(build/include)
 
 template <class TARGET>
 void MatchTable::write_common_regs(typename TARGET::mau_regs &regs, int type, Table *result) {

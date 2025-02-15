@@ -599,8 +599,8 @@ void Deparser::report_resources_deparser_json(json::vector &fde_entries_i,
     *deparser_json_dump << &resources_deparser;
 }
 
+#include "jbay/deparser.cpp"    // NOLINT(build/include)
 #include "tofino/deparser.cpp"  // NOLINT(build/include)
-#include "jbay/deparser.cpp"  // NOLINT(build/include)
 
 std::vector<Deparser::ChecksumVal> Deparser::merge_csum_entries(
     const std::vector<Deparser::ChecksumVal> &entries, int id) {

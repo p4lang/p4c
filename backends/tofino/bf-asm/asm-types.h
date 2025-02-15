@@ -120,7 +120,7 @@ struct value_t {
         struct {
             int lo;
             int hi;
-        };
+        } range;
         char *s;
         match_t m;
         VECTOR(match_t) bigm;
@@ -279,9 +279,9 @@ std::unique_ptr<json::map> toJson(VECTOR(pair_t) &);
 #define PCHECKTYPE2M(P, V, T1, T2, M)                   \
     (((P) && ((V).type == (T1) || (V).type == (T2))) || \
      (error((V).lineno, "Syntax error, expecting %s", M), 0))
-#define VALIDATE_RANGE(V)                      \
-    ((V).type != tRANGE || (V).lo <= (V).hi || \
-     (error((V).lineno, "Invalid range %d..%d", (V).lo, (V).hi), 0))
+#define VALIDATE_RANGE(V)                                  \
+    ((V).type != tRANGE || (V).range.lo <= (V).range.hi || \
+     (error((V).lineno, "Invalid range %d..%d", (V).range.lo, (V).range.hi), 0))
 
 inline value_t *get(VECTOR(pair_t) & map, const char *key) {
     for (auto &kv : map)

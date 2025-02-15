@@ -222,7 +222,7 @@ const char *value_desc(const value_t *p) {
         case tBIGINT:
             return "<bigint>";
         case tRANGE:
-            snprintf(buffer, sizeof(buffer), "%d..%d", p->lo, p->hi);
+            snprintf(buffer, sizeof(buffer), "%d..%d", p->range.lo, p->range.hi);
             return buffer;
         case tMATCH:
             return "<pattern>";
@@ -292,7 +292,7 @@ bool operator==(const struct value_t &a, const struct value_t &b) {
                 if (b.bigi.data[i]) return false;
             return true;
         case tRANGE:
-            return a.lo == b.lo && a.hi == b.hi;
+            return a.range.lo == b.range.lo && a.range.hi == b.range.hi;
         case tSTR:
             return !strcmp(a.s, b.s);
         case tMATCH:

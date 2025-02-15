@@ -130,8 +130,8 @@ void InputXbar::parse_group(Table *t, Group gr, const value_t &value) {
             if (reg.key.type == tINT) {
                 lo = reg.key.i;
             } else {
-                lo = reg.key.lo;
-                hi = reg.key.hi;
+                lo = reg.key.range.lo;
+                hi = reg.key.range.hi;
             }
             if (lo < 0 || lo >= group_size(gr.type)) {
                 error(reg.key.lineno, "Invalid offset for %s group", group_type(gr.type));
@@ -211,7 +211,7 @@ void InputXbar::parse_hash_table(Table *t, HashTable ht, const value_t &value) {
                        c.key.i, c.key.i);
         } else if (c.key.type == tRANGE) {
             setup_hash(hash_tables[ht], ht, t->gress, t->stage->stageno, c.value, c.key.lineno,
-                       c.key.lo, c.key.hi);
+                       c.key.range.lo, c.key.range.hi);
         } else if (CHECKTYPEM(c.key, tCMD, "hash column decriptor")) {
             if (c.key.vec.size != 2 || c.key[0] != "valid" || c.key[1].type != tINT ||
                 options.target != TOFINO) {

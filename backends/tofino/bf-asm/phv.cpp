@@ -71,7 +71,7 @@ int Phv::addreg(gress_t gress, const char *name, const value_t &what, int stage,
                 if (key.type == tINT)
                     rv |= addreg(gress, name, kv.value, key.i);
                 else
-                    rv |= addreg(gress, name, kv.value, key.lo, key.hi);
+                    rv |= addreg(gress, name, kv.value, key.range.lo, key.range.hi);
             }
         }
         int size = -1;
@@ -126,7 +126,7 @@ int Phv::addreg(gress_t gress, const char *name, const value_t &what, int stage,
         } else if (what[1].type == tINT) {
             reg[stage].slice = Slice(*sl, what[1].i, what[1].i);
         } else {
-            reg[stage].slice = Slice(*sl, what[1].lo, what[1].hi);
+            reg[stage].slice = Slice(*sl, what[1].range.lo, what[1].range.hi);
         }
         reg[stage].max_stage = max_stage;
         if (!reg[stage].slice.valid) {
@@ -186,11 +186,11 @@ Phv::Ref::Ref(gress_t g, int stage, const value_t &n)
                 if (n[1].type == tINT) {
                     lo = hi = n[1].i;
                 } else {
-                    lo = n[1].lo;
-                    hi = n[1].hi;
+                    lo = n[1].range.lo;
+                    hi = n[1].range.hi;
                     if (lo > hi) {
-                        lo = n[1].hi;
-                        hi = n[1].lo;
+                        lo = n[1].range.hi;
+                        hi = n[1].range.lo;
                     }
                 }
             }
@@ -492,5 +492,5 @@ void Phv::output(json::map &ctxt_json) {
     //     phv_alloc.push_back(std::move(phv_alloc_stage.clone())); }
 }
 
+#include "jbay/phv.cpp"    // NOLINT(build/include)
 #include "tofino/phv.cpp"  // NOLINT(build/include)
-#include "jbay/phv.cpp"  // NOLINT(build/include)

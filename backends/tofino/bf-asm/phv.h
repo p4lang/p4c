@@ -321,7 +321,7 @@ class Target::Phv {
 
 inline unsigned Phv::mau_groupsize() { return phv.target->mau_groupsize(); }
 
-#include "tofino/phv.h"
 #include "jbay/phv.h"
+#include "tofino/phv.h"
 
 #endif /* BACKENDS_TOFINO_BF_ASM_PHV_H_ */

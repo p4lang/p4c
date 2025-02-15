@@ -615,7 +615,7 @@ HashExpr *HashExpr::create(gress_t gress, int stage, const value_t &what) {
             return rv;
         } else if (what[0] == "slice") {
             if (what.vec.size < 3 || what[2].type == tRANGE
-                    ? what.vec.size > 3 || what[2].hi < what[2].lo
+                    ? what.vec.size > 3 || what[2].range.hi < what[2].range.lo
                     : what[2].type != tINT || what.vec.size > 4 ||
                           (what.vec.size == 4 && what[3].type != tINT)) {
                 error(what.lineno, "Invalid slice operation");
@@ -624,8 +624,8 @@ HashExpr *HashExpr::create(gress_t gress, int stage, const value_t &what) {
             Slice *rv = new Slice(what.lineno);
             rv->what = create(gress, stage, what[1]);
             if (what[2].type == tRANGE) {
-                rv->start = what[2].lo;
-                rv->_width = what[2].hi - what[2].lo + 1;
+                rv->start = what[2].range.lo;
+                rv->_width = what[2].range.hi - what[2].range.lo + 1;
             } else {
                 rv->start = what[2].i;
                 if (what.vec.size > 3) rv->_width = what[3].i;

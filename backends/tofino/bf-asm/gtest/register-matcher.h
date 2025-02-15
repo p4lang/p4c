@@ -24,6 +24,7 @@
 #include <iosfwd>
 #include <sstream>
 
+#include "backends/tofino/bf-asm/register-matcher.h"
 #include "backends/tofino/bf-asm/ubits.h"
 #include "lib/bitvec.h"
 

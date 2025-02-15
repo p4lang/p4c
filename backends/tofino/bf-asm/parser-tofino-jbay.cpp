@@ -37,10 +37,10 @@ void AsmParser::init_port_use(bitvec &port_use, const value_t &arg) {
             init_port_use(port_use, arg[i]);
         }
     } else if (arg.type == tRANGE) {
-        if (arg.hi > arg.lo)
-            error(arg.lineno, "port range hi index %d cannot be smaller than lo index %d", arg.hi,
-                  arg.lo);
-        port_use.setrange(arg.lo, arg.hi - arg.lo + 1);
+        if (arg.range.hi > arg.range.lo)
+            error(arg.lineno, "port range hi index %d cannot be smaller than lo index %d",
+                  arg.range.hi, arg.range.lo);
+        port_use.setrange(arg.range.lo, arg.range.hi - arg.range.lo + 1);
     } else if (arg.type == tINT) {
         port_use.setbit(arg.i);
     }
@@ -703,8 +703,8 @@ Parser::Checksum::Checksum(gress_t gress, pair_t data) : lineno(data.key.lineno)
                     auto range = kv.value[i];
                     unsigned lo = 0, hi = 0;
                     if (range.type == tRANGE) {
-                        lo = range.lo;
-                        hi = range.hi;
+                        lo = range.range.lo;
+                        hi = range.range.hi;
                     } else if (range.type == tINT) {
                         lo = hi = range.i;
                     } else {
@@ -1110,12 +1110,12 @@ int Parser::State::MatchKey::setup_match_el(int at, value_t &spec) {
         case tINT:
             return add_byte(at, spec.i);
         case tRANGE:
-            if (spec.lo >= spec.hi) {
+            if (spec.range.lo >= spec.range.hi) {
                 error(spec.lineno, "Invalid match range");
                 return -1;
             }
-            if (at >= 0) at += spec.hi - spec.lo;
-            for (int i = spec.hi; i >= spec.lo; i--) {
+            if (at >= 0) at += spec.range.hi - spec.range.lo;
+            for (int i = spec.range.hi; i >= spec.range.lo; i--) {
                 if (add_byte(at, i) < 0) return -1;
                 if (at >= 0) at--;
             }
@@ -1367,7 +1367,7 @@ Parser::State::Match::Match(int l, gress_t gress, State *s, match_t m, VECTOR(pa
         } else if (kv.key.type == tINT) {
             save.push_back(new Save(gress, this, kv.key.i, kv.key.i, kv.value));
         } else if (kv.key.type == tRANGE) {
-            save.push_back(new Save(gress, this, kv.key.lo, kv.key.hi, kv.value));
+            save.push_back(new Save(gress, this, kv.key.range.lo, kv.key.range.hi, kv.value));
         } else if (kv.value.type == tINT) {
             set.push_back(new Set(gress, this, kv.key, kv.value.i));
         } else if (kv.value.type == tCMD && kv.value[0] == "rotate") {
@@ -1482,8 +1482,8 @@ Parser::State::Match::Clot::Clot(gress_t gress, const value_t &tag, const value_
         start = data.i;
         length = 1;
     } else if (data.type == tRANGE) {
-        start = data.lo;
-        length = data.hi - data.lo + 1;
+        start = data.range.lo;
+        length = data.range.hi - data.range.lo + 1;
     } else {
         for (auto &kv : data.map) {
             if (kv.key == "start") {
@@ -1551,8 +1551,8 @@ Parser::State::Match::FieldMapping::FieldMapping(Phv::Ref &ref, const value_t &a
     if (CHECKTYPE(a, tCMD)) {
         where = ref;
         container_id = a.vec[0].s;
-        lo = a.vec[1].lo;
-        hi = a.vec[1].hi;
+        lo = a.vec[1].range.lo;
+        hi = a.vec[1].range.hi;
     } else {
         error(a.lineno, "Syntax error");
     }

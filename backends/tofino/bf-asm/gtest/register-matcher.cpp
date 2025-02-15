@@ -15,7 +15,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "backends/tofino/bf-asm/register-matcher.h"
+#include "backends/tofino/bf-asm/gtest/register-matcher.h"
 
 #include <cctype>
 #include <iostream>

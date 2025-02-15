@@ -22,8 +22,8 @@
 #include "misc.h"
 
 // target specific template specializations
-#include "tofino/meter.h"
 #include "jbay/meter.h"
+#include "tofino/meter.h"
 
 Table::Layout::bus_type_t MeterTable::default_bus_type() const {
     // FIXME -- this is a bit of a hack -- if color_mapram_addr has been set, we want the
@@ -75,10 +75,10 @@ void MeterTable::setup(VECTOR(pair_t) & data) {
                 if (CHECKTYPE(kv.value.vec[1], tINT)) pre_color_hash_dist_unit = kv.value.vec[1].i;
                 if (CHECKTYPE(kv.value.vec[2], tRANGE)) {
                     auto range = kv.value.vec[2];
-                    int diff = range.hi - range.lo + 1;
-                    if (diff != 2 || range.lo % 2 != 0)
+                    int diff = range.range.hi - range.range.lo + 1;
+                    if (diff != 2 || range.range.lo % 2 != 0)
                         error(kv.value.lineno, "Invalid hash distribution range for precolor");
-                    pre_color_bit_lo = range.lo;
+                    pre_color_bit_lo = range.range.lo;
                 }
             }
         } else if (kv.key == "type") {
