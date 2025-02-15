@@ -4,8 +4,8 @@
 #include <stdlib.h>
 
 #include <stdexcept>
-#include <utility>
 #include <tuple>
+#include <utility>
 
 namespace BFN {
 

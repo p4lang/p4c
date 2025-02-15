@@ -59,8 +59,8 @@ class HashMatchSource : public MatchSource {
                 error(value.lineno, "Hash Match source must come from a hash group");
             if (value.vec.size != 2) error(value.lineno, "Hash Match source requires a range");
             if (CHECKTYPE(value.vec[1], tRANGE)) {
-                lo = value.vec[1].lo;
-                hi = value.vec[1].hi;
+                lo = value.vec[1].range.lo;
+                hi = value.vec[1].range.hi;
             }
         }
     }

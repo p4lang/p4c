@@ -46,8 +46,8 @@ static value_t value(VECTOR(uintptr_t) &v, int lineno_adj) {
     return rv; }
 static value_t value(int lo, int hi, int lineno_adj) {
     value_t rv{tRANGE, lineno - lineno_adj};
-    rv.lo = lo;
-    rv.hi = hi;
+    rv.range.lo = lo;
+    rv.range.hi = hi;
     return rv; }
 static value_t value(char *v, int lineno_adj) {
     value_t rv{tSTR, lineno - lineno_adj};

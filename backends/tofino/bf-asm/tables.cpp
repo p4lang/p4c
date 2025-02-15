@@ -236,9 +236,9 @@ static int add_rows(std::vector<Table::Layout> &layout, const value_t &rows) {
     if (rows.type == tINT) {
         add_row(rows.lineno, layout, rows.i);
     } else {
-        int step = rows.lo > rows.hi ? -1 : 1;
-        for (int i = rows.lo; i != rows.hi; i += step) add_row(rows.lineno, layout, i);
-        add_row(rows.lineno, layout, rows.hi);
+        int step = rows.range.lo > rows.range.hi ? -1 : 1;
+        for (int i = rows.range.lo; i != rows.range.hi; i += step) add_row(rows.lineno, layout, i);
+        add_row(rows.lineno, layout, rows.range.hi);
     }
     return 0;
 }
@@ -289,9 +289,10 @@ static int add_cols(int stage, Table::Layout &row, const value_t &cols) {
     }
     if (!CHECKTYPE2(cols, tINT, tRANGE)) return 1;
     if (cols.type == tINT) return add_col(cols.lineno, stage, row, cols.i);
-    int step = cols.lo > cols.hi ? -1 : 1;
-    for (int i = cols.lo; i != cols.hi; i += step) rv |= add_col(cols.lineno, stage, row, i);
-    rv |= add_col(cols.lineno, stage, row, cols.hi);
+    int step = cols.range.lo > cols.range.hi ? -1 : 1;
+    for (int i = cols.range.lo; i != cols.range.hi; i += step)
+        rv |= add_col(cols.lineno, stage, row, i);
+    rv |= add_col(cols.lineno, stage, row, cols.range.hi);
     return rv;
 }
 
@@ -311,9 +312,10 @@ static int add_stages(Table::Layout &row, const value_t &stages) {
     }
     if (!CHECKTYPE2(stages, tINT, tRANGE)) return 1;
     if (stages.type == tINT) return add_col(stages.lineno, stages.i, row, 0);
-    int step = stages.lo > stages.hi ? -1 : 1;
-    for (int i = stages.lo; i != stages.hi; i += step) rv |= add_col(stages.lineno, i, row, 0);
-    rv |= add_col(stages.lineno, stages.hi, row, 0);
+    int step = stages.range.lo > stages.range.hi ? -1 : 1;
+    for (int i = stages.range.lo; i != stages.range.hi; i += step)
+        rv |= add_col(stages.lineno, i, row, 0);
+    rv |= add_col(stages.lineno, stages.range.hi, row, 0);
     return rv;
 }
 
@@ -1264,17 +1266,18 @@ Table::Format::Format(Table *t, const VECTOR(pair_t) & data, bool may_overlap) :
             f->size = kv.value.i;
             append_bits(f->bits, nextbit, nextbit + f->size - 1);
         } else if (kv.value.type == tRANGE) {
-            if (kv.value.lo > kv.value.hi)
-                error(kv.value.lineno, "invalid range %d..%d", kv.value.lo, kv.value.hi);
-            append_bits(f->bits, kv.value.lo, kv.value.hi);
-            f->size = kv.value.hi - kv.value.lo + 1;
+            if (kv.value.range.lo > kv.value.range.hi)
+                error(kv.value.lineno, "invalid range %d..%d", kv.value.range.lo,
+                      kv.value.range.hi);
+            append_bits(f->bits, kv.value.range.lo, kv.value.range.hi);
+            f->size = kv.value.range.hi - kv.value.range.lo + 1;
         } else if (kv.value.type == tVEC) {
             f->size = 0;
             for (auto &c : kv.value.vec)
                 if (CHECKTYPE(c, tRANGE) && VALIDATE_RANGE(c)) {
-                    append_bits(f->bits, c.lo, c.hi);
-                    f->size += c.hi - c.lo + 1;
-                    if ((size_t)c.hi + 1 > size) size = c.hi + 1;
+                    append_bits(f->bits, c.range.lo, c.range.hi);
+                    f->size += c.range.hi - c.range.lo + 1;
+                    if ((size_t)c.range.hi + 1 > size) size = c.range.hi + 1;
                 }
         }
         nextbit = f->bits.back().hi + 1;
@@ -1495,8 +1498,8 @@ Table::Actions::Action::alias_t::alias_t(value_t &data) {
                 if (data.vec[1].type == tINT) {
                     lo = hi = data.vec[1].i;
                 } else {
-                    lo = data.vec[1].lo;
-                    hi = data.vec[1].hi;
+                    lo = data.vec[1].range.lo;
+                    hi = data.vec[1].range.hi;
                 }
             }
         } else {
@@ -1535,8 +1538,8 @@ void Table::Actions::Action::setup_mod_cond_values(value_t &map) {
                     if (v[1].type == tINT) {
                         lo = hi = v[1].i;
                     } else if (v[1].type == tRANGE) {
-                        lo = v[1].lo;
-                        hi = v[1].hi;
+                        lo = v[1].range.lo;
+                        hi = v[1].range.hi;
                     }
                     mod_cond_values.at(kv.key.s).at(array_index).setrange(lo, hi - lo + 1);
                 }

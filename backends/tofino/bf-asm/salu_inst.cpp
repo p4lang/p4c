@@ -136,9 +136,9 @@ struct operand : public IHasDbPrint {
             else
                 BUG();
             if (v.type == tCMD && PCHECKTYPE(v.vec.size == 2, v[1], tRANGE)) {
-                if ((v[1].lo & 7) || ((v[1].hi + 1) & 7))
+                if ((v[1].range.lo & 7) || ((v[1].range.hi + 1) & 7))
                     error(lineno, "only byte slices allowed on %s", v[0].s);
-                mask = (1U << (v[1].hi + 1) / 8U) - (1U << (v[1].lo / 8U));
+                mask = (1U << (v[1].range.hi + 1) / 8U) - (1U << (v[1].range.lo / 8U));
             }
         }
         void dbprint(std::ostream &out) const override { out << (pi ? "phv_hi" : "phv_lo"); }
@@ -278,7 +278,7 @@ operand::operand(Table *tbl, const Table::Actions::Action *act, const value_t &v
     if (v->type == tCMD) {
         BUG_CHECK(v->vec.size > 0 && v->vec[0].type == tSTR);
         if (auto f = tbl->format->field(v->vec[0].s)) {
-            if (v->vec.size > 1 && CHECKTYPE(v->vec[1], tRANGE) && v->vec[1].lo != 0)
+            if (v->vec.size > 1 && CHECKTYPE(v->vec[1], tRANGE) && v->vec[1].range.lo != 0)
                 error(v->vec[1].lineno, "Can't slice memory field %s in stateful action",
                       v->vec[0].s);
             op = new Memory(v->lineno, tbl, f);
@@ -929,9 +929,8 @@ struct OutOP : public SaluInstruction {
         return src ? src->phvRead(fn) : false;
     }
     void dbprint(std::ostream &out) const override {
-        out << "INSTR: output " << "pred=0x" << hex(predication_encode)
-            << " word" << (slot - ALUOUT0)
-            << " mux=" << output_mux;
+        out << "INSTR: output " << "pred=0x" << hex(predication_encode) << " word"
+            << (slot - ALUOUT0) << " mux=" << output_mux;
     }
     template <class REGS>
     void write_regs(REGS &regs, Table *tbl, Table::Actions::Action *act);

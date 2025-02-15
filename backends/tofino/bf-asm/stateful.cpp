@@ -121,8 +121,8 @@ void StatefulTable::setup(VECTOR(pair_t) & data) {
                 if (kv.value.type == tINT) {
                     logvpn_min = logvpn_max = kv.value.i;
                 } else {
-                    logvpn_min = kv.value.lo;
-                    logvpn_max = kv.value.hi;
+                    logvpn_min = kv.value.range.lo;
+                    logvpn_max = kv.value.range.hi;
                 }
             }
         } else if (kv.key == "pred_shift") {

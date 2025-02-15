@@ -340,8 +340,8 @@ struct Operand : public IHasDbPrint {
             auto *rv = new HashDist(v[0].lineno, tbl);
             for (int i = 1; i < v.size; ++i) {
                 if (v[i].type == tRANGE && rv->lo == -1) {
-                    rv->lo = v[i].lo;
-                    rv->hi = v[i].hi;
+                    rv->lo = v[i].range.lo;
+                    rv->hi = v[i].range.hi;
                 } else if (CHECKTYPE(v[i], tINT)) {
                     rv->units.push_back(v[i].i);
                 } else {
@@ -455,8 +455,8 @@ struct Operand : public IHasDbPrint {
             if (v.size > 1 && CHECKTYPE(v[1], tINT)) rng.unit = v[1].i;
             if (rng.unit < 0 || rng.unit > 1) error(v[0].lineno, "invalid random number generator");
             if (v.size > 2 && CHECKTYPE(v[2], tRANGE)) {
-                lo = v[2].lo;
-                hi = v[2].hi;
+                lo = v[2].range.lo;
+                hi = v[2].range.hi;
                 if (lo < 0 || hi > 31 || hi < lo)
                     error(v[2].lineno, "invalid random number generator slice");
             }
@@ -598,8 +598,8 @@ static void parse_slice(const VECTOR(value_t) & vec, int idx, int &lo, int &hi) 
         if (vec[idx].type == tINT) {
             lo = hi = vec[idx].i;
         } else {
-            lo = vec[idx].lo;
-            hi = vec[idx].hi;
+            lo = vec[idx].range.lo;
+            hi = vec[idx].range.hi;
         }
     }
 }
@@ -630,8 +630,8 @@ Operand::Operand(Table *tbl, const Table::Actions::Action *act, const value_t &v
         if (name == "hash_dist" && lo == hi) {
             auto hd = new HashDist(v.lineno, tbl, lo);
             if (v.type == tCMD && v[1].type == tRANGE) {
-                hd->lo = v[1].lo;
-                hd->hi = v[1].hi;
+                hd->lo = v[1].range.lo;
+                hd->hi = v[1].range.hi;
             }
             op = hd;
             return;

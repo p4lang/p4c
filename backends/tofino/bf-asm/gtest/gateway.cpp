@@ -15,9 +15,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "backends/tofino/bf-asm/stage.h"
-#include "backends/tofino/bf-asm/bfas.h"
 #include <gtest/gtest.h>
+
+#include "backends/tofino/bf-asm/bfas.h"
+#include "backends/tofino/bf-asm/stage.h"
 
 namespace {
 

@@ -588,9 +588,9 @@ bool SRamMatchTable::parse_way(const value_t &v) {
                 if (kv.value.type == tINT) {
                     way.index = kv.value.i;
                 } else {
-                    way.index = kv.value.lo;
-                    way.index_hi = kv.value.hi;
-                    index_size = kv.value.hi - kv.value.lo + 1;
+                    way.index = kv.value.range.lo;
+                    way.index_hi = kv.value.range.hi;
+                    index_size = kv.value.range.hi - kv.value.range.lo + 1;
                 }
                 if (way.index > Target::IXBAR_HASH_INDEX_MAX() ||
                     way.index % Target::IXBAR_HASH_INDEX_STRIDE() != 0)
@@ -602,13 +602,14 @@ bool SRamMatchTable::parse_way(const value_t &v) {
                         if (kv.value[1].type == tINT) {
                             way.select <<= kv.value[1].i;
                         } else {
-                            way.select <<= kv.value[1].lo;
-                            if (kv.value[1].hi < way.select.max().index())
+                            way.select <<= kv.value[1].range.lo;
+                            if (kv.value[1].range.hi < way.select.max().index())
                                 error(kv.value.lineno, "invalid select mask for range");
                         }
                     }
                 } else if (kv.value.type == tRANGE) {
-                    way.select.setrange(kv.value.lo, kv.value.hi - kv.value.lo + 1);
+                    way.select.setrange(kv.value.range.lo,
+                                        kv.value.range.hi - kv.value.range.lo + 1);
                 } else {
                     error(kv.value.lineno, "invalid select %s", value_desc(&kv.value));
                 }

@@ -117,7 +117,7 @@ ActionBus::ActionBus(Table *tbl, VECTOR(pair_t) & data) {
     lineno = data.size ? data[0].key.lineno : -1;
     for (auto &kv : data) {
         if (!CHECKTYPE2(kv.key, tINT, tRANGE)) continue;
-        unsigned idx = kv.key.type == tRANGE ? kv.key.lo : kv.key.i;
+        unsigned idx = kv.key.type == tRANGE ? kv.key.range.lo : kv.key.i;
         if (!CHECKTYPE2M(kv.value, tSTR, tCMD, "field name or slice")) continue;
         const char *name = kv.value.s;
         value_t *name_ref = &kv.value;
@@ -132,14 +132,14 @@ ActionBus::ActionBus(Table *tbl, VECTOR(pair_t) & data) {
                 if (!PCHECKTYPE2M(kv.value.vec.size == 2, kv.value[1], tRANGE, tSTR,
                                   "field name or slice"))
                     continue;
-                // if ((kv.value[1].lo & 7) != 0 || (kv.value[1].hi & 7) != 7) {
+                // if ((kv.value[1].range.lo & 7) != 0 || (kv.value[1].range.hi & 7) != 7) {
                 //     error(kv.value.lineno, "Slice must be byte slice");
                 //     continue; }
                 name = kv.value[0].s;
                 name_ref = &kv.value[0];
                 if (kv.value[1].type == tRANGE) {
-                    off = kv.value[1].lo;
-                    sz = kv.value[1].hi - kv.value[1].lo + 1;
+                    off = kv.value[1].range.lo;
+                    sz = kv.value[1].range.hi - kv.value[1].range.lo + 1;
                 } else if (kv.value[1] != "color") {
                     error(kv.value[1].lineno, "unexpected %s", kv.value[1].s);
                 }
@@ -189,10 +189,10 @@ ActionBus::ActionBus(Table *tbl, VECTOR(pair_t) & data) {
                                        ActionBusSource(src.hd, hd_hi), 32, 0);
                         }
                     } else if (kv.value[i].type == tRANGE) {
-                        if ((kv.value[i].lo & 7) != 0 || (kv.value[i].hi & 7) != 7)
+                        if ((kv.value[i].range.lo & 7) != 0 || (kv.value[i].range.hi & 7) != 7)
                             error(kv.value.lineno, "Slice must be byte slice");
-                        off += kv.value[i].lo;
-                        sz = kv.value[i].hi - kv.value[i].lo + 1;
+                        off += kv.value[i].range.lo;
+                        sz = kv.value[i].range.hi - kv.value[i].range.lo + 1;
                     } else {
                         error(kv.value[i].lineno, "Unexpected hash_dist %s",
                               value_desc(kv.value[i]));
@@ -202,8 +202,8 @@ ActionBus::ActionBus(Table *tbl, VECTOR(pair_t) & data) {
             } else if (kv.value.type == tCMD && kv.value == "rng") {
                 src = ActionBusSource(RandomNumberGen(kv.value[1].i));
                 if (kv.value.vec.size > 2 && CHECKTYPE(kv.value[2], tRANGE)) {
-                    off = kv.value[2].lo;
-                    sz = kv.value[2].hi + 1 - off;
+                    off = kv.value[2].range.lo;
+                    sz = kv.value[2].range.hi + 1 - off;
                 }
             } else if (name_ref) {
                 src = ActionBusSource(new Table::Ref(*name_ref));
@@ -226,7 +226,7 @@ ActionBus::ActionBus(Table *tbl, VECTOR(pair_t) & data) {
                 error(kv.value.lineno, "Invalid slice of %d bit field %s", f->size, name);
         }
         if (kv.key.type == tRANGE) {
-            unsigned size = (kv.key.hi - idx + 1) * 8;
+            unsigned size = (kv.key.range.hi - idx + 1) * 8;
             // Make slot size (sz) same as no. of bytes allocated on action bus.
             if (size > sz) sz = size;
         } else if (!sz) {

@@ -23,8 +23,8 @@
 #include "misc.h"
 
 // target specific template specializations
-#include "tofino/counter.h"
 #include "jbay/counter.h"
+#include "tofino/counter.h"
 
 void CounterTable::setup(VECTOR(pair_t) & data) {
     common_init_setup(data, false, P4Table::Statistics);
