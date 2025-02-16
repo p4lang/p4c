@@ -231,7 +231,6 @@ fi
 function build_tofino() {
     P4C_TOFINO_PACKAGES="rapidjson-dev"
     sudo apt-get install -y --no-install-recommends ${P4C_TOFINO_PACKAGES}
-    sudo pip3 install jsl==0.2.4 pyinstaller==6.11.0
 }
 
 if [[ "${ENABLE_TOFINO}" == "ON" ]]; then
