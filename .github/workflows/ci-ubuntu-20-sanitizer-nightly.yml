@@ -40,5 +40,5 @@ jobs:
 
       - name: Run tests (Ubuntu 20.04)
         # Need to use sudo for the eBPF kernel tests.
-        run: sudo -E ctest --output-on-failure --schedule-random
+        run: sudo -E env PATH="$PATH" poetry run ctest --output-on-failure --schedule-random
         working-directory: ./build
