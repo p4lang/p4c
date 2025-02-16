@@ -23,7 +23,6 @@ limitations under the License.
 #include "absl/container/flat_hash_map.h"
 #include "absl/time/clock.h"
 #include "absl/time/time.h"
-#include "ir/ir-generated.h"
 #include "lib/hash.h"
 
 #if HAVE_CXXABI_H
@@ -34,15 +33,12 @@ limitations under the License.
 #include <gc/gc.h>
 #endif
 
-#include "dbprint.h"
-#include "ir/id.h"
-#include "ir/ir.h"
+#include "ir/dbprint.h"
 #include "ir/vector.h"
 #include "lib/algorithm.h"
 #include "lib/error_catalog.h"
 #include "lib/indent.h"
 #include "lib/log.h"
-#include "lib/map.h"
 
 namespace P4 {
 
