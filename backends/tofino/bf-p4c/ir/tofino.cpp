@@ -17,6 +17,7 @@
  */
 
 #include "ir/ir.h"
+#include "ir/semantic_less.h"
 
 /* static */ size_t IR::BFN::ContainerRef::nextId = 0;
 
@@ -85,4 +86,19 @@ bool IR::BFN::Pipe::has_pragma(const char *name) const {
         if (annotation->name.name == name) return true;
     }
     return false;
+}
+
+bool IR::BFN::Pipe::thread_t::isSemanticallyLess(const IR::BFN::Pipe::thread_t &a) const {
+    // FIXME:: Implement semantically less here?
+    return IR::isSemanticallyLess(parsers, a.parsers) ||
+           (!IR::isSemanticallyLess(parsers, a.parsers) && IR::isSemanticallyLess(mau, a.mau)) ||
+           (!IR::isSemanticallyLess(mau, a.mau) && IR::isSemanticallyLess(deparser, a.deparser)) ||
+           (!IR::isSemanticallyLess(deparser, a.deparser) &&
+            IR::isSemanticallyLess(hw_constrained_fields, a.hw_constrained_fields));
+}
+
+bool IR::BFN::Pipe::ghost_thread_t::isSemanticallyLess(
+    const IR::BFN::Pipe::ghost_thread_t &a) const {
+    // FIXME:: Implement semantically less here?
+    return std::tie(ghost_mau, ghost_parser) < std::tie(a.ghost_mau, a.ghost_parser);
 }

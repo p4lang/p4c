@@ -285,6 +285,7 @@ class Table : BFN::Unit, IAnnotated  {
             return out;
         }
         Layout &operator+=(const Layout &a);
+        bool operator<(const Layout &a) const;
 #end
     }
     Layout layout;
@@ -293,6 +294,9 @@ class Table : BFN::Unit, IAnnotated  {
         int             match_groups = 0;
         int             entries = 0;
         int             width = 0;
+        bool isSemanticallyLess(Way const & a) const {
+            return std::tie(match_groups, entries, width) < std::tie(a.match_groups, a.entries, a.width);
+        }
     }
     safe_vector<Way>    ways;
     const TableResourceAlloc            *resources = nullptr;
@@ -387,6 +391,7 @@ class Table : BFN::Unit, IAnnotated  {
     bool operator==(const IR::BFN::Unit &a) const override { return a == *this; }
     bool operator==(const IR::Node &a) const override { return a == *this; }
 #end
+    bool isSemanticallyLess(IR::Node const &a_) const override;
     cstring get_table_type_string() const;
     bool uses_gateway() const { return !gateway_rows.empty(); }
     bool uses_gateway_payload() const {
@@ -659,6 +664,9 @@ class StatefulAlu : MeterBus2Port {
         friend std::ostream &operator<<(std::ostream &out, const MathUnit &mu) {
             out << mu.valid;
             return out;
+        }
+        bool operator<(const MathUnit &mu) const {
+            return std::tie(valid, exp_invert, exp_shift, scale, table) < std::tie(mu.valid, mu.exp_invert, mu.exp_shift, mu.scale, mu.table);
         }
 #end
     }
@@ -992,6 +1000,7 @@ class SaluAction : VLIWInstruction, IAnnotated {
         std::map<cstring, unsigned>     tag_used = {};  // bits that might be set for each tag
         unsigned                        cmp_used = 0;   // bits that might be set for instr
         bool operator<=(const ReturnEnumEncoding &a) const;  // partial ordering
+        bool operator<(const ReturnEnumEncoding &a) const;  // partial ordering
         const ReturnEnumEncoding *merge(const ReturnEnumEncoding *a) const;
     }
     const ReturnEnumEncoding *return_encoding = nullptr;
