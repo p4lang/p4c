@@ -171,7 +171,7 @@ const IR::Node *DoConstantFolding::postorder(IR::Declaration_Constant *d) {
                 }
             }
         }
-        if (init != d->initializer)
+        if (!init->equiv(*d->initializer))
             d = new IR::Declaration_Constant(d->srcInfo, d->name, d->annotations, d->type, init);
     }
     if (!typesKnown && (init->is<IR::StructExpression>() ||
