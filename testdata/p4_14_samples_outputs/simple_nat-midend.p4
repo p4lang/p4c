@@ -88,7 +88,7 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("ParserImpl.tmp_0") bit<64> tmp_0;
+    bit<64> tmp_1;
     @name(".parse_cpu_header") state parse_cpu_header {
         packet.extract<cpu_header_t>(hdr.cpu_header);
         meta._meta_if_index10 = hdr.cpu_header.if_index;
@@ -119,8 +119,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".start") state start {
         meta._meta_if_index10 = (bit<8>)standard_metadata.ingress_port;
-        tmp_0 = packet.lookahead<bit<64>>();
-        transition select(tmp_0) {
+        tmp_1 = packet.lookahead<bit<64>>();
+        transition select(tmp_1) {
             64w0: parse_cpu_header;
             default: parse_ethernet;
         }

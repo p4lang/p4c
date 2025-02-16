@@ -26,13 +26,13 @@ struct metadata {
 }
 
 parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
-    @name("prs.tmp_0") bit<8> tmp_0;
+    bit<8> tmp_1;
     state start {
         transition parse_headers;
     }
     state parse_headers {
-        tmp_0 = p.lookahead<bit<8>>();
-        transition select(tmp_0) {
+        tmp_1 = p.lookahead<bit<8>>();
+        transition select(tmp_1) {
             8w1: parse_one;
             8w2: parse_two;
             8w4: parse_four;

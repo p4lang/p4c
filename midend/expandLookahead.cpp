@@ -78,7 +78,7 @@ DoExpandLookahead::ExpansionInfo *DoExpandLookahead::convertLookahead(
               em->method);
     auto targ = expression->typeArguments->at(0);
     auto typearg = typeMap->getTypeType(targ, true);
-    if (!typearg->is<IR::Type_StructLike>() && !typearg->is<IR::Type_Tuple>()) return nullptr;
+    if (!typeMap->typeIsFixedWidth(typearg)) return nullptr;
 
     if (typearg->is<IR::Type_Header>() && !expandHeader) return nullptr;
 
