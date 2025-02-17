@@ -34,6 +34,7 @@ using namespace literals;
 /// functions.
 class ConstantFoldingPolicy {
  public:
+    virtual ~ConstantFoldingPolicy() = default;
     /// The default hook does not modify anything.
     virtual const IR::Node *hook(Visitor &, IR::PathExpression *) { return nullptr; }
 };

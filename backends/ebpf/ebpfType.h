@@ -62,8 +62,10 @@ class EBPFTypeFactory {
 
  public:
     static EBPFTypeFactory *instance;
-    static void createFactory(const P4::TypeMap *typeMap) {
+    static bool isTC;
+    static void createFactory(const P4::TypeMap *typeMap, bool TC) {
         EBPFTypeFactory::instance = new EBPFTypeFactory(typeMap);
+        EBPFTypeFactory::isTC = TC;
     }
     virtual EBPFType *create(const IR::Type *type);
 };
@@ -221,6 +223,20 @@ class EBPFMethodDeclaration : public EBPFObject {
     void emit(CodeBuilder *builder);
 
     DECLARE_TYPEINFO(EBPFMethodDeclaration, EBPFObject);
+};
+
+class EBPFScalarTypePNA : public EBPFScalarType {
+    bool isPrimitiveByteAligned = false;
+
+ public:
+    explicit EBPFScalarTypePNA(const IR::Type_Bits *bits) : EBPFScalarType(bits) {
+        isPrimitiveByteAligned = (width <= 8 || width <= 16 || (width > 24 && width <= 32) ||
+                                  (width > 56 && width <= 64));
+    }
+    unsigned alignment() const;
+    void declare(CodeBuilder *builder, cstring id, bool asPointer);
+    void declareInit(CodeBuilder *builder, cstring id, bool asPointer);
+    void emitInitializer(CodeBuilder *builder);
 };
 
 }  // namespace P4::EBPF

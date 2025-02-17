@@ -74,7 +74,7 @@ class ParameterSubstitution : public IHasDbPrint {
         return paramList->getEnumerator();
     }
 
-    void dbprint(std::ostream &out) const {
+    void dbprint(std::ostream &out) const override {
         bool brief = (DBPrint::dbgetflags(out) & DBPrint::Brief);
         if (paramList != nullptr) {
             if (!brief) out << "paramList:" << Log::endl;

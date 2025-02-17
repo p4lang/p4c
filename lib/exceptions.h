@@ -82,7 +82,7 @@ class P4CExceptionBase : public std::exception {
         message = ::P4::bug_helper(fmt, "", "", std::forward<Args>(args)...);
     }
 
-    const char *what() const noexcept { return message.c_str(); }
+    const char *what() const noexcept override { return message.c_str(); }
 };
 
 /// This class indicates a bug in the compiler

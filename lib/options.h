@@ -84,6 +84,7 @@ class Options {
 
     explicit Options(std::string_view message)
         : binaryName(nullptr), message(message), compileCommand("") {}
+    virtual ~Options() = default;
 
     /// Checks if parsed options make sense with respect to each-other.
     /// @returns true if the validation was successful and false otherwise.

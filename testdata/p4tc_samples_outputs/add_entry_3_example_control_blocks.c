@@ -31,8 +31,8 @@ struct __attribute__((__packed__)) MainControlImpl_ipv4_tbl_1_value {
         struct {
         } MainControlImpl_next_hop;
         struct __attribute__((__packed__)) {
-            u64 dmac;
-            u64 smac;
+            u8 dmac[6];
+            u8 smac[6];
         } MainControlImpl_send_nh;
         struct {
         } MainControlImpl_dflt_route_drop;
@@ -98,8 +98,8 @@ if (/* hdr->ipv4.isValid() */
 /* add_entry(""send_nh"", {hdr->ethernet.dstAddr, hdr->ethernet.srcAddr}, 2) */
                                     struct p4tc_table_entry_act_bpf update_act_bpf = {};
                                     struct MainControlImpl_ipv4_tbl_1_value *update_act_bpf_val = (struct MainControlImpl_ipv4_tbl_1_value*) &update_act_bpf;
-                                    update_act_bpf_val->u.MainControlImpl_send_nh.dmac = hdr->ethernet.dstAddr;
-                                    update_act_bpf_val->u.MainControlImpl_send_nh.smac = hdr->ethernet.srcAddr;
+                                                                        storePrimitive64((u8 *)&update_act_bpf_val->u.MainControlImpl_send_nh.dmac, 48, (getPrimitive64((u8 *)hdr->ethernet.dstAddr, 48)));
+                                                                        storePrimitive64((u8 *)&update_act_bpf_val->u.MainControlImpl_send_nh.smac, 48, (ntohll(getPrimitive64((u8 *)hdr->ethernet.srcAddr, 48) << 16)));
                                     update_act_bpf_val->action = MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_SEND_NH;
 
                                     /* construct key */
@@ -119,8 +119,8 @@ if (/* hdr->ipv4.isValid() */
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_SEND_NH: 
                                 {
-                                    hdr->ethernet.srcAddr = bpf_cpu_to_be64(value->u.MainControlImpl_send_nh.smac);
-                                                                        hdr->ethernet.dstAddr = ntohll(value->u.MainControlImpl_send_nh.dmac << 16);
+                                    storePrimitive64((u8 *)&hdr->ethernet.srcAddr, 48, (bpf_cpu_to_be64(getPrimitive64((u8 *)value->u.MainControlImpl_send_nh.smac, 48))));
+                                                                        storePrimitive64((u8 *)&hdr->ethernet.dstAddr, 48, (ntohll(getPrimitive64((u8 *)value->u.MainControlImpl_send_nh.dmac, 48) << 16)));
                                 }
                                 break;
                             case MAINCONTROLIMPL_IPV4_TBL_1_ACT_MAINCONTROLIMPL_DFLT_ROUTE_DROP: 
@@ -192,7 +192,7 @@ if (/* hdr->ipv4.isValid() */
                 return TC_ACT_SHOT;
             }
             
-            hdr->ethernet.dstAddr = htonll(hdr->ethernet.dstAddr << 16);
+            storePrimitive64((u8 *)&hdr->ethernet.dstAddr, 48, (htonll(getPrimitive64(hdr->ethernet.dstAddr, 48) << 16)));
             ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->ethernet.dstAddr))[1];

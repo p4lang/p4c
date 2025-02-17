@@ -110,6 +110,8 @@ class ExternConverter {
         return false;
     }
     ExternConverter() {}
+    virtual ~ExternConverter() = default;
+
     /// register a converter for a p4_14 extern_type
     /// @type: extern_type that the converter works on
     static void addConverter(cstring type, ExternConverter *);
@@ -771,7 +773,7 @@ class CheckIfMultiEntryPoint : public Inspector {
     explicit CheckIfMultiEntryPoint(ProgramStructure *structure) : structure(structure) {
         setName("CheckIfMultiEntryPoint");
     }
-    bool preorder(const IR::ParserState *state) {
+    bool preorder(const IR::ParserState *state) override {
         for (const auto *anno : state->getAnnotations()) {
             if (anno->name == "packet_entry") {
                 structure->parserEntryPoints.emplace(state->name, state);

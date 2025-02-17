@@ -222,6 +222,60 @@ void PNAArchTC::emitInstances(EBPF::CodeBuilder *builder) const {
     builder->newline();
 }
 
+void PNAArchTC::emitGlobalFunctions(EBPF::CodeBuilder *builder) const {
+    const char *code =
+        "static inline u32 getPrimitive32(u8 *a, int size) {\n"
+        "   if(size <= 16 || size > 24) {\n"
+        "       bpf_printk(\"Invalid size.\");\n"
+        "   };\n"
+        "   return  ((((u32)a[2]) <<16) | (((u32)a[1]) << 8) | a[0]);\n"
+        "}\n"
+        "static inline u64 getPrimitive64(u8 *a, int size) {\n"
+        "   if(size <= 32 || size > 56) {\n"
+        "       bpf_printk(\"Invalid size.\");\n"
+        "   };\n"
+        "   if(size <= 40) {\n"
+        "       return  ((((u64)a[4]) << 32) | (((u64)a[3]) << 24) | (((u64)a[2]) << 16) | "
+        "(((u64)a[1]) << 8) | a[0]);\n"
+        "   } else {\n"
+        "       if(size <= 48) {\n"
+        "           return  ((((u64)a[5]) << 40) | (((u64)a[4]) << 32) | (((u64)a[3]) << 24) | "
+        "(((u64)a[2]) << 16) | (((u64)a[1]) << "
+        "8) | a[0]);\n"
+        "       } else {\n"
+        "           return  ((((u64)a[6]) << 48) | (((u64)a[5]) << 40) | (((u64)a[4]) << 32) | "
+        "(((u64)a[3]) << 24) | (((u64)a[2]) << "
+        "16) | (((u64)a[1]) << 8) | a[0]);\n"
+        "       }\n"
+        "   }\n"
+        "}\n"
+        "static inline void storePrimitive32(u8 *a, int size, u32 value) {\n"
+        "   if(size <= 16 || size > 24) {\n"
+        "       bpf_printk(\"Invalid size.\");\n"
+        "   };\n"
+        "   a[0] = (u8)(value);\n"
+        "   a[1] = (u8)(value >> 8);\n"
+        "   a[2] = (u8)(value >> 16);\n"
+        "}\n"
+        "static inline void storePrimitive64(u8 *a, int size, u64 value) {\n"
+        "   if(size <= 32 || size > 56) {\n"
+        "       bpf_printk(\"Invalid size.\");\n"
+        "   };\n"
+        "   a[0] = (u8)(value);\n"
+        "   a[1] = (u8)(value >> 8);\n"
+        "   a[2] = (u8)(value >> 16);\n"
+        "   a[3] = (u8)(value >> 24);\n"
+        "   a[4] = (u8)(value >> 32);\n"
+        "   if (size > 40) {\n"
+        "       a[5] = (u8)(value >> 40);\n"
+        "   }\n"
+        "   if (size > 48) {\n"
+        "       a[6] = (u8)(value >> 48);\n"
+        "   }\n"
+        "}\n";
+    builder->appendLine(code);
+}
+
 void PNAArchTC::emitParser(EBPF::CodeBuilder *builder) const {
     /**
      * Structure of a C Parser program for PNA
@@ -258,6 +312,7 @@ void PNAArchTC::emitHeader(EBPF::CodeBuilder *builder) const {
     emitP4TCFilterFields(builder);
     //  BPF map definitions.
     emitInstances(builder);
+    emitGlobalFunctions(builder);
 }
 
 // =====================TCIngressPipelinePNA=============================
@@ -660,6 +715,8 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
             noEndiannessConversion = true;
         }
     }
+    auto tcTarget = dynamic_cast<const EBPF::P4TCTarget *>(builder->target);
+    bool isPrimitive = tcTarget->isPrimitiveByteAligned(widthToExtract);
 
     msgStr = absl::StrFormat("Parser: extracting field %v", fieldName);
     builder->target->emitTraceMessage(builder, msgStr.c_str());
@@ -694,19 +751,38 @@ void PnaStateTranslationVisitor::compileExtractField(const IR::Expression *expr,
             builder->appendFormat(".%v, %v + BYTES(%v), %d)", fieldName, program->packetStartVar,
                                   program->offsetVar, widthToExtract / 8);
         } else {
-            visit(expr);
-            builder->appendFormat(".%v = (", fieldName);
-            type->emit(builder);
-            builder->appendFormat(")((%s(%v, BYTES(%v))", helper, program->packetStartVar,
-                                  program->offsetVar);
-            if (shift != 0) builder->appendFormat(" >> %d", shift);
-            builder->append(")");
-            if (widthToExtract != loadSize) {
-                builder->append(" & EBPF_MASK(");
+            if (!isPrimitive) {
+                cstring storePrimitive =
+                    widthToExtract < 32 ? "storePrimitive32"_cs : "storePrimitive64"_cs;
+                builder->appendFormat("%v((u8 *)&", storePrimitive);
+                visit(expr);
+                builder->appendFormat(".%v, %d, (", fieldName, widthToExtract);
                 type->emit(builder);
-                builder->appendFormat(", %d)", widthToExtract);
+                builder->appendFormat(")((%s(%v, BYTES(%v))", helper, program->packetStartVar,
+                                      program->offsetVar);
+                if (shift != 0) builder->appendFormat(" >> %d", shift);
+                builder->append(")");
+                if (widthToExtract != loadSize) {
+                    builder->append(" & EBPF_MASK(");
+                    type->emit(builder);
+                    builder->appendFormat(", %d)", widthToExtract);
+                }
+                builder->append("))");
+            } else {
+                visit(expr);
+                builder->appendFormat(".%v = (", fieldName);
+                type->emit(builder);
+                builder->appendFormat(")((%s(%v, BYTES(%v))", helper, program->packetStartVar,
+                                      program->offsetVar);
+                if (shift != 0) builder->appendFormat(" >> %d", shift);
+                builder->append(")");
+                if (widthToExtract != loadSize) {
+                    builder->append(" & EBPF_MASK(");
+                    type->emit(builder);
+                    builder->appendFormat(", %d)", widthToExtract);
+                }
+                builder->append(")");
             }
-            builder->append(")");
         }
         builder->endOfStatement(true);
     } else {
@@ -833,6 +909,76 @@ void PnaStateTranslationVisitor::compileLookahead(const IR::Expression *destinat
                           state->parser->program->offsetVar.c_str());
     builder->endOfStatement(true);
     builder->blockEnd(true);
+}
+
+bool PnaStateTranslationVisitor::preorder(const IR::SelectCase *selectCase) {
+    unsigned width = EBPF::EBPFInitializerUtils::ebpfTypeWidth(typeMap, selectCase->keyset);
+    bool scalar = EBPF::EBPFScalarType::generatesScalar(width);
+    auto ebpfType = EBPF::EBPFTypeFactory::instance->create(selectType);
+    unsigned selectWidth = 0;
+    if (ebpfType->is<EBPF::EBPFScalarType>()) {
+        selectWidth = ebpfType->to<EBPF::EBPFScalarType>()->implementationWidthInBits();
+    }
+    auto tcTarget = dynamic_cast<const EBPF::P4TCTarget *>(builder->target);
+    bool isPrimitive = tcTarget->isPrimitiveByteAligned(selectWidth);
+
+    builder->emitIndent();
+    if (auto pe = selectCase->keyset->to<IR::PathExpression>()) {
+        builder->append("if (");
+        cstring pvsName = pe->path->name.name;
+        auto pvs = state->parser->getValueSet(pvsName);
+        if (pvs) pvs->emitLookup(builder);
+        builder->append(" != NULL)");
+    } else if (auto mask = selectCase->keyset->to<IR::Mask>()) {
+        if (scalar) {
+            if (!isPrimitive) {
+                cstring getPrimitive = selectWidth < 32 ? "getPrimitive32"_cs : "getPrimitive64"_cs;
+                builder->appendFormat("if ((%v((u8 *)%v, %d)", getPrimitive, selectValue,
+                                      selectWidth);
+            } else {
+                builder->appendFormat("if ((%v", selectValue);
+            }
+            builder->append(" & ");
+            visit(mask->right);
+            builder->append(") == (");
+            visit(mask->left);
+            builder->append(" & ");
+            visit(mask->right);
+            builder->append("))");
+        } else {
+            unsigned bytes = ROUNDUP(width, 8);
+            bool first = true;
+            cstring hex = EBPF::EBPFInitializerUtils::genHexStr(
+                mask->right->to<IR::Constant>()->value, width, mask->right);
+            cstring value = EBPF::EBPFInitializerUtils::genHexStr(
+                mask->left->to<IR::Constant>()->value, width, mask->left);
+            builder->append("if (");
+            for (unsigned i = 0; i < bytes; ++i) {
+                if (!first) {
+                    builder->append(" && ");
+                }
+                builder->appendFormat("((%v[%u] & 0x%v)", selectValue, i, hex.substr(2 * i, 2));
+                builder->append(" == ");
+                builder->appendFormat("(%v & %v))", value.substr(2 * i, 2), hex.substr(2 * i, 2));
+                first = false;
+            }
+            builder->append(") ");
+        }
+    } else {
+        if (!isPrimitive) {
+            cstring getPrimitive = selectWidth < 32 ? "getPrimitive32"_cs : "getPrimitive64"_cs;
+            builder->appendFormat("if (%v((u8 *)%v, %d)", getPrimitive, selectValue, selectWidth);
+        } else {
+            builder->appendFormat("if (%v", selectValue);
+        }
+        builder->append(" == ");
+        visit(selectCase->keyset);
+        builder->append(")");
+    }
+    builder->append("goto ");
+    visit(selectCase->state);
+    builder->endOfStatement(true);
+    return false;
 }
 
 // =====================EBPFTablePNA=============================
@@ -1876,10 +2022,11 @@ void ControlBodyTranslatorPNA::processFunction(const P4::ExternFunction *functio
                                         actionName);
                         }
                         builder->emitIndent();
-                        builder->appendFormat("update_act_bpf_val->u.%v.%v = ", actionExtName,
-                                              param);
-                        visit(components.at(index)->expression);
-                        builder->endOfStatement();
+                        cstring value = "update_act_bpf_val->u."_cs + actionExtName + "."_cs +
+                                        param->toString();
+                        auto valuetype = typeMap->getType(param, true);
+                        emitAssignStatement(valuetype, nullptr, value,
+                                            components.at(index)->expression);
                         builder->newline();
                     }
                     builder->emitIndent();
@@ -2042,10 +2189,13 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
                 }
             }
 
+            bool primitive = true;
             if (ebpfType->is<EBPF::EBPFScalarType>()) {
                 scalar = ebpfType->to<EBPF::EBPFScalarType>();
                 unsigned width = scalar->implementationWidthInBits();
                 memcpy = !EBPF::EBPFScalarType::generatesScalar(width);
+                auto tcTarget = dynamic_cast<const EBPF::P4TCTarget *>(builder->target);
+                primitive = tcTarget->isPrimitiveByteAligned(scalar->implementationWidthInBits());
 
                 if (isKeyBigEndian == "NETWORK" && isDefnBigEndian == "HOST") {
                     if (width <= 8) {
@@ -2063,15 +2213,18 @@ void ControlBodyTranslatorPNA::processApply(const P4::ApplyMethod *method) {
             }
 
             builder->emitIndent();
-            if (memcpy) {
-                builder->appendFormat("__builtin_memcpy(&(%s.%s[0]), &(", keyname.c_str(),
-                                      fieldName.c_str());
+            if (!primitive) {
+                builder->appendFormat("__builtin_memcpy(&(%v.%v), &(", keyname, fieldName);
+                table->codeGen->visit(c->expression);
+                builder->appendFormat("), %d)", scalar->bytesRequired());
+            } else if (memcpy) {
+                builder->appendFormat("__builtin_memcpy(&(%v.%v[0]), &(", keyname, fieldName);
                 table->codeGen->visit(c->expression);
                 builder->appendFormat("[0]), %d)", scalar->bytesRequired());
             } else {
-                builder->appendFormat("%s.%s = ", keyname.c_str(), fieldName.c_str());
+                builder->appendFormat("%v.%v = ", keyname, fieldName);
                 if (isKeyBigEndian == "NETWORK" && isDefnBigEndian == "HOST")
-                    builder->appendFormat("%s(", swap.c_str());
+                    builder->appendFormat("%v(", swap);
                 table->codeGen->visit(c->expression);
                 if (isKeyBigEndian == "NETWORK" && isDefnBigEndian == "HOST") builder->append(")");
             }
@@ -2458,6 +2611,8 @@ void DeparserHdrEmitTranslatorPNA::emitField(EBPF::CodeBuilder *builder, cstring
     unsigned widthToEmit = et->widthInBits();
     unsigned emitSize = 0;
     cstring swap = ""_cs, msgStr;
+    auto tcTarget = dynamic_cast<const EBPF::P4TCTarget *>(builder->target);
+    bool isPrimitive = tcTarget->isPrimitiveByteAligned(widthToEmit);
 
     if (widthToEmit <= 64) {
         if (program->options.emitTraceMessages) {
@@ -2494,14 +2649,29 @@ void DeparserHdrEmitTranslatorPNA::emitField(EBPF::CodeBuilder *builder, cstring
         widthToEmit < 8 ? (emitSize - alignment - widthToEmit) : (emitSize - widthToEmit);
 
     if (!swap.isNullOrEmpty() && !noEndiannessConversion) {
-        builder->emitIndent();
-        visit(hdrExpr);
-        builder->appendFormat(".%v = %v(", field, swap);
-        visit(hdrExpr);
-        builder->appendFormat(".%v", field);
-        if (shift != 0) builder->appendFormat(" << %d", shift);
-        builder->append(")");
-        builder->endOfStatement(true);
+        if (!isPrimitive) {
+            builder->emitIndent();
+            cstring storePrimitive =
+                widthToEmit < 32 ? "storePrimitive32"_cs : "storePrimitive64"_cs;
+            cstring getPrimitive = widthToEmit < 32 ? "getPrimitive32"_cs : "getPrimitive64"_cs;
+            builder->appendFormat("%v((u8 *)&", storePrimitive);
+            visit(hdrExpr);
+            builder->appendFormat(".%v, %d, (%v(%v(", field, widthToEmit, swap, getPrimitive);
+            visit(hdrExpr);
+            builder->appendFormat(".%v, %d)", field, widthToEmit);
+            if (shift != 0) builder->appendFormat(" << %d", shift);
+            builder->append(")))");
+            builder->endOfStatement(true);
+        } else {
+            builder->emitIndent();
+            visit(hdrExpr);
+            builder->appendFormat(".%v = %v(", field, swap);
+            visit(hdrExpr);
+            builder->appendFormat(".%v", field);
+            if (shift != 0) builder->appendFormat(" << %d", shift);
+            builder->append(")");
+            builder->endOfStatement(true);
+        }
     }
     unsigned bitsInFirstByte = widthToEmit % 8;
     if (bitsInFirstByte == 0) bitsInFirstByte = 8;

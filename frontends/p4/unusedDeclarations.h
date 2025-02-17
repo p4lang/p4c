@@ -47,6 +47,7 @@ class UsedDeclSet : public IHasDbPrint {
 
 class RemoveUnusedPolicy {
  public:
+    virtual ~RemoveUnusedPolicy() = default;
     /// The policy for removing unused declarations is baked into the pass -- targets can specify
     /// their own subclass of the pass with a changed policy and return that here
     virtual RemoveUnusedDeclarations *getRemoveUnusedDeclarationsPass(const UsedDeclSet &used,
