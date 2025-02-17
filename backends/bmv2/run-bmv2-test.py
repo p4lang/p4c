@@ -137,8 +137,6 @@ ROOT_DIR = Path(ARGS.rootdir).absolute()
 sys.path.append(str(ROOT_DIR))
 
 from bmv2stf import Options, RunBMV2
-from scapy.layers.all import *
-from scapy.utils import *
 
 from tools import testutils  # pylint: disable=wrong-import-position
 
