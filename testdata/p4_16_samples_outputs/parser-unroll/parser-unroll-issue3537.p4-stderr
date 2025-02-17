@@ -1,3 +1,0 @@
-parser-unroll-issue3537.p4(71): [--Wwarn=unused] warning: Control Aux is not used; removing
-control Aux(inout M meta) {
-        ^^^
