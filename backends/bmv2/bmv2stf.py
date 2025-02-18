@@ -752,8 +752,6 @@ class RunBMV2(object):
                     "--log-file",
                     self.switchLogFile,
                     "--log-flush",
-                    "--dump-packet-data",
-                    str(9000),
                     "--use-files",
                     str(wait),
                     "--thrift-port",
