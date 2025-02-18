@@ -771,8 +771,7 @@ class RunBMV2(object):
             sw = subprocess.Popen(runswitch, cwd=self.folder)
 
             def openInterface(ifname):
-                self.interfaces[interface] = PcapWriter(str(ifname),
-                                                        linktype=LINKTYPE_ETHERNET)
+                self.interfaces[interface] = PcapWriter(str(ifname), linktype=LINKTYPE_ETHERNET)
                 self.interfaces[interface].flush()
 
             # Try to open input interfaces. Each time, we set a 2 second
