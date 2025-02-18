@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # Copyright 2013-present Barefoot Networks, Inc.
 # Copyright 2018 VMware, Inc.
+# SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,10 +27,8 @@ import os
 import sys
 from glob import glob
 from pathlib import Path
-
-import scapy.utils as scapy_util
-
 from .ebpfstf import create_table_file, parse_stf_file
+from ptf.pcap_writer import PcapWriter, LINKTYPE_ETHERNET, rdpcap
 
 # path to the tools folder of the compiler
 # Append tools to the import path.
@@ -122,12 +121,11 @@ class EBPFTarget:
         for iface, pkts in iface_pkts_map.items():
             direction = "in"
             infile = self.filename(iface, direction)
-            # Linktype 1 the Ethernet Link Type, see also 'man pcap-linktype'
-            fp = scapy_util.RawPcapWriter(infile, linktype=1)
-            fp._write_header(None)
+            fp = PcapWriter(infile, linktype=LINKTYPE_ETHERNET)
             for pkt_data in pkts:
                 try:
-                    fp._write_packet(pkt_data)
+                    now = time.time()
+                    fp.write(pkt_data, now)
                 except ValueError:
                     testutils.log.error(f"Invalid packet data {pkt_data}")
                     return testutils.FAILURE
@@ -180,7 +178,7 @@ class EBPFTarget:
                 packets = []
             else:
                 try:
-                    packets = scapy_util.rdpcap(file)
+                    packets = rdpcap(file)
                 except Exception as e:
                     testutils.log.error("Corrupt pcap file %s\n%s", file, e)
                     return testutils.FAILURE
