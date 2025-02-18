@@ -27,6 +27,8 @@ import threading
 from pathlib import Path
 from typing import Any, Dict, List, NamedTuple, Optional, Union
 
+import scapy.packet
+
 # Set up logging.
 log = logging.getLogger(__name__)
 
@@ -91,7 +93,7 @@ def hex_to_byte(hex_str: str) -> str:
     return "".join(byte_vals)
 
 
-def compare_pkt(expected: str, received: bytes) -> int:
+def compare_pkt(expected: str, received: scapy.packet.Packet) -> int:
     """Compare two given byte sequences and check if they are the same.
     Report errors if this is not the case."""
 
@@ -102,7 +104,7 @@ def compare_pkt(expected: str, received: bytes) -> int:
         strict_length_check = True
         expected = expected[:-1]
 
-    received = received.hex().upper()
+    received = received.build().hex().upper()
     expected = "".join(expected.split()).upper()
     if strict_length_check and len(received) > len(expected):
         log.error(
