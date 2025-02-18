@@ -29,7 +29,8 @@ from collections import OrderedDict
 from glob import glob
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
-from ptf.pcap_writer import PcapWriter, LINKTYPE_ETHERNET, rdpcap
+
+from ptf.pcap_writer import LINKTYPE_ETHERNET, PcapWriter, rdpcap
 
 FILE_DIR = Path(__file__).resolve().parent
 # Append the root to the import path.

@@ -25,10 +25,13 @@
 
 import os
 import sys
+import time
 from glob import glob
 from pathlib import Path
+
+from ptf.pcap_writer import LINKTYPE_ETHERNET, PcapWriter, rdpcap
+
 from .ebpfstf import create_table_file, parse_stf_file
-from ptf.pcap_writer import PcapWriter, LINKTYPE_ETHERNET, rdpcap
 
 # path to the tools folder of the compiler
 # Append tools to the import path.
