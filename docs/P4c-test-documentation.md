@@ -54,36 +54,18 @@ Positive tests are those where the P4 compiler should process the input without 
 
 3. **Expected Output Files**:
 
-2. **File Naming Conventions**:
-
-   - For **BMv2-specific tests** with packets, the source file name must match the pattern `*-bmv2.p4`.
-  - For **v1model architecture** tests: `*-bmv2-v1model.p4`.
-
-  - For **PSA architecture** tests: `*-bmv2-psa.p4`.
-  
-   - Additional file name patterns:
-     - For eBPF-specific tests: `*_ebpf.p4` or `*_ebpf-kernel.p4`.
-     - For graph backend tests: `*graph*.p4`.
-     - For UBPF-specific tests: `*_ubpf.p4`.
-
-     - Other specialized tests under subdirectories such as:
-       - `p4tc_samples/` for TC tests.
-       - `fabric_*/` and `omec/` for Fabric and OMEC tests.
-       - `switch_*/` for specific switch samples.
-
-   These naming conventions ensure the CMake configuration files correctly associate test programs with their respective backends or features.
-
-
-3. **Expected Output Files**:
-
    - Run the P4 compiler on the source file to verify the output:
      ```bash
      ./build/p4test path/to/source_file.p4
      ```
+   - To generate or update the expected output file for a single test case, use:
+     ```bash
+     P4TEST_REPLACE=1 ./build/p4test path/to/source_file.p4
+     ```
+   - This will regenerate the expected output file for the specific test case.
+   - Place the generated expected output files in the appropriate directory, such as `p4c/testdata/p4_16_samples_outputs`.
 
-4. **Updating Expected Outputs**:
-
-   - If a change to the P4 compiler modifies the expected outputs, you can regenerate them by rerunning the tests with:
+   - If you need to regenerate expected output files for all test cases, use:
      ```bash
      P4TEST_REPLACE=1 make check
      ```
@@ -154,9 +136,6 @@ Refer to the repository documentation and existing test examples to understand t
 ## **4. Marking Tests as "Expected to Fail" (Xfail)**
 
 An XFail is a test that should pass (by the language spec and architecture), but currently fails due to known problems in the compiler.
-
-
-
 
 
 
