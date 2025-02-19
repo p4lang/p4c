@@ -1,0 +1,51 @@
+
+name: Auto Label Issues
+
+on:
+  issues:
+    types: [opened, edited]  # Runs when an issue is created or modified
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Auto-label Issues
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue = context.payload.issue;
+            const labelsToAdd = [];
+
+            
+            const labelMappings = {
+              "bug": "bug",
+              "error": "bug",
+              "fix": "bug",
+              "feature": "enhancement",
+              "docs": "documentation",
+              "question": "question",
+              "dpdk": "dpdk",
+              "p4c": "p4c",
+              "bmv2": "bmv2",
+              "compiler": "compiler",
+              "test": "testing"
+            };
+
+           
+            for (const [keyword, label] of Object.entries(labelMappings)) {
+              if (issue.title.toLowerCase().includes(keyword) || 
+                  issue.body.toLowerCase().includes(keyword)) {
+                labelsToAdd.push(label);
+              }
+            }
+
+            if (labelsToAdd.length > 0) {
+              github.rest.issues.addLabels({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: labelsToAdd
+              });
+            }
