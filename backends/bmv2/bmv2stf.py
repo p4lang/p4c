@@ -574,8 +574,7 @@ class RunBMV2(object):
             data = stf_entry[2]
             time.sleep(self.packetDelay)
             try:
-                now = time.time()
-                self.interfaces[interface].write(bytes.fromhex(data), now)
+                self.interfaces[interface].write(bytes.fromhex(data))
             except ValueError:
                 testutils.log.error("Invalid packet data %s", data)
                 return testutils.FAILURE

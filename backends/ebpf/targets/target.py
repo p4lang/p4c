@@ -25,7 +25,6 @@
 
 import os
 import sys
-import time
 from glob import glob
 from pathlib import Path
 
@@ -127,8 +126,7 @@ class EBPFTarget:
             fp = PcapWriter(infile, linktype=LINKTYPE_ETHERNET)
             for pkt_data in pkts:
                 try:
-                    now = time.time()
-                    fp.write(pkt_data, now)
+                    fp.write(pkt_data)
                 except ValueError:
                     testutils.log.error(f"Invalid packet data {pkt_data}")
                     return testutils.FAILURE
