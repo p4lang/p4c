@@ -104,7 +104,7 @@ class SideEffects : public Inspector {
 
     /// @return true if the expression may have side-effects.
     static bool check(const IR::Expression *expression, const Visitor *calledBy,
-                      DeclarationLookup *refMap, TypeMap *typeMap,
+                      DeclarationLookup *refMap = nullptr, TypeMap *typeMap = nullptr,
                       const Visitor::Context *ctxt = nullptr) {
         SideEffects se(refMap, typeMap);
         se.setCalledBy(calledBy);

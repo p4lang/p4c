@@ -137,9 +137,27 @@ const IR::Node *TypeInferenceBase::postorder(const IR::AssignmentStatement *assi
     }
 
     auto newInit = assignment(assign, ltype, assign->right);
-    if (newInit != assign->right)
-        assign = new IR::AssignmentStatement(assign->srcInfo, assign->left, newInit);
+    if (newInit != assign->right) {
+        auto *clone = assign->clone();
+        clone->right = newInit;
+        assign = clone;
+    }
     return assign;
+}
+
+const IR::Node *TypeInferenceBase::postorder(const IR::OpAssignmentStatement *assign) {
+    auto ltype = getType(assign->left);
+    if (ltype == nullptr) return assign;
+    if (ltype->is<IR::Type_Boolean>() &&
+        (assign->is<IR::BAndAssign>() || assign->is<IR::BOrAssign>() ||
+         assign->is<IR::BXorAssign>())) {
+        /* ok */
+    } else if (!ltype->is<IR::Type_Bits>()) {
+        typeError("%1%=: cannot be applied to '%2%' with type '%3%'", assign->getStringOp(),
+                  assign->left, ltype->toString());
+        return assign;
+    }
+    return TypeInferenceBase::postorder(static_cast<const IR::AssignmentStatement *>(assign));
 }
 
 const IR::Node *TypeInferenceBase::postorder(const IR::ForInStatement *forin) {
