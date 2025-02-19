@@ -38,7 +38,11 @@ Positive tests are those where the P4 compiler should process the input without 
 
 2. **File Naming Conventions**:
 
-   - For BMv2-specific tests with packets, the source file name must match the pattern `*-bmv2.p4`.
+   - For **BMv2-specific tests** with packets, the source file name must match the pattern `*-bmv2.p4`.
+  <!-- - For **v1model architecture** tests: `*-bmv2-v1model.p4`. -->
+
+  <!-- - For **PSA architecture** tests: `*-bmv2-psa.p4`. -->
+  
    - Additional file name patterns:
      - For eBPF-specific tests: `*_ebpf.p4` or `*_ebpf-kernel.p4`.
      - For graph backend tests: `*graph*.p4`.
