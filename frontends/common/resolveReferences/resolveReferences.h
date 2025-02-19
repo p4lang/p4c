@@ -90,8 +90,9 @@ class ResolutionContext : virtual public Visitor, public DeclarationLookup {
     /// Resolve a refrence to a type @p type.
     const IR::Type *resolveType(const IR::Type *type) const;
 
-    const IR::IDeclaration *getDeclaration(const IR::Path *path, bool notNull = false) const;
-    const IR::IDeclaration *getDeclaration(const IR::This *, bool notNull = false) const;
+    const IR::IDeclaration *getDeclaration(const IR::Path *path,
+                                           bool notNull = false) const override;
+    const IR::IDeclaration *getDeclaration(const IR::This *, bool notNull = false) const override;
 
     /// Returns the set of decls that exist in the given namespace.
     auto getDeclarations(const IR::INamespace *ns) const {

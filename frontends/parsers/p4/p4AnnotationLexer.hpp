@@ -20,8 +20,7 @@ class P4AnnotationLexer : public AbstractP4Lexer {
         // Singletons
         EXPRESSION = P4Parser::token_type::TOK_START_EXPRESSION,
         INTEGER = P4Parser::token_type::TOK_START_INTEGER,
-        INTEGER_OR_STRING_LITERAL =
-            P4Parser::token_type::TOK_START_INTEGER_OR_STRING_LITERAL,
+        INTEGER_OR_STRING_LITERAL = P4Parser::token_type::TOK_START_INTEGER_OR_STRING_LITERAL,
         STRING_LITERAL = P4Parser::token_type::TOK_START_STRING_LITERAL,
 
         // Pairs
@@ -32,30 +31,27 @@ class P4AnnotationLexer : public AbstractP4Lexer {
         // Triples
         EXPRESSION_TRIPLE = P4Parser::token_type::TOK_START_EXPRESSION_TRIPLE,
         INTEGER_TRIPLE = P4Parser::token_type::TOK_START_INTEGER_TRIPLE,
-        STRING_LITERAL_TRIPLE =
-            P4Parser::token_type::TOK_START_STRING_LITERAL_TRIPLE,
+        STRING_LITERAL_TRIPLE = P4Parser::token_type::TOK_START_STRING_LITERAL_TRIPLE,
 
         // P4Runtime annotations
-        P4RT_TRANSLATION_ANNOTATION =
-            P4Parser::token_type::TOK_START_P4RT_TRANSLATION_ANNOTATION,
+        P4RT_TRANSLATION_ANNOTATION = P4Parser::token_type::TOK_START_P4RT_TRANSLATION_ANNOTATION,
     };
 
  private:
     Type type;
-    const IR::Vector<IR::AnnotationToken>& body;
+    const IR::Vector<IR::AnnotationToken> &body;
     bool needStart;
     IR::Vector<IR::AnnotationToken>::const_iterator it;
-    const Util::SourceInfo& srcInfo;
+    const Util::SourceInfo &srcInfo;
 
  public:
-    P4AnnotationLexer(Type type, const Util::SourceInfo& srcInfo,
-                      const IR::Vector<IR::AnnotationToken>& body)
-        : type(type), body(body), needStart(true), it(this->body.begin()),
-          srcInfo(srcInfo) { }
+    P4AnnotationLexer(Type type, const Util::SourceInfo &srcInfo,
+                      const IR::Vector<IR::AnnotationToken> &body)
+        : type(type), body(body), needStart(true), it(this->body.begin()), srcInfo(srcInfo) {}
 
-    Token yylex(P4::P4ParserDriver& driver);
+    Token yylex(P4::P4ParserDriver &driver) override;
 };
 
 }  // namespace P4
 
-#endif  /* FRONTENDS_PARSERS_P4_P4ANNOTATIONLEXER_HPP_ */
+#endif /* FRONTENDS_PARSERS_P4_P4ANNOTATIONLEXER_HPP_ */

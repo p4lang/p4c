@@ -208,7 +208,7 @@ class EBPFTarget:
                 )
                 return testutils.FAILURE
             for idx, expected_pkt in enumerate(expected):
-                cmp = testutils.compare_pkt(expected_pkt, packets[idx])
+                cmp = testutils.compare_pkt(expected_pkt, packets[idx].build())
                 if cmp != testutils.SUCCESS:
                     testutils.log.error("Packet %s on port %s differs", idx, interface)
                     return cmp

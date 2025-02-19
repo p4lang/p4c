@@ -907,7 +907,7 @@ class RunBMV2(object):
                 # We only care that the packet was received on this particular port.
                 if not expected_pkt:
                     continue
-                cmp_result = testutils.compare_pkt(expected_pkt, packets[idx])
+                cmp_result = testutils.compare_pkt(expected_pkt, packets[idx].build())
                 if cmp_result != testutils.SUCCESS:
                     testutils.log.error("Packet %s on port %s differs", idx, interface)
                     return cmp_result

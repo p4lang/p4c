@@ -73,7 +73,7 @@ class TypeMap final : public ProgramMap {
     const IR::Type *getType(const IR::Node *element, bool notNull = false) const;
     // unwraps a TypeType into its contents
     const IR::Type *getTypeType(const IR::Node *element, bool notNull) const;
-    void dbprint(std::ostream &out) const;
+    void dbprint(std::ostream &out) const override;
     void clear();
     bool isLeftValue(const IR::Expression *expression) const {
         return leftValues.count(expression) > 0;
