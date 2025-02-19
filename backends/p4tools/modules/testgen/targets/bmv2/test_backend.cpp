@@ -32,8 +32,6 @@
 
 namespace P4::P4Tools::P4Testgen::Bmv2 {
 
-const big_int Bmv2TestBackend::ZERO_PKT_VAL = 0x2000000;
-const big_int Bmv2TestBackend::ZERO_PKT_MAX = 0xffffffff;
 const std::set<std::string> Bmv2TestBackend::SUPPORTED_BACKENDS = {"PTF", "STF", "PROTOBUF",
                                                                    "PROTOBUF_IR", "METADATA"};
 
