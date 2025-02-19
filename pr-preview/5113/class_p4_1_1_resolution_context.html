@@ -146,10 +146,10 @@ $(function(){initNavTree('class_p4_1_1_resolution_context.html',''); initResizab
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:af2c0f51ddfd9e4847d51f5bad6e8f165" id="r_af2c0f51ddfd9e4847d51f5bad6e8f165"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="class_p4_1_1_i_r_1_1_i_declaration.html">IR::IDeclaration</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af2c0f51ddfd9e4847d51f5bad6e8f165">getDeclaration</a> (const IR::Path *path, bool notNull=false) const</td></tr>
-<tr class="separator:af2c0f51ddfd9e4847d51f5bad6e8f165"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a27bb7008c95b338c0f477d8d7f1a95bb" id="r_a27bb7008c95b338c0f477d8d7f1a95bb"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="class_p4_1_1_i_r_1_1_i_declaration.html">IR::IDeclaration</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a27bb7008c95b338c0f477d8d7f1a95bb">getDeclaration</a> (const IR::This *, bool notNull=false) const</td></tr>
-<tr class="separator:a27bb7008c95b338c0f477d8d7f1a95bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aff168ace89d55ddde455864d81989c6b" id="r_aff168ace89d55ddde455864d81989c6b"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="class_p4_1_1_i_r_1_1_i_declaration.html">IR::IDeclaration</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aff168ace89d55ddde455864d81989c6b">getDeclaration</a> (const IR::Path *path, bool notNull=false) const override</td></tr>
+<tr class="separator:aff168ace89d55ddde455864d81989c6b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acd01aec7900f148b582aea0382a93fec" id="r_acd01aec7900f148b582aea0382a93fec"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="class_p4_1_1_i_r_1_1_i_declaration.html">IR::IDeclaration</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acd01aec7900f148b582aea0382a93fec">getDeclaration</a> (const IR::This *, bool notNull=false) const override</td></tr>
+<tr class="separator:acd01aec7900f148b582aea0382a93fec"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4d39f8bbd62041ae4ea3e5c23e68fb4d" id="r_a4d39f8bbd62041ae4ea3e5c23e68fb4d"><td class="memItemLeft" align="right" valign="top"><a id="a4d39f8bbd62041ae4ea3e5c23e68fb4d" name="a4d39f8bbd62041ae4ea3e5c23e68fb4d"></a>
 auto&#160;</td><td class="memItemRight" valign="bottom"><b>getDeclarations</b> (const IR::INamespace *ns) const</td></tr>
 <tr class="memdesc:a4d39f8bbd62041ae4ea3e5c23e68fb4d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the set of decls that exist in the given namespace. <br /></td></tr>
@@ -420,8 +420,8 @@ const <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *&#160;</td><td
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Visitor mixin for looking up names in enclosing scopes from the Visitor::Context. </p>
 </div><h2 class="groupheader">Member Function Documentation</h2>
-<a id="af2c0f51ddfd9e4847d51f5bad6e8f165" name="af2c0f51ddfd9e4847d51f5bad6e8f165"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af2c0f51ddfd9e4847d51f5bad6e8f165">&#9670;&#160;</a></span>getDeclaration() <span class="overload">[1/2]</span></h2>
+<a id="aff168ace89d55ddde455864d81989c6b" name="aff168ace89d55ddde455864d81989c6b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aff168ace89d55ddde455864d81989c6b">&#9670;&#160;</a></span>getDeclaration() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -442,7 +442,7 @@ const <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *&#160;</td><td
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel virtual">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel override">override</span><span class="mlabel virtual">virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
@@ -451,8 +451,8 @@ const <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *&#160;</td><td
 
 </div>
 </div>
-<a id="a27bb7008c95b338c0f477d8d7f1a95bb" name="a27bb7008c95b338c0f477d8d7f1a95bb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a27bb7008c95b338c0f477d8d7f1a95bb">&#9670;&#160;</a></span>getDeclaration() <span class="overload">[2/2]</span></h2>
+<a id="acd01aec7900f148b582aea0382a93fec" name="acd01aec7900f148b582aea0382a93fec"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acd01aec7900f148b582aea0382a93fec">&#9670;&#160;</a></span>getDeclaration() <span class="overload">[2/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -473,7 +473,7 @@ const <a class="el" href="class_p4_1_1_visitor.html">Visitor</a> *&#160;</td><td
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel virtual">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel override">override</span><span class="mlabel virtual">virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
