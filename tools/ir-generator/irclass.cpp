@@ -104,16 +104,18 @@ void IrDefinitions::toposort() {
     std::vector<IrElement *> sorted;
     std::map<const IrClass *, IrClass *> classes;
 
-    // FIXME -- can't use auto here as it gives an error about using auto before it is deduced
-    std::function<void(const IrClass *)> visit = [&](const IrClass *cl) {
-        auto it = classes.find(cl);
-        if (it != classes.end()) {
-            auto *cl = it->second;
-            classes.erase(it);
-            visit(cl->concreteParent);
-            for (auto *p : cl->parentClasses) visit(p);
-            sorted.push_back(cl);
-        }
+    auto visit = [&](const IrClass *cl) -> void {
+        auto do_visit = [&](const auto &self, const IrClass *cl) -> void {
+            auto it = classes.find(cl);
+            if (it != classes.end()) {
+                auto *cl = it->second;
+                classes.erase(it);
+                self(self, cl->concreteParent);
+                for (auto *p : cl->parentClasses) self(self, p);
+                sorted.push_back(cl);
+            }
+        };
+        do_visit(do_visit, cl);
     };
 
     for (auto *el : elements)

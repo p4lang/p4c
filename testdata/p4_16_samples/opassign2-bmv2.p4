@@ -51,8 +51,10 @@ control ingress(inout headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t stdmeta) {
     apply {
-        hdr.rest[postincr(hdr.data.b1) & 7].x |= hdr.data.f1;
-        hdr.rest[postincr(hdr.data.b1) & 7].x |= hdr.data.f2;
+        if (hdr.rest[7].isValid()) {
+            hdr.rest[postincr(hdr.data.b1) & 7].x |= hdr.data.f1;
+            hdr.rest[postincr(hdr.data.b1) & 7].x |= hdr.data.f2;
+        }
     }
 }
 

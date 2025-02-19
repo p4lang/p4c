@@ -217,7 +217,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new MoveDeclarations(),  // Move all local declarations to the beginning
         new MoveInitializers(),
         new SideEffectOrdering(&typeMap, policy->skipSideEffectOrdering()),
-        policy->removeOpAssign() ? new RemoveOpAssign : nullptr,
+        policy->removeOpAssign() ? new RemoveOpAssign() : nullptr,
         new SimplifyControlFlow(&typeMap),
         new SimplifySwitch(&typeMap),
         new MoveDeclarations(),  // Move all local declarations to the beginning

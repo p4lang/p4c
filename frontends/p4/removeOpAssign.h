@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "cloner.h"
 #include "ir/ir.h"
+#include "sideEffects.h"
 
 namespace P4 {
 
@@ -28,6 +29,7 @@ class RemoveOpAssign : public Transform {
     template <class T>
     const IR::Node *doit(T *as) {
         prune();
+        BUG_CHECK(!SideEffects::check(as->left, this), "side effects in LHS of %s", as);
         return new IR::AssignmentStatement(as->srcInfo, as->left->apply(CloneExpressions()),
                                            new typename T::binop_t(as->left, as->right));
     }
