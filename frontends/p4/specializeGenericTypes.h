@@ -27,33 +27,29 @@ struct TypeSpecialization : public IHasDbPrint {
     cstring name;
     /// Type that is being specialized
     const IR::Type_Specialized *specialized;
-    /// Declaration of specialized type, which will be replaced
+    /// Declaration of specialized type (in the program top-level), specialized type will be
+    /// inserted before it.
     const IR::Type_Declaration *declaration;
     /// New synthesized type (created later)
     const IR::Type_StructLike *replacement;
-    /// Insertion point
-    const IR::Node *insertion;
     /// Save here the canonical types of the type arguments of 'specialized'.
     /// The typeMap will be cleared, so we cannot look them up later.
     const IR::Vector<IR::Type> *argumentTypes;
 
     TypeSpecialization(cstring name, const IR::Type_Specialized *specialized,
-                       const IR::Type_Declaration *decl, const IR::Node *insertion,
-                       const IR::Vector<IR::Type> *argTypes)
+                       const IR::Type_Declaration *decl, const IR::Vector<IR::Type> *argTypes)
         : name(name),
           specialized(specialized),
           declaration(decl),
           replacement(nullptr),
-          insertion(insertion),
           argumentTypes(argTypes) {
         CHECK_NULL(specialized);
         CHECK_NULL(decl);
-        CHECK_NULL(insertion);
         CHECK_NULL(argTypes);
     }
     void dbprint(std::ostream &out) const override {
         out << "Specializing:" << dbp(specialized) << " from " << dbp(declaration) << " as "
-            << dbp(replacement) << " inserted at " << dbp(insertion);
+            << dbp(replacement) << " inserted at " << dbp(declaration);
     }
 };
 
@@ -66,7 +62,7 @@ struct TypeSpecializationMap : public IHasDbPrint {
     std::set<TypeSpecialization *> inserted;
 
     void add(const IR::Type_Specialized *t, const IR::Type_StructLike *decl,
-             const IR::Node *insertion, NameGenerator *nameGen);
+             NameGenerator *nameGen);
     TypeSpecialization *get(const IR::Type_Specialized *t) const;
     bool same(const TypeSpecialization *left, const IR::Type_Specialized *right) const;
     void dbprint(std::ostream &out) const override {
@@ -76,14 +72,14 @@ struct TypeSpecializationMap : public IHasDbPrint {
     }
     IR::Vector<IR::Node> *getSpecializations(const IR::Node *insertionPoint) {
         IR::Vector<IR::Node> *result = nullptr;
-        for (auto s : map) {
-            if (inserted.find(s.second) != inserted.end()) continue;
-            if (s.second->insertion == insertionPoint) {
+        for (const auto &[_, specialization] : map) {
+            if (inserted.find(specialization) != inserted.end()) continue;
+            if (specialization->declaration == insertionPoint) {
                 if (result == nullptr) result = new IR::Vector<IR::Node>();
-                LOG2("Will insert " << dbp(s.second->replacement) << " before "
+                LOG2("Will insert " << dbp(specialization->replacement) << " before "
                                     << dbp(insertionPoint));
-                result->push_back(s.second->replacement);
-                inserted.emplace(s.second);
+                result->push_back(specialization->replacement);
+                inserted.emplace(specialization);
             }
         }
         return result;
@@ -93,7 +89,7 @@ struct TypeSpecializationMap : public IHasDbPrint {
 /**
  * Find all generic type instantiations and their type arguments.
  */
-class FindTypeSpecializations : public Inspector {
+class FindTypeSpecializations : public Inspector, ResolutionContext {
     TypeSpecializationMap *specMap;
     MinimalNameGenerator nameGen;
 
@@ -122,7 +118,6 @@ class CreateSpecializedTypes : public Transform {
 
     const IR::Node *insert(const IR::Node *before);
     const IR::Node *postorder(IR::Type_Declaration *type) override;
-    const IR::Node *postorder(IR::Declaration *decl) override { return insert(decl); }
 };
 
 /**

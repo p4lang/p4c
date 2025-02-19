@@ -35,7 +35,7 @@ bool TypeSpecializationMap::same(const TypeSpecialization *spec,
 }
 
 void TypeSpecializationMap::add(const IR::Type_Specialized *t, const IR::Type_StructLike *decl,
-                                const IR::Node *insertion, NameGenerator *nameGen) {
+                                NameGenerator *nameGen) {
     auto it = map.find(t);
     if (it != map.end()) return;
 
@@ -51,10 +51,10 @@ void TypeSpecializationMap::add(const IR::Type_Specialized *t, const IR::Type_St
 
     cstring name = nameGen->newName(decl->getName().string_view());
     LOG3("Found to specialize: " << dbp(t) << "(" << t << ") with name " << name
-                                 << " insert before " << dbp(insertion));
+                                 << " insert before " << dbp(decl));
     auto argTypes = new IR::Vector<IR::Type>();
     for (auto a : *t->arguments) argTypes->push_back(typeMap->getType(a, true));
-    TypeSpecialization *s = new TypeSpecialization(name, t, decl, insertion, argTypes);
+    TypeSpecialization *s = new TypeSpecialization(name, t, decl, argTypes);
     map.emplace(t, s);
 }
 
@@ -97,8 +97,10 @@ Visitor::profile_t FindTypeSpecializations::init_apply(const IR::Node *node) {
 }
 
 void FindTypeSpecializations::postorder(const IR::Type_Specialized *type) {
-    auto baseType = specMap->typeMap->getTypeType(type->baseType, true);
-    auto st = baseType->to<IR::Type_StructLike>();
+    // Look for the declaration using the resolution context (not type map) to find it always
+    // at the program's top level. This way we can also use the declaration as insertion point.
+    const auto *baseType = getDeclaration(type->baseType->path);
+    const auto *st = baseType->to<IR::Type_StructLike>();
     if (st == nullptr || st->typeParameters->size() == 0)
         // nothing to specialize
         return;
@@ -113,37 +115,25 @@ void FindTypeSpecializations::postorder(const IR::Type_Specialized *type) {
             // specialized instances of G, e.g., G<bit<32>>.
             return;
     }
-    // Find location where the specialization is to be inserted.
-    // This can be before a Parser, Control, or a toplevel instance declaration
-    const IR::Node *insert = findContext<IR::P4Parser>();
-    if (!insert) insert = findContext<IR::Function>();
-    if (!insert) insert = findContext<IR::P4Control>();
-    if (!insert) insert = findContext<IR::Type_Declaration>();
-    if (!insert) insert = findContext<IR::Declaration_Constant>();
-    if (!insert) insert = findContext<IR::Declaration_Variable>();
-    if (!insert) insert = findContext<IR::Declaration_Instance>();
-    if (!insert) insert = findContext<IR::P4Action>();
-    CHECK_NULL(insert);
-    specMap->add(type, st, insert, &nameGen);
+    specMap->add(type, st, &nameGen);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
 const IR::Node *CreateSpecializedTypes::postorder(IR::Type_Declaration *type) {
-    for (auto it : specMap->map) {
-        if (it.second->declaration->name == type->name) {
-            auto specialized = it.first;
+    for (const auto &[specialized, specialization] : specMap->map) {
+        if (specialization->declaration->name == type->name) {
             auto genDecl = type->to<IR::IMayBeGenericType>();
             TypeVariableSubstitution ts;
             ts.setBindings(type, genDecl->getTypeParameters(), specialized->arguments);
             TypeSubstitutionVisitor tsv(specMap->typeMap, &ts);
             tsv.setCalledBy(this);
             auto renamed = type->apply(tsv)->to<IR::Type_StructLike>()->clone();
-            cstring name = it.second->name;
+            cstring name = specialization->name;
             auto empty = new IR::TypeParameters();
             renamed->name = name;
             renamed->typeParameters = empty;
-            it.second->replacement = postorder(renamed)->to<IR::Type_StructLike>();
+            specialization->replacement = renamed;
             LOG3("CST Specializing " << dbp(type) << " with " << ts << " as " << dbp(renamed));
         }
     }
