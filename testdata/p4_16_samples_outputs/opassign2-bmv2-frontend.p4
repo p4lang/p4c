@@ -52,22 +52,24 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("ingress.retval") bit<8> retval_1;
     @name("ingress.rv") bit<8> rv_1;
     apply {
-        x_2 = hdr.data.b1;
-        rv_0 = x_2;
-        x_2 = x_2 + 8w1;
-        retval = rv_0;
-        hdr.data.b1 = x_2;
-        tmp = retval;
-        tmp_0 = tmp & 8w7;
-        hdr.rest[tmp_0].x = hdr.rest[tmp_0].x | hdr.data.f1;
-        x_3 = hdr.data.b1;
-        rv_1 = x_3;
-        x_3 = x_3 + 8w1;
-        retval_1 = rv_1;
-        hdr.data.b1 = x_3;
-        tmp_1 = retval_1;
-        tmp_2 = tmp_1 & 8w7;
-        hdr.rest[tmp_2].x = hdr.rest[tmp_2].x | hdr.data.f2;
+        if (hdr.rest[7].isValid()) {
+            x_2 = hdr.data.b1;
+            rv_0 = x_2;
+            x_2 = x_2 + 8w1;
+            retval = rv_0;
+            hdr.data.b1 = x_2;
+            tmp = retval;
+            tmp_0 = tmp & 8w7;
+            hdr.rest[tmp_0].x = hdr.rest[tmp_0].x | hdr.data.f1;
+            x_3 = hdr.data.b1;
+            rv_1 = x_3;
+            x_3 = x_3 + 8w1;
+            retval_1 = rv_1;
+            hdr.data.b1 = x_3;
+            tmp_1 = retval_1;
+            tmp_2 = tmp_1 & 8w7;
+            hdr.rest[tmp_2].x = hdr.rest[tmp_2].x | hdr.data.f2;
+        }
     }
 }
 

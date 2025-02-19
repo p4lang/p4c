@@ -148,7 +148,11 @@ const IR::Node *TypeInferenceBase::postorder(const IR::AssignmentStatement *assi
 const IR::Node *TypeInferenceBase::postorder(const IR::OpAssignmentStatement *assign) {
     auto ltype = getType(assign->left);
     if (ltype == nullptr) return assign;
-    if (!ltype->is<IR::Type_Bits>()) {
+    if (ltype->is<IR::Type_Boolean>() &&
+        (assign->is<IR::BAndAssign>() || assign->is<IR::BOrAssign>() ||
+         assign->is<IR::BXorAssign>())) {
+        /* ok */
+    } else if (!ltype->is<IR::Type_Bits>()) {
         typeError("%1%=: cannot be applied to '%2%' with type '%3%'", assign->getStringOp(),
                   assign->left, ltype->toString());
         return assign;
