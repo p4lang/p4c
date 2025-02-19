@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright 2013-present Barefoot Networks, Inc.
+# Copyright 2013 Barefoot Networks, Inc.
 # Copyright 2018 VMware, Inc.
 # SPDX-License-Identifier: Apache-2.0
 #
