@@ -848,6 +848,8 @@ void TernaryMatchTable::gen_match_fields(json::vector &match_field_list,
                                       width, match[word].byte_group, tcam_bits[match_index - word]);
                     }
                     break;
+                default:
+                    BUG("Unknown group type");
             }
         }
     }
