@@ -200,7 +200,7 @@ const IR::Node *FunctionsInliner::preorder(IR::IfStatement *statement) {
 
 const IR::Node *FunctionsInliner::preorder(IR::P4Parser *parser) {
     if (preCaller()) {
-        parser->visit_children(*this);
+        parser->visit_children(*this, parser->name.name.c_str());
         return postCaller(parser);
     } else {
         return parser;
@@ -211,14 +211,14 @@ const IR::Node *FunctionsInliner::preorder(IR::P4Control *control) {
     bool hasWork = preCaller();
     // We always visit the children: there may be function calls in
     // actions within the control
-    control->visit_children(*this);
+    control->visit_children(*this, control->name.name.c_str());
     if (hasWork) return postCaller(control);
     return control;
 }
 
 const IR::Node *FunctionsInliner::preorder(IR::Function *function) {
     if (preCaller()) {
-        function->visit_children(*this);
+        function->visit_children(*this, function->name.name.c_str());
         return postCaller(function);
     } else {
         return function;
@@ -227,7 +227,7 @@ const IR::Node *FunctionsInliner::preorder(IR::Function *function) {
 
 const IR::Node *FunctionsInliner::preorder(IR::P4Action *action) {
     if (preCaller()) {
-        action->visit_children(*this);
+        action->visit_children(*this, action->name.name.c_str());
         return postCaller(action);
     } else {
         return action;
