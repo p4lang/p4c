@@ -199,7 +199,7 @@ Phv::Ref::Ref(gress_t g, int stage, const value_t &n)
 }
 
 Phv::Ref::Ref(const Phv::Register &r, gress_t gr, int l, int h)
-    : gress_(gr), stage(0), name_(r.name), lo(l), hi(h < 0 ? l : h), lineno(-1) {}
+    : gress_(gr), name_(r.name), stage(0), lo(l), hi(h < 0 ? l : h), lineno(-1) {}
 
 bool Phv::Ref::merge(const Phv::Ref &r) {
     if (r.name_ != name_ || r.gress_ != gress_) return false;

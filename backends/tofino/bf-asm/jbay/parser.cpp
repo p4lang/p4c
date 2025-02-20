@@ -566,7 +566,6 @@ template <>
 void Parser::gen_configuration_cache(Target::JBay::parser_regs &regs, json::vector &cfg_cache) {
     std::string reg_fqname;
     std::string reg_name;
-    unsigned reg_value;
     std::string reg_value_str;
     unsigned reg_width = 13;
 
@@ -578,7 +577,6 @@ void Parser::gen_configuration_cache(Target::JBay::parser_regs &regs, json::vect
         reg_fqname = "pardereg.pgstnreg.epbprsr4reg[" + std::to_string(i) +
                      "].epbreg.chan0_group.chnl_ctrl.meta_opt";
         reg_name = "epb" + std::to_string(i) + "parser0_chnl_ctrl_0";
-        reg_value = meta_opt;
         reg_value_str = int_to_hex_string(meta_opt, reg_width);
         add_cfg_reg(cfg_cache, reg_fqname, reg_name, reg_value_str);
     }

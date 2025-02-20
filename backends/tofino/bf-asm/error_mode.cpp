@@ -161,8 +161,9 @@ void ErrorMode::write_regs(REGS &regs, const Stage *stage, gress_t gress) {
                         merge.prev_error_ctl[gress].prev_error_ctl_match = 1;
                         break;
                 }
+                [[fallthrough]];
             default:
-                BUG();
+                BUG("unexpected stage_dep: %d", stage->stage_dep[gress]);
         }
     }
 

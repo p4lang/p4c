@@ -21,17 +21,6 @@
 #include "lib/bitops.h"
 #include "lib/bitvec.h"
 
-static bitvec crc(bitvec poly, bitvec val) {
-    int poly_size = poly.max().index() + 1;
-    if (!poly_size) return bitvec(0);
-    val <<= poly_size - 1;
-    for (auto i = val.max(); i.index() >= (poly_size - 1); --i) {
-        BUG_CHECK(*i);
-        val ^= poly << (i.index() - (poly_size - 1));
-    }
-    return val;
-}
-
 static bool check_ixbar(Phv::Ref &ref, InputXbar *ix, InputXbar::HashTable hash_table) {
     if (!ref.check()) return false;
     if (ref->reg.mau_id() < 0) {
@@ -682,6 +671,7 @@ void HashExpr::generate_ixbar_inputs_with_gaps(const std::multimap<unsigned, Phv
                 ixbar_input_type::tPHV,           // type
                 0,                                // ixbar_bit_position
                 entry.first - previous_range_hi,  // bit_size
+                {},                               // symmetric_info
                 false                             // u.valid
             };
             inputs.push_back(invalid_input);
@@ -696,6 +686,7 @@ void HashExpr::generate_ixbar_inputs_with_gaps(const std::multimap<unsigned, Phv
             ixbar_input_type::tPHV,            // type
             0,                                 // ixbar_bit_position
             input_size() - previous_range_hi,  // bit_size
+            {},                                // symmetric_info
             false                              // u.valid
         };
         inputs.push_back(invalid_input);

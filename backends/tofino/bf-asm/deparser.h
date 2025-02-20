@@ -46,8 +46,11 @@ class Deparser : public Section {
         Phv::Ref val;
         int tag = -1;
         ordered_set<Phv::Ref> pov;
-        const int &lineno = val.lineno;
-        Val() {}
+        std::reference_wrapper<int> lineno = val.lineno;
+        Val() = default;
+        Val(const Val &) = default;
+        Val(Val &&) = default;
+        Val &operator=(Val &&) = default;
         virtual ~Val() {}
         Val(gress_t gr, const value_t &v) : val(gr, DEPARSER_STAGE, v) {}
         Val(gress_t gr, const value_t &v, const value_t &p) : val(gr, DEPARSER_STAGE, v) {
@@ -115,8 +118,13 @@ class Deparser : public Section {
             swap = a.swap;
             return *this;
         }
+        ChecksumVal(const ChecksumVal &a) : Val(a) {
+            mask = a.mask;
+            swap = a.swap;
+        };
         ChecksumVal() : Val() {}
-
+        ChecksumVal(ChecksumVal &&) = default;
+        ChecksumVal &operator=(ChecksumVal &&) = default;
         bool check() const override {
             if (is_phv()) {
                 if (mask == 0) error(lineno, "mask is 0 for phv checkum value?");

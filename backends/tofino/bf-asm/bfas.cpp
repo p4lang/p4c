@@ -64,6 +64,7 @@ option_t options = {
     .output_dir = ".",
     .num_stages_override = 0,
     .tof1_egr_parse_depth_checks_disabled = false,
+    .fill_noop_slot = nullptr,
 };
 
 std::string asmfile_name;                       // NOLINT(runtime/string)

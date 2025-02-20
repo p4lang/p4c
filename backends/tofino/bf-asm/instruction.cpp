@@ -140,7 +140,8 @@ struct Operand : public IHasDbPrint {
             if (dest_size != -1) {  // DepositField::encode() calling.
                 auto rotConst =
                     DepositField::discoverRotation(val, group_size[group], 8, minconst - 1);
-                if (rotConst.rotate) return rotConst.value + 24 | (rotConst.rotate << RotationBits);
+                if (rotConst.rotate)
+                    return (rotConst.value + 24) | (rotConst.rotate << RotationBits);
             }
 
             if (val >= minconst && val < 8) return val + 24;
@@ -1002,7 +1003,8 @@ Instruction *LoadConst::pass1(Table *tbl, Table::Actions::Action *) {
     }
     slot = dest->reg.mau_id();
     int size = Phv::reg(slot)->size;
-    int minval = -1 << (size - 1);
+    BUG_CHECK(size > 0, "bad register size");
+    int minval = ~0u << (size - 1);
     if (size > 21) {
         size = 21;
         minval = 0;
@@ -1168,8 +1170,8 @@ struct ByteRotateMerge : VLIWInstruction {
     };
     Phv::Ref dest;
     Operand src1, src2;
-    bitvec byte_mask;
     int src1_shift, src2_shift;
+    bitvec byte_mask;
     ByteRotateMerge(Table *tbl, const Table::Actions::Action *act, const value_t &d,
                     const value_t &s1, const value_t &s2, int s1s, int s2s, int bm)
         : VLIWInstruction(d.lineno),

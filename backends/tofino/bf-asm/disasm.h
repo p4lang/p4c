@@ -23,6 +23,7 @@
 class Disasm {
  public:
     FOR_ALL_TARGETS(DECLARE_TARGET_CLASS)
+    virtual ~Disasm() {}
     virtual void input_binary(uint64_t addr, char tag, uint32_t *data, size_t len) = 0;
     static Disasm *create(std::string target);
 };

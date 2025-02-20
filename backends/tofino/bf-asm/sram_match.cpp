@@ -1323,7 +1323,7 @@ std::string SRamMatchTable::get_match_mode(const Phv::Ref &pref, int offset) con
     return "unused";
 }
 
-void SRamMatchTable::add_field_to_pack_format(json::vector &field_list, int basebit,
+void SRamMatchTable::add_field_to_pack_format(json::vector &field_list, unsigned basebit,
                                               std::string name, const Table::Format::Field &field,
                                               const Table::Actions::Action *act) const {
     if (name != "match") {

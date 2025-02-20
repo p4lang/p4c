@@ -807,7 +807,7 @@ void Parser::Checksum::pass2(Parser *parser) {
 }
 
 Parser::CounterInit::CounterInit(gress_t gress, pair_t data)
-    : lineno(data.key.lineno), gress(gress) {
+    : gress(gress), lineno(data.key.lineno) {
     if (!CHECKTYPE2(data.key, tSTR, tCMD)) return;
     if (!CHECKTYPE(data.value, tMAP)) return;
 

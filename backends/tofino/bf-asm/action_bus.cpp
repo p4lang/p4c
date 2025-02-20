@@ -44,8 +44,9 @@ std::ostream &operator<<(std::ostream &out, const ActionBusSource &src) {
             out << "HashDist(" << src.hd->hash_group << ", " << src.hd->id << ")";
             break;
         case ActionBusSource::HashDistPair:
-            out << "HashDistPair([" << src.hd1->hash_group << ", " << src.hd1->id << "]," << "["
-                << src.hd2->hash_group << ", " << src.hd2->id << "])";
+            out << "HashDistPair([" << src.hd_tuple.hd1->hash_group << ", " << src.hd_tuple.hd1->id
+                << "]," << "[" << src.hd_tuple.hd2->hash_group << ", " << src.hd_tuple.hd2->id
+                << "])";
             break;
         case ActionBusSource::RandomGen:
             out << "rng " << src.rng.unit;
@@ -63,7 +64,7 @@ std::ostream &operator<<(std::ostream &out, const ActionBusSource &src) {
             out << "EALU";
             break;
         case ActionBusSource::XcmpData:
-            out << "XCMP(" << src.xcmp_group << ":" << src.xcmp_byte << ")";
+            out << "XCMP(" << src.xcmp_data.xcmp_group << ":" << src.xcmp_data.xcmp_byte << ")";
             break;
         case ActionBusSource::NameRef:
             out << "NameRef(" << (src.name_ref ? src.name_ref->name : "0") << ")";
@@ -294,11 +295,11 @@ unsigned ActionBus::Slot::lo(Table *tbl) const {
 bool ActionBus::compatible(const ActionBusSource &a, unsigned a_off, const ActionBusSource &b,
                            unsigned b_off) {
     if ((a.type == ActionBusSource::HashDist) && (b.type == ActionBusSource::HashDistPair)) {
-        return ((compatible(a, a_off, ActionBusSource(b.hd1), b_off)) ||
-                (compatible(a, a_off, ActionBusSource(b.hd2), b_off + 16)));
+        return ((compatible(a, a_off, ActionBusSource(b.hd_tuple.hd1), b_off)) ||
+                (compatible(a, a_off, ActionBusSource(b.hd_tuple.hd2), b_off + 16)));
     } else if ((a.type == ActionBusSource::HashDistPair) && (b.type == ActionBusSource::HashDist)) {
-        return ((compatible(ActionBusSource(a.hd1), a_off, b, b_off)) ||
-                (compatible(ActionBusSource(a.hd2), a_off + 16, b, b_off)));
+        return ((compatible(ActionBusSource(a.hd_tuple.hd1), a_off, b, b_off)) ||
+                (compatible(ActionBusSource(a.hd_tuple.hd2), a_off + 16, b, b_off)));
     }
     if (a.type != b.type) return false;
     switch (a.type) {
@@ -310,9 +311,11 @@ bool ActionBus::compatible(const ActionBusSource &a, unsigned a_off, const Actio
         case ActionBusSource::HashDist:
             return a.hd->hash_group == b.hd->hash_group && a.hd->id == b.hd->id && a_off == b_off;
         case ActionBusSource::HashDistPair:
-            return ((a.hd1->hash_group == b.hd1->hash_group && a.hd1->id == b.hd1->id) &&
+            return ((a.hd_tuple.hd1->hash_group == b.hd_tuple.hd1->hash_group &&
+                     a.hd_tuple.hd1->id == b.hd_tuple.hd1->id) &&
                     (a_off == b_off) &&
-                    (a.hd2->hash_group == b.hd2->hash_group && a.hd2->id == b.hd2->id));
+                    (a.hd_tuple.hd2->hash_group == b.hd_tuple.hd2->hash_group &&
+                     a.hd_tuple.hd2->id == b.hd_tuple.hd2->id));
         case ActionBusSource::TableOutput:
             return a.table == b.table;
         default:
@@ -1140,7 +1143,7 @@ std::string ActionBusSource::toString(Table *tbl) const {
         case Ealu:
             return "ealu";
         case XcmpData:
-            tmp << "xcmp(" << xcmp_group << ":" << xcmp_byte << ")";
+            tmp << "xcmp(" << xcmp_data.xcmp_group << ":" << xcmp_data.xcmp_byte << ")";
             return tmp.str();
         case NameRef:
         case ColorRef:

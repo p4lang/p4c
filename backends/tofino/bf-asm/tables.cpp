@@ -150,7 +150,6 @@ void Table::NextTables::resolve_long_branch(const Table *tbl,
             break;
         }
         next_table_ = n;
-    continue2:;
     }
 }
 
@@ -917,7 +916,7 @@ void Table::alloc_rams(bool logical, BFN::Alloc2Dbase<Table *> &use,
                 } else {
                     use[r][c] = this;
                 }
-            } catch (std::out_of_range) {
+            } catch (std::out_of_range & /*e*/) {
                 error(lineno, "Table %s using out-of-bounds (%d,%d)", name(), r, c);
             }
         }
@@ -3022,7 +3021,7 @@ void Table::get_cjson_source(const std::string &field_name, std::string &source,
  * separate functions, as the corner casing for these different cases can be quite different
  * and lead to some significant confusion
  */
-void Table::add_field_to_pack_format(json::vector &field_list, int basebit, std::string name,
+void Table::add_field_to_pack_format(json::vector &field_list, unsigned basebit, std::string name,
                                      const Table::Format::Field &field,
                                      const Table::Actions::Action *act) const {
     decltype(act->reverse_alias()) aliases;
@@ -3071,8 +3070,8 @@ void Table::add_field_to_pack_format(json::vector &field_list, int basebit, std:
     canon_field_list(field_list);
 }
 
-void Table::output_field_to_pack_format(json::vector &field_list, int basebit, std::string name,
-                                        std::string source, int start_bit,
+void Table::output_field_to_pack_format(json::vector &field_list, unsigned basebit,
+                                        std::string name, std::string source, unsigned start_bit,
                                         const Table::Format::Field &field, unsigned value) const {
     unsigned add_width = 0;
     bool pfe_enable = false;

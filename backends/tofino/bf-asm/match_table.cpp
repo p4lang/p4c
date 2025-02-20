@@ -661,7 +661,7 @@ void MatchTable::add_hash_functions(json::map &stage_tbl) const {
         if (ht.size() > 0) {
             // Merge all bits to xor across multiple hash ways in single
             // json::vector for each hash bit
-            for (const auto hash_table : ht) {
+            for (const auto &hash_table : ht) {
                 json::map hash_function;
                 json::vector &hash_bits = hash_function["hash_bits"] = json::vector();
                 hash_function["hash_function_number"] = hash_table.first.uid();

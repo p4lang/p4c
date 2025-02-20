@@ -46,13 +46,13 @@ struct ActionBusSource {
         HashDistribution *hd;
         struct {
             HashDistribution *hd1, *hd2;
-        };
+        } hd_tuple;
         Table *table;
         Table::Ref *name_ref;
         RandomNumberGen rng;
         struct {
             short xcmp_group, xcmp_byte;
-        };
+        } xcmp_data;
     };
     ActionBusSource() : type(None) { field = nullptr; }
     ActionBusSource(Table::Format::Field *f) : type(Field) {  // NOLINT(runtime/explicit)
@@ -60,8 +60,8 @@ struct ActionBusSource {
     }
     ActionBusSource(HashDistribution *h) : type(HashDist) { hd = h; }  // NOLINT(runtime/explicit)
     ActionBusSource(HashDistribution *h1, HashDistribution *h2) : type(HashDistPair) {
-        hd1 = h1;
-        hd2 = h2;
+        hd_tuple.hd1 = h1;
+        hd_tuple.hd2 = h2;
     }
     ActionBusSource(Table *t,
                     TableOutputModifier m = TableOutputModifier::NONE)  // NOLINT(runtime/explicit)
@@ -115,23 +115,26 @@ struct ActionBusSource {
     ActionBusSource(InputXbar::Group grp, int byte) : type(XcmpData) {
         BUG_CHECK(grp.type == InputXbar::Group::XCMP, "Not xcmp ixbar");
         field = nullptr;
-        xcmp_group = grp.index;
-        xcmp_byte = byte;
+        xcmp_data.xcmp_group = grp.index;
+        xcmp_data.xcmp_byte = byte;
     }
     bool operator==(const ActionBusSource &a) const {
         if (type == XcmpData)
-            return a.type == XcmpData && xcmp_group == a.xcmp_group && xcmp_byte == a.xcmp_byte;
-        if (type == HashDistPair && hd2 != a.hd2) return false;
+            return a.type == XcmpData && xcmp_data.xcmp_group == a.xcmp_data.xcmp_group &&
+                   xcmp_data.xcmp_byte == a.xcmp_data.xcmp_byte;
+        if (type == HashDistPair && hd_tuple.hd2 != a.hd_tuple.hd2) return false;
         return type == a.type && field == a.field;
     }
     bool operator<(const ActionBusSource &a) const {
         if (type != a.type) return type < a.type;
         switch (type) {
             case HashDistPair:
-                return hd1 == a.hd1 ? hd2 < a.hd2 : hd1 < a.hd1;
+                return hd_tuple.hd1 == a.hd_tuple.hd1 ? hd_tuple.hd2 < a.hd_tuple.hd2
+                                                      : hd_tuple.hd1 < a.hd_tuple.hd1;
             case XcmpData:
-                return xcmp_group == a.xcmp_group ? xcmp_byte < a.xcmp_byte
-                                                  : xcmp_group < a.xcmp_group;
+                return xcmp_data.xcmp_group == a.xcmp_data.xcmp_group
+                           ? xcmp_data.xcmp_byte < a.xcmp_data.xcmp_byte
+                           : xcmp_data.xcmp_group < a.xcmp_data.xcmp_group;
             default:
                 return field < a.field;
         }
