@@ -1,8 +1,9 @@
+
 name: Auto Label Issues
 
 on:
   issues:
-    types: [opened, edited]  # Runs when an issue is created or modified
+    types: [opened, edited]  
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
