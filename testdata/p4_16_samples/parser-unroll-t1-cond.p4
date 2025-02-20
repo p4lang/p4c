@@ -1,6 +1,7 @@
 // examples for simple IP/tcp.
 #include <core.p4>
 #include <v1model.p4>
+@command_line("--loopsUnroll")
 
 typedef bit<48>     MacAddress;
 typedef bit<32>     ip4Addr_t;

@@ -178,7 +178,7 @@ namespace P4::Test {
         return std::nullopt;
     }
 
-    P4::P4COptionPragmaParser optionsPragmaParser;
+    P4::P4COptionPragmaParser optionsPragmaParser(true);
     program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
     if (::P4::errorCount() > 0) {
         std::cerr << "Encountered " << ::P4::errorCount()

@@ -55,7 +55,7 @@ int main(int argc, char *const argv[]) {
         return 1;
     }
     try {
-        P4::P4COptionPragmaParser optionsPragmaParser;
+        P4::P4COptionPragmaParser optionsPragmaParser(true);
         program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
         P4::FrontEnd frontend;
         frontend.addDebugHook(hook);

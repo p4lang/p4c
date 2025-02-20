@@ -21,13 +21,9 @@ struct headers_t {
 }
 
 parser in_parser(packet_in pkt, out headers_t hdr, inout empty_t user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_t resubmit_meta, in empty_t recirculate_meta) {
-    state start {
-        pkt.extract<ethernet_h>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0x8100: parse_vlan1;
-            16w0x88a8: parse_vlan2;
-            default: accept;
-        }
+    state parse_vlan1 {
+        pkt.extract<vlan_h>(hdr.vlan);
+        transition accept;
     }
     state parse_vlan2 {
         pkt.extract<vlan_h>(hdr.vlan);
@@ -37,9 +33,13 @@ parser in_parser(packet_in pkt, out headers_t hdr, inout empty_t user_meta, in p
             default: reject;
         }
     }
-    state parse_vlan1 {
-        pkt.extract<vlan_h>(hdr.vlan);
-        transition accept;
+    state start {
+        pkt.extract<ethernet_h>(hdr.ethernet);
+        transition select(hdr.ethernet.etherType) {
+            16w0x8100: parse_vlan1;
+            16w0x88a8: parse_vlan2;
+            default: accept;
+        }
     }
 }
 
@@ -49,18 +49,18 @@ control in_cntrl(inout headers_t hdr, inout empty_t user_meta, in psa_ingress_in
 }
 
 control in_deparser(packet_out packet, out empty_t clone_i2e_meta, out empty_t resubmit_meta, out empty_t normal_meta, inout headers_t hdr, in empty_t meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action parserunrollissue4006_twice_extracted_header54() {
+    @hidden action parserunrollissue4006_twice_extracted_header55() {
         packet.emit<ethernet_h>(hdr.ethernet);
         packet.emit<vlan_h>(hdr.vlan);
     }
-    @hidden table tbl_parserunrollissue4006_twice_extracted_header54 {
+    @hidden table tbl_parserunrollissue4006_twice_extracted_header55 {
         actions = {
-            parserunrollissue4006_twice_extracted_header54();
+            parserunrollissue4006_twice_extracted_header55();
         }
-        const default_action = parserunrollissue4006_twice_extracted_header54();
+        const default_action = parserunrollissue4006_twice_extracted_header55();
     }
     apply {
-        tbl_parserunrollissue4006_twice_extracted_header54.apply();
+        tbl_parserunrollissue4006_twice_extracted_header55.apply();
     }
 }
 

@@ -41,21 +41,6 @@ struct headers {
 }
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    state start {
-        hdr.index = 32w0;
-        packet.extract<ethernet_t>(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            16w0: last;
-            16w1: access1;
-            16w2: access2;
-            16w3: access3;
-            default: accept;
-        }
-    }
-    state last {
-        hdr.index = hdr.index + 32w1;
-        transition accept;
-    }
     state access1 {
         hdr.index = hdr.index + 32w1;
         packet.extract<srcRoute_t>(hdr.srcRoutes1);
@@ -70,6 +55,21 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
         hdr.index = hdr.index + 32w1;
         packet.extract<srcRoute_t>(hdr.srcRoutes3);
         transition access2;
+    }
+    state last {
+        hdr.index = hdr.index + 32w1;
+        transition accept;
+    }
+    state start {
+        hdr.index = 32w0;
+        packet.extract<ethernet_t>(hdr.ethernet);
+        transition select(hdr.ethernet.etherType) {
+            16w0: last;
+            16w1: access1;
+            16w2: access2;
+            16w3: access3;
+            default: accept;
+        }
     }
 }
 

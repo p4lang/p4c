@@ -1,3 +1,0 @@
-parser-unroll-issue4006_twice_extracted_header.p4(44): [--Wwarn=multi_header_extract] warning: pkt.extract(hdr.vlan): Performing an extraction more than once on the same header will nearly always cause all but the last extracted header to be deleted from the packet. It may be preferable to replace previous extractions with lookaheads instead.
-        pkt.extract(hdr.vlan);
-        ^^^^^^^^^^^^^^^^^^^^^

@@ -2,7 +2,7 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-header test_header_t {
+@command_line("--loopsUnroll") header test_header_t {
     bit<8> value;
 }
 

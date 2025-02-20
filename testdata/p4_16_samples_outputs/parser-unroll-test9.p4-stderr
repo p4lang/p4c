@@ -1,0 +1,8 @@
+[--Wwarn=invalid] warning: Parser cycle can't be unrolled, because ParserUnroll can't detect the number of loop iterations:
+Parser p state chain: start, start_loops, infinite_loop, infinite_loop
+[--Wwarn=invalid] warning: Parser cycle can't be unrolled, because ParserUnroll can't detect the number of loop iterations:
+Parser p state chain: start, start_loops, mixed_infinite_loop, start_loops
+[--Wwarn=invalid] warning: Parser cycle can't be unrolled, because ParserUnroll can't detect the number of loop iterations:
+Parser p state chain: start, start_loops, mixed_finite_loop, start_loops, mixed_infinite_loop, start_loops
+[--Wwarn=invalid] warning: Parser cycle can't be unrolled, because ParserUnroll can't detect the number of loop iterations:
+Parser p state chain: start, start_loops, mixed_finite_loop, start_loops, mixed_finite_loop, start_loops, mixed_infinite_loop, start_loops

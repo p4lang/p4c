@@ -39,6 +39,41 @@ struct headers {
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("MyParser.index") int<32> index_0;
+    state stateOutOfBound {
+        verify(false, error.StackOutOfBounds);
+        transition reject;
+    }
+    state parse_ipv4 {
+        packet.extract<ipv4_t>(hdr.ipv4);
+        transition accept;
+    }
+    @name(".parse_srcRouting") state parse_srcRouting {
+        packet.extract<srcRoute_t>(hdr.srcRoutes[32s0]);
+        index_0 = index_0 + 32s1;
+        transition select(hdr.srcRoutes[32s0].bos) {
+            1w1: parse_ipv4;
+            default: parse_srcRouting1;
+        }
+    }
+    state parse_srcRouting1 {
+        packet.extract<srcRoute_t>(hdr.srcRoutes[32s1]);
+        index_0 = index_0 + 32s1;
+        transition select(hdr.srcRoutes[32s1].bos) {
+            1w1: parse_ipv4;
+            default: parse_srcRouting2;
+        }
+    }
+    state parse_srcRouting2 {
+        packet.extract<srcRoute_t>(hdr.srcRoutes[32s2]);
+        index_0 = index_0 + 32s1;
+        transition select(hdr.srcRoutes[32s2].bos) {
+            1w1: parse_ipv4;
+            default: parse_srcRouting3;
+        }
+    }
+    state parse_srcRouting3 {
+        transition stateOutOfBound;
+    }
     @name(".start") state start {
         index_0 = 32s0;
         packet.extract<ethernet_t>(hdr.ethernet);
@@ -46,18 +81,6 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
             16w0x1234: parse_srcRouting;
             default: accept;
         }
-    }
-    @name(".parse_srcRouting") state parse_srcRouting {
-        packet.extract<srcRoute_t>(hdr.srcRoutes[index_0]);
-        index_0 = index_0 + 32s1;
-        transition select(hdr.srcRoutes[index_0 + -32s1].bos) {
-            1w1: parse_ipv4;
-            default: parse_srcRouting;
-        }
-    }
-    state parse_ipv4 {
-        packet.extract<ipv4_t>(hdr.ipv4);
-        transition accept;
     }
 }
 
