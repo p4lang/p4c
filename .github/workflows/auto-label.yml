@@ -17,7 +17,7 @@ jobs:
             const issue = context.payload.issue;
             const labelsToAdd = [];
 
-          
+            // Define keyword-label mapping
             const labelMappings = {
               "bug": "bug",
               "error": "bug",
@@ -29,10 +29,17 @@ jobs:
               "p4c": "p4c",
               "bmv2": "bmv2",
               "compiler": "compiler",
-              "test": "testing"
+              "test": "testing",
+              "breaking change": "breaking-change",
+              "performance": "compiler-performance",
+              "control plane": "control-plane",
+              "core": "core",
+              "duplicate": "duplicate",
+              "ebpf": "ebpf",
+              "psa": "ebpf-psa"
             };
 
-        
+            // Check if issue title or body contains keywords
             for (const [keyword, label] of Object.entries(labelMappings)) {
               if (issue.title.toLowerCase().includes(keyword) || 
                   issue.body.toLowerCase().includes(keyword)) {
