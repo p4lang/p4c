@@ -262,29 +262,11 @@ add_dependencies(linkbfas bfas)
 add_dependencies(p4c_driver linkbfas)
 
 
-add_custom_target(check-asm
-  COMMAND export BUILDDIR=${BFASM_GEN_DIR} && cd ${BFASM_SOURCE_DIR}/test &&
-          ./runtests asm/*.tfa asm/*.jba asm/*.bfa asm/*.stf)
-
-# This is broken and it doesn't make sense to use p4 tests here anyways
-# add_custom_target(check-all-asm
-#   COMMAND export BUILDDIR=${BFASM_GEN_DIR} && cd ${BFASM_SOURCE_DIR}/test &&
-#           ./runtests -f asm/*.tfa *.p4 mau/*.p4
-#   COMMAND export BUILDDIR=${BFASM_GEN_DIR} && cd ${BFASM_SOURCE_DIR}/test &&
-#           ./runtests -f -b stf/*.stf brig/*.p4)
-
-add_custom_target(check-sanity
-  COMMAND export BUILDDIR=${BFASM_GEN_DIR} && cd ${BFASM_SOURCE_DIR}/test &&
-  ./runtests *.p4)
-
 string(CONFIGURE "/^DECLARE_(ABSTRACT_)?TABLE_TYPE\(([a-zA-Z0-9_]+)/2/c/" CTAGS_CXX_REGEXP @ONLY)
 add_custom_target(ctags-asm
-  COMMAND ctags -R -I VECTOR --exclude=test --exclude=submodules
-              "--regex-C++=${CTAGS_CXX_REGEXP}"
+  COMMAND ctags -R -I VECTOR "--regex-C++=${CTAGS_CXX_REGEXP}"
   COMMENT "Generating ctags")
 
-# Build the bf-asm test suite
-add_subdirectory(test)
 
 if (ENABLE_GTESTS)
   # TODO Components need to be built, once, into intermediate libraries.
