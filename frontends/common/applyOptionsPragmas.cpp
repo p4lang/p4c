@@ -51,6 +51,22 @@ std::optional<IOptionPragmaParser::CommandLineOptions> P4COptionPragmaParser::tr
     const IR::Annotation *annotation) {
     auto pragmaName = annotation->name.name;
     if (pragmaName == "diagnostic") return parseDiagnostic(annotation);
+    if (supportCommandLinePragma && pragmaName == "command_line") {
+        IOptionPragmaParser::CommandLineOptions options;
+        auto *args = annotation->needsParsing()
+                         ? P4ParserDriver::parseExpressionList(annotation->srcInfo,
+                                                               annotation->getUnparsed())
+                         : &annotation->getExpr();
+        for (auto *arg : *args) {
+            if (auto *a = arg->to<IR::StringLiteral>()) {
+                options.push_back(a->value.c_str());
+            } else {
+                // can this happen?  annotation parser should require only strings
+                warning("ignoring non-string %1% in @command_line", a);
+            }
+        }
+        return options;
+    }
     return std::nullopt;
 }
 
