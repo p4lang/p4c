@@ -101,6 +101,7 @@ class NamedType : public Type {
     }
 
     static NamedType &Bool();
+    static NamedType &Char();
     static NamedType &Int();
     static NamedType &Void();
     static NamedType &Cstring();

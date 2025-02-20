@@ -49,11 +49,11 @@ struct Visitor_Context {
     // in the Visitor::apply_visitor functions as we do the recursive
     // descent traversal.  pre/postorder function can access this
     // context via getContext/findContext
-    const Visitor_Context *parent;
-    const IR::Node *node, *original;
-    mutable const char *child_name;
-    mutable int child_index;
-    int depth;
+    const Visitor_Context *parent = nullptr;
+    const IR::Node *node = nullptr, *original = nullptr;
+    mutable const char *child_name = nullptr;
+    mutable int child_index = 0;
+    int depth = 0;
     template <class T>
     inline const T *findContext(const Visitor_Context *&c) const {
         c = this;
@@ -145,26 +145,26 @@ class Visitor {
     IRNODE_ALL_SUBCLASSES(DECLARE_VISIT_FUNCTIONS)
 #undef DECLARE_VISIT_FUNCTIONS
     void visit(IR::Node &n, const char *name = 0) {
-        if (name && ctxt) ctxt->child_name = name;
-        n.visit_children(*this);
+        if (ctxt) ctxt->child_name = name;
+        n.visit_children(*this, name);
     }
     void visit(const IR::Node &n, const char *name = 0) {
-        if (name && ctxt) ctxt->child_name = name;
-        n.visit_children(*this);
+        if (ctxt) ctxt->child_name = name;
+        n.visit_children(*this, name);
     }
     void visit(IR::Node &n, const char *name, int cidx) {
         if (ctxt) {
             ctxt->child_name = name;
             ctxt->child_index = cidx;
         }
-        n.visit_children(*this);
+        n.visit_children(*this, name);
     }
     void visit(const IR::Node &n, const char *name, int cidx) {
         if (ctxt) {
             ctxt->child_name = name;
             ctxt->child_index = cidx;
         }
-        n.visit_children(*this);
+        n.visit_children(*this, name);
     }
     template <class T>
     void parallel_visit(IR::Vector<T> &v, const char *name = 0) {

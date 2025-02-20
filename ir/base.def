@@ -169,7 +169,7 @@ abstract Expression {
     /// It is used by the P4_14 front-end and by some back-ends.
     /// It is not visited by the visitors by default (can be visited explicitly in preorder)
     optional Type type = Type::Unknown::get();
-    visit_children { (void)v; }
+    visit_children { (void)v; (void)n; }
 #apply
 }
 

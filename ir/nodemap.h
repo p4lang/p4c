@@ -91,8 +91,8 @@ class NodeMap : public Node {
     static cstring static_type_name() {
         return "NodeMap<" + KEY::static_type_name() + "," + VALUE::static_type_name() + ">";
     }
-    void visit_children(Visitor &v) override;
-    void visit_children(Visitor &v) const override;
+    void visit_children(Visitor &v, const char *) override;
+    void visit_children(Visitor &v, const char *) const override;
 
     DECLARE_TYPEINFO(NodeMap, Node);
 };

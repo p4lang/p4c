@@ -219,7 +219,7 @@ public:
         out << "Concolic_" << label << "(" << arguments << ")";
     }
 
-    visit_children { v.visit(type, "type"); }
+    visit_children { (void)n; v.visit(type, "type"); }
 
     ConcolicVariable(const Type *type, cstring methodName,
                      const Vector<Argument> *arguments, int srcIdentifier, int concolicId,

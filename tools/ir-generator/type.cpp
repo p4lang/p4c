@@ -127,6 +127,11 @@ NamedType &NamedType::SourceInfo() {
     return nt;
 }
 
+NamedType &NamedType::Char() {
+    static NamedType nt("char"_cs);
+    return nt;
+}
+
 cstring NamedType::toString() const {
     if (resolved) return resolved->fullName();
     if (!lookup && name == "ID") return "IR::ID"_cs;  // hack -- ID is in namespace P4::IR
