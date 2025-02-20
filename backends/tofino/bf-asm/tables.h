@@ -961,8 +961,8 @@ class Table {
     json::map &add_pack_format(json::map &stage_tbl, Table::Format *format, bool pad_zeros = true,
                                bool print_fields = true,
                                Table::Actions::Action *act = nullptr) const;
-    virtual void add_field_to_pack_format(json::vector &field_list, int basebit, std::string name,
-                                          const Table::Format::Field &field,
+    virtual void add_field_to_pack_format(json::vector &field_list, unsigned basebit,
+                                          std::string name, const Table::Format::Field &field,
                                           const Table::Actions::Action *act) const;
     virtual bool validate_call(Table::Call &call, MatchTable *self, size_t required_args,
                                int hash_dist_type, Table::Call &first_call) {
@@ -1317,7 +1317,7 @@ DECLARE_ABSTRACT_TABLE_TYPE(SRamMatchTable, MatchTable,         // exact, atcam,
     unsigned get_number_entries() const;
     unsigned get_format_width() const;
     virtual int determine_pre_byteswizzle_loc(MatchSource *ms, int lo, int hi, int word);
-    void add_field_to_pack_format(json::vector &field_list, int basebit, std::string name,
+    void add_field_to_pack_format(json::vector &field_list, unsigned basebit, std::string name,
                                   const Table::Format::Field &field,
                                   const Table::Actions::Action *act) const override;
     std::unique_ptr<json::map> gen_memory_resource_allocation_tbl_cfg(const Way &) const;
