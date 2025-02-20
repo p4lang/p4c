@@ -53,4 +53,4 @@ set (BFAS_JBAY_SRCS
 add_library (regs_jbay ${GEN_JBAY_SRCS})
 target_link_libraries (regs_jbay p4ctoolkit)
 # Disable errors for warnings. FIXME: Get rid of this.
-target_compile_options(regs_jbay PUBLIC "-Wno-error")
+target_compile_options(regs_jbay PUBLIC -Wno-error -Wno-unused-parameter -Wno-unused-variable -Wno-type-limits -Wno-sign-compare)

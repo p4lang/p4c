@@ -303,7 +303,8 @@ void *Parser::setup_phv_output_map(Target::JBay::parser_regs &regs, gress_t gres
     return &regs.memory[gress].po_action_row[row];
 }
 template <>
-void Parser::mark_unused_output_map(Target::JBay::parser_regs &, void *, unsigned) {
+void Parser::mark_unused_output_map(Target::JBay::parser_regs & /*regs*/, void * /*map*/,
+                                    unsigned /*used*/) {
     // unneeded on jbay
 }
 
