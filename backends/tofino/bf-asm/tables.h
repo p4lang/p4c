@@ -974,8 +974,8 @@ class Table {
     // Generate the context json for a field into field list.
     // Use the bits specified in field, offset by the base bit.
     // If the field is a constant, output a const_tuple map, including the specified value.
-    void output_field_to_pack_format(json::vector &field_list, int basebit, std::string name,
-                                     std::string source, int start_bit,
+    void output_field_to_pack_format(json::vector &field_list, unsigned basebit, std::string name,
+                                     std::string source, unsigned start_bit,
                                      const Table::Format::Field &field, unsigned value = 0) const;
     void add_zero_padding_fields(Table::Format *format, Table::Actions::Action *act = nullptr,
                                  unsigned format_width = 64) const;
@@ -1001,7 +1001,8 @@ class Table {
     virtual int get_tcam_id() const { BUG("%s not a TCAM table", name()); }
 
     const std::vector<const p4_param *> find_p4_params(std::string s, std::string t = "",
-                                                       int start_bit = -1, int width = -1) const {
+                                                       unsigned start_bit = -1,
+                                                       int width = -1) const {
         remove_name_tail_range(s);
         std::vector<const p4_param *> params;
         if (start_bit <= -1) return params;
@@ -1019,7 +1020,7 @@ class Table {
         return params;
     }
 
-    const p4_param *find_p4_param(std::string s, std::string t = "", int start_bit = -1,
+    const p4_param *find_p4_param(std::string s, std::string t = "", unsigned start_bit = -1,
                                   int width = -1) const {
         remove_name_tail_range(s);
         std::vector<p4_param *> params;
@@ -1088,7 +1089,7 @@ class AlwaysRunTable : public Table {
     void pass1() override { actions->pass1(this); }
     void pass2() override { actions->pass2(this); }
     void pass3() override {}
-    FOR_ALL_REGISTER_SETS(TARGET_OVERLOAD, void write_regs, (mau_regs & regs), override;)
+    FOR_ALL_REGISTER_SETS(TARGET_OVERLOAD, void write_regs, (mau_regs & regs), override)
     void gen_tbl_cfg(json::vector &out) const override {}
 };
 
@@ -1198,7 +1199,7 @@ DECLARE_ABSTRACT_TABLE_TYPE(
          * the name with a _vt extension to help it out. */                                   \
         template <class REGS>                                                                 \
         void write_regs_vt(REGS &regs);                                                       \
-        FOR_ALL_REGISTER_SETS(TARGET_OVERLOAD, void write_regs, (mau_regs & regs), override;) \
+        FOR_ALL_REGISTER_SETS(TARGET_OVERLOAD, void write_regs, (mau_regs & regs), override)  \
         void gen_tbl_cfg(json::vector &out) const override;                                   \
                                                                                               \
      private:                                                                                 \
@@ -1307,7 +1308,7 @@ DECLARE_ABSTRACT_TABLE_TYPE(SRamMatchTable, MatchTable,         // exact, atcam,
     void pass1() override;
     template<class REGS> void write_regs_vt(REGS &regs);
     FOR_ALL_REGISTER_SETS(TARGET_OVERLOAD,
-        void write_regs, (mau_regs &regs), override; )
+        void write_regs, (mau_regs &regs), override )
     virtual std::string get_match_mode(const Phv::Ref &pref, int offset) const;
     json::map* add_common_sram_tbl_cfgs(json::map &tbl,
         std::string match_type, std::string stage_table_type) const;
@@ -1611,7 +1612,7 @@ DECLARE_TABLE_TYPE(
     table_type_t table_type() const override { return HASH_ACTION; } template <class REGS>
     void write_merge_regs_vt(REGS &regs, int type, int bus);
     FOR_ALL_REGISTER_SETS(TARGET_OVERLOAD, void write_merge_regs,
-                          (mau_regs & regs, int type, int bus), override;) Format::Field *
+                          (mau_regs & regs, int type, int bus), override) Format::Field *
     lookup_field(const std::string &n, const std::string &act = "") const override;
     void add_hash_functions(json::map &stage_tbl) const override;
     void determine_word_and_result_bus() override;
@@ -1949,7 +1950,7 @@ DECLARE_TABLE_TYPE(
     FOR_ALL_REGISTER_SETS(TARGET_OVERLOAD, void write_merge_regs,
                           (mau_regs & regs, MatchTable *match, int type, int bus,
                            const std::vector<Call::Arg> &args),
-                          override;) int address_shift()
+                          override) int address_shift()
         const override { return 7; } std::vector<int>
             determine_spare_bank_memory_units() const override;
     unsigned meter_group() const { return layout.at(0).row / 4U; } int home_row() const override {
@@ -2001,9 +2002,9 @@ class IdletimeTable : public Table {
     void write_merge_regs_vt(REGS &regs, int type, int bus);
     template <class REGS>
     void write_regs_vt(REGS &regs);
-    FOR_ALL_REGISTER_SETS(TARGET_OVERLOAD, void write_regs, (mau_regs & regs), override;)
+    FOR_ALL_REGISTER_SETS(TARGET_OVERLOAD, void write_regs, (mau_regs & regs), override)
     FOR_ALL_REGISTER_SETS(TARGET_OVERLOAD, void write_merge_regs,
-                          (mau_regs & regs, int type, int bus), override;)
+                          (mau_regs & regs, int type, int bus), override)
     void gen_tbl_cfg(json::vector &out) const override { /* nothing at top level */ }
     void gen_stage_tbl_cfg(json::map &out) const;
     static IdletimeTable *create(int lineno, const std::string &name, gress_t gress, Stage *stage,
@@ -2034,11 +2035,15 @@ DECLARE_ABSTRACT_TABLE_TYPE(
         OVERLOAD_FUNC_FOREACH(TARGET_CLASS, void, alloc_vpns, (), ()) template <class REGS>
         void write_regs_vt(REGS &regs);
     FOR_ALL_REGISTER_SETS(TARGET_OVERLOAD, void write_regs, (mau_regs & regs), override)
-        FOR_ALL_REGISTER_SETS(TARGET_OVERLOAD, void write_merge_regs,
-                              (mau_regs & regs, MatchTable *match, int type, int bus,
-                               const std::vector<Call::Arg> &args),
-                              override = 0) void common_init_setup(const VECTOR(pair_t) &, bool,
-                                                                   P4Table::type) override;
+    // FIXME: This comment is necessary to stop cpplint from complaining. The format is off because
+    // this code is within a macro.
+    FOR_ALL_REGISTER_SETS(TARGET_OVERLOAD, void write_merge_regs,
+                          (mau_regs & regs, MatchTable *match, int type, int bus,
+                           const std::vector<Call::Arg> &args),
+                          override = 0)
+    // FIXME: This comment is necessary to stop cpplint from complaining. The format is off because
+    // this code is within a macro.
+    void common_init_setup(const VECTOR(pair_t) &, bool, P4Table::type) override;
     bool common_setup(pair_t &, const VECTOR(pair_t) &, P4Table::type) override;
     void pass1() override; void pass2() override; void pass3() override;)
 
@@ -2046,18 +2051,20 @@ DECLARE_TABLE_TYPE(
     CounterTable, Synth2Port, "counter",
     enum {NONE = 0, PACKETS = 1, BYTES = 2, BOTH = 3} type = NONE;
     int teop = -1; bool teop_initialized = false; int bytecount_adjust = 0;
-    table_type_t table_type() const override { return COUNTER; } template <class REGS>
+    table_type_t table_type() const override { return COUNTER; }
+    // FIXME: This comment is necessary to stop cpplint from complaining. The format is off because
+    // this code is within a macro.
+    template <class REGS>
     void write_merge_regs_vt(REGS &regs, MatchTable *match, int type, int bus,
                              const std::vector<Call::Arg> &args);
     FOR_ALL_REGISTER_SETS(TARGET_OVERLOAD, void write_merge_regs,
                           (mau_regs & regs, MatchTable *match, int type, int bus,
                            const std::vector<Call::Arg> &args),
-                          override;)
+                          override)
 
         template <class REGS>
         void setup_teop_regs(REGS &regs, int stats_group_index);
     template <class REGS> void write_alu_vpn_range(REGS &regs);
-
     template <class REGS> void setup_teop_regs_2(REGS &regs, int stats_group_index);
     template <class REGS> void write_alu_vpn_range_2(REGS &regs);
 
@@ -2091,7 +2098,7 @@ DECLARE_TABLE_TYPE(
     FOR_ALL_REGISTER_SETS(TARGET_OVERLOAD, void write_merge_regs,
                           (mau_regs & regs, MatchTable *match, int type, int bus,
                            const std::vector<Call::Arg> &args),
-                          override;)
+                          override)
 
         template <class REGS>
         void setup_teop_regs(REGS &regs, int meter_group_index);
@@ -2145,13 +2152,13 @@ DECLARE_TABLE_TYPE(StatefulTable, Synth2Port, "stateful",
     bool setup_jbay(const pair_t &kv);
     template<class REGS> void write_action_regs_vt(REGS &regs, const Actions::Action *);
     FOR_ALL_REGISTER_SETS(TARGET_OVERLOAD,
-        void write_action_regs, (mau_regs &regs, const Actions::Action *act), override; )
+        void write_action_regs, (mau_regs &regs, const Actions::Action *act), override)
     template<class REGS> void write_merge_regs_vt(REGS &regs, MatchTable *match, int type, int bus,
                                                   const std::vector<Call::Arg> &args);
     template<class REGS> void write_logging_regs(REGS &regs);
     FOR_ALL_REGISTER_SETS(TARGET_OVERLOAD,
         void write_merge_regs, (mau_regs &regs, MatchTable *match, int type,
-                                int bus, const std::vector<Call::Arg> &args), override; )
+                                int bus, const std::vector<Call::Arg> &args), override)
     template<class REGS> void write_tofino2_common_regs(REGS &regs);
     struct const_info_t {
         int         lineno;

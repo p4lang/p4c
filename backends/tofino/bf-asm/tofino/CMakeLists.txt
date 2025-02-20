@@ -57,4 +57,4 @@ set (BFAS_TOFINO_SRCS
 add_library (regs_tofino ${GEN_TOFINO_SRCS})
 target_link_libraries (regs_tofino p4ctoolkit)
 # Disable errors for warnings. FIXME: Get rid of this.
-target_compile_options(regs_tofino PUBLIC "-Wno-error")
+target_compile_options(regs_tofino PUBLIC -Wno-error -Wno-unused-parameter -Wno-unused-variable -Wno-type-limits -Wno-sign-compare)

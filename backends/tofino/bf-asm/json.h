@@ -63,11 +63,11 @@ class obj {
     bool operator<=(const obj &a) const { return !(a < *this); }
     virtual bool operator==(const obj &a) const = 0;
     bool operator!=(const obj &a) const { return !(*this == a); }
-    virtual bool operator==(const char *str) const { return false; }
-    virtual bool operator==(const std::string &str) const { return false; }
-    virtual bool operator==(const string &str) const { return false; }
+    virtual bool operator==(const char * /*str*/) const { return false; }
+    virtual bool operator==(const std::string & /*str*/) const { return false; }
+    virtual bool operator==(const string & /*str*/) const { return false; }
     bool operator!=(const char *str) const { return !(*this == str); }
-    virtual bool operator==(int64_t val) const { return false; }
+    virtual bool operator==(int64_t /*val*/) const { return false; }
     bool operator!=(int64_t val) const { return !(*this == val); }
     struct ptrless {
         bool operator()(const obj *a, const obj *b) const { return b ? a ? *a < *b : true : false; }
@@ -75,8 +75,8 @@ class obj {
             return b ? a ? *a < *b : true : false;
         }
     };
-    virtual void print_on(std::ostream &out, int indent = 0, int width = 80,
-                          const char *pfx = "") const = 0;
+    virtual void print_on(std::ostream &out, int /*indent*/ = 0, int /*width*/ = 80,
+                          const char * /*pfx*/ = "") const = 0;
     virtual bool test_width(int &limit) const = 0;
     virtual number *as_number() { return nullptr; }
     virtual const number *as_number() const { return nullptr; }
@@ -112,7 +112,8 @@ class True : public obj {
         return std::type_index(typeid(*this)) < std::type_index(typeid(a));
     }
     bool operator==(const obj &a) const { return dynamic_cast<const True *>(&a) != 0; }
-    void print_on(std::ostream &out, int indent = 0, int width = 80, const char *pfx = "") const {
+    void print_on(std::ostream &out, int /*indent*/ = 0, int /*width*/ = 80,
+                  const char * /*pfx*/ = "") const {
         out << "true";
     }
     bool test_width(int &limit) const {
@@ -128,7 +129,8 @@ class False : public obj {
         return std::type_index(typeid(*this)) < std::type_index(typeid(a));
     }
     bool operator==(const obj &a) const { return dynamic_cast<const False *>(&a) != 0; }
-    void print_on(std::ostream &out, int indent = 0, int width = 80, const char *pfx = "") const {
+    void print_on(std::ostream &out, int /*indent*/ = 0, int /*width*/ = 80,
+                  const char * /*pfx*/ = "") const {
         out << "false";
     }
     bool test_width(int &limit) const {
@@ -153,8 +155,8 @@ class number : public obj {
         return false;
     }
     bool operator==(int64_t v) const override { return val == v; }
-    void print_on(std::ostream &out, int indent = 0, int width = 80,
-                  const char *pfx = "") const override {
+    void print_on(std::ostream &out, int /*indent*/ = 0, int /*width*/ = 80,
+                  const char * /*pfx*/ = "") const override {
         out << val;
     }
     bool test_width(int &limit) const override {
@@ -199,8 +201,8 @@ class string : public obj, public std::string {
     bool operator==(const std::string &str) const override {
         return static_cast<const std::string &>(*this) == str;
     }
-    void print_on(std::ostream &out, int indent = 0, int width = 80,
-                  const char *pfx = "") const override {
+    void print_on(std::ostream &out, int /*indent*/ = 0, int /*width*/ = 80,
+                  const char * /*pfx*/ = "") const override {
         out << '"' << *this << '"';
     }
     bool test_width(int &limit) const override {
@@ -257,8 +259,8 @@ class vector : public obj, public vector_base {
         return false;
     }
     using obj::operator!=;
-    void print_on(std::ostream &out, int indent = 0, int width = 80,
-                  const char *pfx = "") const override;
+    void print_on(std::ostream &out, int /*indent*/ = 0, int /*width*/ = 80,
+                  const char * /*pfx*/ = "") const override;
     bool test_width(int &limit) const override {
         limit -= 2;
         for (auto &e : *this) {
@@ -350,8 +352,8 @@ class map : public obj, public map_base {
         }
         return std::unique_ptr<obj>();
     }
-    void print_on(std::ostream &out, int indent = 0, int width = 80,
-                  const char *pfx = "") const override;
+    void print_on(std::ostream &out, int /*indent*/ = 0, int /*width*/ = 80,
+                  const char * /*pfx*/ = "") const override;
     bool test_width(int &limit) const override {
         limit -= 2;
         for (auto &e : *this) {

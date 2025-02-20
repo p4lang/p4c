@@ -225,7 +225,7 @@ class InputXbar {
         }
         return "";
     }
-    bool is_p4_param_bit_in_hash(std::string p4_param_name, int bit) {
+    bool is_p4_param_bit_in_hash(std::string p4_param_name, unsigned bit) {
         for (auto &g : groups) {
             for (auto &p : g.second) {
                 std::string phv_field_name = p.what.name();

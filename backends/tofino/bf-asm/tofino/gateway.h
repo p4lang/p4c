@@ -31,7 +31,7 @@ class Target::Tofino::GatewayTable : public ::GatewayTable {
 
     bool check_match_key(MatchKey &, const std::vector<MatchKey> &, bool) override;
     int gw_memory_unit() const override { return layout[0].row * 2 + gw_unit; }
-    REGSETS_IN_CLASS(Tofino, TARGET_OVERLOAD, void write_next_table_regs, (mau_regs &), override;)
+    REGSETS_IN_CLASS(Tofino, TARGET_OVERLOAD, void write_next_table_regs, (mau_regs &), override)
 };
 
 template <class REGS>

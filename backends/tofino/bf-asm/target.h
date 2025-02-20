@@ -463,7 +463,7 @@ class Target::JBay : public Target {
 
     typedef ::JBay::regs_match_action_stage_ mau_regs;
     typedef ::JBay::regs_deparser deparser_regs;
-    enum {
+    enum : int {
         ARAM_UNITS_PER_STAGE = 0,
         PARSER_CHECKSUM_UNITS = 5,
         PARSER_EXTRACT_BYTES = true,
