@@ -193,28 +193,25 @@ void Clot::set_slices(cstring parser_state, const std::vector<const PHV::FieldSl
     }
 }
 
-void Clot::toJSON(JSONGenerator &json) const { json << *this; }
+void Clot::toJSON(JSONGenerator &json) const {
+    json.emit("tag", tag);
+    json.emit("gress", gress);
+    json.emit("pov_bit", pov_bit);
+    json.emit("stack_depth", stack_depth);
+    json.emit("stack_inc", stack_inc);
+}
 
-/* static */ Clot *Clot::fromJSON(JSONLoader &json) {
-    if (auto *v = json.json->to<JsonString>()) return new Clot(cstring(v->c_str()));
-    BUG("Couldn't decode JSON value to clot");
-    return new Clot();
+Clot::Clot(JSONLoader &json) {
+    json.load("tag", tag);
+    json.load("gress", gress);
+    json.load("pov_bit", pov_bit);
+    json.load("stack_depth", stack_depth);
+    json.load("stack_inc", stack_inc);
 }
 
 std::ostream &operator<<(std::ostream &out, const Clot &clot) { return out << "CLOT " << clot.tag; }
 
 std::ostream &operator<<(std::ostream &out, const Clot *clot) {
-    if (clot)
-        return out << *clot;
-    else
-        return out << "(nullptr)";
-}
-
-P4::JSONGenerator &operator<<(P4::JSONGenerator &out, const Clot &clot) {
-    return out << clot.toString();
-}
-
-P4::JSONGenerator &operator<<(P4::JSONGenerator &out, const Clot *clot) {
     if (clot)
         return out << *clot;
     else

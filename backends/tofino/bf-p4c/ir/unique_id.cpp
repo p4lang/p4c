@@ -30,8 +30,8 @@ static const char *attached_id_to_str[] = {"",      "tind",     "idletime", "sta
 static const char *speciality_to_str[] = {"", "atcam", "dleft"};
 
 void UniqueAttachedId::toJSON(P4::JSONGenerator &json) const {
-    json << json.indent << "\"name\": " << name << ",\n"
-         << json.indent << "\"type\": " << type << ",\n";
+    json.emit("name", name);
+    json.emit("type", type);
 }
 
 UniqueAttachedId UniqueAttachedId::fromJSON(P4::JSONLoader &json) {

@@ -50,8 +50,8 @@ void IR::Node::traceCreation() const {
 int IR::Node::currentId = 0;
 
 void IR::Node::toJSON(JSONGenerator &json) const {
-    json << json.indent << "\"Node_ID\" : " << id << "," << std::endl
-         << json.indent << "\"Node_Type\" : " << node_type_name();
+    json.emit("Node_ID", id);
+    json.emit("Node_Type", node_type_name());
 }
 
 IR::Node::Node(JSONLoader &json) : id(-1) {
@@ -146,16 +146,13 @@ void IR::Node::sourceInfoToJSON(JSONGenerator &json) const {
         // Same reasoning as above.
         return;
     }
-
-    json << "," << std::endl << json.indent++ << "\"Source_Info\" : {" << std::endl;
-
-    json << json.indent << "\"filename\" : " << fName << "," << std::endl;
-    json << json.indent << "\"line\" : " << lineNumber << "," << std::endl;
-    json << json.indent << "\"column\" : " << columnNumber << "," << std::endl;
-    json << json.indent << "\"source_fragment\" : " << si.toBriefSourceFragment().escapeJson()
-         << std::endl;
-
-    json << --json.indent << "}";
+    json.emit_tag("Source_Info");
+    auto state = json.begin_object();
+    json.emit("filename", fName);
+    json.emit("line", lineNumber);
+    json.emit("column", columnNumber);
+    json.emit("source_fragment", si.toBriefSourceFragment());
+    json.end_object(state);
 }
 
 IRNODE_DEFINE_APPLY_OVERLOAD(Node, , )

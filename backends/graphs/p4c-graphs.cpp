@@ -181,7 +181,7 @@ int main(int argc, char *const argv[]) {
     try {
         top = midEnd.process(program);
         if (!options.dumpJsonFile.empty())
-            JSONGenerator(*openFile(options.dumpJsonFile, true)) << program << std::endl;
+            JSONGenerator(*openFile(options.dumpJsonFile, true)).emit(program);
     } catch (const std::exception &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;

@@ -29,7 +29,7 @@ TEST(IR, DumpJSON) {
     IR::Expression *e1 = new IR::Add(Util::SourceInfo(), c, c);
 
     std::stringstream ss, ss2;
-    JSONGenerator(ss) << e1 << std::endl;
+    JSONGenerator(ss).emit(e1);
     std::cout << ss.str();
 
     JSONLoader loader(ss);
@@ -37,5 +37,5 @@ TEST(IR, DumpJSON) {
 
     const IR::Node *e2 = nullptr;
     loader >> e2;
-    JSONGenerator(std::cout) << e2 << std::endl;
+    JSONGenerator(std::cout).emit(e2);
 }

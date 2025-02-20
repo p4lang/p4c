@@ -299,15 +299,11 @@ const IR::Literal *Z3Solver::toLiteral(const z3::expr &e, const IR::Type *type) 
 }
 
 void Z3Solver::toJSON(JSONGenerator &json) const {
-    json << json.indent << "{\n";
-    json.indent++;
-    json << json.indent << "\"checkpoints\" : " << checkpoints;
-    json << ",\n";
-    json << json.indent << "\"declarations\" : " << declaredVarsById;
-    json << ",\n";
-    json << json.indent << "\"assertions\" : " << p4Assertions;
-    json.indent--;
-    json << json.indent << "}\n";
+    auto state = json.begin_object();
+    json.emit("checkpoints", checkpoints);
+    json.emit("declarations", declaredVarsById);
+    json.emit("assertions", p4Assertions);
+    json.end_object(state);
 }
 
 void Z3Solver::addZ3Pushes(size_t &chkIndex, size_t asrtIndex) {

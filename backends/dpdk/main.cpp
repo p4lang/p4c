@@ -136,7 +136,7 @@ int main(int argc, char *const argv[]) {
         if (::P4::errorCount() > 1 || toplevel == nullptr || toplevel->getMain() == nullptr)
             return 1;
         if (!options.dumpJsonFile.empty())
-            JSONGenerator(*openFile(options.dumpJsonFile, true), true) << program << std::endl;
+            JSONGenerator(*openFile(options.dumpJsonFile, true), true).emit(program);
     } catch (const std::exception &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
