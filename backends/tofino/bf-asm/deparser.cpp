@@ -673,7 +673,7 @@ void Deparser::process() {
         }
         for (int i = 0; i < MAX_DEPARSER_CHECKSUM_UNITS; i++)
             for (auto &ent : full_checksum_unit[gress][i].entries) {
-                for (auto entry : ent.second) {
+                for (const auto &entry : ent.second) {
                     if (!entry.check()) error(entry.lineno, "Invalid checksum entry");
                 }
                 ent.second = merge_csum_entries(ent.second, i);

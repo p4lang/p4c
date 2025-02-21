@@ -150,7 +150,6 @@ void Table::NextTables::resolve_long_branch(const Table *tbl,
             break;
         }
         next_table_ = n;
-    continue2:;
     }
 }
 

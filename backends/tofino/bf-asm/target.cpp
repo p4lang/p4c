@@ -313,9 +313,9 @@ int Target::NUM_BUS_OF_TYPE(int bus_type) {
 }
 
 // should these be inline in the header file?
-#define DEFINE_PER_TARGET_CONSTANT(TYPE, NAME)                      \
-    TYPE Target::NAME() {                                           \
-        SWITCH_FOREACH_TARGET(options.target, return TARGET::NAME;) \
-        return (TYPE){}; /* NOLINT(readability/braces) */           \
+#define DEFINE_PER_TARGET_CONSTANT(TYPE, NAME)                                      \
+    TYPE Target::NAME() {                                                           \
+        SWITCH_FOREACH_TARGET(options.target, return TARGET::NAME;)                 \
+        return std::conditional_t<std::is_pointer_v<TYPE>, std::nullptr_t, TYPE>(); \
     }
 PER_TARGET_CONSTANTS(DEFINE_PER_TARGET_CONSTANT)
