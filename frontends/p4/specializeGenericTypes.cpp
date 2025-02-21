@@ -17,7 +17,6 @@ limitations under the License.
 #include "specializeGenericTypes.h"
 
 #include "absl/strings/str_replace.h"
-
 #include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
 
 namespace P4 {
