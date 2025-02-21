@@ -44,24 +44,23 @@ void TypeSpecializationMap::markDefined(const IR::Type_Declaration *tdec) {
 
 void TypeSpecializationMap::fillInsertionSet(const IR::Type_StructLike *decl,
                                              InsertionSet &insertion) {
-    for (const auto *field : decl->fields) {
-        // not using type map, the struct type could be a fresh one, and even if it is not, struct
-        // fields will always have known type (unlike e.g. expressions)
-        cstring name;
-        if (const auto *tn = field->type->to<IR::Type_Name>()) {
-            name = tn->path->name.name;
+    auto handleName = [&](cstring name) {
+        LOG4("TSM: " << decl->toString() << " to be inserted after " << name);
+        insertion.insert(name);
+    };
+    // - not using type map, the struct type could be a fresh one, and even if it is not, struct
+    //   fields will always have known type (unlike e.g. expressions)
+    // - using visitor to handle type names and type specialization inside types like `list` and
+    //   `tuple`.
+    forAllMatching<IR::Type_Name>(decl, [&](const IR::Type_Name *tn) {
+        handleName(tn->path->name.name);
+    });
+    forAllMatching<IR::Type_Specialized>(decl, [&](const IR::Type_Specialized *ts) {
+        if (const auto *specialization = get(ts)) {
+            CHECK_NULL(specialization->replacement);
+            handleName(specialization->replacement->name);
         }
-        if (const auto *ts = field->type->to<IR::Type_Specialized>()) {
-            if (const auto *specialization = get(ts)) {
-                CHECK_NULL(specialization->replacement);
-                name = specialization->replacement->name;
-            }
-        }
-        if (!name.isNull()) {
-            LOG4("TSM: " << decl->toString() << " to be inserted after " << name);
-            insertion.insert(name);
-        }
-    }
+    });
 }
 
 void TypeSpecializationMap::add(const IR::Type_Specialized *t, const IR::Type_StructLike *decl,
