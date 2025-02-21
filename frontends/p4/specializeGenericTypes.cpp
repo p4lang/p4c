@@ -17,50 +17,70 @@ limitations under the License.
 #include "specializeGenericTypes.h"
 
 #include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
+#include "ir/context-walker.h"
+#include <absl/strings/str_replace.h>
 
 namespace P4 {
 
-bool TypeSpecializationMap::same(const TypeSpecialization *spec,
-                                 const IR::Type_Specialized *right) const {
-    if (!spec->specialized->baseType->equiv(*right->baseType)) return false;
-    BUG_CHECK(spec->argumentTypes->size() == right->arguments->size(),
-              "Type %1% and %2% specialized with different number of arguments?", spec->specialized,
-              right);
-    for (size_t i = 0; i < spec->argumentTypes->size(); i++) {
-        auto argl = spec->argumentTypes->at(i);
-        auto argr = typeMap->getType(right->arguments->at(i), true);
-        if (!typeMap->equivalent(argl, argr)) return false;
+const IR::Type_Declaration *TypeSpecializationMap::getAvailable() {
+    for (auto &[_, specialization] : map) {
+        if (specialization.inserted) continue;
+        auto &insReq = specialization.insertion;
+        if (insReq.empty()) {
+            specialization.inserted = true;
+            return specialization.replacement;
+        }
     }
-    return true;
+    return nullptr;
+}
+
+void TypeSpecializationMap::markDefined(const IR::Type_Declaration *tdec) {
+    const auto name = tdec->name.name;
+    for (auto &[_, specialization] : map) {
+        if (specialization.inserted) continue;
+        specialization.insertion.erase(name);
+    }
+}
+
+void TypeSpecializationMap::fillInsertionSet(const IR::Type_StructLike *decl,
+                                             InsertionSet &insertion) {
+    for (const auto *field : decl->fields) {
+        // not using type map, the struct type could be a fresh one, and even if it is not, struct
+        // fields will always have known type (unlike e.g. expressions)
+        cstring name;
+        if (const auto *tn = field->type->to<IR::Type_Name>()) {
+            name = tn->path->name.name;
+        }
+        if (const auto *ts = field->type->to<IR::Type_Specialized>()) {
+            if (const auto *specialization = get(ts)) {
+                CHECK_NULL(specialization->replacement);
+                name = specialization->replacement->name;
+            }
+        }
+        if (!name.isNull()) {
+            LOG4("TSM: " << decl->toString() << " to be inserted after " << name);
+            insertion.insert(name);
+        }
+    }
 }
 
 void TypeSpecializationMap::add(const IR::Type_Specialized *t, const IR::Type_StructLike *decl,
                                 NameGenerator *nameGen) {
-    auto it = map.find(t);
-    if (it != map.end()) return;
-
-    // First check if we have another specialization with the same
-    // type arguments, in that case reuse it
-    for (auto it : map) {
-        if (same(it.second, t)) {
-            map.emplace(t, it.second);
-            LOG3("Found to specialize: " << t << " as previous " << it.second->name);
-            return;
-        }
+    const auto sig = SpecSignature::get(t);
+    if (!sig) {
+        return;
     }
+    if (map.count(*sig)) return;
 
-    cstring name = nameGen->newName(decl->getName().string_view());
-    LOG3("Found to specialize: " << dbp(t) << "(" << t << ") with name " << name
-                                 << " insert before " << dbp(decl));
-    auto argTypes = new IR::Vector<IR::Type>();
-    for (auto a : *t->arguments) argTypes->push_back(typeMap->getType(a, true));
-    TypeSpecialization *s = new TypeSpecialization(name, t, decl, argTypes);
-    map.emplace(t, s);
+    cstring name = nameGen->newName(sig->name());
+    LOG3("Found to specialize: " << dbp(t) << " with name " << name
+                                 << " insert after " << dbp(decl));
+    map.emplace(*sig, TypeSpecialization{name, t, decl, {decl->name.name}, t->arguments});
 }
 
-TypeSpecialization *TypeSpecializationMap::get(const IR::Type_Specialized *type) const {
-    for (auto it : map) {
-        if (same(it.second, type)) return it.second;
+const TypeSpecialization *TypeSpecializationMap::get(const IR::Type_Specialized *type) const {
+    if (const auto sig = SpecSignature::get(type)) {
+        return getref(map, *sig);
     }
     return nullptr;
 }
@@ -120,32 +140,41 @@ void FindTypeSpecializations::postorder(const IR::Type_Specialized *type) {
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-const IR::Node *CreateSpecializedTypes::postorder(IR::Type_Declaration *type) {
-    for (const auto &[specialized, specialization] : specMap->map) {
-        if (specialization->declaration->name == type->name) {
+void CreateSpecializedTypes::postorder(IR::Type_Declaration *type) {
+    for (auto &[specialized, specialization] : specMap->map) {
+        if (specialization.declaration->name == type->name) {
             auto genDecl = type->to<IR::IMayBeGenericType>();
             TypeVariableSubstitution ts;
-            ts.setBindings(type, genDecl->getTypeParameters(), specialized->arguments);
+            ts.setBindings(type, genDecl->getTypeParameters(), specialization.argumentTypes);
             TypeSubstitutionVisitor tsv(specMap->typeMap, &ts);
             tsv.setCalledBy(this);
             auto renamed = type->apply(tsv)->to<IR::Type_StructLike>()->clone();
-            cstring name = specialization->name;
-            auto empty = new IR::TypeParameters();
+            cstring name = specialization.name;
             renamed->name = name;
-            renamed->typeParameters = empty;
-            specialization->replacement = renamed;
-            LOG3("CST Specializing " << dbp(type) << " with " << ts << " as " << dbp(renamed));
+            renamed->typeParameters = new IR::TypeParameters();
+            specialization.replacement = renamed;
+            // add additional insertion constraints
+            specMap->fillInsertionSet(renamed, specialization.insertion);
+            LOG3("CST: Specializing " << dbp(type) << " with [" << ts << "] as " << dbp(renamed));
         }
     }
-    return insert(type);
 }
 
-const IR::Node *CreateSpecializedTypes::insert(const IR::Node *before) {
-    auto specs = specMap->getSpecializations(getOriginal());
-    if (specs == nullptr) return before;
-    LOG2(specs->size() << " instantiations before " << dbp(before));
-    specs->push_back(before);
-    return specs;
+void CreateSpecializedTypes::postorder(IR::P4Program *prog) {
+    IR::Vector<IR::Node> newObjects;
+    for (const auto *obj : prog->objects) {
+        newObjects.push_back(obj);
+        if (const auto *tdec = obj->to<IR::Type_Declaration>()) {
+            specMap->markDefined(tdec);
+            while (const auto *addTDec = specMap->getAvailable()) {
+                newObjects.push_back(addTDec);
+                specMap->markDefined(addTDec);
+                LOG2("CST: Will insert " << dbp(addTDec) << " after "
+                                         << dbp(newObjects.back()));
+            }
+        }
+    }
+    prog->objects = newObjects;
 }
 
 const IR::Node *ReplaceTypeUses::postorder(IR::Type_Specialized *type) {
@@ -177,6 +206,39 @@ const IR::Node *ReplaceTypeUses::postorder(IR::StructExpression *expression) {
                           << dbp(replacement->replacement));
     expression->structType = replType->getP4Type();
     return expression;
+}
+
+std::string SpecSignature::name() const {
+    std::stringstream ss;
+    ss << baseType;
+    for (const auto &t : arguments) {
+        ss << "_" << absl::StrReplaceAll(t, {{"<", ""}, {">", ""}, {".", "_"}});
+    }
+    return ss.str();
+}
+
+std::string to_string(const SpecSignature &sig) {
+    std::stringstream out;
+    out << sig.baseType << "<";
+    const char *sep = "";
+    for (const auto &t : sig.arguments) {
+        out << sep << t;
+        sep = ", ";
+    }
+    out << ">";
+    return out.str();
+}
+
+std::optional<SpecSignature> SpecSignature::get(const IR::Type_Specialized *spec) {
+    SpecSignature out;
+    out.baseType = spec->baseType->path->name;
+    for (const auto *arg : *spec->arguments) {
+        if (ContainsTypeVariable::inspect(arg)) {
+            return {};
+        }
+        out.arguments.push_back(arg->toString());
+    }
+    return out;
 }
 
 }  // namespace P4
