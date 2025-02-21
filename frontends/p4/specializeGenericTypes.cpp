@@ -16,9 +16,10 @@ limitations under the License.
 
 #include "specializeGenericTypes.h"
 
+#include <absl/strings/str_replace.h>
+
 #include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
 #include "ir/context-walker.h"
-#include <absl/strings/str_replace.h>
 
 namespace P4 {
 
@@ -52,9 +53,8 @@ void TypeSpecializationMap::fillInsertionSet(const IR::Type_StructLike *decl,
     //   fields will always have known type (unlike e.g. expressions)
     // - using visitor to handle type names and type specialization inside types like `list` and
     //   `tuple`.
-    forAllMatching<IR::Type_Name>(decl, [&](const IR::Type_Name *tn) {
-        handleName(tn->path->name.name);
-    });
+    forAllMatching<IR::Type_Name>(
+        decl, [&](const IR::Type_Name *tn) { handleName(tn->path->name.name); });
     forAllMatching<IR::Type_Specialized>(decl, [&](const IR::Type_Specialized *ts) {
         if (const auto *specialization = get(ts)) {
             CHECK_NULL(specialization->replacement);
@@ -72,8 +72,8 @@ void TypeSpecializationMap::add(const IR::Type_Specialized *t, const IR::Type_St
     if (map.count(*sig)) return;
 
     cstring name = nameGen->newName(sig->name());
-    LOG3("Found to specialize: " << dbp(t) << " with name " << name
-                                 << " insert after " << dbp(decl));
+    LOG3("Found to specialize: " << dbp(t) << " with name " << name << " insert after "
+                                 << dbp(decl));
     map.emplace(*sig, TypeSpecialization{name, t, decl, {decl->name.name}, t->arguments});
 }
 
@@ -168,8 +168,7 @@ void CreateSpecializedTypes::postorder(IR::P4Program *prog) {
             while (const auto *addTDec = specMap->getAvailable()) {
                 newObjects.push_back(addTDec);
                 specMap->markDefined(addTDec);
-                LOG2("CST: Will insert " << dbp(addTDec) << " after "
-                                         << dbp(newObjects.back()));
+                LOG2("CST: Will insert " << dbp(addTDec) << " after " << dbp(newObjects.back()));
             }
         }
     }
