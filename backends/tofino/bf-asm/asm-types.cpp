@@ -310,6 +310,9 @@ bool operator==(const struct value_t &a, const struct value_t &b) {
                 if (a.map.data[i].value != b.map.data[i].value) return false;
             }
             return true;
+        case tBIGMATCH:
+        default:
+            break;
     }
     assert(false && "unknown value type");
     return "";

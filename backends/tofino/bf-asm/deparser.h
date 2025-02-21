@@ -115,8 +115,11 @@ class Deparser : public Section {
             swap = a.swap;
             return *this;
         }
+        ChecksumVal(const ChecksumVal &a) : Val(a) {
+            mask = a.mask;
+            swap = a.swap;
+        };
         ChecksumVal() : Val() {}
-
         bool check() const override {
             if (is_phv()) {
                 if (mask == 0) error(lineno, "mask is 0 for phv checkum value?");
