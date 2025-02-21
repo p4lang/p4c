@@ -16,51 +16,68 @@ limitations under the License.
 
 #include "specializeGenericTypes.h"
 
+#include "absl/strings/str_replace.h"
 #include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
 
 namespace P4 {
 
-bool TypeSpecializationMap::same(const TypeSpecialization *spec,
-                                 const IR::Type_Specialized *right) const {
-    if (!spec->specialized->baseType->equiv(*right->baseType)) return false;
-    BUG_CHECK(spec->argumentTypes->size() == right->arguments->size(),
-              "Type %1% and %2% specialized with different number of arguments?", spec->specialized,
-              right);
-    for (size_t i = 0; i < spec->argumentTypes->size(); i++) {
-        auto argl = spec->argumentTypes->at(i);
-        auto argr = typeMap->getType(right->arguments->at(i), true);
-        if (!typeMap->equivalent(argl, argr)) return false;
+const IR::Type_Declaration *TypeSpecializationMap::getAvailable() {
+    for (auto &[_, specialization] : map) {
+        if (specialization.inserted) continue;
+        auto &insReq = specialization.insertion;
+        if (insReq.empty()) {
+            specialization.inserted = true;
+            return specialization.replacement;
+        }
     }
-    return true;
+    return nullptr;
+}
+
+void TypeSpecializationMap::markDefined(const IR::Type_Declaration *tdec) {
+    const auto name = tdec->name.name;
+    for (auto &[_, specialization] : map) {
+        if (specialization.inserted) continue;
+        specialization.insertion.erase(name);
+    }
+}
+
+void TypeSpecializationMap::fillInsertionSet(const IR::Type_StructLike *decl,
+                                             InsertionSet &insertion) {
+    auto handleName = [&](cstring name) {
+        LOG4("TSM: " << decl->toString() << " to be inserted after " << name);
+        insertion.insert(name);
+    };
+    // - not using type map, the struct type could be a fresh one, and even if it is not, struct
+    //   fields will always have known type (unlike e.g. expressions)
+    // - using visitor to handle type names and type specialization inside types like `list` and
+    //   `tuple`.
+    forAllMatching<IR::Type_Name>(
+        decl, [&](const IR::Type_Name *tn) { handleName(tn->path->name.name); });
+    forAllMatching<IR::Type_Specialized>(decl, [&](const IR::Type_Specialized *ts) {
+        if (const auto *specialization = get(ts)) {
+            CHECK_NULL(specialization->replacement);
+            handleName(specialization->replacement->name);
+        }
+    });
 }
 
 void TypeSpecializationMap::add(const IR::Type_Specialized *t, const IR::Type_StructLike *decl,
-                                const IR::Node *insertion, NameGenerator *nameGen) {
-    auto it = map.find(t);
-    if (it != map.end()) return;
-
-    // First check if we have another specialization with the same
-    // type arguments, in that case reuse it
-    for (auto it : map) {
-        if (same(it.second, t)) {
-            map.emplace(t, it.second);
-            LOG3("Found to specialize: " << t << " as previous " << it.second->name);
-            return;
-        }
+                                NameGenerator *nameGen) {
+    const auto sig = SpecSignature::get(t);
+    if (!sig) {
+        return;
     }
+    if (map.count(*sig)) return;
 
-    cstring name = nameGen->newName(decl->getName().string_view());
-    LOG3("Found to specialize: " << dbp(t) << "(" << t << ") with name " << name
-                                 << " insert before " << dbp(insertion));
-    auto argTypes = new IR::Vector<IR::Type>();
-    for (auto a : *t->arguments) argTypes->push_back(typeMap->getType(a, true));
-    TypeSpecialization *s = new TypeSpecialization(name, t, decl, insertion, argTypes);
-    map.emplace(t, s);
+    cstring name = nameGen->newName(sig->name());
+    LOG3("Found to specialize: " << dbp(t) << " with name " << name << " insert after "
+                                 << dbp(decl));
+    map.emplace(*sig, TypeSpecialization{name, t, decl, {decl->name.name}, t->arguments});
 }
 
-TypeSpecialization *TypeSpecializationMap::get(const IR::Type_Specialized *type) const {
-    for (auto it : map) {
-        if (same(it.second, type)) return it.second;
+const TypeSpecialization *TypeSpecializationMap::get(const IR::Type_Specialized *type) const {
+    if (const auto sig = SpecSignature::get(type)) {
+        return getref(map, *sig);
     }
     return nullptr;
 }
@@ -97,8 +114,10 @@ Visitor::profile_t FindTypeSpecializations::init_apply(const IR::Node *node) {
 }
 
 void FindTypeSpecializations::postorder(const IR::Type_Specialized *type) {
-    auto baseType = specMap->typeMap->getTypeType(type->baseType, true);
-    auto st = baseType->to<IR::Type_StructLike>();
+    // Look for the declaration using the resolution context (not type map) to find it always
+    // at the program's top level. This way we can also use the declaration as insertion point.
+    const auto *baseType = getDeclaration(type->baseType->path);
+    const auto *st = baseType->to<IR::Type_StructLike>();
     if (st == nullptr || st->typeParameters->size() == 0)
         // nothing to specialize
         return;
@@ -113,49 +132,45 @@ void FindTypeSpecializations::postorder(const IR::Type_Specialized *type) {
             // specialized instances of G, e.g., G<bit<32>>.
             return;
     }
-    // Find location where the specialization is to be inserted.
-    // This can be before a Parser, Control, or a toplevel instance declaration
-    const IR::Node *insert = findContext<IR::P4Parser>();
-    if (!insert) insert = findContext<IR::Function>();
-    if (!insert) insert = findContext<IR::P4Control>();
-    if (!insert) insert = findContext<IR::Type_Declaration>();
-    if (!insert) insert = findContext<IR::Declaration_Constant>();
-    if (!insert) insert = findContext<IR::Declaration_Variable>();
-    if (!insert) insert = findContext<IR::Declaration_Instance>();
-    if (!insert) insert = findContext<IR::P4Action>();
-    CHECK_NULL(insert);
-    specMap->add(type, st, insert, &nameGen);
+    specMap->add(type, st, &nameGen);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-const IR::Node *CreateSpecializedTypes::postorder(IR::Type_Declaration *type) {
-    for (auto it : specMap->map) {
-        if (it.second->declaration->name == type->name) {
-            auto specialized = it.first;
+void CreateSpecializedTypes::postorder(IR::Type_Declaration *type) {
+    for (auto &[specialized, specialization] : specMap->map) {
+        if (specialization.declaration->name == type->name) {
             auto genDecl = type->to<IR::IMayBeGenericType>();
             TypeVariableSubstitution ts;
-            ts.setBindings(type, genDecl->getTypeParameters(), specialized->arguments);
+            ts.setBindings(type, genDecl->getTypeParameters(), specialization.argumentTypes);
             TypeSubstitutionVisitor tsv(specMap->typeMap, &ts);
             tsv.setCalledBy(this);
             auto renamed = type->apply(tsv)->to<IR::Type_StructLike>()->clone();
-            cstring name = it.second->name;
-            auto empty = new IR::TypeParameters();
+            cstring name = specialization.name;
             renamed->name = name;
-            renamed->typeParameters = empty;
-            it.second->replacement = postorder(renamed)->to<IR::Type_StructLike>();
-            LOG3("CST Specializing " << dbp(type) << " with " << ts << " as " << dbp(renamed));
+            renamed->typeParameters = new IR::TypeParameters();
+            specialization.replacement = renamed;
+            // add additional insertion constraints
+            specMap->fillInsertionSet(renamed, specialization.insertion);
+            LOG3("CST: Specializing " << dbp(type) << " with [" << ts << "] as " << dbp(renamed));
         }
     }
-    return insert(type);
 }
 
-const IR::Node *CreateSpecializedTypes::insert(const IR::Node *before) {
-    auto specs = specMap->getSpecializations(getOriginal());
-    if (specs == nullptr) return before;
-    LOG2(specs->size() << " instantiations before " << dbp(before));
-    specs->push_back(before);
-    return specs;
+void CreateSpecializedTypes::postorder(IR::P4Program *prog) {
+    IR::Vector<IR::Node> newObjects;
+    for (const auto *obj : prog->objects) {
+        newObjects.push_back(obj);
+        if (const auto *tdec = obj->to<IR::Type_Declaration>()) {
+            specMap->markDefined(tdec);
+            while (const auto *addTDec = specMap->getAvailable()) {
+                newObjects.push_back(addTDec);
+                specMap->markDefined(addTDec);
+                LOG2("CST: Will insert " << dbp(addTDec) << " after " << dbp(newObjects.back()));
+            }
+        }
+    }
+    prog->objects = newObjects;
 }
 
 const IR::Node *ReplaceTypeUses::postorder(IR::Type_Specialized *type) {
@@ -187,6 +202,40 @@ const IR::Node *ReplaceTypeUses::postorder(IR::StructExpression *expression) {
                           << dbp(replacement->replacement));
     expression->structType = replType->getP4Type();
     return expression;
+}
+
+std::string SpecSignature::name() const {
+    std::stringstream ss;
+    ss << baseType;
+    for (const auto &t : arguments) {
+        ss << "_"
+           << absl::StrReplaceAll(t, {{"<", ""}, {">", ""}, {" ", ""}, {",", "_"}, {".", "_"}});
+    }
+    return ss.str();
+}
+
+std::string to_string(const SpecSignature &sig) {
+    std::stringstream out;
+    out << sig.baseType << "<";
+    const char *sep = "";
+    for (const auto &t : sig.arguments) {
+        out << sep << t;
+        sep = ", ";
+    }
+    out << ">";
+    return out.str();
+}
+
+std::optional<SpecSignature> SpecSignature::get(const IR::Type_Specialized *spec) {
+    SpecSignature out;
+    out.baseType = spec->baseType->path->name;
+    for (const auto *arg : *spec->arguments) {
+        if (ContainsTypeVariable::inspect(arg)) {
+            return {};
+        }
+        out.arguments.push_back(arg->toString());
+    }
+    return out;
 }
 
 }  // namespace P4
