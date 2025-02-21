@@ -209,7 +209,8 @@ std::string SpecSignature::name() const {
     std::stringstream ss;
     ss << baseType;
     for (const auto &t : arguments) {
-        ss << "_" << absl::StrReplaceAll(t, {{"<", ""}, {">", ""}, {".", "_"}});
+        ss << "_"
+           << absl::StrReplaceAll(t, {{"<", ""}, {">", ""}, {" ", ""}, {",", "_"}, {".", "_"}});
     }
     return ss.str();
 }
