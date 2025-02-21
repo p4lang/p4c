@@ -32,6 +32,7 @@ class StateTranslationVisitor : public CodeGenInspector {
  protected:
     /// Stores the result of evaluating the select argument.
     cstring selectValue;
+    const IR::Type *selectType;
 
     P4::P4CoreLibrary &p4lib;
     const EBPFParserState *state;

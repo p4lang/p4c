@@ -66,7 +66,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
                 struct MainControlImpl_tbl_default_key key;
                 __builtin_memset(&key, 0, sizeof(key));
                 key.keysz = 128;
-                __builtin_memcpy(&(key.field0[0]), &(hdr->ipv6.srcAddr[0]), 16);
+                __builtin_memcpy(&(key.field0), &(hdr->ipv6.srcAddr), 16);
                 struct p4tc_table_entry_act_bpf *act_bpf;
                 /* value */
                 struct MainControlImpl_tbl_default_value *value = NULL;
@@ -200,7 +200,7 @@ static __always_inline int process(struct __sk_buff *skb, struct headers_t *hdr,
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0 + 1, 4, 4, (ebpf_byte));
             ebpf_packetOffsetInBits += 8;
 
-            hdr->ipv6.flowLabel = htonl(hdr->ipv6.flowLabel << 12);
+            storePrimitive32((u8 *)&hdr->ipv6.flowLabel, 20, (htonl(getPrimitive32(hdr->ipv6.flowLabel, 20) << 12)));
             ebpf_byte = ((char*)(&hdr->ipv6.flowLabel))[0];
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0, 4, 0, (ebpf_byte >> 4));
             write_partial(pkt + BYTES(ebpf_packetOffsetInBits) + 0 + 1, 4, 4, (ebpf_byte));

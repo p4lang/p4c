@@ -56,6 +56,7 @@ class MinimalNameGenerator : public NameGenerator, public Inspector {
 // interchangeably when looking up declarations.  This should go away once the refMap does
 class DeclarationLookup {
  public:
+    virtual ~DeclarationLookup() = default;
     virtual const IR::IDeclaration *getDeclaration(const IR::Path *,
                                                    bool notNull = false) const = 0;
     virtual const IR::IDeclaration *getDeclaration(const IR::This *,
