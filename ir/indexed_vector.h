@@ -74,7 +74,7 @@ class IndexedVector : public Vector<T> {
     }
     IndexedVector &operator=(const IndexedVector &) = default;
     IndexedVector &operator=(IndexedVector &&) = default;
-    explicit IndexedVector(const T *a) { push_back(std::move(a)); }
+    explicit IndexedVector(const T *a) { push_back(a); }
     explicit IndexedVector(const safe_vector<const T *> &a) {
         insert(Vector<T>::end(), a.begin(), a.end());
     }
@@ -92,7 +92,8 @@ class IndexedVector : public Vector<T> {
     // TODO: Although this is not a const_iterator, it should NOT
     // be used to modify the vector directly.  I don't know
     // how to enforce this property, though.
-    typedef typename Vector<T>::iterator iterator;
+    using iterator = typename Vector<T>::iterator;
+    using const_iterator = typename Vector<T>::const_iterator;
 
     const IDeclaration *getDeclaration(cstring name) const {
         auto it = declarations.find(name);
