@@ -19,7 +19,6 @@ limitations under the License.
 #include <absl/strings/str_replace.h>
 
 #include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
-#include "ir/context-walker.h"
 
 namespace P4 {
 
