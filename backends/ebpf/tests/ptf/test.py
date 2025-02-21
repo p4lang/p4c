@@ -3,6 +3,11 @@
 # Copyright 2022-present Open Networking Foundation
 # SPDX-License-Identifier: GPL-2.0-only
 # Reason-GPL: import-scapy
+# Note: This program was originally contributed with the expectation
+# that it would be licensed as Apache-2.0.  It is only licensed as
+# GPL-2.0-only because it imports the GPL-2.0-only module Scapy.  If
+# someone later modifies it so that it no longer uses Scapy, nor any
+# other GPL modules, please change the license to Apache-2.0.
 
 import copy
 
