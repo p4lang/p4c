@@ -133,12 +133,8 @@ class Vector : public VectorBase {
         push_back(item->to<T>());
     }
 
-    iterator insert(iterator i, const T *v) {
-        return vec.insert(i, v);
-    }
-    iterator insert(iterator i, size_t n, const T *v) {
-        return vec.insert(i, n, v);
-    }
+    iterator insert(iterator i, const T *v) { return vec.insert(i, v); }
+    iterator insert(iterator i, size_t n, const T *v) { return vec.insert(i, n, v); }
 
     const T *const &operator[](size_t idx) const { return vec[idx]; }
     const T *&operator[](size_t idx) { return vec[idx]; }
