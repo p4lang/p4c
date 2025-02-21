@@ -1,9 +1,8 @@
-
 name: Auto Label Issues
 
 on:
   issues:
-    types: [opened, edited]  
+    types: [opened, edited]  # Runs when an issue is created or modified
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
@@ -18,32 +17,34 @@ jobs:
             const issue = context.payload.issue;
             const labelsToAdd = [];
 
-            // Define keyword-label mapping
+            // Define label mappings based on brackets in title
             const labelMappings = {
-              "bug": "bug",
-              "error": "bug",
-              "fix": "bug",
-              "feature": "enhancement",
-              "docs": "documentation",
-              "question": "question",
-              "dpdk": "dpdk",
-              "p4c": "p4c",
-              "bmv2": "bmv2",
-              "compiler": "compiler",
-              "test": "testing",
-              "breaking change": "breaking-change",
-              "performance": "compiler-performance",
-              "control plane": "control-plane",
-              "core": "core",
-              "duplicate": "duplicate",
-              "ebpf": "ebpf",
-              "psa": "ebpf-psa"
+              "[bug]": "bug",
+              "[error]": "bug",
+              "[fix]": "bug",
+              "[feature]": "enhancement",
+              "[docs]": "documentation",
+              "[dpdk]": "dpdk",
+              "[p4c]": "p4c",
+              "[bmv2]": "bmv2",
+              "[compiler]": "compiler",
+              "[test]": "testing",
+              "[P4Testgen]": "p4tools",
+              "[P4Smith]": "p4tools",
+              "[P4tools]": "p4tools",
+              "[Tofino]":"tofino",
+              "[p4tc]": "p4tc",
+              "[p4fmt]": "p4fmt",
+              "[core]":"core",
+              ""
             };
 
-            // Check if issue title or body contains keywords
+          
+
+            // Check if issue title contains bracketed keywords
+            const title = issue.title.toLowerCase();
             for (const [keyword, label] of Object.entries(labelMappings)) {
-              if (issue.title.toLowerCase().includes(keyword) || 
-                  issue.body.toLowerCase().includes(keyword)) {
+              if (title.includes(keyword.toLowerCase()) && !excludedLabels.includes(keyword)) {
                 labelsToAdd.push(label);
               }
             }
