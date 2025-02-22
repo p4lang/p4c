@@ -56,7 +56,7 @@ void compile(EbpfOptions &options) {
 
         std::istream inJson(&fb);
         JSONLoader jsonFileLoader(inJson);
-        if (jsonFileLoader.json == nullptr) {
+        if (!jsonFileLoader) {
             ::P4::error(ErrorType::ERR_IO, "%s: Not valid input file", options.file);
             return;
         }

@@ -340,13 +340,13 @@ Z3Solver::Z3Solver(bool isIncremental, std::optional<std::istream *> inOpt)
     JSONLoader loader(*inOpt.value());
 
     JSONLoader solverCheckpoints(loader, "checkpoints");
-    BUG_CHECK(solverCheckpoints.json->is<JsonVector>(),
+    BUG_CHECK(solverCheckpoints.is<JsonVector>(),
               "Z3 solver loading: can't find list of checkpoint");
     solverCheckpoints >> checkpoints;
 
     // loading all assertions
     JSONLoader solverAssertions(loader, "assertions");
-    BUG_CHECK(solverAssertions.json->is<JsonVector>(),
+    BUG_CHECK(solverAssertions.is<JsonVector>(),
               "Z3 solver loading: can't find list of assertions");
     safe_vector<const Constraint *> assertions;
     solverAssertions >> assertions;

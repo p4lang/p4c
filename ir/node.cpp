@@ -155,6 +155,15 @@ void IR::Node::sourceInfoToJSON(JSONGenerator &json) const {
     json.end_object(state);
 }
 
+void IR::Node::sourceInfoFromJSON(JSONLoader &json) {
+    if (auto si = JSONLoader(json, "Source_Info")) {
+        si.load("filename", srcInfo.filename);
+        si.load("line", srcInfo.line);
+        si.load("column", srcInfo.column);
+        si.load("source_fragment", srcInfo.srcBrief);
+    }
+}
+
 IRNODE_DEFINE_APPLY_OVERLOAD(Node, , )
 
 }  // namespace P4

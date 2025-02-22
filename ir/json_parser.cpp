@@ -23,64 +23,6 @@ limitations under the License.
 
 namespace P4 {
 
-int JsonObject::get_id() const {
-    auto it = find("Node_ID");
-    if (it == end()) return -1;
-
-    return it->second->as<JsonNumber>();
-}
-
-std::string JsonObject::get_type() const {
-    auto it = find("Node_Type");
-    if (it == end()) return "";
-
-    return it->second->as<JsonString>();
-}
-
-std::string JsonObject::get_filename() const {
-    auto it = find("filename");
-
-    if (it == end()) return "";
-
-    return it->second->as<JsonString>();
-}
-
-std::string JsonObject::get_sourceFragment() const {
-    auto it = find("source_fragment");
-
-    if (it == end()) return "";
-
-    return it->second->as<JsonString>();
-}
-
-int JsonObject::get_line() const {
-    auto it = find("line");
-
-    if (it == end()) return -1;
-
-    return it->second->as<JsonNumber>();
-}
-
-int JsonObject::get_column() const {
-    auto it = find("column");
-
-    if (it == end()) return -1;
-
-    return it->second->as<JsonNumber>();
-}
-
-JsonObject JsonObject::get_sourceJson() const {
-    auto it = find("Source_Info");
-
-    if (it == end()) {
-        JsonObject obj;
-        obj.setSrcInfo(false);
-        return obj;
-    }
-
-    return it->second->as<JsonObject>();
-}
-
 // Hack to make << operator work multi-threaded
 static thread_local int level = 0;
 
@@ -90,14 +32,14 @@ std::string getIndent(int l) {
     return ss.str();
 }
 
-std::ostream &operator<<(std::ostream &out, JsonData *json) {
+std::ostream &operator<<(std::ostream &out, const JsonData *json) {
     if (auto *obj = json->to<JsonObject>()) {
         out << "{";
         if (obj->size() > 0) {
             level++;
             out << std::endl;
             for (auto &e : *obj)
-                out << getIndent(level) << e.first << " : " << e.second << "," << std::endl;
+                out << getIndent(level) << e.first << " : " << e.second.get() << "," << std::endl;
             out << getIndent(--level);
         }
         out << "}";
@@ -107,7 +49,7 @@ std::ostream &operator<<(std::ostream &out, JsonData *json) {
             level++;
             out << std::endl;
             for (auto &e : *vec) {
-                out << getIndent(level) << e << "," << std::endl;
+                out << getIndent(level) << e.get() << "," << std::endl;
             }
             out << getIndent(--level);
         }
@@ -126,43 +68,43 @@ std::ostream &operator<<(std::ostream &out, JsonData *json) {
     return out;
 }
 
-std::istream &operator>>(std::istream &in, JsonData *&json) {
+std::istream &operator>>(std::istream &in, std::unique_ptr<JsonData> &json) {
     while (in) {
         char ch;
         in >> ch;
         switch (ch) {
             case '{': {
-                ordered_map<std::string, JsonData *> obj;
+                ordered_map<std::string, std::unique_ptr<JsonData>> obj;
                 do {
                     in >> std::ws >> ch;
                     if (ch == '}') break;
                     in.unget();
 
-                    JsonData *key, *val;
+                    std::unique_ptr<JsonData> key, val;
                     in >> key >> std::ws >> ch >> std::ws >> val;
-                    obj[key->as<JsonString>()] = val;
+                    obj[key->as<JsonString>()] = std::move(val);
 
                     in >> std::ws >> ch;
                 } while (in && ch != '}');
 
-                json = new JsonObject(obj);
+                json = std::make_unique<JsonObject>(std::move(obj));
                 return in;
             }
             case '[': {
-                std::vector<JsonData *> vec;
+                std::vector<std::unique_ptr<JsonData>> vec;
                 do {
                     in >> std::ws >> ch;
                     if (ch == ']') break;
                     in.unget();
 
-                    JsonData *elem;
+                    std::unique_ptr<JsonData> elem;
                     in >> elem;
-                    vec.push_back(elem);
+                    vec.emplace_back(std::move(elem));
 
                     in >> std::ws >> ch;
                 } while (in && ch != ']');
 
-                json = new JsonVector(vec);
+                json = std::make_unique<JsonVector>(std::move(vec));
                 return in;
             }
             case '"': {
@@ -177,7 +119,7 @@ std::istream &operator>>(std::istream &in, JsonData *&json) {
                     getline(in, more, '"');
                     s += more;
                 }
-                json = new JsonString(s);
+                json = std::make_unique<JsonString>(s);
                 return in;
             }
             case '-':
@@ -200,23 +142,23 @@ std::istream &operator>>(std::istream &in, JsonData *&json) {
                     in >> ch;
                 } while (isdigit(ch));
                 in.unget();
-                json = new JsonNumber(big_int(num));
+                json = std::make_unique<JsonNumber>(big_int(num));
                 return in;
             }
             case 't':
             case 'T':
                 in.ignore(3);
-                json = new JsonBoolean(true);
+                json = std::make_unique<JsonBoolean>(true);
                 return in;
             case 'f':
             case 'F':
                 in.ignore(4);
-                json = new JsonBoolean(false);
+                json = std::make_unique<JsonBoolean>(false);
                 return in;
             case 'n':
             case 'N':
                 in.ignore(3);
-                json = new JsonNull();
+                json = std::make_unique<JsonNull>();
                 return in;
             default:
                 return in;

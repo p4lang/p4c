@@ -580,7 +580,7 @@ void IR::MAU::HashFunction::build_algorithm_t(bfn_hash_algorithm_ *alg) const {
 }
 
 IR::MAU::HashFunction *IR::MAU::HashFunction::fromJSON(JSONLoader &json) {
-    if (!json.json) return nullptr;
+    if (!json) return nullptr;
     auto *rv = new HashFunction;
     int type = 0;
     json.load("type", type);

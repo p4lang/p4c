@@ -87,7 +87,7 @@ int main(int argc, char *const argv[]) {
         }
         std::istream inJson(&fb);
         JSONLoader jsonFileLoader(inJson);
-        if (jsonFileLoader.json == nullptr) {
+        if (!jsonFileLoader) {
             ::P4::error(ErrorType::ERR_IO, "%s: Not valid json input file", options.file);
             return 1;
         }

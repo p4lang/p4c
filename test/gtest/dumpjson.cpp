@@ -33,7 +33,7 @@ TEST(IR, DumpJSON) {
     std::cout << ss.str();
 
     JSONLoader loader(ss);
-    std::cout << loader.json;
+    std::cout << loader.as<JsonData>();
 
     const IR::Node *e2 = nullptr;
     loader >> e2;

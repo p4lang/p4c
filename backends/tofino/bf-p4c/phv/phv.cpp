@@ -162,7 +162,7 @@ cstring Container::toString() const {
 void Container::toJSON(P4::JSONGenerator &json) const { json.emit(toString()); }
 
 /* static */ Container Container::fromJSON(P4::JSONLoader &json) {
-    if (auto *v = json.json->to<JsonString>()) return Container(v->c_str());
+    if (json.is<JsonString>()) return Container(json.as<JsonString>().c_str());
     BUG("Couldn't decode JSON value to container");
     return Container();
 }
