@@ -41,7 +41,8 @@ jobs:
           sudo mv $BAZEL /usr/local/bin/bazel
 
       - name: First, pass the lint test
-        run: bazel run //:buildifier_check
+        # To fix errors, run with `mode=fix -lint=fix`.
+        run: bazel run -- @buildifier_prebuilt//:buildifier -diff_command="diff -u" -mode=diff -lint=warn -r .
 
       - name: Install Flex and Bison
         run: sudo apt-get update && sudo apt-get install bison flex libfl-dev
@@ -70,7 +71,8 @@ jobs:
             ${{ runner.os }}-build-indirect-
 
       - name: First, pass the lint test
-        run: bazel run //:buildifier_check
+        # To fix errors, run with `mode=fix -lint=fix`.
+        run: bazel run -- @buildifier_prebuilt//:buildifier -diff_command="diff -u" -mode=diff -lint=warn -r .
 
       - name: Install bazelisk
         run: |
