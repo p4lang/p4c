@@ -179,6 +179,7 @@ for xdp_enabled in "${XDP[@]}" ; do
     TEST_PARAMS+=";xdp='$xdp_enabled';xdp2tc='$xdp2tc_mode'"
     # Start tests
     ptf \
+      --packet-manipulation-module bf_pktpy.ptf.packet_pktpy \
       --test-dir ptf/ \
       --test-params="$TEST_PARAMS" \
       --interface 0@s1-eth0 --interface 1@s1-eth1 --interface 2@s1-eth2 --interface 3@s1-eth3 \
