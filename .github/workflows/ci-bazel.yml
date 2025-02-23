@@ -7,6 +7,12 @@ on:
     branches: [main]
   merge_group:
     branches: [main]
+  schedule:
+    # Run daily at 00:00 (https://crontab.guru/#0_0_*_*_*) to keep cache fresh.
+    - cron: "0 0 * * *"
+  # Allow manual triggering of the workflow.
+  # https://docs.github.com/en/actions/managing-workflow-runs-and-deployments/managing-workflow-runs/manually-running-a-workflow
+  workflow_dispatch:
 
 # Cancel any preceding run on the pull request.
 concurrency:
@@ -18,67 +24,87 @@ jobs:
   format_bazel_files:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - run: tools/format-bazel-files.sh
-      - name: Check formatting diff
-        run: |
-          CHANGED_FILES="$(git diff-index --name-only HEAD --)"
-          if [[ -z "${CHANGED_FILES}" ]]; then
-            echo "Success: no formatting changes needed."
-            exit 0
-          fi
-          echo "Found formatting changes in the following files:"
-          echo "${CHANGED_FILES}"
-          echo ""
-          echo "Please run `tools/format-bazel-files.sh` to apply the changes."
-          exit 1
+    - uses: actions/checkout@v4
+    - run: tools/format-bazel-files.sh
+    - name: Check formatting diff
+      run: |
+        CHANGED_FILES="$(git diff-index --name-only HEAD --)"
+        if [[ -z "${CHANGED_FILES}" ]]; then
+          echo "Success: no formatting changes needed."
+          exit 0
+        fi
+        echo "Found formatting changes in the following files:"
+        echo "${CHANGED_FILES}"
+        echo ""
+        echo "Please run `tools/format-bazel-files.sh` to apply the changes."
+        exit 1
 
-  build_direct: # Build p4c directly.
+  build:
     needs: format_bazel_files
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
 
-      - name: Mount bazel cache
-        uses: actions/cache@v4
-        with:
-          # See https://docs.bazel.build/versions/master/output_directories.html
-          path: "~/.cache/bazel"
-          # Create cash entry for every run (by using unique key derived from commit hash).
-          # See https://docs.github.com/en/actions/guides/caching-dependencies-to-speed-up-workflows
-          key: ${{ runner.os }}-build-direct-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-build-direct-
+    - name: Install Flex and Bison
+      run: sudo apt install bison flex libfl-dev
 
-      - name: Install Flex and Bison
-        run: sudo apt install bison flex libfl-dev
+    - name: Mount bazel cache
+      uses: actions/cache/restore@v4
+      with:
+        # See https://docs.bazel.build/versions/master/output_directories.html
+        path: "~/.cache/bazel"
+        key: bazel-${{ hashFiles('**.bazel*', '**.bzl') }}
+        restore-keys: |
+          bazel
 
-      - name: Build p4c
-        run: bazel build //... --verbose_failures
+    - name: Save start time
+      uses: josStorer/get-current-time@v2
+      id: start-time
+      with:
+        # Unix timestamp: seconds since 1970.
+        format: X
 
-  build_indirect: # Build 3rd party Bazel project depending on p4c as a subproject.
-    needs: format_bazel_files
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
+    - name: Build p4c directly
+      run: bazel build //... --verbose_failures
 
-      - name: Mount bazel cache
-        uses: actions/cache@v4
-        with:
-          # See https://docs.bazel.build/versions/master/output_directories.html
-          path: "~/.cache/bazel"
-          # Create cash entry for every run (by using unique key derived from commit hash).
-          # See https://docs.github.com/en/actions/guides/caching-dependencies-to-speed-up-workflows
-          key: ${{ runner.os }}-build-indirect-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-build-indirect-
+    - name: Build p4c via 3rd party project depending on p4c (`bazel/example`)
+      run: cd ./bazel/example && bazel build //... --verbose_failures
 
-      - name: Install Flex and Bison
-        run: sudo apt install bison flex libfl-dev
+    - name: Save end time
+      # Always needed for caching.
+      if: always()
+      uses: josStorer/get-current-time@v2
+      id: end-time
+      with:
+        # Unix timestamp: seconds since 1970.
+        format: X
 
-      - name: Build bazel/example
-        run: cd ./bazel/example && bazel build //... --verbose_failures
+    - name: Calculate build duration
+      # Always needed for caching.
+      if: always()
+      run: |
+        START=${{ steps.start-time.outputs.formattedTime }}
+        END=${{ steps.end-time.outputs.formattedTime }}
+        DURATION=$(( $END - $START ))
+        echo "duration=$DURATION" | tee "$GITHUB_ENV"
+
+    - name: Compress cache
+      # Always needed for caching.
+      if: always()
+      run: rm -rf $(bazel info repository_cache)
+
+    - name: Save bazel cache
+      uses: actions/cache/save@v4
+      # Only create a new cache entry if we're on the main branch or the build
+      # takes > 10 mins.
+      #
+      # NOTE: Even though `always()` evaluates to true, and `true && x == x`,
+      # the `always() &&` prefix is not redundant! Calling `always()` has a
+      # side effect: it prevents this step from being skipped if a previous
+      # step failed.
+      if: always() && (github.ref_name == 'main' || env.duration > 600)
+      with:
+        path: "~/.cache/bazel"
+        key: bazel-${{ hashFiles('**.bazel*', '**.bzl') }}-${{ github.run_id }}
