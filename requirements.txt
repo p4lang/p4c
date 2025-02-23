@@ -23,7 +23,7 @@ black==22.8.0; python_version <= '3.6'
 # The following are needed in order to effectively use the bf-pktpy module,
 # but are not automatically installed as dependencies when you install
 # bf-pktpy.
-six==1.17.0
+six>=1.16.0
 getmac==0.9.5
 scapy_helper==0.14.8
 psutil==7.0.0
