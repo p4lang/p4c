@@ -39,7 +39,7 @@ jobs:
         echo "Please run `tools/format-bazel-files.sh` to apply the changes."
         exit 1
 
-  build:
+  build-direct:  # Build p4c directly.
     needs: format_bazel_files
     runs-on: ubuntu-latest
     steps:
@@ -55,9 +55,9 @@ jobs:
       with:
         # See https://docs.bazel.build/versions/master/output_directories.html
         path: "~/.cache/bazel"
-        key: bazel-${{ hashFiles('**.bazel*', '**.bzl') }}
+        key: bazel-direct-${{ hashFiles('**.bazel*', '**.bzl') }}
         restore-keys: |
-          bazel
+          bazel-direct
 
     - name: Save start time
       uses: josStorer/get-current-time@v2
@@ -68,6 +68,71 @@ jobs:
 
     - name: Build p4c directly
       run: bazel build //... --verbose_failures
+
+    - name: Save end time
+      # Always needed for caching.
+      if: always()
+      uses: josStorer/get-current-time@v2
+      id: end-time
+      with:
+        # Unix timestamp: seconds since 1970.
+        format: X
+
+    - name: Calculate build duration
+      # Always needed for caching.
+      if: always()
+      run: |
+        START=${{ steps.start-time.outputs.formattedTime }}
+        END=${{ steps.end-time.outputs.formattedTime }}
+        DURATION=$(( $END - $START ))
+        echo "duration=$DURATION" | tee "$GITHUB_ENV"
+
+    - name: Compress cache
+      # Always needed for caching.
+      if: always()
+      run: rm -rf $(bazel info repository_cache)
+
+    - name: Save bazel cache
+      uses: actions/cache/save@v4
+      # Only create a new cache entry if we're on the main branch or the build
+      # takes > 10 mins.
+      #
+      # NOTE: Even though `always()` evaluates to true, and `true && x == x`,
+      # the `always() &&` prefix is not redundant! Calling `always()` has a
+      # side effect: it prevents this step from being skipped if a previous
+      # step failed.
+      if: always() && (github.ref_name == 'main' || env.duration > 600)
+      with:
+        path: "~/.cache/bazel"
+        key: bazel-direct-${{ hashFiles('**.bazel*', '**.bzl') }}-${{ github.run_id }}
+
+
+  build-indirect:  # Build 3rd party Bazel project depending on p4c as a subproject.
+    needs: format_bazel_files
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install Flex and Bison
+      run: sudo apt install bison flex libfl-dev
+
+    - name: Mount bazel cache
+      uses: actions/cache/restore@v4
+      with:
+        # See https://docs.bazel.build/versions/master/output_directories.html
+        path: "~/.cache/bazel"
+        key: bazel-indirect-${{ hashFiles('**.bazel*', '**.bzl') }}
+        restore-keys: |
+          bazel-indirect
+
+    - name: Save start time
+      uses: josStorer/get-current-time@v2
+      id: start-time
+      with:
+        # Unix timestamp: seconds since 1970.
+        format: X
 
     - name: Build p4c via 3rd party project depending on p4c (`bazel/example`)
       run: cd ./bazel/example && bazel build //... --verbose_failures
@@ -107,4 +172,4 @@ jobs:
       if: always() && (github.ref_name == 'main' || env.duration > 600)
       with:
         path: "~/.cache/bazel"
-        key: bazel-${{ hashFiles('**.bazel*', '**.bzl') }}-${{ github.run_id }}
+        key: bazel-indirect-${{ hashFiles('**.bazel*', '**.bzl') }}-${{ github.run_id }}
