@@ -7,7 +7,7 @@ ptf @ git+https://github.com/jafingerhut/ptf@add-docs-on-using-bf-pktpy
 # FIXME: We should figure out a way to synchronize P4Runtime versions across CMake and Python.
 # This is the same commit hash as defined in the top-level CMakelists.txt
 p4runtime @ git+https://github.com/p4lang/p4runtime@ec4eb5ef70dbcbcbf2f8357a4b2b8c2f218845a5#subdirectory=py
-bf-pktpy @ git+https://github.com/jafingerhut/bf-pktpy@main
+bf-pktpy @ "git+https://github.com/open-p4studio#subdirectory=pkgsrc/ptf-modules/bf-pktpy"
 clang-format==18.1.0
 isort==5.13.2; python_version > '3.6'
 black==24.3.0; python_version > '3.6'
