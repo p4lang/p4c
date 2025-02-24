@@ -14,10 +14,28 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 jobs:
-  build_direct: # Build p4c directly.
+
+  format_bazel_files:
     runs-on: ubuntu-latest
-    env:
-      BAZEL: bazelisk-linux-amd64
+    steps:
+      - uses: actions/checkout@v4
+      - run: tools/format-bazel-files.sh
+      - name: Check formatting diff
+        run: |
+          CHANGED_FILES="$(git diff-index --name-only HEAD --)"
+          if [[ -z "${CHANGED_FILES}" ]]; then
+            echo "Success: no formatting changes needed."
+            exit 0
+          fi
+          echo "Found formatting changes in the following files:"
+          echo "${CHANGED_FILES}"
+          echo ""
+          echo "Please run `tools/format-bazel-files.sh` to apply the changes."
+          exit 1
+
+  build_direct: # Build p4c directly.
+    needs: format_bazel_files
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
@@ -34,25 +52,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-build-direct-
 
-      - name: Install bazelisk
-        run: |
-          curl -LO "https://github.com/bazelbuild/bazelisk/releases/download/v1.18.0/$BAZEL"
-          chmod +x $BAZEL
-          sudo mv $BAZEL /usr/local/bin/bazel
-
-      - name: First, pass the lint test
-        run: bazel run //:buildifier_check
-
       - name: Install Flex and Bison
-        run: sudo apt-get update && sudo apt-get install bison flex libfl-dev
+        run: sudo apt install bison flex libfl-dev
 
       - name: Build p4c
         run: bazel build //... --verbose_failures
 
   build_indirect: # Build 3rd party Bazel project depending on p4c as a subproject.
+    needs: format_bazel_files
     runs-on: ubuntu-latest
-    env:
-      BAZEL: bazelisk-linux-amd64
     steps:
       - uses: actions/checkout@v4
         with:
@@ -69,17 +77,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-build-indirect-
 
-      - name: First, pass the lint test
-        run: bazel run //:buildifier_check
-
-      - name: Install bazelisk
-        run: |
-          curl -LO "https://github.com/bazelbuild/bazelisk/releases/download/v1.18.0/$BAZEL"
-          chmod +x $BAZEL
-          sudo mv $BAZEL /usr/local/bin/bazel
-
       - name: Install Flex and Bison
-        run: sudo apt-get update && sudo apt-get install bison flex libfl-dev
+        run: sudo apt install bison flex libfl-dev
 
       - name: Build bazel/example
         run: cd ./bazel/example && bazel build //... --verbose_failures
