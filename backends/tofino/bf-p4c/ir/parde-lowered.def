@@ -289,7 +289,7 @@ class LoweredParserState : Unit {
     toString { return name; }
     visit_children {
         v.visit(select);
-        transitions.parallel_visit_children(v); }
+        transitions.parallel_visit_children(v, n); }
 
     /// The name of this state. This does not necessarily correspond to any
     /// state name in the P4 program.
