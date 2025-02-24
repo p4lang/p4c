@@ -489,20 +489,20 @@ class Table : BFN::Unit, IAnnotated  {
 #emit
     // We use a template to obtain polymorphism on the constness of `this`.
     template<class THIS>
-    static void visit_children(THIS*, Visitor& v);
+    static void visit_children(THIS*, Visitor& v, const char *n);
 
     struct payload_info_t; // data to pass between the below helper methods
     /// Helper for visit_children. Visits the match table for when it is not
     /// gateway-inhibited.
     // We use a template to obtain polymorphism on the constness of `this`.
     template<class THIS>
-    static void visit_match_table(THIS* self, Visitor& v, payload_info_t &);
+    static void visit_match_table(THIS* self, Visitor& v, const char *n, payload_info_t &);
 
     /// Helper for visit_children. Visits the gateway payload, for when the
     /// match table is gateway-inhibited.
     // We use a template to obtain polymorphism on the constness of `this`.
     template<class THIS>
-    static void visit_gateway_inhibited(THIS* self, Visitor& v, payload_info_t &);
+    static void visit_gateway_inhibited(THIS* self, Visitor& v, const char *n, payload_info_t &);
 #end
 #apply
 }
@@ -800,7 +800,7 @@ class TypedPrimitive : Primitive {
     TypedPrimitive(Util::SourceInfo srcInfo, const IR::Type* return_type, const IR::Type* m_type, cstring name)
     : Primitive(srcInfo, return_type, name), method_type(m_type) { }
 
-    visit_children { Primitive::visit_children(v); }
+    visit_children { Primitive::visit_children(v, n); }
 }
 
 /// A single MAU instruction.  For the most part instructions look exactly like Primitives,
@@ -945,14 +945,14 @@ class Action : VLIWInstruction, IAnnotated {
     }
 
     visit_children {
-        VLIWInstruction::visit_children(v);
+        VLIWInstruction::visit_children(v, n);
         if (parallel)
-            action.parallel_visit_children(v);
+            action.parallel_visit_children(v, n);
         else
-            action.visit_children(v);
+            action.visit_children(v, n);
         v.visit(annotations, "annotations");
-        default_params.visit_children(v);
-        stateful_calls.visit_children(v);
+        default_params.visit_children(v, n);
+        stateful_calls.visit_children(v, n);
     }
 #apply
 }
@@ -1004,8 +1004,8 @@ class SaluAction : VLIWInstruction, IAnnotated {
     std::map<int, int> output_param_to_alu = {};
 
     visit_children {
-        VLIWInstruction::visit_children(v);
-        action.visit_children(v);
+        VLIWInstruction::visit_children(v, n);
+        action.visit_children(v, n);
         v.visit(annotations, "annotations");
         v.visit(output_dst, "output_dst");
     }

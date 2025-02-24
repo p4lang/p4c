@@ -486,9 +486,9 @@ class ParserState : Unit {
     gress_t thread() const override { return gress; }
     toString { return name; }
     visit_children {
-        statements.visit_children(v);
-        selects.visit_children(v);
-        transitions.parallel_visit_children(v); }
+        statements.visit_children(v, n);
+        selects.visit_children(v, n);
+        transitions.parallel_visit_children(v, n); }
     const IR::ParserState* p4State() const {
         BUG_CHECK(p4States.size() == 1, "Expecing exactly one state in p4States but saw %1%",
                   p4States.size());

@@ -17,6 +17,7 @@ limitations under the License.
 #include "irclass.h"
 #include "lib/algorithm.h"
 #include "lib/enumerator.h"
+#include "type.h"
 
 namespace P4 {
 
@@ -174,22 +175,26 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
       }}},
     {"visit_children"_cs,
      {&NamedType::Void(),
-      {new IrField(&ReferenceType::VisitorRef, "v"_cs)},
+      {new IrField(&ReferenceType::VisitorRef, "v"_cs),
+       new IrField(new PointerType(&NamedType::Char(), true), "n"_cs, "nullptr"_cs)},
       IN_IMPL + OVERRIDE,
       [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
           bool needed = false;
           std::stringstream buf;
           buf << "{" << std::endl;
+          // Silence "not used" warnings in case of name `n` is not used
+          buf << cl->indent << "(void)n;" << std::endl;
           if (auto parent = cl->getParent())
-              buf << cl->indent << parent->qualified_name(cl->containedIn) << "::visit_children(v);"
-                  << std::endl;
+              buf << cl->indent << parent->qualified_name(cl->containedIn)
+                  << "::visit_children(v, n);" << std::endl;
           for (auto f : *cl->getFields()) {
               if (f->type) {
                   if (f->type->resolve(cl->containedIn) == nullptr)
                       // This is not an IR pointer
                       continue;
                   if (f->isInline)
-                      buf << cl->indent << f->name << ".visit_children(v);" << std::endl;
+                      buf << cl->indent << f->name << ".visit_children(v, \"" << f->name << "\");"
+                          << std::endl;
                   else
                       buf << cl->indent << "v.visit(" << f->name << ", \"" << f->name << "\");"
                           << std::endl;

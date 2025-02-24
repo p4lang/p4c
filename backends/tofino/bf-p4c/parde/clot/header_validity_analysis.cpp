@@ -57,7 +57,7 @@ Visitor::profile_t HeaderValidityAnalysis::init_apply(const IR::Node *root) {
 }
 
 bool HeaderValidityAnalysis::preorder(const IR::MAU::Action *act) {
-    act->action.visit_children(*this);
+    act->action.visit_children(*this, "action");
     return false;
 }
 

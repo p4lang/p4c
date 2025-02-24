@@ -1394,7 +1394,7 @@ class MauAsmOutput::EmitAction : public Inspector, public TofinoWriteContext {
             is_empty = false;
             alias.clear();
         }
-        act->action.visit_children(*this);
+        act->action.visit_children(*this, "action");
         // Dumping the information on stateful calls.  For anything that has a meter type,
         // the meter type is dumped first, followed by the address location.  This is
         // required to generate override_full_.*_addr information
@@ -1783,7 +1783,7 @@ class MauAsmOutput::EmitAlwaysRunAction : public MauAsmOutput::EmitAction {
     bool preorder(const IR::MAU::Action *act) override {
         indent++;
         is_empty = true;
-        act->visit_children(*this);
+        act->visit_children(*this, "action");
         return false;
     }
 
