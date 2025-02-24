@@ -1131,7 +1131,6 @@ var hierarchy =
           [ "P4::IR::NameMap< T, MAP, COMP, ALLOC >", "class_p4_1_1_i_r_1_1_name_map.html", null ],
           [ "P4::IR::NodeMap< KEY, VALUE, MAP, COMP, ALLOC >", "class_p4_1_1_i_r_1_1_node_map.html", null ],
           [ "P4::IR::VectorBase", "class_p4_1_1_i_r_1_1_vector_base.html", [
-            [ "P4::IR::iterator< T >", "class_p4_1_1_i_r_1_1_vector.html", null ],
             [ "P4::IR::Vector< IR::Expression >", "class_p4_1_1_i_r_1_1_vector.html", null ],
             [ "P4::IR::Vector< IR::BFN::Pipe >", "class_p4_1_1_i_r_1_1_vector.html", null ],
             [ "P4::IR::Vector< IR::NamedExpression >", "class_p4_1_1_i_r_1_1_vector.html", [
@@ -3728,8 +3727,6 @@ var hierarchy =
       [ "assoc::hash_set< T, Hash, Equal, Allocator >", "classassoc_1_1hash__set.html", null ]
     ] ],
     [ "std::vector< T >", null, [
-      [ "P4::iterator<>", "class_p4_1_1safe__vector.html", null ],
-      [ "P4::const_iterator<>", "class_p4_1_1safe__vector.html", null ],
       [ "P4::iterator<>", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< SingleActionPositions >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const RamSection * >", "class_p4_1_1safe__vector.html", null ],
