@@ -53,6 +53,3 @@ jobs:
           export PATH="$HOME/.local/bin:$PATH"; export PTF_PACKET_MANIPULATION_MODULE="bf_pktpy.ptf.packet_pktpy"; ctest --output-on-failure --schedule-random
 
         working-directory: ./build
-
-      - name: Post test checks
-        run: pip --verbose list

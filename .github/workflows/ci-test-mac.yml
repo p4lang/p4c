@@ -107,6 +107,3 @@ jobs:
           source ~/.bash_profile
           PTF_PACKET_MANIPULATION_MODULE="bf_pktpy.ptf.packet_pktpy" ctest --output-on-failure --schedule-random -E "bpf|ubpf|testgen|smith"
         working-directory: ./build
-
-      - name: Post test checks
-        run: pip --verbose list
