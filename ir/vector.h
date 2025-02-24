@@ -214,16 +214,6 @@ class Vector : public VectorBase {
     DECLARE_TYPEINFO_WITH_DISCRIMINATOR(Vector<T>, NodeDiscriminator::VectorT, T, VectorBase);
 };
 
-}  // namespace P4::IR
-
-// XXX(seth): We use this namespace to hide our get() overloads from ADL. GCC
-// 4.8 has a bug which causes these overloads to be considered when get() is
-// called on a type in the global namespace, even if the number of arguments
-// doesn't match up, which can trigger template instantiations that cause
-// errors.
-namespace P4 {
-namespace GetImpl {
-
 template <class T, class U>
 const T *get(const IR::Vector<T> &vec, U name) {
     for (auto el : vec)
@@ -238,9 +228,6 @@ const T *get(const IR::Vector<T> *vec, U name) {
     return nullptr;
 }
 
-}  // namespace GetImpl
-using namespace GetImpl;  // NOLINT(build/namespaces)
-
-}  // namespace P4
+}  // namespace P4::IR
 
 #endif /* IR_VECTOR_H_ */
