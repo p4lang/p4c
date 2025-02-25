@@ -23,7 +23,9 @@ namespace P4 {
 
 const IR::Node *DoSimplifyControlFlow::postorder(IR::BlockStatement *statement) {
     LOG3("Visiting " << dbp(getOriginal()));
-    if (statement->hasAnnotations()) return statement;
+    if (statement->hasAnnotations() &&
+        !(foldInlinedAt && statement->hasOnlyAnnotation(IR::Annotation::inlinedAtAnnotation)))
+        return statement;
     auto parent = getContext()->node;
     CHECK_NULL(parent);
     if (parent->is<IR::SwitchCase>() || parent->is<IR::P4Control>() || parent->is<IR::Function>() ||

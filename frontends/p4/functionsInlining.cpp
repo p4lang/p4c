@@ -276,13 +276,13 @@ const IR::Statement *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
             subst.add(param, argument);
         } else if (param->direction == IR::Direction::In ||
                    param->direction == IR::Direction::InOut) {
-            auto vardecl = new IR::Declaration_Variable(newName, param->annotations, param->type);
+            auto vardecl = new IR::Declaration_Variable(argument->srcInfo, newName,
+                                                        param->annotations, param->type);
             body.push_back(vardecl);
             auto copyin =
                 new IR::AssignmentStatement(new IR::PathExpression(newName), argument->expression);
             body.push_back(copyin);
-            subst.add(param, new IR::Argument(argument->srcInfo, argument->name,
-                                              new IR::PathExpression(newName)));
+            subst.add(param, new IR::Argument(argument->name, new IR::PathExpression(newName)));
             if (param->direction == IR::Direction::InOut)
                 needCopyout.emplace_back(newName, argument);
         } else if (param->direction == IR::Direction::None) {
@@ -291,9 +291,9 @@ const IR::Statement *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
             subst.add(param, argument);
         } else if (param->direction == IR::Direction::Out) {
             // uninitialized variable
-            auto vardecl = new IR::Declaration_Variable(newName, param->annotations, param->type);
-            subst.add(param, new IR::Argument(argument->srcInfo, argument->name,
-                                              new IR::PathExpression(newName)));
+            auto vardecl = new IR::Declaration_Variable(argument->srcInfo, newName,
+                                                        param->annotations, param->type);
+            subst.add(param, new IR::Argument(argument->name, new IR::PathExpression(newName)));
             body.push_back(vardecl);
             needCopyout.emplace_back(newName, argument);
         }
@@ -344,7 +344,10 @@ const IR::Statement *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
         // ignore the returned value.
     }
 
-    auto result = new IR::BlockStatement(statement->srcInfo, body);
+    IR::Vector<IR::Annotation> annotations(
+        {new IR::Annotation(statement->srcInfo, IR::Annotation::inlinedAtAnnotation,
+                            {new IR::StringLiteral(callee->name)})});
+    auto result = new IR::BlockStatement(statement->srcInfo, annotations, body);
     LOG2("Replacing " << dbp(statement) << " with " << dbp(result));
     return result;
 }
