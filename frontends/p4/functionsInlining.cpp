@@ -345,7 +345,7 @@ const IR::Statement *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
     }
 
     IR::Vector<IR::Annotation> annotations(
-        {new IR::Annotation(statement->srcInfo, IR::Annotation::inlinedAtAnnotation,
+        {new IR::Annotation(statement->srcInfo, IR::Annotation::inlinedFromAnnotation,
                             {new IR::StringLiteral(callee->name)})});
     auto result = new IR::BlockStatement(statement->srcInfo, annotations, body);
     LOG2("Replacing " << dbp(statement) << " with " << dbp(result));

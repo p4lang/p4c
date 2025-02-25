@@ -147,7 +147,7 @@ const IR::Node *ActionsInliner::preorder(IR::MethodCallStatement *statement) {
                 (a->name == IR::Annotation::noWarnAnnotation && a->getSingleString() == "unused"));
         });
     annotations.push_back(new IR::Annotation(statement->srcInfo,
-                                             IR::Annotation::inlinedAtAnnotation,
+                                             IR::Annotation::inlinedFromAnnotation,
                                              {new IR::StringLiteral(callee->name)}));
     auto result = new IR::BlockStatement(statement->srcInfo, annotations, body);
     LOG2("Replacing " << orig << " with " << result);
