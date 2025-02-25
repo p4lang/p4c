@@ -63,7 +63,7 @@ struct TypeSpecialization : public IHasDbPrint {
     }
 };
 
-/// @brief A signature of a *concerte* specialization. None of the parameters can be type variables
+/// @brief A signature of a *concrete* specialization. None of the parameters can be type variables
 /// or generic types, therefore the specialization can always be identified globally the the names
 /// of types.
 struct SpecSignature {
