@@ -155,7 +155,7 @@ class JSONGenerator {
             case OBJ_END:
                 BUG("invalid json output state for emit_tag");
         }
-        out << '\"' << tag << "\" : ";
+        out << '\"' << cstring(tag).escapeJson() << "\" : ";
         output_state = OBJ_AFTERTAG;
     }
 
