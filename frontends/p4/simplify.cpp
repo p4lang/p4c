@@ -24,7 +24,7 @@ namespace P4 {
 const IR::Node *DoSimplifyControlFlow::postorder(IR::BlockStatement *statement) {
     LOG3("Visiting " << dbp(getOriginal()));
     if (statement->hasAnnotations() &&
-        !(foldInlinedAt && statement->hasOnlyAnnotation(IR::Annotation::inlinedAtAnnotation)))
+        !(foldInlinedFrom && statement->hasOnlyAnnotation(IR::Annotation::inlinedFromAnnotation)))
         return statement;
     auto parent = getContext()->node;
     CHECK_NULL(parent);

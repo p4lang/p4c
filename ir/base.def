@@ -290,7 +290,7 @@ class Annotation {
     static const cstring fieldListAnnotation;  /// Used for recirculate, etc.
     static const cstring debugLoggingAnnotation;  /// Used by compiler implementer to limit debug log to the annotated IR context.
     static const cstring disableOptimizationAnnotation; /// annotation to disable certain optimization
-    static const cstring inlinedAtAnnotation; /// annotation to mark block of inlined function
+    static const cstring inlinedFromAnnotation; /// annotation to mark block of inlined function
 
     toString{ return absl::StrCat("@", name); }
     validate{
