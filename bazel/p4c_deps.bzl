@@ -79,16 +79,17 @@ filegroup(
     if not native.existing_rule("com_google_protobuf"):
         http_archive(
             name = "com_google_protobuf",
-            url = "https://github.com/protocolbuffers/protobuf/releases/download/v25.3/protobuf-25.3.tar.gz",
-            strip_prefix = "protobuf-25.3",
-            sha256 = "d19643d265b978383352b3143f04c0641eea75a75235c111cc01a1350173180e",
+            url = "https://github.com/protocolbuffers/protobuf/releases/download/v29.3/protobuf-29.3.tar.gz",
+            strip_prefix = "protobuf-29.3",
+            integrity = "sha256-AIoRzFb5uWZ5tMKF/QX0bTF9aFvjq1JLKjEL4PutmH4=",
+            # sha256 = "d19643d265b978383352b3143f04c0641eea75a75235c111cc01a1350173180e",
         )
     if not native.existing_rule("rules_foreign_cc"):
         http_archive(
             name = "rules_foreign_cc",
-            sha256 = "d54742ffbdc6924f222d2179f0e10e911c5c659c4ae74158e9fe827aad862ac6",
-            strip_prefix = "rules_foreign_cc-0.2.0",
-            url = "https://github.com/bazelbuild/rules_foreign_cc/archive/0.2.0.tar.gz",
+            sha256 = "e0f0ebb1a2223c99a904a565e62aa285bf1d1a8aeda22d10ea2127591624866c",
+            strip_prefix = "rules_foreign_cc-0.14.0",
+            url = "https://github.com/bazel-contrib/rules_foreign_cc/releases/download/0.14.0/rules_foreign_cc-0.14.0.tar.gz",
         )
     if not native.existing_rule("com_github_z3prover_z3"):
         http_archive(
