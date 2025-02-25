@@ -470,7 +470,7 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
         const default_action = do_drop_1();
     }
     @name("PreQosPipe.uplink_term_fwd") action uplink_term_fwd(@name("ctr_idx") counter_index_t ctr_idx_0, @name("tc") TrafficClass tc_2, @name("app_meter_idx") app_meter_idx_t app_meter_idx) {
-        @hidden {
+        @hidden @inlinedAt("common_term_0") {
             local_meta.ctr_idx = ctr_idx_0;
             local_meta.terminations_hit = true;
         }
@@ -478,14 +478,14 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
         local_meta.tc = tc_2;
     }
     @name("PreQosPipe.uplink_term_drop") action uplink_term_drop(@name("ctr_idx") counter_index_t ctr_idx_5) {
-        @hidden {
+        @hidden @inlinedAt("common_term_0") {
             local_meta.ctr_idx = ctr_idx_5;
             local_meta.terminations_hit = true;
         }
         local_meta.needs_dropping = true;
     }
     @name("PreQosPipe.downlink_term_fwd") action downlink_term_fwd(@name("ctr_idx") counter_index_t ctr_idx_6, @name("teid") teid_t teid_1, @name("qfi") qfi_t qfi_1, @name("tc") TrafficClass tc_3, @name("app_meter_idx") app_meter_idx_t app_meter_idx_2) {
-        @hidden {
+        @hidden @inlinedAt("common_term_0") {
             local_meta.ctr_idx = ctr_idx_6;
             local_meta.terminations_hit = true;
         }
@@ -495,7 +495,7 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
         local_meta.tc = tc_3;
     }
     @name("PreQosPipe.downlink_term_drop") action downlink_term_drop(@name("ctr_idx") counter_index_t ctr_idx_7) {
-        @hidden {
+        @hidden @inlinedAt("common_term_0") {
             local_meta.ctr_idx = ctr_idx_7;
             local_meta.terminations_hit = true;
         }
@@ -557,7 +557,7 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
         default_action = NoAction_2();
     }
     @name("PreQosPipe.do_gtpu_tunnel") action do_gtpu_tunnel() {
-        @hidden {
+        @hidden @inlinedAt("_udp_encap_0") {
             hdr.inner_udp = hdr.udp;
             hdr.udp.setInvalid();
             hdr.inner_tcp = hdr.tcp;
@@ -585,7 +585,7 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
             hdr.ipv4.dst_addr = local_meta.tunnel_out_dst_ipv4_addr;
             hdr.ipv4.checksum = 16w0;
         }
-        @hidden {
+        @hidden @inlinedAt("_gtpu_encap_0") {
             hdr.gtpu.setValid();
             hdr.gtpu.version = 3w0x1;
             hdr.gtpu.pt = 1w0x1;
@@ -599,7 +599,7 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
         }
     }
     @name("PreQosPipe.do_gtpu_tunnel_with_psc") action do_gtpu_tunnel_with_psc() {
-        @hidden {
+        @hidden @inlinedAt("_udp_encap_0") {
             hdr.inner_udp = hdr.udp;
             hdr.udp.setInvalid();
             hdr.inner_tcp = hdr.tcp;
@@ -627,7 +627,7 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
             hdr.ipv4.dst_addr = local_meta.tunnel_out_dst_ipv4_addr;
             hdr.ipv4.checksum = 16w0;
         }
-        @hidden {
+        @hidden @inlinedAt("_gtpu_encap_0") {
             hdr.gtpu.setValid();
             hdr.gtpu.version = 3w0x1;
             hdr.gtpu.pt = 1w0x1;
