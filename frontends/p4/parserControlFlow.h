@@ -90,7 +90,7 @@ class RemoveParserControlFlow : public PassRepeated {
  public:
     explicit RemoveParserControlFlow(TypeMap *typeMap) : PassRepeated({}) {
         passes.emplace_back(new DoRemoveParserControlFlow());
-        passes.emplace_back(new SimplifyControlFlow(typeMap));
+        passes.emplace_back(new SimplifyControlFlow(typeMap, true));
         setName("RemoveParserControlFlow");
     }
 };

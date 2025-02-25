@@ -92,11 +92,10 @@ const IR::Node *ActionsInliner::preorder(IR::MethodCallStatement *statement) {
         cstring newName = nameGen->newName(param->name.name.string_view());
         paramRename.emplace(param, newName);
         if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) {
-            const auto *vardecl = new IR::Declaration_Variable(newName, param->annotations,
-                                                               param->type, argument->expression);
+            const auto *vardecl = new IR::Declaration_Variable(
+                argument->srcInfo, newName, param->annotations, param->type, argument->expression);
             body.push_back(vardecl);
-            subst.add(param, new IR::Argument(argument->srcInfo, argument->name,
-                                              new IR::PathExpression(newName)));
+            subst.add(param, new IR::Argument(argument->name, new IR::PathExpression(newName)));
         } else if (param->direction == IR::Direction::None) {
             // This works because there can be no side-effects in the evaluation of this
             // argument.
@@ -108,10 +107,9 @@ const IR::Node *ActionsInliner::preorder(IR::MethodCallStatement *statement) {
             subst.add(param, argument);
         } else if (param->direction == IR::Direction::Out) {
             // uninitialized variable
-            const auto *vardecl =
-                new IR::Declaration_Variable(newName, param->annotations, param->type);
-            subst.add(param, new IR::Argument(argument->srcInfo, argument->name,
-                                              new IR::PathExpression(newName)));
+            const auto *vardecl = new IR::Declaration_Variable(argument->srcInfo, newName,
+                                                               param->annotations, param->type);
+            subst.add(param, new IR::Argument(argument->name, new IR::PathExpression(newName)));
             body.push_back(vardecl);
         }
     }
@@ -136,17 +134,22 @@ const IR::Node *ActionsInliner::preorder(IR::MethodCallStatement *statement) {
         if (param->direction == IR::Direction::InOut || param->direction == IR::Direction::Out) {
             cstring newName = ::P4::get(paramRename, param);
             auto right = new IR::PathExpression(newName);
-            auto copyout = new IR::AssignmentStatement(left->expression, right);
+            // FIXME: Technically, location should be just after the call
+            auto copyout = new IR::AssignmentStatement(statement->srcInfo, left->expression, right);
             body.push_back(copyout);
         }
     }
 
-    auto annotations = callee->annotations.where([&](const IR::Annotation *a) {
-        return !(a->name == IR::Annotation::nameAnnotation ||
-                 (a->name == IR::Annotation::noWarnAnnotation && a->getSingleString() == "unused"));
-    });
-    auto result = new IR::BlockStatement(statement->srcInfo,
-                                         {annotations->begin(), annotations->end()}, body);
+    IR::Vector<IR::Annotation> annotations =
+        callee->annotations.where([&](const IR::Annotation *a) {
+            return !(
+                a->name == IR::Annotation::nameAnnotation ||
+                (a->name == IR::Annotation::noWarnAnnotation && a->getSingleString() == "unused"));
+        });
+    annotations.push_back(new IR::Annotation(statement->srcInfo,
+                                             IR::Annotation::inlinedAtAnnotation,
+                                             {new IR::StringLiteral(callee->name)}));
+    auto result = new IR::BlockStatement(statement->srcInfo, annotations, body);
     LOG2("Replacing " << orig << " with " << result);
     return result;
 }

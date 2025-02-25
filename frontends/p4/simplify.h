@@ -50,9 +50,11 @@ namespace P4 {
  */
 class DoSimplifyControlFlow : public Transform, public ResolutionContext {
     TypeMap *typeMap;
+    bool foldInlinedAt;
 
  public:
-    explicit DoSimplifyControlFlow(TypeMap *typeMap) : typeMap(typeMap) {
+    explicit DoSimplifyControlFlow(TypeMap *typeMap, bool foldInlinedAt)
+        : typeMap(typeMap), foldInlinedAt(foldInlinedAt) {
         CHECK_NULL(typeMap);
         setName("DoSimplifyControlFlow");
         // We may want to replace the same statement with different things
@@ -69,10 +71,11 @@ class DoSimplifyControlFlow : public Transform, public ResolutionContext {
 /// steps enable further simplification.
 class SimplifyControlFlow : public PassRepeated {
  public:
-    explicit SimplifyControlFlow(TypeMap *typeMap, TypeChecking *typeChecking = nullptr) {
+    explicit SimplifyControlFlow(TypeMap *typeMap, bool foldInlinedAt,
+                                 TypeChecking *typeChecking = nullptr) {
         if (!typeChecking) typeChecking = new TypeChecking(nullptr, typeMap);
         passes.push_back(typeChecking);
-        passes.push_back(new DoSimplifyControlFlow(typeMap));
+        passes.push_back(new DoSimplifyControlFlow(typeMap, foldInlinedAt));
         setName("SimplifyControlFlow");
     }
 };

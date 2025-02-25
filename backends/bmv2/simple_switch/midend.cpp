@@ -121,7 +121,7 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions &options, std::ostream *o
                  "meters"_cs,
                  "support_timeout"_cs,
              }),
-             new P4::SimplifyControlFlow(&typeMap),
+             new P4::SimplifyControlFlow(&typeMap, true),
              new P4::EliminateTypedef(&typeMap),
              new P4::CompileTimeOperations(),
              new P4::TableHit(&typeMap),
