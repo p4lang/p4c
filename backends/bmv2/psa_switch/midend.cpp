@@ -155,7 +155,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options, std::ostream *outStre
                 "psa_idle_timeout"_cs,
                 "size"_cs,
             }),
-            new P4::SimplifyControlFlow(&typeMap),
+            new P4::SimplifyControlFlow(&typeMap, true),
             new P4::CompileTimeOperations(),
             new P4::TableHit(&typeMap),
             new P4::EliminateSwitch(&typeMap),
