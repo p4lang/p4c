@@ -4,12 +4,13 @@
 #include <iosfwd>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "lib/big_int_util.h"
 #include "lib/castable.h"
 #include "lib/cstring.h"
-#include "lib/ordered_map.h"
+#include "lib/string_map.h"
 
 namespace P4 {
 
@@ -29,7 +30,7 @@ class JsonData : public ICastable {
 
 class JsonNumber : public JsonData {
  public:
-    JsonNumber(big_int v) : val(v) {}          // NOLINT(runtime/explicit)
+    explicit JsonNumber(big_int v) : val(v) {}
     operator int() const { return int(val); }  // Does not handle overflow
     big_int val;
 
@@ -48,8 +49,7 @@ class JsonBoolean : public JsonData {
 class JsonString : public JsonData, public std::string {
  public:
     JsonString() {}
-    JsonString(const std::string &s) : std::string(s) {}  // NOLINT(runtime/explicit)
-    JsonString(const char *s) : std::string(s) {}         // NOLINT(runtime/explicit)
+    explicit JsonString(std::string_view s) : std::string(s) {}
     JsonString(const JsonString &) = default;
     JsonString(JsonString &&) = default;
     JsonString &operator=(const JsonString &) & = default;
@@ -62,7 +62,7 @@ class JsonString : public JsonData, public std::string {
 class JsonVector : public JsonData, public std::vector<std::unique_ptr<JsonData>> {
  public:
     JsonVector() {}
-    JsonVector(std::vector<std::unique_ptr<JsonData>> &&v)  // NOLINT(runtime/explicit)
+    explicit JsonVector(std::vector<std::unique_ptr<JsonData>> &&v)
         : std::vector<std::unique_ptr<JsonData>>(std::move(v)) {}
     JsonVector &operator=(const JsonVector &) = delete;
     JsonVector &operator=(JsonVector &&) = default;
@@ -70,20 +70,13 @@ class JsonVector : public JsonData, public std::vector<std::unique_ptr<JsonData>
     DECLARE_TYPEINFO(JsonVector, JsonData);
 };
 
-class JsonObject : public JsonData, public ordered_map<std::string, std::unique_ptr<JsonData>> {
+class JsonObject : public JsonData, public string_map<std::unique_ptr<JsonData>> {
  public:
     JsonObject() {}
     JsonObject(const JsonObject &obj) = delete;
     JsonObject &operator=(JsonObject &&) = default;
-    JsonObject(ordered_map<std::string, std::unique_ptr<JsonData>> &&v)  // NOLINT(runtime/explicit)
-        : ordered_map<std::string, std::unique_ptr<JsonData>>(std::move(v)) {}
-
-    // FIXME -- need to create a copy of the string_view to lookup.  With C++20, this
-    // should not be needed, except ordered_map still requires it as its internal
-    // map is weird and doesn't support a templated find (and it is not clear how to).
-    using ordered_map<std::string, std::unique_ptr<JsonData>>::find;
-    iterator find(std::string_view k) { return find(std::string(k)); }
-    const_iterator find(std::string_view k) const { return find(std::string(k)); }
+    explicit JsonObject(string_map<std::unique_ptr<JsonData>> &&v)
+        : string_map<std::unique_ptr<JsonData>>(std::move(v)) {}
 
     DECLARE_TYPEINFO(JsonObject, JsonData);
 };

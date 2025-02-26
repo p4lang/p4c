@@ -58,6 +58,9 @@ class JSONLoader {
     std::unique_ptr<JsonData> json_root;
     const JsonData *json = nullptr;
 
+    JSONLoader(const JsonData *json, std::unordered_map<int, IR::Node *> &refs)
+        : node_refs(refs), json(json) {}
+
  public:
     explicit JSONLoader(std::istream &in)
         : node_refs(*(new std::unordered_map<int, IR::Node *>())) {
@@ -65,11 +68,6 @@ class JSONLoader {
         json = json_root.get();
     }
 
- private:
-    JSONLoader(JsonData *json, std::unordered_map<int, IR::Node *> &refs)
-        : node_refs(refs), json(json) {}
-
- public:
     JSONLoader(const JSONLoader &unpacker, std::string_view field)
         : node_refs(unpacker.node_refs), json(nullptr) {
         if (!unpacker) return;
@@ -119,7 +117,7 @@ class JSONLoader {
         T temp;
         v.clear();
         for (auto &e : as<JsonVector>()) {
-            load(e.get(), temp);
+            load(e, temp);
             v.push_back(temp);
         }
     }
@@ -129,7 +127,7 @@ class JSONLoader {
         T temp;
         v.clear();
         for (auto &e : as<JsonVector>()) {
-            load(e.get(), temp);
+            load(e, temp);
             v.insert(temp);
         }
     }
@@ -139,7 +137,7 @@ class JSONLoader {
         T temp;
         v.clear();
         for (auto &e : as<JsonVector>()) {
-            load(e.get(), temp);
+            load(e, temp);
             v.insert(temp);
         }
     }
@@ -177,14 +175,13 @@ class JSONLoader {
         v.clear();
         if (is<JsonVector>()) {
             for (auto &e : as<JsonVector>()) {
-                load(e.get(), temp);
+                load(e, temp);
                 v.insert(temp);
             }
         } else {
             for (auto &e : as<JsonObject>()) {
-                JsonString *k = new JsonString(e.first);
-                load(k, temp.first);
-                load(e.second.get(), temp.second);
+                load(JsonString(e.first), temp.first);
+                load(e.second, temp.second);
                 v.insert(temp);
             }
         }
@@ -195,14 +192,13 @@ class JSONLoader {
         v.clear();
         if (is<JsonVector>()) {
             for (auto &e : as<JsonVector>()) {
-                load(e.get(), temp);
+                load(e, temp);
                 v.insert(temp);
             }
         } else {
             for (auto &e : as<JsonObject>()) {
-                JsonString *k = new JsonString(e.first);
-                load(k, temp.first);
-                load(e.second.get(), temp.second);
+                load(JsonString(e.first), temp.first);
+                load(e.second, temp.second);
                 v.insert(temp);
             }
         }
@@ -213,7 +209,7 @@ class JSONLoader {
         v.clear();
         for (auto &e : as<JsonObject>()) {
             temp.first = e.first;
-            load(e.second.get(), temp.second);
+            load(e.second, temp.second);
             v.insert(temp);
         }
     }
@@ -224,14 +220,13 @@ class JSONLoader {
         v.clear();
         if (is<JsonVector>()) {
             for (auto &e : as<JsonVector>()) {
-                load(e.get(), temp);
+                load(e, temp);
                 v.insert(temp);
             }
         } else {
             for (auto &e : as<JsonObject>()) {
-                JsonString *k = new JsonString(e.first);
-                load(k, temp.first);
-                load(e.second.get(), temp.second);
+                load(JsonString(e.first), temp.first);
+                load(e.second, temp.second);
                 v.insert(temp);
             }
         }
@@ -242,7 +237,7 @@ class JSONLoader {
         T temp;
         v.clear();
         for (auto &e : as<JsonVector>()) {
-            load(e.get(), temp);
+            load(e, temp);
             v.push_back(temp);
         }
     }
@@ -374,17 +369,22 @@ class JSONLoader {
     void unpack_json(T (&v)[N]) {
         if (auto *j = json->to<JsonVector>()) {
             for (size_t i = 0; i < N && i < j->size(); ++i) {
-                load((*j)[i].get(), v[i]);
+                load(j->at(i), v[i]);
             }
         }
     }
 
+ public:
     template <typename T>
-    void load(JsonData *json, T &v) {
-        JSONLoader(json, node_refs).unpack_json(v);
+    void load(const JsonData &json, T &v) {
+        JSONLoader(&json, node_refs).unpack_json(v);
     }
 
- public:
+    template <typename T>
+    void load(const std::unique_ptr<JsonData> &json, T &v) {
+        JSONLoader(json.get(), node_refs).unpack_json(v);
+    }
+
     template <typename T>
     bool load(std::string_view field, T *&v) {
         if (auto loader = JSONLoader(*this, field)) {
