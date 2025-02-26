@@ -185,17 +185,17 @@ int main(int argc, char *const argv[]) {
         }
         if (program) {
             if (!options.dumpJsonFile.empty())
-                JSONGenerator(*openFile(options.dumpJsonFile, true), true) << program << std::endl;
+                JSONGenerator(*openFile(options.dumpJsonFile, true), true).emit(program);
             if (options.debugJson) {
                 std::stringstream ss1, ss2;
                 JSONGenerator gen1(ss1), gen2(ss2);
-                gen1 << program;
+                gen1.emit(program);
 
                 const IR::Node *node = nullptr;
                 JSONLoader loader(ss1);
                 loader >> node;
 
-                gen2 << node;
+                gen2.emit(node);
                 if (ss1.str() != ss2.str()) {
                     error(ErrorType::ERR_UNEXPECTED, "json mismatch");
                     std::ofstream t1("t1.json"), t2("t2.json");

@@ -542,14 +542,14 @@ bool IR::MAU::HashFunction::convertPolynomialExtern(const IR::GlobalRef *ref) {
 }
 
 void IR::MAU::HashFunction::toJSON(JSONGenerator &json) const {
-    json << json.indent << "\"type\": " << static_cast<int>(type) << ",\n"
-         << json.indent << "\"size\": " << size << ",\n"
-         << json.indent << "\"msb\": " << msb << ",\n"
-         << json.indent << "\"reverse\": " << reverse << ",\n"
-         << json.indent << "\"poly\": " << poly << ",\n"
-         << json.indent << "\"init\": " << init << ",\n"
-         << json.indent << "\"xor\": " << final_xor << ",\n"
-         << json.indent << "\"extend\": " << extend;
+    json.emit("type", static_cast<int>(type));
+    json.emit("size", size);
+    json.emit("msb", msb);
+    json.emit("reverse", reverse);
+    json.emit("poly", poly);
+    json.emit("init", init);
+    json.emit("xor", final_xor);
+    json.emit("extend", extend);
 }
 
 void IR::MAU::HashFunction::build_algorithm_t(bfn_hash_algorithm_ *alg) const {
@@ -580,7 +580,7 @@ void IR::MAU::HashFunction::build_algorithm_t(bfn_hash_algorithm_ *alg) const {
 }
 
 IR::MAU::HashFunction *IR::MAU::HashFunction::fromJSON(JSONLoader &json) {
-    if (!json.json) return nullptr;
+    if (!json) return nullptr;
     auto *rv = new HashFunction;
     int type = 0;
     json.load("type", type);

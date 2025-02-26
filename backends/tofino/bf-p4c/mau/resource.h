@@ -74,7 +74,7 @@ struct TableResourceAlloc {
         meter_format.clear();
         meter_xbar.reset();
     }
-    void toJSON(P4::JSONGenerator &json) const { json << "null"; }
+    void toJSON(P4::JSONGenerator &json) const { json.emit(nullptr); }
     static TableResourceAlloc *fromJSON(P4::JSONLoader &) { return nullptr; }
 
     void merge_instr(const TableResourceAlloc *);

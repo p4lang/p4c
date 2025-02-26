@@ -138,18 +138,11 @@ void IR::Vector<T>::parallel_visit_children(Visitor &v, const char *) const {
 IRNODE_DEFINE_APPLY_OVERLOAD(Vector, template <class T>, <T>)
 template <class T>
 void IR::Vector<T>::toJSON(JSONGenerator &json) const {
-    const char *sep = "";
     Node::toJSON(json);
-    json << "," << std::endl << json.indent++ << "\"vec\" : [";
-    for (auto &k : vec) {
-        json << sep << std::endl << json.indent << k;
-        sep = ",";
-    }
-    --json.indent;
-    if (*sep) {
-        json << std::endl << json.indent;
-    }
-    json << "]";
+    json.emit_tag("vec");
+    auto state = json.begin_vector();
+    for (auto &k : vec) json.emit(k);
+    json.end_vector(state);
 }
 
 std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Expression> &v);
@@ -188,18 +181,11 @@ void IR::IndexedVector<T>::visit_children(Visitor &v, const char *name) const {
 }
 template <class T>
 void IR::IndexedVector<T>::toJSON(JSONGenerator &json) const {
-    const char *sep = "";
     Vector<T>::toJSON(json);
-    json << "," << std::endl << json.indent++ << "\"declarations\" : {";
-    for (const auto &k : declarations) {
-        json << sep << std::endl << json.indent << k.first << " : " << k.second;
-        sep = ",";
-    }
-    --json.indent;
-    if (*sep != 0) {
-        json << std::endl << json.indent;
-    }
-    json << "}";
+    json.emit_tag("declarations");
+    auto state = json.begin_object();
+    for (auto &k : declarations) json.emit(k.first, k.second);
+    json.end_object(state);
 }
 IRNODE_DEFINE_APPLY_OVERLOAD(IndexedVector, template <class T>, <T>)
 
@@ -278,18 +264,11 @@ template <class T, template <class K, class V, class COMP, class ALLOC> class MA
           class COMP /*= std::less<cstring>*/,
           class ALLOC /*= std::allocator<std::pair<cstring, const T*>>*/>
 void IR::NameMap<T, MAP, COMP, ALLOC>::toJSON(JSONGenerator &json) const {
-    const char *sep = "";
     Node::toJSON(json);
-    json << "," << std::endl << json.indent++ << "\"symbols\" : {";
-    for (auto &k : symbols) {
-        json << sep << std::endl << json.indent << k.first << " : " << k.second;
-        sep = ",";
-    }
-    --json.indent;
-    if (*sep) {
-        json << std::endl << json.indent;
-    }
-    json << "}";
+    json.emit_tag("symbols");
+    auto state = json.begin_object();
+    for (auto &k : symbols) json.emit(k.first, k.second);
+    json.end_object(state);
 }
 
 template <class KEY, class VALUE,

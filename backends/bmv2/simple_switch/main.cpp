@@ -87,7 +87,7 @@ int main(int argc, char *const argv[]) {
         }
         std::istream inJson(&fb);
         JSONLoader jsonFileLoader(inJson);
-        if (jsonFileLoader.json == nullptr) {
+        if (!jsonFileLoader) {
             ::P4::error(ErrorType::ERR_IO, "%s: Not valid json input file", options.file);
             return 1;
         }
@@ -105,7 +105,7 @@ int main(int argc, char *const argv[]) {
         if (::P4::errorCount() > 1 || toplevel == nullptr || toplevel->getMain() == nullptr)
             return 1;
         if (!options.dumpJsonFile.empty() && !options.loadIRFromJson)
-            JSONGenerator(*openFile(options.dumpJsonFile, true), true) << program << std::endl;
+            JSONGenerator(*openFile(options.dumpJsonFile, true), true).emit(program);
     } catch (const std::exception &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;

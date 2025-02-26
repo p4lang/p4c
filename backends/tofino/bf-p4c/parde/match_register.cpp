@@ -43,15 +43,11 @@ MatchRegister::MatchRegister(cstring n) : name(n), id(s_id++) {
         BUG("Invalid parser match register %s", name);
 }
 
-void MatchRegister::toJSON(JSONGenerator &json) const { json << *this; }
+void MatchRegister::toJSON(JSONGenerator &json) const { json.emit(toString()); }
 
 /* static */
 MatchRegister MatchRegister::fromJSON(JSONLoader &json) {
-    if (auto *v = json.json->to<JsonString>()) return MatchRegister(cstring(v->c_str()));
+    if (json.is<JsonString>()) return MatchRegister(json.as<JsonString>());
     BUG("Couldn't decode JSON value to parser match register");
     return MatchRegister();
-}
-
-P4::JSONGenerator &operator<<(P4::JSONGenerator &out, const MatchRegister &c) {
-    return out << c.toString();
 }

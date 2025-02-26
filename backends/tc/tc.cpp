@@ -83,7 +83,7 @@ int main(int argc, char *const argv[]) {
             return 1;
         }
         if (!options.dumpJsonFile.empty())
-            JSONGenerator(*openFile(options.dumpJsonFile, true)) << toplevel << std::endl;
+            JSONGenerator(*openFile(options.dumpJsonFile, true)).emit(toplevel);
     } catch (const Util::P4CExceptionBase &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;

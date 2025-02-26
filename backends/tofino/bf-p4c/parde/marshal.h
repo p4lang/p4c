@@ -65,11 +65,6 @@ inline std::ostream &operator<<(std::ostream &s, const MarshaledFrom &m) {
     return s;
 }
 
-inline JSONGenerator &operator<<(JSONGenerator &out, const MarshaledFrom &c) {
-    c.toJSON(out);
-    return out;
-}
-
 }  // namespace P4
 
 #endif /* PARDE_MARSHAL_H_ */
