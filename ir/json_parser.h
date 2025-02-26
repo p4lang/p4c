@@ -71,14 +71,19 @@ class JsonVector : public JsonData, public std::vector<std::unique_ptr<JsonData>
 };
 
 class JsonObject : public JsonData, public ordered_map<std::string, std::unique_ptr<JsonData>> {
-    // bool _hasSrcInfo = true;
-
  public:
     JsonObject() {}
     JsonObject(const JsonObject &obj) = delete;
     JsonObject &operator=(JsonObject &&) = default;
     JsonObject(ordered_map<std::string, std::unique_ptr<JsonData>> &&v)  // NOLINT(runtime/explicit)
         : ordered_map<std::string, std::unique_ptr<JsonData>>(std::move(v)) {}
+
+    // FIXME -- need to create a copy of the string_view to lookup.  With C++20, this
+    // should not be needed, except ordered_map still requires it as its internal
+    // map is weird and doesn't support a templated find (and it is not clear how to).
+    using ordered_map<std::string, std::unique_ptr<JsonData>>::find;
+    iterator find(std::string_view k) { return find(std::string(k)); }
+    const_iterator find(std::string_view k) const { return find(std::string(k)); }
 
     DECLARE_TYPEINFO(JsonObject, JsonData);
 };

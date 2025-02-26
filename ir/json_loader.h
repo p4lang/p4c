@@ -20,6 +20,7 @@ limitations under the License.
 #include <map>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <utility>
 #include <variant>
@@ -69,7 +70,7 @@ class JSONLoader {
         : node_refs(refs), json(json) {}
 
  public:
-    JSONLoader(const JSONLoader &unpacker, const std::string &field)
+    JSONLoader(const JSONLoader &unpacker, std::string_view field)
         : node_refs(unpacker.node_refs), json(nullptr) {
         if (!unpacker) return;
         if (auto *obj = unpacker.json->to<JsonObject>()) {
@@ -385,7 +386,7 @@ class JSONLoader {
 
  public:
     template <typename T>
-    bool load(const std::string field, T *&v) {
+    bool load(std::string_view field, T *&v) {
         if (auto loader = JSONLoader(*this, field)) {
             loader.unpack_json(v);
             return true;
@@ -396,7 +397,7 @@ class JSONLoader {
     }
 
     template <typename T>
-    bool load(const std::string field, T &v) {
+    bool load(std::string_view field, T &v) {
         if (auto loader = JSONLoader(*this, field)) {
             loader.unpack_json(v);
             return true;

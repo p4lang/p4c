@@ -19,6 +19,7 @@ limitations under the License.
 
 #include <optional>
 #include <string>
+#include <string_view>
 #include <unordered_set>
 #include <variant>
 
@@ -140,7 +141,7 @@ class JSONGenerator {
         if (output_state == TOP) out << std::endl;
     }
 
-    void emit_tag(const char *tag) {
+    void emit_tag(std::string_view tag) {
         switch (output_state) {
             case OBJ_START:
                 out << '{' << std::endl << ++indent;
@@ -160,21 +161,10 @@ class JSONGenerator {
     }
 
     template <typename T>
-    void emit(const char *tag, const T &val) {
+    void emit(std::string_view tag, const T &val) {
         emit_tag(tag);
         output_state = OBJ_MID;
         generate(val);
-    }
-
-    void emit_tag(cstring tag) { emit_tag(tag.c_str()); }
-    void emit_tag(std::string tag) { emit_tag(tag.c_str()); }
-    template <typename T>
-    void emit(cstring tag, const T &val) {
-        emit(tag.c_str(), val);
-    }
-    template <typename T>
-    void emit(std::string tag, const T &val) {
-        emit(tag.c_str(), val);
     }
 
  private:

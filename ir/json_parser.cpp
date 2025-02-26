@@ -21,6 +21,8 @@ limitations under the License.
 #include <list>
 #include <utility>
 
+#include "absl/strings/escaping.h"
+
 namespace P4 {
 
 // Hack to make << operator work multi-threaded
@@ -66,22 +68,6 @@ std::ostream &operator<<(std::ostream &out, const JsonData *json) {
         out << "null";
     }
     return out;
-}
-
-static int charcode(char *to, const char *p, int max) {
-    int ch = 0, i;
-    for (i = 0; i < max; ++i) {
-        if (p[i] >= '0' && p[i] <= '9')
-            ch = (ch << 4) + p[i] - '0';
-        else if (p[i] >= 'A' && p[i] <= 'F')
-            ch = (ch << 4) + p[i] - 'A' + 10;
-        else if (p[i] >= 'a' && p[i] <= 'f')
-            ch = (ch << 4) + p[i] - 'a' + 10;
-        else
-            break;
-    }
-    *to = ch;
-    return i;
 }
 
 std::istream &operator>>(std::istream &in, std::unique_ptr<JsonData> &json) {
@@ -135,37 +121,7 @@ std::istream &operator>>(std::istream &in, std::unique_ptr<JsonData> &json) {
                     getline(in, more, '"');
                     s += more;
                 }
-                for (auto p = s.find('\\'); p != std::string::npos; p = s.find('\\', p)) {
-                    s.erase(p, 1);
-                    switch (s[p]) {
-                        case '\\':
-                            ++p;
-                            break;
-                        case 'b':
-                            s[p] = '\b';
-                            break;
-                        case 'f':
-                            s[p] = '\f';
-                            break;
-                        case 'n':
-                            s[p] = '\n';
-                            break;
-                        case 'r':
-                            s[p] = '\r';
-                            break;
-                        case 't':
-                            s[p] = '\t';
-                            break;
-                        case 'u':
-                            s.erase(p+1, charcode(&s[p], &s[p+1], 4));
-                            break;
-                        case 'x':
-                            s.erase(p+1, charcode(&s[p], &s[p+1], 2));
-                            break;
-                        default:
-                            break;
-                    }
-                }
+                absl::CUnescape(s, &s);
                 json = std::make_unique<JsonString>(s);
                 return in;
             }
