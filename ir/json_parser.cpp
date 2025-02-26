@@ -76,7 +76,7 @@ std::istream &operator>>(std::istream &in, std::unique_ptr<JsonData> &json) {
         in >> ch;
         switch (ch) {
             case '{': {
-                ordered_map<std::string, std::unique_ptr<JsonData>> obj;
+                string_map<std::unique_ptr<JsonData>> obj;
                 do {
                     in >> std::ws >> ch;
                     if (ch == '}') break;
