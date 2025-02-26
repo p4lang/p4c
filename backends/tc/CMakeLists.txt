@@ -183,3 +183,4 @@ endmacro(p4tc_add_test_with_args)
 
 p4c_add_tests("p4tc" ${P4TC_COMPILER_DRIVER} "${P4_16_SUITES}" "")
 p4tc_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE "testdata/p4tc_samples_stf/arp_respond.p4" "testdata/p4tc_samples_stf/arp_respond.p4" "-tf ${P4C_SOURCE_DIR}/testdata/p4tc_samples_stf/arp_respond.stf" "")
+p4tc_add_test_with_args("p4tc" ${P4TC_COMPILER_DRIVER} FALSE "testdata/p4tc_samples_stf/simple_l3.p4" "testdata/p4tc_samples_stf/simple_l3.p4" "-tf ${P4C_SOURCE_DIR}/testdata/p4tc_samples_stf/simple_l3.stf" "")
