@@ -67,12 +67,20 @@ struct TypeSpecialization : public IHasDbPrint {
 /// or generic types, therefore the specialization can always be identified globally the the names
 /// of types.
 struct SpecSignature {
+    /// @brief  Name of the type declaration of the base (unspecialized) type (i.e. the
+    /// struct/header)
     cstring baseType;
+    /// @brief String representation of the type argument names.
     safe_vector<cstring> arguments;
 
     /// @brief Get a candidate name for the instantiation.
     std::string name() const;
 
+    /// @brief Order for the sake of std::map only, the requirements are:
+    /// - it is a total order;
+    /// - no-argument specialization is always ordered before any other specializations of the type
+    ///   (for the sake of lower_bound searches).
+    /// Otherwise, correctness does not depend on the order.
     bool operator<(const SpecSignature &other) const {
         return std::tie(baseType, arguments) < std::tie(other.baseType, other.arguments);
     }
@@ -82,7 +90,7 @@ struct SpecSignature {
     static std::optional<SpecSignature> get(const IR::Type_Specialized *spec);
 };
 
-std::string to_string(const SpecSignature &);
+std::string toString(const SpecSignature &);
 
 struct TypeSpecializationMap : IHasDbPrint {
     TypeMap *typeMap;
@@ -93,13 +101,13 @@ struct TypeSpecializationMap : IHasDbPrint {
     const TypeSpecialization *get(const IR::Type_Specialized *t) const;
     void dbprint(std::ostream &out) const override {
         for (auto it : map) {
-            out << to_string(it.first) << " => " << it.second << std::endl;
+            out << toString(it.first) << " => " << it.second << std::endl;
         }
     }
 
     /// @brief Get a single specialization that is already available (i.e. it does not require any
-    /// additional definitions) and makr it as inserted. Returns nullptr if none such exists.
-    const IR::Type_Declaration *getAvailable();
+    /// additional definitions) and mark it as inserted. Returns nullptr if none such exists.
+    [[nodiscard]] const IR::Type_Declaration *nextAvailable();
     /// @brief  Mark the @p tdec as already present and therefore remove it from required
     /// definitions for specializations.
     void markDefined(const IR::Type_Declaration *tdec);

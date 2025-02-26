@@ -21,7 +21,7 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Type_Declaration *TypeSpecializationMap::getAvailable() {
+const IR::Type_Declaration *TypeSpecializationMap::nextAvailable() {
     for (auto &[_, specialization] : map) {
         if (specialization.inserted) continue;
         auto &insReq = specialization.insertion;
@@ -109,14 +109,11 @@ class ContainsTypeVariable : public Inspector {
 Visitor::profile_t FindTypeSpecializations::init_apply(const IR::Node *node) {
     auto rv = Inspector::init_apply(node);
     node->apply(nameGen);
-
     return rv;
 }
 
 void FindTypeSpecializations::postorder(const IR::Type_Specialized *type) {
-    // Look for the declaration using the resolution context (not type map) to find it always
-    // at the program's top level. This way we can also use the declaration as insertion point.
-    const auto *baseType = getDeclaration(type->baseType->path);
+    const auto *baseType = getDeclaration(type->baseType->path, true);
     const auto *st = baseType->to<IR::Type_StructLike>();
     if (st == nullptr || st->typeParameters->size() == 0)
         // nothing to specialize
@@ -138,22 +135,23 @@ void FindTypeSpecializations::postorder(const IR::Type_Specialized *type) {
 ///////////////////////////////////////////////////////////////////////////////////////
 
 void CreateSpecializedTypes::postorder(IR::Type_Declaration *type) {
-    for (auto &[specialized, specialization] : specMap->map) {
-        if (specialization.declaration->name == type->name) {
-            auto genDecl = type->to<IR::IMayBeGenericType>();
-            TypeVariableSubstitution ts;
-            ts.setBindings(type, genDecl->getTypeParameters(), specialization.argumentTypes);
-            TypeSubstitutionVisitor tsv(specMap->typeMap, &ts);
-            tsv.setCalledBy(this);
-            auto renamed = type->apply(tsv)->to<IR::Type_StructLike>()->clone();
-            cstring name = specialization.name;
-            renamed->name = name;
-            renamed->typeParameters = new IR::TypeParameters();
-            specialization.replacement = renamed;
-            // add additional insertion constraints
-            specMap->fillInsertionSet(renamed, specialization.insertion);
-            LOG3("CST: Specializing " << dbp(type) << " with [" << ts << "] as " << dbp(renamed));
-        }
+    for (auto it = specMap->map.lower_bound({type->name.name, {}});
+         it != specMap->map.end() && it->first.baseType == type->name.name; ++it) {
+        auto &[specialized, specialization] = *it;
+
+        auto genDecl = type->to<IR::IMayBeGenericType>();
+        TypeVariableSubstitution ts;
+        ts.setBindings(type, genDecl->getTypeParameters(), specialization.argumentTypes);
+        TypeSubstitutionVisitor tsv(specMap->typeMap, &ts);
+        tsv.setCalledBy(this);
+        auto renamed = type->apply(tsv)->to<IR::Type_StructLike>()->clone();
+        cstring name = specialization.name;
+        renamed->name = name;
+        renamed->typeParameters = new IR::TypeParameters();
+        specialization.replacement = renamed;
+        // add additional insertion constraints
+        specMap->fillInsertionSet(renamed, specialization.insertion);
+        LOG3("CST: Specializing " << dbp(type) << " with [" << ts << "] as " << dbp(renamed));
     }
 }
 
@@ -163,7 +161,7 @@ void CreateSpecializedTypes::postorder(IR::P4Program *prog) {
         newObjects.push_back(obj);
         if (const auto *tdec = obj->to<IR::Type_Declaration>()) {
             specMap->markDefined(tdec);
-            while (const auto *addTDec = specMap->getAvailable()) {
+            while (const auto *addTDec = specMap->nextAvailable()) {
                 newObjects.push_back(addTDec);
                 specMap->markDefined(addTDec);
                 LOG2("CST: Will insert " << dbp(addTDec) << " after " << dbp(newObjects.back()));
@@ -214,16 +212,8 @@ std::string SpecSignature::name() const {
     return ss.str();
 }
 
-std::string to_string(const SpecSignature &sig) {
-    std::stringstream out;
-    out << sig.baseType << "<";
-    const char *sep = "";
-    for (const auto &t : sig.arguments) {
-        out << sep << t;
-        sep = ", ";
-    }
-    out << ">";
-    return out.str();
+std::string toString(const SpecSignature &sig) {
+    return absl::StrCat(sig.baseType, "<", absl::StrJoin(sig.arguments, ","), ">");
 }
 
 std::optional<SpecSignature> SpecSignature::get(const IR::Type_Specialized *spec) {
