@@ -66,7 +66,7 @@ void compile(EbpfOptions &options) {
         program = P4::parseP4File(options);
         if (::P4::errorCount() > 0) return;
 
-        P4::P4COptionPragmaParser optionsPragmaParser;
+        P4::P4COptionPragmaParser optionsPragmaParser(true);
         program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
 
         P4::FrontEnd frontend;

@@ -76,8 +76,13 @@ class ApplyOptionsPragmas : public Inspector {
  * they're unable to parse a pragma.
  */
 class P4COptionPragmaParser : public IOptionPragmaParser {
+    bool supportCommandLinePragma;
+
  public:
     std::optional<CommandLineOptions> tryToParse(const IR::Annotation *annotation) override;
+
+    explicit P4COptionPragmaParser(bool supportCommandLinePragma)
+        : supportCommandLinePragma(supportCommandLinePragma) {}
 
  private:
     std::optional<CommandLineOptions> parseDiagnostic(const IR::Annotation *annotation);
