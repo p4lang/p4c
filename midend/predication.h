@@ -138,6 +138,7 @@ class Predication final : public Transform {
     const IR::Node *preorder(IR::P4Action *action) override;
     const IR::Node *postorder(IR::P4Action *action) override;
     const IR::Node *preorder(IR::AssignmentStatement *statement) override;
+    const IR::Node *preorder(IR::OpAssignmentStatement *statement) override;
     // Assignment dependecy checkers
     const IR::Node *preorder(IR::PathExpression *pathExpr) override;
     const IR::Node *preorder(IR::Member *member) override;

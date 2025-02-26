@@ -1091,6 +1091,17 @@ bool ToP4::preorder(const IR::AssignmentStatement *a) {
     return false;
 }
 
+bool ToP4::preorder(const IR::OpAssignmentStatement *a) {
+    dump(2);
+    visit(a->left);
+    builder.append(" ");
+    builder.append(a->getStringOp());
+    builder.append("= ");
+    visit(a->right);
+    builder.endOfStatement();
+    return false;
+}
+
 bool ToP4::preorder(const IR::BlockStatement *s) {
     dump(1);
     if (printAnnotations(s)) builder.spc();

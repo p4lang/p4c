@@ -110,8 +110,17 @@ IR::Node *HSIndexContretizer::eliminateArrayIndexes(HSIndexFinder &aiFinder,
         } else {
             pathExpr = generatedVariables->at(typeString);
         }
-        auto *newStatement =
-            new IR::AssignmentStatement(aiFinder.arrayIndex->srcInfo, expr, pathExpr);
+        IR::AssignmentStatement *newStatement;
+        if (auto *oldAssign = statement->to<IR::AssignmentStatement>()) {
+            newStatement = oldAssign->clone();
+            newStatement->srcInfo = aiFinder.arrayIndex->srcInfo;
+            newStatement->left = expr;
+            newStatement->right = pathExpr;
+        } else {
+            newStatement =
+                new IR::AssignmentStatement(aiFinder.arrayIndex->srcInfo, expr, pathExpr);
+        }
+
         auto *newCondition = new IR::Geq(
             aiFinder.newVariable, new IR::Constant(aiFinder.arrayIndex->right->type, sz - 1));
         newIf = new IR::IfStatement(newCondition, newStatement, nullptr);
