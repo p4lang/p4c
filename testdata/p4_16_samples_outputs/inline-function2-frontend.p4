@@ -19,7 +19,7 @@ control p(inout bit<1> bt) {
         y2_0 = tmp;
         if (y2_0 == 1w1) {
             y0 = 1w0;
-        } else {
+        } else @inlinedFrom("foo") {
             a_2 = bt;
             retval_1 = a_2 + 1w1;
             if (retval_1 != 1w1) {
