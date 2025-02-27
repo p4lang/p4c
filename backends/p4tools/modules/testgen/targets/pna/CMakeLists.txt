@@ -10,10 +10,15 @@ set(
   ${TESTGEN_SOURCES}
   ${CMAKE_CURRENT_SOURCE_DIR}/backend/metadata/metadata.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/backend/ptf/ptf.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/backend/stf/stf.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/dpdk/cmd_stepper.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/dpdk/expr_stepper.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/dpdk/program_info.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/dpdk/table_stepper.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/p4tc/cmd_stepper.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/p4tc/expr_stepper.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/p4tc/program_info.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/p4tc/table_stepper.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/concolic.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/constants.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/shared_cmd_stepper.cpp

@@ -16,6 +16,9 @@
 #include "backends/p4tools/modules/testgen/targets/pna/dpdk/cmd_stepper.h"
 #include "backends/p4tools/modules/testgen/targets/pna/dpdk/expr_stepper.h"
 #include "backends/p4tools/modules/testgen/targets/pna/dpdk/program_info.h"
+#include "backends/p4tools/modules/testgen/targets/pna/p4tc/cmd_stepper.h"
+#include "backends/p4tools/modules/testgen/targets/pna/p4tc/expr_stepper.h"
+#include "backends/p4tools/modules/testgen/targets/pna/p4tc/program_info.h"
 #include "backends/p4tools/modules/testgen/targets/pna/test_backend.h"
 
 namespace P4::P4Tools::P4Testgen::Pna {
@@ -42,6 +45,32 @@ class PnaDpdkTestgenTarget : public TestgenTarget {
 
  private:
     PnaDpdkTestgenTarget();
+
+    [[nodiscard]] MidEnd mkMidEnd(const CompilerOptions &options) const override;
+};
+
+class PnaP4TCTestgenTarget : public TestgenTarget {
+ public:
+    /// Registers this target.
+    static void make();
+
+ protected:
+    const PnaP4TCProgramInfo *produceProgramInfoImpl(
+        const CompilerResult &compilerResult,
+        const IR::Declaration_Instance *mainDecl) const override;
+
+    PnaTestBackend *getTestBackendImpl(const ProgramInfo &programInfo,
+                                       const TestBackendConfiguration &testBackendConfiguration,
+                                       SymbolicExecutor &symbex) const override;
+
+    PnaP4TCCmdStepper *getCmdStepperImpl(ExecutionState &state, AbstractSolver &solver,
+                                         const ProgramInfo &programInfo) const override;
+
+    PnaP4TCExprStepper *getExprStepperImpl(ExecutionState &state, AbstractSolver &solver,
+                                           const ProgramInfo &programInfo) const override;
+
+ private:
+    PnaP4TCTestgenTarget();
 
     [[nodiscard]] MidEnd mkMidEnd(const CompilerOptions &options) const override;
 };
