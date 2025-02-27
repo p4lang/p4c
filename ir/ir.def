@@ -1,9 +1,8 @@
 /* -*-C++-*- */
 
-
 /** \addtogroup irdefs
-  * @{
-  */
+ * @{
+ */
 
 /**
   P4 compiler IR definition file.
@@ -51,59 +50,79 @@
   Unless there is a '#noconstructor' tag in the class, a constructor
   will automatically be generated that takes as arguments values to
   initialize all fields of the IR class and its bases that do not have
-  explicit initializers. There are some special method constructors which ignore #noconstructor, such as Class(JSONLoader &json). #nomethod_constructor will prevent these files from being generated. Fields marked 'optional' will create multiple constructors both with and without an argument for that field.
+  explicit initializers. There are some special method constructors which ignore #noconstructor,
+  such as Class(JSONLoader &json). #nomethod_constructor will prevent these files from being
+  generated. Fields marked 'optional' will create multiple constructors both with and without an
+  argument for that field.
  */
 
 class ParserState : ISimpleNamespace, Declaration, IAnnotated {
     optional inline Vector<Annotation> annotations;
-    optional inline IndexedVector<StatOrDecl>   components;
+    optional inline IndexedVector<StatOrDecl> components;
     // selectExpression can be a SelectExpression, or a PathExpression representing a state
-    NullOK Expression                   selectExpression;
+    NullOK Expression selectExpression;
 
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
-    Util::Enumerator<IDeclaration>* getDeclarations() const override {
-        return components.getDeclarations(); }
-    const IDeclaration* getDeclByName(cstring name) const override {
-        return components.getDeclaration(name); }
-    const IDeclaration* getDeclByName(std::string_view name) const override {
-        return components.getDeclaration(name); }
+    Util::Enumerator<IDeclaration> *getDeclarations() const override {
+        return components.getDeclarations();
+    }
+    const IDeclaration *getDeclByName(cstring name) const override {
+        return components.getDeclaration(name);
+    }
+    const IDeclaration *getDeclByName(std::string_view name) const override {
+        return components.getDeclaration(name);
+    }
 
     static const cstring accept;
     static const cstring reject;
     static const cstring start;
     static const cstring verify;
-    inline bool isBuiltin() const { return name == ParserState::accept || name == ParserState::reject; }
-    validate{
+    inline bool isBuiltin() const {
+        return name == ParserState::accept || name == ParserState::reject;
+    }
+    validate {
         if (selectExpression != nullptr)
             BUG_CHECK(selectExpression->is<IR::PathExpression>() ||
-                      selectExpression->is<IR::SelectExpression>(),
+                          selectExpression->is<IR::SelectExpression>(),
                       "%1%: unexpected select expression", selectExpression);
     }
 }
 
 // A parser that contains all states (unlike the P4 v1.0 parser, which is really just a state)
-class P4Parser : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, IContainer, IAnnotated {
-    Type_Parser                                 type;
-    optional ParameterList                      constructorParams = new ParameterList;
-    optional inline IndexedVector<Declaration>  parserLocals;
-    optional inline IndexedVector<ParserState>  states;
+class P4Parser : Type_Declaration,
+                 INestedNamespace,
+                 ISimpleNamespace,
+                 IApply,
+                 IContainer,
+                 IAnnotated {
+    Type_Parser type;
+    optional ParameterList constructorParams = new ParameterList;
+    optional inline IndexedVector<Declaration> parserLocals;
+    optional inline IndexedVector<ParserState> states;
 
     const Vector<Annotation> &getAnnotations() const override { return type->getAnnotations(); }
-    Vector<Annotation> &getAnnotations() override { BUG("cannot modify annotations"); return *new Vector<Annotation>(); }
+    Vector<Annotation> &getAnnotations() override {
+        BUG("cannot modify annotations");
+        return *new Vector<Annotation>();
+    }
     TypeParameters getTypeParameters() const override { return type->getTypeParameters(); }
     std::vector<INamespace> getNestedNamespaces() const override {
-        return { type->typeParameters, type->applyParams, constructorParams }; }
-    Util::Enumerator<IDeclaration>* getDeclarations() const override {
-        return parserLocals.getDeclarations()->concat(states.getDeclarations()); }
+        return {type->typeParameters, type->applyParams, constructorParams};
+    }
+    Util::Enumerator<IDeclaration> *getDeclarations() const override {
+        return parserLocals.getDeclarations()->concat(states.getDeclarations());
+    }
     IDeclaration getDeclByName(cstring name) const override {
         auto decl = parserLocals.getDeclaration(name);
         if (!decl) decl = states.getDeclaration(name);
-        return decl; }
+        return decl;
+    }
     IDeclaration getDeclByName(std::string_view name) const override {
         auto decl = parserLocals.getDeclaration(name);
         if (!decl) decl = states.getDeclaration(name);
-        return decl; }
+        return decl;
+    }
 
     Type_Method getApplyMethodType() const override { return type->getApplyMethodType(); }
     ParameterList getApplyParameters() const override { return type->getApplyParameters(); }
@@ -113,90 +132,109 @@ class P4Parser : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, I
     Type getType() const override { return this->type; }
 #apply
     validate {
-        if (!(name == type->name))
-            BUG("Name mismatch for %1%: %2% != %3%", this, name, type->name);
+        if (!(name == type->name)) BUG("Name mismatch for %1%: %2% != %3%", this, name, type->name);
         parserLocals.check_null();
         states.check_null();
         checkDuplicates();
-        for (auto d : parserLocals)
-            BUG_CHECK(!d->is<ParserState>(), "%1%: state in locals", d);
+        for (auto d : parserLocals) BUG_CHECK(!d->is<ParserState>(), "%1%: state in locals", d);
     }
     toString { return "parser "_cs + externalName(); }
 }
 
-class P4Control : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, IContainer, IAnnotated {
-    Type_Control                                type;
-    optional ParameterList                      constructorParams = new ParameterList;
-    optional inline IndexedVector<Declaration>  controlLocals;
-    BlockStatement                              body;
+class P4Control : Type_Declaration,
+                  INestedNamespace,
+                  ISimpleNamespace,
+                  IApply,
+                  IContainer,
+                  IAnnotated {
+    Type_Control type;
+    optional ParameterList constructorParams = new ParameterList;
+    optional inline IndexedVector<Declaration> controlLocals;
+    BlockStatement body;
 
     const Vector<Annotation> &getAnnotations() const override { return type->getAnnotations(); }
-    Vector<Annotation> &getAnnotations() override { BUG("cannot modify annotations"); return *new Vector<Annotation>(); }
+    Vector<Annotation> &getAnnotations() override {
+        BUG("cannot modify annotations");
+        return *new Vector<Annotation>();
+    }
     TypeParameters getTypeParameters() const override { return type->getTypeParameters(); }
     std::vector<INamespace> getNestedNamespaces() const override {
-        return { type->typeParameters, type->applyParams, constructorParams }; }
-    Util::Enumerator<IDeclaration>* getDeclarations() const override {
-        return controlLocals.getDeclarations(); }
+        return {type->typeParameters, type->applyParams, constructorParams};
+    }
+    Util::Enumerator<IDeclaration> *getDeclarations() const override {
+        return controlLocals.getDeclarations();
+    }
     Type_Method getApplyMethodType() const override { return type->getApplyMethodType(); }
     ParameterList getApplyParameters() const override { return type->getApplyParameters(); }
     Type_Method getConstructorMethodType() const override;
     IDeclaration getDeclByName(cstring name) const override {
-        return controlLocals.getDeclaration(name); }
+        return controlLocals.getDeclaration(name);
+    }
     IDeclaration getDeclByName(std::string_view name) const override {
-        return controlLocals.getDeclaration(name); }
+        return controlLocals.getDeclaration(name);
+    }
     ParameterList getConstructorParameters() const override { return constructorParams; }
     Type getType() const override { return this->type; }
 #apply
     validate {
-        if (!(name == type->name))
-            BUG("Name mismatch for %1%: %2% != %3%", this, name, type->name);
+        if (!(name == type->name)) BUG("Name mismatch for %1%: %2% != %3%", this, name, type->name);
         controlLocals.check_null();
     }
     toString { return "control "_cs + externalName(); }
 }
 
 /// A P4-16 action
-class P4Action : Declaration, ISimpleNamespace, IAnnotated, IFunctional {
+class P4Action : Declaration,
+                 ISimpleNamespace,
+                 IAnnotated,
+                 IFunctional {
     optional inline Vector<Annotation> annotations;
-    ParameterList               parameters;
-    BlockStatement              body;
-    Util::Enumerator<IDeclaration>* getDeclarations() const override {
-        return parameters->getDeclarations(); }
+    ParameterList parameters;
+    BlockStatement body;
+    Util::Enumerator<IDeclaration> *getDeclarations() const override {
+        return parameters->getDeclarations();
+    }
     IDeclaration getDeclByName(cstring name) const override {
-        return parameters->getDeclByName(name); }
+        return parameters->getDeclByName(name);
+    }
     IDeclaration getDeclByName(std::string_view name) const override {
-        return parameters->getDeclByName(name); }
+        return parameters->getDeclByName(name);
+    }
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
     ParameterList getParameters() const override { return parameters; }
 }
 
-class Type_Error : ISimpleNamespace, Type_Declaration {
+class Type_Error : ISimpleNamespace,
+                   Type_Declaration {
     static const cstring error;
     optional inline IndexedVector<Declaration_ID> members;
-    Util::Enumerator<IDeclaration>* getDeclarations() const override {
-        return members.getDeclarations(); }
-    IDeclaration getDeclByName(cstring name) const override {
-        return members.getDeclaration(name); }
+    Util::Enumerator<IDeclaration> *getDeclarations() const override {
+        return members.getDeclarations();
+    }
+    IDeclaration getDeclByName(cstring name) const override { return members.getDeclaration(name); }
     IDeclaration getDeclByName(std::string_view name) const override {
-        return members.getDeclaration(name); }
-    validate{ members.check_null(); }
+        return members.getDeclaration(name);
+    }
+    validate { members.check_null(); }
 }
 
 // Not a subclass of IDeclaration
 class Declaration_MatchKind : ISimpleNamespace {
     optional inline IndexedVector<Declaration_ID> members;
-    Util::Enumerator<IDeclaration>* getDeclarations() const override {
-        return members.getDeclarations(); }
-    IDeclaration getDeclByName(cstring name) const override {
-        return members.getDeclaration(name); }
+    Util::Enumerator<IDeclaration> *getDeclarations() const override {
+        return members.getDeclarations();
+    }
+    IDeclaration getDeclByName(cstring name) const override { return members.getDeclaration(name); }
     IDeclaration getDeclByName(std::string_view name) const override {
-        return members.getDeclaration(name); }
-    validate{ members.check_null(); }
+        return members.getDeclaration(name);
+    }
+    validate { members.check_null(); }
 }
 
 /// Table property value abstract base class
-abstract PropertyValue { }
+abstract PropertyValue {
+}
 
 /// A table property whose value is an expression
 class ExpressionValue : PropertyValue {
@@ -210,35 +248,37 @@ class ExpressionListValue : PropertyValue {
 }
 
 // An element in a table actions list
-class ActionListElement : IAnnotated, IDeclaration {
+class ActionListElement : IAnnotated,
+                          IDeclaration {
     optional inline Vector<Annotation> annotations;
-    Expression           expression;  // This can be a PathExpression or a MethodCallExpression
+    Expression expression;  // This can be a PathExpression or a MethodCallExpression
     dbprint { out << annotations << expression; }
     ID getName() const override { return getPath()->name; }
     Path getPath() const;
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
     validate {
-        BUG_CHECK(expression->is<IR::PathExpression>() ||
-                  expression->is<IR::MethodCallExpression>(),
-                  "%1%: unexpected expression", expression);
+        BUG_CHECK(
+            expression->is<IR::PathExpression>() || expression->is<IR::MethodCallExpression>(),
+            "%1%: unexpected expression", expression);
     }
-    toString{ return getName().toString(); }
+    toString { return getName().toString(); }
 }
 
 // A list of actions (in a table)
 class ActionList : PropertyValue {
     inline IndexedVector<ActionListElement> actionList;
-    validate{ actionList.check_null(); }
+    validate { actionList.check_null(); }
     inline size_t size() const { return actionList.size(); }
     inline void push_back(ActionListElement e) { actionList.push_back(e); }
     inline ActionListElement getDeclaration(cstring n) const {
-        return actionList.getDeclaration<ActionListElement>(n); }
+        return actionList.getDeclaration<ActionListElement>(n);
+    }
 }
 
 class KeyElement : IAnnotated {
-    Expression           expression;
-    PathExpression       matchType;
+    Expression expression;
+    PathExpression matchType;
     optional inline Vector<Annotation> annotations;
 
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
@@ -256,11 +296,14 @@ class KeyElement : IAnnotated {
             for (auto el : *vec) {
                 auto *kel = clone();
                 kel->expression = el;
-                rv->push_back(kel); }
+                rv->push_back(kel);
+            }
             return rv;
         } else {
-            expression = exp->to<IR::Expression>(); }
-        return this; }
+            expression = exp->to<IR::Expression>();
+        }
+        return this;
+    }
 }
 
 // Value of a table key property
@@ -274,17 +317,17 @@ class Key : PropertyValue {
 class Entry : IAnnotated {
     /// annotations are optional (supported annotations: @priority(value))
     optional inline Vector<Annotation> annotations;
-    bool                isConst;      /// optional const annotation
-    NullOK Expression   priority;     /// optional entry priority
-    ListExpression      keys;         /// must be a tuple expression
-    Expression          action;       /// typically a MethodCallExpression.
-                                      /// The action must be defined in action list
-    bool                singleton;    /// True if the entry is not a list.
+    bool isConst;                /// optional const annotation
+    NullOK Expression priority;  /// optional entry priority
+    ListExpression keys;         /// must be a tuple expression
+    Expression action;           /// typically a MethodCallExpression.
+                                 /// The action must be defined in action list
+    bool singleton;              /// True if the entry is not a list.
 
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
-    inline ListExpression  getKeys() const { return keys; }
-    inline Expression      getAction() const { return action; }
+    inline ListExpression getKeys() const { return keys; }
+    inline Expression getAction() const { return action; }
     dbprint { out << annotations << keys << action; }
 }
 
@@ -295,10 +338,11 @@ class EntriesList : PropertyValue {
     dbprint { out << "{ " << entries << "}"; }
 }
 
-class Property : Declaration, IAnnotated {
+class Property : Declaration,
+                 IAnnotated {
     optional inline Vector<Annotation> annotations;
     PropertyValue value;
-    bool          isConstant;
+    bool isConstant;
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
     dbprint { out << annotations << (isConstant ? "const " : "") << name << " = " << value; }
@@ -306,17 +350,22 @@ class Property : Declaration, IAnnotated {
 
 class TableProperties : ISimpleNamespace {
     optional inline IndexedVector<Property> properties;
-    toString{ return absl::StrCat("TableProperties(", properties.size(), ")"); }
-    Util::Enumerator<IDeclaration>* getDeclarations() const override {
-        return properties.getDeclarations(); }
+    toString { return absl::StrCat("TableProperties(", properties.size(), ")"); }
+    Util::Enumerator<IDeclaration> *getDeclarations() const override {
+        return properties.getDeclarations();
+    }
     inline Property getProperty(cstring name) const {
-        return properties.getDeclaration<Property>(name); }
+        return properties.getDeclaration<Property>(name);
+    }
     IDeclaration getDeclByName(cstring name) const override {
-        return properties.getDeclaration(name); }
+        return properties.getDeclaration(name);
+    }
     inline Property getProperty(std::string_view name) const {
-        return properties.getDeclaration<Property>(name); }
+        return properties.getDeclaration<Property>(name);
+    }
     IDeclaration getDeclByName(std::string_view name) const override {
-        return properties.getDeclaration(name); }
+        return properties.getDeclaration(name);
+    }
     inline void push_back(Property prop) { properties.push_back(prop); }
 
     static const cstring actionsPropertyName;
@@ -325,12 +374,17 @@ class TableProperties : ISimpleNamespace {
     static const cstring entriesPropertyName;
     static const cstring sizePropertyName;
 #nodbprint
-    validate{ properties.check_null(); properties.validate(); }
+    validate {
+        properties.check_null();
+        properties.validate();
+    }
 }
 
-class P4Table : Declaration, IAnnotated, IApply {
+class P4Table : Declaration,
+                IAnnotated,
+                IApply {
     optional inline Vector<Annotation> annotations;
-    TableProperties             properties;
+    TableProperties properties;
 
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
@@ -361,16 +415,24 @@ class P4Table : Declaration, IAnnotated, IApply {
         if (auto d = properties->getProperty(name)) {
             if (auto ev = d->value->to<IR::ExpressionValue>()) {
                 if (auto k = ev->expression->to<IR::Constant>()) {
-                    return k; } }
-            error(ErrorType::ERR_INVALID, "%1% must be a constant numeric expression", d); }
-        return nullptr; }
+                    return k;
+                }
+            }
+            error(ErrorType::ERR_INVALID, "%1% must be a constant numeric expression", d);
+        }
+        return nullptr;
+    }
     inline BoolLiteral getBooleanProperty(cstring name) const {
         if (auto d = properties->getProperty(name)) {
             if (auto ev = d->value->to<IR::ExpressionValue>()) {
                 if (auto k = ev->expression->to<IR::BoolLiteral>()) {
-                    return k; } }
-            error(ErrorType::ERR_INVALID, "%1% must be a boolean expression", d); }
-        return nullptr; }
+                    return k;
+                }
+            }
+            error(ErrorType::ERR_INVALID, "%1% must be a boolean expression", d);
+        }
+        return nullptr;
+    }
     inline Constant getSizeProperty() const {
         return getConstantProperty(TableProperties::sizePropertyName);
     }
@@ -383,30 +445,34 @@ class P4Table : Declaration, IAnnotated, IApply {
     }
 }
 
-class P4ValueSet : Declaration, IAnnotated {
+class P4ValueSet : Declaration,
+                   IAnnotated {
     optional inline Vector<Annotation> annotations;
-    Type                        elementType;
-    Expression                  size; // number of elements in set.
+    Type elementType;
+    Expression size;  // number of elements in set.
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
 }
 
-class Declaration_Variable : Declaration, IAnnotated {
+class Declaration_Variable : Declaration,
+                             IAnnotated {
     optional inline Vector<Annotation> annotations;
-    Type                        type;
-    optional NullOK Expression  initializer = nullptr;
+    Type type;
+    optional NullOK Expression initializer = nullptr;
 
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
     dbprint {
         out << annotations << type << ' ' << name;
-        if (initializer) out << " = " << *initializer; }
+        if (initializer) out << " = " << *initializer;
+    }
 }
 
-class Declaration_Constant : Declaration, IAnnotated {
+class Declaration_Constant : Declaration,
+                             IAnnotated {
     optional inline Vector<Annotation> annotations;
-    Type                        type;
-    Expression                  initializer;
+    Type type;
+    Expression initializer;
 
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
@@ -418,19 +484,21 @@ class Declaration_Constant : Declaration, IAnnotated {
 /// The syntax is Contructor(args) name = initializer;
 /// Initializers are an experimental features, used for externs with
 /// abstract methods.
-class Declaration_Instance : Declaration, IAnnotated, IInstance {
+class Declaration_Instance : Declaration,
+                             IAnnotated,
+                             IInstance {
     optional inline Vector<Annotation> annotations;
-    Type                  type;  // Either Type_Name or Type_Specialized or Type_Extern
-    Vector<Argument>      arguments;
+    Type type;  // Either Type_Name or Type_Specialized or Type_Extern
+    Vector<Argument> arguments;
     inline NameMap<Property> properties = {};  // P4_14 externs only, at the moment
     optional NullOK BlockStatement initializer = nullptr;
-        // experimental only; contains just declarations, no code
+    // experimental only; contains just declarations, no code
 
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
     Type getType() const override { return type; }
     ID Name() const override { return name; }
-    validate{ arguments->check_null(); }
+    validate { arguments->check_null(); }
 }
 
 /// Toplevel program representation
@@ -440,8 +508,8 @@ class P4Program : IGeneralNamespace {
     /// - we allow overloaded function-like objects.
     /// - not all objects in a P4Program are declarations (e.g., match_kind is not).
     optional inline Vector<Node> objects;
-    Util::Enumerator<IDeclaration>* getDeclarations() const override;
-    validate{ objects.check_null(); }
+    Util::Enumerator<IDeclaration> *getDeclarations() const override;
+    validate { objects.check_null(); }
     static const cstring main;
 #apply
 }
@@ -453,85 +521,102 @@ abstract Statement : StatOrDecl {
 }
 
 class ExitStatement : Statement {
-    toString{ return "exit"_cs; }
+    toString { return "exit"_cs; }
     dbprint { out << "exit"; }
 }
 
 class ReturnStatement : Statement {
     NullOK Expression expression;
-    toString{ return absl::StrCat("return ",
-                                  (expression ?
-                                   expression->toString() : ""_cs)); }
+    toString { return absl::StrCat("return ", (expression ? expression->toString() : ""_cs)); }
 }
 
 class EmptyStatement : Statement {
     dbprint { out << ""; }
 }
 
-class AssignmentStatement : Statement {
+abstract BaseAssignmentStatement : Statement {
     Expression left;
     Expression right;
-    toString{ return absl::StrCat(left, " = ", right); }
+}
+
+class AssignmentStatement : BaseAssignmentStatement {
+    toString { return absl::StrCat(left, " = ", right); }
+}
+
+abstract OpAssignmentStatement : BaseAssignmentStatement {
+    virtual cstring getStringOp() const = 0;
+    toString { return absl::StrCat(left, " ", getStringOp(), "= ", right); }
+    dbprint;
 }
 
 class IfStatement : Statement {
-    Expression       condition;
-    Statement        ifTrue;
+    Expression condition;
+    Statement ifTrue;
     NullOK Statement ifFalse;
     visit_children {
         (void)n;
         v.visit(condition, "condition");
-        SplitFlowVisit<Statement>(v, ifTrue, ifFalse).run_visit(); }
+        SplitFlowVisit<Statement>(v, ifTrue, ifFalse).run_visit();
+    }
 }
 
 class BreakStatement : Statement {
-    toString{ return "break"_cs; }
+    toString { return "break"_cs; }
     dbprint { out << "break"; }
     visit_children;  // in loop-visitor.cpp
 }
 
 class ContinueStatement : Statement {
-    toString{ return "continue"_cs; }
+    toString { return "continue"_cs; }
     dbprint { out << "continue"; }
     visit_children;  // in loop-visitor.cpp
 }
 
-class BlockStatement : Statement, ISimpleNamespace, IAnnotated {
+class BlockStatement : Statement,
+                       ISimpleNamespace,
+                       IAnnotated {
     optional inline Vector<Annotation> annotations;
-    optional inline IndexedVector<StatOrDecl>   components;
+    optional inline IndexedVector<StatOrDecl> components;
     IDeclaration getDeclByName(cstring name) const override {
-        return components.getDeclaration(name); }
+        return components.getDeclaration(name);
+    }
     IDeclaration getDeclByName(std::string_view name) const override {
-        return components.getDeclaration(name); }
-    Util::Enumerator<IDeclaration>* getDeclarations() const override {
-        return components.getDeclarations(); }
+        return components.getDeclaration(name);
+    }
+    Util::Enumerator<IDeclaration> *getDeclarations() const override {
+        return components.getDeclarations();
+    }
     void push_back(StatOrDecl st) { components.push_back(st); }
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
     inline bool empty() const { return components.empty(); }
     void append(StatOrDecl stmt);
-    inline BlockStatement(std::initializer_list<StatOrDecl> il) { for (auto el : il) append(el); }
+    inline BlockStatement(std::initializer_list<StatOrDecl> il) {
+        for (auto el : il) append(el);
+    }
 }
 
 class MethodCallStatement : Statement {
     MethodCallExpression methodCall;
-    inline MethodCallStatement { if (!srcInfo) srcInfo = methodCall->srcInfo; }
-    inline MethodCallStatement(Util::SourceInfo si, IR::ID m, const std::initializer_list<Argument> &a)
-    : Statement(si), methodCall(new MethodCallExpression(si, m, a)) {}
+    inline MethodCallStatement {
+        if (!srcInfo) srcInfo = methodCall->srcInfo;
+    }
+    inline MethodCallStatement(Util::SourceInfo si, IR::ID m,
+                               const std::initializer_list<Argument> &a)
+        : Statement(si), methodCall(new MethodCallExpression(si, m, a)) {}
     inline MethodCallStatement(Util::SourceInfo si, Expression m,
-                        const std::initializer_list<Argument> &a)
-    : Statement(si), methodCall(new MethodCallExpression(si, m, a)) {}
-    toString{ return methodCall->toString(); }
+                               const std::initializer_list<Argument> &a)
+        : Statement(si), methodCall(new MethodCallExpression(si, m, a)) {}
+    toString { return methodCall->toString(); }
 }
 
 class SwitchCase {
-    Expression       label;
+    Expression label;
     NullOK Statement statement;  // If missing then it's a fall-through
 #nodbprint
-    validate{
+    validate {
         BUG_CHECK(statement == nullptr || statement->is<IR::BlockStatement>(),
-                  "%1%: Expected a block statement",
-                  statement);
+                  "%1%: Expected a block statement", statement);
     }
 }
 
@@ -545,76 +630,90 @@ class SwitchStatement : Statement {
         v.visit(expression, "expression");
         SplitFlowVisit<SwitchCase> split(v);
         for (auto &c : cases) split.addNode(c);
-        split.run_visit(); }
+        split.run_visit();
+    }
 }
 
 /* abstract base class for all loops */
-abstract LoopStatement : Statement, ISimpleNamespace, IAnnotated {
+abstract LoopStatement : Statement,
+                         ISimpleNamespace,
+                         IAnnotated {
     optional inline Vector<Annotation> annotations;
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
 }
 
 class ForStatement : LoopStatement {
-    inline IndexedVector<StatOrDecl>    init;
-    Expression                          condition;
-    inline IndexedVector<StatOrDecl>    updates;
-    Statement                           body;
-    IDeclaration getDeclByName(cstring name) const override {
-        return init.getDeclaration(name); }
+    inline IndexedVector<StatOrDecl> init;
+    Expression condition;
+    inline IndexedVector<StatOrDecl> updates;
+    Statement body;
+    IDeclaration getDeclByName(cstring name) const override { return init.getDeclaration(name); }
     IDeclaration getDeclByName(std::string_view name) const override {
-        return init.getDeclaration(name); }
-    Util::Enumerator<IDeclaration>* getDeclarations() const override {
-        return init.getDeclarations(); }
+        return init.getDeclaration(name);
+    }
+    Util::Enumerator<IDeclaration> *getDeclarations() const override {
+        return init.getDeclarations();
+    }
     visit_children;
 #emit
     // template single implementation of const vs non-const ForStatement
-    template<class THIS> static void visit_children(THIS *, Visitor &v);
+    template <class THIS>
+    static void visit_children(THIS *, Visitor &v);
 #end
 }
 
 // FIXME -- should we try to directly convert this to a ForStatement in the parser?
 class ForInStatement : LoopStatement {
-    NullOK Declaration_Variable         decl;
+    NullOK Declaration_Variable decl;
     // the declaration will be moved to the enclosing block by MoveDeclarations, but
     // we keep a ref (PathExpression) to it that will be set by the ctor
-    PathExpression                      ref = nullptr;
-    Expression                          collection;
-    Statement                           body;
+    PathExpression ref = nullptr;
+    Expression collection;
+    Statement body;
     ForInStatement { ref = new PathExpression(decl->name); }
-    ForInStatement(Util::SourceInfo si, Vector<Annotation> a, PathExpression pe, Expression c, Statement b)
+    ForInStatement(Util::SourceInfo si, Vector<Annotation> a, PathExpression pe, Expression c,
+                   Statement b)
         : LoopStatement(si, *a), decl(nullptr), ref(pe), collection(c), body(b) {}
     IDeclaration getDeclByName(cstring name) const override {
-        return decl && decl->name == name ? decl : nullptr; }
+        return decl && decl->name == name ? decl : nullptr;
+    }
     IDeclaration getDeclByName(std::string_view name) const override {
-        return decl && decl->name.name == name ? decl : nullptr; }
-    Util::Enumerator<IDeclaration>* getDeclarations() const override {
+        return decl && decl->name.name == name ? decl : nullptr;
+    }
+    Util::Enumerator<IDeclaration> *getDeclarations() const override {
         if (decl) return new Util::SingleEnumerator<const IDeclaration *>(decl);
-        return new Util::EmptyEnumerator<const IDeclaration *>(); }
+        return new Util::EmptyEnumerator<const IDeclaration *>();
+    }
     visit_children;
 #emit
     // template single implementation of const vs non-const ForInStatement
-    template<class THIS> static void visit_children(THIS *, Visitor &v);
+    template <class THIS>
+    static void visit_children(THIS *, Visitor &v);
 #end
 }
 
 /////////////////////////////////////////////////////////////
 
-class Function : Declaration, IFunctional, IAnnotated, ISimpleNamespace, INestedNamespace {
+class Function : Declaration,
+                 IFunctional,
+                 IAnnotated,
+                 ISimpleNamespace,
+                 INestedNamespace {
     optional inline Vector<Annotation> annotations;
-    Type_Method    type;
+    Type_Method type;
     BlockStatement body;
-    ParameterList getParameters() const override {
-        return type->parameters;
-    }
+    ParameterList getParameters() const override { return type->parameters; }
     Util::Enumerator<IDeclaration> *getDeclarations() const override {
-        return type->parameters->getDeclarations(); }
+        return type->parameters->getDeclarations();
+    }
     IDeclaration getDeclByName(cstring name) const override {
-        return type->parameters->getDeclByName(name); }
+        return type->parameters->getDeclByName(name);
+    }
     IDeclaration getDeclByName(std::string_view name) const override {
-        return type->parameters->getDeclByName(name); }
-    std::vector<INamespace> getNestedNamespaces() const override {
-        return { type->typeParameters }; }
+        return type->parameters->getDeclByName(name);
+    }
+    std::vector<INamespace> getNestedNamespaces() const override { return {type->typeParameters}; }
     const Vector<Annotation> &getAnnotations() const override { return annotations; }
     Vector<Annotation> &getAnnotations() override { return annotations; }
 }
@@ -636,8 +735,8 @@ abstract Block : CompileTimeValue {
     /// This includes all constructor parameters, and all inner nested blocks.
     ordered_map<Node, CompileTimeValue> constantValue = {};
 
-    virtual void dbprint(std::ostream& out) const override;
-    virtual void dbprint_recursive(std::ostream& out) const;
+    virtual void dbprint(std::ostream & out) const override;
+    virtual void dbprint_recursive(std::ostream & out) const;
     /// value can be null for parameters which are optional
     void setValue(Node node, CompileTimeValue value);
     inline bool hasValue(Node node) const {
@@ -647,23 +746,28 @@ abstract Block : CompileTimeValue {
         CHECK_NULL(node);
         auto it = constantValue.find(node);
         BUG_CHECK(it != constantValue.end(), "%1%: No such node %2%", this, node);
-        return it->second; }
-    visit_children { (void)v; (void)n; }
-    virtual const IDeclaration* getContainer() const { return nullptr; }
+        return it->second;
+    }
+    visit_children {
+        (void)v;
+        (void)n;
+    }
+    virtual const IDeclaration *getContainer() const { return nullptr; }
 }
 
 class TableBlock : Block {
     P4Table container;
-    const IDeclaration* getContainer() const override { return container; }
+    const IDeclaration *getContainer() const override { return container; }
 #nodbprint
 }
 
 /// An object that has been instantiated
-abstract InstantiatedBlock : Block, IDeclaration {
+abstract InstantiatedBlock : Block,
+                             IDeclaration {
     Type instanceType;  // May be a SpecializedType
 
     virtual ParameterList getConstructorParameters() const = 0;
-    void instantiate(std::vector<CompileTimeValue> *args);
+    void instantiate(std::vector<CompileTimeValue> * args);
 
     /// @return the argument that the given parameter was instantiated with.
     /// It's a fatal error if no such parameter exists.
@@ -673,26 +777,24 @@ abstract InstantiatedBlock : Block, IDeclaration {
     /// null if no such parameter exists.
     CompileTimeValue findParameterValue(cstring paramName) const;
 
-    virtual void dbprint(std::ostream& out) const override;
+    virtual void dbprint(std::ostream & out) const override;
 }
 
 class ParserBlock : InstantiatedBlock {
     P4Parser container;
-    ParameterList getConstructorParameters() const override {
-        return container->constructorParams; }
+    ParameterList getConstructorParameters() const override { return container->constructorParams; }
     toString { return container->toString(); }
     ID getName() const override { return container->getName(); }
-    const IDeclaration* getContainer() const override { return container; }
+    const IDeclaration *getContainer() const override { return container; }
 #nodbprint
 }
 
 class ControlBlock : InstantiatedBlock {
     P4Control container;
-    ParameterList getConstructorParameters() const override {
-        return container->constructorParams; }
+    ParameterList getConstructorParameters() const override { return container->constructorParams; }
     toString { return container->toString(); }
     ID getName() const override { return container->getName(); }
-    const IDeclaration* getContainer() const override { return container; }
+    const IDeclaration *getContainer() const override { return container; }
 #nodbprint
 }
 
@@ -706,16 +808,18 @@ class PackageBlock : InstantiatedBlock {
 
 class ExternBlock : InstantiatedBlock {
     Type_Extern type;
-    Method      constructor;  // used to instantiate this block
+    Method constructor;  // used to instantiate this block
     ParameterList getConstructorParameters() const override {
-        return constructor->type->parameters; }
+        return constructor->type->parameters;
+    }
     toString { return type->toString(); }
     ID getName() const override { return type->getName(); }
 #nodbprint
 }
 
 /// Represents the program as a whole
-class ToplevelBlock : Block, IDeclaration {
+class ToplevelBlock : Block,
+                      IDeclaration {
     P4Program getProgram() const { return node->to<IR::P4Program>(); }
     PackageBlock getMain() const;
     ID getName() const override { return "main"; }
@@ -723,4 +827,4 @@ class ToplevelBlock : Block, IDeclaration {
     validate { BUG_CHECK(node->is<IR::P4Program>(), "%1%: expected a P4Program", node); }
 }
 
-/** @} *//* end group irdefs */
+/** @} */ /* end group irdefs */

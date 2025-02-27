@@ -106,7 +106,7 @@ class MoveDeclarations : public Transform {
  */
 class MoveInitializers : public Transform, public ResolutionContext {
     MinimalNameGenerator nameGen;
-    IR::IndexedVector<IR::StatOrDecl> toMove;  // This contains just IR::AssignmentStatement
+    IR::IndexedVector<IR::StatOrDecl> toMove;  // This contains just IR::BaseAssignmentStatement
     const IR::ParserState *oldStart;  // nullptr if we do not want to rename the start state
     cstring newStartName;             // name allocated to the new start state
     bool loopsBackToStart;            // true if start is reachable from any other state

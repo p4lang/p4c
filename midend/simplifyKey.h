@@ -173,7 +173,7 @@ class DoSimplifyKey : public Transform {
     const IR::Node *postorder(IR::SwitchStatement *statement) override {
         return doStatement(statement, statement->expression);
     }
-    const IR::Node *postorder(IR::AssignmentStatement *statement) override {
+    const IR::Node *postorder(IR::BaseAssignmentStatement *statement) override {
         return doStatement(statement, statement->right);
     }
     const IR::Node *postorder(IR::KeyElement *element) override;

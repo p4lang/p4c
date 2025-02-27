@@ -34,7 +34,7 @@ class CoverableNodesScanner : public Inspector {
 
     /// Statement coverage.
     bool preorder(const IR::ParserState *parserState) override;
-    bool preorder(const IR::AssignmentStatement *stmt) override;
+    bool preorder(const IR::BaseAssignmentStatement *stmt) override;
     bool preorder(const IR::MethodCallStatement *stmt) override;
     bool preorder(const IR::ExitStatement *stmt) override;
     bool preorder(const IR::MethodCallExpression *call) override;

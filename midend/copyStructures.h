@@ -69,7 +69,7 @@ class DoCopyStructures : public Transform {
         CHECK_NULL(typeMap);
         setName("DoCopyStructures");
     }
-    const IR::Node *postorder(IR::AssignmentStatement *statement) override;
+    const IR::Node *postorder(IR::BaseAssignmentStatement *statement) override;
 };
 
 /**
@@ -109,7 +109,7 @@ class RemoveAliases : public Transform {
         return rv;
     }
 
-    const IR::Node *postorder(IR::AssignmentStatement *statement) override;
+    const IR::Node *postorder(IR::BaseAssignmentStatement *statement) override;
     const IR::Node *postorder(IR::P4Parser *parser) override;
     const IR::Node *postorder(IR::P4Control *control) override;
 };

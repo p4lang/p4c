@@ -96,7 +96,7 @@ bool DoSynthesizeActions::mustMove(const IR::MethodCallStatement *statement) {
     return true;
 }
 
-bool DoSynthesizeActions::mustMove(const IR::AssignmentStatement *assign) {
+bool DoSynthesizeActions::mustMove(const IR::BaseAssignmentStatement *assign) {
     if (auto mc = assign->right->to<IR::MethodCallExpression>()) {
         auto mi = MethodInstance::resolve(mc, refMap, typeMap);
         if (!mi->is<ExternMethod>()) return true;
@@ -123,7 +123,7 @@ const IR::Node *DoSynthesizeActions::preorder(IR::BlockStatement *statement) {
 
     for (auto c : statement->components) {
         bool moveToAction = false;
-        if (auto *as = c->to<IR::AssignmentStatement>()) {
+        if (auto *as = c->to<IR::BaseAssignmentStatement>()) {
             moveToAction = mustMove(as);
         } else if (auto *mc = c->to<IR::MethodCallStatement>()) {
             moveToAction = mustMove(mc);
@@ -205,7 +205,7 @@ const IR::Statement *DoSynthesizeActions::createAction(const IR::Statement *toAd
     return result;
 }
 
-const IR::Node *DoSynthesizeActions::preorder(IR::AssignmentStatement *statement) {
+const IR::Node *DoSynthesizeActions::preorder(IR::BaseAssignmentStatement *statement) {
     // don't move stuff from for init/update -- should be part of policy?
     auto *ctxt = getContext();
     if (ctxt->node->is<IR::ForStatement>() &&

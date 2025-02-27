@@ -81,7 +81,7 @@ const IR::Node *HandleValidityHeaderUnion::expandIsValid(
 
 // u.h1 = {elem1, elem2....} => Already simplified to elementwise initialization
 // u = u1 => Already simplified to elementwise copy
-const IR::Node *HandleValidityHeaderUnion::postorder(IR::AssignmentStatement *a) {
+const IR::Node *HandleValidityHeaderUnion::postorder(IR::BaseAssignmentStatement *a) {
     IR::IndexedVector<IR::StatOrDecl> code_block;
     auto left = a->left;
     auto right = a->right;

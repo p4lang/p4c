@@ -59,7 +59,7 @@ TEST_F(TraversalTest, ComplexIRModify) {
     auto *asgn = new IR::AssignmentStatement(pe, add);
     IR::StatOrDecl *stmt = asgn;
 
-    modify(stmt, RTTI::to<IR::AssignmentStatement>, &IR::AssignmentStatement::right,
+    modify(stmt, RTTI::to<IR::BaseAssignmentStatement>, &IR::BaseAssignmentStatement::right,
            RTTI::to<IR::Operation_Binary>, &IR::Operation_Binary::left,
            RTTI::to<IR::PathExpression>, &IR::PathExpression::path, &IR::Path::name, &IR::ID::name,
            IR::Traversal::Assign(P4::cstring("bar")));

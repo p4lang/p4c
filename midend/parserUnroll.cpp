@@ -467,8 +467,8 @@ class ParserSymbolicInterpreter {
 
         SymbolicValue *errorValue = nullptr;
         bool success = true;
-        if (sord->is<IR::AssignmentStatement>()) {
-            auto ass = sord->to<IR::AssignmentStatement>();
+        if (sord->is<IR::BaseAssignmentStatement>()) {
+            auto ass = sord->to<IR::BaseAssignmentStatement>();
             auto left = ev.evaluate(ass->left, true);
             errorValue = left;
             success = reportIfError(state, left);

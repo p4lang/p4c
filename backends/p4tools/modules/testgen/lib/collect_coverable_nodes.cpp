@@ -48,7 +48,7 @@ bool CoverableNodesScanner::preorder(const IR::ParserState *parserState) {
     return true;
 }
 
-bool CoverableNodesScanner::preorder(const IR::AssignmentStatement *stmt) {
+bool CoverableNodesScanner::preorder(const IR::BaseAssignmentStatement *stmt) {
     // Only track statements, which have a valid source position in the P4 program.
     if (coverageOptions.coverStatements && stmt->getSourceInfo().isValid()) {
         coverableNodes.insert(stmt);

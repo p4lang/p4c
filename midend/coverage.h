@@ -48,7 +48,7 @@ class CollectNodes : public Inspector {
     CoverageOptions coverageOptions;
 
     /// Statement coverage.
-    bool preorder(const IR::AssignmentStatement *stmt) override;
+    bool preorder(const IR::BaseAssignmentStatement *stmt) override;
     bool preorder(const IR::MethodCallStatement *stmt) override;
     bool preorder(const IR::ExitStatement *stmt) override;
 

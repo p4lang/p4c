@@ -71,7 +71,7 @@ class ActionSynthesisPolicy : public P4::ActionSynthesisPolicy {
             if (isWrite()) writes.insert(m->toString());
             return false;
         }
-        bool preorder(const IR::AssignmentStatement *assign) {
+        bool preorder(const IR::BaseAssignmentStatement *assign) {
             // special case -- ignore writing the result of a 'hash.get' call to a var,
             // as we can use that directly in the same action (hash is computed in ixbar hash)
             if (auto *mc = assign->right->to<IR::MethodCallExpression>()) {

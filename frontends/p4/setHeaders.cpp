@@ -62,7 +62,7 @@ void DoSetHeaders::generateSetValid(const IR::Expression *dest, const IR::Expres
     }
 }
 
-const IR::Node *DoSetHeaders::postorder(IR::AssignmentStatement *statement) {
+const IR::Node *DoSetHeaders::postorder(IR::BaseAssignmentStatement *statement) {
     IR::IndexedVector<IR::StatOrDecl> vec;
     auto destType = typeMap->getType(statement->left, true);
     generateSetValid(statement->left, statement->right, destType, vec);
