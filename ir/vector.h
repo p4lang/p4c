@@ -187,10 +187,10 @@ class Vector : public VectorBase {
     }
     cstring node_type_name() const override { return "Vector<" + T::static_type_name() + ">"; }
     static cstring static_type_name() { return "Vector<" + T::static_type_name() + ">"; }
-    void visit_children(Visitor &v) override;
-    void visit_children(Visitor &v) const override;
-    virtual void parallel_visit_children(Visitor &v);
-    virtual void parallel_visit_children(Visitor &v) const;
+    void visit_children(Visitor &v, const char *name) override;
+    void visit_children(Visitor &v, const char *name) const override;
+    virtual void parallel_visit_children(Visitor &v, const char *name = nullptr);
+    virtual void parallel_visit_children(Visitor &v, const char *name = nullptr) const;
     void toJSON(JSONGenerator &json) const override;
     Util::Enumerator<const T *> *getEnumerator() const { return Util::enumerate(vec); }
     template <typename S>

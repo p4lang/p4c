@@ -159,8 +159,8 @@ class Node : public virtual INode {
     virtual bool operator==(const CLASS &) const { return false; }
     IRNODE_ALL_SUBCLASSES(DEFINE_OPEQ_FUNC)
 #undef DEFINE_OPEQ_FUNC
-    virtual void visit_children(Visitor &) {}
-    virtual void visit_children(Visitor &) const {}
+    virtual void visit_children(Visitor &, const char * /*name*/ = nullptr) {}
+    virtual void visit_children(Visitor &, const char * /*name*/ = nullptr) const {}
 
     bool operator!=(const Node &n) const { return !operator==(n); }
 

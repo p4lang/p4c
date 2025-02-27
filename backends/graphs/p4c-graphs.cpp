@@ -162,7 +162,7 @@ int main(int argc, char *const argv[]) {
         if (program == nullptr || ::P4::errorCount() > 0) return 1;
 
         try {
-            P4::P4COptionPragmaParser optionsPragmaParser;
+            P4::P4COptionPragmaParser optionsPragmaParser(false);
             program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
 
             P4::FrontEnd fe;

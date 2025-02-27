@@ -113,7 +113,7 @@ class P4Thread {
     }
 #apply
     visit_children {
-        parsers.parallel_visit_children(v);
+        parsers.parallel_visit_children(v, n);
         v.visit(mau);
         v.visit(deparser);
     }

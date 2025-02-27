@@ -279,7 +279,7 @@ class Constant : Literal {
         }
         return Util::toString(value, width, sign, base);
     }
-    visit_children { v.visit(type, "type"); }
+    visit_children { (void)n; v.visit(type, "type"); }
 }
 
 class BoolLiteral : Literal {
@@ -413,6 +413,7 @@ class Mux : Operation_Ternary {
     stringOp = "?:";
     precedence = DBPrint::Prec_Low;
     visit_children {
+        (void)n;
         v.visit(e0, "e0");
         SplitFlowVisit<Expression>(v, e1, e2).run_visit(); }
     inline Mux { if (type->is<Type::Unknown>() && e1 && e2 && e1->type == e2->type) type = e1->type; }
@@ -450,6 +451,7 @@ class SelectExpression : Expression {
     ListExpression            select;
     inline Vector<SelectCase> selectCases;
     visit_children {
+        (void)n;
         v.visit(select, "select");
         SplitFlowVisitVector<SelectCase>(v, selectCases).run_visit(); }
 }
