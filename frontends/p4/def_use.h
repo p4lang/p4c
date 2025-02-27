@@ -429,7 +429,7 @@ class ProgramPoint : public IHasDbPrint {
             }
             auto l = stack.back();
             if (l != nullptr &&
-                (l->is<IR::AssignmentStatement>() || l->is<IR::MethodCallStatement>()))
+                (l->is<IR::BaseAssignmentStatement>() || l->is<IR::MethodCallStatement>()))
                 out << "[[" << l << "]]";
         }
     }
@@ -657,7 +657,7 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
     bool preorder(const IR::P4Action *action) override;
     bool preorder(const IR::P4Table *table) override;
     bool preorder(const IR::Function *function) override;
-    bool preorder(const IR::AssignmentStatement *statement) override;
+    bool preorder(const IR::BaseAssignmentStatement *statement) override;
     bool preorder(const IR::ReturnStatement *statement) override;
     bool preorder(const IR::ExitStatement *statement) override;
     bool preorder(const IR::BreakStatement *statement) override;

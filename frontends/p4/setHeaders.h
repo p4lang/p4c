@@ -57,7 +57,7 @@ class DoSetHeaders final : public Transform {
         CHECK_NULL(typeMap);
         setName("DoSetHeaders");
     }
-    const IR::Node *postorder(IR::AssignmentStatement *assign) override;
+    const IR::Node *postorder(IR::BaseAssignmentStatement *assign) override;
 };
 
 class SetHeaders final : public PassManager {

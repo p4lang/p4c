@@ -42,6 +42,7 @@ class UBPFControlBodyTranslator : public EBPF::ControlBodyTranslator {
     bool preorder(const IR::PathExpression *expression) override;
     bool preorder(const IR::MethodCallStatement *s) override;
     bool preorder(const IR::MethodCallExpression *expression) override;
+    bool preorder(const IR::BaseAssignmentStatement *a) override { return notSupported(a); }
     bool preorder(const IR::AssignmentStatement *a) override;
     bool preorder(const IR::BlockStatement *s) override;
     bool preorder(const IR::ExitStatement *) override;

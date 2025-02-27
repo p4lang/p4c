@@ -125,7 +125,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::ReturnStatement *statemen
     return statement;
 }
 
-const IR::Node *TypeInferenceBase::postorder(const IR::AssignmentStatement *assign) {
+const IR::Node *TypeInferenceBase::postorder(const IR::BaseAssignmentStatement *assign) {
     LOG3("TI Visiting " << dbp(getOriginal()));
     auto ltype = getType(assign->left);
     if (ltype == nullptr) return assign;
@@ -153,7 +153,7 @@ const IR::Node *TypeInferenceBase::postorder(const IR::OpAssignmentStatement *as
                   assign->left, ltype->toString());
         return assign;
     }
-    return TypeInferenceBase::postorder(static_cast<const IR::AssignmentStatement *>(assign));
+    return TypeInferenceBase::postorder(static_cast<const IR::BaseAssignmentStatement *>(assign));
 }
 
 const IR::Node *TypeInferenceBase::postorder(const IR::ForInStatement *forin) {

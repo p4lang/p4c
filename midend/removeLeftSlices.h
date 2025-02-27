@@ -40,7 +40,7 @@ class DoRemoveLeftSlices : public Transform {
         CHECK_NULL(typeMap);
         setName("DoRemoveLeftSlices");
     }
-    const IR::Node *postorder(IR::AssignmentStatement *stat) override;
+    const IR::Node *postorder(IR::BaseAssignmentStatement *stat) override;
     const IR::Node *postorder(IR::OpAssignmentStatement *stat) override { return stat; }
 };
 

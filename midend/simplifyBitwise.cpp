@@ -20,7 +20,7 @@ void SimplifyBitwise::assignSlices(const IR::Expression *expr, big_int mask) {
     }
 }
 
-const IR::Node *SimplifyBitwise::preorder(IR::AssignmentStatement *as) {
+const IR::Node *SimplifyBitwise::preorder(IR::BaseAssignmentStatement *as) {
     Pattern::Match<IR::Expression> a, b;
     Pattern::Match<IR::Constant> maskA, maskB;
 

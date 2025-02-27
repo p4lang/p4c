@@ -153,7 +153,7 @@ class P4RuntimeArchHandlerIface {
                                        const IR::ExternBlock *externBlock) = 0;
     /// Collects architecture-specific used in assignment statements
     virtual void collectAssignmentStatement(P4RuntimeSymbolTableIface *symbols,
-                                            const IR::AssignmentStatement *assign) = 0;
+                                            const IR::BaseAssignmentStatement *assign) = 0;
     /// Collects architecture-specific @externMethod instance in @symbols table.
     virtual void collectExternMethod(P4RuntimeSymbolTableIface *symbols,
                                      const P4::ExternMethod *externMethod) = 0;

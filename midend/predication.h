@@ -57,7 +57,7 @@ class Predication final : public Transform {
     class ExpressionReplacer final : public Transform {
      private:
         // Original assignment that the replacer works on
-        const IR::AssignmentStatement *statement;
+        const IR::BaseAssignmentStatement *statement;
         // To keep track of the path used while traversing nested if-else statements:
         //      IF - true / ELSE - false
         const std::vector<bool> &traversalPath;
@@ -69,7 +69,7 @@ class Predication final : public Transform {
         bool visitingIndex = false;
 
      public:
-        explicit ExpressionReplacer(const IR::AssignmentStatement *a, std::vector<bool> &t,
+        explicit ExpressionReplacer(const IR::BaseAssignmentStatement *a, std::vector<bool> &t,
                                     std::vector<const IR::Expression *> &c)
             : statement(a), traversalPath(t), conditions(c) {
             CHECK_NULL(a);
@@ -101,11 +101,11 @@ class Predication final : public Transform {
     std::vector<cstring> dependencies;
     // Collects assignment statements with transformed right expression.
     // liveAssignments are pushed at the back of liveAssigns vector.
-    std::map<cstring, const IR::AssignmentStatement *> liveAssignments;
+    std::map<cstring, const IR::BaseAssignmentStatement *> liveAssignments;
     // Vector of assignment statements which collects assignments from
     // liveAssignments and dependencies in adequate order. In preorder
     // of if statements assignments from liveAssigns are pushed on rv block.
-    std::vector<const IR::AssignmentStatement *> liveAssigns;
+    std::vector<const IR::BaseAssignmentStatement *> liveAssigns;
     // Vector of ArrayIndex declarations which is used to temporary
     // store these declarations so they can later be pushed on the 'rv' block.
     std::vector<const IR::Declaration *> indexDeclarations;
@@ -133,11 +133,11 @@ class Predication final : public Transform {
     }
 
     const IR::Expression *clone(const IR::Expression *expression);
-    const IR::Node *clone(const IR::AssignmentStatement *statement);
+    const IR::Node *clone(const IR::BaseAssignmentStatement *statement);
     const IR::Node *preorder(IR::IfStatement *statement) override;
     const IR::Node *preorder(IR::P4Action *action) override;
     const IR::Node *postorder(IR::P4Action *action) override;
-    const IR::Node *preorder(IR::AssignmentStatement *statement) override;
+    const IR::Node *preorder(IR::BaseAssignmentStatement *statement) override;
     const IR::Node *preorder(IR::OpAssignmentStatement *statement) override;
     // Assignment dependecy checkers
     const IR::Node *preorder(IR::PathExpression *pathExpr) override;

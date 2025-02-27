@@ -50,7 +50,7 @@ TEST_F(P4C_IR, InlineBlock) {
     struct TestTrans : public Transform {
         explicit TestTrans(const IR::Constant *c) : c(c) {}
 
-        const IR::Node *postorder(IR::AssignmentStatement *a) override {
+        const IR::Node *postorder(IR::BaseAssignmentStatement *a) override {
             a->right = c;
             return IR::inlineBlock(*this, {a, a});
         }
@@ -74,8 +74,8 @@ TEST_F(P4C_IR, InlineBlock) {
     const auto *bl0 = n->to<IR::BlockStatement>();
     ASSERT_TRUE(bl0);
     ASSERT_EQ(bl0->components.size(), 3);
-    EXPECT_TRUE(bl0->components[0]->is<IR::AssignmentStatement>());
-    EXPECT_TRUE(bl0->components[1]->is<IR::AssignmentStatement>());
+    EXPECT_TRUE(bl0->components[0]->is<IR::BaseAssignmentStatement>());
+    EXPECT_TRUE(bl0->components[1]->is<IR::BaseAssignmentStatement>());
     const auto *ifs = bl0->components[2]->to<IR::IfStatement>();
     ASSERT_TRUE(ifs);
     EXPECT_TRUE(ifs->ifTrue->is<IR::BlockStatement>());

@@ -110,7 +110,7 @@ const IR::Node *DoExpandLookahead::postorder(IR::MethodCallStatement *statement)
     return ei->statement;
 }
 
-const IR::Node *DoExpandLookahead::postorder(IR::AssignmentStatement *statement) {
+const IR::Node *DoExpandLookahead::postorder(IR::BaseAssignmentStatement *statement) {
     if (!statement->right->is<IR::MethodCallExpression>()) return statement;
 
     auto ei = convertLookahead(statement->right->to<IR::MethodCallExpression>());

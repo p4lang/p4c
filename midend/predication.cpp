@@ -145,7 +145,7 @@ const IR::Expression *Predication::clone(const IR::Expression *expression) {
     return expression->apply(cloner);
 }
 
-const IR::Node *Predication::clone(const IR::AssignmentStatement *statement) {
+const IR::Node *Predication::clone(const IR::BaseAssignmentStatement *statement) {
     // Expressions often need to be cloned. This is necessary because
     // in the end different code will be generated for the different clones of
     // an expression.
@@ -155,7 +155,7 @@ const IR::Node *Predication::clone(const IR::AssignmentStatement *statement) {
 }
 
 /// expressionReplacer is applied here and the assignment is stored in liveAssigns vector
-const IR::Node *Predication::preorder(IR::AssignmentStatement *statement) {
+const IR::Node *Predication::preorder(IR::BaseAssignmentStatement *statement) {
     if (!isInContext<IR::P4Action>() || ifNestingLevel == 0) {
         return statement;
     }
@@ -172,7 +172,7 @@ const IR::Node *Predication::preorder(IR::AssignmentStatement *statement) {
         modifyIndex = false;
     }
     // The expressionReplacer responsible for transforming this statement
-    ExpressionReplacer replacer(clone(statement)->to<IR::AssignmentStatement>(), traversalPath,
+    ExpressionReplacer replacer(clone(statement)->to<IR::BaseAssignmentStatement>(), traversalPath,
                                 conditions);
     replacer.setCalledBy(this);
     dependencies.clear();
@@ -273,7 +273,7 @@ const IR::Node *Predication::preorder(IR::ArrayIndex *arrInd) {
         auto indexDecl = new IR::Declaration_Variable(indexName, arrInd->right->type->getP4Type());
         auto index = new IR::PathExpression(IR::ID(indexName));
         auto indexAssignment = new IR::AssignmentStatement(index, clone(arrInd->right));
-        ExpressionReplacer replacer(clone(indexAssignment)->to<IR::AssignmentStatement>(),
+        ExpressionReplacer replacer(clone(indexAssignment)->to<IR::BaseAssignmentStatement>(),
                                     traversalPath, conditions);
         // Creates the initial Mux expression
         replacer.setVisitingIndex(true);

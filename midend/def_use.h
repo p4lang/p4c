@@ -169,7 +169,7 @@ class ComputeDefUse : public Inspector,
     bool preorder(const IR::Type *) override { return false; }
     bool preorder(const IR::Vector<IR::Annotation> *) override { return false; }
     bool preorder(const IR::KeyElement *) override;
-    bool preorder(const IR::AssignmentStatement *) override;
+    bool preorder(const IR::BaseAssignmentStatement *) override;
     const IR::Expression *do_read(def_info_t &, const IR::Expression *, const Context *);
     const IR::Expression *do_write(def_info_t &, const IR::Expression *, const Context *);
     bool preorder(const IR::PathExpression *) override;

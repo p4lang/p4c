@@ -264,8 +264,8 @@ class ProgramStructure {
     /// This inserts the names of the identifiers used in the output P4-16 programs
     /// into allNames, forcing P4-14 names that clash to be renamed.
     void populateOutputNames();
-    const IR::AssignmentStatement *assign(Util::SourceInfo srcInfo, const IR::Expression *left,
-                                          const IR::Expression *right, const IR::Type *type);
+    const IR::BaseAssignmentStatement *assign(Util::SourceInfo srcInfo, const IR::Expression *left,
+                                              const IR::Expression *right, const IR::Type *type);
     virtual const IR::Expression *convertFieldList(const IR::Expression *expression);
     virtual const IR::Expression *convertHashAlgorithm(Util::SourceInfo srcInfo, IR::ID algorithm);
     virtual const IR::Expression *convertHashAlgorithms(const IR::NameList *algorithm);

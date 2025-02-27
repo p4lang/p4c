@@ -29,7 +29,7 @@ class hasSideEffects : public Inspector, public ResolutionContext {
     P4::TypeMap *typeMap = nullptr;
 
     bool result = false;
-    bool preorder(const IR::AssignmentStatement *) override {
+    bool preorder(const IR::BaseAssignmentStatement *) override {
         result = true;
         return false;
     }

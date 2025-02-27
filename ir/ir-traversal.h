@@ -30,7 +30,8 @@ limitations under the License.
 namespace P4::IR::Traversal {
 
 /// @brief A selector used at the end of selector chain to assign to the current sub-object.
-/// e.g. `modify(obj, &IR::AssignmentStatement::left, Assign(var))` will set the LHS of assignment.
+/// e.g. `modify(obj, &IR::BaseAssignmentStatement::left, Assign(var))` will set the LHS of
+/// assignment.
 /// @tparam T the parameter is usually derived by the C++ compiler.
 template <typename T>
 struct Assign {
@@ -74,7 +75,7 @@ namespace P4::IR::Traversal {
 /// Selection of the sub-objects is perfomed mainly using member pointers, but other selectors are
 /// also possible.
 ///
-/// - Object member pointer (e.g. `&IR::Expression::type`, `&IR::AssignmentStatement::left`) --
+/// - Object member pointer (e.g. `&IR::Expression::type`, `&IR::BaseAssignmentStatement::left`) --
 ///   these are used to select members of object. Note that since the IR sometimes uses inline
 ///   members and sometimes uses pointer members these are transparently handled the same -- this
 ///   behaves as-if at any point the current object was a pointer to value that is to be processed
@@ -82,9 +83,10 @@ namespace P4::IR::Traversal {
 /// - @ref `IR::Traversal::Index` -- used for indexing e.g. @ref `IR::Vector` or @ref
 ///   `IR::IndexedVector`.
 /// - @ref `RTTI::to<T>` -- used to cast to a more specific type. This is necessary to access
-///   members of the more specific type (e.g. if you know that a RHS of `IR::AssignmentStatement` is
-///   `IR::Lss`, you can use `RTTI::to<IR::Lss>` and then access members of `IR::Lss`. Note that the
-///   cast is not applied to anything -- we are passing a cast object.
+///   members of the more specific type (e.g. if you know that a RHS of
+///   `IR::BaseAssignmentStatement` is `IR::Lss`, you can use `RTTI::to<IR::Lss>` and then access
+///   members of `IR::Lss`. Note that the cast is not applied to anything -- we are passing a cast
+///   object.
 ///
 /// @section sec_modifiers Modifiers
 ///

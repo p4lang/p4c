@@ -147,7 +147,7 @@ bool FindVariableValues::preorder(const IR::ForInStatement *stat) {
 }
 
 // Update the value for the 'stat->left' variable.
-bool FindVariableValues::preorder(const IR::AssignmentStatement *stat) {
+bool FindVariableValues::preorder(const IR::BaseAssignmentStatement *stat) {
     if (!working || GlobalCopyProp::lValueName(stat->left).isNullOrEmpty()) return false;
 
     LOG5("Working on statement: " << stat);
@@ -324,7 +324,7 @@ class RemoveModifiedValues : public Inspector {
     TypeMap *typeMap;
     std::map<cstring, const IR::Expression *> *vars;
 
-    bool preorder(const IR::AssignmentStatement *stat) override {
+    bool preorder(const IR::BaseAssignmentStatement *stat) override {
         if ((*vars)[GlobalCopyProp::lValueName(stat->left)] == nullptr ||
             !(stat->right->equiv(*((*vars)[GlobalCopyProp::lValueName(stat->left)]))))
             removeVarsContaining(vars, GlobalCopyProp::lValueName(stat->left));
@@ -375,7 +375,7 @@ IR::ForInStatement *DoGlobalCopyPropagation::preorder(IR::ForInStatement *stat) 
 
 // Propagate values for variables on the right side of the statement
 // and update value for 'stat->left' variable if needed.
-const IR::Node *DoGlobalCopyPropagation::preorder(IR::AssignmentStatement *stat) {
+const IR::Node *DoGlobalCopyPropagation::preorder(IR::BaseAssignmentStatement *stat) {
     if (!performRewrite) return stat;
 
     LOG5("Working on statement: " << stat);

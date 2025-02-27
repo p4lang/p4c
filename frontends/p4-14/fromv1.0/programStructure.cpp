@@ -374,10 +374,10 @@ const IR::Expression *ProgramStructure::paramReference(const IR::Parameter *para
     return result;
 }
 
-const IR::AssignmentStatement *ProgramStructure::assign(Util::SourceInfo srcInfo,
-                                                        const IR::Expression *left,
-                                                        const IR::Expression *right,
-                                                        const IR::Type *type) {
+const IR::BaseAssignmentStatement *ProgramStructure::assign(Util::SourceInfo srcInfo,
+                                                            const IR::Expression *left,
+                                                            const IR::Expression *right,
+                                                            const IR::Type *type) {
     if (type != nullptr && type != right->type) {
         auto t1 = right->type->to<IR::Type::Bits>();
         auto t2 = type->to<IR::Type::Bits>();

@@ -66,7 +66,7 @@ V1Switch(parse(), verifyChecksum(), ingress(), egress(),
 
 class CountAssignmentStatements : public Inspector {
     int _as_total = 0;
-    bool preorder(const IR::AssignmentStatement *) {
+    bool preorder(const IR::BaseAssignmentStatement *) {
         _as_total++;
         return true;
     }

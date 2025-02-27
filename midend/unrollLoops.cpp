@@ -21,7 +21,7 @@ limitations under the License.
 namespace P4 {
 
 /** helper function to create a simple assignment to a boolean flag variable */
-static IR::AssignmentStatement *setFlag(cstring name, bool val) {
+static IR::BaseAssignmentStatement *setFlag(cstring name, bool val) {
     auto var = new IR::PathExpression(IR::Type::Boolean::get(), new IR::Path(name));
     return new IR::AssignmentStatement(var, new IR::BoolLiteral(val));
 }
@@ -117,7 +117,7 @@ class ReplaceIndexRefs : public Transform, P4WriteContext {
         }
         return new IR::Constant(pe->type, value);
     }
-    IR::AssignmentStatement *preorder(IR::AssignmentStatement *assign) {
+    IR::BaseAssignmentStatement *preorder(IR::BaseAssignmentStatement *assign) {
         visit(assign->right, "right", 1);
         visit(assign->left, "left", 0);
         prune();
@@ -187,19 +187,19 @@ bool UnrollLoops::findLoopBounds(IR::ForStatement *fstmt, loop_bounds_t &bounds)
         auto d = resolveUnique(v->path->name, P4::ResolutionType::Any);
         bounds.index = d ? d->to<IR::Declaration_Variable>() : nullptr;
         if (!bounds.index) return false;
-        const IR::AssignmentStatement *init = nullptr, *incr = nullptr;
+        const IR::BaseAssignmentStatement *init = nullptr, *incr = nullptr;
         const IR::Constant *initval = nullptr;
         auto &index_defs = defUse->getDefs(v);
         if (index_defs.size() != 2) {
             // must be exactly 2 defs -- one to a constant before the loop and one
             // to a non-constant in the loop
             return false;
-        } else if ((init = index_defs.front()->parent->node->to<IR::AssignmentStatement>()) &&
+        } else if ((init = index_defs.front()->parent->node->to<IR::BaseAssignmentStatement>()) &&
                    (initval = init->right->to<IR::Constant>())) {
-            incr = index_defs.back()->parent->node->to<IR::AssignmentStatement>();
-        } else if ((init = index_defs.back()->parent->node->to<IR::AssignmentStatement>()) &&
+            incr = index_defs.back()->parent->node->to<IR::BaseAssignmentStatement>();
+        } else if ((init = index_defs.back()->parent->node->to<IR::BaseAssignmentStatement>()) &&
                    (initval = init->right->to<IR::Constant>())) {
-            incr = index_defs.front()->parent->node->to<IR::AssignmentStatement>();
+            incr = index_defs.front()->parent->node->to<IR::BaseAssignmentStatement>();
         } else {
             return false;
         }

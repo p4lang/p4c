@@ -84,7 +84,7 @@ class FindVariableValues final : public Inspector {
     bool preorder(const IR::P4Control *) override;
     bool preorder(const IR::P4Table *) override;
     bool preorder(const IR::P4Action *) override;
-    bool preorder(const IR::AssignmentStatement *) override;
+    bool preorder(const IR::BaseAssignmentStatement *) override;
     bool preorder(const IR::OpAssignmentStatement *) override;
     void postorder(const IR::MethodCallExpression *) override;
 
@@ -134,7 +134,7 @@ class DoGlobalCopyPropagation final : public Transform {
     const IR::Expression *postorder(IR::PathExpression *) override;
     const IR::Expression *preorder(IR::ArrayIndex *) override;
     const IR::Expression *preorder(IR::Member *) override;
-    const IR::Node *preorder(IR::AssignmentStatement *) override;
+    const IR::Node *preorder(IR::BaseAssignmentStatement *) override;
     const IR::P4Action *preorder(IR::P4Action *) override;
     const IR::P4Action *postorder(IR::P4Action *) override;
     IR::MethodCallExpression *postorder(IR::MethodCallExpression *) override;

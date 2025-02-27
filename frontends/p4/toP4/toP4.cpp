@@ -1082,7 +1082,7 @@ bool ToP4::preorder(const IR::Cast *c) {
 
 //////////////////////////////////////////////////////////
 
-bool ToP4::preorder(const IR::AssignmentStatement *a) {
+bool ToP4::preorder(const IR::BaseAssignmentStatement *a) {
     dump(2);
     visit(a->left);
     builder.append(" = ");

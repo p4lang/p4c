@@ -106,8 +106,8 @@ void collectControlSymbols(P4RuntimeSymbolTable &symbols, P4RuntimeArchHandlerIf
     });
 
     // Collect any use of something in an assignment statement
-    forAllMatching<IR::AssignmentStatement>(
-        control->body, [&](const IR::AssignmentStatement *assign) {
+    forAllMatching<IR::BaseAssignmentStatement>(
+        control->body, [&](const IR::BaseAssignmentStatement *assign) {
             archHandler->collectAssignmentStatement(&symbols, assign);
         });
 

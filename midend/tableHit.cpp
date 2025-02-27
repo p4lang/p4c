@@ -20,7 +20,7 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Node *DoTableHit::process(IR::AssignmentStatement *statement, DoTableHit::op_t op) {
+const IR::Node *DoTableHit::process(IR::BaseAssignmentStatement *statement, DoTableHit::op_t op) {
     LOG3("Visiting " << getOriginal());
     auto right = statement->right;
     bool negated = false;

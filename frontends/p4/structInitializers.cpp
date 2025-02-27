@@ -76,8 +76,8 @@ const IR::Expression *convert(const IR::Expression *expression, const IR::Type *
     return expression;
 }
 
-const IR::Node *CreateStructInitializers::postorder(IR::AssignmentStatement *statement) {
-    auto type = typeMap->getType(getOriginal<IR::AssignmentStatement>()->left);
+const IR::Node *CreateStructInitializers::postorder(IR::BaseAssignmentStatement *statement) {
+    auto type = typeMap->getType(getOriginal<IR::BaseAssignmentStatement>()->left);
     statement->right = convert(statement->right, type);
     return statement;
 }

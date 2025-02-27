@@ -72,7 +72,7 @@ class DoExpandLookahead : public Transform, public ResolutionContext {
         return rv;
     }
 
-    const IR::Node *postorder(IR::AssignmentStatement *statement) override;
+    const IR::Node *postorder(IR::BaseAssignmentStatement *statement) override;
     const IR::Node *postorder(IR::MethodCallStatement *statement) override;
     const IR::Node *preorder(IR::P4Control *control) override {
         prune();

@@ -24,7 +24,7 @@ limitations under the License.
 namespace P4 {
 
 class RemoveOpAssign : public Transform {
-    const IR::Node *finish(IR::AssignmentStatement *as, const IR::Expression *e);
+    const IR::Node *finish(IR::BaseAssignmentStatement *as, const IR::Expression *e);
 
     template <class T>
     const IR::Node *doit(T *as) {
@@ -50,7 +50,7 @@ class RemoveOpAssign : public Transform {
     PREORDER(BXor)
 #undef PREORDER
 
-    const IR::Node *preorder(IR::AssignmentStatement *s) override {
+    const IR::Node *preorder(IR::BaseAssignmentStatement *s) override {
         prune();
         return s;
     }

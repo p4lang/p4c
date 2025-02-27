@@ -20,7 +20,7 @@ limitations under the License.
 
 namespace P4 {
 
-const IR::Node *RemoveAliases::postorder(IR::AssignmentStatement *statement) {
+const IR::Node *RemoveAliases::postorder(IR::BaseAssignmentStatement *statement) {
     const auto *type = typeMap->getType(statement->left);
     if (!type->is<IR::Type_StructLike>()) {
         return statement;
@@ -62,7 +62,7 @@ const IR::Node *RemoveAliases::postorder(IR::P4Control *control) {
     return control;
 }
 
-const IR::Node *DoCopyStructures::postorder(IR::AssignmentStatement *statement) {
+const IR::Node *DoCopyStructures::postorder(IR::BaseAssignmentStatement *statement) {
     const auto *ltype = typeMap->getType(statement->left, true);
 
     // If the left type is not a struct like or a header stack, return.

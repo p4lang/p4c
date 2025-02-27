@@ -147,7 +147,7 @@ class HandleValidityHeaderUnion : public Transform {
         : refMap(refMap), typeMap(typeMap) {
         setName("HandleValidityHeaderUnion");
     }
-    const IR::Node *postorder(IR::AssignmentStatement *assn) override;
+    const IR::Node *postorder(IR::BaseAssignmentStatement *assn) override;
     const IR::Node *postorder(IR::IfStatement *a) override;
     const IR::Node *postorder(IR::SwitchStatement *a) override;
     const IR::Node *postorder(IR::MethodCallStatement *mcs) override;

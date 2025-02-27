@@ -80,7 +80,7 @@ class DoLocalCopyPropagation::ElimDead : public Transform {
         }
         return var;
     }
-    const IR::Statement *postorder(IR::AssignmentStatement *as) override {
+    const IR::Statement *postorder(IR::BaseAssignmentStatement *as) override {
         if (auto dest = lvalue_out(as->left)->to<IR::PathExpression>()) {
             if (auto var = ::P4::getref(self.available, dest->path->name)) {
                 if (var->local && !var->live) {
@@ -389,7 +389,7 @@ IR::Statement *DoLocalCopyPropagation::preorder(IR::Statement *s) {
     return s;
 }
 
-IR::AssignmentStatement *DoLocalCopyPropagation::preorder(IR::AssignmentStatement *as) {
+IR::BaseAssignmentStatement *DoLocalCopyPropagation::preorder(IR::BaseAssignmentStatement *as) {
     visitAgain();
     if (!working) return as;
     // visit the source subtree first, before the destination subtree
@@ -405,7 +405,7 @@ IR::AssignmentStatement *DoLocalCopyPropagation::preorder(IR::AssignmentStatemen
     return postorder(as);
 }
 
-IR::AssignmentStatement *DoLocalCopyPropagation::postorder(IR::AssignmentStatement *as) {
+IR::BaseAssignmentStatement *DoLocalCopyPropagation::postorder(IR::BaseAssignmentStatement *as) {
     if (as->left->equiv(*as->right)) {
         LOG3("  removing noop assignment " << *as);
         if (inferForFunc && inferForFunc->is_first_write_insert) {
@@ -447,7 +447,7 @@ IR::OpAssignmentStatement *DoLocalCopyPropagation::postorder(IR::OpAssignmentSta
     return as;
 }
 
-void DoLocalCopyPropagation::LoopPrepass::postorder(const IR::AssignmentStatement *as) {
+void DoLocalCopyPropagation::LoopPrepass::postorder(const IR::BaseAssignmentStatement *as) {
     if (auto dest = expr_name(as->left)) self.dropValuesUsing(dest);
 }
 

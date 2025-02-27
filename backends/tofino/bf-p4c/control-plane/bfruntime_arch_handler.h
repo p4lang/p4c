@@ -810,7 +810,7 @@ class BFRuntimeArchHandlerCommon : public P4::ControlPlaneAPI::P4RuntimeArchHand
     }
 
     void collectAssignmentStatement(P4RuntimeSymbolTableIface *,
-                                    const IR::AssignmentStatement *) override {}
+                                    const IR::BaseAssignmentStatement *) override {}
 
     void collectExternMethod(P4RuntimeSymbolTableIface *, const P4::ExternMethod *) override {}
 

@@ -51,7 +51,7 @@ class DoRemoveExits : public DoRemoveReturns, public ResolutionContext {
     const IR::Node *preorder(IR::BlockStatement *statement) override;
     const IR::Node *preorder(IR::IfStatement *statement) override;
     const IR::Node *preorder(IR::SwitchStatement *statement) override;
-    const IR::Node *preorder(IR::AssignmentStatement *statement) override;
+    const IR::Node *preorder(IR::BaseAssignmentStatement *statement) override;
     const IR::Node *preorder(IR::MethodCallStatement *statement) override;
 
     const IR::Node *preorder(IR::P4Action *action) override;
