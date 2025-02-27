@@ -131,10 +131,11 @@ class DoGlobalCopyPropagation final : public Transform {
     IR::IfStatement *preorder(IR::IfStatement *) override;
     IR::ForStatement *preorder(IR::ForStatement *) override;
     IR::ForInStatement *preorder(IR::ForInStatement *) override;
+    IR::BaseAssignmentStatement *preorder(IR::BaseAssignmentStatement *) override;
+    IR::Statement *preorder(IR::AssignmentStatement *) override;
     const IR::Expression *postorder(IR::PathExpression *) override;
     const IR::Expression *preorder(IR::ArrayIndex *) override;
     const IR::Expression *preorder(IR::Member *) override;
-    const IR::Node *preorder(IR::AssignmentStatement *) override;
     const IR::P4Action *preorder(IR::P4Action *) override;
     const IR::P4Action *postorder(IR::P4Action *) override;
     IR::MethodCallExpression *postorder(IR::MethodCallExpression *) override;

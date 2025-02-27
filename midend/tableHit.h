@@ -37,10 +37,10 @@ class DoTableHit : public Transform, public ResolutionContext {
     TypeMap *typeMap;
     enum op_t { None, And, Or, Xor };
 
-    const IR::Node *process(IR::AssignmentStatement *statement, op_t op);
+    const IR::Node *process(IR::BaseAssignmentStatement *statement, op_t op);
 
  public:
-    const IR::Node *postorder(IR::AssignmentStatement *statement) override {
+    const IR::Node *postorder(IR::BaseAssignmentStatement *statement) override {
         return process(statement, None);
     }
     const IR::Node *postorder(IR::OpAssignmentStatement *statement) override { return statement; }

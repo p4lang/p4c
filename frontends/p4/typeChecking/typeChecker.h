@@ -328,6 +328,7 @@ class TypeInferenceBase : public virtual Visitor, public ResolutionContext {
     const IR::Node *postorder(const IR::ReturnStatement *stat);
     const IR::Node *postorder(const IR::IfStatement *stat);
     const IR::Node *postorder(const IR::SwitchStatement *stat);
+    const IR::Node *common_assign(const IR::BaseAssignmentStatement *stat, const IR::Type *);
     const IR::Node *postorder(const IR::AssignmentStatement *stat);
     const IR::Node *postorder(const IR::OpAssignmentStatement *stat);
     const IR::Node *postorder(const IR::ForInStatement *stat);

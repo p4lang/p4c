@@ -59,21 +59,21 @@ namespace P4 {
  */
 class SimplifyBitwise : public Transform {
     IR::Vector<IR::StatOrDecl> *slice_statements = nullptr;
-    const IR::AssignmentStatement *changing_as = nullptr;
+    const IR::BaseAssignmentStatement *changing_as = nullptr;
 
     void assignSlices(const IR::Expression *expr, big_int mask);
 
  public:
-    const IR::Node *preorder(IR::AssignmentStatement *as) override;
+    const IR::Node *preorder(IR::BaseAssignmentStatement *as) override;
     const IR::Node *preorder(IR::OpAssignmentStatement *as) override { return as; }
     const IR::Node *preorder(IR::BAndAssign *as) override {
-        return preorder(static_cast<IR::AssignmentStatement *>(as));
+        return preorder(static_cast<IR::BaseAssignmentStatement *>(as));
     }
     const IR::Node *preorder(IR::BOrAssign *as) override {
-        return preorder(static_cast<IR::AssignmentStatement *>(as));
+        return preorder(static_cast<IR::BaseAssignmentStatement *>(as));
     }
     const IR::Node *preorder(IR::BXorAssign *as) override {
-        return preorder(static_cast<IR::AssignmentStatement *>(as));
+        return preorder(static_cast<IR::BaseAssignmentStatement *>(as));
     }
 };
 

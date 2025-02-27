@@ -38,7 +38,8 @@ void DiscoverFunctionsInlining::postorder(const IR::MethodCallExpression *mce) {
     CHECK_NULL(stat);
 
     BUG_CHECK(
-        bool(RTTI::isAny<IR::MethodCallStatement, IR::AssignmentStatement, IR::IfStatement>(stat)),
+        bool(RTTI::isAny<IR::MethodCallStatement, IR::BaseAssignmentStatement, IR::IfStatement>(
+            stat)),
         "%1%: unexpected statement with call", stat);
 
     if (const auto *ifStat = stat->to<IR::IfStatement>()) {
@@ -173,8 +174,8 @@ void FunctionsInliner::dumpReplacementMap() const {
         LOG2("\t" << it.first << " with " << it.second.first << " via " << it.second.second);
 }
 
-const IR::Node *FunctionsInliner::preorder(IR::AssignmentStatement *statement) {
-    auto orig = getOriginal<IR::AssignmentStatement>();
+const IR::Node *FunctionsInliner::preorder(IR::BaseAssignmentStatement *statement) {
+    auto orig = getOriginal<IR::BaseAssignmentStatement>();
     LOG2("Visiting " << dbp(orig));
 
     auto replMap = getReplacementMap();
@@ -318,7 +319,7 @@ const IR::Statement *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
         body.push_back(copyout);
     }
 
-    if (auto assign = statement->to<IR::AssignmentStatement>()) {
+    if (auto assign = statement->to<IR::BaseAssignmentStatement>()) {
         // copy the return value
         CHECK_NULL(retExpr);
         // If we can replace RHS immediately, do it here, otherwise add return

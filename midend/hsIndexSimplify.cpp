@@ -110,8 +110,8 @@ IR::Node *HSIndexContretizer::eliminateArrayIndexes(HSIndexFinder &aiFinder,
         } else {
             pathExpr = generatedVariables->at(typeString);
         }
-        IR::AssignmentStatement *newStatement;
-        if (auto *oldAssign = statement->to<IR::AssignmentStatement>()) {
+        IR::BaseAssignmentStatement *newStatement;
+        if (auto *oldAssign = statement->to<IR::OpAssignmentStatement>()) {
             newStatement = oldAssign->clone();
             newStatement->srcInfo = aiFinder.arrayIndex->srcInfo;
             newStatement->left = expr;
@@ -131,7 +131,7 @@ IR::Node *HSIndexContretizer::eliminateArrayIndexes(HSIndexFinder &aiFinder,
     return new IR::BlockStatement(newComponents);
 }
 
-IR::Node *HSIndexContretizer::preorder(IR::AssignmentStatement *assignmentStatement) {
+IR::Node *HSIndexContretizer::preorder(IR::BaseAssignmentStatement *assignmentStatement) {
     HSIndexFinder aiFinder(locals, nameGen, typeMap, generatedVariables);
     assignmentStatement->left->apply(aiFinder);
     if (aiFinder.arrayIndex == nullptr) {

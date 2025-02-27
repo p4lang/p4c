@@ -57,7 +57,7 @@ class Predication final : public Transform {
     class ExpressionReplacer final : public Transform {
      private:
         // Original assignment that the replacer works on
-        const IR::AssignmentStatement *statement;
+        const IR::AssignmentStatement *const statement;
         // To keep track of the path used while traversing nested if-else statements:
         //      IF - true / ELSE - false
         const std::vector<bool> &traversalPath;
@@ -133,7 +133,7 @@ class Predication final : public Transform {
     }
 
     const IR::Expression *clone(const IR::Expression *expression);
-    const IR::Node *clone(const IR::AssignmentStatement *statement);
+    const IR::AssignmentStatement *clone(const IR::AssignmentStatement *statement);
     const IR::Node *preorder(IR::IfStatement *statement) override;
     const IR::Node *preorder(IR::P4Action *action) override;
     const IR::Node *postorder(IR::P4Action *action) override;

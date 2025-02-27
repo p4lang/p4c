@@ -80,7 +80,7 @@ class DoLocalCopyPropagation::ElimDead : public Transform {
         }
         return var;
     }
-    const IR::Statement *postorder(IR::AssignmentStatement *as) override {
+    const IR::Statement *postorder(IR::BaseAssignmentStatement *as) override {
         if (auto dest = lvalue_out(as->left)->to<IR::PathExpression>()) {
             if (auto var = ::P4::getref(self.available, dest->path->name)) {
                 if (var->local && !var->live) {
@@ -389,7 +389,7 @@ IR::Statement *DoLocalCopyPropagation::preorder(IR::Statement *s) {
     return s;
 }
 
-IR::AssignmentStatement *DoLocalCopyPropagation::preorder(IR::AssignmentStatement *as) {
+const IR::Node *DoLocalCopyPropagation::preorder(IR::BaseAssignmentStatement *as) {
     visitAgain();
     if (!working) return as;
     // visit the source subtree first, before the destination subtree
@@ -402,7 +402,7 @@ IR::AssignmentStatement *DoLocalCopyPropagation::preorder(IR::AssignmentStatemen
     visit(as->right, "right", 1);
     visit(as->left, "left", 0);
     prune();
-    return postorder(as);
+    return as->apply_visitor_postorder(*this);
 }
 
 IR::AssignmentStatement *DoLocalCopyPropagation::postorder(IR::AssignmentStatement *as) {
@@ -443,11 +443,7 @@ IR::AssignmentStatement *DoLocalCopyPropagation::postorder(IR::AssignmentStateme
     return as;
 }
 
-IR::OpAssignmentStatement *DoLocalCopyPropagation::postorder(IR::OpAssignmentStatement *as) {
-    return as;
-}
-
-void DoLocalCopyPropagation::LoopPrepass::postorder(const IR::AssignmentStatement *as) {
+void DoLocalCopyPropagation::LoopPrepass::postorder(const IR::BaseAssignmentStatement *as) {
     if (auto dest = expr_name(as->left)) self.dropValuesUsing(dest);
 }
 

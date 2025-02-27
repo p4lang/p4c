@@ -115,8 +115,6 @@ const IR::Node *DoExpandLookahead::postorder(IR::AssignmentStatement *statement)
 
     auto ei = convertLookahead(statement->right->to<IR::MethodCallExpression>());
     if (ei == nullptr) return statement;
-    BUG_CHECK(!statement->is<IR::OpAssignmentStatement>(),
-              "invalid lookahead (should not typecheck)");
     auto result = new IR::BlockStatement;
     result->push_back(ei->statement);
 

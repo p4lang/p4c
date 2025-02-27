@@ -41,7 +41,6 @@ class DoRemoveLeftSlices : public Transform {
         setName("DoRemoveLeftSlices");
     }
     const IR::Node *postorder(IR::AssignmentStatement *stat) override;
-    const IR::Node *postorder(IR::OpAssignmentStatement *stat) override { return stat; }
 };
 
 class RemoveLeftSlices : public PassManager {

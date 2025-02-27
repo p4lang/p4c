@@ -125,9 +125,8 @@ const IR::Node *TypeInferenceBase::postorder(const IR::ReturnStatement *statemen
     return statement;
 }
 
-const IR::Node *TypeInferenceBase::postorder(const IR::AssignmentStatement *assign) {
-    LOG3("TI Visiting " << dbp(getOriginal()));
-    auto ltype = getType(assign->left);
+const IR::Node *TypeInferenceBase::common_assign(const IR::BaseAssignmentStatement *assign,
+                                                 const IR::Type *ltype) {
     if (ltype == nullptr) return assign;
 
     if (!isLeftValue(assign->left)) {
@@ -145,15 +144,20 @@ const IR::Node *TypeInferenceBase::postorder(const IR::AssignmentStatement *assi
     return assign;
 }
 
+const IR::Node *TypeInferenceBase::postorder(const IR::AssignmentStatement *assign) {
+    LOG3("TI Visiting " << dbp(getOriginal()));
+    return TypeInferenceBase::common_assign(assign, getType(assign->left));
+}
+
 const IR::Node *TypeInferenceBase::postorder(const IR::OpAssignmentStatement *assign) {
+    LOG3("TI Visiting " << dbp(getOriginal()));
     auto ltype = getType(assign->left);
-    if (ltype == nullptr) return assign;
-    if (!ltype->is<IR::Type_Bits>()) {
+    if (ltype && !ltype->is<IR::Type_Bits>()) {
         typeError("%1%=: cannot be applied to '%2%' with type '%3%'", assign->getStringOp(),
                   assign->left, ltype->toString());
         return assign;
     }
-    return TypeInferenceBase::postorder(static_cast<const IR::AssignmentStatement *>(assign));
+    return TypeInferenceBase::common_assign(assign, ltype);
 }
 
 const IR::Node *TypeInferenceBase::postorder(const IR::ForInStatement *forin) {

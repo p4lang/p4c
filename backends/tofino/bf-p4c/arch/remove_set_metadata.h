@@ -57,7 +57,7 @@ namespace BFN {
 struct RemoveSetMetadata : public Transform {
     RemoveSetMetadata(P4::ReferenceMap *refMap, P4::TypeMap *typeMap);
 
-    const IR::AssignmentStatement *preorder(IR::AssignmentStatement *assignment);
+    const IR::BaseAssignmentStatement *preorder(IR::BaseAssignmentStatement *assignment);
 
  private:
     P4::ReferenceMap *refMap;
