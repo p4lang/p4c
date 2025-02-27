@@ -82,6 +82,8 @@ class ParserOptions : public Util::Options {
     std::filesystem::path file;
     /// if true preprocess only
     bool doNotCompile = false;
+    /// if true save preprocessed P4 to repro.p4
+    bool savePreprocessed = false;
     /// Compiler version.
     cstring compilerVersion;
     /// if true skip preprocess
