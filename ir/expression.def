@@ -75,7 +75,7 @@ class Mul : Operation_Binary {
 }
 class MulAssign : OpAssignmentStatement {
 #emit
-    typedef Mul binop_t;
+    typedef Mul BinOp;
 #end
     stringOp = "*";
 #nodbprint
@@ -87,7 +87,7 @@ class Div : Operation_Binary {
 }
 class DivAssign : OpAssignmentStatement {
 #emit
-    typedef Div binop_t;
+    typedef Div BinOp;
 #end
     stringOp = "/";
 #nodbprint
@@ -98,7 +98,7 @@ class Mod : Operation_Binary {
 }
 class ModAssign : OpAssignmentStatement {
 #emit
-    typedef Mod binop_t;
+    typedef Mod BinOp;
 #end
     stringOp = "%";
 #nodbprint
@@ -109,7 +109,7 @@ class Add : Operation_Binary {
 }
 class AddAssign : OpAssignmentStatement {
 #emit
-    typedef Add binop_t;
+    typedef Add BinOp;
 #end
     stringOp = "+";
 #nodbprint
@@ -120,7 +120,7 @@ class Sub : Operation_Binary {
 }
 class SubAssign : OpAssignmentStatement {
 #emit
-    typedef Sub binop_t;
+    typedef Sub BinOp;
 #end
     stringOp = "-";
 #nodbprint
@@ -131,7 +131,7 @@ class AddSat : Operation_Binary {
 }
 class AddSatAssign : OpAssignmentStatement {
 #emit
-    typedef AddSat binop_t;
+    typedef AddSat BinOp;
 #end
     stringOp = "|+|";
 #nodbprint
@@ -142,7 +142,7 @@ class SubSat : Operation_Binary {
 }
 class SubSatAssign : OpAssignmentStatement {
 #emit
-    typedef SubSat binop_t;
+    typedef SubSat BinOp;
 #end
     stringOp = "|-|";
 #nodbprint
@@ -154,7 +154,7 @@ class Shl : Operation_Binary {
 }
 class ShlAssign : OpAssignmentStatement {
 #emit
-    typedef Shl binop_t;
+    typedef Shl BinOp;
 #end
     stringOp = "<<";
 #nodbprint
@@ -166,7 +166,7 @@ class Shr : Operation_Binary {
 }
 class ShrAssign : OpAssignmentStatement {
 #emit
-    typedef Shr binop_t;
+    typedef Shr BinOp;
 #end
     stringOp = ">>";
 #nodbprint
@@ -201,7 +201,7 @@ class BAnd : Operation_Binary {
 }
 class BAndAssign : OpAssignmentStatement {
 #emit
-    typedef BAnd binop_t;
+    typedef BAnd BinOp;
 #end
     stringOp = "&";
 #nodbprint
@@ -212,7 +212,7 @@ class BOr : Operation_Binary {
 }
 class BOrAssign : OpAssignmentStatement {
 #emit
-    typedef BOr binop_t;
+    typedef BOr BinOp;
 #end
     stringOp = "|";
 #nodbprint
@@ -223,7 +223,7 @@ class BXor : Operation_Binary {
 }
 class BXorAssign : OpAssignmentStatement {
 #emit
-    typedef BXor binop_t;
+    typedef BXor BinOp;
 #end
     stringOp = "^";
 #nodbprint

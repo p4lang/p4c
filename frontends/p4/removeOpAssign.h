@@ -29,7 +29,7 @@ class RemoveOpAssign : public Transform {
         prune();
         BUG_CHECK(!SideEffects::check(as->left, this), "side effects in LHS of %s", as);
         return new IR::AssignmentStatement(as->srcInfo, as->left->apply(CloneExpressions()),
-                                           new typename T::binop_t(as->left, as->right));
+                                           new typename T::BinOp(as->left, as->right));
     }
 
 #define PREORDER(OP) \
