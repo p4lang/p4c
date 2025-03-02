@@ -1396,9 +1396,6 @@ var hierarchy =
     [ "P4::ordered_map< const State *, ordered_set< const State * > >", "class_p4_1_1ordered__map.html", [
       [ "ParserStateMap< State >", "group__parde.html#struct_parser_state_map", null ]
     ] ],
-    [ "P4::ordered_map< std::string, JsonData * >", "class_p4_1_1ordered__map.html", [
-      [ "P4::JsonObject", "class_p4_1_1_json_object.html", null ]
-    ] ],
     [ "P4::ordered_set< T, COMP, ALLOC >", "class_p4_1_1ordered__set.html", null ],
     [ "P4::ordered_set< const PHV::Field * >", "class_p4_1_1ordered__set.html", [
       [ "FieldGroup", "group___deparser_copy_opt.html#struct_field_group", null ]
@@ -1902,6 +1899,9 @@ var hierarchy =
     [ "P4::string_map< V >", "class_p4_1_1string__map.html", null ],
     [ "P4::string_map< IJson * >", "class_p4_1_1string__map.html", [
       [ "P4::Util::JsonObject", "class_p4_1_1_util_1_1_json_object.html", null ]
+    ] ],
+    [ "P4::string_map< std::unique_ptr< JsonData > >", "class_p4_1_1string__map.html", [
+      [ "P4::JsonObject", "class_p4_1_1_json_object.html", null ]
     ] ],
     [ "P4::StringRef", "struct_p4_1_1_string_ref.html", null ],
     [ "P4::StringRef::Split", "class_p4_1_1_string_ref_1_1_split.html", null ],
