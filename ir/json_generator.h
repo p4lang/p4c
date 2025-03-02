@@ -68,37 +68,64 @@ class JSONGenerator {
         OBJ_END
     } output_state = TOP;
 
+    enum state_restore_kind { NONE, OBJECT, VECTOR };
+    class state_restore_t {
+        output_state_t prev_state;
+        JSONGenerator &gen;
+        state_restore_kind kind;
+        friend class JSONGenerator;
+
+        state_restore_t(JSONGenerator &gen, state_restore_kind kind)
+            : prev_state(gen.output_state), gen(gen), kind(kind) {}
+        state_restore_t(const state_restore_t &) = delete;
+        state_restore_t(state_restore_t &&a) : prev_state(a.prev_state), gen(a.gen), kind(a.kind) {
+            a.kind = NONE;
+        }
+
+     public:
+        ~state_restore_t() {
+            if (kind == OBJECT) gen.end_object(*this);
+            if (kind == VECTOR) gen.end_vector(*this);
+        }
+    };
+
  public:
     explicit JSONGenerator(std::ostream &out, bool dumpSourceInfo = false)
         : out(out), dumpSourceInfo(dumpSourceInfo) {}
 
-    output_state_t begin_vector() {
-        output_state_t rv = output_state;
-        if (rv == OBJ_START) rv = OBJ_END;
-        BUG_CHECK(rv != VEC_START, "invalid json output state in begin_vector");
+    state_restore_t begin_vector() {
+        if (output_state == OBJ_START) output_state = OBJ_END;
+        BUG_CHECK(output_state != VEC_START, "invalid json output state in begin_vector");
+        state_restore_t rv(*this, VECTOR);
         output_state = VEC_START;
         out << '[';
         ++indent;
         return rv;
     }
 
-    void end_vector(output_state_t prev) {
+    void end_vector(state_restore_t &prev) {
+        BUG_CHECK(prev.kind == VECTOR, "invalid previous state in end_vector");
+        prev.kind = NONE;
         --indent;
         if (output_state == VEC_MID)
             out << std::endl << indent;
         else if (output_state != VEC_START)
             BUG("invalid json output state in end_vector");
         out << ']';
-        if ((output_state = prev) == OBJ_AFTERTAG) output_state = OBJ_MID;
+        if ((output_state = prev.prev_state) == OBJ_AFTERTAG) output_state = OBJ_MID;
     }
 
-    output_state_t begin_object() {
-        output_state_t rv = output_state;
+    state_restore_t begin_object() {
+        BUG_CHECK(output_state != OBJ_START && output_state != OBJ_MID && output_state != OBJ_END,
+                  "invalid json output state in begin_object");
+        state_restore_t rv(*this, OBJECT);
         output_state = OBJ_START;
         return rv;
     }
 
-    void end_object(output_state_t prev) {
+    void end_object(state_restore_t &prev) {
+        BUG_CHECK(prev.kind == OBJECT, "invalid previous state in end_object");
+        prev.kind = NONE;
         switch (output_state) {
             case OBJ_START:
                 out << "{}";
@@ -112,7 +139,7 @@ class JSONGenerator {
                 BUG("invalid json output state in end_object");
                 break;
         }
-        if ((output_state = prev) == OBJ_AFTERTAG) output_state = OBJ_MID;
+        if ((output_state = prev.prev_state) == OBJ_AFTERTAG) output_state = OBJ_MID;
     }
 
     template <typename T>
@@ -163,8 +190,8 @@ class JSONGenerator {
     template <typename T>
     void emit(std::string_view tag, const T &val) {
         emit_tag(tag);
-        output_state = OBJ_MID;
         generate(val);
+        output_state = OBJ_MID;
     }
 
  private:
