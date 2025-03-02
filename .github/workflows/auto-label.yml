@@ -16,16 +16,14 @@ jobs:
           script: |
             const issue = context.payload.issue;
             const labelsToAdd = [];
-
+            
             // Define label mappings based on brackets in title
             const labelMappings = {
               "[bug]": "bug",
               "[feature]": "enhancement",
               "[docs]": "documentation",
-              "[dpdk]": "dpdk",
-            
-              "[bmv2]": "bmv2",
-           
+              "[dpdk]": "dpdk",              
+              "[bmv2]": "bmv2",              
               "[P4Testgen]": "p4tools",
               "[P4Smith]": "p4tools",
               "[P4tools]": "p4tools",
@@ -38,21 +36,17 @@ jobs:
               "[P4runtime]":"control-plane",
               "[frontend]":"core",
               "[midend]":"core",
-              "[parser]":"core",
-
-              
+              "[parser]":"core",              
             };
-
-          
-
+            
             // Check if issue title contains bracketed keywords
             const title = issue.title.toLowerCase();
             for (const [keyword, label] of Object.entries(labelMappings)) {
-              if (title.includes(keyword.toLowerCase()) && !excludedLabels.includes(keyword)) {
+              if (title.includes(keyword.toLowerCase())) {
                 labelsToAdd.push(label);
               }
             }
-
+            
             if (labelsToAdd.length > 0) {
               github.rest.issues.addLabels({
                 issue_number: context.issue.number,
