@@ -20,15 +20,12 @@ jobs:
             // Define label mappings based on brackets in title
             const labelMappings = {
               "[bug]": "bug",
-              "[error]": "bug",
-              "[fix]": "bug",
               "[feature]": "enhancement",
               "[docs]": "documentation",
               "[dpdk]": "dpdk",
-              "[p4c]": "p4c",
+            
               "[bmv2]": "bmv2",
-              "[compiler]": "compiler",
-              "[test]": "testing",
+           
               "[P4Testgen]": "p4tools",
               "[P4Smith]": "p4tools",
               "[P4tools]": "p4tools",
@@ -36,7 +33,14 @@ jobs:
               "[p4tc]": "p4tc",
               "[p4fmt]": "p4fmt",
               "[core]":"core",
-              ""
+              "[p4-spec]": "p4-spec",
+              "[control-plane]": "control-plane",
+              "[P4runtime]":"control-plane",
+              "[frontend]":"core",
+              "[midend]":"core",
+              "[parser]":"core",
+
+              
             };
 
           
