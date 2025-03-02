@@ -683,7 +683,7 @@ class PSATernaryTest(P4EbpfTest):
         pkt = testutils.simple_udp_packet(
             eth_src="11:22:33:44:55:66", ip_src="1.2.3.4", ip_dst="192.168.2.1"
         )
-        pkt.show()
+        print("pkt bytes to send: %s" % (list(bytes(pkt))))
         testutils.send_packet(self, PORT0, pkt)
         pkt[Ether].type = 0x1122
         pkt[IP].proto = 0x7
@@ -692,7 +692,7 @@ class PSATernaryTest(P4EbpfTest):
         pkt[IP].src = "17.17.17.17"
         pkt[IP].dst = "255.255.255.255"
         pkt[UDP].chksum = 0x044D
-        pkt.show()
+        print("pkt bytes to expect: %s" % (list(bytes(pkt))))
         testutils.verify_packet(self, pkt, PORT1)
 
 
