@@ -96,10 +96,10 @@ class BFN::Pipe {
                 hw_constrained_fields == a.hw_constrained_fields;
         }
         toJSON {
-            json << json.indent << "\"parser\" : " << parsers << "," << std::endl
-                 << json.indent << "\"mau\" : " << mau << "," << std::endl
-                 << json.indent << "\"deparser\" : " << deparser << std::endl
-                 << json.indent << "\"hw_constrained_fields\" : " <<  hw_constrained_fields; }
+            json.emit("parser", parsers);
+            json.emit("mau", mau);
+            json.emit("deparser", deparser);
+            json.emit("hw_constrained_fields",  hw_constrained_fields); }
         fromJSON {
             IR::BFN::Pipe::thread_t * thread = new IR::BFN::Pipe::thread_t();
             json.load("parsers", thread->parsers);
