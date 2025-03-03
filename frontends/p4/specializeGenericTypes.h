@@ -82,8 +82,11 @@ struct SpecSignature {
     /// - no-argument specialization is always ordered immediatelly before any other specializations
     ///   of the type (for the sake of lower_bound searches);
     bool operator<(const SpecSignature &other) const {
-        return std::forward_as_tuple(baseType.size(), baseType, arguments)
-             < std::forward_as_tuple(baseType.size(), other.baseType, other.arguments);
+        // Using pointer comparison to speed up baseType comparation as we don't care about what
+        // that order is. Note that for pointers we have to use `std::less` to make the comparison
+        // defined for pointers into different objects.
+        return std::less<>()(std::forward_as_tuple(baseType.c_str(), arguments),
+                             std::forward_as_tuple(other.baseType.c_str(), other.arguments));
     }
 
     /// @brief Get a specialization signature if it is valid (i.e. the type is specialized only by
