@@ -680,10 +680,17 @@ class PSATernaryTest(P4EbpfTest):
             priority=10,
         )
 
+        import pprint as pp
+        for tbl_name in ['ingress_tbl_ternary_0', 'ingress_tbl_ternary_1', 'ingress_tbl_ternary_2']:
+            table_data = self.table_get(table=tbl_name)
+            print("contents of table %s" % (tbl_name))
+            pp.pprint(table_data)
+
         pkt = testutils.simple_udp_packet(
             eth_src="11:22:33:44:55:66", ip_src="1.2.3.4", ip_dst="192.168.2.1"
         )
-        testutils.send_packet(self, PORT0, pkt)
+        print("pkt bytes to send  : %s" % (list(map(lambda x: '%02x' % (x), list(bytes(pkt))))))
+        testutils.send_packet(self, PORT0, bytes(pkt))
         pkt[Ether].type = 0x1122
         pkt[IP].proto = 0x7
         pkt[IP].tos = 0x5
@@ -691,6 +698,7 @@ class PSATernaryTest(P4EbpfTest):
         pkt[IP].src = "17.17.17.17"
         pkt[IP].dst = "255.255.255.255"
         pkt[UDP].chksum = 0x044D
+        print("pkt bytes to expect: %s" % (list(map(lambda x: '%02x' % (x), list(bytes(pkt))))))
         testutils.verify_packet(self, pkt, PORT1)
 
 
