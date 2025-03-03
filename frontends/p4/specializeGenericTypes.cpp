@@ -78,12 +78,9 @@ namespace {
 
 // depending on constness of Map returns a const or non-const pointer
 template <typename Map>
-auto _get(Map &map, const IR::Type_Specialized *type)
-    -> std::conditional_t<std::is_const_v<Map>, const TypeSpecialization *, TypeSpecialization *> {
-    if (const auto sig = SpecSignature::get(type)) {
-        return getref(map, *sig);
-    }
-    return nullptr;
+auto *_get(Map &map, const IR::Type_Specialized *type) {
+    const auto sig = SpecSignature::get(type);
+    return sig ? getref(map, *sig) : nullptr;
 }
 }  // namespace
 
