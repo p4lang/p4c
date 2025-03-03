@@ -61,6 +61,7 @@ class UBPFStateTranslationVisitor : public EBPF::CodeGenInspector {
         visit(stat->methodCall);
         return false;
     }
+    bool preorder(const IR::BaseAssignmentStatement *stat) override { return notSupported(stat); }
     bool preorder(const IR::AssignmentStatement *stat) override;
 };
 }  // namespace

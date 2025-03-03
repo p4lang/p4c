@@ -189,7 +189,7 @@ const IR::Node *DoConstantFolding::postorder(IR::Declaration_Constant *d) {
     return d;
 }
 
-const IR::Node *DoConstantFolding::preorder(IR::AssignmentStatement *statement) {
+const IR::Node *DoConstantFolding::preorder(IR::BaseAssignmentStatement *statement) {
     assignmentTarget = true;
     visit(statement->left);
     assignmentTarget = false;
