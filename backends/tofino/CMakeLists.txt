@@ -177,7 +177,7 @@ endif()
 
 # Generate the LICENSE file. Do this before generating the build system so
 # that CPack detects that the file exists.
-execute_process(COMMAND "${BFN_P4C_SOURCE_DIR}/scripts/generate-license.sh")
+
 
 set (CPACK_RESOURCE_FILE_LICENSE "${BFN_P4C_SOURCE_DIR}/LICENSE")
 set (THIRD_PARTY_LICENSES "${BFN_P4C_SOURCE_DIR}/LICENSES.txt")
