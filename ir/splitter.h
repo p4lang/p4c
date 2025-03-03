@@ -83,7 +83,6 @@ struct SplitResult {
 ///
 /// After:
 /// @code{.p4}
-/// a = a + 4
 /// if (cond_1) {
 ///     t1.apply();
 ///     d = 8 + v;
