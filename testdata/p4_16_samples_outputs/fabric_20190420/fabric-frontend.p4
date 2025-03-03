@@ -562,34 +562,18 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     }
     @name("FabricIngress.next.routing_hashed") action next_routing_hashed_0(@name("port_num") port_num_t port_num_1, @name("smac") mac_addr_t smac, @name("dmac") mac_addr_t dmac) {
         @hidden {
-            @hidden {
-                hdr.ethernet.src_addr = smac;
-            }
-            @hidden {
-                hdr.ethernet.dst_addr = dmac;
-            }
-            @hidden {
-                standard_metadata.egress_spec = port_num_1;
-            }
+            hdr.ethernet.src_addr = smac;
+            hdr.ethernet.dst_addr = dmac;
+            standard_metadata.egress_spec = port_num_1;
         }
         next_hashed_counter.count();
     }
     @name("FabricIngress.next.mpls_routing_hashed") action next_mpls_routing_hashed_0(@name("port_num") port_num_t port_num_2, @name("smac") mac_addr_t smac_0, @name("dmac") mac_addr_t dmac_0, @name("label") mpls_label_t label_0) {
         @hidden {
-            @hidden {
-                fabric_metadata.mpls_label = label_0;
-            }
-            @hidden {
-                @hidden {
-                    hdr.ethernet.src_addr = smac_0;
-                }
-                @hidden {
-                    hdr.ethernet.dst_addr = dmac_0;
-                }
-                @hidden {
-                    standard_metadata.egress_spec = port_num_2;
-                }
-            }
+            fabric_metadata.mpls_label = label_0;
+            hdr.ethernet.src_addr = smac_0;
+            hdr.ethernet.dst_addr = dmac_0;
+            standard_metadata.egress_spec = port_num_2;
         }
         next_hashed_counter.count();
     }
