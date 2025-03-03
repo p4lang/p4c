@@ -377,6 +377,7 @@ var namespace_p4 =
     [ "RemoveMiss", "class_p4_1_1_remove_miss.html", null ],
     [ "RemoveModifiedValues", "class_p4_1_1_remove_modified_values.html", null ],
     [ "RemoveNestedStructs", "class_p4_1_1_remove_nested_structs.html", "class_p4_1_1_remove_nested_structs" ],
+    [ "RemoveOpAssign", "class_p4_1_1_remove_op_assign.html", null ],
     [ "RemoveParserControlFlow", "class_p4_1_1_remove_parser_control_flow.html", null ],
     [ "RemoveParserIfs", "class_p4_1_1_remove_parser_ifs.html", null ],
     [ "RemoveRedundantParsers", "class_p4_1_1_remove_redundant_parsers.html", null ],

@@ -1258,7 +1258,8 @@ var hierarchy =
     [ "P4::InlineSummary::PerCaller::key_hash", "struct_p4_1_1_inline_summary_1_1_per_caller_1_1key__hash.html", null ],
     [ "P4::IOptionPragmaParser", "class_p4_1_1_i_option_pragma_parser.html", [
       [ "P4::P4COptionPragmaParser", "class_p4_1_1_p4_c_option_pragma_parser.html", [
-        [ "BFNOptionPragmaParser", "class_b_f_n_option_pragma_parser.html", null ]
+        [ "BFNOptionPragmaParser", "class_b_f_n_option_pragma_parser.html", null ],
+        [ "P4TestPragmas", "class_p4_test_pragmas.html", null ]
       ] ]
     ] ],
     [ "P4::IR::MAU::HashFunction", "struct_p4_1_1_i_r_1_1_m_a_u_1_1_hash_function.html", null ],
@@ -1593,7 +1594,8 @@ var hierarchy =
     ] ],
     [ "P4::RemoveUnusedPolicy", "class_p4_1_1_remove_unused_policy.html", [
       [ "P4::FrontEndPolicy", "class_p4_1_1_front_end_policy.html", [
-        [ "BFN::FrontEndPolicy", "struct_b_f_n_1_1_front_end_policy.html", null ]
+        [ "BFN::FrontEndPolicy", "struct_b_f_n_1_1_front_end_policy.html", null ],
+        [ "TestFEPolicy", "class_test_f_e_policy.html", null ]
       ] ]
     ] ],
     [ "P4::RenameMap", "class_p4_1_1_rename_map.html", null ],
@@ -3290,6 +3292,7 @@ var hierarchy =
         [ "P4::RemoveGenericTypes", "class_p4_1_1_remove_generic_types.html", null ],
         [ "P4::RemoveHidden", "class_p4_1_1_remove_hidden.html", null ],
         [ "P4::RemoveNestedStructs", "class_p4_1_1_remove_nested_structs.html", null ],
+        [ "P4::RemoveOpAssign", "class_p4_1_1_remove_op_assign.html", null ],
         [ "P4::RemoveUnusedActionParameters", "class_p4_1_1_remove_unused_action_parameters.html", null ],
         [ "P4::RemoveUnusedDeclarations", "class_p4_1_1_remove_unused_declarations.html", null ],
         [ "P4::RemoveUnusedHUDeclarations", "class_p4_1_1_remove_unused_h_u_declarations.html", null ],

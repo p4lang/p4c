@@ -557,7 +557,7 @@ $(function(){initNavTree('frontends_2p4_2def__use_8h_source.html',''); initResiz
 <div class="line"><a id="l00429" name="l00429"></a><span class="lineno">  429</span>            }</div>
 <div class="line"><a id="l00430" name="l00430"></a><span class="lineno">  430</span>            <span class="keyword">auto</span> l = stack.back();</div>
 <div class="line"><a id="l00431" name="l00431"></a><span class="lineno">  431</span>            <span class="keywordflow">if</span> (l != <span class="keyword">nullptr</span> &amp;&amp;</div>
-<div class="line"><a id="l00432" name="l00432"></a><span class="lineno">  432</span>                (l-&gt;is&lt;IR::AssignmentStatement&gt;() || l-&gt;is&lt;IR::MethodCallStatement&gt;()))</div>
+<div class="line"><a id="l00432" name="l00432"></a><span class="lineno">  432</span>                (l-&gt;is&lt;IR::BaseAssignmentStatement&gt;() || l-&gt;is&lt;IR::MethodCallStatement&gt;()))</div>
 <div class="line"><a id="l00433" name="l00433"></a><span class="lineno">  433</span>                out &lt;&lt; <span class="stringliteral">&quot;[[&quot;</span> &lt;&lt; l &lt;&lt; <span class="stringliteral">&quot;]]&quot;</span>;</div>
 <div class="line"><a id="l00434" name="l00434"></a><span class="lineno">  434</span>        }</div>
 <div class="line"><a id="l00435" name="l00435"></a><span class="lineno">  435</span>    }</div>
@@ -782,7 +782,7 @@ $(function(){initNavTree('frontends_2p4_2def__use_8h_source.html',''); initResiz
 <div class="line"><a id="l00657" name="l00657"></a><span class="lineno">  657</span>    <span class="keywordtype">bool</span> preorder(<span class="keyword">const</span> IR::P4Action *action) <span class="keyword">override</span>;</div>
 <div class="line"><a id="l00658" name="l00658"></a><span class="lineno">  658</span>    <span class="keywordtype">bool</span> preorder(<span class="keyword">const</span> IR::P4Table *table) <span class="keyword">override</span>;</div>
 <div class="line"><a id="l00659" name="l00659"></a><span class="lineno">  659</span>    <span class="keywordtype">bool</span> preorder(<span class="keyword">const</span> IR::Function *function) <span class="keyword">override</span>;</div>
-<div class="line"><a id="l00660" name="l00660"></a><span class="lineno">  660</span>    <span class="keywordtype">bool</span> preorder(<span class="keyword">const</span> IR::AssignmentStatement *statement) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00660" name="l00660"></a><span class="lineno">  660</span>    <span class="keywordtype">bool</span> preorder(<span class="keyword">const</span> IR::BaseAssignmentStatement *statement) <span class="keyword">override</span>;</div>
 <div class="line"><a id="l00661" name="l00661"></a><span class="lineno">  661</span>    <span class="keywordtype">bool</span> preorder(<span class="keyword">const</span> IR::ReturnStatement *statement) <span class="keyword">override</span>;</div>
 <div class="line"><a id="l00662" name="l00662"></a><span class="lineno">  662</span>    <span class="keywordtype">bool</span> preorder(<span class="keyword">const</span> IR::ExitStatement *statement) <span class="keyword">override</span>;</div>
 <div class="line"><a id="l00663" name="l00663"></a><span class="lineno">  663</span>    <span class="keywordtype">bool</span> preorder(<span class="keyword">const</span> IR::BreakStatement *statement) <span class="keyword">override</span>;</div>

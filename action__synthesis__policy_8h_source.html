@@ -171,7 +171,7 @@ $(function(){initNavTree('action__synthesis__policy_8h_source.html',''); initRes
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>            <span class="keywordflow">if</span> (<a class="code hl_function" href="class_tofino_write_context.html#a00ce8f591e564cf3bf292c629728fcaf">isWrite</a>()) writes.insert(m-&gt;toString());</div>
 <div class="line"><a id="l00072" name="l00072"></a><span class="lineno">   72</span>            <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line"><a id="l00073" name="l00073"></a><span class="lineno">   73</span>        }</div>
-<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        <span class="keywordtype">bool</span> preorder(<span class="keyword">const</span> IR::AssignmentStatement *assign) {</div>
+<div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>        <span class="keywordtype">bool</span> preorder(<span class="keyword">const</span> IR::BaseAssignmentStatement *assign) {</div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span>            <span class="comment">// special case -- ignore writing the result of a &#39;hash.get&#39; call to a var,</span></div>
 <div class="line"><a id="l00076" name="l00076"></a><span class="lineno">   76</span>            <span class="comment">// as we can use that directly in the same action (hash is computed in ixbar hash)</span></div>
 <div class="line"><a id="l00077" name="l00077"></a><span class="lineno">   77</span>            <span class="keywordflow">if</span> (<span class="keyword">auto</span> *mc = assign-&gt;right-&gt;to&lt;IR::MethodCallExpression&gt;()) {</div>
