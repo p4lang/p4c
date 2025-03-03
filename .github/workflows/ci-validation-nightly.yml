@@ -10,7 +10,6 @@ on:
     branches: [main]
 
 jobs:
-  #
   # We run validation in parallel with the normal tests.
   # Validation ensures that P4C compiles P4-16 programs correctly.
   # We only test the front end and some mid end passes for now.
