@@ -100,8 +100,7 @@ cstring IR::Node::prepareSourceInfoForJSON(Util::SourceInfo &si, unsigned *lineN
     if (!si.isValid()) {
         return nullptr;
     }
-    if (is<IR::BaseAssignmentStatement>()) {
-        auto assign = to<IR::BaseAssignmentStatement>();
+    if (auto assign = to<IR::BaseAssignmentStatement>()) {
         si = (assign->left->srcInfo + si) + assign->right->srcInfo;
     }
     return si.toSourcePositionData(lineNumber, columnNumber);
