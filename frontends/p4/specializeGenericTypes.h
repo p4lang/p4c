@@ -78,11 +78,12 @@ struct SpecSignature {
 
     /// @brief Order for the sake of std::map only, the requirements are:
     /// - it is a total order;
-    /// - no-argument specialization is always ordered before any other specializations of the type
-    ///   (for the sake of lower_bound searches).
-    /// Otherwise, correctness does not depend on the order.
+    /// - all specializations of the same type are grouped together;
+    /// - no-argument specialization is always ordered immediatelly before any other specializations
+    ///   of the type (for the sake of lower_bound searches);
     bool operator<(const SpecSignature &other) const {
-        return std::tie(baseType, arguments) < std::tie(other.baseType, other.arguments);
+        return std::forward_as_tuple(baseType.size(), baseType, arguments)
+             < std::forward_as_tuple(baseType.size(), other.baseType, other.arguments);
     }
 
     /// @brief Get a specialization signature if it is valid (i.e. the type is specialized only by
@@ -99,6 +100,7 @@ struct TypeSpecializationMap : IHasDbPrint {
     void add(const IR::Type_Specialized *t, const IR::Type_StructLike *decl,
              NameGenerator *nameGen);
     const TypeSpecialization *get(const IR::Type_Specialized *t) const;
+    TypeSpecialization *get(const IR::Type_Specialized *t);
     void dbprint(std::ostream &out) const override {
         for (auto it : map) {
             out << toString(it.first) << " => " << it.second << std::endl;
@@ -147,7 +149,7 @@ class CreateSpecializedTypes : public Modifier, public ResolutionContext {
         setName("CreateSpecializedTypes");
     }
 
-    void postorder(IR::Type_Declaration *type) override;
+    void postorder(IR::Type_Specialized *type) override;
     void postorder(IR::P4Program *prog) override;
 };
 
