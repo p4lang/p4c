@@ -57,7 +57,7 @@ jobs:
     if: ${{ github.repository == 'p4lang/p4c' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     env:
-      OS_TYPE: ubuntu-22.04
+      OS_TYPE: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
 
@@ -93,7 +93,7 @@ jobs:
           - kernels: 5.15
             kernel_version: 5.15.0-69
     env:
-      OS_TYPE: ubuntu-22.04
+      OS_TYPE: ubuntu-20.04
       KERNEL_VERSION: ${{ matrix.kernel_version }}
     steps:
       - uses: actions/checkout@v4
