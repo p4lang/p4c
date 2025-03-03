@@ -299,15 +299,11 @@ const IR::Literal *Z3Solver::toLiteral(const z3::expr &e, const IR::Type *type) 
 }
 
 void Z3Solver::toJSON(JSONGenerator &json) const {
-    json << json.indent << "{\n";
-    json.indent++;
-    json << json.indent << "\"checkpoints\" : " << checkpoints;
-    json << ",\n";
-    json << json.indent << "\"declarations\" : " << declaredVarsById;
-    json << ",\n";
-    json << json.indent << "\"assertions\" : " << p4Assertions;
-    json.indent--;
-    json << json.indent << "}\n";
+    auto state = json.begin_object();
+    json.emit("checkpoints", checkpoints);
+    json.emit("declarations", declaredVarsById);
+    json.emit("assertions", p4Assertions);
+    json.end_object(state);
 }
 
 void Z3Solver::addZ3Pushes(size_t &chkIndex, size_t asrtIndex) {
@@ -344,13 +340,13 @@ Z3Solver::Z3Solver(bool isIncremental, std::optional<std::istream *> inOpt)
     JSONLoader loader(*inOpt.value());
 
     JSONLoader solverCheckpoints(loader, "checkpoints");
-    BUG_CHECK(solverCheckpoints.json->is<JsonVector>(),
+    BUG_CHECK(solverCheckpoints.is<JsonVector>(),
               "Z3 solver loading: can't find list of checkpoint");
     solverCheckpoints >> checkpoints;
 
     // loading all assertions
     JSONLoader solverAssertions(loader, "assertions");
-    BUG_CHECK(solverAssertions.json->is<JsonVector>(),
+    BUG_CHECK(solverAssertions.is<JsonVector>(),
               "Z3 solver loading: can't find list of assertions");
     safe_vector<const Constraint *> assertions;
     solverAssertions >> assertions;

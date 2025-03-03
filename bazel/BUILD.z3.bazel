@@ -7,6 +7,11 @@ filegroup(
 
 configure_make(
     name = "api",
+    args = [
+        "--directory build",
+        "-j8",
+    ],
+    configure_in_place = True,
     # Bazel redacts certain cc macros such as __DATA__ and __TIMESTAMP__
     # since they will cause the compiled code to have timestamps or other
     # similar information in it, causing the compilation to be
@@ -25,19 +30,14 @@ configure_make(
     # 0, which is a valid c++ expression.
     # This is a minor improvement on top of:
     # https://github.com/bazelbuild/rules_foreign_cc/issues/239
-    configure_env_vars = {
+    env = {
         "CFLAGS": "-Dredacted=0",
         "CXXFLAGS": "-Dredacted=0",
         "PYTHON": "python3",
     },
-    configure_in_place = True,
     lib_source = ":all",
-    make_commands = [
-        "cd build",
-        "make -j8",  # Use -j8, hardcoded but otherwise it will be too slow.
-        "make install",
-    ],
     out_binaries = ["z3"],
     out_shared_libs = ["libz3.so"],
+    targets = ["install"],
     visibility = ["//visibility:public"],
 )
