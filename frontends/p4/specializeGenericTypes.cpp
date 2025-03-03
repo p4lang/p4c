@@ -55,8 +55,7 @@ void TypeSpecializationMap::fillInsertionSet(const IR::Type_StructLike *decl,
         decl, [&](const IR::Type_Name *tn) { handleName(tn->path->name.name); });
     forAllMatching<IR::Type_Specialized>(decl, [&](const IR::Type_Specialized *ts) {
         if (const auto *specialization = get(ts)) {
-            CHECK_NULL(specialization->replacement);
-            handleName(specialization->replacement->name);
+            handleName(specialization->name);
         }
     });
 }
@@ -75,11 +74,24 @@ void TypeSpecializationMap::add(const IR::Type_Specialized *t, const IR::Type_St
     map.emplace(*sig, TypeSpecialization{name, t, decl, {decl->name.name}, t->arguments});
 }
 
-const TypeSpecialization *TypeSpecializationMap::get(const IR::Type_Specialized *type) const {
+namespace {
+
+// depending on constness of Map returns a const or non-const pointer
+template<typename Map>
+std::conditional_t<std::is_const_v<Map>, const TypeSpecialization *, TypeSpecialization *> _get(Map &map, const IR::Type_Specialized *type) {
     if (const auto sig = SpecSignature::get(type)) {
         return getref(map, *sig);
     }
-    return nullptr;
+    return nullptr; // nullptr does not typecheck
+}
+}  // namespace
+
+const TypeSpecialization *TypeSpecializationMap::get(const IR::Type_Specialized *type) const {
+    return _get(map, type);
+}
+
+TypeSpecialization *TypeSpecializationMap::get(const IR::Type_Specialized *type) {
+    return _get(map, type);
 }
 
 namespace {
@@ -134,24 +146,24 @@ void FindTypeSpecializations::postorder(const IR::Type_Specialized *type) {
 
 ///////////////////////////////////////////////////////////////////////////////////////
 
-void CreateSpecializedTypes::postorder(IR::Type_Declaration *type) {
-    for (auto it = specMap->map.lower_bound({type->name.name, {}});
-         it != specMap->map.end() && it->first.baseType == type->name.name; ++it) {
-        auto &[specialized, specialization] = *it;
-
-        auto genDecl = type->to<IR::IMayBeGenericType>();
+void CreateSpecializedTypes::postorder(IR::Type_Specialized *spec) {
+    if (auto *specialization = specMap->get(spec)) {
+        const auto *declT = getDeclaration(spec->baseType->path)->to<IR::Type_Declaration>();
+        BUG_CHECK(declT, "Could not get declaration for %1%", spec);
+        auto genDecl = declT->to<IR::IMayBeGenericType>();
+        BUG_CHECK(genDecl, "Not a generic declaration: %1%", declT);
         TypeVariableSubstitution ts;
-        ts.setBindings(type, genDecl->getTypeParameters(), specialization.argumentTypes);
+        ts.setBindings(declT, genDecl->getTypeParameters(), specialization->argumentTypes);
         TypeSubstitutionVisitor tsv(specMap->typeMap, &ts);
         tsv.setCalledBy(this);
-        auto renamed = type->apply(tsv)->to<IR::Type_StructLike>()->clone();
-        cstring name = specialization.name;
+        auto renamed = declT->apply(tsv)->to<IR::Type_StructLike>()->clone();
+        cstring name = specialization->name;
         renamed->name = name;
         renamed->typeParameters = new IR::TypeParameters();
-        specialization.replacement = renamed;
+        specialization->replacement = renamed;
         // add additional insertion constraints
-        specMap->fillInsertionSet(renamed, specialization.insertion);
-        LOG3("CST: Specializing " << dbp(type) << " with [" << ts << "] as " << dbp(renamed));
+        specMap->fillInsertionSet(renamed, specialization->insertion);
+        LOG3("CST: Specializing " << dbp(declT) << " with [" << ts << "] as " << dbp(renamed));
     }
 }
 
@@ -172,9 +184,9 @@ void CreateSpecializedTypes::postorder(IR::P4Program *prog) {
 }
 
 const IR::Node *ReplaceTypeUses::postorder(IR::Type_Specialized *type) {
-    auto t = specMap->get(getOriginal<IR::Type_Specialized>());
+    auto t = specMap->get(type);
     if (!t) return type;
-    CHECK_NULL(t->replacement);
+    BUG_CHECK(t->replacement, "Missing replacement %1% -> %2%", type, t->name);
     LOG3("RTU Replacing " << dbp(type) << " with " << dbp(t->replacement));
     return t->replacement->getP4Type();
 }
