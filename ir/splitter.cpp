@@ -34,6 +34,10 @@ struct StatementSplitter : Inspector, ResolutionContext {
         absl::flat_hash_set<P4::cstring, Util::Hash> &neededDecls)
         : predicate(predicate), nameGen(nameGen), typeMap(typeMap), neededDecls(neededDecls) {}
 
+    bool preorder(const IR::LoopStatement *) override {
+        BUG("Loops not supported in statement splitter, must be unrolled before");
+    }
+
     bool preorder(const IR::Statement *stmt) override {
         handleStmt(stmt);
         return false;

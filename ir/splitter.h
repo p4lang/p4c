@@ -38,17 +38,17 @@ struct SplitResult {
 ///
 /// @pre @p stat must not contain P4::IR::LoopStatement (loops must be unrolled before).
 /// @pre All variable declarations have unique names.
-/// @pre No non-standard control flow blocks exist in the IR of @p stat.
+/// @pre No non-standard control flow blocks exist in the IR of @p stat (only if and switch).
 ///
 /// @note Fresh variables are introduced to save all if conditions and switch selectors. This is to
-/// ensure the right branch is triggered, even if code is inserted between the split points.
+/// ensure the right branch is triggered even if code is inserted between the split points.
 /// Furthemore, declarations that would become invisible in the "after section" are hoisted. No
 /// other provisions are made to isolate side effects that may be inserted between the split code
 /// fragments.
 ///
-/// @note No inspection is done for the called object of IR::MA::MethodCallStatement (except that
-///   @p predicate is applied to them as for any other statement). Therefore, called
-///   functions/actions are not recursively split.
+/// @note No inspection is done for the called object of IR::MA::MethodCallStatement (except that @p
+/// predicate is applied to them as for any other statement). Therefore, called functions/actions
+/// are not recursively split.
 ///
 /// @code{.p4}
 /// a = a + 4
