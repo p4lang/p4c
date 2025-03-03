@@ -20,6 +20,7 @@ limitations under the License.
 #include <vector>
 
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeMap.h"
 #include "ir/ir-traversal.h"
 #include "ir/visitor.h"
 
@@ -28,8 +29,8 @@ namespace P4 {
 struct StatementSplitter : Inspector {
     StatementSplitter(
         std::function<bool(const IR::Statement *, const Visitor::Context *)> predicate,
-        P4::NameGenerator &nameGen)
-        : predicate(predicate), nameGen(nameGen) {}
+        P4::NameGenerator &nameGen, P4::TypeMap *typeMap)
+        : predicate(predicate), nameGen(nameGen), typeMap(typeMap) {}
 
     bool preorder(const IR::Statement *stmt) override {
         handleStmt(stmt);
@@ -55,8 +56,8 @@ struct StatementSplitter : Inspector {
         }
 
         for (size_t i = 0, sz = bs->components.size(); i < sz; i++) {
-            StatementSplitter sub(predicate, nameGen);
-            bs->apply(sub, getChildContext());
+            StatementSplitter sub(predicate, nameGen, typeMap);
+            bs->components[i]->apply(sub, getChildContext());
             const auto &[before, after, hoist] = sub.result;
             if (after) {
                 auto *copy = bs->clone();
@@ -103,6 +104,12 @@ struct StatementSplitter : Inspector {
         afterIf->ifTrue = results[0].after;
         afterIf->ifFalse = results[1].after;
         result.after = afterIf;
+
+        for (auto **trueBranch : {&beforeIf->ifTrue, &afterIf->ifTrue}) {
+            if (*trueBranch == nullptr) {
+                *trueBranch = new IR::BlockStatement(ifs->ifTrue->srcInfo);
+            }
+        }
         return false;
     }
 
@@ -120,6 +127,19 @@ struct StatementSplitter : Inspector {
         if (!anySplit) {
             return false;
         }
+
+        IR::ID selName{nameGen.newName("selector"), nullptr};
+        const auto &si = sw->srcInfo;
+        const auto *selType = typeMap ? typeMap->getType(sw->expression) : nullptr;
+        selType = selType ? selType : sw->expression->type;
+        BUG_CHECK(selType && !selType->is<IR::Type::Unknown>(),
+                  "Cannot split switch statement with unknown selector type %1%", sw->expression);
+        const auto *decl = new IR::Declaration_Variable(si, selName, selType);
+        result.hoistedDeclarations.push_back(decl);
+
+        const auto *selPE = new IR::PathExpression(si, new IR::Path(si, selName));
+        const auto *asgn = new IR::AssignmentStatement(si, selPE, sw->expression);
+
         // ensure we don't accidentally create fallthrough
         for (size_t i = 0; i < branches.size(); ++i) {
             for (const auto **val : {&results[i].before, &results[i].after}) {
@@ -130,12 +150,13 @@ struct StatementSplitter : Inspector {
         }
 
         auto *beforeSw = sw->clone();
+        beforeSw->expression = selPE;
         for (size_t i = 0; i < branches.size(); ++i) {
             setCase(beforeSw, i, results[i].before);
         }
-        result.before = beforeSw;
+        result.before = new IR::BlockStatement(si, {asgn, beforeSw});
 
-        auto *afterSw = sw->clone();
+        auto *afterSw = beforeSw->clone();
         for (size_t i = 0; i < branches.size(); ++i) {
             setCase(afterSw, i, results[i].after);
         }
@@ -147,8 +168,9 @@ struct StatementSplitter : Inspector {
 
  private:
     void setCase(IR::SwitchStatement *sw, size_t i, const IR::Statement *value) {
-        modify(sw, &IR::SwitchStatement::cases, IR::Traversal::Index(i), &IR::SwitchCase::statement,
-               IR::Traversal::Assign(value));
+        // note that we can't go all the way to statement as it can be nullptr
+        modify(sw, &IR::SwitchStatement::cases, IR::Traversal::Index(i),
+               [value](IR::SwitchCase *case_) { case_->statement = value; return case_; });
     }
 
     void addHoisted(const std::vector<const IR::Declaration *> decls) {
@@ -167,7 +189,7 @@ struct StatementSplitter : Inspector {
                 res.emplace_back();
                 continue;
             }
-            StatementSplitter sub(predicate, nameGen);
+            StatementSplitter sub(predicate, nameGen, typeMap);
             branch->apply(sub, getChildContext());
             if (sub.result.after) {
                 anySplit = true;
@@ -180,13 +202,14 @@ struct StatementSplitter : Inspector {
 
     std::function<bool(const IR::Statement *, const Visitor::Context *)> predicate;
     P4::NameGenerator &nameGen;
+    P4::TypeMap *typeMap;
 };
 
 SplitResult<IR::Statement> splitStatementBefore(
     const IR::Statement *stat,
     std::function<bool(const IR::Statement *, const P4::Visitor_Context *)> predicate,
-    P4::NameGenerator &nameGen) {
-    StatementSplitter split(predicate, nameGen);
+    P4::NameGenerator &nameGen, P4::TypeMap *typeMap) {
+    StatementSplitter split(predicate, nameGen, typeMap);
     stat->apply(split);
     return split.result;
 }
