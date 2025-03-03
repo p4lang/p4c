@@ -39,19 +39,6 @@ struct StatementSplitter : Inspector, ResolutionContext {
         return false;
     }
 
-    bool handleStmt(const IR::Statement *stmt) {
-        BUG_CHECK(result.before == nullptr && result.after == nullptr,
-                  "More than one leaf statement found: %1% and %2%",
-                  result.before ? result.before : result.after, stmt);
-        if (predicate(stmt, getChildContext())) {
-            result.after = stmt;
-            collectNeededDeclarations(result.after);
-            return true;
-        }
-        result.before = stmt;
-        return false;
-    }
-
     bool preorder(const IR::BlockStatement *bs) override {
         if (handleStmt(bs)) {
             // split on the bs itself
@@ -172,10 +159,26 @@ struct StatementSplitter : Inspector, ResolutionContext {
     SplitResult<IR::Statement> result;
 
  private:
+    bool handleStmt(const IR::Statement *stmt) {
+        BUG_CHECK(result.before == nullptr && result.after == nullptr,
+                  "More than one leaf statement found: %1% and %2%",
+                  result.before ? result.before : result.after, stmt);
+        if (predicate(stmt, getChildContext())) {
+            result.after = stmt;
+            collectNeededDeclarations(result.after);
+            return true;
+        }
+        result.before = stmt;
+        return false;
+    }
+
     void setCase(IR::SwitchStatement *sw, size_t i, const IR::Statement *value) {
         // note that we can't go all the way to statement as it can be nullptr
         modify(sw, &IR::SwitchStatement::cases, IR::Traversal::Index(i),
-               [value](IR::SwitchCase *case_) { case_->statement = value; return case_; });
+               [value](IR::SwitchCase *case_) {
+                   case_->statement = value;
+                   return case_;
+               });
     }
 
     void addHoisted(const std::vector<const IR::Declaration *> decls) {
@@ -223,11 +226,12 @@ struct StatementSplitter : Inspector, ResolutionContext {
         neededDecls.insert(collect.needed.begin(), collect.needed.end());
     }
 
-    template<typename T>
+    template <typename T>
     const T *filterDeclarations(const T *node) {
         struct FilterDecls : Transform {
             FilterDecls(absl::flat_hash_set<P4::cstring, Util::Hash> &needed,
-                std::vector<const IR::Declaration *> &hoisted) : needed(needed), hoisted(hoisted) {}
+                        std::vector<const IR::Declaration *> &hoisted)
+                : needed(needed), hoisted(hoisted) {}
 
             const IR::Node *preorder(IR::Declaration_Variable *decl) override {
                 if (needed.contains(decl->name)) {

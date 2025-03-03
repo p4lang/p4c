@@ -14,23 +14,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "ir/splitter.h"
-#include "frontends/common/resolveReferences/referenceMap.h"
-#include "frontends/p4/typeChecking/typeChecker.h"
-#include "frontends/common/parseInput.h"
-
 #include <gtest/gtest.h>
 
+#include "frontends/common/parseInput.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 #include "ir/ir.h"
+#include "ir/splitter.h"
 
 using namespace P4::literals;
 
 namespace P4::Test {
 
 struct SplitterTest : public ::testing::Test {
-    SplitResult<IR::Statement> splitBefore(const IR::Statement *stat,   
-        std::function<bool(const IR::Statement *, const P4::Visitor_Context *)> predicate)
-    {
+    SplitResult<IR::Statement> splitBefore(
+        const IR::Statement *stat,
+        std::function<bool(const IR::Statement *, const P4::Visitor_Context *)> predicate) {
         stat->apply(nameGen);
         return splitStatementBefore(stat, predicate, nameGen, &typeMap);
     }
@@ -39,8 +38,8 @@ struct SplitterTest : public ::testing::Test {
         const auto program = absl::StrCat(
             "extern void fn(); extern void f1(); extern void f2(); extern void f3(); ",
             "extern void f4(); extern void f5(); extern void f6(); extern void bar(); ",
-            "control c() { bit<4> a; bit<4> b; bit<4> c; bit<4> d; bool bvar; ",
-            decs, "apply {", code, "} }");
+            "control c() { bit<4> a; bit<4> b; bit<4> c; bit<4> d; bool bvar; ", decs, "apply {",
+            code, "} }");
         const auto *prog = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
         CHECK_NULL(prog);
         P4::TypeInference ti(&typeMap, false, false, false);
@@ -79,8 +78,8 @@ struct SplitterTest : public ::testing::Test {
         return new IR::BlockStatement(std::move(stmts));
     }
 
-    const IR::IfStatement *ifs(const IR::Expression *cond, const IR::Statement *tr, const IR::Statement *fls = nullptr)
-    {
+    const IR::IfStatement *ifs(const IR::Expression *cond, const IR::Statement *tr,
+                               const IR::Statement *fls = nullptr) {
         return new IR::IfStatement(cond, tr, fls);
     }
 
@@ -88,12 +87,15 @@ struct SplitterTest : public ::testing::Test {
     TypeMap typeMap;
 };
 
-#define EXPECT_EQUIV(a, b) EXPECT_TRUE(a->equiv(*b)) \
-    << "Actual:" << Log::indent << Log::endl << a << Log::unindent \
-    << "\nExpected: " << Log::indent << Log::endl << b << Log::unindent;
+#define EXPECT_EQUIV(a, b)                                                                        \
+    EXPECT_TRUE(a->equiv(*b)) << "Actual:" << Log::indent << Log::endl                            \
+                              << a << Log::unindent << "\nExpected: " << Log::indent << Log::endl \
+                              << b << Log::unindent;
 
-template<typename T>
-bool predIs(const IR::Statement *stmt, const P4::Visitor::Context *) { return stmt->is<T>(); }
+template <typename T>
+bool predIs(const IR::Statement *stmt, const P4::Visitor::Context *) {
+    return stmt->is<T>();
+}
 
 TEST_F(SplitterTest, SplitBsEmpty) {
     const auto *bs = blk({});
@@ -107,9 +109,7 @@ TEST_F(SplitterTest, SplitBsEmpty) {
 }
 
 TEST_F(SplitterTest, SplitBsSimple1) {
-    const auto *bs = blk({
-        asgn("a", "b")
-    });
+    const auto *bs = blk({asgn("a", "b")});
     auto [before, after, decls] = splitBefore(bs, &predIs<IR::AssignmentStatement>);
     ASSERT_TRUE(before);
 
@@ -126,10 +126,7 @@ TEST_F(SplitterTest, SplitBsSimple1) {
 }
 
 TEST_F(SplitterTest, SplitBsSimple2) {
-    const auto *bs = blk({
-        call("fn"),
-        asgn("a", "b")
-    });
+    const auto *bs = blk({call("fn"), asgn("a", "b")});
     auto [before, after, decls] = splitBefore(bs, &predIs<IR::AssignmentStatement>);
     ASSERT_TRUE(before);
 
@@ -137,7 +134,7 @@ TEST_F(SplitterTest, SplitBsSimple2) {
     ASSERT_TRUE(bbs) << before;
     ASSERT_EQ(bbs->components.size(), 1) << before;
     EXPECT_TRUE(bbs->components.front()->is<IR::MethodCallStatement>()) << bbs;
-    
+
     const auto *abs = after->to<IR::BlockStatement>();
     ASSERT_TRUE(abs) << after;
     ASSERT_EQ(abs->components.size(), 1) << abs;
@@ -147,11 +144,7 @@ TEST_F(SplitterTest, SplitBsSimple2) {
 }
 
 TEST_F(SplitterTest, SplitBsIfSingleBranch) {
-    const auto *bs = ifs(eq("a", "b"),
-        blk({
-            call("fn"),
-            asgn("a", "b")
-        }));
+    const auto *bs = ifs(eq("a", "b"), blk({call("fn"), asgn("a", "b")}));
     auto [before, after, decls] = splitBefore(bs, &predIs<IR::AssignmentStatement>);
     ASSERT_TRUE(before);
 
@@ -164,11 +157,8 @@ TEST_F(SplitterTest, SplitBsIfSingleBranch) {
     ASSERT_TRUE(bifs->ifTrue) << bifs;
     EXPECT_FALSE(bifs->ifFalse) << bifs;
 
-    EXPECT_EQUIV(before, blk({
-        asgn("cond", eq("a", "b")),
-        ifs(pe("cond"), blk({call("fn")}))
-    }));
-    
+    EXPECT_EQUIV(before, blk({asgn("cond", eq("a", "b")), ifs(pe("cond"), blk({call("fn")}))}));
+
     const auto *aifs = after->to<IR::IfStatement>();
     ASSERT_TRUE(aifs) << after;
     ASSERT_TRUE(aifs->ifTrue) << aifs;
@@ -177,36 +167,27 @@ TEST_F(SplitterTest, SplitBsIfSingleBranch) {
     EXPECT_EQUIV(after, ifs(pe("cond"), blk({asgn("a", "b")})));
 
     ASSERT_EQ(decls.size(), 1);
-    EXPECT_EQUIV(decls.front(),
-                 new IR::Declaration_Variable(IR::ID{"cond"_cs, nullptr}, IR::Type::Boolean::get()));
+    EXPECT_EQUIV(decls.front(), new IR::Declaration_Variable(IR::ID{"cond"_cs, nullptr},
+                                                             IR::Type::Boolean::get()));
 }
 
 TEST_F(SplitterTest, SplitBsIfTwoBranches) {
-    const auto *bs = ifs(eq("a", "b"),
-        blk({
-            call("fn"),
-            asgn("a", "b")
-        }),
-        blk({
-            asgn("c", "d")
-        }));
+    const auto *bs = ifs(eq("a", "b"), blk({call("fn"), asgn("a", "b")}), blk({asgn("c", "d")}));
     auto [before, after, decls] = splitBefore(bs, &predIs<IR::AssignmentStatement>);
     ASSERT_TRUE(before);
 
-    EXPECT_EQUIV(before, blk({
-        asgn("cond", eq("a", "b")),
-        ifs(pe("cond"), blk({call("fn")}), blk({}))
-    }));
-    
+    EXPECT_EQUIV(before,
+                 blk({asgn("cond", eq("a", "b")), ifs(pe("cond"), blk({call("fn")}), blk({}))}));
+
     EXPECT_EQUIV(after, ifs(pe("cond"), blk({asgn("a", "b")}), blk({asgn("c", "d")})));
 
     ASSERT_EQ(decls.size(), 1);
-    EXPECT_EQUIV(decls.front(),
-                 new IR::Declaration_Variable(IR::ID{"cond"_cs, nullptr}, IR::Type::Boolean::get()));
+    EXPECT_EQUIV(decls.front(), new IR::Declaration_Variable(IR::ID{"cond"_cs, nullptr},
+                                                             IR::Type::Boolean::get()));
 }
 
 TEST_F(SplitterTest, SplitBsIfNested) {
-const auto *bs = parse(R"(
+    const auto *bs = parse(R"(
 if (a == b) {
     fn();
     if (bvar) {
@@ -244,8 +225,9 @@ if (a == b) {
     } else {
         // cut
     }
-})", "bool cond_0; bool cond;"));
-    
+})",
+                               "bool cond_0; bool cond;"));
+
     EXPECT_EQUIV(after, parse(R"(
 if (cond_0) {
     if (cond) {
@@ -259,17 +241,18 @@ if (cond_0) {
     // cut
     c = d;
     bar();
-})", "bool cond_0; bool cond;"));
+})",
+                              "bool cond_0; bool cond;"));
 
     ASSERT_EQ(decls.size(), 2);
-    EXPECT_EQUIV(decls.at(0),
-                 new IR::Declaration_Variable(IR::ID{"cond"_cs, nullptr}, IR::Type::Boolean::get()));
-    EXPECT_EQUIV(decls.at(1),
-                 new IR::Declaration_Variable(IR::ID{"cond_0"_cs, nullptr}, IR::Type::Boolean::get()));
+    EXPECT_EQUIV(decls.at(0), new IR::Declaration_Variable(IR::ID{"cond"_cs, nullptr},
+                                                           IR::Type::Boolean::get()));
+    EXPECT_EQUIV(decls.at(1), new IR::Declaration_Variable(IR::ID{"cond_0"_cs, nullptr},
+                                                           IR::Type::Boolean::get()));
 }
 
 TEST_F(SplitterTest, IfSwitchNested) {
-const auto *bs = parse(R"(
+    const auto *bs = parse(R"(
 if (a == b) {
     fn();
     switch (a) {
@@ -311,8 +294,9 @@ if (a == b) {
     } else {
         bar();
     }
-})", "bool cond_0; bool cond; bit<4> selector; "));
-    
+})",
+                               "bool cond_0; bool cond; bit<4> selector; "));
+
     EXPECT_EQUIV(after, parse(R"(
 if (cond_0) {
     switch (selector) {
@@ -324,19 +308,20 @@ if (cond_0) {
     }
     f5();
 }
-)", "bool cond; bool cond_0; bit<4> selector; "));
+)",
+                              "bool cond; bool cond_0; bit<4> selector; "));
 
     ASSERT_EQ(decls.size(), 3);
-    EXPECT_EQUIV(decls.at(0),
-                 new IR::Declaration_Variable(IR::ID{"cond"_cs, nullptr}, IR::Type::Boolean::get()));
-    EXPECT_EQUIV(decls.at(1),
-                 new IR::Declaration_Variable(IR::ID{"selector"_cs, nullptr}, IR::Type::Bits::get(4)));
-    EXPECT_EQUIV(decls.at(2),
-                 new IR::Declaration_Variable(IR::ID{"cond_0"_cs, nullptr}, IR::Type::Boolean::get()));
+    EXPECT_EQUIV(decls.at(0), new IR::Declaration_Variable(IR::ID{"cond"_cs, nullptr},
+                                                           IR::Type::Boolean::get()));
+    EXPECT_EQUIV(decls.at(1), new IR::Declaration_Variable(IR::ID{"selector"_cs, nullptr},
+                                                           IR::Type::Bits::get(4)));
+    EXPECT_EQUIV(decls.at(2), new IR::Declaration_Variable(IR::ID{"cond_0"_cs, nullptr},
+                                                           IR::Type::Boolean::get()));
 }
 
 TEST_F(SplitterTest, HoistVarIf) {
-const auto *bs = parse(R"(
+    const auto *bs = parse(R"(
 if (a == b) {
     bit<4> x;
     bit<4> y;
@@ -358,23 +343,25 @@ if (a == b) {
         x = y + 2;
         // split
     }
-})", "bool cond; bit<4> x; "));
+})",
+                               "bool cond; bit<4> x; "));
 
     EXPECT_EQUIV(after, parse(R"(
 if (cond) {
     f1();
     x = c > a ? x + c : x + a;
-})", "bool cond; bit<4> x; "));
+})",
+                              "bool cond; bit<4> x; "));
 
     ASSERT_EQ(decls.size(), 2);
     EXPECT_EQUIV(decls.at(0),
                  new IR::Declaration_Variable(IR::ID{"x"_cs, nullptr}, IR::Type::Bits::get(4)));
-    EXPECT_EQUIV(decls.at(1),
-                 new IR::Declaration_Variable(IR::ID{"cond"_cs, nullptr}, IR::Type::Boolean::get()));
+    EXPECT_EQUIV(decls.at(1), new IR::Declaration_Variable(IR::ID{"cond"_cs, nullptr},
+                                                           IR::Type::Boolean::get()));
 }
 
 TEST_F(SplitterTest, HoistVarSwitch) {
-const auto *bs = parse(R"(
+    const auto *bs = parse(R"(
 switch (a) {
     0: {
         bit<4> x;
@@ -402,7 +389,8 @@ switch (a) {
         }
         1: { a = b; }
     }
-})", "bit<4> selector; bit<4> x; "));
+})",
+                               "bit<4> selector; bit<4> x; "));
 
     EXPECT_EQUIV(after, parse(R"(
 switch (selector) {
@@ -411,13 +399,14 @@ switch (selector) {
         x = c > a ? x + c : x + a;
     }
     1: {}
-})", "bit<4> selector; bit<4> x; "));
+})",
+                              "bit<4> selector; bit<4> x; "));
 
     ASSERT_EQ(decls.size(), 2);
     EXPECT_EQUIV(decls.at(0),
                  new IR::Declaration_Variable(IR::ID{"x"_cs, nullptr}, IR::Type::Bits::get(4)));
-    EXPECT_EQUIV(decls.at(1),
-                 new IR::Declaration_Variable(IR::ID{"selector"_cs, nullptr}, IR::Type::Bits::get(4)));
+    EXPECT_EQUIV(decls.at(1), new IR::Declaration_Variable(IR::ID{"selector"_cs, nullptr},
+                                                           IR::Type::Bits::get(4)));
 }
 
 }  // namespace P4::Test
