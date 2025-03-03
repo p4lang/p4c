@@ -243,7 +243,7 @@ class ElimCasts : public PassManager {
             new RewriteConcatToSlices(),
             new P4::ClearTypeMap(typeMap),
             new BFN::TypeChecking(refMap, typeMap, true),
-            new P4::SimplifyControlFlow(typeMap),
+            new P4::SimplifyControlFlow(typeMap, true),
             new P4::ClearTypeMap(typeMap),
             new BFN::TypeChecking(refMap, typeMap, true),
         });
