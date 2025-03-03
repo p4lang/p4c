@@ -20,17 +20,19 @@ limitations under the License.
 #include <vector>
 
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir-traversal.h"
 #include "ir/visitor.h"
 
 namespace P4 {
 
-struct StatementSplitter : Inspector {
+struct StatementSplitter : Inspector, ResolutionContext {
     StatementSplitter(
         std::function<bool(const IR::Statement *, const Visitor::Context *)> predicate,
-        P4::NameGenerator &nameGen, P4::TypeMap *typeMap)
-        : predicate(predicate), nameGen(nameGen), typeMap(typeMap) {}
+        P4::NameGenerator &nameGen, P4::TypeMap *typeMap,
+        absl::flat_hash_set<P4::cstring, Util::Hash> &neededDecls)
+        : predicate(predicate), nameGen(nameGen), typeMap(typeMap), neededDecls(neededDecls) {}
 
     bool preorder(const IR::Statement *stmt) override {
         handleStmt(stmt);
@@ -43,6 +45,7 @@ struct StatementSplitter : Inspector {
                   result.before ? result.before : result.after, stmt);
         if (predicate(stmt, getChildContext())) {
             result.after = stmt;
+            collectNeededDeclarations(result.after);
             return true;
         }
         result.before = stmt;
@@ -56,7 +59,7 @@ struct StatementSplitter : Inspector {
         }
 
         for (size_t i = 0, sz = bs->components.size(); i < sz; i++) {
-            StatementSplitter sub(predicate, nameGen, typeMap);
+            StatementSplitter sub(predicate, nameGen, typeMap, neededDecls);
             bs->components[i]->apply(sub, getChildContext());
             const auto &[before, after, hoist] = sub.result;
             if (after) {
@@ -65,12 +68,14 @@ struct StatementSplitter : Inspector {
                 if (before) {
                     copy->components.push_back(before);
                 }
-                result.before = copy;
+                result.before = filterDeclarations(copy);
                 copy = bs->clone();
                 copy->components.erase(copy->components.begin(), copy->components.begin() + i);
                 copy->components.replace(copy->components.begin(), after);
                 result.after = copy;
+                collectNeededDeclarations(result.after);
                 addHoisted(hoist);
+                break;
             }
         }
         return false;
@@ -189,10 +194,11 @@ struct StatementSplitter : Inspector {
                 res.emplace_back();
                 continue;
             }
-            StatementSplitter sub(predicate, nameGen, typeMap);
+            StatementSplitter sub(predicate, nameGen, typeMap, neededDecls);
             branch->apply(sub, getChildContext());
             if (sub.result.after) {
                 anySplit = true;
+                collectNeededDeclarations(result.after);
             }
             addHoisted(sub.result.hoistedDeclarations);
             res.emplace_back(std::move(sub.result));
@@ -200,16 +206,58 @@ struct StatementSplitter : Inspector {
         return {res, anySplit};
     }
 
+    void collectNeededDeclarations(const IR::Node *after) {
+        struct CollectNeededDecls : Inspector, ResolutionContext {
+            void postorder(const IR::PathExpression *pe) override {
+                // using lower-level resolution to avoid emitting errors for things not found
+                if (!resolve(pe->path->name, ResolutionType::Any).empty()) {
+                    needed.insert(pe->path->name);
+                }
+            }
+
+            absl::flat_hash_set<P4::cstring, Util::Hash> needed;
+        };
+
+        CollectNeededDecls collect;
+        after->apply(collect, getChildContext());
+        neededDecls.insert(collect.needed.begin(), collect.needed.end());
+    }
+
+    template<typename T>
+    const T *filterDeclarations(const T *node) {
+        struct FilterDecls : Transform {
+            FilterDecls(absl::flat_hash_set<P4::cstring, Util::Hash> &needed,
+                std::vector<const IR::Declaration *> &hoisted) : needed(needed), hoisted(hoisted) {}
+
+            const IR::Node *preorder(IR::Declaration_Variable *decl) override {
+                if (needed.contains(decl->name)) {
+                    hoisted.push_back(decl);
+                    return nullptr;
+                }
+                return decl;
+            }
+
+            absl::flat_hash_set<P4::cstring, Util::Hash> &needed;
+            std::vector<const IR::Declaration *> &hoisted;
+        };
+
+        FilterDecls filter(neededDecls, result.hoistedDeclarations);
+        return node->apply(filter)->template checkedTo<T>();
+    }
+
     std::function<bool(const IR::Statement *, const Visitor::Context *)> predicate;
     P4::NameGenerator &nameGen;
     P4::TypeMap *typeMap;
+    absl::flat_hash_set<P4::cstring, Util::Hash> &neededDecls;
 };
 
 SplitResult<IR::Statement> splitStatementBefore(
     const IR::Statement *stat,
     std::function<bool(const IR::Statement *, const P4::Visitor_Context *)> predicate,
     P4::NameGenerator &nameGen, P4::TypeMap *typeMap) {
-    StatementSplitter split(predicate, nameGen, typeMap);
+    absl::flat_hash_set<P4::cstring, Util::Hash> neededDecls;
+    StatementSplitter split(predicate, nameGen, typeMap, neededDecls);
+    // no incoming context, declaration resolution will work only within the splitter
     stat->apply(split);
     return split.result;
 }

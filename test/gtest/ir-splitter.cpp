@@ -212,6 +212,7 @@ if (a == b) {
     if (bvar) {
         f2();
         a = b;
+        c = b;
         f3();
     } else {
         f2();
@@ -250,6 +251,7 @@ if (cond_0) {
     if (cond) {
         // cut
         a = b;
+        c = b;
         f3();
     }
     f5();
@@ -364,6 +366,58 @@ if (cond) {
     x = c > a ? x + c : x + a;
 })", "bool cond; bit<4> x; "));
 
+    ASSERT_EQ(decls.size(), 2);
+    EXPECT_EQUIV(decls.at(0),
+                 new IR::Declaration_Variable(IR::ID{"x"_cs, nullptr}, IR::Type::Bits::get(4)));
+    EXPECT_EQUIV(decls.at(1),
+                 new IR::Declaration_Variable(IR::ID{"cond"_cs, nullptr}, IR::Type::Boolean::get()));
+}
+
+TEST_F(SplitterTest, HoistVarSwitch) {
+const auto *bs = parse(R"(
+switch (a) {
+    0: {
+        bit<4> x;
+        bit<4> y;
+        y = c + 4;
+        x = y + 2;
+        // split
+        f1();
+        x = c > a ? x + c : x + a;
+    }
+    1: { a = b; }
+})");
+    auto [before, after, decls] = splitBefore(bs, &predIs<IR::MethodCallStatement>);
+    ASSERT_TRUE(before);
+
+    EXPECT_EQUIV(before, parse(R"(
+{
+    selector = a;
+    switch (selector) {
+        0: {
+            bit<4> y;
+            y = c + 4;
+            x = y + 2;
+            // split
+        }
+        1: { a = b; }
+    }
+})", "bit<4> selector; bit<4> x; "));
+
+    EXPECT_EQUIV(after, parse(R"(
+switch (selector) {
+    0: {
+        f1();
+        x = c > a ? x + c : x + a;
+    }
+    1: {}
+})", "bit<4> selector; bit<4> x; "));
+
+    ASSERT_EQ(decls.size(), 2);
+    EXPECT_EQUIV(decls.at(0),
+                 new IR::Declaration_Variable(IR::ID{"x"_cs, nullptr}, IR::Type::Bits::get(4)));
+    EXPECT_EQUIV(decls.at(1),
+                 new IR::Declaration_Variable(IR::ID{"selector"_cs, nullptr}, IR::Type::Bits::get(4)));
 }
 
 }  // namespace P4::Test

@@ -37,6 +37,7 @@ struct SplitResult {
 /// statemet) is in SplitResult::after.
 ///
 /// @pre @p stat must not contain P4::IR::LoopStatement (loops must be unrolled before).
+/// @pre All variable declarations have unique names.
 /// @pre No non-standard control flow blocks exist in the IR of @p stat.
 ///
 /// @note Fresh variables are introduced to save all if conditions and switch selectors. This is to
