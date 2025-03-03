@@ -148,7 +148,7 @@ const IR::Node *ActionsInliner::preorder(IR::MethodCallStatement *statement) {
         });
     annotations.push_back(new IR::Annotation(statement->srcInfo,
                                              IR::Annotation::inlinedFromAnnotation,
-                                             {new IR::StringLiteral(callee->name)}));
+                                             {new IR::StringLiteral(callee->name.originalName)}));
     auto result = new IR::BlockStatement(statement->srcInfo, annotations, body);
     LOG2("Replacing " << orig << " with " << result);
     return result;
