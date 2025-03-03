@@ -160,6 +160,24 @@ const IR::Node *TypeInferenceBase::postorder(const IR::OpAssignmentStatement *as
     return TypeInferenceBase::common_assign(assign, ltype);
 }
 
+const IR::Node *TypeInferenceBase::shiftAssign(const IR::OpAssignmentStatement *assign) {
+    LOG3("TI Visiting " << dbp(getOriginal()));
+    auto ltype = getType(assign->left);
+    auto rtype = getType(assign->left);
+    if (!ltype) return assign;
+    if (!isLeftValue(assign->left)) {
+        typeError("Expression %1% cannot be the target of an assignment", assign->left);
+        LOG2(assign->left);
+    } else if (!ltype->is<IR::Type_Bits>()) {
+        typeError("%1%=: cannot be applied to '%2%' with type '%3%'", assign->getStringOp(),
+                  assign->left, ltype->toString());
+    } else if (rtype && !rtype->is<IR::Type_Bits>() && !rtype->is<IR::Type_InfInt>()) {
+        typeError("%1%=: cannot be applied with '%2%' with type '%3%'", assign->getStringOp(),
+                  assign->right, rtype->toString());
+    }
+    return assign;
+}
+
 const IR::Node *TypeInferenceBase::postorder(const IR::ForInStatement *forin) {
     LOG3("TI Visiting " << dbp(getOriginal()));
     auto ltype = getType(forin->ref);

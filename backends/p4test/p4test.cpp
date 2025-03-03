@@ -87,6 +87,39 @@ class P4TestOptions : public CompilerOptions {
     }
 };
 
+class P4TestPragmas : public P4::P4COptionPragmaParser {
+    std::optional<IOptionPragmaParser::CommandLineOptions> tryToParse(
+        const IR::Annotation *annotation) {
+        if (annotation->name == "test_keep_opassign") {
+            test_keepOpAssign = true;
+            return std::nullopt;
+        }
+        return P4::P4COptionPragmaParser::tryToParse(annotation);
+    }
+
+ public:
+    P4TestPragmas() : P4::P4COptionPragmaParser(true) {}
+
+    bool test_keepOpAssign = false;
+};
+
+class TestFEPolicy : public P4::FrontEndPolicy {
+    const P4TestPragmas &pragmas;
+
+    P4::ParseAnnotations *getParseAnnotations() const {
+        return new P4::ParseAnnotations("p4test", true,
+                                        P4::ParseAnnotations::HandlerMap({
+                                            PARSE_EMPTY("test_keep_opassign"_cs),
+                                        }),
+                                        false);
+    }
+
+    bool removeOpAssign() const { return !pragmas.test_keepOpAssign; }
+
+ public:
+    explicit TestFEPolicy(const P4TestPragmas &pragmas) : pragmas(pragmas) {}
+};
+
 using P4TestContext = P4CContextWithOptions<P4TestOptions>;
 
 static void log_dump(const IR::Node *node, const char *head) {
@@ -135,13 +168,14 @@ int main(int argc, char *const argv[]) {
         info.emitInfo("PARSER");
 
         if (program != nullptr && ::P4::errorCount() == 0) {
-            P4::P4COptionPragmaParser optionsPragmaParser(true);
-            program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
+            P4TestPragmas testPragmas;
+            program->apply(P4::ApplyOptionsPragmas(testPragmas));
             info.emitInfo("PASS P4COptionPragmaParser");
 
             if (!options.parseOnly) {
                 try {
-                    P4::FrontEnd fe;
+                    TestFEPolicy fe_policy(testPragmas);
+                    P4::FrontEnd fe(&fe_policy);
                     fe.addDebugHook(hook);
                     // use -TdiagnosticCountInPass:1 / -TdiagnosticCountInPass:4 to get output of
                     // this hook
