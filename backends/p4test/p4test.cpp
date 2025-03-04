@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "p4test.h"
+
 #include <fstream>  // IWYU pragma: keep
 #include <iostream>
 
@@ -35,57 +37,56 @@ limitations under the License.
 #include "lib/nullstream.h"
 #include "midend.h"
 
-using namespace P4;
-
-class P4TestOptions : public CompilerOptions {
- public:
-    bool parseOnly = false;
-    bool validateOnly = false;
-    bool loadIRFromJson = false;
-    P4TestOptions() {
-        registerOption(
-            "--listMidendPasses", nullptr,
-            [this](const char *) {
-                listMidendPasses = true;
-                loadIRFromJson = false;
-                P4Test::MidEnd MidEnd(*this, outStream);
-                exit(0);
-                return false;
-            },
-            "[p4test] Lists exact name of all midend passes.\n");
-        registerOption(
-            "--parse-only", nullptr,
-            [this](const char *) {
-                parseOnly = true;
-                return true;
-            },
-            "only parse the P4 input, without any further processing");
-        registerOption(
-            "--validate", nullptr,
-            [this](const char *) {
-                validateOnly = true;
-                return true;
-            },
-            "Validate the P4 input, running just the front-end");
-        registerOption(
-            "--fromJSON", "file",
-            [this](const char *arg) {
-                loadIRFromJson = true;
-                file = arg;
-                return true;
-            },
-            "read previously dumped json instead of P4 source code");
-        registerOption(
-            "--turn-off-logn", nullptr,
-            [](const char *) {
-                ::P4::Log::Detail::enableLoggingGlobally = false;
-                return true;
-            },
-            "Turn off LOGN() statements in the compiler.\n"
-            "Use '@__debug' annotation to enable LOGN on "
-            "the annotated P4 object within the source code.\n");
-    }
-};
+P4TestOptions::P4TestOptions() {
+    registerOption(
+        "--listMidendPasses", nullptr,
+        [this](const char *) {
+            listMidendPasses = true;
+            loadIRFromJson = false;
+            P4Test::MidEnd MidEnd(*this, outStream);
+            exit(0);
+            return false;
+        },
+        "[p4test] Lists exact name of all midend passes.\n");
+    registerOption(
+        "--parse-only", nullptr,
+        [this](const char *) {
+            parseOnly = true;
+            return true;
+        },
+        "only parse the P4 input, without any further processing");
+    registerOption(
+        "--validate", nullptr,
+        [this](const char *) {
+            validateOnly = true;
+            return true;
+        },
+        "Validate the P4 input, running just the front-end");
+    registerOption(
+        "--fromJSON", "file",
+        [this](const char *arg) {
+            loadIRFromJson = true;
+            file = arg;
+            return true;
+        },
+        "read previously dumped json instead of P4 source code");
+    registerOption(
+        "--turn-off-logn", nullptr,
+        [](const char *) {
+            ::P4::Log::Detail::enableLoggingGlobally = false;
+            return true;
+        },
+        "Turn off LOGN() statements in the compiler.\n"
+        "Use '@__debug' annotation to enable LOGN on "
+        "the annotated P4 object within the source code.\n");
+    registerOption(
+        "--preferSwitch", nullptr,
+        [this](const char *) {
+            preferSwitch = true;
+            return true;
+        },
+        "use passes that use general switch instead of action_run");
+}
 
 class P4TestPragmas : public P4::P4COptionPragmaParser {
     std::optional<IOptionPragmaParser::CommandLineOptions> tryToParse(
