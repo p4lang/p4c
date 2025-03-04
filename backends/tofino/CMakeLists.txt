@@ -43,7 +43,7 @@ endif()
 
 if (ENABLE_ASSERTIONS)
   # NDEBUG is automatically defined on non-Debug builds by CMake.
-  # To enable assertions, we need to explicitly undefine NDEBUG.
+  # To enable assertions, we need to explicitly undefine NDEBUG
   if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions( -UNDEBUG )
   endif()
@@ -174,16 +174,6 @@ if (ENABLE_DOXYGEN)
     message(WARNING "Doxygen and dot are needed to build the documentation.")
   endif()
 endif()
-
-# Generate the LICENSE file. Do this before generating the build system so
-# that CPack detects that the file exists.
-execute_process(COMMAND "${BFN_P4C_SOURCE_DIR}/scripts/generate-license.sh")
-
-set (CPACK_RESOURCE_FILE_LICENSE "${BFN_P4C_SOURCE_DIR}/LICENSE")
-set (THIRD_PARTY_LICENSES "${BFN_P4C_SOURCE_DIR}/LICENSES.txt")
-install (FILES ${CPACK_RESOURCE_FILE_LICENSE}
-  ${THIRD_PARTY_LICENSES}
-  DESTINATION share/p4c)
 
 set (CPACK_GENERATOR "TBZ2")
 set (CPACK_PACKAGE_NAME "p4c")
