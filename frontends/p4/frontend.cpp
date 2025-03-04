@@ -50,6 +50,7 @@ limitations under the License.
 #include "parserControlFlow.h"
 #include "reassociation.h"
 #include "redundantParsers.h"
+#include "removeOpAssign.h"
 #include "removeParameters.h"
 #include "removeReturns.h"
 #include "resetHeaders.h"
@@ -216,6 +217,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new MoveDeclarations(),  // Move all local declarations to the beginning
         new MoveInitializers(),
         new SideEffectOrdering(&typeMap, policy->skipSideEffectOrdering()),
+        policy->removeOpAssign() ? new RemoveOpAssign() : nullptr,
         new SimplifyControlFlow(&typeMap),
         new SimplifySwitch(&typeMap),
         new MoveDeclarations(),  // Move all local declarations to the beginning

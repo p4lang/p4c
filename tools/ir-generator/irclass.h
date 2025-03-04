@@ -263,6 +263,7 @@ class CommentBlock : public IrElement {
 
 // Represents a C++ class for an IR node.
 class IrClass : public IrElement {
+    bool resolved = false;
     std::vector<const IrClass *> parentClasses;
     std::vector<const Type *> parents;
     const IrClass *concreteParent;
@@ -274,6 +275,7 @@ class IrClass : public IrElement {
     void generateMethods();
     bool shouldSkip(cstring feature) const;
     bool hasNoDirective(cstring feature) const;
+    friend class IrDefinitions;
 
  public:
     const IrClass *getParent() const {
@@ -373,6 +375,7 @@ class IrDefinitions {
 
  public:
     explicit IrDefinitions(std::vector<IrElement *> classes) : elements(classes) {}
+    void toposort();
     void resolve() {
         IrClass::nodeClass()->resolve();
         IrClass::vectorClass()->resolve();
@@ -381,6 +384,7 @@ class IrDefinitions {
         IrClass::ideclaration()->resolve();
         IrClass::indexedVectorClass()->resolve();
         for (auto cls : *getClasses()) cls->resolve();
+        toposort();
     }
     void generate(std::ostream &t, std::ostream &out, std::ostream &impl) const;
 };

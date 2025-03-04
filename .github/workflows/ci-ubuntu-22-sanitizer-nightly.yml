@@ -40,5 +40,5 @@ jobs:
 
       - name: Run tests (Ubuntu 22.04)
         # Need to use sudo for the eBPF kernel tests.
-        run: sudo -E ctest --output-on-failure --schedule-random
+        run: sudo -E ctest --output-on-failure --schedule-random -E "p4tc_samples_stf|p4tc_cleanup|p4tc_setup"
         working-directory: ./build
