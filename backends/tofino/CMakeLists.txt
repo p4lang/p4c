@@ -43,7 +43,7 @@ endif()
 
 if (ENABLE_ASSERTIONS)
   # NDEBUG is automatically defined on non-Debug builds by CMake.
-  # To enable assertions, we need to explicitly undefine NDEBUG
+  # To enable assertions, we need to explicitly undefine NDEBUG.
   if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
     add_definitions( -UNDEBUG )
   endif()
