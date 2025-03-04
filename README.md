@@ -18,7 +18,6 @@
 [![Validation](https://github.com/p4lang/p4c/actions/workflows/ci-validation-nightly.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-validation-nightly.yml)
 [![Docker Container](https://github.com/p4lang/p4c/actions/workflows/ci-container-image.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-container-image.yml)
 
-
 <!--!
 \internal
 -->
