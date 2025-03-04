@@ -9,14 +9,17 @@ control c(out bit<32> x, out bit<32> y) {
     @name("c.b") bool b_0;
     @name("c.a_0") bit<32> a_10;
     @name("c.retval_0") bit<32> retval;
+    @name("c.inlinedRetval") bit<32> inlinedRetval_9;
     @name("c.a_1") bit<32> a_11;
     @name("c.a_7") bit<32> a_17;
     @name("c.a_8") bit<32> a_18;
     @name("c.retval_0") bit<32> retval_9;
+    @name("c.inlinedRetval_7") bit<32> inlinedRetval_17;
     @name("c.simple_action") action simple_action() {
         a_10 = x;
         retval = a_10;
-        y = retval;
+        inlinedRetval_9 = retval;
+        y = inlinedRetval_9;
         a_11 = 32w0;
         x = a_11;
     }
@@ -32,7 +35,8 @@ control c(out bit<32> x, out bit<32> y) {
             h_0.a = a_17;
             a_18 = h_0.a;
             retval_9 = a_18;
-            x = retval_9;
+            inlinedRetval_17 = retval_9;
+            x = inlinedRetval_17;
         }
         simple_action();
     }
