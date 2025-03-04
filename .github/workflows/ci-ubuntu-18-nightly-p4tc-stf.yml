@@ -1,0 +1,43 @@
+name: "test-p4c-ubuntu-18.04"
+
+on:
+  schedule:
+    # Every day on midnight UTC
+    - cron: "0 0 * * *"
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  # Run p4tc stf tests
+  test-ubuntu18-p4tc-stf:
+    # Only run on pull requests with the "p4tc" label.
+    if: ${{ github.event_name == 'schedule' || contains(github.event.pull_request.labels.*.name, 'p4tc') }}
+    runs-on: ubuntu-20.04
+    env:
+      CTEST_PARALLEL_LEVEL: 4
+      IMAGE_TYPE: test
+      ENABLE_GTESTS: ${{ matrix.gtest }}
+      CMAKE_UNITY_BUILD: ${{ matrix.unity }}
+      BUILD_GENERATOR: Ninja
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: test-${{ matrix.unity }}-${{ runner.os }}-gcc
+          max-size: 1000M
+
+      - name: Build (Ubuntu 20.04, GCC)
+        run: |
+          tools/ci-build.sh
+
+      - name: Run tests (Ubuntu 20.04)
+        # Need to use sudo for the eBPF kernel tests.
+        run: sudo -E ctest --output-on-failure --schedule-random -R "p4tc_samples_stf|p4tc_cleanup|p4tc_setup"
+        working-directory: ./build

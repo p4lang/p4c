@@ -301,7 +301,7 @@ bool skipRegisterActionOutput(const Visitor::Context *ctxt, const IR::Expression
     auto params = method->parameters->to<IR::ParameterList>();
     if (!params) return true;
 
-    auto assign = dynamic_cast<const IR::AssignmentStatement *>(ctxt->parent->node);
+    auto assign = dynamic_cast<const IR::BaseAssignmentStatement *>(ctxt->parent->node);
     if (!assign) return true;
 
     auto dest_path = assign->left->to<IR::PathExpression>();
