@@ -108,7 +108,7 @@ class DoLocalCopyPropagation : public ControlFlowVisitor,
 
     class LoopPrepass : public Inspector {
         DoLocalCopyPropagation &self;
-        void postorder(const IR::AssignmentStatement *) override;
+        void postorder(const IR::BaseAssignmentStatement *) override;
         void postorder(const IR::MethodCallExpression *) override;
         void apply_table(TableInfo *tbl);
         void apply_function(FuncInfo *tbl);
@@ -125,7 +125,7 @@ class DoLocalCopyPropagation : public ControlFlowVisitor,
     const IR::Expression *preorder(IR::Member *) override;
     const IR::Expression *preorder(IR::ArrayIndex *) override;
     IR::Statement *preorder(IR::Statement *) override;
-    IR::AssignmentStatement *preorder(IR::AssignmentStatement *) override;
+    const IR::Node *preorder(IR::BaseAssignmentStatement *) override;
     IR::AssignmentStatement *postorder(IR::AssignmentStatement *) override;
     IR::IfStatement *postorder(IR::IfStatement *) override;
     IR::ForStatement *preorder(IR::ForStatement *) override;

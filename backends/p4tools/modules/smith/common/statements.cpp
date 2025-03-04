@@ -166,10 +166,6 @@ void StatementGenerator::removeLval(const IR::Expression *left, const IR::Type *
 }
 
 IR::Statement *StatementGenerator::genAssignmentStatement() {
-    IR::AssignmentStatement *assignstat = nullptr;
-    IR::Expression *left = nullptr;
-    IR::Expression *right = nullptr;
-
     std::vector<int64_t> percent = {
         Probabilities::get().ASSIGNMENTORMETHODCALLSTATEMENT_ASSIGN_BIT,
         Probabilities::get().ASSIGNMENTORMETHODCALLSTATEMENT_ASSIGN_STRUCTLIKE};
@@ -183,11 +179,11 @@ IR::Statement *StatementGenerator::genAssignmentStatement() {
                 // TODO(fruffy): Find a more meaningful assignment statement
                 return nullptr;
             }
-            left = target().expressionGenerator().pickLvalOrSlice(bitType);
+            auto *left = target().expressionGenerator().pickLvalOrSlice(bitType);
             if (P4Scope::constraints.single_stage_actions) {
                 removeLval(left, bitType);
             }
-            right = target().expressionGenerator().genExpression(bitType);
+            auto *right = target().expressionGenerator().genExpression(bitType);
             return new IR::AssignmentStatement(left, right);
         }
         case 1:
@@ -195,7 +191,7 @@ IR::Statement *StatementGenerator::genAssignmentStatement() {
             break;
     }
 
-    return assignstat;
+    return nullptr;
 }
 
 IR::Statement *StatementGenerator::genMethodCallExpression(const IR::PathExpression *methodName,
