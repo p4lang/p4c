@@ -981,7 +981,7 @@ bool ComputeWriteSet::preorder(const IR::EmptyStatement *) {
     return setDefinitions(currentDefinitions);
 }
 
-bool ComputeWriteSet::preorder(const IR::AssignmentStatement *statement) {
+bool ComputeWriteSet::preorder(const IR::BaseAssignmentStatement *statement) {
     LOG3("CWS Visiting " << dbp(statement) << " " << statement);
     if (currentDefinitions->isUnreachable()) return setDefinitions(currentDefinitions);
     lhs = true;

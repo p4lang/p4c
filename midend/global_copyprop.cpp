@@ -172,6 +172,18 @@ bool FindVariableValues::preorder(const IR::AssignmentStatement *stat) {
     return false;
 }
 
+// Update the value for the 'stat->left' variable.
+bool FindVariableValues::preorder(const IR::OpAssignmentStatement *stat) {
+    if (!working || GlobalCopyProp::lValueName(stat->left).isNullOrEmpty()) return false;
+
+    LOG5("Working on statement: " << stat);
+    // Remove old values
+    if (vars[GlobalCopyProp::lValueName(stat->left)] == nullptr ||
+        !(stat->right->equiv(*(vars[GlobalCopyProp::lValueName(stat->left)]))))
+        removeVarsContaining(&vars, GlobalCopyProp::lValueName(stat->left));
+    return false;
+}
+
 // The core idea of this pass is represented here, it works on 'ActionCall' nodes by accessing
 // the body of the action using the pointer acquired by resolving the 'MethodCallExpression'.
 // An entry in the 'actions' map is set for the action node that was acquired by resolving
@@ -312,7 +324,7 @@ class RemoveModifiedValues : public Inspector {
     TypeMap *typeMap;
     std::map<cstring, const IR::Expression *> *vars;
 
-    bool preorder(const IR::AssignmentStatement *stat) override {
+    bool preorder(const IR::BaseAssignmentStatement *stat) override {
         if ((*vars)[GlobalCopyProp::lValueName(stat->left)] == nullptr ||
             !(stat->right->equiv(*((*vars)[GlobalCopyProp::lValueName(stat->left)]))))
             removeVarsContaining(vars, GlobalCopyProp::lValueName(stat->left));
@@ -363,7 +375,7 @@ IR::ForInStatement *DoGlobalCopyPropagation::preorder(IR::ForInStatement *stat) 
 
 // Propagate values for variables on the right side of the statement
 // and update value for 'stat->left' variable if needed.
-const IR::Node *DoGlobalCopyPropagation::preorder(IR::AssignmentStatement *stat) {
+IR::BaseAssignmentStatement *DoGlobalCopyPropagation::preorder(IR::BaseAssignmentStatement *stat) {
     if (!performRewrite) return stat;
 
     LOG5("Working on statement: " << stat);
@@ -378,6 +390,13 @@ const IR::Node *DoGlobalCopyPropagation::preorder(IR::AssignmentStatement *stat)
     visit(stat->left);
     performRewrite = true;
     prune();
+    return stat;
+}
+
+IR::Statement *DoGlobalCopyPropagation::preorder(IR::AssignmentStatement *assgn) {
+    if (!performRewrite) return assgn;
+    auto *stat = preorder(static_cast<IR::BaseAssignmentStatement *>(assgn));
+
     // Store the value for 'stat->left' if it is now a constant. If it is an assignment to an
     // identical literal as already stored in the 'vars' container the statement is removed.
     if (auto lit = stat->right->to<IR::Literal>()) {

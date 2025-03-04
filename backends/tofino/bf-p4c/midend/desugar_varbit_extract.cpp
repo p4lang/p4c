@@ -83,7 +83,7 @@ struct ErrorOnUnsupportedVarbitUse : public Inspector {
 
     // TODO: When we enable assignment of varbits, we need to make sure the dead emit elimination
     // works correctly even with assignment.
-    bool preorder(const IR::AssignmentStatement *asgn) override {
+    bool preorder(const IR::BaseAssignmentStatement *asgn) override {
         if (asgn->right->type->is<IR::Type_Varbits>()) {
             fatal_error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                         "%1%: cannot assign varbit field. The compiler currently does not "

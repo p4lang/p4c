@@ -40,6 +40,8 @@ class UnrollLoops : public Transform, public P4::ResolutionContext {
 
  private:
     long evalLoop(const IR::Expression *, long, const ComputeDefUse::locset_t &, bool &);
+    long evalLoop(const IR::BaseAssignmentStatement *, long, const ComputeDefUse::locset_t &,
+                  bool &);
     bool findLoopBounds(IR::ForStatement *, loop_bounds_t &);
     bool findLoopBounds(IR::ForInStatement *, loop_bounds_t &);
     const IR::Statement *doUnroll(const loop_bounds_t &, const IR::Statement *,

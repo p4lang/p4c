@@ -128,7 +128,7 @@ class DoSynthesizeActions : public Transform {
  public:
     // If true the statement must be moved to an action
     bool mustMove(const IR::MethodCallStatement *statement);
-    bool mustMove(const IR::AssignmentStatement *statement);
+    bool mustMove(const IR::BaseAssignmentStatement *statement);
 
     DoSynthesizeActions(ReferenceMap *refMap, TypeMap *typeMap, ActionSynthesisPolicy *policy)
         : refMap(refMap), typeMap(typeMap), policy(policy) {
@@ -148,7 +148,7 @@ class DoSynthesizeActions : public Transform {
     }  // skip actions
     // We do not handle return: this pass should be called after it has been removed
     const IR::Node *preorder(IR::BlockStatement *statement) override;
-    const IR::Node *preorder(IR::AssignmentStatement *statement) override;
+    const IR::Node *preorder(IR::BaseAssignmentStatement *statement) override;
     const IR::Node *preorder(IR::MethodCallStatement *statement) override;
     const IR::Node *preorder(IR::ExitStatement *statement) override;
     const IR::Node *preorder(IR::Function *function) override {

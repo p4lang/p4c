@@ -57,7 +57,7 @@ class HasUses {
             if (!isActive()) return false;
             if (previous.isBeforeStart()) return false;
             auto last = previous.last();
-            if (auto *assign_stmt = last->to<IR::AssignmentStatement>()) {
+            if (auto *assign_stmt = last->to<IR::BaseAssignmentStatement>()) {
                 if (auto *slice_stmt = assign_stmt->left->to<IR::Slice>()) {
                     // two slice stmts writing to same location
                     // skip use of previous if it gets overwritten
@@ -790,10 +790,11 @@ class FindUninitialized : public Inspector {
         }
     }
 
-    bool preorder(const IR::AssignmentStatement *statement) override {
+    bool preorder(const IR::BaseAssignmentStatement *statement) override {
         Log::TempIndent indent;
         LOG3("FU Visiting " << dbp(statement) << " " << statement << indent);
         if (!unreachable) {
+            if (statement->is<IR::OpAssignmentStatement>()) visit(statement->left);
             lhs = true;
             visit(statement->left);
             checkHeaderFieldWrite(statement->left, statement->left);
@@ -1382,7 +1383,7 @@ class FindUninitialized : public Inspector {
     bool preorder(const IR::AbstractSlice *expression) override {
         LOG3("FU Visiting [" << expression->id << "]: " << expression);
 
-        auto *slice_stmt = findContext<IR::AssignmentStatement>();
+        auto *slice_stmt = findContext<IR::BaseAssignmentStatement>();
         auto *slice = expression->to<IR::Slice>();
         if (slice_stmt != nullptr && lhs && slice) {
             // track this slice statement
@@ -1471,7 +1472,7 @@ class RemoveUnused : public Transform {
         CHECK_NULL(typeMap);
         setName("RemoveUnused");
     }
-    const IR::Node *postorder(IR::AssignmentStatement *statement) override {
+    const IR::Node *postorder(IR::BaseAssignmentStatement *statement) override {
         if (!hasUses.hasUses(getOriginal())) {
             Log::TempIndent indent;
             LOG3("Removing statement " << getOriginal() << " " << statement << indent);

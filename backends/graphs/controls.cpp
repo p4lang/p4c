@@ -226,7 +226,7 @@ bool ControlGraphs::preorder(const IR::MethodCallStatement *statement) {
     return false;
 }
 
-bool ControlGraphs::preorder(const IR::AssignmentStatement *statement) {
+bool ControlGraphs::preorder(const IR::BaseAssignmentStatement *statement) {
     statementsStack.push_back(statement);
     return false;
 }

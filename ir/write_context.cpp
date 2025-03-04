@@ -37,7 +37,7 @@ bool P4WriteContext::isWrite(bool root_value) {
         if (!ctxt || !ctxt->node) return root_value;
     }
     if (auto *prim = ctxt->node->to<IR::Primitive>()) return prim->isOutput(ctxt->child_index);
-    if (ctxt->node->is<IR::AssignmentStatement>()) return ctxt->child_index == 0;
+    if (ctxt->node->is<IR::BaseAssignmentStatement>()) return ctxt->child_index == 0;
     if (ctxt->node->is<IR::Argument>()) {
         // MethodCallExpression(Vector<Argument(Expression)>)
         if (!ctxt->parent || !ctxt->parent->parent || !ctxt->parent->parent->node) return false;

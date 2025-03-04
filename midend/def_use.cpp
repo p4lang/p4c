@@ -415,7 +415,7 @@ bool ComputeDefUse::preorder(const IR::KeyElement *ke) {
     return false;
 }
 
-bool ComputeDefUse::preorder(const IR::AssignmentStatement *as) {
+bool ComputeDefUse::preorder(const IR::BaseAssignmentStatement *as) {
     // visit RHS of assignment before LHS
     visit(as->right, "right", 1);
     visit(as->left, "left", 0);

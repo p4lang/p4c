@@ -87,6 +87,7 @@ class ExtractDeparser : public DeparserInspector {
     IR::ID getTnaParamName(const IR::BFN::TnaDeparser *deparser, IR::ID orig_name);
 
     bool preorder(const IR::Annotation *annot) override;
+    bool preorder(const IR::BaseAssignmentStatement *) override { BUG("not handled"); }
     bool preorder(const IR::AssignmentStatement *stmt) override;
     void postorder(const IR::MethodCallExpression *mc) override;
     void end_apply() override;

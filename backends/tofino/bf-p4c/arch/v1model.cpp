@@ -1878,7 +1878,7 @@ class ConstructSymbolTable : public Inspector {
                 if (it == toTranslateInParser.end()) return;
                 if (auto type = expr->type->to<IR::Type_Name>()) {
                     if (type->path->name == "ingress_parser_control_signals") {
-                        if (auto stmt = findContext<IR::AssignmentStatement>()) {
+                        if (auto stmt = findContext<IR::BaseAssignmentStatement>()) {
                             if (node->member == "parser_counter") {
                                 ParserCounterConverter cvt(structure);
                                 structure->_map.emplace(stmt, stmt->apply(cvt));

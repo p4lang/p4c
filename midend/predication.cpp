@@ -145,13 +145,13 @@ const IR::Expression *Predication::clone(const IR::Expression *expression) {
     return expression->apply(cloner);
 }
 
-const IR::Node *Predication::clone(const IR::AssignmentStatement *statement) {
+const IR::AssignmentStatement *Predication::clone(const IR::AssignmentStatement *statement) {
     // Expressions often need to be cloned. This is necessary because
     // in the end different code will be generated for the different clones of
     // an expression.
     CloneExpressions cloner;
     cloner.setCalledBy(this);
-    return statement->apply(cloner);
+    return statement->apply(cloner)->to<IR::AssignmentStatement>();
 }
 
 /// expressionReplacer is applied here and the assignment is stored in liveAssigns vector
@@ -172,8 +172,7 @@ const IR::Node *Predication::preorder(IR::AssignmentStatement *statement) {
         modifyIndex = false;
     }
     // The expressionReplacer responsible for transforming this statement
-    ExpressionReplacer replacer(clone(statement)->to<IR::AssignmentStatement>(), traversalPath,
-                                conditions);
+    ExpressionReplacer replacer(clone(statement), traversalPath, conditions);
     replacer.setCalledBy(this);
     dependencies.clear();
     visit(statement->right);
@@ -237,6 +236,17 @@ const IR::Node *Predication::preorder(IR::AssignmentStatement *statement) {
     return new IR::EmptyStatement();
 }
 
+const IR::Node *Predication::preorder(IR::OpAssignmentStatement *statement) {
+    if (!isInContext<IR::P4Action>() || ifNestingLevel == 0) {
+        return statement;
+    }
+    ::P4::error(
+        ErrorType::ERR_EXPRESSION,
+        "%1%: Op-Assignment inside if statement can't be transformed to condition expression",
+        statement);
+    return statement;
+}
+
 const IR::Node *Predication::preorder(IR::PathExpression *pathExpr) {
     dependencies.push_back(Pred::lvalueName(pathExpr));
     return pathExpr;
@@ -262,8 +272,7 @@ const IR::Node *Predication::preorder(IR::ArrayIndex *arrInd) {
         auto indexDecl = new IR::Declaration_Variable(indexName, arrInd->right->type->getP4Type());
         auto index = new IR::PathExpression(IR::ID(indexName));
         auto indexAssignment = new IR::AssignmentStatement(index, clone(arrInd->right));
-        ExpressionReplacer replacer(clone(indexAssignment)->to<IR::AssignmentStatement>(),
-                                    traversalPath, conditions);
+        ExpressionReplacer replacer(clone(indexAssignment), traversalPath, conditions);
         // Creates the initial Mux expression
         replacer.setVisitingIndex(true);
         indexAssignment->right =

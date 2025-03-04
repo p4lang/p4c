@@ -468,10 +468,19 @@ class EmptyStatement : Statement {
     dbprint { out << ""; }
 }
 
-class AssignmentStatement : Statement {
+abstract BaseAssignmentStatement : Statement {
     Expression left;
     Expression right;
+}
+
+class AssignmentStatement : BaseAssignmentStatement {
     toString{ return absl::StrCat(left, " = ", right); }
+}
+
+abstract OpAssignmentStatement : BaseAssignmentStatement {
+    virtual cstring getStringOp() const = 0;
+    toString{ return absl::StrCat(left, " ", getStringOp(), "= ", right); }
+    dbprint;
 }
 
 class IfStatement : Statement {

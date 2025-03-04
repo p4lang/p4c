@@ -104,7 +104,7 @@ class SideEffects : public Inspector {
 
     /// @return true if the expression may have side-effects.
     static bool check(const IR::Expression *expression, const Visitor *calledBy,
-                      DeclarationLookup *refMap, TypeMap *typeMap,
+                      DeclarationLookup *refMap = nullptr, TypeMap *typeMap = nullptr,
                       const Visitor::Context *ctxt = nullptr) {
         SideEffects se(refMap, typeMap);
         se.setCalledBy(calledBy);
@@ -218,7 +218,7 @@ class DoSimplifyExpressions : public Transform, P4WriteContext, public Resolutio
     const IR::Node *postorder(IR::P4Control *control) override;
     const IR::Node *postorder(IR::P4Action *action) override;
     const IR::Node *postorder(IR::ParserState *state) override;
-    const IR::Node *postorder(IR::AssignmentStatement *statement) override;
+    const IR::Node *postorder(IR::BaseAssignmentStatement *statement) override;
     const IR::Node *postorder(IR::MethodCallStatement *statement) override;
     const IR::Node *postorder(IR::ReturnStatement *statement) override;
     const IR::Node *preorder(IR::SwitchStatement *statement) override;
@@ -233,7 +233,7 @@ class DoSimplifyExpressions : public Transform, P4WriteContext, public Resolutio
 class TableInsertions {
  public:
     std::vector<const IR::Declaration_Variable *> declarations;
-    std::vector<const IR::AssignmentStatement *> statements;
+    std::vector<const IR::BaseAssignmentStatement *> statements;
 };
 
 /**
@@ -308,7 +308,7 @@ class KeySideEffect : public Transform, public ResolutionContext {
     const IR::Node *postorder(IR::SwitchStatement *statement) override {
         return doStatement(statement, statement->expression, getContext());
     }
-    const IR::Node *postorder(IR::AssignmentStatement *statement) override {
+    const IR::Node *postorder(IR::BaseAssignmentStatement *statement) override {
         return doStatement(statement, statement->right, getContext());
     }
     const IR::Node *postorder(IR::KeyElement *element) override;

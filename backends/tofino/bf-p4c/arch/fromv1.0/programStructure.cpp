@@ -2614,7 +2614,7 @@ bool CollectDigestFields::preorder(const IR::Primitive *prim) {
     return true;
 }
 
-IR::Node *FixParserPriority::preorder(IR::AssignmentStatement *assign) {
+IR::Node *FixParserPriority::preorder(IR::BaseAssignmentStatement *assign) {
     auto left = assign->left;
     while (auto slice = left->to<IR::Slice>()) left = slice->e0;
     while (auto cast = left->to<IR::Cast>()) left = cast->expr;

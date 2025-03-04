@@ -123,6 +123,7 @@ set (P4_FRONTEND_HDRS
   p4/parserControlFlow.h
   p4/reassociation.h
   p4/redundantParsers.h
+  p4/removeOpAssign.h
   p4/removeParameters.h
   p4/removeReturns.h
   p4/reservedWords.h

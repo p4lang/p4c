@@ -41,7 +41,7 @@ namespace BFN {
  */
 class CheckPadAssignment final : public Inspector {
  private:
-    bool preorder(const IR::AssignmentStatement *statement) override;
+    bool preorder(const IR::BaseAssignmentStatement *statement) override;
 
  public:
     CheckPadAssignment() {}

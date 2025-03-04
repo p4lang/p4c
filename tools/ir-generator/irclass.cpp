@@ -99,6 +99,37 @@ void exit_namespace(std::ostream &out, IrNamespace *ns) {
 
 ////////////////////////////////////////////////////////////////////////////////////
 
+/* sort class definitions so defs come before uses */
+void IrDefinitions::toposort() {
+    std::vector<IrElement *> sorted;
+    std::map<const IrClass *, IrClass *> classes;
+
+    auto visit = [&](const IrClass *cl) -> void {
+        auto do_visit = [&](const auto &self, const IrClass *cl) -> void {
+            auto it = classes.find(cl);
+            if (it != classes.end()) {
+                auto *cl = it->second;
+                classes.erase(it);
+                self(self, cl->concreteParent);
+                for (auto *p : cl->parentClasses) self(self, p);
+                sorted.push_back(cl);
+            }
+        };
+        do_visit(do_visit, cl);
+    };
+
+    for (auto *el : elements)
+        if (auto *cl = el->to<IrClass>()) classes.emplace(cl, cl);
+
+    for (auto *el : elements) {
+        if (auto *cl = el->to<IrClass>())
+            visit(cl);
+        else
+            sorted.push_back(el);
+    }
+    elements = std::move(sorted);
+}
+
 Util::Enumerator<IrClass *> *IrDefinitions::getClasses() const {
     return Util::enumerate(elements)->as<IrClass *>()->where(
         [](IrClass *e) { return e != nullptr; });
@@ -572,6 +603,8 @@ bool IrClass::shouldSkip(cstring feature) const {
 }
 
 void IrClass::resolve() {
+    if (resolved) return;
+    resolved = true;
     for (auto s : parents) {
         const IrClass *p = s->resolve(containedIn);
         if (p == nullptr) throw Util::CompilationError("Could not find class %1%", s);
