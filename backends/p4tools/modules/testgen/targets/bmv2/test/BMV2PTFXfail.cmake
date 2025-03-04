@@ -67,7 +67,6 @@ p4tools_add_xfail_reason(
   # Unexpected error in RPC handling
   issue3374.p4
   control-hs-index-test6.p4
-  parser-unroll-test1.p4
 )
 
 p4tools_add_xfail_reason(

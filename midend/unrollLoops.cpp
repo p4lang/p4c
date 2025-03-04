@@ -117,7 +117,7 @@ class ReplaceIndexRefs : public Transform, P4WriteContext {
         }
         return new IR::Constant(pe->type, value);
     }
-    IR::AssignmentStatement *preorder(IR::AssignmentStatement *assign) {
+    IR::BaseAssignmentStatement *preorder(IR::BaseAssignmentStatement *assign) {
         visit(assign->right, "right", 1);
         visit(assign->left, "left", 0);
         prune();
@@ -180,6 +180,20 @@ long UnrollLoops::evalLoop(const IR::Expression *exp, long val,
     return val;
 }
 
+long UnrollLoops::evalLoop(const IR::BaseAssignmentStatement *assign, long val,
+                           const ComputeDefUse::locset_t &idefs, bool &fail) {
+    if (assign->is<IR::AssignmentStatement>()) return evalLoop(assign->right, val, idefs, fail);
+    if (assign->is<IR::MulAssign>()) return val * evalLoop(assign->right, val, idefs, fail);
+    if (assign->is<IR::DivAssign>()) return val / evalLoop(assign->right, val, idefs, fail);
+    if (assign->is<IR::ModAssign>()) return val % evalLoop(assign->right, val, idefs, fail);
+    if (assign->is<IR::AddAssign>()) return val + evalLoop(assign->right, val, idefs, fail);
+    if (assign->is<IR::SubAssign>()) return val - evalLoop(assign->right, val, idefs, fail);
+    if (assign->is<IR::ShlAssign>()) return val << evalLoop(assign->right, val, idefs, fail);
+    if (assign->is<IR::ShrAssign>()) return val >> evalLoop(assign->right, val, idefs, fail);
+    fail = true;
+    return 1;
+}
+
 bool UnrollLoops::findLoopBounds(IR::ForStatement *fstmt, loop_bounds_t &bounds) {
     Pattern::Match<IR::PathExpression> v;
     Pattern::Match<IR::Constant> k;
@@ -187,7 +201,7 @@ bool UnrollLoops::findLoopBounds(IR::ForStatement *fstmt, loop_bounds_t &bounds)
         auto d = resolveUnique(v->path->name, P4::ResolutionType::Any);
         bounds.index = d ? d->to<IR::Declaration_Variable>() : nullptr;
         if (!bounds.index) return false;
-        const IR::AssignmentStatement *init = nullptr, *incr = nullptr;
+        const IR::BaseAssignmentStatement *init = nullptr, *incr = nullptr;
         const IR::Constant *initval = nullptr;
         auto &index_defs = defUse->getDefs(v);
         if (index_defs.size() != 2) {
@@ -196,10 +210,10 @@ bool UnrollLoops::findLoopBounds(IR::ForStatement *fstmt, loop_bounds_t &bounds)
             return false;
         } else if ((init = index_defs.front()->parent->node->to<IR::AssignmentStatement>()) &&
                    (initval = init->right->to<IR::Constant>())) {
-            incr = index_defs.back()->parent->node->to<IR::AssignmentStatement>();
+            incr = index_defs.back()->parent->node->to<IR::BaseAssignmentStatement>();
         } else if ((init = index_defs.back()->parent->node->to<IR::AssignmentStatement>()) &&
                    (initval = init->right->to<IR::Constant>())) {
-            incr = index_defs.front()->parent->node->to<IR::AssignmentStatement>();
+            incr = index_defs.front()->parent->node->to<IR::BaseAssignmentStatement>();
         } else {
             return false;
         }
@@ -207,7 +221,7 @@ bool UnrollLoops::findLoopBounds(IR::ForStatement *fstmt, loop_bounds_t &bounds)
         bool fail = false;
         for (long val = initval->asLong();
              evalLoop(fstmt->condition, val, index_defs, fail) && !fail;
-             val = evalLoop(incr->right, val, index_defs, fail)) {
+             val = evalLoop(incr, val, index_defs, fail)) {
             if (bounds.indexes.size() > 1000) {
                 fail = true;
                 break;

@@ -1,4 +1,5 @@
 #include <core.p4>
+@command_line("--loopsUnroll")
 
 struct S {
     bit<8> f;

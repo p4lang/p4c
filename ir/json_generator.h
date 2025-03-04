@@ -19,6 +19,7 @@ limitations under the License.
 
 #include <optional>
 #include <string>
+#include <string_view>
 #include <unordered_set>
 #include <variant>
 
@@ -31,6 +32,7 @@ limitations under the License.
 #include "lib/ordered_map.h"
 #include "lib/ordered_set.h"
 #include "lib/safe_vector.h"
+#include "lib/string_map.h"
 
 namespace P4 {
 
@@ -55,156 +57,222 @@ class JSONGenerator {
         static const bool value = sizeof(test<T>(0)) == sizeof(char);
     };
 
-    struct variant_generator {
-        std::ostream &out;
-        JSONGenerator &generator;
+    indent_t indent;
+    enum output_state_t {
+        TOP,
+        VEC_START,
+        VEC_MID,
+        OBJ_START,
+        OBJ_AFTERTAG,
+        OBJ_MID,
+        OBJ_END
+    } output_state = TOP;
 
-        variant_generator(std::ostream &out, JSONGenerator &generator)
-            : out(out), generator(generator) {}
+    enum state_restore_kind { NONE, OBJECT, VECTOR };
+    class state_restore_t {
+        output_state_t prev_state;
+        JSONGenerator &gen;
+        state_restore_kind kind;
+        friend class JSONGenerator;
 
-        template <class T>
-        void operator()(const T &value) const {
-            out << R"("value" : )";
-            generator.generate(value);
+        state_restore_t(JSONGenerator &gen, state_restore_kind kind)
+            : prev_state(gen.output_state), gen(gen), kind(kind) {}
+        state_restore_t(const state_restore_t &) = delete;
+        state_restore_t(state_restore_t &&a) : prev_state(a.prev_state), gen(a.gen), kind(a.kind) {
+            a.kind = NONE;
+        }
+
+     public:
+        ~state_restore_t() {
+            if (kind == OBJECT) gen.end_object(*this);
+            if (kind == VECTOR) gen.end_vector(*this);
         }
     };
 
  public:
-    indent_t indent;
-
     explicit JSONGenerator(std::ostream &out, bool dumpSourceInfo = false)
         : out(out), dumpSourceInfo(dumpSourceInfo) {}
 
+    state_restore_t begin_vector() {
+        if (output_state == OBJ_START) output_state = OBJ_END;
+        BUG_CHECK(output_state != VEC_START, "invalid json output state in begin_vector");
+        state_restore_t rv(*this, VECTOR);
+        output_state = VEC_START;
+        out << '[';
+        ++indent;
+        return rv;
+    }
+
+    void end_vector(state_restore_t &prev) {
+        BUG_CHECK(prev.kind == VECTOR, "invalid previous state in end_vector");
+        prev.kind = NONE;
+        --indent;
+        if (output_state == VEC_MID)
+            out << std::endl << indent;
+        else if (output_state != VEC_START)
+            BUG("invalid json output state in end_vector");
+        out << ']';
+        if ((output_state = prev.prev_state) == OBJ_AFTERTAG) output_state = OBJ_MID;
+    }
+
+    state_restore_t begin_object() {
+        BUG_CHECK(output_state != OBJ_START && output_state != OBJ_MID && output_state != OBJ_END,
+                  "invalid json output state in begin_object");
+        state_restore_t rv(*this, OBJECT);
+        output_state = OBJ_START;
+        return rv;
+    }
+
+    void end_object(state_restore_t &prev) {
+        BUG_CHECK(prev.kind == OBJECT, "invalid previous state in end_object");
+        prev.kind = NONE;
+        switch (output_state) {
+            case OBJ_START:
+                out << "{}";
+                break;
+            case OBJ_MID:
+                out << std::endl << --indent << '}';
+                break;
+            case OBJ_END:
+                break;
+            default:
+                BUG("invalid json output state in end_object");
+                break;
+        }
+        if ((output_state = prev.prev_state) == OBJ_AFTERTAG) output_state = OBJ_MID;
+    }
+
+    template <typename T>
+    void emit(const T &val) {
+        switch (output_state) {
+            case VEC_MID:
+                out << ',';
+                /* fall through */
+            case VEC_START:
+                out << std::endl << indent;
+                output_state = VEC_MID;
+                break;
+            case OBJ_AFTERTAG:
+                output_state = OBJ_MID;
+                break;
+            case TOP:
+                break;
+            case OBJ_START:
+                output_state = OBJ_END;
+                break;
+            case OBJ_MID:
+            case OBJ_END:
+                BUG("invalid json output state for emit(obj)");
+        }
+        generate(val);
+        if (output_state == TOP) out << std::endl;
+    }
+
+    void emit_tag(std::string_view tag) {
+        switch (output_state) {
+            case OBJ_START:
+                out << '{' << std::endl << ++indent;
+                break;
+            case OBJ_MID:
+                out << ',' << std::endl << indent;
+                break;
+            case TOP:
+            case VEC_START:
+            case VEC_MID:
+            case OBJ_AFTERTAG:
+            case OBJ_END:
+                BUG("invalid json output state for emit_tag");
+        }
+        out << '\"' << cstring(tag).escapeJson() << "\" : ";
+        output_state = OBJ_AFTERTAG;
+    }
+
+    template <typename T>
+    void emit(std::string_view tag, const T &val) {
+        emit_tag(tag);
+        generate(val);
+        output_state = OBJ_MID;
+    }
+
+ private:
     template <typename T>
     void generate(const safe_vector<T> &v) {
-        out << "[";
-        if (v.size() > 0) {
-            out << std::endl << ++indent;
-            generate(v[0]);
-            for (size_t i = 1; i < v.size(); i++) {
-                out << "," << std::endl << indent;
-                generate(v[i]);
-            }
-            out << std::endl << --indent;
-        }
-        out << "]";
+        auto t = begin_vector();
+        for (auto &el : v) emit(el);
+        end_vector(t);
     }
 
     template <typename T>
     void generate(const std::vector<T> &v) {
-        out << "[";
-        if (v.size() > 0) {
-            out << std::endl << ++indent;
-            generate(v[0]);
-            for (size_t i = 1; i < v.size(); i++) {
-                out << "," << std::endl << indent;
-                generate(v[i]);
-            }
-            out << std::endl << --indent;
-        }
-        out << "]";
+        auto t = begin_vector();
+        for (auto &el : v) emit(el);
+        end_vector(t);
     }
 
     template <typename T, typename U>
     void generate(const std::pair<T, U> &v) {
-        ++indent;
-        out << "{" << std::endl;
+        auto t = begin_object();
         toJSON(v);
-        out << std::endl << --indent << "}";
+        end_object(t);
     }
 
+ public:
     template <typename T, typename U>
     void toJSON(const std::pair<T, U> &v) {
-        out << indent << "\"first\" : ";
-        generate(v.first);
-        out << "," << std::endl << indent << "\"second\" : ";
-        generate(v.second);
+        emit("first", v.first);
+        emit("second", v.second);
     }
 
+ private:
     template <typename T>
     void generate(const std::optional<T> &v) {
-        if (!v) {
-            out << "{ \"valid\" : false }";
-            return;
-        }
-        out << "{" << std::endl << ++indent;
-        out << "\"valid\" : true," << std::endl;
-        out << "\"value\" : ";
-        generate(*v);
-        out << std::endl << --indent << "}";
+        auto t = begin_object();
+        emit("valid", !!v);
+        if (v) emit("value", *v);
+        end_object(t);
     }
 
     template <typename T>
     void generate(const std::set<T> &v) {
-        out << "[" << std::endl;
-        if (v.size() > 0) {
-            auto it = v.begin();
-            out << ++indent;
-            generate(*it);
-            for (it++; it != v.end(); ++it) {
-                out << "," << std::endl << indent;
-                generate(*it);
-            }
-            out << std::endl << --indent;
-        }
-        out << "]";
+        auto t = begin_vector();
+        for (auto &el : v) emit(el);
+        end_vector(t);
     }
 
     template <typename T>
     void generate(const ordered_set<T> &v) {
-        out << "[" << std::endl;
-        if (v.size() > 0) {
-            auto it = v.begin();
-            out << ++indent;
-            generate(*it);
-            for (it++; it != v.end(); ++it) {
-                out << "," << std::endl << indent;
-                generate(*it);
-            }
-            out << std::endl << --indent;
-        }
-        out << "]";
+        auto t = begin_vector();
+        for (auto &el : v) emit(el);
+        end_vector(t);
     }
 
     template <typename K, typename V>
     void generate(const std::map<K, V> &v) {
-        out << "[" << std::endl;
-        if (v.size() > 0) {
-            auto it = v.begin();
-            out << ++indent;
-            generate(*it);
-            for (it++; it != v.end(); ++it) {
-                out << "," << std::endl << indent;
-                generate(*it);
-            }
-            out << std::endl << --indent;
-        }
-        out << "]";
+        auto t = begin_vector();
+        for (auto &el : v) emit(el);
+        end_vector(t);
     }
 
     template <typename K, typename V>
     void generate(const ordered_map<K, V> &v) {
-        out << "[" << std::endl;
-        if (v.size() > 0) {
-            auto it = v.begin();
-            out << ++indent;
-            generate(*it);
-            for (it++; it != v.end(); ++it) {
-                out << "," << std::endl << indent;
-                generate(*it);
-            }
-            out << std::endl << --indent;
-        }
-        out << "]";
+        auto t = begin_vector();
+        for (auto &el : v) emit(el);
+        end_vector(t);
+    }
+
+    template <typename V>
+    void generate(const string_map<V> &v) {
+        auto t = begin_object();
+        for (auto &el : v) emit(el.first, el.second);
+        end_object(t);
     }
 
     template <class... Types>
     void generate(const std::variant<Types...> &v) {
-        out << "{" << std::endl << ++indent;
-        out << R"("variant_index" : )" << v.index() << "," << std::endl << indent;
-        variant_generator generator(out, *this);
-        std::visit(generator, v);
-        out << std::endl << --indent << "}";
+        auto t = begin_object();
+        emit("variant_index", v.index());
+        std::visit([this](auto &value) { this->emit("value", value); }, v);
+        end_object(t);
     }
 
     void generate(bool v) { out << (v ? "true" : "false"); }
@@ -233,25 +301,23 @@ class JSONGenerator {
     void generate(const bitvec &v) { out << "\"" << v << "\""; }
 
     void generate(const match_t &v) {
-        out << "{" << std::endl
-            << (indent + 1) << "\"word0\" : " << v.word0 << "," << std::endl
-            << (indent + 1) << "\"word1\" : " << v.word1 << std::endl
-            << indent << "}";
+        auto t = begin_object();
+        emit("word0", v.word0);
+        emit("word1", v.word1);
+        end_object(t);
     }
 
     template <typename T>
     std::enable_if_t<has_toJSON<T>::value && !std::is_base_of_v<IR::Node, T>> generate(const T &v) {
-        ++indent;
-        out << "{" << std::endl;
+        auto t = begin_object();
         v.toJSON(*this);
-        out << std::endl << --indent << "}";
+        end_object(t);
     }
 
     void generate(const IR::Node &v) {
-        out << "{" << std::endl;
-        ++indent;
+        auto t = begin_object();
         if (node_refs.find(v.id) != node_refs.end()) {
-            out << indent << "\"Node_ID\" : " << v.id;
+            emit("Node_ID", v.id);
         } else {
             node_refs.insert(v.id);
             v.toJSON(*this);
@@ -259,7 +325,7 @@ class JSONGenerator {
                 v.sourceInfoToJSON(*this);
             }
         }
-        out << std::endl << --indent << "}";
+        end_object(t);
     }
 
     template <typename T>
@@ -273,39 +339,9 @@ class JSONGenerator {
 
     template <typename T, size_t N>
     void generate(const T (&v)[N]) {
-        out << "[";
-        if (N > 0) {
-            out << std::endl << ++indent;
-            generate(v[0]);
-            for (size_t i = 1; i < N; i++) {
-                out << "," << std::endl << indent;
-                generate(v[i]);
-            }
-            out << std::endl << --indent;
-        }
-        out << "]";
-    }
-
-    JSONGenerator &operator<<(char ch) {
-        out << ch;
-        return *this;
-    }
-    JSONGenerator &operator<<(const char *s) {
-        out << s;
-        return *this;
-    }
-    JSONGenerator &operator<<(indent_t i) {
-        out << i;
-        return *this;
-    }
-    JSONGenerator &operator<<(std::ostream &(*fn)(std::ostream &)) {
-        out << fn;
-        return *this;
-    }
-    template <typename T>
-    JSONGenerator &operator<<(const T &v) {
-        generate(v);
-        return *this;
+        auto t = begin_vector();
+        for (auto &el : v) emit(el);
+        end_vector(t);
     }
 };
 

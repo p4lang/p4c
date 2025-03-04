@@ -1,7 +1,6 @@
 load("@rules_license//rules:license.bzl", "license")
-load("//:bazel/flex.bzl", "genlex")
 load("//:bazel/bison.bzl", "genyacc")
-load("@com_github_bazelbuild_buildtools//buildifier:def.bzl", "buildifier")
+load("//:bazel/flex.bzl", "genlex")
 
 package(
     default_applicable_licenses = ["//:license"],
@@ -212,14 +211,14 @@ cc_library(
         "midend/**/*.cpp",
         "control-plane/**/*.cpp",
     ]) + [
-        "frontends/parsers/p4/p4parser.cc",
-        "frontends/parsers/v1/v1parser.cc",
-        "frontends/parsers/p4/p4lexer.cc",
-        "frontends/parsers/v1/v1lexer.cc",
-        "ir/ir-generated.cpp",
-        "backends/dpdk/spec.cpp",
         "backends/dpdk/dbprint-dpdk.cpp",
         "backends/dpdk/printUtils.cpp",
+        "backends/dpdk/spec.cpp",
+        "frontends/parsers/p4/p4lexer.cc",
+        "frontends/parsers/p4/p4parser.cc",
+        "frontends/parsers/v1/v1lexer.cc",
+        "frontends/parsers/v1/v1parser.cc",
+        "ir/ir-generated.cpp",
     ],
     textual_hdrs = glob([
         "ir/**/*.h",
@@ -483,22 +482,4 @@ cc_library(
         ":lib",
         "@boost//:graph",
     ],
-)
-
-buildifier(
-    name = "buildifier_check",
-    diff_command = "diff -u",
-    exclude_patterns = [
-        "./build/*",
-    ],
-    lint_mode = "warn",
-    mode = "diff",
-)
-
-buildifier(
-    name = "buildifier_fix",
-    exclude_patterns = [
-        "./build/*",
-    ],
-    lint_mode = "fix",
 )

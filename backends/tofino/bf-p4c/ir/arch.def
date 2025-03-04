@@ -101,9 +101,9 @@ class P4Thread {
     const IR::P4Control *mau = nullptr;
     const IR::P4Control *deparser = nullptr;
     toJSON {
-        json << json.indent << "\"parsers\" : " << parsers << "," << std::endl
-             << json.indent << "\"mau\" : " << mau << "," << std::endl
-             << json.indent << "\"deparser\" : " << deparser; }
+        json.emit("parsers", parsers);
+        json.emit("mau", mau);
+        json.emit("deparser", deparser); }
     fromJSON {
         IR::BFN::P4Thread * thread = new IR::BFN::P4Thread();
         json.load("parsers", thread->parsers);
@@ -113,7 +113,7 @@ class P4Thread {
     }
 #apply
     visit_children {
-        parsers.parallel_visit_children(v);
+        parsers.parallel_visit_children(v, n);
         v.visit(mau);
         v.visit(deparser);
     }

@@ -2,31 +2,35 @@
 #define IR_JSON_PARSER_H_
 
 #include <iosfwd>
+#include <memory>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "lib/big_int_util.h"
 #include "lib/castable.h"
 #include "lib/cstring.h"
-#include "lib/ordered_map.h"
+#include "lib/string_map.h"
 
 namespace P4 {
 
 class JsonData : public ICastable {
- public:
+ protected:
     JsonData() {}
     JsonData(const JsonData &) = default;
     JsonData(JsonData &&) = default;
-    JsonData &operator=(const JsonData &) & = default;
-    JsonData &operator=(JsonData &&) & = default;
-    virtual ~JsonData() {}
+    JsonData &operator=(const JsonData &) = default;
+    JsonData &operator=(JsonData &&) = default;
+
+ public:
+    virtual ~JsonData() = default;
 
     DECLARE_TYPEINFO(JsonData);
 };
 
 class JsonNumber : public JsonData {
  public:
-    JsonNumber(big_int v) : val(v) {}          // NOLINT(runtime/explicit)
+    explicit JsonNumber(big_int v) : val(v) {}
     operator int() const { return int(val); }  // Does not handle overflow
     big_int val;
 
@@ -45,8 +49,7 @@ class JsonBoolean : public JsonData {
 class JsonString : public JsonData, public std::string {
  public:
     JsonString() {}
-    JsonString(const std::string &s) : std::string(s) {}  // NOLINT(runtime/explicit)
-    JsonString(const char *s) : std::string(s) {}         // NOLINT(runtime/explicit)
+    explicit JsonString(std::string_view s) : std::string(s) {}
     JsonString(const JsonString &) = default;
     JsonString(JsonString &&) = default;
     JsonString &operator=(const JsonString &) & = default;
@@ -56,35 +59,24 @@ class JsonString : public JsonData, public std::string {
     DECLARE_TYPEINFO(JsonString, JsonData);
 };
 
-class JsonVector : public JsonData, public std::vector<JsonData *> {
+class JsonVector : public JsonData, public std::vector<std::unique_ptr<JsonData>> {
  public:
     JsonVector() {}
-    JsonVector(const std::vector<JsonData *> &v)  // NOLINT(runtime/explicit)
-        : std::vector<JsonData *>(v) {}
-    JsonVector &operator=(const JsonVector &) & = default;
-    JsonVector &operator=(JsonVector &&) & = default;
+    explicit JsonVector(std::vector<std::unique_ptr<JsonData>> &&v)
+        : std::vector<std::unique_ptr<JsonData>>(std::move(v)) {}
+    JsonVector &operator=(const JsonVector &) = delete;
+    JsonVector &operator=(JsonVector &&) = default;
 
     DECLARE_TYPEINFO(JsonVector, JsonData);
 };
 
-class JsonObject : public JsonData, public ordered_map<std::string, JsonData *> {
-    bool _hasSrcInfo = true;
-
+class JsonObject : public JsonData, public string_map<std::unique_ptr<JsonData>> {
  public:
     JsonObject() {}
-    JsonObject(const JsonObject &obj) = default;
-    JsonObject &operator=(JsonObject &&) & = default;
-    JsonObject(const ordered_map<std::string, JsonData *> &v)  // NOLINT(runtime/explicit)
-        : ordered_map<std::string, JsonData *>(v) {}
-    int get_id() const;
-    std::string get_type() const;
-    std::string get_filename() const;
-    std::string get_sourceFragment() const;
-    int get_line() const;
-    int get_column() const;
-    JsonObject get_sourceJson() const;
-    bool hasSrcInfo() { return _hasSrcInfo; }
-    void setSrcInfo(bool value) { _hasSrcInfo = value; }
+    JsonObject(const JsonObject &obj) = delete;
+    JsonObject &operator=(JsonObject &&) = default;
+    explicit JsonObject(string_map<std::unique_ptr<JsonData>> &&v)
+        : string_map<std::unique_ptr<JsonData>>(std::move(v)) {}
 
     DECLARE_TYPEINFO(JsonObject, JsonData);
 };
@@ -95,8 +87,9 @@ class JsonNull : public JsonData {
 
 std::string getIndent(int l);
 
-std::ostream &operator<<(std::ostream &out, JsonData *json);
-std::istream &operator>>(std::istream &in, JsonData *&json);
+std::ostream &operator<<(std::ostream &out, const JsonData *json);
+inline std::ostream &operator<<(std::ostream &out, const JsonData &json) { return out << &json; }
+std::istream &operator>>(std::istream &in, std::unique_ptr<JsonData> &json);
 
 }  // namespace P4
 

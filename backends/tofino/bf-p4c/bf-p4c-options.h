@@ -223,6 +223,9 @@ class BFNOptionPragmaParser : public P4::P4COptionPragmaParser {
  public:
     std::optional<CommandLineOptions> tryToParse(const IR::Annotation *annotation) override;
 
+    BFNOptionPragmaParser() : P4::P4COptionPragmaParser(false) {}
+    // FIXME -- should remove the tofino @command_line stuff and use the base class
+
  private:
     std::optional<CommandLineOptions> parseCompilerOption(const IR::Annotation *annotation);
 };

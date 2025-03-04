@@ -117,7 +117,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::Member *expression) {
             if (isIfContext(getContext())) {
                 /* if the hit/miss test is directly in an "if", don't bother cloning it
                  * as that will just create a redundant table later */
-            } else if (getParent<IR::AssignmentStatement>()) {
+            } else if (getParent<IR::BaseAssignmentStatement>()) {
                 /* already assigning it somewhere -- no need to add another copy */
             } else {
                 BUG_CHECK(type->is<IR::Type_Boolean>(), "%1%: not boolean", type);
@@ -558,7 +558,7 @@ const IR::Node *DoSimplifyExpressions::preorder(IR::MethodCallExpression *mce) {
     } else if (tbl_apply) {
         typeMap->setType(mce, type);
         rv = mce;
-    } else if (getParent<IR::AssignmentStatement>() && copyBack.empty()) {
+    } else if (getParent<IR::BaseAssignmentStatement>() && copyBack.empty()) {
         /* no need for an extra copy as there's no out args to copy back afterwards */
         typeMap->setType(mce, type);
         rv = mce;
@@ -619,7 +619,7 @@ const IR::Node *DoSimplifyExpressions::postorder(IR::ParserState *state) {
     return state;
 }
 
-const IR::Node *DoSimplifyExpressions::postorder(IR::AssignmentStatement *statement) {
+const IR::Node *DoSimplifyExpressions::postorder(IR::BaseAssignmentStatement *statement) {
     if (statements.empty()) return statement;
     statements.push_back(statement);
     auto block = new IR::BlockStatement(statements);

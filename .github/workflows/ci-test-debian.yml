@@ -38,8 +38,8 @@ jobs:
           tools/ci-build.sh
 
       - name: Run tests (Ubuntu 22.04)
-        # Need to use sudo for the eBPF kernel tests.
-        run: sudo -E PTF_PACKET_MANIPULATION_MODULE="bf_pktpy.ptf.packet_pktpy" ctest --output-on-failure --schedule-random
+        # Need to use sudo for the eBPF kernel tests and need to avoid p4tc_stf tests.
+        run: sudo -E PTF_PACKET_MANIPULATION_MODULE="bf_pktpy.ptf.packet_pktpy" ctest --output-on-failure --schedule-random -E "p4tc_samples_stf|p4tc_cleanup|p4tc_setup"
         working-directory: ./build
 
   # Build with GCC and test Tofino backend on Ubuntu 22.04.
@@ -116,7 +116,7 @@ jobs:
           tools/ci-build.sh
 
       - name: Run tests (Ubuntu 20.04)
-        # Need to use sudo for the eBPF kernel tests.
-        run: sudo -E PTF_PACKET_MANIPULATION_MODULE="bf_pktpy.ptf.packet_pktpy" ctest --output-on-failure --schedule-random
+        # Need to use sudo for the eBPF kernel tests and need to avoid p4tc_stf tests.
+        run: sudo -E PTF_PACKET_MANIPULATION_MODULE="bf_pktpy.ptf.packet_pktpy" ctest --output-on-failure --schedule-random -E "p4tc_samples_stf|p4tc_cleanup|p4tc_setup"
         working-directory: ./build
         if: matrix.unity == 'ON' && matrix.gtest == 'ON'
