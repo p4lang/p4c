@@ -401,7 +401,7 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     }
     @name("FabricIngress.forwarding.bridging_counter") direct_counter(CounterType.packets_and_bytes) forwarding_bridging_counter;
     @name("FabricIngress.forwarding.set_next_id_bridging") action forwarding_set_next_id_bridging_0(@name("next_id") next_id_t next_id_0) {
-        @hidden {
+        @hidden @inlinedFrom("forwarding_set_next_id") {
             fabric_metadata.next_id = next_id_0;
         }
         forwarding_bridging_counter.count();
@@ -422,7 +422,7 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     @name("FabricIngress.forwarding.mpls_counter") direct_counter(CounterType.packets_and_bytes) forwarding_mpls_counter;
     @name("FabricIngress.forwarding.pop_mpls_and_next") action forwarding_pop_mpls_and_next_0(@name("next_id") next_id_t next_id_6) {
         fabric_metadata.mpls_label = 20w0;
-        @hidden {
+        @hidden @inlinedFrom("forwarding_set_next_id") {
             fabric_metadata.next_id = next_id_6;
         }
         forwarding_mpls_counter.count();
@@ -441,7 +441,7 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     }
     @name("FabricIngress.forwarding.routing_v4_counter") direct_counter(CounterType.packets_and_bytes) forwarding_routing_v4_counter;
     @name("FabricIngress.forwarding.set_next_id_routing_v4") action forwarding_set_next_id_routing_v4_0(@name("next_id") next_id_t next_id_7) {
-        @hidden {
+        @hidden @inlinedFrom("forwarding_set_next_id") {
             fabric_metadata.next_id = next_id_7;
         }
         forwarding_routing_v4_counter.count();
@@ -529,7 +529,7 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     }
     @name("FabricIngress.next.xconnect_counter") direct_counter(CounterType.packets_and_bytes) next_xconnect_counter;
     @name("FabricIngress.next.output_xconnect") action next_output_xconnect_0(@name("port_num") port_num_t port_num) {
-        @hidden {
+        @hidden @inlinedFrom("next_output") {
             standard_metadata.egress_spec = port_num;
         }
         next_xconnect_counter.count();
@@ -555,38 +555,38 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     @max_group_size(16) @name("FabricIngress.next.hashed_selector") action_selector(HashAlgorithm.crc16, 32w1024, 32w16) next_hashed_selector;
     @name("FabricIngress.next.hashed_counter") direct_counter(CounterType.packets_and_bytes) next_hashed_counter;
     @name("FabricIngress.next.output_hashed") action next_output_hashed_0(@name("port_num") port_num_t port_num_0) {
-        @hidden {
+        @hidden @inlinedFrom("next_output") {
             standard_metadata.egress_spec = port_num_0;
         }
         next_hashed_counter.count();
     }
     @name("FabricIngress.next.routing_hashed") action next_routing_hashed_0(@name("port_num") port_num_t port_num_1, @name("smac") mac_addr_t smac, @name("dmac") mac_addr_t dmac) {
-        @hidden {
-            @hidden {
+        @hidden @inlinedFrom("next_routing") {
+            @hidden @inlinedFrom("next_rewrite_smac") {
                 hdr.ethernet.src_addr = smac;
             }
-            @hidden {
+            @hidden @inlinedFrom("next_rewrite_dmac") {
                 hdr.ethernet.dst_addr = dmac;
             }
-            @hidden {
+            @hidden @inlinedFrom("next_output") {
                 standard_metadata.egress_spec = port_num_1;
             }
         }
         next_hashed_counter.count();
     }
     @name("FabricIngress.next.mpls_routing_hashed") action next_mpls_routing_hashed_0(@name("port_num") port_num_t port_num_2, @name("smac") mac_addr_t smac_0, @name("dmac") mac_addr_t dmac_0, @name("label") mpls_label_t label_0) {
-        @hidden {
-            @hidden {
+        @hidden @inlinedFrom("next_mpls_routing") {
+            @hidden @inlinedFrom("next_set_mpls_label") {
                 fabric_metadata.mpls_label = label_0;
             }
-            @hidden {
-                @hidden {
+            @hidden @inlinedFrom("next_routing") {
+                @hidden @inlinedFrom("next_rewrite_smac") {
                     hdr.ethernet.src_addr = smac_0;
                 }
-                @hidden {
+                @hidden @inlinedFrom("next_rewrite_dmac") {
                     hdr.ethernet.dst_addr = dmac_0;
                 }
-                @hidden {
+                @hidden @inlinedFrom("next_output") {
                     standard_metadata.egress_spec = port_num_2;
                 }
             }
