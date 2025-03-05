@@ -640,14 +640,14 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
         local_metadata._wcmp_group_id_value38 = wcmp_group_id_2;
     }
     @id(0x01000011) @name("ingress.routing_lookup.set_wcmp_group_id_and_metadata") action routing_lookup_set_wcmp_group_id_and_metadata_0(@id(1) @refers_to(wcmp_group_table , wcmp_group_id) @name("wcmp_group_id") bit<12> wcmp_group_id_3, @name("route_metadata") bit<6> route_metadata_3) {
-        @id(0x01000004) {
+        @id(0x01000004) @inlinedFrom("routing_lookup_set_wcmp_group_id") {
             local_metadata._wcmp_group_id_valid37 = true;
             local_metadata._wcmp_group_id_value38 = wcmp_group_id_3;
         }
         local_metadata._route_metadata34 = route_metadata_3;
     }
     @id(0x01000011) @name("ingress.routing_lookup.set_wcmp_group_id_and_metadata") action routing_lookup_set_wcmp_group_id_and_metadata_1(@id(1) @refers_to(wcmp_group_table , wcmp_group_id) @name("wcmp_group_id") bit<12> wcmp_group_id_4, @name("route_metadata") bit<6> route_metadata_4) {
-        @id(0x01000004) {
+        @id(0x01000004) @inlinedFrom("routing_lookup_set_wcmp_group_id") {
             local_metadata._wcmp_group_id_valid37 = true;
             local_metadata._wcmp_group_id_value38 = wcmp_group_id_4;
         }
@@ -751,7 +751,7 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
         local_metadata._marked_to_copy18 = true;
     }
     @id(0x01000102) @sai_action(SAI_PACKET_ACTION_TRAP , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_DROP , SAI_PACKET_COLOR_RED) @name("ingress.acl_ingress.acl_trap") action acl_ingress_acl_trap_0(@sai_action_param(QOS_QUEUE) @id(1) @name("qos_queue") bit<8> qos_queue_2) {
-        @id(0x01000101) @sai_action(SAI_PACKET_ACTION_COPY , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_RED) {
+        @id(0x01000101) @sai_action(SAI_PACKET_ACTION_COPY , SAI_PACKET_COLOR_GREEN) @sai_action(SAI_PACKET_ACTION_FORWARD , SAI_PACKET_COLOR_RED) @inlinedFrom("acl_ingress_acl_copy") {
             acl_ingress_acl_ingress_counter.count();
             acl_ingress_acl_ingress_meter.read(local_metadata._color32);
             local_metadata._marked_to_copy18 = true;
@@ -966,7 +966,7 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
     @id(0x01000002) @name("ingress.routing_resolution.set_port_and_src_mac") action routing_resolution_set_port_and_src_mac_0(@id(1) @name("port") bit<9> port_3, @id(2) @format(MAC_ADDRESS) @name("src_mac") bit<48> src_mac_5) {
         @id(0x0100001B) @unsupported @action_restriction("
     // Disallow reserved VLAN IDs with implementation-defined semantics.
-    vlan_id != 0 && vlan_id != 4095") {
+    vlan_id != 0 && vlan_id != 4095") @inlinedFrom("routing_resolution_set_port_and_src_mac_and_vlan_id") {
             standard_metadata.egress_spec = (bit<9>)port_3;
             local_metadata._packet_rewrites_src_mac8 = src_mac_5;
             local_metadata._packet_rewrites_vlan_id10 = 12w0xfff;
@@ -995,7 +995,7 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
         local_metadata._enable_vlan_rewrite7 = !(bool)disable_vlan_rewrite;
     }
     @id(0x01000014) @name("ingress.routing_resolution.set_ip_nexthop") action routing_resolution_set_ip_nexthop_0(@id(1) @refers_to(router_interface_table , router_interface_id) @refers_to(neighbor_table , router_interface_id) @name("router_interface_id") bit<10> router_interface_id_4, @id(2) @format(IPV6_ADDRESS) @refers_to(neighbor_table , neighbor_id) @name("neighbor_id") bit<128> neighbor_id_3) {
-        @id(0x01000017) {
+        @id(0x01000017) @inlinedFrom("routing_resolution_set_ip_nexthop_and_disable_rewrites") {
             routing_resolution_router_interface_id_valid = true;
             routing_resolution_router_interface_id_value = router_interface_id_4;
             routing_resolution_neighbor_id_valid = true;
@@ -1007,8 +1007,8 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
         }
     }
     @id(0x01000003) @deprecated("Use set_ip_nexthop instead.") @name("ingress.routing_resolution.set_nexthop") action routing_resolution_set_nexthop_0(@id(1) @refers_to(router_interface_table , router_interface_id) @refers_to(neighbor_table , router_interface_id) @name("router_interface_id") bit<10> router_interface_id_5, @id(2) @format(IPV6_ADDRESS) @refers_to(neighbor_table , neighbor_id) @name("neighbor_id") bit<128> neighbor_id_4) {
-        @id(0x01000014) {
-            @id(0x01000017) {
+        @id(0x01000014) @inlinedFrom("routing_resolution_set_ip_nexthop") {
+            @id(0x01000017) @inlinedFrom("routing_resolution_set_ip_nexthop_and_disable_rewrites") {
                 routing_resolution_router_interface_id_valid = true;
                 routing_resolution_router_interface_id_value = router_interface_id_5;
                 routing_resolution_neighbor_id_valid = true;
@@ -1042,8 +1042,8 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata, 
         local_metadata._tunnel_encap_src_ipv616 = encap_src_ip;
         local_metadata._tunnel_encap_dst_ipv617 = encap_dst_ip;
         local_metadata._apply_tunnel_encap_at_egress15 = true;
-        @id(0x01000014) {
-            @id(0x01000017) {
+        @id(0x01000014) @inlinedFrom("routing_resolution_set_ip_nexthop") {
+            @id(0x01000017) @inlinedFrom("routing_resolution_set_ip_nexthop_and_disable_rewrites") {
                 routing_resolution_router_interface_id_valid = true;
                 routing_resolution_router_interface_id_value = router_interface_id_6;
                 routing_resolution_neighbor_id_valid = true;
