@@ -15,7 +15,7 @@
    1. Invokes the specified compiler on a provided p4 file.
    2. Parses an stf file and generates a pcap output.
    3. Loads the generated template nd the eBPF binaries
-   4. Feeds the generated pcap test packets into scapy
+   4. Feeds the generated pcap test packets into ptf.pcap_writer.PcapWriter
    5. Evaluates the output with the expected result from the .stf file
 """
 
@@ -40,10 +40,9 @@ FILE_DIR = Path(__file__).resolve().parent
 sys.path.append(str(FILE_DIR.joinpath("../../tools")))
 sys.path.append(str(FILE_DIR.joinpath("../ebpf/targets")))
 
-import scapy.utils as scapy_util
 import testutils
-from scapy.all import sendp
 from stf.stf_parser import STFParser
+from ptf.pcap_writer import LINKTYPE_ETHERNET, PcapWriter, rdpcap
 
 PCAP_PREFIX = "pcap"  # match pattern
 PCAP_SUFFIX = ".pcap"  # could also be ".pcapng"
@@ -271,12 +270,10 @@ class TCInfra:
         for iface, pkts in iface_pkts_map.items():
             direction = "in"
             infile = self.filename(self.runtimedir, iface, direction)
-            # Linktype 1 the Ethernet Link Type, see also 'man pcap-linktype'
-            fp = scapy_util.RawPcapWriter(infile, linktype=1)
-            fp._write_header(None)
+            fp = PcapWriter(infile, linktype=LINKTYPE_ETHERNET)
             for pkt_data in pkts:
                 try:
-                    fp._write_packet(pkt_data)
+                    fp.write(pkt_data)
                 except ValueError:
                     testutils.log.error(f"Invalid packet data {pkt_data}")
                     return testutils.ProcessResult("", testutils.FAILURE)
@@ -502,7 +499,7 @@ class TCInfra:
                 packets = []
             else:
                 try:
-                    packets = scapy_util.rdpcap(file)
+                    packets = rdpcap(file)
                 except Exception as e:
                     testutils.log.error("Corrupt pcap file %s\n%s", file, e)
                     return testutils.FAILURE
