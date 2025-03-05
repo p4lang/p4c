@@ -41,8 +41,8 @@ sys.path.append(str(FILE_DIR.joinpath("../../tools")))
 sys.path.append(str(FILE_DIR.joinpath("../ebpf/targets")))
 
 import testutils
-from stf.stf_parser import STFParser
 from ptf.pcap_writer import LINKTYPE_ETHERNET, PcapWriter, rdpcap
+from stf.stf_parser import STFParser
 
 PCAP_PREFIX = "pcap"  # match pattern
 PCAP_SUFFIX = ".pcap"  # could also be ".pcapng"
