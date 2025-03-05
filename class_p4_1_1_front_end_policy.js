@@ -1,6 +1,7 @@
 var class_p4_1_1_front_end_policy =
 [
     [ "enableSubConstToAddTransform", "class_p4_1_1_front_end_policy.html#ae731738c9792f2b99e61eb29504cb9c2", null ],
+    [ "foldInlinedFrom", "class_p4_1_1_front_end_policy.html#acf526aa06ad400e8db23e894d6eaf644", null ],
     [ "getConstantFoldingPolicy", "class_p4_1_1_front_end_policy.html#a8b5f51f92db63dea3da16a94bfb98a03", null ],
     [ "getDebugHooks", "class_p4_1_1_front_end_policy.html#abe005cdad5f19114c7a91b3bbd9f923b", null ],
     [ "getParseAnnotations", "class_p4_1_1_front_end_policy.html#ae2f8eb05332dffdbfff3326c3afa12bf", null ],

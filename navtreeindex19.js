@@ -1,5 +1,7 @@
 var NAVTREEINDEX19 =
 {
+"class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino_register_value.html#aedaabd384c9e7a15cc71b4f2138c261f":[13,0,7,18,1,3,31,2],
+"class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino_shared_program_info.html":[13,0,7,18,1,3,32],
 "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino_shared_program_info.html#a144d62265192eb361a619b6c92bcaf47":[13,0,7,18,1,3,32,4],
 "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino_shared_program_info.html#a22e85f2bcd0a41c5169d2969f846d4ea":[13,0,7,18,1,3,32,8],
 "class_p4_1_1_p4_tools_1_1_p4_testgen_1_1_tofino_1_1_tofino_shared_program_info.html#a5f18f215756f27412a1e30dee227fb6f":[13,0,7,18,1,3,32,1],
@@ -247,7 +249,5 @@ var NAVTREEINDEX19 =
 "class_p4_1_1_p4_tools_1_1_trace_events_1_1_parser_start.html":[12,0,9,8,2,10],
 "class_p4_1_1_p4_tools_1_1_trace_events_1_1_parser_start.html":[13,0,7,18,4,10],
 "class_p4_1_1_p4_tools_1_1_trace_events_1_1_parser_start.html#a72cd32b5b9f3a3c7ac042f170a28bc79":[12,0,9,8,2,10,0],
-"class_p4_1_1_p4_tools_1_1_trace_events_1_1_parser_start.html#a72cd32b5b9f3a3c7ac042f170a28bc79":[13,0,7,18,4,10,0],
-"class_p4_1_1_p4_tools_1_1_trace_events_1_1_parser_state.html":[12,0,9,8,2,11],
-"class_p4_1_1_p4_tools_1_1_trace_events_1_1_parser_state.html":[13,0,7,18,4,11]
+"class_p4_1_1_p4_tools_1_1_trace_events_1_1_parser_start.html#a72cd32b5b9f3a3c7ac042f170a28bc79":[13,0,7,18,4,10,0]
 };

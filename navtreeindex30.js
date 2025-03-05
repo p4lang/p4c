@@ -1,5 +1,7 @@
 var NAVTREEINDEX30 =
 {
+"class_tofino_mau_power_spec.html#a660c82cb6a4295b2fb654e2cf9850eea":[13,0,598,2],
+"class_tofino_mau_power_spec.html#a6f4ba77b83e414ae77def35139ccbedd":[13,0,598,1],
 "class_tofino_mau_power_spec.html#a78fb084d188e6a46d454931055940708":[13,0,598,3],
 "class_tofino_mau_spec.html":[13,0,599],
 "class_tofino_parde_spec.html":[13,0,600],
@@ -247,7 +249,5 @@ var NAVTREEINDEX30 =
 "namespace_b_f_n.html#a9cdfdafb642e08d9a0be216dd7a749f0":[12,0,2,232],
 "namespace_b_f_n.html#ab0c2b31b0466af93899a969b328935c0":[12,0,2,231],
 "namespace_b_f_n.html#ab1dca5f5e9a7aff278a30cc47c9a5c23":[12,0,2,234],
-"namespace_b_f_n.html#ab751c2e755f97c9d6d0b2431daa97ca2":[12,0,2,227],
-"namespace_b_f_n.html#ac091d49bcd9f9eb014dcc46825e255c5":[12,0,2,257],
-"namespace_b_f_n.html#acbeb50bd2f0b8627287acd80c25f4441":[12,0,2,238]
+"namespace_b_f_n.html#ab751c2e755f97c9d6d0b2431daa97ca2":[12,0,2,227]
 };

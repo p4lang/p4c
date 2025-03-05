@@ -144,6 +144,8 @@ Inheritance diagram for P4::FrontEndPolicy:</div>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:ae731738c9792f2b99e61eb29504cb9c2" id="r_ae731738c9792f2b99e61eb29504cb9c2"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae731738c9792f2b99e61eb29504cb9c2">enableSubConstToAddTransform</a> () const</td></tr>
 <tr class="separator:ae731738c9792f2b99e61eb29504cb9c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acf526aa06ad400e8db23e894d6eaf644" id="r_acf526aa06ad400e8db23e894d6eaf644"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acf526aa06ad400e8db23e894d6eaf644">foldInlinedFrom</a> () const</td></tr>
+<tr class="separator:acf526aa06ad400e8db23e894d6eaf644"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8b5f51f92db63dea3da16a94bfb98a03" id="r_a8b5f51f92db63dea3da16a94bfb98a03"><td class="memItemLeft" align="right" valign="top">virtual <a class="el" href="class_p4_1_1_constant_folding_policy.html">ConstantFoldingPolicy</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a8b5f51f92db63dea3da16a94bfb98a03">getConstantFoldingPolicy</a> () const</td></tr>
 <tr class="separator:a8b5f51f92db63dea3da16a94bfb98a03"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abe005cdad5f19114c7a91b3bbd9f923b" id="r_abe005cdad5f19114c7a91b3bbd9f923b"><td class="memItemLeft" align="right" valign="top">virtual std::vector&lt; <a class="el" href="namespace_p4.html#a5a8d2595231408cba09d1e395f941017">DebugHook</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#abe005cdad5f19114c7a91b3bbd9f923b">getDebugHooks</a> () const</td></tr>
@@ -186,6 +188,32 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 <p>Indicates whether to enable the <code>a - constant</code> to <code>a + (-constant)</code> in StrengthReduction. </p><dl class="section return"><dt>Returns</dt><dd>Defaults to true. </dd></dl>
+
+</div>
+</div>
+<a id="acf526aa06ad400e8db23e894d6eaf644" name="acf526aa06ad400e8db23e894d6eaf644"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acf526aa06ad400e8db23e894d6eaf644">&#9670;&#160;</a></span>foldInlinedFrom()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">virtual bool P4::FrontEndPolicy::foldInlinedFrom </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel virtual">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Indicates whether control flow should fold blocks marked with @inlinedFrom annotation </p><dl class="section return"><dt>Returns</dt><dd>Defaults to true </dd></dl>
 
 </div>
 </div>

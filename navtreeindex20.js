@@ -1,5 +1,7 @@
 var NAVTREEINDEX20 =
 {
+"class_p4_1_1_p4_tools_1_1_trace_events_1_1_parser_state.html":[12,0,9,8,2,11],
+"class_p4_1_1_p4_tools_1_1_trace_events_1_1_parser_state.html":[13,0,7,18,4,11],
 "class_p4_1_1_p4_tools_1_1_trace_events_1_1_parser_state.html#ac1a9223357724230134c49946158e36f":[12,0,9,8,2,11,1],
 "class_p4_1_1_p4_tools_1_1_trace_events_1_1_parser_state.html#ac1a9223357724230134c49946158e36f":[13,0,7,18,4,11,1],
 "class_p4_1_1_p4_tools_1_1_trace_events_1_1_parser_state.html#adb3bf13939be729b86d674ad20d1ec6b":[12,0,9,8,2,11,0],
@@ -247,7 +249,5 @@ var NAVTREEINDEX20 =
 "class_p4_1_1_parser_info.html":[12,0,9,329],
 "class_p4_1_1_parser_info.html":[13,0,7,344],
 "class_p4_1_1_parser_instantiation.html":[12,0,9,330],
-"class_p4_1_1_parser_instantiation.html":[13,0,7,345],
-"class_p4_1_1_parser_options.html":[12,0,9,331],
-"class_p4_1_1_parser_options.html":[13,0,7,346]
+"class_p4_1_1_parser_instantiation.html":[13,0,7,345]
 };
