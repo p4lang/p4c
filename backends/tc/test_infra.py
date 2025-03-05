@@ -10,13 +10,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-""" Represents the call which contains all methods needed to execute a TC
-    test. Currently five phases are defined:
-   1. Invokes the specified compiler on a provided p4 file.
-   2. Parses an stf file and generates a pcap output.
-   3. Loads the generated template nd the eBPF binaries
-   4. Feeds the generated pcap test packets into ptf.pcap_writer.PcapWriter
-   5. Evaluates the output with the expected result from the .stf file
+"""Represents the call which contains all methods needed to execute a TC
+ test. Currently five phases are defined:
+1. Invokes the specified compiler on a provided p4 file.
+2. Parses an stf file and generates a pcap output.
+3. Loads the generated template nd the eBPF binaries
+4. Feeds the generated pcap test packets into ptf.pcap_writer.PcapWriter
+5. Evaluates the output with the expected result from the .stf file
 """
 
 import difflib
