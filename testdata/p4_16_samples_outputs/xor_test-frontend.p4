@@ -67,12 +67,12 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     @name("MyIngress.forward_and_do_something") action forward_and_do_something(@name("port") egressSpec_t port) {
         standard_metadata.egress_spec = port;
-        if (hdr.ipv4.isValid()) {
+        if (hdr.ipv4.isValid()) @inlinedFrom("srcAddr") {
             meta.before1 = hdr.ipv4.srcAddr;
             hdr.ipv4.srcAddr = hdr.ipv4.srcAddr ^ 32w0x12345678;
             meta.after1 = hdr.ipv4.srcAddr;
         }
-        if (hdr.ethernet.isValid()) {
+        if (hdr.ethernet.isValid()) @inlinedFrom("dstAddr") {
             if (hdr.ethernet.isValid()) {
                 hdr.ipv4.protocol = hdr.ipv4.protocol ^ 8w1;
             }
