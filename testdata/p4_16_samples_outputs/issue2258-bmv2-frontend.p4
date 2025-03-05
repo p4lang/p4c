@@ -25,6 +25,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.key_0") bit<16> key_0;
     @name("ingress.retval") bit<16> retval;
+    @name("ingress.inlinedRetval") bit<16> inlinedRetval_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.simple_table") table simple_table_0 {
@@ -38,7 +39,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     apply {
         retval = 16w1;
-        key_0 = retval;
+        inlinedRetval_0 = retval;
+        key_0 = inlinedRetval_0;
         simple_table_0.apply();
     }
 }
