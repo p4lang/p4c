@@ -52,7 +52,7 @@ struct StatementSplitter : Inspector, ResolutionContext {
         for (size_t i = 0, sz = bs->components.size(); i < sz; i++) {
             visit(bs->components[i], "vector");
             if (result.after) {
-                const auto [before, after, _] = result; // copy
+                const auto [before, after, _] = result;  // copy
                 auto *copy = bs->clone();
                 copy->components.erase(copy->components.begin() + i, copy->components.end());
                 if (before) {
