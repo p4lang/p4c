@@ -50,10 +50,9 @@ struct StatementSplitter : Inspector, ResolutionContext {
         }
 
         for (size_t i = 0, sz = bs->components.size(); i < sz; i++) {
-            StatementSplitter sub(predicate, nameGen, typeMap, neededDecls);
-            bs->components[i]->apply(sub, getChildContext());
-            const auto &[before, after, hoist] = sub.result;
-            if (after) {
+            visit(bs->components[i], "vector");
+            if (result.after) {
+                const auto [before, after, _] = result; // copy
                 auto *copy = bs->clone();
                 copy->components.erase(copy->components.begin() + i, copy->components.end());
                 if (before) {
@@ -62,10 +61,9 @@ struct StatementSplitter : Inspector, ResolutionContext {
                 result.before = filterDeclarations(copy);
                 copy = bs->clone();
                 copy->components.erase(copy->components.begin(), copy->components.begin() + i);
+                collectNeededDeclarations(copy);
                 copy->components.replace(copy->components.begin(), after);
                 result.after = copy;
-                collectNeededDeclarations(result.after);
-                addHoisted(hoist);
                 break;
             }
         }
@@ -160,6 +158,12 @@ struct StatementSplitter : Inspector, ResolutionContext {
         return false;
     }
 
+    void end_apply(const IR::Node *root) override {
+        if (!result.before) {
+            result.before = root->checkedTo<IR::Statement>();
+        }
+    }
+
     SplitResult<IR::Statement> result;
 
  private:
@@ -169,10 +173,9 @@ struct StatementSplitter : Inspector, ResolutionContext {
                   result.before ? result.before : result.after, stmt);
         if (predicate(stmt, getChildContext())) {
             result.after = stmt;
-            collectNeededDeclarations(result.after);
+            collectNeededDeclarations(stmt);
             return true;
         }
-        result.before = stmt;
         return false;
     }
 
@@ -185,9 +188,10 @@ struct StatementSplitter : Inspector, ResolutionContext {
                });
     }
 
-    void addHoisted(const std::vector<const IR::Declaration *> decls) {
+    void takeHoisted(std::vector<const IR::Declaration *> &decls) {
         result.hoistedDeclarations.insert(result.hoistedDeclarations.end(), decls.begin(),
                                           decls.end());
+        decls.clear();
     }
 
     std::pair<std::vector<SplitResult<IR::Statement>>, bool> splitBranches(
@@ -201,14 +205,16 @@ struct StatementSplitter : Inspector, ResolutionContext {
                 res.emplace_back();
                 continue;
             }
-            StatementSplitter sub(predicate, nameGen, typeMap, neededDecls);
-            branch->apply(sub, getChildContext());
-            if (sub.result.after) {
-                anySplit = true;
-                collectNeededDeclarations(result.after);
+            visit(branch, "branch");
+            anySplit = anySplit || result.after;
+            if (!result) {
+                result.before = branch;
             }
-            addHoisted(sub.result.hoistedDeclarations);
-            res.emplace_back(std::move(sub.result));
+            res.emplace_back(std::move(result));
+            result.clear();
+        }
+        for (auto &[_, __, hoisted] : res) {
+            takeHoisted(hoisted);
         }
         return {res, anySplit};
     }

@@ -30,6 +30,13 @@ struct SplitResult {
     const Node *before = nullptr;
     const Node *after = nullptr;
     std::vector<const IR::Declaration *> hoistedDeclarations;
+
+    /// @brief Returns true if any splitting occured and false otherwise.
+    explicit operator bool() const { return after; }
+    void clear() {
+        before = after = nullptr;
+        hoistedDeclarations.clear();
+    }
 };
 
 /// @brief  Split @p stat so that on every control-flow path all the statements up to the first one

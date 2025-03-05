@@ -105,7 +105,7 @@ TEST_F(SplitterTest, SplitBsEmpty) {
     ASSERT_TRUE(bbs) << before;
     EXPECT_EQ(bbs->components.size(), 0);
     EXPECT_FALSE(after);
-    ASSERT_EQ(decls.size(), 0);
+    ASSERT_EQ(decls.size(), 0) << decls;
 }
 
 TEST_F(SplitterTest, SplitBsSimple1) {
@@ -122,7 +122,7 @@ TEST_F(SplitterTest, SplitBsSimple1) {
     ASSERT_EQ(abs->components.size(), 1) << abs;
     EXPECT_TRUE(abs->components.front()->is<IR::AssignmentStatement>()) << abs;
 
-    ASSERT_EQ(decls.size(), 0);
+    ASSERT_EQ(decls.size(), 0) << decls;
 }
 
 TEST_F(SplitterTest, SplitBsSimple2) {
@@ -140,7 +140,7 @@ TEST_F(SplitterTest, SplitBsSimple2) {
     ASSERT_EQ(abs->components.size(), 1) << abs;
     EXPECT_TRUE(abs->components.front()->is<IR::AssignmentStatement>()) << abs;
 
-    ASSERT_EQ(decls.size(), 0);
+    ASSERT_EQ(decls.size(), 0) << decls;
 }
 
 TEST_F(SplitterTest, SplitBsIfSingleBranch) {
@@ -166,7 +166,7 @@ TEST_F(SplitterTest, SplitBsIfSingleBranch) {
 
     EXPECT_EQUIV(after, ifs(pe("cond"), blk({asgn("a", "b")})));
 
-    ASSERT_EQ(decls.size(), 1);
+    ASSERT_EQ(decls.size(), 1) << decls;
     EXPECT_EQUIV(decls.front(), new IR::Declaration_Variable(IR::ID{"cond"_cs, nullptr},
                                                              IR::Type::Boolean::get()));
 }
@@ -181,7 +181,7 @@ TEST_F(SplitterTest, SplitBsIfTwoBranches) {
 
     EXPECT_EQUIV(after, ifs(pe("cond"), blk({asgn("a", "b")}), blk({asgn("c", "d")})));
 
-    ASSERT_EQ(decls.size(), 1);
+    ASSERT_EQ(decls.size(), 1) << decls;
     EXPECT_EQUIV(decls.front(), new IR::Declaration_Variable(IR::ID{"cond"_cs, nullptr},
                                                              IR::Type::Boolean::get()));
 }
@@ -244,7 +244,7 @@ if (cond_0) {
 })",
                               "bool cond_0; bool cond;"));
 
-    ASSERT_EQ(decls.size(), 2);
+    ASSERT_EQ(decls.size(), 2) << decls;
     EXPECT_EQUIV(decls.at(0), new IR::Declaration_Variable(IR::ID{"cond"_cs, nullptr},
                                                            IR::Type::Boolean::get()));
     EXPECT_EQUIV(decls.at(1), new IR::Declaration_Variable(IR::ID{"cond_0"_cs, nullptr},
@@ -311,7 +311,7 @@ if (cond_0) {
 )",
                               "bool cond; bool cond_0; bit<4> selector; "));
 
-    ASSERT_EQ(decls.size(), 3);
+    ASSERT_EQ(decls.size(), 3) << decls;
     EXPECT_EQUIV(decls.at(0), new IR::Declaration_Variable(IR::ID{"cond"_cs, nullptr},
                                                            IR::Type::Boolean::get()));
     EXPECT_EQUIV(decls.at(1), new IR::Declaration_Variable(IR::ID{"selector"_cs, nullptr},
@@ -353,11 +353,11 @@ if (cond) {
 })",
                               "bool cond; bit<4> x; "));
 
-    ASSERT_EQ(decls.size(), 2);
-    EXPECT_EQUIV(decls.at(0),
-                 new IR::Declaration_Variable(IR::ID{"x"_cs, nullptr}, IR::Type::Bits::get(4)));
-    EXPECT_EQUIV(decls.at(1), new IR::Declaration_Variable(IR::ID{"cond"_cs, nullptr},
+    ASSERT_EQ(decls.size(), 2) << decls;
+    EXPECT_EQUIV(decls.at(0), new IR::Declaration_Variable(IR::ID{"cond"_cs, nullptr},
                                                            IR::Type::Boolean::get()));
+    EXPECT_EQUIV(decls.at(1),
+                 new IR::Declaration_Variable(IR::ID{"x"_cs, nullptr}, IR::Type::Bits::get(4)));
 }
 
 TEST_F(SplitterTest, HoistVarSwitch) {
@@ -402,11 +402,11 @@ switch (selector) {
 })",
                               "bit<4> selector; bit<4> x; "));
 
-    ASSERT_EQ(decls.size(), 2);
-    EXPECT_EQUIV(decls.at(0),
-                 new IR::Declaration_Variable(IR::ID{"x"_cs, nullptr}, IR::Type::Bits::get(4)));
-    EXPECT_EQUIV(decls.at(1), new IR::Declaration_Variable(IR::ID{"selector"_cs, nullptr},
+    ASSERT_EQ(decls.size(), 2) << decls;
+    EXPECT_EQUIV(decls.at(0), new IR::Declaration_Variable(IR::ID{"selector"_cs, nullptr},
                                                            IR::Type::Bits::get(4)));
+    EXPECT_EQUIV(decls.at(1),
+                 new IR::Declaration_Variable(IR::ID{"x"_cs, nullptr}, IR::Type::Bits::get(4)));
 }
 
 }  // namespace P4::Test
