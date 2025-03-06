@@ -12,11 +12,8 @@ on:
 jobs:
   # Run p4tc stf tests
   test-ubuntu-p4tc-stf:
-    # Only run on pull requests with the "p4tc" label.
-    # TODO: Consider changing label name to "run-p4tc" to be like the
-    # other label names that trigger runs, which all begin with prefix
-    # "run-"
-    if: ${{ github.event_name == 'schedule' || contains(github.event.pull_request.labels.*.name, 'p4tc') }}
+    # Only run on pull requests with the "run-p4tc" label.
+    if: ${{ github.event_name == 'schedule' || contains(github.event.pull_request.labels.*.name, 'run-p4tc') }}
     runs-on: ubuntu-22.04
     env:
       CTEST_PARALLEL_LEVEL: 4
