@@ -946,6 +946,7 @@ var hierarchy =
         [ "P4::RenameSymbols", "class_p4_1_1_rename_symbols.html", null ],
         [ "P4::ReplaceStructs", "class_p4_1_1_replace_structs.html", null ],
         [ "P4::ResolveReferences", "class_p4_1_1_resolve_references.html", null ],
+        [ "P4::StatementSplitter", "struct_p4_1_1_statement_splitter.html", null ],
         [ "P4::SubstituteParameters", "class_p4_1_1_substitute_parameters.html", null ],
         [ "P4::ToP4", "class_p4_1_1_to_p4.html", null ],
         [ "P4::TypeInferenceBase", "class_p4_1_1_type_inference_base.html", [
@@ -1895,6 +1896,7 @@ var hierarchy =
       [ "P4::SplitFlowVisit< N >", "class_p4_1_1_split_flow_visit.html", null ],
       [ "P4::SplitFlowVisitVector< N >", "class_p4_1_1_split_flow_visit_vector.html", null ]
     ] ],
+    [ "P4::SplitResult< Node >", "struct_p4_1_1_split_result.html", null ],
     [ "P4::StackVariable", "class_p4_1_1_stack_variable.html", null ],
     [ "P4::StackVariableHash", "class_p4_1_1_stack_variable_hash.html", null ],
     [ "P4::StorageFactory", "class_p4_1_1_storage_factory.html", null ],
@@ -2820,6 +2822,7 @@ var hierarchy =
         [ "P4::RemoveModifiedValues", "class_p4_1_1_remove_modified_values.html", null ],
         [ "P4::ResolveReferences", "class_p4_1_1_resolve_references.html", null ],
         [ "P4::SideEffects", "class_p4_1_1_side_effects.html", null ],
+        [ "P4::StatementSplitter", "struct_p4_1_1_statement_splitter.html", null ],
         [ "P4::TC::ConvertToBackendIR", "class_p4_1_1_t_c_1_1_convert_to_backend_i_r.html", null ],
         [ "P4::TC::ConvertToEBPFControlPNA", "class_p4_1_1_t_c_1_1_convert_to_e_b_p_f_control_p_n_a.html", null ],
         [ "P4::TC::ConvertToEBPFDeparserPNA", "class_p4_1_1_t_c_1_1_convert_to_e_b_p_f_deparser_p_n_a.html", null ],
