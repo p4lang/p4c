@@ -45,7 +45,7 @@ import testutils
 from scapy.all import sendp
 from stf.stf_parser import STFParser
 
-PCAP_PREFIX = "pcap"  # match pattern
+PCAP_PREFIX = "pcap"  # match  pattern
 PCAP_SUFFIX = ".pcap"  # could also be  ".pcapng"
 
 
