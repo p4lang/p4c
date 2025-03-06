@@ -64,7 +64,7 @@ struct StatementSplitter : Inspector, ResolutionContext {
                 collectNeededDeclarations(copy);
                 copy->components.replace(copy->components.begin(), after);
                 result.after = copy;
-                return false; // stop on first split point
+                return false;  // stop on first split point
             }
         }
         return false;
