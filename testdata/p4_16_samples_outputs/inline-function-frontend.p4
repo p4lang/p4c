@@ -9,6 +9,8 @@ control c(inout bit<32> x) {
     @name("c.b_0") bit<32> b_2;
     @name("c.retval") bit<32> retval_0;
     @name("c.tmp") bit<32> tmp_2;
+    @name("c.inlinedRetval") bit<32> inlinedRetval_1;
+    @name("c.inlinedRetval_0") bit<32> inlinedRetval_2;
     apply {
         a = x;
         b = x;
@@ -21,10 +23,12 @@ control c(inout bit<32> x) {
             tmp_2 = a_2;
         }
         retval_0 = tmp_2;
-        tmp_0 = retval_0;
+        inlinedRetval_1 = retval_0;
+        tmp_0 = inlinedRetval_1;
         tmp_1 = tmp + tmp_0;
         retval = tmp_1;
-        x = retval;
+        inlinedRetval_2 = retval;
+        x = inlinedRetval_2;
     }
 }
 
