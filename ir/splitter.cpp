@@ -64,7 +64,7 @@ struct StatementSplitter : Inspector, ResolutionContext {
                 collectNeededDeclarations(copy);
                 copy->components.replace(copy->components.begin(), after);
                 result.after = copy;
-                break;
+                return false; // stop on first split point
             }
         }
         return false;
@@ -221,6 +221,9 @@ struct StatementSplitter : Inspector, ResolutionContext {
 
     void collectNeededDeclarations(const IR::Node *after) {
         struct CollectNeededDecls : Inspector, ResolutionContext {
+            explicit CollectNeededDecls(absl::flat_hash_set<P4::cstring, Util::Hash> &needed)
+                : needed(needed) {}
+
             void postorder(const IR::PathExpression *pe) override {
                 // using lower-level resolution to avoid emitting errors for things not found
                 if (!resolve(pe->path->name, ResolutionType::Any).empty()) {
@@ -228,12 +231,10 @@ struct StatementSplitter : Inspector, ResolutionContext {
                 }
             }
 
-            absl::flat_hash_set<P4::cstring, Util::Hash> needed;
+            absl::flat_hash_set<P4::cstring, Util::Hash> &needed;
         };
 
-        CollectNeededDecls collect;
-        after->apply(collect, getChildContext());
-        neededDecls.insert(collect.needed.begin(), collect.needed.end());
+        after->apply(CollectNeededDecls(neededDecls), getChildContext());
     }
 
     template <typename T>

@@ -52,7 +52,7 @@ struct SplitterTest : public ::testing::Test {
     }
 
     const IR::PathExpression *pe(std::string_view name) {
-        return new IR::PathExpression(new IR::Path(P4::cstring(name)));
+        return new IR::PathExpression(P4::cstring(name));
     }
 
     /// a = b
