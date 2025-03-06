@@ -3,10 +3,12 @@ control c(out bit<32> r) {
     @name("c.arg") bit<16> arg;
     @name("c.retval") bit<32> retval;
     @name("c.tmp") bit<32> tmp;
+    @name("c.inlinedRetval") bit<32> inlinedRetval_0;
     apply {
         tmp = f(x = 32w1, y = arg);
         retval = tmp;
-        r = retval;
+        inlinedRetval_0 = retval;
+        r = inlinedRetval_0;
     }
 }
 

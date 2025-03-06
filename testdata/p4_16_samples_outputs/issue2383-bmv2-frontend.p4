@@ -24,10 +24,12 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.retval") ethernet_t retval;
+    @name("ingress.inlinedRetval") ethernet_t inlinedRetval_0;
     apply {
         retval.setValid();
         retval = (ethernet_t){dst_addr = 48w1,src_addr = 48w1,eth_type = 16w1};
-        h.eth_hdr = retval;
+        inlinedRetval_0 = retval;
+        h.eth_hdr = inlinedRetval_0;
     }
 }
 
