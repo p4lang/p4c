@@ -169,7 +169,7 @@ abstract Expression {
     /// It is used by the P4_14 front-end and by some back-ends.
     /// It is not visited by the visitors by default (can be visited explicitly in preorder)
     optional Type type = Type::Unknown::get();
-    visit_children { (void)v; }
+    visit_children { (void)v; (void)n; }
 #apply
 }
 
@@ -290,6 +290,7 @@ class Annotation {
     static const cstring fieldListAnnotation;  /// Used for recirculate, etc.
     static const cstring debugLoggingAnnotation;  /// Used by compiler implementer to limit debug log to the annotated IR context.
     static const cstring disableOptimizationAnnotation; /// annotation to disable certain optimization
+    static const cstring inlinedFromAnnotation; /// annotation to mark block of inlined function
 
     toString{ return absl::StrCat("@", name); }
     validate{

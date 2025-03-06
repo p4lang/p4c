@@ -1,0 +1,7 @@
+#!/bin/bash -x
+
+RUNTIME_DIR=$1
+
+cd $RUNTIME_DIR/iproute2-p4tc-pub
+./configure --libbpf_dir $RUNTIME_DIR/libbpf/src/root/
+make -j`nproc`

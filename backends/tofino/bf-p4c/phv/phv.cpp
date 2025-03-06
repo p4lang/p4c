@@ -159,10 +159,10 @@ cstring Container::toString() const {
     return tmp.str();
 }
 
-void Container::toJSON(P4::JSONGenerator &json) const { json << *this; }
+void Container::toJSON(P4::JSONGenerator &json) const { json.emit(toString()); }
 
 /* static */ Container Container::fromJSON(P4::JSONLoader &json) {
-    if (auto *v = json.json->to<JsonString>()) return Container(v->c_str());
+    if (json.is<JsonString>()) return Container(json.as<JsonString>().c_str());
     BUG("Couldn't decode JSON value to container");
     return Container();
 }
@@ -257,10 +257,6 @@ std::ostream &operator<<(std::ostream &out, PHV::Type t) { return out << t.kind(
 
 std::ostream &operator<<(std::ostream &out, const PHV::Container c) {
     return out << c.type() << c.index();
-}
-
-P4::JSONGenerator &operator<<(P4::JSONGenerator &out, const PHV::Container c) {
-    return out << c.toString();
 }
 
 std::ostream &operator<<(std::ostream &out, ordered_set<const PHV::Container *> &c_set) {

@@ -96,10 +96,10 @@ class BFN::Pipe {
                 hw_constrained_fields == a.hw_constrained_fields;
         }
         toJSON {
-            json << json.indent << "\"parser\" : " << parsers << "," << std::endl
-                 << json.indent << "\"mau\" : " << mau << "," << std::endl
-                 << json.indent << "\"deparser\" : " << deparser << std::endl
-                 << json.indent << "\"hw_constrained_fields\" : " <<  hw_constrained_fields; }
+            json.emit("parser", parsers);
+            json.emit("mau", mau);
+            json.emit("deparser", deparser);
+            json.emit("hw_constrained_fields",  hw_constrained_fields); }
         fromJSON {
             IR::BFN::Pipe::thread_t * thread = new IR::BFN::Pipe::thread_t();
             json.load("parsers", thread->parsers);
@@ -160,7 +160,7 @@ class BFN::Pipe {
                 v.visit(ghost_thread.ghost_parser, "ghost_parser");
                 v.visit(ghost_thread.ghost_mau, "ghost_mau");
             } else {
-                thread[th->thread].parsers.parallel_visit_children(v);
+                thread[th->thread].parsers.parallel_visit_children(v, n);
                 ControlFlowVisitor::GuardGlobal guard_except(v, "-EXIT-"_cs);
                 v.visit(thread[th->thread].mau, "mau");
                 v.flow_merge_global_from("-EXIT-"_cs);
@@ -171,7 +171,7 @@ class BFN::Pipe {
             // FIXME -- doesn't do flow_clone/merge properly, but fixing will
             // break ParserGraph (at least) as it doesn't do merge properly
             for (auto &th : thread) {
-                th.parsers.parallel_visit_children(v);
+                th.parsers.parallel_visit_children(v, n);
                 ControlFlowVisitor::GuardGlobal guard_except(v, "-EXIT-"_cs);
                 v.visit(th.mau, "mau");
                 v.flow_merge_global_from("-EXIT-"_cs);
@@ -196,13 +196,13 @@ class BFN::BridgePath : BFN::Pipe {
     visit_children {
         // does not have support for ghost thread yet.
         for (auto &th : threads.at(INGRESS)) {
-            th.parsers.parallel_visit_children(v);
+            th.parsers.parallel_visit_children(v, n);
             ControlFlowVisitor::GuardGlobal guard_except(v, "-EXIT-"_cs);
             v.visit(th.mau, "mau");
             v.flow_merge_global_from("-EXIT-"_cs);
             v.visit(th.deparser, "deparser"); }
         for (auto &th : threads.at(EGRESS)) {
-            th.parsers.parallel_visit_children(v);
+            th.parsers.parallel_visit_children(v, n);
             ControlFlowVisitor::GuardGlobal guard_except(v, "-EXIT-"_cs);
             v.visit(th.mau, "mau");
             v.flow_merge_global_from("-EXIT-"_cs);
@@ -231,7 +231,7 @@ class BFN::Toplevel {
 
 #apply
     visit_children {
-        v.visit(pipes);
+        v.visit(pipes, n);
     }
 }
 
@@ -467,7 +467,7 @@ class BFN::AliasMember : IR::Member {
     }
 
     visit_children {
-        IR::Member::visit_children(v);
+        IR::Member::visit_children(v, n);
     }
 
 #noequiv
@@ -504,7 +504,7 @@ class BFN::AliasSlice : IR::Slice {
     }
 
     visit_children {
-        IR::Slice::visit_children(v);
+        IR::Slice::visit_children(v, n);
     }
 
 #emit

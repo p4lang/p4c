@@ -25,9 +25,11 @@ control ingress(inout Headers h) {
     @name("ingress.tmp") bit<8> tmp;
     @name("ingress.tmp_0") bit<8> tmp_0;
     @name("ingress.retval") bit<8> retval;
+    @name("ingress.inlinedRetval") bit<8> inlinedRetval_0;
     apply {
         retval = 8w1;
-        tmp = retval;
+        inlinedRetval_0 = retval;
+        tmp = inlinedRetval_0;
         tmp_0 = tmp;
         h.h[tmp_0].a = 8w1;
     }

@@ -236,7 +236,7 @@ const IR::Node *DoRemoveExits::preorder(IR::SwitchStatement *statement) {
     return statement;
 }
 
-const IR::Node *DoRemoveExits::preorder(IR::AssignmentStatement *statement) {
+const IR::Node *DoRemoveExits::preorder(IR::BaseAssignmentStatement *statement) {
     CallsExit ce(this, typeMap, &callsExit);
     ce.setCalledBy(this);
     (void)statement->apply(ce, getChildContext());

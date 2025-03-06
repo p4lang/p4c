@@ -48,8 +48,8 @@ class DoRemoveActionParametersTofino : public P4::DoRemoveActionParameters {
         for (auto abc : action->body->components) {
             /* iterate thought all statements, and find the uses of smeta */
             /* if the only use is in mark_to_drop -- that's not a use! */
-            if (abc->is<IR::AssignmentStatement>()) {
-                auto as = abc->to<IR::AssignmentStatement>();
+            if (abc->is<IR::BaseAssignmentStatement>()) {
+                auto as = abc->to<IR::BaseAssignmentStatement>();
                 // TODO: Handle assignment statements with expressions
                 if (p->name == as->left->toString())
                     paramUses++;

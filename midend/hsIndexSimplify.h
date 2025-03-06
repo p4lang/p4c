@@ -95,7 +95,7 @@ class HSIndexContretizer : public Transform {
     }
 
     IR::Node *preorder(IR::IfStatement *ifStatement) override;
-    IR::Node *preorder(IR::AssignmentStatement *assignmentStatement) override;
+    IR::Node *preorder(IR::BaseAssignmentStatement *assignmentStatement) override;
     IR::Node *preorder(IR::BlockStatement *blockStatement) override;
     IR::Node *preorder(IR::MethodCallStatement *methodCallStatement) override;
     IR::Node *preorder(IR::P4Control *control) override;

@@ -1,5 +1,6 @@
 #include <core.p4>
 #include <dpdk/psa.p4>
+@command_line("--loopsUnroll")
 
 typedef bit<48> eth_addr_t;
 

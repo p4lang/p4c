@@ -23,6 +23,8 @@ namespace P4 {
 /// options. Implementations should be singleton classes.
 class P4CConfiguration {
  public:
+    virtual ~P4CConfiguration() = default;
+
     /// Maximum width supported for a bit field or integer.
     virtual int maximumWidthSupported() const = 0;
 
@@ -32,8 +34,8 @@ class P4CConfiguration {
 
 class DefaultP4CConfiguration : public P4CConfiguration {
  public:
-    int maximumWidthSupported() const { return 2048; }
-    int maximumArraySize() const { return 256; }
+    int maximumWidthSupported() const override { return 2048; }
+    int maximumArraySize() const override { return 256; }
 
     /// @return the singleton instance.
     static const DefaultP4CConfiguration &get() {

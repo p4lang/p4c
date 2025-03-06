@@ -25,6 +25,7 @@ parser p(packet_in pkt, out Headers hdr) {
     @name("p.bound_0") bit<3> bound;
     @name("p.retval") bit<3> retval;
     @name("p.tmp") bit<3> tmp_5;
+    @name("p.inlinedRetval") bit<3> inlinedRetval_0;
     state start {
         val_1 = 3w1;
         bound = 3w2;
@@ -34,7 +35,8 @@ parser p(packet_in pkt, out Headers hdr) {
             tmp_5 = bound;
         }
         retval = tmp_5;
-        tmp = retval;
+        inlinedRetval_0 = retval;
+        tmp = inlinedRetval_0;
         tmp_2 = tmp;
         tmp_3 = hdr.h[tmp_2];
         tmp_4 = extern_call(tmp_3);

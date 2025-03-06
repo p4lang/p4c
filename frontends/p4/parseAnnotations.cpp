@@ -51,6 +51,9 @@ ParseAnnotations::HandlerMap ParseAnnotations::standardHandlers() {
 
         // @match has an expression argument
         PARSE(IR::Annotation::matchAnnotation, Expression),
+
+        // @command_line to add to the command line
+        PARSE_STRING_LITERAL_LIST("command_line"_cs),
     };
 }
 
