@@ -24,6 +24,7 @@ limitations under the License.
 #include "parser_options.h"
 // for p4::P4RuntimeFormat definition
 #include "control-plane/p4RuntimeTypes.h"
+#include "../p4/metrics/metrics.h"
 
 namespace P4 {
 
@@ -80,6 +81,8 @@ class CompilerOptions : public ParserOptions {
     cstring arch = nullptr;
     // If true, unroll all parser loops inside the midend.
     bool loopsUnrolling = false;
+    // Code metrics to be collected
+    cstring metrics = nullptr;
 
     // General optimization options -- can be interpreted by backends in various ways
     int optimizationLevel = 1;

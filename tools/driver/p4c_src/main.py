@@ -413,6 +413,19 @@ def main():
         action="store_true",
         default=False,
     )
+    parser.add_argument(
+        "--metrics",
+        dest="metrics",
+        help=(
+            "Select which code metrics will be collected (comma-separated list). "
+            "Valid options: all, cyclomatic, halstead, unused-code, duplicit-code, "
+            "nesting-depth, header-general, header-manipulation, header-modification, "
+            "match-action, parser, inlined, extern. "
+            "Example: --metrics cyclomatic,halstead"
+        ),
+        action="store",
+        default=[],
+    )
 
     ### DRYified “env_indicates_developer_build”
     env_indicates_developer_build = os.environ["P4C_BUILD_TYPE"] == "DEVELOPER"
@@ -442,6 +455,7 @@ def main():
 
     # parse the arguments
     opts = parser.parse_args()
+    print(f"Metrics selected: {opts.metrics}")
 
     ### Accept multiple ways of specifying which language,
     ###   and ensure that it is a consistent string from now on.

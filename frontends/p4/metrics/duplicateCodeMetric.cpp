@@ -1,0 +1,11 @@
+#include "duplicateCodeMetric.h"
+
+namespace P4 {
+
+bool DuplicateCodeMetricPass::preorder(const IR::P4Program *program) {
+    std::cout<<"Duplicate code pass"<<std::endl;
+    duplicateCodeInstances = 5;  
+    return false;
+}
+
+}  // namespace P4

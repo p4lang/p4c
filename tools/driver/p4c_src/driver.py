@@ -215,6 +215,9 @@ class BackendDriver:
             # its commands and the order in which they execute
             pass
 
+        if opts.metrics is not None:
+            self.add_command_option("compiler", "--metrics={}".format(opts.metrics))
+
     def should_not_check_input(self, opts):
         """
         Custom backends can use this function to implement their own --help* options

@@ -174,6 +174,29 @@ CompilerOptions::CompilerOptions(std::string_view defaultMessage) : ParserOption
             return *level == 0;
         },
         "Optimization level");
+    registerOption(
+    "--metrics", "metric1[,metric2]",
+    [this](const char *arg) {
+        auto copy = strdup(arg);
+        while (auto metric = strsep(&copy, ",")) {
+            std::string metricStr(metric);
+            if (metricStr == "all"){
+                codeMetrics = validMetrics;
+                return true;
+            }
+            else if (validMetrics.find(metricStr) == validMetrics.end()) {
+                ::P4::error(ErrorType::ERR_INVALID, "Invalid metric: %s", metricStr.c_str());
+                return false;
+            }
+            else
+                codeMetrics.insert(metricStr);
+        }
+        return true;
+    },
+    "Select which code metrics will be collected.\n"
+    "Valid options: all, cyclomatic, halstead, unused-code, duplicit-code,\n"
+    "nesting-depth, header-general, header-manipulation, header-modification,\n"
+    "match-action, parser, inlined, extern.");
 }
 
 bool CompilerOptions::enable_intrinsic_metadata_fix() { return true; }
