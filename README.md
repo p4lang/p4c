@@ -199,7 +199,7 @@ sudo dpkg -i /path/to/package.deb
     ```
 
 2.  Install [dependencies](#dependencies). You can find specific instructions
-    for Ubuntu 20.04 [here](#ubuntu-dependencies) and for macOS 11
+    for Ubuntu 22.04 [here](#ubuntu-dependencies) and for macOS 11
     [here](#macos-dependencies).  You can also look at the
     [CI installation script](https://github.com/p4lang/p4c/blob/main/tools/ci-build.sh).
 
@@ -267,7 +267,7 @@ If you plan to contribute to P4C, you'll find more useful information
 
 ## Dependencies
 
-Ubuntu 20.04 is the officially supported platform for P4C. There's also
+Ubuntu 22.04 is the officially supported platform for P4C. There's also
 unofficial support for macOS 11. Other platforms are untested; you can try to
 use them, but YMMV.
 
@@ -332,7 +332,7 @@ git clone --depth 1 -b v2.3.4 https://github.com/jothepro/doxygen-awesome-css ./
 ```
 
 `P4C` also depends on Google Protocol Buffers (Protobuf). `P4C` requires version
-3.0 or higher, so the packaged version provided in Ubuntu 20.04 **should**
+3.0 or higher, so the packaged version provided in Ubuntu 22.04 **should**
 work. However, P4C typically installs its own version of Protobuf using CMake's `FetchContent` module
 (at the moment, 3.25.3). If you are experiencing issues with the Protobuf version shipped with your OS distribution, we recommend that to install Protobuf 3.25.3 from source. You can find instructions
 [here](https://github.com/protocolbuffers/protobuf/blob/v3.25.3/src/README.md).
