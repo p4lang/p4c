@@ -38,6 +38,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.bound_0") bit<1> bound;
     @name("ingress.retval") bit<1> retval;
     @name("ingress.tmp") bit<1> tmp_1;
+    @name("ingress.inlinedRetval") bit<1> inlinedRetval_0;
     @name("ingress.perform_action") action perform_action() {
         if (bool_val_0) {
             val = 1w0;
@@ -48,7 +49,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
                 tmp_1 = bound;
             }
             retval = tmp_1;
-            tmp = retval;
+            inlinedRetval_0 = retval;
+            tmp = inlinedRetval_0;
             tmp_0 = tmp;
             h.h[tmp_0].a = 8w1;
         }

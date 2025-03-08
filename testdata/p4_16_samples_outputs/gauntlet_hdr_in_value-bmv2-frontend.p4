@@ -24,9 +24,11 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.retval") bit<16> retval;
+    @name("ingress.inlinedRetval") bit<16> inlinedRetval_0;
     apply {
         retval = 16w2;
-        h.eth_hdr.eth_type = retval;
+        inlinedRetval_0 = retval;
+        h.eth_hdr.eth_type = inlinedRetval_0;
     }
 }
 

@@ -34,10 +34,12 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.val_1") bit<8> val_2;
     @name("ingress.retval") bit<8> retval_1;
+    @name("ingress.inlinedRetval_0") bit<8> inlinedRetval_2;
     apply {
         retval_1 = 8w1;
         m.tmp = val_2;
-        h.h.a = retval_1;
+        inlinedRetval_2 = retval_1;
+        h.h.a = inlinedRetval_2;
     }
 }
 

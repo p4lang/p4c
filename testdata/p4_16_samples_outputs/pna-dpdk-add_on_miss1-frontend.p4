@@ -112,34 +112,42 @@ control MainControlImpl(inout headers_t hdr, inout metadata_t meta, in pna_main_
     @name("MainControlImpl.outbound_address_0") IPv4Address outbound_address;
     @name("MainControlImpl.inbound_address_0") IPv4Address inbound_address;
     @name("MainControlImpl.retval") IPv4Address retval;
+    @name("MainControlImpl.inlinedRetval") IPv4Address inlinedRetval_7;
     @name("MainControlImpl.direction_1") direction_t direction_9;
     @name("MainControlImpl.outbound_address_1") IPv4Address outbound_address_4;
     @name("MainControlImpl.inbound_address_1") IPv4Address inbound_address_4;
     @name("MainControlImpl.retval") IPv4Address retval_0;
+    @name("MainControlImpl.inlinedRetval_0") IPv4Address inlinedRetval_8;
     @name("MainControlImpl.direction_2") direction_t direction_10;
     @name("MainControlImpl.outbound_port_0") bit<16> outbound_port;
     @name("MainControlImpl.inbound_port_0") bit<16> inbound_port;
     @name("MainControlImpl.retval_0") bit<16> retval_3;
+    @name("MainControlImpl.inlinedRetval_1") bit<16> inlinedRetval_9;
     @name("MainControlImpl.direction_3") direction_t direction_11;
     @name("MainControlImpl.outbound_port_1") bit<16> outbound_port_4;
     @name("MainControlImpl.inbound_port_1") bit<16> inbound_port_4;
     @name("MainControlImpl.retval_0") bit<16> retval_4;
+    @name("MainControlImpl.inlinedRetval_2") bit<16> inlinedRetval_10;
     @name("MainControlImpl.direction_4") direction_t direction_12;
     @name("MainControlImpl.outbound_address_2") IPv4Address outbound_address_5;
     @name("MainControlImpl.inbound_address_2") IPv4Address inbound_address_5;
     @name("MainControlImpl.retval") IPv4Address retval_5;
+    @name("MainControlImpl.inlinedRetval_3") IPv4Address inlinedRetval_11;
     @name("MainControlImpl.direction_5") direction_t direction_13;
     @name("MainControlImpl.outbound_address_3") IPv4Address outbound_address_6;
     @name("MainControlImpl.inbound_address_3") IPv4Address inbound_address_6;
     @name("MainControlImpl.retval") IPv4Address retval_6;
+    @name("MainControlImpl.inlinedRetval_4") IPv4Address inlinedRetval_12;
     @name("MainControlImpl.direction_6") direction_t direction_14;
     @name("MainControlImpl.outbound_port_2") bit<16> outbound_port_5;
     @name("MainControlImpl.inbound_port_2") bit<16> inbound_port_5;
     @name("MainControlImpl.retval_0") bit<16> retval_7;
+    @name("MainControlImpl.inlinedRetval_5") bit<16> inlinedRetval_13;
     @name("MainControlImpl.direction_7") direction_t direction_15;
     @name("MainControlImpl.outbound_port_3") bit<16> outbound_port_6;
     @name("MainControlImpl.inbound_port_3") bit<16> inbound_port_6;
     @name("MainControlImpl.retval_0") bit<16> retval_8;
+    @name("MainControlImpl.inlinedRetval_6") bit<16> inlinedRetval_14;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MainControlImpl.drop") action drop() {
@@ -219,7 +227,8 @@ control MainControlImpl(inout headers_t hdr, inout metadata_t meta, in pna_main_
                 } else {
                     retval = inbound_address;
                 }
-                outbound_conntrack_key = retval;
+                inlinedRetval_7 = retval;
+                outbound_conntrack_key = inlinedRetval_7;
                 direction_9 = meta.direction;
                 outbound_address_4 = hdr.ipv4.dst_addr;
                 inbound_address_4 = hdr.ipv4.src_addr;
@@ -228,7 +237,8 @@ control MainControlImpl(inout headers_t hdr, inout metadata_t meta, in pna_main_
                 } else {
                     retval_0 = inbound_address_4;
                 }
-                outbound_conntrack_key_0 = retval_0;
+                inlinedRetval_8 = retval_0;
+                outbound_conntrack_key_0 = inlinedRetval_8;
                 outbound_conntrack_key_1 = hdr.ipv4.protocol;
                 direction_10 = meta.direction;
                 outbound_port = hdr.tcp.src_port;
@@ -238,7 +248,8 @@ control MainControlImpl(inout headers_t hdr, inout metadata_t meta, in pna_main_
                 } else {
                     retval_3 = inbound_port;
                 }
-                outbound_conntrack_key_2 = retval_3;
+                inlinedRetval_9 = retval_3;
+                outbound_conntrack_key_2 = inlinedRetval_9;
                 direction_11 = meta.direction;
                 outbound_port_4 = hdr.tcp.dst_port;
                 inbound_port_4 = hdr.tcp.src_port;
@@ -247,7 +258,8 @@ control MainControlImpl(inout headers_t hdr, inout metadata_t meta, in pna_main_
                 } else {
                     retval_4 = inbound_port_4;
                 }
-                outbound_conntrack_key_3 = retval_4;
+                inlinedRetval_10 = retval_4;
+                outbound_conntrack_key_3 = inlinedRetval_10;
                 outbound_conntrack_ct_tcp_table.apply();
             } else {
                 meta.direction = direction_t.INBOUND;
@@ -260,7 +272,8 @@ control MainControlImpl(inout headers_t hdr, inout metadata_t meta, in pna_main_
                 } else {
                     retval_5 = inbound_address_5;
                 }
-                inbound_conntrack_key = retval_5;
+                inlinedRetval_11 = retval_5;
+                inbound_conntrack_key = inlinedRetval_11;
                 direction_13 = meta.direction;
                 outbound_address_6 = hdr.ipv4.dst_addr;
                 inbound_address_6 = hdr.ipv4.src_addr;
@@ -269,7 +282,8 @@ control MainControlImpl(inout headers_t hdr, inout metadata_t meta, in pna_main_
                 } else {
                     retval_6 = inbound_address_6;
                 }
-                inbound_conntrack_key_0 = retval_6;
+                inlinedRetval_12 = retval_6;
+                inbound_conntrack_key_0 = inlinedRetval_12;
                 inbound_conntrack_key_1 = hdr.ipv4.protocol;
                 direction_14 = meta.direction;
                 outbound_port_5 = hdr.tcp.src_port;
@@ -279,7 +293,8 @@ control MainControlImpl(inout headers_t hdr, inout metadata_t meta, in pna_main_
                 } else {
                     retval_7 = inbound_port_5;
                 }
-                inbound_conntrack_key_2 = retval_7;
+                inlinedRetval_13 = retval_7;
+                inbound_conntrack_key_2 = inlinedRetval_13;
                 direction_15 = meta.direction;
                 outbound_port_6 = hdr.tcp.dst_port;
                 inbound_port_6 = hdr.tcp.src_port;
@@ -288,7 +303,8 @@ control MainControlImpl(inout headers_t hdr, inout metadata_t meta, in pna_main_
                 } else {
                     retval_8 = inbound_port_6;
                 }
-                inbound_conntrack_key_3 = retval_8;
+                inlinedRetval_14 = retval_8;
+                inbound_conntrack_key_3 = inlinedRetval_14;
                 inbound_conntrack_ct_tcp_table.apply();
             }
         }

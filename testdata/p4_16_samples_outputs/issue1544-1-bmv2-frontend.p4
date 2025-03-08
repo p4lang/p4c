@@ -27,6 +27,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("ingress.x_0") bit<16> x;
     @name("ingress.retval") bit<16> retval;
     @name("ingress.tmp") bit<16> tmp_0;
+    @name("ingress.inlinedRetval") bit<16> inlinedRetval_0;
     @name(".my_drop") action my_drop_0() {
         smeta_0 = standard_metadata;
         mark_to_drop(smeta_0);
@@ -54,7 +55,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             tmp_0 = x;
         }
         retval = tmp_0;
-        hdr.ethernet.srcAddr[15:0] = retval;
+        inlinedRetval_0 = retval;
+        hdr.ethernet.srcAddr[15:0] = inlinedRetval_0;
     }
 }
 

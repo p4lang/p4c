@@ -33,14 +33,17 @@ control MainControlImpl(inout Headers hdr, inout main_metadata_t user_meta, in p
     @name("MainControlImpl.year") priceX year_0;
     @name("MainControlImpl.val_0") bit<3> val;
     @name("MainControlImpl.retval_0") bit<8> retval;
+    @name("MainControlImpl.inlinedRetval_0") bit<8> inlinedRetval_1;
     @name("MainControlImpl.bound_0") bit<3> bound;
     @name("MainControlImpl.retval") bit<3> retval_0;
     @name("MainControlImpl.tmp") bit<3> tmp_1;
+    @name("MainControlImpl.inlinedRetval") bit<3> inlinedRetval_2;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MainControlImpl.revie") action revie(@name("orde") bit<128> orde, @name("priv") bit<128> priv) {
         retval = 8w0;
-        val = (bit<3>)retval;
+        inlinedRetval_1 = retval;
+        val = (bit<3>)inlinedRetval_1;
         bound = 3w3;
         if (val < bound) {
             tmp_1 = val;
@@ -48,7 +51,8 @@ control MainControlImpl(inout Headers hdr, inout main_metadata_t user_meta, in p
             tmp_1 = bound;
         }
         retval_0 = tmp_1;
-        hdr.heal[retval_0] = year_0;
+        inlinedRetval_2 = retval_0;
+        hdr.heal[inlinedRetval_2] = year_0;
     }
     @name("MainControlImpl.greatY") table greatY_0 {
         actions = {

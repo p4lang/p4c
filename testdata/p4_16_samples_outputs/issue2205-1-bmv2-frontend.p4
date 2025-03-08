@@ -28,12 +28,14 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp_1") bool tmp_1;
     @name("ingress.val_0") bit<16> val;
     @name("ingress.retval") bit<16> retval;
+    @name("ingress.inlinedRetval") bit<16> inlinedRetval_0;
     apply {
         tmp = h.eth_hdr.eth_type;
         val = 16w182;
         retval = 16w2;
         h.eth_hdr.eth_type = val;
-        tmp_0 = retval;
+        inlinedRetval_0 = retval;
+        tmp_0 = inlinedRetval_0;
         tmp_1 = tmp == tmp_0;
         if (tmp_1) {
             h.eth_hdr.src_addr = 48w1;

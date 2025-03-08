@@ -17,14 +17,18 @@ control c(out bool x) {
     @name("c.a_0") h_0 a_2;
     @name("c.retval") bool retval_0;
     @name("c.v") h_1 v_0;
+    @name("c.inlinedRetval") bool inlinedRetval_1;
+    @name("c.inlinedRetval_0") bool inlinedRetval_2;
     apply {
         a = (h_0){f = 1w0};
         a_2 = a;
         v_0.f = a_2;
         retval_0 = v_0.f == a_2;
-        tmp = retval_0;
+        inlinedRetval_1 = retval_0;
+        tmp = inlinedRetval_1;
         retval = tmp;
-        x = retval;
+        inlinedRetval_2 = retval;
+        x = inlinedRetval_2;
     }
 }
 

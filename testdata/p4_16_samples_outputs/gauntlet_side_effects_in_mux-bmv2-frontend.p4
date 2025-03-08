@@ -35,18 +35,22 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp_1") bit<16> tmp_1;
     @name("ingress.hPSe_0") bit<8> hPSe;
     @name("ingress.retval") bit<16> retval;
+    @name("ingress.inlinedRetval") bit<16> inlinedRetval_1;
     @name("ingress.hPSe_1") bit<8> hPSe_2;
     @name("ingress.retval") bit<16> retval_1;
+    @name("ingress.inlinedRetval_0") bit<16> inlinedRetval_2;
     apply {
         if (h.eth_hdr.src_addr == 48w5) {
             retval = 16w2;
             h.h.a = hPSe;
-            tmp_0 = retval;
+            inlinedRetval_1 = retval;
+            tmp_0 = inlinedRetval_1;
             tmp = tmp_0;
         } else {
             retval_1 = 16w2;
             h.h.b = hPSe_2;
-            tmp_1 = retval_1;
+            inlinedRetval_2 = retval_1;
+            tmp_1 = inlinedRetval_2;
             tmp = tmp_1;
         }
         h.eth_hdr.eth_type = tmp;

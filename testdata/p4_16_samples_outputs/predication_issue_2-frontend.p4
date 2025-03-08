@@ -42,6 +42,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.bound_0") bit<8> bound;
     @name("ingress.retval") bit<8> retval;
     @name("ingress.tmp") bit<8> tmp;
+    @name("ingress.inlinedRetval") bit<8> inlinedRetval_0;
     @name("ingress.simple_action") action simple_action() {
         check_0 = true;
         if (check_0) {
@@ -53,7 +54,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
                 tmp = bound;
             }
             retval = tmp;
-            val = retval;
+            inlinedRetval_0 = retval;
+            val = inlinedRetval_0;
             h.h[val].a = 8w1;
         }
     }

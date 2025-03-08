@@ -42,6 +42,7 @@ control c(out bit<32> size) {
     @name("c.h2_0") H1 h2_3;
     @name("c.retval") bit<32> retval;
     @name("c.b1") bool b1_0;
+    @name("c.inlinedRetval") bit<32> inlinedRetval_0;
     apply {
         h1_2.setInvalid();
         h2_2.setInvalid();
@@ -49,7 +50,8 @@ control c(out bit<32> size) {
         h2_3 = h2_2;
         b1_0 = h2_3.minSizeInBits == 8w32;
         retval = h1_3.isValid + (b1_0 ? 32w117 : 32w162);
-        size = retval;
+        inlinedRetval_0 = retval;
+        size = inlinedRetval_0;
     }
 }
 

@@ -47,10 +47,13 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     @name("ingressImpl.tmp_4") bool tmp_4;
     @name("ingressImpl.retval") H retval;
     @name("ingressImpl.h") H h_0;
+    @name("ingressImpl.inlinedRetval") H inlinedRetval_2;
     @name("ingressImpl.retval_0") U retval_0;
     @name("ingressImpl.u") U u_0;
+    @name("ingressImpl.inlinedRetval_0") U inlinedRetval_3;
     @name("ingressImpl.retval_1") H[1] retval_1;
     @name("ingressImpl.s") H[1] s_0;
+    @name("ingressImpl.inlinedRetval_1") H[1] inlinedRetval_4;
     apply {
         if (hdr.ethernet.isValid()) {
             log_msg("hdr.ethernet is valid");
@@ -59,7 +62,8 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         }
         h_0.setInvalid();
         retval = h_0;
-        tmp = retval;
+        inlinedRetval_2 = retval;
+        tmp = inlinedRetval_2;
         tmp_0 = tmp.isValid();
         if (tmp_0) {
             log_msg("f() returned a valid header");
@@ -68,7 +72,8 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         }
         u_0.h.setInvalid();
         retval_0 = u_0;
-        tmp_1 = retval_0;
+        inlinedRetval_3 = retval_0;
+        tmp_1 = inlinedRetval_3;
         tmp_2 = tmp_1.h.isValid();
         if (tmp_2) {
             log_msg("g() returned a header_union with valid member h");
@@ -77,7 +82,8 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         }
         s_0[0].setInvalid();
         retval_1 = s_0;
-        tmp_3 = retval_1;
+        inlinedRetval_4 = retval_1;
+        tmp_3 = inlinedRetval_4;
         tmp_4 = tmp_3[0].isValid();
         if (tmp_4) {
             log_msg("h() returned a header stack with valid element 0");

@@ -319,6 +319,24 @@ const IR::Statement *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
         body.push_back(copyout);
     }
 
+    // copy return value, if any. Return value could be a PathExpression, so if the same
+    // function is inlined several times we can have wrong path references, e.g.
+    // for code: a = f(b) + f(c) we'll end with something like this without this:
+    // {  <body1>;
+    //    retval = <something1>;
+    //    { <body2>
+    //      retval = <something2>
+    //      a = retval + retval;
+    //    }
+    // }
+    if (retExpr) {
+        cstring newName = nameGen->newName("inlinedRetval");
+        body.push_back(new IR::Declaration_Variable(newName, funclone->type->returnType));
+        auto right = new IR::PathExpression(newName);
+        body.push_back(new IR::AssignmentStatement(right, retExpr));
+        retExpr = right;
+    }
+
     if (auto assign = statement->to<IR::BaseAssignmentStatement>()) {
         // copy the return value
         CHECK_NULL(retExpr);

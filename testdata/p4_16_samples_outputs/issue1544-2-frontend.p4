@@ -5,14 +5,17 @@ control c(inout bit<32> x) {
     @name("c.b_0") bit<32> b;
     @name("c.retval") bit<32> retval;
     @name("c.tmp") bit<32> tmp_1;
+    @name("c.inlinedRetval") bit<32> inlinedRetval_2;
     @name("c.a_1") bit<32> a_3;
     @name("c.b_1") bit<32> b_3;
     @name("c.retval") bit<32> retval_1;
     @name("c.tmp") bit<32> tmp_5;
+    @name("c.inlinedRetval_0") bit<32> inlinedRetval_3;
     @name("c.a_2") bit<32> a_4;
     @name("c.b_2") bit<32> b_4;
     @name("c.retval") bit<32> retval_2;
     @name("c.tmp") bit<32> tmp_6;
+    @name("c.inlinedRetval_1") bit<32> inlinedRetval_4;
     apply {
         a = x;
         b = x + 32w1;
@@ -22,7 +25,8 @@ control c(inout bit<32> x) {
             tmp_1 = a;
         }
         retval = tmp_1;
-        tmp = retval;
+        inlinedRetval_2 = retval;
+        tmp = inlinedRetval_2;
         a_3 = x;
         b_3 = x + 32w4294967295;
         if (a_3 > b_3) {
@@ -31,7 +35,8 @@ control c(inout bit<32> x) {
             tmp_5 = a_3;
         }
         retval_1 = tmp_5;
-        tmp_0 = retval_1;
+        inlinedRetval_3 = retval_1;
+        tmp_0 = inlinedRetval_3;
         a_4 = tmp;
         b_4 = tmp_0;
         if (a_4 > b_4) {
@@ -40,7 +45,8 @@ control c(inout bit<32> x) {
             tmp_6 = a_4;
         }
         retval_2 = tmp_6;
-        x = retval_2;
+        inlinedRetval_4 = retval_2;
+        x = inlinedRetval_4;
     }
 }
 

@@ -82,6 +82,7 @@ control main_control(inout headers_t hdr, inout local_metadata_t local_metadata,
     @name("main_control.tmp") bool tmp;
     @name("main_control.istd_0") pna_main_input_metadata_t istd_1;
     @name("main_control.retval") bool retval;
+    @name("main_control.inlinedRetval") bool inlinedRetval_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @noWarn("unused") @name(".NoAction") action NoAction_2() {
@@ -118,7 +119,8 @@ control main_control(inout headers_t hdr, inout local_metadata_t local_metadata,
     apply {
         istd_1 = istd;
         retval = istd_1.direction == PNA_Direction_t.NET_TO_HOST;
-        tmp = retval;
+        inlinedRetval_0 = retval;
+        tmp = inlinedRetval_0;
         if (tmp) {
             tunnel_decap_ipv4_tunnel_term_table.apply();
         } else {

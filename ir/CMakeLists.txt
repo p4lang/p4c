@@ -30,6 +30,7 @@ set (IR_SRCS
   node.cpp
   pass_manager.cpp
   pass_utils.cpp
+  splitter.cpp
   type.cpp
   visitor.cpp
   write_context.cpp
@@ -56,6 +57,7 @@ set (IR_HDRS
   nodemap.h
   pass_manager.h
   pass_utils.h
+  splitter.h
   vector.h
   visitor.h
 )

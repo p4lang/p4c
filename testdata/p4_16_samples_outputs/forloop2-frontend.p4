@@ -17,6 +17,7 @@ control c(inout headers_t hdrs) {
     @name("c.n") bit<64> n_0;
     @name("c.v") bit<64> v_0;
     @name("c.popcnti") bit<64> popcnti_0;
+    @name("c.inlinedRetval") bit<64> inlinedRetval_0;
     apply {
         val = hdrs.t1.v;
         hasReturned = false;
@@ -37,7 +38,8 @@ control c(inout headers_t hdrs) {
         } else {
             retval = n_0;
         }
-        hdrs.t1.v = retval;
+        inlinedRetval_0 = retval;
+        hdrs.t1.v = inlinedRetval_0;
     }
 }
 

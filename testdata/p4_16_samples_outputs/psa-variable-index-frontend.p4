@@ -75,6 +75,7 @@ control MyIC(inout header_t a, inout EMPTY_M b, in psa_ingress_input_metadata_t 
     @name("MyIC.tmp") bit<2> tmp;
     @name("MyIC.vid_0") bit<12> vid_1;
     @name("MyIC.retval") bit<16> retval;
+    @name("MyIC.inlinedRetval") bit<16> inlinedRetval_0;
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MyIC.tbl") table tbl_0 {
@@ -94,7 +95,8 @@ control MyIC(inout header_t a, inout EMPTY_M b, in psa_ingress_input_metadata_t 
             tmp = b.depth;
             vid_1 = a.vlan_tag[tmp].vid;
             retval = (bit<16>)vid_1 + 16w5;
-            b.ret = retval;
+            inlinedRetval_0 = retval;
+            b.ret = inlinedRetval_0;
             tbl_0.apply();
         }
     }

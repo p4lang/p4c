@@ -48,9 +48,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("ingress.x_0") bit<8> x_2;
     @name("ingress.retval") bit<8> retval;
     @name("ingress.rv") bit<8> rv_0;
+    @name("ingress.inlinedRetval") bit<8> inlinedRetval_1;
     @name("ingress.x_1") bit<8> x_3;
     @name("ingress.retval") bit<8> retval_1;
     @name("ingress.rv") bit<8> rv_1;
+    @name("ingress.inlinedRetval_0") bit<8> inlinedRetval_2;
     apply {
         if (hdr.rest[7].isValid()) {
             x_2 = hdr.data.b1;
@@ -58,7 +60,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             x_2 = x_2 + 8w1;
             retval = rv_0;
             hdr.data.b1 = x_2;
-            tmp = retval;
+            inlinedRetval_1 = retval;
+            tmp = inlinedRetval_1;
             tmp_0 = tmp & 8w7;
             hdr.rest[tmp_0].x = hdr.rest[tmp_0].x | hdr.data.f1;
             x_3 = hdr.data.b1;
@@ -66,7 +69,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             x_3 = x_3 + 8w1;
             retval_1 = rv_1;
             hdr.data.b1 = x_3;
-            tmp_1 = retval_1;
+            inlinedRetval_2 = retval_1;
+            tmp_1 = inlinedRetval_2;
             tmp_2 = tmp_1 & 8w7;
             hdr.rest[tmp_2].x = hdr.rest[tmp_2].x | hdr.data.f2;
         }
