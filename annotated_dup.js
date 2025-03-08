@@ -1686,6 +1686,7 @@ var annotated_dup =
       [ "DynamicVisitor", "class_p4_1_1_dynamic_visitor.html", null ],
       [ "EbpfOptions", "class_p4_1_1_ebpf_options.html", "class_p4_1_1_ebpf_options" ],
       [ "Egress_Model", "struct_p4_1_1_egress___model.html", null ],
+      [ "ElimActionRun", "class_p4_1_1_elim_action_run.html", null ],
       [ "ElimCallExprInIfCond", "group___simplify_if_statement.html#class_p4_1_1_elim_call_expr_in_if_cond", null ],
       [ "EliminateInvalidHeaders", "class_p4_1_1_eliminate_invalid_headers.html", null ],
       [ "EliminateNewtype", "class_p4_1_1_eliminate_newtype.html", null ],

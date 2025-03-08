@@ -1064,7 +1064,6 @@ var hierarchy =
           [ "P4::P4CContextWithOptions< EbpfOptions >", "class_p4_1_1_p4_c_context_with_options.html", null ],
           [ "P4::P4CContextWithOptions< Options >", "class_p4_1_1_p4_c_context_with_options.html", null ],
           [ "P4::P4CContextWithOptions< P4fmtOptions >", "class_p4_1_1_p4_c_context_with_options.html", null ],
-          [ "P4::P4CContextWithOptions< P4TestOptions >", "class_p4_1_1_p4_c_context_with_options.html", null ],
           [ "P4::P4CContextWithOptions< TCOptions >", "class_p4_1_1_p4_c_context_with_options.html", null ],
           [ "P4::P4Tools::CompileContext< P4TestOptions >", "class_p4_1_1_p4_tools_1_1_compile_context.html", null ],
           [ "P4::P4Tools::CompileContext< P4ReachabilityOptions >", "class_p4_1_1_p4_tools_1_1_compile_context.html", null ],
@@ -1171,13 +1170,13 @@ var hierarchy =
             [ "P4::IR::Vector< IR::DpdkDeclaration >", "class_p4_1_1_i_r_1_1_vector.html", [
               [ "P4::IR::IndexedVector< IR::DpdkDeclaration >", "class_p4_1_1_i_r_1_1_indexed_vector.html", null ]
             ] ],
+            [ "P4::IR::Vector< IR::StatOrDecl >", "class_p4_1_1_i_r_1_1_vector.html", [
+              [ "P4::IR::IndexedVector< IR::StatOrDecl >", "class_p4_1_1_i_r_1_1_indexed_vector.html", null ]
+            ] ],
             [ "P4::IR::Vector< IR::ParserState >", "class_p4_1_1_i_r_1_1_vector.html", [
               [ "P4::IR::IndexedVector< IR::ParserState >", "class_p4_1_1_i_r_1_1_indexed_vector.html", null ]
             ] ],
             [ "P4::IR::Vector< IR::SelectCase >", "class_p4_1_1_i_r_1_1_vector.html", null ],
-            [ "P4::IR::Vector< IR::StatOrDecl >", "class_p4_1_1_i_r_1_1_vector.html", [
-              [ "P4::IR::IndexedVector< IR::StatOrDecl >", "class_p4_1_1_i_r_1_1_indexed_vector.html", null ]
-            ] ],
             [ "P4::IR::Vector< N >", "class_p4_1_1_i_r_1_1_vector.html", null ],
             [ "P4::IR::Vector< T >", "class_p4_1_1_i_r_1_1_vector.html", [
               [ "P4::IR::IndexedVector< T >", "class_p4_1_1_i_r_1_1_indexed_vector.html", null ]
@@ -2238,6 +2237,7 @@ var hierarchy =
           [ "P4::DefaultArguments", "class_p4_1_1_default_arguments.html", null ],
           [ "P4::DefaultValues", "class_p4_1_1_default_values.html", null ],
           [ "P4::EBPF::Lower", "class_p4_1_1_e_b_p_f_1_1_lower.html", null ],
+          [ "P4::ElimActionRun", "class_p4_1_1_elim_action_run.html", null ],
           [ "P4::EliminateInvalidHeaders", "class_p4_1_1_eliminate_invalid_headers.html", null ],
           [ "P4::EliminateNewtype", "class_p4_1_1_eliminate_newtype.html", null ],
           [ "P4::EliminateSerEnums", "class_p4_1_1_eliminate_ser_enums.html", null ],
@@ -3781,11 +3781,11 @@ var hierarchy =
       [ "P4::safe_vector< const IR::DpdkAction * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::Parameter * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::DpdkDeclaration * >", "class_p4_1_1safe__vector.html", null ],
+      [ "P4::safe_vector< const IR::StatOrDecl * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const T * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::ParserState * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const Constraint * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const IR::SelectCase * >", "class_p4_1_1safe__vector.html", null ],
-      [ "P4::safe_vector< const IR::StatOrDecl * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< DebugHook >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< P4::Visitor * >", "class_p4_1_1safe__vector.html", null ],
       [ "P4::safe_vector< const N * >", "class_p4_1_1safe__vector.html", null ],
