@@ -23,9 +23,9 @@ std::unordered_set<std::string> validMetrics = {
     "extern"
 };
 
-std::unordered_map<std::string, int> cyclomaticComplexity;
-int duplicateCodeInstances = 0;
-int unusedCodeInstances = 0;
+std::unordered_map<std::string, unsigned> cyclomaticComplexity;
+unsigned duplicateCodeInstances = 0;
+unsigned unusedCodeInstances = 0;
 NestingDepth nestingDepth;
 HalsteadMetrics halsteadMetrics;
 HeaderMetrics headerMetrics;
@@ -33,8 +33,8 @@ HeaderManipulationMetrics headerManipulationMetrics;
 HeaderModificationMetrics headerModificationMetrics;
 MatchActionTableMetrics matchActionTableMetrics;
 ParserMetrics parserMetrics;
-int inlinedActionsNum = 0;
-int externalObjectsNum = 0;
+unsigned inlinedActionsNum = 0;
+unsigned externalObjectsNum = 0;
 
 bool ExportMetricsPass::preorder(const IR::P4Program *program) {
     std::cout<<"Exporting metrics"<<std::endl;
@@ -47,8 +47,6 @@ bool ExportMetricsPass::preorder(const IR::P4Program *program) {
         std::cerr << "Error: Unable to open file " << filename << " for writing metrics.\n";
         return false;
     }
-
-    file << "Collected P4 Metrics:\n";
 
     for (const auto &metric : codeMetrics) {
         if (metric == "cyclomatic") {
@@ -86,6 +84,17 @@ bool ExportMetricsPass::preorder(const IR::P4Program *program) {
             file << "  Total Headers: " << headerMetrics.numHeaders << "\n";
             file << "  Avg Fields Per Header: " << headerMetrics.avgFieldsNum << "\n";
             file << "  Avg Field Size: " << headerMetrics.avgFieldSize << "\n";
+            file << "\n";
+
+            auto iterator = headerMetrics.fieldsNum.begin();
+            while (iterator != headerMetrics.fieldsNum.end()){
+                const auto& [headerName, numFields] = *iterator;
+                auto sizeFields = headerMetrics.fieldSizeSum[headerName];
+                file<<"\t"<<headerName<<":\n";
+                file<<"\t Fields: "<<numFields<<"\n";
+                file<<"\t Fields size sum: "<<sizeFields<<"\n";
+                iterator++;
+            }
         } 
         else if (metric == "header-manipulation") {
             file << "\nHeader Manipulation Metrics:\n";
@@ -101,7 +110,25 @@ bool ExportMetricsPass::preorder(const IR::P4Program *program) {
             file << "\nMatch-Action Table Metrics:\n";
             file << "  Number of Tables: " << matchActionTableMetrics.numTables << "\n";
             file << "  Total Keys: " << matchActionTableMetrics.totalKeys << "\n";
+            file << "  Total Key Size: " << matchActionTableMetrics.totalKeySizeSum << "\n";
+            file << "  Avg Key Size: " << matchActionTableMetrics.avgKeySize << "\n";
+            file << "  Avg Keys Per Table: " << matchActionTableMetrics.avgKeysPerTable << "\n";
+            file << "  Max Keys Per Table: " << matchActionTableMetrics.maxKeysPerTable << "\n";
             file << "  Total Actions: " << matchActionTableMetrics.totalActions << "\n";
+            file << "  Avg Actions Per Table: " << matchActionTableMetrics.avgActionsPerTable << "\n";
+            file << "  Max Actions Per Table: " << matchActionTableMetrics.maxActionsPerTable << "\n";
+
+            auto iterator = matchActionTableMetrics.keysNum.begin();
+            while (iterator != matchActionTableMetrics.keysNum.end()){
+                const auto& [tableName, numKeys] = *iterator;
+                auto numActions = matchActionTableMetrics.actionsNum[tableName];
+                auto keySizeSum = matchActionTableMetrics.keySizeSum[tableName];
+                file<<"\t"<<tableName<<":\n";
+                file<<"\t Actions: "<<numActions<<"\n";
+                file<<"\t Keys: "<<numKeys<<"\n";
+                file<<"\t Key size sum: "<<keySizeSum<<"\n";
+                iterator++;
+            }
         } 
         else if (metric == "parser") {
             file << "\nParser Metrics:\n";

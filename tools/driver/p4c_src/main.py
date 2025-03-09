@@ -424,7 +424,7 @@ def main():
             "Example: --metrics cyclomatic,halstead"
         ),
         action="store",
-        default=[],
+        default=None,
     )
 
     ### DRYified “env_indicates_developer_build”

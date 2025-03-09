@@ -7,9 +7,15 @@
 namespace P4 {
 
 class HeaderMetricsPass : public Inspector {
- public:
+public:
     HeaderMetricsPass() { setName("HeaderMetricsPass"); }
-    bool preorder(const IR::P4Program *program) override;
+    // Collect metrics for each header
+    bool preorder(const IR::Type_Header *header) override;
+    // Calculate averages at the end of traversal
+    void postorder([[maybe_unused]] const IR::P4Program *program) override;
+private:
+    unsigned totalFieldsNum = 0;
+    unsigned totalFieldsSize = 0;
 };
 
 }  // namespace P4

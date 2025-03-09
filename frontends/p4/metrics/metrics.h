@@ -12,23 +12,23 @@ extern std::unordered_set<std::string> codeMetrics;
 // List of valid code metric values
 extern std::unordered_set<std::string> validMetrics;
 // Function name -> CC value
-extern std::unordered_map<std::string, int> cyclomaticComplexity; 
+extern std::unordered_map<std::string, unsigned> cyclomaticComplexity; 
 
-extern int duplicateCodeInstances;
+extern unsigned duplicateCodeInstances;
 
-extern int unusedCodeInstances;
+extern unsigned unusedCodeInstances;
 
 struct NestingDepth {
     double avgNestingDepth = 0.0;
-    int maxNestingDepth = 0;
+    unsigned maxNestingDepth = 0;
 };
 extern NestingDepth nestingDepth;
 
 struct HalsteadMetrics {
-    int uniqueOperators = 0;
-    int uniqueOperands = 0;
-    int totalOperators = 0;
-    int totalOperands = 0;
+    unsigned uniqueOperators = 0;
+    unsigned uniqueOperands = 0;
+    unsigned totalOperators = 0;
+    unsigned totalOperands = 0;
 
     // Derived metrics
     double vocabulary = 0.0;
@@ -41,9 +41,9 @@ struct HalsteadMetrics {
 extern HalsteadMetrics halsteadMetrics;
  
 struct HeaderMetrics {
-    int numHeaders = 0;
-    std::unordered_map<std::string, int> fieldsNum;     // Header name -> num fields
-    std::unordered_map<std::string, int> fieldSizeSum;  // Header name -> total size
+    unsigned numHeaders = 0;
+    std::unordered_map<std::string, unsigned> fieldsNum;     // Header name -> num fields
+    std::unordered_map<std::string, unsigned> fieldSizeSum;  // Header name -> total size
     double avgFieldsNum = 0.0;
     double avgFieldSize = 0.0;    
 };
@@ -51,8 +51,8 @@ extern HeaderMetrics headerMetrics;
 
 // Structure to be used only by other structures
 struct PacketModification {
-    int numOperations = 0;
-    int totalSize = 0;
+    unsigned numOperations = 0;
+    unsigned totalSize = 0;
 };
 
 // Metrics related to header addition and removal operations 
@@ -74,31 +74,33 @@ struct HeaderModificationMetrics{
 extern HeaderModificationMetrics headerModificationMetrics;
 
 struct MatchActionTableMetrics {
-    int numTables = 0;
-    std::unordered_map<std::string, int> keysNum;      // Table name -> num keys
-    std::unordered_map<std::string, int> actionsNum;   // Table name -> num actions
-    std::unordered_map<std::string, int> keySizeSum;   // Table name -> sum key sizes
-    double avgKeySizePerTable = 0.0;
+    unsigned numTables = 0;
+    std::unordered_map<std::string, unsigned> keysNum;      // Table name -> num keys
+    std::unordered_map<std::string, unsigned> actionsNum;   // Table name -> num actions
+    std::unordered_map<std::string, unsigned> keySizeSum;   // Table name -> sum key sizes
 
-    int totalKeys = 0;
-    int totalActions = 0;
-    double avgActionsPerTable = 0.0;
-    int maxActionsPerTable = 0;
+    unsigned totalKeys = 0;
+    unsigned totalKeySizeSum = 0;
+    double avgKeySize = 0;
     double avgKeysPerTable = 0.0;
-    int maxKeysPerTable = 0;
+    unsigned maxKeysPerTable = 0;
+    
+    unsigned totalActions = 0;
+    double avgActionsPerTable = 0.0;
+    unsigned maxActionsPerTable = 0;
 };
 extern MatchActionTableMetrics matchActionTableMetrics;
 
 struct ParserMetrics {
-    std::unordered_map<std::string, int> StateNum;        // Parser name -> num states
-    std::unordered_map<std::string, int> StateComplexity; // State name -> complexity
-    int totalStates = 0;
+    std::unordered_map<std::string, unsigned> StateNum;        // Parser name -> num states
+    std::unordered_map<std::string, unsigned> StateComplexity; // State name -> complexity
+    unsigned totalStates = 0;
 };
 extern ParserMetrics parserMetrics;
 
-extern int inlinedActionsNum;
+extern unsigned inlinedActionsNum;
 
-extern int externalObjectsNum;
+extern unsigned externalObjectsNum;
 
 class ExportMetricsPass : public Inspector {
  public:
