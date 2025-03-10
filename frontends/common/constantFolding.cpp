@@ -1122,7 +1122,8 @@ class FilterLikelyAnnot : public Transform {
         prune();
         if (annot->name == IR::Annotation::likelyAnnotation) return nullptr;
         if (annot->name == IR::Annotation::unlikelyAnnotation) {
-            warning(ErrorType::WARN_IGNORE, "ignoring %1% on always taken statement", annot);
+            // FIXME -- disable this warning due to worries it will trigger too often
+            // warning(ErrorType::WARN_IGNORE, "ignoring %1% on always taken statement", annot);
             return nullptr;
         }
         return annot;
