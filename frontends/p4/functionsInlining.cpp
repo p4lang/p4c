@@ -276,13 +276,13 @@ const IR::Statement *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
             subst.add(param, argument);
         } else if (param->direction == IR::Direction::In ||
                    param->direction == IR::Direction::InOut) {
-            auto vardecl = new IR::Declaration_Variable(newName, param->annotations, param->type);
+            auto vardecl = new IR::Declaration_Variable(argument->srcInfo, newName,
+                                                        param->annotations, param->type);
             body.push_back(vardecl);
             auto copyin =
                 new IR::AssignmentStatement(new IR::PathExpression(newName), argument->expression);
             body.push_back(copyin);
-            subst.add(param, new IR::Argument(argument->srcInfo, argument->name,
-                                              new IR::PathExpression(newName)));
+            subst.add(param, new IR::Argument(argument->name, new IR::PathExpression(newName)));
             if (param->direction == IR::Direction::InOut)
                 needCopyout.emplace_back(newName, argument);
         } else if (param->direction == IR::Direction::None) {
@@ -291,9 +291,9 @@ const IR::Statement *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
             subst.add(param, argument);
         } else if (param->direction == IR::Direction::Out) {
             // uninitialized variable
-            auto vardecl = new IR::Declaration_Variable(newName, param->annotations, param->type);
-            subst.add(param, new IR::Argument(argument->srcInfo, argument->name,
-                                              new IR::PathExpression(newName)));
+            auto vardecl = new IR::Declaration_Variable(argument->srcInfo, newName,
+                                                        param->annotations, param->type);
+            subst.add(param, new IR::Argument(argument->name, new IR::PathExpression(newName)));
             body.push_back(vardecl);
             needCopyout.emplace_back(newName, argument);
         }
@@ -317,6 +317,24 @@ const IR::Statement *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
         auto right = new IR::PathExpression(newName);
         auto copyout = new IR::AssignmentStatement(argument->expression, right);
         body.push_back(copyout);
+    }
+
+    // copy return value, if any. Return value could be a PathExpression, so if the same
+    // function is inlined several times we can have wrong path references, e.g.
+    // for code: a = f(b) + f(c) we'll end with something like this without this:
+    // {  <body1>;
+    //    retval = <something1>;
+    //    { <body2>
+    //      retval = <something2>
+    //      a = retval + retval;
+    //    }
+    // }
+    if (retExpr) {
+        cstring newName = nameGen->newName("inlinedRetval");
+        body.push_back(new IR::Declaration_Variable(newName, funclone->type->returnType));
+        auto right = new IR::PathExpression(newName);
+        body.push_back(new IR::AssignmentStatement(right, retExpr));
+        retExpr = right;
     }
 
     if (auto assign = statement->to<IR::BaseAssignmentStatement>()) {
@@ -344,7 +362,10 @@ const IR::Statement *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
         // ignore the returned value.
     }
 
-    auto result = new IR::BlockStatement(statement->srcInfo, body);
+    IR::Vector<IR::Annotation> annotations(
+        {new IR::Annotation(statement->srcInfo, IR::Annotation::inlinedFromAnnotation,
+                            {new IR::StringLiteral(callee->name.originalName)})});
+    auto result = new IR::BlockStatement(statement->srcInfo, annotations, body);
     LOG2("Replacing " << dbp(statement) << " with " << dbp(result));
     return result;
 }

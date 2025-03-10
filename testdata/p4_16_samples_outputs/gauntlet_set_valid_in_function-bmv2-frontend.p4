@@ -27,11 +27,13 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") bit<16> tmp;
     @name("ingress.retval") bit<16> retval;
     @name("ingress.tmp_ret") H tmp_ret_0;
+    @name("ingress.inlinedRetval") bit<16> inlinedRetval_0;
     apply {
         tmp_ret_0.setValid();
         tmp_ret_0 = (H){a = 8w0,b = 64w0,c = 16w0};
         retval = tmp_ret_0.c;
-        tmp = retval;
+        inlinedRetval_0 = retval;
+        tmp = inlinedRetval_0;
         m.t = (bit<32>)tmp;
     }
 }
