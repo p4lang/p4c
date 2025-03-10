@@ -2,8 +2,8 @@ struct S<T> {
     tuple<T, T> t;
 }
 
-struct S_0 {
+struct S_bit32 {
     tuple<bit<32>, bit<32>> t;
 }
 
-const S_0 x = (S_0){t = { 32w0, 32w0 }};
+const S_bit32 x = (S_bit32){t = { 32w0, 32w0 }};
