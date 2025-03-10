@@ -1,23 +1,23 @@
 #include <core.p4>
 
-struct Headers {
+@command_line("--Wwarn=branch") struct Headers {
     bit<8> a;
     bit<8> b;
 }
 
 control ingress(inout Headers h) {
-    @hidden action annotationlikely11() {
+    @hidden action annotationlikely13() {
         h.a = 8w0;
         h.b = 8w0;
     }
-    @hidden table tbl_annotationlikely11 {
+    @hidden table tbl_annotationlikely13 {
         actions = {
-            annotationlikely11();
+            annotationlikely13();
         }
-        const default_action = annotationlikely11();
+        const default_action = annotationlikely13();
     }
     apply {
-        tbl_annotationlikely11.apply();
+        tbl_annotationlikely13.apply();
     }
 }
 

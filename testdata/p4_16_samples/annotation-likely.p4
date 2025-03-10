@@ -1,5 +1,7 @@
 #include <core.p4>
 
+@command_line("--Wwarn=branch")
+
 struct Headers {
     bit<8> a;
     bit<8> b;

@@ -1122,7 +1122,8 @@ class FilterLikelyAnnot : public Transform {
         prune();
         if (annot->name == IR::Annotation::likelyAnnotation) return nullptr;
         if (annot->name == IR::Annotation::unlikelyAnnotation) {
-            warning(ErrorType::WARN_IGNORE, "ignoring %1% on always taken statement", annot);
+            // FIXME -- disable this warning due to worries it will trigger too often
+            warning(ErrorType::WARN_BRANCH_HINT, "ignoring %1% on always taken statement", annot);
             return nullptr;
         }
         return annot;
@@ -1134,13 +1135,15 @@ const IR::Node *DoConstantFolding::postorder(IR::IfStatement *ifstmt) {
         if (cond->value) {
             if (auto blk = ifstmt->ifFalse ? ifstmt->ifFalse->to<IR::BlockStatement>() : nullptr) {
                 if (auto annot = blk->getAnnotation(IR::Annotation::likelyAnnotation))
-                    warning(ErrorType::WARN_IGNORE, "ignoring %1% on never taken statement", annot);
+                    warning(ErrorType::WARN_BRANCH_HINT, "ignoring %1% on never taken statement",
+                            annot);
             }
             return ifstmt->ifTrue->apply(FilterLikelyAnnot());
         } else {
             if (auto blk = ifstmt->ifTrue->to<IR::BlockStatement>()) {
                 if (auto annot = blk->getAnnotation(IR::Annotation::likelyAnnotation))
-                    warning(ErrorType::WARN_IGNORE, "ignoring %1% on never taken statement", annot);
+                    warning(ErrorType::WARN_BRANCH_HINT, "ignoring %1% on never taken statement",
+                            annot);
             }
             if (ifstmt->ifFalse == nullptr) {
                 return new IR::EmptyStatement(ifstmt->srcInfo);

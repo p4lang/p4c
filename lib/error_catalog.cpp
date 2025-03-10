@@ -18,6 +18,7 @@ limitations under the License.
 
 #include <map>
 
+#include "error_reporter.h"
 #include "lib/cstring.h"
 
 namespace P4 {
@@ -71,6 +72,7 @@ const int ErrorType::WARN_ENTRIES_OUT_OF_ORDER = 1022;
 const int ErrorType::WARN_MULTI_HDR_EXTRACT = 1023;
 const int ErrorType::WARN_EXPRESSION = 1024;
 const int ErrorType::WARN_DUPLICATE = 1025;
+const int ErrorType::WARN_BRANCH_HINT = 1026;
 
 // ------ Info messages -----------
 const int ErrorType::INFO_INFERRED = WARN_MAX + 1;
@@ -124,9 +126,16 @@ std::map<int, cstring> ErrorCatalog::errorCatalog = {
     {ErrorType::WARN_MULTI_HDR_EXTRACT, "multi_header_extract"_cs},
     {ErrorType::WARN_EXPRESSION, "expr"_cs},
     {ErrorType::WARN_DUPLICATE, "duplicate"_cs},
+    {ErrorType::WARN_BRANCH_HINT, "branch"_cs},
 
     // Info messages
     {ErrorType::INFO_INFERRED, "inferred"_cs},
     {ErrorType::INFO_PROGRESS, "progress"_cs}};
+
+void ErrorCatalog::initReporter(ErrorReporter &reporter) {
+    // by default, ignore warnings about branch hints -- user can turn them
+    // on with --Wwarn=branch
+    reporter.setDiagnosticAction("branch"_cs, DiagnosticAction::Ignore);
+}
 
 }  // namespace P4
