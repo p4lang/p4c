@@ -21,6 +21,7 @@ jobs:
       ENABLE_GTESTS: ${{ matrix.gtest }}
       CMAKE_UNITY_BUILD: ${{ matrix.unity }}
       BUILD_GENERATOR: Ninja
+      INSTALL_STF_P4TC_DEPENDENCIES: ON
     steps:
       - uses: actions/checkout@v4
         with:

@@ -88,5 +88,7 @@ make -j$((`nproc`+1))
 make -j$((`nproc`+1)) install-strip
 popd
 
+git clone https://github.com/libbpf/libbpf/ -b v1.5.0 ${P4C_DIR}/backends/tc/runtime/libbpf
+${P4C_DIR}/backends/tc/runtime/build-libbpf
 
 rm -rf "${tmp_dir}"
