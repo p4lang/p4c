@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <string>
 #include "../ir/ir.h"
+#include "lib/ordered_map.h"
 
 namespace P4 {
 
@@ -12,7 +13,7 @@ extern std::unordered_set<std::string> codeMetrics;
 // List of valid code metric values
 extern std::unordered_set<std::string> validMetrics;
 // Function name -> CC value
-extern std::unordered_map<std::string, unsigned> cyclomaticComplexity; 
+extern P4::ordered_map<std::string, unsigned> cyclomaticComplexity; 
 
 extern unsigned duplicateCodeInstances;
 
@@ -42,8 +43,8 @@ extern HalsteadMetrics halsteadMetrics;
  
 struct HeaderMetrics {
     unsigned numHeaders = 0;
-    std::unordered_map<std::string, unsigned> fieldsNum;     // Header name -> num fields
-    std::unordered_map<std::string, unsigned> fieldSizeSum;  // Header name -> total size
+    P4::ordered_map<std::string, unsigned> fieldsNum;     // Header name -> num fields
+    P4::ordered_map<std::string, unsigned> fieldSizeSum;  // Header name -> total size
     double avgFieldsNum = 0.0;
     double avgFieldSize = 0.0;    
 };
@@ -57,7 +58,7 @@ struct PacketModification {
 
 // Metrics related to header addition and removal operations 
 struct HeaderManipulationMetrics {
-    std::unordered_map<std::string, PacketModification> perPacketManipulations;  // Packet type -> manipulations
+    P4::ordered_map<std::string, PacketModification> perPacketManipulations;  // Packet type -> manipulations
     PacketModification totalManipulations;
     PacketModification maxManipulations;
     PacketModification minManipulations;
@@ -66,7 +67,7 @@ extern HeaderManipulationMetrics headerManipulationMetrics;
 
 // Metrics related to editing operations performed on header fields
 struct HeaderModificationMetrics{
-    std::unordered_map<std::string, PacketModification> perPacketModifications;  // Packet type -> modifications
+    P4::ordered_map<std::string, PacketModification> perPacketModifications;  // Packet type -> modifications
     PacketModification totalModifications;
     PacketModification maxModifications;
     PacketModification minModifications;
@@ -75,9 +76,9 @@ extern HeaderModificationMetrics headerModificationMetrics;
 
 struct MatchActionTableMetrics {
     unsigned numTables = 0;
-    std::unordered_map<std::string, unsigned> keysNum;      // Table name -> num keys
-    std::unordered_map<std::string, unsigned> actionsNum;   // Table name -> num actions
-    std::unordered_map<std::string, unsigned> keySizeSum;   // Table name -> sum key sizes
+    P4::ordered_map<std::string, unsigned> keysNum;      // Table name -> num keys
+    P4::ordered_map<std::string, unsigned> actionsNum;   // Table name -> num actions
+    P4::ordered_map<std::string, unsigned> keySizeSum;   // Table name -> sum key sizes
 
     unsigned totalKeys = 0;
     unsigned totalKeySizeSum = 0;
@@ -92,8 +93,8 @@ struct MatchActionTableMetrics {
 extern MatchActionTableMetrics matchActionTableMetrics;
 
 struct ParserMetrics {
-    std::unordered_map<std::string, unsigned> StateNum;        // Parser name -> num states
-    std::unordered_map<std::string, unsigned> StateComplexity; // State name -> complexity
+    P4::ordered_map<std::string, unsigned> StateNum;        // Parser name -> num states
+    P4::ordered_map<std::string, unsigned> StateComplexity; // State name -> complexity
     unsigned totalStates = 0;
 };
 extern ParserMetrics parserMetrics;

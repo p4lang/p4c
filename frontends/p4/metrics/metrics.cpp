@@ -23,7 +23,7 @@ std::unordered_set<std::string> validMetrics = {
     "extern"
 };
 
-std::unordered_map<std::string, unsigned> cyclomaticComplexity;
+P4::ordered_map<std::string, unsigned> cyclomaticComplexity; 
 unsigned duplicateCodeInstances = 0;
 unsigned unusedCodeInstances = 0;
 NestingDepth nestingDepth;
@@ -84,7 +84,6 @@ bool ExportMetricsPass::preorder(const IR::P4Program *program) {
             file << "  Total Headers: " << headerMetrics.numHeaders << "\n";
             file << "  Avg Fields Per Header: " << headerMetrics.avgFieldsNum << "\n";
             file << "  Avg Field Size: " << headerMetrics.avgFieldSize << "\n";
-            file << "\n";
 
             auto iterator = headerMetrics.fieldsNum.begin();
             while (iterator != headerMetrics.fieldsNum.end()){
