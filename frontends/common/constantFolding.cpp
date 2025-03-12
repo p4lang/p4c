@@ -1108,15 +1108,47 @@ const IR::Node *DoConstantFolding::postorder(IR::SelectExpression *expression) {
     return result;
 }
 
+class FilterLikelyAnnot : public Transform {
+    IR::Statement *preorder(IR::Statement *stmt) {
+        prune();
+        return stmt;
+    }
+    IR::BlockStatement *preorder(IR::BlockStatement *stmt) {
+        prune();
+        visit(stmt->annotations, "annotations");
+        return stmt;
+    }
+    IR::Annotation *preorder(IR::Annotation *annot) {
+        prune();
+        if (annot->name == IR::Annotation::likelyAnnotation) return nullptr;
+        if (annot->name == IR::Annotation::unlikelyAnnotation) {
+            // FIXME -- disable this warning due to worries it will trigger too often
+            warning(ErrorType::WARN_BRANCH_HINT, "ignoring %1% on always taken statement", annot);
+            return nullptr;
+        }
+        return annot;
+    }
+};
+
 const IR::Node *DoConstantFolding::postorder(IR::IfStatement *ifstmt) {
     if (auto cond = ifstmt->condition->to<IR::BoolLiteral>()) {
         if (cond->value) {
-            return ifstmt->ifTrue;
+            if (auto blk = ifstmt->ifFalse ? ifstmt->ifFalse->to<IR::BlockStatement>() : nullptr) {
+                if (auto annot = blk->getAnnotation(IR::Annotation::likelyAnnotation))
+                    warning(ErrorType::WARN_BRANCH_HINT, "ignoring %1% on never taken statement",
+                            annot);
+            }
+            return ifstmt->ifTrue->apply(FilterLikelyAnnot());
         } else {
+            if (auto blk = ifstmt->ifTrue->to<IR::BlockStatement>()) {
+                if (auto annot = blk->getAnnotation(IR::Annotation::likelyAnnotation))
+                    warning(ErrorType::WARN_BRANCH_HINT, "ignoring %1% on never taken statement",
+                            annot);
+            }
             if (ifstmt->ifFalse == nullptr) {
                 return new IR::EmptyStatement(ifstmt->srcInfo);
             } else {
-                return ifstmt->ifFalse;
+                return ifstmt->ifFalse->apply(FilterLikelyAnnot());
             }
         }
     }

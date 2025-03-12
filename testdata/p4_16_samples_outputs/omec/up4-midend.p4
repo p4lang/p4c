@@ -431,27 +431,35 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
         const default_action = do_drop_1();
     }
     @name("PreQosPipe.uplink_term_fwd") action uplink_term_fwd(@name("ctr_idx") bit<32> ctr_idx_0, @name("tc") bit<2> tc_2, @name("app_meter_idx") bit<32> app_meter_idx) {
-        local_meta.ctr_idx = ctr_idx_0;
-        local_meta.terminations_hit = true;
+        @hidden @inlinedFrom("common_term") {
+            local_meta.ctr_idx = ctr_idx_0;
+            local_meta.terminations_hit = true;
+        }
         local_meta.app_meter_idx_internal = app_meter_idx;
         local_meta.tc = tc_2;
     }
     @name("PreQosPipe.uplink_term_drop") action uplink_term_drop(@name("ctr_idx") bit<32> ctr_idx_5) {
-        local_meta.ctr_idx = ctr_idx_5;
-        local_meta.terminations_hit = true;
+        @hidden @inlinedFrom("common_term") {
+            local_meta.ctr_idx = ctr_idx_5;
+            local_meta.terminations_hit = true;
+        }
         local_meta.needs_dropping = true;
     }
     @name("PreQosPipe.downlink_term_fwd") action downlink_term_fwd(@name("ctr_idx") bit<32> ctr_idx_6, @name("teid") bit<32> teid_1, @name("qfi") bit<6> qfi_1, @name("tc") bit<2> tc_3, @name("app_meter_idx") bit<32> app_meter_idx_2) {
-        local_meta.ctr_idx = ctr_idx_6;
-        local_meta.terminations_hit = true;
+        @hidden @inlinedFrom("common_term") {
+            local_meta.ctr_idx = ctr_idx_6;
+            local_meta.terminations_hit = true;
+        }
         local_meta.tunnel_out_teid = teid_1;
         local_meta.tunnel_out_qfi = qfi_1;
         local_meta.app_meter_idx_internal = app_meter_idx_2;
         local_meta.tc = tc_3;
     }
     @name("PreQosPipe.downlink_term_drop") action downlink_term_drop(@name("ctr_idx") bit<32> ctr_idx_7) {
-        local_meta.ctr_idx = ctr_idx_7;
-        local_meta.terminations_hit = true;
+        @hidden @inlinedFrom("common_term") {
+            local_meta.ctr_idx = ctr_idx_7;
+            local_meta.terminations_hit = true;
+        }
         local_meta.needs_dropping = true;
     }
     @name("PreQosPipe.terminations_uplink") table terminations_uplink_0 {
@@ -510,78 +518,86 @@ control PreQosPipe(inout parsed_headers_t hdr, inout local_metadata_t local_meta
         default_action = NoAction_2();
     }
     @name("PreQosPipe.do_gtpu_tunnel") action do_gtpu_tunnel() {
-        hdr.inner_udp = hdr.udp;
-        hdr.udp.setInvalid();
-        hdr.inner_tcp = hdr.tcp;
-        hdr.tcp.setInvalid();
-        hdr.inner_icmp = hdr.icmp;
-        hdr.icmp.setInvalid();
-        hdr.udp.setValid();
-        hdr.udp.sport = local_meta.tunnel_out_udp_sport;
-        hdr.udp.dport = 16w2152;
-        hdr.udp.len = hdr.ipv4.total_len + 16w16;
-        hdr.udp.checksum = 16w0;
-        hdr.inner_ipv4 = hdr.ipv4;
-        hdr.ipv4.setValid();
-        hdr.ipv4.version = 4w4;
-        hdr.ipv4.ihl = 4w5;
-        hdr.ipv4.dscp = 6w0;
-        hdr.ipv4.ecn = 2w0;
-        hdr.ipv4.total_len = hdr.ipv4.total_len + 16w36;
-        hdr.ipv4.identification = 16w0x1513;
-        hdr.ipv4.flags = 3w0;
-        hdr.ipv4.frag_offset = 13w0;
-        hdr.ipv4.ttl = 8w64;
-        hdr.ipv4.proto = 8w17;
-        hdr.ipv4.src_addr = local_meta.tunnel_out_src_ipv4_addr;
-        hdr.ipv4.dst_addr = local_meta.tunnel_out_dst_ipv4_addr;
-        hdr.ipv4.checksum = 16w0;
-        hdr.gtpu.setValid();
-        hdr.gtpu.version = 3w0x1;
-        hdr.gtpu.pt = 1w0x1;
-        hdr.gtpu.spare = 1w0;
-        hdr.gtpu.ex_flag = 1w0;
-        hdr.gtpu.seq_flag = 1w0;
-        hdr.gtpu.npdu_flag = 1w0;
-        hdr.gtpu.msgtype = 8w255;
-        hdr.gtpu.msglen = hdr.inner_ipv4.total_len;
-        hdr.gtpu.teid = local_meta.tunnel_out_teid;
+        @hidden @inlinedFrom("_udp_encap") {
+            hdr.inner_udp = hdr.udp;
+            hdr.udp.setInvalid();
+            hdr.inner_tcp = hdr.tcp;
+            hdr.tcp.setInvalid();
+            hdr.inner_icmp = hdr.icmp;
+            hdr.icmp.setInvalid();
+            hdr.udp.setValid();
+            hdr.udp.sport = local_meta.tunnel_out_udp_sport;
+            hdr.udp.dport = 16w2152;
+            hdr.udp.len = hdr.ipv4.total_len + 16w16;
+            hdr.udp.checksum = 16w0;
+            hdr.inner_ipv4 = hdr.ipv4;
+            hdr.ipv4.setValid();
+            hdr.ipv4.version = 4w4;
+            hdr.ipv4.ihl = 4w5;
+            hdr.ipv4.dscp = 6w0;
+            hdr.ipv4.ecn = 2w0;
+            hdr.ipv4.total_len = hdr.ipv4.total_len + 16w36;
+            hdr.ipv4.identification = 16w0x1513;
+            hdr.ipv4.flags = 3w0;
+            hdr.ipv4.frag_offset = 13w0;
+            hdr.ipv4.ttl = 8w64;
+            hdr.ipv4.proto = 8w17;
+            hdr.ipv4.src_addr = local_meta.tunnel_out_src_ipv4_addr;
+            hdr.ipv4.dst_addr = local_meta.tunnel_out_dst_ipv4_addr;
+            hdr.ipv4.checksum = 16w0;
+        }
+        @hidden @inlinedFrom("_gtpu_encap") {
+            hdr.gtpu.setValid();
+            hdr.gtpu.version = 3w0x1;
+            hdr.gtpu.pt = 1w0x1;
+            hdr.gtpu.spare = 1w0;
+            hdr.gtpu.ex_flag = 1w0;
+            hdr.gtpu.seq_flag = 1w0;
+            hdr.gtpu.npdu_flag = 1w0;
+            hdr.gtpu.msgtype = 8w255;
+            hdr.gtpu.msglen = hdr.inner_ipv4.total_len;
+            hdr.gtpu.teid = local_meta.tunnel_out_teid;
+        }
     }
     @name("PreQosPipe.do_gtpu_tunnel_with_psc") action do_gtpu_tunnel_with_psc() {
-        hdr.inner_udp = hdr.udp;
-        hdr.udp.setInvalid();
-        hdr.inner_tcp = hdr.tcp;
-        hdr.tcp.setInvalid();
-        hdr.inner_icmp = hdr.icmp;
-        hdr.icmp.setInvalid();
-        hdr.udp.setValid();
-        hdr.udp.sport = local_meta.tunnel_out_udp_sport;
-        hdr.udp.dport = 16w2152;
-        hdr.udp.len = hdr.ipv4.total_len + 16w24;
-        hdr.udp.checksum = 16w0;
-        hdr.inner_ipv4 = hdr.ipv4;
-        hdr.ipv4.setValid();
-        hdr.ipv4.version = 4w4;
-        hdr.ipv4.ihl = 4w5;
-        hdr.ipv4.dscp = 6w0;
-        hdr.ipv4.ecn = 2w0;
-        hdr.ipv4.total_len = hdr.ipv4.total_len + 16w44;
-        hdr.ipv4.identification = 16w0x1513;
-        hdr.ipv4.flags = 3w0;
-        hdr.ipv4.frag_offset = 13w0;
-        hdr.ipv4.ttl = 8w64;
-        hdr.ipv4.proto = 8w17;
-        hdr.ipv4.src_addr = local_meta.tunnel_out_src_ipv4_addr;
-        hdr.ipv4.dst_addr = local_meta.tunnel_out_dst_ipv4_addr;
-        hdr.ipv4.checksum = 16w0;
-        hdr.gtpu.setValid();
-        hdr.gtpu.version = 3w0x1;
-        hdr.gtpu.pt = 1w0x1;
-        hdr.gtpu.spare = 1w0;
-        hdr.gtpu.seq_flag = 1w0;
-        hdr.gtpu.npdu_flag = 1w0;
-        hdr.gtpu.msgtype = 8w255;
-        hdr.gtpu.teid = local_meta.tunnel_out_teid;
+        @hidden @inlinedFrom("_udp_encap") {
+            hdr.inner_udp = hdr.udp;
+            hdr.udp.setInvalid();
+            hdr.inner_tcp = hdr.tcp;
+            hdr.tcp.setInvalid();
+            hdr.inner_icmp = hdr.icmp;
+            hdr.icmp.setInvalid();
+            hdr.udp.setValid();
+            hdr.udp.sport = local_meta.tunnel_out_udp_sport;
+            hdr.udp.dport = 16w2152;
+            hdr.udp.len = hdr.ipv4.total_len + 16w24;
+            hdr.udp.checksum = 16w0;
+            hdr.inner_ipv4 = hdr.ipv4;
+            hdr.ipv4.setValid();
+            hdr.ipv4.version = 4w4;
+            hdr.ipv4.ihl = 4w5;
+            hdr.ipv4.dscp = 6w0;
+            hdr.ipv4.ecn = 2w0;
+            hdr.ipv4.total_len = hdr.ipv4.total_len + 16w44;
+            hdr.ipv4.identification = 16w0x1513;
+            hdr.ipv4.flags = 3w0;
+            hdr.ipv4.frag_offset = 13w0;
+            hdr.ipv4.ttl = 8w64;
+            hdr.ipv4.proto = 8w17;
+            hdr.ipv4.src_addr = local_meta.tunnel_out_src_ipv4_addr;
+            hdr.ipv4.dst_addr = local_meta.tunnel_out_dst_ipv4_addr;
+            hdr.ipv4.checksum = 16w0;
+        }
+        @hidden @inlinedFrom("_gtpu_encap") {
+            hdr.gtpu.setValid();
+            hdr.gtpu.version = 3w0x1;
+            hdr.gtpu.pt = 1w0x1;
+            hdr.gtpu.spare = 1w0;
+            hdr.gtpu.seq_flag = 1w0;
+            hdr.gtpu.npdu_flag = 1w0;
+            hdr.gtpu.msgtype = 8w255;
+            hdr.gtpu.teid = local_meta.tunnel_out_teid;
+        }
         hdr.gtpu.msglen = hdr.inner_ipv4.total_len + 16w8;
         hdr.gtpu.ex_flag = 1w1;
         hdr.gtpu_options.setValid();
