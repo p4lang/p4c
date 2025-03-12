@@ -1,5 +1,7 @@
 var NAVTREEINDEX29 =
 {
+"class_parser_header_sequences.html#a59b8d724294280e08f9a1fb7ae5cd9ef":[13,0,456,2],
+"class_parser_header_sequences.html#a917ba078543aeb3352e87b2d3a3122be":[13,0,456,1],
 "class_parser_header_sequences.html#adc96ea99ba21ae9a1f53c090097fd2c0":[13,0,456,6],
 "class_parser_header_sequences.html#af22083070841298d18420997487bef13":[13,0,456,3],
 "class_parser_header_sequences.html#af3b141d025afe740662fd7692bf4dfce":[13,0,456,5],
@@ -247,7 +249,5 @@ var NAVTREEINDEX29 =
 "class_tofino_device.html#a209d8f1d037a573c817bd4d2f94f6a22":[13,0,595,1],
 "class_tofino_i_mem_spec.html":[13,0,596],
 "class_tofino_i_x_bar_spec.html":[13,0,597],
-"class_tofino_i_x_bar_spec.html#a9793efaeb0ed3456070a098791f26d91":[13,0,597,0],
-"class_tofino_mau_power_spec.html":[13,0,598],
-"class_tofino_mau_power_spec.html#a0eefe9056dceb24e76300017e4279fd1":[13,0,598,4]
+"class_tofino_i_x_bar_spec.html#a9793efaeb0ed3456070a098791f26d91":[13,0,597,0]
 };

@@ -1718,6 +1718,7 @@ var annotated_dup =
       [ "ExternInstantiation", "class_p4_1_1_extern_instantiation.html", null ],
       [ "ExternMethod", "class_p4_1_1_extern_method.html", "class_p4_1_1_extern_method" ],
       [ "FillEnumMap", "class_p4_1_1_fill_enum_map.html", null ],
+      [ "FilterLikelyAnnot", "class_p4_1_1_filter_likely_annot.html", null ],
       [ "FindActionParameters", "class_p4_1_1_find_action_parameters.html", null ],
       [ "FindFunctionSpecializations", "class_p4_1_1_find_function_specializations.html", null ],
       [ "FindGlobalActionUses", "class_p4_1_1_find_global_action_uses.html", null ],

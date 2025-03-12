@@ -3231,6 +3231,7 @@ var hierarchy =
         [ "P4::EliminateSubparserCalls", "class_p4_1_1_eliminate_subparser_calls.html", null ],
         [ "P4::EntryPriorities", "class_p4_1_1_entry_priorities.html", null ],
         [ "P4::FillEnumMap", "class_p4_1_1_fill_enum_map.html", null ],
+        [ "P4::FilterLikelyAnnot", "class_p4_1_1_filter_likely_annot.html", null ],
         [ "P4::HSIndexContretizer", "class_p4_1_1_h_s_index_contretizer.html", null ],
         [ "P4::HSIndexTransform", "class_p4_1_1_h_s_index_transform.html", null ],
         [ "P4::HandleNoMatch", "class_p4_1_1_handle_no_match.html", null ],
