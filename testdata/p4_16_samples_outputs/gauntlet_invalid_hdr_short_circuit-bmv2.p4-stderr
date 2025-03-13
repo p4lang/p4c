@@ -7,3 +7,6 @@
 [--Wwarn=uninitialized_use] warning: dummy_0.a may be uninitialized
 [--Wwarn=uninitialized_use] warning: dummy_0.b may be uninitialized
 [--Wwarn=uninitialized_use] warning: dummy_0.c may be uninitialized
+[--Wwarn=uninitialized_use] warning: dummy_0.a may be uninitialized
+[--Wwarn=uninitialized_use] warning: dummy_0.b may be uninitialized
+[--Wwarn=uninitialized_use] warning: dummy_0.c may be uninitialized

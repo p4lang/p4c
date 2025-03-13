@@ -39,6 +39,8 @@ const cstring IR::Annotation::fieldListAnnotation = "field_list"_cs;
 const cstring IR::Annotation::debugLoggingAnnotation = "__debug"_cs;
 const cstring IR::Annotation::disableOptimizationAnnotation = "disable_optimization"_cs;
 const cstring IR::Annotation::inlinedFromAnnotation = "inlinedFrom"_cs;
+const cstring IR::Annotation::likelyAnnotation = "likely"_cs;
+const cstring IR::Annotation::unlikelyAnnotation = "unlikely"_cs;
 
 namespace Annotations {
 void addIfNew(Vector<Annotation> &annotations, cstring name, const Expression *expr,

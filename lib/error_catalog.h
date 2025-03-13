@@ -28,6 +28,8 @@ namespace P4 {
 
 using MessageType = ErrorMessage::MessageType;
 
+class ErrorReporter;
+
 /// enumerate supported errors
 /// It is a class and not an enum class because in C++11 you can't extend an enum class
 class ErrorType {
@@ -85,6 +87,7 @@ class ErrorType {
     static const int WARN_MULTI_HDR_EXTRACT;        // same header may be extracted more than once
     static const int WARN_EXPRESSION;               // expression related warnings
     static const int WARN_DUPLICATE;                // duplicate objects
+    static const int WARN_BRANCH_HINT;              // branch frequency/likely hints
     // Backends should extend this class with additional warnings in the range 1500-2141.
     static const int WARN_MIN_BACKEND = 1500;  // first allowed backend warning code
     static const int WARN_MAX = 2141;          // last allowed warning code
@@ -154,6 +157,8 @@ class ErrorCatalog {
 
         return error;
     }
+
+    void initReporter(ErrorReporter &reporter);
 
  private:
     ErrorCatalog() {}
