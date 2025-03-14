@@ -175,16 +175,6 @@ if (ENABLE_DOXYGEN)
   endif()
 endif()
 
-# Generate the LICENSE file. Do this before generating the build system so
-# that CPack detects that the file exists.
-execute_process(COMMAND "${BFN_P4C_SOURCE_DIR}/scripts/generate-license.sh")
-
-set (CPACK_RESOURCE_FILE_LICENSE "${BFN_P4C_SOURCE_DIR}/LICENSE")
-set (THIRD_PARTY_LICENSES "${BFN_P4C_SOURCE_DIR}/LICENSES.txt")
-install (FILES ${CPACK_RESOURCE_FILE_LICENSE}
-  ${THIRD_PARTY_LICENSES}
-  DESTINATION share/p4c)
-
 set (CPACK_GENERATOR "TBZ2")
 set (CPACK_PACKAGE_NAME "p4c")
 set (CPACK_PACKAGE_VERSION_MAJOR ${BFN_P4C_VERSION_MAJOR})
@@ -238,5 +228,4 @@ foreach(src IN LISTS BF_P4C_IR_SRCS)
   set(QUAL_BF_P4C_IR_SRCS ${QUAL_BF_P4C_IR_SRCS} ${CMAKE_CURRENT_SOURCE_DIR}/${src})
 endforeach()
 set(EXTENSION_IR_SOURCES ${EXTENSION_IR_SOURCES} ${QUAL_BF_P4C_IR_SRCS} PARENT_SCOPE)
-
 add_subdirectory(bf-p4c)
