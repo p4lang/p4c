@@ -162,7 +162,7 @@ void ErrorMode::write_regs(REGS &regs, const Stage *stage, gress_t gress) {
                         break;
                 }
             default:
-                BUG();
+                BUG("unexpected stage_dep: %d", stage->stage_dep[gress]);
         }
     }
 
