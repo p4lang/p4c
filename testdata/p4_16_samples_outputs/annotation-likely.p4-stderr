@@ -1,0 +1,6 @@
+annotation-likely.p4(15): [--Wwarn=branch] warning: ignoring @unlikely on always taken statement
+        if (true) @unlikely {
+                  ^
+annotation-likely.p4(18): [--Wwarn=branch] warning: ignoring @likely on never taken statement
+        if (h.a != h.a) @likely {
+                        ^

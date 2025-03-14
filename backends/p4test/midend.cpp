@@ -33,6 +33,7 @@ limitations under the License.
 #include "midend/complexComparison.h"
 #include "midend/copyStructures.h"
 #include "midend/def_use.h"
+#include "midend/eliminateActionRun.h"
 #include "midend/eliminateInvalidHeaders.h"
 #include "midend/eliminateNewtype.h"
 #include "midend/eliminateSerEnums.h"
@@ -76,7 +77,7 @@ class SkipControls : public P4::ActionSynthesisPolicy {
     }
 };
 
-MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
+MidEnd::MidEnd(P4TestOptions &options, std::ostream *outStream) {
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
     refMap.setIsV1(isv1);
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
@@ -125,7 +126,8 @@ MidEnd::MidEnd(CompilerOptions &options, std::ostream *outStream) {
          new P4::SimplifyControlFlow(&typeMap, true),
          new P4::CompileTimeOperations(),
          new P4::TableHit(&typeMap),
-         new P4::EliminateSwitch(&typeMap),
+         !options.preferSwitch ? new P4::EliminateSwitch(&typeMap) : nullptr,
+         options.preferSwitch ? new P4::ElimActionRun() : nullptr,
          new P4::ResolveReferences(&refMap),
          new P4::TypeChecking(&refMap, &typeMap, true),  // update types before ComputeDefUse
          new PassRepeated({
