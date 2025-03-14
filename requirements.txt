@@ -3,7 +3,7 @@
 pyroute2==0.7.3
 ply==3.11
 # Version 0.10.0
-ptf @ git+https://github.com/jafingerhut/ptf@add-bf-pktpy-source
+ptf @ git+https://github.com/p4lang/ptf@e29ef7ec0bd34d4ceef88016383e53238ab5383c
 # FIXME: We should figure out a way to synchronize P4Runtime versions across CMake and Python.
 # This is the same commit hash as defined in the top-level CMakelists.txt
 p4runtime @ git+https://github.com/p4lang/p4runtime@ec4eb5ef70dbcbcbf2f8357a4b2b8c2f218845a5#subdirectory=py
