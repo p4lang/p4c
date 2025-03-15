@@ -128,7 +128,7 @@ const IR::Node *DoRemoveExits::preorder(IR::P4Control *control) {
 }
 
 const IR::Node *DoRemoveExits::preorder(IR::BlockStatement *statement) {
-    auto block = new IR::BlockStatement;
+    auto block = new IR::BlockStatement(statement->srcInfo, statement->annotations);
     auto currentBlock = block;
     TernaryBool ret = TernaryBool::No;
     for (auto s : statement->components) {
@@ -236,7 +236,7 @@ const IR::Node *DoRemoveExits::preorder(IR::SwitchStatement *statement) {
     return statement;
 }
 
-const IR::Node *DoRemoveExits::preorder(IR::AssignmentStatement *statement) {
+const IR::Node *DoRemoveExits::preorder(IR::BaseAssignmentStatement *statement) {
     CallsExit ce(this, typeMap, &callsExit);
     ce.setCalledBy(this);
     (void)statement->apply(ce, getChildContext());

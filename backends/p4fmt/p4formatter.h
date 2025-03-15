@@ -248,6 +248,7 @@ class P4Formatter : public Inspector, ::P4::ResolutionContext {
 
     // statements
     bool preorder(const IR::AssignmentStatement *s) override;
+    bool preorder(const IR::OpAssignmentStatement *s) override;
     bool preorder(const IR::BlockStatement *s) override;
     bool preorder(const IR::MethodCallStatement *s) override;
     bool preorder(const IR::EmptyStatement *s) override;

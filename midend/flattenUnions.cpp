@@ -169,7 +169,7 @@ const IR::Node *HandleValidityHeaderUnion::postorder(IR::MethodCallStatement *mc
 
 const IR::Node *HandleValidityHeaderUnion::postorder(IR::P4Action *action) {
     if (toInsert.empty()) return action;
-    auto body = new IR::BlockStatement(action->body->srcInfo);
+    auto body = new IR::BlockStatement(action->body->srcInfo, action->body->annotations);
     for (auto a : toInsert) body->push_back(a);
     for (auto s : action->body->components) body->push_back(s);
     action->body = body;
@@ -380,7 +380,7 @@ const IR::Node *DoFlattenHeaderUnion::postorder(IR::P4Action *action) {
             }
         }
     }
-    auto body = new IR::BlockStatement(action->body->srcInfo);
+    auto body = new IR::BlockStatement(action->body->srcInfo, action->body->annotations);
     for (auto a : actiondecls) body->push_back(a);
     action->body = body;
     return action;

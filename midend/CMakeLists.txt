@@ -21,6 +21,7 @@ set (MIDEND_SRCS
   copyStructures.cpp
   coverage.cpp
   def_use.cpp
+  eliminateActionRun.cpp
   eliminateInvalidHeaders.cpp
   eliminateNewtype.cpp
   eliminateSerEnums.cpp
@@ -74,6 +75,7 @@ set (MIDEND_HDRS
   copyStructures.h
   coverage.h
   def_use.h
+  eliminateActionRun.h
   eliminateInvalidHeaders.h
   eliminateNewtype.h
   eliminateSerEnums.h

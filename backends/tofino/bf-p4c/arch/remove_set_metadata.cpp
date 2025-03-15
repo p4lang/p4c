@@ -37,7 +37,8 @@ bool isEgressIntrinsicHeader(const IR::Type *type) {
     return false;
 }
 
-const IR::AssignmentStatement *RemoveSetMetadata::preorder(IR::AssignmentStatement *assignment) {
+const IR::BaseAssignmentStatement *RemoveSetMetadata::preorder(
+    IR::BaseAssignmentStatement *assignment) {
     prune();
 
     auto *parser = findContext<IR::BFN::TnaParser>();

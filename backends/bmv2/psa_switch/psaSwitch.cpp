@@ -100,7 +100,7 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
                                   new SkipControls(&structure.non_pipeline_controls)),
         new P4::MoveActionsToTables(refMap, typeMap),
         new P4::TypeChecking(refMap, typeMap),
-        new P4::SimplifyControlFlow(typeMap),
+        new P4::SimplifyControlFlow(typeMap, true),
         new LowerExpressions(typeMap),
         new PassRepeated({
             new P4::ConstantFolding(typeMap),
@@ -109,7 +109,7 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::TypeChecking(refMap, typeMap),
         new P4::RemoveComplexExpressions(typeMap,
                                          new ProcessControls(&structure.pipeline_controls)),
-        new P4::SimplifyControlFlow(typeMap),
+        new P4::SimplifyControlFlow(typeMap, true),
         new P4::RemoveAllUnusedDeclarations(P4::RemoveUnusedPolicy()),
         // Converts the DAG into a TREE (at least for expressions)
         // This is important later for conversion to JSON.
