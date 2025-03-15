@@ -408,9 +408,10 @@ void TernaryMatchTable::tcam_table_map(REGS &regs, int row, int col) {
 static void set_tcam_mode_logical_table(ubits<4> &reg, int tcam_id, int logical_id) {
     reg = logical_id;
 }
-static void set_tcam_mode_logical_table(ubits<8> &reg, int tcam_id, int logical_id) {
-    reg |= 1U << tcam_id;
-}
+// TODO: Unused?
+// static void set_tcam_mode_logical_table(ubits<8> &reg, int tcam_id, int logical_id) {
+//     reg |= 1U << tcam_id;
+// }
 
 template <class REGS>
 void TernaryMatchTable::write_regs_vt(REGS &regs) {
