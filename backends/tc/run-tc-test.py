@@ -15,8 +15,10 @@
 # and limitations under the License.
 # *******************************************************************************/
 
+import argparse
 import difflib
 import os
+import re
 import shutil
 import stat
 import sys
@@ -25,225 +27,192 @@ from pathlib import Path
 from subprocess import Popen, call
 from threading import Thread
 
-SUCCESS = 0
-FAILURE = 1
+from test_infra import TCInfra
+
+FILE_DIR = Path(__file__).resolve().parent
+sys.path.append(str(FILE_DIR.joinpath("../../tools")))
+import testutils
+
+PARSER = argparse.ArgumentParser()
+PARSER.add_argument("compiler_src_dir", help="the root directory of the compiler source tree")
+PARSER.add_argument("p4filename", help="the p4 file to process")
+PARSER.add_argument(
+    "-c",
+    "--compiler",
+    dest="compiler",
+    default="p4c-pna-p4tc",
+    help="Specify the path to the compiler binary, default is p4c-pna-p4tc",
+)
+PARSER.add_argument(
+    "-cb",
+    "--clang-bin",
+    dest="clang",
+    action='store_true',
+    default="clang-15",
+    help="Specify clang binary, default is clang-15",
+)
+PARSER.add_argument(
+    "-tf",
+    "--testfile",
+    dest="testfile",
+    help=(
+        "Provide the path for the stf file for this test. "
+        "If no path is provided, the script will search for an"
+        " stf file in the same folder."
+    ),
+)
+PARSER.add_argument(
+    "-v",
+    "--verbose",
+    dest="verbose",
+    action='store_true',
+    help=("Verbose output"),
+)
+PARSER.add_argument(
+    "-b",
+    dest="cleanupTmp",
+    action='store_true',
+    help=("Do not remove temporary results for failing tests"),
+)
+PARSER.add_argument(
+    "-f",
+    "--replace",
+    dest="replace",
+    action='store_true',
+    help=("Replace"),
+)
 
 
 class Options(object):
     def __init__(self):
         self.binary = ""  # this program's name
-        self.cleanupTmp = False  # if false do not remote tmp folder created
+        self.cleanupTmp = True  # if false do not remote tmp folder created
         self.p4Filename = ""  # file that is being compiled
-        self.compilerSrcDir = ""  # path to compiler source tree
+        self.compiler_src_dir = ""  # path to compiler source tree
         self.verbose = False
         self.replace = False  # replace previous outputs
+        self.compiler = ""
+        self.clang = ""
+        self.p4filename = ""
+        self.testfile = False
+        self.testdir = ""
+        self.runtimedir = str(FILE_DIR.joinpath("runtime"))
         self.compilerOptions = []
 
 
-def usage(options):
-    name = options.binary
-    print(name, "usage:")
-    print(name, "rootdir [options] file.p4")
-    print("Invokes compiler on the supplied file, possibly adding extra arguments")
-    print("`rootdir` is the root directory of the compiler source tree")
-    print("options:")
-    print("          -b: do not remove temporary results for failing tests")
-    print("          -v: verbose operation")
-    print("          -f: replace reference outputs with newly generated ones")
+def import_from(module, name):
+    """Try to import a module and class directly instead of the typical
+    Python method. Allows for dynamic imports."""
+    module = __import__(module, fromlist=[name])
+    return getattr(module, name)
 
 
-def isError(p4filename):
-    # True if the filename represents a p4 program that should fail
-    return "_errors" in p4filename
+def run_model(tc, testfile):
+    result = tc.compile_p4()
+    if result != testutils.SUCCESS:
+        return result
 
+    result = tc.compare_compiled_files()
+    if result != testutils.SUCCESS:
+        return result
 
-class Local(object):
-    # object to hold local vars accessible to nested functions
-    pass
+    # If there is no testfile, just run the compliation testing
+    if not testfile:
+        return result
 
+    result = tc.spawn_bridge()
+    if result != testutils.SUCCESS:
+        return result
 
-def run_timeout(options, args, timeout, stderr):
-    if options.verbose:
-        print("Executing ", " ".join(args))
-    local = Local()
-    local.process = None
+    result = tc.boot()
+    if result != testutils.SUCCESS:
+        return result
 
-    def target():
-        procstderr = None
-        if stderr is not None:
-            procstderr = open(stderr, "w")
-        local.process = Popen(args, stdout=procstderr, stderr=procstderr)
-        local.process.wait()
+    result = tc.run(testfile)
+    if result != testutils.SUCCESS:
+        return result
 
-    thread = Thread(target=target)
-    thread.start()
-    thread.join(timeout)
-    if thread.is_alive():
-        print("Timeout ", " ".join(args), file=sys.stderr)
-        local.process.terminate()
-        thread.join()
-    if local.process is None:
-        # never even started
-        if options.verbose:
-            print("Process failed to start")
-        return -1
-    if options.verbose:
-        print("Exit code ", local.process.returncode)
-    return local.process.returncode
-
-
-timeout = 10 * 60
-
-
-def compare_files(options, produced, expected):
-    if options.verbose:
-        print("Comparing ", produced, " and ", expected)
-    if produced.endswith(".c"):
-        sedcommand = "sed -i.bak '1d;2d' " + produced
-        call(sedcommand, shell=True)
-    if produced.endswith(".h"):
-        sedcommand = "sed -i.bak '1d;2d' " + produced
-        call(sedcommand, shell=True)
-    sedcommand = "sed -i -e 's/[a-zA-Z0-9_\/\-]*testdata\///g' " + produced
-    call(sedcommand, shell=True)
-
-    if options.replace:
-        if options.verbose:
-            print("Saving new version of ", expected)
-        shutil.copy2(produced, expected)
-        return SUCCESS
-
-    diff = difflib.Differ().compare(open(produced).readlines(), open(expected).readlines())
-    result = SUCCESS
-
-    message = ""
-    for l in diff:
-        if l[0] == ' ':
-            continue
-        result = FAILURE
-        message += l
-
-    if message != "":
-        print("Files ", produced, " and ", expected, " differ:", file=sys.stderr)
-        print(message, file=sys.stderr)
+    result = tc.check_outputs()
+    if result != testutils.SUCCESS:
+        return result
 
     return result
 
 
-def check_generated_files(options, tmpdir, expecteddir):
-    files = os.listdir(tmpdir)
-    for file in files:
-        if options.verbose:
-            print("Checking", file)
-        produced = tmpdir + "/" + file
-        expected = expecteddir + "/" + file
-        if not os.path.isfile(expected):
-            if options.verbose:
-                print("Expected file does not exist; creating", expected)
-            shutil.copy2(produced, expected)
-        else:
-            result = compare_files(options, produced, expected)
-            if result != SUCCESS:
-                return result
-    return SUCCESS
-
-
-def process_file(options, argv):
+def run_test(options, argv):
+    """Define the test environment and compile the p4 target
+    Optional: Run the generated model"""
     assert isinstance(options, Options)
 
-    tmpdir = tempfile.mkdtemp(dir=Path(".").absolute())
-    basename = os.path.basename(options.p4filename)
-    base, ext = os.path.splitext(basename)
-    dirname = os.path.dirname(options.p4filename)
-    expected_dirname = dirname + "_outputs"  # expected outputs are here
+    template, _ = os.path.splitext(options.p4filename)
+    tmpdir = tempfile.mkdtemp(dir=Path(FILE_DIR.joinpath("runtime")).absolute())
+    outputfolder = tmpdir
 
-    if options.verbose:
-        print("Writing temporary files into ", tmpdir)
-    outputfolder = tmpdir + "/"
-    stderr = tmpdir + "/" + basename + "-stderr"
+    tc = TCInfra(outputfolder, options, template)
 
-    if not os.path.isfile(options.p4filename):
-        raise Exception("No such file " + options.p4filename)
-    args = ["./p4c-pna-p4tc", "-o", outputfolder]
-    args.extend(argv)
-    print("input: ", options, args, timeout, stderr)
-    result = run_timeout(options, args, timeout, stderr)
-
-    if result != SUCCESS:
-        print("Error compiling")
-        print(" ".join(open(stderr).readlines()))
-        # If the compiler crashed fail the test
-        if 'Compiler Bug' in open(stderr).readlines():
-            return FAILURE
-
-    expected_error = isError(options.p4filename)
-    if expected_error:
-        # invert result
-        if result == SUCCESS:
-            result = FAILURE
-        else:
-            result = SUCCESS
-
-    if result == SUCCESS:
-        result = check_generated_files(options, tmpdir, expected_dirname)
-
-    if options.cleanupTmp:
-        if options.verbose:
-            print("Removing", tmpdir)
-        shutil.rmtree(tmpdir)
-    return result
-
-
-def isdir(path):
-    try:
-        return stat.S_ISDIR(os.stat(path).st_mode)
-    except OSError:
-        return False
+    return run_model(tc, options.testfile)
 
 
 ######################### main
 
 
+def clang_is_installed(clang):
+    result = testutils.exec_process(f"{clang} --version")
+    if result.returncode != testutils.SUCCESS:
+        testutils.log.error("{options.clang} is not installed")
+        return False
+
+    version_pattern = r'clang version (\d+)\.\d+\.\d+'
+
+    match = re.search(version_pattern, result.output)
+    if match:
+        version = match.group(1)
+    else:
+        testutils.log.error("Not able to retrieve {options.clang} version")
+        return False
+
+    if int(version) < 15:
+        testutils.log.error("{options.clang} version")
+        return False
+
+    return True
+
+
 def main(argv):
+    args, argv = PARSER.parse_known_args()
     options = Options()
-    print("P4TC testing")
-    options.binary = argv[0]
-    if len(argv) <= 2:
-        usage(options)
-        sys.exit(FAILURE)
+    options.compiler_src_dir = testutils.check_if_dir(Path(args.compiler_src_dir))
+    compiler = "./" + args.compiler
 
-    options.compilerSrcdir = argv[1]
-    argv = argv[2:]
-    if not os.path.isdir(options.compilerSrcdir):
-        print(options.compilerSrcdir + " is not a folder", file=sys.stderr)
-        usage(options)
-        sys.exit(FAILURE)
+    options.compiler = testutils.check_if_file(Path(compiler))
 
-    while argv[0][0] == '-':
-        if argv[0] == "-b":
-            options.cleanupTmp = False
-        elif argv[0] == "-v":
-            options.verbose = True
-        elif argv[0] == "-f":
-            options.replace = True
-        else:
-            print("Unknown option ", argv[0], file=sys.stderr)
-            usage(options)
-        argv = argv[1:]
+    if not clang_is_installed(args.clang):
+        sys.exit(1)
+
+    options.clang = args.clang
+
+    options.p4filename = testutils.check_if_file(Path(args.p4filename))
+    options.replace = args.replace
+    if args.testfile:
+        options.testfile = testutils.check_if_file(Path(args.testfile))
+    options.testdir = tempfile.mkdtemp(dir=os.path.abspath("./"))
+
+    if args.cleanupTmp:
+        options.cleanupTmp = False
+
+    if args.verbose:
+        options.verbose = True
+
+    if args.replace:
+        options.replace = True
+
+    argv = argv[1:]
 
     if "P4TEST_REPLACE" in os.environ:
         options.replace = True
 
-    options.p4filename = argv[-1]
-    options.testName = None
-    if options.p4filename.startswith(options.compilerSrcdir):
-        options.testName = options.p4filename[len(options.compilerSrcdir) :]
-        if options.testName.startswith('/'):
-            options.testName = options.testName[1:]
-        if options.testName.endswith('.p4'):
-            options.testName = options.testName[:-3]
+    result = run_test(options, argv)
 
-    result = process_file(options, argv)
     sys.exit(result)
 
 

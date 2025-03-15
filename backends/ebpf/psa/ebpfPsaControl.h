@@ -31,6 +31,7 @@ class ControlBodyTranslatorPSA : public ControlBodyTranslator {
  public:
     explicit ControlBodyTranslatorPSA(const EBPFControlPSA *control);
 
+    bool preorder(const IR::BaseAssignmentStatement *a) override { return notSupported(a); }
     bool preorder(const IR::AssignmentStatement *a) override;
 
     void processMethod(const P4::ExternMethod *method) override;

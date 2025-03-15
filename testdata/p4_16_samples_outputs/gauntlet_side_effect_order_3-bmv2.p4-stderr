@@ -7,3 +7,4 @@ bit<8> do_thing(out bit<8> val) {
 [--Wwarn=uninitialized_use] warning: val_0 may be uninitialized
 [--Wwarn=uninitialized_use] warning: val_1 may be uninitialized
 [--Wwarn=uninitialized_use] warning: val_1 may be uninitialized
+[--Wwarn=uninitialized_use] warning: val_1 may be uninitialized

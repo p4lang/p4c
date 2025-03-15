@@ -26,9 +26,11 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.y") bit<64> y_0;
     @name("ingress.tmp") bit<16> tmp;
     @name("ingress.retval") bit<16> retval;
+    @name("ingress.inlinedRetval") bit<16> inlinedRetval_0;
     @name("ingress.iuJze") action iuJze() {
         retval = 16w4;
-        tmp = retval;
+        inlinedRetval_0 = retval;
+        tmp = inlinedRetval_0;
         y_0 = (bit<64>)tmp;
         h.h.c = y_0;
     }

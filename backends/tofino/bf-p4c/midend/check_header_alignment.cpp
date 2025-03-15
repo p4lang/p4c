@@ -27,7 +27,7 @@
 
 namespace BFN {
 
-bool CheckPadAssignment::preorder(const IR::AssignmentStatement *statement) {
+bool CheckPadAssignment::preorder(const IR::BaseAssignmentStatement *statement) {
     auto member = statement->left->to<IR::Member>();
     if (!member) return false;
     auto header_type = dynamic_cast<const IR::Type_StructLike *>(member->expr->type);

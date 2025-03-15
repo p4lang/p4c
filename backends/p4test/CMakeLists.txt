@@ -22,6 +22,7 @@ set (P4TEST_SRCS
   midend.cpp
   )
 set (P4TEST_HDRS
+  p4test.h
   midend.h
   )
 

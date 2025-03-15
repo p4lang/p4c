@@ -85,7 +85,7 @@ class FunctionsInliner : public AbstractInliner<FunctionsInlineList, FunctionsIn
     const IR::Node *preorder(IR::P4Action *action) override;
     const IR::Node *preorder(IR::MethodCallStatement *statement) override;
     const IR::Node *preorder(IR::MethodCallExpression *expr) override;
-    const IR::Node *preorder(IR::AssignmentStatement *statement) override;
+    const IR::Node *preorder(IR::BaseAssignmentStatement *statement) override;
     const IR::Node *preorder(IR::IfStatement *statement) override;
 };
 

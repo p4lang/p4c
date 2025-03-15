@@ -91,6 +91,7 @@ class ErrorReporter {
           defaultInfoDiagnosticAction(DiagnosticAction::Info),
           defaultWarningDiagnosticAction(DiagnosticAction::Warn) {
         outputstream = &std::cerr;
+        ErrorCatalog::getCatalog().initReporter(*this);
     }
     virtual ~ErrorReporter() = default;
 

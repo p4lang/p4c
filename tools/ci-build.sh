@@ -50,6 +50,10 @@ P4C_DIR=$(readlink -f ${THIS_DIR}/..)
 : "${ENABLE_BMV2:=ON}"
 # eBPF is enabled by default.
 : "${ENABLE_EBPF:=ON}"
+# P4TC is enabled by default.
+: "${ENABLE_P4TC:=ON}"
+# P4TC STF is only enabled when running p4tc tagged PRs.
+: "${INSTALL_STF_P4TC_DEPENDENCIES:=OFF}"
 # This is the list of back ends that can be enabled.
 # Back ends can be enabled from the command line with "ENABLE_[backend]=TRUE/FALSE"
 ENABLE_BACKENDS=("TOFINO" "BMV2" "EBPF" "UBPF" "DPDK"
@@ -212,6 +216,59 @@ if [[ "${ENABLE_EBPF}" == "ON" ]] ; then
   fi
 fi
 # ! ------  END EBPF -----------------------------------------------
+
+# ! ------  BEGIN P4TC -----------------------------------------------
+function install_stf_p4tc_test_deps() (
+    P4C_STF_P4TC_PACKAGES=" libmnl-dev \
+                             bridge-utils \
+                             python3-venv \
+                             qemu qemu-system-x86"
+    sudo apt-get install -y --no-install-recommends ${P4C_STF_P4TC_PACKAGES}
+    git clone https://github.com/p4tc-dev/iproute2-p4tc-pub -b master-v17-rc8 ${P4C_DIR}/backends/tc/runtime/iproute2-p4tc-pub
+    ${P4C_DIR}/backends/tc/runtime/build-iproute2 ${P4C_DIR}/backends/tc/runtime
+    git clone --recurse-submodules https://github.com/arighi/virtme-ng.git ${P4C_DIR}/backends/tc/runtime/virtme-ng
+    pushd ${P4C_DIR}/backends/tc/runtime/virtme-ng
+    git checkout v1.19
+    python3 -m venv ${P4C_DIR}/backends/tc/runtime/virtme-ng
+    source ${P4C_DIR}/backends/tc/runtime/virtme-ng/bin/activate
+    pip install --upgrade pip
+    pip install .
+    deactivate
+)
+
+function build_p4tc() {
+  P4TC_DEPS="libpcap-dev \
+             libelf-dev \
+             zlib1g-dev \
+             gcc-multilib \
+             net-tools \
+             flex \
+             libelf-dev \
+             pkg-config \
+             xtables-addons-source \
+             python3 \
+             python3-pip \
+             wget \
+             python3-argcomplete"
+
+  sudo apt-get install -y --no-install-recommends ${P4TC_DEPS}
+
+  wget https://apt.llvm.org/llvm.sh
+  sudo chmod +x llvm.sh
+  sudo ./llvm.sh 15
+  rm llvm.sh
+
+  git clone https://github.com/libbpf/libbpf/ -b v1.5.0 ${P4C_DIR}/backends/tc/runtime/libbpf
+  ${P4C_DIR}/backends/tc/runtime/build-libbpf
+
+  if [[ "${INSTALL_STF_P4TC_DEPENDENCIES}" == "ON" ]] ; then
+             install_stf_p4tc_test_deps
+  fi
+}
+if [[ "${ENABLE_P4TC}" == "ON" ]] ; then
+  build_p4tc
+fi
+# ! ------  END P4TC -----------------------------------------------
 
 # ! ------  BEGIN DPDK -----------------------------------------------
 function build_dpdk() {
