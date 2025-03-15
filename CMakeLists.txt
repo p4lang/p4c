@@ -276,10 +276,6 @@ find_python_module (re REQUIRED)
 # other packages
 find_package (Doxygen)
 find_package (BMV2)
-# If we have found simple switch or psa switch or pna_nic, we also need scapy.
-if(SIMPLE_SWITCH OR PSA_SWITCH OR PNA_NIC)
-    find_python_module (scapy REQUIRED)
-endif()
 # enable CTest
 enable_testing ()
 
