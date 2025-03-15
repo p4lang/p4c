@@ -925,7 +925,8 @@ if (ENABLE_GTESTS)
     # This is necessary because the z3 target itself does not export its includes.
     SYSTEM BEFORE PUBLIC ${Z3_INCLUDE_DIR}
   )
-  add_dependencies (bf_gtest_support p4headers_h p4headers_cpp ir-generated gtest frontend-parser-gen)  # Indirectly we #include "ir/gen-tree-macro.h" and "p4parser.hpp"
+  # Indirectly we #include "ir/gen-tree-macro.h" and "p4parser.hpp"
+  add_dependencies (bf_gtest_support p4headers_h p4headers_cpp ir-generated gtest frontend-parser-gen genLogging)
 
   set (GTEST_BF_P4C_SOURCES
     # Currently all gtests need to be built directly into the gtestp4c binary.

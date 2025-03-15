@@ -65,7 +65,7 @@ const IR::P4Program *CompilerTarget::runParser(const ParserOptions &options) {
 
 const IR::P4Program *CompilerTarget::runFrontend(const CompilerOptions &options,
                                                  const IR::P4Program *program) const {
-    P4COptionPragmaParser optionsPragmaParser;
+    P4COptionPragmaParser optionsPragmaParser(false);
     program->apply(ApplyOptionsPragmas(optionsPragmaParser));
 
     auto frontEnd = mkFrontEnd();

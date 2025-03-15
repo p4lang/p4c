@@ -41,7 +41,7 @@ static __always_inline int run_parser(struct __sk_buff *skb, struct headers_t *h
             hdr->ipv6.trafficClass = (u8)((load_half(pkt, BYTES(ebpf_packetOffsetInBits)) >> 4) & EBPF_MASK(u8, 8));
             ebpf_packetOffsetInBits += 8;
 
-            hdr->ipv6.flowLabel = (u32)((load_word(pkt, BYTES(ebpf_packetOffsetInBits)) >> 8) & EBPF_MASK(u32, 20));
+            storePrimitive32((u8 *)&hdr->ipv6.flowLabel, 20, (u32)((load_word(pkt, BYTES(ebpf_packetOffsetInBits)) >> 8) & EBPF_MASK(u32, 20)));
             ebpf_packetOffsetInBits += 20;
 
             hdr->ipv6.payloadLength = (u16)((load_half(pkt, BYTES(ebpf_packetOffsetInBits))));

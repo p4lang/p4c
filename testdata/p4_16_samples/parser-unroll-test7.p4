@@ -1,5 +1,6 @@
 #include <core.p4>
 #include <v1model.p4>
+@command_line("--loopsUnroll")
 
 header S {
     bit<8> t;

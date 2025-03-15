@@ -40,7 +40,6 @@ p4tools_add_xfail_reason(
   # terminate called after throwing an instance of 'std::runtime_error'
   # Type is not convertible to string
   control-hs-index-test3.p4
-  parser-unroll-test1.p4
   # terminate called after throwing an instance of 'std::out_of_range'
   control-hs-index-test2.p4
 )

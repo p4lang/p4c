@@ -19,6 +19,8 @@
 #include "marshal.h"
 
 #include "ir/ir.h"
+#include "ir/json_generator.h"
+#include "ir/json_loader.h"
 
 std::string MarshaledFrom::toString() const {
     std::stringstream tmp;
@@ -26,10 +28,17 @@ std::string MarshaledFrom::toString() const {
     return tmp.str();
 }
 
-void MarshaledFrom::toJSON(JSONGenerator &json) const { json << *this; }
+void MarshaledFrom::toJSON(JSONGenerator &json) const {
+    json.emit("gress", gress);
+    json.emit("field_name", field_name);
+    json.emit("pre_padding", pre_padding);
+}
 
 /* static */
-MarshaledFrom MarshaledFrom::fromJSON(JSONLoader &) {
-    BUG("Uninmplemented");
-    return MarshaledFrom();
+MarshaledFrom MarshaledFrom::fromJSON(JSONLoader &json) {
+    MarshaledFrom rv;
+    json.load("gress", rv.gress);
+    json.load("field_name", rv.field_name);
+    json.load("pre_padding", rv.pre_padding);
+    return rv;
 }

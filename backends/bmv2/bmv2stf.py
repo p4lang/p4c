@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # Copyright 2013-present Barefoot Networks, Inc.
+# SPDX-License-Identifier: Apache-2.0
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,11 +30,7 @@ from glob import glob
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-try:
-    import scapy.utils as scapy_util
-    from scapy.layers.all import *
-except ImportError:
-    pass
+from ptf.pcap_writer import LINKTYPE_ETHERNET, PcapWriter, rdpcap
 
 FILE_DIR = Path(__file__).resolve().parent
 # Append the root to the import path.
@@ -577,7 +574,7 @@ class RunBMV2(object):
             data = stf_entry[2]
             time.sleep(self.packetDelay)
             try:
-                self.interfaces[interface]._write_packet(bytes.fromhex(data))
+                self.interfaces[interface].write(bytes.fromhex(data))
             except ValueError:
                 testutils.log.error("Invalid packet data %s", data)
                 return testutils.FAILURE
@@ -772,8 +769,8 @@ class RunBMV2(object):
             sw = subprocess.Popen(runswitch, cwd=self.folder)
 
             def openInterface(ifname):
-                fp = self.interfaces[interface] = scapy_util.RawPcapWriter(str(ifname), linktype=0)
-                fp._write_header(None)
+                self.interfaces[interface] = PcapWriter(str(ifname), linktype=LINKTYPE_ETHERNET)
+                self.interfaces[interface].flush()
 
             # Try to open input interfaces. Each time, we set a 2 second
             # timeout. If the timeout expires we check if the bmv2 process is
@@ -875,7 +872,7 @@ class RunBMV2(object):
                 packets = []
             else:
                 try:
-                    packets = scapy_util.rdpcap(file)
+                    packets = rdpcap(file)
                 except Exception as e:
                     testutils.log.error("Corrupt pcap file %s\n%s", file, e)
                     return testutils.FAILURE

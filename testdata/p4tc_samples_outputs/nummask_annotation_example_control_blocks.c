@@ -161,7 +161,7 @@ if (((u32)skb->ifindex == 2 && /* hdr->ipv4.isValid() */
                 return TC_ACT_SHOT;
             }
             
-            hdr->eth.dstAddr = htonll(hdr->eth.dstAddr << 16);
+            storePrimitive64((u8 *)&hdr->eth.dstAddr, 48, (htonll(getPrimitive64(hdr->eth.dstAddr, 48) << 16)));
             ebpf_byte = ((char*)(&hdr->eth.dstAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->eth.dstAddr))[1];
@@ -176,7 +176,7 @@ if (((u32)skb->ifindex == 2 && /* hdr->ipv4.isValid() */
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 5, (ebpf_byte));
             ebpf_packetOffsetInBits += 48;
 
-            hdr->eth.srcAddr = htonll(hdr->eth.srcAddr << 16);
+            storePrimitive64((u8 *)&hdr->eth.srcAddr, 48, (htonll(getPrimitive64(hdr->eth.srcAddr, 48) << 16)));
             ebpf_byte = ((char*)(&hdr->eth.srcAddr))[0];
             write_byte(pkt, BYTES(ebpf_packetOffsetInBits) + 0, (ebpf_byte));
             ebpf_byte = ((char*)(&hdr->eth.srcAddr))[1];

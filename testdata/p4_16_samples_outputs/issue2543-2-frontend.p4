@@ -18,16 +18,20 @@ control ingress(inout Headers h) {
     @name("ingress.tmp_2") bit<16> tmp_2;
     @name("ingress.tmp_3") bit<16> tmp_3;
     @name("ingress.retval") bit<16> retval_0;
+    @name("ingress.inlinedRetval") bit<16> inlinedRetval_1;
+    @name("ingress.inlinedRetval_0") Headers inlinedRetval_2;
     apply {
         tmp_0 = 48w1;
         tmp_1 = 48w1;
         retval_0 = 16w9;
-        tmp_3 = retval_0;
+        inlinedRetval_1 = retval_0;
+        tmp_3 = inlinedRetval_1;
         tmp_2 = tmp_3;
         tmp.setValid();
         tmp = (ethernet_t){dst_addr = tmp_0,src_addr = tmp_1,eth_type = tmp_2};
         retval = (Headers){eth_hdr = tmp};
-        h = retval;
+        inlinedRetval_2 = retval;
+        h = inlinedRetval_2;
     }
 }
 

@@ -32,6 +32,7 @@ class StateTranslationVisitor : public CodeGenInspector {
  protected:
     /// Stores the result of evaluating the select argument.
     cstring selectValue;
+    const IR::Type *selectType;
 
     P4::P4CoreLibrary &p4lib;
     const EBPFParserState *state;
@@ -61,6 +62,7 @@ class StateTranslationVisitor : public CodeGenInspector {
         builder->endOfStatement(true);
         return false;
     }
+    bool preorder(const IR::BaseAssignmentStatement *stat) override { return notSupported(stat); }
     bool preorder(const IR::AssignmentStatement *stat) override;
 };
 

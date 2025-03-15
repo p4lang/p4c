@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include "p4test.h"
+
 #include <fstream>  // IWYU pragma: keep
 #include <iostream>
 
@@ -35,56 +37,88 @@ limitations under the License.
 #include "lib/nullstream.h"
 #include "midend.h"
 
-using namespace P4;
+P4TestOptions::P4TestOptions() {
+    registerOption(
+        "--listMidendPasses", nullptr,
+        [this](const char *) {
+            listMidendPasses = true;
+            loadIRFromJson = false;
+            P4Test::MidEnd MidEnd(*this, outStream);
+            exit(0);
+            return false;
+        },
+        "[p4test] Lists exact name of all midend passes.\n");
+    registerOption(
+        "--parse-only", nullptr,
+        [this](const char *) {
+            parseOnly = true;
+            return true;
+        },
+        "only parse the P4 input, without any further processing");
+    registerOption(
+        "--validate", nullptr,
+        [this](const char *) {
+            validateOnly = true;
+            return true;
+        },
+        "Validate the P4 input, running just the front-end");
+    registerOption(
+        "--fromJSON", "file",
+        [this](const char *arg) {
+            loadIRFromJson = true;
+            file = arg;
+            return true;
+        },
+        "read previously dumped json instead of P4 source code");
+    registerOption(
+        "--turn-off-logn", nullptr,
+        [](const char *) {
+            ::P4::Log::Detail::enableLoggingGlobally = false;
+            return true;
+        },
+        "Turn off LOGN() statements in the compiler.\n"
+        "Use '@__debug' annotation to enable LOGN on "
+        "the annotated P4 object within the source code.\n");
+    registerOption(
+        "--preferSwitch", nullptr,
+        [this](const char *) {
+            preferSwitch = true;
+            return true;
+        },
+        "use passes that use general switch instead of action_run");
+}
 
-class P4TestOptions : public CompilerOptions {
- public:
-    bool parseOnly = false;
-    bool validateOnly = false;
-    bool loadIRFromJson = false;
-    P4TestOptions() {
-        registerOption(
-            "--listMidendPasses", nullptr,
-            [this](const char *) {
-                listMidendPasses = true;
-                loadIRFromJson = false;
-                P4Test::MidEnd MidEnd(*this, outStream);
-                exit(0);
-                return false;
-            },
-            "[p4test] Lists exact name of all midend passes.\n");
-        registerOption(
-            "--parse-only", nullptr,
-            [this](const char *) {
-                parseOnly = true;
-                return true;
-            },
-            "only parse the P4 input, without any further processing");
-        registerOption(
-            "--validate", nullptr,
-            [this](const char *) {
-                validateOnly = true;
-                return true;
-            },
-            "Validate the P4 input, running just the front-end");
-        registerOption(
-            "--fromJSON", "file",
-            [this](const char *arg) {
-                loadIRFromJson = true;
-                file = arg;
-                return true;
-            },
-            "read previously dumped json instead of P4 source code");
-        registerOption(
-            "--turn-off-logn", nullptr,
-            [](const char *) {
-                ::P4::Log::Detail::enableLoggingGlobally = false;
-                return true;
-            },
-            "Turn off LOGN() statements in the compiler.\n"
-            "Use '@__debug' annotation to enable LOGN on "
-            "the annotated P4 object within the source code.\n");
+class P4TestPragmas : public P4::P4COptionPragmaParser {
+    std::optional<IOptionPragmaParser::CommandLineOptions> tryToParse(
+        const IR::Annotation *annotation) {
+        if (annotation->name == "test_keep_opassign") {
+            test_keepOpAssign = true;
+            return std::nullopt;
+        }
+        return P4::P4COptionPragmaParser::tryToParse(annotation);
     }
+
+ public:
+    P4TestPragmas() : P4::P4COptionPragmaParser(true) {}
+
+    bool test_keepOpAssign = false;
+};
+
+class TestFEPolicy : public P4::FrontEndPolicy {
+    const P4TestPragmas &pragmas;
+
+    P4::ParseAnnotations *getParseAnnotations() const {
+        return new P4::ParseAnnotations("p4test", true,
+                                        P4::ParseAnnotations::HandlerMap({
+                                            PARSE_EMPTY("test_keep_opassign"_cs),
+                                        }),
+                                        false);
+    }
+
+    bool removeOpAssign() const { return !pragmas.test_keepOpAssign; }
+
+ public:
+    explicit TestFEPolicy(const P4TestPragmas &pragmas) : pragmas(pragmas) {}
 };
 
 using P4TestContext = P4CContextWithOptions<P4TestOptions>;
@@ -135,13 +169,14 @@ int main(int argc, char *const argv[]) {
         info.emitInfo("PARSER");
 
         if (program != nullptr && ::P4::errorCount() == 0) {
-            P4::P4COptionPragmaParser optionsPragmaParser;
-            program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
+            P4TestPragmas testPragmas;
+            program->apply(P4::ApplyOptionsPragmas(testPragmas));
             info.emitInfo("PASS P4COptionPragmaParser");
 
             if (!options.parseOnly) {
                 try {
-                    P4::FrontEnd fe;
+                    TestFEPolicy fe_policy(testPragmas);
+                    P4::FrontEnd fe(&fe_policy);
                     fe.addDebugHook(hook);
                     // use -TdiagnosticCountInPass:1 / -TdiagnosticCountInPass:4 to get output of
                     // this hook
@@ -185,17 +220,17 @@ int main(int argc, char *const argv[]) {
         }
         if (program) {
             if (!options.dumpJsonFile.empty())
-                JSONGenerator(*openFile(options.dumpJsonFile, true), true) << program << std::endl;
+                JSONGenerator(*openFile(options.dumpJsonFile, true), true).emit(program);
             if (options.debugJson) {
                 std::stringstream ss1, ss2;
                 JSONGenerator gen1(ss1), gen2(ss2);
-                gen1 << program;
+                gen1.emit(program);
 
                 const IR::Node *node = nullptr;
                 JSONLoader loader(ss1);
                 loader >> node;
 
-                gen2 << node;
+                gen2.emit(node);
                 if (ss1.str() != ss2.str()) {
                     error(ErrorType::ERR_UNEXPECTED, "json mismatch");
                     std::ofstream t1("t1.json"), t2("t2.json");

@@ -16,7 +16,7 @@
   bool operator==(const T &a) const;
   void validate() const;
   const char *node_type_name() const;
-  void visit_children(Visitor &v);
+  void visit_children(Visitor &v, const char *name);
   void dump_fields(std::ostream& out) const;
 
   C comments are ignored.
@@ -468,10 +468,19 @@ class EmptyStatement : Statement {
     dbprint { out << ""; }
 }
 
-class AssignmentStatement : Statement {
+abstract BaseAssignmentStatement : Statement {
     Expression left;
     Expression right;
+}
+
+class AssignmentStatement : BaseAssignmentStatement {
     toString{ return absl::StrCat(left, " = ", right); }
+}
+
+abstract OpAssignmentStatement : BaseAssignmentStatement {
+    virtual cstring getStringOp() const = 0;
+    toString{ return absl::StrCat(left, " ", getStringOp(), "= ", right); }
+    dbprint;
 }
 
 class IfStatement : Statement {
@@ -479,6 +488,7 @@ class IfStatement : Statement {
     Statement        ifTrue;
     NullOK Statement ifFalse;
     visit_children {
+        (void)n;
         v.visit(condition, "condition");
         SplitFlowVisit<Statement>(v, ifTrue, ifFalse).run_visit(); }
 }
@@ -540,6 +550,7 @@ class SwitchStatement : Statement {
     Expression expression;
     inline Vector<SwitchCase> cases;
     visit_children {
+        (void)n;
         v.visit(expression, "expression");
         SplitFlowVisit<SwitchCase> split(v);
         for (auto &c : cases) split.addNode(c);
@@ -646,7 +657,7 @@ abstract Block : CompileTimeValue {
         auto it = constantValue.find(node);
         BUG_CHECK(it != constantValue.end(), "%1%: No such node %2%", this, node);
         return it->second; }
-    visit_children { (void)v; }
+    visit_children { (void)v; (void)n; }
     virtual const IDeclaration* getContainer() const { return nullptr; }
 }
 

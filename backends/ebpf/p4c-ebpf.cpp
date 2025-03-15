@@ -56,7 +56,7 @@ void compile(EbpfOptions &options) {
 
         std::istream inJson(&fb);
         JSONLoader jsonFileLoader(inJson);
-        if (jsonFileLoader.json == nullptr) {
+        if (!jsonFileLoader) {
             ::P4::error(ErrorType::ERR_IO, "%s: Not valid input file", options.file);
             return;
         }
@@ -66,7 +66,7 @@ void compile(EbpfOptions &options) {
         program = P4::parseP4File(options);
         if (::P4::errorCount() > 0) return;
 
-        P4::P4COptionPragmaParser optionsPragmaParser;
+        P4::P4COptionPragmaParser optionsPragmaParser(true);
         program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
 
         P4::FrontEnd frontend;
@@ -84,7 +84,7 @@ void compile(EbpfOptions &options) {
     midend.addDebugHook(hook);
     auto toplevel = midend.run(options, program);
     if (!options.dumpJsonFile.empty())
-        JSONGenerator(*openFile(options.dumpJsonFile, true)) << program << std::endl;
+        JSONGenerator(*openFile(options.dumpJsonFile, true)).emit(program);
     if (::P4::errorCount() > 0) return;
 
     EBPF::run_ebpf_backend(options, toplevel, &midend.refMap, &midend.typeMap);

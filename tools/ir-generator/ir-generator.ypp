@@ -253,7 +253,8 @@ method
           { $$ = new IrMethod(@2, canon_name($2)); }
     | modifiers IDENTIFIER '('
           { if ($2 != $<irClass>0->name)
-                yyerror("constructor name %s doesn't match class name %s", $2, $<irClass>0->name);
+                yyerror("constructor name %s doesn't match class name %s", $2.c_str(),
+                        $<irClass>0->name.c_str());
             if ($1 & ~IrField::Inline)
                 yyerror("%s invalid on constructor", IrElement::modifier($1));
             ($<irMethod>$ = new IrMethod(@2, $2))->inImpl = !($1 & IrField::Inline);
@@ -274,7 +275,7 @@ method
           { ($$ = $<irMethod>5)->body = $10;
             if (!$10 || $10.startsWith("=")) {
                 if (!$$->inImpl)
-                    yyerror("inline method %v with no body", $3);
+                    yyerror("inline method %v with no body", $3.c_str());
                 $$->inImpl = false; }
             $$->isUser = true;
             $$->isConst = $8;
@@ -326,15 +327,15 @@ irField
     : modifiers type fieldName optInitializer ';'
           { $$ = new IrField(@3, $2, $3, $4, $1);
             if ($1 & IrElement::Virtual)
-                yyerror("virtual invalid on field %s", $3); }
+                yyerror("virtual invalid on field %s", $3.c_str()); }
     | modifiers CONST nonRefType fieldName optInitializer ';'
           { $$ = new IrField(@4, $3, $4, $5, $1 | IrElement::Const);
             if ($1 & IrElement::Virtual)
-                yyerror("virtual invalid on field %s", $4); }
+                yyerror("virtual invalid on field %s", $4.c_str()); }
     | modifiers VARIANT '<' type_args '>' fieldName optInitializer ';'
           { $$ = new IrVariantField(@6, $4, $6, $7, $1);
             if ($1 & IrElement::Virtual)
-                yyerror("virtual invalid on field %s", $6); }
+                yyerror("virtual invalid on field %s", $6.c_str()); }
     ;
 
 modifier

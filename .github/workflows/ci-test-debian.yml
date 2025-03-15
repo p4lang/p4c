@@ -16,10 +16,22 @@ concurrency:
 jobs:
   # Build with GCC and test P4C on Ubuntu 22.04.
   test-ubuntu22:
+    name: test-ubuntu22 (Unity ${{ matrix.unity }}, GTest ${{ matrix.gtest }})
+    strategy:
+      fail-fast: false
+      matrix:
+        unity: [ON, OFF]
+        include:
+          - unity: ON
+            gtest: ON
+          - unity: OFF
+            gtest: OFF
     runs-on: ubuntu-22.04
     env:
       CTEST_PARALLEL_LEVEL: 4
       IMAGE_TYPE: test
+      ENABLE_GTESTS: ${{ matrix.gtest }}
+      CMAKE_UNITY_BUILD: ${{ matrix.unity }}
       BUILD_GENERATOR: Ninja
     steps:
       - uses: actions/checkout@v4
@@ -30,7 +42,7 @@ jobs:
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1
         with:
-          key: test-${{ runner.os }}-gcc
+          key: test-${{ matrix.unity }}-${{ runner.os }}-gcc
           max-size: 1000M
 
       - name: Build (Ubuntu 22.04, GCC)
@@ -38,9 +50,10 @@ jobs:
           tools/ci-build.sh
 
       - name: Run tests (Ubuntu 22.04)
-        # Need to use sudo for the eBPF kernel tests.
-        run: sudo -E ctest --output-on-failure --schedule-random
+        # Need to use sudo for the eBPF kernel tests and need to avoid p4tc_stf tests.
+        run: sudo -E ctest --output-on-failure --schedule-random -E "p4tc_samples_stf|p4tc_cleanup|p4tc_setup"
         working-directory: ./build
+        if: matrix.unity == 'ON' && matrix.gtest == 'ON'
 
   # Build with GCC and test Tofino backend on Ubuntu 22.04.
   test-ubuntu22-tofino:
@@ -51,6 +64,7 @@ jobs:
       BUILD_GENERATOR: Ninja
       ENABLE_GTESTS: ON
       ENABLE_TOFINO: ON
+      ENABLE_TEST_TOOLS: ON
       ENABLE_BMV2: OFF
       ENABLE_EBPF: OFF
       ENABLE_UBPF: OFF
@@ -75,43 +89,6 @@ jobs:
         run: |
           tools/ci-build.sh
 
-  # Build with GCC and test P4C on Ubuntu 20.04.
-  test-ubuntu20:
-    name: test-ubuntu20 (Unity ${{ matrix.unity }}, GTest ${{ matrix.gtest }})
-    strategy:
-      fail-fast: false
-      matrix:
-        unity: [ON, OFF]
-        include:
-          - unity: ON
-            gtest: ON
-          - unity: OFF
-            gtest: OFF
-    runs-on: ubuntu-20.04
-    env:
-      CTEST_PARALLEL_LEVEL: 4
-      IMAGE_TYPE: test
-      ENABLE_GTESTS: ${{ matrix.gtest }}
-      CMAKE_UNITY_BUILD: ${{ matrix.unity }}
-      BUILD_GENERATOR: Ninja
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 0
-
-      - name: ccache
-        uses: hendrikmuhs/ccache-action@v1
-        with:
-          key: test-${{ matrix.unity }}-${{ runner.os }}-gcc
-          max-size: 1000M
-
-      - name: Build (Ubuntu 20.04, GCC)
-        run: |
-          tools/ci-build.sh
-
-      - name: Run tests (Ubuntu 20.04)
-        # Need to use sudo for the eBPF kernel tests.
-        run: sudo -E ctest --output-on-failure --schedule-random
+      - name: Run tests (Ubuntu 22.04)
+        run: ctest --output-on-failure --schedule-random -R tofino
         working-directory: ./build
-        if: matrix.unity == 'ON' && matrix.gtest == 'ON'

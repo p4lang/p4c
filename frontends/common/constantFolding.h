@@ -34,6 +34,7 @@ using namespace literals;
 /// functions.
 class ConstantFoldingPolicy {
  public:
+    virtual ~ConstantFoldingPolicy() = default;
     /// The default hook does not modify anything.
     virtual const IR::Node *hook(Visitor &, IR::PathExpression *) { return nullptr; }
 };
@@ -170,7 +171,7 @@ class DoConstantFolding : public Transform, public ResolutionContext {
     const IR::Node *postorder(IR::Type_Varbits *type) override;
     const IR::Node *postorder(IR::SelectExpression *e) override;
     const IR::Node *postorder(IR::IfStatement *statement) override;
-    const IR::Node *preorder(IR::AssignmentStatement *statement) override;
+    const IR::Node *preorder(IR::BaseAssignmentStatement *statement) override;
     const IR::Node *preorder(IR::ArrayIndex *e) override;
     const IR::Node *preorder(IR::SwitchCase *c) override;
     const IR::BlockStatement *preorder(IR::BlockStatement *bs) override {

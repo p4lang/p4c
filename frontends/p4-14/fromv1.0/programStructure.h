@@ -31,6 +31,7 @@ namespace P4::P4V1 {
 
 class ConversionContext {
  public:
+    virtual ~ConversionContext() = default;
     const IR::Expression *header = nullptr;
     const IR::Expression *userMetadata = nullptr;
     const IR::Expression *standardMetadata = nullptr;
@@ -121,6 +122,7 @@ class ProgramStructure {
 
  public:
     ProgramStructure();
+    virtual ~ProgramStructure() = default;
 
     P4V1::V1Model &v1model;
     P4::P4CoreLibrary &p4lib;

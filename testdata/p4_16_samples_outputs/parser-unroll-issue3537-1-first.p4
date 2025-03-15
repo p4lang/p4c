@@ -2,7 +2,7 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-struct H {
+@command_line("--loopsUnroll") struct H {
 }
 
 struct M {

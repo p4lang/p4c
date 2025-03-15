@@ -43,10 +43,19 @@ class FrontEndPolicy : public RemoveUnusedPolicy {
     /// @returns Defaults to nullptr.
     virtual ParseAnnotations *getParseAnnotations() const { return nullptr; }
 
+    /// Indicates whether OpAssignmentExpressions should be expanded and replaced
+    /// by simple assignments.  This depends on SideEffectOrdering to be correct, so
+    /// should probably be false if skipSideEffectOrdering is true.
+    virtual bool removeOpAssign() const { return true; }
+
     /// Indicates whether the side-effect-ordering pass should be skipped.
     /// @returns Defaults to false.
     // TODO: This should probably not be allowed to be skipped at all.
     virtual bool skipSideEffectOrdering() const { return false; }
+
+    /// Indicates whether control flow should fold blocks marked with @inlinedFrom annotation
+    /// @returns Defaults to true
+    virtual bool foldInlinedFrom() const { return true; }
 
     /// Indicates whether to enable the `a - constant` to `a + (-constant)` in StrengthReduction.
     /// @returns Defaults to true.

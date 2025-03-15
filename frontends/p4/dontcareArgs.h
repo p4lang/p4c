@@ -40,7 +40,8 @@ class DontcareArgs : public Transform, public ResolutionContext {
         IR::IndexedVector<IR::StatOrDecl> body;
         for (auto d : toAdd) body.push_back(d);
         body.append(function->body->components);
-        function->body = new IR::BlockStatement(function->body->srcInfo, body);
+        function->body =
+            new IR::BlockStatement(function->body->srcInfo, function->body->annotations, body);
         toAdd.clear();
         return function;
     }
@@ -48,7 +49,8 @@ class DontcareArgs : public Transform, public ResolutionContext {
         IR::IndexedVector<IR::StatOrDecl> body;
         for (auto d : toAdd) body.push_back(d);
         body.append(action->body->components);
-        action->body = new IR::BlockStatement(action->body->srcInfo, body);
+        action->body =
+            new IR::BlockStatement(action->body->srcInfo, action->body->annotations, body);
         toAdd.clear();
         return action;
     }
