@@ -1,0 +1,112 @@
+name: Auto Label Issues and PRs
+
+on:
+  issues:
+    types: [opened, edited]  # Runs when an issue is created or modified
+  pull_request:
+    types: [opened, edited]  # Runs when a PR is created or modified
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Auto-label Issues and PRs
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            // Determine if we're processing an issue or PR
+            const isIssue = !!context.payload.issue;
+            const isPR = !!context.payload.pull_request;
+            
+            let itemToLabel;
+            let itemNumber;
+            
+            if (isIssue) {
+              itemToLabel = context.payload.issue;
+              itemNumber = context.issue.number;
+            } else if (isPR) {
+              itemToLabel = context.payload.pull_request;
+              itemNumber = context.payload.pull_request.number;
+            } else {
+              console.log("Not an issue or PR event, exiting");
+              return;
+            }
+            
+            const labelsToAdd = [];
+            
+            // Define label mappings based on brackets in title
+            let labelMappings;
+            
+            if (isIssue) {
+              // Issue label mappings (original set)
+              labelMappings = {
+                "[bug]": "bug",
+                "[feature]": "enhancement",
+                "[docs]": "documentation",
+                "[dpdk]": "dpdk",              
+                "[bmv2]": "bmv2",              
+                "[P4Testgen]": "p4tools",
+                "[P4Smith]": "p4tools",
+                "[P4tools]": "p4tools",
+                "[Tofino]":"tofino",
+                "[p4tc]": "p4tc",
+                "[p4fmt]": "p4fmt",
+                "[core]":"core",
+                "[p4-spec]": "p4-spec",
+                "[control-plane]": "control-plane",
+                "[P4runtime]":"control-plane",
+                "[frontend]":"core",
+                "[midend]":"core",
+                "[parser]":"core",
+              };
+            } else {
+              // PR label mappings (only the ones you want for PRs)
+              labelMappings = {
+                "[core]":"core",
+                "[midend]":"core",
+                "[parser]":"core",
+                "[dpdk]": "dpdk",  
+                "[p4-spec]": "p4-spec",
+                "[tofino]":"tofino",
+                "[bmv2]":"bmv2",
+                "[docs]":"documentation",
+                "[documentation]":"documentation",
+                "[P4Testgen]": "p4tools",
+                "[P4Smith]": "p4tools",
+                "[P4tools]": "p4tools",
+                "[control-plane]": "control-plane",
+                "[P4runtime]":"control-plane",
+                "[p4tc]": "p4tc",
+                "[p4fmt]": "p4fmt",
+                // Add any other PR-specific labels here
+              };
+            }
+            
+            // Check if title contains bracketed keywords
+            const title = itemToLabel.title.toLowerCase();
+            for (const [keyword, label] of Object.entries(labelMappings)) {
+              if (title.includes(keyword.toLowerCase())) {
+                labelsToAdd.push(label);
+              }
+            }
+            
+            if (labelsToAdd.length > 0) {
+              if (isIssue) {
+                github.rest.issues.addLabels({
+                  issue_number: itemNumber,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  labels: labelsToAdd
+                });
+              } else {
+                // PRs use the issues API for labels
+                github.rest.issues.addLabels({
+                  issue_number: itemNumber,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  labels: labelsToAdd
+                });
+              }
+            }
