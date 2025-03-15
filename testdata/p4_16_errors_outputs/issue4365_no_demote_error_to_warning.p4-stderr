@@ -1,0 +1,81 @@
+[--Werror=invalid] error: Error type-error cannot be demoted.
+(from pragmas): Compile a P4 program
+--help                                  Print this help message
+--version                               Print compiler version
+-I path                                 Specify include path (passed to preprocessor)
+-D arg=value                            Define macro (passed to preprocessor)
+-U arg                                  Undefine macro (passed to preprocessor)
+-E                                      Preprocess only, do not compile (prints program on stdout)
+-M                                      Output `make` dependency rule only (passed to preprocessor)
+-MD                                     Output `make` dependency rule to file as side effect (passed to preprocessor)
+-MF file                                With -M, specify output file for dependencies (passed to preprocessor)
+-MG                                     with -M, suppress errors for missing headers (passed to preprocessor)
+-MP                                     with -M, add phony target for each dependency (passed to preprocessor)
+-MT target                              With -M, override target of the output rule (passed to preprocessor)
+-MQ target                              Like -Mt, override target but quote special characters (passed to preprocessor)
+--std {p4-14|p4-16}                     Specify language version to compile.
+--nocpp                                 Skip preprocess, assume input file is already preprocessed.
+--disable-annotations[=annotations]     Specify a (comma separated) list of annotations that should be ignored by
+                                        the compiler. A warning will be printed that the annotation is ignored
+--Wdisable[=diagnostic]                 Disable a compiler diagnostic, or disable all warnings if no diagnostic is specified.
+--Winfo[=diagnostic]                    Report an info message for a compiler diagnostic.
+--Wwarn[=diagnostic]                    Report a warning for a compiler diagnostic, or treat all info messages as warnings if no diagnostic is specified.
+--Werror[=diagnostic]                   Report an error for a compiler diagnostic, or treat all warnings as errors if no diagnostic is specified.
+--maxErrorCount errorCount              Set the maximum number of errors to display before failing.
+-T loglevel                             [Compiler debugging] Adjust logging level per file (see below)
+-v                                      [Compiler debugging] Increase verbosity level (can be repeated)
+--top4 pass1[,pass2]                    [Compiler debugging] Dump the P4 representation after
+                                        passes whose name contains one of `passX' regex substrings. Matching is case-insensitive.
+                                        When '-v' is used this will include the compiler IR.
+--dump folder                           [Compiler debugging] Folder where P4 programs are dumped
+--parser-inline-opt                     Enable optimization of inlining of callee parsers (subparsers).
+                                        The optimization is disabled by default.
+                                        When the optimization is disabled, for each invocation of the subparser
+                                        all states of the subparser are inlined, which means that the subparser
+                                        might be inlined multiple times even if it is the same instance
+                                        which is invoked multiple times.
+                                        When the optimization is enabled, compiler tries to identify the cases,
+                                        when it can inline the subparser's states only once for multiple
+                                        invocations of the same subparser instance.
+--doNotEmitIncludes                     [Compiler debugging] If true do not generate #include statements
+--excludeFrontendPasses pass1[,pass2]   Exclude passes from frontend passes whose name is equal
+                                        to one of `passX' strings.
+--listFrontendPasses                    List exact names of all frontend passes
+--excludeMidendPasses pass1[,pass2]     Exclude passes from midend passes whose name is equal
+                                        to one of `passX' strings.
+--toJSON file                           Dump the compiler IR after the midend as JSON in the specified file.
+--ndebug                                Compile program in non-debug mode.
+--testJson                              [Compiler debugging] Dump and undump the IR
+--pp file                               Pretty-print the program in the specified file.
+--p4runtime-file file                   Write a P4Runtime control plane API description to the specified file.
+                                        [Deprecated; use '--p4runtime-files' instead].
+--p4runtime-entries-file file           Write static table entries as a P4Runtime WriteRequest messageto the specified file.
+                                        [Deprecated; use '--p4runtime-entries-files' instead].
+--p4runtime-files filelist              Write the P4Runtime control plane API description to the specified
+                                        files (comma-separated list). The format is inferred from the file
+                                        suffix: .txt, .json, .bin
+--p4runtime-entries-files files         Write static table entries as a P4Runtime WriteRequest message
+                                        to the specified files (comma-separated list); the file format is
+                                        inferred from the suffix. Legal suffixes are .json, .txt and .bin
+--p4runtime-format {binary,json,text}   Choose output format for the P4Runtime API description (default is binary).
+                                        [Deprecated; use '--p4runtime-files' instead].
+--target target                         Compile for the specified target device.
+--arch arch                             Compile for the specified architecture.
+--loopsUnroll                           Unrolling all parser's loops
+-O                                      Optimization level
+--listMidendPasses                      [p4test] Lists exact name of all midend passes.
+--parse-only                            only parse the P4 input, without any further processing
+--validate                              Validate the P4 input, running just the front-end
+--fromJSON file                         read previously dumped json instead of P4 source code
+--turn-off-logn                         Turn off LOGN() statements in the compiler.
+                                        Use '@__debug' annotation to enable LOGN on the annotated P4 object within the source code.
+--preferSwitch                          use passes that use general switch instead of action_run
+Additional usage instructions:
+loglevel format is: "sourceFile:level,...,sourceFile:level"
+where 'sourceFile' is a compiler source file and 'level' is the verbosity level for LOG messages in that file
+issue4365_no_demote_error_to_warning.p4(4): [--Werror=invalid] error: Invalid parser state: accept should not be implemented, it is built-in
+    state accept {
+          ^^^^^^
+issue4365_no_demote_error_to_warning.p4(3): [--Werror=invalid] error: Parser p has no 'start' state
+parser p() {
+       ^

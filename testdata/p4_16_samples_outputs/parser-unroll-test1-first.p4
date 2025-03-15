@@ -2,7 +2,7 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-const bit<16> TYPE_IPV4 = 16w0x800;
+@command_line("--loopsUnroll") const bit<16> TYPE_IPV4 = 16w0x800;
 const bit<16> TYPE_SRCROUTING = 16w0x1234;
 const bit<16> MAX_HOPS = 16w3;
 typedef bit<9> egressSpec_t;

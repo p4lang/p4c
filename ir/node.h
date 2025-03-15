@@ -148,6 +148,7 @@ class Node : public virtual INode {
     cstring toString() const override { return node_type_name(); }
     void toJSON(JSONGenerator &json) const override;
     void sourceInfoToJSON(JSONGenerator &json) const;
+    void sourceInfoFromJSON(JSONLoader &json);
     Util::JsonObject *sourceInfoJsonObj() const;
     /* operator== does a 'shallow' comparison, comparing two Node subclass objects for equality,
      * and comparing pointers in the Node directly for equality */
@@ -159,8 +160,8 @@ class Node : public virtual INode {
     virtual bool operator==(const CLASS &) const { return false; }
     IRNODE_ALL_SUBCLASSES(DEFINE_OPEQ_FUNC)
 #undef DEFINE_OPEQ_FUNC
-    virtual void visit_children(Visitor &) {}
-    virtual void visit_children(Visitor &) const {}
+    virtual void visit_children(Visitor &, const char * /*name*/ = nullptr) {}
+    virtual void visit_children(Visitor &, const char * /*name*/ = nullptr) const {}
 
     bool operator!=(const Node &n) const { return !operator==(n); }
 

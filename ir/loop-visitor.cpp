@@ -50,8 +50,8 @@ void IR::ForStatement::visit_children(THIS *self, Visitor &v) {
     }
 }
 
-void IR::ForStatement::visit_children(Visitor &v) { visit_children(this, v); }
-void IR::ForStatement::visit_children(Visitor &v) const { visit_children(this, v); }
+void IR::ForStatement::visit_children(Visitor &v, const char *) { visit_children(this, v); }
+void IR::ForStatement::visit_children(Visitor &v, const char *) const { visit_children(this, v); }
 
 template <class THIS>
 void IR::ForInStatement::visit_children(THIS *self, Visitor &v) {
@@ -73,27 +73,27 @@ void IR::ForInStatement::visit_children(THIS *self, Visitor &v) {
         v.visit(self->body, "body", 3);
     }
 }
-void IR::ForInStatement::visit_children(Visitor &v) { visit_children(this, v); }
-void IR::ForInStatement::visit_children(Visitor &v) const { visit_children(this, v); }
+void IR::ForInStatement::visit_children(Visitor &v, const char *) { visit_children(this, v); }
+void IR::ForInStatement::visit_children(Visitor &v, const char *) const { visit_children(this, v); }
 
-void IR::BreakStatement::visit_children(Visitor &v) const {
+void IR::BreakStatement::visit_children(Visitor &v, const char *) const {
     if (auto *cfv = v.controlFlowVisitor()) {
         cfv->flow_merge_global_to("-BREAK-"_cs);
         cfv->setUnreachable();
     }
 }
-void IR::BreakStatement::visit_children(Visitor &v) {
-    return const_cast<const IR::BreakStatement *>(this)->visit_children(v);
+void IR::BreakStatement::visit_children(Visitor &v, const char *name) {
+    return const_cast<const IR::BreakStatement *>(this)->visit_children(v, name);
 }
 
-void IR::ContinueStatement::visit_children(Visitor &v) const {
+void IR::ContinueStatement::visit_children(Visitor &v, const char *) const {
     if (auto *cfv = v.controlFlowVisitor()) {
         cfv->flow_merge_global_to("-CONTINUE-"_cs);
         cfv->setUnreachable();
     }
 }
-void IR::ContinueStatement::visit_children(Visitor &v) {
-    return const_cast<const IR::ContinueStatement *>(this)->visit_children(v);
+void IR::ContinueStatement::visit_children(Visitor &v, const char *name) {
+    return const_cast<const IR::ContinueStatement *>(this)->visit_children(v, name);
 }
 
 }  // namespace P4

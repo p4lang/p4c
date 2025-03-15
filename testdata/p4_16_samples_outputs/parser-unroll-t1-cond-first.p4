@@ -2,7 +2,7 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-typedef bit<48> MacAddress;
+@command_line("--loopsUnroll") typedef bit<48> MacAddress;
 typedef bit<32> ip4Addr_t;
 typedef bit<128> IPv6Address;
 header ethernet_h {

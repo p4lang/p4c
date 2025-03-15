@@ -38,7 +38,8 @@ void DiscoverFunctionsInlining::postorder(const IR::MethodCallExpression *mce) {
     CHECK_NULL(stat);
 
     BUG_CHECK(
-        bool(RTTI::isAny<IR::MethodCallStatement, IR::AssignmentStatement, IR::IfStatement>(stat)),
+        bool(RTTI::isAny<IR::MethodCallStatement, IR::BaseAssignmentStatement, IR::IfStatement>(
+            stat)),
         "%1%: unexpected statement with call", stat);
 
     if (const auto *ifStat = stat->to<IR::IfStatement>()) {
@@ -173,8 +174,8 @@ void FunctionsInliner::dumpReplacementMap() const {
         LOG2("\t" << it.first << " with " << it.second.first << " via " << it.second.second);
 }
 
-const IR::Node *FunctionsInliner::preorder(IR::AssignmentStatement *statement) {
-    auto orig = getOriginal<IR::AssignmentStatement>();
+const IR::Node *FunctionsInliner::preorder(IR::BaseAssignmentStatement *statement) {
+    auto orig = getOriginal<IR::BaseAssignmentStatement>();
     LOG2("Visiting " << dbp(orig));
 
     auto replMap = getReplacementMap();
@@ -200,7 +201,7 @@ const IR::Node *FunctionsInliner::preorder(IR::IfStatement *statement) {
 
 const IR::Node *FunctionsInliner::preorder(IR::P4Parser *parser) {
     if (preCaller()) {
-        parser->visit_children(*this);
+        parser->visit_children(*this, parser->name.name.c_str());
         return postCaller(parser);
     } else {
         return parser;
@@ -211,14 +212,14 @@ const IR::Node *FunctionsInliner::preorder(IR::P4Control *control) {
     bool hasWork = preCaller();
     // We always visit the children: there may be function calls in
     // actions within the control
-    control->visit_children(*this);
+    control->visit_children(*this, control->name.name.c_str());
     if (hasWork) return postCaller(control);
     return control;
 }
 
 const IR::Node *FunctionsInliner::preorder(IR::Function *function) {
     if (preCaller()) {
-        function->visit_children(*this);
+        function->visit_children(*this, function->name.name.c_str());
         return postCaller(function);
     } else {
         return function;
@@ -227,7 +228,7 @@ const IR::Node *FunctionsInliner::preorder(IR::Function *function) {
 
 const IR::Node *FunctionsInliner::preorder(IR::P4Action *action) {
     if (preCaller()) {
-        action->visit_children(*this);
+        action->visit_children(*this, action->name.name.c_str());
         return postCaller(action);
     } else {
         return action;
@@ -275,13 +276,13 @@ const IR::Statement *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
             subst.add(param, argument);
         } else if (param->direction == IR::Direction::In ||
                    param->direction == IR::Direction::InOut) {
-            auto vardecl = new IR::Declaration_Variable(newName, param->annotations, param->type);
+            auto vardecl = new IR::Declaration_Variable(argument->srcInfo, newName,
+                                                        param->annotations, param->type);
             body.push_back(vardecl);
             auto copyin =
                 new IR::AssignmentStatement(new IR::PathExpression(newName), argument->expression);
             body.push_back(copyin);
-            subst.add(param, new IR::Argument(argument->srcInfo, argument->name,
-                                              new IR::PathExpression(newName)));
+            subst.add(param, new IR::Argument(argument->name, new IR::PathExpression(newName)));
             if (param->direction == IR::Direction::InOut)
                 needCopyout.emplace_back(newName, argument);
         } else if (param->direction == IR::Direction::None) {
@@ -290,9 +291,9 @@ const IR::Statement *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
             subst.add(param, argument);
         } else if (param->direction == IR::Direction::Out) {
             // uninitialized variable
-            auto vardecl = new IR::Declaration_Variable(newName, param->annotations, param->type);
-            subst.add(param, new IR::Argument(argument->srcInfo, argument->name,
-                                              new IR::PathExpression(newName)));
+            auto vardecl = new IR::Declaration_Variable(argument->srcInfo, newName,
+                                                        param->annotations, param->type);
+            subst.add(param, new IR::Argument(argument->name, new IR::PathExpression(newName)));
             body.push_back(vardecl);
             needCopyout.emplace_back(newName, argument);
         }
@@ -318,7 +319,25 @@ const IR::Statement *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
         body.push_back(copyout);
     }
 
-    if (auto assign = statement->to<IR::AssignmentStatement>()) {
+    // copy return value, if any. Return value could be a PathExpression, so if the same
+    // function is inlined several times we can have wrong path references, e.g.
+    // for code: a = f(b) + f(c) we'll end with something like this without this:
+    // {  <body1>;
+    //    retval = <something1>;
+    //    { <body2>
+    //      retval = <something2>
+    //      a = retval + retval;
+    //    }
+    // }
+    if (retExpr) {
+        cstring newName = nameGen->newName("inlinedRetval");
+        body.push_back(new IR::Declaration_Variable(newName, funclone->type->returnType));
+        auto right = new IR::PathExpression(newName);
+        body.push_back(new IR::AssignmentStatement(right, retExpr));
+        retExpr = right;
+    }
+
+    if (auto assign = statement->to<IR::BaseAssignmentStatement>()) {
         // copy the return value
         CHECK_NULL(retExpr);
         // If we can replace RHS immediately, do it here, otherwise add return
@@ -343,7 +362,10 @@ const IR::Statement *FunctionsInliner::inlineBefore(const IR::Node *calleeNode,
         // ignore the returned value.
     }
 
-    auto result = new IR::BlockStatement(statement->srcInfo, body);
+    IR::Vector<IR::Annotation> annotations(
+        {new IR::Annotation(statement->srcInfo, IR::Annotation::inlinedFromAnnotation,
+                            {new IR::StringLiteral(callee->name.originalName)})});
+    auto result = new IR::BlockStatement(statement->srcInfo, annotations, body);
     LOG2("Replacing " << dbp(statement) << " with " << dbp(result));
     return result;
 }

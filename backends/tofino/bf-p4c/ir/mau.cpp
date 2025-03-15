@@ -35,8 +35,8 @@ namespace MAU {
 
 // These must be implemented here because C++ requires the definitions and instantiations of
 // function templates to be in the same compilation unit.
-void Table::visit_children(Visitor &v) { visit_children(this, v); }
-void Table::visit_children(Visitor &v) const { visit_children(this, v); }
+void Table::visit_children(Visitor &v, const char *n) { visit_children(this, v, n); }
+void Table::visit_children(Visitor &v, const char *n) const { visit_children(this, v, n); }
 
 /**
  * The potential control flow(s) through an IR::MAU::Table object are quite complex, which
@@ -90,7 +90,7 @@ struct Table::payload_info_t {
 };
 
 template <class THIS>
-void Table::visit_children(THIS *self, Visitor &v) {
+void Table::visit_children(THIS *self, Visitor &v, const char *n) {
     // We visit the table in a way that reflects its control flow: at branches, we visit with
     // clones of the visitor; at join points, we merge the clones back together. IMPORTANT: we must
     // ensure that each node is visited exactly once.
@@ -123,17 +123,17 @@ void Table::visit_children(THIS *self, Visitor &v) {
 
     if (have_gateway_payload && have_match_table) {
         auto &gateway_visitor = v.flow_clone();
-        visit_gateway_inhibited(self, gateway_visitor, payload_info);
-        visit_match_table(self, v, payload_info);
+        visit_gateway_inhibited(self, gateway_visitor, n, payload_info);
+        visit_match_table(self, v, n, payload_info);
         v.flow_merge(gateway_visitor);
     } else if (have_gateway_payload) {
-        visit_gateway_inhibited(self, v, payload_info);
+        visit_gateway_inhibited(self, v, n, payload_info);
         BUG_CHECK(payload_info.action_info.empty(),
                   "non-empty action info on conditional_gateway_only");
         BUG_CHECK(payload_info.post_payload == nullptr || payload_info.post_payload == &v,
                   "inconsistent post-payload for conditional_gateway_only");
     } else if (have_match_table) {
-        visit_match_table(self, v, payload_info);
+        visit_match_table(self, v, n, payload_info);
     } else {
         // Have neither a gateway payload nor a match table. This table is a no-op; fall through to
         // attached tables.
@@ -145,11 +145,12 @@ void Table::visit_children(THIS *self, Visitor &v) {
     // FIXME -- the next tables that happen after those actions?
     // FIXME -- If the actions contain references to them, then they'll be visited when
     // FIXME -- the action is visited, and this will be a 'revisit'
-    self->attached.visit_children(v);
+    self->attached.visit_children(v, n);
 }
 
 template <class THIS>
-void Table::visit_gateway_inhibited(THIS *self, Visitor &v, payload_info_t &payload_info) {
+void Table::visit_gateway_inhibited(THIS *self, Visitor &v, const char *,
+                                    payload_info_t &payload_info) {
     // Now, visit actions for when the table is gateway-inhibited.
 
     // Save the control-flow state. We use v to visit the first execution path through the gateway
@@ -286,9 +287,9 @@ class SplitFlowVisitTableNext : public SplitFlowVisit_base {
 };
 
 template <class THIS>
-void Table::visit_match_table(THIS *self, Visitor &v, payload_info_t &payload_info) {
+void Table::visit_match_table(THIS *self, Visitor &v, const char *n, payload_info_t &payload_info) {
     // Visit match keys.
-    self->match_key.visit_children(v);
+    self->match_key.visit_children(v, n);
 
     // Save the current control-flow state. We use v to visit the first execution path through the
     // table. On subsequent paths, we visit with a copy of this saved state, and merge the result

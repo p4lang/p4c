@@ -110,8 +110,17 @@ IR::Node *HSIndexContretizer::eliminateArrayIndexes(HSIndexFinder &aiFinder,
         } else {
             pathExpr = generatedVariables->at(typeString);
         }
-        auto *newStatement =
-            new IR::AssignmentStatement(aiFinder.arrayIndex->srcInfo, expr, pathExpr);
+        IR::BaseAssignmentStatement *newStatement;
+        if (auto *oldAssign = statement->to<IR::OpAssignmentStatement>()) {
+            newStatement = oldAssign->clone();
+            newStatement->srcInfo = aiFinder.arrayIndex->srcInfo;
+            newStatement->left = expr;
+            newStatement->right = pathExpr;
+        } else {
+            newStatement =
+                new IR::AssignmentStatement(aiFinder.arrayIndex->srcInfo, expr, pathExpr);
+        }
+
         auto *newCondition = new IR::Geq(
             aiFinder.newVariable, new IR::Constant(aiFinder.arrayIndex->right->type, sz - 1));
         newIf = new IR::IfStatement(newCondition, newStatement, nullptr);
@@ -122,7 +131,7 @@ IR::Node *HSIndexContretizer::eliminateArrayIndexes(HSIndexFinder &aiFinder,
     return new IR::BlockStatement(newComponents);
 }
 
-IR::Node *HSIndexContretizer::preorder(IR::AssignmentStatement *assignmentStatement) {
+IR::Node *HSIndexContretizer::preorder(IR::BaseAssignmentStatement *assignmentStatement) {
     HSIndexFinder aiFinder(locals, nameGen, typeMap, generatedVariables);
     assignmentStatement->left->apply(aiFinder);
     if (aiFinder.arrayIndex == nullptr) {

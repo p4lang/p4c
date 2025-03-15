@@ -1,0 +1,12 @@
+#!/bin/bash
+
+BRIDGE_IP=$1
+
+brctl addbr br1 
+ip link set dev br1 up
+
+ip tuntap add dev taptc mode tap
+brctl addif br1 taptc
+ip link set dev taptc up
+
+ip a add $BRIDGE_IP/24 dev br1

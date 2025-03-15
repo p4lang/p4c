@@ -51,7 +51,9 @@ const IrClass *NamedType::resolve(const IrNamespace *in) const {
         if (!in) return nullptr;
         if (auto *found = in->lookupClass(name)) {
             foundin = in;
-            return (resolved = found);
+            resolved = found;
+            found->resolve();
+            return resolved;
         }
         if (in->lookupOther(name)) {
             foundin = in;
@@ -61,7 +63,9 @@ const IrClass *NamedType::resolve(const IrNamespace *in) const {
     while (in) {
         if (auto *found = in->lookupClass(name)) {
             foundin = in;
-            return (resolved = found);
+            resolved = found;
+            found->resolve();
+            return resolved;
         }
         if (in->lookupOther(name)) {
             foundin = in;
@@ -124,6 +128,11 @@ NamedType &NamedType::JSONObject() {
 
 NamedType &NamedType::SourceInfo() {
     static NamedType nt(new LookupScope("Util"_cs), "SourceInfo"_cs);
+    return nt;
+}
+
+NamedType &NamedType::Char() {
+    static NamedType nt("char"_cs);
     return nt;
 }
 

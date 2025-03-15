@@ -60,7 +60,7 @@ struct GetHeaderStackIndex : public Inspector {
 
     bool preorder(const IR::HeaderStackItemRef *ref) override {
         if (ignore_valid) {
-            auto stmt = findContext<IR::AssignmentStatement>();
+            auto stmt = findContext<IR::BaseAssignmentStatement>();
             if (stmt) {
                 auto lhs = stmt->left->to<IR::Member>();
                 // Ignore any prior change to $valid

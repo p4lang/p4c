@@ -542,7 +542,7 @@ class FixPktgenHeaderPath : public RenameFieldPath {
 class FixParserPriority : public Transform {
  public:
     FixParserPriority() {}
-    IR::Node *preorder(IR::AssignmentStatement *assign) override;
+    IR::Node *preorder(IR::BaseAssignmentStatement *assign) override;
 };
 
 class ParserCounterSelectCaseConverter : public Transform {
@@ -1170,7 +1170,7 @@ class ModifyParserForChecksum : public Modifier {
         if (!inst->is<P4::ExternMethod>()) return;
         auto em = inst->to<P4::ExternMethod>();
         if (em->actualExternType->name != "Checksum" || em->method->name != "update") return;
-        auto assign = findOrigCtxt<IR::AssignmentStatement>();
+        auto assign = findOrigCtxt<IR::BaseAssignmentStatement>();
         if (assign == nullptr) return;
         auto destField = assign->left;
         // auto parser = findContext<IR::P4Control>();

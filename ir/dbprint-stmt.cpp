@@ -41,6 +41,12 @@ void IR::AssignmentStatement::dbprint(std::ostream &out) const {
     if (!prec) out << ';';
 }
 
+void IR::OpAssignmentStatement::dbprint(std::ostream &out) const {
+    int prec = getprec(out);
+    out << Prec_Low << left << " " << getStringOp() << "= " << right << setprec(prec);
+    if (!prec) out << ';';
+}
+
 void IR::IfStatement::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     out << Prec_Low << "if (" << condition << ") {" << indent << setprec(0) << Log::endl << ifTrue;

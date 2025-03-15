@@ -55,7 +55,7 @@ int main(int argc, char *const argv[]) {
         return 1;
     }
     try {
-        P4::P4COptionPragmaParser optionsPragmaParser;
+        P4::P4COptionPragmaParser optionsPragmaParser(true);
         program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
         P4::FrontEnd frontend;
         frontend.addDebugHook(hook);
@@ -83,7 +83,7 @@ int main(int argc, char *const argv[]) {
             return 1;
         }
         if (!options.dumpJsonFile.empty())
-            JSONGenerator(*openFile(options.dumpJsonFile, true)) << toplevel << std::endl;
+            JSONGenerator(*openFile(options.dumpJsonFile, true)).emit(toplevel);
     } catch (const Util::P4CExceptionBase &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;

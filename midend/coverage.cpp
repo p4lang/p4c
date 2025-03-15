@@ -16,7 +16,7 @@ bool SourceIdCmp::operator()(const IR::Node *s1, const IR::Node *s2) const {
 
 CollectNodes::CollectNodes(CoverageOptions coverageOptions) : coverageOptions(coverageOptions) {}
 
-bool CollectNodes::preorder(const IR::AssignmentStatement *stmt) {
+bool CollectNodes::preorder(const IR::BaseAssignmentStatement *stmt) {
     // Only track statements, which have a valid source position in the P4 program.
     if (coverageOptions.coverStatements && stmt->getSourceInfo().isValid()) {
         coverableNodes.insert(stmt);

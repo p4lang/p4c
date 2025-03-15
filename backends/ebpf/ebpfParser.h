@@ -62,6 +62,7 @@ class StateTranslationVisitor : public CodeGenInspector {
         builder->endOfStatement(true);
         return false;
     }
+    bool preorder(const IR::BaseAssignmentStatement *stat) override { return notSupported(stat); }
     bool preorder(const IR::AssignmentStatement *stat) override;
 };
 

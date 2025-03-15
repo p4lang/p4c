@@ -21,13 +21,15 @@ namespace P4 {
 ParseAnnotations::HandlerMap ParseAnnotations::standardHandlers() {
     return {
         // These annotations have empty bodies.
-        PARSE_EMPTY(IR::Annotation::tableOnlyAnnotation),
+        PARSE_EMPTY(IR::Annotation::atomicAnnotation),
         PARSE_EMPTY(IR::Annotation::defaultOnlyAnnotation),
         PARSE_EMPTY(IR::Annotation::hiddenAnnotation),
-        PARSE_EMPTY(IR::Annotation::atomicAnnotation),
+        PARSE_EMPTY(IR::Annotation::likelyAnnotation),
+        PARSE_EMPTY(IR::Annotation::noSideEffectsAnnotation),
         PARSE_EMPTY(IR::Annotation::optionalAnnotation),
         PARSE_EMPTY(IR::Annotation::pureAnnotation),
-        PARSE_EMPTY(IR::Annotation::noSideEffectsAnnotation),
+        PARSE_EMPTY(IR::Annotation::tableOnlyAnnotation),
+        PARSE_EMPTY(IR::Annotation::unlikelyAnnotation),
         PARSE_EMPTY("disable_optimization"_cs),
         PARSE_EMPTY("unroll"_cs),
         PARSE_EMPTY("nounroll"_cs),
@@ -51,6 +53,9 @@ ParseAnnotations::HandlerMap ParseAnnotations::standardHandlers() {
 
         // @match has an expression argument
         PARSE(IR::Annotation::matchAnnotation, Expression),
+
+        // @command_line to add to the command line
+        PARSE_STRING_LITERAL_LIST("command_line"_cs),
     };
 }
 

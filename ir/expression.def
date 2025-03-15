@@ -73,40 +73,103 @@ class Mul : Operation_Binary {
     stringOp = "*";
     precedence = DBPrint::Prec_Mul;
 }
+class MulAssign : OpAssignmentStatement {
+#emit
+    typedef Mul BinOp;
+#end
+    stringOp = "*";
+#nodbprint
+}
 
 class Div : Operation_Binary {
     stringOp = "/";
     precedence = DBPrint::Prec_Div;
 }
+class DivAssign : OpAssignmentStatement {
+#emit
+    typedef Div BinOp;
+#end
+    stringOp = "/";
+#nodbprint
+}
 class Mod : Operation_Binary {
     stringOp = "%";
     precedence = DBPrint::Prec_Mod;
+}
+class ModAssign : OpAssignmentStatement {
+#emit
+    typedef Mod BinOp;
+#end
+    stringOp = "%";
+#nodbprint
 }
 class Add : Operation_Binary {
     stringOp = "+";
     precedence = DBPrint::Prec_Add;
 }
+class AddAssign : OpAssignmentStatement {
+#emit
+    typedef Add BinOp;
+#end
+    stringOp = "+";
+#nodbprint
+}
 class Sub : Operation_Binary {
     stringOp = "-";
     precedence = DBPrint::Prec_Sub;
+}
+class SubAssign : OpAssignmentStatement {
+#emit
+    typedef Sub BinOp;
+#end
+    stringOp = "-";
+#nodbprint
 }
 class AddSat : Operation_Binary {
     stringOp = "|+|";
     precedence = DBPrint::Prec_AddSat;
 }
+class AddSatAssign : OpAssignmentStatement {
+#emit
+    typedef AddSat BinOp;
+#end
+    stringOp = "|+|";
+#nodbprint
+}
 class SubSat : Operation_Binary {
     stringOp = "|-|";
     precedence = DBPrint::Prec_SubSat;
+}
+class SubSatAssign : OpAssignmentStatement {
+#emit
+    typedef SubSat BinOp;
+#end
+    stringOp = "|-|";
+#nodbprint
 }
 class Shl : Operation_Binary {
     stringOp = "<<";
     precedence = DBPrint::Prec_Shl;
     inline Shl { if (type->is<Type::Unknown>() && left) type = left->type; }
 }
+class ShlAssign : OpAssignmentStatement {
+#emit
+    typedef Shl BinOp;
+#end
+    stringOp = "<<";
+#nodbprint
+}
 class Shr : Operation_Binary {
     stringOp = ">>";
     precedence = DBPrint::Prec_Shr;
     inline Shr { if (type->is<Type::Unknown>() && left) type = left->type; }
+}
+class ShrAssign : OpAssignmentStatement {
+#emit
+    typedef Shr BinOp;
+#end
+    stringOp = ">>";
+#nodbprint
 }
 class Equ : Operation_Relation {
     stringOp = "==";
@@ -136,13 +199,34 @@ class BAnd : Operation_Binary {
     stringOp = "&";
     precedence = DBPrint::Prec_BAnd;
 }
+class BAndAssign : OpAssignmentStatement {
+#emit
+    typedef BAnd BinOp;
+#end
+    stringOp = "&";
+#nodbprint
+}
 class BOr : Operation_Binary {
     stringOp = "|";
     precedence = DBPrint::Prec_BOr;
 }
+class BOrAssign : OpAssignmentStatement {
+#emit
+    typedef BOr BinOp;
+#end
+    stringOp = "|";
+#nodbprint
+}
 class BXor : Operation_Binary {
     stringOp = "^";
     precedence = DBPrint::Prec_BXor;
+}
+class BXorAssign : OpAssignmentStatement {
+#emit
+    typedef BXor BinOp;
+#end
+    stringOp = "^";
+#nodbprint
 }
 class LAnd : Operation_Binary {
     stringOp = "&&";
@@ -279,7 +363,7 @@ class Constant : Literal {
         }
         return Util::toString(value, width, sign, base);
     }
-    visit_children { v.visit(type, "type"); }
+    visit_children { (void)n; v.visit(type, "type"); }
 }
 
 class BoolLiteral : Literal {
@@ -413,6 +497,7 @@ class Mux : Operation_Ternary {
     stringOp = "?:";
     precedence = DBPrint::Prec_Low;
     visit_children {
+        (void)n;
         v.visit(e0, "e0");
         SplitFlowVisit<Expression>(v, e1, e2).run_visit(); }
     inline Mux { if (type->is<Type::Unknown>() && e1 && e2 && e1->type == e2->type) type = e1->type; }
@@ -450,6 +535,7 @@ class SelectExpression : Expression {
     ListExpression            select;
     inline Vector<SelectCase> selectCases;
     visit_children {
+        (void)n;
         v.visit(select, "select");
         SplitFlowVisitVector<SelectCase>(v, selectCases).run_visit(); }
 }

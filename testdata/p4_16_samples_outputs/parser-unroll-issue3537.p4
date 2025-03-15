@@ -2,7 +2,7 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-header h1_t {
+@command_line("--loopsUnroll") header h1_t {
 }
 
 header h2_t {

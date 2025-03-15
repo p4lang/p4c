@@ -920,6 +920,16 @@ bool P4Formatter::preorder(const IR::AssignmentStatement *a) {
     return false;
 }
 
+bool P4Formatter::preorder(const IR::OpAssignmentStatement *a) {
+    visit(a->left);
+    builder.append(" ");
+    builder.append(a->getStringOp());
+    builder.append("= ");
+    visit(a->right);
+    builder.endOfStatement();
+    return false;
+}
+
 bool P4Formatter::preorder(const IR::BlockStatement *s) {
     if (printAnnotations(s)) builder.spc();
     builder.blockStart();
