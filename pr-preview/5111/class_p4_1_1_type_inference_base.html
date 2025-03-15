@@ -164,6 +164,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:ad19fdff8ca69b0c65bd2f76f72717835" id="r_ad19fdff8ca69b0c65bd2f76f72717835"><td class="memItemLeft" align="right" valign="top"><a id="ad19fdff8ca69b0c65bd2f76f72717835" name="ad19fdff8ca69b0c65bd2f76f72717835"></a>
 &#160;</td><td class="memItemRight" valign="bottom"><b>TypeInferenceBase</b> (<a class="el" href="class_p4_1_1_type_map.html">TypeMap</a> *typeMap, bool readOnly=false, bool checkArrays=true, bool errorOnNullDecls=false)</td></tr>
 <tr class="separator:ad19fdff8ca69b0c65bd2f76f72717835"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9d53ce6fa3c41eb8e7e474cdd2af768e" id="r_a9d53ce6fa3c41eb8e7e474cdd2af768e"><td class="memItemLeft" align="right" valign="top"><a id="a9d53ce6fa3c41eb8e7e474cdd2af768e" name="a9d53ce6fa3c41eb8e7e474cdd2af768e"></a>
+const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>common_assign</b> (const IR::BaseAssignmentStatement *stat, const IR::Type *)</td></tr>
+<tr class="separator:a9d53ce6fa3c41eb8e7e474cdd2af768e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4198eaae3a90606b84b5783c71ddb4dd" id="r_a4198eaae3a90606b84b5783c71ddb4dd"><td class="memItemLeft" align="right" valign="top"><a id="a4198eaae3a90606b84b5783c71ddb4dd" name="a4198eaae3a90606b84b5783c71ddb4dd"></a>
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>compare</b> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *errorPosition, const IR::Type *ltype, const IR::Type *rtype, <a class="el" href="#struct_p4_1_1_type_inference_base_1_1_comparison">Comparison</a> *compare)</td></tr>
 <tr class="separator:a4198eaae3a90606b84b5783c71ddb4dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -309,6 +312,9 @@ const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</
 <tr class="memitem:aad51a03d8a7b0d6ec474ee83f8eedcb4" id="r_aad51a03d8a7b0d6ec474ee83f8eedcb4"><td class="memItemLeft" align="right" valign="top"><a id="aad51a03d8a7b0d6ec474ee83f8eedcb4" name="aad51a03d8a7b0d6ec474ee83f8eedcb4"></a>
 const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::Neg *expression)</td></tr>
 <tr class="separator:aad51a03d8a7b0d6ec474ee83f8eedcb4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a11e40b765c074973412f66abdfcf7edb" id="r_a11e40b765c074973412f66abdfcf7edb"><td class="memItemLeft" align="right" valign="top"><a id="a11e40b765c074973412f66abdfcf7edb" name="a11e40b765c074973412f66abdfcf7edb"></a>
+const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::OpAssignmentStatement *stat)</td></tr>
+<tr class="separator:a11e40b765c074973412f66abdfcf7edb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa1eaa4ee31d2dcaa214bbd6d0907c8cb" id="r_aa1eaa4ee31d2dcaa214bbd6d0907c8cb"><td class="memItemLeft" align="right" valign="top"><a id="aa1eaa4ee31d2dcaa214bbd6d0907c8cb" name="aa1eaa4ee31d2dcaa214bbd6d0907c8cb"></a>
 const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::Operation_Relation *expression)</td></tr>
 <tr class="separator:aa1eaa4ee31d2dcaa214bbd6d0907c8cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -360,9 +366,15 @@ const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</
 <tr class="memitem:a423c28bb2be4e98c6b987f6d402f2e4c" id="r_a423c28bb2be4e98c6b987f6d402f2e4c"><td class="memItemLeft" align="right" valign="top"><a id="a423c28bb2be4e98c6b987f6d402f2e4c" name="a423c28bb2be4e98c6b987f6d402f2e4c"></a>
 const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::Shl *expression)</td></tr>
 <tr class="separator:a423c28bb2be4e98c6b987f6d402f2e4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad16e7d74bd7472b0fbd51f51cd61b5cf" id="r_ad16e7d74bd7472b0fbd51f51cd61b5cf"><td class="memItemLeft" align="right" valign="top"><a id="ad16e7d74bd7472b0fbd51f51cd61b5cf" name="ad16e7d74bd7472b0fbd51f51cd61b5cf"></a>
+const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::ShlAssign *stat)</td></tr>
+<tr class="separator:ad16e7d74bd7472b0fbd51f51cd61b5cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3598ad195fc0f8b373887d8df7bbcecc" id="r_a3598ad195fc0f8b373887d8df7bbcecc"><td class="memItemLeft" align="right" valign="top"><a id="a3598ad195fc0f8b373887d8df7bbcecc" name="a3598ad195fc0f8b373887d8df7bbcecc"></a>
 const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::Shr *expression)</td></tr>
 <tr class="separator:a3598ad195fc0f8b373887d8df7bbcecc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab69e80a27ac226dcbf12f053ab0adf26" id="r_ab69e80a27ac226dcbf12f053ab0adf26"><td class="memItemLeft" align="right" valign="top"><a id="ab69e80a27ac226dcbf12f053ab0adf26" name="ab69e80a27ac226dcbf12f053ab0adf26"></a>
+const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::ShrAssign *stat)</td></tr>
+<tr class="separator:ab69e80a27ac226dcbf12f053ab0adf26"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a546cdd430556e77c1cdc7643753ace84" id="r_a546cdd430556e77c1cdc7643753ace84"><td class="memItemLeft" align="right" valign="top"><a id="a546cdd430556e77c1cdc7643753ace84" name="a546cdd430556e77c1cdc7643753ace84"></a>
 const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>postorder</b> (const IR::Slice *expression)</td></tr>
 <tr class="separator:a546cdd430556e77c1cdc7643753ace84"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -494,6 +506,9 @@ PreorderResult&#160;</td><td class="memItemRight" valign="bottom"><b>preorder</b
 <tr class="memitem:a9238fd2be3f0503534a1cf2d109d320a" id="r_a9238fd2be3f0503534a1cf2d109d320a"><td class="memItemLeft" align="right" valign="top"><a id="a9238fd2be3f0503534a1cf2d109d320a" name="a9238fd2be3f0503534a1cf2d109d320a"></a>
 <a class="el" href="class_p4_1_1_read_only_type_inference.html">ReadOnlyTypeInference</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>readOnlyClone</b> () const</td></tr>
 <tr class="separator:a9238fd2be3f0503534a1cf2d109d320a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5861c4653ec854621daccee4ff084941" id="r_a5861c4653ec854621daccee4ff084941"><td class="memItemLeft" align="right" valign="top"><a id="a5861c4653ec854621daccee4ff084941" name="a5861c4653ec854621daccee4ff084941"></a>
+const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>shiftAssign</b> (const IR::OpAssignmentStatement *stat)</td></tr>
+<tr class="separator:a5861c4653ec854621daccee4ff084941"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a577f4021ab4ec3a99fbc4023ea589a3d" id="r_a577f4021ab4ec3a99fbc4023ea589a3d"><td class="memItemLeft" align="right" valign="top"><a id="a577f4021ab4ec3a99fbc4023ea589a3d" name="a577f4021ab4ec3a99fbc4023ea589a3d"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>start</b> (const <a class="el" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *node)</td></tr>
 <tr class="separator:a577f4021ab4ec3a99fbc4023ea589a3d"><td class="memSeparator" colspan="2">&#160;</td></tr>

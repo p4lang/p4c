@@ -223,8 +223,8 @@ $(function(){initNavTree('nodemap_8h_source.html',''); initResizable(true); });
 <div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span>    <span class="keyword">static</span> <a class="code hl_class" href="class_p4_1_1cstring.html">cstring</a> static_type_name() {</div>
 <div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>        <span class="keywordflow">return</span> <span class="stringliteral">&quot;NodeMap&lt;&quot;</span> + KEY::static_type_name() + <span class="stringliteral">&quot;,&quot;</span> + VALUE::static_type_name() + <span class="stringliteral">&quot;&gt;&quot;</span>;</div>
 <div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span>    }</div>
-<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    <span class="keywordtype">void</span> visit_children(Visitor &amp;v) <span class="keyword">override</span>;</div>
-<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    <span class="keywordtype">void</span> visit_children(Visitor &amp;v) <span class="keyword">const override</span>;</div>
+<div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>    <span class="keywordtype">void</span> visit_children(Visitor &amp;v, <span class="keyword">const</span> <span class="keywordtype">char</span> *) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span>    <span class="keywordtype">void</span> visit_children(Visitor &amp;v, <span class="keyword">const</span> <span class="keywordtype">char</span> *) <span class="keyword">const override</span>;</div>
 <div class="line"><a id="l00096" name="l00096"></a><span class="lineno">   96</span> </div>
 <div class="line"><a id="l00097" name="l00097"></a><span class="lineno">   97</span>    DECLARE_TYPEINFO(<a class="code hl_class" href="class_p4_1_1_i_r_1_1_node_map.html">NodeMap</a>, Node);</div>
 <div class="line"><a id="l00098" name="l00098"></a><span class="lineno">   98</span>};</div>

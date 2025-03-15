@@ -664,7 +664,7 @@ $(function(){initNavTree('backends_2tofino_2bf-p4c_2arch_2fromv1_80_2program_str
 <div class="line"><a id="l00542" name="l00542"></a><span class="lineno"><a class="line" href="class_p4_1_1_p4_v1_1_1_fix_parser_priority.html">  542</a></span><span class="keyword">class </span>FixParserPriority : <span class="keyword">public</span> <a class="code hl_class" href="class_p4_1_1_transform.html">Transform</a> {</div>
 <div class="line"><a id="l00543" name="l00543"></a><span class="lineno">  543</span> <span class="keyword">public</span>:</div>
 <div class="line"><a id="l00544" name="l00544"></a><span class="lineno">  544</span>    FixParserPriority() {}</div>
-<div class="line"><a id="l00545" name="l00545"></a><span class="lineno">  545</span>    <a class="code hl_class" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *preorder(IR::AssignmentStatement *assign) <span class="keyword">override</span>;</div>
+<div class="line"><a id="l00545" name="l00545"></a><span class="lineno">  545</span>    <a class="code hl_class" href="class_p4_1_1_i_r_1_1_node.html">IR::Node</a> *preorder(IR::BaseAssignmentStatement *assign) <span class="keyword">override</span>;</div>
 <div class="line"><a id="l00546" name="l00546"></a><span class="lineno">  546</span>};</div>
 </div>
 <div class="line"><a id="l00547" name="l00547"></a><span class="lineno">  547</span> </div>
@@ -1310,7 +1310,7 @@ $(function(){initNavTree('backends_2tofino_2bf-p4c_2arch_2fromv1_80_2program_str
 <div class="line"><a id="l01170" name="l01170"></a><span class="lineno"> 1170</span>        <span class="keywordflow">if</span> (!inst-&gt;is&lt;<a class="code hl_class" href="class_p4_1_1_extern_method.html">P4::ExternMethod</a>&gt;()) <span class="keywordflow">return</span>;</div>
 <div class="line"><a id="l01171" name="l01171"></a><span class="lineno"> 1171</span>        <span class="keyword">auto</span> em = inst-&gt;to&lt;<a class="code hl_class" href="class_p4_1_1_extern_method.html">P4::ExternMethod</a>&gt;();</div>
 <div class="line"><a id="l01172" name="l01172"></a><span class="lineno"> 1172</span>        <span class="keywordflow">if</span> (em-&gt;actualExternType-&gt;name != <span class="stringliteral">&quot;Checksum&quot;</span> || em-&gt;method-&gt;name != <span class="stringliteral">&quot;update&quot;</span>) <span class="keywordflow">return</span>;</div>
-<div class="line"><a id="l01173" name="l01173"></a><span class="lineno"> 1173</span>        <span class="keyword">auto</span> assign = findOrigCtxt&lt;IR::AssignmentStatement&gt;();</div>
+<div class="line"><a id="l01173" name="l01173"></a><span class="lineno"> 1173</span>        <span class="keyword">auto</span> assign = findOrigCtxt&lt;IR::BaseAssignmentStatement&gt;();</div>
 <div class="line"><a id="l01174" name="l01174"></a><span class="lineno"> 1174</span>        <span class="keywordflow">if</span> (assign == <span class="keyword">nullptr</span>) <span class="keywordflow">return</span>;</div>
 <div class="line"><a id="l01175" name="l01175"></a><span class="lineno"> 1175</span>        <span class="keyword">auto</span> destField = assign-&gt;left;</div>
 <div class="line"><a id="l01176" name="l01176"></a><span class="lineno"> 1176</span>        <span class="comment">// auto parser = findContext&lt;IR::P4Control&gt;();</span></div>

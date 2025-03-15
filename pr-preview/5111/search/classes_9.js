@@ -153,7 +153,7 @@ var searchData=
   ['isslicemask_150',['IsSliceMask',['../class_b_f_n_1_1_is_slice_mask.html',1,'BFN']]],
   ['istype_151',['IsType',['../struct_p4_1_1_r_t_t_i_1_1_detail_1_1_is_type.html',1,'P4::RTTI::Detail']]],
   ['isvalid_152',['IsValid',['../class_p4_1_1_is_valid.html',1,'P4']]],
-  ['iterator_153',['iterator',['../class_p4_1_1_i_r_1_1_vector.html',1,'P4::IR::iterator&lt; T &gt;'],['../class_p4_1_1safe__vector.html',1,'P4::iterator&lt;&gt;'],['../class_p4_1_1safe__vector.html',1,'P4::iterator&lt;&gt;']]],
+  ['iterator_153',['iterator',['../class_p4_1_1safe__vector.html',1,'P4']]],
   ['iterator_5frange_154',['iterator_range',['../class_p4_1_1_util_1_1iterator__range.html',1,'P4::Util']]],
   ['iteratorconfig_155',['IteratorConfig',['../struct_p_h_v_1_1_slicing_1_1_iterator_config.html',1,'PHV::Slicing']]],
   ['iteratorenumerator_156',['IteratorEnumerator',['../class_p4_1_1_util_1_1_iterator_enumerator.html',1,'P4::Util']]],
