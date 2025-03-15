@@ -328,14 +328,12 @@ bool skipFlexibleHeader(const Visitor::Context *, const IR::Type_StructLike *e) 
  */
 class CompileTimeOperations : public P4::CompileTimeOperations {
     bool preorder(const IR::Declaration_Instance *di) {
-#ifdef HAVE_JBAY
         // JBay supports (limited) div/mod in RegisterAction
         if (Device::currentDevice() == Device::JBAY) {
             if (auto st = di->type->to<IR::Type_Specialized>()) {
                 if (st->baseType->path->name.name.endsWith("Action")) return false;
             }
         }
-#endif
         return true;
     }
 };
