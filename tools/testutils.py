@@ -237,26 +237,28 @@ def exec_process(args: Union[List[str], str], **extra_args: Any) -> ProcessResul
         else:
             out = result.stdout
         returncode = result.returncode
+    except FileNotFoundError as exception:
+        if errpipe:
+            out = errpipe.out
+        returncode = FAILURE
+        log.error(
+            'Error %s with exception "%s" when executing "%s".',
+            returncode,
+            exception,
+            " ".join(args),
+        )
     except subprocess.CalledProcessError as exception:
         if errpipe:
             out = errpipe.out
         returncode = exception.returncode
-        cmd = exception.cmd
-        # Rejoin the list for better readability.
-        if isinstance(cmd, list):
-            cmd = " ".join(cmd)
-        log.error('Error %s when executing "%s".', returncode, cmd)
+        log.error('Error %s when executing "%s".', returncode, " ".join(args))
     except subprocess.TimeoutExpired as exception:
         if errpipe:
             out = errpipe.out
         else:
             out = str(exception.stderr)
         returncode = FAILURE
-        cmd = exception.cmd
-        # Rejoin the list for better readability.
-        if isinstance(cmd, list):
-            cmd = " ".join(cmd)
-        log.error("Timed out when executing %s.", cmd)
+        log.error("Timed out when executing %s.", " ".join(args))
     finally:
         if "capture_output" not in extra_args:
             if outpipe:
