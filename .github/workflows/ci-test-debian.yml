@@ -51,7 +51,7 @@ jobs:
 
       - name: Run tests (Ubuntu 22.04)
         # Need to use sudo for the eBPF kernel tests and need to avoid p4tc_stf tests.
-        run: sudo -E ctest --output-on-failure --schedule-random -E "p4tc_samples_stf|p4tc_cleanup|p4tc_setup"
+        run: sudo -E ctest --output-on-failure --schedule-random
         working-directory: ./build
         if: matrix.unity == 'ON' && matrix.gtest == 'ON'
 
