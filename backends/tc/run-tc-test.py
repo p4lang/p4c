@@ -16,16 +16,12 @@
 # *******************************************************************************/
 
 import argparse
-import difflib
 import os
 import re
-import shutil
-import stat
 import sys
 import tempfile
 from pathlib import Path
-from subprocess import Popen, call
-from threading import Thread
+from typing import Any
 
 from test_infra import TCInfra
 
@@ -84,7 +80,7 @@ PARSER.add_argument(
 
 
 class Options(object):
-    def __init__(self):
+    def __init__(self) -> None:
         self.binary = ""  # this program's name
         self.cleanupTmp = True  # if false do not remote tmp folder created
         self.p4Filename = ""  # file that is being compiled
@@ -94,20 +90,13 @@ class Options(object):
         self.compiler = ""
         self.clang = ""
         self.p4filename = ""
-        self.testfile = False
+        self.testfile: Path = Path()
         self.testdir = ""
         self.runtimedir = str(FILE_DIR.joinpath("runtime"))
         self.compilerOptions = []
 
 
-def import_from(module, name):
-    """Try to import a module and class directly instead of the typical
-    Python method. Allows for dynamic imports."""
-    module = __import__(module, fromlist=[name])
-    return getattr(module, name)
-
-
-def run_model(tc, testfile):
+def run_model(tc: TCInfra, testfile: Path) -> int:
     result = tc.compile_p4()
     if result != testutils.SUCCESS:
         return result
@@ -116,7 +105,7 @@ def run_model(tc, testfile):
     if result != testutils.SUCCESS:
         return result
 
-    # If there is no testfile, just run the compliation testing
+    # If there is no testfile, just run the compilation testing
     if not testfile:
         return result
 
@@ -139,7 +128,7 @@ def run_model(tc, testfile):
     return result
 
 
-def run_test(options, argv):
+def run_test(options: Options, argv: Any) -> int:
     """Define the test environment and compile the p4 target
     Optional: Run the generated model"""
     assert isinstance(options, Options)
@@ -156,10 +145,10 @@ def run_test(options, argv):
 ######################### main
 
 
-def clang_is_installed(clang):
+def clang_is_installed(options: Options, clang: str) -> bool:
     result = testutils.exec_process(f"{clang} --version")
     if result.returncode != testutils.SUCCESS:
-        testutils.log.error("{options.clang} is not installed")
+        testutils.log.error(f"{options.clang} is not installed")
         return False
 
     version_pattern = r'clang version (\d+)\.\d+\.\d+'
@@ -172,13 +161,13 @@ def clang_is_installed(clang):
         return False
 
     if int(version) < 15:
-        testutils.log.error("{options.clang} version")
+        testutils.log.error(f"{options.clang} version")
         return False
 
     return True
 
 
-def main(argv):
+def main(argv: Any) -> None:
     args, argv = PARSER.parse_known_args()
     options = Options()
     options.compiler_src_dir = testutils.check_if_dir(Path(args.compiler_src_dir))
@@ -186,7 +175,7 @@ def main(argv):
 
     options.compiler = testutils.check_if_file(Path(compiler))
 
-    if not clang_is_installed(args.clang):
+    if not clang_is_installed(options, args.clang):
         sys.exit(1)
 
     options.clang = args.clang
