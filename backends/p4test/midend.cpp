@@ -144,7 +144,7 @@ MidEnd::MidEnd(P4TestOptions &options, std::ostream *outStream) {
              auto main = toplevel->getMain();
              if (main == nullptr)
                  // nothing further to do
-                 return nullptr;
+                 return root;
              // Special handling when compiling for v1model.p4
              if (main->type->name == P4V1::V1Model::instance.sw.name) {
                  if (main->getConstructorParameters()->size() != 6) return root;

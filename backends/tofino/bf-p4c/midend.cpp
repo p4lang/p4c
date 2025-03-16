@@ -434,7 +434,7 @@ MidEnd::MidEnd(BFN_Options &options) {
             auto main = toplevel->getMain();
             if (main == nullptr)
                 // nothing further to do
-                return nullptr;
+                return root;
             for (auto arg : args_to_skip) {
                 if (!main->getConstructorParameters()->getDeclByName(arg)) continue;
                 if (auto a = main->getParameterValue(arg))
