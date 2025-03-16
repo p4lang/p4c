@@ -50,7 +50,7 @@ class UBPFDeparserTranslationVisitor : public EBPF::CodeGenInspector {
     }
 
     bool preorder(const IR::MethodCallExpression *expression) override;
-    bool preorder(const IR::AssignmentStatement *a) override { return notSupported(a); };
+    bool preorder(const IR::BaseAssignmentStatement *a) override { return notSupported(a); };
     bool preorder(const IR::ExitStatement *s) override { return notSupported(s); };
     bool preorder(UNUSED const IR::BlockStatement *s) override { return true; };
     bool preorder(const IR::ReturnStatement *s) override { return notSupported(s); };

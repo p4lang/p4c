@@ -125,9 +125,8 @@ const IR::Node *TypeInferenceBase::postorder(const IR::ReturnStatement *statemen
     return statement;
 }
 
-const IR::Node *TypeInferenceBase::postorder(const IR::AssignmentStatement *assign) {
-    LOG3("TI Visiting " << dbp(getOriginal()));
-    auto ltype = getType(assign->left);
+const IR::Node *TypeInferenceBase::common_assign(const IR::BaseAssignmentStatement *assign,
+                                                 const IR::Type *ltype) {
     if (ltype == nullptr) return assign;
 
     if (!isLeftValue(assign->left)) {
@@ -137,8 +136,45 @@ const IR::Node *TypeInferenceBase::postorder(const IR::AssignmentStatement *assi
     }
 
     auto newInit = assignment(assign, ltype, assign->right);
-    if (newInit != assign->right)
-        assign = new IR::AssignmentStatement(assign->srcInfo, assign->left, newInit);
+    if (newInit != assign->right) {
+        auto *clone = assign->clone();
+        clone->right = newInit;
+        assign = clone;
+    }
+    return assign;
+}
+
+const IR::Node *TypeInferenceBase::postorder(const IR::AssignmentStatement *assign) {
+    LOG3("TI Visiting " << dbp(getOriginal()));
+    return TypeInferenceBase::common_assign(assign, getType(assign->left));
+}
+
+const IR::Node *TypeInferenceBase::postorder(const IR::OpAssignmentStatement *assign) {
+    LOG3("TI Visiting " << dbp(getOriginal()));
+    auto ltype = getType(assign->left);
+    if (ltype && !ltype->is<IR::Type_Bits>()) {
+        typeError("%1%=: cannot be applied to '%2%' with type '%3%'", assign->getStringOp(),
+                  assign->left, ltype->toString());
+        return assign;
+    }
+    return TypeInferenceBase::common_assign(assign, ltype);
+}
+
+const IR::Node *TypeInferenceBase::shiftAssign(const IR::OpAssignmentStatement *assign) {
+    LOG3("TI Visiting " << dbp(getOriginal()));
+    auto ltype = getType(assign->left);
+    auto rtype = getType(assign->left);
+    if (!ltype) return assign;
+    if (!isLeftValue(assign->left)) {
+        typeError("Expression %1% cannot be the target of an assignment", assign->left);
+        LOG2(assign->left);
+    } else if (!ltype->is<IR::Type_Bits>()) {
+        typeError("%1%=: cannot be applied to '%2%' with type '%3%'", assign->getStringOp(),
+                  assign->left, ltype->toString());
+    } else if (rtype && !rtype->is<IR::Type_Bits>() && !rtype->is<IR::Type_InfInt>()) {
+        typeError("%1%=: cannot be applied with '%2%' with type '%3%'", assign->getStringOp(),
+                  assign->right, rtype->toString());
+    }
     return assign;
 }
 

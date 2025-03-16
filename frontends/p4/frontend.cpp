@@ -50,6 +50,7 @@ limitations under the License.
 #include "parserControlFlow.h"
 #include "reassociation.h"
 #include "redundantParsers.h"
+#include "removeOpAssign.h"
 #include "removeParameters.h"
 #include "removeReturns.h"
 #include "resetHeaders.h"
@@ -206,7 +207,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             new Reassociation(),
             new UselessCasts(&typeMap),
         }),
-        new SimplifyControlFlow(&typeMap),
+        new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()),
         new SwitchAddDefault,
         new FrontEndDump(),  // used for testing the program at this point
         new RemoveAllUnusedDeclarations(*policy, true),
@@ -216,12 +217,13 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new MoveDeclarations(),  // Move all local declarations to the beginning
         new MoveInitializers(),
         new SideEffectOrdering(&typeMap, policy->skipSideEffectOrdering()),
-        new SimplifyControlFlow(&typeMap),
+        policy->removeOpAssign() ? new RemoveOpAssign() : nullptr,
+        new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()),
         new SimplifySwitch(&typeMap),
         new MoveDeclarations(),  // Move all local declarations to the beginning
         new SimplifyDefUse(&typeMap),
         new UniqueParameters(&typeMap),
-        new SimplifyControlFlow(&typeMap),
+        new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()),
         new SpecializeAll(&typeMap, policy),
         new RemoveParserControlFlow(&typeMap),
         new RemoveReturns(),
@@ -257,14 +259,14 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             // Check for constants only after inlining
             new CheckConstants(&typeMap),
             new ConstantFolding(&typeMap, constantFoldingPolicy),
-            new SimplifyControlFlow(&typeMap),
+            new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()),
             // more ifs may have been added to parsers
             new RemoveParserControlFlow(&typeMap),
             new UniqueNames(),       // needed again after inlining
             new MoveDeclarations(),  // needed again after inlining
             new SimplifyDefUse(&typeMap),
             new RemoveAllUnusedDeclarations(*policy),
-            new SimplifyControlFlow(&typeMap),
+            new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()),
         });
     }
     passes.addPasses({

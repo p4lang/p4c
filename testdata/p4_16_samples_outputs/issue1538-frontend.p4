@@ -20,16 +20,20 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     @name("ParserImpl.tmp_port") bit<16> tmp_port_0;
     @name("ParserImpl.x_1") bit<16> x;
     @name("ParserImpl.retval") bit<16> retval;
+    @name("ParserImpl.inlinedRetval_0") bit<16> inlinedRetval_5;
     @name("ParserImpl.x_2") bit<16> x_6;
     @name("ParserImpl.retval") bit<16> retval_0;
+    @name("ParserImpl.inlinedRetval_1") bit<16> inlinedRetval_6;
     state start {
         x = (bit<16>)standard_metadata.ingress_port;
         retval = x + 16w1;
-        tmp_port_0 = retval;
+        inlinedRetval_5 = retval;
+        tmp_port_0 = inlinedRetval_5;
         packet.extract<ethernet_t>(hdr.ethernet);
         x_6 = hdr.ethernet.etherType;
         retval_0 = x_6 + 16w1;
-        hdr.ethernet.etherType = retval_0;
+        inlinedRetval_6 = retval_0;
+        hdr.ethernet.etherType = inlinedRetval_6;
         meta.tmp_port = tmp_port_0;
         transition accept;
     }
@@ -44,10 +48,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("ingress.tmp_1") bit<16> tmp_1;
     @name("ingress.x_0") bit<16> x_8;
     @name("ingress.retval") bit<16> retval_4;
+    @name("ingress.inlinedRetval") bit<16> inlinedRetval_7;
+    @name("ingress.inlinedRetval_2") bit<16> inlinedRetval_8;
     @name("ingress.x_4") bit<16> x_9;
     @name("ingress.retval") bit<16> retval_5;
+    @name("ingress.inlinedRetval_3") bit<16> inlinedRetval_9;
     @name("ingress.x_5") bit<16> x_10;
     @name("ingress.retval") bit<16> retval_6;
+    @name("ingress.inlinedRetval_4") bit<16> inlinedRetval_10;
     @name(".my_drop") action my_drop_0() {
         smeta_0 = standard_metadata;
         mark_to_drop(smeta_0);
@@ -72,16 +80,20 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         tmp = x_7;
         x_8 = x_7;
         retval_4 = x_8 + 16w1;
-        tmp_0 = retval_4;
+        inlinedRetval_7 = retval_4;
+        tmp_0 = inlinedRetval_7;
         tmp_1 = tmp + tmp_0;
         retval_3 = tmp_1;
-        hdr.ethernet.srcAddr[15:0] = retval_3;
+        inlinedRetval_8 = retval_3;
+        hdr.ethernet.srcAddr[15:0] = inlinedRetval_8;
         x_9 = hdr.ethernet.srcAddr[15:0];
         retval_5 = x_9 + 16w1;
-        hdr.ethernet.srcAddr[15:0] = retval_5;
+        inlinedRetval_9 = retval_5;
+        hdr.ethernet.srcAddr[15:0] = inlinedRetval_9;
         x_10 = hdr.ethernet.etherType;
         retval_6 = x_10 + 16w1;
-        hdr.ethernet.etherType = retval_6;
+        inlinedRetval_10 = retval_6;
+        hdr.ethernet.etherType = inlinedRetval_10;
     }
 }
 
