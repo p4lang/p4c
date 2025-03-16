@@ -1001,8 +1001,7 @@ class Table {
     virtual int get_tcam_id() const { BUG("%s not a TCAM table", name()); }
 
     const std::vector<const p4_param *> find_p4_params(std::string s, std::string t = "",
-                                                       unsigned start_bit = -1,
-                                                       int width = -1) const {
+                                                       int start_bit = -1, int width = -1) const {
         remove_name_tail_range(s);
         std::vector<const p4_param *> params;
         if (start_bit <= -1) return params;
@@ -1012,7 +1011,7 @@ class Table {
             if ((p.name == s) || (p.alias == s)) {
                 int p_end_bit = p.start_bit + p.bit_width;
                 if (!t.empty() && (p.type != t)) continue;
-                if (p.start_bit > start_bit) continue;
+                if (p.start_bit > static_cast<unsigned>(start_bit)) continue;
                 if (p_end_bit < end_bit) continue;
                 params.push_back(&p);
             }
@@ -1020,14 +1019,14 @@ class Table {
         return params;
     }
 
-    const p4_param *find_p4_param(std::string s, std::string t = "", unsigned start_bit = -1,
+    const p4_param *find_p4_param(std::string s, std::string t = "", int start_bit = -1,
                                   int width = -1) const {
         remove_name_tail_range(s);
         std::vector<p4_param *> params;
         for (auto &p : p4_params_list) {
             if ((p.name == s) || (p.alias == s)) {
                 if (!t.empty() && (p.type != t)) continue;
-                if ((start_bit > -1) && (start_bit < p.start_bit)) continue;
+                if ((start_bit > -1) && (static_cast<unsigned>(start_bit) < p.start_bit)) continue;
                 if ((width > -1) && (p.start_bit + p.bit_width < start_bit + width)) continue;
                 return &p;
             }
@@ -1121,6 +1120,7 @@ struct AttachedTables {
         __VA_ARGS__                                                                           \
     };
 
+// clang-format off
 DECLARE_ABSTRACT_TABLE_TYPE(
     MatchTable, Table, GatewayTable *gateway = 0; IdletimeTable *idletime = 0;
     AttachedTables attached; bool always_run = false; friend struct AttachedTables;
@@ -1160,11 +1160,7 @@ DECLARE_ABSTRACT_TABLE_TYPE(
             } Format::Field *lookup_field(const std::string &n, const std::string &act = "")
                 const override;
     bool run_at_eop() override { return attached.run_at_eop(); }
-    // FIXME: This comment is necessary to stop cpplint from complaining. The format is off because
-    // this code is within a macro.
     virtual bool is_ternary() { return false; }
-    // FIXME: This comment is necessary to stop cpplint from complaining. The format is off because
-    // this code is within a macro.
     void gen_idletime_tbl_cfg(json::map &stage_tbl) const;
     int direct_shiftcount() const override {
         return 64;
@@ -1174,8 +1170,11 @@ DECLARE_ABSTRACT_TABLE_TYPE(
     virtual void add_hash_functions(json::map &stage_tbl) const;
     void add_all_reference_tables(json::map &tbl, Table *math_table = nullptr) const;
     METER_ACCESS_TYPE default_meter_access_type(bool for_stateful);
-    bool needs_handle() const override { return true; } bool needs_next()
-        const override { return true; } bitvec compute_reachable_tables() override;)
+    bool needs_handle() const override { return true; }
+    bool needs_next() const override { return true; }
+    bitvec compute_reachable_tables() override;
+)
+// clang-format on
 
 #define DECLARE_TABLE_TYPE(TYPE, PARENT, NAME, ...)                                           \
     class TYPE : public PARENT { /* NOLINT */                                                 \
@@ -1229,6 +1228,7 @@ DECLARE_ABSTRACT_TABLE_TYPE(
     FOR_ALL_REGISTER_SETS(TARGET_OVERLOAD, void TYPE::write_regs, (mau_regs & regs),             \
                           { write_regs_vt(regs); })
 
+// clang-format off
 DECLARE_ABSTRACT_TABLE_TYPE(SRamMatchTable, MatchTable,         // exact, atcam, or proxy_hash
 
   // NOLINTNEXTLINE (whitespace/indent)
@@ -1370,7 +1370,9 @@ DECLARE_ABSTRACT_TABLE_TYPE(SRamMatchTable, MatchTable,         // exact, atcam,
         for (auto &way : ways) if (way.group_xme == xme) return &way;
         return nullptr; }
 )
+// clang-format on
 
+// clang-format off
 DECLARE_TABLE_TYPE(
     ExactMatchTable, SRamMatchTable, "exact_match", bool dynamic_key_masks = false;
 
@@ -1442,15 +1444,20 @@ DECLARE_TABLE_TYPE(
         return name;
     } unsigned entry_ram_depth() const override {
         return std::min(number_partitions, 1024);
-    } void gen_alpm_cfg(json::map &) const;)
+    } void gen_alpm_cfg(json::map &) const;
+)
+// clang-format on
 
+// clang-format off
 DECLARE_TABLE_TYPE(
     ProxyHashMatchTable, SRamMatchTable, "proxy_hash", bool dynamic_key_masks = false;
     void setup_ways() override; int proxy_hash_group = -1; std::string proxy_hash_alg = "<invalid>";
     bool verify_match_key() override; table_type_t table_type()
         const override { return PROXY_HASH; } void setup_word_ixbar_group() override;
     int determine_pre_byteswizzle_loc(MatchSource *ms, int lo, int hi, int word) override;
-    void add_proxy_hash_function(json::map &stage_tbl) const;)
+    void add_proxy_hash_function(json::map &stage_tbl) const;
+)
+// clang-format on
 
 DECLARE_TABLE_TYPE(TernaryMatchTable, MatchTable, "ternary_match",
 
@@ -1680,6 +1687,7 @@ DECLARE_TABLE_TYPE(TernaryIndirectTable, Table, "ternary_indirect",
     Layout::bus_type_t default_bus_type() const override { return Layout::TIND_BUS; }
 )
 
+// clang-format off
 DECLARE_ABSTRACT_TABLE_TYPE(
     AttachedTable, Table,
     /* table that can be attached to multiple match tables to do something */
@@ -1703,12 +1711,8 @@ DECLARE_ABSTRACT_TABLE_TYPE(
     action_call() override {
         return match_tables.size() == 1 ? (*match_tables.begin())->action_call() : action;
     }
-    // FIXME: This comment is necessary to stop cpplint from complaining. The format is off because
-    // this code is within a macro.
     int json_memunit(const MemUnit &u) const override;
     void pass1() override;
-    // FIXME: This comment is necessary to stop cpplint from complaining. The format is off because
-    // this code is within a macro.
     virtual unsigned get_alu_index() const {
         if (layout.size() > 0) return layout[0].row / 4U;
         error(lineno, "Cannot determine ALU Index for table %s", name());
@@ -1731,16 +1735,10 @@ DECLARE_ABSTRACT_TABLE_TYPE(
     // NOLINTNEXTLINE (whitespace/indent)
     public
     :
-    // FIXME: This comment is necessary to stop cpplint from complaining. The format is off because
-    // this code is within a macro.
     const MatchTable *get_match_table()
         const override { return match_tables.size() == 1 ? *match_tables.begin() : 0; }
-    // FIXME: This comment is necessary to stop cpplint from complaining. The format is off because
-    // this code is within a macro.
     MatchTable *get_match_table()
         override { return match_tables.size() == 1 ? *match_tables.begin() : 0; }
-    // FIXME: This comment is necessary to stop cpplint from complaining. The format is off because
-    // this code is within a macro.
     std::set<MatchTable *>
         get_match_tables() override { return match_tables; } bool has_per_flow_enable()
             const { return per_flow_enable; } std::string get_per_flow_enable_param() {
@@ -1756,14 +1754,8 @@ DECLARE_ABSTRACT_TABLE_TYPE(
                     per_flow_enable_param.substr(0, per_flow_enable_param.find("_pfe"));
                 return per_flow_enable ? m->lookup_field(pfe_name + "_type") : nullptr;
             }
-    // FIXME: This comment is necessary to stop cpplint from complaining. The format is off because
-    // this code is within a macro.
     bool get_per_flow_enable() { return per_flow_enable; } bool is_direct() const { return direct; }
-    // FIXME: This comment is necessary to stop cpplint from complaining. The format is off because
-    // this code is within a macro.
     virtual int default_pfe_adjust() const { return 0; }
-    // FIXME: This comment is necessary to stop cpplint from complaining. The format is off because
-    // this code is within a macro.
     std::string get_default_action() override {
         if (!default_action.empty()) return default_action;
         for (auto m : match_tables) {
@@ -1772,8 +1764,6 @@ DECLARE_ABSTRACT_TABLE_TYPE(
         }
         return "";
     }
-    // FIXME: This comment is necessary to stop cpplint from complaining. The format is off because
-    // this code is within a macro.
     default_action_params *get_default_action_parameters() override {
         if (!default_action_parameters.empty()) return &default_action_parameters;
         for (auto m : match_tables) {
@@ -1785,8 +1775,11 @@ DECLARE_ABSTRACT_TABLE_TYPE(
                          int hash_dist_type, Table::Call &first_call) override;
     // used by Selection and Stateful tables.
     FOR_ALL_REGISTER_SETS(TARGET_OVERLOAD, int meter_alu_fifo_enable_from_mask,
-                          (mau_regs &, unsigned bytemask)))
+                          (mau_regs &, unsigned bytemask))
+)
+// clang-format on
 
+// clang-format off
 DECLARE_TABLE_TYPE(
     ActionTable, AttachedTable, "action", protected
     : int action_id = -1;
@@ -1826,8 +1819,11 @@ DECLARE_TABLE_TYPE(
     unsigned determine_default(Table::Call &call) const;
     unsigned determine_mask(Table::Call &call) const;
     unsigned determine_vpn_shiftcount(Table::Call &call) const; bool needs_handle()
-        const override { return true; } bool needs_next() const override { return true; })
+        const override { return true; } bool needs_next() const override { return true; }
+)
+// clang-format on
 
+// clang-format off
 DECLARE_TABLE_TYPE(GatewayTable, Table, "gateway",
 
   // NOLINTNEXTLINE (whitespace/indent)
@@ -1925,7 +1921,9 @@ DECLARE_TABLE_TYPE(GatewayTable, Table, "gateway",
     virtual bool check_match_key(MatchKey &, const std::vector<MatchKey> &, bool);
     virtual int gw_memory_unit() const = 0;
 )
+// clang-format on
 
+// clang-format off
 DECLARE_TABLE_TYPE(
     SelectionTable, AttachedTable, "selection",
     bool non_linear_hash = false, /* == enable_sps_scrambling */
@@ -2017,7 +2015,9 @@ class IdletimeTable : public Table {
     bool needs_next() const override { return true; }
     Layout::bus_type_t default_bus_type() const override { return Layout::IDLE_BUS; }
 };
+// clang-format on
 
+// clang-format off
 DECLARE_ABSTRACT_TABLE_TYPE(
     Synth2Port, AttachedTable,
     void vpn_params(int &width, int &depth, int &period, const char *&period_name) const override {
@@ -2035,14 +2035,10 @@ DECLARE_ABSTRACT_TABLE_TYPE(
         OVERLOAD_FUNC_FOREACH(TARGET_CLASS, void, alloc_vpns, (), ()) template <class REGS>
         void write_regs_vt(REGS &regs);
     FOR_ALL_REGISTER_SETS(TARGET_OVERLOAD, void write_regs, (mau_regs & regs), override)
-    // FIXME: This comment is necessary to stop cpplint from complaining. The format is off because
-    // this code is within a macro.
     FOR_ALL_REGISTER_SETS(TARGET_OVERLOAD, void write_merge_regs,
                           (mau_regs & regs, MatchTable *match, int type, int bus,
                            const std::vector<Call::Arg> &args),
                           override = 0)
-    // FIXME: This comment is necessary to stop cpplint from complaining. The format is off because
-    // this code is within a macro.
     void common_init_setup(const VECTOR(pair_t) &, bool, P4Table::type) override;
     bool common_setup(pair_t &, const VECTOR(pair_t) &, P4Table::type) override;
     void pass1() override; void pass2() override; void pass3() override;)
@@ -2052,8 +2048,6 @@ DECLARE_TABLE_TYPE(
     enum {NONE = 0, PACKETS = 1, BYTES = 2, BOTH = 3} type = NONE;
     int teop = -1; bool teop_initialized = false; int bytecount_adjust = 0;
     table_type_t table_type() const override { return COUNTER; }
-    // FIXME: This comment is necessary to stop cpplint from complaining. The format is off because
-    // this code is within a macro.
     template <class REGS>
     void write_merge_regs_vt(REGS &regs, MatchTable *match, int type, int bus,
                              const std::vector<Call::Arg> &args);
@@ -2083,8 +2077,11 @@ DECLARE_TABLE_TYPE(
         const override;
     int address_shift() const override;
     bool run_at_eop() override { return (type & BYTES) != 0; } bool adr_mux_select_stats()
-        override { return true; } int unitram_type() override { return UnitRam::STATISTICS; })
+        override { return true; } int unitram_type() override { return UnitRam::STATISTICS; }
+)
+// clang-format on
 
+// clang-format off
 DECLARE_TABLE_TYPE(
     MeterTable, Synth2Port, "meter", int red_nodrop_value = -1; int red_drop_value = -1;
     int green_value = 0; int yellow_value = 1; int red_value = 3; int profile = 0; int teop = -1;
@@ -2135,7 +2132,9 @@ DECLARE_TABLE_TYPE(
     template <class REGS>
     void setup_tcam_shift(REGS &merge, int bus, int tcam_shift, Call &meter_call, Call &color_call);
     template <class REGS> void write_color_regs(REGS &regs, MatchTable *match, int type, int bus,
-                                                const std::vector<Call::Arg> &args);)
+                                                const std::vector<Call::Arg> &args);
+)
+// clang-format on
 
 namespace StatefulAlu {
 struct TMatchOP;
@@ -2147,6 +2146,7 @@ struct TMatchInfo {
 Instruction *genNoop(StatefulTable *tbl, Table::Actions::Action *act);
 }  // namespace StatefulAlu
 
+// clang-format off
 DECLARE_TABLE_TYPE(StatefulTable, Synth2Port, "stateful",
     table_type_t table_type() const override { return STATEFUL; }
     bool setup_jbay(const pair_t &kv);
@@ -2242,5 +2242,6 @@ DECLARE_TABLE_TYPE(StatefulTable, Synth2Port, "stateful",
 
     bool p4c_5192_workaround(const Actions::Action *) const;
 )
+// clang-format on
 
 #endif /* BACKENDS_TOFINO_BF_ASM_TABLES_H_ */
