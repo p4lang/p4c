@@ -660,7 +660,7 @@ bool ToP4::preorder(const IR::Type_Error *d) {
                                 })
                                 ->toVector();
     if (!isDeclaration || !userErrors.empty()) {
-        builder.append("error");
+        builder.append("error ");
 
         if (!isDeclaration) {
             return false;
