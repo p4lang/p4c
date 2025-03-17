@@ -10,7 +10,7 @@ struct tuple_0 {
     S f0;
 }
 
-struct H3_0 {
+struct H3_S {
     tuple_0 t;
 }
 
