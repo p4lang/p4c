@@ -142,8 +142,8 @@ class Virtme:
             if self.verbose:
                 print(f"Extracted version: {version}")
         else:
-            if self.verbose:
-                print("Version string not found")
+            testutils.log.error("Version string not found")
+            return None
 
         return version + "+"
 
@@ -172,6 +172,8 @@ class Virtme:
 
     def boot(self):
         version = self.extract_version()
+        if version is None:
+            return testutils.FAILURE
         config_str = f"{self.extract_dir}/boot/config-{version}"
         img_str = f"{self.extract_dir}/boot/vmlinuz-{version}"
 
