@@ -434,7 +434,7 @@ MidEnd::MidEnd(BFN_Options &options) {
             auto main = toplevel->getMain();
             if (main == nullptr) {
                 // Nothing further to do. Exit early.
-                early_exit_flag = true;
+                early_exit();
                 return root;
             }
             for (auto arg : args_to_skip) {
