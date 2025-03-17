@@ -105,30 +105,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         u_1[0].h2.setValid();
         u_1[0].h1.setInvalid();
         u_1[0].h3.setInvalid();
-        if (u_1[1w0].h1.isValid()) {
-            u_1[1].h1.setValid();
-            u_1[1].h1 = u_1[1w0].h1;
-            u_1[1].h2.setInvalid();
-            u_1[1].h3.setInvalid();
-        } else {
-            u_1[1].h1.setInvalid();
-        }
-        if (u_1[1w0].h2.isValid()) {
-            u_1[1].h2.setValid();
-            u_1[1].h2 = u_1[1w0].h2;
-            u_1[1].h1.setInvalid();
-            u_1[1].h3.setInvalid();
-        } else {
-            u_1[1].h2.setInvalid();
-        }
-        if (u_1[1w0].h3.isValid()) {
-            u_1[1].h3.setValid();
-            u_1[1].h3 = u_1[1w0].h3;
-            u_1[1].h1.setInvalid();
-            u_1[1].h2.setInvalid();
-        } else {
-            u_1[1].h3.setInvalid();
-        }
+        u_1[1] = u_1[1w0];
         u_1[1].h2.setValid();
         u_1[1].h2.data = 16w1;
         u_1[1].h1.setInvalid();

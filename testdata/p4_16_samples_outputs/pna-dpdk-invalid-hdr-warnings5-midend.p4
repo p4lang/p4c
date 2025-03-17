@@ -9,6 +9,12 @@ header Header2 {
     bit<16> data;
 }
 
+header_union Union {
+    Header1 h1;
+    Header2 h2;
+    Header1 h3;
+}
+
 struct H {
     Header1 h1;
     Header1 u1_h1;
@@ -76,9 +82,11 @@ control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, in
     @name("u1_0_h1") Header1 u1_0_h1_0;
     @name("u1_0_h2") Header2 u1_0_h2_0;
     @name("u1_0_h3") Header1 u1_0_h3_0;
+    @name("ingress.u1") Union u1;
     @name("u2_0_h1") Header1 u2_0_h1_0;
     @name("u2_0_h2") Header2 u2_0_h2_0;
     @name("u2_0_h3") Header1 u2_0_h3_0;
+    @name("ingress.u2") Union u2;
     @hidden @name("pnadpdkinvalidhdrwarnings5l60") action pnadpdkinvalidhdrwarnings5l60_0() {
         u1_0_h1_0.setInvalid();
         u1_0_h2_0.setInvalid();
@@ -96,30 +104,7 @@ control ingress(inout H hdr, inout M meta, in pna_main_input_metadata_t istd, in
         u1_0_h2_0.setValid();
         u1_0_h1_0.setInvalid();
         u1_0_h3_0.setInvalid();
-        if (u1_0_h1_0.isValid()) {
-            u2_0_h1_0.setValid();
-            u2_0_h1_0 = u1_0_h1_0;
-            u2_0_h2_0.setInvalid();
-            u2_0_h3_0.setInvalid();
-        } else {
-            u2_0_h1_0.setInvalid();
-        }
-        if (u1_0_h2_0.isValid()) {
-            u2_0_h2_0.setValid();
-            u2_0_h2_0 = u1_0_h2_0;
-            u2_0_h1_0.setInvalid();
-            u2_0_h3_0.setInvalid();
-        } else {
-            u2_0_h2_0.setInvalid();
-        }
-        if (u1_0_h3_0.isValid()) {
-            u2_0_h3_0.setValid();
-            u2_0_h3_0 = u1_0_h3_0;
-            u2_0_h1_0.setInvalid();
-            u2_0_h2_0.setInvalid();
-        } else {
-            u2_0_h3_0.setInvalid();
-        }
+        u2 = u1;
         u2_0_h2_0.setValid();
         u2_0_h2_0.data = 16w1;
         u2_0_h1_0.setInvalid();
