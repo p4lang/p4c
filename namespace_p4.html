@@ -1080,6 +1080,9 @@ Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_specialize_generic_types.html">SpecializeGenericTypes</a></td></tr>
 <tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specializes each generic type by substituting type parameters.  <a href="class_p4_1_1_specialize_generic_types.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_p4_1_1_spec_signature.html">SpecSignature</a></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">A signature of a <em>concrete</em> specialization. None of the parameters can be type variables or generic types, therefore the specialization can always be identified globally the the names of types.  <a href="struct_p4_1_1_spec_signature.html#details">More...</a><br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_split_flow_visit.html">SplitFlowVisit</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_p4_1_1_split_flow_visit__base.html">SplitFlowVisit_base</a></td></tr>
@@ -1303,6 +1306,10 @@ typedef <a class="el" href="class_p4_1_1_inline_driver.html">InlineDriver</a>&lt
 <tr class="memitem:a03562f92e8f155abe8b38b3a3510e578" id="r_a03562f92e8f155abe8b38b3a3510e578"><td class="memItemLeft" align="right" valign="top"><a id="a03562f92e8f155abe8b38b3a3510e578" name="a03562f92e8f155abe8b38b3a3510e578"></a>
 typedef <a class="el" href="class_p4_1_1_inline_driver.html">InlineDriver</a>&lt; <a class="el" href="class_p4_1_1_simple_inline_list.html">FunctionsInlineList</a>, <a class="el" href="class_p4_1_1_simple_inline_work_list.html">FunctionsInlineWorkList</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>InlineFunctionsDriver</b></td></tr>
 <tr class="separator:a03562f92e8f155abe8b38b3a3510e578"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1ba8027eb7296e2c389f8fcd3ae1648d" id="r_a1ba8027eb7296e2c389f8fcd3ae1648d"><td class="memItemLeft" align="right" valign="top"><a id="a1ba8027eb7296e2c389f8fcd3ae1648d" name="a1ba8027eb7296e2c389f8fcd3ae1648d"></a>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>InsertionSet</b> = absl::flat_hash_set&lt;<a class="el" href="class_p4_1_1cstring.html">P4::cstring</a>&gt;</td></tr>
+<tr class="memdesc:a1ba8027eb7296e2c389f8fcd3ae1648d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set of type declaration names that must be defined before the type can be inserted. <br /></td></tr>
+<tr class="separator:a1ba8027eb7296e2c389f8fcd3ae1648d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5d3a868017aaee2d0fc047455853cfc9" id="r_a5d3a868017aaee2d0fc047455853cfc9"><td class="memItemLeft" align="right" valign="top"><a id="a5d3a868017aaee2d0fc047455853cfc9" name="a5d3a868017aaee2d0fc047455853cfc9"></a>
 using&#160;</td><td class="memItemRight" valign="bottom"><b>le_bitinterval</b> = <a class="el" href="struct_p4_1_1_half_open_range.html">HalfOpenRange</a>&lt;RangeUnit::Bit, <a class="el" href="#a48f0763b16b8e792f4b9d7dd50906318a0f9197b3e286a7522984831949087332">Endian::Little</a>&gt;</td></tr>
 <tr class="separator:a5d3a868017aaee2d0fc047455853cfc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -2229,6 +2236,9 @@ std::string&#160;</td><td class="memItemRight" valign="bottom"><b>toP4</b> (cons
 <tr class="memitem:af5b08964adfe101badc92686da776e0d" id="r_af5b08964adfe101badc92686da776e0d"><td class="memItemLeft" align="right" valign="top"><a id="af5b08964adfe101badc92686da776e0d" name="af5b08964adfe101badc92686da776e0d"></a>
 std::ostream &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>toStream</b> (std::ostream &amp;out, <a class="el" href="#a7e9a037be5ea25d9b22b953f7ec46bf9">RangeUnit</a> unit, <a class="el" href="#a48f0763b16b8e792f4b9d7dd50906318">Endian</a> order, int lo, int hi, bool closed)</td></tr>
 <tr class="separator:af5b08964adfe101badc92686da776e0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a73e1b2414303d910a27277061ce02bf5" id="r_a73e1b2414303d910a27277061ce02bf5"><td class="memItemLeft" align="right" valign="top"><a id="a73e1b2414303d910a27277061ce02bf5" name="a73e1b2414303d910a27277061ce02bf5"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><b>toString</b> (const <a class="el" href="struct_p4_1_1_spec_signature.html">SpecSignature</a> &amp;sig)</td></tr>
+<tr class="separator:a73e1b2414303d910a27277061ce02bf5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa03b52113fe3456871a8392c1b980700" id="r_aa03b52113fe3456871a8392c1b980700"><td class="memItemLeft" align="right" valign="top"><a id="aa03b52113fe3456871a8392c1b980700" name="aa03b52113fe3456871a8392c1b980700"></a>
 <a class="el" href="class_p4_1_1cstring.html">cstring</a>&#160;</td><td class="memItemRight" valign="bottom"><b>toString</b> (const TernaryBool &amp;c)</td></tr>
 <tr class="separator:aa03b52113fe3456871a8392c1b980700"><td class="memSeparator" colspan="2">&#160;</td></tr>
