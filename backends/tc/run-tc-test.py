@@ -21,7 +21,7 @@ import re
 import sys
 import tempfile
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from test_infra import TCInfra
 
@@ -90,13 +90,13 @@ class Options(object):
         self.compiler = ""
         self.clang = ""
         self.p4filename = ""
-        self.testfile: Path = Path()
+        self.testfile: Optional[Path] = None
         self.testdir = ""
         self.runtimedir = str(FILE_DIR.joinpath("runtime"))
         self.compilerOptions = []
 
 
-def run_model(tc: TCInfra, testfile: Path) -> int:
+def run_model(tc: TCInfra, testfile: Optional[Path]) -> int:
     result = tc.compile_p4()
     if result != testutils.SUCCESS:
         return result
@@ -145,8 +145,8 @@ def run_test(options: Options, argv: Any) -> int:
 ######################### main
 
 
-def clang_is_installed(options: Options, clang: str) -> bool:
-    result = testutils.exec_process(f"{clang} --version")
+def clang_is_installed(options: Options) -> bool:
+    result = testutils.exec_process(f"{options.clang} --version")
     if result.returncode != testutils.SUCCESS:
         testutils.log.error(f"{options.clang} is not installed")
         return False
@@ -157,7 +157,7 @@ def clang_is_installed(options: Options, clang: str) -> bool:
     if match:
         version = match.group(1)
     else:
-        testutils.log.error("Not able to retrieve {options.clang} version")
+        testutils.log.error(f"Not able to retrieve {options.clang} version")
         return False
 
     if int(version) < 15:
@@ -174,11 +174,9 @@ def main(argv: Any) -> None:
     compiler = "./" + args.compiler
 
     options.compiler = testutils.check_if_file(Path(compiler))
-
-    if not clang_is_installed(options, args.clang):
-        sys.exit(1)
-
     options.clang = args.clang
+    if not clang_is_installed(options):
+        sys.exit(1)
 
     options.p4filename = testutils.check_if_file(Path(args.p4filename))
     options.replace = args.replace
