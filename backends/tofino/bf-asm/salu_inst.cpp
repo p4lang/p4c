@@ -552,7 +552,7 @@ Instruction *AluOP::pass1(Table *tbl_, Table::Actions::Action *act) {
                k1->value > Target::STATEFUL_ALU_CONST_MAX())) {
         auto min_value = -(INT64_C(1) << (tbl->alu_size() - 1));
         auto max_value = (INT64_C(1) << tbl->alu_size()) - 1;
-        if (k1->value < min_value || k1->value >= max_value) {
+        if (k1->value < min_value || k1->value > max_value) {
             error(lineno,
                   "value %" PRIi64
                   " of the constant operand"
@@ -574,7 +574,7 @@ Instruction *AluOP::pass1(Table *tbl_, Table::Actions::Action *act) {
         int64_t v1 = tbl->get_const_val(r1->index);
         auto min_value = -(INT64_C(1) << (tbl->alu_size() - 1));
         auto max_value = (INT64_C(1) << tbl->alu_size()) - 1;
-        if (v1 < min_value || v1 >= max_value) {
+        if (v1 < min_value || v1 > max_value) {
             error(lineno,
                   "initial value %" PRIi64
                   " of the register file operand"
