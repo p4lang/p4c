@@ -432,9 +432,11 @@ MidEnd::MidEnd(BFN_Options &options) {
         new VisitFunctor([=](const IR::Node *root) -> const IR::Node * {
             auto toplevel = evaluator->getToplevelBlock();
             auto main = toplevel->getMain();
-            if (main == nullptr)
-                // nothing further to do
-                return nullptr;
+            if (main == nullptr) {
+                // Nothing further to do. Exit early.
+                early_exit();
+                return root;
+            }
             for (auto arg : args_to_skip) {
                 if (!main->getConstructorParameters()->getDeclByName(arg)) continue;
                 if (auto a = main->getParameterValue(arg))
