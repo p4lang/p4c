@@ -135,11 +135,12 @@ endmacro(p4tc_add_test_with_args)
 
 include(CheckLinuxKernel)
 check_minimum_kernel_version("5.0.0" SUPPORTS_KERNEL)
+check_minimum_linux_libc_version("5.0.0" SUPPORTS_LIBC)
 
 set(ENABLE_P4TC_TESTS ON)
 set(ENABLE_P4TC_STF_TESTS ON)
 
-if (NOT SUPPORTS_KERNEL)
+if (NOT SUPPORTS_KERNEL OR NOT SUPPORTS_LIBC)
   set(ENABLE_P4TC_TESTS OFF)
 endif()
 
