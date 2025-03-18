@@ -171,30 +171,8 @@ if (ENABLE_DOXYGEN)
   endif()
 endif()
 
-# Generate the LICENSE file. Do this before generating the build system so
-# that CPack detects that the file exists.
+# Generate the LICENSE file.
 execute_process(COMMAND "${BFN_P4C_SOURCE_DIR}/scripts/generate-license.sh")
-
-set (CPACK_RESOURCE_FILE_LICENSE "${BFN_P4C_SOURCE_DIR}/LICENSE")
-set (THIRD_PARTY_LICENSES "${BFN_P4C_SOURCE_DIR}/LICENSES.txt")
-install (FILES ${CPACK_RESOURCE_FILE_LICENSE}
-  ${THIRD_PARTY_LICENSES}
-  DESTINATION share/p4c)
-
-set (CPACK_GENERATOR "TBZ2")
-set (CPACK_PACKAGE_NAME "p4c")
-set (CPACK_PACKAGE_VERSION_MAJOR ${BFN_P4C_VERSION_MAJOR})
-set (CPACK_PACKAGE_VERSION_MINOR ${BFN_P4C_VERSION_MINOR})
-set (CPACK_PACKAGE_VERSION_PATCH ${BFN_P4C_VERSION_PATCH})
-set (CPACK_PACKAGE_VERSION "${BFN_P4C_VERSION}")
-set (CPACK_PACKAGE_CONTACT "Barefoot Networks, Inc. <p4c@barefootnetworks.com>")
-set (CPACK_PACKAGE_VENDOR "Barefoot Networks, Inc.")
-set (CPACK_PACKAGE_DESCRIPTION_SUMMARY "P4C compilers for P4_14 and P4_16")
-set (CPACK_PACKAGE_DESCRIPTION "P4C compilers for the Barefoot Networks Tofino architecture")
-set (CPACK_PROJECT_CONFIG_FILE "${BFN_P4C_SOURCE_DIR}/CPackOptions.cmake")
-set (CPACK_STRIP_FILES TRUE)
-
-include (CPack)
 
 set (BF_P4C_IR_DEF_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/bf-p4c/ir/tofino.def
