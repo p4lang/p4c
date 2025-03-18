@@ -182,21 +182,8 @@ set (EBPF_ERRORS_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_ebpf_errors/*.p4"
   )
 
-# determine the kernel version
-execute_process(COMMAND uname -r
-  OUTPUT_VARIABLE P4C_EBPF_KERNEL_VER
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-  RESULT_VARIABLE rc)
-message(STATUS "Detected kernel version: ${P4C_EBPF_KERNEL_VER}")
-# Check if the kernel version is new enough to support ebpf features
-set (MIN_KERNEL 4.15.0)
-string (REGEX MATCH "[0-9]+[^-]*" KERNEL_VER ${CMAKE_SYSTEM})
-if (${KERNEL_VER} VERSION_LESS ${MIN_KERNEL} )
-  MESSAGE(WARNING "Kernel version ${KERNEL_VER} too small, expected ${MIN_KERNEL}. Ignoring ebpf kernel tests...")
-  set (SUPPORTS_KERNEL False)
-else()
-  set (SUPPORTS_KERNEL True)
-endif()
+include(CheckLinuxKernel)
+check_minimum_kernel_version("4.15.0" SUPPORTS_KERNEL)
 
 # Check if we have the right llvm version
 set (MIN_LLVM 3.7.1)
@@ -212,14 +199,14 @@ if (NOT LLVM_RET)
   if (${LLVM_PACKAGE_VERSION} VERSION_LESS ${MIN_LLVM})
     message(WARNING "LLVM version ${LLVM_PACKAGE_VERSION} too small, expected ${MIN_LLVM}.
     Ignoring ebpf tests...")
-    set (SUPPORTS_KERNEL False)
+    set (SUPPORTS_KERNEL FALSE)
   endif()
 else()
   message(WARNING
     "Did not find an LLVM version that can compile the eBPF kernel tests...\n"
     "'llvm-config' reason: ${LLVM_PACKAGE_VERSION}\n"
     "'llvm-config' return value: ${LLVM_RET}" )
-  set (SUPPORTS_KERNEL False)
+  set (SUPPORTS_KERNEL FALSE)
 endif()
 
 # check for the libbpf library
@@ -230,7 +217,7 @@ else()
   message(WARNING "Missing the libbpf dependency, disabling kernel tests."
   " You can install libbpf by running './build_libbpf' in the "
   "${CMAKE_CURRENT_SOURCE_DIR} folder.")
-  set (SUPPORTS_KERNEL False)
+  set (SUPPORTS_KERNEL FALSE)
 endif()
 
 # Only add the kernel tests if the two requirements are met
