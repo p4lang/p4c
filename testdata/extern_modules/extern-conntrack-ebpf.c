@@ -29,7 +29,7 @@ struct connInfo {
 };
 
 REGISTER_START()
-REGISTER_TABLE(tcp_reg, BPF_MAP_TYPE_HASH, u32, struct connInfo, MAX_ENTRIES)
+REGISTER_TABLE(tcp_reg, BPF_MAP_TYPE_HASH, sizeof(u32), sizeof(struct connInfo), MAX_ENTRIES)
 REGISTER_END()
 
 static inline u8 tcp_conntrack(struct Headers_t hdrs)
