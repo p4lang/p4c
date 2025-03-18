@@ -133,9 +133,16 @@ macro(p4tc_add_test_with_args tag driver isXfail alias p4test test_args cmake_ar
     set_tests_properties(${__testname} PROPERTIES TIMEOUT 1000)
 endmacro(p4tc_add_test_with_args)
 
-p4c_add_tests("p4tc" ${P4TC_COMPILER_DRIVER} "${P4_16_SUITES}" "")
+include(CheckLinuxKernel)
+check_minimum_kernel_version("5.0.0" SUPPORTS_KERNEL)
 
 set(ENABLE_P4TC_STF_TESTS ON)
+
+if (SUPPORTS_KERNEL)
+    p4c_add_tests("p4tc" ${P4TC_COMPILER_DRIVER} "${P4_16_SUITES}" "")
+    set(ENABLE_P4TC_STF_TESTS OFF)
+endif()
+
 # brctl is required for the P4TC STF tests.
 find_program(BRCTL_EXEC brctl)
 # clang is required for the P4TC STF tests.
