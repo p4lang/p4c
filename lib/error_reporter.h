@@ -23,9 +23,8 @@ limitations under the License.
 #include <type_traits>
 #include <unordered_map>
 
-#include <boost/format.hpp>
-
 #include "absl/strings/str_format.h"
+#include "boost_format_compat.h"
 #include "bug_helper.h"
 #include "error_catalog.h"
 #include "error_helper.h"
@@ -98,7 +97,7 @@ class ErrorReporter {
     // error message for a bug
     template <typename... Args>
     std::string bug_message(const char *format, Args &&...args) {
-        boost::format fmt(format);
+        BoostFormatCompat fmt(format);
         // FIXME: This will implicitly take location of the first argument having
         // SourceInfo. Not sure if this always desireable or not.
         return ::P4::bug_helper(fmt, "", "", std::forward<Args>(args)...);
@@ -106,7 +105,7 @@ class ErrorReporter {
 
     template <typename... Args>
     std::string format_message(const char *format, Args &&...args) {
-        boost::format fmt(format);
+        BoostFormatCompat fmt(format);
         return ::P4::error_helper(fmt, std::forward<Args>(args)...).toString();
     }
 
@@ -159,7 +158,7 @@ class ErrorReporter {
             msgType = ErrorMessage::MessageType::Error;
         }
 
-        boost::format fmt(format);
+        BoostFormatCompat fmt(format);
         ErrorMessage msg(msgType, diagnosticName ? diagnosticName : "", suffix);
         msg = ::P4::error_helper(fmt, msg, std::forward<Args>(args)...);
         emit_message(msg);
