@@ -184,6 +184,10 @@ set (EBPF_ERRORS_SUITES
 
 include(CheckLinuxKernel)
 check_minimum_kernel_version("4.15.0" SUPPORTS_KERNEL)
+check_minimum_linux_libc_version("4.15.0" SUPPORTS_LIBC)
+if (NOT SUPPORTS_LIBC)
+  set (SUPPORTS_KERNEL FALSE)
+endif()
 
 # Check if we have the right llvm version
 set (MIN_LLVM 3.7.1)
