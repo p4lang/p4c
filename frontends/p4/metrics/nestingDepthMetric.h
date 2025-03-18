@@ -7,8 +7,11 @@
 namespace P4 {
 
 class NestingDepthMetricPass : public Inspector {
+ private:
+    Metrics &metrics;
  public:
-    NestingDepthMetricPass() { setName("NestingDepthPass"); }
+    explicit NestingDepthMetricPass(Metrics &metricsRef)
+        : metrics(metricsRef) { setName("NestingDepthPass"); }
     bool preorder(const IR::P4Program *program) override;
 };
 

@@ -165,6 +165,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     if (program == nullptr && options.listFrontendPasses == 0) return nullptr;
 
     TypeMap typeMap;
+    Metrics metrics;
 
     ParseAnnotations *parseAnnotations = policy->getParseAnnotations();
     if (!parseAnnotations) parseAnnotations = new ParseAnnotations();
@@ -222,22 +223,22 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         }),
     });
     if (codeMetrics.find("unused-code") != codeMetrics.end()) {
-        passes.addPasses({new UnusedCodeMetricPass()});
+        passes.addPasses({new UnusedCodeMetricPass(metrics)});
     }
     passes.addPasses({ new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()), });
     if (codeMetrics.find("unused-code") != codeMetrics.end()) {
-        passes.addPasses({new UnusedCodeMetricPass()});
+        passes.addPasses({new UnusedCodeMetricPass(metrics)});
     }
     passes.addPasses({
         new SwitchAddDefault,
         new FrontEndDump(),  // used for testing the program at this point
     });
     if (codeMetrics.find("unused-code") != codeMetrics.end()) {
-        passes.addPasses({new UnusedCodeMetricPass()});
+        passes.addPasses({new UnusedCodeMetricPass(metrics)});
     }
     passes.addPasses({ new RemoveAllUnusedDeclarations(*policy, true) });
     if (codeMetrics.find("unused-code") != codeMetrics.end()) {
-        passes.addPasses({new UnusedCodeMetricPass()});
+        passes.addPasses({new UnusedCodeMetricPass(metrics)});
     }
     passes.addPasses({
         // Give each local declaration a unique internal name.
@@ -252,11 +253,11 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         policy->removeOpAssign() ? new RemoveOpAssign() : nullptr,
     });
     if (codeMetrics.find("unused-code") != codeMetrics.end()) {
-        passes.addPasses({new UnusedCodeMetricPass()});
+        passes.addPasses({new UnusedCodeMetricPass(metrics)});
     }
     passes.addPasses({ new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()) });
     if (codeMetrics.find("unused-code") != codeMetrics.end()) {
-        passes.addPasses({new UnusedCodeMetricPass()});
+        passes.addPasses({new UnusedCodeMetricPass(metrics)});
     }
     passes.addPasses({
         new SimplifySwitch(&typeMap),
@@ -265,11 +266,11 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new UniqueParameters(&typeMap),
     });
     if (codeMetrics.find("unused-code") != codeMetrics.end()) {
-        passes.addPasses({new UnusedCodeMetricPass()});
+        passes.addPasses({new UnusedCodeMetricPass(metrics)});
     }
     passes.addPasses({ new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()) });
     if (codeMetrics.find("unused-code") != codeMetrics.end()) {
-        passes.addPasses({new UnusedCodeMetricPass()});
+        passes.addPasses({new UnusedCodeMetricPass(metrics)});
     }
     passes.addPasses({
         new SpecializeAll(&typeMap, policy),
@@ -279,14 +280,14 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new MoveConstructors(),
     });
     if (codeMetrics.find("unused-code") != codeMetrics.end()) {
-        passes.addPasses({new UnusedCodeMetricPass()});
+        passes.addPasses({new UnusedCodeMetricPass(metrics)});
     }
     passes.addPasses({
         new RemoveAllUnusedDeclarations(*policy),
         new RemoveRedundantParsers(&typeMap, *policy),
     });
     if (codeMetrics.find("unused-code") != codeMetrics.end()) {
-        passes.addPasses({new UnusedCodeMetricPass()});
+        passes.addPasses({new UnusedCodeMetricPass(metrics)});
     }
     passes.addPasses({
         new ClearTypeMap(&typeMap),
@@ -305,11 +306,11 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     }
     if (policy->optimize(options)) {
         if (codeMetrics.find("inlined") != codeMetrics.end()) {
-            passes.addPasses({new InlinedActionsMetricPass()});
+            passes.addPasses({new InlinedActionsMetricPass(metrics)});
         }
         passes.addPasses({new InlineActions(&typeMap, *policy)});
         if (codeMetrics.find("inlined") != codeMetrics.end()) {
-            passes.addPasses({new InlinedActionsMetricPass()});
+            passes.addPasses({new InlinedActionsMetricPass(metrics)});
         }
         passes.addPasses({
             new LocalizeAllActions(*policy),
@@ -326,11 +327,11 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             new ConstantFolding(&typeMap, constantFoldingPolicy),
         });
         if (codeMetrics.find("unused-code") != codeMetrics.end()) {
-            passes.addPasses({new UnusedCodeMetricPass()});
+            passes.addPasses({new UnusedCodeMetricPass(metrics)});
         }
         passes.addPasses({ new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()), });
         if (codeMetrics.find("unused-code") != codeMetrics.end()) {
-            passes.addPasses({new UnusedCodeMetricPass()});
+            passes.addPasses({new UnusedCodeMetricPass(metrics)});
         }                     
         passes.addPasses({
             // more ifs may have been added to parsers
@@ -340,49 +341,49 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             new SimplifyDefUse(&typeMap),
         });
         if (codeMetrics.find("unused-code") != codeMetrics.end()) {
-            passes.addPasses({new UnusedCodeMetricPass()});
+            passes.addPasses({new UnusedCodeMetricPass(metrics)});
         }
         passes.addPasses({
             new RemoveAllUnusedDeclarations(*policy),
             new SimplifyControlFlow(&typeMap, policy->foldInlinedFrom()),
         });
         if (codeMetrics.find("unused-code") != codeMetrics.end()) {
-            passes.addPasses({new UnusedCodeMetricPass()});
+            passes.addPasses({new UnusedCodeMetricPass(metrics)});
         }
     }
     // Code metrics
     if (codeMetrics.find("cyclomatic") != codeMetrics.end()) {
-        passes.addPasses({new CyclomaticComplexityPass()});
+        passes.addPasses({new CyclomaticComplexityPass(metrics)});
     }
     if (codeMetrics.find("halstead") != codeMetrics.end()) {
-        passes.addPasses({new HalsteadMetricsPass()});
+        passes.addPasses({new HalsteadMetricsPass(metrics)});
     }
     if (codeMetrics.find("duplicit-code") != codeMetrics.end()) {
-        passes.addPasses({new DuplicateCodeMetricPass()});
+        passes.addPasses({new DuplicateCodeMetricPass(metrics)});
     }
     if (codeMetrics.find("nesting-depth") != codeMetrics.end()) {
-        passes.addPasses({new NestingDepthMetricPass()});
+        passes.addPasses({new NestingDepthMetricPass(metrics)});
     }
     if (codeMetrics.find("header-general") != codeMetrics.end()) {
-        passes.addPasses({new HeaderMetricsPass()});
+        passes.addPasses({new HeaderMetricsPass(metrics)});
     }
     if (codeMetrics.find("header-manipulation") != codeMetrics.end()) {
-        passes.addPasses({new HeaderManipulationMetricsPass()});
+        passes.addPasses({new HeaderManipulationMetricsPass(metrics)});
     }
     if (codeMetrics.find("header-modification") != codeMetrics.end()) {
-        passes.addPasses({new HeaderModificationMetricsPass()});
+        passes.addPasses({new HeaderModificationMetricsPass(metrics)});
     }
     if (codeMetrics.find("match-action") != codeMetrics.end()) {
-        passes.addPasses({new MatchActionTableMetricsPass()});
+        passes.addPasses({new MatchActionTableMetricsPass(metrics)});
     }
     if (codeMetrics.find("parser") != codeMetrics.end()) {
-        passes.addPasses({new ParserMetricsPass()});
+        passes.addPasses({new ParserMetricsPass(metrics)});
     }
     if (codeMetrics.find("extern") != codeMetrics.end()) {
-        passes.addPasses({new ExternalObjectsMetricPass()});
+        passes.addPasses({new ExternalObjectsMetricPass(metrics)});
     }
     if (!codeMetrics.empty()) {
-        passes.addPasses({new ExportMetricsPass("metrics_output.txt")});
+        passes.addPasses({new ExportMetricsPass("metrics_output.txt", metrics)});
     }
 
     passes.addPasses({

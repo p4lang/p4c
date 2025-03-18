@@ -3,9 +3,8 @@
 namespace P4 {
 
 bool HeaderModificationMetricsPass::preorder(const IR::P4Program *program) {
-    std::cout<<"Header modification pass"<<std::endl;
-    headerModificationMetrics.totalModifications.numOperations = 4;
-    headerModificationMetrics.totalModifications.numOperations = 150;
+    metrics.headerModificationMetrics.totalModifications.numOperations = 4;
+    metrics.headerModificationMetrics.totalModifications.numOperations = 150;
     return false;
 }
 

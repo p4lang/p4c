@@ -7,8 +7,11 @@
 namespace P4 {
 
 class HeaderModificationMetricsPass : public Inspector {
+ private:
+    Metrics &metrics;
  public:
-    HeaderModificationMetricsPass() { setName("HeaderModificationMetricsPass"); }
+    explicit HeaderModificationMetricsPass(Metrics &metricsRef)
+        : metrics(metricsRef) { setName("HeaderModificationMetricsPass"); }
     bool preorder(const IR::P4Program *program) override;
 };
 

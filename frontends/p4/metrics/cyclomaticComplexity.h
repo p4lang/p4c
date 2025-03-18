@@ -7,8 +7,11 @@
 namespace P4 {
 
 class CyclomaticComplexityPass : public Inspector {
+ private:
+    Metrics &metrics;
  public:
-    CyclomaticComplexityPass() { setName("CyclomaticComplexityPass"); }
+    explicit CyclomaticComplexityPass(Metrics &metricsRef)
+        : metrics(metricsRef) {setName("CyclomaticComplexityPass");}
     bool preorder(const IR::P4Program *program) override;
 };
 

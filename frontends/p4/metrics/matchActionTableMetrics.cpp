@@ -2,8 +2,6 @@
 
 namespace P4 {
 
-MatchActionTableMetrics &matM = matchActionTableMetrics;
-
 unsigned MatchActionTableMetricsPass::keySize(const IR::KeyElement *keyElement){
     if (keyElement == nullptr)
         return 0;
@@ -28,31 +26,31 @@ bool MatchActionTableMetricsPass::preorder(const IR::P4Table *table) {
 
     if (table->getKey() != nullptr) {
         for (auto keyElement : table->getKey()->keyElements) {
-            matM.keysNum[tableName] += 1;
-            matM.keySizeSum[tableName] += keySize(keyElement);
+            metrics.matchActionTableMetrics.keysNum[tableName] += 1;
+            metrics.matchActionTableMetrics.keySizeSum[tableName] += keySize(keyElement);
         }
     }
 
     if (table->getActionList() != nullptr) {
-        matM.actionsNum[tableName] = table->getActionList()->size();
+        metrics.matchActionTableMetrics.actionsNum[tableName] = table->getActionList()->size();
     }
 
-    matM.numTables += 1;
-    matM.totalKeys += matM.keysNum[tableName];
-    matM.totalKeySizeSum += matM.keySizeSum[tableName];
-    matM.totalActions += matM.actionsNum[tableName];
-    matM.maxKeysPerTable = std::max(matM.maxKeysPerTable, matM.keysNum[tableName]);
-    matM.maxActionsPerTable= std::max(matM.maxActionsPerTable, matM.actionsNum[tableName]);
+    metrics.matchActionTableMetrics.numTables += 1;
+    metrics.matchActionTableMetrics.totalKeys += metrics.matchActionTableMetrics.keysNum[tableName];
+    metrics.matchActionTableMetrics.totalKeySizeSum += metrics.matchActionTableMetrics.keySizeSum[tableName];
+    metrics.matchActionTableMetrics.totalActions += metrics.matchActionTableMetrics.actionsNum[tableName];
+    metrics.matchActionTableMetrics.maxKeysPerTable = std::max(metrics.matchActionTableMetrics.maxKeysPerTable, metrics.matchActionTableMetrics.keysNum[tableName]);
+    metrics.matchActionTableMetrics.maxActionsPerTable= std::max(metrics.matchActionTableMetrics.maxActionsPerTable, metrics.matchActionTableMetrics.actionsNum[tableName]);
     return true;
 }
 
 void MatchActionTableMetricsPass::postorder([[maybe_unused]] const IR::P4Program *program){
-    if(matM.numTables > 0){
-        matM.avgKeysPerTable = static_cast<double>(matM.totalKeys) / matM.numTables;
-        matM.avgActionsPerTable = static_cast<double>(matM.totalActions) / matM.numTables;
+    if(metrics.matchActionTableMetrics.numTables > 0){
+        metrics.matchActionTableMetrics.avgKeysPerTable = static_cast<double>(metrics.matchActionTableMetrics.totalKeys) / metrics.matchActionTableMetrics.numTables;
+        metrics.matchActionTableMetrics.avgActionsPerTable = static_cast<double>(metrics.matchActionTableMetrics.totalActions) / metrics.matchActionTableMetrics.numTables;
     }
-    if (matM.totalKeys > 0)
-        matM.avgKeySize = static_cast<double>(matM.totalKeySizeSum) / matM.totalKeys;
+    if (metrics.matchActionTableMetrics.totalKeys > 0)
+        metrics.matchActionTableMetrics.avgKeySize = static_cast<double>(metrics.matchActionTableMetrics.totalKeySizeSum) / metrics.matchActionTableMetrics.totalKeys;
 }
 
 }  // namespace P4

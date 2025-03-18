@@ -7,8 +7,11 @@
 namespace P4 {
 
 class DuplicateCodeMetricPass : public Inspector {
+ private:
+    Metrics &metrics;
  public:
-    DuplicateCodeMetricPass() { setName("DuplicateCodePass"); }
+    explicit DuplicateCodeMetricPass(Metrics &metricsRef)
+        : metrics(metricsRef) { setName("DuplicateCodePass"); }
     bool preorder(const IR::P4Program *program) override;
 };
 

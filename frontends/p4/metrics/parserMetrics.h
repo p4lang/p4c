@@ -7,8 +7,11 @@
 namespace P4 {
 
 class ParserMetricsPass : public Inspector {
+ private:
+    Metrics &metrics;
  public:
-    ParserMetricsPass() { setName("ParserMetricsPass"); }
+    explicit ParserMetricsPass(Metrics &metricsRef)
+        : metrics(metricsRef) { setName("ParserMetricsPass"); }
     bool preorder(const IR::P4Program *program) override;
 };
 

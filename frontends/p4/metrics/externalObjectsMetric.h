@@ -7,8 +7,11 @@
 namespace P4 {
 
 class ExternalObjectsMetricPass : public Inspector {
+ private:
+    Metrics &metrics;
  public:
-    ExternalObjectsMetricPass() { setName("ExternalObjectsMetricPass"); }
+    explicit ExternalObjectsMetricPass(Metrics &metricsRef)
+        : metrics(metricsRef) { setName("ExternalObjectsMetricPass"); }
     bool preorder(const IR::P4Program *program) override;
 };
 

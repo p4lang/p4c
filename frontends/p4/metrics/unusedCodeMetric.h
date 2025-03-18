@@ -7,8 +7,11 @@
 namespace P4 {
 
 class UnusedCodeMetricPass : public Inspector {
+ private:
+    Metrics &metrics;
  public:
-    UnusedCodeMetricPass() { setName("UnusedCodeMetricPass"); }
+    explicit UnusedCodeMetricPass(Metrics &metricsRef)
+        : metrics(metricsRef) { setName("UnusedCodeMetricPass"); }
     bool preorder(const IR::P4Program *program) override;
 };
 

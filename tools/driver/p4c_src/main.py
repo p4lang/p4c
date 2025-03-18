@@ -455,7 +455,6 @@ def main():
 
     # parse the arguments
     opts = parser.parse_args()
-    print(f"Metrics selected: {opts.metrics}")
 
     ### Accept multiple ways of specifying which language,
     ###   and ensure that it is a consistent string from now on.

@@ -7,14 +7,17 @@
 namespace P4 {
 
 class MatchActionTableMetricsPass : public Inspector {
+ private:
+    unsigned keySize(const IR::KeyElement *keyElement);
+    Metrics &metrics;
  public:
-    MatchActionTableMetricsPass() { setName("MatchActionTableMetricsPass"); }
+    explicit MatchActionTableMetricsPass(Metrics &metricsRef)
+        : metrics(metricsRef) { setName("MatchActionTableMetricsPass"); }
     /// Collect metrics for each match-action table
     bool preorder(const IR::P4Table *table) override;
     /// Calculate averages at the end of traversal
     void postorder([[maybe_unused]] const IR::P4Program *program) override;
-private:
-    unsigned keySize(const IR::KeyElement *keyElement);
+
 };
 
 }  // namespace P4
