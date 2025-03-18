@@ -10,7 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-""" This programs builds a bpftool binary and the libbpf static library and places it in the runtime
+""" This programs builds a libbpf static library and places it in the runtime
     folder. The library and its headers are required by the kernel target.
 """
 
@@ -31,24 +31,21 @@ def main() -> int:
         level=logging.WARN,
         filemode="w",
     )
-    bpftool_dir = FILE_DIR.joinpath("runtime/contrib/bpftool")
-    bpftool_src_dir = bpftool_dir.joinpath("src")
-    bpftool_build_dir = bpftool_src_dir.joinpath("build")
-    bpftool_target_dir = FILE_DIR.joinpath("runtime/install/")
-    bpftool_target_dir.mkdir(parents=True, exist_ok=True)
-    # Create the bpftool build directory
-    testutils.check_and_create_dir(bpftool_build_dir)
-    # Build bpftool
-    mk_cmd = f"make -C {bpftool_src_dir} install "
-    mk_cmd += f"OUTPUT={bpftool_target_dir}/ "
+    libbpf_dir = FILE_DIR.joinpath("runtime/contrib/libbpf")
+    libbpf_src_dir = libbpf_dir.joinpath("src")
+    libbpf_build_dir = libbpf_src_dir.joinpath("build")
+    libbpf_target_dir = FILE_DIR.joinpath("runtime")
+    # Create the libbpf build directory
+    testutils.check_and_create_dir(libbpf_build_dir)
+    # Build libbpf
+    mk_cmd = f"make -C {libbpf_src_dir} install "
     mk_cmd += "BUILD_STATIC_ONLY=y "
-    mk_cmd += f"OBJDIR={bpftool_build_dir} "
-    mk_cmd += f"DESTDIR={bpftool_target_dir} "
+    mk_cmd += f"OBJDIR={libbpf_build_dir} "
+    mk_cmd += f"DESTDIR={libbpf_target_dir} "
     mk_cmd += "EXTRA_CFLAGS=-fPIE"
-    print(mk_cmd)
     result = testutils.exec_process(args=mk_cmd)
     if result.returncode != testutils.SUCCESS:
-        testutils.log.error("Could not build bpftool")
+        testutils.log.error("Could not build libbpf")
     return result.returncode
 
 
