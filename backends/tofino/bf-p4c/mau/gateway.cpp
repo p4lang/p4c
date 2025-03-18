@@ -43,7 +43,6 @@ const Device::GatewaySpec &TofinoDevice::getGatewaySpec() const {
     };
     return spec;
 }
-#if HAVE_JBAY
 const Device::GatewaySpec &JBayDevice::getGatewaySpec() const {
     static const Device::GatewaySpec spec = {
         /* .PhvBytes = */ 4,
@@ -59,7 +58,6 @@ const Device::GatewaySpec &JBayDevice::getGatewaySpec() const {
     };
     return spec;
 }
-#endif
 
 class CanonGatewayExpr::NeedNegate : public Inspector {
     bool rv = false;

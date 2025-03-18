@@ -233,7 +233,6 @@ class StageMatchMemoryDetails(StageMemoryDetailsWithEntryWidthAndIdeal):
 
 
 class MatchTables(jsl.Document):
-
     class StageDetails(jsl.Document):
         title = "StageDetails"
         description = "Information about packing and resource usage on a per-stage basis."

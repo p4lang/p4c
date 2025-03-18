@@ -1,0 +1,1294 @@
+# Copyright (C) 2024 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License.  You may obtain
+# a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  See the
+# License for the specific language governing permissions and limitations
+# under the License.
+#
+#
+# SPDX-License-Identifier: Apache-2.0
+
+# yaml format tags for tofino assembler
+#
+# symbols used below:
+#   <name>      ::= a string of 1 or more letters, digits, '_', '-', '.',
+#                   '$', or '@' not starting with a digit.  Cannot start or
+#                   end with '-' or '.' or have two consecutive '-' or '.'
+#   <thread>    ::= "ingress" | "egress" | "ghost"
+#                   ghost is only availble in jbay mau and phv sections
+#                   ghost only has 'ghost_md' and 'pipe_mask' sections used to
+#                   configure 'tm_status_phv' register
+#   <register>  ::= <name> that matches a predefined register name
+#   <slice>     ::= <name>(<lo>..<hi>) | <name>(<bit>)
+#                   no spaces between parts of the <slice>
+#   <constant>  ::= unsigned integer constant
+#                   0x/0b/0o prefix for hex/binary/octal
+#   <match-constant> ::= constant where one or more digits may be replaced
+#                   by '*' to denote don't-care for ternary matches.
+#   <range>     ::= <constant>..<constant>
+#                   no spaces between parts of the <range>
+#   <vector>    ::= <constant> | <range> | '[' <constant> | <range> , ... ']'
+#                   can be a single constant or range or multiple constants
+#                   or ranges in a yaml list
+#   <phv-location> ::= <name> | <slice>
+#                   Must be a register name or a name defined in the phv section
+#   <bit-location> ::= <phv-location>
+#                   Denotes a single bit
+#   <matcher>    ::= half | byte0 | byte1
+#            denotes one of the parser match units
+#   <operands>   ::= <operand> { , <operand> }
+#   <operand>    ::= <phv-location> | <field> | <constant>
+#                  | hash_dist <unit> [ <lo>..<hi> ]
+#                  | rng <unit> [ <lo>..<hi> ]
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+phv [<thread>]:
+    # Defines PHV alias names for registers.  <thread> is 'ingress', 'ghost' or
+    # 'egress' and is optional.  If present, aliases are defined only for
+    # that thread.  If not present, aliases are for all threads
+    <name>: <register> | <slice>
+        # Makes <name> an alias for a register or piece of a register.
+        # register B0 through B63 for byte registers, H0-H95 for half
+        # (16-bit) registers, or W0-W63 for word (32-bit) registers.
+        # May also use R0-R224 for all registers in W/B/H order.
+        # TW0-TW31, TB0-TB21, TH0-TH47, R256-R367 for tagalong
+    <name>:
+        stage <lo>..<hi>: <register> | <slice>
+        stage <int>: <register> | <slice>
+            # makes name an alias that varies over stages.  In the first form, the map
+            # applies just for those stages; in the second form it applies from that stage
+            # up until the next stage specified by another stage key.  Stage numbers
+            # apply to iPHV (input), so uses for VLIW destinations use the mapping for the
+            # next stage.  Parser uses stage 0 and deparser uses the end-of-pipe stage
+    context_json:
+        <name>:
+            # any keys/vector/values here are converted to json and output into
+            # the context.json phv_allocation.records info for field <name>
+            # verbatim
+hdr:
+    # Information related to hdr_ids (header names and compressed
+    # header sequence and length encoding in bridge metadata)
+    map:
+        # Mapping of hdr_ids to header names
+        <name>: <constant>
+            # constant is hdr_id, name can be used as substitution for hdr_id
+            # e.g. md32: 0, ethernet: 1, ipv4: 2, ...
+    seq:
+        # Compressed header sequence encoding in bridge metadata
+        <constant>: [ <hdr-id-name>, ... ]
+            # constant is 8b sequence number; 255 is reserved for
+            # escape value to specify explicit list of all headers
+            # e.g. 0: ethernet, ipv4
+    len:
+        # Compressed header length encoding in bridge metadata
+        <hdr-id-name>: { base_len: <constant>, num_comp_bits: <constant>, scale: <constant> }
+            # base_len is 8b, num_comp_bits 3b, scale 2b
+            # e.g. ipv4: { base_len: 20, num_comp_bits: 4, scale: 2 }  # (20B + N * 4B; N < 10)
+            # e.g. ipv6: { base_len: 40, num_comp_bits: 7, scale: 3 }  # (40B + N * 8B)
+parser [<thread>] [<port_use>, ...]:
+    # Defines a parser.  <thread> must be 'ingress' or 'egress'
+    # <port_use> can have numerical values, such as range, int, vector of range and int.
+    # <port_use> can also have symbolic values, such as "ALL", "CPU", "PCIE", "UNUSED"
+    # "CPU" and "PCIE" are symbolic names that the corresponding numeric values are device-specific.
+    # "UNUSED" represents the parser program that is not configured to any physical
+    # parser during device initialization, but may be used by driver during runtime.
+    name: <name> # parser name defined in the arch file, used by bfrt to find the parser
+                 # config in context.json
+    start: <name>
+    start: '[' <name>, ... ']'
+        # define up to 4 distinct initial start states for the four channels
+    priority: <int> | '[' <int>, ... ']'
+    priority_threshold: <int> | '[' <int>, ... ']'
+        # define initial parser priority and threshold for the 4 channels
+    states:
+        # Parser states can be defined with or without the 'states' key but this
+        # is preferred as it avoids name collisions with other assembly
+        # directives,
+        <name> [<match-constant>]:
+            # Defines a parser state.  The state 'start' is the implicit initial state
+            # if there is no explicit initial state defined by a separate 'start' entry.
+            # The state 'end' cannot exist (used for exit)
+            # The optional constant is the 8-bit value used to denote the state;
+            # overlapping state values will be flagged as an error
+            match: <vector> | { <matcher> : <byte-loc> }
+                # specifies up to 4 bytes to match against in the input buffer
+                # may also specify 'ctr_zero' and 'ctr_neg' to match those
+                # special bits, or the specific matchers 'byte0', 'byte1' or 'half'
+                # to match against values explicitly loaded by a 'save' in a previous
+                # state.  May additionally specify specific matchers to use.
+            option: <name>
+                # enable an optional feature for this state.  Currently the only option
+                # is "ignore_max_depth" which means the state (and subsequent states) are
+                # ignore for calculating the max parser bytes.  Used for min parser padding
+                # states
+            <match-constant>:
+                # actions to perform when the match matches this match constant
+                # this is a tcam priority match, so only the first match triggers
+                buf_req: <constant>
+                    # number bytes that must be in the input buffer to not stall
+                counter: inc <constant> | dec <constant> | load <constant> |
+                    # modification of the counter
+                    src: <matcher>     # matcher to load counter from
+                    max: <constant>    # max value of the counter
+                    rotate: <constant> # number of bits to circular right rotate
+                    mask: <constant>   # mask of rotated value
+                    add: <constant>    # immediate to add to masked value
+                checksum <int>:
+                    # modification of checksum unit <int>
+                    type: VERIFY | RESIDUAL | CLOT
+                    mask: <vector> # vector of byte ranges of input buffer
+                    swap: <vector>
+                    dest: <phv-location> | clot <tag> # write destination
+                    start: 0 | 1
+                    end: 0 | 1
+                next: <name> | <match-constant>
+                    # next state -- match-constant takes don't care bits
+                    # from current state
+                offset: [set] <constant> | inc <constant>
+                    # modificate to the offset
+                priority: <constant> | @ <offset> [ >> <constant> ] [ & <constant> ]
+                    # update the packet priority
+                load: { <matcher> : <byte-loc>, ... } | <matcher>
+                    # specifies one or more values from the input stream to be
+                    # loaded into specific matchers or specific matchers to have
+                    # their values preserved for use by later states
+                save: [ <matcher>, ... ]
+                    # specifies on more more values from the matchers to be
+                    # saved into the scratch pad registers
+                shift: <constant>
+                    # number of bytes to shift out
+                intr_md: <constant>
+                    # number of bits of intrinsic metadata being shifted out
+                [rotate] <constant> : [offset] <phv_location>
+                [rotate] <range> : [offset] <phv_location>
+                    # write the specifed byte (or range) to named phv slot
+                [offset] <phv_location>: [rotate] <constant>
+                    # write the specified constant to the phv location
+                clot <tag>:
+                    # output a CLOT (jbay only)
+                    start: <constant>
+                    length: <constant> | <expression>
+                        # expression is generally '@' <const> [ '>>' <const> ] [ '&' <const> ]
+                        # with variations (unary is highest precedence, followed by shift,
+                        # mask(&), +/- lowest)
+                    max_length: <constant>
+                    stack_depth: <constant>
+                    stack_inc: <constant>
+                hdr_len_inc_stop: <constant>
+                    # stop the header length counter, and use value as final increment amount (jbay only)
+                disable_partial_hdr_err: <constant>
+                    # specifies whether the partial header error is enabled or not for
+                    # the current state. Specific to:
+                    #           - JBay
+                partial_hdr_err_proc: <constant>
+                    # specifies whether or not the best effort extraction (a.k.a. greedy extract)
+                    # is performed when insufficient data is available in the input buffer.
+            value_set <name> <size>:
+                handle: <int> # pvs handle
+                field_mapping:
+                  <fieldname>(range) : <Matcher>(range)
+                # actions to perform for a value set of the given <name> and integer <size>
+            default:
+                # actions to perform regardless of the match
+            # if there is no 'default' tag in a state, anything that is not
+            # recognized as a valid state tag is treated as part of an implicit
+            # default
+    hdr_len_adj: <constant>
+        # value for the hdr_len_adj register
+    init_zero: [ <phv_location>,... ]
+        # list of phv slots that should be initialized to (valid) zero
+    meta_opt: <constant>
+        # value for the meta_opt register
+    multi_write: [ <phv_location>,... ]
+        # list of phv slots that the parser may write multiple times
+        # values OR'd with previous values
+    parser_error: <phv_location>
+        # define a phv location to receive parser error codes
+    bubble:
+        # configure rate limit registers for pipe
+        inc: <int>
+        dec: <int>
+        max: <int>
+        interval: <int>  # tofino2+ only
+    ghost_md:
+        # container(s) allocated to store ghost intrinsic metadata
+        # tofino2+ only (set tm_status_phv reg)
+    pipe_mask:
+        # pipe_mask to be set for ghost packets
+        # (tm_status_phv.pipe_mask in tofino2)
+    parse_depth_checks_disabled: true | false
+        # Parse depth checks disabled
+    states:
+        <name>: <match-constant>
+            # specifies match values for states (64b)
+            # e.g. parse_ipv4: 0x********_******02
+            # e.g. parse_tcp: 0x********_******04
+    port_metadata:
+        # specifies port metadata for each logical port number
+        <constant>: <vector>
+            # constant is logical port number, vector is port metadata (14B)
+    profile <constant>:
+        # specifies a parser profile, constant represents the TCAM&SRAM index
+        match_port: <match-constant>
+        match_inband_metadata: <match-constant>
+        # if the logical port number (2'b0 ++ 6b) or inband metadata (8B) match is omitted,
+        # it is treated as *
+        initial_pktlen: <constant>
+            # specifies the value to adjust the length for AdjustedPacketLength (6b)
+        initial_seglen: <constant>
+            # specifies the value to adjust the length for AdjustedSegLength (6b)
+        initial_state: <constant> | <name>
+            # specifies initial state (80b)
+            # if a state name is used, all-match bits are initialized to 0
+            # and upper-most two bytes are set to 0
+        initial_flags: <constant>
+            # specifies initial flags (64b)
+        initial_ptr: <constant>
+            # specifies initial pointer (8b)
+        initial_w0_offset: <constant>
+            # specifies initial W0 offset (8b)
+        initial_w1_offset: <constant>
+            # specifies initial W1 offset (8b)
+        initial_w2_offset: <constant>
+            # specifies initial W2 offset (8b)
+        initial_alu0_instruction: <alu0-instruction>
+            # specifies initial instruction for ALU0 (15b)
+        initial_alu1_instruction: <alu1-instruction>
+            # specifies initial instruction for ALU1 (19b)
+        metadata_select: '[' <metadata-select>, ... ']'
+            # specifies source of each of 32B of MD32 metadata
+    analyzer_stage <constant> [<name>]:
+        # constant is stage number
+        # if name is present, it is looked up in state_map and all rules match the state
+        # only one of stage name and rule state match can be present
+        # e.g. stage 0 parse_ipv4
+        rule <constant>:
+            # constant is explicit rule index; it also specifies the rule priority
+            # when more rules match (higher value is higher priority)
+            # each rule supports up to 4 instructions for modifying flags, one for up to 16 bits
+            # (modify_flags16), one for up to 4 bits (modify_flags4), and two for 1 bit
+            # (modify_flag0 and modify_flag1). All of these can be set simultaneously. If the
+            # affected flags overlap, the instructions take effect in the following order of
+            # precedence:
+            # modify_flags16, modify_flag4, modify_flag0, modify_flag1.
+            match_state: <match-constant> | <name>
+            # if state match constant is ommited, it is derived from the state name at stage
+            # if it is missing, it is treated as *
+            match_w0: <match-constant>
+            match_w1: <match-constant>
+            # if w0 or w1 match constant is ommited, it is treated as *
+            # e.g. rule 0 w0 17  # state is matched based on `stage 0 parse_ipv4' above
+            # e.g. rule 0 w0 17 state 0x************02  # 17 is for TCP; 02 is for parse_ipv4 (see state_map)
+            next_state: <match-constant> | <name>
+                # specifies state for the next stage (80b)
+                # e.g. next_state: 0x**************04
+                # e.g. next_state: parse_tcp
+            next_skip_extractions: <bool>
+                # skips Wx extractions in the next stage (bool)
+            next_w0_offset: <constant>
+                # specifies W0 offset for the next stage (8b)
+                # e.g. next_w0_offset: 2  # TCP destination port
+            next_w1_offset: <constant>
+                # specifies W1 offset for the next stage (8b)
+            next_w2_offset: <constant>
+                # specifies W2 offset for the next stage (8b)
+            next_alu0_instruction: <alu0-instruction>
+                # specifies instruction for ALU0 for the next stage (15b)
+            next_alu1_instruction: <alu1-instruction>
+                # specifies instruction for ALU1 for the next stage (19b)
+            push_hdr_id: { hdr: <hdr-id-name>, offset: <constant> }
+                # specifies header ID (8b) or name, and offset (8b) to be pushed to ana_hdr_ptrs
+                # if name is specified, it is looked up in hdr -> map
+                # 0xff for header ID is reserved for invalid
+                # offset is relative to pointer
+                # e.g. push_hdr_id: ipv4 0
+            modify_flags16:
+                # specifies src (2b), imm (16b), mask (16b), and shift (6b) to set/clear
+                # multiple flags at once.
+                src: <modify-flags-src>
+                imm: <constant>
+                    # whether to set or clear the corresponding flags, only used if src == 3
+                mask: <constant>
+                    # modify a flag if the corresponding mask bit is set
+                shift: <constant>
+                    # index into flags at which to start the operation
+            modify_flags4:
+                # same as modify_flag16, but with 4b imm and mask
+                src: <modify-flags-src>
+                imm: <constant>
+                mask: <constant>
+                shift: <constant>
+            modify_flag0: { set: <constant> | clear: <constant> },
+                # set or clear the flag at the index given by the 6-bit <constant>
+            modify_flag1: { set: <constant> | clear: <constant> },
+                # same as modify_flag0
+            modify_checksum: { idx: <constant>, enabled: <bool> },
+                # changes the enabled state of the checksum unit at the 1-bit index idx
+    phv_builder_group <constant>:
+        # specifies extract groups
+        pov_select: <pov-select>
+            # specifies which POV bytes are used to address the TCAM & SRAM
+        extract <constant>:
+            # specifies extracts
+            match: <match-constant>
+                # match constant is 4B
+            source: <phe-source>
+                # specifies a PHE source pair
+    initial_predication_vector:
+        # specifies the initial predication information
+        pov_select: <pov-select>
+            # specifies which POV bytes are used to address the TCAM
+        next_tbl_config:
+            # a mapping for the IPV TCAM, from match constants to next table identifiers
+            <match-constant>: <constant>
+                # match constant is 4B, constant is 1B
+    ghost_initial_predication_vector:
+        # specifies the initial predication information for the ghost thread
+        pov_select: <pov-select>
+            # specifies which POV bytes are used to address the TCAM
+        next_tbl_config:
+            # a mapping for the IPV TCAM, from match constants to next table identifiers
+            <match-constant>: <constant>
+                # match constant is 4B, constant is 1B
+    checksum_checkers:
+        mask <constant>: <constant>
+            # There can be up to 4 masks.
+            # Each mask is specified as an up to 224b wide constant.
+            # A mask specifies which bytes of the header are used for the checksum computation.
+            # 1 -> used, 0 -> not used
+        unit <constant>:
+            # Each unit is able to verify 1 checksum.
+            # The checksum is computed according to the selected 'config'
+            # which specifies a header ('hdr') and a mask ('mask_sel').
+            # A config is selected using the 'match_pov' key.
+            # There are 2 units.
+            # Both units operate independently and allow verification of overlapping bytes.
+            pov_select: <pov-select>
+                # Specifies which POV bytes are used to address the TCAM
+            config <constant>:
+                # There are up to 16 checksum configurations for each unit.
+                match_pov: <match-constant>
+                    # 32b match key
+                mask_sel: <constant>
+                    # Selects one of the 4 masks (2b).
+                    # Both csum units can select the same mask.
+                hdr: <hdr-id-name>
+                    # Specifies which header is used for the checksum computation.
+                    # The concrete header bytes which are used for the checksum
+                    # are specified using a mask.
+                    # One of the 4 masks is selected using the 'mask_sel' field.
+    pov_flags_pos: <constant>
+        # specifies start position of POV flags in bridge metadata (6b)
+    pov_state_pos: <constant>
+        # specifies start position of POV state in bridge metadata (6b)
+stage <constant> <thread>:
+    # Defines a single stage of the MAU.  The order of the tables within the
+    # stage is the logical table ordering, so order matters
+    <table-type> <name> [<logical_id>]:
+        # common keys available in (almost) all tables types
+        row: <vector>
+            # one or more ram rows the table uses
+            # whether these are physical or logical rows depends on the table type
+        column: <vector> | '[' <vector>, ... ']'
+            # May be a single vector or a list of vectors.  If a list, length
+            # must match the number of rows specified
+            # Denotes the rams used on each row.  RAM type (sram, tcam or mapram)
+            # depends on the table type
+            stage <int>: <vector> | '[' <vector>, ... ']'
+            - stage <int>: <vector>
+        stages: <vector> | '[' <vector>, ... ']'
+        bus: 0 | 1 | '[' 0 | 1, ... ']'
+            # bus(es) to use.  If a list, must match the number of rows
+        lhbus: 0 | 1 | <vector>
+        rhbus: 0 | 1 | <vector>
+        word: <vector>
+            # for wide tables, specify which word of the wide word is in each row of the table
+        vpns: <vector>
+            # vpn values to use for rams
+        dyanamic_config:
+            <int> : <match-constant>
+            <int> : { <slice> : <match-constant> }
+                # defines the match for one specific dconfig bit.  Match may be a single
+                # match for the entire width or matches against specific
+                # named slices of those PHVs.  Other bits are implicitly don't-care
+        input_xbar [ <int> | <match-constant> ]:
+            # Input xbar config for this table
+            <group-name>: <phv-location> | '[' <phv_location>, ... ']' |
+                { <int>: <phv_location> | <int>..<int>: <phv_location>,... }
+            [<type>] group <constant>: ...  # tofino 1/2
+                # One or more registers to be mapped into the specified ixbar group
+                # in order or at the locations specified.  Locations are bit offsets in
+                # the group (even for groups that are not bit-addressable
+            hash [table] <constant>:
+                # hash table config
+                <int>: <hash>
+                    # specify one column of the table -- hash is a 64-bit constant
+                <int> | <range>: <expression>
+                    # specify one or more columns according to expression.  Phv refs
+                    # must be in the corresponding input group of this input_xbar
+                    <phv-location>
+                        # identity copy of phv (must match width of range)
+                    random(<phv-location>, ...)
+                        # random hash of the given phv locations.  We generate
+                        # with random(3) and we do NOT call srand, so the hash
+                        # for a given program is repeatable.
+                    crc(<int>, [<int>,] <phv-location>, ...)
+                        # Deprecated.
+                        # crc hash of the given phv locations -- first arg is integer
+                        # constant denoting polynomial (Koopman notation).  Second arg
+                        # is an initial constant prefixed to the input.
+                    crc(<int>, [<int>,] '{' <int> : <phv-location>, ... '}' [, '{' <range> : <int> '}' ])
+                        # crc hash of the given phv locations, at the specified offsets
+                        # from the lsb of the crc input as a whole.
+                        # arguments are polynomial (Koopman Notation)
+                        # init shift register
+                        # final xor
+                        # total number of bits in the crc
+                        # --
+                        # hash calculation could have a list of constants as inputs.
+                        # <range> : <int> represents the constant value in hash calculation,
+                        # the key <range> encodes the offset and length of the constant
+                        # the value <int> encodes the value of the constant
+                    crc_rev(...)
+                        # bit-reversed (little endian instead of the defaul big endian) crc
+                    xor(<int>, '{' <int> : <phv-location>, ... '}')
+                        # XOR of a data block (message)
+                        #
+                        # Fields specified in the second parameter are joined into one
+                        # big bit stream, cut into blocks of width specified in the first
+                        # parameter and the blocks are bitwise XORed together. If the
+                        # field list is not continuous (there are gaps in bit offsets),
+                        # zeros are padded in.
+                        #
+                        # Constants are not supported by this directive - they are computed
+                        # into the seed value by the backend.
+                    <expression> ^ <expression>
+                        # xor of other expressions.
+                    <expression> & <int>
+                    <int> & <expression>
+                        # mask expression, including just some bits in the result
+                    stripe(<expression>, ...)
+                        # stripe other expressions across the width required,
+                        # repeating as necessary
+                    sextend(<expression>)
+                    sign_extend(<expression>)
+                        # sign extend expression (replicating the sign bit to the needed width
+                <int>: parity
+                    # Keyword parity indicates this bit is reserved for parity
+                    # calculation
+                valid <int>: <int>
+                    # specifies the 16-bit valid hash for one column of the table
+            hash group <constant>:
+                # hash group config
+                table: <vector>
+                    # one or more hash tables to xor together for this group
+                seed: <hash>
+                    # 52-bit hash seed value
+                seed_parity: <bool>
+                    # optional parameter to indicate if seed must be parity
+                    # encoded, must be true when hash parity is enabled on the
+                    # group.
+                <int>
+                    # a single table to use for the group
+            <group-name>: '[]'
+            - <group-name>
+                # use an xbar group configured elsewhere
+            random_seed: <constant>
+                # random seed from pragma for the table
+            exact unit: <vector>
+            output unit: <int>
+        gateway:
+            # gateway table on this table -- see below
+        format: { <name>: <range>, <name>: <size> ... }
+            # format of data in the table, mapping names to ranges of bits.
+            # fields with sizes instead of explicit ranges will be laid out
+            # by the assembler following preceeding fields
+        hash_dist: { <unit>: <config>, ... }
+            <int>: # hash distribution unit to config
+                hash: <int>
+                mask: <int>
+                shift: <int>
+                expand: <int>
+                    # hash distribution config params
+                output: <name> | '[' <name>,... ']'
+                    # outputs to enable for this hast_dist unit
+                    # 'lo' | 'hi' | 'meter' | 'stats' | 'action' | 'hashmod'
+        instruction: <table-name>(<instruction-loc>, <pfe-loc>)
+            # specifies where to get the action index and pfe for the instruction
+            # to run in a given table
+        action: <table-name>(<action> [, <index>])
+            # Action table to use -- action is a named field from the format
+            # that determines which action to do.  Index is optional (for
+            # indirect action), named field from format.  If not present use
+            # direct action (index is match address).
+        action_enable: <int>
+        enable_action_data_enable: true | false
+        enable_action_instruction_enable: true | false
+        default_action: <action>
+        default_action_handle: <int>
+            # Specifies a unique integer for action handle, used to match glass
+            # If not present assembler generate handles
+        default_action_parameters: { <name> : <int>, ... }
+            # Specifies list of params and values
+        action_bus: { <int> : <name> | <int>..<int> : <name>, ... }
+            # immediate actions data
+            # meter output data
+        actions:
+            # defines actions that can be used in the table
+            <name> [<index>]:
+                # the optional index is the index to use in the 8-entry
+                # instruction indirection map of the table.
+            [- <address>]   # constant imem address to use for this action
+            [- <data alias map>]        # map of aliases for data operands
+                <name> : <name> [ (<bit-range>) ]
+                    # defines a name as an alias for (a slice of) something else
+            [- p4_param_order: '{' param_name : <int>, ... '}' ]
+                # Param order specifying param name and width for context json (p4_parameters)
+            [- hit_allowed: '{' allowed: true|false, reason: <string> '}' ]
+            [- default_action: '{' allowed: true|false, reason: <string> '}' ]
+               # the next table to be run when the entry hits with this action, could be
+               # an index into the hit_next
+            [- next_table: <int> | <name> ]
+               # the next table to run when the entry misses with this action
+            [- next_table_miss: <name> ]
+            [- context_json: ... ]
+                # any keys/vector/values here are converted to json and output
+                # into the context.json info for this action verbatim
+            - <instruction> <operands>
+        selector: <table-name>(<index-field> [ , <length-field> [ , <shift-field> ] ] )
+            # selection table to use
+        stats: <table-name> [ (<index-field>) ]
+            # statistics table to use
+        meter: <table-name> [ (<index-field>) ]
+            # meter table to use
+        stateful: <table-name> [ (<sful action> [, <index-field> ]) ]
+        stateful: <table-name> [ (<sful action>, counter [ hit | miss | gateway ]) ]
+            # stateful table to use
+        idletime:
+            # idletime table
+            row: <vector>
+            column: <vector> | '[' <vector>, ... ']'
+            bus: <int>
+            precision: 1 | 2 | 3 | 6
+            sweep_interval: <int>
+            notification: enable | disable | two_way
+            per_flow_enable: true | false
+        table_counter: disable | table_miss | table_hit | gateway_miss |
+                   gateway_hit | gateway_inhibit
+            # event type to count in per-table event counter
+        hit: <table-name> | '[' <table-name>, ... ']'
+            # next table on table hit.  If a list, 'format' must contain a
+            # 'next' field that determines which next table to use
+        miss: <table-name>
+            # next table on table miss
+        next: <table-name>
+            # default (unconditional) next table.  Exclusive with hit/miss
+        p4: # information about P4 level tables and control plane API
+            name: <name>
+                # P4 table name
+            handle: <int>
+                # runtime API handle for the table
+            size: <int>
+                # table size specified in P4 -- may be smaller than the actual
+                # table size, as table is rounded up to fill memories
+            match_type: exact | ternary | lpm | ...
+            action_profile: <name>
+            how_referenced: direct | indirect
+        p4_param_order:
+            # order of match params as seen in p4 program
+            # PD generated has same order and needs to match context
+            # json output
+            <name>:
+                # param names with their types and size info
+                type: <table-type>
+                size: <int>
+                ...
+                context_json:
+                    # any keys/vector/values here are converted to json and
+                    # output into the context.json info for this match param
+                    # verbatim
+        context_json:
+            # any keys/vector/values here are converted to json and output into
+            # the context.json info for this table verbatim
+          static_entries:
+            # List of static entries as described in the p4 program. These are
+            # passed on directly to the driver through context json. The
+            # match_key_fields_values and action_parameters_values follow the
+            # same order as the p4_param_order list in the table and action
+            # sections.
+            # Match Key Fields Values based on match type:
+            # Exact - field_name, value
+            # Ternary - field_name, value, mask
+            # Range - field_name, range_start, range_end
+            # Lpm - field_name, value, prefix_length // TODO
+            - priority: <int>
+              match_key_fields_values:
+              - field_name: <name>
+                value: <int>
+                mask: <hex> # Only for ternary match
+                range_start: <int> # Only for range match
+                range_end: <int> # Only for range match
+                prefix_length: <int> # Only for lpm match // TODO
+              action_handle: <int>
+              is_default_entry: <bool>
+              action_parameters_values:
+              - parameter_name: <string>
+                value: <int>
+    exact_match <name> [<logical_id>]:
+        # Exact match table
+        row: <vector>
+        column: <vector> | '[' <vector>, ... ']'
+            # physical rows and srams used by the table
+        stash: # Stash Allocation for exact match tables only
+          row: <vector>
+          col: <vector>
+          # Row and col are indexed in sync to give RAM used to determine word
+          # in entry
+          unit: <vector>
+          # Unit value can be (0,1) as there are 2 units per row and is indexed
+          # in sync with row/col values to give stash unit
+        input_xbar:
+            # specifies exact match groups, hash tables, and groups (see above)
+            # If there are multiple groups, the must match the total width of the
+            # format, which must in turn match the rows and the ways.
+        format: { <name>: <range>, <name>: <size> ... }
+            # names may have `(<int>)` suffix denoting up to 5 match groups
+            # all match groups must contain the same keys
+            # some names have predefined meanings:
+            match: ...  # exact match groups to match against
+            action: ... # field that selects which action to run
+            next: ...   # next table
+        match: <phv-location> | '[' <phv-location>, ... ']'
+            # value(s) to match against the 'match' field(s) in the format
+        ways:
+            - '{' < way description '}'
+            # description of one way of the table
+                xme: <int>
+                    # 0 - 7 (lambs) , 8 - 15 (stms)
+                group: <int>
+                    # hash group or XME used for this way
+                index: <range> | <int>
+                    # hash bits used to index the way rams/lambs (including subword bits)
+                select: <range> [ '&' <mask> ]
+                    # hash bits used to select enable rams/lambs in the way
+                rams: '[' <ram>, ... ']'
+                    # rams or lambs in the way.  Each is a vector of 1, 2, or 3 integers
+                    '[' <row>,<col> ']'             # tofino1/2
+            - '[' <int>,<int>,<int>, '[' <row>,<col> ']',... ']'
+            # DEPRECATED description of one way of the table
+            # initial 3 values are hash group, 10-bit slice from group, and
+            # mask of upper 12 bits from the group.
+        match_group_map: '[' '[' <int>,... ']',... ']'
+            # map from per-word match groups to overall match groups
+            # one row for each word in the width of the table with up to
+            # 5 values for up to 5 match groups in that word.  Values are
+            # match groups in the format
+        # common keys described above
+        action:
+        actions:
+        action_bus:
+        default_action:
+        default_action_handle:
+        default_action_parameters:
+        context_json:
+        gateway:
+        hash_dist:
+        hit:
+        idletime:
+        meter:
+        miss:
+        next:
+        p4:
+        selector:
+        stateful:
+        stats:
+    ternary_match <name> [<logical_id>]:
+        # Ternary match table
+        row: <vector>
+        column: <vector> | '[' <vector>, ... ']'
+            # tcam rows and columns to use
+        input_xbar:
+            # specifies ternary match groups
+            group <constant>: <phv-location> | '[' <phv_location>, ... ']'
+                # odd groups are 5 bytes wide, even groups 6 -- the extra byte
+                # is the byte group n/2
+                # TBD -- Need a way to explicitly set byte swizzler?
+        match:
+            # Input xbar group(s) to match against -- may be a vector of maps for wide
+            # matches using multiple groups
+            group: <int>
+                # Match group to match against (placed on tcam bus)
+            byte_group: <int>
+                # byte group to use for top 4 bits of tcam bus
+            byte_config: <int>
+                # value for tcams.vh_data_xbar.tcam_vh_xbar.tcam_row_halfbyte_mux_ctl
+                #                             .tcam_row_halfbyte_mux_ctl_select
+            dirtcam: <int>
+                # dirtcam control bits for the group; used to set
+                # tcams.col.tcam_mode.tcam_data_dirtcam_mode (bits 0..9)
+                # and tcams.col.tcam_mode.tcam_vbit_dirtcam_mode (bits 10..11)
+        indirect: <table-name>
+            # ternary indirection table to use with this table
+            # if there's an indirection table, it should contain all the table refs
+        indirect: <int> | <vector>
+        indirect_bus: <int>
+            # which indirect bus to use for ternary tables with no indirection table
+        # common keys described above
+        action:
+        actions:
+        action_bus:
+        default_action:
+        default_action_handle:
+        default_action_parameters:
+        context_json:
+        gateway:
+        hash_dist:
+        hit:
+        idletime:
+        meter:
+        miss:
+        next:
+        p4:
+        selector:
+        stateful:
+        stats:
+    ternary_indirect <name>:
+        # Ternary indirection table
+        row: <vector>
+        column: <vector> | '[' <vector>, ... ']'
+            # physical rows and srams to use
+        bus: 0 | 1 | '[' 0 | 1, ... ']'
+            # ternary indirection bus to use.  List must match rows
+        format: { <name>: <range-or-constant>, ... }
+            # fields in the ram record, sized in bits
+        # common keys described above
+        action:
+        actions:
+        action_bus:
+        default_action:
+        default_action_handle:
+        default_action_parameters:
+        context_json:
+        gateway:
+        hash_dist:
+        hit:
+        idletime:
+        meter:
+        miss:
+        next:
+        p4:
+        selector:
+        stateful:
+        stats:
+    hash_action <name> [<logical_id>]:
+        # hash-action table
+        row: <int>
+        bus: <int>
+            # specify which physical row and exact match bus to use
+        input_xbar:
+            # input xbar config (as exact match table)
+        # common keys described above
+        action:
+        actions:
+        action_bus:
+        default_action:
+        default_action_handle:
+        default_action_parameters:
+        context_json:
+        gateway:
+        hash_dist:
+        hit:
+        idletime:
+        meter:
+        miss:
+        next:
+        p4:
+        selector:
+        stateful:
+        stats:
+    phase0_match <name>
+        # special phase 0 match table before stage 0 (only in stage 0 ingress)
+        p4: # information about P4 level tables and control plane API
+        width: <int>
+        # other common keys are NOT available in this table type
+    proxy_hash <name> [<logical_id>]:
+        # Proxy hash Table
+        row: <vector>
+        column: <vector> | '[' <vector>, ... ']'
+            # see exact_match
+        input_xbar:
+            # see exact_match
+        format: { <name>: <range>, <name>: <size> ... }
+            # see exact_match
+            match: ...  # exact match groups to match against
+            action: ... # field that selects which action to run
+            next: ...   # next table
+        match: hash_group(<int>..<int>) | '[' hash_group(<int>..<int>), ... ']'
+            # hash groups
+        ways:
+            - '[' <int>,<int>,<int>, '[' <row>,<col> ']',... ']'
+            # see exact_match
+        proxy_hash_group:
+            # hash group of the 8 possible hash groups to use
+        proxy_hash_algorithm:
+            # for the context JSON, proxy_hash_algorithm key
+        # common keys described above
+        action:
+        actions:
+        action_bus:
+        default_action:
+        default_action_handle:
+        default_action_parameters:
+        context_json:
+        gateway:
+        hash_dist:
+        hit:
+        idletime:
+        meter:
+        miss:
+        next:
+        p4:
+        selector:
+        stateful:
+        stats:
+    action <name>:
+        # Action table
+        logical_row: <vector>
+        column: <vector> | '[' <vector>, ... ']'
+            # srams to use -- in logical (16x6) coords, not physical (8x12)
+        home_row: <vector> | '[' <vector>, ... ']'
+            # row(s) to use as home rows for the table
+        format [<action>]: { <name>: <range-or-constant>, ... }
+            # fields in the ram record.  Different actions may have
+            # different formats (and different sizes)...
+        action_bus: { <int> : <name> | <int>..<int> : <name>, ... }
+            # mapping from action bus bytes to values in the table.  Names
+            # must be present in the 'format' for the table.
+            # Can be optional -- if not present, assembler will attempt to
+            # lay out fields in the action bus based on usage in actions.
+        actions:
+            # defines actions that can be used in the table
+            <name> [<index>]:
+                # the optional index is the index to use in the 8-entry
+                # instruction indirection map of the table.
+            [- <address>]   # constant imem address to use for this action
+            [- <data alias map>]        # map of aliases for data operands
+                <name> : <name> [ (<bit-range>) ]
+                    # defines a name as an alias for (a slice of) something else
+            [- p4_param_order: '{' param_name : <int>, ... '}' ]
+                # Param order specifying param name and width for context json (p4_parameters)
+            [- p4_param_order:
+                param_name:
+                    width: <int>
+                    context_json: #anything
+              ... ]
+                # Alternative syntax for specifying param order when attaching context_json
+            [- default_action: '{' allowed: true|false, reason: <string> '}' ]
+            - <instruction> <operands>
+        p4: # information about P4 level tables and control plane API
+            # same as exact_match p4 info
+        context_json: #anything
+    gateway <name> [<logical_id>]:
+        # 'bare' Gateway table -- no corresponding match table, so must
+        # always specify next table
+        name: <gateway-name>
+            # Only output when gateway associated with a match table i.e. not
+            # 'bare'
+        row: <constant>
+            # physical match row to use
+        bus: 0 | 1
+            # match bus to use
+        payload_row: <constant>
+        payload_bus: <constant>
+            # row/bus to use for payload -- can only be specified on a
+            # standalone gateway, as an attached gateway uses the row(s)
+            # specified by the table it is attached to
+        input_xbar:
+            # as for exact_match, but can only specify one group
+        match: <phv-location> | '[' <phv-location>, ... ']'
+            # value(s) to match against the match constants
+        xor: <phv-location> | '[' <phv-location>, ... ']'
+            # value(s) to xor against the match value
+        range: 2 | 4
+            # do 2 or 4 bit range matches in the upper 12 bits of the gateway
+        <match-constant>:
+            # match row for gateway.  Value may be <table-name> (for next table)
+            # or "run_table" or a map with some or all of these keys.
+            next: <table-name>
+                # next table for this match
+            run_table: <true> | <false>
+                # disable the gateway (run the logical match normally)
+                # not applicable to bare gateways
+            action: <action-name>
+                # run the specified action when the line hits
+        ? [ <int>, ..., <match-constant> ] :
+            # Range match row for gateway.  Each value except the ladt is a
+            # 2**n bit lookup table for a range match unit (so 4 bit values
+            # for range:2 and 16 bit values for range:4).  The last value is
+            # the normal tcam match for the bottm 32 bits of the gateway
+            # Same value options as normal match rows.  Big-endian order
+            # for units (last int is bottom 2 or 4 bits of upper 12 bits)
+        miss:
+            # behavior if no row matches (same options as match row above)
+        condition:
+            # condition output used for model logging
+          expression : <string>
+            # condition string as specified in p4
+          true : <string>
+            # next table name when condition is true
+          false : <string>
+            # next table name when condition is false
+        payload: <constant>
+            # payload data to use if gateway is not disabled (run_table is false)
+        match_address: <constant>
+            # gateway match address to use if the gateway is not disabled
+        context_json: #anything
+    selection <name> [<logical_id>]:
+        row: <vector>
+        logical_bus: <vector>
+            # must match the number of rows specified. Indicate the logical bus
+            # used for each rows. Value can be: 'A' => Action Bus, 'S' => Synth
+            # Bus, 'O' => Overflow Bus, 'X' => Undefined.
+        column: <vector> | '[' <vector>, ... ']'
+            # srams to use -- in logical (16x6) coords, not physical (8x12)
+        maprams: <vector> | '[' <vector>, ... ']'
+            # map rams to use
+        home_row: <vector>
+            # represent the row ultimately connected to the ALU
+        input_xbar:
+            # hash match groups on input xbar
+        mode: resilient <int> | fair <int>
+        non_linear: true | false
+        per_flow_enable: true | false
+        pool_sizes: <vector>
+        selection_hash: <int>
+        hash_dist: <hash_distribution>
+            # see hash_action hash_dist
+        p4: # information about P4 level tables and control plane API
+            # same as exact_match p4 info
+        context_json: #anything
+    counter <name> [<logical_id>]:
+        row: <vector>
+        logical_bus: <vector>
+            # must match the number of rows specified. Indicate the logical bus
+            # used for each rows. Value can be: 'A' => Action Bus, 'S' => Synth
+            # Bus, 'O' => Overflow Bus, 'X' => Undefined.
+        column: <vector> | '[' <vector>, ... ']'
+            # srams to use -- in logical (16x6) coords, not physical (8x12)
+        maprams: <vector> | '[' <vector>, ... ']'
+            # map rams to use
+        vpns: <vector>
+        home_row: <vector>
+            # represent the row ultimately connected to the ALU
+        format:
+        count: bytes | packets | both | packets_and_bytes
+        lrt: '{' <threshold>: <interval>, ... '}'
+          - '{' threshold: <int>, interval: <int> '}' ...
+          # largest recent with threshold params
+        global_binding: true | false
+        per_flow_enable: true | false
+        bytecount_adjust: <int>
+          # add value to counted bytes
+    meter <name> [<logical_id>]:
+        row: <vector>
+        logical_bus: <vector>
+            # must match the number of rows specified. Indicate the logical bus
+            # used for each rows. Value can be: 'A' => Action Bus, 'S' => Synth
+            # Bus, 'O' => Overflow Bus, 'X' => Undefined.
+        column: <vector> | '[' <vector>, ... ']'
+            # srams to use -- in logical (16x6) coords, not physical (8x12)
+        maprams: <vector> | '[' <vector>, ... ']'
+            # map rams to use
+        vpns: <vector>
+        home_row: <vector>
+            # represent the row ultimately connected to the ALU
+        input_xbar:
+            # hash match groups on input xbar
+        color_aware: true | false | per_flow
+        color_maprams:
+            row: <vector>
+                # logical rows
+            column: <vector> | '[' <vector>, ... ']'
+            bus: <vector>
+            vpns: <vector>
+        hash_dist: <hash_distribution>
+            # see hash_action hash_dist
+        type: standard | lpf | red
+        count: bytes | packets
+        bytecount_adjust: <int>
+          # add value to counted bytes
+        sweep_interval: <int>
+        global_binding: true | false
+        per_flow_enable: true | false
+        context_json: #anything
+    stateful <name> [<logical_id>]:
+        row: <vector>
+        logical_bus: <vector>
+            # must match the number of rows specified. Indicate the logical bus
+            # used for each rows. Value can be: 'A' => Action Bus, 'S' => Synth
+            # Bus, 'O' => Overflow Bus, 'X' => Undefined.
+        column: <vector> | '[' <vector>, ... ']'
+            # srams to use -- in logical (16x6) coords, not physical (8x12)
+        maprams: <vector> | '[' <vector>, ... ']'
+            # map rams to use
+        vpns: <vector>
+        home_row: <vector>
+            # represent the row ultimately connected to the ALU
+        hash_dist: <hash_distribution>
+            # see hash_action hash_dist
+        input_xbar:
+            # exact match group and hash to use for phv input
+        data_bytemask: <int>
+        hash_bytemask: <int>
+            # masks specifying which byte of the phv input come from data and hash
+        initial_value: { lo : <int> , hi : <int> }
+            # Specify initial value for register, assumed 0 otherwise
+        const_table: <vector> | '{' <index>: <value> '}'
+        math_table:
+          data: <vector> | '{' <index>: <value> '}'
+          invert: true | false
+          shift: <int>
+          scale: <int>
+        log_vpn: <int> | <range>
+          # vpns to use in stateful logging mode
+        pred_shift: <int>
+        pred_comb_shift: <int>
+          # set the salu_output_pred_shift and _comb_shift csr regs explicitly
+          # FIXME -- should have a better way of doing this?
+        actions:
+            <action name> :
+                - <instruction>
+                    # SALU instructions to run for this table
+        context_json: #anything
+        # jbay additional features:
+        sbus:
+          # jbay only -- shared bus use
+          learn: <table> | '[' <table>, ... ']'
+          match: <table> | '[' <table>, ... ']'
+          combine: "and" | "or"
+        fifo: { push: <mode>, pop: <mode> }
+        stack: { push: <mode>, pop: <mode> }
+        bloom filter clear: <mode>
+          # fifo or stack or bloom filter fast clear mode (mutually exclusive)
+          # <mode> is hit | miss | gateway | active | control_plane
+          # controls when the stack/fifo is pushed or popped
+        watermark: push <level> | pop <level>
+          # watermark interrupts sent every <level> pushes or pops
+        offset_vpn: true | false
+          # adjust immediate data by vpn offset to compute vpns for multistage
+          # fifo/stack (jbay only)
+        address_shift: <int>
+          # shift up the incoming meter address before vpn/index/subword extract (jbay only)
+        stage_alu_id: <int>
+          # stage + alu id to be preprended to output addresses
+    dependency: concurrent | action | match
+        # set the interstage dependency between this stage and the
+        # previous stage.  Ignored in stage 0
+    error_mode: no_config | propagate | map_to_immediate | disable
+    always_run_action:
+        # action that runs automatcially in the stage independent of tables
+        - <instruction> <operands>
+    # configuration setting for mpr_stage_id
+    mpr_stage_id: <int>
+    # configuration setting for mpr_bus_dep_glob_exec
+    # A bit that is 0 means treat that global execute bit as pass-through (action dependent),
+    # because the next stage is action dependent, while a 1 means update it in the current stage.
+    mpr_bus_dep_glob_exec: <int>
+    # configuration setting for mpr_bus_dep_long_brch
+    # A bit that is 0 means treat that long branch tag ID bit as pass-through (action dependent),
+    # because the next stage is action dependent, while a 1 means update it in the current stage.
+    mpr_bus_dep_long_brch: <int>
+    # configuration setting for mpr_always_run
+    mpr_always_run: <int>
+    # Note that unspecified values are assumed to be 0.
+    mpr_next_table_lut:
+        <int>: <int>  # Resolved incoming logical ID to activation bit map
+    mpr_glob_exec_lut:
+        <int>: <int>  # Resolved incoming global execute bit to activation bit map
+    mpr_long_brch_lut:
+        <int>: <int>  # Resolved incoming long branch tag ID to activation bit map
+deparser <thread>:
+    # Defines a deparser.  <thread> must be 'ingress' or 'egress'
+    dictionary:
+        # ordered list of phv locations to write out as the output deparser
+        - <phv-location> : <bit-location>
+            # single value to write iff the referred bit is set
+        - full_checksum <int> : <bit-location>
+            # checksum result to write iff the referred bit is set
+        - <constant> : <bit-location>
+            # constant to write iff the referred bit is set (jbay only)
+        - clot <tag>:
+            # clot to output (jbay only)
+            pov: <bit-location>
+            length: <int>
+                # maximum length of the clot
+            <int>: <phv_location> | checksum <int>
+                # offset in clot to replace with a PHV or checksum value
+    pov: <phv-location> | '[' <phv-location>, ... ']'
+        # optional explicit use/ordering of phvs for POV.  All phvs used for POV bits
+        # in the dictionary will be added to the end of this, if not already present
+    partial_checksum <int>:
+        <phv-location>: { swap: <constant> [, pov: <phv-location> ] }
+        # checksum unit programming -- pov bits for jbay only
+    full_checksum <int>:
+        partial_checksum <int> | clot <tag>: { pov: <phv-location> , invert: <bool> }
+    <name>: <phv-location> [ ':' <pov-bit ] | <digest-params>
+        # more generally, any deparser param that comes from the phv is
+        # specified this way.  Only jbay has pov bits here
+        # <digest-params> are as follows
+        select: <phv-location> [ ':' <pov-bit> ]
+            # controls which digest group is output
+        shift: <constant>
+        <int>: <phv-location> | '[' <phv-location>, ... ']'
+                # values for a single digest group; specifies the sequence of
+                # phv containers in the appropriate table entry. this is usually
+                # data that is included in the digest, but it may also contain
+                # control metadata; for example, when configuring mirroring on
+                # Tofino, the first phv container specifies the mirror session id.
+        context_json: # anything
+    # ingress or egress params:
+    mirror: <digest-params>
+    egress_unicast_port: <phv-location> [ ':' <pov-bit> ]
+        # specifies the port to write to
+    # FIXME: should this be squashed into the port?
+    egress_unicast_pipe: <phv-location> [ ':' <pov-bit> ]
+        # specifies the port to write to
+    drop_ctl: <phv-location> [ ':' <pov-bit> ]
+    # jbay only, ingress or egress
+    afc: '{' <phv->location> ':' <pov-bit> '}'
+    mirr_epipe_port: '{' <phv->location> ':' <pov-bit> '}'
+    mirr_c2c_ctrl: '{' <phv->location> ':' <pov-bit> '}'
+    mirr_coal_smpl_len: '{' <phv->location> ':' <pov-bit> '}'
+    mirr_dond_ctrl: '{' <phv->location> ':' <pov-bit> '}'
+    mirr_hash: '{' <phv->location> ':' <pov-bit> '}'
+    mirr_icos: '{' <phv->location> ':' <pov-bit> '}'
+    mirr_io_sel: '{' <phv->location> ':' <pov-bit> '}'
+    mirr_mc_ctrl: '{' <phv->location> ':' <pov-bit> '}'
+    mirr_qid: '{' <phv->location> ':' <pov-bit> '}'
+    mtu_trunc_err_f: '{' <phv->location> ':' <pov-bit> '}'
+    mtu_trunc_len: '{' <phv->location> ':' <pov-bit> '}'
+    # ingress only deparser params:
+    learning: <digest-params> [ ':' <pov-bit> ]
+    resubmit: <digest-params> [ ':' <pov-bit> ]
+    copy_to_cpu: <phv-location> [ ':' <pov-bit> ]
+    egress_multicast_group_<int>: <phv-location> [ ':' <pov-bit> ]
+    hash_lag_ecmp_mcast_<int>: <phv-location> [ ':' <pov-bit> ]
+    copy_to_cpu_cos: <phv-location> [ ':' <pov-bit> ]
+    ingress_port_source: <phv-location> [ ':' <pov-bit> ]
+    deflect_on_drop: <phv-location> [ ':' <pov-bit> ]
+    meter_color: <phv-location> [ ':' <pov-bit> ]
+    icos: <phv-location> [ ':' <pov-bit> ]
+    qid: <phv-location> [ ':' <pov-bit> ]
+    xid: <phv-location> [ ':' <pov-bit> ]
+    yid: <phv-location> [ ':' <pov-bit> ]
+    rid: <phv-location> [ ':' <pov-bit> ]
+    warp: <phv-location> [ ':' <pov-bit> ]
+    ct_disable: <phv-location> [ ':' <pov-bit> ]
+    ct_mcast: <phv-location> [ ':' <pov-bit> ]
+    # jbay ingress only
+    bypass_egr: '{' <phv->location> ':' <pov-bit> '}'
+    # egress only deparser params: [ ':' <pov-bit> ]
+    force_tx_err: <phv-location> [ ':' <pov-bit> ]
+    tx_pkt_has_offsets: <phv-location> [ ':' <pov-bit> ]
+    capture_tx_ts: <phv-location> [ ':' <pov-bit> ]
+    coal: <phv-location> [ ':' <pov-bit> ]
+    ecos: <phv-location> [ ':' <pov-bit> ]
+    copy_to_cpu_cos: <phv-location> [ ':' <pov-bit> ] # or c2c_cos
+    copy_to_cpu_qid: <phv-location> [ ':' <pov-bit> ] # or c2c_qid
+    mirr_bitmap: <phv-location> [ ':' <pov-bit> ]
+    valid_vec: <phv-location> [ ':' <pov-bit> ]
+    # Ingress pipe -> TM fields
+    #  - tableid (1b) -- ???
+    #  - mcid1 - Multicast Group ID 1
+    #  - mcid2 - Multicast Group ID 2
+    #  - hash1 - Hash for L1 (is the the same as hash_lag_ecmp_mcast_<int>?)
+    #  - hash2 - Hash for L2 (is the the same as hash_lag_ecmp_mcast_<int>?)
+    packet_body_offset:
+        # TODO: Needed? Maybe just use a fixed header type for PBO?
+        # Packet body offset
+        # Payload body offset is:
+        #   base_offset (unsigned) + const_offset (signed) + var_offset (unsigned).
+        hdr: <name> | <constant>
+            # Header name or ID to use for base offset location
+        offset: <constant>
+            # Constant (signed) offset to add to the base offset
+            # Default: 0
+        var_off_pos: <constant>
+            # Variable offset: start bit position in POV
+            # Default: 0
+        var_off_len: <constant>
+            # Variable offset: length in POV
+            # Default: 0
+    zero: <phv_location>,
+        # list of phv slots that should be initialized to (valid) zero
+    remaining_bridge_metadata:
+        # packing of remaining bridge metadata
+        pov_select: <pov-select>
+            # POV bytes used to address the TCAM & SRAM
+        config <constant>:
+            # TCAM & SRAM configuration
+            match: <match-constant>
+                # POV match (4B)
+            start: <constant>
+                # start position of the remaining bridge metadata in bridge metadata (6b)
+                # register: rem_brm_ext_ram.rem_brm_ext[*].rem_brm_start
+            bytes: '[' <constant> | <phv-location>, ... ']' | '{' <constant> ':' <constant> | <phv-location>, ... '}'
+                # source PHEs of the remaining bridge metadata
+                # if a list is used, the items are implicitly addressed (from 0 up) bytes of remaining bridge metadata
+                # if a map is used, the items are explicitly addressed bytes of remaining bridge metadata
+                # up to 62 items depending on the remaining bridge metadata start position and the number of POV bytes (8B flags + 8B state)
+                # if an 8b constant is used as the PHE byte source, its value is directly written to the configuration registers
+                # if a PHE (slice) name is used as the PHE byte source, it is first mapped to the PHE byte number
+                # registers: rem_brm_ext_ram.rem_brm_ext[*].b*_phv_sel
+flexible_headers:
+    # Lists the headers that were re-packed by the compiler because
+    # they were marked flexible. See context.json schema 'flexible_headers' node
+    # for more information. This section is optional. It exists only if there are
+    # flexible headers defined in the program (e.g., bridged metadata)
+    # It consists of the json snippet that is part of context.json verbatim.
+primitives: <filename>
+    # Defines the name of the json file that has information on primitives used
+    # within table actions. These are placed in the respective actions as
+    # primitives node. This node is mainly used by model for logging
+    # instructions as specified in original p4 program
+dynhash: <filename>
+    # Defines the name of the json file that has the dynamic hash calculation
+    # node. This node is directly merged into the context json at the top level
+# version 1.0.0
+version: <number>
+    # semantic versioning number
+# version 1.0.1
+version:
+    version: <number>
+       # semantic versioning number
+    run_id: <sha>
+       # defines an id that ties together all the files produced by the compiler
+       # part of the Version section
+    target: <name>
+       # specify the target architecture

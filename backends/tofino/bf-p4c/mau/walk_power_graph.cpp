@@ -444,10 +444,8 @@ double WalkPowerGraph::estimate_power() {
     always_powered_on_.clear();
     if (Device::currentDevice() == Device::TOFINO) {
         return estimate_power_tofino();
-#if HAVE_JBAY
     } else if (Device::currentDevice() == Device::JBAY) {
         return estimate_power_non_tofino();
-#endif /* HAVE_JBAY */
     } else {
         BUG("estimate_power -- invalid device %d", Device::currentDevice());
     }
