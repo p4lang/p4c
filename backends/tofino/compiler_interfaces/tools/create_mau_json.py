@@ -579,10 +579,11 @@ def get_match_memory(match_stage_table, match_table, context, entries_so_far):
     mem_elem["entry_bit_width_requested"] = ideal_entry_bits
     mem_elem["entry_bit_width_allocated"] = allocated_match_bits
 
-    mem_elem["ideal_entries_per_table_word"], mem_elem["ideal_table_word_bit_width"] = (
-        get_ideal_match_entries(
-            match_stage_table, match_table, mem_elem["imm_bit_width_in_overhead_requested"]
-        )
+    (
+        mem_elem["ideal_entries_per_table_word"],
+        mem_elem["ideal_table_word_bit_width"],
+    ) = get_ideal_match_entries(
+        match_stage_table, match_table, mem_elem["imm_bit_width_in_overhead_requested"]
     )
 
     memories.append(mem_elem)

@@ -3,21 +3,21 @@ header H<T> {
     T       t;
 }
 
-header H_0 {
+header H_bit32 {
     bit<32> b;
     bit<32> t;
 }
 
 control c(out bit<32> r) {
-    H_0 ih;
-    @name("c.s") H_0[3] s_0;
+    H_bit32 ih;
+    @name("c.s") H_bit32[3] s_0;
     @hidden action stackinit8() {
         ih.setInvalid();
         s_0[0].setInvalid();
         s_0[1].setInvalid();
         s_0[2].setInvalid();
-        s_0[0] = (H_0){b = 32w0,t = 32w1};
-        s_0[1] = (H_0){b = 32w2,t = 32w3};
+        s_0[0] = (H_bit32){b = 32w0,t = 32w1};
+        s_0[1] = (H_bit32){b = 32w2,t = 32w3};
         s_0[2] = ih;
         r = s_0[0].b + s_0[0].t + s_0[1].b + s_0[1].t + s_0[2].b;
     }

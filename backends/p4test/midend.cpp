@@ -140,11 +140,12 @@ MidEnd::MidEnd(P4TestOptions &options, std::ostream *outStream) {
          new P4::MoveDeclarations(),  // more may have been introduced
          evaluator,
          [v1controls, evaluator](const IR::Node *root) -> const IR::Node * {
-             auto toplevel = evaluator->getToplevelBlock();
-             auto main = toplevel->getMain();
-             if (main == nullptr)
-                 // nothing further to do
-                 return nullptr;
+             const auto *toplevel = evaluator->getToplevelBlock();
+             const auto *main = toplevel->getMain();
+             if (main == nullptr) {
+                 // nothing further to do.
+                 return root;
+             }
              // Special handling when compiling for v1model.p4
              if (main->type->name == P4V1::V1Model::instance.sw.name) {
                  if (main->getConstructorParameters()->size() != 6) return root;
