@@ -47,7 +47,7 @@
   </g>
 </defs>
 <script type="application/ecmascript">
-var viewWidth = 626;
+var viewWidth = 707;
 var viewHeight = 614;
 var sectionId = 'dynsection-0';
 </script>
@@ -59,8 +59,8 @@ var sectionId = 'dynsection-0';
 <g id="Node000001" class="node">
 <title>Node1</title>
 <g id="a_Node000001"><a xlink:title=" ">
-<polygon fill="#999999" stroke="#666666" points="116,-293.5 0,-293.5 0,-274.5 116,-274.5 116,-293.5"/>
-<text text-anchor="middle" x="58" y="-281.5" font-family="Helvetica,sans-Serif" font-size="10.00">P4::ICompileContext</text>
+<polygon fill="#999999" stroke="#666666" points="116,-330.5 0,-330.5 0,-311.5 116,-311.5 116,-330.5"/>
+<text text-anchor="middle" x="58" y="-318.5" font-family="Helvetica,sans-Serif" font-size="10.00">P4::ICompileContext</text>
 </a>
 </g>
 </g>
@@ -68,8 +68,8 @@ var sectionId = 'dynsection-0';
 <g id="Node000002" class="node">
 <title>Node2</title>
 <g id="a_Node000002"><a xlink:href="class_p4_1_1_base_compile_context.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="289,-293.5 152,-293.5 152,-274.5 289,-274.5 289,-293.5"/>
-<text text-anchor="middle" x="220.5" y="-281.5" font-family="Helvetica,sans-Serif" font-size="10.00">P4::BaseCompileContext</text>
+<polygon fill="white" stroke="#666666" points="289,-330.5 152,-330.5 152,-311.5 289,-311.5 289,-330.5"/>
+<text text-anchor="middle" x="220.5" y="-318.5" font-family="Helvetica,sans-Serif" font-size="10.00">P4::BaseCompileContext</text>
 </a>
 </g>
 </g>
@@ -77,17 +77,17 @@ var sectionId = 'dynsection-0';
 <g id="edge1_Node000001_Node000002" class="edge">
 <title>Node1&#45;&gt;Node2</title>
 <g id="a_edge1_Node000001_Node000002"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M126.27,-284C134.76,-284 143.45,-284 151.94,-284"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="126.04,-280.5 116.04,-284 126.04,-287.5 126.04,-280.5"/>
+<path fill="none" stroke="#63b8ff" d="M126.27,-321C134.76,-321 143.45,-321 151.94,-321"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="126.04,-317.5 116.04,-321 126.04,-324.5 126.04,-317.5"/>
 </a>
 </g>
 </g>
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="class_p4_1_1_p4_c_context.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="421.5,-312.5 329.5,-312.5 329.5,-293.5 421.5,-293.5 421.5,-312.5"/>
-<text text-anchor="middle" x="375.5" y="-300.5" font-family="Helvetica,sans-Serif" font-size="10.00">P4::P4CContext</text>
+<g id="a_Node000003"><a xlink:href="class_compile_context.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#bfbfbf" points="507,-386.5 325,-386.5 325,-367.5 507,-367.5 507,-386.5"/>
+<text text-anchor="middle" x="416" y="-374.5" font-family="Helvetica,sans-Serif" font-size="10.00">CompileContext&lt; GTestOptions &gt;</text>
 </a>
 </g>
 </g>
@@ -95,64 +95,62 @@ var sectionId = 'dynsection-0';
 <g id="edge2_Node000002_Node000003" class="edge">
 <title>Node2&#45;&gt;Node3</title>
 <g id="a_edge2_Node000002_Node000003"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M298.98,-293.62C309.36,-294.91 319.71,-296.2 329.27,-297.38"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="299.41,-290.15 289.05,-292.39 298.55,-297.09 299.41,-290.15"/>
-</a>
-</g>
-</g>
-<!-- Node17 -->
-<g id="Node000017" class="node">
-<title>Node17</title>
-<g id="a_Node000017"><a xlink:href="class_ref_check_context.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#bfbfbf" points="426,-275.5 325,-275.5 325,-256.5 426,-256.5 426,-275.5"/>
-<text text-anchor="middle" x="375.5" y="-263.5" font-family="Helvetica,sans-Serif" font-size="10.00">RefCheckContext</text>
-</a>
-</g>
-</g>
-<!-- Node2&#45;&gt;Node17 -->
-<g id="edge16_Node000002_Node000017" class="edge">
-<title>Node2&#45;&gt;Node17</title>
-<g id="a_edge16_Node000002_Node000017"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M299.23,-274.86C307.91,-273.83 316.57,-272.81 324.77,-271.85"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="298.58,-271.41 289.05,-276.05 299.39,-278.36 298.58,-271.41"/>
+<path fill="none" stroke="#63b8ff" d="M253.94,-334.38C274.13,-342.34 300.78,-352.17 325,-359 336.35,-362.2 348.66,-365.05 360.42,-367.49"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="255.18,-331.1 244.59,-330.65 252.58,-337.6 255.18,-331.1"/>
 </a>
 </g>
 </g>
 <!-- Node4 -->
 <g id="Node000004" class="node">
 <title>Node4</title>
-<g id="a_Node000004"><a xlink:href="class_p4_1_1_p4_c_context_with_options.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="616,-606 464,-606 464,-576 616,-576 616,-606"/>
-<text text-anchor="start" x="472" y="-594" font-family="Helvetica,sans-Serif" font-size="10.00">P4::P4CContextWithOptions</text>
-<text text-anchor="middle" x="540" y="-583" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; BMV2Options &gt;</text>
+<g id="a_Node000004"><a xlink:href="class_compile_context.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#bfbfbf" points="505,-349.5 327,-349.5 327,-330.5 505,-330.5 505,-349.5"/>
+<text text-anchor="middle" x="416" y="-337.5" font-family="Helvetica,sans-Serif" font-size="10.00">CompileContext&lt; OptionsType &gt;</text>
 </a>
 </g>
 </g>
-<!-- Node3&#45;&gt;Node4 -->
-<g id="edge3_Node000003_Node000004" class="edge">
-<title>Node3&#45;&gt;Node4</title>
-<g id="a_edge3_Node000003_Node000004"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M377,-322.6C379.3,-371.11 392.08,-497.84 462,-567 465.48,-570.45 469.46,-573.4 473.71,-575.93"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="380.49,-322.38 376.62,-312.51 373.49,-322.64 380.49,-322.38"/>
+<!-- Node2&#45;&gt;Node4 -->
+<g id="edge3_Node000002_Node000004" class="edge">
+<title>Node2&#45;&gt;Node4</title>
+<g id="a_edge3_Node000002_Node000004"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M299.32,-328.64C308.42,-329.53 317.74,-330.45 326.96,-331.35"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="299.47,-325.14 289.18,-327.65 298.79,-332.11 299.47,-325.14"/>
 </a>
 </g>
 </g>
 <!-- Node5 -->
 <g id="Node000005" class="node">
 <title>Node5</title>
-<g id="a_Node000005"><a xlink:href="class_p4_1_1_p4_c_context_with_options.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="616,-558 464,-558 464,-528 616,-528 616,-558"/>
-<text text-anchor="start" x="472" y="-546" font-family="Helvetica,sans-Serif" font-size="10.00">P4::P4CContextWithOptions</text>
-<text text-anchor="middle" x="540" y="-535" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; PnaNicOptions &gt;</text>
+<g id="a_Node000005"><a xlink:href="class_p4_1_1_p4_c_context.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="462,-312.5 370,-312.5 370,-293.5 462,-293.5 462,-312.5"/>
+<text text-anchor="middle" x="416" y="-300.5" font-family="Helvetica,sans-Serif" font-size="10.00">P4::P4CContext</text>
 </a>
 </g>
 </g>
-<!-- Node3&#45;&gt;Node5 -->
-<g id="edge4_Node000003_Node000005" class="edge">
-<title>Node3&#45;&gt;Node5</title>
-<g id="a_edge4_Node000003_Node000005"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M378.68,-322.96C384.36,-365.32 403.5,-464.72 462,-519 465.7,-522.43 469.87,-525.37 474.33,-527.89"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="382.12,-322.33 377.43,-312.83 375.18,-323.18 382.12,-322.33"/>
+<!-- Node2&#45;&gt;Node5 -->
+<g id="edge4_Node000002_Node000005" class="edge">
+<title>Node2&#45;&gt;Node5</title>
+<g id="a_edge4_Node000002_Node000005"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M299.32,-313.76C323.27,-311.53 348.83,-309.15 369.82,-307.2"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="298.81,-310.29 289.18,-314.7 299.46,-317.26 298.81,-310.29"/>
+</a>
+</g>
+</g>
+<!-- Node19 -->
+<g id="Node000019" class="node">
+<title>Node19</title>
+<g id="a_Node000019"><a xlink:href="class_ref_check_context.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#bfbfbf" points="466.5,-275.5 365.5,-275.5 365.5,-256.5 466.5,-256.5 466.5,-275.5"/>
+<text text-anchor="middle" x="416" y="-263.5" font-family="Helvetica,sans-Serif" font-size="10.00">RefCheckContext</text>
+</a>
+</g>
+</g>
+<!-- Node2&#45;&gt;Node19 -->
+<g id="edge18_Node000002_Node000019" class="edge">
+<title>Node2&#45;&gt;Node19</title>
+<g id="a_edge18_Node000002_Node000019"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M255.91,-307.8C275.88,-300.45 301.64,-291.5 325,-285 337.92,-281.4 352.06,-278.12 365.21,-275.34"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="254.47,-304.6 246.32,-311.37 256.91,-311.16 254.47,-304.6"/>
 </a>
 </g>
 </g>
@@ -160,18 +158,18 @@ var sectionId = 'dynsection-0';
 <g id="Node000006" class="node">
 <title>Node6</title>
 <g id="a_Node000006"><a xlink:href="class_p4_1_1_p4_c_context_with_options.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="616,-510 464,-510 464,-480 616,-480 616,-510"/>
-<text text-anchor="start" x="472" y="-498" font-family="Helvetica,sans-Serif" font-size="10.00">P4::P4CContextWithOptions</text>
-<text text-anchor="middle" x="540" y="-487" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; PsaSwitchOptions &gt;</text>
+<polygon fill="white" stroke="#666666" points="697,-606 545,-606 545,-576 697,-576 697,-606"/>
+<text text-anchor="start" x="553" y="-594" font-family="Helvetica,sans-Serif" font-size="10.00">P4::P4CContextWithOptions</text>
+<text text-anchor="middle" x="621" y="-583" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; BMV2Options &gt;</text>
 </a>
 </g>
 </g>
-<!-- Node3&#45;&gt;Node6 -->
-<g id="edge5_Node000003_Node000006" class="edge">
-<title>Node3&#45;&gt;Node6</title>
-<g id="a_edge5_Node000003_Node000006"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M381.09,-322.53C390.3,-357.47 414.39,-430.81 462,-471 466.07,-474.43 470.62,-477.37 475.43,-479.9"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="384.43,-321.47 378.61,-312.62 377.64,-323.17 384.43,-321.47"/>
+<!-- Node5&#45;&gt;Node6 -->
+<g id="edge5_Node000005_Node000006" class="edge">
+<title>Node5&#45;&gt;Node6</title>
+<g id="a_edge5_Node000005_Node000006"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M472,-304C485.07,-306.86 497.85,-312.26 507,-322 582.37,-402.2 471.49,-483.34 543,-567 545.91,-570.41 549.3,-573.34 553,-575.85"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="472.46,-300.53 462.01,-302.28 471.27,-307.43 472.46,-300.53"/>
 </a>
 </g>
 </g>
@@ -179,18 +177,18 @@ var sectionId = 'dynsection-0';
 <g id="Node000007" class="node">
 <title>Node7</title>
 <g id="a_Node000007"><a xlink:href="class_p4_1_1_p4_c_context_with_options.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="616,-462 464,-462 464,-432 616,-432 616,-462"/>
-<text text-anchor="start" x="472" y="-450" font-family="Helvetica,sans-Serif" font-size="10.00">P4::P4CContextWithOptions</text>
-<text text-anchor="middle" x="540" y="-439" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; SimpleSwitchOptions &gt;</text>
+<polygon fill="white" stroke="#666666" points="697,-558 545,-558 545,-528 697,-528 697,-558"/>
+<text text-anchor="start" x="553" y="-546" font-family="Helvetica,sans-Serif" font-size="10.00">P4::P4CContextWithOptions</text>
+<text text-anchor="middle" x="621" y="-535" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; PnaNicOptions &gt;</text>
 </a>
 </g>
 </g>
-<!-- Node3&#45;&gt;Node7 -->
-<g id="edge6_Node000003_Node000007" class="edge">
-<title>Node3&#45;&gt;Node7</title>
-<g id="a_edge6_Node000003_Node000007"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M385.13,-322.05C398.09,-348.53 425.06,-396.24 462,-423 466.76,-426.45 472.04,-429.41 477.52,-431.96"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="388.16,-320.26 380.72,-312.72 381.83,-323.26 388.16,-320.26"/>
+<!-- Node5&#45;&gt;Node7 -->
+<g id="edge6_Node000005_Node000007" class="edge">
+<title>Node5&#45;&gt;Node7</title>
+<g id="a_edge6_Node000005_Node000007"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M472.15,-304.3C485.08,-307.18 497.77,-312.51 507,-322 569.07,-385.79 484,-452.36 543,-519 546.06,-522.46 549.62,-525.43 553.48,-527.97"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="472.72,-300.85 462.26,-302.55 471.5,-307.74 472.72,-300.85"/>
 </a>
 </g>
 </g>
@@ -198,18 +196,18 @@ var sectionId = 'dynsection-0';
 <g id="Node000008" class="node">
 <title>Node8</title>
 <g id="a_Node000008"><a xlink:href="class_p4_1_1_p4_c_context_with_options.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="616,-414 464,-414 464,-384 616,-384 616,-414"/>
-<text text-anchor="start" x="472" y="-402" font-family="Helvetica,sans-Serif" font-size="10.00">P4::P4CContextWithOptions</text>
-<text text-anchor="middle" x="540" y="-391" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; DpdkOptions &gt;</text>
+<polygon fill="white" stroke="#666666" points="697,-510 545,-510 545,-480 697,-480 697,-510"/>
+<text text-anchor="start" x="553" y="-498" font-family="Helvetica,sans-Serif" font-size="10.00">P4::P4CContextWithOptions</text>
+<text text-anchor="middle" x="621" y="-487" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; PsaSwitchOptions &gt;</text>
 </a>
 </g>
 </g>
-<!-- Node3&#45;&gt;Node8 -->
-<g id="edge7_Node000003_Node000008" class="edge">
-<title>Node3&#45;&gt;Node8</title>
-<g id="a_edge7_Node000003_Node000008"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M392.63,-320.06C408.8,-336.26 435.09,-360.26 462,-375 468.14,-378.36 474.82,-381.33 481.59,-383.92"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="395.04,-317.52 385.55,-312.81 390.04,-322.41 395.04,-317.52"/>
+<!-- Node5&#45;&gt;Node8 -->
+<g id="edge7_Node000005_Node000008" class="edge">
+<title>Node5&#45;&gt;Node8</title>
+<g id="a_edge7_Node000005_Node000008"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M472.54,-304.83C485.22,-307.74 497.69,-312.96 507,-322 555.87,-369.47 496.42,-421.28 543,-471 546.26,-474.47 550,-477.45 554.06,-480"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="472.84,-301.33 462.37,-302.97 471.58,-308.22 472.84,-301.33"/>
 </a>
 </g>
 </g>
@@ -217,18 +215,18 @@ var sectionId = 'dynsection-0';
 <g id="Node000009" class="node">
 <title>Node9</title>
 <g id="a_Node000009"><a xlink:href="class_p4_1_1_p4_c_context_with_options.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="616,-366 464,-366 464,-336 616,-336 616,-366"/>
-<text text-anchor="start" x="472" y="-354" font-family="Helvetica,sans-Serif" font-size="10.00">P4::P4CContextWithOptions</text>
-<text text-anchor="middle" x="540" y="-343" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; EbpfOptions &gt;</text>
+<polygon fill="white" stroke="#666666" points="697,-462 545,-462 545,-432 697,-432 697,-462"/>
+<text text-anchor="start" x="553" y="-450" font-family="Helvetica,sans-Serif" font-size="10.00">P4::P4CContextWithOptions</text>
+<text text-anchor="middle" x="621" y="-439" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; SimpleSwitchOptions &gt;</text>
 </a>
 </g>
 </g>
-<!-- Node3&#45;&gt;Node9 -->
-<g id="edge8_Node000003_Node000009" class="edge">
-<title>Node3&#45;&gt;Node9</title>
-<g id="a_edge8_Node000003_Node000009"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M418.68,-315.46C439.87,-321.72 465.71,-329.35 488.01,-335.94"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="419.58,-312.07 408.99,-312.6 417.59,-318.79 419.58,-312.07"/>
+<!-- Node5&#45;&gt;Node9 -->
+<g id="edge8_Node000005_Node000009" class="edge">
+<title>Node5&#45;&gt;Node9</title>
+<g id="a_edge8_Node000005_Node000009"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M472.26,-305.62C484.83,-308.52 497.32,-313.54 507,-322 542.88,-353.36 508.63,-389.99 543,-423 546.53,-426.39 550.54,-429.31 554.83,-431.81"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="472.68,-302.14 462.21,-303.72 471.38,-309.02 472.68,-302.14"/>
 </a>
 </g>
 </g>
@@ -236,18 +234,18 @@ var sectionId = 'dynsection-0';
 <g id="Node000010" class="node">
 <title>Node10</title>
 <g id="a_Node000010"><a xlink:href="class_p4_1_1_p4_c_context_with_options.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="616,-318 464,-318 464,-288 616,-288 616,-318"/>
-<text text-anchor="start" x="472" y="-306" font-family="Helvetica,sans-Serif" font-size="10.00">P4::P4CContextWithOptions</text>
-<text text-anchor="middle" x="540" y="-295" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; Options &gt;</text>
+<polygon fill="white" stroke="#666666" points="697,-414 545,-414 545,-384 697,-384 697,-414"/>
+<text text-anchor="start" x="553" y="-402" font-family="Helvetica,sans-Serif" font-size="10.00">P4::P4CContextWithOptions</text>
+<text text-anchor="middle" x="621" y="-391" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; DpdkOptions &gt;</text>
 </a>
 </g>
 </g>
-<!-- Node3&#45;&gt;Node10 -->
-<g id="edge9_Node000003_Node000010" class="edge">
-<title>Node3&#45;&gt;Node10</title>
-<g id="a_edge9_Node000003_Node000010"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M431.82,-303C442.11,-303 453.01,-303 463.78,-303"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="431.77,-299.5 421.77,-303 431.77,-306.5 431.77,-299.5"/>
+<!-- Node5&#45;&gt;Node10 -->
+<g id="edge9_Node000005_Node000010" class="edge">
+<title>Node5&#45;&gt;Node10</title>
+<g id="a_edge9_Node000005_Node000010"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M472.33,-307.79C484.47,-310.66 496.74,-315.12 507,-322 530.64,-337.87 520.13,-358.04 543,-375 547.61,-378.42 552.72,-381.36 558.05,-383.89"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="472.72,-304.29 462.22,-305.73 471.32,-311.15 472.72,-304.29"/>
 </a>
 </g>
 </g>
@@ -255,18 +253,18 @@ var sectionId = 'dynsection-0';
 <g id="Node000011" class="node">
 <title>Node11</title>
 <g id="a_Node000011"><a xlink:href="class_p4_1_1_p4_c_context_with_options.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="616,-270 464,-270 464,-240 616,-240 616,-270"/>
-<text text-anchor="start" x="472" y="-258" font-family="Helvetica,sans-Serif" font-size="10.00">P4::P4CContextWithOptions</text>
-<text text-anchor="middle" x="540" y="-247" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; P4fmtOptions &gt;</text>
+<polygon fill="white" stroke="#666666" points="697,-366 545,-366 545,-336 697,-336 697,-366"/>
+<text text-anchor="start" x="553" y="-354" font-family="Helvetica,sans-Serif" font-size="10.00">P4::P4CContextWithOptions</text>
+<text text-anchor="middle" x="621" y="-343" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; EbpfOptions &gt;</text>
 </a>
 </g>
 </g>
-<!-- Node3&#45;&gt;Node11 -->
-<g id="edge10_Node000003_Node000011" class="edge">
-<title>Node3&#45;&gt;Node11</title>
-<g id="a_edge10_Node000003_Node000011"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M418.68,-290.54C439.87,-284.28 465.71,-276.65 488.01,-270.06"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="417.59,-287.21 408.99,-293.4 419.58,-293.93 417.59,-287.21"/>
+<!-- Node5&#45;&gt;Node11 -->
+<g id="edge10_Node000005_Node000011" class="edge">
+<title>Node5&#45;&gt;Node11</title>
+<g id="a_edge10_Node000005_Node000011"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M472.33,-314.29C483.81,-316.74 495.81,-319.39 507,-322 525.44,-326.31 545.48,-331.34 563.5,-335.99"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="472.92,-310.83 462.41,-312.19 471.47,-317.68 472.92,-310.83"/>
 </a>
 </g>
 </g>
@@ -274,94 +272,132 @@ var sectionId = 'dynsection-0';
 <g id="Node000012" class="node">
 <title>Node12</title>
 <g id="a_Node000012"><a xlink:href="class_p4_1_1_p4_c_context_with_options.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="616,-222 464,-222 464,-192 616,-192 616,-222"/>
-<text text-anchor="start" x="472" y="-210" font-family="Helvetica,sans-Serif" font-size="10.00">P4::P4CContextWithOptions</text>
-<text text-anchor="middle" x="540" y="-199" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; TCOptions &gt;</text>
+<polygon fill="white" stroke="#666666" points="697,-318 545,-318 545,-288 697,-288 697,-318"/>
+<text text-anchor="start" x="553" y="-306" font-family="Helvetica,sans-Serif" font-size="10.00">P4::P4CContextWithOptions</text>
+<text text-anchor="middle" x="621" y="-295" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; Options &gt;</text>
 </a>
 </g>
 </g>
-<!-- Node3&#45;&gt;Node12 -->
-<g id="edge11_Node000003_Node000012" class="edge">
-<title>Node3&#45;&gt;Node12</title>
-<g id="a_edge11_Node000003_Node000012"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M420.43,-288.84C422.38,-287.65 424.25,-286.38 426,-285 448.68,-267.18 438.91,-248.28 462,-231 466.6,-227.56 471.7,-224.61 477.02,-222.07"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="418.79,-285.75 411.53,-293.46 422.02,-291.96 418.79,-285.75"/>
+<!-- Node5&#45;&gt;Node12 -->
+<g id="edge11_Node000005_Node000012" class="edge">
+<title>Node5&#45;&gt;Node12</title>
+<g id="a_edge11_Node000005_Node000012"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M472.35,-303C494.67,-303 520.77,-303 544.77,-303"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="472.05,-299.5 462.05,-303 472.05,-306.5 472.05,-299.5"/>
 </a>
 </g>
 </g>
 <!-- Node13 -->
 <g id="Node000013" class="node">
 <title>Node13</title>
-<g id="a_Node000013"><a xlink:href="class_p4_1_1_p4_tools_1_1_compile_context.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="618,-174 462,-174 462,-144 618,-144 618,-174"/>
-<text text-anchor="start" x="470" y="-162" font-family="Helvetica,sans-Serif" font-size="10.00">P4::P4Tools::CompileContext</text>
-<text text-anchor="middle" x="540" y="-151" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; P4TestOptions &gt;</text>
+<g id="a_Node000013"><a xlink:href="class_p4_1_1_p4_c_context_with_options.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="697,-270 545,-270 545,-240 697,-240 697,-270"/>
+<text text-anchor="start" x="553" y="-258" font-family="Helvetica,sans-Serif" font-size="10.00">P4::P4CContextWithOptions</text>
+<text text-anchor="middle" x="621" y="-247" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; P4fmtOptions &gt;</text>
 </a>
 </g>
 </g>
-<!-- Node3&#45;&gt;Node13 -->
-<g id="edge12_Node000003_Node000013" class="edge">
-<title>Node3&#45;&gt;Node13</title>
-<g id="a_edge12_Node000003_Node000013"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M423.02,-287.7C424.06,-286.85 425.06,-285.95 426,-285 459.83,-250.85 427.38,-216.36 462,-183 465.53,-179.6 469.53,-176.68 473.81,-174.17"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="420.8,-284.97 414.33,-293.36 424.62,-290.84 420.8,-284.97"/>
+<!-- Node5&#45;&gt;Node13 -->
+<g id="edge12_Node000005_Node000013" class="edge">
+<title>Node5&#45;&gt;Node13</title>
+<g id="a_edge12_Node000005_Node000013"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M472.36,-292.49C483.84,-290.15 495.84,-287.6 507,-285 526.37,-280.5 547.48,-275.04 566.14,-270.03"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="471.56,-289.08 462.44,-294.48 472.94,-295.95 471.56,-289.08"/>
 </a>
 </g>
 </g>
 <!-- Node14 -->
 <g id="Node000014" class="node">
 <title>Node14</title>
-<g id="a_Node000014"><a xlink:href="class_p4_1_1_p4_tools_1_1_compile_context.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="618,-126 462,-126 462,-96 618,-96 618,-126"/>
-<text text-anchor="start" x="470" y="-114" font-family="Helvetica,sans-Serif" font-size="10.00">P4::P4Tools::CompileContext</text>
-<text text-anchor="middle" x="540" y="-103" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; P4ReachabilityOptions &gt;</text>
+<g id="a_Node000014"><a xlink:href="class_p4_1_1_p4_c_context_with_options.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="697,-222 545,-222 545,-192 697,-192 697,-222"/>
+<text text-anchor="start" x="553" y="-210" font-family="Helvetica,sans-Serif" font-size="10.00">P4::P4CContextWithOptions</text>
+<text text-anchor="middle" x="621" y="-199" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; TCOptions &gt;</text>
 </a>
 </g>
 </g>
-<!-- Node3&#45;&gt;Node14 -->
-<g id="edge13_Node000003_Node000014" class="edge">
-<title>Node3&#45;&gt;Node14</title>
-<g id="a_edge13_Node000003_Node000014"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M423.59,-287.44C424.43,-286.67 425.24,-285.85 426,-285 471.66,-233.86 415.16,-185.07 462,-135 465.16,-131.63 468.78,-128.72 472.69,-126.22"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="421.29,-284.78 415.16,-293.42 425.34,-290.49 421.29,-284.78"/>
+<!-- Node5&#45;&gt;Node14 -->
+<g id="edge13_Node000005_Node000014" class="edge">
+<title>Node5&#45;&gt;Node14</title>
+<g id="a_edge13_Node000005_Node000014"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M472.36,-298.96C484.49,-296.21 496.76,-291.86 507,-285 530.97,-268.95 519.91,-248.28 543,-231 547.6,-227.56 552.7,-224.61 558.02,-222.07"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="471.4,-295.58 462.24,-300.9 472.72,-302.45 471.4,-295.58"/>
 </a>
 </g>
 </g>
 <!-- Node15 -->
 <g id="Node000015" class="node">
 <title>Node15</title>
-<g id="a_Node000015"><a xlink:href="class_p4_1_1_p4_c_context_with_options.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="616,-78 464,-78 464,-48 616,-48 616,-78"/>
-<text text-anchor="start" x="472" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">P4::P4CContextWithOptions</text>
-<text text-anchor="middle" x="540" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; OptionsType &gt;</text>
+<g id="a_Node000015"><a xlink:href="class_p4_1_1_p4_tools_1_1_compile_context.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="699,-174 543,-174 543,-144 699,-144 699,-174"/>
+<text text-anchor="start" x="551" y="-162" font-family="Helvetica,sans-Serif" font-size="10.00">P4::P4Tools::CompileContext</text>
+<text text-anchor="middle" x="621" y="-151" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; P4TestOptions &gt;</text>
 </a>
 </g>
 </g>
-<!-- Node3&#45;&gt;Node15 -->
-<g id="edge14_Node000003_Node000015" class="edge">
-<title>Node3&#45;&gt;Node15</title>
-<g id="a_edge14_Node000003_Node000015"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M424.05,-287.11C424.73,-286.44 425.38,-285.73 426,-285 483.68,-216.64 402.74,-153.99 462,-87 465.06,-83.54 468.61,-80.57 472.48,-78.03"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="421.71,-284.49 415.83,-293.3 425.92,-290.09 421.71,-284.49"/>
+<!-- Node5&#45;&gt;Node15 -->
+<g id="edge14_Node000005_Node000015" class="edge">
+<title>Node5&#45;&gt;Node15</title>
+<g id="a_edge14_Node000005_Node000015"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M472.24,-301.07C484.82,-298.3 497.31,-293.4 507,-285 543.32,-253.5 508.38,-216.36 543,-183 546.53,-179.6 550.53,-176.68 554.81,-174.17"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="471.42,-297.66 462.19,-302.86 472.65,-304.55 471.42,-297.66"/>
 </a>
 </g>
 </g>
 <!-- Node16 -->
 <g id="Node000016" class="node">
 <title>Node16</title>
-<g id="a_Node000016"><a xlink:href="class_p4_1_1_p4_tools_1_1_compile_context.html" target="_top" xlink:title="A compilation context for P4Tools that provides a custom compiler configuration.">
-<polygon fill="white" stroke="#666666" points="618,-30 462,-30 462,0 618,0 618,-30"/>
-<text text-anchor="start" x="470" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">P4::P4Tools::CompileContext</text>
-<text text-anchor="middle" x="540" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; OptionsType &gt;</text>
+<g id="a_Node000016"><a xlink:href="class_p4_1_1_p4_tools_1_1_compile_context.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="699,-126 543,-126 543,-96 699,-96 699,-126"/>
+<text text-anchor="start" x="551" y="-114" font-family="Helvetica,sans-Serif" font-size="10.00">P4::P4Tools::CompileContext</text>
+<text text-anchor="middle" x="621" y="-103" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; P4ReachabilityOptions &gt;</text>
 </a>
 </g>
 </g>
-<!-- Node3&#45;&gt;Node16 -->
-<g id="edge15_Node000003_Node000016" class="edge">
-<title>Node3&#45;&gt;Node16</title>
-<g id="a_edge15_Node000003_Node000016"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M424.08,-287.14C424.75,-286.46 425.39,-285.74 426,-285 495.79,-199.34 390.23,-123.01 462,-39 464.91,-35.59 468.3,-32.66 471.99,-30.14"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="421.74,-284.53 415.94,-293.4 426,-290.08 421.74,-284.53"/>
+<!-- Node5&#45;&gt;Node16 -->
+<g id="edge15_Node000005_Node000016" class="edge">
+<title>Node5&#45;&gt;Node16</title>
+<g id="a_edge15_Node000005_Node000016"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M472.51,-301.84C485.19,-299.07 497.67,-293.98 507,-285 556.39,-237.45 496.16,-185.07 543,-135 546.16,-131.63 549.78,-128.72 553.69,-126.22"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="471.61,-298.45 462.34,-303.59 472.79,-305.34 471.61,-298.45"/>
+</a>
+</g>
+</g>
+<!-- Node17 -->
+<g id="Node000017" class="node">
+<title>Node17</title>
+<g id="a_Node000017"><a xlink:href="class_p4_1_1_p4_c_context_with_options.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="697,-78 545,-78 545,-48 697,-48 697,-78"/>
+<text text-anchor="start" x="553" y="-66" font-family="Helvetica,sans-Serif" font-size="10.00">P4::P4CContextWithOptions</text>
+<text text-anchor="middle" x="621" y="-55" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; OptionsType &gt;</text>
+</a>
+</g>
+</g>
+<!-- Node5&#45;&gt;Node17 -->
+<g id="edge16_Node000005_Node000017" class="edge">
+<title>Node5&#45;&gt;Node17</title>
+<g id="a_edge16_Node000005_Node000017"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M472.11,-302.36C485.05,-299.63 497.74,-294.42 507,-285 569.69,-221.2 483.74,-153.99 543,-87 546.06,-83.54 549.61,-80.57 553.48,-78.03"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="471.52,-298.91 462.22,-304 472.66,-305.82 471.52,-298.91"/>
+</a>
+</g>
+</g>
+<!-- Node18 -->
+<g id="Node000018" class="node">
+<title>Node18</title>
+<g id="a_Node000018"><a xlink:href="class_p4_1_1_p4_tools_1_1_compile_context.html" target="_top" xlink:title="A compilation context for P4Tools that provides a custom compiler configuration.">
+<polygon fill="white" stroke="#666666" points="699,-30 543,-30 543,0 699,0 699,-30"/>
+<text text-anchor="start" x="551" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">P4::P4Tools::CompileContext</text>
+<text text-anchor="middle" x="621" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; OptionsType &gt;</text>
+</a>
+</g>
+</g>
+<!-- Node5&#45;&gt;Node18 -->
+<g id="edge17_Node000005_Node000018" class="edge">
+<title>Node5&#45;&gt;Node18</title>
+<g id="a_edge17_Node000005_Node000018"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M472.34,-302.58C485.27,-299.84 497.91,-294.58 507,-285 583.07,-204.86 471.23,-123.01 543,-39 545.91,-35.59 549.3,-32.66 552.99,-30.14"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="471.74,-299.13 462.44,-304.21 472.88,-306.04 471.74,-299.13"/>
 </a>
 </g>
 </g>

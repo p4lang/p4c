@@ -211,6 +211,8 @@ Classes</h2></td></tr>
 <tr class="memitem:class_compute_def_use" id="r_class_compute_def_use"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__midend.html#class_compute_def_use">ComputeDefUse</a></td></tr>
 <tr class="memdesc:class_compute_def_use"><td class="mdescLeft">&#160;</td><td class="mdescRight">Compute defuse info within P4Parser and P4Control blocks in the midend.  <a href="group__midend.html#class_compute_def_use">More...</a><br /></td></tr>
 <tr class="separator:class_compute_def_use"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:class_deparser" id="r_class_deparser"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#class_deparser">Deparser</a></td></tr>
+<tr class="separator:class_deparser"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:struct_deparser_asm_output" id="r_struct_deparser_asm_output"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___asm_output.html#struct_deparser_asm_output">DeparserAsmOutput</a></td></tr>
 <tr class="separator:struct_deparser_asm_output"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:class_deparser_inspector" id="r_class_deparser_inspector"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#class_deparser_inspector">DeparserInspector</a></td></tr>
@@ -251,6 +253,9 @@ Classes</h2></td></tr>
 <tr class="separator:class_parde_modifier"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:class_parde_transform" id="r_class_parde_transform"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#class_parde_transform">PardeTransform</a></td></tr>
 <tr class="separator:class_parde_transform"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:class_parser" id="r_class_parser"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#class_parser">Parser</a></td></tr>
+<tr class="memdesc:class_parser"><td class="mdescLeft">&#160;</td><td class="mdescRight">Representation of the Tofino 1/2 parser in assembler.  <a href="#class_parser">More...</a><br /></td></tr>
+<tr class="separator:class_parser"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:struct_parser_asm_output" id="r_struct_parser_asm_output"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group___asm_output.html#struct_parser_asm_output">ParserAsmOutput</a></td></tr>
 <tr class="separator:struct_parser_asm_output"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:class_parser_dominator_builder" id="r_class_parser_dominator_builder"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#class_parser_dominator_builder">ParserDominatorBuilder</a></td></tr>
@@ -2529,7 +2534,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
         </tr>
       </table>
 </div><div class="memdoc">
-<div class="textblock"><div class="compoundTemplParams">template&lt;class Parser, class State, class Transition&gt;<br />
+<div class="textblock"><div class="compoundTemplParams">template&lt;class <a class="el" href="#class_parser">Parser</a>, class State, class Transition&gt;<br />
 class CollectParserInfoImpl&lt; Parser, State, Transition &gt;</div></div><div class="dynheader">
 Inheritance diagram for CollectParserInfoImpl&lt; Parser, State, Transition &gt;:</div>
 <div class="dyncontent">
@@ -2546,16 +2551,16 @@ Inheritance diagram for CollectParserInfoImpl&lt; Parser, State, Transition &gt;
 <tr class="memitem:a4be0d94bc40a13ee2a7d2e4481f89656" id="r_a4be0d94bc40a13ee2a7d2e4481f89656"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4be0d94bc40a13ee2a7d2e4481f89656">get_min_shift_amount</a> (const State *dst) const</td></tr>
 <tr class="separator:a4be0d94bc40a13ee2a7d2e4481f89656"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8c9fe25f1646d2315ae04f65ca1dfae5" id="r_a8c9fe25f1646d2315ae04f65ca1dfae5"><td class="memItemLeft" align="right" valign="top"><a id="a8c9fe25f1646d2315ae04f65ca1dfae5" name="a8c9fe25f1646d2315ae04f65ca1dfae5"></a>
-const <a class="el" href="#class_parser_graph_impl">GraphType</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>graph</b> (const Parser *p) const</td></tr>
+const <a class="el" href="#class_parser_graph_impl">GraphType</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>graph</b> (const <a class="el" href="#class_parser">Parser</a> *p) const</td></tr>
 <tr class="separator:a8c9fe25f1646d2315ae04f65ca1dfae5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a156d2f6fcd050049f7e951327abcd0b1" id="r_a156d2f6fcd050049f7e951327abcd0b1"><td class="memItemLeft" align="right" valign="top"><a id="a156d2f6fcd050049f7e951327abcd0b1" name="a156d2f6fcd050049f7e951327abcd0b1"></a>
 const <a class="el" href="#class_parser_graph_impl">GraphType</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>graph</b> (const State *s) const</td></tr>
 <tr class="separator:a156d2f6fcd050049f7e951327abcd0b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a64170495e7e09cfcc1e03a1b63400f05" id="r_a64170495e7e09cfcc1e03a1b63400f05"><td class="memItemLeft" align="right" valign="top"><a id="a64170495e7e09cfcc1e03a1b63400f05" name="a64170495e7e09cfcc1e03a1b63400f05"></a>
-const <a class="el" href="class_p4_1_1ordered__map.html">ordered_map</a>&lt; const Parser *, <a class="el" href="#class_parser_graph_impl">GraphType</a> * &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>graphs</b> () const</td></tr>
+const <a class="el" href="class_p4_1_1ordered__map.html">ordered_map</a>&lt; const <a class="el" href="#class_parser">Parser</a> *, <a class="el" href="#class_parser_graph_impl">GraphType</a> * &gt; &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>graphs</b> () const</td></tr>
 <tr class="separator:a64170495e7e09cfcc1e03a1b63400f05"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a92b0dd065518df686027ee3e43c29617" id="r_a92b0dd065518df686027ee3e43c29617"><td class="memItemLeft" align="right" valign="top"><a id="a92b0dd065518df686027ee3e43c29617" name="a92b0dd065518df686027ee3e43c29617"></a>
-const Parser *&#160;</td><td class="memItemRight" valign="bottom"><b>parser</b> (const State *state) const</td></tr>
+const <a class="el" href="#class_parser">Parser</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>parser</b> (const State *state) const</td></tr>
 <tr class="separator:a92b0dd065518df686027ee3e43c29617"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h4 class="groupheader">Member Function Documentation</h4>
@@ -2565,13 +2570,13 @@ const Parser *&#160;</td><td class="memItemRight" valign="bottom"><b>parser</b> 
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class Parser, class State, class Transition&gt; </div>
+template&lt;class <a class="el" href="#class_parser">Parser</a>, class State, class Transition&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">const std::set&lt; int &gt; * <a class="el" href="#class_collect_parser_info_impl">CollectParserInfoImpl</a>&lt; Parser, State, Transition &gt;::get_all_shift_amounts </td>
+          <td class="memname">const std::set&lt; int &gt; * <a class="el" href="#class_collect_parser_info_impl">CollectParserInfoImpl</a>&lt; <a class="el" href="#class_parser">Parser</a>, State, Transition &gt;::get_all_shift_amounts </td>
           <td>(</td>
           <td class="paramtype">const State *</td>          <td class="paramname"><span class="paramname"><em>dst</em></span></td><td>)</td>
           <td> const</td>
@@ -2594,13 +2599,13 @@ template&lt;class Parser, class State, class Transition&gt; </div>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class Parser, class State, class Transition&gt; </div>
+template&lt;class <a class="el" href="#class_parser">Parser</a>, class State, class Transition&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">const std::set&lt; int &gt; * <a class="el" href="#class_collect_parser_info_impl">CollectParserInfoImpl</a>&lt; Parser, State, Transition &gt;::get_all_shift_amounts </td>
+          <td class="memname">const std::set&lt; int &gt; * <a class="el" href="#class_collect_parser_info_impl">CollectParserInfoImpl</a>&lt; <a class="el" href="#class_parser">Parser</a>, State, Transition &gt;::get_all_shift_amounts </td>
           <td>(</td>
           <td class="paramtype">const State *</td>          <td class="paramname"><span class="paramname"><em>src</em></span>, </td>
         </tr>
@@ -2627,13 +2632,13 @@ template&lt;class Parser, class State, class Transition&gt; </div>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class Parser, class State, class Transition&gt; </div>
+template&lt;class <a class="el" href="#class_parser">Parser</a>, class State, class Transition&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">int <a class="el" href="#class_collect_parser_info_impl">CollectParserInfoImpl</a>&lt; Parser, State, Transition &gt;::get_max_shift_amount </td>
+          <td class="memname">int <a class="el" href="#class_collect_parser_info_impl">CollectParserInfoImpl</a>&lt; <a class="el" href="#class_parser">Parser</a>, State, Transition &gt;::get_max_shift_amount </td>
           <td>(</td>
           <td class="paramtype">const State *</td>          <td class="paramname"><span class="paramname"><em>dst</em></span></td><td>)</td>
           <td> const</td>
@@ -2656,13 +2661,13 @@ template&lt;class Parser, class State, class Transition&gt; </div>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class Parser, class State, class Transition&gt; </div>
+template&lt;class <a class="el" href="#class_parser">Parser</a>, class State, class Transition&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">int <a class="el" href="#class_collect_parser_info_impl">CollectParserInfoImpl</a>&lt; Parser, State, Transition &gt;::get_min_shift_amount </td>
+          <td class="memname">int <a class="el" href="#class_collect_parser_info_impl">CollectParserInfoImpl</a>&lt; <a class="el" href="#class_parser">Parser</a>, State, Transition &gt;::get_min_shift_amount </td>
           <td>(</td>
           <td class="paramtype">const State *</td>          <td class="paramname"><span class="paramname"><em>dst</em></span></td><td>)</td>
           <td> const</td>
@@ -2987,6 +2992,281 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>joinFlows</b> = false
 bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = true</td></tr>
 <tr class="separator:a609ed9bc5d421210d591474f234d5e88 inherit pro_attribs_class_p4_1_1_visitor"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+
+</div>
+</div>
+<a name="class_deparser" id="class_deparser"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#class_deparser">&#9670;&#160;</a></span>Deparser</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">class Deparser</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<div class="textblock"></div><div class="dynheader">
+Inheritance diagram for Deparser:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="class_deparser__inherit__graph.svg" width="214" height="183"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<table class="memberdecls">
+<tr><td colspan="2"><h3>Public Member Functions</h3></td></tr>
+<tr class="memitem:ae4d718ad18cee6218eca6991d58c8026" id="r_ae4d718ad18cee6218eca6991d58c8026"><td class="memTemplParams" colspan="2"><a id="ae4d718ad18cee6218eca6991d58c8026" name="ae4d718ad18cee6218eca6991d58c8026"></a>
+template&lt;class REGS&gt; </td></tr>
+<tr class="memitem:ae4d718ad18cee6218eca6991d58c8026"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>gen_learn_quanta</b> (REGS &amp;, <a class="el" href="classjson_1_1vector.html">json::vector</a> &amp;)</td></tr>
+<tr class="separator:ae4d718ad18cee6218eca6991d58c8026"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3b570089acdf01297a4563c247f92c49" id="r_a3b570089acdf01297a4563c247f92c49"><td class="memItemLeft" align="right" valign="top"><a id="a3b570089acdf01297a4563c247f92c49" name="a3b570089acdf01297a4563c247f92c49"></a>
+template&lt;&gt; </td></tr>
+<tr class="memitem:a3b570089acdf01297a4563c247f92c49"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>gen_learn_quanta</b> (<a class="el" href="struct_target_1_1_j_bay_1_1parser__regs.html">Target::JBay::parser_regs</a> &amp;regs, <a class="el" href="classjson_1_1vector.html">json::vector</a> &amp;learn_quanta)</td></tr>
+<tr class="separator:a3b570089acdf01297a4563c247f92c49"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adada8ec6374152b40d29535cfa7c8096" id="r_adada8ec6374152b40d29535cfa7c8096"><td class="memItemLeft" align="right" valign="top"><a id="adada8ec6374152b40d29535cfa7c8096" name="adada8ec6374152b40d29535cfa7c8096"></a>
+template&lt;&gt; </td></tr>
+<tr class="memitem:adada8ec6374152b40d29535cfa7c8096"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>gen_learn_quanta</b> (<a class="el" href="struct_target_1_1_tofino_1_1parser__regs.html">Target::Tofino::parser_regs</a> &amp;regs, <a class="el" href="classjson_1_1vector.html">json::vector</a> &amp;learn_quanta)</td></tr>
+<tr class="separator:adada8ec6374152b40d29535cfa7c8096"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a72f6386dd02034d9a78de1a57d41f571" id="r_a72f6386dd02034d9a78de1a57d41f571"><td class="memItemLeft" align="right" valign="top"><a id="a72f6386dd02034d9a78de1a57d41f571" name="a72f6386dd02034d9a78de1a57d41f571"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>gtest_clear</b> ()</td></tr>
+<tr class="memdesc:a72f6386dd02034d9a78de1a57d41f571"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clear/reset the deparser object. <br /></td></tr>
+<tr class="separator:a72f6386dd02034d9a78de1a57d41f571"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9336d312ba62f047c450a0c3e524fb1d" id="r_a9336d312ba62f047c450a0c3e524fb1d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9336d312ba62f047c450a0c3e524fb1d">input</a> (VECTOR(<a class="el" href="structvalue__t.html">value_t</a>) args, <a class="el" href="structvalue__t.html">value_t</a> data)</td></tr>
+<tr class="separator:a9336d312ba62f047c450a0c3e524fb1d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab3ec2e67dd4b775f98079167115406c2" id="r_ab3ec2e67dd4b775f98079167115406c2"><td class="memItemLeft" align="right" valign="top"><a id="ab3ec2e67dd4b775f98079167115406c2" name="ab3ec2e67dd4b775f98079167115406c2"></a>
+std::vector&lt; <a class="el" href="struct_deparser_1_1_checksum_val.html">ChecksumVal</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>merge_csum_entries</b> (const std::vector&lt; <a class="el" href="struct_deparser_1_1_checksum_val.html">ChecksumVal</a> &gt; &amp;, int)</td></tr>
+<tr class="separator:ab3ec2e67dd4b775f98079167115406c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1aab7b01682285a1cbe8aa83541a1296" id="r_a1aab7b01682285a1cbe8aa83541a1296"><td class="memItemLeft" align="right" valign="top"><a id="a1aab7b01682285a1cbe8aa83541a1296" name="a1aab7b01682285a1cbe8aa83541a1296"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>output</b> (<a class="el" href="classjson_1_1map.html">json::map</a> &amp;)</td></tr>
+<tr class="separator:a1aab7b01682285a1cbe8aa83541a1296"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3ee0a19e365027ed53077edfb634141e" id="r_a3ee0a19e365027ed53077edfb634141e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3ee0a19e365027ed53077edfb634141e">process</a> ()</td></tr>
+<tr class="memdesc:a3ee0a19e365027ed53077edfb634141e"><td class="mdescLeft">&#160;</td><td class="mdescRight">optionally process the data if not done during parsing  <br /></td></tr>
+<tr class="separator:a3ee0a19e365027ed53077edfb634141e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a016f7a17e8ea8a3a99e96cc019447a2e" id="r_a016f7a17e8ea8a3a99e96cc019447a2e"><td class="memTemplParams" colspan="2"><a id="a016f7a17e8ea8a3a99e96cc019447a2e" name="a016f7a17e8ea8a3a99e96cc019447a2e"></a>
+template&lt;class TARGET&gt; </td></tr>
+<tr class="memitem:a016f7a17e8ea8a3a99e96cc019447a2e"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>process</b> (TARGET *)</td></tr>
+<tr class="separator:a016f7a17e8ea8a3a99e96cc019447a2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6512e8ed0b70e0fc206f5965998c8597" id="r_a6512e8ed0b70e0fc206f5965998c8597"><td class="memItemLeft" align="right" valign="top"><a id="a6512e8ed0b70e0fc206f5965998c8597" name="a6512e8ed0b70e0fc206f5965998c8597"></a>
+template&lt;&gt; </td></tr>
+<tr class="memitem:a6512e8ed0b70e0fc206f5965998c8597"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>process</b> (<a class="el" href="class_target_1_1_j_bay.html">Target::JBay</a> *)</td></tr>
+<tr class="separator:a6512e8ed0b70e0fc206f5965998c8597"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3bc7180b890fbafac60e4c31f4ec86c9" id="r_a3bc7180b890fbafac60e4c31f4ec86c9"><td class="memItemLeft" align="right" valign="top"><a id="a3bc7180b890fbafac60e4c31f4ec86c9" name="a3bc7180b890fbafac60e4c31f4ec86c9"></a>
+template&lt;&gt; </td></tr>
+<tr class="memitem:a3bc7180b890fbafac60e4c31f4ec86c9"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>process</b> (<a class="el" href="class_target_1_1_tofino.html">Target::Tofino</a> *)</td></tr>
+<tr class="separator:a3bc7180b890fbafac60e4c31f4ec86c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae5eb053e9c67d65d19e985ef1984e61e" id="r_ae5eb053e9c67d65d19e985ef1984e61e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae5eb053e9c67d65d19e985ef1984e61e">start</a> (int lineno, VECTOR(<a class="el" href="structvalue__t.html">value_t</a>) args)</td></tr>
+<tr class="memdesc:ae5eb053e9c67d65d19e985ef1984e61e"><td class="mdescLeft">&#160;</td><td class="mdescRight">process the arguments on the same line as the heading  <br /></td></tr>
+<tr class="separator:ae5eb053e9c67d65d19e985ef1984e61e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace3c60d30ada55bc66f41986dbd1ba6f" id="r_ace3c60d30ada55bc66f41986dbd1ba6f"><td class="memTemplParams" colspan="2"><a id="ace3c60d30ada55bc66f41986dbd1ba6f" name="ace3c60d30ada55bc66f41986dbd1ba6f"></a>
+template&lt;class REGS&gt; </td></tr>
+<tr class="memitem:ace3c60d30ada55bc66f41986dbd1ba6f"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>write_config</b> (REGS &amp;)</td></tr>
+<tr class="separator:ace3c60d30ada55bc66f41986dbd1ba6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a068e19499150787c691329c38e479aed" id="r_a068e19499150787c691329c38e479aed"><td class="memItemLeft" align="right" valign="top"><a id="a068e19499150787c691329c38e479aed" name="a068e19499150787c691329c38e479aed"></a>
+template&lt;&gt; </td></tr>
+<tr class="memitem:a068e19499150787c691329c38e479aed"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>write_config</b> (Target::JBay::deparser_regs &amp;regs)</td></tr>
+<tr class="separator:a068e19499150787c691329c38e479aed"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aab453e5aad71731bc50e1591ba14711e" id="r_aab453e5aad71731bc50e1591ba14711e"><td class="memItemLeft" align="right" valign="top"><a id="aab453e5aad71731bc50e1591ba14711e" name="aab453e5aad71731bc50e1591ba14711e"></a>
+template&lt;&gt; </td></tr>
+<tr class="memitem:aab453e5aad71731bc50e1591ba14711e"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>write_config</b> (<a class="el" href="class_target_1_1_tofino.html#struct_target_1_1_tofino_1_1deparser__regs">Target::Tofino::deparser_regs</a> &amp;regs)</td></tr>
+<tr class="separator:aab453e5aad71731bc50e1591ba14711e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><h3>Static Public Member Functions</h3></td></tr>
+<tr class="memitem:a1e00390849d3379b551be092d3a5b637" id="r_a1e00390849d3379b551be092d3a5b637"><td class="memItemLeft" align="right" valign="top"><a id="a1e00390849d3379b551be092d3a5b637" name="a1e00390849d3379b551be092d3a5b637"></a>
+static bool&#160;</td><td class="memItemRight" valign="bottom"><b>add_constant</b> (gress_t gr, int c)</td></tr>
+<tr class="separator:a1e00390849d3379b551be092d3a5b637"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af41041e21a1f35763602e9805479054f" id="r_af41041e21a1f35763602e9805479054f"><td class="memItemLeft" align="right" valign="top"><a id="af41041e21a1f35763602e9805479054f" name="af41041e21a1f35763602e9805479054f"></a>
+static int&#160;</td><td class="memItemRight" valign="bottom"><b>constant_idx</b> (gress_t gr, int c)</td></tr>
+<tr class="separator:af41041e21a1f35763602e9805479054f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aea8fc2c53781f0ee86237c4b3909e5d5" id="r_aea8fc2c53781f0ee86237c4b3909e5d5"><td class="memItemLeft" align="right" valign="top"><a id="aea8fc2c53781f0ee86237c4b3909e5d5" name="aea8fc2c53781f0ee86237c4b3909e5d5"></a>
+static int&#160;</td><td class="memItemRight" valign="bottom"><b>get_constant</b> (gress_t gr, int phv_idx)</td></tr>
+<tr class="separator:aea8fc2c53781f0ee86237c4b3909e5d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1c768a6b80be21ea3e7b4d244fbbad4b" id="r_a1c768a6b80be21ea3e7b4d244fbbad4b"><td class="memItemLeft" align="right" valign="top"><a id="a1c768a6b80be21ea3e7b4d244fbbad4b" name="a1c768a6b80be21ea3e7b4d244fbbad4b"></a>
+static <a class="el" href="#class_deparser">Deparser</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>gtest_get_deparser</b> ()</td></tr>
+<tr class="memdesc:a1c768a6b80be21ea3e7b4d244fbbad4b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the singleton object for use in gtest. <br /></td></tr>
+<tr class="separator:a1c768a6b80be21ea3e7b4d244fbbad4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adad0647339821e4ab55ce4ffe0ea349e" id="r_adad0647339821e4ab55ce4ffe0ea349e"><td class="memItemLeft" align="right" valign="top"><a id="adad0647339821e4ab55ce4ffe0ea349e" name="adad0647339821e4ab55ce4ffe0ea349e"></a>
+static unsigned&#160;</td><td class="memItemRight" valign="bottom"><b>next_handle</b> ()</td></tr>
+<tr class="separator:adad0647339821e4ab55ce4ffe0ea349e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4991403ff4149d9241030f31f553bc59" id="r_a4991403ff4149d9241030f31f553bc59"><td class="memItemLeft" align="right" valign="top"><a id="a4991403ff4149d9241030f31f553bc59" name="a4991403ff4149d9241030f31f553bc59"></a>
+static const <a class="el" href="class_p4_1_1bitvec.html">bitvec</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><b>PhvUse</b> (gress_t gr)</td></tr>
+<tr class="separator:a4991403ff4149d9241030f31f553bc59"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a96e48a4dece358b4065572236d92001d" id="r_a96e48a4dece358b4065572236d92001d"><td class="memItemLeft" align="right" valign="top"><a id="a96e48a4dece358b4065572236d92001d" name="a96e48a4dece358b4065572236d92001d"></a>
+static void&#160;</td><td class="memItemRight" valign="bottom"><b>write_pov_in_json</b> (<a class="el" href="classjson_1_1map.html">json::map</a> &amp;fd, <a class="el" href="classjson_1_1map.html">json::map</a> &amp;fd_entry, const <a class="el" href="struct_phv_1_1_register.html">Phv::Register</a> *phv, int bit, int offset)</td></tr>
+<tr class="separator:a96e48a4dece358b4065572236d92001d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="inherit_header pub_static_methods_class_section"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_static_methods_class_section')"><img src="closed.png" alt="-"/>&#160;Static Public Member Functions inherited from <a class="el" href="class_section.html">Section</a></td></tr>
+<tr class="memitem:a364ec6dcb1fc95d7a73d50741199e7eb inherit pub_static_methods_class_section" id="r_a364ec6dcb1fc95d7a73d50741199e7eb"><td class="memItemLeft" align="right" valign="top">
+static void&#160;</td><td class="memItemRight" valign="bottom"><b>asm_section</b> (char *name, VECTOR(<a class="el" href="structvalue__t.html">value_t</a>) args, <a class="el" href="structvalue__t.html">value_t</a> data)</td></tr>
+<tr class="separator:a364ec6dcb1fc95d7a73d50741199e7eb inherit pub_static_methods_class_section"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae15fcf3d20e7e956f3af167776f41c4f inherit pub_static_methods_class_section" id="r_ae15fcf3d20e7e956f3af167776f41c4f"><td class="memItemLeft" align="right" valign="top">
+static bool&#160;</td><td class="memItemRight" valign="bottom"><b>no_sections_in_assembly</b> ()</td></tr>
+<tr class="separator:ae15fcf3d20e7e956f3af167776f41c4f inherit pub_static_methods_class_section"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aec4ebe5ae9f821cca93eb4ecb309205a inherit pub_static_methods_class_section" id="r_aec4ebe5ae9f821cca93eb4ecb309205a"><td class="memItemLeft" align="right" valign="top">
+static void&#160;</td><td class="memItemRight" valign="bottom"><b>output_all</b> (<a class="el" href="classjson_1_1map.html">json::map</a> &amp;ctxtJson)</td></tr>
+<tr class="separator:aec4ebe5ae9f821cca93eb4ecb309205a inherit pub_static_methods_class_section"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0253248c460c1801801ad15b888fcaf6 inherit pub_static_methods_class_section" id="r_a0253248c460c1801801ad15b888fcaf6"><td class="memItemLeft" align="right" valign="top">
+static void&#160;</td><td class="memItemRight" valign="bottom"><b>process_all</b> ()</td></tr>
+<tr class="separator:a0253248c460c1801801ad15b888fcaf6 inherit pub_static_methods_class_section"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a096ce5743fc752dd530dc30833d36af5 inherit pub_static_methods_class_section" id="r_a096ce5743fc752dd530dc30833d36af5"><td class="memItemLeft" align="right" valign="top">
+static bool&#160;</td><td class="memItemRight" valign="bottom"><b>section_in_assembly</b> (const char *name)</td></tr>
+<tr class="separator:a096ce5743fc752dd530dc30833d36af5 inherit pub_static_methods_class_section"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4e0c5387a30067f36284cb520e45f4e2 inherit pub_static_methods_class_section" id="r_a4e0c5387a30067f36284cb520e45f4e2"><td class="memItemLeft" align="right" valign="top">
+static int&#160;</td><td class="memItemRight" valign="bottom"><b>start_section</b> (int lineno, char *name, VECTOR(<a class="el" href="structvalue__t.html">value_t</a>) args)</td></tr>
+<tr class="separator:a4e0c5387a30067f36284cb520e45f4e2 inherit pub_static_methods_class_section"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a269b23ea9907ee5f5ed3730e9142e912 inherit pub_static_methods_class_section" id="r_a269b23ea9907ee5f5ed3730e9142e912"><td class="memItemLeft" align="right" valign="top">
+static <a class="el" href="class_section.html">Section</a> *&#160;</td><td class="memItemRight" valign="bottom"><b>test_get</b> (const char *name)</td></tr>
+<tr class="separator:a269b23ea9907ee5f5ed3730e9142e912 inherit pub_static_methods_class_section"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><h3>Public Attributes</h3></td></tr>
+<tr class="memitem:ab16a68ace3a9095af51e8998317d198f" id="r_ab16a68ace3a9095af51e8998317d198f"><td class="memItemLeft" align="right" valign="top"><a id="ab16a68ace3a9095af51e8998317d198f" name="ab16a68ace3a9095af51e8998317d198f"></a>
+std::vector&lt; <a class="el" href="struct_deparser_1_1_checksum_val.html">ChecksumVal</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>checksum_entries</b> [2][MAX_DEPARSER_CHECKSUM_UNITS]</td></tr>
+<tr class="separator:ab16a68ace3a9095af51e8998317d198f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a87516ce17cc55283fb184ab09200bfb3" id="r_a87516ce17cc55283fb184ab09200bfb3"><td class="memItemLeft" align="right" valign="top"><a id="a87516ce17cc55283fb184ab09200bfb3" name="a87516ce17cc55283fb184ab09200bfb3"></a>
+std::set&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>constants</b> [2]</td></tr>
+<tr class="separator:a87516ce17cc55283fb184ab09200bfb3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a728dabd7476c9d68e90eed7e43b8ebdf" id="r_a728dabd7476c9d68e90eed7e43b8ebdf"><td class="memItemLeft" align="right" valign="top"><a id="a728dabd7476c9d68e90eed7e43b8ebdf" name="a728dabd7476c9d68e90eed7e43b8ebdf"></a>
+std::vector&lt; <a class="el" href="struct_deparser_1_1_f_d_entry.html">FDEntry</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>dictionary</b> [2]</td></tr>
+<tr class="separator:a728dabd7476c9d68e90eed7e43b8ebdf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa05fb9e41aa04302081026f94f16a51c" id="r_aa05fb9e41aa04302081026f94f16a51c"><td class="memItemLeft" align="right" valign="top"><a id="aa05fb9e41aa04302081026f94f16a51c" name="aa05fb9e41aa04302081026f94f16a51c"></a>
+std::vector&lt; <a class="el" href="struct_deparser_1_1_digest.html">Digest</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>digests</b></td></tr>
+<tr class="separator:aa05fb9e41aa04302081026f94f16a51c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ae08cda088a69c48e7b55a35f755374" id="r_a0ae08cda088a69c48e7b55a35f755374"><td class="memItemLeft" align="right" valign="top"><a id="a0ae08cda088a69c48e7b55a35f755374" name="a0ae08cda088a69c48e7b55a35f755374"></a>
+<a class="el" href="#struct_deparser_1_1_full_checksum_unit">FullChecksumUnit</a>&#160;</td><td class="memItemRight" valign="bottom"><b>full_checksum_unit</b> [2][MAX_DEPARSER_CHECKSUM_UNITS]</td></tr>
+<tr class="separator:a0ae08cda088a69c48e7b55a35f755374"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a60e4271e82a371f36174756dab510579" id="r_a60e4271e82a371f36174756dab510579"><td class="memItemLeft" align="right" valign="top"><a id="a60e4271e82a371f36174756dab510579" name="a60e4271e82a371f36174756dab510579"></a>
+std::vector&lt; <a class="el" href="struct_deparser_1_1_intrinsic.html">Intrinsic</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>intrinsics</b></td></tr>
+<tr class="separator:a60e4271e82a371f36174756dab510579"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aee1a0773e41a353fae666a5b1fbe3ed5" id="r_aee1a0773e41a353fae666a5b1fbe3ed5"><td class="memItemLeft" align="right" valign="top"><a id="aee1a0773e41a353fae666a5b1fbe3ed5" name="aee1a0773e41a353fae666a5b1fbe3ed5"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>lineno</b> [2]</td></tr>
+<tr class="separator:aee1a0773e41a353fae666a5b1fbe3ed5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5acc32baded96804c454add7eabef71a" id="r_a5acc32baded96804c454add7eabef71a"><td class="memItemLeft" align="right" valign="top"><a id="a5acc32baded96804c454add7eabef71a" name="a5acc32baded96804c454add7eabef71a"></a>
+<a class="el" href="class_p4_1_1bitvec.html">bitvec</a>&#160;</td><td class="memItemRight" valign="bottom"><b>phv_use</b> [2]</td></tr>
+<tr class="separator:a5acc32baded96804c454add7eabef71a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af0a2197f011089e644ca843af8de128a" id="r_af0a2197f011089e644ca843af8de128a"><td class="memItemLeft" align="right" valign="top"><a id="af0a2197f011089e644ca843af8de128a" name="af0a2197f011089e644ca843af8de128a"></a>
+<a class="el" href="class_p4_1_1ordered__map.html">ordered_map</a>&lt; const <a class="el" href="struct_phv_1_1_register.html">Phv::Register</a> *, unsigned &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>pov</b> [2]</td></tr>
+<tr class="separator:af0a2197f011089e644ca843af8de128a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aad4ce692c2cdfa8a84b3d80e4c39c32f" id="r_aad4ce692c2cdfa8a84b3d80e4c39c32f"><td class="memItemLeft" align="right" valign="top"><a id="aad4ce692c2cdfa8a84b3d80e4c39c32f" name="aad4ce692c2cdfa8a84b3d80e4c39c32f"></a>
+std::vector&lt; <a class="el" href="class_phv_1_1_ref.html">Phv::Ref</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>pov_order</b> [2]</td></tr>
+<tr class="separator:aad4ce692c2cdfa8a84b3d80e4c39c32f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><h3>Static Public Attributes</h3></td></tr>
+<tr class="memitem:acacd1b7a51fd04cac645b6c0389cb047" id="r_acacd1b7a51fd04cac645b6c0389cb047"><td class="memItemLeft" align="right" valign="top">static unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#acacd1b7a51fd04cac645b6c0389cb047">unique_field_list_handle</a></td></tr>
+<tr class="separator:acacd1b7a51fd04cac645b6c0389cb047"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
+Additional Inherited Members</h2></td></tr>
+<tr class="inherit_header pro_methods_class_section"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_methods_class_section')"><img src="closed.png" alt="-"/>&#160;Protected Member Functions inherited from <a class="el" href="class_section.html">Section</a></td></tr>
+<tr class="memitem:ac6c3f326d1a8939b95d2554c165a14ee inherit pro_methods_class_section" id="r_ac6c3f326d1a8939b95d2554c165a14ee"><td class="memItemLeft" align="right" valign="top">
+&#160;</td><td class="memItemRight" valign="bottom"><b>Section</b> (const char *name_)</td></tr>
+<tr class="separator:ac6c3f326d1a8939b95d2554c165a14ee inherit pro_methods_class_section"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h4 class="groupheader">Member Function Documentation</h4>
+<a id="a9336d312ba62f047c450a0c3e524fb1d" name="a9336d312ba62f047c450a0c3e524fb1d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9336d312ba62f047c450a0c3e524fb1d">&#9670;&#160;</a></span>input()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Deparser::input </td>
+          <td>(</td>
+          <td class="paramtype">VECTOR(<a class="el" href="structvalue__t.html">value_t</a>)</td>          <td class="paramname"><span class="paramname"><em>args</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="structvalue__t.html">value_t</a></td>          <td class="paramname"><span class="paramname"><em>data</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>The check for correct type is done in Phv::Ref constructor</p>
+
+</div>
+</div>
+<a id="a3ee0a19e365027ed53077edfb634141e" name="a3ee0a19e365027ed53077edfb634141e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3ee0a19e365027ed53077edfb634141e">&#9670;&#160;</a></span>process()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Deparser::process </td>
+          <td>(</td>
+          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel virtual">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>optionally process the data if not done during parsing </p>
+
+<p>Reimplemented from <a class="el" href="class_section.html#a8bc055f8b213893a5e002608d1781e86">Section</a>.</p>
+
+</div>
+</div>
+<a id="ae5eb053e9c67d65d19e985ef1984e61e" name="ae5eb053e9c67d65d19e985ef1984e61e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae5eb053e9c67d65d19e985ef1984e61e">&#9670;&#160;</a></span>start()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Deparser::start </td>
+          <td>(</td>
+          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>lineno</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">VECTOR(<a class="el" href="structvalue__t.html">value_t</a>)</td>          <td class="paramname"><span class="paramname"><em>args</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel virtual">virtual</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>process the arguments on the same line as the heading </p>
+
+<p>Reimplemented from <a class="el" href="class_section.html#ad5438ee238f2d8f8d7b65350d532dfce">Section</a>.</p>
+
+</div>
+</div>
+<h4 class="groupheader">Member Data Documentation</h4>
+<a id="acacd1b7a51fd04cac645b6c0389cb047" name="acacd1b7a51fd04cac645b6c0389cb047"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acacd1b7a51fd04cac645b6c0389cb047">&#9670;&#160;</a></span>unique_field_list_handle</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">unsigned Deparser::unique_field_list_handle</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel static">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Copyright (C) 2024 Intel Corporation</p>
+<p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may obtain a copy of the License at</p>
+<p><a href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a></p>
+<p>Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.</p>
+<p>SPDX-License-Identifier: Apache-2.0 </p>
+
+</div>
+</div>
 
 </div>
 </div>
@@ -4050,7 +4330,7 @@ using&#160;</td><td class="memItemRight" valign="bottom"><b>IndexImmediateDomina
 using&#160;</td><td class="memItemRight" valign="bottom"><b>IndexMap</b> = boost::property_map&lt;Graph, boost::vertex_index_t&gt;::type</td></tr>
 <tr class="separator:a2baa2c04243a3f0aeb760d2ae14308a1 inherit pub_types_group__parde"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acb89f9e624e8c32185bc30467eaf07cd inherit pub_types_group__parde" id="r_acb89f9e624e8c32185bc30467eaf07cd"><td class="memItemLeft" align="right" valign="top">
-using&#160;</td><td class="memItemRight" valign="bottom"><b>PredMap</b> = boost::iterator_property_map&lt;std::vector&lt;Vertex&gt;<a class="el" href="class_p4_1_1safe__vector.html">::iterator</a>, IndexMap&gt;</td></tr>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>PredMap</b> = boost::iterator_property_map&lt;std::vector&lt;Vertex&gt;<a class="el" href="struct_iter_values.html">::iterator</a>, IndexMap&gt;</td></tr>
 <tr class="separator:acb89f9e624e8c32185bc30467eaf07cd inherit pub_types_group__parde"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa7806876db7773c0dbb947f4cc714e5a inherit pub_types_group__parde" id="r_aa7806876db7773c0dbb947f4cc714e5a"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa7806876db7773c0dbb947f4cc714e5a">StateImmediateDominatorMap</a></td></tr>
 <tr class="separator:aa7806876db7773c0dbb947f4cc714e5a inherit pub_types_group__parde"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -4362,7 +4642,7 @@ bool&#160;</td><td class="memItemRight" valign="bottom"><b>visitDagOnce</b> = tr
 </div><table class="memberdecls">
 <tr><td colspan="2"><h3>Public Member Functions</h3></td></tr>
 <tr class="memitem:ad095b561a156c37a0b04e2b66a031473" id="r_ad095b561a156c37a0b04e2b66a031473"><td class="memItemLeft" align="right" valign="top"><a id="ad095b561a156c37a0b04e2b66a031473" name="ad095b561a156c37a0b04e2b66a031473"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>HasFullMatchCoverage</b> (const std::vector&lt; match_t &gt; &amp;matches)</td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>HasFullMatchCoverage</b> (const std::vector&lt; <a class="el" href="structmatch__t.html">match_t</a> &gt; &amp;matches)</td></tr>
 <tr class="separator:ad095b561a156c37a0b04e2b66a031473"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr><td colspan="2"><h3>Public Attributes</h3></td></tr>
 <tr class="memitem:a4de319a3d7005c2274793412ed4fe67d" id="r_a4de319a3d7005c2274793412ed4fe67d"><td class="memItemLeft" align="right" valign="top"><a id="a4de319a3d7005c2274793412ed4fe67d" name="a4de319a3d7005c2274793412ed4fe67d"></a>
@@ -4994,6 +5274,251 @@ Inheritance diagram for PardeTransform:</div>
 
 </div>
 </div>
+<a name="class_parser" id="class_parser"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#class_parser">&#9670;&#160;</a></span>Parser</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">class Parser</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<div class="textblock"><p>Representation of the Tofino 1/2 parser in assembler. </p>
+</div><div class="dynheader">
+Inheritance diagram for Parser:</div>
+<div class="dyncontent">
+<div class="center"><iframe scrolling="no" frameborder="0" src="class_parser__inherit__graph.svg" width="236" height="183"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<center><span class="legend">[<a target="top" href="graph_legend.html">legend</a>]</span></center></div>
+<table class="memberdecls">
+<tr><td colspan="2"><h3>Public Member Functions</h3></td></tr>
+<tr class="memitem:abd87568f24c37d4139f3bc4af1595934" id="r_abd87568f24c37d4139f3bc4af1595934"><td class="memItemLeft" align="right" valign="top"><a id="abd87568f24c37d4139f3bc4af1595934" name="abd87568f24c37d4139f3bc4af1595934"></a>
+&#160;</td><td class="memItemRight" valign="bottom"><b>Parser</b> (<a class="el" href="class_p4_1_1bitvec.html">bitvec</a>(&amp;phv_use)[2], gress_t gr, int idx)</td></tr>
+<tr class="separator:abd87568f24c37d4139f3bc4af1595934"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abc0a7d3bada564ff20c801a07b23f04d" id="r_abc0a7d3bada564ff20c801a07b23f04d"><td class="memTemplParams" colspan="2"><a id="abc0a7d3bada564ff20c801a07b23f04d" name="abc0a7d3bada564ff20c801a07b23f04d"></a>
+template&lt;class REGS&gt; </td></tr>
+<tr class="memitem:abc0a7d3bada564ff20c801a07b23f04d"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>gen_configuration_cache</b> (REGS &amp;, <a class="el" href="classjson_1_1vector.html">json::vector</a> &amp;cfg_cache)</td></tr>
+<tr class="separator:abc0a7d3bada564ff20c801a07b23f04d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:adb2ccb0a0af6b8241aac23f8df1a3df5" id="r_adb2ccb0a0af6b8241aac23f8df1a3df5"><td class="memItemLeft" align="right" valign="top"><a id="adb2ccb0a0af6b8241aac23f8df1a3df5" name="adb2ccb0a0af6b8241aac23f8df1a3df5"></a>
+template&lt;&gt; </td></tr>
+<tr class="memitem:adb2ccb0a0af6b8241aac23f8df1a3df5"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>gen_configuration_cache</b> (<a class="el" href="struct_target_1_1_j_bay_1_1parser__regs.html">Target::JBay::parser_regs</a> &amp;regs, <a class="el" href="classjson_1_1vector.html">json::vector</a> &amp;cfg_cache)</td></tr>
+<tr class="separator:adb2ccb0a0af6b8241aac23f8df1a3df5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a395cb7b1e900767cf4857736c1e965e9" id="r_a395cb7b1e900767cf4857736c1e965e9"><td class="memItemLeft" align="right" valign="top"><a id="a395cb7b1e900767cf4857736c1e965e9" name="a395cb7b1e900767cf4857736c1e965e9"></a>
+template&lt;&gt; </td></tr>
+<tr class="memitem:a395cb7b1e900767cf4857736c1e965e9"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>gen_configuration_cache</b> (<a class="el" href="struct_target_1_1_tofino_1_1parser__regs.html">Target::Tofino::parser_regs</a> &amp;regs, <a class="el" href="classjson_1_1vector.html">json::vector</a> &amp;cfg_cache)</td></tr>
+<tr class="separator:a395cb7b1e900767cf4857736c1e965e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abb8fcbf0b9413e271142fc0db00708f5" id="r_abb8fcbf0b9413e271142fc0db00708f5"><td class="memItemLeft" align="right" valign="top"><a id="abb8fcbf0b9413e271142fc0db00708f5" name="abb8fcbf0b9413e271142fc0db00708f5"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>get_header_stack_size_from_valid_bits</b> (std::vector&lt; State::Match::Set * &gt; sets)</td></tr>
+<tr class="separator:abb8fcbf0b9413e271142fc0db00708f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab1926ccdee5c2d5336458cb664bfd3c5" id="r_ab1926ccdee5c2d5336458cb664bfd3c5"><td class="memItemLeft" align="right" valign="top"><a id="ab1926ccdee5c2d5336458cb664bfd3c5" name="ab1926ccdee5c2d5336458cb664bfd3c5"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>get_prsr_max_dph</b> ()</td></tr>
+<tr class="separator:ab1926ccdee5c2d5336458cb664bfd3c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1523a3df2dedc8aae224fdf9e2cacbcd" id="r_a1523a3df2dedc8aae224fdf9e2cacbcd"><td class="memItemLeft" align="right" valign="top"><a id="a1523a3df2dedc8aae224fdf9e2cacbcd" name="a1523a3df2dedc8aae224fdf9e2cacbcd"></a>
+State *&#160;</td><td class="memItemRight" valign="bottom"><b>get_start_state</b> ()</td></tr>
+<tr class="separator:a1523a3df2dedc8aae224fdf9e2cacbcd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa2bf3604012ec5dfb31f06b454f49f55" id="r_aa2bf3604012ec5dfb31f06b454f49f55"><td class="memItemLeft" align="right" valign="top"><a id="aa2bf3604012ec5dfb31f06b454f49f55" name="aa2bf3604012ec5dfb31f06b454f49f55"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>input</b> (VECTOR(<a class="el" href="structvalue__t.html">value_t</a>) args, <a class="el" href="structvalue__t.html">value_t</a> data)</td></tr>
+<tr class="separator:aa2bf3604012ec5dfb31f06b454f49f55"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2d3f806a208ff7cee7d1e2510ce78300" id="r_a2d3f806a208ff7cee7d1e2510ce78300"><td class="memItemLeft" align="right" valign="top"><a id="a2d3f806a208ff7cee7d1e2510ce78300" name="a2d3f806a208ff7cee7d1e2510ce78300"></a>
+template&lt;&gt; </td></tr>
+<tr class="memitem:a2d3f806a208ff7cee7d1e2510ce78300"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>mark_unused_output_map</b> (<a class="el" href="struct_target_1_1_j_bay_1_1parser__regs.html">Target::JBay::parser_regs</a> &amp;, void *, unsigned)</td></tr>
+<tr class="separator:a2d3f806a208ff7cee7d1e2510ce78300"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab4239fe196093689400e1de26902feac" id="r_ab4239fe196093689400e1de26902feac"><td class="memItemLeft" align="right" valign="top"><a id="ab4239fe196093689400e1de26902feac" name="ab4239fe196093689400e1de26902feac"></a>
+template&lt;&gt; </td></tr>
+<tr class="memitem:ab4239fe196093689400e1de26902feac"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>mark_unused_output_map</b> (<a class="el" href="struct_target_1_1_tofino_1_1parser__regs.html">Target::Tofino::parser_regs</a> &amp;regs, void *_map, unsigned used)</td></tr>
+<tr class="separator:ab4239fe196093689400e1de26902feac"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad9f66ff56ea328a5dbd0dd8c289f4aa9" id="r_ad9f66ff56ea328a5dbd0dd8c289f4aa9"><td class="memItemLeft" align="right" valign="top"><a id="ad9f66ff56ea328a5dbd0dd8c289f4aa9" name="ad9f66ff56ea328a5dbd0dd8c289f4aa9"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>output</b> (<a class="el" href="classjson_1_1map.html">json::map</a> &amp;) override</td></tr>
+<tr class="separator:ad9f66ff56ea328a5dbd0dd8c289f4aa9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aefe6ff866dd69b1eff96b80c5de5ccd8" id="r_aefe6ff866dd69b1eff96b80c5de5ccd8"><td class="memItemLeft" align="right" valign="top"><a id="aefe6ff866dd69b1eff96b80c5de5ccd8" name="aefe6ff866dd69b1eff96b80c5de5ccd8"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>output_legacy</b> (<a class="el" href="classjson_1_1map.html">json::map</a> &amp;)</td></tr>
+<tr class="separator:aefe6ff866dd69b1eff96b80c5de5ccd8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa9b3f0d57af4a73412053add679ebf1b" id="r_aa9b3f0d57af4a73412053add679ebf1b"><td class="memItemLeft" align="right" valign="top"><a id="aa9b3f0d57af4a73412053add679ebf1b" name="aa9b3f0d57af4a73412053add679ebf1b"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>print_all_paths</b> ()</td></tr>
+<tr class="separator:aa9b3f0d57af4a73412053add679ebf1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a538975aff390d97afb3153a6d8ef2c0a" id="r_a538975aff390d97afb3153a6d8ef2c0a"><td class="memItemLeft" align="right" valign="top"><a id="a538975aff390d97afb3153a6d8ef2c0a" name="a538975aff390d97afb3153a6d8ef2c0a"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>process</b> ()</td></tr>
+<tr class="separator:a538975aff390d97afb3153a6d8ef2c0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a73280d3237d5fd0c9c4bdd3b429824e0" id="r_a73280d3237d5fd0c9c4bdd3b429824e0"><td class="memTemplParams" colspan="2"><a id="a73280d3237d5fd0c9c4bdd3b429824e0" name="a73280d3237d5fd0c9c4bdd3b429824e0"></a>
+template&lt;class REGS&gt; </td></tr>
+<tr class="memitem:a73280d3237d5fd0c9c4bdd3b429824e0"><td class="memTemplItemLeft" align="right" valign="top">void *&#160;</td><td class="memTemplItemRight" valign="bottom"><b>setup_phv_output_map</b> (REGS &amp;, gress_t, int)</td></tr>
+<tr class="separator:a73280d3237d5fd0c9c4bdd3b429824e0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ada20286c7b2659177d8b5b2d2e2b4732" id="r_ada20286c7b2659177d8b5b2d2e2b4732"><td class="memItemLeft" align="right" valign="top"><a id="ada20286c7b2659177d8b5b2d2e2b4732" name="ada20286c7b2659177d8b5b2d2e2b4732"></a>
+template&lt;&gt; </td></tr>
+<tr class="memitem:ada20286c7b2659177d8b5b2d2e2b4732"><td class="memTemplItemLeft" align="right" valign="top">void *&#160;</td><td class="memTemplItemRight" valign="bottom"><b>setup_phv_output_map</b> (<a class="el" href="struct_target_1_1_j_bay_1_1parser__regs.html">Target::JBay::parser_regs</a> &amp;regs, gress_t gress, int row)</td></tr>
+<tr class="separator:ada20286c7b2659177d8b5b2d2e2b4732"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a00387b18d9ce719377a3eabe6a7dd94b" id="r_a00387b18d9ce719377a3eabe6a7dd94b"><td class="memItemLeft" align="right" valign="top"><a id="a00387b18d9ce719377a3eabe6a7dd94b" name="a00387b18d9ce719377a3eabe6a7dd94b"></a>
+template&lt;&gt; </td></tr>
+<tr class="memitem:a00387b18d9ce719377a3eabe6a7dd94b"><td class="memTemplItemLeft" align="right" valign="top">void *&#160;</td><td class="memTemplItemRight" valign="bottom"><b>setup_phv_output_map</b> (<a class="el" href="struct_target_1_1_tofino_1_1parser__regs.html">Target::Tofino::parser_regs</a> &amp;regs, gress_t gress, int row)</td></tr>
+<tr class="separator:a00387b18d9ce719377a3eabe6a7dd94b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9b8315ce10e32ac48a49dd1a2a1a9b4" id="r_ae9b8315ce10e32ac48a49dd1a2a1a9b4"><td class="memItemLeft" align="right" valign="top"><a id="ae9b8315ce10e32ac48a49dd1a2a1a9b4" name="ae9b8315ce10e32ac48a49dd1a2a1a9b4"></a>
+template&lt;&gt; </td></tr>
+<tr class="memitem:ae9b8315ce10e32ac48a49dd1a2a1a9b4"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><b>write_config</b> (<a class="el" href="struct_target_1_1_j_bay_1_1parser__regs.html">Target::JBay::parser_regs</a> &amp;regs, <a class="el" href="classjson_1_1map.html">json::map</a> &amp;ctxt_json, bool single_parser)</td></tr>
+<tr class="separator:ae9b8315ce10e32ac48a49dd1a2a1a9b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7eae89259e4d6058ddd111968460bb1b" id="r_a7eae89259e4d6058ddd111968460bb1b"><td class="memItemLeft" align="right" valign="top">template&lt;&gt; </td></tr>
+<tr class="memitem:a7eae89259e4d6058ddd111968460bb1b"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a7eae89259e4d6058ddd111968460bb1b">write_config</a> (<a class="el" href="struct_target_1_1_tofino_1_1parser__regs.html">Target::Tofino::parser_regs</a> &amp;regs, <a class="el" href="classjson_1_1map.html">json::map</a> &amp;ctxt_json, bool single_parser)</td></tr>
+<tr class="separator:a7eae89259e4d6058ddd111968460bb1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><h3>Static Public Member Functions</h3></td></tr>
+<tr class="memitem:ad42959fd3c362aa6aa51e8c86449a857" id="r_ad42959fd3c362aa6aa51e8c86449a857"><td class="memItemLeft" align="right" valign="top"><a id="ad42959fd3c362aa6aa51e8c86449a857" name="ad42959fd3c362aa6aa51e8c86449a857"></a>
+static int&#160;</td><td class="memItemRight" valign="bottom"><b>clot_maxlen</b> (gress_t gress, std::string tag)</td></tr>
+<tr class="separator:ad42959fd3c362aa6aa51e8c86449a857"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3f3ffddc8c80e8c04e633615132e3310" id="r_a3f3ffddc8c80e8c04e633615132e3310"><td class="memItemLeft" align="right" valign="top"><a id="a3f3ffddc8c80e8c04e633615132e3310" name="a3f3ffddc8c80e8c04e633615132e3310"></a>
+static int&#160;</td><td class="memItemRight" valign="bottom"><b>clot_maxlen</b> (gress_t gress, unsigned tag)</td></tr>
+<tr class="separator:a3f3ffddc8c80e8c04e633615132e3310"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a54c3ca86b76625e78a9c235f778099e6" id="r_a54c3ca86b76625e78a9c235f778099e6"><td class="memItemLeft" align="right" valign="top"><a id="a54c3ca86b76625e78a9c235f778099e6" name="a54c3ca86b76625e78a9c235f778099e6"></a>
+static int&#160;</td><td class="memItemRight" valign="bottom"><b>clot_tag</b> (gress_t gress, std::string tag)</td></tr>
+<tr class="separator:a54c3ca86b76625e78a9c235f778099e6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a218325e8f3fbe53fafbdef4861303a52" id="r_a218325e8f3fbe53fafbdef4861303a52"><td class="memItemLeft" align="right" valign="top"><a id="a218325e8f3fbe53fafbdef4861303a52" name="a218325e8f3fbe53fafbdef4861303a52"></a>
+static unsigned&#160;</td><td class="memItemRight" valign="bottom"><b>get_parser_handle</b> (std::string phase0Table)</td></tr>
+<tr class="separator:a218325e8f3fbe53fafbdef4861303a52"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4042b9064d8fb4c0f1fd0b8cfb12d50a" id="r_a4042b9064d8fb4c0f1fd0b8cfb12d50a"><td class="memItemLeft" align="right" valign="top"><a id="a4042b9064d8fb4c0f1fd0b8cfb12d50a" name="a4042b9064d8fb4c0f1fd0b8cfb12d50a"></a>
+static int&#160;</td><td class="memItemRight" valign="bottom"><b>match_key_loc</b> (const char *key)</td></tr>
+<tr class="separator:a4042b9064d8fb4c0f1fd0b8cfb12d50a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac2de39f7d0a5e3dbf1470754c386be69" id="r_ac2de39f7d0a5e3dbf1470754c386be69"><td class="memItemLeft" align="right" valign="top"><a id="ac2de39f7d0a5e3dbf1470754c386be69" name="ac2de39f7d0a5e3dbf1470754c386be69"></a>
+static int&#160;</td><td class="memItemRight" valign="bottom"><b>match_key_loc</b> (<a class="el" href="structvalue__t.html">value_t</a> &amp;key, bool errchk=true)</td></tr>
+<tr class="separator:ac2de39f7d0a5e3dbf1470754c386be69"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4cddb6c8ea3c7a0f9e2a69b9a5d7b3bb" id="r_a4cddb6c8ea3c7a0f9e2a69b9a5d7b3bb"><td class="memItemLeft" align="right" valign="top"><a id="a4cddb6c8ea3c7a0f9e2a69b9a5d7b3bb" name="a4cddb6c8ea3c7a0f9e2a69b9a5d7b3bb"></a>
+static const char *&#160;</td><td class="memItemRight" valign="bottom"><b>match_key_loc_name</b> (int loc)</td></tr>
+<tr class="separator:a4cddb6c8ea3c7a0f9e2a69b9a5d7b3bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a748a32dc58f5fbe9bbe9a441d93a52fe" id="r_a748a32dc58f5fbe9bbe9a441d93a52fe"><td class="memItemLeft" align="right" valign="top"><a id="a748a32dc58f5fbe9bbe9a441d93a52fe" name="a748a32dc58f5fbe9bbe9a441d93a52fe"></a>
+static int&#160;</td><td class="memItemRight" valign="bottom"><b>match_key_size</b> (const char *key)</td></tr>
+<tr class="separator:a748a32dc58f5fbe9bbe9a441d93a52fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa57489471755265c6cc0dc6c64bff896" id="r_aa57489471755265c6cc0dc6c64bff896"><td class="memItemLeft" align="right" valign="top"><a id="aa57489471755265c6cc0dc6c64bff896" name="aa57489471755265c6cc0dc6c64bff896"></a>
+static unsigned&#160;</td><td class="memItemRight" valign="bottom"><b>next_handle</b> ()</td></tr>
+<tr class="separator:aa57489471755265c6cc0dc6c64bff896"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><h3>Public Attributes</h3></td></tr>
+<tr class="memitem:a5d13f35e85acdd162715c56c4dc162a8" id="r_a5d13f35e85acdd162715c56c4dc162a8"><td class="memItemLeft" align="right" valign="top"><a id="a5d13f35e85acdd162715c56c4dc162a8" name="a5d13f35e85acdd162715c56c4dc162a8"></a>
+std::vector&lt; State * &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>all</b></td></tr>
+<tr class="separator:a5d13f35e85acdd162715c56c4dc162a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a650d3eea42e071c81d765ff11e2ca45b" id="r_a650d3eea42e071c81d765ff11e2ca45b"><td class="memItemLeft" align="right" valign="top"><a id="a650d3eea42e071c81d765ff11e2ca45b" name="a650d3eea42e071c81d765ff11e2ca45b"></a>
+std::vector&lt; std::array&lt; Checksum *, PARSER_CHECKSUM_ROWS &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>checksum_use</b></td></tr>
+<tr class="separator:a650d3eea42e071c81d765ff11e2ca45b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6e8ac1a9a9e283cd7ced6e78664cd66b" id="r_a6e8ac1a9a9e283cd7ced6e78664cd66b"><td class="memItemLeft" align="right" valign="top"><a id="a6e8ac1a9a9e283cd7ced6e78664cd66b" name="a6e8ac1a9a9e283cd7ced6e78664cd66b"></a>
+std::array&lt; CounterInit *, PARSER_CTRINIT_ROWS &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>counter_init</b> = {}</td></tr>
+<tr class="separator:a6e8ac1a9a9e283cd7ced6e78664cd66b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab9f0f2e0a1d4c997f5386910cb216b4b" id="r_ab9f0f2e0a1d4c997f5386910cb216b4b"><td class="memItemLeft" align="right" valign="top"><a id="ab9f0f2e0a1d4c997f5386910cb216b4b" name="ab9f0f2e0a1d4c997f5386910cb216b4b"></a>
+std::vector&lt; <a class="el" href="class_phv_1_1_ref.html">Phv::Ref</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>ghost_parser</b></td></tr>
+<tr class="separator:ab9f0f2e0a1d4c997f5386910cb216b4b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9b417758c122ef64fd63cc39921fd574" id="r_a9b417758c122ef64fd63cc39921fd574"><td class="memItemLeft" align="right" valign="top"><a id="a9b417758c122ef64fd63cc39921fd574" name="a9b417758c122ef64fd63cc39921fd574"></a>
+unsigned&#160;</td><td class="memItemRight" valign="bottom"><b>ghost_pipe_mask</b> = 0xf</td></tr>
+<tr class="separator:a9b417758c122ef64fd63cc39921fd574"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aeaceb6ef62c2b9e579a77a7408686a52" id="r_aeaceb6ef62c2b9e579a77a7408686a52"><td class="memItemLeft" align="right" valign="top"><a id="aeaceb6ef62c2b9e579a77a7408686a52" name="aeaceb6ef62c2b9e579a77a7408686a52"></a>
+gress_t&#160;</td><td class="memItemRight" valign="bottom"><b>gress</b></td></tr>
+<tr class="separator:aeaceb6ef62c2b9e579a77a7408686a52"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb7378adcb9b06f30c9fabd77f4a5cb7" id="r_afb7378adcb9b06f30c9fabd77f4a5cb7"><td class="memItemLeft" align="right" valign="top"><a id="afb7378adcb9b06f30c9fabd77f4a5cb7" name="afb7378adcb9b06f30c9fabd77f4a5cb7"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>hdr_len_adj</b> = 0</td></tr>
+<tr class="separator:afb7378adcb9b06f30c9fabd77f4a5cb7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8088a2f9c1888f84e8de54922e537244" id="r_a8088a2f9c1888f84e8de54922e537244"><td class="memItemLeft" align="right" valign="top"><a id="a8088a2f9c1888f84e8de54922e537244" name="a8088a2f9c1888f84e8de54922e537244"></a>
+std::map&lt; State::Match *, int &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>match_to_row</b></td></tr>
+<tr class="separator:a8088a2f9c1888f84e8de54922e537244"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa8b89e3a6feddd470e510f7d81862799" id="r_aa8b89e3a6feddd470e510f7d81862799"><td class="memItemLeft" align="right" valign="top"><a id="aa8b89e3a6feddd470e510f7d81862799" name="aa8b89e3a6feddd470e510f7d81862799"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>meta_opt</b> = 0</td></tr>
+<tr class="separator:aa8b89e3a6feddd470e510f7d81862799"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8be422eb29a8a39366bb76dbafa2f34c" id="r_a8be422eb29a8a39366bb76dbafa2f34c"><td class="memItemLeft" align="right" valign="top"><a id="a8be422eb29a8a39366bb76dbafa2f34c" name="a8be422eb29a8a39366bb76dbafa2f34c"></a>
+std::string&#160;</td><td class="memItemRight" valign="bottom"><b>name</b></td></tr>
+<tr class="separator:a8be422eb29a8a39366bb76dbafa2f34c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0684723acf32a3cb568114953676c61e" id="r_a0684723acf32a3cb568114953676c61e"><td class="memItemLeft" align="right" valign="top"><a id="a0684723acf32a3cb568114953676c61e" name="a0684723acf32a3cb568114953676c61e"></a>
+<a class="el" href="class_phv_1_1_ref.html">Phv::Ref</a>&#160;</td><td class="memItemRight" valign="bottom"><b>parser_error</b></td></tr>
+<tr class="separator:a0684723acf32a3cb568114953676c61e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a75d8857d6bd4ee9e454e79f69a3f4b20" id="r_a75d8857d6bd4ee9e454e79f69a3f4b20"><td class="memItemLeft" align="right" valign="top"><a id="a75d8857d6bd4ee9e454e79f69a3f4b20" name="a75d8857d6bd4ee9e454e79f69a3f4b20"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>parser_handle</b> = -1</td></tr>
+<tr class="separator:a75d8857d6bd4ee9e454e79f69a3f4b20"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:affd608dd2e69f82edbd8cdcfff169043" id="r_affd608dd2e69f82edbd8cdcfff169043"><td class="memItemLeft" align="right" valign="top"><a id="affd608dd2e69f82edbd8cdcfff169043" name="affd608dd2e69f82edbd8cdcfff169043"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>parser_no</b></td></tr>
+<tr class="separator:affd608dd2e69f82edbd8cdcfff169043"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae6551e6a8cb44d53103fe13318547500" id="r_ae6551e6a8cb44d53103fe13318547500"><td class="memItemLeft" align="right" valign="top"><a id="ae6551e6a8cb44d53103fe13318547500" name="ae6551e6a8cb44d53103fe13318547500"></a>
+<a class="el" href="class_p4_1_1bitvec.html">bitvec</a>&#160;</td><td class="memItemRight" valign="bottom"><b>phv_allow_bitwise_or</b></td></tr>
+<tr class="separator:ae6551e6a8cb44d53103fe13318547500"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa54b818fdbe1cb7eab37edd60db813a8" id="r_aa54b818fdbe1cb7eab37edd60db813a8"><td class="memItemLeft" align="right" valign="top"><a id="aa54b818fdbe1cb7eab37edd60db813a8" name="aa54b818fdbe1cb7eab37edd60db813a8"></a>
+<a class="el" href="class_p4_1_1bitvec.html">bitvec</a>&#160;</td><td class="memItemRight" valign="bottom"><b>phv_allow_clear_on_write</b></td></tr>
+<tr class="separator:aa54b818fdbe1cb7eab37edd60db813a8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6f74cccbc04e567969d468c2e0b833af" id="r_a6f74cccbc04e567969d468c2e0b833af"><td class="memItemLeft" align="right" valign="top"><a id="a6f74cccbc04e567969d468c2e0b833af" name="a6f74cccbc04e567969d468c2e0b833af"></a>
+<a class="el" href="class_p4_1_1bitvec.html">bitvec</a>&#160;</td><td class="memItemRight" valign="bottom"><b>phv_init_valid</b></td></tr>
+<tr class="separator:a6f74cccbc04e567969d468c2e0b833af"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae299e265c74ce0cf5ca51f52364fec11" id="r_ae299e265c74ce0cf5ca51f52364fec11"><td class="memItemLeft" align="right" valign="top"><a id="ae299e265c74ce0cf5ca51f52364fec11" name="ae299e265c74ce0cf5ca51f52364fec11"></a>
+<a class="el" href="class_p4_1_1bitvec.html">bitvec</a>(&amp;&#160;</td><td class="memItemRight" valign="bottom"><b>phv_use</b> )[2]</td></tr>
+<tr class="separator:ae299e265c74ce0cf5ca51f52364fec11"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a54f725ed0d24845924a7de7e54f724cf" id="r_a54f725ed0d24845924a7de7e54f724cf"><td class="memItemLeft" align="right" valign="top"><a id="a54f725ed0d24845924a7de7e54f724cf" name="a54f725ed0d24845924a7de7e54f724cf"></a>
+<a class="el" href="class_p4_1_1bitvec.html">bitvec</a>&#160;</td><td class="memItemRight" valign="bottom"><b>port_use</b></td></tr>
+<tr class="separator:a54f725ed0d24845924a7de7e54f724cf"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af4253104c0fa2448500d56269c3ccc3b" id="r_af4253104c0fa2448500d56269c3ccc3b"><td class="memItemLeft" align="right" valign="top"><a id="af4253104c0fa2448500d56269c3ccc3b" name="af4253104c0fa2448500d56269c3ccc3b"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>pri_thresh</b> [4] = {0, 0, 0, 0}</td></tr>
+<tr class="separator:af4253104c0fa2448500d56269c3ccc3b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3598bfac98529f6bda8ba479ef94388a" id="r_a3598bfac98529f6bda8ba479ef94388a"><td class="memItemLeft" align="right" valign="top"><a id="a3598bfac98529f6bda8ba479ef94388a" name="a3598bfac98529f6bda8ba479ef94388a"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>priority</b> [4] = {0}</td></tr>
+<tr class="separator:a3598bfac98529f6bda8ba479ef94388a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6382377e9f4a7708d12c9bfac0fd9e71" id="r_a6382377e9f4a7708d12c9bfac0fd9e71"><td class="memItemLeft" align="right" valign="top"><a id="a6382377e9f4a7708d12c9bfac0fd9e71" name="a6382377e9f4a7708d12c9bfac0fd9e71"></a>
+RateLimit&#160;</td><td class="memItemRight" valign="bottom"><b>rate_limit</b></td></tr>
+<tr class="separator:a6382377e9f4a7708d12c9bfac0fd9e71"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a56577af7f36044c97284c72dff7854c8" id="r_a56577af7f36044c97284c72dff7854c8"><td class="memItemLeft" align="right" valign="top"><a id="a56577af7f36044c97284c72dff7854c8" name="a56577af7f36044c97284c72dff7854c8"></a>
+<a class="el" href="struct_parser_1_1_state_1_1_ref.html">State::Ref</a>&#160;</td><td class="memItemRight" valign="bottom"><b>start_state</b> [4]</td></tr>
+<tr class="separator:a56577af7f36044c97284c72dff7854c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab9e40f6dac6330eff425f58d417e8b3d" id="r_ab9e40f6dac6330eff425f58d417e8b3d"><td class="memItemLeft" align="right" valign="top"><a id="ab9e40f6dac6330eff425f58d417e8b3d" name="ab9e40f6dac6330eff425f58d417e8b3d"></a>
+<a class="el" href="class_p4_1_1bitvec.html">bitvec</a>&#160;</td><td class="memItemRight" valign="bottom"><b>state_use</b></td></tr>
+<tr class="separator:ab9e40f6dac6330eff425f58d417e8b3d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a9329055439fa19ea3a44c31555b77979" id="r_a9329055439fa19ea3a44c31555b77979"><td class="memItemLeft" align="right" valign="top"><a id="a9329055439fa19ea3a44c31555b77979" name="a9329055439fa19ea3a44c31555b77979"></a>
+std::map&lt; std::string, State * &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>states</b></td></tr>
+<tr class="separator:a9329055439fa19ea3a44c31555b77979"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a572e4ca204c96ea1327ebcb0b7f263d5" id="r_a572e4ca204c96ea1327ebcb0b7f263d5"><td class="memItemLeft" align="right" valign="top"><a id="a572e4ca204c96ea1327ebcb0b7f263d5" name="a572e4ca204c96ea1327ebcb0b7f263d5"></a>
+int&#160;</td><td class="memItemRight" valign="bottom"><b>tcam_row_use</b> = 0</td></tr>
+<tr class="separator:a572e4ca204c96ea1327ebcb0b7f263d5"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr><td colspan="2"><h3>Static Public Attributes</h3></td></tr>
+<tr class="memitem:a0051fc29e56025f1fef1a4ca3fe61b39" id="r_a0051fc29e56025f1fef1a4ca3fe61b39"><td class="memItemLeft" align="right" valign="top"><a id="a0051fc29e56025f1fef1a4ca3fe61b39" name="a0051fc29e56025f1fef1a4ca3fe61b39"></a>
+static std::array&lt; std::vector&lt; State::Match::Clot * &gt;, PARSER_MAX_CLOTS &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>clot_use</b></td></tr>
+<tr class="separator:a0051fc29e56025f1fef1a4ca3fe61b39"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abc5dbcb22927839254daf79af9676006" id="r_abc5dbcb22927839254daf79af9676006"><td class="memItemLeft" align="right" valign="top"><a id="abc5dbcb22927839254daf79af9676006" name="abc5dbcb22927839254daf79af9676006"></a>
+static std::map&lt; gress_t, std::map&lt; std::string, std::vector&lt; State::Match::Clot * &gt; &gt; &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>clots</b></td></tr>
+<tr class="separator:abc5dbcb22927839254daf79af9676006"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a47925dc630d83fe932f681ea182aec9a" id="r_a47925dc630d83fe932f681ea182aec9a"><td class="memItemLeft" align="right" valign="top"><a id="a47925dc630d83fe932f681ea182aec9a" name="a47925dc630d83fe932f681ea182aec9a"></a>
+static unsigned&#160;</td><td class="memItemRight" valign="bottom"><b>max_handle</b> = 0</td></tr>
+<tr class="separator:a47925dc630d83fe932f681ea182aec9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a356c6a5228fa40b13618653d72ad0f85" id="r_a356c6a5228fa40b13618653d72ad0f85"><td class="memItemLeft" align="right" valign="top"><a id="a356c6a5228fa40b13618653d72ad0f85" name="a356c6a5228fa40b13618653d72ad0f85"></a>
+static std::map&lt; std::string, unsigned &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>parser_handles</b></td></tr>
+<tr class="separator:a356c6a5228fa40b13618653d72ad0f85"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
+Additional Inherited Members</h2></td></tr>
+<tr class="inherit_header pro_attribs_class_base_parser"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_attribs_class_base_parser')"><img src="closed.png" alt="-"/>&#160;Protected Attributes inherited from <a class="el" href="class_base_parser.html">BaseParser</a></td></tr>
+<tr class="memitem:ae54979954472dd8d67d46834e5ba2d66 inherit pro_attribs_class_base_parser" id="r_ae54979954472dd8d67d46834e5ba2d66"><td class="memItemLeft" align="right" valign="top">
+int&#160;</td><td class="memItemRight" valign="bottom"><b>lineno</b> = -1</td></tr>
+<tr class="separator:ae54979954472dd8d67d46834e5ba2d66 inherit pro_attribs_class_base_parser"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h4 class="groupheader">Member Function Documentation</h4>
+<a id="a7eae89259e4d6058ddd111968460bb1b" name="a7eae89259e4d6058ddd111968460bb1b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7eae89259e4d6058ddd111968460bb1b">&#9670;&#160;</a></span>write_config()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;&gt; </div>
+      <table class="memname">
+        <tr>
+          <td class="memname">void Parser::write_config </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_target_1_1_tofino_1_1parser__regs.html">Target::Tofino::parser_regs</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>regs</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="classjson_1_1map.html">json::map</a> &amp;</td>          <td class="paramname"><span class="paramname"><em>ctxt_json</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool</td>          <td class="paramname"><span class="paramname"><em>single_parser</em></span>&#160;)</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>remove after 8.7 release</p>
+<p>TODO remove after 8.7 release TODO Needs fix to simple test harness for parsers node support</p>
+<p>TODO remove after 8.7 release</p>
+
+</div>
+</div>
+
+</div>
+</div>
 <a name="struct_parser_asm_output" id="struct_parser_asm_output"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#struct_parser_asm_output">&#9670;&#160;</a></span>ParserAsmOutput</h2>
 
@@ -5054,7 +5579,7 @@ using&#160;</td><td class="memItemRight" valign="bottom"><b>IndexImmediateDomina
 using&#160;</td><td class="memItemRight" valign="bottom"><b>IndexMap</b> = boost::property_map&lt;Graph, boost::vertex_index_t&gt;::type</td></tr>
 <tr class="separator:a2baa2c04243a3f0aeb760d2ae14308a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acb89f9e624e8c32185bc30467eaf07cd" id="r_acb89f9e624e8c32185bc30467eaf07cd"><td class="memItemLeft" align="right" valign="top"><a id="acb89f9e624e8c32185bc30467eaf07cd" name="acb89f9e624e8c32185bc30467eaf07cd"></a>
-using&#160;</td><td class="memItemRight" valign="bottom"><b>PredMap</b> = boost::iterator_property_map&lt;std::vector&lt;Vertex&gt;<a class="el" href="class_p4_1_1safe__vector.html">::iterator</a>, IndexMap&gt;</td></tr>
+using&#160;</td><td class="memItemRight" valign="bottom"><b>PredMap</b> = boost::iterator_property_map&lt;std::vector&lt;Vertex&gt;<a class="el" href="struct_iter_values.html">::iterator</a>, IndexMap&gt;</td></tr>
 <tr class="separator:acb89f9e624e8c32185bc30467eaf07cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa7806876db7773c0dbb947f4cc714e5a" id="r_aa7806876db7773c0dbb947f4cc714e5a"><td class="memItemLeft" align="right" valign="top">using&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa7806876db7773c0dbb947f4cc714e5a">StateImmediateDominatorMap</a></td></tr>
 <tr class="separator:aa7806876db7773c0dbb947f4cc714e5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -5312,7 +5837,7 @@ std::set&lt; const IR::BFN::ParserState * &gt;&#160;</td><td class="memItemRight
         </tr>
       </table>
 </div><div class="memdoc">
-<div class="textblock"><div class="compoundTemplParams">template&lt;class Parser, class State, class Transition&gt;<br />
+<div class="textblock"><div class="compoundTemplParams">template&lt;class <a class="el" href="#class_parser">Parser</a>, class State, class Transition&gt;<br />
 class ParserGraphImpl&lt; Parser, State, Transition &gt;</div></div><div class="dynheader">
 Inheritance diagram for ParserGraphImpl&lt; Parser, State, Transition &gt;:</div>
 <div class="dyncontent">
@@ -5321,7 +5846,7 @@ Inheritance diagram for ParserGraphImpl&lt; Parser, State, Transition &gt;:</div
 <table class="memberdecls">
 <tr><td colspan="2"><h3>Public Member Functions</h3></td></tr>
 <tr class="memitem:a1c91b9f74c70bc41e50e46b426bfaf7e" id="r_a1c91b9f74c70bc41e50e46b426bfaf7e"><td class="memItemLeft" align="right" valign="top"><a id="a1c91b9f74c70bc41e50e46b426bfaf7e" name="a1c91b9f74c70bc41e50e46b426bfaf7e"></a>
-&#160;</td><td class="memItemRight" valign="bottom"><b>ParserGraphImpl</b> (const Parser *parser)</td></tr>
+&#160;</td><td class="memItemRight" valign="bottom"><b>ParserGraphImpl</b> (const <a class="el" href="#class_parser">Parser</a> *parser)</td></tr>
 <tr class="separator:a1c91b9f74c70bc41e50e46b426bfaf7e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ada656294dd5d25bae28a3e55c7bf8098" id="r_ada656294dd5d25bae28a3e55c7bf8098"><td class="memItemLeft" align="right" valign="top"><a id="ada656294dd5d25bae28a3e55c7bf8098" name="ada656294dd5d25bae28a3e55c7bf8098"></a>
 <a class="el" href="class_p4_1_1ordered__set.html">ordered_set</a>&lt; const State * &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>get_all_descendants</b> (const State *src) const</td></tr>
@@ -5440,13 +5965,13 @@ template&lt;class P, class S, class T&gt; </td></tr>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class Parser, class State, class Transition&gt; </div>
+template&lt;class <a class="el" href="#class_parser">Parser</a>, class State, class Transition&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">bool <a class="el" href="#class_parser_graph_impl">ParserGraphImpl</a>&lt; Parser, State, Transition &gt;::is_ancestor </td>
+          <td class="memname">bool <a class="el" href="#class_parser_graph_impl">ParserGraphImpl</a>&lt; <a class="el" href="#class_parser">Parser</a>, State, Transition &gt;::is_ancestor </td>
           <td>(</td>
           <td class="paramtype">const State *</td>          <td class="paramname"><span class="paramname"><em>src</em></span>, </td>
         </tr>
@@ -5474,13 +5999,13 @@ template&lt;class Parser, class State, class Transition&gt; </div>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class Parser, class State, class Transition&gt; </div>
+template&lt;class <a class="el" href="#class_parser">Parser</a>, class State, class Transition&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">bool <a class="el" href="#class_parser_graph_impl">ParserGraphImpl</a>&lt; Parser, State, Transition &gt;::is_dominated_by_set </td>
+          <td class="memname">bool <a class="el" href="#class_parser_graph_impl">ParserGraphImpl</a>&lt; <a class="el" href="#class_parser">Parser</a>, State, Transition &gt;::is_dominated_by_set </td>
           <td>(</td>
           <td class="paramtype">const State *</td>          <td class="paramname"><span class="paramname"><em>s</em></span>, </td>
         </tr>
@@ -5506,13 +6031,13 @@ template&lt;class Parser, class State, class Transition&gt; </div>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class Parser, class State, class Transition&gt; </div>
+template&lt;class <a class="el" href="#class_parser">Parser</a>, class State, class Transition&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">std::pair&lt; const State *, const State * &gt; <a class="el" href="#class_parser_graph_impl">ParserGraphImpl</a>&lt; Parser, State, Transition &gt;::is_loopback_reassignment </td>
+          <td class="memname">std::pair&lt; const State *, const State * &gt; <a class="el" href="#class_parser_graph_impl">ParserGraphImpl</a>&lt; <a class="el" href="#class_parser">Parser</a>, State, Transition &gt;::is_loopback_reassignment </td>
           <td>(</td>
           <td class="paramtype">const State *</td>          <td class="paramname"><span class="paramname"><em>s</em></span>, </td>
         </tr>
@@ -5541,13 +6066,13 @@ template&lt;class Parser, class State, class Transition&gt; </div>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class Parser, class State, class Transition&gt; </div>
+template&lt;class <a class="el" href="#class_parser">Parser</a>, class State, class Transition&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">bool <a class="el" href="#class_parser_graph_impl">ParserGraphImpl</a>&lt; Parser, State, Transition &gt;::is_mutex </td>
+          <td class="memname">bool <a class="el" href="#class_parser_graph_impl">ParserGraphImpl</a>&lt; <a class="el" href="#class_parser">Parser</a>, State, Transition &gt;::is_mutex </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="class_p4_1_1ordered__set.html">ordered_set</a>&lt; const State * &gt; &amp;</td>          <td class="paramname"><span class="paramname"><em>states</em></span></td><td>)</td>
           <td> const</td>
@@ -5569,13 +6094,13 @@ template&lt;class Parser, class State, class Transition&gt; </div>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class Parser, class State, class Transition&gt; </div>
+template&lt;class <a class="el" href="#class_parser">Parser</a>, class State, class Transition&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">bool <a class="el" href="#class_parser_graph_impl">ParserGraphImpl</a>&lt; Parser, State, Transition &gt;::is_mutex </td>
+          <td class="memname">bool <a class="el" href="#class_parser_graph_impl">ParserGraphImpl</a>&lt; <a class="el" href="#class_parser">Parser</a>, State, Transition &gt;::is_mutex </td>
           <td>(</td>
           <td class="paramtype">const State *</td>          <td class="paramname"><span class="paramname"><em>a</em></span>, </td>
         </tr>
@@ -5601,13 +6126,13 @@ template&lt;class Parser, class State, class Transition&gt; </div>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class Parser, class State, class Transition&gt; </div>
+template&lt;class <a class="el" href="#class_parser">Parser</a>, class State, class Transition&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">bool <a class="el" href="#class_parser_graph_impl">ParserGraphImpl</a>&lt; Parser, State, Transition &gt;::is_postdominated_by_set </td>
+          <td class="memname">bool <a class="el" href="#class_parser_graph_impl">ParserGraphImpl</a>&lt; <a class="el" href="#class_parser">Parser</a>, State, Transition &gt;::is_postdominated_by_set </td>
           <td>(</td>
           <td class="paramtype">const State *</td>          <td class="paramname"><span class="paramname"><em>s</em></span>, </td>
         </tr>
@@ -5633,13 +6158,13 @@ template&lt;class Parser, class State, class Transition&gt; </div>
 <div class="memitem">
 <div class="memproto">
 <div class="memtemplate">
-template&lt;class Parser, class State, class Transition&gt; </div>
+template&lt;class <a class="el" href="#class_parser">Parser</a>, class State, class Transition&gt; </div>
 <table class="mlabels">
   <tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">bool <a class="el" href="#class_parser_graph_impl">ParserGraphImpl</a>&lt; Parser, State, Transition &gt;::is_reachable </td>
+          <td class="memname">bool <a class="el" href="#class_parser_graph_impl">ParserGraphImpl</a>&lt; <a class="el" href="#class_parser">Parser</a>, State, Transition &gt;::is_reachable </td>
           <td>(</td>
           <td class="paramtype">const State *</td>          <td class="paramname"><span class="paramname"><em>src</em></span>, </td>
         </tr>

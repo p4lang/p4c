@@ -371,7 +371,7 @@ $(function(){initNavTree('dpdk_2control-plane_2bfruntime__arch__handler_8h_sourc
 <div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>        <span class="keyword">auto</span> pipeName = getBlockNamePrefix(tableBlock);</div>
 <div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>        <span class="keyword">auto</span> *pre = table-&gt;mutable_preamble();</div>
 <div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>        <span class="keywordflow">if</span> (pre-&gt;name() == tableDeclaration-&gt;controlPlaneName())</div>
-<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>            pre-&gt;set_name(prefix(pipeName, pre-&gt;name()));</div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>            pre-&gt;set_name(<a class="code hl_struct" href="structprefix.html">prefix</a>(pipeName, pre-&gt;name()));</div>
 <div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>    }</div>
 <div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span> </div>
 <div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>    <span class="keywordtype">void</span> addExternInstance(<span class="keyword">const</span> <a class="code hl_class" href="class_p4_runtime_symbol_table_iface.html">P4RuntimeSymbolTableIface</a> &amp;symbols, p4configv1::P4Info *p4info,</div>
@@ -579,6 +579,7 @@ $(function(){initNavTree('dpdk_2control-plane_2bfruntime__arch__handler_8h_sourc
 <div class="ttc" id="astruct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_s_a_arch_handler_builder_for_d_p_d_k_html_a1f034a5d35783b5e49d90cf37f1f5254"><div class="ttname"><a href="struct_p4_1_1_control_plane_a_p_i_1_1_standard_1_1_p_s_a_arch_handler_builder_for_d_p_d_k.html#a1f034a5d35783b5e49d90cf37f1f5254">P4::ControlPlaneAPI::Standard::PSAArchHandlerBuilderForDPDK::operator()</a></div><div class="ttdeci">P4::ControlPlaneAPI::P4RuntimeArchHandlerIface * operator()(ReferenceMap *refMap, TypeMap *typeMap, const IR::ToplevelBlock *evaluatedProgram) const override</div><div class="ttdef"><b>Definition</b> dpdk/control-plane/bfruntime_arch_handler.h:370</div></div>
 <div class="ttc" id="astruct_p4_1_1_r_t_t_i_1_1_base_html_a15a2e4484076dcafa2964ede26024a61"><div class="ttname"><a href="struct_p4_1_1_r_t_t_i_1_1_base.html#a15a2e4484076dcafa2964ede26024a61">P4::RTTI::Base::to</a></div><div class="ttdeci">T * to() noexcept</div><div class="ttdef"><b>Definition</b> rtti.h:226</div></div>
 <div class="ttc" id="astruct_p4_1_1_r_t_t_i_1_1_base_html_a203be294e917ab99212b79aecc23936d"><div class="ttname"><a href="struct_p4_1_1_r_t_t_i_1_1_base.html#a203be294e917ab99212b79aecc23936d">P4::RTTI::Base::is</a></div><div class="ttdeci">bool is() const noexcept</div><div class="ttdef"><b>Definition</b> rtti.h:216</div></div>
+<div class="ttc" id="astructprefix_html"><div class="ttname"><a href="structprefix.html">prefix</a></div><div class="ttdef"><b>Definition</b> register_reference.h:28</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.13.2-->

@@ -144,7 +144,7 @@ $(function(){initNavTree('match__reducer_8h_source.html',''); initResizable(true
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span>    <span class="keyword">const</span> std::vector&lt;match_t&gt; matches_;</div>
 <div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span></div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span>    <span class="keyword">struct </span>cmp {</div>
-<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>        <span class="keywordtype">bool</span> operator()(<span class="keyword">const</span> match_t &amp;a, <span class="keyword">const</span> match_t &amp;b)<span class="keyword"> const </span>{</div>
+<div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span>        <span class="keywordtype">bool</span> operator()(<span class="keyword">const</span> <a class="code hl_struct" href="structmatch__t.html">match_t</a> &amp;a, <span class="keyword">const</span> <a class="code hl_struct" href="structmatch__t.html">match_t</a> &amp;b)<span class="keyword"> const </span>{</div>
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span>            <span class="keywordflow">return</span> std::tie(a.word1, a.word0) &lt; std::tie(b.word1, b.word0);</div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span>        }</div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span>    };</div>
@@ -162,7 +162,7 @@ $(function(){initNavTree('match__reducer_8h_source.html',''); initResizable(true
 <div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>                <span class="keywordflow">if</span> (xor0 != xor1) <span class="keywordflow">continue</span>;</div>
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span>                <span class="keywordflow">if</span> (!is_power_of_2(xor0)) <span class="keywordflow">continue</span>;</div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span> </div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>                match_t combined_match((match1.word0 | xor0), (match1.word1 | xor1));</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>                <a class="code hl_struct" href="structmatch__t.html">match_t</a> combined_match((match1.word0 | xor0), (match1.word1 | xor1));</div>
 <div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>                transformed_matches.insert(combined_match);</div>
 <div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>                combined_matches = <span class="keyword">true</span>;</div>
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span>            }</div>
@@ -173,7 +173,7 @@ $(function(){initNavTree('match__reducer_8h_source.html',''); initResizable(true
 <div class="line"><a id="l00074" name="l00074"></a><span class="lineno">   74</span>    }</div>
 <div class="line"><a id="l00075" name="l00075"></a><span class="lineno">   75</span></div>
 <div class="line"><a id="l00081" name="l00081"></a><span class="lineno">   81</span>    <span class="keywordtype">void</span> has_full_match_coverage() {</div>
-<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>        <span class="keyword">auto</span> is_unconditional_match = [](match_t match) {</div>
+<div class="line"><a id="l00082" name="l00082"></a><span class="lineno">   82</span>        <span class="keyword">auto</span> is_unconditional_match = [](<a class="code hl_struct" href="structmatch__t.html">match_t</a> match) {</div>
 <div class="line"><a id="l00083" name="l00083"></a><span class="lineno">   83</span>            <span class="keywordflow">return</span> match == match_t::dont_care(0) || match == match_t::dont_care(8) ||</div>
 <div class="line"><a id="l00084" name="l00084"></a><span class="lineno">   84</span>                   match == match_t::dont_care(16) || match == match_t::dont_care(24) ||</div>
 <div class="line"><a id="l00085" name="l00085"></a><span class="lineno">   85</span>                   match == match_t::dont_care(32);</div>
@@ -197,6 +197,7 @@ $(function(){initNavTree('match__reducer_8h_source.html',''); initResizable(true
 </div>
 <div class="line"><a id="l00103" name="l00103"></a><span class="lineno">  103</span> </div>
 <div class="line"><a id="l00104" name="l00104"></a><span class="lineno">  104</span><span class="preprocessor">#endif </span><span class="comment">/* BACKENDS_TOFINO_BF_P4C_PARDE_COMMON_MATCH_REDUCER_H_ */</span><span class="preprocessor"></span></div>
+<div class="ttc" id="astructmatch__t_html"><div class="ttname"><a href="structmatch__t.html">match_t</a></div><div class="ttdef"><b>Definition</b> asm-types.h:49</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.13.2-->

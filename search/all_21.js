@@ -10,5 +10,7 @@ var searchData=
   ['xdpingressdeparserpsa_7',['XDPIngressDeparserPSA',['../class_p4_1_1_e_b_p_f_1_1_x_d_p_ingress_deparser_p_s_a.html',1,'P4::EBPF']]],
   ['xdpingresspipeline_8',['XDPIngressPipeline',['../class_p4_1_1_e_b_p_f_1_1_x_d_p_ingress_pipeline.html',1,'P4::EBPF']]],
   ['xdptarget_9',['XdpTarget',['../class_p4_1_1_e_b_p_f_1_1_xdp_target.html',1,'P4::EBPF']]],
-  ['xor16_10',['xor16',['../namespace_p4_1_1_net_hash.html#aaffa89e4bd87fba4761506c9133df39f',1,'P4::NetHash']]]
+  ['xor_10',['Xor',['../class_hash_expr_1_1_xor.html',1,'HashExpr']]],
+  ['xor16_11',['xor16',['../namespace_p4_1_1_net_hash.html#aaffa89e4bd87fba4761506c9133df39f',1,'P4::NetHash']]],
+  ['xorhash_12',['XorHash',['../class_hash_expr_1_1_xor_hash.html',1,'HashExpr']]]
 ];

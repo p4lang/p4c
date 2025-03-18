@@ -1,3 +1,7 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$class_logging_1_1_file_log.html" title="A FileLog is used to redirect the logging output of a visitor pass to a file." alt="" coords="5,5,132,31"/>
+<area shape="rect" id="Node000000" href="$class_group_constraint_extractor.html" title="Blueprint for group constraint extractor classes." alt="" coords="5,31,192,56"/>
+<area shape="rect" id="Node000001" href="$class_equivalent_align_extractor.html" title=" " alt="" coords="240,5,423,31"/>
+<area shape="poly" id="edge2191_Node000000_Node000001" title=" " alt="" coords="205,29,239,25,240,31,206,34"/>
+<area shape="rect" id="Node000002" href="$class_mau_group_extractor.html" title=" " alt="" coords="257,55,405,80"/>
+<area shape="poly" id="edge2192_Node000000_Node000002" title=" " alt="" coords="206,52,257,57,257,62,205,57"/>
 </map>

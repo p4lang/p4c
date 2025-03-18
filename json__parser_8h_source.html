@@ -232,9 +232,9 @@ $(function(){initNavTree('json__parser_8h_source.html',''); initResizable(true);
 <div class="line"><a id="l00087" name="l00087"></a><span class="lineno">   87</span> </div>
 <div class="line"><a id="l00088" name="l00088"></a><span class="lineno">   88</span>std::string getIndent(<span class="keywordtype">int</span> l);</div>
 <div class="line"><a id="l00089" name="l00089"></a><span class="lineno">   89</span> </div>
-<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>std::ostream &amp;operator&lt;&lt;(std::ostream &amp;out, <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_json_data.html">JsonData</a> *json);</div>
-<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span><span class="keyword">inline</span> std::ostream &amp;operator&lt;&lt;(std::ostream &amp;out, <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_json_data.html">JsonData</a> &amp;json) { <span class="keywordflow">return</span> out &lt;&lt; &amp;json; }</div>
-<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>std::istream &amp;operator&gt;&gt;(std::istream &amp;in, std::unique_ptr&lt;JsonData&gt; &amp;json);</div>
+<div class="line"><a id="l00090" name="l00090"></a><span class="lineno">   90</span>std::ostream &amp;operator&lt;&lt;(std::ostream &amp;out, <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_json_data.html">JsonData</a> *<a class="code hl_namespace" href="namespacejson.html">json</a>);</div>
+<div class="line"><a id="l00091" name="l00091"></a><span class="lineno">   91</span><span class="keyword">inline</span> std::ostream &amp;operator&lt;&lt;(std::ostream &amp;out, <span class="keyword">const</span> <a class="code hl_class" href="class_p4_1_1_json_data.html">JsonData</a> &amp;<a class="code hl_namespace" href="namespacejson.html">json</a>) { <span class="keywordflow">return</span> out &lt;&lt; &amp;<a class="code hl_namespace" href="namespacejson.html">json</a>; }</div>
+<div class="line"><a id="l00092" name="l00092"></a><span class="lineno">   92</span>std::istream &amp;operator&gt;&gt;(std::istream &amp;in, std::unique_ptr&lt;JsonData&gt; &amp;<a class="code hl_namespace" href="namespacejson.html">json</a>);</div>
 <div class="line"><a id="l00093" name="l00093"></a><span class="lineno">   93</span> </div>
 <div class="line"><a id="l00094" name="l00094"></a><span class="lineno">   94</span>}  <span class="comment">// namespace P4</span></div>
 <div class="line"><a id="l00095" name="l00095"></a><span class="lineno">   95</span> </div>
@@ -244,6 +244,7 @@ $(function(){initNavTree('json__parser_8h_source.html',''); initResizable(true);
 <div class="ttc" id="aclass_p4_1_1_json_null_html"><div class="ttname"><a href="class_p4_1_1_json_null.html">P4::JsonNull</a></div><div class="ttdef"><b>Definition</b> json_parser.h:84</div></div>
 <div class="ttc" id="aclass_p4_1_1cstring_html"><div class="ttname"><a href="class_p4_1_1cstring.html">P4::cstring</a></div><div class="ttdef"><b>Definition</b> cstring.h:85</div></div>
 <div class="ttc" id="anamespace_p4_html"><div class="ttname"><a href="namespace_p4.html">P4</a></div><div class="ttdoc">TODO: this is not really specific to BMV2, it should reside somewhere else.</div><div class="ttdef"><b>Definition</b> applyOptionsPragmas.cpp:24</div></div>
+<div class="ttc" id="anamespacejson_html"><div class="ttname"><a href="namespacejson.html">json</a></div><div class="ttdef"><b>Definition</b> bson.cpp:69</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.13.2-->

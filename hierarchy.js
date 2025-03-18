@@ -8,6 +8,12 @@ var hierarchy =
     [ "ActionAnalysis::ContainerAction", "struct_action_analysis_1_1_container_action.html", null ],
     [ "ActionAnalysis::FieldAction", "struct_action_analysis_1_1_field_action.html", null ],
     [ "ActionAnalysis::TotalAlignment", "struct_action_analysis_1_1_total_alignment.html", null ],
+    [ "ActionBus", "class_action_bus.html", null ],
+    [ "ActionBus::Slot", "struct_action_bus_1_1_slot.html", null ],
+    [ "ActionBusSource", "struct_action_bus_source.html", null ],
+    [ "ActionBusSource.__unnamed0__", "union_action_bus_source_8____unnamed0____.html", null ],
+    [ "ActionBusSource.__unnamed0__.hd_tuple", "struct_action_bus_source_8____unnamed0_____8hd__tuple.html", null ],
+    [ "ActionBusSource.__unnamed0__.xcmp_data", "struct_action_bus_source_8____unnamed0_____8xcmp__data.html", null ],
     [ "ActionData::ALUOperation", "class_action_data_1_1_a_l_u_operation.html", null ],
     [ "ActionData::ALUParameter", "struct_action_data_1_1_a_l_u_parameter.html", null ],
     [ "ActionData::ALUPosition", "struct_action_data_1_1_a_l_u_position.html", null ],
@@ -34,6 +40,13 @@ var hierarchy =
     [ "ActionPhvConstraintCanPack", "struct_action_phv_constraint_can_pack.html", null ],
     [ "ActionPhvConstraintLogging", "struct_action_phv_constraint_logging.html", null ],
     [ "ActionPhvConstraints::ActionSources", "class_action_phv_constraints.html#struct_action_phv_constraints_1_1_action_sources", null ],
+    [ "ActionTable", null, [
+      [ "Target::Tofino::ActionTable", "class_target_1_1_tofino_1_1_action_table.html", null ]
+    ] ],
+    [ "alias_array_base< T >", "classalias__array__base.html", [
+      [ "alias_array< S, T >", "classalias__array.html", null ]
+    ] ],
+    [ "alias_array_base< T >::iterator", "classalias__array__base_1_1iterator.html", null ],
     [ "AllConstraints", "struct_all_constraints.html", null ],
     [ "alloc_trace_cb_t", "structalloc__trace__cb__t.html", null ],
     [ "AllocAlignment", "struct_alloc_alignment.html", null ],
@@ -45,6 +58,13 @@ var hierarchy =
     [ "AllocInfo", "struct_alloc_info.html", null ],
     [ "AllocResult", "struct_alloc_result.html", null ],
     [ "AllocScore", "struct_alloc_score.html", null ],
+    [ "alpm_t", "structalpm__t.html", null ],
+    [ "AluOP", null, [
+      [ "DivMod", "struct_div_mod.html", null ]
+    ] ],
+    [ "AluOP::Decode", null, [
+      [ "DivMod::Decode", "struct_div_mod_1_1_decode.html", null ]
+    ] ],
     [ "ArchSpec", "class_arch_spec.html", [
       [ "JBayArchSpec", "class_j_bay_arch_spec.html", null ],
       [ "TofinoArchSpec", "class_tofino_arch_spec.html", null ]
@@ -52,6 +72,7 @@ var hierarchy =
     [ "Assign", "group___deparser_copy_opt.html#struct_assign", null ],
     [ "assoc::detail::_void< Ts >", "namespaceassoc_1_1detail.html#structassoc_1_1detail_1_1__void", null ],
     [ "attached_entries_element_t", "structattached__entries__element__t.html", null ],
+    [ "AttachedTables", "struct_attached_tables.html", null ],
     [ "AutoIndent", "struct_auto_indent.html", null ],
     [ "Base", null, [
       [ "assoc::detail::CondIterableAssocBase< Base, Itble, typename _void< typename Base::key_compare >::type >", "classassoc_1_1detail_1_1_cond_iterable_assoc_base_3_01_base_00_01_itble_00_01typename_01__void_301be9afc473011af99b0061f318d14aa.html", null ],
@@ -71,12 +92,26 @@ var hierarchy =
       ] ],
       [ "assoc::detail::CondIterableAssocBase< Base, Itble, typename _void< typename Base::key_compare >::type >", "classassoc_1_1detail_1_1_cond_iterable_assoc_base_3_01_base_00_01_itble_00_01typename_01__void_301be9afc473011af99b0061f318d14aa.html", null ]
     ] ],
+    [ "BfAsm::Test::RegisterMatcher", "class_bf_asm_1_1_test_1_1_register_matcher.html", null ],
+    [ "BFASM::Version", "class_b_f_a_s_m_1_1_version.html", null ],
     [ "BFN::ActionProfile", "struct_b_f_n_1_1_action_profile.html", null ],
     [ "BFN::ActionSelector", "struct_b_f_n_1_1_action_selector.html", null ],
     [ "BFN::Alloc1Dbase< T >", "class_b_f_n_1_1_alloc1_dbase.html", [
+      [ "BFN::Alloc1D< T, S >", "class_b_f_n_1_1_alloc1_d.html", null ],
       [ "BFN::Alloc1D< T, S >", "class_b_f_n_1_1_alloc1_d.html", null ]
     ] ],
+    [ "BFN::Alloc1Dbase< int >", "class_b_f_n_1_1_alloc1_dbase.html", [
+      [ "BFN::Alloc1D< int, LOGICAL_TABLES_PER_STAGE >", "class_b_f_n_1_1_alloc1_d.html", null ],
+      [ "BFN::Alloc1D< int, MAX_LONGBRANCH_TAGS >", "class_b_f_n_1_1_alloc1_d.html", null ],
+      [ "BFN::Alloc1D< int, LOGICAL_TABLES_PER_STAGE >", "class_b_f_n_1_1_alloc1_d.html", null ],
+      [ "BFN::Alloc1D< int, MAX_LONGBRANCH_TAGS >", "class_b_f_n_1_1_alloc1_d.html", null ]
+    ] ],
     [ "BFN::Alloc1Dbase< P4::cstring >", "class_b_f_n_1_1_alloc1_dbase.html", [
+      [ "BFN::Alloc1D< P4::cstring, ADB_BYTES >", "class_b_f_n_1_1_alloc1_d.html", null ],
+      [ "BFN::Alloc1D< P4::cstring, HASH_GROUPS >", "class_b_f_n_1_1_alloc1_d.html", null ],
+      [ "BFN::Alloc1D< P4::cstring, SRAM_ROWS >", "class_b_f_n_1_1_alloc1_d.html", null ],
+      [ "BFN::Alloc1D< P4::cstring, STATS_ALUS >", "class_b_f_n_1_1_alloc1_d.html", null ],
+      [ "BFN::Alloc1D< P4::cstring, METER_ALUS >", "class_b_f_n_1_1_alloc1_d.html", null ],
       [ "BFN::Alloc1D< P4::cstring, ADB_BYTES >", "class_b_f_n_1_1_alloc1_d.html", null ],
       [ "BFN::Alloc1D< P4::cstring, HASH_GROUPS >", "class_b_f_n_1_1_alloc1_d.html", null ],
       [ "BFN::Alloc1D< P4::cstring, SRAM_ROWS >", "class_b_f_n_1_1_alloc1_d.html", null ],
@@ -84,15 +119,51 @@ var hierarchy =
       [ "BFN::Alloc1D< P4::cstring, METER_ALUS >", "class_b_f_n_1_1_alloc1_d.html", null ]
     ] ],
     [ "BFN::Alloc1Dbase< std::pair< P4::cstring, int > >", "class_b_f_n_1_1_alloc1_dbase.html", [
+      [ "BFN::Alloc1D< std::pair< P4::cstring, int >, SRAM_ROWS - 1 >", "class_b_f_n_1_1_alloc1_d.html", null ],
       [ "BFN::Alloc1D< std::pair< P4::cstring, int >, SRAM_ROWS - 1 >", "class_b_f_n_1_1_alloc1_d.html", null ]
     ] ],
     [ "BFN::Alloc1Dbase< std::pair< PHV::Container, int > >", "class_b_f_n_1_1_alloc1_dbase.html", [
+      [ "BFN::Alloc1D< std::pair< PHV::Container, int >, BYTE_GROUPS >", "class_b_f_n_1_1_alloc1_d.html", null ],
       [ "BFN::Alloc1D< std::pair< PHV::Container, int >, BYTE_GROUPS >", "class_b_f_n_1_1_alloc1_d.html", null ]
     ] ],
+    [ "BFN::Alloc1Dbase< std::vector< HashDistribution * > >", "class_b_f_n_1_1_alloc1_dbase.html", [
+      [ "BFN::Alloc1D< std::vector< HashDistribution * >, 6 >", "class_b_f_n_1_1_alloc1_d.html", null ],
+      [ "BFN::Alloc1D< std::vector< HashDistribution * >, 6 >", "class_b_f_n_1_1_alloc1_d.html", null ]
+    ] ],
+    [ "BFN::Alloc1Dbase< Table * >", "class_b_f_n_1_1_alloc1_dbase.html", [
+      [ "BFN::Alloc1D< Table *, LOGICAL_TABLES_PER_STAGE >", "class_b_f_n_1_1_alloc1_d.html", null ],
+      [ "BFN::Alloc1D< Table *, PHYSICAL_TABLES_PER_STAGE >", "class_b_f_n_1_1_alloc1_d.html", null ],
+      [ "BFN::Alloc1D< Table *, TCAM_TABLES_PER_STAGE >", "class_b_f_n_1_1_alloc1_d.html", null ],
+      [ "BFN::Alloc1D< Table *, TCAM_XBAR_INPUT_BYTES >", "class_b_f_n_1_1_alloc1_d.html", null ],
+      [ "BFN::Alloc1D< Table *, ACTION_DATA_BUS_SLOTS >", "class_b_f_n_1_1_alloc1_d.html", null ],
+      [ "BFN::Alloc1D< Table *, LOGICAL_SRAM_ROWS >", "class_b_f_n_1_1_alloc1_d.html", null ],
+      [ "BFN::Alloc1D< Table *, IDLETIME_BUSSES >", "class_b_f_n_1_1_alloc1_d.html", null ],
+      [ "BFN::Alloc1D< Table *, LOGICAL_TABLES_PER_STAGE >", "class_b_f_n_1_1_alloc1_d.html", null ],
+      [ "BFN::Alloc1D< Table *, PHYSICAL_TABLES_PER_STAGE >", "class_b_f_n_1_1_alloc1_d.html", null ],
+      [ "BFN::Alloc1D< Table *, TCAM_TABLES_PER_STAGE >", "class_b_f_n_1_1_alloc1_d.html", null ],
+      [ "BFN::Alloc1D< Table *, TCAM_XBAR_INPUT_BYTES >", "class_b_f_n_1_1_alloc1_d.html", null ],
+      [ "BFN::Alloc1D< Table *, ACTION_DATA_BUS_SLOTS >", "class_b_f_n_1_1_alloc1_d.html", null ],
+      [ "BFN::Alloc1D< Table *, LOGICAL_SRAM_ROWS >", "class_b_f_n_1_1_alloc1_d.html", null ],
+      [ "BFN::Alloc1D< Table *, IDLETIME_BUSSES >", "class_b_f_n_1_1_alloc1_d.html", null ]
+    ] ],
+    [ "BFN::Alloc1Dbase< Table::NextTables * >", "class_b_f_n_1_1_alloc1_dbase.html", [
+      [ "BFN::Alloc1D< Table::NextTables *, MAX_LONGBRANCH_TAGS >", "class_b_f_n_1_1_alloc1_d.html", null ],
+      [ "BFN::Alloc1D< Table::NextTables *, MAX_LONGBRANCH_TAGS >", "class_b_f_n_1_1_alloc1_d.html", null ]
+    ] ],
     [ "BFN::Alloc2Dbase< T >", "class_b_f_n_1_1_alloc2_dbase.html", [
+      [ "BFN::Alloc2D< T, R, C >", "class_b_f_n_1_1_alloc2_d.html", null ],
       [ "BFN::Alloc2D< T, R, C >", "class_b_f_n_1_1_alloc2_d.html", null ]
     ] ],
+    [ "BFN::Alloc2Dbase< GatewayTable * >", "class_b_f_n_1_1_alloc2_dbase.html", [
+      [ "BFN::Alloc2D< GatewayTable *, SRAM_ROWS, 2 >", "class_b_f_n_1_1_alloc2_d.html", null ],
+      [ "BFN::Alloc2D< GatewayTable *, SRAM_ROWS, 2 >", "class_b_f_n_1_1_alloc2_d.html", null ]
+    ] ],
+    [ "BFN::Alloc2Dbase< int >", "class_b_f_n_1_1_alloc2_dbase.html", [
+      [ "BFN::Alloc2D< int, 3, LOGICAL_TABLES_PER_STAGE >", "class_b_f_n_1_1_alloc2_d.html", null ],
+      [ "BFN::Alloc2D< int, 3, LOGICAL_TABLES_PER_STAGE >", "class_b_f_n_1_1_alloc2_d.html", null ]
+    ] ],
     [ "BFN::Alloc2Dbase< P4::bitvec >", "class_b_f_n_1_1_alloc2_dbase.html", [
+      [ "BFN::Alloc2D< P4::bitvec, IMEM_ROWS, IMEM_COLORS >", "class_b_f_n_1_1_alloc2_d.html", null ],
       [ "BFN::Alloc2D< P4::bitvec, IMEM_ROWS, IMEM_COLORS >", "class_b_f_n_1_1_alloc2_d.html", null ]
     ] ],
     [ "BFN::Alloc2Dbase< P4::cstring >", "class_b_f_n_1_1_alloc2_dbase.html", [
@@ -111,19 +182,54 @@ var hierarchy =
       [ "BFN::Alloc2D< P4::cstring, SRAM_ROWS, 2 >", "class_b_f_n_1_1_alloc2_d.html", null ],
       [ "BFN::Alloc2D< P4::cstring, SRAM_ROWS, PAYLOAD_COUNT >", "class_b_f_n_1_1_alloc2_d.html", null ],
       [ "BFN::Alloc2D< P4::cstring, SRAM_ROWS, MAPRAM_COLUMNS >", "class_b_f_n_1_1_alloc2_d.html", null ],
+      [ "BFN::Alloc2D< P4::cstring, 2, NUM_IDLETIME_BUS >", "class_b_f_n_1_1_alloc2_d.html", null ],
+      [ "BFN::Alloc2D< P4::cstring, ActionData::SLOT_TYPES, OUTPUTS >", "class_b_f_n_1_1_alloc2_d.html", null ],
+      [ "BFN::Alloc2D< P4::cstring, RANDOM_NUMBER_GENERATORS, IMMED_SECT >", "class_b_f_n_1_1_alloc2_d.html", null ],
+      [ "BFN::Alloc2D< P4::cstring, HASH_TABLES, HASH_INDEX_GROUPS >", "class_b_f_n_1_1_alloc2_d.html", null ],
+      [ "BFN::Alloc2D< P4::cstring, HASH_TABLES, HASH_SINGLE_BITS >", "class_b_f_n_1_1_alloc2_d.html", null ],
+      [ "BFN::Alloc2D< P4::cstring, HASH_TABLES, HASH_DIST_SLICES >", "class_b_f_n_1_1_alloc2_d.html", null ],
+      [ "BFN::Alloc2D< P4::cstring, HASH_TABLES, HASH_DIST_SLICES *HASH_DIST_BITS >", "class_b_f_n_1_1_alloc2_d.html", null ],
+      [ "BFN::Alloc2D< P4::cstring, IMEM_ROWS, IMEM_COLORS >", "class_b_f_n_1_1_alloc2_d.html", null ],
+      [ "BFN::Alloc2D< P4::cstring, SRAM_ROWS, SRAM_COLUMNS >", "class_b_f_n_1_1_alloc2_d.html", null ],
+      [ "BFN::Alloc2D< P4::cstring, SRAM_ROWS, STASH_UNITS >", "class_b_f_n_1_1_alloc2_d.html", null ],
+      [ "BFN::Alloc2D< P4::cstring, TCAM_ROWS, TCAM_COLUMNS >", "class_b_f_n_1_1_alloc2_d.html", null ],
+      [ "BFN::Alloc2D< P4::cstring, SRAM_ROWS, GATEWAYS_PER_ROW >", "class_b_f_n_1_1_alloc2_d.html", null ],
+      [ "BFN::Alloc2D< P4::cstring, SRAM_ROWS, BUS_COUNT >", "class_b_f_n_1_1_alloc2_d.html", null ],
+      [ "BFN::Alloc2D< P4::cstring, SRAM_ROWS, 2 >", "class_b_f_n_1_1_alloc2_d.html", null ],
+      [ "BFN::Alloc2D< P4::cstring, SRAM_ROWS, PAYLOAD_COUNT >", "class_b_f_n_1_1_alloc2_d.html", null ],
+      [ "BFN::Alloc2D< P4::cstring, SRAM_ROWS, MAPRAM_COLUMNS >", "class_b_f_n_1_1_alloc2_d.html", null ],
       [ "BFN::Alloc2D< P4::cstring, 2, NUM_IDLETIME_BUS >", "class_b_f_n_1_1_alloc2_d.html", null ]
     ] ],
     [ "BFN::Alloc2Dbase< result_bus_info >", "class_b_f_n_1_1_alloc2_dbase.html", [
+      [ "BFN::Alloc2D< result_bus_info, SRAM_ROWS, BUS_COUNT >", "class_b_f_n_1_1_alloc2_d.html", null ],
       [ "BFN::Alloc2D< result_bus_info, SRAM_ROWS, BUS_COUNT >", "class_b_f_n_1_1_alloc2_d.html", null ]
     ] ],
     [ "BFN::Alloc2Dbase< search_bus_info >", "class_b_f_n_1_1_alloc2_dbase.html", [
+      [ "BFN::Alloc2D< search_bus_info, SRAM_ROWS, BUS_COUNT >", "class_b_f_n_1_1_alloc2_d.html", null ],
       [ "BFN::Alloc2D< search_bus_info, SRAM_ROWS, BUS_COUNT >", "class_b_f_n_1_1_alloc2_d.html", null ]
     ] ],
     [ "BFN::Alloc2Dbase< std::pair< PHV::Container, int > >", "class_b_f_n_1_1_alloc2_dbase.html", [
       [ "BFN::Alloc2D< std::pair< PHV::Container, int >, EXACT_GROUPS, EXACT_BYTES_PER_GROUP >", "class_b_f_n_1_1_alloc2_d.html", null ],
+      [ "BFN::Alloc2D< std::pair< PHV::Container, int >, TERNARY_GROUPS, TERNARY_BYTES_PER_GROUP >", "class_b_f_n_1_1_alloc2_d.html", null ],
+      [ "BFN::Alloc2D< std::pair< PHV::Container, int >, EXACT_GROUPS, EXACT_BYTES_PER_GROUP >", "class_b_f_n_1_1_alloc2_d.html", null ],
       [ "BFN::Alloc2D< std::pair< PHV::Container, int >, TERNARY_GROUPS, TERNARY_BYTES_PER_GROUP >", "class_b_f_n_1_1_alloc2_d.html", null ]
     ] ],
+    [ "BFN::Alloc2Dbase< std::pair< Table *, int > >", "class_b_f_n_1_1_alloc2_dbase.html", [
+      [ "BFN::Alloc2D< std::pair< Table *, int >, TCAM_ROWS, 2 >", "class_b_f_n_1_1_alloc2_d.html", null ],
+      [ "BFN::Alloc2D< std::pair< Table *, int >, TCAM_ROWS, 2 >", "class_b_f_n_1_1_alloc2_d.html", null ]
+    ] ],
+    [ "BFN::Alloc2Dbase< Table * >", "class_b_f_n_1_1_alloc2_dbase.html", [
+      [ "BFN::Alloc2D< Table *, SRAM_ROWS, 2 >", "class_b_f_n_1_1_alloc2_d.html", null ],
+      [ "BFN::Alloc2D< Table *, SRAM_ROWS, MAPRAM_UNITS_PER_ROW >", "class_b_f_n_1_1_alloc2_d.html", null ],
+      [ "BFN::Alloc2D< Table *, SRAM_ROWS, 2 >", "class_b_f_n_1_1_alloc2_d.html", null ],
+      [ "BFN::Alloc2D< Table *, SRAM_ROWS, MAPRAM_UNITS_PER_ROW >", "class_b_f_n_1_1_alloc2_d.html", null ]
+    ] ],
+    [ "BFN::Alloc2Dbase< Table::Actions::Action * >", "class_b_f_n_1_1_alloc2_dbase.html", [
+      [ "BFN::Alloc2D< Table::Actions::Action *, 2, ACTION_IMEM_ADDR_MAX >", "class_b_f_n_1_1_alloc2_d.html", null ],
+      [ "BFN::Alloc2D< Table::Actions::Action *, 2, ACTION_IMEM_ADDR_MAX >", "class_b_f_n_1_1_alloc2_d.html", null ]
+    ] ],
     [ "BFN::Alloc3Dbase< T >", "class_b_f_n_1_1_alloc3_dbase.html", [
+      [ "BFN::Alloc3D< T, B, R, C >", "class_b_f_n_1_1_alloc3_d.html", null ],
       [ "BFN::Alloc3D< T, B, R, C >", "class_b_f_n_1_1_alloc3_d.html", null ]
     ] ],
     [ "BFN::AncestorStates", "struct_b_f_n_1_1_ancestor_states.html", null ],
@@ -197,6 +303,9 @@ var hierarchy =
     [ "BFN::ValueSet", "struct_b_f_n_1_1_value_set.html", null ],
     [ "BFN::Wred", "struct_b_f_n_1_1_wred.html", null ],
     [ "bfn_hash_algorithm_", "structbfn__hash__algorithm__.html", null ],
+    [ "binout::byte4", "classbinout_1_1byte4.html", null ],
+    [ "binout::byte8", "classbinout_1_1byte8.html", null ],
+    [ "binout::tag", "classbinout_1_1tag.html", null ],
     [ "boost::default_bfs_visitor", null, [
       [ "FlowGraph::BFSPathFinder", "class_flow_graph_1_1_b_f_s_path_finder.html", null ]
     ] ],
@@ -213,6 +322,9 @@ var hierarchy =
     [ "ByNameLess< T >", "class_by_name_less.html", null ],
     [ "canon_name", "classcanon__name.html", null ],
     [ "CanPackErrorV2", "struct_can_pack_error_v2.html", null ],
+    [ "checked_array_base< T >", "classchecked__array__base.html", [
+      [ "checked_array< S, T >", "classchecked__array.html", null ]
+    ] ],
     [ "ChecksumInfo", "struct_checksum_info.html", null ],
     [ "clone_session_entry", "structclone__session__entry.html", null ],
     [ "ClotInfo", "class_clot_info.html", null ],
@@ -224,6 +336,11 @@ var hierarchy =
       [ "BFN_Options", "class_b_f_n___options.html", null ]
     ] ],
     [ "ComputeDefUse::loc_t", "struct_compute_def_use_1_1loc__t.html", null ],
+    [ "Configurable", null, [
+      [ "BaseParser", "class_base_parser.html", [
+        [ "Parser", "group__parde.html#class_parser", null ]
+      ] ]
+    ] ],
     [ "ConstrainedFieldMapBuilder", "class_constrained_field_map_builder.html", null ],
     [ "Constraints::BooleanConstraint", "class_constraints_1_1_boolean_constraint.html", [
       [ "Constraints::DeparsedToTMConstraint", "class_constraints_1_1_deparsed_to_t_m_constraint.html", null ],
@@ -246,6 +363,22 @@ var hierarchy =
     [ "ContainerSizeExtractor", "class_container_size_extractor.html", [
       [ "P4::Test::ContainerSizeExtractorTest", "class_p4_1_1_test_1_1_container_size_extractor_test.html", null ]
     ] ],
+    [ "Contextable", null, [
+      [ "Parser", "group__parde.html#class_parser", null ],
+      [ "Section", "class_section.html", [
+        [ "AsmStage", "class_asm_stage.html", null ],
+        [ "BFASM::FlexibleHeaders", "class_b_f_a_s_m_1_1_flexible_headers.html", null ],
+        [ "BaseAsmParser", "class_base_asm_parser.html", [
+          [ "AsmParser", "class_asm_parser.html", null ]
+        ] ],
+        [ "DefaultErrorMode", "class_default_error_mode.html", null ],
+        [ "Deparser", "group__parde.html#class_deparser", null ],
+        [ "DynHash", "class_dyn_hash.html", null ],
+        [ "Phv", "class_phv.html", null ],
+        [ "Primitives", "class_primitives.html", null ],
+        [ "Version", "class_version.html", null ]
+      ] ]
+    ] ],
     [ "ControlFlowVisitor", null, [
       [ "ComputeDefUse", "group__midend.html#class_compute_def_use", null ],
       [ "TableMutex", "class_table_mutex.html", null ]
@@ -254,9 +387,13 @@ var hierarchy =
       [ "ComputeDefUse::SetupJoinPoints", "class_compute_def_use_1_1_setup_join_points.html", null ]
     ] ],
     [ "CoreAllocation", "class_core_allocation.html", null ],
+    [ "CounterTable", null, [
+      [ "Target::Tofino::CounterTable", "class_target_1_1_tofino_1_1_counter_table.html", null ]
+    ] ],
     [ "crc_alg_info_", "structcrc__alg__info__.html", null ],
     [ "DarkLiveRange::OrderedFieldInfo", "struct_dark_live_range_1_1_ordered_field_info.html", null ],
     [ "DarkLiveRangeMap", "class_dark_live_range_map.html", null ],
+    [ "DataSwitchboxSetup< REGS >", "class_data_switchbox_setup.html", null ],
     [ "DecidePlacement::Backfill", "class_decide_placement_1_1_backfill.html", null ],
     [ "DecidePlacement::BacktrackManagement", "class_decide_placement_1_1_backtrack_management.html", null ],
     [ "DecidePlacement::BacktrackPlacement", "class_decide_placement_1_1_backtrack_placement.html", null ],
@@ -267,9 +404,25 @@ var hierarchy =
     [ "DecidePlacement::save_placement_t", "class_decide_placement.html#struct_decide_placement_1_1save__placement__t", null ],
     [ "DeparseGraph", "class_deparse_graph.html", null ],
     [ "DeparseGraph::NodeInfo", "struct_deparse_graph_1_1_node_info.html", null ],
+    [ "Deparser::Digest", "struct_deparser_1_1_digest.html", null ],
+    [ "Deparser::Digest::Type", "struct_deparser_1_1_digest_1_1_type.html", null ],
+    [ "Deparser::FDEntry", "struct_deparser_1_1_f_d_entry.html", null ],
+    [ "Deparser::FDEntry::Base", "struct_deparser_1_1_f_d_entry_1_1_base.html", [
+      [ "Deparser::FDEntry::Checksum", "struct_deparser_1_1_f_d_entry_1_1_checksum.html", null ],
+      [ "Deparser::FDEntry::Clot", "struct_deparser_1_1_f_d_entry_1_1_clot.html", null ],
+      [ "Deparser::FDEntry::Constant", "struct_deparser_1_1_f_d_entry_1_1_constant.html", null ],
+      [ "Deparser::FDEntry::Phv", "struct_deparser_1_1_f_d_entry_1_1_phv.html", null ]
+    ] ],
+    [ "Deparser::FullChecksumUnit", "group__parde.html#struct_deparser_1_1_full_checksum_unit", null ],
+    [ "Deparser::Intrinsic", "struct_deparser_1_1_intrinsic.html", null ],
+    [ "Deparser::Intrinsic::Type", "struct_deparser_1_1_intrinsic_1_1_type.html", null ],
+    [ "Deparser::Val", "struct_deparser_1_1_val.html", [
+      [ "Deparser::ChecksumVal", "struct_deparser_1_1_checksum_val.html", null ]
+    ] ],
     [ "DeparserAsmOutput", "group___asm_output.html#struct_deparser_asm_output", null ],
     [ "DependencyGraph", "struct_dependency_graph.html", null ],
     [ "DependencyGraph::StageInfo", "struct_dependency_graph.html#struct_dependency_graph_1_1_stage_info", null ],
+    [ "DepositField::RotateConstant", "namespace_deposit_field.html#struct_deposit_field_1_1_rotate_constant", null ],
     [ "detail::CondIterableAssoc< std::map< const FieldGroup *, std::vector< const IR::Expression * >, std::less< const FieldGroup * >, std::allocator< std::pair< const const FieldGroup *, std::vector< const IR::Expression * > > > >, Iterable::Auto >", null, [
       [ "assoc::map< const FieldGroup *, std::vector< const IR::Expression * > >", "classassoc_1_1map.html", null ]
     ] ],
@@ -393,6 +546,7 @@ var hierarchy =
       [ "ParserGraphImpl< IR::BFN::LoweredParser, IR::BFN::LoweredParserState, IR::BFN::LoweredParserMatch >", "group__parde.html", null ],
       [ "ParserGraphImpl< Parser, State, Transition >", "group__parde.html#class_parser_graph_impl", null ]
     ] ],
+    [ "Disasm", "class_disasm.html", null ],
     [ "DotDumper", "class_dot_dumper.html", [
       [ "DumpParser", "group__parde.html#class_dump_parser", null ],
       [ "DumpSplitStates", "class_dump_split_states.html", null ]
@@ -400,15 +554,23 @@ var hierarchy =
     [ "dp_packet", "structdp__packet.html", null ],
     [ "DumpSeqTables", "class_dump_seq_tables.html", null ],
     [ "DynamicDependencyMetrics", "class_dynamic_dependency_metrics.html", null ],
+    [ "DynamicIXbar", "struct_dynamic_i_xbar.html", null ],
     [ "E", null, [
       [ "P4::backtrace_exception< E >", "class_p4_1_1backtrace__exception.html", null ]
     ] ],
     [ "emit_vector_formatter< VEC >", "structemit__vector__formatter.html", null ],
+    [ "ErrorMode", "class_error_mode.html", [
+      [ "DefaultErrorMode", "class_default_error_mode.html", null ]
+    ] ],
     [ "ErrorReporter", null, [
       [ "BfErrorReporter", "class_bf_error_reporter.html", null ]
     ] ],
+    [ "escape", "classescape.html", null ],
     [ "EventLogger", "class_event_logger.html", [
       [ "P4::Test::EventLoggerTestable", "class_p4_1_1_test_1_1_event_logger_testable.html", null ]
+    ] ],
+    [ "ExactMatchTable", null, [
+      [ "Target::Tofino::ExactMatchTable", "class_target_1_1_tofino_1_1_exact_match_table.html", null ]
     ] ],
     [ "FieldAlignment", "struct_field_alignment.html", null ],
     [ "FieldExtractInfo", "class_field_extract_info.html", null ],
@@ -426,6 +588,9 @@ var hierarchy =
     [ "FormatHash", "struct_format_hash.html", null ],
     [ "FromTo", "struct_from_to.html", null ],
     [ "galois_field_matrix_delta_", "structgalois__field__matrix__delta__.html", null ],
+    [ "GatewayTable", null, [
+      [ "Target::Tofino::GatewayTable", "class_target_1_1_tofino_1_1_gateway_table.html", null ]
+    ] ],
     [ "GenerateVLIWInstructions", "class_generate_v_l_i_w_instructions.html", null ],
     [ "graphs::ParserGraphs", null, [
       [ "P4ParserGraphs", "group__parde.html#class_p4_parser_graphs", null ]
@@ -434,6 +599,7 @@ var hierarchy =
       [ "EquivalentAlignExtractor", "class_equivalent_align_extractor.html", null ],
       [ "MauGroupExtractor", "class_mau_group_extractor.html", null ]
     ] ],
+    [ "GroupInfo", "struct_group_info.html", null ],
     [ "HasFullMatchCoverage", "group__parde.html#class_has_full_match_coverage", null ],
     [ "hash_calc_output_", "structhash__calc__output__.html", null ],
     [ "hash_calc_rotate_info", "structhash__calc__rotate__info.html", null ],
@@ -442,6 +608,8 @@ var hierarchy =
     [ "hash_seed_", "structhash__seed__.html", null ],
     [ "hash_seed_delta_", "structhash__seed__delta__.html", null ],
     [ "hash_symmetric_info_", "structhash__symmetric__info__.html", null ],
+    [ "HashCol", "struct_hash_col.html", null ],
+    [ "HashDistribution", "struct_hash_distribution.html", null ],
     [ "HashFuncLoc", "struct_hash_func_loc.html", null ],
     [ "HashMaskAnnotations", "class_hash_mask_annotations.html", null ],
     [ "HeaderInfo", "struct_header_info.html", null ],
@@ -449,6 +617,13 @@ var hierarchy =
       [ "TofinoIMemSpec", "class_tofino_i_mem_spec.html", null ]
     ] ],
     [ "InferWriteMode::CounterExample", "struct_infer_write_mode_1_1_counter_example.html", null ],
+    [ "InputXbar", "class_input_xbar.html", null ],
+    [ "InputXbar::all_iter", "class_input_xbar_1_1all__iter.html", null ],
+    [ "InputXbar::Group", "struct_input_xbar_1_1_group.html", null ],
+    [ "InputXbar::HashGrp", "class_input_xbar.html#struct_input_xbar_1_1_hash_grp", null ],
+    [ "InputXbar::HashTable", "struct_input_xbar_1_1_hash_table.html", null ],
+    [ "InputXbar::Input", "struct_input_xbar_1_1_input.html", null ],
+    [ "InputXbar::TcamUseCache", "class_input_xbar.html#struct_input_xbar_1_1_tcam_use_cache", null ],
     [ "Inspector", null, [
       [ "CheckForNamePrefix", "class_check_for_name_prefix.html", null ],
       [ "CheckOperations", "class_check_operations.html", null ],
@@ -500,6 +675,27 @@ var hierarchy =
       [ "SourceInfoLogging", "class_source_info_logging.html", null ],
       [ "TableMutex", "class_table_mutex.html", null ]
     ] ],
+    [ "Instruction::Decode", "struct_instruction_1_1_decode.html", [
+      [ "MinMax::Decode", "struct_min_max_1_1_decode.html", null ],
+      [ "StatefulAlu::AluOP::Decode", "struct_stateful_alu_1_1_alu_o_p_1_1_decode.html", [
+        [ "StatefulAlu::DivMod::Decode", "struct_stateful_alu_1_1_div_mod_1_1_decode.html", null ]
+      ] ],
+      [ "StatefulAlu::BitOP::Decode", "struct_stateful_alu_1_1_bit_o_p_1_1_decode.html", null ],
+      [ "StatefulAlu::CmpOP::Decode", "struct_stateful_alu_1_1_cmp_o_p_1_1_decode.html", null ],
+      [ "StatefulAlu::MinMax::Decode", "struct_stateful_alu_1_1_min_max_1_1_decode.html", null ],
+      [ "StatefulAlu::OutOP::Decode", "struct_stateful_alu_1_1_out_o_p_1_1_decode.html", null ],
+      [ "StatefulAlu::TMatchOP::Decode", "struct_stateful_alu_1_1_t_match_o_p_1_1_decode.html", null ],
+      [ "VLIW::AluOP::Decode", "struct_v_l_i_w_1_1_alu_o_p_1_1_decode.html", [
+        [ "VLIW::AluOP3Src::Decode", "struct_v_l_i_w_1_1_alu_o_p3_src_1_1_decode.html", null ]
+      ] ],
+      [ "VLIW::ByteRotateMerge::Decode", "struct_v_l_i_w_1_1_byte_rotate_merge_1_1_decode.html", null ],
+      [ "VLIW::CondMoveMux::Decode", "struct_v_l_i_w_1_1_cond_move_mux_1_1_decode.html", null ],
+      [ "VLIW::DepositField::Decode", "struct_v_l_i_w_1_1_deposit_field_1_1_decode.html", null ],
+      [ "VLIW::LoadConst::Decode", "struct_v_l_i_w_1_1_load_const_1_1_decode.html", null ],
+      [ "VLIW::NulOP::Decode", "struct_v_l_i_w_1_1_nul_o_p_1_1_decode.html", null ],
+      [ "VLIW::Set::Decode", "struct_v_l_i_w_1_1_set_1_1_decode.html", null ],
+      [ "VLIW::ShiftOP::Decode", "struct_v_l_i_w_1_1_shift_o_p_1_1_decode.html", null ]
+    ] ],
     [ "InstructionMemory", "struct_instruction_memory.html", [
       [ "Tofino::InstructionMemory", "struct_tofino_1_1_instruction_memory.html", null ]
     ] ],
@@ -510,6 +706,14 @@ var hierarchy =
     [ "IR::Expression", null, [
       [ "ImplicitParserInit", "group__parde.html#class_implicit_parser_init", null ],
       [ "WriteParserError", "group__parde.html#class_write_parser_error", null ]
+    ] ],
+    [ "IterKeys< PairIter >", "struct_iter_keys.html", null ],
+    [ "IterKeys< Map::const_iterator >", "struct_iter_keys.html", [
+      [ "IterKeysCopy< Map >", "struct_iter_keys_copy.html", null ]
+    ] ],
+    [ "IterValues< PairIter >", "struct_iter_values.html", null ],
+    [ "IterValues< Map::const_iterator >", "struct_iter_values.html", [
+      [ "IterValuesCopy< Map >", "struct_iter_values_copy.html", null ]
     ] ],
     [ "IXBar::FieldInfo", "struct_i_x_bar_1_1_field_info.html", null ],
     [ "IXBar::KeyInfo", "struct_i_x_bar_1_1_key_info.html", null ],
@@ -530,6 +734,16 @@ var hierarchy =
     [ "JbayNextTable::Prop::NTInfo", "struct_jbay_next_table_1_1_prop_1_1_n_t_info.html", null ],
     [ "JbayNextTable::TagReduce::merge_t", "struct_jbay_next_table_1_1_tag_reduce_1_1merge__t.html", null ],
     [ "JbayNextTable::TagReduce::sym_matrix< T >", "class_jbay_next_table_1_1_tag_reduce_1_1sym__matrix.html", null ],
+    [ "json::bson_wrap< T >", "structjson_1_1bson__wrap.html", null ],
+    [ "json::obj", "classjson_1_1obj.html", [
+      [ "json::False", "classjson_1_1_false.html", null ],
+      [ "json::True", "classjson_1_1_true.html", null ],
+      [ "json::map", "classjson_1_1map.html", null ],
+      [ "json::number", "classjson_1_1number.html", null ],
+      [ "json::string", "classjson_1_1string.html", null ],
+      [ "json::vector", "classjson_1_1vector.html", null ]
+    ] ],
+    [ "json::obj::ptrless", "structjson_1_1obj_1_1ptrless.html", null ],
     [ "LayoutChoices", "class_layout_choices.html", null ],
     [ "LayoutOption", "class_layout_option.html", null ],
     [ "LiftEqual< T >", "class_lift_equal.html", [
@@ -582,7 +796,14 @@ var hierarchy =
       [ "Logging::PrettyWriterAdapter", "class_logging_1_1_pretty_writer_adapter.html", null ]
     ] ],
     [ "LoweredParserMatchAllocator", "group__parde.html#class_lowered_parser_match_allocator", null ],
+    [ "lrt_params", "structlrt__params.html", null ],
+    [ "MapForKey< M >", "class_map_for_key.html", null ],
+    [ "MaskCounter", "class_mask_counter.html", null ],
+    [ "Match", "struct_match.html", null ],
+    [ "match_element", "structmatch__element.html", null ],
+    [ "match_t", "structmatch__t.html", null ],
     [ "MatchAction", "struct_match_action.html", null ],
+    [ "MatchSlotTracker", "class_match_slot_tracker.html", null ],
     [ "MAU::Inspector", null, [
       [ "AnalyzeActionTables", "class_analyze_action_tables.html", null ]
     ] ],
@@ -613,7 +834,14 @@ var hierarchy =
     [ "Memories::Use::ScmLoc", "struct_memories_1_1_use_1_1_scm_loc.html", null ],
     [ "Memories::Use::Way", "struct_memories_1_1_use_1_1_way.html", null ],
     [ "memory_vector", "classmemory__vector.html", null ],
+    [ "MemUnit", "struct_mem_unit.html", [
+      [ "Ram", "struct_ram.html", null ]
+    ] ],
     [ "MeterALU::Format::Use", "struct_meter_a_l_u_1_1_format_1_1_use.html", null ],
+    [ "MeterBus_t", "struct_meter_bus__t.html", null ],
+    [ "MeterTable", null, [
+      [ "Target::Tofino::MeterTable", "class_target_1_1_tofino_1_1_meter_table.html", null ]
+    ] ],
     [ "MinToMax", "struct_min_to_max.html", null ],
     [ "Modifier", null, [
       [ "CopyBlockPragmas::CopyToTables", "class_copy_block_pragmas_1_1_copy_to_tables.html", null ],
@@ -645,6 +873,7 @@ var hierarchy =
       ] ],
       [ "RenameParam", "class_rename_param.html", null ]
     ] ],
+    [ "option_t", "structoption__t.html", null ],
     [ "P4::AbstractParserDriver", "class_p4_1_1_abstract_parser_driver.html", [
       [ "P4::P4ParserDriver", "class_p4_1_1_p4_parser_driver.html", null ],
       [ "P4::V1::V1ParserDriver", "class_p4_1_1_v1_1_1_v1_parser_driver.html", null ]
@@ -1057,6 +1286,8 @@ var hierarchy =
     [ "P4::hexvec", "class_p4_1_1hexvec.html", null ],
     [ "P4::ICompileContext", "class_p4_1_1_i_compile_context.html", [
       [ "P4::BaseCompileContext", "class_p4_1_1_base_compile_context.html", [
+        [ "CompileContext< GTestOptions >", "class_compile_context.html", null ],
+        [ "CompileContext< OptionsType >", "class_compile_context.html", null ],
         [ "P4::P4CContext", "class_p4_1_1_p4_c_context.html", [
           [ "P4::P4CContextWithOptions< BMV2Options >", "class_p4_1_1_p4_c_context_with_options.html", null ],
           [ "P4::P4CContextWithOptions< PnaNicOptions >", "class_p4_1_1_p4_c_context_with_options.html", null ],
@@ -1105,11 +1336,51 @@ var hierarchy =
       [ "CollectWeakFields", "group___deparser_copy_opt.html#class_collect_weak_fields", null ],
       [ "CreateConstants", "group___deparser_copy_opt.html#class_create_constants", null ],
       [ "DynamicNextTable", "class_dynamic_next_table.html", null ],
+      [ "HashExpr", "class_hash_expr.html", [
+        [ "HashExpr::Crc", "class_hash_expr_1_1_crc.html", null ],
+        [ "HashExpr::Mask", "class_hash_expr_1_1_mask.html", null ],
+        [ "HashExpr::PhvRef", "class_hash_expr_1_1_phv_ref.html", null ],
+        [ "HashExpr::Random", "class_hash_expr_1_1_random.html", null ],
+        [ "HashExpr::SExtend", "class_hash_expr_1_1_s_extend.html", null ],
+        [ "HashExpr::Slice", "class_hash_expr_1_1_slice.html", null ],
+        [ "HashExpr::Stripe", "class_hash_expr_1_1_stripe.html", null ],
+        [ "HashExpr::Xor", "class_hash_expr_1_1_xor.html", null ],
+        [ "HashExpr::XorHash", "class_hash_expr_1_1_xor_hash.html", null ]
+      ] ],
       [ "IXBar", "struct_i_x_bar.html", [
         [ "Tofino::IXBar", "struct_tofino_1_1_i_x_bar.html", null ]
       ] ],
       [ "IXBar::Use::GroupInfo", "struct_i_x_bar_1_1_use_1_1_group_info.html", null ],
+      [ "InputXbar::GroupSet", "struct_input_xbar_1_1_group_set.html", null ],
+      [ "Instruction", "struct_instruction.html", [
+        [ "StatefulAlu::SaluInstruction", "struct_stateful_alu_1_1_salu_instruction.html", [
+          [ "StatefulAlu::AluOP", "struct_stateful_alu_1_1_alu_o_p.html", [
+            [ "StatefulAlu::DivMod", "struct_stateful_alu_1_1_div_mod.html", null ]
+          ] ],
+          [ "StatefulAlu::BitOP", "struct_stateful_alu_1_1_bit_o_p.html", null ],
+          [ "StatefulAlu::CmpOP", "struct_stateful_alu_1_1_cmp_o_p.html", null ],
+          [ "StatefulAlu::MinMax", "struct_stateful_alu_1_1_min_max.html", null ],
+          [ "StatefulAlu::OutOP", "struct_stateful_alu_1_1_out_o_p.html", null ],
+          [ "StatefulAlu::TMatchOP", "struct_stateful_alu_1_1_t_match_o_p.html", null ]
+        ] ],
+        [ "VLIW::VLIWInstruction", "struct_v_l_i_w_1_1_v_l_i_w_instruction.html", [
+          [ "VLIW::AluOP", "struct_v_l_i_w_1_1_alu_o_p.html", [
+            [ "VLIW::AluOP3Src", "struct_v_l_i_w_1_1_alu_o_p3_src.html", null ]
+          ] ],
+          [ "VLIW::ByteRotateMerge", "struct_v_l_i_w_1_1_byte_rotate_merge.html", null ],
+          [ "VLIW::CondMoveMux", "struct_v_l_i_w_1_1_cond_move_mux.html", null ],
+          [ "VLIW::DepositField", "struct_v_l_i_w_1_1_deposit_field.html", null ],
+          [ "VLIW::LoadConst", "struct_v_l_i_w_1_1_load_const.html", null ],
+          [ "VLIW::NulOP", "struct_v_l_i_w_1_1_nul_o_p.html", null ],
+          [ "VLIW::Set", "struct_v_l_i_w_1_1_set.html", null ],
+          [ "VLIW::ShiftOP", "struct_v_l_i_w_1_1_shift_o_p.html", null ]
+        ] ]
+      ] ],
       [ "JbayNextTable", "class_jbay_next_table.html", null ],
+      [ "MatchSource", "class_match_source.html", [
+        [ "HashMatchSource", "class_hash_match_source.html", null ],
+        [ "Phv::Ref", "class_phv_1_1_ref.html", null ]
+      ] ],
       [ "MauPower::SimplePowerGraph", "class_mau_power_1_1_simple_power_graph.html", null ],
       [ "P4::AllDefinitions", "class_p4_1_1_all_definitions.html", null ],
       [ "P4::BMV2::CFG", "class_p4_1_1_b_m_v2_1_1_c_f_g.html", null ],
@@ -1250,7 +1521,20 @@ var hierarchy =
       [ "P4::Util::Comment", "class_p4_1_1_util_1_1_comment.html", null ],
       [ "P4::ValueMap", "class_p4_1_1_value_map.html", null ],
       [ "P4HashFunction", "struct_p4_hash_function.html", null ],
-      [ "SynthesizePovEncoder", "group___deparser_copy_opt.html#class_synthesize_pov_encoder", null ]
+      [ "Phv::Slice", "class_phv_1_1_slice.html", null ],
+      [ "StatefulAlu::operand", "struct_stateful_alu_1_1operand.html", null ],
+      [ "StatefulAlu::operand::Base", "struct_stateful_alu_1_1operand_1_1_base.html", [
+        [ "StatefulAlu::operand::Const", "struct_stateful_alu_1_1operand_1_1_const.html", null ],
+        [ "StatefulAlu::operand::MathFn", "struct_stateful_alu_1_1operand_1_1_math_fn.html", null ],
+        [ "StatefulAlu::operand::Memory", "struct_stateful_alu_1_1operand_1_1_memory.html", null ],
+        [ "StatefulAlu::operand::Phv", "struct_stateful_alu_1_1operand_1_1_phv.html", [
+          [ "StatefulAlu::operand::PhvRaw", "struct_stateful_alu_1_1operand_1_1_phv_raw.html", null ],
+          [ "StatefulAlu::operand::PhvReg", "struct_stateful_alu_1_1operand_1_1_phv_reg.html", null ]
+        ] ],
+        [ "StatefulAlu::operand::Regfile", "struct_stateful_alu_1_1operand_1_1_regfile.html", null ]
+      ] ],
+      [ "SynthesizePovEncoder", "group___deparser_copy_opt.html#class_synthesize_pov_encoder", null ],
+      [ "VLIW::Operand", "struct_v_l_i_w_1_1_operand.html", null ]
     ] ],
     [ "P4::indent_t", "class_p4_1_1indent__t.html", null ],
     [ "P4::IndentCtl::TempIndent", "class_p4_1_1_indent_ctl_1_1_temp_indent.html", null ],
@@ -1398,6 +1682,9 @@ var hierarchy =
     [ "P4::ordered_map< K, V, COMP, ALLOC >::value_compare", "class_p4_1_1ordered__map_1_1value__compare.html", null ],
     [ "P4::ordered_map< const State *, ordered_set< const State * > >", "class_p4_1_1ordered__map.html", [
       [ "ParserStateMap< State >", "group__parde.html#struct_parser_state_map", null ]
+    ] ],
+    [ "P4::ordered_map< obj *, std::unique_ptr< obj >, obj::ptrless >", "class_p4_1_1ordered__map.html", [
+      [ "json::map", "classjson_1_1map.html", null ]
     ] ],
     [ "P4::ordered_set< T, COMP, ALLOC >", "class_p4_1_1ordered__set.html", null ],
     [ "P4::ordered_set< const PHV::Field * >", "class_p4_1_1ordered__set.html", [
@@ -2026,6 +2313,7 @@ var hierarchy =
     [ "P4::Util::InputSources", "class_p4_1_1_util_1_1_input_sources.html", null ],
     [ "P4::Util::iterator_range< Iter, Sentinel >", "class_p4_1_1_util_1_1iterator__range.html", null ],
     [ "P4::Util::Options", "class_p4_1_1_util_1_1_options.html", [
+      [ "GTestOptions", "class_g_test_options.html", null ],
       [ "P4::ParserOptions", "class_p4_1_1_parser_options.html", [
         [ "P4::CompilerOptions", "class_p4_1_1_compiler_options.html", [
           [ "P4::BMV2::BMV2Options", "class_p4_1_1_b_m_v2_1_1_b_m_v2_options.html", [
@@ -3361,6 +3649,7 @@ var hierarchy =
     [ "P4RuntimeSymbolTableIface", "class_p4_runtime_symbol_table_iface.html", [
       [ "P4::ControlPlaneAPI::P4RuntimeSymbolTable", "class_p4_1_1_control_plane_a_p_i_1_1_p4_runtime_symbol_table.html", null ]
     ] ],
+    [ "P4Table", "class_p4_table.html", null ],
     [ "p4tc_ext_bpf_params", "structp4tc__ext__bpf__params.html", null ],
     [ "p4tc_ext_bpf_val", "structp4tc__ext__bpf__val.html", null ],
     [ "p4tc_ext_csum_params", "structp4tc__ext__csum__params.html", null ],
@@ -3393,6 +3682,10 @@ var hierarchy =
         [ "VerifyParallelWritesAndReads", "class_verify_parallel_writes_and_reads.html", null ]
       ] ]
     ] ],
+    [ "PaddingInfoCollector", "class_padding_info_collector.html", null ],
+    [ "PaddingInfoCollector::PadInfo", "struct_padding_info_collector_1_1_pad_info.html", null ],
+    [ "PaddingInfoCollector::PadState", "struct_padding_info_collector_1_1_pad_state.html", null ],
+    [ "pair_t", "structpair__t.html", null ],
     [ "PairLess< A, B, AComp, BCmp >", "class_pair_less.html", null ],
     [ "Parde::Lowered::ExtractSimplifier", "group___lower_parser_i_r.html#struct_parde_1_1_lowered_1_1_extract_simplifier", null ],
     [ "PardeSpec", "class_parde_spec.html", [
@@ -3401,12 +3694,31 @@ var hierarchy =
       ] ],
       [ "TofinoPardeSpec", "class_tofino_parde_spec.html", null ]
     ] ],
+    [ "Parsable", null, [
+      [ "Section", "class_section.html", null ]
+    ] ],
+    [ "Parser::Checksum", "struct_parser_1_1_checksum.html", null ],
     [ "Parser::Def", "struct_parser_1_1_def.html", null ],
+    [ "Parser::State", "struct_parser_1_1_state.html", null ],
+    [ "Parser::State::Match", "struct_parser_1_1_state_1_1_match.html", null ],
+    [ "Parser::State::Match::Clot", "struct_parser_1_1_state_1_1_match_1_1_clot.html", null ],
+    [ "Parser::State::Match::FieldMapping", "struct_parser_1_1_state_1_1_match_1_1_field_mapping.html", null ],
+    [ "Parser::State::Match::HdrLenIncStop", "struct_parser_1_1_state_1_1_match_1_1_hdr_len_inc_stop.html", null ],
+    [ "Parser::State::Match::Save", "struct_parser_1_1_state_1_1_match_1_1_save.html", null ],
+    [ "Parser::State::Match::Set", "struct_parser_1_1_state_1_1_match_1_1_set.html", null ],
+    [ "Parser::State::MatchKey", "struct_parser_1_1_state_1_1_match_key.html", null ],
+    [ "Parser::State::MatchKey.data", "struct_parser_1_1_state.html#struct_parser_1_1_state_1_1_match_key_8data", null ],
+    [ "Parser::State::OutputUse", "struct_parser_1_1_state_1_1_output_use.html", null ],
+    [ "Parser::State::Ref", "struct_parser_1_1_state_1_1_ref.html", null ],
     [ "Parser::Use", "struct_parser_1_1_use.html", null ],
     [ "Parser::UseDef", "struct_parser_1_1_use_def.html", null ],
     [ "ParserAsmOutput", "group___asm_output.html#struct_parser_asm_output", null ],
     [ "ParserCriticalPathResult", "struct_parser_critical_path_result.html", null ],
     [ "ParserQuery", "struct_parser_query.html", null ],
+    [ "ParserRegisterSet", null, [
+      [ "Target::JBay::parser_regs", "struct_target_1_1_j_bay_1_1parser__regs.html", null ],
+      [ "Target::Tofino::parser_regs", "struct_target_1_1_tofino_1_1parser__regs.html", null ]
+    ] ],
     [ "PassManager", null, [
       [ "AdjustEgressPacketLength", "class_adjust_egress_packet_length.html", null ],
       [ "AllocateParserMatchRegisters", "group___lower_parser_i_r.html#struct_allocate_parser_match_registers", null ],
@@ -3471,6 +3783,8 @@ var hierarchy =
     [ "PHV::ParserPackingValidatorInterface", "class_p_h_v_1_1_parser_packing_validator_interface.html", [
       [ "PHV::v2::ParserPackingValidator", "class_p_h_v_1_1v2_1_1_parser_packing_validator.html", null ]
     ] ],
+    [ "Phv::PerStageInfo", "class_phv.html#struct_phv_1_1_per_stage_info", null ],
+    [ "Phv::Register", "struct_phv_1_1_register.html", null ],
     [ "PHV::SliceResult< Cluster >", "namespace_p_h_v.html#struct_p_h_v_1_1_slice_result", null ],
     [ "PHV::Slicing::AfterSplitConstraint", "struct_p_h_v_1_1_slicing_1_1_after_split_constraint.html", null ],
     [ "PHV::Slicing::Internal::ScSubRangeFsFinder", "struct_p_h_v_1_1_slicing_1_1_internal_1_1_sc_sub_range_fs_finder.html", null ],
@@ -3545,6 +3859,7 @@ var hierarchy =
     [ "PragmaAlias::AliasDestination", "class_pragma_alias.html#struct_pragma_alias_1_1_alias_destination", null ],
     [ "PragmaBytePack::AddConstraintResult", "struct_pragma_byte_pack_1_1_add_constraint_result.html", null ],
     [ "PragmaBytePack::PackConstraint", "class_pragma_byte_pack.html#struct_pragma_byte_pack_1_1_pack_constraint", null ],
+    [ "prefix", "structprefix.html", null ],
     [ "PropagateExtractConst::ResolveExtractConst::AmbiguousPropagation", "struct_propagate_extract_const_1_1_resolve_extract_const_1_1_ambiguous_propagation.html", null ],
     [ "psa_egress_deparser_input_metadata_t", "structpsa__egress__deparser__input__metadata__t.html", null ],
     [ "psa_egress_input_metadata_t", "structpsa__egress__input__metadata__t.html", null ],
@@ -3554,19 +3869,31 @@ var hierarchy =
     [ "psa_ingress_input_metadata_t", "structpsa__ingress__input__metadata__t.html", null ],
     [ "psa_ingress_output_metadata_t", "structpsa__ingress__output__metadata__t.html", null ],
     [ "psa_ingress_parser_input_metadata_t", "structpsa__ingress__parser__input__metadata__t.html", null ],
+    [ "ptrless< T >", "structptrless.html", null ],
+    [ "RandomNumberGen", "struct_random_number_gen.html", null ],
     [ "rapidjson::Document", null, [
       [ "Logging::Logger", "class_logging_1_1_logger.html", null ]
     ] ],
     [ "Reachability< Graph >", "class_reachability.html", null ],
     [ "ReductionOrInfo", "struct_reduction_or_info.html", null ],
+    [ "register_reference< REG >", "classregister__reference.html", null ],
+    [ "regrange", "structregrange.html", null ],
+    [ "REGSET::top_level_regs", null, [
+      [ "TopLevelRegs< REGSET >", "class_top_level_regs.html", null ]
+    ] ],
     [ "RerunTablePlacementTrigger", "struct_rerun_table_placement_trigger.html", null ],
     [ "ReversibleParserGraph", "group__parde.html#class_reversible_parser_graph", null ],
     [ "RunId", "class_run_id.html", null ],
+    [ "rvalue_reference_wrapper< T >", "classrvalue__reference__wrapper.html", null ],
+    [ "SaluInstruction", null, [
+      [ "MinMax", "struct_min_max.html", null ]
+    ] ],
     [ "SccTopoSorter", "class_scc_topo_sorter.html", null ],
     [ "ScoreContext", "class_score_context.html", null ],
     [ "sk_buff", "structsk__buff.html", null ],
     [ "Slice", "class_slice.html", null ],
     [ "SliceListAccumulator", "struct_slice_list_accumulator.html", null ],
+    [ "slist< T >", "classslist.html", null ],
     [ "solver::ActionSolverBase", "classsolver_1_1_action_solver_base.html", [
       [ "solver::ActionDarkSolver", "classsolver_1_1_action_dark_solver.html", null ],
       [ "solver::ActionMochaSolver", "classsolver_1_1_action_mocha_solver.html", null ],
@@ -3587,18 +3914,25 @@ var hierarchy =
     [ "solver::symbolic_bitvec::BvContext", "classsolver_1_1symbolic__bitvec_1_1_bv_context.html", null ],
     [ "solver::symbolic_bitvec::Expr", "classsolver_1_1symbolic__bitvec_1_1_expr.html", null ],
     [ "SortExtracts", "struct_sort_extracts.html", null ],
+    [ "Stage_data", "class_stage__data.html", [
+      [ "Stage", "class_stage.html", null ]
+    ] ],
     [ "StageUseEstimate", "struct_stage_use_estimate.html", null ],
     [ "StageUseEstimate::RAM_counter", "struct_stage_use_estimate_1_1_r_a_m__counter.html", null ],
     [ "StartLen", "struct_start_len.html", null ],
     [ "StateExtractUsage", "struct_state_extract_usage.html", null ],
     [ "StatefulConflict", "struct_stateful_conflict.html", null ],
+    [ "StatefulTable", null, [
+      [ "Target::Tofino::StatefulTable", "class_target_1_1_tofino_1_1_stateful_table.html", null ]
+    ] ],
     [ "std::basic_streambuf", null, [
       [ "P4::basic_nullbuf< cT, std::char_traits< cT > >", "class_p4_1_1basic__nullbuf.html", null ],
       [ "P4::basic_nullbuf< cT, traits >", "class_p4_1_1basic__nullbuf.html", null ]
     ] ],
     [ "std::basic_string< Char >", null, [
       [ "std::string", null, [
-        [ "P4::JsonString", "class_p4_1_1_json_string.html", null ]
+        [ "P4::JsonString", "class_p4_1_1_json_string.html", null ],
+        [ "json::string", "classjson_1_1string.html", null ]
       ] ]
     ] ],
     [ "std::enable_if", null, [
@@ -3654,6 +3988,9 @@ var hierarchy =
           [ "std::basic_iostream< Char >", null, null ]
         ] ]
       ] ]
+    ] ],
+    [ "std::iostream", null, [
+      [ "fdstream", "classfdstream.html", null ]
     ] ],
     [ "std::is_base_of", null, [
       [ "P4::RTTI::has_rtti< T >", "struct_p4_1_1_r_t_t_i_1_1has__rtti.html", null ]
@@ -3848,7 +4185,10 @@ var hierarchy =
       [ "P4::safe_vector< P4::safe_vector< SingleActionPositions > >", "class_p4_1_1safe__vector.html", null ]
     ] ],
     [ "std::iterator< PackedItem >", null, [
-      [ "P4::ordered_set< T, COMP, ALLOC >::sorted_iterator", "class_p4_1_1ordered__set_1_1sorted__iterator.html", null ]
+      [ "IterKeys< PairIter >::iterator", "class_iter_keys_1_1iterator.html", null ],
+      [ "IterValues< PairIter >::iterator", "class_iter_values_1_1iterator.html", null ],
+      [ "P4::ordered_set< T, COMP, ALLOC >::sorted_iterator", "class_p4_1_1ordered__set_1_1sorted__iterator.html", null ],
+      [ "slist< T >::iterator", "classslist_1_1iterator.html", null ]
     ] ],
     [ "std::vector< std::pair< const IR::Node *, const IR::Node * >, std::allocator< std::pair< const IR::Node *, const IR::Node * > > >", null, [
       [ "P4::safe_vector< std::pair< const IR::Node *, const IR::Node * > >", "class_p4_1_1safe__vector.html", null ]
@@ -3859,10 +4199,32 @@ var hierarchy =
     [ "std::vector< std::pair< int, P4::ClosedRange< RangeUnit::Bit, Endian::Little > >, std::allocator< std::pair< int, P4::ClosedRange< RangeUnit::Bit, Endian::Little > > > >", null, [
       [ "P4::safe_vector< std::pair< int, P4::ClosedRange< RangeUnit::Bit, Endian::Little > > >", "class_p4_1_1safe__vector.html", null ]
     ] ],
+    [ "std::vector< std::unique_ptr< obj > >", null, [
+      [ "json::vector", "classjson_1_1vector.html", null ]
+    ] ],
     [ "std::vector< T, std::allocator< std::vector< const IR::MAU::Table * > > >", null, [
       [ "dyn_vector< std::vector< const IR::MAU::Table * > >", "classdyn__vector.html", null ]
     ] ],
     [ "SuperClusterBuilder", "class_super_cluster_builder.html", null ],
+    [ "Table", "class_table.html", [
+      [ "AlwaysRunTable", "class_always_run_table.html", null ],
+      [ "FakeTable", "class_fake_table.html", null ],
+      [ "IdletimeTable", "class_idletime_table.html", null ]
+    ] ],
+    [ "Table::Actions", "class_table_1_1_actions.html", null ],
+    [ "Table::Actions::Action", "struct_table_1_1_actions_1_1_action.html", null ],
+    [ "Table::Actions::Action::alias_t", "struct_table_1_1_actions_1_1_action_1_1alias__t.html", null ],
+    [ "Table::Call::Arg", "struct_table_1_1_call_1_1_arg.html", null ],
+    [ "Table::Format", "class_table_1_1_format.html", null ],
+    [ "Table::Format::bitrange_t", "struct_table_1_1_format_1_1bitrange__t.html", null ],
+    [ "Table::Format::Field", "struct_table_1_1_format_1_1_field.html", null ],
+    [ "Table::Layout", "struct_table_1_1_layout.html", null ],
+    [ "Table::NextTables", "class_table_1_1_next_tables.html", null ],
+    [ "Table::p4_param", "struct_table_1_1p4__param.html", null ],
+    [ "Table::Ref", "struct_table_1_1_ref.html", [
+      [ "Table::Call", "struct_table_1_1_call.html", null ]
+    ] ],
+    [ "Table::Type", "class_table_1_1_type.html", null ],
     [ "TableFormat", "struct_table_format.html", null ],
     [ "TableFormat::Use", "struct_table_format_1_1_use.html", null ],
     [ "TableFormat::Use::match_group_use", "struct_table_format_1_1_use_1_1match__group__use.html", null ],
@@ -3882,6 +4244,33 @@ var hierarchy =
     [ "TableResourceAlloc", "struct_table_resource_alloc.html", null ],
     [ "TableSummary::PlacedTable", "struct_table_summary_1_1_placed_table.html", null ],
     [ "TableTree", "class_table_tree.html", null ],
+    [ "Target", "class_target.html", [
+      [ "Target::JBay", "class_target_1_1_j_bay.html", [
+        [ "Target::Tofino2A0", "class_target_1_1_tofino2_a0.html", null ],
+        [ "Target::Tofino2H", "class_target_1_1_tofino2_h.html", null ],
+        [ "Target::Tofino2M", "class_target_1_1_tofino2_m.html", null ],
+        [ "Target::Tofino2U", "class_target_1_1_tofino2_u.html", null ]
+      ] ],
+      [ "Target::Tofino", "class_target_1_1_tofino.html", null ]
+    ] ],
+    [ "Target::JBay::top_level_regs", "class_target_1_1_j_bay.html#struct_target_1_1_j_bay_1_1top__level__regs", null ],
+    [ "Target::Phv", "class_target_1_1_phv.html", [
+      [ "Target::JBay::Phv", "class_target_1_1_j_bay_1_1_phv.html", [
+        [ "Target::Tofino2A0::Phv", "class_target_1_1_tofino2_a0_1_1_phv.html", null ],
+        [ "Target::Tofino2H::Phv", "class_target_1_1_tofino2_h_1_1_phv.html", null ],
+        [ "Target::Tofino2M::Phv", "class_target_1_1_tofino2_m_1_1_phv.html", null ],
+        [ "Target::Tofino2U::Phv", "class_target_1_1_tofino2_u_1_1_phv.html", null ]
+      ] ],
+      [ "Target::Tofino::Phv", "class_target_1_1_tofino_1_1_phv.html", null ]
+    ] ],
+    [ "Target::Tofino::deparser_regs", "class_target_1_1_tofino.html#struct_target_1_1_tofino_1_1deparser__regs", null ],
+    [ "Target::Tofino::top_level_regs", "class_target_1_1_tofino.html#struct_target_1_1_tofino_1_1top__level__regs", null ],
+    [ "TernaryIndirectTable", null, [
+      [ "Target::Tofino::TernaryIndirectTable", "class_target_1_1_tofino_1_1_ternary_indirect_table.html", null ]
+    ] ],
+    [ "TernaryMatchTable", null, [
+      [ "Target::Tofino::TernaryMatchTable", "class_target_1_1_tofino_1_1_ternary_match_table.html", null ]
+    ] ],
     [ "testing::Test", null, [
       [ "P4::P4Tools::Test::FormatTest", "class_p4_1_1_p4_tools_1_1_test_1_1_format_test.html", null ],
       [ "P4::P4Tools::Test::P4AssertsParserTest", "class_p4_1_1_p4_tools_1_1_test_1_1_p4_asserts_parser_test.html", null ],
@@ -4028,6 +4417,10 @@ var hierarchy =
     [ "Tofino::IXBar::Use::SaluInputSource", "struct_tofino_1_1_i_x_bar_1_1_use_1_1_salu_input_source.html", null ],
     [ "Tofino::Memories::SRAM_group::color_mapram_group", "struct_tofino_1_1_memories_1_1_s_r_a_m__group_1_1color__mapram__group.html", null ],
     [ "Tofino::Memories::SRAM_group::selector_info", "struct_tofino_1_1_memories_1_1_s_r_a_m__group_1_1selector__info.html", null ],
+    [ "tofino_phv_output_map", "structtofino__phv__output__map.html", null ],
+    [ "TopLevel", "class_top_level.html", [
+      [ "TopLevelRegs< REGSET >", "class_top_level_regs.html", null ]
+    ] ],
     [ "TransactData", "struct_transact_data.html", null ],
     [ "Transform", null, [
       [ "DeparserTransform", "group__parde.html#class_deparser_transform", [
@@ -4064,19 +4457,44 @@ var hierarchy =
       ] ],
       [ "SplitPadding", "class_split_padding.html", null ]
     ] ],
+    [ "TwoLevelCache< T1, T2, T3 >", "class_two_level_cache.html", null ],
     [ "TypeComparator", "struct_type_comparator.html", null ],
+    [ "ubits_base", "structubits__base.html", [
+      [ "ubits< 9 >", "structubits.html", null ],
+      [ "ubits< 1 >", "structubits.html", null ],
+      [ "ubits< N >", "structubits.html", null ]
+    ] ],
     [ "UT_hash_bucket", "struct_u_t__hash__bucket.html", null ],
     [ "UT_hash_handle", "struct_u_t__hash__handle.html", null ],
     [ "UT_hash_table", "struct_u_t__hash__table.html", null ],
     [ "Value", "group___deparser_copy_opt.html#struct_value", null ],
+    [ "value_t", "structvalue__t.html", null ],
+    [ "value_t.__unnamed0__", "unionvalue__t_8____unnamed0____.html", null ],
+    [ "value_t.__unnamed0__.range", "structvalue__t_8____unnamed0_____8range.html", null ],
+    [ "VersionIter", "class_version_iter.html", null ],
     [ "VersionMap", "group___deparser_copy_opt.html#struct_version_map", null ],
     [ "Visitor", null, [
       [ "MoveToEgress::FindIngressPacketMods", "class_move_to_egress_1_1_find_ingress_packet_mods.html", null ],
       [ "ThreadVisitor", "class_thread_visitor.html", null ]
     ] ],
+    [ "VLIW::Operand::Base", "struct_v_l_i_w_1_1_operand_1_1_base.html", [
+      [ "VLIW::Operand::Action", "struct_v_l_i_w_1_1_operand_1_1_action.html", null ],
+      [ "VLIW::Operand::Const", "struct_v_l_i_w_1_1_operand_1_1_const.html", null ],
+      [ "VLIW::Operand::HashDist", "struct_v_l_i_w_1_1_operand_1_1_hash_dist.html", null ],
+      [ "VLIW::Operand::Named", "struct_v_l_i_w_1_1_operand_1_1_named.html", null ],
+      [ "VLIW::Operand::Phv", "struct_v_l_i_w_1_1_operand_1_1_phv.html", null ],
+      [ "VLIW::Operand::RandomGen", "struct_v_l_i_w_1_1_operand_1_1_random_gen.html", null ],
+      [ "VLIW::Operand::RawAction", "struct_v_l_i_w_1_1_operand_1_1_raw_action.html", null ]
+    ] ],
+    [ "Way", "struct_way.html", null ],
+    [ "WayRam", "struct_way_ram.html", null ],
+    [ "widereg_base", "structwidereg__base.html", [
+      [ "widereg< N >", "structwidereg.html", null ]
+    ] ],
     [ "WithParamInterface", null, [
       [ "P4::Test::V1ModelStdMetaTranslateIngressExitTest", "class_p4_1_1_test_1_1_v1_model_std_meta_translate_ingress_exit_test.html", null ],
       [ "P4::Test::V1ModelStdMetaTranslateTest", "class_p4_1_1_test_1_1_v1_model_std_meta_translate_test.html", null ]
     ] ],
+    [ "wmatch_t", "structwmatch__t.html", null ],
     [ "ZeroToMax", "struct_zero_to_max.html", null ]
 ];
