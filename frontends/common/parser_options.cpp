@@ -23,6 +23,7 @@ limitations under the License.
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include <filesystem>
 #include <memory>
 #include <regex>
 #include <unordered_set>
@@ -42,6 +43,7 @@ namespace P4 {
  * installed from source locally. If the compiled binary is moved to another
  * machine, the 'p4includePath' would contain the path on the original machine.
  */
+// TODO: This should be std::filesystem::path.
 const char *p4includePath = CONFIG_PKGDATADIR "/p4include";
 const char *p4_14includePath = CONFIG_PKGDATADIR "/p4_14include";
 
@@ -355,53 +357,35 @@ void ParserOptions::setInputFile() {
     }
 }
 
-namespace {
-
-bool setIncludePathIfExists(const char *&includePathOut, const char *possiblePath) {
-    struct stat st;
-    if (!(stat(possiblePath, &st) >= 0 && S_ISDIR(st.st_mode))) return false;
-    if (auto path = realpath(possiblePath, NULL))
-        includePathOut = path;
-    else
-        includePathOut = strdup(possiblePath);
-    return true;
-}
-
-}  // namespace
-
 bool ParserOptions::searchForIncludePath(const char *&includePathOut,
-                                         std::vector<cstring> userSpecifiedPaths,
+                                         const std::vector<cstring> &userSpecifiedPaths,
                                          const char *exename) {
-    bool found = false;
-    char buffer[PATH_MAX];
-
-    BUG_CHECK(strlen(exename) < PATH_MAX, "executable path %1% is too long.", exename);
-
-    snprintf(buffer, sizeof(buffer), "%s", exename);
-    if (char *p = strrchr(buffer, '/')) {
-        ++p;
-        exe_name = cstring(p);
-
-        for (auto path : userSpecifiedPaths) {
-            snprintf(p, buffer + sizeof(buffer) - p, "%s", path.c_str());
-            if (setIncludePathIfExists(includePathOut, buffer)) {
-                LOG3("Setting p4 include path to " << includePathOut);
-                found = true;
-                break;
-            }
+    for (const auto &path : userSpecifiedPaths) {
+        auto includePath =
+            std::filesystem::path(exename).parent_path() / std::filesystem::path(path.c_str());
+        if (std::filesystem::exists(includePath)) {
+            includePathOut = strdup(std::filesystem::absolute(includePath).c_str());
+            return true;
         }
     }
-    return found;
+    return false;
 }
 
 std::vector<const char *> *ParserOptions::process(int argc, char *const argv[]) {
-    searchForIncludePath(p4includePath, {"p4include"_cs, "../p4include"_cs, "../../p4include"_cs},
-                         exename(argv[0]));
+    auto executablePath = getExecutablePath();
+    if (executablePath.empty()) {
+        std::cerr << "Could not determine executable path" << std::endl;
+        return nullptr;
+    }
+    exe_name = cstring(executablePath.stem().c_str());
+
     searchForIncludePath(p4_14includePath,
                          {"p4_14include"_cs, "../p4_14include"_cs, "../../p4_14include"_cs},
-                         exename(argv[0]));
+                         executablePath.c_str());
+    searchForIncludePath(p4includePath, {"p4include"_cs, "../p4include"_cs, "../../p4include"_cs},
+                         executablePath.c_str());
 
-    auto remainingOptions = Util::Options::process(argc, argv);
+    auto *remainingOptions = Util::Options::process(argc, argv);
     if (!validateOptions()) {
         return nullptr;
     }
