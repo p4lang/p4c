@@ -8,7 +8,7 @@
 
 #include "../ir/ir.h"
 #include "../lib/log.h"
-#include "metrics.h"
+#include "metricsStructure.h"
 
 namespace P4 {
 

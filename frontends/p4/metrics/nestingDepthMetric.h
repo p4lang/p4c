@@ -2,7 +2,7 @@
 #define FRONTENDS_P4_NESTING_DEPTH_H_
 
 #include "../ir/ir.h"
-#include "metrics.h"
+#include "metricsStructure.h"
 
 namespace P4 {
 

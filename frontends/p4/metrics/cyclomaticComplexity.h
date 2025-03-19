@@ -2,7 +2,7 @@
 #define FRONTENDS_P4_CYCLOMATIC_COMPLEXITY_H_
 
 #include "ir/ir.h"
-#include "metrics.h"
+#include "metricsStructure.h"
 
 namespace P4 {
 

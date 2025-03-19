@@ -84,7 +84,7 @@ set (P4_FRONTEND_SRCS
   p4/unusedDeclarations.cpp
   p4/uselessCasts.cpp
   p4/validateParsedProgram.cpp
-  p4/metrics/metrics.cpp
+  p4/metrics/metricsPassManager.cpp
   p4/metrics/cyclomaticComplexity.cpp
   p4/metrics/duplicateCodeMetric.cpp
   p4/metrics/unusedCodeMetric.cpp
@@ -97,6 +97,7 @@ set (P4_FRONTEND_SRCS
   p4/metrics/parserMetrics.cpp
   p4/metrics/inlinedActionsMetric.cpp
   p4/metrics/externalObjectsMetric.cpp
+  p4/metrics/exportMetrics.cpp
   )
 
 set (P4_FRONTEND_HDRS
@@ -174,7 +175,7 @@ set (P4_FRONTEND_HDRS
   p4/validateMatchAnnotations.h
   p4/validateParsedProgram.h
   p4/validateValueSets.h
-  p4/metrics/metrics.h
+  p4/metrics/metricsPassManager.h
   p4/metrics/cyclomaticComplexity.h
   p4/metrics/duplicateCodeMetric.h
   p4/metrics/unusedCodeMetric.h
@@ -187,6 +188,7 @@ set (P4_FRONTEND_HDRS
   p4/metrics/parserMetrics.h
   p4/metrics/inlinedActionsMetric.h
   p4/metrics/externalObjectsMetric.h
+  p4/metrics/exportMetrics.h
   )
 
 

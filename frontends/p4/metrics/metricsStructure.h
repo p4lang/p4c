@@ -1,17 +1,10 @@
-#ifndef FRONTENDS_P4_METRICS_H_
-#define FRONTENDS_P4_METRICS_H_
+#ifndef METRICS_STRUCTURE_H_
+#define METRICS_STRUCTURE_H_
 
-#include <unordered_map>
 #include <string>
-#include "../ir/ir.h"
 #include "lib/ordered_map.h"
 
 namespace P4 {
-
-// Code metric collection option
-extern std::unordered_set<std::string> codeMetrics;
-// List of valid code metric values
-extern std::unordered_set<std::string> validMetrics;
 
 // Define the Metrics structure that contains all the metrics
 struct Metrics {
@@ -100,16 +93,5 @@ struct Metrics {
     unsigned externalObjectsNum;
 };
 
-class ExportMetricsPass : public Inspector {
- private:
-    std::string filename;  // Output file for metrics
-    Metrics &metrics;
- public:
-    explicit ExportMetricsPass(const std::string &filename, Metrics &metricsRef)
-        : filename(filename), metrics(metricsRef) { setName("ExportMetricsPass");}
-    bool preorder(const IR::P4Program *program) override;
-};
-
-}  // namespace P4
-
-#endif /* FRONTENDS_P4_METRICS_H_ */
+} // namespace P4
+#endif // METRICS_STRUCTURE_H_

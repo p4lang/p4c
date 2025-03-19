@@ -2,7 +2,7 @@
 #define FRONTENDS_P4_HEADER_MODIFICATION_METRICS_H_
 
 #include "../ir/ir.h"
-#include "metrics.h"
+#include "metricsStructure.h"
 
 namespace P4 {
 

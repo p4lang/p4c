@@ -415,7 +415,7 @@ def main():
     )
     parser.add_argument(
         "--metrics",
-        dest="metrics",
+        dest="inputMetrics",
         help=(
             "Select which code metrics will be collected (comma-separated list). "
             "Valid options: all, cyclomatic, halstead, unused-code, duplicit-code, "

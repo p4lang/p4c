@@ -1,40 +1,19 @@
 #include <iostream>
 #include <fstream>
 #include <unordered_set>
-#include "metrics.h"
+#include "exportMetrics.h"
 
 namespace P4 {
 
-// Code metric collection options
-std::unordered_set<std::string> codeMetrics = {};
-
-std::unordered_set<std::string> validMetrics = {
-    "cyclomatic",
-    "halstead",
-    "unused-code",
-    "duplicit-code",
-    "nesting-depth",
-    "header-general",
-    "header-manipulation",
-    "header-modification",
-    "match-action",
-    "parser",
-    "inlined",
-    "extern"
-};
-
 bool ExportMetricsPass::preorder(const IR::P4Program *program) {
 
-    for (const auto& metric : codeMetrics) {
-            std::cout << metric << "\n";
-    } 
     std::ofstream file(filename);
     if (!file.is_open()) {
         std::cerr << "Error: Unable to open file " << filename << " for writing metrics.\n";
         return false;
     }
 
-    for (const auto &metric : codeMetrics) {
+    for (const auto &metric : selectedMetrics) {
         if (metric == "cyclomatic") {
             file << "\nCyclomatic Complexity:\n";
             for (const auto &[func, cc] : metrics.cyclomaticComplexity) {

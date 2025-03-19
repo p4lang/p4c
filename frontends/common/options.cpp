@@ -177,19 +177,25 @@ CompilerOptions::CompilerOptions(std::string_view defaultMessage) : ParserOption
     registerOption(
     "--metrics", "metric1[,metric2]",
     [this](const char *arg) {
+        static const std::unordered_set<std::string> validMetrics = {
+            "cyclomatic", "halstead", "unused-code", "duplicit-code",
+            "nesting-depth", "header-general", "header-manipulation",
+            "header-modification", "match-action", "parser", "inlined", "extern"
+        };
         auto copy = strdup(arg);
         while (auto metric = strsep(&copy, ",")) {
             std::string metricStr(metric);
             if (metricStr == "all"){
-                codeMetrics = validMetrics;
+                CompilerOptions::selectedMetrics = validMetrics;
                 return true;
             }
             else if (validMetrics.find(metricStr) == validMetrics.end()) {
                 ::P4::error(ErrorType::ERR_INVALID, "Invalid metric: %s", metricStr.c_str());
                 return false;
             }
-            else
-                codeMetrics.insert(metricStr);
+            else{
+                CompilerOptions::selectedMetrics.insert(metricStr);
+            }
         }
         return true;
     },
