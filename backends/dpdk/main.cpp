@@ -35,7 +35,6 @@ limitations under the License.
 #include "ir/json_loader.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
-#include "lib/exename.h"
 #include "lib/gc.h"
 #include "lib/log.h"
 #include "lib/nullstream.h"
