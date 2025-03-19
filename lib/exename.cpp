@@ -34,8 +34,6 @@ namespace P4 {
 #endif
 
 std::filesystem::path getExecutablePath(const std::filesystem::path &suggestedPath) {
-    static std::array<char, PATH_MAX> BUFFER{};
-
 #if defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__)
     // Find the path of the executable.  We use a number of techniques that may fail or work on
     // different systems, and take the first working one we find.  Fallback to not overriding the
@@ -51,24 +49,24 @@ std::filesystem::path getExecutablePath(const std::filesystem::path &suggestedPa
         try {
             // std::filesystem::canonical will throw on error if the path is invalid.
             // It will also try to resolve symlinks.
-            std::filesystem::path exePath = std::filesystem::canonical(path);
-            strncpy(BUFFER.data(), exePath.c_str(), BUFFER.size() - 1);
-            BUFFER[BUFFER.size() - 1] = '\0';
-            return BUFFER.data();
+            return std::filesystem::canonical(path);
         } catch (const std::filesystem::filesystem_error &) {
             // Ignore and try the next path.
         }
     }
 #elif defined(__APPLE__)
-    uint32_t size = static_cast<uint32_t>(BUFFER.size());
-    if (_NSGetExecutablePath(BUFFER.data(), &size) == 0) {
-        return (BUFFER.data());
+    static std::array<char, PATH_MAX> buffer{};
+    uint32_t size = static_cast<uint32_t>(buffer.size());
+    if (_NSGetExecutablePath(buffer.data(), &size) == 0) {
+        // TODO: What to do about the allocation here?
+        return (buffer.data());
     }
 #elif defined(_WIN32)
+    static std::array<char, PATH_MAX> buffer{};
     // TODO: Do we need to support this?
-    DWORD size = GetModuleFileNameA(nullptr, BUFFER.data(), static_cast<DWORD>(BUFFER.size()));
-    if (size > 0 && size < BUFFER.size()) {
-        return (BUFFER.data());
+    DWORD size = GetModuleFileNameA(nullptr, buffer.data(), static_cast<DWORD>(buffer.size()));
+    if (size > 0 && size < buffer.size()) {
+        return (buffer.data());
     }
 #endif
     // If the above fails, try to convert argv0 to a path.
