@@ -23,8 +23,10 @@ limitations under the License.
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include <fstream>
 #include <memory>
 #include <regex>
+#include <sstream>
 #include <unordered_set>
 
 #include "absl/strings/escaping.h"
@@ -119,6 +121,13 @@ ParserOptions::ParserOptions(std::string_view defaultMessage) : Util::Options(de
             return true;
         },
         "Output `make` dependency rule only (passed to preprocessor)");
+    registerOption(
+        "--save-temps", nullptr,
+        [this](const char *) {
+            savePreprocessed = true;
+            return true;
+        },
+        "Saves preprocessed P4 to filename.p4pp and do not exit compilation.");
     registerOption(
         "-MD", nullptr,
         [this](const char *) {
@@ -421,16 +430,30 @@ const char *ParserOptions::getIncludePath() const {
     return path.c_str();
 }
 
+// From (folder, file.ext, suffix)  returns
+// folder/file-suffix.ext
+static std::filesystem::path makeFileName(const std::filesystem::path &folder,
+                                          const std::filesystem::path &name,
+                                          std::string_view baseSuffix) {
+    std::filesystem::path newName(name.stem());
+    newName += baseSuffix;
+    newName += name.extension();
+
+    return folder / newName;
+}
+
 std::optional<ParserOptions::PreprocessorResult> ParserOptions::preprocess() const {
     FILE *in = nullptr;
+
+    std::string cmd;
 
     if (file == "-") {
         in = stdin;
     } else {
 #ifdef __clang__
-        std::string cmd("cc -E -x c -Wno-comment");
+        cmd = "cc -E -x c -Wno-comment";
 #else
-        std::string cmd("cpp");
+        cmd = "cpp";
 #endif
 
         cmd += " -C -undef -nostdinc -x assembler-with-cpp " + preprocessor_options.string() +
@@ -455,19 +478,44 @@ std::optional<ParserOptions::PreprocessorResult> ParserOptions::preprocess() con
         }
         return std::nullopt;
     }
+
+    if (savePreprocessed) {
+        if (file == "-") {
+            ::P4::error(ErrorType::ERR_INVALID,
+                        "--save-temps option is not supported when the "
+                        "input P4 comes from stdin.");
+            return std::nullopt;
+        }
+
+        // Run the cpp command a second time to produce a second input stream to write to
+        // filename.p4pp.
+        FILE *inSave = popen(cmd.c_str(), "r");
+        if (inSave == nullptr) {
+            ::P4::error(ErrorType::ERR_IO, "Error invoking preprocessor");
+            perror("");
+            return std::nullopt;
+        }
+        std::stringstream stream;
+        char *line = nullptr;
+        size_t len = 0;
+        ssize_t read = 0;
+
+        while ((read = getline(&line, &len, inSave)) != -1) {
+            stream << line;
+        }
+        closeFile(inSave);
+
+        std::filesystem::path fileName(file.stem());
+        fileName += ".p4pp";
+        fileName = makeFileName(dumpFolder, fileName, "");
+        std::ofstream filestream{fileName};
+        if (filestream) {
+            if (Log::verbose()) std::cerr << "Writing preprocessed P4 to " << fileName << std::endl;
+            filestream << stream.str();
+        }
+        filestream.close();
+    }
     return ParserOptions::PreprocessorResult(in, &closeFile);
-}
-
-// From (folder, file.ext, suffix)  returns
-// folder/file-suffix.ext
-static std::filesystem::path makeFileName(const std::filesystem::path &folder,
-                                          const std::filesystem::path &name,
-                                          std::string_view baseSuffix) {
-    std::filesystem::path newName(name.stem());
-    newName += baseSuffix;
-    newName += name.extension();
-
-    return folder / newName;
 }
 
 bool ParserOptions::isv1() const { return langVersion == ParserOptions::FrontendVersion::P4_14; }
