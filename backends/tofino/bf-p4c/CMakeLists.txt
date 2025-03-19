@@ -150,7 +150,6 @@ set (BF_P4C_BACKEND_COMMON_SRCS
   common/check_field_corruption.cpp
   common/check_for_unimplemented_features.cpp
   common/check_uninitialized_read.cpp
-  common/dump_pipe.cpp
   common/pragma/collect_global_pragma.cpp
   common/elim_unused.cpp
   common/empty_tableseq.cpp

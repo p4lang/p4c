@@ -17,7 +17,7 @@ else
 fi
 
 install_prefix=/usr/local
-barefoot_internal="-DENABLE_BAREFOOT_INTERNAL=OFF"
+barefoot_internal="-DENABLE_BAREFOOT_INTERNAL=OFF -DENABLE_DUMP_PIPE=OFF"
 pgo=false
 lto=false
 
