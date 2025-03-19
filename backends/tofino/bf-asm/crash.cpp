@@ -35,7 +35,7 @@
 #include <iostream>
 
 #include "bfas.h"
-#include "exename.h"
+#include "lib/exename.h"
 #include "lib/hex.h"
 #include "lib/log.h"
 
