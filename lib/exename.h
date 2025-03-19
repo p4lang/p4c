@@ -16,10 +16,17 @@ limitations under the License.
 #ifndef LIB_EXENAME_H_
 #define LIB_EXENAME_H_
 
+#include <filesystem>
+
 namespace P4 {
 
-/** Attempt to determine the executable name and return a static path to it.  Will use
- * argv0 if provided and nothing better can be found */
+/// Return the full path to the binary being executed.
+/// @returns std::nullopt if unable to determine the path.
+std::filesystem::path getExecutablePath(const std::filesystem::path &suggestedPath = "");
+
+/// Attempt to determine the executable name and return a static path to it.
+/// Will use argv0 if provided and nothing better can be found
+[[deprecated("Use getExecutablePath() instead")]]
 const char *exename(const char *argv0 = nullptr);
 
 }  // namespace P4
