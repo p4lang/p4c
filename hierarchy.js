@@ -2771,7 +2771,6 @@ var hierarchy =
         [ "DarkLiveRange", "class_dark_live_range.html", null ],
         [ "DetermineCandidateFields", "class_determine_candidate_fields.html", null ],
         [ "DetermineCandidateHeaders", "class_determine_candidate_headers.html", null ],
-        [ "DumpPipe", "struct_dump_pipe.html", null ],
         [ "DumpTableFlowGraph::CollectPhvReadsAndWrites", "struct_dump_table_flow_graph_1_1_collect_phv_reads_and_writes.html", null ],
         [ "EmitHashExpression", "class_emit_hash_expression.html", null ],
         [ "ExcludeAliasedHeaderFields", "class_exclude_aliased_header_fields.html", null ],
@@ -2979,6 +2978,7 @@ var hierarchy =
         [ "P4::DiscoverStructure", "class_p4_1_1_discover_structure.html", null ],
         [ "P4::DoCheckConstants", "class_p4_1_1_do_check_constants.html", null ],
         [ "P4::DoCheckCoreMethods", "class_p4_1_1_do_check_core_methods.html", null ],
+        [ "P4::DumpPipe", "struct_p4_1_1_dump_pipe.html", null ],
         [ "P4::EBPF::CodeGenInspector", "class_p4_1_1_e_b_p_f_1_1_code_gen_inspector.html", [
           [ "P4::EBPF::ActionTranslationVisitor", "class_p4_1_1_e_b_p_f_1_1_action_translation_visitor.html", [
             [ "P4::EBPF::ActionTranslationVisitorPSA", "class_p4_1_1_e_b_p_f_1_1_action_translation_visitor_p_s_a.html", null ],

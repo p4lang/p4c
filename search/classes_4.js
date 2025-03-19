@@ -162,7 +162,7 @@ var searchData=
   ['dumpjsongraph_159',['DumpJsonGraph',['../class_dump_json_graph.html',1,'']]],
   ['dumpparser_160',['DumpParser',['../group__parde.html#class_dump_parser',1,'']]],
   ['dumpphvfields_161',['DumpPhvFields',['../struct_phv_info_1_1_dump_phv_fields.html',1,'PhvInfo']]],
-  ['dumppipe_162',['DumpPipe',['../struct_dump_pipe.html',1,'']]],
+  ['dumppipe_162',['DumpPipe',['../struct_p4_1_1_dump_pipe.html',1,'P4']]],
   ['dumpseqtables_163',['DumpSeqTables',['../class_dump_seq_tables.html',1,'']]],
   ['dumpsplitstates_164',['DumpSplitStates',['../class_dump_split_states.html',1,'']]],
   ['dumptabledetails_165',['DumpTableDetails',['../struct_flow_graph_1_1_dump_table_details.html',1,'FlowGraph']]],

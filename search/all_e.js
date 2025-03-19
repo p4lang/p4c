@@ -305,7 +305,7 @@ var searchData=
   ['dumpparser_302',['DumpParser',['../group__parde.html#class_dump_parser',1,'']]],
   ['dumppass_303',['dumpPass',['../class_p4_1_1_parser_options.html#a665e3adf6f5e083e426e261f9be97e66',1,'P4::ParserOptions']]],
   ['dumpphvfields_304',['DumpPhvFields',['../struct_phv_info_1_1_dump_phv_fields.html',1,'PhvInfo']]],
-  ['dumppipe_305',['DumpPipe',['../struct_dump_pipe.html',1,'']]],
+  ['dumppipe_305',['DumpPipe',['../struct_p4_1_1_dump_pipe.html',1,'P4']]],
   ['dumps_306',['Crash dumps',['../getting_started.html#crash-dumps',1,'']]],
   ['dumpseqtables_307',['DumpSeqTables',['../class_dump_seq_tables.html',1,'']]],
   ['dumpsplitstates_308',['DumpSplitStates',['../class_dump_split_states.html',1,'']]],
