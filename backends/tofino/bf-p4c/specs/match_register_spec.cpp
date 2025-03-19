@@ -16,16 +16,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#include "backends/tofino/bf-p4c/mau/mau_spec.h"
+#include "match_register_spec.h"
 
-#include "input_xbar.h"
+#include "lib/exceptions.h"
 
-int TofinoIXBarSpec::getExactOrdBase(int group) const {
-    return group * Tofino::IXBar::EXACT_BYTES_PER_GROUP;
+namespace P4 {
+int MatchRegisterSpec::s_id = 0;
+
+cstring MatchRegisterSpec::toString() const {
+    std::stringstream tmp;
+    tmp << *this;
+    return tmp.str();
 }
 
-int TofinoIXBarSpec::getTernaryOrdBase(int group) const {
-    return Tofino::IXBar::EXACT_GROUPS * Tofino::IXBar::EXACT_BYTES_PER_GROUP +
-           (group / 2) * Tofino::IXBar::TERNARY_BYTES_PER_BIG_GROUP +
-           (group % 2) * (Tofino::IXBar::TERNARY_BYTES_PER_GROUP + 1 /* mid byte */);
+MatchRegisterSpec::MatchRegisterSpec() : name(""), size(0), id(0) {}
+
+MatchRegisterSpec::MatchRegisterSpec(cstring n) : name(n), id(s_id++) {
+    if (name.find("byte"))
+        size = 1;
+    else if (name.find("half"))
+        size = 2;
+    else
+        BUG("Invalid parser match register %s", name);
 }
+
+}  // namespace P4
