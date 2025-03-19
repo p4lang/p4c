@@ -42,7 +42,7 @@ std::filesystem::path getExecutablePath(const std::filesystem::path &suggestedPa
         "/proc/self/exe",         // Linux
         "/proc/curproc/file",     // FreeBSD
         "/proc/curproc/exe",      // NetBSD
-        "/proc/self/path/a.out",  // others?
+        "/proc/self/path/a.out",  // Solaris
     };
 
     for (const auto &path : paths) {
@@ -55,25 +55,32 @@ std::filesystem::path getExecutablePath(const std::filesystem::path &suggestedPa
         }
     }
 #elif defined(__APPLE__)
-    static std::array<char, PATH_MAX> buffer{};
+    std::array<char, PATH_MAX> buffer{};
     uint32_t size = static_cast<uint32_t>(buffer.size());
     if (_NSGetExecutablePath(buffer.data(), &size) == 0) {
         // TODO: What to do about the allocation here?
-        return (buffer.data());
-    }
+        return buffer.data();
+    } else
 #elif defined(_WIN32)
-    static std::array<char, PATH_MAX> buffer{};
+    std::array<char, PATH_MAX> buffer{};
     // TODO: Do we need to support this?
     DWORD size = GetModuleFileNameA(nullptr, buffer.data(), static_cast<DWORD>(buffer.size()));
     if (size > 0 && size < buffer.size()) {
-        return (buffer.data());
-    }
+        return buffer.data();
+    } else
 #endif
-    // If the above fails, try to convert argv0 to a path.
-    if (std::filesystem::exists(suggestedPath)) {
-        return suggestedPath;
+    if (auto *path = getenv("_")) {
+        return path;
     }
-    return {};
+    // If the above fails, try to convert suggestedPath to a path.
+    try {
+        // std::filesystem::canonical will throw on error if the path is invalid.
+        // It will also try to resolve symlinks.
+        return std::filesystem::canonical(suggestedPath);
+    } catch (const std::filesystem::filesystem_error &) {
+        // In the case of an error, return an empty path.
+        return {};
+    }
 }
 
 const char *exename(const char *argv0) {
@@ -84,6 +91,7 @@ const char *exename(const char *argv0) {
     if (path.empty()) {
         return nullptr;
     }
+    // TODO: There is a potential leak here.
     return strdup(path.c_str());
 }
 
